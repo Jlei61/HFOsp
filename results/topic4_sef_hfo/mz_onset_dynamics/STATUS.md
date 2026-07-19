@@ -11,7 +11,8 @@ Densified the previously-unsampled gap `0 < eta_m < 0.0745` (`A_target=[0,0.001,
 × seeds 1/3/4, T=20000ms, no early-stop for z+m, FROZEN slow-off event bar). Verdict
 (`gap_dynamics_summary.json`, `analyze_mz_onset_dynamics.py`):
 **graded prevention with a bounded sub-onset PLATEAU — NOT a containment–recovery cycle.**
-- a=0 runaway 3/3 (D→0.0975). a=0.001 (eta_m=0.0075): D **ratchets** to ~0.056 (~57% of onset), bounded,
+- a=0 runaway 3/3 (run-off onset D≈0.087, corridor 0.0869±0.0018; post-crossing peak 0.0975). a=0.001
+  (eta_m=0.0075): D **ratchets** to ~0.056 (**~65% of the 0.087 onset**), bounded,
   **recovered 0/3** (stays elevated); events do NOT escalate → plateau, not a discrete recruited event.
 - a≥0.0025: prevention, D_max monotonically lower (0.036 / 0.020 / 0.017 / 0.013). No frac recovers.
 - **Minimal linear spike-adaptation PREVENTS/STALLS onset (graded); it does not contain-and-recover.**
@@ -21,8 +22,15 @@ Two corrections to the trajectory-era claims below (both retracted):
 2. "interictal events persist in all non-runaway conditions" was a per-trajectory event-bar artifact; the
    frozen slow-off bar (P0-2 fix) shows strongly-suppressed cells are near-silent, not interictal-preserved.
 
-Fixes landed: P0-2 frozen slow-off event bar, P1-2 real aggregator (no parallel-writer race), conditional
-early-stop, P1-1/P1-3 relabel. Commits `96159ab`, `c7b72aa`.
+Fixes landed (review-1): P0-2 frozen slow-off event bar, P1-2 real aggregator, conditional early-stop, relabel.
+Finalization (review-2 P1): onset ref → D-at-first-crossing (run-off corridor 0.0869±0.0018, NOT post-crossing
+0.0975 → a=0.001 = 65% not 57%); figure frac-key bug fixed (0.0025/0.0075 were silently dropped from the D–a
+plane) + analyzer/plotter tau-contamination fixed + run-off stars moved to onset + D_max-vs-frac readout panel
++ tau figure clipped to D≤0.13 / D-at-crossing / linear x-axis / fixed-η_m title; summary re-aggregated to
+18 rows (was a 2-row smoke artifact); plot-key + aggregator regression tests (38 pass). Structural claim
+softened to "in the registered sampling range" (not a param-space ceiling). **Corridor finding: all 7 run-offs
+cross at D≈0.087 — m decides whether the trajectory REACHES the boundary, not where it is; m is weak at
+crossing (~0.0005) and only strong after (~0.008), too late to contain.** Commits `96159ab`, `c7b72aa`, +this.
 
 Near-critical tau_adp sweep (review §5: 0.5/1 vs 2s at a=0.001) DONE. Faster adaptation recovery does NOT
 enable a cycle — it weakens the brake: tau=2s plateau 3/3 (D~0.056); tau=1s plateau 2 + runaway 1

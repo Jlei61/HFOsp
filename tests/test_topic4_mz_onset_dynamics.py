@@ -312,3 +312,48 @@ def test_15_natural_zm_trajectory_downsample():
     np.testing.assert_allclose(tr["a_allE"], [0.05, 0.25])
     np.testing.assert_allclose(tr["rate_E_hz"], [5.5, 7.5])
     np.testing.assert_allclose(tr["t_ms"], [0.0, 0.2])
+
+
+def _add_scripts_path():
+    import sys
+    R = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    for p in (R, os.path.join(R, "scripts")):
+        if p not in sys.path:
+            sys.path.insert(0, p)
+
+
+def test_plot_load_covers_all_gap_fracs(tmp_path):
+    """P1-1 regression: the plotter's frac key must keep 0.0025/0.0075 distinct — round(...,3) collapsed
+    them (0.0025->0.003) so the D–a plane silently dropped two of five strengths while the legend kept them."""
+    _add_scripts_path()
+    import plot_topic4_mz_onset_dynamics as P
+    fields = dict(t_ms=np.arange(10.0), D_allE=np.zeros(10), a_allE=np.zeros(10), rate_E_hz=np.zeros(10),
+                  event_on_ms=np.zeros(0), event_off_ms=np.zeros(0), runaway_ms=np.nan)
+    for fr in [0.0] + P.NONZERO_FRACS:
+        for s in (1, 3, 4):
+            np.savez(os.path.join(tmp_path, f"traj_{P.REGIME}_A{fr:g}_seed{s}.npz"),
+                     z_regime=P.REGIME, A_frac=fr, seed=s, **fields)
+    P.TRAJ = str(tmp_path)
+    cells = P._load()
+    for fr in P.NONZERO_FRACS:
+        for s in (1, 3, 4):
+            assert (P.REGIME, round(fr, 5), s) in cells, f"frac {fr} seed {s} dropped by _load key"
+
+
+def test_aggregate_focused_m_18_rows_unique(tmp_path, monkeypatch):
+    """P1-3 regression: the aggregator must combine ALL per-seed group JSONs (gap grid = 18 rows, unique
+    (seed,target)); the committed summary had only the 2-row smoke artifact before re-aggregation."""
+    import csv as _csv
+    import json as _json
+    _add_scripts_path()
+    import run_topic4_mz_onset_dynamics as R
+    os.makedirs(os.path.join(tmp_path, "per_seed"))
+    for seed in (1, 3, 4):
+        for g, fracs in [("g0", [0.0, 0.001, 0.0025]), ("g0.005", [0.005, 0.0075, 0.01])]:
+            rows = [dict(seed=seed, A_frac=fr, phenotype="x") for fr in fracs]
+            _json.dump(dict(rows=rows), open(os.path.join(tmp_path, "per_seed", f"focused_m_seed{seed}_{g}.json"), "w"))
+    monkeypatch.setattr(R, "OUT", str(tmp_path))
+    R._aggregate_focused_m()
+    rows = list(_csv.DictReader(open(os.path.join(tmp_path, "focused_m_summary.csv"))))
+    assert len(rows) == 18
+    assert len({(r["seed"], r["A_frac"]) for r in rows}) == 18

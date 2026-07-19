@@ -38,8 +38,10 @@ def _load():
     """Return {(z_regime, a_frac, seed): npz-dict}. a_frac read from the npz field, not the name."""
     cells = {}
     for f in sorted(glob.glob(os.path.join(TRAJ_DIR, "traj_*.npz"))):
+        if "_tau" in os.path.basename(f):
+            continue                          # tau-sweep cells are a separate figure; keep this to the tau=2000 grid
         z = np.load(f)
-        key = (str(z["z_regime"]), round(float(z["A_frac"]), 3), int(z["seed"]))
+        key = (str(z["z_regime"]), round(float(z["A_frac"]), 5), int(z["seed"]))   # 5 places: 0.0025/0.0075 must not collide
         cells[key] = {k: z[k] for k in z.files}
     return cells
 
@@ -93,7 +95,7 @@ def panel_c(fig, gs, cells):
         ax.plot(c["D_allE"], c["a_allE"], color="#c0392b", lw=1.0, alpha=0.5, zorder=3)
         ra = float(c["runaway_ms"])
         if np.isfinite(ra):
-            k = int(np.argmax(c["D_allE"]))
+            k = min(int(np.searchsorted(c["t_ms"], ra)), len(c["D_allE"]) - 1)   # star at run-off ONSET (runaway_ms), not the post-crossing D peak
             ax.scatter([c["D_allE"][k]], [c["a_allE"][k]], marker="*", s=150, color="#c0392b",
                        edgecolor="white", lw=0.8, zorder=6)
     # z+m cells: redirected up the a axis
@@ -124,21 +126,56 @@ def panel_c(fig, gs, cells):
               edgecolor="#ccc", borderpad=0.6)
 
 
+def panel_dmax(fig, gs, cells):
+    """Graded-prevention readout: the D that each strength reaches — run-off onset D (a=0, X on the corridor)
+    vs the bounded plateau height D_max (a>0, o) — read against the z-only run-off corridor band."""
+    ax = fig.add_subplot(gs)
+    fracs = [0.0] + NONZERO_FRACS
+    for xi, frac in enumerate(fracs):
+        for seed in [1, 3, 4]:
+            c = cells.get((REGIME, round(frac, 5), seed))
+            if c is None:
+                continue
+            ra = float(c["runaway_ms"])
+            if np.isfinite(ra):                                   # run-off: D at onset (on the corridor)
+                k = min(int(np.searchsorted(c["t_ms"], ra)), len(c["D_allE"]) - 1)
+                y, run = float(c["D_allE"][k]), True
+            else:                                                 # bounded: plateau height
+                y, run = float(np.max(c["D_allE"])), False
+            col = "#c0392b" if frac == 0 else _frac_color(frac)
+            ax.scatter([xi], [y], s=70, color=col, marker=("X" if run else "o"), edgecolor="white", lw=0.7, zorder=4)
+    ax.axhspan(0.0851, 0.0887, color="#c0392b", alpha=0.12, zorder=1)                 # run-off corridor 0.087±0.002
+    ax.axhline(0.0869, color="#c0392b", ls="--", lw=1.0, zorder=2)
+    ax.text(len(fracs) - 1, 0.0869, "run-off\ncorridor", fontsize=7, color="#c0392b", va="center", ha="right")
+    ax.set_xticks(range(len(fracs)))
+    ax.set_xticklabels([f"{f:g}" for f in fracs], fontsize=8, rotation=30)
+    ax.set_xlabel("target adaptation fraction", fontsize=9.5)
+    ax.set_ylabel("D reached (plateau / onset)", fontsize=9.5)
+    ax.set_title("D · graded prevention", fontsize=10, loc="left", weight="bold")
+    ax.grid(True, alpha=0.18, lw=0.5, axis="y")
+    for s in ("top", "right"):
+        ax.spines[s].set_visible(False)
+    ax.legend(handles=[Line2D([0], [0], marker="X", color="#888", lw=0, markersize=9, label="run-off"),
+                       Line2D([0], [0], marker="o", color="#888", lw=0, markersize=8, label="bounded plateau")],
+              fontsize=7.4, loc="upper right", frameon=True, framealpha=0.9, edgecolor="#ccc")
+
+
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--rep-frac", type=float, default=0.005, help="representative z+m target frac for Panel A")
-    ap.add_argument("--rep-seed", type=int, default=1)
+    ap.add_argument("--rep-frac", type=float, default=0.001, help="representative z+m target frac for Panel A")
+    ap.add_argument("--rep-seed", type=int, default=3)
     args = ap.parse_args()
     os.makedirs(FIG_DIR, exist_ok=True)
     cells = _load()
 
-    fig = plt.figure(figsize=(13.5, 5.2))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.05, 1.0], wspace=0.22,
-                          left=0.06, right=0.985, top=0.9, bottom=0.12)
-    panel_a(fig, gs[0], cells, round(args.rep_frac, 3), args.rep_seed)
+    fig = plt.figure(figsize=(16.5, 5.0))
+    gs = fig.add_gridspec(1, 3, width_ratios=[1.25, 1.0, 0.72], wspace=0.28,
+                          left=0.05, right=0.99, top=0.9, bottom=0.14)
+    panel_a(fig, gs[0], cells, round(args.rep_frac, 5), args.rep_seed)
     panel_c(fig, gs[1], cells)
+    panel_dmax(fig, gs[2], cells)
     fig.suptitle("MZ early-onset dynamics · natural z+m trajectories  (E1146, primary regime zA_q75_tz5000)",
-                 fontsize=11.5, weight="bold", x=0.06, ha="left")
+                 fontsize=11.5, weight="bold", x=0.05, ha="left")
     base = os.path.join(FIG_DIR, "mz_onset_natural_trajectories")
     fig.savefig(base + ".png", dpi=150)
     fig.savefig(base + ".pdf")
