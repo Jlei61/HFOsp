@@ -361,17 +361,30 @@ def eigen_summary(J, grid: Grid, core: CoreMask, theta):
 
 # ======================================================================== per-state operator + top-level
 def state_operator(zbar_field, grid: Grid, scaffold, *, w_ee_mult, ratio, q_floor,
-                   scale_II=False, op_dt=0.5, op_t_max=2500.0, op_tol=1e-9):
+                   scale_II=False, op_dt=0.5, op_t_max=2500.0, op_tol=1e-9, init=None):
     """Build the operating point + finite Jacobian for one slow state (the q=clip(z_bar) field on the
-    FIXED scaffold). Returns (op, J, q_field). op.status in {resolved, unresolved, saturated}."""
+    FIXED scaffold). Returns (op, J, q_field). op.status in {resolved, unresolved, saturated}.
+    `init` = {"rE","rI"} warm-start (for continuation: track the SAME branch across a slow-state path)."""
     q = zbar_to_q(zbar_field, q_floor)
     inh = InhibitionField(q=q, q_global=float(np.nanmean(q)), q_core=1.0, scale_II=bool(scale_II),
                           core=scaffold["core"])
     op = solve_operating_point(grid, scaffold["kernels"], scaffold["exc"], inh, ratio=float(ratio),
                                w_ee_mult=float(w_ee_mult), dt=float(op_dt), t_max=float(op_t_max),
-                               tol=float(op_tol))
+                               tol=float(op_tol), init=init)
     J = build_jacobian_dense(grid, scaffold["kernels"], op) if op.status == "resolved" else None
     return op, J, q
+
+
+def leading_eigenvalue(J, grid: Grid):
+    """(Re, |Im|, is_complex, freq_hz) of the LEADING rate-branch eigenvalue of J. Re>=0 => linear
+    instability; is_complex with Re crossing 0 => Hopf (oscillation birth) at freq_hz = |Im|/(2*pi)*1000
+    (eigenvalues are in 1/ms). None if J is unresolved."""
+    eig = rate_eigenpairs(J, grid, n_modes=4)
+    if eig.status != "resolved" or eig.eigenvalues.size == 0:
+        return None
+    lam = eig.eigenvalues[0]                                     # max Re (sorted desc)
+    return dict(re=float(lam.real), im=float(abs(lam.imag)), is_complex=bool(abs(lam.imag) > 1e-3),
+                freq_hz=float(abs(lam.imag) / (2.0 * np.pi) * 1000.0))
 
 
 def summarize_state_susceptibility(zbar_field, grid: Grid, scaffold, probes, T_list, *,

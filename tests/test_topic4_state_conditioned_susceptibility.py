@@ -199,6 +199,20 @@ def test_fixed_kick_time_response():
     assert kymo.shape == (3, 6) and np.all(kymo >= 0)                      # (n_t, n_x), |rE|>=0
 
 
+def test_leading_eigenvalue_and_warmstart_continuation():
+    from src.topic4_state_conditioned_susceptibility import leading_eigenvalue
+    grid = Grid(n=6, L=5.0)
+    sc = _scaffold(grid, mu_core=0.5)
+    op, J, _ = state_operator(np.ones((6, 6)), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05)
+    assert J is not None
+    le = leading_eigenvalue(J, grid)
+    assert le is not None and np.isfinite(le["re"]) and le["freq_hz"] >= 0 and le["im"] >= 0
+    # warm-start from the converged op reproduces the same fixed point (continuation branch tracking)
+    op2, J2, _ = state_operator(np.ones((6, 6)), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05,
+                                init={"rE": op.rE, "rI": op.rI})
+    assert op2.status == "resolved" and np.allclose(op2.rE, op.rE, atol=1e-6)
+
+
 def test_optimal_perturbation_dominates_any_probe_gain():
     # V1 is the UNCONSTRAINED optimal finite-time input over the whole E-rate space, so sigma1 must be
     # >= the gain of ANY single probe (the probe span is a subset of the input space).

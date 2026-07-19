@@ -166,6 +166,31 @@ and slower self-limiting — the non-normal axial transient shown as DYNAMICS, n
 figure now shows only the 5 static state-map rows; this time-response figure replaces the old compressed
 axial-score row.)
 
+### 4.6 Continuation pre_onset_100ms → onset: transition type (review 2026-07-19; `continuation_summary.json` + `figures/continuation.png`)
+
+The review asked to locate the true critical point along the slow path and classify the bifurcation.
+Warm-start continuation along `z_α = (1-α)·z_pre100 + α·z_onset` (leading rate-branch eigenvalue tracked):
+
+- **All 3 seeds** (consistent): as α increases the leading eigenvalue's real part RISES (destabilizes)
+  from ~−0.011 toward ~−0.008 (1/ms) but does NOT cross 0; the resting fixed point is then LOST (the
+  steady solver stops converging) at **LOW rate** (rE_max stays ~0.0035 kHz, interictal — **not** a jump
+  to a saturated high-rate branch). The leading mode is a weakly-damped **complex pair at ~23.8–23.9 Hz**
+  throughout (frequency very consistent across seeds).
+- A jump to a saturated high-rate branch occurs LATER (higher α), PAST this first fixed-point loss, so it
+  does not define the transition.
+
+**Classification (all 3 seeds): `fixed_point_loss_low_rate`.** Reading: consistent with an OSCILLATORY
+(Hopf-type) transition to a ~24 Hz limit cycle — the resting state loses stability near a ~24 Hz mode with
+the rate staying bounded — but **NOT a confirmed supercritical Hopf** (Re ~−0.008 does not smoothly cross 0
+before the steady solver loses the fixed point; could be a fold or subcritical). The critical α varies per
+seed (0.175 / 0.45 / 0.825) because the straight-line z-interpolation reaches the boundary at different
+depths, but the MECHANISM (~24 Hz low-rate fixed-point loss) is robust.
+
+Concrete testable prediction: if the runaway is oscillatory, it should be near **~24 Hz**. Confirming
+fold-vs-Hopf and the existence of a limit cycle needs the post-onset time-dependent tangent operator +
+Floquet analysis (deferred; §8 next-step). Caveat: the straight-line z-interpolation is not the actual SNN
+z-trajectory; a continuation along the real trajectory + finer α near the loss would sharpen the verdict.
+
 ## 5. Answers to the ten Task-8 questions
 
 1. **Replay w/o observer drift?** Yes — byte-parity proven on the real substrate; onsets exact to the ms.

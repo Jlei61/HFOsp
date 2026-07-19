@@ -45,6 +45,7 @@
 - 所以"沿轴放大增强"要分清：**输入 k∥ 偏好上升 + 渐近模式强沿轴**成立；**有限时输出只是中等沿轴**——"响应沿轴传播"在 30 毫秒尺度是中等、非强。本征模式/V1/U1/探针是四个不同对象，不混叫。
 - **peak_k 7.11→1.26 是撞轨**：1.26=2π/L=**最低非零波数**（整片尺度）。**扩 p_max 只加更高波数、动不了这条低波数轨**；要找更大尺度（更低 k）的最优得增大域 L / 用连续 k / 非周期平滑基。已补 n=8→24 网格收敛检查（**representative seed 1，非三种子**；三种子一致性在 n=12 由主 atlas 建立）：pre-onset 算子层量（σ1、本征沿轴、U1 沿轴）**n≥12 收敛**；baseline n=8 本征模式为异常点、n≥12 才稳。见 `convergence_summary.json` + `figures/convergence.png`。
 - **固定 source kick 时间响应图**（替代旧压缩轴向分数行）：σ1(T) 显示基线单调衰减从不过 1；失控前 5 毫秒过 1、**约 15 毫秒到峰**（−500ms≈1.23、−100ms≈1.51）后自限——**峰比固定 30 毫秒窗更早**。同一 kick 空间演化 + 轴向 kymograph：基线源附近原地消退、汇端不亮；失控前沿轴向汇端铺开、汇被点亮、持续更久。主诊断图现只保留 5 行静态状态地图（第 6 行由本时间响应图替代）。见 `time_response_summary.json` + `figures/time_response.png`。
+- **临界点 continuation（pre100→onset）**：沿 z_α=(1-α)z_pre100+α z_onset warm-start 跟踪主本征值。三种子一致：主本征值实部从 −0.011 升到 −0.008（在去稳）但**不过 0**，静息不动点随后在**低率**丢失（稳态解不收敛、rE_max 仍 ~0.0035 间期级、**非**跳到饱和高率支）；主模式全程是**弱阻尼 ~23.8–23.9 Hz 复共轭对**。分类=`fixed_point_loss_low_rate`：**与到 ~24 Hz 极限环的振荡（Hopf 型）转变兼容，但非确证的超临界 Hopf**（实部没平滑过 0 就丢了不动点，可能是 fold/亚临界）。α_crit 逐种子不同（0.175/0.45/0.825，因直线插值到边界深浅不同），但"~24 Hz 低率丢不动点"机制稳健。可测预言：若失控是振荡，应在 ~24 Hz。确证 fold-vs-Hopf + 是否真有极限环需 onset 后 time-dependent tangent operator + Floquet（下一步）。见 `continuation_summary.json` + `figures/continuation.png`。
 
 ## required controls（失控前 100 毫秒，3 种子中位数）
 

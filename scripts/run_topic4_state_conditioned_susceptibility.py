@@ -733,6 +733,122 @@ def _plot_time_response(a, states, cfg):
         fig.savefig(os.path.join(OUT_DIR, "figures", f"time_response.{ext}"), dpi=150, bbox_inches="tight")
 
 
+def _classify_continuation(traj):
+    """Classify the resting->runaway transition from the leading-eigenvalue trajectory. Honest about the
+    Hopf-vs-fold ambiguity when the steady solver loses the fixed point before Re crosses 0."""
+    res = [r for r in traj if r["op_status"] == "resolved" and r["re"] is not None]
+    if not res:
+        return dict(classification="no_resolved_point", alpha_crit=None)
+    cross = next((r for r in res if r["re"] >= 0.0), None)
+    if cross is not None:                                          # leading Re actually crossed 0 (confirmed)
+        return dict(classification=("hopf_confirmed" if cross["is_complex"] else "real_instability_confirmed"),
+                    alpha_crit=cross["alpha"], freq_hz_crit=(cross["freq_hz"] if cross["is_complex"] else 0.0),
+                    re_at_last_resolved=res[-1]["re"])
+    # the transition is the FIRST loss of the resolved fixed point (its status distinguishes fold vs Hopf;
+    # later saturated alphas are past the transition and do NOT define it)
+    last_before, first_loss, seen = None, None, False
+    for r in traj:
+        if r["op_status"] == "resolved":
+            seen = True; last_before = r
+        elif seen:
+            first_loss = r; break
+    if first_loss is None:
+        return dict(classification="stable_throughout", alpha_crit=None, re_at_last_resolved=res[-1]["re"])
+    if first_loss["op_status"] == "saturated":                    # jumps to a saturated high-rate branch
+        return dict(classification="saturation_jump", alpha_last_resolved=last_before["alpha"],
+                    re_at_last_resolved=last_before["re"],
+                    note="op jumps to a saturated high-rate branch at the first fixed-point loss")
+    last = last_before                                            # low-rate loss: describe the near-critical mode
+    mode = ("complex_%.0fHz" % last["freq_hz"]) if last["is_complex"] else "real"
+    return dict(classification="fixed_point_loss_low_rate",
+                leading_mode=("complex" if last["is_complex"] else "real"),
+                freq_hz_near_crit=(last["freq_hz"] if last["is_complex"] else None),
+                re_at_last_resolved=last["re"], alpha_last_resolved=last["alpha"],
+                note=("resting fixed point lost (steady solver stops converging) at LOW rate (rE_max << "
+                      "saturation, NOT a jump to a high-rate branch) while the leading mode is a weakly-damped "
+                      f"{mode} pair (Re~{last['re']:.3f}). Consistent with an oscillatory (Hopf-type) "
+                      "transition to a limit cycle, but NOT a confirmed supercritical Hopf: leading Re does not "
+                      "smoothly cross 0 before the fixed point vanishes (could be a fold / subcritical). "
+                      "Disambiguate fold-vs-Hopf with finer alpha near the loss + the post-onset limit-cycle "
+                      "analysis (time-dependent tangent operator / Floquet)."))
+
+
+def cmd_run_continuation(args):
+    """Continuation z_alpha=(1-a)z_pre100 + a z_onset (review 2026-07-19): warm-start the operating point
+    along the path, track the leading rate-branch eigenvalue, and classify the resting->runaway
+    transition (Hopf if a complex pair's Re crosses 0; saddle-node/saturation if the fixed point
+    disappears with Re still <0). Answers 'why the resting state becomes oscillatory/runaway'."""
+    import src.topic4_state_conditioned_susceptibility as M
+    cfg = _load_cfg()
+    label = args.candidate or "zA_q50_tz10000"
+    seeds = [int(s) for s in args.seeds.split(",")] if args.seeds else sorted(_load_locked_candidate(label)["onsets"])
+    alphas = [float(a) for a in np.linspace(0.0, 1.0, 41)]
+    per_seed, np_arrays = {}, {}
+    for seed in seeds:
+        snap = _load_snapshot(label, seed)
+        ctx = _seed_context(cfg, snap, cfg["grid_n"])
+        labels = [str(x) for x in snap["snapshot_labels"]]
+        z_pre = M.bin_neuron_state_to_grid(snap["z_E"][labels.index("pre_onset_100ms")], ctx["pos_norm"], ctx["grid"])[0]
+        z_on = M.bin_neuron_state_to_grid(snap["z_E"][labels.index("onset")], ctx["pos_norm"], ctx["grid"])[0]
+        traj, prev = [], None
+        for a in alphas:
+            z_a = (1.0 - a) * z_pre + a * z_on
+            op, J, _ = M.state_operator(z_a, ctx["grid"], ctx["scaffold"], w_ee_mult=cfg["w_ee_mult"],
+                                        ratio=cfg["ratio"], q_floor=cfg["q_floor"], init=prev)
+            rec = dict(alpha=a, op_status=op.status, rE_max=float(op.rE.max()),
+                       re=None, im=None, freq_hz=None, is_complex=None)
+            if J is not None:
+                le = M.leading_eigenvalue(J, ctx["grid"])
+                rec.update(re=le["re"], im=le["im"], freq_hz=le["freq_hz"], is_complex=le["is_complex"])
+                prev = {"rE": op.rE, "rI": op.rI}
+            traj.append(rec)
+        per_seed[str(seed)] = dict(trajectory=traj, **_classify_continuation(traj))
+        for key in ("alpha", "re", "im", "freq_hz", "rE_max"):
+            np_arrays[f"{seed}__{key}"] = np.array([r[key] if r[key] is not None else np.nan for r in traj], float)
+        np_arrays[f"{seed}__resolved"] = np.array([1.0 if r["op_status"] == "resolved" else 0.0 for r in traj])
+        _sc = {"resolved": 1.0, "saturated": 2.0, "unresolved": 0.0}   # status trajectory (fold vs Hopf clue)
+        np_arrays[f"{seed}__status"] = np.array([_sc.get(r["op_status"], 0.0) for r in traj])
+        print(f"[continuation] seed {seed}: {per_seed[str(seed)]['classification']} "
+              f"alpha_crit={per_seed[str(seed)].get('alpha_crit')}", flush=True)
+    summary = dict(schema_version=SCHEMA_VERSION, candidate=label, seeds=seeds, alphas=alphas,
+                   note="continuation z_alpha=(1-a)z_pre100 + a z_onset; warm-start branch tracking; leading "
+                        "rate-branch eigenvalue (Re/Im); classification per seed.",
+                   per_seed={s: {k: v for k, v in d.items() if k != "trajectory"} for s, d in per_seed.items()},
+                   git_sha=_git_sha(), argv=sys.argv)
+    _atomic_savez(os.path.join(OUT_DIR, "continuation_arrays.npz"), **np_arrays)
+    _atomic_json(os.path.join(OUT_DIR, "continuation_summary.json"), summary)
+    _plot_continuation(np_arrays, seeds)
+    print(f"[continuation] -> continuation_summary.json + figures/continuation.png", flush=True)
+
+
+def _plot_continuation(a, seeds):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    cols = ["#2166ac", "#b35806", "#1b7837", "#762a83"]
+    fig, ax = plt.subplots(1, 3, figsize=(16, 4.8))
+    for i, s in enumerate(seeds):
+        al = a[f"{s}__alpha"]; c = cols[i % len(cols)]
+        ax[0].plot(al, a[f"{s}__re"], "-o", color=c, ms=3, label=f"seed {s}")
+        ax[1].plot(al, a[f"{s}__freq_hz"], "-o", color=c, ms=3, label=f"seed {s}")
+        ax[2].plot(al, a[f"{s}__rE_max"], "-o", color=c, ms=3, label=f"seed {s}")
+        res = a[f"{s}__resolved"]
+        lost = np.where(res < 0.5)[0]
+        if lost.size:
+            ax[0].axvline(al[lost[0]], color=c, ls=":", lw=1, alpha=0.7)
+    ax[0].axhline(0, color="0.5", lw=0.8, ls="--"); ax[0].set_ylabel("Re(leading eigenvalue) (1/ms)")
+    ax[0].set_title("leading Re vs alpha  (>=0 => linear instability; dotted = fixed point lost)", fontsize=9.5)
+    ax[1].set_ylabel("leading |Im|/2pi (Hz)"); ax[1].set_title("leading-mode frequency vs alpha  (>0 => complex pair => Hopf-type)", fontsize=9.5)
+    ax[2].set_ylabel("operating-point rE_max (kHz)"); ax[2].set_yscale("log")
+    ax[2].set_title("operating-point rate vs alpha  (jump => saturation/branch loss)", fontsize=9.5)
+    for x in ax:
+        x.set_xlabel("alpha  (0 = pre_onset_100ms  ->  1 = onset)"); x.grid(alpha=0.25); x.legend(fontsize=8)
+    fig.suptitle("Continuation pre_onset_100ms -> onset: is the resting->runaway transition Hopf, real-instability, or saddle-node/saturation?", fontsize=11)
+    fig.tight_layout(rect=[0, 0, 1, 0.95])
+    for ext in ("png", "pdf"):
+        fig.savefig(os.path.join(OUT_DIR, "figures", f"continuation.{ext}"), dpi=150, bbox_inches="tight")
+
+
 # ============================================================ small IO helpers
 def _json_default(o):
     if isinstance(o, (np.integer,)):
@@ -763,7 +879,7 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Topic 4 state-conditioned spatial susceptibility runner.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("audit-inputs", "smoke", "capture-snapshots", "build-atlas", "run-controls",
-                 "run-nonlinear-spotchecks", "run-convergence", "run-time-response", "all"):
+                 "run-nonlinear-spotchecks", "run-convergence", "run-time-response", "run-continuation", "all"):
         sp = sub.add_parser(name)
         sp.add_argument("--confirm-run", action="store_true", help="required to start any simulation")
         sp.add_argument("--candidate", default=None, help="MZ multiseed label (default zA_q50_tz10000)")
@@ -794,6 +910,8 @@ def main(argv=None):
         cmd_run_convergence(args)
     elif args.cmd == "run-time-response":
         cmd_run_time_response(args)
+    elif args.cmd == "run-continuation":
+        cmd_run_continuation(args)
     elif args.cmd == "all":
         cmd_capture_snapshots(args)
         cmd_build_atlas(args)
