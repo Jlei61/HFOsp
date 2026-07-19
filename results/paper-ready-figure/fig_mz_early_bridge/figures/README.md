@@ -1,16 +1,22 @@
-# MZ early-ictal bridge — paper-ready draft 图说明
+# MZ early-field bridge — paper-ready draft 图说明
 
 ### fig_mz_early_bridge.png / .pdf
-论文候选草图（沿用旧 Figure 5 视觉语法，但**全部换成当前 MZ bridge 数据**）。上排两格是**同一 scaffold、
-同一 seed、两次独立状态 replay**（不是一条连续轨迹）：左 = slow-off 安静态里一个**预先确定的留出间期事件**
-（浅蓝窗）；右 = 只开 `z` 后**跨过失控阈值 t120 之前**的转变片段（粉窗 = `t_recruit` 后 0–50 ms 早期招募窗，
-红虚线 = t120）。下排四格：TA（A→B）与 TB（B→A）**两个方向的间期时序模板都画出来**（不只画事后胜出方向；
-viridis 紫=早）、pre-t120 早期能量场（Blues）、以及三 seed 的 observed maxAB（星）对各自 within-shaft null p95
-（灰线）。maxAB「取哪个方向」只进入右下统计格，不写进案例场；已去掉神经元颗粒层（局部组织参与度审计未完成）。
+论文候选草图，严格沿用旧 Figure 5 的视觉语法，但全部换成当前 MZ bridge 数据。上方是 **seed1 z-only
+native run 的一条连续 virtual-SEEG**，不是两次 replay 拼接：显示窗对应绝对时间 7500–9403.6 ms，图上把窗起点
+平移为 0 ms。浅蓝窗是同一连续轨迹内的一个 returning interictal-like burst（绝对时间 7955–8016 ms，包含
+`t_off+40 ms` 的完整 contact-readout 尾窗）；浅红窗是 `t_recruit` 后 0–50 ms 的 pre-t120 early-energy window，
+红虚线是 operational runaway 的 t120。
 
-**关注点**：TB 时序场「最早」的一端（高轴/sink 端）是否与能量场「最热」的一端对上（间期指纹是否预测早期招募
-能量）；TA 只有约 7 个可读触点、TB 全 15 个——说明两个方向支撑不同，别把某个固定方向当稳定表型；右下三 seed
-里 **seed3 的星正落在自己的 null 线上（弱）**，seed1/4 明显高过。
+蓝窗事件不是按目标能量挑选：固定规则是「slow-off 中事件数更多的方向里，选择 native run 在 `t_recruit` 前最后一个
+合格事件」。本例为 TB/B→A，13 个触点可读；它与 slow-off 冻结 TB 模板在共享触点上的 Spearman 为 0.990。下方只保留
+两个与上方阴影一一对应的连续场：左 = 蓝窗 exact event 的 30–80 Hz envelope-peak contact recruitment rank
+（viridis 紫=早）；右 = 红窗的 pre-t120 virtual-LFP early-energy field（Blues 深=高）。两图均在固定 E1146
+registered plane 上用 3 mm Gaussian contact-readout projection 渲染，并叠加完整 15-contact montage。灰色颗粒仅表示同一
+固定底物的 E-neuron 几何位置，不编码局部招募；局部组织参与度审计未完成，因此不能把场热点写成其下方组织已直接招募。
+
+**关注点**：左图最早的高轴端是否与右图最热端一致。这个 exact native event 的描述性
+earliness–energy Spearman 为 0.912；正式 bridge 统计仍使用 held-out-validated slow-off 双向模板的 mirror-invariant
+maxAB（seed1=0.945，within-shaft p=0.0004），不是由这张代表性案例图重新定义。
 
 ### fig_mz_cross_seed_transfer.png / .pdf
 跨 seed 模板迁移（回答：间期时序模板是**固定 scaffold 的属性**，还是只是同 seed 噪声重放的巧合）。做法：用
