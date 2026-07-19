@@ -24,9 +24,13 @@ Two corrections to the trajectory-era claims below (both retracted):
 Fixes landed: P0-2 frozen slow-off event bar, P1-2 real aggregator (no parallel-writer race), conditional
 early-stop, P1-1/P1-3 relabel. Commits `96159ab`, `c7b72aa`.
 
-Near-critical tau_adp sweep (review §5: 0.5/1 vs 2s at the near-critical a=0.001) RUNNING (nohup, detached).
-Preliminary (tau=1s, seed1): D climbs higher (~0.074, ~76% onset) with stronger recruitment, but STILL a
-plateau (no recovery). Full verdict pending the 6 cells.
+Near-critical tau_adp sweep (review §5: 0.5/1 vs 2s at a=0.001) DONE. Faster adaptation recovery does NOT
+enable a cycle — it weakens the brake: tau=2s plateau 3/3 (D~0.056); tau=1s plateau 2 + runaway 1
+(seed4 D=0.58); tau=0.5s runaway 3/3 (D~0.75-0.83, ~477 Hz). The sub-onset plateau rises toward onset then
+tips into full runaway; no (eta_m, tau_adp) recovers. **Locks the honest §6.6 conclusion: minimal linear
+spike-adaptation only prevents/stalls onset (moving the stall-point toward onset then losing control), it
+does not contain-and-recover a seizure.** Next mechanism lever (activity threshold / nonlinear adaptation /
+delay) is the user's call — not added autonomously.
 
 Branch `codex/topic4-mz-onset-dynamics` (off merged MZ base). Absolute-SNN-unit legs are unambiguous;
 one proxy-units question (frozen a-axis) is deferred to the user — see Pending.
