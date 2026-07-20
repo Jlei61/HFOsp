@@ -39,6 +39,18 @@ BASE_KQ, BASE_AG = 0.10, 16.0
 ARR_KEYS = ("trace_qI_mean", "trace_SG", "trace_Irec", "rate", "af", "movie", "q_field_final")
 
 
+def _sanitize(obj):
+    """Recursively replace non-finite floats with None so json.dump(allow_nan=False) never raises
+    (spec §12: strict JSON, non-finite -> null). NaN/inf can arise from empty readout windows."""
+    if isinstance(obj, dict):
+        return {k: _sanitize(v) for k, v in obj.items()}
+    if isinstance(obj, (list, tuple)):
+        return [_sanitize(v) for v in obj]
+    if isinstance(obj, float) and not np.isfinite(obj):
+        return None
+    return obj
+
+
 def _levels(r, t0, t1, T):
     """Bounded pre-pulse level, in-hold level, post-release level, and q_I refill readout."""
     af = np.asarray(r["af"], float)
@@ -48,16 +60,17 @@ def _levels(r, t0, t1, T):
 
     def af_win(a_ms, b_ms):
         i0, i1 = max(0, int(a_ms / bw)), min(af.size, int(b_ms / bw))
-        return float(af[i0:i1].mean()) if i1 > i0 else float("nan")
+        m = float(af[i0:i1].mean()) if i1 > i0 else None      # empty window (e.g. baseline post) -> None, not nan
+        return round(m, 5) if m is not None else None
 
     def qi_at(ms):
-        return float(qi[min(qi.size - 1, max(0, int(ms / dt)))])
+        return round(float(qi[min(qi.size - 1, max(0, int(ms / dt)))]), 4)
 
     return dict(
-        pre_af=round(af_win(t0 - 1000, t0), 5),
-        hold_af=round(af_win(max(t0, t1 - 500), t1), 5),
-        post_af=round(af_win(t1 + 500, T), 5),
-        qI_t0=round(qi_at(t0), 4), qI_t1=round(qi_at(t1), 4), qI_final=round(float(qi[-1]), 4),
+        pre_af=af_win(t0 - 1000, t0),
+        hold_af=af_win(max(t0, t1 - 500), t1),
+        post_af=af_win(t1 + 500, T),
+        qI_t0=qi_at(t0), qI_t1=qi_at(t1), qI_final=round(float(qi[-1]), 4),
     )
 
 
@@ -67,8 +80,10 @@ def _verdict(r, lv, t1):
     if ra is not None and ra > t1 - 50.0:
         return "rebound_runaway"
     pre, post = lv["pre_af"], lv["post_af"]
-    if pre <= 1e-9:
+    if not pre or pre <= 1e-9:
         return "no_bounded_pre"
+    if post is None:
+        return "partial"
     frac = post / pre
     if frac >= 0.5:
         return "rebound_bounded"
@@ -174,10 +189,21 @@ def _arm_worker(spec):
 
 
 def _build_arms(a):
-    """Arms A-E (spec §8). P = calibrated persistence params (from Stage-1)."""
-    P = dict(tau_p=a.tau_p, theta_p=a.theta_p, a50_p=a.a50_p, sigma_p=a.sigma_p)
+    """Arms A-E (spec §8), or a D-only (tau_p:eta_r) sweep. P = calibrated persistence params (from Stage-1)."""
+    P = dict(tau_p=a.tau_p, theta_p=a.theta_p, a50_p=a.a50_p, sigma_p=a.sigma_p, p50_r=a.p50_r, n_r=a.n_r)
     T = a.T
     base = dict(k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG)
+    if a.d_sweep:                          # arm-D (tau_p:eta_r) grid, one build shared across cells
+        cells = []
+        if a.include_anchor:
+            cells.append(("B_m4_anchor", _persist_cfg(**base), T, None))
+        for tok in a.d_sweep.split(","):
+            tp, er = (float(x) for x in tok.split(":"))
+            cells.append((f"D_tau{int(tp)}_eta{er:g}",
+                          _persist_cfg(**base, use_persist=True, tau_p=tp, eta_r=er,
+                                       theta_p=a.theta_p, a50_p=a.a50_p, sigma_p=a.sigma_p,
+                                       p50_r=a.p50_r, n_r=a.n_r), T, None))
+        return cells
     catalog = {
         "A_slow_off":  (_persist_cfg(k_q=0.0, use_SG=False), T),
         "B_m4_anchor": (_persist_cfg(**base), T),
@@ -209,15 +235,15 @@ def _run_arms(a):
         results = pool.map(_arm_worker, specs)
     rows = [r for r, _ in results]
     tag = f"{a.tag}_seed{a.seed}"
-    json.dump(dict(meta=dict(seed=a.seed, tau_p=a.tau_p, theta_p=a.theta_p, a50_p=a.a50_p, eta_r=a.eta_r,
-                             sigma_p=a.sigma_p, clamp_val=a.clamp_val, T=a.T, base_kq=BASE_KQ, base_ag=BASE_AG,
-                             N=int(S["N"]), axis_unit=S["axis_unit"].tolist(),
-                             wall_s=round(time.time() - t_run, 1), argv=" ".join(sys.argv)),
-                   rows=rows),
-              open(os.path.join(a.out, f"arms_{tag}.json"), "w"), indent=2, allow_nan=False)
-    np.savez_compressed(os.path.join(a.out, f"arms_{tag}.npz"),
+    np.savez_compressed(os.path.join(a.out, f"arms_{tag}.npz"),          # npz FIRST (survives a json failure)
                         posE=S["posE"].astype(np.float32), src_xy=S["src_xy"], snk_xy=S["snk_xy"], L=float(S["L"]),
                         **{f"{r['label']}__{k}": arr for (r, arrs) in results if arrs for k, arr in arrs.items()})
+    json.dump(_sanitize(dict(meta=dict(seed=a.seed, tau_p=a.tau_p, theta_p=a.theta_p, a50_p=a.a50_p, eta_r=a.eta_r,
+                                       sigma_p=a.sigma_p, clamp_val=a.clamp_val, T=a.T, base_kq=BASE_KQ, base_ag=BASE_AG,
+                                       N=int(S["N"]), axis_unit=S["axis_unit"].tolist(),
+                                       wall_s=round(time.time() - t_run, 1), argv=" ".join(sys.argv)),
+                             rows=rows)),
+              open(os.path.join(a.out, f"arms_{tag}.json"), "w"), indent=2, allow_nan=False)
     print("\n===== Stage-2 dynamic arms =====", flush=True)
     for r in rows:
         if "error" in r:
@@ -239,16 +265,26 @@ def main():
     ap.add_argument("--dvth", type=float, default=15.0, help="inhibitory_pulse V_th raise (mV)")
     ap.add_argument("--holds", default="500,3000,6000", help="comma-sep hold durations (ms)")
     ap.add_argument("--post-obs", type=float, default=3000.0, help="post-release observation (ms)")
+    ap.add_argument("--baseline", default=True, action=argparse.BooleanOptionalAction,
+                    help="exit_atlas: include an unperturbed bounded-reference cell (--no-baseline to skip)")
     # ---- Stage-2 arms mode: persistence-field calibration (from Stage-1) ----
     ap.add_argument("--T", type=float, default=15000.0, help="arms mode: spontaneous window (ms)")
     ap.add_argument("--arms", default="A_slow_off,B_m4_anchor,C_sensor_on,D_full",
                     help="arms mode: comma list of A_slow_off,B_m4_anchor,C_sensor_on,D_full,E1_no_qI,E2_no_SG,E4_clamp_p")
+    ap.add_argument("--d-sweep", dest="d_sweep", default=None,
+                    help="arms mode: D-only 'tau_p:eta_r' grid (comma-sep), one build shared, e.g. '5000:30,8000:50'")
+    ap.add_argument("--include-anchor", dest="include_anchor", default=False, action=argparse.BooleanOptionalAction,
+                    help="d-sweep: also run B_m4_anchor as the un-terminated reference")
     ap.add_argument("--tau-p", dest="tau_p", type=float, default=5000.0)
     ap.add_argument("--theta-p", dest="theta_p", type=float, default=0.0)
     ap.add_argument("--a50-p", dest="a50_p", type=float, default=1.0)
     ap.add_argument("--sigma-p", dest="sigma_p", type=float, default=1.5)
     ap.add_argument("--eta-r", dest="eta_r", type=float, default=15.0)
+    ap.add_argument("--p50-r", dest="p50_r", type=float, default=0.0, help="Phi(p) Hill half-point; 0 -> linear")
+    ap.add_argument("--n-r", dest="n_r", type=float, default=2.0, help="Phi(p) Hill exponent (if p50_r>0)")
     ap.add_argument("--clamp-val", dest="clamp_val", type=float, default=0.8, help="E4: frozen p value")
+    ap.add_argument("--early-stop", dest="early_stop", default=True, action=argparse.BooleanOptionalAction,
+                    help="exit_atlas: early-stop genuine runaway for speed (won't cut the bounded state or an exit)")
     ap.add_argument("--workers", type=int, default=4)
     ap.add_argument("--out", default=None)
     ap.add_argument("--tag", default="s1")
@@ -265,14 +301,19 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     holds = [float(x) for x in a.holds.split(",")]
 
-    M4._EARLY_STOP["on"] = False          # full post-release trajectory (rebound must be seen)
+    # early-stop truncates only genuine runaway (>=120Hz sustained 100ms); the bounded state maxes ~64-97Hz
+    # and an exit stays low -> neither is cut. It still sets runaway_ms so a rebound_runaway is DETECTED,
+    # just not simulated in full -> big speed win on rebound cells. Default on; --no-early-stop for full traces.
+    M4._EARLY_STOP["on"] = a.early_stop
     t_build = time.time()
     S = PP.build_substrate(a.seed)
     M4._S["S"] = S
     with open(os.path.join(a.out, f"pids_{a.tag}_seed{a.seed}.txt"), "w") as f:
         f.write(f"{os.getpid()}\n")       # manifest for the resource monitor (parent; workers COW-fork)
 
-    cells = [("baseline", None, a.t0, a.t0 + a.post_obs, a.t0 + a.post_obs)]
+    cells = []
+    if a.baseline:                        # optional: unperturbed bounded reference (== each hold's pre_af)
+        cells.append(("baseline", None, a.t0, a.t0 + a.post_obs, a.t0 + a.post_obs))
     for h in holds:
         t1 = a.t0 + h
         T = t1 + a.post_obs
@@ -286,17 +327,17 @@ def main():
 
     rows = [r for r, _ in results]
     out_tag = f"{a.tag}_seed{a.seed}"
-    json.dump(dict(meta=dict(seed=a.seed, t0=a.t0, dvth=a.dvth, holds=holds, post_obs=a.post_obs,
-                             base_kq=BASE_KQ, base_ag=BASE_AG, subject=PP.SUBJECT, montage=PP.MONTAGE,
-                             N=int(S["N"]), axis_unit=S["axis_unit"].tolist(),
-                             wall_s=round(time.time() - t_run, 1), argv=" ".join(sys.argv)),
-                   rows=rows),
-              open(os.path.join(a.out, f"exit_atlas_{out_tag}.json"), "w"), indent=2, allow_nan=False)
-    np.savez_compressed(os.path.join(a.out, f"exit_atlas_{out_tag}.npz"),
+    np.savez_compressed(os.path.join(a.out, f"exit_atlas_{out_tag}.npz"),   # npz FIRST (survives a json failure)
                         posE=S["posE"].astype(np.float32), src_xy=S["src_xy"], snk_xy=S["snk_xy"],
                         L=float(S["L"]),
                         **{f"{r['label']}__{k}": arr for (r, arrs) in results if arrs
                            for k, arr in arrs.items()})
+    json.dump(_sanitize(dict(meta=dict(seed=a.seed, t0=a.t0, dvth=a.dvth, holds=holds, post_obs=a.post_obs,
+                                       base_kq=BASE_KQ, base_ag=BASE_AG, subject=PP.SUBJECT, montage=PP.MONTAGE,
+                                       N=int(S["N"]), axis_unit=S["axis_unit"].tolist(),
+                                       wall_s=round(time.time() - t_run, 1), argv=" ".join(sys.argv)),
+                             rows=rows)),
+              open(os.path.join(a.out, f"exit_atlas_{out_tag}.json"), "w"), indent=2, allow_nan=False)
 
     print("\n===== Stage-1a exit-boundary atlas =====", flush=True)
     for r in rows:
@@ -304,8 +345,8 @@ def main():
             print(f"  {r['label']:12s} ERROR {r['error']}", flush=True)
             continue
         print(f"  {r['label']:12s} hold={r['hold_ms']:6.0f}ms verdict={r['verdict']:16s} "
-              f"cls={r['termination_class']:15s} pre_af={r['pre_af']:.3f} post_af={r['post_af']:.3f} "
-              f"qI:{r['qI_t0']:.2f}->{r['qI_t1']:.2f} runaway={r['runaway_ms']}", flush=True)
+              f"cls={r['termination_class']:15s} pre_af={r['pre_af']} post_af={r['post_af']} "
+              f"qI:{r['qI_t0']:.2f}->{r['qI_t1']:.2f} qI_fin={r['qI_final']:.2f} runaway={r['runaway_ms']}", flush=True)
     print(f"wrote exit_atlas_{out_tag}.json + .npz to {a.out}", flush=True)
 
 
