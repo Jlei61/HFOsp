@@ -24,6 +24,19 @@ from typing import Any, Mapping, Sequence
 import numpy as np
 
 from src.sef_hfo_lif import TAU_AMPA, TAU_GABA, TAU_ME, TAU_MI
+from src.sef_hfo_lif import (
+    C_EE,
+    C_EI,
+    C_IE,
+    C_II,
+    JX_E,
+    JX_I,
+    W_EE,
+    W_EI,
+    W_IE,
+    W_II,
+    nu_theta_pop,
+)
 from src.topic4_spatial_slowfast_stage0c import (
     S_MAX,
     TAU_FAST_MS,
@@ -83,6 +96,10 @@ class PatchKernels:
             raise ValueError("patch weights must be positive and aligned")
         if not np.isclose(weights.sum(), 1.0, rtol=0.0, atol=tolerance):
             raise ValueError("patch weights must sum to one")
+        if not np.allclose(weights @ e, weights, rtol=0.0, atol=tolerance):
+            raise ValueError("patch weights must be stationary for K_EE")
+        if not np.allclose(weights @ i, weights, rtol=0.0, atol=tolerance):
+            raise ValueError("patch weights must be stationary for K_I")
         return self
 
     def weights(self) -> np.ndarray:
@@ -122,6 +139,56 @@ class PatchParameters:
         if self.additive_max_mv < 0.0 or self.pool_p < 1.0:
             raise ValueError("require additive_max_mv>=0 and pool_p>=1")
         return self
+
+
+@dataclass(frozen=True)
+class PreparedPatchRHS:
+    """Prevalidated immutable coefficients for the P-patch hot loop.
+
+    Local ``z`` and ``m`` deliberately remain in the continuous state.  In
+    particular, ``z*W_EI`` must never be cached here because the next gate adds
+    autonomous local resource dynamics.
+    """
+
+    K_EE: np.ndarray
+    K_I: np.ndarray
+    patch_weights: np.ndarray
+    alpha_g: float
+    w_ee: float
+    nu_ext: float
+    additive_max_mv: float
+    pool_p: float
+
+    @property
+    def n_patches(self) -> int:
+        return int(self.K_EE.shape[0])
+
+
+def prepare_patch_rhs(
+    kernels: PatchKernels,
+    parameters: PatchParameters,
+) -> PreparedPatchRHS:
+    """Validate once and materialize the coefficients reused at every step."""
+
+    checked_kernels = kernels.validate()
+    checked_parameters = parameters.validate()
+    arrays = (
+        np.asarray(checked_kernels.K_EE, dtype=float).copy(),
+        np.asarray(checked_kernels.K_I, dtype=float).copy(),
+        checked_kernels.weights().copy(),
+    )
+    for value in arrays:
+        value.setflags(write=False)
+    return PreparedPatchRHS(
+        K_EE=arrays[0],
+        K_I=arrays[1],
+        patch_weights=arrays[2],
+        alpha_g=float(checked_parameters.alpha_g),
+        w_ee=float(checked_parameters.w_ee_mult * W_EE),
+        nu_ext=float(checked_parameters.ratio * nu_theta_pop()),
+        additive_max_mv=float(checked_parameters.additive_max_mv),
+        pool_p=float(checked_parameters.pool_p),
+    )
 
 
 def state_size(n_patches: int) -> int:
@@ -279,6 +346,115 @@ def patch_rhs(
     """Convenience wrapper returning only the frozen-slow vector field."""
 
     return patch_rhs_and_moments(state, kernels, parameters, transfer)[0]
+
+
+def patch_rhs_fast_and_moments(
+    state: Sequence[float] | np.ndarray,
+    prepared: PreparedPatchRHS,
+    transfer: Any,
+) -> tuple[np.ndarray, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+    """Evaluate one or a batch of states without validation in the hot loop.
+
+    This is an algebraic expansion of :func:`patch_rhs_and_moments`, not a new
+    approximation.  Callers must validate the initial state and audit transfer
+    support / finite bounds while integrating.  A one-dimensional input returns
+    one-dimensional RHS and moment vectors; a two-dimensional input is treated
+    as independent forks sharing the same spatial operator.
+    """
+
+    vector = np.asarray(state, dtype=float)
+    one = vector.ndim == 1
+    batch = vector[None, :] if one else vector
+    n_patches = prepared.n_patches
+    if batch.ndim != 2 or batch.shape[1] != state_size(n_patches):
+        raise ValueError(
+            f"state must have shape ({state_size(n_patches)},) or (n,{state_size(n_patches)})"
+        )
+
+    def local(name: str) -> np.ndarray:
+        index = LOCAL_FIELDS.index(name)
+        return batch[:, index * n_patches:(index + 1) * n_patches]
+
+    r_e = local("rE")
+    r_i = local("rI")
+    s_ee = local("sEE")
+    s_ei = local("sEI")
+    s_ie = local("sIE")
+    s_ii = local("sII")
+    r_e_fast = local("rE_fast")
+    z = local("z")
+    m = local("m")
+    mu_g = batch[:, -2]
+    s_g = batch[:, -1]
+
+    divisor = 1.0 + prepared.alpha_g * s_g[:, None]
+    divisor = np.where(np.isfinite(divisor) & (divisor > 0.0), divisor, np.nan)
+    w_ei = z * W_EI
+    recurrent_mean_e = TAU_ME * C_EE * prepared.w_ee * s_ee / divisor
+    recurrent_var_e = TAU_ME * C_EE * prepared.w_ee**2 * s_ee / divisor**2
+    mu_e = (
+        recurrent_mean_e
+        - TAU_ME * C_EI * w_ei * s_ei
+        + TAU_ME * JX_E * prepared.nu_ext
+        - prepared.additive_max_mv * m
+    )
+    var_e = (
+        recurrent_var_e
+        + TAU_ME * C_EI * w_ei**2 * s_ei
+        + TAU_ME * JX_E**2 * prepared.nu_ext
+    )
+    mu_i = (
+        TAU_MI * (C_IE * W_IE * s_ie - C_II * W_II * s_ii)
+        + TAU_MI * JX_I * prepared.nu_ext
+    )
+    var_i = (
+        TAU_MI * (C_IE * W_IE**2 * s_ie + C_II * W_II**2 * s_ii)
+        + TAU_MI * JX_I**2 * prepared.nu_ext
+    )
+    sigma_e = np.sqrt(np.maximum(var_e, 1e-9))
+    sigma_i = np.sqrt(np.maximum(var_i, 1e-9))
+    target_e = np.asarray(transfer.rate(mu_e, sigma_e, "E"), dtype=float)
+    target_i = np.asarray(transfer.rate(mu_i, sigma_i, "I"), dtype=float)
+
+    out = np.zeros_like(batch)
+
+    def put(name: str, value: np.ndarray) -> None:
+        index = LOCAL_FIELDS.index(name)
+        out[:, index * n_patches:(index + 1) * n_patches] = value
+
+    put("rE", (-r_e + target_e) / TAU_ME)
+    put("rI", (-r_i + target_i) / TAU_MI)
+    put("sEE", (r_e @ prepared.K_EE.T - s_ee) / TAU_AMPA)
+    put("sEI", (r_i @ prepared.K_I.T - s_ei) / TAU_GABA)
+    put("sIE", (r_e @ prepared.K_I.T - s_ie) / TAU_AMPA)
+    put("sII", (r_i @ prepared.K_I.T - s_ii) / TAU_GABA)
+    put("rE_fast", (r_e - r_e_fast) / TAU_FAST_MS)
+    # The first spatial gate is frozen-slow by construction.
+    put("z", np.zeros_like(z))
+    put("p", np.zeros_like(z))
+    put("m", np.zeros_like(z))
+
+    sensor = recruitment_sensor(r_e_fast)
+    area_g = np.sum(
+        prepared.patch_weights[None, :] * sensor**prepared.pool_p,
+        axis=1,
+    ) ** (1.0 / prepared.pool_p)
+    out[:, -2] = (-mu_g + area_g) / TAU_MU_MS
+    out[:, -1] = (-s_g + S_MAX * mu_g) / TAU_S_MS
+    moments = (mu_e, sigma_e, mu_i, sigma_i, np.broadcast_to(s_g[:, None], mu_e.shape))
+    if one:
+        return out[0], tuple(value[0] for value in moments)  # type: ignore[return-value]
+    return out, moments
+
+
+def patch_rhs_fast(
+    state: Sequence[float] | np.ndarray,
+    prepared: PreparedPatchRHS,
+    transfer: Any,
+) -> np.ndarray:
+    """Hot-loop wrapper returning only the vector field."""
+
+    return patch_rhs_fast_and_moments(state, prepared, transfer)[0]
 
 
 def patch_rhs_to_stage0c(rhs: Sequence[float]) -> np.ndarray:

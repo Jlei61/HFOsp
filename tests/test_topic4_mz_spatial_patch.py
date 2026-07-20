@@ -10,10 +10,14 @@ from src.topic4_mz_spatial_patch import (
     PatchParameters,
     pack_patch_state,
     patch_rhs,
+    patch_rhs_fast,
+    patch_rhs_fast_and_moments,
+    patch_rhs_and_moments,
     patch_rhs_to_stage0c,
     patch_to_stage0c_state,
     stage0c_to_patch_state,
     state_size,
+    prepare_patch_rhs,
     uniform_patch_state,
     unpack_patch_state,
 )
@@ -121,6 +125,53 @@ def test_shared_pool_uses_explicit_patch_area_weights():
 def test_kernel_contract_rejects_batch_as_space_nonconstant_operator():
     with pytest.raises(ValueError, match="preserve a constant"):
         PatchKernels(np.eye(2) * 0.5, np.eye(2)).validate()
+
+
+def test_kernel_contract_rejects_area_weights_inconsistent_with_operator():
+    matrix = np.asarray([[0.8, 0.2], [0.1, 0.9]])
+    with pytest.raises(ValueError, match="stationary"):
+        PatchKernels(matrix, matrix, np.asarray([0.5, 0.5])).validate()
+
+
+def test_fast_rhs_matches_validated_oracle_for_off_manifold_batch():
+    transfer = DummyTransfer()
+    params = PatchParameters(alpha_g=15.0, additive_max_mv=1.6, pool_p=1.0)
+    weights = np.asarray([1.0 / 3.0, 2.0 / 3.0])
+    kernels = PatchKernels(
+        np.asarray([[0.8, 0.2], [0.1, 0.9]]),
+        np.asarray([[0.9, 0.1], [0.05, 0.95]]),
+        weights,
+    ).validate()
+    rng = np.random.default_rng(8127)
+    states = []
+    for _ in range(12):
+        local = {
+            "rE": rng.uniform(0.001, 0.08, 2),
+            "rI": rng.uniform(0.004, 0.18, 2),
+            "sEE": rng.uniform(0.001, 0.07, 2),
+            "sEI": rng.uniform(0.004, 0.15, 2),
+            "sIE": rng.uniform(0.001, 0.07, 2),
+            "sII": rng.uniform(0.004, 0.15, 2),
+            "rE_fast": rng.uniform(0.001, 0.07, 2),
+            "z": rng.uniform(0.82, 1.0, 2),
+            "p": rng.uniform(0.0, 1.0, 2),
+            "m": rng.uniform(0.0, 0.25, 2),
+        }
+        states.append(pack_patch_state(local, mu_g=rng.uniform(0.0, 0.7), s_g=rng.uniform(0.0, 0.5)))
+    batch = np.asarray(states)
+    expected = np.asarray([patch_rhs(state, kernels, params, transfer) for state in batch])
+    prepared = prepare_patch_rhs(kernels, params)
+    observed = patch_rhs_fast(batch, prepared, transfer)
+    np.testing.assert_allclose(observed, expected, rtol=0.0, atol=4e-18)
+    np.testing.assert_allclose(
+        patch_rhs_fast(batch[0], prepared, transfer), expected[0], rtol=0.0, atol=4e-18
+    )
+
+    expected_rhs, expected_moments = patch_rhs_and_moments(batch[0], kernels, params, transfer)
+    observed_rhs, observed_moments = patch_rhs_fast_and_moments(batch[0], prepared, transfer)
+    np.testing.assert_allclose(observed_rhs, expected_rhs, rtol=0.0, atol=4e-18)
+    for actual, reference in zip(observed_moments, expected_moments):
+        np.testing.assert_array_equal(actual, reference)
 
 
 def test_pack_rejects_missing_slow_field_instead_of_implicitly_broadcasting():
