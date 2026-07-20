@@ -47,8 +47,13 @@ COL_Z = "#3b6fb6"
 COL_TG = "#c74343"
 COL_AG = "#d8902f"
 COL_ONSET = "#b2182b"
+COL_RETROSPECTIVE = "#6f6f6f"
 COL_EVENT = "#6F9FD8"
 COL_RECRUIT = "#d62748"
+
+RECRUITED_HZ = 20.0
+STATE_ENVELOPE_MS = 250.0
+MIN_RECRUITED_MS = 1_000.0
 
 
 def _load_json(path: Path) -> dict:
@@ -69,6 +74,70 @@ def _smooth(x: np.ndarray, dt_ms: float, win_ms: float) -> np.ndarray:
     xp = np.pad(x, (left, right), mode="edge")
     cs = np.r_[0.0, np.cumsum(xp, dtype=float)]
     return (cs[n:] - cs[:-n]) / float(n)
+
+
+def _causal_trailing_mean_1d(values: np.ndarray, n_samples: int) -> np.ndarray:
+    """Trailing moving mean whose value at index ``i`` uses no sample after ``i``."""
+    values = np.asarray(values, float)
+    if values.ndim != 1 or values.size == 0 or not np.all(np.isfinite(values)):
+        raise ValueError("values must be a non-empty finite 1D array")
+    if int(n_samples) < 1:
+        raise ValueError("n_samples must be >= 1")
+    n_samples = int(n_samples)
+    index = np.arange(values.size, dtype=int)
+    start = np.maximum(0, index - n_samples + 1)
+    csum = np.r_[0.0, np.cumsum(values, dtype=float)]
+    return (csum[index + 1] - csum[start]) / (index - start + 1)
+
+
+def _causal_recruited_episode(
+    rate_hz: np.ndarray,
+    dt_ms: float,
+    *,
+    threshold_hz: float = RECRUITED_HZ,
+    envelope_ms: float = STATE_ENVELOPE_MS,
+    minimum_duration_ms: float = MIN_RECRUITED_MS,
+) -> tuple[dict, np.ndarray]:
+    """First sustained crossing of a strictly trailing rate envelope.
+
+    ``onset_ms`` is the first threshold crossing of the causal envelope.  The detector can only
+    certify that crossing after ``minimum_duration_ms`` has elapsed, so ``confirmed_ms`` is stored
+    separately.  This avoids silently treating a centered post-hoc envelope as an online onset.
+    """
+    if not np.isfinite(dt_ms) or float(dt_ms) <= 0.0:
+        raise ValueError("dt_ms must be finite and > 0")
+    n_env = max(1, int(round(float(envelope_ms) / float(dt_ms))))
+    min_n = max(1, int(round(float(minimum_duration_ms) / float(dt_ms))))
+    envelope = _causal_trailing_mean_1d(rate_hz, n_env)
+    above = envelope >= float(threshold_hz)
+    padded = np.r_[False, above, False].astype(np.int8)
+    edges = np.diff(padded)
+    starts = np.flatnonzero(edges == 1)
+    stops = np.flatnonzero(edges == -1)
+    eligible = [(int(a), int(b)) for a, b in zip(starts, stops) if int(b - a) >= min_n]
+    if not eligible:
+        return {
+            "status": "no_recruited_macrostate",
+            "onset_ms": None,
+            "confirmed_ms": None,
+            "episode_end_ms": None,
+            "duration_ms": 0.0,
+            "reaches_record_end": False,
+            "envelope_support": "trailing_only",
+        }, envelope
+    start, stop = eligible[0]
+    return {
+        "status": "recruited_macrostate",
+        "onset_ms": float(start * dt_ms),
+        "confirmed_ms": float((start + min_n) * dt_ms),
+        "episode_end_ms": float(stop * dt_ms),
+        "duration_ms": float((stop - start) * dt_ms),
+        "reaches_record_end": bool(stop >= envelope.size),
+        "envelope_support": "trailing_only",
+        "envelope_ms": float(envelope_ms),
+        "threshold_hz": float(threshold_hz),
+        "minimum_duration_ms": float(minimum_duration_ms),
+    }, envelope
 
 
 def _trace_time(row: dict, arr: np.ndarray) -> tuple[np.ndarray, float]:
@@ -266,7 +335,20 @@ def plot_current_stage(out_dir: Path) -> dict:
     t_s = arrays["times_ms"].astype(float) * 1e-3
     lfp_t_s = arrays["lfp_times_ms"].astype(float) * 1e-3
     event = meta["representative_pre_onset_event"]
-    onset_s = float(meta["recruited_state"]["onset_ms"]) * 1e-3
+    retrospective_state = dict(meta["recruited_state"])
+    retrospective_onset_ms = float(retrospective_state["onset_ms"])
+    simulation_dt_ms = float(meta["simulation"]["dt_ms"])
+    causal_state, causal_state_envelope = _causal_recruited_episode(
+        arrays["rate_E_hz"].astype(float), simulation_dt_ms
+    )
+    if causal_state["status"] != "recruited_macrostate":
+        raise RuntimeError("locked capture has no sustained causal trailing-envelope recruitment")
+    causal_onset_ms = float(causal_state["onset_ms"])
+    if causal_onset_ms < retrospective_onset_ms:
+        raise RuntimeError("causal trailing onset unexpectedly precedes centered retrospective onset")
+    retrospective_onset_s = retrospective_onset_ms * 1e-3
+    causal_onset_s = causal_onset_ms * 1e-3
+    onset_shift_ms = causal_onset_ms - retrospective_onset_ms
     event_on_s = float(event["t_on"]) * 1e-3
     event_off_s = float(event["t_off"]) * 1e-3
     x0 = max(0.0, event_on_s - 0.75)
@@ -276,7 +358,9 @@ def plot_current_stage(out_dir: Path) -> dict:
     contact_idx = _selected_contact_indices(valid, arrays["contact_axis_mm"])
     names = arrays["contact_names"].astype(str)
     lfp = arrays["lfp_gamma_30_80"].astype(float)[:, contact_idx]
-    pre_onset_lfp = lfp_t_s < onset_s
+    # Keep the original pre-transition display scale.  Ending at the earlier, retrospective
+    # boundary avoids contaminating that scale with the rising transition itself.
+    pre_onset_lfp = lfp_t_s < retrospective_onset_s
     amp = np.nanpercentile(np.abs(lfp[pre_onset_lfp]), 95.0, axis=0)
     fallback = np.nanmedian(np.abs(lfp), axis=0)
     amp = np.where(np.isfinite(amp) & (amp > 1e-12), amp, fallback)
@@ -301,8 +385,9 @@ def plot_current_stage(out_dir: Path) -> dict:
         ax_lfp.plot(lfp_t_s, lfp_norm[:, j] + offsets[j], color="#222222", lw=0.42,
                     rasterized=True)
     ax_lfp.axvspan(event_on_s, event_off_s, color=COL_EVENT, alpha=0.20, lw=0)
-    ax_lfp.axvline(onset_s, color=COL_ONSET, lw=1.2, ls="--")
-    ax_lfp.axvspan(onset_s, x1, color=COL_RECRUIT, alpha=0.055, lw=0)
+    ax_lfp.axvline(retrospective_onset_s, color=COL_RETROSPECTIVE, lw=1.0, ls=":")
+    ax_lfp.axvline(causal_onset_s, color=COL_ONSET, lw=1.2, ls="--")
+    ax_lfp.axvspan(causal_onset_s, x1, color=COL_RECRUIT, alpha=0.055, lw=0)
     ax_lfp.set_xlim(x0, x1)
     ax_lfp.set_ylim(-0.7 * spacing, offsets[-1] + 0.8 * spacing)
     ax_lfp.set_yticks(offsets, names[contact_idx])
@@ -312,21 +397,29 @@ def plot_current_stage(out_dir: Path) -> dict:
                      fontsize=10.5, fontweight="bold")
     ax_lfp.text(event_on_s, offsets[-1] + 0.55 * spacing, "returning event", color="#2c5c91",
                 fontsize=8.0, ha="left", va="center", fontweight="bold")
-    ax_lfp.text(onset_s + 0.08, offsets[-1] + 0.55 * spacing, "strict recruited onset",
+    ax_lfp.text(causal_onset_s + 0.08, offsets[-1] + 0.55 * spacing, "causal trailing onset",
                 color=COL_ONSET, fontsize=8.0, ha="left", va="center", fontweight="bold")
+    ax_lfp.text(
+        retrospective_onset_s - 0.04, offsets[-1] + 0.25 * spacing,
+        "centered onset\n(retrospective)", color=COL_RETROSPECTIVE, fontsize=7.2,
+        ha="right", va="center",
+    )
     ax_lfp.text(0.995, 0.03, "scale: each contact's pre-onset |signal| P95",
                 transform=ax_lfp.transAxes, ha="right", va="bottom", fontsize=7.2, color="0.35")
 
     ax_rate = fig.add_subplot(gs[1], sharex=ax_lfp)
-    ax_rate.plot(t_s, arrays["rate_state_envelope_250ms_hz"], color=COL_RATE, lw=1.05,
-                 label="E rate (250-ms envelope)")
-    ax_rate.axhline(20.0, color="0.58", lw=0.75, ls=":")
+    ax_rate.plot(t_s, arrays["rate_state_envelope_250ms_hz"], color="0.68", lw=0.75,
+                 ls=":", label="E rate (250-ms centered; retrospective)")
+    ax_rate.plot(t_s, causal_state_envelope, color=COL_RATE, lw=1.05,
+                 label="E rate (250-ms trailing; causal)")
+    ax_rate.axhline(RECRUITED_HZ, color="0.58", lw=0.75, ls=":")
     ax_rate.axvspan(event_on_s, event_off_s, color=COL_EVENT, alpha=0.18, lw=0)
-    ax_rate.axvline(onset_s, color=COL_ONSET, lw=1.1, ls="--")
+    ax_rate.axvline(retrospective_onset_s, color=COL_RETROSPECTIVE, lw=1.0, ls=":")
+    ax_rate.axvline(causal_onset_s, color=COL_ONSET, lw=1.1, ls="--")
     ax_rate.set_xlim(x0, x1)
     ax_rate.set_ylabel("E rate (Hz)")
     ax_rate.set_xlabel("time (s)")
-    ax_rate.set_title("B  Operational recruitment with unresolved slow drift", loc="left",
+    ax_rate.set_title("B  Causal recruitment threshold with unresolved slow drift", loc="left",
                       fontsize=10.5, fontweight="bold")
     ax_slow = ax_rate.twinx()
     ax_slow.plot(t_s, arrays["slow_z_mean"], color=COL_Z, lw=1.0, label=r"$\langle z\rangle$")
@@ -334,11 +427,12 @@ def plot_current_stage(out_dir: Path) -> dict:
     ax_slow.set_ylim(0.0, 1.02)
     ax_slow.set_ylabel("slow state")
     handles = [
-        Line2D([0], [0], color=COL_RATE, lw=1.2, label="E rate"),
+        Line2D([0], [0], color=COL_RATE, lw=1.2, label="E rate (trailing)"),
+        Line2D([0], [0], color="0.68", lw=1.0, ls=":", label="E rate (centered)"),
         Line2D([0], [0], color=COL_Z, lw=1.2, label=r"$\langle z\rangle$"),
         Line2D([0], [0], color=COL_TG, lw=1.2, label=r"$T_G$"),
     ]
-    ax_rate.legend(handles=handles, loc="upper left", frameon=False, ncol=3, fontsize=7.8)
+    ax_rate.legend(handles=handles, loc="upper left", frameon=False, ncol=4, fontsize=7.3)
 
     pos = arrays["posE"].astype(float)
     contacts = arrays["contacts"].astype(float)
@@ -396,7 +490,8 @@ def plot_current_stage(out_dir: Path) -> dict:
                    facecolor="#35c4d8", edgecolor="white", linewidth=0.7, alpha=0.80, zorder=5)
     cb = fig.colorbar(sc_rec, ax=ax_rec, fraction=0.047, pad=0.025)
     cb.set_label("E-neuron rate in first 1 s (Hz)", fontsize=7.8)
-    ax_rec.set_title("D  Recruited-window field", loc="left", fontsize=10.2, fontweight="bold")
+    ax_rec.set_title("D  Retrospective centered-onset window", loc="left", fontsize=9.8,
+                     fontweight="bold")
     size50 = float(np.sqrt(16.0 + 64.0 * np.clip(energy_p50 / denom, 0.0, 1.0)))
     size95 = float(np.sqrt(80.0))
     ax_rec.legend(
@@ -437,7 +532,8 @@ def plot_current_stage(out_dir: Path) -> dict:
                 float(axial[0]), float(axial[-1])), rasterized=True,
     )
     ax_st.axvspan(event_on_s, event_off_s, color=COL_EVENT, alpha=0.20, lw=0)
-    ax_st.axvline(onset_s, color="white", lw=1.0, ls="--")
+    ax_st.axvline(retrospective_onset_s, color="#bdbdbd", lw=0.9, ls=":")
+    ax_st.axvline(causal_onset_s, color="white", lw=1.0, ls="--")
     src_axis = float((src - arrays["center_xy"]) @ arrays["axis_unit"])
     snk_axis = float((snk - arrays["center_xy"]) @ arrays["axis_unit"])
     ax_st.scatter([event_on_s - 0.12], [src_axis], s=30, marker="o", facecolor="none",
@@ -454,11 +550,11 @@ def plot_current_stage(out_dir: Path) -> dict:
         st,
         arrays["axial_times_ms"].astype(float),
         axial,
-        float(meta["recruited_state"]["onset_ms"]),
+        causal_onset_ms,
     )
     ax_zoom = fig.add_subplot(axial_gs[1, 0])
-    zoom0 = max(float(st_t[0]), onset_s - 0.04)
-    zoom1 = min(float(st_t[-1]), onset_s + 0.20)
+    zoom0 = max(float(st_t[0]), retrospective_onset_s - 0.04)
+    zoom1 = min(float(st_t[-1]), causal_onset_s + 0.20)
     zoom_sel = (st_t >= zoom0) & (st_t <= zoom1)
     ax_zoom.imshow(
         st[zoom_sel].T, origin="lower", aspect="auto", interpolation="nearest", cmap="magma",
@@ -466,13 +562,14 @@ def plot_current_stage(out_dir: Path) -> dict:
         extent=(float(st_t[zoom_sel][0]), float(st_t[zoom_sel][-1]),
                 float(axial[0]), float(axial[-1])), rasterized=True,
     )
-    ax_zoom.axvline(onset_s, color="white", lw=1.0, ls="--")
+    ax_zoom.axvline(retrospective_onset_s, color="#bdbdbd", lw=0.9, ls=":")
+    ax_zoom.axvline(causal_onset_s, color="white", lw=1.0, ls="--")
     crossing_s = np.asarray(sweep["crossing_ms"], float) * 1e-3
     cross_valid = np.isfinite(crossing_s)
     ax_zoom.scatter(crossing_s[cross_valid], axial[cross_valid], s=7.0, facecolor="none",
                     edgecolor="#64d8ff", linewidth=0.55, zorder=4)
     ax_zoom.set(xlabel="time (s)", ylabel="axis (mm)")
-    ax_zoom.set_title("F  Fast event sweep at operational onset", loc="left", fontsize=10.2,
+    ax_zoom.set_title("F  Fast event sweep after causal onset", loc="left", fontsize=10.2,
                       fontweight="bold")
     speed = sweep["apparent_speed_mm_s"]
     speed_text = "n/a" if speed is None else f"~{speed:.0f} mm/s"
@@ -483,6 +580,15 @@ def plot_current_stage(out_dir: Path) -> dict:
         transform=ax_zoom.transAxes, ha="left", va="top", fontsize=7.1, color="white",
         bbox=dict(fc="black", ec="white", alpha=0.54, boxstyle="round,pad=0.22"),
     )
+    ax_zoom.legend(
+        handles=[
+            Line2D([0], [0], color="#bdbdbd", lw=1.0, ls=":",
+                   label="centered (retrospective)"),
+            Line2D([0], [0], color="white", lw=1.0, ls="--", label="trailing (causal)"),
+        ],
+        loc="lower right", frameon=True, framealpha=0.45, facecolor="black",
+        edgecolor="white", labelcolor="white", fontsize=6.4,
+    )
 
     for ax in (ax_lfp, ax_rate, ax_event, ax_rec, ax_st, ax_zoom):
         ax.tick_params(labelsize=7.7, length=3)
@@ -490,7 +596,7 @@ def plot_current_stage(out_dir: Path) -> dict:
         ax.spines["right"].set_visible(False)
     ax_slow.tick_params(labelsize=7.7, length=3)
     ax_slow.spines["top"].set_visible(False)
-    fig.suptitle("Current Z–$T_G$ model: operational recruitment without observed recovery",
+    fig.suptitle("Current Z–$T_G$ model: causal recruitment without observed recovery",
                  fontsize=13.0, fontweight="bold", y=0.982)
     reaches_end = bool(meta["recruited_state"].get("reaches_record_end", False))
     footer = ("Diagnostic only — recruited activity reaches the 20-s record end; "
@@ -519,10 +625,13 @@ def plot_current_stage(out_dir: Path) -> dict:
             "recruited_contact_energy_p50_proxy_squared": energy_p50,
             "recruited_contact_energy_p95_proxy_squared": energy_p95,
             "axial_active_fraction_vmax_p99": st_vmax,
-            "operational_onset_zoom_s": [zoom0, zoom1],
+            "causal_onset_zoom_s": [zoom0, zoom1],
+            "spatial_recruited_window_anchor": "retrospective_centered_onset_from_capture",
         },
         "scientific_readout": {
-            "strict_recruited_state": meta["recruited_state"],
+            "retrospective_centered_recruited_state": retrospective_state,
+            "causal_trailing_recruited_state": causal_state,
+            "causal_minus_centered_onset_ms": onset_shift_ms,
             "representative_pre_onset_event": event,
             "pre_event_contact_direction": meta["readout_contract"].get("pre_event_direction"),
             "pre_event_axis_spearman": meta["readout_contract"].get("pre_event_axis_spearman"),
@@ -530,7 +639,7 @@ def plot_current_stage(out_dir: Path) -> dict:
                 None if event_neuron_rho is None else float(event_neuron_rho.statistic)
             ),
             "pre_event_active_E_neurons": int(active.sum()),
-            "recruited_first_1s": {
+            "retrospective_centered_first_1s": {
                 "active_neuron_fraction": rec_active_fraction,
                 "over_100hz_neuron_fraction": rec_over_100_fraction,
                 "rate_hz_percentiles_all_neurons": {
@@ -538,12 +647,15 @@ def plot_current_stage(out_dir: Path) -> dict:
                     for percentile in (0, 5, 50, 95, 99, 100)
                 },
             },
-            "operational_onset_fast_axial_sweep": {
+            "causal_onset_fast_axial_sweep": {
                 key: value for key, value in sweep.items() if key != "crossing_ms"
             },
         },
         "claim_boundary": [
             "single locked seed and finite 20-s record",
+            "the centered 250-ms onset is retrospective and leads the causal trailing-envelope onset",
+            "the causal onset crossing is only certified after one full second above threshold",
+            "per-neuron recruited-window values were precomputed from the retrospective centered-onset window",
             "virtual-SEEG is the existing pre-divisor synaptic-current proxy, not effective membrane current",
             "recruited segment reaching record end is not observed maintenance or termination",
             "spatial maps diagnose the current structure and do not establish a propagated ictal front",
@@ -588,12 +700,20 @@ def plot_failure_summary(out_dir: Path) -> dict:
     gs = fig.add_gridspec(1, 3, width_ratios=(1.25, 1.05, 1.38), wspace=0.38)
 
     ax = fig.add_subplot(gs[0, 0])
-    onset_s = float(v2_audit["onset_ms"]) * 1e-3
+    retrospective_onset_ms = float(v2_audit["onset_ms"])
+    causal_state, _ = _causal_recruited_episode(rate, dt_ms)
+    if causal_state["status"] != "recruited_macrostate":
+        raise RuntimeError("v2 trace lost causal trailing-envelope recruitment")
+    causal_onset_ms = float(causal_state["onset_ms"])
+    retrospective_onset_s = retrospective_onset_ms * 1e-3
+    causal_onset_s = causal_onset_ms * 1e-3
     ax.plot(t, rate50, color=COL_RATE, lw=1.05)
     ax.axhline(20.0, color="0.55", lw=0.8, ls=":")
-    ax.axvline(onset_s, color=COL_ONSET, lw=1.15, ls="--")
-    ax.axvspan(onset_s, t[-1], color=COL_RECRUIT, alpha=0.075, lw=0)
-    ax.text(onset_s + 0.15, 112, "operational onset (no kick)", color=COL_ONSET, fontsize=8.4,
+    ax.axvline(retrospective_onset_s, color=COL_RETROSPECTIVE, lw=1.0, ls=":")
+    ax.axvline(causal_onset_s, color=COL_ONSET, lw=1.15, ls="--")
+    ax.axvspan(causal_onset_s, t[-1], color=COL_RECRUIT, alpha=0.075, lw=0)
+    ax.text(causal_onset_s + 0.15, 112, "causal trailing onset (no kick)", color=COL_ONSET,
+            fontsize=8.4,
             fontweight="bold", va="top")
     ax.text(0.35, 112, "returning events", color="0.28", fontsize=8.4,
             fontweight="bold", va="top")
@@ -608,7 +728,8 @@ def plot_failure_summary(out_dir: Path) -> dict:
     ax.plot(tz, z_mean, color=COL_Z, lw=1.4, label=r"$\langle z\rangle$")
     ax.plot(tz, tg, color=COL_TG, lw=1.25, label=r"$T_G$")
     ax.plot(tz, ag, color=COL_AG, lw=1.05, label=r"$A_G$")
-    ax.axvline(onset_s, color=COL_ONSET, lw=1.0, ls="--")
+    ax.axvline(retrospective_onset_s, color=COL_RETROSPECTIVE, lw=0.9, ls=":")
+    ax.axvline(causal_onset_s, color=COL_ONSET, lw=1.0, ls="--")
     ax.set(xlim=(0, 20), ylim=(0, 1.02), xlabel="time (s)", ylabel="state value",
            title="Slow state does not settle")
     ax.legend(frameon=False, fontsize=8.1, loc="center left")
@@ -667,7 +788,9 @@ def plot_failure_summary(out_dir: Path) -> dict:
             "v3_trace": str((V3_RUN / "traces_downsampled.npz").relative_to(ROOT)),
         },
         "v2": {
-            "onset_ms": v2_audit["onset_ms"],
+            "retrospective_centered_onset_ms": retrospective_onset_ms,
+            "causal_trailing_recruited_state": causal_state,
+            "causal_minus_centered_onset_ms": causal_onset_ms - retrospective_onset_ms,
             "duration_ms": v2_audit["recruited_duration_ms"],
             "burst_peak_hz": v2_audit["burst_peak_hz"],
             "returned": v2_audit["returned_to_same_seed_slowoff"],
@@ -680,6 +803,7 @@ def plot_failure_summary(out_dir: Path) -> dict:
         },
         "claim_boundary": [
             "single-seed operational sustained recruitment, not a settled ictal attractor",
+            "centered-envelope onset is retrospective; the plotted causal onset uses trailing samples only",
             "linear M prevented a one-second recruited macrostate; it did not terminate an established state",
             "this summary contains no spatial claim",
         ],
@@ -699,24 +823,34 @@ def _write_readme(out_dir: Path, spatial_rendered: bool, spatial_meta: dict | No
     ]
     if spatial_rendered:
         readout = (spatial_meta or {}).get("scientific_readout", {})
-        sweep = readout.get("operational_onset_fast_axial_sweep", {})
-        recruited = readout.get("recruited_first_1s", {})
+        sweep = readout.get("causal_onset_fast_axial_sweep", {})
+        recruited = readout.get("retrospective_centered_first_1s", {})
+        onset_shift_ms = readout.get("causal_minus_centered_onset_ms")
         sweep_sentence = (
-            f"操作性 onset 附近，{sweep.get('n_crossed')}/{sweep.get('n_bins')} 个轴向 bin "
+            f"严格因果 trailing onset 之后，{sweep.get('n_crossed')}/{sweep.get('n_bins')} 个轴向 bin "
             f"在 {sweep.get('crossing_span_ms'):.0f} ms 内依次跨过因果 50-ms activity 门，"
             f"轴向 Spearman rho={sweep.get('axis_spearman'):+.2f}；"
             if sweep else ""
         )
         recruited_sentence = (
-            f"onset 后首个 1 s 中 {100.0 * recruited.get('active_neuron_fraction', 0.0):.1f}% 的 E 神经元发放，"
+            f"原 capture 预计算的 centered-onset 后首个 1 s 中 "
+            f"{100.0 * recruited.get('active_neuron_fraction', 0.0):.1f}% 的 E 神经元发放，"
             f"其中 {100.0 * recruited.get('over_100hz_neuron_fraction', 0.0):.1f}% 的全体 E 神经元超过 100 Hz。"
             if recruited else ""
         )
+        onset_sentence = (
+            f"centered 250-ms envelope 给出的 {readout['retrospective_centered_recruited_state']['onset_ms'] * 1e-3:.4f} s "
+            f"只作 retrospective 标记；trailing-only envelope 的跨越在 "
+            f"{readout['causal_trailing_recruited_state']['onset_ms'] * 1e-3:.4f} s，"
+            f"晚 {onset_shift_ms:.1f} ms，并需再持续满 1 s 才被确认。"
+            if onset_shift_ms is not None else ""
+        )
         blocks.append(
             "\n### fig5_candidate_E1146_mz_divisive_current_stage.png / .pdf\n\n"
-            "上方为同一条 20 s 自发轨迹的连续 virtual-SEEG；中间将 population-rate 定义的 recruited onset 与 `z/T_G` 慢漂移对齐；下方分别显示 onset 前一个机器选择的 returning event、onset 后 recruited window 的真实 E-neuron 空间读出、完整 source→sink 轴时空场，以及 onset 附近的放大图。returning-event 颗粒颜色是逐神经元 first-spike latency，菱形颜色是触点 30–80 Hz envelope-peak latency；两者共用毫秒色标但不是同一测量。所有颗粒、触点与空间热图都来自同一次 capture，未用一维 rate 伪造空间结果。\n\n"
+            "上方为同一条 20 s 自发轨迹的连续 virtual-SEEG；中间同时画出 retrospective centered envelope 与 causal trailing envelope，并与 `z/T_G` 慢漂移对齐；下方分别显示 onset 前一个机器选择的 returning event、原 capture 的 centered-onset recruited window、完整 source→sink 轴时空场，以及因果 onset 附近的放大图。returning-event 颗粒颜色是逐神经元 first-spike latency，菱形颜色是触点 30–80 Hz envelope-peak latency；两者共用毫秒色标但不是同一测量。所有颗粒、触点与空间热图都来自同一次 capture，未用一维 rate 伪造空间结果。\n\n"
+            f"{onset_sentence}\n\n"
             f"{sweep_sentence}这对应约数百 mm/s 的 fast event sweep，而不是秒级的 ictal tissue-recruitment front。{recruited_sentence}\n\n"
-            "**关注点**：当前模型并非没有空间结构；它保留 returning-event 的空间颗粒，并在操作性转变处产生快速有序轴向波。真正缺少的是一个慢速、局部改变组织状态的 recruitment front，以及其后的 refractory wake、stall/annihilation 和 return。高率细胞尾部也说明 population mean 的约 60 Hz 不能单独证明一个生理性有界高态。\n"
+            "**关注点**：当前模型并非没有空间结构；它保留 returning-event 的空间颗粒，但因果 onset 后的 130-ms sweep 轴向 rho 仅约 +0.20，不能称为稳定有序的 recruitment wave。真正缺少的是一个慢速、局部改变组织状态的 recruitment front，以及其后的 refractory wake、stall/annihilation 和 return。高率细胞尾部也说明 population mean 的约 60 Hz 不能单独证明一个生理性有界高态。\n"
         )
     blocks.append(
         "\n两张图都是 current-stage diagnostic，不是正式锁定的 Figure 5，也不支持 seizure lifecycle、limit cycle、患者机制或 cohort inference。\n"

@@ -10,7 +10,20 @@
     "v3_trace": "results/topic4_sef_hfo/mz_divisive_lifecycle/runs/20260719T172358.336529Z_6ce230e_80a127d772_slow_gate_m/traces_downsampled.npz"
   },
   "v2": {
-    "onset_ms": 13856.0,
+    "retrospective_centered_onset_ms": 13856.0,
+    "causal_trailing_recruited_state": {
+      "status": "recruited_macrostate",
+      "onset_ms": 13976.0,
+      "confirmed_ms": 14976.0,
+      "episode_end_ms": 20000.0,
+      "duration_ms": 6024.0,
+      "reaches_record_end": true,
+      "envelope_support": "trailing_only",
+      "envelope_ms": 250.0,
+      "threshold_hz": 20.0,
+      "minimum_duration_ms": 1000.0
+    },
+    "causal_minus_centered_onset_ms": 120.0,
     "duration_ms": 6144.0,
     "burst_peak_hz": 5.045572916666666,
     "returned": false,
@@ -39,6 +52,7 @@
   },
   "claim_boundary": [
     "single-seed operational sustained recruitment, not a settled ictal attractor",
+    "centered-envelope onset is retrospective; the plotted causal onset uses trailing samples only",
     "linear M prevented a one-second recruited macrostate; it did not terminate an established state",
     "this summary contains no spatial claim"
   ]

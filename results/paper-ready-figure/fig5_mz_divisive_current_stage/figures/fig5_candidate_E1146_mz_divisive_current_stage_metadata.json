@@ -51,19 +51,33 @@
     "recruited_contact_energy_p50_proxy_squared": 1412.8062744140625,
     "recruited_contact_energy_p95_proxy_squared": 5462.851171875,
     "axial_active_fraction_vmax_p99": 0.3655629399418827,
-    "operational_onset_zoom_s": [
+    "causal_onset_zoom_s": [
       13.813900000000002,
-      14.0539
-    ]
+      14.1788
+    ],
+    "spatial_recruited_window_anchor": "retrospective_centered_onset_from_capture"
   },
   "scientific_readout": {
-    "strict_recruited_state": {
+    "retrospective_centered_recruited_state": {
       "status": "recruited_macrostate",
       "onset_ms": 13853.900000000001,
       "episode_end_ms": 20000.0,
       "duration_ms": 6146.1,
       "reaches_record_end": true
     },
+    "causal_trailing_recruited_state": {
+      "status": "recruited_macrostate",
+      "onset_ms": 13978.800000000001,
+      "confirmed_ms": 14978.800000000001,
+      "episode_end_ms": 20000.0,
+      "duration_ms": 6021.200000000001,
+      "reaches_record_end": true,
+      "envelope_support": "trailing_only",
+      "envelope_ms": 250.0,
+      "threshold_hz": 20.0,
+      "minimum_duration_ms": 1000.0
+    },
+    "causal_minus_centered_onset_ms": 124.89999999999964,
     "representative_pre_onset_event": {
       "t_on": 9868.2,
       "t_off": 9950.800000000001,
@@ -78,7 +92,7 @@
     "pre_event_axis_spearman": 0.045454545454545456,
     "pre_event_neuron_axis_spearman": -0.44015917008928473,
     "pre_event_active_E_neurons": 11040,
-    "recruited_first_1s": {
+    "retrospective_centered_first_1s": {
       "active_neuron_fraction": 0.47409375,
       "over_100hz_neuron_fraction": 0.18309375,
       "rate_hz_percentiles_all_neurons": {
@@ -90,22 +104,25 @@
         "100": 428.0
       }
     },
-    "operational_onset_fast_axial_sweep": {
+    "causal_onset_fast_axial_sweep": {
       "n_bins": 48,
       "n_crossed": 48,
       "threshold_active_fraction": 0.05,
       "causal_smooth_ms": 50.0,
       "hold_ms": 30.0,
-      "crossing_span_ms": 60.0,
+      "crossing_span_ms": 130.0,
       "axis_span_mm": 19.582931518554688,
-      "apparent_speed_mm_s": 326.3821919759115,
-      "axis_spearman": 0.9632920311666858,
-      "axis_spearman_p": 6.484611872067352e-28,
+      "apparent_speed_mm_s": 150.63793475811298,
+      "axis_spearman": 0.19627999354560158,
+      "axis_spearman_p": 0.18119965222558332,
       "interpretation": "fast_axial_event_sweep_not_slow_tissue_recruitment_front"
     }
   },
   "claim_boundary": [
     "single locked seed and finite 20-s record",
+    "the centered 250-ms onset is retrospective and leads the causal trailing-envelope onset",
+    "the causal onset crossing is only certified after one full second above threshold",
+    "per-neuron recruited-window values were precomputed from the retrospective centered-onset window",
     "virtual-SEEG is the existing pre-divisor synaptic-current proxy, not effective membrane current",
     "recruited segment reaching record end is not observed maintenance or termination",
     "spatial maps diagnose the current structure and do not establish a propagated ictal front",
