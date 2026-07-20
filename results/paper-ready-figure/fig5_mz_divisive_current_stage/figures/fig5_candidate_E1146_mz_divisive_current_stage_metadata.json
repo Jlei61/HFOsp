@@ -1,0 +1,114 @@
+{
+  "status": "paper-ready current-stage diagnostic; not a locked Figure 5 panel",
+  "figure": "results/paper-ready-figure/fig5_mz_divisive_current_stage/figures/fig5_candidate_E1146_mz_divisive_current_stage.png",
+  "sources": {
+    "capture_npz": "results/topic4_sef_hfo/mz_divisive_lifecycle/figure_capture/current_stage_capture.npz",
+    "capture_json": "results/topic4_sef_hfo/mz_divisive_lifecycle/figure_capture/current_stage_capture.json",
+    "capture_npz_sha256": "4d3ebbc7cb0f5e465618e42f1d6c977861c3f1cd5240d989f0b5895269a4ba1d"
+  },
+  "display": {
+    "time_window_s": [
+      9.118200000000002,
+      19.999900390625
+    ],
+    "selected_contact_indices": [
+      3,
+      14,
+      2,
+      13,
+      1,
+      12,
+      11,
+      0,
+      10,
+      9,
+      8,
+      7,
+      6,
+      5,
+      4
+    ],
+    "selected_contact_names": [
+      "SCL9",
+      "ICL11",
+      "SCL8",
+      "ICL10",
+      "SCL7",
+      "ICL9",
+      "ICL8",
+      "SCL6",
+      "ICL7",
+      "ICL6",
+      "ICL5",
+      "ICL4",
+      "ICL3",
+      "ICL2",
+      "ICL1"
+    ],
+    "virtual_seeg_scale": "per-contact pre-onset absolute-amplitude P95; recruited data not clipped before plotting",
+    "event_latency_vmax_ms": 82.60000000000036,
+    "recruited_neuron_rate_vmax_hz_p99": 372.0,
+    "recruited_contact_energy_p50_proxy_squared": 1412.8062744140625,
+    "recruited_contact_energy_p95_proxy_squared": 5462.851171875,
+    "axial_active_fraction_vmax_p99": 0.3655629399418827,
+    "operational_onset_zoom_s": [
+      13.813900000000002,
+      14.0539
+    ]
+  },
+  "scientific_readout": {
+    "strict_recruited_state": {
+      "status": "recruited_macrostate",
+      "onset_ms": 13853.900000000001,
+      "episode_end_ms": 20000.0,
+      "duration_ms": 6146.1,
+      "reaches_record_end": true
+    },
+    "representative_pre_onset_event": {
+      "t_on": 9868.2,
+      "t_off": 9950.800000000001,
+      "duration_ms": 82.60000000000036,
+      "peak_50ms_rate_hz": 83.474375,
+      "return_check_start_ms": 10075.800000000001,
+      "return_check_end_ms": 10325.800000000001,
+      "return_state_median_hz": 19.923125,
+      "returned": true
+    },
+    "pre_event_contact_direction": "unresolved",
+    "pre_event_axis_spearman": 0.045454545454545456,
+    "pre_event_neuron_axis_spearman": -0.44015917008928473,
+    "pre_event_active_E_neurons": 11040,
+    "recruited_first_1s": {
+      "active_neuron_fraction": 0.47409375,
+      "over_100hz_neuron_fraction": 0.18309375,
+      "rate_hz_percentiles_all_neurons": {
+        "0": 0.0,
+        "5": 0.0,
+        "50": 0.0,
+        "95": 266.0,
+        "99": 365.0,
+        "100": 428.0
+      }
+    },
+    "operational_onset_fast_axial_sweep": {
+      "n_bins": 48,
+      "n_crossed": 48,
+      "threshold_active_fraction": 0.05,
+      "causal_smooth_ms": 50.0,
+      "hold_ms": 30.0,
+      "crossing_span_ms": 60.0,
+      "axis_span_mm": 19.582931518554688,
+      "apparent_speed_mm_s": 326.3821919759115,
+      "axis_spearman": 0.9632920311666858,
+      "axis_spearman_p": 6.484611872067352e-28,
+      "interpretation": "fast_axial_event_sweep_not_slow_tissue_recruitment_front"
+    }
+  },
+  "claim_boundary": [
+    "single locked seed and finite 20-s record",
+    "virtual-SEEG is the existing pre-divisor synaptic-current proxy, not effective membrane current",
+    "recruited segment reaching record end is not observed maintenance or termination",
+    "spatial maps diagnose the current structure and do not establish a propagated ictal front",
+    "the ordered tens-of-ms axial sweep is a fast event wave, not a slow tissue-state front"
+  ]
+}

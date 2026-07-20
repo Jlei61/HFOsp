@@ -1,0 +1,86 @@
+experiment: topic4_mz_divisive_lifecycle
+result_root: results/topic4_sef_hfo/mz_divisive_lifecycle
+
+substrate:
+  subject: epilepsiae_1146
+  montage: narrow
+  dt_ms: 0.1
+  seeds: [1, 3, 4]
+
+z_anchor:
+  I_th_EI: 1.6652801609959704
+  tau_z_ms: 10000.0
+  sensitivity:
+    I_th_EI: 95.19851312666987
+    tau_z_ms: 5000.0
+
+pool:
+  r0_psi: 0.0
+  r50_psi: 0.4
+  n_psi: 2.0
+  tau_mu_ms: 30.0
+  tau_S_ms: 80.0
+  S_max: 1.0
+  beta_SG: 0.0
+  arms:
+    peak_anchor:
+      p_pool: 3.0
+      alpha_G: [8.0, 12.0, 16.0, 20.0, 24.0, 32.0]
+    area_integrator:
+      p_pool: 1.0
+      alpha_G: [8.0, 16.0, 24.0, 32.0, 48.0, 64.0]
+  boundary_refinement:
+    peak_anchor:
+      p_pool: 3.0
+      alpha_G: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+    area_integrator:
+      p_pool: 1.0
+      alpha_G: [1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0]
+  tau_S_sensitivity_ms: [40.0, 120.0, 200.0]
+
+adaptation:
+  tau_adp_ms: 2000.0
+  eta_m: [0.0, 0.00186, 0.00373, 0.00745, 0.01118, 0.01863]
+
+slow_gated_divisor:
+  p_pool: 1.0
+  alpha_fast: 2.0
+  tau_S_ms: 80.0
+  AG0: 0.15
+  AG50: 0.10
+  exponent: 4.0
+  TG_max: 1.0
+  alpha_TG: [4.0, 6.0]
+  tau_TG_ms: [750.0, 2000.0]
+  T_ms: 20000.0
+
+screen:
+  observer_T_ms: 6000.0
+  containment_T_ms: 10000.0
+  termination_T_ms: 15000.0
+  confirm_T_ms: 20000.0
+  runaway_hz: 120.0
+  runaway_sustain_ms: 100.0
+  recruited_hz: 20.0
+  recruited_sustain_ms: 250.0
+  min_recruited_ms: 1000.0
+  recovery_ms: 2000.0
+  # Legacy screen descriptor only. Final lifecycle claims use the paired slow-off post-hoc audit.
+  recovery_margin_hz: 5.0
+  envelope_ms: 50.0
+  merge_gap_ms: 100.0
+  burst_min_peaks: 4
+  burst_min_modulation: 0.30
+  burst_band_hz: [0.5, 20.0]
+  peak_min_separation_ms: 50.0
+  boundary_long_check:
+    - area_integrator_p1_aG2
+    - peak_anchor_p3_aG1
+
+resources:
+  reserve_gib: 96.0
+  unmeasured_worker_gib: 6.5
+  rss_safety_factor: 1.2
+  initial_worker_cap: 8
+  hard_worker_cap: 12
+  cpu_reserve: 16
