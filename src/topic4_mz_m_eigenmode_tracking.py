@@ -215,6 +215,23 @@ def subspace_alignment(A, B):
     return float(np.mean(np.cos(ang))) if ang.size else float("nan")
 
 
+def leading_subspace(K, degeneracy_ratio):
+    """SVD an ensemble finite-time operator K (n_bins × n_modes) and return the leading empirical
+    singular mode + the leading SUBSPACE for cross-state tracking (spec §4 P3). When
+    sigma_hat_1/sigma_hat_2 < degeneracy_ratio the leading direction is unstable, so the tracked object
+    is the leading subspace (dim ≥ 2) rather than a single vector (E17)."""
+    U, s, Vt = np.linalg.svd(np.asarray(K, float), full_matrices=False)
+    s1 = float(s[0]) if s.size else 0.0
+    s2 = float(s[1]) if s.size > 1 else 0.0
+    gap = (s1 / s2) if s2 > 0 else float("inf")
+    degenerate = bool(s2 > 0 and gap < degeneracy_ratio)
+    r = int(np.sum(s >= s1 / degeneracy_ratio)) if s1 > 0 else 1
+    dim = max(r, 2) if degenerate else max(r, 1)
+    return dict(u1=U[:, 0], U=U[:, :dim].copy(), sigma1=s1, gap=float(gap),
+                degenerate=degenerate, subspace_dim=int(dim),
+                singular_values=[float(x) for x in s[:6]])
+
+
 def weighted_centroid(field, X, Y):
     """|field|²-weighted centroid (cx, cy) over grid coordinates X, Y (sign-invariant)."""
     w = np.abs(np.asarray(field, float)).ravel() ** 2

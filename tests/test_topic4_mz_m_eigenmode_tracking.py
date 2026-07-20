@@ -20,7 +20,7 @@ import copy  # noqa: E402
 from src.topic4_mz_m_eigenmode_tracking import (  # noqa: E402
     build_zm_slow_config, resting_mask, register_states, trajectory_parity, transform_m,
     apply_m_control, principal_angles_deg, subspace_alignment, weighted_centroid,
-    centroid_displacement, state_checkpoint_fingerprint, SCHEMA_VERSION,
+    centroid_displacement, state_checkpoint_fingerprint, leading_subspace, SCHEMA_VERSION,
 )
 
 
@@ -217,6 +217,23 @@ def test_e19_checkpoint_fingerprint_deterministic_and_m_sensitive():
     b = state_checkpoint_fingerprint(_FakeCk([0.0, 1.0, 2.0]))
     c = state_checkpoint_fingerprint(_FakeCk([0.0, 1.0, 9.0]))   # m changed
     assert a == b and a != c and isinstance(a, str) and len(a) >= 12
+
+
+def test_leading_subspace_degeneracy(P17=None):
+    """leading_subspace flags a near-degenerate leading pair (gap < ratio) -> subspace_dim >= 2, and a
+    well-separated leading mode -> single vector. Used by P3 cross-state mode tracking."""
+    rng = np.random.default_rng(2)
+    U, _ = np.linalg.qr(rng.standard_normal((36, 36)))
+    V, _ = np.linalg.qr(rng.standard_normal((9, 9)))
+
+    def _K(sig):
+        return (U[:, :9] * np.asarray(sig)) @ V.T
+
+    sep = leading_subspace(_K([4.0, 1.0, 0.5, 0, 0, 0, 0, 0, 0]), 1.05)
+    assert not sep["degenerate"] and sep["subspace_dim"] == 1 and sep["u1"].shape == (36,)
+    deg = leading_subspace(_K([2.0, 1.99, 0.4, 0, 0, 0, 0, 0, 0]), 1.05)
+    assert deg["degenerate"] and deg["subspace_dim"] >= 2 and deg["U"].shape[1] >= 2
+    assert np.isclose(sep["sigma1"], 4.0, rtol=1e-6)
 
 
 def test_schema_version():
