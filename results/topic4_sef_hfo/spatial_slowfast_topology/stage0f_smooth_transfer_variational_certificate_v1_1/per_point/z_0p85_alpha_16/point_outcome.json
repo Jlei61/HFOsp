@@ -1,0 +1,177 @@
+{
+  "z": 0.85,
+  "alpha_G": 16.0,
+  "outcome": "periodic_orbit_derivative_unresolved",
+  "derivative_certified": false,
+  "failed_gates": [
+    "base_whole_return_jv"
+  ],
+  "stage1_open": false,
+  "space_open": false,
+  "state_scales": [
+    0.09434251230935006,
+    0.20705067882182449,
+    0.08795578698279181,
+    0.11177874649836085,
+    0.08795578698279181,
+    0.11177874649836085,
+    0.0613171992322944,
+    0.7000361871900492,
+    0.3526551620223682
+  ],
+  "base_smooth_shooting": {
+    "pass": true,
+    "checks": {
+      "shooting_converged": true,
+      "fixed_point_residual": true,
+      "period_cv": true,
+      "cycle_valid": true,
+      "event_restarted_map_valid": true,
+      "event_restarted_p_closure": true,
+      "event_restarted_p2_closure": true,
+      "two_cycle_aligned": true
+    },
+    "residual_series": [
+      8.263126676914367e-05,
+      6.806585202108807e-09,
+      4.5015035364803135e-13,
+      2.234773500025994e-15
+    ],
+    "period_series_ms": [
+      608.4417570015027,
+      608.435988804927,
+      608.4359890990216,
+      608.4359890990429
+    ],
+    "last_four_period_cv": 4.104970139936077e-06,
+    "event_restarted_p_closure": 1.9864653333564392e-15,
+    "event_restarted_p2_closure": 1.9864653333564392e-15,
+    "aligned_cycle_residual": 5.100334811267854e-05,
+    "non_event_restarted_second_closure_diagnostic_only": 1.663937898614717e-06
+  },
+  "base_lut_orbit_parity": {
+    "pass": true,
+    "smooth_period_ms": 608.4359890990429,
+    "lut_period_ms": 608.5185032687947,
+    "period_difference_ms": 0.08251416975178927,
+    "aligned_waveform_residual": 0.00035719475648198016
+  },
+  "base_nominal_map_identity": {
+    "pass": true,
+    "checks": {
+      "period_identity": true,
+      "full_crossing_identity": true,
+      "continuous_transversality": true,
+      "discrete_transversality": true,
+      "nominal_physical_support": true
+    },
+    "shooting_period_ms": 608.4359890990429,
+    "variational_period_ms": 608.4359890990429,
+    "period_difference_ms": 0.0,
+    "crossing_difference_scaled": 0.0,
+    "continuous_rhs_transversality_per_ms": 0.006124241221106436,
+    "discrete_bracket_transversality_per_ms": 0.006122838687832033,
+    "nominal_audit": {
+      "clean": true,
+      "n_every_euler_states": 4868,
+      "event_located_crossing_audited_separately": true,
+      "state_minimum": [
+        0.00038867401444483854,
+        0.0010228659731729166,
+        0.00038915197078029915,
+        0.005199214951920653,
+        0.00038915197078029915,
+        0.005199214951920653,
+        0.00040881380399047256,
+        1.549582136337441e-08,
+        0.000943685654980344
+      ],
+      "state_maximum": [
+        0.09633267872358625,
+        0.2082682366159602,
+        0.08876987608631602,
+        0.11697911033237797,
+        0.08876987608631602,
+        0.11697911033237797,
+        0.06178322973612501,
+        0.7000227682820167,
+        0.3536663251945574
+      ],
+      "moment_minimum": [
+        -130.4020156925113,
+        3.8252728668478477,
+        -63.991644553216275,
+        5.0364347881085765
+      ],
+      "moment_maximum": [
+        57.83363728241014,
+        12.137829301417465,
+        41.153390455317535,
+        16.374884171829322
+      ],
+      "peak_rE_hz": 96.33267872358626,
+      "support_violation_count": 0,
+      "state_bound_violation_count": 0,
+      "over_100hz_count": 0
+    }
+  },
+  "base_variational_consistency": {
+    "pass": true,
+    "checks": {
+      "matrix_agreement": true,
+      "spectral_radius_agreement": true,
+      "event_section_row": true,
+      "continuous_transversality": true,
+      "discrete_transversality": true,
+      "physical_support": true
+    },
+    "matrix_relative_differences": {
+      "fd_ladder": 0.0002083114609108543,
+      "chain_vs_fd_1e-5": 0.00022869322327652883,
+      "chain_vs_fd_3e-6": 2.0384500320013423e-05
+    },
+    "spectral_radii": {
+      "chain_rule": 7.239834316069405e-05,
+      "finite_difference_1e-5": 7.243629108158026e-05,
+      "finite_difference_3e-6": 7.24017270412975e-05
+    },
+    "spectral_radius_range": 3.7947920886207656e-08,
+    "maximum_normalized_section_row": 3.148183109693819e-16,
+    "continuous_rhs_transversality_per_ms": 0.006124241221106436,
+    "discrete_bracket_transversality_per_ms": 0.006122838687832033,
+    "stencil_totals": {
+      "finite_difference_1e-5": {
+        "central": 42338,
+        "forward": 1474,
+        "backward": 0
+      },
+      "finite_difference_3e-6": {
+        "central": 42630,
+        "forward": 1182,
+        "backward": 0
+      }
+    }
+  },
+  "base_whole_return_jv": {
+    "pass": false,
+    "checks": {
+      "matrix_agreement": false,
+      "spectral_radius_agreement": true,
+      "all_probe_audits_clean": true,
+      "all_initial_probe_audits_clean": true,
+      "all_crossing_audits_clean": true,
+      "all_period_bands_pass": true
+    },
+    "matrix_relative_differences": {
+      "epsilon_ladder": 1.2662069137270242,
+      "chain_vs_epsilon_1e-3": 1.264326816667101,
+      "chain_vs_epsilon_3e-4": 0.013132089075858716
+    },
+    "spectral_radii_chain_and_jv": [
+      7.239834316069405e-05,
+      7.828640034025604e-05,
+      6.935359639834947e-05
+    ],
+    "spectral_radius_range": 8.932803941906565e-06
+  }
+}

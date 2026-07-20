@@ -1,7 +1,7 @@
-# Topic 4：topology-first spatial slow–fast field 路线（review-ready v0.6）
+# Topic 4：topology-first spatial slow–fast field 路线（review-ready v0.8）
 
 > 日期：2026-07-20
-> 状态：**review-ready v0.6；Stage 0B 已触发 fast-equation stop rule；Stage 0C 打开 dynamic-divisor 振荡线索；Stage 0D v1.1 未通过窗口式 open-basin 门；Stage 0E 已直接解出两条闭合 period-1 orbit 和强有限扰动回归，但 Floquet 导数平台未解析；仅 Stage 0F 数值证书开放，slow/field 仍关闭**
+> 状态：**review-ready v0.8；Stage 0E 已直接解出两条闭合 period-1 orbit 和强有限扰动回归；Stage 0F v1 已归档为 engineering-invalid，v1.1 权威运行完成并固定为 `STAGE0F_NUMERICAL_UNRESOLVED`；slow/field 仍关闭，本文件后半部只保留 conditional next-version contract**
 > 本路线 owner：`.worktrees/topic4-mz-divisive-lifecycle`
 > 与并行 FCXR 的边界：本路线只做 reduced rate/field 的动力学拓扑与空间前沿；不改 LIF 膜电导，不实现 E→E presynaptic relay `x_j`，不编辑 `.worktrees/topic4-mz-conductance`。
 
@@ -29,162 +29,95 @@
 4. **患者 scaffold 只做异质耦合，不替代动力学**：先在 homogeneous 0D/1D 找到拓扑，再加入 E1146 长轴 `W_AB`；不能靠固定异质性把全场同步误写成传播。
 5. **cheap first**：0D continuation → 1D front → 2D E1146 field；只有三层都通过，才讨论映射回 40k SNN。
 
-## 3. 主方程：spatial E–I fast field + local Z/recovery loop
+## 3. 主方程：九维快对象 + local fractional-gain recovery
 
-第一版用可继续分析的 E–I rate field，而不是再改 LIF 电流。fast block 不另造任意 sigmoid；
-复用 `src/topic4_m3b_spectral_phase.py` 已有的 LIF transfer、E/I rate 与
-`sEE/sEI/sIE/sII` 四个 synaptic filters。完整输入合同锁为：
+主版不再回到原六维块，而是保留 Stage 0E 已解出周期的九维快状态：
 
 \[
-\tau_A\partial_t s_{EE}=K_E*e-s_{EE},\qquad
-\tau_G\partial_t s_{EI}=K_I*i-s_{EI},
+X=(e,i,s_{EE},s_{EI},s_{IE},s_{II},\bar e_D,\mu_D,S_D).
+\]
+
+四个突触滤波与 LIF population transfer 完全复用 Stage 0C--0F 合同。delayed recurrent-E divisor 为：
+
+\[
+\tau_s\partial_t\bar e_D=-\bar e_D+K_{D0}*e,
+\quad
+\tau_\mu\partial_t\mu_D=-\mu_D+\Psi(\bar e_D),
+\quad
+\tau_S\partial_tS_D=-S_D+S_{\max}\mu_D.
+\]
+
+慢 recovery 不再作为第三股加性电流，而是另一个独立分数增益：
+
+\[
+D_G=1+\alpha_GS_D,
+\qquad
+D_R=1+\kappa_Rr,
+\qquad
+w_{EE}^{eff}=\frac{w_{EE}}{D_GD_R}.
 \]
 
 \[
-\tau_A\partial_t s_{IE}=K_{IE}*e-s_{IE},\qquad
-\tau_G\partial_t s_{II}=K_{II}*i-s_{II}.
-\]
-
-Z 延续当前 SNN 的 **postsynaptic inhibitory-efficacy** 语义，而不是改成 presynaptic resource：
-
-\[
-\mu_E=\tau_{mE}\!\left(C_{EE}w_{EE}s_{EE}
--C_{EI}\,z(x,t)w_{EI}s_{EI}\right)
-+\tau_{mE}J_{XE}\nu_{ext}+\mu_{core}-r(x,t),
+\mu_E=\tau_{mE}\left[C_{EE}w_{EE}^{eff}s_{EE}
+-C_{EI}z(x,t)w_{EI}s_{EI}\right]
++\tau_{mE}J_{XE}\nu_{ext}+\mu_{core},
 \]
 
 \[
-\sigma_E^2=\tau_{mE}\!\left(C_{EE}w_{EE}^2s_{EE}
-+C_{EI}[z(x,t)w_{EI}]^2s_{EI}\right)
-+\tau_{mE}J_{XE}^2\nu_{ext},
+\sigma_E^2=\tau_{mE}\left[C_{EE}(w_{EE}^{eff})^2s_{EE}
++C_{EI}[z(x,t)w_{EI}]^2s_{EI}\right]
++\tau_{mE}J_{XE}^2\nu_{ext}.
+\]
+
+Z 保留 postsynaptic inhibitory-efficacy 语义，sensor 读取未被 Z 缩放前的 raw inhibitory drive：
+
+\[
+I_I^{raw}=\tau_{mE}C_{EI}w_{EI}s_{EI},
+\quad
+\tau_z\partial_tz=1-S_\epsilon(I_I^{raw}-I_{th})-z.
+\]
+
+普通 IED 也可有高峰，因此 persistence 不直接积分 mean rate，而是积分高活动占用：
+
+\[
+\tau_p\partial_tp=H_\epsilon(e-e_p)-p,
 \]
 
 \[
-\mu_I=\tau_{mI}(C_{IE}w_{IE}s_{IE}-C_{II}w_{II}s_{II})
-+\tau_{mI}J_{XI}\nu_{ext},
+\partial_tr=k_\uparrow H_\epsilon(p-p_r)(1-r)
+-k_\downarrow[1-H_\epsilon(p-p_r)]r.
 \]
 
-\[
-\sigma_I^2=\tau_{mI}(C_{IE}w_{IE}^2s_{IE}+C_{II}w_{II}^2s_{II})
-+\tau_{mI}J_{XI}^2\nu_{ext},
-\]
+`k_up/k_down` 分开是为了让 recovery 能在 ictal 段跨过退出线，又在 offset 后保留到 Z 恢复。主版锁 `D_r=0`；弱扩散只作 sensitivity。dynamic-threshold `phi` 因快周期已存在而关闭，仅保留为映射回 SNN 后 tonic-only 的备选对照。
 
-\[
-\tau_E\partial_t e=-e+\Phi_E(\mu_E,\sigma_E;V_{th,E}+\phi),\qquad
-\tau_I\partial_t i=-i+\Phi_I(\mu_I,\sigma_I;V_{th,I}).
-\]
+一次 cheap frozen probe 给出窄范围先验：在 `z=.85`时，约 `5.1%` recurrent-E gain reduction（`D_R~=1.053`）可使注册 orbit fork 回 low；在 `D_R=1`时，`z=.87` 仍有周期而 `.88` 回 low。这只证明存在操作性退出杠杆，不是正式 `B_C` 或分岔类型。
 
-其中：
+### 3.1 matched comparators
 
-- `e/i` 与四个 synaptic filters 是快变量；`Phi_E/Phi_I` 使用既有、有界且单位已审计的 LIF
-  population transfer，输出有明确 rate ceiling；
-- `K_E` 较窄且可沿 E1146 长轴各向异性；`K_I` 较宽，负责前沿外的 feedforward-inhibition penumbra；
-- `W_AB` 是患者特异固定 scaffold，只在 homogeneous/1D gate 通过并锁定 producer、单位、归一化与
-  subject fingerprint 后加入；
-- Z 在抑制均值中乘一次、在抑制方差中平方一次；禁止写成 `K_I*(z*i)`，因为那会静默改成
-  presynaptic resource；
-- recovery `r(x,t)` 单位为 mV，只从 `mu_E` 减一次；dynamic threshold `phi` 只进入
-  `V_th,E`，禁止把 `r` 同时写进 threshold。`r` 不是 FCXR 的 presynaptic E->E resource `x_j`。
+- **additive comparator**：`mu_E -> mu_E-eta_R r`，`eta_R` 只按 Stage 0F 周期上的 phase-averaged recurrent-mean reduction 匹配，不单独调优；
+- **global-r comparator**：把 `r(x,t)` 替换为全场均值，检验有界率是否以丢失 front/wake 为代价。
 
-Z 的 sensor 也延续当前 SNN：它读取 **未被 Z 缩放前**的 postsynaptic inhibitory drive：
+加性对照也可能让周期退出，因此主线不声称 divisive uniqueness。可比较的是 cycle-loss geometry、peak control 和 low-baseline preservation。
 
-\[
-I_I^{raw}(x,t)=\tau_{mE}C_{EI}w_{EI}s_{EI}(x,t),
-\]
+## 4. 慢路径必须在 `(z,D_R)` 平面穿过真实边界
 
-\[
-\tau_z\partial_t z=z_\infty(I_I^{raw})-z,\qquad
-z_\infty=1-S_\epsilon(I_I^{raw}-I_{th}),\qquad 0\le z\le1.
-\]
+先用 root continuation、periodic-orbit continuation 与 exact-root state forks 分开求：
 
-`S_epsilon` 是为 continuation 使用的平滑 Heaviside；`epsilon -> 0` 必须作为 current-SNN strict-threshold
-sensitivity。recovery loop 写成：
+1. `B_L(z,D_R)`：low fixed point 失稳/消失线；
+2. `B_C(z,D_R)`：periodic orbit 失稳/消失线；
+3. `Sigma(z,D_R)`：low/cycle basin separatrix；
+4. `D_sep(z)`：特定 probe 的操作性 state-fork 边界。
 
-\[
-\tau_p\partial_t p=-p+e,
-\]
-
-\[
-\tau_r\partial_t r=-r+r_{\max}
-\frac{[p-\vartheta_r]_+^{n_r}}
-{p_{50}^{n_r}+[p-\vartheta_r]_+^{n_r}}
-+D_r\nabla^2r.
-\]
-
-解释：
-
-- 普通短 IED 可消耗少量 Z，但 `p` 达不到 `vartheta_r`，所以 recovery gate 不启动；
-- 持续局部 recruitment 使 `p` 越阈，`r` 在该处累积并把 E-nullcline 推向退出边界；
-- `r` 在 wavefront 后方保留有限时间，形成 refractory wake，使刚退出的组织不会立刻被低 Z 再点燃；
-- `D_r=0` 是主版本起点，弱扩散只作 sensitivity。第一版不引入第三个全局 slow scalar。
-
-若 frozen fast block 只得到 bounded tonic high branch、没有可读的 ictal oscillation，则只开放一个
-预注册扩展：加入 80--150 ms 量级的 dynamic threshold `phi(x,t)`，使其只承担 within-bout rhythm：
-
-\[
-\tau_\phi\partial_t\phi=-\phi+\Delta_\phi e,
-\qquad \Phi_E(\cdot;V_{th,E})\rightarrow\Phi_E(\cdot;V_{th,E}+\phi).
-\]
-
-`phi` 不承担秒级最终 termination；`r` 不承担 onset 前的一般 IED 抑制。两者不能合成一个从
-`t=0` 起工作的 M。
-
-### 3.1 两个明确的非候选对照
-
-- **current-control**：把 `r` 改成 uniform additive subtraction；用于复刻当前失败，不能成为主模型。
-- **global-control**：把 `r(x,t)` 替换为全场均值；用于检验“有界率”是否以丢失 front/wake 为代价。
-
-## 4. 关键差别不在“additive / non-additive”标签
-
-必须明确：`r` 从 `mu_E` 中减去，在代数上仍是 activation input 中的 additive
-subtraction。把它叫 threshold、current 或 control parameter，本身都不会自动产生 seizure dynamics。
-current-based 系统只要 fast phase portrait 合适，同样可以有 bistability/Hopf/limit cycle；conductance
-也不自动保证这些对象存在。
-
-当前模型固定 Z/`T_G`/M 后，fast subsystem 基本仍是原 current-LIF，只是输入偏置或 recurrent gain 改了；有限窗 bursting 可以来自慢变量的瞬时抵消，而不要求存在新的 fast attractor。
-
-新路线真正新增的是三个合同，而不是一种神奇的代数形式：
-
-1. fast E–I block 必须先独立通过 fixed-point/branch/orbit/state-fork；
-2. recovery 必须由 established local recruitment 持续门控，不能从第一颗 IED spike 就工作；
-3. recovery 必须是局部场，在 front 后方保存空间历史。
-
-目标不是“多加一条负电流”，而是先锁定 fast phase portrait，再让慢控制参数按可验证次序跨越它：
-
-\[
-\text{low fixed point}
-\xrightarrow[Z\downarrow]{entry}
-\text{finite oscillatory branch}
-\xrightarrow[r\uparrow]{exit}
-\text{low fixed point}.
-\]
-
-空间卷积随后用于检验局部 branch switching 能否形成 moving front；局部 `r` 用于检验招募历史能否形成
-wake。两者都不是预设成功。没有这些局部状态与对照，固定 scaffold 只能决定哪里更容易点火，不能自动提供传播和退出。
-
-### 4.1 慢路径必须在 `(z,r)` 平面闭环
-
-先用 frozen state forks 在 `(z,r)` 平面求出：
-
-- low/high basin 与 onset/offset surfaces；
-- `r_sep(z)`：给定 Z 时，使注册的 high-state initial condition 回到 low basin 所需的最小 recovery；
-- `z_safe`：在 `r=0` 时，该 high-state probe 也只能回到 low basin 的最小恢复 Z。
+`D_sep` 不能代替 `B_C`；Z 恢复到 low root 重现也不代表 stable cycle 已消失。所有 low fork 必须从同一 frozen point 的 exact low root 启动，不得用任意低率初值代替。
 
 真实慢轨迹必须满足：
 
 \[
-\text{cross onset surface}\rightarrow\text{establish high state}
-\rightarrow\text{cross offset surface}\rightarrow\text{return low},
+\text{cross }B_L\rightarrow\text{establish cycle}
+\rightarrow\text{cross }B_C\rightarrow\text{return low},
 \]
 
-并在 offset 后、Z 尚未恢复到 `z_safe` 的整个窗口内满足：
-
-\[
-r(t)-r_{sep}(z(t))\ge \delta_r>0.
-\]
-
-这条 safety margin 防止 `r` 先衰减、低 Z 立即重新点燃。`delta_r`、early probe 与 late probe
-必须在看结果前锁定；只看一条 rate trace 不算闭环证明。
+并在 offset 后保持 `D_R` 于 cycle side 之外，直到 `z>=z_safe`，再让 `r` 衰减到 0。cheap probe 的 `.87--.88` Z bracket 和 `D_R~=1.053` 只用作 continuation seeds；正式 safety margin 由 Stage 1A 重新锁定。
 
 ## 5. 分阶段执行门
 
@@ -239,7 +172,7 @@ X=(e,i,s_{EE},s_{EI},s_{IE},s_{II},\bar e_G,\mu_G,S_G),
 \[
 \mu_E=\tau_{mE}\left[
 C_{EE}\frac{w_{EE}w_{mult}}{D_G}s_{EE}
--C_{EI}z w_{EI}s_{EI}\right]+\tau_{mE}J_{XE}\nu_{ext}-r,
+-C_{EI}z w_{EI}s_{EI}\right]+\tau_{mE}J_{XE}\nu_{ext}-\beta_R,
 \]
 
 \[
@@ -268,7 +201,7 @@ e50=0.015 kHz, n_Psi=2, beta_SG=0`。`mu_G/S_G` 的连续 ODE 不用数值 clip 
 SNN 的 `r50_psi=0.4` 输入是每步网格 spike-field 量，不是 kHz；禁止直接搬入 reduced equation。
 0D homogeneous 时 p-norm 满足 `A_G=Psi_G`，所以 `p_pool` 严格消掉，不能成为 Stage 0C 扫描轴。
 
-固定 `ratio=1, w_ee_mult=1.1, r=0`，只扫：
+这里 `beta_R` 只是 Stage 0C 历史 matched-subtractive diagnostic，不是新的局部 recovery；主 screen 固定 `beta_R=0`。固定 `ratio=1, w_ee_mult=1.1`，只扫：
 
 - `z={1.00,0.99,...,0.80}`；
 - `alpha_G={0,1,2,4,8,12,16,24,32}`。
@@ -284,7 +217,7 @@ matched-subtractive / mean-only-divisor` 对照。只有 full dynamic 有有限 
 
 **Stage 0C pass** 至少要求：`z=1` 保留 `<5 Hz` stable low；有限 stable high root/orbit 跨相邻两个格、
 由至少两个非 exact-root 初态进入；tail mean/peak 均 `<100 Hz`，无 LUT clipping、ceiling 或 drift；
-`alpha_G=0` 同点没有该对象。通过后才沿 `z down` 定位 entry，并以冻结 `r in (0,7) mV` 定位 exit。
+`alpha_G=0` 同点没有该对象。通过后才沿 `z down` 定位 entry，并以冻结 `D_R in [1,1.06]` 做正式 periodic continuation 定位 exit。
 只有 exact separator、initialized-high pool、prevention、`>100 Hz` 或 window-dependent transient 均 no-go。
 
 这个 pool 的安全名称是 **activity-dependent recurrent-E divisive normalization** 或 M4 rank-one fast
@@ -305,7 +238,7 @@ returns 已支持两条闭合且对有限扰动强收缩的 period-1 orbit。但
 Jacobian 的三档 epsilon 之间没有形成相对差平台，所以按锁定门仍是
 `STAGE0E_NUMERICAL_UNRESOLVED`，不能称 stable Floquet attractor。
 
-Stage 0F 是当前唯一开放节点，只解析上述导数级不确定性：
+Stage 0F v1.1 已完成，只解析上述导数级不确定性：
 
 1. 参数点、Poincare 截面、base/half `dt` 和 Stage 0E orbit 全部固定；
 2. 用 smooth/exact transfer 加 discrete variational/event projection，或与数值积分器一致的 tangent map；
@@ -313,28 +246,37 @@ Stage 0F 是当前唯一开放节点，只解析上述导数级不确定性：
 4. 同时报告 absolute operator error、base/half-`dt` 一致性和与 Stage 0E nonlinear return battery 的一致性；
 5. 不缩小 epsilon 到机器底噪进行事后救援，不用 FFT 替代 Floquet，不扫新生物参数。
 
-Stage 0F 只有在两种步长和两种导数构造中均给出与 nonlinear battery 一致、且对单位圆有预注册余量的稳定半径，才允许进入冻结 `r` continuation。若得到可靠 `rho>=1`，关闭 dynamic-divisor 节点；若仍不可辨，停在 numerical unresolved，不加慢变量“救”它。
+权威结果中 smooth closure、nominal map、crossing transversality 和内部 variational ladder 均通过；`epsilon=3e-4` 的 whole-return Jv 与 chain-rule 相差 `0.0076/0.0131`，但预注册 `epsilon=1e-3` 相差 `1.317/1.264`。因此双尺度门未过，verdict 固定为 `STAGE0F_NUMERICAL_UNRESOLVED`。不删除较大 epsilon、不放宽阈值、不重跑 v1.1，也不加慢变量“救”它。后续如继续数值诊断，必须另立 pre-registered numerical-resolution arm；在此之前下列 Stage 1--3 全部是 conditional design，不是执行许可。
 
 ### Stage 1：0D closed slow loop
 
-只在 Stage 0F 完成稳定性证书，且冻结 continuation 找到 low/cycle 与 `r_sep(z)` 边界后打开 Z、`p/r`：
+只在新的独立数值证据完成稳定性证书后，先在 `(z,D_R)` 中分开定位 `B_L`、`B_C`、`Sigma` 与 probe-specific `D_sep`，再打开 Z、`p/r`。当前 v1.1 没有满足该前提。`D_sep` 不能代替真正 cycle-loss `B_C`：
 
 - 短事件能返回且不启动 `r`；
 - Z 漂移可使系统自主或由有限短刺激进入 fast high branch；
 - `r` 必须在 established recruitment 后上升，并使 frozen fast system 穿过 exit；
 - 无 reset 回到同一 low basin；
-- offset 后到 `z>=z_safe` 期间始终满足 `r-r_sep(z)>=delta_r`；
+- offset 后到 `z>=z_safe+delta_z` 期间，始终满足 `D_R>=D_guard(z)+delta_D`；
 - early retrigger 被抑制、late retrigger 恢复。
 
-必须做 `r free / r=0 / matched-clamped r` state fork，不能只比较两条从 `t=0` 就不同的轨迹。
+必须做 `r free / r=0 / matched-clamped r` state fork，不能只比较两条从 `t=0` 就不同的轨迹。疑似 infinite-period exit 附近必须过 adiabaticity gate，并从最后一个有效周期直接积分完整慢快 terminal layer；不用周期平均外推代替真实 offset。
 
 ### Stage 2：1D source→sink field
 
-只沿 E1146 注册长轴布点，加入 `K_E/K_I`，暂不加完整二维异质性。验收：
+只沿 E1146 注册长轴布点，暂不加完整二维异质性。局部/较宽程 recurrent-E divisor 核为：
+
+\[
+K_D=(1-\gamma_D)G_{\sigma_E}+\gamma_DG_{\sigma_D},
+\qquad \sigma_E<\sigma_D\ll L.
+\]
+
+Stage 2A 先以 `gamma_D=0` 验证 nucleation/front/wake；Stage 2B 再测 finite-range front interaction。归一 finite-range kernel 超过 `sigma_D` 会饱和，不预设它能积分全部 recruited extent。
+
+空间读出锁为 `A_hist/A_act`、observed `c_on/c_off` 与 clamped-feedback signed invasion velocity `c_inv`。`c_on/c_off` 是非负历史速度，只有 `c_inv` 可以穿零。验收：
 
 - 局部 onset，不是全轴同一时间跨阈；
 - local ictal state 以冻结 branch/orbit membership 和至少 2--3 个周期的 persistent dwell 定义，并使用分开的 onset/offset hysteresis；
-- front position 取每个位置首次 persistent state switch，禁止用首次 spike 或 50-ms activity crossing 代替；
+- membership 必须冻结完整 slow field 并保留 fast spatial coupling 的 full-field fork 复核；局部 atlas 只作 surrogate；
 - 有可测 front position、front velocity 和 recruited width；
 - front 前有高 synaptic/inhibitory drive、低 local E firing 的 penumbra；
 - front 后 `r` 滞后于 recruitment，形成 wake；
@@ -342,19 +284,21 @@ Stage 0F 只有在两种步长和两种导数构造中均给出与 nonlinear bat
 
 局部 wake **不等于** containment。Stage 2 必须把结果分成：
 
-1. `intrinsic_stall_or_annihilation`：front 在到达边界前停下/相消，并全轴返回，才允许继续；
+1. `contained_self_termination`：`c_inv` 有穿零平台，dynamic `c_on->0`、`c_off>0`、`A_act->0`，且 `A_hist` 在边界前达有限平台；
 2. `constant_speed_traveling_pulse`：wake 成立但 front 一直跑到边界，只能判 wake PASS、containment FAIL；
-3. `near_synchronous_global_ignition`：空间 gate FAIL。
+3. `stationary_persistent_bump`：`c_on=c_off=0` 但 `A_act>0`，只是 containment without lifecycle；
+4. `near_synchronous_global_ignition/prevention`：空间 gate FAIL。
 
-只有第 2 类才开放一个预注册的 reduced-field sensitivity：
+如 Stage 2B 只得 traveling pulse，才条件开放 Stage 2C continuous activity-load 低秩 divisor，不把离线 tissue classifier 送回方程：
 
 \[
-K_I=(1-\gamma)G_{\sigma_I}+\gamma U,
+Q_A(t)=\frac{1}{A_{ref}}\int_\Omega
+[S_D(x,t)-S_{D,rest}-\delta_D]_{+,\epsilon}\,dx,
+\qquad D_A=1+\kappa_AQ_A,
+\qquad D_E=D_GD_RD_A.
 \]
 
-其中 `U` 是归一化均匀核，表示 fast extent-dependent nonlocal inhibition，不是第三个 global slow
-scalar。若不存在同时避开 prevention、全场同步和 boundary termination 的有限 `gamma` 窗口，则停止，不能用患者
-异质性或边界制造假 stall。
+`A_ref` 是预锁的固定物理尺度，积分不除 domain size。Stage 2C 是新动力学节点，需重做 clamped `Q_A` 的 `B_L/B_C/c_inv` atlas 与 local-core-survival gate；它不是 GABA conductance，不与并行线重复。详细合同见 `2026-07-20-topic4-local-divisive-recovery-spatial-lifecycle-design.md`。
 
 ### Stage 3：2D E1146 scaffold
 
@@ -365,7 +309,7 @@ Stage 3 启动前先锁定 `W_AB` 的 canonical producer/artifact、subject fing
 随后固定 Stage 1/2 的 fast/slow 参数，只允许一个总耦合尺度校准，再加入：
 
 - 各向异性 `K_E`；
-- 较宽 `K_I`；
+- 较宽 finite-range `K_D`，以及仅在 Stage 2C 开放时的 low-rank `Q_A`；
 - 患者特异 `W_AB` 与双 source heterogeneity；
 - 正式 virtual-SEEG readout。
 
@@ -415,7 +359,8 @@ Stage 3 启动前先锁定 `W_AB` 的 canonical producer/artifact、subject fing
 - `z off`：应失去慢性进入或 recruitment susceptibility；
 - `r off`：应失去 exit/refractory wake；
 - `p gate off`（令所有活动驱动 r）：应退化为 IED prevention；
-- `K_I` 不比 `K_E` 宽：检验 penumbra/containment 是否消失；
+- `gamma_D=0` / broad `K_D` off：检验是否只剩 local wake/traveling pulse；
+- `kappa_A=0` / clamped `Q_A` / dynamic `Q_A`：仅 Stage 2C 开放后检验 extent brake 与 timing；
 - global `r`：检验是否只剩全场同步退出；
 - `W_AB` shuffle/isotropic：区分动态前沿与固定 scaffold 继承；
 - matched-clamped `r`：区分动态 timing 与相同 DC 抑制量。
@@ -433,7 +378,8 @@ Stage 3 启动前先锁定 `W_AB` 的 canonical producer/artifact、subject fing
 - Jirsa et al. 的 Epileptor 强调 fast/intermediate objects 与 slow permittivity 的分时标结构，并把 onset/offset 定义为不同动力学边界：[Brain 2014](https://academic.oup.com/brain/article/137/8/2210/2847958)。
 - Proix et al. 把局部 Epileptor 扩展为空间 field，区分慢 ictal wavefront 与快 SWD，并展示空间传播/终止来自 excitable media、coupled oscillators 与多时标相互作用：[Nature Communications 2018](https://www.nature.com/articles/s41467-018-02973-y)。
 - Schevon et al. 的人类记录支持 ictal core、wavefront 与被强突触输入影响但未局部招募的 inhibitory penumbra 分离：[Nature Communications 2012](https://www.nature.com/articles/ncomms2056)。
-- Liou et al. 的 biophysical network 用 reversal-aware conductances、局部与广域 inhibition、sAHP 等解释 recruitment/termination；它支持并行 FCXR 的膜方程方向，但不等于本 reduced-field 路线：[eLife 2020](https://elifesciences.org/articles/50927)。
+- Liou et al. 的 biophysical network 用 reversal-aware conductances、局部/广域 inhibition 与 sAHP 解释 recruitment/termination；其 global component 按已招募范围增强、作为 spatial integrator。它支持并行 FCXR 的膜方程方向，也支持本线对 extent-load 作为 conditional node 的验收原则，但本线输出是 recurrent-E gain 而不是 GABA conductance：[eLife 2020](https://elifesciences.org/articles/50927)。
+- 包含 adaptation 的 neural field 本来就可以支持 traveling pulse；抑制参数可使 wave 通过 existence/stability loss 突然消失。这支持本线把 local wake、constant-width pulse、signed frozen invasion 和真正 annihilation 分开，而不用一张有限宽带图代替动力学验收：[Palkar et al., PLoS Computational Biology 2023](https://pubmed.ncbi.nlm.nih.gov/37669292/)。
 
 本 spec 借的是这些工作的**动力学组织原则**，不是直接复制数值或宣称当前 HFOsp 模型已复现它们。
 
@@ -460,5 +406,5 @@ Stage 3 启动前先锁定 `W_AB` 的 canonical producer/artifact、subject fing
 - 独立 transfer-support v1.1 用经 exact-Siegert 验证的 extra-fine、no-clip/no-extrapolation transfer 重放 6 点、102 histories：17 条 `>100 Hz`，84 条 unresolved，仅 `z=0.85, alpha_G=16, root_0_plus` 一条轨迹在 12 s confirm 与 `dt/2` 下保留约 1.665 Hz 振荡。同点只有 1/17 histories 存活，0 个 supported parameter points，因而当前 verdict 是 `EXTRA_FINE_VALID_NO_SUPPORTED_OBJECT_WITH_UNRESOLVED_TRANSIENTS`，不是 pass 也不是 clean no-go。
 - Stage 0D v1.1 已完成：180 条锁定 histories 得到 175 `numerical_unresolved` + 5 `candidate_survives`；5 条全部集中在 `z=0.85, alpha_G=15, phase_050`，中心点无 survivor，无 open basin/相容 Manhattan 邻点。v1-->v1.1 为 0/180 分类改变，`scientific_result_changed=false`；verdict 为 `STAGE0D_NO_REPLICATION_WITH_UNRESOLVED_TRAJECTORIES`。
 - Stage 0E 已完成：`alpha_G=15/16` 均有约 605--609 ms 的 period-1 shooting closure，base/half-`dt` 波形一致性通过，每点 16 条多相位 fast/pool 扰动均在 8 returns 内收缩到数值底噪。两点 physical/support audit 通过，但 Floquet Jacobian epsilon 平台失败，因而 verdict 为 `STAGE0E_NUMERICAL_UNRESOLVED`，不是 stable-attractor PASS。
-- Stage 0F smooth/variational Floquet certificate 已锁为唯一开放节点；它不扫生物参数、不加 slow/space、不修改 conductance 线。
-- Stage 1--3 继续关闭。Stage 0A PASS、Stage 0C engineering completion、Stage 0D survivor 或 Stage 0E 闭合周期都尚不构成 HFOsp Z/recovery 时空机制证据。
+- Stage 0F v1.1 已完成：engineering/provenance 与内部 variational consistency 通过，但预注册 whole-return Jv 双尺度门未过，verdict 固定为 `STAGE0F_NUMERICAL_UNRESOLVED`；不改 gate 重跑。
+- Stage 1--3 继续关闭。Stage 0A PASS、Stage 0C engineering completion、Stage 0D survivor、Stage 0E 闭合周期或 Stage 0F 的较小 epsilon 一致性都尚不构成 HFOsp Z/recovery 时空机制证据。

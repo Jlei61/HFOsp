@@ -1,0 +1,124 @@
+result_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_1
+stage0e_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit
+stage0f_v1_archive: results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20
+transfer_path: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz
+
+locked_hashes:
+  stage0e_summary: b478adc6b261eb6712c3c757777ba9441208a8dc2c159d2829e8450f66f4bca0
+  extra_fine_transfer: dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703
+  stage0e_module: 5c3ef24ffdc1f4d64962a3b3dc80dac2ab55d4c77ecfdca89ba6daf9dfb3c877
+  stage0c_module: 25b6538007d6974b44aa500f4f05929fa6f1d9ed48c6692d8acb1798180235ca
+  transfer_module: 48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed
+  sef_hfo_lif_module: d21e6441559906c7c4685c6523f20a91179577d3ef5c25aee71fa27e5efb92a4
+  atomic_helper_runner: 36fbca9fd507d2501d942829a7698ee051088884454635dcfcf9bb19e6ffbe05
+  stage0f_v1_module: 7a2496f93f51c211539cc4356d7f57ccbc55a6124e4b402fe55f887329767eb3
+  alpha15_shooting: 0da44a5999a57a8f53e244ab23e29fe38a0dd9bedce36d7efdae900296b0a120
+  alpha15_base_trace: eec8886a0dab52761e68eab0e01d85f53b3bcfd5056a2c73e9e22f2db510d700
+  alpha15_half_trace: cd304b6fcf3f6bf3d12dfc7fdcd64889923f743c01b0cf19be7619eec449fa0e
+  alpha15_outcome: 643991c3d63b8f861b81e4d87cb4040ff3abb8d06e419b927d4a352836e4660c
+  alpha16_shooting: d3130ea6db6b65f912e2489aed3ecb5b86dbc42d79ff3edccfba0188194f7dc3
+  alpha16_base_trace: d1bc0553f85f12b0d425be10c809824e799eb71c94fd043546e0532be9dab531
+  alpha16_half_trace: 467f28402272334e98746ebd3c117fc83f24c86d6c7942f6fd6e6adde7291e02
+  alpha16_outcome: 1ff24defa3684195be1fd934ee57f46bed59c5f6fe3306642637bbd7e61506d6
+  stage0f_v1_execution_lock: 3eb744cf436cabe4592b308aeca9dff630a3c644a95e70c32e62dc63e035eb06
+  stage0f_v1_summary: 030b9ffddc8df78b8fd72228f1796e7927d8d4847e5c18af3abeb3dcb207587a
+  stage0f_v1_alpha15_outcome: 5598c068efe219c1f244e1221bd8f235d78f9f867825ce9bb8399c29f23af46a
+  stage0f_v1_alpha16_outcome: 6853f868675a4b4e811652fd29c16dd48659da811589a5f5f91a01a1678dc557
+
+points:
+  - {z: 0.85, alpha_G: 15.0}
+  - {z: 0.85, alpha_G: 16.0}
+model: {w_ee_mult: 1.1, ratio: 1.0}
+
+section:
+  state_index: 8
+  state_name: S_G
+  level: 0.15
+  direction: upward
+  min_return_ms: 300.0
+  max_return_ms: 1200.0
+
+time_steps_ms: [0.125, 0.0625]
+phase_bins: 256
+transfer_parity_variational_samples: 512
+
+smooth_transfer:
+  mu_min_mv: -160.0
+  mu_max_mv: 80.0
+  sigma_min_mv: 3.0
+  sigma_max_mv: 20.0
+  spline_degree_mu: 3
+  spline_degree_sigma: 3
+  smoothing: 0.0
+
+transfer_parity:
+  rate_absolute_khz: 5.0e-5
+  rate_relative: 5.0e-3
+  rate_relative_floor_khz: 1.0e-4
+  derivative_absolute_khz_per_mv: 5.0e-5
+  derivative_relative: 5.0e-2
+  derivative_relative_floor_khz_per_mv: 1.0e-7
+
+shooting:
+  max_iterations: 20
+  residual_tolerance: 1.0e-8
+  period_cv_tolerance: 1.0e-3
+  aligned_cycle_residual_tolerance: 2.0e-4
+  minimum_iterations: 4
+  event_restarted_p_closure_tolerance: 1.0e-8
+  event_restarted_p2_closure_tolerance: 1.0e-8
+
+orbit_parity:
+  period_abs_ms: 1.0
+  aligned_waveform_residual: 3.0e-2
+  dt_period_abs_ms: 1.0
+  dt_period_relative: 5.0e-3
+  dt_aligned_waveform_residual: 3.0e-2
+
+variational:
+  finite_difference_relative_steps: [1.0e-5, 3.0e-6]
+  finite_difference_absolute_floor: 1.0e-9
+  matrix_relative_difference_max: 5.0e-2
+  matrix_norm_floor: 1.0e-8
+  spectral_radius_range_max: 2.0e-2
+  section_row_abs_max: 1.0e-10
+  minimum_continuous_transversality_per_ms: 1.0e-4
+  minimum_discrete_transversality_per_ms: 1.0e-4
+  nominal_period_identity_abs_ms: 1.0e-9
+  nominal_crossing_identity_scaled: 1.0e-10
+
+whole_return_jv:
+  epsilon_relative: [1.0e-3, 3.0e-4]
+  matrix_relative_difference_max: 5.0e-2
+  spectral_radius_range_max: 2.0e-2
+
+stability:
+  minimum_unit_circle_margin: 5.0e-2
+  uncertainty_multiplier: 3.0
+
+artifact_contract:
+  complete_parity_rows: 4096
+  complete_derivative_summary_rows: 4
+  complete_cycle_traces: 4
+  complete_certificate_matrices: 12
+  complete_certificate_multipliers: 96
+  complete_whole_return_jv_arrays: 8
+  figure_panels: 4
+
+physical_acceptance:
+  finite_high_max_hz: 100.0
+  max_refractory_occupancy: 0.05
+
+resource_contract: {blas_threads: 1, max_memory_gib: 4.0}
+
+scope:
+  parameter_search: false
+  change_equations: false
+  fit_transfer_values: false
+  transfer_extrapolation: false
+  adaptive_finite_difference_step: false
+  first_order_finite_difference: false
+  noise: false
+  slow_variables: false
+  spatial_coupling: false
+  stage1: false
