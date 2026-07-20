@@ -182,3 +182,28 @@ def classify_branch_D(low_label, high_labels, high_plateaus, T=THRESHOLDS):
         D_label = "UNRESOLVED"
     return dict(D_label=D_label, low_label=low_label, high_labels=list(high_labels),
                 plateau_rel_spread=spread)
+
+
+# ------------------------------------------------------------------------------------
+# D2.10 — SNN-connectivity sech^2 effective-operator lens at a landmark (reuse P1-2)
+# ------------------------------------------------------------------------------------
+
+def snn_landmark_sech2(W_EE, g_raw, g_sat=21.6, k=6):
+    """Effective-operator lens on the REAL 40k E->E connectivity at a landmark state (the P1-2 path):
+    leading-mode IPR of raw W_EE vs the saturation-weighted operator diag(sech^2(g_raw/g_sat)) @ W_EE.
+    Answers whether the smooth saturation localizes or preserves the dominant spatial mode (a localized
+    leading mode would be a runaway-mode artifact; ~1/N stays global). g_raw = per-E-cell recurrent
+    conductance snapshot (e.g. max_raw_gErec recorded during the branch cell). This is a REDUCED-MODEL
+    connectivity lens on the SNN branch map, not a claim on its own (§6.3)."""
+    from src.topic4_mz_fcxr_modes import leading_modes, effective_jacobian_modes
+    lm = leading_modes(W_EE, k=k)
+    eff = effective_jacobian_modes(W_EE, np.asarray(g_raw, float), float(g_sat), k=k)
+    raw_ipr = lm.get("right_ipr", [float("nan")])
+    return dict(
+        raw_lead_ipr=float(raw_ipr[0]) if raw_ipr else float("nan"),
+        eff_lead_ipr=float(eff.get("eff_leading_ipr", float("nan"))),
+        sech2_min=float(eff.get("sech2_min", float("nan"))),
+        sech2_mean=float(eff.get("sech2_mean", float("nan"))),
+        sech2_p05=float(eff.get("sech2_p05", float("nan"))),
+        N=int(W_EE.shape[0]),
+    )

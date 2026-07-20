@@ -211,3 +211,20 @@ def test_z_frozen_is_applied_by_conductance_membrane():
     grel_full = np.asarray(mt(None)[1])[:4]              # z=1 (full inhibition, use_z False)
     assert not np.allclose(grel_dep, grel_full)          # frozen depletion actually changes the membrane
     assert grel_dep.sum() < grel_full.sum()              # less inhibition -> lower total relative conductance
+
+
+# ---------------- D2.10: SNN sech^2 effective-operator lens ----------------
+from src.topic4_mz_fcxr_dynamics import snn_landmark_sech2   # noqa: E402
+import scipy.sparse as sp   # noqa: E402
+
+
+def test_snn_landmark_sech2_iprs_in_range_and_sech2_bounded():
+    N = 120
+    W = sp.random(N, N, density=0.1, random_state=0, data_rvs=lambda n: np.abs(np.random.default_rng(1).normal(size=n))).tocsr()
+    g_raw = np.abs(np.random.default_rng(2).normal(15, 8, N))
+    out = snn_landmark_sech2(W, g_raw, g_sat=21.6, k=4)
+    assert out["N"] == N
+    assert 0.0 < out["sech2_mean"] <= 1.0 and 0.0 <= out["sech2_min"] <= 1.0   # sech^2 in [0,1]
+    for key in ("raw_lead_ipr", "eff_lead_ipr"):
+        v = out[key]
+        assert np.isnan(v) or (1.0 / N - 1e-9 <= v <= 1.0 + 1e-9)              # IPR in [1/N, 1]
