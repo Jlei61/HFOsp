@@ -333,7 +333,11 @@ def cmd_controls(args, cfg):
             for cond in mc["conditions"]:
                 ck_c = apply_m_control(ck, cond, S["NE"], seed=int(mc["shuffle_seed"]))
                 fk = DSM.fixed_kick_state(S, ck_c, branch, cfg)
+                raK = fk.get("kick_induced_saturation_ms")
+                peak = float(np.nanmax(np.abs(fk["arrays"]["dY_full"])))
                 rows[st][cond] = dict(response_norm=fk["response_norm"], censor=fk["censor"],
+                                      kick_induced_saturation_ms=raK, peak_drate_hz=peak,
+                                      ignition=bool(raK is not None or peak >= float(cfg["runaway_hz"])),
                                       region=fk["region"],
                                       distal_over_matched_off_axis=fk.get("distal_corridor_over_matched_off_axis"),
                                       cum_remote_over_source=fk.get("cum_remote_over_source_final"),

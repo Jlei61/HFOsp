@@ -254,24 +254,53 @@ def _identifiability_strip(ax, rows, tol):
 
 
 def _m_control_panel(ax, cfg, out):
+    """Per-seed m-mechanism contrast at the settled plateau: native vs reset/uniform/shuffle fixed-kick
+    response. IGNITION cases (m perturbation drives the field past the runaway rate) are drawn as a
+    capped hatched bar + a red ▲ — never as the raw off-scale norm (which would misread as a huge
+    linear response). The heterogeneity across seeds IS the finding, so it is shown per seed."""
+    from matplotlib.patches import Patch
     ctrl_path = os.path.join(out, "controls_summary.json")
     conds = cfg["m_controls"]["conditions"]
     cc = {"native_zm": "#555555", "m_reset": "#d95f0e", "m_uniform": "#8c96c6", "m_shuffle": "#41ab5d"}
     if not os.path.exists(ctrl_path):
         _blank(ax, "m-controls\nnot run"); return
     cr = json.load(open(ctrl_path))["rows"]
-    for ci, cond in enumerate(conds):
-        vals = []
+    seeds = sorted(row["seed"] for row in cr)
+
+    def _cell(s, cond):
         for row in cr:
-            s = row["states"].get("settled_plateau", {})
-            if isinstance(s, dict) and cond in s and s[cond].get("response_norm") is not None:
-                vals.append(s[cond]["response_norm"])
-        ax.scatter([ci] * len(vals), vals, color=cc.get(cond, "#666"), s=24, zorder=3)
-        if vals:
-            ax.plot([ci - 0.28, ci + 0.28], [np.mean(vals)] * 2, color=cc.get(cond, "#666"), lw=1.8)
-    ax.set_xticks(range(len(conds)))
-    ax.set_xticklabels([c.replace("_zm", "").replace("m_", "") for c in conds], fontsize=7, rotation=20, ha="right")
-    ax.set_ylabel("fixed-kick response\nnorm — settled plateau", fontsize=7.5)
+            if row["seed"] == s:
+                d = row["states"].get("settled_plateau", {})
+                return d.get(cond) if isinstance(d, dict) else None
+        return None
+
+    ni = [v["response_norm"] for s in seeds for c in conds
+          if (v := _cell(s, c)) and not v.get("ignition") and v.get("response_norm") is not None]
+    cap = (max(ni) * 1.28) if ni else 1.0
+    ncond = len(conds); w = 0.82 / ncond
+    any_ign = False
+    for si, s in enumerate(seeds):
+        for ci, cond in enumerate(conds):
+            v = _cell(s, cond)
+            if not isinstance(v, dict):
+                continue
+            x = si + (ci - (ncond - 1) / 2.0) * w
+            if v.get("ignition"):
+                ax.bar(x, cap, width=w * 0.9, color=cc[cond], hatch="////", edgecolor="k", lw=0.4, alpha=0.55)
+                ax.plot(x, cap * 0.99, marker="^", color="#d1001f", ms=5.5, zorder=6, clip_on=False)
+                any_ign = True
+            else:
+                ax.bar(x, v.get("response_norm", 0.0), width=w * 0.9, color=cc[cond])
+    ax.set_ylim(0, cap * 1.1)
+    ax.set_xticks(range(len(seeds))); ax.set_xticklabels([f"s{s}" for s in seeds], fontsize=7.5)
+    ax.set_ylabel("fixed-kick response norm\n— settled plateau (Hz)", fontsize=7.3)
+    ytop = 0.75 if any_ign else 0.99
+    if any_ign:
+        ax.text(0.02, 0.98, "▲ ignition (>120 Hz) when m perturbed", transform=ax.transAxes,
+                fontsize=6.0, va="top", color="#d1001f")
+    ax.legend(handles=[Patch(color=cc[c], label=c.replace("_zm", "").replace("m_", "")) for c in conds],
+              fontsize=5.6, frameon=False, ncol=2, loc="upper left", bbox_to_anchor=(0.0, ytop),
+              handlelength=1.0, columnspacing=0.8)
     ax.spines[["top", "right"]].set_visible(False)
 
 
@@ -293,9 +322,9 @@ def figure_b(cfg, out=OUT):
 
 def _figure_b_bounded_negative(rows, tol, cfg, out):
     """0 identifiable states -> compact honest layout (strip + m-controls + one note), NOT 4 blank boxes."""
-    fig = plt.figure(figsize=(7.2, 3.4))
-    gs = GridSpec(1, 2, figure=fig, width_ratios=[1.5, 1.0], left=0.09, right=0.965,
-                  top=0.82, bottom=0.2, wspace=0.5)
+    fig = plt.figure(figsize=(7.4, 3.7))
+    gs = GridSpec(1, 2, figure=fig, width_ratios=[1.25, 1.15], left=0.085, right=0.97,
+                  top=0.8, bottom=0.24, wspace=0.42)
     axA = fig.add_subplot(gs[0, 0])
     _identifiability_strip(axA, rows, tol)
     axA.text(4.4, tol, "15% gate", fontsize=6.6, va="center", ha="right")
