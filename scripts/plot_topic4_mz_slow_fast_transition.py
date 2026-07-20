@@ -68,6 +68,11 @@ def _load_cf(cond, seed):
     return {r["branch"]: r for r in json.load(open(p))["rows"]} if os.path.exists(p) else {}
 
 
+def _load_matched_d(cond, seed):
+    p = os.path.join(OUT, "matched_d", f"{cond}_seed{seed}.json")
+    return json.load(open(p))["rows"] if os.path.exists(p) else []
+
+
 def _labels():
     p = os.path.join(OUT, "slow_fast_transition_summary.json")
     if not os.path.exists(p):
@@ -115,31 +120,41 @@ def panel_A(sub):
 
 # ------------------------------------------------------------------ Panel B: P_runaway vs D
 def panel_B(ax):
+    # NO connecting line (it implied a continuous step through unsampled D — misleading, esp. for MZ whose own
+    # onset region is 1.6-3.8 s past the last matched-time point). Show only the ACTUAL sampled points:
+    # filled o = matched-time checkpoints; hollow s = matched-D checkpoints (these sample the mid-D range);
+    # star = first crossing. + Wilson CI bars.
     for cond in COND_ORDER:
         col = COND_COLOR[cond]
         for seed in SEEDS:
             st = _load_states(cond, seed)
-            pts = [(st[s]["D"], st[s]["p_runaway"], st[s].get("p_runaway_ci") or [None, None], s)
-                   for s in STATE_ORDER if s in st and st[s].get("p_runaway") is not None]
-            if not pts:
-                continue
-            pts.sort(key=lambda z: z[0])
-            D = [p[0] for p in pts]; P = [p[1] for p in pts]
-            ax.plot(D, P, color=col, lw=1.0, alpha=0.55, zorder=3, marker="o", ms=3)
-            for d, p, ci, sname in pts:
+            for s in STATE_ORDER:
+                if s not in st or st[s].get("p_runaway") is None:
+                    continue
+                d, p = st[s]["D"], st[s]["p_runaway"]
+                ci = st[s].get("p_runaway_ci") or [None, None]
                 if ci[0] is not None:
                     ax.plot([d, d], [ci[0], ci[1]], color=col, lw=0.7, alpha=0.4, zorder=2)
-                if sname == "first_crossing":
+                if s == "first_crossing":
                     ax.scatter([d], [p], marker="*", s=110, color=col, edgecolor="white", lw=0.7, zorder=6)
+                else:
+                    ax.scatter([d], [p], marker="o", s=18, color=col, alpha=0.8, zorder=4)
+            for r in _load_matched_d(cond, seed):   # mid-D samples (the "middle" of the curve)
+                if r.get("p_runaway") is None:
+                    continue
+                ax.scatter([r["D"]], [r["p_runaway"]], marker="s", s=22, facecolor="none",
+                           edgecolor=col, lw=1.0, alpha=0.8, zorder=5)
     ax.set_xlabel("natural slow state   D = 1 − z̄", fontsize=9)
     ax.set_ylabel("P(operational runaway)  frozen fast system", fontsize=9)
     ax.set_ylim(-0.04, 1.04)
-    ax.set_title("B · perturbation-free escape probability", fontsize=9.5, loc="left", weight="bold")
+    ax.set_title("B · perturbation-free escape probability  (points only — no interpolation)",
+                 fontsize=9.5, loc="left", weight="bold")
     ax.tick_params(labelsize=7.5)
-    ax.legend(handles=[Line2D([0], [0], color=COND_COLOR[c], lw=2, marker="o", ms=4, label=COND_LABEL[c])
+    ax.legend(handles=[Line2D([0], [0], color=COND_COLOR[c], lw=0, marker="o", ms=5, label=COND_LABEL[c])
                        for c in COND_ORDER] +
-                      [Line2D([0], [0], marker="*", color="#555", lw=0, ms=10, label="first crossing")],
-              fontsize=7.0, loc="center right", frameon=True, framealpha=0.9, edgecolor="#ccc")
+                      [Line2D([0], [0], marker="s", color="#555", markerfacecolor="none", lw=0, ms=6, label="matched-D"),
+                       Line2D([0], [0], marker="*", color="#555", lw=0, ms=10, label="first crossing")],
+              fontsize=6.8, loc="center right", frameon=True, framealpha=0.9, edgecolor="#ccc")
 
 
 # ------------------------------------------------------------------ Panel C: epsilon_c + tau_rec vs D
@@ -209,12 +224,13 @@ def panel_D(ax):
     ax.set_ylim(0, 1.04)
     ax.set_title("D · state-matched M/Z counterfactuals", fontsize=9.5, loc="left", weight="bold")
     ax.tick_params(labelsize=7.5)
-    ax.text(0.5, 0.62, "branch = pre-onset 100 ms — below the boundary for every condition:\n"
-                       "no z/m swap tips the frozen fast system (P≈0).\n"
-                       "resetting m (m→0) or swapping early/late m leaves it unchanged\n"
-                       "→ m does not set proximity to the edge (only z / D does).",
-            transform=ax.transAxes, ha="center", va="center", fontsize=7.6, color="#555",
-            bbox=dict(boxstyle="round,pad=0.5", fc="#f7f7f7", ec="#d8d8d8", lw=0.8))
+    ax.text(0.5, 0.60, "UNINFORMATIVE NULL (not evidence about m):\n"
+                       "branch = pre-onset 100 ms (z-only anchor) is far below the\n"
+                       "boundary for the MZ conditions → nothing tips (P≈0); AND the\n"
+                       "replays are NOT common-noise-paired (z-only native vs m→0 are\n"
+                       "physically identical yet gave P=0 vs 0.25). Cannot judge z vs m here.",
+            transform=ax.transAxes, ha="center", va="center", fontsize=7.4, color="#555",
+            bbox=dict(boxstyle="round,pad=0.5", fc="#fbf3f3", ec="#e0c0c0", lw=0.8))
     ax.legend(handles=[Line2D([0], [0], marker="s", color="w", markerfacecolor="#bbb", markeredgecolor="#333",
                               markersize=9, label=CF_LABEL[br]) for br in CF_ORDER],
               fontsize=6.6, loc="upper right", frameon=True, framealpha=0.9, edgecolor="#ccc", ncol=1)
