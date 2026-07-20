@@ -272,6 +272,87 @@ $$
 - $\tau_{\text{rec}}$：资源恢复时间常数。
 - $k_{\text{use}}$：活动使用资源的强度，是 M3A-A2 主扫旋钮。
 
+### B2.1. M4 regional q–p–M hybrid lifecycle（rate-patch experimental node）
+
+> **状态（2026-07-21）**：本节记录
+> `topic4-mz-divisive-lifecycle` 独立线已经数值闭合的 R4 center equation；它属于 P=3
+> core–annulus–bath rate-patch mechanism screen，**尚未移植到本文件 A 节的 full SNN**。它不修改
+> E→E weight/kernel/delay、conductance membrane 或 presynaptic relay。
+
+core 与 annulus 共用 effective inhibitory capacity $q$；bath 在当前诊断中固定为 $q_0=.90$。
+用抑制使用传感器 $U_r\in[0,1]$、fast-rate occupancy $O_r\in[0,1]$、neighborhood
+recruitment $R=K O$ 和 pooled M 状态 $m\in[0,1]$：
+
+$$
+\dot q_r=
+r_{\mathrm{rec}}(m)(q_0-q_r)
+-\frac{U_r}{\tau_D}(q_r-q_{\mathrm{res}}),
+\qquad r\in\{\mathrm{core,annulus}\},
+$$
+
+$$
+r_{\mathrm{rec}}(m)=
+\frac{1-m}{\tau_{\mathrm{slow}}}
++\frac{m}{\tau_{\mathrm{fast}}},
+\qquad \tau_{\mathrm{fast}}<\tau_{\mathrm{slow}}.
+$$
+
+冻结 $(m,U)$ 时只有一个稳定 q-nullcline：
+
+$$
+q^*(m,U)=
+\frac{r_{\mathrm{rec}}(m)q_0+(U/\tau_D)q_{\mathrm{res}}}
+{r_{\mathrm{rec}}(m)+U/\tau_D},
+\qquad
+\lambda_q=-\left[r_{\mathrm{rec}}(m)+\frac{U}{\tau_D}\right]<0.
+$$
+
+因此 M-gated recovery 只移动唯一稳定 q 点并加快 q 收缩；它本身不生成 Hopf 或第二个稳定点。
+
+persistence 由 fast occupancy 低通得到：
+
+$$
+\tau_p\dot p_r=O_r-p_r.
+$$
+
+离散 regional latch $L\in\{0,1\}$ 使用 hysteresis：
+
+$$
+L:0\to1
+\quad\text{if}\quad
+p_{c,a}\ge p_{\mathrm{on}}
+\ \text{and}\ R_{c,a}\ge R_{\mathrm{on}},
+$$
+
+$$
+L:1\to0
+\quad\text{if}\quad
+r^{\mathrm{fast}}_{c,a}\le r_{\mathrm{low}},
+\quad q_{c,a}\ge q_{\mathrm{safe}},
+p_{c,a}\le p_{\mathrm{off}}.
+$$
+
+pooled M 与当前 additive exit 为：
+
+$$
+\dot m=
+L\,O_cO_a\frac{1-m}{\tau_{M\uparrow}}
+-(1-L)\frac{m}{\tau_{M\downarrow}},
+\qquad
+A_M=A_{\max}m,
+$$
+
+$$
+\mu_{E,r}^{\mathrm{eff}}=\mu_{E,r}-A_M.
+$$
+
+当前数值分工是：q 耗竭负责跨 entry fold；既有 bounded regional CCO 提供 bursting 内环；
+$A_M$ 负责 fast exit；M-gated q recovery 负责达到 safe reset；$L:1\to0$ 后 M 自然释放并回到
+LLL basin。R4 从共同 20-s checkpoint 开始的 recovery 与 recovered challenge 在
+`.125/.0625 ms` 下都闭合该外环；原 Segment A 仍是 `.125 ms` source。该结果是 **hybrid
+relaxation lifecycle existence proof**，不是连续分岔或空间传播结论。完整验收与边界见
+`docs/archive/topic4/sef_hfo/mz_actual_entry_lifecycle_closure_2026-07-21.md`。
+
 ### B3. 状态坐标
 
 静态 E/I 比例：

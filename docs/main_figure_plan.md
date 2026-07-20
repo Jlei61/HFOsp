@@ -220,6 +220,28 @@ Panel A 支持 coarse scaffold similarity 的 onset-near trajectory 目视素材
 
 这张图只支持“模型底物可产生自发双向传播，并且虚拟 SEEG 可读出方向”。它不单独证明真实病人的机制，也不声称 M2 brake-off 已解决沿轴空间自限。
 
+### M4 MZ R3/R4 lifecycle 诊断图（archive-only，暂不进入 Fig5 主图）
+
+**目的**：把 inhibitory slow-path 的三个证据层分开，避免把 frozen/path oracle、coupled onset
+failure 和 actual-entry hybrid closure 混成一张“成功发作模型”图。
+
+**当前输出**：
+
+- R3 scalar/path：`results/topic4_sef_hfo/mz_m_gated_reserve_recovery/figures/mz_m_gated_reserve_recovery.png`
+- R3 coupled canary：`results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/figures/mz_m_gated_reserve_coupled_canary.png`
+- R4 center closure：`results/topic4_sef_hfo/mz_actual_entry_lifecycle_closure/figures/mz_actual_entry_lifecycle_closure.png`
+- producers：`scripts/run_topic4_mz_{m_gated_reserve_recovery,m_gated_reserve_coupled_canary,actual_entry_lifecycle_closure}.py`
+
+**当前口径**：
+
+R3 scalar/path 只说明 M-gated q recovery 在 frozen sensor 下形成必要 corridor；R3 coupled 说明真实
+q→fast feedback 把 entry 从 event 6 提前到 event 5，同时在 actual-entry-aligned window 中出现 4 次
+paired bursts；R4 从该真实末态继续，闭合真实 latch reset、M release、same-basin return 和
+protected/recovered 同挑战分离。R4 是 fixed-bath three-patch center-point **hybrid** existence proof。
+protected challenge 仍有 evoked crossings，只是不重建 response-excluded autonomous lifecycle。
+在 robust corridor、continuous space 和 full SNN 未通过前，这三张图保持 archive/mechanism diagnostic，
+不占 Fig5 paper-ready 主 panel。
+
 ### M3A-v2 Step4 诊断图：低-q / gK closed-loop 负结果目视审阅
 
 **目的**：把 M3A-v2 Step4 的代表性动力学现象画成同一套 SNN 四列图，供目视检查：baseline 轴向事件、shallow low-q 无明显扩张、shallow low-q + gK suppress、deep low-q runaway、deep low-q + gK 仍不 rescue。
