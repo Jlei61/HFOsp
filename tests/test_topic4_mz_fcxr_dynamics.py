@@ -196,3 +196,18 @@ def test_D_single_finite_ic_is_unresolved():
     # only one of two high ICs reached high -> not confirmed (needs >=2 concordant)
     d = classify_branch_D("DECAYS_TO_LOW", ["FINITE_HIGH_FIXED", "DECAYS_TO_LOW"], [60.0, None])
     assert d["D_label"] == "UNRESOLVED"
+
+
+def test_z_frozen_is_applied_by_conductance_membrane():
+    # THE load-bearing invariant the pilot exposed: a frozen field must CHANGE the membrane, not just be stored.
+    def mt(z_frozen_E, N=6, NE=4):
+        cfg = MZSlowVarsConfig(membrane_mode="full_conductance", E_E=58.0, v_match=18.0, e_gaba=0.0,
+                               ff_conductance=False, rec_conductance=True, rec_sat_g=21.6, z_frozen_E=z_frozen_E)
+        s = MZSlowVars(N, 18.0, cfg=cfg, NE=NE)
+        rng = np.random.default_rng(0)
+        I_E = np.abs(rng.normal(5, 2, N)); I_I = np.abs(rng.normal(3, 1, N)); I_E_rec = 0.5 * I_E
+        return s.membrane_terms(I_E, I_I, I_E_rec=I_E_rec)
+    grel_dep = np.asarray(mt(np.full(4, 0.3))[1])[:4]    # depleted -> 30% of inhibitory efficacy
+    grel_full = np.asarray(mt(None)[1])[:4]              # z=1 (full inhibition, use_z False)
+    assert not np.allclose(grel_dep, grel_full)          # frozen depletion actually changes the membrane
+    assert grel_dep.sum() < grel_full.sum()              # less inhibition -> lower total relative conductance

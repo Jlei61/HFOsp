@@ -174,9 +174,9 @@ class MZSlowVars:
         self._z_sensor_last_E = np.asarray(I_I[:self.NE], float)
         if self.cfg.record_calib:
             self._record_calib(I_E, I_I)                        # pure side-effect (does not alter return)
-        if not self.cfg.use_z and not self.cfg.use_m:
+        if not self.cfg.use_z and not self.cfg.use_m and self.cfg.z_frozen_E is None:
             return I_E - I_I                                    # EXACT byte-parity path (== membrane_step)
-        inh = self.z * I_I if self.cfg.use_z else I_I          # z==1 on I cells -> unscaled there
+        inh = self.z * I_I if (self.cfg.use_z or self.cfg.z_frozen_E is not None) else I_I  # frozen z is applied
         I_net = I_E - inh
         if self.cfg.use_m:
             I_net = I_net - self.cfg.eta_m * self.m            # m==0 on I cells -> E-only adaptation current
@@ -245,7 +245,7 @@ class MZSlowVars:
             sensor = I_I.copy()
             sensor[:self.NE] = self._z_sensor_last_E
             self._record_calib(I_E, sensor)
-        if c.use_z:
+        if c.use_z or c.z_frozen_E is not None:                   # FCXR Stage D: a frozen field is APPLIED (not evolved)
             zE = self.z[:self.NE]
             if c.z_scope == "total":
                 I_inh_eff = zE * pre_z_total
