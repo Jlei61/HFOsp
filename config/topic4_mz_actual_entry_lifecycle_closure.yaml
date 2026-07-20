@@ -1,0 +1,96 @@
+result_root: results/topic4_sef_hfo/mz_actual_entry_lifecycle_closure
+
+# R4 is a continuation of the immutable R3 coupled center artifact.  The R3
+# config in turn content-locks the unchanged rate-patch scaffold and all R2/R3
+# provenance inputs.
+source_summary_path: results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/coupled_canary_summary.json
+source_trace_path: results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/segment_a_center_canary_trace.npz
+source_config_path: config/topic4_mz_m_gated_reserve_coupled_canary.yaml
+
+input_sha256:
+  source_summary_path: 040576ed24fe4000549a95b9e6d432ce390c185989dde2ac06baeffd8ee55b20
+  source_trace_path: 3ff79988e205f3cd9751c800103d87e976c8eae264bee7299b468dfc484d285b
+  source_config_path: a125486f96ef41cf73f2f1f241f790ac124c925bf33e4f741853c5f1c985fe92
+
+source_phenotype:
+  required_status: R3_COUPLED_CLEAN_NO_GO_PREMATURE_EVENT5_ENTRY
+  entry_fold_q: 0.8558315843088748
+  response_exclusion_ms: 100.0
+  pairing_max_lag_ms: 20.0
+  minimum_paired_returns: 4
+  section_level_khz: 0.020
+  rearm_level_khz: 0.015
+  low_threshold_khz: 0.005
+  sustained_low_ms: 250.0
+  expected_first_entry_event: 5
+  expected_first_entry_time_ms: 7620.0
+  expected_paired_times_ms: [8833.603, 9544.708, 10177.268, 10811.904]
+  expected_joint_last_downcross_ms: 10890.699
+  expected_sustained_all_low_onset_ms: 10922.0
+  expected_latch_set_ms: 10233.375
+  diagnostic_time_tolerance_ms: 2.0
+
+checkpoint:
+  time_ms: 20000.0
+  p_max: 0.03
+  q_reset_threshold: 0.885
+  regional_rate_max_khz: 0.005
+  sensor_zero_tolerance: 1.0e-12
+
+protected_recovery:
+  q_stop_epsilon: 0.0005
+  sentinel_fractions: [0.25, 0.50, 0.75]
+  sentinel_duration_ms: 500.0
+  sentinel_settling_ms: 100.0
+
+latch_reset:
+  integration_chunk_ms: 500.0
+  max_from_segment_a_termination_ms: 120000.0
+  q_min: 0.885
+  p_max: 0.03
+  regional_fast_max_khz: 0.005
+
+natural_release:
+  additive_sentinels_mv: [0.10, 0.02, 0.002]
+  sentinel_duration_ms: 500.0
+  sentinel_settling_ms: 100.0
+  q_same_basin_min: 0.899
+  p_same_basin_max: 0.001
+  additive_same_basin_max_mv: 0.002
+  final_full_duration_ms: 4000.0
+  final_fast_rhs_max_per_ms: 1.0e-8
+
+retrigger:
+  duration_ms: 20000.0
+  onsets_ms: [1000.0, 3122.0, 5044.0, 6321.0, 7531.0, 10915.0]
+  pulse_duration_ms: 20.0
+  amplitude_mv: 3.0
+  profile_core_annulus_bath: [1.0, 0.0, 0.0]
+
+integration:
+  dt_values_ms: [0.125, 0.0625]
+  save_dt_ms: 1.0
+  max_trace_bytes: 67108864
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  max_memory_gib: 1.5
+  max_total_wall_seconds: 1200.0
+  base_must_pass_before_half_dt: true
+
+scope:
+  center_only: true
+  actual_entry_alignment: true
+  hybrid_analytic_zero_use_bridge: true
+  real_latch_state_machine_reset: true
+  common_early_late_classifier: true
+  fixed_bath_resource_mask: true
+  q_recalibration: false
+  parameter_grid: false
+  continuous_field: false
+  full_snn: false
+  ee_weight_change: false
+  ee_kernel_change: false
+  conductance_membrane: false
+  relay_change: false
