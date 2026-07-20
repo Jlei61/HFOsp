@@ -285,7 +285,16 @@ runaway 改造成有限高支必须由 Stage D 验证**。
 冻结 Z/X 沿失效轴 D 扫，带 eigenvalue/eigenvector/IPR readout 查**有限高支**（low branch → Z 耗竭降 finite-amplitude
 ignition 阈 → 高态 saturation 使 S' 降、主模态重新有界 → 才 X）。**有限高支成立前不加 X。**
 
-**Stage D 前两个必做前置（审阅 §5 P1-1/P1-2）**：(1) 最终饱和方程的 **dt 收敛对照**（`g_sat=21.6, seed1, dt=0.05`，因未饱和
-arm C 在 dt=0.1→0.05 事件数 30→22 漂移、饱和版只在 dt=0.1 验收、tau_eff 余量不大）；(2) **有效 Jacobian 的 eigenvector/IPR**——
-饱和改变有效行增益 `J_eff ~ D_{sech²(g_raw/g_sat)}·W_EE`（连接拓扑不变但有效模态可变），当前只证了 participation 没变成全局同步、
-**未证主模态保留**，须实算 `D_{sech²}·W_EE` 的 leading eigenvector/IPR。
+**Stage D 前两个必做前置（审阅 §5 P1-1/P1-2）——已补跑：**
+
+- **(P1-1) 最终饱和方程 dt=0.05 对照**：`g_sat=21.6, seed1, dt=0.05`：**all_bands=True、settled_safe=True、preserves=True、
+  0 clip、tau_eff_min 0.274ms、max_total 71.9**。即**饱和版的验收（workpoint 保住 + 零 clip + 数值安全）在 dt=0.1 与 dt=0.05
+  都成立、dt-鲁棒**；数值修法（saturation 有界化总电导）与 dt 无关。**但绝对事件统计大幅漂移**（n_ret 28→12、dur 26.5→10ms）
+  ——事件检测器强 dt-依赖，所以 workpoint 是"相对同-dt 参照落在带内"这个层面 dt-鲁棒、**绝对动力学不是严格 dt-收敛**。
+  → Stage D 应固定一个 dt（建议 0.05）并在该 dt 重锚 workpoint 后再解释高支。
+- **(P1-2) 有效 Jacobian 主模态**：实算 `J_eff ~ D_{sech²(g_raw/g_sat)}·W_EE`（`effective_jacobian_modes`）：raw leading IPR
+  `3.1e-5` vs 有效 leading IPR `1.5e-4`——**两者都基本全局（~1/N）**，虽然活跃核行被 sech² 压到 min 0.28、mean 0.73，但**主模态
+  没有被饱和局部化成伪影、仍近全局**。即 saturation 没有扭曲主空间模态（既没抹成同步、也没造出局部主模态）。证据补足，P1-2 关闭。
+
+**综合**：饱和版底座验收 dt-鲁棒（workpoint + 零 clip 两 dt 都过）、主模态近全局不被扭曲；唯一 caveat 是绝对事件统计随
+检测器强 dt-依赖，Stage D 固定 dt=0.05 重锚即可。
