@@ -117,6 +117,23 @@ def _upstream_traj(cfg, seed):
 
 
 # ============================================================ checkpoint persistence
+_SLOW_TRACE_ATTRS = ("trace_z_mean", "trace_z_min", "trace_z_core_mean", "trace_z_surround_mean",
+                     "trace_m_mean", "trace_m_max", "trace_m_core_mean", "trace_m_surround_mean",
+                     "trace_adap_current", "trace_I_EI_E_mean", "trace_rate_E", "trace_rate_I",
+                     "calib_hist_I_EI", "calib_hist_I_EE")
+
+
+def _strip_slow_traces(slow):
+    """Clear the slow object's diagnostic trace lists (they grow to ~200k entries over the replay and
+    are NOT part of the recoverable state — z/m/currents/rings/rng carry that). Stripping them shrinks
+    the checkpoint pickle and makes every fork's deepcopy(ck.slow) cheap. Does not change the checkpoint
+    fingerprint (traces are not hashed)."""
+    for a in _SLOW_TRACE_ATTRS:
+        if hasattr(slow, a):
+            setattr(slow, a, [])
+    return slow
+
+
 def _ck_path(seed, state):
     return os.path.join(CKDIR, f"ck_seed{seed}_{state}.pkl")
 
@@ -136,6 +153,7 @@ def _capture_checkpoints(S, zm_cfg, states, seed, *, persist=True):
         rep = run_loop(S["p"], S["net"], slow, S["vth"], n_steps=n, start=start,
                        capture_final=True, store_spikes=False)
         ck = rep["checkpoint"]
+        _strip_slow_traces(ck.slow)                             # lean checkpoint (traces not needed to fork)
         cks[st], fps[st] = ck, state_checkpoint_fingerprint(ck)
         if persist:
             os.makedirs(CKDIR, exist_ok=True)
@@ -164,7 +182,9 @@ def _load_checkpoints(seed, seed_rec):
     for st, d in seed_rec["states"].items():
         if d.get("branch_step") is not None and os.path.exists(_ck_path(seed, st)):
             with open(_ck_path(seed, st), "rb") as f:
-                cks[st] = pickle.load(f)
+                ck = pickle.load(f)
+            _strip_slow_traces(ck.slow)                        # lean forks even from a pre-fix fat pickle
+            cks[st] = ck
     return cks
 
 
