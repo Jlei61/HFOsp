@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+from copy import deepcopy
 from pathlib import Path
 
 import numpy as np
@@ -11,6 +12,8 @@ from scripts.run_topic4_mz_m_gated_reserve_recovery import (
     CLEAN_NO_GO,
     SUPPORTED,
     _first_sustained_low,
+    _load_inputs,
+    _r2_parity,
     _save_json,
     _validate_config,
     protected_handoff,
@@ -107,6 +110,54 @@ def test_config_is_fail_closed_and_forbids_scope_drift() -> None:
 def test_strict_json_rejects_nan(tmp_path: Path) -> None:
     with pytest.raises(ValueError):
         _save_json(tmp_path / "bad.json", {"bad": float("nan")})
+
+
+def test_existing_r2_schedule_parity_is_recomputed_and_fails_closed() -> None:
+    cfg = _config()
+    _, r2, _, _, tables, _, _ = _load_inputs(cfg)
+    canonical_rows, canonical_schedule, _ = _r2_parity(cfg, r2, tables)
+    assert all(row["r2_schedule_label_match"] for row in canonical_rows)
+    assert canonical_schedule == {
+        70.0: True, 80.0: True, 90.0: True,
+        100.0: True, 120.0: False, 160.0: False,
+    }
+
+    tampered = deepcopy(tables)
+    dense_base = next(
+        row for row in tampered["schedule"]
+        if float(row["tau_recovery_s"]) == 80.0
+        and row["schedule"] == "dense_1200ms"
+        and int(row["substeps"]) == 1
+    )
+    dense_base["entered"] = False
+    tampered_rows, _, _ = _r2_parity(cfg, r2, tampered)
+    assert not all(
+        row["r2_schedule_label_match"]
+        for row in tampered_rows if row["tau_slow_s"] == 80.0
+    )
+
+    missing = deepcopy(tables)
+    missing["schedule"] = [
+        row for row in missing["schedule"]
+        if not (
+            float(row["tau_recovery_s"]) == 120.0
+            and row["schedule"] == "heldout_seed_20260723"
+            and int(row["substeps"]) == 2
+        )
+    ]
+    missing_rows, _, _ = _r2_parity(cfg, r2, missing)
+    assert not all(
+        row["r2_schedule_label_match"]
+        for row in missing_rows if row["tau_slow_s"] == 120.0
+    )
+
+    missing_tau = deepcopy(tables)
+    missing_tau["schedule"] = [
+        row for row in missing_tau["schedule"]
+        if float(row["tau_recovery_s"]) != 100.0
+    ]
+    with pytest.raises(RuntimeError, match="missing for a registered tau"):
+        _r2_parity(cfg, r2, missing_tau)
 
 
 def test_canonical_artifact_is_complete_and_fail_closed() -> None:

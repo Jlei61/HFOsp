@@ -40,6 +40,7 @@ from scripts.run_topic4_mz_inhibitory_reserve_corridor_r0b import (  # noqa: E40
     _ramp_parameters,
 )
 from scripts.run_topic4_mz_inhibitory_reserve_recovery_corridor import (  # noqa: E402
+    _schedule_contract,
     hybrid_handoff_predictor,
 )
 from scripts.run_topic4_mz_spatial_regional_entry_exit import (  # noqa: E402
@@ -527,24 +528,57 @@ def _r2_parity(cfg: dict[str, Any], r2: dict[str, Any], tables: dict[str, list[d
     }
     if len(mapping) != len(tau_axis) * len(q_axis):
         raise RuntimeError("R2 no-refit parameter mapping incomplete")
-    schedule_pass = {
+    source_schedule_pass = {
         float(row["tau_recovery_s"]): bool(row["primary_qhold_schedule_pass"])
         for row in r2["tau_acceptance"] if float(row["tau_recovery_s"]) in tau_axis
+    }
+    if set(source_schedule_pass) != set(tau_axis):
+        raise RuntimeError("R2 schedule summary labels incomplete")
+
+    schedule_keys_by_tau = {
+        tau: {
+            (str(row["schedule"]), int(row["substeps"]))
+            for row in schedule if float(row["tau_recovery_s"]) == tau
+        }
+        for tau in tau_axis
+    }
+    if any(not keys for keys in schedule_keys_by_tau.values()):
+        raise RuntimeError("R2 schedule parity rows missing for a registered tau")
+    expected_schedule_keys = set.union(*schedule_keys_by_tau.values())
+    schedule_complete = {
+        tau: (
+            schedule_keys_by_tau[tau] == expected_schedule_keys
+            and sum(float(row["tau_recovery_s"]) == tau for row in schedule)
+            == len(expected_schedule_keys)
+        )
+        for tau in tau_axis
+    }
+    schedule_pass = {
+        tau: bool(_schedule_contract([
+            row for row in schedule if float(row["tau_recovery_s"]) == tau
+        ]))
+        for tau in tau_axis
     }
     parity_rows: list[dict[str, Any]] = []
     for tau in tau_axis:
         for q in q_axis:
             local_event = [row for row in event if float(row["tau_recovery_s"]) == tau and float(row["q_hold"]) == q]
             local_periodic = [row for row in periodic if float(row["tau_recovery_s"]) == tau and float(row["q_hold"]) == q]
+            local_schedule = [row for row in schedule if float(row["tau_recovery_s"]) == tau]
             source = mapping[(tau, q)]
             parity_rows.append({
                 "tau_slow_s": tau, "q_hold": q,
                 "event_row_count": len(local_event), "periodic_row_count": len(local_periodic),
+                "schedule_row_count": len(local_schedule),
                 "entry_pass": bool(len(local_event) == 2 and all(bool(row["entry_pass"]) for row in local_event)),
                 "periodic_pass": bool(len(local_periodic) == 8 and all(bool(row["periodic_pass"]) for row in local_periodic)),
                 "schedule_pass": bool(schedule_pass[tau]),
                 "r2_entry_label_match": bool(source["entry_pass"]) == bool(len(local_event) == 2 and all(bool(row["entry_pass"]) for row in local_event)),
                 "r2_periodic_label_match": bool(source["periodic_pass"]) == bool(len(local_periodic) == 8 and all(bool(row["periodic_pass"]) for row in local_periodic)),
+                "r2_schedule_label_match": bool(
+                    schedule_complete[tau]
+                    and source_schedule_pass[tau] == schedule_pass[tau]
+                ),
                 "q_reserve": float(source["q_reserve"]),
                 "tau_depletion_ms": float(source["tau_depletion_ms"]),
                 "periodic_q_min": float(source["periodic_q_min"]),
@@ -803,7 +837,12 @@ def run(config_path: Path) -> dict[str, Any]:
         "hash_locked_upstream_and_r2_provenance": True,
         "complete_24_cell_sensor_product": len(sensor_rows) == 24 and len({_key(row["q_hold"], row["phase"], row["source_dt_ms"]) for row in sensor_rows}) == 24,
         "all_sensor_generation_gates_pass": all(row["sensor_pass"] for row in sensor_rows),
-        "preentry_event_periodic_schedule_parity_exact": all(row["r2_entry_label_match"] and row["r2_periodic_label_match"] for row in parity_rows),
+        "preentry_event_periodic_schedule_parity_exact": all(
+            row["r2_entry_label_match"]
+            and row["r2_periodic_label_match"]
+            and row["r2_schedule_label_match"]
+            for row in parity_rows
+        ),
         "primary_exact_80_90_100_corridor": accepted_by_fast[20.0] == required,
         "fixed_15_25s_no_refit_corridor": all(accepted_by_fast[tau_fast] == required for tau_fast in (15.0, 25.0)),
         "registered_70_entry_and_120_160_schedule_rejections_preserved": bool(

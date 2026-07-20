@@ -220,3 +220,7 @@ r_{rec}(m)+\bar U/\tau_D}.
 当前最安全的核心结论是：
 
 > 让已有 M 状态只调节 effective inhibitory capacity q 的恢复速度，能够在 frozen-sensor / feed-forward path 层把 R2 的单点 `80 s` 扩成预注册的 `80/90/100 s` 三节点 corridor，并在 `tau_fast=15/20/25 s` 下无重拟合复现。nullcline 分析与 causal controls 表明该门只加快唯一稳定 q 状态的恢复；additive M 仍负责 fast exit，M-gated recovery 只负责及时 reset。这不是 Hopf 或完整 lifecycle。现有 timing 还预示 M 可能在第 4 次 return 前过早退出，因此下一步必须先跑一个 center coupled canary，少于 4 returns 就立即停止。
+
+### 后续 coupled update（不改变本报告的 scalar/path 结论）
+
+center coupled canary 已完成：按预注册的“event 6 首次进入”正式门，它因 q–fast 闭环在 event 5 提前进入而得到 `clean no-go`，因此没有展开 coupled grid。若改为只读、描述性地按实际 event 5 entry 对齐，同一轨迹可见 4 次 paired pulse-free returns，随后 event 6 被抑制；这提示当前机制可能包含一个值得重新注册的 actual-entry-aligned lifecycle candidate，但不能反向改写 R3 的正式验收。late recovery、真实 latch reset、same-basin recovery 与 late retrigger 均尚未测试，所以本报告原有的 scalar/path-only claim boundary 保持不变。
