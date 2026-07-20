@@ -117,6 +117,20 @@ class SpatialSlowFieldConfig:
     n_min: float = 0.0
     n_max: float = 10.0
     g_A_max: float = 20.0      # conductance cap
+    # ---- persistence-gated local recovery field p(x,t) (SNN-native M4 exit, spec 2026-07-21 §5) ----
+    # p is a SLOW leaky integral of supra-theta_p local activity: short IEDs (<< tau_p) barely charge it,
+    # a sustained bounded state saturates it. It gates a LOCAL OUTWARD recovery current on E cells only
+    # (g_K-type actuator, right direction per M3A Step-3 lineage; but persistence-gated, never before tested).
+    use_persist: bool = False  # master gate; False -> no p coupling / no advance -> byte-parity
+    tau_p: float = 5000.0      # ms, persistence leak (>> IED duration -> duration selectivity; ~ q_I refill)
+    theta_p: float = 0.0       # activity threshold: p charges only where K_p*r_E > theta_p
+    a50_p: float = 1.0         # Psi half-saturation: Psi=[a-theta]_+/(a50+[a-theta]_+)
+    sigma_p: float = 1.5       # mm, K_p persistence-sensor footprint
+    eta_r: float = 0.0         # recovery-current strength (mV); 0 -> OFF -> byte-parity
+    p50_r: float = 0.0         # Phi(p) Hill half-point; <=0 -> linear Phi(p)=p
+    n_r: float = 2.0           # Phi(p) Hill exponent (used only if p50_r>0)
+    p_init: float = 0.0        # initial p (parity requires 0 when off)
+    clamp_persist: float = None  # open-loop probe / E4 ablation: freeze p at this value (None -> normal dynamics)
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -164,6 +178,22 @@ class SpatialSlowFieldConfig:
         # ---- M4-3A n->a load/shunt field ----
         if self.use_A and self.sigma_n <= 0.0:
             raise ValueError("sigma_n must be > 0 when use_A")
+        # ---- persistence-gated recovery field (spec 2026-07-21 §5); checked only when the field is on ----
+        if self.use_persist:
+            if self.tau_p <= 0.0:
+                raise ValueError(f"tau_p must be > 0, got {self.tau_p}")
+            if self.a50_p <= 0.0:
+                raise ValueError(f"a50_p must be > 0, got {self.a50_p}")
+            if self.sigma_p <= 0.0:
+                raise ValueError(f"sigma_p must be > 0, got {self.sigma_p}")
+            if self.eta_r < 0.0:
+                raise ValueError(f"eta_r must be >= 0, got {self.eta_r}")
+            if self.n_r <= 0.0:
+                raise ValueError(f"n_r must be > 0, got {self.n_r}")
+            if not (0.0 <= self.p_init <= 1.0):
+                raise ValueError(f"p_init must be in [0, 1], got {self.p_init}")
+            if self.clamp_persist is not None and not (0.0 <= self.clamp_persist <= 1.0):
+                raise ValueError(f"clamp_persist must be in [0, 1], got {self.clamp_persist}")
 
 
 # ---------------------------------------------------------------------------
@@ -279,6 +309,13 @@ class SpatialSlowField:
         self.trace_n_mean = []
         self.trace_a_mean = []
         self.trace_un_mean = []                     # P1-4: field-derived drive u_n (for P0b param lock)
+        # ---- persistence-gated recovery field p(x,t) (spec 2026-07-21 §5) ----
+        self.p = np.full((n, n), self.cfg.p_init, dtype=float)
+        if self.cfg.clamp_persist is not None:
+            self.p[:] = float(self.cfg.clamp_persist)     # open-loop / ablation: frozen p (step skips its ODE)
+        self._Kp = isotropic_gaussian(n, L, self.cfg.sigma_p)
+        self.trace_p_mean = []
+        self.trace_p_max = []
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
@@ -297,6 +334,11 @@ class SpatialSlowField:
         if self.cfg.use_A and self.cfg.eta_A != 0.0:               # M4-3A subtractive bias (E only)
             aE = self.a_shunt[self._iyE, self._ixE]
             out[:nE] -= self.cfg.eta_A * aE
+        if self.cfg.use_persist and self.cfg.eta_r != 0.0:         # §5 persistence-gated recovery current (E only)
+            pE = self.p[self._iyE, self._ixE]                      # local: p sampled at each E neuron's cell
+            phi = (pE if self.cfg.p50_r <= 0.0                     # linear Phi, or Hill if p50_r>0
+                   else pE ** self.cfg.n_r / (self.cfg.p50_r ** self.cfg.n_r + pE ** self.cfg.n_r))
+            out[:nE] -= self.cfg.eta_r * phi                       # outward (g_K-type) displacement, E only
         if self.cfg.use_SG and I_E_rec is None and (self.cfg.alpha_G > 0.0 or self.cfg.beta_SG > 0.0):
             raise RuntimeError(                                        # §6: loud failure beats silent contamination
                 "use_SG with alpha_G>0 or beta_SG>0 requires I_E_rec (recurrent-only current), got None. "
@@ -359,6 +401,14 @@ class SpatialSlowField:
             fk = saturation(a_K, cfg.a0_K, cfg.a50_K)
             self.g_K += dt * (-self.g_K / cfg.tau_K + cfg.k_K * fk * (cfg.gK_max - self.g_K))
             np.clip(self.g_K, 0.0, cfg.gK_max, out=self.g_K)
+        if cfg.use_persist:                                         # §5 persistence sensor: slow leaky integral
+            if cfg.clamp_persist is None:                           # of supra-theta_p activity (frozen when clamped)
+                a_p = convolve_periodic(self.rE, self._Kp)         # smoothed EMA rate (sustained activity)
+                drive = saturation(a_p, cfg.theta_p, cfg.a50_p)    # Psi(K_p*r_E - theta_p) in [0,1)
+                self.p += dt * (drive - self.p) / cfg.tau_p        # tau_p dp/dt = Psi - p
+                np.clip(self.p, 0.0, 1.0, out=self.p)
+            self.trace_p_mean.append(float(self.p.mean()))
+            self.trace_p_max.append(float(self.p.max()))
         if cfg.use_A:                                               # M4-3A load -> shunt
             u_n = convolve_periodic(self.rE, self._Kn)              # field-derived drive K_n * rE (EMA rE)
             self.trace_un_mean.append(float(u_n.mean()))            # P1-4: dump real u_n even when k_n=0 (P0b lock)
