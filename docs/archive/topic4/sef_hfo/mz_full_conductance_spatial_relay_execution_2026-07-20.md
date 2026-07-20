@@ -213,9 +213,16 @@ recurrent-only smooth saturation → 重过 seed1/3 workpoint → 带 eigenvalue
 - **含义**：它确实是个真实的单核局部模态（值得用 recurrent smooth saturation 治），但因为 `gErec` 在 workpoint bulk（~19–28）
   与 clip（~29）之间**没有干净的分界**，Stage C 的饱和必须**实测**是否在杀掉 clip 的同时保住 workpoint（见 Stage C）。
 
-### Stage B — dt/cap 数值收敛（运行中）
+### Stage B — dt/cap 数值收敛
 
-（high-cap "去掉 clip 会不会 runaway" + dt=0.05 收敛结果填充中。）
+**high-cap（cap=1e12，dt=0.1）——关键：硬 clip 不承重。** 把数值 cap 基本去掉后：**0 个 cell 触顶、同样 30 个 returning
+event、无 runaway、max_raw_total 仍 102.5、tau_eff_min 0.193ms**——动力学与有 cap 时**完全一样**。即硬 clip **既没有掩盖真实
+失稳、也没有制造"看似有界"的假高态**（审阅担心的两点都没发生）。所谓"clip"只是活跃核在事件峰值、强 E+强 I 平衡电导下
+tau_eff 掉到 0.193ms 的**轻微分辨率下沉**；dt=0.1 的 2·dt=0.2 判据把它标成"没分辨开"，但 0.193 > 2·0.05=0.1，**在 dt=0.05 下
+应当数值干净**（dt=0.05 收敛跑确认，见下）。
+
+**dt=0.05 收敛（运行中）**：比事件画像四维 + gErec 尾 + tau_eff 是否 dt-收敛。预期：动力学收敛（event≈30、gErec 尾同形），
+tau_eff_min 仍 ~0.193（物理量、dt-无关）→ 在 dt=0.05 下 tau_eff 0.193 > 2dt=0.1，clip 是 dt=0.1 分辨率技术性问题而非真失稳。
 
 ### Stage C — recurrent-only smooth saturation（Stage B 后跑）
 
