@@ -19,13 +19,18 @@ Tier = 模型本体机制分析（model-side mechanism），不是发作验证�
 下"（同样位置/宽度/强度/时刻），看这一踢的响应停在源头不动还是沿源→汇轴向铺开；同一踢在三个时刻各
 做一遍、三条种子重复。
 
-**揭示了什么** — 在这张网络本体上，靠很小的分布式扰动量不出干净的线性空间算子：安静时响应太弱、被
-放电的离散性（一个个整数 spike）淹没，活跃时又太非线性（快饱和）。这跟我们之前用"冻结速率场"近似
-算出来的干净线性算子/本征模**不一样**——真 spiking 网络在临界点附近的响应是非线性的。但固定的局部
-"踢一下"看得很清楚：安静的间期，同一踢的响应就窝在源头附近、几乎不铺开；快到失控前，同样一踢的响
-应沿源→汇的轴向走廊铺开（走廊上的响应比源头还强），而且响应到达各处的时间跟距离基本成线性关系（拟
-合很好）——像是沿轴向逐步招募，但我们只说"像招募"，没证明是连续行波。远端汇核团在 50 ms 内始终没被
-点亮。
+**揭示了什么** — 两件事。(1) **空间响应强烈依赖慢状态**：固定的局部源头"踢一下"，安静间期响应就窝在
+源头附近、几乎不铺开；快到失控前，同样一踢的响应沿源→汇轴向走廊铺开（走廊响应≈或>源头，三种子一致
+≈0.2），且响应到达各处的时间跟距离基本成线性（拟合 R²≈0.9）——像沿轴逐步招募（只说"像招募"，没证明
+连续行波）；远端汇核团 50 ms 内始终没被点亮。(2) **这张真网络有没有一个"线性空间算子"，是个"测量能不
+能辨识"的问题，不是"存不存在"的问题**：第一版审计只在 seed1 上、用很细（每格强度只有踢的 1/12）的单
+轨迹扰动量，量出来"到处都非线性"——但那是测量假象。改用**集成平均**（对每个状态平均多条独立的未来噪
+声）**+ 把扰动强度按每格 RMS 匹配到那个"踢"的量级 + 只用平衡的低波数模式**重新审计后，**中等活动的
+midpoint 状态在 3 个种子里有 2 个能干净辨识出算子**（差异 0.07–0.12，低于 15% 线），其最优输出模式**偏
+向源→汇轴向**；seed3 的 baseline 也能辨识。安静 baseline 仍被放电离散性限制（种子间不稳，1/3），快到
+失控的 pre_onset 三种子一致地"刚好过线一点点"（0.16–0.19，比 midpoint 更难线性化）。所以**"整张网络到处
+没有线性算子"这个说法不成立**——修正审计说算子在中等活动区可辨识、且偏轴向；这跟旧"冻结速率场"近似有
+干净算子的方向一致，只是真 spiking 网络的可辨识窗口是中段、两头（太静/太饱和）辨识不出。
 
 （内部归档代号：nonlinear_response_only；empirical finite-time SNN response operator；zA_q75_tz5000
 [use_z, I_th_EI=95.199, tau_z=5000]；freeze z/m 50 ms；144-dim real Fourier basis；common random
@@ -80,19 +85,31 @@ locked runoff 9293.6/9499.3/9757.9 ms；D≈0.087 runoff corridor。）
 冻结 z/m 后三个状态的 no-probe 控制在 50 ms 内都不自发失控（未触发 right-censoring），所以三个状态
 都可测。
 
-### 3.2 线性审计 → operator 不可辨识（lock seed = 1）
+### 3.2 算子可辨识性：第一版审计（假象）→ 修正审计（可辨识窗口在中段）
 
-15% 判定线；归一化差异 ‖K(ε)−K(ε/2)‖/‖K(ε/2)‖ over ladder [0.001, 0.0025, 0.005, 0.01]×I_EE_scale：
+**第一版审计（seed1 only，thin-input，单轨迹）** — 归一化差异 ‖K(ε)−K(ε/2)‖/‖K(ε/2)‖ over
+ladder [0.001…0.01]×I_EE_scale：baseline nan/nan/0.661/0.813、midpoint 0.503/0.535/2.606/0.444、
+pre_onset 1.432/1.004/0.864/1.012，全部远超 15% → 当时写成 `nonlinear_response_only`。
 
-| state | ε=0.001 | 0.0025 | 0.005 | 0.01 | 判定 |
+**这个"到处非线性"是测量假象**（2026-07-20 review 拦下，逐条核对属实）：(a) 只在 seed1 跑了审计，
+seed3/4 复用了全局锁，不能代表三种子；(b) 每个状态只用一条随机未来、没有集成平均，30 ms baseline 响应
+被整数 spike 的量化噪声淹没；(c) Fourier basis 每列 per-grid RMS 只有 1/12，同一个 ε 下算子输入比那个
+固定"踢"弱约 12 倍；(d) "前 16 个模式"其实含单方向到 Nyquist 的高频列，不是平衡低波数。
+
+**修正审计**（新 `audit` 子命令；平衡对称低波数 9 模式 + 每格 RMS 匹配到踢的量级 strength_frac×I_EE_scale
++ 对每个状态集成平均 8 条独立未来噪声，±共享每条未来=CRN；只有过线才 SVD）：
+
+| state | seed1 | seed3 | seed4 | identifiable | σ̂₁(T30) / U₁ 轴向（可辨识处）|
 |---|---|---|---|---|---|
-| baseline | nan（无响应） | nan | 0.661 | 0.813 | 不合格 |
-| midpoint | 0.503 | 0.535 | 2.606 | 0.444 | 不合格 |
-| pre_onset | 1.432 | 1.004 | 0.864 | 1.012 | 不合格 |
+| baseline | 0.429 | **0.081** | 0.217 | 1/3（量化受限、seed 不稳）| seed3: σ̂₁=4.06, u1_axis=−0.35 |
+| midpoint | **0.122** | 0.249 | **0.074** | **2/3** | seed1 σ̂₁=87.5 u1_axis=+0.24；seed4 σ̂₁=8.86 u1_axis=+0.52 |
+| pre_onset | 0.191 | 0.178 | 0.164 | 0/3（三种子一致刚过线）| — |
 
-三个状态所有幅度都远超 15% → **全局 `nonlinear_response_only`**，不计算 operator SVD，不扩大 ladder
-（spec §2.3 合规 fallback）。这是有效完成结果（spec §12：operator 不满足线性资格是有效完成态）。
-安静 baseline 是被放电离散性淹没；活跃 midpoint/pre_onset 是真非线性（近饱和）。
+**结论（修正后）**：差异从第一版的 0.4–2.6 全面降到 0.07–0.43；**中等活动的 midpoint 有 2/3 种子干净辨识
+出算子**，其最优输出模式偏源→汇轴向（u1_axis>0）；安静 baseline 被量化限制、seed 不稳（1/3）；pre_onset
+三种子一致地"刚好过线一点点"（0.16–0.19，比 midpoint 更难线性化，是温和且可复现的非线性）。→ **"整网到处
+无线性算子"不成立**；这是一个"测量可辨识性问题"，可辨识窗口在中段，两头（太静/太饱和）辨识不出。`corrected_
+audit_summary.json`。（口径：这仍是低波数子空间上的经验有限时算子，不是精确 full-SNN 本征模。）
 
 ### 3.3 固定 kick 空间响应（同一源头踢，跨状态，三种子 1/3/4）
 
@@ -120,13 +137,13 @@ locked runoff 9293.6/9499.3/9757.9 ms；D≈0.087 runoff corridor。）
   可复现）。** 远端汇核团 remote_sink 在所有状态、50 ms 内始终为 0（没到远端）。
 
 **两个诚实警示：**
-1. **midpoint 是过渡不稳态，seed 极不一致**（response norm 0.99 / 23.94 / 0.00；seed3 的踢引起一次
-   大暴发 src=13.4 但未持续失控，seed4 的踢净效应为 0）。spec 明确 midpoint 只用于模态轨迹；本轮无
-   operator → 无模态轨迹 → midpoint 只进 §3.2 线性诊断（证明 operator 到处不可辨识），**不进主对比、
-   不进主图空间/幅度面板**。
-2. baseline 的 seed3/4 arrival 标为"合格"是**在近零响应上拟合噪声的假性合格**（arrival 阈值=10%×max|kymo|，
-   max 很小的时候噪声也能跨 ≥4 位置）→ **baseline arrival 不可解读**；只在有实响应的 pre_onset 解读
-   arrival。主图 Supplementary 2c 只画 pre_onset arrival。
+1. **midpoint 的固定-kick 响应是过渡不稳态，seed 极不一致**（response norm 0.99 / 23.94 / 0.00；seed3
+   踢引起一次大暴发 src=13.4，seed4 净效应 0）→ **固定-kick 主对比只用 baseline vs pre_onset，midpoint
+   不进主图空间/幅度面板**。注意：这跟 §3.2 的"midpoint 是修正算子审计能辨识的窗口（2/3）"不矛盾——固定
+   -kick 是一个强的单点踢（对过渡态敏感），修正审计是集成平均的小扰动线性响应（把过渡态的抖动平掉了）。
+2. arrival 零/近零响应假性合格的 bug **已修复**（review 2026-07-20）：加了绝对响应地板 `arrival_min_peak_hz`
+   + `fit_arrival_distance` 拒绝常数到达（零展布）。baseline seed3/4 现在正确判 ineligible；主图 Supplementary
+   1d 只画有实响应的 pre_onset arrival。
 
 ### 3.4 控制：z+m plateau vs D-matched z-only（P1）
 
@@ -155,48 +172,54 @@ unstable，不是"适应抑制响应"（那只是 seed1 单点，未复现）。
 
 ## 4. 与旧冻结-q 速率场结果的一致/不一致
 
-- **不一致**：冻结-q 速率场（M3B）是一个线性化，天然有干净的线性算子、本征模、σ₁(T)、exp(JT) 响应；
-  真 spiking 网络在注册幅度下**量不出**干净线性算子（近临界非线性 + 放电离散性）。以直接 SNN 为模型本体
-  结果，速率场保留为理论 closure；差异来源于 spike/reset/delay/noise/非线性（spec §9）。**不调参强行
-  让二者一致。**
-- **定性一致的方向**：旧冻结-q 分析的"非正规瞬态沿轴"结论（骨架各向异性给方向）与这里 fixed-kick 在
-  pre_onset 的沿轴铺开方向一致——都指向源→汇轴向走廊。但直接 SNN 说明这种沿轴响应在真网络里是非线性
-  放大出来的，不是一个线性算子的 U₁。
+- **一致的方向**：冻结-q 速率场（M3B）是线性化，天然有干净算子/本征模，其"非正规瞬态沿轴"结论指向源→汇
+  轴向。修正审计里 midpoint 的**可辨识算子最优输出 U₁ 也偏轴向**（u1_axis +0.24/+0.52），且 fixed-kick 在
+  pre_onset 沿轴铺开——两条独立证据都指向轴向。
+- **不一致 / 需分层**：真 spiking 网络的**线性可辨识窗口在中段**（midpoint 2/3），两头辨识不出——安静
+  baseline 被放电离散性限制（1/3、seed 不稳），近饱和 pre_onset 一致地温和非线性（0/3、0.16–0.19 刚过线）。
+  速率场那种"全状态都有干净算子"在真网络里不成立；是**测量可辨识性 + 状态窗口**的差别，不是"SNN 没有算子"。
+  差异来源 spike/reset/delay/noise/非线性（spec §9）。**不调参强行让二者一致**；以直接 SNN 为本体结果，
+  速率场留作理论 closure。
 
-## 5. 数值/随机性/分辨率/稳健性
+## 5. 数值/随机性/分辨率/稳健性 + review 2026-07-20 修复
 
-- 线性：见 §3.2，全部不合格 → operator 降级（预注册资格失败，非"结果不好看"）。
-- 随机性：common random numbers（±ε/no-probe 共享 checkpoint rng_state），tiny-net contract test
-  C3 通过；full-net smoke 复现 idempotent。
-- 分辨率：12×12 读出，occ_min=45（无空格），basis 正交残差见 numerical_audit.json。
-- arrival：pre_onset **三种子全合格**（≥4 轴向位置，seed1 R²≈0.92）；baseline seed3/4 的"合格"是
-  近零响应上拟合噪声，不可解读（§3.3 警示 2）。
-- 种子稳健：三种子（1/3/4）全部完成、全部 `nonlinear_response_only`（口径一致）。**pre_onset 轴向走廊
-  响应三种子紧密一致（0.178/0.221/0.234≈0.2）+ arrival 全合格 = 主发现可复现。** baseline 近零、
-  seed 波动大（但都表示"无沿轴铺开"）。midpoint 是过渡不稳态，seed 极不一致（§3.3 警示 1），不进主对比。
-  线性不可辨识（operator 缺失）三种子一致（lock seed=1 审计代表；seed3/4 复用 lock，不重审）。
+- **算子可辨识性**：第一版审计只 seed1、thin-input、单轨迹 → 假象（§3.2）；修正审计（集成 + RMS 匹配 +
+  平衡低波数）后 midpoint 2/3 可辨识、σ̂₁/U₁ 已算（低波数子空间；不是精确本征模）。
+- 随机性：common random numbers（±ε/no-probe 共享 checkpoint rng_state），tiny-net C3 通过 + full-net
+  smoke idempotent；修正审计的集成对每状态平均 8 条独立未来噪声，±共享每条未来。
+- 分辨率：12×12 读出，occ_min=45（无空格），basis 正交残差 2e-15。
+- arrival：**bug 已修**（绝对响应地板 + 拒绝常数到达）；pre_onset seed1 R²≈0.92，baseline 现正确 ineligible。
+- **within-window saturation / right-censoring bug 已修**：fork 窗 50 ms 装不下 100 ms 的 operational-
+  runaway 判据（原判据永不触发 → censor/kick_runaway 恒 None 是假的）。改用 within-window 判据（120 Hz
+  持续 ≥ saturation_dur_ms=20 ms，能在 50 ms 窗内触发），字段改名 `*_saturation` 诚实标注（不是 100 ms
+  operational-runaway）。
+- 种子稳健：fixed-kick 的 **pre_onset 轴向走廊响应三种子紧密一致（0.178/0.221/0.234≈0.2）+ arrival 合格 =
+  主发现可复现**；baseline 近零、seed 波动大（都表示"无沿轴铺开"）；midpoint 固定-kick 过渡不稳（不进主
+  对比）。算子可辨识性：midpoint 2/3、baseline 1/3、pre_onset 0/3（三种子一致刚过线）。
 
 ## 6. 结论口径（允许/禁止）
 
 **允许**：同一 MZ spiking 骨架在不同慢状态下有限时空间易感性不同；快到失控前同一局部刺激响应更沿轴
-铺开（走廊 > 源头）；直接 SNN 与冻结-q 速率场不一致（真网络非线性，无干净线性算子）；沿轴到达时间随
-距离线性（compatible with 轴向招募）。
+铺开（走廊≈或>源头，三种子一致），沿轴到达时间随距离线性（compatible with 轴向招募）；**低波数经验算子
+在中等活动（midpoint）可辨识、其最优输出偏轴向**；这是**测量可辨识性问题**（可辨识窗口在中段），不是
+"SNN 没有算子"。
 
-**禁止**：operational runoff = 临床发作起始；复现完整间期—发作—恢复循环；V₁/U₁ 是精确 full-SNN
-本征模（本轮根本没算 operator）；σ̂₁>1 = 净放大；kymograph 证明连续行波；证明 Hopf/fold/Floquet；
-按结果换 state/seed/ε/basis/T 救结论。
+**禁止**：operational runoff = 临床发作起始；复现完整间期—发作—恢复循环；把 midpoint 的低波数 V₁/U₁ 说成
+**精确 full-SNN 本征模**；说"三种子/整网到处都没有线性算子"（已被修正审计推翻）；把算子失败归因于"跨临界
+非线性"（三状态都失败、无状态选择性——是量化噪声/输入过弱/单轨迹的测量问题）；σ̂₁>1 = 净放大；kymograph
+证明连续行波；证明 Hopf/fold/Floquet；按结果换 state/seed/ε/basis/T 救结论。
 
 ## 7. 最大局限与下一步（不自主启动新机制）
 
-- 最大局限：empirical operator 在注册幅度下不可辨识——线性算子这条路在真 spiking 网络本体上（这组
-  幅度 + 1 ms 脉冲 + 50 ms 窗 + 冻结）走不通。fixed-kick 承重全部结论。轴向招募是"像"，非证明。
-- P1 plateau + D-matched 控制**已做三种子**：inconclusive/seed-unstable（§3.4），中间耗竭水平（D≈0.04）
-  是过渡不稳区，量不出干净适应空间效应。这本身印证了 §3.3 的 midpoint 不稳定——中间 D 状态对同一踢的响应
-  对 seed 极敏感。
-- 下一步候选（**待用户定，不自主启动新机制**）：(a) 若要 operator，需不同可辨识化设计（更强/更久探针、
-  更粗读出、或选真正线性的工作点），超出本轮注册合同；(b) fixed-kick 的沿轴招募可加 within-window 时间
-  分辨 + 空间置换 null 做更强判读；(c) native-dynamic（不冻结）次级核验；(d) 若要看适应的空间效应，得避开
-  过渡不稳的中间 D，或换更稳的匹配量（不是 D）。
+- **最大局限**：算子只在低波数子空间 + 中段活动可辨识（midpoint 2/3），仍**不是精确 full-SNN 本征模**；
+  baseline 量化受限、pre_onset 温和非线性。fixed-kick 承重"状态条件化空间易感性"这条主结论；轴向招募是
+  "像"非证明。
+- **P1 plateau + D-matched 对照已撤下结论**（review）：settle_ms 原来没用上（现已修，加 `settled` flag），
+  且 D-matched 选到的中间 D（≈0.04）是过渡不稳区，量不出干净适应空间效应 → 登记为 seed-unstable/withdrawn，
+  不进科学结论；已存 `controls_summary.json` 留作 exploratory。
+- 下一步候选（**待用户定，不自主启动新机制**）：(a) 把可辨识算子从低波数扩到全 144 维、扫更多 T 看 σ̂₁(T)；
+  (b) fixed-kick 沿轴招募加 within-window 时间分辨 + 空间置换 null；(c) native-dynamic（不冻结）次级核验；
+  (d) 用 settled plateau + 避开过渡 D 重做适应对照。
 
 ## 8. 产物
 

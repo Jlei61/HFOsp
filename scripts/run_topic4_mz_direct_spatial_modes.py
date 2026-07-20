@@ -972,12 +972,27 @@ def cmd_aggregate(args, cfg):
     # aggregate arrays
     _agg_arrays(label, "op_", os.path.join(OUT, "empirical_operator_arrays.npz"))
     _agg_arrays(label, "fk_", os.path.join(OUT, "fixed_kick_arrays.npz"))
+    # corrected identifiability audit (ensemble / low-k / RMS-matched)
+    ca_rows = []
+    for f in sorted(glob.glob(os.path.join(OUT, "per_seed", f"corrected_audit_{label}_seed*_*.json"))):
+        d = json.load(open(f))
+        s30 = (d.get("sigma1") or {}).get(str(float(cfg["T_windows_ms"][1])), {})
+        ca_rows.append(dict(seed=d["seed"], state=d["state"], discrepancy=d["linearity_discrepancy"],
+                            identifiable=d["identifiable"], n_modes=d["n_modes"], n_realizations=d["n_realizations"],
+                            per_cell_rms_current=d.get("per_cell_rms_current"),
+                            sigma1_T30=s30.get("sigma1"), u1_axis_T30=s30.get("u1_axis"),
+                            u1_glob_T30=s30.get("u1_globality")))
+    if ca_rows:
+        n_id = sum(1 for r in ca_rows if r["identifiable"])
+        _dump(dict(schema_version=SCHEMA_VERSION, tol=float(cfg["linearity_tol"]), rows=ca_rows,
+                   n_identifiable=n_id, provenance=_provenance(cfg, dict(phase="corrected-audit-aggregate"))),
+              os.path.join(OUT, "corrected_audit_summary.json"))   # V1/U1 arrays stay per-seed (identifiable states only)
     ctrl = sorted(glob.glob(os.path.join(OUT, "per_seed", "controls_seed*.json")))
     if ctrl:
         _dump(dict(rows=[json.load(open(f)) for f in ctrl]), os.path.join(OUT, "controls_summary.json"))
     _dump(_provenance(cfg, dict(phase="aggregate", n_state_files=len(per))), os.path.join(OUT, "provenance.json"))
     print(f"[aggregate] {len(op_rows)} state rows; basis ortho resid={ortho:.2e}; "
-          f"controls={len(ctrl)}", flush=True)
+          f"controls={len(ctrl)}; corrected_audit={len(ca_rows)} ({sum(1 for r in ca_rows if r['identifiable'])} identifiable)", flush=True)
 
 
 def _agg_arrays(label, prefix, out_path):
