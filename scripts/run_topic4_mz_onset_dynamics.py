@@ -575,14 +575,16 @@ def cmd_counterfactual(args, cfg):
     _write_csv(rows, os.path.join(OUT, f"z_counterfactual_summary_{label}.csv"))
 
 
-def _rotate90_neuron_field(z, posE, L, n):
-    """REAL 90-degree rotation of a per-E-neuron scalar field via a coarse n x n grid round-trip (task §5.1).
+def _rotate90_coarse_field(z, posE, L, n):
+    """COARSE-FIELD 90-degree rotation of a per-E-neuron scalar field via an n x n grid round-trip (task §5.1).
 
-    Bin each E neuron to its grid cell, take the per-cell mean, np.rot90 the grid, then read each neuron's
-    ROTATED value back from its own cell. This preserves the field's grid histogram and spatial
-    autocorrelation (unlike a shuffle), so it is a valid spatial-pattern control. FAIL-CLOSED: if any
-    occupied target cell's rot90-source cell was empty, the rotation would have to invent a value -> raise.
-    Coordinate provenance (grid n, extent L, row/col convention) is fixed here and never an identity fallback.
+    Bin each E neuron to its grid cell, take the per-cell MEAN, np.rot90 the coarse grid, then read each
+    neuron's rotated value back from its own cell. This is NOT identity (its whole purpose) and preserves the
+    COARSE field's grid-level histogram + spatial autocorrelation. But because every neuron in a cell receives
+    the same cell mean, it does NOT preserve the neuron-level z histogram when grid cells hold unequal neuron
+    counts -> it is a *coarse-field spatial control*, NOT a strict state-matched causal control (a true
+    state-matched rotation needs a neuron-level permutation, which a non-lattice point cloud does not admit).
+    FAIL-CLOSED: if any occupied target cell's rot90-source cell was empty, raise rather than invent a value.
     """
     z = np.asarray(z, float); pos = np.asarray(posE, float)
     if pos.shape[0] != z.size:
@@ -608,7 +610,9 @@ def _counterfactual_transforms(z_branch, regions, qeff_mean, shuffle_seed, *, po
       with the SPATIAL MEAN of z (nanmean). It matches mean disinhibition, NOT inhibitory current, so it is
       DEMOTED from any causal main analysis until a verified current-aware match (sum(z*I_I)/sum(I_I), which
       MZOnsetProbe.qeff_fields already computes) is run behind a bit-identical state-resume (task §5.2).
-    - ``rotated_90`` is now a REAL grid round-trip rotation (fail-closed), never ``lambda z: z``.
+    - ``rotated_90`` is a COARSE-FIELD grid round-trip rotation (fail-closed), never ``lambda z: z`` — but it
+      is NOT a strict state-matched causal control (per-cell mean does not preserve the neuron-level z
+      histogram); see _rotate90_coarse_field. Treat it as a coarse spatial control only.
     """
     rng = np.random.default_rng(int(shuffle_seed))
     shuf = z_branch.copy(); rng.shuffle(shuf)
@@ -617,7 +621,7 @@ def _counterfactual_transforms(z_branch, regions, qeff_mean, shuffle_seed, *, po
         uniform_mean_matched=lambda z: np.full_like(z, qeff_mean),   # spatial mean of z (NOT current-matched)
         spatial_shuffle=lambda z, s=shuf: s.copy(),
         reset_one=lambda z: np.ones_like(z),
-        rotated_90=lambda z: _rotate90_neuron_field(z, posE, L, grid_n),   # real rotation; fail-closed
+        rotated_90=lambda z: _rotate90_coarse_field(z, posE, L, grid_n),   # coarse-field rotation; fail-closed
     )
 
 

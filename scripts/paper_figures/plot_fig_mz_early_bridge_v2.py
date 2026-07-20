@@ -260,8 +260,8 @@ def _plot_continuous_trace(ax, native, names, display_event, t_recruit, t120):
     for tick, name in zip(ax.get_yticklabels(), names):
         tick.set_color(_shaft_color(name, shafts))
     ax.set_xlabel("time in displayed continuous trajectory (ms)", fontsize=11.0)
-    ax.set_ylabel("contacts", fontsize=11.0)
-    ax.set_title("Virtual-SEEG", fontsize=13.0, fontweight="bold", pad=7)
+    ax.set_ylabel("virtual-LFP contacts", fontsize=11.0)
+    ax.set_title("Virtual-LFP (30–80 Hz)", fontsize=13.0, fontweight="bold", pad=7)
     ax.spines[["top", "right"]].set_visible(False)
     ax.tick_params(axis="x", labelsize=9.2, length=3)
     ax.tick_params(axis="y", length=2.5)
@@ -457,7 +457,7 @@ def main():
         xlim,
         ylim,
         cmap="viridis",
-        title=f"{direction_label} event order",
+        title=f"{direction_label} event order\n(contact readout)",
         title_color=direction_color,
         show_y=True,
         substrate_points=neurons,
@@ -480,7 +480,7 @@ def main():
         xlim,
         ylim,
         cmap="Blues",
-        title="Pre-t120 early energy",
+        title="Pre-t120 early energy\n(contact readout)",
         title_color="black",
         show_y=False,
         substrate_points=neurons,

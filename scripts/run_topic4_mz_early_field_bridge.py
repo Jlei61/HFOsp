@@ -81,10 +81,11 @@ def _provenance(seed, cfg, extra=None):
 
 
 def _fingerprint(seed, cfg):
-    """Stable per-seed provenance fingerprint for --resume (git sha + engine shas + candidate + T + seed)."""
-    payload = dict(git_sha=_git_sha(), engine_shas=_engine_shas(), seed=seed,
-                   candidate=cfg["candidate"], T_ms=cfg["T_ms"],
-                   schema=cfg.get("schema_version"))
+    """Stable per-seed --resume fingerprint keyed on what actually determines the sim output: the 6 guarded
+    engine SHAs + candidate cfg + native T + slow-off T + seed + schema. Deliberately EXCLUDES the whole-repo
+    git HEAD, so committing results/docs does NOT invalidate resume when model/config/runner are unchanged."""
+    payload = dict(engine_shas=_engine_shas(), seed=seed, candidate=cfg["candidate"], T_ms=cfg["T_ms"],
+                   slowoff_T_ms=cfg.get("slowoff_T_ms", cfg["T_ms"]), schema=cfg.get("schema_version"))
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()[:16]
 
 
@@ -304,6 +305,17 @@ def run_seed(seed, cfg, out_dir, resume=False, T_override=None, reuse_root=None)
     try:
         result = _run_seed_body(seed, cfg, seed_dir, fp, T_override, reuse_root)
         result["wall_s"] = round(time.time() - t0, 1)
+        gate = result.get("preflight_gate")
+        if gate is not None and not gate.get("pass"):
+            # FAIL-CLOSED (design §16 / task §6): a seed whose native t120 does not reproduce the committed
+            # onset within tol is not scientifically usable -> mark ineligible so aggregate() EXCLUDES it
+            # (aggregate only counts status=="complete"). Loud, not silent.
+            result["status"] = "preflight_gate_failed"
+            _dump(metrics_path, result)
+            print(f"[seed {seed}] PREFLIGHT GATE FAILED: t120={gate.get('t120_ms')} ref={gate.get('reference_onset_ms')} "
+                  f"delta={gate.get('delta_ms')} > tol={gate.get('tol_ms')} -> status=preflight_gate_failed, "
+                  f"EXCLUDED from cohort", flush=True)
+            return result
         result["status"] = "complete"
         _dump(metrics_path, result)
         print(f"[seed {seed}] complete in {result['wall_s']}s -> {metrics_path}", flush=True)
@@ -633,8 +645,18 @@ def aggregate(out_dir, seeds, cfg):
         wtr.writeheader()
         for r in rows:
             wtr.writerow(r)
+    per_seed_producer = {}
+    for seed in seeds:
+        pp = os.path.join(out_dir, "per_seed", f"seed{seed}", "bridge_metrics.json")
+        if os.path.exists(pp):
+            pv = (json.load(open(pp)).get("provenance") or {})
+            per_seed_producer[str(seed)] = {"git_sha": pv.get("git_sha"), "status": json.load(open(pp)).get("status")}
     _dump(os.path.join(out_dir, "provenance.json"),
-          {"git_sha": _git_sha(), "engine_shas": _engine_shas(), "seeds": seeds,
+          {"aggregate_git_sha": _git_sha(), "engine_shas": _engine_shas(), "seeds": seeds,
+           "per_seed_producer_sha": per_seed_producer,
+           "note": "seeds may be produced at different git commits (e.g. seed1 was committed before seeds 3/4 ran); "
+                   "per_seed_producer_sha records each seed's actual producer git_sha. The 6 engine_shas are the "
+                   "sim-determining hashes and are identical across seeds.",
            "candidate": cfg["candidate"], "T_ms": cfg["T_ms"], "argv": sys.argv})
     print(f"[aggregate] {len(rows)} complete seeds; rho_maxab median="
           f"{cohort['rho_maxab_median']} range={cohort['rho_maxab_range']} -> {out_dir}/cohort_summary.json",

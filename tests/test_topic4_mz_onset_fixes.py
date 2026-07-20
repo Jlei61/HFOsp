@@ -115,7 +115,7 @@ def _grid_filling_posE(n, L=1.0):
 
 def test_rotated90_is_real_rotation_not_identity(R):
     posE, z = _grid_filling_posE(4, L=1.0)
-    z_rot = R._rotate90_neuron_field(z, posE, 1.0, 4)
+    z_rot = R._rotate90_coarse_field(z, posE, 1.0, 4)
     assert not np.array_equal(z_rot, z), "rotated_90 returned the input unchanged (identity fallback)"
     assert sorted(np.round(z_rot, 6)) == sorted(np.round(z, 6)), "rotation must preserve the value multiset"
 
@@ -126,7 +126,7 @@ def test_rotated90_fail_closed_on_empty_source_cell(R):
     posE = np.column_stack([(np.arange(n) + 0.5) / n * L, np.full(n, 0.5 / n * L)])
     z = np.arange(n, dtype=float)
     with pytest.raises(ValueError, match="FAIL-CLOSED"):
-        R._rotate90_neuron_field(z, posE, L, n)
+        R._rotate90_coarse_field(z, posE, L, n)
 
 
 def test_uniform_arm_is_mean_matched_and_named(R):

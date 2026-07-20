@@ -1,5 +1,5 @@
 {
-  "git_sha": "1719a67",
+  "aggregate_git_sha": "36d4000",
   "engine_shas": {
     "kick_probe.py": "5faaedab37ab",
     "params.py": "c2036d1e1548",
@@ -13,6 +13,21 @@
     3,
     4
   ],
+  "per_seed_producer_sha": {
+    "1": {
+      "git_sha": "7951052",
+      "status": "complete"
+    },
+    "3": {
+      "git_sha": "1719a67",
+      "status": "complete"
+    },
+    "4": {
+      "git_sha": "1719a67",
+      "status": "complete"
+    }
+  },
+  "note": "seeds may be produced at different git commits (e.g. seed1 was committed before seeds 3/4 ran); per_seed_producer_sha records each seed's actual producer git_sha. The 6 engine_shas are the sim-determining hashes and are identical across seeds.",
   "candidate": {
     "label": "zA_q75_tz5000__mA0p001_tau500",
     "cfg": {
@@ -34,12 +49,10 @@
   "T_ms": 20000.0,
   "argv": [
     "scripts/run_topic4_mz_early_field_bridge.py",
-    "--confirm-run",
+    "--aggregate-only",
     "--config",
     "config/topic4_mz_early_field_bridge_v2_zm.yaml",
     "--output-dir",
-    "results/topic4_sef_hfo/mz_early_field_bridge_v2_zm_tau500",
-    "--seeds",
-    "1,3,4"
+    "results/topic4_sef_hfo/mz_early_field_bridge_v2_zm_tau500"
   ]
 }

@@ -1,0 +1,153 @@
+{
+  "experiment": "V2 bridge long-axis control + temporal evolution + local participation (no re-sim)",
+  "interpretation": "(A) the fixed contact long-axis coordinate ALONE predicts the pre-runaway early energy field (axis-only maxAB significant in 3/3 seeds); the interictal contact-order template is nearly the axis itself (|Spearman|>0.95) and adds only a modest maxAB increment. (B) after controlling for the axis, a residual template->energy association survives in 2/3 seeds (seed1/seed3), marginal in seed4 -> 'template beyond geometry' is partially, not cleanly, established. (C) the bridge is temporally early: strong in 0-50 ms, weaker by 50-100 ms (seed1 loses significance). (D) high-energy contacts co-occur with strong nearby recruitment (energy-participation Spearman ~0.90-0.94), but energy and participation both vary along the axis, so local exclusivity is NOT established.",
+  "rows": [
+    {
+      "seed": 1,
+      "template_maxab": 0.8914887841427127,
+      "template_within_shaft_p": 0.0026997300269973002,
+      "axis_only_maxab": 0.7892857142857141,
+      "axis_only_within_shaft_p": 0.0047995200479952005,
+      "template_minus_axis": 0.10220306985699856,
+      "corr_template_vs_axis": -0.954269684434453,
+      "partial_template_energy_given_axis_r": -0.5535714285714285,
+      "partial_p": 0.03228710377012365,
+      "windows": {
+        "early_0_25_ms": {
+          "maxab": 0.8753451240676937,
+          "within_shaft_p": 0.0033996600339966003,
+          "lp_median": 0.24339622641509434
+        },
+        "early_25_50_ms": {
+          "maxab": 0.8879013041260416,
+          "within_shaft_p": 0.0031996800319968005,
+          "lp_median": 0.27735849056603773
+        },
+        "early_0_50_ms": {
+          "maxab": 0.8914887841427127,
+          "within_shaft_p": 0.0026997300269973002,
+          "lp_median": 0.28679245283018867
+        },
+        "early_50_100_ms": {
+          "maxab": 0.7174960033341751,
+          "within_shaft_p": 0.13288671132886712,
+          "lp_median": 0.5358490566037736
+        },
+        "early_0_100_ms": {
+          "maxab": 0.889695044134377,
+          "within_shaft_p": 0.0032996700329967,
+          "lp_median": 0.5358490566037736
+        }
+      },
+      "energy_localparticipation_spearman": 0.9029010639394219,
+      "hot3_participation": [
+        1.0,
+        0.901,
+        1.0
+      ],
+      "cold3_participation": [
+        0.002,
+        0.0,
+        0.0
+      ]
+    },
+    {
+      "seed": 3,
+      "template_maxab": 0.9691043678307522,
+      "template_within_shaft_p": 9.999000099990002e-05,
+      "axis_only_maxab": 0.8392857142857142,
+      "axis_only_within_shaft_p": 0.0008999100089991,
+      "template_minus_axis": 0.12981865354503797,
+      "corr_template_vs_axis": -0.9646893137631862,
+      "partial_template_energy_given_axis_r": -0.7802197802197802,
+      "partial_p": 0.0009944938002309496,
+      "windows": {
+        "early_0_25_ms": {
+          "maxab": 0.9779344759658842,
+          "within_shaft_p": 9.999000099990002e-05,
+          "lp_median": 0.12852112676056338
+        },
+        "early_25_50_ms": {
+          "maxab": 0.9249538271550916,
+          "within_shaft_p": 0.0010998900109989002,
+          "lp_median": 0.17077464788732394
+        },
+        "early_0_50_ms": {
+          "maxab": 0.9691043678307522,
+          "within_shaft_p": 9.999000099990002e-05,
+          "lp_median": 0.17077464788732394
+        },
+        "early_50_100_ms": {
+          "maxab": 0.7615968266551469,
+          "within_shaft_p": 0.05369463053694631,
+          "lp_median": 0.323943661971831
+        },
+        "early_0_100_ms": {
+          "maxab": 0.9426140434253557,
+          "within_shaft_p": 0.00039996000399960006,
+          "lp_median": 0.323943661971831
+        }
+      },
+      "energy_localparticipation_spearman": 0.9139843654841338,
+      "hot3_participation": [
+        0.886,
+        1.0,
+        1.0
+      ],
+      "cold3_participation": [
+        0.012,
+        0.002,
+        0.005
+      ]
+    },
+    {
+      "seed": 4,
+      "template_maxab": 0.9042909762485462,
+      "template_within_shaft_p": 0.0016998300169983002,
+      "axis_only_maxab": 0.7785714285714285,
+      "axis_only_within_shaft_p": 0.006299370062993701,
+      "template_minus_axis": 0.12571954767711768,
+      "corr_template_vs_axis": -0.9768982809108381,
+      "partial_template_energy_given_axis_r": -0.48571428571428577,
+      "partial_p": 0.07827588645863327,
+      "windows": {
+        "early_0_25_ms": {
+          "maxab": 0.9394945179029908,
+          "within_shaft_p": 0.00039996000399960006,
+          "lp_median": 0.25985663082437277
+        },
+        "early_25_50_ms": {
+          "maxab": 0.8514856637668792,
+          "within_shaft_p": 0.007899210078992101,
+          "lp_median": 0.3548387096774194
+        },
+        "early_0_50_ms": {
+          "maxab": 0.9042909762485462,
+          "within_shaft_p": 0.0016998300169983002,
+          "lp_median": 0.3548387096774194
+        },
+        "early_50_100_ms": {
+          "maxab": 0.842684778353268,
+          "within_shaft_p": 0.013498650134986502,
+          "lp_median": 0.5842293906810035
+        },
+        "early_0_100_ms": {
+          "maxab": 0.9174923043689629,
+          "within_shaft_p": 0.0007999200079992001,
+          "lp_median": 0.5842293906810035
+        }
+      },
+      "energy_localparticipation_spearman": 0.9409675163742262,
+      "hot3_participation": [
+        0.988,
+        1.0,
+        1.0
+      ],
+      "cold3_participation": [
+        0.007,
+        0.002,
+        0.0
+      ]
+    }
+  ]
+}
