@@ -111,9 +111,13 @@ seed3/4 复用了全局锁，不能代表三种子；(b) 每个状态只用一�
 | midpoint | 1 | 0.125 | 0.122/**0.159** | 0 | False（half 越线）|
 | midpoint | 3 | 0.246 | 0.249/0.246 | 0 | False |
 | midpoint | 4 | **0.062** | **0.074/0.080** | 0 | **True** |
-| pre_onset | 1 | 0.135 | 0.191/0.176 | 0 | False（half 越线）|
-| pre_onset | 3 | (N=16 收尾中) | — | 0 | False（N=8=0.178；N=16 与 seed1/4 同型必 False，落地后回填）|
-| pre_onset | 4 | 0.125 | 0.164/0.177 | 0 | False（half 越线）|
+| pre_onset | 1 | 0.135 | 0.191/0.176 | 0 | False（full 过线但 half 越线）|
+| pre_onset | 3 | 0.132 | 0.178/0.173 | 0 | False（full 过线但 half 越线）|
+| pre_onset | 4 | 0.125 | 0.164/0.177 | 0 | False（full 过线但 half 越线）|
+
+> **pre_onset 是 split-half 判据的最好例证**：N=16 全平均把三种子的差异全部拉到 15% 线以下（0.135/0.132/
+> 0.125），但**每一组独立 8 条都越线**（0.16–0.19）——所以三个都判 False。只看"全平均过线"会误判可辨识，
+> 只有"两组独立各自都过线"才稳健。
 
 可辨识 2 点的模式：seed3 baseline σ̂₁=4.15 **u1_axis=−0.32（横轴）** corridor_frac=0.35；seed4 midpoint
 σ̂₁=8.57 **u1_axis=+0.52（沿轴）** corridor_frac=0.00（沿轴但不落走廊）。**两模式互不相同**：sign-invariant
@@ -121,7 +125,7 @@ seed3/4 复用了全局锁，不能代表三种子；(b) 每个状态只用一�
 
 **结论（N=16 严格判据）**：(1) 差异从第一版 0.4–2.6 全面降到 0.06–0.36 → **第一版"整网到处非线性"是测量
 假象，推翻**。(2) **但严格判据下 9 个种子×时刻只 2 个稳健辨识**（seed3 baseline、seed4 midpoint）；**split-
-half 是判别关键**——好几个点全 16 平均能压过线（seed1 midpoint full 0.125、pre_onset seed1/4 full 0.13/0.13），
+half 是判别关键**——好几个点全 16 平均能压过线（seed1 midpoint full 0.125、pre_onset 三种子 full 全≈0.13），
 但拆两组各 8 就越线（0.16–0.19），说明不稳健；**全程 sat=0**。midpoint 只 1/3 稳健（不是 2/3）；只有 3 个离散
 时刻，不足以定义连续"窗口"。(3) **两个可辨识模式互不相同、朝向相反 → 没有跨种子一致的轴向算子模式**；只能说
 个别孤立点上勉强辨识出的模式各自有取向倾向（orientation tendency）。`corrected_audit_summary.json` + 每
@@ -208,7 +212,7 @@ unstable，不是"适应抑制响应"（那只是 seed1 单点，未复现）。
   修正审计（集成 + RMS 匹配 + 平衡低波数）把差异全面降到 0.06–0.36（确认假象）。**但严格判据 = 全 16 条过线
   且 两组独立 8 条都过线 且 无 fork 饱和 → 9 个种子×时刻里只 2 个稳健辨识**（seed3 baseline、seed4 midpoint）。
   **split-half 是判别关键**：好几个点全 16 条平均能压过线，但拆两组各 8 条就越线（如 seed1 midpoint full=0.125
-  但 repB=0.159；pre_onset seed1/4 full=0.135/0.125 但半批 0.16–0.19）——所以它们不稳健。**全程 sat=0/576**
+  但 repB=0.159；**pre_onset 三种子 full 全 0.125–0.135 都过线**但半批全 0.16–0.19）——所以它们不稳健。**全程 sat=0/576**
   （RMS 匹配强度没点燃冻结 fork），可辨识性不被饱和污染。每 realization 的 K 已存（`corr_Kr_*`），可复算。
 - 随机性：common random numbers（±/no-probe 共享 checkpoint rng_state）+ 修正审计每状态 16 条独立未来、±共享
   每条未来；tiny C3 + full-net smoke idempotent。
