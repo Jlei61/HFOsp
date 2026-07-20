@@ -110,8 +110,30 @@ seed3 workpoint（c_E=0.85,1.0；reference current-model slow-off n_returning=22
 | D | conductance | conductance | 复现当前 NO-GO |
 
 四臂共享 `V_match` 力锚（`ampa_drive + gE·(E_E−V_match) == c_E·I_E`，已单测），只在 off-`V_match` 的状态依赖上不同。
-判读：A 保留 workpoint（应），若 C 保留而 B 失败 → recurrent 电导才是关键、外源电导才是压垮 baseline 的主因；反之或
-两路单独都失败则另有结论。**结果填充中**（runner `pathway` 命令，`results/.../runs/*pathway*`）。
+
+**结果（seed1，c_E=1，参照 current-model slow-off n_ret=23 / participation 3.75%）：**
+
+| arm | 改动 | n_ret | participation% | settled clip | safe | all_bands | preserves |
+|---|---|---:|---:|---:|---|---|---|
+| A add/add | 无（参照） | 23 | 3.75 | 0 | ✓ | ✓ | **YES** |
+| B ff-cond | 只外源 | **52**(2.3×) | 6.52 | 0 | ✓ | ✗ | over-active |
+| C rec-cond | 只 recurrent | 30 | 4.35 | **0.48%** | ✗ | **✓** | clips |
+| D cond/cond | 两路（=NO-GO） | 58 | 7.47 | 0.93% | ✗ | ✗ | both |
+
+**判读（干净的因果拆分，且是可加的——D ≈ B 的过活跃 + C 的 clip，不需要交互项）：**
+
+- **A 复现 accepted workpoint**（23 事件、bands、safe）——验证 2×2 setup 可信。
+- **feedforward 电导 → 过活跃**（arm B：52 事件 2.3×、off-band，但 clip=0/数值安全）。事件数暴涨来自外源电导——正是
+  状态依赖 1.45×-at-rest 效应：外源在静息附近推得更狠 → 更多点火。
+- **recurrent 电导 → clip，但事件画像基本保住**（arm C：**bands=True**、30 事件/participation 4.35% 都近参照，但 0.48%
+  cell 触顶 → settled_safe=False）。clip 来自 recurrent 电导 `g_E_rec = c_E·I_E_rec/40` 随本地 recurrent 驱动**无界增长**
+  ——事件峰值时少数 cell 的 recurrent 电导过冲 cap（driving force 饱和的是"劲"，电导本身不饱和）。
+
+**对审阅推荐（arm C = 只 recurrent 电导）的判决：部分验证。** arm C **保住了间期 workpoint 的事件画像**（bands=True），
+证明"外源保持 additive"这一方向是对的（外源电导才是压垮 baseline 兴奋性的那半）；但它暴露一个**新的、和原 NO-GO
+不同的障碍**——recurrent 电导过冲 clip（0.48%，比 D 的 0.93% 小）。按 §6 step 3，arm C **未完整通过**（数值不安全），
+故**不自动跑 seed3**；但它是目前最接近的一档（画像已保住，只差 clip）。剩余问题从"静息↔过热"变成了"recurrent 电导
+本地过冲"——更局部、更可能可治（例如给 recurrent 电导本身一个饱和上界，或核查这 0.48% 是否可容忍），由用户拍板。
 
 ## 3. 分层判决（更新）
 
@@ -132,23 +154,30 @@ seed3 workpoint（c_E=0.85,1.0；reference current-model slow-off n_returning=22
 c_E=1.15 约 23%——过热但**不是全片同步**）且触 conductance cap。**只能说这三个注册点失败，不能说 `0.85–1.0` 连续区间
 里不存在很窄的临界窗口**（当前设计禁止插值）——这不影响预注册 gate 失败，但限定了机制解释的范围。
 
-**禁止写成**：已得到发作态 / 极限环 / Hopf / 双稳态 / 有限高支 / 完整 seizure lifecycle（Stage 1 未执行）；也**不能说
-"feedforward 饱和已被证明是主因"**——当前只跑了两路都改（arm D），没有单路对照，所以那是**待检验假设**（§2.4 正在跑）。
+**禁止写成**：已得到发作态 / 极限环 / Hopf / 双稳态 / 有限高支 / 完整 seizure lifecycle（Stage 1 未执行）。
 
-**下一步（先做通路归因，不是直接继续 X、也不是立刻扩 c_E 扫描）：** 见 §6 最小执行路线。核心是固定 `c_E=1` 的
-**2×2 通路拆分**（外源/recurrent AMPA 各自 additive-vs-conductance 四臂），先回答"失败来自外源电导、recurrent 电导、
-还是二者相互作用"，再决定锁哪版方程。**推荐方向（只让 recurrent E→E 成电导、外源保持 additive）在科学上更贴合原目标**
-（要改的是 recurrent 正反馈支，外源主要维持间期工作点、不应和 fast-topology 机制同时改变）——但这是"下一候选"，
-不是"已证实的修复"，须等 2×2（arm C 单独过 workpoint）确认。**一次只放开一个轴、重新预注册。**
+**2×2 通路归因已跑完（§2.4），答案是分工而非单一主因**：**feedforward 电导 → 过活跃（事件数暴涨）**、**recurrent
+电导 → 本地过冲 clip（但事件画像保住）**，两者可加地凑成 arm D 的 NO-GO。所以"feedforward 是唯一主因"不成立；准确说是
+**外源电导负责过活跃、recurrent 电导负责 clip**。
+
+**下一步（由用户拍板，一次只放开一个轴、重新预注册）：** 审阅推荐的 arm C（只 recurrent 电导、外源保持 additive）
+**部分验证成功**——它保住了间期 workpoint 的事件画像（bands=True），证明"外源保持 additive"方向正确；剩下唯一障碍是
+recurrent 电导过冲的 0.48% clip（比 D 的 0.93% 小、且更局部）。按 §6 step 3 arm C 未完整过（数值不安全），故未自动跑
+seed3。建议用户从以下里选一（只选一个）：**(a)** 给 recurrent 电导本身一个饱和/软上界（治 clip，最贴合"要有限高支"的
+初衷）；或 **(b)** 核查这 0.48% clip 是否可容忍（若只是峰值瞬时少数 cell，放宽 numerical gate 后 arm C 可能直接过）；
+或 **(c)** 先不动 clip、用 arm C 进 Stage 1 看有没有有限高支（clip 只在事件峰值、可能不影响 topology 判读）。**不建议**
+去调 drive 或扩 c_E——2×2 已把问题从"静息↔过热"收窄到"recurrent 电导本地过冲"这一个更小的点。
 
 ## 5. 最小执行路线（审阅 §6）
 
-1. （已做）修 workpoint 候选 gate 漏 `all_bands`（+回归测试 `tests/test_fcxr_workpoint_gate.py`），并让 full_conductance
-   在 X 关闭时也记录 `gEff/gErec`（Stage 0 才能归因 ff vs rec）。
-2. （运行中）`seed1, L=20, T=8s, c_E=1` 跑 A/B/C/D 四臂，不加 Z/M/X/global、不动其它参数（runner `pathway`）。
-3. 只有 arm C（外源 additive + recurrent conductance）同时数值安全且完整 workpoint band，才用 seed3 确认。
-4. arm C 通过后，把下一版方程锁为 `tau_m V̇ = −V + I_E^{ff} + g_E^{rec}(E_E−V) + g_I(E_I−V)`，再重进 Stage 1 查有限高支；
-   高支存在后才做 `y/x`。
-5. 如果 arm C 失败：**不立即调 drive**，由用户决定做有界 `c_E` 插值还是调 `V_match`，一次只开放一个轴。
+1. **（已做）** 修 workpoint 候选 gate 漏 `all_bands`（+回归测试 `tests/test_fcxr_workpoint_gate.py`），并让
+   full_conductance 在 X 关闭时也记录 `gEff/gErec`（Stage 0 才能归因 ff vs rec）。commit `2a97311`。
+2. **（已做）** `seed1, L=20, T=8s, c_E=1` 跑 A/B/C/D 四臂（runner `pathway`）——见 §2.4：ff→过活跃、rec→clip、可加。
+3. **（不触发）** arm C bands=True 但 settled_safe=False（0.48% clip），未同时满足两条 → **不跑 seed3**。
+4. **（待用户）** arm C 若把 clip 治掉再过 workpoint，方程锁为 `tau_m V̇ = −V + I_E^{ff} + g_E^{rec}(E_E−V) + g_I(E_I−V)`，
+   再重进 Stage 1 查有限高支；高支存在后才做 `y/x`。
+5. **（待用户）** 现在的岔口不是"调 drive/扩 c_E"（2×2 已否掉那个方向），而是"怎么治 recurrent 电导过冲"——见 §4 的
+   (a)/(b)/(c) 三选一，一次只开放一个轴、重新预注册。
 
-这一步比"直接相信 feedforward 是主因"多一个小实验，但能真正回答失败来自外源电导、recurrent 电导、还是二者相互作用。
+这个 2×2 比"直接相信 feedforward 是主因"多跑了 3 个 arm，但把 NO-GO 从"full-conductance 不行"精确拆成"外源电导过活跃 +
+recurrent 电导 clip"，并把审阅推荐的 recurrent-only 方向从"合理假设"变成"画像已验证、只差 clip"。
