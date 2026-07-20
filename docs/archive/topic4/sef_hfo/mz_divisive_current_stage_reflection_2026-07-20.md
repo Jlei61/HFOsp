@@ -4,6 +4,8 @@
 分支：`codex/topic4-mz-divisive-lifecycle`
 状态：current-based v1/v2/v3 与代表性时空 capture 已收口；paper-ready current-stage diagnostic 已生成；Stage 0A 分析链正对照已 PASS；Stage 0B 原始六变量 fast topology 已限定范围 clean no-go；Stage 0E 已在 `alpha_G={15,16}` 直接解析出闭合 period-1 orbit 和强有限扰动回归；Stage 0F v1 已作为 engineering-invalid archive 保留；修复后的 v1.1 完成权威运行并锁定为 `STAGE0F_NUMERICAL_UNRESOLVED`；Stage 1/空间层仍关闭
 
+> **后续更新**：本文写作时尚未完成 exact entry/exit nullcline。现已定位 low saddle-node `z_SN=0.87447467`，解析出 strong SNIC-like period slowing，并证明 frozen additive M 会移动 fold；因此本文后半部 `D_R` 主方案和 60-ms/rho=.963 onset sweep 已被后续审计取代。当前入口见 `docs/archive/topic4/sef_hfo/mz_entry_exit_nullcline_audit_2026-07-20.md`；新方程见 `docs/superpowers/specs/2026-07-20-topic4-mz-persistence-gated-additive-spatial-lifecycle-design.md`。
+
 ## 1. 一句话判断
 
 **完整 SNN 已做到“间期事件逐渐增强并自主跨入 recruited bursting”，约化快系统也已找到闭合且能吸引有限扰动的 period-1 周期；但 Stage 0F v1.1 的独立 whole-return 导数尺度门仍未通过，所以尚无可靠的 Floquet 稳定性证书、entry/exit boundary，更没有由局部恢复场实现同一间期 basin 的时空闭环。**

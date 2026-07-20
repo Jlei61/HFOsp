@@ -11,6 +11,8 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- 2026-07-20 MZ entry/exit 最新审计：`docs/archive/topic4/sef_hfo/mz_entry_exit_nullcline_audit_2026-07-20.md`；主图与机器产物在 `results/topic4_sef_hfo/mz_entry_exit_nullclines/`。
+- 2026-07-20 下一版 conditional 方程：`docs/superpowers/specs/2026-07-20-topic4-mz-persistence-gated-additive-spatial-lifecycle-design.md`。旧 `local-divisive-recovery/D_R` 方案已 superseded；本线不再增加 recurrent-E recovery divisor。
 - v0.2 plan：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`
 - 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际进入稳定性分析
 - 保留 v1 真实数据验收合同（H1–H6）：endpoint compactness / source-sink reversal / mark independence + stable geometry / rate-geometry decoupling / pre-post-ictal endpoint shift / participation-field segregation

@@ -1,8 +1,8 @@
-# Topic 4：local divisive-recovery spatial lifecycle（conditional design v0.2）
+# Topic 4：local divisive-recovery spatial lifecycle（superseded conditional design v0.2）
 
 日期：2026-07-20
 
-状态：conditional design 已锁到可执行层；Stage 0F v1 已归档为 engineering-invalid，v1.1 权威运行固定为 `STAGE0F_NUMERICAL_UNRESOLVED`。因此 Stage 1/2 当前关闭；本文只保留下一版本方程、预测和 stop rules，不构成生物参数扫描许可。
+状态：**2026-07-20 已被 entry/exit nullcline 审计取代，不再作为主实现合同。** `D_R` 再次作用于 recurrent E gain，与既有 `S_G/T_G` fast topology 以及并行 E→E relay 线机制重叠；它仍可作为历史 counterfactual 保留，但不得继续实现或扫描。新的主合同见 `docs/superpowers/specs/2026-07-20-topic4-mz-persistence-gated-additive-spatial-lifecycle-design.md`。Stage 0F v1 已归档为 engineering-invalid，v1.1 权威运行仍固定为 `STAGE0F_NUMERICAL_UNRESOLVED`；本文以下内容仅作被取代方案的审计记录。
 
 本线 worktree：`.worktrees/topic4-mz-divisive-lifecycle`
 

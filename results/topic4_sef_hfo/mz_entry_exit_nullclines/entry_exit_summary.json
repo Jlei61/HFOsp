@@ -1,0 +1,280 @@
+{
+  "status": "entry_exit_geometry_resolved_next_slow_lifecycle_open",
+  "model_contract": {
+    "fast_system": "locked Stage0C nine-state E/I + delayed recurrent-E divisor",
+    "new_counterfactual": "frozen additive E current mu_E -> mu_E - A",
+    "parallel_line_exclusions": [
+      "no E-E weight/kernel/delay changes",
+      "no presynaptic E-E relay",
+      "no new recurrent-E recovery divisor"
+    ]
+  },
+  "fixed_point_fold_surface": [
+    {
+      "additive_mv": 0.0,
+      "z": 0.8744746730086702,
+      "rE_hz": 2.026389819297687,
+      "rI_hz": 7.05590510763672,
+      "residual_inf": 1.0183694165721846e-11,
+      "residual_rate_det": 6.956361112619906e-12,
+      "leading_real_per_ms": -1.0309189730209101e-13
+    },
+    {
+      "additive_mv": 0.1,
+      "z": 0.8668870542801383,
+      "rE_hz": 1.926634045450492,
+      "rI_hz": 6.942858067016512,
+      "residual_inf": 1.229587425205425e-11,
+      "residual_rate_det": 1.229587425205425e-11,
+      "leading_real_per_ms": -1.7732378604164389e-13
+    },
+    {
+      "additive_mv": 0.2,
+      "z": 0.8591625308371377,
+      "rE_hz": 1.8349566946358482,
+      "rI_hz": 6.838962215861355,
+      "residual_inf": 1.3245470791018105e-11,
+      "residual_rate_det": -1.3245470791018105e-11,
+      "leading_real_per_ms": 1.859234202889637e-13
+    },
+    {
+      "additive_mv": 0.3,
+      "z": 0.8513086199901017,
+      "rE_hz": 1.7504206816233867,
+      "rI_hz": 6.743157576314845,
+      "residual_inf": 8.728583433649294e-12,
+      "residual_rate_det": -8.728583433649294e-12,
+      "leading_real_per_ms": 1.1905077738209036e-13
+    },
+    {
+      "additive_mv": 0.3165,
+      "z": 0.8500007873385788,
+      "rE_hz": 1.7371059791872705,
+      "rI_hz": 6.728067936817861,
+      "residual_inf": 1.7096434350259198e-11,
+      "residual_rate_det": 1.7096434350259198e-11,
+      "leading_real_per_ms": -2.327857265035609e-13
+    },
+    {
+      "additive_mv": 0.4,
+      "z": 0.8433324573200781,
+      "rE_hz": 1.6722787643161747,
+      "rI_hz": 6.654598722159379,
+      "residual_inf": 3.832892655476807e-11,
+      "residual_rate_det": 3.832892655476807e-11,
+      "leading_real_per_ms": -5.114731762445884e-13
+    },
+    {
+      "additive_mv": 0.5,
+      "z": 0.8352408241942676,
+      "rE_hz": 1.5998409391063455,
+      "rI_hz": 6.572504588446225,
+      "residual_inf": 1.0659055849476515e-11,
+      "residual_rate_det": 1.0659055849476515e-11,
+      "leading_real_per_ms": -1.3916135228912012e-13
+    },
+    {
+      "additive_mv": 1.0,
+      "z": 0.7932661023694489,
+      "rE_hz": 1.3054748535146798,
+      "rI_hz": 6.238917117709982,
+      "residual_inf": 1.5677251050756136e-11,
+      "residual_rate_det": 1.5677251050756136e-11,
+      "leading_real_per_ms": -1.8670784614240307e-13
+    },
+    {
+      "additive_mv": 1.25,
+      "z": 0.7714771104308078,
+      "rE_hz": 1.1906399705909032,
+      "rI_hz": 6.108798641291941,
+      "residual_inf": 5.385199898408281e-12,
+      "residual_rate_det": -5.385199898408281e-12,
+      "leading_real_per_ms": 6.173622880258121e-14
+    },
+    {
+      "additive_mv": 1.5,
+      "z": 0.7492548546646671,
+      "rE_hz": 1.0917424477096687,
+      "rI_hz": 5.9967509544429785,
+      "residual_inf": 1.3856547175782375e-11,
+      "residual_rate_det": -1.3856547175782375e-11,
+      "leading_real_per_ms": 1.536149631885735e-13
+    },
+    {
+      "additive_mv": 2.0,
+      "z": 0.703768196237878,
+      "rE_hz": 0.9306614005567592,
+      "rI_hz": 5.814283343403564,
+      "residual_inf": 1.8924553291724523e-11,
+      "residual_rate_det": 1.8924553291724523e-11,
+      "leading_real_per_ms": -1.988881401263863e-13
+    }
+  ],
+  "reference_equilibria": {
+    "z": 0.85,
+    "A0": [
+      {
+        "rE_hz": 6.071838938357655,
+        "rI_hz": 11.62692486185578,
+        "stability": "unstable",
+        "leading_real_per_ms": 0.04250416491225156,
+        "leading_imag_per_ms": 0.03415063817587987,
+        "residual_inf_khz": 1.734723475976807e-17
+      }
+    ],
+    "A0.32": [
+      {
+        "rE_hz": 1.579489100823475,
+        "rI_hz": 6.549439897011331,
+        "stability": "stable",
+        "leading_real_per_ms": -0.004318675162574413,
+        "leading_imag_per_ms": 0.0,
+        "residual_inf_khz": 1.465841337200402e-16
+      },
+      {
+        "rE_hz": 1.9053884415833362,
+        "rI_hz": 6.918781167026518,
+        "stability": "unstable",
+        "leading_real_per_ms": 0.004612042216036274,
+        "leading_imag_per_ms": 0.0,
+        "residual_inf_khz": 2.0550531762419944e-13
+      },
+      {
+        "rE_hz": 5.901047001833614,
+        "rI_hz": 11.434647465922762,
+        "stability": "unstable",
+        "leading_real_per_ms": 0.04351141002680314,
+        "leading_imag_per_ms": 0.024291044249019,
+        "residual_inf_khz": 2.7755575615628914e-17
+      }
+    ]
+  },
+  "snic_like_period_fit": {
+    "intercept_ms": 500.06176087167046,
+    "coefficient_ms_sqrt_z": 24.453138445137025,
+    "r_squared": 0.9993173858488614,
+    "n_points": 11
+  },
+  "operational_state_fork_boundaries": {
+    "z_alpha15_dt_base": {
+      "largest_oscillatory": 0.87445,
+      "smallest_settled_low": 0.8745,
+      "interpretation": "state_fork_strip_not_periodic_orbit_continuation"
+    },
+    "z_alpha15_dt_half": {
+      "largest_oscillatory": 0.87445,
+      "smallest_settled_low": 0.8745,
+      "interpretation": "state_fork_strip_not_periodic_orbit_continuation"
+    },
+    "A_alpha15_dt0.125": {
+      "largest_oscillatory": 0.31,
+      "smallest_settled_low": 0.32,
+      "interpretation": "state_fork_strip_not_periodic_orbit_continuation"
+    },
+    "A_alpha15_dt0.0625": {
+      "largest_oscillatory": 0.31,
+      "smallest_settled_low": 0.32,
+      "interpretation": "state_fork_strip_not_periodic_orbit_continuation"
+    },
+    "A_alpha16_dt0.125": {
+      "largest_oscillatory": 0.31,
+      "smallest_settled_low": 0.32,
+      "interpretation": "state_fork_strip_not_periodic_orbit_continuation"
+    },
+    "A_alpha16_dt0.0625": {
+      "largest_oscillatory": 0.31,
+      "smallest_settled_low": 0.32,
+      "interpretation": "state_fork_strip_not_periodic_orbit_continuation"
+    }
+  },
+  "persistence_sensor_audit": {
+    "A_fold_at_reference_z_mv": 0.3165099207379754,
+    "causal_onset_ms": 13978.800000000001,
+    "pre_onset_TG_max": 0.06004224345088005,
+    "post_onset_plus_2s_TG_q25": 0.08340046182274818,
+    "candidate_persistence_threshold": 0.07172135263681412,
+    "threshold_interval_nonempty": true,
+    "first_threshold_crossing_after_onset_ms": 2756.500781249999,
+    "interpretation": "T_G is reused only as a persistence sensor candidate; the next arm must not apply it to the recurrent-E denominator"
+  },
+  "timing_leverage_oracle": {
+    "source": "cross-model stress-test oracle, not a calibrated slow trajectory",
+    "capture_derived_depletion_occupancy": 0.5628164311381522,
+    "capture_tau_z_ms": 10000.0,
+    "baseline_cycle_period_ms": 604.0,
+    "cycle_rows": [
+      {
+        "elapsed_cycles": 1,
+        "elapsed_ms": 604.0,
+        "z_if_unopposed": 0.848844124439754,
+        "required_additive_mv": 0.3310582542685254
+      },
+      {
+        "elapsed_cycles": 2,
+        "elapsed_ms": 1208.0,
+        "z_if_unopposed": 0.8247158360671099,
+        "required_additive_mv": 0.6281144201126042
+      },
+      {
+        "elapsed_cycles": 3,
+        "elapsed_ms": 1812.0,
+        "z_if_unopposed": 0.8020017572705475,
+        "required_additive_mv": 0.8981536812208475
+      },
+      {
+        "elapsed_cycles": 4,
+        "elapsed_ms": 2416.0,
+        "z_if_unopposed": 0.7806189982613596,
+        "required_additive_mv": 1.1457596280362032
+      },
+      {
+        "elapsed_cycles": 5,
+        "elapsed_ms": 3020.0,
+        "z_if_unopposed": 0.7604895275951662,
+        "required_additive_mv": 1.374171251512369
+      }
+    ],
+    "at_existing_sensor_crossing": {
+      "elapsed_ms": 2756.500781249999,
+      "z_if_unopposed": 0.7691218453396329,
+      "required_additive_mv": 1.2767155519659907
+    }
+  },
+  "key_findings": [
+    "the low-state saddle-node is near z=0.874475 and is independent of alpha_G at low rate",
+    "the fast-cycle period has inverse-square-root divergence near the same boundary",
+    "a frozen additive E current near 0.3165 mV moves the fold to z=0.85",
+    "cycle-seeded state forks switch from oscillatory at A=0.31 mV to low at A=0.32 mV",
+    "therefore additive M has exit leverage; the old linear-M failure was a gating/timing failure",
+    "0.3165 mV is only the frozen-z lower bound; after three unopposed cycles the timing oracle requires about 0.9 mV",
+    "alpha_G=15 approaches the transition with >100-Hz peaks; alpha_G=16 is closer to the physical ceiling and remains a sensitivity concern",
+    "the existing T_G trace has a post-onset persistence window but must be detached from the E-E denominator"
+  ],
+  "claim_boundary": [
+    "state-fork strips do not prove periodic-orbit loss",
+    "inverse-square-root scaling is strong SNIC-like evidence, not a formal bifurcation label",
+    "no full slow Z/M trajectory was integrated",
+    "no spatial front, containment, recovery, or SNN lifecycle is claimed",
+    "the current-stage capture remains a finite 20-s non-recovered trajectory"
+  ],
+  "artifacts": {
+    "figure": "results/topic4_sef_hfo/mz_entry_exit_nullclines/figures/mz_entry_exit_nullcline_diagnostic.png",
+    "fold_csv": "results/topic4_sef_hfo/mz_entry_exit_nullclines/fixed_point_fold_surface.csv",
+    "cycle_z_csv": "results/topic4_sef_hfo/mz_entry_exit_nullclines/cycle_z_state_forks.csv",
+    "additive_csv": "results/topic4_sef_hfo/mz_entry_exit_nullclines/additive_current_state_forks.csv",
+    "timing_oracle_csv": "results/topic4_sef_hfo/mz_entry_exit_nullclines/timing_leverage_oracle.csv",
+    "nullcline_npz": "results/topic4_sef_hfo/mz_entry_exit_nullclines/nullcline_fields.npz"
+  },
+  "resource_contract": {
+    "processes": 1,
+    "blas_threads": 1,
+    "max_memory_gib": 2.0
+  },
+  "input_sha256": {
+    "transfer_path": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+    "phase_source_path": "c819aa83b926b53d771a4124d18c818aadc217ee21f57d873b1e7b897afb6397",
+    "current_capture_path": "4d3ebbc7cb0f5e465618e42f1d6c977861c3f1cd5240d989f0b5895269a4ba1d",
+    "current_capture_json": "3668a6e7c349f24f110864cbdfacbb5910bc23c2ffd592a7873dd878590edae0"
+  },
+  "config": "config/topic4_mz_entry_exit_nullclines.yaml"
+}

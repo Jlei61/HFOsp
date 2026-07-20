@@ -4,6 +4,8 @@
 分支：`codex/topic4-mz-divisive-lifecycle`
 owner worktree：`.worktrees/topic4-mz-divisive-lifecycle`
 
+> **2026-07-20 entry/exit addendum（后写，优先于下文旧主方案）**：新的 exact-nullcline 审计已定位 low saddle-node `z_SN=0.87447467`，并在 Z 与 frozen additive-current 两个方向观察到 `R²=0.9993` 的 inverse-square-root period slowing。原 `D_R` 主方案因重复 recurrent-E gain 方向已退出；新主合同改为 persistence-gated bounded additive M。current-stage figure 的 centered onset `13.8539 s` 也已改标为 retrospective，causal trailing onset 为 `13.9788 s`；以 causal onset 重算的 130-ms sweep 轴向 rho 仅 `+0.20`，不再称为稳定有序轴向波。先读 `docs/archive/topic4/sef_hfo/mz_entry_exit_nullcline_audit_2026-07-20.md` 和 `docs/superpowers/specs/2026-07-20-topic4-mz-persistence-gated-additive-spatial-lifecycle-design.md`；下文涉及 `D_R`、60-ms/rho=.963 sweep 和 `(z,D_R)` 主路线的句子只作历史记录。
+
 ## 1. 当前安全结论
 
 1. 完整 current-based SNN 已能在无 kick 条件下从 returning interictal events 跨入持续到记录终点的 recruited activity，但该状态仍伴随 Z/`T_G` 漂移，不是已证实的稳定 ictal attractor，也未观察到 offset/recovery。

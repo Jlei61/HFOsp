@@ -24,6 +24,8 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
+> **M4 MZ entry/exit 更新（2026-07-20）**：current-based MZ 的 exact-nullcline 审计已定位 low saddle-node `z_SN=0.87447467`；existing delayed `S_G` fast block 在该边界前存在大振幅周期，并显示 `R²=0.9993` 的 SNIC-like period slowing。冻结 additive M-current 会移动同一 fold，`z=.85` 时下界约 `0.3165 mV`，但考虑 Z 在 3 个周期内继续下降后 timing oracle 约需 `0.9 mV`。因此旧 `D_R` recurrent-E recovery 方案已 superseded，新 conditional 主路线是 **Z entry + inherited `S_G` inner cycle + causal persistence sensor + bounded additive M recovery field**；空间/SNN 尚未开放。入口：`docs/archive/topic4/sef_hfo/mz_entry_exit_nullcline_audit_2026-07-20.md`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。

@@ -1,0 +1,62 @@
+result_root: results/topic4_sef_hfo/mz_entry_exit_nullclines
+transfer_path: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz
+phase_source_path: results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication_v1_1/phase_source_traces.npz
+current_capture_path: results/topic4_sef_hfo/mz_divisive_lifecycle/figure_capture/current_stage_capture.npz
+current_capture_json: results/topic4_sef_hfo/mz_divisive_lifecycle/figure_capture/current_stage_capture.json
+
+input_sha256:
+  transfer_path: dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703
+  phase_source_path: c819aa83b926b53d771a4124d18c818aadc217ee21f57d873b1e7b897afb6397
+  current_capture_path: 4d3ebbc7cb0f5e465618e42f1d6c977861c3f1cd5240d989f0b5895269a4ba1d
+  current_capture_json: 3668a6e7c349f24f110864cbdfacbb5910bc23c2ffd592a7873dd878590edae0
+
+model:
+  w_ee_mult: 1.1
+  ratio: 1.0
+  primary_alpha_G: 15.0
+  sensitivity_alpha_G: 16.0
+  reference_z: 0.85
+
+smooth_transfer:
+  mu_min_mv: -160.0
+  mu_max_mv: 80.0
+  sigma_min_mv: 3.0
+  sigma_max_mv: 20.0
+  spline_degree_mu: 3
+  spline_degree_sigma: 3
+  smoothing: 0.0
+
+fold_additive_mv: [0.0, 0.1, 0.2, 0.3, 0.3165, 0.4, 0.5, 1.0, 1.25, 1.5, 2.0]
+
+cycle_z_values:
+  [0.85, 0.86, 0.868, 0.87, 0.872, 0.873, 0.8735, 0.874,
+   0.8742, 0.8743, 0.87435, 0.8744, 0.87445, 0.8745]
+
+additive_fork_mv:
+  [0.0, 0.1, 0.2, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.30,
+   0.31, 0.32, 0.33]
+
+integration:
+  dt_ms: [0.125, 0.0625]
+  duration_ms: 20000.0
+  save_dt_ms: 1.0
+  audit_start_ms: 10000.0
+  tail_start_ms: 15000.0
+
+nullclines:
+  e_hz: [0.2, 8.0, 240]
+  i_hz: [4.0, 14.0, 240]
+  comparison_additive_mv: 0.32
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  max_memory_gib: 2.0
+
+scope:
+  full_snn: false
+  spatial_simulation: false
+  ee_weight_change: false
+  ee_relay: false
+  periodic_orbit_continuation: false
+  state_fork_is_cycle_loss_certificate: false
