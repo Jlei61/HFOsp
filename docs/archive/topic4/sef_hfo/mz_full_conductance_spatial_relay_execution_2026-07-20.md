@@ -229,6 +229,24 @@ dt=0.05 自己的参照 all_bands=False（participation/peak 在带内、event_c
 混淆，不能直接说"dt=0.05 保住 workpoint"）。**净结论：clip = 单核局部 shunting 模态（Stage A）+ dt=0.1 离散化过冲（Stage B）
 的叠加；正确的下一步是在 dt=0.05（分辨率足够）上重新确立 recurrent-only workpoint，而不是在欠分辨的 dt=0.1 上硬 clip。**
 
-### Stage C — recurrent-only smooth saturation（Stage B 后跑）
+### Stage C — recurrent-only smooth saturation：干净成功（seed1）
 
-（`g_sat` 从 arm C 原始 `gErec` 分布锁、主值 + ±20%，检验是否零 clip 且保住 workpoint；结果填充中。）
+`g_sat=21.6`（从 arm C 原始 active-cell median peak `gErec` 锁定，非调参）、`g_rec_eff = g_sat·tanh(g_rec_raw/g_sat)`、
+只作用 recurrent E→E、dt=0.1、cap=99：**0 clip、settled_safe=True（tau_eff_min 0.244ms > 2dt=0.2）、总电导峰值被压到
+81.1（102.5→81.1）、事件画像 28 event / dur 26.5ms / participation 3.49% 全在 band、all_bands=True、preserves_workpoint=True**。
+
+即 **recurrent-only smooth saturation 同时（a）消掉 clip（把活跃核的 recurrent 电导那一份压下去，总电导不再过 99）、
+（b）保住间期 workpoint（小事件在 slope-1 区不变、只削峰值过冲）**。这正是审阅 Stage C 预期的结果——有界化核 recurrent 电导、
+不动 workpoint。**审阅推荐的主线（external additive + recurrent conductance + recurrent-only saturation）在 seed1 上验收。**
+
+三个 arm C 变体对照（都 dt=0.1 除 dt005）：
+
+| 变体 | n_ret | dur | part% | all_bands | settled_safe | max_total | 判读 |
+|---|---:|---:|---:|---|---|---:|---|
+| high-cap（去 clip） | 30 | 38.5 | 4.35 | ✓ | ✗（tau_eff 0.193<0.2） | 102.5 | workpoint 在、但裸 tau_eff 掉破 2dt |
+| dt=0.05 | 22 | 36.5 | 6.03 | ✗（跨-dt 检测混淆） | ✓ | 94.1 | 细网无 clip、但事件数漂 |
+| **Stage C g_sat=21.6** | **28** | **26.5** | **3.49** | **✓** | **✓** | **81.1** | **零 clip + workpoint 保住 = 干净解** |
+
+**下一步**：按审阅 §6 step 3，arm C+saturation 已同时数值安全且完整 band → **seed3 确认**（运行中）；通过后锁方程
+`tau_m V̇ = −V + I_E^{ff} + g_sat·tanh(g_rec_raw/g_sat)·(E_E−V)/... + g_I(E_I−V)` 再进 Stage D（带 eigenvalue/eigenvector
+readout 的原 Stage 1，查有限高支；有限高支成立前不加 X）。g_sat ±20%（17.3/25.9）sensitivity 作稳健性补充。
