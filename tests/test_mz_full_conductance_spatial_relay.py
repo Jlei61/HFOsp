@@ -190,6 +190,47 @@ def test_full_conductance_split_recurrent_only_reflects_I_E_rec():
     assert abs(mz._gEff_mean_last - float(np.mean((I_E[:4] - I_E_rec[:4])) / denom)) < 1e-11
 
 
+def test_rec_smooth_saturation_slope1_at_small_saturates_at_large():
+    """FCXR-RC1 Stage C: recurrent conductance g_sat*tanh(g_raw/g_sat) — slope 1 at small (workpoint
+    preserved), saturates toward g_sat at large (no hard clip). Recurrent side only."""
+    gsat = 5.0
+    denom = 58.0 - 18.0
+    def mk():
+        return _mk_fc(use_z=False, ff_conductance=False, rec_conductance=True, rec_sat_g=gsat)
+    # small recurrent drive (I_E == I_E_rec so feedforward part is 0; gI=0 with I_I=0) -> gErec ~ raw
+    I_small = np.array([2.0, 2.0, 2.0, 2.0, 1.0, 1.0])
+    _, _, gr_s = mk().membrane_terms(I_small, np.zeros(6), labels=None, I_E_rec=I_small)
+    gErec_raw_s = 1.0 * I_small[:4] / denom
+    gErec_sat_s = gr_s[:4] / 58.0                                  # g_rev = gErec_sat * E_E (gI=0)
+    np.testing.assert_allclose(gErec_sat_s, gsat * np.tanh(gErec_raw_s / gsat), atol=1e-11)
+    np.testing.assert_allclose(gErec_sat_s, gErec_raw_s, rtol=0.01)   # slope ~1 at small
+    # large recurrent drive -> saturates toward g_sat (bounded above by g_sat, well below the cap)
+    I_big = np.full(6, 1e4)
+    _, grel_b, gr_b = mk().membrane_terms(I_big, np.zeros(6), labels=None, I_E_rec=I_big)
+    gErec_sat_b = gr_b[:4] / 58.0
+    assert np.all(gErec_sat_b <= gsat + 1e-9) and np.all(gErec_sat_b > 0.99 * gsat)  # saturated to g_sat
+    assert np.all(grel_b[:4] < 99.0)                              # saturation prevents the cap clip
+
+
+def test_rec_sat_off_is_arm_C_byte_identity():
+    off = _mk_fc(use_z=False, ff_conductance=False, rec_conductance=True, rec_sat_g=0.0)
+    default = _mk_fc(use_z=False, ff_conductance=False, rec_conductance=True)   # rec_sat_g default 0
+    I_E = np.array([12.0, 12.0, 12.0, 12.0, 4.0, 4.0]); I_rec = np.array([5.0, 4.0, 3.0, 2.0, 1.0, 1.0])
+    a = off.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+    b = default.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+    for x, y in zip(a, b):
+        np.testing.assert_array_equal(x, y)
+
+
+def test_rec_sat_requires_full_and_rec():
+    with pytest.raises(ValueError, match="rec_sat_g"):
+        MZSlowVars(6, 18.0, MZSlowVarsConfig(membrane_mode="full_conductance", rec_conductance=False,
+                                             rec_sat_g=5.0, e_gaba=0.0), NE=4, core_mask_E=np.zeros(4, bool))
+    with pytest.raises(ValueError, match="rec_sat_g"):
+        MZSlowVars(6, 18.0, MZSlowVarsConfig(membrane_mode="conductance", rec_sat_g=5.0, e_gaba=0.0),
+                   NE=4, core_mask_E=np.zeros(4, bool))
+
+
 def test_clip_identity_observer_is_pure_side_effect():
     """FCXR-RC1: record_clip_identity records WHICH cells clip without changing membrane_terms output."""
     def mk(rec):

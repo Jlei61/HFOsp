@@ -61,6 +61,7 @@ class MZSlowVarsConfig:
     c_E: float = 1.0               # excitatory force-match coefficient (full_conductance only)
     ff_conductance: bool = True    # full_conductance: feedforward(external) AMPA as conductance, else additive c_E*I
     rec_conductance: bool = True   # full_conductance: recurrent E->E AMPA as conductance, else additive c_E*I
+    rec_sat_g: float = 0.0         # FCXR-RC1 Stage C: >0 -> recurrent conductance smooth-saturates g_sat*tanh(g_raw/g_sat)
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
     tau_y: float = 120.0           # ms  persistence sensor time constant
     tau_x: float = 1000.0          # ms  relay availability time constant
@@ -272,19 +273,24 @@ class MZSlowVars:
             else:
                 gEff = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_ffE
             if c.rec_conductance:
-                gErec = c.c_E * I_recE / denomE
+                gErec_raw = c.c_E * I_recE / denomE
+                # FCXR-RC1 Stage C: smooth-saturate the recurrent conductance (slope 1 at small input ->
+                # interictal workpoint preserved; saturates toward g_sat at high input -> no hard clip).
+                gErec = (c.rec_sat_g * np.tanh(gErec_raw / c.rec_sat_g)) if c.rec_sat_g > 0.0 else gErec_raw
             else:
+                gErec_raw = np.zeros(self.NE, dtype=float)
                 gErec = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_recE
             gE = gEff + gErec
         else:
             gEff = np.zeros(self.NE, dtype=float)
+            gErec_raw = np.zeros(self.NE, dtype=float)
             gErec = np.zeros(self.NE, dtype=float)
             gE = np.zeros(self.NE, dtype=float)
 
         total = gE + gI + gM                      # partial: gE==0 -> total==gI+gM (byte-identical)
         clip = total > c.max_total_conductance
-        if c.record_clip_identity:                # pure read of RAW (pre-scale) gErec/total + clip mask
-            self.max_raw_gErec = np.maximum(self.max_raw_gErec, gErec)
+        if c.record_clip_identity:                # pure read of RAW (pre-clip, pre-saturation) gErec/total + clip mask
+            self.max_raw_gErec = np.maximum(self.max_raw_gErec, gErec_raw)
             self.max_raw_total = np.maximum(self.max_raw_total, total)
             if np.any(clip):
                 self.clip_count[clip] += 1
@@ -490,6 +496,10 @@ class MZSlowVars:
                 raise ValueError("full_conductance requires E_E > v_match for positive AMPA force matching")
             if c.c_E < 0.0:
                 raise ValueError("c_E must be non-negative")
+        if c.rec_sat_g < 0.0:
+            raise ValueError("rec_sat_g must be non-negative (0 = off)")
+        if c.rec_sat_g > 0.0 and not (c.membrane_mode == "full_conductance" and c.rec_conductance):
+            raise ValueError("rec_sat_g>0 (recurrent smooth saturation) requires full_conductance + rec_conductance")
         if c.use_x:
             if c.membrane_mode != "full_conductance":
                 raise ValueError("use_x (E->E relay) requires membrane_mode='full_conductance'")
