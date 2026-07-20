@@ -55,3 +55,25 @@ def test_local_summary_resolves_clean_cycle_and_low_without_forcing_other():
     assert low["status"] == "L"
     assert sheet_label(cycle["status"], low["status"]) == "CL"
     assert sheet_label("tonic_plateau", "L") == "O_unresolved"
+
+
+def test_high_narrow_cycle_is_separate_from_sustained_ceiling():
+    time = np.arange(0.0, 6000.0 + 2.0, 2.0)
+    phase = np.mod(time, 600.0)
+    narrow = 0.002 + 0.134 * np.exp(-0.5 * ((phase - 120.0) / 12.0) ** 2)
+    fast = 0.002 + 0.030 * np.exp(-0.5 * ((phase - 150.0) / 35.0) ** 2)
+    returns = np.arange(120.0, 6000.0, 600.0)
+    bounded = summarize_local_state(
+        time, narrow, fast, returns,
+        support_violation_count=0, state_bound_violation_count=0, finite=True,
+    )
+    assert bounded["peak_rE_hz"] > 120.0
+    assert bounded["status"] == "C"
+    assert bounded["sustained_ceiling_120hz_80of100ms"] is False
+
+    plateau = summarize_local_state(
+        time, np.full(time.size, 0.130), np.full(time.size, 0.130), [],
+        support_violation_count=0, state_bound_violation_count=0, finite=True,
+    )
+    assert plateau["status"] == "ceiling_or_nonclosed"
+    assert plateau["sustained_ceiling_120hz_80of100ms"] is True

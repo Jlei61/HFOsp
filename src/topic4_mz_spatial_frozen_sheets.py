@@ -118,6 +118,9 @@ def integrate_frozen_patch_batch(
     return_times: list[list[list[float]]] = [
         [[] for _ in range(n_patches)] for _ in range(n_forks)
     ]
+    return_states: list[list[list[np.ndarray]]] = [
+        [[] for _ in range(n_patches)] for _ in range(n_forks)
+    ]
 
     local0, _, _ = _unpack_batch(state, n_patches)
     previous_fast = local0["rE_fast"].copy()
@@ -175,6 +178,10 @@ def integrate_frozen_patch_batch(
             return_times[int(fork_index)][int(patch_index)].append(
                 float(step) * float(dt_ms) + fraction * float(dt_ms)
             )
+            return_states[int(fork_index)][int(patch_index)].append(
+                state[int(fork_index)].copy()
+                + fraction * (next_state[int(fork_index)] - state[int(fork_index)])
+            )
         armed[crossed] = False
         state = next_state
         previous_fast = next_fast.copy()
@@ -190,6 +197,7 @@ def integrate_frozen_patch_batch(
         "support_violation_count": support_violations,
         "state_bound_violation_count": bound_violations,
         "return_times_ms": return_times,
+        "return_states": return_states,
     }
 
 
@@ -214,6 +222,22 @@ def summarize_local_state(
         raise ValueError("time and local traces must be aligned")
     peak = float(np.nanmax(rate))
     high_fraction = float(np.mean(rate > 100.0))
+    if time.size > 1:
+        sample_dt_ms = float(np.median(np.diff(time)))
+        ceiling_window_samples = max(1, int(round(100.0 / sample_dt_ms)))
+        ceiling_required_samples = max(1, int(np.ceil(80.0 / sample_dt_ms)))
+        above_ceiling = (rate > 120.0).astype(np.int16)
+        if above_ceiling.size >= ceiling_window_samples:
+            rolling = np.convolve(
+                above_ceiling,
+                np.ones(ceiling_window_samples, dtype=np.int16),
+                mode="valid",
+            )
+            sustained_ceiling = bool(np.any(rolling >= ceiling_required_samples))
+        else:
+            sustained_ceiling = bool(np.sum(above_ceiling) >= ceiling_required_samples)
+    else:
+        sustained_ceiling = bool(rate[0] > 120.0)
     if (
         not finite
         or int(support_violation_count) > 0
@@ -221,8 +245,6 @@ def summarize_local_state(
         or not np.all(np.isfinite(rate))
     ):
         status = "physical_or_numerical_failure"
-    elif peak >= 120.0 or high_fraction >= 0.05:
-        status = "unbounded_or_saturation"
     else:
         retained = returns[int(discard_returns):]
         intervals = np.diff(retained)
@@ -251,6 +273,8 @@ def summarize_local_state(
             status = "C"
         elif low:
             status = "L"
+        elif sustained_ceiling or high_fraction >= 0.05:
+            status = "ceiling_or_nonclosed"
         elif float(np.mean(rate[tail])) >= 20.0 and float(np.ptp(rate[tail])) <= 10.0:
             status = "tonic_plateau"
         else:
@@ -272,6 +296,7 @@ def summarize_local_state(
         "recent_period_cv": float(np.std(recent) / np.mean(recent)) if recent.size == 3 else None,
         "peak_rE_hz": peak,
         "fraction_over_100hz": high_fraction,
+        "sustained_ceiling_120hz_80of100ms": sustained_ceiling,
         "tail_mean_rE_hz": tail_mean,
         "support_violation_count": int(support_violation_count),
         "state_bound_violation_count": int(state_bound_violation_count),

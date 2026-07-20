@@ -1,0 +1,75 @@
+result_root: results/topic4_sef_hfo/mz_spatial_p3_front_handoff
+
+transfer_path: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz
+orbit_cycle_path: results/topic4_sef_hfo/mz_additive_orbit_continuation/cycle_states_and_traces.npz
+orbit_summary_path: results/topic4_sef_hfo/mz_additive_orbit_continuation/orbit_continuation_summary.json
+
+input_sha256:
+  transfer_path: dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703
+  orbit_cycle_path: 3f2709a01451e9e1d9e135e454346e857771866c5eb3fa0d4c12a77cc5e073bf
+  orbit_summary_path: 8355b196b7adc1b942935f92acec1fb5d738ef59ff7e3aa8606ce3f7fe6b7c56
+
+model:
+  z_low: 0.90
+  z_cycle: 0.85
+  alpha_G: 15.0
+  w_ee_mult: 1.1
+  ratio: 1.0
+  additive_max_mv: 1.6
+  pool_p: 1.0
+
+geometry:
+  source: canonical_m3b_api_defaults
+  grid_n: 48
+  grid_L_mm: 12.0
+  core_radius_mm: 1.5
+  annulus_outer_radius_rule: sqrt2_times_core_radius
+  theta_deg: 45.0
+  ell_parallel_mm: 0.54
+  ell_perpendicular_mm: 0.27
+  inhibitory_width_mm: 0.25
+  boundary: periodic_torus
+  partition: core_equal_area_annulus_far_bath
+
+smooth_transfer:
+  mu_min_mv: -160.0
+  mu_max_mv: 80.0
+  sigma_min_mv: 3.0
+  sigma_max_mv: 20.0
+  spline_degree_mu: 3
+  spline_degree_sigma: 3
+  smoothing: 0.0
+
+initial_sheets:
+  cycle_trace_key: A_0p00000
+  phase_fractions: [0.0, 0.25, 0.50, 0.75]
+  antisymmetric_perturbation_khz: 0.0001
+  sheets: [LLL, CLL, LCL, CCL, CCC]
+
+integration:
+  dt_ms: [0.125, 0.0625]
+  duration_ms: 20000.0
+  save_dt_ms: 2.0
+  section_level_rE_fast_khz: 0.020
+  rearm_level_rE_fast_khz: 0.015
+  discard_returns: 2
+  established_min_returns: 4
+
+arms:
+  - fixed_m3b_coupling
+  - cross_zone_synaptic_coupling_off
+
+resource_contract:
+  processes: 1
+  vectorized_forks: 16
+  blas_threads: 1
+  max_memory_gib: 2.0
+
+scope:
+  frozen_local_slow_variables: true
+  local_front_handoff_gate: true
+  far_bath_retained: true
+  lifecycle_claim: false
+  ee_weight_change: false
+  ee_kernel_tuning: false
+  conductance_membrane: false

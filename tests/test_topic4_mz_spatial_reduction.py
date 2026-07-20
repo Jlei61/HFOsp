@@ -6,7 +6,9 @@ import pytest
 from src.sef_hfo_field import convolve_periodic
 from src.topic4_mz_spatial_reduction import (
     binary_block_average,
+    canonical_m3b_core_annulus_bath,
     canonical_m3b_core_surround,
+    partition_block_average,
 )
 
 
@@ -72,3 +74,45 @@ def test_binary_projection_does_not_multiply_source_area_twice():
 def test_binary_projection_rejects_empty_partition():
     with pytest.raises(ValueError, match="non-empty"):
         binary_block_average(np.full((2, 2), 0.25), np.ones((2, 2), dtype=bool))
+
+
+def test_canonical_core_annulus_bath_is_mass_balanced_and_numerically_locked():
+    reduction = canonical_m3b_core_annulus_bath()
+    assert reduction.patch_names == ("core", "annulus", "bath")
+    assert reduction.patch_cells == (113, 112, 2079)
+    assert reduction.outer_annulus_radius_mm == pytest.approx(np.sqrt(2.0) * 1.5)
+    weights = np.asarray(reduction.patch_cells, dtype=float) / 2304.0
+    np.testing.assert_array_equal(reduction.kernels.weights(), weights)
+    np.testing.assert_allclose(
+        reduction.kernels.K_EE,
+        np.asarray([
+            [0.779680238653688, 0.195566130777002, 0.024753630569310],
+            [0.197312256944654, 0.515382345409652, 0.287305397645694],
+            [0.001345435427769, 0.015477731859701, 0.983176832712530],
+        ]),
+        rtol=0.0,
+        atol=6e-15,
+    )
+    np.testing.assert_allclose(
+        reduction.kernels.K_I,
+        np.asarray([
+            [0.867570011856607, 0.131499116782518, 0.000930871360875],
+            [0.132673216039505, 0.682993405179333, 0.184333378781163],
+            [0.000050595701673, 0.009930417712117, 0.990018986586210],
+        ]),
+        rtol=0.0,
+        atol=6e-15,
+    )
+    for matrix in (reduction.kernels.K_EE, reduction.kernels.K_I):
+        np.testing.assert_allclose(matrix.sum(axis=1), 1.0, rtol=0.0, atol=1e-14)
+        np.testing.assert_allclose(weights @ matrix, weights, rtol=0.0, atol=1e-14)
+
+
+def test_general_partition_rejects_overlap_or_missing_bath():
+    kernel = np.full((3, 3), 1.0 / 9.0)
+    first = np.zeros((3, 3), dtype=bool)
+    first[0, 0] = True
+    second = ~first
+    second[0, 0] = True
+    with pytest.raises(ValueError, match="disjoint and exhaustive"):
+        partition_block_average(kernel, (first, second))
