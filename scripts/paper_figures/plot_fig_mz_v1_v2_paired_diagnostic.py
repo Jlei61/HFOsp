@@ -124,7 +124,6 @@ def plot_diagnostic(rows, out_png):
     axm.set_ylabel("same-seed contact maxAB")
     axm.set_ylim(0, 1.05); axm.set_title("Interictal-axis prediction of\npre-runaway energy (maxAB)", fontsize=10)
     axm.legend(fontsize=8, frameon=False, loc="lower right")
-    axm.text(0.02, 0.97, "* within-shaft p<0.05", transform=axm.transAxes, fontsize=7, va="top", color="0.35")
 
     # panel B: operational-runaway onset latency (t120), V1 vs V2
     v1t = [(r["v1_zonly"]["t120_ms"] or np.nan) / 1000.0 for r in complete]
@@ -138,6 +137,7 @@ def plot_diagnostic(rows, out_png):
 
     fig.suptitle("E1146 z-only (V1) vs z+m tau500 (V2) — paired by noise seed (n=3 seeds, one substrate; not a cohort)",
                  fontsize=10, y=1.02)
+    fig.text(0.008, 0.004, "* within-shaft p < 0.05", fontsize=8, color="0.4")
     fig.tight_layout()
     os.makedirs(os.path.dirname(out_png), exist_ok=True)
     fig.savefig(out_png, dpi=170, bbox_inches="tight")

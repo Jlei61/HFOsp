@@ -1,0 +1,1284 @@
+{
+  "seed": 3,
+  "provenance_fingerprint": "58388100850be6dc",
+  "provenance": {
+    "git_sha": "1719a67",
+    "engine_shas": {
+      "kick_probe.py": "5faaedab37ab",
+      "params.py": "c2036d1e1548",
+      "model.py": "e77aad35cbfa",
+      "connectivity.py": "5ad75ec5066b",
+      "connectivity_rot.py": "2aa442624fef",
+      "lfp.py": "7f079081de4e"
+    },
+    "subject": "epilepsiae_1146",
+    "montage": "narrow",
+    "dt": 0.1,
+    "seed": 3,
+    "candidate": {
+      "label": "zA_q75_tz5000__mA0p001_tau500",
+      "cfg": {
+        "use_z": true,
+        "use_m": true,
+        "I_th_EI": 95.19851312666987,
+        "tau_z": 5000.0,
+        "tau_adp": 500.0,
+        "eta_m": 0.007451594355587098
+      },
+      "A_target": 0.001,
+      "eta_m_calibration": {
+        "formula": "A_target * I_EE_scale / peak_m_tau2000",
+        "I_EE_scale": 272.75518960107513,
+        "peak_m_tau2000": 36.6036014019694,
+        "source": "results/topic4_sef_hfo/mz_slowvars/calibration.json"
+      }
+    },
+    "T_ms": 20000.0,
+    "argv": [
+      "scripts/run_topic4_mz_early_field_bridge.py",
+      "--confirm-run",
+      "--config",
+      "config/topic4_mz_early_field_bridge_v2_zm.yaml",
+      "--output-dir",
+      "results/topic4_sef_hfo/mz_early_field_bridge_v2_zm_tau500",
+      "--seeds",
+      "1,3,4"
+    ]
+  },
+  "onset": {
+    "status": "eligible",
+    "t120_ms": 11008.6,
+    "theta_recruit": 36.47187656250003,
+    "t_recruit_ms": 10838.6,
+    "onset_diff_ms": 170.0
+  },
+  "t120_ms": 11008.6,
+  "preflight_gate": {
+    "reference_onset_ms": 11008.6,
+    "t120_ms": 11008.6,
+    "delta_ms": 0.0,
+    "tol_ms": 1.0,
+    "pass": true
+  },
+  "reused_slowoff_from": null,
+  "template_eligibility": {
+    "A_to_B": {
+      "contact": true,
+      "source": true
+    },
+    "B_to_A": {
+      "contact": true,
+      "source": true
+    }
+  },
+  "maxab_eligible": true,
+  "n_returning_events": 40,
+  "within_trajectory_audit": {
+    "n_pre_runaway_returning": 30,
+    "status": "eligible"
+  },
+  "by_window": {
+    "early_0_50_ms": {
+      "window_ms": [
+        0.0,
+        50.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 4545.69497288947,
+        "dynamic_range": 22.063496759551608,
+        "recruited": 5,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 2894.7532193888783,
+        "dynamic_range": 8069538520091627.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.43479285428994846,
+            "rho_b": 0.9691043678307522,
+            "rho_maxab": 0.9691043678307522,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9691043678307522,
+            "p_one_sided": 9.999000099990002e-05,
+            "null_median": 0.5309049589224634,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9691043678307522,
+            "p_one_sided": 9.999000099990002e-05,
+            "null_median": 0.19680097615229242,
+            "null_p95": 0.5720958609078268,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.43479285428994846,
+            "earliness_energy_spearman": -0.43479285428994846,
+            "field_cosine": -0.6255021025973075,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": -1.3288411984091386
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9691043678307522,
+            "earliness_energy_spearman": 0.9691043678307522,
+            "field_cosine": 0.8357217700200664,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 1.9286892659308308
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.43479285428994846,
+            "rho_b": 0.9691043678307522,
+            "rho_maxab": 0.9691043678307522,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9691043678307522,
+            "p_one_sided": 9.999000099990002e-05,
+            "null_median": 0.5309049589224634,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9691043678307522,
+            "p_one_sided": 9.999000099990002e-05,
+            "null_median": 0.19680097615229242,
+            "null_p95": 0.5720958609078268,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.43479285428994846,
+            "earliness_energy_spearman": -0.43479285428994846,
+            "field_cosine": -0.6255021025973075,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": -1.3288411984091386
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9691043678307522,
+            "earliness_energy_spearman": 0.9691043678307522,
+            "field_cosine": 0.8357217700200664,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 1.9286892659308308
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "per_contact": [
+          0.0018148820326678765,
+          0.00530035335689046,
+          0.012455516014234875,
+          0.013307984790874524,
+          1.0,
+          1.0,
+          1.0,
+          0.8860759493670886,
+          0.7795992714025501,
+          0.4680451127819549,
+          0.21652892561983472,
+          0.17077464788732394,
+          0.0018050541516245488,
+          0.005385996409335727,
+          0.0176678445229682
+        ],
+        "median": 0.17077464788732394
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.4457513717752197,
+            "rho_b": 0.49778698925572556,
+            "rho_maxab": 0.49778698925572556,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.49778698925572556,
+            "p_one_sided": 0.04513888888888889,
+            "null_median": -0.02698226096962937,
+            "null_p95": 0.4916096135642694,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4457513717752197,
+            "earliness_energy_spearman": 0.4457513717752197,
+            "field_cosine": 0.3311121244637846,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.6452968340417735
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.49778698925572556,
+            "earliness_energy_spearman": 0.49778698925572556,
+            "field_cosine": 0.5512595528559529,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.9952017891565047
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.45434679055607735,
+            "rho_b": 0.4088780427829869,
+            "rho_maxab": 0.45434679055607735,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.45434679055607735,
+            "p_one_sided": 0.06076388888888889,
+            "null_median": -0.02140152635848231,
+            "null_p95": 0.4599904790043964,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.45434679055607735,
+            "earliness_energy_spearman": 0.45434679055607735,
+            "field_cosine": 0.32547508775504486,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.3196610111331537
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4088780427829869,
+            "earliness_energy_spearman": 0.4088780427829869,
+            "field_cosine": 0.4865969478302898,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.5110721406692222
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    },
+    "early_0_100_ms": {
+      "window_ms": [
+        0.0,
+        100.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 3223.918872508207,
+        "dynamic_range": 6.431012805470922,
+        "recruited": 5,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 3074.2088765344,
+        "dynamic_range": 39759.68655976894,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.3020666145593326,
+            "rho_b": 0.9426140434253557,
+            "rho_maxab": 0.9426140434253557,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9426140434253557,
+            "p_one_sided": 0.00039996000399960006,
+            "null_median": 0.5320140151417113,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9426140434253557,
+            "p_one_sided": 0.00029997000299970003,
+            "null_median": 0.20088496007425613,
+            "null_p95": 0.5720958609078268,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.3020666145593326,
+            "earliness_energy_spearman": -0.3020666145593326,
+            "field_cosine": -0.25311630445835576,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": -0.18858039460643175
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9426140434253557,
+            "earliness_energy_spearman": 0.9426140434253557,
+            "field_cosine": 0.8796163516940637,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.3733685390958807
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.3020666145593326,
+            "rho_b": 0.9426140434253557,
+            "rho_maxab": 0.9426140434253557,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9426140434253557,
+            "p_one_sided": 0.00039996000399960006,
+            "null_median": 0.5320140151417113,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9426140434253557,
+            "p_one_sided": 0.00029997000299970003,
+            "null_median": 0.20088496007425613,
+            "null_p95": 0.5720958609078268,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.3020666145593326,
+            "earliness_energy_spearman": -0.3020666145593326,
+            "field_cosine": -0.25311630445835576,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": -0.18858039460643175
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9426140434253557,
+            "earliness_energy_spearman": 0.9426140434253557,
+            "field_cosine": 0.8796163516940637,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.3733685390958807
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "per_contact": [
+          0.010889292196007259,
+          0.02120141342756184,
+          0.01601423487544484,
+          0.015209125475285171,
+          1.0,
+          1.0,
+          1.0,
+          0.9963833634719711,
+          0.9744990892531876,
+          0.7612781954887218,
+          0.428099173553719,
+          0.323943661971831,
+          0.021660649819494584,
+          0.00718132854578097,
+          0.019434628975265017
+        ],
+        "median": 0.323943661971831
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.4115827497928952,
+            "rho_b": 0.5591058673829823,
+            "rho_maxab": 0.5591058673829823,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5591058673829823,
+            "p_one_sided": 0.019097222222222224,
+            "null_median": -0.03232992583962591,
+            "null_p95": 0.5172925958929819,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4115827497928952,
+            "earliness_energy_spearman": 0.4115827497928952,
+            "field_cosine": 0.34786095860885313,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.5352770517033086
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5591058673829823,
+            "earliness_energy_spearman": 0.5591058673829823,
+            "field_cosine": 0.605048932117691,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.8620550867065281
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.4220745678992368,
+            "rho_b": 0.48095328317378433,
+            "rho_maxab": 0.48095328317378433,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.48095328317378433,
+            "p_one_sided": 0.06770833333333333,
+            "null_median": -0.023343639574760787,
+            "null_p95": 0.4930810445795212,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4220745678992368,
+            "earliness_energy_spearman": 0.4220745678992368,
+            "field_cosine": 0.33579107331036484,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.7650930533790509
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.48095328317378433,
+            "earliness_energy_spearman": 0.48095328317378433,
+            "field_cosine": 0.5522198912829973,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.063303718227947
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    },
+    "early_0_25_ms": {
+      "window_ms": [
+        0.0,
+        25.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 6137.668124883966,
+        "dynamic_range": 309.87488470598294,
+        "recruited": 5,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 2710.9056983537444,
+        "dynamic_range": 6553778156273385.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.48513729004983724,
+            "rho_b": 0.9779344759658842,
+            "rho_maxab": 0.9779344759658842,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9779344759658842,
+            "p_one_sided": 9.999000099990002e-05,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9779344759658842,
+            "p_one_sided": 9.999000099990002e-05,
+            "null_median": 0.19680097615229242,
+            "null_p95": 0.576164555817372,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.48513729004983724,
+            "earliness_energy_spearman": -0.48513729004983724,
+            "field_cosine": -0.7254495915061131,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -2.2219732387573434
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9779344759658842,
+            "earliness_energy_spearman": 0.9779344759658842,
+            "field_cosine": 0.8031485520542406,
+            "top_k_used": 3,
+            "top_k_overlap": 1.0,
+            "quartile_contrast": 3.094637367376763
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.48513729004983724,
+            "rho_b": 0.9779344759658842,
+            "rho_maxab": 0.9779344759658842,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9779344759658842,
+            "p_one_sided": 9.999000099990002e-05,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.770426934790279,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9779344759658842,
+            "p_one_sided": 9.999000099990002e-05,
+            "null_median": 0.19680097615229242,
+            "null_p95": 0.576164555817372,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.48513729004983724,
+            "earliness_energy_spearman": -0.48513729004983724,
+            "field_cosine": -0.7254495915061131,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -2.2219732387573434
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9779344759658842,
+            "earliness_energy_spearman": 0.9779344759658842,
+            "field_cosine": 0.8031485520542406,
+            "top_k_used": 3,
+            "top_k_overlap": 1.0,
+            "quartile_contrast": 3.094637367376763
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "per_contact": [
+          0.0,
+          0.0017667844522968198,
+          0.0071174377224199285,
+          0.0038022813688212928,
+          1.0,
+          1.0,
+          0.9906890130353817,
+          0.7956600361663653,
+          0.6994535519125683,
+          0.37781954887218044,
+          0.13553719008264462,
+          0.12852112676056338,
+          0.0018050541516245488,
+          0.0,
+          0.0
+        ],
+        "median": 0.12852112676056338
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.19443120625891822,
+            "rho_b": 0.6294863020827626,
+            "rho_maxab": 0.6294863020827626,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.6294863020827626,
+            "p_one_sided": 0.001736111111111111,
+            "null_median": -0.01760225874743352,
+            "null_p95": 0.47480239859418194,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.19443120625891822,
+            "earliness_energy_spearman": 0.19443120625891822,
+            "field_cosine": 0.19707084510692224,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.8575426781538736
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.6294863020827626,
+            "earliness_energy_spearman": 0.6294863020827626,
+            "field_cosine": 0.5491772146346408,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.9777959346340908
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.2424421534000039,
+            "rho_b": 0.5680350786179744,
+            "rho_maxab": 0.5680350786179744,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5680350786179744,
+            "p_one_sided": 0.001736111111111111,
+            "null_median": -0.0065521421128668916,
+            "null_p95": 0.4340179350051955,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.2424421534000039,
+            "earliness_energy_spearman": 0.2424421534000039,
+            "field_cosine": 0.24346791192067108,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 7.966794393056105
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5680350786179744,
+            "earliness_energy_spearman": 0.5680350786179744,
+            "field_cosine": 0.4948508750875082,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 6.6281134641390915
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    },
+    "early_25_50_ms": {
+      "window_ms": [
+        25.0,
+        50.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 3449.5717167969633,
+        "dynamic_range": 9.498924484453827,
+        "recruited": 3,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 3208.1463850815794,
+        "dynamic_range": 8922789280066809.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.2608757125739691,
+            "rho_b": 0.9249538271550916,
+            "rho_maxab": 0.9249538271550916,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9249538271550916,
+            "p_one_sided": 0.0010998900109989002,
+            "null_median": 0.5292519599983043,
+            "null_p95": 0.766011880722713,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9249538271550916,
+            "p_one_sided": 0.00029997000299970003,
+            "null_median": 0.20088496007425613,
+            "null_p95": 0.571749501749806,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.2608757125739691,
+            "earliness_energy_spearman": -0.2608757125739691,
+            "field_cosine": -0.3394926513790407,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": -0.581817711027659
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9249538271550916,
+            "earliness_energy_spearman": 0.9249538271550916,
+            "field_cosine": 0.7706506932895556,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 2.174072129713679
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.2608757125739691,
+            "rho_b": 0.9249538271550916,
+            "rho_maxab": 0.9249538271550916,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9249538271550916,
+            "p_one_sided": 0.0010998900109989002,
+            "null_median": 0.5292519599983043,
+            "null_p95": 0.766011880722713,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9249538271550916,
+            "p_one_sided": 0.00029997000299970003,
+            "null_median": 0.20088496007425613,
+            "null_p95": 0.571749501749806,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.2608757125739691,
+            "earliness_energy_spearman": -0.2608757125739691,
+            "field_cosine": -0.3394926513790407,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": -0.581817711027659
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9249538271550916,
+            "earliness_energy_spearman": 0.9249538271550916,
+            "field_cosine": 0.7706506932895556,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 2.174072129713679
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "per_contact": [
+          0.0018148820326678765,
+          0.0035335689045936395,
+          0.005338078291814947,
+          0.009505703422053232,
+          1.0,
+          1.0,
+          1.0,
+          0.8860759493670886,
+          0.7795992714025501,
+          0.4680451127819549,
+          0.21652892561983472,
+          0.17077464788732394,
+          0.0,
+          0.005385996409335727,
+          0.0176678445229682
+        ],
+        "median": 0.17077464788732394
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.44600899252921,
+            "rho_b": 0.5274562604593033,
+            "rho_maxab": 0.5274562604593033,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5274562604593033,
+            "p_one_sided": 0.022569444444444444,
+            "null_median": -0.0649416267615092,
+            "null_p95": 0.5059311463006906,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.44600899252921,
+            "earliness_energy_spearman": 0.44600899252921,
+            "field_cosine": 0.4006221422190752,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.5616213646571507
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5274562604593033,
+            "earliness_energy_spearman": 0.5274562604593033,
+            "field_cosine": 0.5210987349734703,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.6705038844088699
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.4538786366366514,
+            "rho_b": 0.4524058574492339,
+            "rho_maxab": 0.4538786366366514,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.4538786366366514,
+            "p_one_sided": 0.0763888888888889,
+            "null_median": -0.048875145045162195,
+            "null_p95": 0.4749001207646348,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4538786366366514,
+            "earliness_energy_spearman": 0.4538786366366514,
+            "field_cosine": 0.3592525145867245,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.9285906085682728
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4524058574492339,
+            "earliness_energy_spearman": 0.4524058574492339,
+            "field_cosine": 0.47365496365336224,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.0503627723082605
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    },
+    "early_50_100_ms": {
+      "window_ms": [
+        50.0,
+        100.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 3516.8940485048884,
+        "dynamic_range": 14.050130592743347,
+        "recruited": 4,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 3403.5921333335777,
+        "dynamic_range": 9006398078233811.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.0915353377452523,
+            "rho_b": 0.7615968266551469,
+            "rho_maxab": 0.7615968266551469,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.7615968266551469,
+            "p_one_sided": 0.05369463053694631,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.766011880722713,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.7615968266551469,
+            "p_one_sided": 0.0044995500449955,
+            "null_median": 0.19680097615229242,
+            "null_p95": 0.5722992956533012,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.0915353377452523,
+            "earliness_energy_spearman": 0.0915353377452523,
+            "field_cosine": 0.3859209638268677,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 1.1461569800760731
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.7615968266551469,
+            "earliness_energy_spearman": 0.7615968266551469,
+            "field_cosine": 0.5162163865438707,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.1638927591400956
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.0915353377452523,
+            "rho_b": 0.7615968266551469,
+            "rho_maxab": 0.7615968266551469,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.7615968266551469,
+            "p_one_sided": 0.05369463053694631,
+            "null_median": 0.5275989610741453,
+            "null_p95": 0.766011880722713,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.7615968266551469,
+            "p_one_sided": 0.0044995500449955,
+            "null_median": 0.19680097615229242,
+            "null_p95": 0.5722992956533012,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 11,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.0915353377452523,
+            "earliness_energy_spearman": 0.0915353377452523,
+            "field_cosine": 0.3859209638268677,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 1.1461569800760731
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.7615968266551469,
+            "earliness_energy_spearman": 0.7615968266551469,
+            "field_cosine": 0.5162163865438707,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.1638927591400956
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "per_contact": [
+          0.009074410163339383,
+          0.015901060070671377,
+          0.0035587188612099642,
+          0.0019011406844106464,
+          1.0,
+          1.0,
+          1.0,
+          0.9963833634719711,
+          0.9744990892531876,
+          0.7612781954887218,
+          0.428099173553719,
+          0.323943661971831,
+          0.021660649819494584,
+          0.0017953321364452424,
+          0.0017667844522968198
+        ],
+        "median": 0.323943661971831
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.4041048672221606,
+            "rho_b": 0.6068322784584733,
+            "rho_maxab": 0.6068322784584733,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.6068322784584733,
+            "p_one_sided": 0.006944444444444444,
+            "null_median": -0.03692651816196847,
+            "null_p95": 0.5342655989436889,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 294,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4041048672221606,
+            "earliness_energy_spearman": 0.4041048672221606,
+            "field_cosine": 0.34286313407801033,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.4598998694378207
+          },
+          "assoc_B_to_A": {
+            "n": 281,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.6068322784584733,
+            "earliness_energy_spearman": 0.6068322784584733,
+            "field_cosine": 0.6215758881633267,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 0.7925474719733886
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.4186197093637042,
+            "rho_b": 0.5433928635880221,
+            "rho_maxab": 0.5433928635880221,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5433928635880221,
+            "p_one_sided": 0.03125,
+            "null_median": -0.02227313135802251,
+            "null_p95": 0.5082381536609184,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 262,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4186197093637042,
+            "earliness_energy_spearman": 0.4186197093637042,
+            "field_cosine": 0.3229405345647202,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.4897700766352581
+          },
+          "assoc_B_to_A": {
+            "n": 249,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5433928635880221,
+            "earliness_energy_spearman": 0.5433928635880221,
+            "field_cosine": 0.5766920628498546,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 0.7090907919956574
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      }
+    }
+  },
+  "wall_s": 12230.6,
+  "status": "complete"
+}
