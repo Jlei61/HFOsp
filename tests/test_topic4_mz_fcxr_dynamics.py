@@ -117,43 +117,42 @@ from src.topic4_mz_fcxr_dynamics import (           # noqa: E402
 
 
 def _row(**kw):
-    base = dict(numerical_unsafe=False, end_rate_hz=5.0, af_tail=0.03, baseline_rate=5.0,
-                baseline_sigma=5.0, baseline_af_q95=0.05, modulation=0.05,
-                oscillatory_candidate=False, tail_rate_band=True, high_duration_ms=0.0)
+    # "high" = sustained: long contiguous elevation (high_duration_ms) AND still elevated at end (tail_high_frac).
+    base = dict(numerical_unsafe=False, high_duration_ms=0.0, tail_high_frac=0.02, af_tail=0.001,
+                modulation=0.05, oscillatory_candidate=False, end_rate_hz=5.0)
     base.update(kw)
     return base
 
 
 def test_run_numerical_unsafe_wins_first():
     # even a high-looking row is UNSAFE if the numerical flag is set (clause 1: checked first)
-    assert classify_run_provisional(_row(numerical_unsafe=True, end_rate_hz=80, af_tail=0.6)) == "NUMERICAL_UNSAFE"
+    assert classify_run_provisional(_row(numerical_unsafe=True, high_duration_ms=3000, tail_high_frac=0.95)) == "NUMERICAL_UNSAFE"
 
 
 def test_run_finite_high_fixed():
-    assert classify_run_provisional(_row(end_rate_hz=60, af_tail=0.5, modulation=0.2,
-                                         tail_rate_band=False)) == "FINITE_HIGH_FIXED"
+    assert classify_run_provisional(_row(high_duration_ms=3000, tail_high_frac=0.95, af_tail=0.4,
+                                         modulation=0.15)) == "FINITE_HIGH_FIXED"
 
 
 def test_run_finite_high_orbit():
-    assert classify_run_provisional(_row(end_rate_hz=60, af_tail=0.5, modulation=0.4,
-                                         oscillatory_candidate=True, tail_rate_band=False)) == "FINITE_HIGH_ORBIT"
+    assert classify_run_provisional(_row(high_duration_ms=3000, tail_high_frac=0.95, af_tail=0.4,
+                                         modulation=0.4, oscillatory_candidate=True)) == "FINITE_HIGH_ORBIT"
 
 
 def test_run_refractory_ceiling_beats_finite():
     # pinned: nearly all cells firing (af_tail>=0.90) with ~no modulation -> ceiling, not a finite attractor
-    assert classify_run_provisional(_row(end_rate_hz=120, af_tail=0.95, modulation=0.02,
-                                         tail_rate_band=False)) == "REFRACTORY_CEILING"
+    assert classify_run_provisional(_row(high_duration_ms=3000, tail_high_frac=1.0, af_tail=0.95,
+                                         modulation=0.02)) == "REFRACTORY_CEILING"
 
 
 def test_run_decays_to_low():
-    assert classify_run_provisional(_row(end_rate_hz=5, af_tail=0.03, tail_rate_band=True,
-                                         high_duration_ms=0.0)) == "DECAYS_TO_LOW"
+    # interictal-like: only brief events (~12ms contiguous), tail back at the quiet floor
+    assert classify_run_provisional(_row(high_duration_ms=12, tail_high_frac=0.02)) == "DECAYS_TO_LOW"
 
 
 def test_run_excursion_decayed():
-    # had a big excursion (>=300ms) but not high at the end -> metastable candidate (needs 2 windows to confirm)
-    assert classify_run_provisional(_row(end_rate_hz=6, af_tail=0.04, high_duration_ms=1500,
-                                         tail_rate_band=True)) == "EXCURSION_DECAYED"
+    # long contiguous excursion (>=300ms) but decayed by the end (low tail occupancy) -> metastable candidate
+    assert classify_run_provisional(_row(high_duration_ms=1500, tail_high_frac=0.05)) == "EXCURSION_DECAYED"
 
 
 def test_resolve_high_ic_finite_needs_both_windows():

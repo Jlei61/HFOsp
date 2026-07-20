@@ -46,6 +46,7 @@ from kick_probe import simulate_kick    # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
     load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field,
+    classify_run_provisional, classify_branch_D, THRESHOLDS,
 )
 from src.topic4_mz_conductance import oscillation_metrics  # noqa: E402
 
@@ -107,6 +108,7 @@ def _branch_row(S, res, slow, bref, dt, analysis_start_ms, *, D, ic, kick_boost,
     end_rate = float(np.mean(rate[-endn:])) if rate.size else float("nan")
     afn = max(1, int(round(END_WIN_MS / af_bin)))
     af_tail = float(np.mean(af[-afn:])) if af.size else float("nan")
+    tail_high_frac = float(np.mean(af[-afn:] > Q95)) if af.size else float("nan")   # tail occupancy (persistence)
     a0_bin = max(0, int(round(analysis_start_ms / af_bin)))
     return dict(
         D=float(D), ic=ic, kick_boost=float(kick_boost), seed=int(seed), T_ms=float(T_ms), dt=float(dt),
@@ -117,7 +119,7 @@ def _branch_row(S, res, slow, bref, dt, analysis_start_ms, *, D, ic, kick_boost,
         oscillatory_candidate=bool(om["oscillatory_candidate"]), tail_rate_band=bool(om["tail_rate_band"]),
         recruitment_pass=bool(om["recruitment_pass"]), spectral_pass=bool(om.get("spectral_pass", False)),
         dominant_hz=float(om["dominant_hz"]), tail_mean_hz=float(om["tail_mean_hz"]),
-        end_rate_hz=end_rate, af_tail=af_tail, af_bin_ms=af_bin,
+        end_rate_hz=end_rate, af_tail=af_tail, tail_high_frac=tail_high_frac, af_bin_ms=af_bin,
         n_bins_high=int(np.sum(af[a0_bin:] > Q95)),
         baseline_rate=BR, baseline_sigma=BS, baseline_af_q95=Q95,
     )
@@ -236,8 +238,31 @@ def cmd_pilot(args):
                   flush=True)
             del slow; gc.collect()
             rows.append(row)
-        FCXR._write_json(os.path.join(run_dir, "pilot_rows.json"), dict(seed=args.seed, dt=DT_D, T_post=args.T,
-                         D_grid=PILOT_D, kicks=[KICK_HIGH1, KICK_HIGH2], rows=rows))
+        # provisional labels (single window T1; two-window resolution deferred to the full grid)
+        by_D = {}
+        for row in rows:
+            row["provisional_label"] = classify_run_provisional(row)
+            by_D.setdefault(row["D"], {})[row["label"].split("_")[-1]] = row
+        per_D = []
+        for D in PILOT_D:
+            cd = by_D.get(D, {})
+            low = cd.get("low", {}).get("provisional_label", "MISSING")
+            highs = [cd[k]["provisional_label"] for k in ("high1", "high2") if k in cd]
+            plateaus = [cd[k]["end_rate_hz"] for k in ("high1", "high2") if k in cd]
+            highs_mapped = ["METASTABLE_TRANSIENT" if h == "EXCURSION_DECAYED" else h for h in highs]  # 1-window read
+            d = classify_branch_D(low, highs_mapped, plateaus)
+            per_D.append(dict(D=D, low=low, highs=highs, provisional=True, **d))
+            print(f"[pilot] D={D:g}: low={low} high={highs} -> provisional {d['D_label']}", flush=True)
+        any_finite = any(p["D_label"] in ("BISTABLE", "FINITE_HIGH") for p in per_D)
+        verdict = ("CANDIDATE finite-high present (>=1 pilot D provisionally BISTABLE/FINITE_HIGH) "
+                   "-> proceed to full grid + two-window (T2) + seed3" if any_finite else
+                   "NO provisional finite-high at any pilot D (only low / metastable / ceiling / unsafe) "
+                   "-> NO-GO leaning; RC1 saturation does not give a bounded persistent high branch")
+        FCXR._write_json(os.path.join(run_dir, "pilot_rows.json"),
+                         dict(seed=args.seed, dt=DT_D, T_post=args.T, D_grid=PILOT_D,
+                              kicks=[KICK_HIGH1, KICK_HIGH2], thresholds=THRESHOLDS,
+                              per_D=per_D, rows=rows, pilot_verdict=verdict))
+        print(f"[pilot] VERDICT: {verdict}", flush=True)
         print(f"[pilot] done -> {run_dir}/pilot_rows.json", flush=True)
 
 

@@ -93,38 +93,36 @@ def frozen_z_field(p_i, D):
 # Locked thresholds (clause 7). All are relative to the dt=0.05 slow-off baseline anchor
 # (baseline_rate / baseline_sigma / baseline_af_q95), so they inherit dt-robustness.
 THRESHOLDS = dict(
-    K_HIGH=4.0,        # persist-at-end rate must exceed baseline_rate + K_HIGH*sigma
-    CEIL_FRAC=0.90,    # af_tail >= this AND low modulation -> pinned refractory ceiling, not a finite attractor
+    HIGH_MS=1000.0,    # min CONTIGUOUS elevation (af>q95) to call a state persistent high (>> interictal event ~12ms)
+    HIGH_OCC=0.5,      # trailing-window occupancy (fraction of tail bins above q95) for "still elevated at the end"
+    MIN_HIGH_MS=300.0, # a "substantial" excursion (metastable candidate) must last at least this long contiguously
+    CEIL_FRAC=0.90,    # mean tail active fraction >= this (+ low modulation) -> pinned refractory ceiling
     MOD_CEIL=0.10,     # modulation below this at a ceiling -> pinned (no breathing)
-    MIN_HIGH_MS=300.0, # a "substantial" high excursion (metastable candidate) must last at least this long
     PLATEAU_TOL=0.20,  # two high ICs must land within this relative spread to count as the same plateau
 )
 
-_PER_RUN = ("NUMERICAL_UNSAFE", "REFRACTORY_CEILING", "FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT",
-            "EXCURSION_DECAYED", "DECAYS_TO_LOW")
 _FINITE = ("FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT")
 
 
-def _end_high(row, T):
-    """persist-at-end (clause 3): trailing-window rate above baseline band AND participation above q95."""
-    return bool(row["end_rate_hz"] > row["baseline_rate"] + T["K_HIGH"] * row["baseline_sigma"]
-                and row["af_tail"] > row["baseline_af_q95"])
-
-
 def classify_run_provisional(row, T=THRESHOLDS):
-    """Per-RUN provisional label from ONE (D, ic) trajectory at ONE observation window.
+    """Per-RUN provisional label from ONE (D, ic) trajectory at ONE window.
 
-    Single-window only distinguishes present-at-end (FINITE_HIGH_*) from had-excursion-but-decayed
-    (EXCURSION_DECAYED) — the attractor-vs-long-transient call needs the two-window resolver (clause 4).
+    The dt=0.05 slow-off anchor is near-silent between events (baseline_rate ~0.01Hz), so an
+    instantaneous-rate bar is meaningless -- a single brief interictal event would clear it. "High" is
+    therefore a SUSTAINED elevation: a long CONTIGUOUS run above the quiet af-q95 (high_duration_ms >>
+    the ~12ms interictal event) that is STILL elevated at the window end (tail occupancy). Single-window
+    only distinguishes still-elevated (FINITE_HIGH_*) from had-a-long-excursion-but-decayed
+    (EXCURSION_DECAYED); attractor vs long-transient needs the two-window resolver (clause 4).
     """
     if row["numerical_unsafe"]:                                   # clause 1: unsafe checked FIRST
         return "NUMERICAL_UNSAFE"
-    if _end_high(row, T):
+    persistent_high = bool(row["high_duration_ms"] >= T["HIGH_MS"] and row["tail_high_frac"] >= T["HIGH_OCC"])
+    if persistent_high:                                           # clause 3: duration AND tail occupancy
         if row["af_tail"] >= T["CEIL_FRAC"] and row["modulation"] < T["MOD_CEIL"]:
             return "REFRACTORY_CEILING"                           # clause 2: pinned ceiling before finite-high
         return "FINITE_HIGH_ORBIT" if row["oscillatory_candidate"] else "FINITE_HIGH_FIXED"
-    if row["high_duration_ms"] >= T["MIN_HIGH_MS"]:
-        return "EXCURSION_DECAYED"                                # substantial excursion, did not persist
+    if row["high_duration_ms"] >= T["MIN_HIGH_MS"]:               # substantial excursion that did not persist
+        return "EXCURSION_DECAYED"
     return "DECAYS_TO_LOW"
 
 
