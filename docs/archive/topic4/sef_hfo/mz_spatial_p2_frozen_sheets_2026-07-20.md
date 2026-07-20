@@ -1,5 +1,7 @@
 # 审阅结论：MZ spatial P=2 frozen fast sheets
 
+> **2026-07-20 P3 后续修正**：P=2 的 whole-complement `CL` negative 不能回流成“没有任何局部 bounded sheet”。质量守恒 P=3 已找到预置 core+annulus 的 bounded `CCO` fast cycle，但 `CLL/LCL` 仍不能 fast hand-off；最新判定见 `mz_spatial_p3_front_handoff_2026-07-20.md`。
+
 日期：2026-07-20
 
 工作线：`.worktrees/topic4-mz-divisive-lifecycle`
