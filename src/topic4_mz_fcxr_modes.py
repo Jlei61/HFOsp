@@ -75,6 +75,26 @@ def leading_modes(W_EE, k=6):
     return out
 
 
+def effective_jacobian_modes(W_EE, g_raw, g_sat, k=6):
+    """Leading modes of the saturation-weighted recurrent operator diag(sech^2(g_raw/g_sat)) @ W_EE
+    (reviewer P1-2): recurrent smooth saturation changes the effective ROW gain even though the connectivity
+    W_EE is fixed, so the effective Jacobian's leading eigenvector/IPR can differ from raw W_EE. Compare the
+    two IPR to check whether saturation localized/preserved the dominant spatial mode."""
+    import scipy.sparse as sp
+    from scipy.sparse.linalg import eigs
+    w = 1.0 / np.cosh(np.asarray(g_raw, float) / float(g_sat)) ** 2      # sech^2, in [0,1]; ~1 quiet, <1 active-core
+    Jw = sp.diags(w).tocsr() @ W_EE
+    out = dict(sech2_min=float(w.min()), sech2_mean=float(w.mean()), sech2_p05=float(np.percentile(w, 5)))
+    try:
+        wr, Vr = eigs(Jw, k=k, which="LM", maxiter=2000)
+        order = np.argsort(-np.abs(wr))
+        out["eff_eig_vals_abs"] = np.abs(wr[order])
+        out["eff_leading_ipr"] = ipr(Vr[:, order][:, 0].real)
+    except Exception as e:  # pragma: no cover
+        out["eff_error"] = str(e)
+    return out
+
+
 def _top_overlap(clip_cells, vec, frac=0.02):
     """Jaccard-ish: fraction of clip cells that fall in the top-`frac` loading nodes of `vec`."""
     if clip_cells.sum() == 0:

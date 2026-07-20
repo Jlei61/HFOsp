@@ -236,8 +236,10 @@ dt=0.05 自己的参照 all_bands=False（participation/peak 在带内、event_c
 81.1（102.5→81.1）、事件画像 28 event / dur 26.5ms / participation 3.49% 全在 band、all_bands=True、preserves_workpoint=True**。
 
 即 **recurrent-only smooth saturation 同时（a）消掉 clip（把活跃核的 recurrent 电导那一份压下去，总电导不再过 99）、
-（b）保住间期 workpoint（小事件在 slope-1 区不变、只削峰值过冲）**。这正是审阅 Stage C 预期的结果——有界化核 recurrent 电导、
-不动 workpoint。**审阅推荐的主线（external additive + recurrent conductance + recurrent-only saturation）在 seed1 上验收。**
+（b）保住间期 workpoint**。**措辞更正（审阅 §5 P1-3）**：`g_sat=21.6` 取自 active-cell median peak `gErec`，不是"远高于工作点"——
+在 `g_raw=g_sat` 处斜率 `sech²(1)≈0.42`，即**事件期间的 recurrent 增益已被明显压缩**（不是"低态完全不变、只削极端峰值"）。
+准确说法是：**工作点在受到明显 recurrent 压缩后，事件画像仍落在接受带内**（对 g_sat ±20% 稳健）。审阅推荐的主线
+（external additive + recurrent conductance + recurrent-only saturation）在 seed1 上（及 seed3）保留了间期工作点。
 
 三个 arm C 变体对照（都 dt=0.1 除 dt005）：
 
@@ -257,13 +259,33 @@ dt=0.05 自己的参照 all_bands=False（participation/peak 在带内、event_c
 | 1 | 25.9(+20%) | 30 | 3.67 | ✓ | ✓ | ✓ | 0 | 84.7 |
 
 **四个 run 全部 preserves_workpoint=True + 零 clip。两个 primary seed 一致确认，且对 g_sat ±20% 稳健。** 审阅 §6 Stage C
-再验收标准（seed1/3 workpoint、零 hard-clip、±20% sensitivity）全满足。saturation 是 off-by-default byte-parity 的
-state-dependent 缩放（不改连接），主模态空间结构保留（criterion 4）。
+再验收标准里 seed1/3 workpoint、零 hard-clip、±20% sensitivity **全满足**；**但"主模态空间结构保留"（criterion 4）证据不足
+（审阅 §5 P1-2）**：饱和 run 的 `audit=null`（未算 modes），而 saturation 改变有效 Jacobian（`J_eff ~ D_{sech²}·W_EE`，连接不变
+但有效行增益变），当前**只能说 participation 没变成全局同步、不能说主模态已被证明保留**——实算 `D_{sech²}·W_EE` 的 leading
+eigenvector/IPR 列为 Stage D 前置。
 
-**FCXR-RC1 净判决：审阅推荐的整条 recurrent-only + smooth-saturation 主线在两个 primary seed 上验收通过。** full-conductance
-的原 NO-GO（都改成电导）被拆成"外源电导过活跃 + recurrent 电导单核局部 shunting clip"，只把 recurrent 成电导 + 只对
-recurrent 做平滑饱和，既保住间期 workpoint 又零 clip。
+**FCXR-RC1 净判决（正式口径，审阅 §6 三档拆分）：**
 
-**下一步（Stage D，单独 session）**：锁方程 `tau_m V̇ = −V + I_E^{ff} + g_sat·tanh(g_rec_raw/g_sat)·(E_E−V)/(E_E−V_match) + g_I(E_I−V)`
-（去 hard cap，用 smooth saturation），冻结 Z/X 沿失效轴 D 扫，带 eigenvalue/eigenvector/IPR readout 查**有限高支**
-（low branch → Z 耗竭降 finite-amplitude ignition 阈 → 高态 saturation 使 S' 降、主模态重新有界 → 才 X）。**有限高支成立前不加 X。**
+> **FCXR-RC1 完成"模型底座"验收**：在 L=20 E1146 网络上，**external additive + recurrent conductance + recurrent-only smooth
+> saturation** 在两个 primary seed 均保留间期 workpoint、零 hard clip，并通过预注册的 `g_sat ±20%` gate sensitivity。**原始
+> FF+recurrent full-conductance 路线仍为 NO-GO。有限高支、Z/M 驱动的发作转换、X-mediated recovery、时空间 lifecycle 尚未验证。**
+
+即：**FCXR-RC1 上半程（底座）= ACCEPT；原始 full-conductance = NO-GO；FCXR 整体发作机制 = 尚不能宣布成功。** full-conductance
+的原 NO-GO 被拆成"外源电导过活跃 + recurrent 电导单核局部 shunting clip"，只把 recurrent 成电导 + 只对 recurrent 平滑饱和，
+既保住间期 workpoint 又零 clip——但这只是"更有希望的非线性结构"（低活动保留 recurrent 增益、高活动压低增量增益），**能否把
+runaway 改造成有限高支必须由 Stage D 验证**。
+
+**下一步（Stage D，单独 session）**：锁**两步**方程（`g_rec_raw` 本身已是电导、只乘一次 `(E_E−V)`，不再除第二次
+`(E_E−V_match)`——审阅 §3.5 更正、与代码 `mz_slow_vars.py` 一致）：
+
+- `g_rec_raw = c_E·I_E^{rec}/(E_E−V_match)`
+- `g_rec_eff = g_sat·tanh(g_rec_raw/g_sat)`
+- `tau_m V̇ = −V + c_E·I_E^{ff} + g_rec_eff·(E_E−V) + g_I(z)(E_I−V) + g_M(m)(E_K−V)`（去 hard cap，用 smooth saturation）。
+
+冻结 Z/X 沿失效轴 D 扫，带 eigenvalue/eigenvector/IPR readout 查**有限高支**（low branch → Z 耗竭降 finite-amplitude
+ignition 阈 → 高态 saturation 使 S' 降、主模态重新有界 → 才 X）。**有限高支成立前不加 X。**
+
+**Stage D 前两个必做前置（审阅 §5 P1-1/P1-2）**：(1) 最终饱和方程的 **dt 收敛对照**（`g_sat=21.6, seed1, dt=0.05`，因未饱和
+arm C 在 dt=0.1→0.05 事件数 30→22 漂移、饱和版只在 dt=0.1 验收、tau_eff 余量不大）；(2) **有效 Jacobian 的 eigenvector/IPR**——
+饱和改变有效行增益 `J_eff ~ D_{sech²(g_raw/g_sat)}·W_EE`（连接拓扑不变但有效模态可变），当前只证了 participation 没变成全局同步、
+**未证主模态保留**，须实算 `D_{sech²}·W_EE` 的 leading eigenvector/IPR。
