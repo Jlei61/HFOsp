@@ -67,22 +67,26 @@ def main():
     axA.set_title("A · full-conductance dynamics per c_E", fontsize=11, loc="left")
     axA.legend(fontsize=7, loc="upper right", framealpha=0.9)
 
-    # ---- Panel B: event-profile bars vs reference bands ----
+    # ---- Panel B: event-profile RATIO to reference (all 4 gate dims incl. participation, dimensionless) ----
     axB = fig.add_subplot(gs[0, 1])
-    metrics = [("n_returning", ref.get("n_events"), "returning\nevents"),
-               ("duration_median_ms", ref["dur_med"], "dur\nmed (ms)"),
-               ("peak_rate_median_hz", 0.5 * (ref["act_lo"] + ref["act_hi"]), "peak\nrate (Hz)")]
+    part_ref = 0.5 * (ref["part_lo"] + ref["part_hi"])
+    peak_ref = 0.5 * (ref["act_lo"] + ref["act_hi"])
+    metrics = [("n_returning", ref.get("n_events"), "events"),
+               ("duration_median_ms", ref["dur_med"], "duration"),
+               ("participation_median", part_ref, "participation"),
+               ("peak_rate_median_hz", peak_ref, "peak rate")]
     x = np.arange(len(metrics)); w = 0.24
+    axB.axhspan(0.5, 2.0, color="0.85", alpha=0.5, zorder=0, label="~within-band (0.5–2×)")
+    axB.axhline(1.0, color="k", lw=1.2, ls="--", zorder=1)
     for j, r in enumerate(rows):
         cE = r["cfg"]["c_E"]; col = C_COLORS.get(cE, "0.4")
-        vals = [r["event_profile"].get(m[0], np.nan) for m in metrics]
+        vals = [(r["event_profile"].get(m[0]) or np.nan) / m[1] if (m[1] and np.isfinite(m[1])) else np.nan
+                for m in metrics]
         axB.bar(x + (j - (len(rows) - 1) / 2) * w, vals, w, color=col, label=f"c_E={cE:g}")
-    for i, (_, refv, _) in enumerate(metrics):
-        if refv is not None and np.isfinite(refv):
-            axB.plot([i - 0.4, i + 0.4], [refv, refv], color="k", lw=1.6, ls="--", zorder=5)
-    axB.set_xticks(x); axB.set_xticklabels([m[2] for m in metrics], fontsize=8)
-    axB.set_title("B · event profile vs reference (dashed)", fontsize=11, loc="left")
-    axB.legend(fontsize=7, loc="upper right")
+    axB.set_xticks(x); axB.set_xticklabels([m[2] for m in metrics], fontsize=8, rotation=20)
+    axB.set_ylabel("value / reference (×)"); axB.set_yscale("log")
+    axB.set_title("B · event profile ÷ reference (all 4 gate dims)", fontsize=11, loc="left")
+    axB.legend(fontsize=6.5, loc="upper left")
 
     # ---- Panel C: numerical safety ----
     axC = fig.add_subplot(gs[0, 2])
@@ -102,13 +106,15 @@ def main():
     axC2.axhline(2 * 0.1, color="crimson", lw=0.9, ls="--", alpha=0.7)
     axC.set_xlabel("time (s)"); axC.set_ylabel("cap-clip fraction (%)")
     axC2.set_ylabel("tau_eff_min (ms, dotted); 2·dt=red")
-    axC.set_title("C · numerical safety (clip solid / tau_eff dotted)", fontsize=11, loc="left")
+    axC.set_title("C · numerical safety — clip & tau_eff are ONE cap event (20/(1+99)=0.2ms)",
+                  fontsize=9.5, loc="left")
     axC.legend(fontsize=7, loc="upper left")
 
     verdict = summ.get("verdict", "?"); pick = summ.get("picked_c_E")
-    fig.suptitle(f"MZ-FCXR Stage 0B workpoint (L=20 E1146 seed{summ.get('seed')}, T={summ.get('T'):.0f}ms)"
-                 f"  —  verdict: {verdict}" + (f", picked c_E={pick}" if pick is not None else ""),
-                 fontsize=12, y=1.02)
+    fig.suptitle(f"MZ-FCXR Stage 0B workpoint (L=20 E1146 seed{summ.get('seed')} shown; seed3 confirms same, "
+                 f"T={summ.get('T'):.0f}ms)  —  verdict: {verdict}"
+                 + (f", picked c_E={pick}" if pick is not None else ""),
+                 fontsize=11, y=1.02)
     out = os.path.join(FIGDIR, "stage0_workpoint.png")
     fig.savefig(out, dpi=140, bbox_inches="tight")
     print("wrote", out)

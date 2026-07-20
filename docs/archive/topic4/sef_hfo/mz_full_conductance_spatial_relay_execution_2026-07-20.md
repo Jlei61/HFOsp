@@ -56,11 +56,13 @@
 即 **允许的 `c_E∈{0.85,1.0,1.15}` 恰好跨越"静息 ↔ 过热"，中间没有落在间期工作点上的档**。正式判决用 T=8s +
 事件检测器的 workpoint（§2.2），不因诊断提前下结论。
 
-**机制归因（reasoning，已被 parity/force-match 测试锁住不是 bug）**：full conductance 把兴奋输入折成电导后，
-额外的 `g_E` 进入 `tau_eff = tau_m/(1+g_E+g_I)` 的分母 → 膜时间常数变短 → 对输入涨落响应更快、动力学更"敏感"；
-同时 driving force `E_E−V` 在接近阈值时变小（饱和）。二者叠加把兴奋性窗口整体挪动：在锁定的 drive=0.6 下，
-accepted 间期区间落进了 `c_E` 的"静息↔过热"缝里。drive 与 `c_E` 均锁定、不许扩 bracket，故若 workpoint 确认
-无匹配档即 NO-GO。
+**机制归因（reasoning，已被 parity/force-match 测试锁住不是 bug；但"谁是主因"待 §2.4 通路拆分实验判）**：
+full conductance 是一个**状态依赖变换**，不是简单"把外源输入削弱"——在 `V_match=18` 力匹配处两者相等，但在别处
+`g_E(E_E−V)/I_E = (E_E−V)/(E_E−V_match)`：在静息附近（`V=0`）该比值 = `58/40 = 1.45`，即电导化在低膜电位区反而
+**比原电流更强**（更容易点着 → 更热）；接近阈值时才变小（饱和）；同时额外 `g_E` 进入 `tau_eff = tau_m/(1+g_E+g_I)`
+分母 → 膜时间常数变短 → 对涨落响应更快。这三点合起来把兴奋性窗口整体挪位，accepted 间期区间落进了测试的 `c_E`
+三档的"静息↔过热"之间。（注：数值层面 clip 与 `tau_eff=0.2ms` **不是两条独立证据**——总电导被 clip 到 cap=99 后
+`tau_eff = 20/(1+99) = 0.2ms`，二者是同一个 cap 事件的两种读法。）
 
 ### 2.2 workpoint 正式判决（L=20 seed1 T=8s，Z/M/global off）
 
@@ -95,6 +97,22 @@ seed3 workpoint（c_E=0.85,1.0；reference current-model slow-off n_returning=22
 两个 primary seed 一致 NO-GO**（seed3 verdict = `no_go_no_safe_workpoint_c_E`）。机制（tau_eff 变短 + 饱和）本就 seed-独立，
 数据佐证。
 
+### 2.4 通路归因 2×2（feedforward vs recurrent conductance，seed1，c_E=1）
+
+审阅意见（2026-07-20）：当前只跑了外源+recurrent AMPA **都**改成电导（arm D），"外源饱和是主因"缺独立对照。
+补一个固定 `c_E=1` 的 2×2（在 workpoint 关闭 Z/M/X/global）：
+
+| arm | feedforward(外源) AMPA | recurrent E→E AMPA | 作用 |
+|---|---|---|---|
+| A | additive | additive | accepted reference（partial conductance） |
+| B | conductance | additive | 只改外源 |
+| C | additive | conductance | 只改 recurrent（推荐下一版主候选） |
+| D | conductance | conductance | 复现当前 NO-GO |
+
+四臂共享 `V_match` 力锚（`ampa_drive + gE·(E_E−V_match) == c_E·I_E`，已单测），只在 off-`V_match` 的状态依赖上不同。
+判读：A 保留 workpoint（应），若 C 保留而 B 失败 → recurrent 电导才是关键、外源电导才是压垮 baseline 的主因；反之或
+两路单独都失败则另有结论。**结果填充中**（runner `pathway` 命令，`results/.../runs/*pathway*`）。
+
 ## 3. 分层判决（更新）
 
 | 层 | 判决 | 备注 |
@@ -108,17 +126,29 @@ seed3 workpoint（c_E=0.85,1.0；reference current-model slow-off n_returning=22
 
 ## 4. 当前安全科学结论 + 下一步
 
-**安全结论（措辞受限）：** 在锁定的 E1146 / L=20 / drive=0.6 衬底上，把 E 细胞兴奋输入从 additive current 改成朝
-`E_E=58` 饱和的 full conductance 后，**在允许的 `c_E∈{0.85,1.0,1.15}` 力匹配 bracket 内，没有一个档能复现 accepted
-的间期放电工作点**：`c_E=0.85` 把网络压成静息（0 事件）、`c_E≥1.0` 把网络推成过活跃（事件数 2–3× 参照）且开始/持续
-触 conductance cap（tau_eff 掉破 2dt）。机制归因（已被 parity/force-match 测试锁住不是 bug）：饱和电导让 `tau_eff`
-变短、driving force 接近阈值时变小，兴奋性窗口整体挪动，accepted 间期区间掉进 `c_E` 的"静息↔过热"缝里。
+**安全结论（措辞受限，边界收窄）：** 在锁定的 E1146 / L=20 / drive=0.6 衬底上，把 E 细胞兴奋输入从 additive current
+改成朝 `E_E=58` 饱和的 full conductance 后，**测试的三个离散档 `c_E∈{0.85,1.0,1.15}` 都不能复现 accepted 间期工作点**
+（seed 1+3 一致）：`c_E=0.85` 静息（0 事件）、`c_E≥1.0` 过活跃（事件数 2–3× 参照，participation seed1 c_E=1.0 约 7.5% /
+c_E=1.15 约 23%——过热但**不是全片同步**）且触 conductance cap。**只能说这三个注册点失败，不能说 `0.85–1.0` 连续区间
+里不存在很窄的临界窗口**（当前设计禁止插值）——这不影响预注册 gate 失败，但限定了机制解释的范围。
 
-**禁止写成**：已得到发作态 / 极限环 / Hopf / 双稳态 / 有限高支 / 完整 seizure lifecycle（Stage 1 未执行，无从声称）。
-本结论只到"full-conductance 快系统在允许 bracket 内不保留间期工作点"。
+**禁止写成**：已得到发作态 / 极限环 / Hopf / 双稳态 / 有限高支 / 完整 seizure lifecycle（Stage 1 未执行）；也**不能说
+"feedforward 饱和已被证明是主因"**——当前只跑了两路都改（arm D），没有单路对照，所以那是**待检验假设**（§2.4 正在跑）。
 
-**下一步（唯一建议，交由用户拍板，非自主继续）：** full-conductance route 在 workpoint 关 NO-GO。若要继续 MZ-FCXR
-的科学目标（找有限高支 + persistence-gated 空间尾迹），需要用户先决定放开哪一个当前锁定项之一（且只放开一个、
-重新预注册）：例如 (a) 允许更细/更宽的 `c_E`（当前禁止扩 bracket）；或 (b) 只让 recurrent E→E 成电导、feedforward
-外源 AMPA 保持 additive（当前设计让二者都成电导，正是它压掉 baseline 兴奋性的主因）；或 (c) 调整 drive 重配工作点
-（当前 drive 锁 0.6）。**在没有新的预注册决定前不继续**——一个正确 gate 的 NO-GO 已是合格交付。
+**下一步（先做通路归因，不是直接继续 X、也不是立刻扩 c_E 扫描）：** 见 §6 最小执行路线。核心是固定 `c_E=1` 的
+**2×2 通路拆分**（外源/recurrent AMPA 各自 additive-vs-conductance 四臂），先回答"失败来自外源电导、recurrent 电导、
+还是二者相互作用"，再决定锁哪版方程。**推荐方向（只让 recurrent E→E 成电导、外源保持 additive）在科学上更贴合原目标**
+（要改的是 recurrent 正反馈支，外源主要维持间期工作点、不应和 fast-topology 机制同时改变）——但这是"下一候选"，
+不是"已证实的修复"，须等 2×2（arm C 单独过 workpoint）确认。**一次只放开一个轴、重新预注册。**
+
+## 5. 最小执行路线（审阅 §6）
+
+1. （已做）修 workpoint 候选 gate 漏 `all_bands`（+回归测试 `tests/test_fcxr_workpoint_gate.py`），并让 full_conductance
+   在 X 关闭时也记录 `gEff/gErec`（Stage 0 才能归因 ff vs rec）。
+2. （运行中）`seed1, L=20, T=8s, c_E=1` 跑 A/B/C/D 四臂，不加 Z/M/X/global、不动其它参数（runner `pathway`）。
+3. 只有 arm C（外源 additive + recurrent conductance）同时数值安全且完整 workpoint band，才用 seed3 确认。
+4. arm C 通过后，把下一版方程锁为 `tau_m V̇ = −V + I_E^{ff} + g_E^{rec}(E_E−V) + g_I(E_I−V)`，再重进 Stage 1 查有限高支；
+   高支存在后才做 `y/x`。
+5. 如果 arm C 失败：**不立即调 drive**，由用户决定做有界 `c_E` 插值还是调 `V_match`，一次只开放一个轴。
+
+这一步比"直接相信 feedforward 是主因"多一个小实验，但能真正回答失败来自外源电导、recurrent 电导、还是二者相互作用。
