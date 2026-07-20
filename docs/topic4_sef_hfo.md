@@ -758,20 +758,25 @@ returning event contact field + pre-t120 contact-energy field；灰色神经元�
 counterfactual。没有这些对照，即使新增相图也只能叫动力学描述，不能升级为 causal bridge。完整数值、问题清单和
 V2 锁见 `docs/archive/topic4/sef_hfo/mz_early_field_bridge_2026-07-19.md` §10。
 
-### 6.7 MZ early-field bridge V2（z+m，τ_adp=500 ms；2026-07-20，observation layer — supported）
+### 6.7 MZ early-field bridge V2（z+m，τ_adp=500 ms；2026-07-20，observation layer — (A) supported / (B) partial）
 
 在同一 E1146 底物、同一批 held-out 双向间期模板上，把 native 轨迹从 z-only 换成 z+m（`use_m=true, tau_adp=500,
-eta_m=0.007451594355587098`，从提交 calibration 逐位推导），只测"加入快速适应 `m` 后间期时序轴是否仍预测
+eta_m=0.007451594355587098`，从提交 calibration 逐位推导），测"加入快速适应 `m` 后间期时序轴是否仍预测
 pre-runaway 早期能量场"。三个 seed 的 native `t120` 逐位复现提交的 onset（delta=0.0 ms，同时证明 `m` 进入仿真 +
 LFP 记录器不扰动动力学）；contact `maxAB` = 0.891 / 0.969 / 0.904（median 0.904，**3/3 过 within-shaft null**：
-p=0.0027 / 0.0001 / 0.0017），胜出方向都是 B_to_A；`m` 把失控时刻推后 +1.5～+3.7 s。与 V1 配对：**V1 里唯一未过线的
-seed3（0.735，p=0.086）在 V2 里反而最强（0.969）** → 加入 `m` 保留（甚至更一致）双向轴的可预测性，主要改变的是
-点火时刻。source-grid（补充）2/3 过 toroidal null（seed1 marginal）；local participation（V2-only 真值）per-contact
-混合；core-exclusion `n_kept=15` uninformative（不下"不依赖 core"结论）。
+p=0.0027 / 0.0001 / 0.0017）。
 
-本轮上限＝**observational bridge supported**；causal（区分整体去抑制 vs 局部 `z` 图案、事件是否因果触发失控）
-未完成，需 bit-identical snapshot/resume + state-matched z 对照。完整数值、配对表、声明边界见
-`docs/archive/topic4/sef_hfo/mz_early_field_bridge_v2_zm_tau500_2026-07-20.md`。
+**关键对照（2026-07-20 审阅）**：单凭触点的**固定长轴坐标**本身就 3/3 显著预测早期能量场（axis-only maxAB
+0.789/0.839/0.779，p<0.01）；间期模板与长轴相关 −0.95～−0.98、只多贡献 +0.10～0.13，控制长轴后残余关联只 2/3 显著。
+故结论分两层：**(A) 固定病理长轴在失控前被调用 = 3/3 成立；(B) 间期细粒度时序超越几何轴的额外信息 = 只 2/3 部分、
+未干净确立**；且这是**早期（0–50 ms）现象**（50–100 ms 减弱）。`m` 把失控时刻推后 +1.5～+3.7 s，但**不只改点火时刻**：
+也改招募（seed3 recruited 0→5）/动态范围（seed3 3.88→22.06）/跨尺度（source maxAB 三个全部下降）。三个 V2 都
+B→A 胜出、A→B held-out 弱 → 只验证 B→A 分支。local participation（V2-only）energy-participation Spearman 0.90–0.94
+（热触点局部招募明显、但沿轴共变，不证局部独占）；core-exclusion `n_kept=15` uninformative。
+
+本轮上限＝**observational bridge，(A) 层 supported / (B) 层部分**；causal 未完成（需 bit-identical snapshot/resume +
+state-matched z 对照）。完整数值、长轴对照、时间演化、配对表、声明边界见
+`docs/archive/topic4/sef_hfo/mz_early_field_bridge_v2_zm_tau500_2026-07-20.md` §10。
 
 ---
 

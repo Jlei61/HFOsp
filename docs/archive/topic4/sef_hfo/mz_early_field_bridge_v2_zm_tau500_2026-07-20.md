@@ -11,7 +11,16 @@
 
 **怎么测的。** 复用**同一块组织、同一批安静期模板**，只把中间那段自然演化从"只有去抑制"换成"去抑制＋快速适应"。先确认新版轨迹能**精确复现**之前单独记录的失控时刻——三个噪声实现都差 **0 毫秒**，说明快速适应确实进了仿真、加装虚拟电极也没改变动力学。再取失控前那段窗口（识别到的招募起点后 0–50 ms）的触点能量，跟安静期先后顺序做**方向无关**的相关（A→B、B→A 两个方向都试、取较强的那个，叫 maxAB），然后把触点在**各自电极杆内部**随机重排一万次，看真实相关是不是明显超过随机。
 
-**揭示了什么。** 三个噪声实现都一致：加了快速适应之后，失控时刻从约 9.3–9.8 秒**推后到约 11–13 秒**；但那条安静期先后顺序**仍然预测**失控前的能量分布——相关中位数约 **0.90**（三个分别 0.89 / 0.97 / 0.90），杆内随机重排里都只有 0.01%–0.3% 能达到这么高（**三个都过随机线**），胜出方向一致。看起来这条轴在加了快速适应后被**完整保留**了，甚至比"只有去抑制"时更一致——"只有去抑制"那版里偏弱、没过随机线的那个实现，在加了快速适应后反而是最强的。安全结论只能到这一步：**加入快速适应变量、并推后了点火时刻之后，安静期时序轴对失控前早期能量场的预测仍然存在。** 这是一块组织 × 三个噪声实现的**观测层**结果，不是队列级结论；因果需要逐位可续跑的状态分叉证据，本轮没有。
+**揭示了什么（分两层，见 §10 审阅修订）。** 三个噪声实现都：加了快速适应之后，失控时刻从约 9.3–9.8 秒
+**推后到约 11–13 秒**；失控前 0–50 ms 的早期能量场沿 E1146 长轴排布。关键对照是：**单凭触点的固定长轴坐标
+本身，就已经能显著预测这个早期能量场（3/3，maxAB 0.79/0.84/0.78，p<0.01）**。安静期先后顺序模板**几乎就是
+这条长轴本身**（与长轴坐标相关 −0.95～−0.98），只在长轴之上多贡献一点点（maxAB +0.10～0.13）；控制长轴之后，
+模板对能量还留有残余关联的只有 2/3（seed1 p=0.032、seed3 p=0.001 显著，seed4 p=0.078 边缘）。而且这条读出
+是**早期现象**：0–50 ms 强，到 50–100 ms 减弱（seed1 失去显著、seed3 边缘）。所以最安全的说法要分两层：
+**(A) 失控前早期能量场沿固定病理长轴组织、并在失控前被调用——这一层 3/3 成立；(B) 间期事件的细粒度时序是否
+在几何长轴之上再提供预测信息——只在 2/3 部分成立，尚未干净确立。** 加入快速适应**主要推后了点火时刻，但不只
+改变点火时刻**：它同时改变了早期场的动态范围、招募规模、以及跨尺度（source-grid）表达（见 §5/§10）。这是一块
+组织 × 三个噪声实现的**观测层**结果，不是队列级、也不是因果结论（因果需逐位可续跑的状态分叉证据，本轮没有）。
 
 （内部归档代号：candidate `zA_q75_tz5000__mA0p001_tau500`；`t120` / `t_recruit`；`rho_maxab` / within-shaft null；source-grid toroidal null；design §14 level-4 "bridge supported"。）
 
@@ -43,9 +52,9 @@
 | 4 | PASS Δ0.0 | 12676.6 | 0.9043 | B_to_A | 0.0017 | 0.535 | 0.047 | 4 | 15 | 0.355 | 39 |
 
 - **contact maxAB 三个 seed 全 eligible + 全过 within-shaft null**（median 0.9043，range [0.891, 0.969]，3/3 positive，胜出方向都是 B_to_A）。这满足 design §14 level-4 "bridge supported" 的诊断判据（≥2/3 held-out eligible + positive contact maxAB，source 不矛盾，无结果只靠 core loading）。**按 task 口径只报到 observational（level 3–4 诊断判据），不作队列级统计主张（n=3，一块组织）。**
-- **source-grid（supplementary）**：2/3 过 toroidal null（seed1 marginal p=0.069），方向不矛盾（无相反方向）。比 V1（三个都过）略弱；仍只作方向无关轴调用的补充诊断，不与 contact 合并成"跨尺度同方向"。
+- **source-grid（supplementary）**：2/3 过 toroidal null（seed1 marginal p=0.069）。**不写成"方向不矛盾"**：seed1 的 source 名义 winner 是 A_to_B，与 contact 的 B_to_A **不同**；且 source maxAB 三个 seed 相对 V1 **全部下降**（0.651→0.573、0.546→0.498、0.585→0.535）。准确口径：source-grid 在 2/3 seed 出现方向无关的正轴匹配，但 seed1 不显著、名义方向与 contact 不同——**尚无稳定的跨尺度方向一致性**。只作补充诊断，不与 contact 合并。
 - **core-exclusion**：三个 seed `n_kept=15`（一个触点都没删）→ **uninformative**；**不能**下"不依赖核心区域"的结论（与 V1 相同）。
-- **local participation（V2-only，真值）**：median 0.287 / 0.171 / 0.355，per-contact 0–1 混合（部分触点附近神经元几乎都参与、部分几乎不参与）。所以高 contact energy **部分**对应局部招募、部分是远场读出——诚实的"混合"，不是纯局部也不是纯远场。V1 因为是 readout-only patch、没持久化 raster，**没有可配对的基线值**（V2-only）。
+- **local participation（V2-only，真值）**：**不是简单的"混合"**。逐 contact 看，energy 与局部参与度的 Spearman = **0.903 / 0.914 / 0.941**；每 seed 最热三触点附近参与度约 0.89–1.00、最冷三触点约 0（median 0.287/0.171/0.355 只因触点在轴上冷热各半被拉到中间）。所以**高能量触点确实伴随明显的局部神经元招募**；但 energy 与 participation **都沿长轴变化**，**不能证明 contact 信号由局部组织独占产生**——既不写"contact 热点=局部源"，也不写成"局部参与混合/不支持"。V1 是 readout-only patch、无 raster、无可配对基线（V2-only）。
 
 ## 5. V1 z-only ↔ V2 z+m 配对（按 seed，`v1_vs_v2_comparison.{json,csv}`）
 
@@ -56,10 +65,10 @@
 | 4 | 0.924 (0.0010) | 0.904 (0.0017) | −0.020 | +2919 ms | 是 (B_to_A) |
 
 判读（对齐 task §10 的问题）：
-- **加了 m 后双向轴的可预测性是否保留？** 是——3/3 seed contact maxAB 仍显著，胜出方向不变。
-- **m 改变了什么？** 主要是**点火时刻**（三个 seed 都推后 +1.5～+3.7 s）；早期场**强度**（recruited 4–5、dynamic range 有限）与**轴调用本身**大体保留，个别 seed 略弱、个别更强。
-- **seed3 的弱 contact result 是否仍在？** **不在**——V1 里 seed3 是唯一未过线的（0.735，p=0.086），V2 里 seed3 反而最强（0.969，p=0.0001）。
-- **contact 与 local participation 是否一致？** 部分一致（高能量触点里有一部分局部参与度高），但 median 中等，属混合。
+- **加了 m 后 contact 级轴匹配是否保留？** 是——3/3 seed contact maxAB 仍显著。但注意 winner 都是 B→A、A→B 模板 held-out 稳定性弱（§10），**winner 一致不作为"双向轴被稳定使用"的证据**。
+- **m 改变了什么？** **不只推后点火时刻。** 它推后了点火（+1.5～+3.7 s）、并保留最早 0–50 ms 的 contact 级轴匹配；但它**也**改变了早期场的**动态范围**（seed3 dynamic_range 3.88→22.06、seed4 5.15→29.88）、**招募规模**（seed3 recruited 0→5）、以及**跨尺度表达**（source maxAB 三个 seed **全部下降**）。所以"m 主要只改变点火时间"是**不准确的**。
+- **seed3 的弱 contact result 是否仍在？** **不在**——V1 里 seed3 是唯一未过线的（0.735，p=0.086），V2 里 seed3 反而最强（0.969，p=0.0001）；这与 seed3 招募规模/动态范围的大幅上升同步。
+- **contact 与 local participation 是否一致？** 一致方向上是——高能量触点局部参与度明显（energy-participation Spearman 0.90–0.94，§10/§4）；但两者都沿长轴变化，不能据此说 contact 信号由局部独占产生。
 - 统计单位只有 3 个噪声实现；V1+V2 六次运行**不是**六个独立样本，9 格/6 次不做队列 p 值。
 
 ## 6. 图
@@ -74,12 +83,42 @@
 - **scientific observation（本轮上限）**：方向/效应量/nulls/seed 一致性都按合同报告（不论正负）。✔ 结论：观测层桥**supported**。
 - **causal mechanism：未完成。** CRN replay 不是 checkpoint 后的真实状态分叉，无法区分"整体去抑制增益"与"局部 z 图案"，也不能说间期事件因果触发失控。需逐位可续跑的 snapshot/resume + native/uniform/shuffle/reset z 对照（design §11.2）——本轮明确未做。
 
-## 8. 声明边界（design §15）
+## 8. 声明边界（design §15 + 2026-07-20 审阅）
 
-可以写：固定患者布局支架上，held-out 双向间期时序轴在三个噪声实现里预测了失控前虚拟触点能量的空间分布（加入快速适应 m、并推后点火后仍然成立）——观测层"同一支架、状态依赖读出"的可行性桥。
-**不可以写**：临床发作 / 临床宽带功率 / 完整发作循环 / m 稳住了发作或产生恢复态 / `z_i` 是唯一生物机制 / 某一端是固定发作灶 / 间期事件因果触发失控 / 局部 z 图案有因果作用 / contact 热点＝局部神经元优先招募 / 结果不依赖 core（core-exclusion uninformative）。
+可以写：固定患者布局支架上，失控前早期虚拟触点能量场**沿固定长轴组织、并在失控前被调用**（**单凭触点长轴坐标即可预测，3/3**；加入快速适应 m、推后点火后仍成立）——观测层"同一支架、状态依赖读出"的可行性桥。
+**不可以写**：临床发作 / 临床宽带功率 / 完整发作循环 / m 稳住发作或产生恢复态 / **m "只改变点火时间"**（它也改招募/动态范围/跨尺度，§5/§10）/ `z_i` 唯一生物机制 / 某端固定发作灶 / 间期事件因果触发失控 / 局部 z 图案有因果作用 / **contact 热点＝局部独占源**（§10.1）/ 结果不依赖 core（uninformative）/ **间期时序模板在几何长轴之上提供了预测信息**（本轮只 2/3 部分、未干净确立，§10.1）/ **双向轴都被稳定使用**（三个都 B→A、A→B held-out 弱，§10.3）/ source 跨尺度方向一致（seed1 名义方向与 contact 不同、且全部下降，§4）。
 
 ## 9. Provenance / 复现
 
 runner：`scripts/run_topic4_mz_early_field_bridge.py --confirm-run --config config/topic4_mz_early_field_bridge_v2_zm.yaml --output-dir results/topic4_sef_hfo/mz_early_field_bridge_v2_zm_tau500 --seeds 1,3,4`
-per-seed `bridge_metrics.json` 携带 git_sha + 6 engine_shas + candidate + T；`provenance.json`（cohort）同。大 `*.npz`（LFP/raster，各 ~8–10 MB）不进 git，路径与内容可由上面命令确定性重生。
+per-seed `bridge_metrics.json` 携带 git_sha + 6 engine_shas + candidate + T；`provenance.json`（cohort）记录 per-seed producer SHA。大 `*.npz`（LFP/raster，各 ~8–10 MB）不进 git（清单见 `LARGE_ARTIFACTS_MANIFEST.txt`），路径与内容可由上面命令确定性重生。
+
+## 10. 2026-07-20 审阅修订（长轴几何对照 / 时间局限 / 口径更正）
+
+审阅指出并经复核确认（均基于已提交 artifact，**未重跑 SNN**；分析 `scripts/paper_figures/analyze_mz_v2_axis_and_temporal.py`，结果 `axis_and_temporal_control.json`，补充图 `fig_mz_v2_axis_temporal_supp.{png,pdf}`）：
+
+### 10.1 长轴几何对照（最重要）
+把触点的**固定长轴坐标本身**当模板，做同样的双向 maxAB + within-shaft null：
+
+| seed | 间期模板 maxAB | **长轴-only maxAB (p)** | 模板−长轴 | corr(模板,长轴) | 控制长轴后残余 partial(模板,E\|轴) |
+|---|---|---|---|---|---|
+| 1 | 0.891 | **0.789 (p=0.0048)** | +0.102 | −0.954 | r=−0.554, **p=0.032** |
+| 3 | 0.969 | **0.839 (p=0.0009)** | +0.130 | −0.965 | r=−0.780, **p=0.001** |
+| 4 | 0.904 | **0.779 (p=0.0063)** | +0.126 | −0.977 | r=−0.486, p=0.078（边缘）|
+
+- 单凭长轴几何就 **3/3 显著**预测早期能量场；间期模板**几乎就是长轴**（|corr|>0.95），只多贡献 +0.10～0.13。
+- 控制长轴后，模板对能量的残余关联只有 **2/3 显著**（seed4 边缘）。
+- 结论分两层：**(A) 固定病理长轴在 runaway 前被调用 → 3/3 成立**（主结论改写到这一层）；**(B) 间期事件细粒度时序提供了超越几何轴的预测信息 → 只 2/3 部分成立、未干净确立**。最小补法已做（axis-only / 增量 / 残余 partial）；若要坐实 (B) 未来需 leave-one-contact-out 或轴保持 null。
+
+### 10.2 时间局限
+contact maxAB 在 0–25 / 25–50 ms 都强，到 **50–100 ms 减弱**：seed1 p=0.133（失去显著）、seed3 p=0.054（边缘）、seed4 p=0.013；同时 local participation 继续上升。更符合数据的说法：**最初 50 ms 先出现刻板的 contact 级轴读出，随后局部招募扩大、但间期模板与能量场的精确排序关系减弱**。这条桥是**早期（0–50 ms）现象**。
+
+### 10.3 双向模板 held-out 不对称
+contact held-out median：seed1 A→B **0.361**（含负分）vs B→A 0.995；seed4 A→B 0.743 vs B→A 1.0；seed3 两向都强但 A→B 含负分。当前 eligibility 只查事件数/共享触点/非退化，**不查 held-out 中位数或符号一致性**，故"两向都够数据进 maxAB"≠"两向同样稳定"。三个 V2 早期场都由 **B→A** 胜出——本轮**只**验证了 B→A 分支；**winner 一致不列为成功证据**。
+
+### 10.4 工程口径同批修复
+- **t120 gate 现 fail-closed**：gate 失败 → seed 状态 `preflight_gate_failed`、被 aggregate 排除（本轮 3/3 pass，不影响结果，但符合 fail-closed 声明）。
+- **--resume fingerprint** 去掉整仓 git HEAD，改为 engine SHA + candidate + T + slowoff_T + seed + schema：提交 results/docs 不再让相同模型/config 的 seed 被判不可 resume。
+- **cohort provenance** 记录 per-seed producer SHA（seed1=`7951052`，seed3/4=`1719a67`）。
+- **`rotated_90`** 更名 `_rotate90_coarse_field`；docstring 说明它是**粗场旋转**（每格均值→旋转→映射回，格内神经元数不等时不保持神经元级 z 分布），**不是严格 state-matched 因果对照**。
+- **主图标签**：顶排 "Virtual-LFP (30–80 Hz)"、两张场加 "(contact readout)"，杜绝误读为真实 SEEG / 局部源。
