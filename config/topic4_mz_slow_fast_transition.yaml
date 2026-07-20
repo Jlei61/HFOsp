@@ -31,7 +31,11 @@ checkpoints:
   baseline_ms: 1000.0
   mid_fraction: 0.50
   pre_onset_ms: [2000.0, 1000.0, 500.0, 200.0, 100.0]
-natural_tail_ms: 1500.0     # continue past onset anchor to capture crossing / plateau tail
+# continue past the (z-only) onset anchor far enough to catch the DELAYED MZ crossings. Adaptation pushes the
+# mz_runaway crossing to ~12956 ms (onset-dynamics tau500 seed1) -- well past O_s. tail=6000 -> end ~15.3-15.8 s
+# (>= onset-dynamics T=15000 window that established runaway 3/3); the tail early-stops AT the crossing, so the
+# slow post-runaway saturated tail is never run. Bounded conditions (edge/plateau) run the full tail.
+natural_tail_ms: 6000.0
 
 # --- perturbation-free escape probability P_runaway (design §3.1) ---
 # n_replay=12 = the spec's stated lower bound ("12-20"); chosen for the 40k-neuron (~2-4 ms/step) compute
