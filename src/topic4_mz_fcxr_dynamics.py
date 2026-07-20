@@ -72,3 +72,16 @@ def assert_field_substrate_aligned(pi_pack, S, *, atol_pos=1e-4, atol_vth=1e-4):
         raise ValueError("onset-depletion pos_E does not match RC1 substrate posE (mis-registered field)")
     if not np.allclose(field_vth, vthE, atol=atol_vth):
         raise ValueError("onset-depletion vth_E does not match RC1 substrate vth (mis-registered field)")
+
+
+# ------------------------------------------------------------------------------------
+# D1.3 — frozen failure field z_i(D)
+# ------------------------------------------------------------------------------------
+
+def frozen_z_field(p_i, D):
+    """Frozen inhibitory-efficacy field z_i(D) = clip(1 - D * p_i, 0, 1) along the failure coordinate D.
+
+    p_i is the mean-1 onset-depletion pattern, so mean(D * p_i) = D and the mean depletion of the
+    frozen field is ~= D — the same scalar coordinate as the unsaturated slow-fast-transition line
+    (their sharp transition sits at D ~= 0.087)."""
+    return np.clip(1.0 - float(D) * np.asarray(p_i, float), 0.0, 1.0)

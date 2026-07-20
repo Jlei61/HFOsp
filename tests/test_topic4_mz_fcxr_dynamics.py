@@ -12,7 +12,9 @@ import pytest
 from src.topic4_mz_fcxr_dynamics import (
     load_onset_depletion_pi,
     assert_field_substrate_aligned,
+    frozen_z_field,
 )
+from src.snn_engine.mz_slow_vars import MZSlowVars, MZSlowVarsConfig
 
 SNAP = "results/topic4_sef_hfo/state_conditioned_susceptibility/snapshots/zA_q75_tz5000/seed_1.npz"
 
@@ -65,3 +67,44 @@ def test_alignment_rejects_NE_mismatch():
     S = _fake_S(_fake_pack(NE=40))   # substrate has 40 E cells, field has 50
     with pytest.raises(ValueError):
         assert_field_substrate_aligned(pk, S)
+
+
+# ---------------- D1.3: frozen-Z field + injection ----------------
+
+def test_frozen_z_field_clips():
+    p = np.array([0.0, 1.0, 2.0, 10.0])
+    z = frozen_z_field(p, 0.15)
+    assert np.allclose(z, np.clip(1 - 0.15 * p, 0, 1))
+    assert z[0] == 1.0 and z[-1] == 0.0          # p_i=0 -> no depletion; large p_i -> full
+
+
+def _mzsv(z_frozen_E=None, use_z=False, N=10, NE=8):
+    cfg = MZSlowVarsConfig(use_z=use_z, z_frozen_E=z_frozen_E)
+    return MZSlowVars(N, 18.0, cfg=cfg, NE=NE)
+
+
+def test_z_none_is_all_ones_byte_identical_init():
+    s = _mzsv(z_frozen_E=None)
+    assert np.array_equal(s.z, np.ones(10))       # unchanged default -> byte-parity path
+
+
+def test_z_frozen_sets_E_block_only():
+    field = np.linspace(0.2, 0.9, 8)
+    s = _mzsv(z_frozen_E=field)
+    assert np.allclose(s.z[:8], field)            # E block = frozen field
+    assert np.allclose(s.z[8:], 1.0)              # I block pinned at 1 (E-only clause)
+
+
+def test_z_frozen_wrong_length_raises():
+    with pytest.raises(ValueError):
+        _mzsv(z_frozen_E=np.ones(7))              # NE=8, field length 7
+
+
+def test_z_frozen_out_of_range_raises():
+    with pytest.raises(ValueError):
+        _mzsv(z_frozen_E=np.full(8, 1.2))         # value > 1
+
+
+def test_z_frozen_requires_use_z_false():
+    with pytest.raises(ValueError):
+        _mzsv(z_frozen_E=np.linspace(0.2, 0.9, 8), use_z=True)   # frozen field must not evolve

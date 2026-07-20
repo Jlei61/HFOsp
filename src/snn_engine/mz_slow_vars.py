@@ -80,6 +80,7 @@ class MZSlowVarsConfig:
     record_calib: bool = False     # slow-off OBSERVER: also bin I_I[E]/I_E[E] each step (pure side-effect)
     calib_hist_edges: "np.ndarray | None" = None
     record_clip_identity: bool = False  # FCXR-RC1 clip audit: per-cell clip_count + max raw gErec/total (pure side-effect)
+    z_frozen_E: "np.ndarray | None" = None  # FCXR Stage D: hold z_i frozen at this per-E field (requires use_z=False)
 
 
 class MZSlowVars:
@@ -106,6 +107,11 @@ class MZSlowVars:
             self.surr_e_idx = np.flatnonzero(~cm)
         # state: full-N. I-cell entries pinned (z=1, m=0), never touched by step() -> E-only.
         self.z = np.ones(self.N)
+        if self.cfg.z_frozen_E is not None:                       # FCXR Stage D: hold E-cell z frozen at a preset field
+            zf = np.asarray(self.cfg.z_frozen_E, float)
+            if zf.shape != (self.NE,):
+                raise ValueError(f"z_frozen_E must have length NE={self.NE}, got {zf.shape}")
+            self.z[:self.NE] = zf                                 # I-cell z stays 1 (E-only clause)
         self.m = np.zeros(self.N)
         self.phi = np.zeros(self.N)
         # FCXR persistence sensor y_j (Hz) + presynaptic E->E relay availability x_j in [0,1] (E cells only).
@@ -485,6 +491,12 @@ class MZSlowVars:
             raise ValueError("max_total_conductance must be positive")
         if c.use_z and c.tau_z <= 0.0:
             raise ValueError("use_z requires tau_z>0")
+        if c.z_frozen_E is not None:
+            zf = np.asarray(c.z_frozen_E, float)
+            if zf.ndim != 1 or not np.all(np.isfinite(zf)) or zf.min() < 0.0 or zf.max() > 1.0:
+                raise ValueError("z_frozen_E must be a finite 1-D field with values in [0,1]")
+            if c.use_z:
+                raise ValueError("z_frozen_E (frozen field) requires use_z=False; a frozen field must not evolve")
         if c.use_m and c.tau_adp <= 0.0:
             raise ValueError("use_m requires tau_adp>0")
         if c.use_phi and (c.tau_phi <= 0.0 or c.delta_phi < 0.0):
