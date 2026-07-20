@@ -54,6 +54,7 @@ from src.topic4_mz_direct_spatial_modes import (  # noqa: E402
     normalized_field_overlap, gaussian_current_field, response_norm, region_response,
     cumulative_response_ratio, axis_kymograph, first_arrival_times, fit_arrival_distance,
     threshold_sensitivity_arrivals, linearity_discrepancy, select_epsilon, right_censoring_label,
+    robust_identifiability_gate,
 )
 
 OUT = os.path.join(ROOT, "results", "topic4_sef_hfo", "mz_direct_spatial_modes")
@@ -589,8 +590,11 @@ def corrected_operator_audit(S, ck, branch, cfg, *, workers, freeze=True):
     disc_full = disc_over(allR)
     split_half_stability = float(linearity_discrepancy(ensK(repA, 0, Tmid), ensK(repB, 0, Tmid)))
     any_sat = bool(n_sat > 0)
-    # STRICT identifiable: full-N gate passes AND both independent halves pass AND no fork saturated
-    identifiable = bool(np.isfinite(disc_full) and disc_full <= tol and discA <= tol and discB <= tol and not any_sat)
+    # STRICT identifiable: full-N + both independent halves are amplitude-consistent, the two halves
+    # recover the same operator, and no fork saturates.  The cross-half term was already computed in
+    # round-2 but was accidentally omitted from the predicate; adding it does not change the 2/9 result.
+    identifiable = robust_identifiability_gate(
+        disc_full, discA, discB, split_half_stability, any_saturated=any_sat, tol=tol)
     out = dict(k_max=int(ca["k_max"]), n_modes=n_modes, n_realizations=N, strength_frac=a_base,
                per_cell_rms_current=round(amps[0], 3), linearity_discrepancy=disc_full,
                disc_convergence=conv, disc_repeatA=discA, disc_repeatB=discB,
@@ -1017,14 +1021,31 @@ def cmd_aggregate(args, cfg):
     for f in sorted(glob.glob(os.path.join(OUT, "per_seed", f"corrected_audit_{label}_seed*_*.json"))):
         d = json.load(open(f))
         s30 = (d.get("sigma1") or {}).get(str(float(cfg["T_windows_ms"][1])), {})
+        robust_id = robust_identifiability_gate(
+            d.get("linearity_discrepancy"), d.get("disc_repeatA"), d.get("disc_repeatB"),
+            d.get("split_half_stability"), any_saturated=bool(d.get("any_fork_saturated")),
+            tol=float(cfg["linearity_tol"]))
+        half_u1_overlap = None
+        arrays_path = os.path.join(
+            OUT, "per_seed", f"corrected_audit_arrays_{label}_seed{d['seed']}_{d['state']}.npz")
+        if robust_id and os.path.exists(arrays_path):
+            aa = np.load(arrays_path)
+            key = f"corr_Kr_a0_T{int(round(cfg['T_windows_ms'][1] / DT))}"
+            if key in aa.files:
+                kr = aa[key]
+                half = kr.shape[0] // 2
+                ua = np.linalg.svd(kr[:half].mean(axis=0), full_matrices=False)[0][:, 0]
+                ub = np.linalg.svd(kr[half:].mean(axis=0), full_matrices=False)[0][:, 0]
+                half_u1_overlap = normalized_field_overlap(ua, ub)
         ca_rows.append(dict(seed=d["seed"], state=d["state"], discrepancy=d["linearity_discrepancy"],
                             disc_repeatA=d.get("disc_repeatA"), disc_repeatB=d.get("disc_repeatB"),
                             disc_convergence=d.get("disc_convergence"), split_half_stability=d.get("split_half_stability"),
                             n_saturated_forks=d.get("n_saturated_forks"), any_fork_saturated=d.get("any_fork_saturated"),
-                            identifiable=d["identifiable"], n_modes=d["n_modes"], n_realizations=d["n_realizations"],
+                            identifiable=robust_id, n_modes=d["n_modes"], n_realizations=d["n_realizations"],
                             per_cell_rms_current=d.get("per_cell_rms_current"),
                             sigma1_T30=s30.get("sigma1"), u1_axis_T30=s30.get("u1_axis"),
-                            u1_glob_T30=s30.get("u1_globality"), u1_corridor_frac_T30=s30.get("u1_corridor_frac")))
+                            u1_glob_T30=s30.get("u1_globality"), u1_corridor_frac_T30=s30.get("u1_corridor_frac"),
+                            u1_half_overlap_T30=half_u1_overlap))
     if ca_rows:
         n_id = sum(1 for r in ca_rows if r["identifiable"])
         _dump(dict(schema_version=SCHEMA_VERSION, tol=float(cfg["linearity_tol"]), rows=ca_rows,

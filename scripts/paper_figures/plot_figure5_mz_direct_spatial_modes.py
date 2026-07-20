@@ -175,9 +175,8 @@ def figure_supp2(label, cfg):
                   left=0.085, right=0.965, top=0.82, bottom=0.2)
 
     # Panel A: identifiability map — full-N discrepancy point + split-half whisker [repA,repB] vs the
-    # 15% gate. Filled = robustly identifiable (full-N AND both independent 8-halves below gate + no
-    # saturation). Shows the split-half is the discriminating check: several full-N points dip below
-    # the gate but their two halves straddle it -> not robust.
+    # 15% gate. Filled = robustly identifiable (full-N + both independent 8-halves + cross-half
+    # operator stability below gate, and no saturation).
     axA = fig.add_subplot(gs[0, 0])
     order = ["baseline", "midpoint", "pre_onset"]
     for xi, st in enumerate(order):
@@ -192,15 +191,16 @@ def figure_supp2(label, cfg):
     axA.axhline(tol, color="k", lw=0.9, ls="--")
     axA.text(2.42, tol, "15% gate", fontsize=6.6, va="center", ha="left")
     n_id = len(ident)
-    axA.text(0.02, 0.98, f"ensemble N=16 · RMS-matched · low-k\norig. thin-input audit 0.5–2.6\n"
-             f"robustly identifiable {n_id}/9 (filled)", transform=axA.transAxes, fontsize=6.0, va="top")
+    axA.text(0.02, 0.98, f"N=16 · two 8-half repeats\nrobust {n_id}/9 (filled)",
+             transform=axA.transAxes, fontsize=6.2, va="top")
     axA.set_xticks(range(3)); axA.set_xticklabels([STATE_SHORT[s] for s in order], fontsize=7.5)
     axA.set_xlim(-0.5, 2.55); axA.set_ylim(0, max(0.5, max(r["discrepancy"] for r in rows.values()) * 1.12))
     axA.set_ylabel("linearity discrepancy\n(point=N16, whisker=8+8 halves)", fontsize=7.3)
     axA.spines[["top", "right"]].set_visible(False); _letter(axA, "a")
 
-    # Panels B/C: the U1 output of EACH robustly identifiable (seed,state) — they DISAGREE (different
-    # modes, opposite orientation), so this is an orientation tendency at isolated points, not a mode.
+    # Panels B/C: U1 from each robustly identifiable condition.  They are internally stable across
+    # halves but come from different state AND seed, so their difference cannot identify a state effect
+    # or a cross-seed failure; it only shows that no shared mode is established by this sparse set.
     Tmid = int(round(cfg["T_windows_ms"][1]))
     ident_sorted = sorted(ident, key=lambda r: r["discrepancy"])[:2]
     for ax_i in range(2):

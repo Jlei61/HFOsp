@@ -392,6 +392,18 @@ def linearity_discrepancy(K_full, K_half):
     return float(np.linalg.norm(a - b) / denom) if denom > 0 else float("nan")
 
 
+def robust_identifiability_gate(disc_full, disc_repeat_a, disc_repeat_b,
+                                split_half_stability, *, any_saturated, tol=0.15):
+    """Strict corrected-audit gate.
+
+    A finite-time operator is robustly identifiable only when the full ensemble and both independent
+    halves are internally amplitude-consistent, the two halves recover the same operator, and no
+    perturbation fork reaches the within-window saturation criterion.
+    """
+    vals = np.asarray([disc_full, disc_repeat_a, disc_repeat_b, split_half_stability], float)
+    return bool(np.all(np.isfinite(vals)) and np.all(vals <= float(tol)) and not any_saturated)
+
+
 def select_epsilon(ladder, discrepancies, saturated, *, tol=0.15):
     """Pick the LARGEST ladder amplitude whose linearity discrepancy <= tol and is not saturated
     (spec §2.3). If none qualify -> `nonlinear_response_only` (fixed-kick only; do NOT widen the

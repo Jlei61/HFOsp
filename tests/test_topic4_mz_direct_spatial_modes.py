@@ -28,6 +28,7 @@ from src.topic4_mz_direct_spatial_modes import (  # noqa: E402
     normalized_field_overlap, gaussian_current_field, response_norm, region_response,
     cumulative_response_ratio, axis_kymograph, first_arrival_times, fit_arrival_distance,
     linearity_discrepancy, select_epsilon, right_censoring_label, balanced_lowk_indices,
+    robust_identifiability_gate,
 )
 
 
@@ -412,6 +413,13 @@ def test_arrival_fit_rejects_low_r2():
     assert not fit["eligible"]
     good = fit_arrival_distance(np.arange(5.0), np.arange(5.0) * 2.0 + 1.0, min_points=4, r2_min=0.5)
     assert good["eligible"] and good["slope"] > 0 and good["r2"] > 0.99   # clean line still passes
+
+
+def test_corrected_identifiability_gate_requires_cross_half_stability():
+    """Within-half amplitude checks do not replace agreement between the two estimated operators."""
+    assert robust_identifiability_gate(0.10, 0.11, 0.12, 0.13, any_saturated=False, tol=0.15)
+    assert not robust_identifiability_gate(0.10, 0.11, 0.12, 0.16, any_saturated=False, tol=0.15)
+    assert not robust_identifiability_gate(0.10, 0.11, 0.12, 0.13, any_saturated=True, tol=0.15)
 
 
 def test_region_response_and_norm():
