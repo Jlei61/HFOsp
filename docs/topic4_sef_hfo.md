@@ -24,7 +24,7 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
-> **M4 MZ entry/exit 更新（2026-07-20）**：current-based MZ 的 exact-nullcline 审计已定位 low saddle-node `z_SN=0.87447467`；existing delayed `S_G` fast block 在该边界前存在大振幅周期，并显示 `R²=0.9993` 的 SNIC-like period slowing。冻结 additive M-current 会移动同一 fold，`z=.85` 时下界约 `0.3165 mV`，但考虑 Z 在 3 个周期内继续下降后 timing oracle 约需 `0.9 mV`。因此旧 `D_R` recurrent-E recovery 方案已 superseded，新 conditional 主路线是 **Z entry + inherited `S_G` inner cycle + causal persistence sensor + bounded additive M recovery field**；空间/SNN 尚未开放。入口：`docs/archive/topic4/sef_hfo/mz_entry_exit_nullcline_audit_2026-07-20.md`。
+> **M4 MZ Stage A/B 更新（2026-07-20）**：additive-current Poincaré continuation 把 attracting cycle loss 定位到 `A=.31645–.31648 mV`，紧贴 fixed-point fold `.3165099 mV`；period 增至 `11.35 s`，inverse-square-root fit `R²=.999987`，当前标签为 **strong SNIC-like candidate, formal label open**。随后 dual-sensor Stage B 得到 clean no-go：同一个 memoryless scalar persistence gate 在真实空间 SNN history 中到 `4.56` 个 A=0 baseline-period equivalents 才开门且第 5 个 equivalent 杠杆不足，在 homogeneous mature-cycle history 中却于 `<0.82` 个 equivalent 开门并构成 prevention；这些不是 dynamic slow trajectory 的真实 return counts。post-no-go latch 只恢复 SNN timing leverage，不能修复空间信息缺失。按 stop rule 未运行完整 0D/空间/SNN；下一节点改为 **spatial-recruitment-set / Z-safe-reset additive recovery latch**，仍不碰并行线的 E→E relay/conductance。入口：`docs/archive/topic4/sef_hfo/mz_additive_orbit_persistence_stage_ab_2026-07-20.md`。
 >
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >

@@ -2,6 +2,8 @@
 
 日期：2026-07-20
 
+> 后续执行更新：formal attracting-cycle continuation 与 persistence dual-sensor Stage B 已完成；最新判定见 `mz_additive_orbit_persistence_stage_ab_2026-07-20.md`。本文保留 entry/exit cheap geometry 的阶段性证据，不再代表当前执行状态。
+
 工作线：`.worktrees/topic4-mz-divisive-lifecycle`
 
 ## 1. 一句话判断
