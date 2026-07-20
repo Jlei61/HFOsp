@@ -1,8 +1,8 @@
-# Topic 4：persistence-gated additive Z–M spatial lifecycle（executed design v0.5）
+# Topic 4：persistence-gated additive Z–M spatial lifecycle（executed design v0.6）
 
 日期：2026-07-20
 
-状态：formal stable-cycle boundary、dual-sensor Stage B 与 seed-1 spatial Gate 0 sentinel 已执行；memoryless 0D gate 为 clean no-go，single-seed operational decomposition 支持 spatial recruitment 是缺失状态，但 formal multiseed Gate 0 仍开放。下一执行节点为 P=1/uniform parity。
+状态：formal stable-cycle boundary、dual-sensor Stage B、seed-1 Gate 0 sentinel 与 P=1/uniform-P parity 已执行。P=1 在 RHS、full trace、directed return、`.31645/.31648` boundary 和 fold surface 上均为 exact identity，已解锁 P=2 frozen-sheet oracle；formal multiseed Gate 0 仍开放。
 
 本线 worktree：`.worktrees/topic4-mz-divisive-lifecycle`
 
@@ -68,6 +68,12 @@ A_G(t)=\max_x\Psi(r_{E,fast}(x,t))\,\rho_{eff}(t),
 > `single_seed_operational_spatial_decomposition_supported_persistence_AND_latch_required`
 
 这允许进入 P=1 parity 和 P=2 cheap oracle，但不允许声称 formal Gate 0 pass，也不允许从该 trace 标定 memoryless rho threshold。
+
+### 0.5 P=1/uniform-P parity：新 scaffold 与 Stage 0C exact identity
+
+通用 state 已锁为 field-major `10P+2`：local `(rE,rI,sEE,sEI,sIE,sII,rEfast,z,p,m)`，全域唯一 shared `(mu_G,S_G)`。parity mode 中 local `dot z=dot p=dot m=0`，冻结 `A=Amax*m` 不 decay。P=1 与 uniform P=4 在 cycle/off-manifold probes、完整 Euler trace 和 `A=0/.30/.316/.31645/.31648` base/half-dt directed returns 上最大误差均为 `0.0`；fold surface `A=0–1.5 mV` 的 mapped RHS 也为 `0.0` 差异。`.31645` 复刻 `11.345 s` clean return，`.31648` 两边均为 `12 s` no-return。
+
+因此 P=2 差异不再能归因于方程重写或 local pool 复制。P=4 ring/uniform matrix 只是 constant-preserving identity probe，不是正式 P=2 coupling；P=2 必须从既有 M3B fixed geometry block-average 导出。
 
 ## 1. 这次反思修正了什么
 
@@ -461,7 +467,7 @@ D_j=z_j-z_{B,j}(A_{max}m_j,X_k).
 ### 6.5 Cheap gates
 
 1. **Gate 0，artifact replay**：seed-1 operational sentinel 已完成。area-weighted local signal 能解释 recorded late gate，并与独立二维 movie extent 一致；但当前 artifact不能精确提取 core occupancy、没有 primary-seed common interval，formal Gate 0 继续开放。新增 capture 最小字段为每步 `sum(z_G),sum(z_G^2),max(z_G)` 与 core/surround compact numerator，不保存 full field/raster。
-2. **Gate 1，P=1/uniform parity**：RHS、period、boundary、constant-preserving kernels 必须复刻 Stage 0C；失败即工程 no-go。
+2. **Gate 1，P=1/uniform parity**：已 PASS。RHS、full trace、period、`.31645/.31648` boundary、fold surface 与 constant-preserving uniform operators 全部 exact；进入 P=2。
 3. **Gate 2，P=2 core–surround**：只跑 memoryless/latch、rho off/on、m off、cross-zone coupling off；`Amax=1.6,tau_p=750,tau_up=125 ms` 起步，不做宽网格。
 4. **Gate 3，coarse 1D field**：两区通过后原参数直接移植；先 `gamma_p=0` 看 wake，再只加一个预注册 broad arm（可用 `1/6`）看 stall/annihilation。
 

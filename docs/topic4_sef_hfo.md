@@ -28,6 +28,8 @@
 >
 > **M4 spatial Gate 0 sentinel（2026-07-20）**：seed-1 artifact replay 在 `p_pool=1` 下把 SNN sensor 严格分成 local peak 与 effective extent。local-intensity-only p 在记录 `421.7 ms` 已被 ordinary IED 误触发；area-weighted p 到 causal macro onset 后 `2758.5 ms` 才过同一阈值。onset-seed→recruited window 中 local peak 仅变 `+2.6%`，effective extent 增 `.099`、独立 24×24 movie PR 增 `.114`，intensity-matched 后仍为正；但 pre-onset `rho_eff` 最大 `.300` 高于 established Q25 `.158`，所以不能锁 memoryless rho threshold。当前只允许 **single-seed operational support**，formal multiseed Gate 0 保持 OPEN；下一步是 P=1 parity → P=2 persistence-AND-recruitment latch。入口：`docs/archive/topic4/sef_hfo/mz_spatial_recruitment_gate0_2026-07-20.md`。
 >
+> **M4 spatial P=1 parity（2026-07-20）**：通用 `10P+2` scaffold 已证明在 P=1/uniform P=4 极限与锁定 Stage 0C additive system exact identity。pointwise RHS、full Euler trace、base/half-dt return、fold surface 最大差异均为 `0.0`；`.31645` clean return `11.345 s` 与 `.31648` no-return within `12 s` 也逐状态一致。local `z/p/m` 本 Gate 严格冻结，全域只有一对 shared `mu_G/S_G`。这只解锁 P=2 fixed-coupling/frozen-sheet oracle，不是空间动力学成功。入口：`docs/archive/topic4/sef_hfo/mz_spatial_patch_p1_parity_2026-07-20.md`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
