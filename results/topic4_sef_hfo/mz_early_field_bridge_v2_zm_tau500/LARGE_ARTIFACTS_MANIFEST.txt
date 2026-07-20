@@ -1,0 +1,15 @@
+# Uncommitted large artifacts (LFP/raster .npz) — task §12 manifest
+# Not in git (repo convention: large .npz stay out). Deterministically reproducible via:
+#   python scripts/run_topic4_mz_early_field_bridge.py --confirm-run \
+#     --config config/topic4_mz_early_field_bridge_v2_zm.yaml \
+#     --output-dir results/topic4_sef_hfo/mz_early_field_bridge_v2_zm_tau500 --seeds 1,3,4
+# path\tsize_bytes\tsha256
+per_seed/seed1/native.npz	10238080	c37d39e0aa41035f6b9bc81ee320a18e56095d0c10fa952dc018e247e9ca4727
+per_seed/seed1/slowoff.npz	8001063	4d41143ecc3e53f7dbd2172d5273f99057bc2182ef762b6403dbb4b6fe20a9dc
+per_seed/seed1/templates.npz	2525	2478f615e4e3947d3dd659ae33e76552b27eb7e8da820d1d589fc0e4112d5fe3
+per_seed/seed3/native.npz	10082389	7fde1291b8dbf11a7c6ab74a26b485c1aaa2c29fb4ea977a87cd43445259c9e8
+per_seed/seed3/slowoff.npz	8000677	f7c4854304cc95413868563385ca0bba5cb636e1280f01bba988389fb30b98fd
+per_seed/seed3/templates.npz	2547	756bcb49790339ee1d9b9c37e6de645b1fd6ed5f015f7abdc2ff4a1051c964bd
+per_seed/seed4/native.npz	10243503	45b3f8c0613c292c68ddc5a18f8dcf97799b8bbeffe49605d846dd3a1eb6a98f
+per_seed/seed4/slowoff.npz	8006378	9b12fed072c69061584c5407a9a210e62e2918abbd2e7866c11bb56ddf93f31f
+per_seed/seed4/templates.npz	2591	1d7d68c0dd898597b622381005efc72e3d998b64e14c797a31af4c0af419c939
