@@ -1,8 +1,8 @@
-# Topic 4：persistence-gated additive Z–M spatial lifecycle（executed design v0.7）
+# Topic 4：persistence-gated additive Z–M spatial lifecycle（executed design v1.0）
 
 日期：2026-07-20
 
-状态：formal stable-cycle boundary、dual-sensor Stage B、seed-1 Gate 0 sentinel、P=1 parity 与 P=2 whole-sheet frozen-fast oracle 已执行。P=2 保存 LL/CC，但 focal CL 在 fixed K 下回 LL、在 K=I 下越出 support；下一 cheap gate 已修正为 P=3 core–annulus–bath。formal multiseed Gate 0 仍开放。
+状态：本设计链已执行到 inhibitory-reserve constant-recovery R2。P3 证明 bounded localized CCO 存在但 fast CLL hand-off negative；regional frozen oracle 证明 real entry fold + delayed additive exit + 同一 low basin；autonomous additive slow loop得到 registered-margin clean no-go。R0b 随后确认 fixed-q additive-exit safe strip，R1 证明 reserve 可稳定 hold CCO 但 `tau_r=20 s` 在第5事件提前 entry，R2 又证明常数恢复只能在孤立的 `80 s` 节点同时满足 entry 与 reset，未形成 3-node corridor。coupled R2 保持关闭；下一节点仅为 M-gated state-dependent recovery cheap-first。formal multiseed Gate 0 仍开放。
 
 本线 worktree：`.worktrees/topic4-mz-divisive-lifecycle`
 
@@ -90,6 +90,58 @@ canonical M3B `n=48,L=12 mm,r_core=1.5 mm` 的 single-core/full-complement Galer
 因此当前 p=1 architecture 的 fast spatial failure 不是单向的：小 core 对 shared divisor 的面积贡献太弱，去掉 cross-zone coupling 会失控；保留 full-surround coupling 时，低态 bath 又把 core 过度压回 low。M 的 exit leverage 尚未开始 build，系统已经缺少 latch 所需的 focal `CL` 驻留窗口。
 
 同时修正原 P=2 stop rule：把 95% complement 压成一个变量会稀释 near-boundary wake，`CL` 未招募 whole-surround 不能单独否定 wavefront。下一最小对象是完整质量守恒的 P=3 `core / equal-area annulus / far bath`；不能截取两区后 row-normalize，因为那会把遗漏 bath mass 人为塞回 cross coupling。
+
+### 0.7 P=3 frozen-fast：target cycle 存在，fast hand-off negative
+
+core/equal-area-annulus/bath 的真实权重为 `(.049045,.048611,.902344)`，`K_EE/K_I` 同时满足 row sum 与面积平稳性。预置 core+annulus cycle 的四相位在 base/half-dt 均为 bounded `CCO`：约 29–30 returns、period `.6705–.6708 s`、Poincaré closure 达标、bath 0 returns；瞬时约 136-Hz 峰值没有形成 sustained ceiling。
+
+但 `CLL/LCL` 四相位全部回 `LLL`，annulus 没有在 core exit 前建立 returns。结论因此拆为：
+
+- bounded localized fast-cycle target：PASS；
+- single-core fast spatial hand-off：NEGATIVE。
+
+这不解锁 direct local slow latch，只允许一个 shared regional-Z entry/exit oracle；不能把预置 CCO 写成 spontaneous onset。
+
+### 0.8 Regional frozen oracle：real entry fold 与 additive exit 均存在
+
+在 `z=(z_R,z_R,.90),A=0` 上，6D equilibrium manifold 的增广解得到：
+
+\[
+z_R^{SN}=.8558315843,
+\]
+
+23D fast leading eigenvalue 约 `-2.10e-8+0i/ms`，`u^T F_z=-.02558`、`u^T D²F[v,v]=34.99`，bath critical-mode fraction `2.08%`。同一 low history 在 `.8560` 保持 LLL，在 `.8555` 进入 bounded CCO。
+
+established-cycle fork 中，regional `A=(A,A,0)` 的首个确认 delayed exit 为：
+
+- `z=.855`：`.02 mV`；
+- `z=.850`：`.12 mV`。
+
+matched A=0 持续 CCO；参数恢复到 `z=.90,A=0` 后 `16/16` 回同一 LLL basin。8 个 frozen gate 全通过，解锁一个 autonomous regional slow-loop test。
+
+### 0.9 Autonomous regional latch：registered-margin clean no-go，触发 stop rule 7
+
+fixed-seed ordinary-event schedule 在 slow-off 下产生 6 次 returning events；shared regional Z 在 base/half-dt 均于 `11.0 s` 自主跨 fold。在 fixed bath-resource mask 下 bath `z=.90` 且无 returns；这不是 emergent containment。persistence/recruitment calibration 使 latch 不被普通 IED 误触发。
+
+但完整 slow loop 出现不可兼得的时序边界：
+
+- `p_on=.115,tau_m_up=200 ms`：finite exit，但只有 3 个 pulse-free returns；
+- `p_on=.115,tau_m_up=225 ms`：保留 4 returns，约 `13.91 s` 离开 transfer support；
+- `p_on=.120,tau_m_up=100 ms`：延后 set 后仍在 4 returns、约 `13.61 s` 离开 support。
+
+六 arm 的 base/half-dt outcome 全一致，无 four-return finite-low-tail candidate。225-ms arm 第 4 次 annulus return 到 support escape 仅约 `18.9 ms`，故不能数学排除无稳健余量的中间值，但它违反 `<.25 return` stop rule。原因是 CCO 中 `dot z<0` 持续把 `A_exit(z)` 上推；M 快则过早 exit，M 稍慢或 gate 稍晚则 Z 先离开 validated corridor。进一步续算显示 failure 接近二维 low-root fold `(q,A)`，而非一维 q-support boundary。该结果触发 stop rule 7：关闭继续扫 `tau_m/p_on/Amax`，下一 cheap object 改为 depletable + nondepletable inhibitory reserve 的二维 frozen corridor；dynamic threshold 只在 reserve 留下 tonic plateau 时作为条件第二臂。
+
+### 0.10 Inhibitory-reserve R0b：fixed-q exit corridor 通过
+
+在 `q=.835-.845` 的连续 5-node strip 上，四 phase、base/half-dt 的 established CCO 均可由原 225-ms occupancy-gated M ramp 退出，并且全过程没有 support/bound/nonfinite failure；恢复 `q=.90,A=0` 后回到同一 LLL basin。该节点证明 `A_exit(q)` 与首次 failure 之间有 registered margin，因此 autonomous latch 的失败不是 fast exit geometry 本身不存在。
+
+### 0.11 R1 mapping：CCO hold 成立，20-s event ordering 不成立
+
+从完整 fixed-q CCO sensor 的 exact periodic map 反解 `q_res`，再只用不变的 event-6 final target 反解 `tau_D`。三 `q_hold` × 四 phase × 两 source-dt 的 periodic orbit 全部有界、contractive 且 exact closure，但 `tau_r=20 s` 的六事件 replay 在第5事件提前跨 entry fold。H/tanh thresholded eligibility 的完整 root/sensitivity scan也没有稳健 safe cell，因此关闭继续添加单调 eligibility gain。
+
+### 0.12 R2 constant recovery：单点可行但 corridor clean no-go
+
+锁定 `tau_r=[20,40,50,60,70,80,90,100,120,160] s` 后，30/30 mapping roots 与 4,800-row scan 均数值闭合；延长恢复可以保存跨事件耗竭，使 entry 推迟到第6事件。与此同时，postictal latch reset 要求 `q` 在 120 s 内恢复到 `.885`，使高 `tau_r` nodes 失败。只有 `80 s` 在全部三个 `q_hold` 上同时通过 entry、periodic、schedule 与 handoff；未满足至少3个连续节点，故不运行 coupled R2。该 no-go 暴露的是同一常数同时承担 preictal memory 与 postictal reset 的结构冲突，不是 fast Hopf 或 CCO branch 的结论。
 
 ## 1. 这次反思修正了什么
 
@@ -495,8 +547,14 @@ P=2 结果表明 whole-surround averaging 对 local wavefront 是错仪器：cor
 1. **Gate 0，artifact replay**：seed-1 operational sentinel 已完成。area-weighted local signal 能解释 recorded late gate，并与独立二维 movie extent 一致；但当前 artifact不能精确提取 core occupancy、没有 primary-seed common interval，formal Gate 0 继续开放。新增 capture 最小字段为每步 `sum(z_G),sum(z_G^2),max(z_G)` 与 core/surround compact numerator，不保存 full field/raster。
 2. **Gate 1，P=1/uniform parity**：已 PASS。RHS、full trace、period、`.31645/.31648` boundary、fold surface 与 constant-preserving uniform operators 全部 exact；进入 P=2。
 3. **Gate 2，P=2 whole-sheet frozen fast**：已完成。LL/CC 保存；CL fixed K→LL、K=I→support failure；不进入 slow latch。
-4. **Gate 2b，P=3 core–annulus–bath**：只跑 frozen fast、cross-zone coupling off 与 base/half-dt；先判断 local hand-off，不扫 `Amax/tau_p/tau_up`。
-5. **Gate 3，coarse 1D field**：P=3 有 local hand-off 后原参数直接移植；先 `gamma_p=0` 看 wake，再只加一个预注册 broad arm（可用 `1/6`）看 stall/annihilation。
+4. **Gate 2b，P=3 core–annulus–bath**：已完成。bounded CCO existence PASS；CLL/LCL fast hand-off NEGATIVE。只解锁 regional-Z oracle，不解锁 direct field。
+5. **Gate 2c，regional frozen entry/exit**：已 PASS。localized real fold、post-fold bounded CCO、event-locked additive exit 与 parameter-restoration basin 均成立。
+6. **Gate 2d，autonomous regional Z–p–M**：已 registered-margin clean no-go。3-return finite exit 与 4-return support escape 构成 moving-boundary timing conflict，关闭 additive timing 精调。
+7. **Gate R0，inhibitory-reserve 二维 frozen corridor**：已 PASS。`.835-.845` fixed-q safe strip 在 smooth M ramp、恢复 basin 与双 dt 上均成立。
+8. **Gate R1，reserve mapping / periodic hold / event entry**：已完成。periodic hold PASS；`tau_r=20 s` event ordering clean no-go；thresholded eligibility robustness clean no-go。
+9. **Gate R2，constant recovery-timescale continuation**：已 clean no-go。只有 `80 s` 单节点全 q-hold 通过，未达到至少3连续节点；禁止 coupled R2。
+10. **Gate R3，M-gated state-dependent recovery**：下一 cheap-first 节点。先做 nullcline、event-map 与 hybrid path necessary-condition oracle；只有形成跨至少3个 `tau_slow` 节点且通过 fixed `tau_fast` sensitivity 的 corridor，才允许短 P3 state-fork。
+11. **Gate 3，coarse 1D field**：保持关闭。reserve P=3 完整 lifecycle 通过后才移植；先 `gamma_p=0` 看 wake，再只加一个预注册 broad arm看 stall/annihilation。
 
 必须用真实 Poincaré returns 计 cycle。near-boundary period 已达到 `1.6–11.3 s`，不能再用固定 `604.8 ms × cycle count` 代替真实快慢时标。
 
@@ -510,9 +568,9 @@ P=2 结果表明 whole-surround averaging 对 local wavefront 是错仪器：cor
 2. area-weighted local occupancy 不能解释 `U_TG` 的 late spatial gate，或正式 SNN 确认阶段 primary seeds 没有共同 spatiotemporal separation；当前 seed-1 replay 支持前者，但 instantaneous rho interval 明确失败，所以未来 slow P3/field 必须使用 persistence AND recruitment，不能 memoryless set；
 3. P=1/uniform-P 不能复刻原 Stage 0C RHS、period 或 boundary；
 4. 每个 patch 拥有自己的 `mu_G/S_G`，而不是全域唯一 shared pool；
-5. P=3 fixed coupling 下 `CLL` 在 annulus 获得三个 bounded returns 前已退出，或只剩 support runaway；此时停止本 additive architecture，不用大网格挽救；
+5. P=3 fixed coupling 下 `CLL` 在 annulus 获得三个 bounded returns 前已退出，或只剩 support runaway；direct fast-handoff route 停止。若预置 CCO 独立通过 boundedness，只允许一个 regional-Z frozen entry/exit oracle，不得直接跳 field；本例已按该例外执行；
 6. core-only 时 latch 在第 3 个真实 return 前 set，重新造成 prevention；
-7. recruitment 后 `A_max m(t)` 仍追不上随 Z 下降而上升的 exit boundary；
+7. recruitment 后 `A_max m(t)` 仍追不上随 Z 下降而上升的 exit boundary；本例已触发（3-return finite exit vs 4-return support escape），因此 exact additive regional latch 已关闭；
 8. crossing 距 3–5 return window 边缘小于 `.25 return`，或 current margin 小于 `.1 mV`/预注册 uncertainty band；当前 `4.958 baseline-period equivalents,.034 mV` latch diagnostic 因此不能升格；
 9. slow vector 在 `CL/CC` exit curve 前形成 stable cycle-sheet fixed point；
 10. transition-near orbit 的 `>=100 Hz` violation 在 base/half `dt` 均持续；
@@ -530,6 +588,8 @@ P=2 结果表明 whole-surround averaging 对 local wavefront 是错仪器：cor
 
 > Mass-balanced P=2 保存 homogeneous LL/CC，但不存在可维持 focal CL：fixed K 把四相位 CL 压回 LL，K=I 则越出 transfer support。该结果定位到 shared-pool dilution 与 low-bath coupling 的相反作用；由于 full-complement averaging 稀释 local wake，它只解锁 P=3 core–annulus–bath，不能写成 wavefront no-go。
 
+> Mass-balanced P=3 存在预置的 bounded localized CCO，但 CLL/LCL 不能靠 fast coupling 自主进入它。regional Z 提供一个 localized real entry fold，delayed regional additive A 提供 established-cycle exit；然而 autonomous Z–p–M slow flow 存在 clean timing conflict：安全 finite exit 早于 4-return gate，而保留 4 returns 的 arms 先离开 transfer support。该 no-go 关闭的是当前 slow-flow law，不否定 frozen fast geometry。
+
 禁止写：
 
 - 已证明 SNIC；
@@ -538,6 +598,10 @@ P=2 结果表明 whole-surround averaging 对 local wavefront 是错仪器：cor
 - 已形成 torus；
 - 已有 spatial seizure front、containment 或 recovery；
 - 已完成完整 SNN lifecycle。
+- 3-return finite exit 已通过 ictal lifecycle；
+- support escape 或 NaN 可以当 termination；
+- 继续细扫 `tau_m/p_on/Amax` 足以修复 moving-boundary conflict；
+- P3 regional shared coordinates 已经等同于连续空间 wavefront；
 - latched diagnostic 已通过生命周期验收；
 - memoryless no-go 可以靠继续扩大 `Amax` 直接抢救；
 - homogeneous phase sensor 可以代表局部起始后逐步扩大的空间招募。
