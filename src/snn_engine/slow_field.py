@@ -131,6 +131,9 @@ class SpatialSlowFieldConfig:
     n_r: float = 2.0           # Phi(p) Hill exponent (used only if p50_r>0)
     p_init: float = 0.0        # initial p (parity requires 0 when off)
     clamp_persist: float = None  # open-loop probe / E4 ablation: freeze p at this value (None -> normal dynamics)
+    tau_p_down: float = None   # asymmetric decay time (ms); None -> symmetric (== tau_p). When set, p CHARGES with
+                               # tau_p (fast, short ictal) but DECAYS with tau_p_down (slow) once activity drops --
+                               # a long hold that lets q_I refill (continuous analog of R4's active-low M freeze).
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -194,6 +197,8 @@ class SpatialSlowFieldConfig:
                 raise ValueError(f"p_init must be in [0, 1], got {self.p_init}")
             if self.clamp_persist is not None and not (0.0 <= self.clamp_persist <= 1.0):
                 raise ValueError(f"clamp_persist must be in [0, 1], got {self.clamp_persist}")
+            if self.tau_p_down is not None and self.tau_p_down <= 0.0:
+                raise ValueError(f"tau_p_down must be > 0 when set, got {self.tau_p_down}")
 
 
 # ---------------------------------------------------------------------------
@@ -405,7 +410,11 @@ class SpatialSlowField:
             if cfg.clamp_persist is None:                           # of supra-theta_p activity (frozen when clamped)
                 a_p = convolve_periodic(self.rE, self._Kp)         # smoothed EMA rate (sustained activity)
                 drive = saturation(a_p, cfg.theta_p, cfg.a50_p)    # Psi(K_p*r_E - theta_p) in [0,1)
-                self.p += dt * (drive - self.p) / cfg.tau_p        # tau_p dp/dt = Psi - p
+                if cfg.tau_p_down is None:
+                    self.p += dt * (drive - self.p) / cfg.tau_p    # tau_p dp/dt = Psi - p (symmetric)
+                else:                                              # asymmetric: charge tau_p (fast), decay tau_p_down (slow)
+                    tau_eff = np.where(drive >= self.p, cfg.tau_p, cfg.tau_p_down)
+                    self.p += dt * (drive - self.p) / tau_eff      # long hold once activity drops -> q_I refills
                 np.clip(self.p, 0.0, 1.0, out=self.p)
             self.trace_p_mean.append(float(self.p.mean()))
             self.trace_p_max.append(float(self.p.max()))

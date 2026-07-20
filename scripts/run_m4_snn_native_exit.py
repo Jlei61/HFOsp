@@ -124,7 +124,7 @@ def _cell_worker(cell):
 # ===========================================================================================
 def _persist_cfg(*, k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG, use_persist=False,
                  tau_p=5000.0, theta_p=0.0, a50_p=1.0, sigma_p=1.5, eta_r=0.0,
-                 p50_r=0.0, n_r=2.0, clamp_persist=None):
+                 p50_r=0.0, n_r=2.0, clamp_persist=None, tau_p_down=None):
     """M4 base config (k_q depletion + S_G pool, params from run_m4_dynamic_qi) + persistence field."""
     return SpatialSlowFieldConfig(
         use_qI=True, k_q=k_q, sigma_q=M4.SIGMA_Q, sigma_K=0.5, q_min=M4.Q_MIN, q_init=1.0,
@@ -132,7 +132,7 @@ def _persist_cfg(*, k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG, use_persist=False
         use_SG=use_SG, alpha_G=alpha_G, r0_psi=0.0, r50_psi=M4.R50_PSI, n_psi=M4.N_PSI,
         p_pool=M4.P_POOL, tau_mu=M4.TAU_MU, tau_S=M4.TAU_S, S_max=M4.S_MAX,
         use_persist=use_persist, tau_p=tau_p, theta_p=theta_p, a50_p=a50_p, sigma_p=sigma_p,
-        eta_r=eta_r, p50_r=p50_r, n_r=n_r, clamp_persist=clamp_persist)
+        eta_r=eta_r, p50_r=p50_r, n_r=n_r, clamp_persist=clamp_persist, tau_p_down=tau_p_down)
 
 
 def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
@@ -190,7 +190,8 @@ def _arm_worker(spec):
 
 def _build_arms(a):
     """Arms A-E (spec §8), or a D-only (tau_p:eta_r) sweep. P = calibrated persistence params (from Stage-1)."""
-    P = dict(tau_p=a.tau_p, theta_p=a.theta_p, a50_p=a.a50_p, sigma_p=a.sigma_p, p50_r=a.p50_r, n_r=a.n_r)
+    P = dict(tau_p=a.tau_p, theta_p=a.theta_p, a50_p=a.a50_p, sigma_p=a.sigma_p, p50_r=a.p50_r, n_r=a.n_r,
+             tau_p_down=a.tau_p_down)
     T = a.T
     base = dict(k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG)
     if a.d_sweep:                          # arm-D (tau_p:eta_r) grid, one build shared across cells
@@ -276,6 +277,8 @@ def main():
     ap.add_argument("--include-anchor", dest="include_anchor", default=False, action=argparse.BooleanOptionalAction,
                     help="d-sweep: also run B_m4_anchor as the un-terminated reference")
     ap.add_argument("--tau-p", dest="tau_p", type=float, default=5000.0)
+    ap.add_argument("--tau-p-down", dest="tau_p_down", type=float, default=None,
+                    help="asymmetric p decay time (ms); None -> symmetric. Fast charge (tau_p) + slow decay = long hold")
     ap.add_argument("--theta-p", dest="theta_p", type=float, default=0.0)
     ap.add_argument("--a50-p", dest="a50_p", type=float, default=1.0)
     ap.add_argument("--sigma-p", dest="sigma_p", type=float, default=1.5)

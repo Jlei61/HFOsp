@@ -105,6 +105,25 @@ def test_duration_selectivity():
     assert p_long > 5.0 * p_short                          # sustained accumulates far more than a brief burst
 
 
+# ---- Asymmetric p: fast charge, slow decay (long hold once activity drops) ----------------
+def test_asymmetric_p_slow_decay():
+    p, net, NE, NI = _net()
+
+    def _decay_from_high(**cfgkw):
+        # theta_p high + zero activity -> drive=0 < p -> pure DECAY branch (isolates tau_p vs tau_p_down)
+        slow = _slow(p, net, use_persist=True, theta_p=10.0, a50_p=0.3, tau_p=200.0, eta_r=0.0, **cfgkw)
+        slow.p[:] = 0.9
+        slow.rE[:] = 0.0
+        spk_off = np.zeros(NE + NI, bool)
+        for _ in range(2000):                       # 200 ms quiet decay
+            slow.step(spk_off, net["labels"], DT)
+        return float(slow.p.mean())
+
+    p_sym = _decay_from_high()                      # decays with tau_p=200 -> ~0.9*e^-1 = 0.33
+    p_asym = _decay_from_high(tau_p_down=5000.0)    # decays with tau_p_down=5000 -> ~0.9*e^-0.04 = 0.865
+    assert p_asym > 2.0 * p_sym                     # asymmetric holds p far higher (long hold once activity drops)
+
+
 # ---- Clause 4: clamp ----------------------------------------------------------------------
 def test_clamp_persist_frozen():
     p, net, NE, NI = _net()
