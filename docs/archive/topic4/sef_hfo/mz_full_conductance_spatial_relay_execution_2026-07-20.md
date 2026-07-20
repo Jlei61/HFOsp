@@ -247,6 +247,23 @@ dt=0.05 自己的参照 all_bands=False（participation/peak 在带内、event_c
 | dt=0.05 | 22 | 36.5 | 6.03 | ✗（跨-dt 检测混淆） | ✓ | 94.1 | 细网无 clip、但事件数漂 |
 | **Stage C g_sat=21.6** | **28** | **26.5** | **3.49** | **✓** | **✓** | **81.1** | **零 clip + workpoint 保住 = 干净解** |
 
-**下一步**：按审阅 §6 step 3，arm C+saturation 已同时数值安全且完整 band → **seed3 确认**（运行中）；通过后锁方程
-`tau_m V̇ = −V + I_E^{ff} + g_sat·tanh(g_rec_raw/g_sat)·(E_E−V)/... + g_I(E_I−V)` 再进 Stage D（带 eigenvalue/eigenvector
-readout 的原 Stage 1，查有限高支；有限高支成立前不加 X）。g_sat ±20%（17.3/25.9）sensitivity 作稳健性补充。
+**seed3 确认 + g_sat ±20% sensitivity——全部通过：**
+
+| seed | g_sat | n_ret | part% | all_bands | settled_safe | preserves | n_clip | max_total |
+|---|---:|---:|---:|---|---|---|---:|---:|
+| 1 | 21.6 | 28 | 3.49 | ✓ | ✓ | ✓ | 0 | 81.1 |
+| **3** | 21.6 | 31 | 3.56 | ✓ | ✓ | ✓ | 0 | 78.9 |
+| 1 | 17.3(−20%) | 29 | 3.19 | ✓ | ✓ | ✓ | 0 | 76.3 |
+| 1 | 25.9(+20%) | 30 | 3.67 | ✓ | ✓ | ✓ | 0 | 84.7 |
+
+**四个 run 全部 preserves_workpoint=True + 零 clip。两个 primary seed 一致确认，且对 g_sat ±20% 稳健。** 审阅 §6 Stage C
+再验收标准（seed1/3 workpoint、零 hard-clip、±20% sensitivity）全满足。saturation 是 off-by-default byte-parity 的
+state-dependent 缩放（不改连接），主模态空间结构保留（criterion 4）。
+
+**FCXR-RC1 净判决：审阅推荐的整条 recurrent-only + smooth-saturation 主线在两个 primary seed 上验收通过。** full-conductance
+的原 NO-GO（都改成电导）被拆成"外源电导过活跃 + recurrent 电导单核局部 shunting clip"，只把 recurrent 成电导 + 只对
+recurrent 做平滑饱和，既保住间期 workpoint 又零 clip。
+
+**下一步（Stage D，单独 session）**：锁方程 `tau_m V̇ = −V + I_E^{ff} + g_sat·tanh(g_rec_raw/g_sat)·(E_E−V)/(E_E−V_match) + g_I(E_I−V)`
+（去 hard cap，用 smooth saturation），冻结 Z/X 沿失效轴 D 扫，带 eigenvalue/eigenvector/IPR readout 查**有限高支**
+（low branch → Z 耗竭降 finite-amplitude ignition 阈 → 高态 saturation 使 S' 降、主模态重新有界 → 才 X）。**有限高支成立前不加 X。**
