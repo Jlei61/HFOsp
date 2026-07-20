@@ -11,6 +11,7 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- 2026-07-20 MZ spatial P=2 frozen fast：`docs/archive/topic4/sef_hfo/mz_spatial_p2_frozen_sheets_2026-07-20.md`。真实面积/质量守恒 whole-sheet P=2 保存 LL/CC，但 focal CL 在 fixed K 下回 LL、K=I 下越出 support；定位为 small-core shared-pool dilution 与 low-bath over-containment 的夹击。full-complement 不能否定 local front，下一 gate 修正为 P=3 core–annulus–bath。
 - 2026-07-20 MZ spatial P=1 parity：`docs/archive/topic4/sef_hfo/mz_spatial_patch_p1_parity_2026-07-20.md`。通用 `10P+2` shared-pool scaffold 与 Stage 0C additive vector field 在 RHS/full trace/return boundary/fold surface 上 exact identity，解锁 P=2；本节点不含空间 recruitment 结论。
 - 2026-07-20 MZ spatial Gate 0 sentinel：`docs/archive/topic4/sef_hfo/mz_spatial_recruitment_gate0_2026-07-20.md`。seed-1 operational decomposition 支持 spatial extent 是 Stage-B 缺失状态，但 instantaneous rho separation 与 multiseed/core-specific artifact 均未闭合；formal Gate 0 保持 OPEN，进入 P=1 parity 后再决定 P=2。
 - 2026-07-20 MZ additive Stage A/B 最新判定：`docs/archive/topic4/sef_hfo/mz_additive_orbit_persistence_stage_ab_2026-07-20.md`。Stable fast boundary 为 strong SNIC-like candidate（formal label open）；memoryless scalar persistence dual-sensor screen 为 clean no-go，按 stop rule 未进入完整 0D/空间/SNN。下一节点是 spatial-recruitment-set / Z-safe-reset additive latch。

@@ -1,8 +1,8 @@
-# Topic 4：persistence-gated additive Z–M spatial lifecycle（executed design v0.6）
+# Topic 4：persistence-gated additive Z–M spatial lifecycle（executed design v0.7）
 
 日期：2026-07-20
 
-状态：formal stable-cycle boundary、dual-sensor Stage B、seed-1 Gate 0 sentinel 与 P=1/uniform-P parity 已执行。P=1 在 RHS、full trace、directed return、`.31645/.31648` boundary 和 fold surface 上均为 exact identity，已解锁 P=2 frozen-sheet oracle；formal multiseed Gate 0 仍开放。
+状态：formal stable-cycle boundary、dual-sensor Stage B、seed-1 Gate 0 sentinel、P=1 parity 与 P=2 whole-sheet frozen-fast oracle 已执行。P=2 保存 LL/CC，但 focal CL 在 fixed K 下回 LL、在 K=I 下越出 support；下一 cheap gate 已修正为 P=3 core–annulus–bath。formal multiseed Gate 0 仍开放。
 
 本线 worktree：`.worktrees/topic4-mz-divisive-lifecycle`
 
@@ -74,6 +74,22 @@ A_G(t)=\max_x\Psi(r_{E,fast}(x,t))\,\rho_{eff}(t),
 通用 state 已锁为 field-major `10P+2`：local `(rE,rI,sEE,sEI,sIE,sII,rEfast,z,p,m)`，全域唯一 shared `(mu_G,S_G)`。parity mode 中 local `dot z=dot p=dot m=0`，冻结 `A=Amax*m` 不 decay。P=1 与 uniform P=4 在 cycle/off-manifold probes、完整 Euler trace 和 `A=0/.30/.316/.31645/.31648` base/half-dt directed returns 上最大误差均为 `0.0`；fold surface `A=0–1.5 mV` 的 mapped RHS 也为 `0.0` 差异。`.31645` 复刻 `11.345 s` clean return，`.31648` 两边均为 `12 s` no-return。
 
 因此 P=2 差异不再能归因于方程重写或 local pool 复制。P=4 ring/uniform matrix 只是 constant-preserving identity probe，不是正式 P=2 coupling；P=2 必须从既有 M3B fixed geometry block-average 导出。
+
+### 0.6 P=2 whole-sheet frozen-fast：LL/CC 保存，但 focal CL sheet 缺失
+
+canonical M3B `n=48,L=12 mm,r_core=1.5 mm` 的 single-core/full-complement Galerkin projection 给出真实面积权重 `f=(.049045,.950955)`。正式 `K_EE/K_I` 同时满足 row sum=1 与 `f^T K=f^T`，最大误差 `2.22e-16`；不能再使用 equal P weights。
+
+20 s base/half-dt (`.125/.0625 ms`) frozen forks 得到一致标签：
+
+- `LL→LL`，包括反对称扰动；
+- 同步/相对相位 `CC→CC`；
+- `CL→LL`，四个 cycle phases 全部成立，core 未完成一个 local return；
+- `K=I` 时四个 `CL` 全部越出 transfer support；
+- `LC→CC` 只在 fixed K 出现，但这里 active surround 已占 95.1% tissue，不能解释成局部 front。
+
+因此当前 p=1 architecture 的 fast spatial failure 不是单向的：小 core 对 shared divisor 的面积贡献太弱，去掉 cross-zone coupling 会失控；保留 full-surround coupling 时，低态 bath 又把 core 过度压回 low。M 的 exit leverage 尚未开始 build，系统已经缺少 latch 所需的 focal `CL` 驻留窗口。
+
+同时修正原 P=2 stop rule：把 95% complement 压成一个变量会稀释 near-boundary wake，`CL` 未招募 whole-surround 不能单独否定 wavefront。下一最小对象是完整质量守恒的 P=3 `core / equal-area annulus / far bath`；不能截取两区后 row-normalize，因为那会把遗漏 bath mass 人为塞回 cross coupling。
 
 ## 1. 这次反思修正了什么
 
@@ -364,7 +380,7 @@ entry 必须在 `D=0` 时满足 `dot D<0`；exit 必须在 `D=0` 时满足 `dot 
 
 当前 dual-sensor no-go 已证明 homogeneous mature cycle 和逐步扩大 recruited area 不是同一个 autonomous nullcline。下一步先用 `0D+rho replay` 检验 recruited fraction 是否真能解释晚 gate，但它只允许作为 necessary-condition oracle；外加一个 logistic `rho(t)` 不能算空间模型。
 
-真正的最小动力学节点是 **core–surround 两区**。实现可写成通用 P-patch 模块，但执行顺序必须为 `P=1 parity → P=2 core–surround → P=32/64 coarse field`，不能直接用 field 大网格同时调 sensor、coupling 和 termination。
+第一层最小诊断节点是 **core–whole-surround 两区**；它已经证明 fast low/cycle manifold 保存，但无法解析 local front。执行顺序现修正为 `P=1 parity → P=2 whole-sheet mass audit → P=3 core–annulus–bath → P=32/64 coarse field`，不能直接用 field 大网格同时调 sensor、coupling 和 termination。
 
 ### 6.2 P-patch 状态与共享 pool
 
@@ -399,10 +415,10 @@ s_{II}\leftarrow K_I*r_I.
 共享 recruitment pool 为：
 
 \[
-A_G=\left[\frac{1}{P}\sum_j\Psi(\bar r_{E,j})^{p_G}\right]^{1/p_G},
+A_G=\left[\sum_j f_j\Psi(\bar r_{E,j})^{p_G}\right]^{1/p_G},
 \]
 
-并沿用锁定的 `tau_mu/tau_S` 更新唯一 `mu_G/S_G`。
+其中 `f_j` 是离散 tissue area fraction，必须显式保存、满足 `sum f=1`，并沿用锁定的 `tau_mu/tau_S` 更新唯一 `mu_G/S_G`。P=2 canonical core 仅占 `.0490`；用 `1/P=.5` 会把 focal pool 人为放大约 10 倍，已禁止。
 
 ### 6.3 Recruitment AND gate 与 latch
 
@@ -443,9 +459,9 @@ A_j=A_{max}m_j,
 
 其中 `ell_j` 是上述 set/reset 合同的 hybrid state。memoryless `ell_j=G_on,j` 必须保留为负 baseline，不能删除。
 
-### 6.4 Core–surround frozen sheets
+### 6.4 Core–surround frozen sheets 与 P=3 修正
 
-两区先只检查 `LL/CL/CC/LC` 四个 sheet。邻区状态会移动本区边界，因此需要：
+两区 `LL/CL/CC/LC` 已执行。邻区状态会移动本区边界，因此原目标写为：
 
 \[
 z_{B,j}=z_{B,j}(A_j,X_k^{L/C}),
@@ -464,12 +480,23 @@ D_j=z_j-z_{B,j}(A_{max}m_j,X_k).
 
 `CL/CC` sheet 内若三个 slow nullcline在 exit boundary 前形成共同稳定点，判 permanent-bursting trap。
 
+P=2 结果表明 whole-surround averaging 对 local wavefront 是错仪器：core→surround 的平均 `K_EE=.01136` 被 95% complement 稀释，而 surround→core 为 `.22032`。下一正式 cheap object 必须是：
+
+\[
+\Omega_c:r\le R,\qquad
+\Omega_f:R<r\le\sqrt2R,\qquad
+\Omega_b:\text{其余 tissue},
+\]
+
+其中 core 与 front annulus 等面积，far bath 保留为第三列/第三个动态 patch。完整 3×3 operator 必须同时满足 `K1=1` 与 `f^T K=f^T`；禁止删 bath 后把两列重新归一化。P=3 先检验 `CLL→CCL/CCC` 是否在 core 熄灭前发生，仍不加 slow variables。
+
 ### 6.5 Cheap gates
 
 1. **Gate 0，artifact replay**：seed-1 operational sentinel 已完成。area-weighted local signal 能解释 recorded late gate，并与独立二维 movie extent 一致；但当前 artifact不能精确提取 core occupancy、没有 primary-seed common interval，formal Gate 0 继续开放。新增 capture 最小字段为每步 `sum(z_G),sum(z_G^2),max(z_G)` 与 core/surround compact numerator，不保存 full field/raster。
 2. **Gate 1，P=1/uniform parity**：已 PASS。RHS、full trace、period、`.31645/.31648` boundary、fold surface 与 constant-preserving uniform operators 全部 exact；进入 P=2。
-3. **Gate 2，P=2 core–surround**：只跑 memoryless/latch、rho off/on、m off、cross-zone coupling off；`Amax=1.6,tau_p=750,tau_up=125 ms` 起步，不做宽网格。
-4. **Gate 3，coarse 1D field**：两区通过后原参数直接移植；先 `gamma_p=0` 看 wake，再只加一个预注册 broad arm（可用 `1/6`）看 stall/annihilation。
+3. **Gate 2，P=2 whole-sheet frozen fast**：已完成。LL/CC 保存；CL fixed K→LL、K=I→support failure；不进入 slow latch。
+4. **Gate 2b，P=3 core–annulus–bath**：只跑 frozen fast、cross-zone coupling off 与 base/half-dt；先判断 local hand-off，不扫 `Amax/tau_p/tau_up`。
+5. **Gate 3，coarse 1D field**：P=3 有 local hand-off 后原参数直接移植；先 `gamma_p=0` 看 wake，再只加一个预注册 broad arm（可用 `1/6`）看 stall/annihilation。
 
 必须用真实 Poincaré returns 计 cycle。near-boundary period 已达到 `1.6–11.3 s`，不能再用固定 `604.8 ms × cycle count` 代替真实快慢时标。
 
@@ -480,25 +507,28 @@ D_j=z_j-z_{B,j}(A_{max}m_j,X_k).
 以下任一出现就停止当前结构，不用大网格挽救：
 
 1. formal cycle continuation 显示 `A<=1.6 mV` 时 stable cycle 仍存在，state fork 只是换 basin；
-2. area-weighted local occupancy 不能解释 `U_TG` 的 late spatial gate，或正式 SNN 确认阶段 primary seeds 没有共同 spatiotemporal separation；当前 seed-1 replay 支持前者，但 instantaneous rho interval 明确失败，所以 P=2 必须使用 persistence AND recruitment，不能 memoryless set；
+2. area-weighted local occupancy 不能解释 `U_TG` 的 late spatial gate，或正式 SNN 确认阶段 primary seeds 没有共同 spatiotemporal separation；当前 seed-1 replay 支持前者，但 instantaneous rho interval 明确失败，所以未来 slow P3/field 必须使用 persistence AND recruitment，不能 memoryless set；
 3. P=1/uniform-P 不能复刻原 Stage 0C RHS、period 或 boundary；
 4. 每个 patch 拥有自己的 `mu_G/S_G`，而不是全域唯一 shared pool；
-5. core-only 时 latch 在第 3 个真实 return 前 set，重新造成 prevention；
-6. recruitment 后 `A_max m(t)` 仍追不上随 Z 下降而上升的 exit boundary；
-7. crossing 距 3–5 return window 边缘小于 `.25 return`，或 current margin 小于 `.1 mV`/预注册 uncertainty band；当前 `4.958 baseline-period equivalents,.034 mV` latch diagnostic 因此不能升格；
-8. slow vector 在 `CL/CC` exit curve 前形成 stable cycle-sheet fixed point；
-9. transition-near orbit 的 `>=100 Hz` violation 在 base/half `dt` 均持续；
-10. offset 后 m 过早下降导致立即 re-entry，或过晚下降导致永久 suppression；
-11. cross-zone coupling off 后仍凭 imposed rho/latch“招募”，说明空间动力学是外加脚本；
-12. coarse field 的 `gamma_p=0` 无 refractory wake；
-13. broad arm 只造成全场同步 prevention，没有局部 onset、front、stall/annihilation；
-14. 任何实现修改 E→E relay、weight、kernel 或 delay——该结果归并行线，不归本线。
+5. P=3 fixed coupling 下 `CLL` 在 annulus 获得三个 bounded returns 前已退出，或只剩 support runaway；此时停止本 additive architecture，不用大网格挽救；
+6. core-only 时 latch 在第 3 个真实 return 前 set，重新造成 prevention；
+7. recruitment 后 `A_max m(t)` 仍追不上随 Z 下降而上升的 exit boundary；
+8. crossing 距 3–5 return window 边缘小于 `.25 return`，或 current margin 小于 `.1 mV`/预注册 uncertainty band；当前 `4.958 baseline-period equivalents,.034 mV` latch diagnostic 因此不能升格；
+9. slow vector 在 `CL/CC` exit curve 前形成 stable cycle-sheet fixed point；
+10. transition-near orbit 的 `>=100 Hz` violation 在 base/half `dt` 均持续；
+11. offset 后 m 过早下降导致立即 re-entry，或过晚下降导致永久 suppression；
+12. cross-zone coupling off 后仍凭 imposed rho/latch“招募”，说明空间动力学是外加脚本；
+13. coarse field 的 `gamma_p=0` 无 refractory wake；
+14. broad arm 只造成全场同步 prevention，没有局部 onset、front、stall/annihilation；
+15. 任何实现修改 E→E relay、weight、kernel 或 delay——该结果归并行线，不归本线。
 
 ## 8. 当前允许与禁止的结论
 
 允许写：
 
 > Additive current 的 attracting fast-cycle branch 在 fixed-point fold 前出现 inverse-square-root period divergence，并在 `A=.31645–.31648 mV` 的窄带失去有限 return，支持 strong SNIC-like boundary candidate。原 memoryless scalar persistence gate 在真实空间 SNN history 中过晚、在 homogeneous mature-cycle history 中过早，未得到共同 3–5 baseline-period-equivalent exit arm；post-no-go latch 只恢复了 SNN timing leverage，说明下一版必须显式加入 spatial recruitment coordinate 与 post-detection hysteresis。
+
+> Mass-balanced P=2 保存 homogeneous LL/CC，但不存在可维持 focal CL：fixed K 把四相位 CL 压回 LL，K=I 则越出 transfer support。该结果定位到 shared-pool dilution 与 low-bath coupling 的相反作用；由于 full-complement averaging 稀释 local wake，它只解锁 P=3 core–annulus–bath，不能写成 wavefront no-go。
 
 禁止写：
 

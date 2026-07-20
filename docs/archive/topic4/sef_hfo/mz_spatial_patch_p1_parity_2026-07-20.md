@@ -6,6 +6,8 @@
 
 并行边界：本节点只把既有 Stage 0C fast scaffold 嵌入通用 P-patch state；没有改变 E→E weight/kernel/delay，没有实现 conductance/relay，也没有运行 P=2 或 SNN。
 
+> **后续执行修正**：P=2 whole-complement 会把 local boundary wake 稀释，故本文第 6/7 节“P=2 不招募即停止”的旧预案已由 `mz_spatial_p2_frozen_sheets_2026-07-20.md` supersede。当前 stop gate 是质量守恒 P=3 core–annulus–bath 仍无 local hand-off；不调 E→E。
+
 ## 1. 一句话判断
 
 **P=1/uniform-P parity 完整通过，可以进入 P=2。**新的 `10P+2` scaffold 在逐点 RHS、完整 Euler trace、directed return、`.31645/.31648` cycle boundary 和 fold surface 上都与锁定 Stage 0C additive system 为机器级 exact identity；这一步没有产生任何新的空间动力学结论。
