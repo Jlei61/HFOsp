@@ -160,60 +160,67 @@ def figure_supp1(label, seed):
     _save(fig, "figure5_supplementary_1_direct_snn_spatial_response")
 
 
-# =============================================================== Supplementary 2: identifiability + modes
+# =============================================================== Supplementary 2: identifiability diagnostic
 def figure_supp2(label, cfg):
     ca_path = os.path.join(OUT, "corrected_audit_summary.json")
     if not os.path.exists(ca_path):
         raise SystemExit("[fig2] missing corrected_audit_summary.json")
     ca = json.load(open(ca_path))
     tol = float(ca["tol"])
-    rows = ca["rows"]
-    # pick the cleanest identifiable state (lowest discrepancy) for the mode fields
-    ident = [r for r in rows if r["identifiable"]]
-    best = min(ident, key=lambda r: r["discrepancy"]) if ident else None
+    rows = {(r["seed"], r["state"]): r for r in ca["rows"]}
+    ident = [r for r in ca["rows"] if r["identifiable"]]           # robustly identifiable (seed,state)
 
-    fig = plt.figure(figsize=(7.2, 3.1))
-    gs = GridSpec(1, 3, figure=fig, width_ratios=[1.35, 1.0, 1.0], wspace=0.42,
-                  left=0.085, right=0.965, top=0.86, bottom=0.2)
+    fig = plt.figure(figsize=(7.2, 3.2))
+    gs = GridSpec(1, 3, figure=fig, width_ratios=[1.45, 1.0, 1.0], wspace=0.5,
+                  left=0.085, right=0.965, top=0.82, bottom=0.2)
 
-    # Panel A: corrected identifiability map — discrepancy per state x seed vs the 15% gate
+    # Panel A: identifiability map — full-N discrepancy point + split-half whisker [repA,repB] vs the
+    # 15% gate. Filled = robustly identifiable (full-N AND both independent 8-halves below gate + no
+    # saturation). Shows the split-half is the discriminating check: several full-N points dip below
+    # the gate but their two halves straddle it -> not robust.
     axA = fig.add_subplot(gs[0, 0])
     order = ["baseline", "midpoint", "pre_onset"]
     for xi, st in enumerate(order):
-        vals = [r["discrepancy"] for r in rows if r["state"] == st]
-        idf = [r["identifiable"] for r in rows if r["state"] == st]
-        for v, i in zip(vals, idf):
-            axA.scatter([xi], [v], s=30, zorder=3, facecolor=(STATE_COLOR[st] if i else "none"),
-                        edgecolor=STATE_COLOR[st], linewidth=1.2)
+        seeds = sorted({s for (s, ss) in rows if ss == st})
+        for k, s in enumerate(seeds):
+            r = rows[(s, st)]
+            x = xi + (k - 1) * 0.18
+            lo, hi = sorted([r["disc_repeatA"], r["disc_repeatB"]])
+            axA.plot([x, x], [lo, hi], color=STATE_COLOR[st], lw=1.1, zorder=2)   # split-half whisker
+            axA.scatter([x], [r["discrepancy"]], s=26, zorder=3, linewidth=1.1,
+                        facecolor=(STATE_COLOR[st] if r["identifiable"] else "none"), edgecolor=STATE_COLOR[st])
     axA.axhline(tol, color="k", lw=0.9, ls="--")
-    axA.text(2.15, tol, "15% gate", fontsize=6.6, va="center", ha="left")
-    axA.text(0.02, 0.97, "ensemble · RMS-matched · low-k\n(orig. thin-input audit: 0.5–2.6, all states)",
-             transform=axA.transAxes, fontsize=6.2, va="top")
+    axA.text(2.42, tol, "15% gate", fontsize=6.6, va="center", ha="left")
+    n_id = len(ident)
+    axA.text(0.02, 0.98, f"ensemble N=16 · RMS-matched · low-k\norig. thin-input audit 0.5–2.6\n"
+             f"robustly identifiable {n_id}/9 (filled)", transform=axA.transAxes, fontsize=6.0, va="top")
     axA.set_xticks(range(3)); axA.set_xticklabels([STATE_SHORT[s] for s in order], fontsize=7.5)
-    axA.set_xlim(-0.4, 2.4); axA.set_ylim(0, max(0.5, max(r["discrepancy"] for r in rows) * 1.1))
-    axA.set_ylabel("linearity discrepancy\n(filled = identifiable)", fontsize=7.5)
+    axA.set_xlim(-0.5, 2.55); axA.set_ylim(0, max(0.5, max(r["discrepancy"] for r in rows.values()) * 1.12))
+    axA.set_ylabel("linearity discrepancy\n(point=N16, whisker=8+8 halves)", fontsize=7.3)
     axA.spines[["top", "right"]].set_visible(False); _letter(axA, "a")
 
-    # Panels B/C: identified V1 input + U1 output at the cleanest identifiable state
+    # Panels B/C: the U1 output of EACH robustly identifiable (seed,state) — they DISAGREE (different
+    # modes, opposite orientation), so this is an orientation tendency at isolated points, not a mode.
     Tmid = int(round(cfg["T_windows_ms"][1]))
-    v1 = u1 = None
-    if best is not None:
-        npz = os.path.join(OUT, "per_seed", f"corrected_audit_arrays_{label}_seed{best['seed']}_{best['state']}.npz")
-        if os.path.exists(npz):
-            a = np.load(npz)
-            v1 = a.get(f"corr_v1_T{Tmid}"); u1 = a.get(f"corr_u1_T{Tmid}")
-    st0 = load_state(label, best["seed"], best["state"]) if best else None
-    src = st0["summary"].get("src_g") if st0 else None
-    snk = st0["summary"].get("snk_g") if st0 else None
-    lab = f"{STATE_LABEL[best['state']]} seed{best['seed']}" if best else ""
-    for ax_i, (kind, field) in enumerate([("V₁ input", v1), ("U₁ output", u1)]):
+    ident_sorted = sorted(ident, key=lambda r: r["discrepancy"])[:2]
+    for ax_i in range(2):
         ax = fig.add_subplot(gs[0, 1 + ax_i])
-        if field is not None:
-            vmax = np.nanmax(np.abs(field)) or 1.0
-            _signed_field(ax, field, vmax=vmax, src=src, snk=snk)
-            ax.set_title(f"{kind}\n{lab}", fontsize=7.5, color=MID)
+        if ax_i < len(ident_sorted):
+            r = ident_sorted[ax_i]
+            npz = os.path.join(OUT, "per_seed", f"corrected_audit_arrays_{label}_seed{r['seed']}_{r['state']}.npz")
+            u1 = np.load(npz).get(f"corr_u1_T{Tmid}") if os.path.exists(npz) else None
+            st0 = load_state(label, r["seed"], r["state"])
+            src = st0["summary"].get("src_g") if st0 else None
+            snk = st0["summary"].get("snk_g") if st0 else None
+            if u1 is not None:
+                _signed_field(ax, u1, vmax=(np.nanmax(np.abs(u1)) or 1.0), src=src, snk=snk)
+                ori = "∥axis" if (r.get("u1_axis_T30") or 0) > 0 else "⊥axis"
+                ax.set_title(f"U₁  {STATE_LABEL[r['state']]} seed{r['seed']}", fontsize=7.5,
+                             color=STATE_COLOR[r["state"]], pad=3)
+                ax.set_xlabel(f"axis={r.get('u1_axis_T30'):+.2f} ({ori}) · corridor={r.get('u1_corridor_frac_T30', float('nan')):.2f}",
+                              fontsize=6.6)
         else:
-            ax.set_axis_off(); ax.text(0.5, 0.5, "no identifiable\noperator", ha="center", va="center", fontsize=8)
+            ax.set_axis_off()
         _letter(ax, "b" if ax_i == 0 else "c")
 
     _save(fig, "figure5_supplementary_2_direct_snn_empirical_modes")

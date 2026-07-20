@@ -348,18 +348,18 @@ def first_arrival_times(kymo, times, *, threshold):
     return arr
 
 
-def fit_arrival_distance(distances, arrivals, *, min_points=4):
-    """Linear arrival-time-vs-distance fit (spec §4). Fails closed (`eligible=False`) with fewer
-    than `min_points` crossed axial positions — never a forced wavefront."""
+def fit_arrival_distance(distances, arrivals, *, min_points=4, r2_min=0.5):
+    """Linear arrival-time-vs-distance fit (spec §4). Eligible ONLY as source-driven axial recruitment:
+    >= `min_points` crossed positions, a real (non-constant) front, POSITIVE slope (arrival grows with
+    distance from source), and a finite R2 >= `r2_min`. Fails closed otherwise — never a spurious
+    0-slope / NaN-R2 / negative-slope / poor-fit 'eligible' (review 2026-07-20)."""
     d = np.asarray(distances, float)
     a = np.asarray(arrivals, float)
     ok = np.isfinite(a) & np.isfinite(d)
     n = int(ok.sum())
-    # <min_points crossings, OR a degenerate CONSTANT-arrival front (every position 'arrives' at the
-    # same time — what a near-zero/quantization-noise response produces when the 0.1*max threshold ~ 0)
-    # -> ineligible. Never a spurious 0-slope / NaN-R2 'eligible' fit (review 2026-07-20).
-    if n < int(min_points) or np.ptp(a[ok]) == 0:
-        return dict(eligible=False, n_points=n, slope=None, velocity_proxy=None, r2=None)
+    fail = dict(eligible=False, n_points=n, slope=None, velocity_proxy=None, r2=None)
+    if n < int(min_points) or np.ptp(a[ok]) == 0:              # too few / degenerate constant-arrival
+        return fail
     dd, aa = d[ok], a[ok]
     coef = np.polyfit(dd, aa, 1)
     slope = float(coef[0])                                      # ms per distance-unit
@@ -368,17 +368,18 @@ def fit_arrival_distance(distances, arrivals, *, min_points=4):
     ss_tot = float(np.sum((aa - aa.mean()) ** 2))
     r2 = float(1.0 - ss_res / ss_tot) if ss_tot > 0 else float("nan")
     velocity = float(1.0 / slope) if slope != 0 else float("inf")   # distance-unit per ms
-    return dict(eligible=True, n_points=n, slope=slope, velocity_proxy=velocity, r2=r2)
+    eligible = bool(slope > 0 and np.isfinite(r2) and r2 >= float(r2_min))
+    return dict(eligible=eligible, n_points=n, slope=slope, velocity_proxy=velocity, r2=r2)
 
 
-def threshold_sensitivity_arrivals(kymo, times, distances, *, fracs, peak=None):
+def threshold_sensitivity_arrivals(kymo, times, distances, *, fracs, peak=None, r2_min=0.5):
     """Arrival-fit slope/R²/eligibility at several thresholds = `fracs` × peak (spec §4)."""
     kymo = np.asarray(kymo, float)
-    pk = float(np.nanmax(kymo)) if peak is None else float(peak)
+    pk = float(np.nanmax(np.abs(kymo))) if peak is None else float(peak)
     out = {}
     for fr in fracs:
         arr = first_arrival_times(kymo, times, threshold=fr * pk)
-        out[float(fr)] = fit_arrival_distance(distances, arr)
+        out[float(fr)] = fit_arrival_distance(distances, arr, r2_min=r2_min)
     return out
 
 

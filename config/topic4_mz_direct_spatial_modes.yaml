@@ -96,9 +96,11 @@ controls:
 #     operator do we compute/plot V1/U1/sigma1. ---
 corrected_audit:
   k_max: 1                    # balanced low-k: 1-D freqs {0,1} in BOTH axes -> 9 symmetric 2-D modes
-  n_realizations: 8           # independent continuation-noise futures per (seed,state); +/- share each future (CRN)
+  n_realizations: 16          # -> N=4/8/16 convergence + two independent 8-realization repeats (review round-2)
   strength_frac: 0.02         # per-cell RMS current = strength_frac * I_EE_scale (matched to the fixed-kick RMS scale)
   realization_base_seed: 90001
+  # identifiable REQUIRES: full-N linearity discrepancy <= tol AND both independent 8-halves <= tol AND
+  # no fork saturated (within-window saturation gate). Per-realization K saved for post-hoc reproducibility.
 
 # --- parallelism ---
 workers: 12                   # COW-shared connectivity fork workers (each shares 13GB read-only + ~150MB/fork)

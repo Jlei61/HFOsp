@@ -147,7 +147,10 @@ def build_S(seed, cfg):
 
 
 def grid_region_masks(ro, src_g, snk_g, axis_g, core_r, corridor_hw):
-    """(n,n) boolean grid masks: source_core, remote_sink, axis_corridor, off_axis (spec §4)."""
+    """(n,n) boolean grid masks: source_core, remote_sink, axis_corridor, off_axis, and (review
+    2026-07-20) DISTAL_corridor (corridor beyond the source half, toward the sink) + MATCHED_off_axis
+    (an off-axis band at the same distal along-axis distance) — to separate "reaches down the corridor
+    toward sink" from "local + isotropic off-axis spread"."""
     X, Y = ro.grid.coords()
     pts = np.column_stack([X.ravel(), Y.ravel()])
     d_src = np.linalg.norm(pts - src_g, axis=1)
@@ -159,10 +162,14 @@ def grid_region_masks(ro, src_g, snk_g, axis_g, core_r, corridor_hw):
     perp = np.abs(rel @ up)
     axis_len = float(np.linalg.norm(snk_g - src_g))
     corridor = (perp <= corridor_hw) & (proj >= -core_r) & (proj <= axis_len + core_r)
+    distal = (proj >= 0.5 * axis_len) & (proj <= axis_len + core_r)     # far half toward sink
+    distal_corridor = corridor & distal
+    matched_off_axis = (perp > corridor_hw) & (perp <= 2.0 * corridor_hw) & distal   # off-axis, matched distance
     n = ro.n
     rs = lambda m: m.reshape(n, n)
     return dict(source_core=rs(d_src <= core_r), remote_sink=rs(d_snk <= core_r),
-                axis_corridor=rs(corridor), off_axis=rs(~corridor))
+                axis_corridor=rs(corridor), off_axis=rs(~corridor),
+                distal_corridor=rs(distal_corridor), matched_off_axis=rs(matched_off_axis))
 
 
 def _cand(cfg, which):
@@ -434,19 +441,27 @@ def fixed_kick_state(S, ck, branch, cfg):
     # 0.1*max threshold sits in quantization noise and fabricates a spurious front (review 2026-07-20).
     kymo_max = float(np.nanmax(np.abs(ky["kymo"])))
     min_peak = float(fk.get("arrival_min_peak_hz", 2.0))
+    r2_min = float(fk.get("arrival_r2_min", 0.5))
+    dir_consistent = None
     if kymo_max < min_peak:
         arrivals = np.full(ky["kymo"].shape[1], np.nan)
         fit = dict(eligible=False, n_points=0, slope=None, velocity_proxy=None, r2=None, below_floor=True)
         thr = {}
     else:
         arrivals = first_arrival_times(ky["kymo"], ky["times"], threshold=max(0.1 * kymo_max, min_peak))
-        fit = fit_arrival_distance(ky["distances"], arrivals)
+        fit = fit_arrival_distance(ky["distances"], arrivals, r2_min=r2_min)
         thr = threshold_sensitivity_arrivals(ky["kymo"], ky["times"], ky["distances"],
-                                             fracs=[float(x) for x in fk["arrival_thresh_fracs"]])
+                                             fracs=[float(x) for x in fk["arrival_thresh_fracs"]], r2_min=r2_min)
+        # direction consistency: eligible + positive slope at EVERY sampled threshold (not a threshold artifact)
+        dir_consistent = bool(thr and all(v.get("eligible") and (v.get("slope") or 0) > 0 for v in thr.values()))
     return dict(
         censor=censor, kick_induced_saturation_ms=raK, response_norm=response_norm(dY_full), region=reg,
+        distal_corridor_over_matched_off_axis=(
+            float(reg["distal_corridor"] / reg["matched_off_axis"])
+            if reg.get("matched_off_axis") and reg["matched_off_axis"] > 0 else None),
         cum_remote_over_source_final=float(cumratio[-1]) if cumratio.size else float("nan"),
-        arrival_fit=fit, arrival_threshold_sensitivity={str(k): v for k, v in thr.items()},
+        arrival_fit=fit, arrival_direction_consistent=dir_consistent,
+        arrival_threshold_sensitivity={str(k): v for k, v in thr.items()},
         arrays=dict(dmaps=np.stack([dmaps[c] for c in centers]), map_centers=np.array(centers),
                     kymo=ky["kymo"], kymo_dist=ky["distances"], kymo_times=ky["times"],
                     dY_full=dY_full, kick_field=kick2d, cumratio=cumratio))
@@ -512,9 +527,9 @@ def _corr_task(args):
     pat2d = W["P_rms"][:, j].reshape(W["n"], W["n"])          # unit per-cell-RMS low-k pattern
     cur = sign * W["amps"][ai] * grid_pattern_to_current(pat2d, ro)   # per-cell RMS current = amps[ai]
     ck_r = copy.copy(W["ck"]); ck_r.rng_state = W["real_states"][r]   # same branch state, realization-r future noise
-    Ys, _ = _fork_Y(W["S"], ck_r, W["branch"], cur, W["window_steps"], W["cur_dur_steps"],
-                    W["T_steps_list"], ro, W["freeze"], W["run_hz"], W["run_dur"])
-    return (j, int(sign), r, ai, {int(T): Ys[T] for T in Ys})
+    Ys, ra = _fork_Y(W["S"], ck_r, W["branch"], cur, W["window_steps"], W["cur_dur_steps"],
+                     W["T_steps_list"], ro, W["freeze"], W["run_hz"], W["run_dur"])
+    return (j, int(sign), r, ai, {int(T): Ys[T] for T in Ys}, ra is not None)   # ra -> within-window saturation
 
 
 def corrected_operator_audit(S, ck, branch, cfg, *, workers, freeze=True):
@@ -542,44 +557,68 @@ def corrected_operator_audit(S, ck, branch, cfg, *, workers, freeze=True):
               T_steps_list=T_steps_list, freeze=freeze, run_hz=float(cfg["runaway_hz"]),
               run_dur=float(cfg["saturation_dur_ms"]))
     n_modes = len(lowk)
+    tol = float(cfg["linearity_tol"])
     tasks = [(j, s, r, ai) for j in range(n_modes) for s in (+1, -1) for r in range(N) for ai in (0, 1)]
     t0 = time.time()
     res = _parallel_map(_corr_task, tasks, ws, workers)
-    from collections import defaultdict
-    sums = defaultdict(lambda: np.zeros(n * n))
-    cnts = defaultdict(int)
-    for j, sign, r, ai, Ys in res:
+    # PER-REALIZATION responses (review round-2): keep each realization separate so we can post-hoc
+    # average any subset (N=4/8/16 convergence) or two independent 8-realization halves, AND register
+    # within-window saturation (a saturated fork = left the linear regime = contaminates the estimate).
+    Yr = {}                                                    # (r, ai, sign, T) -> [n_modes arrays]
+    n_sat = 0
+    for j, sign, r, ai, Ys, sat in res:
+        n_sat += int(sat)
         for T, y in Ys.items():
-            sums[(ai, sign, T, j)] += y                       # accumulate ensemble sum over realizations
-            cnts[(ai, sign, T, j)] += 1
-    K = {}
-    for ai in (0, 1):
-        for T in T_steps_list:
-            cols = [((sums[(ai, +1, T, j)] / max(cnts[(ai, +1, T, j)], 1))
-                     - (sums[(ai, -1, T, j)] / max(cnts[(ai, -1, T, j)], 1))) / (2.0 * amps[ai])
-                    for j in range(n_modes)]                  # ensemble-mean central difference
-            K[(ai, T)] = np.column_stack(cols)
-    disc = linearity_discrepancy(K[(0, Tmid)], K[(1, Tmid)])
-    identifiable = bool(np.isfinite(disc) and disc <= float(cfg["linearity_tol"]))
-    out = dict(k_max=int(ca["k_max"]), n_modes=n_modes, n_realizations=N,
-               strength_frac=a_base, per_cell_rms_current=round(amps[0], 3),
-               linearity_discrepancy=float(disc), identifiable=identifiable,
-               T_mid_ms=float(cfg["T_windows_ms"][1]), wall_s=round(time.time() - t0, 1), sigma1={})
+            Yr.setdefault((r, ai, sign, T), [None] * n_modes)[j] = y
+
+    def Kr(r, ai, T):                                          # per-realization central-difference K
+        yp, ym = Yr[(r, ai, +1, T)], Yr[(r, ai, -1, T)]
+        return np.column_stack([(yp[j] - ym[j]) / (2.0 * amps[ai]) for j in range(n_modes)])
+
+    def ensK(R, ai, T):                                       # ensemble-mean K over realization subset R
+        return np.mean([Kr(r, ai, T) for r in R], axis=0)
+
+    def disc_over(R):                                         # linearity discrepancy on ensemble R at Tmid
+        return float(linearity_discrepancy(ensK(R, 0, Tmid), ensK(R, 1, Tmid)))
+
+    allR = list(range(N))
+    conv = {str(nn): disc_over(list(range(nn))) for nn in (4, 8, N) if nn <= N}   # N-convergence
+    half = N // 2
+    repA, repB = list(range(half)), list(range(half, N))      # two independent halves
+    discA, discB = disc_over(repA), disc_over(repB)
+    disc_full = disc_over(allR)
+    split_half_stability = float(linearity_discrepancy(ensK(repA, 0, Tmid), ensK(repB, 0, Tmid)))
+    any_sat = bool(n_sat > 0)
+    # STRICT identifiable: full-N gate passes AND both independent halves pass AND no fork saturated
+    identifiable = bool(np.isfinite(disc_full) and disc_full <= tol and discA <= tol and discB <= tol and not any_sat)
+    out = dict(k_max=int(ca["k_max"]), n_modes=n_modes, n_realizations=N, strength_frac=a_base,
+               per_cell_rms_current=round(amps[0], 3), linearity_discrepancy=disc_full,
+               disc_convergence=conv, disc_repeatA=discA, disc_repeatB=discB,
+               split_half_stability=split_half_stability, n_forks=len(tasks), n_saturated_forks=int(n_sat),
+               any_fork_saturated=any_sat, identifiable=identifiable, T_mid_ms=float(cfg["T_windows_ms"][1]),
+               wall_s=round(time.time() - t0, 1), sigma1={})
     arrays = {}
+    corr_mask = S["regions"]["axis_corridor"].ravel()
     if identifiable:
         for T_ms in cfg["T_windows_ms"]:
             Ts = int(round(T_ms / DT))
-            U, s, Vt = np.linalg.svd(K[(0, Ts)], full_matrices=False)
+            Kf = ensK(allR, 0, Ts)
+            U, s, Vt = np.linalg.svd(Kf, full_matrices=False)
             u1 = U[:, 0].reshape(n, n)
             v1 = (P_lowk @ Vt[0, :]).reshape(n, n)
+            u1sq = np.abs(u1.ravel()) ** 2
             out["sigma1"][float(T_ms)] = dict(
                 sigma1=float(s[0]), gap=(float(s[0] / s[1]) if s.size > 1 and s[1] > 0 else float("inf")),
                 u1_axis=field_axis_alignment(u1, ro, S["axis_g"]), u1_globality=field_globality(u1),
+                u1_corridor_frac=float(u1sq[corr_mask].sum() / u1sq.sum()),   # does U1 sit on the src->sink corridor?
                 v1_axis=field_axis_alignment(v1, ro, S["axis_g"]),
                 singular_values=[float(x) for x in s[:6]])
             arrays[f"corr_u1_T{int(T_ms)}"] = u1
             arrays[f"corr_v1_T{int(T_ms)}"] = v1
-            arrays[f"corr_K_T{int(T_ms)}"] = K[(0, Ts)]
+            arrays[f"corr_K_T{int(T_ms)}"] = Kf
+    # per-realization K sufficient statistics at T_mid (both amplitudes) for post-hoc reproducibility
+    for ai in (0, 1):
+        arrays[f"corr_Kr_a{ai}_T{Tmid}"] = np.stack([Kr(r, ai, Tmid) for r in allR])  # (N, n_bins, n_modes)
     return out, arrays
 
 
@@ -608,6 +647,7 @@ def cmd_audit(args, cfg):
             if arrays:
                 np.savez_compressed(os.path.join(OUT, "per_seed", f"corrected_audit_arrays_{label}_seed{seed}_{st}.npz"), **arrays)
             print(f"[audit] {label} s{seed} {st} disc={out['linearity_discrepancy']:.3f} "
+                  f"repA/B={out['disc_repeatA']:.3f}/{out['disc_repeatB']:.3f} sat={out['n_saturated_forks']}/{out['n_forks']} "
                   f"identifiable={out['identifiable']} ({out['wall_s']}s)", flush=True)
         del S, cks
         gc.collect()
@@ -978,10 +1018,13 @@ def cmd_aggregate(args, cfg):
         d = json.load(open(f))
         s30 = (d.get("sigma1") or {}).get(str(float(cfg["T_windows_ms"][1])), {})
         ca_rows.append(dict(seed=d["seed"], state=d["state"], discrepancy=d["linearity_discrepancy"],
+                            disc_repeatA=d.get("disc_repeatA"), disc_repeatB=d.get("disc_repeatB"),
+                            disc_convergence=d.get("disc_convergence"), split_half_stability=d.get("split_half_stability"),
+                            n_saturated_forks=d.get("n_saturated_forks"), any_fork_saturated=d.get("any_fork_saturated"),
                             identifiable=d["identifiable"], n_modes=d["n_modes"], n_realizations=d["n_realizations"],
                             per_cell_rms_current=d.get("per_cell_rms_current"),
                             sigma1_T30=s30.get("sigma1"), u1_axis_T30=s30.get("u1_axis"),
-                            u1_glob_T30=s30.get("u1_globality")))
+                            u1_glob_T30=s30.get("u1_globality"), u1_corridor_frac_T30=s30.get("u1_corridor_frac")))
     if ca_rows:
         n_id = sum(1 for r in ca_rows if r["identifiable"])
         _dump(dict(schema_version=SCHEMA_VERSION, tol=float(cfg["linearity_tol"]), rows=ca_rows,

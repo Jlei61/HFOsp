@@ -395,6 +395,25 @@ def test_arrival_fit_ineligible_degenerate_constant():
     assert not fit["eligible"]                                # degenerate (zero spread) rejected
 
 
+def test_arrival_fit_rejects_negative_slope():
+    """Arrival DECREASING with distance (far positions respond first) is not source-driven axial
+    recruitment -> ineligible (review 2026-07-20 round-2)."""
+    dist = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    arr = np.array([4.0, 3.0, 2.0, 1.0, 0.0])                 # arrival falls with distance -> slope<0
+    fit = fit_arrival_distance(dist, arr, min_points=4)
+    assert not fit["eligible"] and fit["slope"] < 0
+
+
+def test_arrival_fit_rejects_low_r2():
+    """A positive but very poor (low-R2) fit is not a clean front -> ineligible."""
+    dist = np.array([0.0, 1.0, 2.0, 3.0, 4.0, 5.0])
+    arr = np.array([0.0, 5.0, 0.0, 5.0, 0.0, 6.0])           # scatter, ~flat trend, low R2
+    fit = fit_arrival_distance(dist, arr, min_points=4, r2_min=0.5)
+    assert not fit["eligible"]
+    good = fit_arrival_distance(np.arange(5.0), np.arange(5.0) * 2.0 + 1.0, min_points=4, r2_min=0.5)
+    assert good["eligible"] and good["slope"] > 0 and good["r2"] > 0.99   # clean line still passes
+
+
 def test_region_response_and_norm():
     dY = np.array([[1.0, -1.0], [2.0, 0.0]])
     assert np.isclose(response_norm(dY), np.sqrt(1 + 1 + 4 + 0))
