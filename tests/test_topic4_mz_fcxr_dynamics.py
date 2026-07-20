@@ -108,3 +108,92 @@ def test_z_frozen_out_of_range_raises():
 def test_z_frozen_requires_use_z_false():
     with pytest.raises(ValueError):
         _mzsv(z_frozen_E=np.linspace(0.2, 0.9, 8), use_z=True)   # frozen field must not evolve
+
+
+# ---------------- D1.5: two-layer branch classifier (synthetic rows, no sim) ----------------
+from src.topic4_mz_fcxr_dynamics import (           # noqa: E402
+    classify_run_provisional, resolve_high_ic, classify_branch_D, THRESHOLDS,
+)
+
+
+def _row(**kw):
+    base = dict(numerical_unsafe=False, end_rate_hz=5.0, af_tail=0.03, baseline_rate=5.0,
+                baseline_sigma=5.0, baseline_af_q95=0.05, modulation=0.05,
+                oscillatory_candidate=False, tail_rate_band=True, high_duration_ms=0.0)
+    base.update(kw)
+    return base
+
+
+def test_run_numerical_unsafe_wins_first():
+    # even a high-looking row is UNSAFE if the numerical flag is set (clause 1: checked first)
+    assert classify_run_provisional(_row(numerical_unsafe=True, end_rate_hz=80, af_tail=0.6)) == "NUMERICAL_UNSAFE"
+
+
+def test_run_finite_high_fixed():
+    assert classify_run_provisional(_row(end_rate_hz=60, af_tail=0.5, modulation=0.2,
+                                         tail_rate_band=False)) == "FINITE_HIGH_FIXED"
+
+
+def test_run_finite_high_orbit():
+    assert classify_run_provisional(_row(end_rate_hz=60, af_tail=0.5, modulation=0.4,
+                                         oscillatory_candidate=True, tail_rate_band=False)) == "FINITE_HIGH_ORBIT"
+
+
+def test_run_refractory_ceiling_beats_finite():
+    # pinned: nearly all cells firing (af_tail>=0.90) with ~no modulation -> ceiling, not a finite attractor
+    assert classify_run_provisional(_row(end_rate_hz=120, af_tail=0.95, modulation=0.02,
+                                         tail_rate_band=False)) == "REFRACTORY_CEILING"
+
+
+def test_run_decays_to_low():
+    assert classify_run_provisional(_row(end_rate_hz=5, af_tail=0.03, tail_rate_band=True,
+                                         high_duration_ms=0.0)) == "DECAYS_TO_LOW"
+
+
+def test_run_excursion_decayed():
+    # had a big excursion (>=300ms) but not high at the end -> metastable candidate (needs 2 windows to confirm)
+    assert classify_run_provisional(_row(end_rate_hz=6, af_tail=0.04, high_duration_ms=1500,
+                                         tail_rate_band=True)) == "EXCURSION_DECAYED"
+
+
+def test_resolve_high_ic_finite_needs_both_windows():
+    assert resolve_high_ic("FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED") == "FINITE_HIGH_FIXED"
+    assert resolve_high_ic("FINITE_HIGH_ORBIT", "FINITE_HIGH_FIXED") == "FINITE_HIGH_ORBIT"
+    # high at short window, gone by the longer window -> long transient (F1)
+    assert resolve_high_ic("FINITE_HIGH_FIXED", "EXCURSION_DECAYED") == "METASTABLE_TRANSIENT"
+    assert resolve_high_ic("NUMERICAL_UNSAFE", "FINITE_HIGH_FIXED") == "NUMERICAL_UNSAFE"
+    assert resolve_high_ic("REFRACTORY_CEILING", "FINITE_HIGH_FIXED") == "REFRACTORY_CEILING"
+    assert resolve_high_ic("DECAYS_TO_LOW", "DECAYS_TO_LOW") == "DECAYS_TO_LOW"
+
+
+def test_D_bistable():
+    d = classify_branch_D("DECAYS_TO_LOW", ["FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED"], [60.0, 62.0])
+    assert d["D_label"] == "BISTABLE"
+
+
+def test_D_low_only():
+    d = classify_branch_D("DECAYS_TO_LOW", ["DECAYS_TO_LOW", "DECAYS_TO_LOW"], [None, None])
+    assert d["D_label"] == "LOW_ONLY"
+
+
+def test_D_unresolved_when_plateaus_disagree():
+    # both high ICs go high but to very different plateaus (spread > 0.20) -> not a single branch
+    d = classify_branch_D("DECAYS_TO_LOW", ["FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED"], [40.0, 90.0])
+    assert d["D_label"] == "UNRESOLVED"
+
+
+def test_D_finite_high_monostable():
+    d = classify_branch_D("FINITE_HIGH_FIXED", ["FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED"], [60.0, 61.0])
+    assert d["D_label"] == "FINITE_HIGH"
+
+
+def test_D_ceiling_and_metastable_and_unsafe():
+    assert classify_branch_D("DECAYS_TO_LOW", ["REFRACTORY_CEILING", "REFRACTORY_CEILING"], [None, None])["D_label"] == "REFRACTORY_CEILING"
+    assert classify_branch_D("DECAYS_TO_LOW", ["METASTABLE_TRANSIENT", "METASTABLE_TRANSIENT"], [None, None])["D_label"] == "METASTABLE_TRANSIENT"
+    assert classify_branch_D("NUMERICAL_UNSAFE", ["FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED"], [60.0, 61.0])["D_label"] == "NUMERICAL_UNSAFE"
+
+
+def test_D_single_finite_ic_is_unresolved():
+    # only one of two high ICs reached high -> not confirmed (needs >=2 concordant)
+    d = classify_branch_D("DECAYS_TO_LOW", ["FINITE_HIGH_FIXED", "DECAYS_TO_LOW"], [60.0, None])
+    assert d["D_label"] == "UNRESOLVED"

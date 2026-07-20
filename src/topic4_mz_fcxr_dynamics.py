@@ -85,3 +85,102 @@ def frozen_z_field(p_i, D):
     frozen field is ~= D — the same scalar coordinate as the unsaturated slow-fast-transition line
     (their sharp transition sits at D ~= 0.087)."""
     return np.clip(1.0 - float(D) * np.asarray(p_i, float), 0.0, 1.0)
+
+
+# ------------------------------------------------------------------------------------
+# D1.5 — two-layer 8-label frozen fast-branch classifier (pure; TDD on synthetic rows)
+# ------------------------------------------------------------------------------------
+# Locked thresholds (clause 7). All are relative to the dt=0.05 slow-off baseline anchor
+# (baseline_rate / baseline_sigma / baseline_af_q95), so they inherit dt-robustness.
+THRESHOLDS = dict(
+    K_HIGH=4.0,        # persist-at-end rate must exceed baseline_rate + K_HIGH*sigma
+    CEIL_FRAC=0.90,    # af_tail >= this AND low modulation -> pinned refractory ceiling, not a finite attractor
+    MOD_CEIL=0.10,     # modulation below this at a ceiling -> pinned (no breathing)
+    MIN_HIGH_MS=300.0, # a "substantial" high excursion (metastable candidate) must last at least this long
+    PLATEAU_TOL=0.20,  # two high ICs must land within this relative spread to count as the same plateau
+)
+
+_PER_RUN = ("NUMERICAL_UNSAFE", "REFRACTORY_CEILING", "FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT",
+            "EXCURSION_DECAYED", "DECAYS_TO_LOW")
+_FINITE = ("FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT")
+
+
+def _end_high(row, T):
+    """persist-at-end (clause 3): trailing-window rate above baseline band AND participation above q95."""
+    return bool(row["end_rate_hz"] > row["baseline_rate"] + T["K_HIGH"] * row["baseline_sigma"]
+                and row["af_tail"] > row["baseline_af_q95"])
+
+
+def classify_run_provisional(row, T=THRESHOLDS):
+    """Per-RUN provisional label from ONE (D, ic) trajectory at ONE observation window.
+
+    Single-window only distinguishes present-at-end (FINITE_HIGH_*) from had-excursion-but-decayed
+    (EXCURSION_DECAYED) — the attractor-vs-long-transient call needs the two-window resolver (clause 4).
+    """
+    if row["numerical_unsafe"]:                                   # clause 1: unsafe checked FIRST
+        return "NUMERICAL_UNSAFE"
+    if _end_high(row, T):
+        if row["af_tail"] >= T["CEIL_FRAC"] and row["modulation"] < T["MOD_CEIL"]:
+            return "REFRACTORY_CEILING"                           # clause 2: pinned ceiling before finite-high
+        return "FINITE_HIGH_ORBIT" if row["oscillatory_candidate"] else "FINITE_HIGH_FIXED"
+    if row["high_duration_ms"] >= T["MIN_HIGH_MS"]:
+        return "EXCURSION_DECAYED"                                # substantial excursion, did not persist
+    return "DECAYS_TO_LOW"
+
+
+def resolve_high_ic(prov_T1, prov_T2):
+    """Two-window resolver (clause 4, F1): FINITE_HIGH requires present-at-end at BOTH windows; persisted
+    at the short window but decayed by the longer window => long transient => METASTABLE_TRANSIENT."""
+    if "NUMERICAL_UNSAFE" in (prov_T1, prov_T2):
+        return "NUMERICAL_UNSAFE"
+    if "REFRACTORY_CEILING" in (prov_T1, prov_T2):
+        return "REFRACTORY_CEILING"
+    fin1, fin2 = prov_T1 in _FINITE, prov_T2 in _FINITE
+    if fin1 and fin2:
+        return "FINITE_HIGH_ORBIT" if "FINITE_HIGH_ORBIT" in (prov_T1, prov_T2) else "FINITE_HIGH_FIXED"
+    if fin1 and not fin2:                                          # high at T1, gone by T2 -> long transient
+        return "METASTABLE_TRANSIENT"
+    if "EXCURSION_DECAYED" in (prov_T1, prov_T2):
+        return "METASTABLE_TRANSIENT"
+    return "DECAYS_TO_LOW"
+
+
+def _plateau_rel_spread(plateaus):
+    p = np.asarray([x for x in plateaus if x is not None and np.isfinite(x)], float)
+    if p.size < 2 or p.mean() <= 0:
+        return float("nan")
+    return float((p.max() - p.min()) / p.mean())
+
+
+def classify_branch_D(low_label, high_labels, high_plateaus, T=THRESHOLDS):
+    """Per-D label (clause 6: distinct layer from per-run) from the native-low run + the resolved high-IC runs.
+
+    high_labels/high_plateaus are the RESOLVED per-high-IC labels (>=2 ICs) and their end-of-run plateau rates.
+    """
+    all_labels = [low_label] + list(high_labels)
+    if "NUMERICAL_UNSAFE" in all_labels:
+        return dict(D_label="NUMERICAL_UNSAFE", low_label=low_label, high_labels=list(high_labels),
+                    plateau_rel_spread=float("nan"))
+    fin_idx = [i for i, l in enumerate(high_labels) if l in _FINITE]
+    spread = _plateau_rel_spread([high_plateaus[i] for i in fin_idx]) if fin_idx else float("nan")
+    if fin_idx:
+        if len(fin_idx) < 2:                                       # only one IC reached high -> not confirmed
+            D_label = "UNRESOLVED"
+        elif np.isfinite(spread) and spread > T["PLATEAU_TOL"]:    # clause 5: plateaus disagree
+            D_label = "UNRESOLVED"
+        elif low_label == "DECAYS_TO_LOW":
+            D_label = "BISTABLE"                                   # low stays low, high stays high (coexistence)
+        elif low_label in _FINITE:
+            D_label = "FINITE_HIGH"                                # even the native-low IC settles high
+        else:
+            D_label = "UNRESOLVED"
+    elif any(l == "REFRACTORY_CEILING" for l in high_labels):
+        D_label = "REFRACTORY_CEILING"
+    elif any(l == "METASTABLE_TRANSIENT" for l in high_labels):
+        D_label = "METASTABLE_TRANSIENT"
+    elif all(l == "DECAYS_TO_LOW" for l in all_labels):
+        D_label = "LOW_ONLY"
+    else:
+        D_label = "UNRESOLVED"
+    return dict(D_label=D_label, low_label=low_label, high_labels=list(high_labels),
+                plateau_rel_spread=spread)
