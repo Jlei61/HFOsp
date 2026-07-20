@@ -29,6 +29,7 @@ os.environ.setdefault("MPLCONFIGDIR", "/tmp/mpl-topic4-mz-fcxr-stage-d")
 import argparse
 import dataclasses
 import gc
+import multiprocessing as mp
 import sys
 import time
 
@@ -266,6 +267,95 @@ def cmd_pilot(args):
         print(f"[pilot] done -> {run_dir}/pilot_rows.json", flush=True)
 
 
+# ----------------------------------------------------------------- full 8-D grid (D1.7/D1.8)
+_CTX = {}
+
+
+def _grid_cell_task(task):
+    """Run one grid cell (fork-pool worker or sequential). Writes per-cell JSON + g_raw; returns the row."""
+    S, pi, bref, run_dir = _CTX["S"], _CTX["pi"], _CTX["bref"], _CTX["run_dir"]
+    t0 = time.time()
+    row, slow = run_branch_cell(S, pi, bref, D=task["D"], ic=task["ic"], kick_boost=task["kick_boost"],
+                                T_post_ms=task["T_post"], seed=_CTX["seed"], dt=DT_D)
+    row["label"] = task["label"]; row["slot"] = task["slot"]; row["window"] = task["window"]
+    row["wall_s"] = round(time.time() - t0, 1)
+    row["provisional_label"] = classify_run_provisional(row)
+    FCXR._write_json(os.path.join(run_dir, "per_cell", f"{task['label']}.json"), row)
+    FCXR._write_npz(os.path.join(run_dir, "per_cell", f"{task['label']}_graw.npz"),
+                    max_raw_gErec=np.asarray(getattr(slow, "max_raw_gErec", []), np.float32))
+    print(f"[grid] {task['label']:20s} -> {row['provisional_label']:18s} "
+          f"high_dur={row['high_duration_ms']:7.0f} tail_occ={row['tail_high_frac']:.2f} "
+          f"end={row['end_rate_hz']:6.1f} unsafe={str(row['numerical_unsafe'])[0]} {row['wall_s']}s", flush=True)
+    del slow; gc.collect()
+    return row
+
+
+def _run_tasks(tasks, workers):
+    if workers <= 1 or len(tasks) <= 1:
+        return [_grid_cell_task(t) for t in tasks]
+    with mp.get_context("fork").Pool(workers) as pool:      # COW-share the 6.8GB substrate (FCXR pattern)
+        return pool.map(_grid_cell_task, tasks)
+
+
+def cmd_grid(args):
+    """Full frozen branch map: 8 D x {low, high1, high2} at T1, two-window (T2) resolution for excursions."""
+    with FCXR._launcher_lock():
+        FCXR._assert_engine_blessed()
+        bref_path = _baseline_ref_path()
+        if not os.path.exists(bref_path):
+            raise SystemExit(f"missing baseline anchor {bref_path}; run `baseline --seed 1 --confirm-run` first")
+        bref = FCXR.json.load(open(bref_path))
+        run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"grid_seed{args.seed}_dt{DT_D}"))
+        T1, T2 = float(args.T1), float(args.T2)
+        base = [dict(D=D, ic=ic, kick_boost=kb, T_post=T1, window="T1", slot=slot, label=f"D{D:g}_{slot}_T1")
+                for D in D_GRID for ic, kb, slot in
+                (("low", 0.0, "low"), ("high", KICK_HIGH1, "high1"), ("high", KICK_HIGH2, "high2"))]
+        plan = FCXR._plan_workers(T1 * (FCXR.DT / DT_D), args.workers)
+        FCXR._resource_log(run_dir, "grid_start", dict(n_base=len(base), T1=T1, T2=T2, **plan))
+        print(f"[grid] build seed={args.seed}; {len(base)} base cells (D={D_GRID}) T1={T1} T2={T2} "
+              f"workers={plan['workers']}", flush=True)
+        S, pi = _build_and_align(args.seed)
+        _CTX.update(S=S, pi=pi, bref=bref, run_dir=run_dir, seed=args.seed)
+        rows = _run_tasks(base, plan["workers"])
+        t1_by = {(r["D"], r["slot"]): r for r in rows}
+        # T2 only for high ICs that showed a substantial excursion (resolve FINITE_HIGH vs METASTABLE, clause 4)
+        excursion = ("FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT", "EXCURSION_DECAYED")
+        t2 = [dict(D=D, ic="high", kick_boost=(KICK_HIGH1 if slot == "high1" else KICK_HIGH2), T_post=T2,
+                   window="T2", slot=slot, label=f"D{D:g}_{slot}_T2")
+              for D in D_GRID for slot in ("high1", "high2")
+              if t1_by[(D, slot)]["provisional_label"] in excursion]
+        print(f"[grid] T1 done; {len(t2)} T2 (two-window) cells for excursion candidates", flush=True)
+        t2_rows = _run_tasks(t2, plan["workers"]) if t2 else []
+        t2_by = {(r["D"], r["slot"]): r for r in t2_rows}
+        # per-D resolution
+        per_D = []
+        for D in D_GRID:
+            low = t1_by[(D, "low")]["provisional_label"]
+            resolved, plateaus = [], []
+            for slot in ("high1", "high2"):
+                p1 = t1_by[(D, slot)]["provisional_label"]
+                if p1 in excursion:
+                    r2 = t2_by.get((D, slot))
+                    lab = (resolve_high_ic(p1, r2["provisional_label"]) if r2 is not None
+                           else ("METASTABLE_TRANSIENT" if p1 == "EXCURSION_DECAYED" else p1))
+                else:
+                    lab = p1                                    # DECAYS_TO_LOW / REFRACTORY_CEILING / UNSAFE: stable at T1
+                resolved.append(lab); plateaus.append(t1_by[(D, slot)]["end_rate_hz"])
+            d = classify_branch_D(low, resolved, plateaus)
+            per_D.append(dict(D=D, low=low, high_resolved=resolved, **d))
+            print(f"[grid] D={D:g}: low={low} high={resolved} -> {d['D_label']}", flush=True)
+        landmarks = [p["D"] for p in per_D if p["D_label"] in ("BISTABLE", "FINITE_HIGH")]
+        verdict = (f"FINITE-HIGH/BISTABLE at D={landmarks} -> proceed to seed3 confirm + D2" if landmarks else
+                   "CLEAN NO-GO: no persistent finite-high / bistable at any D in [0,0.15] (seed1); RC1 smooth "
+                   "saturation bounds the transient (no runaway/clip) but gives no high-state attractor")
+        FCXR._write_json(os.path.join(run_dir, "branch_map.json"),
+                         dict(seed=args.seed, dt=DT_D, T1=T1, T2=T2, D_grid=D_GRID, kicks=[KICK_HIGH1, KICK_HIGH2],
+                              thresholds=THRESHOLDS, per_D=per_D, landmarks=landmarks,
+                              base_rows=rows, t2_rows=t2_rows, verdict=verdict))
+        print(f"[grid] VERDICT: {verdict}", flush=True)
+        print(f"[grid] done -> {run_dir}/branch_map.json", flush=True)
+
+
 # ----------------------------------------------------------------- CLI
 def main():
     ap = argparse.ArgumentParser(description="FCXR Stage D — frozen fast-branch map (dt=0.05).")
@@ -276,10 +366,13 @@ def main():
     s.add_argument("--ic", choices=["low", "high"], default="low"); s.add_argument("--T", type=float, default=300.0)
     p = sub.add_parser("pilot"); p.add_argument("--seed", type=int, default=1); p.add_argument("--T", type=float, default=4000.0)
     p.add_argument("--workers", type=int, default=1)
+    g = sub.add_parser("grid"); g.add_argument("--seed", type=int, default=1)
+    g.add_argument("--T1", type=float, default=4000.0); g.add_argument("--T2", type=float, default=8000.0)
+    g.add_argument("--workers", type=int, default=2)
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("REFUSING: simulations require --confirm-run")
-    {"baseline": cmd_baseline, "smoke": cmd_smoke, "pilot": cmd_pilot}[args.cmd](args)
+    {"baseline": cmd_baseline, "smoke": cmd_smoke, "pilot": cmd_pilot, "grid": cmd_grid}[args.cmd](args)
 
 
 if __name__ == "__main__":
