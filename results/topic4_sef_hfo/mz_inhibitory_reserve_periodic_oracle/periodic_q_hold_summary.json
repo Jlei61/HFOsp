@@ -1,0 +1,120 @@
+{
+  "status": "EXACT_PERIODIC_Q_HOLD_ORACLE_SUPPORTED_BUT_ENTRY_ORDERING_NO_GO_PERSISTS",
+  "scientific_layer": "exact_scalar_periodic_q_hold_on_frozen_CCO_sensor_not_autonomous",
+  "decision": "preserve_entry_ordering_no_go_and_stop_before_autonomous_lifecycle",
+  "gates": {
+    "hash_locked_inputs_match": true,
+    "complete_24_q_phase_dt_combinations": true,
+    "all_periodic_q_min_above_gate": true,
+    "all_periodic_q_max_below_gate": true,
+    "all_periodic_means_match_q_hold": true,
+    "all_per_period_rho_below_gate": true
+  },
+  "gate_thresholds": {
+    "expected_combinations": 24,
+    "minimum_q": 0.8325,
+    "maximum_q": 0.85,
+    "maximum_abs_mean_minus_hold": 0.00125,
+    "maximum_per_period_rho": 0.9
+  },
+  "combination_count": 24,
+  "aggregates_by_q_hold": {
+    "0.84": {
+      "q_min": 0.8394428733079302,
+      "q_max": 0.8406317327234214,
+      "maximum_abs_mean_minus_hold": 3.521295810504643e-05,
+      "maximum_per_period_rho": 0.6390952746450236,
+      "maximum_convergence_error": 2.0872192862952943e-14
+    },
+    "0.8425": {
+      "q_min": 0.8419401603353288,
+      "q_max": 0.843144190071786,
+      "maximum_abs_mean_minus_hold": 4.019675004607315e-05,
+      "maximum_per_period_rho": 0.6055254412384515,
+      "maximum_convergence_error": 3.530509218307998e-14
+    },
+    "0.845": {
+      "q_min": 0.8444346964845151,
+      "q_max": 0.8456636817830127,
+      "maximum_abs_mean_minus_hold": 4.7424155325104245e-05,
+      "maximum_per_period_rho": 0.5626714472171389,
+      "maximum_convergence_error": 5.551115123125783e-14
+    }
+  },
+  "input_sha256": {
+    "mapping_summary_path": "7bad797aef9b381fe2ecd3b9ee8a90dd5264c5c366c2457b073d0535153bdaa8",
+    "cycle_sensor_replay_path": "ac7e74278f63dbe14092be3cc1d7dc7e7182718313bad3528c75fd8c509389f1",
+    "cycle_measurements_path": "cde2d7d4aa09f611d800bb014da5cb47e51b97acf8a91b0b1dd327b24df71e00"
+  },
+  "mapping_provenance_status": "RESERVE_MAPPING_CLEAN_NO_GO_LOCKED_EVENT_ORDERING_CONFLICT",
+  "claim_boundary": [
+    "U(t) is a hash-locked frozen CCO sensor replay and does not respond to q(t)",
+    "each q update is exact for piecewise-constant saved U over exact CSV return endpoints",
+    "rho is the exact affine 8-return-window slope raised to the one-eighth power",
+    "passing hold stability cannot repair the locked early-entry ordering conflict",
+    "BUT_ENTRY_ORDERING_NO_GO_PERSISTS and autonomous testing remains locked",
+    "no E-E, conductance, relay, dynamic threshold, or dynamic bath containment was added"
+  ],
+  "config": {
+    "result_root": "results/topic4_sef_hfo/mz_inhibitory_reserve_periodic_oracle",
+    "mapping_summary_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/reserve_mapping_summary.json",
+    "cycle_sensor_replay_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_sensor_replay.npz",
+    "cycle_measurements_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_use_measurements.csv",
+    "input_sha256": {
+      "mapping_summary_path": "7bad797aef9b381fe2ecd3b9ee8a90dd5264c5c366c2457b073d0535153bdaa8",
+      "cycle_sensor_replay_path": "ac7e74278f63dbe14092be3cc1d7dc7e7182718313bad3528c75fd8c509389f1",
+      "cycle_measurements_path": "cde2d7d4aa09f611d800bb014da5cb47e51b97acf8a91b0b1dd327b24df71e00"
+    },
+    "oracle": {
+      "q_hold_axis": [
+        0.84,
+        0.8425,
+        0.845
+      ],
+      "relative_phase_fractions": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ],
+      "dt_ms": [
+        0.125,
+        0.0625
+      ],
+      "q_rest": 0.9,
+      "tau_recovery_ms": 20000.0,
+      "integrated_returns_per_window": 8,
+      "initial_q": 0.9,
+      "stroboscopic_tolerance": 1e-13,
+      "maximum_stroboscopic_iterations": 10000
+    },
+    "formal_gate": {
+      "expected_combinations": 24,
+      "minimum_q": 0.8325,
+      "maximum_q": 0.85,
+      "maximum_abs_mean_minus_hold": 0.00125,
+      "maximum_per_period_rho": 0.9
+    },
+    "resource_contract": {
+      "processes": 1,
+      "blas_threads": 1,
+      "max_memory_gib": 1.0
+    },
+    "scope": {
+      "exact_piecewise_constant_use_update": true,
+      "exact_csv_return_windows": true,
+      "frozen_sensor_replay_only": true,
+      "entry_ordering_no_go_remains_binding": true,
+      "autonomous_lifecycle_unlocked": false,
+      "ee_weight_change": false,
+      "ee_kernel_change": false,
+      "conductance_membrane": false,
+      "dynamic_threshold": false
+    }
+  },
+  "artifacts": {
+    "figure": "results/topic4_sef_hfo/mz_inhibitory_reserve_periodic_oracle/figures/mz_inhibitory_reserve_periodic_oracle.png",
+    "csv": "results/topic4_sef_hfo/mz_inhibitory_reserve_periodic_oracle/periodic_q_hold_oracle.csv",
+    "representative_traces": "results/topic4_sef_hfo/mz_inhibitory_reserve_periodic_oracle/periodic_q_representative_traces.npz"
+  }
+}

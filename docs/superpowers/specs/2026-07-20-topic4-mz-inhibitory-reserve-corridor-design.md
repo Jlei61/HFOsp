@@ -1,8 +1,8 @@
-# Topic 4：inhibitory-reserve 二维 frozen corridor（locked design v1.0）
+# Topic 4：inhibitory-reserve 二维 frozen corridor（executed design v1.1）
 
 日期：2026-07-20
 
-状态：R0a cheap screen 待执行；本文件先锁方程、数值轴、资源上限与 stop rule。
+状态：R0a/R0b fixed-q corridor 已通过；R1 complete-cycle mapping 得到 clean event-ordering no-go；exact periodic q oracle 证明 hold 可稳定，但不能修复 entry。原线性 reserve law 的 autonomous arm 保持关闭，下一节点仅允许独立的 thresholded-eligibility scalar discovery。
 
 工作线：`.worktrees/topic4-mz-divisive-lifecycle`
 
@@ -47,6 +47,8 @@ U_j=H_\epsilon(s^{EI}_j-s^{EI,0}_j).
 \]
 
 core 与 annulus 第一版共享一个 `D_R`；bath 暂固定 `q_B=q_0=.90`，只用于与既有 frozen oracle 同坐标比较。field lift 时必须移除该 bath mask。
+
+机制口径锁定：这里的 `D_R/q_R` 只能解释为**突触前可释放 GABA reserve 的粗粒化代理**，或更保守地称 effective inhibitory capacity。它不表示 intracellular chloride，也不表示 KCC2 transport。若未来加入 chloride，必须另设改变 `E_GABA` 的离子变量；禁止把 release depletion、chloride accumulation 与 KCC2 recovery 混成同一个乘性 q。
 
 等价 q 方程：
 
@@ -159,17 +161,55 @@ A_{exit}(q)+\Delta A_{margin}<A_{fail}(q),
 
 R0 只证明 fast geometry 对 reserve-compatible slow flow 有空间，不证明 autonomous lifecycle。
 
-## 7. R1 解锁后的最小映射
+## 7. R1 映射与执行结果
 
-R0 通过后才做：
+R0 通过后执行：
 
-1. 在 `I_safe` 下/中/上节点记录 `Ubar_CCO(q,A=0)`；
-2. 由 q-nullcline反算各自 `q_res`；
-3. 用固定背景事件 sensor replay 锁一个 `tau_D,d`，使最后一个 pulse 后 q 带余量跨 entry fold；
-4. 固定原 four-return M arm `p_on=.115,tau_m_up=225 ms`，不先调 M；
+1. 在 `I_safe` 下/中/上节点记录完整 return-to-return `Ubar_CCO(q,A=0)`；
+2. 由 q-nullcline 反算各自 `q_res`；
+3. 用固定背景事件 sensor replay 锁一个 `tau_D,d`，并严格检查是否只有最后一个 pulse 后 q 才跨 entry fold；
+4. 固定原 four-return M arm，不先调 M；
 5. old no-reserve arm 保留为已知 no-go 对照。
 
-不把 `q_res`、`tau_D,d`、M 参数做三维网格。
+### 7.1 R0b：二维 safe strip 成立
+
+formal safe strip 为 `.835-.845`，五节点 spacing `.0025`。source、instantaneous fold bracket、`.025 mV` registered margin、225-ms smooth M ramp、parameter restoration、双 dt/四 phase、zero fail-closed violations 与 outcome-derived continuous interval 共 13 个 gate 全通过。
+
+`.825 failure/.830 safe` 只构成 confirmed-anchor bracket；`.8275` 因 source Poincare closure 略超门保持 unresolved。它不是 formal strip 下端，也不是已证明单调的动力学边界。
+
+### 7.2 R1 complete-cycle mapping：entry-ordering clean no-go
+
+`q_hold=.840/.8425/.845` 上，丢弃四 returns 后对 exact 8-return window 积分得到 `Ubar=.19946/.19075/.18097`。每个节点的 event endpoint root 唯一、scan monotone、平均 q-nullcline局部吸引。
+
+但三个节点都在第 5 个锁定事件后、约 `7.60 s` 已越 `q_entry=.8558315843`；第 6 个事件在 `10.915 s`。preferred `.8425` 的结果为：
+
+```text
+tau_D,d = 218.560 ms
+q_res = .839206
+minimum q before last event = .854325
+```
+
+因此 status 锁为 `RESERVE_MAPPING_CLEAN_NO_GO_LOCKED_EVENT_ORDERING_CONFLICT`。不能换 seed、event target 或把 q_res 当安全下界来救结果。
+
+### 7.3 exact periodic q oracle：hold supported，entry no-go persists
+
+hash-locked CCO sensor 的 24 个 `q_hold x phase x dt` exact periodic scalar maps 全部收敛：
+
+```text
+global periodic q range = .839443-.845664
+max |period mean - q_hold| = 4.74e-5
+max q-direction rho per return period = .63910
+max stroboscopic convergence error = 5.55e-14
+```
+
+这排除了“平均 nullcline 本身不能 hold CCO”这一替代解释。当前结构的精确问题是：**hold 可解，sparse-event entry ordering 不可解**。periodic sensor 仍是 frozen replay，不能解锁 autonomous lifecycle。
+
+### 7.4 两个直接补丁被关闭
+
+1. `tau_H dot H=U-H`、depletion 直接由 H 驱动：平均 q-nullcline不变，locked event ordering 在 `tau_H=1 ms-10^7 ms` 全部失败；二维平均 `(q,H)` divergence 恒负，H 只增加 transient memory。
+2. depletion 改为 `U H`：只有 `tau_D,d<=4.5 ms` 才通过 locked ordering，已经离开慢变量尺度，并在大 `tau_H` 下退化为不可辨识的乘积缩放。
+
+唯一保留的独立候选是 thresholded eligibility：H 只决定 event-use depletion 是否打开，而 `U=0` 时始终只恢复。它必须走单独 3x3 scalar discovery，不能回写成当前线性 reserve 已通过。
 
 ## 8. Stop rules
 
@@ -181,7 +221,7 @@ R0 通过后才做：
 4. 瞬时 A-step 安全，但 fixed-q smooth M ramp 越出 support；
 5. base/half-dt 或四 phase 标签不一致；
 6. sustained ceiling 或 bath recruitment；
-7. q-nullcline无法落入 `I_safe`，同时 fixed-event replay 无法跨 entry fold；
+7. q-nullcline虽能落入 `I_safe`，但 locked sparse-event replay 无法满足 pre-last safe + last-only entry；本例已触发，原线性 reserve autonomous arm关闭；
 8. reserve-only 仍在第 4 return 前离开 safe strip。
 
 只有 reserve 把轨迹限制在 safe CCO strip、但最终只留下 tonic plateau 时，才解锁 local dynamic threshold `phi`。否则不加 `phi`，也不回头扫 E→E。

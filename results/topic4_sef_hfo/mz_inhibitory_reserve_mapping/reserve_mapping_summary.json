@@ -1,0 +1,302 @@
+{
+  "status": "RESERVE_MAPPING_CLEAN_NO_GO_LOCKED_EVENT_ORDERING_CONFLICT",
+  "scientific_layer": "complete_cycle_informed_scalar_mapping_not_coupled_lifecycle",
+  "decision": "preserve_no_go_and_require_noncyclic_R1a_periodic_oracle",
+  "gates": {
+    "locked_R0b_provenance_accepts_mapping_axis": true,
+    "cycle_sensor_cartesian_product_complete": true,
+    "cycle_sensor_all_q_phase_dt_bounded_CCO": true,
+    "cycle_use_phase_dt_spread_within_gate": true,
+    "fixed_event_replay_preserves_six_regional_returns": true,
+    "fixed_event_sensor_is_failclosed_clean": true,
+    "event_sensor_dose_is_finite_positive": true,
+    "all_q_nodes_have_one_monotone_physical_root": true,
+    "all_mapped_nullclines_are_locally_attracting": true,
+    "all_event_replays_cross_only_on_last_event": false,
+    "geometry_preferred_mapping_root_exists": true
+  },
+  "event_sensor_dose_ms": 453.30910027551,
+  "mean_use_by_q": {
+    "0.84": 0.1994623704772979,
+    "0.8425": 0.1907488650497394,
+    "0.845": 0.18097022545735936
+  },
+  "use_spread_by_q": {
+    "0.84": 6.908640115635412e-05,
+    "0.8425": 4.463787272704356e-05,
+    "0.845": 1.5676585296720003e-05
+  },
+  "use_slope_per_q": -3.6984290039878625,
+  "mappings": [
+    {
+      "mapping_status": "root_found",
+      "q_hold": 0.84,
+      "mean_cycle_use": 0.1994623704772979,
+      "tau_depletion_ms": 246.00798814657406,
+      "q_reserve": 0.8362999338538206,
+      "event_final_q": 0.8549999325060696,
+      "event_target_residual": -6.749393033356199e-08,
+      "minimum_q_before_last_pulse": 0.8545676262920286,
+      "minimum_q_full_replay": 0.8545676262920286,
+      "first_entry_fold_crossing_ms": 7611.0,
+      "averaged_nullcline_q": 0.8399999999999999,
+      "nullcline_residual": -1.1102230246251565e-16,
+      "slow_q_derivative_per_ms": -0.0008051703500575202,
+      "root_bracket_count": 1,
+      "root_scan_monotone": true,
+      "event_endpoint_root_slope_per_ms": 6.551586937103238e-05,
+      "q_reserve_is_physical": true,
+      "q_reserve_above_confirmed_lower_anchor_diagnostic": true,
+      "pre_last_event_stays_above_entry_fold": false,
+      "full_replay_crosses_entry_fold": true,
+      "use_slope_per_q": -3.6984290039878625
+    },
+    {
+      "mapping_status": "root_found",
+      "q_hold": 0.8425,
+      "mean_cycle_use": 0.1907488650497394,
+      "tau_depletion_ms": 218.56023084786557,
+      "q_reserve": 0.8392058222678087,
+      "event_final_q": 0.8549999199137036,
+      "event_target_residual": -8.008629637235032e-08,
+      "minimum_q_before_last_pulse": 0.8543245314083613,
+      "minimum_q_full_replay": 0.8543245314083613,
+      "first_entry_fold_crossing_ms": 7607.0,
+      "averaged_nullcline_q": 0.8425,
+      "nullcline_residual": 0.0,
+      "slow_q_derivative_per_ms": -0.0008670085741948507,
+      "root_bracket_count": 1,
+      "root_scan_monotone": true,
+      "event_endpoint_root_slope_per_ms": 6.567450208321925e-05,
+      "q_reserve_is_physical": true,
+      "q_reserve_above_confirmed_lower_anchor_diagnostic": true,
+      "pre_last_event_stays_above_entry_fold": false,
+      "full_replay_crosses_entry_fold": true,
+      "use_slope_per_q": -3.6984290039878625
+    },
+    {
+      "mapping_status": "root_found",
+      "q_hold": 0.845,
+      "mean_cycle_use": 0.18097022545735936,
+      "tau_depletion_ms": 189.8153446637312,
+      "q_reserve": 0.8421155907193791,
+      "event_final_q": 0.8549999304934175,
+      "event_target_residual": -6.950658248960906e-08,
+      "minimum_q_before_last_pulse": 0.8540518291635539,
+      "minimum_q_full_replay": 0.8540518291635539,
+      "first_entry_fold_crossing_ms": 7601.0,
+      "averaged_nullcline_q": 0.8450000000000001,
+      "nullcline_residual": 1.1102230246251565e-16,
+      "slow_q_derivative_per_ms": -0.0009472006073388855,
+      "root_bracket_count": 1,
+      "root_scan_monotone": true,
+      "event_endpoint_root_slope_per_ms": 6.470323720225882e-05,
+      "q_reserve_is_physical": true,
+      "q_reserve_above_confirmed_lower_anchor_diagnostic": true,
+      "pre_last_event_stays_above_entry_fold": false,
+      "full_replay_crosses_entry_fold": true,
+      "use_slope_per_q": -3.6984290039878625
+    }
+  ],
+  "geometry_preferred_mapping": {
+    "mapping_status": "root_found",
+    "q_hold": 0.8425,
+    "mean_cycle_use": 0.1907488650497394,
+    "tau_depletion_ms": 218.56023084786557,
+    "q_reserve": 0.8392058222678087,
+    "event_final_q": 0.8549999199137036,
+    "event_target_residual": -8.008629637235032e-08,
+    "minimum_q_before_last_pulse": 0.8543245314083613,
+    "minimum_q_full_replay": 0.8543245314083613,
+    "first_entry_fold_crossing_ms": 7607.0,
+    "averaged_nullcline_q": 0.8425,
+    "nullcline_residual": 0.0,
+    "slow_q_derivative_per_ms": -0.0008670085741948507,
+    "root_bracket_count": 1,
+    "root_scan_monotone": true,
+    "event_endpoint_root_slope_per_ms": 6.567450208321925e-05,
+    "q_reserve_is_physical": true,
+    "q_reserve_above_confirmed_lower_anchor_diagnostic": true,
+    "pre_last_event_stays_above_entry_fold": false,
+    "full_replay_crosses_entry_fold": true,
+    "use_slope_per_q": -3.6984290039878625
+  },
+  "selected_mapping": null,
+  "input_sha256": {
+    "transfer_path": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+    "orbit_cycle_path": "3f2709a01451e9e1d9e135e454346e857771866c5eb3fa0d4c12a77cc5e073bf",
+    "orbit_summary_path": "8355b196b7adc1b942935f92acec1fb5d738ef59ff7e3aa8606ce3f7fe6b7c56"
+  },
+  "r0_provenance_sha256": {
+    "r0b_summary_path": "54a49a4486a25a3b8c16a4da8f3b92769a6117d3ff494ef7d7a2d7cf40d0f54c",
+    "r0b_sentinel_path": "d943cf9b66ef3e0fbbcb395e172924d562321a778869ac911c621251fe6e0d91"
+  },
+  "interictal_root": {
+    "rE_hz": 0.8108934281399697,
+    "rI_hz": 5.678646486900357,
+    "stability": "stable",
+    "leading_real_per_ms": -0.012499999999999999,
+    "leading_imag_per_ms": 0.0,
+    "residual_inf_khz": 2.430174117495909e-14
+  },
+  "claim_boundary": [
+    "the event sensor trace is generated with q and M frozen; q trajectories are scalar offline replays",
+    "q_res and tau_D,d are a preliminary two-equation calibration, not an independently validated identification",
+    "q_res is a parameter floor and is not used as the dynamical safety boundary",
+    "the locked event schedule calibrates the endpoint and therefore cannot serve as held-out validation",
+    "even a supported mapping would require periodic and closed-loop q(t) oracles before autonomous testing",
+    "no E-E, conductance, relay, or dynamic-threshold mechanism was changed"
+  ],
+  "config": {
+    "result_root": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping",
+    "transfer_path": "results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz",
+    "orbit_cycle_path": "results/topic4_sef_hfo/mz_additive_orbit_continuation/cycle_states_and_traces.npz",
+    "orbit_summary_path": "results/topic4_sef_hfo/mz_additive_orbit_continuation/orbit_continuation_summary.json",
+    "r0b_summary_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_summary.json",
+    "r0b_sentinel_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_lower_boundary_sentinel.json",
+    "input_sha256": {
+      "transfer_path": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+      "orbit_cycle_path": "3f2709a01451e9e1d9e135e454346e857771866c5eb3fa0d4c12a77cc5e073bf",
+      "orbit_summary_path": "8355b196b7adc1b942935f92acec1fb5d738ef59ff7e3aa8606ce3f7fe6b7c56"
+    },
+    "r0_provenance_sha256": {
+      "r0b_summary_path": "54a49a4486a25a3b8c16a4da8f3b92769a6117d3ff494ef7d7a2d7cf40d0f54c",
+      "r0b_sentinel_path": "d943cf9b66ef3e0fbbcb395e172924d562321a778869ac911c621251fe6e0d91"
+    },
+    "model": {
+      "z_interictal": 0.9,
+      "z_cycle_anchor": 0.85,
+      "z_bath": 0.9,
+      "alpha_G": 15.0,
+      "w_ee_mult": 1.1,
+      "ratio": 1.0,
+      "additive_max_mv": 1.6,
+      "pool_p": 1.0
+    },
+    "geometry": {
+      "source": "canonical_m3b_api_defaults",
+      "grid_n": 48,
+      "grid_L_mm": 12.0,
+      "core_radius_mm": 1.5,
+      "theta_deg": 45.0,
+      "partition": "core_equal_area_annulus_far_bath",
+      "boundary": "periodic_torus"
+    },
+    "smooth_transfer": {
+      "mu_min_mv": -160.0,
+      "mu_max_mv": 80.0,
+      "sigma_min_mv": 3.0,
+      "sigma_max_mv": 20.0,
+      "spline_degree_mu": 3,
+      "spline_degree_sigma": 3,
+      "smoothing": 0.0
+    },
+    "mapping": {
+      "q_hold_axis": [
+        0.84,
+        0.8425,
+        0.845
+      ],
+      "preferred_q_hold": 0.8425,
+      "relative_phase_fractions": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ],
+      "cycle_trace_key": "A_0p00000",
+      "cycle_discard_returns": 4,
+      "cycle_integral_returns": 8,
+      "q_rest": 0.9,
+      "tau_recovery_ms": 20000.0,
+      "event_target_q": 0.855,
+      "entry_fold_q": 0.8558315843088748,
+      "confirmed_lower_anchor_q": 0.83,
+      "future_coupled_cycle_min_q": 0.8325,
+      "tau_depletion_search_ms": [
+        50.0,
+        3000.0
+      ],
+      "tau_depletion_scan_points": 96,
+      "root_tolerance_q": 1e-07,
+      "maximum_phase_dt_use_spread": 0.01
+    },
+    "sensor": {
+      "inhibitory_use_threshold_khz": 0.004,
+      "inhibitory_use_width_khz": 0.004,
+      "tau_p_ms": 750.0,
+      "occupancy_threshold_khz": 0.02,
+      "occupancy_width_khz": 0.01
+    },
+    "background_event_challenge": {
+      "generator": "shifted_exponential_fixed_seed_then_locked",
+      "seed": 20260720,
+      "realized_onsets_ms": [
+        1000.0,
+        3122.0,
+        5044.0,
+        6321.0,
+        7531.0,
+        10915.0
+      ],
+      "duration_ms": 20.0,
+      "amplitude_mv": 3.0,
+      "profile_core_annulus_bath": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "replay_stop_ms": 11035.0,
+      "last_pulse_onset_ms": 10915.0,
+      "expected_returning_events": 6
+    },
+    "classification": {
+      "discard_returns": 2,
+      "accepted_min_returns": 6,
+      "period_cv_max": 0.01,
+      "peak_drift_max": 0.01,
+      "poincare_closure_max": 2e-05,
+      "bath_peak_max_hz": 20.0,
+      "low_tail_max_hz": 5.0,
+      "low_tail_ms": 2000.0,
+      "low_final_fast_rhs_max_per_ms": 1e-08
+    },
+    "integration": {
+      "dt_ms": [
+        0.125,
+        0.0625
+      ],
+      "cycle_measurement_ms": 12000.0,
+      "event_replay_dt_ms": 0.125,
+      "cycle_save_dt_ms": 1.0,
+      "event_save_dt_ms": 1.0,
+      "section_level_rE_fast_khz": 0.02,
+      "rearm_level_rE_fast_khz": 0.015
+    },
+    "resource_contract": {
+      "processes": 1,
+      "blas_threads": 1,
+      "maximum_vectorized_forks": 12,
+      "max_trace_bytes": 268435456,
+      "max_memory_gib": 2.0
+    },
+    "scope": {
+      "maps_q_hold_to_q_res_and_tau_dep_only": true,
+      "reserve_dynamics_not_yet_coupled_to_fast_system": true,
+      "fixed_event_sensor_replay": true,
+      "ee_weight_change": false,
+      "ee_kernel_change": false,
+      "conductance_membrane": false,
+      "dynamic_threshold": false
+    }
+  },
+  "artifacts": {
+    "figure": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/figures/mz_inhibitory_reserve_mapping.png",
+    "cycle_csv": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_use_measurements.csv",
+    "cycle_sensor_trace": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_sensor_replay.npz",
+    "mapping_csv": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/reserve_parameter_mappings.csv",
+    "raw_event_trace": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/fixed_event_sensor_raw.npz",
+    "event_trace": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/fixed_event_sensor_replay.npz"
+  },
+  "plot_status": "complete"
+}

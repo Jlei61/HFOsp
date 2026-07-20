@@ -1,0 +1,116 @@
+result_root: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping
+
+transfer_path: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz
+orbit_cycle_path: results/topic4_sef_hfo/mz_additive_orbit_continuation/cycle_states_and_traces.npz
+orbit_summary_path: results/topic4_sef_hfo/mz_additive_orbit_continuation/orbit_continuation_summary.json
+r0b_summary_path: results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_summary.json
+r0b_sentinel_path: results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_lower_boundary_sentinel.json
+
+input_sha256:
+  transfer_path: dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703
+  orbit_cycle_path: 3f2709a01451e9e1d9e135e454346e857771866c5eb3fa0d4c12a77cc5e073bf
+  orbit_summary_path: 8355b196b7adc1b942935f92acec1fb5d738ef59ff7e3aa8606ce3f7fe6b7c56
+
+r0_provenance_sha256:
+  r0b_summary_path: 54a49a4486a25a3b8c16a4da8f3b92769a6117d3ff494ef7d7a2d7cf40d0f54c
+  r0b_sentinel_path: d943cf9b66ef3e0fbbcb395e172924d562321a778869ac911c621251fe6e0d91
+
+model:
+  z_interictal: 0.90
+  z_cycle_anchor: 0.85
+  z_bath: 0.90
+  alpha_G: 15.0
+  w_ee_mult: 1.1
+  ratio: 1.0
+  additive_max_mv: 1.6
+  pool_p: 1.0
+
+geometry:
+  source: canonical_m3b_api_defaults
+  grid_n: 48
+  grid_L_mm: 12.0
+  core_radius_mm: 1.5
+  theta_deg: 45.0
+  partition: core_equal_area_annulus_far_bath
+  boundary: periodic_torus
+
+smooth_transfer:
+  mu_min_mv: -160.0
+  mu_max_mv: 80.0
+  sigma_min_mv: 3.0
+  sigma_max_mv: 20.0
+  spline_degree_mu: 3
+  spline_degree_sigma: 3
+  smoothing: 0.0
+
+mapping:
+  q_hold_axis: [0.8400, 0.8425, 0.8450]
+  preferred_q_hold: 0.8425
+  relative_phase_fractions: [0.0, 0.25, 0.50, 0.75]
+  cycle_trace_key: A_0p00000
+  cycle_discard_returns: 4
+  cycle_integral_returns: 8
+  q_rest: 0.90
+  tau_recovery_ms: 20000.0
+  event_target_q: 0.8550
+  entry_fold_q: 0.8558315843088748
+  confirmed_lower_anchor_q: 0.8300
+  future_coupled_cycle_min_q: 0.8325
+  tau_depletion_search_ms: [50.0, 3000.0]
+  tau_depletion_scan_points: 96
+  root_tolerance_q: 1.0e-7
+  maximum_phase_dt_use_spread: 0.01
+
+sensor:
+  inhibitory_use_threshold_khz: 0.004
+  inhibitory_use_width_khz: 0.004
+  tau_p_ms: 750.0
+  occupancy_threshold_khz: 0.020
+  occupancy_width_khz: 0.010
+
+background_event_challenge:
+  generator: shifted_exponential_fixed_seed_then_locked
+  seed: 20260720
+  realized_onsets_ms: [1000.0, 3122.0, 5044.0, 6321.0, 7531.0, 10915.0]
+  duration_ms: 20.0
+  amplitude_mv: 3.0
+  profile_core_annulus_bath: [1.0, 0.0, 0.0]
+  replay_stop_ms: 11035.0
+  last_pulse_onset_ms: 10915.0
+  expected_returning_events: 6
+
+classification:
+  discard_returns: 2
+  accepted_min_returns: 6
+  period_cv_max: 0.01
+  peak_drift_max: 0.01
+  poincare_closure_max: 2.0e-5
+  bath_peak_max_hz: 20.0
+  low_tail_max_hz: 5.0
+  low_tail_ms: 2000.0
+  low_final_fast_rhs_max_per_ms: 1.0e-8
+
+integration:
+  dt_ms: [0.125, 0.0625]
+  cycle_measurement_ms: 12000.0
+  event_replay_dt_ms: 0.125
+  cycle_save_dt_ms: 1.0
+  event_save_dt_ms: 1.0
+  section_level_rE_fast_khz: 0.020
+  rearm_level_rE_fast_khz: 0.015
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  maximum_vectorized_forks: 12
+  max_trace_bytes: 268435456
+  max_memory_gib: 2.0
+
+scope:
+  maps_q_hold_to_q_res_and_tau_dep_only: true
+  reserve_dynamics_not_yet_coupled_to_fast_system: true
+  fixed_event_sensor_replay: true
+  ee_weight_change: false
+  ee_kernel_change: false
+  conductance_membrane: false
+  dynamic_threshold: false

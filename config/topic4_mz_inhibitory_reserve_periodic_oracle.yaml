@@ -1,0 +1,44 @@
+result_root: results/topic4_sef_hfo/mz_inhibitory_reserve_periodic_oracle
+
+mapping_summary_path: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/reserve_mapping_summary.json
+cycle_sensor_replay_path: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_sensor_replay.npz
+cycle_measurements_path: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_use_measurements.csv
+
+input_sha256:
+  mapping_summary_path: 7bad797aef9b381fe2ecd3b9ee8a90dd5264c5c366c2457b073d0535153bdaa8
+  cycle_sensor_replay_path: ac7e74278f63dbe14092be3cc1d7dc7e7182718313bad3528c75fd8c509389f1
+  cycle_measurements_path: cde2d7d4aa09f611d800bb014da5cb47e51b97acf8a91b0b1dd327b24df71e00
+
+oracle:
+  q_hold_axis: [0.8400, 0.8425, 0.8450]
+  relative_phase_fractions: [0.0, 0.25, 0.50, 0.75]
+  dt_ms: [0.125, 0.0625]
+  q_rest: 0.90
+  tau_recovery_ms: 20000.0
+  integrated_returns_per_window: 8
+  initial_q: 0.90
+  stroboscopic_tolerance: 1.0e-13
+  maximum_stroboscopic_iterations: 10000
+
+formal_gate:
+  expected_combinations: 24
+  minimum_q: 0.8325
+  maximum_q: 0.8500
+  maximum_abs_mean_minus_hold: 0.00125
+  maximum_per_period_rho: 0.90
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  max_memory_gib: 1.0
+
+scope:
+  exact_piecewise_constant_use_update: true
+  exact_csv_return_windows: true
+  frozen_sensor_replay_only: true
+  entry_ordering_no_go_remains_binding: true
+  autonomous_lifecycle_unlocked: false
+  ee_weight_change: false
+  ee_kernel_change: false
+  conductance_membrane: false
+  dynamic_threshold: false
