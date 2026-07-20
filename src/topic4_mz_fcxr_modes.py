@@ -129,16 +129,19 @@ def clip_mode_audit(*, clip_count, max_raw_gErec, in_strength, out_strength, vth
     core_localized = bool(np.isfinite(core_enrich) and core_enrich >= 3.0)
     persistent = bool(np.isfinite(persistent_share) and persistent_share >= 0.5)
     n_frames = int(len(clip_frames)) if clip_frames is not None else None
+    # Localization is judged by core-enrichment + spatial compactness (the strong signals); persistence
+    # (same cells vs rotating within the core) is a descriptor, not a gate.
     if n_clip == 0:
         verdict = "no_clip"
-    elif core_localized and compact and persistent:
-        verdict = "localized_recurrent_mode (low-Vth core, compact, persistent) -> real modal problem, treat with saturation"
-    elif core_localized and persistent and not compact:
-        verdict = "core-localized but spatially extended (source+sink cores) -> modal, still saturation-treatable"
-    elif not core_localized and not compact:
-        verdict = "diffuse / not core-enriched -> more numerical/random-tail than a single dominant mode"
+    elif core_localized and compact:
+        verdict = ("localized_recurrent_mode (low-Vth core, compact cluster) -> real modal problem, "
+                   "treat with recurrent smooth saturation")
+    elif core_localized and not compact:
+        verdict = "core-localized but spatially extended (both cores) -> modal, still saturation-treatable"
+    elif compact and not core_localized:
+        verdict = "compact non-core cluster -> localized elsewhere, inspect before saturation"
     else:
-        verdict = "mixed — inspect spatial + core_enrich + persistent_share"
+        verdict = "diffuse / not core-enriched -> more numerical/random-tail than a single dominant mode"
     return dict(
         n_clip_cells=n_clip, n_persistent_clippers=int(repeat.sum()), n_clip_frames=n_frames,
         clip_count_max=int(clip_count.max()), clip_count_total=int(clip_count.sum()),

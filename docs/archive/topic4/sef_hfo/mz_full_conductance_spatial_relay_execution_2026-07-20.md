@@ -197,4 +197,26 @@ recurrent-only smooth saturation → 重过 seed1/3 workpoint → 带 eigenvalue
 
 ## 6. FCXR-RC1 Stage A/B 结果
 
-（clip audit + dt 收敛结果填充中——见 `run_topic4_mz_fcxr.py clip-audit`、`results/.../clip_audit_*` 与 `figures/clip_audit.png`。）
+### Stage A — mode-resolved clip audit（arm C，seed1，dt=0.1，cap=99；图 `figures/clip_audit.png`）
+
+**核心问题（审阅 §7）"这 0.48% 是不是控制整个空间动力学的 dominant localized mode" → 答案：是一个空间局部化的核模态，
+但机制是平衡电导 shunting、不是 recurrent 增益离群。**
+
+- **空间上高度局部化**：176 个触顶 cell 是一个**紧凑簇**（rms 半径 **0.73mm**、p90 **1.17mm**），且**只落在两个低 V_th 核里
+  的一个**（右核 ~(16.6, 8.66)，左核零 clip）。core enrichment **27.7×**（核仅占 3.5% cell，却占 clip cell 的 **98.3%**），
+  corr(clip, −V_th)=0.31。→ 不是随机尾、不是全局数值瑕疵，是**单核局部化模态**（审阅假设方向对）。
+- **但不是 recurrent 电导离群**：per-cell 峰值 `gErec` 分布是 ~0.1（安静）+ ~20–29（活跃）双峰，clip cell 的 `gErec` 峰值
+  ~29，只比 bulk P95 的 ~28 高一点点；raw 总电导峰值 102.5 而 `gErec` 峰值只 29.6 → **总电导主要由 GABA 电导（~73）撑起**。
+  即 clip = 活跃核里 **强 E + 强 I 同时到来 → 两个电导都进 `tau_eff` 分母（shunting）→ 总电导过 99**；recurrent AMPA 电导只
+  贡献 ~29 的那一份、把总数顶过线。**W_EE 主特征向量是全局的（IPR≈1/N，均匀连接）**，所以局部化来自"低 V_th 核 + 活动集中"，
+  不是连接矩阵的 localized eigenmode。
+- **含义**：它确实是个真实的单核局部模态（值得用 recurrent smooth saturation 治），但因为 `gErec` 在 workpoint bulk（~19–28）
+  与 clip（~29）之间**没有干净的分界**，Stage C 的饱和必须**实测**是否在杀掉 clip 的同时保住 workpoint（见 Stage C）。
+
+### Stage B — dt/cap 数值收敛（运行中）
+
+（high-cap "去掉 clip 会不会 runaway" + dt=0.05 收敛结果填充中。）
+
+### Stage C — recurrent-only smooth saturation（Stage B 后跑）
+
+（`g_sat` 从 arm C 原始 `gErec` 分布锁、主值 + ±20%，检验是否零 clip 且保住 workpoint；结果填充中。）
