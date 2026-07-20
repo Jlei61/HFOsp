@@ -307,6 +307,10 @@ def cmd_grid(args):
         bref = FCXR.json.load(open(bref_path))
         run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"grid_seed{args.seed}_dt{DT_D}"))
         T1, T2 = float(args.T1), float(args.T2)
+        if T1 < THRESHOLDS["HIGH_MS"] and not getattr(args, "allow_smoke", False):   # P0 runtime gate
+            raise SystemExit(f"T1={T1:.0f}ms < persistence threshold HIGH_MS={THRESHOLDS['HIGH_MS']:.0f}ms: a "
+                             "sub-threshold run cannot yield a scientific verdict (no run can reach persistent-high "
+                             "in a window shorter than the threshold). Pass --allow-smoke to run it as validation.")
         base = [dict(D=D, ic=ic, kick_boost=kb, T_post=T1, window="T1", slot=slot, label=f"D{D:g}_{slot}_T1")
                 for D in D_GRID for ic, kb, slot in
                 (("low", 0.0, "low"), ("high", KICK_HIGH1, "high1"), ("high", KICK_HIGH2, "high2"))]
@@ -344,16 +348,23 @@ def cmd_grid(args):
             d = classify_branch_D(low, resolved, plateaus)
             per_D.append(dict(D=D, low=low, high_resolved=resolved, **d))
             print(f"[grid] D={D:g}: low={low} high={resolved} -> {d['D_label']}", flush=True)
+        is_smoke = T1 < THRESHOLDS["HIGH_MS"]
         landmarks = [p["D"] for p in per_D if p["D_label"] in ("BISTABLE", "FINITE_HIGH")]
-        verdict = (f"FINITE-HIGH/BISTABLE at D={landmarks} -> proceed to seed3 confirm + D2" if landmarks else
-                   "CLEAN NO-GO: no persistent finite-high / bistable at any D in [0,0.15] (seed1); RC1 smooth "
-                   "saturation bounds the transient (no runaway/clip) but gives no high-state attractor")
-        FCXR._write_json(os.path.join(run_dir, "branch_map.json"),
+        if is_smoke:                                             # P0: a sub-threshold run is NOT a scientific verdict
+            verdict = (f"SMOKE_ONLY: T1={T1:.0f}ms < persistence threshold {THRESHOLDS['HIGH_MS']:.0f}ms — "
+                       "plumbing/pool validation only, NOT a scientific branch-map verdict")
+            out_name = "branch_map_SMOKE.json"
+        else:
+            verdict = (f"FINITE-HIGH/BISTABLE at D={landmarks} -> proceed to seed3 confirm + D2" if landmarks else
+                       "CLEAN NO-GO: no persistent finite-high / bistable at any D in [0,0.15] (seed1); RC1 smooth "
+                       "saturation bounds the transient (no runaway/clip) but gives no high-state attractor")
+            out_name = "branch_map.json"
+        FCXR._write_json(os.path.join(run_dir, out_name),
                          dict(seed=args.seed, dt=DT_D, T1=T1, T2=T2, D_grid=D_GRID, kicks=[KICK_HIGH1, KICK_HIGH2],
-                              thresholds=THRESHOLDS, per_D=per_D, landmarks=landmarks,
+                              thresholds=THRESHOLDS, per_D=per_D, landmarks=landmarks, smoke_only=is_smoke,
                               base_rows=rows, t2_rows=t2_rows, verdict=verdict))
         print(f"[grid] VERDICT: {verdict}", flush=True)
-        print(f"[grid] done -> {run_dir}/branch_map.json", flush=True)
+        print(f"[grid] done -> {run_dir}/{out_name}", flush=True)
 
 
 # ----------------------------------------------------------------- CLI
@@ -369,6 +380,8 @@ def main():
     g = sub.add_parser("grid"); g.add_argument("--seed", type=int, default=1)
     g.add_argument("--T1", type=float, default=4000.0); g.add_argument("--T2", type=float, default=8000.0)
     g.add_argument("--workers", type=int, default=2)
+    g.add_argument("--allow-smoke", action="store_true",
+                   help="permit T1<HIGH_MS as plumbing/pool validation (writes branch_map_SMOKE.json only)")
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("REFUSING: simulations require --confirm-run")

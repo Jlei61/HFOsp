@@ -43,6 +43,7 @@ def _latest_branch_map():
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else _latest_branch_map()
     j = json.load(open(path))
+    is_smoke = bool(j.get("smoke_only")) or float(j.get("T1", 0)) < float(j["thresholds"]["HIGH_MS"])  # P0 gate
     rows = j["base_rows"]
     D_grid = sorted(set(r["D"] for r in rows))
     per_D = {p["D"]: p for p in j["per_D"]}
@@ -85,16 +86,20 @@ def main():
                  ha="center", va="center", color="0.45")
 
     verdict = j.get("verdict", "")
-    short = "CLEAN NO-GO: saturation bounds the transient, no persistent high branch" if "NO-GO" in verdict else verdict[:80]
+    short = ("SMOKE_ONLY — plumbing validation, NOT a scientific verdict" if is_smoke else
+             ("CLEAN NO-GO: saturation bounds the transient, no persistent high branch" if "NO-GO" in verdict
+              else verdict[:80]))
     fig.suptitle(f"FCXR-RC1 frozen fast-branch map (seed {j['seed']}, dt={j['dt']}, T1={j['T1']:.0f}ms)  —  {short}",
                  fontsize=11)
     fig.text(0.5, 0.005, "parameter-scan diagnostic — not the 4-column mechanism figure", ha="center",
              fontsize=7.5, color="0.5")
     fig.tight_layout(rect=(0, 0.04, 1, 0.96))
     os.makedirs(OUT_DIR, exist_ok=True)
+    stem = "_SMOKE_frozen_branch_map_DO_NOT_USE" if is_smoke else "frozen_branch_map"   # never canonicalize a smoke run
     for ext in ("png", "pdf"):
-        fig.savefig(os.path.join(OUT_DIR, f"frozen_branch_map.{ext}"), dpi=150)
-    print(f"wrote {OUT_DIR}/frozen_branch_map.png  (from {os.path.basename(os.path.dirname(path))})")
+        fig.savefig(os.path.join(OUT_DIR, f"{stem}.{ext}"), dpi=150)
+    tag = "SMOKE (T1<HIGH_MS) — NOT canonical" if is_smoke else "canonical"
+    print(f"wrote {OUT_DIR}/{stem}.png  [{tag}]  (from {os.path.basename(os.path.dirname(path))})")
 
 
 if __name__ == "__main__":
