@@ -352,6 +352,7 @@ def patch_rhs_fast_and_moments(
     state: Sequence[float] | np.ndarray,
     prepared: PreparedPatchRHS,
     transfer: Any,
+    external_e_mv: float | Sequence[float] | np.ndarray | None = None,
 ) -> tuple[np.ndarray, tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
     """Evaluate one or a batch of states without validation in the hot loop.
 
@@ -398,6 +399,19 @@ def patch_rhs_fast_and_moments(
         + TAU_ME * JX_E * prepared.nu_ext
         - prepared.additive_max_mv * m
     )
+    if external_e_mv is not None:
+        external = np.asarray(external_e_mv, dtype=float)
+        if external.ndim == 0:
+            external = np.full(mu_e.shape, float(external), dtype=float)
+        elif external.shape == (n_patches,):
+            external = np.broadcast_to(external[None, :], mu_e.shape)
+        elif external.shape != mu_e.shape:
+            raise ValueError(
+                "external_e_mv must be scalar, patch-aligned, or batch-by-patch aligned"
+            )
+        if not np.all(np.isfinite(external)):
+            raise ValueError("external_e_mv must be finite")
+        mu_e = mu_e + external
     var_e = (
         recurrent_var_e
         + TAU_ME * C_EI * w_ei**2 * s_ei
@@ -451,10 +465,13 @@ def patch_rhs_fast(
     state: Sequence[float] | np.ndarray,
     prepared: PreparedPatchRHS,
     transfer: Any,
+    external_e_mv: float | Sequence[float] | np.ndarray | None = None,
 ) -> np.ndarray:
     """Hot-loop wrapper returning only the vector field."""
 
-    return patch_rhs_fast_and_moments(state, prepared, transfer)[0]
+    return patch_rhs_fast_and_moments(
+        state, prepared, transfer, external_e_mv=external_e_mv
+    )[0]
 
 
 def patch_rhs_to_stage0c(rhs: Sequence[float]) -> np.ndarray:

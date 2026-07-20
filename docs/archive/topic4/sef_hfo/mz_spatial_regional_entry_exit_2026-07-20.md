@@ -6,6 +6,8 @@
 
 独立性：本节点固定 current-based Stage 0C / M3B spatial operator，只改变 regional `z` 与 recruited-region additive `A` 两个控制坐标。没有修改 E→E weight/kernel/delay，没有使用并行 `topic4-mz-conductance` 线已接受的 recurrent conductance/smooth saturation，也没有加入 relay `x_j`。
 
+> **2026-07-20 downstream addendum**：后续 autonomous regional Z–p–M 已完成并得到 clean no-go：Z 可自主跨本报告的 real fold，但 additive M 安全退出早于 4-return gate；保留第 4 个 return 时，轨迹先离开 transfer support。因此本 frozen geometry 仍成立，但它没有自动闭合 slow lifecycle。后续入口为 `docs/archive/topic4/sef_hfo/mz_spatial_autonomous_latch_2026-07-20.md`。
+
 ## 1. 一句话判断
 
 **当前 fast spatial system 已具备一条可被慢变量穿越的完整入口–退出几何。**区域性 Z 耗竭通过一个局部实模 fold 把同一低态历史带入 bounded `CCO`；在该 cycle 已建立后，只对 core+annulus 打开 additive A，又能把它推回同一个 `LLL` basin。这个结果解锁一个最小 autonomous regional Z/M latch，但还不是完整自发 seizure lifecycle。

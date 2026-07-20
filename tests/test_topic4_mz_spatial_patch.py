@@ -178,3 +178,20 @@ def test_pack_rejects_missing_slow_field_instead_of_implicitly_broadcasting():
     local = {name: np.zeros(2) for name in LOCAL_FIELDS if name != "z"}
     with pytest.raises(ValueError, match="exactly"):
         pack_patch_state(local, mu_g=0.0, s_g=0.0)
+
+
+def test_optional_external_e_drive_is_zero_default_and_patch_local():
+    transfer = DummyTransfer()
+    params = PatchParameters(additive_max_mv=1.6)
+    kernels = PatchKernels.identity(2)
+    prepared = prepare_patch_rhs(kernels, params)
+    state = uniform_patch_state(
+        equilibrium_state((0.02, 0.04)),
+        n_patches=2, z=0.9, additive_mv=0.0, parameters=params,
+    )
+    default = patch_rhs_fast(state, prepared, transfer)
+    explicit_zero = patch_rhs_fast(state, prepared, transfer, external_e_mv=[0.0, 0.0])
+    np.testing.assert_array_equal(default, explicit_zero)
+    driven = patch_rhs_fast(state, prepared, transfer, external_e_mv=[100.0, 0.0])
+    assert driven[0] > default[0]
+    assert driven[1] == default[1]
