@@ -212,3 +212,39 @@ def test_integrator_fail_closes_an_unsupported_fork_without_nan_propagation():
     assert result["first_support_failure_ms"][0] == 0.0
     assert np.isnan(result["first_nonfinite_ms"][0])
     assert np.all(np.isfinite(result["rE"]))
+
+
+def test_integrator_accepts_only_regional_initial_latch_state():
+    from src.topic4_mz_spatial_autonomous_latch import integrate_autonomous_latch_batch
+
+    class UnsupportedTransfer:
+        @staticmethod
+        def rate(mu, sigma, pop):
+            return np.zeros_like(np.asarray(mu, dtype=float))
+
+        @staticmethod
+        def support_mask(mu, sigma):
+            return np.zeros_like(np.asarray(mu, dtype=float), dtype=bool)
+
+    params = PatchParameters(additive_max_mv=1.6)
+    prepared = prepare_patch_rhs(PatchKernels.identity(3), params)
+    initial = uniform_patch_state(
+        equilibrium_state((0.001, 0.006)), n_patches=3,
+        z=0.84, additive_mv=0.0, parameters=params,
+    )
+    with pytest.raises(ValueError, match="fork-by-patch"):
+        integrate_autonomous_latch_batch(
+            initial[None, :], prepared, UnsupportedTransfer(),
+            [RegionalSlowParameters(enable_z=False)], [],
+            inhibitory_baseline_khz=initial[9:12], dt_ms=0.125,
+            duration_ms=1.0, save_dt_ms=0.125,
+            initial_latch_state=np.asarray([[True, True]]),
+        )
+    result = integrate_autonomous_latch_batch(
+        initial[None, :], prepared, UnsupportedTransfer(),
+        [RegionalSlowParameters(enable_z=False)], [],
+        inhibitory_baseline_khz=initial[9:12], dt_ms=0.125,
+        duration_ms=1.0, save_dt_ms=0.125,
+        initial_latch_state=np.asarray([[True, True, False]]),
+    )
+    np.testing.assert_array_equal(result["latch"][0, 0], [1, 1, 0])

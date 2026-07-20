@@ -290,6 +290,7 @@ def integrate_autonomous_latch_batch(
     section_level_khz: float = 0.020,
     rearm_level_khz: float = 0.015,
     max_trace_bytes: int = 512 * 1024 * 1024,
+    initial_latch_state: np.ndarray | None = None,
 ) -> dict[str, Any]:
     """Vectorized Euler integration with autonomous regional Z/p/M and fixed pulses."""
 
@@ -352,7 +353,14 @@ def integrate_autonomous_latch_batch(
     previous_fast = state[:, 6 * p:7 * p].copy()
     armed = previous_fast <= rearm_level_khz
     sample_index = 0
-    latch = np.zeros((n_forks, p), dtype=bool)
+    if initial_latch_state is None:
+        latch = np.zeros((n_forks, p), dtype=bool)
+    else:
+        latch = np.asarray(initial_latch_state, dtype=bool).copy()
+        if latch.shape != (n_forks, p) or np.any(latch[:, 2]):
+            raise ValueError(
+                "initial_latch_state must be fork-by-patch with the bath latch off"
+            )
     last_sensors = {
         "z_use": np.zeros((n_forks, p)),
         "occupancy": np.zeros((n_forks, p)),
