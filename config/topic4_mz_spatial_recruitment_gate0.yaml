@@ -1,0 +1,85 @@
+result_root: results/topic4_sef_hfo/mz_spatial_recruitment_gate0
+
+expected_capture_contract:
+  schema_version: topic4_mz_divisive_current_stage_capture_v1
+  seed: 1
+  dt_ms: 0.1
+  duration_ms: 20000.0
+  p_pool: 1.0
+
+capture_path: results/topic4_sef_hfo/mz_divisive_lifecycle/figure_capture/current_stage_capture.npz
+capture_json: results/topic4_sef_hfo/mz_divisive_lifecycle/figure_capture/current_stage_capture.json
+persistence_config_path: config/topic4_mz_persistence_feasibility.yaml
+persistence_summary_path: results/topic4_sef_hfo/mz_persistence_feasibility/persistence_feasibility_summary.json
+
+input_sha256:
+  capture_path: 4d3ebbc7cb0f5e465618e42f1d6c977861c3f1cd5240d989f0b5895269a4ba1d
+  capture_json: 3668a6e7c349f24f110864cbdfacbb5910bc23c2ffd592a7873dd878590edae0
+  persistence_config_path: 83a2d7bb582c9879bc06fbeb672a57fa28ff6167157c51c66372189b0c9b4ae9
+  persistence_summary_path: 04fb8ff0e57a8a25edd88b6de68432327c733212bd1c8ac48963ddfaaa8db0e1
+
+causal_onset:
+  envelope_ms: 250.0
+  threshold_hz: 20.0
+  minimum_duration_ms: 1000.0
+  expected_onset_ms: 13978.8
+
+persistence:
+  tau_p_ms: 750.0
+  threshold: 0.07222870046052841
+  established_delay_ms: 2000.0
+  established_quantile: 0.25
+
+extent:
+  zero_tolerance: 1.0e-12
+  bound_tolerance: 1.0e-6
+
+spatial_validation:
+  movie_frame_ms: 25.0
+  axial_frame_ms: 10.0
+  descriptive_block_ms: 500.0
+  minimum_frames_per_block: 8
+
+operational_sentinel:
+  # Locked after a read-only feasibility audit and before the formal producer.
+  # This single-seed sentinel cannot grade the formal multiseed Gate 0.
+  amplitude_floor_psi: 0.5
+  seed_window_from_onset_ms: [0.0, 250.0]
+  recruited_window_from_onset_ms: [1000.0, 3000.0]
+  persistence_block_ms: 250.0
+  minimum_consecutive_directional_blocks: 4
+  maximum_local_raw_relative_change: 0.10
+  minimum_extent_absolute_increase: 0.05
+  minimum_extent_relative_increase: 0.25
+  minimum_movie_pr_absolute_increase: 0.05
+  minimum_movie_pr_relative_increase: 0.25
+  intensity_match_caliper_psi: 0.02
+  minimum_intensity_matched_pairs: 8
+  minimum_matched_extent_increase: 0.05
+  minimum_matched_movie_pr_increase: 0.05
+  coverage_sensitivity_threshold: 0.10
+
+decision_contract:
+  # Gate 0 is a single-capture necessary-condition audit, not a calibrated
+  # rho threshold. Correlations are descriptive because frames are dependent.
+  reconstruction_atol: 2.0e-6
+  persistence_parity_atol: 2.0e-5
+  minimum_movie_descriptive_spearman: 0.5
+  axial_projection_is_sensitivity_only: true
+  direct_threshold_lock_requires_premax_below_established_q25: true
+
+plot:
+  trace_stride: 20
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  max_memory_gib: 1.0
+
+scope:
+  artifact_replay_only: true
+  new_snn_simulation: false
+  p_patch_ode: false
+  ee_weight_change: false
+  ee_kernel_change: false
+  conductance_membrane: false

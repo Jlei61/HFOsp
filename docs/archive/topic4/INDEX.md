@@ -11,6 +11,7 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- 2026-07-20 MZ spatial Gate 0 sentinel：`docs/archive/topic4/sef_hfo/mz_spatial_recruitment_gate0_2026-07-20.md`。seed-1 operational decomposition 支持 spatial extent 是 Stage-B 缺失状态，但 instantaneous rho separation 与 multiseed/core-specific artifact 均未闭合；formal Gate 0 保持 OPEN，进入 P=1 parity 后再决定 P=2。
 - 2026-07-20 MZ additive Stage A/B 最新判定：`docs/archive/topic4/sef_hfo/mz_additive_orbit_persistence_stage_ab_2026-07-20.md`。Stable fast boundary 为 strong SNIC-like candidate（formal label open）；memoryless scalar persistence dual-sensor screen 为 clean no-go，按 stop rule 未进入完整 0D/空间/SNN。下一节点是 spatial-recruitment-set / Z-safe-reset additive latch。
 - 2026-07-20 MZ entry/exit 最新审计：`docs/archive/topic4/sef_hfo/mz_entry_exit_nullcline_audit_2026-07-20.md`；主图与机器产物在 `results/topic4_sef_hfo/mz_entry_exit_nullclines/`。
 - 2026-07-20 下一版 conditional 方程：`docs/superpowers/specs/2026-07-20-topic4-mz-persistence-gated-additive-spatial-lifecycle-design.md`。旧 `local-divisive-recovery/D_R` 方案已 superseded；本线不再增加 recurrent-E recovery divisor。

@@ -1,8 +1,8 @@
-# Topic 4：persistence-gated additive Z–M spatial lifecycle（executed design v0.4）
+# Topic 4：persistence-gated additive Z–M spatial lifecycle（executed design v0.5）
 
 日期：2026-07-20
 
-状态：formal stable-cycle boundary 与 dual-sensor timing/leverage Stage B 已执行；memoryless 0D gate 为 clean no-go，按预注册 stop rule 未进入完整 0D、空间层或 SNN。
+状态：formal stable-cycle boundary、dual-sensor Stage B 与 seed-1 spatial Gate 0 sentinel 已执行；memoryless 0D gate 为 clean no-go，single-seed operational decomposition 支持 spatial recruitment 是缺失状态，但 formal multiseed Gate 0 仍开放。下一执行节点为 P=1/uniform parity。
 
 本线 worktree：`.worktrees/topic4-mz-divisive-lifecycle`
 
@@ -48,6 +48,26 @@ primary `tau_p=750 ms,p_r=.0722287` 下：
 2. **post-detection latch/hysteresis**：一旦 established ictal state 被确认，effector 继续 build，直到 Z 回到安全侧才释放。
 
 下一版不再强行把空间信息压成 homogeneous scalar；优先进入 coarse multi-patch rate field，而不是继续调 `p_r/Amax`。
+
+### 0.4 Gate 0 sentinel：空间坐标方向成立，瞬时 rho 阈值不成立
+
+对锁定 seed-1 capture 做 artifact replay。当前 `p_pool=1`，因此：
+
+\[
+A_G(t)=\max_x\Psi(r_{E,fast}(x,t))\,\rho_{eff}(t),
+\qquad
+\rho_{eff}=\frac{\langle\Psi\rangle_x}{\max_x\Psi}.
+\]
+
+重建 `U_TG` 最大误差 `1.74e-7`，重建 `T_G` 最大误差 `7.86e-9`。同一 `tau_p=750 ms,p_r=.0722287` 下，local-intensity-only p 在记录 `421.7 ms` 已由普通 IED 开门，area-weighted p 则在 causal macro onset 后 `2758.5 ms` 开门。
+
+以 causal frame end 对齐的 onset-seed `[0,.25 s)` 和 recruited `[1,3 s)` window 比较：local raw peak 仅变 `+2.64%`，`rho_eff` 增 `.0994`，独立 24×24 movie area-PR 增 `.1139`；在 `|Delta Psi_peak|<=.02` 的 10 对 frame 中，两者 median increase 仍为 `.0562/.0623`，且 8 个连续 250-ms block 方向一致。post-onset `rho_eff` 与 movie PR descriptive Spearman 为 `.942`；不对 dependent frames 报 iid p-value。48-bin axial PR 只作 longitudinal-span sensitivity，不进入二维主判定。
+
+但完整 pre-onset `rho_eff` 最大 `.3000`，高于 onset+2 s 后 established Q25 `.1579`，所以一个 instantaneous `rho>rho_r` 仍会被 IED 误触发。当前只有 seed 1 且没有 core-specific numerator / same-field `sum(z_G^2)`，因此状态锁为：
+
+> `single_seed_operational_spatial_decomposition_supported_persistence_AND_latch_required`
+
+这允许进入 P=1 parity 和 P=2 cheap oracle，但不允许声称 formal Gate 0 pass，也不允许从该 trace 标定 memoryless rho threshold。
 
 ## 1. 这次反思修正了什么
 
@@ -440,7 +460,7 @@ D_j=z_j-z_{B,j}(A_{max}m_j,X_k).
 
 ### 6.5 Cheap gates
 
-1. **Gate 0，artifact replay**：从 spatial capture 提取 core occupancy、recruited fraction `rho(t)` 和 global `U_TG`；若 area-weighted local signal不能解释晚 gate，停止 rho 假设。
+1. **Gate 0，artifact replay**：seed-1 operational sentinel 已完成。area-weighted local signal 能解释 recorded late gate，并与独立二维 movie extent 一致；但当前 artifact不能精确提取 core occupancy、没有 primary-seed common interval，formal Gate 0 继续开放。新增 capture 最小字段为每步 `sum(z_G),sum(z_G^2),max(z_G)` 与 core/surround compact numerator，不保存 full field/raster。
 2. **Gate 1，P=1/uniform parity**：RHS、period、boundary、constant-preserving kernels 必须复刻 Stage 0C；失败即工程 no-go。
 3. **Gate 2，P=2 core–surround**：只跑 memoryless/latch、rho off/on、m off、cross-zone coupling off；`Amax=1.6,tau_p=750,tau_up=125 ms` 起步，不做宽网格。
 4. **Gate 3，coarse 1D field**：两区通过后原参数直接移植；先 `gamma_p=0` 看 wake，再只加一个预注册 broad arm（可用 `1/6`）看 stall/annihilation。
@@ -454,7 +474,7 @@ D_j=z_j-z_{B,j}(A_{max}m_j,X_k).
 以下任一出现就停止当前结构，不用大网格挽救：
 
 1. formal cycle continuation 显示 `A<=1.6 mV` 时 stable cycle 仍存在，state fork 只是换 basin；
-2. area-weighted local occupancy 不能解释 `U_TG` 的 late spatial gate，或 primary seeds 没有共同 rho separation interval；
+2. area-weighted local occupancy 不能解释 `U_TG` 的 late spatial gate，或正式 SNN 确认阶段 primary seeds 没有共同 spatiotemporal separation；当前 seed-1 replay 支持前者，但 instantaneous rho interval 明确失败，所以 P=2 必须使用 persistence AND recruitment，不能 memoryless set；
 3. P=1/uniform-P 不能复刻原 Stage 0C RHS、period 或 boundary；
 4. 每个 patch 拥有自己的 `mu_G/S_G`，而不是全域唯一 shared pool；
 5. core-only 时 latch 在第 3 个真实 return 前 set，重新造成 prevention；
