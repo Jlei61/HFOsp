@@ -1,6 +1,6 @@
 {
   "experiment": "V2 bridge long-axis control + temporal evolution + local participation (no re-sim)",
-  "interpretation": "(A) the fixed contact long-axis coordinate ALONE predicts the pre-runaway early energy field (axis-only maxAB significant in 3/3 seeds); the interictal contact-order template is nearly the axis itself (|Spearman|>0.95) and adds only a modest maxAB increment. (B) after controlling for the axis, a residual template->energy association survives in 2/3 seeds (seed1/seed3), marginal in seed4 -> 'template beyond geometry' is partially, not cleanly, established. (C) the bridge is temporally early: strong in 0-50 ms, weaker by 50-100 ms (seed1 loses significance). (D) high-energy contacts co-occur with strong nearby recruitment (energy-participation Spearman ~0.90-0.94), but energy and participation both vary along the axis, so local exclusivity is NOT established.",
+  "interpretation": "(A) the fixed contact long-axis coordinate ALONE predicts the pre-runaway early energy field (axis-only maxAB significant in 3/3 seeds); the interictal contact-order template is nearly the axis itself (|Spearman|>0.95) and adds only a modest maxAB increment. (B) after controlling for the axis, a residual template->energy association is nominally significant in 2/3 (seed1 p=0.032, seed3 p=0.001) but leave-one-contact-out shows it is ROBUST in only 1/3 (seed3 LOO-worst p=0.022; seed1 single-contact-fragile LOO-worst p=0.203; seed4 marginal) -> 'template beyond geometry' is NOT established, at most a single-seed (seed3) hint. (C) the bridge is temporally early: strong in 0-50 ms, weaker by 50-100 ms (seed1 loses significance). (D) high-energy contacts co-occur with strong nearby recruitment (energy-participation Spearman ~0.90-0.94), but energy and participation both vary along the axis, so local exclusivity is NOT established.",
   "rows": [
     {
       "seed": 1,
@@ -12,6 +12,8 @@
       "corr_template_vs_axis": -0.954269684434453,
       "partial_template_energy_given_axis_r": -0.5535714285714285,
       "partial_p": 0.03228710377012365,
+      "loo_partial_worstcase_p": 0.20256454381724162,
+      "loo_partial_min_abs_r": 0.3626373626373627,
       "windows": {
         "early_0_25_ms": {
           "maxab": 0.8753451240676937,
@@ -61,6 +63,8 @@
       "corr_template_vs_axis": -0.9646893137631862,
       "partial_template_energy_given_axis_r": -0.7802197802197802,
       "partial_p": 0.0009944938002309496,
+      "loo_partial_worstcase_p": 0.02198860240988966,
+      "loo_partial_min_abs_r": 0.6263736263736264,
       "windows": {
         "early_0_25_ms": {
           "maxab": 0.9779344759658842,
@@ -110,6 +114,8 @@
       "corr_template_vs_axis": -0.9768982809108381,
       "partial_template_energy_given_axis_r": -0.48571428571428577,
       "partial_p": 0.07827588645863327,
+      "loo_partial_worstcase_p": 0.20855405979520908,
+      "loo_partial_min_abs_r": 0.3736263736263736,
       "windows": {
         "early_0_25_ms": {
           "maxab": 0.9394945179029908,

@@ -34,9 +34,9 @@ def _shafts(names):
     return np.array([re.match(r"[A-Za-z]+", n).group(0) for n in names], object)
 
 
-def _partial_spearman(x, y, z):
+def _partial_spearman(x, y, z, mask=None):
     """partial Spearman(x, y | z): rank all, linearly residualize x and y on z, correlate residuals."""
-    m = np.isfinite(x) & np.isfinite(y) & np.isfinite(z)
+    m = (np.isfinite(x) & np.isfinite(y) & np.isfinite(z)) if mask is None else np.asarray(mask, bool)
     xr, yr, zr = rankdata(x[m]), rankdata(y[m]), rankdata(z[m])
     z1 = np.c_[np.ones_like(zr), zr]
 
@@ -45,6 +45,23 @@ def _partial_spearman(x, y, z):
         return a - z1 @ coef
     r, p = spearmanr(resid(xr), resid(yr))
     return float(r), float(p)
+
+
+def _loo_partial(x, y, z):
+    """Leave-one-contact-out robustness of the residual template->energy association (task review, layer B).
+    Drops each finite contact once and recomputes partial(template, energy | axis); reports the WORST-case
+    (max) p and min |r| over drops, so a (B)-layer increment driven by a single contact is exposed."""
+    base = np.isfinite(x) & np.isfinite(y) & np.isfinite(z)
+    idx = np.where(base)[0]
+    ps, rs = [], []
+    for d in idx:
+        keep = base.copy(); keep[d] = False
+        if int(keep.sum()) < 5:
+            continue
+        r, p = _partial_spearman(x, y, z, mask=keep)
+        ps.append(p); rs.append(abs(r))
+    return {"loo_max_p": (float(max(ps)) if ps else None), "loo_min_abs_r": (float(min(rs)) if rs else None),
+            "n_drops": len(ps)}
 
 
 def analyze():
@@ -73,6 +90,7 @@ def analyze():
         mfin = np.isfinite(tB) & np.isfinite(axis)
         corr_tmpl_axis = float(spearmanr(tB[mfin], axis[mfin]).correlation)
         partial_r, partial_p = _partial_spearman(tB, energy, axis)
+        loo = _loo_partial(tB, energy, axis)
         # (C) temporal windows
         windows = {}
         for wk in WINDOWS:
@@ -93,6 +111,7 @@ def analyze():
             "template_minus_axis": float(tmpl_maxab - obs_ax["rho_maxab"]),
             "corr_template_vs_axis": corr_tmpl_axis,
             "partial_template_energy_given_axis_r": partial_r, "partial_p": partial_p,
+            "loo_partial_worstcase_p": loo["loo_max_p"], "loo_partial_min_abs_r": loo["loo_min_abs_r"],
             "windows": windows,
             "energy_localparticipation_spearman": elp_r,
             "hot3_participation": [round(float(x), 3) for x in lp0[mlp][order[-3:]]],
@@ -104,8 +123,10 @@ def analyze():
             "(A) the fixed contact long-axis coordinate ALONE predicts the pre-runaway early energy field "
             "(axis-only maxAB significant in 3/3 seeds); the interictal contact-order template is nearly the "
             "axis itself (|Spearman|>0.95) and adds only a modest maxAB increment. (B) after controlling for "
-            "the axis, a residual template->energy association survives in 2/3 seeds (seed1/seed3), marginal "
-            "in seed4 -> 'template beyond geometry' is partially, not cleanly, established. (C) the bridge is "
+            "the axis, a residual template->energy association is nominally significant in 2/3 (seed1 p=0.032, "
+            "seed3 p=0.001) but leave-one-contact-out shows it is ROBUST in only 1/3 (seed3 LOO-worst p=0.022; "
+            "seed1 single-contact-fragile LOO-worst p=0.203; seed4 marginal) -> 'template beyond geometry' is "
+            "NOT established, at most a single-seed (seed3) hint. (C) the bridge is "
             "temporally early: strong in 0-50 ms, weaker by 50-100 ms (seed1 loses significance). (D) high-"
             "energy contacts co-occur with strong nearby recruitment (energy-participation Spearman ~0.90-0.94), "
             "but energy and participation both vary along the axis, so local exclusivity is NOT established."),
@@ -125,10 +146,11 @@ def plot(rows):
     axB.bar(x + w / 2, tmpl, w, label="interictal template", color="#b85450", edgecolor="black", lw=0.6)
     for i, r in enumerate(rows):
         axB.text(i, max(tmpl[i], axo[i]) + 0.015,
-                 f"+{r['template_minus_axis']:.02f}\npartial p={r['partial_p']:.03f}", ha="center", va="bottom", fontsize=7)
+                 f"+{r['template_minus_axis']:.02f}\npartial p={r['partial_p']:.03f}\nLOO worst p={r['loo_partial_worstcase_p']:.02f}",
+                 ha="center", va="bottom", fontsize=6.5)
     axB.set_xticks(x); axB.set_xticklabels([f"seed {s}" for s in SEEDS])
     axB.set_ylim(0, 1.15); axB.set_ylabel("contact maxAB (0-50 ms)")
-    axB.set_title("Long-axis geometry alone already predicts;\ntemplate ≈ axis (|r|>0.95) adds a small increment", fontsize=9.5)
+    axB.set_title("Long-axis geometry alone already predicts (3/3);\ntemplate ≈ axis (|r|>0.95), increment robust in only 1/3 (LOO)", fontsize=9.5)
     axB.legend(fontsize=8, frameon=False, loc="lower center")
     # Panel T: temporal maxAB across windows + participation trend
     disp = ["0-25", "25-50", "50-100"]
@@ -160,5 +182,6 @@ if __name__ == "__main__":
     for r in rows:
         print(f"seed{r['seed']}: tmpl={r['template_maxab']:.3f} axis-only={r['axis_only_maxab']:.3f}(p={r['axis_only_within_shaft_p']:.4f}) "
               f"incr=+{r['template_minus_axis']:.3f} corr(tmpl,axis)={r['corr_template_vs_axis']:.3f} "
-              f"partial r={r['partial_template_energy_given_axis_r']:.3f} p={r['partial_p']:.3f} | E-LP rho={r['energy_localparticipation_spearman']:.3f}")
+              f"partial r={r['partial_template_energy_given_axis_r']:.3f} p={r['partial_p']:.3f} "
+              f"LOO-worst-p={r['loo_partial_worstcase_p']:.3f} | E-LP rho={r['energy_localparticipation_spearman']:.3f}")
     plot(rows)
