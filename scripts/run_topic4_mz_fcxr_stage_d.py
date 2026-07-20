@@ -47,7 +47,8 @@ from kick_probe import simulate_kick    # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
     load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field,
-    classify_run_provisional, classify_branch_D, THRESHOLDS,
+    classify_run_provisional, classify_run_envelope, envelope_metrics, resolve_high_ic,
+    classify_branch_D, THRESHOLDS,
 )
 from src.topic4_mz_conductance import oscillation_metrics  # noqa: E402
 
@@ -95,23 +96,51 @@ def _numerical_dt(S, res, slow, dt):
     return dict(finite=finite, tau_eff_min_ms=tau_eff_min_ms, clip_frac_max=max_clip, numerical_unsafe=unsafe)
 
 
+def _region_masks(S):
+    """E-cell core / axis-band / off-axis masks for regional participation traces (reviewer P1)."""
+    posE = np.asarray(S["posE"], float); src = np.asarray(S["src_xy"], float); axis = np.asarray(S["axis_unit"], float)
+    core = np.linalg.norm(posE - src, axis=1) <= PP.CORE_R
+    rel = posE - src; along = rel @ axis
+    perp = np.linalg.norm(rel - np.outer(along, axis), axis=1)
+    axis_band = (perp <= PP.CORE_R) & (~core)
+    return core, axis_band, (~core & ~axis_band)
+
+
+def _ds(x, target=2000):
+    x = np.asarray(x, np.float32)
+    return x[::max(1, int(np.ceil(x.size / max(1, target))))]
+
+
 def _branch_row(S, res, slow, bref, dt, analysis_start_ms, *, D, ic, kick_boost, seed, T_ms):
-    """Reduce one completed run to the classifier observable row (no T x N array kept)."""
+    """Reduce one completed run to the classifier observable row + a few downsampled scalar traces
+    (population + core/axis/off-axis participation) so dynamics type (fixed / orbit / transient / event-train)
+    can be judged later. NO T x N array is kept."""
     num = _numerical_dt(S, res, slow, dt)
     rate = np.asarray(res["rate_E"], float)
-    af, af_bin = OLD.C.active_fraction(res["E_spk_bool"], dt, OLD.C.BIN_MS)
+    spk = res["E_spk_bool"]
+    af, af_bin = OLD.C.active_fraction(spk, dt, OLD.C.BIN_MS)
     af = np.asarray(af, float); af_bin = float(af_bin)
     BR, BS, Q95 = float(bref["baseline_rate"]), float(bref["sigma_rate"]), float(bref["floor_af"])
     om = oscillation_metrics(rate, dt, analysis_start_ms=analysis_start_ms, baseline_rate=BR, baseline_sigma=BS,
                              active_fraction=af, af_bin_ms=af_bin, baseline_af_q95=Q95,
                              runaway=bool(not num["finite"]))
+    env = envelope_metrics(af, af_bin, analysis_start_ms, Q95)
     endn = max(1, int(round(END_WIN_MS / dt)))
     end_rate = float(np.mean(rate[-endn:])) if rate.size else float("nan")
     afn = max(1, int(round(END_WIN_MS / af_bin)))
     af_tail = float(np.mean(af[-afn:])) if af.size else float("nan")
-    tail_high_frac = float(np.mean(af[-afn:] > Q95)) if af.size else float("nan")   # tail occupancy (persistence)
+    tail_high_frac = float(np.mean(af[-afn:] > Q95)) if af.size else float("nan")
     a0_bin = max(0, int(round(analysis_start_ms / af_bin)))
-    return dict(
+    core, axm, offm = _region_masks(S)
+
+    def _reg(mask):
+        a, _ = OLD.C.active_fraction(spk[:, mask], dt, OLD.C.BIN_MS)
+        return np.asarray(a, float)
+
+    traces = dict(af_bin_ms=np.asarray([af_bin], np.float32),
+                  rate_dt_ms=np.asarray([dt * max(1, int(np.ceil(rate.size / 2000)))], np.float32),
+                  rate_E=_ds(rate), af=_ds(af), af_core=_ds(_reg(core)), af_axis=_ds(_reg(axm)), af_off=_ds(_reg(offm)))
+    row = dict(
         D=float(D), ic=ic, kick_boost=float(kick_boost), seed=int(seed), T_ms=float(T_ms), dt=float(dt),
         analysis_start_ms=float(analysis_start_ms),
         finite=num["finite"], clip_frac_max=num["clip_frac_max"], tau_eff_min_ms=num["tau_eff_min_ms"],
@@ -123,7 +152,11 @@ def _branch_row(S, res, slow, bref, dt, analysis_start_ms, *, D, ic, kick_boost,
         end_rate_hz=end_rate, af_tail=af_tail, tail_high_frac=tail_high_frac, af_bin_ms=af_bin,
         n_bins_high=int(np.sum(af[a0_bin:] > Q95)),
         baseline_rate=BR, baseline_sigma=BS, baseline_af_q95=Q95,
+        env_high_ms=float(env["env_high_ms"]), env_end_occ=float(env["env_end_occ"]),
+        env_occ=float(env["env_occ"]), env_modulation=float(env["env_modulation"]),
+        env_window_ms=float(env["env_window_ms"]),
     )
+    return row, traces
 
 
 def run_branch_cell(S, pi, bref, *, D, ic, kick_boost, T_post_ms, seed, dt=DT_D, g_sat=G_SAT):
@@ -140,10 +173,10 @@ def run_branch_cell(S, pi, bref, *, D, ic, kick_boost, T_post_ms, seed, dt=DT_D,
         raise ValueError(f"ic must be 'low' or 'high', got {ic!r}")
     T_ms = a0 + float(T_post_ms)
     res, slow = _stage_d_run(S, cfg, T_ms, kick_boost=kb, t_kick=t_kick, seed=seed, dt=dt)
-    row = _branch_row(S, res, slow, bref, dt, a0, D=D, ic=ic, kick_boost=kb, seed=seed, T_ms=T_ms)
+    row, traces = _branch_row(S, res, slow, bref, dt, a0, D=D, ic=ic, kick_boost=kb, seed=seed, T_ms=T_ms)
     del res
     gc.collect()
-    return row, slow
+    return row, slow, traces
 
 
 # ----------------------------------------------------------------- commands
@@ -188,8 +221,8 @@ def cmd_smoke(args):
         S, pi = _build_and_align(args.seed)
         bref = dict(baseline_rate=5.0, sigma_rate=5.0, floor_af=0.05)   # placeholder (timing/finiteness only)
         t0 = time.time()
-        row, slow = run_branch_cell(S, pi, bref, D=args.D, ic=args.ic, kick_boost=KICK_HIGH1,
-                                    T_post_ms=args.T, seed=args.seed, dt=DT_D)
+        row, slow, _ = run_branch_cell(S, pi, bref, D=args.D, ic=args.ic, kick_boost=KICK_HIGH1,
+                                       T_post_ms=args.T, seed=args.seed, dt=DT_D)
         row["wall_s"] = round(time.time() - t0, 1)
         FCXR._resource_log(run_dir, "smoke_done", dict(wall_s=row["wall_s"], finite=row["finite"],
                                                        numerical_unsafe=row["numerical_unsafe"]))
@@ -225,12 +258,12 @@ def cmd_pilot(args):
         rows = []
         for i, c in enumerate(cells):
             t0 = time.time()
-            row, slow = run_branch_cell(S, pi, bref, D=c["D"], ic=c["ic"], kick_boost=c["kick_boost"],
-                                        T_post_ms=args.T, seed=args.seed, dt=DT_D)
+            row, slow, traces = run_branch_cell(S, pi, bref, D=c["D"], ic=c["ic"], kick_boost=c["kick_boost"],
+                                                T_post_ms=args.T, seed=args.seed, dt=DT_D)
             row["label"] = c["label"]; row["wall_s"] = round(time.time() - t0, 1)
             FCXR._write_json(os.path.join(run_dir, "per_cell", f"{c['label']}.json"), row)
-            FCXR._write_npz(os.path.join(run_dir, "per_cell", f"{c['label']}_graw.npz"),
-                            max_raw_gErec=np.asarray(getattr(slow, "max_raw_gErec", []), np.float32))
+            FCXR._write_npz(os.path.join(run_dir, "per_cell", f"{c['label']}_trace.npz"),
+                            max_raw_gErec=np.asarray(getattr(slow, "max_raw_gErec", []), np.float32), **traces)
             FCXR._resource_log(run_dir, f"cell_{c['label']}", dict(wall_s=row["wall_s"], finite=row["finite"],
                                numerical_unsafe=row["numerical_unsafe"], end_rate=row["end_rate_hz"]))
             print(f"[pilot] {i+1}/{len(cells)} {c['label']}: finite={row['finite']} "
@@ -242,7 +275,8 @@ def cmd_pilot(args):
         # provisional labels (single window T1; two-window resolution deferred to the full grid)
         by_D = {}
         for row in rows:
-            row["provisional_label"] = classify_run_provisional(row)
+            row["label_raw_contiguity"] = classify_run_provisional(row)
+            row["provisional_label"] = classify_run_envelope(row)
             by_D.setdefault(row["D"], {})[row["label"].split("_")[-1]] = row
         per_D = []
         for D in PILOT_D:
@@ -275,17 +309,19 @@ def _grid_cell_task(task):
     """Run one grid cell (fork-pool worker or sequential). Writes per-cell JSON + g_raw; returns the row."""
     S, pi, bref, run_dir = _CTX["S"], _CTX["pi"], _CTX["bref"], _CTX["run_dir"]
     t0 = time.time()
-    row, slow = run_branch_cell(S, pi, bref, D=task["D"], ic=task["ic"], kick_boost=task["kick_boost"],
-                                T_post_ms=task["T_post"], seed=_CTX["seed"], dt=DT_D)
+    row, slow, traces = run_branch_cell(S, pi, bref, D=task["D"], ic=task["ic"], kick_boost=task["kick_boost"],
+                                        T_post_ms=task["T_post"], seed=_CTX["seed"], dt=DT_D)
     row["label"] = task["label"]; row["slot"] = task["slot"]; row["window"] = task["window"]
     row["wall_s"] = round(time.time() - t0, 1)
-    row["provisional_label"] = classify_run_provisional(row)
+    row["label_raw_contiguity"] = classify_run_provisional(row)      # legacy raw-contiguity classifier (comparison)
+    row["provisional_label"] = classify_run_envelope(row)            # envelope classifier (primary, reviewer P1)
     FCXR._write_json(os.path.join(run_dir, "per_cell", f"{task['label']}.json"), row)
-    FCXR._write_npz(os.path.join(run_dir, "per_cell", f"{task['label']}_graw.npz"),
-                    max_raw_gErec=np.asarray(getattr(slow, "max_raw_gErec", []), np.float32))
+    FCXR._write_npz(os.path.join(run_dir, "per_cell", f"{task['label']}_trace.npz"),
+                    max_raw_gErec=np.asarray(getattr(slow, "max_raw_gErec", []), np.float32), **traces)
     print(f"[grid] {task['label']:20s} -> {row['provisional_label']:18s} "
-          f"high_dur={row['high_duration_ms']:7.0f} tail_occ={row['tail_high_frac']:.2f} "
-          f"end={row['end_rate_hz']:6.1f} unsafe={str(row['numerical_unsafe'])[0]} {row['wall_s']}s", flush=True)
+          f"env_occ={row['env_occ']:.2f} env_end={row['env_end_occ']:.2f} env_hi={row['env_high_ms']:6.0f}ms "
+          f"env_mod={row['env_modulation']:.2f} end={row['end_rate_hz']:5.1f}Hz "
+          f"unsafe={str(row['numerical_unsafe'])[0]} {row['wall_s']}s", flush=True)
     del slow; gc.collect()
     return row
 
@@ -322,29 +358,34 @@ def cmd_grid(args):
         _CTX.update(S=S, pi=pi, bref=bref, run_dir=run_dir, seed=args.seed)
         rows = _run_tasks(base, plan["workers"])
         t1_by = {(r["D"], r["slot"]): r for r in rows}
-        # T2 only for high ICs that showed a substantial excursion (resolve FINITE_HIGH vs METASTABLE, clause 4)
+        # T2 (longer window) for any cell NOT clearly returned-to-low at T1: an excursion label OR a still-
+        # elevated envelope tail (reviewer P1 -- a native-low with a rising envelope also enters T2).
         excursion = ("FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT", "EXCURSION_DECAYED")
-        t2 = [dict(D=D, ic="high", kick_boost=(KICK_HIGH1 if slot == "high1" else KICK_HIGH2), T_post=T2,
+
+        def _needs_t2(r):
+            return bool(r["provisional_label"] in excursion or r["env_end_occ"] >= THRESHOLDS["HIGH_OCC"])
+
+        slot_kick = {"low": 0.0, "high1": KICK_HIGH1, "high2": KICK_HIGH2}
+        t2 = [dict(D=D, ic=("low" if slot == "low" else "high"), kick_boost=slot_kick[slot], T_post=T2,
                    window="T2", slot=slot, label=f"D{D:g}_{slot}_T2")
-              for D in D_GRID for slot in ("high1", "high2")
-              if t1_by[(D, slot)]["provisional_label"] in excursion]
-        print(f"[grid] T1 done; {len(t2)} T2 (two-window) cells for excursion candidates", flush=True)
+              for D in D_GRID for slot in ("low", "high1", "high2") if _needs_t2(t1_by[(D, slot)])]
+        print(f"[grid] T1 done; {len(t2)} T2 (two-window) cells (excursion OR still-elevated tail)", flush=True)
         t2_rows = _run_tasks(t2, plan["workers"]) if t2 else []
         t2_by = {(r["D"], r["slot"]): r for r in t2_rows}
-        # per-D resolution
+
+        def _resolved(D, slot):
+            r = t1_by[(D, slot)]; p1 = r["provisional_label"]
+            if _needs_t2(r):                                     # two-window resolution (clause 4)
+                r2 = t2_by.get((D, slot))
+                return (resolve_high_ic(p1, r2["provisional_label"]) if r2 is not None
+                        else ("METASTABLE_TRANSIENT" if p1 == "EXCURSION_DECAYED" else p1))
+            return p1                                            # clearly returned-to-low at T1
+
         per_D = []
         for D in D_GRID:
-            low = t1_by[(D, "low")]["provisional_label"]
-            resolved, plateaus = [], []
-            for slot in ("high1", "high2"):
-                p1 = t1_by[(D, slot)]["provisional_label"]
-                if p1 in excursion:
-                    r2 = t2_by.get((D, slot))
-                    lab = (resolve_high_ic(p1, r2["provisional_label"]) if r2 is not None
-                           else ("METASTABLE_TRANSIENT" if p1 == "EXCURSION_DECAYED" else p1))
-                else:
-                    lab = p1                                    # DECAYS_TO_LOW / REFRACTORY_CEILING / UNSAFE: stable at T1
-                resolved.append(lab); plateaus.append(t1_by[(D, slot)]["end_rate_hz"])
+            low = _resolved(D, "low")
+            resolved = [_resolved(D, "high1"), _resolved(D, "high2")]
+            plateaus = [t1_by[(D, "high1")]["end_rate_hz"], t1_by[(D, "high2")]["end_rate_hz"]]
             d = classify_branch_D(low, resolved, plateaus)
             per_D.append(dict(D=D, low=low, high_resolved=resolved, **d))
             print(f"[grid] D={D:g}: low={low} high={resolved} -> {d['D_label']}", flush=True)

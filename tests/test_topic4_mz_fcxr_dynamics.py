@@ -228,3 +228,45 @@ def test_snn_landmark_sech2_iprs_in_range_and_sech2_bounded():
     for key in ("raw_lead_ipr", "eff_lead_ipr"):
         v = out[key]
         assert np.isnan(v) or (1.0 / N - 1e-9 <= v <= 1.0 + 1e-9)              # IPR in [1/N, 1]
+
+
+# ---------------- D1.5b: envelope-based persistence classifier (4 synthetic dynamics classes) ----------------
+from src.topic4_mz_fcxr_dynamics import envelope_metrics, classify_run_envelope   # noqa: E402
+
+
+def _classify_af(af, bin_ms, q95=3e-5, af_tail=None):
+    em = envelope_metrics(np.asarray(af, float), bin_ms, 0.0, q95)
+    row = dict(numerical_unsafe=False,
+               af_tail=float(np.mean(af[-100:])) if af_tail is None else af_tail, **em)
+    return classify_run_envelope(row), em
+
+
+def test_envelope_interictal_ied_train_is_low():
+    # brief 15ms events every 200ms on a quiet floor -> smoothed envelope high only in short per-event bumps
+    bin_ms = 5; n = 3000 // bin_ms; af = np.zeros(n)
+    for on in range(0, n, 200 // bin_ms):
+        af[on:on + 15 // bin_ms] = 0.05
+    lab, em = _classify_af(af, bin_ms)
+    assert lab == "DECAYS_TO_LOW", (lab, em)
+
+
+def test_envelope_gapped_periodic_orbit_is_orbit():
+    # bursts every 50ms (15ms burst, 35ms gap) for 3s -> envelope bridges gaps, stays high, oscillates
+    bin_ms = 5; n = 3000 // bin_ms; af = np.zeros(n)
+    for on in range(0, n, 50 // bin_ms):
+        af[on:on + 15 // bin_ms] = 0.15
+    lab, em = _classify_af(af, bin_ms)
+    assert lab == "FINITE_HIGH_ORBIT", (lab, em)
+
+
+def test_envelope_sustained_fixed_high_is_fixed():
+    bin_ms = 5; af = np.full(3000 // bin_ms, 0.05)         # flat elevated plateau
+    lab, em = _classify_af(af, bin_ms)
+    assert lab == "FINITE_HIGH_FIXED", (lab, em)
+
+
+def test_envelope_long_transient_is_metastable():
+    # elevated 1500ms (>= HIGH_MS) then fully decays -> NOT still-high at end -> EXCURSION_DECAYED
+    bin_ms = 5; n = 3000 // bin_ms; af = np.zeros(n); af[:1500 // bin_ms] = 0.05
+    lab, em = _classify_af(af, bin_ms)
+    assert lab == "EXCURSION_DECAYED", (lab, em)

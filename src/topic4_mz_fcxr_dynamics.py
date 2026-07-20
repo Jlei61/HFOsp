@@ -93,11 +93,13 @@ def frozen_z_field(p_i, D):
 # Locked thresholds (clause 7). All are relative to the dt=0.05 slow-off baseline anchor
 # (baseline_rate / baseline_sigma / baseline_af_q95), so they inherit dt-robustness.
 THRESHOLDS = dict(
-    HIGH_MS=1000.0,    # min CONTIGUOUS elevation (af>q95) to call a state persistent high (>> interictal event ~12ms)
+    HIGH_MS=1000.0,    # min elevation (on the SMOOTHED envelope) to call a state persistent high (>> ~12ms event)
     HIGH_OCC=0.5,      # trailing-window occupancy (fraction of tail bins above q95) for "still elevated at the end"
-    MIN_HIGH_MS=300.0, # a "substantial" excursion (metastable candidate) must last at least this long contiguously
+    MIN_HIGH_MS=300.0, # a "substantial" excursion (metastable candidate) must last at least this long
     CEIL_FRAC=0.90,    # mean tail active fraction >= this (+ low modulation) -> pinned refractory ceiling
-    MOD_CEIL=0.10,     # modulation below this at a ceiling -> pinned (no breathing)
+    MOD_CEIL=0.10,     # envelope modulation below this at a ceiling -> pinned (no breathing)
+    MOD_ORBIT=0.30,    # envelope modulation >= this on a persistent high -> oscillatory (orbit), else fixed plateau
+    ENVELOPE_MS=30.0,  # population-envelope smoothing window (P1: bridges sub-window dips of a bursty sustained high)
     PLATEAU_TOL=0.20,  # two high ICs must land within this relative spread to count as the same plateau
 )
 
@@ -182,6 +184,72 @@ def classify_branch_D(low_label, high_labels, high_plateaus, T=THRESHOLDS):
         D_label = "UNRESOLVED"
     return dict(D_label=D_label, low_label=low_label, high_labels=list(high_labels),
                 plateau_rel_spread=spread)
+
+
+# ------------------------------------------------------------------------------------
+# D1.5b — envelope-based persistence (reviewer P1: raw 1ms contiguity misses gapped/oscillatory high)
+# ------------------------------------------------------------------------------------
+
+def _moving_avg(x, w):
+    x = np.asarray(x, float)
+    if w <= 1 or x.size == 0:
+        return x
+    return np.convolve(x, np.ones(int(w)) / float(w), mode="same")
+
+
+def _longest_true_ms(mask, bin_ms):
+    m = np.asarray(mask, bool)
+    if not m.any():
+        return 0.0
+    edges = np.flatnonzero(np.diff(np.r_[False, m, False]))
+    return float((edges[1::2] - edges[::2]).max() * bin_ms)
+
+
+def envelope_metrics(af, af_bin_ms, analysis_start_ms, baseline_af_q95, T=THRESHOLDS):
+    """Smoothed population-envelope persistence. A 20-50ms envelope tolerates the brief sub-window dips that
+    break raw 1ms-bin contiguity, so a gapped/bursty sustained high (seizure-like orbit) is NOT split into
+    short segments and missed. Returns env_high_ms (longest contiguous smoothed elevation above the quiet
+    q95), the trailing-window occupancy, and the envelope modulation (flat plateau ~0, oscillatory orbit high)."""
+    af = np.asarray(af, float)
+    a0 = max(0, int(round(analysis_start_ms / af_bin_ms)))
+    seg = af[a0:]
+    if seg.size == 0:
+        return dict(env_high_ms=0.0, env_end_occ=0.0, env_occ=0.0, env_modulation=0.0)
+    w = max(1, int(round(T["ENVELOPE_MS"] / af_bin_ms)))
+    env = _moving_avg(seg, w)
+    above = env > baseline_af_q95
+    env_high_ms = _longest_true_ms(above, af_bin_ms)
+    endn = max(1, int(round(500.0 / af_bin_ms)))
+    env_end_occ = float(np.mean(above[-endn:]))
+    hi = env[above]
+    if hi.size >= 4:
+        p90, p10 = float(np.percentile(hi, 90)), float(np.percentile(hi, 10))
+        env_modulation = float((p90 - p10) / max(p90, 1e-12))
+    else:
+        env_modulation = 0.0
+    return dict(env_high_ms=env_high_ms, env_end_occ=env_end_occ, env_occ=float(np.mean(above)),
+                env_modulation=env_modulation, env_window_ms=float(seg.size * af_bin_ms))
+
+
+def classify_run_envelope(row, T=THRESHOLDS):
+    """Per-run label from smoothed-envelope persistence (supersedes the raw-contiguity classifier for the
+    scientific verdict; needs the recorded trace -> envelope_metrics fields on the row). Fixes the
+    self-contradictory FINITE_HIGH_ORBIT: an orbit is sustained ON THE ENVELOPE (gaps bridged) with high
+    envelope modulation; a fixed high is a flat plateau; a ceiling is pinned (near-total participation, ~no
+    modulation)."""
+    if row["numerical_unsafe"]:
+        return "NUMERICAL_UNSAFE"
+    # persistent = elevated MOST of a long-enough window (occupancy, so gapped orbits are not missed) AND still
+    # elevated at the end. env_high_ms (longest contiguous) only flags "had a substantial excursion".
+    persistent = bool(row["env_window_ms"] >= T["HIGH_MS"] and row["env_occ"] >= T["HIGH_OCC"]
+                      and row["env_end_occ"] >= T["HIGH_OCC"])
+    if persistent:
+        if row["af_tail"] >= T["CEIL_FRAC"] and row["env_modulation"] < T["MOD_CEIL"]:
+            return "REFRACTORY_CEILING"
+        return "FINITE_HIGH_ORBIT" if row["env_modulation"] >= T["MOD_ORBIT"] else "FINITE_HIGH_FIXED"
+    if row["env_high_ms"] >= T["MIN_HIGH_MS"] or row["env_occ"] >= T["HIGH_OCC"]:
+        return "EXCURSION_DECAYED"                             # substantial activity but not still-high-at-end
+    return "DECAYS_TO_LOW"
 
 
 # ------------------------------------------------------------------------------------
