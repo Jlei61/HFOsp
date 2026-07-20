@@ -200,12 +200,12 @@ def _assert_engine_blessed():
 # ----------------------------------------------------------------- cfg + run
 def _fc_cfg(c_E, *, gamma=0.0, global_mode="additive", z=False, tau_z=2500.0,
             use_x=False, tau_x=1000.0, x_min=0.0, y_gate=0.0, K_y=5.0, tau_y=120.0,
-            fail_on_clip=True, ff_conductance=True, rec_conductance=True):
+            fail_on_clip=True, ff_conductance=True, rec_conductance=True, rec_sat_g=0.0):
     """FCXR locked config: full_conductance E_E=58 / V_match=18 / E_I=0 / gaba_gain=1.125 /
     z_scope=local_only / protected additive-global.  M off."""
     return dict(
         membrane_mode="full_conductance", E_E=58.0, c_E=float(c_E), v_match=18.0, e_gaba=0.0, e_k=0.0,
-        ff_conductance=bool(ff_conductance), rec_conductance=bool(rec_conductance),
+        ff_conductance=bool(ff_conductance), rec_conductance=bool(rec_conductance), rec_sat_g=float(rec_sat_g),
         use_z=bool(z), use_m=False, use_phi=False, I_th_EI=I_TH_EI, tau_z=float(tau_z),
         gaba_gain=1.125, m_conductance_gain=1.0,
         global_gaba_fraction=float(gamma), global_gaba_mode=str(global_mode), z_scope="local_only",
@@ -545,8 +545,8 @@ def _cmd_clip_audit(args):
                          early_stop_runaway=False)
     baseline = OLD.compute_baseline_ref(res0, dt); event_bar = OLD.slowoff_event_bar(res0, dt)
     del res0
-    # arm C with clip observer
-    cfg = _fc_cfg(1.0, ff_conductance=False, rec_conductance=True, fail_on_clip=False)
+    # arm C with clip observer (+ optional Stage C recurrent smooth saturation)
+    cfg = _fc_cfg(1.0, ff_conductance=False, rec_conductance=True, fail_on_clip=False, rec_sat_g=args.rec_sat_g)
     cfg["max_total_conductance"] = cap; cfg["record_clip_identity"] = True
     slow = _make_slow(S, cfg)
     p = dataclasses.replace(S["p"], T=float(args.T), dt=dt)
@@ -561,7 +561,11 @@ def _cmd_clip_audit(args):
     tau_eff_min = float(S["p"].tau_m_E * (taur[i0:].min() if taur.size > i0 else taur.min()))
     settled_clip = float(clipf[i0:].max() if clipf.size > i0 else clipf.max())
     clip_frames = np.where(clipf > 0)[0]
-    row = dict(dt=dt, cap=cap, event_profile=profile, tau_eff_min_ms=tau_eff_min, settled_max_clip=settled_clip,
+    wp = _workpoint_distance(profile, baseline)
+    settled_safe = bool(np.isfinite(tau_eff_min) and tau_eff_min >= 2 * dt and settled_clip == 0.0)
+    row = dict(dt=dt, cap=cap, rec_sat_g=float(args.rec_sat_g), event_profile=profile, workpoint=wp,
+               all_bands=wp["all_bands"], settled_safe=settled_safe, preserves_workpoint=bool(wp["all_bands"] and settled_safe),
+               tau_eff_min_ms=tau_eff_min, settled_max_clip=settled_clip,
                n_clip_cells=int((slow.clip_count > 0).sum()), clip_count_total=int(slow.clip_count.sum()),
                n_clip_frames=int(clip_frames.size), max_raw_gErec=float(slow.max_raw_gErec.max()),
                max_raw_total=float(slow.max_raw_total.max()), runaway_ms=runaway, wall_s=round(time.time() - t0, 1))
@@ -638,6 +642,8 @@ def main(argv=None):
     ca.add_argument("--T", type=float, default=8000.0)
     ca.add_argument("--dt", type=float, default=0.1)
     ca.add_argument("--cap", type=float, default=99.0)
+    ca.add_argument("--rec-sat-g", dest="rec_sat_g", type=float, default=0.0,
+                    help="Stage C: >0 -> recurrent smooth saturation g_sat*tanh(g_raw/g_sat)")
     ca.add_argument("--modes", action="store_true", help="compute W_EE leading modes + overlap (Stage A)")
 
     args = ap.parse_args(argv)
