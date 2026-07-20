@@ -1,0 +1,807 @@
+{
+  "schema_version": "topic4_stage0e_poincare_floquet_audit.v1",
+  "verdict": "STAGE0E_NUMERICAL_UNRESOLVED",
+  "engineering_pass": true,
+  "sources_and_inputs_unchanged": true,
+  "seed_provenance": {
+    "phase_id": "phase_050",
+    "phase_index": 2,
+    "source_state_index": 2305,
+    "source_time_ms": 11525.0,
+    "phase_state_vs_source_max_abs": 0.0,
+    "seed_state": [
+      0.0005768338451161981,
+      0.0054353754967451096,
+      0.0005689436802640557,
+      0.005391490180045366,
+      0.0005689436802640557,
+      0.005391490180045366,
+      0.0005460380925796926,
+      0.00019935973978135735,
+      0.03423261269927025
+    ]
+  },
+  "superseded_incomplete_run": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit_pre_battery_incomplete_2026-07-20",
+    "exists": true,
+    "reason": "Floquet failure incorrectly short-circuited the sibling return-battery and physical-report audits",
+    "authoritative": false,
+    "execution_lock_sha256": "f9b1984c907452f3f180e52772e25ee57f8b4c4f8b84da046362bedf11ab7238",
+    "summary_sha256": "e10da465c8f8e2003bfb1897c2bf1cc9bc484e68751d5721b664607ef2e9fb29"
+  },
+  "parameter_points": [
+    {
+      "z": 0.85,
+      "alpha_G": 15.0,
+      "w_ee_mult": 1.1,
+      "ratio": 1.0,
+      "outcome": "periodic_orbit_numerically_unresolved",
+      "stable_periodic_orbit": false,
+      "failed_gates": [
+        "floquet_epsilon_dt_or_margin"
+      ],
+      "stage1_open": false,
+      "space_open": false,
+      "scout": {
+        "pass": true,
+        "crossing_count": 20,
+        "period_ms": [
+          604.8975990568653,
+          604.8976380361145,
+          604.8976272335008,
+          604.8975891813548,
+          604.8975545421445,
+          604.8976216440683,
+          604.8976162194549,
+          604.8976400374204,
+          604.8976264415587,
+          604.8975663295869,
+          604.8975913610939,
+          604.8976034008165,
+          604.8976366102916,
+          604.8976296635601,
+          604.8975921380079,
+          604.897555929907,
+          604.8976203198108,
+          604.8976174324271,
+          604.8976420852832
+        ],
+        "period_mean_ms": 604.8976088243825,
+        "period_cv": 4.46485320733518e-08,
+        "minimum_transversality_per_ms": 0.006148163420771751,
+        "physical_audit": {
+          "clean": true,
+          "finite": true,
+          "n_euler_states": 96001,
+          "support_violation_count": 0,
+          "state_bound_violation_count": 0,
+          "over_100hz_count": 0,
+          "e_refractory_count": 0,
+          "i_refractory_count": 0,
+          "e_refractory_occupancy": 0.0,
+          "i_refractory_occupancy": 0.0,
+          "above_80hz_count": 1604,
+          "above_80hz_occupancy": 0.016708159290007397,
+          "peak_rE_hz": 98.16290407109234,
+          "moment_min": [
+            -130.57740188618683,
+            3.825710681109063,
+            -64.61568151972419,
+            5.036980760826601
+          ],
+          "moment_max": [
+            58.65383874298168,
+            12.255882129131926,
+            41.44426969119999,
+            16.510831807082518
+          ]
+        },
+        "last_two_cycle_aligned_residual": 2.6595061380820838e-05
+      },
+      "state_scales": [
+        0.09664087918647704,
+        0.20968907222492558,
+        0.08991575014683123,
+        0.1136875973370354,
+        0.08991575014683123,
+        0.1136875973370354,
+        0.0626940063369978,
+        0.7055566118233831,
+        0.35724527390695376
+      ],
+      "base_dt_shooting": {
+        "pass": true,
+        "checks": {
+          "shooting_converged": true,
+          "final_residual": true,
+          "period_cv": true,
+          "cycle_valid": true,
+          "first_cycle_closure": true,
+          "second_cycle_closure": true,
+          "aligned_cycle_residual": true
+        },
+        "n_iterations": 4,
+        "residual_series": [
+          9.267458021573398e-07,
+          4.057592688228009e-10,
+          4.0152103411330586e-13,
+          5.294615560291392e-16
+        ],
+        "period_series_ms": [
+          604.8976277006037,
+          604.8976402672015,
+          604.8976402795984,
+          604.8976402796101
+        ],
+        "last_four_period_cv": 9.0016538892053e-09,
+        "closure_residual": 3.0517374218650946e-15,
+        "second_closure_residual": 7.115788025603225e-07,
+        "aligned_cycle_residual": 2.7211788780307483e-06,
+        "minimum_shooting_transversality_per_ms": 0.006148167545559672
+      },
+      "half_dt_shooting": {
+        "pass": true,
+        "checks": {
+          "shooting_converged": true,
+          "final_residual": true,
+          "period_cv": true,
+          "cycle_valid": true,
+          "first_cycle_closure": true,
+          "second_cycle_closure": true,
+          "aligned_cycle_residual": true
+        },
+        "n_iterations": 4,
+        "residual_series": [
+          0.007455091800095867,
+          1.5305918812579116e-07,
+          3.167563399234048e-11,
+          5.564033549792303e-14
+        ],
+        "period_series_ms": [
+          604.8656880170843,
+          604.3729203870944,
+          604.3729213841401,
+          604.372921382377
+        ],
+        "last_four_period_cv": 0.0003529788708049072,
+        "closure_residual": 1.2347369874712462e-15,
+        "second_closure_residual": 4.969307882781056e-08,
+        "aligned_cycle_residual": 1.0967044192849252e-06,
+        "minimum_shooting_transversality_per_ms": 0.006133983511601104
+      },
+      "dt_cycle_consistency": {
+        "pass": true,
+        "base_period_ms": 604.8976066536767,
+        "half_period_ms": 604.3729202212947,
+        "period_difference_ms": 0.5246864323819409,
+        "period_tolerance_ms": 3.0244880332683834,
+        "aligned_waveform_residual": 0.014947285838116416,
+        "aligned_waveform_tolerance": 0.03
+      },
+      "base_orbit_physical": {
+        "valid": true,
+        "n_euler_states": 4840,
+        "period_ms": 604.8976402796103,
+        "peak_rE_hz": 98.16253028891036,
+        "above_80hz_occupancy": 0.01652892561983471,
+        "above_100hz_occupancy": 0.0,
+        "state_minimum": [
+          0.00039102926186759124,
+          0.0010261697600018446,
+          0.0003915231755564528,
+          0.005201554625881252,
+          0.0003915231755564528,
+          0.005201554625881252,
+          0.0004118099040475789,
+          1.795450060904455e-08,
+          0.0010047137807000972
+        ],
+        "state_maximum": [
+          0.09816253028891037,
+          0.21079466812130807,
+          0.0905870814963049,
+          0.11892801924213593,
+          0.0905870814963049,
+          0.11892801924213593,
+          0.06314229623437354,
+          0.705766583395289,
+          0.3582645329392798
+        ],
+        "moment_ranges": {
+          "muE_mv": {
+            "minimum": -130.57740190477963,
+            "maximum": 58.65177941765481
+          },
+          "sigmaE_mv": {
+            "minimum": 3.825710715901175,
+            "maximum": 12.255879816908834
+          },
+          "muI_mv": {
+            "minimum": -64.61470980658295,
+            "maximum": 41.44339459025904
+          },
+          "sigmaI_mv": {
+            "minimum": 5.036980773724369,
+            "maximum": 16.51079091850727
+          }
+        },
+        "full_validation_trace_audit": {
+          "clean": true,
+          "finite": true,
+          "n_euler_states": 28801,
+          "support_violation_count": 0,
+          "state_bound_violation_count": 0,
+          "over_100hz_count": 0,
+          "e_refractory_count": 0,
+          "i_refractory_count": 0,
+          "e_refractory_occupancy": 0.0,
+          "i_refractory_occupancy": 0.0,
+          "above_80hz_count": 422,
+          "above_80hz_occupancy": 0.01465226901843686,
+          "peak_rE_hz": 98.16291590209072,
+          "moment_min": [
+            -130.57740190477963,
+            3.825710681144486,
+            -64.61567417495154,
+            5.036980761861674
+          ],
+          "moment_max": [
+            58.65381940394181,
+            12.255879816908834,
+            41.444219636518355,
+            16.510829848755527
+          ]
+        }
+      },
+      "half_orbit_physical": {
+        "valid": true,
+        "n_euler_states": 9670,
+        "period_ms": 604.37292138238,
+        "peak_rE_hz": 97.42625877843061,
+        "above_80hz_occupancy": 0.016132368148914167,
+        "above_100hz_occupancy": 0.0,
+        "state_minimum": [
+          0.00039142876518292785,
+          0.0010455224639456728,
+          0.00039191972491508273,
+          0.0052021665891515715,
+          0.00039191972491508273,
+          0.0052021665891515715,
+          0.00041219196886017607,
+          1.8410414829358745e-08,
+          0.0010076011596868379
+        ],
+        "state_maximum": [
+          0.09742625877843061,
+          0.2090494934850453,
+          0.089777798599904,
+          0.11772389433326869,
+          0.089777798599904,
+          0.11772389433326869,
+          0.06257526858667357,
+          0.7034829375452836,
+          0.35662474559426594
+        ],
+        "moment_ranges": {
+          "muE_mv": {
+            "minimum": -128.7483683090941,
+            "maximum": 58.33389025062682
+          },
+          "sigmaE_mv": {
+            "minimum": 3.8258091587523118,
+            "maximum": 12.201818827396867
+          },
+          "muI_mv": {
+            "minimum": -63.45535298801809,
+            "maximum": 41.2182550684572
+          },
+          "sigmaI_mv": {
+            "minimum": 5.037109327879596,
+            "maximum": 16.4349101345059
+          }
+        },
+        "full_validation_trace_audit": {
+          "clean": true,
+          "finite": true,
+          "n_euler_states": 57601,
+          "support_violation_count": 0,
+          "state_bound_violation_count": 0,
+          "over_100hz_count": 0,
+          "e_refractory_count": 0,
+          "i_refractory_count": 0,
+          "e_refractory_occupancy": 0.0,
+          "i_refractory_occupancy": 0.0,
+          "above_80hz_count": 872,
+          "above_80hz_occupancy": 0.015138626065519696,
+          "peak_rE_hz": 97.4262877006314,
+          "moment_min": [
+            -128.74837751841304,
+            3.8258091557299028,
+            -63.455356552298724,
+            5.037109327106766
+          ],
+          "moment_max": [
+            58.33396935417059,
+            12.201819186810736,
+            41.2182550684572,
+            16.4349101345059
+          ]
+        }
+      },
+      "physical_acceptance_pass": true,
+      "floquet": {
+        "base_epsilon_ladder": {
+          "pass": false,
+          "spectral_radii": [
+            0.0008138225808407324,
+            0.0016372600145153618,
+            0.001700587134722079
+          ],
+          "spectral_radius_range": 0.0008867645538813466,
+          "jacobian_relative_differences": [
+            1.0734449465458067,
+            0.21836745354327194
+          ],
+          "gradient_pass": true
+        },
+        "half_epsilon_ladder": {
+          "pass": false,
+          "spectral_radii": [
+            1.9515223252632048e-05,
+            0.0006012876898278215,
+            0.0007944601472511185
+          ],
+          "spectral_radius_range": 0.0007749449239984864,
+          "jacobian_relative_differences": [
+            0.9786545088193799,
+            0.9752281698509817
+          ],
+          "gradient_pass": true
+        },
+        "stability": {
+          "pass": false,
+          "reason": "epsilon_ladder_or_order_unresolved",
+          "base_ladder_pass": false,
+          "half_ladder_pass": false
+        }
+      },
+      "return_battery": {
+        "pass": true,
+        "phase_restart_pass": true,
+        "families": {
+          "fast": {
+            "pass": true,
+            "n_histories": 8,
+            "median_final_to_first_ratio": 1.3172104510051868e-09,
+            "maximum_final_distance": 3.0517374218650946e-15,
+            "directions": [
+              "fast_direction_1",
+              "fast_direction_2"
+            ],
+            "phases": [
+              "phase_000",
+              "phase_025",
+              "phase_050",
+              "phase_075"
+            ]
+          },
+          "pool": {
+            "pass": true,
+            "n_histories": 8,
+            "median_final_to_first_ratio": 8.379910894076594e-10,
+            "maximum_final_distance": 3.0517374218650946e-15,
+            "directions": [
+              "pool_direction_1",
+              "pool_direction_2"
+            ],
+            "phases": [
+              "phase_000",
+              "phase_025",
+              "phase_050",
+              "phase_075"
+            ]
+          }
+        }
+      }
+    },
+    {
+      "z": 0.85,
+      "alpha_G": 16.0,
+      "w_ee_mult": 1.1,
+      "ratio": 1.0,
+      "outcome": "periodic_orbit_numerically_unresolved",
+      "stable_periodic_orbit": false,
+      "failed_gates": [
+        "floquet_epsilon_dt_or_margin"
+      ],
+      "stage1_open": false,
+      "space_open": false,
+      "scout": {
+        "pass": true,
+        "crossing_count": 20,
+        "period_ms": [
+          608.5184855299246,
+          608.5184749661512,
+          608.5184231842043,
+          608.5184125810479,
+          608.5184656689225,
+          608.5184403713743,
+          608.518474112982,
+          608.5184829633627,
+          608.51847187351,
+          608.518416750484,
+          608.5184166815716,
+          608.5184608590862,
+          608.5184401677843,
+          608.5184766927978,
+          608.518476840929,
+          608.5184582160273,
+          608.5184125651449,
+          608.5184270197187,
+          608.5184580898549
+        ],
+        "period_mean_ms": 608.5184513228884,
+        "period_cv": 4.195121962413588e-08,
+        "minimum_transversality_per_ms": 0.006124357020712061,
+        "physical_audit": {
+          "clean": true,
+          "finite": true,
+          "n_euler_states": 96001,
+          "support_violation_count": 0,
+          "state_bound_violation_count": 0,
+          "over_100hz_count": 0,
+          "e_refractory_count": 0,
+          "i_refractory_count": 0,
+          "e_refractory_occupancy": 0.0,
+          "i_refractory_occupancy": 0.0,
+          "above_80hz_count": 1488,
+          "above_80hz_occupancy": 0.015499838543348507,
+          "peak_rE_hz": 96.34655619660792,
+          "moment_min": [
+            -130.41618144842678,
+            3.825211111210803,
+            -63.998543187891244,
+            5.036353055885205
+          ],
+          "moment_max": [
+            57.84066052218728,
+            12.138379862460583,
+            41.157075925507854,
+            16.375683674624
+          ]
+        },
+        "last_two_cycle_aligned_residual": 2.4367330086734956e-05
+      },
+      "state_scales": [
+        0.09434251230935006,
+        0.20705067882182449,
+        0.08795578698279181,
+        0.11177874649836085,
+        0.08795578698279181,
+        0.11177874649836085,
+        0.0613171992322944,
+        0.7000361871900492,
+        0.3526551620223682
+      ],
+      "base_dt_shooting": {
+        "pass": true,
+        "checks": {
+          "shooting_converged": true,
+          "final_residual": true,
+          "period_cv": true,
+          "cycle_valid": true,
+          "first_cycle_closure": true,
+          "second_cycle_closure": true,
+          "aligned_cycle_residual": true
+        },
+        "n_iterations": 4,
+        "residual_series": [
+          5.314616766816514e-08,
+          2.878386481881118e-10,
+          1.6015996152445684e-12,
+          9.821892574339274e-15
+        ],
+        "period_series_ms": [
+          608.5184991660838,
+          608.5185032459707,
+          608.5185032686669,
+          608.5185032687942
+        ],
+        "last_four_period_cv": 2.91402383664483e-09,
+        "closure_residual": 1.0184751736389487e-15,
+        "second_closure_residual": 7.439338589148083e-07,
+        "aligned_cycle_residual": 1.687036792872649e-05,
+        "minimum_shooting_transversality_per_ms": 0.006124363984894877
+      },
+      "half_dt_shooting": {
+        "pass": true,
+        "checks": {
+          "shooting_converged": true,
+          "final_residual": true,
+          "period_cv": true,
+          "cycle_valid": true,
+          "first_cycle_closure": true,
+          "second_cycle_closure": true,
+          "aligned_cycle_residual": true
+        },
+        "n_iterations": 4,
+        "residual_series": [
+          0.007541762199952376,
+          1.535667350858007e-07,
+          5.763036111840582e-10,
+          2.904691195218282e-12
+        ],
+        "period_series_ms": [
+          608.4888841987068,
+          607.9799272850748,
+          607.9799361955844,
+          607.9799361505231
+        ],
+        "last_four_period_cv": 0.00036240691301646827,
+        "closure_residual": 1.6635094502769497e-14,
+        "second_closure_residual": 5.7682299278360715e-08,
+        "aligned_cycle_residual": 7.348531913467198e-06,
+        "minimum_shooting_transversality_per_ms": 0.006109495853755096
+      },
+      "dt_cycle_consistency": {
+        "pass": true,
+        "base_period_ms": 608.5184766755167,
+        "half_period_ms": 607.9799281864239,
+        "period_difference_ms": 0.5385484890928183,
+        "period_tolerance_ms": 3.0425923833775834,
+        "aligned_waveform_residual": 0.01562972114977758,
+        "aligned_waveform_tolerance": 0.03
+      },
+      "base_orbit_physical": {
+        "valid": true,
+        "n_euler_states": 4869,
+        "period_ms": 608.5185032687947,
+        "peak_rE_hz": 96.34612287047744,
+        "above_80hz_occupancy": 0.015198192647360855,
+        "above_100hz_occupancy": 0.0,
+        "state_minimum": [
+          0.00038857464115777876,
+          0.001022761561746621,
+          0.00038905633485196396,
+          0.00519877692696068,
+          0.00038905633485196396,
+          0.00519877692696068,
+          0.00040874638830594543,
+          1.5433006079930177e-08,
+          0.0009427592074930505
+        ],
+        "state_maximum": [
+          0.09634612287047745,
+          0.2082867084610348,
+          0.08877814697038035,
+          0.11699015953558659,
+          0.08877814697038035,
+          0.11699015953558659,
+          0.06178943576069382,
+          0.7000452751727918,
+          0.35368308463859455
+        ],
+        "moment_ranges": {
+          "muE_mv": {
+            "minimum": -130.41556844781013,
+            "maximum": 57.8382701398742
+          },
+          "sigmaE_mv": {
+            "minimum": 3.8252111122808636,
+            "maximum": 12.138379942845908
+          },
+          "muI_mv": {
+            "minimum": -63.998321212729024,
+            "maximum": 41.156637199183166
+          },
+          "sigmaI_mv": {
+            "minimum": 5.036353084887913,
+            "maximum": 16.375676825045833
+          }
+        },
+        "full_validation_trace_audit": {
+          "clean": true,
+          "finite": true,
+          "n_euler_states": 28801,
+          "support_violation_count": 0,
+          "state_bound_violation_count": 0,
+          "over_100hz_count": 0,
+          "e_refractory_count": 0,
+          "i_refractory_count": 0,
+          "e_refractory_occupancy": 0.0,
+          "i_refractory_occupancy": 0.0,
+          "above_80hz_count": 371,
+          "above_80hz_occupancy": 0.012881497170237144,
+          "peak_rE_hz": 96.34612287047744,
+          "moment_min": [
+            -130.4161679314222,
+            3.825211111334435,
+            -63.998511726716956,
+            5.036353056000658
+          ],
+          "moment_max": [
+            57.840663401579306,
+            12.138379942845908,
+            41.15706129028146,
+            16.375676825045833
+          ]
+        }
+      },
+      "half_orbit_physical": {
+        "valid": true,
+        "n_euler_states": 9728,
+        "period_ms": 607.979936150751,
+        "peak_rE_hz": 95.60946444318459,
+        "above_80hz_occupancy": 0.014802631578947368,
+        "above_100hz_occupancy": 0.0,
+        "state_minimum": [
+          0.00038896852964685226,
+          0.0010422848799675163,
+          0.00038944674368536074,
+          0.00519938327778514,
+          0.00038944674368536074,
+          0.00519938327778514,
+          0.0004091220439823026,
+          1.582826276327277e-08,
+          0.0009454739581098933
+        ],
+        "state_maximum": [
+          0.09560946444318459,
+          0.20651994248236402,
+          0.08797271197882224,
+          0.11578424199832335,
+          0.08797271197882224,
+          0.11578424199832335,
+          0.06122584026314165,
+          0.6976852567423883,
+          0.35200654380433327
+        ],
+        "moment_ranges": {
+          "muE_mv": {
+            "minimum": -128.56077624461864,
+            "maximum": 57.522081063842094
+          },
+          "sigmaE_mv": {
+            "minimum": 3.825308386359826,
+            "maximum": 12.083908075699743
+          },
+          "muI_mv": {
+            "minimum": -62.827444947324295,
+            "maximum": 40.928418547944396
+          },
+          "sigmaI_mv": {
+            "minimum": 5.036480369163404,
+            "maximum": 16.29911654344913
+          }
+        },
+        "full_validation_trace_audit": {
+          "clean": true,
+          "finite": true,
+          "n_euler_states": 57601,
+          "support_violation_count": 0,
+          "state_bound_violation_count": 0,
+          "over_100hz_count": 0,
+          "e_refractory_count": 0,
+          "i_refractory_count": 0,
+          "e_refractory_occupancy": 0.0,
+          "i_refractory_occupancy": 0.0,
+          "above_80hz_count": 723,
+          "above_80hz_occupancy": 0.012551865419003142,
+          "peak_rE_hz": 95.6102392784411,
+          "moment_min": [
+            -128.5608592465994,
+            3.825308380710319,
+            -62.82757140608504,
+            5.03648036839018
+          ],
+          "moment_max": [
+            57.5221047878303,
+            12.083913113841854,
+            40.928418547944396,
+            16.29912280432452
+          ]
+        }
+      },
+      "physical_acceptance_pass": true,
+      "floquet": {
+        "base_epsilon_ladder": {
+          "pass": false,
+          "spectral_radii": [
+            0.0006045176997310549,
+            0.0009189447461978699,
+            0.003033506905370029
+          ],
+          "spectral_radius_range": 0.002428989205638974,
+          "jacobian_relative_differences": [
+            0.9856920541588828,
+            0.4308759292556108
+          ],
+          "gradient_pass": true
+        },
+        "half_epsilon_ladder": {
+          "pass": false,
+          "spectral_radii": [
+            7.724815036317919e-05,
+            0.0003923472359005501,
+            0.0015814402888856484
+          ],
+          "spectral_radius_range": 0.0015041921385224692,
+          "jacobian_relative_differences": [
+            0.958675999757733,
+            0.7321288377839522
+          ],
+          "gradient_pass": true
+        },
+        "stability": {
+          "pass": false,
+          "reason": "epsilon_ladder_or_order_unresolved",
+          "base_ladder_pass": false,
+          "half_ladder_pass": false
+        }
+      },
+      "return_battery": {
+        "pass": true,
+        "phase_restart_pass": true,
+        "families": {
+          "fast": {
+            "pass": true,
+            "n_histories": 8,
+            "median_final_to_first_ratio": 2.227708031141946e-09,
+            "maximum_final_distance": 2.2632781636421084e-15,
+            "directions": [
+              "fast_direction_1",
+              "fast_direction_2"
+            ],
+            "phases": [
+              "phase_000",
+              "phase_025",
+              "phase_050",
+              "phase_075"
+            ]
+          },
+          "pool": {
+            "pass": true,
+            "n_histories": 8,
+            "median_final_to_first_ratio": 1.8283937700103424e-09,
+            "maximum_final_distance": 1.4711308063673704e-15,
+            "directions": [
+              "pool_direction_1",
+              "pool_direction_2"
+            ],
+            "phases": [
+              "phase_000",
+              "phase_025",
+              "phase_050",
+              "phase_075"
+            ]
+          }
+        }
+      }
+    }
+  ],
+  "resource_usage": {
+    "blas_threads": 1,
+    "peak_rss_gib": 0.22052001953125,
+    "rss_limit_gib": 4.0,
+    "rss_pass": true,
+    "wall_seconds": 221.65347308851779
+  },
+  "figure_metadata": {
+    "png": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/figures/stage0e_poincare_floquet_audit.png",
+    "pdf": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/figures/stage0e_poincare_floquet_audit.pdf",
+    "panels": {
+      "A": "last 3 s of every-Euler-state scouts",
+      "B": "scaled Poincare fixed-point residuals",
+      "C": "all eight transverse multipliers for every valid epsilon and dt",
+      "D": "fast and pool perturbation return distances"
+    },
+    "multiplier_count_rendered": 96,
+    "perturbation_histories_rendered": 32
+  },
+  "scope": {
+    "stage1_open": false,
+    "spatial_simulation_open": false,
+    "parameter_search_performed": false,
+    "fft_substitute_used": false
+  }
+}

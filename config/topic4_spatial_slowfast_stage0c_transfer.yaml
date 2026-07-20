@@ -1,0 +1,57 @@
+result_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit
+primary_root_continuation: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_dynamic_divisive_pool/root_continuation.json
+primary_screen: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_dynamic_divisive_pool/state_fork_screen.json
+
+candidate_points:
+  - {z: 0.80, alpha_G: 12.0}
+  - {z: 0.85, alpha_G: 16.0}
+  - {z: 0.81, alpha_G: 16.0}
+  - {z: 0.84, alpha_G: 24.0}
+  - {z: 0.82, alpha_G: 24.0}
+  - {z: 0.84, alpha_G: 32.0}
+
+transfer_support:
+  mu_min_mv: -2500.0
+  mu_core_min_mv: -250.0
+  mu_max_mv: 120.0
+  sigma_min_mv: 0.5
+  sigma_max_mv: 50.0
+
+resolutions:
+  coarse: {mu_core_step_mv: 0.5, sigma_step_mv: 0.25, n_tail: 64}
+  fine: {mu_core_step_mv: 0.25, sigma_step_mv: 0.125, n_tail: 128}
+
+screen: {dt_ms: 0.25, duration_ms: 6000.0, save_stride: 20}
+confirm: {dt_ms: 0.125, duration_ms: 12000.0, save_stride: 40}
+dt_half: {dt_ms: 0.0625, duration_ms: 12000.0, save_stride: 80}
+
+classifier:
+  tail_fraction: 0.40
+  low_mean_hz: 5.0
+  finite_high_max_hz: 100.0
+  fixed_sd_floor_hz: 0.5
+  fixed_cv: 0.03
+  max_relative_drift: 0.08
+  max_abs_slope_hz_s: 1.0
+  min_oscillation_p2p_hz: 2.0
+  min_oscillation_cycles: 3.0
+  min_spectral_power_ratio: 0.20
+  refractory_margin_fraction: 0.05
+  max_refractory_occupancy: 0.05
+
+direct_exact:
+  max_points_per_fork: 16
+  max_abs_error_hz: 0.25
+  p99_relative_error: 0.02
+
+resource_contract:
+  blas_threads: 1
+  max_memory_gib: 4.0
+
+scope:
+  new_parameter_search: false
+  exact_roots_in_dynamical_replay: false
+  noise: false
+  local_recovery_r: false
+  spatial_coupling: false
+  dynamic_phi: false

@@ -1,0 +1,2817 @@
+{
+  "schema_version": "topic4_stage0d_local_basin.v1_1",
+  "verdict": "STAGE0D_NO_REPLICATION_WITH_UNRESOLVED_TRAJECTORIES",
+  "reason_cn": "中心 open basin 未复制，且仍有长瞬态或数值/分类未决轨迹。",
+  "phase_source_valid": true,
+  "n_parameter_points": 9,
+  "n_histories_per_point": 20,
+  "n_screen_histories": 180,
+  "n_screen_survivors": 20,
+  "n_confirm_survivors": 5,
+  "final_status_counts": {
+    "numerical_unresolved": 175,
+    "candidate_survives": 5
+  },
+  "centre_open_local_basin_support": false,
+  "n_compatible_manhattan_neighbours": 0,
+  "compatible_manhattan_neighbours": [],
+  "parameter_point_outcomes": [
+    {
+      "z": 0.84,
+      "alpha_G": 15.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 20
+      },
+      "n_survivors": 0,
+      "n_off_orbit_survivors": 0,
+      "surviving_families": [],
+      "surviving_phase_ids": [],
+      "same_object_agreement": false,
+      "mean_rate_hz": null,
+      "mean_frequency_hz": null,
+      "mean_amplitude_hz": null,
+      "rate_agreement": false,
+      "frequency_agreement": false,
+      "amplitude_agreement": false,
+      "open_local_basin_support": false,
+      "is_centre": false,
+      "is_manhattan_neighbour": false
+    },
+    {
+      "z": 0.84,
+      "alpha_G": 16.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 20
+      },
+      "n_survivors": 0,
+      "n_off_orbit_survivors": 0,
+      "surviving_families": [],
+      "surviving_phase_ids": [],
+      "same_object_agreement": false,
+      "mean_rate_hz": null,
+      "mean_frequency_hz": null,
+      "mean_amplitude_hz": null,
+      "rate_agreement": false,
+      "frequency_agreement": false,
+      "amplitude_agreement": false,
+      "open_local_basin_support": false,
+      "is_centre": false,
+      "is_manhattan_neighbour": true
+    },
+    {
+      "z": 0.84,
+      "alpha_G": 17.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 20
+      },
+      "n_survivors": 0,
+      "n_off_orbit_survivors": 0,
+      "surviving_families": [],
+      "surviving_phase_ids": [],
+      "same_object_agreement": false,
+      "mean_rate_hz": null,
+      "mean_frequency_hz": null,
+      "mean_amplitude_hz": null,
+      "rate_agreement": false,
+      "frequency_agreement": false,
+      "amplitude_agreement": false,
+      "open_local_basin_support": false,
+      "is_centre": false,
+      "is_manhattan_neighbour": false
+    },
+    {
+      "z": 0.85,
+      "alpha_G": 15.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 15,
+        "candidate_survives": 5
+      },
+      "n_survivors": 5,
+      "n_off_orbit_survivors": 4,
+      "surviving_families": [
+        "fast",
+        "pool"
+      ],
+      "surviving_phase_ids": [
+        "phase_050"
+      ],
+      "same_object_agreement": true,
+      "mean_rate_hz": 6.0489431121256905,
+      "mean_frequency_hz": 1.6657990629883586,
+      "mean_amplitude_hz": 96.96548258216353,
+      "range_rate_hz": 2.2962846478513654e-05,
+      "range_frequency_hz": 0.0,
+      "range_amplitude_hz": 0.08371329749934375,
+      "rate_agreement": true,
+      "frequency_agreement": true,
+      "amplitude_agreement": true,
+      "open_local_basin_support": false,
+      "is_centre": false,
+      "is_manhattan_neighbour": true
+    },
+    {
+      "z": 0.85,
+      "alpha_G": 16.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 20
+      },
+      "n_survivors": 0,
+      "n_off_orbit_survivors": 0,
+      "surviving_families": [],
+      "surviving_phase_ids": [],
+      "same_object_agreement": false,
+      "mean_rate_hz": null,
+      "mean_frequency_hz": null,
+      "mean_amplitude_hz": null,
+      "rate_agreement": false,
+      "frequency_agreement": false,
+      "amplitude_agreement": false,
+      "open_local_basin_support": false,
+      "is_centre": true,
+      "is_manhattan_neighbour": false
+    },
+    {
+      "z": 0.85,
+      "alpha_G": 17.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 20
+      },
+      "n_survivors": 0,
+      "n_off_orbit_survivors": 0,
+      "surviving_families": [],
+      "surviving_phase_ids": [],
+      "same_object_agreement": false,
+      "mean_rate_hz": null,
+      "mean_frequency_hz": null,
+      "mean_amplitude_hz": null,
+      "rate_agreement": false,
+      "frequency_agreement": false,
+      "amplitude_agreement": false,
+      "open_local_basin_support": false,
+      "is_centre": false,
+      "is_manhattan_neighbour": true
+    },
+    {
+      "z": 0.86,
+      "alpha_G": 15.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 20
+      },
+      "n_survivors": 0,
+      "n_off_orbit_survivors": 0,
+      "surviving_families": [],
+      "surviving_phase_ids": [],
+      "same_object_agreement": false,
+      "mean_rate_hz": null,
+      "mean_frequency_hz": null,
+      "mean_amplitude_hz": null,
+      "rate_agreement": false,
+      "frequency_agreement": false,
+      "amplitude_agreement": false,
+      "open_local_basin_support": false,
+      "is_centre": false,
+      "is_manhattan_neighbour": false
+    },
+    {
+      "z": 0.86,
+      "alpha_G": 16.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 20
+      },
+      "n_survivors": 0,
+      "n_off_orbit_survivors": 0,
+      "surviving_families": [],
+      "surviving_phase_ids": [],
+      "same_object_agreement": false,
+      "mean_rate_hz": null,
+      "mean_frequency_hz": null,
+      "mean_amplitude_hz": null,
+      "rate_agreement": false,
+      "frequency_agreement": false,
+      "amplitude_agreement": false,
+      "open_local_basin_support": false,
+      "is_centre": false,
+      "is_manhattan_neighbour": true
+    },
+    {
+      "z": 0.86,
+      "alpha_G": 17.0,
+      "n_histories": 20,
+      "status_counts": {
+        "numerical_unresolved": 20
+      },
+      "n_survivors": 0,
+      "n_off_orbit_survivors": 0,
+      "surviving_families": [],
+      "surviving_phase_ids": [],
+      "same_object_agreement": false,
+      "mean_rate_hz": null,
+      "mean_frequency_hz": null,
+      "mean_amplitude_hz": null,
+      "rate_agreement": false,
+      "frequency_agreement": false,
+      "amplitude_agreement": false,
+      "open_local_basin_support": false,
+      "is_centre": false,
+      "is_manhattan_neighbour": false
+    }
+  ],
+  "numerical_audits": {
+    "phase_source_direct_exact": {
+      "fork_index": 0,
+      "n_samples": 110,
+      "n_meaningful_rate_samples": 78,
+      "max_abs_error_hz": 0.002139874524870883,
+      "p99_abs_error_hz": 0.0021152952034977565,
+      "max_relative_error_meaningful": 0.0018900140490219065,
+      "p99_relative_error_meaningful": 0.0013138130330024957,
+      "meaningful_rate_floor_khz": 1e-09,
+      "pass": true
+    },
+    "screen_direct_exact": {
+      "n_samples": 17366,
+      "n_meaningful_rate_samples": 12849,
+      "max_abs_error_hz": 0.002753810330484441,
+      "p99_abs_error_hz": 0.0021357495204040577,
+      "max_relative_error_meaningful": 0.00247644278252438,
+      "p99_relative_error_meaningful": 0.0012101369289868095,
+      "meaningful_rate_floor_khz": 1e-09,
+      "pass": true,
+      "per_fork": [
+        {
+          "fork_index": 0,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 81,
+          "max_abs_error_hz": 0.0021039943097680286,
+          "p99_abs_error_hz": 0.002083390941874426,
+          "max_relative_error_meaningful": 0.0022375587818908573,
+          "p99_relative_error_meaningful": 0.0011322735343962873,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 1,
+          "n_samples": 74,
+          "n_meaningful_rate_samples": 62,
+          "max_abs_error_hz": 0.0021046564032886628,
+          "p99_abs_error_hz": 0.002101624967411576,
+          "max_relative_error_meaningful": 0.002447941483644837,
+          "p99_relative_error_meaningful": 0.0013841216858794308,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 2,
+          "n_samples": 92,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.002101454905459668,
+          "p99_abs_error_hz": 0.002089883156160136,
+          "max_relative_error_meaningful": 0.0021907342546586056,
+          "p99_relative_error_meaningful": 0.0020123107805594693,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 3,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.0021037503034893046,
+          "p99_abs_error_hz": 0.002081880087599725,
+          "max_relative_error_meaningful": 0.0020514889684230746,
+          "p99_relative_error_meaningful": 0.0019756432983933634,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 4,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 81,
+          "max_abs_error_hz": 0.002104225160565708,
+          "p99_abs_error_hz": 0.002090185380881991,
+          "max_relative_error_meaningful": 0.0021510325763691314,
+          "p99_relative_error_meaningful": 0.0013467679052690759,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 5,
+          "n_samples": 98,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.002444962877864998,
+          "p99_abs_error_hz": 0.002436052430879257,
+          "max_relative_error_meaningful": 0.0008334232116052615,
+          "p99_relative_error_meaningful": 0.0008272912888520304,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 6,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.002444962877864998,
+          "p99_abs_error_hz": 0.00243586871032285,
+          "max_relative_error_meaningful": 0.0008334232116052615,
+          "p99_relative_error_meaningful": 0.0008271054730110232,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 7,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 65,
+          "max_abs_error_hz": 0.002444962877864998,
+          "p99_abs_error_hz": 0.002436236151435664,
+          "max_relative_error_meaningful": 0.001132229049024326,
+          "p99_relative_error_meaningful": 0.0009409933130761246,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 8,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.0022849463860406816,
+          "p99_abs_error_hz": 0.0021855864371284573,
+          "max_relative_error_meaningful": 0.0009040035825977058,
+          "p99_relative_error_meaningful": 0.0008854194296167032,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 9,
+          "n_samples": 98,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.002496158695915185,
+          "p99_abs_error_hz": 0.0021428319696672857,
+          "max_relative_error_meaningful": 0.0007606812806167751,
+          "p99_relative_error_meaningful": 0.0007374395809224554,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 10,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002659668555025918,
+          "p99_abs_error_hz": 0.0021773774613666717,
+          "max_relative_error_meaningful": 0.0009781423094743177,
+          "p99_relative_error_meaningful": 0.0009220651247389732,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 11,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0026595456877366586,
+          "p99_abs_error_hz": 0.0021773775425721134,
+          "max_relative_error_meaningful": 0.0009781349688529522,
+          "p99_relative_error_meaningful": 0.0009220562501633068,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 12,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0026597268699413146,
+          "p99_abs_error_hz": 0.0021773774613666717,
+          "max_relative_error_meaningful": 0.0009781463270438146,
+          "p99_relative_error_meaningful": 0.0009220732680687176,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 13,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002647486272218391,
+          "p99_abs_error_hz": 0.0025430360537891787,
+          "max_relative_error_meaningful": 0.001025655097034096,
+          "p99_relative_error_meaningful": 0.0009826131331093987,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 14,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002461155140784377,
+          "p99_abs_error_hz": 0.0024344899834767295,
+          "max_relative_error_meaningful": 0.000913853879919287,
+          "p99_relative_error_meaningful": 0.0008871110537210707,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 15,
+          "n_samples": 98,
+          "n_meaningful_rate_samples": 66,
+          "max_abs_error_hz": 0.0023355955106035137,
+          "p99_abs_error_hz": 0.001833939745444708,
+          "max_relative_error_meaningful": 0.001075071228103418,
+          "p99_relative_error_meaningful": 0.0010583616171238313,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 16,
+          "n_samples": 86,
+          "n_meaningful_rate_samples": 63,
+          "max_abs_error_hz": 0.0022217863813352168,
+          "p99_abs_error_hz": 0.0018768921578730623,
+          "max_relative_error_meaningful": 0.0010689412870344766,
+          "p99_relative_error_meaningful": 0.0010646923557006943,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 17,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 70,
+          "max_abs_error_hz": 0.00211791264939816,
+          "p99_abs_error_hz": 0.0018536688892485244,
+          "max_relative_error_meaningful": 0.0010813589983909781,
+          "p99_relative_error_meaningful": 0.0010684537663084835,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 18,
+          "n_samples": 86,
+          "n_meaningful_rate_samples": 72,
+          "max_abs_error_hz": 0.002380341043658335,
+          "p99_abs_error_hz": 0.00190279996683668,
+          "max_relative_error_meaningful": 0.0010603241083580641,
+          "p99_relative_error_meaningful": 0.0010570805574321336,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 19,
+          "n_samples": 80,
+          "n_meaningful_rate_samples": 64,
+          "max_abs_error_hz": 0.0018745114867008833,
+          "p99_abs_error_hz": 0.001856832644425172,
+          "max_relative_error_meaningful": 0.0010831797743507375,
+          "p99_relative_error_meaningful": 0.0010734403582814535,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 20,
+          "n_samples": 70,
+          "n_meaningful_rate_samples": 58,
+          "max_abs_error_hz": 0.0020675241007971773,
+          "p99_abs_error_hz": 0.002013150928285882,
+          "max_relative_error_meaningful": 0.0010610747565781443,
+          "p99_relative_error_meaningful": 0.0009998340131149367,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 21,
+          "n_samples": 66,
+          "n_meaningful_rate_samples": 52,
+          "max_abs_error_hz": 0.002135375977482118,
+          "p99_abs_error_hz": 0.0020119507233435233,
+          "max_relative_error_meaningful": 0.001209783749088152,
+          "p99_relative_error_meaningful": 0.0011269076467282867,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 22,
+          "n_samples": 74,
+          "n_meaningful_rate_samples": 55,
+          "max_abs_error_hz": 0.0023825116535810403,
+          "p99_abs_error_hz": 0.002124642926702272,
+          "max_relative_error_meaningful": 0.0010721052527787986,
+          "p99_relative_error_meaningful": 0.0010574472049719743,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 23,
+          "n_samples": 70,
+          "n_meaningful_rate_samples": 58,
+          "max_abs_error_hz": 0.0021531457181454133,
+          "p99_abs_error_hz": 0.002122106654327896,
+          "max_relative_error_meaningful": 0.001062651602830578,
+          "p99_relative_error_meaningful": 0.0010210086744742008,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 24,
+          "n_samples": 80,
+          "n_meaningful_rate_samples": 63,
+          "max_abs_error_hz": 0.0019825996033740953,
+          "p99_abs_error_hz": 0.0019618889411153907,
+          "max_relative_error_meaningful": 0.0010592335954502582,
+          "p99_relative_error_meaningful": 0.0009622798549339023,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 25,
+          "n_samples": 70,
+          "n_meaningful_rate_samples": 52,
+          "max_abs_error_hz": 0.0023917371202875765,
+          "p99_abs_error_hz": 0.0022425596175313597,
+          "max_relative_error_meaningful": 0.0010546285980790307,
+          "p99_relative_error_meaningful": 0.0010095647934470532,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 26,
+          "n_samples": 72,
+          "n_meaningful_rate_samples": 54,
+          "max_abs_error_hz": 0.0023917371202875765,
+          "p99_abs_error_hz": 0.002238235631944224,
+          "max_relative_error_meaningful": 0.0010546285980790307,
+          "p99_relative_error_meaningful": 0.0010077975854222696,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 27,
+          "n_samples": 68,
+          "n_meaningful_rate_samples": 50,
+          "max_abs_error_hz": 0.0023917371202875765,
+          "p99_abs_error_hz": 0.0022468836031184956,
+          "max_relative_error_meaningful": 0.0011294199124406942,
+          "p99_relative_error_meaningful": 0.001092772168403479,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 28,
+          "n_samples": 70,
+          "n_meaningful_rate_samples": 50,
+          "max_abs_error_hz": 0.002192537014496926,
+          "p99_abs_error_hz": 0.002104747996725283,
+          "max_relative_error_meaningful": 0.0012408406788807064,
+          "p99_relative_error_meaningful": 0.0012330741231934522,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 29,
+          "n_samples": 80,
+          "n_meaningful_rate_samples": 59,
+          "max_abs_error_hz": 0.002291650787737687,
+          "p99_abs_error_hz": 0.0021456209127834734,
+          "max_relative_error_meaningful": 0.000950659550084035,
+          "p99_relative_error_meaningful": 0.0009356600663469725,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 30,
+          "n_samples": 66,
+          "n_meaningful_rate_samples": 53,
+          "max_abs_error_hz": 0.0021551587766196686,
+          "p99_abs_error_hz": 0.0020819319452169186,
+          "max_relative_error_meaningful": 0.0016816310790091068,
+          "p99_relative_error_meaningful": 0.0014495718453666655,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 31,
+          "n_samples": 66,
+          "n_meaningful_rate_samples": 53,
+          "max_abs_error_hz": 0.0021551587766196686,
+          "p99_abs_error_hz": 0.0020819273238657002,
+          "max_relative_error_meaningful": 0.0016816318869102506,
+          "p99_relative_error_meaningful": 0.001449588346186081,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 32,
+          "n_samples": 66,
+          "n_meaningful_rate_samples": 53,
+          "max_abs_error_hz": 0.0021551587766196686,
+          "p99_abs_error_hz": 0.0020819273238657002,
+          "max_relative_error_meaningful": 0.0016816315665546372,
+          "p99_relative_error_meaningful": 0.0014495915685287426,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 33,
+          "n_samples": 74,
+          "n_meaningful_rate_samples": 52,
+          "max_abs_error_hz": 0.002302206335007273,
+          "p99_abs_error_hz": 0.0021665288073932027,
+          "max_relative_error_meaningful": 0.001025529185792549,
+          "p99_relative_error_meaningful": 0.0010205790086042393,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 34,
+          "n_samples": 86,
+          "n_meaningful_rate_samples": 62,
+          "max_abs_error_hz": 0.002191235874937983,
+          "p99_abs_error_hz": 0.001978232964934113,
+          "max_relative_error_meaningful": 0.001408004510148053,
+          "p99_relative_error_meaningful": 0.0013168176936581037,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 35,
+          "n_samples": 60,
+          "n_meaningful_rate_samples": 51,
+          "max_abs_error_hz": 0.0020472027641941365,
+          "p99_abs_error_hz": 0.002028075847014159,
+          "max_relative_error_meaningful": 0.0014460214222800944,
+          "p99_relative_error_meaningful": 0.0012359523884930427,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 36,
+          "n_samples": 62,
+          "n_meaningful_rate_samples": 51,
+          "max_abs_error_hz": 0.0020260402343579703,
+          "p99_abs_error_hz": 0.001994678969270622,
+          "max_relative_error_meaningful": 0.0014080666853094955,
+          "p99_relative_error_meaningful": 0.001381297812414411,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 37,
+          "n_samples": 70,
+          "n_meaningful_rate_samples": 58,
+          "max_abs_error_hz": 0.00210078075280843,
+          "p99_abs_error_hz": 0.0020768750713490765,
+          "max_relative_error_meaningful": 0.0015252454813774266,
+          "p99_relative_error_meaningful": 0.0012405904265695906,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 38,
+          "n_samples": 72,
+          "n_meaningful_rate_samples": 61,
+          "max_abs_error_hz": 0.0020417722121695778,
+          "p99_abs_error_hz": 0.0019874421739846195,
+          "max_relative_error_meaningful": 0.0018365879537785182,
+          "p99_relative_error_meaningful": 0.001678848953667805,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 39,
+          "n_samples": 64,
+          "n_meaningful_rate_samples": 53,
+          "max_abs_error_hz": 0.0021316422394983964,
+          "p99_abs_error_hz": 0.0021093409179792286,
+          "max_relative_error_meaningful": 0.0018250484044304628,
+          "p99_relative_error_meaningful": 0.0014411597743419964,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 40,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.002104088815302503,
+          "p99_abs_error_hz": 0.0020167762441879347,
+          "max_relative_error_meaningful": 0.0015454790489363567,
+          "p99_relative_error_meaningful": 0.0011555940810000491,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 41,
+          "n_samples": 76,
+          "n_meaningful_rate_samples": 64,
+          "max_abs_error_hz": 0.002104863638562743,
+          "p99_abs_error_hz": 0.0020688751086513774,
+          "max_relative_error_meaningful": 0.0013707476135993916,
+          "p99_relative_error_meaningful": 0.0011517828977082075,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 42,
+          "n_samples": 98,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.0021012820855580497,
+          "p99_abs_error_hz": 0.002071641044929084,
+          "max_relative_error_meaningful": 0.001461549580746098,
+          "p99_relative_error_meaningful": 0.0014276322848267378,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 43,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.00210387709589574,
+          "p99_abs_error_hz": 0.0020171924762352276,
+          "max_relative_error_meaningful": 0.001630802827100065,
+          "p99_relative_error_meaningful": 0.0012145559661003971,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 44,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0021042942832732656,
+          "p99_abs_error_hz": 0.0020039936446423524,
+          "max_relative_error_meaningful": 0.001655559133722441,
+          "p99_relative_error_meaningful": 0.0011766744409173143,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 45,
+          "n_samples": 92,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.0020696420165947776,
+          "p99_abs_error_hz": 0.002062140492121575,
+          "max_relative_error_meaningful": 0.0015701116362924026,
+          "p99_relative_error_meaningful": 0.0011424772607331718,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 46,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 71,
+          "max_abs_error_hz": 0.002120962240189858,
+          "p99_abs_error_hz": 0.002073234432246433,
+          "max_relative_error_meaningful": 0.0015701116362924026,
+          "p99_relative_error_meaningful": 0.0011298997790990795,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 47,
+          "n_samples": 90,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.0020696420165947776,
+          "p99_abs_error_hz": 0.0020623053607913156,
+          "max_relative_error_meaningful": 0.0015701116362924026,
+          "p99_relative_error_meaningful": 0.0012649076635319202,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 48,
+          "n_samples": 92,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.0022659542114750186,
+          "p99_abs_error_hz": 0.0021169702051931313,
+          "max_relative_error_meaningful": 0.0015098956760039423,
+          "p99_relative_error_meaningful": 0.0012205848300414714,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 49,
+          "n_samples": 92,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.0020816680908232466,
+          "p99_abs_error_hz": 0.0020666805911717483,
+          "max_relative_error_meaningful": 0.000975182450576601,
+          "p99_relative_error_meaningful": 0.0008633538413806893,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 50,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.002126474957299916,
+          "p99_abs_error_hz": 0.002097220371542474,
+          "max_relative_error_meaningful": 0.001365653264438654,
+          "p99_relative_error_meaningful": 0.001357358985875045,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 51,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.002126474957299916,
+          "p99_abs_error_hz": 0.002097220893821283,
+          "max_relative_error_meaningful": 0.0013657504970893447,
+          "p99_relative_error_meaningful": 0.0013579547561778618,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 52,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.0021264666093690626,
+          "p99_abs_error_hz": 0.002097220184549423,
+          "max_relative_error_meaningful": 0.0013654654890222595,
+          "p99_relative_error_meaningful": 0.0013558395012941713,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 53,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.0021637840379078524,
+          "p99_abs_error_hz": 0.0021034531778575238,
+          "max_relative_error_meaningful": 0.0020365000409799175,
+          "p99_relative_error_meaningful": 0.0017844386049658434,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 54,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0020858862303640285,
+          "p99_abs_error_hz": 0.0020778823467584775,
+          "max_relative_error_meaningful": 0.0019007035036043805,
+          "p99_relative_error_meaningful": 0.0011815018449156654,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 55,
+          "n_samples": 70,
+          "n_meaningful_rate_samples": 58,
+          "max_abs_error_hz": 0.002589471986004857,
+          "p99_abs_error_hz": 0.002233581364178831,
+          "max_relative_error_meaningful": 0.0018764647522204136,
+          "p99_relative_error_meaningful": 0.001407664308462436,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 56,
+          "n_samples": 80,
+          "n_meaningful_rate_samples": 62,
+          "max_abs_error_hz": 0.002054842611684017,
+          "p99_abs_error_hz": 0.0020462087238986085,
+          "max_relative_error_meaningful": 0.0012809941185923503,
+          "p99_relative_error_meaningful": 0.0011373204951797662,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 57,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.0020988598965375124,
+          "p99_abs_error_hz": 0.0020914011552439476,
+          "max_relative_error_meaningful": 0.001064757724877844,
+          "p99_relative_error_meaningful": 0.0009362029950327002,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 58,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.0023126764876688077,
+          "p99_abs_error_hz": 0.0020870495775667294,
+          "max_relative_error_meaningful": 0.0020746570108185892,
+          "p99_relative_error_meaningful": 0.0013834878151155199,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 59,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.0021189994794772182,
+          "p99_abs_error_hz": 0.0020722905995904095,
+          "max_relative_error_meaningful": 0.0017270990812012364,
+          "p99_relative_error_meaningful": 0.001282047535400291,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 60,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.0021963715795781866,
+          "p99_abs_error_hz": 0.0021747719292287797,
+          "max_relative_error_meaningful": 0.0024657045317840165,
+          "p99_relative_error_meaningful": 0.0015049345449398822,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 61,
+          "n_samples": 98,
+          "n_meaningful_rate_samples": 71,
+          "max_abs_error_hz": 0.0021851855756980718,
+          "p99_abs_error_hz": 0.0021416126451938907,
+          "max_relative_error_meaningful": 0.001035062197357296,
+          "p99_relative_error_meaningful": 0.0010161540271126075,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 62,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0023053100549324385,
+          "p99_abs_error_hz": 0.0021981342148965494,
+          "max_relative_error_meaningful": 0.002275088508428029,
+          "p99_relative_error_meaningful": 0.0013349771562073654,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 63,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0021971427444211072,
+          "p99_abs_error_hz": 0.0021729669557922844,
+          "max_relative_error_meaningful": 0.00247644278252438,
+          "p99_relative_error_meaningful": 0.0013676513101532825,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 64,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0021953298788811304,
+          "p99_abs_error_hz": 0.0021625530282481753,
+          "max_relative_error_meaningful": 0.0018886539927865725,
+          "p99_relative_error_meaningful": 0.0012348131871429218,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 65,
+          "n_samples": 98,
+          "n_meaningful_rate_samples": 66,
+          "max_abs_error_hz": 0.0020186987723103123,
+          "p99_abs_error_hz": 0.001982289640353029,
+          "max_relative_error_meaningful": 0.001350714850387786,
+          "p99_relative_error_meaningful": 0.0012985262222250636,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 66,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 68,
+          "max_abs_error_hz": 0.0020507115390203806,
+          "p99_abs_error_hz": 0.0020408681543598872,
+          "max_relative_error_meaningful": 0.001350714850387786,
+          "p99_relative_error_meaningful": 0.0012969204182815956,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 67,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 64,
+          "max_abs_error_hz": 0.0020186987723103123,
+          "p99_abs_error_hz": 0.0019830403441047258,
+          "max_relative_error_meaningful": 0.001350714850387786,
+          "p99_relative_error_meaningful": 0.0013001320261685323,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 68,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 64,
+          "max_abs_error_hz": 0.0019633794809395186,
+          "p99_abs_error_hz": 0.001955498619640641,
+          "max_relative_error_meaningful": 0.0011363280062925232,
+          "p99_relative_error_meaningful": 0.0010605303583469134,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 69,
+          "n_samples": 92,
+          "n_meaningful_rate_samples": 65,
+          "max_abs_error_hz": 0.002286238142763103,
+          "p99_abs_error_hz": 0.002064065774239769,
+          "max_relative_error_meaningful": 0.0011492748711440677,
+          "p99_relative_error_meaningful": 0.0010661427238346604,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 70,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.001968946324731012,
+          "p99_abs_error_hz": 0.001953251286201706,
+          "max_relative_error_meaningful": 0.0017367777543925904,
+          "p99_relative_error_meaningful": 0.0012688097287227148,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 71,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.001968946324731012,
+          "p99_abs_error_hz": 0.001953251286201706,
+          "max_relative_error_meaningful": 0.0017367655268045676,
+          "p99_relative_error_meaningful": 0.0012688067941015893,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 72,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.001968946324731012,
+          "p99_abs_error_hz": 0.001953251286201706,
+          "max_relative_error_meaningful": 0.0017368053969264716,
+          "p99_relative_error_meaningful": 0.0012688140636575504,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 73,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0020124243339490755,
+          "p99_abs_error_hz": 0.0019530856699389362,
+          "max_relative_error_meaningful": 0.0011390110464259344,
+          "p99_relative_error_meaningful": 0.0010087101911919626,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 74,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0019528160207045106,
+          "p99_abs_error_hz": 0.0019518980398439134,
+          "max_relative_error_meaningful": 0.0010943780438435553,
+          "p99_relative_error_meaningful": 0.0010334927551427103,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 75,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.002753810330484441,
+          "p99_abs_error_hz": 0.0021639409219901488,
+          "max_relative_error_meaningful": 0.0017619954654481574,
+          "p99_relative_error_meaningful": 0.0012870305950726775,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 76,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0021728987114749687,
+          "p99_abs_error_hz": 0.002163785923194397,
+          "max_relative_error_meaningful": 0.0014181742345803195,
+          "p99_relative_error_meaningful": 0.0012089323870545785,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 77,
+          "n_samples": 108,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0021667970616220597,
+          "p99_abs_error_hz": 0.0020829827348560906,
+          "max_relative_error_meaningful": 0.001691413792102135,
+          "p99_relative_error_meaningful": 0.001273075923764357,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 78,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.002153497526337367,
+          "p99_abs_error_hz": 0.0021027455344165866,
+          "max_relative_error_meaningful": 0.0016866034837759393,
+          "p99_relative_error_meaningful": 0.0012660793306650934,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 79,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0024771690340374963,
+          "p99_abs_error_hz": 0.002155775248267868,
+          "max_relative_error_meaningful": 0.0011516575542396001,
+          "p99_relative_error_meaningful": 0.0010290706663794937,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 80,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0021881362769369736,
+          "p99_abs_error_hz": 0.0021575182119458556,
+          "max_relative_error_meaningful": 0.0010054008881482156,
+          "p99_relative_error_meaningful": 0.0009934854397709186,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 81,
+          "n_samples": 86,
+          "n_meaningful_rate_samples": 73,
+          "max_abs_error_hz": 0.0021816910238002182,
+          "p99_abs_error_hz": 0.002165872137328915,
+          "max_relative_error_meaningful": 0.0010051236477293655,
+          "p99_relative_error_meaningful": 0.0009929160366814634,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 82,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 70,
+          "max_abs_error_hz": 0.002196525185492633,
+          "p99_abs_error_hz": 0.0021225048099079644,
+          "max_relative_error_meaningful": 0.001352188546383811,
+          "p99_relative_error_meaningful": 0.0011123952182188505,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 83,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.002189839349334491,
+          "p99_abs_error_hz": 0.0021543543069039036,
+          "max_relative_error_meaningful": 0.0010785345354874978,
+          "p99_relative_error_meaningful": 0.0010236650950879878,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 84,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.002562571339917441,
+          "p99_abs_error_hz": 0.002185693372421223,
+          "max_relative_error_meaningful": 0.0010054227654261235,
+          "p99_relative_error_meaningful": 0.0009935933685436874,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 85,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.002365198550452821,
+          "p99_abs_error_hz": 0.002070374423114272,
+          "max_relative_error_meaningful": 0.0013791334107830166,
+          "p99_relative_error_meaningful": 0.0011663588853515598,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 86,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 68,
+          "max_abs_error_hz": 0.002365198550452821,
+          "p99_abs_error_hz": 0.0020825020804990393,
+          "max_relative_error_meaningful": 0.0013791334107830166,
+          "p99_relative_error_meaningful": 0.001193991940602397,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 87,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 64,
+          "max_abs_error_hz": 0.002365198550452821,
+          "p99_abs_error_hz": 0.0020939241600931293,
+          "max_relative_error_meaningful": 0.0013791334107830166,
+          "p99_relative_error_meaningful": 0.0012050451627027322,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 88,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 71,
+          "max_abs_error_hz": 0.002009993649821143,
+          "p99_abs_error_hz": 0.001991591056013384,
+          "max_relative_error_meaningful": 0.001132187778344656,
+          "p99_relative_error_meaningful": 0.0011281580864442673,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 89,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.002354394087447989,
+          "p99_abs_error_hz": 0.0021520263105552833,
+          "max_relative_error_meaningful": 0.001070117593047673,
+          "p99_relative_error_meaningful": 0.0010153572680931754,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 90,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.002091241350804865,
+          "p99_abs_error_hz": 0.00203420341254746,
+          "max_relative_error_meaningful": 0.0011443309164369257,
+          "p99_relative_error_meaningful": 0.0011335192473694998,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 91,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.002091241350804865,
+          "p99_abs_error_hz": 0.00203420341254746,
+          "max_relative_error_meaningful": 0.0011443309164369257,
+          "p99_relative_error_meaningful": 0.0011335192473694998,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 92,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.002091241350804865,
+          "p99_abs_error_hz": 0.00203420341254746,
+          "max_relative_error_meaningful": 0.0011443309164369257,
+          "p99_relative_error_meaningful": 0.0011335299929707261,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 93,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.00213677365364269,
+          "p99_abs_error_hz": 0.002068855408425725,
+          "max_relative_error_meaningful": 0.0012743415749318393,
+          "p99_relative_error_meaningful": 0.0011909041614117006,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 94,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0020212448752351606,
+          "p99_abs_error_hz": 0.001996594645127048,
+          "max_relative_error_meaningful": 0.0011585534877104203,
+          "p99_relative_error_meaningful": 0.0011361630900151999,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 95,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002145468889154338,
+          "p99_abs_error_hz": 0.0021035600258604518,
+          "max_relative_error_meaningful": 0.0009947437181936883,
+          "p99_relative_error_meaningful": 0.0009730261576484994,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 96,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.002140391336492159,
+          "p99_abs_error_hz": 0.0021063839628476713,
+          "max_relative_error_meaningful": 0.0009962295977227456,
+          "p99_relative_error_meaningful": 0.0009766102901645106,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 97,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.0022651100134649105,
+          "p99_abs_error_hz": 0.00215338061201594,
+          "max_relative_error_meaningful": 0.0009922436779532511,
+          "p99_relative_error_meaningful": 0.000970402117710176,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 98,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.0021719152600513728,
+          "p99_abs_error_hz": 0.0021121077012936206,
+          "max_relative_error_meaningful": 0.0010456365797677045,
+          "p99_relative_error_meaningful": 0.0010129142661313084,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 99,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.002163762943100528,
+          "p99_abs_error_hz": 0.0020972011583127517,
+          "max_relative_error_meaningful": 0.000984712609218632,
+          "p99_relative_error_meaningful": 0.0009486001809985266,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 100,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.0023176971718705253,
+          "p99_abs_error_hz": 0.002185324063817012,
+          "max_relative_error_meaningful": 0.001130977137816473,
+          "p99_relative_error_meaningful": 0.0010205455386479534,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 101,
+          "n_samples": 78,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.0021921538292130754,
+          "p99_abs_error_hz": 0.00214978049282469,
+          "max_relative_error_meaningful": 0.001495188424673698,
+          "p99_relative_error_meaningful": 0.0012485179289042439,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 102,
+          "n_samples": 108,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002617783911966487,
+          "p99_abs_error_hz": 0.0021605999385176065,
+          "max_relative_error_meaningful": 0.0011390642949496768,
+          "p99_relative_error_meaningful": 0.001002806831641464,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 103,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0025584854012848657,
+          "p99_abs_error_hz": 0.0021726951678933525,
+          "max_relative_error_meaningful": 0.001131762466731977,
+          "p99_relative_error_meaningful": 0.0010042794123267943,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 104,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.002177647214188401,
+          "p99_abs_error_hz": 0.002152202972552312,
+          "max_relative_error_meaningful": 0.0011300395124739216,
+          "p99_relative_error_meaningful": 0.001020428960299826,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 105,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0020063468378038463,
+          "p99_abs_error_hz": 0.001968922502750209,
+          "max_relative_error_meaningful": 0.0016952383882772623,
+          "p99_relative_error_meaningful": 0.001544800425368437,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 106,
+          "n_samples": 92,
+          "n_meaningful_rate_samples": 68,
+          "max_abs_error_hz": 0.0020767545527797943,
+          "p99_abs_error_hz": 0.002012683532151682,
+          "max_relative_error_meaningful": 0.0016952383882772623,
+          "p99_relative_error_meaningful": 0.0015643378231488029,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 107,
+          "n_samples": 88,
+          "n_meaningful_rate_samples": 64,
+          "max_abs_error_hz": 0.0020063468378038463,
+          "p99_abs_error_hz": 0.0018994107660295384,
+          "max_relative_error_meaningful": 0.0016952383882772623,
+          "p99_relative_error_meaningful": 0.0015721527822609494,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 108,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.0022750589813973904,
+          "p99_abs_error_hz": 0.001983974182299778,
+          "max_relative_error_meaningful": 0.002278665530450961,
+          "p99_relative_error_meaningful": 0.0014847209278046922,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 109,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.002103598277100431,
+          "p99_abs_error_hz": 0.001971842617213812,
+          "max_relative_error_meaningful": 0.0019277650389812756,
+          "p99_relative_error_meaningful": 0.001326529511103574,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 110,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.002072225882452164,
+          "p99_abs_error_hz": 0.0020437650819518562,
+          "max_relative_error_meaningful": 0.0014482320717650844,
+          "p99_relative_error_meaningful": 0.0012425831129179792,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 111,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.002072225882452164,
+          "p99_abs_error_hz": 0.0020437650819518562,
+          "max_relative_error_meaningful": 0.001448217129883379,
+          "p99_relative_error_meaningful": 0.0012425750476103676,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 112,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.002072225882452164,
+          "p99_abs_error_hz": 0.0020437650819518562,
+          "max_relative_error_meaningful": 0.0014482172234522434,
+          "p99_relative_error_meaningful": 0.001242576232786349,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 113,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.0021069941473659745,
+          "p99_abs_error_hz": 0.0020719975282821198,
+          "max_relative_error_meaningful": 0.0013115502729931139,
+          "p99_relative_error_meaningful": 0.001199888036844838,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 114,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002285298732664781,
+          "p99_abs_error_hz": 0.001968268543302027,
+          "max_relative_error_meaningful": 0.0011144901341476638,
+          "p99_relative_error_meaningful": 0.001041851021724312,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 115,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.002533863979626433,
+          "p99_abs_error_hz": 0.002161634870944777,
+          "max_relative_error_meaningful": 0.001139591055104084,
+          "p99_relative_error_meaningful": 0.001000829827461035,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 116,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 71,
+          "max_abs_error_hz": 0.0021600718121119952,
+          "p99_abs_error_hz": 0.0021537183535511734,
+          "max_relative_error_meaningful": 0.00113762120503154,
+          "p99_relative_error_meaningful": 0.0010170939942145644,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 117,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 71,
+          "max_abs_error_hz": 0.0021647110779914394,
+          "p99_abs_error_hz": 0.0021299772804685927,
+          "max_relative_error_meaningful": 0.001142438052805401,
+          "p99_relative_error_meaningful": 0.0010154756122154913,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 118,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.0027063472333721528,
+          "p99_abs_error_hz": 0.0022144827316709034,
+          "max_relative_error_meaningful": 0.0014803106119966095,
+          "p99_relative_error_meaningful": 0.0012132370729860717,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 119,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 70,
+          "max_abs_error_hz": 0.0021661690176649415,
+          "p99_abs_error_hz": 0.0020869401031457352,
+          "max_relative_error_meaningful": 0.0017449024019869502,
+          "p99_relative_error_meaningful": 0.001355507349282217,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 120,
+          "n_samples": 108,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002499587262672076,
+          "p99_abs_error_hz": 0.002179031206945777,
+          "max_relative_error_meaningful": 0.0012043567955464496,
+          "p99_relative_error_meaningful": 0.0012041276132373775,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 121,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.002182776117787971,
+          "p99_abs_error_hz": 0.0021251804073965388,
+          "max_relative_error_meaningful": 0.0017002940121959864,
+          "p99_relative_error_meaningful": 0.0013333732583030423,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 122,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 81,
+          "max_abs_error_hz": 0.0021771785217415685,
+          "p99_abs_error_hz": 0.0020580001396054443,
+          "max_relative_error_meaningful": 0.0012046682475721137,
+          "p99_relative_error_meaningful": 0.001204056667979464,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 123,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0024842972563970944,
+          "p99_abs_error_hz": 0.0021841475642093377,
+          "max_relative_error_meaningful": 0.0012042924341467529,
+          "p99_relative_error_meaningful": 0.0012040560495466465,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 124,
+          "n_samples": 108,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0024741141513330567,
+          "p99_abs_error_hz": 0.002179476649261432,
+          "max_relative_error_meaningful": 0.0013279967143968153,
+          "p99_relative_error_meaningful": 0.0012316126405516005,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 125,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002185975242403361,
+          "p99_abs_error_hz": 0.0021115633885859185,
+          "max_relative_error_meaningful": 0.0017451575198234584,
+          "p99_relative_error_meaningful": 0.0013233836431017442,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 126,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 69,
+          "max_abs_error_hz": 0.002185975242403361,
+          "p99_abs_error_hz": 0.002118193340743544,
+          "max_relative_error_meaningful": 0.0017451575198234584,
+          "p99_relative_error_meaningful": 0.001396652156863539,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 127,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 65,
+          "max_abs_error_hz": 0.002185975242403361,
+          "p99_abs_error_hz": 0.0021209320034368696,
+          "max_relative_error_meaningful": 0.0017451575198234584,
+          "p99_relative_error_meaningful": 0.0013906594428910425,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 128,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.0020904326253632158,
+          "p99_abs_error_hz": 0.0020739042258199718,
+          "max_relative_error_meaningful": 0.0018317258358632284,
+          "p99_relative_error_meaningful": 0.001373732988467179,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 129,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.0022206732775021526,
+          "p99_abs_error_hz": 0.002151311520962917,
+          "max_relative_error_meaningful": 0.001697894487704863,
+          "p99_relative_error_meaningful": 0.001337675540595686,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 130,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0020601875128662545,
+          "p99_abs_error_hz": 0.0019924897612138247,
+          "max_relative_error_meaningful": 0.0021992664102788574,
+          "p99_relative_error_meaningful": 0.0014332798168075291,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 131,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0020601875128662545,
+          "p99_abs_error_hz": 0.0019924897612138247,
+          "max_relative_error_meaningful": 0.002199197770275957,
+          "p99_relative_error_meaningful": 0.001433264029606862,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 132,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0020601875128662545,
+          "p99_abs_error_hz": 0.0019924897612138247,
+          "max_relative_error_meaningful": 0.0021991911355514105,
+          "p99_relative_error_meaningful": 0.0014332625036202163,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 133,
+          "n_samples": 98,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.0021014512845557443,
+          "p99_abs_error_hz": 0.001998032504373628,
+          "max_relative_error_meaningful": 0.0024605268017883716,
+          "p99_relative_error_meaningful": 0.0015944938342626453,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 134,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.0020726165196709168,
+          "p99_abs_error_hz": 0.0020520754570501564,
+          "max_relative_error_meaningful": 0.0012045001230688935,
+          "p99_relative_error_meaningful": 0.001204068108573642,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 135,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0021332052586985756,
+          "p99_abs_error_hz": 0.0020894052065848455,
+          "max_relative_error_meaningful": 0.0013880999384945662,
+          "p99_relative_error_meaningful": 0.001248605664215808,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 136,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0025762401376291932,
+          "p99_abs_error_hz": 0.0021283511634975685,
+          "max_relative_error_meaningful": 0.001281047500842001,
+          "p99_relative_error_meaningful": 0.0012218506988623443,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 137,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 68,
+          "max_abs_error_hz": 0.0021347578328832426,
+          "p99_abs_error_hz": 0.0020921949648368674,
+          "max_relative_error_meaningful": 0.001467893400648808,
+          "p99_relative_error_meaningful": 0.0012913368033258957,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 138,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.002264394715355972,
+          "p99_abs_error_hz": 0.002114057839555745,
+          "max_relative_error_meaningful": 0.001204511243690112,
+          "p99_relative_error_meaningful": 0.0012040723312400875,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 139,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.002323694555654565,
+          "p99_abs_error_hz": 0.0021581114982479645,
+          "max_relative_error_meaningful": 0.0012043548198036869,
+          "p99_relative_error_meaningful": 0.0012041318321839652,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 140,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.0022540840437478005,
+          "p99_abs_error_hz": 0.0020872673533911274,
+          "max_relative_error_meaningful": 0.0012039889117121576,
+          "p99_relative_error_meaningful": 0.0012039850520715668,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 141,
+          "n_samples": 86,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.002238228069103426,
+          "p99_abs_error_hz": 0.0021052542130800033,
+          "max_relative_error_meaningful": 0.0012039840260911565,
+          "p99_relative_error_meaningful": 0.0012036445321984698,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 142,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.0023620604378271626,
+          "p99_abs_error_hz": 0.002104868293022026,
+          "max_relative_error_meaningful": 0.0013811090503086114,
+          "p99_relative_error_meaningful": 0.001248269214460672,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 143,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.0022486105327786804,
+          "p99_abs_error_hz": 0.0020878119054682995,
+          "max_relative_error_meaningful": 0.0012556061720553305,
+          "p99_relative_error_meaningful": 0.001216895183749019,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 144,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.0022591520798705134,
+          "p99_abs_error_hz": 0.00208660531176158,
+          "max_relative_error_meaningful": 0.001203990057623668,
+          "p99_relative_error_meaningful": 0.0012039855897643843,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 145,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.0021712472134810534,
+          "p99_abs_error_hz": 0.001991146860939874,
+          "max_relative_error_meaningful": 0.0016149903610427128,
+          "p99_relative_error_meaningful": 0.0013385141652242525,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 146,
+          "n_samples": 96,
+          "n_meaningful_rate_samples": 66,
+          "max_abs_error_hz": 0.0021712472134810534,
+          "p99_abs_error_hz": 0.0020951980076764055,
+          "max_relative_error_meaningful": 0.0016149903610427128,
+          "p99_relative_error_meaningful": 0.0013753776580000452,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 147,
+          "n_samples": 92,
+          "n_meaningful_rate_samples": 62,
+          "max_abs_error_hz": 0.0021712472134810534,
+          "p99_abs_error_hz": 0.0019989993140468077,
+          "max_relative_error_meaningful": 0.0016149903610427128,
+          "p99_relative_error_meaningful": 0.0013901230551103653,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 148,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0021195766996481846,
+          "p99_abs_error_hz": 0.002113503268356383,
+          "max_relative_error_meaningful": 0.001253159764987065,
+          "p99_relative_error_meaningful": 0.001214810797388415,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 149,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.0021851389817705708,
+          "p99_abs_error_hz": 0.0020145643291222867,
+          "max_relative_error_meaningful": 0.0012208519569069424,
+          "p99_relative_error_meaningful": 0.0012075292526789623,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 150,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.0022100901800291284,
+          "p99_abs_error_hz": 0.002056642401434888,
+          "max_relative_error_meaningful": 0.0017673893079824222,
+          "p99_relative_error_meaningful": 0.001329829187708849,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 151,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.0022100901800291284,
+          "p99_abs_error_hz": 0.0020566421733468534,
+          "max_relative_error_meaningful": 0.0017673835910995868,
+          "p99_relative_error_meaningful": 0.0013298279871634534,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 152,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.0022100901800291284,
+          "p99_abs_error_hz": 0.002056641944831166,
+          "max_relative_error_meaningful": 0.001767384068912517,
+          "p99_relative_error_meaningful": 0.0013298280875041688,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 153,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 75,
+          "max_abs_error_hz": 0.0022144630364845375,
+          "p99_abs_error_hz": 0.0021124223851992033,
+          "max_relative_error_meaningful": 0.0012039914679994245,
+          "p99_relative_error_meaningful": 0.0012039854051391333,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 154,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0022990430747511087,
+          "p99_abs_error_hz": 0.0021332415731710463,
+          "max_relative_error_meaningful": 0.0012520046054751062,
+          "p99_relative_error_meaningful": 0.0012155144873503903,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 155,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 73,
+          "max_abs_error_hz": 0.002096603410369456,
+          "p99_abs_error_hz": 0.0019911586986429055,
+          "max_relative_error_meaningful": 0.001203990456497331,
+          "p99_relative_error_meaningful": 0.0012039850090617876,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 156,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0020968988688058188,
+          "p99_abs_error_hz": 0.001990870122967848,
+          "max_relative_error_meaningful": 0.001203991020525657,
+          "p99_relative_error_meaningful": 0.0012039856794472238,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 157,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 76,
+          "max_abs_error_hz": 0.0020959890052220376,
+          "p99_abs_error_hz": 0.0019916343395171357,
+          "max_relative_error_meaningful": 0.0012039929495559264,
+          "p99_relative_error_meaningful": 0.0012039674945744528,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 158,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0020976675036716436,
+          "p99_abs_error_hz": 0.0020394500550432316,
+          "max_relative_error_meaningful": 0.0019157947341115178,
+          "p99_relative_error_meaningful": 0.001367708493717794,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 159,
+          "n_samples": 106,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002088295497946341,
+          "p99_abs_error_hz": 0.002051227349674032,
+          "max_relative_error_meaningful": 0.0012039902120579455,
+          "p99_relative_error_meaningful": 0.0012039856008854424,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 160,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0021540731018065973,
+          "p99_abs_error_hz": 0.002084702959994468,
+          "max_relative_error_meaningful": 0.0019271933637780045,
+          "p99_relative_error_meaningful": 0.0013770603557827896,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 161,
+          "n_samples": 78,
+          "n_meaningful_rate_samples": 65,
+          "max_abs_error_hz": 0.0021586551388671354,
+          "p99_abs_error_hz": 0.002096609939679466,
+          "max_relative_error_meaningful": 0.0012082186855673165,
+          "p99_relative_error_meaningful": 0.0012059978251936622,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 162,
+          "n_samples": 108,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0021418407738886536,
+          "p99_abs_error_hz": 0.0020842963990629756,
+          "max_relative_error_meaningful": 0.0012044328017124625,
+          "p99_relative_error_meaningful": 0.0012033929847600512,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 163,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 70,
+          "max_abs_error_hz": 0.0021534882544849837,
+          "p99_abs_error_hz": 0.0020866468150691855,
+          "max_relative_error_meaningful": 0.001966068682903582,
+          "p99_relative_error_meaningful": 0.0014398382658013138,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 164,
+          "n_samples": 92,
+          "n_meaningful_rate_samples": 72,
+          "max_abs_error_hz": 0.0021547285238609007,
+          "p99_abs_error_hz": 0.002091234615379792,
+          "max_relative_error_meaningful": 0.0018432379816982639,
+          "p99_relative_error_meaningful": 0.001388835356753887,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 165,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0021396768534786073,
+          "p99_abs_error_hz": 0.0021355636498254435,
+          "max_relative_error_meaningful": 0.001203990075041255,
+          "p99_relative_error_meaningful": 0.0012035386956575648,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 166,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 67,
+          "max_abs_error_hz": 0.0021396768534786073,
+          "p99_abs_error_hz": 0.002137319221834034,
+          "max_relative_error_meaningful": 0.001203990075041255,
+          "p99_relative_error_meaningful": 0.001197180442428606,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 167,
+          "n_samples": 90,
+          "n_meaningful_rate_samples": 63,
+          "max_abs_error_hz": 0.0021396768534786073,
+          "p99_abs_error_hz": 0.0021374206253456287,
+          "max_relative_error_meaningful": 0.001203990075041255,
+          "p99_relative_error_meaningful": 0.0011569684172488528,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 168,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0021291154092776404,
+          "p99_abs_error_hz": 0.002010144836381931,
+          "max_relative_error_meaningful": 0.00120574142712494,
+          "p99_relative_error_meaningful": 0.0012036190823711294,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 169,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 68,
+          "max_abs_error_hz": 0.0021520643368943757,
+          "p99_abs_error_hz": 0.002131471875839461,
+          "max_relative_error_meaningful": 0.0012027746883061022,
+          "p99_relative_error_meaningful": 0.00120092437277606,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 170,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.002499196370618975,
+          "p99_abs_error_hz": 0.002105562842525156,
+          "max_relative_error_meaningful": 0.0012057870519260972,
+          "p99_relative_error_meaningful": 0.0012039574899288638,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 171,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.002499196370618975,
+          "p99_abs_error_hz": 0.002105562842525156,
+          "max_relative_error_meaningful": 0.0012057870519260972,
+          "p99_relative_error_meaningful": 0.0012039574899288638,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 172,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.002499197309126927,
+          "p99_abs_error_hz": 0.0021055628519102356,
+          "max_relative_error_meaningful": 0.0012057870519260972,
+          "p99_relative_error_meaningful": 0.0012039574899288638,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 173,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 68,
+          "max_abs_error_hz": 0.002139629269356201,
+          "p99_abs_error_hz": 0.0020986380550078432,
+          "max_relative_error_meaningful": 0.0012045593653811206,
+          "p99_relative_error_meaningful": 0.0012034220585118115,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 174,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.00212686364523592,
+          "p99_abs_error_hz": 0.0020196335705297865,
+          "max_relative_error_meaningful": 0.0012769960946370628,
+          "p99_relative_error_meaningful": 0.00124909690828236,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 175,
+          "n_samples": 86,
+          "n_meaningful_rate_samples": 61,
+          "max_abs_error_hz": 0.0021721061422754623,
+          "p99_abs_error_hz": 0.0021305575779499712,
+          "max_relative_error_meaningful": 0.0014001857467077071,
+          "p99_relative_error_meaningful": 0.0012817962549236646,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 176,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 72,
+          "max_abs_error_hz": 0.002170229493737505,
+          "p99_abs_error_hz": 0.0021195683269633813,
+          "max_relative_error_meaningful": 0.00142550211992778,
+          "p99_relative_error_meaningful": 0.00126783409650559,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 177,
+          "n_samples": 102,
+          "n_meaningful_rate_samples": 77,
+          "max_abs_error_hz": 0.0021751416188087874,
+          "p99_abs_error_hz": 0.0021258364214155915,
+          "max_relative_error_meaningful": 0.001210462941200954,
+          "p99_relative_error_meaningful": 0.0012048712331788974,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 178,
+          "n_samples": 94,
+          "n_meaningful_rate_samples": 64,
+          "max_abs_error_hz": 0.0021205568060348595,
+          "p99_abs_error_hz": 0.002073536677225113,
+          "max_relative_error_meaningful": 0.0013277654692789495,
+          "p99_relative_error_meaningful": 0.0012492465190074022,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 179,
+          "n_samples": 104,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.002235652778239186,
+          "p99_abs_error_hz": 0.0021839189541660985,
+          "max_relative_error_meaningful": 0.0012033815899167002,
+          "p99_relative_error_meaningful": 0.0012030747745001504,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        }
+      ],
+      "all_forks_pass": true
+    },
+    "confirm_direct_exact": {
+      "n_samples": 2226,
+      "n_meaningful_rate_samples": 1613,
+      "max_abs_error_hz": 0.0024278511085613907,
+      "p99_abs_error_hz": 0.0021393092199605782,
+      "max_relative_error_meaningful": 0.0017612005468197924,
+      "p99_relative_error_meaningful": 0.0011271526001587076,
+      "meaningful_rate_floor_khz": 1e-09,
+      "pass": true,
+      "per_fork": [
+        {
+          "fork_index": 0,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 81,
+          "max_abs_error_hz": 0.002248730973685928,
+          "p99_abs_error_hz": 0.002151331559164414,
+          "max_relative_error_meaningful": 0.0013699454407940291,
+          "p99_relative_error_meaningful": 0.0010813542274795234,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 1,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 81,
+          "max_abs_error_hz": 0.00224872635240167,
+          "p99_abs_error_hz": 0.002151331559164414,
+          "max_relative_error_meaningful": 0.001370246526842818,
+          "p99_relative_error_meaningful": 0.0010814144446892812,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 2,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 81,
+          "max_abs_error_hz": 0.002248750423240742,
+          "p99_abs_error_hz": 0.002151328479800237,
+          "max_relative_error_meaningful": 0.0013692741556994227,
+          "p99_relative_error_meaningful": 0.0010812188496337818,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 3,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 80,
+          "max_abs_error_hz": 0.002166501857686111,
+          "p99_abs_error_hz": 0.002087183411973621,
+          "max_relative_error_meaningful": 0.0017612005468197924,
+          "p99_relative_error_meaningful": 0.0011641862755581067,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 4,
+          "n_samples": 100,
+          "n_meaningful_rate_samples": 74,
+          "max_abs_error_hz": 0.0021759563477753707,
+          "p99_abs_error_hz": 0.0021301377005614798,
+          "max_relative_error_meaningful": 0.0017333759640903404,
+          "p99_relative_error_meaningful": 0.0012321434448392698,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 5,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.002367149736979407,
+          "p99_abs_error_hz": 0.002166041882484468,
+          "max_relative_error_meaningful": 0.0010197019476739762,
+          "p99_relative_error_meaningful": 0.0010084008690153749,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 6,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.002367154709470576,
+          "p99_abs_error_hz": 0.002166041882484468,
+          "max_relative_error_meaningful": 0.0010197080894563944,
+          "p99_relative_error_meaningful": 0.0010084020359540343,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 7,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.0023671480337272843,
+          "p99_abs_error_hz": 0.002166041882484468,
+          "max_relative_error_meaningful": 0.0010197019476739762,
+          "p99_relative_error_meaningful": 0.0010083991275511707,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 8,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.0021238681858484418,
+          "p99_abs_error_hz": 0.0020344936933982486,
+          "max_relative_error_meaningful": 0.0013502167198645209,
+          "p99_relative_error_meaningful": 0.0011165663655788014,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 9,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.0024177613629546707,
+          "p99_abs_error_hz": 0.002249515307989154,
+          "max_relative_error_meaningful": 0.0010259448430726432,
+          "p99_relative_error_meaningful": 0.0010060627462267313,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 10,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0020819115305508243,
+          "p99_abs_error_hz": 0.001973778053969014,
+          "max_relative_error_meaningful": 0.001124024336511275,
+          "p99_relative_error_meaningful": 0.0011216798693598025,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 11,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0020921841537967917,
+          "p99_abs_error_hz": 0.0019678044064270084,
+          "max_relative_error_meaningful": 0.001270448163625933,
+          "p99_relative_error_meaningful": 0.0012008828446691583,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 12,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002064931089370073,
+          "p99_abs_error_hz": 0.0019826026253962417,
+          "max_relative_error_meaningful": 0.0011181490395633746,
+          "p99_relative_error_meaningful": 0.0010393348856044965,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 13,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0021284129029276733,
+          "p99_abs_error_hz": 0.00196590004058997,
+          "max_relative_error_meaningful": 0.0016820462560749403,
+          "p99_relative_error_meaningful": 0.0012593135918996187,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 14,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0020195790536130243,
+          "p99_abs_error_hz": 0.0020139906586583937,
+          "max_relative_error_meaningful": 0.0012725820217207103,
+          "p99_relative_error_meaningful": 0.001263809007177234,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 15,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.002151226032945548,
+          "p99_abs_error_hz": 0.002076966308173127,
+          "max_relative_error_meaningful": 0.0011370501393026782,
+          "p99_relative_error_meaningful": 0.0010372828355318894,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 16,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.002142520664633052,
+          "p99_abs_error_hz": 0.0020786646765787696,
+          "max_relative_error_meaningful": 0.0011391986722526747,
+          "p99_relative_error_meaningful": 0.0010359628144934459,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 17,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.0024278511085613907,
+          "p99_abs_error_hz": 0.0021552167504071754,
+          "max_relative_error_meaningful": 0.0011333450253766847,
+          "p99_relative_error_meaningful": 0.0010389407390016638,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 18,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 82,
+          "max_abs_error_hz": 0.0021014252370278944,
+          "p99_abs_error_hz": 0.0020687073164722767,
+          "max_relative_error_meaningful": 0.0011480968082747001,
+          "p99_relative_error_meaningful": 0.00102841787499396,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 19,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 83,
+          "max_abs_error_hz": 0.0022524749206179195,
+          "p99_abs_error_hz": 0.0021779505346758692,
+          "max_relative_error_meaningful": 0.0011186615466126817,
+          "p99_relative_error_meaningful": 0.001039826545053216,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        }
+      ],
+      "all_forks_pass": true
+    },
+    "dt_half_direct_exact": {
+      "n_samples": 552,
+      "n_meaningful_rate_samples": 394,
+      "max_abs_error_hz": 0.0021733662751129493,
+      "p99_abs_error_hz": 0.0020472898171746898,
+      "max_relative_error_meaningful": 0.0016084317358300044,
+      "p99_relative_error_meaningful": 0.0011475138011585596,
+      "meaningful_rate_floor_khz": 1e-09,
+      "pass": true,
+      "per_fork": [
+        {
+          "fork_index": 0,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002109499174181295,
+          "p99_abs_error_hz": 0.0020429134059549506,
+          "max_relative_error_meaningful": 0.0011475137543430602,
+          "p99_relative_error_meaningful": 0.0010455450125286753,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 1,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0021095099507024637,
+          "p99_abs_error_hz": 0.002042925809298945,
+          "max_relative_error_meaningful": 0.0011475137543430602,
+          "p99_relative_error_meaningful": 0.001045543533575965,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 2,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.0021094887727350978,
+          "p99_abs_error_hz": 0.002042891351373005,
+          "max_relative_error_meaningful": 0.0011475144231359094,
+          "p99_relative_error_meaningful": 0.0010455466385077203,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 3,
+          "n_samples": 110,
+          "n_meaningful_rate_samples": 78,
+          "max_abs_error_hz": 0.0021733662751129493,
+          "p99_abs_error_hz": 0.002114536211550391,
+          "max_relative_error_meaningful": 0.0016084317358300044,
+          "p99_relative_error_meaningful": 0.0012445259628342301,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        },
+        {
+          "fork_index": 4,
+          "n_samples": 112,
+          "n_meaningful_rate_samples": 79,
+          "max_abs_error_hz": 0.002000059389065112,
+          "p99_abs_error_hz": 0.0019861544771648722,
+          "max_relative_error_meaningful": 0.0013829433433278087,
+          "p99_relative_error_meaningful": 0.001203359933781609,
+          "meaningful_rate_floor_khz": 1e-09,
+          "pass": true
+        }
+      ],
+      "all_forks_pass": true
+    }
+  },
+  "integration_contract": {
+    "phase_source": {
+      "dt_ms": 0.125,
+      "duration_ms": 12000.0,
+      "save_stride": 40,
+      "tail_start_ms": 7200.0,
+      "peak_height_hz": 20.0,
+      "peak_prominence_hz": 10.0,
+      "peak_min_distance_ms": 300.0,
+      "phases": [
+        0.0,
+        0.25,
+        0.5,
+        0.75
+      ],
+      "parity_rate_atol_khz": 1e-07,
+      "parity_pool_atol": 1e-07
+    },
+    "screen": {
+      "dt_ms": 0.25,
+      "duration_ms": 6000.0,
+      "save_stride": 20
+    },
+    "confirm": {
+      "dt_ms": 0.125,
+      "duration_ms": 24000.0,
+      "save_stride": 40
+    },
+    "dt_half": {
+      "dt_ms": 0.0625,
+      "duration_ms": 24000.0,
+      "save_stride": 80
+    }
+  },
+  "battery_contract": {
+    "perturbation_fraction": 0.03,
+    "histories": [
+      "phase_anchor",
+      "fast_plus",
+      "fast_minus",
+      "pool_plus",
+      "pool_minus"
+    ]
+  },
+  "provenance": {
+    "locked_inputs": {
+      "root_continuation": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_dynamic_divisive_pool/root_continuation.json",
+        "expected_sha256": "eb89514f62e127367774e1c849ec16f340ef2b4ac1713b3f57b6c9696ed4999f",
+        "observed_sha256": "eb89514f62e127367774e1c849ec16f340ef2b4ac1713b3f57b6c9696ed4999f",
+        "pass": true
+      },
+      "extra_fine_transfer": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz",
+        "expected_sha256": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+        "observed_sha256": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+        "pass": true
+      },
+      "v1_1_confirm_trace": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/state_fork_confirm_extra_fine_traces.npz",
+        "expected_sha256": "8151891d26dffefc9b87dc1fcf107269e515090277e8bf996c7e5a5e212e1579",
+        "observed_sha256": "8151891d26dffefc9b87dc1fcf107269e515090277e8bf996c7e5a5e212e1579",
+        "pass": true
+      },
+      "transfer_module": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0c_transfer.py",
+        "expected_sha256": "48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed",
+        "observed_sha256": "48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed",
+        "pass": true
+      }
+    },
+    "config": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0d_v1_1.yaml",
+    "config_sha256": "87173a62bc3e2bd3c972214da5fbe44b16a028f8063c2a33a7723a12d2ead860",
+    "spec": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0d-local-basin-replication-design.md",
+    "spec_sha256": "21f45fb5d1f980a7001e605cc9f6f53c8aad2289996f5d898a08a1c615e55d89",
+    "module": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0d.py",
+    "module_sha256": "7ded4464f77ac96c37c9669c9fb16b5b2c13eb66c75d0acce563ed58199952d7",
+    "runner": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0d.py",
+    "runner_sha256": "5bf87bc5a6d574f19072b4c3fae5dbc1d10a6205647b6c12afa90549b32388cb"
+  },
+  "resource_usage": {
+    "wall_seconds": 218.47013880405575,
+    "max_rss_gib": 0.23882675170898438,
+    "max_memory_gib_contract": 4.0,
+    "within_memory_contract": true,
+    "execution": "single_process_blas_threads_1",
+    "wrapper_wall_seconds": 220.99204848706722
+  },
+  "stage1_opened": false,
+  "scientific_boundary_cn": "v1.1 仅修复 Stage0D frequency gate 和 Figure B；模型、180 battery、阈值与 T/dt 未变，不含 Stage0E、slow 或 space。",
+  "engineering_repair": {
+    "v1_deviation": "v1 confirm-vs-dt/2 frequency implementation used legacy max(0.5 Hz,15%) instead of the written max(0.25 Hz,10%) gate; authoritative Figure B was also semantically empty.",
+    "v1_1_frequency_gate": "max(0.25 Hz,10% of pair mean)",
+    "rate_gate_unchanged": "max(1 Hz,10% of pair mean)",
+    "amplitude_gate_unchanged": "max(5 Hz,10% of pair mean)",
+    "scientific_contract_changed": false,
+    "battery_or_integration_changed": false,
+    "scientific_result_changed": false
+  },
+  "v1_vs_v1_1": {
+    "schema_version": "topic4_stage0d_v1_vs_v1_1.v1",
+    "v1_summary": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/stage0d_local_basin_summary.json",
+    "v1_verdict": "STAGE0D_NO_REPLICATION_WITH_UNRESOLVED_TRAJECTORIES",
+    "v1_1_verdict": "STAGE0D_NO_REPLICATION_WITH_UNRESOLVED_TRAJECTORIES",
+    "verdict_changed": false,
+    "v1_final_status_counts": {
+      "numerical_unresolved": 175,
+      "candidate_survives": 5
+    },
+    "v1_1_final_status_counts": {
+      "numerical_unresolved": 175,
+      "candidate_survives": 5
+    },
+    "counts_changed": false,
+    "centre_open_basin_changed": false,
+    "compatible_neighbour_count_changed": false,
+    "n_aligned_histories": 180,
+    "n_fork_status_changes": 0,
+    "fork_status_changes": [],
+    "any_fork_status_changed": false,
+    "scientific_result_changed": false,
+    "interpretation_cn": "v1.1 修复了实现偏差，但最终 fork 状态、open-basin 判定和科学 verdict 均未改变。"
+  },
+  "execution_lock": {
+    "schema_version": "topic4_stage0d_v1_1_execution_lock.v1",
+    "locked_before_numerical_execution": true,
+    "v1_immutable_inputs": {
+      "spec": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0d-local-basin-replication-design.md",
+        "expected_sha256": "21f45fb5d1f980a7001e605cc9f6f53c8aad2289996f5d898a08a1c615e55d89",
+        "observed_sha256": "21f45fb5d1f980a7001e605cc9f6f53c8aad2289996f5d898a08a1c615e55d89",
+        "pass": true
+      },
+      "config": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0d.yaml",
+        "expected_sha256": "2413909ce3c5c51418ccdfb95685ac7d3e76b3aae7a051fc26ae966489258793",
+        "observed_sha256": "2413909ce3c5c51418ccdfb95685ac7d3e76b3aae7a051fc26ae966489258793",
+        "pass": true
+      },
+      "module": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0d.py",
+        "expected_sha256": "7ded4464f77ac96c37c9669c9fb16b5b2c13eb66c75d0acce563ed58199952d7",
+        "observed_sha256": "7ded4464f77ac96c37c9669c9fb16b5b2c13eb66c75d0acce563ed58199952d7",
+        "pass": true
+      },
+      "runner": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0d.py",
+        "expected_sha256": "5bf87bc5a6d574f19072b4c3fae5dbc1d10a6205647b6c12afa90549b32388cb",
+        "observed_sha256": "5bf87bc5a6d574f19072b4c3fae5dbc1d10a6205647b6c12afa90549b32388cb",
+        "pass": true
+      },
+      "tests": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0d.py",
+        "expected_sha256": "6bac873d6100e0aa287884af363a2044ba774fc60c85e08acb34859f067826ed",
+        "observed_sha256": "6bac873d6100e0aa287884af363a2044ba774fc60c85e08acb34859f067826ed",
+        "pass": true
+      },
+      "summary": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/stage0d_local_basin_summary.json",
+        "expected_sha256": "0ac3084102e56085ddf6c4e3f8dfd5ace1e16214efb2a22bf7ad25739f4dfccd",
+        "observed_sha256": "0ac3084102e56085ddf6c4e3f8dfd5ace1e16214efb2a22bf7ad25739f4dfccd",
+        "pass": true
+      },
+      "fork_outcomes": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/fork_outcomes.json",
+        "expected_sha256": "dcba29655fd673503b0d462debf23dbfc456cb8f485477aa114e1c2854e26fee",
+        "observed_sha256": "dcba29655fd673503b0d462debf23dbfc456cb8f485477aa114e1c2854e26fee",
+        "pass": true
+      },
+      "phase_source": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/phase_source.json",
+        "expected_sha256": "f676c6f331cbaa1401ff348e014ded724aba22d4e6000c3ff50ffa9ea1e3cec9",
+        "observed_sha256": "f676c6f331cbaa1401ff348e014ded724aba22d4e6000c3ff50ffa9ea1e3cec9",
+        "pass": true
+      }
+    },
+    "v1_1_sources_pre_execution": {
+      "spec": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0d-local-basin-replication-v1_1-engineering-repair-design.md",
+        "sha256": "a3e075c9f1a5cab040bc94baf5bc399f03e9905bb2f6daeced867a083cf7fd63"
+      },
+      "config": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0d_v1_1.yaml",
+        "sha256": "87173a62bc3e2bd3c972214da5fbe44b16a028f8063c2a33a7723a12d2ead860"
+      },
+      "module": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0d_v1_1.py",
+        "sha256": "867b8e029bf706459a854e450c9c34d1973b965485ba978597bcdc0d9df069fa"
+      },
+      "runner": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0d_v1_1.py",
+        "sha256": "4d4c9838f19b357c25d94d9711dce972c9553592c95f3618d3cbc43ded6055b0"
+      },
+      "tests": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0d_v1_1.py",
+        "sha256": "34c2e37b08dbe51ee5a7a1f0ab6f996507f18a5e8bc5838c42549bd9d2b5f439"
+      }
+    },
+    "v1_1_sources_post_execution": {
+      "spec": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0d-local-basin-replication-v1_1-engineering-repair-design.md",
+        "sha256": "a3e075c9f1a5cab040bc94baf5bc399f03e9905bb2f6daeced867a083cf7fd63"
+      },
+      "config": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0d_v1_1.yaml",
+        "sha256": "87173a62bc3e2bd3c972214da5fbe44b16a028f8063c2a33a7723a12d2ead860"
+      },
+      "module": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0d_v1_1.py",
+        "sha256": "867b8e029bf706459a854e450c9c34d1973b965485ba978597bcdc0d9df069fa"
+      },
+      "runner": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0d_v1_1.py",
+        "sha256": "4d4c9838f19b357c25d94d9711dce972c9553592c95f3618d3cbc43ded6055b0"
+      },
+      "tests": {
+        "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0d_v1_1.py",
+        "sha256": "34c2e37b08dbe51ee5a7a1f0ab6f996507f18a5e8bc5838c42549bd9d2b5f439"
+      }
+    },
+    "sources_unchanged_during_execution": true
+  },
+  "stage0e_opened": false,
+  "figure_contract": {
+    "schema_version": "topic4_stage0d_v1_1_figure.v1",
+    "centre_final_survivor_count": 0,
+    "figure_b_empty_text_rendered": "none passed locked gate",
+    "figure_b_uses_only_final_centre_survivors": true,
+    "png": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication_v1_1/figures/stage0d_local_basin_replication_v1_1.png",
+    "png_sha256": "7187ae65617522d8d9445af9b6ff40bd4096b3992702ffe988d21070e1f591d6",
+    "pdf": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication_v1_1/figures/stage0d_local_basin_replication_v1_1.pdf",
+    "pdf_sha256": "3405677a04eb792dc618ac1f9e3380d8226b9479f07fc35ff7278626dacd5445"
+  },
+  "v1_immutable_post_execution": {
+    "spec": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0d-local-basin-replication-design.md",
+      "expected_sha256": "21f45fb5d1f980a7001e605cc9f6f53c8aad2289996f5d898a08a1c615e55d89",
+      "observed_sha256": "21f45fb5d1f980a7001e605cc9f6f53c8aad2289996f5d898a08a1c615e55d89",
+      "pass": true
+    },
+    "config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0d.yaml",
+      "expected_sha256": "2413909ce3c5c51418ccdfb95685ac7d3e76b3aae7a051fc26ae966489258793",
+      "observed_sha256": "2413909ce3c5c51418ccdfb95685ac7d3e76b3aae7a051fc26ae966489258793",
+      "pass": true
+    },
+    "module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0d.py",
+      "expected_sha256": "7ded4464f77ac96c37c9669c9fb16b5b2c13eb66c75d0acce563ed58199952d7",
+      "observed_sha256": "7ded4464f77ac96c37c9669c9fb16b5b2c13eb66c75d0acce563ed58199952d7",
+      "pass": true
+    },
+    "runner": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0d.py",
+      "expected_sha256": "5bf87bc5a6d574f19072b4c3fae5dbc1d10a6205647b6c12afa90549b32388cb",
+      "observed_sha256": "5bf87bc5a6d574f19072b4c3fae5dbc1d10a6205647b6c12afa90549b32388cb",
+      "pass": true
+    },
+    "tests": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0d.py",
+      "expected_sha256": "6bac873d6100e0aa287884af363a2044ba774fc60c85e08acb34859f067826ed",
+      "observed_sha256": "6bac873d6100e0aa287884af363a2044ba774fc60c85e08acb34859f067826ed",
+      "pass": true
+    },
+    "summary": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/stage0d_local_basin_summary.json",
+      "expected_sha256": "0ac3084102e56085ddf6c4e3f8dfd5ace1e16214efb2a22bf7ad25739f4dfccd",
+      "observed_sha256": "0ac3084102e56085ddf6c4e3f8dfd5ace1e16214efb2a22bf7ad25739f4dfccd",
+      "pass": true
+    },
+    "fork_outcomes": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/fork_outcomes.json",
+      "expected_sha256": "dcba29655fd673503b0d462debf23dbfc456cb8f485477aa114e1c2854e26fee",
+      "observed_sha256": "dcba29655fd673503b0d462debf23dbfc456cb8f485477aa114e1c2854e26fee",
+      "pass": true
+    },
+    "phase_source": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/phase_source.json",
+      "expected_sha256": "f676c6f331cbaa1401ff348e014ded724aba22d4e6000c3ff50ffa9ea1e3cec9",
+      "observed_sha256": "f676c6f331cbaa1401ff348e014ded724aba22d4e6000c3ff50ffa9ea1e3cec9",
+      "pass": true
+    }
+  }
+}

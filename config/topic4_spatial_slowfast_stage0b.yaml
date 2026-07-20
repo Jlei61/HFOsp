@@ -1,0 +1,42 @@
+result_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0b_ei_fast
+
+axes:
+  ratio: 1.0
+  w_ee_mult: [1.0, 1.1, 1.2, 1.3, 1.4, 1.5]
+  q: [1.00, 0.99, 0.98, 0.97, 0.96, 0.95, 0.94, 0.93, 0.92, 0.91, 0.90,
+      0.89, 0.88, 0.87, 0.86, 0.85, 0.84, 0.83, 0.82, 0.81, 0.80]
+
+screen:
+  dt_ms: 0.25
+  duration_ms: 6000.0
+  save_stride: 20
+
+confirm:
+  dt_ms: 0.125
+  duration_ms: 12000.0
+  save_stride: 40
+
+classifier:
+  tail_fraction: 0.40
+  low_mean_hz: 5.0
+  finite_high_max_hz: 100.0
+  fixed_sd_floor_hz: 0.5
+  fixed_cv: 0.03
+  max_relative_drift: 0.08
+  max_abs_slope_hz_s: 1.0
+  min_oscillation_p2p_hz: 2.0
+  min_oscillation_cycles: 3.0
+  min_spectral_power_ratio: 0.20
+  refractory_margin_fraction: 0.05
+  max_refractory_occupancy: 0.05
+
+resource_contract:
+  max_cpus: 4
+  max_memory_gib: 4.0
+  blas_threads: 1
+
+scope:
+  noise: false
+  slow_variables: false
+  spatial_coupling: false
+  dynamic_phi: false
