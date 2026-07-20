@@ -121,10 +121,11 @@ def _ck_path(seed, state):
     return os.path.join(CKDIR, f"ck_seed{seed}_{state}.pkl")
 
 
-def _capture_checkpoints(S, zm_cfg, states, seed):
+def _capture_checkpoints(S, zm_cfg, states, seed, *, persist=True):
     """Segmented replay + resume capturing the full LoopState at each RESOLVED registered step (one
     pass, bit-consistent with the registration replay because it re-runs the identical seed/substrate/
-    slow with the RNG reset — spec §3.6, verified by E4)."""
+    slow with the RNG reset — spec §3.6, verified by E4). persist=False (smoke) keeps checkpoints in
+    memory only, so the tiny-net smoke never writes into the real CKDIR."""
     items = sorted([(st, int(d["branch_step"])) for st, d in states.items() if d.get("branch_step") is not None],
                    key=lambda x: x[1])
     slow = MZSpatialProbe(S["N"], 18.0, zm_cfg, NE=S["NE"])
@@ -136,11 +137,26 @@ def _capture_checkpoints(S, zm_cfg, states, seed):
                        capture_final=True, store_spikes=False)
         ck = rep["checkpoint"]
         cks[st], fps[st] = ck, state_checkpoint_fingerprint(ck)
-        os.makedirs(CKDIR, exist_ok=True)
-        with open(_ck_path(seed, st), "wb") as f:
-            pickle.dump(ck, f)
+        if persist:
+            os.makedirs(CKDIR, exist_ok=True)
+            with open(_ck_path(seed, st), "wb") as f:
+                pickle.dump(ck, f)
         start, cur, slow = ck, int(ck.t), copy.deepcopy(ck.slow)
     return cks, fps
+
+
+def _register_done(seed, reg_all):
+    """Resume: True iff `seed` is registered AND every resolved-state checkpoint exists on disk."""
+    rec = reg_all.get("seeds", {}).get(str(seed))
+    if rec is None:
+        return False
+    return all(os.path.exists(_ck_path(seed, st)) for st, d in rec["states"].items()
+               if d.get("branch_step") is not None)
+
+
+def _state_done(path, resume):
+    """Resume-skip predicate: a completed per-state output JSON is not recomputed (idempotency, E18)."""
+    return bool(resume and os.path.exists(path))
 
 
 def _load_checkpoints(seed, seed_rec):
@@ -162,9 +178,7 @@ def cmd_register(args, cfg):
     reg_all = _load_json(REGPATH) or dict(schema_version=SCHEMA_VERSION, eta_m=zm_cfg.eta_m,
                                           work_point=cfg["work_point"], lock=sr, seeds={})
     for seed in _seeds(args, cfg):
-        if args.resume and str(seed) in reg_all["seeds"] and all(
-                os.path.exists(_ck_path(seed, st)) for st, d in reg_all["seeds"][str(seed)]["states"].items()
-                if d.get("branch_step") is not None):
+        if args.resume and _register_done(seed, reg_all):
             print(f"[register] resume skip seed{seed}", flush=True)
             continue
         t0 = time.time()
@@ -185,6 +199,9 @@ def cmd_register(args, cfg):
         up = _upstream_traj(cfg, seed)
         parity = trajectory_parity(traj["D_allE"], traj["a_allE"], traj["rate_E_hz"],
                                    up["D"], up["a"], up["rate"], rel_tol=float(sr["parity_rel_tol"]))
+        np.savez_compressed(os.path.join(OUT, "per_seed", f"traj_seed{seed}.npz"),   # downsampled traj for the figure
+                            t_ms=traj["t_ms"], D_allE=traj["D_allE"], a_allE=traj["a_allE"],
+                            rate_E_hz=traj["rate_E_hz"])
         # registration (step resolution) + full-state checkpoint capture
         reg = register_states(D_step, a_step, rate_step, DT, **_sr_kwargs(sr))
         cks, fps = _capture_checkpoints(S, zm_cfg, reg["states"], seed)
@@ -234,7 +251,7 @@ def cmd_run(args, cfg):
         cks = _load_checkpoints(seed, seed_rec)
         for st in states:
             rj = os.path.join(OUT, "per_seed", f"state_seed{seed}_{st}.json")
-            if args.resume and os.path.exists(rj):
+            if _state_done(rj, args.resume):
                 print(f"[run] resume skip s{seed} {st}", flush=True)
                 continue
             srec = seed_rec["states"].get(st, {})
@@ -276,7 +293,7 @@ def cmd_controls(args, cfg):
         raise SystemExit("controls require registration: run `register` first")
     for seed in _seeds(args, cfg):
         rj = os.path.join(OUT, "per_seed", f"controls_seed{seed}.json")
-        if args.resume and os.path.exists(rj):
+        if _state_done(rj, args.resume):
             print(f"[controls] resume skip s{seed}", flush=True)
             continue
         seed_rec = reg_all["seeds"].get(str(seed))
@@ -446,7 +463,7 @@ def cmd_smoke(args, cfg):
                           settled_min_resting_frac=0.0, D_onset_ref=0.0)
     print(f"[smoke] D_base={reg['D_base']:.4f} D_plateau={reg['D_plateau']:.4f} "
           f"steps={[reg['states'][s]['branch_step'] for s in STATE_ORDER]}", flush=True)
-    cks, fps = _capture_checkpoints(S, zm_cfg, reg["states"], seed=1)
+    cks, fps = _capture_checkpoints(S, zm_cfg, reg["states"], seed=1, persist=False)   # smoke: no CKDIR write
     st = "baseline" if reg["states"]["baseline"]["branch_step"] is not None else next(iter(cks))
     ck, br = cks[st], int(reg["states"][st]["branch_step"])
     fk = DSM.fixed_kick_state(S, ck, br, scfg)

@@ -240,6 +240,36 @@ def test_schema_version():
     assert SCHEMA_VERSION == "mz-m-eigenmode-tracking-1.0"
 
 
+# ================================================================= E18 resume idempotency (runner predicates)
+def test_e18_resume_predicates(tmp_path):
+    """A completed cell is not recomputed; an absent/incomplete cell IS recomputed; resume off always
+    recomputes (spec §7 E18). Importing the runner is side-effect-free (no simulations)."""
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    import run_topic4_mz_m_eigenmode_tracking as R
+    p = str(tmp_path / "state.json")
+    assert not R._state_done(p, resume=True)               # missing -> recompute
+    open(p, "w").write("{}")
+    assert R._state_done(p, resume=True)                   # present + resume -> skip
+    assert not R._state_done(p, resume=False)              # resume off -> always recompute
+    assert not R._register_done(99, {"seeds": {}})         # seed unregistered -> recompute
+    reg = {"seeds": {"99": {"states": {"baseline": {"branch_step": 999}}}}}   # seed 99: no real checkpoints
+    assert not R._register_done(99, reg)                   # registered but checkpoint missing -> recompute
+
+
+# ================================================================= E20 plotting fails closed on missing sidecar
+def test_e20_plot_fail_closed(tmp_path):
+    sys.path.insert(0, os.path.join(ROOT, "scripts", "paper_figures"))
+    import plot_figure5_mz_m_eigenmode_tracking as P
+    empty = str(tmp_path)
+    assert P.load_state(1, "baseline", out=empty) is None      # missing sidecar -> None (no crash)
+    assert P.load_registration(out=empty) is None
+    with pytest.raises(SystemExit):
+        P.require_registration(out=empty)                      # required sidecar missing -> fail closed
+    with pytest.raises(SystemExit):
+        P.figure_b({"T_windows_ms": [10.0, 30.0, 50.0], "linearity_tol": 0.15,
+                    "m_controls": {"conditions": []}}, out=empty)
+
+
 # ================================================================= tiny-SNN: E4/E5/E9 + m-control checkpoint
 @pytest.fixture(scope="module")
 def tiny():
