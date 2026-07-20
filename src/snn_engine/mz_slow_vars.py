@@ -59,6 +59,8 @@ class MZSlowVarsConfig:
     # ---- FCXR: full-conductance E-cell AMPA + persistence-gated E->E relay (all OFF by default) ----
     E_E: float = 58.0              # AMPA reversal (full_conductance only), engine V_L=0 coords
     c_E: float = 1.0               # excitatory force-match coefficient (full_conductance only)
+    ff_conductance: bool = True    # full_conductance: feedforward(external) AMPA as conductance, else additive c_E*I
+    rec_conductance: bool = True   # full_conductance: recurrent E->E AMPA as conductance, else additive c_E*I
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
     tau_y: float = 120.0           # ms  persistence sensor time constant
     tau_x: float = 1000.0          # ms  relay availability time constant
@@ -247,12 +249,23 @@ class MZSlowVars:
         # V_match by c_E.  Split feedforward (external) vs recurrent (E->E) is exposed for diagnostics;
         # the x-modulation is applied at the presynaptic SCATTER (source-level) so I_E_rec already carries
         # it -> g_E_ff+g_E_rec == c_E*I_E/(E_E-V_match).  Partial conductance keeps AMPA additive (gE=0).
+        # Pathway split (feedforward vs recurrent AMPA): each side is independently a conductance (toward
+        # E_E) or an additive current (c_E*I).  All combinations share the SAME V_match force anchor
+        # (ampa_drive + gE*(E_E-V_match) == c_E*I_E), so arms differ ONLY in state-dependence off V_match.
+        # Default ff_conductance=rec_conductance=True == the original full_conductance (arm D).
+        ampa_drive = np.zeros(self.NE, dtype=float)
         if full:
             denomE = c.E_E - c.v_match
             I_ffE = np.maximum(I_E[:self.NE] - I_E_rec[:self.NE], 0.0)
             I_recE = np.maximum(I_E_rec[:self.NE], 0.0)
-            gEff = c.c_E * I_ffE / denomE
-            gErec = c.c_E * I_recE / denomE
+            if c.ff_conductance:
+                gEff = c.c_E * I_ffE / denomE
+            else:
+                gEff = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_ffE
+            if c.rec_conductance:
+                gErec = c.c_E * I_recE / denomE
+            else:
+                gErec = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_recE
             gE = gEff + gErec
         else:
             gEff = np.zeros(self.NE, dtype=float)
@@ -277,7 +290,7 @@ class MZSlowVars:
             raise FloatingPointError("non-finite or negative MZ conductance")
 
         if full:
-            drive[:self.NE] = 0.0                             # E cells: all excitation is now conductance
+            drive[:self.NE] = ampa_drive                      # additive AMPA parts (0 when both sides conductance)
             g_rev[:self.NE] = gE * c.E_E + gI * c.e_gaba + gM * c.e_k
         else:
             drive[:self.NE] = I_E[:self.NE]                   # partial: AMPA stays additive (byte-identical)
@@ -376,9 +389,12 @@ class MZSlowVars:
         self.trace_tau_eff_ratio_mean.append(float(self._tau_ratio_mean_last))
         self.trace_tau_eff_ratio_min.append(float(self._tau_ratio_min_last))
         self.trace_conductance_clip_frac.append(float(self._clip_frac_last))
-        if self.cfg.use_x:                                    # FCXR relay diagnostics (only when active)
+        # AMPA ff/rec conductance split is a full_conductance property (independent of the relay), so record
+        # it whenever the membrane is full_conductance -> Stage 0 (use_x=False) can attribute ff vs rec drift.
+        if self.cfg.membrane_mode == "full_conductance":
             self.trace_gEff_mean.append(float(self._gEff_mean_last))
             self.trace_gErec_mean.append(float(self._gErec_mean_last))
+        if self.cfg.use_x:                                    # relay sensor/availability traces (relay only)
             self.trace_y_mean.append(float(self.y.mean()))
             self.trace_y_max.append(float(self.y.max()))
             self.trace_x_relay_mean.append(float(self.x_relay.mean()))

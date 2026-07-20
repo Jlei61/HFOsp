@@ -200,11 +200,12 @@ def _assert_engine_blessed():
 # ----------------------------------------------------------------- cfg + run
 def _fc_cfg(c_E, *, gamma=0.0, global_mode="additive", z=False, tau_z=2500.0,
             use_x=False, tau_x=1000.0, x_min=0.0, y_gate=0.0, K_y=5.0, tau_y=120.0,
-            fail_on_clip=True):
+            fail_on_clip=True, ff_conductance=True, rec_conductance=True):
     """FCXR locked config: full_conductance E_E=58 / V_match=18 / E_I=0 / gaba_gain=1.125 /
     z_scope=local_only / protected additive-global.  M off."""
     return dict(
         membrane_mode="full_conductance", E_E=58.0, c_E=float(c_E), v_match=18.0, e_gaba=0.0, e_k=0.0,
+        ff_conductance=bool(ff_conductance), rec_conductance=bool(rec_conductance),
         use_z=bool(z), use_m=False, use_phi=False, I_th_EI=I_TH_EI, tau_z=float(tau_z),
         gaba_gain=1.125, m_conductance_gain=1.0,
         global_gaba_fraction=float(gamma), global_gaba_mode=str(global_mode), z_scope="local_only",
@@ -212,6 +213,24 @@ def _fc_cfg(c_E, *, gamma=0.0, global_mode="additive", z=False, tau_z=2500.0,
         use_x=bool(use_x), tau_y=float(tau_y), tau_x=float(tau_x), x_min=float(x_min),
         y_gate=float(y_gate), K_y=float(K_y), hill_n=4,
     )
+
+
+def _partial_cfg():
+    """Arm A reference: accepted partial conductance (all AMPA additive, GABA conductance)."""
+    return dict(membrane_mode="conductance", v_match=18.0, e_gaba=0.0, e_k=0.0,
+                use_z=False, use_m=False, use_phi=False, gaba_gain=1.125, m_conductance_gain=1.0,
+                global_gaba_fraction=0.0, global_gaba_mode="additive", z_scope="local_only",
+                max_total_conductance=99.0, fail_on_clip=False)
+
+
+def _pathway_arms(c_E=1.0):
+    """2x2 feedforward/recurrent AMPA conductance attribution (reviewer 2026-07-20). c_E fixed (default 1)."""
+    return [
+        dict(label="A_ff-add_rec-add",  cfg=_partial_cfg()),                                       # accepted reference
+        dict(label="B_ff-cond_rec-add", cfg=_fc_cfg(c_E, ff_conductance=True,  rec_conductance=False, fail_on_clip=False)),
+        dict(label="C_ff-add_rec-cond", cfg=_fc_cfg(c_E, ff_conductance=False, rec_conductance=True,  fail_on_clip=False)),
+        dict(label="D_ff-cond_rec-cond",cfg=_fc_cfg(c_E, ff_conductance=True,  rec_conductance=True,  fail_on_clip=False)),
+    ]
 
 
 def _make_slow(S, cfg):
@@ -279,6 +298,20 @@ def _workpoint_distance(profile, baseline):
     return dict(clauses=clauses, all_bands=bool(all(clauses.values())),
                 event_count_ratio=float(n_ratio), duration_ratio=float(dur_ratio),
                 baseline_distance_score=float(score))
+
+
+def _workpoint_candidates(rows):
+    """A workpoint candidate must PRESERVE the workpoint: settled-numerically-safe AND the event profile
+    inside every reference band (workpoint.all_bands) AND has returning events AND not runaway/unsafe.
+    "has some returning events" is NOT enough -- an over-active cell (event count / duration /
+    participation / peak-rate off) must never be picked. Returns (ranked_candidates, picked_c_E_or_None)."""
+    safe = [r for r in rows if r.get("numerical", {}).get("settled_safe")
+            and r.get("workpoint", {}).get("all_bands")
+            and r.get("event_profile", {}).get("n_returning", 0) > 0
+            and r.get("phenotype") not in ("runaway", "numerically_unsafe")]
+    ranked = sorted(safe, key=lambda r: r["workpoint"]["baseline_distance_score"])
+    pick = ranked[0]["cfg"]["c_E"] if ranked else None
+    return ranked, pick
 
 
 def _small_trace(res, slow, target=4000):
@@ -404,12 +437,7 @@ def _cmd_workpoint(args):
     print(f"[workpoint] {len(tasks)} c_E cells, workers={workers}", flush=True)
     rows = _pool(tasks, workers)
     _resource_log(run_dir, "bracket_done", dict(self_rss_gb=round(_self_rss_gb(), 3)))
-    # a workpoint candidate = settled-numerically-safe AND has returning interictal events
-    safe = [r for r in rows if r.get("numerical", {}).get("settled_safe")
-            and r.get("event_profile", {}).get("n_returning", 0) > 0
-            and r.get("phenotype") not in ("runaway", "numerically_unsafe")]
-    ranked = sorted(safe, key=lambda r: r["workpoint"]["baseline_distance_score"])
-    pick = ranked[0]["cfg"]["c_E"] if ranked else None
+    ranked, pick = _workpoint_candidates(rows)
     summary = dict(
         run_id=run_id, tag="workpoint", stage="0B", seed=args.seed, T=args.T,
         resource_plan=plan, baseline=base_payload,
@@ -433,6 +461,67 @@ def _cmd_workpoint(args):
               f"score={wp.get('baseline_distance_score', float('nan')):.3f} bands={wp.get('all_bands')} "
               f"clip={r.get('numerical', {}).get('max_clip_fraction', 'NA')}", flush=True)
     print(f"[workpoint] verdict={summary['verdict']} picked_c_E={pick}", flush=True)
+    return summary
+
+
+def _cmd_pathway(args):
+    """2x2 feedforward/recurrent AMPA conductance attribution at fixed c_E: which pathway causes the
+    workpoint drift? Arms A(add/add ref) B(ff-cond) C(rec-cond) D(cond/cond=NO-GO), seed1, Z/M/X/global off."""
+    run_id = _run_id("pathway")
+    run_dir = os.path.join(OUT_ROOT, "runs", run_id)
+    os.makedirs(os.path.join(run_dir, "per_cell"), exist_ok=True)
+    plan = _plan_workers(args.T, args.workers)
+    _resource_log(run_dir, "pathway_start", plan)
+    print(f"[pathway] build L=20 seed={args.seed}; c_E={args.c_E}; {plan}", flush=True)
+    S = PP.build_substrate(args.seed)
+    baseline, event_bar, base_payload = _baseline(S, args.T)
+    _write_json(os.path.join(run_dir, "baseline_current.json"), base_payload)
+    _resource_log(run_dir, "baseline_done", dict(n_base_events=baseline.n_events))
+    if baseline.n_events < 5:
+        raise SystemExit(f"baseline anchor fail: {baseline.n_events} events")
+    _CTX.update(S=S, T=float(args.T), baseline=baseline, event_bar=event_bar, run_dir=run_dir)
+    tasks = _pathway_arms(args.c_E)
+    workers = max(1, plan["workers"])
+    print(f"[pathway] {len(tasks)} arms, workers={workers}", flush=True)
+    rows = _pool(tasks, workers)
+    _resource_log(run_dir, "arms_done", dict(self_rss_gb=round(_self_rss_gb(), 3)))
+    by = {r["label"]: r for r in rows}
+    def _preserves(lab):
+        r = by.get(lab, {})
+        return bool(r.get("numerical", {}).get("settled_safe") and r.get("workpoint", {}).get("all_bands"))
+    A, B, C, D = (_preserves(l) for l in ("A_ff-add_rec-add", "B_ff-cond_rec-add",
+                                          "C_ff-add_rec-cond", "D_ff-cond_rec-cond"))
+    if A and C and not B:
+        attribution = "feedforward_conductance_is_the_cause (rec-only preserves, ff-only breaks)"
+    elif A and B and not C:
+        attribution = "recurrent_conductance_is_the_cause (ff-only preserves, rec-only breaks)"
+    elif A and not B and not C:
+        attribution = "both_pathways_individually_break_workpoint (interaction not required)"
+    elif A and B and C:
+        attribution = "neither_pathway_alone_breaks_it (drift needs the ff+rec interaction)"
+    elif not A:
+        attribution = "reference_arm_A_did_not_preserve_workpoint (setup problem — investigate)"
+    else:
+        attribution = "mixed / inconclusive — see per-arm table"
+    summary = dict(run_id=run_id, tag="pathway", seed=args.seed, T=args.T, c_E=args.c_E,
+                   resource_plan=plan, baseline=base_payload, reference_workpoint=base_payload.get("baseline"),
+                   arms=[dict(label=r["label"], phenotype=r.get("phenotype"),
+                              n_returning=r.get("event_profile", {}).get("n_returning"),
+                              participation_median=r.get("event_profile", {}).get("participation_median"),
+                              peak_rate_median_hz=r.get("event_profile", {}).get("peak_rate_median_hz"),
+                              settled_safe=r.get("numerical", {}).get("settled_safe"),
+                              settled_max_clip_fraction=r.get("numerical", {}).get("settled_max_clip_fraction"),
+                              all_bands=r.get("workpoint", {}).get("all_bands"),
+                              preserves_workpoint=_preserves(r["label"])) for r in rows],
+                   preserves=dict(A=A, B=B, C=C, D=D), attribution=attribution, provenance=_provenance())
+    _write_json(os.path.join(run_dir, "summary.json"), summary)
+    _write_json(os.path.join(OUT_ROOT, "latest_pathway.json"), dict(run_id=run_id, path=run_dir))
+    for r in rows:
+        wp = r.get("workpoint", {}); ep = r.get("event_profile", {})
+        print(f"  {r['label']}: pheno={r.get('phenotype')} n_ret={ep.get('n_returning')} "
+              f"part={ep.get('participation_median')} settled_safe={r.get('numerical',{}).get('settled_safe')} "
+              f"all_bands={wp.get('all_bands')} preserves={_preserves(r['label'])}", flush=True)
+    print(f"[pathway] attribution: {attribution}", flush=True)
     return summary
 
 
@@ -463,6 +552,13 @@ def main(argv=None):
     w.add_argument("--c-E", dest="c_E", default="0.85,1.0,1.15")
     w.add_argument("--workers", type=int, default=2)
 
+    pw = sub.add_parser("pathway")
+    pw.add_argument("--confirm-run", action="store_true")
+    pw.add_argument("--seed", type=int, default=1)
+    pw.add_argument("--T", type=float, default=8000.0)
+    pw.add_argument("--c-E", dest="c_E", type=float, default=1.0)
+    pw.add_argument("--workers", type=int, default=2)
+
     args = ap.parse_args(argv)
     if not getattr(args, "confirm_run", False):
         raise SystemExit("REFUSING: simulations require --confirm-run")
@@ -472,6 +568,8 @@ def main(argv=None):
             _cmd_smoke(args)
         elif args.cmd == "workpoint":
             _cmd_workpoint(args)
+        elif args.cmd == "pathway":
+            _cmd_pathway(args)
 
 
 if __name__ == "__main__":

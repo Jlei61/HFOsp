@@ -132,6 +132,42 @@ def test_full_conductance_e_cells_have_no_additive_drive():
     np.testing.assert_allclose(gE, mz.cfg.c_E * I_E[:mz.NE] / (mz.cfg.E_E - mz.cfg.v_match), atol=1e-11)
 
 
+@pytest.mark.parametrize("ff_cond,rec_cond", [(True, True), (True, False), (False, True), (False, False)])
+def test_pathway_arms_share_v_match_force_anchor(ff_cond, rec_cond):
+    """All ff/rec conductance-vs-additive arms force-match to the SAME thing at V_match
+    (ampa_drive + gE*(E_E-V_match) == c_E*I_E); they differ only OFF V_match."""
+    mz = _mk_fc(use_z=True, use_m=False, c_E=1.15, gaba_gain=1.125, global_gaba_fraction=0.0,
+                z_scope="local_only", ff_conductance=ff_cond, rec_conductance=rec_cond)
+    mz.z[:mz.NE] = np.array([0.25, 0.5, 0.75, 1.0])
+    I_E = np.array([25.0, 24.0, 23.0, 22.0, 7.0, 8.0])
+    I_E_rec = np.array([10.0, 8.0, 6.0, 4.0, 3.0, 3.0])
+    I_I = np.array([8.0, 7.0, 6.0, 5.0, 2.0, 3.0])
+    drive, g_rel, g_rev = mz.membrane_terms(I_E, I_I, labels=None, I_E_rec=I_E_rec)
+    v = mz.cfg.v_match
+    new_rhs = drive[:mz.NE] + g_rev[:mz.NE] - (1.0 + g_rel[:mz.NE]) * v
+    expected = mz.cfg.c_E * I_E[:mz.NE] - mz.cfg.gaba_gain * (mz.z[:mz.NE] * I_I[:mz.NE]) - v
+    np.testing.assert_allclose(new_rhs, expected, atol=1e-11)
+
+
+def test_arm_D_default_is_all_conductance_no_additive_drive():
+    mz = _mk_fc(use_z=False)                                   # default ff=rec=True (arm D)
+    I_E = np.array([12.0, 12.0, 12.0, 12.0, 4.0, 4.0]); I_E_rec = np.array([5.0, 4.0, 3.0, 2.0, 1.0, 1.0])
+    drive, _, _ = mz.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_E_rec)
+    assert np.all(drive[:mz.NE] == 0.0)                        # arm D: all AMPA is conductance
+
+
+def test_arm_B_and_C_route_additive_to_drive():
+    """Arm B (ff cond / rec additive) -> drive == c_E*I_rec; arm C (ff additive / rec cond) -> drive == c_E*I_ff."""
+    I_E = np.array([12.0, 12.0, 12.0, 12.0, 4.0, 4.0]); I_E_rec = np.array([5.0, 4.0, 3.0, 2.0, 1.0, 1.0])
+    I_ff = I_E[:4] - I_E_rec[:4]
+    b = _mk_fc(use_z=False, c_E=1.15, ff_conductance=True, rec_conductance=False)
+    db, _, _ = b.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_E_rec)
+    np.testing.assert_allclose(db[:4], 1.15 * I_E_rec[:4], atol=1e-11)
+    c = _mk_fc(use_z=False, c_E=1.15, ff_conductance=False, rec_conductance=True)
+    dc, _, _ = c.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_E_rec)
+    np.testing.assert_allclose(dc[:4], 1.15 * I_ff, atol=1e-11)
+
+
 def test_full_conductance_requires_and_gates_I_E_rec():
     mz = _mk_fc(use_z=False)
     with pytest.raises(ValueError, match="requires the recurrent AMPA"):
