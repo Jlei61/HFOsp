@@ -190,6 +190,24 @@ def test_full_conductance_split_recurrent_only_reflects_I_E_rec():
     assert abs(mz._gEff_mean_last - float(np.mean((I_E[:4] - I_E_rec[:4])) / denom)) < 1e-11
 
 
+def test_clip_identity_observer_is_pure_side_effect():
+    """FCXR-RC1: record_clip_identity records WHICH cells clip without changing membrane_terms output."""
+    def mk(rec):
+        return _mk_fc(use_z=False, c_E=10.0, max_total_conductance=9.0, fail_on_clip=False,
+                      record_clip_identity=rec)
+    I_E = np.array([100.0, 5.0, 5.0, 5.0, 4.0, 4.0])
+    I_E_rec = np.array([100.0, 0.0, 0.0, 0.0, 1.0, 1.0])            # E cell 0 has huge recurrent -> clips
+    off = mk(False); on = mk(True)
+    do = off.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_E_rec)
+    dn = on.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_E_rec)
+    for a, b in zip(do, dn):
+        np.testing.assert_array_equal(a, b)                        # identical output -> pure side-effect
+    assert not hasattr(off, "clip_count")                         # off-by-default: no allocation
+    assert on.clip_count[0] == 1 and int(on.clip_count[1:].sum()) == 0   # only cell 0 clipped
+    assert on.max_raw_gErec[0] > 9.0                              # recorded the raw pre-clip recurrent conductance
+    assert on.first_clip_step[0] == 0 and on.last_clip_step[0] == 0
+
+
 def test_full_conductance_cap_and_fail_on_clip():
     mz = _mk_fc(use_z=False, c_E=10.0, max_total_conductance=9.0, fail_on_clip=True)
     with pytest.raises(FloatingPointError, match="exceeded cap"):

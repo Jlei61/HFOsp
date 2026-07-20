@@ -78,6 +78,7 @@ class MZSlowVarsConfig:
     fail_on_clip: bool = False      # scientific runner sets True; clipping then fails the cell immediately
     record_calib: bool = False     # slow-off OBSERVER: also bin I_I[E]/I_E[E] each step (pure side-effect)
     calib_hist_edges: "np.ndarray | None" = None
+    record_clip_identity: bool = False  # FCXR-RC1 clip audit: per-cell clip_count + max raw gErec/total (pure side-effect)
 
 
 class MZSlowVars:
@@ -149,6 +150,14 @@ class MZSlowVars:
         self.trace_x_relay_mean = []; self.trace_x_relay_min = []
         # calibration observer (slow-off only): per-step histograms of E-cell I_I / I_E
         self.calib_hist_I_EI = []; self.calib_hist_I_EE = []
+        # FCXR-RC1 clip-identity observer (pure side-effect; only allocated when record_clip_identity).
+        # Answers "WHICH E cells hit the conductance cap, how often, how hard" -> is the clip a localized mode?
+        if self.cfg.record_clip_identity:
+            self.clip_count = np.zeros(self.NE, dtype=np.int64)   # # steps this cell's total conductance > cap
+            self.max_raw_gErec = np.zeros(self.NE, dtype=float)   # peak pre-clip recurrent AMPA conductance
+            self.max_raw_total = np.zeros(self.NE, dtype=float)   # peak pre-clip total conductance
+            self.first_clip_step = np.full(self.NE, -1, dtype=np.int64)
+            self.last_clip_step = np.full(self.NE, -1, dtype=np.int64)
 
     # ------------------------------------------------------------------ hooks
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
@@ -274,6 +283,15 @@ class MZSlowVars:
 
         total = gE + gI + gM                      # partial: gE==0 -> total==gI+gM (byte-identical)
         clip = total > c.max_total_conductance
+        if c.record_clip_identity:                # pure read of RAW (pre-scale) gErec/total + clip mask
+            self.max_raw_gErec = np.maximum(self.max_raw_gErec, gErec)
+            self.max_raw_total = np.maximum(self.max_raw_total, total)
+            if np.any(clip):
+                self.clip_count[clip] += 1
+                t = int(self._step_i)
+                new = clip & (self.first_clip_step < 0)
+                self.first_clip_step[new] = t
+                self.last_clip_step[clip] = t
         if np.any(clip):
             if c.fail_on_clip:
                 raise FloatingPointError(

@@ -120,20 +120,24 @@ seed3 workpoint（c_E=0.85,1.0；reference current-model slow-off n_returning=22
 | C rec-cond | 只 recurrent | 30 | 4.35 | **0.48%** | ✗ | **✓** | clips |
 | D cond/cond | 两路（=NO-GO） | 58 | 7.47 | 0.93% | ✗ | ✗ | both |
 
-**判读（干净的因果拆分，且是可加的——D ≈ B 的过活跃 + C 的 clip，不需要交互项）：**
+**判读（因果分工，但"可加"只对事件画像成立、对 clip 不成立——审阅 2026-07-20 修正）：**
 
-- **A 复现 accepted workpoint**（23 事件、bands、safe）——验证 2×2 setup 可信。
+- **A 复现 accepted workpoint**（23 事件、bands、safe，score 0.27）——验证 2×2 setup 可信。
 - **feedforward 电导 → 过活跃**（arm B：52 事件 2.3×、off-band，但 clip=0/数值安全）。事件数暴涨来自外源电导——正是
   状态依赖 1.45×-at-rest 效应：外源在静息附近推得更狠 → 更多点火。
-- **recurrent 电导 → clip，但事件画像基本保住**（arm C：**bands=True**、30 事件/participation 4.35% 都近参照，但 0.48%
-  cell 触顶 → settled_safe=False）。clip 来自 recurrent 电导 `g_E_rec = c_E·I_E_rec/40` 随本地 recurrent 驱动**无界增长**
-  ——事件峰值时少数 cell 的 recurrent 电导过冲 cap（driving force 饱和的是"劲"，电导本身不饱和）。
+- **recurrent 电导 → clip，事件画像近参照**（arm C：**bands=True**、30 事件/participation 4.35%，但 0.48% cell 触顶 →
+  settled_safe=False）。clip 来自 `g_E_rec = c_E·I_E_rec/40` 随本地 recurrent 驱动无界增长。
+- **可加性只在事件画像层成立，clip 层有明显活动依赖交互**：`Δ_int = D−B−C+A`，事件数 Δ_int=−1（近似可加），但
+  **clip Δ_int = +0.447 个百分点**（D=0.928% ≈ 2×C=0.481%）。即 feedforward 自己不 clip，但它把活动抬高后**显著放大**
+  了 recurrent 过冲。准确表述：**工作点画像近似可加的通路分工，但高电导尾部是活动依赖交互，不是简单叠加。**
 
-**对审阅推荐（arm C = 只 recurrent 电导）的判决：部分验证。** arm C **保住了间期 workpoint 的事件画像**（bands=True），
-证明"外源保持 additive"这一方向是对的（外源电导才是压垮 baseline 兴奋性的那半）；但它暴露一个**新的、和原 NO-GO
-不同的障碍**——recurrent 电导过冲 clip（0.48%，比 D 的 0.93% 小）。按 §6 step 3，arm C **未完整通过**（数值不安全），
-故**不自动跑 seed3**；但它是目前最接近的一档（画像已保住，只差 clip）。剩余问题从"静息↔过热"变成了"recurrent 电导
-本地过冲"——更局部、更可能可治（例如给 recurrent 电导本身一个饱和上界，或核查这 0.48% 是否可容忍），由用户拍板。
+**对审阅推荐（arm C = 只 recurrent 电导）的判决：方向对，但 arm C 只是"边界候选"，不是"只差一个可忽略 clip 的工作点"。**
+arm C 保住四维 bands（方向验证："外源保持 additive"是对的），但它**不在工作点中心**：baseline-distance score **1.04**（arm A
+只 0.27）、population mean rate **7.81Hz**（arm A 5.01，高 56%）、事件数 30 卡在 1.5× 上限。且 **0.48% clip 很可能是主 recurrent
+空间模态在少数高增益节点的局部失稳**（7/4000 帧、~154 cell、gErec 群体均值 P95 仅 2.51 vs cap 99 = 重尾，不是全网逼近 99），
+不是全局数值瑕疵。**硬 clip 本身又可能人为制造我们正想找的"有限高支"**（不可微 fast negative feedback）——所以 §4 原来的
+"容忍 clip"/"带 clip 进 Stage 1" 两个选项**撤回**。下一步见 §6 FCXR-RC1：先做 mode-resolved clip audit + dt 收敛，再决定
+recurrent-only smooth saturation。
 
 ## 3. 分层判决（更新）
 
@@ -156,28 +160,41 @@ c_E=1.15 约 23%——过热但**不是全片同步**）且触 conductance cap�
 
 **禁止写成**：已得到发作态 / 极限环 / Hopf / 双稳态 / 有限高支 / 完整 seizure lifecycle（Stage 1 未执行）。
 
-**2×2 通路归因已跑完（§2.4），答案是分工而非单一主因**：**feedforward 电导 → 过活跃（事件数暴涨）**、**recurrent
-电导 → 本地过冲 clip（但事件画像保住）**，两者可加地凑成 arm D 的 NO-GO。所以"feedforward 是唯一主因"不成立；准确说是
-**外源电导负责过活跃、recurrent 电导负责 clip**。
+**2×2 通路归因已跑完（§2.4）：分工，事件画像近似可加、但高电导尾部有活动依赖交互**：**feedforward 电导 → 过活跃**、
+**recurrent 电导 → 本地过冲 clip（事件画像保住）**；事件数 `Δ_int=−1`（近可加），但 **clip `Δ_int=+0.447pp`（D≈2×C）**——
+外源自己不 clip，却把活动抬高后放大了 recurrent 过冲。所以"feedforward 是唯一主因"和"两路完全可加"都不成立。
 
-**下一步（由用户拍板，一次只放开一个轴、重新预注册）：** 审阅推荐的 arm C（只 recurrent 电导、外源保持 additive）
-**部分验证成功**——它保住了间期 workpoint 的事件画像（bands=True），证明"外源保持 additive"方向正确；剩下唯一障碍是
-recurrent 电导过冲的 0.48% clip（比 D 的 0.93% 小、且更局部）。按 §6 step 3 arm C 未完整过（数值不安全），故未自动跑
-seed3。建议用户从以下里选一（只选一个）：**(a)** 给 recurrent 电导本身一个饱和/软上界（治 clip，最贴合"要有限高支"的
-初衷）；或 **(b)** 核查这 0.48% clip 是否可容忍（若只是峰值瞬时少数 cell，放宽 numerical gate 后 arm C 可能直接过）；
-或 **(c)** 先不动 clip、用 arm C 进 Stage 1 看有没有有限高支（clip 只在事件峰值、可能不影响 topology 判读）。**不建议**
-去调 drive 或扩 c_E——2×2 已把问题从"静息↔过热"收窄到"recurrent 电导本地过冲"这一个更小的点。
+**下一步（审阅 2026-07-20 修正，不是"三选一"）：** 主线方向确定为 **external additive + recurrent E→E conductance**（arm C
+方程）。但 arm C 只是**边界候选**（score 1.04 vs A 0.27、mean rate 高 56%），不能直接进 Stage 1——0.48% clip 很可能是主
+recurrent 空间模态在少数高增益节点的局部失稳，且硬 clip 本身会人为制造"看似有界"的高态（不可微 fast negative feedback）。
+**原来的 (b) 容忍 clip、(c) 带 clip 进 Stage 1 两个选项撤回。** 关键科学问题变成：**这 0.48% 是不是控制整个空间动力学的
+dominant localized mode？** 执行序列见 §6（FCXR-RC1）：**mode-resolved clip audit + dt 收敛 → 确认稳定局部模态后做
+recurrent-only smooth saturation → 重过 seed1/3 workpoint → 带 eigenvalue/eigenvector readout 进 Stage 1 → 有限高支成立前不加 X。**
+**不调 drive、不扩 c_E**（2×2 已否掉那条路）。
 
-## 5. 最小执行路线（审阅 §6）
+## 5. FCXR-RC1 执行线（审阅 2026-07-20 §6/§7）
 
-1. **（已做）** 修 workpoint 候选 gate 漏 `all_bands`（+回归测试 `tests/test_fcxr_workpoint_gate.py`），并让
-   full_conductance 在 X 关闭时也记录 `gEff/gErec`（Stage 0 才能归因 ff vs rec）。commit `2a97311`。
-2. **（已做）** `seed1, L=20, T=8s, c_E=1` 跑 A/B/C/D 四臂（runner `pathway`）——见 §2.4：ff→过活跃、rec→clip、可加。
-3. **（不触发）** arm C bands=True 但 settled_safe=False（0.48% clip），未同时满足两条 → **不跑 seed3**。
-4. **（待用户）** arm C 若把 clip 治掉再过 workpoint，方程锁为 `tau_m V̇ = −V + I_E^{ff} + g_E^{rec}(E_E−V) + g_I(E_I−V)`，
-   再重进 Stage 1 查有限高支；高支存在后才做 `y/x`。
-5. **（待用户）** 现在的岔口不是"调 drive/扩 c_E"（2×2 已否掉那个方向），而是"怎么治 recurrent 电导过冲"——见 §4 的
-   (a)/(b)/(c) 三选一，一次只开放一个轴、重新预注册。
+已做：workpoint all_bands gate 修复（`2a97311`）、gEff/gErec always-on trace（`2a97311`）、2×2 通路归因（§2.4）。
+下面是审阅指定的、进 Stage 1 之前必须先做的 clip 身份+收敛审计（本报告 §6 记录 Stage A/B 结果，代码在 `run_topic4_mz_fcxr.py`
+的 `clip-audit` 命令 + `src/topic4_mz_fcxr_modes.py`）。
 
-这个 2×2 比"直接相信 feedforward 是主因"多跑了 3 个 arm，但把 NO-GO 从"full-conductance 不行"精确拆成"外源电导过活跃 +
-recurrent 电导 clip"，并把审阅推荐的 recurrent-only 方向从"合理假设"变成"画像已验证、只差 clip"。
+- **Stage A（mode-resolved clip audit，不改方程）**：只重跑 arm C，加 O(N) observer（per-cell `clip_count`、`max_raw_gErec`、
+  首末 clip 时刻），不存新的 T×N 矩阵；post-hoc 算 `W_EE`（E→E 块）主 left/right 特征向量 + leading singular vectors + IPR，
+  以及 recurrent in/out-strength、core/source/sink/axis 标签；核 clip cell 与各模态热点/高中心度/低 V_th core 的 overlap，
+  以及 clip 属于哪个 returning event。硬判读：同一批 core/高中心度反复 clip + 高 mode overlap = 真实局部 recurrent 模态；
+  clip 身份跨事件随机 + 低 overlap = 随机尾/离散化；沿轴传播 = 可能是要找的空间主模态但增益过强；近全局均匀 = arm C 不适合空间机制。
+- **Stage B（数值收敛，不许"直接容忍"）**：arm C 做 dt/cap 诊断——现 `dt=0.1/cap=99`、无缩放高 cap/无限 cap、以及 `dt=0.05`，
+  比工作点四维 / clip-raw-g 尾 / leading-mode 位置+IPR / event rate+duration 的 dt 漂移。若减小 dt 不收敛，0.48% 不能算可容忍。
+- **Stage C（只有 A 确认稳定局部模态才做）**：recurrent-only smooth saturation `g_rec_eff = g_sat·tanh(g_rec_raw/g_sat)`
+  （小输入斜率 1 保工作点、高输入平滑饱和、`S'` 随活动下降真正压高态 recurrent eigenvalue、只作用 recurrent E→E、保空间异质）。
+  `g_sat` 只由 arm C slow-off 原始 `gErec` 分布锁（主值 + ±20% sens，不做参数海）。重过：seed1/3 workpoint、零 hard-clip、
+  主模态 IPR/位置没被抹成全局均匀、arm A/off parity。
+- **Stage D（Stage C 过后才进原 Stage 1）**：冻结 Z/X 沿 D 查 low branch / finite high branch / leading eigenvalue 实部 /
+  complex pair / eigenvector-IPR-vs-D / low-high hysteresis。理想：low 态主模态稳定但可激 → Z 耗竭把主模态推近 0/降低有限幅
+  ignition 阈 → 高态 smooth saturation 使 `S'` 降、主模态重新有界 → X 用 `W·diag(x)` 进一步降传播模态并促退出。**有限高支成立前不加 X。**
+
+**科学问题（审阅 §7）**：不是"0.48% 能否容忍"，而是"这 0.48% 是不是控制整个空间动力学的 dominant localized mode"。
+
+## 6. FCXR-RC1 Stage A/B 结果
+
+（clip audit + dt 收敛结果填充中——见 `run_topic4_mz_fcxr.py clip-audit`、`results/.../clip_audit_*` 与 `figures/clip_audit.png`。）

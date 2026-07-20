@@ -525,6 +525,79 @@ def _cmd_pathway(args):
     return summary
 
 
+def _cmd_clip_audit(args):
+    """FCXR-RC1 Stage A/B: rerun arm C (rec-cond) with per-cell clip observer at a given dt/cap; identify
+    WHICH cells clip and whether they are a localized recurrent mode (--modes computes W_EE eigenmodes)."""
+    import src.topic4_mz_fcxr_modes as MODES
+    dt = float(args.dt); cap = float(args.cap)
+    run_id = _run_id(f"clip_audit_dt{dt:g}_cap{cap:g}")
+    run_dir = os.path.join(OUT_ROOT, "runs", run_id)
+    os.makedirs(run_dir, exist_ok=True)
+    plan = _plan_workers(args.T, 1)
+    _resource_log(run_dir, "clip_audit_start", dict(plan, dt=dt, cap=cap))
+    print(f"[clip-audit] build L=20 seed={args.seed}; arm C dt={dt} cap={cap}; {plan}", flush=True)
+    S = PP.build_substrate(args.seed)
+    # reference bands from the current-model slow-off at the SAME dt (extract_run_metrics uses dt)
+    p0 = dataclasses.replace(S["p"], T=float(args.T), dt=dt)
+    S["net"]["rng"] = np.random.default_rng(S["seed"])
+    res0 = simulate_kick(p0, S["net"], 0.0, slow=_make_slow(S, dict(use_z=False, use_m=False, membrane_mode="current")),
+                         kick_center=list(S["src_xy"]), r_kick=PP.R_KICK, t_kick=1e9, V_th_per_neuron=S["vth"],
+                         early_stop_runaway=False)
+    baseline = OLD.compute_baseline_ref(res0, dt); event_bar = OLD.slowoff_event_bar(res0, dt)
+    del res0
+    # arm C with clip observer
+    cfg = _fc_cfg(1.0, ff_conductance=False, rec_conductance=True, fail_on_clip=False)
+    cfg["max_total_conductance"] = cap; cfg["record_clip_identity"] = True
+    slow = _make_slow(S, cfg)
+    p = dataclasses.replace(S["p"], T=float(args.T), dt=dt)
+    S["net"]["rng"] = np.random.default_rng(S["seed"])
+    t0 = time.time()
+    res = simulate_kick(p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]), r_kick=PP.R_KICK,
+                        t_kick=1e9, V_th_per_neuron=S["vth"], early_stop_runaway=True)
+    rm, events, af, bin_w, runaway = OLD.extract_run_metrics(res, dt, baseline, event_bar=event_bar)
+    profile = _event_profile(events, res["rate_E"], dt)
+    taur = np.asarray(slow.trace_tau_eff_ratio_min, float); clipf = np.asarray(slow.trace_conductance_clip_frac, float)
+    i0 = int(round(1000.0 / dt))
+    tau_eff_min = float(S["p"].tau_m_E * (taur[i0:].min() if taur.size > i0 else taur.min()))
+    settled_clip = float(clipf[i0:].max() if clipf.size > i0 else clipf.max())
+    clip_frames = np.where(clipf > 0)[0]
+    row = dict(dt=dt, cap=cap, event_profile=profile, tau_eff_min_ms=tau_eff_min, settled_max_clip=settled_clip,
+               n_clip_cells=int((slow.clip_count > 0).sum()), clip_count_total=int(slow.clip_count.sum()),
+               n_clip_frames=int(clip_frames.size), max_raw_gErec=float(slow.max_raw_gErec.max()),
+               max_raw_total=float(slow.max_raw_total.max()), runaway_ms=runaway, wall_s=round(time.time() - t0, 1))
+    _write_npz(os.path.join(run_dir, "clip_identity.npz"),
+               clip_count=slow.clip_count, max_raw_gErec=slow.max_raw_gErec, max_raw_total=slow.max_raw_total,
+               first_clip_step=slow.first_clip_step, last_clip_step=slow.last_clip_step,
+               posE=np.asarray(S["posE"], np.float32), vth_E=np.asarray(S["vth"][:S["NE"]], np.float32))
+    audit = None
+    if args.modes:
+        print("[clip-audit] building W_EE + leading modes ...", flush=True)
+        W = MODES.build_W_EE(S["net"], S["NE"]); in_s, out_s = MODES.strengths(W)
+        md = MODES.leading_modes(W, k=6)
+        core = OLD.build_core_masks(S)
+        audit = MODES.clip_mode_audit(clip_count=slow.clip_count, max_raw_gErec=slow.max_raw_gErec,
+                                      in_strength=in_s, out_strength=out_s, vth_E=S["vth"][:S["NE"]],
+                                      core_mask_E=core, posE=S["posE"], modes=md, dt_ms=dt, clip_frames=clip_frames)
+        _write_npz(os.path.join(run_dir, "modes.npz"), in_strength=in_s, out_strength=out_s,
+                   eig_vals_abs=np.abs(md.get("eig_vals", np.array([]))),
+                   right_ipr=np.asarray(md.get("right_ipr", []), float),
+                   sing_vals=np.asarray(md.get("sing_vals", []), float))
+    summary = dict(run_id=run_id, tag="clip_audit", stage="A/B", seed=args.seed, T=args.T, dt=dt, cap=cap,
+                   row=row, audit=audit, resource_plan=plan, provenance=_provenance())
+    _write_json(os.path.join(run_dir, "summary.json"), summary)
+    _write_json(os.path.join(OUT_ROOT, f"latest_clip_audit_dt{dt:g}_cap{cap:g}.json"), dict(run_id=run_id, path=run_dir))
+    _resource_log(run_dir, "clip_audit_done", dict(self_rss_gb=round(_self_rss_gb(), 3)))
+    print(f"[clip-audit] dt={dt} cap={cap}: n_clip_cells={row['n_clip_cells']} frames={row['n_clip_frames']} "
+          f"tau_eff_min={tau_eff_min:.3f}ms settled_clip={settled_clip:.5f} max_raw_total={row['max_raw_total']:.1f} "
+          f"n_ret={profile['n_returning']}", flush=True)
+    if audit:
+        print(f"[clip-audit] verdict: {audit['verdict']}", flush=True)
+        print(f"   corr(clip,in_strength)={audit['corr_clipcount_in_strength']:.3f} "
+              f"corr(clip,-vth)={audit['corr_clipcount_neg_vth']:.3f} core_frac={audit['clip_in_low_vth_core_frac']} "
+              f"lead_right_ipr={audit['leading_right_ipr']} spatial={audit['spatial']}", flush=True)
+    return summary
+
+
 def _provenance():
     return dict(git_sha=_git_sha(), argv=sys.argv,
                 git_status=subprocess.run(["git", "-C", ROOT, "status", "--short"],
@@ -559,6 +632,14 @@ def main(argv=None):
     pw.add_argument("--c-E", dest="c_E", type=float, default=1.0)
     pw.add_argument("--workers", type=int, default=2)
 
+    ca = sub.add_parser("clip-audit")
+    ca.add_argument("--confirm-run", action="store_true")
+    ca.add_argument("--seed", type=int, default=1)
+    ca.add_argument("--T", type=float, default=8000.0)
+    ca.add_argument("--dt", type=float, default=0.1)
+    ca.add_argument("--cap", type=float, default=99.0)
+    ca.add_argument("--modes", action="store_true", help="compute W_EE leading modes + overlap (Stage A)")
+
     args = ap.parse_args(argv)
     if not getattr(args, "confirm_run", False):
         raise SystemExit("REFUSING: simulations require --confirm-run")
@@ -570,6 +651,8 @@ def main(argv=None):
             _cmd_workpoint(args)
         elif args.cmd == "pathway":
             _cmd_pathway(args)
+        elif args.cmd == "clip-audit":
+            _cmd_clip_audit(args)
 
 
 if __name__ == "__main__":
