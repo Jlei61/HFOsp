@@ -221,8 +221,13 @@ event、无 runaway、max_raw_total 仍 102.5、tau_eff_min 0.193ms**——动�
 tau_eff 掉到 0.193ms 的**轻微分辨率下沉**；dt=0.1 的 2·dt=0.2 判据把它标成"没分辨开"，但 0.193 > 2·0.05=0.1，**在 dt=0.05 下
 应当数值干净**（dt=0.05 收敛跑确认，见下）。
 
-**dt=0.05 收敛（运行中）**：比事件画像四维 + gErec 尾 + tau_eff 是否 dt-收敛。预期：动力学收敛（event≈30、gErec 尾同形），
-tau_eff_min 仍 ~0.193（物理量、dt-无关）→ 在 dt=0.05 下 tau_eff 0.193 > 2dt=0.1，clip 是 dt=0.1 分辨率技术性问题而非真失稳。
+**dt=0.05 收敛——clip 消失，但动力学未完全 dt-收敛。** arm C @ dt=0.05, cap=99：**0 clip、settled_safe=True、tau_eff_min
+0.210ms（> 2dt=0.1）、max_raw_total 94.1（< cap 99）、n_ret 22**。对比 dt=0.1（max_total 102.5、n_ret 30、clip）：
+**峰值总电导 102.5→94.1、事件数 30→22 都在漂**——即 dt=0.1 的 arm C **没有 dt-收敛**，那 0.48% clip 里含明显的**离散化过冲**
+成分（按审阅 §6 判据"减小 dt 不收敛→0.48% 不能算可容忍"，成立）。在 dt=0.05 下 clip 消失（数值干净），但事件画像相对
+dt=0.05 自己的参照 all_bands=False（participation/peak 在带内、event_count/duration 偏高；跨 dt 比较被 dt-依赖的事件检测器
+混淆，不能直接说"dt=0.05 保住 workpoint"）。**净结论：clip = 单核局部 shunting 模态（Stage A）+ dt=0.1 离散化过冲（Stage B）
+的叠加；正确的下一步是在 dt=0.05（分辨率足够）上重新确立 recurrent-only workpoint，而不是在欠分辨的 dt=0.1 上硬 clip。**
 
 ### Stage C — recurrent-only smooth saturation（Stage B 后跑）
 
