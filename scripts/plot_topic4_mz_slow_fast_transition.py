@@ -15,9 +15,13 @@ import json
 import os
 import sys
 
+import warnings
+
 import numpy as np
 import matplotlib
 matplotlib.use("Agg")
+warnings.filterwarnings("ignore", message="Mean of empty slice")
+warnings.filterwarnings("ignore", message="All-NaN slice encountered")
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from matplotlib.lines import Line2D
@@ -205,6 +209,12 @@ def panel_D(ax):
     ax.set_ylim(0, 1.04)
     ax.set_title("D · state-matched M/Z counterfactuals", fontsize=9.5, loc="left", weight="bold")
     ax.tick_params(labelsize=7.5)
+    ax.text(0.5, 0.62, "branch = pre-onset 100 ms — below the boundary for every condition:\n"
+                       "no z/m swap tips the frozen fast system (P≈0).\n"
+                       "resetting m (m→0) or swapping early/late m leaves it unchanged\n"
+                       "→ m does not set proximity to the edge (only z / D does).",
+            transform=ax.transAxes, ha="center", va="center", fontsize=7.6, color="#555",
+            bbox=dict(boxstyle="round,pad=0.5", fc="#f7f7f7", ec="#d8d8d8", lw=0.8))
     ax.legend(handles=[Line2D([0], [0], marker="s", color="w", markerfacecolor="#bbb", markeredgecolor="#333",
                               markersize=9, label=CF_LABEL[br]) for br in CF_ORDER],
               fontsize=6.6, loc="upper right", frameon=True, framealpha=0.9, edgecolor="#ccc", ncol=1)
@@ -220,11 +230,15 @@ def main():
     panel_B(plt.subplot(gs[0, 1]))
     panel_C(plt.subplot(gs[1, 0]))
     panel_D(plt.subplot(gs[1, 1]))
-    verdict = "  ·  ".join(f"{c}: {labels.get(c, '—')}" for c in COND_ORDER) if labels else "run aggregate for labels"
-    fig.suptitle("MZ slow–fast dynamical transition  —  frozen fast system across the natural slow-state drift "
-                 "(E1146, operational runaway 120 Hz/100 ms; model-side mechanism, NOT seizure)\n"
-                 f"result-neutral class:  {verdict}",
-                 fontsize=10.5, weight="bold", x=0.06, ha="left")
+    _sc = {"z_only": "z-only", "mz_runaway": "runaway", "mz_edge": "edge", "mz_plateau": "plateau"}
+    _sl = {"dynamical_tipping": "tipping", "finite_amplitude_escape": "finite-amp",
+           "noise_driven_escape": "noise", "smooth_crossover": "smooth", "seed-inconsistent": "seed-incons"}
+    verdict = " · ".join(f"{_sc[c]}:{_sl.get(labels.get(c, ''), labels.get(c, '—'))}" for c in COND_ORDER) \
+        if labels else "run aggregate for labels"
+    fig.suptitle("MZ slow–fast dynamical transition — frozen fast system across the natural slow-state drift\n"
+                 "E1146; operational runaway 120 Hz / 100 ms; model-side mechanism, NOT seizure    "
+                 f"class: {verdict}",
+                 fontsize=9.5, weight="bold", x=0.06, ha="left")
     base = os.path.join(FIGDIR, "mz_slow_fast_transition")
     fig.savefig(base + ".png", dpi=150)
     fig.savefig(base + ".pdf")
