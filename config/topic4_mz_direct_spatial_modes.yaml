@@ -61,6 +61,7 @@ fixed_kick:
   kymograph_band_norm: 0.5
   kymograph_n_pos: 12
   arrival_thresh_fracs: [0.05, 0.10, 0.20]
+  arrival_min_peak_hz: 2.0     # response floor: below this kymo peak the front is quantization noise -> arrival ineligible
 
 # --- phase-paired Gabor probe scan (spec §3.3): derived from the empirical operator (M @ probe) ---
 gabor:
@@ -69,9 +70,14 @@ gabor:
   center: source
   validate_forks: true       # spot-check: direct fork of the peak probe vs operator prediction
 
-# --- runaway / right-censoring criterion (locked 120 Hz / 100 ms) ---
+# --- within-window saturation / right-censoring criterion ---
+# The fork analysis window is only window_ms (50 ms), so the onset-dynamics operational-runaway
+# criterion (120 Hz sustained >= 100 ms) CANNOT fire inside a fork (review 2026-07-20). Fork
+# saturation/right-censoring uses a WITHIN-WINDOW criterion (120 Hz sustained >= saturation_dur_ms)
+# that CAN fire; it is a within-window saturation flag, NOT the 100 ms operational-runaway.
 runaway_hz: 120.0
-runaway_dur_ms: 100.0
+saturation_dur_ms: 20.0
+runaway_dur_ms: 100.0        # reference only (onset-dynamics operational criterion; not used for forks)
 
 # --- z+m plateau + D-matched z-only controls (spec §1, P1) ---
 controls:
@@ -82,6 +88,17 @@ controls:
     peak_m_tau2000: 36.6036014019694        # eta_m = A_target * I_EE_scale / peak_m
     plateau_window_ms: 500.0                 # choose the plateau checkpoint in the last 500 ms
     settle_ms: 6000.0                        # start of the stable segment to search for the checkpoint
+
+# --- corrected identifiability audit (review 2026-07-20): the original single-trajectory / thin-input
+#     audit ran only on seed1 and could not separate quantization noise from true nonlinearity. This
+#     re-audit per (seed,state): balanced symmetric low-k modes, per-grid RMS matched to the fixed kick,
+#     ensemble-averaged over independent continuation-noise realizations. Only if it identifies a stable
+#     operator do we compute/plot V1/U1/sigma1. ---
+corrected_audit:
+  k_max: 1                    # balanced low-k: 1-D freqs {0,1} in BOTH axes -> 9 symmetric 2-D modes
+  n_realizations: 8           # independent continuation-noise futures per (seed,state); +/- share each future (CRN)
+  strength_frac: 0.02         # per-cell RMS current = strength_frac * I_EE_scale (matched to the fixed-kick RMS scale)
+  realization_base_seed: 90001
 
 # --- parallelism ---
 workers: 12                   # COW-shared connectivity fork workers (each shares 13GB read-only + ~150MB/fork)

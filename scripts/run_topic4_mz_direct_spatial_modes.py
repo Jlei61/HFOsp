@@ -49,11 +49,11 @@ from src.topic4_state_conditioned_susceptibility import (  # noqa: E402
 )
 from src.topic4_mz_direct_spatial_modes import (  # noqa: E402
     SCHEMA_VERSION, MZSpatialProbe, build_grid_readout, grid_pattern_to_current,
-    spikes_to_rate_grid, local_window_maps, real_fourier_basis_2d, central_difference,
-    build_empirical_operator, field_globality, field_axis_alignment, normalized_field_overlap,
-    gaussian_current_field, response_norm, region_response, cumulative_response_ratio,
-    axis_kymograph, first_arrival_times, fit_arrival_distance, threshold_sensitivity_arrivals,
-    linearity_discrepancy, select_epsilon, right_censoring_label,
+    spikes_to_rate_grid, local_window_maps, real_fourier_basis_2d, balanced_lowk_indices,
+    central_difference, build_empirical_operator, field_globality, field_axis_alignment,
+    normalized_field_overlap, gaussian_current_field, response_norm, region_response,
+    cumulative_response_ratio, axis_kymograph, first_arrival_times, fit_arrival_distance,
+    threshold_sensitivity_arrivals, linearity_discrepancy, select_epsilon, right_censoring_label,
 )
 
 OUT = os.path.join(ROOT, "results", "topic4_sef_hfo", "mz_direct_spatial_modes")
@@ -312,7 +312,7 @@ def operator_for_state(S, ck, branch, cfg, eps, *, workers, freeze=True):
     T_steps_list = [int(round(t / DT)) for t in cfg["T_windows_ms"]]
     cur_dur = int(round(cfg["current_dur_ms"] / DT))
     window_steps = int(round(cfg["window_ms"] / DT))
-    run_hz, run_dur = float(cfg["runaway_hz"]), float(cfg["runaway_dur_ms"])
+    run_hz, run_dur = float(cfg["runaway_hz"]), float(cfg["saturation_dur_ms"])  # within-window saturation (fits window_ms)
 
     # no-probe control (right-censoring + fixed-kick reference)
     Y0, ra0 = _fork_Y(S, ck, branch, None, window_steps, cur_dur, T_steps_list, ro, freeze, run_hz, run_dur)
@@ -336,7 +336,7 @@ def operator_for_state(S, ck, branch, cfg, eps, *, workers, freeze=True):
             tgt[T][j] = v
 
     out = dict(censor="resolved", sigma1={}, arrays={}, Y0={int(t): Y0[t] for t in Y0},
-               any_fork_runaway=bool(any_runaway), wall_s=round(time.time() - t0, 1))
+               any_fork_saturation=bool(any_runaway), wall_s=round(time.time() - t0, 1))
     for T_ms in cfg["T_windows_ms"]:
         Ts = int(round(T_ms / DT))
         K = np.column_stack([central_difference(Yp[Ts][j], Ym[Ts][j], eps) for j in range(basis.shape[1])])
@@ -367,7 +367,7 @@ def linearity_audit_state(S, ck, branch, cfg, *, workers, freeze=True):
     Ts = [int(round(T_ms / DT))]
     cur_dur = int(round(cfg["current_dur_ms"] / DT))
     window_steps = int(round(cfg["window_ms"] / DT))
-    run_hz, run_dur = float(cfg["runaway_hz"]), float(cfg["runaway_dur_ms"])
+    run_hz, run_dur = float(cfg["runaway_hz"]), float(cfg["saturation_dur_ms"])  # within-window saturation (fits window_ms)
     I_EE = float(cfg["I_EE_scale"])
     ladder = [float(a) for a in cfg["amplitude_ladder"]]
     discreps, saturated = [], []
@@ -402,7 +402,7 @@ def fixed_kick_state(S, ck, branch, cfg):
     kick2d = gaussian_current_field(ro, center_norm=tuple(S["src_g"]), sigma=float(fk["sigma_norm"]),
                                     rms=float(fk["frac"]) * float(cfg["I_EE_scale"]))
     kick_E = grid_pattern_to_current(kick2d, ro)
-    run_hz, run_dur = float(cfg["runaway_hz"]), float(cfg["runaway_dur_ms"])
+    run_hz, run_dur = float(cfg["runaway_hz"]), float(cfg["saturation_dur_ms"])  # within-window saturation (fits window_ms)
 
     res0 = _fork_run(S, ck, branch, None, window_steps=window_steps, cur_dur_steps=cur_dur,
                      freeze=True, store_spikes=True)
@@ -430,12 +430,21 @@ def fixed_kick_state(S, ck, branch, cfg):
     src_series = np.abs(dstack.reshape(dstack.shape[0], -1)[:, S["regions"]["source_core"].ravel()]).sum(1)
     rem_series = np.abs(dstack.reshape(dstack.shape[0], -1)[:, S["regions"]["remote_sink"].ravel()]).sum(1)
     cumratio = cumulative_response_ratio(rem_series, src_series)
-    arrivals = first_arrival_times(ky["kymo"], ky["times"], threshold=0.1 * np.nanmax(np.abs(ky["kymo"])))
-    fit = fit_arrival_distance(ky["distances"], arrivals)
-    thr = threshold_sensitivity_arrivals(ky["kymo"], ky["times"], ky["distances"],
-                                         fracs=[float(x) for x in fk["arrival_thresh_fracs"]])
+    # arrival is only defined when the kymograph peak clears an absolute response floor; below it the
+    # 0.1*max threshold sits in quantization noise and fabricates a spurious front (review 2026-07-20).
+    kymo_max = float(np.nanmax(np.abs(ky["kymo"])))
+    min_peak = float(fk.get("arrival_min_peak_hz", 2.0))
+    if kymo_max < min_peak:
+        arrivals = np.full(ky["kymo"].shape[1], np.nan)
+        fit = dict(eligible=False, n_points=0, slope=None, velocity_proxy=None, r2=None, below_floor=True)
+        thr = {}
+    else:
+        arrivals = first_arrival_times(ky["kymo"], ky["times"], threshold=max(0.1 * kymo_max, min_peak))
+        fit = fit_arrival_distance(ky["distances"], arrivals)
+        thr = threshold_sensitivity_arrivals(ky["kymo"], ky["times"], ky["distances"],
+                                             fracs=[float(x) for x in fk["arrival_thresh_fracs"]])
     return dict(
-        censor=censor, kick_induced_runaway_ms=raK, response_norm=response_norm(dY_full), region=reg,
+        censor=censor, kick_induced_saturation_ms=raK, response_norm=response_norm(dY_full), region=reg,
         cum_remote_over_source_final=float(cumratio[-1]) if cumratio.size else float("nan"),
         arrival_fit=fit, arrival_threshold_sensitivity={str(k): v for k, v in thr.items()},
         arrays=dict(dmaps=np.stack([dmaps[c] for c in centers]), map_centers=np.array(centers),
@@ -488,6 +497,120 @@ def gabor_scan_from_operator(M, S, cfg):
                 axis_minus_perp=float(axial - perp), peak_pq=list(peak_pq) if peak_pq else None,
                 peak_gain=float(paired[peak_pq]["gain"]) if peak_pq else 0.0,
                 gains={f"{p},{q}": v["gain"] for (p, q), v in paired.items()})
+
+
+# ============================================================ corrected identifiability audit (review 2026-07-20)
+def _realization_state(base_seed, seed, branch, r):
+    """Independent continuation-noise future r: a fresh PCG64 state, distinct per (seed,state,r)."""
+    return np.random.default_rng(np.random.SeedSequence([int(base_seed), int(seed), int(branch), int(r)])).bit_generator.state
+
+
+def _corr_task(args):
+    j, sign, r, ai = args
+    W = _WS
+    ro = W["readout"]
+    pat2d = W["P_rms"][:, j].reshape(W["n"], W["n"])          # unit per-cell-RMS low-k pattern
+    cur = sign * W["amps"][ai] * grid_pattern_to_current(pat2d, ro)   # per-cell RMS current = amps[ai]
+    ck_r = copy.copy(W["ck"]); ck_r.rng_state = W["real_states"][r]   # same branch state, realization-r future noise
+    Ys, _ = _fork_Y(W["S"], ck_r, W["branch"], cur, W["window_steps"], W["cur_dur_steps"],
+                    W["T_steps_list"], ro, W["freeze"], W["run_hz"], W["run_dur"])
+    return (j, int(sign), r, ai, {int(T): Ys[T] for T in Ys})
+
+
+def corrected_operator_audit(S, ck, branch, cfg, *, workers, freeze=True):
+    """Corrected identifiability audit (review 2026-07-20): balanced symmetric low-k modes, per-grid RMS
+    matched to the fixed kick, ENSEMBLE-averaged over independent continuation-noise realizations (each +/-
+    pair shares its future = CRN). Tests whether an ensemble linear-response operator IS identifiable at
+    THIS (seed,state) once quantization noise is averaged out and the input strength matches the kick.
+    Only if identifiable does it SVD -> sigma1/V1/U1 (over the low-k probed subspace)."""
+    ca = cfg["corrected_audit"]
+    ro = S["readout"]
+    n = ro.n
+    basis = real_fourier_basis_2d(n)
+    lowk = balanced_lowk_indices(n, int(ca["k_max"]))
+    P_lowk = basis[:, lowk]                                    # n_bins x n_modes (orthonormal columns)
+    P_rms = P_lowk * float(np.sqrt(n * n))                    # unit per-cell RMS patterns
+    I_EE = float(cfg["I_EE_scale"])
+    a_base = float(ca["strength_frac"])
+    amps = [a_base * I_EE, (a_base / 2.0) * I_EE]             # per-cell RMS current: base, half (linearity check)
+    N = int(ca["n_realizations"])
+    real_states = [_realization_state(ca["realization_base_seed"], S["seed"], branch, r) for r in range(N)]
+    T_steps_list = [int(round(t / DT)) for t in cfg["T_windows_ms"]]
+    Tmid = int(round(cfg["T_windows_ms"][1] / DT))
+    ws = dict(S=S, ck=ck, branch=branch, readout=ro, P_rms=P_rms, n=n, amps=amps, real_states=real_states,
+              window_steps=int(round(cfg["window_ms"] / DT)), cur_dur_steps=int(round(cfg["current_dur_ms"] / DT)),
+              T_steps_list=T_steps_list, freeze=freeze, run_hz=float(cfg["runaway_hz"]),
+              run_dur=float(cfg["saturation_dur_ms"]))
+    n_modes = len(lowk)
+    tasks = [(j, s, r, ai) for j in range(n_modes) for s in (+1, -1) for r in range(N) for ai in (0, 1)]
+    t0 = time.time()
+    res = _parallel_map(_corr_task, tasks, ws, workers)
+    from collections import defaultdict
+    sums = defaultdict(lambda: np.zeros(n * n))
+    cnts = defaultdict(int)
+    for j, sign, r, ai, Ys in res:
+        for T, y in Ys.items():
+            sums[(ai, sign, T, j)] += y                       # accumulate ensemble sum over realizations
+            cnts[(ai, sign, T, j)] += 1
+    K = {}
+    for ai in (0, 1):
+        for T in T_steps_list:
+            cols = [((sums[(ai, +1, T, j)] / max(cnts[(ai, +1, T, j)], 1))
+                     - (sums[(ai, -1, T, j)] / max(cnts[(ai, -1, T, j)], 1))) / (2.0 * amps[ai])
+                    for j in range(n_modes)]                  # ensemble-mean central difference
+            K[(ai, T)] = np.column_stack(cols)
+    disc = linearity_discrepancy(K[(0, Tmid)], K[(1, Tmid)])
+    identifiable = bool(np.isfinite(disc) and disc <= float(cfg["linearity_tol"]))
+    out = dict(k_max=int(ca["k_max"]), n_modes=n_modes, n_realizations=N,
+               strength_frac=a_base, per_cell_rms_current=round(amps[0], 3),
+               linearity_discrepancy=float(disc), identifiable=identifiable,
+               T_mid_ms=float(cfg["T_windows_ms"][1]), wall_s=round(time.time() - t0, 1), sigma1={})
+    arrays = {}
+    if identifiable:
+        for T_ms in cfg["T_windows_ms"]:
+            Ts = int(round(T_ms / DT))
+            U, s, Vt = np.linalg.svd(K[(0, Ts)], full_matrices=False)
+            u1 = U[:, 0].reshape(n, n)
+            v1 = (P_lowk @ Vt[0, :]).reshape(n, n)
+            out["sigma1"][float(T_ms)] = dict(
+                sigma1=float(s[0]), gap=(float(s[0] / s[1]) if s.size > 1 and s[1] > 0 else float("inf")),
+                u1_axis=field_axis_alignment(u1, ro, S["axis_g"]), u1_globality=field_globality(u1),
+                v1_axis=field_axis_alignment(v1, ro, S["axis_g"]),
+                singular_values=[float(x) for x in s[:6]])
+            arrays[f"corr_u1_T{int(T_ms)}"] = u1
+            arrays[f"corr_v1_T{int(T_ms)}"] = v1
+            arrays[f"corr_K_T{int(T_ms)}"] = K[(0, Ts)]
+    return out, arrays
+
+
+def cmd_audit(args, cfg):
+    import gc
+    label, mzcfg, onsets = _cand(cfg, args.candidate)
+    seeds = [int(s) for s in (args.seeds.split(",") if args.seeds else cfg["seeds"])]
+    states = args.states.split(",") if args.states else cfg["primary_states"]
+    workers = int(args.workers or cfg["workers"])
+    freeze = bool(cfg.get("freeze_zm", True))
+    os.makedirs(os.path.join(OUT, "per_seed"), exist_ok=True)
+    for seed in seeds:
+        S = build_S(seed, cfg)
+        branches = state_branches(onsets[seed], cfg)
+        cks = replay_checkpoints(S, mzcfg, branches, label, resume=args.resume)
+        _ensure_flat(S)
+        for st in states:
+            rj = os.path.join(OUT, "per_seed", f"corrected_audit_{label}_seed{seed}_{st}.json")
+            if args.resume and os.path.exists(rj):
+                print(f"[audit] resume skip s{seed} {st}", flush=True)
+                continue
+            out, arrays = corrected_operator_audit(S, cks[st], branches[st], cfg, workers=workers, freeze=freeze)
+            out.update(candidate=label, seed=seed, state=st, branch=branches[st], time_ms=branches[st] * DT,
+                       provenance=_provenance(cfg, dict(phase="corrected-audit", seed=seed, state=st)))
+            _dump(out, rj)
+            if arrays:
+                np.savez_compressed(os.path.join(OUT, "per_seed", f"corrected_audit_arrays_{label}_seed{seed}_{st}.npz"), **arrays)
+            print(f"[audit] {label} s{seed} {st} disc={out['linearity_discrepancy']:.3f} "
+                  f"identifiable={out['identifiable']} ({out['wall_s']}s)", flush=True)
+        del S, cks
+        gc.collect()
 
 
 # ============================================================ tiny substrate (smoke only)
@@ -559,8 +682,14 @@ def cmd_smoke(args, cfg):
     reg_str = {k: round(v, 3) for k, v in fk["region"].items()}
     print(f"[smoke] fixed_kick norm={fk['response_norm']:.4g} censor={fk['censor']} region={reg_str} "
           f"arrival_eligible={fk['arrival_fit']['eligible']}", flush=True)
+    # corrected identifiability audit mechanics (ensemble + low-k + RMS-matched)
+    scfg["corrected_audit"] = dict(k_max=1, n_realizations=3, strength_frac=0.05, realization_base_seed=90001)
+    ca, _ = corrected_operator_audit(S, ck, branch, scfg, workers=workers)
+    print(f"[smoke] corrected-audit n_modes={ca['n_modes']} n_real={ca['n_realizations']} "
+          f"disc={ca['linearity_discrepancy']:.3f} identifiable={ca['identifiable']}", flush=True)
     print(f"[smoke] ~{dt_fork*1000:.0f} ms/fork on tiny net ({n_forks} forks); OK", flush=True)
-    print("[smoke] PASS" if (crn and changed and op["censor"] == "resolved") else "[smoke] CHECK", flush=True)
+    ok = crn and changed and op["censor"] == "resolved" and ca["n_modes"] == 9
+    print("[smoke] PASS" if ok else "[smoke] CHECK", flush=True)
 
 
 # ============================================================ full-density run (P0)
@@ -591,7 +720,7 @@ def _process_state(S, ck, branch, cfg, label, seed, st, eps, mode, workers, free
     if mode == "operator" and eps is not None:
         op, _ = operator_for_state(S, ck, branch, cfg, eps, workers=workers, freeze=freeze)
         summ["operator"] = dict(censor=op["censor"], sigma1=op.get("sigma1", {}),
-                                any_fork_runaway=op.get("any_fork_runaway"),
+                                any_fork_saturation=op.get("any_fork_saturation"),
                                 linearity_verified=bool(linearity_verified))
         if op["censor"] == "resolved":
             for k, v in op["arrays"].items():
@@ -676,7 +805,8 @@ def cmd_controls(args, cfg):
         # --- D-matched z-only checkpoint at the SAME D (selection by D + resting only) ---
         zk = _select_dmatched_checkpoint(S, mzcfg, cfg, onset_step, pk["D_target"])
         out = dict(candidate=label, seed=seed, eta_m=eta_m,
-                   plateau=dict(branch=pk["branch"], time_ms=pk["branch"] * DT, D=pk["D_target"]),
+                   plateau=dict(branch=pk["branch"], time_ms=pk["branch"] * DT, D=pk["D_target"],
+                                settled=pk.get("settled")),
                    dmatched=dict(branch=zk["branch"], time_ms=zk["branch"] * DT, D=zk["D_actual"]))
         arrays = {}
         for tag, ck, br in (("plateau", pk["ck"], pk["branch"]), ("dmatched", zk["ck"], zk["branch"])):
@@ -722,21 +852,26 @@ def _resting_mask(rate_hz, *, win_ms=20.0, k=0.3):
 
 
 def _select_plateau_checkpoint(S, zm_cfg, cfg, onset_step):
-    """Replay the z+m plateau; pick a RESTING time in the last plateau_window_ms whose D is nearest
-    the window median (selection frozen BEFORE any spatial response, spec §1)."""
+    """Replay the z+m plateau; pick a RESTING time in the plateau window (AFTER settle_ms, so the
+    plateau has formed) whose D is nearest the window median (selection frozen BEFORE any spatial
+    response, spec §1). Also report whether the plateau is actually settled (D roughly constant over
+    the window) — an unsettled checkpoint is not the upstream stable plateau (review 2026-07-20)."""
     cc = cfg["controls"]["zm_plateau"]
     T_ms = min(onset_step * DT, 15000.0)
     rate, D = _replay_traj(S, zm_cfg, T_ms)
     rest = _resting_mask(rate)
-    win_lo = int(round((T_ms - float(cc["plateau_window_ms"])) / DT))
+    settle_lo = int(round(float(cc.get("settle_ms", 6000.0)) / DT))        # plateau must have formed
+    win_lo = max(int(round((T_ms - float(cc["plateau_window_ms"])) / DT)), settle_lo)
     idx = np.arange(win_lo, len(D))
     idx = idx[rest[win_lo:len(D)]]
     if idx.size == 0:
         idx = np.arange(win_lo, len(D))
     med = float(np.median(D[idx]))
     branch = int(idx[np.argmin(np.abs(D[idx] - med))])
+    d_win = D[win_lo:len(D)]
+    settled = bool(d_win.size > 0 and np.ptp(d_win) < 0.02)                # plateau D varies < 0.02 over window
     ck = _capture_at(S, zm_cfg, branch)
-    return dict(branch=branch, D_target=float(D[branch]), ck=ck)
+    return dict(branch=branch, D_target=float(D[branch]), settled=settled, ck=ck)
 
 
 def _select_dmatched_checkpoint(S, mzcfg, cfg, onset_step, D_target):
@@ -861,7 +996,7 @@ def _agg_arrays(label, prefix, out_path):
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Topic 4 MZ direct spatial mode dynamics runner.")
     sub = ap.add_subparsers(dest="cmd", required=True)
-    for name in ("smoke", "run", "controls", "aggregate"):
+    for name in ("smoke", "run", "audit", "controls", "aggregate"):
         sp = sub.add_parser(name)
         sp.add_argument("--confirm-run", action="store_true")
         sp.add_argument("--candidate", default="primary", choices=["primary", "sensitivity"])
@@ -871,12 +1006,13 @@ def main(argv=None):
         sp.add_argument("--resume", action="store_true")
     args = ap.parse_args(argv)
     cfg = load_cfg()
-    needs_run = {"smoke", "run", "controls"}
+    needs_run = {"smoke", "run", "audit", "controls"}
     if args.cmd in needs_run and not args.confirm_run:
         print(f"REFUSING: '{args.cmd}' runs simulations. Pass --confirm-run.", file=sys.stderr)
         sys.exit(2)
     os.makedirs(os.path.join(OUT, "per_seed"), exist_ok=True)
-    {"smoke": cmd_smoke, "run": cmd_run, "controls": cmd_controls, "aggregate": cmd_aggregate}[args.cmd](args, cfg)
+    {"smoke": cmd_smoke, "run": cmd_run, "audit": cmd_audit, "controls": cmd_controls,
+     "aggregate": cmd_aggregate}[args.cmd](args, cfg)
 
 
 if __name__ == "__main__":

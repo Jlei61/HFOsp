@@ -187,6 +187,23 @@ def real_fourier_basis_2d(n):
     return np.column_stack(cols)
 
 
+def balanced_lowk_indices(n, k_max):
+    """Column indices of real_fourier_basis_2d(n) that are BALANCED low-k: 2-D modes built from 1-D
+    frequencies <= k_max in BOTH axes (symmetric — DC + cos/sin of each low frequency, both x and y).
+
+    This is the corrected low-k audit set: the leading n columns are outer(DC, everything) which
+    includes DC x Nyquist (a max-frequency column), so `range(n_sub)` is NOT a low-k selection.
+    1-D frequency f -> real_fourier_basis_1d index: f=0 -> 0; 1<=f<n/2 -> {2f-1 (cos), 2f (sin)};
+    Nyquist (n even, f=n/2) -> the last index n-1 (included only when k_max >= n/2)."""
+    lo1d = [0]
+    for f in range(1, int(k_max) + 1):
+        if 2 * f == n:
+            lo1d.append(n - 1)                     # Nyquist (single cosine)
+        else:
+            lo1d.extend([2 * f - 1, 2 * f])        # cos + sin of frequency f
+    return [a * n + b for a in lo1d for b in lo1d]
+
+
 # ======================================================================== empirical operator (spec §3.2 / §4)
 def central_difference(Y_plus, Y_minus, epsilon):
     """K column = [Y(+eps p) - Y(-eps p)] / (2 eps)  (units: output Hz / input current fraction)."""
@@ -338,7 +355,10 @@ def fit_arrival_distance(distances, arrivals, *, min_points=4):
     a = np.asarray(arrivals, float)
     ok = np.isfinite(a) & np.isfinite(d)
     n = int(ok.sum())
-    if n < int(min_points):
+    # <min_points crossings, OR a degenerate CONSTANT-arrival front (every position 'arrives' at the
+    # same time — what a near-zero/quantization-noise response produces when the 0.1*max threshold ~ 0)
+    # -> ineligible. Never a spurious 0-slope / NaN-R2 'eligible' fit (review 2026-07-20).
+    if n < int(min_points) or np.ptp(a[ok]) == 0:
         return dict(eligible=False, n_points=n, slope=None, velocity_proxy=None, r2=None)
     dd, aa = d[ok], a[ok]
     coef = np.polyfit(dd, aa, 1)

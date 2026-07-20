@@ -27,7 +27,7 @@ from src.topic4_mz_direct_spatial_modes import (  # noqa: E402
     central_difference, build_empirical_operator, field_globality, field_axis_alignment,
     normalized_field_overlap, gaussian_current_field, response_norm, region_response,
     cumulative_response_ratio, axis_kymograph, first_arrival_times, fit_arrival_distance,
-    linearity_discrepancy, select_epsilon, right_censoring_label,
+    linearity_discrepancy, select_epsilon, right_censoring_label, balanced_lowk_indices,
 )
 
 
@@ -188,6 +188,21 @@ def test_c5_fourier_basis_2d_144_orthonormal():
     # a DC (constant) column exists (all-equal pattern)
     col_ptp = np.ptp(P, axis=0)
     assert np.isclose(col_ptp.min(), 0.0, atol=1e-12)
+
+
+def test_balanced_lowk_indices_symmetric():
+    """Balanced low-k selection = 2-D modes built from 1-D frequencies <= k_max in BOTH axes
+    (symmetric cos/sin, both directions) — NOT the leading columns (which include Nyquist)."""
+    n = 12
+    idx = balanced_lowk_indices(n, k_max=1)                    # 1-D freqs {0,1} -> 1-D idx {0,1,2}
+    assert len(idx) == 9                                       # 3 x 3 outer products
+    P = real_fourier_basis_2d(n)
+    sub = P[:, idx]
+    assert np.allclose(sub.T @ sub, np.eye(len(idx)), atol=1e-10)   # still orthonormal
+    idx2 = balanced_lowk_indices(n, k_max=2)                   # 1-D freqs {0,1,2} -> 5 idx -> 25
+    assert len(idx2) == 25
+    assert set(idx).issubset(set(idx2))                        # nested
+    assert max(idx2) < n * n
 
 
 # ============================================================ C6 grid readout + spike-mass conservation
@@ -369,6 +384,15 @@ def test_arrival_fit_ineligible_few_points():
     arr = np.array([1.0, np.nan, np.nan, np.nan])              # only one position crossed
     fit = fit_arrival_distance(dist, arr, min_points=4)
     assert not fit["eligible"] and fit["n_points"] == 1
+
+
+def test_arrival_fit_ineligible_degenerate_constant():
+    """A zero/near-zero response makes every position 'arrive' at t=0 (threshold ~0) -> constant
+    arrivals -> ineligible (no front), never a spurious 0-slope / NaN-R2 'eligible' fit."""
+    dist = np.array([0.0, 1.0, 2.0, 3.0, 4.0])
+    arr = np.zeros(5)                                          # all positions cross at t=0 (noise)
+    fit = fit_arrival_distance(dist, arr, min_points=4)
+    assert not fit["eligible"]                                # degenerate (zero spread) rejected
 
 
 def test_region_response_and_norm():
