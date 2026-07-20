@@ -75,6 +75,76 @@ def test_primary_resource_pool_keeps_core_annulus_z_on_registered_coordinate():
     assert rhs[0, 21] == pytest.approx(rhs[0, 22])
 
 
+def test_default_resource_rhs_preserves_the_original_m_independent_equation():
+    arm = RegionalSlowParameters(
+        z_rest=0.9, tau_z_recovery_ms=20000.0,
+        tau_z_depletion_ms=4000.0,
+    )
+    state = _state([0.020, 0.012, 0.006], [0.001, 0.001, 0.001], z=0.88, m=0.75)
+    rhs, sensors = regional_slow_rhs(
+        state[None, :], [arm], inhibitory_baseline_khz=np.full(3, 0.006),
+        recruitment_kernel=np.eye(3), patch_weights=np.asarray([0.3, 0.2, 0.5]),
+        latch_state=np.zeros((1, 3), dtype=bool),
+    )
+    expected = (
+        (arm.z_rest - 0.88) / arm.tau_z_recovery_ms
+        - sensors["z_use"][0] * 0.88 / arm.tau_z_depletion_ms
+    )
+    np.testing.assert_array_equal(rhs[0, 21:24], expected)
+
+
+def test_m_gated_reserve_uses_pooled_dimensionless_m_and_keeps_bath_fixed():
+    arm = RegionalSlowParameters(
+        z_rest=0.9, tau_z_recovery_ms=90000.0,
+        tau_z_fast_recovery_ms=20000.0, tau_z_depletion_ms=280.0,
+        q_reserve=0.8415, enable_m_gated_z_recovery=True,
+    )
+    state = _state([0.020, 0.012, 0.020], [0.001, 0.001, 0.001], z=0.88, m=0.4)
+    rhs, sensors = regional_slow_rhs(
+        state[None, :], [arm], inhibitory_baseline_khz=np.full(3, 0.006),
+        recruitment_kernel=np.eye(3), patch_weights=np.asarray([0.3, 0.2, 0.5]),
+        latch_state=np.zeros((1, 3), dtype=bool),
+    )
+    recovery_rate = 0.6 / 90000.0 + 0.4 / 20000.0
+    expected = (
+        recovery_rate * (0.9 - 0.88)
+        - sensors["z_use"][0, 0] * (0.88 - 0.8415) / 280.0
+    )
+    assert rhs[0, 21] == pytest.approx(expected)
+    assert rhs[0, 22] == pytest.approx(expected)
+    assert rhs[0, 23] == 0.0
+
+
+def test_m_gated_reserve_parameters_fail_closed():
+    with pytest.raises(ValueError, match="paired"):
+        RegionalSlowParameters(enable_m_gated_z_recovery=True).validate()
+    with pytest.raises(ValueError, match="q_reserve"):
+        RegionalSlowParameters(
+            q_reserve=0.9, tau_z_fast_recovery_ms=20000.0,
+            enable_m_gated_z_recovery=True,
+        ).validate()
+    with pytest.raises(ValueError, match="tau_fast"):
+        RegionalSlowParameters(
+            tau_z_recovery_ms=20000.0, q_reserve=0.84,
+            tau_z_fast_recovery_ms=20000.0, enable_m_gated_z_recovery=True,
+        ).validate()
+    with pytest.raises(ValueError, match="require"):
+        RegionalSlowParameters(q_reserve=0.84).validate()
+
+    arm = RegionalSlowParameters(
+        tau_z_recovery_ms=90000.0, q_reserve=0.84,
+        tau_z_fast_recovery_ms=20000.0, enable_m_gated_z_recovery=True,
+    )
+    invalid = _state([0.006] * 3, [0.001] * 3)
+    invalid[27:30] = [1.2, 0.0, 0.0]
+    with pytest.raises(ValueError, match="dimensionless m"):
+        regional_slow_rhs(
+            invalid[None, :], [arm], inhibitory_baseline_khz=np.full(3, 0.006),
+            recruitment_kernel=np.eye(3), patch_weights=np.asarray([0.3, 0.2, 0.5]),
+            latch_state=np.zeros((1, 3), dtype=bool),
+        )
+
+
 def test_latch_requires_persistence_and_neighbor_recruitment_then_safe_resets():
     arm = RegionalSlowParameters(persistence_on=0.15, recruitment_on=0.60)
     kernel = np.asarray([
@@ -248,3 +318,4 @@ def test_integrator_accepts_only_regional_initial_latch_state():
         initial_latch_state=np.asarray([[True, True, False]]),
     )
     np.testing.assert_array_equal(result["latch"][0, 0], [1, 1, 0])
+    np.testing.assert_array_equal(result["final_latch_state"], [[True, True, False]])

@@ -49,6 +49,9 @@ class RegionalSlowParameters:
     pool_core_annulus_effector: bool = True
     enable_z: bool = True
     enable_m: bool = True
+    q_reserve: float | None = None
+    tau_z_fast_recovery_ms: float | None = None
+    enable_m_gated_z_recovery: bool = False
 
     def validate(self) -> "RegionalSlowParameters":
         values = (
@@ -80,6 +83,32 @@ class RegionalSlowParameters:
             raise ValueError("low reset threshold must lie below occupancy threshold")
         if not 0.0 < self.z_safe <= self.z_rest:
             raise ValueError("z_safe must lie in (0,z_rest]")
+        reserve_fields = (self.q_reserve, self.tau_z_fast_recovery_ms)
+        if self.enable_m_gated_z_recovery:
+            if any(value is None for value in reserve_fields):
+                raise ValueError(
+                    "m-gated z recovery requires paired q_reserve and "
+                    "tau_z_fast_recovery_ms"
+                )
+            assert self.q_reserve is not None
+            assert self.tau_z_fast_recovery_ms is not None
+            if not (
+                np.isfinite(self.q_reserve)
+                and 0.0 < self.q_reserve < self.z_rest
+            ):
+                raise ValueError("q_reserve must satisfy 0<q_reserve<z_rest")
+            if not (
+                np.isfinite(self.tau_z_fast_recovery_ms)
+                and 0.0 < self.tau_z_fast_recovery_ms < self.tau_z_recovery_ms
+            ):
+                raise ValueError(
+                    "tau_z_fast_recovery_ms must satisfy 0<tau_fast<tau_slow"
+                )
+        elif any(value is not None for value in reserve_fields):
+            raise ValueError(
+                "q_reserve and tau_z_fast_recovery_ms require "
+                "enable_m_gated_z_recovery"
+            )
         mask = np.asarray(self.depletion_mask, dtype=float)
         if mask.shape != (3,) or np.any((mask < 0.0) | (mask > 1.0)):
             raise ValueError("depletion_mask must be a three-patch [0,1] mask")
@@ -186,10 +215,31 @@ def regional_slow_rhs(
         m_slice = slice(9 * p, 10 * p)
         output[fork, p_slice] = (occupancy[fork] - persistence[fork]) / arm.tau_p_ms
         if arm.enable_z:
-            output[fork, z_slice] = (
-                (arm.z_rest - z[fork]) / arm.tau_z_recovery_ms
-                - z_sensor[fork] * z[fork] / arm.tau_z_depletion_ms
-            )
+            if arm.enable_m_gated_z_recovery:
+                assert arm.q_reserve is not None
+                assert arm.tau_z_fast_recovery_ms is not None
+                regional_weights = weights[:2] / np.sum(weights[:2])
+                regional_m = np.asarray(m[fork, :2], dtype=float)
+                if np.any((regional_m < -1.0e-12) | (regional_m > 1.0 + 1.0e-12)):
+                    raise ValueError("regional dimensionless m must lie in [0,1]")
+                regional_m_value = float(regional_weights @ regional_m)
+                regional_m_value = float(np.clip(regional_m_value, 0.0, 1.0))
+                recovery_rate = (
+                    (1.0 - regional_m_value) / arm.tau_z_recovery_ms
+                    + regional_m_value / arm.tau_z_fast_recovery_ms
+                )
+                output[fork, z_slice.start:z_slice.start + 2] = (
+                    recovery_rate * (arm.z_rest - z[fork, :2])
+                    - z_sensor[fork, :2] * (z[fork, :2] - arm.q_reserve)
+                    / arm.tau_z_depletion_ms
+                )
+                # The registered bath is an imposed fixed-resource diagnostic.
+                output[fork, z_slice.start + 2] = 0.0
+            else:
+                output[fork, z_slice] = (
+                    (arm.z_rest - z[fork]) / arm.tau_z_recovery_ms
+                    - z_sensor[fork] * z[fork] / arm.tau_z_depletion_ms
+                )
         if arm.enable_m:
             regional_m = m[fork, :2]
             active = latch[fork, :2].astype(float)
@@ -509,4 +559,5 @@ def integrate_autonomous_latch_batch(
         "return_states": return_states,
         "latch_set_times_ms": latch_set_times,
         "latch_reset_times_ms": latch_reset_times,
+        "final_latch_state": latch.copy(),
     }
