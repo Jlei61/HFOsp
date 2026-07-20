@@ -547,11 +547,23 @@ def cmd_run(args, cfg):
     _dump_atomic(dict(units=results, n_units=len(units), n_failed=len(failed),
                       provenance=provenance(cfg, dict(phase="run-all", workers=W))),
                  os.path.join(OUT, "run_manifest.json"))
+    # auto-aggregate + plot whatever completed, so the deliverables exist when the sweep ends unattended.
+    print(f"[run] {len(units) - len(failed)}/{len(units)} units ok; aggregating + plotting...", flush=True)
+    try:
+        cmd_aggregate(args, cfg)
+    except Exception as e:
+        print(f"[run] aggregate failed: {type(e).__name__}: {e}", flush=True)
+    try:
+        import subprocess
+        subprocess.run([sys.executable, os.path.join(ROOT, "scripts", "plot_topic4_mz_slow_fast_transition.py")],
+                       check=False)
+    except Exception as e:
+        print(f"[run] plot failed: {type(e).__name__}: {e}", flush=True)
     if failed:
         for r in failed:
             print(f"[run] --- traceback {r['condition']} s{r['seed']} ---\n{r.get('tb')}", file=sys.stderr)
         raise SystemExit(f"{len(failed)}/{len(units)} units FAILED (see run_manifest.json)")
-    print(f"[run] all {len(units)} units done", flush=True)
+    print(f"[run] all {len(units)} units done + aggregated + plotted", flush=True)
 
 
 # ============================================================ aggregate (no sim)
