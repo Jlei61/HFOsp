@@ -279,4 +279,33 @@ loud-fail。**本会话网络中断恰好实测了它**：anchor 进程被上个
 
 Session-2 commits：`4d7a4d6`(Phase0) `2230fad`(Phase1/2 infra) `735abce`(Phase2 atlas)；41 测试绿。审阅 07-22 后：
 plot 4 类 taxonomy 修正(17 low-only/7 bistability-consistent/2 high-only/1 reverse-discordant)+全文档"低=近0Hz静默≠
-interictal"改口径（下一 commit）。
+interictal"改口径。
+
+---
+
+## 11. Phase-1 + Phase-3 结果（2026-07-22，seed 1）——一句话：**能进、能兜、能终止；回不去**
+
+**Phase-1 form-then-terminate 判决 = termination-no-go / fragment**（commit `2099320`）：无-p anchor（T=12000, 73min）
+形成真宽有界态，数据驱动 t_form=1600ms（敏感性稳），85% plateau ~2150ms → onset=2300ms（τ_up=3000 使电流
+~3370ms 才起效、过成形，MEASURED 非盲设）。两干预臂（η=80/150）都 fragment：电流**能把成形态压到 0**，但活动一停
+S_G 塌 → 兜底没了 → 灶复燃成 11.8/13/14.5s 的稀疏击穿（非恢复 IED）；赖着的慢衰 p 又过度压制。匹配 prevention 对照
+证实选择性差（门控电流仍把 onset 后 IED 29→11）。两严格合同都过（介入前逐字一致、onset 处确成形）。**顺带纠错**：
+M4 有界态是宽条带（q_core≈q_surround≈地板、无核-周梯度，spec §9），我的成形判据"梯度硬门"错杀真态、已改判宽招募+宽耗竭。
+
+**Phase-3 vNext = 除法兜底慢记忆 H（commits `10d036f` 建 + `3100695` 判决）**：`τ_H Ḣ=<Φ(p)>−H`，进
+`I_EE/(1+α_G S_G+α_H H)`，off-by-default 字节一致、无 re-bless、4 TDD 绿。三消融 + 快放诊断：
+- **H-only**（C_sensor_on + H、无减法电流）：H 建到 **0.31**（活动没被自限）→ 除法兜底 **~5.2s 终止**有界态 + 兜过回灌
+  （无击穿、q_I→0.82）。因果：无 H = anchor persist 永不终止；加 H 才终止。**→ H 是干净的新终止器、比自限的减法 p 干净。**
+- **p+H**（同 fragment 干预臂参 + H）：H 几乎没建起来（0.05）——减法电流把活动压死、切断 p 传感器、`<Φ(p)>` 被稀释；
+  仍终止 + **静默**。
+- **快放**（τ_down=2000）：放太快、抑制油箱没灌满 → 灶复燃成 ~200–250Hz 反复爆发（**runaway**）。
+- **→ Recovery 腿处处失败：保住(H)=静默、放快=复燃，中间没有间期事件那一档。** 跟 Phase-2 相图一致（low=静默）。
+  **机制定位：间期 IED 是"抑制油箱边耗边发"的进入瞬态、不是稳定吸引子——没有可回的间期态。瓶颈=衬底（缺稳定间期
+  吸引子），不是退出机制（H 已是干净终止器）。**
+
+**最终分层完成度（seed 1）**：Entry ✓ / Containment ✓ / **Termination ✓（H 干净终止器=本线正面新增）** / **Recovery ✗
+（根本瓶颈=衬底无稳定间期吸引子）** / spatial+cross-seed 未做（recovery 先卡）。**能写**：H 是 divisive containment
+memory、是比减法电流更干净的 M4 终止器；recovery 腿在减法/H/快放全设定下都不落间期（静默或复燃）。**不能写**：lifecycle
+candidate；"证明衬底绝无 recovery"（只 seed 1、未穷举 θ_p/独立节律器）；任何 clinical/发作机制。**下一杠杆（待用户）**：
+θ_p 持续时间门控（但静默是真 rate=0、可能不够）/ 给衬底独立间期节律器（让 recovery 有对象）/ 非对称 τ_H 让 H 在 p+H
+也建得起来。产物 `phase3_containment_memory/{figures/{arms_pH,arms_Honly,arms_pfast}+README, phase3_verdict.json}`。
