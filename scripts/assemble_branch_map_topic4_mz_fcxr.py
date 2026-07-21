@@ -18,7 +18,7 @@ from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
 )
 
 BASE = os.path.join(ROOT, "results", "topic4_sef_hfo", "mz_full_conductance_spatial_relay", "fast_slow_dynamics")
-D_GRID = [0.0, 0.05, 0.075, 0.085, 0.09, 0.1, 0.125, 0.15]
+D_GRID = [0.0, 0.05, 0.075, 0.085, 0.09, 0.1, 0.125, 0.13, 0.14, 0.145, 0.15]
 
 
 def _label_from_trace(jf, band):
