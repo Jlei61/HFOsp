@@ -59,7 +59,7 @@ D_GRID = [0.0, 0.05, 0.075, 0.085, 0.09, 0.10, 0.125, 0.15]   # scalar D ~= mean
 PILOT_D = [0.075, 0.10, 0.125]                                 # below / just above / well above the transition
 T_KICK_MS = 120.0
 DUR_KICK_MS = 18.0                                             # engine constant kick_probe.DUR_KICK
-KICK_HIGH1, KICK_HIGH2 = 3.0, 6.0                             # two high-IC kick amplitudes (PP.KICK and 2x)
+KICK_HIGH1, KICK_HIGH2 = 3.0, 12.0                           # moderate (RC1 default) + strong (4x) high-IC probes
 END_WIN_MS = 500.0                                            # trailing window for end-of-run high state
 OUT = os.path.join(FCXR.OUT_ROOT, "fast_slow_dynamics")
 SNAP_FMT = os.path.join(ROOT, "results", "topic4_sef_hfo", "state_conditioned_susceptibility",

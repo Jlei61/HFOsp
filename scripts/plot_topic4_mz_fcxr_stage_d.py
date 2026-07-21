@@ -25,9 +25,9 @@ OUT_DIR = os.path.join(ROOT, "results", "topic4_sef_hfo", "mz_full_conductance_s
 RUNS = os.path.join(ROOT, "results", "topic4_sef_hfo", "mz_full_conductance_spatial_relay",
                     "fast_slow_dynamics", "runs")
 UNSAT_TRANSITION_D = 0.087   # sharp cliff on the UNSATURATED slow-fast-transition line (context marker)
-SLOTS = [("low", "native low (no kick)", "#4c72b0", "o"),
-         ("high1", "kicked high (kick 3)", "#dd8452", "s"),
-         ("high2", "kicked high (kick 6)", "#c44e52", "^")]
+SLOTS = [("low", None, "#4c72b0", "o"),        # (slot, kick-index into j["kicks"] or None, color, marker)
+         ("high1", 0, "#dd8452", "s"),
+         ("high2", 1, "#c44e52", "^")]
 SHORT = {"LOW_ONLY": "low", "METASTABLE_TRANSIENT": "metastable", "REFRACTORY_CEILING": "ceiling",
          "FINITE_HIGH_FIXED": "finite-high", "FINITE_HIGH_ORBIT": "finite-orbit", "FINITE_HIGH": "finite-high",
          "BISTABLE": "bistable", "NUMERICAL_UNSAFE": "unsafe", "UNRESOLVED": "unresolved"}
@@ -47,43 +47,45 @@ def main():
     rows = j["base_rows"]
     D_grid = sorted(set(r["D"] for r in rows))
     per_D = {p["D"]: p for p in j["per_D"]}
-    HIGH_MS = float(j["thresholds"]["HIGH_MS"])
+    HIGH_OCC = float(j["thresholds"]["HIGH_OCC"])
+    kicks = j.get("kicks", [3.0, 12.0])
+
+    def _slabel(ki):
+        return "native low (no kick)" if ki is None else f"kicked high (kick {kicks[ki]:g})"
 
     def series(slot, field):
-        by = {r["D"]: r[field] for r in rows if r["slot"] == slot}
+        by = {r["D"]: r.get(field, np.nan) for r in rows if r["slot"] == slot}
         return np.array([by.get(D, np.nan) for D in D_grid], float)
 
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(12.5, 4.9))
 
-    # Panel A: persistence (longest contiguous elevation) vs D
-    for slot, label, c, m in SLOTS:
-        axA.plot(D_grid, series(slot, "high_duration_ms"), m + "-", color=c, label=label, ms=7, lw=1.6)
-    axA.set_ylim(bottom=-HIGH_MS * 0.03, top=HIGH_MS * 1.12)          # headroom so the threshold clears the title
-    axA.axhline(HIGH_MS, ls="--", color="k", lw=1.2)
-    axA.text(D_grid[-1], HIGH_MS, f"persistent-high threshold ({HIGH_MS:.0f} ms)", fontsize=9,
+    # Panel A: persistence -- smoothed-envelope still-elevated-at-end occupancy vs D (a transient decays -> low)
+    for slot, ki, c, m in SLOTS:
+        axA.plot(D_grid, series(slot, "env_end_occ"), m + "-", color=c, label=_slabel(ki), ms=7, lw=1.6)
+    axA.set_ylim(-0.03, 1.08)
+    axA.axhline(HIGH_OCC, ls="--", color="k", lw=1.2)
+    axA.text(D_grid[-1], HIGH_OCC, f"persistent-high threshold (occupancy {HIGH_OCC:.2f})", fontsize=9,
              ha="right", va="bottom")
     axA.axvline(UNSAT_TRANSITION_D, ls=":", color="0.5", lw=1.2)
-    axA.text(UNSAT_TRANSITION_D, HIGH_MS * 0.55, " unsaturated\n runaway onset\n (D≈0.087)",
-             fontsize=8, color="0.4", va="center")
+    axA.text(UNSAT_TRANSITION_D, 0.60, " unsaturated\n runaway onset\n (D≈0.087)", fontsize=8, color="0.4", va="center")
     axA.set_xlabel("failure coordinate  D  (frozen mean depletion)")
-    axA.set_ylabel("longest continuous high activity  (ms)")
-    axA.set_title("A. Persistence — is there a high branch?")
+    axA.set_ylabel("envelope still-high-at-end occupancy")
+    axA.set_title("A. Persistence — still elevated at window end?")
     axA.legend(loc="upper left", fontsize=8, framealpha=0.9)
 
-    # Panel B: end-of-run activity vs D
-    for slot, label, c, m in SLOTS:
-        axB.plot(D_grid, series(slot, "end_rate_hz"), m + "-", color=c, label=label, ms=7, lw=1.6)
+    # Panel B: end-of-run activity level vs D
+    for slot, ki, c, m in SLOTS:
+        axB.plot(D_grid, series(slot, "end_rate_hz"), m + "-", color=c, label=_slabel(ki), ms=7, lw=1.6)
     axB.axvline(UNSAT_TRANSITION_D, ls=":", color="0.5", lw=1.2)
     axB.set_xlabel("failure coordinate  D  (frozen mean depletion)")
     axB.set_ylabel("end-of-run mean firing rate  (Hz)")
-    axB.set_title("B. Excitability — activity rises but stays bounded")
+    axB.set_title("B. Excitability — activity level (bounded)")
     axB.legend(loc="upper left", fontsize=8, framealpha=0.9)
 
-    # per-D verdict labels inside panel A's empty upper region (short forms; avoids x-ticks + title)
+    # per-D verdict labels inside panel A's upper region (short forms; avoids x-ticks + title)
     for D in D_grid:
         lab = per_D.get(D, {}).get("D_label", "?")
-        axA.text(D, HIGH_MS * 0.72, SHORT.get(lab, lab.lower()), rotation=90, fontsize=6.5,
-                 ha="center", va="center", color="0.45")
+        axA.text(D, 0.86, SHORT.get(lab, lab.lower()), rotation=90, fontsize=6.5, ha="center", va="center", color="0.45")
 
     verdict = j.get("verdict", "")
     short = ("SMOKE_ONLY — plumbing validation, NOT a scientific verdict" if is_smoke else
