@@ -21,11 +21,12 @@
   **但即使把 `q_I` 加到接近基线（0.87），低阈值双灶 + 递归骨架仍会把网络重新点着成持续态**。单靠"压住 + 回灌 q_I"退不出去。
   这跟历史上所有终止器失败、以及 R4 必须用离散 latch 硬切**同向**——退出的真正障碍是灶的自发再点火，不是 q_I 不够。
 - **动态机制的传感器工作正常**：持续态上 `p` 平滑积累（12s 到 p_max≈0.55），而间期短事件几乎不充它（持续时间选择性成立）。
-- **已测的动态电流也退不出去（负结果）**：对称版被负反馈压到一个更低的持续水平（不终止）、或饿死 `S_G` 失控。
-  （⚠️ 原"不对称版=周期性失控脉冲"因 P0 bug 实为对称 `τ_p=3000`、已作废；真·不对称重跑中，见 §7。）
-  **候选共同解释（非 impossibility proof）**：`q_I` 与 `S_G` 对活动响应**符号相反**、随周期负相关——压住活动灌 `q_I` 往往让 `S_G` 衰减，
-  已测轨迹没进低活动间期 basin。但 `q_I` 有始终存在的恢复项、`S_G` 有有限记忆（实测有 ~403ms 重叠），且用的是空间均值 `q_I`（可能掩盖 core）——
-  **退出 corridor 是否存在未测**（需 `q_core×S_G` 冻结 atlas）。**结论=已测 actuator 下的 BOUNDED-NEGATIVE，带一个待验证的候选机制**。
+- **对称动态电流退不出**（被负反馈压到更低持续水平、或饿死 `S_G` 失控）；**但真·不对称 slow-release（快充 τ_p=3000/慢放 τ_p_down=12000）质变**：
+  `no_runaway`、活动被压到 0 → `q_I` 回灌 0.6–0.8 → 之后离散短促自终止 burst，不再回宽持续态——**更像生命周期、是有希望的候选**（`arms_asymfix`）。
+  （⚠️ 原"不对称=周期性失控脉冲"因 `d_sweep` 漏传 `tau_p_down` 的 P0 bug 实为对称、已作废。）
+  **但未确证**：`τ_p=3000` 快充可能在成形期就压住（prevention 而非 termination，须加大 τ_up 复验）、后段 burst 未验真假、seed1 单例、退出 basin（`q_core×S_G`）未映射。
+  一个**候选**观察：`q_I` 与 `S_G` 对活动响应**符号相反**、负相关（不是"绝无重叠"——实测有 ~403ms 重叠、均值 `q_I` 可能掩盖 core）。
+  **结论=开环+对称退不出；不对称 slow-release=待验证候选，非确证 lifecycle、也非 bounded-negative**。
 
 （内部代号：M4 `k_q=0.10 alpha_G=16` 有界态、`q_I` 场、`S_G` 除法池、persistence 场 `p`、Hill Φ、R4 latch。）
 
@@ -110,17 +111,32 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
 （review 2026-07-21 P0 抓到）。故"不对称→周期性失控脉冲列"这个结论**无效、撤回**，主结论图第四列作废。
 
 **已修**：`d_sweep` 改为从 `P`（唯一 persist 参数源，含 `tau_p_down`）构建、`{**P,"tau_p":tp}` 覆盖，label 加 `_dn{tau_p_down}`；
-每 row 落 `cfg_effective` 全量有效配置（不再只靠 argv）；加 `test_d_sweep_propagates_tau_p_down` 回归测试（修复前会失败）。
-**真·不对称（τ_up=3000 / τ_down=12000, η_r=80/150）已用修复代码重跑（`s2dasymFIX`），结果待折入。**
+每 row 落 `cfg_effective`（不再只靠 argv）；加 `test_d_sweep_propagates_tau_p_down` 回归测试（修复前会失败）。
 
-注：那批（实为对称 `τ_p=3000` 强 `η_r`）确实给出 runaway（train_then_runaway / one_shot_burst），可作为"快对称+强电流→runaway"的数据点，
-但**不是**不对称 hold 的检验。
+**真·不对称结果（`arms_asymfix_seed1`，τ_up=3000 / τ_down=12000, η_r=80/150, `cfg_effective` 确认 tau_p_down=12000, T=20000, early-stop on）**：
 
-## 8. Verdict —— BOUNDED-NEGATIVE（已测 actuator 下 temporal lifecycle 未达成；候选机制待验证）
+| arm | cls | maxHz | q_mean_fin | area_tail | runaway | 轨迹 rate@[3,6,10,14,18]s |
+|---|---|---|---|---|---|---|
+| D τ3000 η80 dn12000 | fragment | 67.6 | **0.61** | 0.0 | None | 18.8 → 0 → 0 → 8.1 → 9.8 |
+| D τ3000 η150 dn12000 | fragment | 126 | **0.60** | 0.0 | None | 16.2 → 12.5 → 0 → 6.6 → 8.3 |
 
-**一句话**：在**已测的**恢复 actuator（开环抬阈值 hold + 对称闭环电流；真·不对称电流重跑中）下，都**没能**把 M4 有界持续态干净地
-终止并恢复回间期——得到 rebound / 更低率持续态 / runaway pulse train。这是一个可信的**负结果**；一个候选的共同机制解释见下，
-但**尚未证明"不存在退出轨迹"**。
+**关键：跟错误的"runaway train"结论相反——真·不对称 hold `no_runaway`**，且行为**质变、更像生命周期**：初段活动（~20–50Hz）→ 电流把它**压到 0**
+→ 一段 ~8–10s **安静期 `q_I` 回灌到 0.7–0.8** → 之后出现**离散、短促、自终止的 burst**（~14.5s、18.5s，每个伴 `q_I` 下凹 + `S_G` 瞬起）。
+即"活动 → 压住 → `q_I` 恢复 → 返回式短事件"，**不再回到宽持续态、不失控**。这正是 review 猜的"慢释放让 `q_I` 恢复 + 缓慢放开网络"的机制。
+
+**但两条诚实 caveat（别再过度解读）**：
+1. **可能是 prevention 而非 termination**：`τ_p=3000` 快充 + 强 `η_r` → 电流约 3s 就介入，此时有界态还在爬升（~20–30Hz、没到满态 ~80Hz）→ 更像"在成形期就压住"而非"让发作充分成形后再终止"。要判"form-then-terminate"须**加大 τ_up**（如 5000–8000）让有界态先立起来。
+2. **后段离散 burst 未验证**是真返回间期事件还是 `p` 衰减到阈下的击穿；`cls=fragment`（非 `terminate_clean`）；seed1 单例；退出 basin 未映射。
+
+**定性**：真·不对称是**有希望的候选**（避开了 open-loop/对称的 rebound/lower-persistent/runaway 失效），**不是**确证的 clean lifecycle。下一步见 §8。
+
+## 8. Verdict —— open-loop+对称 actuator 退不出；不对称 slow-release = 候选（未确证）
+
+**一句话**：开环抬阈值 hold + 对称闭环电流都**没能**把 M4 有界态干净退回间期（rebound / 更低率持续态 / runaway）。
+**但真·不对称 slow-release（快充 τ_p=3000 / 慢放 τ_p_down=12000）质变**：`no_runaway`、把活动压到 0 后 `q_I` 回灌到 0.6–0.8、
+之后出现离散短促自终止 burst，不再回宽持续态——**更像生命周期，是有希望的候选**。这**不是**确证的 clean lifecycle
+（可能是 prevention 而非 termination、后段 burst 未验、seed1 单例、退出 basin 未映射），也**不是**原先误报的 bounded-negative
+（那个"不对称→runaway"因 P0 bug 实为对称、已作废）。
 
 **候选共同机制（不是 impossibility proof）**：`q_I` 与 `S_G` 对活动 `R` 的响应**符号相反**——
 `∂q̇_I/∂R < 0`（活动耗 `q_I`，局部去抑制助点燃），`∂Ṡ_G/∂R > 0`（活动建 `S_G`，除法压 recurrent 完成 containment）。
@@ -133,8 +149,8 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
 **完成度（分层，诚实）**：
 - engineering green：✅（persistence 场 off-by-default byte-parity，8+ 契约测试 + `BASELINE_SHA` 全绿；无引擎 re-bless）。
 - fast-state existence：✅（复现 M4 有界态 persist；复现间期 34 IED 基线）。
-- exit / dynamic accessibility：❌（已测：开环 hold + 对称电流；真·不对称重跑中）。
-- termination / recovery：❌（无 clean terminate；无回间期）。
+- exit / dynamic accessibility：开环 hold + 对称电流 ❌；**不对称 slow-release = 🟡 候选**（no_runaway + `q_I` 回灌 0.6–0.8 + 离散短事件；未确证）。
+- termination / recovery：对称 ❌；不对称 🟡（活动被压到 0 + `q_I` 恢复 + 返回式短 burst，但 `cls=fragment` 非 `terminate_clean`、可能 prevention）。
 - spatial pattern：❌（电流把宽态推成大面积游走活动，非局灶起始/终止波前）。
 - cross-seed：seed1（open-loop 5 + 对称 3 + 消融 2）+ seed3 对称复核（D_tau5000_eta40=fragment、D_tau8000_eta80=runaway）。
   **两 seed 每个已测对称动态臂都落 {fragment, runaway}、无一 clean terminate**；fragment↔runaway 边界随 seed 微移（S_G-饿死阈值 seed-敏感）。

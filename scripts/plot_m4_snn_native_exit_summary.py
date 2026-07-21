@@ -68,8 +68,8 @@ def main():
             ax.set_ylabel("q_I / S_G")
         if ci == nC - 1:
             ax.legend(fontsize=7, loc="center right")
-    fig.suptitle(a.suptitle + "  —  q_I refill (needs QUIET) and S_G containment (needs ACTIVITY) are anti-phase",
-                 fontsize=10)
+    fig.suptitle(a.suptitle + "  —  q_I (green) & S_G (red) respond to activity with opposite signs (negatively correlated)",
+                 fontsize=9)
     fig.tight_layout(rect=(0, 0, 1, 0.95))
     os.makedirs(os.path.dirname(a.out), exist_ok=True)
     fig.savefig(a.out, dpi=150)
