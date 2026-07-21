@@ -50,8 +50,10 @@ def main():
         axR.axvline(a0, ls=":", color="0.6", lw=1)
         axR.set_ylabel("rate_E (Hz)"); axR.set_xlim(0, t_rate[-1] if t_rate.size else 1)
         axR.set_title(f"{label}  ->  {row.get('provisional_label','?')}   "
-                      f"(env_occ={row.get('env_occ',float('nan')):.2f}, end={row.get('env_end_occ',float('nan')):.2f}, "
-                      f"mod={row.get('env_modulation',float('nan')):.2f})", fontsize=9, loc="left")
+                      f"(roll_occ={row.get('roll_occ',float('nan')):.2f}, "
+                      f"end={row.get('roll_end_occ',float('nan')):.2f}, "
+                      f"roll_hi={row.get('roll_high_ms',float('nan')):.0f}ms, "
+                      f"mod={row.get('roll_modulation',float('nan')):.2f})", fontsize=9, loc="left")
         for key, c, lab in (("af", "#000", "population"), ("af_core", "#c44e52", "core"),
                             ("af_axis", "#dd8452", "axis-band"), ("af_off", "#4c72b0", "off-axis")):
             axP.plot(t_af[:npz[key].size], npz[key], color=c, lw=0.8, label=lab, alpha=0.85)

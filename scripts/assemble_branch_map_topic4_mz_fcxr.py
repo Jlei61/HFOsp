@@ -65,10 +65,15 @@ def main():
             verdict_cells.append((D, d["D_label"]))
 
     finite = [D for D, l in verdict_cells if l in ("FINITE_HIGH", "BISTABLE")]
+    # per-RUN finite-high cells (even where the per-D aggregated to UNRESOLVED on plateau spread) are candidates
+    finite_cells = sorted(set(c["D"] for c in cells.values() if c["label"] in ("FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT")))
     meta = [D for D, l in verdict_cells if l == "METASTABLE_TRANSIENT"]
     elev = [D for D, l in verdict_cells if l == "ELEVATED_EVENT_TRAIN"]
     if finite:
         verdict = f"FINITE-HIGH / BISTABLE at D={finite} -> proceed to sech^2/eigenmode + seed3 + spatial confirm"
+    elif finite_cells:
+        verdict = (f"PROVISIONAL finite-high orbit candidate at D={finite_cells} (per-run FINITE_HIGH_ORBIT; per-D "
+                   "UNRESOLVED on plateau spread) -> requires T2=8s confirmation + IC convergence before any verdict")
     elif meta:
         verdict = (f"NO persistent high branch. Near-transition (D={meta}) shows bounded METASTABLE transients "
                    "that decay by the longer T2; RC1 saturation caps the amplitude but gives no high attractor.")
