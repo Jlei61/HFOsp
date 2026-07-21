@@ -23,6 +23,7 @@ import dataclasses
 import json
 import multiprocessing as mp
 import os
+import subprocess
 import sys
 import time
 
@@ -34,9 +35,168 @@ import run_m4_dynamic_qi as M4          # noqa: E402  (forces OMP=1 at import; p
 from kick_probe import simulate_kick    # noqa: E402
 from slow_field import SpatialSlowField, SpatialSlowFieldConfig  # noqa: E402
 from src.sef_hfo_m4_termination import classify_termination  # noqa: E402
+from src.sef_hfo_snn_engine_guard import record_versions, assert_versions  # noqa: E402
 
 BASE_KQ, BASE_AG = 0.10, 16.0
 ARR_KEYS = ("trace_qI_mean", "trace_SG", "trace_Irec", "rate", "af", "movie", "q_field_final")
+
+# ---- provenance / engine drift guard (spec 2026-07-21 §5, §12) --------------------------------------
+# The mechanism lives in the UNGUARDED slow_field.py (kick_probe/params/model/connectivity(_rot)/lfp stay
+# frozen -> no re-bless). This bless snapshot pins exactly those guarded files; _engine_guard() fails loud
+# if any drifted, so an unreviewed engine edit can't silently contaminate a run.
+ENGINE_VERSIONS = os.path.join(PP.ROOT, "results", "topic4_sef_hfo", "snn_heterogeneity", "engine_versions.json")
+_GUARDED_ENGINE = ("kick_probe.py", "params.py", "model.py", "connectivity.py", "connectivity_rot.py", "lfp.py")
+
+# module-local manifest state so a COW-forked _arm_worker can drop a "running" marker without threading
+# out/tag/seed through the Pool (set by _orchestrate_arms BEFORE the Pool forks).
+_MANI = {}
+
+
+def _engine_guard():
+    """Loud fail if a GUARDED engine file drifted from the bless snapshot (spec §12). A missing snapshot
+    is a warning, not a hard stop -- git history is the primary integrity record (sef_hfo_snn_engine_guard
+    docstring); slow_field.py is deliberately absent (this line's mechanism edits it)."""
+    if not os.path.exists(ENGINE_VERSIONS):
+        print(f"[engine-guard] WARN: bless snapshot missing ({ENGINE_VERSIONS}); skipping drift check", flush=True)
+        return
+    assert_versions(json.loads(open(ENGINE_VERSIONS).read()))
+
+
+def _provenance():
+    """base_sha (git HEAD) + engine_versions (sha256 of the GUARDED engine files) + argv (spec §6/§12
+    schema). Recorded in every run JSON + the manifest so a result is reproducible without the dir name."""
+    try:
+        base_sha = subprocess.check_output(["git", "-C", PP.ROOT, "rev-parse", "--short", "HEAD"],
+                                           text=True).strip() or None
+    except Exception:
+        base_sha = None
+    eng_dir = os.path.join(PP.ROOT, "src", "snn_engine")
+    paths = [os.path.join(eng_dir, f) for f in _GUARDED_ENGINE]
+    return dict(base_sha=base_sha, engine_versions=record_versions([p for p in paths if os.path.exists(p)]),
+                argv=" ".join(sys.argv))
+
+
+def _cfg_effective(cfg):
+    """Full persistence + M4 param snapshot for a run row / manifest (spec §6 schema). Distinguishes the
+    four axes the task brief §3 requires -- onset (persist_onset_ms) / tau_up (tau_p) / tau_down
+    (tau_p_down) / actuator (eta_r) -- and records k_q / alpha_G. persist_onset_ms + clamp_persist were
+    missing from the pre-Phase-0 inline dict (silently dropped)."""
+    return dict(use_persist=cfg.use_persist, tau_p=cfg.tau_p, tau_p_down=cfg.tau_p_down,
+                persist_onset_ms=cfg.persist_onset_ms, theta_p=cfg.theta_p, a50_p=cfg.a50_p,
+                sigma_p=cfg.sigma_p, eta_r=cfg.eta_r, p50_r=cfg.p50_r, n_r=cfg.n_r,
+                clamp_persist=cfg.clamp_persist, k_q=cfg.k_q, use_SG=cfg.use_SG, alpha_G=cfg.alpha_G)
+
+
+# ---- crash-safe per-arm output + run_manifest + resume (task brief §3) --------------------------------
+def _arm_dir(out, tag, seed):
+    return os.path.join(out, "per_arm", f"{tag}_seed{seed}")
+
+
+def _write_arm_result(arm_dir, row, arrays):
+    """Land one arm's row (JSON) + arrays (NPZ) the moment it finishes (npz first so a json failure can't
+    orphan arrays). Returns (json_path, npz_path). An interrupt now loses at most the in-flight arm."""
+    os.makedirs(arm_dir, exist_ok=True)
+    label = row["label"]
+    npzp = os.path.join(arm_dir, f"{label}.npz")
+    jp = os.path.join(arm_dir, f"{label}.json")
+    np.savez_compressed(npzp, **{k: np.asarray(v) for k, v in (arrays or {}).items()})
+    json.dump(_sanitize(row), open(jp, "w"), indent=2, allow_nan=False)
+    return jp, npzp
+
+
+def _load_completed_arms(arm_dir):
+    """label -> row for every per-arm JSON that parses AND has no 'error' (an error row is NOT complete,
+    so --resume re-runs it). Missing dir -> {}."""
+    out = {}
+    if not os.path.isdir(arm_dir):
+        return out
+    for fn in sorted(os.listdir(arm_dir)):
+        if not fn.endswith(".json"):
+            continue
+        try:
+            row = json.load(open(os.path.join(arm_dir, fn)))
+        except Exception:
+            continue
+        if isinstance(row, dict) and "error" not in row and "label" in row:
+            out[row["label"]] = row
+    return out
+
+
+def _manifest_dict(specs, results, running, provenance, meta):
+    """Per-arm status: complete (row in, no error) / error (row has 'error') / running (worker started) /
+    pending (submitted, not started). cfg_effective snapshot per arm so onset/tau_up/tau_down/actuator are
+    recoverable from the manifest alone."""
+    arms = {}
+    for (label, cfg, T_ms, perturb) in specs:
+        r = results.get(label)
+        if r is not None and "error" in r:
+            status = "error"
+        elif r is not None:
+            status = "complete"
+        elif label in running:
+            status = "running"
+        else:
+            status = "pending"
+        arms[label] = dict(status=status, cfg_effective=_cfg_effective(cfg), T_ms=float(T_ms),
+                           error=(r.get("error") if r and "error" in r else None),
+                           verdict=(r.get("verdict") if r else None),
+                           termination_class=(r.get("termination_class") if r else None))
+    return dict(provenance=provenance, meta=meta, n_arms=len(specs),
+                n_complete=sum(1 for a in arms.values() if a["status"] == "complete"),
+                arms=arms)
+
+
+def _scan_running(arm_dir, results):
+    """Labels whose worker dropped a `_running_<label>` marker and haven't produced a result yet."""
+    if not os.path.isdir(arm_dir):
+        return set()
+    return {fn[len("_running_"):] for fn in os.listdir(arm_dir)
+            if fn.startswith("_running_")} - set(results)
+
+
+def _orchestrate_arms(specs, out, tag, seed, provenance, meta, workers, run_one, resume=False):
+    """Run `specs` through `run_one(spec)->(row, arrays)`, landing each arm's JSON+NPZ + rewriting
+    run_manifest_<tag>_seed<seed>.json AS each completes (crash-safe). resume=True skips arms whose
+    per-arm JSON is already complete. workers<=1 runs serially (also the injectable-fake test path); else
+    a fork Pool + imap_unordered streams completions. Returns rows for ALL target arms
+    (loaded-from-disk + freshly computed)."""
+    os.makedirs(out, exist_ok=True)
+    arm_dir = _arm_dir(out, tag, seed)
+    os.makedirs(arm_dir, exist_ok=True)
+    _MANI["arm_dir"] = arm_dir                            # COW-inherited by forked workers
+    results = dict(_load_completed_arms(arm_dir)) if resume else {}
+    pending = [s for s in specs if s[0] not in results]
+
+    def _flush():
+        _write_manifest(out, tag, seed,
+                        _manifest_dict(specs, results, _scan_running(arm_dir, results), provenance, meta))
+
+    _flush()
+
+    def _consume(res):
+        row, arrays = res
+        label = row["label"]
+        _write_arm_result(arm_dir, row, arrays or {})
+        mk = os.path.join(arm_dir, f"_running_{label}")
+        if os.path.exists(mk):
+            os.remove(mk)
+        results[label] = row
+        _flush()
+
+    if workers <= 1:
+        for spec in pending:
+            _consume(run_one(spec))
+    elif pending:
+        with mp.Pool(min(workers, len(pending))) as pool:
+            for res in pool.imap_unordered(run_one, pending):
+                _consume(res)
+    return [results[s[0]] for s in specs if s[0] in results]
+
+
+def _write_manifest(out, tag, seed, manifest):
+    path = os.path.join(out, f"run_manifest_{tag}_seed{seed}.json")
+    json.dump(_sanitize(manifest), open(path, "w"), indent=2, allow_nan=False)
+    return path
 
 
 def _sanitize(obj):
@@ -167,9 +327,7 @@ def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
         p_mean_final=round(float(slow.p.mean()), 4), p_max_final=round(float(slow.p.max()), 4),
         p_peak=round(float(max(slow.trace_p_max)) if slow.trace_p_max else 0.0, 4),
         T_ms=float(T_ms), perturb_kind=(perturb["kind"] if perturb else None),
-        cfg_effective=dict(use_persist=cfg.use_persist, tau_p=cfg.tau_p, tau_p_down=cfg.tau_p_down,
-                           theta_p=cfg.theta_p, a50_p=cfg.a50_p, sigma_p=cfg.sigma_p, eta_r=cfg.eta_r,
-                           p50_r=cfg.p50_r, n_r=cfg.n_r, k_q=cfg.k_q, use_SG=cfg.use_SG, alpha_G=cfg.alpha_G),
+        cfg_effective=_cfg_effective(cfg),
         wall_s=round(time.time() - t0, 1), **M4._spatial_coverage(movie),
         events=[(round(e["t_on"], 1), round(e["t_off"], 1)) for e in events],
     )
@@ -186,6 +344,12 @@ def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
 
 def _arm_worker(spec):
     label, cfg, T_ms, perturb = spec
+    ad = _MANI.get("arm_dir")
+    if ad:                                                # drop a "running" marker so the manifest can
+        try:                                              # distinguish in-flight from queued arms
+            open(os.path.join(ad, f"_running_{label}"), "w").close()
+        except Exception:
+            pass
     S = M4._S["S"]
     try:
         return _run_persist_arm(S, label, cfg, T_ms, perturb=perturb)
@@ -205,9 +369,12 @@ def _build_arms(a):
             cells.append(("B_m4_anchor", _persist_cfg(**base), T, None))
         for tok in a.d_sweep.split(","):
             tp, er = (float(x) for x in tok.split(":"))
-            # build from P (single source of persist params incl tau_p_down) with tau_p overridden per cell,
-            # so a param can never be silently dropped again. Label encodes tau_p_down when asymmetric.
-            lab = f"D_tau{int(tp)}_eta{er:g}" + (f"_dn{int(a.tau_p_down)}" if a.tau_p_down else "")
+            # build from P (single source of persist params incl tau_p_down + persist_onset_ms) with tau_p
+            # overridden per cell, so a param can never be silently dropped again. Label distinguishes the
+            # four brief-§3 axes: tau_up (tau{tp}) / actuator (eta{er}) / tau_down (dn) / onset (on).
+            lab = (f"D_tau{int(tp)}_eta{er:g}"
+                   + (f"_dn{int(a.tau_p_down)}" if a.tau_p_down else "")
+                   + (f"_on{int(a.persist_onset_ms)}" if a.persist_onset_ms else ""))
             cells.append((lab, _persist_cfg(**base, use_persist=True, eta_r=er, **{**P, "tau_p": tp}), T, None))
         return cells
     catalog = {
@@ -225,8 +392,27 @@ def _build_arms(a):
     return [(name, catalog[name][0], catalog[name][1], None) for name in want if name in catalog]
 
 
+def _assemble_combined(out, tag, seed, S, meta, rows):
+    """Backward-compat combined outputs the plotters read: arms_<tag>_seed<seed>.{json,npz}. Rebuilt from
+    the per-arm pieces so it reflects exactly what completed (resume included). npz first (survives a json
+    failure)."""
+    tagf = f"{tag}_seed{seed}"
+    arm_dir = _arm_dir(out, tag, seed)
+    payload = dict(posE=S["posE"].astype(np.float32), src_xy=S["src_xy"], snk_xy=S["snk_xy"], L=float(S["L"]))
+    for r in rows:
+        npzp = os.path.join(arm_dir, f"{r['label']}.npz")
+        if os.path.exists(npzp):
+            with np.load(npzp) as z:
+                for k in z.files:
+                    payload[f"{r['label']}__{k}"] = z[k]
+    np.savez_compressed(os.path.join(out, f"arms_{tagf}.npz"), **payload)
+    json.dump(_sanitize(dict(meta=meta, rows=rows)),
+              open(os.path.join(out, f"arms_{tagf}.json"), "w"), indent=2, allow_nan=False)
+
+
 def _run_arms(a):
     os.makedirs(a.out, exist_ok=True)
+    _engine_guard()                         # spec §12: loud fail on unreviewed GUARDED-engine drift (slow_field unguarded)
     M4._EARLY_STOP["on"] = a.early_stop     # runaway arms truncate (still set runaway_ms); clean-exit/bounded run full
     t_build = time.time()
     S = PP.build_substrate(a.seed)
@@ -235,32 +421,28 @@ def _run_arms(a):
     with open(os.path.join(a.out, f"pids_{a.tag}_seed{a.seed}.txt"), "w") as f:
         f.write(f"{os.getpid()}\n")
     specs = _build_arms(a)
-    print(f"[arms] N={S['N']} seed={a.seed} tau_p={a.tau_p} theta_p={a.theta_p} a50_p={a.a50_p} "
-          f"eta_r={a.eta_r} sigma_p={a.sigma_p} arms={[s[0] for s in specs]} T={a.T} "
-          f"workers={a.workers} build={time.time()-t_build:.0f}s", flush=True)
+    prov = _provenance()
+    print(f"[arms] N={S['N']} seed={a.seed} tau_p={a.tau_p} tau_p_down={a.tau_p_down} onset={a.persist_onset_ms} "
+          f"theta_p={a.theta_p} a50_p={a.a50_p} eta_r={a.eta_r} sigma_p={a.sigma_p} arms={[s[0] for s in specs]} "
+          f"T={a.T} workers={a.workers} resume={a.resume} base_sha={prov['base_sha']} "
+          f"build={time.time()-t_build:.0f}s", flush=True)
     t_run = time.time()
-    with mp.Pool(min(a.workers, len(specs))) as pool:
-        results = pool.map(_arm_worker, specs)
-    rows = [r for r, _ in results]
-    tag = f"{a.tag}_seed{a.seed}"
-    np.savez_compressed(os.path.join(a.out, f"arms_{tag}.npz"),          # npz FIRST (survives a json failure)
-                        posE=S["posE"].astype(np.float32), src_xy=S["src_xy"], snk_xy=S["snk_xy"], L=float(S["L"]),
-                        **{f"{r['label']}__{k}": arr for (r, arrs) in results if arrs for k, arr in arrs.items()})
-    json.dump(_sanitize(dict(meta=dict(seed=a.seed, tau_p=a.tau_p, theta_p=a.theta_p, a50_p=a.a50_p, eta_r=a.eta_r,
-                                       sigma_p=a.sigma_p, clamp_val=a.clamp_val, T=a.T, base_kq=BASE_KQ, base_ag=BASE_AG,
-                                       N=int(S["N"]), axis_unit=S["axis_unit"].tolist(),
-                                       wall_s=round(time.time() - t_run, 1), argv=" ".join(sys.argv)),
-                             rows=rows)),
-              open(os.path.join(a.out, f"arms_{tag}.json"), "w"), indent=2, allow_nan=False)
+    meta = dict(seed=a.seed, tau_p=a.tau_p, tau_p_down=a.tau_p_down, persist_onset_ms=a.persist_onset_ms,
+                theta_p=a.theta_p, a50_p=a.a50_p, eta_r=a.eta_r, sigma_p=a.sigma_p, p50_r=a.p50_r, n_r=a.n_r,
+                clamp_val=a.clamp_val, T=a.T, base_kq=BASE_KQ, base_ag=BASE_AG, N=int(S["N"]),
+                axis_unit=S["axis_unit"].tolist(), argv=" ".join(sys.argv), provenance=prov)
+    rows = _orchestrate_arms(specs, a.out, a.tag, a.seed, prov, meta, a.workers, _arm_worker, resume=a.resume)
+    meta["wall_s"] = round(time.time() - t_run, 1)
+    _assemble_combined(a.out, a.tag, a.seed, S, meta, rows)
     print("\n===== Stage-2 dynamic arms =====", flush=True)
     for r in rows:
         if "error" in r:
-            print(f"  {r['label']:14s} ERROR {r['error']}", flush=True)
+            print(f"  {r['label']:24s} ERROR {r['error']}", flush=True)
             continue
-        print(f"  {r['label']:14s} verdict={r['verdict']:18s} cls={r['termination_class']:15s} "
+        print(f"  {r['label']:24s} verdict={r['verdict']:18s} cls={r['termination_class']:15s} "
               f"n_ev={r['n_events']:2d} maxHz={r['max_rate_hz']:6.1f} qmin={r['q_min_final']:.2f} "
               f"SGmax={r['S_G_max']:.2f} p_peak={r['p_peak']:.2f} area_tail={r.get('active_area_tail')}", flush=True)
-    print(f"wrote arms_{tag}.json + .npz to {a.out}", flush=True)
+    print(f"wrote arms_{a.tag}_seed{a.seed}.json + .npz (+ per_arm/ + run_manifest) to {a.out}", flush=True)
 
 
 def main():
@@ -298,6 +480,8 @@ def main():
     ap.add_argument("--early-stop", dest="early_stop", default=True, action=argparse.BooleanOptionalAction,
                     help="exit_atlas: early-stop genuine runaway for speed (won't cut the bounded state or an exit)")
     ap.add_argument("--workers", type=int, default=4)
+    ap.add_argument("--resume", action="store_true",
+                    help="arms mode: skip arms whose per-arm JSON already completed (crash-safe re-run)")
     ap.add_argument("--out", default=None)
     ap.add_argument("--tag", default="s1")
     a = ap.parse_args()

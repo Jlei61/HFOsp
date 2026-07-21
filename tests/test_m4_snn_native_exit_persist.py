@@ -158,7 +158,7 @@ def test_d_sweep_propagates_tau_p_down():
     sys.path.insert(0, os.path.join(ROOT, "scripts"))
     import run_m4_snn_native_exit as R
     a = types.SimpleNamespace(tau_p=5000.0, theta_p=0.05, a50_p=0.3, sigma_p=1.5, p50_r=0.15, n_r=4.0,
-                              tau_p_down=12000.0, T=20000.0, d_sweep="3000:80,3000:150",
+                              tau_p_down=12000.0, persist_onset_ms=0.0, T=20000.0, d_sweep="3000:80,3000:150",
                               include_anchor=False, eta_r=15.0, clamp_val=0.8, arms="")
     cells = R._build_arms(a)
     assert len(cells) == 2
