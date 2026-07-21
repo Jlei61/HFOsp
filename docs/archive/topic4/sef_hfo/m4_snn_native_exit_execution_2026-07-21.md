@@ -131,7 +131,7 @@ R4 必须用"固定 bath（外挂 `q` 储库、跟活动解耦）+ 离散 latch"
 - exit / dynamic accessibility：❌（开环+对称+不对称全 bounded-negative）。
 - termination / recovery：❌（无 clean terminate；无回间期）。
 - spatial pattern：❌（电流把宽态推成四处游走的大团，非局灶起始/终止波前）。
-- cross-seed：seed1 airtight（open-loop 5 + 对称 3 + 不对称 2 + 消融 2，全一致）；**seed3 复核：不对称 D_tau3000_eta150 = train_then_runaway（maxHz 238，runaway 11957ms）复现 runaway 失效模式**；对称 fragment cell seed3 重跑中。根因是结构属性（与 seed 无关）。
+- cross-seed：**2-seed 一致 bounded-negative**。seed1 穷举（open-loop 5 + 对称 3 + 不对称 2 + 消融 2）；seed3 复核：对称 D_tau5000_eta40=fragment、D_tau8000_eta80=runaway、不对称 D_tau3000_eta150=train_then_runaway。**两 seed 每个动态臂都落 {fragment, runaway}、无一 clean terminate**；fragment↔runaway 边界随 seed 微移（S_G-饿死阈值 seed-敏感），但"退不出去"seed-稳健，符合反相根因预测（结构属性、与 seed 无关）。
 
 **能写 / 不能写**：
 - 能写：M4 有界态是稳健吸引子；persistence-gated 恢复电流（任意 τ 对称性/强度）不能 clean-exit；根因=`q_I`↔`S_G` 反相；
@@ -164,9 +164,10 @@ R4 的人工成分正好对应 SNN 缺的那个解耦。
 非局灶起始、非渐进招募、非终止波前——即"电流把活动空间搬家，不是熄灭它"。因无 lifecycle candidate，**未跑昂贵的 Stage-3 自发长轨迹**（cheap-first 纪律），
 也无 paper-ready Figure 5；Figure 5 落为诚实的 NO-GO 诊断图。
 
-**cross-seed**：seed1 穷举一致（open-loop 5 holds + 对称 3 + 不对称 2 + 消融 2）。seed3 复核：**不对称 D_tau3000_eta150 = train_then_runaway
-复现 runaway 失效**（maxHz 238、runaway 11957ms）；对称 fragment cell（`s2d_s3` 第一次 detached 跑因 SIGHUP 死于写 JSON 前，已 harness-tracked 重跑 `s2d_s3b`）。
-失败根因（`q_I`↔`S_G` 反相）是 M4 设计的**结构属性、与 seed 无关**，故 verdict 不依赖 seed3——seed3 只作稳健性复核。
+**cross-seed（2-seed 一致）**：seed1 穷举（open-loop 5 holds + 对称 3 + 不对称 2 + 消融 2）；seed3 复核 `arms_s2d_s3b_seed3.json`（对称：D_tau5000_eta40=fragment、
+D_tau8000_eta80=runaway）+ `arms_s2dasym_s3_seed3.json`（不对称 D_tau3000_eta150=train_then_runaway）。**两 seed 每个动态臂都落 {fragment, runaway}、无一 clean terminate**；
+fragment↔runaway 边界随 seed 微移（S_G-饿死阈值 seed-敏感）。失败根因（`q_I`↔`S_G` 反相）是 M4 设计的**结构属性、与 seed 无关**，seed3 作稳健性复核确认。
+（注：`s2d_s3` 首次 detached 跑因 shell 退出 SIGHUP 死于写 JSON 前 → 已 harness-tracked 重跑为 `s2d_s3b`。）
 
 **资源**：worker 峰值 ≤8（多为 2–4），canary peak RSS 7.12GB，全程 `min mem_avail_frac=0.85`、**swap 增长 0**、未触发 protective stop、
 不干扰并行 FCXR 线；`OMP=1`；`resource_log.jsonl` + `topic4_resource_monitor.py`。
