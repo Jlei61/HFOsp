@@ -1,0 +1,52 @@
+{
+  "subject": "epilepsiae_1146",
+  "montage": "narrow_twoend_equal",
+  "seed": 1,
+  "T_ms": 2500,
+  "grid": {
+    "q_core": [
+      0.05,
+      0.4,
+      0.9
+    ],
+    "S_G": [
+      0.0,
+      0.2,
+      0.4
+    ],
+    "J_exit": [
+      0.0,
+      8.0,
+      20.0
+    ]
+  },
+  "n_cells": 27,
+  "regime_counts": {
+    "high_only": 2,
+    "bistable": 8,
+    "low_only": 17
+  },
+  "verdict": "low_basin_exists_and_reachable",
+  "finding": "A low/interictal basin (monostable low) covers 17/27 cells and is universal at recovered q_core=0.9; the ictal branch (runaway) is confined to no/weak containment S_G<=0.2 + depleted/mid q_core + weak recovery current. Raising S_G and J_exit collapses bistable->low_only. Even at fully depleted q_core=0.05, (S_G=0.4,J_exit>=8) or (S_G=0.2,J_exit=20) reaches low_only. => NOT a no-basin bottleneck; the stop-rule is not triggered. The remaining question is dynamic: does the trajectory reach and STAY (S_G decays when activity drops -> motivates a containment memory H). Division of labor: divisive S_G is the necessary brake (S_G=0 -> runaway on kick at q<=0.4); J_exit + high S_G then push the contained state into the low basin.",
+  "caveats": [
+    "frozen atlas != dynamic trajectory",
+    "frozen S_G undercounts dynamic containment (bounded-persist branch may read as runaway)",
+    "q_core frozen UNIFORMLY (core<surround structure deferred)",
+    "warm IC = focal core kick surrogate for the broad established-M4 fast state (kick_probe guarded)",
+    "seed 1 only"
+  ],
+  "lowest_corridor_SG_Jexit_per_qcore": {
+    "0.05": [
+      0.4,
+      8.0
+    ],
+    "0.4": [
+      0.2,
+      0.0
+    ],
+    "0.9": [
+      0.2,
+      0.0
+    ]
+  }
+}
