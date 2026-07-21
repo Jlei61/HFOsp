@@ -333,14 +333,91 @@ def plot_formed_state_diagnostic(out_dir, tag, seed, res, label="B_m4_anchor", m
     return out
 
 
+def _regate_at_onset(z, onset_ms, dt=0.1, movie_bin_ms=25.0, activity_bin_ms=25.0):
+    """Re-run the formed-state gate on ONLY [0, onset) of an intervention's own traces (review contract:
+    each intervention must independently be formed at its own onset, not just inherit the anchor's t_form)."""
+    i = int(onset_ms / dt); fi = int(onset_ms / movie_bin_ms); ai = int(onset_ms / activity_bin_ms)
+    movie = np.asarray(z.get("movie", np.zeros((0, 1, 1))), float)[:fi]
+    area = (movie > 0.1).mean(axis=(1, 2)) if movie.size else np.zeros(0)
+    return formed_state_time(np.asarray(z["rate"], float)[:i], np.asarray(z.get("trace_SG", []), float)[:i],
+                             np.asarray(z["trace_qI_mean"], float)[:i], area, dt=dt, movie_bin_ms=movie_bin_ms,
+                             core_activity=np.asarray(z.get("core_activity", []), float)[:ai],
+                             surround_activity=np.asarray(z.get("surround_activity", []), float)[:ai],
+                             trace_q_core=np.asarray(z.get("trace_q_core", []), float)[:i],
+                             trace_q_surround=np.asarray(z.get("trace_q_surround", []), float)[:i],
+                             activity_bin_ms=activity_bin_ms)
+
+
+def analyze_phase1(out_dir, seed=1, anchor_tag="p1anchor", intervene_tag="intervene", prev_tag="prevgated80",
+                   onset_ms=2300.0, recovery_margin_ms=1000.0):
+    """Full Phase-1 verdict (review 2026-07-22). Per intervention arm: (1) pre-onset byte-identity to the
+    anchor, (2) re-pass the formed-state gate at its own onset, (3) termination class, (4) if terminated,
+    match post-offset events to the A_slow_off baseline IEDs. Plus the gated-prevention control (do IEDs
+    survive the gated current on the slow-off substrate?). Writes phase1_verdict.json."""
+    _, anchor_z = _load_arm(out_dir, anchor_tag, seed, "B_m4_anchor")
+    base_row, base_z = _load_arm(out_dir, prev_tag, seed, "A_slow_off")
+    prev_row, _ = _load_arm(out_dir, prev_tag, seed, "A_persist_act")
+    base_feats = arm_event_features(base_row, base_z) if (base_row and base_z is not None) else []
+
+    ad = os.path.join(out_dir, "per_arm", f"{intervene_tag}_seed{seed}")
+    arms = {}
+    for label in sorted(f[:-5] for f in os.listdir(ad) if f.endswith(".json") and f.startswith("D_")):
+        row, z = _load_arm(out_dir, intervene_tag, seed, label)
+        ident = verify_pre_onset_identity(anchor_z, z, onset_ms) if anchor_z is not None else {"pre_onset_identical": None}
+        regate = _regate_at_onset(z, onset_ms)
+        term, offset = row.get("termination_class"), row.get("offset_ms")
+        rec = None
+        if offset is not None and base_feats:
+            post = arm_event_features(row, z, t_min=offset + recovery_margin_ms)
+            rec = recovery_match(base_feats, post)
+        verdict = classify_phase1_verdict(term or "", row.get("n_pre_runaway", 0), row.get("n_events", 0),
+                                          (rec["n_post"] if (rec and rec["recovered"]) else 0),
+                                          state_formed=(regate["t_form"] is not None))
+        arms[label] = dict(termination_class=term, offset_ms=offset,
+                           pre_onset_identical=ident["pre_onset_identical"],
+                           reformed_at_onset=bool(regate["t_form"] is not None),
+                           n_events=row.get("n_events"), q_mean_final=row.get("q_mean_final"),
+                           max_rate_hz=row.get("max_rate_hz"), area_tail=row.get("active_area_tail"),
+                           recovery=rec, verdict=verdict)
+    prev = None
+    if prev_row and base_row:
+        be, pe = base_row.get("events") or [], prev_row.get("events") or []
+        n_base_post = sum(1 for e in be if e[0] >= onset_ms)
+        n_prev_post = sum(1 for e in pe if e[0] >= onset_ms)
+        prev = dict(n_slowoff_total=len(be), n_slowoff_post_onset=n_base_post,
+                    n_gated_total=len(pe), n_gated_post_onset=n_prev_post,
+                    prevention_after_onset=bool(n_base_post > 0 and n_prev_post < 0.6 * n_base_post),
+                    note="gated current on slow-off substrate; onset-gated IED survival after onset")
+    out = dict(onset_ms=onset_ms, baseline_n_ieds=len(base_feats), arms=arms, prevention=prev)
+    json.dump(out, open(os.path.join(out_dir, f"phase1_verdict_seed{seed}.json"), "w"), indent=2,
+              default=lambda o: None)
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description="SNN-native M4 exit Phase-1/2 analysis")
+    ap.add_argument("--phase1", action="store_true", help="run the full Phase-1 verdict (needs intervene + prevgated arms)")
+    ap.add_argument("--onset-ms", type=float, default=2300.0)
     ap.add_argument("--out-dir", required=True, help="run --out dir (contains per_arm/<tag>_seed<seed>/)")
     ap.add_argument("--tag", required=True)
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--anchor-label", default="B_m4_anchor")
     ap.add_argument("--window-ms", type=float, default=1500.0)
     a = ap.parse_args()
+    if a.phase1:
+        v = analyze_phase1(a.out_dir, seed=a.seed, onset_ms=a.onset_ms)
+        print(json.dumps(v, indent=2, default=lambda o: None))
+        print(f"\n[Phase-1] onset={v['onset_ms']}ms  baseline IEDs={v['baseline_n_ieds']}")
+        for lab, r in v["arms"].items():
+            rec = r.get("recovery")
+            print(f"  {lab}: verdict={r['verdict']}  term={r['termination_class']} offset={r['offset_ms']} "
+                  f"pre_onset_identical={r['pre_onset_identical']} reformed={r['reformed_at_onset']} "
+                  f"recovered={rec['recovered'] if rec else None}")
+        if v.get("prevention"):
+            p = v["prevention"]
+            print(f"  prevention(gated): slow-off post-onset={p['n_slowoff_post_onset']} -> gated post-onset="
+                  f"{p['n_gated_post_onset']}  prevention_after_onset={p['prevention_after_onset']}")
+        return
     res = analyze_anchor(a.out_dir, a.tag, a.seed, label=a.anchor_label, window_ms=a.window_ms)
     fig = plot_formed_state_diagnostic(a.out_dir, a.tag, a.seed, res, label=a.anchor_label)
     json.dump(res, open(os.path.join(a.out_dir, f"formed_state_{a.tag}_seed{a.seed}.json"), "w"),
