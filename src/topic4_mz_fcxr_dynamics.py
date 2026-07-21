@@ -253,6 +253,73 @@ def classify_run_envelope(row, T=THRESHOLDS):
 
 
 # ------------------------------------------------------------------------------------
+# D1.5c — workpoint-relative classifier (reviewer P0: "high" = sustained deviation ABOVE the accepted
+#          interictal band, NOT above the near-zero quiet floor; the interictal workpoint is itself an
+#          oscillatory event train and must be classified INTERICTAL_WORKPOINT, not finite-high)
+# ------------------------------------------------------------------------------------
+WP_THRESHOLDS = dict(
+    ROLL_MS=300.0,       # rolling-mean rate window ("sustained" activity, not a single brief event)
+    HIGH_MS=1000.0,      # a new high branch must stay above the interictal band for at least ~1 s
+    HIGH_OCC=0.5,        # fraction of the window whose rolling rate is above the interictal upper bound
+    ELEVATED_OCC=0.10,   # above this occupancy = more active than interictal (event train); below = workpoint
+    MOD_ORBIT=0.30,      # rolling-rate modulation on a persistent high -> oscillatory (orbit), else fixed
+    BASELINE_Q=99.0,     # interictal band upper edge = this percentile of the baseline rolling-mean rate
+)
+
+
+def rolling_rate_upper(rate, dt_ms, win_ms=WP_THRESHOLDS["ROLL_MS"], q=WP_THRESHOLDS["BASELINE_Q"]):
+    """Interictal band upper edge: the q-th percentile of the win_ms rolling-mean rate over an accepted
+    interictal (slow-off / no-kick) reference run. A test run only counts as 'above the band' when its
+    rolling rate exceeds THIS empirical bound -- not the near-zero quiet floor."""
+    rate = np.asarray(rate, float)
+    w = max(1, int(round(win_ms / dt_ms)))
+    roll = _moving_avg(rate, w)
+    return float(np.percentile(roll, q)) if roll.size else 0.0
+
+
+def workpoint_metrics(rate, dt_ms, baseline_roll_hi, analysis_start_ms=0.0, T=WP_THRESHOLDS):
+    """Metrics of a test run RELATIVE to the empirical interictal band: occupancy / longest stretch / tail
+    occupancy of its ROLL_MS rolling-mean rate ABOVE baseline_roll_hi, plus the modulation of the above-band
+    segment (flat high vs oscillatory)."""
+    rate = np.asarray(rate, float)
+    a0 = max(0, int(round(analysis_start_ms / dt_ms)))
+    seg = rate[a0:]
+    if seg.size == 0:
+        return dict(roll_occ=0.0, roll_end_occ=0.0, roll_high_ms=0.0, roll_modulation=0.0, window_ms=0.0)
+    w = max(1, int(round(T["ROLL_MS"] / dt_ms)))
+    roll = _moving_avg(seg, w)
+    above = roll > baseline_roll_hi
+    endn = max(1, int(round(500.0 / dt_ms)))
+    hi = roll[above]
+    if hi.size >= 4:
+        p90, p10 = float(np.percentile(hi, 90)), float(np.percentile(hi, 10))
+        mod = float((p90 - p10) / max(p90, 1e-9))
+    else:
+        mod = 0.0
+    return dict(roll_occ=float(np.mean(above)), roll_end_occ=float(np.mean(above[-endn:])),
+                roll_high_ms=_longest_true_ms(above, dt_ms), roll_modulation=mod,
+                window_ms=float(seg.size * dt_ms))
+
+
+def classify_run_workpoint(row, T=WP_THRESHOLDS):
+    """Per-run label relative to the accepted interictal workpoint (reviewer P0 negative-control contract):
+    INTERICTAL_WORKPOINT = stays within the interictal band; ELEVATED_EVENT_TRAIN = above the band but not a
+    >=1 s sustained excursion; METASTABLE_TRANSIENT = a >=1 s above-band excursion that decays; FINITE_HIGH_* =
+    sustained above the band AND still above at the end (a new high branch), fixed vs orbit by modulation."""
+    if row["numerical_unsafe"]:
+        return "NUMERICAL_UNSAFE"
+    occ, end_occ, hi_ms = row["roll_occ"], row["roll_end_occ"], row["roll_high_ms"]
+    persistent = bool(row["window_ms"] >= T["HIGH_MS"] and occ >= T["HIGH_OCC"] and end_occ >= T["HIGH_OCC"])
+    if persistent:
+        return "FINITE_HIGH_ORBIT" if row["roll_modulation"] >= T["MOD_ORBIT"] else "FINITE_HIGH_FIXED"
+    if hi_ms >= T["HIGH_MS"]:                                 # a >=1 s contiguous above-band excursion that decayed
+        return "METASTABLE_TRANSIENT"
+    if occ >= T["ELEVATED_OCC"]:                             # more active than interictal, but not a high branch
+        return "ELEVATED_EVENT_TRAIN"
+    return "INTERICTAL_WORKPOINT"                            # within the accepted interictal band
+
+
+# ------------------------------------------------------------------------------------
 # D2.10 — SNN-connectivity sech^2 effective-operator lens at a landmark (reuse P1-2)
 # ------------------------------------------------------------------------------------
 

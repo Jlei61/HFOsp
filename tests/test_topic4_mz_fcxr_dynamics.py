@@ -270,3 +270,56 @@ def test_envelope_long_transient_is_metastable():
     bin_ms = 5; n = 3000 // bin_ms; af = np.zeros(n); af[:1500 // bin_ms] = 0.05
     lab, em = _classify_af(af, bin_ms)
     assert lab == "EXCURSION_DECAYED", (lab, em)
+
+
+# ---------------- D1.5c: workpoint-relative classifier (reviewer P0 -- interictal negative control) ----------------
+from src.topic4_mz_fcxr_dynamics import rolling_rate_upper, workpoint_metrics, classify_run_workpoint  # noqa: E402
+
+
+def _interictal_rate(dt_ms=2.0, n_ms=8000, period_ms=175, event_ms=12, peak=60.0, floor=0.5):
+    n = int(n_ms / dt_ms); r = np.full(n, floor); ev = int(event_ms / dt_ms)
+    for on in range(0, n, int(period_ms / dt_ms)):
+        r[on:on + ev] = peak
+    return r
+
+
+def _classify_rate(rate, dt_ms, band_hi, af_tail=0.0):
+    wm = workpoint_metrics(rate, dt_ms, band_hi)
+    return classify_run_workpoint(dict(numerical_unsafe=False, af_tail=af_tail, **wm)), wm
+
+
+def test_workpoint_interictal_is_workpoint_not_high():
+    # THE reviewer P0 negative control: the accepted interictal workpoint (oscillatory event train) at its
+    # real event density must be INTERICTAL_WORKPOINT, never finite-high.
+    dt = 2.0; band = rolling_rate_upper(_interictal_rate(dt), dt)
+    lab, wm = _classify_rate(_interictal_rate(dt), dt, band)
+    assert lab == "INTERICTAL_WORKPOINT", (lab, band, wm)
+
+
+def test_workpoint_sustained_fixed_high():
+    dt = 2.0; band = rolling_rate_upper(_interictal_rate(dt), dt)
+    lab, wm = _classify_rate(np.full(int(8000 / dt), 40.0), dt, band)   # continuously elevated, flat
+    assert lab == "FINITE_HIGH_FIXED", (lab, wm)
+
+
+def test_workpoint_slow_oscillatory_high():
+    dt = 2.0; band = rolling_rate_upper(_interictal_rate(dt), dt); n = int(8000 / dt)
+    rate = 25 + 15 * np.sin(2 * np.pi * (np.arange(n) * dt) / 1200.0)   # 10-40Hz, period 1.2s, always > band
+    lab, wm = _classify_rate(rate, dt, band)
+    assert lab == "FINITE_HIGH_ORBIT", (lab, wm)
+
+
+def test_workpoint_long_transient_is_metastable():
+    dt = 2.0; band = rolling_rate_upper(_interictal_rate(dt), dt)
+    rate = _interictal_rate(dt); rate[:int(2000 / dt)] = 40.0           # 2s high then back to interictal
+    lab, wm = _classify_rate(rate, dt, band)
+    assert lab == "METASTABLE_TRANSIENT", (lab, wm)
+
+
+def test_workpoint_scattered_elevation_is_event_train():
+    dt = 2.0; band = rolling_rate_upper(_interictal_rate(dt), dt)
+    rate = _interictal_rate(dt); n = rate.size
+    for on in range(int(1000 / dt), n, int(1500 / dt)):                 # 400ms above-band bumps, spaced
+        rate[on:on + int(400 / dt)] = 15.0
+    lab, wm = _classify_rate(rate, dt, band)
+    assert lab == "ELEVATED_EVENT_TRAIN", (lab, wm)

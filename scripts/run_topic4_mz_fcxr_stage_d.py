@@ -48,6 +48,7 @@ from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
     load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field,
     classify_run_provisional, classify_run_envelope, envelope_metrics, resolve_high_ic,
+    rolling_rate_upper, workpoint_metrics, classify_run_workpoint, WP_THRESHOLDS,
     classify_branch_D, THRESHOLDS,
 )
 from src.topic4_mz_conductance import oscillation_metrics  # noqa: E402
@@ -106,11 +107,6 @@ def _region_masks(S):
     return core, axis_band, (~core & ~axis_band)
 
 
-def _ds(x, target=2000):
-    x = np.asarray(x, np.float32)
-    return x[::max(1, int(np.ceil(x.size / max(1, target))))]
-
-
 def _branch_row(S, res, slow, bref, dt, analysis_start_ms, *, D, ic, kick_boost, seed, T_ms):
     """Reduce one completed run to the classifier observable row + a few downsampled scalar traces
     (population + core/axis/off-axis participation) so dynamics type (fixed / orbit / transient / event-train)
@@ -125,6 +121,7 @@ def _branch_row(S, res, slow, bref, dt, analysis_start_ms, *, D, ic, kick_boost,
                              active_fraction=af, af_bin_ms=af_bin, baseline_af_q95=Q95,
                              runaway=bool(not num["finite"]))
     env = envelope_metrics(af, af_bin, analysis_start_ms, Q95)
+    wm = workpoint_metrics(rate, dt, float(bref["rate_roll_hi"]), analysis_start_ms)   # primary (reviewer P0)
     endn = max(1, int(round(END_WIN_MS / dt)))
     end_rate = float(np.mean(rate[-endn:])) if rate.size else float("nan")
     afn = max(1, int(round(END_WIN_MS / af_bin)))
@@ -137,9 +134,14 @@ def _branch_row(S, res, slow, bref, dt, analysis_start_ms, *, D, ic, kick_boost,
         a, _ = OLD.C.active_fraction(spk[:, mask], dt, OLD.C.BIN_MS)
         return np.asarray(a, float)
 
+    # af/regions kept at NATIVE bin (already coarse ~1ms; a 4s run is ~4000 pts) so af_bin_ms stays correct;
+    # only the fine rate_E (dt=0.05) is downsampled, with its matching rate_dt_ms (fixes the plotter time axis).
+    rate_stride = max(1, int(np.ceil(rate.size / 2000)))
     traces = dict(af_bin_ms=np.asarray([af_bin], np.float32),
-                  rate_dt_ms=np.asarray([dt * max(1, int(np.ceil(rate.size / 2000)))], np.float32),
-                  rate_E=_ds(rate), af=_ds(af), af_core=_ds(_reg(core)), af_axis=_ds(_reg(axm)), af_off=_ds(_reg(offm)))
+                  rate_dt_ms=np.asarray([dt * rate_stride], np.float32),
+                  rate_E=rate[::rate_stride].astype(np.float32),
+                  af=af.astype(np.float32), af_core=_reg(core).astype(np.float32),
+                  af_axis=_reg(axm).astype(np.float32), af_off=_reg(offm).astype(np.float32))
     row = dict(
         D=float(D), ic=ic, kick_boost=float(kick_boost), seed=int(seed), T_ms=float(T_ms), dt=float(dt),
         analysis_start_ms=float(analysis_start_ms),
@@ -155,6 +157,9 @@ def _branch_row(S, res, slow, bref, dt, analysis_start_ms, *, D, ic, kick_boost,
         env_high_ms=float(env["env_high_ms"]), env_end_occ=float(env["env_end_occ"]),
         env_occ=float(env["env_occ"]), env_modulation=float(env["env_modulation"]),
         env_window_ms=float(env["env_window_ms"]),
+        roll_occ=float(wm["roll_occ"]), roll_end_occ=float(wm["roll_end_occ"]),
+        roll_high_ms=float(wm["roll_high_ms"]), roll_modulation=float(wm["roll_modulation"]),
+        window_ms=float(wm["window_ms"]), baseline_roll_hi=float(bref["rate_roll_hi"]),
     )
     return row, traces
 
@@ -198,8 +203,17 @@ def cmd_baseline(args):
         res, slow = _stage_d_run(S, cfg, args.T, kick_boost=0.0, t_kick=1e9, seed=args.seed, dt=DT_D)
         base = OLD.compute_baseline_ref(res, DT_D)
         num = _numerical_dt(S, res, slow, DT_D)
+        rate = np.asarray(res["rate_E"], float)
+        rate_roll_hi = rolling_rate_upper(rate, DT_D)          # interictal band upper edge (300ms rolling-mean q99)
+        af, af_bin = OLD.C.active_fraction(res["E_spk_bool"], DT_D, OLD.C.BIN_MS)
+        rate_stride = max(1, int(np.ceil(rate.size / 4000)))
+        FCXR._write_npz(os.path.join(OUT, f"baseline_trace_seed{args.seed}.npz"),
+                        rate_dt_ms=np.asarray([DT_D * rate_stride], np.float32),
+                        rate_E=rate[::rate_stride].astype(np.float32),
+                        af_bin_ms=np.asarray([af_bin], np.float32), af=np.asarray(af, np.float32))
         payload = dict(seed=args.seed, dt=DT_D, T=args.T, g_sat=G_SAT, wall_s=round(time.time() - t0, 1),
                        baseline_rate=base.baseline_rate, sigma_rate=base.sigma_rate, floor_af=base.floor_af,
+                       rate_roll_hi=rate_roll_hi, roll_ms=WP_THRESHOLDS["ROLL_MS"], baseline_q=WP_THRESHOLDS["BASELINE_Q"],
                        n_returning=base.n_events, duration_median_ms=base.dur_med,
                        participation_lo=base.part_lo, participation_hi=base.part_hi,
                        peak_rate_lo=base.act_lo, peak_rate_hi=base.act_hi, numerical=num)
@@ -207,8 +221,8 @@ def cmd_baseline(args):
         FCXR._write_json(out, payload)
         FCXR._resource_log(run_dir, "baseline_done", dict(wall_s=payload["wall_s"], **num))
         print(f"[baseline] seed{args.seed}: rate={base.baseline_rate:.2f}+/-{base.sigma_rate:.2f}Hz "
-              f"af_q95={base.floor_af:.4f} n_ret={base.n_events} safe={not num['numerical_unsafe']} "
-              f"-> {out}  ({payload['wall_s']}s)", flush=True)
+              f"roll_hi(interictal band)={rate_roll_hi:.1f}Hz af_q95={base.floor_af:.4f} n_ret={base.n_events} "
+              f"safe={not num['numerical_unsafe']} -> {out}  ({payload['wall_s']}s)", flush=True)
 
 
 def cmd_smoke(args):
@@ -276,7 +290,8 @@ def cmd_pilot(args):
         by_D = {}
         for row in rows:
             row["label_raw_contiguity"] = classify_run_provisional(row)
-            row["provisional_label"] = classify_run_envelope(row)
+            row["label_envelope"] = classify_run_envelope(row)
+            row["provisional_label"] = classify_run_workpoint(row)
             by_D.setdefault(row["D"], {})[row["label"].split("_")[-1]] = row
         per_D = []
         for D in PILOT_D:
@@ -313,14 +328,15 @@ def _grid_cell_task(task):
                                         T_post_ms=task["T_post"], seed=_CTX["seed"], dt=DT_D)
     row["label"] = task["label"]; row["slot"] = task["slot"]; row["window"] = task["window"]
     row["wall_s"] = round(time.time() - t0, 1)
-    row["label_raw_contiguity"] = classify_run_provisional(row)      # legacy raw-contiguity classifier (comparison)
-    row["provisional_label"] = classify_run_envelope(row)            # envelope classifier (primary, reviewer P1)
+    row["label_raw_contiguity"] = classify_run_provisional(row)      # legacy raw-contiguity (comparison)
+    row["label_envelope"] = classify_run_envelope(row)              # envelope-vs-near-zero-q95 (comparison; flawed)
+    row["provisional_label"] = classify_run_workpoint(row)          # workpoint-relative (PRIMARY, reviewer P0)
     FCXR._write_json(os.path.join(run_dir, "per_cell", f"{task['label']}.json"), row)
     FCXR._write_npz(os.path.join(run_dir, "per_cell", f"{task['label']}_trace.npz"),
                     max_raw_gErec=np.asarray(getattr(slow, "max_raw_gErec", []), np.float32), **traces)
-    print(f"[grid] {task['label']:20s} -> {row['provisional_label']:18s} "
-          f"env_occ={row['env_occ']:.2f} env_end={row['env_end_occ']:.2f} env_hi={row['env_high_ms']:6.0f}ms "
-          f"env_mod={row['env_modulation']:.2f} end={row['end_rate_hz']:5.1f}Hz "
+    print(f"[grid] {task['label']:20s} -> {row['provisional_label']:20s} "
+          f"roll_occ={row['roll_occ']:.2f} roll_end={row['roll_end_occ']:.2f} roll_hi={row['roll_high_ms']:6.0f}ms "
+          f"end={row['end_rate_hz']:5.1f}Hz band={row['baseline_roll_hi']:.1f}Hz "
           f"unsafe={str(row['numerical_unsafe'])[0]} {row['wall_s']}s", flush=True)
     del slow; gc.collect()
     return row
