@@ -218,8 +218,11 @@ def verify_pre_onset_identity(anchor_npz, cand_npz, onset_ms, dt=0.1):
     for k in ("rate", "trace_qI_mean", "trace_SG"):
         a = np.asarray(anchor_npz.get(k, []), float)
         c = np.asarray(cand_npz.get(k, []), float)
-        m = min(i, a.size, c.size)
-        checks[k] = bool(m > 0 and np.array_equal(a[:m], c[:m]))
+        if a.size == 0 and c.size == 0:
+            checks[k] = True                       # both traces absent (e.g. no S_G pool) -> vacuously identical
+        else:
+            m = min(i, a.size, c.size)
+            checks[k] = bool(m > 0 and np.array_equal(a[:m], c[:m]))
     return dict(pre_onset_identical=all(checks.values()), onset_ms=onset_ms, per_trace=checks)
 
 
