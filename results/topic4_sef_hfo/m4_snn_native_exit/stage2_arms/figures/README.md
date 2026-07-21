@@ -14,6 +14,10 @@
 上面 fragment 态的源空间活动帧：一个**大团四处游走**（压这里→那里冒→漂移），非局灶起始、非轴向招募、非终止波前。
 **关注点**：电流是把活动空间搬家、不是熄灭它。
 
-### arms_s2dasym_seed1.png
-不对称 `p`（快充 τ_p=3000 + 慢放 τ_p_down=12000 = R4 latch 的连续版）。两个 η_r 都变成**周期性失控脉冲列**：慢放长压期 `S_G` 排空、`q_I` 回灌，活动一恢复就无 containment→失控脉冲→`S_G` 瞬起→熄→再排空，如此循环。
-**关注点**：下行 `q_I`/`S_G` 反相锯齿——把"灌满油箱需要安静"和"刹车就位需要活动"这对矛盾暴露得最干净；不对称 hold 没解决它，只是把它变成极限环。
+### arms_asymfix_seed1.png（真·不对称，修复后）
+真·不对称 `p`（快充 τ_p=3000 + 慢放 τ_p_down=12000，`cfg_effective` 确认 tau_p_down=12000）。**不失控**：初段活动被压到 0 → 安静期 `q_I` 回灌到 0.7–0.8 → 之后**离散短促 burst**（伴 `q_I` 下凹 + `S_G` 瞬起）。
+**关注点**：这是本线唯一像"活动→压住→恢复→返回式短事件"的轨迹，但**未确证**：τ_p=3000 快充约 3s 就介入、有界态还没到满态（可能 prevention 非 termination）；后段 burst ~26–198ms、~每 4s 一次（长于基线 IED ~22ms、疏于 ~0.3–0.5s），更像 rebound/breakthrough 而非返回间期事件；空间仍是宽条带。⚠️ 旧 `arms_s2dasym*`（此前误标"真不对称"、实为对称 τ_p=3000 的 P0-bug 跑）已移入 `../invalidated_pre_p0_fix/`。
+
+### A_sensor_on / A_persist_act（selectivity + prevention 控制）
+`A_sensor_on`=slow-off + 传感器(η_r=0)，测真间期事件充 `p` 到多少。`A_persist_act`=slow-off + **候选 actuator 开**（同候选参数 τ3000/τ_down12000/p50=0.15/η80,150），测真 34 个 IED 在候选电流下是否存活（prevention 检验）。
+**关注点**：候选 `p50=0.15` 下 `Φ(0.084)≈0.09→7–13mV`，不可忽略——所以"候选只作用持续态不误伤 IED"必须用**候选参数匹配**的 `A_persist_act` 验证（`arms_prevctl_eta*`），不能用 `p50=0.25` 的 `A_sensor_on` 代替。

@@ -1,7 +1,8 @@
 # SNN-native M4 containment-to-exit lifecycle — execution log (2026-07-21)
 
-> **Status: CLOSED — BOUNDED-NEGATIVE (temporal lifecycle).** Stage 0–2 done (open-loop exit atlas + dynamic
-> arms symmetric/asymmetric + ablations, seed1 exhaustive; seed3 cross-seed confirmation running). Verdict §8.
+> **Status: 开环+对称退不出；不对称 slow-release = 待确认候选（GO 窄确认）.** Stage 0–2 done; P0（`d_sweep` 漏传 `tau_p_down`）
+> 已修 + 真·不对称重跑（`arms_asymfix`）。当前科学标签=**slow-release suppression–rebound bursting candidate**，非确证可恢复 lifecycle。
+> 最大风险：候选参数（`p50=0.15`, η80/150）可能压制普通 IED（prevention）→ 正跑候选参数匹配控制 `arms_prevctl_eta*`。Verdict §8。
 > Mechanism SCREEN, not a seizure claim. Branch `codex/topic4-m4-snn-native-exit`, base `4d40b03`.
 > Spec: `docs/superpowers/specs/2026-07-21-topic4-m4-snn-native-exit-design.md`.
 
@@ -88,9 +89,10 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
   一压活动就少 → `p` 的驱动就少 → 电流就弱 → 稳到一个自洽的低持续态（~25Hz、`q_I` 只回灌到 ~0.18）。
   太弱/太慢的电流反而饿死 `S_G` 除法池 → 失控。**都不给 clean terminate+recover**——与 STD/shunt 的 fragment/suppress 撞同一堵墙。
 - **反馈自限**：`p` 只涨到 ~0.22（远低于 sensor-only 的 0.55），因为压制切掉了自己的传感器输入（闭环自限），有效电流比标定弱。
-- **传感器选择性（真数据验证，`A_sensor_on` slow-off + sensor η_r=0）**：在真实 34 个间期事件上 `p_max` 只涨到 **0.084**（p_mean 0.027），
-  远低于有界态的 0.55；Hill `p50_r=0.25` 下 `Φ(0.084)≈0.013`≈0 → **actuator 在真间期事件上基本不触发**。即持续时间门控在真衬底上确实区分"短间期"与"长有界"，
-  不只是单元测试。（回应 review P1：selectivity 现有真数据支持。）
+- **传感器选择性（⚠️ 控制参数不匹配，结论待补）**：`A_sensor_on`（slow-off + sensor η_r=0）测得真 34 个间期事件 `p_max` 只涨到 **0.084**（p_mean 0.027），
+  远低于有界态的 0.55——这是好迹象。**但此控制用 `p50_r=0.25`（`Φ(0.084)≈0.013`≈0），而候选用 `p50_r=0.15`**：`Φ(0.084)≈0.090` → 电流 **7.2mV(η80) / 13.4mV(η150)**，
+  **不可忽略**（review P0-science 抓到）。且候选的慢衰减会跨事件累积。所以**不能**据 `A_sensor_on` 说"候选只作用持续态、不误伤 IED"——
+  必须用**候选参数匹配**的 slow-off + actuator 控制（`A_persist_act`：τ3000/τ_down12000/p50=0.15/η80,150，`arms_prevctl_eta*` 运行中）看真 IED 是否存活。这是判"prevention vs termination"的关键门。
 - **空间**：源空间帧显示电流把宽持续态推成一个**大面积游走活动**（压这里→那里冒→漂移），非局灶起始、非轴向招募、非终止波前
   （空间验收失败；6 帧不足以严格区分"连续游走"与"不同区域交替点燃"，下一版需 kymograph）。图 `results/.../stage2_arms/figures/{arms_s2d_seed1.png, spatial_D_tau5000_eta40.png}`。
 - **⚠️ asymmetric `p`（见 §7）**：原 `s2dasym` 因 `d_sweep` 漏传 `tau_p_down` 实为对称、已作废；**真·不对称（τ_up3000/τ_down12000）已修复重跑 `s2dasymFIX`，结果折入 §7**。
@@ -179,23 +181,22 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
 ## 9. 产物、Stage-4 空间、cross-seed、资源、git
 
 **关键图**（`results/topic4_sef_hfo/m4_snn_native_exit/`，各 `figures/` 有中文 README）：
-- `figures/fig5_no_go_diagnostic.png` —— 结论图：四列结局（persist / open-loop rebound / symmetric fragment / asymmetric runaway）+ `q_I`/`S_G` 反相。
+- `figures/fig5_exit_attempts_diagnostic.png` —— 四列结局（persist / open-loop rebound / symmetric lower-rate-persistent / **真·不对称 candidate=suppress→refill→discrete bursts**）。
 - `stage1_exit_atlas/figures/exit_atlas_s1_seed1.png`（短压 500/3000/6000）+ `exit_atlas_s1long_seed1.png`（长压 10000/14000）。
-- `stage2_arms/figures/{arms_s2cal_seed1.png（A/B/C 校准）, arms_s2d_seed1.png（对称扫描）, arms_s2dasym_seed1.png（不对称）, spatial_D_tau5000_eta40.png（游走）}`。
+- `stage2_arms/figures/{arms_s2cal_seed1.png（A/B/C 校准）, arms_s2d_seed1.png（对称扫描）, arms_asymfix_seed1.png（真·不对称 candidate）, spatial_D_tau5000_eta40.png（对称态游走）}`。
+- **作废**（P0-bug，移入 `stage2_arms/invalidated_pre_p0_fix/`）：`arms_s2dasym_seed1.*`, `arms_s2dasym_s3_seed3.*`（实为对称 τ_p=3000）。
 
-**Summary JSON**：`stage1_exit_atlas/exit_atlas_s1{,long}_seed1.json`、`stage2_arms/arms_s2{cal,d,dasym,abl}_seed1.json`（raw traces `.npz` gitignored）。
+**Summary JSON**：`stage1_exit_atlas/exit_atlas_s1{,long}_seed1.json`、`stage2_arms/arms_s2{cal,d,abl}_seed1.json` + `arms_asymfix_seed1.json`（真·不对称）+ `arms_sensor_/prevctl_eta*`（selectivity/prevention 控制）（raw `.npz` gitignored）。
 
-**脚本**：`scripts/{run_m4_snn_native_exit.py（exit_atlas 探针 + arms 动态臂 + d_sweep）, plot_m4_snn_native_exit.py, plot_m4_snn_native_exit_spatial.py, plot_m4_snn_native_exit_summary.py, topic4_resource_monitor.py}`；引擎 `src/snn_engine/slow_field.py`（`p` 场）；测试 `tests/test_m4_snn_native_exit_persist.py`（9 绿 + `BASELINE_SHA` 绿）。
+**脚本**：`scripts/{run_m4_snn_native_exit.py（exit_atlas 探针 + arms 动态臂 + d_sweep + A_persist_act）, plot_m4_snn_native_exit{,_spatial,_summary}.py, topic4_resource_monitor.py}`；引擎 `src/snn_engine/slow_field.py`（`p` 场，含非对称 `tau_p_down`）；测试 `tests/test_m4_snn_native_exit_persist.py`（10 绿含 `test_d_sweep_propagates_tau_p_down` + `BASELINE_SHA` 绿）。
 
 **spec / archive**：`docs/superpowers/specs/2026-07-21-topic4-m4-snn-native-exit-design.md`；本文件。
 
-**Stage-4 空间**：源空间活动帧（`spatial_D_tau5000_eta40.png`）显示恢复电流把宽持续态推成一个**四处游走的大团**（压这里→那里冒→漂移），
-非局灶起始、非渐进招募、非终止波前——即"电流把活动空间搬家，不是熄灭它"。因无 lifecycle candidate，**未跑昂贵的 Stage-3 自发长轨迹**（cheap-first 纪律），
-也无 paper-ready Figure 5；Figure 5 落为诚实的 NO-GO 诊断图。
+**Stage-4 空间**：对称 fragment 态（`spatial_D_tau5000_eta40.png`）是大面积游走活动（非局灶）。真·不对称 candidate 的后段 burst **空间上仍是宽条带/半平面切换、非紧凑双核事件**——即使时间上孤立、空间上没恢复成原始 IED 形态，故**不能**写"回到同一种间期事件"。**未跑** Stage-3 自发长轨迹 / paper-ready Figure 5（候选未确证，按 cheap-first 先做 §8 窄确认）。
 
-**cross-seed（2-seed 一致）**：seed1 穷举（open-loop 5 holds + 对称 3 + 不对称 2 + 消融 2）；seed3 复核 `arms_s2d_s3b_seed3.json`（对称：D_tau5000_eta40=fragment、
-D_tau8000_eta80=runaway）+ `arms_s2dasym_s3_seed3.json`（不对称 D_tau3000_eta150=train_then_runaway）。**两 seed 每个动态臂都落 {fragment, runaway}、无一 clean terminate**；
-fragment↔runaway 边界随 seed 微移（S_G-饿死阈值 seed-敏感）。失败根因（`q_I`↔`S_G` 反相）是 M4 设计的**结构属性、与 seed 无关**，seed3 作稳健性复核确认。
+**cross-seed**：seed1（open-loop 5 holds + 对称 3 + 消融 2 + 真·不对称 2）+ seed3 对称复核 `arms_s2d_s3b_seed3.json`（D_tau5000_eta40=fragment、D_tau8000_eta80=runaway）。
+**已测对称动态臂两 seed 都落 {fragment, runaway}、无 clean terminate**（fragment↔runaway 边界随 seed 微移）。真·不对称 candidate 目前只有 seed1，多 seed 待窄确认后再上。
+（⚠️ 原 §此处引用的"不对称 D_tau3000_eta150=train_then_runaway seed3"是 P0-bug 的对称跑、已作废。）
 （注：`s2d_s3` 首次 detached 跑因 shell 退出 SIGHUP 死于写 JSON 前 → 已 harness-tracked 重跑为 `s2d_s3b`。）
 
 **资源**：worker 峰值 ≤8（多为 2–4），canary peak RSS 7.12GB，全程 `min mem_avail_frac=0.85`、**swap 增长 0**、未触发 protective stop、

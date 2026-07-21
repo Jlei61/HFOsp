@@ -212,6 +212,7 @@ def _build_arms(a):
     catalog = {
         "A_slow_off":  (_persist_cfg(k_q=0.0, use_SG=False), T),
         "A_sensor_on": (_persist_cfg(k_q=0.0, use_SG=False, use_persist=True, eta_r=0.0, **P), T),  # p on real IEDs, actuator off
+        "A_persist_act": (_persist_cfg(k_q=0.0, use_SG=False, use_persist=True, eta_r=a.eta_r, **P), T),  # slow-off + candidate actuator ON -> do real IEDs survive? (prevention test)
         "B_m4_anchor": (_persist_cfg(**base), T),
         "C_sensor_on": (_persist_cfg(**base, use_persist=True, eta_r=0.0, **P), T),   # p evolves, actuator off
         "D_full":      (_persist_cfg(**base, use_persist=True, eta_r=a.eta_r, **P), T),
