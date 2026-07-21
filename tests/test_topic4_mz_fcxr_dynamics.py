@@ -323,3 +323,27 @@ def test_workpoint_scattered_elevation_is_event_train():
         rate[on:on + int(400 / dt)] = 15.0
     lab, wm = _classify_rate(rate, dt, band)
     assert lab == "ELEVATED_EVENT_TRAIN", (lab, wm)
+
+
+# ---------------- D1.5c: workpoint per-D aggregation ----------------
+from src.topic4_mz_fcxr_dynamics import resolve_high_ic_wp, classify_branch_D_wp   # noqa: E402
+
+
+def test_resolve_high_ic_wp():
+    assert resolve_high_ic_wp("FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED") == "FINITE_HIGH_FIXED"
+    assert resolve_high_ic_wp("FINITE_HIGH_ORBIT", "FINITE_HIGH_FIXED") == "FINITE_HIGH_ORBIT"
+    assert resolve_high_ic_wp("FINITE_HIGH_FIXED", "ELEVATED_EVENT_TRAIN") == "METASTABLE_TRANSIENT"  # high@T1, gone@T2
+    assert resolve_high_ic_wp("ELEVATED_EVENT_TRAIN", "ELEVATED_EVENT_TRAIN") == "ELEVATED_EVENT_TRAIN"
+    assert resolve_high_ic_wp("INTERICTAL_WORKPOINT", "INTERICTAL_WORKPOINT") == "INTERICTAL_WORKPOINT"
+    assert resolve_high_ic_wp("NUMERICAL_UNSAFE", "FINITE_HIGH_FIXED") == "NUMERICAL_UNSAFE"
+
+
+def test_classify_branch_D_wp():
+    assert classify_branch_D_wp("INTERICTAL_WORKPOINT", ["INTERICTAL_WORKPOINT", "INTERICTAL_WORKPOINT"], [3, 3])["D_label"] == "INTERICTAL_WORKPOINT"
+    assert classify_branch_D_wp("ELEVATED_EVENT_TRAIN", ["INTERICTAL_WORKPOINT", "ELEVATED_EVENT_TRAIN"], [8, 9])["D_label"] == "ELEVATED_EVENT_TRAIN"
+    assert classify_branch_D_wp("INTERICTAL_WORKPOINT", ["FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED"], [40, 41])["D_label"] == "BISTABLE"
+    assert classify_branch_D_wp("FINITE_HIGH_FIXED", ["FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED"], [40, 41])["D_label"] == "FINITE_HIGH"
+    assert classify_branch_D_wp("INTERICTAL_WORKPOINT", ["METASTABLE_TRANSIENT", "METASTABLE_TRANSIENT"], [None, None])["D_label"] == "METASTABLE_TRANSIENT"
+    # only one high finite, or plateaus disagree -> UNRESOLVED
+    assert classify_branch_D_wp("INTERICTAL_WORKPOINT", ["FINITE_HIGH_FIXED", "INTERICTAL_WORKPOINT"], [40, None])["D_label"] == "UNRESOLVED"
+    assert classify_branch_D_wp("INTERICTAL_WORKPOINT", ["FINITE_HIGH_FIXED", "FINITE_HIGH_FIXED"], [20, 60])["D_label"] == "UNRESOLVED"

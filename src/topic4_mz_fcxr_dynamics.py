@@ -264,6 +264,7 @@ WP_THRESHOLDS = dict(
     ELEVATED_OCC=0.10,   # above this occupancy = more active than interictal (event train); below = workpoint
     MOD_ORBIT=0.30,      # rolling-rate modulation on a persistent high -> oscillatory (orbit), else fixed
     BASELINE_Q=99.0,     # interictal band upper edge = this percentile of the baseline rolling-mean rate
+    PLATEAU_TOL=0.20,    # two high ICs must land within this relative plateau spread to count as one branch
 )
 
 
@@ -317,6 +318,50 @@ def classify_run_workpoint(row, T=WP_THRESHOLDS):
     if occ >= T["ELEVATED_OCC"]:                             # more active than interictal, but not a high branch
         return "ELEVATED_EVENT_TRAIN"
     return "INTERICTAL_WORKPOINT"                            # within the accepted interictal band
+
+
+def resolve_high_ic_wp(t1, t2):
+    """Two-window (T1,T2) resolution for the workpoint label set: a new high branch must be finite at BOTH
+    windows; finite at T1 but gone by the longer T2 = a long transient (METASTABLE_TRANSIENT)."""
+    if "NUMERICAL_UNSAFE" in (t1, t2):
+        return "NUMERICAL_UNSAFE"
+    f1, f2 = t1 in _FINITE, t2 in _FINITE
+    if f1 and f2:
+        return "FINITE_HIGH_ORBIT" if "FINITE_HIGH_ORBIT" in (t1, t2) else "FINITE_HIGH_FIXED"
+    if f1 and not f2:
+        return "METASTABLE_TRANSIENT"
+    if "METASTABLE_TRANSIENT" in (t1, t2):
+        return "METASTABLE_TRANSIENT"
+    if "ELEVATED_EVENT_TRAIN" in (t1, t2):
+        return "ELEVATED_EVENT_TRAIN"
+    return "INTERICTAL_WORKPOINT"
+
+
+def classify_branch_D_wp(low_label, high_labels, high_plateaus, T=WP_THRESHOLDS):
+    """Per-D label from the workpoint per-run labels (low + resolved high ICs). BISTABLE = interictal/elevated
+    low coexisting with a finite-high branch under kick; FINITE_HIGH = even the native-low settles high."""
+    all_labels = [low_label] + list(high_labels)
+    if "NUMERICAL_UNSAFE" in all_labels:
+        return dict(D_label="NUMERICAL_UNSAFE", low_label=low_label, high_labels=list(high_labels),
+                    plateau_rel_spread=float("nan"))
+    fin_idx = [i for i, l in enumerate(high_labels) if l in _FINITE]
+    spread = _plateau_rel_spread([high_plateaus[i] for i in fin_idx]) if fin_idx else float("nan")
+    if fin_idx:
+        if len(fin_idx) < 2 or (np.isfinite(spread) and spread > T["PLATEAU_TOL"]):
+            D_label = "UNRESOLVED"
+        elif low_label in ("INTERICTAL_WORKPOINT", "ELEVATED_EVENT_TRAIN"):
+            D_label = "BISTABLE"                              # low stays interictal/elevated, high goes finite
+        elif low_label in _FINITE:
+            D_label = "FINITE_HIGH"                           # even the native-low IC settles high
+        else:
+            D_label = "UNRESOLVED"
+    elif any(l == "METASTABLE_TRANSIENT" for l in all_labels):
+        D_label = "METASTABLE_TRANSIENT"
+    elif any(l == "ELEVATED_EVENT_TRAIN" for l in all_labels):
+        D_label = "ELEVATED_EVENT_TRAIN"
+    else:
+        D_label = "INTERICTAL_WORKPOINT"
+    return dict(D_label=D_label, low_label=low_label, high_labels=list(high_labels), plateau_rel_spread=spread)
 
 
 # ------------------------------------------------------------------------------------
