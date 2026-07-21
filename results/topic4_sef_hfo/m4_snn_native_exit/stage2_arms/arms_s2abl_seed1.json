@@ -1,0 +1,124 @@
+{
+  "meta": {
+    "seed": 1,
+    "tau_p": 5000.0,
+    "theta_p": 0.0,
+    "a50_p": 0.3,
+    "eta_r": 40.0,
+    "sigma_p": 1.5,
+    "clamp_val": 0.8,
+    "T": 15000.0,
+    "base_kq": 0.1,
+    "base_ag": 16.0,
+    "N": 40000,
+    "axis_unit": [
+      1.0,
+      -2.721952853909272e-16
+    ],
+    "wall_s": 617.7,
+    "argv": "scripts/run_m4_snn_native_exit.py --confirm-run --mode arms --seed 1 --arms E1_no_qI,E4_clamp_p --T 15000 --tau-p 5000 --theta-p 0.0 --a50-p 0.3 --sigma-p 1.5 --eta-r 40 --p50-r 0.25 --n-r 4 --clamp-val 0.8 --workers 2 --tag s2abl"
+  },
+  "rows": [
+    {
+      "label": "E1_no_qI",
+      "seed": 1,
+      "verdict": "no_runaway",
+      "termination_class": "suppress",
+      "offset_ms": null,
+      "runaway_ms": null,
+      "max_rate_hz": 25.7,
+      "n_events": 13,
+      "n_pre_runaway": 13,
+      "q_min_final": 1.0,
+      "q_mean_final": 1.0,
+      "S_G_max": 0.0598,
+      "p_mean_final": 0.0105,
+      "p_max_final": 0.0436,
+      "p_peak": 0.0436,
+      "T_ms": 15000.0,
+      "perturb_kind": null,
+      "wall_s": 616.7,
+      "active_area_peak": 0.2049,
+      "active_area_tail": 0.0297,
+      "tail_frac_gt_0p5": 0.0241,
+      "events": [
+        [
+          372.0,
+          382.0
+        ],
+        [
+          798.0,
+          806.0
+        ],
+        [
+          2999.0,
+          3008.0
+        ],
+        [
+          4390.0,
+          4409.0
+        ],
+        [
+          5562.0,
+          5572.0
+        ],
+        [
+          6127.0,
+          6135.0
+        ],
+        [
+          7377.0,
+          7385.0
+        ],
+        [
+          9494.0,
+          9501.0
+        ],
+        [
+          9884.0,
+          9901.0
+        ],
+        [
+          10416.0,
+          10433.0
+        ],
+        [
+          13822.0,
+          13831.0
+        ],
+        [
+          14485.0,
+          14492.0
+        ],
+        [
+          14963.0,
+          14971.0
+        ]
+      ]
+    },
+    {
+      "label": "E4_clamp_p",
+      "seed": 1,
+      "verdict": "no_runaway",
+      "termination_class": "suppress",
+      "offset_ms": null,
+      "runaway_ms": null,
+      "max_rate_hz": 0.0,
+      "n_events": 0,
+      "n_pre_runaway": 0,
+      "q_min_final": 0.8948,
+      "q_mean_final": 0.905,
+      "S_G_max": 0.0,
+      "p_mean_final": 0.8,
+      "p_max_final": 0.8,
+      "p_peak": 0.8,
+      "T_ms": 15000.0,
+      "perturb_kind": null,
+      "wall_s": 533.2,
+      "active_area_peak": 0.0,
+      "active_area_tail": 0.0,
+      "tail_frac_gt_0p5": 0.0,
+      "events": []
+    }
+  ]
+}
