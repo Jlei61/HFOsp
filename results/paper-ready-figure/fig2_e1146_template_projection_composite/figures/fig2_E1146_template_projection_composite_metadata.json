@@ -1,0 +1,191 @@
+{
+  "schema_version": "fig2_e1146_template_projection_composite_v15",
+  "subject_id": "epilepsiae_1146",
+  "display_label": "E1146",
+  "input_artifact": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1146.json",
+  "input_contract": "topic5_interictal_template_fields_v1",
+  "input_fingerprint_algorithm": "sha256_v1p1_nonfinite_canonical",
+  "input_fingerprint_sha256": "18bf1de782f41878a97b940f85ff1ceedbd9dfcacb9fe79779772b44f9aae056",
+  "coordinate_space": "mni152_1mm",
+  "implantation": {
+    "n_all_invasive_contacts": 114,
+    "local_context_shafts": [
+      "ICL",
+      "SCL"
+    ],
+    "n_local_context_contacts": 20,
+    "local_context_contacts": [
+      "ICL1",
+      "ICL10",
+      "ICL11",
+      "ICL2",
+      "ICL3",
+      "ICL4",
+      "ICL5",
+      "ICL6",
+      "ICL7",
+      "ICL8",
+      "ICL9",
+      "SCL1",
+      "SCL2",
+      "SCL3",
+      "SCL4",
+      "SCL5",
+      "SCL6",
+      "SCL7",
+      "SCL8",
+      "SCL9"
+    ],
+    "n_lagpat_selected_contacts": 15,
+    "lagpat_selected_contacts": [
+      "SCL6",
+      "SCL7",
+      "SCL8",
+      "SCL9",
+      "ICL1",
+      "ICL2",
+      "ICL3",
+      "ICL4",
+      "ICL5",
+      "ICL6",
+      "ICL7",
+      "ICL8",
+      "ICL9",
+      "ICL10",
+      "ICL11"
+    ],
+    "local_context_not_selected": [
+      "SCL1",
+      "SCL2",
+      "SCL3",
+      "SCL4",
+      "SCL5"
+    ],
+    "selection_contract": "joint_valid_mapped_and_positive_support_in_both_TA_TB",
+    "support_source": "canonical_template_participation_records",
+    "selected_subset_of_local_context": true
+  },
+  "axis_contract": {
+    "definition": "template_propagation_axis_v2",
+    "direction": "positive_early_to_late",
+    "u_ta": [
+      0.8738555735599358,
+      0.2976505969586967,
+      -0.38442237017162123
+    ],
+    "u_tb": [
+      -0.8166802985905458,
+      -0.41343669060559796,
+      -0.4026206561456431
+    ],
+    "cos_ta_tb": -0.6819439215877638,
+    "line_angle_deg": 47.00426467603522,
+    "relation": "reversed",
+    "point_estimate_collinear": true,
+    "pair_bootstrap_p_collinear": 0.766,
+    "pair_bootstrap_p_sign_stable": 0.992,
+    "pair_bootstrap_robust_collinear": false
+  },
+  "shared_plane": {
+    "u": [
+      0.9217298176159541,
+      0.38770567763339253,
+      0.009922240094450367
+    ],
+    "w_after_display_sign": [
+      -0.0716871663855997,
+      0.14517423772509694,
+      0.9868056500023397
+    ],
+    "normal": [
+      0.3811496995843804,
+      -0.9102794890756185,
+      0.1616049450820355
+    ],
+    "origin_mm": [
+      -26.466666666666665,
+      -80.06666666666666,
+      0.7333333333333333
+    ],
+    "transverse_sign": -1,
+    "selected_normal_residual_max_abs_mm": 0.8217342200558202,
+    "selected_normal_residual_rms_mm": 0.43184575486657006
+  },
+  "rendering": {
+    "display_sigma_mm": 6.0,
+    "kernel_exemplar_contact": "ICL3",
+    "continuous_field_renderer": "scripts.plot_topic5_interictal_template_ab_fields.draw_interictal_rank_field_panel",
+    "contact_style_contract": {
+      "straight_3d_rod_contacts": "#F2F4F5",
+      "left_panel_measured_plane_footprints": "small low-alpha grey with no edge",
+      "middle_panel_field_nodes": "#587F8B",
+      "yellow_highlight_rings": false
+    },
+    "flow_arrow_contract": {
+      "length": "span the compact inter-panel gap",
+      "line_width_pt": 1.05,
+      "mutation_scale": 8.0
+    },
+    "spatial_early_contact_overlay": {
+      "n_per_template": 3,
+      "ta_contacts": [
+        "SCL9",
+        "ICL11",
+        "ICL9"
+      ],
+      "tb_contacts": [
+        "SCL9",
+        "ICL1",
+        "ICL2"
+      ],
+      "shared_contact_style": "half TA red and half TB blue",
+      "edge_style": "same dark edge and size as all other 3-D shaft contacts",
+      "scope": "left-panel 3-D shaft contacts only"
+    },
+    "direction_glyph_contract": {
+      "origins": "separate template-specific origins adjacent to opposite early-contact sides",
+      "placement": "TA occupies the left inter-shaft gap and points toward the TB-early blue side; TB occupies the right inter-shaft gap and points toward the TA-early red side",
+      "line_width_pt": 0.95,
+      "font_weight": "normal",
+      "shared_axis_rendered": false,
+      "angle_wedge_rendered": false
+    },
+    "projection_focus_shafts": [
+      "ICL",
+      "SCL"
+    ],
+    "straight_shaft_display_fit": {
+      "ICL": {
+        "n_contacts": 11,
+        "max_residual_mm": 0.6058926337075228,
+        "rms_residual_mm": 0.39418986883108975
+      },
+      "SCL": {
+        "n_contacts": 9,
+        "max_residual_mm": 0.5333716727324929,
+        "rms_residual_mm": 0.3489886470807463
+      }
+    },
+    "left_panel_camera": {
+      "elevation_deg": 32.0,
+      "azimuth_deg": -95.0
+    },
+    "normal_display_exaggeration": 3.0,
+    "normal_display_exaggeration_scope": "left 3-D method illustration only; x/y projection, axes, plane and fields unchanged",
+    "display_plane_normal_offset_units": -1.2,
+    "display_plane_offset_scope": "left-panel z separation only; frozen shared-plane x/y coordinates and all fields unchanged",
+    "display_plane_crossing_by_shaft": {
+      "ICL": false,
+      "SCL": true
+    },
+    "projection_contract": "each implanted carrier and its displayed 3-D contacts lie on the same best-fit straight line; plane footprints retain the measured E1146 x/y projection coordinates, are shown as small blue-grey points, and are not joined into a projected rod",
+    "colormap": "viridis",
+    "rank_scale": [
+      0.0,
+      14.0
+    ],
+    "png_dpi": 400,
+    "pdf_fonttype": 42
+  },
+  "claim_boundary": "Patient-specific method illustration. Highlighted contacts are the exact frozen lagPat-selected, joint-valid, positive-support TA/TB field contacts; no visual threshold is introduced. The shared plane is allowed by the frozen point-estimate collinearity route, but its paired-bootstrap robust_collinear flag is false. Continuous surfaces are support-limited display interpolation, not measurements in unsampled tissue."
+}
