@@ -1,0 +1,333 @@
+{
+  "meta": {
+    "seed": 1,
+    "tau_p": 3000.0,
+    "tau_p_down": 12000.0,
+    "persist_onset_ms": 2300.0,
+    "theta_p": 0.0,
+    "a50_p": 0.3,
+    "eta_r": 80.0,
+    "sigma_p": 1.5,
+    "p50_r": 0.15,
+    "n_r": 4.0,
+    "clamp_val": 0.8,
+    "T": 12000.0,
+    "base_kq": 0.1,
+    "base_ag": 16.0,
+    "N": 40000,
+    "axis_unit": [
+      1.0,
+      -2.721952853909272e-16
+    ],
+    "argv": "scripts/run_m4_snn_native_exit.py --confirm-run --mode arms --arms A_slow_off,A_persist_act --persist-onset-ms 2300 --tau-p 3000 --tau-p-down 12000 --p50-r 0.15 --n-r 4 --eta-r 80 --theta-p 0.0 --a50-p 0.3 --sigma-p 1.5 --T 12000 --seed 1 --workers 2 --tag prevgated80 --out results/topic4_sef_hfo/m4_snn_native_exit/phase1_form_terminate",
+    "provenance": {
+      "base_sha": "ee599c2",
+      "engine_versions": {
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/kick_probe.py": "5faaedab37ab6208888607f70dc387f378b1ec9e51bfc21e29f0c81e80aa8b99",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+      },
+      "argv": "scripts/run_m4_snn_native_exit.py --confirm-run --mode arms --arms A_slow_off,A_persist_act --persist-onset-ms 2300 --tau-p 3000 --tau-p-down 12000 --p50-r 0.15 --n-r 4 --eta-r 80 --theta-p 0.0 --a50-p 0.3 --sigma-p 1.5 --T 12000 --seed 1 --workers 2 --tag prevgated80 --out results/topic4_sef_hfo/m4_snn_native_exit/phase1_form_terminate"
+    },
+    "wall_s": 639.5
+  },
+  "rows": [
+    {
+      "label": "A_slow_off",
+      "seed": 1,
+      "verdict": "no_runaway",
+      "termination_class": "fragment",
+      "offset_ms": null,
+      "runaway_ms": null,
+      "max_rate_hz": 40.6,
+      "n_events": 34,
+      "n_pre_runaway": 34,
+      "q_min_final": 1.0,
+      "q_mean_final": 1.0,
+      "q_core_final": 1.0,
+      "q_surround_final": 1.0,
+      "S_G_max": 0.0,
+      "p_mean_final": 0.0,
+      "p_max_final": 0.0,
+      "p_core_final": null,
+      "p_surround_final": null,
+      "p_peak": 0.0,
+      "T_ms": 12000.0,
+      "perturb_kind": null,
+      "cfg_effective": {
+        "use_persist": false,
+        "tau_p": 5000.0,
+        "tau_p_down": null,
+        "persist_onset_ms": 0.0,
+        "theta_p": 0.0,
+        "a50_p": 1.0,
+        "sigma_p": 1.5,
+        "eta_r": 0.0,
+        "p50_r": 0.0,
+        "n_r": 2.0,
+        "clamp_persist": null,
+        "k_q": 0.0,
+        "use_SG": false,
+        "alpha_G": 16.0
+      },
+      "wall_s": 638.7,
+      "active_area_peak": 0.2812,
+      "active_area_tail": 0.0794,
+      "tail_frac_gt_0p5": 0.0658,
+      "events": [
+        [
+          411.0,
+          431.0
+        ],
+        [
+          737.0,
+          764.0
+        ],
+        [
+          1131.0,
+          1141.0
+        ],
+        [
+          1639.0,
+          1662.0
+        ],
+        [
+          1941.0,
+          1963.0
+        ],
+        [
+          2315.0,
+          2334.0
+        ],
+        [
+          2601.0,
+          2620.0
+        ],
+        [
+          2971.0,
+          2978.0
+        ],
+        [
+          3007.0,
+          3031.0
+        ],
+        [
+          3463.0,
+          3488.0
+        ],
+        [
+          3752.0,
+          3760.0
+        ],
+        [
+          3787.0,
+          3812.0
+        ],
+        [
+          4383.0,
+          4400.0
+        ],
+        [
+          4793.0,
+          4813.0
+        ],
+        [
+          5604.0,
+          5627.0
+        ],
+        [
+          5872.0,
+          5899.0
+        ],
+        [
+          6153.0,
+          6181.0
+        ],
+        [
+          6573.0,
+          6592.0
+        ],
+        [
+          7031.0,
+          7052.0
+        ],
+        [
+          7306.0,
+          7332.0
+        ],
+        [
+          7600.0,
+          7629.0
+        ],
+        [
+          7883.0,
+          7899.0
+        ],
+        [
+          8189.0,
+          8219.0
+        ],
+        [
+          8773.0,
+          8787.0
+        ],
+        [
+          9051.0,
+          9058.0
+        ],
+        [
+          9084.0,
+          9113.0
+        ],
+        [
+          9519.0,
+          9545.0
+        ],
+        [
+          9869.0,
+          9891.0
+        ],
+        [
+          10259.0,
+          10266.0
+        ],
+        [
+          10294.0,
+          10315.0
+        ],
+        [
+          10673.0,
+          10687.0
+        ],
+        [
+          11106.0,
+          11133.0
+        ],
+        [
+          11564.0,
+          11586.0
+        ],
+        [
+          11963.0,
+          11982.0
+        ]
+      ]
+    },
+    {
+      "label": "A_persist_act",
+      "seed": 1,
+      "verdict": "no_runaway",
+      "termination_class": "suppress",
+      "offset_ms": null,
+      "runaway_ms": null,
+      "max_rate_hz": 39.4,
+      "n_events": 17,
+      "n_pre_runaway": 17,
+      "q_min_final": 1.0,
+      "q_mean_final": 1.0,
+      "q_core_final": 1.0,
+      "q_surround_final": 1.0,
+      "S_G_max": 0.0,
+      "p_mean_final": 0.0189,
+      "p_max_final": 0.0568,
+      "p_core_final": 0.0451,
+      "p_surround_final": 0.0178,
+      "p_peak": 0.0619,
+      "T_ms": 12000.0,
+      "perturb_kind": null,
+      "cfg_effective": {
+        "use_persist": true,
+        "tau_p": 3000.0,
+        "tau_p_down": 12000.0,
+        "persist_onset_ms": 2300.0,
+        "theta_p": 0.0,
+        "a50_p": 0.3,
+        "sigma_p": 1.5,
+        "eta_r": 80.0,
+        "p50_r": 0.15,
+        "n_r": 4.0,
+        "clamp_persist": null,
+        "k_q": 0.0,
+        "use_SG": false,
+        "alpha_G": 16.0
+      },
+      "wall_s": 629.1,
+      "active_area_peak": 0.2344,
+      "active_area_tail": 0.0,
+      "tail_frac_gt_0p5": 0.0,
+      "events": [
+        [
+          375.0,
+          382.0
+        ],
+        [
+          409.0,
+          432.0
+        ],
+        [
+          736.0,
+          765.0
+        ],
+        [
+          1128.0,
+          1143.0
+        ],
+        [
+          1635.0,
+          1664.0
+        ],
+        [
+          1940.0,
+          1963.0
+        ],
+        [
+          2313.0,
+          2334.0
+        ],
+        [
+          2598.0,
+          2620.0
+        ],
+        [
+          2949.0,
+          2958.0
+        ],
+        [
+          2983.0,
+          3010.0
+        ],
+        [
+          3833.0,
+          3871.0
+        ],
+        [
+          4417.0,
+          4424.0
+        ],
+        [
+          4452.0,
+          4468.0
+        ],
+        [
+          6596.0,
+          6618.0
+        ],
+        [
+          7832.0,
+          7853.0
+        ],
+        [
+          9953.0,
+          9977.0
+        ],
+        [
+          10845.0,
+          10864.0
+        ]
+      ]
+    }
+  ]
+}

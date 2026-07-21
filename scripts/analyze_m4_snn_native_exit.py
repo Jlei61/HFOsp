@@ -336,19 +336,33 @@ def plot_formed_state_diagnostic(out_dir, tag, seed, res, label="B_m4_anchor", m
     return out
 
 
-def _regate_at_onset(z, onset_ms, dt=0.1, movie_bin_ms=25.0, activity_bin_ms=25.0):
-    """Re-run the formed-state gate on ONLY [0, onset) of an intervention's own traces (review contract:
-    each intervention must independently be formed at its own onset, not just inherit the anchor's t_form)."""
-    i = int(onset_ms / dt); fi = int(onset_ms / movie_bin_ms); ai = int(onset_ms / activity_bin_ms)
-    movie = np.asarray(z.get("movie", np.zeros((0, 1, 1))), float)[:fi]
-    area = (movie > 0.1).mean(axis=(1, 2)) if movie.size else np.zeros(0)
-    return formed_state_time(np.asarray(z["rate"], float)[:i], np.asarray(z.get("trace_SG", []), float)[:i],
-                             np.asarray(z["trace_qI_mean"], float)[:i], area, dt=dt, movie_bin_ms=movie_bin_ms,
-                             core_activity=np.asarray(z.get("core_activity", []), float)[:ai],
-                             surround_activity=np.asarray(z.get("surround_activity", []), float)[:ai],
-                             trace_q_core=np.asarray(z.get("trace_q_core", []), float)[:i],
-                             trace_q_surround=np.asarray(z.get("trace_q_surround", []), float)[:i],
-                             activity_bin_ms=activity_bin_ms)
+def formed_at_onset(z, onset_ms, dt=0.1, activity_bin_ms=25.0, movie_bin_ms=25.0, win_ms=500.0,
+                    min_rate_hz=40.0, min_core_hz=80.0, min_sg=0.30, max_qcore=0.20, min_area=0.35):
+    """Independent point-check (review contract 2): is the arm's OWN state a bounded M4 state in
+    [onset-win, onset]? Uses absolute bounded thresholds (calibrated from the measured anchor plateau:
+    core~160Hz, S_G~0.42, q_core~0.05, area~0.62 -> thresholds at ~half). This replaces re-running the
+    1500ms formed-window on [0,onset] (which can never satisfy a 1500ms window before onset, and estimates
+    the plateau from the RISING phase) -- that gave a false 'not formed'."""
+    def _wmean(a, tbin):
+        a = np.asarray(a, float)
+        if a.size == 0:
+            return None
+        i0, i1 = max(0, int((onset_ms - win_ms) / tbin)), min(a.size, int(onset_ms / tbin))
+        return float(a[i0:i1].mean()) if i1 > i0 else None
+    rate, core = _wmean(z.get("rate", []), dt), _wmean(z.get("core_activity", []), activity_bin_ms)
+    sg, qc = _wmean(z.get("trace_SG", []), dt), _wmean(z.get("trace_q_core", []), dt)
+    movie = np.asarray(z.get("movie", np.zeros((0, 1, 1))), float)
+    area = None
+    if movie.size:
+        f0, f1 = max(0, int((onset_ms - win_ms) / movie_bin_ms)), min(movie.shape[0], int(onset_ms / movie_bin_ms))
+        area = float((movie[f0:f1] > 0.1).mean()) if f1 > f0 else None
+    checks = dict(rate=bool(rate is not None and rate >= min_rate_hz),
+                  core=bool(core is not None and core >= min_core_hz),
+                  sg=bool(sg is not None and sg >= min_sg),
+                  qcore=bool(qc is not None and qc <= max_qcore),
+                  area=bool(area is not None and area >= min_area))
+    return dict(formed_at_onset=all(checks.values()), window_ms=[onset_ms - win_ms, onset_ms],
+                values=dict(rate=rate, core=core, sg=sg, qcore=qc, area=area), checks=checks)
 
 
 def analyze_phase1(out_dir, seed=1, anchor_tag="p1anchor", intervene_tag="intervene", prev_tag="prevgated80",
@@ -367,7 +381,7 @@ def analyze_phase1(out_dir, seed=1, anchor_tag="p1anchor", intervene_tag="interv
     for label in sorted(f[:-5] for f in os.listdir(ad) if f.endswith(".json") and f.startswith("D_")):
         row, z = _load_arm(out_dir, intervene_tag, seed, label)
         ident = verify_pre_onset_identity(anchor_z, z, onset_ms) if anchor_z is not None else {"pre_onset_identical": None}
-        regate = _regate_at_onset(z, onset_ms)
+        regate = formed_at_onset(z, onset_ms)
         term, offset = row.get("termination_class"), row.get("offset_ms")
         rec = None
         if offset is not None and base_feats:
@@ -375,10 +389,10 @@ def analyze_phase1(out_dir, seed=1, anchor_tag="p1anchor", intervene_tag="interv
             rec = recovery_match(base_feats, post)
         verdict = classify_phase1_verdict(term or "", row.get("n_pre_runaway", 0), row.get("n_events", 0),
                                           (rec["n_post"] if (rec and rec["recovered"]) else 0),
-                                          state_formed=(regate["t_form"] is not None))
+                                          state_formed=bool(regate["formed_at_onset"]))
         arms[label] = dict(termination_class=term, offset_ms=offset,
                            pre_onset_identical=ident["pre_onset_identical"],
-                           reformed_at_onset=bool(regate["t_form"] is not None),
+                           reformed_at_onset=bool(regate["formed_at_onset"]), regate_values=regate["values"],
                            n_events=row.get("n_events"), q_mean_final=row.get("q_mean_final"),
                            max_rate_hz=row.get("max_rate_hz"), area_tail=row.get("active_area_tail"),
                            recovery=rec, verdict=verdict)

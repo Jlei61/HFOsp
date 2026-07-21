@@ -1,0 +1,52 @@
+{
+  "onset_ms": 2300.0,
+  "baseline_n_ieds": 34,
+  "arms": {
+    "D_tau3000_eta150_dn12000_on2300": {
+      "termination_class": "fragment",
+      "offset_ms": null,
+      "pre_onset_identical": true,
+      "reformed_at_onset": true,
+      "regate_values": {
+        "rate": 62.6869375,
+        "core": 110.39858894348144,
+        "sg": 0.4077349868834019,
+        "qcore": 0.08433991111069918,
+        "area": 0.5328125
+      },
+      "n_events": 2,
+      "q_mean_final": 0.76,
+      "max_rate_hz": 160.9,
+      "area_tail": 0.0,
+      "recovery": null,
+      "verdict": "termination-no-go"
+    },
+    "D_tau3000_eta80_dn12000_on2300": {
+      "termination_class": "fragment",
+      "offset_ms": null,
+      "pre_onset_identical": true,
+      "reformed_at_onset": true,
+      "regate_values": {
+        "rate": 62.6869375,
+        "core": 110.39858894348144,
+        "sg": 0.4077349868834019,
+        "qcore": 0.08433991111069918,
+        "area": 0.5328125
+      },
+      "n_events": 11,
+      "q_mean_final": 0.6766,
+      "max_rate_hz": 79.2,
+      "area_tail": 0.0,
+      "recovery": null,
+      "verdict": "termination-no-go"
+    }
+  },
+  "prevention": {
+    "n_slowoff_total": 34,
+    "n_slowoff_post_onset": 29,
+    "n_gated_total": 17,
+    "n_gated_post_onset": 11,
+    "prevention_after_onset": true,
+    "note": "gated current on slow-off substrate; onset-gated IED survival after onset"
+  }
+}
