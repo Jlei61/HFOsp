@@ -134,6 +134,9 @@ class SpatialSlowFieldConfig:
     tau_p_down: float = None   # asymmetric decay time (ms); None -> symmetric (== tau_p). When set, p CHARGES with
                                # tau_p (fast, short ictal) but DECAYS with tau_p_down (slow) once activity drops --
                                # a long hold that lets q_I refill (continuous analog of R4's active-low M freeze).
+    persist_onset_ms: float = 0.0  # p stays 0 (no accumulation, no current) until t >= this. 0 -> active from t=0.
+                               # >0 -> established-state fork: let the M4 state FORM first, THEN engage the recovery
+                               # current -> distinguishes termination-of-formed-state from prevention-of-formation.
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -199,6 +202,8 @@ class SpatialSlowFieldConfig:
                 raise ValueError(f"clamp_persist must be in [0, 1], got {self.clamp_persist}")
             if self.tau_p_down is not None and self.tau_p_down <= 0.0:
                 raise ValueError(f"tau_p_down must be > 0 when set, got {self.tau_p_down}")
+            if self.persist_onset_ms < 0.0:
+                raise ValueError(f"persist_onset_ms must be >= 0, got {self.persist_onset_ms}")
 
 
 # ---------------------------------------------------------------------------
@@ -407,7 +412,9 @@ class SpatialSlowField:
             self.g_K += dt * (-self.g_K / cfg.tau_K + cfg.k_K * fk * (cfg.gK_max - self.g_K))
             np.clip(self.g_K, 0.0, cfg.gK_max, out=self.g_K)
         if cfg.use_persist:                                         # §5 persistence sensor: slow leaky integral
-            if cfg.clamp_persist is None:                           # of supra-theta_p activity (frozen when clamped)
+            if cfg.clamp_persist is None and self._t >= cfg.persist_onset_ms:  # of supra-theta_p activity (frozen when
+                                                                    # clamped; inactive before persist_onset_ms so the
+                                                                    # M4 state forms first = established-state fork)
                 a_p = convolve_periodic(self.rE, self._Kp)         # smoothed EMA rate (sustained activity)
                 drive = saturation(a_p, cfg.theta_p, cfg.a50_p)    # Psi(K_p*r_E - theta_p) in [0,1)
                 if cfg.tau_p_down is None:

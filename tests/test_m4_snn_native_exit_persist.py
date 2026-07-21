@@ -124,6 +124,20 @@ def test_asymmetric_p_slow_decay():
     assert p_asym > 2.0 * p_sym                     # asymmetric holds p far higher (long hold once activity drops)
 
 
+# ---- persist_onset_ms: established-state fork (p inactive until onset) ---------------------
+def test_persist_onset_gate():
+    p, net, NE, NI = _net()
+    slow = _slow(p, net, use_persist=True, tau_p=50.0, theta_p=0.0, a50_p=0.3, eta_r=0.0, persist_onset_ms=20.0)
+    spk = np.zeros(NE + NI, bool)
+    spk[:NE] = True
+    for _ in range(150):                      # 15 ms < 20 ms onset -> p must stay 0
+        slow.step(spk, net["labels"], DT)
+    assert float(slow.p.max()) == 0.0
+    for _ in range(500):                      # +50 ms, past onset -> p accumulates
+        slow.step(spk, net["labels"], DT)
+    assert float(slow.p.max()) > 0.0
+
+
 # ---- Clause 4: clamp ----------------------------------------------------------------------
 def test_clamp_persist_frozen():
     p, net, NE, NI = _net()
