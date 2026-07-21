@@ -1,0 +1,149 @@
+{
+  "meta": {
+    "seed": 1,
+    "tau_p": 3000.0,
+    "tau_p_down": 12000.0,
+    "persist_onset_ms": 2300.0,
+    "theta_p": 0.0,
+    "a50_p": 0.3,
+    "eta_r": 15.0,
+    "sigma_p": 1.5,
+    "p50_r": 0.15,
+    "n_r": 4.0,
+    "clamp_val": 0.8,
+    "T": 18000.0,
+    "base_kq": 0.1,
+    "base_ag": 16.0,
+    "N": 40000,
+    "axis_unit": [
+      1.0,
+      -2.721952853909272e-16
+    ],
+    "argv": "scripts/run_m4_snn_native_exit.py --confirm-run --mode arms --arms C_sensor_on --tau-p 3000 --tau-p-down 12000 --p50-r 0.15 --n-r 4 --theta-p 0.0 --a50-p 0.3 --sigma-p 1.5 --persist-onset-ms 2300 --use-H --alpha-H 16 --tau-H 6000 --T 18000 --seed 1 --workers 1 --tag Honly --out results/topic4_sef_hfo/m4_snn_native_exit/phase3_containment_memory",
+    "provenance": {
+      "base_sha": "10d036f",
+      "engine_versions": {
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/kick_probe.py": "5faaedab37ab6208888607f70dc387f378b1ec9e51bfc21e29f0c81e80aa8b99",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+      },
+      "argv": "scripts/run_m4_snn_native_exit.py --confirm-run --mode arms --arms C_sensor_on --tau-p 3000 --tau-p-down 12000 --p50-r 0.15 --n-r 4 --theta-p 0.0 --a50-p 0.3 --sigma-p 1.5 --persist-onset-ms 2300 --use-H --alpha-H 16 --tau-H 6000 --T 18000 --seed 1 --workers 1 --tag Honly --out results/topic4_sef_hfo/m4_snn_native_exit/phase3_containment_memory"
+    },
+    "wall_s": 1660.2
+  },
+  "rows": [
+    {
+      "label": "C_sensor_on",
+      "seed": 1,
+      "verdict": "no_runaway",
+      "termination_class": "fragment",
+      "offset_ms": null,
+      "runaway_ms": null,
+      "max_rate_hz": 88.3,
+      "n_events": 15,
+      "n_pre_runaway": 15,
+      "q_min_final": 0.7669,
+      "q_mean_final": 0.8188,
+      "q_core_final": 0.7763,
+      "q_surround_final": 0.8204,
+      "S_G_max": 0.4303,
+      "p_mean_final": 0.0608,
+      "p_max_final": 0.1283,
+      "p_core_final": 0.1236,
+      "p_surround_final": 0.0583,
+      "p_peak": 0.363,
+      "H_final": 0.2209,
+      "H_peak": 0.3063,
+      "T_ms": 18000.0,
+      "perturb_kind": null,
+      "cfg_effective": {
+        "use_persist": true,
+        "tau_p": 3000.0,
+        "tau_p_down": 12000.0,
+        "persist_onset_ms": 2300.0,
+        "theta_p": 0.0,
+        "a50_p": 0.3,
+        "sigma_p": 1.5,
+        "eta_r": 0.0,
+        "p50_r": 0.15,
+        "n_r": 4.0,
+        "clamp_persist": null,
+        "k_q": 0.1,
+        "use_SG": true,
+        "alpha_G": 16.0,
+        "use_H": true,
+        "alpha_H": 16.0,
+        "tau_H": 6000.0
+      },
+      "wall_s": 1659.4,
+      "active_area_peak": 0.6615,
+      "active_area_tail": 0.0,
+      "tail_frac_gt_0p5": 0.0,
+      "events": [
+        [
+          599.0,
+          652.0
+        ],
+        [
+          1126.0,
+          1133.0
+        ],
+        [
+          1151.0,
+          1161.0
+        ],
+        [
+          1176.0,
+          1268.0
+        ],
+        [
+          1282.0,
+          1348.0
+        ],
+        [
+          1361.0,
+          3464.0
+        ],
+        [
+          3521.0,
+          3679.0
+        ],
+        [
+          3736.0,
+          3895.0
+        ],
+        [
+          3977.0,
+          4093.0
+        ],
+        [
+          4207.0,
+          4318.0
+        ],
+        [
+          4441.0,
+          4538.0
+        ],
+        [
+          4724.0,
+          4805.0
+        ],
+        [
+          4958.0,
+          4996.0
+        ],
+        [
+          5013.0,
+          5021.0
+        ],
+        [
+          5197.0,
+          5264.0
+        ]
+      ]
+    }
+  ]
+}

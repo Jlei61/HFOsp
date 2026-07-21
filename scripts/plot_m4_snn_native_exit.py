@@ -70,6 +70,7 @@ def main():
         SG = np.asarray(d[f"{lab}__trace_SG"], float) if f"{lab}__trace_SG" in d.files else None
         pm = np.asarray(d[f"{lab}__trace_p_mean"], float) if f"{lab}__trace_p_mean" in d.files else None
         px = np.asarray(d[f"{lab}__trace_p_max"], float) if f"{lab}__trace_p_max" in d.files else None
+        hx = np.asarray(d[f"{lab}__trace_H"], float) if f"{lab}__trace_H" in d.files else None
         mr = meta_rows.get(lab, {})
 
         ax = axes[0][ci]
@@ -99,9 +100,11 @@ def main():
             ax.plot(np.arange(pm.size) * DT, pm, lw=0.9, color="#9467bd", label="p_mean")
         if px is not None and px.size:
             ax.plot(np.arange(px.size) * DT, px, lw=0.7, color="#9467bd", ls="--", label="p_max")
+        if hx is not None and hx.size:
+            ax.plot(np.arange(hx.size) * DT, hx, lw=1.1, color="#8c564b", label="H")   # containment memory
         ax.set_xlabel("t (ms)")
         if ci == 0:
-            ax.set_ylabel("S_G / p")
+            ax.set_ylabel("S_G / p / H")
         if ci == nC - 1 and ((SG is not None and SG.size) or (pm is not None and pm.size)):
             ax.legend(fontsize=6, loc="upper left")
 

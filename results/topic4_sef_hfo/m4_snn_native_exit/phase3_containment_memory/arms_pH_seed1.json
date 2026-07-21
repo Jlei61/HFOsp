@@ -1,0 +1,175 @@
+{
+  "meta": {
+    "seed": 1,
+    "tau_p": 5000.0,
+    "tau_p_down": 12000.0,
+    "persist_onset_ms": 2300.0,
+    "theta_p": 0.0,
+    "a50_p": 0.3,
+    "eta_r": 15.0,
+    "sigma_p": 1.5,
+    "p50_r": 0.15,
+    "n_r": 4.0,
+    "clamp_val": 0.8,
+    "T": 18000.0,
+    "base_kq": 0.1,
+    "base_ag": 16.0,
+    "N": 40000,
+    "axis_unit": [
+      1.0,
+      -2.721952853909272e-16
+    ],
+    "argv": "scripts/run_m4_snn_native_exit.py --confirm-run --mode arms --d-sweep 3000:80,3000:150 --tau-p-down 12000 --persist-onset-ms 2300 --theta-p 0.0 --a50-p 0.3 --sigma-p 1.5 --p50-r 0.15 --n-r 4 --use-H --alpha-H 16 --tau-H 6000 --T 18000 --seed 1 --workers 2 --tag pH --out results/topic4_sef_hfo/m4_snn_native_exit/phase3_containment_memory",
+    "provenance": {
+      "base_sha": "10d036f",
+      "engine_versions": {
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/kick_probe.py": "5faaedab37ab6208888607f70dc387f378b1ec9e51bfc21e29f0c81e80aa8b99",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+        "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-m4-snn-native-exit/src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+      },
+      "argv": "scripts/run_m4_snn_native_exit.py --confirm-run --mode arms --d-sweep 3000:80,3000:150 --tau-p-down 12000 --persist-onset-ms 2300 --theta-p 0.0 --a50-p 0.3 --sigma-p 1.5 --p50-r 0.15 --n-r 4 --use-H --alpha-H 16 --tau-H 6000 --T 18000 --seed 1 --workers 2 --tag pH --out results/topic4_sef_hfo/m4_snn_native_exit/phase3_containment_memory"
+    },
+    "wall_s": 1527.3
+  },
+  "rows": [
+    {
+      "label": "D_tau3000_eta80_dn12000_on2300_H16t6000",
+      "seed": 1,
+      "verdict": "no_runaway",
+      "termination_class": "fragment",
+      "offset_ms": null,
+      "runaway_ms": null,
+      "max_rate_hz": 151.1,
+      "n_events": 7,
+      "n_pre_runaway": 7,
+      "q_min_final": 0.7865,
+      "q_mean_final": 0.8348,
+      "q_core_final": 0.7979,
+      "q_surround_final": 0.8362,
+      "S_G_max": 0.437,
+      "p_mean_final": 0.0318,
+      "p_max_final": 0.044,
+      "p_core_final": 0.03,
+      "p_surround_final": 0.0319,
+      "p_peak": 0.1286,
+      "H_final": 0.019,
+      "H_peak": 0.0519,
+      "T_ms": 18000.0,
+      "perturb_kind": null,
+      "cfg_effective": {
+        "use_persist": true,
+        "tau_p": 3000.0,
+        "tau_p_down": 12000.0,
+        "persist_onset_ms": 2300.0,
+        "theta_p": 0.0,
+        "a50_p": 0.3,
+        "sigma_p": 1.5,
+        "eta_r": 80.0,
+        "p50_r": 0.15,
+        "n_r": 4.0,
+        "clamp_persist": null,
+        "k_q": 0.1,
+        "use_SG": true,
+        "alpha_G": 16.0,
+        "use_H": true,
+        "alpha_H": 16.0,
+        "tau_H": 6000.0
+      },
+      "wall_s": 1526.0,
+      "active_area_peak": 0.6267,
+      "active_area_tail": 0.0,
+      "tail_frac_gt_0p5": 0.0,
+      "events": [
+        [
+          2301.0,
+          2308.0
+        ],
+        [
+          2329.0,
+          2339.0
+        ],
+        [
+          2361.0,
+          2368.0
+        ],
+        [
+          2448.0,
+          2455.0
+        ],
+        [
+          2510.0,
+          2518.0
+        ],
+        [
+          3915.0,
+          4021.0
+        ],
+        [
+          4948.0,
+          5047.0
+        ]
+      ]
+    },
+    {
+      "label": "D_tau3000_eta150_dn12000_on2300_H16t6000",
+      "seed": 1,
+      "verdict": "no_runaway",
+      "termination_class": "fragment",
+      "offset_ms": null,
+      "runaway_ms": null,
+      "max_rate_hz": 156.1,
+      "n_events": 2,
+      "n_pre_runaway": 2,
+      "q_min_final": 0.7646,
+      "q_mean_final": 0.8363,
+      "q_core_final": 0.7965,
+      "q_surround_final": 0.8377,
+      "S_G_max": 0.438,
+      "p_mean_final": 0.0281,
+      "p_max_final": 0.0355,
+      "p_core_final": 0.0273,
+      "p_surround_final": 0.0282,
+      "p_peak": 0.1071,
+      "H_final": 0.0117,
+      "H_peak": 0.0324,
+      "T_ms": 18000.0,
+      "perturb_kind": null,
+      "cfg_effective": {
+        "use_persist": true,
+        "tau_p": 3000.0,
+        "tau_p_down": 12000.0,
+        "persist_onset_ms": 2300.0,
+        "theta_p": 0.0,
+        "a50_p": 0.3,
+        "sigma_p": 1.5,
+        "eta_r": 150.0,
+        "p50_r": 0.15,
+        "n_r": 4.0,
+        "clamp_persist": null,
+        "k_q": 0.1,
+        "use_SG": true,
+        "alpha_G": 16.0,
+        "use_H": true,
+        "alpha_H": 16.0,
+        "tau_H": 6000.0
+      },
+      "wall_s": 1486.7,
+      "active_area_peak": 0.6233,
+      "active_area_tail": 0.0,
+      "tail_frac_gt_0p5": 0.0,
+      "events": [
+        [
+          3857.0,
+          3964.0
+        ],
+        [
+          4908.0,
+          5000.0
+        ]
+      ]
+    }
+  ]
+}

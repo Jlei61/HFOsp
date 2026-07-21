@@ -1,0 +1,48 @@
+{
+  "subject": "epilepsiae_1146",
+  "seed": 1,
+  "onset_ms": 2300,
+  "T_ms": 18000,
+  "ablations": {
+    "p_only": "Phase-1 interventions (tau_down=12000, eta80/150): cls=fragment, S_G collapses -> sparse breakthroughs at 11.8/13/14.5s, no recovery",
+    "p_plus_H": {
+      "alpha_H": 16,
+      "tau_H": 6000,
+      "eta80": {
+        "cls": "fragment",
+        "H_peak": 0.0519,
+        "q_mean_final": 0.8348
+      },
+      "note": "H barely builds (~0.05) -- subtractive p self-limits activity -> cuts p sensor; terminates + SILENCE, no recovery"
+    },
+    "H_only": {
+      "alpha_H": 16,
+      "tau_H": 6000,
+      "C_sensor_on": {
+        "cls": "fragment",
+        "H_peak": 0.3063,
+        "q_mean_final": 0.8188
+      },
+      "note": "H builds to 0.31 (no self-limiting current) -> divisive containment TERMINATES the bounded state + holds through refill; but SILENCE, no recovery. H is a cleaner terminator than subtractive p."
+    },
+    "fast_release": {
+      "tau_down": 2000,
+      "eta80": "runaway",
+      "eta150": "runaway",
+      "note": "release fast -> q_I not refilled -> cores RE-IGNITE into recurring ~200-250Hz bursts (RUNAWAY), not interictal IEDs"
+    }
+  },
+  "verdict": "Entry+Containment+Termination achievable (H is a clean novel terminator); RECOVERY leg is the fundamental bottleneck",
+  "finding": "The divisive containment MEMORY H works for TERMINATION (H-only: builds to 0.31, contains the bounded state, holds through q_I refill -> terminates, cleaner than the self-limiting subtractive p). BUT the RECOVERY leg fails under every setting: p+H and H-only -> terminate + SILENCE (no IEDs); fast-release -> RE-IGNITION/runaway. There is NO containment setting that lands in the interictal-IED regime -- release too fast re-ignites, hold too long yields quiescent silence. This matches the Phase-2 atlas (low = near-0 Hz quiescent, NOT interictal). Mechanistically: the interictal IEDs are the ENTRY TRANSIENT (q_I depleting from 1.0), NOT a stable attractor; so there is no stable interictal state to recover TO. The bottleneck is the SUBSTRATE (no stable interictal-IED attractor), not the exit mechanism -- H already provides a clean terminator.",
+  "next_levers_for_user": [
+    "theta_p duration-gated containment (H engages only for sustained activity -> may allow sparse IEDs) -- but likely insufficient since no IEDs fire post-termination (silence is genuine, rate=0)",
+    "give the substrate an INDEPENDENT interictal rhythm generator (not the q_I-depletion transient) so recovery has a target attractor",
+    "asymmetric tau_H / active-region-mean <Phi(p)> so H builds usefully in p+H too (H_peak was diluted to 0.05)"
+  ],
+  "caveats": [
+    "seed 1 only",
+    "diagnostic tier",
+    "H driven by grid-mean <Phi(p)> (diluted by inactive cells)",
+    "recovery matcher not run (no post-offset events to match -- silence or runaway)"
+  ]
+}
