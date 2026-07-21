@@ -424,6 +424,31 @@ def cmd_grid(args):
         print(f"[grid] done -> {run_dir}/{out_name}", flush=True)
 
 
+def cmd_cells(args):
+    """Run a SPECIFIED list of cells (targeted re-run / T2), reusing the pool + fixed classifier. Honors the
+    reviewer 'reuse existing, run missing + targeted T2' rule. spec = D:slot:Tpost, e.g. D0.085:low:8000."""
+    with FCXR._launcher_lock():
+        FCXR._assert_engine_blessed()
+        bref = FCXR.json.load(open(_baseline_ref_path()))
+        run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"cells_seed{args.seed}_dt{DT_D}"))
+        slot_kick = {"low": 0.0, "high1": KICK_HIGH1, "high2": KICK_HIGH2}
+        tasks = []
+        for spec in args.cells:
+            d_s, slot, tp = spec.split(":")
+            D = float(d_s.lstrip("D")); Tp = float(tp); win = "T2" if Tp >= 6000 else "T1"
+            tasks.append(dict(D=D, ic=("low" if slot == "low" else "high"), kick_boost=slot_kick[slot],
+                              T_post=Tp, window=win, slot=slot, label=f"D{D:g}_{slot}_{win}"))
+        plan = FCXR._plan_workers(max(t["T_post"] for t in tasks) * (FCXR.DT / DT_D), args.workers)
+        FCXR._resource_log(run_dir, "cells_start", dict(n=len(tasks), **plan))
+        print(f"[cells] {len(tasks)} cells (band={bref['rate_roll_hi']:.1f}Hz); {plan}", flush=True)
+        S, pi = _build_and_align(args.seed)
+        _CTX.update(S=S, pi=pi, bref=bref, run_dir=run_dir, seed=args.seed)
+        rows = _run_tasks(tasks, plan["workers"])
+        FCXR._write_json(os.path.join(run_dir, "cells_rows.json"),
+                         dict(seed=args.seed, dt=DT_D, band_hz=bref["rate_roll_hi"], rows=rows))
+        print(f"[cells] done -> {run_dir}/cells_rows.json", flush=True)
+
+
 # ----------------------------------------------------------------- CLI
 def main():
     ap = argparse.ArgumentParser(description="FCXR Stage D — frozen fast-branch map (dt=0.05).")
@@ -439,10 +464,12 @@ def main():
     g.add_argument("--workers", type=int, default=2)
     g.add_argument("--allow-smoke", action="store_true",
                    help="permit T1<HIGH_MS as plumbing/pool validation (writes branch_map_SMOKE.json only)")
+    c = sub.add_parser("cells"); c.add_argument("--seed", type=int, default=1); c.add_argument("--workers", type=int, default=2)
+    c.add_argument("--cells", nargs="+", required=True, help="D:slot:Tpost specs, e.g. D0.085:low:8000 D0.1:low:8000")
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("REFUSING: simulations require --confirm-run")
-    {"baseline": cmd_baseline, "smoke": cmd_smoke, "pilot": cmd_pilot, "grid": cmd_grid}[args.cmd](args)
+    {"baseline": cmd_baseline, "smoke": cmd_smoke, "pilot": cmd_pilot, "grid": cmd_grid, "cells": cmd_cells}[args.cmd](args)
 
 
 if __name__ == "__main__":
