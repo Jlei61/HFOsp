@@ -332,9 +332,7 @@ def resolve_high_ic_wp(t1, t2):
         return "METASTABLE_TRANSIENT"
     if "METASTABLE_TRANSIENT" in (t1, t2):
         return "METASTABLE_TRANSIENT"
-    if "ELEVATED_EVENT_TRAIN" in (t1, t2):
-        return "ELEVATED_EVENT_TRAIN"
-    return "INTERICTAL_WORKPOINT"
+    return t2   # non-finite: the longer window (T2) is the definitive read (elevation that decays -> its T2 label)
 
 
 def classify_branch_D_wp(low_label, high_labels, high_plateaus, T=WP_THRESHOLDS):
