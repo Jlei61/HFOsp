@@ -429,7 +429,10 @@ def cmd_cells(args):
     reviewer 'reuse existing, run missing + targeted T2' rule. spec = D:slot:Tpost, e.g. D0.085:low:8000."""
     with FCXR._launcher_lock():
         FCXR._assert_engine_blessed()
-        bref = FCXR.json.load(open(_baseline_ref_path()))
+        bref_path = _baseline_ref_path() if args.seed == 1 else os.path.join(OUT, f"baseline_ref_seed{args.seed}.json")
+        if not os.path.exists(bref_path):
+            raise SystemExit(f"missing baseline {bref_path}; run `baseline --seed {args.seed} --confirm-run` first")
+        bref = FCXR.json.load(open(bref_path))
         run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"cells_seed{args.seed}_dt{DT_D}"))
         slot_kick = {"low": 0.0, "high1": KICK_HIGH1, "high2": KICK_HIGH2}
         tasks = []

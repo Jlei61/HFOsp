@@ -29,6 +29,7 @@ def _label_from_trace(jf, band):
     lab = classify_run_workpoint(dict(numerical_unsafe=bool(row["numerical_unsafe"]),
                                       af_tail=float(row.get("af_tail", 0.0)), **wm))
     return dict(D=row["D"], slot=row["slot"], window=row["window"], label=lab, T_ms=float(row["T_ms"]),
+                seed=int(row.get("seed", 1)),
                 end_rate_hz=row["end_rate_hz"], roll_occ=wm["roll_occ"], roll_end_occ=wm["roll_end_occ"],
                 roll_high_ms=wm["roll_high_ms"])
 
@@ -44,6 +45,8 @@ def main():
             continue
         c = _label_from_trace(jf, band)
         if c["T_ms"] < WP_THRESHOLDS["HIGH_MS"]:       # exclude smoke/validation runs (T<HIGH_MS)
+            continue
+        if c["seed"] != 1:                             # seed1 = canonical map; other seeds are separate confirmations
             continue
         cells[(c["D"], c["slot"], c["window"])] = c    # sorted glob -> newest real run overwrites
 
