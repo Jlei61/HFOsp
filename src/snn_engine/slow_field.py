@@ -137,6 +137,16 @@ class SpatialSlowFieldConfig:
     persist_onset_ms: float = 0.0  # p stays 0 (no accumulation, no current) until t >= this. 0 -> active from t=0.
                                # >0 -> established-state fork: let the M4 state FORM first, THEN engage the recovery
                                # current -> distinguishes termination-of-formed-state from prevention-of-formation.
+    # ---- containment memory H (Phase-3 vNext, spec §6 review 2026-07-22; scalar; OFF by default -> byte-parity).
+    # H builds with the mean recovery-current gate <Phi(p)> and decays with tau_H (tau_H dH/dt = <Phi(p)> - H),
+    # so it HOLDS the divisive containment through the q_I-refill window AFTER activity (and thus the activity-
+    # driven S_G) drops: I_EE_eff = I_EE / (1 + alpha_G*S_G + alpha_H*H). Requires use_SG (kick_probe tracks the
+    # recurrent-only current I_E_rec only when use_SG; kick_probe is guarded, so H piggybacks on that path). ----
+    use_H: bool = False        # master gate; False -> H not in the denominator, no advance -> byte-parity
+    alpha_H: float = 0.0       # divisive coupling of H (adds to the 1+alpha_G*S_G denominator)
+    tau_H: float = 5000.0      # ms, H build/decay time (SLOW; must outlast the q_I-refill so containment holds)
+    H_init: float = 0.0        # initial H (parity requires 0)
+    H_max: float = 1.0         # ceiling (<Phi(p)> in [0,1] -> H in [0,1])
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -204,6 +214,15 @@ class SpatialSlowFieldConfig:
                 raise ValueError(f"tau_p_down must be > 0 when set, got {self.tau_p_down}")
             if self.persist_onset_ms < 0.0:
                 raise ValueError(f"persist_onset_ms must be >= 0, got {self.persist_onset_ms}")
+        # ---- containment memory H (Phase-3 vNext) ----
+        if self.use_H:
+            if not self.use_SG:
+                raise ValueError("use_H requires use_SG (H rides the recurrent-divisive term; kick_probe "
+                                 "tracks I_E_rec only when use_SG)")
+            if self.tau_H <= 0.0:
+                raise ValueError(f"tau_H must be > 0, got {self.tau_H}")
+            if self.alpha_H < 0.0:
+                raise ValueError(f"alpha_H must be >= 0, got {self.alpha_H}")
 
 
 # ---------------------------------------------------------------------------
@@ -338,6 +357,9 @@ class SpatialSlowField:
         self.trace_q_surround = []
         self.trace_p_core = []
         self.trace_p_surround = []
+        # ---- containment memory H (Phase-3 vNext) ----
+        self.H = float(self.cfg.H_init)
+        self.trace_H = []
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
@@ -368,7 +390,11 @@ class SpatialSlowField:
                 "simulate_kick (which tracks I_E_rec); do not use a caller that omits it.")
         if self.cfg.use_SG and I_E_rec is not None:                   # §5 divisive recurrent-gain (E only)
             aS = self.cfg.alpha_G * self.S_G
-            frac = aS / (1.0 + aS)                                     # aS=0 -> 0 (exact -> byte-parity)
+            if self.cfg.use_H:                                        # + containment memory H (Phase-3 vNext)
+                aH = self.cfg.alpha_H * self.H
+                frac = (aS + aH) / (1.0 + aS + aH)                    # I_EE/(1+alpha_G*S_G+alpha_H*H)
+            else:
+                frac = aS / (1.0 + aS)                                # exact pre-H expression -> byte-parity
             out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + self.cfg.beta_SG * self.S_G
             self.trace_Irec_mean.append(float(np.asarray(I_E_rec, float)[:nE].mean()))  # for matched-subtractive calib
         return out
@@ -437,6 +463,12 @@ class SpatialSlowField:
                 np.clip(self.p, 0.0, 1.0, out=self.p)
             self.trace_p_mean.append(float(self.p.mean()))
             self.trace_p_max.append(float(self.p.max()))
+        if cfg.use_H:                                              # §Phase-3: tau_H dH/dt = <Phi(p)> - H
+            phi = (self.p if cfg.p50_r <= 0.0                      # linear Phi, or Hill (same Phi as the actuator)
+                   else self.p ** cfg.n_r / (cfg.p50_r ** cfg.n_r + self.p ** cfg.n_r))
+            self.H += dt * (float(phi.mean()) - self.H) / cfg.tau_H
+            self.H = float(np.clip(self.H, 0.0, cfg.H_max))
+            self.trace_H.append(self.H)
         if cfg.use_A:                                               # M4-3A load -> shunt
             u_n = convolve_periodic(self.rE, self._Kn)              # field-derived drive K_n * rE (EMA rE)
             self.trace_un_mean.append(float(u_n.mean()))            # P1-4: dump real u_n even when k_n=0 (P0b lock)

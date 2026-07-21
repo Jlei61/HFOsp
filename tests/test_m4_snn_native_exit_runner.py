@@ -55,7 +55,7 @@ def test_d_sweep_label_encodes_onset():
     import types
     a = types.SimpleNamespace(tau_p=3000.0, theta_p=0.0, a50_p=0.3, sigma_p=1.5, p50_r=0.15, n_r=4.0,
                               tau_p_down=12000.0, persist_onset_ms=2500.0, T=25000.0,
-                              d_sweep="3000:80", include_anchor=False, eta_r=15.0, clamp_val=0.8, arms="")
+                              d_sweep="3000:80", include_anchor=False, eta_r=15.0, clamp_val=0.8, arms="", use_H=False, alpha_H=0.0, tau_H=6000.0)
     (label, cfg, T, perturb) = R._build_arms(a)[0]
     assert cfg.persist_onset_ms == 2500.0                 # propagated, not dropped
     assert "on2500" in label and "dn12000" in label       # onset + tau_down both in the label

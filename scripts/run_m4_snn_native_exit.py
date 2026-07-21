@@ -84,7 +84,8 @@ def _cfg_effective(cfg):
     return dict(use_persist=cfg.use_persist, tau_p=cfg.tau_p, tau_p_down=cfg.tau_p_down,
                 persist_onset_ms=cfg.persist_onset_ms, theta_p=cfg.theta_p, a50_p=cfg.a50_p,
                 sigma_p=cfg.sigma_p, eta_r=cfg.eta_r, p50_r=cfg.p50_r, n_r=cfg.n_r,
-                clamp_persist=cfg.clamp_persist, k_q=cfg.k_q, use_SG=cfg.use_SG, alpha_G=cfg.alpha_G)
+                clamp_persist=cfg.clamp_persist, k_q=cfg.k_q, use_SG=cfg.use_SG, alpha_G=cfg.alpha_G,
+                use_H=cfg.use_H, alpha_H=cfg.alpha_H, tau_H=cfg.tau_H)
 
 
 # ---- crash-safe per-arm output + run_manifest + resume (task brief §3) --------------------------------
@@ -284,8 +285,10 @@ def _cell_worker(cell):
 # ===========================================================================================
 def _persist_cfg(*, k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG, use_persist=False,
                  tau_p=5000.0, theta_p=0.0, a50_p=1.0, sigma_p=1.5, eta_r=0.0,
-                 p50_r=0.0, n_r=2.0, clamp_persist=None, tau_p_down=None, persist_onset_ms=0.0):
-    """M4 base config (k_q depletion + S_G pool, params from run_m4_dynamic_qi) + persistence field."""
+                 p50_r=0.0, n_r=2.0, clamp_persist=None, tau_p_down=None, persist_onset_ms=0.0,
+                 use_H=False, alpha_H=0.0, tau_H=5000.0):
+    """M4 base config (k_q depletion + S_G pool, params from run_m4_dynamic_qi) + persistence field p + the
+    Phase-3 containment memory H (off by default -> byte-parity)."""
     return SpatialSlowFieldConfig(
         use_qI=True, k_q=k_q, sigma_q=M4.SIGMA_Q, sigma_K=0.5, q_min=M4.Q_MIN, q_init=1.0,
         tau_q=M4.TAU_Q, tau_a=M4.TAU_A, use_gK=False, k_K=0.0,
@@ -293,7 +296,7 @@ def _persist_cfg(*, k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG, use_persist=False
         p_pool=M4.P_POOL, tau_mu=M4.TAU_MU, tau_S=M4.TAU_S, S_max=M4.S_MAX,
         use_persist=use_persist, tau_p=tau_p, theta_p=theta_p, a50_p=a50_p, sigma_p=sigma_p,
         eta_r=eta_r, p50_r=p50_r, n_r=n_r, clamp_persist=clamp_persist, tau_p_down=tau_p_down,
-        persist_onset_ms=persist_onset_ms)
+        persist_onset_ms=persist_onset_ms, use_H=use_H, alpha_H=alpha_H, tau_H=tau_H)
 
 
 # ---- spatial readouts (Phase 1 output list: core/surround activity + axis/transverse kymographs) --------
@@ -369,6 +372,8 @@ def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
         p_core_final=round(float(slow.trace_p_core[-1]), 4) if slow.trace_p_core else None,
         p_surround_final=round(float(slow.trace_p_surround[-1]), 4) if slow.trace_p_surround else None,
         p_peak=round(float(max(slow.trace_p_max)) if slow.trace_p_max else 0.0, 4),
+        H_final=round(float(slow.H), 4) if slow.cfg.use_H else None,
+        H_peak=round(float(max(slow.trace_H)) if slow.trace_H else 0.0, 4) if slow.cfg.use_H else None,
         T_ms=float(T_ms), perturb_kind=(perturb["kind"] if perturb else None),
         cfg_effective=_cfg_effective(cfg),
         wall_s=round(time.time() - t0, 1), **M4._spatial_coverage(movie),
@@ -383,6 +388,7 @@ def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
         trace_p_max=(np.asarray(slow.trace_p_max, np.float32) if slow.trace_p_max else np.zeros(0, np.float32)),
         trace_p_core=(np.asarray(slow.trace_p_core, np.float32) if slow.trace_p_core else np.zeros(0, np.float32)),
         trace_p_surround=(np.asarray(slow.trace_p_surround, np.float32) if slow.trace_p_surround else np.zeros(0, np.float32)),
+        trace_H=(np.asarray(slow.trace_H, np.float32) if slow.trace_H else np.zeros(0, np.float32)),
         kymo_axis=kymo_axis, kymo_transverse=kymo_transverse,
         core_activity=core_act, surround_activity=surr_act,
         rate=rate.astype(np.float32), af=af.astype(np.float32), movie=movie,
@@ -411,7 +417,8 @@ def _build_arms(a):
     P = dict(tau_p=a.tau_p, theta_p=a.theta_p, a50_p=a.a50_p, sigma_p=a.sigma_p, p50_r=a.p50_r, n_r=a.n_r,
              tau_p_down=a.tau_p_down, persist_onset_ms=a.persist_onset_ms)
     T = a.T
-    base = dict(k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG)
+    base = dict(k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG,
+                use_H=a.use_H, alpha_H=a.alpha_H, tau_H=a.tau_H)   # Phase-3 containment memory (off by default)
     if a.d_sweep:                          # arm-D (tau_p:eta_r) grid, one build shared across cells
         cells = []
         if a.include_anchor:
@@ -423,7 +430,8 @@ def _build_arms(a):
             # four brief-§3 axes: tau_up (tau{tp}) / actuator (eta{er}) / tau_down (dn) / onset (on).
             lab = (f"D_tau{int(tp)}_eta{er:g}"
                    + (f"_dn{int(a.tau_p_down)}" if a.tau_p_down else "")
-                   + (f"_on{int(a.persist_onset_ms)}" if a.persist_onset_ms else ""))
+                   + (f"_on{int(a.persist_onset_ms)}" if a.persist_onset_ms else "")
+                   + (f"_H{a.alpha_H:g}t{int(a.tau_H)}" if a.use_H else ""))
             cells.append((lab, _persist_cfg(**base, use_persist=True, eta_r=er, **{**P, "tau_p": tp}), T, None))
         return cells
     catalog = {
@@ -671,6 +679,11 @@ def main():
                     help="asymmetric p decay time (ms); None -> symmetric. Fast charge (tau_p) + slow decay = long hold")
     ap.add_argument("--persist-onset-ms", dest="persist_onset_ms", type=float, default=0.0,
                     help="established-state fork: p inactive until this t (ms) so the M4 state forms first, then engages")
+    # ---- Phase-3 vNext: containment memory H (divisive; holds through q_I refill) ----
+    ap.add_argument("--use-H", dest="use_H", action="store_true",
+                    help="enable the containment memory H (tau_H dH/dt=<Phi(p)>-H; I_EE/(1+alpha_G*S_G+alpha_H*H))")
+    ap.add_argument("--alpha-H", dest="alpha_H", type=float, default=0.0, help="H divisive coupling (like alpha_G)")
+    ap.add_argument("--tau-H", dest="tau_H", type=float, default=6000.0, help="H build/decay time (ms; outlast q_I refill)")
     ap.add_argument("--theta-p", dest="theta_p", type=float, default=0.0)
     ap.add_argument("--a50-p", dest="a50_p", type=float, default=1.0)
     ap.add_argument("--sigma-p", dest="sigma_p", type=float, default=1.5)

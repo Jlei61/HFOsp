@@ -159,7 +159,7 @@ def test_d_sweep_propagates_tau_p_down():
     import run_m4_snn_native_exit as R
     a = types.SimpleNamespace(tau_p=5000.0, theta_p=0.05, a50_p=0.3, sigma_p=1.5, p50_r=0.15, n_r=4.0,
                               tau_p_down=12000.0, persist_onset_ms=0.0, T=20000.0, d_sweep="3000:80,3000:150",
-                              include_anchor=False, eta_r=15.0, clamp_val=0.8, arms="")
+                              include_anchor=False, eta_r=15.0, clamp_val=0.8, arms="", use_H=False, alpha_H=0.0, tau_H=6000.0)
     cells = R._build_arms(a)
     assert len(cells) == 2
     for (label, cfg, T, perturb) in cells:
@@ -213,6 +213,52 @@ def test_core_surround_p_traces_under_persist():
     slow.p[slow._iyE[core_mask_E], slow._ixE[core_mask_E]] = 0.6
     slow.step(np.zeros(NE + NI, bool), net["labels"], DT)      # tau_p huge -> ~no change over one quiet step
     assert slow.trace_p_core[-1] > slow.trace_p_surround[-1]   # core carries the higher persistence
+
+
+# ---- containment memory H (Phase-3 vNext: hold divisive containment during q_I refill) -----
+def test_H_off_byte_parity():
+    """use_H=False with H params set == plain config (recurrent-divisive denom unchanged) -> spikes identical."""
+    p, net, NE, NI = _net()
+    res_a = _run(p, net, _slow(p, net, use_qI=True, k_q=0.1, use_SG=True, alpha_G=16.0))
+    res_b = _run(p, net, _slow(p, net, use_qI=True, k_q=0.1, use_SG=True, alpha_G=16.0,
+                               use_H=False, tau_H=5000.0, alpha_H=8.0, H_init=0.0))
+    assert np.array_equal(res_a["E_spk_bool"], res_b["E_spk_bool"])
+
+
+def test_H_evolves_toward_phi():
+    """tau_H*dH/dt = <Phi(p)> - H: H builds toward <Phi(p)> when p is high (clamped), and decays when p=0."""
+    p, net, NE, NI = _net()
+    slow = _slow(p, net, use_SG=True, alpha_G=16.0, use_persist=True, clamp_persist=0.8, eta_r=0.0,
+                 p50_r=0.0, use_H=True, tau_H=100.0, alpha_H=8.0)     # Phi linear, p==0.8 -> <Phi>=0.8
+    spk = np.zeros(NE + NI, bool)
+    for _ in range(3000):                                            # 300 ms >> tau_H -> H -> ~0.8
+        slow.step(spk, net["labels"], DT)
+    assert slow.H > 0.5
+    slow.p[:] = 0.0                                                  # activity gone -> H must decay
+    for _ in range(3000):
+        slow.step(spk, net["labels"], DT)
+    assert slow.H < 0.2
+
+
+def test_H_adds_to_divisive_containment():
+    """I_EE/(1+alpha_G*S_G + alpha_H*H): H>0 removes MORE recurrent-E current than H=0 (same S_G)."""
+    p, net, NE, NI = _net()
+    s0 = _slow(p, net, use_SG=True, alpha_G=16.0)
+    sH = _slow(p, net, use_SG=True, alpha_G=16.0, use_H=True, alpha_H=8.0)
+    s0.S_G = sH.S_G = 0.2
+    sH.H = 0.5
+    I_E = np.full(NE + NI, 5.0); I_I = np.full(NE + NI, 1.0); I_rec = np.full(NE + NI, 4.0)
+    out0 = s0.apply_currents(I_E, I_I, net["labels"], I_rec)
+    outH = sH.apply_currents(I_E, I_I, net["labels"], I_rec)
+    assert outH[:NE].mean() < out0[:NE].mean() - 1e-6                # stronger divisive -> more removed
+
+
+def test_validate_H():
+    with pytest.raises(ValueError):
+        SpatialSlowFieldConfig(use_SG=True, use_H=True, tau_H=0.0).validate()
+    with pytest.raises(ValueError):
+        SpatialSlowFieldConfig(use_SG=True, use_H=True, alpha_H=-1.0).validate()
+    SpatialSlowFieldConfig(use_SG=True, use_H=True, tau_H=5000.0, alpha_H=8.0).validate()  # ok
 
 
 # ---- Clause 5: validate -------------------------------------------------------------------
