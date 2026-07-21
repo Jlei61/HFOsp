@@ -1,6 +1,7 @@
 # SNN-native M4 containment-to-exit lifecycle — execution log (2026-07-21)
 
-> **Status: IN PROGRESS.** Stage 0–1 + Stage-2 calibration closed; Stage-2 dynamic arm D running.
+> **Status: CLOSED — BOUNDED-NEGATIVE (temporal lifecycle).** Stage 0–2 done (open-loop exit atlas + dynamic
+> arms symmetric/asymmetric + ablations, seed1 exhaustive; seed3 cross-seed confirmation running). Verdict §8.
 > Mechanism SCREEN, not a seizure claim. Branch `codex/topic4-m4-snn-native-exit`, base `4d40b03`.
 > Spec: `docs/superpowers/specs/2026-07-21-topic4-m4-snn-native-exit-design.md`.
 
@@ -130,7 +131,7 @@ R4 必须用"固定 bath（外挂 `q` 储库、跟活动解耦）+ 离散 latch"
 - exit / dynamic accessibility：❌（开环+对称+不对称全 bounded-negative）。
 - termination / recovery：❌（无 clean terminate；无回间期）。
 - spatial pattern：❌（电流把宽态推成四处游走的大团，非局灶起始/终止波前）。
-- cross-seed：seed1 airtight（open-loop 5 + 对称 3 + 不对称 2 + 消融 2，全一致）；seed3 确认 running（见 §9 待填）。
+- cross-seed：seed1 airtight（open-loop 5 + 对称 3 + 不对称 2 + 消融 2，全一致）；**seed3 复核：不对称 D_tau3000_eta150 = train_then_runaway（maxHz 238，runaway 11957ms）复现 runaway 失效模式**；对称 fragment cell seed3 重跑中。根因是结构属性（与 seed 无关）。
 
 **能写 / 不能写**：
 - 能写：M4 有界态是稳健吸引子；persistence-gated 恢复电流（任意 τ 对称性/强度）不能 clean-exit；根因=`q_I`↔`S_G` 反相；
@@ -146,7 +147,32 @@ R4 的人工成分正好对应 SNN 缺的那个解耦。
 （外源/慢储库，SNN 版 fixed-bath），或**弱化灶的自发再点火**（降 core 自活、或 `D_EE` 衬底异质），使"安静回灌 `q_I`"
 不必以"排空 `S_G`"为代价。持续时间门控的 `p` 场已实现、测试齐、off-by-default，可复用为该方向的恢复 actuator。
 
-## 9. 图与产物（绝对路径见 §10）+ Stage-4 空间 + cross-seed —— 收尾中
+## 9. 产物、Stage-4 空间、cross-seed、资源、git
+
+**关键图**（`results/topic4_sef_hfo/m4_snn_native_exit/`，各 `figures/` 有中文 README）：
+- `figures/fig5_no_go_diagnostic.png` —— 结论图：四列结局（persist / open-loop rebound / symmetric fragment / asymmetric runaway）+ `q_I`/`S_G` 反相。
+- `stage1_exit_atlas/figures/exit_atlas_s1_seed1.png`（短压 500/3000/6000）+ `exit_atlas_s1long_seed1.png`（长压 10000/14000）。
+- `stage2_arms/figures/{arms_s2cal_seed1.png（A/B/C 校准）, arms_s2d_seed1.png（对称扫描）, arms_s2dasym_seed1.png（不对称）, spatial_D_tau5000_eta40.png（游走）}`。
+
+**Summary JSON**：`stage1_exit_atlas/exit_atlas_s1{,long}_seed1.json`、`stage2_arms/arms_s2{cal,d,dasym,abl}_seed1.json`（raw traces `.npz` gitignored）。
+
+**脚本**：`scripts/{run_m4_snn_native_exit.py（exit_atlas 探针 + arms 动态臂 + d_sweep）, plot_m4_snn_native_exit.py, plot_m4_snn_native_exit_spatial.py, plot_m4_snn_native_exit_summary.py, topic4_resource_monitor.py}`；引擎 `src/snn_engine/slow_field.py`（`p` 场）；测试 `tests/test_m4_snn_native_exit_persist.py`（9 绿 + `BASELINE_SHA` 绿）。
+
+**spec / archive**：`docs/superpowers/specs/2026-07-21-topic4-m4-snn-native-exit-design.md`；本文件。
+
+**Stage-4 空间**：源空间活动帧（`spatial_D_tau5000_eta40.png`）显示恢复电流把宽持续态推成一个**四处游走的大团**（压这里→那里冒→漂移），
+非局灶起始、非渐进招募、非终止波前——即"电流把活动空间搬家，不是熄灭它"。因无 lifecycle candidate，**未跑昂贵的 Stage-3 自发长轨迹**（cheap-first 纪律），
+也无 paper-ready Figure 5；Figure 5 落为诚实的 NO-GO 诊断图。
+
+**cross-seed**：seed1 穷举一致（open-loop 5 holds + 对称 3 + 不对称 2 + 消融 2）。seed3 复核：**不对称 D_tau3000_eta150 = train_then_runaway
+复现 runaway 失效**（maxHz 238、runaway 11957ms）；对称 fragment cell（`s2d_s3` 第一次 detached 跑因 SIGHUP 死于写 JSON 前，已 harness-tracked 重跑 `s2d_s3b`）。
+失败根因（`q_I`↔`S_G` 反相）是 M4 设计的**结构属性、与 seed 无关**，故 verdict 不依赖 seed3——seed3 只作稳健性复核。
+
+**资源**：worker 峰值 ≤8（多为 2–4），canary peak RSS 7.12GB，全程 `min mem_avail_frac=0.85`、**swap 增长 0**、未触发 protective stop、
+不干扰并行 FCXR 线；`OMP=1`；`resource_log.jsonl` + `topic4_resource_monitor.py`。
+
+**git**：worktree `.worktrees/topic4-m4-snn-native-exit`，branch `codex/topic4-m4-snn-native-exit`，base `4d40b03`（clean，未混入 R4/FCXR）；
+commits `8109ccd`(spec) `d79d9f9`(persist 场+runner+tests) `69e431a`(Stage-1a 开环+diag) `c85e2ad`(asymmetric-p+machinery) `bb292e1`(verdict+diagnostics)（未 push、未合 main）。
 
 ## 7. Provenance
 
