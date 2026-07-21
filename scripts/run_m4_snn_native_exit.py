@@ -142,7 +142,8 @@ def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
     S["net"]["rng"] = np.random.default_rng(S["seed"])
     t0 = time.time()
     res = simulate_kick(p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]), r_kick=PP.R_KICK,
-                        t_kick=1e9, V_th_per_neuron=S["vth"], perturb=perturb, early_stop_runaway=False)
+                        t_kick=1e9, V_th_per_neuron=S["vth"], perturb=perturb,
+                        early_stop_runaway=M4._EARLY_STOP["on"])  # runaway (>120Hz sustained) truncates; clean-exit/bounded unaffected
     spk = res["E_spk_bool"]
     rate = np.asarray(res["rate_E"], float)
     af, bin_w = M4.C.active_fraction(spk, M4.DT, M4.C.BIN_MS)
@@ -224,7 +225,7 @@ def _build_arms(a):
 
 def _run_arms(a):
     os.makedirs(a.out, exist_ok=True)
-    M4._EARLY_STOP["on"] = False
+    M4._EARLY_STOP["on"] = a.early_stop     # runaway arms truncate (still set runaway_ms); clean-exit/bounded run full
     t_build = time.time()
     S = PP.build_substrate(a.seed)
     S["p"].T = a.T

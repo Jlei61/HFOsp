@@ -87,9 +87,12 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
   一压活动就少 → `p` 的驱动就少 → 电流就弱 → 稳到一个自洽的低持续态（~25Hz、`q_I` 只回灌到 ~0.18）。
   太弱/太慢的电流反而饿死 `S_G` 除法池 → 失控。**都不给 clean terminate+recover**——与 STD/shunt 的 fragment/suppress 撞同一堵墙。
 - **反馈自限**：`p` 只涨到 ~0.22（远低于 sensor-only 的 0.55），因为压制切掉了自己的传感器输入（闭环自限），有效电流比标定弱。
-- **空间**：源空间帧显示电流把宽持续态推成一个**大团四处游走**（压这里→那里冒→漂移），非局灶起始、非轴向招募、非终止波前。
-  即"退出的障碍是灶/衬底的自发再点火 + 活动可空间搬家"，不是恢复坐标不够。图 `results/.../stage2_arms/figures/{arms_s2d_seed1.png, spatial_D_tau5000_eta40.png}`。
-- **修正尝试（asymmetric `p`，running）**：快充 τ_p=3000 + 慢放 τ_p_down=12000 —— R4 active-low latch 的连续版：终止后 `p` 慢衰 → 长 hold 让 `q_I` 灌满 → 缓释放。判决待填。
+- **传感器选择性（真数据验证，`A_sensor_on` slow-off + sensor η_r=0）**：在真实 34 个间期事件上 `p_max` 只涨到 **0.084**（p_mean 0.027），
+  远低于有界态的 0.55；Hill `p50_r=0.25` 下 `Φ(0.084)≈0.013`≈0 → **actuator 在真间期事件上基本不触发**。即持续时间门控在真衬底上确实区分"短间期"与"长有界"，
+  不只是单元测试。（回应 review P1：selectivity 现有真数据支持。）
+- **空间**：源空间帧显示电流把宽持续态推成一个**大面积游走活动**（压这里→那里冒→漂移），非局灶起始、非轴向招募、非终止波前
+  （空间验收失败；6 帧不足以严格区分"连续游走"与"不同区域交替点燃"，下一版需 kymograph）。图 `results/.../stage2_arms/figures/{arms_s2d_seed1.png, spatial_D_tau5000_eta40.png}`。
+- **⚠️ asymmetric `p`（见 §7）**：原 `s2dasym` 因 `d_sweep` 漏传 `tau_p_down` 实为对称、已作废；**真·不对称（τ_up3000/τ_down12000）已修复重跑 `s2dasymFIX`，结果折入 §7**。
 
 ## 6. Stage-2 ablations（seed1，符号版 arm-D 参数 τ5000 η40）
 
