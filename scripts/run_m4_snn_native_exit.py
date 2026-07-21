@@ -210,6 +210,7 @@ def _build_arms(a):
         return cells
     catalog = {
         "A_slow_off":  (_persist_cfg(k_q=0.0, use_SG=False), T),
+        "A_sensor_on": (_persist_cfg(k_q=0.0, use_SG=False, use_persist=True, eta_r=0.0, **P), T),  # p on real IEDs, actuator off
         "B_m4_anchor": (_persist_cfg(**base), T),
         "C_sensor_on": (_persist_cfg(**base, use_persist=True, eta_r=0.0, **P), T),   # p evolves, actuator off
         "D_full":      (_persist_cfg(**base, use_persist=True, eta_r=a.eta_r, **P), T),

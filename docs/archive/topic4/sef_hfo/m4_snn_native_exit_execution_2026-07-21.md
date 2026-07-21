@@ -145,13 +145,17 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
   ❌"不对称 hold 也失败"（真·不对称重跑中）；❌"造出 seizure lifecycle / 证明发作机制 / 任何 clinical/SOZ"；❌把 fragment/游走当"发作样招募"。
 
 **与旧工作的关系（真正新增了什么）**：不是把 STD/shunt/m/g_K 换名重跑——本线加的是**持续时间门控 + 空间局部**的恢复坐标
-（lineage 从没测过的组合），并**在 M4 有界态上**测；新增的正面知识是 **`q_I`↔`S_G` 反相**这个把整条 lineage 失败统一起来
-的结构性诊断，以及"不对称 hold 只把矛盾变成极限环"。这是对 R4（rate-patch + latch + fixed bath 闭环）的**机制侧解释**：
-R4 的人工成分正好对应 SNN 缺的那个解耦。
+（lineage 从没测过的组合），并**在 M4 有界态上**测；新增的正面视角是 **`q_I` 与 `S_G` 对活动反号**这个可能统一多个失败模式的
+**候选**诊断（非证明），以及一个可复用的、测试齐的 `p` 场基础设施。
 
-**下一杠杆（非本 session 自主，交给用户定向）**：要在完整 SNN 里闭环，需要一个**跟即时活动解耦的 `q_I` 恢复通路**
-（外源/慢储库，SNN 版 fixed-bath），或**弱化灶的自发再点火**（降 core 自活、或 `D_EE` 衬底异质），使"安静回灌 `q_I`"
-不必以"排空 `S_G`"为代价。持续时间门控的 `p` 场已实现、测试齐、off-by-default，可复用为该方向的恢复 actuator。
+**下一步（按 review 2026-07-21 §7 优先级，交用户定向）**：
+1. **[做中]** 修 P0 后重跑真·不对称 `p`（τ_up=3000/τ_down=12000，η_r=80/150；有 candidate 才上 seeds 3/4，无则停）。
+2. **`q_core × S_G` frozen exit atlas**（P1，关键）：从同一 M4 persistent checkpoint 分叉，独立 clamp `q_core∈{0.2..1.0}×S_G∈{0..0.4}`，
+   短跑 fast 子系统分类 low/rebound/bounded/runaway，再叠真实动态轨迹——直接回答"退出 basin 是否存在、需要什么组合、当前轨迹是错过/穿太快/无低支"。
+3. 若 basin 存在但轨迹错过 → 试**持续性全局 containment memory** `H`（`τ_H Ḣ = P_G(p) − H`，`I_EE^eff = I_EE/(1+α_f S_G + α_H H)`，
+   慢建慢衰、活动暂降时仍保 recurrent-E containment、`q_I` 恢复后再衰减），直接作用 M4 分母、不改 E→E、与并行 EE 线独立。
+4. 补齐 review 列的对照：open-loop **current** actuator atlas、matched-instantaneous sensor、E2 no-`S_G` 同批、core/surround/`q_min` 慢变量 traces、
+   连接长轴+横轴 space–time kymograph（真 mm 坐标）。若 frozen atlas 显示即使 `q_core=1、S_G/H` 足够高也无可保持低 basin → 本线正式停、瓶颈交 fast substrate。
 
 ## 9. 产物、Stage-4 空间、cross-seed、资源、git
 
