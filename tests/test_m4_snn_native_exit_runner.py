@@ -185,3 +185,97 @@ def test_formed_state_time_none_when_no_bounded_state():
     area = np.full(n // 250, 0.02)
     res = A.formed_state_time(rate, SG, qI, area, dt=dt, movie_bin_ms=25.0)
     assert res["t_form"] is None                    # end-of-run is not a bounded state -> no formation
+
+
+def _step_traces_v2(dt=0.1, T=10000.0, t_step=3000.0):
+    """Step traces incl. core/surround: baseline -> bounded M4 (core depletes more than surround, both recruit)."""
+    rate, SG, qI, area = _step_traces(dt, T, t_step)
+    n = int(T / dt); t = np.arange(n) * dt
+    q_core = np.where(t < t_step, 1.0, 0.05)         # core q_I depletes to the floor
+    q_surr = np.where(t < t_step, 1.0, 0.40)         # surround less depleted -> a gradient forms
+    nf = n // int(round(25.0 / dt)); tf = np.arange(nf) * 25.0
+    core_act = np.where(tf < t_step, 3.0, 90.0)      # core rate forms at onset
+    surr_act = np.where(tf < t_step, 2.0, 40.0)      # surround recruited to a plateau
+    return rate, SG, qI, area, core_act, surr_act, q_core, q_surr
+
+
+def test_formed_state_uses_core_surround():
+    rate, SG, qI, area, ca, sa, qc, qs = _step_traces_v2(t_step=3000.0)
+    res = A.formed_state_time(rate, SG, qI, area, dt=0.1, movie_bin_ms=25.0, window_ms=1500.0,
+                              core_activity=ca, surround_activity=sa, trace_q_core=qc, trace_q_surround=qs)
+    assert res["used_core_surround"] is True
+    assert res["t_form"] is not None and 2800.0 <= res["t_form"] <= 3400.0
+
+
+def test_formed_state_rejects_when_core_never_forms():
+    """Global rate high but CORE rate stays at baseline -> NOT a formed M4 core -> t_form None."""
+    rate, SG, qI, area, ca, sa, qc, qs = _step_traces_v2(t_step=3000.0)
+    ca[:] = 2.5                                       # core never elevates (only surround/global do)
+    qc[:] = 1.0                                       # core q_I never depletes
+    res = A.formed_state_time(rate, SG, qI, area, dt=0.1, movie_bin_ms=25.0,
+                              core_activity=ca, surround_activity=sa, trace_q_core=qc, trace_q_surround=qs)
+    assert res["t_form"] is None
+
+
+def test_t_form_sensitivity_stable_on_clean_step():
+    rate, SG, qI, area, ca, sa, qc, qs = _step_traces_v2(t_step=3000.0)
+    sens = A.t_form_sensitivity(rate, SG, qI, area, dt=0.1, movie_bin_ms=25.0,
+                                core_activity=ca, surround_activity=sa, trace_q_core=qc, trace_q_surround=qs)
+    assert sens["stable"] is True                    # a clean step -> t_form stable across window+threshold
+    assert sens["spread_ms"] is not None and sens["spread_ms"] <= 500.0
+    assert all(v is not None for v in sens["t_form_by_variant"].values())
+
+
+# ---- recovery matcher: post-offset events vs slow-off IEDs (review 07-22 P0) ------------------
+def _feat(t_on, dur, peak, area, ratio, mode):
+    return dict(t_on=t_on, dur=dur, peak=peak, area=area, core_surr_ratio=ratio, mode=np.asarray(mode, float))
+
+
+def test_recovery_match_recovered_when_similar():
+    m = np.ones((4, 4))
+    base = [_feat(i * 300.0, 25.0, 40.0, 0.20, 1.5, m) for i in range(10)]
+    post = [_feat(15000 + i * 320.0, 24.0, 42.0, 0.19, 1.55, m) for i in range(6)]   # matched distribution
+    r = A.recovery_match(base, post)
+    assert r["recovered"] is True
+    assert {"duration", "iei", "peak_rate", "active_area", "core_surround_ratio", "spatial_mode"} <= set(r["per_metric"])
+
+
+def test_recovery_match_rejects_fragment():
+    m = np.ones((4, 4)); m2 = np.zeros((4, 4)); m2[0, 0] = 1.0          # wrong spatial mode
+    base = [_feat(i * 300.0, 25.0, 40.0, 0.20, 1.5, m) for i in range(10)]
+    post = [_feat(15000 + i * 4000.0, 200.0, 130.0, 0.80, 5.0, m2) for i in range(3)]  # long/sparse/broad/wrong
+    r = A.recovery_match(base, post)
+    assert r["recovered"] is False
+
+
+def test_recovery_match_rejects_too_few():
+    m = np.ones((4, 4))
+    base = [_feat(i * 300.0, 25.0, 40.0, 0.20, 1.5, m) for i in range(10)]
+    r = A.recovery_match(base, [_feat(15000.0, 25.0, 40.0, 0.20, 1.5, m)], min_post=3)
+    assert r["recovered"] is False and "too few" in r["reason"]
+
+
+def test_arm_event_features_extracts():
+    dt = 0.1; n = 3000                                                  # 300 ms
+    rate = np.full(n, 5.0); rate[1000:1500] = 60.0                      # event [100,150] ms peaks 60
+    nf = n // 250
+    movie = np.zeros((nf, 4, 4)); movie[4:6] = 0.5                      # frames 4-5 = [100,150) ms
+    core = np.full(nf, 3.0); core[4:6] = 80.0
+    surr = np.full(nf, 2.0); surr[4:6] = 40.0
+    row = dict(events=[[100.0, 150.0]])
+    npz = dict(rate=rate.astype("float32"), movie=movie.astype("float32"),
+               core_activity=core.astype("float32"), surround_activity=surr.astype("float32"))
+    feats = A.arm_event_features(row, npz, dt=0.1, movie_bin_ms=25.0, activity_bin_ms=25.0)
+    assert len(feats) == 1
+    assert feats[0]["dur"] == 50.0 and abs(feats[0]["peak"] - 60.0) < 1e-5
+    assert feats[0]["core_surr_ratio"] > 1.5                            # 80/40 = 2
+
+
+def test_verify_pre_onset_identity():
+    n = 5000
+    a = dict(rate=np.arange(n, dtype=float), trace_qI_mean=np.ones(n), trace_SG=np.zeros(n))
+    c = dict(rate=np.arange(n, dtype=float), trace_qI_mean=np.ones(n), trace_SG=np.zeros(n))
+    c["rate"] = c["rate"].copy(); c["rate"][3000:] += 1.0               # differ only AFTER onset (300 ms)
+    assert A.verify_pre_onset_identity(a, c, onset_ms=300.0, dt=0.1)["pre_onset_identical"] is True
+    c["rate"][100] += 1.0                                              # now differ BEFORE onset
+    assert A.verify_pre_onset_identity(a, c, onset_ms=300.0, dt=0.1)["pre_onset_identical"] is False

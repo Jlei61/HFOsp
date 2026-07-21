@@ -37,48 +37,77 @@ def _at(arr, t_ms, dt_arr):
 
 
 def formed_state_time(rate_hz, trace_SG, trace_qI_mean, area_frames, dt, movie_bin_ms,
+                      core_activity=None, surround_activity=None, activity_bin_ms=25.0,
+                      trace_q_core=None, trace_q_surround=None,
                       window_ms=1500.0, probe_ms=100.0,
                       rate_frac=0.5, sg_frac=0.7, q_frac=0.3, area_frac=0.6,
-                      bounded_rate_hz=15.0, bounded_sg=0.1, bounded_qfloor=0.6):
+                      core_frac=0.5, surr_frac=0.5, grad_frac=0.5,
+                      bounded_rate_hz=15.0, bounded_sg=0.1, bounded_qfloor=0.6,
+                      bounded_core_hz=15.0, bounded_surr_hz=15.0, bounded_grad=0.1):
     """Earliest t (ms) after which the M4 bounded state is stably FORMED for >= window_ms.
 
-    Plateau references = median over the LAST THIRD of the run (assumed settled). The end-of-run must
-    itself be a bounded state (rate_plateau > bounded_rate_hz AND S_G_plateau > bounded_sg AND
-    q_floor < bounded_qfloor) -- otherwise there is nothing formed and t_form is None (this is what makes
-    the detector reject a run that never left baseline; the fractional criteria alone would be vacuous).
+    Review 2026-07-22: the detector must use CORE/SURROUND, not just the spatial mean. When core/surround
+    traces are given (core_activity/surround_activity Hz per activity_bin_ms; trace_q_core/trace_q_surround
+    per-step), formation additionally requires: core rate formed+stable, surround recruited to its plateau,
+    q_core depleted, and a q_surround-q_core gradient established. Otherwise falls back to global-only.
 
-    At each probe the state is "in the formed regime" iff ALL of:
-      rate_s >= rate_frac*rate_plateau ; S_G >= sg_frac*S_G_plateau ;
-      q_I_mean <= q_floor + q_frac*(1-q_floor) ; active_area >= area_frac*area_plateau .
-    t_form = first probe whose next window_ms of probes are ALL in the formed regime."""
+    Plateau references = median over the LAST THIRD (assumed settled). The end-of-run must itself be a
+    bounded M4 state (global: rate>bounded_rate_hz, S_G>bounded_sg, q<bounded_qfloor; +core: core rate>
+    bounded_core_hz, q_core<bounded_qfloor, gradient>bounded_grad) -- else t_form=None (fractional criteria
+    alone are vacuous). At each probe "in formed regime" iff ALL criteria hold; t_form = first probe whose
+    next window_ms are ALL in regime."""
     rate_s = _smooth(rate_hz, dt, 200.0)
-    SG = np.asarray(trace_SG, float)
-    qI = np.asarray(trace_qI_mean, float)
-    area = np.asarray(area_frames, float)
+    SG = np.asarray(trace_SG, float); qI = np.asarray(trace_qI_mean, float); area = np.asarray(area_frames, float)
+    use_cs = core_activity is not None and surround_activity is not None \
+        and trace_q_core is not None and trace_q_surround is not None
+    ca = _smooth(np.asarray(core_activity, float), activity_bin_ms, 3 * activity_bin_ms) if use_cs else np.zeros(0)
+    sa = _smooth(np.asarray(surround_activity, float), activity_bin_ms, 3 * activity_bin_ms) if use_cs else np.zeros(0)
+    qc = np.asarray(trace_q_core, float) if use_cs else np.zeros(0)
+    qs = np.asarray(trace_q_surround, float) if use_cs else np.zeros(0)
+    grad = (qs - qc) if use_cs else np.zeros(0)
     n = rate_s.size
     if n == 0:
-        return dict(t_form=None, reason="empty rate trace")
+        return dict(t_form=None, reason="empty rate trace", used_core_surround=use_cs)
     T = n * dt
-    w0 = int(0.66 * n)
-    rate_plat = float(np.median(rate_s[w0:]))
-    sg_plat = float(np.median(SG[w0:])) if SG.size else 0.0
-    q_floor = float(np.median(qI[w0:])) if qI.size else 1.0
-    area_plat = float(np.median(area[int(0.66 * area.size):])) if area.size else 0.0
+    _p = lambda a: float(np.median(a[int(0.66 * a.size):])) if a.size else 0.0
+    rate_plat, sg_plat, area_plat = _p(rate_s), _p(SG), _p(area)
+    q_floor = _p(qI) if qI.size else 1.0
+    core_plat, surr_plat, grad_plat = _p(ca), _p(sa), _p(grad)
+    qc_floor = _p(qc) if qc.size else 1.0
 
     bounded = (rate_plat > bounded_rate_hz and sg_plat > bounded_sg and q_floor < bounded_qfloor)
-    diag = dict(rate_plateau=round(rate_plat, 2), sg_plateau=round(sg_plat, 3),
-                q_floor=round(q_floor, 3), area_plateau=round(area_plat, 3),
-                window_ms=window_ms, end_state_is_bounded=bool(bounded))
+    if use_cs:
+        # The M4 bounded state is a BROAD stripe (spec §9 highest-risk flag: "broad ~60% stripe, NOT a
+        # localized core"). Measured q_core~=q_surround~=floor, so the core-surround q GRADIENT is small BY
+        # THE STATE'S NATURE. We therefore do NOT gate formation on the gradient (that would reject the real
+        # broad state); we gate on broad RECRUITMENT (core AND surround rate at plateau) + broad DEPLETION
+        # (q_core at its floor). q_gradient_plateau is reported as a descriptive field only.
+        bounded = bounded and (core_plat > bounded_core_hz and surr_plat > bounded_surr_hz
+                               and qc_floor < bounded_qfloor)
+    diag = dict(rate_plateau=round(rate_plat, 2), sg_plateau=round(sg_plat, 3), q_floor=round(q_floor, 3),
+                area_plateau=round(area_plat, 3), window_ms=window_ms, used_core_surround=use_cs,
+                end_state_is_bounded=bool(bounded))
+    if use_cs:
+        diag.update(core_plateau=round(core_plat, 2), surround_plateau=round(surr_plat, 2),
+                    q_core_floor=round(qc_floor, 3), q_gradient_plateau=round(grad_plat, 3))
     if not bounded:
-        return dict(t_form=None, reason="end-of-run is not a bounded state", **diag)
+        return dict(t_form=None, reason="end-of-run is not a bounded M4 state", **diag)
 
     probes = np.arange(0.0, T, probe_ms)
-    in_regime = np.array([
-        (_at(rate_s, t, dt) >= rate_frac * rate_plat)
-        and (True if not (SG.size and sg_plat > 0) else _at(SG, t, dt) >= sg_frac * sg_plat)
-        and (True if qI.size == 0 else _at(qI, t, dt) <= q_floor + q_frac * (1.0 - q_floor))
-        and (True if not (area.size and area_plat > 0) else _at(area, t, movie_bin_ms) >= area_frac * area_plat)
-        for t in probes], bool)
+
+    def _formed(t):
+        ok = (_at(rate_s, t, dt) >= rate_frac * rate_plat) \
+            and (True if not (SG.size and sg_plat > 0) else _at(SG, t, dt) >= sg_frac * sg_plat) \
+            and (True if qI.size == 0 else _at(qI, t, dt) <= q_floor + q_frac * (1.0 - q_floor)) \
+            and (True if not (area.size and area_plat > 0) else _at(area, t, movie_bin_ms) >= area_frac * area_plat)
+        if use_cs:
+            # broad recruitment (core+surround at plateau) + core depletion; NOT the gradient (broad state)
+            ok = ok and (_at(ca, t, activity_bin_ms) >= core_frac * core_plat) \
+                and (_at(sa, t, activity_bin_ms) >= surr_frac * surr_plat) \
+                and (_at(qc, t, dt) <= qc_floor + q_frac * (1.0 - qc_floor))
+        return ok
+
+    in_regime = np.array([_formed(t) for t in probes], bool)
     k = int(round(window_ms / probe_ms))
     t_form = None
     for i in range(len(probes) - k):
@@ -87,6 +116,111 @@ def formed_state_time(rate_hz, trace_SG, trace_qI_mean, area_frames, dt, movie_b
             break
     return dict(t_form=t_form, reason=("stable window found" if t_form is not None
                                        else "no continuous formed window >= window_ms"), **diag)
+
+
+def t_form_sensitivity(rate_hz, trace_SG, trace_qI_mean, area_frames, dt, movie_bin_ms,
+                       windows=(1000.0, 1500.0, 2000.0), frac_deltas=(-0.1, 0.0, 0.1),
+                       tol_ms=500.0, **cs_kw):
+    """t_form stability (review 2026-07-22): re-run formed_state_time across window {1,1.5,2}s AND +/-10%
+    perturbation of the fractional thresholds. stable = every variant finds a t_form AND their spread <=
+    tol_ms. A t_form that only exists at one window / one threshold is NOT safe to intervene on."""
+    variants = {}
+    for w in windows:
+        variants[f"window_{int(w)}"] = formed_state_time(
+            rate_hz, trace_SG, trace_qI_mean, area_frames, dt, movie_bin_ms, window_ms=w, **cs_kw)["t_form"]
+    base = dict(rate_frac=0.5, sg_frac=0.7, area_frac=0.6, core_frac=0.5, surr_frac=0.5)
+    for d in frac_deltas:
+        if d == 0.0:
+            continue
+        kw = {k: v * (1.0 + d) for k, v in base.items()}
+        variants[f"frac_{d:+.2f}"] = formed_state_time(
+            rate_hz, trace_SG, trace_qI_mean, area_frames, dt, movie_bin_ms, **kw, **cs_kw)["t_form"]
+    vals = [v for v in variants.values() if v is not None]
+    stable = (len(vals) == len(variants)) and (len(vals) > 0) and (max(vals) - min(vals) <= tol_ms)
+    return dict(t_form_by_variant=variants, stable=bool(stable),
+                spread_ms=(max(vals) - min(vals) if vals else None),
+                t_form_median=(float(np.median(vals)) if vals else None))
+
+
+def arm_event_features(row, npz, dt=0.1, movie_bin_ms=25.0, activity_bin_ms=25.0, t_min=None):
+    """Per-event feature dicts from an arm's event table (row['events']) + traces (npz: rate, movie,
+    core_activity, surround_activity). t_min keeps only events with t_on >= t_min (the post-offset window)."""
+    rate = np.asarray(npz["rate"], float)
+    movie = np.asarray(npz.get("movie", np.zeros((0, 1, 1))), float)
+    ca = np.asarray(npz.get("core_activity", []), float)
+    sa = np.asarray(npz.get("surround_activity", []), float)
+    feats = []
+    for e in (row.get("events") or []):
+        t_on, t_off = float(e[0]), float(e[1])
+        if t_min is not None and t_on < t_min:
+            continue
+        i0, i1 = int(t_on / dt), max(int(t_off / dt), int(t_on / dt) + 1)
+        f0, f1 = int(t_on / movie_bin_ms), max(int(t_off / movie_bin_ms), int(t_on / movie_bin_ms) + 1)
+        a0, a1 = int(t_on / activity_bin_ms), max(int(t_off / activity_bin_ms), int(t_on / activity_bin_ms) + 1)
+        peak = float(rate[i0:min(i1, rate.size)].max()) if i0 < rate.size and i1 > i0 else 0.0
+        area = float((movie[f0:min(f1, movie.shape[0])] > 0.1).mean()) if movie.size and f0 < movie.shape[0] and f1 > f0 else 0.0
+        cr = float(ca[a0:min(a1, ca.size)].mean()) if ca.size and a0 < ca.size and a1 > a0 else 0.0
+        sr = float(sa[a0:min(a1, sa.size)].mean()) if sa.size and a0 < sa.size and a1 > a0 else 0.0
+        mode = (movie[f0:min(f1, movie.shape[0])].mean(axis=0) if movie.size and f0 < movie.shape[0] and f1 > f0
+                else np.zeros(movie.shape[1:] if movie.ndim == 3 else (1, 1)))
+        feats.append(dict(t_on=t_on, dur=t_off - t_on, peak=peak, area=area,
+                          core_surr_ratio=cr / (sr + 1e-9), mode=np.asarray(mode, float)))
+    return feats
+
+
+def recovery_match(baseline_feats, post_feats, min_post=3, tol_frac=0.6, mode_thresh=0.5):
+    """Compare post-offset event feature DISTRIBUTIONS to the slow-off baseline IED distributions (review
+    07-22): a post-offset burst counts as a RECOVERED IED only if there are ENOUGH of them AND their
+    duration / cadence(IEI) / peak-rate / active-area / core-surround-ratio medians are within tol_frac of
+    baseline AND the mean spatial footprint matches (cosine >= mode_thresh). Returns per-metric + a
+    recovered bool. (virtual-SEEG contact order + per-event axial order are further checks DEFERRED until
+    the LFP montage is wired per event -- so recovered=True here is necessary, not yet sufficient.)"""
+    if len(post_feats) < min_post:
+        return dict(recovered=False, reason=f"too few post-offset events ({len(post_feats)} < {min_post})",
+                    n_post=len(post_feats), per_metric={})
+
+    def _med(fs, k):
+        return float(np.median([f[k] for f in fs])) if fs else 0.0
+
+    def _iei(fs):
+        d = np.diff(sorted(f["t_on"] for f in fs))
+        return float(np.median(d)) if d.size else 0.0
+
+    per = {}
+    for name, key in (("duration", "dur"), ("peak_rate", "peak"), ("active_area", "area"),
+                      ("core_surround_ratio", "core_surr_ratio")):
+        b, p = _med(baseline_feats, key), _med(post_feats, key)
+        ratio = p / b if b > 1e-9 else (1.0 if p < 1e-9 else float("inf"))
+        per[name] = dict(baseline_median=round(b, 4), post_median=round(p, 4), ratio=round(ratio, 3),
+                         ok=bool(1.0 - tol_frac <= ratio <= 1.0 + tol_frac))
+    b_iei, p_iei = _iei(baseline_feats), _iei(post_feats)
+    r_iei = p_iei / b_iei if b_iei > 1e-9 else float("inf")
+    per["iei"] = dict(baseline_median=round(b_iei, 1), post_median=round(p_iei, 1), ratio=round(r_iei, 3),
+                      ok=bool(1.0 - tol_frac <= r_iei <= 1.0 + tol_frac))
+    bm = np.mean([f["mode"].ravel() for f in baseline_feats], axis=0) if baseline_feats else np.zeros(1)
+    pm = np.mean([f["mode"].ravel() for f in post_feats], axis=0)
+    cos = float(bm @ pm / (np.linalg.norm(bm) * np.linalg.norm(pm) + 1e-12))
+    per["spatial_mode"] = dict(cosine=round(cos, 3), ok=bool(cos >= mode_thresh))
+    recovered = all(m["ok"] for m in per.values())
+    return dict(recovered=bool(recovered), n_post=len(post_feats), per_metric=per,
+                reason=("recovered (necessary; vSEEG/axial order pending)" if recovered else "one or more metrics off baseline"),
+                deferred=["virtual_SEEG_contact_order (needs LFP montage per event)",
+                          "axial_propagation_order (needs per-event kymograph onset gradient)"])
+
+
+def verify_pre_onset_identity(anchor_npz, cand_npz, onset_ms, dt=0.1):
+    """Contract (review 07-22): with persist_onset_ms=onset the recovery current is exactly 0 before onset
+    (p stays 0), so an intervention MUST be byte-identical to the anchor before onset. Checks the saved
+    per-step rate / trace_qI_mean / trace_SG are equal on [0, onset). rate == spikes/step, so equal rate +
+    equal spatial slow-var traces is a near-exact spike-identity proxy (the runner does not save E_spk_bool)."""
+    i = int(onset_ms / dt)
+    checks = {}
+    for k in ("rate", "trace_qI_mean", "trace_SG"):
+        a = np.asarray(anchor_npz.get(k, []), float)
+        c = np.asarray(cand_npz.get(k, []), float)
+        m = min(i, a.size, c.size)
+        checks[k] = bool(m > 0 and np.array_equal(a[:m], c[:m]))
+    return dict(pre_onset_identical=all(checks.values()), onset_ms=onset_ms, per_trace=checks)
 
 
 def classify_phase1_verdict(termination_class, n_pre_events, n_post_events, recovered_events,
@@ -113,18 +247,90 @@ def _load_arm(out_dir, tag, seed, label):
     return row, z
 
 
-def analyze_anchor(out_dir, tag, seed, label="B_m4_anchor", movie_bin_ms=25.0, **kw):
-    """Run formed_state_time on an anchor arm's traces. Returns the formed-state dict + provenance."""
+def analyze_anchor(out_dir, tag, seed, label="B_m4_anchor", movie_bin_ms=25.0, activity_bin_ms=25.0, **kw):
+    """Run the core/surround formed-state detector + t_form sensitivity on an anchor arm's traces (review
+    2026-07-22: core/surround, not spatial mean; and t_form must be stable to launch interventions)."""
     row, z = _load_arm(out_dir, tag, seed, label)
     if z is None:
         raise SystemExit(f"anchor npz not found for {label} in {out_dir}/per_arm/{tag}_seed{seed}")
     movie = z.get("movie")
     area = ((movie > 0.1).mean(axis=(1, 2)) if movie is not None and movie.size else np.zeros(0))
+    cs = dict(core_activity=z.get("core_activity"), surround_activity=z.get("surround_activity"),
+              trace_q_core=z.get("trace_q_core"), trace_q_surround=z.get("trace_q_surround"),
+              activity_bin_ms=activity_bin_ms)
     res = formed_state_time(z["rate"], z.get("trace_SG", np.zeros(0)), z["trace_qI_mean"], area,
-                            dt=0.1, movie_bin_ms=movie_bin_ms, **kw)
+                            dt=0.1, movie_bin_ms=movie_bin_ms, **cs, **kw)
+    res["sensitivity"] = t_form_sensitivity(z["rate"], z.get("trace_SG", np.zeros(0)), z["trace_qI_mean"], area,
+                                            dt=0.1, movie_bin_ms=movie_bin_ms, **cs)
     res["label"] = label
     res["max_rate_hz"] = row.get("max_rate_hz") if row else None
+    res["safe_to_intervene"] = bool(res["t_form"] is not None and res["sensitivity"]["stable"])
     return res
+
+
+def plot_formed_state_diagnostic(out_dir, tag, seed, res, label="B_m4_anchor", movie_bin_ms=25.0,
+                                 activity_bin_ms=25.0):
+    """Formed-state diagnostic figure the review requires BEFORE any intervention: total/core/surround rate,
+    q_core/q_surround/q_mean, S_G, active area, axial+transverse kymograph, with t_form + its sensitivity
+    spread marked. Saves PNG+PDF next to the anchor's figures/ dir."""
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    _, z = _load_arm(out_dir, tag, seed, label)
+    dt = 0.1
+    rate = _smooth(np.asarray(z["rate"], float), dt, 200.0)
+    tr = np.arange(rate.size) * dt
+    qm = np.asarray(z["trace_qI_mean"], float); tq = np.arange(qm.size) * dt
+    qc = np.asarray(z.get("trace_q_core", []), float); qs = np.asarray(z.get("trace_q_surround", []), float)
+    SG = np.asarray(z.get("trace_SG", []), float)
+    ca = np.asarray(z.get("core_activity", []), float); sa = np.asarray(z.get("surround_activity", []), float)
+    ta = np.arange(ca.size) * activity_bin_ms
+    movie = np.asarray(z.get("movie", np.zeros((0, 1, 1))), float)
+    area = (movie > 0.1).mean(axis=(1, 2)) if movie.size else np.zeros(0)
+    tf = np.arange(area.size) * movie_bin_ms
+    kax = np.asarray(z.get("kymo_axis", np.zeros((0, 1))), float)
+    ktr = np.asarray(z.get("kymo_transverse", np.zeros((0, 1))), float)
+    t_form = res.get("t_form")
+    spread = res.get("sensitivity", {}).get("spread_ms")
+
+    fig, ax = plt.subplots(3, 2, figsize=(13, 9))
+    ax[0, 0].plot(tr, rate, color="#333", lw=1.0, label="total")
+    if ca.size:
+        ax[0, 0].plot(ta, _smooth(ca, activity_bin_ms, 3 * activity_bin_ms), color="#B2182B", lw=1.0, label="core")
+        ax[0, 0].plot(ta, _smooth(sa, activity_bin_ms, 3 * activity_bin_ms), color="#2166AC", lw=1.0, label="surround")
+    ax[0, 0].set_ylabel("E rate (Hz)"); ax[0, 0].legend(fontsize=8); ax[0, 0].set_title("rate: total / core / surround")
+    ax[1, 0].plot(tq, qm, color="#333", lw=1.0, label="q mean")
+    if qc.size:
+        ax[1, 0].plot(np.arange(qc.size) * dt, qc, color="#B2182B", lw=1.0, label="q_core")
+        ax[1, 0].plot(np.arange(qs.size) * dt, qs, color="#2166AC", lw=1.0, label="q_surround")
+    ax[1, 0].set_ylabel("q_I"); ax[1, 0].set_ylim(0, 1.05); ax[1, 0].legend(fontsize=8); ax[1, 0].set_title("inhibitory resource")
+    ax[2, 0].plot(np.arange(SG.size) * dt, SG, color="#762A83", lw=1.0, label="S_G")
+    if area.size:
+        ax[2, 0].plot(tf, area, color="#1B7837", lw=1.0, label="active area")
+    ax[2, 0].set_xlabel("t (ms)"); ax[2, 0].set_ylabel("S_G / area"); ax[2, 0].legend(fontsize=8); ax[2, 0].set_title("containment + spatial extent")
+    for a, k, ttl in ((ax[0, 1], kax, "kymograph: axial"), (ax[1, 1], ktr, "kymograph: transverse")):
+        if k.size:
+            a.imshow(k.T, aspect="auto", origin="lower", cmap="magma",
+                     extent=(0, k.shape[0] * movie_bin_ms, 0, k.shape[1]))
+        a.set_ylabel("space bin"); a.set_title(ttl)
+    ax[2, 1].axis("off")
+    ax[2, 1].text(0.02, 0.9, f"t_form = {t_form} ms" + (f"\nsensitivity spread = {spread} ms" if spread is not None else "")
+                  + f"\nsafe_to_intervene = {res.get('safe_to_intervene')}"
+                  + f"\nend_state_bounded = {res.get('end_state_is_bounded')}"
+                  + f"\ncore_plateau = {res.get('core_plateau')} Hz  q_core_floor = {res.get('q_core_floor')}"
+                  + f"\nq_gradient_plateau = {res.get('q_gradient_plateau')}"
+                  + f"\nt_form by variant:\n  " + "\n  ".join(f"{k}: {v}" for k, v in res.get("sensitivity", {}).get("t_form_by_variant", {}).items()),
+                  va="top", ha="left", fontsize=8.5, family="monospace")
+    for a in (ax[0, 0], ax[1, 0], ax[0, 1], ax[1, 1]):
+        if t_form is not None:
+            a.axvline(t_form, color="#F1A340", lw=1.5, ls="--")
+    fig.suptitle(f"Formed-state diagnostic — {label} (seed {seed}); dashed = data-driven t_form", fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    figdir = os.path.join(out_dir, "figures"); os.makedirs(figdir, exist_ok=True)
+    out = os.path.join(figdir, f"formed_state_diagnostic_{tag}_seed{seed}.png")
+    fig.savefig(out, dpi=140); fig.savefig(out.replace(".png", ".pdf"))
+    plt.close(fig)
+    return out
 
 
 def main():
@@ -136,13 +342,20 @@ def main():
     ap.add_argument("--window-ms", type=float, default=1500.0)
     a = ap.parse_args()
     res = analyze_anchor(a.out_dir, a.tag, a.seed, label=a.anchor_label, window_ms=a.window_ms)
-    print(json.dumps(res, indent=2))
-    if res["t_form"] is not None:
-        print(f"\n[formed-state] t_form = {res['t_form']:.0f} ms  -> use --persist-onset-ms {int(res['t_form'])} "
+    fig = plot_formed_state_diagnostic(a.out_dir, a.tag, a.seed, res, label=a.anchor_label)
+    json.dump(res, open(os.path.join(a.out_dir, f"formed_state_{a.tag}_seed{a.seed}.json"), "w"),
+              indent=2, default=lambda o: None)
+    print(json.dumps({k: v for k, v in res.items() if k != "sensitivity"}, indent=2, default=lambda o: None))
+    print("sensitivity:", json.dumps(res["sensitivity"], default=lambda o: None))
+    print(f"[diagnostic figure] {fig}", flush=True)
+    if res["safe_to_intervene"]:
+        print(f"\n[formed-state] SAFE: t_form = {res['t_form']:.0f} ms, sensitivity stable "
+              f"(spread {res['sensitivity']['spread_ms']} ms) -> use --persist-onset-ms {int(res['t_form'])} "
               f"for the form-then-terminate arms", flush=True)
     else:
-        print(f"\n[formed-state] NO stable formed window ({res['reason']}) -> "
-              f"anchor did not form a stable bounded state; do not schedule an onset.", flush=True)
+        why = ("no stable formed window: " + res["reason"]) if res["t_form"] is None \
+            else f"t_form UNSTABLE across window/threshold (spread {res['sensitivity']['spread_ms']} ms)"
+        print(f"\n[formed-state] NOT SAFE to intervene ({why}). Do NOT schedule an onset yet.", flush=True)
 
 
 if __name__ == "__main__":
