@@ -84,7 +84,7 @@ def main():
               f"high={p.get('high_labels', p.get('high'))})")
     print(f"\nVERDICT: {verdict}")
     n_t2 = sum(1 for k in cells if k[2] == "T2")
-    json.dump(dict(seed=1, dt=0.05, band_hz=band, D_grid=D_GRID, thresholds=WP_THRESHOLDS,
+    json.dump(dict(seed=1, dt=0.05, band_hz=band, D_grid=D_GRID, thresholds=WP_THRESHOLDS, kicks=[3.0, 12.0],
                    per_D=per_D, cells=list(cells.values()), n_T2=n_t2, verdict=verdict,
                    classifier="workpoint_relative"),
               open(os.path.join(BASE, "branch_map.json"), "w"), indent=2)

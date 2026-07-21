@@ -28,49 +28,62 @@ UNSAT_TRANSITION_D = 0.087   # sharp cliff on the UNSATURATED slow-fast-transiti
 SLOTS = [("low", None, "#4c72b0", "o"),        # (slot, kick-index into j["kicks"] or None, color, marker)
          ("high1", 0, "#dd8452", "s"),
          ("high2", 1, "#c44e52", "^")]
-SHORT = {"LOW_ONLY": "low", "METASTABLE_TRANSIENT": "metastable", "REFRACTORY_CEILING": "ceiling",
+SHORT = {"INTERICTAL_WORKPOINT": "interictal", "ELEVATED_EVENT_TRAIN": "elevated",
+         "METASTABLE_TRANSIENT": "metastable", "REFRACTORY_CEILING": "ceiling",
          "FINITE_HIGH_FIXED": "finite-high", "FINITE_HIGH_ORBIT": "finite-orbit", "FINITE_HIGH": "finite-high",
-         "BISTABLE": "bistable", "NUMERICAL_UNSAFE": "unsafe", "UNRESOLVED": "unresolved"}
+         "BISTABLE": "bistable", "NUMERICAL_UNSAFE": "unsafe", "UNRESOLVED": "unresolved",
+         "INCOMPLETE": "incomplete", "LOW_ONLY": "low"}
 
 
 def _latest_branch_map():
+    assembled = os.path.join(os.path.dirname(OUT_DIR), "branch_map.json")   # workpoint assembly output
+    if os.path.exists(assembled):
+        return assembled
     cands = sorted(glob.glob(os.path.join(RUNS, "*grid*", "branch_map.json")))
     if not cands:
-        raise SystemExit("no grid branch_map.json found; run `grid --confirm-run` first")
+        raise SystemExit("no branch_map.json found; run the assembler or `grid --confirm-run` first")
     return cands[-1]
 
 
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else _latest_branch_map()
     j = json.load(open(path))
-    is_smoke = bool(j.get("smoke_only")) or float(j.get("T1", 0)) < float(j["thresholds"]["HIGH_MS"])  # P0 gate
-    rows = j["base_rows"]
-    D_grid = sorted(set(r["D"] for r in rows))
+    is_smoke = bool(j.get("smoke_only"))                       # workpoint branch_map excludes smoke by construction
+    rows = j.get("cells", j.get("base_rows", []))
+    D_grid = j.get("D_grid") or sorted(set(r["D"] for r in rows))
     per_D = {p["D"]: p for p in j["per_D"]}
     HIGH_OCC = float(j["thresholds"]["HIGH_OCC"])
+    band = float(j.get("band_hz", 0.0))
     kicks = j.get("kicks", [3.0, 12.0])
 
     def _slabel(ki):
         return "native low (no kick)" if ki is None else f"kicked high (kick {kicks[ki]:g})"
 
     def series(slot, field):
-        by = {r["D"]: r.get(field, np.nan) for r in rows if r["slot"] == slot}
-        return np.array([by.get(D, np.nan) for D in D_grid], float)
+        # per (D, slot) pick the longest observation window (T2 if present, else T1)
+        best = {}
+        for r in rows:
+            if r["slot"] != slot:
+                continue
+            if r["D"] not in best or r.get("T_ms", 0) > best[r["D"]].get("T_ms", 0):
+                best[r["D"]] = r
+        return np.array([best.get(D, {}).get(field, np.nan) for D in D_grid], float)
 
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(12.5, 4.9))
 
-    # Panel A: persistence -- smoothed-envelope still-elevated-at-end occupancy vs D (a transient decays -> low)
+    # Panel A: persistence -- fraction of the trailing window whose rolling-mean rate is ABOVE the interictal
+    # band (a new high branch stays above; interictal + a decaying transient fall below)
     for slot, ki, c, m in SLOTS:
-        axA.plot(D_grid, series(slot, "env_end_occ"), m + "-", color=c, label=_slabel(ki), ms=7, lw=1.6)
+        axA.plot(D_grid, series(slot, "roll_end_occ"), m + "-", color=c, label=_slabel(ki), ms=7, lw=1.6)
     axA.set_ylim(-0.03, 1.08)
     axA.axhline(HIGH_OCC, ls="--", color="k", lw=1.2)
-    axA.text(D_grid[-1], HIGH_OCC, f"persistent-high threshold (occupancy {HIGH_OCC:.2f})", fontsize=9,
+    axA.text(D_grid[-1], HIGH_OCC, f"high-branch threshold (occupancy {HIGH_OCC:.2f})", fontsize=9,
              ha="right", va="bottom")
     axA.axvline(UNSAT_TRANSITION_D, ls=":", color="0.5", lw=1.2)
     axA.text(UNSAT_TRANSITION_D, 0.60, " unsaturated\n runaway onset\n (D≈0.087)", fontsize=8, color="0.4", va="center")
     axA.set_xlabel("failure coordinate  D  (frozen mean depletion)")
-    axA.set_ylabel("envelope still-high-at-end occupancy")
-    axA.set_title("A. Persistence — still elevated at window end?")
+    axA.set_ylabel(f"end-window occupancy above interictal band ({band:.1f} Hz)")
+    axA.set_title("A. Persistence — still above the interictal band at end?")
     axA.legend(loc="upper left", fontsize=8, framealpha=0.9)
 
     # Panel B: end-of-run activity level vs D
@@ -88,10 +101,11 @@ def main():
         axA.text(D, 0.86, SHORT.get(lab, lab.lower()), rotation=90, fontsize=6.5, ha="center", va="center", color="0.45")
 
     verdict = j.get("verdict", "")
-    short = ("SMOKE_ONLY — plumbing validation, NOT a scientific verdict" if is_smoke else
-             ("CLEAN NO-GO: saturation bounds the transient, no persistent high branch" if "NO-GO" in verdict
-              else verdict[:80]))
-    fig.suptitle(f"FCXR-RC1 frozen fast-branch map (seed {j['seed']}, dt={j['dt']}, T1={j['T1']:.0f}ms)  —  {short}",
+    short = ("no persistent high branch — near-transition is an elevated event train, rest interictal"
+             if verdict.startswith("NO high") else
+             ("no persistent high branch — bounded metastable transients near the transition"
+              if verdict.startswith("NO persistent") else verdict[:90]))
+    fig.suptitle(f"FCXR-RC1 frozen fast-branch map (seed {j['seed']}, dt={j['dt']}, workpoint classifier)  —  {short}",
                  fontsize=11)
     fig.text(0.5, 0.005, "parameter-scan diagnostic — not the 4-column mechanism figure", ha="center",
              fontsize=7.5, color="0.5")
