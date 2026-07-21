@@ -2,7 +2,7 @@
 
 > **Status: 开环+对称退不出；不对称 slow-release = 待确认候选（GO 窄确认）.** Stage 0–2 done; P0（`d_sweep` 漏传 `tau_p_down`）
 > 已修 + 真·不对称重跑（`arms_asymfix`）。当前科学标签=**slow-release suppression–rebound bursting candidate**，非确证可恢复 lifecycle。
-> 最大风险：候选参数（`p50=0.15`, η80/150）可能压制普通 IED（prevention）→ 正跑候选参数匹配控制 `arms_prevctl_eta*`。Verdict §8。
+> **候选参数匹配控制已证实电流压制普通 IED（34→15/12）→ 相当程度 prevention、选择性不足**（`arms_prevctl_eta*`）；能否终止**已成形**态由 established-state fork 判（running）。Verdict §8。
 > Mechanism SCREEN, not a seizure claim. Branch `codex/topic4-m4-snn-native-exit`, base `4d40b03`.
 > Spec: `docs/superpowers/specs/2026-07-21-topic4-m4-snn-native-exit-design.md`.
 
@@ -25,7 +25,7 @@
 - **对称动态电流退不出**（被负反馈压到更低持续水平、或饿死 `S_G` 失控）；**但真·不对称 slow-release（快充 τ_p=3000/慢放 τ_p_down=12000）质变**：
   `no_runaway`、活动被压到 0 → `q_I` 回灌 0.6–0.8 → 之后离散短促自终止 burst，不再回宽持续态——**更像生命周期、是有希望的候选**（`arms_asymfix`）。
   （⚠️ 原"不对称=周期性失控脉冲"因 `d_sweep` 漏传 `tau_p_down` 的 P0 bug 实为对称、已作废。）
-  **但未确证**：`τ_p=3000` 快充可能在成形期就压住（prevention 而非 termination，须加大 τ_up 复验）、后段 burst 未验真假、seed1 单例、退出 basin（`q_core×S_G`）未映射。
+  **⚠️ 但候选参数匹配 prevention 控制证实电流压制普通 IED：34 个 → 15（η80）/12（η150）**——所以上面"候选"有一半是普通 IED 被压掉、只剩击穿，**相当程度是 prevention**。仍未确证：能否终止**已成形**态（established-state fork running）、后段 burst 真假未验、seed1、basin 未映射。选择性不足（`θ_p=0`），修法=按活动幅度门控。
   一个**候选**观察：`q_I` 与 `S_G` 对活动响应**符号相反**、负相关（不是"绝无重叠"——实测有 ~403ms 重叠、均值 `q_I` 可能掩盖 core）。
   **结论=开环+对称退不出；不对称 slow-release=待验证候选，非确证 lifecycle、也非 bounded-negative**。
 
@@ -92,7 +92,10 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
 - **传感器选择性（⚠️ 控制参数不匹配，结论待补）**：`A_sensor_on`（slow-off + sensor η_r=0）测得真 34 个间期事件 `p_max` 只涨到 **0.084**（p_mean 0.027），
   远低于有界态的 0.55——这是好迹象。**但此控制用 `p50_r=0.25`（`Φ(0.084)≈0.013`≈0），而候选用 `p50_r=0.15`**：`Φ(0.084)≈0.090` → 电流 **7.2mV(η80) / 13.4mV(η150)**，
   **不可忽略**（review P0-science 抓到）。且候选的慢衰减会跨事件累积。所以**不能**据 `A_sensor_on` 说"候选只作用持续态、不误伤 IED"——
-  必须用**候选参数匹配**的 slow-off + actuator 控制（`A_persist_act`：τ3000/τ_down12000/p50=0.15/η80,150，`arms_prevctl_eta*` 运行中）看真 IED 是否存活。这是判"prevention vs termination"的关键门。
+  必须用**候选参数匹配**的 slow-off + actuator 控制（`A_persist_act`：τ3000/τ_down12000/p50=0.15/η80,150）看真 IED 是否存活。
+  **结果（`arms_prevctl_eta{80,150}`）：候选电流确实压制普通间期事件——34 个 IED → 15（η80）/ 12（η150），峰值 40.6→32Hz**。
+  机制：`τ_down=12000` 慢衰减让 `p` 跨 IED 串累积（正是 review 警告的），逐步压掉后面的事件。**所以候选是相当程度的 prevention、不是干净的选择性终止**——
+  "候选 lifecycle"里的"发作压住 + 之后离散 burst"有一半是"普通 IED 被压掉、只剩一部分击穿"，不是真恢复。**修法=更好的选择性**（`θ_p` 按活动**幅度**门控：让 40Hz IED 不充 `p`、只让 ~80Hz 有界态充），这是下一轮的必测项，不是当前能声称的。
 - **空间**：源空间帧显示电流把宽持续态推成一个**大面积游走活动**（压这里→那里冒→漂移），非局灶起始、非轴向招募、非终止波前
   （空间验收失败；6 帧不足以严格区分"连续游走"与"不同区域交替点燃"，下一版需 kymograph）。图 `results/.../stage2_arms/figures/{arms_s2d_seed1.png, spatial_D_tau5000_eta40.png}`。
 - **⚠️ asymmetric `p`（见 §7）**：原 `s2dasym` 因 `d_sweep` 漏传 `tau_p_down` 实为对称、已作废；**真·不对称（τ_up3000/τ_down12000）已修复重跑 `s2dasymFIX`，结果折入 §7**。
@@ -135,10 +138,10 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
 ## 8. Verdict —— open-loop+对称 actuator 退不出；不对称 slow-release = 候选（未确证）
 
 **一句话**：开环抬阈值 hold + 对称闭环电流都**没能**把 M4 有界态干净退回间期（rebound / 更低率持续态 / runaway）。
-**但真·不对称 slow-release（快充 τ_p=3000 / 慢放 τ_p_down=12000）质变**：`no_runaway`、把活动压到 0 后 `q_I` 回灌到 0.6–0.8、
-之后出现离散短促自终止 burst，不再回宽持续态——**更像生命周期，是有希望的候选**。这**不是**确证的 clean lifecycle
-（可能是 prevention 而非 termination、后段 burst 未验、seed1 单例、退出 basin 未映射），也**不是**原先误报的 bounded-negative
-（那个"不对称→runaway"因 P0 bug 实为对称、已作废）。
+真·不对称 slow-release（快充 τ_p=3000 / 慢放 τ_p_down=12000）**不失控、且出现"压住→`q_I` 回灌→离散 burst"轨迹**，一度看着像候选；
+**但候选参数匹配的 prevention 控制证实：该电流把 34 个普通 IED 压到 15/12——相当程度是 prevention、不是干净选择性终止**（慢衰减让 `p` 跨事件累积）。
+所以当前科学标签只能是 **slow-release suppression–rebound bursting candidate**，且**选择性不足**（`θ_p=0`，需按活动幅度门控）；
+**不是**确证 lifecycle、**也不是** bounded-negative（原"不对称→runaway"是 P0-bug 的对称跑、已作废）。"能否终止**已成形**有界态（vs 仅 prevention）由 established-state fork（`persist_onset_ms=2500`）判，running。
 
 **候选共同机制（不是 impossibility proof）**：`q_I` 与 `S_G` 对活动 `R` 的响应**符号相反**——
 `∂q̇_I/∂R < 0`（活动耗 `q_I`，局部去抑制助点燃），`∂Ṡ_G/∂R > 0`（活动建 `S_G`，除法压 recurrent 完成 containment）。
