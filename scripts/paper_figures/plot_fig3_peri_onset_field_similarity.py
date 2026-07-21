@@ -51,6 +51,10 @@ COL_A = "#B2182B"
 COL_B = "#2166AC"
 COL_INDIV = "#B5B5B5"
 
+DESIGN_STANDARD = "standard"
+DESIGN_JOURNAL_CLEAN = "journal_clean"
+DESIGN_VARIANTS = (DESIGN_STANDARD, DESIGN_JOURNAL_CLEAN)
+
 
 def _subject_label(ds_sid: str) -> str:
     return ds_sid.replace("epilepsiae_", "E").replace("yuquan_", "Y-")
@@ -274,8 +278,19 @@ def _draw_band_line(
     ax.plot(x, med, color=color, lw=2.2, label=label, zorder=4)
 
 
-def _make_figure(df: pd.DataFrame, agg: pd.DataFrame, *, subject_label: str) -> plt.Figure:
-    fig, axes = plt.subplots(1, 2, figsize=(7.4, 3.25), sharex=True)
+def _make_figure(
+    df: pd.DataFrame,
+    agg: pd.DataFrame,
+    *,
+    subject_label: str,
+    design_variant: str = DESIGN_STANDARD,
+) -> plt.Figure:
+    if design_variant not in DESIGN_VARIANTS:
+        raise ValueError(f"unknown design_variant={design_variant!r}")
+    journal_clean = design_variant == DESIGN_JOURNAL_CLEAN
+
+    figsize = (7.4, 2.55) if journal_clean else (7.4, 3.25)
+    fig, axes = plt.subplots(1, 2, figsize=figsize, sharex=True)
     ax0, ax1 = axes
     xlo = float(agg["window_center_sec"].min())
     xhi = float(agg["window_center_sec"].max())
@@ -292,12 +307,18 @@ def _make_figure(df: pd.DataFrame, agg: pd.DataFrame, *, subject_label: str) -> 
     ax0.axvline(0, color="0.30", ls="--", lw=0.9, zorder=0)
     ax0.set_ylim(0.0, 1.0)
     ax0.set_xlim(xlo, xhi)
-    ax0.set_title("shared-gradient maxAB", fontsize=FS_LABEL, pad=8)
-    ax0.set_ylabel("field similarity |r|", fontsize=FS_LABEL)
-    ax0.set_xlabel("window center from onset (s)", fontsize=FS_LABEL)
+    if journal_clean:
+        ax0.set_ylabel(
+            "Field similarity\n" + r"$\max(|r_A|, |r_B|)$",
+            fontsize=FS_LABEL - 2,
+        )
+        ax0.set_xlabel("Time (s)", fontsize=FS_LABEL - 2)
+    else:
+        ax0.set_title("shared-gradient maxAB", fontsize=FS_LABEL, pad=8)
+        ax0.set_ylabel("field similarity |r|", fontsize=FS_LABEL)
+        ax0.set_xlabel("window center from onset (s)", fontsize=FS_LABEL)
     ax0.set_xticks([-100, -80, -60, -40, -20, 0])
     ax0.legend(frameon=False, loc="lower right", fontsize=9, handlelength=1.7)
-    style_panel(ax0, "a", label_x=-0.17, label_y=1.07)
 
     for _idx, g in df.groupby("seizure_idx"):
         g = g.sort_values("window_center_sec")
@@ -309,33 +330,67 @@ def _make_figure(df: pd.DataFrame, agg: pd.DataFrame, *, subject_label: str) -> 
     _draw_band_line(ax1, agg, "B", color=COL_B, label="template B")
     ax1.set_ylim(-1.0, 1.0)
     ax1.set_xlim(xlo, xhi)
-    ax1.set_title("signed shared-gradient A/B", fontsize=FS_LABEL, pad=8)
-    ax1.set_ylabel("signed field similarity r", fontsize=FS_LABEL)
-    ax1.set_xlabel("window center from onset (s)", fontsize=FS_LABEL)
+    if journal_clean:
+        ax1.set_ylabel("Signed field similarity, r", fontsize=FS_LABEL - 2)
+        ax1.set_xlabel("Time (s)", fontsize=FS_LABEL - 2)
+    else:
+        ax1.set_title("signed shared-gradient A/B", fontsize=FS_LABEL, pad=8)
+        ax1.set_ylabel("signed field similarity r", fontsize=FS_LABEL)
+        ax1.set_xlabel("window center from onset (s)", fontsize=FS_LABEL)
     ax1.set_xticks([-100, -80, -60, -40, -20, 0])
     ax1.legend(frameon=False, loc="lower left", fontsize=9, handlelength=1.7)
-    style_panel(ax1, "b", label_x=-0.17, label_y=1.07)
 
     for ax in axes:
+        style_panel(ax, "" if journal_clean else ("a" if ax is ax0 else "b"), label_x=-0.17, label_y=1.07)
         ax.tick_params(labelsize=FS_TICK - 2)
-        ax.text(
-            0.02,
-            0.97,
-            f"{subject_label} · shared A/B · n={int(df['seizure_idx'].nunique())} seizures",
-            transform=ax.transAxes,
-            ha="left",
-            va="top",
-            fontsize=8.5,
-            color="0.25",
-        )
+        if not journal_clean:
+            ax.text(
+                0.02,
+                0.97,
+                f"{subject_label} · shared A/B · n={int(df['seizure_idx'].nunique())} seizures",
+                transform=ax.transAxes,
+                ha="left",
+                va="top",
+                fontsize=8.5,
+                color="0.25",
+            )
 
-    fig.subplots_adjust(left=0.09, right=0.99, bottom=0.18, top=0.84, wspace=0.34)
+    if journal_clean:
+        fig.subplots_adjust(left=0.11, right=0.995, bottom=0.25, top=0.98, wspace=0.35)
+    else:
+        fig.subplots_adjust(left=0.09, right=0.99, bottom=0.18, top=0.84, wspace=0.34)
     return fig
 
 
-def _plot(df: pd.DataFrame, agg: pd.DataFrame, out_png: Path, out_pdf: Path, *, subject_label: str) -> None:
-    savefig_pub(_make_figure(df, agg, subject_label=subject_label), out_png, dpi=300)
-    savefig_pub(_make_figure(df, agg, subject_label=subject_label), out_pdf, dpi=300)
+def _plot(
+    df: pd.DataFrame,
+    agg: pd.DataFrame,
+    out_png: Path,
+    out_pdf: Path,
+    *,
+    subject_label: str,
+    design_variant: str = DESIGN_STANDARD,
+) -> None:
+    savefig_pub(
+        _make_figure(
+            df,
+            agg,
+            subject_label=subject_label,
+            design_variant=design_variant,
+        ),
+        out_png,
+        dpi=300,
+    )
+    savefig_pub(
+        _make_figure(
+            df,
+            agg,
+            subject_label=subject_label,
+            design_variant=design_variant,
+        ),
+        out_pdf,
+        dpi=300,
+    )
 
 
 def _build_summary(
@@ -345,6 +400,8 @@ def _build_summary(
     agg: pd.DataFrame,
     out_png: Path,
     out_pdf: Path,
+    *,
+    design_variant: str = DESIGN_STANDARD,
 ) -> dict:
     source_summary_path = src.with_name(src.name.replace("_per_seizure.csv", "_summary.json"))
     if not source_summary_path.exists():
@@ -358,6 +415,7 @@ def _build_summary(
         raise RuntimeError(f"{source_summary_path}: seizure coverage mismatch")
     return {
         "subject": ds_sid,
+        "design_variant": design_variant,
         "source_csv": str(src.relative_to(ROOT)),
         "time_range_sec": [LO_SEC, HI_SEC],
         "band_hz": [1.0, 150.0],
@@ -410,7 +468,10 @@ def run(
     *,
     source_csv: Path | None = None,
     out_dir: Path | None = None,
+    design_variant: str = DESIGN_STANDARD,
 ) -> tuple[Path, Path, Path]:
+    if design_variant not in DESIGN_VARIANTS:
+        raise ValueError(f"unknown design_variant={design_variant!r}")
     output_dir = Path(out_dir).resolve() if out_dir is not None else OUT_DIR
     output_dir.mkdir(parents=True, exist_ok=True)
     src = Path(source_csv).resolve() if source_csv is not None else _source_csv(ds_sid)
@@ -418,15 +479,32 @@ def run(
         raise FileNotFoundError(src)
     df = _load_peri_onset(src, ds_sid)
     agg = _agg(df)
-    out_png = output_dir / f"{ds_sid}_peri_onset_field_similarity_paper_ready.png"
-    out_pdf = output_dir / f"{ds_sid}_peri_onset_field_similarity_paper_ready.pdf"
-    meta = output_dir / f"{ds_sid}_peri_onset_field_similarity_paper_ready_summary.json"
-    summary = _build_summary(ds_sid, src, df, agg, out_png, out_pdf)
+    suffix = "_journal_clean" if design_variant == DESIGN_JOURNAL_CLEAN else ""
+    stem = f"{ds_sid}_peri_onset_field_similarity_paper_ready{suffix}"
+    out_png = output_dir / f"{stem}.png"
+    out_pdf = output_dir / f"{stem}.pdf"
+    meta = output_dir / f"{stem}_summary.json"
+    summary = _build_summary(
+        ds_sid,
+        src,
+        df,
+        agg,
+        out_png,
+        out_pdf,
+        design_variant=design_variant,
+    )
     tmp_png = _temporary_sibling(out_png)
     tmp_pdf = _temporary_sibling(out_pdf)
     tmp_meta = _temporary_sibling(meta)
     try:
-        _plot(df, agg, tmp_png, tmp_pdf, subject_label=_subject_label(ds_sid))
+        _plot(
+            df,
+            agg,
+            tmp_png,
+            tmp_pdf,
+            subject_label=_subject_label(ds_sid),
+            design_variant=design_variant,
+        )
         tmp_meta.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n")
         if not tmp_png.stat().st_size or not tmp_pdf.stat().st_size:
             raise RuntimeError(f"{ds_sid}: renderer produced an empty figure")
@@ -447,8 +525,14 @@ def main() -> None:
     ap.add_argument("--subject", default="epilepsiae_1146")
     ap.add_argument("--source-csv", type=Path, default=None)
     ap.add_argument("--out-dir", type=Path, default=None)
+    ap.add_argument("--design-variant", choices=DESIGN_VARIANTS, default=DESIGN_STANDARD)
     args = ap.parse_args()
-    run(args.subject, source_csv=args.source_csv, out_dir=args.out_dir)
+    run(
+        args.subject,
+        source_csv=args.source_csv,
+        out_dir=args.out_dir,
+        design_variant=args.design_variant,
+    )
 
 
 if __name__ == "__main__":
