@@ -25,6 +25,7 @@ sys.path.insert(0, os.path.join(ROOT, "scripts"))
 sys.path.insert(0, os.path.join(ROOT, "src", "snn_engine"))
 
 import run_m4_snn_native_exit as R  # noqa: E402
+import analyze_m4_snn_native_exit as A  # noqa: E402
 from slow_field import SpatialSlowFieldConfig  # noqa: E402
 
 
@@ -128,3 +129,59 @@ def test_orchestrate_incremental_and_resume(tmp_path):
                                 run_one=fake_run, resume=True)
     assert calls == ["B"]
     assert {r["label"] for r in rows3} == {"A", "B"}
+
+
+# ---- Phase 2 frozen exit atlas: pure helpers -----------------------------------------------
+def test_atlas_cfg_freezes_slow_coords():
+    cfg = R._atlas_cfg(q_core=0.4, S_G=0.2, J_exit=8.0)
+    assert cfg.k_q == 0.0 and cfg.q_init == 0.4                     # q_I FROZEN at q_core (no ODE)
+    assert cfg.use_SG and cfg.clamp_SG == 0.2                       # S_G FROZEN (divisive containment)
+    assert cfg.use_persist and cfg.clamp_persist == 1.0 and cfg.p50_r == 0.0 and cfg.eta_r == 8.0  # J_exit=eta_r*Phi(1)
+    assert R._atlas_cfg(0.9, 0.0, 0.0).use_persist is False         # J_exit=0 -> no recovery current
+
+
+def test_classify_atlas():
+    assert R._classify_atlas(200.0, 0.1, 0.9, runaway=1200.0) == "runaway"
+    assert R._classify_atlas(0.5, 0.1, 0.0, runaway=None) == "low"
+    assert R._classify_atlas(40.0, 0.2, 0.5, runaway=None) == "bounded_high"
+    assert R._classify_atlas(40.0, 0.9, 0.5, runaway=None) == "bounded_oscillatory"
+    assert R._classify_atlas(20.0, 0.3, 0.0, runaway=None) == "fragment"
+
+
+def test_build_atlas_cells_grid_and_ics():
+    import types
+    a = types.SimpleNamespace(q_core_grid="0.05,0.9", sg_grid="0.0,0.4", j_exit_grid="0.0", T=2500.0)
+    cells = R._build_atlas_cells(a)
+    assert len(cells) == 2 * 2 * 1 * 2                              # q x S_G x J_exit x {cold, warm}
+    warm = next(c for c in cells if c[0].endswith("warm"))
+    cold = next(c for c in cells if c[0].endswith("cold"))
+    assert warm[3] is True and cold[3] is False                    # 4th tuple element = warm flag
+    assert warm[1].q_init == 0.05 or warm[1].q_init == 0.9         # cfg carries a grid q_core
+
+
+# ---- Phase 1 formed-state detector (data-driven t_form; NOT assumed 2500ms) ----------------
+def _step_traces(dt=0.1, T=10000.0, t_step=3000.0):
+    n = int(T / dt)
+    t = np.arange(n) * dt
+    rate = np.where(t < t_step, 2.0, 80.0)          # baseline -> bounded plateau
+    SG = np.where(t < t_step, 0.0, 0.4)             # containment engages at formation
+    qI = np.where(t < t_step, 1.0, 0.1)             # inhibitory resource depletes at formation
+    nf = n // int(round(25.0 / dt))
+    tf = np.arange(nf) * 25.0
+    area = np.where(tf < t_step, 0.02, 0.30)        # spatial extent established at formation
+    return rate, SG, qI, area
+
+
+def test_formed_state_time_detects_step():
+    rate, SG, qI, area = _step_traces(t_step=3000.0)
+    res = A.formed_state_time(rate, SG, qI, area, dt=0.1, movie_bin_ms=25.0, window_ms=1500.0)
+    assert res["t_form"] is not None
+    assert 2800.0 <= res["t_form"] <= 3400.0        # ~3000ms up to smoothing + probe resolution
+
+
+def test_formed_state_time_none_when_no_bounded_state():
+    dt, n = 0.1, 50000
+    rate = np.full(n, 2.0); SG = np.zeros(n); qI = np.ones(n)   # never leaves baseline
+    area = np.full(n // 250, 0.02)
+    res = A.formed_state_time(rate, SG, qI, area, dt=dt, movie_bin_ms=25.0)
+    assert res["t_form"] is None                    # end-of-run is not a bounded state -> no formation

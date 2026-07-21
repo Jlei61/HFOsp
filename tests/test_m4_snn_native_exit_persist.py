@@ -174,6 +174,47 @@ def test_d_sweep_propagates_tau_p_down():
     assert cfg.tau_p_down is None and "dn" not in label
 
 
+# ---- core/surround field traces (Phase 1 readout: q_core/q_surround/p_core/p_surround) ------
+def test_core_surround_qI_traces():
+    """core_mask_E -> per-step q_core / q_surround traces sampling the field at core vs surround E cells."""
+    p, net, NE, NI = _net()
+    posE = net["pos"][net["labels"] == 0]
+    posI = net["pos"][net["labels"] == 1]
+    core_mask_E = posE[:, 0] < p.L / 2.0                       # left half = "core" (column-clean split)
+    cfg = SpatialSlowFieldConfig(n_grid=8, use_qI=True, k_q=0.0)   # k_q=0 -> q_I frozen (no depletion)
+    slow = SpatialSlowField(NE + NI, p.V_th, posE, posI, p.L, core_mask_E=core_mask_E, cfg=cfg)
+    slow.q_I[:] = 1.0
+    slow.q_I[slow._iyE[core_mask_E], slow._ixE[core_mask_E]] = 0.2   # deplete only core-neuron cells
+    slow.step(np.zeros(NE + NI, bool), net["labels"], DT)
+    assert abs(slow.trace_q_core[-1] - 0.2) < 1e-6              # core samples the depleted cells
+    assert abs(slow.trace_q_surround[-1] - 1.0) < 1e-6         # surround samples the full cells
+
+
+def test_core_traces_absent_without_mask():
+    """No core_mask_E -> no core/surround split recorded (empty), and the field still advances."""
+    p, net, NE, NI = _net()
+    slow = _slow(p, net, use_qI=True, k_q=0.1)                 # no core_mask_E
+    spk = np.zeros(NE + NI, bool); spk[:NE] = True
+    slow.step(spk, net["labels"], DT)
+    assert slow.trace_q_core == [] and slow.trace_q_surround == []
+    assert len(slow.trace_qI_mean) == 1                        # the global-mean trace is unaffected
+
+
+def test_core_surround_p_traces_under_persist():
+    """Under use_persist, p_core / p_surround are recorded alongside q_core / q_surround."""
+    p, net, NE, NI = _net()
+    posE = net["pos"][net["labels"] == 0]
+    posI = net["pos"][net["labels"] == 1]
+    core_mask_E = posE[:, 0] < p.L / 2.0
+    cfg = SpatialSlowFieldConfig(n_grid=8, use_qI=True, k_q=0.0,
+                                 use_persist=True, tau_p=1e9, theta_p=0.0, a50_p=0.3, eta_r=0.0)
+    slow = SpatialSlowField(NE + NI, p.V_th, posE, posI, p.L, core_mask_E=core_mask_E, cfg=cfg)
+    slow.p[:] = 0.1
+    slow.p[slow._iyE[core_mask_E], slow._ixE[core_mask_E]] = 0.6
+    slow.step(np.zeros(NE + NI, bool), net["labels"], DT)      # tau_p huge -> ~no change over one quiet step
+    assert slow.trace_p_core[-1] > slow.trace_p_surround[-1]   # core carries the higher persistence
+
+
 # ---- Clause 5: validate -------------------------------------------------------------------
 def test_validate_persist():
     with pytest.raises(ValueError):

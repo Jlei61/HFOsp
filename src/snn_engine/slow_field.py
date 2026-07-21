@@ -326,6 +326,18 @@ class SpatialSlowField:
         self._Kp = isotropic_gaussian(n, L, self.cfg.sigma_p)
         self.trace_p_mean = []
         self.trace_p_max = []
+        # ---- core/surround field split (SNN-native exit Phase 1 readout; core_mask_E=None -> no split
+        # recorded -> zero overhead. These traces only READ q_I/p so E_spk_bool is unchanged -> BASELINE_SHA
+        # preserved). q_core/q_surround = mean q_I sampled at core / non-core E-neuron cells. ----
+        self._core_mask_E = None if core_mask_E is None else np.asarray(core_mask_E, bool)
+        if self._core_mask_E is not None:
+            self._iyE_core, self._ixE_core = self._iyE[self._core_mask_E], self._ixE[self._core_mask_E]
+            _surr = ~self._core_mask_E
+            self._iyE_surr, self._ixE_surr = self._iyE[_surr], self._ixE[_surr]
+        self.trace_q_core = []
+        self.trace_q_surround = []
+        self.trace_p_core = []
+        self.trace_p_surround = []
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
@@ -464,4 +476,10 @@ class SpatialSlowField:
                 self.S_G = float(cfg.clamp_SG)                        # static-pool arm: freeze S_G (mu_G still advances internally)
             self.trace_AG.append(A_G); self.trace_muG.append(self.mu_G); self.trace_SG.append(self.S_G)
             self.trace_rEfast_max.append(float(self.rE_fast.max()))   # time trace of the sensor-field peak
+        if self._core_mask_E is not None:                            # Phase 1 readout: core vs surround field split
+            self.trace_q_core.append(float(self.q_I[self._iyE_core, self._ixE_core].mean()))
+            self.trace_q_surround.append(float(self.q_I[self._iyE_surr, self._ixE_surr].mean()))
+            if cfg.use_persist:
+                self.trace_p_core.append(float(self.p[self._iyE_core, self._ixE_core].mean()))
+                self.trace_p_surround.append(float(self.p[self._iyE_surr, self._ixE_surr].mean()))
         self._t += dt

@@ -296,10 +296,44 @@ def _persist_cfg(*, k_q=BASE_KQ, use_SG=True, alpha_G=BASE_AG, use_persist=False
         persist_onset_ms=persist_onset_ms)
 
 
+# ---- spatial readouts (Phase 1 output list: core/surround activity + axis/transverse kymographs) --------
+def _core_mask_E(S):
+    """E-only bool mask of the two low-threshold cores (E cells within PP.CORE_R of source/sink centroid).
+    Reuses the stim-locus disk convention (run_m4_dynamic_qi._e_disk_mask), sliced to E."""
+    return M4._e_disk_mask(S, [S["src_xy"], S["snk_xy"]], PP.CORE_R)[:S["NE"]]
+
+
+def _kymograph(spk_E, posE, origin, unit, bin_ms=25.0, n_space=24):
+    """Active-fraction kymograph: project E positions onto `unit` (relative to `origin`), bin space x time.
+    Returns (n_frames, n_space) fraction of E cells in each spatial bin active per bin_ms frame."""
+    proj = (np.asarray(posE, float) - np.asarray(origin, float)) @ np.asarray(unit, float)
+    edges = np.linspace(proj.min(), proj.max(), n_space + 1)
+    sidx = np.clip(np.digitize(proj, edges) - 1, 0, n_space - 1)
+    per_bin = np.bincount(sidx, minlength=n_space).astype(float); per_bin[per_bin == 0] = 1.0
+    bs = int(round(bin_ms / M4.DT))
+    frames = [np.bincount(sidx[spk_E[b0:b0 + bs].any(axis=0)], minlength=n_space).astype(float) / per_bin
+              for b0 in range(0, spk_E.shape[0], bs)]
+    return np.asarray(frames, np.float32)
+
+
+def _core_surround_activity(spk_E, core_mask_E, bin_ms=25.0):
+    """Per-bin_ms E firing rate (Hz) inside the cores vs the surround (Phase 1 output: core/surround activity)."""
+    bs = int(round(bin_ms / M4.DT))
+    nc, ns = max(1, int(core_mask_E.sum())), max(1, int((~core_mask_E).sum()))
+    core, surr = [], []
+    for b0 in range(0, spk_E.shape[0], bs):
+        seg = spk_E[b0:b0 + bs]
+        dt_win = seg.shape[0] * M4.DT
+        core.append(float(seg[:, core_mask_E].sum()) / nc / dt_win * 1e3)
+        surr.append(float(seg[:, ~core_mask_E].sum()) / ns / dt_win * 1e3)
+    return np.asarray(core, np.float32), np.asarray(surr, np.float32)
+
+
 def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
     """One spontaneous (KICK_BOOST=0) arm with the persistence field; full readout + termination class."""
     p = dataclasses.replace(S["p"], T=float(T_ms))
-    slow = SpatialSlowField(S["N"], 18.0, S["posE"], S["posI"], S["L"], cfg=cfg)
+    core_mask_E = _core_mask_E(S)
+    slow = SpatialSlowField(S["N"], 18.0, S["posE"], S["posI"], S["L"], core_mask_E=core_mask_E, cfg=cfg)
     S["net"]["rng"] = np.random.default_rng(S["seed"])
     t0 = time.time()
     res = simulate_kick(p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]), r_kick=PP.R_KICK,
@@ -319,12 +353,21 @@ def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
                else "one_shot_burst" if (runaway <= 200.0 or n_pre == 0) else "few_events_then_runaway")
     cls, info = classify_termination(af, bin_w, baseline=floor, runaway_ms=runaway)
     movie = M4._spatial_movie(spk, S["posE"], S["L"], M4.DT)
+    axis_u = np.asarray(S["axis_unit"], float)                    # source->sink (connection long axis)
+    perp_u = np.array([-axis_u[1], axis_u[0]])                    # transverse
+    kymo_axis = _kymograph(spk, S["posE"], S["center"], axis_u)
+    kymo_transverse = _kymograph(spk, S["posE"], S["center"], perp_u)
+    core_act, surr_act = _core_surround_activity(spk, core_mask_E)
     row = dict(
         label=label, seed=S["seed"], verdict=verdict, termination_class=cls, offset_ms=info["offset_ms"],
         runaway_ms=runaway, max_rate_hz=round(float(rate_s.max()), 1), n_events=len(events), n_pre_runaway=int(n_pre),
         q_min_final=round(float(slow.q_I.min()), 4), q_mean_final=round(float(slow.q_I.mean()), 4),
+        q_core_final=round(float(slow.trace_q_core[-1]), 4) if slow.trace_q_core else None,
+        q_surround_final=round(float(slow.trace_q_surround[-1]), 4) if slow.trace_q_surround else None,
         S_G_max=round(float(max(slow.trace_SG)) if slow.trace_SG else 0.0, 4),
         p_mean_final=round(float(slow.p.mean()), 4), p_max_final=round(float(slow.p.max()), 4),
+        p_core_final=round(float(slow.trace_p_core[-1]), 4) if slow.trace_p_core else None,
+        p_surround_final=round(float(slow.trace_p_surround[-1]), 4) if slow.trace_p_surround else None,
         p_peak=round(float(max(slow.trace_p_max)) if slow.trace_p_max else 0.0, 4),
         T_ms=float(T_ms), perturb_kind=(perturb["kind"] if perturb else None),
         cfg_effective=_cfg_effective(cfg),
@@ -333,9 +376,15 @@ def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
     )
     arrays = dict(
         trace_qI_mean=np.asarray(slow.trace_qI_mean, np.float32),
+        trace_q_core=np.asarray(slow.trace_q_core, np.float32),
+        trace_q_surround=np.asarray(slow.trace_q_surround, np.float32),
         trace_SG=(np.asarray(slow.trace_SG, np.float32) if slow.trace_SG else np.zeros(0, np.float32)),
         trace_p_mean=(np.asarray(slow.trace_p_mean, np.float32) if slow.trace_p_mean else np.zeros(0, np.float32)),
         trace_p_max=(np.asarray(slow.trace_p_max, np.float32) if slow.trace_p_max else np.zeros(0, np.float32)),
+        trace_p_core=(np.asarray(slow.trace_p_core, np.float32) if slow.trace_p_core else np.zeros(0, np.float32)),
+        trace_p_surround=(np.asarray(slow.trace_p_surround, np.float32) if slow.trace_p_surround else np.zeros(0, np.float32)),
+        kymo_axis=kymo_axis, kymo_transverse=kymo_transverse,
+        core_activity=core_act, surround_activity=surr_act,
         rate=rate.astype(np.float32), af=af.astype(np.float32), movie=movie,
         q_field_final=slow.q_I.astype(np.float32), p_field_final=slow.p.astype(np.float32),
     )
@@ -390,6 +439,150 @@ def _build_arms(a):
     }
     want = [x for x in a.arms.split(",") if x]
     return [(name, catalog[name][0], catalog[name][1], None) for name in want if name in catalog]
+
+
+# ===========================================================================================
+# Phase 2 (task brief §5): frozen dual-initial-state exit atlas. Freeze the slow coordinates
+#   q_core (uniform frozen q_I via k_q=0 + q_init), S_G (clamp_SG), J_exit (frozen uniform outward
+#   recovery current eta_r*Phi(1), linear Phi) -- and run the FULL SNN fast subsystem short from TWO
+#   initial conditions: cold (spontaneous, no kick) and warm (a strong core kick at t~0, an
+#   established-M4-fast-state surrogate; kick_probe is guarded so a true V-checkpoint isn't available).
+#   cold->low AND warm->high at the same frozen coords => BISTABLE cell; both->low => monostable low
+#   (no ictal branch); both->high => monostable high (no low basin to exit into). Answers the stop-rule:
+#   does a low/interictal basin exist near recovered q_core + high S_G/J_exit? NO ENGINE EDIT.
+# ===========================================================================================
+ATLAS_KICK_BOOST, ATLAS_KICK_R, ATLAS_KICK_T = 6.0, 1.5, 50.0     # warm-IC core ignition (2x focal KICK, core-wide)
+
+
+def _atlas_cfg(q_core, S_G, J_exit):
+    """Frozen-slow config for one exit-atlas cell (spec §5). q_core = uniform frozen q_I (k_q=0 -> ODE
+    skipped, stays q_init); S_G = clamped divisive pool; J_exit = frozen uniform outward recovery current
+    eta_r*Phi(1) with linear Phi (clamp_persist=1). J_exit=0 -> no persistence coupling."""
+    return SpatialSlowFieldConfig(
+        use_qI=True, k_q=0.0, q_init=float(q_core), sigma_q=M4.SIGMA_Q, sigma_K=0.5, q_min=0.0,
+        tau_q=M4.TAU_Q, tau_a=M4.TAU_A, use_gK=False, k_K=0.0,
+        use_SG=True, alpha_G=BASE_AG, clamp_SG=float(S_G), r0_psi=0.0, r50_psi=M4.R50_PSI, n_psi=M4.N_PSI,
+        p_pool=M4.P_POOL, tau_mu=M4.TAU_MU, tau_S=M4.TAU_S, S_max=M4.S_MAX,
+        use_persist=(J_exit > 0.0), clamp_persist=1.0, p50_r=0.0, n_r=2.0, eta_r=float(J_exit),
+        sigma_p=1.5, a50_p=1.0)
+
+
+def _classify_atlas(settled_rate, settled_cv, area_tail, runaway, low_hz=4.0, cv_burst=0.6):
+    """Steady-state class of a frozen-slow fast run over the settled window: runaway / low(interictal-like)
+    / bounded_oscillatory (sustained but bursty) / bounded_high (sustained, broad) / fragment (some activity,
+    no spatial extent). Thresholds reported raw in the row so the class is transparent + adjustable."""
+    if runaway is not None:
+        return "runaway"
+    if settled_rate < low_hz and area_tail < 0.05:
+        return "low"
+    if settled_cv >= cv_burst:
+        return "bounded_oscillatory"
+    if area_tail >= 0.05:
+        return "bounded_high"
+    return "fragment"
+
+
+def _build_atlas_cells(a):
+    """(q_core x S_G x J_exit) grid, each from cold + warm IC. Cell = (label, cfg, T_ms, warm)."""
+    qs = [float(x) for x in a.q_core_grid.split(",")]
+    sgs = [float(x) for x in a.sg_grid.split(",")]
+    js = [float(x) for x in a.j_exit_grid.split(",")]
+    cells = []
+    for q in qs:
+        for sg in sgs:
+            for j in js:
+                cfg = _atlas_cfg(q, sg, j)
+                base = f"q{q:g}_sg{sg:g}_j{j:g}"
+                for warm in (False, True):
+                    cells.append((f"{base}_{'warm' if warm else 'cold'}", cfg, a.T, warm))
+    return cells
+
+
+def _run_atlas_cell(S, label, cfg, T_ms, warm):
+    """One frozen-slow short run from a cold (no kick) or warm (strong core kick at t~0) IC; classify the
+    settled fast state. Saves the spatial movie (full field, not just the mean) per the atlas contract."""
+    p = dataclasses.replace(S["p"], T=float(T_ms))
+    core_mask_E = _core_mask_E(S)
+    slow = SpatialSlowField(S["N"], 18.0, S["posE"], S["posI"], S["L"], core_mask_E=core_mask_E, cfg=cfg)
+    S["net"]["rng"] = np.random.default_rng(S["seed"])
+    t0 = time.time()
+    kb = ATLAS_KICK_BOOST if warm else 0.0
+    tk = ATLAS_KICK_T if warm else 1e9
+    res = simulate_kick(p, S["net"], kb, slow=slow, kick_center=list(S["src_xy"]), r_kick=ATLAS_KICK_R,
+                        t_kick=tk, V_th_per_neuron=S["vth"], early_stop_runaway=M4._EARLY_STOP["on"])
+    spk = res["E_spk_bool"]
+    rate_s = M4._smooth(np.asarray(res["rate_E"], float), M4.DT)
+    runaway = M4._first_sustained(rate_s, M4.DT)
+    movie = M4._spatial_movie(spk, S["posE"], S["L"], M4.DT)
+    cov = M4._spatial_coverage(movie)
+    n = rate_s.size
+    settled = rate_s[int(0.66 * n):]                             # fast subsystem has settled by the last third
+    settled_rate = float(settled.mean()) if settled.size else 0.0
+    settled_cv = float(settled.std() / (settled.mean() + 1e-9)) if settled.size else 0.0
+    cls = _classify_atlas(settled_rate, settled_cv, cov["active_area_tail"], runaway)
+    core_act, surr_act = _core_surround_activity(spk, core_mask_E)
+    row = dict(
+        label=label, seed=S["seed"], warm=bool(warm), atlas_class=cls,
+        q_core=float(cfg.q_init), S_G=float(cfg.clamp_SG), J_exit=float(cfg.eta_r if cfg.use_persist else 0.0),
+        settled_rate_hz=round(settled_rate, 2), settled_cv=round(settled_cv, 3),
+        peak_rate_hz=round(float(rate_s.max()), 1), runaway_ms=runaway,
+        T_ms=float(T_ms), cfg_effective=_cfg_effective(cfg), wall_s=round(time.time() - t0, 1),
+        **cov,
+    )
+    axis_u = np.asarray(S["axis_unit"], float)
+    arrays = dict(rate=np.asarray(res["rate_E"], np.float32), movie=movie,
+                  kymo_axis=_kymograph(spk, S["posE"], S["center"], axis_u),
+                  core_activity=core_act, surround_activity=surr_act,
+                  q_field_final=slow.q_I.astype(np.float32))
+    return row, arrays
+
+
+def _atlas_worker(spec):
+    label, cfg, T_ms, warm = spec
+    ad = _MANI.get("arm_dir")
+    if ad:
+        try:
+            open(os.path.join(ad, f"_running_{label}"), "w").close()
+        except Exception:
+            pass
+    S = M4._S["S"]
+    try:
+        return _run_atlas_cell(S, label, cfg, T_ms, warm)
+    except Exception as e:
+        return dict(label=label, error=repr(e)), None
+
+
+def _run_atlas(a):
+    os.makedirs(a.out, exist_ok=True)
+    _engine_guard()
+    M4._EARLY_STOP["on"] = a.early_stop
+    t_build = time.time()
+    S = PP.build_substrate(a.seed)
+    S["p"].T = a.T
+    M4._S["S"] = S
+    with open(os.path.join(a.out, f"pids_{a.tag}_seed{a.seed}.txt"), "w") as f:
+        f.write(f"{os.getpid()}\n")
+    cells = _build_atlas_cells(a)
+    prov = _provenance()
+    print(f"[frozen-atlas] N={S['N']} seed={a.seed} n_cells={len(cells)} "
+          f"q_core={a.q_core_grid} S_G={a.sg_grid} J_exit={a.j_exit_grid} T={a.T} workers={a.workers} "
+          f"resume={a.resume} base_sha={prov['base_sha']} build={time.time()-t_build:.0f}s", flush=True)
+    t_run = time.time()
+    meta = dict(mode="frozen_atlas", seed=a.seed, T=a.T, q_core_grid=a.q_core_grid, sg_grid=a.sg_grid,
+                j_exit_grid=a.j_exit_grid, kick=dict(boost=ATLAS_KICK_BOOST, r_kick=ATLAS_KICK_R, t_kick=ATLAS_KICK_T),
+                base_kq=BASE_KQ, base_ag=BASE_AG, N=int(S["N"]), axis_unit=S["axis_unit"].tolist(),
+                argv=" ".join(sys.argv), provenance=prov)
+    rows = _orchestrate_arms(cells, a.out, a.tag, a.seed, prov, meta, a.workers, _atlas_worker, resume=a.resume)
+    meta["wall_s"] = round(time.time() - t_run, 1)
+    _assemble_combined(a.out, a.tag, a.seed, S, meta, rows)
+    print("\n===== frozen exit atlas (q_core x S_G x J_exit; cold/warm IC) =====", flush=True)
+    for r in sorted([x for x in rows if "error" not in x], key=lambda r: (r["q_core"], r["S_G"], r["J_exit"], r["warm"])):
+        print(f"  q={r['q_core']:.2f} SG={r['S_G']:.2f} J={r['J_exit']:5.1f} {'warm' if r['warm'] else 'cold'} "
+              f"-> {r['atlas_class']:20s} rate={r['settled_rate_hz']:6.1f}Hz cv={r['settled_cv']:.2f} "
+              f"area_tail={r['active_area_tail']:.2f} runaway={r['runaway_ms']}", flush=True)
+    for r in [x for x in rows if "error" in x]:
+        print(f"  {r['label']:26s} ERROR {r['error']}", flush=True)
+    print(f"wrote arms_{a.tag}_seed{a.seed}.json + .npz (+ per_arm/ + run_manifest) to {a.out}", flush=True)
 
 
 def _assemble_combined(out, tag, seed, S, meta, rows):
@@ -448,8 +641,16 @@ def _run_arms(a):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--confirm-run", action="store_true")
-    ap.add_argument("--mode", default="exit_atlas", choices=["exit_atlas", "arms"],
-                    help="exit_atlas = Stage-1a inhibitory-pulse hold sweep; arms = Stage-2 dynamic persistence arms")
+    ap.add_argument("--mode", default="exit_atlas", choices=["exit_atlas", "arms", "frozen_atlas"],
+                    help="exit_atlas = Stage-1a inhibitory-pulse hold sweep; arms = Stage-2 dynamic persistence "
+                         "arms; frozen_atlas = Phase-2 frozen dual-IC exit atlas (q_core x S_G x J_exit)")
+    # ---- Phase-2 frozen atlas grid (task brief §5) ----
+    ap.add_argument("--q-core-grid", dest="q_core_grid", default="0.05,0.4,0.9",
+                    help="frozen_atlas: comma q_core levels (low/middle/recovered = uniform frozen q_I)")
+    ap.add_argument("--sg-grid", dest="sg_grid", default="0.0,0.2,0.4",
+                    help="frozen_atlas: comma S_G levels (0/intermediate/high divisive containment)")
+    ap.add_argument("--j-exit-grid", dest="j_exit_grid", default="0.0,8.0,20.0",
+                    help="frozen_atlas: comma J_exit levels (mV outward recovery current = eta_r*Phi(1))")
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--t0", type=float, default=3000.0, help="branch time (bounded state settled)")
     ap.add_argument("--dvth", type=float, default=15.0, help="inhibitory_pulse V_th raise (mV)")
@@ -489,10 +690,13 @@ def main():
         print("REFUSED: exit sim gate. Re-run with --confirm-run.")
         return
     if a.out is None:
-        sub = "stage2_arms" if a.mode == "arms" else "stage1_exit_atlas"
+        sub = {"arms": "stage2_arms", "frozen_atlas": "phase2_exit_atlas"}.get(a.mode, "stage1_exit_atlas")
         a.out = os.path.join(PP.ROOT, "results", "topic4_sef_hfo", "m4_snn_native_exit", sub)
     if a.mode == "arms":
         _run_arms(a)
+        return
+    if a.mode == "frozen_atlas":
+        _run_atlas(a)
         return
     os.makedirs(a.out, exist_ok=True)
     holds = [float(x) for x in a.holds.split(",")]
