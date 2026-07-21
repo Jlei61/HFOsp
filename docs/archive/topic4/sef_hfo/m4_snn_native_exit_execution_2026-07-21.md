@@ -21,11 +21,11 @@
   **但即使把 `q_I` 加到接近基线（0.87），低阈值双灶 + 递归骨架仍会把网络重新点着成持续态**。单靠"压住 + 回灌 q_I"退不出去。
   这跟历史上所有终止器失败、以及 R4 必须用离散 latch 硬切**同向**——退出的真正障碍是灶的自发再点火，不是 q_I 不够。
 - **动态机制的传感器工作正常**：持续态上 `p` 平滑积累（12s 到 p_max≈0.55），而间期短事件几乎不充它（持续时间选择性成立）。
-- **但动态电流也退不出去（bounded-negative）**：对称版被负反馈压到一个更低的持续水平（不终止）、或饿死 `S_G` 失控；
-  不对称版（快充慢放=R4 latch 连续版）变成一列周期性失控脉冲。**共同根因**：抑制油箱 `q_I` 只在安静时回灌、除法池 `S_G`
-  只在活动时起效——两者**时间反相**，没有一条连续轨迹能让"油箱灌满"与"刹车就位"在释放时刻同时成立。这解释了 lineage
-  里所有终止器失败、以及 R4 为何必须用"固定 bath（跟活动解耦的 `q` 储库）+ 离散 latch"硬造闭环。**结论=BOUNDED-NEGATIVE
-  的 temporal lifecycle，但带一个干净的结构性解释（本线最有价值的正面产出）**。
+- **已测的动态电流也退不出去（负结果）**：对称版被负反馈压到一个更低的持续水平（不终止）、或饿死 `S_G` 失控。
+  （⚠️ 原"不对称版=周期性失控脉冲"因 P0 bug 实为对称 `τ_p=3000`、已作废；真·不对称重跑中，见 §7。）
+  **候选共同解释（非 impossibility proof）**：`q_I` 与 `S_G` 对活动响应**符号相反**、随周期负相关——压住活动灌 `q_I` 往往让 `S_G` 衰减，
+  已测轨迹没进低活动间期 basin。但 `q_I` 有始终存在的恢复项、`S_G` 有有限记忆（实测有 ~403ms 重叠），且用的是空间均值 `q_I`（可能掩盖 core）——
+  **退出 corridor 是否存在未测**（需 `q_core×S_G` 冻结 atlas）。**结论=已测 actuator 下的 BOUNDED-NEGATIVE，带一个待验证的候选机制**。
 
 （内部代号：M4 `k_q=0.10 alpha_G=16` 有界态、`q_I` 场、`S_G` 除法池、persistence 场 `p`、Hill Φ、R4 latch。）
 
@@ -100,43 +100,49 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
 
 （E2_no_SG 的 no-pool→runaway 已由 M4 pass1 机制对照确立，未重跑省时。）
 
-## 7. Stage-2 asymmetric arm-D（seed1，T=28000，快充 τ_p=3000 / 慢放 τ_p_down=12000）
+## 7. Stage-2 asymmetric arm-D —— ⚠️ 原运行作废（P0 bug），已修+重跑
 
-| arm | cls | maxHz | runaway_ms | 解读 |
-|---|---|---|---|---|
-| B_m4_anchor | persist | 116 | – | 有界参照 |
-| D τ3000 η80 | runaway | 273 | 9022 | 周期性失控脉冲列 |
-| D τ3000 η150 | runaway | 216 | 4844 | 周期性失控脉冲列 |
+**⚠️ 撤回**：标为 "asymmetric"（`arms_s2dasym_seed1`, `arms_s2dasym_s3_seed3`）的运行**实际是对称 `τ_p=3000`**——
+`_build_arms` 的 `d_sweep` 分支逐项拼 `_persist_cfg` 时**漏传 `tau_p_down`**（默认 `None`=对称），尽管 `argv` 里写着 `--tau-p-down 12000`
+（review 2026-07-21 P0 抓到）。故"不对称→周期性失控脉冲列"这个结论**无效、撤回**，主结论图第四列作废。
 
-不对称电流（R4 active-low latch 的连续版）**没有给生命周期**，而是变成一列**周期性失控脉冲**：慢放长压期 `S_G` 排空、
-`q_I` 回灌；活动一恢复就**没有 containment（`S_G`=0）→ 失控脉冲 → `S_G` 瞬起 → 熄 → `S_G` 再排空**，如此极限环。
+**已修**：`d_sweep` 改为从 `P`（唯一 persist 参数源，含 `tau_p_down`）构建、`{**P,"tau_p":tp}` 覆盖，label 加 `_dn{tau_p_down}`；
+每 row 落 `cfg_effective` 全量有效配置（不再只靠 argv）；加 `test_d_sweep_propagates_tau_p_down` 回归测试（修复前会失败）。
+**真·不对称（τ_up=3000 / τ_down=12000, η_r=80/150）已用修复代码重跑（`s2dasymFIX`），结果待折入。**
 
-## 8. Verdict —— BOUNDED-NEGATIVE（temporal lifecycle 未达成，结构性原因清楚）
+注：那批（实为对称 `τ_p=3000` 强 `η_r`）确实给出 runaway（train_then_runaway / one_shot_burst），可作为"快对称+强电流→runaway"的数据点，
+但**不是**不对称 hold 的检验。
 
-**一句话**：在原始空间 E/I spiking 网络里，用一个持续时间门控的局部恢复坐标**不能**把 M4 有界持续态干净地终止并恢复回间期——
-穷举了开环抬阈值（任意时长、`q_I` 灌到 0.87）、对称闭环电流、不对称闭环电流，全部失败，且失败有一个共同的结构性根因。
+## 8. Verdict —— BOUNDED-NEGATIVE（已测 actuator 下 temporal lifecycle 未达成；候选机制待验证）
 
-**结构性根因（本线最有价值的正面产出）**：两个保护机制在**时间上反相**——
-- 抑制油箱 `q_I` **只在网络安静时回灌**（活动会耗它）；
-- 除法 containment 池 `S_G` **只在网络活动时起效**（安静就排空）。
+**一句话**：在**已测的**恢复 actuator（开环抬阈值 hold + 对称闭环电流；真·不对称电流重跑中）下，都**没能**把 M4 有界持续态干净地
+终止并恢复回间期——得到 rebound / 更低率持续态 / runaway pulse train。这是一个可信的**负结果**；一个候选的共同机制解释见下，
+但**尚未证明"不存在退出轨迹"**。
 
-任何"压住活动让 `q_I` 灌满"的恢复坐标，必然同时**排空 `S_G`**；于是活动一恢复就无 containment → 失控。反过来，要让 `S_G` 保持
-就位就得持续活动 → `q_I` 一直空 → persist。**不存在一条连续轨迹让"油箱灌满"与"刹车就位"在释放时刻同时成立。** 这正是
-R4 必须用"固定 bath（外挂 `q` 储库、跟活动解耦）+ 离散 latch"才能闭环的原因——完整自发 SNN 里没有这种解耦。三种失败模式
-（rebound / fragment-wander / runaway-train）都是这一根因的不同表现。
+**候选共同机制（不是 impossibility proof）**：`q_I` 与 `S_G` 对活动 `R` 的响应**符号相反**——
+`∂q̇_I/∂R < 0`（活动耗 `q_I`，局部去抑制助点燃），`∂Ṡ_G/∂R > 0`（活动建 `S_G`，除法压 recurrent 完成 containment）。
+两者随活动周期**负相关**：压住活动去灌 `q_I` 往往让 `S_G` 衰减，已测轨迹没把网络带进低活动间期 basin。
+**但注意**：(a) `q_I` 有**始终存在**的恢复项 `(1−q_I)/τ_q`、`S_G` 有**有限记忆** `τ_S`——不是"安静即零/活动才有"的二值；
+实测 14s-hold release 后 `q_I≥0.5 ∧ S_G≥0.2` **确曾同时成立 ~403ms**，只是不足以掉进低 basin。(b) 用的是**空间均值** `q_I`，
+可能掩盖 core 仍低于 surround。**因此"退出 corridor 是否存在、需要多高的 `q_core`/`S_G`/维持多久"未测**——要一张 `q_core × S_G`
+冻结-态 exit atlas 才能定。R4 用"固定 bath（跟活动解耦的 `q` 储库）+ latch"闭环，可解读为**绕过**这个负相关，但这不等于 SNN 里绝无退出。
 
 **完成度（分层，诚实）**：
 - engineering green：✅（persistence 场 off-by-default byte-parity，8+ 契约测试 + `BASELINE_SHA` 全绿；无引擎 re-bless）。
 - fast-state existence：✅（复现 M4 有界态 persist；复现间期 34 IED 基线）。
-- exit / dynamic accessibility：❌（开环+对称+不对称全 bounded-negative）。
+- exit / dynamic accessibility：❌（已测：开环 hold + 对称电流；真·不对称重跑中）。
 - termination / recovery：❌（无 clean terminate；无回间期）。
-- spatial pattern：❌（电流把宽态推成四处游走的大团，非局灶起始/终止波前）。
-- cross-seed：**2-seed 一致 bounded-negative**。seed1 穷举（open-loop 5 + 对称 3 + 不对称 2 + 消融 2）；seed3 复核：对称 D_tau5000_eta40=fragment、D_tau8000_eta80=runaway、不对称 D_tau3000_eta150=train_then_runaway。**两 seed 每个动态臂都落 {fragment, runaway}、无一 clean terminate**；fragment↔runaway 边界随 seed 微移（S_G-饿死阈值 seed-敏感），但"退不出去"seed-稳健，符合反相根因预测（结构属性、与 seed 无关）。
+- spatial pattern：❌（电流把宽态推成大面积游走活动，非局灶起始/终止波前）。
+- cross-seed：seed1（open-loop 5 + 对称 3 + 消融 2）+ seed3 对称复核（D_tau5000_eta40=fragment、D_tau8000_eta80=runaway）。
+  **两 seed 每个已测对称动态臂都落 {fragment, runaway}、无一 clean terminate**；fragment↔runaway 边界随 seed 微移（S_G-饿死阈值 seed-敏感）。
+  （原"不对称 D_tau3000"两 seed 因 P0 bug 实为对称 `τ_p=3000`，已作废；真·不对称 cross-seed 视重跑结果补。）
 
-**能写 / 不能写**：
-- 能写：M4 有界态是稳健吸引子；persistence-gated 恢复电流（任意 τ 对称性/强度）不能 clean-exit；根因=`q_I`↔`S_G` 反相；
-  这解释了 lineage 里所有终止器失败 + R4 需要 fixed-bath+latch。
-- 不能写：❌"造出了 seizure lifecycle"；❌"证明发作机制"；❌任何 clinical/SOZ claim；❌把 fragment/游走当"发作样招募"。
+**能写 / 不能写**（review 2026-07-21 收紧后）：
+- 能写：M4 有界态在**已测窗口内**是 reproducible persistent state；**已测的**开环 hold + 对称恢复电流不能 clean-exit（2 seed）；
+  `q_I` 与 `S_G` 对活动响应符号相反、随周期负相关，是这些失败的一个**候选共同解释**。
+- 不能写：❌"证明不存在退出轨迹 / `q_I`-`S_G` 绝无重叠"（未做 basin/nullcline atlas，且实测有 ~403ms 重叠）；❌"稳健吸引子"
+  （只测了单 actuator/固定 ΔV_th/5 hold/seed1 的开环 + 有限对称扫描）；❌"穷举/任意时长"；❌"解释 lineage 所有失败"（只能说"为多个失败模式提供一个候选共同解释"）；
+  ❌"不对称 hold 也失败"（真·不对称重跑中）；❌"造出 seizure lifecycle / 证明发作机制 / 任何 clinical/SOZ"；❌把 fragment/游走当"发作样招募"。
 
 **与旧工作的关系（真正新增了什么）**：不是把 STD/shunt/m/g_K 换名重跑——本线加的是**持续时间门控 + 空间局部**的恢复坐标
 （lineage 从没测过的组合），并**在 M4 有界态上**测；新增的正面知识是 **`q_I`↔`S_G` 反相**这个把整条 lineage 失败统一起来

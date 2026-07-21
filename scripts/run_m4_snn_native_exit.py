@@ -165,6 +165,9 @@ def _run_persist_arm(S, label, cfg, T_ms, perturb=None):
         p_mean_final=round(float(slow.p.mean()), 4), p_max_final=round(float(slow.p.max()), 4),
         p_peak=round(float(max(slow.trace_p_max)) if slow.trace_p_max else 0.0, 4),
         T_ms=float(T_ms), perturb_kind=(perturb["kind"] if perturb else None),
+        cfg_effective=dict(use_persist=cfg.use_persist, tau_p=cfg.tau_p, tau_p_down=cfg.tau_p_down,
+                           theta_p=cfg.theta_p, a50_p=cfg.a50_p, sigma_p=cfg.sigma_p, eta_r=cfg.eta_r,
+                           p50_r=cfg.p50_r, n_r=cfg.n_r, k_q=cfg.k_q, use_SG=cfg.use_SG, alpha_G=cfg.alpha_G),
         wall_s=round(time.time() - t0, 1), **M4._spatial_coverage(movie),
         events=[(round(e["t_on"], 1), round(e["t_off"], 1)) for e in events],
     )
@@ -200,10 +203,10 @@ def _build_arms(a):
             cells.append(("B_m4_anchor", _persist_cfg(**base), T, None))
         for tok in a.d_sweep.split(","):
             tp, er = (float(x) for x in tok.split(":"))
-            cells.append((f"D_tau{int(tp)}_eta{er:g}",
-                          _persist_cfg(**base, use_persist=True, tau_p=tp, eta_r=er,
-                                       theta_p=a.theta_p, a50_p=a.a50_p, sigma_p=a.sigma_p,
-                                       p50_r=a.p50_r, n_r=a.n_r), T, None))
+            # build from P (single source of persist params incl tau_p_down) with tau_p overridden per cell,
+            # so a param can never be silently dropped again. Label encodes tau_p_down when asymmetric.
+            lab = f"D_tau{int(tp)}_eta{er:g}" + (f"_dn{int(a.tau_p_down)}" if a.tau_p_down else "")
+            cells.append((lab, _persist_cfg(**base, use_persist=True, eta_r=er, **{**P, "tau_p": tp}), T, None))
         return cells
     catalog = {
         "A_slow_off":  (_persist_cfg(k_q=0.0, use_SG=False), T),

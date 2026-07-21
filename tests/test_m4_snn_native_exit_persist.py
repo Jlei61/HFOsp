@@ -135,6 +135,31 @@ def test_clamp_persist_frozen():
     assert np.allclose(slow.p, 0.3)                        # frozen despite activity
 
 
+# ---- Regression: d_sweep must propagate tau_p_down (P0, review 2026-07-21) -----------------
+def test_d_sweep_propagates_tau_p_down():
+    """The --d-sweep path must carry tau_p_down (and every persist param) into the cell config,
+    not silently drop it to None. Caught in review: asymmetric arms ran symmetric because the
+    d_sweep branch spelled params out individually and omitted tau_p_down."""
+    import types
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    import run_m4_snn_native_exit as R
+    a = types.SimpleNamespace(tau_p=5000.0, theta_p=0.05, a50_p=0.3, sigma_p=1.5, p50_r=0.15, n_r=4.0,
+                              tau_p_down=12000.0, T=20000.0, d_sweep="3000:80,3000:150",
+                              include_anchor=False, eta_r=15.0, clamp_val=0.8, arms="")
+    cells = R._build_arms(a)
+    assert len(cells) == 2
+    for (label, cfg, T, perturb) in cells:
+        assert cfg.tau_p == 3000.0                 # per-cell override applied
+        assert cfg.tau_p_down == 12000.0           # THE BUG: was silently None
+        assert cfg.theta_p == 0.05 and cfg.p50_r == 0.15 and cfg.n_r == 4.0 and cfg.sigma_p == 1.5
+        assert "dn12000" in label                  # asymmetric encoded in the label
+    # symmetric (tau_p_down=None) must stay None
+    a.tau_p_down = None
+    a.d_sweep = "5000:40"
+    (label, cfg, T, perturb) = R._build_arms(a)[0]
+    assert cfg.tau_p_down is None and "dn" not in label
+
+
 # ---- Clause 5: validate -------------------------------------------------------------------
 def test_validate_persist():
     with pytest.raises(ValueError):
