@@ -22,31 +22,27 @@
   },
   "n_cells": 27,
   "regime_counts": {
-    "high_only": 2,
-    "bistable": 8,
-    "low_only": 17
+    "high-only": 2,
+    "bistable-consistent": 7,
+    "low-only": 17,
+    "reverse-discordant": 1
   },
-  "verdict": "low_basin_exists_and_reachable",
-  "finding": "A low/interictal basin (monostable low) covers 17/27 cells and is universal at recovered q_core=0.9; the ictal branch (runaway) is confined to no/weak containment S_G<=0.2 + depleted/mid q_core + weak recovery current. Raising S_G and J_exit collapses bistable->low_only. Even at fully depleted q_core=0.05, (S_G=0.4,J_exit>=8) or (S_G=0.2,J_exit=20) reaches low_only. => NOT a no-basin bottleneck; the stop-rule is not triggered. The remaining question is dynamic: does the trajectory reach and STAY (S_G decays when activity drops -> motivates a containment memory H). Division of labor: divisive S_G is the necessary brake (S_G=0 -> runaway on kick at q<=0.4); J_exit + high S_G then push the contained state into the low basin.",
+  "regime_taxonomy": {
+    "low_only": "both cold+warm IC settle low/QUIESCENT (near-0 Hz)",
+    "bistable_consistent": "cold->low, warm(kick)->high; here all 7 are low-vs-RUNAWAY (bistability-COMPATIBLE dual-probe, NOT proven low-vs-bounded-ictal)",
+    "high_only": "both IC -> high/runaway",
+    "reverse_discordant": "cold->high, warm->low (NOT bistability; inconclusive)"
+  },
+  "verdict": "low_quiescent_basin_exists; recovery_to_interictal_NOT_shown; dynamic_reach_stay_recover_OPEN",
+  "finding": "A low/QUIESCENT fast-state outcome (near-0 Hz; NOT proven interictal-with-IEDs) covers 17/27 cells (monostable low, both ICs) and is universal at recovered q_core=0.9. The high branch: 2 high-only (S_G=0, depleted/mid q, no recovery current) + 7 bistability-consistent (cold-low / warm-RUNAWAY -- a bistability-COMPATIBLE dual-probe outcome, low-vs-runaway NOT low-vs-bounded-ictal, so NOT proven interictal-ictal bistability) + 1 reverse-discordant (q=0.9,S_G=0,J=0: cold-high(8Hz osc)/warm-low, inconclusive). Raising S_G + J_exit converts warm-runaway->low even at fully depleted q_core=0.05 [(S_G=0.4,J>=8) or (S_G=0.2,J=20)]. => RULES OUT 'the test range is all high/runaway'; the bottleneck narrows from 'does a low outcome exist' to the DYNAMIC question: can the trajectory ENTER the low region, STAY, and RECOVER the original IEDs on release.",
+  "division_of_labor": "Within the inhibition-DEPLETED, KICK-activated tested region: divisive S_G is the necessary brake (S_G=0 -> warm kick runs away at q<=0.4). BUT S_G is NOT universally required -- at recovered q_core=0.9, OR with a strong enough J_exit, the warm state goes low without S_G (no-S_G low-only cells: [(0.9, 8.0), (0.9, 20.0)]). J_exit + S_G together push the contained warm ignition into the low/quiescent outcome.",
   "caveats": [
-    "frozen atlas != dynamic trajectory",
-    "frozen S_G undercounts dynamic containment (bounded-persist branch may read as runaway)",
-    "q_core frozen UNIFORMLY (core<surround structure deferred)",
-    "warm IC = focal core kick surrogate for the broad established-M4 fast state (kick_probe guarded)",
-    "seed 1 only"
-  ],
-  "lowest_corridor_SG_Jexit_per_qcore": {
-    "0.05": [
-      0.4,
-      8.0
-    ],
-    "0.4": [
-      0.2,
-      0.0
-    ],
-    "0.9": [
-      0.2,
-      0.0
-    ]
-  }
+    "frozen atlas is the FIXED-POINT landscape, NOT the dynamic trajectory",
+    "'low' = near-0 Hz quiescent; recovery to an interictal attractor WITH original IEDs is NOT shown here",
+    "frozen S_G undercounts dynamic containment (a truly-bounded-persist branch may read as runaway)",
+    "q_core frozen UNIFORMLY across the sheet (real core-depleted/surround-recovered spatial field NOT used)",
+    "J_exit = uniform constant current from clamped p=1 (dynamic local p(x,t) reachable current NOT tested)",
+    "warm IC = focal core-kick surrogate for the broad established-M4 fast state (kick_probe guarded, no true V-checkpoint)",
+    "no wavefront stall/annihilation probed; seed 1 only"
+  ]
 }

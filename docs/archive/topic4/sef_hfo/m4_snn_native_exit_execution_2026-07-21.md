@@ -212,3 +212,71 @@ commits `8109ccd`(spec) `d79d9f9`(persist 场+runner+tests) `69e431a`(Stage-1a �
 
 commits: `8109ccd`(spec) `d79d9f9`(persist field+runner+tests) `69e431a`(Stage-1a screen+diag)；
 tests `tests/test_m4_snn_native_exit_persist.py` 8 绿 + `test_snn_gates.py` BASELINE_SHA 绿。
+
+---
+
+## 10. Session-2（2026-07-21 续）：Phase 0/1/2 re-plan 执行
+
+**执行决策——杀掉 estfork**：上个会话遗留一个 `--persist-onset-ms 2500` 的 established-state fork 进程仍
+存活（本 doc §8 曾记"running"）。它把恢复电流**固定在 2500ms 介入**——正是 re-plan Phase 1 明确禁止的
+"默认 2500ms 已成形"假设，且用未修的旧 runner（无断点续跑/provenance）。已杀，Phase 1 用"先测成形时间、
+再介入"的干净版本重做。`invalidated_pre_p0_fix/` 旧结果仍作废、不复用。
+
+**Phase 0（工程，commit `4d7a4d6`）——runner 崩溃可恢复 + 全 provenance**：旧 `_run_arms` 用 `pool.map`
+一次性等全部 arm 跑完才写一个合并 JSON——中断丢掉全部、无续跑、JSON 无 `base_sha`/`engine_versions`、
+`cfg_effective` 漏了 `persist_onset_ms`。改为 `_orchestrate_arms`：每个 arm 一完成立刻落 per-arm JSON+NPZ、
+每次完成重写 `run_manifest`（pending/running/complete/error）、`--resume` 跳过已完成 arm；每份输出记
+`base_sha`+`engine_versions`(guarded 引擎 sha256)+完整 `cfg_effective`；`_engine_guard()` 对 guarded 引擎漂移
+loud-fail。**本会话网络中断恰好实测了它**：anchor 进程被上个会话退出杀掉、只留 `_running_` 标记无完成产物，
+`--resume` 干净重跑。7 新 runner 测试 + BASELINE_SHA 门全绿、无 re-bless。
+
+**Phase 1/2 基础设施（commit `2230fad`）**：
+- `slow_field.py`（unguarded、只读 trace→字节一致性保住）：借已有 `core_mask_E` 钩子加 core/surround 场
+  分裂 → 每步 `q_core`/`q_surround`(+`p_core`/`p_surround`)。3 新测试 + parity 门绿。
+- runner：`_run_persist_arm` 现输出 Phase-1 清单（core/surround 慢变量 trace、沿轴+横轴 kymograph、
+  核/周活动率）；新增 `frozen_atlas` 模式（见下），复用 `_orchestrate_arms`。
+- `analyze_m4_snn_native_exit.py`：`formed_state_time`——数据驱动 t_form（非假设 2500ms）：率/`S_G`/`q_I`/
+  active-area **全部**连续落在有界带 ≥ window_ms 的最早时刻；末态非有界则返回 None。
+
+**Phase 2（commit `735abce`；审阅纠正 07-22）——冻结退出相图：低放电/静默落脚点存在（非已证明回到原有间期事件的间期态）**（朴素话）：
+- **测了什么**：那个"停不下来的持续放电态"里，网络到底有没有一个**低放电/静默的落脚点**能退回去；要多满的
+  抑制油箱 / 多强的除法刹车 / 多大的恢复电流才够得着。
+- **怎么测的**：把三个慢变量冻死（抑制油箱 `q_core`=**整片均匀**冻结 q_I、除法刹车 `S_G`、**全场恒定**外向电流
+  `J_exit`=p≡1 产生），让真脉冲网络从冷（不踢）/热（狠踢核区=**焦点** kick 代理"已在发作"）两起点各跑。
+  seed 1、T=2500、27 格×2 起点=54 跑、无引擎改动。**四类判决**：only-低 / bistability-consistent(冷低热高) /
+  only-高 / reverse-discordant(冷高热低,非双稳)。
+- **揭示了什么（安全口径）**：**低放电落脚点广泛存在**（17/27 冷热都归低；`q_core=0.9` 处处低放电）。高支=
+  **2 only-高**（`S_G`=0+耗竭 q+无电流）+**7 bistability-consistent（全是 低-vs-失控，非 低-vs-有界发作态→
+  只是"双稳兼容双探针结果"、非已证明 间期↔发作 双稳）**+**1 reverse-discordant**（q0.9/S_G0/J0: 冷高8Hz振荡/
+  热低,判不清）。**抬高 `S_G`+`J_exit` 能把热起点从失控转成低放电**，即便 q_core=0.05[(S_G0.4,J≥8)/(S_G0.2,J20)]。
+  **分工（限定在 抑制耗竭+被 kick 激活的已测区域）**：除法刹车 `S_G` 是必需刹车（=0 则踢就失控 at q≤0.4）；
+  **但 `S_G` 非普遍必需**——`q_core=0.9` 或 `J_exit` 够强时无 `S_G` 也归低。**→ 排除"测试范围内处处高态/失控"**；
+  瓶颈从"有没有低落点"收缩成**纯动态问题**：轨迹能否进入、停住、**释放后恢复原有 IED**（活动降则 `S_G` 衰减
+  →可能需"刹车慢记忆" H）。
+- **⚠️不能写**：低格多是**近0Hz静默态、非已证明"回到产生原有间期事件的间期吸引子"**；只能说"冻结慢坐标下
+  存在低/静默 fast-state 结果"。caveat：冻结≠动态；冻结 `S_G` 低估动态刹车；`q_core` **均匀**冻结(非核空周满真实
+  空间场)、`J_exit` **均匀**恒流(非动态局部 p(x,t))；热IC=焦点 kick 代理(kick_probe guarded 无真 V-checkpoint)；
+  未探 wavefront stall/annihilation；seed 1。产物：`phase2_exit_atlas/{figures/exit_atlas_coarse_seed1.png+README,
+  arms_coarse_seed1.json, exit_atlas_analysis.json}`。
+
+**Phase 1（进行中；审阅 07-22 纠正后重排）**：anchor `B_m4_anchor` T=12000 seed1 因会话边界/内存压力**死过**
+（机器有 OOM 历史；单长 arm 未完成仍需整臂重跑）→ `--resume` 续跑 + 持续监控。审阅要求的**硬合同**（在启动
+干预臂前必须满足）：
+1. **formed-state 用 core/surround 非空间均值**：`formed_state_time` 现主要用 `trace_qI_mean`；须升级为核率成形+稳、
+   周招募达 bounded plateau、`q_core` 耗竭、`q_surround`−core 差已成形；且 t_form 对 window{1.0,1.5,2.0}s + 阈值小扰动
+   稳定才可启动（先出 formed-state 诊断图 + 敏感性）。
+2. **干预臂两严格合同**：(a) intervention 与 anchor 在 t_form 前 spike/rate/slow trace **逐字一致**；(b) 每个 intervention
+   自己在介入前也要**重新过 formed-state gate**（不只继承 anchor 的 t_form）。
+3. **真 recovery matcher**：终止后不能只看"又冒 burst"；须把 post-offset 事件与原 slow-off IED 比 duration/IEI/peak-rate/
+   active-area/core-surround-ratio/轴向顺序/spatial-mode/虚拟电极顺序。没有这个 producer，`lifecycle-candidate` 只是未接线
+   的标签（`classify_phase1_verdict` 现只收外传 `recovered_events` 计数）。
+4. **不急着上 H**：只有 Phase 1 结果=fragment/rebound（活动降 `S_G` 消失太快）才测 containment-memory H；
+   termination-only→调释放时间+sensor selectivity；prevention→改 persistence sensor 防跨事件累积；termination+matched
+   IED recovery→做 seed 3/4+空间确认不加机制。H 是现有 M4 分母的慢记忆、不改 `W_EE`/各向异性。
+5. **不做 paper-ready lifecycle 作图**，直到自主长轨迹（去掉所有定时开关）跑通。
+
+判决：invalid / termination-no-go / termination-only / lifecycle-candidate。
+
+Session-2 commits：`4d7a4d6`(Phase0) `2230fad`(Phase1/2 infra) `735abce`(Phase2 atlas)；41 测试绿。审阅 07-22 后：
+plot 4 类 taxonomy 修正(17 low-only/7 bistability-consistent/2 high-only/1 reverse-discordant)+全文档"低=近0Hz静默≠
+interictal"改口径（下一 commit）。

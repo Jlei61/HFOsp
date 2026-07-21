@@ -22,14 +22,27 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt  # noqa: E402
 from matplotlib.patches import Patch  # noqa: E402
 
-REG_COLOR = {"low-only": "#92C5DE", "bistable": "#FDB863", "high-only": "#B2182B"}
-REG_ORDER = ["low-only", "bistable", "high-only"]
+REG_COLOR = {"low-only": "#92C5DE", "bistable-consistent": "#FDB863",
+             "high-only": "#B2182B", "reverse-discordant": "#B0B0B0"}
+REG_ORDER = ["low-only", "bistable-consistent", "high-only", "reverse-discordant"]
+REG_LABEL = {"low-only": "low-only", "bistable-consistent": "bistability-consistent\n(cold-low / warm-high)",
+             "high-only": "high-only", "reverse-discordant": "reverse-discordant\n(cold-high / warm-low)"}
 _HIGH = ("runaway", "bounded_high", "bounded_oscillatory")
 
 
 def _regime(cold_cls, warm_cls):
+    """Dual-probe outcome. cold-low/warm-high = bistability-CONSISTENT (the kicked/warm IC reaches a high
+    branch the cold IC does not) -- but note most such cells are low-vs-RUNAWAY, not low-vs-bounded-ictal,
+    so this is a bistability-compatible dual-probe outcome, NOT proven interictal-ictal bistability.
+    cold-high/warm-low is the REVERSE discordance (not bistability) -> flagged inconclusive."""
     ch, wh = cold_cls in _HIGH, warm_cls in _HIGH
-    return "low-only" if not (ch or wh) else "high-only" if (ch and wh) else "bistable"
+    if not ch and not wh:
+        return "low-only"
+    if ch and wh:
+        return "high-only"
+    if not ch and wh:
+        return "bistable-consistent"
+    return "reverse-discordant"
 
 
 def main():
@@ -70,11 +83,12 @@ def main():
         for spine in ax.spines.values():
             spine.set_visible(False)
 
-    handles = [Patch(facecolor=REG_COLOR[r], edgecolor="#555", label=r) for r in REG_ORDER]
+    handles = [Patch(facecolor=REG_COLOR[r], edgecolor="#555", label=REG_LABEL[r]) for r in REG_ORDER]
     handles.append(plt.Line2D([0], [0], marker="o", ls="", color="#222", ms=5, label="cold IC also high"))
-    fig.legend(handles=handles, loc="lower center", ncol=4, frameon=False, fontsize=9, bbox_to_anchor=(0.5, -0.02))
-    fig.suptitle("Frozen exit atlas — does a low/interictal basin exist?  (E1146 M4, seed 1; "
-                 "cell text = warm-kick settled rate Hz / RA=runaway)", fontsize=10.5)
+    fig.legend(handles=handles, loc="lower center", ncol=5, frameon=False, fontsize=8, bbox_to_anchor=(0.5, -0.04))
+    fig.suptitle("Frozen exit atlas — does a low/QUIESCENT fast-state basin exist?  (E1146 M4, seed 1; "
+                 "low = near-0 Hz quiescent, NOT proven interictal-with-IEDs; cell text = warm-kick settled rate Hz / RA=runaway)",
+                 fontsize=9.5)
     fig.tight_layout(rect=(0, 0.06, 1, 0.95))
     out = a.out or os.path.join(os.path.dirname(a.json), "figures",
                                 os.path.basename(a.json).replace("arms_", "exit_atlas_").replace(".json", ".png"))
