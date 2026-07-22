@@ -135,7 +135,9 @@ def _run_arm(S, label, cfg, T_ms, early_stop=True, es_thresh_hz=120.0):
         z_core=np.asarray(slow.trace_z_core_mean, np.float32),
         z_surround=np.asarray(slow.trace_z_surround_mean, np.float32),
         m_mean=np.asarray(slow.trace_m_mean, np.float32), m_max=np.asarray(slow.trace_m_max, np.float32),
-        SG=np.asarray(slow.trace_SG, np.float32), H=np.asarray(slow.trace_H, np.float32))
+        SG=np.asarray(slow.trace_SG, np.float32), H=np.asarray(slow.trace_H, np.float32),
+        p_mean=np.asarray(slow.trace_p_mean, np.float32), p_max=np.asarray(slow.trace_p_max, np.float32))
+    row["p_max_final"] = float(slow.trace_p_max[-1]) if slow.trace_p_max else 0.0
     return row, arrays
 
 
@@ -143,7 +145,9 @@ ARMS = {
     "bare":  dict(),                                                        # Z/M only (no containment)
     "sg":    dict(use_SG=True, alpha_G=16.0),                               # + divisive containment pool
     "sgh":   dict(use_SG=True, alpha_G=16.0, use_H=True, alpha_H=16.0,      # + slow memory H (active-focus sensor)
-                  tau_H=6000.0, H_sensor="active", use_persist=True),
+                  tau_H=6000.0, H_sensor="active", use_persist=True,        # asymmetric p: fast charge (2000) / slow
+                  tau_p=2000.0, tau_p_down=10000.0),                        # decay (10000) -> p accumulates the bursty
+                                                                           # IED train into a sustained-seizure memory
 }
 
 
@@ -187,12 +191,24 @@ def main():
               f"tail={row['tail_all_hz']:.1f}Hz z_min={row['z_min_final']:.3f} "
               f"S_G_max={row['S_G_max']:.3f} H_max={row['H_max']:.3f} wall={row['wall_s']}s", flush=True)
 
+    jpath = os.path.join(OUT, f"lifecycle_seed{a.seed}.json")
+    by_label = {}                                              # accumulate across runs: this run's arms update by label
+    if os.path.exists(jpath):
+        try:
+            for rr in json.load(open(jpath)).get("rows", []):
+                by_label[rr["label"]] = rr
+        except Exception:
+            pass
+    for rr in rows:
+        by_label[rr["label"]] = dict(rr, T_ms=float(a.T))
+    order = ["bare", "sg", "sgh"]
+    merged = [by_label[k] for k in order if k in by_label] + [v for k, v in by_label.items() if k not in order]
     manifest = dict(subject="epilepsiae_1146", placement="twoend_equal", substrate=dict(
-        L=float(S["L"]), N=int(S["N"]), NE=int(S["NE"])), I_th_EI=I_th_EI, seed=a.seed, T_ms=a.T,
-        lockpoint="zA_q75_tz5000__mA0p001_tau500", tau_z=TAU_Z, tau_adp=TAU_ADP, eta_m=ETA_M, rows=rows)
-    with open(os.path.join(OUT, f"lifecycle_seed{a.seed}.json"), "w") as f:
+        L=float(S["L"]), N=int(S["N"]), NE=int(S["NE"])), I_th_EI=I_th_EI, seed=a.seed,
+        lockpoint="zA_q75_tz5000__mA0p001_tau500", tau_z=TAU_Z, tau_adp=TAU_ADP, eta_m=ETA_M, rows=merged)
+    with open(jpath, "w") as f:
         json.dump(manifest, f, indent=2, default=lambda o: o.tolist() if hasattr(o, "tolist") else o)
-    print(f"[done] wrote {OUT}/lifecycle_seed{a.seed}.json")
+    print(f"[done] wrote {jpath} ({len(merged)} arms: {[r['label'] for r in merged]})")
 
 
 if __name__ == "__main__":

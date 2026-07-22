@@ -84,10 +84,12 @@ def main():
         if ci == 0:
             ax.set_ylabel("m / S_G / H")
         ax2 = ax.twinx()
-        for key, col, lab in (("SG", "#d62728", "S_G"), ("H", "#8c564b", "H")):
-            v = d[key]
-            if v.size and float(np.max(v)) > 0:
-                ax2.plot(_t_step(len(v)), v, lw=1.1, color=col, ls="--", label=lab)
+        for key, col, lab, ls in (("SG", "#d62728", "S_G", "--"), ("H", "#8c564b", "H", "-"),
+                                  ("p_max", "#17becf", "p max (H sensor in)", ":")):
+            if key in d.files:
+                v = d[key]
+                if v.size and float(np.max(v)) > 0:
+                    ax2.plot(_t_step(len(v)), v, lw=1.1, color=col, ls=ls, label=lab)
         ax2.set_ylim(bottom=0)
         h1, l1 = ax.get_legend_handles_labels(); h2, l2 = ax2.get_legend_handles_labels()
         if h1 or h2:
