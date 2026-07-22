@@ -31,10 +31,12 @@ REGIMES = ("UNSAFE", "ICTAL", "DENSE", "INTERICTAL", "SILENT", "OTHER")
 LC_THRESHOLDS = dict(
     HIGH_OCC=0.5,          # rolling-rate occupancy above the interictal band upper edge -> ictal-like
     ELEVATED_OCC=0.10,     # above this occupancy = more active than interictal (dense event train)
-    PRE_MS=8000.0,         # required contiguous interictal BEFORE the bout
+    PRE_MS=8000.0,         # required interictal BEFORE the bout (isolated bursts tolerated)
     ICTAL_MS=1000.0,       # a bout must be >= this to count as ictal-like (not a single event)
-    POST_MS=8000.0,        # required contiguous returning interictal AFTER termination (+ any leading silence)
+    POST_MS=8000.0,        # required returning interictal AFTER termination (+ any leading silence)
     RELAPSE_GUARD_MS=2000.0,  # ictal re-entry within this of termination -> rapid relapse
+    DENSE_MIN_MS=2000.0,   # a DENSE_EVENT_TRAIN needs a SUSTAINED dense run (isolated bursts don't count)
+    MIN_INTERICTAL_WINDOWS=3,  # minimum interictal windows to call a no-bout run an interictal baseline
 )
 
 
@@ -108,6 +110,27 @@ def _relapse_within(regimes, start_idx, win_ms, guard_ms):
     return False
 
 
+def _max_run(regimes, target):
+    """Longest contiguous run of `target`."""
+    best = cur = 0
+    for r in regimes:
+        cur = cur + 1 if r == target else 0
+        best = max(best, cur)
+    return best
+
+
+def _smooth_isolated(regimes):
+    """Relabel an ISOLATED single non-ictal, non-interictal window (a lone DENSE/SILENT/OTHER burst or gap
+    surrounded by interictal) to INTERICTAL, so a normal interictal run with occasional bursts is not
+    shattered. ICTAL windows are NEVER smoothed -> real bouts and ictal-strength flashes survive; a run of
+    >=2 consecutive non-interictal windows (a genuine dense train / real silence) is preserved."""
+    out = list(regimes)
+    for i in range(1, len(out) - 1):
+        if regimes[i] not in ("ICTAL", "INTERICTAL") and regimes[i - 1] == "INTERICTAL" and regimes[i + 1] == "INTERICTAL":
+            out[i] = "INTERICTAL"
+    return out
+
+
 def _res(label, regimes, *, bout=None, reasons=None, **extra):
     d = dict(label=label, regimes=list(regimes), bout=bout, reasons=list(reasons or []))
     d.update(extra)
@@ -128,29 +151,35 @@ def classify_lifecycle(windows, band, *, runaway=False, T=LC_THRESHOLDS):
         return _res("RUNAWAY", regimes, reasons=["global runaway flag set"])
     if "UNSAFE" in regimes:
         return _res("NUMERICAL_UNSAFE", regimes, reasons=["a window failed the numerical-safety gate"])
+    sm = _smooth_isolated(regimes)   # isolated single non-ictal bursts -> interictal (ICTAL never smoothed)
 
-    bout = _first_ictal_bout(regimes, win_ms, T["ICTAL_MS"])
+    bout = _first_ictal_bout(sm, win_ms, T["ICTAL_MS"])
     if bout is None:
-        if regimes and all(r == "INTERICTAL" for r in regimes):
-            return _res("INTERICTAL_BASELINE", regimes, reasons=["all windows within the interictal band"])
-        if any(r in ("DENSE", "ICTAL") for r in regimes):     # elevated present but no >=ICTAL_MS bout
-            return _res("DENSE_EVENT_TRAIN", regimes, reasons=["elevated event train, no >=ICTAL_MS ictal bout"])
-        return _res("UNRESOLVED", regimes, reasons=["neither an interictal baseline nor an ictal bout"])
+        if "ICTAL" in sm:                                     # ictal-strength flash(es) below the bout duration
+            return _res("DENSE_EVENT_TRAIN", regimes, reasons=["ictal-strength flash below the >=ICTAL_MS bout"])
+        if _max_run(sm, "DENSE") * win_ms >= T["DENSE_MIN_MS"]:
+            return _res("DENSE_EVENT_TRAIN", regimes, reasons=[f">={T['DENSE_MIN_MS']:.0f}ms sustained dense-event train"])
+        n_int = sm.count("INTERICTAL")
+        if n_int >= T["MIN_INTERICTAL_WINDOWS"] and n_int >= 0.5 * len(sm):
+            return _res("INTERICTAL_BASELINE", regimes, reasons=["interictal-dominant (isolated bursts tolerated)"])
+        if n_int > 0:
+            return _res("INTERICTAL_BASELINE", regimes, reasons=["sparse but interictal (no bout, no sustained dense)"])
+        return _res("UNRESOLVED", regimes, reasons=["no interictal windows and no ictal bout"])
 
     b0, b1 = bout
-    pre_ms = _trailing_run_ms(regimes[:b0], "INTERICTAL", win_ms)     # contiguous interictal just before bout
+    pre_ms = _trailing_run_ms(sm[:b0], "INTERICTAL", win_ms)          # interictal run just before bout (smoothed)
     bout_ms = (b1 - b0 + 1) * win_ms
 
-    terminated = (b1 + 1 < len(regimes)) and (regimes[b1 + 1] != "ICTAL")
+    terminated = (b1 + 1 < len(sm)) and (sm[b1 + 1] != "ICTAL")
     if not terminated:
         return _res("ICTAL_LIKE_BOUNDED", regimes, bout=bout, pre_ms=pre_ms, bout_ms=bout_ms,
                     reasons=["ictal bout runs to the end of the record; no autonomous termination observed"])
 
-    if _relapse_within(regimes, b1 + 1, win_ms, T["RELAPSE_GUARD_MS"]):
+    if _relapse_within(sm, b1 + 1, win_ms, T["RELAPSE_GUARD_MS"]):
         return _res("RAPID_RELAPSE", regimes, bout=bout, pre_ms=pre_ms, bout_ms=bout_ms,
                     reasons=["ictal re-entry within the relapse guard window"])
 
-    post = regimes[b1 + 1:]
+    post = sm[b1 + 1:]
     if post and all(r == "SILENT" for r in post):                    # L5 anti-cheat: entirely silent tail
         return _res("PERMANENT_SILENCE", regimes, bout=bout, pre_ms=pre_ms, bout_ms=bout_ms, post_return_ms=0.0,
                     reasons=["post-ictal segment is entirely silent (no returning events) -> not a recovery"])

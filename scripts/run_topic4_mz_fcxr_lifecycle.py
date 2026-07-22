@@ -206,7 +206,7 @@ def cmd_baseline(args):
         num = red["numerical"]
         gate_ok = bool((not num["numerical_unsafe"]) and num["clip_frac_max"] == 0.0
                        and red["n_returning"] >= OLD.MIN_BASE_EVENTS
-                       and lc["label"] in ("INTERICTAL_BASELINE", "DENSE_EVENT_TRAIN"))
+                       and lc["label"] == "INTERICTAL_BASELINE")   # workpoint must read as a clean interictal baseline
         rate_stride = max(1, int(np.ceil(red["rate"].size / 4000)))
         FCXR._write_npz(os.path.join(OUT, f"baseline_trace_seed{args.seed}.npz"),
                         rate_dt_ms=np.asarray([DT_LC * rate_stride], np.float32),
@@ -217,7 +217,7 @@ def cmd_baseline(args):
             min_base_events=OLD.MIN_BASE_EVENTS, af_bin_ms=red["af_bin_ms"], floor_af=red["floor_af"],
             numerical=num, band=red["band"], win_ms=LC_WIN_MS, event_lookback_ms=LC_LOOKBACK_MS,
             n_windows=len(red["base_windows"]), slowoff_lifecycle_label=lc["label"],
-            slowoff_regimes=lc["regimes"], workpoint_gate_pass=gate_ok,
+            slowoff_regimes=lc["regimes"], base_windows=red["base_windows"], workpoint_gate_pass=gate_ok,
             event_durations_ms=[round(float(e["dur_ms"]), 1) for e in red["returning_events"]],
             event_participation=[round(float(e["peak_ext"]), 4) for e in red["returning_events"]],
         )

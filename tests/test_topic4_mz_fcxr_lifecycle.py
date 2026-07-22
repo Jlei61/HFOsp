@@ -68,6 +68,22 @@ def test_L3_elevated_no_bout_is_dense_event_train():
     assert classify_lifecycle([II] * 5 + [ICT] + [II] * 5, bf)["label"] == "DENSE_EVENT_TRAIN"
 
 
+# ---- real-baseline shape: warm-up silence + interictal + one end burst -> interictal baseline ----
+def test_baseline_like_shape_is_interictal_baseline():
+    # matches the observed seed1 slow-off run: 2 warm-up SILENT + 21 INTERICTAL + 1 isolated DENSE end burst
+    ws = [SIL] * 2 + [II] * 21 + [DEN]
+    assert classify_lifecycle(ws, _band())["label"] == "INTERICTAL_BASELINE"
+
+
+# ---- isolated interictal burst does NOT shatter the pre-ictal interictal run ----
+def test_isolated_pre_burst_still_recovers():
+    b = _band()
+    ws = [II] * 5 + [DEN] + [II] * 3 + [ICT] * 2 + [II] * 9   # a lone burst inside the pre-ictal interictal
+    r = classify_lifecycle(ws, b)
+    assert r["label"] == "RECOVERED_INTERICTAL"
+    assert r["pre_ms"] >= LC_THRESHOLDS["PRE_MS"]             # smoothing keeps the 9 s pre-ictal run intact
+
+
 # ---- L4 (load-bearing): full lifecycle -> recovered ----
 def test_L4_full_lifecycle_recovered():
     b = _band()
