@@ -465,11 +465,15 @@ class MZSlowVars:
         return norm
 
     def _capture(self, label):
-        """Copy ONLY z_E/m_E (E cells [:NE]) at the current step -> n_snapshots x NE (never n_steps x NE)."""
-        self.snapshots[label] = dict(
-            z_E=self.z[:self.NE].copy(), m_E=self.m[:self.NE].copy(),
-            step=int(self._step_i), captured_after_update=True,
-        )
+        """Copy ONLY z_E/m_E (E cells [:NE]) at the current step -> n_snapshots x NE (never n_steps x NE).
+        FCXR-LC1: also copy the E->E relay x_E and its persistence sensor y_E when the relay is active, so
+        D_X and regional (core/axis/off) x/y recruitment can be computed post-hoc from a few snapshots."""
+        snap = dict(z_E=self.z[:self.NE].copy(), m_E=self.m[:self.NE].copy(),
+                    step=int(self._step_i), captured_after_update=True)
+        if self.cfg.use_x:
+            snap["x_E"] = self.x_relay.copy()        # relay availability (length NE)
+            snap["y_E"] = self.y.copy()              # persistence sensor y_j (length NE)
+        self.snapshots[label] = snap
 
     @property
     def n_steps_run(self):

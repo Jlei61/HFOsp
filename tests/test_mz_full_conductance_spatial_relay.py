@@ -525,6 +525,26 @@ def test_lc1_C8_asym_deterministic_same_inputs():
     assert np.array_equal(x1, x2) and np.array_equal(t1, t2)
 
 
+def test_lc1_snapshot_captures_x_and_y_only_when_relay_on():
+    """FCXR-LC1: the z/m snapshot observer also copies x_E/y_E when use_x (for D_X + regional recruitment),
+    and does NOT add them for a z-only run."""
+    cfg = MZSlowVarsConfig(membrane_mode="full_conductance", E_E=58.0, c_E=1.0, v_match=18.0, e_gaba=0.0,
+                           use_x=True, tau_y=120.0, tau_x=1000.0, K_y=5.0, y_gate=0.0, hill_n=4, x_min=0.2)
+    mz = MZSlowVars(6, 18.0, cfg, NE=4, core_mask_E=np.zeros(4, bool), snapshot_steps={2: "a"})
+    spk = np.zeros(6, bool); spk[:4] = True
+    for _ in range(5):
+        mz.step(spk, None, DT)
+    s = mz.snapshots["a"]
+    assert s["x_E"].shape == (4,) and s["y_E"].shape == (4,)
+    assert np.all(s["x_E"] < 1.0) and np.all(s["y_E"] > 0.0)          # relay depleted + sensor loaded by step 2
+    z_only = MZSlowVars(6, 18.0, MZSlowVarsConfig(use_z=True, I_th_EI=5.0), NE=4,
+                        core_mask_E=np.zeros(4, bool), snapshot_steps={2: "a"})
+    for _ in range(5):
+        z_only.apply_currents(np.zeros(6), np.full(6, 10.0), None)
+        z_only.step(np.zeros(6, bool), None, DT)
+    assert "x_E" not in z_only.snapshots["a"] and "y_E" not in z_only.snapshots["a"]
+
+
 def test_lc1_C9_asym_x_bounded_unit_interval():
     """C9: x_relay stays in [x_min,1] under asymmetric depletion then recovery hammering."""
     mz = _mk_fc(use_x=True, tau_y=120.0, tau_x=1e9, x_min=0.2, y_gate=0.0, K_y=5.0, hill_n=4,
