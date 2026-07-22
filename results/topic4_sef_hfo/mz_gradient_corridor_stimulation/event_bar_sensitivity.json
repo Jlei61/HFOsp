@@ -1,0 +1,139 @@
+{
+  "caveat": "downsampled active_fraction (~3.1ms bins); counts approximate; definitive control = slow-off baseline",
+  "windows_ms": [
+    2000.0,
+    3000.0,
+    4000.0,
+    5000.0,
+    6000.0
+  ],
+  "cal_fracs": [
+    0.3,
+    0.5,
+    0.7
+  ],
+  "n_subject_seed": 11,
+  "grid": [
+    {
+      "window_ms": 2000.0,
+      "cal_frac": 0.3,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 2000.0,
+      "cal_frac": 0.5,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 2000.0,
+      "cal_frac": 0.7,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 5,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 3000.0,
+      "cal_frac": 0.3,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 3000.0,
+      "cal_frac": 0.5,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 3000.0,
+      "cal_frac": 0.7,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 4,
+      "median_pre": 6.0
+    },
+    {
+      "window_ms": 4000.0,
+      "cal_frac": 0.3,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 4000.0,
+      "cal_frac": 0.5,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 4000.0,
+      "cal_frac": 0.7,
+      "n_admitted": 9,
+      "n_total": 11,
+      "min_pre": 1,
+      "median_pre": 6.0
+    },
+    {
+      "window_ms": 5000.0,
+      "cal_frac": 0.3,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 5000.0,
+      "cal_frac": 0.5,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 5000.0,
+      "cal_frac": 0.7,
+      "n_admitted": 9,
+      "n_total": 11,
+      "min_pre": 1,
+      "median_pre": 6.0
+    },
+    {
+      "window_ms": 6000.0,
+      "cal_frac": 0.3,
+      "n_admitted": 11,
+      "n_total": 11,
+      "min_pre": 6,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 6000.0,
+      "cal_frac": 0.5,
+      "n_admitted": 10,
+      "n_total": 11,
+      "min_pre": 1,
+      "median_pre": 8.0
+    },
+    {
+      "window_ms": 6000.0,
+      "cal_frac": 0.7,
+      "n_admitted": 7,
+      "n_total": 11,
+      "min_pre": 1,
+      "median_pre": 4.0
+    }
+  ],
+  "all_admitted_across_grid": false
+}

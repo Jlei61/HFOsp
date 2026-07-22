@@ -1,0 +1,28 @@
+{
+  "contract": "mz-gradient-corridor-stim-1.0",
+  "generated_at": "2026-07-21T16:51:05.239242+00:00",
+  "input_root": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields",
+  "admitted_primary": [
+    "epilepsiae_1146",
+    "epilepsiae_590",
+    "epilepsiae_958",
+    "yuquan_zhaochenxi"
+  ],
+  "n_admitted_primary": 4,
+  "admitted_sensitivity": [],
+  "excluded": {
+    "epilepsiae_1084": "corridor_degenerate (core_sep 2.96mm <= 2*core_r 3.0mm)",
+    "epilepsiae_583": "only 1 adjacent same-shaft bipolar pair(s) among frozen contacts",
+    "epilepsiae_384": "no middle bipolar pair disjoint from both endpoints"
+  },
+  "cohort_go": true,
+  "git_sha": "f6f0e32",
+  "engine_shas": {
+    "kick_probe.py": "5faaedab37ab",
+    "params.py": "c2036d1e1548",
+    "connectivity.py": "5ad75ec5066b",
+    "connectivity_rot.py": "2aa442624fef",
+    "mz_slow_vars.py": "91068ef6920f",
+    "lfp.py": "7f079081de4e"
+  }
+}
