@@ -43,8 +43,12 @@ import run_topic4_mz_slowvars as OLD    # noqa: E402  build_core_masks, compute_
 import run_topic4_mz_fcxr as FCXR       # noqa: E402  _fc_cfg + scaffolding (flock/bless/run_id/io/mem/plan_workers)
 from kick_probe import simulate_kick    # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
-from src.topic4_mz_fcxr_dynamics import rolling_rate_upper  # noqa: E402
-from src.topic4_mz_fcxr_lifecycle import build_windows, classify_lifecycle, LC_THRESHOLDS  # noqa: E402
+from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
+    rolling_rate_upper, load_onset_depletion_pi, assert_field_substrate_aligned,
+)
+from src.topic4_mz_fcxr_lifecycle import (  # noqa: E402
+    build_windows, classify_lifecycle, depletion_coordinate, _smooth_isolated, LC_THRESHOLDS,
+)
 
 # ---- locked LC1 constants ----
 G_SAT = 21.6
@@ -53,6 +57,14 @@ LC_WIN_MS = 1000.0          # classifier analysis-window granularity (fine bout 
 LC_LOOKBACK_MS = 8000.0     # trailing window for the event-rate estimate (sparse-IED robust)
 SEEDS = (1, 3)
 OUT = os.path.join(FCXR.OUT_ROOT, "lifecycle_closure")
+D_Z_SNAP_MS = 100.0         # D_Z(t) phase-portrait snapshot cadence
+BOUNDED_MAX_HZ = 60.0       # end-of-run mean rate above this = clearly unbounded (soft flag; safety is `finite`)
+SNAP_ZA_FMT = os.path.join(ROOT, "results", "topic4_sef_hfo", "state_conditioned_susceptibility",
+                           "snapshots", "zA_q75_tz5000", "seed_{seed}.npz")   # p_i weights for D_Z
+Z_REGIMES = {   # existing calibration (results/topic4_sef_hfo/mz_slowvars/calibration.json); NOT invented
+    "q75": dict(I_th_EI=95.19851312666987, tau_z=5000.0),    # primary — mid depletion (zA_q75_tz5000)
+    "q50": dict(I_th_EI=1.6652801609959704, tau_z=10000.0),  # sensitivity — strong depletion (zA_q50_tz10000)
+}
 
 # ---- resource watchdog thresholds (§13.3; relative to the per-launcher swap baseline) ----
 SOFT_MEM_GB, HARD_MEM_GB = 64.0, 32.0
@@ -232,6 +244,104 @@ def cmd_baseline(args):
               f"-> {out}  ({wall}s, peak {contract['peak_rss_gb']}GB)", flush=True)
 
 
+# ----------------------------------------------------------------- E2 dynamic Z-only
+def _zonly_cfg(regime):
+    """Dynamic Z-only config for a calibration regime (X/M/phi off). q50 overrides the _fc_cfg-hardcoded I_th_EI."""
+    r = Z_REGIMES[regime]
+    cfg = _slowoff_cfg()
+    cfg.update(use_z=True, tau_z=float(r["tau_z"]), I_th_EI=float(r["I_th_EI"]))
+    return cfg
+
+
+def _load_baseline_contract(seed):
+    p = os.path.join(OUT, f"baseline_contract_seed{seed}.json")
+    if not os.path.exists(p):
+        raise SystemExit(f"missing baseline contract {p}; run `baseline --seed {seed} --confirm-run` first")
+    return json.load(open(p))
+
+
+def _reduce_run_windows(res, slow, S, dt, frozen_bar, band):
+    """Reduce a dynamic run to classifier windows using the SEED's frozen slow-off bar + baseline band."""
+    rate = np.asarray(res["rate_E"], float)
+    num = _numerical(S, res, slow, dt)
+    events, af, af_bin, floor, _ = OLD._events_from_res(res, dt, event_bar=frozen_bar)
+    ret = [e for e in events if e["returned"]]
+    wins = build_windows(rate, dt, np.asarray(af, float), float(af_bin), float(band["roll_hi"]), ret,
+                         float(band["win_ms"]), event_lookback_ms=float(band["event_lookback_ms"]),
+                         finite=num["finite"])
+    return wins, num, rate
+
+
+def cmd_zonly(args):
+    """E2: dynamic Z-only (X/M off, no kick). Does Z preserve interictal first, then self-drive into the
+    metastable dense-event region, bounded? Is D_Z(t) an event-locked staircase or a hard-threshold jump?"""
+    with FCXR._launcher_lock():
+        FCXR._assert_engine_blessed()
+        run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"zonly_seed{args.seed}_{args.regime}_T{int(args.T)}"))
+        swap_base = _launch_baseline(run_dir, f"zonly --seed {args.seed} --regime {args.regime} --T {args.T}")
+        _sentinel(run_dir, "RUNNING.json", phase="zonly", seed=args.seed, regime=args.regime, T=args.T)
+        state, info = _resource_state(swap_base)
+        if state == "hard":
+            _sentinel(run_dir, "ABORTED.json", reason="resource hard-stop before start", **info)
+            raise SystemExit(f"[zonly] resource hard-stop before start: {info}")
+        bc = _load_baseline_contract(args.seed)
+        band, frozen_bar = bc["band"], bc["frozen_event_bar"]
+        r = Z_REGIMES[args.regime]
+        print(f"[zonly] seed={args.seed} regime={args.regime} I_th_EI={r['I_th_EI']:.3f} tau_z={r['tau_z']:.0f} "
+              f"T={args.T} dt={DT_LC}; {info}", flush=True)
+        S = PP.build_substrate(args.seed)
+        pk = load_onset_depletion_pi(SNAP_ZA_FMT.format(seed=args.seed))
+        assert_field_substrate_aligned(pk, S)                 # STOP if the D_Z weight field is mis-registered
+        p_i = pk["p_i"]
+        snap = {int(round(t / DT_LC)): f"t{t}" for t in range(0, int(args.T), int(D_Z_SNAP_MS))}
+        t0 = time.time()
+        res, slow = _lc_run(S, _zonly_cfg(args.regime), args.T, seed=args.seed, snapshot_steps=snap)
+        wins, num, rate = _reduce_run_windows(res, slow, S, DT_LC, frozen_bar, band)
+        lc = classify_lifecycle(wins, band)
+        end_rate = float(np.mean(rate[-max(1, int(round(500.0 / DT_LC))):]))
+        z_mean_trace = np.asarray(slow.trace_z_mean, float)
+        del res
+        gc.collect()
+        # D_Z(t) phase-portrait coordinate from the z snapshots (p_i-weighted depletion)
+        snaps = sorted(slow.snapshots.values(), key=lambda s: s["step"])
+        DZ = np.array([[s["step"] * DT_LC, depletion_coordinate(s["z_E"], p_i)] for s in snaps], float)
+        dz = DZ[:, 1] if DZ.size else np.zeros(1)
+        ddz = np.diff(dz) if dz.size > 1 else np.zeros(1)
+        # onset = first window that leaves the interictal band (DENSE or ICTAL); pre = interictal preserved before it
+        regimes = lc["regimes"]
+        sm = _smooth_isolated(regimes)                        # ignore isolated baseline bursts -> SUSTAINED onset
+        onset_idx = next((i for i, rg in enumerate(sm) if rg in ("DENSE", "ICTAL")), None)
+        pre_interictal_ms = (onset_idx if onset_idx is not None else len(sm)) * band["win_ms"]
+        entered_sustained = lc["label"] not in ("INTERICTAL_BASELINE", "PERMANENT_SILENCE", "UNRESOLVED")
+        bounded = bool(num["finite"] and (not num["numerical_unsafe"]) and end_rate < BOUNDED_MAX_HZ)
+        wall = round(time.time() - t0, 1)
+        summary = dict(
+            seed=args.seed, regime=args.regime, I_th_EI=r["I_th_EI"], tau_z=r["tau_z"], T=args.T, dt=DT_LC,
+            wall_s=wall, peak_rss_gb=round(_self_rss_gb(), 2), numerical=num, lifecycle_label=lc["label"],
+            regimes=regimes, n_windows=len(regimes), entered_sustained_dense=entered_sustained,
+            onset_window_idx=onset_idx, pre_interictal_ms=pre_interictal_ms, end_rate_hz=end_rate, bounded=bounded,
+            D_Z_start=float(dz[0]), D_Z_end=float(dz[-1]), D_Z_max=float(dz.max()),
+            D_Z_max_step=float(np.max(np.abs(ddz))), D_Z_monotone=bool(np.all(ddz >= -1e-6)),
+            z_mean_start=float(z_mean_trace[0]) if z_mean_trace.size else float("nan"),
+            z_mean_end=float(z_mean_trace[-1]) if z_mean_trace.size else float("nan"),
+            band=band,
+        )
+        out = os.path.join(OUT, f"z_only_summary_seed{args.seed}_{args.regime}.json")
+        _atomic_json(out, summary)
+        rstride = max(1, int(np.ceil(rate.size / 4000)))
+        FCXR._write_npz(os.path.join(run_dir, "zonly_traces.npz"),
+                        rate_dt_ms=np.asarray([DT_LC * rstride], np.float32), rate_E=rate[::rstride].astype(np.float32),
+                        DZ_t_ms=DZ[:, 0].astype(np.float32), DZ=dz.astype(np.float32),
+                        z_mean=z_mean_trace[::max(1, int(np.ceil(z_mean_trace.size / 4000)))].astype(np.float32))
+        _sentinel(run_dir, "DONE.json", phase="zonly", seed=args.seed, regime=args.regime, label=lc["label"], out=out)
+        FCXR._resource_log(run_dir, "zonly_done", dict(wall_s=wall, label=lc["label"], bounded=bounded, **num))
+        print(f"[zonly] seed{args.seed} {args.regime}: label={lc['label']} entered_sustained={entered_sustained} "
+              f"pre_interictal={pre_interictal_ms:.0f}ms end_rate={end_rate:.1f}Hz bounded={bounded} "
+              f"D_Z {summary['D_Z_start']:.3f}->{summary['D_Z_end']:.3f} (max_step={summary['D_Z_max_step']:.3f}, "
+              f"monotone={summary['D_Z_monotone']}) z_mean {summary['z_mean_start']:.3f}->{summary['z_mean_end']:.3f} "
+              f"clip={num['clip_frac_max']:.3g} -> {out} ({wall}s, peak {summary['peak_rss_gb']}GB)", flush=True)
+
+
 # ----------------------------------------------------------------- smoke + dry-run
 def cmd_smoke(args):
     """One short continuous slow-off run: plumbing + timing (ms/1k-steps) + peak RSS. NOT a contract."""
@@ -281,12 +391,16 @@ def main(argv=None):
         pr.add_argument("--seed", type=int, default=1)
         pr.add_argument("--T", type=float, default=defT)
         pr.add_argument("--confirm-run", action="store_true", help="required to run any simulation")
+    z = sub.add_parser("zonly")
+    z.add_argument("--seed", type=int, default=1); z.add_argument("--T", type=float, default=24000.0)
+    z.add_argument("--regime", choices=["q75", "q50"], default="q75")
+    z.add_argument("--confirm-run", action="store_true", help="required to run any simulation")
     args = ap.parse_args(argv)
     if args.cmd == "dry-run":                                  # dry-run performs NO simulation -> no gate
         return cmd_dryrun(args)
     if not getattr(args, "confirm_run", False):
         raise SystemExit("REFUSING: simulations require --confirm-run")
-    {"smoke": cmd_smoke, "baseline": cmd_baseline}[args.cmd](args)
+    {"smoke": cmd_smoke, "baseline": cmd_baseline, "zonly": cmd_zonly}[args.cmd](args)
 
 
 if __name__ == "__main__":
