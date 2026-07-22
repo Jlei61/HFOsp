@@ -13,7 +13,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 
 from src.topic4_mz_fcxr_lifecycle import (  # noqa: E402
-    window_regime, classify_lifecycle, depletion_coordinate, LC_THRESHOLDS,
+    window_regime, classify_lifecycle, depletion_coordinate, build_windows, LC_THRESHOLDS,
 )
 
 
@@ -125,6 +125,23 @@ def test_insufficient_pre_ictal_is_unresolved():
     b = _band()
     ws = [II] * 3 + [ICT] * 2 + [II] * 9
     assert classify_lifecycle(ws, b)["label"] == "UNRESOLVED"
+
+
+# ---- run -> windows reducer (pure over synthetic rate + events) ----
+def test_build_windows_reducer():
+    dt, win, roll_hi, n = 1.0, 1000.0, 5.0, 10000
+    rate = np.ones(n)
+    rate[4000:6000] = 20.0                                   # windows 4,5 are sustained above the band
+    events = [dict(t_on=wi * 1000 + 100 + k * 150, peak_ext=0.15) for wi in range(10) for k in range(5)]
+    W = build_windows(rate, dt, roll_hi, events, win, roll_ms=300.0, start_ms=0.0)
+    assert len(W) == 10
+    assert W[4]["occ"] > 0.8 and W[5]["occ"] > 0.8          # high segment occupies the window
+    assert W[0]["occ"] < 0.2 and W[9]["occ"] < 0.2
+    assert abs(W[0]["event_rate_hz"] - 5.0) < 1e-9          # 5 events / 1 s
+    assert abs(W[0]["recruit_frac"] - 0.15) < 1e-9
+    b = _band(win_ms=1000.0, recruit_p90=0.10)
+    assert window_regime(W[0], b) == "INTERICTAL"
+    assert window_regime(W[4], b) == "ICTAL"
 
 
 # ---- slow-variable phase-portrait coordinate ----

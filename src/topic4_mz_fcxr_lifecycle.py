@@ -173,6 +173,44 @@ def classify_lifecycle(windows, band, *, runaway=False, T=LC_THRESHOLDS):
                          f"(< {T['POST_MS']:.0f}ms) -> no statistical return"])
 
 
+# ------------------------------------------------------------------ run -> ordered analysis windows (reducer)
+def build_windows(rate, dt_ms, roll_hi, events, win_ms, *, roll_ms=300.0, start_ms=0.0, finite=True):
+    """Reduce ONE continuous run to the ordered window list the classifier consumes. PURE over arrays so it
+    is testable without a simulation; the runner detects `events` with the SAME frozen slow-off bar used to
+    build the E1 baseline band (apples-to-apples).
+
+    Per window: occ = fraction of the roll_ms rolling-mean rate above the interictal band edge roll_hi;
+    event_rate_hz = events whose onset falls in the window / win_s; recruit_frac = mean event participation
+    (peak_ext) in the window (0 if none); numerical_unsafe = window rate non-finite (or the global finite flag).
+    events: list of dicts with 't_on' (ms) and 'peak_ext' (participation)."""
+    rate = np.asarray(rate, float)
+    if rate.size == 0:
+        return []
+    w = max(1, int(round(roll_ms / dt_ms)))
+    roll = np.convolve(rate, np.ones(w) / float(w), mode="same")
+    above = (roll > float(roll_hi)).astype(float)
+    n_per = max(1, int(round(win_ms / dt_ms)))
+    a0 = max(0, int(round(start_ms / dt_ms)))
+    ev_on = np.array([float(e["t_on"]) for e in events], float) if events else np.zeros(0)
+    ev_part = np.array([float(e.get("peak_ext", 0.0)) for e in events], float) if events else np.zeros(0)
+    windows = []
+    t = a0
+    while t + n_per <= rate.size:
+        seg = rate[t:t + n_per]
+        w0, w1 = t * dt_ms, (t + n_per) * dt_ms
+        in_win = (ev_on >= w0) & (ev_on < w1) if ev_on.size else np.zeros(0, bool)
+        n_ev = int(in_win.sum())
+        windows.append(dict(
+            occ=float(above[t:t + n_per].mean()),
+            event_rate_hz=n_ev / (win_ms / 1000.0),
+            recruit_frac=float(ev_part[in_win].mean()) if n_ev else 0.0,
+            numerical_unsafe=(not (finite and bool(np.all(np.isfinite(seg))))),
+            t0_ms=float(w0), t1_ms=float(w1), n_events=n_ev,
+        ))
+        t += n_per
+    return windows
+
+
 # ------------------------------------------------------------------ slow-variable phase-portrait coordinates
 def depletion_coordinate(v, p_weights):
     """Weighted mean depletion D = sum_i p_i (1 - v_i) / sum_i p_i, for a per-neuron slow variable v (z or x)
