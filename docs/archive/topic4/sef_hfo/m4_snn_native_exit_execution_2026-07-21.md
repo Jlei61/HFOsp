@@ -1,5 +1,22 @@
 # SNN-native M4 containment-to-exit lifecycle — execution log (2026-07-21)
 
+> ## 🔴 WRONG-SUBSTRATE — ARCHIVE-ONLY q_I SANDBOX (review 2026-07-22)
+> **This entire line ran on the OLD field-based `q_I + S_G + p/H` model** (`src/snn_engine/slow_field.py`,
+> `use_qI=True, use_gK=False`), **NOT the current locked `Z/M` per-neuron model** (`src/snn_engine/slow_vars.py`,
+> `use_z/use_m`; lockpoint `zA_q75_tz5000__mA0p001_tau500`, τ_Z=5000/τ_M=500/A_M=0.001). The 2026-07-21 spec
+> handed to this line explicitly defined the substrate as q_I+S_G (§5 line 120) and said z is "not used here"
+> (§3 E2); the agent followed the spec but **failed to surface that the task brief said "preserve Z/M slow
+> variables"** (CLAUDE.md §1 miss). **Every scientific conclusion below is q_I-M4-sandbox only and is NOT
+> validated on the current Z/M SNN** — the H "terminates", "no recovery attractor", t_form=1600, onset=2300,
+> the frozen `q_core×S_G×J_exit` atlas all describe the q_I sandbox. **Reusable = engineering + method** (Phase-0
+> crash-safe resume/provenance; formed-state detection; core/surround + kymograph + virtual-SEEG readouts;
+> frozen dual-IC atlas; termination/recovery classifiers) **and H as a CANDIDATE divisive slow-memory mechanism
+> to re-test on Z/M.** Note: `slow_vars.py` (Z/M) is per-neuron and has NO S_G / no divisive term, so "Z/M + S_G
+> + α_H H" is a NEW combination to build; the Z/M lines live in the peer MZ worktrees this line's spec listed
+> READ-ONLY. **Correct口径**: *the old q_I-M4 sandbox suggests a slow divisive memory MAY terminate its bounded
+> persistent state, but this is NOT validated on the current Z/M SNN; the recoverable Z/M lifecycle is UNSOLVED.*
+> Branch `codex/topic4-m4-snn-native-exit` is unmerged, unpushed, and did not touch any Z/M worktree.
+
 > **Status: 开环+对称退不出；不对称 slow-release = 待确认候选（GO 窄确认）.** Stage 0–2 done; P0（`d_sweep` 漏传 `tau_p_down`）
 > 已修 + 真·不对称重跑（`arms_asymfix`）。当前科学标签=**slow-release suppression–rebound bursting candidate**，非确证可恢复 lifecycle。
 > **候选参数匹配控制已证实电流压制普通 IED（34→15/12）→ 相当程度 prevention、选择性不足**（`arms_prevctl_eta*`）；能否终止**已成形**态由 established-state fork 判（running）。Verdict §8。
