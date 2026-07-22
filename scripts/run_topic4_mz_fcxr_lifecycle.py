@@ -44,7 +44,7 @@ import run_topic4_mz_fcxr as FCXR       # noqa: E402  _fc_cfg + scaffolding (flo
 from kick_probe import simulate_kick    # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
-    rolling_rate_upper, load_onset_depletion_pi, assert_field_substrate_aligned,
+    rolling_rate_upper, load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field,
 )
 from src.topic4_mz_fcxr_lifecycle import (  # noqa: E402
     build_windows, classify_lifecycle, depletion_coordinate, _smooth_isolated, LC_THRESHOLDS,
@@ -65,6 +65,9 @@ Z_REGIMES = {   # existing calibration (results/topic4_sef_hfo/mz_slowvars/calib
     "q75": dict(I_th_EI=95.19851312666987, tau_z=5000.0),    # primary — mid depletion (zA_q75_tz5000)
     "q50": dict(I_th_EI=1.6652801609959704, tau_z=10000.0),  # sensitivity — strong depletion (zA_q50_tz10000)
 }
+D_DENSE = 0.15              # frozen dense operating point (Stage-D metastable dense region D~=0.145-0.15)
+SENSOR_TAU_Y = 120.0       # persistence-sensor time constant (primary; E3 sensitivity 80/200)
+SENSOR_K_Y, SENSOR_HILL_N = 5.0, 4
 
 # ---- resource watchdog thresholds (§13.3; relative to the per-launcher swap baseline) ----
 SOFT_MEM_GB, HARD_MEM_GB = 64.0, 32.0
@@ -342,6 +345,104 @@ def cmd_zonly(args):
               f"clip={num['clip_frac_max']:.3g} -> {out} ({wall}s, peak {summary['peak_rss_gb']}GB)", flush=True)
 
 
+# ----------------------------------------------------------------- E3 X sensor separation
+def _region_masks(S):
+    """E-cell core / axis-band / off-axis masks (source-anchored), for regional y recruitment order."""
+    posE = np.asarray(S["posE"], float)[:S["NE"]]; src = np.asarray(S["src_xy"], float); axis = np.asarray(S["axis_unit"], float)
+    core = np.linalg.norm(posE - src, axis=1) <= PP.CORE_R
+    rel = posE - src; along = rel @ axis
+    perp = np.linalg.norm(rel - np.outer(along, axis), axis=1)
+    axis_band = (perp <= PP.CORE_R) & (~core)
+    return core, axis_band, (~core & ~axis_band)
+
+
+def _sensor_run(S, p_i, D, seed, T, tau_y):
+    """Frozen-Z run at coordinate D with the persistence sensor ACTIVE but the relay NEUTRAL (x_min=1 ->
+    x stays 1 -> connectivity unchanged, byte-identical firing to no-relay). Records only the y_j sensor
+    (peak trace + O(N_snap) regional means) -> is the sensor above baseline at the dense operating point?"""
+    cfg = _slowoff_cfg()
+    cfg.update(use_x=True, x_min=1.0, tau_y=float(tau_y), tau_x=1e9, K_y=SENSOR_K_Y, y_gate=0.0, hill_n=SENSOR_HILL_N)
+    cfg["z_frozen_E"] = frozen_z_field(p_i, D)                 # use_z stays False -> a frozen field is APPLIED
+    snap = {int(round(t / DT_LC)): f"t{t}" for t in range(0, int(T), int(D_Z_SNAP_MS))}
+    res, slow = _lc_run(S, cfg, T, seed=seed, snapshot_steps=snap)
+    num = _numerical(S, res, slow, DT_LC)
+    rate = np.asarray(res["rate_E"], float)
+    end_rate = float(np.mean(rate[-max(1, int(round(500.0 / DT_LC))):]))
+    ymax = np.asarray(slow.trace_y_max, float)
+    core, axm, offm = _region_masks(S)
+    snaps = sorted(slow.snapshots.values(), key=lambda s: s["step"])
+    tms = np.array([s["step"] * DT_LC for s in snaps], float)
+    yreg = lambda m: np.array([float(s["y_E"][m].mean()) for s in snaps], float)
+    yc, ya, yo = yreg(core), yreg(axm), yreg(offm)
+    del res
+    gc.collect()
+    return dict(numerical=num, end_rate=end_rate, ymax=ymax, tms=tms, y_core=yc, y_axis=ya, y_off=yo,
+                y_max_peak=float(ymax.max()) if ymax.size else 0.0,
+                y_max_q999=float(np.percentile(ymax, 99.9)) if ymax.size else 0.0)
+
+
+def cmd_sensor(args):
+    """E3: does the persistence sensor y_j separate the interictal workpoint (frozen D=0) from the dense
+    region (frozen D=D_dense)? x_min=1 keeps X neutral -> pure sensor calibration. y_gate = baseline y q99.9."""
+    with FCXR._launcher_lock():
+        FCXR._assert_engine_blessed()
+        run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"sensor_seed{args.seed}_ty{int(args.tau_y)}_T{int(args.T)}"))
+        swap_base = _launch_baseline(run_dir, f"sensor --seed {args.seed} --tau-y {args.tau_y} --T {args.T}")
+        _sentinel(run_dir, "RUNNING.json", phase="sensor", seed=args.seed, tau_y=args.tau_y, T=args.T)
+        state, info = _resource_state(swap_base)
+        if state == "hard":
+            _sentinel(run_dir, "ABORTED.json", reason="resource hard-stop before start", **info)
+            raise SystemExit(f"[sensor] resource hard-stop before start: {info}")
+        print(f"[sensor] seed={args.seed} tau_y={args.tau_y} D_dense={D_DENSE} T={args.T}; {info}", flush=True)
+        S = PP.build_substrate(args.seed)
+        pk = load_onset_depletion_pi(SNAP_ZA_FMT.format(seed=args.seed))
+        assert_field_substrate_aligned(pk, S)
+        p_i = pk["p_i"]
+        t0 = time.time()
+        r0 = _sensor_run(S, p_i, 0.0, args.seed, args.T, args.tau_y)          # interictal workpoint
+        rd = _sensor_run(S, p_i, D_DENSE, args.seed, args.T, args.tau_y)      # metastable dense region
+        y_gate = r0["y_max_q999"]                                             # baseline y q99.9
+        dense_occ = float(np.mean(rd["ymax"] > y_gate)) if rd["ymax"].size else 0.0
+        base_occ = float(np.mean(r0["ymax"] > y_gate)) if r0["ymax"].size else 0.0
+        # recruitment order at the dense operating point: first snapshot each region's mean y crosses half the
+        # dense core peak (core should cross first, then axis, then off) -> interpretable core->axis->off wave.
+        thr = 0.5 * float(np.max(rd["y_core"])) if rd["y_core"].size else 0.0
+
+        def _cross(y):
+            idx = next((i for i, v in enumerate(y) if v > thr), None)
+            return float(rd["tms"][idx]) if idx is not None else None
+        tc, ta, to = _cross(rd["y_core"]), _cross(rd["y_axis"]), _cross(rd["y_off"])
+        order_ok = bool(tc is not None and (ta is None or tc <= ta) and (ta is None or to is None or ta <= to))
+        # Principled separation: baseline almost never crosses its own q99.9 gate; the dense state crosses it
+        # MUCH more often and reaches higher. (A hard dense_occ>0.5 is wrong for a metastable dense region that
+        # is only intermittently active -> y crosses during dense bursts, not continuously.)
+        occ_ratio = dense_occ / base_occ if base_occ > 0 else float("inf")
+        separated = bool(base_occ < 0.02 and dense_occ > max(0.05, 5.0 * base_occ) and rd["y_max_peak"] > 1.3 * y_gate)
+        wall = round(time.time() - t0, 1)
+        summary = dict(
+            seed=args.seed, tau_y=args.tau_y, D_dense=D_DENSE, T=args.T, dt=DT_LC, wall_s=wall,
+            peak_rss_gb=round(_self_rss_gb(), 2), y_gate_q999=y_gate,
+            dense_occ_above_gate=dense_occ, base_occ_above_gate=base_occ, occ_ratio=occ_ratio,
+            interictal_y_peak=r0["y_max_peak"], dense_y_peak=rd["y_max_peak"],
+            interictal_end_rate=r0["end_rate"], dense_end_rate=rd["end_rate"],
+            interictal_numerical=r0["numerical"], dense_numerical=rd["numerical"],
+            recruit_cross_ms=dict(core=tc, axis=ta, off=to), recruit_order_core_first=order_ok,
+            separated=separated,
+        )
+        out = os.path.join(OUT, f"sensor_separation_seed{args.seed}_ty{int(args.tau_y)}.json")
+        _atomic_json(out, summary)
+        FCXR._write_npz(os.path.join(run_dir, "sensor_traces.npz"),
+                        tms=rd["tms"].astype(np.float32), dense_y_core=rd["y_core"].astype(np.float32),
+                        dense_y_axis=rd["y_axis"].astype(np.float32), dense_y_off=rd["y_off"].astype(np.float32),
+                        base_y_core=r0["y_core"].astype(np.float32))
+        _sentinel(run_dir, "DONE.json", phase="sensor", seed=args.seed, separated=separated, out=out)
+        FCXR._resource_log(run_dir, "sensor_done", dict(wall_s=wall, separated=separated))
+        print(f"[sensor] seed{args.seed} ty{args.tau_y}: y_gate={y_gate:.2f} dense_occ_above={dense_occ:.3f} "
+              f"base_occ_above={base_occ:.3f} y_peak base={r0['y_max_peak']:.1f} dense={rd['y_max_peak']:.1f} "
+              f"recruit(core,axis,off)={tc},{ta},{to} order_ok={order_ok} SEPARATED={separated} "
+              f"-> {out} ({wall}s)", flush=True)
+
+
 # ----------------------------------------------------------------- smoke + dry-run
 def cmd_smoke(args):
     """One short continuous slow-off run: plumbing + timing (ms/1k-steps) + peak RSS. NOT a contract."""
@@ -395,12 +496,16 @@ def main(argv=None):
     z.add_argument("--seed", type=int, default=1); z.add_argument("--T", type=float, default=24000.0)
     z.add_argument("--regime", choices=["q75", "q50"], default="q75")
     z.add_argument("--confirm-run", action="store_true", help="required to run any simulation")
+    sen = sub.add_parser("sensor")
+    sen.add_argument("--seed", type=int, default=1); sen.add_argument("--T", type=float, default=8000.0)
+    sen.add_argument("--tau-y", dest="tau_y", type=float, default=SENSOR_TAU_Y)
+    sen.add_argument("--confirm-run", action="store_true", help="required to run any simulation")
     args = ap.parse_args(argv)
     if args.cmd == "dry-run":                                  # dry-run performs NO simulation -> no gate
         return cmd_dryrun(args)
     if not getattr(args, "confirm_run", False):
         raise SystemExit("REFUSING: simulations require --confirm-run")
-    {"smoke": cmd_smoke, "baseline": cmd_baseline, "zonly": cmd_zonly}[args.cmd](args)
+    {"smoke": cmd_smoke, "baseline": cmd_baseline, "zonly": cmd_zonly, "sensor": cmd_sensor}[args.cmd](args)
 
 
 if __name__ == "__main__":
