@@ -382,3 +382,158 @@ def test_engine_blessed_fcxr():
     kp = os.path.join(ROOT, "src", "snn_engine", "kick_probe.py")
     cur = hashlib.sha256(open(kp, "rb").read()).hexdigest()
     assert rec["src/snn_engine/kick_probe.py"] == cur           # FAILS until re-blessed after the edit
+
+
+# ============================== (C) FCXR-LC1 asymmetric relay kinetics (tau_x_down / tau_x_up) =============
+# Contract clauses C1-C9 (docs/superpowers/plans/2026-07-22-topic4-mz-fcxr-lc1.md §2.1). Off-by-default
+# asymmetric relay availability kinetics in mz_slow_vars.step(): depletion (x_inf<x) relaxes on tau_x_down,
+# recovery (x_inf>=x) on tau_x_up. Both None -> byte-parity with the existing single-tau_x path. The engine
+# is NOT touched (kick_probe.py stays blessed); only the non-blessed mz_slow_vars plugin gains the branch.
+
+def _ref_relay_step(y, x, spkE, dt, *, tau_y, tau_x, x_min, y_gate, K_y, n):
+    """Independent reference for one step() relay update at a SINGLE tau, matching the engine order:
+    y decays exp(-dt/tau_y) then jumps 1000/tau_y per E spike; x relaxes toward x_inf(y)."""
+    y = y * np.exp(-dt / tau_y)
+    y = y.copy(); y[spkE] += 1000.0 / tau_y
+    u = np.maximum(y - y_gate, 0.0); un = u ** n
+    x_inf = 1.0 - (1.0 - x_min) * (un / (K_y ** n + un))
+    x = x + (x_inf - x) * (1.0 - np.exp(-dt / tau_x))
+    return y, x
+
+
+def test_lc1_C1_asym_off_is_symmetric_byte_parity():
+    """C1: tau_x_down/up both None -> step() x-update == the single-tau_x reference (default path unchanged)."""
+    mz = _mk_fc(use_x=True, tau_y=120.0, tau_x=300.0, x_min=0.2, y_gate=0.0, K_y=5.0, hill_n=4)
+    y = np.zeros(mz.NE); x = mz.x_relay.copy()
+    spkE = np.ones(mz.NE, bool); spk = np.zeros(mz.N, bool); spk[:mz.NE] = True
+    for _ in range(40):
+        mz.step(spk, None, DT)
+        y, x = _ref_relay_step(y, x, spkE, DT, tau_y=120.0, tau_x=300.0, x_min=0.2, y_gate=0.0, K_y=5.0, n=4)
+    np.testing.assert_allclose(mz.x_relay, x, atol=1e-12)
+
+
+def test_lc1_C2_depletion_uses_tau_down():
+    """C2: while x_inf<x (sustained firing depletes), the relay relaxes on tau_x_down, NOT tau_x_up."""
+    td, tu = 200.0, 5000.0
+    mz = _mk_fc(use_x=True, tau_y=120.0, tau_x=1e9, x_min=0.2, y_gate=0.0, K_y=5.0, hill_n=4,
+                tau_x_down=td, tau_x_up=tu)
+    y = np.zeros(mz.NE); xd = mz.x_relay.copy(); xu = mz.x_relay.copy()
+    spkE = np.ones(mz.NE, bool); spk = np.zeros(mz.N, bool); spk[:mz.NE] = True
+    for _ in range(60):
+        mz.step(spk, None, DT)
+        y2, xd = _ref_relay_step(y, xd, spkE, DT, tau_y=120.0, tau_x=td, x_min=0.2, y_gate=0.0, K_y=5.0, n=4)
+        _,  xu = _ref_relay_step(y, xu, spkE, DT, tau_y=120.0, tau_x=tu, x_min=0.2, y_gate=0.0, K_y=5.0, n=4)
+        y = y2
+    np.testing.assert_allclose(mz.x_relay, xd, atol=1e-12)           # matches tau_down reference
+    assert not np.allclose(mz.x_relay, xu, atol=1e-4)                # and is NOT the tau_up trajectory
+
+
+def test_lc1_C3_recovery_uses_tau_up():
+    """C3: while x_inf>=x (quiet -> recovery toward 1), the relay relaxes on tau_x_up, NOT tau_x_down."""
+    td, tu = 200.0, 5000.0
+    mz = _mk_fc(use_x=True, tau_y=120.0, tau_x=1e9, x_min=0.2, y_gate=0.0, K_y=5.0, hill_n=4,
+                tau_x_down=td, tau_x_up=tu)
+    mz.x_relay[:] = 0.3
+    y = np.zeros(mz.NE); xu = np.full(mz.NE, 0.3); xd = np.full(mz.NE, 0.3)
+    spkE = np.zeros(mz.NE, bool); spk = np.zeros(mz.N, bool)         # no spikes -> y=0 -> x_inf=1 -> recovery
+    for _ in range(60):
+        mz.step(spk, None, DT)
+        y2, xu = _ref_relay_step(y, xu, spkE, DT, tau_y=120.0, tau_x=tu, x_min=0.2, y_gate=0.0, K_y=5.0, n=4)
+        _,  xd = _ref_relay_step(y, xd, spkE, DT, tau_y=120.0, tau_x=td, x_min=0.2, y_gate=0.0, K_y=5.0, n=4)
+        y = y2
+    np.testing.assert_allclose(mz.x_relay, xu, atol=1e-12)           # matches tau_up reference
+    assert not np.allclose(mz.x_relay, xd, atol=1e-4)
+
+
+def test_lc1_C4_causal_send_snapshot_preserved_under_asym():
+    """C4: ee_relay_send = x_j(t-) snapshot happens BEFORE the (now asymmetric) y/x update -- unchanged order."""
+    mz = _mk_fc(use_x=True, tau_y=120.0, tau_x=1e9, x_min=0.0, y_gate=0.0, K_y=5.0, hill_n=4,
+                tau_x_down=100.0, tau_x_up=100.0)
+    mz.x_relay[:] = np.array([0.9, 0.8, 0.7, 0.6])
+    pre = mz.x_relay.copy()
+    spk = np.zeros(mz.N, bool); spk[0] = spk[1] = True
+    mz.step(spk, None, DT)
+    np.testing.assert_array_equal(mz.ee_relay_send, pre)            # send scale is the PRE-update availability
+    assert not np.array_equal(mz.x_relay, pre)                      # x itself advanced (post-update)
+
+
+def _run_relay_taus(tau_x_down=None, tau_x_up=None, *, y_gate=5.0, seed=SEED):
+    """Engine-level relay run with optional asymmetric taus (mirrors _run_fc's config)."""
+    p, net, NE, NI = _net(); N = NE + NI
+    vth = np.full(N, 18.0); vth[:5] = 16.0
+    cfg = MZSlowVarsConfig(
+        membrane_mode="full_conductance", E_E=58.0, c_E=1.0, v_match=18.0, e_gaba=0.0, e_k=0.0,
+        use_z=False, use_m=False, gaba_gain=1.125, max_total_conductance=99.0, fail_on_clip=False,
+        use_x=True, tau_y=120.0, tau_x=1000.0, x_min=0.0, y_gate=y_gate, K_y=5.0, hill_n=4,
+        tau_x_down=tau_x_down, tau_x_up=tau_x_up,
+    )
+    slow = MZSlowVars(N, 18.0, cfg, NE=NE, core_mask_E=np.zeros(NE, bool))
+    net["rng"] = np.random.default_rng(seed)
+    res = simulate_kick(p, net, KICK_BOOST=4.0, slow=slow, kick_center=np.array([3., 3.]),
+                        r_kick=0.5, t_kick=50.0, V_th_per_neuron=vth)
+    return res, slow
+
+
+def test_lc1_C5_asym_equal_taus_is_symmetric_byte_identity():
+    """C5: asym with tau_x_down==tau_x_up==tau_x is byte-identical to the symmetric relay AND perturbs no
+    other pathway (identical E raster AND identical I rate -> the change scales only outgoing E->E)."""
+    sym, _ = _run_relay_taus(None, None, y_gate=5.0)
+    asym, _ = _run_relay_taus(1000.0, 1000.0, y_gate=5.0)
+    assert np.array_equal(sym["E_spk_bool"], asym["E_spk_bool"])
+    assert np.array_equal(sym["rate_E"], asym["rate_E"])
+    assert np.array_equal(sym["rate_I"], asym["rate_I"])
+
+
+def test_lc1_C6_mutex_with_m1_std_preserved_under_asym():
+    """C6: use_x (asymmetric) + ee_std_u>0 still raises -- the blessed relay<->M1 STD mutex is intact."""
+    p, net, NE, NI = _net(); N = NE + NI
+    vth = np.full(N, 18.0)
+    cfg = MZSlowVarsConfig(membrane_mode="full_conductance", use_x=True, tau_y=120.0, tau_x=1000.0,
+                           K_y=5.0, y_gate=5.0, e_gaba=0.0, v_match=18.0,
+                           tau_x_down=1.0, tau_x_up=5000.0)
+    slow = MZSlowVars(N, 18.0, cfg, NE=NE, core_mask_E=np.zeros(NE, bool))
+    net["rng"] = np.random.default_rng(SEED)
+    with pytest.raises(ValueError, match="mutually exclusive"):
+        simulate_kick(p, net, KICK_BOOST=0.0, slow=slow, t_kick=1e9, V_th_per_neuron=vth,
+                      ee_std_u=0.2, ee_std_tau_ms=200.0)
+
+
+def test_lc1_C7_invalid_asym_timescales_fail_fast():
+    """C7: non-positive OR partially-specified asymmetric taus fail fast at construction."""
+    base = dict(use_x=True, tau_y=120.0, tau_x=1000.0, x_min=0.0, y_gate=0.0, K_y=5.0, hill_n=4)
+    with pytest.raises(ValueError):
+        _mk_fc(tau_x_down=-1.0, tau_x_up=100.0, **base)             # negative down
+    with pytest.raises(ValueError):
+        _mk_fc(tau_x_down=100.0, tau_x_up=0.0, **base)             # zero up
+    with pytest.raises(ValueError):
+        _mk_fc(tau_x_down=100.0, tau_x_up=None, **base)            # partial (up missing)
+    with pytest.raises(ValueError):
+        _mk_fc(tau_x_down=None, tau_x_up=100.0, **base)            # partial (down missing)
+
+
+def test_lc1_C8_asym_deterministic_same_inputs():
+    """C8: identical config + spike stream -> identical x_relay trajectory (exercises BOTH where-branches)."""
+    def run():
+        mz = _mk_fc(use_x=True, tau_y=120.0, tau_x=1e9, x_min=0.2, y_gate=0.0, K_y=5.0, hill_n=4,
+                    tau_x_down=150.0, tau_x_up=4000.0)
+        rng = np.random.default_rng(0)
+        for _ in range(200):
+            spk = np.zeros(mz.N, bool); spk[:mz.NE] = rng.random(mz.NE) < 0.3
+            mz.step(spk, None, DT)
+        return mz.x_relay.copy(), np.array(mz.trace_x_relay_mean)
+    x1, t1 = run(); x2, t2 = run()
+    assert np.array_equal(x1, x2) and np.array_equal(t1, t2)
+
+
+def test_lc1_C9_asym_x_bounded_unit_interval():
+    """C9: x_relay stays in [x_min,1] under asymmetric depletion then recovery hammering."""
+    mz = _mk_fc(use_x=True, tau_y=120.0, tau_x=1e9, x_min=0.2, y_gate=0.0, K_y=5.0, hill_n=4,
+                tau_x_down=50.0, tau_x_up=50.0)
+    spk = np.zeros(mz.N, bool); spk[:mz.NE] = True
+    for _ in range(300):
+        mz.step(spk, None, DT)
+        assert np.all((mz.x_relay >= 0.2 - 1e-12) & (mz.x_relay <= 1.0 + 1e-12))
+    quiet = np.zeros(mz.N, bool)
+    for _ in range(300):
+        mz.step(quiet, None, DT)
+        assert np.all((mz.x_relay >= 0.2 - 1e-12) & (mz.x_relay <= 1.0 + 1e-12))
