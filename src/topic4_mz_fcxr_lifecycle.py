@@ -174,38 +174,47 @@ def classify_lifecycle(windows, band, *, runaway=False, T=LC_THRESHOLDS):
 
 
 # ------------------------------------------------------------------ run -> ordered analysis windows (reducer)
-def build_windows(rate, dt_ms, roll_hi, events, win_ms, *, roll_ms=300.0, start_ms=0.0, finite=True):
+def build_windows(rate, dt_ms, af, af_bin_ms, roll_hi, events, win_ms, *,
+                  roll_ms=300.0, start_ms=0.0, event_lookback_ms=None, finite=True):
     """Reduce ONE continuous run to the ordered window list the classifier consumes. PURE over arrays so it
     is testable without a simulation; the runner detects `events` with the SAME frozen slow-off bar used to
     build the E1 baseline band (apples-to-apples).
 
-    Per window: occ = fraction of the roll_ms rolling-mean rate above the interictal band edge roll_hi;
-    event_rate_hz = events whose onset falls in the window / win_s; recruit_frac = mean event participation
-    (peak_ext) in the window (0 if none); numerical_unsafe = window rate non-finite (or the global finite flag).
-    events: list of dicts with 't_on' (ms) and 'peak_ext' (participation)."""
-    rate = np.asarray(rate, float)
+    Per window (win_ms wide):
+      occ           = fraction of the roll_ms rolling-mean rate above the interictal band edge roll_hi
+                      (sustained-duration signal, fine time resolution).
+      recruit_frac  = PEAK active-fraction in the window (spatial recruitment / spread; `af` is the codebase
+                      participation measure). Compared against the baseline P90 to flag ictal-like spread.
+      event_rate_hz = returning-event onsets in a TRAILING window of event_lookback_ms (default win_ms),
+                      per second. The trailing estimate keeps sparse-but-normal interictal from reading as
+                      SILENT just because a single fine window happened to contain no discrete event.
+      numerical_unsafe = window rate non-finite (or the global finite flag).
+    events: list of dicts with 't_on' (ms). af: per-af_bin active fraction; af_bin_ms its bin width."""
+    rate = np.asarray(rate, float); af = np.asarray(af, float)
     if rate.size == 0:
         return []
+    lookback = float(win_ms if event_lookback_ms is None else event_lookback_ms)
     w = max(1, int(round(roll_ms / dt_ms)))
     roll = np.convolve(rate, np.ones(w) / float(w), mode="same")
     above = (roll > float(roll_hi)).astype(float)
     n_per = max(1, int(round(win_ms / dt_ms)))
     a0 = max(0, int(round(start_ms / dt_ms)))
     ev_on = np.array([float(e["t_on"]) for e in events], float) if events else np.zeros(0)
-    ev_part = np.array([float(e.get("peak_ext", 0.0)) for e in events], float) if events else np.zeros(0)
     windows = []
     t = a0
     while t + n_per <= rate.size:
         seg = rate[t:t + n_per]
         w0, w1 = t * dt_ms, (t + n_per) * dt_ms
-        in_win = (ev_on >= w0) & (ev_on < w1) if ev_on.size else np.zeros(0, bool)
-        n_ev = int(in_win.sum())
+        af0, af1 = int(round(w0 / af_bin_ms)), int(round(w1 / af_bin_ms))
+        seg_af = af[af0:af1]
+        lb0 = w1 - lookback
+        n_ev = int(((ev_on >= lb0) & (ev_on < w1)).sum()) if ev_on.size else 0
         windows.append(dict(
             occ=float(above[t:t + n_per].mean()),
-            event_rate_hz=n_ev / (win_ms / 1000.0),
-            recruit_frac=float(ev_part[in_win].mean()) if n_ev else 0.0,
+            recruit_frac=float(seg_af.max()) if seg_af.size else 0.0,
+            event_rate_hz=n_ev / (lookback / 1000.0),
             numerical_unsafe=(not (finite and bool(np.all(np.isfinite(seg))))),
-            t0_ms=float(w0), t1_ms=float(w1), n_events=n_ev,
+            t0_ms=float(w0), t1_ms=float(w1), n_events_lookback=n_ev,
         ))
         t += n_per
     return windows
