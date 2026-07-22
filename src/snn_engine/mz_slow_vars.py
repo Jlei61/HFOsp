@@ -64,7 +64,9 @@ class MZSlowVarsConfig:
     rec_sat_g: float = 0.0         # FCXR-RC1 Stage C: >0 -> recurrent conductance smooth-saturates g_sat*tanh(g_raw/g_sat)
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
     tau_y: float = 120.0           # ms  persistence sensor time constant
-    tau_x: float = 1000.0          # ms  relay availability time constant
+    tau_x: float = 1000.0          # ms  relay availability time constant (symmetric; used when tau_x_down/up are None)
+    tau_x_down: "float | None" = None  # FCXR-LC1: asymmetric relay depletion tau (x_inf<x); None+None -> symmetric tau_x
+    tau_x_up: "float | None" = None    # FCXR-LC1: asymmetric relay recovery tau (x_inf>=x)
     x_min: float = 0.0             # relay availability floor
     y_gate: float = 0.0            # Hz  sensor gate (locked from slow-off Q99.9)
     K_y: float = 5.0               # Hz  Hill half-activation above the gate
@@ -368,7 +370,13 @@ class MZSlowVars:
             un = u ** c.hill_n
             hill = un / (c.K_y ** c.hill_n + un)
             x_inf = 1.0 - (1.0 - c.x_min) * hill
-            self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))
+            if c.tau_x_down is None and c.tau_x_up is None:
+                self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))   # symmetric (byte-parity)
+            else:
+                # FCXR-LC1 asymmetric: deplete (x_inf<x) on tau_x_down, recover (x_inf>=x) on tau_x_up.
+                # Equal taus reduce EXACTLY to the symmetric relaxation above (per-element factor identical).
+                tau_sel = np.where(x_inf < self.x_relay, c.tau_x_down, c.tau_x_up)
+                self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / tau_sel))
         if c.use_z:
             # z_inf = H(I_th_EI - I_I): 1 iff I_I < I_th_EI (strict); I_I >= I_th_EI -> 0 (deplete)
             z_inf_E = (self._z_sensor_last_E < c.I_th_EI).astype(float)
@@ -525,3 +533,10 @@ class MZSlowVars:
                 raise ValueError("use_x requires hill_n>=1")
             if not np.isfinite(c.y_gate):
                 raise ValueError("y_gate must be finite")
+            # FCXR-LC1 asymmetric relay kinetics: both-or-neither + positive (design invariant
+            # tau_x_down < tau_z <= tau_x_up is a RUN-parameter check enforced by the runner, not here).
+            if (c.tau_x_down is not None) or (c.tau_x_up is not None):
+                if c.tau_x_down is None or c.tau_x_up is None:
+                    raise ValueError("asymmetric relay kinetics require BOTH tau_x_down and tau_x_up (or neither)")
+                if c.tau_x_down <= 0.0 or c.tau_x_up <= 0.0:
+                    raise ValueError("tau_x_down and tau_x_up must be > 0 (asymmetric relay kinetics)")
