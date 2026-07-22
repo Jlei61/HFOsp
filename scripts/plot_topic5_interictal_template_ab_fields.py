@@ -250,6 +250,7 @@ def draw_interictal_rank_field_panel(
     ax, payload: Mapping[str, object], template: str, *,
     compact: bool = False, panel_title: str | None = None,
     contact_outline_lw: float | None = None, contact_size: float | None = None,
+    show_template_tag: bool = True,
 ):
     """Draw one locked TA/TB rank-field panel using the shared renderer."""
     template = str(template).upper()
@@ -271,12 +272,13 @@ def draw_interictal_rank_field_panel(
     )
     if compact:
         ax.title.set(color="#222222", fontsize=9)
-        ax.text(
-            0.035, 0.965, template, transform=ax.transAxes,
-            ha="left", va="top", fontsize=9, fontweight="bold", color=color,
-            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.8},
-            zorder=8,
-        )
+        if show_template_tag:
+            ax.text(
+                0.035, 0.965, template, transform=ax.transAxes,
+                ha="left", va="top", fontsize=9, fontweight="bold", color=color,
+                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.78, "pad": 0.8},
+                zorder=8,
+            )
     else:
         ax.title.set(color=color, fontsize=FS_PANEL_TITLE, fontweight="bold")
     return ax

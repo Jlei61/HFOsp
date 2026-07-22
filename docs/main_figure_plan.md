@@ -110,6 +110,39 @@ Fig2-C 是 raw-EEG-derived envelope timing 在既有冻结间期轴上的 repres
 
 Fig2-E 候选支持“间期 TA/TB 模板在患者特异电极几何中形成可视化的空间传播场”。它是 representative subject visualization，不是 cohort 统计，也不证明与发作早期能量一致；后者由 Fig3 的 field-concordance 分析独立回答。
 
+### Fig2-F: shared-axis 队列的 TA–TB field 反向性（最后一行候选）
+
+**目的**：在 Fig2 前面已经展示定轴、单事件传播和代表患者 TA/TB 场之后，用一个不做关系分层的
+cohort 行回答：已有 shared axis 的患者中，TA 与 TB 连续 field 是否呈系统性的反向组织，并且 cohort
+中位反向程度是否比全触点随机打乱更极端。
+
+**当前候选版本**：
+
+- 输出目录：`results/paper-ready-figure/fig2_shared_field_reversal/figures/`。
+- 正式候选：`fig2_shared_field_reversal_last_row.{png,pdf}`，尺寸固定为 7.15 × 3.05 inch，供 Figure 2
+  最后一行横跨整版使用。
+- 复现入口：`scripts/paper_figures/plot_fig2_shared_field_reversal_row.py`。
+- 主分母：已有 `shared_a/shared_b` 且 `geometry_2d_supported=true` 的12名患者；不按 signed axis cosine、
+  same/reversed 标签或 strict-stability 分组。
+- 左侧锁定匿名投稿代号 E15、E14、E13、Y9 四个负相关且二维几何易读的案例，复用统一间期场 renderer 成对
+  绘制 TA/TB Viridis rank field，只作形态例子。E958 因触点过密、图形瘦长而排除，E1146 因已在
+  Figure 2 前文出现而不重复。右上显示全部12名患者的 signed `r`、零线、中位数和 IQR；当前8/12
+  为负，中位 `r=-0.353`。
+- `r` 直接由冻结 artifact 的 contact-evaluated `shared_a.template_field` 与
+  `shared_b.template_field` 计算；左侧 6 mm field map 是统一 display renderer，不能用图像 pixel 重算 `r`。
+  四个示例统一裁到以各自触点范围为中心的 `50 × 60 mm` display-only 窗口，裁切不改变轴、触点、rank、
+  kernel 或统计；白色触点圈使用细线，避免遮盖连续 field。
+- 右下固定显示 primary channel shuffle 的层级 cohort-median-shift null：TB earliness 与 support 在全部
+  触点间联合打乱、在冻结 shared plane 上重建 TB field。当前 `Δmedian=-0.339`，lower-tail
+  `P_perm=0.01840`。
+
+**当前口径**：
+
+该行支持“shared-axis cohort 的 TA/TB field 中位相关比全触点随机化更负”。左侧显示案例是
+outcome-selected morphology，不能冒充独立验证；右侧全12人分布才是 cohort 视图。逐患者 observed 与
+各自 channel-null 中位数的配对 Wilcoxon 为 `P=0.08813`，within-shaft cohort sensitivity 为
+`P=0.87836`，因此不能泛化成所有空间 null 均显著或多数单患者均显著。
+
 ### Fig3-A: 发作原始波形与标准频带谱（正式版，LOCKED 2026-07-18）
 
 **目的**：作为 Fig3 的正式起始 panel，用一个真实 seizure 建立读者可见的 signal context：clinical onset 前后的 raw SEEG、同一代表通道的 baseline-normalized TFR，以及四档 band-power trajectory。它解释后续 field readout 消费的原始信号与 baseline 关系，但本身不是 cohort 统计或机制证据。

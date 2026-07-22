@@ -136,6 +136,32 @@ docs/fig2c_interictal_event_envelope_field_spec.md
 Do not copy the renderer or relabel this template-conditioned representative figure as template-free
 or cohort-level evidence.
 
+## Fig2-F Shared-field Reversal Last Row
+
+Formal entry point:
+
+```bash
+python scripts/paper_figures/plot_fig2_shared_field_reversal_row.py
+```
+
+Default output:
+
+```text
+results/paper-ready-figure/fig2_shared_field_reversal/figures/
+```
+
+This is a full-width Figure 2 last-row candidate. It includes all 12 patients with a frozen shared
+axis and supported 2-D geometry, with no same/reversed/different or strict-stability strata. The left
+block reuses the canonical interictal Viridis renderer for the locked manuscript IDs E15/E14/E13/Y9 negative-field
+examples, selected for legible 2-D geometry; E958 is excluded because its contacts are dense/tall and
+E1146 is not repeated after its earlier Figure 2 use. Patient IDs are the only column titles, physical-mm
+ticks remain visible, and one vertical normalized-rank colorbar spans both TA/TB rows. The upper-right
+strip contains all 12 patient-level signed r values plus
+median/IQR; the lower-right density reproduces the hierarchical full-contact-shuffle cohort-median
+null (`P_perm=0.01840`). Exact contact-evaluated fields, not display-grid pixels, define both observed
+r and the null. The extreme examples, complete cohort distribution and corresponding null must remain
+together so morphology selection cannot masquerade as prevalence or inference.
+
 ## Interictal Template A/B Direction Axis
 
 Formal entry point:

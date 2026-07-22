@@ -29,6 +29,11 @@
   raw-envelope timing cross-check，不是 template-free/cohort/traveling-wave 证明。
 - `fig2e_interictal_template_fields/` — **Fig2-E paper-ready candidate**：患者特异 TA/TB 静态 rank
   field；与 Fig2-C 共用冻结轴/平面，但不使用事件包络时间轴。
+- `fig2_shared_field_reversal/` — **Fig2-F 最后一行 paper-ready candidate**：12名 shared-axis +
+  有效二维几何患者的 TA–TB contact-field signed `r`；左侧复用统一 renderer 展示匿名投稿代号 E15/E14/E13/Y9
+  四个几何易读的负相关 TA/TB Viridis 场，右上为完整12人分布，右下为全触点 channel-shuffle
+  cohort-median null。
+  当前8/12为负、中位 `r=-0.353`，`Δmedian=-0.339`，`P_perm=0.01840`；不做关系分组。
 - `fig_interictal_ab_direction_axis/` — **间期空间方向候选图**：A/B 独立 earliness gradient、过门后的共享线、
   subject-native 脑表面 early→late 箭头与描述性解剖 overlay。主触点池与 expanded-contact sensitivity 并存；
   脚本 `scripts/paper_figures/plot_interictal_ab_direction_axis.py`。
