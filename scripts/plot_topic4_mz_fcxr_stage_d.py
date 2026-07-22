@@ -1,11 +1,13 @@
 """Plot the FCXR Stage D frozen fast-branch map (parameter-scan DIAGNOSTIC, not the 4-column mechanism figure).
 
 Two panels, each one independent question (figure discipline):
-  A) persistence: longest contiguous high activity vs the failure coordinate D -> is there a persistent
-     high branch anywhere? (threshold = 1000ms >> the ~12ms interictal event)
-  B) excitability: end-of-run activity vs D -> does failure raise activity, and does saturation keep it bounded?
+  A) densification: whole-window above-band occupancy vs D -> does the elevated event train densify CONTINUOUSLY
+     into the labelled "finite-high" region, or jump discretely? Main = median across the 3 ICs + min-max band
+     (shows IC disagreement); faint = end-window occupancy (auxiliary persistence read); seed3 D=0.15 overlaid.
+  B) boundedness: end-of-run activity vs D -> saturation keeps rate bounded (never runaway), and the metastable
+     dropouts (rate -> 0 for the IC that decays) are seed/IC-dependent.
 
-Usage: python scripts/plot_topic4_mz_fcxr_stage_d.py [branch_map.json]  (default: newest grid run)
+Usage: python scripts/plot_topic4_mz_fcxr_stage_d.py [branch_map.json]  (default: assembled workpoint map)
 """
 from __future__ import annotations
 
@@ -28,11 +30,6 @@ UNSAT_TRANSITION_D = 0.087   # sharp cliff on the UNSATURATED slow-fast-transiti
 SLOTS = [("low", None, "#4c72b0", "o"),        # (slot, kick-index into j["kicks"] or None, color, marker)
          ("high1", 0, "#dd8452", "s"),
          ("high2", 1, "#c44e52", "^")]
-SHORT = {"INTERICTAL_WORKPOINT": "interictal", "ELEVATED_EVENT_TRAIN": "elevated",
-         "METASTABLE_TRANSIENT": "metastable", "REFRACTORY_CEILING": "ceiling",
-         "FINITE_HIGH_FIXED": "finite-high", "FINITE_HIGH_ORBIT": "finite-orbit", "FINITE_HIGH": "finite-high",
-         "BISTABLE": "bistable", "NUMERICAL_UNSAFE": "unsafe", "UNRESOLVED": "unresolved",
-         "INCOMPLETE": "incomplete", "LOW_ONLY": "low"}
 
 
 def _latest_branch_map():
@@ -48,70 +45,72 @@ def _latest_branch_map():
 def main():
     path = sys.argv[1] if len(sys.argv) > 1 else _latest_branch_map()
     j = json.load(open(path))
-    is_smoke = bool(j.get("smoke_only"))                       # workpoint branch_map excludes smoke by construction
-    rows = j.get("cells", j.get("base_rows", []))
+    is_smoke = bool(j.get("smoke_only"))
+    rows = j.get("cells", [])
     D_grid = j.get("D_grid") or sorted(set(r["D"] for r in rows))
-    per_D = {p["D"]: p for p in j["per_D"]}
-    HIGH_OCC = float(j["thresholds"]["HIGH_OCC"])
     band = float(j.get("band_hz", 0.0))
     kicks = j.get("kicks", [3.0, 12.0])
+    HIGH_OCC = float(j["thresholds"]["HIGH_OCC"])
+    seed3 = j.get("seed3_d015", {})
+
+    def pick(D, slot):                                   # per (D, slot) take the longest observation window
+        best = None
+        for r in rows:
+            if r["D"] == D and r["slot"] == slot and (best is None or r.get("T_ms", 0) > best.get("T_ms", 0)):
+                best = r
+        return best
 
     def _slabel(ki):
         return "native low (no kick)" if ki is None else f"kicked high (kick {kicks[ki]:g})"
 
-    def series(slot, field):
-        # per (D, slot) pick the longest observation window (T2 if present, else T1)
-        best = {}
-        for r in rows:
-            if r["slot"] != slot:
-                continue
-            if r["D"] not in best or r.get("T_ms", 0) > best[r["D"]].get("T_ms", 0):
-                best[r["D"]] = r
-        return np.array([best.get(D, {}).get(field, np.nan) for D in D_grid], float)
-
     fig, (axA, axB) = plt.subplots(1, 2, figsize=(12.5, 4.9))
 
-    # Panel A: persistence -- fraction of the trailing window whose rolling-mean rate is ABOVE the interictal
-    # band (a new high branch stays above; interictal + a decaying transient fall below)
-    for slot, ki, c, m in SLOTS:
-        axA.plot(D_grid, series(slot, "roll_end_occ"), m + "-", color=c, label=_slabel(ki), ms=7, lw=1.6)
-    axA.set_ylim(-0.03, 1.08)
-    axA.axhline(HIGH_OCC, ls="--", color="k", lw=1.2)
-    axA.text(D_grid[-1], HIGH_OCC, f"high-branch threshold (occupancy {HIGH_OCC:.2f})", fontsize=9,
-             ha="right", va="bottom")
-    axA.axvline(UNSAT_TRANSITION_D, ls=":", color="0.5", lw=1.2)
-    axA.text(UNSAT_TRANSITION_D, 0.60, " unsaturated\n runaway onset\n (D≈0.087)", fontsize=8, color="0.4", va="center")
-    axA.set_xlabel("failure coordinate  D  (frozen mean depletion)")
-    axA.set_ylabel(f"end-window occupancy above interictal band ({band:.1f} Hz)")
-    axA.set_title("A. Persistence — still above the interictal band at end?")
-    axA.legend(loc="upper left", fontsize=8, framealpha=0.9)
+    # ---- Panel A: whole-window above-band occupancy -- median + IC min-max band (continuous ramp vs jump) ----
+    occ = {D: [pick(D, s)["roll_occ"] for s in ("low", "high1", "high2") if pick(D, s)] for D in D_grid}
+    endo = {D: [pick(D, s)["roll_end_occ"] for s in ("low", "high1", "high2") if pick(D, s)] for D in D_grid}
+    med = np.array([np.median(occ[D]) if occ[D] else np.nan for D in D_grid])
+    lo = np.array([np.min(occ[D]) if occ[D] else np.nan for D in D_grid])
+    hi = np.array([np.max(occ[D]) if occ[D] else np.nan for D in D_grid])
+    endm = np.array([np.mean(endo[D]) if endo[D] else np.nan for D in D_grid])
 
-    # Panel B: end-of-run activity level vs D
+    axA.fill_between(D_grid, lo, hi, color="#4c72b0", alpha=0.16, label="IC spread (min–max)")
+    axA.plot(D_grid, med, "o-", color="#2a4d8f", lw=1.9, ms=6, label="median occupancy (3 ICs, whole 8 s)")
+    axA.plot(D_grid, endm, ":", color="0.55", lw=1.3, label="end-window occupancy (aux)")
+    if seed3:
+        ys = [v["roll_occ"] for v in seed3.values()]
+        axA.plot([0.15] * len(ys), ys, "D", mfc="none", mec="#c44e52", mew=1.7, ms=9,
+                 label="seed3 D=0.15 (per IC)")
+    axA.axhline(HIGH_OCC, ls="--", color="k", lw=1.0)
+    axA.text(D_grid[0], HIGH_OCC + 0.015,
+             f"operational threshold ({HIGH_OCC:.1f}) — not a dynamical breakpoint", fontsize=8, va="bottom")
+    axA.axvline(UNSAT_TRANSITION_D, ls=":", color="0.6", lw=1.1)
+    axA.text(UNSAT_TRANSITION_D + 0.001, 0.93, "unsat. runaway\nonset (D≈0.087)", fontsize=7.5, color="0.45", va="top")
+    axA.set_ylim(-0.03, 1.05)
+    axA.set_xlabel("failure coordinate  D  (frozen mean depletion)")
+    axA.set_ylabel(f"fraction of window above interictal band ({band:.1f} Hz)")
+    axA.set_title("A. Densification — continuous ramp, not a discrete jump")
+    axA.legend(loc="upper left", fontsize=7.6, framealpha=0.9)
+
+    # ---- Panel B: end-of-run rate -- bounded (no runaway) + seed/IC-dependent metastable dropouts ----
     for slot, ki, c, m in SLOTS:
-        axB.plot(D_grid, series(slot, "end_rate_hz"), m + "-", color=c, label=_slabel(ki), ms=7, lw=1.6)
-    axB.axvline(UNSAT_TRANSITION_D, ls=":", color="0.5", lw=1.2)
+        y = np.array([(pick(D, slot) or {}).get("end_rate_hz", np.nan) for D in D_grid], float)
+        axB.plot(D_grid, y, m + "-", color=c, label=_slabel(ki), ms=6, lw=1.5)
+    if seed3:
+        ys = [v["end_rate_hz"] for v in seed3.values()]
+        axB.plot([0.15] * len(ys), ys, "D", mfc="none", mec="0.25", mew=1.6, ms=9, label="seed3 D=0.15 (per IC)")
+    axB.axvline(UNSAT_TRANSITION_D, ls=":", color="0.6", lw=1.1)
     axB.set_xlabel("failure coordinate  D  (frozen mean depletion)")
     axB.set_ylabel("end-of-run mean firing rate  (Hz)")
-    axB.set_title("B. Excitability — activity level (bounded)")
-    axB.legend(loc="upper left", fontsize=8, framealpha=0.9)
+    axB.set_title("B. Boundedness — capped ~10–12 Hz, no runaway")
+    axB.legend(loc="upper left", fontsize=7.6, framealpha=0.9)
 
-    # per-D verdict labels inside panel A's upper region (short forms; avoids x-ticks + title)
-    for D in D_grid:
-        lab = per_D.get(D, {}).get("D_label", "?")
-        axA.text(D, 0.86, SHORT.get(lab, lab.lower()), rotation=90, fontsize=6.5, ha="center", va="center", color="0.45")
-
-    verdict = j.get("verdict", "")
-    short = ("no persistent high branch — near-transition is an elevated event train, rest interictal"
-             if verdict.startswith("NO high") else
-             ("no persistent high branch — bounded metastable transients near the transition"
-              if verdict.startswith("NO persistent") else verdict[:90]))
-    fig.suptitle(f"FCXR-RC1 frozen fast-branch map (seed {j['seed']}, dt={j['dt']}, workpoint classifier)  —  {short}",
-                 fontsize=11)
+    fig.suptitle("FCXR-RC1 frozen fast-branch map (seed1, dt=0.05) — no robust independent high branch",
+                 fontsize=11.5)
     fig.text(0.5, 0.005, "parameter-scan diagnostic — not the 4-column mechanism figure", ha="center",
              fontsize=7.5, color="0.5")
-    fig.tight_layout(rect=(0, 0.04, 1, 0.96))
+    fig.tight_layout(rect=(0, 0.04, 1, 0.95))
     os.makedirs(OUT_DIR, exist_ok=True)
-    stem = "_SMOKE_frozen_branch_map_DO_NOT_USE" if is_smoke else "frozen_branch_map"   # never canonicalize a smoke run
+    stem = "_SMOKE_frozen_branch_map_DO_NOT_USE" if is_smoke else "frozen_branch_map"
     for ext in ("png", "pdf"):
         fig.savefig(os.path.join(OUT_DIR, f"{stem}.{ext}"), dpi=150)
     tag = "SMOKE (T1<HIGH_MS) — NOT canonical" if is_smoke else "canonical"

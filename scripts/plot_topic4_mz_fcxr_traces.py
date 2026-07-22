@@ -37,6 +37,10 @@ def main():
     cells = [c for c in cells if os.path.exists(os.path.join(run_dir, "per_cell", f"{c}_trace.npz"))]
     if not cells:
         raise SystemExit(f"no trace npz for {DEFAULT_CELLS} in {run_dir}/per_cell")
+    # name the output by the run's seed so seed1 and seed3 land in DISTINCT files (never overwrite each other)
+    base = os.path.basename(run_dir)
+    seed_tag = "seed3" if "seed3" in base else ("seed1" if "seed1" in base else None)
+    stem = f"{seed_tag}_d015_traces" if seed_tag else "landmark_traces"
 
     fig, axes = plt.subplots(len(cells), 2, figsize=(13, 2.6 * len(cells)), squeeze=False)
     for i, label in enumerate(cells):
@@ -68,8 +72,8 @@ def main():
                  fontsize=11)
     fig.tight_layout(rect=(0, 0, 1, 0.97))
     os.makedirs(OUT_DIR, exist_ok=True)
-    fig.savefig(os.path.join(OUT_DIR, "landmark_traces.png"), dpi=150)
-    print(f"wrote {OUT_DIR}/landmark_traces.png  ({len(cells)} cells from {os.path.basename(run_dir)})")
+    fig.savefig(os.path.join(OUT_DIR, f"{stem}.png"), dpi=150)
+    print(f"wrote {OUT_DIR}/{stem}.png  ({len(cells)} cells from {os.path.basename(run_dir)})")
 
 
 if __name__ == "__main__":
