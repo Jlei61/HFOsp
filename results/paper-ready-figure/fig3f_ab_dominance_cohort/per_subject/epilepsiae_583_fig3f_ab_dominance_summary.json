@@ -1,0 +1,168 @@
+{
+  "subject": "epilepsiae_583",
+  "status": "ok",
+  "cohort_source": "results/topic5_ictal_recruitment/template_axis_field/cohort_summary.json",
+  "n_requested_seizures": 22,
+  "n_successful_seizures": 3,
+  "coverage_fraction": 0.13636363636363635,
+  "seizure_drops": [
+    {
+      "seizure_idx": 3,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 4,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 5,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 6,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 7,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 8,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 9,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 10,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 11,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 12,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 13,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 14,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 15,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 16,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 17,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 18,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 19,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 20,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    },
+    {
+      "seizure_idx": 21,
+      "reason": "RuntimeError: epilepsiae_583: Nyquist 128 <= band_hi 150"
+    }
+  ],
+  "n_joint": 7,
+  "joint_contact_names": [
+    "TLA2",
+    "TLA3",
+    "TLB4",
+    "TLB7",
+    "TBA2",
+    "TBB3",
+    "TBC3"
+  ],
+  "geometry_2d_supported": true,
+  "strict_2d": true,
+  "axis_relation": "reversed",
+  "axis_cosine": -0.9132377257262088,
+  "rank_contrast_rho_AB": -0.3214285714285715,
+  "rank_contrast_tier": "oblique",
+  "shaft_qc": {
+    "n_contacts": 7,
+    "n_shafts": 5,
+    "shaft_sizes": {
+      "TBA": 1,
+      "TBB": 1,
+      "TBC": 1,
+      "TLA": 2,
+      "TLB": 2
+    },
+    "n_multi_contact_shafts": 2,
+    "n_contacts_shuffled": 4,
+    "fraction_contacts_shuffled": 0.5714285714285714,
+    "n_singleton_contacts": 3,
+    "testable": false,
+    "low_dof": true
+  },
+  "primary": {
+    "eligible": true,
+    "subject_locked": false,
+    "n_valid_seizures": 3,
+    "polar_far": 0.11056101117875117,
+    "polar_near": 0.18713455655057296,
+    "delta": 0.07657354537182179,
+    "null_p95": 0.16972055416332987,
+    "p": 0.2837162837162837
+  },
+  "within_shaft_sensitivity": {
+    "eligible": false,
+    "subject_locked": false,
+    "n_valid_seizures": 0,
+    "polar_far": null,
+    "polar_near": null,
+    "delta": null,
+    "null_p95": null,
+    "p": null
+  },
+  "event_class_counts": {
+    "selection": 1,
+    "switch": 0,
+    "persistent": 0,
+    "none": 2
+  },
+  "gate_nperm": 1000,
+  "subject_null_nperm": 1000,
+  "seed": 0,
+  "subject_seed": 2804731075,
+  "ranges_sec": {
+    "far_pre": [
+      -120.0,
+      -60.0
+    ],
+    "near_onset": [
+      -30.0,
+      10.0
+    ]
+  },
+  "algorithm_version": "fig3f_full17_fixed_ab_contrast_v2",
+  "permutation_coupling": "per_seizure_fixed_spatial_mapping_across_66_windows_v1",
+  "field_fingerprint_sha256": "5ddfbcd1da4ca266c4786e083d72d7cd05e51e43579aaadd4fa2902ed2296c3e",
+  "caveats": [
+    "Primary C_AB is an ungated relative A/B template contrast and is defined for all own-field 2-D subjects.",
+    "Only a reversed A/B axis supports source/sink reversal wording; same/different relations remain relative template contrast.",
+    "The within-shaft axis-present result is a sensitivity analysis, not the full-cohort inclusion rule.",
+    "Near-onset polarization does not by itself prove a literal A-to-B temporal switch."
+  ]
+}

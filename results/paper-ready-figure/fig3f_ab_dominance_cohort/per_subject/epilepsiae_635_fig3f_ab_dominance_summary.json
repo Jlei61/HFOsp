@@ -1,0 +1,88 @@
+{
+  "subject": "epilepsiae_635",
+  "status": "ok",
+  "cohort_source": "results/topic5_ictal_recruitment/template_axis_field/cohort_summary.json",
+  "n_requested_seizures": 17,
+  "n_successful_seizures": 17,
+  "coverage_fraction": 1.0,
+  "seizure_drops": [],
+  "n_joint": 7,
+  "joint_contact_names": [
+    "HL1",
+    "HL7",
+    "HL9",
+    "HL10",
+    "HL12",
+    "HL13",
+    "HRB1"
+  ],
+  "geometry_2d_supported": true,
+  "strict_2d": false,
+  "axis_relation": "different",
+  "axis_cosine": -0.3987633952823885,
+  "rank_contrast_rho_AB": -0.4412030439583958,
+  "rank_contrast_tier": "oblique",
+  "shaft_qc": {
+    "n_contacts": 7,
+    "n_shafts": 2,
+    "shaft_sizes": {
+      "HL": 6,
+      "HRB": 1
+    },
+    "n_multi_contact_shafts": 1,
+    "n_contacts_shuffled": 6,
+    "fraction_contacts_shuffled": 0.8571428571428571,
+    "n_singleton_contacts": 1,
+    "testable": false,
+    "low_dof": true
+  },
+  "primary": {
+    "eligible": true,
+    "subject_locked": false,
+    "n_valid_seizures": 17,
+    "polar_far": 0.18397413293358558,
+    "polar_near": 0.247232211872154,
+    "delta": 0.06325807893856841,
+    "null_p95": 0.11407749745414952,
+    "p": 0.23476523476523475
+  },
+  "within_shaft_sensitivity": {
+    "eligible": false,
+    "subject_locked": false,
+    "n_valid_seizures": 0,
+    "polar_far": null,
+    "polar_near": null,
+    "delta": null,
+    "null_p95": null,
+    "p": null
+  },
+  "event_class_counts": {
+    "selection": 9,
+    "switch": 0,
+    "persistent": 1,
+    "none": 7
+  },
+  "gate_nperm": 1000,
+  "subject_null_nperm": 1000,
+  "seed": 0,
+  "subject_seed": 125883244,
+  "ranges_sec": {
+    "far_pre": [
+      -120.0,
+      -60.0
+    ],
+    "near_onset": [
+      -30.0,
+      10.0
+    ]
+  },
+  "algorithm_version": "fig3f_full17_fixed_ab_contrast_v2",
+  "permutation_coupling": "per_seizure_fixed_spatial_mapping_across_66_windows_v1",
+  "field_fingerprint_sha256": "fbcca1022d5ec56c997134893b8508170c8732bb259a008fb8dbded767b7d462",
+  "caveats": [
+    "Primary C_AB is an ungated relative A/B template contrast and is defined for all own-field 2-D subjects.",
+    "Only a reversed A/B axis supports source/sink reversal wording; same/different relations remain relative template contrast.",
+    "The within-shaft axis-present result is a sensitivity analysis, not the full-cohort inclusion rule.",
+    "Near-onset polarization does not by itself prove a literal A-to-B temporal switch."
+  ]
+}
