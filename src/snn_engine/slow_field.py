@@ -147,6 +147,10 @@ class SpatialSlowFieldConfig:
     tau_H: float = 5000.0      # ms, H build/decay time (SLOW; must outlast the q_I-refill so containment holds)
     H_init: float = 0.0        # initial H (parity requires 0)
     H_max: float = 1.0         # ceiling (<Phi(p)> in [0,1] -> H in [0,1])
+    H_sensor: str = "global"   # H build drive: 'global' = spatial-mean Phi(p) (broad q_I state; DEFAULT -> the
+                               # existing byte-parity path); 'active' = 90th-pct of Phi(p) = active-focus intensity,
+                               # NOT diluted by inactive cortex (needed for a spatially-localized Z/M bursting focus,
+                               # where the global mean starves H -- Z/M migration 2026-07-22)
     # ---- Z/M per-neuron slow variables (ported byte-identical from mz_slow_vars.py; Z/M migration 2026-07-22).
     # Per-E-cell z_i (inhibitory efficacy: tau_z dz/dt = H(I_th_EI - I_I^E) - z; effective E inhibition = z_i*I_I)
     # and m_i (spike-frequency adaptation: dm/dt = -m/tau_adp + spikes; current eta_m*m_i subtracted). Both act on
@@ -234,6 +238,8 @@ class SpatialSlowFieldConfig:
                 raise ValueError(f"tau_H must be > 0, got {self.tau_H}")
             if self.alpha_H < 0.0:
                 raise ValueError(f"alpha_H must be >= 0, got {self.alpha_H}")
+            if self.H_sensor not in ("global", "active"):
+                raise ValueError(f"H_sensor must be 'global' or 'active', got {self.H_sensor!r}")
         # ---- Z/M per-neuron slow variables (ported from mz_slow_vars.py) ----
         if self.use_z and self.tau_z <= 0.0:
             raise ValueError(f"tau_z must be > 0 when use_z, got {self.tau_z}")
@@ -517,7 +523,12 @@ class SpatialSlowField:
         if cfg.use_H:                                              # §Phase-3: tau_H dH/dt = <Phi(p)> - H
             phi = (self.p if cfg.p50_r <= 0.0                      # linear Phi, or Hill (same Phi as the actuator)
                    else self.p ** cfg.n_r / (cfg.p50_r ** cfg.n_r + self.p ** cfg.n_r))
-            self.H += dt * (float(phi.mean()) - self.H) / cfg.tau_H
+            if cfg.H_sensor == "active":                          # active-focus mean: mean Phi(p) over cells within
+                pmax = float(phi.max())                           # 20% of the peak -> tracks a localized focus's
+                phi_drive = float(phi[phi > 0.2 * pmax].mean()) if pmax > 0.0 else 0.0  # intensity, NOT grid-diluted
+            else:                                                # (reduces to the mean for a broad/uniform state)
+                phi_drive = float(phi.mean())                    # global spatial mean (byte-parity path)
+            self.H += dt * (phi_drive - self.H) / cfg.tau_H
             self.H = float(np.clip(self.H, 0.0, cfg.H_max))
             self.trace_H.append(self.H)
         if cfg.use_A:                                               # M4-3A load -> shunt

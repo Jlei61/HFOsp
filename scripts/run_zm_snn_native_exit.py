@@ -71,17 +71,18 @@ def _calibrate_I_th_EI(S, T_ms=1500.0, q=75.0, settle_frac=1.0 / 3.0):
 
 
 def _zm_cfg(I_th_EI, *, use_SG=False, alpha_G=0.0, use_H=False, alpha_H=0.0, tau_H=6000.0,
-            use_persist=False, tau_p=5000.0, tau_p_down=None):
+            H_sensor="active", use_persist=False, tau_p=5000.0, tau_p_down=None):
     """Locked Z/M base + optional S_G divisive containment + H slow memory. q_I/g_K OFF (use_qI=False
     -> q_I==1 -> z*q_I*I_I == z*I_I). H rides S_G's recurrent-divisive term (needs use_SG) and its p
-    sensor (needs use_persist, eta_r=0 -> sensor only, no subtractive current)."""
+    sensor (needs use_persist, eta_r=0 -> sensor only, no subtractive current). H_sensor='active' =
+    active-focus intensity (the Z/M bursting focus is localized -> the global spatial mean starves H)."""
     return SpatialSlowFieldConfig(
         use_qI=False, use_gK=False,
         use_z=True, use_m=True, tau_z=TAU_Z, I_th_EI=float(I_th_EI), tau_adp=TAU_ADP, eta_m=ETA_M,
         use_SG=use_SG, alpha_G=alpha_G, r0_psi=0.0, r50_psi=M4.R50_PSI, n_psi=M4.N_PSI,
         p_pool=M4.P_POOL, tau_mu=M4.TAU_MU, tau_S=M4.TAU_S, S_max=M4.S_MAX,
         use_persist=use_persist, tau_p=tau_p, tau_p_down=tau_p_down, sigma_p=1.5, eta_r=0.0,
-        use_H=use_H, alpha_H=alpha_H, tau_H=tau_H)
+        use_H=use_H, alpha_H=alpha_H, tau_H=tau_H, H_sensor=H_sensor)
 
 
 def _core_mask_E(S):
@@ -141,8 +142,8 @@ def _run_arm(S, label, cfg, T_ms, early_stop=True, es_thresh_hz=120.0):
 ARMS = {
     "bare":  dict(),                                                        # Z/M only (no containment)
     "sg":    dict(use_SG=True, alpha_G=16.0),                               # + divisive containment pool
-    "sgh":   dict(use_SG=True, alpha_G=16.0, use_H=True, alpha_H=16.0,      # + slow memory H (rides p sensor)
-                  tau_H=6000.0, use_persist=True),
+    "sgh":   dict(use_SG=True, alpha_G=16.0, use_H=True, alpha_H=16.0,      # + slow memory H (active-focus sensor)
+                  tau_H=6000.0, H_sensor="active", use_persist=True),
 }
 
 

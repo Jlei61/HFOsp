@@ -82,3 +82,37 @@ def test_engine_byte_parity_zm_matches_canonical_mz_and_engages():
     # non-trivial: z/m actually changed the dynamics vs the plain substrate
     assert res_sf["E_spk_bool"].sum() > 0
     assert not np.array_equal(res_sf["E_spk_bool"], res_base["E_spk_bool"]), "z+m had no effect (not engaged)"
+
+
+def test_H_active_sensor_builds_on_localized_focus_while_global_starves():
+    """Z/M migration fix: with a spatially-LOCALIZED persistence focus (the Z/M bursting focus is core-
+    localized on the L=20 sheet), H_sensor='active' (mean Phi over cells >20% of peak) builds H, while
+    'global' (spatial mean) is diluted by inactive cortex and starves. Exercises the real use_H branch:
+    use_persist=False freezes p at the injected focus, so H integrates the sensor of a fixed field."""
+    N, NE = 200, 160
+    rng = np.random.default_rng(0)
+    posE = rng.random((NE, 2)) * 20.0; posI = rng.random((N - NE, 2)) * 20.0
+
+    def build(sensor):
+        c = SpatialSlowFieldConfig(use_qI=False, use_gK=False, use_SG=True, alpha_G=16.0,
+                                   use_persist=False, use_H=True, alpha_H=16.0, tau_H=100.0, H_sensor=sensor)
+        c.validate()
+        return SpatialSlowField(N, 18.0, posE, posI, 20.0, cfg=c)
+
+    Hs = {}
+    for sensor in ("global", "active"):
+        sf = build(sensor)
+        sf.p[:] = 0.0; sf.p[:3, :3] = 0.9                 # localized focus (~1% of the n_grid lattice)
+        for _ in range(1000):                             # p frozen (use_persist=False) -> H integrates the sensor
+            sf.step(np.zeros(N, bool), None, 1.0)
+        Hs[sensor] = sf.H
+    assert Hs["active"] > 0.5 and Hs["global"] < 0.05, f"active must build, global must starve: {Hs}"
+
+
+def test_H_sensor_invalid_raises():
+    c = SpatialSlowFieldConfig(use_qI=False, use_gK=False, use_SG=True, use_H=True, H_sensor="bogus")
+    try:
+        c.validate()
+    except ValueError as e:
+        assert "H_sensor" in str(e); return
+    raise AssertionError("invalid H_sensor must raise")
