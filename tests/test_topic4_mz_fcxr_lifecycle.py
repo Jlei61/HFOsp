@@ -127,6 +127,28 @@ def test_insufficient_pre_ictal_is_unresolved():
     assert classify_lifecycle(ws, b)["label"] == "UNRESOLVED"
 
 
+# ---- runner CLI gates (--confirm-run required; dry-run runs no simulation) ----
+RUNNER = os.path.join(ROOT, "scripts", "run_topic4_mz_fcxr_lifecycle.py")
+
+
+def test_confirm_run_gate_required():
+    import subprocess
+    env = {**os.environ, "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1"}
+    r = subprocess.run([sys.executable, RUNNER, "smoke", "--seed", "1", "--T", "100"],
+                       capture_output=True, text=True, cwd=ROOT, env=env, timeout=180)
+    assert r.returncode != 0
+    assert "REFUSING" in (r.stdout + r.stderr)
+
+
+def test_dry_run_needs_no_confirm_and_runs_no_sim():
+    import subprocess
+    env = {**os.environ, "OMP_NUM_THREADS": "1", "OPENBLAS_NUM_THREADS": "1"}
+    r = subprocess.run([sys.executable, RUNNER, "dry-run", "--T", "24000", "--workers", "1"],
+                       capture_output=True, text=True, cwd=ROOT, env=env, timeout=180)
+    assert r.returncode == 0
+    assert "dry-run" in r.stdout and "raster" in r.stdout
+
+
 # ---- run -> windows reducer (pure over synthetic rate + events) ----
 def test_build_windows_reducer():
     dt, win, roll_hi, n = 1.0, 1000.0, 5.0, 10000
