@@ -147,6 +147,17 @@ class SpatialSlowFieldConfig:
     tau_H: float = 5000.0      # ms, H build/decay time (SLOW; must outlast the q_I-refill so containment holds)
     H_init: float = 0.0        # initial H (parity requires 0)
     H_max: float = 1.0         # ceiling (<Phi(p)> in [0,1] -> H in [0,1])
+    # ---- Z/M per-neuron slow variables (ported byte-identical from mz_slow_vars.py; Z/M migration 2026-07-22).
+    # Per-E-cell z_i (inhibitory efficacy: tau_z dz/dt = H(I_th_EI - I_I^E) - z; effective E inhibition = z_i*I_I)
+    # and m_i (spike-frequency adaptation: dm/dt = -m/tau_adp + spikes; current eta_m*m_i subtracted). Both act on
+    # E CELLS ONLY (z=1, m=0 on I cells). Both OFF -> byte-parity with slow=None. For the pure Z/M substrate set
+    # use_qI=False (q_I frozen at 1) so z_i*q_I*I_I == z_i*I_I, matching mz's z*I_I exactly. Defaults == mz. ----
+    use_z: bool = False        # master gate; False -> z stays 1 -> inhibition unscaled -> byte-parity
+    use_m: bool = False        # master gate; False -> no adaptation current -> byte-parity
+    tau_z: float = 5000.0      # ms, z (inhibitory-efficacy) time constant
+    I_th_EI: float = 0.0       # z_inf = H(I_th_EI - I_I): z depletes where E-cell inhibitory current I_I >= I_th_EI
+    tau_adp: float = 2000.0    # ms, m (adaptation) decay time
+    eta_m: float = 0.0         # adaptation-current strength (mV per unit m)
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -223,6 +234,14 @@ class SpatialSlowFieldConfig:
                 raise ValueError(f"tau_H must be > 0, got {self.tau_H}")
             if self.alpha_H < 0.0:
                 raise ValueError(f"alpha_H must be >= 0, got {self.alpha_H}")
+        # ---- Z/M per-neuron slow variables (ported from mz_slow_vars.py) ----
+        if self.use_z and self.tau_z <= 0.0:
+            raise ValueError(f"tau_z must be > 0 when use_z, got {self.tau_z}")
+        if self.use_m:
+            if self.tau_adp <= 0.0:
+                raise ValueError(f"tau_adp must be > 0 when use_m, got {self.tau_adp}")
+            if self.eta_m < 0.0:
+                raise ValueError(f"eta_m must be >= 0 when use_m, got {self.eta_m}")
 
 
 # ---------------------------------------------------------------------------
@@ -360,6 +379,14 @@ class SpatialSlowField:
         # ---- containment memory H (Phase-3 vNext) ----
         self.H = float(self.cfg.H_init)
         self.trace_H = []
+        # ---- Z/M per-neuron slow variables (ported from mz_slow_vars.py; Z/M migration 2026-07-22) ----
+        self.is_E = np.zeros(self.N, dtype=bool); self.is_E[:self.nE] = True   # E cells are [:nE]
+        self.z = np.ones(self.N, dtype=float)     # inhibitory efficacy in [0,1]; 1 on I cells (never updated)
+        self.m = np.zeros(self.N, dtype=float)    # adaptation; 0 on I cells (never updated)
+        self._I_I_last = None                     # E-cell I_I from the last apply_currents (z_inf Heaviside input)
+        self.trace_z_mean = []; self.trace_z_min = []
+        self.trace_z_core_mean = []; self.trace_z_surround_mean = []
+        self.trace_m_mean = []; self.trace_m_max = []
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
@@ -371,10 +398,17 @@ class SpatialSlowField:
         gK_E = self.g_K[self._iyE, self._ixE]
         out = np.asarray(I_E, float) - np.asarray(I_I, float)          # I cells: I_E - I_I
         nE = self.nE
+        if self.cfg.use_z:                                             # Z/M: stash E-cell I_I for the z_inf Heaviside (step)
+            self._I_I_last = np.asarray(I_I, float)[:nE]
         hG_eff = self.h_G if self.cfg.use_hG else 0.0                  # HARD gate: use_hG=False -> no h_G
-        out[:nE] = (I_E[:nE] - qI_E * I_I[:nE]
+        inh_E = qI_E * I_I[:nE]                                        # q_I-model inhibition (q_I==1 for pure Z/M)
+        if self.cfg.use_z:                                            # Z/M: z_i scales E inhibition (z*q_I*I_I == z*I_I)
+            inh_E = self.z[:nE] * inh_E
+        out[:nE] = (I_E[:nE] - inh_E
                     - self.cfg.eta_K * gK_E
                     - self.cfg.eta_G * hG_eff)                         # global recovery scalar (E only)
+        if self.cfg.use_m:                                            # Z/M: adaptation current eta_m*m subtracted (E-only)
+            out[:nE] -= self.cfg.eta_m * self.m[:nE]
         if self.cfg.use_A and self.cfg.eta_A != 0.0:               # M4-3A subtractive bias (E only)
             aE = self.a_shunt[self._iyE, self._ixE]
             out[:nE] -= self.cfg.eta_A * aE
@@ -432,6 +466,23 @@ class SpatialSlowField:
         q_I/g_K are read directly in apply_currents (no per-neuron cache). Task 5."""
         cfg = self.cfg
         spk = np.asarray(spk, bool)
+        if cfg.use_z:                                            # Z/M z_i update (ported byte-identical from mz_slow_vars.py)
+            z_inf_E = (self._I_I_last < cfg.I_th_EI).astype(float)   # z_inf = H(I_th_EI - I_I): 1 iff I_I < I_th_EI (strict)
+            zE = self.z[self.is_E]
+            zE = zE + (dt / cfg.tau_z) * (z_inf_E - zE)
+            self.z[self.is_E] = np.clip(zE, 0.0, 1.0)           # z in [0,1]
+        if cfg.use_m:                                            # Z/M m_i update (ported byte-identical from mz_slow_vars.py)
+            mE = self.m[self.is_E]
+            mE = mE - (mE / cfg.tau_adp) * dt                    # decay
+            self.m[self.is_E] = np.maximum(mE, 0.0)             # m >= 0
+            self.m[spk & self.is_E] += 1.0                      # E spike -> +1 ; I spikes ignored (E-only)
+        if cfg.use_z or cfg.use_m:                               # Z/M traces (skipped when both off -> parity)
+            zE_t = self.z[:self.nE]; mE_t = self.m[:self.nE]
+            self.trace_z_mean.append(float(zE_t.mean())); self.trace_z_min.append(float(zE_t.min()))
+            self.trace_m_mean.append(float(mE_t.mean())); self.trace_m_max.append(float(mE_t.max()))
+            if self._core_mask_E is not None:
+                self.trace_z_core_mean.append(float(zE_t[self._core_mask_E].mean()))
+                self.trace_z_surround_mean.append(float(zE_t[~self._core_mask_E].mean()))
         rE_inst = firing_rate_field(spk[:self.nE], self.posE, self.L, cfg.n_grid, cfg.sigma_r)
         rI_inst = firing_rate_field(spk[self.nE:], self.posI, self.L, cfg.n_grid, cfg.sigma_r)
         if self._alpha_a is None:
