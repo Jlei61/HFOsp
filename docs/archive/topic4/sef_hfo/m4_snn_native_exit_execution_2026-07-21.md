@@ -17,6 +17,30 @@
 > persistent state, but this is NOT validated on the current Z/M SNN; the recoverable Z/M lifecycle is UNSOLVED.*
 > Branch `codex/topic4-m4-snn-native-exit` is unmerged, unpushed, and did not touch any Z/M worktree.
 
+---
+
+## 🟢 Z/M-native rebuild (session-3, 2026-07-22 → 07-23) — CORRECT substrate
+
+按 WRONG-SUBSTRATE 复审，在**正确的 Z/M 衬底**上重建这条线（用户选 "port z+m into slow_field.py" + "Z/M+S_G+H as written"）。
+代码见 commits `538c8ae`(移植)/`c144ef7`(harness)/`4bf3828`(active H 传感器)/`4c7af2e`(p 追踪+json 累积)。
+
+**测了什么（朴素话）** —— 换成当前锁定的模型：每个兴奋神经元自己带两个慢变量——`z`（抑制效能，长时间挨强抑制就"疲劳"、把抑制卸掉→去抑制）、`m`（放电后适应）。在真实 E1146 双灶衬底（L=20, N=40000）上，先标定那个疲劳阈值 `I_th_EI = 静息态兴奋细胞所受抑制电流的 q75 = 1.28`（只有挨最强 25% 抑制的细胞才疲劳→去抑制→点火，这就是慢场→发作的机制入口），再看能不能走完整生命周期：间期 IED → 起始 → 有界发作 → 终止 → 回间期。
+
+**怎么测的（梯级 + 逐位一致地基）** —— 先证明移植没走样：新搬进 `slow_field` 的 z+m，和它的规范母本 `mz_slow_vars.py`，同一网络同一噪声跑出来的**每个神经元每步放电栅格逐位相同**，且和"关掉慢变量"的基线明显不同（`tests/test_zm_slow_field_parity.py`）。然后三臂梯级（自发协议，两个低阈核自己点火，无外部 kick）：
+- **裸 Z/M**：只有 z+m。
+- **+S_G**：加原来那套"除法式全局抑制池"当容纳器。
+- **+S_G+H**：再加"慢记忆" H（不随活动塌、慢建慢衰的除法兜底），公平地试了 3 种 H 传感器（全局空间均值 / active-focus 均值 / active + 非对称 p 累积）。
+
+**揭示了什么（seed 1 pilot 判决）：**
+- **裸 Z/M = 间期→起始→失控**：核区先冒一串离散 IED（≈350/750/1100/1550/1900ms），随 z 疲劳（z_core→0.75）越来越密、招募 surround，冲到 175Hz 失控（~2.5s 截断）。链路端到端验证通过，且和独立的 mz-onset-dynamics 线对上口径。
+- **+S_G = 按成"持续 bursty IED 串"**：S_G 把平滑失控整形成一串越来越猛的离散爆发（核峰 100→325Hz），但**全场平均率只有 ~2.2Hz（=间期级！）**——低占空比。z_core 疲劳到准稳态 ~0.31–0.33，S_G 随每次爆发涨落、事件间就塌（S_G_max~0.13）。有界，但 25s 内**不自终止**。（和 q_I sandbox 一个教训：S_G 只塑形/封顶，不终止。）
+- **+S_G+H = 终止阻塞，H 建不起来**：3 种传感器 H_max 全 ≤0.035（0.011/0.029/0.035）。存了 p 迹象后**诊断清楚**根因：被 S_G 容纳的 Z/M 发作态是**低均值率的 bursty 串**（全场均值 2.2Hz、p_max 才 0.09），持续场 p 一时间平均就被稀释到 ~0.01–0.09 → H 没有可积累的"持续活动"信号。**这不是传感器工艺问题，是本质错配**：H 当年在 q_I sandbox 能终止，只因为那个有界态是**持续高率平台**；Z/M 的有界态是**bursty 低均值串**，天生喂不饱一个靠"活动持续度"的终止器。（连 H_max=0.035×α_H=16=0.56 都把峰从 72 削到 40Hz，但离终止很远；m 在锁点 η_m=0.001 可忽略。）
+
+**判决**：**Z/M 容纳-退出生命周期的终止+恢复两条腿仍未解，但瓶颈和 q_I 不同**——q_I 卡在**恢复**（没有能回去的稳定间期吸引子）；Z/M 更早一步卡在**终止**（S_G 容纳出的 bursty 低均值串既不自终止、又喂不饱 persistence-based H）。当初赌的"Z/M 的 z 会自愈→1、事件后重建可兴奋态、所以恢复也许能成"——**测不到**，因为根本走不到终止那一步，z 一直被活动压在 0.31 附近、拿不到安静窗去自愈。这是**公平测了 H（3 传感器、诊断非瞎猜）之后的诚实负结果**。下一杠杆（待用户）：按爆发**计数**（而非时间平均）的终止器；把 m 适应调强（脱离锁点）让衬底自己适应出来；或接受 Z/M+S_G bursty 串就是模型终点。**仅 seed 1，多 seed 稳健性待跑。**
+可复用工程：Z/M-native harness `scripts/run_zm_snn_native_exit.py` + 标定 + active-focus H 传感器（opt-in，默认 `global` 保持 q_I byte-parity）。图 `results/topic4_sef_hfo/zm_snn_native_exit/figures/`。
+
+---
+
 > **Status: 开环+对称退不出；不对称 slow-release = 待确认候选（GO 窄确认）.** Stage 0–2 done; P0（`d_sweep` 漏传 `tau_p_down`）
 > 已修 + 真·不对称重跑（`arms_asymfix`）。当前科学标签=**slow-release suppression–rebound bursting candidate**，非确证可恢复 lifecycle。
 > **候选参数匹配控制已证实电流压制普通 IED（34→15/12）→ 相当程度 prevention、选择性不足**（`arms_prevctl_eta*`）；能否终止**已成形**态由 established-state fork 判（running）。Verdict §8。
