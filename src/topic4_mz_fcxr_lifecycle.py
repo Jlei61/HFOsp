@@ -145,8 +145,15 @@ def classify_lifecycle(windows, band, *, runaway=False, T=LC_THRESHOLDS):
     label follows from pre-ictal interictal duration, autonomous termination, relapse, and whether the
     post-ictal segment carries RETURNING interictal events (never satisfiable by a silent tail — L5 anti-cheat).
     """
-    win_ms = float(band["win_ms"])
     regimes = [window_regime(w, band, T) for w in windows]
+    return classify_regime_sequence(regimes, float(band["win_ms"]), runaway=runaway, T=T)
+
+
+def classify_regime_sequence(regimes, win_ms, *, runaway=False, T=LC_THRESHOLDS):
+    """Sequence-level lifecycle logic over a PRECOMPUTED regime list. Split out so the sequence machine is
+    independently testable and a run can be re-classified from a stored `slowoff_regimes` list without the
+    original window dicts (e.g. after a classifier-logic change)."""
+    win_ms = float(win_ms)
     if runaway:
         return _res("RUNAWAY", regimes, reasons=["global runaway flag set"])
     if "UNSAFE" in regimes:
