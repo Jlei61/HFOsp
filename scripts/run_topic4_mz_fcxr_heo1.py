@@ -48,6 +48,11 @@ from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
     load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field,
     rolling_rate_upper, workpoint_metrics, classify_run_workpoint,
 )
+from src.topic4_mz_fcxr_heo1 import build_baseline_reference, classify_heo  # noqa: E402
+
+import multiprocessing as mp  # noqa: E402
+
+_CTX = {}   # fork-shared context (substrate + baseline ref); set before the pool (COW inheritance)
 
 # ---- locked HEO1 constants (design lock) ----
 G_SAT = 21.6
@@ -242,6 +247,216 @@ def cmd_baseline(a):
             raise
 
 
+# ----------------------------------------------------------------- screen (F2) / confirm (F3)
+def _load_baseline(seed):
+    """F0 outputs -> (HEO baseline reference, u_c per gate_quantile, rate_roll_hi, scl_mask, contacts)."""
+    d = np.load(os.path.join(OUT, f"baseline_lfp_seed{seed}.npz"), allow_pickle=True)
+    ref = build_baseline_reference(np.asarray(d["lfp_trace"], float), np.asarray(d["rate_E"], float), DT)
+    contract = json.load(open(os.path.join(OUT, f"baseline_spectral_contract_seed{seed}.json")))
+    u_c = {float(k): float(v) for k, v in contract["u_c"].items()}
+    return (ref, u_c, float(contract["rate_roll_hi"]),
+            np.asarray(d["scl_mask"], bool), np.asarray(d["contacts"], float))
+
+
+def _kick_for_ic(ic):
+    if ic == "nokick":
+        return 0.0, 1e9
+    if ic == "kick3":
+        return KICK3, T_KICK_MS
+    if ic == "kick12":
+        return KICK12, T_KICK_MS
+    raise ValueError(f"unknown ic {ic!r}")
+
+
+def _region_rates(S, res):
+    """Core vs surround E-cell mean firing rate (Hz) from the raster (platform coverage is separate)."""
+    E = np.asarray(res["E_spk_bool"])
+    core = OLD.build_core_masks(S)
+    to_hz = 1000.0 / DT
+    return dict(core_rate_hz=float(E[:, core].mean() * to_hz) if core.any() else float("nan"),
+                surround_rate_hz=float(E[:, ~core].mean() * to_hz) if (~core).any() else float("nan"),
+                core_frac=float(core.mean()))
+
+
+def _cell_row(gate_q, A_c, D, ic, u_c, res, slow, num, verdict, regions):
+    rate = np.asarray(res["rate_E"], float)
+    eng = np.asarray(slow.trace_coop_engaged_frac, float)
+    row = dict(gate_quantile=gate_q, A_c=A_c, D=D, ic=ic, u_c=u_c, K_c=0.25 * u_c,
+               end_rate_hz=float(rate[-1]), mean_rate_hz=float(rate.mean()), max_rate_hz=float(rate.max()),
+               engaged_frac_mean=float(eng.mean()) if eng.size else 0.0,
+               engaged_frac_max=float(eng.max()) if eng.size else 0.0,
+               gErec_raw_max=float(slow.max_raw_gErec.max()),
+               HEO_BRANCH=verdict["HEO_BRANCH"], plateau=verdict["plateau"], oscillation=verdict["oscillation"],
+               max_platform_contacts=verdict["max_platform_contacts"],
+               max_platform_scl=verdict["max_platform_scl"],
+               platform_window_frac=verdict["platform_window_frac"])
+    row.update({k: num[k] for k in ("finite", "tau_eff_min_ms", "clip_frac_max",
+                                    "numerical_unsafe", "runaway_early_stop_ms")})
+    row.update({k: verdict[k] for k in ("gate_A_plateau", "gate_B_broadband", "gate_C_platform",
+                                        "gate_D_oscillation", "gate_E_numerical")})
+    row.update(regions)
+    return row
+
+
+def _workpoint_cell(task):
+    gate_q, A_c = task
+    S, p_i, contacts = _CTX["S"], _CTX["p_i"], _CTX["contacts"]
+    roll_hi, u_c = _CTX["roll_hi"], _CTX["u_c"][gate_q]
+    label = f"wp_gq{gate_q:g}_A{A_c:g}"
+    t0 = time.time()
+    cfg = _heo_cfg(A_c, u_c, None, p_i)                    # D=0 (no frozen field) workpoint probe
+    res, slow = _heo_run(S, cfg, 4000.0, kick_boost=0.0, t_kick=1e9, seed=1,
+                         lfp_sites=contacts, early_stop=True)
+    num = _numerical(S, res, slow)
+    rate = np.asarray(res["rate_E"], float)
+    wm = workpoint_metrics(rate, DT, roll_hi)
+    wp = classify_run_workpoint(dict(numerical_unsafe=num["numerical_unsafe"], **wm))
+    eng = np.asarray(slow.trace_coop_engaged_frac, float)
+    preserved = bool((not num["numerical_unsafe"]) and wp == "INTERICTAL_WORKPOINT"
+                     and num["runaway_early_stop_ms"] is None)
+    row = dict(gate_quantile=gate_q, A_c=A_c, u_c=u_c, label=label, workpoint_label=wp,
+               preserved=preserved, mean_rate_hz=float(rate.mean()), end_rate_hz=float(rate[-1]),
+               max_rate_hz=float(rate.max()), engaged_frac_mean=float(eng.mean()) if eng.size else 0.0,
+               wall_s=round(time.time() - t0, 1))
+    row.update(num); row.update(wm)
+    FCXR._write_json(os.path.join(OUT, "screen_cells", f"{label}.json"), row)
+    return row
+
+
+def _screen_cell(task):
+    gate_q, A_c, D, ic = task
+    S, p_i, contacts, scl, ref = _CTX["S"], _CTX["p_i"], _CTX["contacts"], _CTX["scl"], _CTX["ref"]
+    u_c = _CTX["u_c"][gate_q]
+    kb, tk = _kick_for_ic(ic)
+    label = f"gq{gate_q:g}_A{A_c:g}_D{D:g}_{ic}"
+    t0 = time.time()
+    cfg = _heo_cfg(A_c, u_c, D, p_i)
+    res, slow = _heo_run(S, cfg, 4000.0, kick_boost=kb, t_kick=tk, seed=1, lfp_sites=contacts, early_stop=True)
+    num = _numerical(S, res, slow)
+    verdict = classify_heo(np.asarray(res["lfp_trace"], float), np.asarray(res["rate_E"], float),
+                           DT, scl, ref, num)
+    regions = _region_rates(S, res)
+    row = _cell_row(gate_q, A_c, D, ic, u_c, res, slow, num, verdict, regions)
+    row.update(label=label, wall_s=round(time.time() - t0, 1))
+    FCXR._write_json(os.path.join(OUT, "screen_cells", f"{label}.json"), row)
+    FCXR._write_npz(os.path.join(OUT, "screen_cells", f"{label}_trace.npz"),
+                    rate_E=np.asarray(res["rate_E"], np.float32),
+                    lfp_trace=np.asarray(res["lfp_trace"], np.float32),
+                    engaged_frac=np.asarray(slow.trace_coop_engaged_frac, np.float32))
+    return row
+
+
+def _run_tasks(fn, tasks, workers):
+    if workers <= 1 or len(tasks) <= 1:
+        return [fn(t) for t in tasks]
+    ctx = mp.get_context("fork")            # COW-share the ~7 GB substrate + baseline ref via _CTX
+    with ctx.Pool(workers) as pool:
+        return pool.map(fn, tasks)
+
+
+def _pick_workers(a):
+    plan = FCXR._plan_workers(4000.0, a.workers)
+    workers = min(plan["workers"], 2)       # task §7: T<=8000 -> at most 2 workers
+    return workers, plan
+
+
+def _select_candidate(rows):
+    """Lexicographic minimal-mechanism-deviation HEO candidate (design lock F3)."""
+    heo = [r for r in rows if r["HEO_BRANCH"]]
+    if not heo:
+        return None
+    ic_rank = {"nokick": 0, "kick3": 1, "kick12": 2}
+    heo.sort(key=lambda r: (r["A_c"], 0 if r["gate_quantile"] == 0.999 else 1, ic_rank.get(r["ic"], 9), r["D"]))
+    return heo[0]
+
+
+def cmd_screen(a):
+    if not a.confirm_run:
+        raise SystemExit("screen: pass --confirm-run to launch the F2 grid")
+    FCXR._assert_engine_blessed()
+    os.makedirs(os.path.join(OUT, "screen_cells"), exist_ok=True)
+    with FCXR._launcher_lock():
+        ref, u_c, roll_hi, scl0, contacts0 = _load_baseline(1)
+        S, p_i = _build_and_align(1)
+        contacts, names, scl = _montage(S)
+        if not (np.array_equal(scl, scl0) and contacts.shape == contacts0.shape):
+            raise SystemExit("screen: montage mismatch vs F0 baseline (SCL/contacts) -> STOP")
+        _CTX.update(S=S, p_i=p_i, contacts=contacts, scl=scl, ref=ref, u_c=u_c, roll_hi=roll_hi)
+        workers, plan = _pick_workers(a)
+        FCXR._resource_log(OUT, "screen_start", dict(plan=plan, workers=workers))
+        _sentinel(OUT, "RUNNING.json", dict(mode="screen", pid=os.getpid(), workers=workers,
+                  started=datetime.now(timezone.utc).isoformat(), plan=plan))
+        with open(os.path.join(OUT, "launcher.pid"), "w") as f:
+            f.write(str(os.getpid()))
+        try:
+            # phase 1 — workpoint gate (D=0/no-kick) prunes arms that break the baseline
+            wp_tasks = [(gq, A) for gq in GATE_QUANTILES for A in A_GRID]
+            wp_rows = _run_tasks(_workpoint_cell, wp_tasks, workers)
+            survivors = [(r["gate_quantile"], r["A_c"]) for r in wp_rows if r["preserved"]]
+            FCXR._write_json(os.path.join(OUT, "workpoint_gate.json"),
+                             dict(rows=wp_rows, survivors=survivors, n_survivors=len(survivors)))
+            FCXR._resource_log(OUT, "workpoint_done", dict(n_survivors=len(survivors)))
+            print(f"[screen] workpoint survivors {len(survivors)}/{len(wp_tasks)}: {survivors}", flush=True)
+            # phase 2 — screen surviving arms over frozen D x IC
+            screen_tasks = [(gq, A, D, ic) for (gq, A) in survivors for D in D_SCREEN
+                            for ic in ("nokick", "kick3", "kick12")]
+            screen_rows = _run_tasks(_screen_cell, screen_tasks, workers)
+            candidate = _select_candidate(screen_rows)
+            n_heo = sum(1 for r in screen_rows if r["HEO_BRANCH"])
+            FCXR._write_json(os.path.join(OUT, "branch_map.json"),
+                             dict(workpoint=wp_rows, survivors=survivors, cells=screen_rows,
+                                  n_cells=len(screen_rows), n_heo=n_heo))
+            FCXR._write_json(os.path.join(OUT, "candidate_verdict.json"),
+                             dict(candidate=candidate, n_heo=n_heo, n_cells=len(screen_rows),
+                                  verdict="HEO_CANDIDATE" if candidate else "NO_GO_no_HEO_in_screen"))
+            _sentinel(OUT, "DONE.json", dict(mode="screen", n_cells=len(screen_rows), n_heo=n_heo,
+                      candidate=candidate, finished=datetime.now(timezone.utc).isoformat()))
+            if os.path.exists(os.path.join(OUT, "RUNNING.json")):
+                os.remove(os.path.join(OUT, "RUNNING.json"))
+            print(f"[screen] DONE cells={len(screen_rows)} n_heo={n_heo} candidate={candidate}", flush=True)
+        except Exception as exc:
+            _sentinel(OUT, "FAILED.json", dict(mode="screen", error=repr(exc),
+                      failed=datetime.now(timezone.utc).isoformat()))
+            raise
+
+
+def cmd_confirm(a):
+    if not a.confirm_run:
+        raise SystemExit("confirm: pass --confirm-run")
+    FCXR._assert_engine_blessed()
+    conf_dir = os.path.join(OUT, "confirm")
+    os.makedirs(conf_dir, exist_ok=True)
+    ref, u_c_map, roll_hi, scl0, contacts0 = _load_baseline(1)
+    u_c = u_c_map[a.gate_q]
+    ics = ["nokick", "kick3", "kick12"] if a.seed == 1 else ["nokick", a.min_ic]
+    rows = []
+    for coop_on in (True, False):                          # candidate + matched cooperative-OFF control
+        S, p_i = _build_and_align(a.seed)
+        contacts, names, scl = _montage(S)
+        for ic in ics:
+            kb, tk = _kick_for_ic(ic)
+            A_c = a.A if coop_on else 0.0
+            uc = u_c if coop_on else 0.0
+            label = f"seed{a.seed}_{'coopON' if coop_on else 'coopOFF'}_gq{a.gate_q:g}_A{A_c:g}_D{a.D:g}_{ic}"
+            t0 = time.time()
+            cfg = _heo_cfg(A_c, uc, a.D, p_i)
+            res, slow = _heo_run(S, cfg, a.t_ms, kick_boost=kb, t_kick=tk, seed=a.seed,
+                                 lfp_sites=contacts, early_stop=True)
+            num = _numerical(S, res, slow)
+            verdict = classify_heo(np.asarray(res["lfp_trace"], float), np.asarray(res["rate_E"], float),
+                                   DT, scl, ref, num)
+            row = _cell_row(a.gate_q, A_c, a.D, ic, uc, res, slow, num, verdict, _region_rates(S, res))
+            row.update(label=label, seed=a.seed, coop_on=coop_on, wall_s=round(time.time() - t0, 1))
+            FCXR._write_json(os.path.join(conf_dir, f"{label}.json"), row)
+            FCXR._write_npz(os.path.join(conf_dir, f"{label}_trace.npz"),
+                            rate_E=np.asarray(res["rate_E"], np.float32),
+                            lfp_trace=np.asarray(res["lfp_trace"], np.float32),
+                            engaged_frac=np.asarray(slow.trace_coop_engaged_frac, np.float32))
+            rows.append(row)
+            print(f"[confirm] {label} HEO={verdict['HEO_BRANCH']} wall={row['wall_s']}s", flush=True)
+    FCXR._write_json(os.path.join(conf_dir, f"confirm_seed{a.seed}.json"), dict(rows=rows))
+
+
 def main():
     ap = argparse.ArgumentParser(description="FCXR-HEO1 runner")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -250,6 +465,13 @@ def main():
     bl = sub.add_parser("baseline"); bl.add_argument("--seed", type=int, default=1)
     bl.add_argument("--t-ms", type=float, default=8000.0); bl.add_argument("--confirm-run", action="store_true")
     bl.set_defaults(fn=cmd_baseline)
+    sc = sub.add_parser("screen"); sc.add_argument("--workers", type=int, default=2)
+    sc.add_argument("--confirm-run", action="store_true"); sc.set_defaults(fn=cmd_screen)
+    cf = sub.add_parser("confirm"); cf.add_argument("--seed", type=int, default=1)
+    cf.add_argument("--gate-q", dest="gate_q", type=float, required=True)
+    cf.add_argument("--A", type=float, required=True); cf.add_argument("--D", type=float, required=True)
+    cf.add_argument("--min-ic", dest="min_ic", default="kick3"); cf.add_argument("--t-ms", type=float, default=8000.0)
+    cf.add_argument("--confirm-run", action="store_true"); cf.set_defaults(fn=cmd_confirm)
     a = ap.parse_args()
     a.fn(a)
 
