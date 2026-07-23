@@ -44,7 +44,7 @@ import run_topic4_mz_fcxr as FCXR       # noqa: E402  _fc_cfg + scaffolding (flo
 from kick_probe import simulate_kick    # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
-    rolling_rate_upper, load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field,
+    rolling_rate_upper, load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field, workpoint_metrics,
 )
 from src.topic4_mz_fcxr_lifecycle import (  # noqa: E402
     build_windows, classify_lifecycle, depletion_coordinate, _smooth_isolated, LC_THRESHOLDS,
@@ -68,6 +68,8 @@ Z_REGIMES = {   # existing calibration (results/topic4_sef_hfo/mz_slowvars/calib
 D_DENSE = 0.15              # frozen dense operating point (Stage-D metastable dense region D~=0.145-0.15)
 SENSOR_TAU_Y = 120.0       # persistence-sensor time constant (primary; E3 sensitivity 80/200)
 SENSOR_K_Y, SENSOR_HILL_N = 5.0, 4
+XMIN_SWEEP = (1.0, 0.7, 0.5, 0.3, 0.1)   # E4a xcontrol: relay-availability floor sweep at frozen D=0.15
+CAL_TAU_X_DOWN, CAL_TAU_X_UP = 1000.0, 5000.0   # fixed asymmetric taus during the x_min authority sweep
 
 # ---- resource watchdog thresholds (§13.3; relative to the per-launcher swap baseline) ----
 SOFT_MEM_GB, HARD_MEM_GB = 64.0, 32.0
@@ -443,6 +445,150 @@ def cmd_sensor(args):
               f"-> {out} ({wall}s)", flush=True)
 
 
+# ----------------------------------------------------------------- E4 dynamic Z + asymmetric X lifecycle
+def _zx_cfg(x_min, tau_x_down, tau_x_up, y_gate, *, tau_y=SENSOR_TAU_Y, regime="q75"):
+    """Dynamic Z (regime) + asymmetric X relay (deplete on tau_x_down, recover on tau_x_up), no kick. The
+    design invariant tau_x_down < tau_z <= tau_x_up (§2.1) is a run-parameter check enforced by the caller."""
+    r = Z_REGIMES[regime]
+    cfg = _slowoff_cfg()
+    cfg.update(use_z=True, tau_z=float(r["tau_z"]), I_th_EI=float(r["I_th_EI"]),
+               use_x=True, x_min=float(x_min), tau_y=float(tau_y), tau_x_down=float(tau_x_down),
+               tau_x_up=float(tau_x_up), K_y=SENSOR_K_Y, y_gate=float(y_gate), hill_n=SENSOR_HILL_N)
+    return cfg
+
+
+def _load_sensor_y_gate(seed, tau_y=SENSOR_TAU_Y):
+    p = os.path.join(OUT, f"sensor_separation_seed{seed}_ty{int(tau_y)}.json")
+    if not os.path.exists(p):
+        raise SystemExit(f"missing sensor separation {p}; run `sensor --seed {seed} --confirm-run` first")
+    return float(json.load(open(p))["y_gate_q999"])
+
+
+def cmd_xcontrol(args):
+    """E4a: at the frozen dense operating point (D=0.15), sweep the relay floor x_min (fixed asymmetric taus)
+    and measure how much the persistence-gated X relay REDUCES the dense occupancy -> objective x_min bracket
+    selection (§10.1), NOT cherry-picked from lifecycle outcomes."""
+    with FCXR._launcher_lock():
+        FCXR._assert_engine_blessed()
+        run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"xcontrol_seed{args.seed}_T{int(args.T)}"))
+        swap_base = _launch_baseline(run_dir, f"xcontrol --seed {args.seed} --T {args.T}")
+        _sentinel(run_dir, "RUNNING.json", phase="xcontrol", seed=args.seed, T=args.T)
+        bc = _load_baseline_contract(args.seed); roll_hi = float(bc["band"]["roll_hi"])
+        y_gate = _load_sensor_y_gate(args.seed)
+        print(f"[xcontrol] seed={args.seed} D=0.15 y_gate={y_gate:.1f} roll_hi={roll_hi:.1f} sweep x_min={XMIN_SWEEP}", flush=True)
+        S = PP.build_substrate(args.seed)
+        pk = load_onset_depletion_pi(SNAP_ZA_FMT.format(seed=args.seed)); assert_field_substrate_aligned(pk, S)
+        rows = []
+        for x_min in XMIN_SWEEP:
+            state, info = _resource_state(swap_base)
+            if state == "hard":
+                _sentinel(run_dir, "ABORTED.json", reason="resource hard-stop mid-sweep", x_min=x_min, **info)
+                raise SystemExit(f"[xcontrol] resource hard-stop at x_min={x_min}: {info}")
+            cfg = _slowoff_cfg()
+            cfg.update(use_x=True, x_min=float(x_min), tau_y=SENSOR_TAU_Y, tau_x_down=CAL_TAU_X_DOWN,
+                       tau_x_up=CAL_TAU_X_UP, K_y=SENSOR_K_Y, y_gate=y_gate, hill_n=SENSOR_HILL_N)
+            cfg["z_frozen_E"] = frozen_z_field(pk["p_i"], D_DENSE)
+            t0 = time.time()
+            res, slow = _lc_run(S, cfg, args.T, seed=args.seed)
+            num = _numerical(S, res, slow, DT_LC)
+            rate = np.asarray(res["rate_E"], float)
+            wm = workpoint_metrics(rate, DT_LC, roll_hi)
+            end_rate = float(np.mean(rate[-max(1, int(round(500.0 / DT_LC))):]))
+            x_reached = float(min(slow.trace_x_relay_min)) if slow.trace_x_relay_min else 1.0
+            del res; gc.collect()
+            rows.append(dict(x_min=x_min, roll_occ=float(wm["roll_occ"]), end_rate_hz=end_rate,
+                             x_relay_min_reached=x_reached, numerical=num, wall_s=round(time.time() - t0, 1)))
+            print(f"[xcontrol] x_min={x_min}: roll_occ={wm['roll_occ']:.3f} end_rate={end_rate:.1f}Hz "
+                  f"x_reached={x_reached:.3f} safe={not num['numerical_unsafe']} ({rows[-1]['wall_s']}s)", flush=True)
+        occ0 = next((r["roll_occ"] for r in rows if r["x_min"] == 1.0), rows[0]["roll_occ"])
+        for r in rows:
+            r["occ_reduction"] = float(occ0 - r["roll_occ"])
+        out = os.path.join(OUT, f"xcontrol_seed{args.seed}.json")
+        _atomic_json(out, dict(seed=args.seed, D_dense=D_DENSE, y_gate=y_gate, roll_hi=roll_hi,
+                               tau_x_down=CAL_TAU_X_DOWN, tau_x_up=CAL_TAU_X_UP, neutral_roll_occ=occ0, rows=rows))
+        _sentinel(run_dir, "DONE.json", phase="xcontrol", seed=args.seed, out=out)
+        print(f"[xcontrol] done (neutral occ={occ0:.3f}) -> {out}", flush=True)
+
+
+def cmd_lifecycle(args):
+    """E4: dynamic Z (q75) + asymmetric X relay, NO kick. Does the system preserve interictal, self-drive into
+    the dense region (Z), have X deplete and TERMINATE the bout, Z recover, and RETURN to statistical
+    interictal? Reports the lifecycle label + D_Z(t)/D_X(t) + the causal ordering (X after onset; Z before X)."""
+    with FCXR._launcher_lock():
+        FCXR._assert_engine_blessed()
+        tag = f"xm{args.x_min}_td{int(args.tau_x_down)}_tu{int(args.tau_x_up)}"
+        run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"lifecycle_seed{args.seed}_{tag}_T{int(args.T)}"))
+        swap_base = _launch_baseline(run_dir, f"lifecycle --seed {args.seed} {tag} --T {args.T}")
+        _sentinel(run_dir, "RUNNING.json", phase="lifecycle", seed=args.seed, x_min=args.x_min,
+                  tau_x_down=args.tau_x_down, tau_x_up=args.tau_x_up, T=args.T)
+        state, info = _resource_state(swap_base)
+        if state == "hard":
+            _sentinel(run_dir, "ABORTED.json", reason="resource hard-stop before start", **info)
+            raise SystemExit(f"[lifecycle] resource hard-stop before start: {info}")
+        tau_z = Z_REGIMES["q75"]["tau_z"]
+        if not (args.tau_x_down < tau_z <= args.tau_x_up):       # design invariant (§2.1) run-parameter check
+            print(f"[lifecycle] WARNING: tau_x_down({args.tau_x_down})<tau_z({tau_z})<=tau_x_up({args.tau_x_up}) violated", flush=True)
+        bc = _load_baseline_contract(args.seed); band = bc["band"]; frozen_bar = bc["frozen_event_bar"]
+        y_gate = _load_sensor_y_gate(args.seed)
+        print(f"[lifecycle] seed={args.seed} x_min={args.x_min} tau_x_down={args.tau_x_down} tau_x_up={args.tau_x_up} "
+              f"y_gate={y_gate:.1f} T={args.T}; {info}", flush=True)
+        S = PP.build_substrate(args.seed)
+        pk = load_onset_depletion_pi(SNAP_ZA_FMT.format(seed=args.seed)); assert_field_substrate_aligned(pk, S)
+        p_i = pk["p_i"]
+        snap = {int(round(t / DT_LC)): f"t{t}" for t in range(0, int(args.T), int(D_Z_SNAP_MS))}
+        t0 = time.time()
+        res, slow = _lc_run(S, _zx_cfg(args.x_min, args.tau_x_down, args.tau_x_up, y_gate), args.T,
+                            seed=args.seed, snapshot_steps=snap)
+        wins, num, rate = _reduce_run_windows(res, slow, S, DT_LC, frozen_bar, band)
+        lc = classify_lifecycle(wins, band)
+        end_rate = float(np.mean(rate[-max(1, int(round(500.0 / DT_LC))):]))
+        x_relay_min = float(min(slow.trace_x_relay_min)) if slow.trace_x_relay_min else 1.0
+        del res
+        gc.collect()
+        snaps = sorted(slow.snapshots.values(), key=lambda s: s["step"])
+        tms = np.array([s["step"] * DT_LC for s in snaps], float)
+        DZ = np.array([depletion_coordinate(s["z_E"], p_i) for s in snaps], float)
+        DX = (np.array([depletion_coordinate(s["x_E"], p_i) for s in snaps], float)
+              if snaps and "x_E" in snaps[0] else np.zeros(len(snaps)))
+        onset_ms = (lc.get("bout") or [None])[0]
+        onset_ms = onset_ms * band["win_ms"] if onset_ms is not None else None
+        dx_peak_ms = float(tms[int(np.argmax(DX))]) if DX.size else None
+        dz_peak_ms = float(tms[int(np.argmax(DZ))]) if DZ.size else None
+        x_after_onset = bool(onset_ms is not None and dx_peak_ms is not None and dx_peak_ms >= onset_ms)
+        z_before_x = None                                        # after D_X peak, does D_Z fall to half first?
+        if DX.size and DZ.size:
+            ip = int(np.argmax(DX))
+            zt = next((tms[j] for j in range(ip, len(DZ)) if DZ[j] <= 0.5 * DZ.max()), None)
+            xt = next((tms[j] for j in range(ip, len(DX)) if DX[j] <= 0.5 * DX.max()), None)
+            z_before_x = bool(zt is not None and (xt is None or zt <= xt))
+        bounded = bool(num["finite"] and (not num["numerical_unsafe"]) and end_rate < BOUNDED_MAX_HZ)
+        wall = round(time.time() - t0, 1)
+        summary = dict(
+            seed=args.seed, x_min=args.x_min, tau_x_down=args.tau_x_down, tau_x_up=args.tau_x_up, y_gate=y_gate,
+            T=args.T, dt=DT_LC, wall_s=wall, peak_rss_gb=round(_self_rss_gb(), 2), numerical=num,
+            lifecycle_label=lc["label"], regimes=lc["regimes"], bout=lc.get("bout"), reasons=lc.get("reasons"),
+            pre_ms=lc.get("pre_ms"), bout_ms=lc.get("bout_ms"), post_return_ms=lc.get("post_return_ms"),
+            end_rate_hz=end_rate, bounded=bounded, x_relay_min=x_relay_min,
+            D_Z_end=float(DZ[-1]) if DZ.size else None, D_Z_max=float(DZ.max()) if DZ.size else None,
+            D_X_end=float(DX[-1]) if DX.size else None, D_X_max=float(DX.max()) if DX.size else None,
+            onset_ms=onset_ms, dx_peak_ms=dx_peak_ms, dz_peak_ms=dz_peak_ms,
+            x_activates_after_onset=x_after_onset, z_recovers_before_x=z_before_x,
+        )
+        out = os.path.join(OUT, f"lifecycle_seed{args.seed}_{tag}.json")
+        _atomic_json(out, summary)
+        rstride = max(1, int(np.ceil(rate.size / 4000)))
+        FCXR._write_npz(os.path.join(run_dir, "lifecycle_traces.npz"),
+                        rate_dt_ms=np.asarray([DT_LC * rstride], np.float32), rate_E=rate[::rstride].astype(np.float32),
+                        t_ms=tms.astype(np.float32), D_Z=DZ.astype(np.float32), D_X=DX.astype(np.float32))
+        _sentinel(run_dir, "DONE.json", phase="lifecycle", seed=args.seed, label=lc["label"], out=out)
+        FCXR._resource_log(run_dir, "lifecycle_done", dict(wall_s=wall, label=lc["label"], bounded=bounded, **num))
+        print(f"[lifecycle] seed{args.seed} {tag}: label={lc['label']} pre={lc.get('pre_ms')} bout={lc.get('bout_ms')} "
+              f"post={lc.get('post_return_ms')} end_rate={end_rate:.1f}Hz bounded={bounded} "
+              f"D_Z_max={summary['D_Z_max']} D_X_max={summary['D_X_max']} x_min_reached={x_relay_min:.3f} "
+              f"x_after_onset={x_after_onset} z_before_x={z_before_x} clip={num['clip_frac_max']:.3g} "
+              f"-> {out} ({wall}s, peak {summary['peak_rss_gb']}GB)", flush=True)
+
+
 # ----------------------------------------------------------------- smoke + dry-run
 def cmd_smoke(args):
     """One short continuous slow-off run: plumbing + timing (ms/1k-steps) + peak RSS. NOT a contract."""
@@ -500,12 +646,22 @@ def main(argv=None):
     sen.add_argument("--seed", type=int, default=1); sen.add_argument("--T", type=float, default=8000.0)
     sen.add_argument("--tau-y", dest="tau_y", type=float, default=SENSOR_TAU_Y)
     sen.add_argument("--confirm-run", action="store_true", help="required to run any simulation")
+    xc = sub.add_parser("xcontrol")
+    xc.add_argument("--seed", type=int, default=1); xc.add_argument("--T", type=float, default=4000.0)
+    xc.add_argument("--confirm-run", action="store_true", help="required to run any simulation")
+    lf = sub.add_parser("lifecycle")
+    lf.add_argument("--seed", type=int, default=1); lf.add_argument("--T", type=float, default=30000.0)
+    lf.add_argument("--x-min", dest="x_min", type=float, default=0.5)
+    lf.add_argument("--tau-x-down", dest="tau_x_down", type=float, default=1000.0)
+    lf.add_argument("--tau-x-up", dest="tau_x_up", type=float, default=5000.0)
+    lf.add_argument("--confirm-run", action="store_true", help="required to run any simulation")
     args = ap.parse_args(argv)
     if args.cmd == "dry-run":                                  # dry-run performs NO simulation -> no gate
         return cmd_dryrun(args)
     if not getattr(args, "confirm_run", False):
         raise SystemExit("REFUSING: simulations require --confirm-run")
-    {"smoke": cmd_smoke, "baseline": cmd_baseline, "zonly": cmd_zonly, "sensor": cmd_sensor}[args.cmd](args)
+    {"smoke": cmd_smoke, "baseline": cmd_baseline, "zonly": cmd_zonly, "sensor": cmd_sensor,
+     "xcontrol": cmd_xcontrol, "lifecycle": cmd_lifecycle}[args.cmd](args)
 
 
 if __name__ == "__main__":
