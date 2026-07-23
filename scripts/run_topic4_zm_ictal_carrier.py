@@ -64,12 +64,21 @@ def _mem_snapshot():
     return info
 
 
-def _snapshot_times(onset_ms, macro, T_ms):
-    """4 source-space snapshots: pre-onset, first recruitment, putative carrier, late (spec §6.4)."""
-    if onset_ms is not None and macro.get("duration_ms", 0) > 0:
-        d = macro["duration_ms"]
-        return [max(0.0, onset_ms - 200.0), onset_ms + 100.0, onset_ms + 0.5 * d, min(T_ms - 60.0, onset_ms + 0.9 * d)]
-    return [0.1 * T_ms, 0.3 * T_ms, 0.6 * T_ms, 0.9 * T_ms]     # no onset -> evenly spaced
+def _snapshot_times(core_rate, bin_ms, onset_ms, T_ms):
+    """4 source-space snapshots snapped to ACTUAL burst peaks (spec §6.4): pre-onset (quiet), first
+    recruitment (first post-onset burst), putative carrier (mid burst), late (last burst). Snapping to
+    burst peaks (not fixed offsets) keeps a burst-train's snapshots from landing in the black inter-burst
+    gaps -- so the panel actually shows the spatial pattern DURING activity."""
+    from src.topic4_zm_slowfast import detect_bursts
+    pk, _ = detect_bursts(np.asarray(core_rate, float), bin_ms)
+    pk_ms = pk * bin_ms
+    post = pk_ms[pk_ms >= onset_ms] if onset_ms is not None else pk_ms
+    pre = max(0.0, (onset_ms - 300.0) if onset_ms is not None else 0.1 * T_ms)
+    if post.size >= 3:
+        return [pre, float(post[0]), float(post[post.size // 2]), float(post[-1])]
+    if post.size >= 1:
+        return [pre, float(post[0]), float(post[min(1, post.size - 1)]), float(post[-1])]
+    return [0.1 * T_ms, 0.3 * T_ms, 0.6 * T_ms, 0.9 * T_ms]     # no bursts -> evenly spaced
 
 
 def _run_arm(S, name, spec, rec, contact_names):
@@ -106,8 +115,8 @@ def _run_arm(S, name, spec, rec, contact_names):
     ax, tr = CG.axis_transverse_coords(S["posE"], S["src_xy"], S["axis_unit"])
     kymo_ax, ax_edges, kt = CG.kymograph(spk, ax, DT)
     kymo_tr, tr_edges, _ = CG.kymograph(spk, tr, DT)
-    snap_ms = _snapshot_times(src["onset_ms"], src["macro"], spk.shape[0] * DT)
-    snaps = np.stack([CG.field_snapshot(spk, S["posE"], S["L"], t, t + 50.0, DT) for t in snap_ms])
+    snap_ms = _snapshot_times(src["rates"]["core"], src["rates"]["bin_ms"], src["onset_ms"], spk.shape[0] * DT)
+    snaps = np.stack([CG.field_snapshot(spk, S["posE"], S["L"], t - 60.0, t + 60.0, DT) for t in snap_ms])
 
     fr = src["rates"]
     npz = os.path.join(OUT, f"{name}_seed{S['seed']}.npz")
