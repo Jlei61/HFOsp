@@ -42,6 +42,24 @@ from dataclasses import dataclass
 import numpy as np
 
 
+def cooperative_u_tilde(u, A_c, u_c, K_c, n):
+    """FCXR-HEO1 cooperative recurrent-conductance gate (design lock 2026-07-24 §mechanism).
+
+    Applied to the RAW recurrent conductance u = gErec_raw BEFORE the g_sat*tanh saturation.
+    OFF when A_c<=0 -> returns u unchanged (byte parity). For u<=u_c the excess is 0 -> H=0 ->
+    u_tilde = u*(1+0) = u exactly. Monotone non-decreasing, non-negative and finite in u>=0;
+    the boost is bounded by (1+A_c) since H<1. n is the Hill exponent (fixed n=4 this sprint).
+
+        H = relu(u-u_c)^n / (K_c^n + relu(u-u_c)^n) ;  u_tilde = u * (1 + A_c * H)
+    """
+    if A_c <= 0.0:
+        return u
+    excess = np.maximum(u - u_c, 0.0)
+    exc_n = excess ** n
+    H = exc_n / (K_c ** n + exc_n)
+    return u * (1.0 + A_c * H)
+
+
 @dataclass
 class MZSlowVarsConfig:
     use_z: bool = False            # OFF by default -> byte parity with slow=None
@@ -62,6 +80,11 @@ class MZSlowVarsConfig:
     ff_conductance: bool = True    # full_conductance: feedforward(external) AMPA as conductance, else additive c_E*I
     rec_conductance: bool = True   # full_conductance: recurrent E->E AMPA as conductance, else additive c_E*I
     rec_sat_g: float = 0.0         # FCXR-RC1 Stage C: >0 -> recurrent conductance smooth-saturates g_sat*tanh(g_raw/g_sat)
+    # ---- FCXR-HEO1: cooperative recurrent-conductance gate (all OFF by default -> RC1 byte parity) ----
+    coop_A: float = 0.0            # A_c: cooperative gain amplitude (0 -> gate off); acts on gErec_raw only
+    coop_uc: float = 0.0           # u_c: gErec_raw activation threshold (locked from slow-off baseline quantile)
+    coop_Kc: float = 0.0           # K_c: Hill half-activation above u_c (0.25*u_c)
+    coop_n: int = 4                # Hill exponent (fixed n=4)
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
     tau_y: float = 120.0           # ms  persistence sensor time constant
     tau_x: float = 1000.0          # ms  relay availability time constant (symmetric; used when tau_x_down/up are None)
@@ -282,9 +305,13 @@ class MZSlowVars:
                 gEff = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_ffE
             if c.rec_conductance:
                 gErec_raw = c.c_E * I_recE / denomE
+                # FCXR-HEO1: cooperative gate boosts the RAW recurrent conductance in a mid-activity band
+                # BEFORE saturation. gErec_raw is kept raw (clip/histogram audit reads it below); coop_A=0
+                # -> u_tilde IS gErec_raw -> the saturation line stays byte-identical to FCXR-RC1.
+                u_tilde = cooperative_u_tilde(gErec_raw, c.coop_A, c.coop_uc, c.coop_Kc, c.coop_n)
                 # FCXR-RC1 Stage C: smooth-saturate the recurrent conductance (slope 1 at small input ->
                 # interictal workpoint preserved; saturates toward g_sat at high input -> no hard clip).
-                gErec = (c.rec_sat_g * np.tanh(gErec_raw / c.rec_sat_g)) if c.rec_sat_g > 0.0 else gErec_raw
+                gErec = (c.rec_sat_g * np.tanh(u_tilde / c.rec_sat_g)) if c.rec_sat_g > 0.0 else u_tilde
             else:
                 gErec_raw = np.zeros(self.NE, dtype=float)
                 gErec = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_recE
@@ -524,6 +551,17 @@ class MZSlowVars:
             raise ValueError("rec_sat_g must be non-negative (0 = off)")
         if c.rec_sat_g > 0.0 and not (c.membrane_mode == "full_conductance" and c.rec_conductance):
             raise ValueError("rec_sat_g>0 (recurrent smooth saturation) requires full_conductance + rec_conductance")
+        if c.coop_A < 0.0:
+            raise ValueError("coop_A must be non-negative (0 = cooperative gate off)")
+        if c.coop_A > 0.0:
+            # cooperative gain with no saturation would be unbounded -> require the tanh anchor + recurrent path
+            if not (c.membrane_mode == "full_conductance" and c.rec_conductance and c.rec_sat_g > 0.0):
+                raise ValueError("coop_A>0 (cooperative recurrent gate) requires full_conductance + "
+                                 "rec_conductance + rec_sat_g>0 (bounded by saturation)")
+            if c.coop_uc <= 0.0 or c.coop_Kc <= 0.0:
+                raise ValueError("coop_A>0 requires coop_uc>0 and coop_Kc>0")
+            if int(c.coop_n) < 1:
+                raise ValueError("coop_A>0 requires coop_n>=1")
         if c.use_x:
             if c.membrane_mode != "full_conductance":
                 raise ValueError("use_x (E->E relay) requires membrane_mode='full_conductance'")
