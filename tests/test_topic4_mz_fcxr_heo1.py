@@ -271,3 +271,137 @@ def test_engine_coop_on_changes_dynamics():
     off = _engine_run(dict(coop_A=0.0))
     on = _engine_run(dict(coop_A=8.0, coop_uc=1e-3, coop_Kc=2.5e-4, coop_n=4))
     assert not np.array_equal(off["E_spk_bool"], on["E_spk_bool"])
+
+
+# ============================== §T3 HEO spectral classifier (7 synthetic cases) ==============================
+import src.topic4_mz_fcxr_heo1 as HEO  # noqa: E402
+
+FS_T = 1000.0
+DT_T = 1000.0 / FS_T          # dt(ms) so fs_raw == FS_WORK -> decimation is a no-op (test the gate logic)
+NC = 15
+SCL_T = np.array([True] * 4 + [False] * 11)   # SCL6-9 are the first 4 contacts (matches real montage)
+
+
+def _tt(n):
+    return np.arange(n) / FS_T
+
+
+def _white(rng, n, sigma, C=NC):
+    return rng.standard_normal((n, C)) * sigma
+
+
+def _baseline_ref(rng):
+    lfp = _white(rng, 4000, 1.0)
+    rate = 0.5 + 0.1 * rng.standard_normal(4000)
+    return HEO.build_baseline_reference(lfp, rate, DT_T)
+
+
+def _safe():
+    return dict(numerical_unsafe=False, runaway_early_stop_ms=None)
+
+
+def _hi_broadband(rng, n, sigma=5.0, C=NC):
+    """High white noise -> flat PSD -> every band elevated (broadband, no oscillatory peak)."""
+    return _white(rng, n, sigma, C)
+
+
+def _oscillate(n, freq=50.0, amp=6.0, C=NC):
+    s = amp * (np.sin(2 * np.pi * freq * _tt(n)) + 0.4 * np.sin(2 * np.pi * 2 * freq * _tt(n)))
+    return np.tile(s[:, None], (1, C))
+
+
+def test_heo_oscillatory_broadband_platform_passes():
+    rng = np.random.default_rng(0)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _hi_broadband(rng, n, sigma=5.0) + _oscillate(n, 50.0, 6.0)
+    rate = 150.0 + 45.0 * np.sin(2 * np.pi * 50.0 * _tt(n)) + 2.0 * rng.standard_normal(n)
+    v = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, _safe())
+    assert v["HEO_BRANCH"] is True
+    assert v["gate_A_plateau"] and v["gate_C_platform"] and v["gate_D_oscillation"]
+    assert abs(v["oscillation"]["center_hz"] - 50.0) <= HEO.OSC_CENTER_TOL_HZ
+
+
+def test_heo_sparse_irregular_ied_fails():
+    rng = np.random.default_rng(1)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _white(rng, n, 1.0)                       # quiet baseline
+    for c in (500, 1500, 2500):                      # 3 isolated 30 ms broadband bursts
+        lfp[c:c + 30] += rng.standard_normal((30, NC)) * 8.0
+    rate = 0.6 + 0.1 * rng.standard_normal(n)
+    v = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, _safe())
+    assert v["HEO_BRANCH"] is False
+    assert v["gate_A_plateau"] is False              # no sustained >=1000 ms platform
+
+
+def test_heo_dense_event_train_fails():
+    rng = np.random.default_rng(2)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _white(rng, n, 1.0)
+    for start in range(300, 2700, 80):               # burst 40 ms every 80 ms -> returns to baseline between
+        lfp[start:start + 40] += rng.standard_normal((40, NC)) * 6.0
+    rate = 0.6 + 0.1 * rng.standard_normal(n)
+    v = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, _safe())
+    assert v["HEO_BRANCH"] is False                  # dips to baseline -> not a plateau (A) or no osc (D)
+
+
+def test_heo_tonic_ceiling_fails():
+    rng = np.random.default_rng(3)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _hi_broadband(rng, n, sigma=5.0)           # high broadband, NO oscillation
+    rate = 450.0 + 1.0 * rng.standard_normal(n)      # pinned near the 500 Hz refractory ceiling, flat
+    v = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, _safe())
+    assert v["HEO_BRANCH"] is False
+    assert (v["gate_D_oscillation"] is False) or (v["gate_E_numerical"] is False)
+
+
+def test_heo_narrowband_local_only_fails():
+    rng = np.random.default_rng(4)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _white(rng, n, 1.0)                        # quiet broadband floor
+    lfp[:, :3] += _oscillate(n, 50.0, 8.0, C=3)      # sustained 50 Hz on only 3 contacts (narrow band)
+    rate = 0.6 + 0.1 * rng.standard_normal(n)
+    v = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, _safe())
+    assert v["HEO_BRANCH"] is False                  # not broadband (few bands) and not a platform (few contacts)
+
+
+def test_heo_broadband_nonoscillatory_fails():
+    rng = np.random.default_rng(5)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _hi_broadband(rng, n, sigma=5.0)           # sustained high broadband, WHITE (no peak)
+    rate = 150.0 + 30.0 * rng.standard_normal(n)     # high but noisy -> no coherent oscillation
+    v = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, _safe())
+    assert v["gate_A_plateau"] is True               # it IS a sustained broadband platform ...
+    assert v["gate_D_oscillation"] is False          # ... but no oscillation -> not HEO
+    assert v["HEO_BRANCH"] is False
+
+
+def test_heo_silent_post_tail_localizes_plateau():
+    rng = np.random.default_rng(6)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _white(rng, n, 1.0)
+    rate = 0.6 + 0.1 * rng.standard_normal(n)
+    lfp[:1500] = _hi_broadband(rng, 1500, sigma=5.0) + _oscillate(1500, 50.0, 6.0)   # plateau first half
+    rate[:1500] = 150.0 + 45.0 * np.sin(2 * np.pi * 50.0 * _tt(1500)) + 2.0 * rng.standard_normal(1500)
+    v = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, _safe())
+    assert v["gate_A_plateau"] is True and v["HEO_BRANCH"] is True
+    # plateau is localized to the high first half; the silent tail is NOT swept into it
+    assert v["plateau"]["j"] * HEO.HOP_MS < 2000.0
+
+
+def test_heo_runaway_and_unsafe_drop_gate_E():
+    rng = np.random.default_rng(7)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _hi_broadband(rng, n, sigma=5.0) + _oscillate(n, 50.0, 6.0)
+    rate = 150.0 + 45.0 * np.sin(2 * np.pi * 50.0 * _tt(n)) + 2.0 * rng.standard_normal(n)
+    v_run = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, dict(numerical_unsafe=False, runaway_early_stop_ms=1234.0))
+    v_uns = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, dict(numerical_unsafe=True, runaway_early_stop_ms=None))
+    assert v_run["gate_E_numerical"] is False and v_run["HEO_BRANCH"] is False
+    assert v_uns["gate_E_numerical"] is False and v_uns["HEO_BRANCH"] is False
