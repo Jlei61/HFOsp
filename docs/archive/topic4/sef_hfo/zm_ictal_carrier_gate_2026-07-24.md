@@ -106,8 +106,42 @@ z/m + S_G + 记忆刹车 H（sgh）。我们把每个细胞的电流按病人真
 > memory `project_topic4_m4_snn_native_exit_2026-07-21`。可复用的只有：工程/方法（crash-safe resume、
 > provenance、active-focus H sensor），以及 H 作为一个**候选**机制留待在 Z/M 上重测。
 
-## 8. 判决（Phase 1 跑完后填 — commit 3）
+## 8. 判决（seed-1，2026-07-24）—— NO-GO：是 HFO 样爆发串，不是持续 carrier
 
-_待填：seed-1 `bare` / `sg` 的 `ictal_carrier_verdict`（源空间门 A + 电极门 B 的具体数值）+ carrier 是
-"持续高频能量" 还是 "HFO-like burst train" + Phase 2 分支选择（Path A exit atlas / Path B spatial
-inhibitory carrier）。_
+**一句话**：在当前原始各向异性 Z/M SNN 上，S_G 把失控刹成的发作态，在虚拟 SEEG 上是**一串彼此分开、之间
+回到基线的 HFO 样爆发**，**不是**一个持续增强的 ictal high-frequency-energy carrier → 走 Path B（先改抑制侧
+的空间反馈造 carrier），**不**走 Path A（没有 carrier 就没有 exit 可谈），并**停止**一切 H/α_H/τ_H/burst-count
+扫描。
+
+**测了什么.** sg 臂（z/m + 全局分裂抑制池 S_G，15 s，seed 1）产生的核心反复爆发，到底是"发作载体"（电极上
+高频能量一直抬高）还是"一串分开的 HFO 尖峰"（能量一阵一阵回到基线）。
+
+**怎么测.** 跑前锁死的两层门（spec §3/§4），在 10 kHz 采样、存 2 kHz（Nyquist 1 kHz > 150 Hz）的虚拟 SEEG 上：
+门 A 看源空间核心放电率的最长 macroepisode 是否 ≥2 s 且 occupancy ≥80%（爆发之间不掉回基线）；门 B 看是否
+≥2 个触点的 30–80 Hz 能量包络持续抬高（occupancy ≥80%、gap ≤250 ms）。
+
+**揭示了什么（seed-1）.**
+- **门 A 失败（`source_not_sustained`）**：核心峰值 455 Hz，但最优 2 s 窗只有 **occupancy 0.17**、最长
+  macroepisode 1730 ms（< 2000）——爆发之间核心掉回基线，~83% 时间是安静的。全体均值 4.79 Hz、tail 10.29 Hz。
+  （A7 sep=3、recruit=True、flash=False、sat=False：爆发是**局部+招募+区别于间期事件**的，唯独**不持续**。）
+- **门 B 失败（0 个持续触点）**：汇侧触点 ICL8–11 的 30–80 Hz 有很强的凸起（峰值 dB 14–32），比源空间"更接近
+  持续"（最优触点 occupancy 0.55），但仍 < 0.80 → 没有触点通过 B1。**注意**：电极因为把 ~19 个邻近细胞的
+  |电流| 加权平均，包络比脉冲率平滑，所以显得没那么间歇——但两层门一致判"间歇"。
+- **Section-8 慢-快（`transient_burst_train`）**：47 次爆发，IBI≈300 ms（cv_tail 0.13＝周期基本平稳），但幅度随
+  z_core 从 1.0 耗竭到 0.34 而**持续escalate**（drift 0.55）；S_G 在每次爆发后 ~65 ms 才涌起、随后塌陷＝松弛泵。
+  → 这是**瞬态反复爆发串 / 候选 inner cycle**，**不是** limit cycle（无 frozen-slow 重复轨迹）。
+
+**当前能写**：sg = "S_G 有界化的持续局部反复爆发串（escalating transient burst train）"；机制＝单一**全局标量**
+S_G 每次把整个核心**同步 reset**（burst→S_G 涌起→whole-core reset→S_G 塌陷→再点火），天然生成窄爆发串；瓶颈
+是**缺内在 ictal carrier**，不是缺 exit actuator。
+
+**当前不能写**：ictal attractor / limit cycle / lifecycle 完成；"持续 ictal carrier"；"高核心率＝高频 SEEG 能量"；
+"H 建不起来"（H 本阶段关闭，不测）；旧 q_I 关于间期吸引子的任何结论。仍是 seed-1 pilot。
+
+**下一步为什么是 Path B 而不是 exit.** stop condition #4：carrier 门失败后不许再调 H。缺的是**内在载体**，不是
+退出器。按 §7 Path B：把单一全局 S_G 拆成 **patchwise 局部抑制反馈 + 较弱全局**，先做 2–8 patch 的 cheap-first
+rate 屏幕，看快子系统能否从"全同步松弛振荡"变成"异步 microdomain / 有界空间波 / 持续高频群体载体"；只有 cheap
+proxy 通过才移植回全 SNN，且全 SNN 仍须过上面的 A+B 门。**不**以"更强 M"为首选，burst-count H 暂缓。
+
+图：`results/topic4_sef_hfo/zm_ictal_carrier_gate/figures/`（README 逐图说明）。
+manifest：`carrier_gate_seed1.json`（每臂 provenance + verdict）。engine SHA `8ef5b60`，readout 2 kHz/Nyquist 1 kHz。
