@@ -385,6 +385,9 @@ class SpatialSlowField:
         # ---- containment memory H (Phase-3 vNext) ----
         self.H = float(self.cfg.H_init)
         self.trace_H = []
+        # H-drive diagnostics (Phase-0.2 carrier hardening 2026-07-24): the ACTUAL sensor input phi_drive
+        # (NOT p_max), and the active-focus mask fraction. Observation-only -> spike output unchanged.
+        self.trace_phi_drive = []; self.trace_active_frac = []
         # ---- Z/M per-neuron slow variables (ported from mz_slow_vars.py; Z/M migration 2026-07-22) ----
         self.is_E = np.zeros(self.N, dtype=bool); self.is_E[:self.nE] = True   # E cells are [:nE]
         self.z = np.ones(self.N, dtype=float)     # inhibitory efficacy in [0,1]; 1 on I cells (never updated)
@@ -393,6 +396,7 @@ class SpatialSlowField:
         self.trace_z_mean = []; self.trace_z_min = []
         self.trace_z_core_mean = []; self.trace_z_surround_mean = []
         self.trace_m_mean = []; self.trace_m_max = []
+        self.trace_m_core_mean = []; self.trace_m_surround_mean = []
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
@@ -489,6 +493,8 @@ class SpatialSlowField:
             if self._core_mask_E is not None:
                 self.trace_z_core_mean.append(float(zE_t[self._core_mask_E].mean()))
                 self.trace_z_surround_mean.append(float(zE_t[~self._core_mask_E].mean()))
+                self.trace_m_core_mean.append(float(mE_t[self._core_mask_E].mean()))
+                self.trace_m_surround_mean.append(float(mE_t[~self._core_mask_E].mean()))
         rE_inst = firing_rate_field(spk[:self.nE], self.posE, self.L, cfg.n_grid, cfg.sigma_r)
         rI_inst = firing_rate_field(spk[self.nE:], self.posI, self.L, cfg.n_grid, cfg.sigma_r)
         if self._alpha_a is None:
@@ -525,12 +531,20 @@ class SpatialSlowField:
                    else self.p ** cfg.n_r / (cfg.p50_r ** cfg.n_r + self.p ** cfg.n_r))
             if cfg.H_sensor == "active":                          # active-focus mean: mean Phi(p) over cells within
                 pmax = float(phi.max())                           # 20% of the peak -> tracks a localized focus's
-                phi_drive = float(phi[phi > 0.2 * pmax].mean()) if pmax > 0.0 else 0.0  # intensity, NOT grid-diluted
+                if pmax > 0.0:                                    # intensity, NOT grid-diluted
+                    mask = phi > 0.2 * pmax                       # (phi[mask]==phi[phi>0.2*pmax] -> byte-parity phi_drive)
+                    phi_drive = float(phi[mask].mean())
+                    active_frac = float(mask.mean())
+                else:
+                    phi_drive = 0.0; active_frac = 0.0
             else:                                                # (reduces to the mean for a broad/uniform state)
                 phi_drive = float(phi.mean())                    # global spatial mean (byte-parity path)
+                active_frac = 1.0
             self.H += dt * (phi_drive - self.H) / cfg.tau_H
             self.H = float(np.clip(self.H, 0.0, cfg.H_max))
             self.trace_H.append(self.H)
+            self.trace_phi_drive.append(phi_drive)                # the REAL H input (was untraced; NOT p_max)
+            self.trace_active_frac.append(active_frac)            # active-focus size = frac of grid cells sensed
         if cfg.use_A:                                               # M4-3A load -> shunt
             u_n = convolve_periodic(self.rE, self._Kn)              # field-derived drive K_n * rE (EMA rE)
             self.trace_un_mean.append(float(u_n.mean()))            # P1-4: dump real u_n even when k_n=0 (P0b lock)
