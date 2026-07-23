@@ -60,6 +60,29 @@ def cooperative_u_tilde(u, A_c, u_c, K_c, n):
     return u * (1.0 + A_c * H)
 
 
+def gerec_baseline_quantiles(counts, edges, qs):
+    """Quantiles of gErec_raw from the slow-off cumulative fixed-edge histogram (FCXR-HEO1 calibration).
+
+    Linear interpolation within the crossing bin. A quantile that falls in a trailing overflow bin
+    (edges[-1]=inf) returns +inf, so the runner widens the edge grid + re-runs F0 rather than locking
+    a bogus u_c. counts/edges come straight off MZSlowVars.gerec_hist_* + cfg.gerec_hist_edges."""
+    counts = np.asarray(counts, float)
+    edges = np.asarray(edges, float)
+    total = counts.sum()
+    if total <= 0:
+        raise ValueError("empty gErec histogram (no baseline samples)")
+    cum = np.cumsum(counts) / total
+    out = {}
+    for q in qs:
+        k = min(int(np.searchsorted(cum, q, side="left")), len(counts) - 1)
+        lo, hi = edges[k], edges[k + 1]
+        c_lo = cum[k - 1] if k > 0 else 0.0
+        c_hi = cum[k]
+        frac = 0.0 if c_hi <= c_lo else (q - c_lo) / (c_hi - c_lo)
+        out[float(q)] = float(lo + frac * (hi - lo))
+    return out
+
+
 @dataclass
 class MZSlowVarsConfig:
     use_z: bool = False            # OFF by default -> byte parity with slow=None
@@ -85,6 +108,8 @@ class MZSlowVarsConfig:
     coop_uc: float = 0.0           # u_c: gErec_raw activation threshold (locked from slow-off baseline quantile)
     coop_Kc: float = 0.0           # K_c: Hill half-activation above u_c (0.25*u_c)
     coop_n: int = 4                # Hill exponent (fixed n=4)
+    record_gerec_hist: bool = False  # slow-off OBSERVER: cumulative fixed-edge gErec_raw histogram (overall/core/surround)
+    gerec_hist_edges: "np.ndarray | None" = None
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
     tau_y: float = 120.0           # ms  persistence sensor time constant
     tau_x: float = 1000.0          # ms  relay availability time constant (symmetric; used when tau_x_down/up are None)
@@ -156,6 +181,8 @@ class MZSlowVars:
         self._gEff_mean_last = self._gErec_mean_last = 0.0   # FCXR AMPA conductance split (full_conductance)
         self._tau_ratio_mean_last = self._tau_ratio_min_last = 1.0
         self._clip_frac_last = 0.0
+        self._coop_engaged_frac_last = 0.0        # FCXR-HEO1: fraction of E cells with gErec_raw > u_c
+        self._coop_H_mean_last = 0.0              # FCXR-HEO1: mean cooperative Hill activation
         # off-by-default slow-state snapshot observer (design §4.3): copy z_E/m_E at registered
         # INTEGER steps only, AFTER the slow update; None -> no capture, exact simulation parity.
         self._snap_steps = self._normalize_snapshot_steps(snapshot_steps)
@@ -180,6 +207,7 @@ class MZSlowVars:
         self.trace_gEff_mean = []; self.trace_gErec_mean = []
         self.trace_y_mean = []; self.trace_y_max = []
         self.trace_x_relay_mean = []; self.trace_x_relay_min = []
+        self.trace_coop_engaged_frac = []; self.trace_coop_H_mean = []   # FCXR-HEO1 (appended when coop_A>0)
         # calibration observer (slow-off only): per-step histograms of E-cell I_I / I_E
         self.calib_hist_I_EI = []; self.calib_hist_I_EE = []
         # FCXR-RC1 clip-identity observer (pure side-effect; only allocated when record_clip_identity).
@@ -190,6 +218,13 @@ class MZSlowVars:
             self.max_raw_total = np.zeros(self.NE, dtype=float)   # peak pre-clip total conductance
             self.first_clip_step = np.full(self.NE, -1, dtype=np.int64)
             self.last_clip_step = np.full(self.NE, -1, dtype=np.int64)
+        if self.cfg.record_gerec_hist:                             # FCXR-HEO1 baseline calibration observer
+            if self.cfg.gerec_hist_edges is None:
+                raise ValueError("record_gerec_hist requires gerec_hist_edges")
+            nb = len(np.asarray(self.cfg.gerec_hist_edges)) - 1    # cumulative fixed-edge gErec_raw histograms
+            self.gerec_hist_overall = np.zeros(nb, dtype=np.int64)
+            self.gerec_hist_core = np.zeros(nb, dtype=np.int64)
+            self.gerec_hist_surround = np.zeros(nb, dtype=np.int64)
 
     # ------------------------------------------------------------------ hooks
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
@@ -333,6 +368,13 @@ class MZSlowVars:
                 new = clip & (self.first_clip_step < 0)
                 self.first_clip_step[new] = t
                 self.last_clip_step[clip] = t
+        if c.record_gerec_hist:                   # FCXR-HEO1: pool slow-off gErec_raw distribution for u_c
+            self._record_gerec_hist(gErec_raw)
+        if c.coop_A > 0.0:                         # FCXR-HEO1 cooperative engagement diagnostics (pure side-effect)
+            _excess = np.maximum(gErec_raw - c.coop_uc, 0.0)
+            self._coop_engaged_frac_last = float(np.mean(_excess > 0.0)) if _excess.size else 0.0
+            _en = _excess ** c.coop_n
+            self._coop_H_mean_last = float(np.mean(_en / (c.coop_Kc ** c.coop_n + _en))) if _en.size else 0.0
         if np.any(clip):
             if c.fail_on_clip:
                 raise FloatingPointError(
@@ -464,6 +506,9 @@ class MZSlowVars:
             self.trace_y_max.append(float(self.y.max()))
             self.trace_x_relay_mean.append(float(self.x_relay.mean()))
             self.trace_x_relay_min.append(float(self.x_relay.min()))
+        if self.cfg.coop_A > 0.0:                             # FCXR-HEO1 cooperative engagement (coop on only)
+            self.trace_coop_engaged_frac.append(float(self._coop_engaged_frac_last))
+            self.trace_coop_H_mean.append(float(self._coop_H_mean_last))
 
     def _record_calib(self, I_E, I_I):
         edges = self.cfg.calib_hist_edges
@@ -473,6 +518,17 @@ class MZSlowVars:
         hE, _ = np.histogram(I_E[self.is_E], bins=edges)
         self.calib_hist_I_EI.append(hI.astype(np.int64))
         self.calib_hist_I_EE.append(hE.astype(np.int64))
+
+    def _record_gerec_hist(self, gErec_raw):
+        """FCXR-HEO1: accumulate the pooled (cell x step) gErec_raw distribution into fixed edges for
+        overall / core / surround E cells. Pure side-effect (never alters the trajectory)."""
+        edges = self.cfg.gerec_hist_edges
+        self.gerec_hist_overall += np.histogram(gErec_raw, bins=edges)[0].astype(np.int64)
+        ci, si = self.core_e_idx, self.surr_e_idx
+        if ci.size:
+            self.gerec_hist_core += np.histogram(gErec_raw[ci], bins=edges)[0].astype(np.int64)
+        if si.size:
+            self.gerec_hist_surround += np.histogram(gErec_raw[si], bins=edges)[0].astype(np.int64)
 
     # ------------------------------------------------------------------ snapshot observer (design §4.3)
     @staticmethod

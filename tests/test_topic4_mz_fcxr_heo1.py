@@ -17,7 +17,8 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "snn_engine"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src"))
-from mz_slow_vars import MZSlowVars, MZSlowVarsConfig, cooperative_u_tilde  # noqa: E402
+from mz_slow_vars import (  # noqa: E402
+    MZSlowVars, MZSlowVarsConfig, cooperative_u_tilde, gerec_baseline_quantiles)
 
 DENOM = 58.0 - 18.0   # E_E - v_match
 GSAT = 21.6
@@ -156,6 +157,82 @@ def test_coop_validation_raises():
     with pytest.raises(ValueError):                                  # coop needs full_conductance+rec
         MZSlowVars(6, 18.0, MZSlowVarsConfig(membrane_mode="conductance", v_match=18.0, e_gaba=0.0,
                    coop_A=4.0, coop_uc=1.0, coop_Kc=0.25), NE=4, core_mask_E=np.zeros(4, bool))
+
+
+# ============================== §T2 gErec_raw histogram + engagement traces ==============================
+def _mk_fc_hist(edges, core=(0, 1), N=6, NE=4, **kw):
+    cm = np.zeros(NE, bool)
+    for i in core:
+        cm[i] = True
+    base = dict(membrane_mode="full_conductance", E_E=58.0, c_E=1.0, v_match=18.0, e_gaba=0.0,
+                e_k=0.0, ff_conductance=False, rec_conductance=True, rec_sat_g=GSAT,
+                max_total_conductance=99.0, record_gerec_hist=True, gerec_hist_edges=edges)
+    base.update(kw)
+    return MZSlowVars(N, 18.0, MZSlowVarsConfig(**base), NE=NE, core_mask_E=cm)
+
+
+def test_gerec_hist_requires_edges():
+    with pytest.raises(ValueError):
+        _mk_fc(record_gerec_hist=True)                  # edges=None -> raise
+
+
+def test_gerec_hist_counts_and_partitions():
+    edges = np.linspace(0.0, 20.0, 41)                  # width 0.5 bins over [0,20]
+    mz = _mk_fc_hist(edges, core=(0, 1))                # core = E cells {0,1}, surround = {2,3}
+    # gErec_raw = I_recE/40 ; feed 3 steps with I_I=0 -> gErec_raw known per E cell
+    recs = [np.array([40.0, 80.0, 200.0, 400.0]),       # raw = 1, 2, 5, 10
+            np.array([40.0, 40.0, 40.0, 40.0]),         # raw = 1,1,1,1
+            np.array([400.0, 400.0, 80.0, 80.0])]       # raw = 10,10,2,2
+    all_raw = []
+    for rec in recs:
+        I_E = np.zeros(6); I_E[:4] = rec
+        I_rec = np.zeros(6); I_rec[:4] = rec
+        mz.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+        all_raw.append(rec / 40.0)
+    ref_overall = sum(np.histogram(r, bins=edges)[0] for r in all_raw)
+    np.testing.assert_array_equal(mz.gerec_hist_overall, ref_overall)
+    # core (cells 0,1) + surround (cells 2,3) partition the overall E histogram exactly
+    np.testing.assert_array_equal(mz.gerec_hist_core + mz.gerec_hist_surround, mz.gerec_hist_overall)
+    ref_core = sum(np.histogram(r[:2], bins=edges)[0] for r in all_raw)
+    np.testing.assert_array_equal(mz.gerec_hist_core, ref_core)
+
+
+def test_gerec_hist_engine_pure_side_effect():
+    """record_gerec_hist=True must not change the raster (pure observer)."""
+    edges = np.linspace(0.0, 30.0, 601)
+    off = _engine_run(dict(coop_A=0.0))
+    on = _engine_run(dict(coop_A=0.0, record_gerec_hist=True, gerec_hist_edges=edges))
+    assert np.array_equal(off["E_spk_bool"], on["E_spk_bool"])
+    assert np.array_equal(off["rate_E"], on["rate_E"])
+
+
+def test_coop_engagement_traces_present_and_bounded():
+    edges = np.linspace(0.0, 20.0, 41)
+    mz = _mk_fc_hist(edges, coop_A=6.0, coop_uc=2.0, coop_Kc=0.5, coop_n=4)
+    for _ in range(7):
+        I_E = np.zeros(6); I_E[:4] = np.array([40.0, 400.0, 40.0, 400.0])   # raw 1,10,1,10 (u_c=2)
+        I_rec = I_E.copy()
+        mz.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+        mz.step(np.zeros(6, bool), None, 0.05)
+    assert len(mz.trace_coop_engaged_frac) == 7 and len(mz.trace_coop_H_mean) == 7
+    assert all(0.0 <= f <= 1.0 for f in mz.trace_coop_engaged_frac)
+    assert abs(mz.trace_coop_engaged_frac[0] - 0.5) < 1e-9    # 2 of 4 E cells have raw(=10) > u_c(=2)
+
+
+def test_gerec_baseline_quantiles_uniform():
+    edges = np.arange(0.0, 11.0)                        # 10 unit bins over [0,10)
+    counts = np.full(10, 100, dtype=np.int64)          # uniform
+    q = gerec_baseline_quantiles(counts, edges, [0.5, 0.9, 0.99])
+    assert abs(q[0.5] - 5.0) < 1e-9
+    assert abs(q[0.9] - 9.0) < 1e-9
+    assert abs(q[0.99] - 9.9) < 1e-9
+
+
+def test_gerec_baseline_quantiles_overflow_is_inf():
+    edges = np.array([0.0, 1.0, 2.0, np.inf])          # last bin = overflow
+    counts = np.array([980, 15, 5], dtype=np.int64)    # 0.5% mass in the overflow bin
+    q = gerec_baseline_quantiles(counts, edges, [0.999])
+    assert not np.isfinite(q[0.999])                   # Q99.9 falls in overflow -> inf (runner widens)
 
 
 # ============================== §T1 engine-level parity / non-triviality ==============================
