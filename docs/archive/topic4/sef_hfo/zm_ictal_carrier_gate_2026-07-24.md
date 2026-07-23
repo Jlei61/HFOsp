@@ -145,3 +145,37 @@ proxy 通过才移植回全 SNN，且全 SNN 仍须过上面的 A+B 门。**不*
 
 图：`results/topic4_sef_hfo/zm_ictal_carrier_gate/figures/`（README 逐图说明）。
 manifest：`carrier_gate_seed1.json`（每臂 provenance + verdict）。engine SHA `8ef5b60`，readout 2 kHz/Nyquist 1 kHz。
+
+## 9. Path B —— spatial inhibitory carrier 设计 + cheap-first screen（2026-07-24）
+
+**设计（锁定）.** 不改 E→E 拓扑、不动 relay/conductance；只在**抑制侧**把 §8 诊断出的"单一全局标量 S_G 每次
+同步 reset 整个核心→窄爆发串"这个机制拆掉：把一个全局池换成**空间分辨的抑制反馈**——patchwise 局部池
+（每个微区各自的 S_i）、可选**较弱的全局成分**、可选**空间平滑/低秩共享**。核心假设：局部化后不同微区不再同步
+归零→相位错开的 microdomain 活动叠加→群体（电极）高频能量包络持续，而非一起塌到基线。
+
+**cheap-first screen（reduced K-patch rate 模型，`src/topic4_zm_patch_screen.py`，非 SNN）.** 每个 patch =
+慢分裂抑制池门控的快放电率松弛振子（自兴奋 w_rec 给快双稳→松弛振荡；τ_s=80 匹配 S_G）。比较四种抑制结构
+（K=16、异质 σ_I=0.4、弱耦合 w_c=0.05、4 seeds、OFF 态为绝对基线的群体 occupancy + 跨 patch 同步度 + 是否仍
+振荡）：
+
+| 结构 | pop occupancy | synchrony | 仍振荡 | carrier proxy |
+|---|---|---|---|---|
+| global scalar（homogeneous＝SNN 复现） | **0.52** | +1.00 | 是 | **0/4**（同步爆发串，P 塌到 OFF） |
+| global scalar（heterogeneous） | 1.00 | +1.00 | **否**（osc≈0） | 0/4（死不动点，非载体） |
+| **patchwise 独立局部池** | **1.00** | **+0.04** | 是 | **4/4** |
+| patchwise + 空间平滑（σ=1） | 1.00 | −0.06 | 是 | 4/4 |
+| local + weak global（ε=0.2） | 0.96 | +0.09 | 是 | 4/4 |
+
+**揭示了什么.** 便宜模型里**方向性 GO**：把全局标量池换成 patchwise 局部池，把"同步爆发串（P 在爆发间塌到
+OFF、occ 0.52）"变成"去同步、仍振荡、群体不再塌到 OFF 的持续载体（occ≈1.0、sync +1.0→+0.04）"。global 要么
+同步爆发串、要么（加异质）退成死不动点；local+weak-global 也过（弱全局不重新同步）。K-scan（K=2..64）patchwise
+方向稳健。
+
+**能写**：在 reduced rate 模型里，**patchwise（空间分辨）抑制是把 global-S_G burst train 转成持续群体载体的正确
+杠杆**；下一步＝把 patchwise 抑制移植回原始各向异性 SNN（**仅抑制侧、不动 E→E**）。**不能写**：这不是 SNN 结果、
+不是 LFP 上的 carrier（rate 代理不含带内高频结构，群体仍有 ~1.3× 调制、非平滑纯载体）；移植后**仍须**过预注册的
+A+B carrier 门才算数。**不**用"更强 M"、burst-count H 暂缓（stop condition #4）。
+
+图 `results/topic4_sef_hfo/zm_patch_screen/figures/patch_screen.png`（+README）；summary
+`patch_screen_summary.json`；测试 `tests/test_topic4_zm_patch_screen.py`（8 green，锁定振荡带 + global>patchwise
+同步度 + patchwise 过载体代理）。
