@@ -516,7 +516,7 @@ def cmd_lifecycle(args):
     interictal? Reports the lifecycle label + D_Z(t)/D_X(t) + the causal ordering (X after onset; Z before X)."""
     with FCXR._launcher_lock():
         FCXR._assert_engine_blessed()
-        tag = f"xm{args.x_min}_td{int(args.tau_x_down)}_tu{int(args.tau_x_up)}"
+        tag = f"{args.regime}_xm{args.x_min}_td{int(args.tau_x_down)}_tu{int(args.tau_x_up)}"
         run_dir = os.path.join(OUT, "runs", FCXR._run_id(f"lifecycle_seed{args.seed}_{tag}_T{int(args.T)}"))
         swap_base = _launch_baseline(run_dir, f"lifecycle --seed {args.seed} {tag} --T {args.T}")
         _sentinel(run_dir, "RUNNING.json", phase="lifecycle", seed=args.seed, x_min=args.x_min,
@@ -525,7 +525,7 @@ def cmd_lifecycle(args):
         if state == "hard":
             _sentinel(run_dir, "ABORTED.json", reason="resource hard-stop before start", **info)
             raise SystemExit(f"[lifecycle] resource hard-stop before start: {info}")
-        tau_z = Z_REGIMES["q75"]["tau_z"]
+        tau_z = Z_REGIMES[args.regime]["tau_z"]
         if not (args.tau_x_down < tau_z <= args.tau_x_up):       # design invariant (§2.1) run-parameter check
             print(f"[lifecycle] WARNING: tau_x_down({args.tau_x_down})<tau_z({tau_z})<=tau_x_up({args.tau_x_up}) violated", flush=True)
         bc = _load_baseline_contract(args.seed); band = bc["band"]; frozen_bar = bc["frozen_event_bar"]
@@ -537,12 +537,15 @@ def cmd_lifecycle(args):
         p_i = pk["p_i"]
         snap = {int(round(t / DT_LC)): f"t{t}" for t in range(0, int(args.T), int(D_Z_SNAP_MS))}
         t0 = time.time()
-        res, slow = _lc_run(S, _zx_cfg(args.x_min, args.tau_x_down, args.tau_x_up, y_gate), args.T,
-                            seed=args.seed, snapshot_steps=snap)
+        res, slow = _lc_run(S, _zx_cfg(args.x_min, args.tau_x_down, args.tau_x_up, y_gate, regime=args.regime),
+                            args.T, seed=args.seed, snapshot_steps=snap)
         wins, num, rate = _reduce_run_windows(res, slow, S, DT_LC, frozen_bar, band)
         lc = classify_lifecycle(wins, band)
         end_rate = float(np.mean(rate[-max(1, int(round(500.0 / DT_LC))):]))
         x_relay_min = float(min(slow.trace_x_relay_min)) if slow.trace_x_relay_min else 1.0
+        ymax = np.asarray(slow.trace_y_max, float)                # X-sensor diagnostic: does y cross the gate?
+        y_max_peak = float(ymax.max()) if ymax.size else 0.0
+        y_occ_above_gate = float(np.mean(ymax > y_gate)) if ymax.size else 0.0
         del res
         gc.collect()
         snaps = sorted(slow.snapshots.values(), key=lambda s: s["step"])
@@ -564,11 +567,13 @@ def cmd_lifecycle(args):
         bounded = bool(num["finite"] and (not num["numerical_unsafe"]) and end_rate < BOUNDED_MAX_HZ)
         wall = round(time.time() - t0, 1)
         summary = dict(
-            seed=args.seed, x_min=args.x_min, tau_x_down=args.tau_x_down, tau_x_up=args.tau_x_up, y_gate=y_gate,
-            T=args.T, dt=DT_LC, wall_s=wall, peak_rss_gb=round(_self_rss_gb(), 2), numerical=num,
+            seed=args.seed, regime=args.regime, x_min=args.x_min, tau_x_down=args.tau_x_down,
+            tau_x_up=args.tau_x_up, y_gate=y_gate, T=args.T, dt=DT_LC, wall_s=wall,
+            peak_rss_gb=round(_self_rss_gb(), 2), numerical=num,
             lifecycle_label=lc["label"], regimes=lc["regimes"], bout=lc.get("bout"), reasons=lc.get("reasons"),
             pre_ms=lc.get("pre_ms"), bout_ms=lc.get("bout_ms"), post_return_ms=lc.get("post_return_ms"),
             end_rate_hz=end_rate, bounded=bounded, x_relay_min=x_relay_min,
+            y_max_peak=y_max_peak, y_occ_above_gate=y_occ_above_gate,
             D_Z_end=float(DZ[-1]) if DZ.size else None, D_Z_max=float(DZ.max()) if DZ.size else None,
             D_X_end=float(DX[-1]) if DX.size else None, D_X_max=float(DX.max()) if DX.size else None,
             onset_ms=onset_ms, dx_peak_ms=dx_peak_ms, dz_peak_ms=dz_peak_ms,
@@ -585,6 +590,7 @@ def cmd_lifecycle(args):
         print(f"[lifecycle] seed{args.seed} {tag}: label={lc['label']} pre={lc.get('pre_ms')} bout={lc.get('bout_ms')} "
               f"post={lc.get('post_return_ms')} end_rate={end_rate:.1f}Hz bounded={bounded} "
               f"D_Z_max={summary['D_Z_max']} D_X_max={summary['D_X_max']} x_min_reached={x_relay_min:.3f} "
+              f"y_peak={y_max_peak:.1f}(gate {y_gate:.1f}) y_occ={y_occ_above_gate:.3f} "
               f"x_after_onset={x_after_onset} z_before_x={z_before_x} clip={num['clip_frac_max']:.3g} "
               f"-> {out} ({wall}s, peak {summary['peak_rss_gb']}GB)", flush=True)
 
@@ -651,6 +657,7 @@ def main(argv=None):
     xc.add_argument("--confirm-run", action="store_true", help="required to run any simulation")
     lf = sub.add_parser("lifecycle")
     lf.add_argument("--seed", type=int, default=1); lf.add_argument("--T", type=float, default=30000.0)
+    lf.add_argument("--regime", choices=["q75", "q50"], default="q75")
     lf.add_argument("--x-min", dest="x_min", type=float, default=0.5)
     lf.add_argument("--tau-x-down", dest="tau_x_down", type=float, default=1000.0)
     lf.add_argument("--tau-x-up", dest="tau_x_up", type=float, default=5000.0)
