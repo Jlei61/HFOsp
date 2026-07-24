@@ -24,7 +24,7 @@ import numpy as np
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT); sys.path.insert(0, os.path.join(ROOT, "src"))
 from topic4_mz_fcxr_heo1 import (  # noqa: E402
-    build_baseline_reference, band_power_spectrogram, band_db_field, oscillation_probe,
+    build_baseline_reference, band_power_spectrogram, band_db_field, oscillation_probe, classify_heo,
     decimate_to_work, BANDS, Z_GATE, N_BANDS_GATE, BROADBAND_IDX, DB_GAIN_GATE,
     N_CONTACTS_GATE, N_SCL_GATE)
 
@@ -85,14 +85,15 @@ def _comparison_figure(real_terr):
     labels = [f"{lo:g}-{hi:g} Hz" for lo, hi in BANDS]
     x = np.arange(6); w = 0.38
     fig, ax = plt.subplots(figsize=(9.6, 4.7))
-    ax.bar(x - w / 2, real_terr, w, label="real E1146 seizure  (12-14/15 contacts → PASSES gate)", color="#c44e52")
-    ax.bar(x + w / 2, model_terr, w, label="model cooperative ~16 Hz state  (0/48 → fails gate)", color="#4c72b0")
-    ax.axhline(6.0, ls="--", lw=1, color="0.45"); ax.annotate("+6 dB gate", (4.7, 6.6), fontsize=8, color="0.45")
+    ax.bar(x - w / 2, real_terr, w, label="real E1146 seizure  (~3 Hz spiky broadband)", color="#c44e52")
+    ax.bar(x + w / 2, model_terr, w, label="model cooperative ~16 Hz state  (narrowband)", color="#4c72b0")
+    ax.axhline(6.0, ls="--", lw=1, color="0.45"); ax.annotate("+6 dB", (5.35, 6.6), fontsize=8, color="0.45")
     ax.axhline(0.0, lw=0.8, color="0.6")
     ax.set_xticks(x); ax.set_xticklabels(labels, fontsize=8.5)
     ax.set_ylabel("territory-median ΔdB vs interictal baseline")
-    ax.set_title("Real E1146 seizure = broadband (all bands up); model ~16 Hz = narrowband (low bands suppressed)",
-                 fontsize=10)
+    ax.set_title("Real E1146 seizure = ~3 Hz spiky, all bands up (NOT a sustained 30-150 Hz platform — fails HEO1 "
+                 "Gate A);\nmodel ~16 Hz state = narrowband, low bands suppressed. NEITHER passes the HEO1 gate.",
+                 fontsize=9.5)
     ax.legend(fontsize=8.8, loc="upper right", frameon=False)
     fig.text(0.5, 0.005, "FCXR-HEO1 review §6.3 — real-seizure gate validation (diagnostic)", ha="center",
              fontsize=7.5, color="0.4")
@@ -148,28 +149,35 @@ def main():
     terr = np.median(ddb, axis=0)
     # money figure: real-seizure vs model ~16Hz-state per-band ΔdB (real = all bands up; model = narrowband)
     _comparison_figure(terr)
+    v_full = classify_heo(ict, ict.mean(axis=1), dt_ms, SCL_MASK, ref,
+                          dict(numerical_unsafe=False, runaway_early_stop_ms=None))
     row = dict(
         subject="epilepsiae_1146", block=os.path.basename(data_path), sfreq=hd["sfreq"],
         ictal_window="onset+3..18s", baseline_window="block+60..180s",
         gate_B_max_contacts=int(contact_high.sum(1).max()), gate_C_platform_windows=int(platform.sum()),
-        gate_C_passes=bool(platform.any()),
+        gate_C_passes_some_windows=bool(platform.any()),
+        gate_A_plateau=bool(v_full["gate_A_plateau"]), plateau=v_full["plateau"],
+        gate_D_status=v_full["gate_D_status"], passes_full_HEO1_gate=bool(v_full["HEO_BRANCH"]),
         max_platform_contacts=int(contact_high.sum(1).max()), max_scl=int(contact_high[:, SCL_MASK].max(0).sum()),
         band_pass_ever_per_band={f"{BANDS[b][0]:g}-{BANDS[b][1]:g}": int(band_pass.any(0)[:, b].sum()) for b in range(6)},
         territory_dB={f"{lo:g}-{hi:g}": round(float(terr[i]), 1) for i, (lo, hi) in enumerate(BANDS)},
         per_contact_dominant_hz_med=round(dom_med, 2),
-        real_seizure_passes_HEO_gate=bool(platform.any()),
-        note="robust across onset+0/+3/+20s windows (12-14/15 contacts); low bands ELEVATED (broadband) "
-             "unlike the model ~16Hz state (low bands suppressed). CAVEAT: model LFP = synthetic |current| "
+        interpretation="Real E1146 CP seizure = ~3Hz intermittent spiky broadband. PASSES Gate B/C (broadband + "
+             ">=11/15 contacts in SOME windows) but FAILS Gate A (no sustained >=1s plateau — the spike-wave returns "
+             "to baseline ~every 300ms) and is ~3Hz not 30-150Hz -> does NOT pass the full HEO1 gate. So the HEO1 gate "
+             "('sustained 30-150Hz broadband platform') is MIS-SPECIFIED for this subject's real seizure phenotype; the "
+             "real target is the empirical broadband-spiky (~3-8Hz) pattern. CAVEAT: model LFP = synthetic |current| "
              "proxy vs real referential iEEG; comparison valid for baseline-normalized band structure + dominant freq.",
     )
     os.makedirs(OUT, exist_ok=True)
     json.dump(row, open(os.path.join(OUT, "real_e1146_seizure_gate.json"), "w"), indent=1)
     print(json.dumps(row, indent=1))
-    print(f"\n[real] REAL SEIZURE passes strict HEO platform gate: {row['real_seizure_passes_HEO_gate']} "
-          f"(max {row['max_platform_contacts']}/15 contacts; need >=11) -> the gate tests a REAL phenotype")
-    print(f"[real] real-seizure per-contact dominant ~{row['per_contact_dominant_hz_med']} Hz + BROADBAND "
-          f"(1-4={row['territory_dB']['1-4']}dB .. 80-150={row['territory_dB']['80-150']}dB); "
-          f"model ~16Hz state is narrowband (low bands suppressed) -> strict NO-GO is correct")
+    print(f"\n[real] full HEO1 gate: passes_full_HEO1_gate={row['passes_full_HEO1_gate']} "
+          f"(gate_A_plateau={row['gate_A_plateau']}, gate_D={row['gate_D_status']}); "
+          f"Gate B/C platform in {row['gate_C_platform_windows']} windows, max {row['max_platform_contacts']}/15.")
+    print(f"[real] real seizure = ~{row['per_contact_dominant_hz_med']} Hz spiky BROADBAND (1-4={row['territory_dB']['1-4']}dB "
+          f".. 80-150={row['territory_dB']['80-150']}dB) but INTERMITTENT (fails Gate A). So the HEO1 gate "
+          f"(sustained 30-150Hz platform) is MIS-SPECIFIED for this subject's real seizure; neither real nor model passes it.")
 
 
 if __name__ == "__main__":
