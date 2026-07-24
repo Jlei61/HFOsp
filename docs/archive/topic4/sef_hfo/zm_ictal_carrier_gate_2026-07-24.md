@@ -8,7 +8,7 @@ This is the **Z/M-only** archive. The old q_I+S_G+p/H sandbox is quarantined in 
 
 ## 0. 朴素话摘要（测了什么 / 怎么测 / 揭示了什么）
 
-**测了什么.** 我们有一张 2 万个兴奋细胞 + 8 千个抑制细胞的二维皮层片子（各向异性连接，来自病人
+**测了什么.** 我们有一张 3.2 万个兴奋细胞 + 8 千个抑制细胞（NE=32000/NI=8000）的二维皮层片子（各向异性连接，来自病人
 E1146 的电极几何）。每个兴奋细胞带两个"慢变量"：一个记录"抑制还剩多少劲"（z，反复放电会把它耗掉→
 去抑制），一个记录"自己放电后有多累"（m，适应）。片子会自己冒出零星的"发作间期"放电事件；随着 z 被耗
 掉，事件越来越密，最后冲进失控高频（runaway）。我们再加一个"全局分裂式抑制池"S_G，想把失控刹住，看它
@@ -108,6 +108,12 @@ z/m + S_G + 记忆刹车 H（sgh）。我们把每个细胞的电流按病人真
 
 ## 8. 判决（seed-1，2026-07-24）—— NO-GO：是 HFO 样爆发串，不是持续 carrier
 
+> ⚠️ **本节的 v1 门数值（源 occ 0.17、电极最优触点 occ 0.55、onset 8720ms）来自一个偏离预注册 spec 的
+> 实现**（review 发现，见 §10）：v1 把 onset 取成"最长 FLOOR 段起点"而非"第一次持续≥100ms 越 ON"、baseline 用
+> 固定前 300ms 而非 `[0,onset)`、电极 baseline 因而落在 `[0,8720ms]` 被爆发污染。**忠实 spec 的 v2 离线重判见
+> §10**：定性 NO-GO 稳（sg 源根本没有持续 onset＝更干净的 burst train；电极活跃触点 occ 中位 0.75、baseline
+> 不敏感、仍 <0.80）。下面 v1 叙述保留作历史。
+
 **一句话**：在当前原始各向异性 Z/M SNN 上，S_G 把失控刹成的发作态，在虚拟 SEEG 上是**一串彼此分开、之间
 回到基线的 HFO 样爆发**，**不是**一个持续增强的 ictal high-frequency-energy carrier → 走 Path B（先改抑制侧
 的空间反馈造 carrier），**不**走 Path A（没有 carrier 就没有 exit 可谈），并**停止**一切 H/α_H/τ_H/burst-count
@@ -166,16 +172,52 @@ manifest：`carrier_gate_seed1.json`（每臂 provenance + verdict）。engine S
 | patchwise + 空间平滑（σ=1） | 1.00 | −0.06 | 是 | 4/4 |
 | local + weak global（ε=0.2） | 0.96 | +0.09 | 是 | 4/4 |
 
-**揭示了什么.** 便宜模型里**方向性 GO**：把全局标量池换成 patchwise 局部池，把"同步爆发串（P 在爆发间塌到
-OFF、occ 0.52）"变成"去同步、仍振荡、群体不再塌到 OFF 的持续载体（occ≈1.0、sync +1.0→+0.04）"。global 要么
-同步爆发串、要么（加异质）退成死不动点；local+weak-global 也过（弱全局不重新同步）。K-scan（K=2..64）patchwise
-方向稳健。
+**揭示了什么.** 便宜模型里，"把全局刹车换成分区局部刹车、让局部振子去同步来填平群体波谷"这个**假设通过了
+plausibility 筛选**（非验证）：把全局标量池换成 patchwise 局部池，把"同步爆发串（P 在爆发间塌到 OFF、occ 0.52）"
+变成"去同步、仍振荡、群体不再塌到 OFF（occ≈1.0、sync +1.0→+0.04）"。global 要么同步爆发串、要么（加异质）退成死
+不动点；local+weak-global 也过（弱全局不重新同步）。K-scan（K=2..64）方向稳健。
 
-**能写**：在 reduced rate 模型里，**patchwise（空间分辨）抑制是把 global-S_G burst train 转成持续群体载体的正确
-杠杆**；下一步＝把 patchwise 抑制移植回原始各向异性 SNN（**仅抑制侧、不动 E→E**）。**不能写**：这不是 SNN 结果、
-不是 LFP 上的 carrier（rate 代理不含带内高频结构，群体仍有 ~1.3× 调制、非平滑纯载体）；移植后**仍须**过预注册的
-A+B carrier 门才算数。**不**用"更强 M"、burst-count H 暂缓（stop condition #4）。
+**能写**：在这个**高度简化的 rate 模型**里，"去同步的局部抑制"假设是**可信的、值得移植**的（局部版去同步 + 群体
+不塌到 OFF、全局版不行）——这是**假设经受住 plausibility 筛选**，**不是**"机制已在 SNN 上验证"、**不是**"正确杠杆
+已确立"。下一步＝在原始各向异性 SNN 上实测（**仅抑制侧、不动 E→E**）。**不能写**：这不是 SNN 结果、不是 LFP 上的
+carrier；这个 toy 模型没有 Z/M、没有二维 E/I、没有各向异性几何、patch index 是环不是物理空间、`w_rec` 是人为放入
+制造振荡的、图里的"斜纹"只是 phase-staggered patch activity 不是空间波；rate 代理不含带内高频结构、群体仍有
+~1.3× 调制。移植后**仍须**过预注册 A+B 门才算数。**不**用"更强 M"、burst-count H 暂缓（stop condition #4）。
 
 图 `results/topic4_sef_hfo/zm_patch_screen/figures/patch_screen.png`（+README）；summary
 `patch_screen_summary.json`；测试 `tests/test_topic4_zm_patch_screen.py`（8 green，锁定振荡带 + global>patchwise
 同步度 + patchwise 过载体代理）。
+
+## 10. Post-review 修订（v2 忠实门 + 诚实性纠正，2026-07-24）
+
+Review 发现 §8 的正式门实现偏离了预注册 spec，且报告有几处事实错误。保留 v1 作历史（`topic4_zm_carrier_verdict`
++ `topic4_zm_ictal_carrier`），新增**忠实版 `src/topic4_zm_carrier_gate_v2.py`**，用现有 NPZ **离线重判、不重跑 SNN**。
+
+**六处门修正（v1→v2）**：① onset＝第一次持续≥100ms 越 ON（v1 是"最长 FLOOR 段起点"）；② baseline＝真正的
+`[0,onset)`（v1 是固定前 300ms）；③ 电极 dB baseline＝固定早窗（发作前 300ms，避开爆发污染；v1 用 `[0,onset)`＝
+`[0,8720ms]` 混入 8.7s 爆发）；④ B2＝高频增强须与 B1 低-γ macroepisode **时间窗重叠**（v1 只查任意触点任意时刻有峰）；
+⑤ A7 第三维用**活跃面积**（v1 误用 rate-energy）；⑥ A8 用**沿轴 first-passage 时延梯度**（v1 只比 50ms 内活跃面积大小）。
+
+**v2 离线重判（`scripts/recompute_carrier_gate_v2.py` → `carrier_gate_v2_seed1.json`）——定性 NO-GO 稳，数值修订**：
+- **源空间**：sg 忠实门下**根本没有持续 onset**（核心爆发太短、越 ON 撑不满 100ms）→ gate A trivially fail →
+  `fail_hfo_like_train`。这比 v1 的"occ 0.17"**更干净**地说明是爆发串。bare=`fail_runaway`（不变）、interictal_ctrl=
+  `fail_hfo_like_train`（不变）。
+- **电极**：用干净早 baseline，汇侧活跃触点（ICL1/8/9/10）30-80Hz 峰值 **35-49 dB**（比 v1 的 14-32 高，因为 v1
+  baseline 被爆发抬高了）、macroepisode occupancy **中位 0.75**，对 baseline 窗（150/300/500/800ms）**不敏感**，
+  **0 个触点达 0.80**。所以电极侧比 v1（0.55）"更接近持续"但仍 borderline、**没过**。（v1 的"最优触点 occ 1.0"是
+  安静平触点如 SCL6 峰值 2.2dB 的假象，已改成看活跃触点。）
+- **结论**：忠实门下**两侧一致 NO-GO**，且源侧结论更强（无持续 onset）、电极侧更诚实（活跃触点 occ~0.75 borderline，
+  非 v1 的"clearly 0"）。
+
+**诚实性纠正**：① substrate 是 **32000 E + 8000 I**（archive 早稿误写"2万 E"，已改）；② 引擎不是"byte-unchanged"——
+`slow_field.py` 改了 15 行（**纯加观测 trace，spike 输出 byte-parity、BASELINE_SHA 不动、6 个 guarded 核心文件未动**），
+正确说法＝"observation-only engine-source change"；③ "每 2 分钟资源日志"是 scratchpad 里的**临时**产物（非持久 artifact），
+持久的是每臂 JSON 里的 `mem` 快照。
+
+**patch screen 措辞降级**：`carrier_proxy` 现把**去同步**写进 pass 条件（不再只是叙述）；结论从"patchwise 是正确杠杆/
+directional GO"降级为"去同步局部抑制假设**通过 reduced-model plausibility 筛选**"（见 §9 修订）。
+
+**仍未做（下一轮）**：忠实 A8 空间传播只有在出现持续 onset 的候选上才承重（当前爆发串够不到）；把 toy patch 升级成
+与 32×32 慢场对齐的**二维连续抑制场** `τ_S ∂_t S_L(x) = -S_L + μ_L(x)`、`I_EE_eff = I_EE/(1+α_L S_L(x)+α_G S_G)`
+（σ_S 锚到抑制空间尺度）；frozen-z 多档 + matched 参数 + 长时稳定 + 相位重置返回的动力学验证；最后才是最小 SNN
+pilot（global/local/local+weak-global 三臂、seed1、H off、过忠实 A+B 门）。**暂不调 H、暂不启动大规模 patchwise SNN 网格。**
