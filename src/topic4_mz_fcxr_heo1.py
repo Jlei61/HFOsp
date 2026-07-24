@@ -19,7 +19,7 @@ HEO_BRANCH = A AND B AND C AND D AND E.
 from __future__ import annotations
 
 import numpy as np
-from scipy.signal import decimate, spectrogram, welch
+from scipy.signal import csd, decimate, spectrogram, welch
 
 # ---- locked spectral + gate constants (design lock §3) ----
 FS_WORK = 1000.0
@@ -152,6 +152,62 @@ def _osc_peak(f, psd, lo=OSC_LO, hi=OSC_HI):
     return peak_hz, float(prom)
 
 
+# ----------------------------------------------------------------- plateau-independent diagnostics
+def oscillation_probe(lfp, rate, dt, warmup_ms=500.0):
+    """Plateau-INDEPENDENT oscillation characterization: does a coherent cross-contact rhythm exist at
+    ALL, regardless of the strict 30-150 Hz broadband-platform gate? Reports the population-rate and
+    per-contact dominant frequency (2-300 Hz), the fraction of contacts sharing it (+-2 Hz), and the
+    cross-contact magnitude-squared coherence + phase spread at that frequency (vs contact 0). This is
+    NOT Gate D — Gate D only checks a 30-150 Hz peak ON a detected plateau; this always runs."""
+    ldec, fs = decimate_to_work(lfp, dt)
+    rdec, _ = decimate_to_work(rate, dt)
+    s0 = int(round(warmup_ms / 1000.0 * fs))
+    seg, segr = ldec[s0:], rdec[s0:]
+    nan = dict(rate_dominant_hz=float("nan"), contact_center_hz=float("nan"), frac_contacts_common=0.0,
+               coherence_med=0.0, coherence_min=0.0, phase_span_deg=0.0, phase_deg=[],
+               mean_rate_hz=float(segr.mean()) if segr.size else float("nan"))
+    if seg.shape[0] < 256:
+        return nan
+    nper = int(min(512, max(128, seg.shape[0] // 6)))   # ~8-12 averaging segments -> honest coherence
+    band = None
+    fr, pr = welch(segr - segr.mean(), fs=fs, nperseg=nper)
+    band = (fr > 2.0) & (fr < 300.0)
+    rate_hz = float(fr[band][np.argmax(pr[band])]) if np.any(band) else float("nan")
+    peaks = []
+    for c in range(seg.shape[1]):
+        fc, pc = welch(seg[:, c] - seg[:, c].mean(), fs=fs, nperseg=nper)
+        m = (fc > 2.0) & (fc < 300.0)
+        peaks.append(float(fc[m][np.argmax(pc[m])]) if np.any(m) else float("nan"))
+    peaks = np.asarray(peaks)
+    center = float(np.nanmedian(peaks))
+    frac_common = float(np.mean(np.abs(peaks - center) <= 2.0))
+    ref_c = seg[:, 0] - seg[:, 0].mean()
+    cohs, phis = [], []
+    for c in range(seg.shape[1]):
+        x = seg[:, c] - seg[:, c].mean()
+        fcx, Pxy = csd(ref_c, x, fs=fs, nperseg=nper)
+        _, Pxx = welch(ref_c, fs=fs, nperseg=nper)
+        _, Pyy = welch(x, fs=fs, nperseg=nper)
+        i = int(np.argmin(np.abs(fcx - center)))
+        cohs.append(float(np.abs(Pxy[i]) ** 2 / (Pxx[i] * Pyy[i] + 1e-300)))
+        phis.append(float(np.angle(Pxy[i], deg=True)))
+    span = float(np.ptp(np.degrees(np.unwrap(np.radians(phis))))) if len(phis) > 1 else 0.0
+    return dict(rate_dominant_hz=rate_hz, contact_center_hz=center, frac_contacts_common=frac_common,
+                coherence_med=float(np.median(cohs)), coherence_min=float(np.min(cohs)),
+                phase_span_deg=span, phase_deg=[round(p, 1) for p in phis],
+                mean_rate_hz=float(segr.mean()))
+
+
+def band_db_field(lfp, dt, baseline_ref):
+    """Per-(contact,band) baseline-normalized ΔdB = 10*log10(median cell band power / baseline median
+    power). This is the quantity the platform gate composes — report it to show WHERE the fast-band
+    energy actually reaches, separate from the absolute-energy field."""
+    ldec, fs = decimate_to_work(lfp, dt)
+    bp, _ = band_power_spectrogram(ldec, fs)
+    cell_med = np.median(bp, axis=0)
+    return 10.0 * np.log10(cell_med / np.maximum(baseline_ref["med_power"], 1e-300))
+
+
 # ----------------------------------------------------------------- classifier
 def classify_heo(lfp, rate, dt, scl_mask, baseline_ref, safety=None):
     """Full HEO gate. safety = numerical row (numerical_unsafe, runaway_early_stop_ms). Returns a
@@ -210,6 +266,11 @@ def classify_heo(lfp, rate, dt, scl_mask, baseline_ref, safety=None):
             osc["common_center"] = bool(np.mean(np.abs(np.array(peaks) - center) <= OSC_CENTER_TOL_HZ) >= 0.5)
     osc_ok = bool(plateau is not None and osc["rate_prom_db"] >= OSC_PROM_DB
                   and osc["frac_contacts_osc"] >= 0.5 and osc["common_center"])
+    # Gate D only evaluates 30-150 Hz oscillation ON a plateau -> distinguish "not evaluated" from
+    # "evaluated and failed" so a no-plateau run is never mis-read as "no oscillation".
+    gate_D_status = ("not_evaluated_no_plateau" if plateau is None
+                     else ("pass" if osc_ok else "fail_on_plateau"))
+    probe = oscillation_probe(lfp, rate, dt)      # plateau-INDEPENDENT coherent-rhythm characterization
 
     gate_A = plateau is not None
     gate_C = bool(platform.any())
@@ -223,7 +284,7 @@ def classify_heo(lfp, rate, dt, scl_mask, baseline_ref, safety=None):
         HEO_BRANCH=heo,
         gate_A_plateau=bool(gate_A), gate_B_broadband=bool(gate_B), gate_C_platform=bool(gate_C),
         gate_D_oscillation=bool(gate_D), gate_E_numerical=bool(gate_E),
-        plateau=plateau, oscillation=osc,
+        gate_D_status=gate_D_status, plateau=plateau, oscillation=osc, oscillation_probe=probe,
         max_platform_contacts=int(n_high.max()) if n_high.size else 0,
         max_platform_scl=int(scl_high.max()) if scl_high.size else 0,
         platform_window_frac=float(platform.mean()) if platform.size else 0.0,

@@ -395,6 +395,52 @@ def test_heo_silent_post_tail_localizes_plateau():
     assert v["plateau"]["j"] * HEO.HOP_MS < 2000.0
 
 
+def test_oscillation_probe_recovers_coherent_rhythm():
+    """Plateau-INDEPENDENT probe: a common cross-contact rhythm -> dominant freq + high coherence."""
+    n = 3000
+    t = _tt(n)
+    ph = np.linspace(0, np.pi, NC)                      # 0..180 deg phase ramp across contacts
+    lfp = np.stack([3.0 * np.sin(2 * np.pi * 40.0 * t + ph[c]) for c in range(NC)], axis=1)
+    lfp += 0.05 * np.random.default_rng(0).standard_normal((n, NC))
+    rate = 120.0 + 30.0 * np.sin(2 * np.pi * 40.0 * t)
+    pr = HEO.oscillation_probe(lfp, rate, DT_T)
+    assert abs(pr["rate_dominant_hz"] - 40.0) <= 2.0
+    assert abs(pr["contact_center_hz"] - 40.0) <= 2.0
+    assert pr["frac_contacts_common"] == 1.0 and pr["coherence_med"] > 0.9
+    assert pr["phase_span_deg"] > 90.0                  # the 0..180 spatial gradient is recovered
+
+
+def test_oscillation_probe_incoherent_has_low_coherence():
+    rng = np.random.default_rng(1)
+    n = 3000
+    lfp = rng.standard_normal((n, NC))                  # independent white noise per contact
+    rate = 5.0 + rng.standard_normal(n)
+    pr = HEO.oscillation_probe(lfp, rate, DT_T)
+    assert pr["coherence_med"] < 0.5                    # no common rhythm
+
+
+def test_band_db_field_matches_baseline_ratio():
+    rng = np.random.default_rng(2)
+    ref = _baseline_ref(rng)
+    lfp = _hi_broadband(rng, 3000, sigma=4.0)           # ~ +12 dB white broadband vs sigma=1 baseline
+    ddb = HEO.band_db_field(lfp, DT_T, ref)
+    assert ddb.shape == (NC, len(HEO.BANDS))
+    assert np.median(ddb) > 6.0                         # broadband elevation shows up as positive dB
+
+
+def test_gate_D_status_reports_not_evaluated_without_plateau():
+    """Gate D is only evaluated on a plateau; without one the verdict must say so (not 'no oscillation')."""
+    rng = np.random.default_rng(3)
+    ref = _baseline_ref(rng)
+    n = 3000
+    lfp = _white(rng, n, 1.0)                           # quiet -> no plateau
+    rate = 0.6 + 0.1 * rng.standard_normal(n)
+    v = HEO.classify_heo(lfp, rate, DT_T, SCL_T, ref, _safe())
+    assert v["plateau"] is None
+    assert v["gate_D_status"] == "not_evaluated_no_plateau"
+    assert "oscillation_probe" in v                     # always-measured coherent-rhythm characterization
+
+
 def test_heo_runaway_and_unsafe_drop_gate_E():
     rng = np.random.default_rng(7)
     ref = _baseline_ref(rng)
