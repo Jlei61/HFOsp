@@ -1,6 +1,9 @@
-"""carrier_gate_v2 (2026-07-24, post-review): FAITHFUL implementation of the pre-registered gate (spec
-§2-§4). v1 (src/topic4_zm_carrier_verdict.analyze_macroepisode + src/topic4_zm_ictal_carrier) is KEPT for
-history; it silently deviated from the spec on four clauses, caught in review:
+"""carrier_gate_v2 (2026-07-24, post-review) -- a VERSIONED REVISED PROTOCOL, NOT a literal-faithful
+implementation of the pre-registered spec. It corrects v1's spec-deviations AND makes two deliberate
+revisions of its own: the observed dB baseline uses a fixed EARLY window (not the spec's [0,onset), to
+avoid burst-pollution), and the onset is re-validated after the baseline update. Call it "revised gate
+v2.1", not "the faithful gate". v1 (src/topic4_zm_carrier_verdict.analyze_macroepisode +
+src/topic4_zm_ictal_carrier) is KEPT for history; it silently deviated from the spec on these clauses:
 
   1. onset = start of the longest FLOOR episode  ->  should be FIRST sustained ON crossing (>= MIN_ONSET_MS)
   2. baseline = fixed first 300 ms              ->  should be [0, onset)
@@ -17,12 +20,13 @@ from __future__ import annotations
 import numpy as np
 
 from src.topic4_zm_carrier_verdict import (
-    ictal_carrier_verdict, is_sustained,
+    ictal_carrier_verdict,
     ON_FRAC, FLOOR_FRAC, MAX_GAP_MS, MIN_MACRO_MS, OCCUPANCY_MIN, SMOOTH_MS,
-    SEP_FACTOR, A7_DIMS_REQUIRED, ENH_DB, N_CONTACTS_MIN, DIMS_REQUIRED, FLASH_WINDOW_MS,
+    SEP_FACTOR, A7_DIMS_REQUIRED, ENH_DB, N_CONTACTS_MIN, FLASH_WINDOW_MS,
     _merge_episodes, _longest_subthreshold_run_ms)
 import src.topic4_zm_ictal_carrier as CG
 
+GATE_VERSION = "carrier_gate_v2.1_revised_2026-07-24"
 PROVISIONAL_BASELINE_MS = 300.0
 MIN_ONSET_MS = 100.0        # spec: ON must persist this long to count as onset (v1 never used it)
 OBS_BASELINE_MS = 300.0     # observed dB baseline = a fixed EARLY (pre-first-burst) window, not [0,onset)
@@ -58,10 +62,21 @@ def analyze_macroepisode_v2(e, dt_ms, provisional_baseline_ms=PROVISIONAL_BASELI
     oi = first_sustained_crossing(e >= on0, min_bins)
     if oi is None:
         return base                                        # no sustained onset -> no_onset (gate A trivially fails)
-    b = float(np.median(e[:oi])) if oi >= 2 else prov_b    # spec: baseline from the true pre-onset window [0, onset)
-    amp = peak - b
+    # spec: baseline from the true pre-onset window [0, onset). The [0,onset) baseline can differ from the
+    # provisional (first-window) baseline, which changes ON -> RE-VALIDATE the onset against the updated
+    # threshold (iterate once for stability); if the crossing does not survive it, return no_onset.
+    b = prov_b
+    for _ in range(2):
+        b = float(np.median(e[:oi])) if oi >= 2 else prov_b
+        amp = peak - b
+        on2 = b + ON_FRAC * amp
+        oi2 = first_sustained_crossing(e >= on2, min_bins)
+        if oi2 is None:
+            return dict(base, baseline=b, amp=amp)         # onset does not survive the updated baseline
+        if oi2 == oi:
+            break
+        oi = oi2
     floor = b + FLOOR_FRAC * amp
-    on2 = b + ON_FRAC * amp
     gap = int(round(MAX_GAP_MS / dt_ms))
     eps = _merge_episodes(e >= floor, gap)
     cont = [(i0, i1) for i0, i1 in eps if i0 <= oi < i1]
@@ -109,8 +124,10 @@ def _axial_recruitment(kymo, kt_ms, onset_ms, dt_ms, window_ms=400.0, active_fra
     window, the first time it crosses active_frac_of_peak of its in-window max; the spread of those times
     is the recruitment latency. flash = spread <= FLASH_WINDOW_MS (near-simultaneous ignition)."""
     kymo = np.asarray(kymo, float)
-    oi = int(round(onset_ms / dt_ms))
-    w = max(1, int(round(window_ms / dt_ms)))
+    kt = np.asarray(kt_ms, float)
+    col_dt = float(kt[1] - kt[0]) if kt.size > 1 else dt_ms      # use the kymograph's OWN time axis (robust
+    oi = int(np.searchsorted(kt, onset_ms)) if kt.size else int(round(onset_ms / dt_ms))  # to kt!=dt spacing)
+    w = max(1, int(round(window_ms / col_dt)))
     seg = kymo[:, oi:oi + w]
     if seg.shape[1] == 0:
         return dict(spread_ms=0.0, n_active_axial=0, whole_field_flash=True)
@@ -128,15 +145,17 @@ def _axial_recruitment(kymo, kt_ms, onset_ms, dt_ms, window_ms=400.0, active_fra
                 whole_field_flash=bool(spread_ms <= FLASH_WINDOW_MS))
 
 
-def compute_source_gate_v2(core_rate, active_frac, kymo_axis, kt_ms, bin_ms, runaway_early_stop_ms):
-    """Gate-A metrics from saved arrays, faithful to spec: analyze_macroepisode_v2 + A7 active-AREA + A8
-    axial first-passage. Returns the dict consumed by ictal_carrier_verdict (plus diagnostics)."""
+def compute_source_gate_v2(core_rate, all_rate, active_frac, kymo_axis, kt_ms, bin_ms, runaway_early_stop_ms):
+    """Gate-A metrics from saved arrays (revised protocol): analyze_macroepisode_v2 + A7 active-AREA + A8
+    axial first-passage + tail-escalation (from all-E rate) + whole-field saturation (from active area).
+    Returns the dict consumed by ictal_carrier_verdict (plus diagnostics)."""
     e_A = CG.moving_average(np.asarray(core_rate, float), SMOOTH_MS / bin_ms)
     macro = analyze_macroepisode_v2(e_A, bin_ms)
     onset_ms = macro["onset_ms"]
 
     whole_field_flash = False
     has_recruitment = False
+    saturated_plateau = False
     src_sep_count = A7_DIMS_REQUIRED
     if onset_ms is not None and macro["sustained"]:
         oi = int(round(onset_ms / bin_ms))
@@ -148,6 +167,7 @@ def compute_source_gate_v2(core_rate, active_frac, kymo_axis, kt_ms, bin_ms, run
         af = np.asarray(active_frac, float)
         dur_bins = int(macro["duration_ms"] / bin_ms)
         macro_area = float(af[oi:oi + dur_bins].mean()) if dur_bins else 0.0
+        saturated_plateau = bool(macro_area >= CG.PLATEAU_AREA_FRAC)   # sustained AND whole-sheet active
         pre = e_A[:oi]
         if pre.size:
             b = float(np.median(pre))
@@ -165,7 +185,8 @@ def compute_source_gate_v2(core_rate, active_frac, kymo_axis, kt_ms, bin_ms, run
                 # recruitment only gates fail_plateau when there IS a sustained source; a NON-sustained
                 # source (no >=100ms onset = a burst train) must route to fail_hfo_like_train, not fail_plateau
                 has_recruitment=(has_recruitment if (onset_ms is not None and macro["sustained"]) else True),
-                saturated_plateau=False, tail_escalating=False, src_sep_count=src_sep_count,
+                saturated_plateau=saturated_plateau,
+                tail_escalating=CG._tail_escalates(np.asarray(all_rate, float)), src_sep_count=src_sep_count,
                 runaway_early_stop_ms=runaway_early_stop_ms, e_A=e_A)
 
 
@@ -202,13 +223,42 @@ def compute_observed_gate_v2(lfp, fs, baseline_ms=OBS_BASELINE_MS):
                                 or b2_highfreq_overlaps_window(bb_db[:, c], (i0, i1)) for c in range(lg_db.shape[1]))
     return dict(n_sustained_contacts=len(sustained), highfreq_enhanced=bool(highfreq_enhanced),
                 best_macro=best, best_contact_idx=best_idx, contacts=contacts,
+                lg_db=lg_db, frame_dt_ms=dt_frame_ms, pre_frames=pre_frames,
                 contact_peak_lowgamma_db=[round(c["peak_lowgamma_db"], 2) for c in contacts])
 
 
+def observed_sep_count_v2(observed):
+    """B6 (real 4-dim, replacing v2.0's placeholder): the best-contact macroepisode vs its pre-onset
+    returning events on {duration, duty-cycle, energy, spatial-extent}. Duration/energy need a pre-onset
+    reference event (else that dim can't be established -> counts 0, conservative = no false pass)."""
+    bc = observed["best_contact_idx"]
+    lg = observed["lg_db"][:, bc]
+    dt = observed["frame_dt_ms"]
+    pre = observed["pre_frames"]
+    macro = observed["best_macro"]
+    if macro["onset_ms"] is None or macro["duration_ms"] <= 0:
+        return 0
+    b = float(np.median(lg[:pre])) if pre else 0.0
+    amp = macro["peak"] - b
+    ev = _events_v2(lg[:pre], dt, b, amp)
+    on = b + ON_FRAC * amp
+    pre_duty = float((lg[:pre] >= on).mean()) if pre else 0.0
+    oi = int(macro["onset_ms"] / dt)
+    macro_energy = float(np.clip(lg[oi:oi + int(macro["duration_ms"] / dt)] - b, 0, None).sum() * dt)
+    dims = 0
+    if ev:
+        med_dur = float(np.median([(i1 - i0) * dt for i0, i1 in ev]))
+        med_energy = float(np.median([np.clip(lg[i0:i1] - b, 0, None).sum() * dt for i0, i1 in ev]))
+        dims += macro["duration_ms"] >= SEP_FACTOR * max(med_dur, 1e-9)          # duration
+        dims += macro_energy >= SEP_FACTOR * max(med_energy, 1e-9)               # energy
+    dims += macro["occupancy"] >= SEP_FACTOR * max(pre_duty, 1e-9)               # duty-cycle
+    dims += observed["n_sustained_contacts"] >= N_CONTACTS_MIN                   # spatial extent
+    return int(dims)
+
+
 def carrier_verdict_v2(source, observed):
-    """Assemble + adjudicate with the unchanged v1 verdict logic (only the metrics are corrected). B6 sep
-    is left as the conservative 'spatial extent' check (>=2 sustained contacts) since a full 4-dim redo
-    is only reached when gate A passes, which does not happen for the current burst-train arms."""
+    """Assemble + adjudicate with the unchanged v1 verdict logic (only the metrics are corrected). B6 is
+    now the REAL 4-dim separation (observed_sep_count_v2), not the v2.0 placeholder."""
     m = dict(
         runaway_early_stop_ms=source.get("runaway_early_stop_ms"),
         tail_escalating=source["tail_escalating"],
@@ -220,6 +270,6 @@ def carrier_verdict_v2(source, observed):
         obs_n_sustained_contacts=observed["n_sustained_contacts"],
         obs_highfreq_enhanced=observed["highfreq_enhanced"],
         obs_best_macro=observed["best_macro"],
-        obs_sep_count=DIMS_REQUIRED if observed["n_sustained_contacts"] >= N_CONTACTS_MIN else 0,
+        obs_sep_count=observed_sep_count_v2(observed),
     )
     return ictal_carrier_verdict(m)
