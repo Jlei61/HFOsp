@@ -1,210 +1,239 @@
-# Reduced 2-D `S_L(x)+S_G` field — transversal-instability screen (design, revised per review, 2026-07-24)
+# Reduced 2-D `S_L(x)+S_G` field — transversal-instability screen (design, revision 2, 2026-07-25)
 
 **Status: design, pre-registered. LOCKED before any run.** Branch `codex/topic4-m4-snn-native-exit`.
-This is the reduced-model gate the seed-1 SNN pilot is contingent on. It runs a **rate field only** — NO
-SNN, NO H/termination, NO E→E topology change. Companion: carrier archive
-`docs/archive/topic4/sef_hfo/zm_ictal_carrier_gate_2026-07-24.md` §9-§10; the K-patch predecessor
+Reduced **rate field only** — NO SNN, NO H/termination, NO E→E change. Rev-2 incorporates the second review:
+the pool is now **dual (divisive + subtractive)**, a gating **Phase 0** mean-field check is added, and the
+transverse readout is a proper **per-mode 3×3 Floquet** analysis. Companion carrier archive
+`docs/archive/topic4/sef_hfo/zm_ictal_carrier_gate_2026-07-24.md` §9-§10; predecessor
 `src/topic4_zm_patch_screen.py`.
 
 ---
 
 ## 0. The one question (scoped)
 
-On a **fixed anisotropic excitatory scaffold** with a **matched mean inhibition budget**, can a **local**
-inhibition field `S_L(x)` **destabilise the transverse (spatial) modes** of the synchronised ictal carrier
-and settle into a **recoverable, long-time-bounded, high-duty phase-staggered** state — where a single
-**global** scalar `S_G` at the same mean budget leaves the carrier synchronised?
+On a **fixed anisotropic excitatory scaffold** with a **matched inhibition budget**, does making the
+inhibitory pool **spatially local** (`S_L(x)`) render the **synchronised burst-train orbit transversally
+unstable** — so the population settles into a **recoverable, long-time-bounded, high-duty phase-staggered**
+state — where a single **global** scalar `S_G` at the same budget keeps it synchronised?
 
-The carrier gate (§8-§10 of the archive) showed the Z/M+global-`S_G` SNN makes an HFO **burst train**: dense
-but ~0.6 s clusters that never connect into a ≥2 s macroepisode. The mechanism hypothesis is that a **single
-global scalar** resets the whole core synchronously each cycle. This screen tests, in a reduced 2-D field,
-whether **spatially-resolved** inhibition removes that synchronous reset — i.e. whether the synchronised
-periodic orbit is **transversally unstable** under local (not global) inhibition, and whether the resulting
-phase-staggered state is a bounded attractor.
+Carrier gate §8-§10: the Z/M+global-`S_G` SNN makes an HFO **burst train** (dense ~0.6 s clusters that never
+connect into a ≥2 s macroepisode), hypothesised to be a **single global scalar resetting the whole core
+synchronously**. This screen tests, in a reduced 2-D field, whether spatially-resolved inhibition removes that
+synchronous reset.
 
-**This screen does NOT claim**: the full Z/M onset→termination lifecycle; a quantitative equivalence between
-the reduced excitability coordinate and the SNN's `z`; that the SNN has a clinical ictal carrier. A pass only
-buys a clean migration reason: *what must migrate is the spatial STRUCTURE of local inhibition, not a
-termination current and not an E→E change.*
+**Non-goals** (unchanged, restated §10): the full Z/M onset→termination lifecycle; a quantitative
+`ξ ↔ z` equivalence; that the SNN has a clinical ictal carrier. A pass buys ONLY a migration justification:
+*what must migrate is the spatial STRUCTURE of local inhibition — not a termination current, not an E→E change.*
 
 ---
 
-## 1. Model — fast E-rate field
+## 1. Model — fast E-rate field with a DUAL (divisive + subtractive) pool
 
-One fast E-rate variable `r(x,t) ≥ 0` per cell on an `n×n` lattice (`n=32`, matching the SNN slow-field grid)
-over the `L×L` sheet (`L=20 mm`). Reuse `src/sef_hfo_field.convolve_periodic` + a new
-`anisotropic_gaussian` kernel; reuse the SNN pooling nonlinearities (§3).
-
-```
-τ_a ṙ(x) = −r(x) + F( I0(ξ)  +  [ w_rec·r(x) + w_c·(K_E ∗ r)(x) ] / (1 + α_L·S_L(x) + α_G·S_G)  −  θ )
-```
-
-- `F(u) = a_max·[u]_+ / (u_half + [u]_+)` — saturating (bounds `r`), as in the K-patch model.
-- **Divisive containment acts on the RECURRENT excitation only** (`w_rec·r + w_c·K_E∗r`), matching the SNN
-  `S_G` acting on `I_E_rec`. The external drive `I0(ξ)` is OUTSIDE the division.
-- `w_rec` = **local self-recurrence**; `w_c·(K_E∗r)` = **non-local anisotropic recurrence**, with `K_E(0)=0`
-  so the two terms do not double-count the self weight.
-- **Fast-field parameters inherit the K-patch calibrated oscillatory regime** (`topic4_zm_patch_screen`:
-  `τ_a=10, w_rec=2, θ=0.5, a_max=1, u_half=0.5`; `α_ref` at the divisive scale `g_S=16`). `I_base` and `κ_ξ`
-  are fixed in Phase A so the 5 `ξ` levels land inside the mean-field oscillation window (§6.1, §8-A).
-
-## 2. Excitability coordinate `ξ` (NOT "frozen z")
-
-The reduced rate field has no per-cell `z`; `z`-depletion (use-dependent inhibition loss) raises
-excitability. So the frozen-slow axis is an **independent excitability coordinate**:
+One fast E-rate variable `r(x,t) ≥ 0` per cell on an `n×n` lattice (`n=32` primary, `n=64` central-candidate
+sensitivity) over `L=20 mm`. Reuse `sef_hfo_field.convolve_periodic` + a new anisotropic kernel; reuse the SNN
+pooling nonlinearities (§3).
 
 ```
-ξ = 1 − z ,      I0(ξ) = I_base + κ_ξ·ξ        (equivalently θ_eff(ξ) = θ0 − κ_ξ·ξ)
+u(x)     = I0(ξ)  +  [ w_rec·r(x) + w_c·(K_E ∗ r)(x) ] / (1 + α·S_eff(x))  −  β·S_eff(x)  −  θ
+τ_a ṙ(x) = −r(x) + F(u(x)) ,        F(u) = [u]_+ / (u_half + [u]_+)     (a_max=1, u_half=0.5)
 ```
 
-`ξ` scales **excitability only**; it MUST NOT scale `S_L`/`S_G` (that would fuse use-dependent inhibition
-depletion with spatial containment and make the phase-staggered state's origin unattributable). Until `κ_ξ`
-is calibrated from SNN frozen-`z` data, the variable is reported as the **frozen excitability coordinate ξ**,
-never as "frozen z". This is a legitimate reduced-order projection of the model's slow variable onto a
-neural-field excitability parameter (per review: Proix et al., PMC5852068), not a term-by-term replica.
+- **DUAL inhibition, both faithful to the SNN `S_G`** (`slow_field` has `alpha_G` divisive **and** `beta_SG`
+  subtractive): `α·S` divides the **recurrent excitation only** (matches `S_G` on `I_E_rec`); `−β·S`
+  subtracts on the membrane. **Why dual is required** (Phase-0 finding, §6.0): with the divisive term ALONE,
+  the external drive `I0` props the high state up so the pool cannot produce a full OFF/reset → no synchronised
+  orbit exists (a uniform-mean-field scan over `W0∈[2,24], α∈[0.5,16], I0∈[0,2], θ∈[0.3,0.8]` found 0
+  oscillatory sets). Adding `−β·S` restores a clean relaxation orbit (trough→0, period ~150–220 ms ≈ the SNN
+  ~300 ms IBI; 111 oscillatory sets). The subtractive reset is what ties synchrony to the pool's spatial rank
+  (global `−β·S_G` resets every cell identically = synchronous; local `−β·S_L(x)` resets each microdomain =
+  can desynchronise).
+- `w_rec` = local self-recurrence; `w_c·(K_E∗r)` = non-local anisotropic recurrence; `K_E(0)=0` (no
+  self-double-count), `K_E` renormalised to `Σ=1` (§4). On the uniform manifold the total recurrent gain is
+  `W0 = w_rec + w_c`.
+- `S_eff(x)` is the pool the cell sees, set by the arm (§5).
 
-## 3. Inhibition fields — pooling order is nonlinearity-THEN-pool
+## 2. Excitability coordinate `ξ`
 
-Matches the SNN (`slow_field.py:577-581`: `z_G = psi_recruit(r); A_G = pnorm_pool(z_G); μ_G,S_G low-pass`).
-Decide **per location** whether it is strongly active, THEN pool — so quiescent surround does not recruit the
-pool:
+`ξ ∈ [0,1]` is a **frozen excitability coordinate that monotonically represents inhibition depletion**
+(higher `ξ` = more depleted = more excitable): `I0(ξ) = I_base + κ_ξ·ξ`. It scales **excitability only** and
+MUST NOT scale `S_L`/`S_G` (that would fuse use-dependent inhibition depletion with spatial containment and
+make the staggered state's origin unattributable). It is a reduced-order excitability abstraction (Proix et al.
+PMC5852068, for motivation only), **NOT** a term-by-term `z` replica; `κ_ξ` is uncalibrated and `ξ` is never
+called "frozen z", and there is no strict `ξ=1−z` claim.
+
+## 3. Inhibition pools — nonlinearity-THEN-pool (matches the SNN)
+
+Matches `slow_field.py:577-581` (`z_G=psi_recruit(r)` per-location, THEN `A_G=pnorm_pool(z_G)`, THEN
+two-stage low-pass `μ→S`). Decide per-location whether it is strongly active FIRST, then pool, so quiescent
+surround does not recruit the pool:
 
 ```
-Ψ(r) = psi_recruit(r; r0=0, r50=0.4, n=2)                       (reuse slow_field.psi_recruit)
-A_L(x) = [ (K_σS ∗ Ψ(r)^p)(x) ]^{1/p}          (local drive; p = p_pool = 3)
-A_G    = [ ⟨ Ψ(r)^p ⟩_x ]^{1/p}                (global drive; reuse pnorm_pool over the whole field)
-τ_μ μ̇_L = −μ_L + A_L(x) ,   τ_S Ṡ_L = −S_L + S_max·μ_L
-τ_μ μ̇_G = −μ_G + A_G   ,   τ_S Ṡ_G = −S_G + S_max·μ_G
+Ψ(r) = psi_recruit(r; r0=0, r50=0.4, n=2)                          (reuse slow_field.psi_recruit)
+A_L(x) = [ (K_σS ∗ Ψ(r)^p)(x) ]^{1/p}         (local drive; p = p_pool = 3)
+A_G    = [ ⟨ Ψ(r)^p ⟩_x ]^{1/p}               (global drive; reuse slow_field.pnorm_pool)
+τ_μ μ̇_L = −μ_L + A_L(x) ,  τ_S Ṡ_L = −S_L + S_max·μ_L
+τ_μ μ̇_G = −μ_G + A_G    ,  τ_S Ṡ_G = −S_G + S_max·μ_G
 ```
-
-`τ_μ=30, τ_S=80, S_max=1` (SNN values). Both pooling kernels are **normalised to sum 1** (see §5).
+`τ_μ=30, τ_S=80, S_max=1` (SNN values). Both pooling kernels normalised to `Σ=1`.
 
 ## 4. Kernels
 
-- **`K_E` — anisotropic, fixed to the SNN scaffold.** Anisotropic Gaussian, aspect ratio `AR=2.0` along the
-  source→sink axis `theta_deg` (the E1146 values `build_connectivity_rot(theta_EE, AR=2.0)` uses), `K_E(0)=0`.
-  Parallel width `σ_E∥`, perpendicular `σ_E⊥ = σ_E∥/AR`. **Not modified in this line** (that would break the
-  transfer back to the anisotropic SNN scaffold). Default `σ_E∥ = 1.0 mm` (sanity-anchor to the SNN E→E length;
-  the ABSOLUTE scale is secondary to `AR` and to being narrower than `K_σS`).
-- **`K_σS` — inhibition pooling kernel.** Normalised **isotropic broad** Gaussian, `σ_S` anchored to the
-  inhibition spatial scale (default `σ_S = 3.0 mm`, broader than `σ_E`, matching the SNN's wide-inhibition /
-  narrow-excitation structure). Local/global inhibition topologies can independently gate local instability,
-  recruitment, and propagation containment (per review: Liou et al., PMC7089769) — this is the structure being
-  tested, not merely an extra global negative current.
+- **`K_E` — the real SNN anisotropic kernel, coarse-grained onto the lattice, FIXED.** Rotated
+  elliptical-exponential (matching `connectivity_rot` + `params.py:68` `l_EE=0.38 mm`, `AR=2`):
+  `K_E(x) ∝ exp(−√((u/l∥)² + (v/l⊥)²))` with `(u,v)` rotated to the source→sink axis `θ_EE`,
+  `l∥ = l_EE·√AR ≈ 0.537 mm`, `l⊥ = l_EE/√AR ≈ 0.269 mm`; `K_E(0)=0`; renormalise `Σ K_E = 1`. **Not modified
+  in this line.** Because `l_EE` is sub-lattice at `n=32` (`0.625 mm/cell`), `n=64` (`0.3125 mm/cell`) is run
+  as a resolution sensitivity for the central candidate; the anisotropy `AR=2` and orientation are the
+  load-bearing features.
+- **`K_σS` — inhibition pooling kernel.** Normalised isotropic Gaussian at a **pre-registered coarse-grained
+  containment scale** `σ_S` (primary `σ_S = 2.0 mm`, broader than `K_E`; the SNN has no native `S_L` pool —
+  direct inhibition ~0.25 mm, slow-resource `σ_q=1.5 mm` — so this is a NEW mechanism scale, not "matching the
+  SNN"). One primary `σ_S` is locked; a `σ_S ∈ {1.0, 2.0, 4.0} mm` sensitivity is run for the central
+  candidate ONLY; `σ_S` is never re-chosen to favour local (Liou et al. PMC7089769, motivation only).
 
-## 5. Three arms + matched inhibition budget
+## 5. Three arms + matched budget
 
-Both pooling kernels normalised (sum 1); identical `Ψ, p, τ_μ, τ_S`. Then:
+Both pooling kernels normalised; identical `Ψ, p, τ_μ, τ_S, α, β`. The arms differ ONLY in the **spatial rank
+of the pool the cells see**:
 
-| arm | `α_L` | `α_G` |
-|---|---|---|
-| global-only | 0 | `α_ref` |
-| local-only | `α_ref` | 0 |
-| mixed (local + weak global) | `(1−ε_G)·α_ref` | `ε_G·α_ref` |
+| arm | `S_eff(x)` |
+|---|---|
+| global-only | `S_G` (scalar) |
+| local-only | `S_L(x)` (field) |
+| mixed | `(1−ε_G)·S_L(x) + ε_G·S_G`,  `ε_G=0.2` |
 
-`ε_G = 0.2` (v1). **`α_L + α_G = α_ref` in ALL three arms.** On the uniform manifold `r(x)=r̄(t)`,
-`S_L(x)=S_G=S̄(t)`, so every arm has the identical divisive factor `1 + α_ref·S̄` on **any** uniform
-trajectory (not just at one reference state). ⇒ **the three arms share the exact same mean-field / synchronised
-orbit; they differ ONLY in the transverse (spatial-mode) stability of that orbit.** That is the whole design:
-the comparison isolates spatial STRUCTURE, not inhibition STRENGTH.
+On the uniform manifold `r(x)=r̄(t) ⇒ S_L(x)=S_G=S̄(t)`, so `S_eff=S̄` and **every arm has the identical
+`(r̄,μ̄,S̄)` mean-field on ANY uniform trajectory** — same `(α,β)`, same synchronised orbit. ⇒ the arms differ
+ONLY in the **transverse (spatial-mode)** stability of that orbit. The comparison isolates spatial STRUCTURE,
+not inhibition STRENGTH.
 
-## 6. Dynamical analysis — transversal instability is the core criterion
+## 6. Dynamical analysis
 
-### 6.1 Mean-field (uniform manifold)
-Reduce to `(r̄, S̄)` (same for all arms): find fixed points, the **oscillation window in `ξ`**, and the
-mean-field Jacobian. A bare mean nullcline can only tell us there is a uniform oscillation — it CANNOT prove a
-spatial staggered attractor.
-
-### 6.2 Transverse Floquet-like growth rate `λ_⊥(k)` — THE key readout
-On the synchronised periodic orbit, linearise for a spatial-Fourier perturbation of wavenumber `k`. Because the
-kernels enter as convolutions, mode `k` sees `K̂_E(k)` and `K̂_σS(k)`; `S_G` (global) contributes only to `k=0`,
-while `S_L` (local) contributes at every `k`. Numerically estimate `λ_⊥(k)` as the **early exponential growth
-rate of the spatial-mode amplitude** `|r̂_k(t)|` over the first few cycles (before nonlinear saturation),
-averaged over the fixed perturbation seeds. **Expectation to be tested (not assumed):**
+### 6.0 Phase 0 — mean-field recalibration + NO-ORBIT STOP (gating; run FIRST)
+Uniform 3-state `(r̄, μ̄, S̄)` (identical across arms):
 ```
-global-only:   λ_⊥(k) < 0   for all k>0        (all transverse modes decay → stays synchronised)
-local / mixed: λ_⊥(k*) > 0   at some k*>0 in a finite ξ window   (a transverse mode grows → lateral instability)
+τ_a ṙ̄ = −r̄ + F(I0(ξ) + W0·r̄/(1+α·S̄) − β·S̄ − θ) ,  τ_μ μ̄̇ = −μ̄ + Ψ(r̄) ,  τ_S S̄̇ = −S̄ + S_max·μ̄
 ```
-Then nonlinear saturation must **bound** the grown mode into a sustained phase-staggered state (NOT runaway,
-NOT collapse). The ξ window where `local λ_⊥(k*)>0` while `global λ_⊥<0` is the window the §8 nonlinear screen
-runs in.
+Pre-register a SMALL continuation over the grid `W0∈{2,3,4,6}, α∈{1,2,4}, β∈{1,2,4,8}, θ∈{0.4,0.5,0.6}`,
+sweeping `I0∈[0.5,2.0]` (seeded from the Phase-0 finding `W0≈2, α≈2, β≈2–4, θ=0.5`, oscillation for
+`I0≈1–1.5`). **Lock the operating point `(W0, α, β, θ)` and the `ξ→I0` map** from a
+synchronised orbit with a clear period, amplitude, and OFF trough, judged on the mean-field ONLY (not
+local/mixed). **If no periodic orbit exists in the pre-registered range → immediate NO-GO; the 2-D field is
+NOT built.** (This is why "inherit the K-patch calibration" is wrong: recurrent-only division is a different
+oscillator.) Mean-field is 3-D; `μ̄=A(r̄)`, `S̄=S_max·μ̄` may be substituted only for the fixed-point equation,
+never for the orbit / Jacobian / continuation.
 
-### 6.3 Transversal-instability numerical protocol (fixes the "uniform IC can't desync" trap)
-A perfectly translation-symmetric system with a uniform IC keeps `r(x,t)=r̄(t)` forever — the uniform manifold
-is invariant, so even a transversally-unstable orbit stays synchronised numerically. Therefore:
-- **Homogeneous parameters** (no per-cell heterogeneity) for the primary transverse-stability test — so what we
-  measure is genuine lateral instability of the orbit, not param-noise / IC-bias desync.
-- Seed the aligned limit cycle with a **fixed zero-mean small perturbation**: `r(x,0) = r̄(0) + ε·δr(x)`,
-  `⟨δr⟩_x = 0`, `ε ≈ 10⁻⁴ ×` local amplitude.
-- **4 pre-fixed perturbation seeds**, the SAME set across all arms (never a different perturbation per arm).
-- Record per-`k` early growth rates.
+### 6.1 Mean-field structure
+Fixed points, oscillation window in `ξ`, mean-field Jacobian (3×3) vs `ξ` — establishes the uniform orbit the
+transverse analysis linearises around. A mean nullcline alone cannot prove a spatial staggered attractor.
 
-## 7. Metrics (locked definitions)
-All are computed **post burn-in** = the first **25%** of each run discarded (matches the patch screen
-`settle_frac=0.25`).
-- **occupancy** — population `P(t)=⟨r⟩_x`; fraction above `floor_frac·P95` (`floor_frac=0.20`) with the OFF
-  state as the absolute baseline (reuse `topic4_zm_patch_screen.population_occupancy`).
-- **R_phase** — Kuramoto order parameter of the per-cell oscillation phases (analytic-signal phase of
-  `r(x,t)−⟨r⟩_t` per active cell): `R = |⟨e^{iφ_x}⟩_x|`. `R≈1` synchronised, `R≈0` desynchronised.
-- **pairwise correlation** — mean pairwise temporal correlation across active cells (as in the patch screen).
-- **local-oscillation** — per active cell: number of completed cycles and normalised peak-to-trough amplitude.
-- **`λ_⊥(k)`** — §6.2 (early-growth estimate over the first ~5 cycles).
-- **active cell** — temporal oscillation amplitude ≥ `AMP_MIN = 0.1 × population peak` (excludes quiescent +
-  dead-plateau cells).
+### 6.2 Transverse Floquet — THE primary criterion (per 2-D mode, 3×3 monodromy)
+On the synchronised periodic orbit `(r_0(t), μ_0(t), S_0(t))`, linearise the FIELD for a spatial-Fourier
+perturbation `(δr, δμ, δS) ∝ e^{i(k_x x + k_y y)}`. Convolutions become multiplications by `K̂_E(k)`,
+`K̂_σS(k)`; **the global pool `S_G` responds only at `k=0`**, so for `k≠0` global-only sees a frozen pool,
+while the local pool `S_L` responds at every `k` via `K̂_σS(k)`. For each mode:
+1. integrate the **3×3 time-periodic variational system** over one orbit period `T`;
+2. form the `3×3` **monodromy matrix**; take the max-magnitude Floquet multiplier `ρ_max`;
+3. `λ_⊥(k_x,k_y) = T^{-1}·log|ρ_max|`.
+Because `K_E` is anisotropic, DO NOT collapse to scalar `|k|` or average over equal `|k|`: save the full 2-D
+`λ_⊥` heatmap, the most-unstable mode `k*`, and its angle vs `θ_EE`. **Sign requires a numerical margin:** the
+same sign at `dt` and `dt/2`, and `|λ_⊥| >` the discretisation-error floor. A full-field small-perturbation
+growth-rate estimate is an **independent sanity check**, NOT the primary estimator.
+Target: `global-only λ_⊥(k)<0 ∀k`; `local/mixed λ_⊥(k*)>0` at some `k*` in a finite `ξ` window.
+
+### 6.3 Nonlinear transverse-instability protocol (fixes the invariant-manifold trap)
+A translation-symmetric system with a uniform IC keeps `r(x,t)=r̄(t)` forever (invariant manifold). Therefore:
+- **Homogeneous parameters** (no per-cell heterogeneity) — primary transverse test measures genuine lateral
+  instability, not param-noise / IC-bias desync.
+- Initialise **all fields to a fixed uniform-orbit phase point** `(r_0(t*), μ_0(t*), S_0(t*))` (so `μ_L,S_L,
+  μ_G,S_G` start at the orbit value, NOT zero — avoids a slow-pool startup transient being read as growth),
+  then add a **fixed zero-mean small perturbation to `r` only**: `r(x,0)=r_0(t*)+ε·δr(x)`, `⟨δr⟩=0`,
+  `ε=10⁻⁴×` amplitude.
+- **4 pre-fixed perturbation seeds**, the SAME set across all arms.
+
+## 7. Metrics (locked; post burn-in = first 25% discarded)
+- **occupancy** — `P(t)=⟨r⟩_x`; fraction above `0.20·P95` (OFF-state absolute baseline; reuse
+  `population_occupancy`).
+- **energy floors** — `P95 ≥ 0.1·a_max` AND `mean P_local ≥ 0.5·mean P_global` (a staggered state must carry
+  real energy, not just avoid zero).
+- **active_area_frac** — fraction of **all** cells with temporal oscillation amplitude ≥ `0.1·a_max`.
+- **oscillatory fraction** — fraction of **all** cells (denominator = every cell, not the active subset)
+  completing ≥ 10 cycles with normalised peak-to-trough `p2p/a_max ≥ 0.20`. Cycle phase via
+  **upward-crossing / cycle interpolation** (relaxation-oscillation-appropriate); Hilbert phase reported as a
+  sensitivity only (non-sinusoidal bursts break Hilbert monotonicity).
+- **R_phase** — spatial Kuramoto `R(t)=|⟨e^{iφ_x(t)}⟩_x|` computed at each time, then **median over the
+  acceptance window**.
+- **pairwise correlation** — mean pairwise temporal correlation across active cells.
+- **period** — dominant cycle period per arm.
+- **`λ_⊥(k)`** — §6.2.
 
 ## 8. Pre-registered acceptance gate
 
-### Phase A — lock the excitability levels FIRST (no post-hoc selection)
-1. Use the **global-only** arm to locate the synchronised-oscillation window in `ξ`.
-2. Pre-fix **5 `ξ` levels inside that window** (evenly spaced).
-3. All arms, all perturbation seeds, and the phase-reset test use **exactly these 5 levels**. Levels are NOT
-   re-chosen after seeing local/mixed results.
+**Phase 0** (§6.0): orbit exists → continue; no orbit → NO-GO (no field built).
 
-### Phase B — reduced-field GO conditions
-local-only OR mixed must pass in **≥3 CONSECUTIVE of the 5 preset levels**, and at each such level in **≥3/4
-fixed perturbation seeds**, ALL of:
-1. **Sustained energy** — occupancy ≥ **0.80**.
-2. **Genuine local oscillation** — ≥ **50%** of active cells complete ≥ **10 cycles** with normalised
-   peak-to-trough amplitude ≥ **0.20** (excludes a high fixed plateau that would pass occupancy trivially).
-3. **Spatial desynchronisation** — post burn-in **median `R_phase` < 0.50 AND pairwise correlation < 0.50**.
-4. **Phase-reset return** — re-align all cells to a uniform state + the same small perturbation; the staggered
-   criterion (2+3) is re-reached within **5 s** and holds to the end of the run (the staggered state is an
-   attractor, not a one-off transient).
-5. **Long-time hold** — 30 s screen with the last 10 s showing no drift to synchrony, silence, or a saturated
-   plateau; the **central** passing level is re-confirmed at **60 s**.
-6. **global-only control** — at the same levels, global-only must remain a **synchronised oscillation**
-   (`R_phase ≥ 0.80`). If global-only instead goes silent or to a non-oscillating plateau at a level, that level
-   has **no valid matched comparison** (excluded), it is NOT counted as "global failed to synchronise".
+**Phase A** — lock excitability levels FIRST. Use the mean-field (arm-independent) to fix **5 `ξ` levels evenly
+inside the oscillation window**. Write an **immutable `phaseA_lock.json`**: spec SHA, `(W0,α,β,θ)`, oscillation-
+window definition, the 5 `ξ`/`I0` levels, the 4 perturbation seeds, solver + `dt` + grid `n`, kernel hashes.
+Phase B reads this lock ONLY; levels are never re-chosen after seeing local/mixed.
 
-**Verdict.** GO (→ SNN migration) iff Phase-B holds for local-only or mixed AND the §6.2 transverse analysis
-shows `local λ_⊥(k*)>0 / global λ_⊥<0` in the same window. Otherwise **NO-GO**: the desynchronised-local-inhibition
-hypothesis fails even in the reduced 2-D field, and we do not migrate.
+**Phase B** — reduced-field GO iff BOTH:
+- **(i) Nonlinear screen:** local-only OR mixed passes in **≥3 CONSECUTIVE of the 5 levels**, each in **≥3/4
+  fixed perturbation seeds**, ALL of:
+  1. **energy** — occupancy ≥ 0.80 AND the §7 energy floors.
+  2. **genuine local oscillation** — active_area_frac ≥ 0.50 AND oscillatory fraction ≥ 0.50 (over all cells),
+     `p2p/a_max ≥ 0.20` (excludes a high fixed plateau + a tiny-active-set loophole).
+  3. **spatial desync** — median-over-time `R_phase < 0.50` AND pairwise correlation < 0.50.
+  4. **period band** — local period within `0.5–2×` the matched global period (excludes slow drift).
+  5. **phase-reset return** — full-state reset (`r,μ_L,S_L,μ_G,S_G`) to a uniform-orbit phase point + the same
+     `10⁻⁴` `r`-perturbation; criteria 2+3 re-reached within 5 s and held to the end.
+  6. **long-time** — 30 s screen, last 10 s no drift to synchrony / silence / saturated plateau; the central
+     passing level re-confirmed at **60 s**, and at `dt/2` and `n=64`.
+  7. **global-only control** — at the same levels, global-only remains a **synchronised oscillation**
+     (`R_phase ≥ 0.80`). If global-only goes silent or to a non-oscillating plateau at a level, that level has
+     **no valid matched comparison** (excluded) — NOT counted as "global failed to synchronise".
+- **(ii) Transverse Floquet (§6.2):** `local/mixed λ_⊥(k*)>0` while `global λ_⊥<0` in the SAME window
+  (numerical sign margin met).
 
-## 9. Migration rule (out of scope for this spec, stated for the record)
-Only on a full Phase-B + §6.2 GO: seed-1 SNN 3-arm (global-`S_G` / local-`S_L(x)` / mixed, inhibition-side only,
-E→E untouched, H off) judged by `carrier_gate_v2.1` (source + virtual-SEEG). H/exit stays out until a carrier
-passes. A large patchwise/`S_L` SNN parameter grid is NOT run.
+## 9. Verdict taxonomy (4-cell; no over-broad NO-GO)
+Report the pair `(global transverse stability, local transverse stability)`:
+- **global-stable / local-unstable** + Phase-B(i) → **GO** (target mechanism; migrate).
+- **global-unstable / local-stable** → reverse result (local suppresses spatial modes MORE — a real finding).
+- **both-stable** → no transverse instability route in the tested window.
+- **both-unstable** → the substrate is transversally unstable regardless of inhibition rank.
+- A recoverable staggered state with `λ_⊥<0` (nonlinear pass but linearly stable orbit) → **subcritical /
+  finite-amplitude staggered candidate** — this refutes ONLY the "instability-from-the-synchronised-orbit"
+  path, NOT the whole local-inhibition hypothesis.
 
-## 10. Non-goals / forbidden claims
-- No "the SNN has a carrier / lifecycle / termination".
-- No "ξ = frozen z" (it is an excitability abstraction; `κ_ξ` uncalibrated).
-- No "phase-staggered relay observed" — the relay is the hypothesis this screen TESTS, not a result.
-- No modification of `K_E` / E→E strength.
-- A reduced-field GO is a **migration justification**, not a mechanism proof in the SNN.
+## 10. Migration rule (out of scope here, for the record)
+Only on GO: seed-1 SNN 3-arm (global-`S_G` / local-`S_L(x)` / mixed, inhibition-side only, dual divisive+
+subtractive to match this field, E→E untouched, H off) judged by `carrier_gate_v2.1`. No large `S_L` SNN grid.
 
-## 11. Code / outputs
-- `src/topic4_zm_field_screen.py` — the field model + `anisotropic_gaussian` + `λ_⊥(k)` estimator + `R_phase`;
-  reuses `psi_recruit`/`pnorm_pool` (slow_field) + `convolve_periodic`/`isotropic_gaussian` (sef_hfo_field) +
-  `population_occupancy` (patch screen). Off-by-default parity not applicable (new standalone rate model).
-- `scripts/run_topic4_zm_field_screen.py` (Phase-A level lock + Phase-B screen + phase-reset + 60 s confirm,
-  provenance: git SHA/dirty + module hashes + locked levels + seeds), `scripts/plot_topic4_zm_field_screen.py`.
-- `tests/test_topic4_zm_field_screen.py` (kernel normalisation + anisotropy; pooling order; matched-budget
-  uniform-manifold identity across arms; `λ_⊥(k)` sign on a constructed stable/unstable orbit; R_phase on
-  synthetic in/anti-phase fields; occupancy/oscillation/desync metrics).
-- Outputs → `results/topic4_sef_hfo/zm_field_screen/` (+ `figures/README.md`). Cheap rate field; OMP=1.
+## 11. Forbidden claims
+- No "SNN has a carrier / lifecycle / termination".
+- No "`ξ = frozen z`" and no strict `ξ=1−z`.
+- No "phase-staggered relay observed" — it is the hypothesis under test.
+- No `K_E` / E→E modification; no calling `σ_S` an existing SNN scale.
+- "synchronised **burst-train orbit**" / "candidate carrier substrate", never "synchronised ictal carrier".
+- A reduced-field GO = migration justification, not an SNN mechanism proof.
 
-## 12. References (per review)
-- Proix et al., neural-field reduced-order frozen-slow-variable projection — supports treating `ξ` as an
-  excitability abstraction (PMC5852068).
-- Liou et al., local vs global inhibition topology controlling local instability / recruitment / propagation
-  containment (PMC7089769).
+## 12. Code / outputs / engineering
+- `src/topic4_zm_field_meanfield.py` — Phase-0 uniform 3-state RHS + orbit detector + continuation (tested).
+- `src/topic4_zm_field_screen.py` — 2-D field (Fix A) + anisotropic elliptical-exp `K_E` + per-mode 3×3
+  Floquet estimator + upward-crossing phase / `R_phase`; reuse `psi_recruit`/`pnorm_pool` (slow_field),
+  `convolve_periodic`/`isotropic_gaussian` (sef_hfo_field), `population_occupancy` (patch screen).
+- `scripts/run_topic4_zm_field_screen.py` (Phase 0 → A lock → B), `scripts/plot_topic4_zm_field_screen.py`,
+  `tests/test_topic4_zm_field_{meanfield,screen}.py` (kernel normalisation + anisotropy; pooling order; matched-
+  budget uniform-manifold identity across arms; Phase-0 orbit detection incl. a NO-ORBIT case; `λ_⊥(k)` sign on
+  a constructed stable vs unstable orbit + `dt`/`dt/2` margin; `R_phase` on in/anti-phase fields; the §7 metrics
+  incl. the tiny-active-set + plateau loopholes).
+- **Engineering:** `OMP/MKL/OPENBLAS/NUMEXPR_NUM_THREADS=1`; arms run sequentially, arrays released between
+  arms; **streaming metrics** — never hold `60 s × time × 32 × 32 × all-states`; field traces downsampled to
+  ~5 ms for figures; primary `dt` locked with a `dt/2` central-candidate convergence check. Outputs →
+  `results/topic4_sef_hfo/zm_field_screen/` (+ `figures/README.md`). Provenance JSONs carry git SHA + git_dirty
+  + module SHA256 + `phaseA_lock` hash (as in `carrier_gate_v2.1`).
+
+## 13. References (per review; motivation only, do NOT support the expected sign)
+- Proix et al., PMC5852068 — neural-field reduced-order frozen-slow projection (supports `ξ` as an excitability
+  abstraction, not `ξ↔z` equivalence).
+- Liou et al., PMC7089769 — local vs global inhibition topology (supports studying inhibition spatial rank, not
+  that local necessarily destabilises the synchronised orbit).
