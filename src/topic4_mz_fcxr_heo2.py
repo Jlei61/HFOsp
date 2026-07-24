@@ -95,6 +95,45 @@ def max_silence_gap_ms(rate, fs, frac=0.3, win_ms=30.0):
     return float((max(gaps) if gaps else 0) / fs * 1000.0)
 
 
+def _mean_crossings(x):
+    x = np.asarray(x, float)
+    x = x - x.mean()
+    return int(np.sum(np.diff(np.sign(x)) != 0))
+
+
+def phase1_verdict(pre, post, m_mean_post, m_off_dist, m_off_coverage, safety):
+    """Phase-1 arm verdict (spec §3, 8 conjunctive criteria). pre/post are metric dicts; m_mean_post is
+    the adaptation trace in the post-enable window; m_off_* are the reference (no-adaptation) arm's values.
+    verdict ∈ {transformed_broadband_spiky, unchanged_16Hz, collapsed_sparse, silenced, stalled,
+    no_high_state, unsafe}. 'transformed' requires all six transform criteria (given established+safe)."""
+    ddb = post["six_band_ddb"]
+    crit = dict(
+        established=bool(pre["mean_rate"] > 60.0 and pre["coherence"] >= 0.9),      # 1: 16Hz high state pre-enable
+        spiky_freq=bool(3.0 <= post["dominant_hz"] <= 8.0 and abs(post["dominant_hz"] - post["event_ipi_hz"]) <= 2.0),  # 2
+        broadband=bool(ddb[0] > 0 and ddb[1] > 0 and ddb[3] > 0),                   # 3: low + beta up
+        closer_to_real=bool(post["dist_to_real"] < m_off_dist),                     # 4
+        not_collapsed=bool(post["mean_rate"] > 20.0),                               # 5: not back to interictal
+        coverage_kept=bool(post["coverage"] >= max(m_off_coverage, 4)),             # 6: not degraded to focal
+        bursting=bool(_mean_crossings(m_mean_post) >= 3),                           # 7: m lags-and-recovers
+        safe=bool(not safety.get("numerical_unsafe", False) and safety.get("runaway_early_stop_ms") is None),  # 8
+    )
+    if not crit["safe"]:
+        v = "unsafe"
+    elif not crit["established"]:
+        v = "no_high_state"
+    elif all(crit[k] for k in ("spiky_freq", "broadband", "closer_to_real", "not_collapsed", "coverage_kept", "bursting")):
+        v = "transformed_broadband_spiky"
+    elif post["mean_rate"] < 5.0:
+        v = "silenced"
+    elif post["dominant_hz"] > 13.0:
+        v = "unchanged_16Hz"
+    elif post["dominant_hz"] < 8.0:
+        v = "collapsed_sparse"
+    else:
+        v = "stalled"
+    return dict(verdict=v, criteria=crit)
+
+
 def classify_state(m):
     """4-class label (spec §2). Precedence: target_like_spiky > tonic_16Hz_cycle > sparse_event_train
     > transitional. m keys: dominant_hz, duty_cycle, coverage, six_band_ddb, coherent."""

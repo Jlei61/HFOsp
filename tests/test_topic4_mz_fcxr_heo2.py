@@ -159,3 +159,47 @@ def test_m_frozen_E_validation():
     with pytest.raises(ValueError):
         MZSlowVars(6, 18.0, MZSlowVarsConfig(membrane_mode="current", m_frozen_E=np.full(4, 2.0)),
                    NE=4, core_mask_E=np.zeros(4, bool))                       # requires full_conductance
+
+
+# ============================== Task 5: Phase-1 arm verdict ==============================
+_PRE_HI = dict(mean_rate=90.0, coherence=0.97)                                # established 16Hz high state
+_BURST = np.tile([0.0, 1.0, 2.0, 1.0], 200)                                   # oscillating m -> bursting
+_MONO = np.linspace(0, 5, 800)                                               # monotone m -> not bursting
+_MOFF_DIST, _MOFF_COV = 60.0, 0
+
+
+def test_phase1_transformed():
+    post = dict(dominant_hz=5.0, event_ipi_hz=5.2, mean_rate=45.0, coverage=10,
+                dist_to_real=12.0, six_band_ddb=[8, 9, 7, 8, 5, 1])
+    v = H2.phase1_verdict(_PRE_HI, post, _BURST, _MOFF_DIST, _MOFF_COV,
+                          dict(numerical_unsafe=False, runaway_early_stop_ms=None))
+    assert v["verdict"] == "transformed_broadband_spiky" and all(v["criteria"].values())
+
+
+def test_phase1_unchanged_16hz():
+    post = dict(dominant_hz=16.0, event_ipi_hz=16.0, mean_rate=90.0, coverage=0,
+                dist_to_real=60.0, six_band_ddb=[-20, -14, -9, 16, 3, 0])
+    assert H2.phase1_verdict(_PRE_HI, post, _MONO, _MOFF_DIST, _MOFF_COV,
+                             dict(numerical_unsafe=False, runaway_early_stop_ms=None))["verdict"] == "unchanged_16Hz"
+
+
+def test_phase1_collapsed_sparse():
+    post = dict(dominant_hz=3.5, event_ipi_hz=3.6, mean_rate=9.0, coverage=2,
+                dist_to_real=13.0, six_band_ddb=[5, 6, 5, 6, 4, 5])
+    assert H2.phase1_verdict(_PRE_HI, post, _BURST, _MOFF_DIST, _MOFF_COV,
+                             dict(numerical_unsafe=False, runaway_early_stop_ms=None))["verdict"] == "collapsed_sparse"
+
+
+def test_phase1_silenced_stalled_unsafe():
+    silent = dict(dominant_hz=2.0, event_ipi_hz=2.0, mean_rate=2.0, coverage=0, dist_to_real=40.0,
+                  six_band_ddb=[-5, -5, -5, -5, -5, -5])
+    assert H2.phase1_verdict(_PRE_HI, silent, _MONO, _MOFF_DIST, _MOFF_COV,
+                             dict(numerical_unsafe=False, runaway_early_stop_ms=None))["verdict"] == "silenced"
+    stalled = dict(dominant_hz=10.0, event_ipi_hz=10.0, mean_rate=55.0, coverage=5, dist_to_real=40.0,
+                   six_band_ddb=[3, 4, 2, 6, 3, 0])
+    assert H2.phase1_verdict(_PRE_HI, stalled, _MONO, _MOFF_DIST, _MOFF_COV,
+                             dict(numerical_unsafe=False, runaway_early_stop_ms=None))["verdict"] == "stalled"
+    ok = dict(dominant_hz=5.0, event_ipi_hz=5.0, mean_rate=45.0, coverage=10, dist_to_real=12.0,
+              six_band_ddb=[8, 9, 7, 8, 5, 1])
+    assert H2.phase1_verdict(_PRE_HI, ok, _BURST, _MOFF_DIST, _MOFF_COV,
+                             dict(numerical_unsafe=True, runaway_early_stop_ms=None))["verdict"] == "unsafe"
