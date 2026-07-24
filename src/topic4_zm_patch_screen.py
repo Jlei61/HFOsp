@@ -22,6 +22,8 @@ from dataclasses import dataclass
 
 import numpy as np
 
+SYNC_MAX = 0.5     # carrier_proxy requires the patches to be DESYNCHRONIZED (mean pairwise corr below this)
+
 
 @dataclass
 class PatchParams:
@@ -142,7 +144,9 @@ def screen_metrics(res, settle_frac=0.25):
     mean_act = float(ps.mean())
     patch_osc = float(np.mean(A[int(A.shape[0] * settle_frac):].std(axis=0)))   # per-patch temporal std, averaged
     p_depth = float((ps.max() - ps.min()) / (ps.mean() + 1e-9))                  # population oscillation depth
-    # sustained population carrier proxy: active, patches oscillate, P stays up (not collapsing to baseline)
-    carrier_proxy = bool(mean_act > 0.02 and patch_osc > 0.01 and occ >= 0.80)
+    # sustained population carrier proxy: active, patches oscillate, DESYNCHRONIZED (the narrated mechanism),
+    # and P stays up (not collapsing to baseline). Desync is now a PASS CONDITION, not just narration -- a
+    # synchronized-but-high-baseline oscillation must NOT count as a carrier.
+    carrier_proxy = bool(mean_act > 0.02 and patch_osc > 0.01 and occ >= 0.80 and sync < SYNC_MAX)
     return dict(occupancy=occ, synchrony=sync, mean_activity=mean_act, patch_osc=patch_osc,
                 pop_depth=p_depth, carrier_proxy=carrier_proxy)
