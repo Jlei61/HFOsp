@@ -91,6 +91,8 @@ class MZSlowVarsConfig:
     I_th_EI: float = 0.0           # E-cell GABA current depletion threshold (CALIBRATION)
     tau_adp: float = 2000.0        # ms   adaptation decay time constant (CALIBRATION)
     eta_m: float = 0.0             # adaptation current per unit m (CALIBRATION)
+    m_enable_ms: "float | None" = None  # FCXR-HEO2: delayed adaptation onset — m stays 0 until step*dt>=this (None = from step 0)
+    m_frozen_E: "np.ndarray | None" = None  # FCXR-HEO2: static-K control — hold m frozen at this per-E field (requires use_m=False, full_conductance)
     use_phi: bool = False          # optional Abbott-style spike-triggered threshold adaptation
     tau_phi: float = 100.0         # ms
     delta_phi: float = 0.0         # mV threshold increment per E spike
@@ -163,6 +165,11 @@ class MZSlowVars:
                 raise ValueError(f"z_frozen_E must have length NE={self.NE}, got {zf.shape}")
             self.z[:self.NE] = zf                                 # I-cell z stays 1 (E-only clause)
         self.m = np.zeros(self.N)
+        if self.cfg.m_frozen_E is not None:                       # FCXR-HEO2: hold E-cell m frozen (static-K)
+            mf = np.asarray(self.cfg.m_frozen_E, float)
+            if mf.shape != (self.NE,):
+                raise ValueError(f"m_frozen_E must have length NE={self.NE}, got {mf.shape}")
+            self.m[:self.NE] = mf                                 # I-cell m stays 0 (E-only clause)
         self.phi = np.zeros(self.N)
         # FCXR persistence sensor y_j (Hz) + presynaptic E->E relay availability x_j in [0,1] (E cells only).
         # ee_relay_send is the x_j(t-) snapshot the engine scatter reads BEFORE step() updates y/x this frame
@@ -315,7 +322,7 @@ class MZSlowVars:
             I_inh_eff = local + global_part
 
         gI = c.gaba_gain * I_inh_eff / (c.v_match - c.e_gaba)
-        if c.use_m:
+        if c.use_m or c.m_frozen_E is not None:                   # FCXR-HEO2: frozen m also drives a static gM
             I_adap = c.eta_m * self.m[:self.NE]
             gM = c.m_conductance_gain * I_adap / (c.v_match - c.e_k)
         else:
@@ -452,7 +459,9 @@ class MZSlowVars:
             zE = self.z[self.is_E]
             zE = zE + (dt / c.tau_z) * (z_inf_E - zE)
             self.z[self.is_E] = np.clip(zE, 0.0, 1.0)          # z in [0,1]
-        if c.use_m:
+        if c.use_m and (c.m_enable_ms is None or self._step_i * dt >= c.m_enable_ms):
+            # FCXR-HEO2: before m_enable_ms both decay AND accumulation are skipped -> m stays 0 (its init
+            # value), so apply_currents/membrane_terms see no adaptation in the pre-enable window.
             mE = self.m[self.is_E]
             mE = mE - (mE / c.tau_adp) * dt                    # decay
             self.m[self.is_E] = np.maximum(mE, 0.0)            # m >= 0
@@ -594,6 +603,16 @@ class MZSlowVars:
                 raise ValueError("z_frozen_E (frozen field) requires use_z=False; a frozen field must not evolve")
         if c.use_m and c.tau_adp <= 0.0:
             raise ValueError("use_m requires tau_adp>0")
+        if c.m_enable_ms is not None and not c.use_m:
+            raise ValueError("m_enable_ms (delayed adaptation onset) requires use_m=True")
+        if c.m_frozen_E is not None:
+            if c.membrane_mode != "full_conductance":
+                raise ValueError("m_frozen_E (static-K control) requires membrane_mode='full_conductance'")
+            if c.use_m or c.m_enable_ms is not None:
+                raise ValueError("m_frozen_E requires use_m=False and m_enable_ms=None (a frozen field must not evolve)")
+            mf = np.asarray(c.m_frozen_E, float)
+            if mf.ndim != 1 or not np.all(np.isfinite(mf)) or mf.min() < 0.0:
+                raise ValueError("m_frozen_E must be a finite 1-D field with values >= 0")
         if c.use_phi and (c.tau_phi <= 0.0 or c.delta_phi < 0.0):
             raise ValueError("use_phi requires tau_phi>0 and delta_phi>=0")
         if c.membrane_mode == "full_conductance":

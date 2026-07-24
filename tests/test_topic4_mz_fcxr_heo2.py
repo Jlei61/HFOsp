@@ -14,8 +14,13 @@ import pytest
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "snn_engine"))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 import src.topic4_mz_fcxr_heo2 as H2  # noqa: E402
+from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 
 FS = 1000.0
+
+
+def _mk(N=10, NE=8, **kw):
+    return MZSlowVars(N, 18.0, MZSlowVarsConfig(**kw), NE=NE, core_mask_E=np.zeros(NE, bool))
 
 
 def _t(n):
@@ -86,3 +91,71 @@ def test_classify_state_four_classes():
     assert H2.classify_state(sparse) == "sparse_event_train"
     assert H2.classify_state(target) == "target_like_spiky"
     assert H2.classify_state(trans) == "transitional"
+
+
+# ============================== Task 2: m_enable_ms (delayed adaptation) ==============================
+def test_m_enable_ms_none_accumulates_from_step0():
+    """Default None -> current behavior: m accumulates from the first step (byte-parity path)."""
+    mz = _mk(use_m=True, eta_m=1.0, tau_adp=5000.0)          # m_enable_ms default None
+    spk = np.zeros(10, bool); spk[:3] = True
+    mz.step(spk, None, 0.1)
+    assert mz.trace_m_mean[0] > 0.0                           # accumulated at step 0
+
+
+def test_m_enable_ms_delays_accumulation():
+    """m stays 0 while step*dt < m_enable_ms, then accumulates (delayed onset)."""
+    mz = _mk(use_m=True, eta_m=1.0, tau_adp=5000.0, m_enable_ms=100.0)   # dt=0.1 -> enable at step 1000
+    spk = np.zeros(10, bool); spk[:3] = True
+    for _ in range(1100):
+        mz.apply_currents(np.zeros(10), np.zeros(10), None)
+        mz.step(spk, None, 0.1)
+    assert mz.trace_m_mean[500] == 0.0 and mz.trace_m_mean[999] == 0.0   # 50/99.9 ms < 100 -> m=0
+    assert mz.trace_m_mean[1000] > 0.0                                    # 100 ms -> accumulates
+
+
+def test_m_enable_ms_no_adaptation_current_before_enable():
+    """Pre-enable, m=0 -> apply_currents has NO eta_m*m subtraction (distinguishes from the None path,
+    where continual spiking would have grown m)."""
+    mz = _mk(use_m=True, eta_m=0.5, tau_adp=5000.0, m_enable_ms=100.0)
+    spk = np.zeros(10, bool); spk[:3] = True
+    for _ in range(500):                                     # 50 ms < 100 ms
+        out = mz.apply_currents(np.ones(10), np.ones(10), None)
+        assert np.allclose(out[:8], 0.0)                     # 1 - 1 - 0.5*0 (m gated off)
+        mz.step(spk, None, 0.1)
+
+
+def test_m_enable_ms_requires_use_m():
+    with pytest.raises(ValueError):
+        _mk(use_m=False, m_enable_ms=100.0)
+
+
+# ============================== Task 3: m_frozen_E (static-K control) ==============================
+def _mk_fc(NE=4, N=6, **kw):
+    base = dict(membrane_mode="full_conductance", E_E=58.0, c_E=1.0, v_match=18.0, e_gaba=0.0, e_k=0.0,
+                rec_conductance=True, rec_sat_g=21.6, eta_m=0.5, m_conductance_gain=1.0)
+    base.update(kw)
+    return MZSlowVars(N, 18.0, MZSlowVarsConfig(**base), NE=NE, core_mask_E=np.zeros(NE, bool))
+
+
+def test_m_frozen_E_static_gM():
+    """Static-K: m held at a preset field -> gM = m_cond_gain*eta_m*m/(v_match-e_k), unchanged over steps."""
+    mz = _mk_fc(m_frozen_E=np.full(4, 2.0))
+    I_E = np.array([10., 10., 10., 10., 4., 4.]); I_rec = np.array([2., 2., 2., 2., 1., 1.])
+    mz.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+    expected = 1.0 * 0.5 * 2.0 / (18.0 - 0.0)                 # m_cond_gain * eta_m * const / (v_match - e_k)
+    assert abs(mz._gM_mean_last - expected) < 1e-11
+    mz.step(np.ones(6, bool), None, 0.05)                    # a step must NOT change the frozen field
+    mz.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+    assert abs(mz._gM_mean_last - expected) < 1e-11
+
+
+def test_m_frozen_E_validation():
+    with pytest.raises(ValueError):
+        _mk_fc(m_frozen_E=np.full(4, 2.0), use_m=True)                        # must not evolve
+    with pytest.raises(ValueError):
+        _mk_fc(m_frozen_E=np.full(4, -1.0))                                   # negative
+    with pytest.raises(ValueError):
+        _mk_fc(m_frozen_E=np.full(3, 2.0))                                    # wrong length (NE=4)
+    with pytest.raises(ValueError):
+        MZSlowVars(6, 18.0, MZSlowVarsConfig(membrane_mode="current", m_frozen_E=np.full(4, 2.0)),
+                   NE=4, core_mask_E=np.zeros(4, bool))                       # requires full_conductance
