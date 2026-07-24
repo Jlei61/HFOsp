@@ -111,8 +111,9 @@ z/m + S_G + 记忆刹车 H（sgh）。我们把每个细胞的电流按病人真
 > ⚠️ **本节的 v1 门数值（源 occ 0.17、电极最优触点 occ 0.55、onset 8720ms）来自一个偏离预注册 spec 的
 > 实现**（review 发现，见 §10）：v1 把 onset 取成"最长 FLOOR 段起点"而非"第一次持续≥100ms 越 ON"、baseline 用
 > 固定前 300ms 而非 `[0,onset)`、电极 baseline 因而落在 `[0,8720ms]` 被爆发污染。**忠实 spec 的 v2 离线重判见
-> §10**：定性 NO-GO 稳（sg 源根本没有持续 onset＝更干净的 burst train；电极活跃触点 occ 中位 0.75、baseline
-> 不敏感、仍 <0.80）。下面 v1 叙述保留作历史。
+> §10**（用 revised protocol v2.1 离线重判）：定性 NO-GO 稳（sg 源根本没有持续 onset＝更干净的 burst train；电极
+> 有触点 occ 达 0.8-1.0 但持续簇只 ~0.6s、**0 个过完整持续门 occ≥0.8 且 dur≥2s**——占空非稀疏，缺的是连成 ≥2s
+> macroepisode）。下面 v1 叙述保留作历史。
 
 **一句话**：在当前原始各向异性 Z/M SNN 上，S_G 把失控刹成的发作态，在虚拟 SEEG 上是**一串彼此分开、之间
 回到基线的 HFO 样爆发**，**不是**一个持续增强的 ictal high-frequency-energy carrier → 走 Path B（先改抑制侧
@@ -188,26 +189,38 @@ carrier；这个 toy 模型没有 Z/M、没有二维 E/I、没有各向异性几
 `patch_screen_summary.json`；测试 `tests/test_topic4_zm_patch_screen.py`（8 green，锁定振荡带 + global>patchwise
 同步度 + patchwise 过载体代理）。
 
-## 10. Post-review 修订（v2 忠实门 + 诚实性纠正，2026-07-24）
+## 10. Post-review 修订（carrier_gate v2.1 修订协议门 + 诚实性纠正，2026-07-24）
 
 Review 发现 §8 的正式门实现偏离了预注册 spec，且报告有几处事实错误。保留 v1 作历史（`topic4_zm_carrier_verdict`
-+ `topic4_zm_ictal_carrier`），新增**忠实版 `src/topic4_zm_carrier_gate_v2.py`**，用现有 NPZ **离线重判、不重跑 SNN**。
++ `topic4_zm_ictal_carrier`），新增 `src/topic4_zm_carrier_gate_v2.py`＝**versioned 修订协议（revised protocol
+v2.1，`GATE_VERSION=carrier_gate_v2.1_revised_2026-07-24`）**——**不是**字面 spec 忠实门：它修正 v1 的偏离，但也
+有两处**自己的刻意修订**（observed baseline 用固定早窗而非 spec 的 `[0,onset)`，以避开爆发污染；onset 在 baseline
+更新后重验证）。用现有 NPZ **离线重判、不重跑 SNN**。
 
-**六处门修正（v1→v2）**：① onset＝第一次持续≥100ms 越 ON（v1 是"最长 FLOOR 段起点"）；② baseline＝真正的
-`[0,onset)`（v1 是固定前 300ms）；③ 电极 dB baseline＝固定早窗（发作前 300ms，避开爆发污染；v1 用 `[0,onset)`＝
-`[0,8720ms]` 混入 8.7s 爆发）；④ B2＝高频增强须与 B1 低-γ macroepisode **时间窗重叠**（v1 只查任意触点任意时刻有峰）；
-⑤ A7 第三维用**活跃面积**（v1 误用 rate-energy）；⑥ A8 用**沿轴 first-passage 时延梯度**（v1 只比 50ms 内活跃面积大小）。
+**v1 的六处门偏离（v2 修正）**：① onset＝第一次持续≥100ms 越 ON（v1 是"最长 FLOOR 段起点"）；② baseline＝
+`[0,onset)`（v1 是固定前 300ms）；③ 电极 dB baseline＝固定早窗（避开爆发污染；v1 用 `[0,onset)`=`[0,8720ms]` 混入
+8.7s 爆发）；④ B2＝高频增强须与 B1 低-γ macroepisode **时间窗重叠**（v1 只查任意触点任意时刻有峰）；⑤ A7 第三维用
+**活跃面积**（v1 误用 rate-energy）；⑥ A8 用**沿轴 first-passage 时延梯度**（v1 只比 50ms 内活跃面积大小）。
+**v2.1 收口补充（第二轮 review）**：⑦ baseline 更新后**重验证 onset**（不满足新 ON 则 no_onset）；⑧ B6 改成**真的
+四维分离**（duration/duty/energy/spatial-extent vs 发作前 returning events，不再占位放行）；⑨ `saturated_plateau`
+和 `tail_escalating` **从 all_rate/active_frac 真算**（不再硬编码 False）；⑩ A7/A8 补合成 fixture 单测；⑪ 离线输出补
+provenance（gate_version + git_sha + NPZ sha256 + 时间戳）。⚠️ A7/A8/B6 只在**出现持续 onset 的候选**上承重（当前爆发串
+够不到 gate A 入口，故它们在真实臂上只有单测覆盖、未在真数据上被触发）。
 
-**v2 离线重判（`scripts/recompute_carrier_gate_v2.py` → `carrier_gate_v2_seed1.json`）——定性 NO-GO 稳，数值修订**：
-- **源空间**：sg 忠实门下**根本没有持续 onset**（核心爆发太短、越 ON 撑不满 100ms）→ gate A trivially fail →
+**v2.1 离线重判（`scripts/recompute_carrier_gate_v2.py` → `carrier_gate_v2_seed1.json`）——定性 NO-GO 稳，数值修订**：
+- **源空间**：sg 修订门下**根本没有持续 onset**（核心爆发太短、越 ON 撑不满 100ms）→ gate A trivially fail →
   `fail_hfo_like_train`。这比 v1 的"occ 0.17"**更干净**地说明是爆发串。bare=`fail_runaway`（不变）、interictal_ctrl=
   `fail_hfo_like_train`（不变）。
-- **电极**：用干净早 baseline，汇侧活跃触点（ICL1/8/9/10）30-80Hz 峰值 **35-49 dB**（比 v1 的 14-32 高，因为 v1
-  baseline 被爆发抬高了）、macroepisode occupancy **中位 0.75**，对 baseline 窗（150/300/500/800ms）**不敏感**，
-  **0 个触点达 0.80**。所以电极侧比 v1（0.55）"更接近持续"但仍 borderline、**没过**。（v1 的"最优触点 occ 1.0"是
-  安静平触点如 SCL6 峰值 2.2dB 的假象，已改成看活跃触点。）
-- **结论**：忠实门下**两侧一致 NO-GO**，且源侧结论更强（无持续 onset）、电极侧更诚实（活跃触点 occ~0.75 borderline，
-  非 v1 的"clearly 0"）。
+- **电极**：用干净早 baseline，30-80Hz 峰值最高的活跃触点是 **ICL6/7/5/2/3/4**（默认 300ms baseline；峰值
+  **42-49 dB**，比 v1 的 14-32 高，因为 v1 baseline 被爆发抬高了）。**关键更正（review）**：有触点确实**达到
+  occ 0.80**（ICL6 occ 0.80 dur 625ms）、甚至 occ 1.0（ICL11，500ms baseline，dur 只 150ms），但它们的
+  macroepisode **持续时间只有 150-625ms**（远 < 2s）→ 按**完整 sustained-contact 门**（occ≥0.8 **且** dur≥2s
+  **且** peak≥6dB）**0 个触点通过**——所以正确说法是"**0 个触点通过完整持续门**"，**不是**"0 个触点达 0.80"。对
+  baseline 窗（150/300/500/800ms）不敏感。**更准确的动力学语义**：电极高频能量**并不稀疏**，它形成**密集但只有
+  ~0.6s 的短簇**，始终连不成 ≥2s 的持续 macroepisode——所以缺口不只是"提高占空比"，而是要**让不同局部区域错相接力、
+  把多个亚秒能量簇连成持续 macroepisode**。（v1 说的"最优触点 occ 1.0"是安静平触点如 SCL6 峰值 2.2dB 的假象。）
+- **结论**：修订门下**两侧一致 NO-GO**，且源侧结论更强（无持续 onset）、电极侧更诚实（有触点 occ 达 0.8-1.0 但簇
+  只 ~0.6s、0 个过完整持续门）。
 
 **诚实性纠正**：① substrate 是 **32000 E + 8000 I**（archive 早稿误写"2万 E"，已改）；② 引擎不是"byte-unchanged"——
 `slow_field.py` 改了 15 行（**纯加观测 trace，spike 输出 byte-parity、BASELINE_SHA 不动、6 个 guarded 核心文件未动**），
