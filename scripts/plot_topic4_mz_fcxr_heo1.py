@@ -23,7 +23,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "src"))
 from topic4_mz_fcxr_heo1 import (  # noqa: E402
-    decimate_to_work, band_power_spectrogram, build_baseline_reference, classify_heo, BANDS)
+    decimate_to_work, band_power_spectrogram, build_baseline_reference, classify_heo, BANDS,
+    band_db_field, oscillation_probe, Z_GATE)
 
 OUT = os.path.join(ROOT, "results", "topic4_sef_hfo", "mz_full_conductance_spatial_relay",
                    "high_energy_oscillatory_branch")
@@ -123,6 +124,7 @@ def fig_candidate_spectral(label, row, dt=0.05):
     base_lfp, base_rate, contacts, names, scl = _load_baseline_bits()
     ldec, fs = decimate_to_work(lfp, dt)
     rdec, _ = decimate_to_work(rate, dt)
+    pr = oscillation_probe(lfp, rate, dt)
     t = np.arange(ldec.shape[0]) / fs
     plateau = (row.get("plateau") or {})
     fig, ax = plt.subplots(4, 1, figsize=(11.0, 11.0), gridspec_kw=dict(height_ratios=[2.4, 1.6, 1.6, 1.0]))
@@ -148,8 +150,10 @@ def fig_candidate_spectral(label, row, dt=0.05):
     ax[2].legend(fontsize=6.5, ncol=6, loc="upper center"); ax[2].set_ylabel("log10 band power")
     ax[2].set_title("six-band energy (median across contacts)", fontsize=9)
 
-    # (d) population rate
+    # (d) population rate (the coherent rhythm rides on this high-rate level)
     ax[3].plot(t, rdec, lw=0.7, color="#333"); ax[3].set_ylabel("rate_E (Hz)"); ax[3].set_xlabel("time (s)")
+    ax[3].set_title(f"population rate — coherent {pr['rate_dominant_hz']:.1f} Hz on ~{pr['mean_rate_hz']:.0f} Hz mean "
+                    f"(cross-contact coh {pr['coherence_med']:.2f}, phase span {pr['phase_span_deg']:.0f}°)", fontsize=8.5)
     for a in ax:
         if plateau:
             i, j = plateau["i"], plateau["j"]
@@ -168,46 +172,40 @@ def _spec(sig, fs):
                        scaling="density", mode="psd")
 
 
-# ----------------------------------------------------------------- figure 3: spatial modes
-def _broadband_energy(lfp_win, dt=0.05):
-    ldec, fs = decimate_to_work(lfp_win, dt)
-    bp, _ = band_power_spectrogram(ldec, fs)          # (nw,C,B)
-    return np.log10(bp[:, :, 4:6].sum(axis=2).mean(axis=0) + 1e-12)   # 30-150Hz mean log energy per contact
-
-
-def _ipr(x):
-    p = np.maximum(x - x.min(), 1e-12); p = p / p.sum()
-    return float(1.0 / np.sum(p ** 2))                # participation ratio (higher = more distributed)
-
-
+# ----------------------------------------------------------------- figure 3: per-band ΔdB field
 def fig_spatial_modes(label, row, dt=0.05):
+    """Baseline-normalized ΔdB per band on the real E1146 contact geometry (the composite quantity the
+    platform gate actually uses) + a ring where a contact EVER clears the strict per-band gate
+    (robust-z>=Z_GATE AND power>=q99). Shows WHERE fast energy reaches vs where the strict gate is met —
+    unlike an absolute-energy field, this is directly comparable to the verdict."""
     lfp, rate = _load_cell_trace(label)
     base_lfp, base_rate, contacts, names, scl = _load_baseline_bits()
-    fs_raw = 1000.0 / dt
-    plateau = row.get("plateau") or {}
-    n = lfp.shape[0]
-    # windows (raw-sample slices): baseline IED (from F0), early-high (pre-plateau 200ms), plateau steady
-    ei = int((plateau.get("i", 5)) * 0.1 * fs_raw)      # plateau start in raw samples (hop 100ms)
-    early = lfp[max(0, ei - int(0.2 * fs_raw)):ei] if ei > int(0.2 * fs_raw) else lfp[:int(0.5 * fs_raw)]
-    plat = lfp[ei:ei + int(1.0 * fs_raw)] if ei + int(fs_raw) <= n else lfp[-int(1.0 * fs_raw):]
-    base_win = base_lfp[:int(2.0 * fs_raw)]
-    windows = [("baseline (F0)", _broadband_energy(base_win)),
-               ("early-high (pre-plateau)", _broadband_energy(early) if early.shape[0] > 50 else np.full(lfp.shape[1], np.nan)),
-               ("plateau steady", _broadband_energy(plat) if plat.shape[0] > 50 else np.full(lfp.shape[1], np.nan))]
-    vmin = np.nanmin([w[1] for w in windows]); vmax = np.nanmax([w[1] for w in windows])
-    fig, ax = plt.subplots(1, 3, figsize=(13.5, 4.6))
-    for k, (title, e) in enumerate(windows):
-        sc = ax[k].scatter(contacts[:, 0], contacts[:, 1], c=e, s=210, cmap="magma", vmin=vmin, vmax=vmax,
-                           edgecolors="k", lw=0.9)
-        for xy, nm, s in zip(contacts, names, scl):
-            ax[k].annotate(nm, xy, fontsize=5.5, ha="center", va="center",
-                           color="white" if s else "0.15")
-        ipr = _ipr(e) if np.all(np.isfinite(e)) else float("nan")
-        ax[k].set_title(f"{title}\nIPR={ipr:.1f}", fontsize=9)
+    ref = build_baseline_reference(base_lfp, base_rate, dt)
+    ddb = band_db_field(lfp, dt, ref)                              # (15,6) per-contact per-band ΔdB
+    ldec, fs = decimate_to_work(lfp, dt)
+    bp, _ = band_power_spectrogram(ldec, fs)
+    logbp = np.log10(np.maximum(bp, 1e-300))
+    denom = 1.4826 * ref["mad_log"]
+    z = np.where(denom[None] > 0, (logbp - ref["med_log"][None]) / np.where(denom[None] > 0, denom[None], 1), -np.inf)
+    ever_pass = ((z >= Z_GATE) & (bp >= ref["q99_power"][None])).any(axis=0)   # (15,6) strict per-band pass
+    pr = oscillation_probe(lfp, rate, dt)
+    show = [(3, "13-30 Hz"), (4, "30-80 Hz"), (5, "80-150 Hz")]
+    vmax = max(6.0, float(np.nanmax(np.abs(ddb[:, [3, 4, 5]]))))
+    fig, ax = plt.subplots(1, 3, figsize=(13.8, 4.8))
+    sc = None
+    for k, (bi, nm) in enumerate(show):
+        lw = [2.4 if p else 0.7 for p in ever_pass[:, bi]]
+        sc = ax[k].scatter(contacts[:, 0], contacts[:, 1], c=ddb[:, bi], s=250, cmap="RdBu_r",
+                           vmin=-vmax, vmax=vmax, edgecolors="k", linewidths=lw)
+        for xy, n2 in zip(contacts, names):
+            ax[k].annotate(n2, xy, fontsize=5.3, ha="center", va="center")
+        ax[k].set_title(f"{nm} ΔdB   ({int(ever_pass[:, bi].sum())}/15 clear strict gate)", fontsize=9)
         ax[k].set_aspect("equal"); ax[k].set_xticks([]); ax[k].set_yticks([])
-    fig.colorbar(sc, ax=ax, fraction=0.025, pad=0.01, label="log10 30-150Hz energy")
-    cov = f"platform {row.get('max_platform_contacts', 0)}/15  SCL {row.get('max_platform_scl', 0)}/4"
-    fig.suptitle(f"E1146 broadband energy field — {label}  ({cov})", fontsize=11, x=0.5)
+    fig.colorbar(sc, ax=ax, fraction=0.024, pad=0.01, label="ΔdB vs slow-off baseline (thick ring = clears strict per-band gate)")
+    fig.suptitle(f"E1146 baseline-normalized band ΔdB — {label}   "
+                 f"(coherent {pr['rate_dominant_hz']:.1f} Hz, coh {pr['coherence_med']:.2f}, "
+                 f"phase span {pr['phase_span_deg']:.0f}°, platform {row.get('max_platform_contacts', 0)}/15)",
+                 fontsize=10.5)
     fig.text(0.5, 0.01, FOOTER, ha="center", fontsize=7.5, color="0.4")
     fig.savefig(os.path.join(FIG, "candidate_spatial_modes.png"), dpi=150, bbox_inches="tight")
     plt.close(fig)
