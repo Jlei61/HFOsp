@@ -137,16 +137,15 @@ stalled, collapsed_sparse, silenced, unchanged_16Hz, unsafe}. `transformed` requ
 
 **TDD:** synthetic traces for each verdict (establish-then-3Hz-spiky-broadband → transformed;
 establish-then-decay-to-sparse → collapsed; establish-then-unchanged → unchanged_16Hz; etc.).
-- [ ] tests RED→GREEN→commit. Run classification over the 6 arms → `phase1_verdict.json`.
-- [ ] `plot_topic4_heo2_phase1.py`: per-arm (rate + m_mean + spectrogram + six-band ΔdB, m-enable line),
-  + a summary comparing each arm's six-band ΔdB + spectral_distance_to_real vs m_off + real. Eyeball. Commit.
+- [x] tests RED→GREEN→commit. Run classification over the 6 arms → `phase1_verdict.json`. **0/4 transformed.**
+- [x] `plot_topic4_heo2_phase1.py`: per-arm (rate + m_mean, m-enable line) + six-band ΔdB vs real summary. Eyeballed. Committed `7caff82`.
 
 ## Task 6 — archive + STATUS + README + memory + finalize
 
-- [ ] `docs/archive/topic4/sef_hfo/mz_fcxr_heo2_2026-07-24.md` (plain-language 测了什么/怎么测/揭示了什么
-  + Phase-0 map + Phase-1 verdict + decision: which knob for the sprint). `broadband_diagnostic/STATUS.md`
-  + `figures/README.md` (中文). Update memory (project file + MEMORY.md one-liner).
-- [ ] Final: git status clean; 6 blessed SHAs unchanged; all tests green; no stray sim procs. Report + stop.
+- [x] `docs/archive/topic4/sef_hfo/mz_fcxr_heo2_2026-07-24.md` (bounded-negative: adaptation = brake not
+  frequency-converter; gap = synchrony↔coverage vs desync↔broadband-spiky; next lever = spatial desync / HEO3).
+  `broadband_diagnostic/STATUS.md` + `figures/README.md` (中文) written. Memory updated (project file + MEMORY.md).
+- [x] Final: docs committed; 6 blessed SHAs unchanged; 17 heo2 + 94 existing tests green; no stray sim procs.
 
 ## Self-review
 
