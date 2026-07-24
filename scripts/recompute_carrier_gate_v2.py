@@ -9,6 +9,7 @@ from __future__ import annotations
 import datetime
 import json
 import os
+import subprocess
 import sys
 
 import numpy as np
@@ -20,6 +21,14 @@ from src.topic4_zm_carrier_gate_v2 import (  # noqa: E402
 from src.topic4_zm_ictal_carrier import git_sha, sha256_file  # noqa: E402
 
 DIR = os.path.join(_ROOT, "results", "topic4_sef_hfo", "zm_ictal_carrier_gate")
+_MODULES = [os.path.join(_ROOT, "src", f) for f in
+            ("topic4_zm_carrier_gate_v2.py", "topic4_zm_ictal_carrier.py", "topic4_zm_carrier_verdict.py")]
+
+
+def _git_dirty():
+    """True if any TRACKED file differs from HEAD (so git_sha alone would NOT rebuild the analysis code)."""
+    out = subprocess.check_output(["git", "-C", _ROOT, "status", "--porcelain", "--untracked-files=no"], text=True)
+    return bool(out.strip())
 
 
 def _rd(d, k):
@@ -66,7 +75,8 @@ def main():
     seed = int(sys.argv[1]) if len(sys.argv) > 1 else 1
     out = {"note": "carrier_gate_v2.1 REVISED-protocol offline recompute (not literal-spec faithful; "
                    "observed baseline = fixed early window; onset re-validated). v1 kept for history.",
-           "provenance": dict(gate_version=GATE_VERSION, git_sha=git_sha(_ROOT),
+           "provenance": dict(gate_version=GATE_VERSION, git_sha=git_sha(_ROOT), git_dirty=_git_dirty(),
+                              analysis_module_sha256={os.path.basename(m): sha256_file(m) for m in _MODULES},
                               generated_at=datetime.datetime.now().isoformat(timespec="seconds"),
                               obs_baseline_ms_default=OBS_BASELINE_MS),
            "obs_baseline_ms_default": OBS_BASELINE_MS, "arms": {}}

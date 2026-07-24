@@ -79,6 +79,19 @@ def test_axial_recruitment_gradient_vs_flash():
     assert _axial_recruitment(flash, kt, onset_ms=200.0, dt_ms=DT, window_ms=1000.0)["whole_field_flash"]
 
 
+def test_axial_recruitment_uses_kymograph_time_axis_not_rate_bin():
+    # kymograph columns are 10ms apart; the rate bin dt_ms=5 is DIFFERENT. A 9-column ignition spread is
+    # 90ms (>FLASH_WINDOW 50) under the correct col_dt, but would be 45ms (<50, falsely "flash") if the
+    # buggy rate-bin dt were used. Correct code must NOT call it a flash.
+    n_pos, n_t = 10, 200
+    kt = np.arange(n_t) * 10.0                          # 10 ms columns
+    grad = np.zeros((n_pos, n_t))
+    for a in range(n_pos):
+        grad[a, 20 + a:] = 1.0                          # 9-column spread
+    r = _axial_recruitment(grad, kt, onset_ms=200.0, dt_ms=5.0, window_ms=1000.0)
+    assert abs(r["spread_ms"] - 90.0) < 1e-6 and not r["whole_field_flash"]
+
+
 # ---------------------------------------------------------------- A7 active-area + tail + saturation
 def test_source_gate_a7_active_area_and_tail_and_saturation():
     n = 2000
@@ -97,18 +110,25 @@ def test_source_gate_a7_active_area_and_tail_and_saturation():
     assert src2["tail_escalating"] is True and src2["saturated_plateau"] is True
 
 
-# ---------------------------------------------------------------- B6 real 4-dim (not placeholder)
-def test_observed_sep_count_v2_counts_four_dims():
+# ---------------------------------------------------------------- B6 real event-to-event 4-dim
+def test_observed_sep_count_v2_reference_window_and_cross_contact_extent():
     n = 200
     lg = np.zeros((n, 3))
-    lg[10:14, 0] = 10.0                                 # brief pre-onset event on the best contact
-    lg[40:, 0] = 12.0                                   # long high macro
-    obs = dict(best_contact_idx=0, lg_db=lg, frame_dt_ms=25.0, pre_frames=20, n_sustained_contacts=2,
+    lg[10:14, 0] = 10.0                                 # a brief 1-contact returning event in [0, onset)
+    lg[40:, :3] = 12.0                                  # long macro on ALL 3 contacts (spatial extent 3 vs event 1)
+    obs = dict(best_contact_idx=0, lg_db=lg, frame_dt_ms=25.0, pre_frames=20,   # onset=1000ms -> onset_f=40
                best_macro=dict(onset_ms=1000.0, duration_ms=3000.0, occupancy=0.95, peak=12.0))
-    assert observed_sep_count_v2(obs) >= 3
-    weak = dict(obs, n_sustained_contacts=1,
-                best_macro=dict(onset_ms=1000.0, duration_ms=100.0, occupancy=0.30, peak=12.0))
-    assert observed_sep_count_v2(weak) < 3
+    assert observed_sep_count_v2(obs) == 4              # duration + energy + duty + spatial-extent all separate
+    weak = dict(obs, best_macro=dict(onset_ms=1000.0, duration_ms=100.0, occupancy=0.30, peak=12.0))
+    assert observed_sep_count_v2(weak) < 3              # short low macro -> duration/energy/duty fail
+
+
+def test_observed_sep_count_v2_fail_closed_without_reference_events():
+    n = 200
+    lg = np.zeros((n, 3)); lg[40:, :3] = 12.0           # NO pre-onset returning event in [0, onset=40)
+    obs = dict(best_contact_idx=0, lg_db=lg, frame_dt_ms=25.0, pre_frames=20,
+               best_macro=dict(onset_ms=1000.0, duration_ms=3000.0, occupancy=0.95, peak=12.0))
+    assert observed_sep_count_v2(obs) == 0             # no reference -> not evaluable -> fail-closed
 
 
 # ---------------------------------------------------------------- onset re-validation invariant
@@ -118,3 +138,18 @@ def test_onset_survives_the_final_baseline_threshold():
     oi = int(round(m["onset_ms"] / DT))
     on2 = m["baseline"] + ON_FRAC * (m["peak"] - m["baseline"])
     assert (e[oi:oi + 20] >= on2).all()                 # the reported onset holds ON for >=100ms under FINAL baseline
+
+
+def test_source_gate_a7_fail_closed_without_reference_events():
+    n = 2000
+    core = np.full(n, 1.0); core[100:] = 50.0           # sustained, but NO pre-onset event in [0, onset)
+    kymo = np.zeros((10, n)); kymo[:, 100:] = 1.0
+    kt = np.arange(n) * DT
+    src = compute_source_gate_v2(core, np.full(n, 5.0), np.full(n, 0.30), kymo, kt, DT, None)
+    assert src["macro"]["sustained"] and src["src_sep_count"] == 0   # A7 fail-closed: no reference events
+
+
+def test_tail_escalating_v2_flags_ramp_below_absolute_threshold():
+    from src.topic4_zm_carrier_gate_v2 import _tail_escalating_v2
+    assert _tail_escalating_v2(np.linspace(10.0, 100.0, 2000)) is True   # 10->100 Hz ramp, never hits 150
+    assert _tail_escalating_v2(np.full(2000, 50.0)) is False             # stationary -> not escalating

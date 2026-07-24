@@ -22,7 +22,7 @@ import numpy as np
 from src.topic4_zm_carrier_verdict import (
     ictal_carrier_verdict,
     ON_FRAC, FLOOR_FRAC, MAX_GAP_MS, MIN_MACRO_MS, OCCUPANCY_MIN, SMOOTH_MS,
-    SEP_FACTOR, A7_DIMS_REQUIRED, ENH_DB, N_CONTACTS_MIN, FLASH_WINDOW_MS,
+    SEP_FACTOR, ENH_DB, FLASH_WINDOW_MS,
     _merge_episodes, _longest_subthreshold_run_ms)
 import src.topic4_zm_ictal_carrier as CG
 
@@ -140,9 +140,28 @@ def _axial_recruitment(kymo, kt_ms, onset_ms, dt_ms, window_ms=400.0, active_fra
             fp.append(int(cr[0]))
     if len(fp) < 2:
         return dict(spread_ms=0.0, n_active_axial=int(active.sum()), whole_field_flash=True)
-    spread_ms = float((max(fp) - min(fp)) * dt_ms)
+    spread_ms = float((max(fp) - min(fp)) * col_dt)     # col_dt (kymograph axis), NOT the rate-bin dt_ms
     return dict(spread_ms=spread_ms, n_active_axial=int(active.sum()),
                 whole_field_flash=bool(spread_ms <= FLASH_WINDOW_MS))
+
+
+TAIL_RISE_RATIO = 1.5       # late-tail / early-tail ratio flagging an escalating (non-stationary) trend
+TAIL_RISE_FLOOR_HZ = 30.0   # ...only when the late tail is also non-trivially elevated
+
+
+def _tail_escalating_v2(all_rate):
+    """Escalation = absolute saturation (>=150Hz sustained tail, via CG) OR a RISING trend: the late tail is
+    well above the early post-onset tail AND non-trivially elevated -- catches a 10->100Hz ramp that never
+    reaches 150Hz (v1's CG._tail_escalates only checked the absolute level, not the slope)."""
+    r = np.asarray(all_rate, float)
+    n = r.size
+    if n < 20:
+        return CG._tail_escalates(r)
+    late = float(r[-max(1, n // 20):].mean())                       # last 5%
+    early = float(r[n // 10:max(n // 10 + 1, n // 5)].mean())       # early post-onset (10-20%)
+    absolute = late >= CG.RUNAWAY_ALLE_HZ
+    rising = late >= TAIL_RISE_RATIO * max(early, 1e-9) and late >= TAIL_RISE_FLOOR_HZ
+    return bool(absolute or rising)
 
 
 def compute_source_gate_v2(core_rate, all_rate, active_frac, kymo_axis, kt_ms, bin_ms, runaway_early_stop_ms):
@@ -156,7 +175,7 @@ def compute_source_gate_v2(core_rate, all_rate, active_frac, kymo_axis, kt_ms, b
     whole_field_flash = False
     has_recruitment = False
     saturated_plateau = False
-    src_sep_count = A7_DIMS_REQUIRED
+    src_sep_count = 0             # A7 FAIL-CLOSED: no pre-onset reference events -> cannot establish separation
     if onset_ms is not None and macro["sustained"]:
         oi = int(round(onset_ms / bin_ms))
         # ---- A8 axial gradient ----
@@ -186,7 +205,7 @@ def compute_source_gate_v2(core_rate, all_rate, active_frac, kymo_axis, kt_ms, b
                 # source (no >=100ms onset = a burst train) must route to fail_hfo_like_train, not fail_plateau
                 has_recruitment=(has_recruitment if (onset_ms is not None and macro["sustained"]) else True),
                 saturated_plateau=saturated_plateau,
-                tail_escalating=CG._tail_escalates(np.asarray(all_rate, float)), src_sep_count=src_sep_count,
+                tail_escalating=_tail_escalating_v2(all_rate), src_sep_count=src_sep_count,
                 runaway_early_stop_ms=runaway_early_stop_ms, e_A=e_A)
 
 
@@ -228,31 +247,40 @@ def compute_observed_gate_v2(lfp, fs, baseline_ms=OBS_BASELINE_MS):
 
 
 def observed_sep_count_v2(observed):
-    """B6 (real 4-dim, replacing v2.0's placeholder): the best-contact macroepisode vs its pre-onset
-    returning events on {duration, duty-cycle, energy, spatial-extent}. Duration/energy need a pre-onset
-    reference event (else that dim can't be established -> counts 0, conservative = no false pass)."""
+    """B6 (real event-to-event 4-dim): the best-contact macroepisode vs the RETURNING EVENTS in the true
+    pre-onset window [0, candidate onset) -- NOT the fixed 300ms dB-normalization baseline -- on
+    {duration, duty-cycle, energy, spatial-extent}. The dB-normalization baseline (pre_frames) and the
+    returning-event reference window ([0,onset)) are kept SEPARATE. Spatial extent is a real comparison of
+    the macro's enhanced-contact count vs the returning events' (not a re-check of n_sustained>=2). If there
+    are no returning events, no dim can be established -> 0 (fail-closed)."""
+    lg_all = np.asarray(observed["lg_db"])                  # (n_frames, n_contacts)
     bc = observed["best_contact_idx"]
-    lg = observed["lg_db"][:, bc]
+    lg = lg_all[:, bc]
     dt = observed["frame_dt_ms"]
-    pre = observed["pre_frames"]
+    pre_norm = observed["pre_frames"]                       # dB-normalization window (fixed early), NOT the ref window
     macro = observed["best_macro"]
     if macro["onset_ms"] is None or macro["duration_ms"] <= 0:
         return 0
-    b = float(np.median(lg[:pre])) if pre else 0.0
+    onset_f = int(round(macro["onset_ms"] / dt))
+    dur_f = int(round(macro["duration_ms"] / dt))
+    b = float(np.median(lg[:pre_norm])) if pre_norm else 0.0
     amp = macro["peak"] - b
-    ev = _events_v2(lg[:pre], dt, b, amp)
     on = b + ON_FRAC * amp
-    pre_duty = float((lg[:pre] >= on).mean()) if pre else 0.0
-    oi = int(macro["onset_ms"] / dt)
-    macro_energy = float(np.clip(lg[oi:oi + int(macro["duration_ms"] / dt)] - b, 0, None).sum() * dt)
+    ref = lg[:onset_f]                                      # returning-event REFERENCE window = [0, onset)
+    ev = _events_v2(ref, dt, b, amp)
+    if not ev:
+        return 0                                            # no returning events -> separation not evaluable (fail-closed)
+    med_dur = float(np.median([(i1 - i0) * dt for i0, i1 in ev]))
+    med_energy = float(np.median([np.clip(lg[i0:i1] - b, 0, None).sum() * dt for i0, i1 in ev]))
+    med_extent = float(np.median([int((lg_all[i0:i1] >= ENH_DB).any(axis=0).sum()) for i0, i1 in ev]))
+    macro_energy = float(np.clip(lg[onset_f:onset_f + dur_f] - b, 0, None).sum() * dt)
+    macro_extent = int((lg_all[onset_f:onset_f + dur_f] >= ENH_DB).any(axis=0).sum())
+    pre_duty = float((ref >= on).mean()) if ref.size else 0.0    # fraction of [0,onset) the returning events are on
     dims = 0
-    if ev:
-        med_dur = float(np.median([(i1 - i0) * dt for i0, i1 in ev]))
-        med_energy = float(np.median([np.clip(lg[i0:i1] - b, 0, None).sum() * dt for i0, i1 in ev]))
-        dims += macro["duration_ms"] >= SEP_FACTOR * max(med_dur, 1e-9)          # duration
-        dims += macro_energy >= SEP_FACTOR * max(med_energy, 1e-9)               # energy
-    dims += macro["occupancy"] >= SEP_FACTOR * max(pre_duty, 1e-9)               # duty-cycle
-    dims += observed["n_sustained_contacts"] >= N_CONTACTS_MIN                   # spatial extent
+    dims += macro["duration_ms"] >= SEP_FACTOR * max(med_dur, 1e-9)          # duration
+    dims += macro_energy >= SEP_FACTOR * max(med_energy, 1e-9)               # energy
+    dims += macro["occupancy"] >= SEP_FACTOR * max(pre_duty, 1e-9)           # duty-cycle (event-based, over [0,onset))
+    dims += macro_extent >= SEP_FACTOR * max(med_extent, 1e-9)               # spatial extent vs returning-event extent
     return int(dims)
 
 
