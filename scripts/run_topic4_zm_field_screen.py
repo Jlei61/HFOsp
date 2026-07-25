@@ -88,7 +88,7 @@ def run_formation_arm(lock, I0, arm, seed, T, dt=None, n=None, tag="form"):
     out = simulate_field(p, arm, T=T, dt=dt, seed=seed, state_init=st, record_stride=int(round(REC_MS / dt)))
     m = field_metrics(out["r_trace"], REC_MS)
     os.makedirs(RUNS, exist_ok=True); os.makedirs(TRACES, exist_ok=True)
-    tp = os.path.join(TRACES, f"{tag}_L{level}_{arm}_s{seed}.npz")
+    tp = os.path.join(TRACES, f"{tag}_L{level}_{arm}_s{seed}_T{int(round(T))}_dt{dt:g}_n{p.n}.npz")
     np.savez_compressed(tp, r_trace=out["r_trace"][::4], t_ms=out["t_ms"][::4])   # downsampled for figures
     rec = dict(level=level, arm=arm, seed=seed, tag=tag, T=T, dt=dt, n=p.n, metrics=m, period_ms=per,
                trace=os.path.basename(tp), final_state={k: (v.tolist() if hasattr(v, "tolist") else v)

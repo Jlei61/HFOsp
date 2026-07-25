@@ -4,6 +4,12 @@ missing / NaN metric fails CLOSED. The transverse taxonomy already excludes the 
 from __future__ import annotations
 import math
 
+# ⚠️ NOT IMPLEMENTED (spec §7 / §8(i)-1): the second half of the energy floor,
+#    mean P_local >= 0.5 * mean P_global,
+# is a cross-ARM comparison. _seed_passes only sees one arm's metrics, so it cannot evaluate it, and it is
+# NOT evaluated anywhere else either (field_metrics emits mean_P; nothing consumes it). Consequence: a
+# future GO from this module certifies the energy floor only PARTIALLY (P95 only). Any positive verdict
+# must implement this before being reported. Tracked alongside the unautomated criteria 5-6.
 TH = dict(occ=0.80, area=0.50, osc=0.50, R=0.50, corr=0.50, R_global=0.80, p_lo=0.5, p_hi=2.0,
           P95_min=0.1, seeds_required=3, levels_required=3,
           # spec §6.2: a growth rate is only sign-resolvable ABOVE the discretisation error floor.
@@ -68,6 +74,7 @@ def _taxonomy(lam_local, lam_global):
 
 def adjudicate_field_screen(summary, lock):
     levels = summary.get("levels", {})
+    fmap = summary.get("floquet", {}) or {}     # {level_key: {arm: lam_max}}
     order = [str(x) for x in lock.get("I0_levels", sorted(levels))]
     n_expected = len(lock.get("seeds") or [])          # 0 -> no seed-count contract supplied
     passing, excluded, tax_votes = [], [], []
@@ -118,13 +125,23 @@ def adjudicate_field_screen(summary, lock):
         else:
             run = 0; cur = []
     # deterministic tie-break: sorted() first, so the result never depends on set-iteration order
-    taxonomy = max(sorted(set(tax_votes)), key=tax_votes.count) if tax_votes else "both_stable"
+    if tax_votes:
+        taxonomy = max(sorted(set(tax_votes)), key=tax_votes.count)
+    elif fmap:
+        # no level was evaluated nonlinearly (e.g. the cheap Floquet pass found no candidate window), so
+        # derive the taxonomy DIRECTLY from the Floquet map instead of falling through to a default label
+        votes = [_taxonomy(_num(v, "dual_local"), _num(v, "dual_global")) for v in fmap.values()]
+        votes = [t for t in votes if t]
+        taxonomy = max(sorted(set(votes)), key=votes.count) if votes else "no_evidence"
+    else:
+        taxonomy = "no_evidence"
     if best_run >= TH["levels_required"]:
         # GO requires the linear-stability crossing INSIDE the accepted window, not anywhere in the sweep
         verdict = ("GO" if any(floquet_by_level.get(k, False) for k in window)
                    else "subcritical_finite_amplitude_candidate")
     else:
         verdict = {"global_unstable_local_stable": "reverse_global_unstable_local_stable",
-                   "both_stable": "both_stable", "both_unstable": "both_unstable"}.get(taxonomy, "no_go")
+                   "both_stable": "both_stable", "both_unstable": "both_unstable",
+                   "no_evidence": "no_evidence"}.get(taxonomy, "no_go")
     return dict(verdict=verdict, taxonomy=taxonomy, passing_levels=passing, window=window,
                 reasons=dict(excluded_levels=excluded, longest_consecutive=best_run))

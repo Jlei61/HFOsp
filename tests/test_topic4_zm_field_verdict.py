@@ -136,3 +136,26 @@ def test_truncated_control_seed_list_excludes_the_level():
     r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1, 2], seeds=[0, 1, 2, 3]))
     assert r["verdict"] != "GO"
     assert sorted(str(x) for x in r["reasons"]["excluded_levels"]) == ["0", "1", "2"]
+
+
+def test_empty_levels_derives_taxonomy_from_the_floquet_map_not_a_default():
+    """When the cheap Floquet pass finds no candidate, no level is evaluated nonlinearly. The taxonomy must
+    then be DERIVED from the Floquet map -- otherwise both_unstable and indeterminate would silently be
+    reported under the same label as a genuine both_stable."""
+    stable = {"0.7": {"dual_local": -0.004, "dual_global": -0.055},
+              "0.8": {"dual_local": -0.004, "dual_global": -0.055}}
+    r = adjudicate_field_screen(dict(levels={}, floquet=stable), dict(I0_levels=[0.7, 0.8]))
+    assert r["taxonomy"] == "both_stable"
+
+    unstable = {k: {"dual_local": 0.02, "dual_global": 0.02} for k in ("0.7", "0.8")}
+    r2 = adjudicate_field_screen(dict(levels={}, floquet=unstable), dict(I0_levels=[0.7, 0.8]))
+    assert r2["taxonomy"] == "both_unstable" and r2["verdict"] != "GO"
+
+    tiny = {k: {"dual_local": 5e-4, "dual_global": -5e-4} for k in ("0.7", "0.8")}
+    r3 = adjudicate_field_screen(dict(levels={}, floquet=tiny), dict(I0_levels=[0.7, 0.8]))
+    assert r3["taxonomy"] == "indeterminate_below_noise_floor" and r3["verdict"] != "GO"
+
+
+def test_no_floquet_and_no_levels_is_no_evidence():
+    r = adjudicate_field_screen(dict(levels={}), dict(I0_levels=[0.7]))
+    assert r["taxonomy"] == "no_evidence" and r["verdict"] == "no_evidence"

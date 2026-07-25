@@ -30,6 +30,7 @@ if _ROOT not in sys.path:
 
 from src.topic4_zm_field_meanfield import MFParams, detect_orbit, simulate_meanfield
 from src.topic4_zm_field_screen import FieldParams, floquet_map, uniform_orbit
+from src.topic4_zm_field_verdict import TH
 
 OUT = os.path.join(_ROOT, "results", "topic4_sef_hfo", "zm_field_screen")
 LOCK_PATH = os.path.join(OUT, "phaseA_lock.json")
@@ -39,7 +40,7 @@ FIG_DIR = os.path.join(OUT, "figures")
 FIG_STEM = "zm_field_screen_local_vs_global"
 
 M_MAX = 4          # integer spatial-mode half-width for the Floquet heatmap (panel B)
-LAM_FLOOR = 0.002   # sign-resolution floor; matches src.topic4_zm_field_verdict.TH["lam_floor"]
+LAM_FLOOR = TH["lam_floor"]   # sign-resolution floor; imported so it cannot drift from the adjudicator
 
 ARM_LABEL = {
     "div_global": "divisive-only (beta=0):\nNO orbit -- not a stability result",
