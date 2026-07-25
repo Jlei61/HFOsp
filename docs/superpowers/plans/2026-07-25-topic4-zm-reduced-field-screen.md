@@ -470,7 +470,10 @@ def _osc(n, nt, phases, amp=0.8, base=0.1, period=40):
     return f.astype(np.float32)
 
 def test_inphase_vs_desync_metrics():
-    n, nt = 8, 400
+    # nt=600 (not 400): settle=0.25 drops 25%, so 600 frames leave 450 = 11.25 cycles at period=40,
+    # clearing the LOCKED ncyc>=10 oscillation gate. With nt=400 only 7.5 cycles survive, no cell counts
+    # as oscillatory, and BOTH inputs fail-close to R_phase=1.0 -- the test could not discriminate at all.
+    n, nt = 8, 600
     mi = field_metrics(_osc(n, nt, np.zeros((n, n))), 5.0)
     md = field_metrics(_osc(n, nt, np.random.default_rng(0).uniform(0, 2 * np.pi, (n, n))), 5.0)
     assert mi["median_R_phase"] > 0.8 and md["median_R_phase"] < 0.5
@@ -554,7 +557,7 @@ def field_metrics(r_trace, dt_rec_ms, a_max=1.0, settle=0.25):
                 median_local_period_ms=median_local_period, population_period_ms=pop_period)
 ```
 
-- [ ] **Step 4: Run to verify PASS** — `12 passed`
+- [ ] **Step 4: Run to verify PASS** — `11 passed` (7 from Tasks 3-4 + 4 new)
 - [ ] **Step 5: Commit** — `git commit -m "feat(topic4): field metrics with local-cell period + phase coverage + fail-closed"`
 
 ---
