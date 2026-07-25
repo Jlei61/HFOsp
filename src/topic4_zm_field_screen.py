@@ -224,3 +224,14 @@ def floquet_map(p: FieldParams, arm, orbit, dt, m_max=6):
             modes.append((mx, my)); lam.append(transverse_floquet(p, arm, mx, my, orbit, dt))
     lam = np.asarray(lam); i = int(np.argmax(lam))
     return dict(modes=modes, lam=lam, lam_max=float(lam[i]), k_star=modes[i])
+
+def orbit_phasepoint_state(p: FieldParams, orbit, phase_idx):
+    r0, mu0, S0 = orbit[int(phase_idx) % len(orbit)]
+    o = np.ones((p.n, p.n))
+    return dict(r=r0 * o, muL=mu0 * o, SL=S0 * o, muG=float(mu0), SG=float(S0))
+
+def add_r_perturbation(state, eps, seed, n):
+    rng = np.random.default_rng(seed)
+    d = rng.standard_normal((n, n)); d -= d.mean()
+    state["r"] = state["r"] + eps * float(np.max(state["r"])) * d
+    return state

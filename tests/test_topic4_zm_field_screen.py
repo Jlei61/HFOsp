@@ -217,3 +217,20 @@ def test_mode_responses_at_dc_returns_total_gain_and_unit_pool():
     p = FieldParams(W0=2.0, alpha=2.0, beta=4.0, theta=0.5, I0=1.0, n=16)
     Wk, Kk = mode_responses(p, 0, 0)
     assert abs(Wk - p.W0) < 1e-9 and abs(Kk - 1.0) < 1e-9
+
+# append to tests/test_topic4_zm_field_screen.py
+from src.topic4_zm_field_screen import orbit_phasepoint_state, add_r_perturbation
+
+def test_phasepoint_resets_every_field_uniformly():
+    p = _P(n=8); orbit, _ = uniform_orbit(p, 0.25)
+    st = orbit_phasepoint_state(p, orbit, len(orbit) // 3)
+    for k in ("r", "muL", "SL"):
+        assert np.allclose(st[k], st[k].flat[0])       # no leftover spatial S_L memory
+    assert np.isscalar(st["muG"]) and np.isscalar(st["SG"])
+
+def test_perturbation_is_zero_mean_and_r_only():
+    p = _P(n=16); orbit, _ = uniform_orbit(p, 0.25)
+    st0 = orbit_phasepoint_state(p, orbit, 5)
+    st1 = add_r_perturbation({k: (v.copy() if hasattr(v, "copy") else v) for k, v in st0.items()}, 1e-4, 0, 16)
+    assert abs(float((st1["r"] - st0["r"]).mean())) < 1e-12
+    assert np.allclose(st1["SL"], st0["SL"]) and np.allclose(st1["muL"], st0["muL"])
