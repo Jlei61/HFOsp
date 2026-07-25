@@ -203,3 +203,56 @@ def test_phase1_silenced_stalled_unsafe():
               six_band_ddb=[8, 9, 7, 8, 5, 1])
     assert H2.phase1_verdict(_PRE_HI, ok, _BURST, _MOFF_DIST, _MOFF_COV,
                              dict(numerical_unsafe=True, runaway_early_stop_ms=None))["verdict"] == "unsafe"
+
+
+# ====================== HEO2.1 closeout: de-conflated spatial readouts ======================
+# bands order [1-4, 4-8, 8-13, 13-30, 30-80, 80-150]; indices 0..4 = 1-80 Hz, 5 = 80-150.
+def test_active_recruitment_counts_any_1_80_band():
+    flat = np.zeros((15, 6))
+    assert H2.active_recruitment(flat) == 0                      # nothing above baseline
+    allup = np.full((15, 6), 10.0)
+    assert H2.active_recruitment(allup) == 15                    # everyone up
+    narrow = np.zeros((15, 6)); narrow[:, 3] = 5.0               # only 13-30 up (16Hz-anchor-like)
+    assert H2.active_recruitment(narrow) == 15                   # RECRUITED via beta (not 0!)
+    hf_only = np.zeros((15, 6)); hf_only[:, 5] = 10.0            # only 80-150 up -> not 1-80
+    assert H2.active_recruitment(hf_only) == 0
+
+
+def test_broadband_coverage_1_80_needs_multiband_excludes_hf():
+    flat = np.zeros((15, 6))
+    assert H2.broadband_coverage_1_80(flat) == 0
+    narrow = np.zeros((15, 6)); narrow[:, 3] = 5.0               # only beta -> NOT broadband
+    assert H2.broadband_coverage_1_80(narrow) == 0
+    real = np.tile(np.array(H2.REAL_E1146_DDB), (15, 1))        # all 5 sub-80 up (real E1146)
+    assert H2.broadband_coverage_1_80(real) == 15
+    # exactly k_bands-1 up -> fails; k_bands up -> passes
+    two = np.zeros((15, 6)); two[:, 0] = two[:, 1] = 5.0
+    assert H2.broadband_coverage_1_80(two, k_bands=3) == 0
+    three = np.zeros((15, 6)); three[:, 0] = three[:, 1] = three[:, 2] = 5.0
+    assert H2.broadband_coverage_1_80(three, k_bands=3) == 15
+    hf = np.zeros((15, 6)); hf[:, 2] = hf[:, 3] = hf[:, 5] = 5.0  # 80-150 doesn't count toward broadband
+    assert H2.broadband_coverage_1_80(hf, k_bands=3) == 0
+
+
+def test_segment_state_label_terminated_vs_bursting_vs_sustained():
+    fs = 1000.0
+    n = 5000
+    # terminated: high for 2.5s then dead
+    term = np.concatenate([np.full(2500, 120.0), np.zeros(2500)])
+    assert H2.segment_state_label(term, fs, m_enable_ms=None, dt=1.0) == "terminated_no_recovery_in_window"
+    # intermittent bursting: high, gap, high, gap, high (re-ignites, tail active)
+    burst = np.concatenate([np.full(700, 120.0), np.zeros(400), np.full(700, 120.0),
+                            np.zeros(400), np.full(700, 120.0), np.zeros(400), np.full(1700, 120.0)])
+    assert H2.segment_state_label(burst, fs, m_enable_ms=None, dt=1.0) == "intermittent_fast_bursting"
+    # sustained: high throughout
+    sust = np.full(n, 120.0)
+    assert H2.segment_state_label(sust, fs, m_enable_ms=None, dt=1.0) == "sustained_high"
+
+
+def test_segment_state_label_16hz_carrier_is_sustained_not_bursting():
+    # a sustained ~16Hz oscillation (rate rings 0..250 at 16Hz) must read as sustained_high, NOT
+    # bursting — the envelope smoother must remove the carrier (regression: real m_off arm).
+    fs = 1000.0
+    t = np.arange(5000) / fs
+    carrier = np.clip(130.0 + 120.0 * np.sin(2 * np.pi * 16.0 * t), 0, None)
+    assert H2.segment_state_label(carrier, fs, m_enable_ms=None, dt=1.0) == "sustained_high"

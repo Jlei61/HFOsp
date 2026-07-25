@@ -134,6 +134,54 @@ def phase1_verdict(pre, post, m_mean_post, m_off_dist, m_off_coverage, safety):
     return dict(verdict=v, criteria=crit)
 
 
+# ------------------------------------------------ HEO2.1: de-conflated spatial readouts
+# ddb_field = per-contact six-band ΔdB (band_db_field), bands [1-4,4-8,8-13,13-30,30-80,80-150];
+# indices 0..4 = 1-80 Hz, 5 = 80-150. These split the old single `coverage` into orthogonal readouts:
+# "how many contacts active" vs "how many broadband-shaped" vs (via oscillation_probe) "synchronous?".
+def active_recruitment(ddb_field, thr_db=3.0):
+    """# contacts recruited = ANY 1-80 Hz band (0..4) elevated ≥ thr_db over baseline. Loose OR — a
+    narrowband 16 Hz contact is recruited via its beta band, so recruitment≠0 for the synchronous high
+    state. 80-150 (index 5) excluded (not part of the real E1146 target). De-conflates participation
+    from spectral shape."""
+    f = np.asarray(ddb_field, float)
+    return int(np.sum(np.any(f[:, :5] >= thr_db, axis=1)))
+
+
+def broadband_coverage_1_80(ddb_field, thr_db=3.0, k_bands=3):
+    """# contacts with E1146-like broadband elevation = ≥ k_bands of the 5 sub-80 Hz bands (0..4) each
+    ≥ thr_db. EXCLUDES 80-150 (real E1146 has 80-150 ≈ -1.2 dB, not up). A narrowband 16 Hz contact
+    (only beta up) fails; the real six-band vector (all 5 sub-80 up) passes. Replaces HEO1's strict
+    all-6-band composite."""
+    f = np.asarray(ddb_field, float)
+    return int(np.sum(np.sum(f[:, :5] >= thr_db, axis=1) >= k_bands))
+
+
+def segment_state_label(rate, fs, m_enable_ms=None, dt=0.05):
+    """Tail/envelope-segmented label for a delayed-adaptation arm's post-enable window (fixes the two
+    mislabeled strong arms). Envelope = 30 ms-smoothed rate; on/off threshold 0.3·q95; silent = <5 Hz.
+    - `terminated_no_recovery_in_window`: established high state, last 25% silent (died and stayed dead).
+    - `intermittent_fast_bursting`: ≥2 re-ignitions (off→on) and the tail is still active.
+    - `sustained_high`: established, tail active, few re-ignitions. - `other`/`silent` otherwise."""
+    r = np.asarray(rate, float)
+    k = int((m_enable_ms or 0.0) / dt)
+    seg = r[k:] if r.size - k > int(0.5 * fs) else r
+    w = max(1, int(0.15 * fs))                                 # 150 ms >> carrier period, << burst envelope
+    roll = np.convolve(seg, np.ones(w) / w, mode="same")
+    q95 = float(np.percentile(roll, 95))
+    established = float(roll.max()) > 60.0
+    n = len(seg)
+    tail_silent = float(seg[int(0.75 * n):].mean()) < 5.0
+    if q95 < 1e-6 or not established:
+        return "silent" if tail_silent else "other"
+    active = roll > 0.3 * q95
+    offon = int(np.sum((~active[:-1]) & (active[1:])))          # re-ignitions
+    if tail_silent:
+        return "terminated_no_recovery_in_window"
+    if offon >= 2:
+        return "intermittent_fast_bursting"
+    return "sustained_high"
+
+
 def classify_state(m):
     """4-class label (spec §2). Precedence: target_like_spiky > tonic_16Hz_cycle > sparse_event_train
     > transitional. m keys: dominant_hz, duty_cycle, coverage, six_band_ddb, coherent."""
