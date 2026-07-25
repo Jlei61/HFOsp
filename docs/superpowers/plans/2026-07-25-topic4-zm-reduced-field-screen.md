@@ -974,6 +974,16 @@ def adjudicate_field_screen(summary, lock):
 - [ ] **Step 4: Run to verify PASS** — `OMP_NUM_THREADS=1 python -m pytest -q tests/test_topic4_zm_field_verdict.py` → `11 passed`
 - [ ] **Step 5: Commit** — `git commit -m "feat(topic4): pure reduced-field adjudicator with fail-closed TDD"`
 
+> **⚠️ SHIPPED CODE DIFFERS FROM THE BLOCK ABOVE — review fix `bf7c311` is authoritative.** A review
+> hand-traced a FALSE-POSITIVE path: `floquet_ok` was accumulated over the whole sweep, so `GO` could fire
+> when the accepted consecutive window was entirely subcritical and a *disconnected* level supplied the
+> crossing. The shipped `adjudicate_field_screen` scores Floquet per LEVEL (`floquet_by_level`) and requires
+> the crossing to fall INSIDE `window`. Three further hardenings shipped with it: `level_control_is_valid`
+> aggregates control validity over seeds (was seed-0 only); the taxonomy tie-break goes through
+> `sorted(set(...))` (was set-iteration order); and an arm whose seed list is shorter than the lock's
+> declared seed count is skipped (so "3 of 4" cannot be satisfied as "3 of 3"). Four regression tests cover
+> these. Read `src/topic4_zm_field_verdict.py`, not this block.
+
 ---
 
 ### Task 9: Orchestrator — Phase 0 → A (write-once lock) → B (Floquet first, resume)
