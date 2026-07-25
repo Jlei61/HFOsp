@@ -247,7 +247,18 @@ def panel_c(ax, floquet, lock):
 # Panel D -- what does the field actually do?
 # ---------------------------------------------------------------------------
 def _trace_path(level_str, arm, seed=0):
-    return os.path.join(TRACES_DIR, f"form_L{level_str}_{arm}_s{seed}.npz")
+    """Trace filenames carry T/dt/n (the runner encodes them so a short run cannot overwrite a production
+    trace). Glob rather than hard-code them, so this keeps working across run lengths; prefer the LONGEST
+    T available, and fall back to the pre-parameterisation name for traces written before that change."""
+    import glob
+    import re
+    cands = glob.glob(os.path.join(TRACES_DIR, f"form_L{level_str}_{arm}_s{seed}_T*.npz"))
+    if cands:
+        def _T(p):
+            m = re.search(r"_T(\d+)_", os.path.basename(p))
+            return int(m.group(1)) if m else -1
+        return max(cands, key=_T)
+    return os.path.join(TRACES_DIR, f"form_L{level_str}_{arm}_s{seed}.npz")   # legacy name
 
 
 def panel_d(axes, lock, L_mm, seed=0):
