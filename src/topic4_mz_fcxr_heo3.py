@@ -20,10 +20,15 @@ BANDS = [(1.0, 4.0), (4.0, 8.0), (8.0, 13.0), (13.0, 30.0), (30.0, 80.0), (80.0,
 
 
 # ------------------------------------------------------------------ per-window spectral field
-def band_power_windows(lfp_dec, fs, win_ms=250.0, hop_ms=50.0):
-    """(n_windows, n_contacts, n_bands) band power on a SHORT Hann window (HEO1's is fixed at 1 s).
-    Density scaling x df -> band power is window-length independent in expectation, so these windows
-    stay comparable to the 1 s baseline reference. Returns (bandpower, window_center_times_s)."""
+def band_power_windows(lfp_dec, fs, win_ms=1000.0, hop_ms=100.0):
+    """(n_windows, n_contacts, n_bands) band power on a Hann window of `win_ms` (HEO1's is fixed at 1 s).
+
+    ⚠️ WINDOW-LENGTH FLOOR: the joint gate must NOT use a 200-300 ms window. At 250 ms the spectrogram
+    has no bin below 4 Hz (the 1-4 Hz band comes out empty -> -inf dB) and the Hann main lobe is ~16 Hz
+    wide, so a strong 16 Hz peak leaks +20 dB into 8-13 Hz and fakes 'broadband'. The target phenotype
+    is defined by ~3 Hz content, so 1 s (>=3 cycles at 3 Hz, ~1 Hz bins) is the shortest defensible
+    window; the joint judgement is kept dense via the 100 ms hop. Density scaling x df keeps band power
+    comparable to the 1 s baseline reference. Returns (bandpower, window_center_times_s)."""
     x = np.asarray(lfp_dec, float)
     if x.ndim == 1:
         x = x[:, None]
@@ -42,45 +47,81 @@ def band_power_windows(lfp_dec, fs, win_ms=250.0, hop_ms=50.0):
     return out, tcen
 
 
-def phase_order_parameter(lfp_dec, fs, band=(4.0, 30.0)):
-    """Cross-contact Kuramoto order parameter R(t) from Hilbert phase in `band`.
-    R=1 -> every contact in phase (fully synchronous); R->0 -> phases dispersed across contacts.
-    Per-sample (not a windowed coherence), so it can be restricted to ACTIVE samples — this is what
-    keeps silent gaps from masquerading as spatial desynchronization (review P1-c)."""
+def band_phase(lfp_dec, fs, band=(4.0, 30.0)):
+    """Instantaneous Hilbert phase per contact, band-limited. (n_samples, C)."""
     x = np.asarray(lfp_dec, float)
     if x.ndim == 1:
         x = x[:, None]
     lo, hi = band
     sos = butter(4, [lo / (fs / 2.0), min(hi / (fs / 2.0), 0.99)], btype="band", output="sos")
     xf = sosfiltfilt(sos, x - x.mean(axis=0), axis=0)
-    phi = np.angle(hilbert(xf, axis=0))
-    return np.abs(np.exp(1j * phi).mean(axis=1))
+    return np.angle(hilbert(xf, axis=0))
+
+
+def phase_order_parameter(lfp_dec, fs, band=(4.0, 30.0)):
+    """Cross-contact Kuramoto order parameter R(t) = instantaneous phase ALIGNMENT.
+
+    ⚠️ NOT the desynchronization instrument. A travelling wave (fixed inter-contact lag, phase spread
+    over ~180°) is perfectly ORGANIZED yet scores R~0.4 — the FCXR 16 Hz reference state does exactly
+    this (coherence 0.98, phase span 186°, R 0.43). Use `pairwise_plv_windows` to judge whether the
+    phase ORGANIZATION broke up; R is reported only as a descriptive alignment/travelling-wave readout."""
+    return np.abs(np.exp(1j * band_phase(lfp_dec, fs, band)).mean(axis=1))
+
+
+def pairwise_plv_windows(phi, tcen, dt_ms, win_ms, active=None):
+    """Per-window mean pairwise phase-locking value = consistency of inter-contact phase RELATIONSHIPS.
+
+    PLV_cd = |mean_t exp(i(φ_d - φ_c))| over the window's samples; returns the mean over contact pairs.
+    Invariant to fixed lags, so a travelling wave scores ~1 (organized) while phases that drift relative
+    to one another score low (genuinely desynchronized) — this is the criterion HEO3 needs. `active`
+    restricts the average to supra-threshold samples so silent gaps cannot fake desynchronization."""
+    p = np.asarray(phi, float)
+    n, C = p.shape
+    half = max(1, int(round(win_ms / dt_ms / 2)))
+    out = np.full(len(tcen), np.nan)
+    for i, tc in enumerate(np.asarray(tcen, float)):
+        c0 = int(round(tc * 1000.0 / dt_ms))
+        lo, hi = max(0, c0 - half), min(n, c0 + half + 1)
+        seg = p[lo:hi]
+        if active is not None:
+            g = np.asarray(active, bool)[lo:hi]
+            if g.sum() < 8:
+                continue                                   # too little ACTIVE signal -> undefined (nan),
+            seg = seg[g]                                   #   NOT "desynchronized": silence must not pass
+        if seg.shape[0] < 8:
+            continue
+        z = np.exp(1j * seg)                                   # (m, C)
+        M = np.abs(z.conj().T @ z) / seg.shape[0]              # (C, C) pairwise PLV
+        iu = np.triu_indices(C, k=1)
+        out[i] = float(M[iu].mean())
+    return out
 
 
 # ------------------------------------------------------------------ the joint gate
-def joint_target_windows(bp, ref_med_power, rate_dec, order_R, fs_win, *, thr_db=3.0,
-                         min_recruit=12, min_broadband=8, max_order=0.80, min_rate_hz=60.0,
-                         k_bands=3, active_rate_hz=20.0):
-    """Judge recruited ∧ broadband ∧ phase-dispersed ∧ high-energy PER WINDOW (review P1-c).
+def joint_target_windows(bp, ref_med_power, rate_dec, plv, fs_win, *, thr_db=3.0,
+                         min_recruit=12, min_broadband=8, max_plv=0.60, min_rate_hz=60.0,
+                         k_bands=3):
+    """Judge recruited ∧ broadband ∧ phase-DESYNCHRONIZED ∧ high-energy PER WINDOW (review P1-c).
 
-    bp: (nw, C, B) short-window band power; ref_med_power: (C, B) baseline median; rate_dec/order_R:
-    per-sample population rate and order parameter (resampled onto the windows); fs_win: windows/s.
-    Phase dispersion uses the ACTIVE-sample mean of R inside each window (silence excluded), so an
-    on-off burst train cannot score as 'dispersed' just by having gaps.
-    Returns per-window arrays + the fraction of target windows + the longest CONSECUTIVE run (ms)."""
+    bp: (nw, C, B) band power (>=1 s window, see band_power_windows); ref_med_power: (C, B) baseline
+    median; rate_dec: per-window population rate; `plv`: per-window mean pairwise PLV on ACTIVE samples
+    (pairwise_plv_windows) — NOT the instantaneous order parameter, which a travelling wave fails for
+    the wrong reason. Desynchronized := PLV <= max_plv (phase relationships stopped being consistent).
+    Returns per-window arrays + fraction of target windows + longest CONSECUTIVE run (ms)."""
     ddb = 10.0 * np.log10(np.maximum(bp, 1e-300) / np.maximum(ref_med_power[None], 1e-300))
     up = ddb[:, :, :5] >= thr_db                                  # (nw, C, 5) 1-80 Hz only
     recruit = up.any(axis=2).sum(axis=1)                          # contacts with ANY 1-80 band up
     broadband = (up.sum(axis=2) >= k_bands).sum(axis=1)           # contacts with >=k of 5 bands up
+    plv = np.asarray(plv, float)
     crit = dict(recruited=recruit >= min_recruit, broadband=broadband >= min_broadband,
-                dispersed=order_R <= max_order, high_energy=rate_dec >= min_rate_hz)
-    target = crit["recruited"] & crit["broadband"] & crit["dispersed"] & crit["high_energy"]
-    # longest consecutive run of target windows -> ms
+                desynchronized=np.nan_to_num(plv, nan=1.0) <= max_plv,   # nan (silent) -> not desync
+                high_energy=rate_dec >= min_rate_hz)
+    target = crit["recruited"] & crit["broadband"] & crit["desynchronized"] & crit["high_energy"]
     best = run = 0
-    for t in target:
+    for t in target:                                              # longest consecutive run
         run = run + 1 if t else 0
         best = max(best, run)
-    return dict(recruit=recruit, broadband=broadband, order_R=order_R, rate=rate_dec,
+    return dict(recruit=recruit, broadband=broadband, plv=plv, rate=rate_dec,
                 target=target, criteria={k: v for k, v in crit.items()},
                 frac_target=float(target.mean()) if target.size else 0.0,
                 longest_run_ms=float(best / fs_win * 1000.0),
