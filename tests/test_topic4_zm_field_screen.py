@@ -99,3 +99,15 @@ def test_phase_coverage_reported_and_failclosed():
     n, nt = 8, 400
     m = field_metrics(np.full((nt, n, n), 0.8, np.float32), 5.0)   # no oscillating cells at all
     assert m["phase_coverage_frac"] == 0.0 and m["median_R_phase"] == 1.0   # fail closed
+
+def test_osc_frac_denominator_is_all_cells_not_the_active_subset():
+    """LOCKED contract: osc_frac's denominator is ALL cells, never the active subset. Here 4 of 64 cells
+    oscillate (with nt=600, enough frames to clear the ncyc>=10 gate) while the other 60 are flat. The
+    correct denominator gives 4/64=0.0625; an active-subset denominator would give 1.0 and would let a
+    tiny-active-set state pass as fully oscillatory."""
+    n, nt = 8, 600
+    f = np.full((nt, n, n), 0.10, np.float32)
+    f[:, :2, :2] = _osc(2, nt, np.zeros((2, 2)))      # 2x2 = 4 oscillating cells, same frame budget
+    m = field_metrics(f, 5.0)
+    assert abs(m["osc_frac"] - 4.0 / 64.0) < 1e-9
+    assert m["active_area_frac"] < 0.1                 # only 4/64 cells are active at all
