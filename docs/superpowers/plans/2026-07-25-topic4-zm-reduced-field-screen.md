@@ -147,11 +147,12 @@ def test_contiguous_runs_splits_gaps():
     assert contiguous_runs([False, False]) == []
 
 def test_continuation_minimal_intervention_prefers_smallest_beta():
-    # tiny grid where beta=1 and beta=8 both oscillate -> must pick beta=1 (least new mechanism)
-    r = meanfield_continuation(grid=dict(W0=[2], alpha=[2], beta=[1, 8], theta=[0.5]),
+    # beta=2 and beta=8 BOTH oscillate at (W0=2, alpha=2, I0~1.0-1.5) -> must pick beta=2 (least new
+    # mechanism). Unconditional: if this grid yields no orbit the test FAILS (it must not pass vacuously).
+    r = meanfield_continuation(grid=dict(W0=[2], alpha=[2], beta=[2, 8], theta=[0.5]),
                                I0s=np.arange(0.8, 1.81, 0.1), min_seg=3)
-    if r["has_orbit"]:
-        assert r["operating_point"]["beta"] == 1
+    assert r["has_orbit"], "expected an orbit for both beta=2 and beta=8 in this grid"
+    assert r["operating_point"]["beta"] == 2
 
 def test_continuation_reports_interior_levels_and_segment():
     r = meanfield_continuation(min_seg=5)
