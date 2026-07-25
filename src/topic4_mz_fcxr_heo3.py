@@ -190,20 +190,19 @@ def build_patch_field(posE, src_xy, snk_xy, patch_w, tau_fast, tau_slow, tau0, e
 
 
 def region_alternation(rows, region_a="core_source", region_b="core_sink"):
-    """Do two regions TAKE TURNS carrying the activity? Correlation of their per-window rates after
-    removing the common drive (each normalized by the total across the two). Alternation -> negative.
-    A rate-weighted centroid cannot see this (both ends bright leaves the centroid mid-axis), so this
-    is the required extra criterion before any 'regions alternate' claim."""
+    """Do two regions TAKE TURNS carrying the activity? Pearson correlation of their per-window RATES:
+    negative = one is high while the other is low (alternation), positive = they rise and fall together
+    (common drive, no turn-taking). A rate-weighted centroid cannot see alternation (both ends bright
+    leaves it mid-axis), so this is the required extra criterion before any 'regions alternate' claim.
+
+    ⚠️ Do NOT compute this on the regions' SHARES a/(a+b), b/(a+b): two shares sum to 1, so they are
+    perfectly anticorrelated by construction and every arm scores -1 regardless of the dynamics."""
     a = np.array([r[f"rate_{region_a}"] for r in rows], float)
     b = np.array([r[f"rate_{region_b}"] for r in rows], float)
-    tot = a + b
-    ok = tot > 0
-    if ok.sum() < 4:
+    ok = (a + b) > 0
+    if ok.sum() < 4 or a[ok].std() < 1e-12 or b[ok].std() < 1e-12:
         return float("nan")
-    fa, fb = a[ok] / tot[ok], b[ok] / tot[ok]                  # shares -> common drive removed
-    if fa.std() < 1e-12 or fb.std() < 1e-12:
-        return float("nan")
-    return float(np.corrcoef(fa, fb)[0, 1])
+    return float(np.corrcoef(a[ok], b[ok])[0, 1])
 
 
 def participation_ratio(rates):

@@ -341,8 +341,13 @@ def test_region_alternation_is_negative_only_when_regions_take_turns():
     t = np.arange(n)
     alt_a = 50 + 40 * np.sin(2 * np.pi * t / 10)               # antiphase: they take turns
     alt_b = 50 - 40 * np.sin(2 * np.pi * t / 10)
-    tog_a = 50 + 40 * np.sin(2 * np.pi * t / 10)               # in phase: common drive, no turns
-    tog_b = 50 + 40 * np.sin(2 * np.pi * t / 10)
     assert H3.region_alternation(rows(alt_a, alt_b)) < -0.9
-    assert np.isnan(H3.region_alternation(rows(tog_a, tog_b)))  # shares constant -> undefined, not "alternating"
+    # REGRESSION for the shares tautology: a purely COMMON-DRIVEN pair (in phase, different amplitude,
+    # so the shares are NOT constant) must score POSITIVE. Computing this on shares a/(a+b), b/(a+b)
+    # returns -1 here — shares sum to 1 and are anticorrelated by construction — which would have
+    # reported "perfect alternation" for every arm.
+    tog_a = 50 + 40 * np.sin(2 * np.pi * t / 10)
+    tog_b = 0.8 * tog_a + 2.0
+    assert H3.region_alternation(rows(tog_a, tog_b)) > 0.9     # common drive -> POSITIVE, not -1
     assert np.isnan(H3.region_alternation(rows(np.zeros(n), np.zeros(n))))   # silence -> undefined
+    assert np.isnan(H3.region_alternation(rows(np.full(n, 5.0), np.full(n, 5.0))))  # constant -> undefined
