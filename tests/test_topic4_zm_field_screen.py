@@ -152,3 +152,68 @@ def test_dt_halving_sign_margin_on_a_real_orbit():
     l1 = transverse_floquet(p, "dual_local", 2, 0, o1, 0.25)
     l2 = transverse_floquet(p, "dual_local", 2, 0, o2, 0.125)
     assert np.sign(l1) == np.sign(l2) and abs(l1 - l2) < 0.5 * max(abs(l1), abs(l2), 1e-6) + 1e-3
+
+
+def _field_rhs_parts(p, arm, r, muL, SL, muG, SG):
+    """One RHS evaluation replicating simulate_field's own expressions (for independent FD checking)."""
+    import src.topic4_zm_field_screen as M
+    n = p.n
+    KE = np.fft.rfft2(M.elliptical_exp_kernel(n, p.L, p.l_par, p.l_perp, p.theta_EE))
+    KS = np.fft.rfft2(M.gaussian_kernel(n, p.L, p.sigma_S))
+    q = M.resolve_w_frac(p); w_rec, w_c = p.W0 * q, p.W0 * (1.0 - q)
+    beta = M.arm_beta(p, arm)
+    Se = M._S_eff(arm, SL, SG, p.eps_G)
+    rec_E = w_rec * r + w_c * np.fft.irfft2(np.fft.rfft2(r) * KE, s=(n, n))
+    u = p.I0 + rec_E / (1.0 + p.alpha * Se) - beta * Se - p.theta
+    dr = (-r + M._Fsat(u, 0.5)) / p.tau_a
+    z = M.psi_recruit(r, 0.0, p.r50, p.n_psi)
+    conv = np.fft.irfft2(np.fft.rfft2(z ** p.p_pool) * KS, s=(n, n))
+    A_L = np.maximum(conv, 0.0) ** (1.0 / p.p_pool)
+    dmuL = (-muL + A_L) / p.tau_mu
+    dSL = (-SL + p.S_max * muL) / p.tau_S
+    return dr, dmuL, dSL
+
+
+def _mode_field(n, mx, my):
+    i = np.arange(n)[:, None]; j = np.arange(n)[None, :]
+    return np.cos(2 * np.pi * (mx * i + my * j) / n)
+
+
+def test_variational_jacobian_matches_finite_difference_of_the_field_rhs():
+    """Independent mutation-catching net: the analytic Jacobian must equal a finite difference of the
+    ACTUAL field RHS projected on the same Fourier mode. This fails if the base state uses Wk instead of
+    W0, if psi_prime is evaluated at the wrong variable, if c_S is dropped for the mixed arm, or if the
+    u0<=0 branch guard is removed (that last mutation flips the growth rate's sign)."""
+    from src.topic4_zm_field_screen import mode_responses, variational_jacobian
+    eps = 1e-6
+
+    def coeff(fp, fm, C):
+        d = (fp - fm) / (2 * eps)
+        return float((d * C).sum() / (C * C).sum())
+
+    for (r0, mu0, S0) in [(0.30, 0.20, 0.20), (0.05, 0.10, 0.50)]:   # 2nd base point has u0 < 0
+        for arm in ("dual_local", "dual_mixed", "dual_global"):
+            for (mx, my) in [(2, 0), (1, 3)]:                        # even and ODD modes
+                p = FieldParams(W0=2.0, alpha=2.0, beta=4.0, theta=0.5, I0=1.0, n=16)
+                C = _mode_field(p.n, mx, my)
+                Wk, Kk = mode_responses(p, mx, my)
+                J = variational_jacobian(p, arm, Wk, Kk, r0, mu0, S0)
+                R = np.full((p.n, p.n), r0); MU = np.full((p.n, p.n), mu0); S = np.full((p.n, p.n), S0)
+                fp = _field_rhs_parts(p, arm, R + eps * C, MU, S, mu0, S0)[0]
+                fm = _field_rhs_parts(p, arm, R - eps * C, MU, S, mu0, S0)[0]
+                assert abs(coeff(fp, fm, C) - J[0, 0]) < 1e-6, ("a_rr", arm, mx, my, r0)
+                if J.shape[0] == 3:
+                    sp = _field_rhs_parts(p, arm, R, MU, S + eps * C, mu0, S0)[0]
+                    sm = _field_rhs_parts(p, arm, R, MU, S - eps * C, mu0, S0)[0]
+                    assert abs(coeff(sp, sm, C) - J[0, 2]) < 1e-6, ("a_rS", arm, mx, my, r0)
+                    mp = _field_rhs_parts(p, arm, R + eps * C, MU, S, mu0, S0)[1]
+                    mm = _field_rhs_parts(p, arm, R - eps * C, MU, S, mu0, S0)[1]
+                    assert abs(coeff(mp, mm, C) - J[1, 0]) < 1e-6, ("a_mr", arm, mx, my, r0)
+
+
+def test_mode_responses_at_dc_returns_total_gain_and_unit_pool():
+    """Kernel-layout check: at DC both normalised kernels contribute their full mass."""
+    from src.topic4_zm_field_screen import mode_responses
+    p = FieldParams(W0=2.0, alpha=2.0, beta=4.0, theta=0.5, I0=1.0, n=16)
+    Wk, Kk = mode_responses(p, 0, 0)
+    assert abs(Wk - p.W0) < 1e-9 and abs(Kk - 1.0) < 1e-9

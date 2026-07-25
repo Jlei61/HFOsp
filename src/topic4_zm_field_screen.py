@@ -165,6 +165,10 @@ from src.topic4_zm_field_meanfield import (simulate_meanfield, MFParams, detect_
 
 def uniform_orbit(p: FieldParams, dt, T=6000.0, settle=0.5):
     mf = MFParams(p.W0, p.alpha, p.beta, p.theta, p.I0, p.tau_a, p.tau_mu, p.tau_S, p.S_max)
+    if (p.r50, p.n_psi) != (0.4, 2.0):   # simulate_meanfield's psi() hard-codes r50=0.4, n=2.0; a mismatch
+        raise ValueError(                # would linearise about the orbit of a DIFFERENT system, silently
+            f"uniform_orbit requires r50=0.4, n_psi=2.0 to match simulate_meanfield's psi(); "
+            f"got r50={p.r50}, n_psi={p.n_psi}")
     tr = simulate_meanfield(mf, T=T, dt=dt)
     o = detect_orbit(tr, dt, settle)
     if not o["oscillates"]:
@@ -189,7 +193,9 @@ def variational_jacobian(p: FieldParams, arm, Wk, Kk, r0, mu0, S0, is_dc=False):
     a_rr = (-1.0 + Fp * Wk / D) / p.tau_a
     if arm in ("div_global", "dual_global") and not is_dc:
         return np.array([[a_rr]])                              # global pool has no d.o.f. off DC -> 1-D
-    c_S = 1.0 if arm == "dual_local" else (1.0 - p.eps_G) if arm == "dual_mixed" else 1.0
+    # at DC the local and global pools coincide (delta S_L == delta S_G) so the mixed weights sum to 1;
+    # off DC only the local part responds, hence (1 - eps_G).
+    c_S = 1.0 if (arm == "dual_local" or is_dc) else (1.0 - p.eps_G) if arm == "dual_mixed" else 1.0
     a_rS = Fp * (-p.alpha * p.W0 * r0 / D ** 2 - beta) * c_S / p.tau_a
     a_mr = Kk * psi_prime(r0, p.r50, p.n_psi) / p.tau_mu
     return np.array([[a_rr, 0.0, a_rS],
