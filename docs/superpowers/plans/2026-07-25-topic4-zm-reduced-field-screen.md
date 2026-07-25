@@ -999,7 +999,12 @@ def phaseA_lock(op, seg):
         print(f"[PHASE A] lock already exists at {path}; reusing it (delete it manually to re-lock).")
         return json.load(open(path))
     os.makedirs(OUT, exist_ok=True)
-    levels = list(seg["interior_I0s"])[:5] if len(seg["interior_I0s"]) >= 5 else list(seg["interior_I0s"])
+    interior = [float(x) for x in seg["interior_I0s"]]
+    if len(interior) >= 5:            # 5 levels EVENLY across the interior (spec §8 Phase A) -- taking the
+        idx = np.linspace(0, len(interior) - 1, 5).round().astype(int)   # first 5 would bias toward low I0
+        levels = [interior[i] for i in dict.fromkeys(idx.tolist())]
+    else:
+        levels = interior
     p0 = FieldParams(W0=op["W0"], alpha=op["alpha"], beta=op["beta"], theta=op["theta"], I0=op["I0"], n=N)
     lock = dict(spec_sha=_sha(os.path.join(_ROOT, "docs/superpowers/specs/2026-07-24-topic4-zm-reduced-field-Sl-Sg-design.md")),
                 operating_point=op, segment=seg, I0_levels=levels, seeds=list(SEEDS), dt=DT, grid_n=N,
