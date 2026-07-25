@@ -500,6 +500,19 @@ def test_phase_coverage_reported_and_failclosed():
     n, nt = 8, 400
     m = field_metrics(np.full((nt, n, n), 0.8, np.float32), 5.0)   # no oscillating cells at all
     assert m["phase_coverage_frac"] == 0.0 and m["median_R_phase"] == 1.0   # fail closed
+
+
+def test_osc_frac_denominator_is_all_cells_not_the_active_subset():
+    """LOCKED contract: osc_frac's denominator is ALL cells, never the active subset. Here 4 of 64 cells
+    oscillate (with nt=600, enough frames to clear the ncyc>=10 gate) while the other 60 are flat. The
+    correct denominator gives 4/64=0.0625; an active-subset denominator would give 1.0 and would let a
+    tiny-active-set state pass as fully oscillatory."""
+    n, nt = 8, 600
+    f = np.full((nt, n, n), 0.10, np.float32)
+    f[:, :2, :2] = _osc(2, nt, np.zeros((2, 2)))      # 2x2 = 4 oscillating cells, same frame budget
+    m = field_metrics(f, 5.0)
+    assert abs(m["osc_frac"] - 4.0 / 64.0) < 1e-9
+    assert m["active_area_frac"] < 0.1                 # only 4/64 cells are active at all
 ```
 
 - [ ] **Step 2: Run to verify FAIL** — FAIL (ImportError: field_metrics)
@@ -557,7 +570,7 @@ def field_metrics(r_trace, dt_rec_ms, a_max=1.0, settle=0.25):
                 median_local_period_ms=median_local_period, population_period_ms=pop_period)
 ```
 
-- [ ] **Step 4: Run to verify PASS** — `11 passed` (7 from Tasks 3-4 + 4 new)
+- [ ] **Step 4: Run to verify PASS** — `12 passed` (7 from Tasks 3-4 + 5 new)
 - [ ] **Step 5: Commit** — `git commit -m "feat(topic4): field metrics with local-cell period + phase coverage + fail-closed"`
 
 ---
