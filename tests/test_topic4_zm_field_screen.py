@@ -111,3 +111,44 @@ def test_osc_frac_denominator_is_all_cells_not_the_active_subset():
     m = field_metrics(f, 5.0)
     assert abs(m["osc_frac"] - 4.0 / 64.0) < 1e-9
     assert m["active_area_frac"] < 0.1                 # only 4/64 cells are active at all
+
+# append to tests/test_topic4_zm_field_screen.py
+from src.topic4_zm_field_screen import (uniform_orbit, variational_jacobian, transverse_floquet, floquet_map)
+
+def test_constant_orbit_recovers_the_jacobian_eigenvalue():
+    """With a CONSTANT 'orbit', the monodromy is exp(J*T) -> lambda == max Re eig(J). Known answer."""
+    p = _P(n=32)
+    const = np.tile(np.array([[0.3, 0.2, 0.2]]), (400, 1))       # frozen (r,mu,S)
+    lam = transverse_floquet(p, "dual_local", 2, 0, const, 0.25)
+    J = variational_jacobian(p, "dual_local", *_wk_kk(p, 2, 0), 0.3, 0.2, 0.2)
+    assert abs(lam - float(np.max(np.linalg.eigvals(J).real))) < 5e-3
+
+def _wk_kk(p, mx, my):
+    from src.topic4_zm_field_screen import mode_responses
+    return mode_responses(p, mx, my)
+
+def test_global_arm_is_one_dimensional_off_dc():
+    p = _P(n=32)
+    J = variational_jacobian(p, "dual_global", *_wk_kk(p, 2, 0), 0.3, 0.2, 0.2)
+    assert J.shape == (1, 1)                                     # no spatial pool d.o.f. at k != 0
+    Jl = variational_jacobian(p, "dual_local", *_wk_kk(p, 2, 0), 0.3, 0.2, 0.2)
+    assert Jl.shape == (3, 3)
+
+def test_dc_mode_rejected_and_excluded_from_the_map():
+    p = _P(n=32)
+    const = np.tile(np.array([[0.3, 0.2, 0.2]]), (200, 1))
+    try:
+        transverse_floquet(p, "dual_local", 0, 0, const, 0.25)
+    except ValueError:
+        pass
+    else:
+        raise AssertionError("DC mode must be rejected")
+    fm = floquet_map(p, "dual_local", const, 0.25, m_max=3)
+    assert (0, 0) not in [tuple(m) for m in fm["modes"]]
+
+def test_dt_halving_sign_margin_on_a_real_orbit():
+    p = _P(n=32)
+    o1, _ = uniform_orbit(p, 0.25); o2, _ = uniform_orbit(p, 0.125)
+    l1 = transverse_floquet(p, "dual_local", 2, 0, o1, 0.25)
+    l2 = transverse_floquet(p, "dual_local", 2, 0, o2, 0.125)
+    assert np.sign(l1) == np.sign(l2) and abs(l1 - l2) < 0.5 * max(abs(l1), abs(l2), 1e-6) + 1e-3

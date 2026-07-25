@@ -159,3 +159,62 @@ def field_metrics(r_trace, dt_rec_ms, a_max=1.0, settle=0.25):
                 osc_frac=float(osc_cells.mean()), median_R_phase=median_R,
                 phase_coverage_frac=float(np.mean(cov)), mean_pair_corr=mpc,
                 median_local_period_ms=median_local_period, population_period_ms=pop_period)
+
+# append to src/topic4_zm_field_screen.py
+from src.topic4_zm_field_meanfield import (simulate_meanfield, MFParams, detect_orbit, psi_prime)
+
+def uniform_orbit(p: FieldParams, dt, T=6000.0, settle=0.5):
+    mf = MFParams(p.W0, p.alpha, p.beta, p.theta, p.I0, p.tau_a, p.tau_mu, p.tau_S, p.S_max)
+    tr = simulate_meanfield(mf, T=T, dt=dt)
+    o = detect_orbit(tr, dt, settle)
+    if not o["oscillates"]:
+        raise ValueError("no uniform orbit at this operating point (Phase-0 STOP condition)")
+    per = max(2, int(round(o["period_ms"] / dt)))
+    tail = tr[int(len(tr) * settle):]
+    return tail[:per].copy(), o["period_ms"]
+
+def mode_responses(p: FieldParams, mx, my):
+    """(W_k, Khat_sigmaS(k)) at the INTEGER FFT lattice mode (mx,my)."""
+    n = p.n
+    KE = np.fft.fft2(elliptical_exp_kernel(n, p.L, p.l_par, p.l_perp, p.theta_EE))
+    KS = np.fft.fft2(gaussian_kernel(n, p.L, p.sigma_S))
+    q = resolve_w_frac(p); w_rec, w_c = p.W0 * q, p.W0 * (1.0 - q)
+    return w_rec + w_c * float(KE[mx % n, my % n].real), float(KS[mx % n, my % n].real)
+
+def variational_jacobian(p: FieldParams, arm, Wk, Kk, r0, mu0, S0, is_dc=False):
+    beta = arm_beta(p, arm)
+    D = 1.0 + p.alpha * S0
+    u0 = p.I0 + p.W0 * r0 / D - beta * S0 - p.theta            # BASE state uses W0 (uniform), NOT Wk
+    Fp = 0.0 if u0 <= 0 else 0.5 / (0.5 + u0) ** 2
+    a_rr = (-1.0 + Fp * Wk / D) / p.tau_a
+    if arm in ("div_global", "dual_global") and not is_dc:
+        return np.array([[a_rr]])                              # global pool has no d.o.f. off DC -> 1-D
+    c_S = 1.0 if arm == "dual_local" else (1.0 - p.eps_G) if arm == "dual_mixed" else 1.0
+    a_rS = Fp * (-p.alpha * p.W0 * r0 / D ** 2 - beta) * c_S / p.tau_a
+    a_mr = Kk * psi_prime(r0, p.r50, p.n_psi) / p.tau_mu
+    return np.array([[a_rr, 0.0, a_rS],
+                     [a_mr, -1.0 / p.tau_mu, 0.0],
+                     [0.0, p.S_max / p.tau_S, -1.0 / p.tau_S]])
+
+def transverse_floquet(p: FieldParams, arm, mx, my, orbit, dt):
+    """lambda_perp at integer mode (mx,my) via the monodromy over one orbit period. DC is not transverse."""
+    if (mx % p.n, my % p.n) == (0, 0):
+        raise ValueError("(0,0) is the DC mode; it is not a transverse mode (its multiplier is neutral)")
+    Wk, Kk = mode_responses(p, mx, my)
+    dim = 1 if arm in ("div_global", "dual_global") else 3
+    M = np.eye(dim)
+    for r0, mu0, S0 in orbit:
+        J = variational_jacobian(p, arm, Wk, Kk, r0, mu0, S0)
+        M = (np.eye(dim) + dt * J) @ M
+    rho = float(np.max(np.abs(np.linalg.eigvals(M))))
+    return float(np.log(max(rho, 1e-300)) / (len(orbit) * dt))
+
+def floquet_map(p: FieldParams, arm, orbit, dt, m_max=6):
+    modes, lam = [], []
+    for mx in range(-m_max, m_max + 1):
+        for my in range(-m_max, m_max + 1):
+            if (mx, my) == (0, 0):
+                continue                                        # DC excluded from the transverse map
+            modes.append((mx, my)); lam.append(transverse_floquet(p, arm, mx, my, orbit, dt))
+    lam = np.asarray(lam); i = int(np.argmax(lam))
+    return dict(modes=modes, lam=lam, lam_max=float(lam[i]), k_star=modes[i])
