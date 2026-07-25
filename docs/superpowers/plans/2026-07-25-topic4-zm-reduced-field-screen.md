@@ -462,8 +462,6 @@ Expected: FAIL (ImportError: field_metrics)
 
 ```python
 # append to src/topic4_zm_field_screen.py
-sys_path_patch = None  # (no-op marker)
-
 def _cycle_crossings(x, dt):
     """Upward mid-line crossing indices of a 1-D signal (relaxation-oscillation cycle markers)."""
     mid = 0.5 * (x.max() + x.min())
@@ -615,7 +613,7 @@ def floquet_map(p, arm, orbit, dt, kmax=4.0, nk=13):
     return KX, KY, LAM
 ```
 
-- [ ] **Step 4: Run to verify PASS** (adjust `_khat` stub — delete the unused `_khat` placeholder before running)
+- [ ] **Step 4: Run to verify PASS**
 
 Run: `OMP_NUM_THREADS=1 python -m pytest -q tests/test_topic4_zm_field_screen.py -k "floquet or all_modes"`
 Expected: PASS (2 passed). If the local sign is not yet positive anywhere, that is a SCIENTIFIC result to
@@ -843,4 +841,4 @@ git commit -m "feat(topic4): reduced-field screen orchestrator (Phase 0 -> A loc
 
 ## Self-Review notes (resolved inline)
 - **Spec coverage:** Phase 0 (T1-2), dual pool + arms (T4), pooling order (T4), anisotropic `K_E` (T3), matched budget uniform identity (T4), transverse Floquet 3×3 (T6), full-state phase-reset (T7), metrics incl. loopholes (T5), Phase-A lock + provenance (T8), 4-cell verdict (T9), run+archive (T10). `σ_S`/`n=64`/`dt/2` sensitivities live in T8/T10.
-- **Floquet caveat:** `transverse_floquet` uses a nearest-lattice-mode `K̂` and a `psi'`-based `dA/dr` (a first-order estimate); the spec marks the full-field growth-rate as the independent sanity check (add in T10 if the linear and nonlinear pictures disagree). Delete the `_khat` stub in T6 before running.
+- **Floquet caveat:** `transverse_floquet` uses a nearest-lattice-mode `K̂` and a `psi'`-based `dA/dr` (a first-order estimate); the spec marks the full-field growth-rate as the independent sanity check (add in T10 if the linear and nonlinear pictures disagree).
