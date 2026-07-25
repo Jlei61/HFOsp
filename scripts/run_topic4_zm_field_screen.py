@@ -38,9 +38,21 @@ def phase0():
 
 def phaseA_lock(op, seg):
     path = os.path.join(OUT, "phaseA_lock.json")
-    if os.path.exists(path):                       # WRITE-ONCE: fail closed, never silently overwrite
-        print(f"[PHASE A] lock already exists at {path}; reusing it (delete it manually to re-lock).")
-        return json.load(open(path))
+    if os.path.exists(path):
+        # WRITE-ONCE and FAIL-CLOSED: reuse an existing lock ONLY if it still describes the same contract.
+        # Reusing a lock whose spec, operating point, grid or dt no longer match the current code silently
+        # pairs old pre-registration with a new implementation (review finding).
+        old = json.load(open(path))
+        cur = dict(spec_sha=_sha(os.path.join(_ROOT, "docs/superpowers/specs/2026-07-24-topic4-zm-reduced-field-Sl-Sg-design.md")),
+                   operating_point=op, dt=DT, grid_n=N, seeds=list(SEEDS))
+        mismatch = {k: (old.get(k), v) for k, v in cur.items() if old.get(k) != v}
+        if mismatch:
+            print(f"[PHASE A] REFUSING to reuse {path}: contract changed -> " +
+                  "; ".join(f"{k}: locked={o!r} now={n!r}" for k, (o, n) in mismatch.items()))
+            print("[PHASE A] delete the lock explicitly (and archive the old results) to re-lock.")
+            sys.exit(3)
+        print(f"[PHASE A] lock exists and its contract still matches; reusing {path}.")
+        return old
     os.makedirs(OUT, exist_ok=True)
     interior = [float(x) for x in seg["interior_I0s"]]
     op_I0 = float(op["I0"])

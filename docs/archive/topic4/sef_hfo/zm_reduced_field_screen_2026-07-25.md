@@ -36,8 +36,12 @@
 更要紧的是**谱的形状**（终审复核补算）：局部臂"最不稳的那个模态"永远落在**盒子里能装下的最长波长**
 （k*=(0,±1)，与兴奋长轴成 90°），而在那个极限上增长率必然趋近于均匀态本身的**中性方向**（实测 +1.5e-4）——
 **任何**能响应空间的刹车、**任何**稳定的均匀极限环都会这样，这是构造决定的，**不是"离散开还差一点"**。真正
-的图案模态（波长更短的那些）反而**更稳 3–5 倍**（−0.016 / −0.019 / −0.017）。所以正确的说法是：**在测过的
-所有波长上都没有一条"要长图案"的带，上确界只是被均匀态的中性方向钉住了**。
+的图案模态（波长更短的那些）反而**更稳 3–5 倍**（−0.016 / −0.019 / −0.017）。所以正确的说法是：**没有一条
+"要长图案"的带，上确界只是被均匀态的中性方向钉住了**。
+
+**收尾全谱复核（2026-07-26，见 §2.1）**：出货那一轮只扫了 81 个模态（|mx|,|my|≤4）。现已扩到 n=32 网格的
+**全部 513 个独立非 DC 模态**：每一档、每一条臂，**513/513 增长率严格为负**（全场最大 −0.0033），`k*` 仍是
+(0,±1)——说明原先的上确界**不是截断产物**。"所有可表示的空间波长"这句话现在**字面成立**，不再只在预注册窗口内成立。
 
 朴素结论：**在这个模型里，把刹车局部化不足以让整片同步自己散开。** 我们没有拿到"相位错开接力"这个机制，
 所以不把它搬到全 SNN 上去做昂贵的验证。
@@ -98,13 +102,32 @@
 周期数字出处：`phaseA_lock.json::segment.period_ms = 175.36`（段内中位数）；工作点 I0=1.0 自身周期 **169.72 ms**
 （见 `runs/form_L1.0000_*` 与图 panel A，非 lock 字段）。
 
+### 2.1 收尾全谱复核（2026-07-26，`floquet_full_spectrum.json`）
+
+出货那轮 `floquet_map(..., m_max=4)` 只覆盖 **81 个模态**，而 n=32 环面有 **513 个独立非 DC 模态**（用实对称核
+保证的 λ(k)=λ(−k) 去重）。早稿"每一个空间模态/所有波长"是**超出实际扫描范围的表述**（审阅 P0），现已补算：
+
+| 结果 | 值 |
+|---|---|
+| 扫描模态数 | **513/513**（每档每臂） |
+| `λ > 0` 的模态数 | **0**（不是"低于地板"，是严格为负） |
+| 全场最大 λ（所有档所有臂） | **−0.0033**（I0=0.70, `dual_local`） |
+| `k*` | **(0,±1)**，与 E→E 长轴成 **90°**（与 81 模态那轮一致 → 上确界非截断产物） |
+| dt vs dt/2 符号一致 | **5/5 档全部通过**（最大漂移 **1.3e-3** < 地板 2e-3） |
+| `any_mode_above_floor` | **False** |
+
+这一步同时补上了 spec §6.2 的两个预注册报告项（dt/dt-半 符号检查、`k*` 及其角度），出货 orchestrator 只落盘
+`lam_max`，未落这两项。脚本 `scripts/closure_full_spectrum_topic4_zm_field.py`（向量化：每步一次
+(513,3,3) 批矩阵乘，秒级完成），产物带 git SHA / dirty / lock hash / 模态数 provenance。
+
 ---
 
 ## 3. 能写 / 不能写
 
 **能写**：
 - 在这个双成分抑制池的降阶二维率场里，**局部化抑制反馈不足以使均匀振荡横向失稳**（5 档全负、局部档高于分辨底噪）。
-- **测过的任何波长上都没有正的图案带**；局部谱的上确界被均匀态的中性方向钉住，内部图案模态更稳 3–5 倍。
+- **n=32 网格全部 513 个独立非 DC 模态上增长率严格为负**（全场最大 −0.0033，`any_mode_above_floor=False`）；
+  局部谱的上确界被均匀态的中性方向钉住，内部图案模态更稳 3–5 倍；5 档全部通过 dt/dt-半 符号检查。
 - 因此**不移植到全 SNN**；"相位错开接力"仍然是**待验证的假设**，本轮**没有观测到**它。
 
 **不能写**：
@@ -137,12 +160,11 @@
    `_taxonomy`，5 档全部 `both_stable`、每个 |λ|>2e-3），但属**巧合一致而非推导**。且该默认值会把未来的
    `both_unstable` / `indeterminate` 也伪装成 `both_stable`。已修（taxonomy 改为在 `levels=={}` 时直接从
    Floquet 图推导，无图则报 `no_evidence`）+ 加回归测试。
-8. **spec §6.2 的 dt / dt-半 同号检查，pipeline 自己不做**（唯一的 dt/2 单测跑在非锁定参数上）。终审复核在
-   5 档中的 3 档补跑了真检查：**符号全稳，dt→dt/2 漂移 ≤1.8e-4**（约为局部 |λ| 的 1/20、底噪的 1/10）。
-9. **k\* 与其角度未落盘**（spec §6.2 预注册报告项）：orchestrator 只存 `lam_max`。复核补算：k\*=(0,±1)，
-   与 E→E 长轴成 90°。
-10. **lock 复用不是 fail-closed**：实现打印 "reusing it" 后直接返回，**不比对** `spec_sha`/工作点/网格；
-    且出货 lock 里 `git_dirty: true`（结果产自未提交工作树，虽已验证在 HEAD 上逐位复现）。
+8. ~~spec §6.2 的 dt/dt-半 同号检查 pipeline 不做~~ → **已补**（§2.1）：5 档 × 全部 513 模态，符号全稳，最大漂移 1.3e-3。
+9. ~~k\* 与其角度未落盘~~ → **已补**（§2.1，`floquet_full_spectrum.json`）：k\*=(0,±1)、90°。
+   ⚠️ 出货 orchestrator 仍只落 `lam_max`；全谱由独立收尾脚本产生。
+10. ~~lock 复用不是 fail-closed~~ → **已修**：复用前比对 `spec_sha`/工作点/`dt`/`grid_n`/`seeds`，不一致直接 `exit(3)`
+    并要求显式删除后重锁。⚠️ 出货 lock 仍是 `git_dirty: true`（产自未提交工作树；已验证在 HEAD 上逐位复现，且当前判决器重裁现有 map 仍得 `both_stable`）。
 11. **trace 文件名原先不带参数**（已修）：`--smoke` 会覆盖生产 trace；且 `--smoke` 的 verdict 会写到生产
     `field_screen_summary.json` 且不记 T/smoke 标记（**未修**，下一轮注意）。
 
@@ -154,8 +176,13 @@
   （各向异性核 + 派生 `q_cell` + 4 臂场 + 流式指标 + 逐模 3×3 幺矩阵 Floquet + 全状态相位重置）、
   `src/topic4_zm_field_verdict.py`（纯函数判决，fail-closed）、`scripts/run_topic4_zm_field_screen.py`
   （Phase0→A 写一次锁→B Floquet 优先 + 逐臂 resume）、`scripts/plot_topic4_zm_field_screen.py`。
-- 测试：`tests/test_topic4_zm_field_{meanfield,screen,verdict}.py` —— 共 43 项（含把 Jacobian 与**全场 RHS 有限差分**
-  对齐的变异捕获测试、以及 4 项 false-GO 回归测试）。
+- 测试（**精确命令与计数**）：
+  `OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 python -m pytest -q \`
+  `tests/test_topic4_zm_field_{meanfield,screen,verdict}.py` → **45 passed**（本场三文件；含 Jacobian vs 全场 RHS
+  有限差分的变异捕获测试 + 6 项 false-GO / no-evidence 回归测试）。
+  同命令再加上 `tests/test_zm_slow_field_parity.py tests/test_snn_gates.py tests/test_zm_hdrive_diagnostics.py`
+  `tests/test_topic4_zm_{carrier_verdict,ictal_carrier,carrier_gate_v2,slowfast,patch_screen}.py`（即本分支 Z/M 全线）
+  → **105 passed**。
 - 产物（`results/` 被 gitignore，但实际存在）：`results/topic4_sef_hfo/zm_field_screen/{phaseA_lock.json,
   floquet_map.json, field_screen_summary.json, runs/, traces/, figures/}`，图 `zm_field_screen_local_vs_global.png`
   + 中文 `figures/README.md`；`results/FIGURE_INDEX.md` 已加行。
