@@ -836,8 +836,17 @@ def test_subcritical_when_nonlinear_passes_but_floquet_stable():
     r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1, 2, 3, 4]))
     assert r["verdict"] == "subcritical_finite_amplitude_candidate"
 
+def test_lambda_below_the_noise_floor_is_indeterminate_not_a_verdict():
+    """spec §6.2: |lam| under the discretisation error floor cannot resolve a sign, so it must NOT be
+    reported as a stable/unstable cell and must never yield GO."""
+    lv = {str(i): _lvl([M()] * 4, lam_local=5e-4, lam_global=-5e-4) for i in range(5)}
+    r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1, 2, 3, 4]))
+    assert r["taxonomy"] == "indeterminate_below_noise_floor"
+    assert r["verdict"] != "GO"
+
+
 def test_taxonomy_four_cells():
-    def tax(ll, lg):
+    def tax(ll, lg):   # magnitudes deliberately ABOVE TH["lam_floor"]=2e-3 so signs are resolvable
         lv = {str(i): _lvl([M(occupancy=0.1)] * 4, lam_local=ll, lam_global=lg) for i in range(5)}
         return adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1, 2, 3, 4]))["taxonomy"]
     assert tax(-0.05, -0.05) == "both_stable"
@@ -858,7 +867,11 @@ from __future__ import annotations
 import math
 
 TH = dict(occ=0.80, area=0.50, osc=0.50, R=0.50, corr=0.50, R_global=0.80, p_lo=0.5, p_hi=2.0,
-          P95_min=0.1, seeds_required=3, levels_required=3)
+          P95_min=0.1, seeds_required=3, levels_required=3,
+          # spec §6.2: a growth rate is only sign-resolvable ABOVE the discretisation error floor.
+          # Measured Euler-vs-exact monodromy error 2e-5..1.3e-3 and dt-halving scatter ~5e-4 (local) /
+          # 1.3e-3 (global) at dt=0.25 -> 2e-3 is the conservative floor. |lam| <= floor = indeterminate.
+          lam_floor=2e-3)
 
 def _num(d, k):
     v = d.get(k, None) if isinstance(d, dict) else None
@@ -899,11 +912,15 @@ def level_is_valid(global_metrics):
     return bool(R is not None and osc is not None and R >= TH["R_global"] and osc >= TH["osc"])
 
 def _taxonomy(lam_local, lam_global):
-    lu = lam_local is not None and lam_local > 0
-    gu = lam_global is not None and lam_global > 0
-    if gu and lu: return "both_unstable"
-    if gu and not lu: return "global_unstable_local_stable"
-    if lu: return "global_stable_local_unstable"
+    def cls(v):
+        if v is None or abs(v) <= TH["lam_floor"]:
+            return "indet"                      # below the discretisation noise floor -> sign not resolvable
+        return "unstable" if v > 0 else "stable"
+    l, g = cls(lam_local), cls(lam_global)
+    if "indet" in (l, g): return "indeterminate_below_noise_floor"
+    if g == "unstable" and l == "unstable": return "both_unstable"
+    if g == "unstable": return "global_unstable_local_stable"
+    if l == "unstable": return "global_stable_local_unstable"
     return "both_stable"
 
 def adjudicate_field_screen(summary, lock):
@@ -930,7 +947,8 @@ def adjudicate_field_screen(summary, lock):
             tax_votes.append(_taxonomy(lam_l, lam_g))
             if n >= TH["seeds_required"]:
                 best = arm
-                floquet_ok.append(lam_l is not None and lam_g is not None and lam_l > 0 and lam_g < 0)
+                floquet_ok.append(lam_l is not None and lam_g is not None
+                                  and lam_l > TH["lam_floor"] and lam_g < -TH["lam_floor"])
         if best:
             passing.append(key)
     # longest run of CONSECUTIVE passing levels in the locked order
@@ -953,7 +971,7 @@ def adjudicate_field_screen(summary, lock):
                 reasons=dict(excluded_levels=excluded, longest_consecutive=best_run))
 ```
 
-- [ ] **Step 4: Run to verify PASS** — `OMP_NUM_THREADS=1 python -m pytest -q tests/test_topic4_zm_field_verdict.py` → `10 passed`
+- [ ] **Step 4: Run to verify PASS** — `OMP_NUM_THREADS=1 python -m pytest -q tests/test_topic4_zm_field_verdict.py` → `11 passed`
 - [ ] **Step 5: Commit** — `git commit -m "feat(topic4): pure reduced-field adjudicator with fail-closed TDD"`
 
 ---
