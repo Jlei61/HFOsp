@@ -49,6 +49,11 @@ def level_is_valid(global_metrics):
     R = _num(global_metrics or {}, "median_R_phase"); osc = _num(global_metrics or {}, "osc_frac")
     return bool(R is not None and osc is not None and R >= TH["R_global"] and osc >= TH["osc"])
 
+def level_control_is_valid(metrics_list):
+    """The control arm must be a valid matched comparison in a MAJORITY of seeds (>= seeds_required), not
+    merely in seed 0 -- otherwise one lucky seed could admit a level whose control actually desynchronised."""
+    return sum(1 for m in (metrics_list or []) if level_is_valid(m)) >= TH["seeds_required"]
+
 def _taxonomy(lam_local, lam_global):
     def cls(v):
         if v is None or abs(v) <= TH["lam_floor"]:
@@ -64,34 +69,43 @@ def _taxonomy(lam_local, lam_global):
 def adjudicate_field_screen(summary, lock):
     levels = summary.get("levels", {})
     order = [str(x) for x in lock.get("I0_levels", sorted(levels))]
-    passing, excluded, tax_votes, floquet_ok = [], [], [], []
+    n_expected = len(lock.get("seeds") or [])          # 0 -> no seed-count contract supplied
+    passing, excluded, tax_votes = [], [], []
+    floquet_by_level = {}                              # per-LEVEL, so GO can be scoped to the window
     for key in order:
         lv = levels.get(key)
         if not lv:
             continue
         arms = lv.get("arms", {})
-        g = arms.get("dual_global", {}); gm = (g.get("metrics") or [{}])[0]
-        if not level_is_valid(gm):
-            excluded.append(key); continue
+        g = arms.get("dual_global", {})
+        if not level_control_is_valid(g.get("metrics") or []):
+            excluded.append(key)
+            continue
         gper = _num(g, "period_ms")
         lam_g = _num(g, "lambda_perp_max")
-        best = None
+        ok_level = False
         for arm in ("dual_local", "dual_mixed"):
             a = arms.get(arm)
             if not a:
                 continue
-            n, _ = level_arm_passes(a.get("metrics") or [], gper)
+            ms = a.get("metrics") or []
+            if n_expected and len(ms) < n_expected:     # a dropped/crashed seed must not shrink the denominator
+                continue
+            n, _ = level_arm_passes(ms, gper)
             lam_l = _num(a, "lambda_perp_max")
             tax_votes.append(_taxonomy(lam_l, lam_g))
             if n >= TH["seeds_required"]:
-                best = arm
-                floquet_ok.append(lam_l is not None and lam_g is not None
-                                  and lam_l > TH["lam_floor"] and lam_g < -TH["lam_floor"])
-        if best:
+                ok_level = True
+                if (lam_l is not None and lam_g is not None
+                        and lam_l > TH["lam_floor"] and lam_g < -TH["lam_floor"]):
+                    floquet_by_level[key] = True
+        if ok_level:
             passing.append(key)
-    # longest run of CONSECUTIVE passing levels in the locked order
-    run = best_run = 0; window = []
-    cur = []
+            floquet_by_level.setdefault(key, False)
+    # longest run of CONSECUTIVE passing levels in the locked order (an excluded level breaks the run,
+    # which is deliberate: it is not evidence either way)
+    run = best_run = 0
+    cur, window = [], []
     for key in order:
         if key in passing:
             cur.append(key); run += 1
@@ -99,9 +113,12 @@ def adjudicate_field_screen(summary, lock):
                 best_run, window = run, list(cur)
         else:
             run = 0; cur = []
-    taxonomy = max(set(tax_votes), key=tax_votes.count) if tax_votes else "both_stable"
+    # deterministic tie-break: sorted() first, so the result never depends on set-iteration order
+    taxonomy = max(sorted(set(tax_votes)), key=tax_votes.count) if tax_votes else "both_stable"
     if best_run >= TH["levels_required"]:
-        verdict = "GO" if any(floquet_ok) else "subcritical_finite_amplitude_candidate"
+        # GO requires the linear-stability crossing INSIDE the accepted window, not anywhere in the sweep
+        verdict = ("GO" if any(floquet_by_level.get(k, False) for k in window)
+                   else "subcritical_finite_amplitude_candidate")
     else:
         verdict = {"global_unstable_local_stable": "reverse_global_unstable_local_stable",
                    "both_stable": "both_stable", "both_unstable": "both_unstable"}.get(taxonomy, "no_go")

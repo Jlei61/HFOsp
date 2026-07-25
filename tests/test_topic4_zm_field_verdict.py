@@ -82,3 +82,44 @@ def test_taxonomy_four_cells():
     assert tax(0.05, 0.05) == "both_unstable"
     assert tax(-0.05, 0.05) == "global_unstable_local_stable"
     assert tax(0.05, -0.05) == "global_stable_local_unstable"
+
+
+def test_go_requires_a_floquet_crossing_inside_the_accepted_window():
+    """FALSE-POSITIVE GUARD: levels 0-2 form the accepted window but are Floquet-subcritical; level 4 has
+    the crossing but is OUTSIDE the window (level 3 breaks the run). GO must NOT fire on evidence that
+    sits outside the window the verdict actually rests on."""
+    lv = {str(i): _lvl([M()] * 4, lam_local=-0.05, lam_global=-0.05) for i in (0, 1, 2)}
+    lv["3"] = _lvl([M(occupancy=0.1)] * 4, lam_local=-0.05, lam_global=-0.05)
+    lv["4"] = _lvl([M()] * 4, lam_local=0.05, lam_global=-0.05)
+    r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1, 2, 3, 4]))
+    assert r["window"] == ["0", "1", "2"]
+    assert r["verdict"] == "subcritical_finite_amplitude_candidate"
+
+
+def test_control_validity_is_aggregated_over_seeds_not_just_seed0():
+    """One valid control seed must not admit a level whose control desynchronised in the other three."""
+    lv = {str(i): _lvl([M()] * 4) for i in range(5)}
+    bad = M(median_R_phase=0.2)
+    lv["2"] = dict(arms=dict(dual_local=dict(metrics=[M()] * 4, lambda_perp_max=0.05),
+                             dual_global=dict(metrics=[M(median_R_phase=0.95), bad, bad, bad],
+                                              lambda_perp_max=-0.05, period_ms=200.0)))
+    r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1, 2, 3, 4]))
+    assert "2" in [str(x) for x in r["reasons"]["excluded_levels"]]
+
+
+def test_truncated_seed_list_does_not_pass_when_the_lock_declares_four_seeds():
+    """'3 of 4' must not be satisfiable as '3 of 3' by a silently dropped seed."""
+    lv = {str(i): dict(arms=dict(dual_local=dict(metrics=[M()] * 3, lambda_perp_max=0.05),
+                                 dual_global=dict(metrics=[M(median_R_phase=0.95)] * 4,
+                                                  lambda_perp_max=-0.05, period_ms=200.0)))
+          for i in range(5)}
+    r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1, 2, 3, 4], seeds=[0, 1, 2, 3]))
+    assert r["passing_levels"] == [] and r["verdict"] != "GO"
+
+
+def test_taxonomy_tiebreak_is_deterministic():
+    """A tie must resolve by sorted order, never by set-iteration order."""
+    lv = {"0": _lvl([M(occupancy=0.1)] * 4, lam_local=0.05, lam_global=-0.05),
+          "1": _lvl([M(occupancy=0.1)] * 4, lam_local=-0.05, lam_global=0.05)}
+    r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1]))
+    assert r["taxonomy"] == "global_stable_local_unstable"
