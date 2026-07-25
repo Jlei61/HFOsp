@@ -110,3 +110,52 @@ def simulate_field(p: FieldParams, arm, T=6000.0, dt=0.25, seed=0, r_init=None, 
             rec.append(r.astype(np.float32).copy())
     return dict(r_trace=np.asarray(rec), t_ms=np.arange(len(rec)) * record_stride * dt,
                 final_state=dict(r=r, muL=muL, SL=SL, muG=muG, SG=SG))
+
+# append to src/topic4_zm_field_screen.py
+def _cycle_crossings(x):
+    """Upward mid-line crossing indices (relaxation-oscillation cycle markers)."""
+    mid = 0.5 * (float(np.max(x)) + float(np.min(x)))
+    x = np.asarray(x)
+    return np.flatnonzero((x[:-1] < mid) & (x[1:] >= mid))
+
+def field_metrics(r_trace, dt_rec_ms, a_max=1.0, settle=0.25):
+    R = np.asarray(r_trace, float)[int(len(r_trace) * settle):]
+    nt = R.shape[0]; flat = R.reshape(nt, -1); ncell = flat.shape[1]
+    P = flat.mean(axis=1)
+    P95 = float(np.percentile(P, 95))
+    occ = float((P >= 0.2 * P95).mean()) if P95 > 1e-12 else 0.0
+    amp = flat.max(axis=0) - flat.min(axis=0)
+    active = amp >= 0.1 * a_max
+    crossings = [(_cycle_crossings(flat[:, c]) if active[c] else np.array([], int)) for c in range(ncell)]
+    ncyc = np.array([c.size for c in crossings])
+    osc_cells = (ncyc >= 10) & (amp / a_max >= 0.20)
+    # per-cell (LOCAL) period -- the gate metric; population period is diagnostic only
+    locp = [float(np.mean(np.diff(crossings[c])) * dt_rec_ms) for c in np.flatnonzero(osc_cells)
+            if crossings[c].size >= 2]
+    median_local_period = float(np.median(locp)) if locp else float("nan")
+    # phase per oscillatory cell, then R(t) only where coverage >= 50%
+    phases = np.full((nt, ncell), np.nan)
+    for c in np.flatnonzero(osc_cells):
+        cr = crossings[c]
+        for a, b in zip(cr[:-1], cr[1:]):
+            phases[a:b, c] = 2 * np.pi * (np.arange(a, b) - a) / (b - a)
+    n_osc = int(osc_cells.sum())
+    Rt, cov = [], []
+    for t in range(nt):
+        ph = phases[t][~np.isnan(phases[t])]
+        c = (ph.size / n_osc) if n_osc else 0.0
+        cov.append(c)
+        if n_osc and c >= 0.5 and ph.size >= 2:
+            Rt.append(abs(np.mean(np.exp(1j * ph))))
+    median_R = float(np.median(Rt)) if Rt else 1.0            # fail closed: no valid coverage -> "synchronised"
+    act = flat[:, active]
+    if act.shape[1] >= 2 and np.all(act.std(axis=0) > 0):
+        C = np.corrcoef(act.T); iu = np.triu_indices(act.shape[1], 1); mpc = float(np.nanmean(C[iu]))
+    else:
+        mpc = 1.0
+    crP = _cycle_crossings(P)
+    pop_period = float(np.mean(np.diff(crP)) * dt_rec_ms) if crP.size >= 2 else float("nan")
+    return dict(occupancy=occ, P95=P95, mean_P=float(P.mean()), active_area_frac=float(active.mean()),
+                osc_frac=float(osc_cells.mean()), median_R_phase=median_R,
+                phase_coverage_frac=float(np.mean(cov)), mean_pair_corr=mpc,
+                median_local_period_ms=median_local_period, population_period_ms=pop_period)

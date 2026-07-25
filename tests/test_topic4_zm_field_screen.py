@@ -57,3 +57,45 @@ def test_uniform_field_reduces_to_meanfield():
     mf = simulate_meanfield(MFParams(2., 2., 4., .5, 1.), T=1500., dt=0.25, r0=0.15)
     got = fr["r_trace"].reshape(fr["r_trace"].shape[0], -1).mean(axis=1)
     assert np.allclose(got, mf[::20, 0][:len(got)], atol=1e-6)
+
+# append to tests/test_topic4_zm_field_screen.py
+from src.topic4_zm_field_screen import field_metrics
+
+def _osc(n, nt, phases, amp=0.8, base=0.1, period=40):
+    t = np.arange(nt); f = np.empty((nt, n, n))
+    for i in range(n):
+        for j in range(n):
+            f[:, i, j] = base + amp * (0.5 + 0.5 * np.sign(np.sin(2 * np.pi * t / period + phases[i, j])))
+    return f.astype(np.float32)
+
+def test_inphase_vs_desync_metrics():
+    # nt=600 (not 400): settle=0.25 drops 25%, so 600 frames leave 450 = 11.25 cycles at period=40,
+    # clearing the LOCKED ncyc>=10 oscillation gate. With nt=400 only 7.5 cycles survive, no cell counts
+    # as oscillatory, and BOTH inputs fail-close to R_phase=1.0 -- the test could not discriminate at all.
+    n, nt = 8, 600
+    mi = field_metrics(_osc(n, nt, np.zeros((n, n))), 5.0)
+    md = field_metrics(_osc(n, nt, np.random.default_rng(0).uniform(0, 2 * np.pi, (n, n))), 5.0)
+    assert mi["median_R_phase"] > 0.8 and md["median_R_phase"] < 0.5
+    assert mi["osc_frac"] > 0.9 and mi["active_area_frac"] > 0.9
+
+def test_local_period_survives_a_flat_population_signal():
+    """The IDEAL staggered state flattens P(t) -> population period is NaN, but each cell still cycles.
+    The gate must use the LOCAL period, else the best result would fail on a NaN."""
+    n, nt = 8, 600
+    f = _osc(n, nt, np.random.default_rng(1).uniform(0, 2 * np.pi, (n, n)))
+    m = field_metrics(f, 5.0)
+    assert 100.0 < m["median_local_period_ms"] < 300.0      # ~40 bins * 5 ms = 200 ms
+    assert m["osc_frac"] > 0.9
+
+def test_plateau_and_tiny_active_set_loopholes():
+    n, nt = 8, 400
+    plateau = np.full((nt, n, n), 0.8, np.float32)
+    assert field_metrics(plateau, 5.0)["osc_frac"] < 0.1
+    tiny = np.full((nt, n, n), 0.8, np.float32)
+    tiny[:, 0, 0] = _osc(1, nt, np.zeros((1, 1)))[:, 0, 0]
+    assert field_metrics(tiny, 5.0)["active_area_frac"] < 0.1
+
+def test_phase_coverage_reported_and_failclosed():
+    n, nt = 8, 400
+    m = field_metrics(np.full((nt, n, n), 0.8, np.float32), 5.0)   # no oscillating cells at all
+    assert m["phase_coverage_frac"] == 0.0 and m["median_R_phase"] == 1.0   # fail closed
