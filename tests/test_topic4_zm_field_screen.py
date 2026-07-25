@@ -22,3 +22,38 @@ def test_kernel_axis_and_ar_recovered_at_several_rotations():
 def test_cell_mass_fraction_scales_with_resolution():
     q32 = cell_mass_fraction(20.0, 32); q64 = cell_mass_fraction(20.0, 64)
     assert 0.15 < q32 < 0.30 and 0.04 < q64 < 0.12 and q64 < q32          # finer cells hold less mass
+
+# append to tests/test_topic4_zm_field_screen.py
+from src.topic4_zm_field_screen import FieldParams, simulate_field, ARMS
+from src.topic4_zm_field_meanfield import simulate_meanfield, MFParams
+
+def _P(**kw):
+    return FieldParams(W0=2.0, alpha=2.0, beta=4.0, theta=0.5, I0=1.0, **kw)
+
+def test_w_frac_is_derived_not_half():
+    p = _P(n=32)
+    assert p.w_frac is None
+    from src.topic4_zm_field_screen import resolve_w_frac
+    assert abs(resolve_w_frac(p) - 0.226) < 0.03            # derived q_cell, NOT 0.5
+
+def test_dual_arms_identical_on_the_uniform_manifold():
+    p = _P(n=16)
+    outs = {a: simulate_field(p, a, T=800., dt=0.25, r_init=np.full((16, 16), 0.15))["final_state"]["r"]
+            for a in ("dual_global", "dual_local", "dual_mixed")}
+    assert np.allclose(outs["dual_global"], outs["dual_local"], atol=1e-9)
+    assert np.allclose(outs["dual_global"], outs["dual_mixed"], atol=1e-9)
+    assert np.allclose(outs["dual_global"], outs["dual_global"].mean())    # stays uniform
+
+def test_div_global_arm_forces_beta_zero():
+    p = _P(n=16)
+    a = simulate_field(p, "div_global", T=1500., dt=0.25, r_init=np.full((16, 16), 0.15))
+    b = simulate_field(FieldParams(W0=2., alpha=2., beta=0.0, theta=.5, I0=1., n=16), "dual_global",
+                       T=1500., dt=0.25, r_init=np.full((16, 16), 0.15))
+    assert np.allclose(a["final_state"]["r"], b["final_state"]["r"], atol=1e-9)
+
+def test_uniform_field_reduces_to_meanfield():
+    p = _P(n=16)
+    fr = simulate_field(p, "dual_global", T=1500., dt=0.25, r_init=np.full((16, 16), 0.15), record_stride=20)
+    mf = simulate_meanfield(MFParams(2., 2., 4., .5, 1.), T=1500., dt=0.25, r0=0.15)
+    got = fr["r_trace"].reshape(fr["r_trace"].shape[0], -1).mean(axis=1)
+    assert np.allclose(got, mf[::20, 0][:len(got)], atol=1e-6)
