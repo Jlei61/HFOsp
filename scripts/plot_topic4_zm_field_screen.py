@@ -42,13 +42,13 @@ M_MAX = 4          # integer spatial-mode half-width for the Floquet heatmap (pa
 LAM_FLOOR = 0.002   # sign-resolution floor; matches src.topic4_zm_field_verdict.TH["lam_floor"]
 
 ARM_LABEL = {
-    "div_global": "global, divisive-only",
+    "div_global": "divisive-only (beta=0):\nNO orbit -- not a stability result",
     "dual_global": "global inhibition",
     "dual_local": "local inhibition",
     "dual_mixed": "mixed local+global",
 }
 ARM_COLOR = {
-    "div_global": "#999999",
+    "div_global": "#BEBEBE",
     "dual_global": "#2166AC",
     "dual_local": "#B2182B",
     "dual_mixed": "#762A83",
@@ -120,6 +120,12 @@ def panel_a(axes, lock):
     plt.setp(ax_r.get_xticklabels(), visible=False)
     plt.setp(ax_mu.get_xticklabels(), visible=False)
     ax_s.set_xlabel("time (ms)", fontsize=9)
+
+    # the 5 excitability levels panel C sweeps are otherwise only implied by panel C's x-axis --
+    # name them here explicitly against the single trace (at the locked operating point) shown above
+    levels_str = ", ".join(f"{v:.2f}" for v in lock["I0_levels"])
+    ax_s.text(0.0, -0.30, f"panel C sweeps these 5 locked excitability levels ($I_0$): {levels_str}",
+              transform=ax_s.transAxes, fontsize=6.8, color="#555555", va="top", ha="left")
     return period_ms
 
 
@@ -190,6 +196,15 @@ def panel_c(ax, floquet, lock):
         ys = [floquet[f"{lv:.4f}"].get(arm) for lv in levels]
         if all(y is None for y in ys):
             continue
+        if arm == "div_global":
+            # beta=0 ablation: at this operating point the system has NO oscillation of its own (it
+            # settles to a fixed point -- see test_divisive_only_beta0_has_no_orbit), so this curve is a
+            # coefficient ablation evaluated along the DUAL system's orbit, not a stability statement
+            # about div_global's own dynamics. Styled to read as clearly secondary / not comparable to
+            # the three self-consistent arms below -- full caveat in the in-panel note underneath.
+            ax.plot(levels, ys, marker="o", ms=3.2, lw=0.8, ls=":", alpha=0.5,
+                     color=ARM_COLOR[arm], label=ARM_LABEL[arm], zorder=1)
+            continue
         primary = arm in ("dual_global", "dual_local")
         ax.plot(levels, ys, marker="o", ms=5,
                  lw=2.4 if primary else 1.3, ls="-" if primary else "--",
@@ -204,14 +219,27 @@ def panel_c(ax, floquet, lock):
              ha="center", va="bottom")
 
     ax.set_ylim(top=max(ax.get_ylim()[1], 0.012))
-    ax.text(levels[0], LAM_FLOOR * 1.3, f"sign-resolution floor (|λ|≤{LAM_FLOOR:g})",
-             fontsize=7.4, color="#555555", va="bottom", ha="left")
-    ax.legend(fontsize=7.6, loc="upper right", frameon=False, title="inhibitory feedback",
-              title_fontsize=7.6)
+    # place the floor-band label in the (data-driven, so it stays clear on any rerun) gap between the
+    # dual_local and dual_mixed curves at the leftmost level -- the near-zero strip directly above it is
+    # now the legend's territory (the div_global caveat entry made the legend taller than before)
+    lvl0_key = f"{levels[0]:.4f}"
+    floor_label_y = 0.5 * (floquet[lvl0_key]["dual_local"] + floquet[lvl0_key]["dual_mixed"])
+    ax.text(levels[0], floor_label_y, f"sign-resolution floor (|λ|≤{LAM_FLOOR:g})",
+             fontsize=7.4, color="#555555", va="center", ha="left")
+    ax.legend(fontsize=6.6, loc="upper right", frameon=False, title="inhibitory feedback",
+              title_fontsize=6.8)
 
     ax.set_xlabel("excitability level  $I_0$", fontsize=9.3)
     ax.set_ylabel("max transverse growth rate  $\\lambda_\\perp^{max}$  (ms$^{-1}$)", fontsize=9.3)
     ax.margins(x=0.08)
+
+    ax.text(0.0, -0.10,
+             "The beta=0 ablation has no oscillation of its own at this operating point (it settles to a\n"
+             "fixed point), so its curve is a coefficient ablation evaluated along the dual system's orbit --\n"
+             "NOT a statement about its own stability. Its role in this project is to show that the\n"
+             "subtractive term is what creates the oscillation; that contrast is separate from the\n"
+             "local-vs-global spatial-rank contrast the other three curves make.",
+             transform=ax.transAxes, fontsize=6.9, color="#555555", va="top", ha="left", linespacing=1.4)
 
 
 # ---------------------------------------------------------------------------
@@ -292,6 +320,10 @@ def panel_d(axes, lock, L_mm, seed=0):
     ax_ts.legend(fontsize=7, frameon=False, loc="upper right")
 
     note_lines = [
+        "this axis plots the population-MEAN rate r(t), not the phase-synchrony measure originally",
+        "sketched for this panel -- harmless here because the field never develops a spatial pattern",
+        "(it stays spatially uniform throughout, matching panels B/C), so a synchrony measure would",
+        "have nothing to distinguish and would be uninformative.",
         f"short diagnostic run: T=3000 ms, seed {seed} (not production-length).",
         "Snapshots are visually flat (no spatial texture) for both arms at both times --",
         "consistent with panels B/C: no spatial pattern is emerging here.",
@@ -363,8 +395,8 @@ def main():
 
     fig.suptitle(
         "Reduced 2-D field: does spatially LOCAL inhibitory feedback destabilise the uniform oscillation\n"
-        "into a phase-staggered pattern?  Verdict: NO -- every spatial mode decays, for every arm, at every "
-        "excitability level tested.",
+        "into a phase-staggered pattern?  Verdict: NO -- every spatial mode decays, for local, global and "
+        "mixed inhibition, at every excitability level tested.",
         fontsize=12.5, y=0.975)
 
     stem = os.path.join(FIG_DIR, FIG_STEM)
