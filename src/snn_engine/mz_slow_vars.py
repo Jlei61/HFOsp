@@ -93,6 +93,7 @@ class MZSlowVarsConfig:
     eta_m: float = 0.0             # adaptation current per unit m (CALIBRATION)
     m_enable_ms: "float | None" = None  # FCXR-HEO2: delayed adaptation onset — m stays 0 until step*dt>=this (None = from step 0)
     m_frozen_E: "np.ndarray | None" = None  # FCXR-HEO2: static-K control — hold m frozen at this per-E field (requires use_m=False, full_conductance)
+    m_frozen_enable_ms: "float | None" = None  # FCXR-HEO2.1: delayed static-K — inject m_frozen_E only at step*dt>=this (None = t=0; requires m_frozen_E)
     use_phi: bool = False          # optional Abbott-style spike-triggered threshold adaptation
     tau_phi: float = 100.0         # ms
     delta_phi: float = 0.0         # mV threshold increment per E spike
@@ -165,11 +166,15 @@ class MZSlowVars:
                 raise ValueError(f"z_frozen_E must have length NE={self.NE}, got {zf.shape}")
             self.z[:self.NE] = zf                                 # I-cell z stays 1 (E-only clause)
         self.m = np.zeros(self.N)
+        self._m_frozen_cached = None
         if self.cfg.m_frozen_E is not None:                       # FCXR-HEO2: hold E-cell m frozen (static-K)
             mf = np.asarray(self.cfg.m_frozen_E, float)
             if mf.shape != (self.NE,):
                 raise ValueError(f"m_frozen_E must have length NE={self.NE}, got {mf.shape}")
-            self.m[:self.NE] = mf                                 # I-cell m stays 0 (E-only clause)
+            self._m_frozen_cached = mf                            # FCXR-HEO2.1: cache for (possibly delayed) inject
+            if self.cfg.m_frozen_enable_ms is None:
+                self.m[:self.NE] = mf                             # immediate static-K (I-cell m stays 0)
+            # else: leave m=0 until m_frozen_enable_ms, inject in step()
         self.phi = np.zeros(self.N)
         # FCXR persistence sensor y_j (Hz) + presynaptic E->E relay availability x_j in [0,1] (E cells only).
         # ee_relay_send is the x_j(t-) snapshot the engine scatter reads BEFORE step() updates y/x this frame
@@ -466,6 +471,8 @@ class MZSlowVars:
             mE = mE - (mE / c.tau_adp) * dt                    # decay
             self.m[self.is_E] = np.maximum(mE, 0.0)            # m >= 0
             self.m[spk & self.is_E] += 1.0                     # E spike -> +1 ; I spikes ignored (E-only)
+        if c.m_frozen_E is not None and c.m_frozen_enable_ms is not None and self._step_i * dt >= c.m_frozen_enable_ms:
+            self.m[:self.NE] = self._m_frozen_cached          # FCXR-HEO2.1: delayed static-K inject (idempotent)
         if c.use_phi:
             phiE = self.phi[self.is_E]
             phiE = phiE - (phiE / c.tau_phi) * dt
@@ -613,6 +620,8 @@ class MZSlowVars:
             mf = np.asarray(c.m_frozen_E, float)
             if mf.ndim != 1 or not np.all(np.isfinite(mf)) or mf.min() < 0.0:
                 raise ValueError("m_frozen_E must be a finite 1-D field with values >= 0")
+        if c.m_frozen_enable_ms is not None and c.m_frozen_E is None:
+            raise ValueError("m_frozen_enable_ms (delayed static-K) requires m_frozen_E")
         if c.use_phi and (c.tau_phi <= 0.0 or c.delta_phi < 0.0):
             raise ValueError("use_phi requires tau_phi>0 and delta_phi>=0")
         if c.membrane_mode == "full_conductance":

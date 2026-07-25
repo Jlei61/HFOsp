@@ -256,3 +256,32 @@ def test_segment_state_label_16hz_carrier_is_sustained_not_bursting():
     t = np.arange(5000) / fs
     carrier = np.clip(130.0 + 120.0 * np.sin(2 * np.pi * 16.0 * t), 0, None)
     assert H2.segment_state_label(carrier, fs, m_enable_ms=None, dt=1.0) == "sustained_high"
+
+
+# ============== HEO2.1 closeout: delayed static-K (m_frozen_enable_ms) for mean-matched control ==============
+def test_m_frozen_enable_ms_none_is_immediate():
+    """m_frozen_enable_ms=None (default) -> frozen field injected at t=0 (byte-parity with current)."""
+    mz = _mk_fc(m_frozen_E=np.full(4, 2.0))
+    I_E = np.array([10., 10., 10., 10., 4., 4.]); I_rec = np.array([2., 2., 2., 2., 1., 1.])
+    mz.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+    expected = 1.0 * 0.5 * 2.0 / (18.0 - 0.0)
+    assert abs(mz._gM_mean_last - expected) < 1e-11
+
+
+def test_m_frozen_enable_ms_delays_injection():
+    """Delayed static-K: m=0 (gM=0) before the enable time, frozen field (static gM) after."""
+    dt = 0.1
+    mz = _mk_fc(m_frozen_E=np.full(4, 2.0), m_frozen_enable_ms=50.0)     # enable at step 500
+    I_E = np.array([10., 10., 10., 10., 4., 4.]); I_rec = np.array([2., 2., 2., 2., 1., 1.])
+    mz.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+    assert abs(mz._gM_mean_last) < 1e-12                                 # pre-enable: m=0 -> gM=0
+    for _ in range(600):
+        mz.step(np.zeros(6, bool), None, dt)
+    mz.membrane_terms(I_E, np.zeros(6), labels=None, I_E_rec=I_rec)
+    expected = 1.0 * 0.5 * 2.0 / (18.0 - 0.0)
+    assert abs(mz._gM_mean_last - expected) < 1e-11                      # post-enable: static gM
+
+
+def test_m_frozen_enable_ms_requires_frozen_field():
+    with pytest.raises(ValueError):
+        _mk_fc(m_frozen_enable_ms=50.0)                                  # delay without a frozen field
