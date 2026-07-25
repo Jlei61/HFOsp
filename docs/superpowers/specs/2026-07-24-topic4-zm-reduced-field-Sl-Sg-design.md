@@ -1,6 +1,9 @@
-# Reduced 2-D `S_L(x)+S_G` field — transversal-instability screen (design, revision 2, 2026-07-25)
+# Reduced 2-D `S_L(x)+S_G` field — transversal-instability screen (design, revision 3, 2026-07-25)
 
-**Status: design, pre-registered. LOCKED before any run.** Branch `codex/topic4-m4-snn-native-exit`.
+**Status: calibration-informed design, LOCKED before the confirmatory field screen.** (Not "pre-registered"
+in the strict sense: the Fix-A operating region `β≈2–4` and the existence of ~111 oscillatory sets were seen
+in an offline 0-D probe BEFORE this spec was written. Everything downstream of the Phase-A lock — arms,
+thresholds, verdict — is fixed before the confirmatory runs.) Branch `codex/topic4-m4-snn-native-exit`.
 Reduced **rate field only** — NO SNN, NO H/termination, NO E→E change. Rev-2 incorporates the second review:
 the pool is now **dual (divisive + subtractive)**, a gating **Phase 0** mean-field check is added, and the
 transverse readout is a proper **per-mode 3×3 Floquet** analysis. Companion carrier archive
@@ -21,7 +24,20 @@ connect into a ≥2 s macroepisode), hypothesised to be a **single global scalar
 synchronously**. This screen tests, in a reduced 2-D field, whether spatially-resolved inhibition removes that
 synchronous reset.
 
-**Non-goals** (unchanged, restated §10): the full Z/M onset→termination lifecycle; a quantitative
+**⚠️ SCOPE CONDITIONAL (rev-3, review P0-1).** The `−β·S` subtractive term is a **NEW mechanism on this
+line**: the Z/M `sg` arm that produced the burst-train result ran `alpha_G=16, beta_SG=0.0` (verified in
+`sg_seed1.json::config`), i.e. **purely divisive**. The engine *supports* `beta_SG`, but it was never engaged.
+Phase 0 showed the purely-divisive oscillator has **no synchronised orbit at all**, so the subtractive term is
+what *creates* the orbit here. Therefore this screen answers:
+
+> *Conditional on a NEW dual (divisive + subtractive) pool oscillator substrate, does the spatial rank of the
+> inhibitory feedback control synchrony vs phase staggering?*
+
+It **cannot** answer: *"does merely localising the CURRENT Z/M+`S_G` global pool produce a carrier?"* — because
+the current Z/M+`S_G` (β=0) has no orbit to localise. This line is a **new inhibition-side mechanism arm**, not
+a seamless spatialisation of the existing model. The 4-arm decomposition (§5) makes that attribution explicit.
+
+**Non-goals** (unchanged, restated §11): the full Z/M onset→termination lifecycle; a quantitative
 `ξ ↔ z` equivalence; that the SNN has a clinical ictal carrier. A pass buys ONLY a migration justification:
 *what must migrate is the spatial STRUCTURE of local inhibition — not a termination current, not an E→E change.*
 
@@ -38,9 +54,10 @@ u(x)     = I0(ξ)  +  [ w_rec·r(x) + w_c·(K_E ∗ r)(x) ] / (1 + α·S_eff(x))
 τ_a ṙ(x) = −r(x) + F(u(x)) ,        F(u) = [u]_+ / (u_half + [u]_+)     (a_max=1, u_half=0.5)
 ```
 
-- **DUAL inhibition, both faithful to the SNN `S_G`** (`slow_field` has `alpha_G` divisive **and** `beta_SG`
-  subtractive): `α·S` divides the **recurrent excitation only** (matches `S_G` on `I_E_rec`); `−β·S`
-  subtracts on the membrane. **Why dual is required** (Phase-0 finding, §6.0): with the divisive term ALONE,
+- **DUAL inhibition. `α·S` divides the recurrent excitation only** (this part matches the SNN `S_G` acting on
+  `I_E_rec`, `alpha_G=16`); **`−β·S` subtracts on the membrane and is NEW on this line** (the engine exposes
+  `beta_SG` but the `sg` arm ran `beta_SG=0`; see the §0 scope conditional). **Why dual is required**
+  (Phase-0 finding, §6.0): with the divisive term ALONE,
   the external drive `I0` props the high state up so the pool cannot produce a full OFF/reset → no synchronised
   orbit exists (a uniform-mean-field scan over `W0∈[2,24], α∈[0.5,16], I0∈[0,2], θ∈[0.3,0.8]` found 0
   oscillatory sets). Adding `−β·S` restores a clean relaxation orbit (trough→0, period ~150–220 ms ≈ the SNN
@@ -50,6 +67,13 @@ u(x)     = I0(ξ)  +  [ w_rec·r(x) + w_c·(K_E ∗ r)(x) ] / (1 + α·S_eff(x))
 - `w_rec` = local self-recurrence; `w_c·(K_E∗r)` = non-local anisotropic recurrence; `K_E(0)=0` (no
   self-double-count), `K_E` renormalised to `Σ=1` (§4). On the uniform manifold the total recurrent gain is
   `W0 = w_rec + w_c`.
+- **The local/non-local SPLIT IS DERIVED, NOT SET** (review P0-2): `w_rec = W0·q_cell`, `w_c = W0·(1−q_cell)`,
+  where `q_cell` = the fraction of the continuous `K_E` mass falling inside ONE lattice cell (fine-quadrature
+  coarse-graining). Computed: **`q_cell = 0.226` at `n=32`** (0.625 mm cells) and **`0.077` at `n=64`** — so it
+  scales correctly with resolution. A hand-set `w_frac=0.5` would MORE THAN DOUBLE the self-excitation and
+  manufacture per-cell microdomain oscillators (an EE-structure change in disguise, violating "EE untouched").
+  `q_cell` is locked into `phaseA_lock.json` and never re-chosen from `λ_⊥` results; a `w_frac` sensitivity
+  (`0.5×q_cell`, `q_cell`, `2×q_cell`) is run for the central candidate only.
 - `S_eff(x)` is the pool the cell sees, set by the arm (§5).
 
 ## 2. Excitability coordinate `ξ`
@@ -91,21 +115,25 @@ A_G    = [ ⟨ Ψ(r)^p ⟩_x ]^{1/p}               (global drive; reuse slow_fie
   SNN"). One primary `σ_S` is locked; a `σ_S ∈ {1.0, 2.0, 4.0} mm` sensitivity is run for the central
   candidate ONLY; `σ_S` is never re-chosen to favour local (Liou et al. PMC7089769, motivation only).
 
-## 5. Three arms + matched budget
+## 5. FOUR arms — mechanism decomposition (review P0-1)
 
-Both pooling kernels normalised; identical `Ψ, p, τ_μ, τ_S, α, β`. The arms differ ONLY in the **spatial rank
-of the pool the cells see**:
+Both pooling kernels normalised; identical `Ψ, p, τ_μ, τ_S`. Arms 2-4 share `(α, β)` and differ ONLY in the
+**spatial rank of the pool the cells see**; arm 1 is the β-ablation that pins what the new term contributes:
 
-| arm | `S_eff(x)` |
-|---|---|
-| global-only | `S_G` (scalar) |
-| local-only | `S_L(x)` (field) |
-| mixed | `(1−ε_G)·S_L(x) + ε_G·S_G`,  `ε_G=0.2` |
+| # | arm | `S_eff(x)` | `β` | role |
+|---|---|---|---|---|
+| 1 | `div_global` | `S_G` (scalar) | **0** | **reduced baseline of the CURRENT Z/M+`S_G`** (`alpha_G=16, beta_SG=0`) — expected: no orbit (Phase-0 finding) |
+| 2 | `dual_global` | `S_G` (scalar) | `β_lock` | shows the NEW subtractive term is what creates the synchronised orbit |
+| 3 | `dual_local` | `S_L(x)` (field) | `β_lock` | the test arm |
+| 4 | `dual_mixed` | `(1−ε_G)·S_L(x) + ε_G·S_G`, `ε_G=0.2` | `β_lock` | local + weak global |
 
-On the uniform manifold `r(x)=r̄(t) ⇒ S_L(x)=S_G=S̄(t)`, so `S_eff=S̄` and **every arm has the identical
-`(r̄,μ̄,S̄)` mean-field on ANY uniform trajectory** — same `(α,β)`, same synchronised orbit. ⇒ the arms differ
-ONLY in the **transverse (spatial-mode)** stability of that orbit. The comparison isolates spatial STRUCTURE,
-not inhibition STRENGTH.
+Arm 1 vs 2 is the **mechanism attribution** (β creates the orbit); arm 2 vs 3/4 is the **spatial-rank test**
+(the actual question). Reporting must never collapse these two contrasts into one claim.
+
+On the uniform manifold `r(x)=r̄(t) ⇒ S_L(x)=S_G=S̄(t)`, so `S_eff=S̄` and **arms 2-4 share the identical
+`(r̄,μ̄,S̄)` mean-field on ANY uniform trajectory** — same `(α,β)`, same synchronised orbit ⇒ they differ ONLY
+transversally. The comparison isolates spatial STRUCTURE, not inhibition STRENGTH.
+
 
 ## 6. Dynamical analysis
 
@@ -114,14 +142,31 @@ Uniform 3-state `(r̄, μ̄, S̄)` (identical across arms):
 ```
 τ_a ṙ̄ = −r̄ + F(I0(ξ) + W0·r̄/(1+α·S̄) − β·S̄ − θ) ,  τ_μ μ̄̇ = −μ̄ + Ψ(r̄) ,  τ_S S̄̇ = −S̄ + S_max·μ̄
 ```
-Pre-register a SMALL continuation over the grid `W0∈{2,3,4,6}, α∈{1,2,4}, β∈{1,2,4,8}, θ∈{0.4,0.5,0.6}`,
-sweeping `I0∈[0.5,2.0]` (seeded from the Phase-0 finding `W0≈2, α≈2, β≈2–4, θ=0.5`, oscillation for
-`I0≈1–1.5`). **Lock the operating point `(W0, α, β, θ)` and the `ξ→I0` map** from a
-synchronised orbit with a clear period, amplitude, and OFF trough, judged on the mean-field ONLY (not
-local/mixed). **If no periodic orbit exists in the pre-registered range → immediate NO-GO; the 2-D field is
-NOT built.** (This is why "inherit the K-patch calibration" is wrong: recurrent-only division is a different
-oscillator.) Mean-field is 3-D; `μ̄=A(r̄)`, `S̄=S_max·μ̄` may be substituted only for the fixed-point equation,
-never for the orbit / Jacobian / continuation.
+Continuation over the grid `W0∈{2,3,4,6}, α∈{1,2,4}, β∈{0,1,2,4,8}, θ∈{0.4,0.5,0.6}`, sweeping
+`I0∈[0.5,2.0]` (`β=0` included so the divisive-only ablation is measured, not assumed).
+
+**MINIMAL-INTERVENTION selection rule (locked; review P0-1) — NOT "widest window / strongest oscillator":**
+among configs whose oscillatory `I0` points form a **single contiguous segment** of the `I0` sweep with
+`n_points ≥ 5`, choose in this strict lexicographic order:
+1. **smallest `β`** (least new mechanism);
+2. then smallest `|α − 16|`-rank … i.e. smallest deviation from the SNN anchor `α_anchor = 16` — implemented as
+   smallest `|log2(α/16)|`; ties → smaller `α`;
+3. then smallest `|W0 − W0_anchor|` with `W0_anchor = 2`; ties → smaller `W0`;
+4. then `θ` closest to 0.5; ties → smaller `θ`;
+5. final tie-break: lexicographic `(W0, α, β, θ)` — deterministic, never dict-iteration order.
+Stop as soon as a config satisfies {periodic orbit, OFF trough, numerical convergence}; do not keep searching
+for a "better" oscillator.
+
+**Contiguity + robustness (review P0-3):** oscillatory `I0` points are split into contiguous runs; only ONE
+run may be used; the 5 `ξ` levels are taken from that run's **interior** (drop the two boundary points, to stay
+off the bifurcation edges). The chosen operating point must give the **same orbit classification at `dt` and
+`dt/2`**; otherwise take the next candidate in the ordering.
+
+**Lock the operating point `(W0, α, β, θ)` and the `ξ→I0` map** judged on the MEAN-FIELD ONLY (arm-independent;
+never using local/mixed results). **If no config with a contiguous ≥5-point orbit segment exists → immediate
+NO-GO; the 2-D field is NOT built.** (This is why "inherit the K-patch calibration" is wrong: recurrent-only
+division is a different oscillator.) Mean-field is 3-D; `μ̄=A(r̄)`, `S̄=S_max·μ̄` may be substituted only for the
+fixed-point equation, never for the orbit / Jacobian / continuation.
 
 ### 6.1 Mean-field structure
 Fixed points, oscillation window in `ξ`, mean-field Jacobian (3×3) vs `ξ` — establishes the uniform orbit the
@@ -172,9 +217,16 @@ A translation-symmetric system with a uniform IC keeps `r(x,t)=r̄(t)` forever (
 **Phase 0** (§6.0): orbit exists → continue; no orbit → NO-GO (no field built).
 
 **Phase A** — lock excitability levels FIRST. Use the mean-field (arm-independent) to fix **5 `ξ` levels evenly
-inside the oscillation window**. Write an **immutable `phaseA_lock.json`**: spec SHA, `(W0,α,β,θ)`, oscillation-
-window definition, the 5 `ξ`/`I0` levels, the 4 perturbation seeds, solver + `dt` + grid `n`, kernel hashes.
-Phase B reads this lock ONLY; levels are never re-chosen after seeing local/mixed.
+inside the chosen contiguous segment's INTERIOR**. Write `phaseA_lock.json`: spec SHA, `(W0,α,β,θ)`, segment
+definition, the 5 `ξ`/`I0` levels, `q_cell`/`w_frac` provenance, the 4 perturbation seeds, solver + `dt` +
+grid `n`, kernel hashes. **The lock is write-once: if the file already exists the runner FAILS CLOSED** (never
+silently overwrites); re-locking requires an explicit human deletion. Phase B reads this lock ONLY; levels are
+never re-chosen after seeing local/mixed results.
+
+**Cheap-first ordering (review P1-3):** Phase B runs the **Floquet map for every level FIRST** (seconds), and
+only then launches nonlinear runs — restricted to the target window (`global λ_⊥<0 & local/mixed λ_⊥>0`) or a
+pre-registered subcritical-diagnostic window. If no level shows a target window, write the taxonomy verdict and
+STOP without the 30/60 s sweeps.
 
 **Phase B** — reduced-field GO iff BOTH:
 - **(i) Nonlinear screen:** local-only OR mixed passes in **≥3 CONSECUTIVE of the 5 levels**, each in **≥3/4
@@ -209,6 +261,9 @@ Only on GO: seed-1 SNN 3-arm (global-`S_G` / local-`S_L(x)` / mixed, inhibition-
 subtractive to match this field, E→E untouched, H off) judged by `carrier_gate_v2.1`. No large `S_L` SNN grid.
 
 ## 11. Forbidden claims
+- **No "localising the current Z/M+`S_G` global pool produces a carrier"** — the current `sg` arm is β=0 and has
+  no orbit; every result here is conditional on the NEW dual-pool substrate (§0). Report arm 1-vs-2 (β creates
+  the orbit) and arm 2-vs-3/4 (spatial rank) as SEPARATE contrasts, never merged.
 - No "SNN has a carrier / lifecycle / termination".
 - No "`ξ = frozen z`" and no strict `ξ=1−z`.
 - No "phase-staggered relay observed" — it is the hypothesis under test.
