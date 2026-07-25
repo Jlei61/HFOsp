@@ -123,3 +123,16 @@ def test_taxonomy_tiebreak_is_deterministic():
           "1": _lvl([M(occupancy=0.1)] * 4, lam_local=-0.05, lam_global=0.05)}
     r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1]))
     assert r["taxonomy"] == "global_stable_local_unstable"
+
+
+def test_truncated_control_seed_list_excludes_the_level():
+    """Symmetric to the treatment-arm guard: a level whose CONTROL arm lost a seed must be EXCLUDED, not
+    admitted on the surviving 3. Otherwise three such consecutive levels with a genuine treatment crossing
+    would yield a false GO."""
+    lv = {str(i): dict(arms=dict(
+        dual_local=dict(metrics=[M()] * 4, lambda_perp_max=0.05),
+        dual_global=dict(metrics=[M(median_R_phase=0.95)] * 3,      # only 3 of the declared 4 seeds
+                         lambda_perp_max=-0.05, period_ms=200.0))) for i in range(3)}
+    r = adjudicate_field_screen(_summary(lv), dict(I0_levels=[0, 1, 2], seeds=[0, 1, 2, 3]))
+    assert r["verdict"] != "GO"
+    assert sorted(str(x) for x in r["reasons"]["excluded_levels"]) == ["0", "1", "2"]

@@ -78,7 +78,11 @@ def adjudicate_field_screen(summary, lock):
             continue
         arms = lv.get("arms", {})
         g = arms.get("dual_global", {})
-        if not level_control_is_valid(g.get("metrics") or []):
+        gm_list = g.get("metrics") or []
+        if n_expected and len(gm_list) < n_expected:   # same denominator rule as the treatment arms: a
+            excluded.append(key)                       # dropped control seed must not shrink "3 of 4"
+            continue
+        if not level_control_is_valid(gm_list):
             excluded.append(key)
             continue
         gper = _num(g, "period_ms")
