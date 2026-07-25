@@ -43,9 +43,16 @@ def phaseA_lock(op, seg):
         return json.load(open(path))
     os.makedirs(OUT, exist_ok=True)
     interior = [float(x) for x in seg["interior_I0s"]]
-    if len(interior) >= 5:            # 5 levels EVENLY across the interior (spec §8 Phase A) -- taking the
-        idx = np.linspace(0, len(interior) - 1, 5).round().astype(int)   # first 5 would bias toward low I0
-        levels = [interior[i] for i in dict.fromkeys(idx.tolist())]
+    op_I0 = float(op["I0"])
+    if len(interior) >= 5:
+        idx = np.linspace(0, len(interior) - 1, 5).round().astype(int)
+        levels = sorted({interior[i] for i in idx.tolist()})
+        if not any(abs(x - op_I0) < 1e-9 for x in levels):
+            # round-half-to-even can drop the very point Phase 0 validated at dt and dt/2; swap the
+            # nearest level for the operating point so the best-validated point is actually measured
+            j = min(range(len(levels)), key=lambda k: abs(levels[k] - op_I0))
+            levels[j] = op_I0
+            levels = sorted(set(levels))
     else:
         levels = interior
     p0 = FieldParams(W0=op["W0"], alpha=op["alpha"], beta=op["beta"], theta=op["theta"], I0=op["I0"], n=N)
@@ -64,16 +71,18 @@ def _params(lock, I0, n=None):
     return FieldParams(W0=op["W0"], alpha=op["alpha"], beta=op["beta"], theta=op["theta"], I0=I0,
                        n=n or lock["grid_n"])
 
-def _run_path(level, arm, seed, tag):
-    return os.path.join(RUNS, f"{tag}_L{level}_{arm}_s{seed}.json")
+def _run_path(level, arm, seed, tag, T, dt, n):
+    """Cache key MUST encode every parameter that changes the trajectory, else a short smoke run silently
+    resumes as if it were a full-length production run (review finding)."""
+    return os.path.join(RUNS, f"{tag}_L{level}_{arm}_s{seed}_T{int(round(T))}_dt{dt:g}_n{n}.json")
 
 def run_formation_arm(lock, I0, arm, seed, T, dt=None, n=None, tag="form"):
     """Aligned-orbit start + fixed 1e-4 zero-mean r-perturbation -> does a staggered state FORM?"""
     dt = dt or lock["dt"]; level = f"{I0:.4f}"
-    path = _run_path(level, arm, seed, tag)
+    p = _params(lock, I0, n)
+    path = _run_path(level, arm, seed, tag, T, dt, p.n)
     if os.path.exists(path):
         return json.load(open(path))                 # resume
-    p = _params(lock, I0, n)
     orbit, per = uniform_orbit(p, dt)
     st = add_r_perturbation(orbit_phasepoint_state(p, orbit, len(orbit) // 3), lock["eps_perturb"], seed, p.n)
     out = simulate_field(p, arm, T=T, dt=dt, seed=seed, state_init=st, record_stride=int(round(REC_MS / dt)))
@@ -88,18 +97,26 @@ def run_formation_arm(lock, I0, arm, seed, T, dt=None, n=None, tag="form"):
     return rec
 
 def run_phase_reset_arm(lock, I0, arm, seed, T, formed_rec):
-    """FULL-state reset (r,muL,SL,muG,SG) to a uniform orbit phase + the same perturbation -> does the
-    staggered state RE-FORM? (An attractor test, not a leftover-inhibition-memory test.)"""
-    return run_formation_arm(lock, I0, arm, seed, T, tag="reset")
+    """NOT IMPLEMENTED (spec §8(i) criterion 5, phase-reset return). Reaching this requires a candidate
+    window, which the current screen does not produce. It must reset r/muL/SL/muG/SG from an ALREADY-FORMED
+    staggered state -- NOT re-run formation, which is what a previous draft silently did."""
+    raise NotImplementedError(
+        "phase-reset return (spec §8(i) criterion 5) is not automated; a GO verdict requires it")
+
 
 def run_long_confirm(lock, I0, arm, seed):
-    return run_formation_arm(lock, I0, arm, seed, T=60000.0, tag="long60s")
+    """NOT IMPLEMENTED (spec §8(i) criterion 6, 60 s confirmation)."""
+    raise NotImplementedError("60 s confirmation (spec §8(i) criterion 6) is not automated")
+
 
 def run_resolution_confirm(lock, I0, arm, seed):
-    return run_formation_arm(lock, I0, arm, seed, T=30000.0, n=64, tag="n64")
+    """NOT IMPLEMENTED (spec §8(i) criterion 6, n=64 resolution confirmation)."""
+    raise NotImplementedError("n=64 confirmation (spec §8(i) criterion 6) is not automated")
+
 
 def run_dt_confirm(lock, I0, arm, seed):
-    return run_formation_arm(lock, I0, arm, seed, T=30000.0, dt=lock["dt"] / 2, tag="dthalf")
+    """NOT IMPLEMENTED (spec §8(i) criterion 6, halved-timestep confirmation)."""
+    raise NotImplementedError("dt/2 confirmation (spec §8(i) criterion 6) is not automated")
 
 def main():
     ap = argparse.ArgumentParser()
@@ -126,14 +143,13 @@ def main():
         print("[floquet] no target window -> writing taxonomy verdict WITHOUT the expensive nonlinear sweep.")
 
     # ---- Phase B.2: nonlinear ONLY for candidate levels (or all, in smoke) ----
-    run_levels = lock["I0_levels"] if (a.smoke or targets) else []
-    if targets:
-        run_levels = targets
+    # candidates only; under --smoke run every level so the plumbing is exercised end-to-end
+    run_levels = targets if targets else (lock["I0_levels"] if a.smoke else [])
     summary = dict(phaseA=lock, floquet=fmap, levels={})
     for I0 in run_levels:
         key = f"{I0:.4f}"; arms = {}
         for arm in ("dual_global", "dual_local", "dual_mixed"):
-            recs = [run_formation_arm(lock, I0, arm, s, T=T) for s in SEEDS]
+            recs = [run_formation_arm(lock, I0, arm, s, T=T) for s in lock["seeds"]]
             arms[arm] = dict(metrics=[r["metrics"] for r in recs], period_ms=recs[0]["period_ms"],
                              lambda_perp_max=fmap[key][arm])
             print(f"  [L{key} {arm}] R={np.median([r['metrics']['median_R_phase'] for r in recs]):.2f} "
