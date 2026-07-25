@@ -165,7 +165,8 @@ def build_regions(posE, src_xy, snk_xy, core_r, corridor_w=None):
                 off_axis=~(core_s | core_k | corridor), axis_coord=s)
 
 
-def build_patch_field(posE, src_xy, snk_xy, patch_w, tau_fast, tau_slow, tau0, eta0, shuffle_seed=None):
+def build_patch_field(posE, src_xy, snk_xy, patch_w, tau_fast, tau_slow, tau0, eta0, shuffle_seed=None,
+                      phase_shift=0.0):
     """H3.1 patchy RECOVERY-TIME field: stripes of width `patch_w` perpendicular to the source->sink
     axis, alternating tau_fast / tau_slow, with per-cell eta_i = eta0*tau0/tau_i.
 
@@ -174,12 +175,19 @@ def build_patch_field(posE, src_xy, snk_xy, patch_w, tau_fast, tau_slow, tau0, e
     recovers. That is what isolates 'spatially organized recovery time' from 'spatially organized load'.
     `shuffle_seed` permutes the field across cells -> identical histogram/mean/variance, spatial
     organization destroyed (the required patch-rotation/shuffle control).
+
+    ⚠️ STRIPE PHASE IS PART OF THE HYPOTHESIS. The source core sits at axis coord s=0 and the sink core
+    at s=D; with the default phase_shift=0 and patch_w=D/3 both core CENTRES land exactly on stripe
+    boundaries, so each core ends up ~50/50 fast/slow and the two regions never get different recovery
+    times (measured: 51.1% / 48.4% slow). Pass phase_shift=patch_w/2 to centre the stripes ON the cores
+    (source entirely fast, sink entirely slow, boundaries in between) — that is what actually tests
+    "region-level recovery-time offset".
     Returns (tau_E, eta_E, patch_id)."""
     p = np.asarray(posE, float)
     a, b = np.asarray(src_xy, float), np.asarray(snk_xy, float)
     ab = b - a
     proj = ((p - a) @ ab) / (np.linalg.norm(ab) or 1.0)        # signed distance along the axis (units)
-    patch_id = (np.floor(proj / float(patch_w)).astype(int) % 2)
+    patch_id = (np.floor((proj + float(phase_shift)) / float(patch_w)).astype(int) % 2)
     tau_E = np.where(patch_id == 0, float(tau_fast), float(tau_slow))
     if shuffle_seed is not None:
         rng = np.random.default_rng(int(shuffle_seed))

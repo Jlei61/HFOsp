@@ -351,3 +351,24 @@ def test_region_alternation_is_negative_only_when_regions_take_turns():
     assert H3.region_alternation(rows(tog_a, tog_b)) > 0.9     # common drive -> POSITIVE, not -1
     assert np.isnan(H3.region_alternation(rows(np.zeros(n), np.zeros(n))))   # silence -> undefined
     assert np.isnan(H3.region_alternation(rows(np.full(n, 5.0), np.full(n, 5.0))))  # constant -> undefined
+
+
+def test_stripe_phase_must_centre_on_cores_to_separate_the_two_regions():
+    """REGRESSION for the H3.1 P0: with phase_shift=0 and patch_w=D/3 both core centres fall on stripe
+    BOUNDARIES, so each core is ~50/50 fast/slow and the two regions never get different recovery
+    times — the manipulation silently does not test the hypothesis. phase_shift=w/2 fixes it."""
+    n = 60
+    src, snk = np.array([3.5, 8.5]), np.array([16.5, 8.5])
+    D = float(np.linalg.norm(snk - src)); w = D / 3
+    # cells packed inside each core (radius 1.5) plus a corridor line
+    core_s = np.stack([np.linspace(src[0] - 1.4, src[0] + 1.4, n), np.full(n, 8.5)], axis=1)
+    core_k = np.stack([np.linspace(snk[0] - 1.4, snk[0] + 1.4, n), np.full(n, 8.5)], axis=1)
+    pos = np.vstack([core_s, core_k])
+    kw = dict(patch_w=w, tau_fast=125.0, tau_slow=500.0, tau0=250.0, eta0=0.4)
+    tau0_, _, _ = H3.build_patch_field(pos, src, snk, **kw)                      # boundary-aligned (bug)
+    tau_c, _, _ = H3.build_patch_field(pos, src, snk, phase_shift=w / 2, **kw)   # centred (correct)
+    slow_src0, slow_snk0 = (tau0_[:n] == 500.0).mean(), (tau0_[n:] == 500.0).mean()
+    slow_srcC, slow_snkC = (tau_c[:n] == 500.0).mean(), (tau_c[n:] == 500.0).mean()
+    assert 0.3 < slow_src0 < 0.7 and 0.3 < slow_snk0 < 0.7      # bug: both cores ~half-and-half
+    assert slow_srcC == 0.0 and slow_snkC == 1.0                # fixed: source all fast, sink all slow
+    assert abs(np.mean(tau_c == 125.0) - np.mean(tau0_ == 125.0)) < 0.35  # same marginal mix, different placement
