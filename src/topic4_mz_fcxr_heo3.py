@@ -165,6 +165,47 @@ def build_regions(posE, src_xy, snk_xy, core_r, corridor_w=None):
                 off_axis=~(core_s | core_k | corridor), axis_coord=s)
 
 
+def build_patch_field(posE, src_xy, snk_xy, patch_w, tau_fast, tau_slow, tau0, eta0, shuffle_seed=None):
+    """H3.1 patchy RECOVERY-TIME field: stripes of width `patch_w` perpendicular to the source->sink
+    axis, alternating tau_fast / tau_slow, with per-cell eta_i = eta0*tau0/tau_i.
+
+    The eta compensation is the design invariant: steady-state adaptation current ~ eta_i*<m_i> ~
+    eta_i*r*tau_i, so eta_i*tau_i = eta0*tau0 holds every cell's K LOAD fixed and varies only WHEN it
+    recovers. That is what isolates 'spatially organized recovery time' from 'spatially organized load'.
+    `shuffle_seed` permutes the field across cells -> identical histogram/mean/variance, spatial
+    organization destroyed (the required patch-rotation/shuffle control).
+    Returns (tau_E, eta_E, patch_id)."""
+    p = np.asarray(posE, float)
+    a, b = np.asarray(src_xy, float), np.asarray(snk_xy, float)
+    ab = b - a
+    proj = ((p - a) @ ab) / (np.linalg.norm(ab) or 1.0)        # signed distance along the axis (units)
+    patch_id = (np.floor(proj / float(patch_w)).astype(int) % 2)
+    tau_E = np.where(patch_id == 0, float(tau_fast), float(tau_slow))
+    if shuffle_seed is not None:
+        rng = np.random.default_rng(int(shuffle_seed))
+        perm = rng.permutation(len(tau_E))
+        tau_E, patch_id = tau_E[perm], patch_id[perm]
+    eta_E = float(eta0) * float(tau0) / tau_E
+    return tau_E, eta_E, patch_id
+
+
+def region_alternation(rows, region_a="core_source", region_b="core_sink"):
+    """Do two regions TAKE TURNS carrying the activity? Correlation of their per-window rates after
+    removing the common drive (each normalized by the total across the two). Alternation -> negative.
+    A rate-weighted centroid cannot see this (both ends bright leaves the centroid mid-axis), so this
+    is the required extra criterion before any 'regions alternate' claim."""
+    a = np.array([r[f"rate_{region_a}"] for r in rows], float)
+    b = np.array([r[f"rate_{region_b}"] for r in rows], float)
+    tot = a + b
+    ok = tot > 0
+    if ok.sum() < 4:
+        return float("nan")
+    fa, fb = a[ok] / tot[ok], b[ok] / tot[ok]                  # shares -> common drive removed
+    if fa.std() < 1e-12 or fb.std() < 1e-12:
+        return float("nan")
+    return float(np.corrcoef(fa, fb)[0, 1])
+
+
 def participation_ratio(rates):
     """Effective FRACTION of E-cells carrying the activity: (Σr)²/(N·Σr²). 1 = perfectly uniform,
     ~n/N = only n cells active. Distinguishes 'the whole tissue is recruited' from 'one core is loud'."""

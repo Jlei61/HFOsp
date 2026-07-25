@@ -218,3 +218,131 @@ def test_pairwise_plv_is_undefined_not_low_when_window_is_silent():
     out = H3.joint_target_windows(np.full((nw, C, B), 10.0), np.ones((C, B)),
                                   np.full(nw, 100.0), plv, fs_win=10.0)
     assert out["frac_by_criterion"]["desynchronized"] == 0.0
+
+
+# ============== HEO3 H3.1 engine: per-cell recovery time / strength + mean-field control ==============
+import sys as _sys, os as _os
+_sys.path.insert(0, _os.path.join(_os.path.dirname(__file__), "..", "src", "snn_engine"))
+from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
+
+
+def _mk_m(NE=6, N=8, **kw):
+    base = dict(use_m=True, eta_m=0.5, tau_adp=250.0)
+    base.update(kw)
+    return MZSlowVars(N, 18.0, MZSlowVarsConfig(**base), NE=NE, core_mask_E=np.zeros(NE, bool))
+
+
+def test_tau_adp_E_gives_per_cell_recovery_times():
+    """Patchy recovery time: cells with a shorter tau must decay faster, in the SAME run."""
+    NE = 6
+    tau = np.array([100.0, 100.0, 100.0, 800.0, 800.0, 800.0])
+    mz = _mk_m(NE=NE, tau_adp_E=tau)
+    mz.m[:NE] = 10.0                                           # same starting adaptation everywhere
+    for _ in range(200):                                       # 20 ms at dt=0.1, no spikes
+        mz.step(np.zeros(8, bool), None, 0.1)
+    fast, slow = mz.m[:3], mz.m[3:6]
+    assert np.all(fast < slow)                                 # short tau -> decayed further
+    assert abs(fast[0] - 10.0 * np.exp(-20.0 / 100.0)) < 0.05  # matches the analytic decay
+    assert abs(slow[0] - 10.0 * np.exp(-20.0 / 800.0)) < 0.05
+
+
+def test_eta_m_E_scales_adaptation_current_per_cell():
+    NE, N = 4, 6
+    eta = np.array([0.0, 0.25, 0.5, 1.0])
+    mz = MZSlowVars(N, 18.0, MZSlowVarsConfig(use_m=True, eta_m=0.5, tau_adp=250.0, eta_m_E=eta),
+                    NE=NE, core_mask_E=np.zeros(NE, bool))
+    mz.m[:NE] = 2.0
+    out = mz.apply_currents(np.zeros(N), np.zeros(N), None)
+    assert np.allclose(out[:NE], -eta * 2.0)                   # per-cell eta drives per-cell current
+
+
+def test_load_compensated_patch_holds_steady_state_K_fixed():
+    """THE H3.1 design invariant: eta_i = eta0*tau0/tau_i makes each cell's steady-state adaptation
+    current independent of its recovery time, so a patchy tau field varies TIMING, not LOAD."""
+    tau0, eta0 = 250.0, 0.4
+    tau = np.array([125.0, 250.0, 500.0])                      # the H3.1 range (4x spread)
+    eta = eta0 * tau0 / tau
+    assert np.allclose(eta * tau, eta0 * tau0)                 # steady-state m ~ r*tau -> eta*m ~ eta*tau
+    NE, N, dt = 3, 5, 0.1
+    mz = MZSlowVars(N, 18.0, MZSlowVarsConfig(use_m=True, eta_m=eta0, tau_adp=tau0,
+                                              tau_adp_E=tau, eta_m_E=eta),
+                    NE=NE, core_mask_E=np.zeros(NE, bool))
+    spk = np.zeros(N, bool); spk[:NE] = True
+    for i in range(30000):                                     # 3000 ms = 6x the longest tau -> equilibrated
+        mz.step(spk if i % 10 == 0 else np.zeros(N, bool), None, dt)
+    cur = eta * mz.m[:NE]                                      # steady-state adaptation current per cell
+    assert cur.max() / cur.min() < 1.02                        # equal load despite the 4x tau spread
+    assert np.allclose(cur, eta0 * tau0, rtol=0.02)            # and equal to the uniform-arm load
+
+
+def test_m_mean_field_removes_inter_cell_differences():
+    """Control arm: the population-mean m applied to every cell -> pure temporal modulation."""
+    NE, N = 6, 8
+    mz = _mk_m(NE=NE, m_mean_field=True)
+    spk = np.zeros(N, bool); spk[0] = spk[1] = True            # only 2 cells spike
+    mz.step(spk, None, 0.1)
+    assert np.allclose(mz.m[:NE], mz.m[0])                     # every E cell carries the same m
+    assert mz.m[0] > 0                                         # and it is the population mean (2/6)
+    assert abs(mz.m[0] - 2.0 / NE) < 1e-9
+    mz_off = _mk_m(NE=NE)                                      # without the control: cells differ
+    mz_off.step(spk, None, 0.1)
+    assert not np.allclose(mz_off.m[:NE], mz_off.m[0])
+
+
+def test_per_cell_adaptation_fields_validate():
+    import pytest
+    with pytest.raises(ValueError):
+        _mk_m(tau_adp_E=np.array([100.0, -1.0, 100.0, 100.0, 100.0, 100.0]))   # tau must be > 0
+    with pytest.raises(ValueError):
+        _mk_m(eta_m_E=np.array([0.1, -0.2, 0.1, 0.1, 0.1, 0.1]))               # eta must be >= 0
+    with pytest.raises(ValueError):
+        MZSlowVars(8, 18.0, MZSlowVarsConfig(use_m=False, tau_adp_E=np.ones(6)),
+                   NE=6, core_mask_E=np.zeros(6, bool))                        # requires use_m
+
+
+# ============== HEO3 H3.1: patch field + alternation metric ==============
+def test_patch_field_stripes_alternate_and_preserve_load():
+    pos = _grid(40)
+    src, snk = np.array([3.5, 8.5]), np.array([16.5, 8.5])
+    tau, eta, pid = H3.build_patch_field(pos, src, snk, patch_w=4.35, tau_fast=125.0,
+                                         tau_slow=500.0, tau0=250.0, eta0=0.4)
+    assert set(np.unique(tau)) == {125.0, 500.0}
+    assert np.allclose(eta * tau, 0.4 * 250.0)                 # load invariant holds cell by cell
+    # stripes run perpendicular to the axis: cells at the same axis coord share a patch id
+    proj = ((pos - src) @ (snk - src)) / np.linalg.norm(snk - src)
+    for lo in (0.0, 5.0, 9.0):
+        band = (proj >= lo) & (proj < lo + 4.0)                # inside one stripe width
+        if band.sum() > 5:
+            assert len(np.unique(pid[band])) == 1
+    assert 0 < pid.mean() < 1                                  # both patch types present
+
+
+def test_patch_shuffle_preserves_histogram_but_destroys_organization():
+    pos = _grid(40)
+    src, snk = np.array([3.5, 8.5]), np.array([16.5, 8.5])
+    kw = dict(patch_w=4.35, tau_fast=125.0, tau_slow=500.0, tau0=250.0, eta0=0.4)
+    tau, eta, _ = H3.build_patch_field(pos, src, snk, **kw)
+    tau_s, eta_s, _ = H3.build_patch_field(pos, src, snk, shuffle_seed=7, **kw)
+    assert np.allclose(np.sort(tau), np.sort(tau_s))            # identical histogram/mean/variance
+    assert abs(tau.mean() - tau_s.mean()) < 1e-12 and abs(tau.std() - tau_s.std()) < 1e-12
+    assert np.allclose(eta_s * tau_s, 0.4 * 250.0)              # load invariant survives the shuffle
+    # organization: neighbours share tau in the striped field, far less so once shuffled
+    proj = ((pos - src) @ (snk - src)) / np.linalg.norm(snk - src)
+    order = np.argsort(proj)
+    same = np.mean(tau[order][:-1] == tau[order][1:])
+    same_s = np.mean(tau_s[order][:-1] == tau_s[order][1:])
+    assert same > 0.9 and same_s < 0.7
+
+
+def test_region_alternation_is_negative_only_when_regions_take_turns():
+    def rows(a, b):
+        return [{"rate_core_source": x, "rate_core_sink": y} for x, y in zip(a, b)]
+    n = 40
+    t = np.arange(n)
+    alt_a = 50 + 40 * np.sin(2 * np.pi * t / 10)               # antiphase: they take turns
+    alt_b = 50 - 40 * np.sin(2 * np.pi * t / 10)
+    tog_a = 50 + 40 * np.sin(2 * np.pi * t / 10)               # in phase: common drive, no turns
+    tog_b = 50 + 40 * np.sin(2 * np.pi * t / 10)
+    assert H3.region_alternation(rows(alt_a, alt_b)) < -0.9
+    assert np.isnan(H3.region_alternation(rows(tog_a, tog_b)))  # shares constant -> undefined, not "alternating"
+    assert np.isnan(H3.region_alternation(rows(np.zeros(n), np.zeros(n))))   # silence -> undefined
