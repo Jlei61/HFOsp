@@ -110,6 +110,123 @@ def adjudicate_gate_Ib(regime, operator):
                 reasons=[f"{k} failed" for k, v in checks.items() if not v])
 
 
+# Fast-branch label families from the accepted workpoint-relative classifier
+# (src/topic4_mz_fcxr_dynamics.classify_run_workpoint). "low" is the interictal side: it includes
+# ELEVATED_EVENT_TRAIN, which is an event train that never sustains >=1 s above the interictal band.
+LOW_LABELS = ("INTERICTAL_WORKPOINT", "ELEVATED_EVENT_TRAIN")
+TRANSIENT_LABELS = ("METASTABLE_TRANSIENT",)
+
+
+def _is_high(label):
+    return str(label).startswith("FINITE_HIGH")
+
+
+def _is_low(label):
+    return str(label) in LOW_LABELS
+
+
+def adjudicate_gate_T(cells, *, field="shaped"):
+    """Gate T verdict from the frozen Z x P map + branch-conditioned slow flow (spec §5).
+
+    The question is NOT "does more pump lower the rate" -- that is trivially true. It is whether
+    there exists a SELECTIVE exit corridor: a pump level at which the sustained high branch is no
+    longer reachable WHILE the interictal low branch still exists at the same frozen coordinates,
+    with the high branch's own slow flow pointing toward that corridor.
+
+    Verdicts:
+      PASS             selective exit corridor + low branch preserved + flow toward the exit
+      TOPOLOGY_NO_GO   the pump removes low and high together, or never removes high
+      NO_HIGH_BRANCH   the impaired-Z corner has no sustained high branch to exit from
+      UNSAFE           deciding cells hit a conductance cap / non-finite rate / runaway early stop
+      UNRESOLVED       the grid does not contain the cells needed to decide
+    """
+    rows = [c for c in cells if c.get("field", "shaped") == field]
+    if not rows:
+        return dict(status="UNRESOLVED", reasons=[f"no cells for field {field!r}"])
+    by = {}
+    for c in rows:
+        by.setdefault((round(float(c["D"]), 6), round(float(c["rho_u"]), 6)), {})[c["ic"]] = c
+    Ds = sorted({k[0] for k in by})
+    rhos = sorted({k[1] for k in by})
+    if not Ds or not rhos:
+        return dict(status="UNRESOLVED", reasons=["empty grid"])
+    D_heal, D_imp = Ds[0], Ds[-1]
+
+    unsafe = [c for c in rows if c.get("numerical", {}).get("numerical_unsafe")
+              or c.get("numerical", {}).get("runaway_early_stop_ms") is not None]
+    if unsafe:
+        return dict(status="UNSAFE", n_unsafe=len(unsafe),
+                    reasons=["frozen cells hit a cap / non-finite rate / runaway early stop; the "
+                             "topology would be a numerical artifact"],
+                    unsafe_cells=[dict(D=c["D"], rho_u=c["rho_u"], ic=c["ic"]) for c in unsafe[:8]])
+
+    missing = [k for k in by if not {"low", "high"} <= set(by[k])]
+    if missing:
+        return dict(status="UNRESOLVED",
+                    reasons=[f"{len(missing)} grid cells lack both low and high initial conditions"])
+
+    healthy_low = all(_is_low(by[(D_heal, r)]["low"]["label"]) for r in rhos)
+    imp = [(r, by[(D_imp, r)]) for r in rhos]
+    high_at_min_P = _is_high(imp[0][1]["high"]["label"])
+    if not high_at_min_P:
+        return dict(status="NO_HIGH_BRANCH", healthy_low_preserved=bool(healthy_low),
+                    reasons=[f"at D={D_imp} and the lowest pump load the high initial condition "
+                             f"settles to {imp[0][1]['high']['label']}, not a sustained high branch"],
+                    impaired_labels={str(r): c["high"]["label"] for r, c in imp})
+
+    exit_row = next((c for r, c in imp[1:] if not _is_high(c["high"]["label"])), None)
+    if exit_row is None:
+        return dict(status="TOPOLOGY_NO_GO", healthy_low_preserved=bool(healthy_low),
+                    reasons=["the sustained high branch survives every pump level on the grid: no "
+                             "exit corridor"],
+                    impaired_labels={str(r): c["high"]["label"] for r, c in imp})
+    low_survives = _is_low(exit_row["low"]["label"])
+    if not low_survives:
+        return dict(status="TOPOLOGY_NO_GO", healthy_low_preserved=bool(healthy_low),
+                    exit=dict(D=exit_row["high"]["D"], rho_u=exit_row["high"]["rho_u"],
+                              P=exit_row["high"]["P"], high_label=exit_row["high"]["label"],
+                              low_label=exit_row["low"]["label"]),
+                    reasons=["at the pump level that removes the high branch the low branch is also "
+                             "gone: the pump suppresses both, it does not select"])
+
+    flows = [c["high"]["slow_flow"]["dP_dt"] for r, c in imp if _is_high(c["high"]["label"])]
+    flow_to_exit = bool(flows) and all(f > 0 for f in flows)
+    status = "PASS" if (healthy_low and flow_to_exit) else "UNRESOLVED"
+    reasons = []
+    if not healthy_low:
+        reasons.append("the healthy-Z low branch is not preserved across the pump axis")
+    if not flow_to_exit:
+        reasons.append("the high branch's own load flow does not point toward the exit corridor "
+                       "(dP/dt <= 0 on at least one high cell)")
+    if status == "PASS":
+        reasons = ["a selective exit corridor exists: the sustained high branch is removed while the "
+                   "interictal low branch survives at the same frozen coordinates",
+                   "the high branch accumulates load, so its own slow flow moves it into that corridor",
+                   "the healthy-Z low branch is preserved at every pump level"]
+    return dict(status=status, healthy_low_preserved=bool(healthy_low),
+                high_branch_dP_dt=flows, flow_toward_exit=flow_to_exit,
+                exit=dict(D=exit_row["high"]["D"], rho_u=exit_row["high"]["rho_u"],
+                          P=exit_row["high"]["P"], high_label=exit_row["high"]["label"],
+                          low_label=exit_row["low"]["label"]),
+                impaired_labels={str(r): c["high"]["label"] for r, c in imp}, reasons=reasons)
+
+
+def compare_field_controls(cells, kinds=("shaped", "uniform", "shuffle")):
+    """Spec §T2/§S7: an activity-shaped pump field must be distinguishable from a mean-EXCESS-matched
+    uniform field and a value-matched spatial shuffle. Same abscissa, different spatial arrangement --
+    if every arm exits at the same pump level, the spatial structure is not load-bearing."""
+    out = {}
+    for k in kinds:
+        v = adjudicate_gate_T(cells, field=k)
+        out[k] = dict(status=v["status"], exit_P=(v.get("exit") or {}).get("P"))
+    present = [k for k in kinds if any(c.get("field") == k for c in cells)]
+    exits = [out[k]["exit_P"] for k in present if out[k].get("exit_P") is not None]
+    return dict(per_field=out, fields_present=present,
+                distinguishable=bool(len(exits) >= 2 and max(exits) - min(exits) > 1e-9),
+                note="fewer than two arms with an exit corridor -> not comparable"
+                if len(exits) < 2 else "")
+
+
 def gate_conclusion_language(gates):
     """The single sentence a given set of gate verdicts entitles us to (spec §14). Engineering-green,
     one pretty trajectory, two agreeing seeds, a falling rate or a rendered figure never upgrade it."""

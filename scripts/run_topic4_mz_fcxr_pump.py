@@ -549,7 +549,8 @@ def cmd_equivalence(a):
         try:
             S = _substrate()
             contacts, names = _montage(S)
-            arms = {}
+            bar = float(calib["event_bar"])
+            per_arm, keep = {}, {}
             for label, cfg in (("pump_off", _pump_off_cfg()),
                                ("pump_on", _pump_cfg(sensor_only=False, a_load=chosen["a_load"],
                                                      tau_ms=chosen["tau_N"], Imax=imax,
@@ -560,28 +561,29 @@ def cmd_equivalence(a):
                 res, slow, obs = _run(S, cfg, T, noise_seed=NOISE_HELDOUT)
                 wall = time.time() - t1
                 FCXR._resource_log(run_dir, f"p0_equivalence_{label}_done", dict(wall_s=round(wall, 1)))
-                arms[label] = dict(res=res, slow=slow, traces=obs.stack(), wall_s=wall)
+                traces = obs.stack()
+                blocks = _blocks(len(res["rate_E"]), DT)
+                # reduce to metrics INSIDE the loop and drop the raster: holding two full
+                # n_steps x NE rasters at once would peak ~14 GB for no reason.
+                bm = [_block_metrics(res, traces, S, lo, hi, DT, bar) for lo, hi in blocks]
+                per_arm[label] = dict(block_metrics=bm, wall_s=round(wall, 1),
+                                      pooled={k: float(np.nanmean([b[k] for b in bm])) for k in bm[0]})
+                keep[label] = dict(rate=np.asarray(res["rate_E"], np.float32), traces=traces,
+                                   audit=PUMP.component_audit(traces, DT), blocks=blocks)
+                if label == "pump_on":
+                    keep[label]["u_mean"] = np.asarray(slow.trace_u_mean, float)
+                    keep[label]["excess_mean"] = np.asarray(slow.trace_pump_excess_mean, float)
                 print(f"[p0-equivalence] {label} wall={wall:.1f}s "
                       f"mean_rate={float(np.mean(res['rate_E'])):.3f}Hz", flush=True)
+                del res, slow, obs, traces
 
-            n_steps = min(len(arms["pump_off"]["res"]["rate_E"]), len(arms["pump_on"]["res"]["rate_E"]))
-            blocks = _blocks(n_steps, DT)
-            bar = float(calib["event_bar"])
-            per_arm = {}
-            for label, pack_a in arms.items():
-                bm = [_block_metrics(pack_a["res"], pack_a["traces"], S, lo, hi, DT, bar)
-                      for lo, hi in blocks]
-                per_arm[label] = dict(block_metrics=bm,
-                                      pooled={k: float(np.nanmean([b[k] for b in bm]))
-                                              for k in bm[0]})
+            blocks = keep["pump_off"]["blocks"]
             margins = var["margins"]
             eq = PUMP.evaluate_baseline_equivalence(per_arm["pump_off"]["pooled"],
                                                     per_arm["pump_on"]["pooled"], margins)
-            on_slow = arms["pump_on"]["slow"]
-            u_tr = np.asarray(on_slow.trace_u_mean, float)
-            ex_tr = np.asarray(on_slow.trace_pump_excess_mean, float)
-            audit_on = PUMP.component_audit(arms["pump_on"]["traces"], DT)
-            audit_off = PUMP.component_audit(arms["pump_off"]["traces"], DT)
+            u_tr = keep["pump_on"]["u_mean"]
+            ex_tr = keep["pump_on"]["excess_mean"]
+            audit_on, audit_off = keep["pump_on"]["audit"], keep["pump_off"]["audit"]
             FCXR._write_json(os.path.join(run_dir, "pump_baseline_equivalence.json"), dict(
                 provenance=_provenance(dict(stage="p0-equivalence", noise_seed=NOISE_HELDOUT,
                                             t_ms=T, Imax=imax)),
@@ -596,15 +598,14 @@ def cmd_equivalence(a):
                 readout_audit=dict(pump_on=audit_on, pump_off=audit_off),
                 one_shot="margins were locked by p0-baseline and are NOT refitted here"))
             FCXR._write_npz(os.path.join(run_dir, "heldout_traces_noise202.npz"),
-                            rate_off=np.asarray(arms["pump_off"]["res"]["rate_E"], np.float32),
-                            rate_on=np.asarray(arms["pump_on"]["res"]["rate_E"], np.float32),
+                            rate_off=keep["pump_off"]["rate"], rate_on=keep["pump_on"]["rate"],
                             u_mean_on=u_tr.astype(np.float32),
                             pump_excess_mean_on=ex_tr.astype(np.float32),
                             contacts=contacts, names=np.array(names, object), dt=DT,
                             **{f"on_seeg_{k}": v.astype(np.float32)
-                               for k, v in arms["pump_on"]["traces"].items()},
+                               for k, v in keep["pump_on"]["traces"].items()},
                             **{f"off_seeg_{k}": v.astype(np.float32)
-                               for k, v in arms["pump_off"]["traces"].items()})
+                               for k, v in keep["pump_off"]["traces"].items()})
             _sentinel(run_dir, "DONE_p0_equivalence.json", dict(
                 stage="p0-equivalence", all_within=eq["all_within"], n_outside=eq["n_outside"],
                 finished=datetime.now(timezone.utc).isoformat()))
