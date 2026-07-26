@@ -55,7 +55,8 @@ def fig_instrument():
     if calib is None:
         print("[fig1] no calibration artifact - skipped")
         return
-    fig, ax = plt.subplots(1, 3, figsize=(11.5, 3.2))
+    fig, ax = plt.subplots(1, 3, figsize=(13.4, 3.4))
+    fig.subplots_adjust(wspace=0.52)
 
     # (a) which load candidates make an ordinary event visibly move the load without pinning it
     rows = calib["candidate_grid"]
@@ -71,7 +72,8 @@ def fig_instrument():
     ax[0].axhline(3.0, color=C_GREY, ls="--", lw=0.9)
     ax[0].axvline(0.90, color=C_GREY, ls="--", lw=0.9)
     ax[0].text(0.02, 3.4, "visibility floor (3x)", color=C_GREY, fontsize=6.5)
-    ax[0].text(0.905, ax[0].get_ylim()[1] * 0.55, "pump\npinned", color=C_GREY, fontsize=6.5)
+    ax[0].text(0.885, ax[0].get_ylim()[1] * 0.86, "pump\npinned", color=C_GREY, fontsize=6.5,
+               ha="right", va="top")
     ch = calib.get("chosen_candidate")
     if ch:
         ax[0].scatter([ch["phi_q99"]], [ch["visibility_ratio"]], s=190, facecolor="none",
@@ -82,7 +84,7 @@ def fig_instrument():
     ax[0].set_xlabel("99th pct of per-cell pump activation")
     ax[0].set_ylabel("event rise / matched quiet change")
     ax[0].set_title("(a) load candidates: visible, not pinned", fontsize=8.5, loc="left")
-    ax[0].legend(frameon=False, fontsize=6.5, loc="lower right")
+    ax[0].legend(frameon=False, fontsize=6.5, loc="center right", handletextpad=0.3)
     ax[0].set_xlim(0, 1.05)
 
     # (b) held-out equivalence:每 metric 的 (on - off) 相对其预锁 margin
