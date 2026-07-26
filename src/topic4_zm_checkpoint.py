@@ -186,10 +186,10 @@ def save_state_npz(state, manifest, path):
                keys=sorted(k for k in state if k != "rng_state"))
     payload["__manifest__"] = np.frombuffer(
         json.dumps(man, sort_keys=True, default=str).encode(), dtype=np.uint8)
-    tmp = f"{path}.tmp"
     os.makedirs(os.path.dirname(os.path.abspath(path)), exist_ok=True)
-    np.savez(tmp, **payload)
-    os.replace(tmp + ".npz" if not tmp.endswith(".npz") else tmp, path)
+    tmp = f"{path}.tmp.npz"
+    np.savez_compressed(tmp, **payload)   # lossless -> exactness preserved; delay rings are sparse
+    os.replace(tmp, path)
     return man
 
 
