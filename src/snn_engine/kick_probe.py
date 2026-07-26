@@ -96,7 +96,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
-                  feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None):
+                  feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None,
+                  zm_ckpt=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
@@ -251,11 +252,42 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                 if xdep_mask_mean is not None:
                     xdep_mask_mean[tt] = 1.0
 
+    # ---- Z/M branch-decision checkpoint controller (spec 2026-07-26 rev3.1 §3.1; OFF by default).
+    # zm_ckpt=None -> `_ck_*` are all False/None -> every branch below is skipped -> no new RNG draw,
+    # allocation or float op -> byte-parity with the pre-edit engine (tests/test_topic4_zm_checkpoint
+    # _hook.py compares against tests/fixtures/topic4_zm_preedit_parity.npz). State packing lives in
+    # src/topic4_zm_checkpoint.py; the timestep mathematics below stay single-source. ----
+    t_start = 0
+    _ck_mean = _ck_dump = False
+    _ck_snap = None
+    if zm_ckpt is not None:
+        _st0 = zm_ckpt.begin(nsteps=nsteps, rng=rng, slow=slow)
+        if _st0 is not None:
+            V[:] = _st0["V"]; ref[:] = _st0["ref"]
+            s_E[:] = _st0["s_E"]; I_E[:] = _st0["I_E"]
+            s_I[:] = _st0["s_I"]; I_I[:] = _st0["I_I"]
+            ring_sE[:] = _st0["ring_sE"]; ring_sI[:] = _st0["ring_sI"]
+            xi = float(_st0["xi"]); t_start = int(_st0["t"])
+            _es_ema = float(_st0["_es_ema"]); _es_run = int(_st0["_es_run"])
+            if track_rec:
+                s_E_rec[:] = _st0["s_E_rec"]; I_E_rec[:] = _st0["I_E_rec"]
+            if ee_std_on:
+                x_dep[:] = _st0["x_dep"]
+            if fb_dyn:
+                r_ema = float(_st0["r_ema"])
+        _ck_mean = zm_ckpt.ext_mean_only
+        _ck_dump = zm_ckpt.dump_ext
+        _ck_snap = zm_ckpt.snapshot_steps
+        if _ck_mean:
+            xi = 0.0                      # mean_input_only: drop the OU fluctuation, keep the mean
+
     t0 = time.time()
     for t in range(nsteps):
-        tm = t * dt
+        tg = t + t_start                  # ABSOLUTE step (== t when not resuming -> parity)
+        tm = tg * dt
         # ----- external homogeneous Poisson rate (Eq 6) -----
-        xi = ou_a * xi + ou_b * rng.standard_normal()
+        if not _ck_mean:
+            xi = ou_a * xi + ou_b * rng.standard_normal()
         nu_now = nu_signal_fn(tm) + xi
         if nu_now < 0.0:
             nu_now = 0.0
@@ -263,7 +295,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # ----- synaptic gating s: decay, recurrent arrivals, external -----
         s_E *= decay_sE
         s_I *= decay_sI
-        slot = t % M
+        slot = tg % M
         if track_rec:
             # HARD CONSTRAINT: read ring_sE[slot] HERE, BEFORE the next line clears it (ring_sE[slot]=0.0).
             # Moving this read after the clear makes I_E_rec read 0 -> divisive term silently no-ops.
@@ -279,7 +311,12 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             nu_vec[kick_mask] += KICK_BOOST          # extra external rate, units 1/ms
         if t_kick2 is not None and t_kick2 <= tm < t_kick2 + DUR_KICK:
             nu_vec[kick_mask] += KICK_BOOST2         # M4-2 post-offset retrigger probe (same source core; None -> parity)
-        ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)
+        if _ck_mean:
+            ext = nu_vec * dt                        # deterministic external MEAN (no Poisson draw)
+        else:
+            ext = rng.poisson(nu_vec * dt, size=N).astype(np.float64)
+        if _ck_dump:                                 # paired-noise audit: the drive actually delivered
+            zm_ckpt.ext_nu[t] = nu_now; zm_ckpt.ext_sum[t] = ext.sum()
         s_E += ext * ext_incr
         # ==================================================================================
 
@@ -397,16 +434,16 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                         # E->I edges untouched. Then deplete the firers (vesicle use): x_j(t+)=x_j*(1-U).
                         x_per_edge = np.repeat(x_dep[spE], cnt)
                         w_eff = ee_std_apply(a_w[idx], a_dst[idx], x_per_edge, NE)
-                        np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), w_eff)
+                        np.add.at(ring_sE, ((tg + a_dly[idx]) % M, a_dst[idx]), w_eff)
                         x_dep[spE] *= (1.0 - ee_std_u)
                     else:
-                        np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), a_w[idx])
+                        np.add.at(ring_sE, ((tg + a_dly[idx]) % M, a_dst[idx]), a_w[idx])
             if spI.size:
                 st = g_indptr[spI]; cnt = g_indptr[spI + 1] - st; tot = int(cnt.sum())
                 if tot:
                     idx = (np.arange(tot) - np.repeat(np.cumsum(cnt) - cnt, cnt)
                            + np.repeat(st, cnt))
-                    np.add.at(ring_sI, ((t + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
+                    np.add.at(ring_sI, ((tg + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
 
         if verbose and (t % max(1, nsteps // 5) == 0):
             print(f"  sim {t}/{nsteps}  ({tm:.0f} ms)  "
@@ -415,6 +452,29 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
         if dump_ee_std_trace:                    # normal frame: record post-depletion (:378), not post-recovery (:259)
             _rec_xdep(t)
+
+        if _ck_snap is not None and (tg + 1) in _ck_snap:   # END-of-step state = what step tg+1 needs
+            zm_ckpt.take(tg + 1, store=True, rng=rng, slow=slow, V=V, ref=ref, s_E=s_E, I_E=I_E,
+                         s_I=s_I, I_I=I_I, ring_sE=ring_sE, ring_sI=ring_sI, xi=xi,
+                         _es_ema=_es_ema, _es_run=_es_run,
+                         s_E_rec=(s_E_rec if track_rec else None),
+                         I_E_rec=(I_E_rec if track_rec else None),
+                         x_dep=(x_dep if ee_std_on else None),
+                         r_ema=(r_ema if fb_dyn else None))
+
+    if zm_ckpt is not None and zm_ckpt.return_final_state:
+        # a runaway early-stop breaks BEFORE the delay scatter of the break frame, so that state is
+        # mid-step and must never be forked from -> fail closed rather than hand back a bad snapshot
+        if _stop_t < nsteps:
+            zm_ckpt.final_truncated = True
+        else:
+            zm_ckpt.take(t_start + nsteps, store=False, rng=rng, slow=slow, V=V, ref=ref, s_E=s_E,
+                         I_E=I_E, s_I=s_I, I_I=I_I, ring_sE=ring_sE, ring_sI=ring_sI, xi=xi,
+                         _es_ema=_es_ema, _es_run=_es_run,
+                         s_E_rec=(s_E_rec if track_rec else None),
+                         I_E_rec=(I_E_rec if track_rec else None),
+                         x_dep=(x_dep if ee_std_on else None),
+                         r_ema=(r_ema if fb_dyn else None))
 
     if _stop_t < nsteps:                                             # runaway early-stop: truncate per-step arrays
         nsteps = _stop_t
@@ -442,6 +502,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         lfp_trace=lfp_trace,                                    # (nsteps, n_sites) or None
         lfp_sites=(None if lfp_recorder is None else lfp_recorder.sites),
     )
+    if zm_ckpt is not None:
+        res["t_start"] = t_start
+        if zm_ckpt.dump_ext:
+            res["zm_ext_nu"] = zm_ckpt.ext_nu[:nsteps]
+            res["zm_ext_sum"] = zm_ckpt.ext_sum[:nsteps]
     if dump_i_spikes:
         res["I_spk_bool"] = I_spk_bool
     if dump_drive:
