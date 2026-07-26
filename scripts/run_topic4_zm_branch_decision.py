@@ -100,6 +100,11 @@ def load_lock(seed):
 
 def build_context(seed, *, smoke=False):
     """Substrate + slow config + virtual-SEEG montage, all pinned to the Phase-0 lock."""
+    # Capture this ONCE.  A multi-hour continuation may span a later commit in
+    # the same worktree; resolving HEAD when the row is finally written would
+    # falsely attribute already-imported code to that later commit.
+    runtime_git_sha = _git_sha()
+    runtime_started_at = time.strftime("%Y-%m-%dT%H:%M:%S")
     cfg_locked, cfg_sha = load_lock(seed)
     t0 = time.time()
     S = PP.build_substrate(seed=int(seed))
@@ -113,7 +118,8 @@ def build_context(seed, *, smoke=False):
     print(f"[ctx] seed={seed} built in {time.time()-t0:.0f}s N={S['N']} contacts={len(mont.names)} "
           f"config_sha={cfg_sha[:16]} rss={_rss_gb()}GB", flush=True)
     return dict(S=S, rec=rec, core=core, axis=along, contacts=list(mont.names),
-                cfg_locked=cfg_locked, cfg_sha=cfg_sha, smoke=smoke)
+                cfg_locked=cfg_locked, cfg_sha=cfg_sha, smoke=smoke,
+                runtime_git_sha=runtime_git_sha, runtime_started_at=runtime_started_at)
 
 
 def make_slow(ctx, freeze_arm=None):
@@ -163,7 +169,9 @@ def slow_coords(slow, n_bins, n_steps):
 
 
 def provenance(ctx, **extra):
-    p = dict(git_sha=_git_sha(), config_sha=ctx["cfg_sha"], seed=int(ctx["S"]["seed"]), dt=DT,
+    p = dict(git_sha=ctx["runtime_git_sha"],
+             runtime_started_at=ctx["runtime_started_at"],
+             config_sha=ctx["cfg_sha"], seed=int(ctx["S"]["seed"]), dt=DT,
              engine_sha256=ctx["cfg_locked"]["engine_sha256"],
              metrics_version=MC.METRICS_VERSION, state_schema=CK.STATE_SCHEMA,
              lockpoint=ctx["cfg_locked"]["lockpoint"], arm_kwargs=ARM_KWARGS,
@@ -302,7 +310,8 @@ def phase_anchor(ctx, T_ms):
             config_sha=ctx["cfg_sha"], engine_sha=ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"],
             dt=DT, seed=int(seed), t_step=int(t_star), t_ms=float(t_star * DT),
             bin_name=st["bin_name"], fast_phase=st["fast_phase"], springboard_step=c,
-            slow_coord=st.get("slow_coord"), git_sha=_git_sha()), path)
+            slow_coord=st.get("slow_coord"), git_sha=ctx["runtime_git_sha"],
+            runtime_started_at=ctx["runtime_started_at"]), path)
         captured.append(dict(bin_name=st["bin_name"], fast_phase=st["fast_phase"], t_step=int(t_star),
                              t_ms=float(t_star * DT), path=os.path.relpath(path, _ROOT),
                              state_hash=smanifest["state_hash"], springboard_step=c,
@@ -524,7 +533,8 @@ def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_RE
                                  is_control_arm=arm in CONTROL_ARMS,
                                  freeze_policy=FS.FreezePolicy.for_arm(arm).as_dict(),
                                  state_hash=st["state_hash"], bank_sha=bank["bank_sha"],
-                                 config_sha=ctx["cfg_sha"], git_sha=_git_sha(),
+                                 config_sha=ctx["cfg_sha"], git_sha=ctx["runtime_git_sha"],
+                                 runtime_started_at=ctx["runtime_started_at"],
                                  metrics_version=MC.METRICS_VERSION, T_cont_ms=float(T_ms),
                                  peak_rss_gb=_rss_gb(), mem_available_gb=_mem_avail_gb(), **summ)
                 write_json_atomic(man_path, dict(seed=int(seed), anchor=os.path.relpath(anchor_path, _ROOT),
@@ -645,7 +655,8 @@ def phase_neighbourhood(ctx, base_state="bounded_mid__peak", arms=NB_ARMS,
                 rows[key] = dict(key=key, seed=int(seed), family=pr["family"], label=pr["label"],
                                  base_state=base_state, arm=arm, replicate=rep,
                                  coarse_q=coarse_q, axis_projection=axis_proj,
-                                 config_sha=ctx["cfg_sha"], git_sha=_git_sha(),
+                                 config_sha=ctx["cfg_sha"], git_sha=ctx["runtime_git_sha"],
+                                 runtime_started_at=ctx["runtime_started_at"],
                                  bank_sha=bank["bank_sha"], T_cont_ms=float(T_ms),
                                  neighbourhood_version=NBH.NEIGHBOURHOOD_VERSION,
                                  peak_rss_gb=_rss_gb(), **summ)
