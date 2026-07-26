@@ -707,13 +707,34 @@ T_KICK_MS = 120.0
 SHUFFLE_SEED = 7001
 
 
+ANCHOR_CONTRACT_REL = os.path.join("results", "topic4_sef_hfo", "mz_full_conductance_spatial_relay",
+                                   "high_energy_oscillatory_branch",
+                                   f"baseline_spectral_contract_seed{CONN_SEED}.json")
+
+
+def _anchor_contract():
+    """The accepted HEO1 slow-off baseline contract (u_c and the interictal rolling-rate band).
+
+    It was produced on the `codex/topic4-mz-fcxr-heo1` branch this sprint forked from, so its
+    artifact lives in THAT worktree; this worktree's results/ and the main checkout do not carry it.
+    Search the three roots explicitly and fail loudly rather than silently inventing a value.
+    """
+    main = os.path.dirname(os.path.dirname(ROOT))
+    for r in (ROOT, os.path.join(main, ".worktrees", "topic4-mz-fcxr-heo1"), main):
+        src = os.path.join(r, ANCHOR_CONTRACT_REL)
+        if os.path.exists(src):
+            return json.load(open(src))
+    raise SystemExit("HEO1 baseline contract not found under " + ANCHOR_CONTRACT_REL)
+
+
 def _anchor_uc():
-    """u_c for the locked gate quantile, read from the accepted HEO1 F0 baseline contract."""
-    src = os.path.join(FCXR.OUT_ROOT, "high_energy_oscillatory_branch",
-                       f"baseline_spectral_contract_seed{CONN_SEED}.json")
-    if not os.path.exists(src):     # worktree results/ may be sparse; fall back to the main checkout
-        src = src.replace(ROOT, os.path.dirname(os.path.dirname(ROOT)))
-    return float(json.load(open(src))["u_c"][str(ANCHOR_GQ)])
+    """u_c for the locked gate quantile, read from the accepted HEO1 slow-off baseline contract.
+
+    That contract was produced on the `codex/topic4-mz-fcxr-heo1` branch this sprint forked from, so
+    its artifact lives in THAT worktree; this worktree's results/ and the main checkout do not carry
+    it. Search the three roots explicitly and fail loudly rather than silently inventing a u_c.
+    """
+    return float(_anchor_contract()["u_c"][str(ANCHOR_GQ)])
 
 
 def _anchor_cfg(D, *, pump=None):
@@ -904,9 +925,7 @@ def cmd_p1_map(a):
         try:
             S = _substrate()
             _load_pi(S)
-            base = json.load(open(os.path.join(FCXR.OUT_ROOT, "high_energy_oscillatory_branch",
-                                               f"baseline_spectral_contract_seed{CONN_SEED}.json")))
-            _map_cell.roll_hi = float(base["rate_roll_hi"])
+            _map_cell.roll_hi = float(_anchor_contract()["rate_roll_hi"])
             i_th = MZSlowVarsConfig(**_pump_off_cfg()).I_th_EI
             tasks = [(S, D, r, fk, ic, chosen, p0_E, u0, u_high, Imax, i_th)
                      for fk in fields for D in D_GRID for r in RHO_U_GRID for ic in ("low", "high")]
