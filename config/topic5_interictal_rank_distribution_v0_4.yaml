@@ -1,0 +1,90 @@
+contract:
+  name: topic5_interictal_rank_distribution_cross_state_v0_4
+  version: "0.4"
+  source_spec: docs/superpowers/specs/2026-07-25-topic5-interictal-rank-distribution-cross-state-readout-design.md
+  masked_rank_required: true
+  ictal_target_read_before_stage_b_forbidden: true
+  inter_event_interval_forbidden: true
+  ab_label_forbidden: true
+
+cohort:
+  audit: results/topic4_attractor_masked/step0_audit.csv
+  eligible_column: eligible_for_main
+  expected_subjects: 34
+  expected_epilepsiae: 18
+  expected_yuquan: 16
+  candidate_prefix_attrition: results/topic5_state_conditioned_predictor/fit2_prefix_scaffold/prefix_field_attrition.csv
+  candidate_subjects_expected: 13
+  datasets: [epilepsiae, yuquan]
+  seizure_guard_post_minutes: 120
+  heldout_calibration_fraction: 0.80
+  min_participants: 3
+  min_recruitment_sets: 2
+  min_train_events: 100
+  min_eval_events: 25
+
+event_encoding:
+  tie_tolerance_seconds: 0.0
+  near_tie_audit_ms: [1.0, 2.0, 5.0, 10.0]
+  rank_normalization: participating_contacts_only_zero_to_one
+  nonparticipant_value: .nan
+  rank_distribution_bins: 10
+
+contact_features:
+  use_prefix_participation_support: true
+  use_centered_geometry: true
+  use_within_shaft_position: true
+  use_channel_or_patient_string_id: false
+  allow_missing_geometry: true
+  allow_epilepsiae_voxel_fallback: false
+
+stage_a:
+  architecture: contact_query_sequence_gru
+  hidden_sizes: [32, 64]
+  contact_embedding_dim: 32
+  contact_encoder_hidden: 32
+  local_offset_dim: 8
+  learning_rate: 0.001
+  local_learning_rate: 0.002
+  weight_decay: 0.0001
+  batch_events: 128
+  max_shared_cycles: 6
+  max_calibration_cycles: 8
+  pilot_shared_steps: 96
+  pilot_calibration_steps: 64
+  screen_shared_steps: 256
+  screen_calibration_steps: 128
+  early_stopping_patience: 3
+  gradient_clip: 1.0
+  seeds: [20260725, 20260726, 20260727]
+  patient_bootstrap_draws: 5000
+  min_rollout_groups: 2
+  pilot_rollouts: 1000
+  formal_rollouts: 5000
+
+hyperparameter_tuning:
+  inner_validation_fraction_of_first80: 0.10
+  shared_steps: 512
+  batch_events: 128
+  seed: 20260725
+  hidden_sizes: [32, 64]
+  learning_rates: [0.0005, 0.001]
+  local_offset_dims: [4, 8]
+  selection_rule: patient_level_one_standard_error_then_fewest_parameters
+
+resources:
+  conda_env: cuda_env
+  device: cuda
+  gpu_memory_fraction_per_process: 0.24
+  cpu_threads_per_process: 8
+  max_parallel_gpu_processes: 3
+  dataloader_workers_per_process: 2
+  min_mem_available_gb: 32
+  max_swap_delta_gb: 1.0
+
+outputs:
+  root: results/topic5_interictal_rank_distribution
+  dataset: results/topic5_interictal_rank_distribution/dataset_v0_4
+  runs: results/topic5_interictal_rank_distribution/runs
+  stage_a: results/topic5_interictal_rank_distribution/stage_a
+  cross_state_readout: results/topic5_interictal_rank_distribution/cross_state_readout
