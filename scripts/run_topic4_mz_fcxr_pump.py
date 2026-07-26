@@ -551,10 +551,28 @@ def cmd_equivalence(a):
             contacts, names = _montage(S)
             bar = float(calib["event_bar"])
             per_arm, keep = {}, {}
-            for label, cfg in (("pump_off", _pump_off_cfg()),
-                               ("pump_on", _pump_cfg(sensor_only=False, a_load=chosen["a_load"],
-                                                     tau_ms=chosen["tau_N"], Imax=imax,
-                                                     p0_E=p0_E, record_calibration=True))):
+            arms = [("pump_off", _pump_off_cfg()),
+                    ("pump_on", _pump_cfg(sensor_only=False, a_load=chosen["a_load"],
+                                          tau_ms=chosen["tau_N"], Imax=imax,
+                                          p0_E=p0_E, record_calibration=True))]
+            if a.reuse_off:
+                # The pump-off arm carries no pump term at all, so it is byte-identical for every
+                # Imax on the same noise seed. Reuse it rather than paying 16 min to reproduce it.
+                prev = json.load(open(os.path.join(run_dir, a.reuse_off)))
+                assert prev["provenance"]["noise_seed"] == NOISE_HELDOUT, "reuse: noise seed mismatch"
+                per_arm["pump_off"] = prev["per_arm"]["pump_off"]
+                prev_npz = os.path.join(run_dir, a.reuse_off.replace("pump_baseline_equivalence", "heldout_traces_noise202").replace(".json", ".npz"))
+                pz = np.load(prev_npz, allow_pickle=True) if os.path.exists(prev_npz) else {}
+                keep["pump_off"] = dict(blocks=prev["blocks"], reused_from=a.reuse_off,
+                                        audit=prev["readout_audit"]["pump_off"],
+                                        rate=np.asarray(pz["rate_off"], np.float32) if "rate_off" in pz
+                                        else np.zeros(0, np.float32),
+                                        traces={k[len("off_seeg_"):]: np.asarray(pz[k], float)
+                                                for k in getattr(pz, "files", []) if k.startswith("off_seeg_")}
+                                        or None)
+                arms = [arms[1]]
+                print(f"[p0-equivalence] reusing pump_off arm from {a.reuse_off}", flush=True)
+            for label, cfg in arms:
                 if label == "pump_on":
                     cfg["pump_u_init_E"] = u_init
                 t1 = time.time()
@@ -578,17 +596,18 @@ def cmd_equivalence(a):
                 del res, slow, obs, traces
 
             blocks = keep["pump_off"]["blocks"]
+            budget = PUMP.baseline_neutrality_budget(
+                np.asarray(np.load(os.path.join(run_dir, "p0_E.npz"))["block_phi_mean"], float), p0_E)
             margins = var["margins"]
             eq = PUMP.evaluate_baseline_equivalence(per_arm["pump_off"]["pooled"],
                                                     per_arm["pump_on"]["pooled"], margins)
             u_tr = keep["pump_on"]["u_mean"]
             ex_tr = keep["pump_on"]["excess_mean"]
             audit_on, audit_off = keep["pump_on"]["audit"], keep["pump_off"]["audit"]
-            FCXR._write_json(os.path.join(run_dir, "pump_baseline_equivalence.json"), dict(
+            FCXR._write_json(os.path.join(run_dir, a.equiv_out), dict(
                 provenance=_provenance(dict(stage="p0-equivalence", noise_seed=NOISE_HELDOUT,
                                             t_ms=T, Imax=imax)),
-                chosen_candidate=chosen, Imax=imax, imax_anchor="mean |inhibitory| SEEG component "
-                "of the calibration trajectory", blocks=blocks,
+                chosen_candidate=chosen, Imax=imax, imax_anchor=budget, blocks=blocks,
                 per_arm={k: v for k, v in per_arm.items()}, equivalence=eq,
                 held_out_load=dict(u_mean_start=float(u_tr[0]), u_mean_end=float(u_tr[-1]),
                                    u_drift_rel=float(abs(u_tr[-1] - u_tr[0]) / max(u_tr[0], 1e-12)),
@@ -597,15 +616,17 @@ def cmd_equivalence(a):
                                    excess_max=float(ex_tr.max()) if ex_tr.size else None),
                 readout_audit=dict(pump_on=audit_on, pump_off=audit_off),
                 one_shot="margins were locked by p0-baseline and are NOT refitted here"))
+            off_tr = keep["pump_off"].get("traces")
             FCXR._write_npz(os.path.join(run_dir, "heldout_traces_noise202.npz"),
-                            rate_off=keep["pump_off"]["rate"], rate_on=keep["pump_on"]["rate"],
+                            rate_off=keep["pump_off"].get("rate", np.zeros(0, np.float32)),
+                            rate_on=keep["pump_on"]["rate"],
                             u_mean_on=u_tr.astype(np.float32),
                             pump_excess_mean_on=ex_tr.astype(np.float32),
                             contacts=contacts, names=np.array(names, object), dt=DT,
                             **{f"on_seeg_{k}": v.astype(np.float32)
                                for k, v in keep["pump_on"]["traces"].items()},
-                            **{f"off_seeg_{k}": v.astype(np.float32)
-                               for k, v in keep["pump_off"]["traces"].items()})
+                            **({f"off_seeg_{k}": v.astype(np.float32) for k, v in off_tr.items()}
+                               if off_tr is not None else {}))
             _sentinel(run_dir, "DONE_p0_equivalence.json", dict(
                 stage="p0-equivalence", all_within=eq["all_within"], n_outside=eq["n_outside"],
                 finished=datetime.now(timezone.utc).isoformat()))
@@ -730,10 +751,22 @@ def _chosen_and_fields(run_dir):
 
 
 def _imax_anchor(run_dir):
-    """Imax scale anchored on the BASELINE inhibitory current proxy, not tuned to any result: at
-    full ictal load the pump adds about as much outward current as baseline inhibition supplies."""
-    d = np.load(os.path.join(run_dir, "baseline_traces_noise201.npz"), allow_pickle=True)
-    return float(np.mean(np.abs(d["seeg_inhibitory"])))
+    """Pump strength = the BASELINE-NEUTRALITY BUDGET derived from the calibration trajectory.
+
+    ANCHOR CORRECTION (2026-07-26). The first anchor equated Imax with the mean magnitude of the
+    electrode-weighted inhibitory SEEG component (48.1). That is an aggregate of a different
+    quantity, and at that strength the pump is not baseline-neutral even though its p0 compensation
+    is exact in the mean: a cell's own activation still wanders by q95 ~ 0.044 on the block
+    timescale, which at Imax=48 is a multi-second per-cell current of ~12% of spike threshold. The
+    measured consequence is recorded in pump_baseline_equivalence_imax48.json -- fewer, longer, far
+    more regular events and a +1.0 Hz mean-rate shift, i.e. a reorganised interictal train.
+
+    The replacement bounds exactly that residual and is computed from the CALIBRATION trajectory
+    alone, never from the held-out equivalence outcome (src.topic4_mz_fcxr_pump.baseline_neutrality_budget).
+    """
+    pack = np.load(os.path.join(run_dir, "p0_E.npz"))
+    return float(PUMP.baseline_neutrality_budget(np.asarray(pack["block_phi_mean"], float),
+                                                 np.asarray(pack["p0"], float))["imax_budget"])
 
 
 def cmd_p1_sensor_field(a):
@@ -919,6 +952,8 @@ def main(argv=None):
     ap.add_argument("--fields", default="shaped", help="comma list: shaped,uniform,shuffle")
     ap.add_argument("--field-label", default="t2000ms", help="which sensor-field snapshot to use")
     ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--reuse-off", default="", help="reuse the pump-off arm from this equivalence JSON")
+    ap.add_argument("--equiv-out", default="pump_baseline_equivalence.json")
     ap.add_argument("--small-only", action="store_true")
     a = ap.parse_args(argv)
     {"p0-smoke": cmd_smoke, "p0-baseline": cmd_baseline,

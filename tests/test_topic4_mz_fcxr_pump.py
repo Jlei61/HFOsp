@@ -540,3 +540,23 @@ def test_observer_z_sensor_counts_cells_below_the_depletion_threshold():
     off = PUMP.VirtualSeegComponentObserver(rec, cfg)
     off.sample(I_E, I_I, gE, gI, gM, None)
     assert np.isnan(off.frac_z_inf_high())
+
+
+def test_baseline_neutrality_budget_scales_inversely_with_the_residual_load_wander():
+    """The p0 compensation is exact in the MEAN, but a cell's activation still wanders on the block
+    timescale; multiplied by Imax that residual becomes a slow per-cell DC current. The budget must
+    shrink as the wander grows, and must be computable from the calibration trajectory alone."""
+    p0 = np.full(200, 0.16)
+    tight = p0[None, :] + np.linspace(-0.004, 0.004, 200)[None, :] * np.ones((5, 1))
+    loose = p0[None, :] + np.linspace(-0.04, 0.04, 200)[None, :] * np.ones((5, 1))
+    b_tight = PUMP.baseline_neutrality_budget(tight, p0)
+    b_loose = PUMP.baseline_neutrality_budget(loose, p0)
+    assert b_tight["imax_budget"] > 5 * b_loose["imax_budget"]
+    # at the budget the perturbation is exactly eps*V_th by construction
+    assert b_loose["imax_budget"] * b_loose["residual_q95"] == pytest.approx(0.02 * 18.0)
+
+
+def test_zero_residual_gives_an_unbounded_budget_rather_than_a_divide_by_zero():
+    p0 = np.full(50, 0.2)
+    b = PUMP.baseline_neutrality_budget(np.tile(p0, (4, 1)), p0)
+    assert np.isinf(b["imax_budget"]) and b["residual_q95"] == 0.0

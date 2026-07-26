@@ -446,6 +446,31 @@ def branch_slow_flow(rate_E_hz, u_frozen, p0, z_frozen, frac_z_inf_high, *, a_lo
                 P=mean_excess_pump_activation(u, p0, h), Z=float(np.mean(z_frozen)))
 
 
+BASELINE_NEUTRALITY_EPS = 0.02      # the pump may move a cell's drive by at most 2% of threshold
+                                    # at the 95th percentile of BASELINE block-scale load fluctuation
+
+
+def baseline_neutrality_budget(block_phi_mean, p0, v_th=18.0, eps=BASELINE_NEUTRALITY_EPS):
+    """Largest pump strength that still leaves the interictal baseline undisturbed (spec §I2).
+
+    The p0 compensation cancels the pump current IN THE MEAN, but a cell's own activation still
+    wanders around its mean on the block timescale, and that residual is multiplied by Imax into a
+    slowly-varying per-cell DC current. The budget bounds exactly that residual:
+
+        Imax_budget = eps * V_th / q95_{cell,block} |phi_i,block - p0_i|
+
+    Derived from the CALIBRATION trajectory only -- never from the held-out equivalence outcome.
+    Reported alongside the observed residual so the ceiling can be audited, not just trusted.
+    """
+    dev = np.abs(np.asarray(block_phi_mean, float) - np.asarray(p0, float)[None, :])
+    q95 = float(np.percentile(dev, 95))
+    budget = float(eps * v_th / q95) if q95 > 0 else float("inf")
+    return dict(imax_budget=budget, eps=float(eps), v_th=float(v_th),
+                residual_q95=q95, residual_sd=float(dev.std()),
+                perturbation_at_budget_frac_vth=float(eps),
+                definition="Imax_budget = eps*V_th / q95|phi_block - p0|, calibration trajectory only")
+
+
 def readout_identifiability_note():
     """Capability audit (Gate I-a, spec §I3): what the NON-BLESSED observer can actually obtain from
     the slow protocol without touching the blessed engine, and what it cannot.
