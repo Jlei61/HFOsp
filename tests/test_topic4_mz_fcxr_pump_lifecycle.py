@@ -151,14 +151,34 @@ def test_gate_T_reports_no_high_branch_instead_of_a_false_exit():
 
 
 def test_gate_T_refuses_to_read_topology_off_numerically_unsafe_cells():
+    """A conductance cap or a non-finite rate is an INSTRUMENT artifact: the topology read off such a
+    cell is meaningless, so a deciding cell hitting one vetoes the verdict."""
     cells = _grid(["FINITE_HIGH_ORBIT", "FINITE_HIGH_ORBIT", "INTERICTAL_WORKPOINT",
                    "INTERICTAL_WORKPOINT"])
     cells[3]["numerical"]["numerical_unsafe"] = True
     assert LC.adjudicate_gate_T(cells)["status"] == "UNSAFE"
-    cells2 = _grid(["FINITE_HIGH_ORBIT", "FINITE_HIGH_ORBIT", "INTERICTAL_WORKPOINT",
-                    "INTERICTAL_WORKPOINT"])
-    cells2[5]["numerical"]["runaway_early_stop_ms"] = 300.0
-    assert LC.adjudicate_gate_T(cells2)["status"] == "UNSAFE"
+
+
+def test_gate_T_treats_a_runaway_as_an_unbounded_high_branch_not_an_artifact():
+    """A 250 Hz operational runaway is a PHYSICAL outcome -- the high branch with no bound -- so it
+    counts as 'high' for the exit question and is reported, never silently read as 'not sustained'
+    just because the early stop truncated the window."""
+    cells = _grid([LC.RUNAWAY_LABEL, "FINITE_HIGH_ORBIT", "INTERICTAL_WORKPOINT",
+                   "INTERICTAL_WORKPOINT"])
+    for c in cells:
+        if c["D"] == 0.15 and c["ic"] == "high" and c["rho_u"] == 0.0:
+            c["numerical"]["runaway_early_stop_ms"] = 300.0
+    v = LC.adjudicate_gate_T(cells)
+    assert v["status"] == "PASS" and v["n_runaway"] == 1
+    assert v["exit"]["rho_u"] == 0.67
+
+
+def test_gate_T_ignores_an_artifact_in_a_row_that_never_decides_anything():
+    cells = _grid(["FINITE_HIGH_ORBIT", "FINITE_HIGH_ORBIT", "INTERICTAL_WORKPOINT",
+                   "INTERICTAL_WORKPOINT"])
+    cells.append(_cell(0.08, 0.5, "low", "NUMERICAL_UNSAFE", unsafe=True))
+    cells.append(_cell(0.08, 0.5, "high", "NUMERICAL_UNSAFE", unsafe=True))
+    assert LC.adjudicate_gate_T(cells)["status"] == "PASS"
 
 
 def test_gate_T_is_unresolved_when_the_high_branch_flow_does_not_point_at_the_exit():

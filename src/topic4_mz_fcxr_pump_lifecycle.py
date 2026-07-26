@@ -115,10 +115,14 @@ def adjudicate_gate_Ib(regime, operator):
 # ELEVATED_EVENT_TRAIN, which is an event train that never sustains >=1 s above the interictal band.
 LOW_LABELS = ("INTERICTAL_WORKPOINT", "ELEVATED_EVENT_TRAIN")
 TRANSIENT_LABELS = ("METASTABLE_TRANSIENT",)
+# A 250 Hz operational runaway is a PHYSICAL outcome -- an unbounded high branch -- not an instrument
+# artifact, so it counts as "high" for the exit-corridor question and is reported separately. A
+# conductance clip or a non-finite rate IS an instrument artifact and invalidates the cell.
+RUNAWAY_LABEL = "OPERATIONAL_RUNAWAY"
 
 
 def _is_high(label):
-    return str(label).startswith("FINITE_HIGH")
+    return str(label).startswith("FINITE_HIGH") or str(label) == RUNAWAY_LABEL
 
 
 def _is_low(label):
@@ -147,42 +151,50 @@ def adjudicate_gate_T(cells, *, field="shaped"):
     for c in rows:
         by.setdefault((round(float(c["D"]), 6), round(float(c["rho_u"]), 6)), {})[c["ic"]] = c
     Ds = sorted({k[0] for k in by})
-    rhos = sorted({k[1] for k in by})
-    if not Ds or not rhos:
-        return dict(status="UNRESOLVED", reasons=["empty grid"])
+    if len(Ds) < 2:
+        return dict(status="UNRESOLVED", reasons=["grid has fewer than two inhibition-depletion rows"])
     D_heal, D_imp = Ds[0], Ds[-1]
+    # the pump axis is only defined where BOTH deciding rows sampled it
+    rhos = sorted({k[1] for k in by if k[0] == D_heal} & {k[1] for k in by if k[0] == D_imp})
+    if not rhos:
+        return dict(status="UNRESOLVED",
+                    reasons=["the healthy and impaired rows share no pump level"])
 
-    unsafe = [c for c in rows if c.get("numerical", {}).get("numerical_unsafe")
-              or c.get("numerical", {}).get("runaway_early_stop_ms") is not None]
+    # Only the DECIDING rows can invalidate the verdict: the healthy-Z row (does the low branch
+    # survive?) and the most-impaired row (is there a high branch, and does it exit?). An artifact in
+    # an intermediate row is reported but does not veto a verdict it never entered.
+    deciding = [c for c in rows if round(float(c["D"]), 6) in (D_heal, D_imp)]
+    unsafe = [c for c in deciding if c.get("numerical", {}).get("numerical_unsafe")]
+    n_runaway = sum(1 for c in rows if c.get("numerical", {}).get("runaway_early_stop_ms") is not None)
     if unsafe:
-        return dict(status="UNSAFE", n_unsafe=len(unsafe),
-                    reasons=["frozen cells hit a cap / non-finite rate / runaway early stop; the "
-                             "topology would be a numerical artifact"],
+        return dict(status="UNSAFE", n_unsafe=len(unsafe), n_runaway=n_runaway,
+                    reasons=["deciding frozen cells hit a conductance cap or a non-finite rate; the "
+                             "topology read off them would be a numerical artifact"],
                     unsafe_cells=[dict(D=c["D"], rho_u=c["rho_u"], ic=c["ic"]) for c in unsafe[:8]])
 
     missing = [k for k in by if not {"low", "high"} <= set(by[k])]
     if missing:
-        return dict(status="UNRESOLVED",
+        return dict(status="UNRESOLVED", n_runaway=n_runaway,
                     reasons=[f"{len(missing)} grid cells lack both low and high initial conditions"])
 
     healthy_low = all(_is_low(by[(D_heal, r)]["low"]["label"]) for r in rhos)
     imp = [(r, by[(D_imp, r)]) for r in rhos]
     high_at_min_P = _is_high(imp[0][1]["high"]["label"])
     if not high_at_min_P:
-        return dict(status="NO_HIGH_BRANCH", healthy_low_preserved=bool(healthy_low),
+        return dict(status="NO_HIGH_BRANCH", healthy_low_preserved=bool(healthy_low), n_runaway=n_runaway,
                     reasons=[f"at D={D_imp} and the lowest pump load the high initial condition "
                              f"settles to {imp[0][1]['high']['label']}, not a sustained high branch"],
                     impaired_labels={str(r): c["high"]["label"] for r, c in imp})
 
     exit_row = next((c for r, c in imp[1:] if not _is_high(c["high"]["label"])), None)
     if exit_row is None:
-        return dict(status="TOPOLOGY_NO_GO", healthy_low_preserved=bool(healthy_low),
+        return dict(status="TOPOLOGY_NO_GO", healthy_low_preserved=bool(healthy_low), n_runaway=n_runaway,
                     reasons=["the sustained high branch survives every pump level on the grid: no "
                              "exit corridor"],
                     impaired_labels={str(r): c["high"]["label"] for r, c in imp})
     low_survives = _is_low(exit_row["low"]["label"])
     if not low_survives:
-        return dict(status="TOPOLOGY_NO_GO", healthy_low_preserved=bool(healthy_low),
+        return dict(status="TOPOLOGY_NO_GO", healthy_low_preserved=bool(healthy_low), n_runaway=n_runaway,
                     exit=dict(D=exit_row["high"]["D"], rho_u=exit_row["high"]["rho_u"],
                               P=exit_row["high"]["P"], high_label=exit_row["high"]["label"],
                               low_label=exit_row["low"]["label"]),
@@ -203,7 +215,7 @@ def adjudicate_gate_T(cells, *, field="shaped"):
                    "interictal low branch survives at the same frozen coordinates",
                    "the high branch accumulates load, so its own slow flow moves it into that corridor",
                    "the healthy-Z low branch is preserved at every pump level"]
-    return dict(status=status, healthy_low_preserved=bool(healthy_low),
+    return dict(status=status, healthy_low_preserved=bool(healthy_low), n_runaway=n_runaway,
                 high_branch_dP_dt=flows, flow_toward_exit=flow_to_exit,
                 exit=dict(D=exit_row["high"]["D"], rho_u=exit_row["high"]["rho_u"],
                           P=exit_row["high"]["P"], high_label=exit_row["high"]["label"],

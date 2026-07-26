@@ -832,6 +832,10 @@ def _map_cell(args):
     num["numerical_unsafe"] = bool((not num["finite"]) or num["clip_frac_max"] > 0.0)
     wm = workpoint_metrics(rate, DT, _map_cell.roll_hi, analysis_start_ms=T_KICK_MS + 100.0)
     label = classify_run_workpoint(dict(numerical_unsafe=num["numerical_unsafe"], **wm))
+    if num["runaway_early_stop_ms"] is not None:
+        # The early stop truncates the window, so the persistence test would silently mis-read an
+        # unbounded escape as "not sustained". Label it for what it is: a high branch with no bound.
+        label = "OPERATIONAL_RUNAWAY"
     a0 = int((T_KICK_MS + 100.0) / DT)
     rate_cell = res["E_spk_bool"][a0:].sum(axis=0) / ((len(rate) - a0) * DT / 1000.0)
     flow = PUMP.branch_slow_flow(rate_cell, u_f, p0_E, slow.z[:S["NE"]], obs.frac_z_inf_high(),
