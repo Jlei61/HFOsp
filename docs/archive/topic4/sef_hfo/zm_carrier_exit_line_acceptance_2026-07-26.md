@@ -17,14 +17,14 @@ lifecycle。**
 
 \[
 \boxed{
-\text{冻结慢变量后仍存在的 bounded ictal carrier}
+\text{最小动力学子系统中的 stable/metastable carrier}
 \quad+\quad
-\text{跨越独立 offset boundary 的累积退出坐标}
+\text{与 entry 区分的 joint offset geometry}
 }
 \]
 
 下一步设计已修订为：
-`docs/superpowers/specs/2026-07-26-topic4-zm-excitable-wave-carrier-design.md`。
+`docs/superpowers/specs/2026-07-26-topic4-zm-minimal-carrier-branch-decision-design.md`。
 
 ---
 
@@ -237,13 +237,15 @@ tonic–clonic 转换；是否能承担 offset 必须由 frozen-\(M\) continuati
 
 ## 7. 下一步决策树
 
-1. 在真实 Z/M+\(S_G\) 轨迹上做 exact-state capture。
-2. 冻结 \(z_i,m_i,S_G\)，从 active state 做 fast-subsystem continuation。
-3. 用 source-space + revised v2.1 virtual-SEEG 门判 carrier。
-4. 若无 carrier：进入独立 Branch F，只修 fast E/I carrier，E→E 不动。
-5. 若有 carrier：冻结 \(z/S_G\)，扫描实际可达 \(M\) 范围，找 offset surface。
-6. 若 \(M\) 足够：不新增退出变量。
-7. 若 \(M\) 不足：先离线比较 local cumulative load \(P\) 与 recruited-area integrator
-   \(A\) 的选择性，再只实现其中一条。
-8. 只有完成 carrier → offset → refractory/recovery → returning interictal events 后，才恢复
+1. 在 canonical SNN 上加入 parity-locked checkpoint，做 exact-state capture。
+2. 以自然 fast phase × paired future noise，比较 E/I、E/I+\(M\)、E/I+\(S_G\)、
+   E/I+\(M+S_G\) 的 probabilistic stable/metastable carrier。
+3. 若 visited states 无 carrier，先审计 coarse + full-field/pathology-axis slow neighbourhood：
+   邻域有 carrier → Branch T；邻域仍无 → Branch F。
+4. 若有 carrier，先做 slow-coordinate functional rank 与 trajectory-conditioned modal audit。
+5. 分别估计 \(Z\)-entry 和 existing slow-coordinate offset：
+   \(M\) alone、\(M+S_G\)、\(M+Z\)-recovery。
+6. 只有所有现有 offset 坐标均不足，才离线比较 local cumulative load \(P\) 与
+   recruited-area/flux \(A\)，并另写 spec 实现其中一条。
+7. 只有完成 carrier → offset → refractory/recovery → returning interictal events 后，才恢复
    Figure-5 lifecycle 与三条下游 workflow。
