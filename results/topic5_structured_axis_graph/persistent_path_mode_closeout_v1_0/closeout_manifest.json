@@ -1,0 +1,39 @@
+{
+  "contract": "topic5_persistent_path_mode_rnn_v1_0",
+  "status": "complete_bounded_negative",
+  "implementation_commit": "fe4a4457283a828603dadeed8af31c16c0d5c0ab",
+  "formal_run": {
+    "n_patients": 34,
+    "n_seeds": 3,
+    "n_conditions": 5,
+    "n_expected_runs": 510,
+    "n_complete_runs": 510,
+    "n_failed_runs": 0,
+    "formal_interictal_gate_pass": false,
+    "comparison_gate_pass": false,
+    "structure_gate_pass": false,
+    "ictal_target_read": false,
+    "next_action": "freeze_v1_and_pivot_to_symmetric_axis_system_identification_v2"
+  },
+  "scientific_boundary": {
+    "supported": [
+      "interictal_rank_prefixes_contain_learnable_local_history",
+      "teacher_forced_next_set_likelihood_improves_over_prespecified_controls"
+    ],
+    "not_supported": [
+      "event_persistent_discrete_path_identity",
+      "structured_free_running_contact_distribution_generator",
+      "graph_or_mode_structural_necessity",
+      "ictal_transfer_or_seizure_prediction"
+    ]
+  },
+  "input_config": {
+    "path": "config/topic5_persistent_path_mode_rnn_v1_0.yaml",
+    "sha256": "71c8ec119194f8c787774183e1b48c31baee6d25303e356598fd0f32caf4d666"
+  },
+  "canonical_report": "docs/archive/topic5/persistent_path_mode_rnn_formal_result_2026-07-26.md",
+  "paper_draft": "docs/paper-draft/figure6_persistent_path_mode_rnn_bounded_negative.md",
+  "figure": "results/paper-ready-figure/fig6_structured_rank_rnn/figures/fig6_structured_rank_rnn.png",
+  "successor_spec": "docs/superpowers/specs/2026-07-26-topic5-symmetric-axis-ei-system-identification-v2_0.md",
+  "successor_plan": "docs/superpowers/plans/2026-07-26-topic5-symmetric-axis-ei-system-identification-v2_0.md"
+}

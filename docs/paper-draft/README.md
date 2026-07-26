@@ -17,6 +17,10 @@
 - [Figure 1：间期 HFO 时序组织](figure1_interictal_hfo_temporal_scaffold.md)
 - [Cohort contract 与 Supplementary Tables](cohort_contract_and_supplementary_tables.md)
 
+## 计算模型
+
+- [Figure 6：structured path-mode RNN 的正式 34 人阴性边界](figure6_persistent_path_mode_rnn_bounded_negative.md)：510 个 LOSO runs 已完成；局部 next-set NLL 可学，但自由生成触点分布与结构必要性均未过门，clinical-onset target 保持封存。
+
 ## 使用规则
 
 1. 主文方法必须能回溯到当前 producer、配置和结果 artifact。

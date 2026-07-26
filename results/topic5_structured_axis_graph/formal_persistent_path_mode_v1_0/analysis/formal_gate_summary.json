@@ -1,0 +1,38 @@
+{
+  "status": "complete",
+  "contract": "topic5_persistent_path_mode_rnn_v1_0",
+  "n_patients": 34,
+  "n_seeds": 3,
+  "n_runs": 510,
+  "mode_count": 2,
+  "primary_metrics": [
+    "participation_mae",
+    "rank_wasserstein"
+  ],
+  "comparison_gate_pass": false,
+  "structure_gate_options": {
+    "graph": false,
+    "mode_collapse": false
+  },
+  "structure_gate_pass": false,
+  "formal_interictal_gate_pass": false,
+  "development_subjects": [
+    "epilepsiae_1073",
+    "epilepsiae_1146",
+    "yuquan_chenziyang"
+  ],
+  "development_excluded_sensitivity": {
+    "n_patients": 31,
+    "comparison_gate_pass": false,
+    "structure_gate_options": {
+      "graph": false,
+      "mode_collapse": false
+    },
+    "structure_gate_pass": false,
+    "role": "sensitivity_not_formal_hard_gate"
+  },
+  "ictal_target_read": false,
+  "next_action": "bounded_negative_stop_no_ictal",
+  "peak_gpu_memory_mb": 653.94091796875,
+  "total_run_hours": 21.918205628328852
+}
