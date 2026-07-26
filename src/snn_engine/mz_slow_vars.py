@@ -146,6 +146,7 @@ class MZSlowVarsConfig:
     pump_Imax: float = 0.0         # max electrogenic membrane effect; >0 requires pump_p0_E
     pump_h: int = 3                # Hill exponent of phi(u)=u^h/(1+u^h); primary tier fixes 3
     pump_p0_E: "np.ndarray | None" = None    # per-E baseline pump activation E_baseline[phi(u_i)] (shrunken)
+    pump_u_init_E: "np.ndarray | None" = None  # start the load at an equilibrated field (None -> zeros)
     pump_record_calibration: bool = False    # OBSERVER: cumulative per-cell sum phi(u) + spike counts
     pump_interventions: "list | None" = None  # scheduled INTEGER-step interventions (see _normalize_pump_interventions)
 
@@ -207,7 +208,16 @@ class MZSlowVars:
         self._pump_p0_E = None
         self._pump_phi_last = None
         self._pump_excess_last = None
+        # Non-blessed virtual-SEEG component observer (src/topic4_mz_fcxr_pump.py). Assigned by the
+        # runner AFTER construction; None -> never called -> byte parity. Pure side-effect: it only
+        # reduces the already-computed E-cell components onto the electrode weights.
+        self.seeg_observer = None
         if self.cfg.use_pump:
+            if self.cfg.pump_u_init_E is not None:              # start equilibrated (no startup transient)
+                u0 = np.asarray(self.cfg.pump_u_init_E, float)
+                if u0.shape != (self.NE,) or not np.all(np.isfinite(u0)) or u0.min() < 0.0:
+                    raise ValueError(f"pump_u_init_E must be a finite field of shape ({self.NE},) with values >= 0")
+                self.u_pump_E[:] = u0
             if self.cfg.pump_Imax > 0.0:                        # a live membrane effect NEEDS its baseline
                 if self.cfg.pump_p0_E is None:
                     raise ValueError("pump_Imax>0 requires pump_p0_E (per-E baseline pump activation)")
@@ -464,6 +474,8 @@ class MZSlowVars:
             drive[:self.NE] = I_E[:self.NE]                   # partial: AMPA stays additive (byte-identical)
             g_rev[:self.NE] = gI * c.e_gaba + gM * c.e_k
         ex_pump = self._pump_excess_E()                       # None -> no float touched (pump-off parity)
+        if self.seeg_observer is not None:                    # pure read of the final (post-clip) components
+            self.seeg_observer.sample(I_E, I_I, gE, gI, gM, ex_pump)
         if ex_pump is not None:
             # Electrogenic pump: an E-only CURRENT in the numerator of V_inf=(drive+g_rev)/(1+g_rel),
             # i.e. tau_m dV/dt = ... - Imax*phi(u) + Imax*p0.  It is NOT a conductance: g_rel/g_rev
@@ -841,7 +853,8 @@ class MZSlowVars:
                     raise ValueError("tau_x_down and tau_x_up must be > 0 (asymmetric relay kinetics)")
         # ---- FCXR pump lifecycle (per-E activity-dependent load u_i + electrogenic pump) ----
         if not c.use_pump:
-            if c.pump_sensor_only or c.pump_Imax > 0.0 or c.pump_record_calibration or c.pump_interventions:
+            if (c.pump_sensor_only or c.pump_Imax > 0.0 or c.pump_record_calibration
+                    or c.pump_interventions or c.pump_u_init_E is not None):
                 raise ValueError("pump_* options require use_pump=True")
         else:
             if not (c.pump_tau_ms > 0.0 and np.isfinite(c.pump_tau_ms)):

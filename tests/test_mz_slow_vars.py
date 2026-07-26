@@ -651,3 +651,20 @@ def test_pump_snapshot_stores_only_landmark_load_vectors():
     d_cnt = mz.snapshots["b"]["pump_phi_count"] - mz.snapshots["a"]["pump_phi_count"]
     assert d_cnt == 3 and np.all(d_sum > 0)
     assert len(mz.trace_u_mean) == 6 and len(mz.trace_pump_excess_mean) == 0   # sensor-only: no excess
+
+
+def test_pump_u_init_field_removes_the_startup_transient():
+    """A slow tau_N candidate needs seconds to equilibrate; starting at the analytic steady state
+    keeps the held-out pump-on baseline from being judged on a startup transient."""
+    NE, N = 4, 6
+    u0 = np.array([0.3, 0.4, 0.5, 0.6])
+    mz = _fc_pump(NE, N, use_pump=True, pump_sensor_only=True, pump_a_load=0.0, pump_tau_ms=1e9,
+                  pump_u_init_E=u0)
+    assert np.array_equal(mz.u_pump_E, u0)
+    mz.step(np.zeros(N, bool), None, 0.05)
+    assert np.allclose(mz.u_pump_E, u0, atol=1e-9)
+    with pytest.raises(ValueError):
+        _fc_pump(NE, N, use_pump=True, pump_sensor_only=True, pump_a_load=0.0, pump_tau_ms=1e9,
+                 pump_u_init_E=np.array([0.1, -0.2, 0.3, 0.4]))
+    with pytest.raises(ValueError):
+        _fc_pump(NE, N, use_pump=False, pump_u_init_E=u0)
