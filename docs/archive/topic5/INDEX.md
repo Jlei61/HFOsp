@@ -6,6 +6,14 @@
 
 ## 主线（network-axis pivot）
 
+### `persistent_path_mode_rnn_closeout_and_v2_pivot_2026-07-26.md` — **Figure 6 旧 RNN 收口与 v2.0 系统辨识转向**
+- 冻结 v0.7/v0.9/v1.0：局部历史可学，但离散、event-persistent path mode 不是合适科学对象；不再调 K、hidden size 或开放发作期 target。
+- 下一版改为共同的近似对称轴向 scaffold + event source + excitation/restraint state；先过 SNN 真值恢复，再做 34 人纯间期条件预测和 gated clinical-onset 动态迁移。
+
+### `persistent_path_mode_rnn_formal_result_2026-07-26.md` — **Figure 6 正式 34 人 structured graph RNN bounded-negative**
+- 34 人 × 3 seeds × 5 conditions 的 510 个 LOSO runs 全部完成；局部 next-set NLL 可学，但 participation 与完整 rank distribution 的自由生成主门未通过。
+- graph / mode-collapse 结构必要性未成立，path-direction posterior 保持高熵；按预注册合同不读取 clinical-onset 发作期 target。给出可保留口径、禁止口径和若重开时必须修改的训练目标。
+
 ### `fig3a_raw_spectral_context_acceptance_2026-07-18.md` — **Fig3-A 正式画图合同与验收**
 - 锁定 E1146 seizure 7 的 raw SEEG + SCL9 TFR + 四频带 2×2 布局、严格时间轴对齐、row-shared y 轴、clinical-onset shading 和可/不可报告边界。
 - canonical producer：`scripts/paper_figures/plot_fig3_raw_spectral_context.py`；输出：`results/paper-ready-figure/fig3a_raw_spectral_context/figures/`。

@@ -136,6 +136,7 @@
 
 | 目录 | 内容 |
 |---|---|
+| [paper-ready-figure/fig6_structured_rank_rnn/figures/](paper-ready-figure/fig6_structured_rank_rnn/figures/) | **Figure 6 structured path-mode graph RNN 正式 bounded-negative（34 人 × 3 seeds × 5 conditions，510 runs）**：A 模型结构；B E1146 heldout 触点参与概率与完整 rank distribution；C 四个主对照；D 结构损伤；E event-rank 内部状态；F 预注册决策。局部 next-set NLL 可学，但两个自由生成主终点和 graph/mode 必要性均未过门；clinical-onset `[0,10] s`、`1–150 Hz` target 未读取。producer `scripts/paper_figures/plot_fig6_structured_rank_rnn.py`。 |
 | [data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/](data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/) | ictal ER-onset timing atlas（per_seizure：全 371 张横向布局[上gamma/下broad，左raw/右heatmap，y轴对齐]，Epilepsiae 339 + Yuquan 32，EEG-zoom ±90s，z-ER bin=0.1s 与 field 一致；见 figures/README.md） |
 | [data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/](data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/) | PR-1 z-ER 子型聚类（per-subject 在子目录） |
 | [topic5_ictal_template_echo/figures/](topic5_ictal_template_echo/figures/) | Stage 1 ictal-template-echo（anchor vs path） |
