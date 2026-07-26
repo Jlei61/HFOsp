@@ -1,197 +1,430 @@
-# Excitable-wave ictal carrier — pre-registered design (2026-07-26)
+# Z/M frozen-carrier → independent-exit decision tree — revised design (2026-07-26)
 
-**Status: LOCKED before any run.** Branch `codex/topic4-m4-snn-native-exit`.
-Supersedes the *mechanism question* of the reduced-field screen
-(`zm_reduced_field_screen_2026-07-25.md` = `both_stable` NO-GO), **not** its engineering discipline —
-every hard-won rule from that round (fail-closed lock, parameter-encoded caches, mutation-catching tests,
-stubs that raise, claim-only-what-was-computed) is carried forward verbatim in §9.
+**Status: REVISION 2 LOCKED BEFORE NEW RUNS.** Branch
+`codex/topic4-m4-snn-native-exit`.
 
----
+> This revision **supersedes the immediate excitable-wave atlas** previously stored at this path.
+> That draft tried to build a new two-population rate field before establishing what dynamical
+> object is missing in the current Z/M SNN. Its Phase-0 prototype also counted the response at
+> the exact kick-offset sample as post-stimulus excitation, so a passive graded decay could be
+> labelled `excitable`. That unaccepted prototype was never committed and is not evidence.
+>
+> The next step is now a decision tree on the **existing anisotropic Z/M SNN**:
+>
+> 1. freeze the slow state and ask whether the fast E/I network contains a bounded ictal carrier;
+> 2. only if such a carrier exists, ask whether the existing \(M\) trajectory crosses an offset
+>    boundary;
+> 3. only if the carrier exists but \(M\) cannot exit it, compare one independent cumulative
+>    exit coordinate at a time;
+> 4. only if no frozen carrier exists, open a separately specified fast-carrier branch.
 
-## 0. Why the question changes
-
-The previous line asked: *does a spatially uniform oscillation spontaneously break into a phase-staggered
-pattern when inhibition is localised?* Answer, over the **complete** 513-mode spectrum: **no** — no positive
-growth band at any representable wavelength. That closed one specific route to a carrier.
-
-It also showed *why* that route was the wrong shape: the reduced field had **no explicit inhibitory
-population, no E–I delay, and a single narrow inhibitory scale**, and its oscillation only existed because a
-**new subtractive term** was bolted on. A uniform oscillator asked to disperse its own phase is not how
-cortical seizure activity is thought to spread.
-
-This line asks the **excitability** question instead:
-
-> On the ORIGINAL anisotropic E/I substrate with the real Z/M depletion semantics, does a **local** trigger
-> produce a **propagating / re-entrant wave** whose spatial relay keeps virtual-electrode energy continuous —
-> rather than dying out, flashing the whole field at once, or running away?
-
-This is a different mechanism class (excitable medium, finite-velocity front) and is testable at the reduced
-level before any spiking cost.
-
-**What stays frozen (non-negotiable, keeps this line independent of the parallel E→E line):**
-- E→E kernel shape, anisotropy and length: elliptical-exponential, `l_EE = 0.38 mm`, `AR = 2` (`l∥ = 0.537`,
-  `l⊥ = 0.269`), `K_E(0) = 0`, `Σ = 1`. **Not tuned, not swept, not rotated.**
-- **No artificial oscillator**: the `−β·S` subtractive pool from the previous line is REMOVED. If this
-  substrate oscillates it must do so through E–I interaction, not through a bolted-on term.
-- **No H / termination actuator** (upstream stop #4 still in force).
-- Z/M keeps its real semantics: `z ∈ [0,1]` **scales inhibition** (depletion ⇒ disinhibition), `m` is a
-  subtracted adaptation current. `z` is NOT re-abstracted into an arbitrary drive parameter.
+Canonical acceptance of the completed upstream line:
+`docs/archive/topic4/sef_hfo/zm_carrier_exit_line_acceptance_2026-07-26.md`.
 
 ---
 
-## 1. Model — two-population rate field with explicit fast I
+## 0. Core scientific question
 
-Fields `r_E(x,t), r_I(x,t) ≥ 0` on an `n×n` lattice over `L = 20 mm` (periodic), `n = 48` primary.
+The current Z/M substrate already provides a credible entry sequence:
 
-```
-τ_E ṙ_E = −r_E + F_E[ I_ext + W_EE·(K_E ∗ r_E)/(1 + α_G·S_G) − z·W_EI·(K_EI ∗ r_I)(t−d) − η_m·m − θ_E ]
-τ_I ṙ_I = −r_I + F_I[ W_IE·(K_IE ∗ r_E)(t−d) − W_II·(K_II ∗ r_I) − θ_I ]
-```
+\[
+\text{returning interictal events}
+\rightarrow z\downarrow
+\rightarrow \text{denser recruitment}
+\rightarrow \text{runaway}.
+\]
 
-- `F_•(u) = [u]_+ / (u_half + [u]_+)`, `u_half = 0.5`, ceiling 1 (bounded, as before).
-- **`τ_I < τ_E`** — the explicit fast inhibitory population the previous field lacked. `τ_E = 10 ms`,
-  `τ_I = 4 ms`.
-- **`d` = E–I delay** (ms), applied to the *cross*-population terms only (E→I and I→E), implemented as a
-  ring buffer. `d = 2 ms` primary. `d = 0` is an explicit ablation arm (§5).
-- **Inhibitory spatial scale is broader than excitatory**: `K_EI`, `K_IE`, `K_II` are normalised isotropic
-  Gaussians of width `σ_I`. Primary `σ_I = 1.5 mm` — anchored to the SNN's slow-resource footprint
-  `sigma_q = 1.5 mm`; it is a **coarse-grained containment scale**, NOT a claim about monosynaptic
-  inhibitory axon length (~0.25 mm). Sensitivity `σ_I ∈ {0.75, 1.5, 3.0}` for the central candidate only.
-- `α_G·S_G` = the divisive global pool, kept from the SNN (`alpha_G = 16`); `S_G` is FROZEN in Phase 1.
-- Local/non-local split of `K_E` uses the same derived `q_cell` quadrature as the previous line (never
-  hand-set): `w_rec = W_EE·q_cell`, `w_c = W_EE·(1−q_cell)`, `K_E(0)=0`.
+Adding the divisive shared inhibitory pool \(S_G\) converts runaway into a bounded but
+low-duty-cycle recurrent burst train. It does **not** establish that the model contains an
+ictal attractor. The observed train may instead be generated by the slow feedback loop itself:
 
-**Phase-1 frozen slow state**: `(z, m, S_G)` are uniform frozen scalars. No slow dynamics in this sprint.
+\[
+\text{local burst}\rightarrow S_G/M\text{ reset}\rightarrow
+\text{quiescent gap}\rightarrow\text{re-ignition}.
+\]
 
-## 2. The three staged questions (only Q1–Q2 are in scope this sprint)
+The decisive question is therefore:
 
-1. **Entry** — as `z` depletes, does a local trigger cross a propagation threshold?
-2. **Carrier** — does that produce a finite-velocity propagating / re-entrant front giving **≥ 2 s** of
-   continuous electrode-band energy, as opposed to a whole-field synchronous flash or a train of separated
-   discrete events?
-3. **Exit** *(NOT this sprint)* — do `m`/`z` recovery and `S_G` remove the propagation condition and return
-   the substrate to a region that can still generate irregular interictal events?
+> At slow states actually visited by the Z/M+\(S_G\) trajectory, does the frozen fast E/I
+> subsystem support a bounded, spatially organised, observation-level ictal carrier that
+> persists without further \(z\), \(m\), or \(S_G\) drift?
 
-**This sprint delivers the frozen-state atlas for Q1 and the wave classification for Q2 only.** Q3 and any
-slow-variable closed loop are out of scope and must not be claimed.
+This separates three dynamical jobs:
 
-## 3. Phase 0 — is the substrate EXCITABLE at all? (hard gate)
+\[
+\boxed{
+Z:\ \text{entry/recruitment}
+\quad+\quad
+\text{fast E/I}:\ \text{carrier}
+\quad+\quad
+M\ \text{or}\ P/A:\ \text{exit}
+}
+\]
 
-The whole question is malformed unless the uniform two-population system has a **stable low-activity rest
-state with a threshold**. Reduce to the space-independent `(r̄_E, r̄_I)` system (all kernels sum to 1) and,
-over a pre-registered grid `W_EE ∈ {2,3,4,6}, W_EI ∈ {1,2,4}, W_IE ∈ {2,4,8}, W_II ∈ {0,1,2}`,
-`θ_E ∈ {0.4,0.5,0.6}`, `θ_I = 0.5`, at the atlas-centre `(z,m,S_G) = (1.0, 0, 0)`, classify each point:
+- \(Z\): slow inhibitory depletion and spontaneous interictal-to-ictal entry coordinate.
+- fast E/I network: the bounded active carrier, if it exists.
+- \(M\): first tested as the existing medium-slow adaptation/shape coordinate.
+- \(P\) or \(A\): conditional alternatives for exit, tested separately only if \(M\) is
+  insufficient.
+- \(S_G\): a weak containment/safety cap, not the lifecycle engine.
 
-- **`excitable`** — a stable low fixed point (`r̄_E < 0.05`) AND a super-threshold pulse produces a large
-  transient excursion (`peak r̄_E ≥ 0.3`) that RETURNS to the low state; AND a sub-threshold pulse does not.
-- **`oscillatory`** — no stable fixed point (limit cycle). ⚠️ Not what this line wants; a self-oscillating
-  medium re-opens the previous line's question.
-- **`bistable_saturated`** — a super-threshold pulse leaves the system in a high state permanently.
-- **`inexcitable`** — even a large pulse decays without a large excursion.
+The target is **not** a compulsory permanent limit cycle. A frozen slow state may support a
+bounded active attractor or bursting orbit over a finite slow-state window; the lifecycle then
+enters and leaves that window through different slow coordinates.
 
-**Selection rule (minimal intervention, locked, applied to `excitable` points only)** — in strict order:
-1. smallest `W_EE` (least excitatory gain);
-2. then smallest `|log2(W_EI/2)|` (closest to a balanced E/I ratio), ties → smaller `W_EI`;
-3. then smallest `W_IE`, then smallest `W_II`, then `θ_E` closest to 0.5;
-4. final deterministic lexicographic tie-break `(W_EE, W_EI, W_IE, W_II, θ_E)`.
-Stop at the first satisfying point; do NOT keep searching for a "better" excitable regime.
+## 1. Locked substrate and scope
 
-**Robustness**: the chosen point must retain the `excitable` class at `dt` and `dt/2`.
-**NO-ORBIT-STYLE STOP**: if the grid contains **no** `excitable` point → immediate NO-GO; the 2-D field is
-NOT built, and we report that this substrate (with `K_E` frozen) is not an excitable medium in the tested
-window. **Do not respond by tuning `K_E`.**
+### 1.1 Canonical substrate
 
-## 4. Phase A — the frozen state-fork atlas (write-once lock)
+Reuse the current Z/M-native SNN without changing E→E:
 
-Lock, before any 2-D run, into `phaseA_lock.json`: spec SHA, the Phase-0 operating point, the atlas grid,
-kick parameters, `q_cell`, seeds, `dt`, `n`, kernel hashes, git SHA + dirty flag.
+- E1146 `twoend_equal` anisotropic substrate;
+- \(L=20\) mm, \(N=40000\), \(N_E=32000\), \(N_I=8000\);
+- per-neuron `use_z=True`, `use_m=True`, `use_qI=False`, `use_gK=False`;
+- lockpoint `zA_q75_tz5000__mA0p001_tau500`;
+- \(\tau_z=5000\) ms, \(\tau_m=500\) ms, \(\eta_m=0.001\);
+- \(I_{\mathrm{th},EI}=1.28\), with provenance retained from the in-run calibration;
+- \(S_G\) arm initially uses the already tested \(\alpha_G=16\);
+- no \(H\), no persistence current, no q_I/g_K fallback, no E→E retuning.
 
-**Atlas axes** (frozen slow state; 3-D grid):
-- `z ∈ {1.00, 0.85, 0.70, 0.55, 0.40, 0.25}` — inhibitory efficacy from intact to strongly depleted.
-- `m ∈ {0, 2, 5, 10}` — adaptation load (`η_m = 0.001` as in the SNN lockpoint ⇒ current `η_m·m`).
-- `S_G ∈ {0, 0.05, 0.15}` — frozen global divisive pool.
+Canonical runner/instrumentation to extend:
 
-**Kick** (the local trigger): a disk of radius `r_kick = 1.5 mm` at a fixed site, added to `I_ext` with
-amplitude `A_kick` for `d_kick = 20 ms`. `A_kick` is calibrated ONCE at the atlas centre as the smallest
-amplitude that produces a super-threshold local response there, then FROZEN across the atlas (so the atlas
-varies only in slow state, not in trigger strength). A **sub-threshold control** at `0.5·A_kick` is run at
-every atlas point.
+- `scripts/run_zm_snn_native_exit.py`;
+- `src/snn_engine/slow_field.py`;
+- carrier gate `src/topic4_zm_carrier_gate_v2.py`;
+- virtual-SEEG recorder and E1146 montage already used in the carrier audit.
 
-## 5. Arms (ablations; all share the frozen kernels and the locked operating point)
+Any code change must be opt-in and preserve the existing slow-off and Z/M parity gates.
 
-| arm | change | purpose |
-|---|---|---|
-| `full` | as §1 | the candidate |
-| `no_delay` | `d = 0` | is the E–I delay load-bearing for propagation? |
-| `narrow_inh` | `σ_I = 0.375 mm` (≈ `K_E` scale) | is the BROAD inhibitory scale load-bearing? |
-| `no_I` | `W_EI = W_IE = 0` (E-only, inhibition removed) | sanity: without inhibition it must run away — if it does NOT, the substrate is mis-calibrated |
+### 1.2 In scope
 
-## 6. Pre-registered classification of the response to a kick
+1. data-driven state capture from the existing Z/M+\(S_G\) trajectory;
+2. frozen-slow state forks on the exact SNN fast state;
+3. source-space and virtual-SEEG classification of the frozen fast dynamics;
+4. conditional frozen-\(M\) offset audit;
+5. offline comparison of possible independent exit observables;
+6. a decision on which branch, if any, deserves a new executable spec.
 
-Per atlas point × arm × seed, from `r_E(x,t)` over `T = 4000 ms`:
+### 1.3 Out of scope
 
-- **front arrival** at radius `ρ` = first time the ring-mean `r_E` at distance `ρ` from the kick centre
-  exceeds `0.2 × (its own peak over the run)`, for `ρ ∈ {2,4,6,8} mm`.
-- **wave speed** `v` = slope of a least-squares fit of `ρ` vs arrival time (mm/s), reported with `R²`.
-- **active area fraction** `A(t)` = fraction of cells with `r_E ≥ 0.1·a_max`.
-- **duration** = length of the longest span with `A(t) ≥ 0.05`.
+- no new P/A actuator before the carrier and \(M\)-offset audits;
+- no H tuning;
+- no large parameter grid;
+- no migration of the discarded local-inhibition field into the SNN;
+- no modification of E→E weights, kernel, anisotropy, or topology;
+- no claim of a complete lifecycle until recovery to the same interictal event-producing
+  substrate is demonstrated.
 
-Classes (evaluated in this order):
+## 2. Phase 0 — lock the empirical carrier target
 
-1. **`runaway`** — `A(t) ≥ 0.80` sustained for ≥ 500 ms, or `A(T_end) ≥ 0.5`.
-2. **`whole_field_flash`** — the front reaches `ρ = 8 mm` within **≤ 20 ms** of the kick (i.e. faster than
-   any finite-velocity front the lattice can resolve) OR arrival-time fit `R² < 0.5` with all arrivals inside
-   20 ms — activation without a spatial gradient.
-3. **`propagating_wave`** — arrivals at ≥ 3 of the 4 radii, monotone in `ρ`, fit `R² ≥ 0.8`, speed
-   `v ∈ [20, 2000] mm/s` (a physiologically loose but finite band), and `A(t)` peaks below 0.80.
-4. **`sustained_wave`** — as `propagating_wave` AND `duration ≥ 2000 ms` (the carrier target).
-5. **`no_propagation`** — none of the above (front never reaches 4 mm, or decays back).
+Before inspecting new model outputs, freeze the observation contract used to distinguish
+ictal activity from an HFO-like burst train.
 
-**Sub-threshold control must classify as `no_propagation`** at any point claimed as a wave; if the
-half-amplitude kick propagates too, the point is **not** threshold behaviour and is excluded.
+### 2.1 Source-space requirements
 
-## 7. Phase-B GO / NO-GO (pre-registered)
+A candidate carrier must:
 
-**GO** (→ justifies restoring slow variables, then an SNN pilot) iff ALL:
-1. A **non-empty, contiguous** region of the `(z, m, S_G)` atlas classifies as `propagating_wave` or
-   `sustained_wave` in the `full` arm, in **≥ 3 of 4 seeds** per point.
-2. That region is **bounded on both sides**: adjacent atlas points (in the `z` direction) include at least
-   one `no_propagation` and at least one `runaway`/`whole_field_flash` — i.e. a genuine window, not an edge
-   artefact of the grid.
-3. The sub-threshold control is `no_propagation` throughout the region.
-4. At least one point in the region reaches `sustained_wave` (≥ 2 s), OR — if none does — the verdict is
-   the weaker `propagating_but_not_sustained`, which is **not** a GO for the SNN and instead defines the
-   next question.
+1. remain bounded below the registered runaway criterion;
+2. avoid a flat saturated high-rate plateau;
+3. maintain nonzero recruited activity across burst troughs rather than repeatedly returning
+   to the pre-event rest distribution;
+4. recruit more than a single fixed hotspot and show a reproducible spatial organisation
+   (front, relay, re-entry, or distributed active set);
+5. persist for at least 2 s after the state fork, excluding the first 250 ms fork transient.
 
-**Verdict vocabulary** (single source of truth, adjudicated by a pure function):
-`no_excitable_regime` (Phase-0 stop) · `no_propagation_anywhere` · `flash_only` · `runaway_only` ·
-`propagating_but_not_sustained` · `sustained_wave_window` (= GO) · `no_evidence`.
+### 2.2 Observation-level requirements
 
-**Ablations are reported as SEPARATE contrasts** (never merged into the main verdict): `no_delay` and
-`narrow_inh` say *which ingredient the propagation needed*; `no_I` is a calibration sanity check.
+Use revised carrier protocol v2.1, not the historical v1 diagnostic. The candidate must show:
 
-## 8. Forbidden claims
-- ❌ "the SNN has a seizure / carrier / lifecycle" — this is a reduced field; no SNN, no virtual SEEG here.
-- ❌ any Exit / termination / recovery claim (Q3 is out of scope).
-- ❌ "propagation proves the clinical mechanism" — a finite-velocity front in a rate field is a *candidate*.
-- ❌ claiming coverage beyond the atlas actually run, or beyond the classified radii/`T` window.
-- ❌ tuning `K_E`, adding a subtractive oscillator, or touching H in response to a negative result.
-- ❌ merging the ablation contrasts with the main verdict.
+- a sustained onset surviving baseline re-estimation;
+- occupancy \(\ge 0.80\) for at least 2 s at more than one active virtual contact;
+- no `fail_runaway`, `fail_plateau`, or `fail_hfo_like_train`;
+- macroepisode separation from returning events in duration, duty cycle, energy, and spatial
+  extent using the existing conservative four-dimensional gate;
+- axial first-passage structure rather than a simultaneous whole-sheet flash.
 
-## 9. Engineering rules carried forward (all learned the hard way last round)
-1. `phaseA_lock.json` is **write-once AND fail-closed**: reuse only if spec SHA / operating point / grid /
-   `dt` / seeds all still match; otherwise `exit(3)`.
-2. Every cached artefact's filename encodes **every parameter that changes the trajectory** (`T`, `dt`, `n`,
-   arm, seed, atlas point) — a short diagnostic run must never be resumable as a production run.
-3. Any linearisation added later must be verified by **finite difference against the independently-written
-   field RHS** (mutation-catching), not against itself.
-4. Unimplemented acceptance criteria **raise `NotImplementedError`** — never look functional.
-5. Provenance in every output JSON: git SHA, dirty flag, module SHA256s, lock hash, exact parameters.
-6. **Cheap-first**: Phase 0 (0-D, seconds) → atlas coarse pass → only then long/at-scale runs.
-7. Claim only what was computed; state the scanned ranges next to every conclusion.
-8. `OMP/MKL/OPENBLAS/NUMEXPR_NUM_THREADS=1`; memory floor 64 GB; per-arm resume.
+Before model inspection, add two reference-locked diagnostics to distinguish real broadband
+energy from a sharp periodic pulse train:
 
-## 10. Outputs
-`src/topic4_zm_excitable_{meanfield,field,verdict}.py`, `scripts/run_topic4_zm_excitable_atlas.py`,
-`scripts/plot_topic4_zm_excitable_atlas.py`, `tests/test_topic4_zm_excitable_*.py`;
-results → `results/topic4_sef_hfo/zm_excitable_wave/` (+ Chinese `figures/README.md`, FIGURE_INDEX row).
+1. harmonic-comb concentration around a fitted fundamental and its integer harmonics;
+2. spectral entropy or an equivalent broadband-continuity statistic.
+
+Thresholds for these two diagnostics must be derived once from the fixed observed reference
+and a synthetic pulse-train null, written to the Phase-0 lock, and never tuned on model arms.
+Until those thresholds are locked, the result can be called a **source-space frozen carrier**
+only, not an observation-matched ictal carrier.
+
+## 3. Phase 1 — trajectory-derived frozen-state continuation
+
+### 3.1 Anchor run
+
+Run one canonical seed-1 Z/M+\(S_G\) anchor long enough to include:
+
+- returning interictal events;
+- the transition into the bounded recurrent burst train;
+- at least 4 s of the bounded train, if it persists.
+
+Save the exact state needed for deterministic continuation:
+
+- all neuron membrane/refractory state;
+- synaptic and delay-buffer state;
+- random-number-generator state;
+- per-neuron \(z_i\) and \(m_i\);
+- \(S_G\) and its internal pool state;
+- spike history required by the engine;
+- source-space and virtual-SEEG observer state.
+
+If the engine cannot exactly resume these states, that is an engineering P0 and Phase 1 stops.
+Reinitialising membrane or synaptic variables while only copying \(z/m/S_G\) is not a valid
+state fork.
+
+### 3.2 State selection
+
+Select fork points from trajectory observables, not hard-coded times:
+
+- `pre_entry`: last returning-event regime before persistent escalation;
+- `early_transition`: first sustained change in event density/recruitment;
+- `bounded_early`: first time the \(S_G\)-contained state satisfies its source-space formation
+  criterion;
+- `bounded_mid` and `bounded_late`: trajectory-quantile states spanning the observed
+  \(z_\mathrm{core}\), \(m_\mathrm{core}\), and \(S_G\) range.
+
+Write the measured values and state hashes to a fail-closed `phase1_state_lock.json`.
+If the bounded state never forms, record `no_bounded_anchor` and stop.
+
+### 3.3 Fork arms
+
+For each saved state:
+
+| arm | \(z\) | \(m\) | \(S_G\) | purpose |
+|---|---|---|---|---|
+| `dynamic_replay` | dynamic | dynamic | dynamic | exact-resume control |
+| `freeze_all_slow` | frozen field | frozen field | frozen state | does the fast carrier exist? |
+| `freeze_z_sg_dynamic_m` | frozen | dynamic | frozen | can existing M reshape/exit it? |
+| `freeze_zm_dynamic_sg` | frozen | frozen | dynamic | is the burst train generated by S_G reset? |
+| `freeze_zm_sg_noiseoff` | frozen | frozen | frozen | noise-dependence diagnostic |
+
+Primary continuation duration: 8 s after a 250 ms fork transient. The central candidate, if
+any, is confirmed for 20 s at `dt` and `dt/2`.
+
+Noise-off is a diagnostic, not a requirement: a stochastic active attractor may need background
+noise. The decisive control is whether the frozen state maintains a statistically stationary
+active regime instead of repeatedly restarting only because slow variables drift.
+
+### 3.4 Frozen-carrier taxonomy
+
+Adjudicate with a pure fail-closed function:
+
+- `no_bounded_anchor`;
+- `decays_to_interictal_or_silence`;
+- `transient_active_state`;
+- `hfo_like_relaxation_train`;
+- `bounded_frozen_carrier_source_only`;
+- `bounded_frozen_carrier_observed`;
+- `saturated_plateau`;
+- `runaway`;
+- `no_evidence`.
+
+`bounded_frozen_carrier_observed` requires both §2.1 and §2.2. A repeated burst train that
+returns to rest between events remains `hfo_like_relaxation_train`, even if its peak rate is
+high or its Fourier spectrum spans many bands.
+
+### 3.5 Phase-1 decision
+
+- **No frozen carrier**: stop all exit-variable work and open conditional Branch F (§7).
+- **Source-space carrier only**: retain as mechanistic candidate, but fix/validate the
+  observation layer before any exit claim.
+- **Observed carrier**: continue to Phase 2.
+- **Runaway or plateau only**: treat as no acceptable carrier.
+
+## 4. Phase 2 — can the existing M coordinate cross an offset boundary?
+
+This phase runs only if Phase 1 identifies a bounded frozen carrier.
+
+### 4.1 Frozen-\(M\) atlas on the actual trajectory range
+
+At the central carrier state:
+
+- freeze \(z_i\) and \(S_G\);
+- scale or clamp the saved \(m_i\) spatial field across values spanning the actually observed
+  trajectory range, including its maximum;
+- start both from the active carrier state and from a matched low-state initial condition;
+- apply one standardized finite perturbation to test basin membership.
+
+Do not invent an arbitrary \(m\) range that the dynamic model cannot reach. An expanded
+sensitivity range may be reported separately, never as evidence that the locked model exits.
+
+### 4.2 Offset outcomes
+
+- `M_sufficient_and_reached`: an offset surface exists and the dynamic \(m\) trajectory crosses
+  it after carrier formation;
+- `M_boundary_exists_but_unreached`: the surface exists outside the attained \(m\) range;
+- `M_shapes_but_no_offset_surface`: \(m\) changes burst structure but cannot remove the carrier;
+- `no_M_evidence`.
+
+Only the first outcome permits a lifecycle attempt without a new exit variable.
+
+### 4.3 Effective-rank diagnostic
+
+At matched frozen states, estimate finite-difference sensitivities of interpretable fast
+observables to \(z\), \(m\), and \(S_G\), including:
+
+- mean and core rate;
+- recruited area;
+- dominant axial and transverse spatial-mode amplitudes;
+- carrier duty cycle and virtual-SEEG energy.
+
+Compute the singular spectrum of the resulting local sensitivity operator. This is a
+diagnostic of functional rank, not a standalone proof:
+
+- near rank-1 means the variables mainly push the same effective-excitability direction;
+- separated singular directions support genuinely distinct entry, shaping, and exit effects.
+
+## 5. Phase 3 — choose an independent exit observable offline
+
+Run only when an acceptable carrier exists and Phase 2 shows that locked \(M\) cannot perform
+the offset.
+
+Without adding any actuator, compute candidate drivers on:
+
+1. all accepted returning interictal events;
+2. the bounded frozen carrier;
+3. carrier termination/recovery controls if available.
+
+Candidate driver families:
+
+- \(D_{\mathrm{mean}}\): time-integrated local activity or ionic-load proxy;
+- \(D_{\mathrm{area}}\): time integral of recruited area above a locked threshold;
+- \(D_{\mathrm{flux}}\): cumulative newly recruited area/front flux;
+- \(D_{\mathrm{supra}}\): suprathreshold activity duration with a carrier-selective gate.
+
+Required properties before a driver can become an actuator:
+
+- low loading during returning interictal events;
+- monotonic accumulation during the frozen carrier;
+- persistence across carrier troughs;
+- spatial information not reducible to the same mean-rate statistic driving \(M/S_G\);
+- a plausible decay window that leaves postictal refractoriness but can recover.
+
+Do not choose the driver with the prettiest single trajectory. Selection must use the
+pre-registered separation score across events and at least three seeds once a seed-1 candidate
+exists.
+
+## 6. Conditional exit branches
+
+These are **design placeholders**, not authorised implementations in this spec.
+
+### 6.1 Branch P — local cumulative load
+
+\[
+\tau_P\dot P_i = \mathcal{D}_{P,i}(r,\text{spikes})-P_i,
+\]
+
+with an effect through a physiologically distinct outward/pump-like current or conductance.
+It must integrate local cumulative activity and remain elevated through brief troughs.
+
+### 6.2 Branch A — recruited-area integrator
+
+\[
+\tau_A\dot A = \langle \mathbf{1}[r_i>r_A]\rangle-A,
+\]
+
+or a front-flux variant, acting preferentially on a broad/non-local inhibitory or adaptation
+channel. It must be compared directly with Branch P at matched containment budget.
+
+### 6.3 Rules
+
+- P and A are never combined in the first test.
+- \(S_G\) remains a weak runaway cap, with a matched `S_G off` safety ablation.
+- each branch must show `form then terminate`; prevention is not termination.
+- exit must be followed by \(z\) recovery, an early-retrigger refractory period, late
+  retrigger recovery, and spontaneous returning interictal events without reset.
+
+## 7. Conditional Branch F — repair the fast carrier
+
+This branch opens only after Phase 1 returns no acceptable frozen carrier. It requires its own
+implementation plan and must remain independent of the parallel E→E-modification line.
+
+Allowed mechanism family: an SNN-calibrated explicit E/I field or SNN-fast-subsystem analysis
+that changes inhibitory timing/spatial organisation while holding E→E fixed.
+
+The discarded immediate excitable-wave draft is **not** reusable as evidence. A future Branch-F
+spec must include these corrections:
+
+1. calibrate the reduced E/I parameters against the actual SNN transfer, delays, and inhibitory
+   spatial scale; do not call an arbitrary rate grid the “original SNN”;
+2. define post-kick excitation strictly after a guard interval following kick offset;
+3. require autonomous amplification or a delayed post-offset peak, an all-or-none threshold
+   curve, and a matched passive-decay control;
+4. classify `sustained` before the generic `propagating` class so the sustained branch is
+   reachable;
+5. use an absolute baseline-locked arrival threshold, not each ring's own peak;
+6. use open/absorbing or sufficiently large boundaries for propagation and re-entry claims;
+   periodic wrap-around cannot count as re-entry;
+7. require the same source-space + virtual-SEEG carrier gate as Phase 1;
+8. retain E→E weights/kernel/topology unchanged.
+
+Possible analyses after calibration:
+
+- frozen-state eigenvalue/eigenvector map;
+- non-normal finite-time gain;
+- front velocity and wake recovery;
+- re-entry feasibility under non-periodic geometry.
+
+## 8. Lifecycle acceptance gate
+
+The full model is a lifecycle candidate only if all are satisfied:
+
+1. spontaneous returning interictal events survive with the slow mechanism active;
+2. \(Z\) drives spontaneous onset without an external seizure trigger;
+3. a bounded frozen fast carrier exists;
+4. virtual contacts show sustained, multi-contact, non-pulse-comb broadband energy rather than
+   isolated high-frequency peaks;
+5. onset begins locally and has analysable spatial recruitment;
+6. a distinct cumulative exit coordinate terminates an already formed carrier without reset;
+7. activity returns to the same interictal event-producing basin, not permanent silence;
+8. early retrigger is suppressed and late retrigger recovers;
+9. frozen continuation/state forks identify distinct entry and exit boundaries;
+10. results survive at least three primary seeds and the registered ablations;
+11. no claimed propagation/re-entry depends on periodic wrap-around;
+12. the output supports the intended Figure-5 semantic layout:
+    interictal events → spatial onset → sustained ictal carrier → autonomous offset →
+    postictal refractory/recovery → returning interictal events.
+
+Until all twelve are met, use component-level language only:
+`entry mechanism`, `bounded carrier candidate`, `offset candidate`, or `recovery candidate`.
+
+## 9. Engineering and resource rules
+
+1. Every lock is write-once and fail-closed against spec SHA, git SHA, parameters, seed,
+   duration, `dt`, and input-state hash.
+2. Smoke outputs cannot write production summaries.
+3. Exact-resume parity is tested before scientific forks.
+4. Every trajectory-changing parameter appears in cache provenance and/or filename.
+5. Missing acceptance fields produce `no_evidence` or raise; never silently default to a
+   scientific taxonomy.
+6. Use a seed-1 cheap gate before multi-seed or long runs.
+7. `OMP_NUM_THREADS=1`, `MKL_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`,
+   `NUMEXPR_NUM_THREADS=1`.
+8. Start with one 40k-neuron process; estimate peak RSS before parallel expansion.
+9. Maintain at least 96 GB `MemAvailable`, zero swap growth, and no more than two simultaneous
+   full SNN workers unless a fresh measured RSS budget proves a larger count safe.
+10. Crash-safe per-arm resume and resource logs are required.
+11. New figure directories require a Chinese `figures/README.md` and `FIGURE_INDEX` entry after
+    the figures exist.
+
+## 10. Deliverables and stopping point
+
+This spec authorises only Phases 0–3 and the branch decision:
+
+- revised carrier-target lock;
+- exact-state resume test;
+- frozen-state fork runner;
+- frozen-carrier verdict and diagnostic figure;
+- conditional frozen-\(M\) atlas;
+- conditional offline driver comparison;
+- one archive report with allowed/forbidden claims;
+- a new implementation spec for **one** selected branch, if justified.
+
+It does **not** authorise implementing P, A, or Branch F in the same execution. The correct
+stopping point is a scientifically supported branch decision, not another long parameter sweep.
