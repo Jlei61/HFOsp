@@ -24,6 +24,18 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
+> **Z/M carrier–exit 线验收（2026-07-26）**：正确 Z/M SNN 已验证
+> `returning interictal events → recruitment → runaway`；加入除法共享抑制 \(S_G\) 后，
+> runaway 被整形成**有界但低占空比的 recurrent burst train**，没有通过 revised v2.1
+> 持续 carrier 门；persistence-based \(H\) 与该载体驱动错配。并行的 matched-budget
+> 局部抑制降阶场完整 513-mode Floquet 谱均稳定（`both_stable`），不迁移 SNN。
+> 因而当前安全口径是：**entry 成立到 runaway；bounded ictal carrier、独立 offset 与
+> recovery 均未建立**。下一步不再先调终止器，而是在原 Z/M+\(S_G\) SNN 上做 exact-state
+> frozen-slow continuation：先判快 E/I carrier 是否存在，再审计实际 \(M\) 是否跨越 offset
+> boundary；只有“有 carrier、M 不足”时才比较独立的 local-load \(P\) 与 recruited-area \(A\)。
+> 统一验收：`docs/archive/topic4/sef_hfo/zm_carrier_exit_line_acceptance_2026-07-26.md`；
+> 修订 spec：`docs/superpowers/specs/2026-07-26-topic4-zm-excitable-wave-carrier-design.md`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。

@@ -11,6 +11,12 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- **2026-07-26 Z/M carrier–exit 机制线统一验收**：
+  `sef_hfo/zm_carrier_exit_line_acceptance_2026-07-26.md`。结论 =
+  `ACCEPT_BOUNDED_MECHANISM_NO_GO`：Z/M entry 到 runaway 成立；\(S_G\) 只形成低占空比
+  relaxation burst train，未建立持续 ictal carrier；\(H\) 驱动错配；局部抑制降阶场
+  513-mode 谱为 `both_stable`，不迁移 SNN。下一步先做原 Z/M SNN 的 frozen-slow
+  carrier continuation，再决定 \(M\)、\(P\) 或 recruited-area \(A\) 的 exit 分支。
 - v0.2 plan：`docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`
 - 核心断言：间期群体 HFO = 局部低异质性、各向异性连接、近临界但仍亚阈值的 E-I 易激斑块，在噪声触发下产生的自限性瞬态传播事件；低异质性必须通过 effective gain 实际进入稳定性分析
 - 保留 v1 真实数据验收合同（H1–H6）：endpoint compactness / source-sink reversal / mark independence + stable geometry / rate-geometry decoupling / pre-post-ictal endpoint shift / participation-field segregation

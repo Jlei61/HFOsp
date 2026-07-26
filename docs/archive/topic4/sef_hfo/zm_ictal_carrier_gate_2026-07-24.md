@@ -1,5 +1,9 @@
 # Z/M ictal-carrier gate — archive (2026-07-24)
 
+> **最终验收（2026-07-26）**：本线作为 `bounded_hfo_like_relaxation_train` 的机制性
+> NO-GO 验收，不作为 ictal carrier 或 lifecycle。统一解释、允许/禁止口径与下一步决策树见
+> `zm_carrier_exit_line_acceptance_2026-07-26.md`。
+
 Branch `codex/topic4-m4-snn-native-exit`. Pre-registered design:
 `docs/superpowers/specs/2026-07-24-topic4-zm-ictal-carrier-gate-design.md`.
 This is the **Z/M-only** archive. The old q_I+S_G+p/H sandbox is quarantined in §7 as ARCHIVE-ONLY.

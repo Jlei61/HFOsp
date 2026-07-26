@@ -1,5 +1,10 @@
 # SNN-native M4 containment-to-exit lifecycle — execution log (2026-07-21)
 
+> **最终验收入口（2026-07-26）**：旧 q_I 沙盒继续保持隔离；正确 Z/M 重建、
+> \(S_G/H\) 结果、carrier gate 与局部抑制场的统一判决见
+> `zm_carrier_exit_line_acceptance_2026-07-26.md`。当前安全结论是“entry 到 runaway
+> 成立；containment 产物不是持续 carrier；完整 lifecycle 未建立”。
+
 > ## 🔴 WRONG-SUBSTRATE — ARCHIVE-ONLY q_I SANDBOX (review 2026-07-22)
 > **This entire line ran on the OLD field-based `q_I + S_G + p/H` model** (`src/snn_engine/slow_field.py`,
 > `use_qI=True, use_gK=False`), **NOT the current locked `Z/M` per-neuron model** (`src/snn_engine/slow_vars.py`,
@@ -15,7 +20,8 @@
 > + α_H H" is a NEW combination to build; the Z/M lines live in the peer MZ worktrees this line's spec listed
 > READ-ONLY. **Correct口径**: *the old q_I-M4 sandbox suggests a slow divisive memory MAY terminate its bounded
 > persistent state, but this is NOT validated on the current Z/M SNN; the recoverable Z/M lifecycle is UNSOLVED.*
-> Branch `codex/topic4-m4-snn-native-exit` is unmerged, unpushed, and did not touch any Z/M worktree.
+> At this historical checkpoint the branch was unmerged/unpushed and did not touch any Z/M worktree;
+> current delivery status is recorded in the 2026-07-26 unified acceptance linked above.
 
 ---
 
@@ -247,7 +253,7 @@ wall 364s（build 107s + sim 257s）。**复现 M4 有界态**。
 不干扰并行 FCXR 线；`OMP=1`；`resource_log.jsonl` + `topic4_resource_monitor.py`。
 
 **git**：worktree `.worktrees/topic4-m4-snn-native-exit`，branch `codex/topic4-m4-snn-native-exit`，base `4d40b03`（clean，未混入 R4/FCXR）；
-commits `8109ccd`(spec) `d79d9f9`(persist 场+runner+tests) `69e431a`(Stage-1a 开环+diag) `c85e2ad`(asymmetric-p+machinery) `bb292e1`(verdict+diagnostics)（未 push、未合 main）。
+commits `8109ccd`(spec) `d79d9f9`(persist 场+runner+tests) `69e431a`(Stage-1a 开环+diag) `c85e2ad`(asymmetric-p+machinery) `bb292e1`(verdict+diagnostics)（当时未 push、未合 main）。
 
 ## 7. Provenance
 

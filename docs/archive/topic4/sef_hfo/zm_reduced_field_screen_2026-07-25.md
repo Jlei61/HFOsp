@@ -1,5 +1,9 @@
 # Reduced 2-D `S_L(x)+S_G` field screen — 判决 (2026-07-25)
 
+> **最终验收（2026-07-26）**：本线作为“matched-budget 局部抑制没有使同步轨道横向
+> 失稳”的 bounded NO-GO 验收；它不代表原始 Z/M SNN 的普遍结论，也不再继续迁移。
+> 统一口径见 `zm_carrier_exit_line_acceptance_2026-07-26.md`。
+
 **一句话**：**NO-GO（`both_stable`）**——在一个**新构造的双成分抑制池振子**上，把抑制反馈从"一个全局标量"
 换成"每个小区各管各的"，**并没有**让空间均匀的振荡失稳成相位错开的图案；每一个空间模态在每一个预注册
 兴奋度档位上都是衰减的。因此**不移植到全 SNN**。
@@ -7,7 +11,7 @@
 设计（跑前锁死）：`docs/superpowers/specs/2026-07-24-topic4-zm-reduced-field-Sl-Sg-design.md` rev3。
 实现计划：`docs/superpowers/plans/2026-07-25-topic4-zm-reduced-field-screen.md`。
 上游承接：`zm_ictal_carrier_gate_2026-07-24.md` §8–§10（发作载体门 NO-GO → Path-B）。
-分支 `codex/topic4-m4-snn-native-exit`（未 push）。
+分支 `codex/topic4-m4-snn-native-exit`（未合 main）。
 
 ---
 
