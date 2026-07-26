@@ -137,6 +137,17 @@ class MZSlowVarsConfig:
     calib_hist_edges: "np.ndarray | None" = None
     record_clip_identity: bool = False  # FCXR-RC1 clip audit: per-cell clip_count + max raw gErec/total (pure side-effect)
     z_frozen_E: "np.ndarray | None" = None  # FCXR Stage D: hold z_i frozen at this per-E field (requires use_z=False)
+    # ---- FCXR pump lifecycle: per-E activity-dependent load u_i + electrogenic pump (all OFF by default) ----
+    # u_i is an ACTIVITY-DEPENDENT INTRACELLULAR LOAD (Na/pump-inspired) -- never a Na concentration.
+    use_pump: bool = False         # master switch; False -> no state allocated, no float touched (byte parity)
+    pump_sensor_only: bool = False # u evolves but the membrane is byte-identical to pump-off (Imax must be 0)
+    pump_a_load: float = 0.0       # per-E-spike load jump (NOT scaled by dt)
+    pump_tau_ms: float = 0.0       # ms  pump-mediated load release time (clearance scaled by dt/tau_N)
+    pump_Imax: float = 0.0         # max electrogenic membrane effect; >0 requires pump_p0_E
+    pump_h: int = 3                # Hill exponent of phi(u)=u^h/(1+u^h); primary tier fixes 3
+    pump_p0_E: "np.ndarray | None" = None    # per-E baseline pump activation E_baseline[phi(u_i)] (shrunken)
+    pump_record_calibration: bool = False    # OBSERVER: cumulative per-cell sum phi(u) + spike counts
+    pump_interventions: "list | None" = None  # scheduled INTEGER-step interventions (see _normalize_pump_interventions)
 
 
 class MZSlowVars:
@@ -186,6 +197,32 @@ class MZSlowVars:
         self._eta_full = np.full(self.N, float(self.cfg.eta_m))
         self._eta_full[:self.NE] = self._eta_E
         self.phi = np.zeros(self.N)
+        # ---- FCXR pump lifecycle state (allocated ONLY when use_pump; off -> None -> byte parity) ----
+        self.u_pump_E = np.zeros(self.NE) if self.cfg.use_pump else None
+        self.pump_phi_sum_E = None
+        self.pump_spike_count_E = None
+        self.pump_phi_count = 0
+        self._pump_knockout_step = None                         # set by a scheduled current knockout
+        self._pump_set_load = {}                                # step -> field (one-shot load reset/injection)
+        self._pump_p0_E = None
+        self._pump_phi_last = None
+        self._pump_excess_last = None
+        if self.cfg.use_pump:
+            if self.cfg.pump_Imax > 0.0:                        # a live membrane effect NEEDS its baseline
+                if self.cfg.pump_p0_E is None:
+                    raise ValueError("pump_Imax>0 requires pump_p0_E (per-E baseline pump activation)")
+                p0 = np.asarray(self.cfg.pump_p0_E, float)
+                if p0.shape != (self.NE,) or not np.all(np.isfinite(p0)):
+                    raise ValueError(f"pump_p0_E must be a finite field of shape ({self.NE},), got {p0.shape}")
+                self._pump_p0_E = p0
+            if self.cfg.pump_record_calibration:
+                self.pump_phi_sum_E = np.zeros(self.NE)
+                self.pump_spike_count_E = np.zeros(self.NE, dtype=np.int64)
+            self._pump_knockout_step, self._pump_set_load = \
+                self._normalize_pump_interventions(self.cfg.pump_interventions)
+            for fld in self._pump_set_load.values():
+                if fld.shape != (self.NE,):
+                    raise ValueError(f"set_load field must have shape ({self.NE},), got {fld.shape}")
         # FCXR persistence sensor y_j (Hz) + presynaptic E->E relay availability x_j in [0,1] (E cells only).
         # ee_relay_send is the x_j(t-) snapshot the engine scatter reads BEFORE step() updates y/x this frame
         # (causal send scale). All three stay untouched unless cfg.use_x -> no effect on non-relay runs.
@@ -230,6 +267,10 @@ class MZSlowVars:
         self.trace_y_mean = []; self.trace_y_max = []
         self.trace_x_relay_mean = []; self.trace_x_relay_min = []
         self.trace_coop_engaged_frac = []; self.trace_coop_H_mean = []   # FCXR-HEO1 (appended when coop_A>0)
+        # FCXR pump traces (appended only when cfg.use_pump); excess traces only when it reaches the membrane
+        self.trace_u_mean = []; self.trace_u_max = []
+        self.trace_phi_pump_mean = []; self.trace_phi_pump_max = []
+        self.trace_pump_excess_mean = []; self.trace_pump_excess_max = []; self.trace_pump_excess_min = []
         # calibration observer (slow-off only): per-step histograms of E-cell I_I / I_E
         self.calib_hist_I_EI = []; self.calib_hist_I_EE = []
         # FCXR-RC1 clip-identity observer (pure side-effect; only allocated when record_clip_identity).
@@ -256,12 +297,16 @@ class MZSlowVars:
         self._z_sensor_last_E = np.asarray(I_I[:self.NE], float)
         if self.cfg.record_calib:
             self._record_calib(I_E, I_I)                        # pure side-effect (does not alter return)
-        if not self.cfg.use_z and not self.cfg.use_m and self.cfg.z_frozen_E is None:
+        ex = self._pump_excess_E()                              # None unless the pump reaches the membrane
+        if ex is None and not self.cfg.use_z and not self.cfg.use_m and self.cfg.z_frozen_E is None:
             return I_E - I_I                                    # EXACT byte-parity path (== membrane_step)
         inh = self.z * I_I if (self.cfg.use_z or self.cfg.z_frozen_E is not None) else I_I  # frozen z is applied
         I_net = I_E - inh
         if self.cfg.use_m:
             I_net = I_net - self._eta_full * self.m            # m==0 on I cells -> E-only adaptation current
+        if ex is not None:
+            I_net = I_net.copy()
+            I_net[:self.NE] -= ex                              # E-only electrogenic pump (I cells untouched)
         return I_net
 
     def uses_conductance_membrane(self):
@@ -418,6 +463,12 @@ class MZSlowVars:
         else:
             drive[:self.NE] = I_E[:self.NE]                   # partial: AMPA stays additive (byte-identical)
             g_rev[:self.NE] = gI * c.e_gaba + gM * c.e_k
+        ex_pump = self._pump_excess_E()                       # None -> no float touched (pump-off parity)
+        if ex_pump is not None:
+            # Electrogenic pump: an E-only CURRENT in the numerator of V_inf=(drive+g_rev)/(1+g_rel),
+            # i.e. tau_m dV/dt = ... - Imax*phi(u) + Imax*p0.  It is NOT a conductance: g_rel/g_rev
+            # (and hence tau_eff) are untouched, so the pump cannot shunt the membrane.
+            drive[:self.NE] -= ex_pump
         g_rel[:self.NE] = total
         if not (np.all(np.isfinite(drive)) and np.all(np.isfinite(g_rev))):
             raise FloatingPointError("non-finite MZ membrane term")
@@ -490,11 +541,94 @@ class MZSlowVars:
             phiE = phiE - (phiE / c.tau_phi) * dt
             self.phi[self.is_E] = np.maximum(phiE, 0.0)
             self.phi[spk & self.is_E] += c.delta_phi
+        if c.use_pump:
+            self._pump_step(spk, dt)
         self._record_traces(spk)
         # snapshot AFTER the slow update + trace record -> snapshots[label].z_E.mean() == trace_z_mean[step_i]
         if self._snap_steps is not None and self._step_i in self._snap_steps:
             self._capture(self._snap_steps[self._step_i])
         self._step_i += 1
+
+    # ------------------------------------------------------------------ pump plugin (off by default)
+    def _pump_excess_E(self):
+        """Baseline-centered electrogenic pump current on E cells at the CURRENT load u(t^-), or None
+        when the pump must not reach the membrane (off / sensor-only / after a scheduled knockout).
+
+        Formula pinned to src/topic4_mz_fcxr_pump.excess_pump_current by
+        tests/test_mz_slow_vars.py::test_membrane_uses_pre_step_load_and_step_applies_the_jump_after.
+        NO positive part: phi<p0 gives a negative excess (activation below the baseline reference).
+        """
+        c = self.cfg
+        if not c.use_pump or c.pump_sensor_only or c.pump_Imax <= 0.0:
+            self._pump_excess_last = None
+            return None
+        if self._pump_knockout_step is not None and self._step_i >= self._pump_knockout_step:
+            self._pump_excess_last = None                       # scheduled current knockout (u keeps evolving)
+            return None
+        uh = self.u_pump_E ** c.pump_h
+        ex = c.pump_Imax * (uh / (1.0 + uh) - self._pump_p0_E)
+        self._pump_excess_last = ex
+        return ex
+
+    def _pump_step(self, spk, dt):
+        """Load mass balance at the LOCKED causal order (spec §2.2): the membrane above already used
+        u(t^-); the clearance is evaluated at u(t^-) and the per-spike jump is added on top, so a
+        spike generated this step only reaches the pump current from the NEXT step.
+
+            u(t+dt) = max[0, u(t) + a_load*N_spike - (dt/tau_N)*phi(u(t))]
+
+        The jump carries no dt; the clearance carries dt/tau_N. A one-shot ``set_load`` intervention
+        registered for this step is applied LAST (first affected membrane call = step+1).
+        """
+        c = self.cfg
+        u = self.u_pump_E
+        if not np.all(np.isfinite(u)):                          # fail-fast: a blown-up candidate is failed
+            raise FloatingPointError("non-finite activity-dependent pump load u")
+        uh = u ** c.pump_h
+        phi = uh / (1.0 + uh)                                   # phi(u(t^-)) == what the membrane used
+        self._pump_phi_last = phi
+        spkE = spk[:self.NE]
+        if self.pump_phi_sum_E is not None:                     # calibration observer (pure side-effect)
+            self.pump_phi_sum_E += phi
+            self.pump_spike_count_E += spkE
+            self.pump_phi_count += 1
+        np.maximum(u + c.pump_a_load * spkE - (dt / c.pump_tau_ms) * phi, 0.0, out=u)
+        fld = self._pump_set_load.get(self._step_i)
+        if fld is not None:
+            np.copyto(u, fld)                                   # scheduled load reset / sufficiency injection
+
+    @staticmethod
+    def _normalize_pump_interventions(items):
+        """Validate scheduled interventions -> (knockout_step, {step: load_field}).
+
+        INTEGER steps only (no float-time equality). Two primitives, both prefix-preserving:
+          * ``pump_current_knockout``  membrane pump current = 0 from this step on; u keeps evolving.
+                                       First affected membrane call = this step.
+          * ``set_load``               one-shot u <- field at the END of this step (load reset,
+                                       sufficiency injection, uniform/shuffle matched controls).
+                                       First affected membrane call = this step + 1.
+        """
+        knockout, set_load = None, {}
+        for item in (items or []):
+            kind = item.get("kind")
+            step = item.get("step")
+            if not isinstance(step, (int, np.integer)) or bool(step != int(step)) or int(step) < 0:
+                raise ValueError(f"pump intervention step must be a non-negative integer, got {step!r}")
+            step = int(step)
+            if kind == "pump_current_knockout":
+                if knockout is not None:
+                    raise ValueError("at most one pump_current_knockout may be scheduled")
+                knockout = step
+            elif kind == "set_load":
+                fld = np.asarray(item["field"], float)
+                if fld.ndim != 1 or not np.all(np.isfinite(fld)) or fld.min() < 0.0:
+                    raise ValueError("set_load field must be a finite 1-D load field with values >= 0")
+                if step in set_load:
+                    raise ValueError(f"duplicate set_load intervention at step {step}")
+                set_load[step] = fld
+            else:
+                raise ValueError(f"unknown pump intervention kind {kind!r}")
+        return knockout, set_load
 
     # ------------------------------------------------------------------ traces
     def _record_traces(self, spk):
@@ -537,6 +671,18 @@ class MZSlowVars:
         if self.cfg.coop_A > 0.0:                             # FCXR-HEO1 cooperative engagement (coop on only)
             self.trace_coop_engaged_frac.append(float(self._coop_engaged_frac_last))
             self.trace_coop_H_mean.append(float(self._coop_H_mean_last))
+        if self.cfg.use_pump:
+            # u is POST-update (same convention as z/m); phi/excess are the values the membrane
+            # actually USED at this step, i.e. evaluated at u(t^-) -- documented +-1 step offset.
+            self.trace_u_mean.append(float(self.u_pump_E.mean()))
+            self.trace_u_max.append(float(self.u_pump_E.max()))
+            self.trace_phi_pump_mean.append(float(self._pump_phi_last.mean()))
+            self.trace_phi_pump_max.append(float(self._pump_phi_last.max()))
+            ex = self._pump_excess_last
+            if ex is not None:                                # only when the pump reaches the membrane
+                self.trace_pump_excess_mean.append(float(ex.mean()))
+                self.trace_pump_excess_max.append(float(ex.max()))
+                self.trace_pump_excess_min.append(float(ex.min()))
 
     def _record_calib(self, I_E, I_I):
         edges = self.cfg.calib_hist_edges
@@ -584,6 +730,12 @@ class MZSlowVars:
         if self.cfg.use_x:
             snap["x_E"] = self.x_relay.copy()        # relay availability (length NE)
             snap["y_E"] = self.y.copy()              # persistence sensor y_j (length NE)
+        if self.cfg.use_pump:
+            snap["u_E"] = self.u_pump_E.copy()       # activity-dependent load (length NE)
+            if self.pump_phi_sum_E is not None:      # CUMULATIVE sums -> per-block means by differencing
+                snap["pump_phi_sum_E"] = self.pump_phi_sum_E.copy()
+                snap["pump_spike_count_E"] = self.pump_spike_count_E.copy()
+                snap["pump_phi_count"] = int(self.pump_phi_count)
         self.snapshots[label] = snap
 
     @property
@@ -687,3 +839,18 @@ class MZSlowVars:
                     raise ValueError("asymmetric relay kinetics require BOTH tau_x_down and tau_x_up (or neither)")
                 if c.tau_x_down <= 0.0 or c.tau_x_up <= 0.0:
                     raise ValueError("tau_x_down and tau_x_up must be > 0 (asymmetric relay kinetics)")
+        # ---- FCXR pump lifecycle (per-E activity-dependent load u_i + electrogenic pump) ----
+        if not c.use_pump:
+            if c.pump_sensor_only or c.pump_Imax > 0.0 or c.pump_record_calibration or c.pump_interventions:
+                raise ValueError("pump_* options require use_pump=True")
+        else:
+            if not (c.pump_tau_ms > 0.0 and np.isfinite(c.pump_tau_ms)):
+                raise ValueError("use_pump requires a finite pump_tau_ms>0 (load release time)")
+            if not (c.pump_a_load >= 0.0 and np.isfinite(c.pump_a_load)):
+                raise ValueError("pump_a_load must be finite and >= 0")
+            if not (c.pump_Imax >= 0.0 and np.isfinite(c.pump_Imax)):
+                raise ValueError("pump_Imax must be finite and >= 0")
+            if int(c.pump_h) < 1:
+                raise ValueError("pump_h must be >= 1 (primary tier fixes 3)")
+            if c.pump_sensor_only and c.pump_Imax > 0.0:
+                raise ValueError("pump_sensor_only requires pump_Imax=0 (the membrane must stay untouched)")
