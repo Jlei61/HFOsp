@@ -31,7 +31,7 @@ import scipy.signal as ss
 import src.topic4_zm_ictal_carrier as CG
 import src.topic4_zm_carrier_gate_v2 as CGV2
 
-LOCK_VERSION = "zm_empirical_carrier_v1_2026-07-26"
+LOCK_VERSION = "zm_empirical_carrier_v1.1_2026-07-27_returning_event_contract"
 
 EPI_ROOT = "/mnt/epilepsia_data"
 E1146_REC = os.path.join(EPI_ROOT, "inv", "pat_114602", "adm_1146102", "rec_114600102")
@@ -302,6 +302,37 @@ def sha256_file(path):
             if h.name and f.tell() > (1 << 28):     # 256 MB prefix is enough to pin identity
                 break
     return h.hexdigest()
+
+
+def reference_contract_status(early_ictal_windows, returning_group_event_windows,
+                              geometry_path, min_n=3):
+    """Fail-closed availability audit for the empirical observation lock.
+
+    Ordinary seizure-free background windows are not substitutes for returning
+    group events: the latter are the event-duration/energy/extent comparator in
+    the scientific question.  The caller must pass descriptors explicitly
+    labelled ``returning_group_event``.
+    """
+    early = [r for r in early_ictal_windows
+             if r.get("kind") == "early_ictal" and r.get("stem")]
+    returning = [r for r in returning_group_event_windows
+                 if r.get("kind") == "returning_group_event" and r.get("path")]
+    missing = []
+    if len(early) < min_n:
+        missing.append(f"early_ictal_windows<{min_n}")
+    if len(returning) < min_n:
+        missing.append(f"returning_group_event_windows<{min_n}")
+    if not geometry_path or not os.path.exists(geometry_path):
+        missing.append("E1146_current_readout_geometry")
+    return dict(
+        sufficient=not missing,
+        min_n=int(min_n),
+        n_early_ictal=len(early),
+        n_returning_group_events=len(returning),
+        geometry_path=geometry_path,
+        missing=missing,
+        forbidden_substitution="generic seizure-free background cannot replace returning group events",
+    )
 
 
 # ================================================================ the lock

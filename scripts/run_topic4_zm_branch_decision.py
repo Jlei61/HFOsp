@@ -275,7 +275,7 @@ def phase_anchor(ctx, T_ms):
     for st in sel["states"]:
         t_star = int(st["bin_index"]) * bs
         targets.append((t_star, st))
-    targets.sort()
+    targets.sort(key=lambda x: (x[0], x[1]["bin_name"], x[1]["fast_phase"]))
     springs = np.array(coarse, dtype=int)
     captured = []
     for t_star, st in targets:
@@ -423,7 +423,15 @@ def summarize_continuation(run, locks, T_ms=T_CONT_MS):
     E = _cat(chunks, "E_vSEEG")[b0:]
     r = _cat(chunks, "r_all")[b0:]
     H = _cat(chunks, "H_spatial")[b0:]
+    slow_m = np.concatenate([c["_slow"]["m_core"] for c in chunks])[b0:]
     slow_S_G = np.concatenate([c["_slow"]["S_G"] for c in chunks])[b0:]
+    drift_by_coordinate = dict(
+        A_active=MC.drift_stats(A),
+        E_vSEEG=MC.drift_stats(E),
+        m_core=MC.drift_stats(slow_m),
+        S_G=MC.drift_stats(slow_S_G),
+    )
+    stationarity = MC.stationarity_gate(drift_by_coordinate)
     return dict(
         survived=bool(surv["survived"]), lifetime_ms=float(surv["lifetime_ms"]),
         end_reason=surv["end_reason"] or run["end_reason"],
@@ -438,12 +446,33 @@ def summarize_continuation(run, locks, T_ms=T_CONT_MS):
         H_spatial_mean=float(np.mean(H)) if H.size else 0.0,
         E_vSEEG_mean=float(np.mean(E)) if E.size else 0.0,
         duty_cycle=float(np.mean(r > 0.2 * np.max(r))) if r.size and np.max(r) > 0 else 0.0,
-        drift_A=MC.drift_stats(A), drift_E=MC.drift_stats(E), drift_S_G=MC.drift_stats(slow_S_G),
+        drift_A=drift_by_coordinate["A_active"],
+        drift_E=drift_by_coordinate["E_vSEEG"],
+        drift_m=drift_by_coordinate["m_core"],
+        drift_S_G=drift_by_coordinate["S_G"],
+        stationarity_ok=bool(stationarity["passed"]),
+        stationarity=stationarity,
         burn_in_ms=run["burn_in_ms"], n_bins_post_burn=int(d_post.size), wall_s=run["wall_s"])
 
 
+def dump_continuation_traces(path, run, locks):
+    """Per-bin series of one continuation (figure input; summaries alone cannot show a burst train
+    re-igniting vs a state that simply died)."""
+    chunks = run["chunks"]
+    arrays = {k: _cat(chunks, k).astype(np.float32)
+              for k in ("r_core", "r_surround", "r_all", "A_active", "H_spatial", "E_vSEEG",
+                        "n_grid_active")}
+    arrays["d_rest"] = _rest_series(chunks, locks).astype(np.float32)
+    for k in ("z_core", "z_surround", "m_core", "S_G"):
+        arrays[f"slow_{k}"] = np.concatenate([c["_slow"][k] for c in chunks]).astype(np.float32)
+    arrays["bin_ms"] = np.asarray(MC.BIN_MS)
+    arrays["burn_in_ms"] = np.asarray(run["burn_in_ms"])
+    arrays["d_rest_thresh"] = np.asarray(locks["d_rest_thresh"])
+    save_npz_atomic(path, **arrays)
+
+
 def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_REPLICATES,
-               resume=True, T_ms=T_CONT_MS):
+               resume=True, T_ms=T_CONT_MS, dump_traces=False):
     seed = ctx["S"]["seed"]
     root = os.path.join(OUT, "smoke" if ctx["smoke"] else "forks", f"seed{seed}")
     anchor_path = os.path.join(OUT, "anchors", f"seed{seed}", "anchor.json")
@@ -474,11 +503,21 @@ def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_RE
         for arm in arms:
             for rep in replicates:
                 key = f"{tag}|{arm}|{rep}"
-                if key in rows:
+                existing = rows.get(key)
+                # v1 summaries did not carry the mandatory bounded-drift /
+                # bounded-variance gate.  A negative v1 continuation remains a
+                # valid negative (stationarity cannot rescue a state that
+                # returned to rest), but any putative surviving v1 candidate
+                # must be rerun under v1.1 before it can count positively.
+                needs_stationarity_rerun = MC.needs_stationarity_rerun(existing)
+                if existing is not None and not needs_stationarity_rerun:
                     continue
                 bank = NB.build_noise_bank(ctx["cfg_sha"], seed, st["t_step"], rep)
                 run = run_continuation(ctx, state0, arm, bank, locks, T_ms=T_ms)
                 summ = summarize_continuation(run, locks, T_ms=T_ms)
+                if dump_traces:
+                    dump_continuation_traces(
+                        os.path.join(root, "traces", f"{tag}__{arm}__{rep}.npz"), run, locks)
                 rows[key] = dict(key=key, seed=int(seed), bin_name=st["bin_name"],
                                  fast_phase=st["fast_phase"], t_step=int(st["t_step"]),
                                  t_ms=float(st["t_ms"]), arm=arm, replicate=rep,
@@ -496,6 +535,146 @@ def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_RE
                       f"A={summ['A_active_mean']:.3f} r={summ['r_all_mean_hz']:.1f}Hz "
                       f"resets={summ['rest_returns']} wall={summ['wall_s']}s", flush=True)
     print(f"[fork] seed={seed} rows={len(rows)} -> {man_path}", flush=True)
+    return rows
+
+
+# ================================================================ phase: neighbourhood (Task 8)
+NB_ARMS = ("freeze_all", "freeze_zm", "freeze_zsg")
+NB_REPLICATES = ("noise_replay", "noise_resample_1")
+
+
+def _load_state_fields(path, nE, cfg_sha, eng_sha):
+    st, _ = CK.load_state_npz(path, expected_config_sha=cfg_sha, expected_engine_sha=eng_sha,
+                              expected_dt=DT)
+    return st, dict(z=np.asarray(st["slow.z"], float)[:nE],
+                    m=np.asarray(st["slow.m"], float)[:nE],
+                    S_G=float(np.asarray(st["slow.S_G"])))
+
+
+def phase_neighbourhood(ctx, base_state="bounded_mid__peak", arms=NB_ARMS,
+                        replicates=NB_REPLICATES, resume=True, T_ms=T_CONT_MS):
+    """Displace the SLOW fields of a real visited snapshot inside the locked neighbourhood and ask
+    the carrier question again. The fast state stays a naturally occurring microstate throughout."""
+    import src.topic4_zm_neighbourhood as NBH
+    import src.topic4_zm_anchor_states as AS
+
+    seed = ctx["S"]["seed"]
+    nE = int(ctx["S"]["NE"])
+    eng_sha = ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"]
+    anchor = json.load(open(os.path.join(OUT, "anchors", f"seed{seed}", "anchor.json")))
+    locks = anchor["locks"]
+    root = os.path.join(OUT, "neighbourhood", f"seed{seed}")
+    man_path = os.path.join(root, "neighbourhood.json")
+
+    # ---- representation 1: coarse decision PCA on the anchor's own 7-summary trajectory ----
+    tr = np.load(os.path.join(OUT, "anchors", f"seed{seed}", "anchor_traces.npz"))
+    sc = {k[5:]: tr[k] for k in tr.files if k.startswith("slow_")}
+    Q = AS.slow_feature_matrix(sc)
+    Q_std, std_ref = AS.robust_standardize(Q, anchor["selection"]["standardization"])
+    coarse = NBH.coarse_representation(Q_std, n_modes=2)
+    scale = NBH.trajectory_scale(Q_std)
+
+    # ---- representation 2: full-field PCA over the captured states ----
+    states = {f"{s['bin_name']}__{s['fast_phase']}": s for s in anchor["captured_states"]}
+    fields, raws = {}, {}
+    for tag, s in states.items():
+        raws[tag], fields[tag] = _load_state_fields(os.path.join(_ROOT, s["path"]), nE,
+                                                    ctx["cfg_sha"], eng_sha)
+    order = [t for t in states if t.startswith("bounded")]
+    field_pca = NBH.full_field_representation([fields[t] for t in order], n_modes=3)
+    X = np.array([np.concatenate([fields[t]["z"], fields[t]["m"], [fields[t]["S_G"]]])
+                  for t in order], float)
+    scores = (X - field_pca["mean"]) @ field_pca["components"].T
+    sd_scores = scores.std(axis=0)
+
+    if base_state not in fields:
+        raise SystemExit(f"{base_state} not captured for seed {seed}")
+    base_raw = raws[base_state]
+    base_vec = np.concatenate([fields[base_state]["z"], fields[base_state]["m"],
+                               [fields[base_state]["S_G"]]])
+    base_score = (base_vec - field_pca["mean"]) @ field_pca["components"].T
+
+    # ---- the locked displacement families (all are field reconstructions, never scalar edits) ----
+    probes = []
+    for k in (0, 1):
+        for sgn in (-1.0, +1.0):
+            c = base_score.copy()
+            c[k] += sgn * NBH.MAX_SD * sd_scores[k]
+            probes.append(dict(family="field_pca", label=f"pc{k+1}{'+' if sgn > 0 else '-'}",
+                               vec=field_pca["mean"] + c @ field_pca["components"]))
+    for lam, other in ((0.35, "bounded_early__peak"), (0.65, "bounded_late__peak")):
+        if other in fields:
+            v = np.concatenate([fields[other]["z"], fields[other]["m"], [fields[other]["S_G"]]])
+            probes.append(dict(family="trajectory_interp", label=f"interp_{other}_{lam}",
+                               vec=NBH.interpolate_fields(base_vec, v, lam)))
+    axis = np.asarray(ctx["axis"], float)
+    axis_n = (axis - axis.mean()) / (np.std(axis) + 1e-12)
+    for sgn in (-1.0, +1.0):
+        v = base_vec.copy()
+        amp = NBH.MAX_SD * float(np.std(fields[base_state]["z"]))
+        v[:nE] = np.clip(v[:nE] + sgn * amp * axis_n, 0.0, 1.0)
+        probes.append(dict(family="pathology_axis", label=f"axial_z{'+' if sgn > 0 else '-'}",
+                           vec=v))
+
+    done = {}
+    if resume and os.path.exists(man_path):
+        done = {r["key"]: r for r in json.load(open(man_path)).get("rows", [])}
+    rows = dict(done)
+    for pr in probes:
+        f = NBH.split_full_field(np.asarray(pr["vec"], float), nE)
+        st = {k: (v.copy() if hasattr(v, "copy") else v) for k, v in base_raw.items()}
+        st["slow.z"] = np.asarray(st["slow.z"], float).copy()
+        st["slow.m"] = np.asarray(st["slow.m"], float).copy()
+        st["slow.z"][:nE] = f["z"]
+        st["slow.m"][:nE] = f["m"]
+        st["slow.S_G"] = np.asarray(float(f["S_G"]))
+        coarse_q = dict(z_core=float(f["z"][ctx["core"]].mean()),
+                        z_surround=float(f["z"][~ctx["core"]].mean()),
+                        m_core=float(f["m"][ctx["core"]].mean()),
+                        m_surround=float(f["m"][~ctx["core"]].mean()), S_G=float(f["S_G"]))
+        axis_proj = NBH.pathology_axis_projection(f["z"], f["m"], ctx["axis"], ctx["core"])
+        for arm in arms:
+            for rep in replicates:
+                key = f"{pr['family']}|{pr['label']}|{arm}|{rep}"
+                if key in rows:
+                    continue
+                bank = NB.build_noise_bank(ctx["cfg_sha"], seed,
+                                           int(np.asarray(base_raw["t"])), rep)
+                run = run_continuation(ctx, st, arm, bank, locks, T_ms=T_ms)
+                summ = summarize_continuation(run, locks, T_ms=T_ms)
+                rows[key] = dict(key=key, seed=int(seed), family=pr["family"], label=pr["label"],
+                                 base_state=base_state, arm=arm, replicate=rep,
+                                 coarse_q=coarse_q, axis_projection=axis_proj,
+                                 config_sha=ctx["cfg_sha"], git_sha=_git_sha(),
+                                 bank_sha=bank["bank_sha"], T_cont_ms=float(T_ms),
+                                 neighbourhood_version=NBH.NEIGHBOURHOOD_VERSION,
+                                 peak_rss_gb=_rss_gb(), **summ)
+                write_json_atomic(man_path, dict(
+                    seed=int(seed), base_state=base_state, max_sd=NBH.MAX_SD,
+                    coarse_pca=dict(explained_variance_ratio=coarse["explained_variance_ratio"],
+                                    trajectory_scale=scale),
+                    field_pca=dict(explained_variance_ratio=field_pca["explained_variance_ratio"],
+                                   n_samples=field_pca["n_samples"], dim=field_pca["dim"],
+                                   score_sd=sd_scores.tolist()),
+                    standardization=std_ref, arms=list(arms), replicates=list(replicates),
+                    audit=dict(
+                        complete=False,
+                        representations_agree=False,
+                        local_carrier_window=False,
+                        formal_local_negative=False,
+                        family_results={},
+                        reason=(
+                            "exploratory scaffold only: this run has not yet "
+                            "closed all onset/early/mid/late anchors, two fast "
+                            "phases, four scientific arms and three paired-noise "
+                            "replicates required for a formal Branch T/F verdict"
+                        ),
+                    ),
+                    rows=sorted(rows.values(), key=lambda r: r["key"])))
+                print(f"[nbh] {key} survived={summ['survived']} life={summ['lifetime_ms']:.0f}ms "
+                      f"end={summ['end_reason']} A={summ['A_active_mean']:.3f} "
+                      f"resets={summ['rest_returns']} wall={summ['wall_s']}s", flush=True)
+    print(f"[nbh] seed={seed} rows={len(rows)} -> {man_path}", flush=True)
     return rows
 
 
@@ -547,7 +726,8 @@ def phase_smoke(ctx, T_anchor_ms=2000.0, T_cont_ms=500.0):
 # ================================================================ CLI
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--phase", required=True, choices=["anchor1", "anchor", "fork", "smoke"])
+    ap.add_argument("--phase", required=True,
+                    choices=["anchor1", "anchor", "fork", "neighbourhood", "smoke"])
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--T", type=float, default=15000.0)
     ap.add_argument("--confirm-run", action="store_true")
@@ -557,6 +737,8 @@ def main():
     ap.add_argument("--replicates", default=",".join(NB.PAIRED_REPLICATES))
     ap.add_argument("--T-cont", dest="T_cont", type=float, default=T_CONT_MS)
     ap.add_argument("--no-resume", action="store_true")
+    ap.add_argument("--dump-traces", action="store_true",
+                    help="also save per-bin continuation series (figure input)")
     a = ap.parse_args()
     if a.phase != "smoke" and not a.confirm_run:
         raise SystemExit("refusing a multi-minute N=40000 run without --confirm-run")
@@ -567,12 +749,20 @@ def main():
         phase_anchor(ctx, a.T)
     elif a.phase == "smoke":
         phase_smoke(ctx)
+    elif a.phase == "neighbourhood":
+        phase_neighbourhood(ctx, base_state=(a.states.split(",")[0] if a.states
+                                             else "bounded_mid__peak"),
+                            arms=tuple(x.strip() for x in a.arms.split(",") if x.strip())
+                            if a.arms != ",".join(ARMS_ORDER) else NB_ARMS,
+                            replicates=tuple(x.strip() for x in a.replicates.split(",") if x.strip())
+                            if a.replicates != ",".join(NB.PAIRED_REPLICATES) else NB_REPLICATES,
+                            resume=not a.no_resume, T_ms=a.T_cont)
     elif a.phase == "fork":
         phase_fork(ctx,
                    states_filter=[s.strip() for s in a.states.split(",")] if a.states else None,
                    arms=tuple(x.strip() for x in a.arms.split(",") if x.strip()),
                    replicates=tuple(x.strip() for x in a.replicates.split(",") if x.strip()),
-                   resume=not a.no_resume, T_ms=a.T_cont)
+                   resume=not a.no_resume, T_ms=a.T_cont, dump_traces=a.dump_traces)
 
 
 if __name__ == "__main__":

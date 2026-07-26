@@ -16,10 +16,12 @@ from __future__ import annotations
 
 import numpy as np
 
-METRICS_VERSION = "zm_minimal_carrier_v1_2026-07-26"
+METRICS_VERSION = "zm_minimal_carrier_v1.1_2026-07-27_stationarity"
 
 BIN_MS = 25.0            # source-space rate bin (matches the existing Z/M lifecycle runner)
 REST_KEYS = ("r_core", "r_surround", "A_active", "E_vSEEG", "H_spatial")
+MAX_ABS_REL_DRIFT = 0.50
+MAX_VARIANCE_RATIO = 4.0
 
 
 # ================================================================ source-space metrics
@@ -159,13 +161,61 @@ def drift_stats(x, half=True):
     """Monotonic-drift check over the latter half (spec §6.3 'no systematic monotonic drift')."""
     v = np.asarray(x, float)
     v = v[len(v) // 2:] if half else v
-    if v.size < 4:
-        return dict(slope_per_s=float("nan"), rel_drift=float("nan"), cv=float("nan"))
+    if v.size < 8:
+        return dict(slope_per_s=float("nan"), rel_drift=float("nan"), cv=float("nan"),
+                    variance_ratio=float("nan"))
+    v_full = v
     t = np.arange(v.size, dtype=float)
     slope = float(np.polyfit(t, v, 1)[0])
     m = float(np.mean(v))
+    h = v_full.size // 2
+    v0, v1 = float(np.var(v_full[:h])), float(np.var(v_full[h:]))
+    variance_ratio = v1 / max(v0, 1e-12)
     return dict(slope_per_s=slope, rel_drift=float(slope * v.size / m) if m else float("nan"),
-                cv=float(np.std(v) / m) if m else float("nan"))
+                cv=float(np.std(v) / m) if m else float("nan"),
+                variance_ratio=float(variance_ratio))
+
+
+def stationarity_gate(drift_by_coordinate, max_abs_rel_drift=MAX_ABS_REL_DRIFT,
+                      max_variance_ratio=MAX_VARIANCE_RATIO):
+    """Fail-closed stationarity gate for a putative surviving carrier.
+
+    A large oscillatory CV is allowed: bursting is not itself non-stationary.
+    What is forbidden is a systematic half-window drift or a variance that is
+    still expanding.  Missing coordinates are evidence gaps, never implicit
+    passes.
+    """
+    required = ("A_active", "E_vSEEG", "m_core", "S_G")
+    missing = [k for k in required if k not in drift_by_coordinate]
+    reasons = []
+    if missing:
+        reasons.append("missing:" + ",".join(missing))
+    for name in required:
+        d = drift_by_coordinate.get(name)
+        if not isinstance(d, dict):
+            continue
+        rel = float(d.get("rel_drift", float("nan")))
+        vr = float(d.get("variance_ratio", float("nan")))
+        if not np.isfinite(rel) or not np.isfinite(vr):
+            reasons.append(f"{name}:nonfinite")
+            continue
+        if abs(rel) > max_abs_rel_drift:
+            reasons.append(f"{name}:abs_rel_drift>{max_abs_rel_drift}")
+        if vr > max_variance_ratio:
+            reasons.append(f"{name}:variance_ratio>{max_variance_ratio}")
+    return dict(passed=not reasons, reasons=reasons,
+                max_abs_rel_drift=float(max_abs_rel_drift),
+                max_variance_ratio=float(max_variance_ratio))
+
+
+def needs_stationarity_rerun(row):
+    """Only old *surviving* rows need recomputation under metrics v1.1.
+
+    A returned-to-rest/runaway/plateau row cannot become a carrier by adding a
+    stationarity check, so its expensive SNN trajectory is backward-compatible
+    negative evidence.  An old survivor is ungradable and must be rerun.
+    """
+    return bool(row and row.get("survived") and "stationarity_ok" not in row)
 
 
 # ================================================================ taxonomy
@@ -201,11 +251,21 @@ def classify_replicas(replicas, ied_lifetime_ms, cred=0.95):
     repeated_reset = bool(np.median(resets) >= 2)
     runaway = sum(r.get("end_reason") == "runaway" for r in replicas)
     plateau = sum(r.get("end_reason") == "saturated_plateau" for r in replicas)
+    surviving = [r for r in replicas if bool(r["survived"])]
+    missing_stationarity = [r for r in surviving if "stationarity_ok" not in r]
+    nonstationary = [r for r in surviving if not bool(r.get("stationarity_ok", False))]
 
     if runaway >= max(1, n // 2 + 1):
         return dict(klass="runaway", posterior=post, k=k, n=n)
     if plateau >= max(1, n // 2 + 1):
         return dict(klass="saturated_plateau", posterior=post, k=k, n=n)
+    if k and missing_stationarity:
+        return dict(klass="no_evidence", posterior=post, k=k, n=n,
+                    reason="surviving replicas lack the preregistered stationarity gate")
+    if k and nonstationary:
+        return dict(klass="transient_carrier_like", posterior=post, k=k, n=n,
+                    reason="active survival is accompanied by drift or expanding variance",
+                    n_nonstationary=len(nonstationary))
     # Threshold-edge uncertainty -> indeterminate, never forced up or down (spec §6.3). The rule is
     # posterior MASS, not the median's distance to the line: a decision threshold is unresolved when
     # the data leave P(p > thr) between INDET_BAND. With 3 replicas that is usually the honest

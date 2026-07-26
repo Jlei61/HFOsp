@@ -21,7 +21,7 @@ from __future__ import annotations
 
 import numpy as np
 
-NEIGHBOURHOOD_VERSION = "zm_neighbourhood_v1_2026-07-26"
+NEIGHBOURHOOD_VERSION = "zm_neighbourhood_v1.1_2026-07-27_fail_closed"
 
 MAX_SD = 1.0            # §7.2: no coordinate more than one robust trajectory SD from observed range
 LATTICE = ((-1.0, 0.0), (1.0, 0.0), (0.0, -1.0), (0.0, 1.0), (-0.7, -0.7), (0.7, 0.7))
@@ -134,7 +134,8 @@ def split_full_field(vec, nE):
 
 # ================================================================ branch verdict
 def branch_verdict(visited_positive, local_positive_seeds, eligible_seeds,
-                   representations_agree, n_required_seeds=2):
+                   representations_agree, n_required_seeds=2, *,
+                   local_negative_seeds=(), evidence_complete=False):
     """The §7.3 pure decision. Unknown / missing evidence NEVER falls through to Branch F."""
     if visited_positive:
         return dict(verdict="carrier_at_visited_states", reason="carrier found at visited states")
@@ -145,10 +146,13 @@ def branch_verdict(visited_positive, local_positive_seeds, eligible_seeds,
     if n_local >= n_required_seeds:
         return dict(verdict="branch_T_slow_trajectory_repair",
                     reason=f"local carrier window in {n_local} eligible primary seeds")
-    if len(set(eligible_seeds)) >= 3 and n_local == 0:
+    n_negative = len(set(local_negative_seeds))
+    if (evidence_complete and len(set(eligible_seeds)) >= 3 and
+            n_negative >= 3 and n_local == 0):
         return dict(verdict="branch_F_fast_carrier_repair",
                     reason="no carrier at visited states or in the local neighbourhood, "
                            "replicated across three eligible seeds, representations agree")
     return dict(verdict="no_evidence",
-                reason=f"insufficient replication: {len(set(eligible_seeds))} eligible seeds, "
-                       f"{n_local} with a local positive")
+                reason=f"incomplete local audit: {len(set(eligible_seeds))} eligible seeds, "
+                       f"{n_local} local-positive, {n_negative} fully local-negative, "
+                       f"evidence_complete={bool(evidence_complete)}")

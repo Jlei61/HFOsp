@@ -74,8 +74,9 @@ def test_a_brief_trough_is_not_a_rest_return():
 
 
 # ---------------------------------------------------------------- taxonomy
-def _rep(survived, life, end=None, resets=0):
-    return dict(survived=survived, lifetime_ms=life, end_reason=end, rest_returns=resets)
+def _rep(survived, life, end=None, resets=0, stationarity_ok=True):
+    return dict(survived=survived, lifetime_ms=life, end_reason=end, rest_returns=resets,
+                stationarity_ok=stationarity_ok)
 
 
 def test_stable_carrier_requires_high_posterior_and_lifetime_beyond_ied():
@@ -110,6 +111,40 @@ def test_threshold_edge_returns_indeterminate_not_a_forced_class():
     out = MC.classify_replicas([_rep(True, 9000.0)] * 2 + [_rep(False, 800.0)], 120.0)
     assert out["klass"] == "probabilistically_indeterminate", out
     assert out["posterior"]["lo"] < 0.8 < out["posterior"]["hi"]
+
+
+def test_survival_with_drift_is_not_a_stable_carrier():
+    reps = [_rep(True, 8000.0, stationarity_ok=False) for _ in range(6)]
+    out = MC.classify_replicas(reps, 120.0)
+    assert out["klass"] == "transient_carrier_like"
+    assert out["n_nonstationary"] == 6
+
+
+def test_missing_stationarity_is_no_evidence_not_an_implicit_pass():
+    reps = [_rep(True, 8000.0) for _ in range(6)]
+    for r in reps:
+        r.pop("stationarity_ok")
+    out = MC.classify_replicas(reps, 120.0)
+    assert out["klass"] == "no_evidence"
+    assert "stationarity" in out["reason"]
+
+
+def test_stationarity_gate_allows_oscillatory_cv_but_rejects_drift_and_variance_growth():
+    good = {k: dict(rel_drift=0.1, variance_ratio=1.5, cv=3.0)
+            for k in ("A_active", "E_vSEEG", "m_core", "S_G")}
+    assert MC.stationarity_gate(good)["passed"]
+    bad = {k: dict(v) for k, v in good.items()}
+    bad["A_active"]["rel_drift"] = 0.8
+    assert not MC.stationarity_gate(bad)["passed"]
+    bad = {k: dict(v) for k, v in good.items()}
+    bad["E_vSEEG"]["variance_ratio"] = 5.0
+    assert not MC.stationarity_gate(bad)["passed"]
+
+
+def test_only_old_survivors_require_stationarity_rerun():
+    assert MC.needs_stationarity_rerun(dict(survived=True))
+    assert not MC.needs_stationarity_rerun(dict(survived=False))
+    assert not MC.needs_stationarity_rerun(dict(survived=True, stationarity_ok=False))
 
 
 def test_empty_evidence_is_no_evidence_not_a_negative():

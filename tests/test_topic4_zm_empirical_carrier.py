@@ -119,3 +119,15 @@ def test_real_reference_resolver_is_honest_about_availability():
     w = EC.resolve_early_ictal_windows(fake_seizure)
     assert len(w) == 1 and w[0]["crop_start_sec"] >= 0
     assert EC.resolve_early_ictal_windows([dict(eeg_onset_epoch=0.0, seizure_id="Y")]) == []
+
+
+def test_generic_interictal_background_cannot_substitute_for_returning_events(tmp_path):
+    geo = tmp_path / "geometry.npz"
+    geo.write_bytes(b"x")
+    early = [dict(kind="early_ictal", stem=f"s{i}") for i in range(3)]
+    generic = [dict(kind="interictal", path=f"p{i}") for i in range(10)]
+    out = EC.reference_contract_status(early, generic, str(geo), min_n=3)
+    assert not out["sufficient"]
+    assert out["n_returning_group_events"] == 0
+    returning = [dict(kind="returning_group_event", path=f"p{i}") for i in range(3)]
+    assert EC.reference_contract_status(early, returning, str(geo), min_n=3)["sufficient"]
