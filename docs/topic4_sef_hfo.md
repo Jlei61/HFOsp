@@ -32,6 +32,17 @@
 > 能否把 runaway 变成 bounded high-recruitment bout。给其他 agent 的精确 gate、复现锚、no-go 边界和图路径见
 > `docs/archive/topic4/sef_hfo/mz_conductance_stage_handoff_2026-07-20.md`。
 >
+> **FCXR-HEO 线最终验收（2026-07-26）**：recurrent-only conductance + smooth saturation 保住了间期
+> 工作点并消除了 runaway；cooperative recurrent gain 进一步产生了约 15.6 Hz、振幅有界、跨区域相位锁定的
+> 高活动振荡分支。但真实 E1146 的目标是约 3 Hz 尖波、`1–80 Hz` 宽带抬升，当前模型则是低频受压的
+> `13–30 Hz` 主导窄带分支；HEO3 的四项联合目标窗仍为 0，两核仍同起同落。故该线只验收为
+> **bounded coherent common-mode oscillatory branch / 受控机制中间态**，不验收为发作态、limit cycle
+> 或完整 lifecycle。逐细胞适应差异承载了有限的拓宽，外加空间摆放只改变指标权衡，未确立方向性机制。
+> 下一阶段冻结 fast substrate，先做 Floquet / virtual-SEEG 审计，再只引入逐细胞 Na-like load →
+> pump-equivalent recovery；详见
+> `docs/archive/topic4/sef_hfo/mz_fcxr_heo_line_acceptance_2026-07-26.md` 与
+> `docs/superpowers/specs/2026-07-26-topic4-mz-fcxr-pump-lifecycle-design.md`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
@@ -907,6 +918,9 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
   - `docs/archive/topic4/sef_hfo/mz_conductance_stage_handoff_2026-07-20.md` —— **其他 agent 的唯一入口**：分阶段 gate、当前安全/禁止 claim、复现锚、下一机制线和 no-touch 规则。
   - `docs/archive/topic4/sef_hfo/mz_conductance_dynamics_reflection_and_next_model_2026-07-20.md` —— 当前结果的动力学反思：conductance/global/M 各自解决了什么、为什么仍只有 terminal runaway、为何下一步转向 E→E presynaptic resource。
   - `results/paper-ready-figure/fig_mz_conductance_current_dynamics/figures/` —— 当前阶段机制图、PDF、metadata 和中文 README；只展示“间期轴向事件 → terminal runaway”，不是最终可恢复发作态图。
+- **FCXR-HEO 后续机制线（2026-07-26 最终收口）**：
+  - `docs/archive/topic4/sef_hfo/mz_fcxr_heo_line_acceptance_2026-07-26.md` —— RC1→Stage D→LC1→HEO1/2/3 的统一验收、三张关键图的最终读法、允许/禁止 claim；最终标签为 **bounded coherent common-mode oscillatory branch**。
+  - `docs/superpowers/specs/2026-07-26-topic4-mz-fcxr-pump-lifecycle-design.md` —— 下一阶段唯一入口：先诊断当前周期样分支与真实读出，再以逐细胞 Na-like load / pump-equivalent recovery 单独解决 termination、postictal memory 与统计恢复。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档
