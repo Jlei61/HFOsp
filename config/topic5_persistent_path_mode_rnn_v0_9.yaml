@@ -1,0 +1,67 @@
+contract:
+  name: topic5_persistent_path_mode_rnn_v0_9
+  version: "0.9"
+  source_spec: docs/superpowers/specs/2026-07-26-topic5-persistent-path-mode-rnn-v0_9.md
+  target_sealed: true
+  ab_label_forbidden: true
+  iei_forbidden: true
+  component_persistent_for_event: true
+  prefix_only_posterior: true
+
+inputs:
+  dataset: results/topic5_interictal_rank_distribution/dataset_v0_4
+  axis_prior: results/topic5_structured_axis_graph/axis_prior_v1_fast
+  aggregate_prior: results/topic5_structured_axis_graph/transition_skeleton_prior_v0_7
+  path_mode_prior: results/topic5_structured_axis_graph/path_mode_prior_v0_9
+  expected_subjects: 34
+
+prior:
+  mode_counts: [1, 2, 3, 4]
+  axis_floor: 0.20
+  neighbors: 2
+  factorization_seed: 20260726
+  nmf_max_iter: 1000
+  train_tie_fraction_ceiling: 0.001
+
+model:
+  local_offset_dim: 1
+  stop_calibration_weight: 0.10
+  endpoint_source_weight: 0.00
+
+training:
+  learning_rate: 0.001
+  local_learning_rate: 0.002
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  batch_events: 192
+  pilot_shared_steps: 512
+  pilot_calibration_steps: 256
+  formal_shared_coverage_cycles: 2
+  formal_calibration_coverage_cycles: 4
+  formal_updates_per_patient: 8
+  seeds: [20260726, 20260727, 20260728]
+
+evaluation:
+  pilot_rollouts: 1500
+  formal_rollouts: 5000
+  rank_distribution_bins: 10
+  random_path_projections: 48
+  path_quantiles: 200
+  path_max_events: 1000
+  pilot_min_patient_seed_better: 6
+  pilot_min_subjects_better: 2
+  pilot_seed_rank_stability_min: 0.40
+  formal_min_patients_better: 18
+  formal_fdr_q: 0.05
+
+resources:
+  conda_env: cuda_env
+  cpu_threads_per_process: 6
+  gpu_memory_fraction_per_process: 0.30
+  max_parallel_gpu_processes: 6
+
+outputs:
+  root: results/topic5_structured_axis_graph
+  prior: results/topic5_structured_axis_graph/path_mode_prior_v0_9
+  pilot: results/topic5_structured_axis_graph/screen_persistent_path_mode_v0_9
+  formal: results/topic5_structured_axis_graph/formal_persistent_path_mode_v0_9

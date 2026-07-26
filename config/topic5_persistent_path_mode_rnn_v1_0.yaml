@@ -1,0 +1,71 @@
+contract:
+  name: topic5_persistent_path_mode_rnn_v1_0
+  version: "1.0"
+  source_spec: docs/superpowers/specs/2026-07-27-topic5-persistent-path-mode-rnn-v1_0-formal.md
+  target_sealed: true
+  ab_label_forbidden: true
+  iei_forbidden: true
+  component_persistent_for_event: true
+  prefix_only_posterior: true
+  primary_scope: contact_rank_distribution
+
+inputs:
+  dataset: results/topic5_interictal_rank_distribution/dataset_v0_4
+  axis_prior: results/topic5_structured_axis_graph/axis_prior_v1_fast
+  aggregate_prior: results/topic5_structured_axis_graph/transition_skeleton_prior_v0_7
+  path_mode_prior: results/topic5_structured_axis_graph/path_mode_prior_v0_9
+  expected_subjects: 34
+
+prior:
+  mode_counts: [2]
+  axis_floor: 0.20
+  neighbors: 2
+  factorization_seed: 20260726
+  nmf_max_iter: 1000
+  train_tie_fraction_ceiling: 0.001
+
+model:
+  local_offset_dim: 1
+  stop_calibration_weight: 0.10
+  endpoint_source_weight: 0.00
+
+training:
+  learning_rate: 0.001
+  local_learning_rate: 0.002
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  batch_events: 1024
+  pilot_shared_steps: 512
+  pilot_calibration_steps: 256
+  formal_shared_coverage_cycles: 2
+  formal_calibration_coverage_cycles: 4
+  formal_updates_per_patient: 8
+  seeds: [20260726, 20260727, 20260728]
+
+evaluation:
+  pilot_rollouts: 1500
+  formal_rollouts: 5000
+  rank_distribution_bins: 10
+  random_path_projections: 48
+  path_quantiles: 200
+  path_max_events: 1000
+  formal_min_patients_better: 18
+  formal_fdr_q: 0.05
+  primary_metrics: [participation_mae, rank_wasserstein]
+  secondary_metrics:
+    - heldout_event_nll
+    - precedence_mae
+    - path_sliced_wasserstein
+
+resources:
+  conda_env: cuda_env
+  cpu_threads_per_process: 6
+  gpu_memory_fraction_per_process: 0.12
+  max_parallel_gpu_processes: 8
+  min_mem_available_gb: 64
+
+outputs:
+  root: results/topic5_structured_axis_graph
+  prior: results/topic5_structured_axis_graph/path_mode_prior_v0_9
+  pilot: results/topic5_structured_axis_graph/screen_persistent_path_mode_v0_9
+  formal: results/topic5_structured_axis_graph/formal_persistent_path_mode_v1_0

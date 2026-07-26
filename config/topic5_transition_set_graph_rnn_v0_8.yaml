@@ -1,0 +1,53 @@
+contract:
+  name: topic5_transition_set_graph_rnn_v0_8
+  version: "0.8"
+  status: invalidated_observed_contact_ranks_are_unique
+  source_spec: docs/superpowers/specs/2026-07-26-topic5-transition-set-graph-rnn-v0_8.md
+  ictal_target_read_before_interictal_gate_forbidden: true
+  ab_label_forbidden: true
+  patient_axis_sign_is_arbitrary: true
+  transition_skeleton_train80_only: true
+  one_action_is_one_rank_set: true
+
+inputs:
+  dataset: results/topic5_interictal_rank_distribution/dataset_v0_4
+  axis_prior: results/topic5_structured_axis_graph/transition_skeleton_prior_v0_7
+  expected_subjects: 34
+
+model:
+  structured_ranks: [0, 1, 2, 3, 4]
+  local_offset_dim: 1
+  stop_calibration_weight: 0.10
+  endpoint_source_weight: 0.00
+
+training:
+  learning_rate: 0.001
+  local_learning_rate: 0.002
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  batch_events: 256
+  pilot_shared_steps: 512
+  pilot_calibration_steps: 256
+  formal_shared_coverage_cycles: 2
+  formal_calibration_coverage_cycles: 4
+  formal_updates_per_patient: 8
+  seeds: [20260726, 20260727, 20260728]
+
+evaluation:
+  pilot_rollouts: 1500
+  formal_rollouts: 5000
+  rank_distribution_bins: 10
+  random_path_projections: 48
+  path_quantiles: 200
+  path_max_events: 1000
+
+resources:
+  conda_env: cuda_env
+  cpu_threads_per_process: 8
+  gpu_memory_fraction_per_process: 0.24
+  max_parallel_gpu_processes: 9
+
+outputs:
+  root: results/topic5_structured_axis_graph
+  pilot: results/topic5_structured_axis_graph/screen_transition_set_v0_8
+  formal: results/topic5_structured_axis_graph/formal_transition_set_v0_8
