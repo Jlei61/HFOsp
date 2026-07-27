@@ -325,8 +325,18 @@ ARM_FREEZE_TABLE = {
 }
 #: NOT a primary arm (spec §2.2): freezing the pool OUTPUT while its sensor keeps drifting is mixed
 #: semantics, so it carries a different name and can never support a carrier verdict.
-DIAGNOSTIC_ARMS = {"freeze_sg_output_only": dict(freeze_z=True, freeze_m=True,
-                                                 freeze_sg_family=False, freeze_sg_output_only=True)}
+DIAGNOSTIC_ARMS = {
+    "freeze_sg_output_only": dict(
+        freeze_z=True, freeze_m=True,
+        freeze_sg_family=False, freeze_sg_output_only=True,
+    ),
+    # Phase 2B only: let the specified Z recovery and M adaptation evolve
+    # together while the minimal fast carrier's shared pool is held fixed.
+    # This is not a discovery arm and can never establish a carrier window.
+    "dynamic_zm_freeze_sg": dict(
+        freeze_z=False, freeze_m=False, freeze_sg_family=True,
+    ),
+}
 
 
 @dataclasses.dataclass(frozen=True)

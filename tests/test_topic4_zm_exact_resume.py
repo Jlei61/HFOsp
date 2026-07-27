@@ -229,6 +229,15 @@ def test_output_only_sg_freeze_is_a_separate_non_primary_arm(reference):
     assert float(slow.inner.mu_G) != float(snap["slow.mu_G"]), "sensor state must keep drifting"
 
 
+def test_phase2b_joint_zm_recovery_arm_freezes_only_shared_pool():
+    pol = FS.FreezePolicy.for_arm("dynamic_zm_freeze_sg")
+    assert not pol.is_primary
+    assert not pol.freeze_z
+    assert not pol.freeze_m
+    assert pol.freeze_sg_family
+    assert not pol.freeze_sg_output_only
+
+
 def test_arm_freeze_table_is_exactly_the_spec_matrix():
     assert set(FS.ARM_FREEZE_TABLE) == {"dynamic_replay", "freeze_z", "freeze_zm", "freeze_zsg",
                                         "freeze_all", "dynamic_z_only"}
