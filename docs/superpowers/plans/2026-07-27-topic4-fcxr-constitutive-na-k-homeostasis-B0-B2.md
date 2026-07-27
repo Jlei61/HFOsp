@@ -1,14 +1,26 @@
 # FCXR-ION 实施计划：Phase B0–B2
 
-日期：2026-07-27（rev2，随 spec rev3 同步；新增 artifact preflight、f 数值门、校准判决分档）
+日期：2026-07-27（rev3，随 spec rev4 同步；异质初始化器、空格合同、T7 五条门重写）
 
 状态：**IMPLEMENTATION PLAN。本文件不授权立即启动 40k 长仿真；每个仿真 stage 需 `--confirm-run`。**
 
 设计来源（唯一入口）：
-`docs/superpowers/specs/2026-07-27-topic4-fcxr-constitutive-na-k-homeostasis-design.md`（**rev3**）
+`docs/superpowers/specs/2026-07-27-topic4-fcxr-constitutive-na-k-homeostasis-design.md`（**rev4**）
 
-⚠️ spec rev3 修正了 rev2 的核心方程错误（背景 Na/K 通量缺失）。**本 plan 的所有离子方程以 rev3 为准**；
+⚠️ spec rev4 把方程改为**偏差形式**（rev3 的常数形式在空格上破坏静息不动点）。**本 plan 的所有离子方程以 rev4 为准**；
 rev2 的 `J_Na_rest = 3I₀(1−f)` 与「110 倍动态范围」均已作废，dial 也已从 `f` 改名重定义为 `f'`。
+
+**rev3（第三轮审阅）改动**：
+
+| 位置 | 改动 |
+|---|---|
+| T2 §4 | 顺带落盘**逐细胞基线率场** `b0_baseline_rate_field.npz` + sha256，作为异质初始化器的输入（零额外仿真） |
+| T3 §5 | 新增偏差形式导数与 `heterogeneous_steady_state`；新增**空格静息不动点**与**异质初始化残差**两条测试（各带反向回归） |
+| T4 §6 | 可行性表的比对候选改为 `{0.5, 1.0, 2.0}`；可行性门改为"静息不动点（含空格）" |
+| T5 §7 | 初始状态改为异质预平衡；**修正测试 11 的空格合同**（旧写法会让空格以 +0.28221 mM/s 自己积钾） |
+| T6 §8 | Gate H 新增第 4 项异质初始化残差（**逐细胞/逐格 q95/q99/max，群体均值不算通过**）+ 两个新 FAIL 分支 |
+| T7 §9 | 候选集 → `{0.5, 1.0, 2.0}`（`1.0` primary）；**五条门全部重写**（旧三条经实算全部失效）；tie-break 由"取最大"改为"最接近 1.0" |
+| T8 §10 | 探针与验证运行改用异质预平衡；块间趋势须逐细胞/逐格报告 |
 
 上一代际终局：
 `docs/archive/topic4/sef_hfo/mz_fcxr_pump_lifecycle_gate_Ia_2026-07-27.md`
@@ -201,6 +213,16 @@ python scripts/run_topic4_fcxr_ion.py --stage b0-units
 一次 40k：arm-C 泵关配置（**无**离子层）、`noise_seed = 202`、`T = 11 s`，与已接受的泵关臂**逐参数一致**，
 因此同时是一次**复现性检查**（`mean_rate_hz` 应复现 4.158 Hz）。
 
+**这次运行同时落盘异质初始化器的输入（rev3 新增，闭合 spec §4.2c）**：本 task 已经要跑这条泵关轨迹，
+顺带写出**逐细胞基线放电率场** `r_i`（E 与 I 分开，燃烧期之后的窗口平均）即可，**零额外仿真成本**：
+
+- 产物 `b0_baseline_rate_field.npz`：`rate_E`（`N_E` 个 float32）、`rate_I`、`cell_voxel`（细胞→格索引）、
+  `n_cells_per_voxel`（含**哪些格是空的**）、窗口定义、`noise_seed`；
+- 记录该文件的 **sha256**，T5/T6/T8 的初始化器必须引用同一个哈希；
+- 体量约 32000 + 8000 个 float32 ≈ 160 KB，不触碰"不保存 `N_cell × T` dense state"的资源合同。
+
+**没有这个率场就不得进入 T8**：单一全局速率的标量稳态会留下 11 s 暴露不出来的缓慢空间重排（spec §4.2c）。
+
 ### Gate（B0-2）
 
 ```text
@@ -231,7 +253,13 @@ K_i_from_Na_i(Na_i, *, K_i0, Na_i0)
 E_K(K_o, K_i, *, RTF=26.64)
 background_fluxes(I_pump_0, beta)         # -> (J_Na_0 = 3*I0,  J_K_0 = 2*beta*I0)   常数
 q_ion_from_fprime(fp, *, J_Na_0, r0)      # -> q_ion = J_Na_0 * fp / r0
-interictal_steady_state(q_ion, r)         # -> (Na_star, K_o_star)  2D 联立解
+interictal_steady_state(q_ion, r)         # -> (Na_star, K_o_star)  2D 联立解（同质，仅用于解析表）
+
+# rev3 新增（spec §4.1/§4.2 偏差形式 + §4.2c 异质初始化器）
+dNa_dt(Na_i, K_o, spikes, *, q_ion)                    # = q_ion*S - 3*(I_pump - I_pump_0)
+dKo_dt(K_o, r_bar, I_pump_bar, n_cells, K_o_nb, ...)   # 全部偏差项；n_cells==0 时 spike 项与泵偏差项均为 0
+heterogeneous_steady_state(rate_E, rate_I, cell_voxel, *, q_ion)
+    # -> (Na_star[per cell], K_o_star[per voxel], n_iter, residual)  §4.2c 的不动点迭代
 ```
 
 ### Tests first（每条都是 spec §3 的一个子句）
@@ -242,10 +270,19 @@ interictal_steady_state(q_ion, r)         # -> (Na_star, K_o_star)  2D 联立解
 4. `K_i = 140 + (18 − Na_i)` 代数闭合；
 5. `E_K(4.0, 140.0) == −94.71 mV`（2 位小数）；
 6. `background_fluxes`：`J_Na_0 = 0.06047`、`J_K_0 = 0.28221 mM/s`（5 位有效数字），**与 `f'` 无关**；
-7. **静息不动点（rev3 的核心回归）**：无 spike、`Na_i = 18`、`K_o = 4` 时
+7. **静息不动点（核心回归）**：无 spike、`Na_i = 18`、`K_o = 4` 时
    `d[Na]_i/dt` 与 `d[K]_o/dt` **都精确为 0**（到机器精度）。
-   **同时附一条反向回归**：若去掉 `J_K,0`（即 rev2 的写法），`d[K]_o/dt` 必须回到 `−2β·I₀ ≈ −0.2822`
-   ——这条测试锁死了本次修正，防止将来有人"简化"回去；
+   **两条反向回归**，分别锁死两次修正、防止将来有人"简化"回去：
+   (a) 去掉背景通量（rev2 写法）→ `d[K]_o/dt` 必须回到 `−2β·I₀ ≈ −0.2822`；
+   (b) 用 rev3 的常数写法（保留常数 `J_K,0` 但把空格泵项置零）→ 空格必须回到 `+0.28221`；
+7b. **空格静息不动点（rev3 新增，spec §4.2 空格合同）**：`n_cells = 0` 且 `K_o = 4` 时
+   `d[K]_o/dt` **精确为 0**。这是 rev3 的 P0：空格是采样缺口不是无组织区，
+   泵项取未解析组织的静息值 `I_pump_0`，只把 spike 超额置零；
+7c. **异质初始化残差（rev3 新增，spec §4.2c）**：给一个 E/I 与空间都不均匀的合成率场，
+   `heterogeneous_steady_state` 的输出代回 `dNa_dt`/`dKo_dt` 后，
+   **逐细胞与逐格的 max |残差|** 都 < 1e-8；且断言含空格的率场也收敛（空格取 `I_pump_0`）。
+   **同时附一条反向回归**：用单一全局标量稳态初始化同一个异质率场，
+   逐细胞残差的 q99 必须**显著非零**——证明这条测试真的能区分两种初始化；
 8. `f'` ≤ 0 **抛异常**，不得静默 clip；`f'` > 1 **允许**（它是倍数不是比例）；
 9. `interictal_steady_state`：`f'=1, r=r0` 给 `(Na*, K_o*) ≈ (20.07, 4.11)`，
    `r=50 Hz` 给 `K_o* ≈ 5.28`（2 位小数）；
@@ -280,8 +317,9 @@ pytest -q tests/test_topic4_fcxr_ion.py
 
 1. `test_every_inherited_param_has_a_single_source_label`；
 2. `test_no_effective_param_is_labelled_inherited`（防止把自己的闭合假设伪装成继承）；
-3. `test_analytic_feasibility_reproduces_the_spec_table`（对 `f ∈ {1.0, 0.5, 0.25}` 三行逐值比对）；
-4. `test_feasibility_gate_rejects_negative_rest_leak`。
+3. `test_analytic_feasibility_reproduces_the_spec_table`（对 `f' ∈ {0.5, 1.0, 2.0}` 三行逐值比对；
+   spec §3.2 表里另外两行 `0.25` / `4.0` 是**参考行不是候选**，一并比对但标注 out-of-candidate-set）；
+4. `test_feasibility_gate_rejects_broken_rest_fixed_point`（含空格那一支）。
 
 产物：`b0_parameter_provenance.json`、`b0_analytic_feasibility.json`。
 
@@ -303,8 +341,11 @@ pump_flux_all   (N,)
 E_K_all         (N,)
 grid_spikes_E / grid_spikes_I
 cell_to_grid    (N,)  int   由 net["pos"] 预计算
-n_per_grid      (32,32) int 占用数（空格 -> 源项 0）
+n_per_grid      (32,32) int 占用数（空格 -> 只把 spike 超额置零；泵取 I_pump_0，见 spec §4.2 空格合同）
 ```
+
+**初始状态不是常数**：`Na_i_all` / `K_o_grid` 由 §4.2c 的 `heterogeneous_steady_state`
+从 T2 落盘的 `b0_baseline_rate_field.npz` 生成（引用其 sha256），**不得**用单一全局标量稳态填充。
 
 ### `IonHomeostaticMZAdapter` 委托合同（spec §6 rev3）
 
@@ -340,12 +381,17 @@ def __getattr__(self, name):        # 未覆盖的一切原样委托；不存在
 5  apply_currents 与 membrane_terms 对称加同一离子电流（不 raise、不静默失效）
 5b full-conductance 集成测试：走真实 simulate_kick 的电导分支，而非只做单元级调用
 6  resting equilibrium：无 spike -> Na_i、K_o 不动
+6b EMPTY-voxel resting equilibrium：n_g = 0 且 K_o = 4 时 dK_o/dt 精确为 0（rev3 的 P0-1 回归）
+6c heterogeneous init residual：用 T2 的真实率场初始化后，逐细胞与逐格残差的
+   q95/q99/max 都过门；反向回归=单一全局标量初始化时 q99 显著非零
 7  single-spike Na/K update：一次 spike 的 Na 增量 = q_ion，格内 K 增量 = beta*q_ion/n_g
-7b background fluxes present：无 spike 时 J_Na_0/J_K_0 使两个导数精确为 0
+7b deviation form is exact：无 spike 时两个导数精确为 0，且该性质**与 occupancy 无关**
 8  3:2 pump flux identity：同一 I_pump 在 Na 方程系数 3、K 方程系数 2*beta
 9  finite-volume K budget closure：源 − (泵回收+清除+胶质) − 扩散净通量 与 Δ总胞外钾 相对误差 < 1e-10
 10 zero-flux boundary：扩散净通量恒为 0（角/边格邻居数 2/3）
-11 empty-voxel handling：n_g = 0 时源项与泵项为 0，清除与扩散照常
+11 empty-voxel handling：n_g = 0 时**只有 spike 超额项为 0**；泵项取未解析组织的静息值
+   I_pump_0（偏差为 0），清除、胶质与扩散照常。**不得**把泵项整体置零——那等于宣称空格无组织，
+   会让空格以 +0.28221 mM/s 自己积钾（rev3 的 P0-1）
 12 grid-resolution：16/32/64 的总预算与粗粒化场一致（**不**要求逐格相同）
 13 multi-rate convergence：dt_ion ∈ {0.25,0.5,1,2} ms 收敛
 14 checkpoint/restart identity
@@ -376,14 +422,20 @@ pytest -q tests/test_mz_slow_vars.py tests/test_mz_full_conductance_spatial_rela
 ### 三项检验（spec §9，措辞已订正：**不得**暗示 ion-conserving）
 
 1. **ODE balance residual**：无 spike 时静息不动点正确，`|d[Na]_i/dt|`、`|d[K]_o/dt|` → 0；
+   **含空格**（`n_g = 0` 必须同样为 0，rev3 的 P0-1）；
 2. **finite-volume K budget closure**：相对误差 < 1e-10，零通量边界净通量为 0；
-3. **pump 3:2 flux identity**。
+3. **pump 3:2 flux identity**；
+4. **异质初始化残差（rev3 新增，spec §4.2c）**：用 T2 的真实率场初始化后立即取残差 ——
+   **逐细胞** `|d[Na]_i/dt|` 与**逐格** `|d[K]_o,g/dt|` 的 **q95 / q99 / max** 全部过门。
+
+> **群体均值平稳一律不算通过。** 异质基底上均值可以平得很好，同时底下有一个 11 s 完全看不见的
+> 缓慢空间重排（`tau_Na = 54.4 s`）。`gate_H.json` 必须逐项落盘 q95/q99/max，**不得只写均值**。
 
 另需：baseline 泵通量**非零**；局部扰动能恢复；网格/`dt_ion`/checkpoint 一致；
 离子层关闭时旧引擎 byte-parity；无负浓度、未触 safety bound。
 
-产物：`gate_H.json`，`status ∈ {PASS, FAIL_EQUILIBRIUM, FAIL_BUDGET, FAIL_STOICHIOMETRY,
-FAIL_PARITY, FAIL_NUMERICAL, UNRESOLVED}`。
+产物：`gate_H.json`，`status ∈ {PASS, FAIL_EQUILIBRIUM, FAIL_EMPTY_VOXEL, FAIL_INIT_RESIDUAL,
+FAIL_BUDGET, FAIL_STOICHIOMETRY, FAIL_PARITY, FAIL_NUMERICAL, UNRESOLVED}`。
 
 **Gate H 不 PASS 不进入 40k。**
 
@@ -391,7 +443,11 @@ FAIL_PARITY, FAIL_NUMERICAL, UNRESOLVED}`。
 
 ## 9. Task 7 — B1-3：在小网络上选 `f'`（三点，判据已数值化）
 
-`f' ∈ {1.0, 0.5, 0.25}`，**只在这三点里选**，不做连续搜索。
+`f' ∈ {0.5, 1.0, 2.0}`，**只在这三点里选**，不做连续搜索。**`f' = 1.0` 是 primary normalization**，
+0.5 / 2.0 是对称的 sensitivity bracket。
+
+> **rev3 改动（第三轮审阅）**：旧候选集 `{1.0, 0.5, 0.25}` 里 `0.25` 在间期只抬 `E_K` 0.31 mV（2% `V_th`），
+> 过弱；`f' = 4` 在持续 50 Hz 下抬 22.7 mV（126% `V_th`），超出约化 LIF 的有效区。故取 `{0.5, 1.0, 2.0}`。
 
 ### 9.1 小网络网格必须按 occupancy 对齐 40k（P1）
 
@@ -405,24 +461,50 @@ FAIL_PARITY, FAIL_NUMERICAL, UNRESOLVED}`。
 
 ### 9.2 刺激协议（预注册，执行前锁死）
 
-同一小网络、同一噪声种子，**全部三段都从解析预平衡态起步**（`tau_Na ≈ 54 s`，spec §3.2b）：
+同一小网络、同一噪声种子，**全部三段都从异质解析预平衡态起步**（`tau_Na = 54.4 s`，spec §3.2b/§4.2c）。
+
+小网络**不能**直接用 T2 那个 40k 率场（网络规模与网格都不同）。本 task 先跑一段**同配置、离子层关闭**的
+短静息运行取本网络自己的逐细胞率场，再喂给 `heterogeneous_steady_state`；该率场与其 sha256
+一并写入 `b1_f_selection.json`。5×5 / 10×10 的 occupancy 已按 §9.1 对齐 40k（40.0 vs 39.1 细胞/格），
+正常情况下没有空格，但**空格分支仍须走 §4.2 的合同**（不得因"小网络没空格"而不实现）：
 
 1. **静息段** 20 s，无刺激 —— 量 `Na_i`/`K_o` 的基线波动；
 2. **单事件段**：`t = 25 s` 施加一次局部 kick（沿用既有 `kick_center`/`R_KICK`/`DUR_KICK`），之后 **30 s** 无刺激；
 3. **事件簇段**：`t = 60 s` 起以 **200 ms 间隔连打 5 次**同样 kick，之后 **30 s** 无刺激。
 
-### 9.3 数值判据与 tie-break（三条全过才 admissible）
+### 9.3 数值判据与 tie-break（rev3 重写：旧的三条门全部不可靠）
 
-| 判据 | 数值门 |
-|---|---|
-| **可测** | 单事件段中参与格的 `ΔK_o` 峰值 ≥ **5 ×** 静息段该格 `K_o` 的标准差 |
-| **会恢复** | 单事件后 **20 s** 内参与格 `K_o` 回到静息均值 **1 个标准差**内，且 `Na_i` 回到静息值 **2%** 内 |
-| **能积分** | 事件簇第 5 次的 `ΔK_o` 峰值 ≥ 第 1 次的 **1.5 ×**（无积分应 ≈ 1.0） |
+**先说为什么重写。** 用锁定的常数把 rev2 的三条门各算一遍，三条**都**在构造上失效：
 
-**tie-break**：多个 `f'` 同时可接受时取**最大**者（钾正反馈权限最大，给 B3/B4 留最多余量）。
-**三点全不可接受** → `NO_GO_ION_SCALE`，不得扩大候选集、不得连续搜索。
+| 旧门 | 实算 | 失效方式 |
+|---|---|---|
+| `ΔK_o ≥ 5σ` | `σ` 由初始化质量决定，没有下界 | 初始化越好 `σ` 越小，门越容易过；**测的是初始化，不是钾信号** |
+| `Na_i` 20 s 内回到静息 **2%** | 单事件单细胞 `ΔNa` = 0.015–0.087 mM，门 = **0.36 mM** | 门比它要检验的信号大 **4–25 倍**，恒过 |
+| `Na_i` 20 s 内"回到" | `tau_Na = 54.4 s`，20 s 只衰减 **30.8%** | 若门收紧到真能卡住，则**构造上不可满足** |
+| `ΔK_o` 第 5 次 ≥ 第 1 次 **1.5×** | `tau_Ko = 0.655 s`，200 ms 间隔的**纯线性叠加**已给 **2.97×** | 门低于线性预测，过它**不构成**超线性累积的证据 |
 
-产物 `b1_f_selection.json` 必须记录**三点的完整对照**，不只写选中的那个。
+根因是**两个变量差 83 倍时间常数**（`tau_Ko = 0.655 s`、`tau_Na = 54.4 s`），却被塞进同一个 20 s 窗口：
+对 K 太长（30 个时间常数，残留 5e-14，不可能失败），对 Na 太短（0.37 个时间常数，不可能成功）。
+
+**rev3 的门**——每条按各自时间常数定，且都有**绝对**下界（不只相对 `σ`）：
+
+| 判据 | 变量 | 数值门 |
+|---|---|---|
+| **可测** | `K_o` | 单事件参与格 `ΔK_o` 峰值 ≥ `max(5σ_rest, 0.15 mM)`。绝对地板 0.15 mM = `E_K` 抬高 1 mV = 5.6% `V_th`，即"至少要能被膜看见" |
+| **安全（新增，双侧）** | `K_o` | 同一峰值 ≤ **0.90 mM**（= `ΔE_K` 5.4 mV = 30% `V_th`）。**单次**间期事件就把膜推过阈值的三成，说明尺度选过头，不是好候选 |
+| **会恢复 (K)** | `K_o` | 单事件后 **3 s**（= 4.6 `tau_Ko`）内回到该格静息均值 **1σ** 内 |
+| **会恢复 (Na)** | `Na_i` | 判**事件诱发超额**（`Na_i(t) −` 该细胞 kick 前 5 s 的自身基线），**不是**判绝对浓度：(a) 峰后 20 s 内单调不增（允许 1σ 抖动），(b) 20 s 的衰减比例落在解析预测 30.8% 的 **[0.5×, 1.5×] = [15.4%, 46.2%]** 内。偏高=清除过快（`rho` 标定错），偏低/不降=积累失控 |
+| **能积分** | `K_o` | 事件簇第 5 次 `ΔK_o` 峰值 / 第 1 次 ≥ **2.97×** 的 **0.8 倍 = 2.38×**（2.97 是 200 ms 间隔下的纯线性叠加预测）。同时报告实测比值与 2.97 的比，**> 1 才是超线性**，`b1_f_selection.json` 必须显式记录这一比值 |
+
+**五条全过才 admissible。**
+
+**tie-break（rev3 改）**：多个 `f'` 同时可接受时取**最接近 `f' = 1.0`** 者。
+> rev2 的"取最大"会系统性偏向更强的钾正反馈——那正是最容易把后续 B3/B4 推成 runaway 的方向，
+> 等于用一条 tie-break 规则预先偏置机制结论。primary 是 1.0，另外两点是 sensitivity。
+
+**三点全不可接受** → `NO_GO_ION_SCALE`，不得扩大候选集、不得连续搜索、不得放宽上表任何一格。
+
+产物 `b1_f_selection.json` 必须记录**三点 × 五条门的完整对照**（含每格的实测值与门值），不只写选中的那个。
 
 ## 10. Task 8 — B2-1：40k bias 重标定 + 一次闭合迭代
 
@@ -446,8 +528,13 @@ FAIL_PARITY, FAIL_NUMERICAL, UNRESOLVED}`。
 | 12 次用尽仍未收敛，但合法边界**未被完整括住** | **`UNRESOLVED_CALIBRATION`**（校准器失败，**不是**机制结论） |
 | 合法边界被完整括住且区间内**不存在**可行解 | `NO_GO_BASELINE`（此时才是 spec 停机条件 4） |
 
-⚠️ **4 s 探针只能估快速率响应，不能验收 Na 稳态**（`tau_Na ≈ 54 s`）。探针阶段**必须**用解析预平衡
-把 `Na_i`/`K_o` 置于该 bias 下的预测稳态；最终稳态检查只在 11 s 验证运行里做，并必须报告 `Na_i` 的块间趋势。
+⚠️ **4 s 探针只能估快速率响应，不能验收 Na 稳态**（`tau_Na = 54.4 s`）。探针阶段**必须**用 §4.2c 的
+**异质**解析预平衡把 `Na_i`/`K_o` 置于该 bias 下的预测稳态（输入 = T2 的 `b0_baseline_rate_field.npz`，
+按当前 bias 的率响应线性外推；引用其 sha256）；最终稳态检查只在 11 s 验证运行里做。
+
+**块间趋势必须逐细胞 / 逐格报告 q95/q99/max，不能只报群体均值**——`tau_Na` 是 11 s 窗口的 5 倍，
+均值平稳完全可以掩盖一个还没走完的空间重排。11 s 只能验证"初始化点附近稳定"，
+**不能**证明系统已达稳态；`b2_closure_iteration.json` 必须显式写下这条限制。
 
 ### 一次闭合迭代（spec §7.1）
 
@@ -611,10 +698,12 @@ pytest -q tests/test_ion_homeostasis.py tests/test_topic4_fcxr_ion.py \
 
 - **T1 fail**：引擎电压单位链路不自洽 → `g_K_ion` 量级无依据，停在 B0；
 - **T2 fail**：方向读出在自己底座上功率不足 → 先解决读出，不得进入 B2；
-- **T7 = `NO_GO_ION_SCALE`**：三个 `f'` 都不满足可测/恢复/积分 → 归档，不得扩大候选集；
+- **T7 = `NO_GO_ION_SCALE`**：三个 `f'` 都不满足可测/安全/恢复(K)/恢复(Na)/积分 五条门 → 归档，
+  不得扩大候选集、不得改 tie-break、不得放宽任何一格；
 - **T8 = `UNRESOLVED_CALIBRATION`**：校准器未收敛但可行域未被排除 → **不是**机制结论，
   须另行改进校准器，不得写成 baseline NO-GO；
-- **Gate H fail**：离子稳态或数值合同不成立 → 不进入 40k；
+- **Gate H fail**：离子稳态或数值合同不成立 → 不进入 40k。含两个 rev3 新增分支：
+  `FAIL_EMPTY_VOXEL`（空格不是不动点）与 `FAIL_INIT_RESIDUAL`（异质初始化残差过不了 q95/q99/max）；
 - **Gate B fail**：构成性离子 substrate 拿不回合法间期工作点 → 归档为
   "constitutive Na/K on this substrate cannot recover the interictal working point"，
   **不是**"离子机制被否定"。
