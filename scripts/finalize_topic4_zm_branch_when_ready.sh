@@ -42,6 +42,34 @@ worker_alive() {
         >/dev/null
 }
 
+assert_phase_workers() {
+    local phase="$1"
+    local subdir="$2"
+    local filename="$3"
+    local complete_field="$4"
+    local seed
+    for seed in 1 3 4; do
+        local path="$out/$subdir/seed${seed}/$filename"
+        if json_true "$path" "$complete_field"; then
+            continue
+        fi
+        if ! worker_alive "$phase" "$seed"; then
+            echo "[finalizer] $(date -Is) P0: ${phase} seed=${seed} " \
+                 "worker absent before ${complete_field}=true" >>"$log"
+            exit 4
+        fi
+    done
+}
+
+assert_all_workers() {
+    assert_phase_workers \
+        effective_rank effective_rank rank_probes.json probe_matrix_complete
+    assert_phase_workers \
+        entry_boundary boundaries/entry entry_probes.json complete
+    assert_phase_workers \
+        offset_boundary boundaries/offset offset_probes.json complete
+}
+
 wait_phase() {
     local phase="$1"
     local subdir="$2"
@@ -49,6 +77,7 @@ wait_phase() {
     local complete_field="$4"
     local seed
     while true; do
+        assert_all_workers
         local pending=0
         for seed in 1 3 4; do
             local path="$out/$subdir/seed${seed}/$filename"
@@ -56,11 +85,6 @@ wait_phase() {
                 continue
             fi
             pending=$((pending + 1))
-            if ! worker_alive "$phase" "$seed"; then
-                echo "[finalizer] $(date -Is) P0: ${phase} seed=${seed} " \
-                     "worker absent before ${complete_field}=true" >>"$log"
-                exit 4
-            fi
         done
         echo "[finalizer] $(date -Is) ${phase} pending=${pending}" >>"$log"
         if [[ "$pending" -eq 0 ]]; then

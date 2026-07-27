@@ -95,5 +95,6 @@ def test_wait_only_finalizer_cannot_launch_an_snn_worker():
     assert "wait_phase effective_rank" in source
     assert "wait_phase entry_boundary" in source
     assert "wait_phase offset_boundary" in source
+    assert "assert_all_workers" in source
     assert "python scripts/run_topic4_zm_branch_decision.py \\\n" not in source
     assert "P0:" in source
