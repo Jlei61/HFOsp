@@ -85,6 +85,22 @@ def base_cells():
     ]
 
 
+def preentry_base_cells():
+    """Locked offset cells safe to backfill while entry replicates finish.
+
+    The legacy canonical writers traverse ``M_alone`` first.  Restricting the
+    early backfill to the two later joint families keeps their work disjoint
+    without changing the registered offset grid or starting any adaptive
+    extension before the entry merge.
+    """
+
+    return [
+        cell
+        for cell in reversed(base_cells())
+        if cell["family"] in {"M_SG", "M_Z_recovery"}
+    ]
+
+
 def cell_key(cell):
     if cell["family"] == "dynamic_ZM":
         return f"dynamic_ZM|late_active|{cell['replicate']}"
@@ -111,6 +127,18 @@ def _canonical_next_key(seed):
         if key not in completed:
             return key
     return None
+
+
+def canonical_inflight_cells():
+    """Return only canonical cells whose writer window is actually alive."""
+
+    windows = _window_names()
+    return {
+        (seed, key)
+        for seed in SEEDS
+        if f"seed{seed}_offset" in windows
+        if (key := _canonical_next_key(seed)) is not None
+    }
 
 
 def _option_value(tokens, name, *, required=True, default=None):
@@ -379,7 +407,41 @@ def main():
     _log(f"started max_snn={args.max_snn} poll={args.poll:g}s")
 
     while not _entry_complete():
-        _log("waiting for three-seed entry merge")
+        rows_by_seed = {seed: available_rows(seed) for seed in SEEDS}
+        inflight = live_offset_cells() | canonical_inflight_cells()
+        launched = 0
+        pending = []
+        for seed in SEEDS:
+            canonical_key = next(
+                (
+                    key
+                    for inflight_seed, key in canonical_inflight_cells()
+                    if inflight_seed == seed
+                ),
+                None,
+            )
+            # A live canonical writer is safe to run alongside this backfill
+            # only while it is still in the disjoint M-alone family.
+            if canonical_key is not None and not canonical_key.startswith(
+                "M_alone|"
+            ):
+                continue
+            for cell in preentry_base_cells():
+                key = cell_key(cell)
+                if key in rows_by_seed[seed] or (seed, key) in inflight:
+                    continue
+                pending.append((seed, cell))
+        for seed, cell in pending:
+            if live_snn_count() >= args.max_snn:
+                break
+            if _launch_cell(seed, cell):
+                launched += 1
+                inflight.add((seed, cell_key(cell)))
+        _log(
+            f"waiting for three-seed entry merge; "
+            f"safe_offset_pending={len(pending)} launched={launched} "
+            f"live_snn={live_snn_count()}"
+        )
         time.sleep(args.poll)
 
     base = base_cells()
@@ -393,11 +455,7 @@ def main():
         ]
         if not missing:
             break
-        inflight = live_offset_cells() | {
-            (seed, key)
-            for seed in SEEDS
-            if (key := _canonical_next_key(seed)) is not None
-        }
+        inflight = live_offset_cells() | canonical_inflight_cells()
         launched = 0
         for seed, cell in missing:
             if (seed, cell_key(cell)) in inflight:

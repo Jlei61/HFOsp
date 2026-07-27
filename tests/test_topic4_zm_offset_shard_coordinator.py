@@ -23,6 +23,38 @@ def test_offset_base_contract_has_every_family_level_and_basin():
     assert {cell["initial_kind"] for cell in cells} == {"active", "low"}
 
 
+def test_preentry_backfill_is_locked_and_disjoint_from_canonical_m_alone():
+    cells = C.preentry_base_cells()
+    assert cells
+    assert {cell["family"] for cell in cells} == {
+        "M_SG",
+        "M_Z_recovery",
+    }
+    assert {C.cell_key(cell) for cell in cells} < {
+        C.cell_key(cell) for cell in C.base_cells()
+    }
+
+
+def test_canonical_inflight_requires_a_live_writer_window(monkeypatch):
+    monkeypatch.setattr(
+        C,
+        "_window_names",
+        lambda: {"seed1_offset", "seed4_offset", "offset_coord"},
+    )
+    monkeypatch.setattr(
+        C,
+        "_canonical_next_key",
+        lambda seed: {
+            1: "M_alone|lambda=0.333333|active|noise_replay",
+            3: "M_alone|lambda=0.333333|active|noise_replay",
+            4: None,
+        }[seed],
+    )
+    assert C.canonical_inflight_cells() == {
+        (1, "M_alone|lambda=0.333333|active|noise_replay")
+    }
+
+
 def test_offset_window_names_are_disjoint_for_locked_cells():
     cells = [
         *C.base_cells(),
