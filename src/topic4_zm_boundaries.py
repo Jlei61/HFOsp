@@ -8,6 +8,7 @@ coordinate range actually brackets one.
 
 from __future__ import annotations
 
+import copy
 from collections import defaultdict
 
 import numpy as np
@@ -16,6 +17,7 @@ from scipy.stats import beta
 
 BOUNDARY_VERSION = "zm_probability_boundaries_v1_2026-07-27"
 HYSTERESIS_MIN_NORMALIZED_SEPARATION = 0.1
+_STATE_KEY = {"z": "slow.z", "m": "slow.m", "sg": "slow.S_G"}
 
 
 def _as_bool(value):
@@ -24,6 +26,103 @@ def _as_bool(value):
     if isinstance(value, (int, np.integer)) and value in (0, 1):
         return bool(value)
     raise ValueError(f"binary outcome required, got {value!r}")
+
+
+def _coordinate_vector(state, coordinate, nE):
+    key = _STATE_KEY[coordinate]
+    value = np.asarray(state[key], dtype=float)
+    if coordinate in {"z", "m"}:
+        if value.ndim != 1 or value.size < int(nE):
+            raise ValueError(f"{key} does not contain nE entries")
+        return value[:int(nE)].copy()
+    if value.size != 1:
+        raise ValueError("slow.S_G must be scalar")
+    return np.asarray([float(value)])
+
+
+def interpolate_slow_state(
+    early_state,
+    late_state,
+    lam,
+    *,
+    coordinates,
+    nE,
+    allow_extrapolation=False,
+):
+    """Interpolate actual slow fields while preserving every fast-state array.
+
+    Only the named coordinates are changed.  Physical bounds are checked after
+    interpolation and never enforced by clipping, because clipping silently
+    changes the tested trajectory direction.
+    """
+
+    lam = float(lam)
+    nE = int(nE)
+    coordinates = tuple(coordinates)
+    if not coordinates or any(name not in _STATE_KEY for name in coordinates):
+        raise ValueError("coordinates must be a non-empty subset of z, m, sg")
+    if len(set(coordinates)) != len(coordinates):
+        raise ValueError("coordinates must be unique")
+    if not np.isfinite(lam):
+        raise ValueError("lambda must be finite")
+    if not allow_extrapolation and not 0.0 <= lam <= 1.0:
+        raise ValueError("lambda outside [0, 1] requires allow_extrapolation")
+
+    out = copy.deepcopy(early_state)
+    for coordinate in coordinates:
+        a = _coordinate_vector(early_state, coordinate, nE)
+        b = _coordinate_vector(late_state, coordinate, nE)
+        candidate = a + lam * (b - a)
+        if not np.isfinite(candidate).all():
+            raise ValueError(f"{coordinate}: interpolated field is non-finite")
+        if coordinate == "z" and np.any((candidate < 0.0) | (candidate > 1.0)):
+            raise ValueError("z interpolation leaves [0, 1]; refusing to clip")
+        if coordinate in {"m", "sg"} and np.any(candidate < 0.0):
+            raise ValueError(f"{coordinate} interpolation becomes negative")
+        key = _STATE_KEY[coordinate]
+        if coordinate in {"z", "m"}:
+            full = np.asarray(out[key], dtype=float).copy()
+            full[:nE] = candidate
+            out[key] = full
+        else:
+            out[key] = np.asarray(float(candidate[0]))
+    return out
+
+
+def slow_state_coordinate_values(
+    states,
+    early_state,
+    late_state,
+    *,
+    coordinates,
+    nE,
+):
+    """Project states onto equal-weight actual early-to-late slow directions."""
+
+    coordinates = tuple(coordinates)
+    if not states:
+        raise ValueError("at least one state is required")
+    per_coordinate = {}
+    for coordinate in coordinates:
+        a = _coordinate_vector(early_state, coordinate, nE)
+        b = _coordinate_vector(late_state, coordinate, nE)
+        direction = b - a
+        norm2 = float(np.dot(direction, direction))
+        if norm2 <= 1e-18:
+            raise ValueError(f"{coordinate}: early-to-late direction is degenerate")
+        values = []
+        for state in states:
+            value = _coordinate_vector(state, coordinate, nE)
+            values.append(float(np.dot(value - a, direction) / norm2))
+        per_coordinate[coordinate] = values
+    matrix = np.column_stack([per_coordinate[name] for name in coordinates])
+    return {
+        "joint_lambda": np.mean(matrix, axis=1).tolist(),
+        "per_coordinate_lambda": per_coordinate,
+        "coordinate_disagreement_sd": np.std(matrix, axis=1).tolist(),
+        "coordinates": list(coordinates),
+        "boundary_version": BOUNDARY_VERSION,
+    }
 
 
 def jeffreys_probability_curve(rows, coordinate_key, outcome_key, alpha=0.05):
