@@ -406,7 +406,8 @@ def _count_rest_returns(d_rest, bin_ms, thresh, dwell_ms):
     return n
 
 
-def run_continuation(ctx, state0, arm, bank, locks, *, T_ms=T_CONT_MS, chunk_ms=CHUNK_MS):
+def run_continuation(ctx, state0, arm, bank, locks, *, T_ms=T_CONT_MS, chunk_ms=CHUNK_MS,
+                     capture_readout=False):
     """One exact, chunked, early-stopping continuation. Chunking is byte-exact (proved by
     tests/test_topic4_zm_exact_resume.py), so a continuation that has definitively fallen back into
     the interictal basin costs seconds instead of the full window."""
@@ -424,6 +425,11 @@ def run_continuation(ctx, state0, arm, bank, locks, *, T_ms=T_CONT_MS, chunk_ms=
                              ext_mean_only=bank["ext_mean_only"])
         res = run_segment(ctx, slow, this_ms, ckpt=ck)
         met = segment_metrics(ctx, res)
+        if capture_readout:
+            # Retain the native multi-contact current proxy until all chunks
+            # can be concatenated and decimated once.  Per-chunk decimation
+            # would introduce artificial FIR edge transients every second.
+            met["_lfp_raw"] = np.asarray(res["lfp_trace"], np.float32)
         met["_slow"] = slow_coords(slow, met["n_bins"], res["E_spk_bool"].shape[0])
         chunks.append(met)
         if res.get("runaway_early_stop_ms") is not None:
@@ -476,6 +482,7 @@ def summarize_continuation(run, locks, T_ms=T_CONT_MS):
     E = _cat(chunks, "E_vSEEG")[b0:]
     r = _cat(chunks, "r_all")[b0:]
     H = _cat(chunks, "H_spatial")[b0:]
+    n_grid = _cat(chunks, "n_grid_active")[b0:]
     slow_m = np.concatenate([c["_slow"]["m_core"] for c in chunks])[b0:]
     slow_S_G = np.concatenate([c["_slow"]["S_G"] for c in chunks])[b0:]
     drift_by_coordinate = dict(
@@ -496,7 +503,16 @@ def summarize_continuation(run, locks, T_ms=T_CONT_MS):
         A_active_max=float(np.max(A)) if A.size else 0.0,
         r_all_mean_hz=float(np.mean(r)) if r.size else 0.0,
         r_all_peak_hz=float(np.max(r)) if r.size else 0.0,
+        r_all_cv=float(np.std(r) / np.mean(r)) if r.size and np.mean(r) > 0 else float("nan"),
+        r_all_p2p_hz=float(np.ptp(r)) if r.size else 0.0,
+        morphology_label=(
+            "tonic_like_fixed"
+            if r.size and np.mean(r) > 0 and float(np.std(r) / np.mean(r)) < 0.05
+            else "temporally_modulated"
+        ),
         H_spatial_mean=float(np.mean(H)) if H.size else 0.0,
+        n_grid_active_mean=float(np.mean(n_grid)) if n_grid.size else 0.0,
+        spatial_extent_fraction=float(np.mean(n_grid) / (16 * 16)) if n_grid.size else 0.0,
         E_vSEEG_mean=float(np.mean(E)) if E.size else 0.0,
         duty_cycle=float(np.mean(r > 0.2 * np.max(r))) if r.size and np.max(r) > 0 else 0.0,
         drift_A=drift_by_coordinate["A_active"],
@@ -508,7 +524,7 @@ def summarize_continuation(run, locks, T_ms=T_CONT_MS):
         burn_in_ms=run["burn_in_ms"], n_bins_post_burn=int(d_post.size), wall_s=run["wall_s"])
 
 
-def dump_continuation_traces(path, run, locks):
+def dump_continuation_traces(path, run, locks, *, dt_ms):
     """Per-bin series of one continuation (figure input; summaries alone cannot show a burst train
     re-igniting vs a state that simply died)."""
     chunks = run["chunks"]
@@ -518,6 +534,15 @@ def dump_continuation_traces(path, run, locks):
     arrays["d_rest"] = _rest_series(chunks, locks).astype(np.float32)
     for k in ("z_core", "z_surround", "m_core", "S_G"):
         arrays[f"slow_{k}"] = np.concatenate([c["_slow"][k] for c in chunks]).astype(np.float32)
+    if chunks and all("kymo_axial" in c for c in chunks):
+        arrays["kymo_axial"] = np.concatenate(
+            [np.asarray(c["kymo_axial"], np.float32) for c in chunks], axis=1
+        )
+    if chunks and all("_lfp_raw" in c for c in chunks):
+        lfp_raw = np.concatenate([c["_lfp_raw"] for c in chunks], axis=0)
+        lfp, lfp_fs = CG.decimate_lfp(lfp_raw, fs_in=CG.lfp_sample_hz(dt_ms))
+        arrays["lfp"] = lfp
+        arrays["lfp_fs"] = np.asarray(lfp_fs)
     arrays["bin_ms"] = np.asarray(MC.BIN_MS)
     arrays["burn_in_ms"] = np.asarray(run["burn_in_ms"])
     arrays["d_rest_thresh"] = np.asarray(locks["d_rest_thresh"])
@@ -609,11 +634,16 @@ def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_RE
                         and not needs_horizon_rerun):
                     continue
                 bank = NB.build_noise_bank(ctx["cfg_sha"], seed, st["t_step"], rep)
-                run = run_continuation(ctx, state0, arm, bank, locks, T_ms=T_ms)
+                run = run_continuation(
+                    ctx, state0, arm, bank, locks, T_ms=T_ms,
+                    capture_readout=dump_traces,
+                )
                 summ = summarize_continuation(run, locks, T_ms=T_ms)
                 if dump_traces:
                     dump_continuation_traces(
-                        os.path.join(root, "traces", f"{tag}__{arm}__{rep}.npz"), run, locks)
+                        os.path.join(root, "traces", f"{tag}__{arm}__{rep}.npz"),
+                        run, locks, dt_ms=ctx["dt"],
+                    )
                 rows[key] = dict(key=key, seed=int(seed), bin_name=st["bin_name"],
                                  fast_phase=st["fast_phase"], t_step=int(st["t_step"]),
                                  t_ms=float(st["t_ms"]), arm=arm, replicate=rep,
