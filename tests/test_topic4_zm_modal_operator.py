@@ -8,6 +8,7 @@ from src.topic4_zm_modal_operator import (
     fit_discrete_operator,
     infer_linearity_range,
     mode_axis_angle_deg,
+    route_source_temporal_class,
     route_operator_tool,
 )
 
@@ -26,6 +27,11 @@ def test_equal_energy_spatial_perturbations_are_distinct_and_matched():
 
 
 def test_carrier_type_routes_to_valid_tool_and_periodic_mean_jacobian_is_forbidden():
+    assert route_source_temporal_class("global_periodic_candidate") == "periodic"
+    assert route_source_temporal_class("phase_staggered_periodic_candidate") == "periodic"
+    assert route_source_temporal_class("asynchronous_or_irregular_candidate") == "stochastic"
+    with pytest.raises(ValueError, match="insufficient"):
+        route_source_temporal_class("insufficient_active_cells")
     assert route_operator_tool("fixed") == "eigen"
     assert route_operator_tool("periodic") == "stroboscopic_floquet"
     assert route_operator_tool("stochastic") == "dmd_finite_time_gain"

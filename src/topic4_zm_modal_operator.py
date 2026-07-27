@@ -19,6 +19,24 @@ _TOOL_BY_CARRIER = {
     "stochastic": "dmd_finite_time_gain",
 }
 
+_CARRIER_BY_SOURCE_CLASS = {
+    "stationary_rate_candidate": "fixed",
+    "global_periodic_candidate": "periodic",
+    "phase_staggered_periodic_candidate": "periodic",
+    "asynchronous_or_irregular_candidate": "stochastic",
+}
+
+
+def route_source_temporal_class(source_temporal_class):
+    """Map the fine source audit onto the operator-level carrier taxonomy."""
+
+    if source_temporal_class not in _CARRIER_BY_SOURCE_CLASS:
+        raise ValueError(
+            f"insufficient or unsupported source temporal class: "
+            f"{source_temporal_class!r}"
+        )
+    return _CARRIER_BY_SOURCE_CLASS[source_temporal_class]
+
 
 def route_operator_tool(carrier_type, requested_tool=None):
     """Return the registered operator tool for a source carrier class."""
