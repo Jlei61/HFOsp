@@ -33,6 +33,7 @@ GATE_TESTS = ["tests/test_topic4_zm_fork_state.py", "tests/test_topic4_zm_checkp
               "tests/test_topic4_zm_minimal_carrier.py", "tests/test_topic4_zm_branch_verdict.py",
               "tests/test_topic4_zm_neighbourhood.py",
               "tests/test_topic4_zm_empirical_carrier.py", "tests/test_snn_shunting.py",
+              "tests/test_topic4_zm_ictal_carrier.py",
               "tests/test_snn_gates.py", "tests/test_zm_slow_field_parity.py",
               "tests/test_a1c_feedback.py"]
 
