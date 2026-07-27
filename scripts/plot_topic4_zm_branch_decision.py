@@ -333,6 +333,11 @@ def fig_confirmation_morphology():
     readout therefore need to be shown together before the word ``ictal`` is
     used.
     """
+    audit = _load(os.path.join(OUT, "confirmations", "carrier_morphology.json"), {})
+    audit_by_key = {
+        (r["tier"], int(r["seed"]), r["row_key"]): r
+        for r in audit.get("rows", [])
+    }
     manifests = []
     for tier in ("dt2", "long"):
         for p in sorted(glob.glob(os.path.join(
@@ -354,12 +359,20 @@ def fig_confirmation_morphology():
     )
     for i, (tier, row, trace) in enumerate(manifests):
         z = np.load(trace)
+        morphology = audit_by_key.get((tier, int(row["seed"]), row["key"]), {})
         bin_ms = float(z["bin_ms"])
         t_rate = np.arange(z["r_all"].size) * bin_ms / 1000.0
         burn_s = float(z["burn_in_ms"]) / 1000.0
+        coarse_label = morphology.get(
+            "coarse_rate_label",
+            str(row.get("morphology_label", "unclassified")).replace(
+                "tonic_like_fixed", "tonic_at_25ms"
+            ),
+        )
+        readout_label = morphology.get("readout_temporal_class", "readout audit pending")
         title = (
             f"seed {row['seed']} · {tier} · {row.get('T_cont_ms', 0) / 1000:g}s · "
-            f"{row.get('morphology_label', 'unclassified')}\n"
+            f"{coarse_label} / {readout_label}\n"
             f"mean={row.get('r_all_mean_hz', float('nan')):.1f} Hz, "
             f"CV={row.get('r_all_cv', float('nan')):.3f}, "
             f"extent={row.get('spatial_extent_fraction', float('nan')):.2f}, "
@@ -380,7 +393,9 @@ def fig_confirmation_morphology():
                 extent=[0, kymo.shape[1] * bin_ms / 1000.0, 0, kymo.shape[0]],
                 cmap="magma", vmin=0, vmax=max(vmax, 1e-9),
             )
-            _style(ax, "axial activity kymograph", xlabel="time after fork (s)",
+            ktcv = morphology.get("kymograph_temporal_cv_median", float("nan"))
+            _style(ax, f"axial activity kymograph · temporal CV={ktcv:.3f}",
+                   xlabel="time after fork (s)",
                    ylabel="axial spatial bin")
         else:
             ax.text(0.5, 0.5, "kymograph unavailable", ha="center", va="center")
@@ -405,7 +420,11 @@ def fig_confirmation_morphology():
                 extent=[0, lfp.shape[0] / fs, 0, lfp.shape[1]],
                 cmap="RdBu_r", vmin=-6, vmax=6,
             )
-            _style(ax, f"multi-contact virtual readout ({fs:g} Hz)",
+            f0 = morphology.get("dominant_frequency_median_hz", float("nan"))
+            agree = morphology.get("dominant_frequency_agreement", float("nan"))
+            plv = morphology.get("phase_coherence", float("nan"))
+            _style(ax, f"multi-contact readout ({fs:g} Hz) · "
+                       f"f0={f0:.1f} Hz, agree={agree:.2f}, PLV={plv:.2f}",
                    xlabel="time after fork (s)", ylabel="contact index")
         else:
             ax.text(0.5, 0.5, "readout unavailable", ha="center", va="center")

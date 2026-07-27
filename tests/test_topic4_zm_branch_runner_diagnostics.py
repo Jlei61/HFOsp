@@ -75,6 +75,6 @@ def test_summary_labels_nearly_flat_high_rate_as_tonic_like_fixed():
         "runaway_ms": None,
     }
     out = R.summarize_continuation(run, _locks(), T_ms=200.0)
-    assert out["morphology_label"] == "tonic_like_fixed"
+    assert out["morphology_label"] == "tonic_at_25ms"
     assert out["r_all_cv"] < 0.05
     assert out["spatial_extent_fraction"] == 0.5

@@ -506,9 +506,9 @@ def summarize_continuation(run, locks, T_ms=T_CONT_MS):
         r_all_cv=float(np.std(r) / np.mean(r)) if r.size and np.mean(r) > 0 else float("nan"),
         r_all_p2p_hz=float(np.ptp(r)) if r.size else 0.0,
         morphology_label=(
-            "tonic_like_fixed"
+            "tonic_at_25ms"
             if r.size and np.mean(r) > 0 and float(np.std(r) / np.mean(r)) < 0.05
-            else "temporally_modulated"
+            else "modulated_at_25ms"
         ),
         H_spatial_mean=float(np.mean(H)) if H.size else 0.0,
         n_grid_active_mean=float(np.mean(n_grid)) if n_grid.size else 0.0,
