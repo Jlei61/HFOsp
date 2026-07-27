@@ -6,6 +6,8 @@
 
 上一代际终局：`docs/archive/topic4/sef_hfo/mz_fcxr_pump_lifecycle_gate_Ia_2026-07-27.md`
 
+实施计划（B0–B2）：`docs/superpowers/plans/2026-07-27-topic4-fcxr-constitutive-na-k-homeostasis-B0-B2.md`
+
 rev2 相对 rev1 的实质改动都记在 §16，其中三项是**读源文献后改设计**，不是措辞调整。
 
 ---
