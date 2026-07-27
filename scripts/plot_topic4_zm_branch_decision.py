@@ -563,6 +563,97 @@ def fig_effective_rank():
     return path
 
 
+# ============================================================ Fig 7: projected modal/operator audit
+def fig_modal_operator():
+    summary_path = os.path.join(
+        OUT, "modal_operator", "modal_operator_summary.json"
+    )
+    summary = _load(summary_path)
+    rows = (summary or {}).get("rows", [])
+    if not rows:
+        return None
+    rows = sorted(rows, key=lambda row: int(row["seed"]))
+    fig, axes = plt.subplots(2, 3, figsize=(14.2, 7.0))
+    seeds = [f"seed {row['seed']}" for row in rows]
+    x = np.arange(len(rows))
+
+    ax = axes[0, 0]
+    ax.bar(x - 0.17, [row["spectral_radius"] for row in rows], 0.34,
+           color="#D1495B", label="spectral radius")
+    ax.bar(x + 0.17, [row["finite_time_gain"] for row in rows], 0.34,
+           color="#00798C", label="finite-time gain")
+    ax.axhline(1.0, color="#777", ls="--", lw=0.8)
+    ax.set_xticks(x, seeds)
+    ax.legend(fontsize=7, frameon=False)
+    _style(ax, f"projected operator · {summary['status']}", ylabel="gain")
+
+    ax = axes[0, 1]
+    errors = [row["heldout_median_relative_error"] for row in rows]
+    ax.bar(x, errors, color="#EDAE49")
+    ax.axhline(0.20, color="#D1495B", ls="--", lw=0.9,
+               label="locked max error")
+    ax.set_xticks(x, seeds)
+    ax.legend(fontsize=7, frameon=False)
+    _style(ax, "held-out composite prediction", ylabel="relative error")
+
+    ax = axes[0, 2]
+    width = 0.26
+    for offset, key, label, color in (
+        (-width, "right_mode_angle_to_E_pathology_axis_deg", "right→E axis", "#D1495B"),
+        (0.0, "right_mode_angle_to_axial_EI_subspace_deg", "right→axial E/I", "#00798C"),
+        (width, "optimal_input_angle_to_axial_EI_subspace_deg", "optimal→axial E/I", "#7B5AA6"),
+    ):
+        ax.bar(x + offset, [row[key] for row in rows], width,
+               color=color, label=label)
+    ax.set_xticks(x, seeds)
+    ax.set_ylim(0, 90)
+    ax.legend(fontsize=6.5, frameon=False)
+    _style(ax, "mode alignment", ylabel="acute angle (deg)")
+
+    heat_axes = [axes[1, 0], axes[1, 1]]
+    for panel, row in zip(heat_axes, rows):
+        manifest_path = os.path.join(
+            OUT, "modal_operator", f"seed{row['seed']}", "modal_probes.json"
+        )
+        manifest = _load(manifest_path)
+        operator = None
+        if manifest and manifest.get("operator_path"):
+            horizon = float(row["horizon_ms"])
+            energy = float(row["total_energy_mv2"])
+            key = f"h{horizon:g}_E{energy:g}".replace(".", "p")
+            with np.load(os.path.join(_ROOT, manifest["operator_path"]),
+                         allow_pickle=False) as arrays:
+                operator = np.asarray(arrays[f"{key}_operator"], float)
+        if operator is None:
+            panel.axis("off")
+            continue
+        vmax = max(1e-12, float(np.max(np.abs(operator))))
+        image = panel.imshow(
+            operator, cmap="RdBu_r", vmin=-vmax, vmax=vmax, aspect="equal"
+        )
+        panel.set_xlabel("input voltage mode", fontsize=8)
+        panel.set_ylabel("future voltage mode", fontsize=8)
+        panel.set_title(
+            f"seed {row['seed']} · {row['operator_tool']}", fontsize=9, loc="left"
+        )
+        panel.tick_params(labelsize=6)
+        fig.colorbar(image, ax=panel, fraction=0.046)
+
+    ax = axes[1, 2]
+    axial = [row["axial_column_gain"] for row in rows]
+    transverse = [row["transverse_column_gain"] for row in rows]
+    ax.bar(x - 0.17, axial, 0.34, color="#D1495B", label="axial")
+    ax.bar(x + 0.17, transverse, 0.34, color="#3B6FB6", label="transverse")
+    ax.set_xticks(x, seeds)
+    ax.legend(fontsize=7, frameon=False)
+    _style(ax, "pathology-axis response contrast", ylabel="column gain")
+    fig.tight_layout()
+    path = os.path.join(FIG, "trajectory_conditioned_modal_operator.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return path
+
+
 # ============================================================ Fig 5: readout impostor separation
 def fig_impostors():
     import src.topic4_zm_empirical_carrier as EC
@@ -655,6 +746,10 @@ def fig_phase_status(made):
     n_rank_seed = len(glob.glob(os.path.join(
         OUT, "effective_rank", "seed*", "rank_probes.json"
     )))
+    modal_summary = _load(os.path.join(
+        OUT, "modal_operator", "modal_operator_summary.json"
+    ), {})
+    n_modal_seed = int(modal_summary.get("n_complete_seeds", 0))
     neighbourhood = v.get("neighbourhood") or {}
     neighbourhood_status = (
         "complete" if neighbourhood.get("evidence_complete") is True
@@ -691,7 +786,9 @@ def fig_phase_status(made):
         ("1.5A functional rank",
          "complete" if rank_summary_exists else
          "in progress" if n_rank_seed else "conditional / not authorized"),
-        ("1.5B modal / gain", "conditional / not authorized"),
+        ("1.5B modal / gain",
+         "complete" if n_modal_seed >= 2 else
+         "in progress" if n_modal_seed else "conditional / not authorized"),
         ("2A Z-entry boundary", "conditional / not authorized"),
         ("2B offset boundary", "conditional / not authorized"),
         ("3 exit-driver comparison", "conditional / not authorized")]
@@ -772,6 +869,13 @@ FIGURE_NOTES = {
         "判断这些既有慢变量在 carrier 附近是否只是局部共线；rank-1 不能外推成整个"
         "慢流形一维。"
     ),
+    "trajectory_conditioned_modal_operator.png": (
+        "展示按 fine-source carrier 类型选择的 E/I 膜电位有限时传播算子、held-out "
+        "组合扰动误差、轴向模式夹角和轴向/横向增益。输入与输出保持在同一膜电位坐标，"
+        "避免把 voltage-to-rate susceptibility 误写成 eigen/Floquet 算子。",
+        "先看 held-out 与子空间残差是否过门；只有预测有效时，谱半径、有限时增益和"
+        "病理轴夹角才有动力学解释。"
+    ),
     "readout_impostor_discrimination.png": (
         "展示合成 broadband carrier、尖锐谐波 pulse train 与全局固定振荡器在"
         " readout 指标上的可分性。这是 observation gate 的 synthetic sanity check。",
@@ -814,7 +918,7 @@ def main():
     failures = []
     for fn in (fig_phase0, fig_anchors, fig_carrier_matrix, fig_dynamics,
                fig_confirmation_morphology, fig_source_rhythm, fig_impostors,
-               fig_neighbourhood, fig_effective_rank):
+               fig_neighbourhood, fig_effective_rank, fig_modal_operator):
         try:
             p = fn()
         except Exception as e:                                # pragma: no cover - figure only
