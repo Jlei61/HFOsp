@@ -30,6 +30,32 @@ _CARRIER_BY_SOURCE_CLASS = {
 }
 
 
+def modal_probe_authorized(source_summary):
+    """Fail closed until fine-source routing is replicated across two seeds."""
+
+    return bool(
+        (source_summary or {}).get("status") == "replicated"
+        and (source_summary or {}).get("carrier_type") in _TOOL_BY_CARRIER
+    )
+
+
+def operator_horizons_ms(carrier_type, *, frequency_hz=None, bin_ms=2.0):
+    """Return locked response horizons matched to the replicated carrier type."""
+
+    route_operator_tool(carrier_type)
+    bin_ms = float(bin_ms)
+    if not np.isfinite(bin_ms) or bin_ms <= 0:
+        raise ValueError("bin_ms must be finite and positive")
+    if carrier_type == "periodic":
+        if frequency_hz is None or not np.isfinite(frequency_hz) or frequency_hz <= 0:
+            raise ValueError("periodic carrier requires a positive source frequency")
+        period = 1000.0 / float(frequency_hz)
+        return [float(max(bin_ms, round(period / bin_ms) * bin_ms))]
+    if carrier_type == "stochastic":
+        return [20.0, 50.0, 100.0]
+    return [2.0, 10.0, 20.0]
+
+
 def route_source_temporal_class(source_temporal_class):
     """Map the fine source audit onto the operator-level carrier taxonomy."""
 

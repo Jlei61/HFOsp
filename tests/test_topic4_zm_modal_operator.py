@@ -9,10 +9,12 @@ from src.topic4_zm_modal_operator import (
     evaluate_operator_prediction,
     fit_discrete_operator,
     infer_linearity_range,
+    modal_probe_authorized,
     mode_axis_angle_deg,
     project_ei_grid,
     route_source_temporal_class,
     route_operator_tool,
+    operator_horizons_ms,
     spatial_basis_diagnostics,
 )
 
@@ -42,6 +44,12 @@ def test_carrier_type_routes_to_valid_tool_and_periodic_mean_jacobian_is_forbidd
     assert route_operator_tool("stochastic") == "dmd_finite_time_gain"
     with pytest.raises(ValueError, match="periodic"):
         route_operator_tool("periodic", requested_tool="eigen")
+    assert not modal_probe_authorized({})
+    assert modal_probe_authorized({"status": "replicated", "carrier_type": "periodic"})
+    assert operator_horizons_ms("periodic", frequency_hz=47.0) == [22.0]
+    assert operator_horizons_ms("stochastic") == [20.0, 50.0, 100.0]
+    with pytest.raises(ValueError, match="frequency"):
+        operator_horizons_ms("periodic")
 
 
 def test_fitted_operator_predicts_held_out_states_and_recovers_rotated_soft_mode():
