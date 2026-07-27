@@ -55,6 +55,24 @@ def test_canonical_inflight_requires_a_live_writer_window(monkeypatch):
     }
 
 
+def test_canonical_handoff_waits_for_atomic_target_row():
+    targets = {
+        1: "M_alone|lambda=0.333333|active|noise_replay",
+        3: "M_alone|lambda=0.333333|low|noise_replay",
+    }
+    rows = {
+        1: {
+            "M_alone|lambda=0.333333|active|noise_replay": {
+                "completed": True
+            }
+        },
+        3: {
+            "M_alone|lambda=0|low|noise_replay": {"completed": True}
+        },
+    }
+    assert C.completed_handoff_seeds(targets, rows) == {1}
+
+
 def test_offset_window_names_are_disjoint_for_locked_cells():
     cells = [
         *C.base_cells(),

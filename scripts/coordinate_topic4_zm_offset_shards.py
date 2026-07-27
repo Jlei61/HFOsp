@@ -141,6 +141,16 @@ def canonical_inflight_cells():
     }
 
 
+def completed_handoff_seeds(handoff_targets, rows_by_seed):
+    """Identify canonical writers that have atomically saved their target."""
+
+    return {
+        int(seed)
+        for seed, key in handoff_targets.items()
+        if key in rows_by_seed.get(int(seed), {})
+    }
+
+
 def _option_value(tokens, name, *, required=True, default=None):
     """Read either ``--name value`` or ``--name=value`` from argv tokens."""
 
@@ -444,9 +454,35 @@ def main():
         )
         time.sleep(args.poll)
 
+    handoff_targets = {
+        int(seed): key
+        for seed, key in canonical_inflight_cells()
+    }
+    if handoff_targets:
+        _log(f"canonical handoff targets={handoff_targets}")
+
     base = base_cells()
     while True:
         rows_by_seed = {seed: available_rows(seed) for seed in SEEDS}
+        for seed in sorted(
+            completed_handoff_seeds(handoff_targets, rows_by_seed)
+        ):
+            _kill_window(f"seed{seed}_offset")
+            _log(
+                f"handed off seed={seed} canonical offset writer after "
+                f"completed key={handoff_targets[seed]}"
+            )
+            handoff_targets.pop(seed)
+        # A vanished writer has no in-memory work to preserve.  Release its
+        # target so the ordinary shard scheduler can restore the missing cell.
+        windows = _window_names()
+        for seed in list(handoff_targets):
+            if f"seed{seed}_offset" not in windows:
+                _log(
+                    f"canonical writer vanished seed={seed}; "
+                    f"releasing key={handoff_targets[seed]}"
+                )
+                handoff_targets.pop(seed)
         missing = [
             (seed, cell)
             for seed in SEEDS
