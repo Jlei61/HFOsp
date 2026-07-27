@@ -1,14 +1,21 @@
 # FCXR-ION：在 E1146 各向异性 E/I sheet 上引入构成性 Na/K 离子稳态
 
-日期：2026-07-27（rev2，按 2026-07-27 审阅闭合 5 项 P0 + 4 项 P1）
+日期：2026-07-27（rev3，按第二轮审阅修正参考平衡等 4 项 P0 + 6 项 P1）
 
-状态：**DESIGN LOCK CANDIDATE — 方程与出处已闭合，无未定方程、无未定出处；剩 2 项 B0 待验证（引擎电压单位对应、方向读出的功率前置），见 §16 末尾。**
+状态：**DESIGN LOCK CANDIDATE — 不得创建执行分支、不得进入 T5，更不得启动 40k。**
+
+rev3 修正了 rev2 的一处**核心方程错误**：按 rev2 的公式，`(Na_i, K_o) = (18, 4)` 在数学上**不可能**是
+静息不动点（无 spike 时 `dNa/dt = −3·I_pump_0·f`、`dK_o/dt = −2β·I_pump_0 = −0.2822 mM/s`），
+Gate H 的静息检验会**按设计必然失败**。根因是 spike-impulse 约化把参考模型里的**背景 Na/K 跨膜通量**
+删掉了。§4 已补回，无 spike 态现为精确不动点。rev2 据此得出的"110 倍动态范围"**同时作废**（正确值 ~8 倍，见 §3.2）。
+
+剩 2 项 B0 待验证：引擎电压单位链路、方向读出的功率前置（见 §16 末尾）。
 
 上一代际终局：`docs/archive/topic4/sef_hfo/mz_fcxr_pump_lifecycle_gate_Ia_2026-07-27.md`
 
 实施计划（B0–B2）：`docs/superpowers/plans/2026-07-27-topic4-fcxr-constitutive-na-k-homeostasis-B0-B2.md`
 
-rev2 相对 rev1 的实质改动都记在 §16，其中三项是**读源文献后改设计**，不是措辞调整。
+修订记录见 §16（rev3）与 §17（rev2）。
 
 ---
 
@@ -101,37 +108,56 @@ I_pump_0 = 0.02016 mM/s          E_K_0 = -94.71 mV
 
 ### 3.2 spike→ion 约化（本模型自己的 effective 闭合，含唯一一个 dial）
 
-原参考是 HH 网络，`I_K`/`I_Na` 是真实电流，用 `0.33 mM·cm²/µcoul` 把电流密度换成浓度变化率。
-本模型是 LIF，**没有**显式 Na/K 电流，因此必须自己定义每个模型 spike 的有效离子增量。
-**这一段是 `effective`，不是继承。**
+原参考是 HH 网络，`I_K`/`I_Na` 是**真实膜电流**，在静息时**本身非零**，与泵、胶质、浴池共同构成平衡。
+本模型是 LIF，没有显式 Na/K 电流，只有 spike。**rev2 的错误就出在这里**：把 `0.33·I_K` 整体换成一个
+纯 spike 驱动的源，等于把静息期的背景跨膜通量删掉了，于是无 spike 态不再是不动点。
 
-唯一的 dial 是无量纲的 **`f ∈ (0,1]`**：静息期泵负荷中由 spike 驱动的比例。
+**rev3 的修法：背景通量显式补回，且全部解析导出、无自由度。**
 
-| 量 | 表达式 | 类型 |
-|---|---|---|
-| `q_ion`（每模型 spike 的胞内 Na 增量） | `3 * I_pump_0 * f / r0` | derived（给定 f） |
-| `J_Na_rest`（静息 Na leak） | `3 * I_pump_0 * (1 - f)` | derived，**恒 ≥ 0** |
-| `q_K`（每模型 spike 的胞外 K 增量） | `beta * q_ion` | effective：取每 spike 的 K 外流与 Na 内流**摩尔数相等**（最小电荷平衡闭合），再由 `beta` 换算到胞外体积 |
+| 量 | 表达式 | 值 | 类型 |
+|---|---|---:|---|
+| `J_Na,0`（背景 Na 内流，恰好平衡静息泵） | `3 * I_pump_0` | 0.06047 mM/s | derived |
+| `J_K,0`（背景 K 外流，恰好平衡静息泵的 K 回收） | `2 * beta * I_pump_0` | 0.28221 mM/s | derived |
+| `q_ion`（每模型 spike 的胞内 Na 增量） | `J_Na,0 * f' / r0` | 见下表 | derived（给定 f'） |
+| `q_K`（每模型 spike 的胞外 K 增量） | `beta * q_ion` | — | effective：每 spike 的 K 外流与 Na 内流摩尔数相等（最小电荷平衡闭合） |
 
-把 `q_ion` 写成 `f` 的函数的好处：`J_Na_rest ≥ 0` **由构造保证**（审阅要求的解析可行性门之一自动满足），
-且 `f` 有明确物理含义与硬边界，不像原始的自由 `q_ion` 那样量纲含糊。
+唯一的 dial 改为无量纲的 **`f' > 0`**：**spike 驱动的 Na 内流相对背景内流的倍数**（在 `r0` 处）。
+`f' = 1` 表示 spike 使 Na 负荷翻倍。注意这**不再是** rev2 那个"静息泵负荷中 spike 占的比例"——
+背景通量现在是常数，不再被 `f'` 瓜分，因此可行性门 `J_Na,0 > 0` 由构造恒成立。
 
-**B0 已完成的解析可行性核算**（表中用 `r0 = 3.838 Hz`；§7.1 把 primary 锁为同一条泵关轨迹实测的
-`4.158 Hz`，两者差 8%，对下面的量级结论无影响）：
+**两个参考态必须分清（rev2 把它们混为一谈）**：
 
-| `f` | `q_ion` (mM/spike) | 一次普通事件的 `ΔK_o` | 对应 `ΔE_K` | 占 `V_th=18` | 持续 50 Hz 的稳态 `K_o` | 对应 `ΔE_K` |
-|---:|---:|---:|---:|---:|---:|---:|
-| 1.00 | 0.01576 | 0.0215 mM | 0.143 mV | 0.8% | ~7.2 mM | +15.7 mV |
-| 0.50 | 0.00788 | 0.0108 mM | 0.072 mV | 0.4% | ~5.7 mM | +9.2 mV |
-| 0.25 | 0.00394 | 0.0054 mM | 0.036 mV | 0.2% | ~4.9 mM | +5.2 mV |
+- **无 spike 静息态** `(Na_i, K_o) = (18.0, 4.0)`：由 `J_Na,0` / `J_K,0` 构造成**精确不动点**
+  （两个导数解析为 0）。这是 Gate H 检验的对象。
+- **间期统计稳态**：在基线率 `r0` 下由两式联立决定，位于静息态**之上**。这是 Gate B 的对象，
+  也是 bias 重标定要落回的工作点。
 
-**这是本 spec 最重要的 B0 结论**：在**零自由参数**（`f=1` 即"静息泵负荷全部由 spike 驱动"）下，
-一次普通间期事件只把钾抬 0.02 mM、对膜的影响不到阈值的 1%，而持续 50 Hz 会把钾推到约 7.2 mM、
-钾反转电位移动 +15.7 mV（阈值的 87%）——约 **110 倍动态范围**，且落在这类模型报告的发作期钾区间内。
-即"间期安静、高态强正反馈"这个必要条件在动笔仿真之前就已经解析成立。
+**B0 已完成的解析核算（订正后；`q_ion` 由 `r0 = 4.1581 Hz` 锁定后不再随率改变）**：
 
-`f` 的 B1 任务因此不是"找一个能出发作的值"，而是"找一个让单次事件的钾瞬态**可测但会恢复**、
-重复事件簇能时间积分、且普通事件不产生持续积累的值"。primary 起点 `f = 1.0`，B1 只在 `{1.0, 0.5, 0.25}` 三点里选。
+| `f'` | `q_ion` (mM/spike) | 间期稳态 `Na*`/`K_o*` | 间期 `ΔE_K` | 20 Hz `K_o*` / `ΔE_K` | 50 Hz `K_o*` / `ΔE_K` |
+|---:|---:|---|---:|---|---|
+| 1.00 | 0.01454 | 20.07 / 4.11 mM | +1.11 mV (6% V_th) | 4.52 mM / +4.23 mV (24%) | 5.28 mM / +8.69 mV (48%) |
+| 0.50 | 0.00727 | 19.21 / 4.05 mM | +0.59 mV (3%) | 4.26 mM / +2.38 mV (13%) | 4.65 mM / +5.07 mV (28%) |
+| 0.25 | 0.00364 | 18.67 / 4.03 mM | +0.31 mV (2%) | 4.13 mM / +1.31 mV (7%) | 4.33 mM / +2.87 mV (16%) |
+
+**rev2 的"110 倍动态范围"作废。** 订正后间期→50 Hz 的钾反转移动是 **1.11 → 8.69 mV，约 8 倍**。
+同时必须改口径：离子层**按构造**就会把间期工作点从 `K_o = 4.0` 抬到 `4.11`（钾反转 +1.11 mV，
+阈值的 6%）。这**不是**"扰动"，而是**新的工作点**——路线 B 的前提本来就是重新标定工作点，
+两个 bias 的职责正是吸收它。**不得**再写"离子层在间期是安静的"。
+
+`f'` 的 B1 任务：在 `{1.0, 0.5, 0.25}` 三点里选，判据见 plan §T7（已数值化）。
+
+### 3.2b Na 的慢弛豫（rev3 新增，直接约束 plan 的探针长度）
+
+在静息点线性化 `dNa/dt`：
+
+```
+tau_Na = 1 / (3*rho*F_K(K_o0)*dF_Na/dNa|_{Na_i0}) = 54.4 s
+```
+
+**因此 4 s 甚至 11 s 的探针都看不到 Na 平衡。** 任何 40k 运行**必须**用解析预平衡把 `Na_i` / `K_o`
+直接置于该率下的联立稳态（与上一 sprint 对负荷做 `analytic_steady_load` 同一手法），
+否则测到的只是一段瞬态。这是 plan 的硬约束，不是建议。
 
 ### 3.3 `rho` 的阶段权限（P0-2 闭合）
 
@@ -149,11 +175,16 @@ rev1 里"第一阶段标定 rho"与"B4 才确定 rho"的自相矛盾就此消除
 ### 4.1 每个细胞的胞内 Na
 
 ```
-d[Na]_i/dt = J_Na_rest + q_ion * S_i(t) - 3 * I_pump_i
+d[Na]_i/dt = J_Na,0 + q_ion * S_i(t) - 3 * I_pump_i
 I_pump_i   = rho / (1+exp((Na_half-[Na]_i)/s_Na)) / (1+exp((K_half-[K]_o,g(i))/s_K))
+J_Na,0     = 3 * I_pump_0                       # 背景内流，恰好平衡静息泵；常数，不含 f'
 ```
 
 系数 3 来自泵每循环外排 3 个 Na（与 Cressman 的 `-3 I_pump` 一致）。
+
+**`J_Na,0` 对 E 和 I 相同**（同一静息泵），每个细胞按**自己的**放电率落到自己的稳态，
+因此不存在 rev2 那个"用 E 群体率推的常数作用到 I 细胞会导致 I 细胞系统漂移"的问题。
+仍需在产物里分别记录 `r0_E` 与 `r0_I` 及各自的预测稳态，作为 Gate B 的检验项。
 
 ### 4.2 胞外 K：显式有限体积
 
@@ -170,19 +201,25 @@ I_pump_i   = rho / (1+exp((Na_half-[Na]_i)/s_Na)) / (1+exp((K_half-[K]_o,g(i))/s
 r̄_g(t) = (1/n_g) * sum_{i in g} S_i(t)          # 每细胞平均 spike 率；n_g = 0 -> 源项 = 0
 Ī_pump,g(t) = (1/n_g) * sum_{i in g} I_pump_i    # 同上
 
-d[K]_o,g/dt =  beta * q_ion * r̄_g(t)             # spike 驱动的 K 外流（= q_K * r̄_g）
+d[K]_o,g/dt =  J_K,0                             # 背景 K 外流，恰好平衡静息泵的 K 回收（常数）
+             + beta * q_ion * r̄_g(t)             # spike 驱动的额外 K 外流（= q_K * r̄_g）
              - 2 * beta * Ī_pump,g(t)            # 泵每循环回收 2 个 K
              - eps * ([K]_o,g - k_o_inf)         # 储库/血管清除（线性，inherited）
              - I_glia([K]_o,g) + I_glia(K_o0)    # 胶质缓冲，围绕静息中心化（inherited 形状）
              + (D_K / Δx²) * (sum_{nb} [K]_o,nb - n_nb * [K]_o,g)   # 局部扩散
+
+J_K,0 = 2 * beta * I_pump_0                      # = 0.28221 mM/s
 ```
+
+**rev2 缺的就是 `J_K,0`。** 没有它，无 spike 时残留 `-2β·I_pump_0 = -0.2822 mM/s`，钾会一路掉下去。
 
 **为什么保留胶质项而不是并进一条线性储库**（rev1 曾把两者并成一个 `(K_res - K_o)/tau_K`）：
 胶质摄取是**饱和**的（`I_glia` 在高钾处趋于 `G_glia`），这正是钾积累失控的已知机制之一。
 把它并进线性项会**删掉**路线 B 依赖的一个正反馈成分。因此按参考分开写。
 
-`+ I_glia(K_o0)` 与 `- eps(K_o - k_o_inf)` 的组合使 `K_o = K_o0 = k_o_inf` 在**无 spike、泵处于静息**时
-恰为不动点，无需再引入自由的 `K_res`（rev1 的 `K_res` 反推式随之删除）。
+`J_K,0`、`- eps(K_o - k_o_inf)` 与 `- I_glia(K_o) + I_glia(K_o0)` 三者的组合，使
+`(Na_i, K_o) = (18.0, 4.0)` 在**无 spike** 时成为**精确不动点**（两个导数解析为 0，已数值验证到机器精度），
+无需再引入自由的 `K_res`（rev1 的 `K_res` 反推式随之删除）。
 
 边界条件：**零通量（反射）**，`n_nb` 为该格实际存在的邻居数（角/边格分别为 2/3）。空格
 （`n_g = 0`）源项与泵项为 0，但清除与扩散照常作用。
@@ -190,6 +227,17 @@ d[K]_o,g/dt =  beta * q_ion * r̄_g(t)             # spike 驱动的 K 外流（
 **网格不变性的正确表述**：由于 K 源用的是 per-cell 平均且 `beta` 是组织常数，细化网格**不改变**
 总钾预算，也不改变粗粒化后的场；但**逐格场本身不期望逐点相同**（扩散离散化 + 采样噪声）。
 Gate H 的检验因此是"总预算闭合 + 粗粒化场一致"，不是"逐格数值相同"。
+
+### 4.2b 量纲合同（rev3 新增，防 1000 倍错误）
+
+**引擎的 `dt` 是毫秒；所有离子通量是 mM/秒。** 因此每个离子更新步必须显式乘 `dt_ms * 1e-3`：
+
+```
+Δ[Na]_i = (dt_ion_ms * 1e-3) * (J_Na,0 + q_ion*S_i/(dt_ion_ms*1e-3) - 3*I_pump_i)
+```
+
+即 spike 项本身是**每 spike 的浓度增量**（不乘时间），而连续通量项乘 `dt_ion_ms*1e-3`。
+必须有一条专门的量纲测试：把 `dt_ion` 加倍时，连续项的增量加倍而 spike 项不变。
 
 ### 4.3 与膜方程的耦合（受 §5 引擎钩子硬约束）
 
@@ -202,12 +250,22 @@ tau_m_a * dV_i/dt = F_FCXR_i
 两项都是**电流**量纲，**对 E 和 I 一视同仁**。减去 `I_pump_0` 只是把静息泵电流吸收进重新标定的
 bias 平衡；**离子质量方程（§4.1/§4.2）始终使用完整的、非零的 `I_pump_i`**。
 
-`g_K_ion`：**effective**。这是围绕静息电位的**线性化** —— 它抓住"钾反转移动导致静息处的钾电流改变"，
+**`eta_pump` 在 B0–B2 锁为 0（rev3 新增）。** rev2 让 B0–B2 的方程用到它、却把它的标定留到 B4，
+执行时没有唯一值。锁 0 的含义是：**B0–B2 只检验泵的「钾介导」通路**（泵回收 K → `E_K` 恢复 → 兴奋性），
+把「电生性外向电流」这条直接通路**整体推迟到 B4**。这必须在所有产物与结论里显式写明，
+**不得**在 B0–B2 之后说"泵的电生性作用已被检验"。
+
+`g_K_ion`：**effective reference normalization，不是单位核算的结论（rev3 订正）**。
+T1 的单位链路只能证明**量纲兼容**（往 `drive` 加一个 mV 量纲的量是自洽的），
+**不能**推出数值必须为 1。取 `g_K_ion = 1` 是一个明示的建模归一化——
+"静息钾电导与漏电导同量级"——其数值由 B3 标定；**B0–B2 的任何结论都必须带上这个归一化的前提**。
+
+这是围绕静息电位的**线性化** —— 它抓住"钾反转移动导致静息处的钾电流改变"，
 但**丢掉**了电导本身的分流效应（真正的 `g_K(E_K − V)` 会同时改变有效时间常数）。这一线性化对 I 细胞
 是引擎强制的（§5），为一致性对 E 细胞也采用。B0–B2 锁 reference `g_K_ion = 1`（含义：静息钾电导
 与漏电导同量级，1 mV 的钾反转移动产生 1 个引擎单位的驱动改变）；B3 才细化，**任何改动都要重跑 Gate B**。
 
-⚠️ **B0 待验证项之一**：上述 `g_K_ion = 1` 依赖"1 个引擎电压单位 = 1 mV"。证据支持
+⚠️ **B0 待验证项之一**：上述写法依赖"1 个引擎电压单位 = 1 mV"。证据支持
 （`V_L = 0` 坐标、`V_th = 18` 约等于生理阈上量、`E_E = 58` 对应静息 −58 mV 时的 0 mV AMPA 反转），
 但**必须在 B0 用一次显式的单位核算确认**，因为它直接决定 `g_K_ion` 的量级。未确认前不得进入 B1。
 
@@ -231,46 +289,59 @@ bias 平衡；**离子质量方程（§4.1/§4.2）始终使用完整的、非�
 
 ## 6. 与既有慢变量的组合协议（P0-4 闭合）
 
-引擎只接受**一个** `slow=` 对象，其协议表面（已逐条枚举）为：
+引擎只接受**一个** `slow=` 对象。**rev3 订正**：rev2 把 `nE`、`q_I`、`uses_shunt` 列进"必须直通"，
+但实测 `MZSlowVars` **没有**这三个属性（只有 `NE`）——它们属于另一个慢变量实现，引擎用 `hasattr` 守卫。
+**合成它们会翻转引擎的 `hasattr` 判断、改变执行路径**，是静默污染。
+
+引擎实际会碰的表面（已在实例上逐项 `hasattr` 验证）：
 
 ```
-capability : uses_conductance_membrane()  uses_split_excitation()  uses_ee_relay()  uses_shunt()
-attribute  : cfg.use_SG      ee_relay_send[...]      nE        q_I[:]
-call       : membrane_terms(I_E, I_I, labels[, I_E_rec=...])
-             apply_currents(I_E, I_I, labels[, I_E_rec])
-             threshold(base_vth)
-             step(spk, labels, dt)
+存在：NE  cfg  ee_relay_send  uses_conductance_membrane  uses_split_excitation
+      uses_ee_relay  membrane_terms  apply_currents  threshold  step
+不存在（必须保持不存在）：nE   q_I   uses_shunt
 ```
 
-因此**不新造一个平行的 slow 对象**，而是包装：
+因此 adapter **不列白名单**，改用 `__getattr__` 委托——**天然保留"缺席"语义**，
+只显式覆盖真正需要改写的两个调用：
 
 ```python
 class IonHomeostaticMZAdapter:
-    """包装既有 MZSlowVars，保留 Z 与 FCXR 电导路径不变，只在其结果上叠加离子电流。"""
-    def __init__(self, mz, ions): self.mz, self.ions = mz, ions
-    # 四个 capability 谓词 + cfg / ee_relay_send / nE / q_I 一律直通 self.mz
+    """包装既有 MZSlowVars：保留 Z 与 FCXR 电导路径不变，只在其结果上叠加离子电流。"""
+    def __init__(self, mz, ions):
+        object.__setattr__(self, "mz", mz)
+        object.__setattr__(self, "ions", ions)
+
+    def __getattr__(self, name):          # 未覆盖的一切原样委托；不存在的仍然不存在
+        return getattr(self.mz, name)
+
+    def membrane_terms(self, *a, **k): ...   # 见下
+    def apply_currents(self, *a, **k): ...   # 见下
+    def step(self, spk, labels, dt):   ...   # 见下
 ```
 
 **委托顺序（合同）**：
 
-1. `membrane_terms(...)` → 先**原样调用** `self.mz.membrane_terms(...)` 拿到 `(drive, g_rel, g_rev)`；
-   再对 **E 和 I 全体** 执行 `drive += g_K_ion*(E_K − E_K_0) − eta_pump*(I_pump − I_pump_0)`，
-   用的是**上一个离子块**的 `E_K` / `I_pump`（因果：离子状态从下一块才生效）；
-   `g_rel` / `g_rev` **一个字节都不动**。
-2. `threshold(...)` → 直通。
-3. `step(spk, labels, dt)` → **先**原样调用 `self.mz.step(...)`（既有 Z/M/X 顺序与逐步值不变），
-   **再**累积本步的 E/I 网格 spike；每 `dt_ion / dt` 步更新一次离子状态。
-4. `apply_currents(...)` → 直通（本代际只走电导膜路径，此路径不应被触发；若被触发则 `raise`，
-   遵循"stub 必须响亮失败"的项目约定）。
+1. `membrane_terms(...)` → 先**原样**调 `mz.membrane_terms(...)` 得 `(drive, g_rel, g_rev)`；
+   再对 **E 和 I 全体** 执行
+   `drive += I_bias_a + g_K_ion*(E_K − E_K_0) − eta_pump*(I_pump − I_pump_0)`，
+   用**上一个离子块**的 `E_K`/`I_pump`（因果：离子状态从下一块才生效）；
+   `g_rel` / `g_rev` **一个字节不动**。B0–B2 中 `eta_pump = 0`，该项恒为 0。
+2. `apply_currents(...)` → **rev3 消除 rev2 的自相矛盾**（rev2 同时写了"直通"和"触发即 raise"）。
+   正确做法与 `membrane_terms` **对称**：先委托，再对全体加**同一个**离子电流。
+   这样即使将来有配置走电流膜路径，离子层也不会静默失效。
+3. `threshold(...)` → 由 `__getattr__` 直通。
+4. `step(spk, labels, dt)` → **先**原样调 `mz.step(...)`（既有 Z/M/X 顺序与逐步值不变），
+   **再**累积本步 E/I 网格 spike；每 `dt_ion/dt` 步更新一次离子状态。
 
 **必需回归测试**：
 
-- `adapter-off byte-parity`：`ions` 关闭时，整条 `simulate_kick` 与**裸** `MZSlowVars` 逐位相同；
-- `existing Z/M/X update order unchanged`：复用本 sprint 已有的逐步值级别测试；
-- `I-cell coupling is a CURRENT`：显式验证离子项在 **I 细胞**上确实生效（防止只作用于 E 却报告成 E/I 都有）；
+- `adapter-off byte-parity`：`ions` 关闭时整条 `simulate_kick` 与**裸** `MZSlowVars` 逐位相同；
+- `existing Z/M/X update order unchanged`：复用上一 sprint 的逐步值测试；
+- **`absent attributes stay absent`**：`hasattr(adapter, 'nE'/'q_I'/'uses_shunt')` 必须为 `False`
+  （防止 `__getattr__` 实现把 `AttributeError` 吞掉）；
+- `I-cell coupling is a CURRENT`：显式验证离子项在 **I 细胞**上确实生效；
+- **full-conductance 集成测试**：走真实 `simulate_kick` 的电导分支，而不只是单元级调用；
 - 六个 blessed 引擎文件 sha256 不变。
-
----
 
 ## 7. 工作点闭合与参数辨识顺序（P1 循环定义闭合）
 
@@ -391,18 +462,24 @@ canonical bar；块指标、块间容差（`k = 2`）、以及"容差宽于均�
 
 #### B-real（优先级 1，binding）—— 面向真实 E1146
 
-**先纠正 rev1 的一处事实错误（2026-07-27 查产物后订正）。** rev1 把"双向轴向传播"写成 E1146 的
-真实目标并引了通道层产物。查证结果：
+**rev2 的这一段本身有事实错误，rev3 再订正一次（已逐字段查产物）。**
+rev1 说 E1146 有"双向轴向传播"是错的；但 rev2 说"通道层互换分数未 populated"**同样是错的**
+（rev2 查错了键名：找的是 `primary_pair`，实际是 `pairs[0]`）。实测：
 
-| 事实 | 证据 |
-|---|---|
-| E1146 **有**两个稳定的间期传播模板 | `interictal_propagation_masked/per_subject/epilepsiae_1146.json` → `adaptive_cluster.stable_k = 2` |
-| 两个模板整体秩相关 = **−0.464** | 同上 `inter_cluster_corr_matrix` |
-| E1146 **没有**已确立的正/反向模板对 | 同上 `adaptive_cluster.candidate_forward_reverse_pairs = **null**` |
-| 通道层互换分数**未populated** | `rank_displacement/per_subject/epilepsiae_1146.json` → `pr6_swap_score = null`、`pr6_swap_null_p = null`、`fwd_rev_reproduced = null`、`fwd_rev_source = "unknown"`；该文件**没有** `primary_pair` 字段 |
+| 层级 | 字段 | 实测值 |
+|---|---|---|
+| 模板层 | `adaptive_cluster.stable_k` | **2**（两个稳定模板存在） |
+| 模板层 | `adaptive_cluster.inter_cluster_corr_matrix` | 两模板整体秩相关 **−0.464** |
+| 模板层 | `adaptive_cluster.candidate_forward_reverse_pairs` | **`[]`（空列表，不是 null）** —— 没有候选正反模板对 |
+| 通道层 | `rank_displacement pairs[0].swap_sweep.swap_class` | **`strict`** |
+| 通道层 | 同上 `decision_k` / `T_obs` / `p_fw` | **7 / 0.653 / 0.025**；k = 4,5,6,7 均超 95% null |
+| 复现性 | `fwd_rev_reproduced` / `fwd_rev_source` | **`None` / `"unknown"`** —— 复现性合同**未确认** |
 
-因此 **Gate B 不得把"双向/正反向传播"作为面向真实数据的判据** —— 这个被试上它没有被确立。
-两个模板整体秩相关只有 −0.464，远不是一对反向。
+**因此安全的说法是**：E1146 在**通道层**有超过族系零分布的角色互换证据（`strict`，k=7，p=0.025），
+但**没有通过模板层的复现性合同确认的正反模板对**。并且按项目既有的分层裁定，
+**通道层的 `swap_class` 属于描述性 / 机制兜底档，不是队列级主张**，因此**不能**用来承载 Gate B 的判据。
+
+**不得**写成"E1146 没有任何互换证据"（rev2 的错），也**不得**写成"E1146 有已确立的双向传播"（rev1 的错）。
 
 **改为可支撑的判据**：模型必须保留**锚定在两个注册核上的两个可区分的传播起始位点**
 （即事件不塌缩到单一核），这正是 substrate 编码的内容（两个低阈值核放在两个模板的 source foci 上）。
@@ -433,7 +510,8 @@ canonical bar；块指标、块间容差（`k = 2`）、以及"容差宽于均�
 - 长 burn-in 后 `Na_i` / `K_o` 块间平稳，**无缓慢倒计时**；
 - 稀疏、不规则的间期事件保留（事件率、间隔中位数、间隔变异系数落在泵关臂的块间容差内；
   UNDERPOWERED 的指标不作为等价证据）；
-- 源 / 汇 / 轴外放电份额落在泵关臂容差内；
+- `core_A` / `core_B` / 轴外放电份额落在泵关臂容差内（**不再叫 source/sink**：
+  E1146 的方向性未被确立，沿用 source/sink 会夹带一个没有证据的方向主张）；
 - **普通间期事件不产生全 sheet 钾波**：事件后 `K_o` 的空间标准差不得超过其均值抬升的预锁倍数，
   且远离事件的格 `ΔK_o` 必须 < 事件格的 10%；
 - baseline 泵不饱和（`I_pump` 远离 `rho`）；
@@ -479,7 +557,7 @@ V_all            + 泵电生电流
 **不授权**：B3、B4、三维 `(Z̄, K̄_o, N̄a_i)` 相图、动态生命周期、因果分解（含四臂泵分解、钾钳制、
 Na 钳制、Z 消融、爆后 reset）、空间响应模态、数据一致性判据、以及任何 `Cl`/`Ca`/双室扩展。
 
-只有新的构成性离子 substrate 在**真实间期目标**与**两个注册核的起始位点**上重新验收，才允许进入
+只有新的构成性离子 substrate 在**真实间期目标**与**两个注册核（`core_A` / `core_B`）的起始位点**上重新验收，才允许进入
 三维相图与生命周期实验，届时另写 spec 与 plan。
 
 **本 spec 完成后的下一步是写 implementation plan，不是启动 B1。**
@@ -520,7 +598,7 @@ guarded-engine-change spec。
 ## 14. 允许的结论层级
 
 - **Gate H only**：离子稳态与数值合同成立；尚未证明任何网络级性质。
-- **Gate H + B**：构成性离子 substrate 重新达到间期工作点，并保留锚定在两个注册核上的两个起始位点；
+- **Gate H + B**：构成性离子 substrate 重新达到间期工作点，并保留锚定在两个注册核（`core_A` / `core_B`）上的两个起始位点；
   尚未证明相图或生命周期。**不得**写成"保留双向传播"——该性质在 E1146 上未被确立（§9 B-real）。
 
 即使全部通过，安全表述也只能是 **reduced ion-homeostatic mechanism on an E1146-informed spatial
@@ -541,7 +619,32 @@ spike→ion 的粗粒化（§3.2，标为 effective）；Epileptor-2 留给 B3/B
 
 ---
 
-## 16. rev2 相对 rev1 的实质改动
+## 16. 修订记录
+
+### rev3（第二轮审阅）—— 修正 rev2 的核心方程错误
+
+| # | 问题 | 处理 |
+|---|---|---|
+| **P0-1** | **静息平衡数学上不成立**：rev2 的 `J_Na_rest = 3I₀(1−f)` 使无 spike 时 `dNa/dt = −3I₀f`；K 方程更缺整项，`dK_o/dt = −2βI₀ = −0.2822 mM/s`。Gate H 会**按设计必然失败** | §3.2/§4：补回解析导出的背景通量 `J_Na,0 = 3I₀`、`J_K,0 = 2βI₀`；无 spike 态成为**精确不动点**（已数值验证）；`f` 重定义为 `f'` = spike 内流相对背景的倍数 |
+| **P0-1b** | rev2 的"110 倍动态范围"是用坏方程算的 | **作废**。订正值：间期 `ΔE_K = +1.11 mV`（阈值 6%）→ 50 Hz `+8.69 mV`（48%），约 **8 倍**。同时改口径：离子层**按构造**抬高间期工作点，**不得**再说"间期是安静的" |
+| **P0-2a** | `eta_pump` 在 B0–B2 已被方程使用却无值 | **锁 `eta_pump = 0`**；B0–B2 只检验泵的**钾介导**通路，电生性通路整体推迟到 B4，并禁止在 B0–B2 后声称它已被检验 |
+| **P0-2b** | `g_K_ion = 1` 被当成单位核算的结论 | 改标为 **effective reference normalization**；T1 只能证明量纲兼容，数值由 B3 标定，B0–B2 的结论必须带上该归一化前提 |
+| **P0-2c** | E/I 用同一个由 E 群体率推的常数 → I 细胞漂移 | 订正后的 `J_Na,0` 是常数且 E/I 相同，每个细胞按自己的率落到自己的稳态，漂移问题**自动消失**；仍要求分别记录 `r0_E` / `r0_I` 与各自预测稳态 |
+| **P0-3** | adapter 协议与真实 `MZSlowVars` 不符（`nE`/`q_I`/`uses_shunt` 并不存在；`apply_currents` 同时写成直通与 raise） | §6 改为 `__getattr__` 委托（天然保留"缺席"语义），只覆盖 `membrane_terms`/`apply_currents`/`step`；两者对称加同一个离子电流；新增 `absent attributes stay absent` 与 full-conductance 集成测试 |
+| **P1-a** | 量纲：`dt` 是 ms、通量是 mM/s | §4.2b 新增量纲合同 + 专门测试（`dt_ion` 加倍时连续项加倍、spike 项不变） |
+| **P1-b** | Na 弛豫时间未估 | §3.2b：`tau_Na = 54.4 s`，因此 4 s / 11 s 探针都看不到 Na 平衡，**解析预平衡是硬约束** |
+| **P1-c** | rev2 关于 E1146 通道层"未 populated"是**错的** | §9 重新逐字段核实：模板层 `candidate_forward_reverse_pairs = []`（空列表），通道层 `swap_class = strict`、`decision_k = 7`、`p = 0.025`、k=4–7 超 null，但 `fwd_rev_reproduced = None`。安全说法：**有通道层互换证据，但没有通过复现性合同确认的正反模板**；且该层属描述性档，不能承载 Gate B |
+| **P1-d** | `source` / `sink` 命名夹带方向主张 | 改为 `core_A` / `core_B` |
+
+**rev3 后仍未闭合的 B0 项（进 B1/B2 前必须解决）**：
+
+1. 引擎电压单位链路核算（§4.3 ⚠️）——只定量纲，不定 `g_K_ion` 数值；
+2. 起始位点方向读出的功率前置（§9 B-real）。
+
+---
+
+## 17. rev2 相对 rev1 的实质改动（保留）
+
 
 **读源文献后改设计（三项）**
 
