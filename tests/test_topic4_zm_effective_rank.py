@@ -8,6 +8,7 @@ from src.topic4_zm_effective_rank import (
     trajectory_coordinate_directions,
     trajectory_coordinate_values,
     rank_summary,
+    response_vectors,
     robust_scales,
     standardize_sensitivity,
 )
@@ -150,3 +151,15 @@ def test_trajectory_coordinate_projection_and_robust_scales():
     scale = robust_scales(q)
     assert scale.shape == (3,)
     assert np.all(scale > 0)
+
+
+def test_response_vectors_keep_static_and_impulse_views_separate():
+    series = {
+        "rate": np.arange(12.0),
+        "area": 2.0 * np.arange(12.0),
+    }
+    out = response_vectors(series, ("rate", "area"), burn_bins=2, static_tail_bins=4)
+    assert np.allclose(out["static"], [9.5, 19.0])
+    assert out["impulse"].shape == (20,)
+    assert np.allclose(out["impulse"][:4], [2.0, 4.0, 3.0, 6.0])
+    assert out["n_time_bins"] == 10

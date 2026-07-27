@@ -15,6 +15,8 @@ Phases (each is crash-safe and writes atomically under results/topic4_sef_hfo/zm
   source_rhythm
             Short, post-confirmation fine E/I field audit used only to route fixed/periodic/
             stochastic operator tools. It cannot establish an ictal or observation-space claim.
+  effective_rank
+            Task 9A paired central differences along actual Z/M/S_G trajectory-field directions.
 
 Every phase pins the canonical config SHA, the engine SHAs, the state hash and the noise-bank SHA.
 OMP/MKL/OPENBLAS/NUMEXPR are forced to 1.
@@ -23,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import dataclasses
+import hashlib
 import json
 import os
 import resource
@@ -51,6 +54,7 @@ import src.topic4_zm_noise_bank as NB                # noqa: E402
 import src.topic4_zm_minimal_carrier as MC           # noqa: E402
 import src.topic4_zm_ictal_carrier as CG             # noqa: E402
 import src.topic4_zm_source_rhythm as SR             # noqa: E402
+import src.topic4_zm_effective_rank as ER             # noqa: E402
 
 OUT = os.path.join(_ROOT, "results", "topic4_sef_hfo", "zm_branch_decision")
 PHASE0 = os.path.join(OUT, "phase0")
@@ -61,6 +65,11 @@ ES_THRESH_HZ = 250.0        # bounded-arm runaway threshold (the containment arm
 ARM_KWARGS = dict(use_SG=True, alpha_G=16.0)
 SOURCE_RHYTHM_MS = 2000.0
 SOURCE_RHYTHM_BIN_MS = 2.0
+RANK_STATES = ("bounded_early__peak", "bounded_mid__peak", "bounded_late__peak")
+RANK_COORDINATES = ("z", "m", "sg")
+RANK_OBSERVABLES = ("r_all", "A_active", "H_spatial", "E_vSEEG")
+RANK_DELTA = 0.05
+RANK_RESPONSE_MS = 1000.0
 
 
 # ================================================================ helpers
@@ -965,12 +974,215 @@ def phase_source_rhythm(ctx, state_tag="bounded_mid__peak"):
     return out
 
 
+# ================================================================ phase: effective rank (Task 9A)
+def _rank_direction_hash(directions):
+    h = hashlib.sha256()
+    for name in RANK_COORDINATES:
+        a = np.asarray(directions[name], float)
+        h.update(name.encode())
+        h.update(str(a.shape).encode())
+        h.update(np.ascontiguousarray(a).tobytes())
+    return h.hexdigest()
+
+
+def _rank_response(run):
+    series = {name: _cat(run["chunks"], name) for name in RANK_OBSERVABLES}
+    burn_bins = int(round(BURN_IN_MS["freeze_all"] / MC.BIN_MS))
+    expected_bins = int(round(RANK_RESPONSE_MS / MC.BIN_MS))
+    if any(v.size < burn_bins + expected_bins for v in series.values()):
+        return None
+    out = ER.response_vectors(
+        series, RANK_OBSERVABLES, burn_bins=burn_bins,
+        static_tail_bins=int(round(500.0 / MC.BIN_MS)),
+    )
+    if out["n_time_bins"] != expected_bins:
+        return None
+    return out
+
+
+def phase_effective_rank(ctx, resume=True):
+    """Paired central differences along actual early-to-late slow-field axes."""
+    if ctx["resolution"] != "dt":
+        raise SystemExit("effective_rank runs on original dt after the native dt/2 carrier gate")
+    verdict_path = os.path.join(OUT, "branch_verdict.json")
+    verdict = json.load(open(verdict_path)) if os.path.exists(verdict_path) else {}
+    if not SR.source_rhythm_authorized(verdict):
+        raise SystemExit(
+            "effective_rank is not authorized until two-seed native carrier "
+            "confirmation passes"
+        )
+
+    seed = int(ctx["S"]["seed"])
+    nE = int(ctx["S"]["NE"])
+    anchor_path = os.path.join(OUT, "anchors", f"seed{seed}", "anchor.json")
+    anchor = json.load(open(anchor_path))
+    captured = {
+        f"{s['bin_name']}__{s['fast_phase']}": s
+        for s in anchor.get("captured_states", [])
+    }
+    missing = [tag for tag in RANK_STATES if tag not in captured]
+    if missing:
+        raise SystemExit(f"effective_rank missing natural states: {missing}")
+    engine_sha = ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"]
+    states, state_manifests = {}, {}
+    for tag in RANK_STATES:
+        states[tag], state_manifests[tag] = CK.load_state_npz(
+            os.path.join(_ROOT, captured[tag]["path"]),
+            expected_config_sha=ctx["cfg_sha"],
+            expected_engine_sha=engine_sha,
+            expected_dt=ctx["dt"],
+        )
+
+    early, late = states[RANK_STATES[0]], states[RANK_STATES[-1]]
+    directions = ER.trajectory_coordinate_directions(early, late, nE=nE)
+    direction_sha = _rank_direction_hash(directions)
+    q_values = ER.trajectory_coordinate_values(
+        [states[tag] for tag in RANK_STATES], early, directions, nE=nE
+    )
+    q_scales = ER.robust_scales(q_values)
+
+    trace_path = os.path.join(OUT, "anchors", f"seed{seed}", "anchor_traces.npz")
+    with np.load(trace_path, allow_pickle=False) as tr:
+        lo = int(np.floor(captured[RANK_STATES[0]]["t_ms"] / MC.BIN_MS))
+        hi = int(np.ceil(captured[RANK_STATES[-1]]["t_ms"] / MC.BIN_MS)) + 1
+        natural_y = np.column_stack([
+            np.asarray(tr[name], float)[lo:hi] for name in RANK_OBSERVABLES
+        ])
+    y_scales = ER.robust_scales(natural_y)
+
+    root = os.path.join(OUT, "effective_rank", f"seed{seed}")
+    manifest_path = os.path.join(root, "rank_probes.json")
+    done = {}
+    if resume and os.path.exists(manifest_path):
+        old = json.load(open(manifest_path))
+        if old.get("direction_sha") != direction_sha:
+            raise SystemExit("effective_rank direction SHA changed; refusing mixed resume")
+        done = {row["key"]: row for row in old.get("rows", [])}
+    rows = dict(done)
+    save_npz_atomic(
+        os.path.join(root, "trajectory_directions.npz"),
+        z=np.asarray(directions["z"], np.float64),
+        m=np.asarray(directions["m"], np.float64),
+        sg=np.asarray(directions["sg"], np.float64),
+        q_values=q_values.astype(np.float64),
+        q_scales=q_scales.astype(np.float64),
+        y_scales=y_scales.astype(np.float64),
+    )
+
+    def write_manifest():
+        payload = dict(
+            provenance(ctx, phase="effective_rank"),
+            effective_rank_version=ER.EFFECTIVE_RANK_VERSION,
+            direction_sha=direction_sha,
+            direction_path=os.path.relpath(
+                os.path.join(root, "trajectory_directions.npz"), _ROOT
+            ),
+            state_tags=list(RANK_STATES),
+            coordinate_order=list(RANK_COORDINATES),
+            observable_order=list(RANK_OBSERVABLES),
+            requested_delta=RANK_DELTA,
+            response_ms=RANK_RESPONSE_MS,
+            q_values=q_values.tolist(),
+            q_scales=q_scales.tolist(),
+            y_scales=y_scales.tolist(),
+            rows=sorted(rows.values(), key=lambda x: x["key"]),
+        )
+        write_json_atomic(manifest_path, payload)
+
+    for tag in RANK_STATES:
+        bank = NB.build_noise_bank(
+            ctx["cfg_sha"], seed, int(captured[tag]["t_step"]), "noise_replay"
+        )
+        for coordinate in RANK_COORDINATES:
+            plus, minus, actual_delta = ER.paired_trajectory_coordinate(
+                states[tag], directions, coordinate,
+                delta=RANK_DELTA, nE=nE,
+            )
+            for sign, perturbed in ((+1, plus), (-1, minus)):
+                key = f"{tag}|{coordinate}|{'plus' if sign > 0 else 'minus'}"
+                old = rows.get(key)
+                if (
+                    old is not None
+                    and old.get("effective_rank_version") == ER.EFFECTIVE_RANK_VERSION
+                    and old.get("direction_sha") == direction_sha
+                    and old.get("completed") is True
+                ):
+                    continue
+                run = run_continuation(
+                    ctx, perturbed, "freeze_all", bank, anchor["locks"],
+                    T_ms=RANK_RESPONSE_MS,
+                )
+                response = _rank_response(run)
+                valid = bool(
+                    response is not None
+                    and run["end_reason"] is None
+                    and run["runaway_ms"] is None
+                )
+                rows[key] = dict(
+                    key=key, seed=seed, state_tag=tag,
+                    coordinate=coordinate, sign=int(sign),
+                    delta=float(actual_delta), requested_delta=RANK_DELTA,
+                    bank_sha=bank["bank_sha"],
+                    state_hash=state_manifests[tag]["state_hash"],
+                    direction_sha=direction_sha,
+                    effective_rank_version=ER.EFFECTIVE_RANK_VERSION,
+                    completed=True,
+                    response_valid=valid,
+                    invalid_reason=(None if valid else
+                                    (run["end_reason"] or "short_response")),
+                    y_static=(response["static"].tolist() if valid else None),
+                    y_impulse=(response["impulse"].tolist() if valid else None),
+                    n_time_bins=(response["n_time_bins"] if valid else None),
+                    wall_s=run["wall_s"], peak_rss_gb=_rss_gb(),
+                )
+                write_manifest()
+                print(
+                    f"[effective_rank] {key} valid={valid} "
+                    f"delta={actual_delta:.5f} wall={run['wall_s']}s",
+                    flush=True,
+                )
+
+    state_summaries = {}
+    for tag in RANK_STATES:
+        selected = [r for r in rows.values() if r["state_tag"] == tag]
+        if len(selected) != 2 * len(RANK_COORDINATES) or not all(
+                r.get("response_valid") for r in selected):
+            continue
+        static_raw = ER.assemble_paired_sensitivity(
+            [{**r, "y": r["y_static"]} for r in selected], RANK_COORDINATES
+        )
+        impulse_raw = ER.assemble_paired_sensitivity(
+            [{**r, "y": r["y_impulse"]} for r in selected], RANK_COORDINATES
+        )
+        n_time = int(selected[0]["n_time_bins"])
+        static_std = ER.standardize_sensitivity(static_raw, q_scales, y_scales)
+        impulse_std = ER.standardize_sensitivity(
+            impulse_raw, q_scales, np.tile(y_scales, n_time)
+        )
+        state_summaries[tag] = {
+            "static": ER.rank_summary(static_std),
+            "impulse": ER.rank_summary(impulse_std),
+            "static_matrix": static_std.tolist(),
+            "impulse_matrix_shape": list(impulse_std.shape),
+        }
+    manifest = json.load(open(manifest_path))
+    manifest["state_summaries"] = state_summaries
+    manifest["complete"] = bool(len(state_summaries) == len(RANK_STATES))
+    write_json_atomic(manifest_path, manifest)
+    print(
+        f"[effective_rank] seed={seed} complete={manifest['complete']} "
+        f"states={len(state_summaries)} -> {manifest_path}",
+        flush=True,
+    )
+    return manifest
+
+
 # ================================================================ CLI
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--phase", required=True,
                     choices=["anchor1", "anchor", "fork", "neighbourhood",
-                             "source_rhythm", "smoke"])
+                             "source_rhythm", "effective_rank", "smoke"])
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--T", type=float, default=15000.0)
     ap.add_argument("--confirm-run", action="store_true")
@@ -992,14 +1204,16 @@ def main():
         raise SystemExit("refusing a multi-minute N=40000 run without --confirm-run")
     if a.phase == "neighbourhood" and a.resolution != "dt":
         raise SystemExit("neighbourhood is a discovery-dt phase; dt2 is confirmation-only")
+    if a.phase == "effective_rank" and a.resolution != "dt":
+        raise SystemExit("effective_rank runs at original dt after native dt/2 confirmation")
     if a.phase != "fork" and a.evidence_tier != "discovery":
         raise SystemExit("--evidence-tier applies only to --phase fork")
-    if a.phase == "source_rhythm":
+    if a.phase in {"source_rhythm", "effective_rank"}:
         verdict_path = os.path.join(OUT, "branch_verdict.json")
         verdict = json.load(open(verdict_path)) if os.path.exists(verdict_path) else {}
         if not SR.source_rhythm_authorized(verdict):
             raise SystemExit(
-                "source_rhythm is not authorized until two-seed native carrier "
+                f"{a.phase} is not authorized until two-seed native carrier "
                 "confirmation passes"
             )
     ctx = build_context(
@@ -1024,6 +1238,8 @@ def main():
             ctx, state_tag=(a.states.split(",")[0] if a.states
                             else "bounded_mid__peak")
         )
+    elif a.phase == "effective_rank":
+        phase_effective_rank(ctx, resume=not a.no_resume)
     elif a.phase == "fork":
         phase_fork(ctx,
                    states_filter=[s.strip() for s in a.states.split(",")] if a.states else None,

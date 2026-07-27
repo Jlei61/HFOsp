@@ -160,6 +160,29 @@ def robust_scales(values):
     return scale
 
 
+def response_vectors(series_by_name, observable_order, *, burn_bins, static_tail_bins):
+    """Build separate static and time-resolved response vectors from aligned bins."""
+    arrays = [np.asarray(series_by_name[name], float) for name in observable_order]
+    if not arrays or any(a.ndim != 1 for a in arrays):
+        raise ValueError("response series must be non-empty 1D arrays")
+    n = arrays[0].size
+    if any(a.size != n for a in arrays):
+        raise ValueError("response series are not time-aligned")
+    burn = int(burn_bins)
+    if burn < 0 or burn >= n:
+        raise ValueError("invalid burn_bins")
+    post = np.column_stack([a[burn:] for a in arrays])
+    tail = int(static_tail_bins)
+    if tail < 1 or post.shape[0] < tail:
+        raise ValueError("not enough post-burn bins for static response")
+    return {
+        "static": np.mean(post[-tail:], axis=0),
+        "impulse": post.reshape(-1),
+        "n_time_bins": int(post.shape[0]),
+        "n_observables": int(post.shape[1]),
+    }
+
+
 def assemble_paired_sensitivity(rows, coordinate_order):
     """Assemble dy/dq from central-difference rows under matched future noise."""
     columns = []
