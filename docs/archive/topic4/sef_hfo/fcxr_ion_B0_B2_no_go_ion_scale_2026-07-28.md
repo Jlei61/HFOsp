@@ -213,7 +213,7 @@ Gate H 已经通过，40k 因此被允许；而**第一次小网络尝试是作�
 ## 5. 资源与再现
 
 - 长任务全部 `setsid nohup` + `RUNNING/DONE/FAILED` sentinel + `<stage>.pid` + 按 stage 分片的单实例锁；
-- 峰值 RSS 约 **12.9 GB**（单 worker，40k / 11 s + 三个 sensor 离子实例 + 20000×40000 的 int8 raster 捕获）；
+- 峰值 RSS 约 **12.3 GB**（单 worker，40k / 11 s + 三个 sensor 离子实例 + 20000×40000 的 int8 raster 捕获）；
 - swap 相对本 sprint 基线 delta 全程 < **25 MiB**（门槛 256 MiB），`MemAvailable` 全程 > 180 GB，无 OOM；
 - 并发：40k 阶段实际用 1 worker（用户授权上限 6）；多进程探针路径已 smoke 验证可用但**未被使用**——
   T7 停机后 B2 未执行；
