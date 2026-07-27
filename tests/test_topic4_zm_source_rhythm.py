@@ -1,6 +1,7 @@
 import numpy as np
 
 from src.topic4_zm_source_rhythm import (
+    adjudicate_source_rhythm,
     bin_spikes_to_grid,
     characterize_source_rhythm,
     source_rhythm_authorized,
@@ -88,3 +89,18 @@ def test_independent_fluctuations_are_not_periodic_candidate():
 
     assert out["source_temporal_class"] == "asynchronous_or_irregular_candidate"
     assert out["local_peak_fraction_median"] < 0.25
+
+
+def test_two_seed_source_route_is_fail_closed_on_missing_or_disagreeing_classes():
+    periodic = [
+        {"seed": 1, "source_temporal_class": "global_periodic_candidate"},
+        {"seed": 3, "source_temporal_class": "phase_staggered_periodic_candidate"},
+    ]
+    assert adjudicate_source_rhythm(periodic)["carrier_type"] == "periodic"
+    assert adjudicate_source_rhythm(periodic[:1])["status"] == "insufficient_seeds"
+    mixed = [
+        periodic[0],
+        {"seed": 3, "source_temporal_class": "asynchronous_or_irregular_candidate"},
+    ]
+    assert adjudicate_source_rhythm(mixed)["status"] == "class_disagreement"
+    assert adjudicate_source_rhythm(mixed)["carrier_type"] is None

@@ -114,6 +114,7 @@ if [[ "$rc" -ne 0 ]]; then
     exit "$rc"
 fi
 
+python scripts/analyze_topic4_zm_source_rhythm.py >>"$coordinator_log" 2>&1
 python scripts/analyze_topic4_zm_effective_rank.py >>"$coordinator_log" 2>&1
 python scripts/plot_topic4_zm_branch_decision.py >>"$coordinator_log" 2>&1
 echo "[postcarrier] $(date -Is) complete" >>"$coordinator_log"

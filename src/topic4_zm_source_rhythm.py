@@ -18,6 +18,12 @@ from scipy import signal as ss
 
 
 SOURCE_RHYTHM_VERSION = "zm_source_rhythm_v1_2026-07-27"
+_CARRIER_TYPE_BY_CLASS = {
+    "stationary_rate_candidate": "fixed",
+    "global_periodic_candidate": "periodic",
+    "phase_staggered_periodic_candidate": "periodic",
+    "asynchronous_or_irregular_candidate": "stochastic",
+}
 
 
 def source_rhythm_authorized(verdict):
@@ -29,6 +35,67 @@ def source_rhythm_authorized(verdict):
         and confirmation.get("status") == "passed"
         and layers.get("source_space_carrier") == "carrier_window"
     )
+
+
+def adjudicate_source_rhythm(rows, min_seeds=2):
+    """Require a replicated source class before routing the operator audit."""
+
+    by_seed = {}
+    conflicts = []
+    for row in rows:
+        seed = int(row["seed"])
+        klass = row.get("source_temporal_class")
+        if seed in by_seed and by_seed[seed] != klass:
+            conflicts.append(seed)
+        by_seed[seed] = klass
+    if conflicts:
+        return {
+            "status": "within_seed_conflict",
+            "carrier_type": None,
+            "conflicting_seeds": sorted(set(conflicts)),
+            "source_rhythm_version": SOURCE_RHYTHM_VERSION,
+        }
+    if len(by_seed) < int(min_seeds):
+        return {
+            "status": "insufficient_seeds",
+            "carrier_type": None,
+            "n_seeds": len(by_seed),
+            "min_seeds": int(min_seeds),
+            "source_rhythm_version": SOURCE_RHYTHM_VERSION,
+        }
+    unresolved = {
+        seed: klass for seed, klass in by_seed.items()
+        if klass not in _CARRIER_TYPE_BY_CLASS
+    }
+    if unresolved:
+        return {
+            "status": "unresolved_source_class",
+            "carrier_type": None,
+            "unresolved": unresolved,
+            "source_rhythm_version": SOURCE_RHYTHM_VERSION,
+        }
+    routed = {
+        seed: _CARRIER_TYPE_BY_CLASS[klass] for seed, klass in by_seed.items()
+    }
+    types = sorted(set(routed.values()))
+    if len(types) != 1:
+        return {
+            "status": "class_disagreement",
+            "carrier_type": None,
+            "seed_classes": by_seed,
+            "seed_carrier_types": routed,
+            "source_rhythm_version": SOURCE_RHYTHM_VERSION,
+        }
+    return {
+        "status": "replicated",
+        "carrier_type": types[0],
+        "seed_classes": by_seed,
+        "seed_carrier_types": routed,
+        "source_rhythm_version": SOURCE_RHYTHM_VERSION,
+        "claim_boundary": (
+            "operator-tool routing only; not an ictal or lifecycle verdict"
+        ),
+    }
 
 
 def _cell_index(pos, L, n_grid):
