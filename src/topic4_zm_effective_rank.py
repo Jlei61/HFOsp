@@ -12,12 +12,111 @@ not claim that the full slow manifold is globally one-dimensional.
 """
 from __future__ import annotations
 
+import copy
+
 import numpy as np
 
 
 EFFECTIVE_RANK_VERSION = "zm_effective_rank_v1_2026-07-27"
 RANK1_S2_RATIO_MAX = 0.20
 RANK1_ENERGY_MIN = 0.90
+
+
+def trajectory_coordinate_directions(early_state, late_state, *, nE):
+    """Use the actual early-to-late field displacement as each coordinate axis."""
+    nE = int(nE)
+    z0 = np.asarray(early_state["slow.z"], float)[:nE]
+    z1 = np.asarray(late_state["slow.z"], float)[:nE]
+    m0 = np.asarray(early_state["slow.m"], float)[:nE]
+    m1 = np.asarray(late_state["slow.m"], float)[:nE]
+    sg0 = float(np.asarray(early_state["slow.S_G"]))
+    sg1 = float(np.asarray(late_state["slow.S_G"]))
+    directions = {
+        "z": z1 - z0,
+        "m": m1 - m0,
+        "sg": float(sg1 - sg0),
+    }
+    for name, value in directions.items():
+        norm = abs(value) if np.ndim(value) == 0 else np.linalg.norm(value)
+        if not np.isfinite(norm) or norm <= 1e-12:
+            raise ValueError(f"{name}: early-to-late trajectory direction is degenerate")
+    return directions
+
+
+def apply_trajectory_coordinate(
+    state,
+    directions,
+    coordinate,
+    sign,
+    *,
+    delta,
+    nE,
+    min_delta=1e-5,
+):
+    """Displace one real slow field without clipping a central difference.
+
+    When a requested displacement would leave a physical bound, its magnitude
+    is halved until the entire field is valid.  The returned actual delta must
+    be paired across plus/minus arms by the caller.
+    """
+    if coordinate not in {"z", "m", "sg"}:
+        raise ValueError(f"unknown coordinate {coordinate!r}")
+    if int(sign) not in {-1, 1}:
+        raise ValueError("sign must be -1 or +1")
+    actual = float(delta)
+    if actual <= 0:
+        raise ValueError("delta must be positive")
+    nE = int(nE)
+
+    while actual >= float(min_delta):
+        if coordinate == "z":
+            base = np.asarray(state["slow.z"], float)[:nE]
+            candidate = base + int(sign) * actual * np.asarray(directions["z"], float)
+            valid = np.all((candidate >= 0.0) & (candidate <= 1.0))
+        elif coordinate == "m":
+            base = np.asarray(state["slow.m"], float)[:nE]
+            candidate = base + int(sign) * actual * np.asarray(directions["m"], float)
+            valid = np.all(candidate >= 0.0)
+        else:
+            base = float(np.asarray(state["slow.S_G"]))
+            candidate = base + int(sign) * actual * float(directions["sg"])
+            valid = bool(candidate >= 0.0)
+        if valid:
+            break
+        actual *= 0.5
+    else:
+        raise ValueError(f"{coordinate}: no valid central displacement above min_delta")
+
+    out = copy.deepcopy(state)
+    if coordinate == "z":
+        out["slow.z"] = np.asarray(out["slow.z"], float).copy()
+        out["slow.z"][:nE] = candidate
+    elif coordinate == "m":
+        out["slow.m"] = np.asarray(out["slow.m"], float).copy()
+        out["slow.m"][:nE] = candidate
+    else:
+        out["slow.S_G"] = np.asarray(float(candidate))
+    return out, actual
+
+
+def paired_trajectory_coordinate(state, directions, coordinate, *, delta, nE):
+    """Return a symmetric plus/minus pair at the largest jointly valid delta."""
+    _, dp = apply_trajectory_coordinate(
+        state, directions, coordinate, +1, delta=delta, nE=nE
+    )
+    _, dm = apply_trajectory_coordinate(
+        state, directions, coordinate, -1, delta=delta, nE=nE
+    )
+    actual = min(dp, dm)
+    plus, dp2 = apply_trajectory_coordinate(
+        state, directions, coordinate, +1, delta=actual, nE=nE
+    )
+    minus, dm2 = apply_trajectory_coordinate(
+        state, directions, coordinate, -1, delta=actual, nE=nE
+    )
+    if not np.isclose(dp2, dm2):
+        raise RuntimeError("failed to construct a symmetric central pair")
+    return plus, minus, float(actual)
 
 
 def assemble_paired_sensitivity(rows, coordinate_order):

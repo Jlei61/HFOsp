@@ -1,8 +1,11 @@
 import numpy as np
 
 from src.topic4_zm_effective_rank import (
+    apply_trajectory_coordinate,
     assemble_paired_sensitivity,
     bootstrap_rank,
+    paired_trajectory_coordinate,
+    trajectory_coordinate_directions,
     rank_summary,
     standardize_sensitivity,
 )
@@ -73,3 +76,58 @@ def test_bootstrap_requires_rank1_uncertainty_interval_not_point_only():
     assert a["rank1_supported"]
     assert a["s2_over_s1_ci"][1] < 0.2
     assert not b["rank1_supported"]
+
+
+def test_field_perturbations_follow_actual_early_to_late_directions():
+    early = {
+        "slow.z": np.array([0.9, 0.8, 1.0]),
+        "slow.m": np.array([1.0, 2.0, 0.0]),
+        "slow.S_G": np.asarray(0.2),
+    }
+    late = {
+        "slow.z": np.array([0.7, 0.5, 1.0]),
+        "slow.m": np.array([4.0, 6.0, 0.0]),
+        "slow.S_G": np.asarray(0.5),
+    }
+    center = {
+        "slow.z": np.array([0.8, 0.65, 1.0]),
+        "slow.m": np.array([2.5, 4.0, 0.0]),
+        "slow.S_G": np.asarray(0.35),
+        "V": np.array([1.0, 2.0, 3.0]),
+    }
+    directions = trajectory_coordinate_directions(early, late, nE=2)
+    plus, dp = apply_trajectory_coordinate(
+        center, directions, "z", +1, delta=0.1, nE=2
+    )
+    minus, dm = apply_trajectory_coordinate(
+        center, directions, "z", -1, delta=0.1, nE=2
+    )
+    assert dp == dm == 0.1
+    assert np.allclose(plus["slow.z"][:2] - minus["slow.z"][:2],
+                       0.2 * (late["slow.z"][:2] - early["slow.z"][:2]))
+    assert np.array_equal(plus["slow.z"][2:], center["slow.z"][2:])
+    assert np.array_equal(plus["V"], center["V"])
+
+
+def test_field_perturbation_halves_delta_instead_of_clipping_asymmetrically():
+    early = {"slow.z": np.array([1.0]), "slow.m": np.array([0.0]),
+             "slow.S_G": np.asarray(0.0)}
+    late = {"slow.z": np.array([0.0]), "slow.m": np.array([1.0]),
+            "slow.S_G": np.asarray(1.0)}
+    center = {"slow.z": np.array([0.99]), "slow.m": np.array([0.01]),
+              "slow.S_G": np.asarray(0.01)}
+    directions = trajectory_coordinate_directions(early, late, nE=1)
+    out, actual = apply_trajectory_coordinate(
+        center, directions, "z", -1, delta=0.1, nE=1
+    )
+    assert 0 < actual < 0.1
+    assert out["slow.z"][0] <= 1.0
+
+    plus, minus, paired_delta = paired_trajectory_coordinate(
+        center, directions, "z", delta=0.1, nE=1
+    )
+    assert paired_delta == actual
+    assert np.allclose(
+        plus["slow.z"] - minus["slow.z"],
+        2 * paired_delta * directions["z"],
+    )
