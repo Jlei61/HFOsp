@@ -99,3 +99,35 @@ def test_early_expansion_skips_existing_part_rows():
         (cell["lambda"], cell["replicate"])
         for cell in C.early_expansion_cells(rows)
     }
+
+
+def test_entry_cell_identity_is_recovered_from_python_argv():
+    assert C._entry_cell_from_command(
+        "/opt/env/bin/python scripts/run_topic4_zm_entry_cell.py "
+        "--seed 4 --lambda=0.75 --replicate noise_resample_2 "
+        "--confirm-run"
+    ) == (4, "lambda=0.75|noise_resample_2")
+
+
+def test_entry_cell_parser_ignores_shell_that_mentions_runner():
+    assert (
+        C._entry_cell_from_command(
+            "/bin/bash -lc 'rg run_topic4_zm_entry_cell.py scripts/'"
+        )
+        is None
+    )
+
+
+def test_canonical_handoff_requires_every_missing_cell_in_flight():
+    missing = [
+        "lambda=0.5|noise_replay",
+        "lambda=1|noise_replay",
+    ]
+    live = {
+        (1, "lambda=0.5|noise_replay"),
+        (1, "lambda=1|noise_replay"),
+    }
+    assert C.missing_covered_by_shards(1, missing, live)
+    assert not C.missing_covered_by_shards(
+        4, missing, {(4, "lambda=1|noise_replay")}
+    )

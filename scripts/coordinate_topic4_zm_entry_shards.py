@@ -12,6 +12,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import subprocess
 import sys
 import time
@@ -117,6 +118,76 @@ def early_expansion_cells(rows):
                     {"lambda": float(lam), "replicate": replicate}
                 )
     return pending
+
+
+def _option_value(tokens, name, *, required=True, default=None):
+    for index, token in enumerate(tokens):
+        if token == name:
+            if index + 1 >= len(tokens):
+                raise RuntimeError(f"in-flight entry command has bare {name}")
+            return tokens[index + 1]
+        if token.startswith(name + "="):
+            return token.split("=", 1)[1]
+    if required:
+        raise RuntimeError(f"in-flight entry command is missing {name}")
+    return default
+
+
+def _entry_cell_from_command(command):
+    """Recover a shard's scientific identity from its live Python argv."""
+
+    try:
+        tokens = shlex.split(command)
+    except ValueError as exc:
+        if "run_topic4_zm_entry_cell.py" in command:
+            raise RuntimeError(
+                "cannot parse a live entry-cell command"
+            ) from exc
+        return None
+    indexes = [
+        index
+        for index, token in enumerate(tokens)
+        if token.endswith("run_topic4_zm_entry_cell.py")
+    ]
+    if not indexes:
+        return None
+    script_index = indexes[0]
+    if script_index == 0 or not Path(tokens[script_index - 1]).name.startswith(
+        "python"
+    ):
+        return None
+    argv = tokens[script_index + 1 :]
+    seed = int(_option_value(argv, "--seed"))
+    lam = float(_option_value(argv, "--lambda"))
+    replicate = _option_value(
+        argv,
+        "--replicate",
+        required=False,
+        default=R.ENTRY_BASE_REPLICATE,
+    )
+    return seed, f"lambda={lam:g}|{replicate}"
+
+
+def live_entry_cells():
+    """Return ``(seed, key)`` for all in-flight isolated entry workers."""
+
+    result = subprocess.run(
+        ["ps", "-eo", "args="],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError("ps failed while identifying in-flight entry cells")
+    cells = set()
+    for command in result.stdout.splitlines():
+        parsed = _entry_cell_from_command(command)
+        if parsed is not None:
+            cells.add(parsed)
+    return cells
+
+
+def missing_covered_by_shards(seed, missing_keys, live_cells):
+    return all((int(seed), key) in live_cells for key in missing_keys)
 
 
 def live_snn_count():
@@ -256,6 +327,40 @@ def main():
             seed: sorted(base - set(rows_by_seed[seed]))
             for seed in SEEDS
         }
+        live_cells = live_entry_cells()
+        windows = _window_names()
+        for seed in SEEDS:
+            canonical = f"seed{seed}_entry"
+            if (
+                canonical in windows
+                and missing_covered_by_shards(
+                    seed, missing[seed], live_cells
+                )
+            ):
+                # The isolated workers now cover every unfinished base cell.
+                # Stop the wait-only finalizer first so it cannot mistake the
+                # intentional handoff for a vanished required worker.
+                _kill_window("finalizer")
+                _kill_window(canonical)
+                windows.discard(canonical)
+                _log(
+                    f"handed off seed={seed} canonical entry writer; "
+                    f"covered_missing={missing[seed]}"
+                )
+        # If a handed-off shard dies before writing its atomic part, restore
+        # that exact base cell instead of leaving a silent hole.
+        live_cells = live_entry_cells()
+        for seed in SEEDS:
+            if f"seed{seed}_entry" in _window_names():
+                continue
+            for lam in R.ENTRY_LEVELS:
+                key = f"lambda={float(lam):g}|{R.ENTRY_BASE_REPLICATE}"
+                if key not in missing[seed] or (seed, key) in live_cells:
+                    continue
+                if live_snn_count() >= args.max_snn:
+                    break
+                if _launch_cell(seed, lam, R.ENTRY_BASE_REPLICATE):
+                    live_cells.add((seed, key))
         launched = 0
         for seed in SEEDS:
             if missing[seed]:
