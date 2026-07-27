@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import shlex
 import subprocess
 import sys
 import time
@@ -110,6 +111,103 @@ def _canonical_next_key(seed):
         if key not in completed:
             return key
     return None
+
+
+def _option_value(tokens, name, *, required=True, default=None):
+    """Read either ``--name value`` or ``--name=value`` from argv tokens."""
+
+    for index, token in enumerate(tokens):
+        if token == name:
+            if index + 1 >= len(tokens):
+                raise RuntimeError(f"in-flight offset command has bare {name}")
+            return tokens[index + 1]
+        if token.startswith(name + "="):
+            return token.split("=", 1)[1]
+    if required:
+        raise RuntimeError(f"in-flight offset command is missing {name}")
+    return default
+
+
+def _offset_cell_from_command(command):
+    """Recover a shard cell from a live Python command, if applicable.
+
+    Window names are deliberately not trusted here: manually resumed workers
+    and future coordinators may use different tmux labels.  The scientific
+    identity is encoded by the runner argv itself.
+    """
+
+    try:
+        tokens = shlex.split(command)
+    except ValueError as exc:
+        if "run_topic4_zm_offset_cell.py" in command:
+            raise RuntimeError(
+                "cannot parse a live offset-cell command"
+            ) from exc
+        return None
+    script_indexes = [
+        index
+        for index, token in enumerate(tokens)
+        if token.endswith("run_topic4_zm_offset_cell.py")
+    ]
+    if not script_indexes:
+        return None
+    # Ignore shell/inspection commands that merely contain the script text.
+    script_index = script_indexes[0]
+    if script_index == 0 or not Path(tokens[script_index - 1]).name.startswith(
+        "python"
+    ):
+        return None
+    argv = tokens[script_index + 1 :]
+    seed = int(_option_value(argv, "--seed"))
+    family = _option_value(argv, "--family")
+    initial_kind = _option_value(
+        argv, "--initial-kind", required=False, default="active"
+    )
+    replicate = _option_value(
+        argv,
+        "--replicate",
+        required=False,
+        default=R.OFFSET_BASE_REPLICATE,
+    )
+    lam_text = _option_value(argv, "--lambda", required=False)
+    if family == "dynamic_ZM":
+        lam = None
+    elif lam_text is None:
+        raise RuntimeError(
+            "live static offset-cell command is missing --lambda"
+        )
+    else:
+        lam = float(lam_text)
+    cell = {
+        "family": family,
+        "lambda": lam,
+        "initial_kind": initial_kind,
+        "replicate": replicate,
+    }
+    # Reuse the contract validator embedded in cell_key for dynamic/static
+    # naming rather than maintaining a second identity convention.
+    cell_key(cell)
+    return seed, cell
+
+
+def live_offset_cells():
+    """Return scientific identities for every in-flight offset shard."""
+
+    result = subprocess.run(
+        ["ps", "-eo", "args="],
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        raise RuntimeError("ps failed while identifying in-flight offset cells")
+    cells = set()
+    for command in result.stdout.splitlines():
+        parsed = _offset_cell_from_command(command)
+        if parsed is None:
+            continue
+        seed, cell = parsed
+        cells.add((int(seed), cell_key(cell)))
+    return cells
 
 
 def live_snn_count():
@@ -295,7 +393,7 @@ def main():
         ]
         if not missing:
             break
-        inflight = {
+        inflight = live_offset_cells() | {
             (seed, key)
             for seed in SEEDS
             if (key := _canonical_next_key(seed)) is not None

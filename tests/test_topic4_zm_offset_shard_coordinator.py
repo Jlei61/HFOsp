@@ -39,3 +39,38 @@ def test_offset_window_names_are_disjoint_for_locked_cells():
         for cell in cells
     }
     assert len(names) == len(C.SEEDS) * len(cells)
+
+
+def test_offset_cell_identity_is_recovered_from_python_argv():
+    parsed = C._offset_cell_from_command(
+        "python scripts/run_topic4_zm_offset_cell.py "
+        "--seed 3 --family M_Z_recovery --lambda=1.0 "
+        "--initial-kind low --replicate noise_replay --confirm-run"
+    )
+    assert parsed is not None
+    seed, cell = parsed
+    assert seed == 3
+    assert C.cell_key(cell) == (
+        "M_Z_recovery|lambda=1|low|noise_replay"
+    )
+
+
+def test_offset_cell_identity_handles_dynamic_default_level():
+    parsed = C._offset_cell_from_command(
+        "/usr/bin/python3 scripts/run_topic4_zm_offset_cell.py "
+        "--seed 1 --family dynamic_ZM --initial-kind active "
+        "--replicate noise_resample_1 --confirm-run"
+    )
+    assert parsed is not None
+    seed, cell = parsed
+    assert seed == 1
+    assert C.cell_key(cell) == "dynamic_ZM|late_active|noise_resample_1"
+
+
+def test_offset_cell_parser_ignores_shell_that_mentions_runner():
+    assert (
+        C._offset_cell_from_command(
+            "/bin/bash -lc 'rg run_topic4_zm_offset_cell.py scripts/'"
+        )
+        is None
+    )
