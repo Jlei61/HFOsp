@@ -37,6 +37,7 @@ GATE_TESTS = ["tests/test_topic4_zm_fork_state.py", "tests/test_topic4_zm_checkp
               "tests/test_topic4_zm_branch_runner_diagnostics.py",
               "tests/test_topic4_zm_carrier_morphology.py",
               "tests/test_topic4_zm_source_rhythm.py",
+              "tests/test_topic4_zm_effective_rank.py",
               "tests/test_snn_gates.py", "tests/test_zm_slow_field_parity.py",
               "tests/test_a1c_feedback.py"]
 
