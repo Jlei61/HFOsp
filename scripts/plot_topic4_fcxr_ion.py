@@ -44,7 +44,7 @@ def fig_b0():
     if not (feas and units):
         print("[plot] skip b0_feasibility_and_units (missing input)")
         return
-    fig, ax = plt.subplots(1, 2, figsize=(12.5, 4.6), gridspec_kw=dict(width_ratios=[1.15, 1]))
+    fig, ax = plt.subplots(1, 2, figsize=(13.2, 5.2), gridspec_kw=dict(width_ratios=[1.05, 1]))
 
     # Q1: how large is the potassium effect at each candidate scale, interictal vs high rate?
     rates = ["interictal", "20hz", "50hz"]
@@ -79,13 +79,13 @@ def fig_b0():
     ax[1].set_title(f"engine voltage-unit chain — {units['status']}", fontsize=11)
     import textwrap
     for i, c in enumerate(units["chain"]):
-        y = 0.95 - i * 0.135
+        y = 0.98 - i * 0.138
         ax[1].text(0.0, y, "PASS" if c["ok"] else "FAIL", color=OK if c["ok"] else BAD,
                    fontsize=8.5, fontweight="bold", family="monospace")
         ax[1].text(0.10, y, c["step"], fontsize=8.5, va="baseline")
-        ax[1].text(0.10, y - 0.042, "\n".join(textwrap.wrap(c["evidence"], 82)[:2]),
-                   fontsize=6.6, color="0.35", va="top", linespacing=1.35)
-    ax[1].text(0.0, -0.02, "Dimension only: g_K_ion = 1 is a declared normalization\n"
+        ax[1].text(0.10, y - 0.038, "\n".join(textwrap.wrap(c["evidence"], 80)[:3]),
+                   fontsize=6.3, color="0.35", va="top", linespacing=1.3)
+    ax[1].text(0.0, -0.075, "Dimension only: g_K_ion = 1 is a declared normalization\n"
                            "(calibrated in B3), NOT a conclusion of this audit.",
                fontsize=8, style="italic", color="0.25")
     fig.tight_layout()

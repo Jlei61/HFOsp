@@ -1370,8 +1370,7 @@ def probe_task(job):
     predicted rate response at this bias (spec §4.2c).  A 4 s probe estimates the FAST rate
     response only -- it cannot and does not claim that Na has reached steady state (tau_Na=54.4 s).
     """
-    import importlib
-    m = importlib.import_module("run_topic4_fcxr_ion")
+    m = sys.modules[__name__]          # under spawn this is __mp_main__, not a third copy
     from src.snn_engine.ion_homeostasis import (                    # noqa: E402
         IonHomeostasisConfig, IonHomeostaticMZAdapter, build_from_rate_field)
     from mz_slow_vars import MZSlowVars, MZSlowVarsConfig           # noqa: E402
@@ -1393,6 +1392,10 @@ def probe_task(job):
     res, _ = m.run_arm_c(S, noise_seed=int(job["noise_seed"]), T_ms=float(job["T_ms"]),
                          slow=IonHomeostaticMZAdapter(mz, ions), dump_i=False, verbose=False)
     lo = int(round(m.PROBE_BURN_MS / m.DT))
+    if lo >= np.asarray(res["rate_E"]).size:
+        raise ValueError(f"probe T_ms={job['T_ms']} does not exceed the {m.PROBE_BURN_MS} ms "
+                         f"burn-in: the measurement window would be empty and the rate would come "
+                         f"back as NaN")
     out = dict(job=job,
                r_E=float(np.asarray(res["rate_E"], float)[lo:].mean()),
                r_I=float(np.asarray(res["rate_I"], float)[lo:].mean()),
@@ -1567,8 +1570,7 @@ def trajectory_task(job):
     Returns the accepted block metrics, the initiation-site readout and the ion diagnostics.
     Used for both the development validation run and the six confirmatory runs.
     """
-    import importlib
-    m = importlib.import_module("run_topic4_fcxr_ion")
+    m = sys.modules[__name__]          # under spawn this is __mp_main__, not a third copy
     from src.snn_engine.ion_homeostasis import (                    # noqa: E402
         IonHomeostasisConfig, IonHomeostaticMZAdapter, build_from_rate_field)
     from mz_slow_vars import MZSlowVars, MZSlowVarsConfig           # noqa: E402
@@ -1892,8 +1894,76 @@ def write_manifest():
     return man
 
 
+def write_status():
+    """STATUS.md -- layered, so an upstream PASS never silently propagates downstream."""
+    def _m(n):
+        p = os.path.join(OUT, n)
+        return json.load(open(p)) if os.path.exists(p) else None
+
+    pf, units, feas = _m("b0_artifact_preflight.json"), _m("b0_voltage_unit_audit.json"), \
+        _m("b0_analytic_feasibility.json")
+    dp, gh, fs = _m("b0_direction_power.json"), _m("gate_H.json"), _m("b1_f_selection.json")
+    cal, clo, gb = _m("b2_bias_calibration.json"), _m("b2_closure_iteration.json"), _m("gate_B.json")
+
+    def row(name, obj, key="status", extra=""):
+        v = "NOT RUN" if obj is None else obj.get(key, "?")
+        return f"| {name} | `{v}` | {extra} |"
+
+    L = ["# FCXR-ION Phase B0-B2 — STATUS", "",
+         "Spec: `docs/superpowers/specs/2026-07-27-topic4-fcxr-constitutive-na-k-homeostasis-design.md` (rev4)",
+         "Plan: `docs/superpowers/plans/2026-07-27-topic4-fcxr-constitutive-na-k-homeostasis-B0-B2.md` (rev3)",
+         f"Branch: `codex/topic4-fcxr-ion`  ·  commit `{_git_sha()[:8]}`", "",
+         "**Layers are reported separately. An upstream PASS does not propagate downstream.**", "",
+         "| layer | verdict | note |", "|---|---|---|",
+         row("artifact preflight", pf, extra="7 inputs resolved across worktree / pump / heo1 / main"),
+         row("T1 engine voltage units", units,
+             extra="dimension only; `g_K_ion = 1` stays a declared normalization"),
+         row("T4 analytic feasibility", feas,
+             extra=f"tau_Na={feas['tau_Na_s']:.1f}s vs tau_Ko={feas['tau_Ko_s']:.3f}s "
+                   f"({feas['tau_ratio']:.0f}x)" if feas else ""),
+         row("T2 direction-readout power", (dp or {}).get("power_gate") if dp else None,
+             extra=(f"{dp['initiation_site']['pooled']['n_scoreable']} of "
+                    f"{dp['initiation_site']['pooled']['n_events']} events scoreable; "
+                    f"mean-rate reproduction rel {dp['reproduction']['rel_diff']:.1e}")
+             if dp else ""),
+         row("Gate H (homeostasis + numerics)", gh,
+             extra=f"primary tier {gh['primary_network']}" if gh else ""),
+         row("T7 f' selection", fs,
+             extra=f"selected f' = {fs.get('selected_f_prime')}" if fs else ""),
+         row("T8 bias calibration", cal,
+             extra=(f"bias=({cal['best']['I_bias_E']:+.3f}, {cal['best']['I_bias_I']:+.3f}), "
+                    f"{cal['n_probes']} probes") if cal else ""),
+         row("closure iteration", (clo or {}).get("closure") if clo else None, key="passed",
+             extra=(f"|r0'-r0|/r0 = {clo['closure']['rel_err']:.4f}") if clo else ""),
+         row("Gate B (interictal substrate)", gb,
+             extra=(f"B-real {gb['b_real']['n_direction_passing']}/"
+                    f"{gb['b_real']['n_trajectories']}, B-model ok={gb['b_model']['ok']}")
+             if gb else ""),
+         "| lifecycle | `NOT TESTED` | B3/B4 not authorised |", "",
+         "## Allowed statement", "",
+         f"> {gb['allowed_statement']}" if gb else "> (Gate B has not been adjudicated.)", "",
+         "## Not claimed", ""]
+    for f in (gb or {}).get("forbidden_statements", [
+            "reproduced bidirectional propagation (not established for E1146)",
+            "the ion mechanism is refuted",
+            "the electrogenic pump pathway was tested (eta_pump locked to 0)",
+            "a seizure lifecycle was obtained",
+            "patient ion concentrations were reconstructed"]):
+        L.append(f"- {f}")
+    L += ["",
+          "## Window caveat", "",
+          "`tau_Na` = 54.4 s and every trajectory here is 11 s = 0.2 `tau_Na`. These runs can show "
+          "that the ion state is stable NEAR its initialization point; they cannot show that the "
+          "system has reached steady state. All ion stationarity is therefore reported per cell "
+          "and per voxel (q95 / q99 / max) — a flat population mean is not evidence.", ""]
+    with open(os.path.join(OUT, "STATUS.md"), "w") as f:
+        f.write("\n".join(L))
+    print("[status] STATUS.md written")
+
+
 def cmd_manifest(args):
     write_manifest()
+    write_status()
     return 0
 
 
