@@ -156,3 +156,14 @@ def test_ei_grid_projection_uses_same_registered_spatial_basis():
     out = project_ei_grid(E, I, modes, mode_order=("axial", "core"))
     assert out["coordinate_order"] == ["axial_E", "core_E", "axial_I", "core_I"]
     assert np.allclose(out["coordinates"], [2.0, 0.5, -0.3, 1.2])
+
+
+def test_grid_projection_uses_dual_basis_when_modes_are_not_orthogonal():
+    modes = {
+        "a": np.array([[1.0, 0.0], [0.0, -1.0]]),
+        "b": np.array([[1.0, 1.0], [0.0, -2.0]]),
+    }
+    E = 1.7 * modes["a"] - 0.4 * modes["b"]
+    I = -0.2 * modes["a"] + 0.9 * modes["b"]
+    out = project_ei_grid(E, I, modes, mode_order=("a", "b"))
+    assert np.allclose(out["coordinates"], [1.7, -0.4, -0.2, 0.9])

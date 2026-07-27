@@ -161,20 +161,23 @@ def project_ei_grid(E_grid, I_grid, spatial_modes, *, mode_order):
         raise ValueError("E_grid and I_grid must be matched 2D fields")
     if not np.isfinite(E_grid).all() or not np.isfinite(I_grid).all():
         raise ValueError("E/I grids must be finite")
+    basis = []
+    for name in mode_order:
+        if name not in spatial_modes:
+            raise ValueError(f"missing spatial mode {name!r}")
+        mode = np.asarray(spatial_modes[name], dtype=float)
+        if mode.shape != E_grid.shape or not np.isfinite(mode).all():
+            raise ValueError(f"{name}: spatial mode does not align with E/I grid")
+        basis.append(mode.ravel())
+    design = np.column_stack(basis)
+    if np.linalg.matrix_rank(design) != len(mode_order):
+        raise ValueError("spatial probe basis is rank deficient")
     coordinates = []
     names = []
     for population, grid in (("E", E_grid), ("I", I_grid)):
-        for name in mode_order:
-            if name not in spatial_modes:
-                raise ValueError(f"missing spatial mode {name!r}")
-            mode = np.asarray(spatial_modes[name], dtype=float)
-            if mode.shape != grid.shape or not np.isfinite(mode).all():
-                raise ValueError(f"{name}: spatial mode does not align with E/I grid")
-            norm2 = float(np.sum(mode ** 2))
-            if norm2 <= np.finfo(float).eps:
-                raise ValueError(f"{name}: spatial mode has zero energy")
-            coordinates.append(float(np.sum(grid * mode) / norm2))
-            names.append(f"{name}_{population}")
+        coefficient, *_ = np.linalg.lstsq(design, grid.ravel(), rcond=None)
+        coordinates.extend(float(value) for value in coefficient)
+        names.extend(f"{name}_{population}" for name in mode_order)
     return {
         "coordinates": np.asarray(coordinates, dtype=float),
         "coordinate_order": names,
