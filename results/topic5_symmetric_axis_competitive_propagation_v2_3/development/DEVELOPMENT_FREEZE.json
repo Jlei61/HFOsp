@@ -1,0 +1,40 @@
+{
+  "contract": "topic5_symmetric_axis_competitive_propagation_v2_3",
+  "status": "FROZEN",
+  "selection_endpoint": "mean_across_three_patients_of_seed_mean_validation_categorical_nll",
+  "selected_persistence_label": "p050_c075",
+  "rho_propagation": 0.5,
+  "rho_competition": 0.75,
+  "learning_rate": 0.01,
+  "batch_size": 2048,
+  "optimizer": "AdamW",
+  "weight_decay": 0.0001,
+  "gradient_clip": 5.0,
+  "maximum_epochs": 200,
+  "patience": 20,
+  "development_patients": [
+    "epilepsiae_1077",
+    "epilepsiae_1146",
+    "yuquan_chengshuai"
+  ],
+  "development_seeds": [
+    17,
+    29
+  ],
+  "n_runs": 36,
+  "all_runs_finite": true,
+  "heldout20_read_for_selection": false,
+  "ab_labels_read": false,
+  "early_ictal_target_values_read": false,
+  "scientific_gate_applied": false,
+  "permission": "formal_interictal_training_only",
+  "selected_validation_summary": {
+    "persistence_label": "p050_c075",
+    "learning_rate": 0.01,
+    "patient_first_mean_validation_nll": 1.4170371895251677,
+    "patient_first_median_validation_nll": 1.2684885826886663,
+    "patient_first_mean_benefit": 0.11104187860984212,
+    "median_best_epoch": 114.0,
+    "max_seed_sd": 0.0001854661080009035
+  }
+}
