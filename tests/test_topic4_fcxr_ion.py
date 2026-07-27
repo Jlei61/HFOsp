@@ -493,6 +493,95 @@ def test_f_prime_all_three_failing_is_a_bounded_negative():
     assert out["status"] == "NO_GO_ION_SCALE" and out["selected"] is None
 
 
+# =====================================================================================
+#  T9 -- Gate B adjudication (plan §11)
+# =====================================================================================
+def _run(n_sc=30, fa=0.6, fb=0.4, drift=1e-3, wave=0.02, sat=0.05, rate=4.16, tag="t"):
+    return dict(
+        job=dict(tag=tag, conn_seed=1, noise_seed=402),
+        pooled=dict(n_scoreable=n_sc, frac_A=fa, frac_B=fb, mean_rate_hz=rate,
+                    ied_rate_hz=2.2, iei_median_ms=321.0, iei_cv=0.39,
+                    duration_median_ms=10.0),
+        ion=dict(q99_abs_dNa_dt=drift, q99_abs_dKo_dt=drift, Na_mean_first=20.0,
+                 Na_mean_last=20.0, k_wave_far_over_event=wave,
+                 pump_saturation_frac_of_rho=sat))
+
+
+_TOL = dict(mean_rate_hz=dict(off=4.15805625, margin=0.8431070173327828, underpowered=False),
+            duration_median_ms=dict(off=10.0, margin=2.0736441353327724, underpowered=False),
+            ied_rate_hz=dict(off=2.2, margin=1.6733200530681511, underpowered=True),
+            iei_cv=dict(off=0.39150098010197826, margin=0.44864692901289116, underpowered=True))
+_TPL = dict(stable_k=2, source="epilepsiae_1146 adaptive_cluster")
+
+
+def test_gate_B_accepts_when_all_six_pass():
+    out = ION.adjudicate_gate_B([_run(tag=f"t{i}") for i in range(6)], _TOL, template_layer=_TPL)
+    assert out["status"] == "ACCEPTED"
+    assert out["b_real"]["n_direction_passing"] == 6
+
+
+def test_gate_B_needs_five_of_six_not_a_bare_majority():
+    runs = [_run(tag=f"t{i}") for i in range(4)] + [_run(n_sc=8, tag="bad1"),
+                                                    _run(fb=0.05, tag="bad2")]
+    out = ION.adjudicate_gate_B(runs, _TOL, template_layer=_TPL)
+    assert out["b_real"]["n_direction_passing"] == 4
+    assert out["status"] == "REJECTED"
+    runs[-1] = _run(tag="ok")
+    assert ION.adjudicate_gate_B(runs, _TOL, template_layer=_TPL)["status"] == "ACCEPTED"
+
+
+def test_gate_B_direction_rule_needs_both_count_and_balance():
+    assert not ION.adjudicate_gate_B([_run(n_sc=19)], _TOL,
+                                     template_layer=_TPL)["per_trajectory"][0]["direction"]["ok"]
+    assert not ION.adjudicate_gate_B([_run(fa=0.9, fb=0.1)], _TOL,
+                                     template_layer=_TPL)["per_trajectory"][0]["direction"]["ok"]
+    assert ION.adjudicate_gate_B([_run(fa=0.85, fb=0.15)], _TOL,
+                                 template_layer=_TPL)["per_trajectory"][0]["direction"]["ok"]
+
+
+def test_gate_B_underpowered_metrics_are_not_equivalence_evidence():
+    """An UNDERPOWERED metric sitting inside its tolerance must not be counted as a binding pass."""
+    runs = [_run(tag=f"t{i}") for i in range(6)]
+    for r in runs:
+        r["pooled"]["ied_rate_hz"] = 3.5          # inside the wide UNDERPOWERED margin
+    out = ION.adjudicate_gate_B(runs, _TOL, template_layer=_TPL)
+    assert out["status"] == "ACCEPTED"
+    assert "ied_rate_hz" not in out["b_model"]["binding_metrics_outside"]
+    assert out["per_trajectory"][0]["tolerance"]["ied_rate_hz"]["underpowered"] is True
+
+
+def test_gate_B_rejects_a_binding_metric_outside_tolerance():
+    runs = [_run(tag=f"t{i}") for i in range(6)]
+    for r in runs:
+        r["pooled"]["duration_median_ms"] = 14.0     # the Gate I-a failure mode
+    out = ION.adjudicate_gate_B(runs, _TOL, template_layer=_TPL)
+    assert out["status"] == "REJECTED"
+    assert "duration_median_ms" in out["b_model"]["binding_metrics_outside"]
+
+
+def test_gate_B_rejects_slow_ion_countdown_and_whole_sheet_K_wave():
+    assert ION.adjudicate_gate_B([_run(drift=0.2, tag=f"t{i}") for i in range(6)], _TOL,
+                                 template_layer=_TPL)["status"] == "REJECTED"
+    assert ION.adjudicate_gate_B([_run(wave=0.5, tag=f"t{i}") for i in range(6)], _TOL,
+                                 template_layer=_TPL)["status"] == "REJECTED"
+    assert ION.adjudicate_gate_B([_run(sat=0.8, tag=f"t{i}") for i in range(6)], _TOL,
+                                 template_layer=_TPL)["status"] == "REJECTED"
+
+
+def test_gate_B_statements_keep_the_two_layers_apart():
+    """CLAUDE.md §6.3: the data supports 'two stable templates exist'; the model supports 'events
+    initiate at both registered cores'.  Neither licenses 'bidirectional propagation'."""
+    out = ION.adjudicate_gate_B([_run(tag=f"t{i}") for i in range(6)], _TOL, template_layer=_TPL)
+    assert "both registered cores" in out["allowed_statement"]
+    assert "bidirectional" not in out["allowed_statement"]
+    assert any("bidirectional" in f for f in out["forbidden_statements"])
+    assert any("eta_pump" in f for f in out["forbidden_statements"])
+    rej = ION.adjudicate_gate_B([_run(n_sc=5, tag=f"t{i}") for i in range(6)], _TOL,
+                                template_layer=_TPL)
+    assert "did not recover" in rej["allowed_statement"]
+    assert "refut" not in rej["allowed_statement"]
+
+
 def test_power_precondition_is_a_hard_gate():
     """n_scoreable < 20 -> INSUFFICIENT_POWER; the function must NOT hand back a usable threshold."""
     bad = ION.direction_power_gate(dict(n_scoreable=7, frac_A=0.5, frac_B=0.5))

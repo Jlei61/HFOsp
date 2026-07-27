@@ -59,6 +59,7 @@ class IonHomeostasisConfig:
     record_trace: bool = False
     k_trace_stride: int = 0            # >0: keep the K_o grid every N ion blocks (T7 measurement)
     na_snapshot_blocks: tuple = ()     # ion-block indices at which to keep the full Na_i field
+    capture_counts_range: tuple = ()   # (b0, b1): keep per-cell spike counts for these ion blocks
 
     def __post_init__(self):
         if self.q_ion <= 0.0:
@@ -104,6 +105,7 @@ class IonHomeostasis:
         self.k_trace_blocks = []
         self.na_snapshots = {}
         self._na_snapshot_at = set(int(b) for b in cfg.na_snapshot_blocks)
+        self.captured_counts = [] if cfg.capture_counts_range else None
         self._refresh_membrane_state()
 
     # ------------------------------------------------------------------ derived membrane state
@@ -142,6 +144,10 @@ class IonHomeostasis:
         dt_s = cfg.dt_ion_ms * 1e-3
         counts = self._cell_spikes.astype(float)
         Ip = self.pump_flux_all
+        if self.captured_counts is not None:
+            b0, b1 = cfg.capture_counts_range
+            if b0 <= self.n_updates < b1:
+                self.captured_counts.append(self._cell_spikes.astype(np.int8).copy())
 
         occ = self.n_per_grid > 0
         n_safe = np.where(occ, self.n_per_grid, 1).astype(float)
@@ -176,6 +182,15 @@ class IonHomeostasis:
             self.k_trace_blocks.append(self.n_updates)
         if self.n_updates in self._na_snapshot_at:
             self.na_snapshots[self.n_updates] = self.Na_i_all.astype(np.float32).copy()
+
+    def replay_block(self, counts):
+        """Advance one ion block from a STORED per-cell spike count vector.
+
+        In sensor mode (g_K_ion = 0) the ion state is a pure function of the raster, so a recorded
+        event can be replayed / superposed offline.  This is the same device the accepted pump
+        sprint used for its sensor-only load calibration."""
+        self._cell_spikes[:] = np.asarray(counts, np.int32)
+        self.update()
 
     def _check_bounds(self):
         lo, hi = self.cfg.na_bounds

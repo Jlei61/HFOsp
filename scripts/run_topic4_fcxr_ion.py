@@ -1031,10 +1031,870 @@ def cmd_b1_gate_h(args):
     return 0
 
 
-def _not_yet(name):
-    def _f(args):
-        raise SystemExit(f"stage {name} is not implemented yet in this worktree")
-    return _f
+# ================================================================== T7: f' selection (plan §9)
+# Measurement mode: the ion layer runs as a SENSOR (g_K_ion = 0), i.e. its state is a pure
+# function of the recorded raster.  Three reasons, all pre-declared:
+#   1. it is the accepted device in this lineage -- the pump sprint calibrated its per-cell load
+#      from one sensor-only trajectory plus offline replay, and that was reviewed and accepted;
+#   2. the five gates ask "what does ONE interictal event do to the ions".  Measuring that with
+#      the feedback live is circular: a larger f' would change the network, change the event and
+#      change dK_o, so the quantity being gated would depend on the answer being chosen;
+#   3. the integration gate's linear reference (2.973 = sum of exp(-0.2k/tau_Ko), k=0..4) assumes
+#      five IDENTICAL deposits; only a fixed raster satisfies that premise.
+# The feedback-on behaviour is reported separately as a diagnostic, never as a gate.
+# Executed on the 40k substrate with real spontaneous events -- see cmd_b1_select_f's docstring
+# for the deviation from the plan's small-network protocol and the instrument failure behind it.
+def _blk(ms):
+    return int(round(ms / DT_ION_MS))
+
+
+def _t7_replay(io_factory, cap, kernel, bg, n_bg_blocks, *, hot, participants, with_event=True,
+               settle_blocks=4000):
+    """Offline sensor replay: settle on background, optionally inject ONE recorded event kernel,
+    then continue on background only.  Returns the K trace at `hot` and the median Na of the
+    event's participants, sampled every block-group.
+
+    The gates' analytic references (K back inside 1 sigma in 3 s = 4.6 tau_Ko; Na excess decaying
+    30.8% in 20 s = 1-exp(-20/54.42)) are PURE-RELAXATION predictions.  They are only meaningful
+    for an isolated event, which never occurs on a substrate firing an event every ~455 ms -- so
+    the replay is not a convenience, it is what makes the gate well posed.
+    """
+    io = io_factory()
+    nb = len(bg)
+    for i in range(settle_blocks):
+        io.replay_block(cap[bg[i % nb]])
+    K0 = float(io.K_o_grid.ravel()[hot])
+    Na0 = io.Na_i_all[participants].copy()
+    Kt, Nat = [], []
+    if with_event:
+        for c in kernel:
+            io.replay_block(c)
+            Kt.append(float(io.K_o_grid.ravel()[hot]))
+            Nat.append(float(np.median(io.Na_i_all[participants] - Na0)))
+    for i in range(n_bg_blocks):
+        io.replay_block(cap[bg[(settle_blocks + i) % nb]])
+        Kt.append(float(io.K_o_grid.ravel()[hot]))
+        Nat.append(float(np.median(io.Na_i_all[participants] - Na0)))
+    return np.array(Kt), np.array(Nat), K0
+
+
+def _t7_measure_40k(io_factory, io_live, cap, kernel, bg, events, hot, participants, sigma_rest):
+    """The five pre-registered quantities, measured on REAL spontaneous interictal events."""
+    dt_s = DT_ION_MS * 1e-3
+    n20 = int(round(20.0 / dt_s))
+    n3 = int(round(3.0 / dt_s))
+
+    # ---- measurable / safe: peak dK_o of a typical single event, on the live sensor trace ----
+    K = np.asarray(io_live.k_trace)
+    tK = np.asarray(io_live.k_trace_blocks) * DT_ION_MS
+    flat = K.reshape(K.shape[0], -1)
+    peaks = []
+    for ev in events:
+        pre = (tK >= ev["t_on"] - 100.0) & (tK < ev["t_on"] - 10.0)
+        win = (tK >= ev["t_on"]) & (tK < ev["t_on"] + 250.0)
+        if not (pre.any() and win.any()):
+            continue
+        d = flat[win] - flat[pre].mean(axis=0)
+        peaks.append(float(d.max()))
+    dK_med = float(np.median(peaks))
+
+    # ---- recovery K + recovery Na: isolated-event replay against a background-only control ----
+    Ke, Nae, K0 = _t7_replay(io_factory, cap, kernel, bg, n20, hot=hot, participants=participants,
+                             with_event=True)
+    Kc, Nac, _ = _t7_replay(io_factory, cap, kernel, bg, n20, hot=hot, participants=participants,
+                            with_event=False)
+    nk = len(kernel)
+    # the event's own contribution = event replay minus the matched background-only control
+    dK_ev = Ke[:len(Kc) + nk][nk:] - Kc[:len(Ke) - nk]
+    i_pk = int(np.argmax(Ke[:nk + n3]))
+    k_after_3s = abs(float(Ke[min(i_pk + n3, len(Ke) - 1)] - Kc[min(i_pk + n3 - nk, len(Kc) - 1)]))
+    k_resid_sigma = k_after_3s / max(sigma_rest, 1e-12)
+
+    exc = Nae[:len(Nac) + nk][nk:] - Nac[:len(Nae) - nk]
+    i_peak = int(np.argmax(exc[:max(1, nk + 200)]))       # the peak must occur near the event
+    peak_val = float(exc[i_peak])
+    i_end = min(i_peak + n20, len(exc) - 1)
+    tail = exc[i_peak:i_end + 1]
+    still_rising = bool(i_end > i_peak and float(exc[i_end]) > peak_val)
+    measurable = bool(peak_val > 0 and (i_end - i_peak) >= int(0.9 * n20) and not still_rising)
+    decay = float((peak_val - exc[i_end]) / peak_val) if peak_val > 0 else float("nan")
+    slack = ION.F_GATES["na_monotone_sigma_slack"] * float(np.std(np.diff(tail))) if tail.size > 2 else 0.0
+    monotone = bool(np.all(np.diff(tail) <= slack + 1e-12))
+
+    # ---- integration: the SAME recorded event replayed 5x at 200 ms ----
+    io2 = io_factory()
+    nb = len(bg)
+    for i in range(4000):
+        io2.replay_block(cap[bg[i % nb]])
+    pre = float(io2.K_o_grid.ravel()[hot])
+    cpeaks = []
+    for _ in range(5):
+        seg = []
+        for c in kernel:
+            io2.replay_block(c)
+            seg.append(float(io2.K_o_grid.ravel()[hot]))
+        cpeaks.append(max(seg) - pre)
+    ratio = cpeaks[4] / cpeaks[0] if cpeaks[0] > 0 else float("nan")
+
+    return dict(dK_peak_single_mM=dK_med, dK_peak_per_event_mM=peaks,
+                sigma_rest_K_mM=sigma_rest, n_events_measured=len(peaks),
+                k_returns_within_1sigma_3s=bool(k_resid_sigma <= ION.F_GATES["k_recovery_sigma"]),
+                k_residual_after_3s_in_sigma=k_resid_sigma,
+                k_event_peak_replay_mM=float(np.max(dK_ev)) if dK_ev.size else float("nan"),
+                na_excess_peak_mM=peak_val, na_excess_at_20s_mM=float(exc[i_end]),
+                na_excess_decay_frac_20s=decay,
+                na_excess_monotone_nonincreasing=monotone,
+                na_excess_measurable=measurable, na_excess_still_rising_at_20s=still_rising,
+                na_analytic_decay_frac_20s=float(1.0 - np.exp(-20.0 / 54.4188)),
+                na_n_participants=int(participants.size),
+                integration_peaks_mM=[float(p) for p in cpeaks],
+                integration_ratio_5th_over_1st=float(ratio),
+                cluster_spacing_ms=200.0, cluster_n=5)
+
+
+def cmd_b1_select_f(args):
+    """T7 on the REAL 40k substrate with REAL spontaneous interictal events (see the deviation note).
+
+    The plan put T7 on a small network to avoid paying for 40k before Gate H.  Gate H has passed,
+    so 40k is permitted, and the first small-network attempt failed as an INSTRUMENT, not as
+    physics: its pre-equilibrium was built from a 3.28 Hz rate field while the protocol run went at
+    5.48 Hz, so the entire 26 s was one monotonic Na transient and the decay came out identically
+    0.000 for all three candidates by construction; and the kick recruited 2652 of 3200 E cells
+    (83%), which is not the "single interictal event" the gates name.  That run is preserved under
+    superseded/.  Running the same five pre-registered gates on the real substrate removes both
+    defects: the rate field comes from the very trajectory being measured, and the events are the
+    substrate's own spontaneous interictal events.
+    """
+    if not args.confirm_run:
+        raise SystemExit("b1-select-f runs a 40k trajectory; pass --confirm-run")
+    with staged("b1-select-f"):
+        pre = preflight()
+        gh = json.load(open(os.path.join(OUT, "gate_H.json")))
+        if gh["status"] != "PASS":
+            raise SystemExit(f"Gate H is {gh['status']}: T7 may not run (plan §8)")
+        gate = check_resource_gate("b1-select-f")
+        resource_log("b1_select_f_gate", gate)
+        if gate["status"] == "PAUSE":
+            raise SystemExit(f"resource gate PAUSE: {gate}")
+
+        from src.snn_engine.ion_homeostasis import (                # noqa: E402
+            IonHomeostasisConfig, build_from_rate_field)
+        from mz_slow_vars import MZSlowVars, MZSlowVarsConfig       # noqa: E402
+        import run_topic4_mz_slowvars as OLD                        # noqa: E402
+
+        bar = float(load_artifact("pump_event_bar")["event_bar"])
+        rE, rI, voxel, field_sha = _load_40k_rate_field()
+        S, PP = _substrate(CONN_SEED_DEV)
+        b_lo = _blk(BURN_IN_MS)
+        b_hi = _blk(T_MS)
+
+        def _cfg(fp, capture):
+            return IonHomeostasisConfig(
+                q_ion=ION.q_ion_from_fprime(fp), n_grid=N_GRID_40K, dx_mm=DX_MM_40K,
+                dt_ion_ms=DT_ION_MS, g_K_ion=0.0,          # SENSOR mode
+                k_trace_stride=2, capture_counts_range=(b_lo, b_hi) if capture else ())
+
+        def _mk(fp, capture=False):
+            return build_from_rate_field(S["N"], S["NE"], voxel, _cfg(fp, capture), rE, rI)
+
+        instances = {fp: _mk(fp, capture=(fp == ION.F_PRIME_PRIMARY))
+                     for fp in ION.F_PRIME_CANDIDATES}
+
+        class _Fan:
+            def __init__(self, mz, ions_list):
+                object.__setattr__(self, "mz", mz)
+                object.__setattr__(self, "_ions", ions_list)
+
+            def __getattr__(self, name):
+                if name in ("mz", "_ions"):
+                    raise AttributeError(name)
+                return getattr(self.mz, name)
+
+            def membrane_terms(self, *a, **k):
+                return self.mz.membrane_terms(*a, **k)     # sensor mode: membrane untouched
+
+            def apply_currents(self, *a, **k):
+                return self.mz.apply_currents(*a, **k)
+
+            def step(self, spk, labels, dt):
+                self.mz.step(spk, labels, dt)
+                for io in self._ions:
+                    io.accumulate(spk)
+                    io.maybe_update(dt)
+
+        mz = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**arm_c_pump_off_cfg()),
+                        NE=S["NE"], core_mask_E=OLD.build_core_masks(S))
+        t0 = time.time()
+        res, _ = run_arm_c(S, noise_seed=NOISE_DIRECTION_POWER, T_ms=T_MS,
+                           slow=_Fan(mz, list(instances.values())), dump_i=False, verbose=True)
+        print(f"[b1-select-f] sensor run {time.time()-t0:.0f}s  "
+              f"mean_rate_E={float(np.asarray(res['rate_E'])[_blk(BURN_IN_MS)*0:].mean()):.3f} Hz",
+              flush=True)
+        resource_log("b1_select_f_sim_done")
+
+        n_steps = res["E_spk_bool"].shape[0]
+        events = []
+        for lo, hi in block_edges(n_steps):
+            for e in detect_events(res, bar, lo, hi):
+                events.append(dict(e, t_on=e["t_on"] + lo * DT, t_off=e["t_off"] + lo * DT))
+        print(f"[b1-select-f] {len(events)} self-terminating events on the real substrate",
+              flush=True)
+
+        cap = np.asarray(instances[ION.F_PRIME_PRIMARY].captured_counts)   # (blocks, N) int8
+        ev_mask = np.zeros(cap.shape[0], bool)
+        for e in events:
+            ev_mask[max(0, _blk(e["t_on"] - 30.0) - b_lo):
+                    min(cap.shape[0], _blk(e["t_off"] + 300.0) - b_lo)] = True
+        bg = np.where(~ev_mask)[0]
+        print(f"[b1-select-f] background blocks: {bg.size}/{cap.shape[0]}", flush=True)
+        if bg.size < 2000:
+            raise SystemExit("not enough event-free blocks to build the background replay")
+
+        # typical event = the one whose K excursion is the median (primary f' as the reference)
+        ref = instances[ION.F_PRIME_PRIMARY]
+        Kref = np.asarray(ref.k_trace).reshape(len(ref.k_trace), -1)
+        tK = np.asarray(ref.k_trace_blocks) * DT_ION_MS
+        pk, hots = [], []
+        for e in events:
+            p = (tK >= e["t_on"] - 100.0) & (tK < e["t_on"] - 10.0)
+            w = (tK >= e["t_on"]) & (tK < e["t_on"] + 250.0)
+            if not (p.any() and w.any()):
+                pk.append(-1.0), hots.append(0)
+                continue
+            d = Kref[w] - Kref[p].mean(axis=0)
+            hots.append(int(np.argmax(d.max(axis=0))))
+            pk.append(float(d.max()))
+        order = np.argsort(pk)
+        i_typ = int(order[len(order) // 2])
+        typ, hot = events[i_typ], hots[i_typ]
+        k0 = _blk(typ["t_on"] - 20.0) - b_lo
+        kernel = cap[k0:k0 + int(round(200.0 / DT_ION_MS))]
+        s0, s1 = int(round(typ["t_on"] / DT)), int(round((typ["t_off"] + 50.0) / DT))
+        participants = np.where(res["E_spk_bool"][s0:s1].any(axis=0))[0]
+        sigma_rest = float(np.median(Kref[np.isin(np.round(tK / DT_ION_MS).astype(int) - b_lo, bg)]
+                                     .std(axis=0)))
+        print(f"[b1-select-f] typical event t_on={typ['t_on']:.0f} ms hot voxel={hot} "
+              f"participants={participants.size} sigma_rest={sigma_rest:.5f} mM", flush=True)
+
+        rows = []
+        for fp, io in instances.items():
+            m = _t7_measure_40k(lambda fp=fp: _mk(fp), io, cap, kernel, bg, events, hot,
+                                participants, sigma_rest)
+            if not m["na_excess_measurable"]:
+                ev = dict(admissible=False, gates=dict(recovery_Na=dict(
+                    ok=False, reason="the event-induced Na excess never peaked inside the "
+                                     "measurement window -- reported as UNMEASURABLE rather than "
+                                     "as a decay of 0")), measured=m)
+            else:
+                ev = ION.evaluate_f_prime_gates(m)
+            ev["f_prime"] = fp
+            ev["q_ion"] = ION.q_ion_from_fprime(fp)
+            rows.append(ev)
+            print(f"[b1-select-f] f'={fp}: admissible={ev['admissible']}  "
+                  f"dK={m['dK_peak_single_mM']:.4f}  K_rec={m['k_residual_after_3s_in_sigma']:.2f}sig "
+                  f"Na_decay={m['na_excess_decay_frac_20s']:.3f} "
+                  f"(analytic {m['na_analytic_decay_frac_20s']:.3f})  "
+                  f"ratio={m['integration_ratio_5th_over_1st']:.3f}", flush=True)
+            for name, gg in ev["gates"].items():
+                if not gg["ok"]:
+                    print(f"      FAIL {name}: {gg}", flush=True)
+            resource_log(f"b1_select_f_{fp}")
+
+        sel = ION.select_f_prime(rows)
+        payload = dict(
+            generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+            status=sel["status"], selected_f_prime=sel["selected"], tie_break=sel.get("tie_break"),
+            rows=rows, gates_definition=ION.F_GATES,
+            measurement_mode=dict(
+                substrate="40k E1146-informed sheet (the real one)", g_K_ion=0.0,
+                mode="sensor: the ion state is a pure function of the recorded raster",
+                events="the substrate's own spontaneous self-terminating interictal events",
+                rationale="the five gates ask what ONE interictal event does to the ions. Measuring "
+                          "with the feedback live is circular (a larger f' changes the network, the "
+                          "event and dK_o), and the gates' analytic references are PURE-RELAXATION "
+                          "predictions that only exist for an isolated event -- which never occurs "
+                          "on a substrate firing every ~455 ms. Hence: sensor mode plus an "
+                          "isolated-event replay against a matched background-only control.",
+                same_device_as="the accepted pump-sprint sensor-only load calibration"),
+            deviation_from_plan=dict(
+                planned="T7 on a small occupancy-matched network (plan §9.1/§9.2)",
+                executed="T7 on the 40k substrate with real spontaneous events",
+                reason="the small-network attempt failed as an instrument, not as physics: its "
+                       "pre-equilibrium was built from a 3.28 Hz field while the protocol ran at "
+                       "5.48 Hz, making the whole 26 s one monotonic Na transient (decay came out "
+                       "identically 0.000 for all three candidates BY CONSTRUCTION), and the kick "
+                       "recruited 83% of the E population. Gate H had already passed, so 40k was "
+                       "permitted.",
+                superseded_evidence="superseded/b1_f_selection_smallnet_instrument_failure.json",
+                precedent="the pump sprint likewise found an event-detection instrument bug, fixed "
+                          "it, re-ran once and kept the first run as evidence"),
+            protocol=dict(N=S["N"], n_grid=N_GRID_40K, dx_mm=DX_MM_40K, T_ms=T_MS,
+                          noise_seed=NOISE_DIRECTION_POWER, conn_seed=CONN_SEED_DEV,
+                          dt=DT, dt_ion_ms=DT_ION_MS, event_bar=bar,
+                          n_events=len(events), n_background_blocks=int(bg.size),
+                          typical_event_t_on_ms=typ["t_on"], hot_voxel=hot,
+                          n_participants=int(participants.size), sigma_rest_mM=sigma_rest,
+                          rate_field_sha256=field_sha),
+            small_network_caveat=gh["small_network_caveat"])
+        _write_json(os.path.join(OUT, "b1_f_selection.json"), payload)
+        print(f"[b1-select-f] {sel['status']}  selected f' = {sel['selected']}")
+        if sel["status"] != "SELECTED":
+            _write_json(os.path.join(OUT, "NO_GO_ION_SCALE.json"), payload)
+            raise SystemExit("T7 = NO_GO_ION_SCALE -- archive and stop; the candidate set may not "
+                             "be widened and no gate may be relaxed (plan §15)")
+    return 0
+
+
+# ================================================================== T8: 40k bias calibration
+BIAS_BOUNDS = (-2.0, 2.0)      # engine units = mV; V_th = 18, so +-11% of threshold (plan §10)
+BIAS_DELTA = 0.5               # finite-difference step
+PROBE_T_MS = 4000.0
+PROBE_BURN_MS = 1000.0
+MAX_PROBES = 12
+R_E_TARGET = ION.R0_HZ
+R_I_TARGET = 10.367974281311035   # accepted arm-C pump-off I rate, reproduced bit-exactly in T2
+CLOSURE_REL_TOL = 0.10
+
+
+def _load_40k_rate_field():
+    z = np.load(os.path.join(OUT, "b0_baseline_rate_field.npz"))
+    return (np.asarray(z["rate_E"], float), np.asarray(z["rate_I"], float),
+            np.asarray(z["cell_voxel"], np.int32),
+            _sha(os.path.join(OUT, "b0_baseline_rate_field.npz")))
+
+
+def probe_task(job):
+    """One 40k probe at a fixed (I_bias_E, I_bias_I).  Runs in its own process.
+
+    The initial ion state is the HETEROGENEOUS pre-equilibrium of the T2 rate field, scaled by the
+    predicted rate response at this bias (spec §4.2c).  A 4 s probe estimates the FAST rate
+    response only -- it cannot and does not claim that Na has reached steady state (tau_Na=54.4 s).
+    """
+    import importlib
+    m = importlib.import_module("run_topic4_fcxr_ion")
+    from src.snn_engine.ion_homeostasis import (                    # noqa: E402
+        IonHomeostasisConfig, IonHomeostaticMZAdapter, build_from_rate_field)
+    from mz_slow_vars import MZSlowVars, MZSlowVarsConfig           # noqa: E402
+    import run_topic4_mz_slowvars as OLD                            # noqa: E402
+
+    t0 = time.time()
+    rE, rI, voxel, sha = m._load_40k_rate_field()
+    rE = rE * float(job["rate_scale_E"])
+    rI = rI * float(job["rate_scale_I"])
+    S, _PP = m._substrate(int(job["conn_seed"]))
+    cfg = IonHomeostasisConfig(q_ion=float(job["q_ion"]), n_grid=m.N_GRID_40K,
+                               dx_mm=m.DX_MM_40K, dt_ion_ms=m.DT_ION_MS,
+                               g_K_ion=ION.G_K_ION_REFERENCE,
+                               I_bias_E=float(job["I_bias_E"]), I_bias_I=float(job["I_bias_I"]))
+    ions, rep = build_from_rate_field(S["N"], S["NE"], voxel, cfg, rE, rI, return_report=True)
+    Na0, K0 = ions.Na_i_all.copy(), ions.K_o_grid.copy()
+    mz = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**m.arm_c_pump_off_cfg()),
+                    NE=S["NE"], core_mask_E=OLD.build_core_masks(S))
+    res, _ = m.run_arm_c(S, noise_seed=int(job["noise_seed"]), T_ms=float(job["T_ms"]),
+                         slow=IonHomeostaticMZAdapter(mz, ions), dump_i=False, verbose=False)
+    lo = int(round(m.PROBE_BURN_MS / m.DT))
+    out = dict(job=job,
+               r_E=float(np.asarray(res["rate_E"], float)[lo:].mean()),
+               r_I=float(np.asarray(res["rate_I"], float)[lo:].mean()),
+               Na_mean_start=float(Na0.mean()), Na_mean_end=float(ions.Na_i_all.mean()),
+               K_mean_start=float(K0.mean()), K_mean_end=float(ions.K_o_grid.mean()),
+               K_max_end=float(ions.K_o_grid.max()), Na_max_end=float(ions.Na_i_all.max()),
+               pump_mean_end=float(ions.pump_flux_all.mean()),
+               init_residual_q99_dNa=rep["q99_abs_dNa_dt"],
+               init_residual_q99_dKo=rep["q99_abs_dKo_dt"],
+               rate_field_sha256=sha, wall_s=round(time.time() - t0, 1))
+    return out
+
+
+def _run_probes(jobs, workers):
+    import multiprocessing as mp
+    if len(jobs) == 1:
+        return [probe_task(jobs[0])]
+    ctx = mp.get_context("spawn")
+    with ctx.Pool(processes=min(workers, len(jobs))) as pool:
+        return pool.map(probe_task, jobs)
+
+
+def cmd_b2_bias(args):
+    if not args.confirm_run:
+        raise SystemExit("b2-bias runs 40k probes; pass --confirm-run")
+    with staged("b2-bias"):
+        pre = preflight()
+        gh = json.load(open(os.path.join(OUT, "gate_H.json")))
+        fs = json.load(open(os.path.join(OUT, "b1_f_selection.json")))
+        if gh["status"] != "PASS":
+            raise SystemExit(f"Gate H is {gh['status']}: no 40k stage may run")
+        if fs["status"] != "SELECTED":
+            raise SystemExit(f"f' selection is {fs['status']}: B2 may not run")
+        gate = check_resource_gate("b2-bias")
+        resource_log("b2_bias_gate", gate)
+        if gate["status"] == "PAUSE":
+            raise SystemExit(f"resource gate PAUSE: {gate}")
+
+        fp = float(fs["selected_f_prime"])
+        q_ion = ION.q_ion_from_fprime(fp)
+        plan = plan_workers(args.workers or 4)
+        print(f"[b2-bias] f'={fp} q_ion={q_ion:.5f}  workers={plan['workers']} "
+              f"(siblings={plan['siblings']}, MemAvailable={plan['mem_available_gb']} GB)",
+              flush=True)
+
+        def job(be, bi, sE=1.0, sI=1.0, tag=""):
+            return dict(I_bias_E=be, I_bias_I=bi, q_ion=q_ion, conn_seed=CONN_SEED_DEV,
+                        noise_seed=NOISE_DEV, T_ms=PROBE_T_MS, rate_scale_E=sE, rate_scale_I=sI,
+                        tag=tag)
+
+        probes, history = [], []
+        # ---- 4 common-noise probes: base + two single-axis steps + a linearity check ----
+        d = BIAS_DELTA
+        batch = [job(0.0, 0.0, tag="base"), job(d, 0.0, tag="dE"), job(0.0, d, tag="dI"),
+                 job(d, d, tag="dEdI")]
+        res = _run_probes(batch, plan["workers"])
+        probes += res
+        resource_log("b2_bias_jacobian_done")
+        base, pE, pI, pEI = res
+        J = np.array([[(pE["r_E"] - base["r_E"]) / d, (pI["r_E"] - base["r_E"]) / d],
+                      [(pE["r_I"] - base["r_I"]) / d, (pI["r_I"] - base["r_I"]) / d]])
+        lin_pred = np.array([base["r_E"], base["r_I"]]) + J @ np.array([d, d])
+        lin_err = float(np.max(np.abs(lin_pred - np.array([pEI["r_E"], pEI["r_I"]]))))
+        print(f"[b2-bias] base r_E={base['r_E']:.3f} r_I={base['r_I']:.3f} | target "
+              f"{R_E_TARGET:.3f}/{R_I_TARGET:.3f}\n          J=\n{J}\n          "
+              f"linearity check |err| = {lin_err:.3f} Hz", flush=True)
+        history.append(dict(stage="jacobian", J=J.tolist(), linearity_max_err_hz=lin_err))
+
+        target = np.array([R_E_TARGET, R_I_TARGET])
+        cur = np.array([0.0, 0.0])
+        cur_rates = np.array([base["r_E"], base["r_I"]])
+        verdict, best = None, base
+        for rnd in range(2):
+            resid = target - cur_rates
+            try:
+                step = np.linalg.solve(J, resid)
+            except np.linalg.LinAlgError:
+                verdict = "UNRESOLVED_CALIBRATION"
+                history.append(dict(stage=f"round{rnd}", error="singular Jacobian"))
+                break
+            trust = 1.5
+            if np.max(np.abs(step)) > trust:                 # trust-region clip
+                step = step * trust / np.max(np.abs(step))
+            nxt = np.clip(cur + step, *BIAS_BOUNDS)
+            hit_bound = bool(np.any(np.isclose(nxt, BIAS_BOUNDS[0]))
+                             or np.any(np.isclose(nxt, BIAS_BOUNDS[1])))
+            pred = cur_rates + J @ (nxt - cur)
+            sE = float(np.clip(pred[0] / R_E_TARGET, 0.2, 5.0))
+            sI = float(np.clip(pred[1] / R_I_TARGET, 0.2, 5.0))
+            jobs = [job(float(nxt[0]), float(nxt[1]), sE, sI, tag=f"round{rnd}")]
+            if rnd == 0:                                     # second probe of the round: a bracket
+                alt = np.clip(cur + 0.5 * step, *BIAS_BOUNDS)
+                predA = cur_rates + J @ (alt - cur)
+                jobs.append(job(float(alt[0]), float(alt[1]),
+                                float(np.clip(predA[0] / R_E_TARGET, 0.2, 5.0)),
+                                float(np.clip(predA[1] / R_I_TARGET, 0.2, 5.0)),
+                                tag=f"round{rnd}_half"))
+            got = _run_probes(jobs, plan["workers"])
+            probes += got
+            resource_log(f"b2_bias_round{rnd}_done")
+            for g in got:
+                err = max(abs(g["r_E"] - R_E_TARGET) / R_E_TARGET,
+                          abs(g["r_I"] - R_I_TARGET) / R_I_TARGET)
+                print(f"[b2-bias] round{rnd} bias=({g['job']['I_bias_E']:+.3f},"
+                      f"{g['job']['I_bias_I']:+.3f}) -> r_E={g['r_E']:.3f} r_I={g['r_I']:.3f} "
+                      f"rel_err={err:.3f}", flush=True)
+            best = min(probes, key=lambda p: max(abs(p["r_E"] - R_E_TARGET) / R_E_TARGET,
+                                                 abs(p["r_I"] - R_I_TARGET) / R_I_TARGET))
+            history.append(dict(stage=f"round{rnd}", bias=[float(nxt[0]), float(nxt[1])],
+                                probes=[dict(bias=[g["job"]["I_bias_E"], g["job"]["I_bias_I"]],
+                                             r_E=g["r_E"], r_I=g["r_I"]) for g in got],
+                                hit_bound=hit_bound))
+            b0 = got[0]
+            if max(abs(b0["r_E"] - R_E_TARGET) / R_E_TARGET,
+                   abs(b0["r_I"] - R_I_TARGET) / R_I_TARGET) <= CLOSURE_REL_TOL:
+                verdict = "CALIBRATED"
+                best = b0
+                break
+            # re-anchor for the next round using the measured point
+            cur = np.array([b0["job"]["I_bias_E"], b0["job"]["I_bias_I"]])
+            cur_rates = np.array([b0["r_E"], b0["r_I"]])
+            if len(probes) >= MAX_PROBES:
+                break
+
+        best_err = max(abs(best["r_E"] - R_E_TARGET) / R_E_TARGET,
+                       abs(best["r_I"] - R_I_TARGET) / R_I_TARGET)
+        if verdict is None:
+            verdict = "CALIBRATED" if best_err <= CLOSURE_REL_TOL else "UNRESOLVED_CALIBRATION"
+        # NO_GO_BASELINE requires the legal box to be BRACKETED and shown to contain no solution.
+        # A probe budget that ran out is a calibrator failure, never a mechanism conclusion.
+        bracketed = False
+        payload = dict(
+            generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+            status=verdict, f_prime=fp, q_ion=q_ion,
+            targets=dict(r_E_hz=R_E_TARGET, r_I_hz=R_I_TARGET, rel_tol=CLOSURE_REL_TOL),
+            best=dict(I_bias_E=best["job"]["I_bias_E"], I_bias_I=best["job"]["I_bias_I"],
+                      r_E=best["r_E"], r_I=best["r_I"], rel_err=best_err),
+            jacobian=J.tolist(), linearity_max_err_hz=lin_err,
+            n_probes=len(probes), max_probes=MAX_PROBES, probes=probes, history=history,
+            bias_bounds=list(BIAS_BOUNDS), bias_delta=BIAS_DELTA,
+            legal_box_bracketed=bracketed,
+            nuisance_parameters=["I_bias_E", "I_bias_I"],
+            verdict_semantics=dict(
+                CALIBRATED="the two biases recovered the accepted rates within 10%",
+                UNRESOLVED_CALIBRATION="the calibrator did not converge inside its probe budget; "
+                                       "the feasible region was NOT excluded, so this is NOT a "
+                                       "mechanism conclusion",
+                NO_GO_BASELINE="only when the legal box is fully bracketed AND contains no "
+                               "solution"),
+            probe_caveat=("4 s probes estimate the FAST rate response only. tau_Na = 54.4 s, so no "
+                          "probe here demonstrates that Na has reached steady state; that is what "
+                          "the 11 s validation run reports on, and even 11 s only shows stability "
+                          "near the initialization point."),
+            workers=plan)
+        _write_json(os.path.join(OUT, "b2_bias_calibration.json"), payload)
+        print(f"[b2-bias] {verdict}  best bias=({best['job']['I_bias_E']:+.3f},"
+              f"{best['job']['I_bias_I']:+.3f}) r_E={best['r_E']:.3f} r_I={best['r_I']:.3f} "
+              f"rel_err={best_err:.3f}  probes={len(probes)}")
+        if verdict != "CALIBRATED":
+            raise SystemExit(f"b2-bias = {verdict}: archive and stop (plan §10/§15)")
+    return 0
+
+
+# ================================================================== T9: full 11 s trajectory
+K_TRACE_STRIDE = 20            # ion blocks -> 10 ms K_o frames
+FAR_FIELD_MM = 5.0             # "far from the event" for the whole-sheet K-wave check
+
+
+def trajectory_task(job):
+    """One full 11 s trajectory with the ion layer live, at the FROZEN bias and q_ion.
+
+    Returns the accepted block metrics, the initiation-site readout and the ion diagnostics.
+    Used for both the development validation run and the six confirmatory runs.
+    """
+    import importlib
+    m = importlib.import_module("run_topic4_fcxr_ion")
+    from src.snn_engine.ion_homeostasis import (                    # noqa: E402
+        IonHomeostasisConfig, IonHomeostaticMZAdapter, build_from_rate_field)
+    from mz_slow_vars import MZSlowVars, MZSlowVarsConfig           # noqa: E402
+    import run_topic4_mz_slowvars as OLD                            # noqa: E402
+
+    t0 = time.time()
+    rE, rI, voxel, sha = m._load_40k_rate_field()
+    rE = rE * float(job["rate_scale_E"])
+    rI = rI * float(job["rate_scale_I"])
+    S, PP = m._substrate(int(job["conn_seed"]))
+    n_steps = int(round(float(job["T_ms"]) / m.DT))
+    blocks = m.block_edges(n_steps)
+    na_blocks = tuple(int(round(b * m.DT / m.DT_ION_MS)) for b, _ in blocks) + \
+                (int(round(blocks[-1][1] * m.DT / m.DT_ION_MS)) - 1,)
+    cfg = IonHomeostasisConfig(q_ion=float(job["q_ion"]), n_grid=m.N_GRID_40K, dx_mm=m.DX_MM_40K,
+                               dt_ion_ms=m.DT_ION_MS, g_K_ion=ION.G_K_ION_REFERENCE,
+                               I_bias_E=float(job["I_bias_E"]), I_bias_I=float(job["I_bias_I"]),
+                               k_trace_stride=m.K_TRACE_STRIDE, na_snapshot_blocks=na_blocks)
+    ions, rep = build_from_rate_field(S["N"], S["NE"], voxel, cfg, rE, rI, return_report=True)
+    mz = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**m.arm_c_pump_off_cfg()),
+                    NE=S["NE"], core_mask_E=OLD.build_core_masks(S))
+    res, _ = m.run_arm_c(S, noise_seed=int(job["noise_seed"]), T_ms=float(job["T_ms"]),
+                         slow=IonHomeostaticMZAdapter(mz, ions), dump_i=False, verbose=False)
+
+    posE = np.asarray(S["posE"], float)
+    A, B = np.asarray(S["src_xy"], float), np.asarray(S["snk_xy"], float)
+    srcm = np.linalg.norm(posE - A, axis=1) <= PP.CORE_R
+    snkm = np.linalg.norm(posE - B, axis=1) <= PP.CORE_R
+    offm = ~(srcm | snkm)
+    rate = np.asarray(res["rate_E"], float)
+    bar = float(job["event_bar"])
+
+    blk, all_ev = [], []
+    for lo, hi in blocks:
+        ret = m.detect_events(res, bar, lo, hi)
+        spk = res["E_spk_bool"][lo:hi]
+        onsets = np.array([e["t_on"] for e in ret], float)
+        iei = np.diff(onsets) if onsets.size >= 2 else np.array([])
+        tot = max(1, int(spk.sum()))
+        win_s = (hi - lo) * m.DT / 1000.0
+        init = ION.initiation_site_readout(spk, posE, A, B, ret, dt=m.DT, core_r=PP.CORE_R)
+        blk.append(dict(
+            ied_rate_hz=len(ret) / win_s,
+            iei_median_ms=float(np.median(iei)) if iei.size else float("nan"),
+            iei_cv=float(np.std(iei) / np.mean(iei)) if iei.size and np.mean(iei) > 0 else float("nan"),
+            duration_median_ms=float(np.median([e["dur_ms"] for e in ret])) if ret else float("nan"),
+            participation_median=float(np.median([e["peak_ext"] for e in ret])) if ret else float("nan"),
+            mean_rate_hz=float(rate[lo:hi].mean()), n_events=len(ret),
+            source_spike_share=float(spk[:, srcm].sum()) / tot,
+            sink_spike_share=float(spk[:, snkm].sum()) / tot,
+            offaxis_spike_share=float(spk[:, offm].sum()) / tot,
+            n_scoreable=init["n_scoreable"], n_A=init["n_A"], n_B=init["n_B"],
+            n_ambiguous=init["n_ambiguous"]))
+        all_ev += [dict(e, _lo=lo) for e in ret]
+
+    n_sc = sum(b["n_scoreable"] for b in blk)
+    nA = sum(b["n_A"] for b in blk)
+    nB = sum(b["n_B"] for b in blk)
+    pooled = {k: float(np.nanmean([b[k] for b in blk]))
+              for k in ("ied_rate_hz", "iei_median_ms", "iei_cv", "duration_median_ms",
+                        "participation_median", "mean_rate_hz", "n_events",
+                        "source_spike_share", "sink_spike_share", "offaxis_spike_share")}
+    pooled.update(n_scoreable=n_sc, n_A=nA, n_B=nB,
+                  frac_A=nA / max(n_sc, 1), frac_B=nB / max(n_sc, 1),
+                  n_ambiguous=sum(b["n_ambiguous"] for b in blk))
+
+    # ---- ion diagnostics ----
+    snaps = sorted(ions.na_snapshots)
+    Na = np.stack([ions.na_snapshots[b] for b in snaps])
+    dt_blk = (snaps[1] - snaps[0]) * m.DT_ION_MS * 1e-3
+    dNa = np.abs(np.diff(Na, axis=0)) / dt_blk
+    Kt = np.asarray(ions.k_trace)
+    kb = np.asarray(ions.k_trace_blocks) * m.DT_ION_MS
+    keep = kb >= m.BURN_IN_MS
+    Kp = Kt.reshape(Kt.shape[0], -1)[keep]
+    dK = np.abs(np.diff(Kp[::int(max(1, Kp.shape[0] // 6))], axis=0)) / \
+        (float(job["T_ms"]) * 1e-3 / 6.0)
+
+    # whole-sheet K wave check: for the largest event, event voxel vs far field
+    ng = m.N_GRID_40K
+    gx, gy = np.meshgrid(np.arange(ng), np.arange(ng))
+    cen = np.stack([(gx.ravel() + 0.5) * m.DX_MM_40K, (gy.ravel() + 0.5) * m.DX_MM_40K], axis=1)
+    base_K = Kp[:max(1, int(0.1 * Kp.shape[0]))].mean(axis=0)
+    exc = Kp - base_K
+    hot = int(np.argmax(exc.max(axis=0)))
+    far = np.linalg.norm(cen - cen[hot], axis=1) > m.FAR_FIELD_MM
+    peak_hot = float(exc[:, hot].max())
+    peak_far = float(exc[:, far].max()) if far.any() else 0.0
+
+    out = dict(job=job, pooled=pooled, block_metrics=blk,
+               n_events_total=len(all_ev),
+               ion=dict(
+                   q95_abs_dNa_dt=float(np.quantile(dNa, 0.95)),
+                   q99_abs_dNa_dt=float(np.quantile(dNa, 0.99)),
+                   max_abs_dNa_dt=float(dNa.max()),
+                   mean_abs_dNa_dt=float(dNa.mean()),
+                   q95_abs_dKo_dt=float(np.quantile(dK, 0.95)),
+                   q99_abs_dKo_dt=float(np.quantile(dK, 0.99)),
+                   max_abs_dKo_dt=float(dK.max()),
+                   Na_mean_first=float(Na[0].mean()), Na_mean_last=float(Na[-1].mean()),
+                   Na_max=float(Na.max()), K_mean=float(Kp.mean()), K_max=float(Kp.max()),
+                   K_min=float(Kp.min()),
+                   pump_mean=float(ions.pump_flux_all.mean()),
+                   pump_saturation_frac_of_rho=float(ions.pump_flux_all.mean() / ION.RHO),
+                   pump_max_frac_of_rho=float(ions.pump_flux_all.max() / ION.RHO),
+                   k_wave_peak_event_voxel_mM=peak_hot,
+                   k_wave_peak_far_field_mM=peak_far,
+                   k_wave_far_over_event=(peak_far / peak_hot) if peak_hot > 0 else float("nan"),
+                   far_field_mm=m.FAR_FIELD_MM,
+                   init_residual_q99_dNa=rep["q99_abs_dNa_dt"],
+                   init_residual_q99_dKo=rep["q99_abs_dKo_dt"]),
+               rate_field_sha256=sha, wall_s=round(time.time() - t0, 1))
+    return out
+
+
+def cmd_b2_validate(args):
+    if not args.confirm_run:
+        raise SystemExit("b2-validate runs 40k trajectories; pass --confirm-run")
+    with staged("b2-validate"):
+        pre = preflight()
+        cal = json.load(open(os.path.join(OUT, "b2_bias_calibration.json")))
+        if cal["status"] != "CALIBRATED":
+            raise SystemExit(f"b2-bias is {cal['status']}: validation may not run")
+        gate = check_resource_gate("b2-validate")
+        if gate["status"] == "PAUSE":
+            raise SystemExit(f"resource gate PAUSE: {gate}")
+        bar = float(load_artifact("pump_event_bar")["event_bar"])
+        bE, bI = cal["best"]["I_bias_E"], cal["best"]["I_bias_I"]
+        sE = cal["best"]["r_E"] / R_E_TARGET
+        sI = cal["best"]["r_I"] / R_I_TARGET
+
+        def job(q, tag):
+            return dict(I_bias_E=bE, I_bias_I=bI, q_ion=q, conn_seed=CONN_SEED_DEV,
+                        noise_seed=NOISE_DEV, T_ms=T_MS, rate_scale_E=sE, rate_scale_I=sI,
+                        event_bar=bar, tag=tag)
+
+        q0 = ION.q_ion_from_fprime(float(cal["f_prime"]))
+        first = trajectory_task(job(q0, "pre_closure"))
+        r0p = first["pooled"]["mean_rate_hz"]
+        # EXACTLY ONE closure iteration, then freeze (spec §7.1)
+        q1 = ION.q_ion_from_fprime(float(cal["f_prime"]), r0=r0p)
+        second = trajectory_task(job(q1, "post_closure"))
+        r0pp = second["pooled"]["mean_rate_hz"]
+        rel = abs(r0pp - ION.R0_HZ) / ION.R0_HZ
+        payload = dict(
+            generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+            frozen=dict(I_bias_E=bE, I_bias_I=bI, f_prime=cal["f_prime"], q_ion_final=q1),
+            closure=dict(r0_locked=ION.R0_HZ, r0_measured=r0p, q_ion_before=q0, q_ion_after=q1,
+                         r0_after_closure=r0pp, rel_err=rel, tol=CLOSURE_REL_TOL,
+                         passed=bool(rel <= CLOSURE_REL_TOL), iterations=1,
+                         rule="recompute q_ion exactly once, rerun, then FREEZE -- convergence may "
+                              "not be pursued by further iteration (spec §7.1)"),
+            runs=[first, second],
+            window_caveat=("11 s = 0.2 tau_Na. This run can only show that the ion state is stable "
+                           "NEAR the initialization point; it does NOT show the system has reached "
+                           "steady state. Inter-block trends are reported per cell and per voxel "
+                           "(q95/q99/max); a flat population mean is not evidence."))
+        _write_json(os.path.join(OUT, "b2_closure_iteration.json"), payload)
+        print(f"[b2-validate] r0'={r0p:.4f} -> q_ion {q0:.5f}->{q1:.5f} -> r0''={r0pp:.4f} "
+              f"(rel {rel:.4f}, tol {CLOSURE_REL_TOL})  closure "
+              f"{'PASS' if rel <= CLOSURE_REL_TOL else 'FAIL'}")
+        if rel > CLOSURE_REL_TOL:
+            raise SystemExit("closure residual exceeds 10%: NO-GO, do not iterate further")
+    return 0
+
+
+def cmd_b2_confirm(args):
+    if not args.confirm_run:
+        raise SystemExit("b2-confirm runs six 40k trajectories; pass --confirm-run")
+    with staged("b2-confirm"):
+        pre = preflight()
+        clo = json.load(open(os.path.join(OUT, "b2_closure_iteration.json")))
+        if not clo["closure"]["passed"]:
+            raise SystemExit("closure did not pass: confirmatory runs may not proceed")
+        gate = check_resource_gate("b2-confirm")
+        resource_log("b2_confirm_gate", gate)
+        if gate["status"] == "PAUSE":
+            raise SystemExit(f"resource gate PAUSE: {gate}")
+        fz = clo["frozen"]
+        last = clo["runs"][-1]["job"]
+        bar = float(load_artifact("pump_event_bar")["event_bar"])
+        jobs = [dict(I_bias_E=fz["I_bias_E"], I_bias_I=fz["I_bias_I"], q_ion=fz["q_ion_final"],
+                     conn_seed=cs, noise_seed=ns, T_ms=T_MS,
+                     rate_scale_E=last["rate_scale_E"], rate_scale_I=last["rate_scale_I"],
+                     event_bar=bar, tag=f"conn{cs}_noise{ns}")
+                for cs in CONN_SEEDS_CONFIRM for ns in NOISE_CONFIRM]
+        plan = plan_workers(args.workers or 4, per_worker_gb=16.0)
+        print(f"[b2-confirm] {len(jobs)} trajectories, workers={plan['workers']} "
+              f"(siblings={plan['siblings']}, MemAvailable={plan['mem_available_gb']} GB)",
+              flush=True)
+        import multiprocessing as mp
+        ctx = mp.get_context("spawn")
+        with ctx.Pool(processes=plan["workers"]) as pool:
+            runs = pool.map(trajectory_task, jobs)
+        resource_log("b2_confirm_done")
+        for r in runs:
+            p = r["pooled"]
+            print(f"[b2-confirm] {r['job']['tag']}: rate={p['mean_rate_hz']:.3f} "
+                  f"events={p['n_events']:.1f}/blk scoreable={p['n_scoreable']} "
+                  f"A={p['n_A']} B={p['n_B']} minfrac={min(p['frac_A'], p['frac_B']):.3f}",
+                  flush=True)
+        _write_json(os.path.join(OUT, "b2_confirmatory.json"),
+                    dict(generated=datetime.now(timezone.utc).isoformat(),
+                         code_commit=pre["code_commit"], frozen=fz, runs=runs,
+                         note="bias and q_ion were frozen on the development seed; these six "
+                              "trajectories were NOT used for tuning", workers=plan))
+    return 0
+
+
+def cmd_b2_adjudicate(args):
+    with staged("b2-adjudicate"):
+        pre = preflight()
+        conf = json.load(open(os.path.join(OUT, "b2_confirmatory.json")))
+        clo = json.load(open(os.path.join(OUT, "b2_closure_iteration.json")))
+        cal = json.load(open(os.path.join(OUT, "b2_bias_calibration.json")))
+        eq = load_artifact("pump_off_baseline")
+        prop = load_artifact("e1146_propagation")
+        tol = {k: dict(off=v["off"], margin=v["margin"], underpowered=v["underpowered"])
+               for k, v in eq["equivalence"]["per_metric"].items()}
+        ac = prop["adaptive_cluster"]
+        template_layer = dict(
+            subject="epilepsiae_1146", stable_k=ac["stable_k"],
+            inter_cluster_corr=ac["inter_cluster_corr_matrix"][0][1],
+            candidate_forward_reverse_pairs=ac["candidate_forward_reverse_pairs"],
+            layer="template layer (PR-2 adaptive cluster)",
+            supports="two stable propagation templates exist for this subject",
+            does_not_support="a confirmed forward/reverse template pair "
+                             "(candidate_forward_reverse_pairs is the empty list) or established "
+                             "bidirectional propagation")
+        gb = ION.adjudicate_gate_B(conf["runs"], tol, template_layer=template_layer)
+        gb.update(generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+                  frozen=clo["frozen"], closure=clo["closure"],
+                  calibration_status=cal["status"],
+                  tolerance_source=dict(
+                      artifact=resolve_artifact(
+                          REQUIRED_ARTIFACTS["pump_off_baseline"]["rel"])["resolved_abs_path"],
+                      field="equivalence.per_metric[*].{off, margin, underpowered}",
+                      note="margins were pre-locked by the accepted pump sprint; they are read, "
+                           "not recomputed"),
+                  window_caveat=clo["window_caveat"])
+        _write_json(os.path.join(OUT, "gate_B.json"), gb)
+
+        gh = json.load(open(os.path.join(OUT, "gate_H.json")))
+        fs = json.load(open(os.path.join(OUT, "b1_f_selection.json")))
+        verdict = dict(
+            generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+            sprint="FCXR-ION Phase B0-B2",
+            layers=dict(
+                engineering="green" if gh["status"] == "PASS" else "see gate_H",
+                gate_H=gh["status"], f_prime_selection=fs["status"],
+                selected_f_prime=fs.get("selected_f_prime"),
+                bias_calibration=cal["status"], gate_B=gb["status"],
+                lifecycle="not tested (B3/B4 not authorised)"),
+            allowed_statement=gb["allowed_statement"],
+            forbidden_statements=gb["forbidden_statements"],
+            locks=dict(eta_pump=ION.ETA_PUMP_B0_B2, g_K_ion=ION.G_K_ION_REFERENCE,
+                       g_K_ion_kind="effective reference normalization (B3 would calibrate it)",
+                       rho=ION.RHO, nuisance_parameters=["I_bias_E", "I_bias_I"]),
+            not_executed=["B3 (local K perturbation -> g_K_ion)",
+                          "B4 (frozen high branch -> eta_pump)",
+                          "three-dimensional phase map", "dynamic lifecycle",
+                          "causal decomposition", "any Cl / Ca / two-compartment extension"])
+        _write_json(os.path.join(OUT, "candidate_verdict.json"), verdict)
+        print(f"[b2-adjudicate] Gate B = {gb['status']}  "
+              f"(B-real {gb['b_real']['n_direction_passing']}/{gb['b_real']['n_trajectories']} "
+              f"trajectories, B-model ok={gb['b_model']['ok']})")
+        print(f"   allowed: {gb['allowed_statement']}")
+    return 0
+
+
+def write_manifest():
+    """run_manifest.json -- every field the plan §12 lists."""
+    pre = preflight(write=False)
+    fld = os.path.join(OUT, "b0_baseline_rate_field.npz")
+
+    def _maybe(name):
+        p = os.path.join(OUT, name)
+        return json.load(open(p)) if os.path.exists(p) else None
+
+    fs, cal, clo, gh, gb = (_maybe(n) for n in ("b1_f_selection.json", "b2_bias_calibration.json",
+                                                "b2_closure_iteration.json", "gate_H.json",
+                                                "gate_B.json"))
+    cfg_hash = hashlib.sha256(json.dumps(arm_c_pump_off_cfg(), sort_keys=True).encode()).hexdigest()
+    avail, swap = _meminfo()
+    man = dict(
+        sprint="FCXR-ION Phase B0-B2", generated=datetime.now(timezone.utc).isoformat(),
+        code_commit=pre["code_commit"], branch="codex/topic4-fcxr-ion",
+        spec="docs/superpowers/specs/2026-07-27-topic4-fcxr-constitutive-na-k-homeostasis-design.md",
+        plan="docs/superpowers/plans/2026-07-27-topic4-fcxr-constitutive-na-k-homeostasis-B0-B2.md",
+        artifacts=pre["artifacts"],
+        blessed_engine_sha256=blessed_engine_hashes(),
+        selected_f_prime=(fs or {}).get("selected_f_prime"),
+        q_ion=(clo or {}).get("frozen", {}).get("q_ion_final"),
+        slow_variable_config=dict(
+            arm="arm-C FCXR (ff additive, recurrent conductance, g_sat=21.6)",
+            config=arm_c_pump_off_cfg(), config_sha256=cfg_hash,
+            use_z=False, use_m=False, use_x=False, use_h=False,
+            note="Z / M / X / H are all OFF on this substrate; the ion layer is the only "
+                 "slow mechanism added, and eta_pump is locked to 0"),
+        seeds=dict(connectivity_dev=CONN_SEED_DEV, connectivity_confirm=list(CONN_SEEDS_CONFIRM),
+                   noise_direction_power=NOISE_DIRECTION_POWER, noise_dev=NOISE_DEV,
+                   noise_confirm=list(NOISE_CONFIRM), initial_state="deterministic reset"),
+        grid=dict(n_grid=N_GRID_40K, dx_mm=DX_MM_40K, L_mm=20.0, dt_ion_ms=DT_ION_MS, dt_ms=DT,
+                  cells_per_voxel_mean=39.0625),
+        locks=dict(eta_pump=ION.ETA_PUMP_B0_B2, g_K_ion=ION.G_K_ION_REFERENCE,
+                   g_K_ion_kind="effective reference normalization",
+                   ions_on_both_E_and_I=True,
+                   virtual_electrode_readout="E-only (engine recorder limitation, spec §5)",
+                   rho=ION.RHO, r0_hz=ION.R0_HZ),
+        baseline_rate_field=dict(path=fld, sha256=_sha(fld) if os.path.exists(fld) else None),
+        gates=dict(gate_H=(gh or {}).get("status"), gate_B=(gb or {}).get("status"),
+                   f_selection=(fs or {}).get("status"),
+                   bias_calibration=(cal or {}).get("status")),
+        resources=dict(mem_available_gb_now=round(avail, 2), swap_used_gb_now=round(swap, 3),
+                       baseline=json.load(open(_baseline_swap_path()))
+                       if os.path.exists(_baseline_swap_path()) else None,
+                       max_workers_authorised=MAX_WORKERS))
+    _write_json(os.path.join(OUT, "run_manifest.json"), man)
+    print(f"[manifest] written: gate_H={man['gates']['gate_H']} gate_B={man['gates']['gate_B']} "
+          f"f'={man['selected_f_prime']}")
+    return man
+
+
+def cmd_manifest(args):
+    write_manifest()
+    return 0
 
 
 STAGES = {
@@ -1043,11 +1903,12 @@ STAGES = {
     "b0-direction-power": cmd_b0_direction_power,
     "b1-smallnet": cmd_b1_smallnet,
     "b1-gate-h": cmd_b1_gate_h,
-    "b1-select-f": _not_yet("b1-select-f"),
-    "b2-bias": _not_yet("b2-bias"),
-    "b2-validate": _not_yet("b2-validate"),
-    "b2-confirm": _not_yet("b2-confirm"),
-    "b2-adjudicate": _not_yet("b2-adjudicate"),
+    "b1-select-f": cmd_b1_select_f,
+    "b2-bias": cmd_b2_bias,
+    "b2-validate": cmd_b2_validate,
+    "b2-confirm": cmd_b2_confirm,
+    "b2-adjudicate": cmd_b2_adjudicate,
+    "manifest": cmd_manifest,
 }
 
 

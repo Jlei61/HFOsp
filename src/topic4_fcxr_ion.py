@@ -796,6 +796,109 @@ def select_f_prime(rows):
                 tie_break="closest to f' = 1.0")
 
 
+# =====================================================================================
+#  Gate B -- the new interictal substrate (spec §9, plan §11).  All bounds pre-registered.
+# =====================================================================================
+GATE_B_MIN_SCOREABLE = 20          # per trajectory (plan §11)
+GATE_B_MIN_FRAC = 0.15             # min(frac_A, frac_B) per trajectory
+GATE_B_MIN_PASSING = 5             # of the 6 confirmatory trajectories -- a majority is not enough
+GATE_B_K_WAVE_FAR_RATIO = 0.10     # far-field dK_o must stay under 10% of the event voxel's
+GATE_B_PUMP_SAT_MAX = 0.50         # mean pump must stay well below rho
+# "no slow countdown": 0.05 mM/s integrates to 0.55 mM over the 11 s window, about a quarter of the
+# interictal Na excursion at f'=1 -- a drift that large IS a countdown.  The net drift bound is
+# tighter still (0.02 mM/s -> 0.22 mM, ~10% of the excursion).
+GATE_B_ION_BLOCK_DRIFT_MAX = 0.05
+GATE_B_ION_NET_DRIFT_MAX = 0.02
+
+
+def adjudicate_gate_B(runs, tolerances, *, template_layer):
+    """Gate B verdict from the six confirmatory trajectories.
+
+    Layer discipline (spec §9 rev3, CLAUDE.md §6.3): the real artifact supports only "TWO STABLE
+    TEMPLATES EXIST"; the model side supports only "events initiate at both registered cores".
+    Those are different layers and must never be collapsed -- in particular this gate never
+    licenses "reproduced bidirectional propagation".
+    """
+    per = []
+    for r in runs:
+        p = r["pooled"]
+        ion = r["ion"]
+        minf = min(p["frac_A"], p["frac_B"])
+        direction_ok = bool(p["n_scoreable"] >= GATE_B_MIN_SCOREABLE and minf >= GATE_B_MIN_FRAC)
+        tol = {}
+        for name, t in tolerances.items():
+            if name not in p:
+                continue
+            delta = p[name] - t["off"]
+            tol[name] = dict(value=p[name], accepted=t["off"], delta=delta, margin=t["margin"],
+                             within=bool(abs(delta) <= t["margin"]),
+                             underpowered=bool(t["underpowered"]))
+        binding = {k: v for k, v in tol.items() if not v["underpowered"]}
+        drift_ok = bool(ion["q99_abs_dNa_dt"] < GATE_B_ION_BLOCK_DRIFT_MAX
+                        and ion["q99_abs_dKo_dt"] < GATE_B_ION_BLOCK_DRIFT_MAX
+                        and abs(ion["Na_mean_last"] - ion["Na_mean_first"])
+                        / 11.0 < GATE_B_ION_NET_DRIFT_MAX)
+        wave_ok = bool(ion["k_wave_far_over_event"] < GATE_B_K_WAVE_FAR_RATIO)
+        pump_ok = bool(ion["pump_saturation_frac_of_rho"] < GATE_B_PUMP_SAT_MAX)
+        per.append(dict(
+            tag=r["job"].get("tag"), conn_seed=r["job"]["conn_seed"],
+            noise_seed=r["job"]["noise_seed"],
+            direction=dict(ok=direction_ok, n_scoreable=p["n_scoreable"],
+                           frac_A=p["frac_A"], frac_B=p["frac_B"], min_frac=minf),
+            tolerance=tol,
+            n_binding_outside=sum(1 for v in binding.values() if not v["within"]),
+            binding_outside=[k for k, v in binding.items() if not v["within"]],
+            ion=dict(no_slow_countdown=drift_ok, no_whole_sheet_K_wave=wave_ok,
+                     pump_not_saturated=pump_ok,
+                     q99_abs_dNa_dt=ion["q99_abs_dNa_dt"], q99_abs_dKo_dt=ion["q99_abs_dKo_dt"],
+                     net_Na_drift_mM_s=abs(ion["Na_mean_last"] - ion["Na_mean_first"]) / 11.0,
+                     k_wave_far_over_event=ion["k_wave_far_over_event"],
+                     pump_saturation_frac_of_rho=ion["pump_saturation_frac_of_rho"])))
+
+    n_dir = sum(1 for p in per if p["direction"]["ok"])
+    b_real = dict(
+        template_layer=template_layer,
+        n_trajectories=len(per), n_direction_passing=n_dir,
+        required=GATE_B_MIN_PASSING,
+        ok=bool(n_dir >= GATE_B_MIN_PASSING),
+        rule=f"per trajectory n_scoreable >= {GATE_B_MIN_SCOREABLE} and "
+             f"min(frac_A, frac_B) >= {GATE_B_MIN_FRAC}; at least {GATE_B_MIN_PASSING} of "
+             f"{len(per)} must satisfy it")
+    b_model = dict(
+        no_slow_countdown=all(p["ion"]["no_slow_countdown"] for p in per),
+        no_whole_sheet_K_wave=all(p["ion"]["no_whole_sheet_K_wave"] for p in per),
+        pump_not_saturated=all(p["ion"]["pump_not_saturated"] for p in per),
+        n_runs_with_binding_metric_outside=sum(1 for p in per if p["n_binding_outside"] > 0),
+        binding_metrics_outside=sorted({k for p in per for k in p["binding_outside"]}),
+        note="UNDERPOWERED metrics are excluded from the binding set: 'within tolerance' there "
+             "means 'indistinguishable at this window length', not equivalence")
+    b_model["ok"] = bool(b_model["no_slow_countdown"] and b_model["no_whole_sheet_K_wave"]
+                         and b_model["pump_not_saturated"]
+                         and b_model["n_runs_with_binding_metric_outside"] == 0)
+
+    status = "ACCEPTED" if (b_real["ok"] and b_model["ok"]) else "REJECTED"
+    allowed = (
+        "The reduced ion-homeostatic substrate recovered the accepted interictal working point "
+        "and retained initiation at both registered cores under the locked effective "
+        "normalization (g_K_ion = 1, eta_pump = 0)."
+        if status == "ACCEPTED" else
+        "Constitutive Na/K on this substrate did not recover the accepted interictal working point.")
+    return dict(status=status, b_real=b_real, b_model=b_model, per_trajectory=per,
+                allowed_statement=allowed,
+                forbidden_statements=[
+                    "reproduced bidirectional propagation (not established for E1146)",
+                    "the ion mechanism is refuted (a Gate B failure is about THIS substrate)",
+                    "the electrogenic pump pathway was tested (eta_pump was locked to 0)",
+                    "a seizure lifecycle was obtained (B3/B4 were not authorised)",
+                    "patient ion concentrations were reconstructed"],
+                thresholds=dict(min_scoreable=GATE_B_MIN_SCOREABLE, min_frac=GATE_B_MIN_FRAC,
+                                min_passing=GATE_B_MIN_PASSING,
+                                k_wave_far_ratio=GATE_B_K_WAVE_FAR_RATIO,
+                                pump_sat_max=GATE_B_PUMP_SAT_MAX,
+                                ion_block_drift_max=GATE_B_ION_BLOCK_DRIFT_MAX,
+                                ion_net_drift_max=GATE_B_ION_NET_DRIFT_MAX))
+
+
 MIN_SCOREABLE_EVENTS = 20      # spec §9 B-real hard precondition
 
 
