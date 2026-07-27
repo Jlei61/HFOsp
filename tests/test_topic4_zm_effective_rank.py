@@ -210,6 +210,44 @@ def test_incomplete_central_pairs_write_no_evidence_instead_of_crashing(
     assert len(out["coverage"]) == 2
 
 
+def test_no_evidence_rank_summary_renders_diagnostic_figure(
+        tmp_path, monkeypatch):
+    plot_path = os.path.join(
+        _ROOT, "scripts", "plot_topic4_zm_branch_decision.py"
+    )
+    spec = importlib.util.spec_from_file_location("rank_plotter_for_test", plot_path)
+    plotter = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(plotter)
+    out_root = tmp_path / "results"
+    fig_root = out_root / "figures"
+    summary_path = out_root / "effective_rank" / "effective_rank_summary.json"
+    summary_path.parent.mkdir(parents=True)
+    summary_path.write_text(json.dumps({
+        "verdict": "no_evidence_incomplete_central_pairs",
+        "n_seeds": 0,
+        "coverage": [
+            {
+                "seed": 1,
+                "n_valid_rows": 4,
+                "valid_by_coordinate": {"z": 2, "sg": 2},
+                "invalid_by_coordinate": {"m": 2},
+            },
+            {
+                "seed": 3,
+                "n_valid_rows": 4,
+                "valid_by_coordinate": {"z": 2, "sg": 2},
+                "invalid_by_coordinate": {"m": 2},
+            },
+        ],
+    }))
+    monkeypatch.setattr(plotter, "OUT", str(out_root))
+    monkeypatch.setattr(plotter, "FIG", str(fig_root))
+    fig_root.mkdir()
+    made = plotter.fig_effective_rank()
+    assert made == str(fig_root / "slow_coordinate_effective_rank.png")
+    assert os.path.getsize(made) > 0
+
+
 def test_trajectory_coordinate_projection_and_robust_scales():
     early = {"slow.z": np.array([0.9, 0.8]), "slow.m": np.array([1.0, 2.0]),
              "slow.S_G": np.asarray(0.2)}

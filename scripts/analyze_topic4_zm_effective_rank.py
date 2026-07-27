@@ -71,10 +71,20 @@ def _matrices(manifest, state_tag):
 def _coverage(manifest):
     rows = manifest.get("rows", [])
     invalid = {}
+    valid_by_coordinate = {}
+    invalid_by_coordinate = {}
     for row in rows:
+        coordinate = row.get("coordinate", "unknown")
+        if row.get("response_valid") is True:
+            valid_by_coordinate[coordinate] = (
+                valid_by_coordinate.get(coordinate, 0) + 1
+            )
         reason = row.get("invalid_reason")
         if reason:
             invalid[reason] = invalid.get(reason, 0) + 1
+            invalid_by_coordinate[coordinate] = (
+                invalid_by_coordinate.get(coordinate, 0) + 1
+            )
     return {
         "seed": int(manifest["seed"]),
         "probe_matrix_complete": bool(manifest.get("probe_matrix_complete", False)),
@@ -83,6 +93,8 @@ def _coverage(manifest):
         "n_completed_rows": sum(row.get("completed") is True for row in rows),
         "n_valid_rows": sum(row.get("response_valid") is True for row in rows),
         "invalid_reasons": invalid,
+        "valid_by_coordinate": valid_by_coordinate,
+        "invalid_by_coordinate": invalid_by_coordinate,
     }
 
 

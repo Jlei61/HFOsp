@@ -511,6 +511,79 @@ def fig_effective_rank():
     summary = _load(path_json)
     if not summary:
         return None
+    if "static_bootstrap" not in summary or "impulse_bootstrap" not in summary:
+        fig, axes = plt.subplots(1, 3, figsize=(13.5, 3.7))
+        coverage = summary.get("coverage", [])
+        seeds = [str(row.get("seed", "?")) for row in coverage]
+        valid = [int(row.get("n_valid_rows", 0)) for row in coverage]
+        invalid = [
+            sum((row.get("invalid_by_coordinate") or {}).values())
+            for row in coverage
+        ]
+
+        ax = axes[0]
+        x = np.arange(len(seeds))
+        ax.bar(x, valid, color="#3B6FB6", label="valid response")
+        ax.bar(x, invalid, bottom=valid, color="#D1495B",
+               label="physical central pair unavailable")
+        ax.set_xticks(x)
+        ax.set_xticklabels([f"seed {seed}" for seed in seeds])
+        ax.legend(fontsize=8, frameon=False)
+        _style(ax, "registered probe coverage",
+               xlabel="seed", ylabel="completed probe rows")
+
+        ax = axes[1]
+        coordinates = sorted({
+            coordinate
+            for row in coverage
+            for coordinate in (
+                set((row.get("valid_by_coordinate") or {}))
+                | set((row.get("invalid_by_coordinate") or {}))
+            )
+        })
+        if coverage and coordinates:
+            matrix = np.asarray([
+                [
+                    int((row.get("invalid_by_coordinate") or {}).get(
+                        coordinate, 0
+                    ))
+                    for coordinate in coordinates
+                ]
+                for row in coverage
+            ], float)
+            im = ax.imshow(matrix, cmap="Reds", vmin=0, aspect="auto")
+            ax.set_xticks(range(len(coordinates)))
+            ax.set_xticklabels([c.upper() if c != "sg" else "S_G"
+                                for c in coordinates])
+            ax.set_yticks(range(len(seeds)))
+            ax.set_yticklabels([f"seed {seed}" for seed in seeds])
+            fig.colorbar(im, ax=ax, fraction=0.046,
+                         label="invalid central-pair rows")
+            _style(ax, "physical-boundary failures",
+                   xlabel="trajectory coordinate", ylabel="seed")
+        else:
+            ax.axis("off")
+            ax.text(0.5, 0.5, "No completed probe coverage",
+                    ha="center", va="center", transform=ax.transAxes)
+
+        ax = axes[2]
+        ax.axis("off")
+        verdict = summary.get("verdict", "no_evidence")
+        text = (
+            f"{verdict}\n\n"
+            "A symmetric finite difference cannot cross a physical slow-state "
+            "boundary. The missing M column is therefore unavailable evidence, "
+            "not evidence for rank 1 or rank 2.\n\n"
+            f"Complete analyzable seeds: {summary.get('n_seeds', 0)}"
+        )
+        ax.text(0.02, 0.98, text, ha="left", va="top", wrap=True,
+                transform=ax.transAxes, fontsize=9)
+        _style(ax, "fail-closed interpretation")
+        fig.tight_layout()
+        path = os.path.join(FIG, "slow_coordinate_effective_rank.png")
+        fig.savefig(path, dpi=150)
+        plt.close(fig)
+        return path
     static = summary["static_bootstrap"]
     impulse = summary["impulse_bootstrap"]
     fig, axes = plt.subplots(1, 3, figsize=(13.5, 3.7))
@@ -866,9 +939,9 @@ def fig_phase_status(made):
     n_source_rhythm = len(glob.glob(os.path.join(
         OUT, "source_rhythm", "*", "seed*", "source_rhythm.json"
     )))
-    rank_summary_exists = os.path.exists(os.path.join(
+    rank_summary = _load(os.path.join(
         OUT, "effective_rank", "effective_rank_summary.json"
-    ))
+    ), {})
     n_rank_seed = len(glob.glob(os.path.join(
         OUT, "effective_rank", "seed*", "rank_probes.json"
     )))
@@ -918,7 +991,9 @@ def fig_phase_status(made):
          "in progress" if n_source_rhythm else "conditional / not authorized"),
         ("1C neighbourhood audit", neighbourhood_status),
         ("1.5A functional rank",
-         "complete" if rank_summary_exists else
+         "no evidence: central-pair boundary"
+         if rank_summary.get("verdict") == "no_evidence_incomplete_central_pairs"
+         else "complete" if rank_summary else
          "in progress" if n_rank_seed else "conditional / not authorized"),
         ("1.5B modal / gain",
          "complete" if n_modal_seed >= 2 else
