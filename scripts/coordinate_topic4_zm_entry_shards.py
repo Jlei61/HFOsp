@@ -86,6 +86,39 @@ def expected_base_keys():
     }
 
 
+def early_expansion_cells(rows):
+    """Return registered resamples once one seed's base grid is complete."""
+
+    base_rows = [
+        {
+            "lambda": row["lambda"],
+            "entered_carrier": row["entered_carrier"],
+        }
+        for row in rows.values()
+        if row.get("replicate") == R.ENTRY_BASE_REPLICATE
+        and row.get("completed")
+    ]
+    if len(base_rows) != len(R.ENTRY_LEVELS):
+        return []
+    bracket = R.BD.half_boundary(
+        R.BD.jeffreys_probability_curve(
+            base_rows, "lambda", "entered_carrier"
+        ),
+        expected_direction="increasing",
+    )
+    if bracket.get("status") != "bracketed":
+        return []
+    pending = []
+    for lam in bracket["q_bracket"]:
+        for replicate in R.ENTRY_EXPANSION_REPLICATES:
+            key = f"lambda={float(lam):g}|{replicate}"
+            if key not in rows:
+                pending.append(
+                    {"lambda": float(lam), "replicate": replicate}
+                )
+    return pending
+
+
 def live_snn_count():
     result = subprocess.run(
         ["pgrep", "-af", r"python scripts/run_topic4_zm_.*\.py"],
@@ -156,7 +189,7 @@ def _cell_window(seed, lam, replicate):
 def _launch_cell(seed, lam, replicate):
     name = _cell_window(seed, lam, replicate)
     if name in _window_names():
-        return
+        return False
     log = (
         Path(R.OUT)
         / "logs"
@@ -177,6 +210,7 @@ def _launch_cell(seed, lam, replicate):
         f"launched window={name} seed={seed} lambda={float(lam):g} "
         f"replicate={replicate}"
     )
+    return True
 
 
 def _restart_finalizer():
@@ -217,11 +251,26 @@ def main():
 
     base = expected_base_keys()
     while True:
+        rows_by_seed = {seed: available_rows(seed) for seed in SEEDS}
         missing = {
-            seed: sorted(base - set(available_rows(seed)))
+            seed: sorted(base - set(rows_by_seed[seed]))
             for seed in SEEDS
         }
-        _log(f"base pending={ {seed: len(keys) for seed, keys in missing.items()} }")
+        launched = 0
+        for seed in SEEDS:
+            if missing[seed]:
+                continue
+            for cell in early_expansion_cells(rows_by_seed[seed]):
+                if live_snn_count() >= args.max_snn:
+                    break
+                if _launch_cell(seed, cell["lambda"], cell["replicate"]):
+                    launched += 1
+        _log(
+            f"base pending="
+            f"{ {seed: len(keys) for seed, keys in missing.items()} } "
+            f"early_expansion_launched={launched} "
+            f"live_snn={live_snn_count()}"
+        )
         if not any(missing.values()):
             break
         time.sleep(args.poll)

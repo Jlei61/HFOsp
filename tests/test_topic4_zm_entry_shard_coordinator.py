@@ -33,3 +33,69 @@ def test_coordinator_uses_distinct_expansion_window_names():
         for replicate in C.R.ENTRY_EXPANSION_REPLICATES
     }
     assert len(names) == 3 * 2 * 2
+
+
+def _row(lam, entered, replicate="noise_replay"):
+    return {
+        "key": f"lambda={lam:g}|{replicate}",
+        "lambda": float(lam),
+        "replicate": replicate,
+        "entered_carrier": bool(entered),
+        "completed": True,
+    }
+
+
+def test_early_expansion_waits_for_complete_base_grid():
+    rows = {
+        row["key"]: row
+        for row in (
+            _row(0.0, False),
+            _row(0.25, True),
+            _row(0.50, True),
+            _row(0.75, True),
+        )
+    }
+    assert C.early_expansion_cells(rows) == []
+
+
+def test_early_expansion_uses_only_registered_bracket_endpoints():
+    rows = {
+        row["key"]: row
+        for row in (
+            _row(0.0, False),
+            _row(0.25, True),
+            _row(0.50, True),
+            _row(0.75, True),
+            _row(1.0, True),
+        )
+    }
+    pending = C.early_expansion_cells(rows)
+    assert {
+        (cell["lambda"], cell["replicate"]) for cell in pending
+    } == {
+        (0.0, "noise_resample_1"),
+        (0.0, "noise_resample_2"),
+        (0.25, "noise_resample_1"),
+        (0.25, "noise_resample_2"),
+    }
+
+
+def test_early_expansion_skips_existing_part_rows():
+    rows = {
+        row["key"]: row
+        for row in (
+            _row(0.0, False),
+            _row(0.25, True),
+            _row(0.50, True),
+            _row(0.75, True),
+            _row(1.0, True),
+            _row(0.0, False, "noise_resample_1"),
+        )
+    }
+    assert (
+        0.0,
+        "noise_resample_1",
+    ) not in {
+        (cell["lambda"], cell["replicate"])
+        for cell in C.early_expansion_cells(rows)
+    }
