@@ -8,6 +8,8 @@ average and treated as a fixed point.
 
 from __future__ import annotations
 
+import copy
+
 import numpy as np
 
 
@@ -98,6 +100,128 @@ def equal_energy_perturbations(n, theta_deg, energy=1.0, random_seed=0):
         "isotropic": _zero_mean_equal_energy(isotropic, energy),
         "core": _zero_mean_equal_energy(core, energy),
         "random": _zero_mean_equal_energy(random, energy),
+    }
+
+
+def apply_voltage_perturbation(
+    state,
+    field,
+    posE,
+    posI,
+    *,
+    L,
+    population,
+    rms_amplitude_mv,
+    sign,
+):
+    """Map a grid mode to E or I membrane voltage with matched neuron RMS."""
+
+    field = np.asarray(field, dtype=float)
+    posE = np.asarray(posE, dtype=float)
+    posI = np.asarray(posI, dtype=float)
+    if field.ndim != 2 or field.shape[0] != field.shape[1]:
+        raise ValueError("field must be a square spatial grid")
+    if population not in {"E", "I"}:
+        raise ValueError("population must be E or I")
+    if int(sign) not in {-1, 1}:
+        raise ValueError("sign must be -1 or +1")
+    amplitude = float(rms_amplitude_mv)
+    if not np.isfinite(amplitude) or amplitude <= 0:
+        raise ValueError("rms_amplitude_mv must be finite and positive")
+    positions = posE if population == "E" else posI
+    n_grid = field.shape[0]
+    ix = np.clip((positions[:, 0] / float(L) * n_grid).astype(int), 0, n_grid - 1)
+    iy = np.clip((positions[:, 1] / float(L) * n_grid).astype(int), 0, n_grid - 1)
+    delta = field[iy, ix].astype(float)
+    delta -= np.mean(delta)
+    rms = float(np.sqrt(np.mean(delta ** 2)))
+    if rms <= np.finfo(float).eps:
+        raise ValueError("grid mode is degenerate on the selected neurons")
+    delta *= int(sign) * amplitude / rms
+
+    out = copy.deepcopy(state)
+    voltage = np.asarray(out["V"], dtype=float).copy()
+    nE = len(posE)
+    expected = nE + len(posI)
+    if voltage.ndim != 1 or voltage.size != expected:
+        raise ValueError("state V does not align with E/I positions")
+    selected = slice(0, nE) if population == "E" else slice(nE, expected)
+    voltage[selected] += delta
+    out["V"] = voltage
+    return out, delta
+
+
+def project_ei_grid(E_grid, I_grid, spatial_modes, *, mode_order):
+    """Project matched E/I rate differences onto the registered spatial probes."""
+
+    E_grid = np.asarray(E_grid, dtype=float)
+    I_grid = np.asarray(I_grid, dtype=float)
+    mode_order = tuple(mode_order)
+    if E_grid.ndim != 2 or I_grid.shape != E_grid.shape:
+        raise ValueError("E_grid and I_grid must be matched 2D fields")
+    if not np.isfinite(E_grid).all() or not np.isfinite(I_grid).all():
+        raise ValueError("E/I grids must be finite")
+    coordinates = []
+    names = []
+    for population, grid in (("E", E_grid), ("I", I_grid)):
+        for name in mode_order:
+            if name not in spatial_modes:
+                raise ValueError(f"missing spatial mode {name!r}")
+            mode = np.asarray(spatial_modes[name], dtype=float)
+            if mode.shape != grid.shape or not np.isfinite(mode).all():
+                raise ValueError(f"{name}: spatial mode does not align with E/I grid")
+            norm2 = float(np.sum(mode ** 2))
+            if norm2 <= np.finfo(float).eps:
+                raise ValueError(f"{name}: spatial mode has zero energy")
+            coordinates.append(float(np.sum(grid * mode) / norm2))
+            names.append(f"{name}_{population}")
+    return {
+        "coordinates": np.asarray(coordinates, dtype=float),
+        "coordinate_order": names,
+        "modal_operator_version": MODAL_OPERATOR_VERSION,
+    }
+
+
+def assemble_central_propagator(rows, *, input_order, amplitude):
+    """Assemble a finite-time response operator from paired +/- voltage probes."""
+
+    input_order = tuple(input_order)
+    amplitude = float(amplitude)
+    if not input_order or len(set(input_order)) != len(input_order):
+        raise ValueError("input_order must contain unique mode names")
+    if not np.isfinite(amplitude) or amplitude <= 0:
+        raise ValueError("amplitude must be finite and positive")
+    columns = []
+    bank_shas = {}
+    for name in input_order:
+        selected = [
+            row for row in rows
+            if row.get("input_mode") == name
+            and np.isclose(float(row.get("amplitude", np.nan)), amplitude)
+        ]
+        if len(selected) != 2 or {int(row.get("sign", 0)) for row in selected} != {-1, 1}:
+            raise ValueError(f"{name}: require one matched plus/minus pair")
+        plus = next(row for row in selected if int(row["sign"]) == 1)
+        minus = next(row for row in selected if int(row["sign"]) == -1)
+        if plus.get("bank_sha") != minus.get("bank_sha"):
+            raise ValueError(f"{name}: central pair uses unmatched future noise")
+        yp = np.asarray(plus["response"], dtype=float)
+        ym = np.asarray(minus["response"], dtype=float)
+        if yp.ndim != 1 or yp.shape != ym.shape or not np.isfinite([*yp, *ym]).all():
+            raise ValueError(f"{name}: response vectors must be matched and finite")
+        columns.append((yp - ym) / (2.0 * amplitude))
+        bank_shas[name] = plus.get("bank_sha")
+    operator = np.column_stack(columns)
+    if operator.shape != (len(input_order), len(input_order)):
+        raise ValueError(
+            "projected response dimension must equal the registered input basis"
+        )
+    return {
+        "operator": operator,
+        "input_order": list(input_order),
+        "amplitude": amplitude,
+        "bank_sha_by_mode": bank_shas,
+        "modal_operator_version": MODAL_OPERATOR_VERSION,
     }
 
 

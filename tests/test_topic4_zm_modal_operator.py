@@ -3,11 +3,14 @@ import pytest
 
 from src.topic4_zm_modal_operator import (
     analyze_discrete_operator,
+    apply_voltage_perturbation,
+    assemble_central_propagator,
     equal_energy_perturbations,
     evaluate_operator_prediction,
     fit_discrete_operator,
     infer_linearity_range,
     mode_axis_angle_deg,
+    project_ei_grid,
     route_source_temporal_class,
     route_operator_tool,
 )
@@ -97,3 +100,59 @@ def test_linearity_range_is_largest_contiguous_passing_amplitude():
         max_relative_error=0.15,
     )
     assert failed["status"] == "no_valid_linear_range"
+
+
+def test_voltage_probe_has_matched_rms_and_touches_only_selected_population():
+    state = {"V": np.linspace(5.0, 10.0, 6)}
+    posE = np.array([[0.1, 0.1], [0.8, 0.1], [0.2, 0.8], [0.8, 0.8]])
+    posI = np.array([[0.2, 0.2], [0.7, 0.7]])
+    field = np.array([[-1.0, 0.5], [0.0, 1.0]])
+    out, delta = apply_voltage_perturbation(
+        state, field, posE, posI, L=1.0, population="E",
+        rms_amplitude_mv=0.2, sign=1,
+    )
+    assert np.isclose(np.sqrt(np.mean(delta ** 2)), 0.2)
+    assert abs(np.mean(delta)) < 1e-12
+    assert np.allclose(out["V"][:4] - state["V"][:4], delta)
+    assert np.array_equal(out["V"][4:], state["V"][4:])
+
+
+def test_central_pairs_recover_finite_time_propagator_and_require_matched_noise():
+    truth = np.array([[0.8, 0.2], [-0.1, 0.6]])
+    rows = []
+    for j, name in enumerate(("axial_E", "transverse_E")):
+        for amplitude in (0.01, 0.03):
+            for sign in (-1, 1):
+                x = np.zeros(2)
+                x[j] = sign * amplitude
+                rows.append(
+                    {
+                        "input_mode": name,
+                        "amplitude": amplitude,
+                        "sign": sign,
+                        "bank_sha": f"bank-{amplitude}",
+                        "response": (truth @ x).tolist(),
+                    }
+                )
+    out = assemble_central_propagator(
+        rows, input_order=("axial_E", "transverse_E"), amplitude=0.01
+    )
+    assert np.allclose(out["operator"], truth)
+
+    rows[0]["bank_sha"] = "mismatch"
+    with pytest.raises(ValueError, match="noise"):
+        assemble_central_propagator(
+            rows, input_order=("axial_E", "transverse_E"), amplitude=0.01
+        )
+
+
+def test_ei_grid_projection_uses_same_registered_spatial_basis():
+    modes = {
+        "axial": np.array([[-1.0, 0.0], [0.0, 1.0]]),
+        "core": np.array([[1.0, -1.0], [-1.0, 1.0]]),
+    }
+    E = 2.0 * modes["axial"] + 0.5 * modes["core"]
+    I = -0.3 * modes["axial"] + 1.2 * modes["core"]
+    out = project_ei_grid(E, I, modes, mode_order=("axial", "core"))
+    assert out["coordinate_order"] == ["axial_E", "core_E", "axial_I", "core_I"]
+    assert np.allclose(out["coordinates"], [2.0, 0.5, -0.3, 1.2])
