@@ -1,0 +1,51 @@
+[01/31] epilepsiae_1073: decomposition complete
+[02/31] epilepsiae_1084: decomposition complete
+[03/31] epilepsiae_1096: decomposition complete
+[04/31] epilepsiae_1125: decomposition complete
+[05/31] epilepsiae_1150: decomposition complete
+[06/31] epilepsiae_139: decomposition complete
+[07/31] epilepsiae_253: decomposition complete
+[08/31] epilepsiae_384: decomposition complete
+[09/31] epilepsiae_442: decomposition complete
+[10/31] epilepsiae_548: decomposition complete
+[11/31] epilepsiae_583: decomposition complete
+[12/31] epilepsiae_590: decomposition complete
+[13/31] epilepsiae_620: decomposition complete
+[14/31] epilepsiae_635: decomposition complete
+[15/31] epilepsiae_922: decomposition complete
+[16/31] epilepsiae_958: decomposition complete
+[17/31] yuquan_chenziyang: decomposition complete
+[18/31] yuquan_gaolan: decomposition complete
+[19/31] yuquan_hanyuxuan: decomposition complete
+[20/31] yuquan_huanghanwen: decomposition complete
+[21/31] yuquan_litengsheng: decomposition complete
+[22/31] yuquan_liyouran: decomposition complete
+[23/31] yuquan_pengzihang: decomposition complete
+[24/31] yuquan_songzishuo: decomposition complete
+[25/31] yuquan_sunyuanxin: decomposition complete
+[26/31] yuquan_wangyiyang: decomposition complete
+[27/31] yuquan_xuxinyi: decomposition complete
+[28/31] yuquan_zhangbichen: decomposition complete
+[29/31] yuquan_zhangjiaqi: decomposition complete
+[30/31] yuquan_zhangkexuan: decomposition complete
+[31/31] yuquan_zhaochenxi: decomposition complete
+{
+  "contract": "topic5_interictal_transition_signal_decomposition",
+  "version": "0.1",
+  "status": "COMPLETE",
+  "decision": "GO_V2_3_RNN",
+  "go_conditions": {
+    "directed_beyond_local_geometry_and_cross_shaft": true,
+    "symmetric_residual_over_node": true,
+    "axis_beyond_local_geometry": true,
+    "source_direction_beyond_axis": true,
+    "ordered_history_over_last_rank": true
+  },
+  "coordinate_free_patients": 31,
+  "physical_axis_patients": 22,
+  "target_values_read": false,
+  "spec_sha256": "b0aef207017dc520ff0bfab1116b8b39e67a4eb541aabb98fa50b516a9526800",
+  "plan_sha256": "78d20cb54b66599755811302e3a0f8a53833d8c2c06908639722eea58728a7ef",
+  "core_sha256": "db64d3936e885a232e2492a9d514e7d2c81af8811185f0c08522ddd7edbead40",
+  "runner_sha256": "f634c25b1b1dd809406db0ea9ed8c6625cb31c868e4acbaa47ca67f17db07c8f"
+}

@@ -1,0 +1,56 @@
+{
+  "subject": "yuquan_zhangkexuan",
+  "coordinate_free_models": {
+    "node_bias": 0.23514447918334144,
+    "empirical_probability_markov": 0.21439291429535087,
+    "directed_logit_markov": 0.21439291429535087,
+    "symmetric_only": 0.21453516556075775,
+    "skew_only": 0.23577671171376974,
+    "symmetric_plus_skew": 0.21439291429535087,
+    "source_only": 0.2660771495018488,
+    "last_2_ranks": 0.2071496441297355,
+    "last_3_ranks": 0.20579714383259534,
+    "unordered_full_prefix": 0.21006134557931985,
+    "ordered_full_prefix": 0.20427154643967832
+  },
+  "selected_history_decay": 0.75,
+  "history_validation_scores": {
+    "0.25": 0.19103662100826932,
+    "0.5": 0.18845909114597495,
+    "0.75": 0.1884502596606206
+  },
+  "physical_axis": {
+    "models": {
+      "node_bias": 0.23611017678681354,
+      "directed_logit_markov": 0.215358611898823,
+      "same_shaft_only": 0.23635362370033122,
+      "distance_only": 0.2339990523521966,
+      "same_shaft_plus_distance": 0.23403218536706216,
+      "physical_axis_residual": 0.23398100142928333,
+      "source_conditioned_axis": 0.23397942750518716
+    },
+    "axis": {
+      "subject": "yuquan_zhangkexuan",
+      "selected_axis_index": 22,
+      "axis_x": 0.7897540927167819,
+      "axis_y": 0.6116299595442433,
+      "axis_z": 0.046875,
+      "axis_pca1_abs_cosine": 0.43688548833516655,
+      "local_axis_frobenius_cosine": 0.9735100937885673,
+      "same_shaft_coefficient": 0.31223976808300624,
+      "distance_coefficient": 1.9880818233608388,
+      "geometry_same_coefficient": 0.02100384175478887,
+      "geometry_distance_coefficient": 1.9598713400066685,
+      "axis_excess_coefficient": 18.67428028865474,
+      "source_direction_beta": 0.29439551635410566,
+      "source_projection_center": -11.55744891730998,
+      "source_projection_iqr": 5.691815110507235,
+      "same_shaft_train_pair_mse": 1.0199945495581346,
+      "distance_train_pair_mse": 0.9375134219717275,
+      "geometry_train_pair_mse": 0.9374277702055442,
+      "axis_train_pair_mse": 0.9124770878003007
+    }
+  },
+  "input_sha256": "5022e5521225ca6e9f51ae6d656e742df5e92ae9a980e51374603245e33929d3",
+  "target_values_read": false
+}

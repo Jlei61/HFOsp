@@ -1,0 +1,26 @@
+{
+  "contract": "topic5_symmetric_axis_propagation_state_rnn",
+  "version": "2.2",
+  "status": "pass",
+  "assertions": {
+    "all_34": true,
+    "all_subject_gates": true,
+    "geometry_complete_25": true,
+    "development_exact": true,
+    "development_all_geometry_complete": true,
+    "sequence_formal_31": true,
+    "physical_axis_formal_22": true,
+    "geometry_incomplete_sequence_9": true,
+    "candidate_target_not_used_for_routing": true,
+    "target_values_not_read": true
+  },
+  "counts": {
+    "all": 34,
+    "geometry_complete": 25,
+    "development": 3,
+    "sequence_formal": 31,
+    "physical_axis_formal": 22,
+    "geometry_incomplete_sequence": 9
+  },
+  "ictal_target_values_read": false
+}

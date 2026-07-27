@@ -1,0 +1,54 @@
+{
+  "contract": "topic5_symmetric_axis_propagation_state_rnn",
+  "version": "2.2",
+  "status": "locked",
+  "subjects": [
+    "epilepsiae_1084",
+    "epilepsiae_1096",
+    "epilepsiae_1150",
+    "epilepsiae_139",
+    "epilepsiae_253",
+    "epilepsiae_384",
+    "epilepsiae_442",
+    "epilepsiae_583",
+    "epilepsiae_590",
+    "epilepsiae_620",
+    "epilepsiae_922",
+    "epilepsiae_958",
+    "yuquan_huanghanwen",
+    "yuquan_litengsheng",
+    "yuquan_liyouran",
+    "yuquan_pengzihang",
+    "yuquan_songzishuo",
+    "yuquan_xuxinyi",
+    "yuquan_zhangbichen",
+    "yuquan_zhangjiaqi",
+    "yuquan_zhangkexuan",
+    "yuquan_zhaochenxi"
+  ],
+  "n_folds": 22,
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "selected_objective": "next_plus_rollout_h3",
+  "H_train": 3,
+  "loso_shared_training_patients_per_fold": 21,
+  "heldout_patient_scaffold_fit_partition": "train80",
+  "evaluation_partition": "heldout20",
+  "primary_comparison": "symmetric_axis_full_vs_local_isotropic",
+  "later_controls": [
+    "random_axis_256",
+    "shaft_preserving_coordinate_permutation_256",
+    "pca1_axis",
+    "two_direction_operator"
+  ],
+  "null_seed": 20260726,
+  "target_values_sealed": true,
+  "hashes": {
+    "development_lock": "35ba96ed33d65dfdd563c0999bf7961cc79304d7dfca684837a08aaaff8193f3",
+    "physical_cohort": "36cec5693a481465a87271a8eda3523c85835e31857b4fba39a5bb2348ab5d61",
+    "target_seal": "08c44a2e235e19cb179fd599c060add31a296b48ca10f4d8035b7c27e345af31"
+  }
+}

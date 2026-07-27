@@ -1,0 +1,69 @@
+{
+  "contract": "topic5_symmetric_axis_propagation_state_rnn",
+  "version": "2.2",
+  "status": "pass",
+  "selected_objective": "next_plus_rollout_h3",
+  "H_train": 3,
+  "H_eval": "remaining eligible contacts at each true prefix",
+  "H_transfer": "N_contacts - N_clinical_onset_source_contacts",
+  "selection": {
+    "status": "selected_pending_confirmation",
+    "selected_objective": "next_plus_rollout_h3",
+    "H_train": 3,
+    "best_future_benefit": 0.0004813671112060547,
+    "selected_future_benefit": 0.000171661376953125,
+    "selected_next_benefit": 0.00020888447761535645,
+    "tie_tolerance_absolute_nll": 0.0055388307571411135,
+    "tie_rule": "0.5% of development patient-median local-isotropic future NLL; within tie choose next_only, then h3, then h5"
+  },
+  "confirmation": {
+    "n_patients": 3,
+    "patient_median_future_benefit": 0.00014770030975341797,
+    "patient_median_next_benefit": 0.00015497207641601562,
+    "future_direction_not_reversed": true,
+    "next_direction_not_reversed": true,
+    "confirmation_used_for_model_changes": false,
+    "pass": true
+  },
+  "shared_parameters": [
+    "anisotropy_ratio",
+    "rho_p",
+    "c0",
+    "c_p",
+    "c_n"
+  ],
+  "patient_parameters": [
+    "axis_u",
+    "gamma",
+    "gain"
+  ],
+  "optimizer": {
+    "name": "AdamW",
+    "learning_rate": 0.001,
+    "weight_decay": 0.0001,
+    "gradient_clip": 1.0,
+    "max_epochs": 200,
+    "patience": 15,
+    "seeds": [
+      17,
+      29,
+      43
+    ]
+  },
+  "aggregation": "eligible-contact normalization -> within-event decision mean -> patient-seed event mean -> seed median -> patient inference",
+  "two_w_margin_fraction": 0.1,
+  "development_subjects": [
+    "epilepsiae_1077",
+    "epilepsiae_1146",
+    "yuquan_chengshuai"
+  ],
+  "input_config_hashes": {
+    "config": "e8155a2f540ddf2ed093242da857f3db4892273e1cbfcd9f3085f318a36f8137",
+    "core": "79bba3bb1d211736b0660e81540a108a30626c1bab7c57cbd954a851002045a2",
+    "trainer": "367e63484763fb2efbf25c5f0b11206dfa14d49560635a69ca1b77996f713489",
+    "analyzer": "796ca626229bf62e93013a27cba86f1b61dc280f868698bb5a887959a9803ee1"
+  },
+  "git_commit": "df265beff892d5336afbaa3fa2330df43fe655c4",
+  "confirmation_used_for_model_changes": false,
+  "ictal_target_values_read": false
+}

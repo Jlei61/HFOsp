@@ -1,0 +1,56 @@
+{
+  "subject": "epilepsiae_922",
+  "coordinate_free_models": {
+    "node_bias": 0.40853576283613197,
+    "empirical_probability_markov": 0.4093250781769947,
+    "directed_logit_markov": 0.4093250781769947,
+    "symmetric_only": 0.4110194487387086,
+    "skew_only": 0.40607815847004736,
+    "symmetric_plus_skew": 0.4093250781769947,
+    "source_only": 0.4111930873449877,
+    "last_2_ranks": 0.4009834655179315,
+    "last_3_ranks": 0.3990751515853485,
+    "unordered_full_prefix": 0.39881789169165716,
+    "ordered_full_prefix": 0.39910574820529965
+  },
+  "selected_history_decay": 0.75,
+  "history_validation_scores": {
+    "0.25": 0.4015266181302422,
+    "0.5": 0.3988847400966064,
+    "0.75": 0.3981324051236405
+  },
+  "physical_axis": {
+    "models": {
+      "node_bias": 0.40852245964960576,
+      "directed_logit_markov": 0.40931177499046856,
+      "same_shaft_only": 0.4091480330158179,
+      "distance_only": 0.40979945020404146,
+      "same_shaft_plus_distance": 0.409701221462379,
+      "physical_axis_residual": 0.4029023627730083,
+      "source_conditioned_axis": 0.402899883013524
+    },
+    "axis": {
+      "subject": "epilepsiae_922",
+      "selected_axis_index": 9,
+      "axis_x": -0.6572709429222912,
+      "axis_y": 0.2713118905706906,
+      "axis_z": 0.7031250000000001,
+      "axis_pca1_abs_cosine": 0.25033442377799314,
+      "local_axis_frobenius_cosine": 0.9985754430146588,
+      "same_shaft_coefficient": 0.02843576669064339,
+      "distance_coefficient": 0.14835453369812093,
+      "geometry_same_coefficient": -0.00653410316128881,
+      "geometry_distance_coefficient": 0.15335021573441623,
+      "axis_excess_coefficient": -44.652113139551396,
+      "source_direction_beta": 0.05516380103981237,
+      "source_projection_center": 7.388027842175267,
+      "source_projection_iqr": 4.62759224536283,
+      "same_shaft_train_pair_mse": 0.22303929874185988,
+      "distance_train_pair_mse": 0.22113097064066978,
+      "geometry_train_pair_mse": 0.22111928270190345,
+      "axis_train_pair_mse": 0.12834713253373894
+    }
+  },
+  "input_sha256": "e1ed0adfdfc9a7a430f576b8e6c10135cf5fd514c0abb0da5b6014e9a019351f",
+  "target_values_read": false
+}

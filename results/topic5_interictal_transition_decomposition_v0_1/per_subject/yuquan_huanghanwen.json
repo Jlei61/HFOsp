@@ -1,0 +1,56 @@
+{
+  "subject": "yuquan_huanghanwen",
+  "coordinate_free_models": {
+    "node_bias": 0.3249167418362953,
+    "empirical_probability_markov": 0.3220374539785601,
+    "directed_logit_markov": 0.3220374539785601,
+    "symmetric_only": 0.3214886660144412,
+    "skew_only": 0.32609357124282795,
+    "symmetric_plus_skew": 0.3220374539785601,
+    "source_only": 0.3357566217837772,
+    "last_2_ranks": 0.3145553585389239,
+    "last_3_ranks": 0.31515998510670584,
+    "unordered_full_prefix": 0.31621447987873624,
+    "ordered_full_prefix": 0.3152246769755896
+  },
+  "selected_history_decay": 0.75,
+  "history_validation_scores": {
+    "0.25": 0.316903516273025,
+    "0.5": 0.31377036962528976,
+    "0.75": 0.3124853460325157
+  },
+  "physical_axis": {
+    "models": {
+      "node_bias": 0.3249204309852704,
+      "directed_logit_markov": 0.3220411431275351,
+      "same_shaft_only": 0.3300258772480234,
+      "distance_only": 0.32814609040172404,
+      "same_shaft_plus_distance": 0.33012837102882464,
+      "physical_axis_residual": 0.32526059923672984,
+      "source_conditioned_axis": 0.32512573199169176
+    },
+    "axis": {
+      "subject": "yuquan_huanghanwen",
+      "selected_axis_index": 0,
+      "axis_x": 0.17608480733726006,
+      "axis_y": 0.0,
+      "axis_z": 0.984375,
+      "axis_pca1_abs_cosine": 0.021004976049680348,
+      "local_axis_frobenius_cosine": 0.9483372990642983,
+      "same_shaft_coefficient": 0.337848074690927,
+      "distance_coefficient": 0.6570205223983506,
+      "geometry_same_coefficient": 0.28276111032062834,
+      "geometry_distance_coefficient": 0.20070620896532104,
+      "axis_excess_coefficient": -6.429417137145246,
+      "source_direction_beta": 2.337768935195661,
+      "source_projection_center": -0.40823852908888425,
+      "source_projection_iqr": 4.410872394855868,
+      "same_shaft_train_pair_mse": 0.3312427748635473,
+      "distance_train_pair_mse": 0.3437238606702752,
+      "geometry_train_pair_mse": 0.3300703700988518,
+      "axis_train_pair_mse": 0.2728354920539022
+    }
+  },
+  "input_sha256": "7803bb5e819b668280ad99cfccec8fc1693d6c2589d85d80a95a93a4199fd560",
+  "target_values_read": false
+}

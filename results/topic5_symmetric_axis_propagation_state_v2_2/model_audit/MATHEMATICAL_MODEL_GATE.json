@@ -1,0 +1,33 @@
+{
+  "contract": "topic5_symmetric_axis_propagation_state_rnn",
+  "version": "2.2",
+  "status": "pass",
+  "pytest_returncode": 0,
+  "pytest_output": "........................                                                 [100%]\n24 passed in 2.22s",
+  "scientific_contract": {
+    "symmetric_operator_only": true,
+    "axis_sign_invariant": true,
+    "opposite_source_displacement_tested": true,
+    "geometry_incomplete_rejected": true,
+    "one_propagation_state_only": true,
+    "scalar_stop_only": true,
+    "exact_nonempty_set_likelihood": true,
+    "absorbing_rollout_mass_conserved": true,
+    "no_dense_bypass": true,
+    "no_future_head": true,
+    "event_reset": true,
+    "train_only_node_hazard_bias": true,
+    "event_first_aggregation": true,
+    "cpu_gpu_operator_checked": true,
+    "ictal_target_values_read": false
+  },
+  "files": {
+    "src/topic5_symmetric_axis_propagation_state_v2_2.py": "79bba3bb1d211736b0660e81540a108a30626c1bab7c57cbd954a851002045a2",
+    "scripts/train_topic5_symmetric_axis_propagation_state_v2_2.py": "367e63484763fb2efbf25c5f0b11206dfa14d49560635a69ca1b77996f713489",
+    "tests/test_topic5_symmetric_axis_operator_v2_2.py": "076399b83d69a51fd86abc19a5b36a54d34f63a69c7a1eca17affbb41fb6b3a0",
+    "tests/test_topic5_propagation_state_recurrence_v2_2.py": "88f9a5fc523d69ea364a06741b432a6ada510d3a4824857436537d5fbf6f7371",
+    "tests/test_topic5_absorbing_rollout_v2_2.py": "d330bf24780b6a495e37d6ea419566af888b3670afc5c3a3bd6e09b136b06161",
+    "tests/test_topic5_symmetric_axis_leakage_v2_2.py": "abfa3a732530dfa709ee93a25b7fba4b8b0b3fb4c7d19630e84196f5057e4d7b",
+    "tests/test_topic5_symmetric_axis_aggregation_v2_2.py": "e1c015fb785b231340e4e716ba3e0f0437739aac310d2ea3434dac3da828dc01"
+  }
+}

@@ -1,0 +1,182 @@
+{
+  "contract": "topic5_symmetric_axis_propagation_state_rnn",
+  "version": "2.2",
+  "status": "PASS",
+  "selected_objective": "next_plus_rollout_h3",
+  "development_models_expected": 18,
+  "development_models_audited": 18,
+  "maximum_epochs": 200,
+  "patience": 15,
+  "all_selected_development_models_best_at_final_epoch": true,
+  "formal_policy": "fixed 200 epochs because every selected-objective development full/control run improved through epoch 199; heldout20 is never used for formal early stopping",
+  "formal_resolved_configs_audited": 66,
+  "formal_epoch_values": [
+    200
+  ],
+  "development_rows": [
+    {
+      "subject": "epilepsiae_1077",
+      "seed": 17,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "74c2f55228d6c9e2495b92fa8a068b866d3a7479a31bdf3cbe8a9f079ed8b14d"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "seed": 17,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "74c2f55228d6c9e2495b92fa8a068b866d3a7479a31bdf3cbe8a9f079ed8b14d"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "seed": 29,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "d6aad3934feac6015033c8d7e373e4e35dcc786131c635bad44fea85db42f457"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "seed": 29,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "d6aad3934feac6015033c8d7e373e4e35dcc786131c635bad44fea85db42f457"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "seed": 43,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "d3980302700603402da710fea644de4b3de1cdaf5459547faa760a9942953d5a"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "seed": 43,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "d3980302700603402da710fea644de4b3de1cdaf5459547faa760a9942953d5a"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "seed": 17,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "cc9b12ea30dc9a7b6d72129243da8da99afe81866a7552e153c424fd4e99182d"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "seed": 17,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "cc9b12ea30dc9a7b6d72129243da8da99afe81866a7552e153c424fd4e99182d"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "seed": 29,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "e3a9a09c197c6c1e87e398c3d9bd5588144308ad3a443a7a74f20494dddb5627"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "seed": 29,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "e3a9a09c197c6c1e87e398c3d9bd5588144308ad3a443a7a74f20494dddb5627"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "seed": 43,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "38dbcec0b89afe37a974ebefef021e6ef6c444b4aa0fd07d85adef0c147e369f"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "seed": 43,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "38dbcec0b89afe37a974ebefef021e6ef6c444b4aa0fd07d85adef0c147e369f"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "seed": 17,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "b60ee5b183b7673fded0863c85a58677bdc9ae4d92986548941f54fe925371ac"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "seed": 17,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "b60ee5b183b7673fded0863c85a58677bdc9ae4d92986548941f54fe925371ac"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "seed": 29,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "5591ca8f5eff419fe17d4019d1f3b729693be25d80d13604a19723e32fa0f728"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "seed": 29,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "5591ca8f5eff419fe17d4019d1f3b729693be25d80d13604a19723e32fa0f728"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "seed": 43,
+      "variant": "full",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "1b89b03d530d351728e098dff0a3a0c8691a736f8d0b1c501562be7bb3c5e9af"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "seed": 43,
+      "variant": "local_isotropic",
+      "best_epoch": 199,
+      "epochs_completed": 200,
+      "early_stopped": false,
+      "metrics_sha256": "1b89b03d530d351728e098dff0a3a0c8691a736f8d0b1c501562be7bb3c5e9af"
+    }
+  ],
+  "development_lock_sha256": "35ba96ed33d65dfdd563c0999bf7961cc79304d7dfca684837a08aaaff8193f3",
+  "target_values_read": false
+}

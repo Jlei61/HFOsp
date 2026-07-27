@@ -1,0 +1,20 @@
+{
+  "contract": "topic5_interictal_transition_signal_decomposition",
+  "version": "0.1",
+  "status": "COMPLETE",
+  "decision": "GO_V2_3_RNN",
+  "go_conditions": {
+    "directed_beyond_local_geometry_and_cross_shaft": true,
+    "symmetric_residual_over_node": true,
+    "axis_beyond_local_geometry": true,
+    "source_direction_beyond_axis": true,
+    "ordered_history_over_last_rank": true
+  },
+  "coordinate_free_patients": 31,
+  "physical_axis_patients": 22,
+  "target_values_read": false,
+  "spec_sha256": "b0aef207017dc520ff0bfab1116b8b39e67a4eb541aabb98fa50b516a9526800",
+  "plan_sha256": "78d20cb54b66599755811302e3a0f8a53833d8c2c06908639722eea58728a7ef",
+  "core_sha256": "db64d3936e885a232e2492a9d514e7d2c81af8811185f0c08522ddd7edbead40",
+  "runner_sha256": "f634c25b1b1dd809406db0ea9ed8c6625cb31c868e4acbaa47ca67f17db07c8f"
+}

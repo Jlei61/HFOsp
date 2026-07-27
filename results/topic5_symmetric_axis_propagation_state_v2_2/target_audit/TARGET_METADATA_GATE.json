@@ -1,0 +1,37 @@
+{
+  "contract": "topic5_symmetric_axis_propagation_state_rnn",
+  "version": "2.2",
+  "status": "complete_with_blocker",
+  "routing_metadata_audited": true,
+  "energy_values_read": false,
+  "recruitment_values_read": false,
+  "source_contact_metadata_ready": false,
+  "primary_transfer_metadata_ready": false,
+  "blocker": "no exact per-seizure clinical-onset contact set is available; SOZ, patient-level focus, A/B source, and energy-top contacts were not substituted",
+  "interictal_model_execution_allowed": true,
+  "early_ictal_transfer_allowed": false,
+  "endpoint_denominators": {
+    "routing": {
+      "patients": 13,
+      "seizures": 71
+    },
+    "energy_metadata": {
+      "patients": 13,
+      "seizures": 71
+    },
+    "exact_clinical_onset_source_set": {
+      "patients": 0,
+      "seizures": 0
+    },
+    "primary_structural_transfer": {
+      "patients": 0,
+      "seizures": 0
+    },
+    "dynamic_recruitment_rank": {
+      "patients": 0,
+      "seizures": 0
+    },
+    "analysis_denominator": "SEALED_UNTIL_INTERICTAL_UNLOCK",
+    "target_values_read": false
+  }
+}

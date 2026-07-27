@@ -1,0 +1,73 @@
+{
+  "contract": "topic5_symmetric_axis_propagation_state_rnn",
+  "version": "2.2.1-closeout",
+  "status": "COMPLETE",
+  "scientific_contract_execution_to_preregistered_stop": "100%",
+  "claim1_predictive_adequacy": "FAIL",
+  "claim2_next": "FAIL",
+  "claim2_future": "FAIL",
+  "claim3_random_axis": "LOCKED_NOT_RUN",
+  "claim4_shared_scaffold": "LOCKED_NOT_RUN",
+  "early_ictal_transfer": "BLOCKED_INTERICTAL_GATE_AND_MISSING_SOURCE_METADATA",
+  "cohort_endpoints": {
+    "markov_benefit_over_node": {
+      "endpoint": "markov_benefit_over_node",
+      "n_patients": 22,
+      "median": 0.01077823160097216,
+      "median_ci95": [
+        0.006612488160550156,
+        0.015457918351548028
+      ],
+      "n_positive": 21,
+      "wilcoxon_one_sided_p": 4.76837158203125e-07
+    },
+    "isotropic_benefit_over_node": {
+      "endpoint": "isotropic_benefit_over_node",
+      "n_patients": 22,
+      "median": -0.016608649835300054,
+      "median_ci95": [
+        -0.032703564344948144,
+        -0.008748613917176878
+      ],
+      "n_positive": 1,
+      "wilcoxon_one_sided_p": 0.9999995231628418
+    },
+    "full_benefit_over_node": {
+      "endpoint": "full_benefit_over_node",
+      "n_patients": 22,
+      "median": -0.016565630182933416,
+      "median_ci95": [
+        -0.03266452330262026,
+        -0.008884035670106566
+      ],
+      "n_positive": 1,
+      "wilcoxon_one_sided_p": 0.9999995231628418
+    },
+    "markov_benefit_over_full": {
+      "endpoint": "markov_benefit_over_full",
+      "n_patients": 22,
+      "median": 0.028973729740531362,
+      "median_ci95": [
+        0.02159153452847444,
+        0.04910975496895864
+      ],
+      "n_positive": 22,
+      "wilcoxon_one_sided_p": 2.384185791015625e-07
+    },
+    "markov_benefit_over_isotropic": {
+      "endpoint": "markov_benefit_over_isotropic",
+      "n_patients": 22,
+      "median": 0.028711376332367644,
+      "median_ci95": [
+        0.021550943765382427,
+        0.04910364549286911
+      ],
+      "n_positive": 22,
+      "wilcoxon_one_sided_p": 2.384185791015625e-07
+    }
+  },
+  "calibration_scope": "frozen full/isotropic heldout checkpoints; no parameter update",
+  "operator_identifiability_scope": "descriptive fixed-checkpoint audit; seed reproducibility is not treated as structural identifiability",
+  "safe_conclusion": "A nonnegative linear one-state symmetric physical scaffold used directly as the next-contact operator is predictively inadequate; this does not test whether a shared pathological axis exists.",
+  "target_values_read": false
+}
