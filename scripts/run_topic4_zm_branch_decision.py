@@ -12,6 +12,9 @@ Phases (each is crash-safe and writes atomically under results/topic4_sef_hfo/zm
             ``--evidence-tier long_confirmation`` writes a separate 20 s central-state result.
             ``--resolution dt2 --evidence-tier dt2_confirmation`` consumes only an independently
             generated dt/2-native anchor and writes another separate result namespace.
+  source_rhythm
+            Short, post-confirmation fine E/I field audit used only to route fixed/periodic/
+            stochastic operator tools. It cannot establish an ictal or observation-space claim.
 
 Every phase pins the canonical config SHA, the engine SHAs, the state hash and the noise-bank SHA.
 OMP/MKL/OPENBLAS/NUMEXPR are forced to 1.
@@ -47,6 +50,7 @@ import src.topic4_zm_checkpoint as CK                # noqa: E402
 import src.topic4_zm_noise_bank as NB                # noqa: E402
 import src.topic4_zm_minimal_carrier as MC           # noqa: E402
 import src.topic4_zm_ictal_carrier as CG             # noqa: E402
+import src.topic4_zm_source_rhythm as SR             # noqa: E402
 
 OUT = os.path.join(_ROOT, "results", "topic4_sef_hfo", "zm_branch_decision")
 PHASE0 = os.path.join(OUT, "phase0")
@@ -55,6 +59,8 @@ DT_HALF = 0.05
 RESOLUTION_DT = {"dt": DT_BASE, "dt2": DT_HALF}
 ES_THRESH_HZ = 250.0        # bounded-arm runaway threshold (the containment arm plateaus high)
 ARM_KWARGS = dict(use_SG=True, alpha_G=16.0)
+SOURCE_RHYTHM_MS = 2000.0
+SOURCE_RHYTHM_BIN_MS = 2.0
 
 
 # ================================================================ helpers
@@ -164,7 +170,7 @@ def make_slow(ctx, freeze_arm=None):
     return slow
 
 
-def run_segment(ctx, slow, T_ms, *, ckpt=None, fresh_rng=True):
+def run_segment(ctx, slow, T_ms, *, ckpt=None, fresh_rng=True, dump_i_spikes=False):
     S = ctx["S"]
     p = dataclasses.replace(S["p"], T=float(T_ms))
     if fresh_rng:
@@ -172,7 +178,8 @@ def run_segment(ctx, slow, T_ms, *, ckpt=None, fresh_rng=True):
     return simulate_kick(p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]),
                          r_kick=PP.R_KICK, t_kick=1e9, V_th_per_neuron=S["vth"], verbose=False,
                          lfp_recorder=ctx["rec"], early_stop_runaway=True,
-                         es_thresh_hz=ES_THRESH_HZ, es_dur_ms=100.0, zm_ckpt=ckpt)
+                         es_thresh_hz=ES_THRESH_HZ, es_dur_ms=100.0,
+                         dump_i_spikes=dump_i_spikes, zm_ckpt=ckpt)
 
 
 def segment_metrics(ctx, res, *, bin_ms=MC.BIN_MS):
@@ -854,11 +861,116 @@ def phase_smoke(ctx, T_anchor_ms=2000.0, T_cont_ms=500.0):
     return out
 
 
+# ================================================================ phase: fine source rhythm (Task 9B routing)
+def phase_source_rhythm(ctx, state_tag="bounded_mid__peak"):
+    """Save a 2 ms E/I spatial-rate field from a confirmed carrier state.
+
+    This is deliberately short and starts from the same natural checkpoint as
+    Task 7. It routes the later operator tool; it is not another carrier
+    survival trial.
+    """
+    verdict_path = os.path.join(OUT, "branch_verdict.json")
+    verdict = json.load(open(verdict_path)) if os.path.exists(verdict_path) else {}
+    if not SR.source_rhythm_authorized(verdict):
+        raise SystemExit(
+            "source_rhythm is not authorized until two-seed native carrier "
+            "confirmation passes"
+        )
+
+    seed = int(ctx["S"]["seed"])
+    anchor_path = os.path.join(
+        OUT, ctx["anchor_root"], f"seed{seed}", "anchor.json"
+    )
+    anchor = json.load(open(anchor_path))
+    states = {
+        f"{s['bin_name']}__{s['fast_phase']}": s
+        for s in anchor.get("captured_states", [])
+    }
+    if state_tag not in states:
+        raise SystemExit(f"{state_tag} not captured in {anchor_path}")
+    selected = states[state_tag]
+    engine_sha = ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"]
+    state, state_manifest = CK.load_state_npz(
+        os.path.join(_ROOT, selected["path"]),
+        expected_config_sha=ctx["cfg_sha"],
+        expected_engine_sha=engine_sha,
+        expected_dt=ctx["dt"],
+    )
+    bank = NB.build_noise_bank(
+        ctx["cfg_sha"], seed, int(selected["t_step"]), "noise_replay"
+    )
+    burn_ms = float(BURN_IN_MS["freeze_all"])
+    slow = make_slow(ctx, freeze_arm="freeze_all")
+    ck = CK.ZMCheckpoint(
+        initial_state=state, return_final_state=False,
+        rng_state=bank["rng_state"], ext_mean_only=bank["ext_mean_only"],
+    )
+    t0 = time.time()
+    res = run_segment(
+        ctx, slow, burn_ms + SOURCE_RHYTHM_MS, ckpt=ck, dump_i_spikes=True
+    )
+    if res.get("runaway_early_stop_ms") is not None:
+        raise RuntimeError("confirmed carrier ran away during source_rhythm audit")
+    if res.get("I_spk_bool") is None:
+        raise RuntimeError("source_rhythm requires dump_i_spikes output")
+
+    fields = SR.bin_spikes_to_grid(
+        res["E_spk_bool"], res["I_spk_bool"],
+        ctx["S"]["posE"], ctx["S"]["posI"],
+        L=ctx["S"]["L"], dt_ms=ctx["dt"],
+        bin_ms=SOURCE_RHYTHM_BIN_MS, n_grid=16,
+    )
+    burn_bins = int(round(burn_ms / SOURCE_RHYTHM_BIN_MS))
+    metrics = SR.characterize_source_rhythm(
+        fields["E_rate_grid"][burn_bins:],
+        fields["I_rate_grid"][burn_bins:],
+        bin_ms=SOURCE_RHYTHM_BIN_MS,
+    )
+    root = os.path.join(OUT, "source_rhythm", ctx["resolution"], f"seed{seed}")
+    npz_path = os.path.join(root, "source_rhythm_fields.npz")
+    save_npz_atomic(
+        npz_path,
+        E_rate_grid=fields["E_rate_grid"],
+        I_rate_grid=fields["I_rate_grid"],
+        global_E_rate_hz=fields["global_E_rate_hz"],
+        global_I_rate_hz=fields["global_I_rate_hz"],
+        nE_per_cell=fields["nE_per_cell"],
+        nI_per_cell=fields["nI_per_cell"],
+        bin_ms=np.asarray(SOURCE_RHYTHM_BIN_MS),
+        burn_in_ms=np.asarray(burn_ms),
+    )
+    out = dict(
+        provenance(
+            ctx, phase="source_rhythm", state_tag=state_tag,
+            T_measure_ms=SOURCE_RHYTHM_MS, burn_in_ms=burn_ms,
+            source_rhythm_bin_ms=SOURCE_RHYTHM_BIN_MS,
+        ),
+        state_hash=state_manifest["state_hash"],
+        state_path=selected["path"],
+        bank_sha=bank["bank_sha"],
+        freeze_policy=FS.FreezePolicy.for_arm("freeze_all").as_dict(),
+        fields_path=os.path.relpath(npz_path, _ROOT),
+        source_rhythm=metrics,
+        wall_s=round(time.time() - t0, 1),
+        evidence_value="operator routing only",
+    )
+    write_json_atomic(os.path.join(root, "source_rhythm.json"), out)
+    print(
+        f"[source_rhythm] seed={seed} resolution={ctx['resolution']} "
+        f"class={metrics['source_temporal_class']} "
+        f"f0={metrics.get('dominant_frequency_median_hz', float('nan')):.1f}Hz "
+        f"wall={out['wall_s']}s",
+        flush=True,
+    )
+    return out
+
+
 # ================================================================ CLI
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--phase", required=True,
-                    choices=["anchor1", "anchor", "fork", "neighbourhood", "smoke"])
+                    choices=["anchor1", "anchor", "fork", "neighbourhood",
+                             "source_rhythm", "smoke"])
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--T", type=float, default=15000.0)
     ap.add_argument("--confirm-run", action="store_true")
@@ -882,6 +994,14 @@ def main():
         raise SystemExit("neighbourhood is a discovery-dt phase; dt2 is confirmation-only")
     if a.phase != "fork" and a.evidence_tier != "discovery":
         raise SystemExit("--evidence-tier applies only to --phase fork")
+    if a.phase == "source_rhythm":
+        verdict_path = os.path.join(OUT, "branch_verdict.json")
+        verdict = json.load(open(verdict_path)) if os.path.exists(verdict_path) else {}
+        if not SR.source_rhythm_authorized(verdict):
+            raise SystemExit(
+                "source_rhythm is not authorized until two-seed native carrier "
+                "confirmation passes"
+            )
     ctx = build_context(
         a.seed, smoke=a.smoke or a.phase == "smoke", resolution=a.resolution
     )
@@ -899,6 +1019,11 @@ def main():
                             replicates=tuple(x.strip() for x in a.replicates.split(",") if x.strip())
                             if a.replicates != ",".join(NB.PAIRED_REPLICATES) else NB_REPLICATES,
                             resume=not a.no_resume, T_ms=a.T_cont)
+    elif a.phase == "source_rhythm":
+        phase_source_rhythm(
+            ctx, state_tag=(a.states.split(",")[0] if a.states
+                            else "bounded_mid__peak")
+        )
     elif a.phase == "fork":
         phase_fork(ctx,
                    states_filter=[s.strip() for s in a.states.split(",")] if a.states else None,

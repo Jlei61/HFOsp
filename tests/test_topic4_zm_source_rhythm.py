@@ -3,6 +3,7 @@ import numpy as np
 from src.topic4_zm_source_rhythm import (
     bin_spikes_to_grid,
     characterize_source_rhythm,
+    source_rhythm_authorized,
 )
 
 
@@ -23,6 +24,22 @@ def test_bin_spikes_to_grid_preserves_population_rate_and_ei_shapes():
     assert out["I_rate_grid"].shape == (2, 2, 2)
     assert np.allclose(out["global_E_rate_hz"], [50.0, 50.0])
     assert np.allclose(out["global_I_rate_hz"], [50.0, 50.0])
+
+
+def test_source_rhythm_gate_is_fail_closed_until_native_confirmation_passes():
+    assert not source_rhythm_authorized({})
+    assert not source_rhythm_authorized({
+        "confirmation": {"status": "pending"},
+        "layers": {"source_space_carrier": "provisional_carrier_window"},
+    })
+    assert not source_rhythm_authorized({
+        "confirmation": {"status": "passed"},
+        "layers": {"source_space_carrier": "provisional_carrier_window"},
+    })
+    assert source_rhythm_authorized({
+        "confirmation": {"status": "passed"},
+        "layers": {"source_space_carrier": "source_space_carrier"},
+    })
 
 
 def _periodic_field(phases, *, f0=47.0, duration_s=4.0, bin_ms=2.0):

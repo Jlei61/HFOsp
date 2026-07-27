@@ -20,6 +20,16 @@ from scipy import signal as ss
 SOURCE_RHYTHM_VERSION = "zm_source_rhythm_v1_2026-07-27"
 
 
+def source_rhythm_authorized(verdict):
+    """Fail closed unless the two-seed native carrier confirmation passed."""
+    confirmation = (verdict or {}).get("confirmation") or {}
+    layers = (verdict or {}).get("layers") or {}
+    return bool(
+        confirmation.get("status") == "passed"
+        and layers.get("source_space_carrier") == "source_space_carrier"
+    )
+
+
 def _cell_index(pos, L, n_grid):
     p = np.asarray(pos, float)
     ix = np.clip((p[:, 0] / float(L) * n_grid).astype(int), 0, n_grid - 1)
