@@ -1,0 +1,69 @@
+{
+  "contract": "topic5_rank_distribution_fidelity_v2_4",
+  "status": "COMPLETE",
+  "n_patients": 14,
+  "metrics": {
+    "full_empirical_mean_contact_tv": {
+      "n": 14,
+      "median": 0.10609254773872737,
+      "iqr": [
+        0.08630374986387324,
+        0.12278675608935632
+      ],
+      "minimum": 0.0607263262583209,
+      "maximum": 0.21863048564857587
+    },
+    "full_no_history_mean_contact_tv": {
+      "n": 14,
+      "median": 0.013033377602955119,
+      "iqr": [
+        0.011244899088134324,
+        0.01808138188595573
+      ],
+      "minimum": 0.005823921055707615,
+      "maximum": 0.021967285133611698
+    },
+    "full_isotropic_mean_contact_tv": {
+      "n": 14,
+      "median": 0.004674002097806696,
+      "iqr": [
+        0.0035811752206225513,
+        0.005958159628789872
+      ],
+      "minimum": 0.0013003016097678079,
+      "maximum": 0.015138989851738397
+    },
+    "full_node_only_mean_contact_tv": {
+      "n": 14,
+      "median": 0.0316657622706049,
+      "iqr": [
+        0.02398299498732244,
+        0.03868327519567407
+      ],
+      "minimum": 0.018505712796468288,
+      "maximum": 0.042683557694545016
+    },
+    "full_empirical_participation_spearman": {
+      "n": 14,
+      "median": 0.9221925133689839,
+      "iqr": [
+        0.8738095238095237,
+        0.9661764705882353
+      ],
+      "minimum": 0.6382905982905983,
+      "maximum": 1.0
+    },
+    "full_empirical_expected_rank_spearman": {
+      "n": 14,
+      "median": 0.7416666666666667,
+      "iqr": [
+        0.6638655462184875,
+        0.8133928571428571
+      ],
+      "minimum": 0.5603418803418803,
+      "maximum": 0.9323529411764706
+    }
+  },
+  "bounded_interpretation": "The full rollout preserved the broad contact ordering of the empirical interictal distribution, but remained extremely close to the isotropic rollout. The larger probability-level distance from the empirical distribution identifies smoothing/compression as a plausible source of the failed static transfer; this audit does not use the ictal target and is not a new predictive gate.",
+  "target_values_read": false
+}

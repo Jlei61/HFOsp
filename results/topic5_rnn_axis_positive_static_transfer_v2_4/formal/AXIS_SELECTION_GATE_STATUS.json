@@ -1,0 +1,51 @@
+{
+  "contract": "topic5_rnn_candidate_axis_v2_4",
+  "status": "COMPLETE",
+  "n_axis_positive": 9,
+  "n_reversed": 6,
+  "metrics": {
+    "alignment_margin": {
+      "n": 9,
+      "median": -0.20470126548102707,
+      "bootstrap_ci95": [
+        -0.43676313065684647,
+        0.05188896325015324
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.935546875
+    },
+    "axis_over_isotropic_heldout_benefit": {
+      "n": 9,
+      "median": 0.007982761759487644,
+      "bootstrap_ci95": [
+        0.00226455409759585,
+        0.030957953736577837
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.00390625
+    },
+    "reversed_source_over_no_source_heldout_benefit": {
+      "n": 6,
+      "median": 4.1283586340812306e-05,
+      "bootstrap_ci95": [
+        -0.0013128286509547227,
+        0.0018366694420802743
+      ],
+      "n_positive": 3,
+      "wilcoxon_greater_p": 0.421875
+    },
+    "seed_axis_consistency_abs_cosine": {
+      "n": 9,
+      "median": 1.0,
+      "bootstrap_ci95": [
+        1.0,
+        1.0000000000000002
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.001953125
+    }
+  },
+  "gate_a_axis_positive_construct_validity": "FAIL",
+  "claim_scope": "secondary construct validity in a pre-existing axis-positive subgroup",
+  "target_values_read": false
+}

@@ -1,0 +1,180 @@
+{
+  "contract": "topic5_static_readout_diagnostics_v2_4",
+  "status": "COMPLETE",
+  "analysis_role": "post-gate decomposition of already frozen outputs; does not alter Gates S/H/X",
+  "n_patients": 14,
+  "models": {
+    "empirical_train80": {
+      "all_contact_margin": {
+        "n": 14,
+        "median": 0.3676470588235294,
+        "bootstrap_ci95": [
+          -0.33636363636363625,
+          0.6190476190476191
+        ],
+        "n_positive": 9,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.04805754624882886
+      },
+      "within_shaft_margin": {
+        "n": 14,
+        "median": 0.14285714285714285,
+        "bootstrap_ci95": [
+          -0.01602193149987235,
+          0.3166666666666666
+        ],
+        "n_positive": 10,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.02471923828125
+      },
+      "spearman_rho": {
+        "n": 14,
+        "median": 0.36470588235294116,
+        "bootstrap_ci95": [
+          -0.33441558441558433,
+          0.6190476190476191
+        ],
+        "n_positive": 9,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.052001953125
+      }
+    },
+    "full_fixed_axis": {
+      "all_contact_margin": {
+        "n": 14,
+        "median": -0.1533613445378151,
+        "bootstrap_ci95": [
+          -0.4363636363636364,
+          0.6005952380952381
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.357421875
+      },
+      "within_shaft_margin": {
+        "n": 14,
+        "median": -0.07450980392156856,
+        "bootstrap_ci95": [
+          -0.1852941176470588,
+          0.1380952380952381
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.66510009765625
+      },
+      "spearman_rho": {
+        "n": 14,
+        "median": -0.1588235294117647,
+        "bootstrap_ci95": [
+          -0.4181818181818182,
+          0.5947916666666536
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.357421875
+      }
+    },
+    "local_isotropic": {
+      "all_contact_margin": {
+        "n": 14,
+        "median": -0.192156862745098,
+        "bootstrap_ci95": [
+          -0.4358766233766233,
+          0.6071428571428572
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.38043212890625
+      },
+      "within_shaft_margin": {
+        "n": 14,
+        "median": -0.04726890756302515,
+        "bootstrap_ci95": [
+          -0.19950980392156856,
+          0.1380952380952381
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.66510009765625
+      },
+      "spearman_rho": {
+        "n": 14,
+        "median": -0.192156862745098,
+        "bootstrap_ci95": [
+          -0.4371753246753246,
+          0.6071428571428572
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.38043212890625
+      }
+    },
+    "no_history": {
+      "all_contact_margin": {
+        "n": 14,
+        "median": -0.21358543417366943,
+        "bootstrap_ci95": [
+          -0.39870129870129867,
+          0.5964285714285714
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.3128662109375
+      },
+      "within_shaft_margin": {
+        "n": 14,
+        "median": -0.11713139801375096,
+        "bootstrap_ci95": [
+          -0.2088235294117646,
+          0.1428571428571429
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.66510009765625
+      },
+      "spearman_rho": {
+        "n": 14,
+        "median": -0.21358543417366943,
+        "bootstrap_ci95": [
+          -0.38961038961038963,
+          0.6023809523809524
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.3128662109375
+      }
+    },
+    "node_only": {
+      "all_contact_margin": {
+        "n": 14,
+        "median": -0.22352941176470587,
+        "bootstrap_ci95": [
+          -0.3321428571428571,
+          0.5535714285714286
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.357421875
+      },
+      "within_shaft_margin": {
+        "n": 14,
+        "median": -0.05952380952380951,
+        "bootstrap_ci95": [
+          -0.2323529411764704,
+          0.16006493506493502
+        ],
+        "n_positive": 7,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.66510009765625
+      },
+      "spearman_rho": {
+        "n": 14,
+        "median": -0.2264705882352941,
+        "bootstrap_ci95": [
+          -0.3249999999999999,
+          0.6071428571428572
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p_uncorrected_descriptive": 0.357421875
+      }
+    }
+  },
+  "frozen_gate_status": {
+    "gate_s": "FAIL",
+    "gate_h": "FAIL",
+    "gate_x": "FAIL"
+  },
+  "bounded_interpretation": "The empirical train80 rank distribution showed a positive patient-median cross-state trend, but its bootstrap interval included zero and its P values are descriptive and uncorrected. Every simulated RNN representation failed the frozen Gate S. The contrast suggests that the current model/rollout compression may lose information present in the empirical interictal ranks; it does not by itself establish a new cross-state cohort claim.",
+  "empirical_all_contact_margin_median": 0.3676470588235294,
+  "empirical_within_shaft_margin_median": 0.14285714285714285,
+  "full_all_contact_margin_median": -0.1533613445378151,
+  "target_values_read": true,
+  "no_retraining_or_hyperparameter_selection": true,
+  "inference_scope": "descriptive post-gate diagnostic; no multiplicity-corrected empirical-model claim"
+}

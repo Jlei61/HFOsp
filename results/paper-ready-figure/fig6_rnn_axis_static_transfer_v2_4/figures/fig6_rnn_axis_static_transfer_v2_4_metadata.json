@@ -1,0 +1,32 @@
+{
+  "contract": "fig6_rnn_axis_static_transfer_v2_4",
+  "status": "COMPLETE",
+  "source_files": {
+    "audit": "results/topic5_rnn_axis_positive_static_transfer_v2_4/input_audit/INPUT_AUDIT_STATUS.json",
+    "a0_status": "results/topic5_rnn_axis_positive_static_transfer_v2_4/axis_readback_stage_a0/STAGE_A0_STATUS.json",
+    "a0_metrics": "results/topic5_rnn_axis_positive_static_transfer_v2_4/axis_readback_stage_a0/patient_metrics.csv",
+    "a1_status": "results/topic5_rnn_axis_positive_static_transfer_v2_4/formal/AXIS_SELECTION_GATE_STATUS.json",
+    "a1_metrics": "results/topic5_rnn_axis_positive_static_transfer_v2_4/formal/axis_selected_patient_metrics.csv",
+    "static_status": "results/topic5_rnn_axis_positive_static_transfer_v2_4/static_readout/STATIC_READOUT_GATE_STATUS.json",
+    "static_metrics": "results/topic5_rnn_axis_positive_static_transfer_v2_4/static_readout/patient_model_metrics.csv",
+    "diagnostic": "results/topic5_rnn_axis_positive_static_transfer_v2_4/static_readout/STATIC_READOUT_DIAGNOSTICS.json",
+    "fidelity": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/RANK_DISTRIBUTION_FIDELITY.json"
+  },
+  "panels": {
+    "A": "frozen analysis chain",
+    "B": "cohort denominators",
+    "C": "transition-selected and RNN-selected axis alignment margins",
+    "D": "selected-axis and source-term heldout NLL benefits",
+    "E": "display-only node rank distributions for the first sorted axis-positive target-ready patient",
+    "F": "source-free early-ictal static readout margins"
+  },
+  "example_subject_internal": "epilepsiae_1084",
+  "example_selection_rule": "first sorted patient in the frozen axis-positive/target-ready intersection",
+  "gate_a": "FAIL",
+  "gate_s": "FAIL",
+  "gate_h": "FAIL",
+  "gate_x": "FAIL",
+  "dynamic_source_conditioned_rollout": "BLOCKED_MISSING_EXACT_CLINICAL_ONSET_SOURCE_METADATA",
+  "target_values_read": true,
+  "claim_scope": "bounded model closeout; does not negate the empirical A/B axis or the existing empirical interictal-to-ictal field result"
+}

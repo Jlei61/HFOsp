@@ -1,0 +1,97 @@
+{
+  "contract": "topic5_source_free_static_readout_v2_4",
+  "status": "COMPLETE",
+  "n_patients": 14,
+  "patients": [
+    "epilepsiae_1084",
+    "epilepsiae_1096",
+    "epilepsiae_1150",
+    "epilepsiae_139",
+    "epilepsiae_253",
+    "epilepsiae_384",
+    "epilepsiae_442",
+    "epilepsiae_583",
+    "epilepsiae_590",
+    "epilepsiae_620",
+    "epilepsiae_922",
+    "epilepsiae_958",
+    "yuquan_xuxinyi",
+    "yuquan_zhangkexuan"
+  ],
+  "target": "clinical-onset [0,10] s 1-150 Hz baseline-robust-z static field",
+  "readout": "patient-LOSO ridge alpha=1.0",
+  "n_perm": 5000,
+  "metrics": {
+    "gate_s_full_all_contact_margin": {
+      "n": 14,
+      "median": -0.15336134453781514,
+      "bootstrap_ci95": [
+        -0.43636363636363645,
+        0.6007589285714142
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.357421875,
+      "bh_fdr_q": 0.5203231829799182
+    },
+    "gate_h_full_over_no_history_rho": {
+      "n": 14,
+      "median": 0.0,
+      "bootstrap_ci95": [
+        -0.03571428571428581,
+        0.045616883116883056
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.5203231829799182,
+      "bh_fdr_q": 0.5203231829799182
+    },
+    "gate_x_full_over_isotropic_rho": {
+      "n": 14,
+      "median": 0.0,
+      "bootstrap_ci95": [
+        -0.014285714285714124,
+        0.024999999999999994
+      ],
+      "n_positive": 4,
+      "wilcoxon_greater_p": 0.20040708469146723,
+      "bh_fdr_q": 0.5203231829799182
+    },
+    "full_over_node_only_rho": {
+      "n": 14,
+      "median": -0.01607142857142857,
+      "bootstrap_ci95": [
+        -0.07261904761904764,
+        0.07499999999999996
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.5966168386885512
+    },
+    "empirical_over_full_rho": {
+      "n": 14,
+      "median": 0.08872549019607848,
+      "bootstrap_ci95": [
+        0.0,
+        0.3220779220779221
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.030941875526068825
+    }
+  },
+  "gate_s_source_free_static_readout": "FAIL",
+  "gate_h_history_contribution": "FAIL",
+  "gate_x_axis_contribution": "FAIL",
+  "axis_positive_target_sensitivity": {
+    "n": 5,
+    "patients": [
+      "epilepsiae_1084",
+      "epilepsiae_384",
+      "epilepsiae_583",
+      "epilepsiae_590",
+      "epilepsiae_958"
+    ],
+    "full_rho_median": -0.06764705882352941,
+    "full_all_contact_margin_median": -0.06029411764705882,
+    "inference": "descriptive_only_n5"
+  },
+  "dynamic_source_conditioned_rollout": "BLOCKED_MISSING_EXACT_CLINICAL_ONSET_SOURCE_METADATA",
+  "target_values_read": true
+}

@@ -1,0 +1,314 @@
+{
+  "contract": "topic5_axis_positive_static_transfer_closeout_v2_4",
+  "status": "COMPLETE",
+  "scientific_contract_execution": "COMPLETE_TO_FROZEN_STOP_RULES",
+  "cohorts": {
+    "physical_axis_formal": 22,
+    "axis_positive": 9,
+    "axis_reversed": 6,
+    "target_ready": 14,
+    "axis_positive_target_overlap": 5
+  },
+  "gates": {
+    "axis_positive_construct_validity": "FAIL",
+    "source_free_static_readout": "FAIL",
+    "history_contribution": "FAIL",
+    "axis_contribution": "FAIL",
+    "dynamic_source_conditioned_rollout": "BLOCKED_MISSING_EXACT_CLINICAL_ONSET_SOURCE_METADATA"
+  },
+  "formal_axis_runs": [
+    {
+      "subject": "epilepsiae_1084",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 23,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 23,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 23,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_384",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 6,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_384",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 6,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_384",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 6,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_583",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 13,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_583",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 13,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_583",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 13,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_590",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 23,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_590",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 23,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_590",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 23,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_958",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 12,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_958",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 12,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_958",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 12,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 21,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 21,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 21,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 18,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 18,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 18,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 7,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 7,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 7,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "seed": 17,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 5,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "seed": 29,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 5,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "seed": 43,
+      "device": "cpu",
+      "n_candidate_complete": 32,
+      "selected_axis_index": 5,
+      "heldout_read_after_axis_freeze": true,
+      "target_values_read": false
+    }
+  ],
+  "resource_recovery_audit": {
+    "formal_device": "cpu",
+    "quarantine_root": "results/topic5_rnn_axis_positive_static_transfer_v2_4/formal/quarantine",
+    "quarantined_gpu_mixed_candidates_excluded": true,
+    "reason": "a resource benchmark briefly resumed incomplete E958 candidates on GPU; every affected candidate directory was moved out of the formal tree and retrained from a clean CPU state before aggregation"
+  },
+  "target_chronology": {
+    "representations_frozen_before_target_read": true,
+    "target_values_read": true,
+    "dynamic_source_metadata_available": false
+  },
+  "rnn_selected_axis_static_sensitivity": "NOT_RUN_TO_PRESERVE_TARGET_BLIND_FREEZE; A1 completed after the five primary representations had been frozen and the static target had been read",
+  "code_sha256": {
+    "src/topic5_axis_positive_static_transfer_v2_4.py": "ce602fe5c335ff21727716302f09879562495ddf8a25e7422266050aed8c76c0",
+    "scripts/audit_topic5_axis_positive_static_transfer_v2_4.py": "d46615b2f7c5f1f1ff4bc2fce784a6e9be121e603c3b112547a7a4f245cfdb9c",
+    "scripts/analyze_topic5_axis_readback_stage_a0_v2_4.py": "dd5053d75dc113bec66e562ade61a1cf5940bd70a5a77923de8cdb98dbe7289d",
+    "scripts/train_topic5_rnn_candidate_axis_v2_4.py": "5248c15612c26109852131c65d5ffa5809e0a2fa377c76d991e9c369e189fc36",
+    "scripts/launch_topic5_rnn_candidate_axis_v2_4.py": "9f8d289d1541981eeb4323a919e3417140aa4d7c9491e0f73bbe42d6e9af67a8",
+    "scripts/watch_topic5_rnn_candidate_axis_v2_4.py": "17e88fd0764537f346d92e51e214a2fda2709b75998d92f6b9a29069a0ffb97f",
+    "scripts/analyze_topic5_rnn_candidate_axis_v2_4.py": "69f85566a39aabbef60ea7ef65a13de3263f1379f57107836a08d07b8c96a404",
+    "scripts/run_topic5_rnn_candidate_axis_e958_chunk_resume_v2_4.sh": "d6679c21e1b795af443739fff332df746d4db042bb0f6a0dd9e34381f5726fc9",
+    "scripts/build_topic5_rnn_rank_distributions_v2_4.py": "e6e7cfa13688ba4cd749e766b6949dba2a18f6645f827188c7a70762b2329173",
+    "scripts/finalize_topic5_rnn_rank_distributions_v2_4.py": "2609ae0fbb5dc56c430f0f6abfa5e49c6ac35a18eb7852c875060ada1101cf16",
+    "scripts/launch_topic5_rnn_rank_distributions_v2_4.py": "a09b71b4c1a51c4b8d0276426695acf6d856a2f6bfc4cf1f1c5b525db032c2b6",
+    "scripts/run_topic5_source_free_static_readout_v2_4.py": "2fa5403d4252a145cf84f02c5663a5b1e802eadb59227b682f5973cdd9f0a60f",
+    "scripts/analyze_topic5_static_readout_diagnostics_v2_4.py": "d056157828013c9ceaa203af37477a3ebce4f29d6fe58dd6cd138be7fbcc1d1e",
+    "scripts/analyze_topic5_rank_distribution_fidelity_v2_4.py": "4de21871e7e1745a87948f7ccccd18f94f36090323415ef9c899fbacee430829",
+    "scripts/paper_figures/plot_fig6_topic5_rnn_axis_static_transfer_v2_4.py": "be57129bfffca049ff74c6b22dbf102fffcb9f23b0bb6f8c243ac5de77d8a1b9",
+    "tests/test_topic5_axis_positive_static_transfer_v2_4.py": "64746ebcef49308833667445b6114ccdd5c3b3d79b3ef70c3923f8f390f7db9f"
+  },
+  "artifact_sha256": {
+    "input_audit": "2d30ef87cb2066d012cc33738bbb4d3943a9c1ba907135f38c29f9edd38bb076",
+    "stage_a0": "6f8f70852af96bd1acb51832812899b2b55f7fc7c7ba5bbe70489ba70dcb6697",
+    "stage_a1": "19e0beeaf61676a02c87cbf7461705ab3dc8fbfeb7702e7cb7df7fa4a50a0725",
+    "axis_launcher": "4819f9926a4b6a89b1bcdf353cd7c7831e7cde743f2d1b932ba77893cbca8a2b",
+    "representation_freeze": "cedcc3af03579db13982ca2577e0f92e8766212159d05e4a8e3dbdab032a9fb5",
+    "target_unlock": "7a814c9be4238d03825a5b595927f41f7a3ec45b6733f7b7749b696b31b204b2",
+    "rank_fidelity": "4ca834f4a0be8865e0a5c66fea5374b1a8732af2ebb3d57087446e04ebcc5dc6",
+    "static_readout": "9abb42e204f01e75ba1e61cf73f2a0dc653c3ef45197c59f2c12ec8edef6f1b9",
+    "static_diagnostics": "777d02a65b4f772abe88bfb8b2145ae192b93a76226230c26e1678b2e95b90d9",
+    "target_read_state": "e748636411b82dcef7c96afba7521f72a208fa1862053a718d6a4b5218eef7b8",
+    "figure_png": "17bce9b25eee3cefa470c4963e7638e16b03749e51d3ba6da25845346a2e73ba",
+    "figure_pdf": "7b34c1bd9436edd4f8e71fc7a1ea032bca40bf15e26c1a105e268c09be28769e",
+    "figure_metadata": "6cde843aaa1f9abf5fbd106a6bf1c411d53c0a828ab5bcb00523768c2b20646c",
+    "figure_readme": "4e2f7de6d797204216c919f2b648545a33cec3e047976754d3dba47e5a667ba5"
+  },
+  "tests": {
+    "command": "python -m pytest -q tests/test_topic5_axis_positive_static_transfer_v2_4.py tests/test_topic5_competitive_propagation_v2_3.py tests/test_topic5_transition_decomposition_v0_1.py",
+    "expected": "25 passed"
+  }
+}
