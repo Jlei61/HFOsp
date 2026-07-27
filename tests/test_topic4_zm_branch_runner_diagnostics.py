@@ -85,3 +85,15 @@ def test_effective_rank_runner_records_unavailable_central_pair_contract():
     assert "except ER.CentralPairUnavailable as exc:" in source
     assert "central_pair_unavailable:" in source
     assert 'manifest["probe_matrix_complete"]' in source
+
+
+def test_wait_only_finalizer_cannot_launch_an_snn_worker():
+    path = os.path.join(
+        _ROOT, "scripts", "finalize_topic4_zm_branch_when_ready.sh"
+    )
+    source = open(path, encoding="utf-8").read()
+    assert "wait_phase effective_rank" in source
+    assert "wait_phase entry_boundary" in source
+    assert "wait_phase offset_boundary" in source
+    assert "python scripts/run_topic4_zm_branch_decision.py \\\n" not in source
+    assert "P0:" in source
