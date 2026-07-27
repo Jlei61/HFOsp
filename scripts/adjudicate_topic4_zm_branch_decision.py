@@ -221,8 +221,9 @@ def main():
     print(f"layers: {json.dumps(out['layers'], indent=2)}")
     print(f"eligible seeds: {eligible}; fork rows: {len(rows)}; nbh rows: {len(nb_rows)}")
     if coverage:
-        print(f"coverage: {coverage['n_cells_run']}/{coverage['n_cells_planned']} cells "
-              f"({coverage['n_not_run']} not run)")
+        print(f"coverage: {coverage['n_cells_planned_run']}/"
+              f"{coverage['n_cells_planned']} planned cells "
+              f"({coverage['n_cells_extra']} extra; {coverage['n_not_run']} planned not run)")
     for arm, v in sorted(per_arm.items()):
         print(f"  {arm:16s} {v['status']:28s} positives={v['positive_cells']} "
               f"seeds={v['seeds']} phases={v['phases']}")

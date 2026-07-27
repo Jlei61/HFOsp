@@ -112,6 +112,13 @@ def carrier_window(cells, min_seeds=2, min_phases=2):
 def coverage_report(cells, planned):
     """What was actually run vs what the contract asks for -- never left implicit."""
     got = {(k[0], k[1], k[2], k[3]) for k in cells}
+    planned_cells = {
+        (s, b, p, a)
+        for s in planned.get("seeds", [])
+        for b in planned.get("bins", [])
+        for p in planned.get("phases", [])
+        for a in planned.get("arms", [])
+    }
     seeds = sorted({k[0] for k in got})
     bins = sorted({k[1] for k in got})
     phases = sorted({k[2] for k in got})
@@ -123,11 +130,14 @@ def coverage_report(cells, planned):
                 for a in planned.get("arms", []):
                     if (s, b, p, a) not in got:
                         missing.append(dict(seed=s, bin_name=b, fast_phase=p, arm=a))
+    planned_run = got & planned_cells
+    extras = got - planned_cells
     return dict(seeds_run=seeds, bins_run=bins, phases_run=phases, arms_run=arms,
-                n_cells_run=len(got), n_cells_planned=(len(planned.get("seeds", [])) *
-                                                       len(planned.get("bins", [])) *
-                                                       len(planned.get("phases", [])) *
-                                                       len(planned.get("arms", []))),
+                n_cells_run=len(got), n_cells_planned_run=len(planned_run),
+                n_cells_extra=len(extras),
+                extra_cells=[dict(seed=s, bin_name=b, fast_phase=p, arm=a)
+                             for s, b, p, a in sorted(extras)[:200]],
+                n_cells_planned=len(planned_cells),
                 not_run=missing[:200], n_not_run=len(missing))
 
 
@@ -272,7 +282,9 @@ def adjudicate(*, state_inventory_ok, exact_resume_ok, eligible_seeds, cells, pe
             isolated=sorted(isolated),
             reason=(
                 "the declared discovery fork ladder is incomplete "
-                f"({coverage.get('n_cells_run', 0)}/{coverage.get('n_cells_planned', 0)} cells); "
+                f"({coverage.get('n_cells_planned_run', 0)}/"
+                f"{coverage.get('n_cells_planned', 0)} planned cells; "
+                f"{coverage.get('n_cells_extra', 0)} extra cells); "
                 "partial negatives cannot be promoted to a visited-state verdict"
             ),
         )

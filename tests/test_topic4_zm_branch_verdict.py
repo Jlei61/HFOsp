@@ -205,7 +205,22 @@ def test_coverage_report_names_what_was_not_run():
     cov = BV.coverage_report(_cells(rows), dict(seeds=[1, 3, 4], bins=list(BINS),
                                                 phases=list(PHASES), arms=["freeze_all"]))
     assert cov["n_cells_run"] == 1 and cov["n_cells_planned"] == 18
+    assert cov["n_cells_planned_run"] == 1 and cov["n_cells_extra"] == 0
     assert cov["n_not_run"] == 17 and cov["not_run"]
+
+
+def test_coverage_keeps_extra_cells_out_of_the_planned_fraction():
+    rows = _rows([1], {"freeze_all": False}, bins=("bounded_mid",), phases=("peak",))
+    rows += _rows([1], {"freeze_all": True}, bins=("bounded_early",), phases=("rising",))
+    cov = BV.coverage_report(
+        _cells(rows),
+        dict(seeds=[1, 3], bins=["bounded_mid"], phases=["peak"], arms=["freeze_all"]),
+    )
+    assert cov["n_cells_run"] == 2
+    assert cov["n_cells_planned_run"] == 1
+    assert cov["n_cells_planned"] == 2
+    assert cov["n_cells_extra"] == 1
+    assert cov["n_not_run"] == 1
 
 
 def test_control_arms_are_flagged_and_do_not_create_a_carrier_claim():
