@@ -437,6 +437,74 @@ def fig_confirmation_morphology():
     return path
 
 
+# ============================================================ Fig 4c: fine E/I source rhythm
+def fig_source_rhythm():
+    manifests = sorted(glob.glob(os.path.join(
+        OUT, "source_rhythm", "*", "seed*", "source_rhythm.json"
+    )))
+    if not manifests:
+        return None
+    fig, axes = plt.subplots(
+        len(manifests), 3, figsize=(13.5, 3.0 * len(manifests)), squeeze=False
+    )
+    for i, p in enumerate(manifests):
+        man = _load(p, {})
+        metrics = man.get("source_rhythm") or {}
+        z = np.load(os.path.join(_ROOT, man["fields_path"]))
+        bin_ms = float(z["bin_ms"])
+        burn = int(round(float(z["burn_in_ms"]) / bin_ms))
+        E = np.asarray(z["E_rate_grid"], float)[burn:]
+        I = np.asarray(z["I_rate_grid"], float)[burn:]
+        gE = np.asarray(z["global_E_rate_hz"], float)[burn:]
+        gI = np.asarray(z["global_I_rate_hz"], float)[burn:]
+        t = np.arange(gE.size) * bin_ms / 1000.0
+        show = t <= min(0.75, t[-1])
+
+        ax = axes[i, 0]
+        ax.plot(t[show], gE[show], color="#D1495B", lw=0.8, label="global E")
+        ax.plot(t[show], gI[show], color="#00798C", lw=0.8, label="global I")
+        ax.legend(fontsize=7, frameon=False, ncol=2)
+        _style(
+            ax,
+            f"seed {man['seed']} · {man['resolution']} · "
+            f"{metrics.get('source_temporal_class', 'unclassified')}\n"
+            f"f0={metrics.get('dominant_frequency_median_hz', float('nan')):.1f} Hz, "
+            f"local agreement={metrics.get('local_frequency_agreement', float('nan')):.2f}",
+            xlabel="time after burn-in (s)", ylabel="rate (Hz)",
+        )
+
+        # Complex Fourier coefficient at the locally dominant frequency.
+        f0 = float(metrics.get("dominant_frequency_median_hz", np.nan))
+        x = E - np.mean(E, axis=0, keepdims=True)
+        freq = np.fft.rfftfreq(x.shape[0], d=bin_ms * 1e-3)
+        idx = int(np.argmin(np.abs(freq - f0))) if np.isfinite(f0) else 0
+        coef = np.fft.rfft(x, axis=0)[idx]
+        amplitude = np.abs(coef) / max(1, x.shape[0])
+        phase = np.angle(coef)
+
+        ax = axes[i, 1]
+        im = ax.imshow(amplitude, origin="lower", cmap="magma", interpolation="nearest")
+        fig.colorbar(im, ax=ax, fraction=0.046, label="rate amplitude")
+        _style(ax, f"local amplitude at {freq[idx]:.1f} Hz",
+               xlabel="grid x", ylabel="grid y")
+
+        ax = axes[i, 2]
+        im = ax.imshow(phase, origin="lower", cmap="twilight", vmin=-np.pi, vmax=np.pi,
+                       interpolation="nearest")
+        cb = fig.colorbar(im, ax=ax, fraction=0.046, ticks=[-np.pi, 0, np.pi])
+        cb.ax.set_yticklabels(["-π", "0", "π"])
+        _style(
+            ax,
+            f"local phase · PLV={metrics.get('local_phase_locking', float('nan')):.2f}",
+            xlabel="grid x", ylabel="grid y",
+        )
+    fig.tight_layout()
+    path = os.path.join(FIG, "fine_source_rhythm_and_phase_map.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return path
+
+
 # ============================================================ Fig 5: readout impostor separation
 def fig_impostors():
     import src.topic4_zm_empirical_carrier as EC
@@ -520,6 +588,9 @@ def fig_phase_status(made):
         fork_status = ("complete" if n_cells_planned and n_cells_run >= n_cells_planned
                        else "in progress" if n_cells_run else "not started")
     n_neighbourhood = int(v.get("n_neighbourhood_rows", 0))
+    n_source_rhythm = len(glob.glob(os.path.join(
+        OUT, "source_rhythm", "*", "seed*", "source_rhythm.json"
+    )))
     neighbourhood = v.get("neighbourhood") or {}
     neighbourhood_status = (
         "complete" if neighbourhood.get("evidence_complete") is True
@@ -549,6 +620,9 @@ def fig_phase_status(made):
         ("1A anchors", "complete" if len(v.get("eligible_seeds", [])) >= 3 else "in progress"),
         ("1B minimal-subsystem forks", fork_status),
         ("1B 20 s + native dt/2 confirm", confirmation_label),
+        ("1.5 carrier-type source audit",
+         "complete" if n_source_rhythm >= 2 else
+         "in progress" if n_source_rhythm else "conditional / not authorized"),
         ("1C neighbourhood audit", neighbourhood_status),
         ("1.5A functional rank", "conditional / not authorized"),
         ("1.5B modal / gain", "conditional / not authorized"),
@@ -620,6 +694,12 @@ FIGURE_NOTES = {
         "即使 source-space stationarity 通过，也要检查空间范围、传播/相位结构和触点"
         "能量；全场 tonic fixed point 不能表述成有界 ictal oscillation。"
     ),
+    "fine_source_rhythm_and_phase_map.png": (
+        "展示 confirmation 通过后，从同一自然 snapshot 得到的 2 ms E/I source-rate field。"
+        "左图是全局 E/I，中央和右侧分别是主频局部振幅与相位。",
+        "判断高频成分是全局同步、局部相位错开还是不规则活动；该图只负责 operator 路由，"
+        "不等于 observation-space 或 ictal lifecycle 验收。"
+    ),
     "readout_impostor_discrimination.png": (
         "展示合成 broadband carrier、尖锐谐波 pulse train 与全局固定振荡器在"
         " readout 指标上的可分性。这是 observation gate 的 synthetic sanity check。",
@@ -661,7 +741,8 @@ def main():
     made = []
     failures = []
     for fn in (fig_phase0, fig_anchors, fig_carrier_matrix, fig_dynamics,
-               fig_confirmation_morphology, fig_impostors, fig_neighbourhood):
+               fig_confirmation_morphology, fig_source_rhythm, fig_impostors,
+               fig_neighbourhood):
         try:
             p = fn()
         except Exception as e:                                # pragma: no cover - figure only
