@@ -262,6 +262,15 @@ def main():
     for seed, manifest in manifests.items():
         if manifest.get("complete") is not True:
             raise RuntimeError(f"seed {seed}: entry merge ended incomplete")
+    R.write_json_atomic(
+        os.path.join(R.OUT, "boundaries", "entry", "entry_shards_complete.json"),
+        {
+            "complete": True,
+            "seeds": list(SEEDS),
+            "max_snn": int(args.max_snn),
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%S"),
+        },
+    )
     _restart_finalizer()
     _log("entry shards complete")
 
