@@ -13,6 +13,7 @@ from src.topic4_zm_modal_operator import (
     project_ei_grid,
     route_source_temporal_class,
     route_operator_tool,
+    spatial_basis_diagnostics,
 )
 
 
@@ -27,6 +28,7 @@ def test_equal_energy_spatial_perturbations_are_distinct_and_matched():
         assert abs(np.mean(value)) < 1e-12
     assert abs(np.dot(flattened["axial"], flattened["transverse"])) < 1e-8
     assert not np.allclose(flattened["core"], flattened["isotropic"])
+    assert spatial_basis_diagnostics(modes)["well_conditioned"]
 
 
 def test_carrier_type_routes_to_valid_tool_and_periodic_mean_jacobian_is_forbidden():
@@ -167,3 +169,7 @@ def test_grid_projection_uses_dual_basis_when_modes_are_not_orthogonal():
     I = -0.2 * modes["a"] + 0.9 * modes["b"]
     out = project_ei_grid(E, I, modes, mode_order=("a", "b"))
     assert np.allclose(out["coordinates"], [1.7, -0.4, -0.2, 0.9])
+
+    bad = {"a": modes["a"], "b": modes["a"] + 1e-9 * modes["b"]}
+    with pytest.raises(ValueError, match="ill-conditioned"):
+        project_ei_grid(E, I, bad, mode_order=("a", "b"))
