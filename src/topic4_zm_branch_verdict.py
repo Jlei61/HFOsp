@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 
-VERDICT_VERSION = "zm_branch_verdict_v1.2_2026-07-27_fail_closed_confirmation"
+VERDICT_VERSION = "zm_branch_verdict_v1.3_2026-07-27_no_direct_actuator"
 
 VERDICTS = (
     "blocked_state_inventory",
@@ -315,12 +315,22 @@ def adjudicate(*, state_inventory_ok, exact_resume_ok, eligible_seeds, cells, pe
 
 def apply_observation_status(result, reference_lock):
     """A source-only result keeps `observation_layer_blocked` visible at the top level and can never
-    authorize an actuator (spec §4.5 / §11)."""
+    authorize an actuator (spec §4.5 / §11).
+
+    Task 12 is an offline driver-selection step.  Even with a complete
+    observation reference, ``phase3_driver_selection_required`` means that
+    selection has not happened yet; if one driver later passes, the locked
+    plan still requires a new actuator spec.  Therefore this branch-decision
+    workflow never directly authorizes implementation.
+    """
     blocked = not (reference_lock or {}).get("sufficient_reference_sample", False)
     result = dict(result)
     result["observation_layer_blocked"] = bool(blocked)
-    result["actuator_authorized"] = bool(
-        (not blocked) and result.get("verdict") == "phase3_driver_selection_required")
+    result["actuator_authorized"] = False
+    result["actuator_authorization_reason"] = (
+        "requires a passing offline driver selection and a separately approved "
+        "actuator specification"
+    )
     return result
 
 

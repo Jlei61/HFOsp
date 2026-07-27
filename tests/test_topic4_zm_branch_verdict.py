@@ -200,6 +200,16 @@ def test_source_only_carrier_never_authorizes_an_actuator():
     assert tagged["actuator_authorized"] is False
 
 
+def test_phase3_required_never_pre_authorizes_actuator_even_with_reference():
+    tagged = BV.apply_observation_status(
+        {"verdict": "phase3_driver_selection_required"},
+        reference_lock={"sufficient_reference_sample": True},
+    )
+    assert tagged["observation_layer_blocked"] is False
+    assert tagged["actuator_authorized"] is False
+    assert "separately approved" in tagged["actuator_authorization_reason"]
+
+
 def test_coverage_report_names_what_was_not_run():
     rows = _rows([1], {"freeze_all": False}, bins=("bounded_mid",), phases=("peak",))
     cov = BV.coverage_report(_cells(rows), dict(seeds=[1, 3, 4], bins=list(BINS),
