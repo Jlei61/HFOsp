@@ -29,16 +29,24 @@ def test_bin_spikes_to_grid_preserves_population_rate_and_ei_shapes():
 def test_source_rhythm_gate_is_fail_closed_until_native_confirmation_passes():
     assert not source_rhythm_authorized({})
     assert not source_rhythm_authorized({
+        "verdict": "no_evidence",
         "confirmation": {"status": "pending"},
         "layers": {"source_space_carrier": "provisional_carrier_window"},
     })
     assert not source_rhythm_authorized({
+        "verdict": "no_evidence",
         "confirmation": {"status": "passed"},
         "layers": {"source_space_carrier": "provisional_carrier_window"},
     })
-    assert source_rhythm_authorized({
+    assert not source_rhythm_authorized({
+        "verdict": "no_evidence",
         "confirmation": {"status": "passed"},
-        "layers": {"source_space_carrier": "source_space_carrier"},
+        "layers": {"source_space_carrier": "carrier_window"},
+    })
+    assert source_rhythm_authorized({
+        "verdict": "carrier_at_visited_states",
+        "confirmation": {"status": "passed"},
+        "layers": {"source_space_carrier": "carrier_window"},
     })
 
 

@@ -25,8 +25,9 @@ def source_rhythm_authorized(verdict):
     confirmation = (verdict or {}).get("confirmation") or {}
     layers = (verdict or {}).get("layers") or {}
     return bool(
-        confirmation.get("status") == "passed"
-        and layers.get("source_space_carrier") == "source_space_carrier"
+        (verdict or {}).get("verdict") == "carrier_at_visited_states"
+        and confirmation.get("status") == "passed"
+        and layers.get("source_space_carrier") == "carrier_window"
     )
 
 
