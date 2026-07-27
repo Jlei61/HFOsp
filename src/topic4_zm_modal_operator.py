@@ -156,10 +156,11 @@ def apply_voltage_perturbation(
     *,
     L,
     population,
-    rms_amplitude_mv,
+    rms_amplitude_mv=None,
+    total_energy_mv2=None,
     sign,
 ):
-    """Map a grid mode to E or I membrane voltage with matched neuron RMS."""
+    """Map a grid mode to E/I voltage with explicit RMS or total energy."""
 
     field = np.asarray(field, dtype=float)
     posE = np.asarray(posE, dtype=float)
@@ -170,10 +171,20 @@ def apply_voltage_perturbation(
         raise ValueError("population must be E or I")
     if int(sign) not in {-1, 1}:
         raise ValueError("sign must be -1 or +1")
-    amplitude = float(rms_amplitude_mv)
-    if not np.isfinite(amplitude) or amplitude <= 0:
-        raise ValueError("rms_amplitude_mv must be finite and positive")
     positions = posE if population == "E" else posI
+    if (rms_amplitude_mv is None) == (total_energy_mv2 is None):
+        raise ValueError(
+            "provide exactly one of rms_amplitude_mv or total_energy_mv2"
+        )
+    if total_energy_mv2 is not None:
+        energy = float(total_energy_mv2)
+        if not np.isfinite(energy) or energy <= 0:
+            raise ValueError("total_energy_mv2 must be finite and positive")
+        amplitude = float(np.sqrt(energy / len(positions)))
+    else:
+        amplitude = float(rms_amplitude_mv)
+        if not np.isfinite(amplitude) or amplitude <= 0:
+            raise ValueError("rms_amplitude_mv must be finite and positive")
     n_grid = field.shape[0]
     ix = np.clip((positions[:, 0] / float(L) * n_grid).astype(int), 0, n_grid - 1)
     iy = np.clip((positions[:, 1] / float(L) * n_grid).astype(int), 0, n_grid - 1)

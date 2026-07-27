@@ -118,6 +118,19 @@ def test_voltage_probe_has_matched_rms_and_touches_only_selected_population():
     assert np.allclose(out["V"][:4] - state["V"][:4], delta)
     assert np.array_equal(out["V"][4:], state["V"][4:])
 
+    e_state, e_delta = apply_voltage_perturbation(
+        state, field, posE, posI, L=1.0, population="E",
+        total_energy_mv2=0.8, sign=1,
+    )
+    i_state, i_delta = apply_voltage_perturbation(
+        state, field, posE, posI, L=1.0, population="I",
+        total_energy_mv2=0.8, sign=1,
+    )
+    assert np.isclose(np.sum(e_delta ** 2), 0.8)
+    assert np.isclose(np.sum(i_delta ** 2), 0.8)
+    assert np.sqrt(np.mean(i_delta ** 2)) > np.sqrt(np.mean(e_delta ** 2))
+    assert not np.array_equal(e_state["V"], i_state["V"])
+
 
 def test_central_pairs_recover_finite_time_propagator_and_require_matched_noise():
     truth = np.array([[0.8, 0.2], [-0.1, 0.6]])
