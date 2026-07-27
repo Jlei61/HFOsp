@@ -210,6 +210,70 @@ def test_phase3_required_never_pre_authorizes_actuator_even_with_reference():
     assert "separately approved" in tagged["actuator_authorization_reason"]
 
 
+def _carrier_result_for_offset():
+    return {
+        "verdict": "carrier_at_visited_states",
+        "layers": {
+            "offset": "not_established",
+            "recovery_lifecycle": "not_established",
+        },
+        "reason": "carrier",
+    }
+
+
+def test_offset_routing_reached_does_not_overclaim_lifecycle():
+    routed = BV.apply_offset_status(
+        _carrier_result_for_offset(),
+        {
+            "verdict": "M_SG_joint_offset_reached",
+            "n_complete_seeds": 2,
+        },
+    )
+    assert routed["verdict"] == "carrier_at_visited_states"
+    assert routed["layers"]["offset"] == "M_SG_joint_offset_reached"
+    assert routed["layers"]["recovery_lifecycle"] == "not_established"
+    assert "not established" in routed["reason"]
+
+
+def test_offset_routing_near_boundary_goes_only_to_M_calibration():
+    routed = BV.apply_offset_status(
+        _carrier_result_for_offset(),
+        {
+            "verdict": "M_boundary_near_but_unreached",
+            "n_complete_seeds": 2,
+        },
+    )
+    assert routed["verdict"] == "branch_M_calibration"
+    assert routed["layers"]["offset"] == "M_boundary_near_but_unreached"
+
+
+def test_offset_routing_no_surface_requires_phase3_but_not_actuator():
+    routed = BV.apply_offset_status(
+        _carrier_result_for_offset(),
+        {
+            "verdict": "M_shapes_but_no_offset_surface",
+            "n_complete_seeds": 2,
+        },
+    )
+    tagged = BV.apply_observation_status(
+        routed, {"sufficient_reference_sample": True}
+    )
+    assert tagged["verdict"] == "phase3_driver_selection_required"
+    assert tagged["actuator_authorized"] is False
+
+
+def test_offset_routing_static_unreached_boundary_fails_closed():
+    routed = BV.apply_offset_status(
+        _carrier_result_for_offset(),
+        {
+            "verdict": "M_Z_recovery_boundary_exists_but_unreached",
+            "n_complete_seeds": 2,
+        },
+    )
+    assert routed["verdict"] == "carrier_at_visited_states"
+    assert "no calibration" in routed["reason"]
+
+
 def test_coverage_report_names_what_was_not_run():
     rows = _rows([1], {"freeze_all": False}, bins=("bounded_mid",), phases=("peak",))
     cov = BV.coverage_report(_cells(rows), dict(seeds=[1, 3, 4], bins=list(BINS),

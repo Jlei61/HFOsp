@@ -207,12 +207,7 @@ def main():
     offset_summary = load_json(os.path.join(
         OUT, "boundaries", "offset", "offset_boundary_summary.json"
     ))
-    if offset_summary and result["verdict"] == "carrier_at_visited_states":
-        offset_verdict = offset_summary.get("verdict")
-        if offset_verdict and offset_verdict != "no_evidence":
-            result["layers"]["offset"] = offset_verdict
-        elif int(offset_summary.get("n_complete_seeds", 0)) >= 2:
-            result["layers"]["offset"] = "existing_coordinate_offset_unresolved"
+    result = BV.apply_offset_status(result, offset_summary)
 
     out = dict(
         version=BV.VERDICT_VERSION, timestamp=time.strftime("%Y-%m-%dT%H:%M:%S"),

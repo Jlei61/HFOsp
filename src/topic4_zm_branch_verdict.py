@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 
-VERDICT_VERSION = "zm_branch_verdict_v1.3_2026-07-27_no_direct_actuator"
+VERDICT_VERSION = "zm_branch_verdict_v1.4_2026-07-28_offset_routing"
 
 VERDICTS = (
     "blocked_state_inventory",
@@ -35,6 +35,16 @@ POSITIVE = ("stable_carrier", "metastable_carrier")
 CENTRAL_CONFIRMATION_STATE = ("bounded_mid", "peak")
 LONG_CONFIRMATION_MS = 20_000.0
 DT2_CONFIRMATION_MS = 8_000.0
+OFFSET_REACHED = {
+    "M_sufficient_and_reached",
+    "M_SG_joint_offset_reached",
+    "M_Z_recovery_offset_reached",
+}
+OFFSET_PHASE3 = {
+    "M_boundary_far_unreached",
+    "M_is_carrier_component",
+    "M_shapes_but_no_offset_surface",
+}
 
 
 def _group(rows, keys):
@@ -332,6 +342,55 @@ def apply_observation_status(result, reference_lock):
         "actuator specification"
     )
     return result
+
+
+def apply_offset_status(result, offset_summary):
+    """Route a completed Phase-2B result without inventing lifecycle recovery.
+
+    A reached carrier-exit boundary remains an offset-layer result because
+    returning interictal events have not been demonstrated.  A narrowly
+    unreached boundary routes to the pre-registered M-calibration branch.
+    Phase 3 is authorized only for the explicit no-usable-offset outcomes.
+    Ambiguous/static-only outcomes remain at the carrier verdict.
+    """
+
+    out = dict(result)
+    out["layers"] = dict(result.get("layers") or {})
+    if (
+        out.get("verdict") != "carrier_at_visited_states"
+        or not offset_summary
+        or int(offset_summary.get("n_complete_seeds", 0)) < 2
+    ):
+        return out
+    offset_verdict = offset_summary.get("verdict")
+    if not offset_verdict or offset_verdict == "no_evidence":
+        out["layers"]["offset"] = "existing_coordinate_offset_unresolved"
+        return out
+
+    out["layers"]["offset"] = offset_verdict
+    if offset_verdict == "M_boundary_near_but_unreached":
+        out["verdict"] = "branch_M_calibration"
+        out["reason"] = (
+            "a registered existing-coordinate offset boundary is narrowly "
+            "outside the observed range; only a later M-calibration spec is allowed"
+        )
+    elif offset_verdict in OFFSET_PHASE3:
+        out["verdict"] = "phase3_driver_selection_required"
+        out["reason"] = (
+            "a confirmed carrier exists, but every valid existing slow-coordinate "
+            "family lacks a usable offset; matched offline driver selection is required"
+        )
+    elif offset_verdict in OFFSET_REACHED:
+        out["reason"] = (
+            "a confirmed carrier and an existing-coordinate offset boundary are "
+            "present, but returning-event recovery and a lifecycle are not established"
+        )
+    else:
+        out["reason"] = (
+            "the existing-coordinate offset audit is incomplete or dynamically "
+            "unreached; no calibration, Phase-3, or lifecycle branch is authorized"
+        )
+    return out
 
 
 def summarize_cells(cells):
