@@ -1,0 +1,60 @@
+{
+  "contract": "topic5_axis_readback_stage_a0_v2_4",
+  "status": "COMPLETE",
+  "interpretation": "transition-selected axis construct read-back; not RNN axis discovery",
+  "n_axis_positive": 9,
+  "n_reversed": 6,
+  "metrics": {
+    "alignment_margin": {
+      "n": 9,
+      "median": 0.3000792257111826,
+      "bootstrap_ci95": [
+        -0.14144548509545707,
+        0.45629728179346396
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.1796875
+    },
+    "axis_no_source_over_isotropic_benefit": {
+      "n": 9,
+      "median": -6.84953824283685e-05,
+      "bootstrap_ci95": [
+        -0.0003494620232336043,
+        0.0008970449061997954
+      ],
+      "n_positive": 4,
+      "wilcoxon_greater_p": 0.5
+    },
+    "axis_full_over_isotropic_benefit": {
+      "n": 9,
+      "median": 0.00010320079772663249,
+      "bootstrap_ci95": [
+        -0.0013027003343437649,
+        0.002252119791701368
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.326171875
+    },
+    "source_over_no_source_benefit": {
+      "n": 9,
+      "median": 3.058925727028594e-05,
+      "bootstrap_ci95": [
+        -0.0009532383111101606,
+        0.0006389367259256318
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.544921875
+    },
+    "reversed_source_over_no_source_benefit": {
+      "n": 6,
+      "median": 3.0635270341417e-05,
+      "bootstrap_ci95": [
+        -0.0005706195338287534,
+        0.0012174720191461263
+      ],
+      "n_positive": 4,
+      "wilcoxon_greater_p": 0.421875
+    }
+  },
+  "target_values_read": false
+}

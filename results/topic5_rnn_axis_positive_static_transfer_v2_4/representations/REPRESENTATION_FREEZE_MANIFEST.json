@@ -1,0 +1,235 @@
+{
+  "contract": "topic5_rnn_rank_distribution_freeze_v2_4",
+  "status": "FROZEN_INTERICTAL_REPRESENTATIONS",
+  "n_subjects": 14,
+  "subjects": [
+    "epilepsiae_1084",
+    "epilepsiae_1096",
+    "epilepsiae_1150",
+    "epilepsiae_139",
+    "epilepsiae_253",
+    "epilepsiae_384",
+    "epilepsiae_442",
+    "epilepsiae_583",
+    "epilepsiae_590",
+    "epilepsiae_620",
+    "epilepsiae_922",
+    "epilepsiae_958",
+    "yuquan_xuxinyi",
+    "yuquan_zhangkexuan"
+  ],
+  "seeds": [
+    17,
+    29,
+    43
+  ],
+  "n_rollouts_per_seed": 5000,
+  "representation_arrays": [
+    "full_fixed_axis",
+    "no_history",
+    "local_isotropic",
+    "node_only",
+    "empirical_train80"
+  ],
+  "aggregation": "patient_contact_feature_median_across_model_seeds_then_simplex_closure",
+  "rows": [
+    {
+      "subject": "epilepsiae_1084",
+      "n_contacts": 11,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_1084.npz",
+      "output_sha256": "9a06ba2993e1ffa1b352d912862d5d19a4c3cce4232812374cef5e46c816c31d",
+      "seed_outputs_sha256": {
+        "17": "219612f4c2671906322edea0111b5d13f1c554229f54e3c1135ad5393f8f40be",
+        "29": "14f3b67aa5f81c301af37310ce213ff74c8fd0b8caeedcabaacd973a2e8ad3a0",
+        "43": "556a6ea731b66afbb7f7dddab266e7b3c476e995dfb71781f92c0397eb617d27"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "n_contacts": 7,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_1096.npz",
+      "output_sha256": "16764432fa45149874d6049785f5f4f4de169d3e6a711f01ad0bd9f4202c4313",
+      "seed_outputs_sha256": {
+        "17": "4c6ce8a8dba032a56ef24c4483665ed33629c7d049e9584d830c7837047c83a0",
+        "29": "15624aef34ab89908f856a87cf73b17de229a78f5d700319e1b5d133a9d35bac",
+        "43": "c98d86d34682abf67ae4d313d422ffc0ce009f7f531401c976147e0fcf4bfe30"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "n_contacts": 9,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_1150.npz",
+      "output_sha256": "18e9f976df3ae8ff92b39a40f17578a336c15e1133810a2d4bd723cf58dacff1",
+      "seed_outputs_sha256": {
+        "17": "6eb2c5e507edb8e5ad412e49766a059d24ef69b92fb837c4fa151d28d4a1ef8f",
+        "29": "93895e2528c74de24a51314009e93a00031cccd3792388ac17766ff7fcd385c7",
+        "43": "31f1be8b475077d53c79839adddc8b59eb56039106e41b0feabd3878a68ea042"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_139",
+      "n_contacts": 7,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_139.npz",
+      "output_sha256": "406f51c37c93fad976de636a9289cafe45c70965f35895ebdaf98db9db72d146",
+      "seed_outputs_sha256": {
+        "17": "f353b5b2cadc5ebdeaf712ab6281e11af319037990217de174aaf0c738e1509b",
+        "29": "9f9f8e2588392c4cf35763a1b4f0dc5f70e17a79f4bb14ea8f05b3e017ba1d11",
+        "43": "f7cee3f677b50473fb4a12ce9050fbd01b8fc632277f92b42e063f212a5063fe"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_253",
+      "n_contacts": 8,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_253.npz",
+      "output_sha256": "6fcd74a919d4dff04a89d5cd092e74adecef6fe9e5b7ed163acdae1513a05e7b",
+      "seed_outputs_sha256": {
+        "17": "bbde3c6f95a8228840194a4f9f28917ae9ad2ce43d129dcc703c0d18136bd4c5",
+        "29": "613490428b7f43869ce97571c5f3d51cad36120958fb581503035e7665246dd4",
+        "43": "e0e1090c7e32faf6c37b155b6597d8c0190b7cdb0155c312f3b2f18676fa7808"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_384",
+      "n_contacts": 9,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_384.npz",
+      "output_sha256": "71444bb7d622741450e371dd619b758fbfe8e33c1721a06b935dd9d291ea1149",
+      "seed_outputs_sha256": {
+        "17": "bfd8f8824408df669677c2cab5040c745180f98c68729db79ba00d75f3f11005",
+        "29": "d4473cb0233472b959c7023661d9dcea0ffdcaf44f17e1d0d26ac0db461d2104",
+        "43": "e34e1db29cd8c86570c49e420591745d56d98c2a5d528d0295920960f02311aa"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_442",
+      "n_contacts": 15,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_442.npz",
+      "output_sha256": "85f6d480d2407c597c27d049f8b7ce0fe61f0cbcb85f3e8ba8c210060687e632",
+      "seed_outputs_sha256": {
+        "17": "59ea24968bf0189541cdf050687dee67b9f0bdfeb9a269ba8d4813e0c3ce2efe",
+        "29": "6f7971f7c73c92c7968a7249ea78215cec90442d09498b3833d3513f722ce2da",
+        "43": "bce1c38b8bdb5b1b464438aa5b8b1ab00630929a0067d83c6aa8eada17a29b8b"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_583",
+      "n_contacts": 7,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_583.npz",
+      "output_sha256": "631ed978ee387f3818717c0877bed2270b291192006a5d5b6181044082f4f6ee",
+      "seed_outputs_sha256": {
+        "17": "0d31fcd0b8a5e14f9067afb2d23739d653d5b71c96f0b5edba4db7e281bdab33",
+        "29": "f04df6da25c77ffd921e5bed367f0833478cb9a4f9d14d56ab07f9d1a298d3c6",
+        "43": "468f1a02c10bd33a45025ce7f89fb9ba48ccde3b0bec3e0f82489ac4e1d9ac11"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_590",
+      "n_contacts": 16,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_590.npz",
+      "output_sha256": "a8a25c5cee2066f77023689af534691d24a1b9897dcf8150d420298bd3321ef6",
+      "seed_outputs_sha256": {
+        "17": "8a95d3c8b6862adb31664cf4575e3291904ed135426494b502939cd8ca63c992",
+        "29": "e88f2370e9a9ec65e80c0f31b13d489235ecad6d5374cf0637d93d42ef8a8b0b",
+        "43": "1983a502acc115a429f9bc30cac6af87ff48634679b2ee84817e619333dc350d"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_620",
+      "n_contacts": 9,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_620.npz",
+      "output_sha256": "2be69d885479ce4793ee08a404a31bd25e57e54548daf49a6ebd6e61f8a8a700",
+      "seed_outputs_sha256": {
+        "17": "7ca879572390e3b3e29144c12d924798f315ca3ef69e65a7c1b5b35ca28f944c",
+        "29": "e5bc3360320de62c266b30e6fe886a33529972a5fe88504e83b8e9fd7bca760f",
+        "43": "970e99d4f4e395f226b2fdfca94fdf6d6a885e0977db686687bed87e6f79bc2e"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_922",
+      "n_contacts": 8,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_922.npz",
+      "output_sha256": "d4378bbd52a224aa9b8c6fb5ae1db7fa8bc6bb4d60fa39d824368030ecdaad47",
+      "seed_outputs_sha256": {
+        "17": "c295ec9d17e8289370d5f086a6fca8b38ed07ecb10fe28dc267719054fbfe2a2",
+        "29": "8776be91857b938397cfdf00362602e107ba3ba5085b8424c527e6517849c3aa",
+        "43": "63d294d16bfd615199452478eb71b04ec0d79ce5faeb2cdf875e7468f4100745"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "epilepsiae_958",
+      "n_contacts": 16,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/epilepsiae_958.npz",
+      "output_sha256": "9f5f431d552beceb525678d7b1de7a21aa494ca5b3742d386ced3621a8545a84",
+      "seed_outputs_sha256": {
+        "17": "678de0c0f55510503e7f5e9b842397c244fe57dc287a5ed6d01f60b1cd947a1f",
+        "29": "723dbd8485aa6a5218749abcdd1bb62a742949c159b28a558287f207e66a6142",
+        "43": "757e3e70b58349fc82a89c6c03bd0ec2e5167dcfc5272b556d8a029499501c6a"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "n_contacts": 15,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/yuquan_xuxinyi.npz",
+      "output_sha256": "50b921c8414b1baa5e3ebc7f0a840c6e115602df50ed0a606fbdb38c488c446e",
+      "seed_outputs_sha256": {
+        "17": "25c5b836e11b820cf814e97f6ce404602c119d588d7e337ba88d097e8aba4be1",
+        "29": "a9b0c1ea297eeba558cc7df424825f1b567f7200ab1dccca67f1fc10b868d658",
+        "43": "10bceb2d424d18a267d4121179abe8a8df5e1282ee93a66a95ad4b893f2342a7"
+      },
+      "target_values_read": false
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "n_contacts": 26,
+      "n_seeds": 3,
+      "n_rollouts_per_seed": 5000,
+      "output": "results/topic5_rnn_axis_positive_static_transfer_v2_4/representations/per_subject/yuquan_zhangkexuan.npz",
+      "output_sha256": "df5aadebdbd93071300c5bd7efa8820aea9cf86088fa757bb48bd445fa908992",
+      "seed_outputs_sha256": {
+        "17": "21a4cca74232077952995249802ff020dc6783e1615c210e0861b38b39d1814e",
+        "29": "37d8719dcfb2d8fbbebf22881b3417ee99085071caa0f854c4b75180adcd5715",
+        "43": "9530da65b4f94cbce19c102fa8ab62270aa3b7a19fbcc04269d62899a0cf7176"
+      },
+      "target_values_read": false
+    }
+  ],
+  "target_arrays_deserialized": false,
+  "target_values_read": false
+}
