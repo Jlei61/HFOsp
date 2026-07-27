@@ -119,6 +119,47 @@ def paired_trajectory_coordinate(state, directions, coordinate, *, delta, nE):
     return plus, minus, float(actual)
 
 
+def trajectory_coordinate_values(states, origin_state, directions, *, nE):
+    """Project visited slow fields onto the three early-to-late coordinate axes."""
+    nE = int(nE)
+    z0 = np.asarray(origin_state["slow.z"], float)[:nE]
+    m0 = np.asarray(origin_state["slow.m"], float)[:nE]
+    sg0 = float(np.asarray(origin_state["slow.S_G"]))
+    dz = np.asarray(directions["z"], float)
+    dm = np.asarray(directions["m"], float)
+    dsg = float(directions["sg"])
+    out = []
+    for state in states:
+        z = np.asarray(state["slow.z"], float)[:nE]
+        m = np.asarray(state["slow.m"], float)[:nE]
+        sg = float(np.asarray(state["slow.S_G"]))
+        out.append([
+            float(np.dot(z - z0, dz) / np.dot(dz, dz)),
+            float(np.dot(m - m0, dm) / np.dot(dm, dm)),
+            float((sg - sg0) / dsg),
+        ])
+    return np.asarray(out, float)
+
+
+def robust_scales(values):
+    """Per-column robust SD; degeneracy is evidence failure, never a silent floor."""
+    x = np.asarray(values, float)
+    if x.ndim == 1:
+        x = x[:, None]
+    if x.ndim != 2 or x.shape[0] < 3 or not np.all(np.isfinite(x)):
+        raise ValueError("robust scales require at least three finite samples")
+    q25, q75 = np.percentile(x, [25, 75], axis=0)
+    scale = (q75 - q25) / 1.349
+    mad = 1.4826 * np.median(np.abs(x - np.median(x, axis=0)), axis=0)
+    scale = np.where(scale > 1e-12, scale, mad)
+    sd = np.std(x, axis=0)
+    scale = np.where(scale > 1e-12, scale, sd)
+    if np.any(scale <= 1e-12):
+        bad = np.flatnonzero(scale <= 1e-12).tolist()
+        raise ValueError(f"degenerate trajectory scales at columns {bad}")
+    return scale
+
+
 def assemble_paired_sensitivity(rows, coordinate_order):
     """Assemble dy/dq from central-difference rows under matched future noise."""
     columns = []

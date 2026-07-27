@@ -6,7 +6,9 @@ from src.topic4_zm_effective_rank import (
     bootstrap_rank,
     paired_trajectory_coordinate,
     trajectory_coordinate_directions,
+    trajectory_coordinate_values,
     rank_summary,
+    robust_scales,
     standardize_sensitivity,
 )
 
@@ -131,3 +133,20 @@ def test_field_perturbation_halves_delta_instead_of_clipping_asymmetrically():
         plus["slow.z"] - minus["slow.z"],
         2 * paired_delta * directions["z"],
     )
+
+
+def test_trajectory_coordinate_projection_and_robust_scales():
+    early = {"slow.z": np.array([0.9, 0.8]), "slow.m": np.array([1.0, 2.0]),
+             "slow.S_G": np.asarray(0.2)}
+    mid = {"slow.z": np.array([0.8, 0.65]), "slow.m": np.array([2.5, 4.0]),
+           "slow.S_G": np.asarray(0.35)}
+    late = {"slow.z": np.array([0.7, 0.5]), "slow.m": np.array([4.0, 6.0]),
+            "slow.S_G": np.asarray(0.5)}
+    directions = trajectory_coordinate_directions(early, late, nE=2)
+    q = trajectory_coordinate_values([early, mid, late], early, directions, nE=2)
+    assert np.allclose(q[0], 0.0)
+    assert np.allclose(q[1], 0.5)
+    assert np.allclose(q[2], 1.0)
+    scale = robust_scales(q)
+    assert scale.shape == (3,)
+    assert np.all(scale > 0)
