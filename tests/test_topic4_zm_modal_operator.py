@@ -13,6 +13,7 @@ from src.topic4_zm_modal_operator import (
     mode_axis_angle_deg,
     neuron_values_to_grid,
     project_ei_grid,
+    project_voltage_state_difference,
     route_source_temporal_class,
     route_operator_tool,
     operator_horizons_ms,
@@ -191,6 +192,30 @@ def test_neuron_voltage_coarse_graining_preserves_cell_means():
     assert np.isclose(out["grid"][1, 1], 6.0)
     assert out["counts"][0, 0] == 2
     assert out["counts"][1, 1] == 2
+
+
+def test_voltage_state_difference_projects_input_and_future_in_same_coordinates():
+    posE = np.array([[0.1, 0.1], [0.8, 0.1], [0.1, 0.8], [0.8, 0.8]])
+    posI = posE.copy()
+    modes = {
+        "x": np.array([[-1.0, 1.0], [-1.0, 1.0]]),
+        "y": np.array([[-1.0, -1.0], [1.0, 1.0]]),
+    }
+    base = {"V": np.zeros(8)}
+    state = {
+        "V": np.concatenate(
+            [
+                (1.5 * modes["x"] - 0.2 * modes["y"]).ravel(),
+                (-0.4 * modes["x"] + 0.8 * modes["y"]).ravel(),
+            ]
+        )
+    }
+    out = project_voltage_state_difference(
+        state, base, posE, posI, L=1.0, spatial_modes=modes,
+        mode_order=("x", "y"),
+    )
+    assert out["coordinate_order"] == ["x_E", "y_E", "x_I", "y_I"]
+    assert np.allclose(out["coordinates"], [1.5, -0.2, -0.4, 0.8])
 
 
 def test_grid_projection_uses_dual_basis_when_modes_are_not_orthogonal():

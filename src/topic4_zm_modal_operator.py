@@ -269,6 +269,45 @@ def neuron_values_to_grid(values, positions, *, L, n_grid):
     }
 
 
+def project_voltage_state_difference(
+    state,
+    baseline_state,
+    posE,
+    posI,
+    *,
+    L,
+    spatial_modes,
+    mode_order,
+):
+    """Project future-minus-baseline voltage in the same E/I probe basis."""
+
+    voltage = np.asarray(state["V"], dtype=float)
+    baseline = np.asarray(baseline_state["V"], dtype=float)
+    posE = np.asarray(posE, dtype=float)
+    posI = np.asarray(posI, dtype=float)
+    if voltage.shape != baseline.shape or voltage.ndim != 1:
+        raise ValueError("state and baseline V arrays do not align")
+    if voltage.size != len(posE) + len(posI):
+        raise ValueError("V arrays do not align with E/I positions")
+    first_mode = np.asarray(spatial_modes[tuple(mode_order)[0]], dtype=float)
+    if first_mode.ndim != 2 or first_mode.shape[0] != first_mode.shape[1]:
+        raise ValueError("spatial modes must use a square grid")
+    n_grid = first_mode.shape[0]
+    delta = voltage - baseline
+    E = neuron_values_to_grid(delta[:len(posE)], posE, L=L, n_grid=n_grid)
+    I = neuron_values_to_grid(delta[len(posE):], posI, L=L, n_grid=n_grid)
+    if not E["all_cells_observed"] or not I["all_cells_observed"]:
+        raise ValueError("modal grid contains an unobserved E or I cell")
+    projected = project_ei_grid(
+        E["grid"], I["grid"], spatial_modes, mode_order=mode_order
+    )
+    return {
+        **projected,
+        "E_deltaV_grid": E["grid"],
+        "I_deltaV_grid": I["grid"],
+    }
+
+
 def project_ei_grid(E_grid, I_grid, spatial_modes, *, mode_order):
     """Project matched E/I rate differences onto the registered spatial probes."""
 
