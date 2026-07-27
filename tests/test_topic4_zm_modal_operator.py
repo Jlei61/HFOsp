@@ -11,6 +11,7 @@ from src.topic4_zm_modal_operator import (
     infer_linearity_range,
     modal_probe_authorized,
     mode_axis_angle_deg,
+    neuron_values_to_grid,
     project_ei_grid,
     route_source_temporal_class,
     route_operator_tool,
@@ -179,6 +180,17 @@ def test_ei_grid_projection_uses_same_registered_spatial_basis():
     out = project_ei_grid(E, I, modes, mode_order=("axial", "core"))
     assert out["coordinate_order"] == ["axial_E", "core_E", "axial_I", "core_I"]
     assert np.allclose(out["coordinates"], [2.0, 0.5, -0.3, 1.2])
+
+
+def test_neuron_voltage_coarse_graining_preserves_cell_means():
+    pos = np.array(
+        [[0.1, 0.1], [0.2, 0.1], [0.8, 0.8], [0.9, 0.8]]
+    )
+    out = neuron_values_to_grid([1.0, 3.0, 5.0, 7.0], pos, L=1.0, n_grid=2)
+    assert np.isclose(out["grid"][0, 0], 2.0)
+    assert np.isclose(out["grid"][1, 1], 6.0)
+    assert out["counts"][0, 0] == 2
+    assert out["counts"][1, 1] == 2
 
 
 def test_grid_projection_uses_dual_basis_when_modes_are_not_orthogonal():

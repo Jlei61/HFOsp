@@ -233,6 +233,42 @@ def apply_voltage_perturbation(
     return out, delta
 
 
+def neuron_values_to_grid(values, positions, *, L, n_grid):
+    """Average a per-neuron state coordinate on the locked spatial grid."""
+
+    values = np.asarray(values, dtype=float)
+    positions = np.asarray(positions, dtype=float)
+    n_grid = int(n_grid)
+    if (
+        values.ndim != 1
+        or positions.ndim != 2
+        or positions.shape != (values.size, 2)
+        or not np.isfinite(values).all()
+        or not np.isfinite(positions).all()
+    ):
+        raise ValueError("values and positions must be aligned finite arrays")
+    if n_grid < 1 or not np.isfinite(L) or float(L) <= 0:
+        raise ValueError("n_grid and L must be positive")
+    ix = np.clip((positions[:, 0] / float(L) * n_grid).astype(int), 0, n_grid - 1)
+    iy = np.clip((positions[:, 1] / float(L) * n_grid).astype(int), 0, n_grid - 1)
+    counts = np.zeros((n_grid, n_grid), dtype=int)
+    total = np.zeros((n_grid, n_grid), dtype=float)
+    np.add.at(counts, (iy, ix), 1)
+    np.add.at(total, (iy, ix), values)
+    grid = np.divide(
+        total,
+        counts,
+        out=np.zeros_like(total),
+        where=counts > 0,
+    )
+    return {
+        "grid": grid,
+        "counts": counts,
+        "all_cells_observed": bool(np.all(counts > 0)),
+        "modal_operator_version": MODAL_OPERATOR_VERSION,
+    }
+
+
 def project_ei_grid(E_grid, I_grid, spatial_modes, *, mode_order):
     """Project matched E/I rate differences onto the registered spatial probes."""
 
