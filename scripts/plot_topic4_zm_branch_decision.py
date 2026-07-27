@@ -505,6 +505,64 @@ def fig_source_rhythm():
     return path
 
 
+# ============================================================ Fig 6: standardized slow-coordinate rank
+def fig_effective_rank():
+    path_json = os.path.join(OUT, "effective_rank", "effective_rank_summary.json")
+    summary = _load(path_json)
+    if not summary:
+        return None
+    static = summary["static_bootstrap"]
+    impulse = summary["impulse_bootstrap"]
+    fig, axes = plt.subplots(1, 3, figsize=(13.5, 3.7))
+
+    ax = axes[0]
+    for label, result, color in (
+        ("static", static, "#D1495B"),
+        ("impulse", impulse, "#00798C"),
+    ):
+        s = np.asarray(result["point"]["singular_values"], float)
+        s = s / max(s[0], 1e-12)
+        ax.plot(np.arange(1, s.size + 1), s, marker="o", color=color, label=label)
+    ax.axhline(0.2, color="#888", ls="--", lw=0.8)
+    ax.set_yscale("log")
+    ax.legend(fontsize=8, frameon=False)
+    _style(ax, f"standardized rank · {summary['verdict']}",
+           xlabel="singular direction", ylabel="singular value / s1")
+
+    ax = axes[1]
+    states = list(summary["per_state"])
+    x = np.arange(len(states))
+    st = [summary["per_state"][s]["static_point"]["s2_over_s1"] for s in states]
+    it = [summary["per_state"][s]["impulse_point"]["s2_over_s1"] for s in states]
+    ax.plot(x, st, marker="o", color="#D1495B", label="static")
+    ax.plot(x, it, marker="o", color="#00798C", label="impulse")
+    ax.axhline(0.2, color="#888", ls="--", lw=0.8)
+    ax.set_xticks(x)
+    ax.set_xticklabels([s.replace("bounded_", "").replace("__peak", "") for s in states])
+    ax.legend(fontsize=8, frameon=False)
+    _style(ax, "rank across visited carrier states", ylabel="s2 / s1")
+
+    ax = axes[2]
+    mats = []
+    for state in states:
+        mats.extend(np.asarray(summary["per_state"][state]["static_seed_matrices"], float))
+    mean_matrix = np.mean(mats, axis=0)
+    vmax = max(1e-9, float(np.max(np.abs(mean_matrix))))
+    im = ax.imshow(mean_matrix, cmap="RdBu_r", vmin=-vmax, vmax=vmax, aspect="auto")
+    ax.set_yticks(range(4))
+    ax.set_yticklabels(["rate", "active area", "spatial entropy", "vSEEG energy"])
+    ax.set_xticks(range(3))
+    ax.set_xticklabels(["Z", "M", "S_G"])
+    fig.colorbar(im, ax=ax, fraction=0.046, label="standardized sensitivity")
+    _style(ax, "mean static response matrix",
+           xlabel="trajectory-field coordinate", ylabel="observable")
+    fig.tight_layout()
+    path = os.path.join(FIG, "slow_coordinate_effective_rank.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return path
+
+
 # ============================================================ Fig 5: readout impostor separation
 def fig_impostors():
     import src.topic4_zm_empirical_carrier as EC
@@ -591,6 +649,12 @@ def fig_phase_status(made):
     n_source_rhythm = len(glob.glob(os.path.join(
         OUT, "source_rhythm", "*", "seed*", "source_rhythm.json"
     )))
+    rank_summary_exists = os.path.exists(os.path.join(
+        OUT, "effective_rank", "effective_rank_summary.json"
+    ))
+    n_rank_seed = len(glob.glob(os.path.join(
+        OUT, "effective_rank", "seed*", "rank_probes.json"
+    )))
     neighbourhood = v.get("neighbourhood") or {}
     neighbourhood_status = (
         "complete" if neighbourhood.get("evidence_complete") is True
@@ -624,7 +688,9 @@ def fig_phase_status(made):
          "complete" if n_source_rhythm >= 2 else
          "in progress" if n_source_rhythm else "conditional / not authorized"),
         ("1C neighbourhood audit", neighbourhood_status),
-        ("1.5A functional rank", "conditional / not authorized"),
+        ("1.5A functional rank",
+         "complete" if rank_summary_exists else
+         "in progress" if n_rank_seed else "conditional / not authorized"),
         ("1.5B modal / gain", "conditional / not authorized"),
         ("2A Z-entry boundary", "conditional / not authorized"),
         ("2B offset boundary", "conditional / not authorized"),
@@ -700,6 +766,12 @@ FIGURE_NOTES = {
         "判断高频成分是全局同步、局部相位错开还是不规则活动；该图只负责 operator 路由，"
         "不等于 observation-space 或 ictal lifecycle 验收。"
     ),
+    "slow_coordinate_effective_rank.png": (
+        "展示沿真实 early-to-late Z、M、S_G 场方向做配对中心差分后，标准化响应矩阵的"
+        "奇异值谱、各慢状态的 s2/s1 以及平均静态灵敏度。",
+        "判断这些既有慢变量在 carrier 附近是否只是局部共线；rank-1 不能外推成整个"
+        "慢流形一维。"
+    ),
     "readout_impostor_discrimination.png": (
         "展示合成 broadband carrier、尖锐谐波 pulse train 与全局固定振荡器在"
         " readout 指标上的可分性。这是 observation gate 的 synthetic sanity check。",
@@ -742,7 +814,7 @@ def main():
     failures = []
     for fn in (fig_phase0, fig_anchors, fig_carrier_matrix, fig_dynamics,
                fig_confirmation_morphology, fig_source_rhythm, fig_impostors,
-               fig_neighbourhood):
+               fig_neighbourhood, fig_effective_rank):
         try:
             p = fn()
         except Exception as e:                                # pragma: no cover - figure only
