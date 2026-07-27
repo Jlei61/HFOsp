@@ -404,8 +404,8 @@ def main():
                 continue
             if live_snn_count() >= args.max_snn:
                 break
-            _launch_cell(seed, cell["lambda"], cell["replicate"])
-            launched += 1
+            if _launch_cell(seed, cell["lambda"], cell["replicate"]):
+                launched += 1
         _log(
             f"expansion pending={len(pending)} launched={launched} "
             f"live_snn={live_snn_count()}"
