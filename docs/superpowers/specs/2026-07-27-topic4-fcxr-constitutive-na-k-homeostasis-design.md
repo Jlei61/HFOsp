@@ -2,7 +2,7 @@
 
 日期：2026-07-27（rev4，按第三轮审阅闭合空格不动点与异质预平衡两项 P0 + 两项 P1）
 
-状态：**DESIGN LOCK CANDIDATE — 不得创建执行分支、不得进入 T5，更不得启动 40k。**
+状态：**DESIGN LOCK — Phase B0–B2 only; execution remains gated by Gate H and Gate B.**
 
 rev3 修正了 rev2 的一处**核心方程错误**：按 rev2 的公式，`(Na_i, K_o) = (18, 4)` 在数学上**不可能**是
 静息不动点（无 spike 时 `dNa/dt = −3·I_pump_0·f`、`dK_o/dt = −2β·I_pump_0 = −0.2822 mM/s`），
