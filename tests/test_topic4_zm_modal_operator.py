@@ -171,6 +171,30 @@ def test_central_pairs_recover_finite_time_propagator_and_require_matched_noise(
         )
 
 
+def test_central_propagator_uses_measured_input_coordinates_not_nominal_mode():
+    truth = np.array([[0.7, -0.2], [0.1, 0.8]])
+    input_columns = np.array([[1.0, 0.15], [0.2, 0.9]])
+    rows = []
+    for j, name in enumerate(("a", "b")):
+        for sign in (-1, 1):
+            x = sign * input_columns[:, j]
+            rows.append(
+                {
+                    "input_mode": name,
+                    "amplitude": 1.0,
+                    "sign": sign,
+                    "bank_sha": "same",
+                    "input_coordinates": x.tolist(),
+                    "response": (truth @ x).tolist(),
+                }
+            )
+    out = assemble_central_propagator(
+        rows, input_order=("a", "b"), amplitude=1.0
+    )
+    assert np.allclose(out["operator"], truth)
+    assert np.isclose(out["input_condition_number"], np.linalg.cond(input_columns))
+
+
 def test_ei_grid_projection_uses_same_registered_spatial_basis():
     modes = {
         "axial": np.array([[-1.0, 0.0], [0.0, 1.0]]),

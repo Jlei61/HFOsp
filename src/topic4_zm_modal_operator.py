@@ -355,9 +355,10 @@ def assemble_central_propagator(rows, *, input_order, amplitude):
         raise ValueError("input_order must contain unique mode names")
     if not np.isfinite(amplitude) or amplitude <= 0:
         raise ValueError("amplitude must be finite and positive")
-    columns = []
+    input_columns = []
+    output_columns = []
     bank_shas = {}
-    for name in input_order:
+    for mode_index, name in enumerate(input_order):
         selected = [
             row for row in rows
             if row.get("input_mode") == name
@@ -373,15 +374,43 @@ def assemble_central_propagator(rows, *, input_order, amplitude):
         ym = np.asarray(minus["response"], dtype=float)
         if yp.ndim != 1 or yp.shape != ym.shape or not np.isfinite([*yp, *ym]).all():
             raise ValueError(f"{name}: response vectors must be matched and finite")
-        columns.append((yp - ym) / (2.0 * amplitude))
+        if "input_coordinates" in plus or "input_coordinates" in minus:
+            xp = np.asarray(plus.get("input_coordinates"), dtype=float)
+            xm = np.asarray(minus.get("input_coordinates"), dtype=float)
+            if (
+                xp.shape != (len(input_order),)
+                or xm.shape != xp.shape
+                or not np.isfinite(xp).all()
+                or not np.isfinite(xm).all()
+            ):
+                raise ValueError(f"{name}: measured input coordinates do not align")
+            input_columns.append((xp - xm) / 2.0)
+        else:
+            nominal = np.zeros(len(input_order), dtype=float)
+            nominal[mode_index] = amplitude
+            input_columns.append(nominal)
+        output_columns.append((yp - ym) / 2.0)
         bank_shas[name] = plus.get("bank_sha")
-    operator = np.column_stack(columns)
-    if operator.shape != (len(input_order), len(input_order)):
+    X = np.column_stack(input_columns)
+    Y = np.column_stack(output_columns)
+    if Y.shape != (len(input_order), len(input_order)):
         raise ValueError(
             "projected response dimension must equal the registered input basis"
         )
+    input_condition = float(np.linalg.cond(X))
+    if (
+        np.linalg.matrix_rank(X) != len(input_order)
+        or not np.isfinite(input_condition)
+        or input_condition > MAX_SPATIAL_BASIS_CONDITION
+    ):
+        raise ValueError(
+            "measured input probe matrix is rank deficient or ill-conditioned"
+        )
+    operator = Y @ np.linalg.inv(X)
     return {
         "operator": operator,
+        "input_matrix": X,
+        "input_condition_number": input_condition,
         "input_order": list(input_order),
         "amplitude": amplitude,
         "bank_sha_by_mode": bank_shas,
