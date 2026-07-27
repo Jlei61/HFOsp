@@ -18,6 +18,7 @@ from src.topic4_zm_modal_operator import (
     route_operator_tool,
     operator_horizons_ms,
     spatial_basis_diagnostics,
+    mode_subspace_angle_deg,
 )
 
 
@@ -92,6 +93,14 @@ def test_complex_oscillatory_modes_are_phase_aligned_not_rejected():
     summary = analyze_discrete_operator(operator, dt_ms=2.0, horizon_ms=20.0)
     assert abs(summary["leading_eigenvalue_imag"]) > 0
     assert np.isfinite(mode_axis_angle_deg(summary["leading_right_mode"], [1, 0]))
+    assert np.isclose(
+        mode_subspace_angle_deg([1, 1, 0], [[1, 0, 0], [0, 1, 0]]),
+        0.0,
+    )
+    assert np.isclose(
+        mode_subspace_angle_deg([0, 0, 1], [[1, 0, 0], [0, 1, 0]]),
+        90.0,
+    )
 
 
 def test_linearity_range_is_largest_contiguous_passing_amplitude():

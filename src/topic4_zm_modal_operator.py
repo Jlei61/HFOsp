@@ -569,6 +569,27 @@ def mode_axis_angle_deg(mode, axis):
     return float(np.rad2deg(np.arccos(cosine)))
 
 
+def mode_subspace_angle_deg(mode, basis_vectors):
+    """Return the acute principal angle from a mode to a real/complex subspace."""
+
+    mode = np.asarray(mode, dtype=complex)
+    basis = np.asarray(basis_vectors, dtype=complex)
+    if mode.ndim != 1 or basis.ndim != 2 or basis.shape[1] != mode.size:
+        raise ValueError("basis_vectors must be [basis, state] and align with mode")
+    if not np.isfinite(mode).all() or not np.isfinite(basis).all():
+        raise ValueError("mode and basis must be finite")
+    if np.linalg.norm(mode) <= np.finfo(float).eps:
+        raise ValueError("mode must be nonzero")
+    q, _ = np.linalg.qr(basis.T)
+    rank = np.linalg.matrix_rank(basis)
+    if rank < 1:
+        raise ValueError("basis subspace is degenerate")
+    q = q[:, :rank]
+    projection_fraction = np.linalg.norm(q.conj().T @ mode) / np.linalg.norm(mode)
+    projection_fraction = float(np.clip(projection_fraction, 0.0, 1.0))
+    return float(np.rad2deg(np.arccos(projection_fraction)))
+
+
 def infer_linearity_range(rows, max_relative_error):
     """Find the largest contiguous low-amplitude range passing prediction error."""
 
