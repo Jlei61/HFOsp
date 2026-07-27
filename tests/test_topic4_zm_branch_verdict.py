@@ -48,8 +48,28 @@ def _adj(rows, **kw):
     per_arm = BV.carrier_window(cells)
     base = dict(state_inventory_ok=True, exact_resume_ok=True,
                 eligible_seeds=kw.pop("eligible_seeds", [1, 3, 4]), cells=cells, per_arm=per_arm)
+    if any(v["status"] == "carrier_window" for v in per_arm.values()):
+        base["confirmation"] = dict(
+            status="passed", arm="freeze_all", seeds_passed=[1, 3],
+            long_horizon_seeds=[1, 3], dt2_seeds=[1, 3],
+        )
     base.update(kw)
     return BV.adjudicate(**base), cells, per_arm
+
+
+def _confirmation_rows(seeds, *, resolution, T_ms, survived=True):
+    return [
+        dict(
+            seed=s, bin_name="bounded_mid", fast_phase="peak", arm="freeze_all",
+            replicate="noise_replay", resolution=resolution, evidence_tier=(
+                "long_confirmation" if resolution == "dt" else "dt2_confirmation"
+            ),
+            T_cont_ms=float(T_ms), survived=bool(survived),
+            stationarity_ok=bool(survived),
+            end_reason=None if survived else "rest_return",
+        )
+        for s in seeds
+    ]
 
 
 def test_verdict_vocabulary_is_exactly_the_spec_list():
@@ -77,6 +97,46 @@ def test_replicated_positive_is_a_carrier_window():
     assert out["verdict"] == "carrier_at_visited_states"
     assert per_arm["freeze_all"]["status"] == "carrier_window"
     assert out["layers"]["source_space_carrier"] == "carrier_window"
+
+
+def test_discovery_window_without_long_and_dt2_confirmation_is_only_provisional():
+    rows = _rows([1, 3, 4], {"freeze_all": True})
+    cells = _cells(rows)
+    out = BV.adjudicate(
+        state_inventory_ok=True, exact_resume_ok=True, eligible_seeds=[1, 3, 4],
+        cells=cells, per_arm=BV.carrier_window(cells),
+    )
+    assert out["verdict"] == "no_evidence"
+    assert out["layers"]["source_space_carrier"] == "provisional_carrier_window"
+    assert "confirmation" in out["reason"]
+
+
+def test_confirmation_gate_requires_two_seeds_at_20s_and_native_dt2():
+    long_rows = _confirmation_rows([1, 3], resolution="dt", T_ms=20000.0)
+    dt2_rows = _confirmation_rows([1, 3], resolution="dt2", T_ms=8000.0)
+    ok = BV.confirmation_gate(long_rows, dt2_rows, arm="freeze_all")
+    assert ok["status"] == "passed"
+    assert ok["seeds_passed"] == [1, 3]
+
+    missing_dt2 = BV.confirmation_gate(long_rows, dt2_rows[:1], arm="freeze_all")
+    assert missing_dt2["status"] == "pending"
+    assert missing_dt2["seeds_passed"] == [1]
+
+    bad_dt2 = _confirmation_rows([1, 3], resolution="dt2", T_ms=8000.0)
+    bad_dt2[1]["survived"] = False
+    bad_dt2[1]["stationarity_ok"] = False
+    failed = BV.confirmation_gate(long_rows, bad_dt2, arm="freeze_all")
+    assert failed["status"] == "failed"
+    assert failed["failed_seeds"] == [3]
+
+
+def test_confirmation_gate_rejects_wrong_horizon_or_reused_dt_snapshot():
+    short = _confirmation_rows([1, 3], resolution="dt", T_ms=8000.0)
+    fake_dt2 = _confirmation_rows([1, 3], resolution="dt", T_ms=8000.0)
+    out = BV.confirmation_gate(short, fake_dt2, arm="freeze_all")
+    assert out["status"] == "pending"
+    assert out["long_horizon_seeds"] == []
+    assert out["dt2_seeds"] == []
 
 
 def test_one_lucky_seed_is_isolated_not_a_window():

@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import numpy as np
 
-VERDICT_VERSION = "zm_branch_verdict_v1.1_2026-07-27_fail_closed_controls"
+VERDICT_VERSION = "zm_branch_verdict_v1.2_2026-07-27_fail_closed_confirmation"
 
 VERDICTS = (
     "blocked_state_inventory",
@@ -32,6 +32,9 @@ VERDICTS = (
 ADJACENT_BINS = (("bounded_early", "bounded_mid"), ("bounded_mid", "bounded_late"))
 PRIMARY_SEEDS = (1, 3, 4)
 POSITIVE = ("stable_carrier", "metastable_carrier")
+CENTRAL_CONFIRMATION_STATE = ("bounded_mid", "peak")
+LONG_CONFIRMATION_MS = 20_000.0
+DT2_CONFIRMATION_MS = 8_000.0
 
 
 def _group(rows, keys):
@@ -128,9 +131,81 @@ def coverage_report(cells, planned):
                 not_run=missing[:200], n_not_run=len(missing))
 
 
+def confirmation_gate(long_rows, dt2_rows, *, arm, min_seeds=2):
+    """Fail-closed §6.2 confirmation of a discovery carrier window.
+
+    The central homologous state is locked as ``bounded_mid__peak``.  The
+    discovery posterior already carries the three paired-future-noise
+    replicates; the confirmation asks a separate question and therefore uses
+    the native ``noise_replay`` continuation in each supporting seed:
+
+    * the original-dt state must remain stationary for at least 20 s;
+    * a newly selected state from an independently rerun dt/2 anchor must
+      remain stationary for at least the primary 8 s horizon.
+
+    Rows with the wrong resolution, horizon, tier, state, arm, or replicate are
+    not evidence.  Missing evidence is ``pending``; two fully observed seeds
+    with fewer than ``min_seeds`` passes are an explicit ``failed`` result.
+    """
+    b, p = CENTRAL_CONFIRMATION_STATE
+
+    def eligible(rows, *, resolution, tier, min_ms):
+        out = {}
+        for r in rows or []:
+            if (
+                r.get("bin_name") == b
+                and r.get("fast_phase") == p
+                and r.get("arm") == arm
+                and r.get("replicate") == "noise_replay"
+                and r.get("resolution") == resolution
+                and r.get("evidence_tier") == tier
+                and float(r.get("T_cont_ms", 0.0)) >= float(min_ms)
+            ):
+                out[int(r["seed"])] = r
+        return out
+
+    long_by_seed = eligible(
+        long_rows, resolution="dt", tier="long_confirmation",
+        min_ms=LONG_CONFIRMATION_MS,
+    )
+    dt2_by_seed = eligible(
+        dt2_rows, resolution="dt2", tier="dt2_confirmation",
+        min_ms=DT2_CONFIRMATION_MS,
+    )
+    complete = sorted(set(long_by_seed) & set(dt2_by_seed))
+
+    def passed(r):
+        return bool(r.get("survived")) and bool(r.get("stationarity_ok"))
+
+    seeds_passed = [
+        s for s in complete
+        if passed(long_by_seed[s]) and passed(dt2_by_seed[s])
+    ]
+    failed = [s for s in complete if s not in seeds_passed]
+    if len(seeds_passed) >= int(min_seeds):
+        status = "passed"
+    elif len(complete) >= int(min_seeds):
+        status = "failed"
+    else:
+        status = "pending"
+    return dict(
+        status=status,
+        arm=arm,
+        central_state=f"{b}__{p}",
+        min_seeds=int(min_seeds),
+        long_horizon_ms=LONG_CONFIRMATION_MS,
+        dt2_horizon_ms=DT2_CONFIRMATION_MS,
+        long_horizon_seeds=sorted(long_by_seed),
+        dt2_seeds=sorted(dt2_by_seed),
+        complete_seeds=complete,
+        seeds_passed=seeds_passed,
+        failed_seeds=failed,
+    )
+
+
 def adjudicate(*, state_inventory_ok, exact_resume_ok, eligible_seeds, cells, per_arm,
                neighbourhood=None, reference_lock=None, smallest_subsystem=None,
-               offset_result=None, coverage=None):
+               offset_result=None, coverage=None, confirmation=None):
     """The single fail-closed decision (spec §13). Returns the verdict plus every layer's status."""
     layers = dict(
         state_gate="ok" if state_inventory_ok else "blocked",
@@ -139,6 +214,7 @@ def adjudicate(*, state_inventory_ok, exact_resume_ok, eligible_seeds, cells, pe
                      n_eligible=len(set(eligible_seeds))),
         source_space_carrier="not_established",
         observation_space_carrier="not_established",
+        carrier_confirmation="not_established",
         entry="not_established",
         offset="not_established",
         recovery_lifecycle="not_established",
@@ -159,7 +235,25 @@ def adjudicate(*, state_inventory_ok, exact_resume_ok, eligible_seeds, cells, pe
     n_elig = len(set(eligible_seeds))
 
     if windows:
+        confirm_status = (confirmation or {}).get("status", "pending")
+        layers["carrier_confirmation"] = confirm_status
+        if confirm_status != "passed":
+            layers["source_space_carrier"] = "provisional_carrier_window"
+            return dict(
+                verdict="no_evidence",
+                layers=layers,
+                carrier_arms=sorted(windows),
+                smallest_subsystem=smallest_subsystem,
+                isolated=sorted(isolated),
+                coverage=coverage,
+                confirmation=confirmation,
+                reason=(
+                    "an 8 s discovery carrier window exists, but the mandatory "
+                    f"20 s plus native-dt/2 confirmation is {confirm_status}"
+                ),
+            )
         layers["source_space_carrier"] = "carrier_window"
+        layers["carrier_confirmation"] = "passed"
         verdict = "carrier_at_visited_states"
         if offset_result:
             verdict = offset_result.get("verdict", verdict)

@@ -9,6 +9,9 @@ Phases (each is crash-safe and writes atomically under results/topic4_sef_hfo/zm
   anchor2   snapshot pass: re-run the SAME trajectory and capture exact states at the slow-state
             bins x natural fast phases selected from anchor1.
   fork      Task 7 minimal carrier-subsystem matrix over arms x paired-noise replicates.
+            ``--evidence-tier long_confirmation`` writes a separate 20 s central-state result.
+            ``--resolution dt2 --evidence-tier dt2_confirmation`` consumes only an independently
+            generated dt/2-native anchor and writes another separate result namespace.
 
 Every phase pins the canonical config SHA, the engine SHAs, the state hash and the noise-bank SHA.
 OMP/MKL/OPENBLAS/NUMEXPR are forced to 1.
@@ -47,7 +50,9 @@ import src.topic4_zm_ictal_carrier as CG             # noqa: E402
 
 OUT = os.path.join(_ROOT, "results", "topic4_sef_hfo", "zm_branch_decision")
 PHASE0 = os.path.join(OUT, "phase0")
-DT = 0.1
+DT_BASE = 0.1
+DT_HALF = 0.05
+RESOLUTION_DT = {"dt": DT_BASE, "dt2": DT_HALF}
 ES_THRESH_HZ = 250.0        # bounded-arm runaway threshold (the containment arm plateaus high)
 ARM_KWARGS = dict(use_SG=True, alpha_G=16.0)
 
@@ -86,28 +91,53 @@ def save_npz_atomic(path, **arrays):
     os.replace(tmp, path)
 
 
-def load_lock(seed):
+def load_lock(seed, *, resolution="dt"):
+    if resolution not in RESOLUTION_DT:
+        raise ValueError(f"unknown resolution {resolution!r}; choices={sorted(RESOLUTION_DT)}")
+    dt = RESOLUTION_DT[resolution]
     lock = json.load(open(os.path.join(PHASE0, "canonical_config.json")))
-    rec = lock["seeds"][str(int(seed))]
-    live = FS.build_canonical_config(seed=seed, I_th_EI=rec["config"]["I_th_EI"],
-                                     arm_kwargs=ARM_KWARGS)
+    parent = lock["seeds"][str(int(seed))]
+    live = FS.build_canonical_config(seed=seed, I_th_EI=parent["config"]["I_th_EI"],
+                                     arm_kwargs=ARM_KWARGS, dt=dt)
     live_sha = FS.config_sha(live)
-    if live_sha != rec["config_sha"]:
-        raise SystemExit(f"config drift for seed {seed}: live {live_sha[:16]} != locked "
-                         f"{rec['config_sha'][:16]}; re-run audit_topic4_zm_dynamic_state.py")
-    return rec["config"], rec["config_sha"]
+    if resolution == "dt":
+        if live_sha != parent["config_sha"]:
+            raise SystemExit(f"config drift for seed {seed}: live {live_sha[:16]} != locked "
+                             f"{parent['config_sha'][:16]}; re-run "
+                             "audit_topic4_zm_dynamic_state.py")
+        return parent["config"], parent["config_sha"], dt
+
+    # A dt snapshot cannot be converted to dt/2.  Lock a separate native
+    # configuration per seed before constructing the independent anchor.
+    lock_path = os.path.join(PHASE0, "dt2", f"seed{int(seed)}_config.json")
+    expected = dict(
+        resolution="dt2", dt=dt, seed=int(seed),
+        parent_config_sha=parent["config_sha"],
+        config_sha=live_sha, config=live,
+        created_from="independent dt/2 canonical config; no state interpolation",
+    )
+    if os.path.exists(lock_path):
+        old = json.load(open(lock_path))
+        if old.get("config_sha") != live_sha or old.get("parent_config_sha") != parent["config_sha"]:
+            raise SystemExit(
+                f"dt/2 config drift for seed {seed}: live {live_sha[:16]} != "
+                f"locked {str(old.get('config_sha'))[:16]}"
+            )
+    else:
+        write_json_atomic(lock_path, expected)
+    return live, live_sha, dt
 
 
-def build_context(seed, *, smoke=False):
+def build_context(seed, *, smoke=False, resolution="dt"):
     """Substrate + slow config + virtual-SEEG montage, all pinned to the Phase-0 lock."""
     # Capture this ONCE.  A multi-hour continuation may span a later commit in
     # the same worktree; resolving HEAD when the row is finally written would
     # falsely attribute already-imported code to that later commit.
     runtime_git_sha = _git_sha()
     runtime_started_at = time.strftime("%Y-%m-%dT%H:%M:%S")
-    cfg_locked, cfg_sha = load_lock(seed)
+    cfg_locked, cfg_sha, dt = load_lock(seed, resolution=resolution)
     t0 = time.time()
-    S = PP.build_substrate(seed=int(seed))
+    S = PP.build_substrate(seed=int(seed), dt=dt)
     S["seed"] = int(seed)
     S["I_th_EI"] = float(cfg_locked["I_th_EI"])
     mont = S["reg"]["montage_sheet"]
@@ -116,9 +146,12 @@ def build_context(seed, *, smoke=False):
     core = ZM._core_mask_E(S)
     along, _perp = CG.axis_transverse_coords(S["posE"], S["src_xy"], S["axis_unit"])
     print(f"[ctx] seed={seed} built in {time.time()-t0:.0f}s N={S['N']} contacts={len(mont.names)} "
-          f"config_sha={cfg_sha[:16]} rss={_rss_gb()}GB", flush=True)
+          f"resolution={resolution} dt={dt:g} config_sha={cfg_sha[:16]} "
+          f"rss={_rss_gb()}GB", flush=True)
     return dict(S=S, rec=rec, core=core, axis=along, contacts=list(mont.names),
                 cfg_locked=cfg_locked, cfg_sha=cfg_sha, smoke=smoke,
+                resolution=resolution, dt=dt,
+                anchor_root=("anchors" if resolution == "dt" else "anchors_dt2"),
                 runtime_git_sha=runtime_git_sha, runtime_started_at=runtime_started_at)
 
 
@@ -144,7 +177,8 @@ def run_segment(ctx, slow, T_ms, *, ckpt=None, fresh_rng=True):
 
 def segment_metrics(ctx, res, *, bin_ms=MC.BIN_MS):
     S = ctx["S"]
-    m = MC.source_metrics(res["E_spk_bool"], ctx["core"], S["posE"], S["L"], DT, bin_ms=bin_ms,
+    m = MC.source_metrics(res["E_spk_bool"], ctx["core"], S["posE"], S["L"], ctx["dt"],
+                          bin_ms=bin_ms,
                           lfp_trace=res.get("lfp_trace"), axis_coord=ctx["axis"])
     m["runaway_early_stop_ms"] = res.get("runaway_early_stop_ms")
     return m
@@ -171,7 +205,8 @@ def slow_coords(slow, n_bins, n_steps):
 def provenance(ctx, **extra):
     p = dict(git_sha=ctx["runtime_git_sha"],
              runtime_started_at=ctx["runtime_started_at"],
-             config_sha=ctx["cfg_sha"], seed=int(ctx["S"]["seed"]), dt=DT,
+             config_sha=ctx["cfg_sha"], seed=int(ctx["S"]["seed"]), dt=ctx["dt"],
+             resolution=ctx["resolution"],
              engine_sha256=ctx["cfg_locked"]["engine_sha256"],
              metrics_version=MC.METRICS_VERSION, state_schema=CK.STATE_SCHEMA,
              lockpoint=ctx["cfg_locked"]["lockpoint"], arm_kwargs=ARM_KWARGS,
@@ -192,7 +227,7 @@ def phase_anchor1(ctx, T_ms, tag="anchor"):
     sc = slow_coords(slow, met["n_bins"], n_steps)
     lfp_ds, fs = CG.decimate_lfp(res["lfp_trace"])
     seed = ctx["S"]["seed"]
-    base = os.path.join(OUT, "smoke" if ctx["smoke"] else "anchors")
+    base = os.path.join(OUT, "smoke" if ctx["smoke"] else ctx["anchor_root"])
     save_npz_atomic(os.path.join(base, f"{tag}_seed{seed}_traces.npz"),
                     **{k: np.asarray(v, np.float32) for k, v in met.items()
                        if isinstance(v, np.ndarray)},
@@ -226,11 +261,16 @@ def phase_anchor(ctx, T_ms):
     and capture the EXACT state at the target step (no second full re-run).
     """
     seed = ctx["S"]["seed"]
-    base = os.path.join(OUT, "smoke" if ctx["smoke"] else "anchors", f"seed{seed}")
+    base = os.path.join(
+        OUT, "smoke" if ctx["smoke"] else ctx["anchor_root"], f"seed{seed}"
+    )
     t0 = time.time()
-    bs = int(round(MC.BIN_MS / DT))
-    n_total = int(round(T_ms / DT))
-    coarse = sorted(set(range(int(round(COARSE_MS / DT)), n_total, int(round(COARSE_MS / DT)))))
+    dt = ctx["dt"]
+    bs = int(round(MC.BIN_MS / dt))
+    n_total = int(round(T_ms / dt))
+    coarse = sorted(
+        set(range(int(round(COARSE_MS / dt)), n_total, int(round(COARSE_MS / dt))))
+    )
 
     slow = make_slow(ctx)
     ck = CK.ZMCheckpoint(snapshot_steps=coarse)
@@ -301,22 +341,22 @@ def phase_anchor(ctx, T_ms):
         else:
             slow2 = make_slow(ctx)
             ck2 = CK.ZMCheckpoint(initial_state=ck.snapshots[c], snapshot_steps=[t_star])
-            run_segment(ctx, slow2, (t_star - c) * DT, ckpt=ck2, fresh_rng=True)
+            run_segment(ctx, slow2, (t_star - c) * dt, ckpt=ck2, fresh_rng=True)
             state = ck2.snapshots.get(t_star)
             if state is None:
                 print(f"[anchor:p2] {tag}: capture failed (early stop?), skipped", flush=True)
                 continue
         smanifest = CK.save_state_npz(state, dict(
             config_sha=ctx["cfg_sha"], engine_sha=ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"],
-            dt=DT, seed=int(seed), t_step=int(t_star), t_ms=float(t_star * DT),
+            dt=dt, seed=int(seed), t_step=int(t_star), t_ms=float(t_star * dt),
             bin_name=st["bin_name"], fast_phase=st["fast_phase"], springboard_step=c,
             slow_coord=st.get("slow_coord"), git_sha=ctx["runtime_git_sha"],
             runtime_started_at=ctx["runtime_started_at"]), path)
         captured.append(dict(bin_name=st["bin_name"], fast_phase=st["fast_phase"], t_step=int(t_star),
-                             t_ms=float(t_star * DT), path=os.path.relpath(path, _ROOT),
+                             t_ms=float(t_star * dt), path=os.path.relpath(path, _ROOT),
                              state_hash=smanifest["state_hash"], springboard_step=c,
                              size_mb=round(os.path.getsize(path) / 1024 ** 2, 1)))
-        print(f"[anchor:p2] {tag} t={t_star * DT:.0f}ms captured "
+        print(f"[anchor:p2] {tag} t={t_star * dt:.0f}ms captured "
               f"({captured[-1]['size_mb']}MB, spring={c}) rss={_rss_gb()}GB", flush=True)
     man["captured_states"] = captured
     man["wall_s"] = round(time.time() - t0, 1)
@@ -481,10 +521,44 @@ def dump_continuation_traces(path, run, locks):
 
 
 def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_REPLICATES,
-               resume=True, T_ms=T_CONT_MS, dump_traces=False):
+               resume=True, T_ms=T_CONT_MS, dump_traces=False,
+               evidence_tier="discovery"):
     seed = ctx["S"]["seed"]
-    root = os.path.join(OUT, "smoke" if ctx["smoke"] else "forks", f"seed{seed}")
-    anchor_path = os.path.join(OUT, "anchors", f"seed{seed}", "anchor.json")
+    confirmation_roots = {
+        "long_confirmation": os.path.join("confirmations", "long"),
+        "dt2_confirmation": os.path.join("confirmations", "dt2"),
+    }
+    if evidence_tier == "discovery":
+        fork_root = "smoke" if ctx["smoke"] else "forks"
+    elif evidence_tier in confirmation_roots:
+        fork_root = confirmation_roots[evidence_tier]
+    else:
+        raise ValueError(f"unknown evidence tier {evidence_tier!r}")
+    root = os.path.join(OUT, fork_root, f"seed{seed}")
+    anchor_path = os.path.join(OUT, ctx["anchor_root"], f"seed{seed}", "anchor.json")
+
+    if evidence_tier != "discovery":
+        expected_resolution = "dt" if evidence_tier == "long_confirmation" else "dt2"
+        min_horizon = (20_000.0 if evidence_tier == "long_confirmation" else T_CONT_MS)
+        central = ["bounded_mid__peak"]
+        if ctx["resolution"] != expected_resolution:
+            raise SystemExit(
+                f"{evidence_tier} requires resolution={expected_resolution}, "
+                f"got {ctx['resolution']}"
+            )
+        if states_filter != central:
+            raise SystemExit(
+                f"{evidence_tier} is locked to --states {central[0]}"
+            )
+        if tuple(arms) != ("freeze_all",) or tuple(replicates) != ("noise_replay",):
+            raise SystemExit(
+                f"{evidence_tier} requires --arms freeze_all "
+                "--replicates noise_replay"
+            )
+        if float(T_ms) < min_horizon:
+            raise SystemExit(
+                f"{evidence_tier} requires T_cont >= {min_horizon:g} ms"
+            )
     if not os.path.exists(anchor_path):
         raise SystemExit(f"no anchor for seed {seed}: run --phase anchor first")
     anchor = json.load(open(anchor_path))
@@ -508,7 +582,7 @@ def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_RE
         state0, sman = CK.load_state_npz(
             os.path.join(_ROOT, st["path"]), expected_config_sha=ctx["cfg_sha"],
             expected_engine_sha=ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"],
-            expected_dt=DT)
+            expected_dt=ctx["dt"])
         for arm in arms:
             for rep in replicates:
                 key = f"{tag}|{arm}|{rep}"
@@ -519,7 +593,16 @@ def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_RE
                 # returned to rest), but any putative surviving v1 candidate
                 # must be rerun under v1.1 before it can count positively.
                 needs_stationarity_rerun = MC.needs_stationarity_rerun(existing)
-                if existing is not None and not needs_stationarity_rerun:
+                needs_horizon_rerun = bool(
+                    existing is not None
+                    and (
+                        float(existing.get("T_cont_ms", 0.0)) < float(T_ms)
+                        or existing.get("evidence_tier", "discovery") != evidence_tier
+                        or existing.get("resolution", "dt") != ctx["resolution"]
+                    )
+                )
+                if (existing is not None and not needs_stationarity_rerun
+                        and not needs_horizon_rerun):
                     continue
                 bank = NB.build_noise_bank(ctx["cfg_sha"], seed, st["t_step"], rep)
                 run = run_continuation(ctx, state0, arm, bank, locks, T_ms=T_ms)
@@ -535,6 +618,8 @@ def phase_fork(ctx, states_filter=None, arms=ARMS_ORDER, replicates=NB.PAIRED_RE
                                  state_hash=st["state_hash"], bank_sha=bank["bank_sha"],
                                  config_sha=ctx["cfg_sha"], git_sha=ctx["runtime_git_sha"],
                                  runtime_started_at=ctx["runtime_started_at"],
+                                 resolution=ctx["resolution"], evidence_tier=evidence_tier,
+                                 dt=ctx["dt"],
                                  metrics_version=MC.METRICS_VERSION, T_cont_ms=float(T_ms),
                                  peak_rss_gb=_rss_gb(), mem_available_gb=_mem_avail_gb(), **summ)
                 write_json_atomic(man_path, dict(seed=int(seed), anchor=os.path.relpath(anchor_path, _ROOT),
@@ -555,7 +640,7 @@ NB_REPLICATES = ("noise_replay", "noise_resample_1")
 
 def _load_state_fields(path, nE, cfg_sha, eng_sha):
     st, _ = CK.load_state_npz(path, expected_config_sha=cfg_sha, expected_engine_sha=eng_sha,
-                              expected_dt=DT)
+                              expected_dt=DT_BASE)
     return st, dict(z=np.asarray(st["slow.z"], float)[:nE],
                     m=np.asarray(st["slow.m"], float)[:nE],
                     S_G=float(np.asarray(st["slow.S_G"])))
@@ -696,7 +781,8 @@ def phase_smoke(ctx, T_anchor_ms=2000.0, T_cont_ms=500.0):
     seed = ctx["S"]["seed"]
     base = os.path.join(OUT, "smoke", "vertical_slice")
     t0 = time.time()
-    t_fork = int(round(T_anchor_ms / DT)) - int(round(500.0 / DT))
+    dt = ctx["dt"]
+    t_fork = int(round(T_anchor_ms / dt)) - int(round(500.0 / dt))
     slow = make_slow(ctx)
     ck = CK.ZMCheckpoint(snapshot_steps=[t_fork])
     res = run_segment(ctx, slow, T_anchor_ms, ckpt=ck)
@@ -708,9 +794,9 @@ def phase_smoke(ctx, T_anchor_ms=2000.0, T_cont_ms=500.0):
     state = ck.snapshots[t_fork]
     path = os.path.join(base, f"state_seed{seed}_t{t_fork}.npz")
     sman = CK.save_state_npz(state, dict(
-        config_sha=ctx["cfg_sha"], dt=DT, seed=int(seed), t_step=int(t_fork),
+        config_sha=ctx["cfg_sha"], dt=dt, seed=int(seed), t_step=int(t_fork),
         engine_sha=ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"]), path)
-    back, bman = CK.load_state_npz(path, expected_config_sha=ctx["cfg_sha"], expected_dt=DT)
+    back, bman = CK.load_state_npz(path, expected_config_sha=ctx["cfg_sha"], expected_dt=dt)
     assert bman["state_hash"] == sman["state_hash"], "state hash did not round-trip"
 
     bank = NB.build_noise_bank(ctx["cfg_sha"], seed, t_fork, "noise_replay")
@@ -746,6 +832,11 @@ def main():
     ap.add_argument("--states", default=None, help="comma list of bin__phase tags (default: all)")
     ap.add_argument("--arms", default=",".join(ARMS_ORDER))
     ap.add_argument("--replicates", default=",".join(NB.PAIRED_REPLICATES))
+    ap.add_argument("--resolution", choices=sorted(RESOLUTION_DT), default="dt",
+                    help="dt2 always builds an independent native anchor; snapshots are never converted")
+    ap.add_argument("--evidence-tier",
+                    choices=("discovery", "long_confirmation", "dt2_confirmation"),
+                    default="discovery")
     ap.add_argument("--T-cont", dest="T_cont", type=float, default=T_CONT_MS)
     ap.add_argument("--no-resume", action="store_true")
     ap.add_argument("--dump-traces", action="store_true",
@@ -753,7 +844,13 @@ def main():
     a = ap.parse_args()
     if a.phase != "smoke" and not a.confirm_run:
         raise SystemExit("refusing a multi-minute N=40000 run without --confirm-run")
-    ctx = build_context(a.seed, smoke=a.smoke or a.phase == "smoke")
+    if a.phase == "neighbourhood" and a.resolution != "dt":
+        raise SystemExit("neighbourhood is a discovery-dt phase; dt2 is confirmation-only")
+    if a.phase != "fork" and a.evidence_tier != "discovery":
+        raise SystemExit("--evidence-tier applies only to --phase fork")
+    ctx = build_context(
+        a.seed, smoke=a.smoke or a.phase == "smoke", resolution=a.resolution
+    )
     if a.phase == "anchor1":
         phase_anchor1(ctx, a.T)
     elif a.phase == "anchor":
@@ -773,7 +870,8 @@ def main():
                    states_filter=[s.strip() for s in a.states.split(",")] if a.states else None,
                    arms=tuple(x.strip() for x in a.arms.split(",") if x.strip()),
                    replicates=tuple(x.strip() for x in a.replicates.split(",") if x.strip()),
-                   resume=not a.no_resume, T_ms=a.T_cont, dump_traces=a.dump_traces)
+                   resume=not a.no_resume, T_ms=a.T_cont, dump_traces=a.dump_traces,
+                   evidence_tier=a.evidence_tier)
 
 
 if __name__ == "__main__":

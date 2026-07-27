@@ -92,7 +92,7 @@ K_MIN = 3                                                  # go(plane): min cont
 LABELS = ["decay", "blip", "trivial_A", "trivial_B", "runaway", "other_nogo", "go"]   # classify_cell labels
 
 
-def build_substrate(seed=1):
+def build_substrate(seed=1, dt=None):
     """E1146 SNN Stage-5 subject substrate on the L=20 sheet (REUSE sef_hfo_subject_placement; blessed
     twoend_equal cores at the source/sink centroids). Data read from the main checkout (worktree results/ is
     gitignored/empty). vth = min of the two sample_core_field patches (two low-V_th cores); E->E axis along
@@ -101,7 +101,12 @@ def build_substrate(seed=1):
     reg = register_to_sheet(m_real, src_names, snk_names, L=L, target_inter_core_mm=TARGET_INTER_CORE)
     src_xy, snk_xy = reg["source_centroid"], reg["sink_centroid"]
     axis_unit = (snk_xy - src_xy) / np.linalg.norm(snk_xy - src_xy)          # forward = source -> sink
-    p = Params(g=G, L=L, density=DENSITY, T=T_SIM, dt=DT, nu_ext_ratio=DRIVE, seed=seed)
+    # ``dt`` is optional so every existing caller remains byte-identical.  The
+    # Z/M branch-decision resolution check uses this hook to rebuild the whole
+    # substrate (including delay quantisation) natively at dt/2; replacing only
+    # ``p.dt`` after connectivity construction would be numerically invalid.
+    p = Params(g=G, L=L, density=DENSITY, T=T_SIM, dt=DT if dt is None else float(dt),
+               nu_ext_ratio=DRIVE, seed=seed)
     rng = np.random.default_rng(seed)
     pos, labels, NE, NI = place_neurons(p, rng)
     net = build_connectivity_rot(p, pos, labels, NE, NI, rng, theta_EE=np.deg2rad(reg["theta_deg"]),

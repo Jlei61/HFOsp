@@ -152,12 +152,42 @@ def main():
         if not info.get("is_control_arm", False)
     }) if per_arm else None
 
+    long_rows, dt2_rows = [], []
+    for p in sorted(glob.glob(os.path.join(
+            OUT, "confirmations", "long", "seed*", "fork_matrix.json"))):
+        long_rows.extend(json.load(open(p)).get("rows", []))
+    for p in sorted(glob.glob(os.path.join(
+            OUT, "confirmations", "dt2", "seed*", "fork_matrix.json"))):
+        dt2_rows.extend(json.load(open(p)).get("rows", []))
+    window_arms = [
+        arm for arm, info in per_arm.items()
+        if info.get("status") == "carrier_window" and not info.get("is_control_arm", False)
+    ]
+    confirmation_by_arm = {
+        arm: BV.confirmation_gate(long_rows, dt2_rows, arm=arm)
+        for arm in window_arms
+    }
+    passed_confirmations = [
+        v for v in confirmation_by_arm.values() if v.get("status") == "passed"
+    ]
+    if passed_confirmations:
+        confirmation = passed_confirmations[0]
+    elif confirmation_by_arm:
+        # Missing evidence must dominate an explicit failure in another arm:
+        # one unconfirmed candidate cannot be silently discarded to promote or
+        # reject a different one.
+        pending = [v for v in confirmation_by_arm.values() if v.get("status") == "pending"]
+        confirmation = pending[0] if pending else next(iter(confirmation_by_arm.values()))
+    else:
+        confirmation = None
+
     result = BV.adjudicate(
         state_inventory_ok=bool(inv.get("audit", {}).get("status") == "ok"),
         exact_resume_ok=bool(gates.get("passed")),
         eligible_seeds=eligible, cells=cells, per_arm=per_arm,
         neighbourhood=neighbourhood,
-        reference_lock=ref_lock, smallest_subsystem=smallest, coverage=coverage)
+        reference_lock=ref_lock, smallest_subsystem=smallest, coverage=coverage,
+        confirmation=confirmation)
     result = BV.apply_observation_status(result, ref_lock)
 
     out = dict(
@@ -173,7 +203,9 @@ def main():
         anchors=anchors, eligible_seeds=eligible,
         per_arm=per_arm, smallest_positive_subsystem=smallest,
         coverage=coverage, cells=BV.summarize_cells(cells) if cells else [],
-        neighbourhood=neighbourhood,
+        neighbourhood=neighbourhood, confirmation=confirmation,
+        confirmation_by_arm=confirmation_by_arm,
+        n_long_confirmation_rows=len(long_rows), n_dt2_confirmation_rows=len(dt2_rows),
         conditional_phases_not_run=[
             "Task 9A slow-coordinate functional rank", "Task 9B modal/operator audit",
             "Task 10 Z-entry probability boundary", "Task 11 existing-coordinate offset boundary",

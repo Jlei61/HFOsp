@@ -123,6 +123,15 @@ def test_config_sha_changes_with_any_locked_field():
     assert FS.config_sha(a) == FS.config_sha(FS.build_canonical_config(seed=1, I_th_EI=1.28))
 
 
+def test_half_dt_is_a_distinct_native_configuration():
+    base = FS.build_canonical_config(seed=1, I_th_EI=1.28, dt=0.1)
+    half = FS.build_canonical_config(seed=1, I_th_EI=1.28, dt=0.05)
+    assert base["params"]["dt"] == 0.1
+    assert half["params"]["dt"] == 0.05
+    assert half["protocol"]["lfp_sample_hz"] == 20_000.0
+    assert FS.config_sha(base) != FS.config_sha(half)
+
+
 def test_config_is_json_serialisable_and_flat_enough_to_diff():
     cfg = FS.build_canonical_config(seed=1, I_th_EI=1.28)
     json.loads(json.dumps(cfg))  # raises on numpy scalars / non-serialisable objects
