@@ -19,6 +19,8 @@ Phases (each is crash-safe and writes atomically under results/topic4_sef_hfo/zm
             Task 9A paired central differences along actual Z/M/S_G trajectory-field directions.
   modal_operator
             Task 9B matched E/I-voltage propagator selected by replicated source carrier type.
+  entry_boundary
+            Task 10 conditional actual-field Z entry probability boundary.
 
 Every phase pins the canonical config SHA, the engine SHAs, the state hash and the noise-bank SHA.
 OMP/MKL/OPENBLAS/NUMEXPR are forced to 1.
@@ -58,6 +60,7 @@ import src.topic4_zm_ictal_carrier as CG             # noqa: E402
 import src.topic4_zm_source_rhythm as SR             # noqa: E402
 import src.topic4_zm_effective_rank as ER             # noqa: E402
 import src.topic4_zm_modal_operator as MO              # noqa: E402
+import src.topic4_zm_boundaries as BD                  # noqa: E402
 
 OUT = os.path.join(_ROOT, "results", "topic4_sef_hfo", "zm_branch_decision")
 PHASE0 = os.path.join(OUT, "phase0")
@@ -80,6 +83,10 @@ MODAL_SETTLE_MS = 250.0
 MODAL_HELDOUT_MAX_ERROR = 0.20
 MODAL_INPUT_MAX_RESIDUAL = 0.05
 MODAL_RESPONSE_MAX_RESIDUAL = 0.20
+ENTRY_LEVELS = (0.0, 0.25, 0.50, 0.75, 1.0)
+ENTRY_RESPONSE_MS = 8000.0
+ENTRY_BASE_REPLICATE = "noise_replay"
+ENTRY_EXPANSION_REPLICATES = ("noise_resample_1", "noise_resample_2")
 
 
 # ================================================================ helpers
@@ -1681,13 +1688,219 @@ def phase_modal_operator(ctx, resume=True):
     return manifest
 
 
+# ================================================================ phase: Z-entry boundary (Task 10)
+def phase_entry_boundary(ctx, resume=True):
+    """Map a conditional Z-entry surface from matched pre-entry fast states.
+
+    M and the complete S_G family are held at the natural onset-adjacent state.
+    Only the actual pre-entry-to-carrier z field is interpolated.  This makes
+    the result a conditional Z slice, not a claim that Z is globally
+    sufficient independent of the other slow coordinates.
+    """
+
+    if ctx["resolution"] != "dt":
+        raise SystemExit("entry_boundary runs at original dt only")
+    verdict_path = os.path.join(OUT, "branch_verdict.json")
+    verdict = json.load(open(verdict_path)) if os.path.exists(verdict_path) else {}
+    if not SR.source_rhythm_authorized(verdict):
+        raise SystemExit(
+            "entry_boundary requires the confirmed two-seed source carrier"
+        )
+    smallest = set(verdict.get("smallest_positive_subsystem") or [])
+    if "carrier_fast_only" not in smallest:
+        raise SystemExit(
+            "entry_boundary implementation is locked to the observed fast-only "
+            "minimal carrier; another subsystem requires a new conditional slice"
+        )
+
+    seed = int(ctx["S"]["seed"])
+    nE = int(ctx["S"]["NE"])
+    anchor_path = os.path.join(OUT, "anchors", f"seed{seed}", "anchor.json")
+    anchor = json.load(open(anchor_path))
+    captured = {
+        f"{row['bin_name']}__{row['fast_phase']}": row
+        for row in anchor.get("captured_states", [])
+    }
+    required = (
+        "pre_entry__natural",
+        "onset_adjacent__natural",
+        "bounded_mid__peak",
+    )
+    missing = [tag for tag in required if tag not in captured]
+    if missing:
+        raise SystemExit(f"entry_boundary missing states: {missing}")
+    engine_sha = ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"]
+    states = {}
+    manifests = {}
+    for tag in required:
+        states[tag], manifests[tag] = CK.load_state_npz(
+            os.path.join(_ROOT, captured[tag]["path"]),
+            expected_config_sha=ctx["cfg_sha"],
+            expected_engine_sha=engine_sha,
+            expected_dt=ctx["dt"],
+        )
+    pre = states["pre_entry__natural"]
+    onset = states["onset_adjacent__natural"]
+    carrier = states["bounded_mid__peak"]
+
+    def conditional_state(lam):
+        state = BD.interpolate_slow_state(
+            pre,
+            carrier,
+            lam,
+            coordinates=("z",),
+            nE=nE,
+        )
+        state["slow.m"] = np.asarray(onset["slow.m"]).copy()
+        for key in ("slow.rE_fast", "slow.mu_G", "slow.S_G"):
+            state[key] = np.asarray(onset[key]).copy()
+        return state
+
+    root = os.path.join(OUT, "boundaries", "entry", f"seed{seed}")
+    manifest_path = os.path.join(root, "entry_probes.json")
+    rows = {}
+    if resume and os.path.exists(manifest_path):
+        old = json.load(open(manifest_path))
+        expected_hashes = {
+            tag: manifests[tag]["state_hash"] for tag in required
+        }
+        if old.get("source_state_hashes") != expected_hashes:
+            raise SystemExit("entry source states changed; refusing mixed resume")
+        rows = {row["key"]: row for row in old.get("rows", [])}
+
+    def write_manifest():
+        payload = dict(
+            provenance(ctx, phase="entry_boundary"),
+            boundary_version=BD.BOUNDARY_VERSION,
+            coordinate_family="conditional_z_slice",
+            scientific_assumption=(
+                "interpolate the actual pre-entry-to-carrier z field while "
+                "holding M and the full S_G family at onset-adjacent values"
+            ),
+            starting_fast_state="pre_entry__natural",
+            source_state_hashes={
+                tag: manifests[tag]["state_hash"] for tag in required
+            },
+            levels=list(ENTRY_LEVELS),
+            response_ms=ENTRY_RESPONSE_MS,
+            base_replicate=ENTRY_BASE_REPLICATE,
+            expansion_replicates=list(ENTRY_EXPANSION_REPLICATES),
+            rows=sorted(rows.values(), key=lambda row: row["key"]),
+        )
+        write_json_atomic(manifest_path, payload)
+
+    def run_cell(lam, replicate):
+        key = f"lambda={lam:g}|{replicate}"
+        previous = rows.get(key)
+        if (
+            previous is not None
+            and previous.get("completed") is True
+            and previous.get("boundary_version") == BD.BOUNDARY_VERSION
+        ):
+            return
+        state = conditional_state(lam)
+        bank = NB.build_noise_bank(
+            ctx["cfg_sha"],
+            seed,
+            int(captured["pre_entry__natural"]["t_step"]),
+            replicate,
+        )
+        run = run_continuation(
+            ctx,
+            state,
+            "freeze_all",
+            bank,
+            anchor["locks"],
+            T_ms=ENTRY_RESPONSE_MS,
+        )
+        summary = summarize_continuation(
+            run, anchor["locks"], T_ms=ENTRY_RESPONSE_MS
+        )
+        entered = bool(summary["survived"] and summary["stationarity_ok"])
+        zE = np.asarray(state["slow.z"], float)[:nE]
+        rows[key] = {
+            "key": key,
+            "seed": seed,
+            "lambda": float(lam),
+            "replicate": replicate,
+            "bank_sha": bank["bank_sha"],
+            "entered_carrier": entered,
+            "completed": True,
+            "boundary_version": BD.BOUNDARY_VERSION,
+            "z_core_mean": float(zE[ctx["core"]].mean()),
+            "z_surround_mean": float(zE[~ctx["core"]].mean()),
+            **summary,
+        }
+        write_manifest()
+        print(
+            f"[entry] seed={seed} lambda={lam:g} rep={replicate} "
+            f"entered={entered} end={summary['end_reason']} "
+            f"wall={summary['wall_s']}s",
+            flush=True,
+        )
+
+    # Cheap-first bracket: one matched future-noise continuation at every
+    # locked level, followed only by two extra replicas at the adjacent levels
+    # that actually bracket P_enter=0.5.
+    for lam in ENTRY_LEVELS:
+        run_cell(lam, ENTRY_BASE_REPLICATE)
+    base_rows = [
+        {
+            "lambda": row["lambda"],
+            "entered_carrier": row["entered_carrier"],
+        }
+        for row in rows.values()
+        if row["replicate"] == ENTRY_BASE_REPLICATE
+    ]
+    curve = BD.jeffreys_probability_curve(
+        base_rows, "lambda", "entered_carrier"
+    )
+    bracket = BD.half_boundary(curve, expected_direction="increasing")
+    if bracket["status"] == "bracketed":
+        for lam in bracket["q_bracket"]:
+            for replicate in ENTRY_EXPANSION_REPLICATES:
+                run_cell(float(lam), replicate)
+
+    manifest = json.load(open(manifest_path))
+    manifest["cheap_bracket"] = bracket
+    manifest["complete"] = bool(
+        len([
+            row for row in rows.values()
+            if row["replicate"] == ENTRY_BASE_REPLICATE
+        ]) == len(ENTRY_LEVELS)
+        and (
+            bracket["status"] != "bracketed"
+            or all(
+                any(
+                    np.isclose(row["lambda"], lam)
+                    and row["replicate"] == replicate
+                    for row in rows.values()
+                )
+                for lam in bracket["q_bracket"]
+                for replicate in ENTRY_EXPANSION_REPLICATES
+            )
+        )
+    )
+    manifest["claim_boundary"] = (
+        "conditional Z-entry slice on the observed trajectory context; no "
+        "offset, recovery, observation match, or lifecycle implication"
+    )
+    write_json_atomic(manifest_path, manifest)
+    print(
+        f"[entry] seed={seed} complete={manifest['complete']} "
+        f"bracket={bracket['status']} -> {manifest_path}",
+        flush=True,
+    )
+    return manifest
+
+
 # ================================================================ CLI
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--phase", required=True,
                     choices=["anchor1", "anchor", "fork", "neighbourhood",
                              "source_rhythm", "effective_rank",
-                             "modal_operator", "smoke"])
+                             "modal_operator", "entry_boundary", "smoke"])
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--T", type=float, default=15000.0)
     ap.add_argument("--confirm-run", action="store_true")
@@ -1709,13 +1922,13 @@ def main():
         raise SystemExit("refusing a multi-minute N=40000 run without --confirm-run")
     if a.phase == "neighbourhood" and a.resolution != "dt":
         raise SystemExit("neighbourhood is a discovery-dt phase; dt2 is confirmation-only")
-    if a.phase in {"effective_rank", "modal_operator"} and a.resolution != "dt":
+    if a.phase in {"effective_rank", "modal_operator", "entry_boundary"} and a.resolution != "dt":
         raise SystemExit(
             f"{a.phase} runs at original dt after native dt/2 confirmation"
         )
     if a.phase != "fork" and a.evidence_tier != "discovery":
         raise SystemExit("--evidence-tier applies only to --phase fork")
-    if a.phase in {"source_rhythm", "effective_rank"}:
+    if a.phase in {"source_rhythm", "effective_rank", "entry_boundary"}:
         verdict_path = os.path.join(OUT, "branch_verdict.json")
         verdict = json.load(open(verdict_path)) if os.path.exists(verdict_path) else {}
         if not SR.source_rhythm_authorized(verdict):
@@ -1761,6 +1974,8 @@ def main():
         phase_effective_rank(ctx, resume=not a.no_resume)
     elif a.phase == "modal_operator":
         phase_modal_operator(ctx, resume=not a.no_resume)
+    elif a.phase == "entry_boundary":
+        phase_entry_boundary(ctx, resume=not a.no_resume)
     elif a.phase == "fork":
         phase_fork(ctx,
                    states_filter=[s.strip() for s in a.states.split(",")] if a.states else None,

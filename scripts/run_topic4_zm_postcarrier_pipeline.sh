@@ -118,6 +118,16 @@ run_modal() {
     echo "[postcarrier] $(date -Is) seed=$seed modal complete" >>"$log"
 }
 
+run_entry() {
+    local seed="$1"
+    local log="$out/logs/postcarrier_seed${seed}.log"
+    echo "[postcarrier] $(date -Is) seed=$seed entry start" >>"$log"
+    python scripts/run_topic4_zm_branch_decision.py \
+        --phase entry_boundary --seed "$seed" --resolution dt --confirm-run \
+        >>"$log" 2>&1
+    echo "[postcarrier] $(date -Is) seed=$seed entry complete" >>"$log"
+}
+
 run_source 1 &
 pid1=$!
 run_source 3 &
@@ -180,5 +190,19 @@ else
     echo "[postcarrier] $(date -Is) modal skipped: source class unresolved" >>"$coordinator_log"
 fi
 
+run_entry 1 &
+pid1=$!
+run_entry 3 &
+pid3=$!
+rc=0
+wait "$pid1" || rc=$?
+wait "$pid3" || rc=$?
+if [[ "$rc" -ne 0 ]]; then
+    echo "[postcarrier] $(date -Is) entry worker failure rc=$rc" >>"$coordinator_log"
+    exit "$rc"
+fi
+python scripts/analyze_topic4_zm_entry_boundary.py >>"$coordinator_log" 2>&1
+
+python scripts/adjudicate_topic4_zm_branch_decision.py >>"$coordinator_log" 2>&1
 python scripts/plot_topic4_zm_branch_decision.py >>"$coordinator_log" 2>&1
 echo "[postcarrier] $(date -Is) complete" >>"$coordinator_log"

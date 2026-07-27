@@ -196,6 +196,14 @@ def main():
         reference_lock=ref_lock, smallest_subsystem=smallest, coverage=coverage,
         confirmation=confirmation)
     result = BV.apply_observation_status(result, ref_lock)
+    entry_summary = load_json(os.path.join(
+        OUT, "boundaries", "entry", "entry_boundary_summary.json"
+    ))
+    if entry_summary and result["verdict"] == "carrier_at_visited_states":
+        if entry_summary.get("verdict") == "conditional_Z_entry_boundary_crossed":
+            result["layers"]["entry"] = "conditional_Z_boundary_crossed"
+        elif int(entry_summary.get("n_complete_seeds", 0)) >= 2:
+            result["layers"]["entry"] = "conditional_Z_boundary_unresolved"
 
     out = dict(
         version=BV.VERDICT_VERSION, timestamp=time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -209,6 +217,7 @@ def main():
         gates=gates, state_inventory=inv.get("audit"), engine_guard_change=guard,
         anchors=anchors, eligible_seeds=eligible,
         per_arm=per_arm, smallest_positive_subsystem=smallest,
+        entry_boundary=entry_summary,
         coverage=coverage, cells=BV.summarize_cells(cells) if cells else [],
         neighbourhood=neighbourhood, confirmation=confirmation,
         confirmation_by_arm=confirmation_by_arm,

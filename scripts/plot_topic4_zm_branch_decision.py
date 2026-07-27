@@ -654,6 +654,68 @@ def fig_modal_operator():
     return path
 
 
+# ============================================================ Fig 8: conditional Z-entry boundary
+def fig_entry_boundary():
+    summary = _load(os.path.join(
+        OUT, "boundaries", "entry", "entry_boundary_summary.json"
+    ))
+    if not summary or not summary.get("n_rows"):
+        return None
+    boundary = summary["boundary"]
+    curve = boundary.get("curve", [])
+    fig, axes = plt.subplots(1, 2, figsize=(11.5, 4.0))
+
+    ax = axes[0]
+    if curve:
+        q = np.asarray([row["q"] for row in curve], float)
+        median = np.asarray([row["posterior_median"] for row in curve], float)
+        ci = np.asarray([row["posterior_ci"] for row in curve], float)
+        ax.plot(q, median, marker="o", color="#D1495B")
+        ax.fill_between(q, ci[:, 0], ci[:, 1], color="#D1495B", alpha=0.18)
+    ax.axhline(0.5, color="#777", ls="--", lw=0.8)
+    if boundary.get("q_half") is not None:
+        ax.axvline(boundary["q_half"], color="#00798C", lw=1.2)
+        qci = boundary.get("q_half_ci")
+        if qci is not None:
+            ax.axvspan(qci[0], qci[1], color="#00798C", alpha=0.14)
+    ax.set_ylim(0, 1)
+    _style(ax, f"P_enter · {summary['verdict']}",
+           xlabel="actual-field Z interpolation λ", ylabel="posterior P(carrier)")
+
+    ax = axes[1]
+    manifests = [
+        _load(path) for path in sorted(glob.glob(os.path.join(
+            OUT, "boundaries", "entry", "seed*", "entry_probes.json"
+        )))
+    ]
+    colors = {1: "#D1495B", 3: "#00798C", 4: "#7B5AA6"}
+    for manifest in manifests:
+        if not manifest:
+            continue
+        seed = int(manifest["seed"])
+        rows = manifest.get("rows", [])
+        levels = sorted({float(row["lambda"]) for row in rows})
+        probability = [
+            np.mean([
+                bool(row["entered_carrier"]) for row in rows
+                if np.isclose(row["lambda"], level)
+            ])
+            for level in levels
+        ]
+        ax.plot(levels, probability, marker="o", color=colors.get(seed, "#555"),
+                label=f"seed {seed}")
+    ax.axhline(0.5, color="#777", ls="--", lw=0.8)
+    ax.set_ylim(-0.03, 1.03)
+    ax.legend(fontsize=8, frameon=False)
+    _style(ax, "replicate outcomes by seed",
+           xlabel="conditional Z coordinate λ", ylabel="empirical carrier fraction")
+    fig.tight_layout()
+    path = os.path.join(FIG, "conditional_z_entry_boundary.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return path
+
+
 # ============================================================ Fig 5: readout impostor separation
 def fig_impostors():
     import src.topic4_zm_empirical_carrier as EC
@@ -750,6 +812,10 @@ def fig_phase_status(made):
         OUT, "modal_operator", "modal_operator_summary.json"
     ), {})
     n_modal_seed = int(modal_summary.get("n_complete_seeds", 0))
+    entry_summary = _load(os.path.join(
+        OUT, "boundaries", "entry", "entry_boundary_summary.json"
+    ), {})
+    n_entry_seed = int(entry_summary.get("n_complete_seeds", 0))
     neighbourhood = v.get("neighbourhood") or {}
     neighbourhood_status = (
         "complete" if neighbourhood.get("evidence_complete") is True
@@ -789,7 +855,9 @@ def fig_phase_status(made):
         ("1.5B modal / gain",
          "complete" if n_modal_seed >= 2 else
          "in progress" if n_modal_seed else "conditional / not authorized"),
-        ("2A Z-entry boundary", "conditional / not authorized"),
+        ("2A Z-entry boundary",
+         "complete" if n_entry_seed >= 2 else
+         "in progress" if n_entry_seed else "conditional / not authorized"),
         ("2B offset boundary", "conditional / not authorized"),
         ("3 exit-driver comparison", "conditional / not authorized")]
     colors = {
@@ -876,6 +944,13 @@ FIGURE_NOTES = {
         "先看 held-out 与子空间残差是否过门；只有预测有效时，谱半径、有限时增益和"
         "病理轴夹角才有动力学解释。"
     ),
+    "conditional_z_entry_boundary.png": (
+        "展示从 matched pre-entry fast state 出发，沿真实 pre-entry→carrier Z 场方向"
+        "插值时的 P_enter；M 和完整 S_G family 固定在 onset-adjacent 值。阴影为"
+        "Jeffreys/Bootstrap 不确定度。",
+        "只有 P=0.5 被实际采样点包围、bootstrap 稳定且真实 λ=0→1 方向穿越，才能写"
+        "conditional Z-entry boundary；它不是 Z 的全局充分性。"
+    ),
     "readout_impostor_discrimination.png": (
         "展示合成 broadband carrier、尖锐谐波 pulse train 与全局固定振荡器在"
         " readout 指标上的可分性。这是 observation gate 的 synthetic sanity check。",
@@ -918,7 +993,8 @@ def main():
     failures = []
     for fn in (fig_phase0, fig_anchors, fig_carrier_matrix, fig_dynamics,
                fig_confirmation_morphology, fig_source_rhythm, fig_impostors,
-               fig_neighbourhood, fig_effective_rank, fig_modal_operator):
+               fig_neighbourhood, fig_effective_rank, fig_modal_operator,
+               fig_entry_boundary):
         try:
             p = fn()
         except Exception as e:                                # pragma: no cover - figure only
