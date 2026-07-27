@@ -324,6 +324,100 @@ def fig_dynamics():
     return path
 
 
+# ============================================================ Fig 4b: native confirmation morphology
+def fig_confirmation_morphology():
+    """Show spatial/readout morphology of completed native confirmation runs.
+
+    A continuation can satisfy the source-space stationarity gate while being a
+    nearly uniform tonic fixed point. The rate, axial kymograph, and contact
+    readout therefore need to be shown together before the word ``ictal`` is
+    used.
+    """
+    manifests = []
+    for tier in ("dt2", "long"):
+        for p in sorted(glob.glob(os.path.join(
+                OUT, "confirmations", tier, "seed*", "fork_matrix.json"))):
+            man = _load(p, {})
+            for row in man.get("rows", []):
+                trace = os.path.join(
+                    os.path.dirname(p), "traces",
+                    f"{row['bin_name']}__{row['fast_phase']}__"
+                    f"{row['arm']}__{row['replicate']}.npz",
+                )
+                if os.path.exists(trace):
+                    manifests.append((tier, row, trace))
+    if not manifests:
+        return None
+
+    fig, axes = plt.subplots(
+        len(manifests), 3, figsize=(14.5, 3.0 * len(manifests)), squeeze=False
+    )
+    for i, (tier, row, trace) in enumerate(manifests):
+        z = np.load(trace)
+        bin_ms = float(z["bin_ms"])
+        t_rate = np.arange(z["r_all"].size) * bin_ms / 1000.0
+        burn_s = float(z["burn_in_ms"]) / 1000.0
+        title = (
+            f"seed {row['seed']} · {tier} · {row.get('T_cont_ms', 0) / 1000:g}s · "
+            f"{row.get('morphology_label', 'unclassified')}\n"
+            f"mean={row.get('r_all_mean_hz', float('nan')):.1f} Hz, "
+            f"CV={row.get('r_all_cv', float('nan')):.3f}, "
+            f"extent={row.get('spatial_extent_fraction', float('nan')):.2f}, "
+            f"stationary={bool(row.get('stationarity_ok', False))}"
+        )
+
+        ax = axes[i, 0]
+        ax.plot(t_rate, z["r_all"], color=ARM_COLOR["freeze_all"], lw=0.8)
+        ax.axvspan(0, burn_s, color="#DDD", alpha=0.6)
+        _style(ax, title, xlabel="time after fork (s)", ylabel="population rate (Hz)")
+
+        ax = axes[i, 1]
+        if "kymo_axial" in z:
+            kymo = np.asarray(z["kymo_axial"], float)
+            vmax = float(np.nanpercentile(kymo, 99)) if np.any(np.isfinite(kymo)) else 1.0
+            ax.imshow(
+                kymo, origin="lower", aspect="auto", interpolation="nearest",
+                extent=[0, kymo.shape[1] * bin_ms / 1000.0, 0, kymo.shape[0]],
+                cmap="magma", vmin=0, vmax=max(vmax, 1e-9),
+            )
+            _style(ax, "axial activity kymograph", xlabel="time after fork (s)",
+                   ylabel="axial spatial bin")
+        else:
+            ax.text(0.5, 0.5, "kymograph unavailable", ha="center", va="center")
+            ax.axis("off")
+
+        ax = axes[i, 2]
+        if "lfp" in z:
+            lfp = np.asarray(z["lfp"], float)
+            if lfp.ndim == 1:
+                lfp = lfp[:, None]
+            # Canonical producer stores time x contact. Fail visibly rather
+            # than silently treating a short time axis as contacts.
+            if lfp.shape[0] < lfp.shape[1]:
+                lfp = lfp.T
+            med = np.nanmedian(lfp, axis=0, keepdims=True)
+            scale = 1.4826 * np.nanmedian(np.abs(lfp - med), axis=0, keepdims=True)
+            scale = np.where(scale > 1e-12, scale, 1.0)
+            lfp_z = np.clip((lfp - med) / scale, -6, 6).T
+            fs = float(z["lfp_fs"])
+            ax.imshow(
+                lfp_z, origin="lower", aspect="auto", interpolation="nearest",
+                extent=[0, lfp.shape[0] / fs, 0, lfp.shape[1]],
+                cmap="RdBu_r", vmin=-6, vmax=6,
+            )
+            _style(ax, f"multi-contact virtual readout ({fs:g} Hz)",
+                   xlabel="time after fork (s)", ylabel="contact index")
+        else:
+            ax.text(0.5, 0.5, "readout unavailable", ha="center", va="center")
+            ax.axis("off")
+
+    fig.tight_layout()
+    path = os.path.join(FIG, "native_confirmation_spatiotemporal_morphology.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return path
+
+
 # ============================================================ Fig 5: readout impostor separation
 def fig_impostors():
     import src.topic4_zm_empirical_carrier as EC
@@ -400,8 +494,12 @@ def fig_phase_status(made):
     coverage = v.get("coverage", {})
     n_cells_run = int(coverage.get("n_cells_planned_run", coverage.get("n_cells_run", 0)))
     n_cells_planned = int(coverage.get("n_cells_planned", 0))
-    fork_status = ("complete" if n_cells_planned and n_cells_run >= n_cells_planned
-                   else "in progress" if n_cells_run else "not started")
+    source_layer = (v.get("layers") or {}).get("source_space_carrier")
+    if source_layer in {"provisional_carrier_window", "source_space_carrier"}:
+        fork_status = "discovery complete"
+    else:
+        fork_status = ("complete" if n_cells_planned and n_cells_run >= n_cells_planned
+                       else "in progress" if n_cells_run else "not started")
     n_neighbourhood = int(v.get("n_neighbourhood_rows", 0))
     neighbourhood = v.get("neighbourhood") or {}
     neighbourhood_status = (
@@ -440,6 +538,7 @@ def fig_phase_status(made):
         ("3 exit-driver comparison", "conditional / not authorized")]
     colors = {
         "complete": "#00798C",
+        "discovery complete": "#00798C",
         "in progress": "#EDAE49",
         "exploratory partial": "#7B5AA6",
         "blocked: returning-event windows": "#D1495B",
@@ -452,11 +551,12 @@ def fig_phase_status(made):
     ax.barh(y, [1] * len(phases), color=[colors[status] for _, status in phases])
     for i, (name, status) in enumerate(phases):
         dark = status in {
-            "complete", "exploratory partial", "blocked: returning-event windows", "failed"
+            "complete", "discovery complete", "exploratory partial",
+            "blocked: returning-event windows", "failed"
         }
         ax.text(0.02, i, name, va="center", fontsize=8.5,
                 color="white" if dark else "#444",
-                fontweight="bold" if status == "complete" else "normal")
+                fontweight="bold" if status in {"complete", "discovery complete"} else "normal")
         ax.text(0.98, i, status, va="center", ha="right",
                 fontsize=7.5, color="white" if dark else "#666")
     ax.set_yticks([])
@@ -494,6 +594,12 @@ FIGURE_NOTES = {
         "虚线是 rest-distance threshold。",
         "区分持续高活动支、返回间期、relaxation train 与 runaway；平坦高率支本身"
         "不等于已经复现 ictal oscillation。"
+    ),
+    "native_confirmation_spatiotemporal_morphology.png": (
+        "把原生 dt/2 与 20 秒 confirmation 的 population rate、轴向时空图和多触点"
+        "虚拟电极读数并列。只有实际完成并保存完整 trace 的 confirmation 才会出现。",
+        "即使 source-space stationarity 通过，也要检查空间范围、传播/相位结构和触点"
+        "能量；全场 tonic fixed point 不能表述成有界 ictal oscillation。"
     ),
     "readout_impostor_discrimination.png": (
         "展示合成 broadband carrier、尖锐谐波 pulse train 与全局固定振荡器在"
@@ -535,8 +641,8 @@ def main():
     os.makedirs(FIG, exist_ok=True)
     made = []
     failures = []
-    for fn in (fig_phase0, fig_anchors, fig_carrier_matrix, fig_dynamics, fig_impostors,
-               fig_neighbourhood):
+    for fn in (fig_phase0, fig_anchors, fig_carrier_matrix, fig_dynamics,
+               fig_confirmation_morphology, fig_impostors, fig_neighbourhood):
         try:
             p = fn()
         except Exception as e:                                # pragma: no cover - figure only
