@@ -1084,7 +1084,12 @@ def phase_effective_rank(ctx, resume=True):
         old = json.load(open(manifest_path))
         if old.get("direction_sha") != direction_sha:
             raise SystemExit("effective_rank direction SHA changed; refusing mixed resume")
-        done = {row["key"]: row for row in old.get("rows", [])}
+        old_git_sha = old.get("git_sha")
+        done = {}
+        for row in old.get("rows", []):
+            row = dict(row)
+            row.setdefault("producer_git_sha", old_git_sha)
+            done[row["key"]] = row
     rows = dict(done)
     save_npz_atomic(
         os.path.join(root, "trajectory_directions.npz"),
@@ -1112,6 +1117,11 @@ def phase_effective_rank(ctx, resume=True):
             q_values=q_values.tolist(),
             q_scales=q_scales.tolist(),
             y_scales=y_scales.tolist(),
+            contributing_git_shas=sorted({
+                row.get("producer_git_sha")
+                for row in rows.values()
+                if row.get("producer_git_sha")
+            } | {ctx["runtime_git_sha"]}),
             rows=sorted(rows.values(), key=lambda x: x["key"]),
         )
         write_json_atomic(manifest_path, payload)
@@ -1121,10 +1131,44 @@ def phase_effective_rank(ctx, resume=True):
             ctx["cfg_sha"], seed, int(captured[tag]["t_step"]), "noise_replay"
         )
         for coordinate in RANK_COORDINATES:
-            plus, minus, actual_delta = ER.paired_trajectory_coordinate(
-                states[tag], directions, coordinate,
-                delta=RANK_DELTA, nE=nE,
-            )
+            try:
+                plus, minus, actual_delta = ER.paired_trajectory_coordinate(
+                    states[tag], directions, coordinate,
+                    delta=RANK_DELTA, nE=nE,
+                )
+            except ER.CentralPairUnavailable as exc:
+                reason = f"central_pair_unavailable:{exc}"
+                for sign in (+1, -1):
+                    key = f"{tag}|{coordinate}|{'plus' if sign > 0 else 'minus'}"
+                    old = rows.get(key)
+                    if (
+                        old is not None
+                        and old.get("effective_rank_version") == ER.EFFECTIVE_RANK_VERSION
+                        and old.get("direction_sha") == direction_sha
+                        and old.get("completed") is True
+                    ):
+                        continue
+                    rows[key] = dict(
+                        key=key, seed=seed, state_tag=tag,
+                        coordinate=coordinate, sign=int(sign),
+                        delta=None, requested_delta=RANK_DELTA,
+                        bank_sha=bank["bank_sha"],
+                        state_hash=state_manifests[tag]["state_hash"],
+                        direction_sha=direction_sha,
+                        effective_rank_version=ER.EFFECTIVE_RANK_VERSION,
+                        producer_git_sha=ctx["runtime_git_sha"],
+                        completed=True,
+                        response_valid=False,
+                        invalid_reason=reason,
+                        y_static=None, y_impulse=None, n_time_bins=None,
+                        wall_s=0.0, peak_rss_gb=_rss_gb(),
+                    )
+                write_manifest()
+                print(
+                    f"[effective_rank] {tag}|{coordinate} invalid={reason}",
+                    flush=True,
+                )
+                continue
             for sign, perturbed in ((+1, plus), (-1, minus)):
                 key = f"{tag}|{coordinate}|{'plus' if sign > 0 else 'minus'}"
                 old = rows.get(key)
@@ -1153,6 +1197,7 @@ def phase_effective_rank(ctx, resume=True):
                     state_hash=state_manifests[tag]["state_hash"],
                     direction_sha=direction_sha,
                     effective_rank_version=ER.EFFECTIVE_RANK_VERSION,
+                    producer_git_sha=ctx["runtime_git_sha"],
                     completed=True,
                     response_valid=valid,
                     invalid_reason=(None if valid else
@@ -1194,6 +1239,16 @@ def phase_effective_rank(ctx, resume=True):
         }
     manifest = json.load(open(manifest_path))
     manifest["state_summaries"] = state_summaries
+    expected_keys = {
+        f"{tag}|{coordinate}|{side}"
+        for tag in RANK_STATES
+        for coordinate in RANK_COORDINATES
+        for side in ("plus", "minus")
+    }
+    manifest["probe_matrix_complete"] = bool(
+        expected_keys.issubset(rows)
+        and all(rows[key].get("completed") is True for key in expected_keys)
+    )
     manifest["complete"] = bool(len(state_summaries) == len(RANK_STATES))
     write_json_atomic(manifest_path, manifest)
     print(

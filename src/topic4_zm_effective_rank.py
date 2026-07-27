@@ -22,6 +22,15 @@ RANK1_S2_RATIO_MAX = 0.20
 RANK1_ENERGY_MIN = 0.90
 
 
+class CentralPairUnavailable(ValueError):
+    """A physical boundary prevents a symmetric finite-difference pair.
+
+    This is an evidence-availability outcome, not a malformed request.  The
+    production runner records the affected coordinate as invalid and continues
+    the remaining registered probes.
+    """
+
+
 def trajectory_coordinate_directions(early_state, late_state, *, nE):
     """Use the actual early-to-late field displacement as each coordinate axis."""
     nE = int(nE)
@@ -85,7 +94,9 @@ def apply_trajectory_coordinate(
             break
         actual *= 0.5
     else:
-        raise ValueError(f"{coordinate}: no valid central displacement above min_delta")
+        raise CentralPairUnavailable(
+            f"{coordinate}: no valid central displacement above min_delta"
+        )
 
     out = copy.deepcopy(state)
     if coordinate == "z":

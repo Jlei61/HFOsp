@@ -1,6 +1,11 @@
+import importlib.util
+import json
+import os
+
 import numpy as np
 
 from src.topic4_zm_effective_rank import (
+    CentralPairUnavailable,
     apply_trajectory_coordinate,
     assemble_paired_sensitivity,
     bootstrap_rank,
@@ -12,6 +17,12 @@ from src.topic4_zm_effective_rank import (
     response_vectors,
     robust_scales,
     standardize_sensitivity,
+)
+
+
+_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+_ANALYZE_PATH = os.path.join(
+    _ROOT, "scripts", "analyze_topic4_zm_effective_rank.py"
 )
 
 
@@ -154,6 +165,49 @@ def test_field_perturbation_halves_delta_instead_of_clipping_asymmetrically():
         plus["slow.z"] - minus["slow.z"],
         2 * paired_delta * directions["z"],
     )
+
+
+def test_central_pair_at_physical_m_boundary_is_explicitly_unavailable():
+    early = {"slow.z": np.array([0.9]), "slow.m": np.array([0.0]),
+             "slow.S_G": np.asarray(0.2)}
+    late = {"slow.z": np.array([0.7]), "slow.m": np.array([1.0]),
+            "slow.S_G": np.asarray(0.5)}
+    directions = trajectory_coordinate_directions(early, late, nE=1)
+    with np.testing.assert_raises(CentralPairUnavailable):
+        paired_trajectory_coordinate(
+            early, directions, "m", delta=0.1, nE=1
+        )
+
+
+def test_incomplete_central_pairs_write_no_evidence_instead_of_crashing(
+        tmp_path, monkeypatch):
+    spec = importlib.util.spec_from_file_location("rank_analyzer_for_test", _ANALYZE_PATH)
+    analyzer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(analyzer)
+    monkeypatch.setattr(analyzer, "OUT", str(tmp_path))
+    for seed in (1, 3):
+        path = tmp_path / "effective_rank" / f"seed{seed}" / "rank_probes.json"
+        path.parent.mkdir(parents=True)
+        path.write_text(json.dumps({
+            "seed": seed,
+            "effective_rank_version": analyzer.ER.EFFECTIVE_RANK_VERSION,
+            "complete": False,
+            "probe_matrix_complete": True,
+            "rows": [{
+                "completed": True,
+                "response_valid": False,
+                "invalid_reason": (
+                    "central_pair_unavailable:m: no valid central displacement"
+                ),
+            }],
+        }))
+    analyzer.main()
+    out = json.loads(
+        (tmp_path / "effective_rank" / "effective_rank_summary.json").read_text()
+    )
+    assert out["verdict"] == "no_evidence_incomplete_central_pairs"
+    assert out["n_seeds"] == 0
+    assert len(out["coverage"]) == 2
 
 
 def test_trajectory_coordinate_projection_and_robust_scales():

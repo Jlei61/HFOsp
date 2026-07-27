@@ -68,18 +68,63 @@ def _matrices(manifest, state_tag):
     )
 
 
+def _coverage(manifest):
+    rows = manifest.get("rows", [])
+    invalid = {}
+    for row in rows:
+        reason = row.get("invalid_reason")
+        if reason:
+            invalid[reason] = invalid.get(reason, 0) + 1
+    return {
+        "seed": int(manifest["seed"]),
+        "probe_matrix_complete": bool(manifest.get("probe_matrix_complete", False)),
+        "analysis_complete": bool(manifest.get("complete", False)),
+        "n_rows": len(rows),
+        "n_completed_rows": sum(row.get("completed") is True for row in rows),
+        "n_valid_rows": sum(row.get("response_valid") is True for row in rows),
+        "invalid_reasons": invalid,
+    }
+
+
 def main():
     paths = sorted(glob.glob(os.path.join(
         OUT, "effective_rank", "seed*", "rank_probes.json"
     )))
-    manifests = [json.load(open(p)) for p in paths]
+    all_manifests = [json.load(open(p)) for p in paths]
     manifests = [
-        m for m in manifests
+        m for m in all_manifests
         if m.get("complete") is True
         and m.get("effective_rank_version") == ER.EFFECTIVE_RANK_VERSION
     ]
     if len(manifests) < 2:
-        raise SystemExit("effective-rank aggregation requires two complete seeds")
+        payload = {
+            "effective_rank_version": ER.EFFECTIVE_RANK_VERSION,
+            "analysis_git_sha": subprocess.check_output(
+                ["git", "rev-parse", "HEAD"], cwd=_ROOT, text=True
+            ).strip(),
+            "created_at": datetime.now().astimezone().isoformat(timespec="seconds"),
+            "verdict": "no_evidence_incomplete_central_pairs",
+            "n_seeds": len(manifests),
+            "seeds": sorted(int(m["seed"]) for m in manifests),
+            "n_seed_microstates": 0,
+            "coverage": [_coverage(m) for m in all_manifests],
+            "sources": [
+                {"path": os.path.relpath(path, _ROOT), "sha256": _sha(path)}
+                for path in paths
+            ],
+            "claim_boundary": (
+                "full Z/M/S_G functional rank is not identifiable when fewer "
+                "than two seeds provide complete physical central pairs; this "
+                "is missing rank evidence, not rank-1 or rank-2 evidence"
+            ),
+        }
+        out = os.path.join(OUT, "effective_rank", "effective_rank_summary.json")
+        _atomic(out, payload)
+        print(
+            "[effective_rank] verdict=no_evidence_incomplete_central_pairs "
+            f"complete_seeds={len(manifests)} -> {os.path.relpath(out, _ROOT)}"
+        )
+        return
     state_tags = tuple(manifests[0]["state_tags"])
     if any(tuple(m["state_tags"]) != state_tags for m in manifests):
         raise RuntimeError("effective-rank manifests use different state sets")

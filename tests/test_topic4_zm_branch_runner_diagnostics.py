@@ -78,3 +78,10 @@ def test_summary_labels_nearly_flat_high_rate_as_tonic_like_fixed():
     assert out["morphology_label"] == "tonic_at_25ms"
     assert out["r_all_cv"] < 0.05
     assert out["spatial_extent_fraction"] == 0.5
+
+
+def test_effective_rank_runner_records_unavailable_central_pair_contract():
+    source = open(_PATH, encoding="utf-8").read()
+    assert "except ER.CentralPairUnavailable as exc:" in source
+    assert "central_pair_unavailable:" in source
+    assert 'manifest["probe_matrix_complete"]' in source
