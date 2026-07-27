@@ -328,8 +328,15 @@ def trajectory_crossing(coordinate_trajectory, boundary, expected_direction):
     }
 
 
-def hysteresis_summary(onset_boundary, offset_boundary, scale):
-    """Compare distinct onset and offset surfaces on a common coordinate."""
+def hysteresis_summary(
+    onset_boundary,
+    offset_boundary,
+    scale,
+    *,
+    onset_ci=None,
+    offset_ci=None,
+):
+    """Compare onset/offset surfaces without mistaking point noise for hysteresis."""
 
     onset_boundary = float(onset_boundary)
     offset_boundary = float(offset_boundary)
@@ -338,13 +345,49 @@ def hysteresis_summary(onset_boundary, offset_boundary, scale):
         raise ValueError("finite boundaries and a positive scale are required")
     signed = offset_boundary - onset_boundary
     normalized = signed / scale
+    intervals_available = onset_ci is not None and offset_ci is not None
+    intervals_nonoverlap = False
+    onset_interval = offset_interval = None
+    if intervals_available:
+        onset_interval = np.asarray(onset_ci, dtype=float)
+        offset_interval = np.asarray(offset_ci, dtype=float)
+        if (
+            onset_interval.shape != (2,)
+            or offset_interval.shape != (2,)
+            or not np.isfinite(onset_interval).all()
+            or not np.isfinite(offset_interval).all()
+            or onset_interval[0] > onset_interval[1]
+            or offset_interval[0] > offset_interval[1]
+            or not onset_interval[0] <= onset_boundary <= onset_interval[1]
+            or not offset_interval[0] <= offset_boundary <= offset_interval[1]
+        ):
+            raise ValueError("boundary intervals must be ordered and contain point estimates")
+        intervals_nonoverlap = bool(
+            onset_interval[1] < offset_interval[0]
+            or offset_interval[1] < onset_interval[0]
+        )
+    point_separation_large = bool(
+        abs(normalized) >= HYSTERESIS_MIN_NORMALIZED_SEPARATION
+    )
+    distinct = bool(
+        intervals_available and intervals_nonoverlap and point_separation_large
+    )
     return {
         "onset_boundary": onset_boundary,
         "offset_boundary": offset_boundary,
+        "onset_ci": onset_interval.tolist() if onset_interval is not None else None,
+        "offset_ci": offset_interval.tolist() if offset_interval is not None else None,
         "signed_separation": float(signed),
         "normalized_separation": float(normalized),
-        "distinct_surfaces": bool(
-            abs(normalized) >= HYSTERESIS_MIN_NORMALIZED_SEPARATION
+        "point_separation_large": point_separation_large,
+        "intervals_nonoverlap": intervals_nonoverlap,
+        "distinct_surfaces": distinct,
+        "status": (
+            "distinct"
+            if distinct
+            else "uncertainty_missing"
+            if not intervals_available
+            else "not_resolved"
         ),
         "minimum_normalized_separation": HYSTERESIS_MIN_NORMALIZED_SEPARATION,
         "boundary_version": BOUNDARY_VERSION,

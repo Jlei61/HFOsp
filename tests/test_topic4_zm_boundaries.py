@@ -59,11 +59,18 @@ def test_actual_trajectory_crossing_direction_is_explicit():
 
 
 def test_onset_and_offset_surfaces_report_hysteresis_not_one_threshold():
-    h = hysteresis_summary(0.7, 1.4, scale=1.0)
-    same = hysteresis_summary(1.0, 1.01, scale=1.0)
+    h = hysteresis_summary(
+        0.7, 1.4, scale=1.0, onset_ci=[0.6, 0.8], offset_ci=[1.2, 1.6]
+    )
+    same = hysteresis_summary(
+        1.0, 1.01, scale=1.0, onset_ci=[0.8, 1.2], offset_ci=[0.9, 1.2]
+    )
+    missing = hysteresis_summary(0.7, 1.4, scale=1.0)
     assert h["distinct_surfaces"]
     assert np.isclose(h["signed_separation"], 0.7)
     assert not same["distinct_surfaces"]
+    assert not missing["distinct_surfaces"]
+    assert missing["status"] == "uncertainty_missing"
 
 
 def _state(z, m, sg):
