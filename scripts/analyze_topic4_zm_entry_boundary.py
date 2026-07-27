@@ -60,21 +60,21 @@ def main():
             expected_direction="increasing",
             n_boot=2000,
             seed=20260727,
+            cluster_key="seed",
+        )
+        reachability = BD.boundary_reachability(
+            boundary,
+            [0.0, 1.0],
+            expected_direction="increasing",
+            reachable_range=(0.0, 1.0),
         )
         crossing = (
-            BD.trajectory_crossing(
-                [0.0, 1.0],
-                boundary["q_half"],
-                expected_direction="increasing",
-            )
-            if boundary.get("status") == "bracketed"
-            else {"crossed": False, "direction_ok": False}
+            reachability["crossing"]
+            or {"crossed": False, "direction_ok": False}
         )
         verdict = (
             "conditional_Z_entry_boundary_crossed"
-            if boundary.get("status") == "bracketed"
-            and boundary.get("q_half_ci") is not None
-            and crossing["direction_ok"]
+            if reachability["reached"]
             else "conditional_Z_entry_boundary_unresolved"
         )
     end_counts = {}
@@ -88,6 +88,9 @@ def main():
         "n_rows": len(rows),
         "boundary": boundary,
         "trajectory_crossing": crossing,
+        "reachability": (
+            reachability if len(complete) >= 2 else None
+        ),
         "end_reason_counts": end_counts,
         "coordinate_family": "conditional_z_slice",
         "inputs": [

@@ -17,7 +17,7 @@ import copy
 import numpy as np
 
 
-EFFECTIVE_RANK_VERSION = "zm_effective_rank_v1_2026-07-27"
+EFFECTIVE_RANK_VERSION = "zm_effective_rank_v1.1_2026-07-27"
 RANK1_S2_RATIO_MAX = 0.20
 RANK1_ENERGY_MIN = 0.90
 
@@ -280,6 +280,78 @@ def bootstrap_rank(sample_matrices, *, n_boot=2000, seed=0, ci=(2.5, 97.5)):
     return {
         "effective_rank_version": EFFECTIVE_RANK_VERSION,
         "n_samples": int(X.shape[0]),
+        "n_boot": int(n_boot),
+        "point": point,
+        "s2_over_s1_ci": ratio_ci.tolist(),
+        "first_direction_energy_fraction_ci": energy_ci.tolist(),
+        "effective_rank_participation_ci": participation_ci.tolist(),
+        "rank1_supported": bool(
+            ratio_ci[1] < RANK1_S2_RATIO_MAX
+            and energy_ci[0] > RANK1_ENERGY_MIN
+        ),
+        "rank1_thresholds": {
+            "s2_over_s1_upper_max": RANK1_S2_RATIO_MAX,
+            "first_energy_lower_min": RANK1_ENERGY_MIN,
+        },
+    }
+
+
+def hierarchical_bootstrap_rank(
+    seed_state_matrices,
+    *,
+    n_boot=2000,
+    seed=0,
+    ci=(2.5, 97.5),
+):
+    """Bootstrap standardized response matrices by seed, then microstate.
+
+    The expected shape is ``seed x microstate x output x coordinate``.
+    Network seeds are the independent replication level; carrier microstates
+    are resampled only within each selected seed.  Flattening both dimensions
+    before resampling would incorrectly count three states from one seed as
+    three independent seeds.
+    """
+
+    X = np.asarray(seed_state_matrices, float)
+    if (
+        X.ndim != 4
+        or X.shape[0] < 2
+        or X.shape[1] < 2
+        or not np.all(np.isfinite(X))
+    ):
+        raise ValueError(
+            "seed_state_matrices must be finite "
+            "seed x microstate x output x coordinate with >=2 seeds/states"
+        )
+    if int(n_boot) < 20:
+        raise ValueError("n_boot must be at least 20")
+
+    rng = np.random.default_rng(seed)
+    ratios, energies, participation = [], [], []
+    n_seed, n_state = X.shape[:2]
+    for _ in range(int(n_boot)):
+        selected_seed = rng.integers(0, n_seed, size=n_seed)
+        sampled_seed_means = []
+        for seed_index in selected_seed:
+            selected_state = rng.integers(0, n_state, size=n_state)
+            sampled_seed_means.append(
+                np.mean(X[seed_index, selected_state], axis=0)
+            )
+        summary = rank_summary(np.mean(sampled_seed_means, axis=0))
+        ratios.append(summary["s2_over_s1"])
+        energies.append(summary["first_direction_energy_fraction"])
+        participation.append(summary["effective_rank_participation"])
+
+    ratio_ci = np.percentile(ratios, ci)
+    energy_ci = np.percentile(energies, ci)
+    participation_ci = np.percentile(participation, ci)
+    point = rank_summary(np.mean(X, axis=(0, 1)))
+    return {
+        "effective_rank_version": EFFECTIVE_RANK_VERSION,
+        "bootstrap_structure": "hierarchical_seed_then_microstate",
+        "n_seeds": int(n_seed),
+        "n_microstates_per_seed": int(n_state),
+        "n_samples": int(n_seed * n_state),
         "n_boot": int(n_boot),
         "point": point,
         "s2_over_s1_ci": ratio_ci.tolist(),

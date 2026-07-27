@@ -1,6 +1,7 @@
 import numpy as np
 
 from src.topic4_zm_boundaries import (
+    boundary_reachability,
     bootstrap_half_boundary,
     half_boundary,
     hysteresis_summary,
@@ -51,11 +52,110 @@ def test_bootstrap_boundary_reports_uncertainty_only_when_replicates_bracket():
     assert out["q_half_ci"][0] < out["q_half"] < out["q_half_ci"][1]
 
 
+def test_clustered_boundary_bootstrap_resamples_seeds_before_replicates():
+    rows = []
+    for seed in (1, 3, 4):
+        for q, k in zip([0, 1, 2, 3], [0, 1, 4, 5]):
+            rows.extend(
+                {
+                    "seed": seed,
+                    "q": float(q),
+                    "outcome": i < k,
+                }
+                for i in range(5)
+            )
+    out = bootstrap_half_boundary(
+        rows,
+        "q",
+        "outcome",
+        expected_direction="increasing",
+        n_boot=300,
+        seed=5,
+        cluster_key="seed",
+    )
+    assert out["status"] == "bracketed"
+    assert out["bootstrap_structure"] == "hierarchical_seed_then_replicate"
+    assert out["n_clusters"] == 3
+    assert out["q_half_ci"] is not None
+
+
+def test_clustered_boundary_bootstrap_fails_closed_with_one_seed():
+    rows = [
+        {"seed": 1, "q": q, "outcome": outcome}
+        for q, outcome in [(0.0, False), (1.0, True)]
+    ]
+    out = bootstrap_half_boundary(
+        rows,
+        "q",
+        "outcome",
+        expected_direction="increasing",
+        n_boot=100,
+        seed=5,
+        cluster_key="seed",
+    )
+    assert out["status"] == "bootstrap_indeterminate"
+    assert out["q_half"] is None
+    assert out["n_clusters"] == 1
+
+
+def test_clustered_boundary_requires_seed_even_when_point_is_unbracketed():
+    rows = [
+        {"q": 0.0, "outcome": False},
+        {"q": 1.0, "outcome": False},
+    ]
+    with np.testing.assert_raises(ValueError):
+        bootstrap_half_boundary(
+            rows,
+            "q",
+            "outcome",
+            expected_direction="increasing",
+            n_boot=100,
+            seed=5,
+            cluster_key="seed",
+        )
+
+
 def test_actual_trajectory_crossing_direction_is_explicit():
     inc = trajectory_crossing([0.0, 0.8, 1.2, 1.8], 1.0, expected_direction="increasing")
     wrong = trajectory_crossing([1.8, 1.2, 0.8, 0.0], 1.0, expected_direction="increasing")
     assert inc["crossed"] and inc["direction_ok"]
     assert wrong["crossed"] and not wrong["direction_ok"]
+
+
+def test_boundary_reachability_requires_ci_range_and_actual_direction():
+    boundary = {
+        "status": "bracketed",
+        "q_half": 0.6,
+        "q_half_ci": [0.5, 0.7],
+    }
+    reached = boundary_reachability(
+        boundary,
+        [0.0, 1.0],
+        expected_direction="increasing",
+        reachable_range=(0.0, 1.0),
+    )
+    wrong_direction = boundary_reachability(
+        boundary,
+        [1.0, 0.0],
+        expected_direction="increasing",
+        reachable_range=(0.0, 1.0),
+    )
+    missing_ci = boundary_reachability(
+        {**boundary, "q_half_ci": None},
+        [0.0, 1.0],
+        expected_direction="increasing",
+        reachable_range=(0.0, 1.0),
+    )
+    outside_ci = boundary_reachability(
+        {**boundary, "q_half_ci": [0.5, 1.1]},
+        [0.0, 1.0],
+        expected_direction="increasing",
+        reachable_range=(0.0, 1.0),
+    )
+    assert reached["reached"]
+    assert not wrong_direction["reached"]
+    assert not missing_ci["reached"]
+    assert not outside_ci["reached"]
 
 
 def test_onset_and_offset_surfaces_report_hysteresis_not_one_threshold():

@@ -84,16 +84,23 @@ def main():
     if any(tuple(m["state_tags"]) != state_tags for m in manifests):
         raise RuntimeError("effective-rank manifests use different state sets")
 
-    static_samples, impulse_samples = [], []
+    static_by_seed, impulse_by_seed = [], []
     per_state = {}
+    per_seed_state = {}
+    for manifest in manifests:
+        seed = int(manifest["seed"])
+        per_seed_state[seed] = {}
+        for state_tag in state_tags:
+            per_seed_state[seed][state_tag] = _matrices(
+                manifest, state_tag
+            )
+
     for state_tag in state_tags:
         st, it = [], []
         for manifest in manifests:
-            a, b = _matrices(manifest, state_tag)
+            a, b = per_seed_state[int(manifest["seed"])][state_tag]
             st.append(a)
             it.append(b)
-            static_samples.append(a)
-            impulse_samples.append(b)
         per_state[state_tag] = {
             "static_seed_matrices": [x.tolist() for x in st],
             "impulse_matrix_shape": list(it[0].shape),
@@ -101,11 +108,22 @@ def main():
             "impulse_point": ER.rank_summary(np.mean(it, axis=0)),
         }
 
-    static_boot = ER.bootstrap_rank(
-        np.asarray(static_samples), n_boot=2000, seed=271
+    for manifest in manifests:
+        seed = int(manifest["seed"])
+        static_by_seed.append([
+            per_seed_state[seed][state_tag][0]
+            for state_tag in state_tags
+        ])
+        impulse_by_seed.append([
+            per_seed_state[seed][state_tag][1]
+            for state_tag in state_tags
+        ])
+
+    static_boot = ER.hierarchical_bootstrap_rank(
+        np.asarray(static_by_seed), n_boot=2000, seed=271
     )
-    impulse_boot = ER.bootstrap_rank(
-        np.asarray(impulse_samples), n_boot=2000, seed=272
+    impulse_boot = ER.hierarchical_bootstrap_rank(
+        np.asarray(impulse_by_seed), n_boot=2000, seed=272
     )
     if static_boot["rank1_supported"] and impulse_boot["rank1_supported"]:
         verdict = "near_rank1_local_functional_collinearity"
@@ -123,7 +141,8 @@ def main():
         "verdict": verdict,
         "n_seeds": len(manifests),
         "seeds": sorted(int(m["seed"]) for m in manifests),
-        "n_seed_microstates": len(static_samples),
+        "n_seed_microstates": len(manifests) * len(state_tags),
+        "bootstrap_structure": "hierarchical_seed_then_microstate",
         "static_bootstrap": static_boot,
         "impulse_bootstrap": impulse_boot,
         "per_state": per_state,
@@ -141,7 +160,8 @@ def main():
     out = os.path.join(OUT, "effective_rank", "effective_rank_summary.json")
     _atomic(out, payload)
     print(
-        f"[effective_rank] verdict={verdict} samples={len(static_samples)} "
+        f"[effective_rank] verdict={verdict} "
+        f"samples={len(manifests) * len(state_tags)} "
         f"-> {os.path.relpath(out, _ROOT)}"
     )
 

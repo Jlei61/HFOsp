@@ -59,39 +59,66 @@ def main():
                 expected_direction="decreasing",
                 n_boot=2000,
                 seed=20260727,
+                cluster_key="seed",
             )
             q_half = boundary.get("q_half")
+            reachability = BD.boundary_reachability(
+                boundary,
+                [0.0, 1.0],
+                expected_direction="increasing",
+                reachable_range=(0.0, 1.0),
+            )
             actual_crossing = (
-                BD.trajectory_crossing(
-                    [0.0, 1.0], q_half, expected_direction="increasing"
-                )
-                if boundary.get("status") == "bracketed"
-                and q_half is not None
-                else {"crossed": False, "direction_ok": False}
+                reachability["crossing"]
+                or {"crossed": False, "direction_ok": False}
             )
             low = [
                 row for row in rows
                 if row.get("family") == family
                 and row.get("initial_kind") == "low"
             ]
+            base_active_by_level = {
+                float(row["lambda"]): bool(row["remained_carrier"])
+                for row in active
+                if row.get("replicate") == "noise_replay"
+            }
+            base_low_by_level = {
+                float(row["lambda"]): bool(row.get("low_basin_persisted"))
+                for row in low
+                if row.get("replicate") == "noise_replay"
+            }
+            coexistence_levels = sorted(
+                level
+                for level in set(base_active_by_level) & set(base_low_by_level)
+                if base_active_by_level[level] and base_low_by_level[level]
+            )
+            boundary_has_ci = bool(boundary.get("q_half_ci") is not None)
+            q_half_ci = boundary.get("q_half_ci")
+            boundary_within_actual_range = bool(
+                reachability["within_reachable_range"]
+            )
+            boundary_reached = bool(reachability["reached"])
             family_results[family] = {
                 "boundary": boundary,
                 "actual_0_to_1_crossing": actual_crossing,
+                "reachability": reachability,
                 "n_active_rows": len(active),
                 "n_low_rows": len(low),
                 "low_basin_persistence_fraction": (
                     sum(bool(row.get("low_basin_persisted")) for row in low)
                     / len(low) if low else None
                 ),
-                "boundary_within_actual_range": bool(
-                    boundary.get("status") == "bracketed"
-                    and q_half is not None
-                    and 0.0 <= q_half <= 1.0
-                ),
+                "coexistence_levels": coexistence_levels,
+                "basin_coexistence_observed": bool(coexistence_levels),
+                "boundary_has_bootstrap_ci": boundary_has_ci,
+                "boundary_within_actual_range": boundary_within_actual_range,
+                "boundary_reached_by_actual_direction": boundary_reached,
                 "boundary_in_locked_extension": bool(
-                    boundary.get("status") == "bracketed"
+                    boundary_has_ci
                     and q_half is not None
                     and 1.0 < q_half <= 1.25
+                    and 1.0 < float(q_half_ci[0])
+                    and float(q_half_ci[1]) <= 1.25
                 ),
             }
     dynamic = [
@@ -120,12 +147,14 @@ def main():
 
     verdict = "no_evidence"
     if len(complete) >= 2:
-        if family_results["M_alone"]["boundary_within_actual_range"]:
+        if family_results["M_alone"]["boundary_reached_by_actual_direction"]:
             verdict = "M_sufficient_and_reached"
-        elif family_results["M_SG"]["boundary_within_actual_range"]:
+        elif family_results["M_SG"]["boundary_reached_by_actual_direction"]:
             verdict = "M_SG_joint_offset_reached"
         elif (
-            family_results["M_Z_recovery"]["boundary_within_actual_range"]
+            family_results["M_Z_recovery"][
+                "boundary_reached_by_actual_direction"
+            ]
             and dynamic_reached
         ):
             verdict = "M_Z_recovery_offset_reached"
@@ -135,7 +164,9 @@ def main():
         ):
             verdict = "M_boundary_near_but_unreached"
         elif (
-            family_results["M_Z_recovery"]["boundary_within_actual_range"]
+            family_results["M_Z_recovery"][
+                "boundary_reached_by_actual_direction"
+            ]
             and not dynamic_reached
         ):
             verdict = "M_Z_recovery_boundary_exists_but_unreached"

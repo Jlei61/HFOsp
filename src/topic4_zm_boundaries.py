@@ -15,7 +15,7 @@ import numpy as np
 from scipy.stats import beta
 
 
-BOUNDARY_VERSION = "zm_probability_boundaries_v1_2026-07-27"
+BOUNDARY_VERSION = "zm_probability_boundaries_v1.1_2026-07-27"
 HYSTERESIS_MIN_NORMALIZED_SEPARATION = 0.1
 _STATE_KEY = {"z": "slow.z", "m": "slow.m", "sg": "slow.S_G"}
 
@@ -245,11 +245,31 @@ def bootstrap_half_boundary(
     n_boot=2000,
     seed=0,
     alpha=0.05,
+    cluster_key=None,
 ):
-    """Bootstrap replicate outcomes within each sampled coordinate level."""
+    """Bootstrap a probability boundary, optionally respecting seed clusters.
+
+    With ``cluster_key=None`` this retains the original replicate-level
+    bootstrap.  When a cluster key (normally ``"seed"``) is supplied, the
+    resample is hierarchical: clusters are sampled first and replicate
+    outcomes are then sampled within each selected cluster and coordinate.
+    This prevents multiple future-noise realizations from masquerading as
+    independent biological/network seeds.
+    """
 
     if int(n_boot) <= 0:
         raise ValueError("n_boot must be positive")
+    cluster_ids_all = []
+    if cluster_key is not None:
+        missing = [i for i, row in enumerate(rows) if cluster_key not in row]
+        if missing:
+            raise ValueError(
+                f"rows are missing cluster key {cluster_key!r}: {missing[:5]}"
+            )
+        cluster_ids_all = sorted(
+            {row[cluster_key] for row in rows},
+            key=lambda value: str(value),
+        )
     point_curve = jeffreys_probability_curve(
         rows, coordinate_key, outcome_key, alpha=alpha
     )
@@ -260,23 +280,63 @@ def bootstrap_half_boundary(
         "n_bootstrap": int(n_boot),
         "n_valid_bootstrap": 0,
         "q_half_ci": None,
+        "bootstrap_structure": (
+            "replicate_within_level"
+            if cluster_key is None
+            else f"hierarchical_{cluster_key}_then_replicate"
+        ),
+        **(
+            {"n_clusters": len(cluster_ids_all)}
+            if cluster_key is not None else {}
+        ),
     }
     if point["status"] != "bracketed":
         return out
+    if cluster_key is not None and len(cluster_ids_all) < 2:
+        out["status"] = "bootstrap_indeterminate"
+        out["q_half"] = None
+        return out
 
     grouped = defaultdict(list)
+    clustered = defaultdict(lambda: defaultdict(list))
     for row in rows:
-        grouped[float(row[coordinate_key])].append(_as_bool(row[outcome_key]))
+        q = float(row[coordinate_key])
+        outcome = _as_bool(row[outcome_key])
+        grouped[q].append(outcome)
+        if cluster_key is not None:
+            clustered[row[cluster_key]][q].append(outcome)
+    cluster_ids = cluster_ids_all
+
     rng = np.random.default_rng(seed)
     samples = []
     for _ in range(int(n_boot)):
         boot_rows = []
-        for q in sorted(grouped):
-            values = np.asarray(grouped[q], dtype=bool)
-            draw = rng.choice(values, size=values.size, replace=True)
-            boot_rows.extend(
-                {coordinate_key: q, outcome_key: bool(value)} for value in draw
+        if cluster_key is None:
+            for q in sorted(grouped):
+                values = np.asarray(grouped[q], dtype=bool)
+                draw = rng.choice(values, size=values.size, replace=True)
+                boot_rows.extend(
+                    {coordinate_key: q, outcome_key: bool(value)}
+                    for value in draw
+                )
+        else:
+            selected_clusters = rng.choice(
+                np.asarray(cluster_ids, dtype=object),
+                size=len(cluster_ids),
+                replace=True,
             )
+            for cluster_id in selected_clusters:
+                for q in sorted(clustered[cluster_id]):
+                    values = np.asarray(
+                        clustered[cluster_id][q], dtype=bool
+                    )
+                    draw = rng.choice(
+                        values, size=values.size, replace=True
+                    )
+                    boot_rows.extend(
+                        {coordinate_key: q, outcome_key: bool(value)}
+                        for value in draw
+                    )
         candidate = half_boundary(
             jeffreys_probability_curve(
                 boot_rows, coordinate_key, outcome_key, alpha=alpha
@@ -324,6 +384,75 @@ def trajectory_crossing(coordinate_trajectory, boundary, expected_direction):
         "crossings": crossings,
         "expected_direction": expected_direction,
         "boundary": boundary,
+        "boundary_version": BOUNDARY_VERSION,
+    }
+
+
+def boundary_reachability(
+    boundary_result,
+    coordinate_trajectory,
+    *,
+    expected_direction,
+    reachable_range,
+):
+    """Fail-closed test that an uncertain boundary is actually reached.
+
+    A point boundary alone is insufficient.  The bootstrap interval must
+    exist, the point and its interval must lie inside the declared reachable
+    coordinate range, and the observed trajectory must cross the point in the
+    registered direction.
+    """
+
+    _validate_direction(expected_direction)
+    lo, hi = map(float, reachable_range)
+    if not np.isfinite([lo, hi]).all() or lo > hi:
+        raise ValueError("reachable_range must be finite and ordered")
+    q_half = (boundary_result or {}).get("q_half")
+    q_ci = (boundary_result or {}).get("q_half_ci")
+    if (
+        (boundary_result or {}).get("status") != "bracketed"
+        or q_half is None
+        or q_ci is None
+    ):
+        return {
+            "reached": False,
+            "reason": "boundary_or_uncertainty_unresolved",
+            "crossing": None,
+            "within_reachable_range": False,
+            "boundary_version": BOUNDARY_VERSION,
+        }
+    q_half = float(q_half)
+    q_ci = np.asarray(q_ci, dtype=float)
+    if (
+        q_ci.shape != (2,)
+        or not np.isfinite(q_ci).all()
+        or q_ci[0] > q_ci[1]
+        or not q_ci[0] <= q_half <= q_ci[1]
+    ):
+        raise ValueError("q_half_ci must be ordered and contain q_half")
+    within = bool(
+        lo <= q_half <= hi
+        and lo <= float(q_ci[0])
+        and float(q_ci[1]) <= hi
+    )
+    crossing = trajectory_crossing(
+        coordinate_trajectory,
+        q_half,
+        expected_direction=expected_direction,
+    )
+    reached = bool(within and crossing["direction_ok"])
+    return {
+        "reached": reached,
+        "reason": (
+            "reached"
+            if reached
+            else "uncertainty_outside_reachable_range"
+            if not within
+            else "trajectory_does_not_cross_in_registered_direction"
+        ),
+        "crossing": crossing,
+        "within_reachable_range": within,
+        "reachable_range": [lo, hi],
         "boundary_version": BOUNDARY_VERSION,
     }
 

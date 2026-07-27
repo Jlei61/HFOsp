@@ -4,6 +4,7 @@ from src.topic4_zm_effective_rank import (
     apply_trajectory_coordinate,
     assemble_paired_sensitivity,
     bootstrap_rank,
+    hierarchical_bootstrap_rank,
     paired_trajectory_coordinate,
     trajectory_coordinate_directions,
     trajectory_coordinate_values,
@@ -79,6 +80,25 @@ def test_bootstrap_requires_rank1_uncertainty_interval_not_point_only():
     assert a["rank1_supported"]
     assert a["s2_over_s1_ci"][1] < 0.2
     assert not b["rank1_supported"]
+
+
+def test_hierarchical_rank_bootstrap_preserves_seed_as_replication_level():
+    rng = np.random.default_rng(12)
+    samples = np.stack([
+        np.stack([
+            np.array([[1.0, 2.0], [0.5, 1.0]])
+            + 0.002 * rng.standard_normal((2, 2))
+            for _ in range(3)
+        ])
+        for _ in range(4)
+    ])
+    out = hierarchical_bootstrap_rank(
+        samples, n_boot=300, seed=9
+    )
+    assert out["bootstrap_structure"] == "hierarchical_seed_then_microstate"
+    assert out["n_seeds"] == 4
+    assert out["n_microstates_per_seed"] == 3
+    assert out["rank1_supported"]
 
 
 def test_field_perturbations_follow_actual_early_to_late_directions():
