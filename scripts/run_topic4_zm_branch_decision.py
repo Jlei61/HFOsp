@@ -78,6 +78,8 @@ MODAL_MODE_ORDER = ("axial", "transverse", "isotropic", "core", "random")
 MODAL_TOTAL_ENERGY_MV2 = (12.8, 80.0, 320.0)
 MODAL_SETTLE_MS = 250.0
 MODAL_HELDOUT_MAX_ERROR = 0.20
+MODAL_INPUT_MAX_RESIDUAL = 0.05
+MODAL_RESPONSE_MAX_RESIDUAL = 0.20
 
 
 # ================================================================ helpers
@@ -1417,6 +1419,8 @@ def phase_modal_operator(ctx, resume=True):
             horizons_ms=horizons_ms,
             total_energy_mv2=list(MODAL_TOTAL_ENERGY_MV2),
             heldout_max_relative_error=MODAL_HELDOUT_MAX_ERROR,
+            input_max_projection_residual=MODAL_INPUT_MAX_RESIDUAL,
+            response_max_projection_residual=MODAL_RESPONSE_MAX_RESIDUAL,
             rows=sorted(rows.values(), key=lambda row: row["key"]),
         )
         write_json_atomic(manifest_path, payload)
@@ -1463,10 +1467,19 @@ def phase_modal_operator(ctx, resume=True):
                     spatial_modes=modes,
                     mode_order=MODAL_MODE_ORDER,
                 )
+                input_residual = max(
+                    input_projection["residual_fraction_by_population"].values()
+                )
+                if input_residual > MODAL_INPUT_MAX_RESIDUAL:
+                    raise RuntimeError(
+                        f"{key}: input probe leaves the registered basis "
+                        f"(residual={input_residual:.3f})"
+                    )
                 result, snapshots, valid = _modal_snapshot_run(
                     ctx, perturbed, horizons_ms
                 )
                 responses = {}
+                response_residuals = {}
                 if valid:
                     for horizon in horizons_ms:
                         projection = MO.project_voltage_state_difference(
@@ -1481,6 +1494,11 @@ def phase_modal_operator(ctx, resume=True):
                         responses[f"{horizon:g}"] = (
                             projection["coordinates"].tolist()
                         )
+                        response_residuals[f"{horizon:g}"] = max(
+                            projection[
+                                "residual_fraction_by_population"
+                            ].values()
+                        )
                 rows[key] = {
                     "key": key,
                     "kind": kind,
@@ -1492,9 +1510,11 @@ def phase_modal_operator(ctx, resume=True):
                     "input_coordinates": (
                         input_projection["coordinates"].tolist()
                     ),
+                    "input_projection_residual": input_residual,
                     "input_energy_observed_mv2": float(np.sum(delta_v ** 2)),
                     "bank_sha": base_manifest["state_hash"],
                     "responses": responses,
+                    "response_projection_residuals": response_residuals,
                     "completed": True,
                     "response_valid": valid,
                     "invalid_reason": (
@@ -1585,6 +1605,17 @@ def phase_modal_operator(ctx, resume=True):
                     "heldout_relative_error": median_error,
                 }
             )
+            projection_residuals = [
+                float(row["response_projection_residuals"][hkey])
+                for row in rows.values()
+                if np.isclose(row.get("total_energy_mv2", np.nan), energy)
+                and row.get("response_valid")
+                and hkey in row.get("response_projection_residuals", {})
+            ]
+            max_projection_residual = (
+                max(projection_residuals)
+                if projection_residuals else float("inf")
+            )
             summaries[array_key] = {
                 "horizon_ms": horizon,
                 "total_energy_mv2": float(energy),
@@ -1597,6 +1628,13 @@ def phase_modal_operator(ctx, resume=True):
                 "heldout_pass": bool(
                     heldout_errors
                     and max(heldout_errors) <= MODAL_HELDOUT_MAX_ERROR
+                    and max_projection_residual <= MODAL_RESPONSE_MAX_RESIDUAL
+                ),
+                "maximum_response_projection_residual": (
+                    max_projection_residual
+                ),
+                "maximum_allowed_response_projection_residual": (
+                    MODAL_RESPONSE_MAX_RESIDUAL
                 ),
                 **modal,
             }

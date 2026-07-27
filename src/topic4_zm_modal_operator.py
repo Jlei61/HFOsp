@@ -335,13 +335,20 @@ def project_ei_grid(E_grid, I_grid, spatial_modes, *, mode_order):
     design = np.column_stack(basis)
     coordinates = []
     names = []
+    residuals = {}
     for population, grid in (("E", E_grid), ("I", I_grid)):
         coefficient, *_ = np.linalg.lstsq(design, grid.ravel(), rcond=None)
         coordinates.extend(float(value) for value in coefficient)
         names.extend(f"{name}_{population}" for name in mode_order)
+        denominator = float(np.linalg.norm(grid.ravel()))
+        residuals[population] = (
+            float(np.linalg.norm(design @ coefficient - grid.ravel()) / denominator)
+            if denominator > np.finfo(float).eps else 0.0
+        )
     return {
         "coordinates": np.asarray(coordinates, dtype=float),
         "coordinate_order": names,
+        "residual_fraction_by_population": residuals,
         "modal_operator_version": MODAL_OPERATOR_VERSION,
     }
 

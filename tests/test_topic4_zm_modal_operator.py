@@ -214,6 +214,7 @@ def test_ei_grid_projection_uses_same_registered_spatial_basis():
     out = project_ei_grid(E, I, modes, mode_order=("axial", "core"))
     assert out["coordinate_order"] == ["axial_E", "core_E", "axial_I", "core_I"]
     assert np.allclose(out["coordinates"], [2.0, 0.5, -0.3, 1.2])
+    assert max(out["residual_fraction_by_population"].values()) < 1e-12
 
 
 def test_neuron_voltage_coarse_graining_preserves_cell_means():
@@ -260,6 +261,7 @@ def test_grid_projection_uses_dual_basis_when_modes_are_not_orthogonal():
     I = -0.2 * modes["a"] + 0.9 * modes["b"]
     out = project_ei_grid(E, I, modes, mode_order=("a", "b"))
     assert np.allclose(out["coordinates"], [1.7, -0.4, -0.2, 0.9])
+    assert max(out["residual_fraction_by_population"].values()) < 1e-12
 
     bad = {"a": modes["a"], "b": modes["a"] + 1e-9 * modes["b"]}
     with pytest.raises(ValueError, match="ill-conditioned"):
