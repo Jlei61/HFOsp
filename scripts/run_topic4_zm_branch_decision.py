@@ -21,6 +21,8 @@ Phases (each is crash-safe and writes atomically under results/topic4_sef_hfo/zm
             Task 9B matched E/I-voltage propagator selected by replicated source carrier type.
   entry_boundary
             Task 10 conditional actual-field Z entry probability boundary.
+  offset_boundary
+            Task 11 existing M, M+S_G and M+Z-recovery offset audit.
 
 Every phase pins the canonical config SHA, the engine SHAs, the state hash and the noise-bank SHA.
 OMP/MKL/OPENBLAS/NUMEXPR are forced to 1.
@@ -28,6 +30,7 @@ OMP/MKL/OPENBLAS/NUMEXPR are forced to 1.
 from __future__ import annotations
 
 import argparse
+import copy
 import dataclasses
 import hashlib
 import json
@@ -87,6 +90,12 @@ ENTRY_LEVELS = (0.0, 0.25, 0.50, 0.75, 1.0)
 ENTRY_RESPONSE_MS = 8000.0
 ENTRY_BASE_REPLICATE = "noise_replay"
 ENTRY_EXPANSION_REPLICATES = ("noise_resample_1", "noise_resample_2")
+OFFSET_LEVELS = (0.0, 1.0 / 3.0, 2.0 / 3.0, 1.0)
+OFFSET_EXTENSION_LEVEL = 1.25
+OFFSET_RESPONSE_MS = 8000.0
+OFFSET_BASE_REPLICATE = "noise_replay"
+OFFSET_EXPANSION_REPLICATES = ("noise_resample_1", "noise_resample_2")
+OFFSET_FAMILIES = ("M_alone", "M_SG", "M_Z_recovery")
 
 
 # ================================================================ helpers
@@ -417,7 +426,8 @@ ARMS_ORDER = ("freeze_all", "freeze_zm", "freeze_zsg", "freeze_z", "dynamic_repl
 #: (tau_adp=500 ms for M, tau_S=120 ms for the S_G pool); Z is the entry coordinate, not a carrier
 #: component, and the two dynamic-Z arms are controls -- both facts are recorded per arm.
 BURN_IN_MS = {"freeze_all": 250.0, "freeze_zm": 250.0, "freeze_zsg": 1000.0, "freeze_z": 1000.0,
-              "dynamic_replay": 250.0, "dynamic_z_only": 1000.0}
+              "dynamic_replay": 250.0, "dynamic_z_only": 1000.0,
+              "dynamic_zm_freeze_sg": 0.0}
 CONTROL_ARMS = ("dynamic_replay", "dynamic_z_only")
 
 
@@ -1894,13 +1904,355 @@ def phase_entry_boundary(ctx, resume=True):
     return manifest
 
 
+# ================================================================ phase: existing-coordinate offset (Task 11)
+def phase_offset_boundary(ctx, resume=True):
+    """Audit M, M+S_G and M+Z-recovery directions from active and low basins."""
+
+    if ctx["resolution"] != "dt":
+        raise SystemExit("offset_boundary runs at original dt only")
+    verdict_path = os.path.join(OUT, "branch_verdict.json")
+    verdict = json.load(open(verdict_path)) if os.path.exists(verdict_path) else {}
+    if not SR.source_rhythm_authorized(verdict):
+        raise SystemExit(
+            "offset_boundary requires the confirmed two-seed source carrier"
+        )
+    smallest = set(verdict.get("smallest_positive_subsystem") or [])
+    if "carrier_fast_only" not in smallest:
+        raise SystemExit(
+            "offset_boundary implementation is locked to the observed fast-only "
+            "carrier; a slow carrier component changes the valid families"
+        )
+
+    seed = int(ctx["S"]["seed"])
+    nE = int(ctx["S"]["NE"])
+    anchor_path = os.path.join(OUT, "anchors", f"seed{seed}", "anchor.json")
+    anchor = json.load(open(anchor_path))
+    captured = {
+        f"{row['bin_name']}__{row['fast_phase']}": row
+        for row in anchor.get("captured_states", [])
+    }
+    required = (
+        "pre_entry__natural",
+        "bounded_early__peak",
+        "bounded_mid__peak",
+        "bounded_late__peak",
+    )
+    missing = [tag for tag in required if tag not in captured]
+    if missing:
+        raise SystemExit(f"offset_boundary missing states: {missing}")
+    engine_sha = ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"]
+    states = {}
+    manifests = {}
+    for tag in required:
+        states[tag], manifests[tag] = CK.load_state_npz(
+            os.path.join(_ROOT, captured[tag]["path"]),
+            expected_config_sha=ctx["cfg_sha"],
+            expected_engine_sha=engine_sha,
+            expected_dt=ctx["dt"],
+        )
+    low_fast = states["pre_entry__natural"]
+    early = states["bounded_early__peak"]
+    active_fast = states["bounded_mid__peak"]
+    late = states["bounded_late__peak"]
+
+    def lerp(a, b, lam):
+        return np.asarray(a, float) + float(lam) * (
+            np.asarray(b, float) - np.asarray(a, float)
+        )
+
+    def family_state(family, lam, fast_state):
+        out = copy.deepcopy(fast_state)
+        if family == "M_alone":
+            out["slow.m"] = lerp(early["slow.m"], late["slow.m"], lam)
+            out["slow.z"] = np.asarray(active_fast["slow.z"]).copy()
+            for key in ("slow.rE_fast", "slow.mu_G", "slow.S_G"):
+                out[key] = np.asarray(active_fast[key]).copy()
+        elif family == "M_SG":
+            out["slow.m"] = lerp(early["slow.m"], late["slow.m"], lam)
+            out["slow.z"] = np.asarray(active_fast["slow.z"]).copy()
+            for key in ("slow.rE_fast", "slow.mu_G", "slow.S_G"):
+                out[key] = lerp(early[key], late[key], lam)
+        elif family == "M_Z_recovery":
+            out["slow.m"] = np.asarray(late["slow.m"]).copy()
+            out["slow.z"] = lerp(late["slow.z"], low_fast["slow.z"], lam)
+            for key in ("slow.rE_fast", "slow.mu_G", "slow.S_G"):
+                out[key] = np.asarray(late[key]).copy()
+        else:
+            raise ValueError(f"unknown offset family {family!r}")
+        z = np.asarray(out["slow.z"], float)[:nE]
+        m = np.asarray(out["slow.m"], float)[:nE]
+        sg = float(np.asarray(out["slow.S_G"]))
+        mu = float(np.asarray(out["slow.mu_G"]))
+        r_fast = np.asarray(out["slow.rE_fast"], float)
+        valid = bool(
+            np.isfinite(z).all()
+            and np.isfinite(m).all()
+            and np.all((z >= 0.0) & (z <= 1.0))
+            and np.all(m >= 0.0)
+            and np.isfinite(sg)
+            and 0.0 <= sg <= 1.0
+            and np.isfinite(mu)
+            and 0.0 <= mu <= 1.0
+            and np.isfinite(r_fast).all()
+            and np.all(r_fast >= 0.0)
+        )
+        if not valid:
+            return None
+        return out
+
+    root = os.path.join(OUT, "boundaries", "offset", f"seed{seed}")
+    manifest_path = os.path.join(root, "offset_probes.json")
+    rows = {}
+    if resume and os.path.exists(manifest_path):
+        old = json.load(open(manifest_path))
+        expected_hashes = {
+            tag: manifests[tag]["state_hash"] for tag in required
+        }
+        if old.get("source_state_hashes") != expected_hashes:
+            raise SystemExit("offset source states changed; refusing mixed resume")
+        rows = {row["key"]: row for row in old.get("rows", [])}
+
+    def write_manifest():
+        write_json_atomic(
+            manifest_path,
+            dict(
+                provenance(ctx, phase="offset_boundary"),
+                boundary_version=BD.BOUNDARY_VERSION,
+                families=list(OFFSET_FAMILIES),
+                levels=list(OFFSET_LEVELS),
+                extension_level=OFFSET_EXTENSION_LEVEL,
+                response_ms=OFFSET_RESPONSE_MS,
+                base_replicate=OFFSET_BASE_REPLICATE,
+                expansion_replicates=list(OFFSET_EXPANSION_REPLICATES),
+                source_state_hashes={
+                    tag: manifests[tag]["state_hash"] for tag in required
+                },
+                family_semantics={
+                    "M_alone": (
+                        "actual early-to-late M field; Z and full S_G family "
+                        "held at bounded-mid values"
+                    ),
+                    "M_SG": (
+                        "actual joint early-to-late M and full S_G family; "
+                        "Z held at bounded-mid"
+                    ),
+                    "M_Z_recovery": (
+                        "late M held high while Z interpolates from bounded-late "
+                        "toward the actual pre-entry recovered field"
+                    ),
+                },
+                rows=sorted(rows.values(), key=lambda row: row["key"]),
+            ),
+        )
+
+    def run_cell(family, lam, replicate, initial_kind="active"):
+        key = f"{family}|lambda={lam:g}|{initial_kind}|{replicate}"
+        previous = rows.get(key)
+        if (
+            previous is not None
+            and previous.get("completed") is True
+            and previous.get("boundary_version") == BD.BOUNDARY_VERSION
+        ):
+            return previous
+        fast = active_fast if initial_kind == "active" else low_fast
+        state = family_state(family, lam, fast)
+        if state is None:
+            rows[key] = {
+                "key": key,
+                "seed": seed,
+                "family": family,
+                "lambda": float(lam),
+                "initial_kind": initial_kind,
+                "replicate": replicate,
+                "completed": True,
+                "response_valid": False,
+                "invalid_reason": "physical_bound_violation_without_clipping",
+                "boundary_version": BD.BOUNDARY_VERSION,
+            }
+            write_manifest()
+            return rows[key]
+        bank = NB.build_noise_bank(
+            ctx["cfg_sha"],
+            seed,
+            int(captured[
+                "bounded_mid__peak" if initial_kind == "active"
+                else "pre_entry__natural"
+            ]["t_step"]),
+            replicate,
+        )
+        run = run_continuation(
+            ctx,
+            state,
+            "freeze_all",
+            bank,
+            anchor["locks"],
+            T_ms=OFFSET_RESPONSE_MS,
+        )
+        summary = summarize_continuation(
+            run, anchor["locks"], T_ms=OFFSET_RESPONSE_MS
+        )
+        remained = bool(summary["survived"] and summary["stationarity_ok"])
+        rows[key] = {
+            "key": key,
+            "seed": seed,
+            "family": family,
+            "lambda": float(lam),
+            "initial_kind": initial_kind,
+            "replicate": replicate,
+            "bank_sha": bank["bank_sha"],
+            "remained_carrier": remained,
+            "low_basin_persisted": bool(
+                initial_kind == "low"
+                and not remained
+                and summary["end_reason"] == "dead_in_rest_basin"
+            ),
+            "completed": True,
+            "response_valid": True,
+            "boundary_version": BD.BOUNDARY_VERSION,
+            **summary,
+        }
+        write_manifest()
+        print(
+            f"[offset] seed={seed} family={family} lambda={lam:g} "
+            f"init={initial_kind} rep={replicate} remain={remained} "
+            f"end={summary['end_reason']} wall={summary['wall_s']}s",
+            flush=True,
+        )
+        return rows[key]
+
+    family_brackets = {}
+    for family in OFFSET_FAMILIES:
+        for lam in OFFSET_LEVELS:
+            run_cell(family, lam, OFFSET_BASE_REPLICATE, "active")
+            run_cell(family, lam, OFFSET_BASE_REPLICATE, "low")
+        active_base = [
+            {
+                "lambda": row["lambda"],
+                "remained_carrier": row["remained_carrier"],
+            }
+            for row in rows.values()
+            if row.get("family") == family
+            and row.get("initial_kind") == "active"
+            and row.get("replicate") == OFFSET_BASE_REPLICATE
+            and row.get("response_valid")
+            and row["lambda"] in OFFSET_LEVELS
+        ]
+        curve = BD.jeffreys_probability_curve(
+            active_base, "lambda", "remained_carrier"
+        )
+        bracket = BD.half_boundary(curve, expected_direction="decreasing")
+        if bracket["status"] == "unbracketed" and all(
+            row["remained_carrier"] for row in active_base
+        ):
+            extension = run_cell(
+                family,
+                OFFSET_EXTENSION_LEVEL,
+                OFFSET_BASE_REPLICATE,
+                "active",
+            )
+            if extension.get("response_valid"):
+                active_base.append(
+                    {
+                        "lambda": extension["lambda"],
+                        "remained_carrier": extension["remained_carrier"],
+                    }
+                )
+                curve = BD.jeffreys_probability_curve(
+                    active_base, "lambda", "remained_carrier"
+                )
+                bracket = BD.half_boundary(
+                    curve, expected_direction="decreasing"
+                )
+        family_brackets[family] = bracket
+        if bracket["status"] == "bracketed":
+            for lam in bracket["q_bracket"]:
+                for replicate in OFFSET_EXPANSION_REPLICATES:
+                    run_cell(family, float(lam), replicate, "active")
+
+    # Separate dynamic realization test: does the specified Z/M ODE move the
+    # late active state out while S_G is held at its carrier value?
+    for replicate in (
+        OFFSET_BASE_REPLICATE,
+        *OFFSET_EXPANSION_REPLICATES,
+    ):
+        key = f"dynamic_ZM|late_active|{replicate}"
+        if key in rows and rows[key].get("completed"):
+            continue
+        bank = NB.build_noise_bank(
+            ctx["cfg_sha"],
+            seed,
+            int(captured["bounded_late__peak"]["t_step"]),
+            replicate,
+        )
+        run = run_continuation(
+            ctx,
+            late,
+            "dynamic_zm_freeze_sg",
+            bank,
+            anchor["locks"],
+            T_ms=OFFSET_RESPONSE_MS,
+        )
+        summary = summarize_continuation(
+            run, anchor["locks"], T_ms=OFFSET_RESPONSE_MS
+        )
+        rows[key] = {
+            "key": key,
+            "seed": seed,
+            "family": "dynamic_ZM",
+            "initial_kind": "active",
+            "replicate": replicate,
+            "bank_sha": bank["bank_sha"],
+            "remained_carrier": bool(
+                summary["survived"] and summary["stationarity_ok"]
+            ),
+            "completed": True,
+            "response_valid": True,
+            "boundary_version": BD.BOUNDARY_VERSION,
+            **summary,
+        }
+        write_manifest()
+        print(
+            f"[offset] seed={seed} dynamic_ZM rep={replicate} "
+            f"remain={rows[key]['remained_carrier']} "
+            f"end={summary['end_reason']} wall={summary['wall_s']}s",
+            flush=True,
+        )
+
+    manifest = json.load(open(manifest_path))
+    manifest["cheap_brackets"] = family_brackets
+    manifest["complete"] = bool(
+        all(
+            sum(
+                row.get("family") == family
+                and row.get("initial_kind") in {"active", "low"}
+                and row.get("replicate") == OFFSET_BASE_REPLICATE
+                and row.get("response_valid")
+                for row in rows.values()
+            ) >= 2 * len(OFFSET_LEVELS)
+            for family in OFFSET_FAMILIES
+        )
+        and sum(row.get("family") == "dynamic_ZM" for row in rows.values()) == 3
+    )
+    manifest["claim_boundary"] = (
+        "existing-coordinate carrier-remain/offset audit only; termination "
+        "does not establish returning interictal events or a lifecycle"
+    )
+    write_json_atomic(manifest_path, manifest)
+    print(
+        f"[offset] seed={seed} complete={manifest['complete']} -> {manifest_path}",
+        flush=True,
+    )
+    return manifest
+
+
 # ================================================================ CLI
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--phase", required=True,
                     choices=["anchor1", "anchor", "fork", "neighbourhood",
                              "source_rhythm", "effective_rank",
-                             "modal_operator", "entry_boundary", "smoke"])
+                             "modal_operator", "entry_boundary",
+                             "offset_boundary", "smoke"])
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--T", type=float, default=15000.0)
     ap.add_argument("--confirm-run", action="store_true")
@@ -1922,13 +2274,17 @@ def main():
         raise SystemExit("refusing a multi-minute N=40000 run without --confirm-run")
     if a.phase == "neighbourhood" and a.resolution != "dt":
         raise SystemExit("neighbourhood is a discovery-dt phase; dt2 is confirmation-only")
-    if a.phase in {"effective_rank", "modal_operator", "entry_boundary"} and a.resolution != "dt":
+    if a.phase in {
+        "effective_rank", "modal_operator", "entry_boundary", "offset_boundary"
+    } and a.resolution != "dt":
         raise SystemExit(
             f"{a.phase} runs at original dt after native dt/2 confirmation"
         )
     if a.phase != "fork" and a.evidence_tier != "discovery":
         raise SystemExit("--evidence-tier applies only to --phase fork")
-    if a.phase in {"source_rhythm", "effective_rank", "entry_boundary"}:
+    if a.phase in {
+        "source_rhythm", "effective_rank", "entry_boundary", "offset_boundary"
+    }:
         verdict_path = os.path.join(OUT, "branch_verdict.json")
         verdict = json.load(open(verdict_path)) if os.path.exists(verdict_path) else {}
         if not SR.source_rhythm_authorized(verdict):
@@ -1976,6 +2332,8 @@ def main():
         phase_modal_operator(ctx, resume=not a.no_resume)
     elif a.phase == "entry_boundary":
         phase_entry_boundary(ctx, resume=not a.no_resume)
+    elif a.phase == "offset_boundary":
+        phase_offset_boundary(ctx, resume=not a.no_resume)
     elif a.phase == "fork":
         phase_fork(ctx,
                    states_filter=[s.strip() for s in a.states.split(",")] if a.states else None,

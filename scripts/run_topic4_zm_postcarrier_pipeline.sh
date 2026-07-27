@@ -128,6 +128,16 @@ run_entry() {
     echo "[postcarrier] $(date -Is) seed=$seed entry complete" >>"$log"
 }
 
+run_offset() {
+    local seed="$1"
+    local log="$out/logs/postcarrier_seed${seed}.log"
+    echo "[postcarrier] $(date -Is) seed=$seed offset start" >>"$log"
+    python scripts/run_topic4_zm_branch_decision.py \
+        --phase offset_boundary --seed "$seed" --resolution dt --confirm-run \
+        >>"$log" 2>&1
+    echo "[postcarrier] $(date -Is) seed=$seed offset complete" >>"$log"
+}
+
 run_source 1 &
 pid1=$!
 run_source 3 &
@@ -202,6 +212,19 @@ if [[ "$rc" -ne 0 ]]; then
     exit "$rc"
 fi
 python scripts/analyze_topic4_zm_entry_boundary.py >>"$coordinator_log" 2>&1
+
+run_offset 1 &
+pid1=$!
+run_offset 3 &
+pid3=$!
+rc=0
+wait "$pid1" || rc=$?
+wait "$pid3" || rc=$?
+if [[ "$rc" -ne 0 ]]; then
+    echo "[postcarrier] $(date -Is) offset worker failure rc=$rc" >>"$coordinator_log"
+    exit "$rc"
+fi
+python scripts/analyze_topic4_zm_offset_boundary.py >>"$coordinator_log" 2>&1
 
 python scripts/adjudicate_topic4_zm_branch_decision.py >>"$coordinator_log" 2>&1
 python scripts/plot_topic4_zm_branch_decision.py >>"$coordinator_log" 2>&1

@@ -716,6 +716,70 @@ def fig_entry_boundary():
     return path
 
 
+# ============================================================ Fig 9: existing-coordinate offset
+def fig_offset_boundary():
+    summary = _load(os.path.join(
+        OUT, "boundaries", "offset", "offset_boundary_summary.json"
+    ))
+    families = (summary or {}).get("family_results", {})
+    if not families:
+        return None
+    fig, axes = plt.subplots(1, 3, figsize=(14.0, 4.0))
+    colors = {"M_alone": "#D1495B", "M_SG": "#00798C",
+              "M_Z_recovery": "#7B5AA6"}
+
+    ax = axes[0]
+    for family, result in families.items():
+        curve = result["boundary"].get("curve", [])
+        if not curve:
+            continue
+        q = np.asarray([row["q"] for row in curve], float)
+        p = np.asarray([row["posterior_median"] for row in curve], float)
+        ax.plot(q, p, marker="o", color=colors[family], label=family)
+        q_half = result["boundary"].get("q_half")
+        if q_half is not None:
+            ax.axvline(q_half, color=colors[family], lw=0.8, alpha=0.7)
+    ax.axhline(0.5, color="#777", ls="--", lw=0.8)
+    ax.axvline(1.0, color="#999", ls=":", lw=0.8, label="actual range end")
+    ax.set_ylim(0, 1)
+    ax.legend(fontsize=7, frameon=False)
+    _style(ax, f"P_remain · {summary['verdict']}",
+           xlabel="existing-coordinate λ", ylabel="posterior P(remain carrier)")
+
+    ax = axes[1]
+    names = list(families)
+    values = [
+        families[name].get("low_basin_persistence_fraction") or 0.0
+        for name in names
+    ]
+    ax.bar(np.arange(len(names)), values,
+           color=[colors[name] for name in names])
+    ax.set_xticks(np.arange(len(names)),
+                  [name.replace("_", "\n") for name in names])
+    ax.set_ylim(0, 1)
+    _style(ax, "matched-low basin coexistence",
+           ylabel="fraction returning/staying in low basin")
+
+    ax = axes[2]
+    dynamic = summary.get("dynamic_ZM", {})
+    posterior = dynamic.get("posterior_offset_reached") or {}
+    median = float(posterior.get("median", 0.0))
+    lo, hi = float(posterior.get("lo", 0.0)), float(posterior.get("hi", 0.0))
+    ax.errorbar([0], [median], yerr=[[median - lo], [hi - median]],
+                fmt="o", color="#00798C", capsize=4)
+    ax.axhline(0.8, color="#D1495B", ls="--", lw=0.8)
+    ax.set_xlim(-0.6, 0.6)
+    ax.set_ylim(0, 1)
+    ax.set_xticks([0], ["dynamic Z+M\nS_G frozen"])
+    _style(ax, "actual ODE realization",
+           ylabel="Jeffreys P(offset to rest basin)")
+    fig.tight_layout()
+    path = os.path.join(FIG, "existing_slow_coordinate_offset.png")
+    fig.savefig(path, dpi=150)
+    plt.close(fig)
+    return path
+
+
 # ============================================================ Fig 5: readout impostor separation
 def fig_impostors():
     import src.topic4_zm_empirical_carrier as EC
@@ -816,6 +880,10 @@ def fig_phase_status(made):
         OUT, "boundaries", "entry", "entry_boundary_summary.json"
     ), {})
     n_entry_seed = int(entry_summary.get("n_complete_seeds", 0))
+    offset_summary = _load(os.path.join(
+        OUT, "boundaries", "offset", "offset_boundary_summary.json"
+    ), {})
+    n_offset_seed = int(offset_summary.get("n_complete_seeds", 0))
     neighbourhood = v.get("neighbourhood") or {}
     neighbourhood_status = (
         "complete" if neighbourhood.get("evidence_complete") is True
@@ -858,7 +926,9 @@ def fig_phase_status(made):
         ("2A Z-entry boundary",
          "complete" if n_entry_seed >= 2 else
          "in progress" if n_entry_seed else "conditional / not authorized"),
-        ("2B offset boundary", "conditional / not authorized"),
+        ("2B offset boundary",
+         "complete" if n_offset_seed >= 2 else
+         "in progress" if n_offset_seed else "conditional / not authorized"),
         ("3 exit-driver comparison", "conditional / not authorized")]
     colors = {
         "complete": "#00798C",
@@ -951,6 +1021,13 @@ FIGURE_NOTES = {
         "只有 P=0.5 被实际采样点包围、bootstrap 稳定且真实 λ=0→1 方向穿越，才能写"
         "conditional Z-entry boundary；它不是 Z 的全局充分性。"
     ),
+    "existing_slow_coordinate_offset.png": (
+        "比较 M、M+S_G 和 M+Z-recovery 三条真实慢场方向上的 P_remain=0.5 "
+        "边界，同时显示 matched-low basin 是否仍存在，以及动态 Z+M、固定 S_G 时"
+        "是否真正退入 rest basin。",
+        "offset 只表示离开 carrier；即使回到 rest basin，也不能自动写成原有间期事件"
+        "恢复，更不能单独构成完整 lifecycle。"
+    ),
     "readout_impostor_discrimination.png": (
         "展示合成 broadband carrier、尖锐谐波 pulse train 与全局固定振荡器在"
         " readout 指标上的可分性。这是 observation gate 的 synthetic sanity check。",
@@ -994,7 +1071,7 @@ def main():
     for fn in (fig_phase0, fig_anchors, fig_carrier_matrix, fig_dynamics,
                fig_confirmation_morphology, fig_source_rhythm, fig_impostors,
                fig_neighbourhood, fig_effective_rank, fig_modal_operator,
-               fig_entry_boundary):
+               fig_entry_boundary, fig_offset_boundary):
         try:
             p = fn()
         except Exception as e:                                # pragma: no cover - figure only
