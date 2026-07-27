@@ -385,6 +385,114 @@ def test_ambiguous_when_centroid_is_equidistant():
     assert out["frac_ambiguous"] == pytest.approx(1.0)
 
 
+# =====================================================================================
+#  T6 / T7 -- Gate H and f' selection adjudication (plan §8, §9.3)
+# =====================================================================================
+def _gate_h_all_ok():
+    return {name: dict(ok=True) for name, _ in ION._GATE_H_ORDER} | {
+        "heterogeneous_init_residual": dict(
+            ok=True, q95_abs_dNa_dt=1e-12, q99_abs_dNa_dt=2e-12, max_abs_dNa_dt=5e-12,
+            q95_abs_dKo_dt=1e-13, q99_abs_dKo_dt=2e-13, max_abs_dKo_dt=4e-13)}
+
+
+def test_gate_H_passes_only_when_every_item_passes():
+    assert ION.adjudicate_gate_H(_gate_h_all_ok())["status"] == "PASS"
+
+
+@pytest.mark.parametrize("item,code", [
+    ("resting_fixed_point", "FAIL_EQUILIBRIUM"),
+    ("empty_voxel_fixed_point", "FAIL_EMPTY_VOXEL"),
+    ("heterogeneous_init_residual", "FAIL_INIT_RESIDUAL"),
+    ("k_budget_closure", "FAIL_BUDGET"),
+    ("pump_stoichiometry", "FAIL_STOICHIOMETRY"),
+    ("ions_off_byte_parity", "FAIL_PARITY"),
+    ("dt_ion_convergence", "FAIL_NUMERICAL"),
+])
+def test_gate_H_maps_each_failure_to_its_registered_code(item, code):
+    checks = _gate_h_all_ok()
+    checks[item] = dict(checks[item], ok=False)
+    assert ION.adjudicate_gate_H(checks)["status"] == code
+
+
+def test_gate_H_is_unresolved_when_only_the_population_mean_was_measured():
+    """spec §4.2c: a flat population mean is NOT evidence -- the per-cell / per-voxel q95, q99 and
+    max must all be present, or the gate is UNRESOLVED rather than PASS."""
+    checks = _gate_h_all_ok()
+    checks["heterogeneous_init_residual"] = dict(ok=True, mean_abs_dNa_dt=1e-14,
+                                                 mean_abs_dKo_dt=1e-15)
+    out = ION.adjudicate_gate_H(checks)
+    assert out["status"] == "UNRESOLVED"
+    assert "q95_abs_dNa_dt" in out["reason"]
+
+
+def test_gate_H_is_unresolved_when_an_item_was_never_measured():
+    checks = _gate_h_all_ok()
+    del checks["checkpoint_restart_identity"]
+    out = ION.adjudicate_gate_H(checks)
+    assert out["status"] == "UNRESOLVED" and "checkpoint_restart_identity" in out["reason"]
+
+
+def _f_meas(dK=0.3, sigma=0.01, ratio=2.6, decay=0.31, monotone=True, resid=0.4):
+    return dict(dK_peak_single_mM=dK, sigma_rest_K_mM=sigma,
+                integration_ratio_5th_over_1st=ratio, na_excess_decay_frac_20s=decay,
+                na_excess_monotone_nonincreasing=monotone,
+                k_returns_within_1sigma_3s=True, k_residual_after_3s_in_sigma=resid)
+
+
+def test_f_prime_gates_pass_a_healthy_candidate():
+    out = ION.evaluate_f_prime_gates(_f_meas())
+    assert out["admissible"] is True
+    assert all(v["ok"] for v in out["gates"].values())
+
+
+def test_f_prime_measurable_gate_uses_an_absolute_floor_not_only_sigma():
+    """The rev2 gate was relative to sigma alone, so a better initialization made it EASIER to
+    pass -- it measured the initialization, not the potassium signal."""
+    tiny = ION.evaluate_f_prime_gates(_f_meas(dK=0.02, sigma=1e-6))
+    assert tiny["gates"]["measurable"]["ok"] is False
+    assert tiny["gates"]["measurable"]["threshold"] == 0.15
+
+
+def test_f_prime_safety_ceiling_is_two_sided():
+    out = ION.evaluate_f_prime_gates(_f_meas(dK=1.2))
+    assert out["gates"]["measurable"]["ok"] is True and out["gates"]["safe"]["ok"] is False
+    assert out["admissible"] is False
+
+
+def test_f_prime_na_recovery_band_rejects_both_too_fast_and_too_slow():
+    assert ION.evaluate_f_prime_gates(_f_meas(decay=0.60))["gates"]["recovery_Na"]["ok"] is False
+    assert ION.evaluate_f_prime_gates(_f_meas(decay=0.05))["gates"]["recovery_Na"]["ok"] is False
+    assert ION.evaluate_f_prime_gates(_f_meas(decay=0.31))["gates"]["recovery_Na"]["ok"] is True
+    assert ION.evaluate_f_prime_gates(
+        _f_meas(decay=0.31, monotone=False))["gates"]["recovery_Na"]["ok"] is False
+
+
+def test_f_prime_integration_gate_separates_passing_from_supralinear():
+    """Passing 2.38 is NOT evidence of supralinear accumulation: pure linear superposition at
+    200 ms spacing already predicts 2.97."""
+    mid = ION.evaluate_f_prime_gates(_f_meas(ratio=2.6))["gates"]["integration"]
+    assert mid["ok"] is True and mid["supralinear"] is False
+    hi = ION.evaluate_f_prime_gates(_f_meas(ratio=3.4))["gates"]["integration"]
+    assert hi["ok"] is True and hi["supralinear"] is True
+    assert hi["ratio_vs_linear"] > 1.0
+
+
+def test_f_prime_tie_break_is_closest_to_one_not_largest():
+    rows = [dict(f_prime=0.5, admissible=True), dict(f_prime=1.0, admissible=True),
+            dict(f_prime=2.0, admissible=True)]
+    assert ION.select_f_prime(rows)["selected"] == 1.0
+    rows2 = [dict(f_prime=0.5, admissible=True), dict(f_prime=1.0, admissible=False),
+             dict(f_prime=2.0, admissible=True)]
+    # 0.5 and 2.0 are equidistant in absolute terms; the lower (weaker feedback) wins
+    assert ION.select_f_prime(rows2)["selected"] == 0.5
+
+
+def test_f_prime_all_three_failing_is_a_bounded_negative():
+    rows = [dict(f_prime=f, admissible=False) for f in (0.5, 1.0, 2.0)]
+    out = ION.select_f_prime(rows)
+    assert out["status"] == "NO_GO_ION_SCALE" and out["selected"] is None
+
+
 def test_power_precondition_is_a_hard_gate():
     """n_scoreable < 20 -> INSUFFICIENT_POWER; the function must NOT hand back a usable threshold."""
     bad = ION.direction_power_gate(dict(n_scoreable=7, frac_A=0.5, frac_B=0.5))

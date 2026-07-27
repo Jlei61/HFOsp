@@ -57,6 +57,8 @@ class IonHomeostasisConfig:
     na_bounds: tuple = (1.0, 80.0)     # fail-fast guards, NEVER saturators
     ko_bounds: tuple = (0.2, 80.0)
     record_trace: bool = False
+    k_trace_stride: int = 0            # >0: keep the K_o grid every N ion blocks (T7 measurement)
+    na_snapshot_blocks: tuple = ()     # ion-block indices at which to keep the full Na_i field
 
     def __post_init__(self):
         if self.q_ion <= 0.0:
@@ -98,6 +100,10 @@ class IonHomeostasis:
         self.grid_spikes_E = np.zeros(self.nv, np.int64)   # cumulative, diagnostics only
         self.grid_spikes_I = np.zeros(self.nv, np.int64)
         self.trace = [] if cfg.record_trace else None
+        self.k_trace = [] if cfg.k_trace_stride else None
+        self.k_trace_blocks = []
+        self.na_snapshots = {}
+        self._na_snapshot_at = set(int(b) for b in cfg.na_snapshot_blocks)
         self._refresh_membrane_state()
 
     # ------------------------------------------------------------------ derived membrane state
@@ -165,6 +171,11 @@ class IonHomeostasis:
                                    K_mean=float(self.K_o_grid.mean()),
                                    K_max=float(self.K_o_grid.max()),
                                    pump_mean=float(self.pump_flux_all.mean())))
+        if self.k_trace is not None and self.n_updates % self.cfg.k_trace_stride == 0:
+            self.k_trace.append(self.K_o_grid.astype(np.float32).copy())
+            self.k_trace_blocks.append(self.n_updates)
+        if self.n_updates in self._na_snapshot_at:
+            self.na_snapshots[self.n_updates] = self.Na_i_all.astype(np.float32).copy()
 
     def _check_bounds(self):
         lo, hi = self.cfg.na_bounds

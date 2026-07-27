@@ -658,6 +658,144 @@ def initiation_site_readout(spk_bool, pos_E, core_A_xy, core_B_xy, events, *, dt
                 per_event=per)
 
 
+# =====================================================================================
+#  Gate H -- homeostasis and numerical contract (spec §9, plan §8)
+# =====================================================================================
+# Pre-locked BEFORE any measurement.  Rationale for the residual bound:
+#   * over the full 11 s window 1e-6 mM/s integrates to 1.1e-5 mM, four orders of magnitude
+#     below the interictal excursion the layer is supposed to produce (dK_o ~ 0.11 mM,
+#     dNa ~ 2.07 mM at f'=1), so it cannot masquerade as dynamics;
+#   * it also sits four orders below what the single-global-rate scalar initializer leaves
+#     (q99 ~ 1e-2 mM/s), so the gate genuinely discriminates the two initializers.
+GATE_H_RESIDUAL_MAX_MM_S = 1e-6
+GATE_H_BUDGET_REL_TOL = 1e-10
+GATE_H_DIFFUSION_ABS_TOL = 1e-11
+GATE_H_FIXED_POINT_TOL = 1e-12
+GATE_H_RECOVERY_REL_TOL = 0.01     # local K perturbation must return within 1% in 3 s
+GATE_H_PUMP_MIN_FRAC = 0.5         # baseline pump must be constitutive, not silently off
+
+_GATE_H_ORDER = [
+    ("resting_fixed_point", "FAIL_EQUILIBRIUM"),
+    ("empty_voxel_fixed_point", "FAIL_EMPTY_VOXEL"),
+    ("heterogeneous_init_residual", "FAIL_INIT_RESIDUAL"),
+    ("k_budget_closure", "FAIL_BUDGET"),
+    ("zero_flux_boundary", "FAIL_BUDGET"),
+    ("pump_stoichiometry", "FAIL_STOICHIOMETRY"),
+    ("ions_off_byte_parity", "FAIL_PARITY"),
+    ("baseline_pump_nonzero", "FAIL_NUMERICAL"),
+    ("local_perturbation_recovers", "FAIL_NUMERICAL"),
+    ("grid_consistency", "FAIL_NUMERICAL"),
+    ("dt_ion_convergence", "FAIL_NUMERICAL"),
+    ("checkpoint_restart_identity", "FAIL_NUMERICAL"),
+    ("no_negative_or_bound_collision", "FAIL_NUMERICAL"),
+    ("blessed_engine_unmodified", "FAIL_PARITY"),
+]
+
+
+def adjudicate_gate_H(checks):
+    """Map the measured Gate H items to the pre-registered status enum (plan §8).
+
+    Population-mean stationarity NEVER counts: the initialization residual item must carry
+    per-cell / per-voxel q95, q99 and max, because on a heterogeneous substrate the mean can be
+    flat while a slow spatial re-arrangement (tau_Na = 54.4 s) runs underneath it unseen in 11 s.
+    """
+    missing = [name for name, _ in _GATE_H_ORDER if name not in checks]
+    if missing:
+        return dict(status="UNRESOLVED", reason=f"items not measured: {missing}",
+                    checks=checks, missing=missing)
+    res = checks["heterogeneous_init_residual"]
+    for stat in ("q95", "q99", "max"):
+        for var in ("dNa_dt", "dKo_dt"):
+            if f"{stat}_abs_{var}" not in res:
+                return dict(status="UNRESOLVED",
+                            reason=f"init residual is missing {stat}_abs_{var}; a population mean "
+                                   f"is not an acceptable substitute (spec §4.2c)",
+                            checks=checks)
+    failures = [(name, code) for name, code in _GATE_H_ORDER if not checks[name].get("ok")]
+    if not failures:
+        return dict(status="PASS", checks=checks, failures=[],
+                    thresholds=dict(residual_max_mM_s=GATE_H_RESIDUAL_MAX_MM_S,
+                                    budget_rel_tol=GATE_H_BUDGET_REL_TOL,
+                                    diffusion_abs_tol=GATE_H_DIFFUSION_ABS_TOL,
+                                    fixed_point_tol=GATE_H_FIXED_POINT_TOL))
+    return dict(status=failures[0][1], checks=checks,
+                failures=[dict(item=n, code=c, detail=checks[n]) for n, c in failures])
+
+
+# =====================================================================================
+#  T7 -- f' selection on the small network (plan §9.3, rev3 five gates)
+# =====================================================================================
+# Every bound is pre-registered.  The rev2 gates were all rewritten because each of them failed
+# by construction once the two relaxation times were computed: tau_Ko = 0.655 s and
+# tau_Na = 54.42 s differ by 83x, so no single 20 s window can judge both.
+F_GATES = dict(
+    measurable_sigma_mult=5.0,
+    measurable_abs_floor_mM=0.15,     # = 1 mV of E_K = 5.6% of V_th: "the membrane must see it"
+    safe_ceiling_mM=0.90,             # = 5.4 mV = 30% of V_th from ONE interictal event: too much
+    k_recovery_window_s=3.0,          # 4.6 tau_Ko
+    k_recovery_sigma=1.0,
+    na_recovery_window_s=20.0,        # 0.37 tau_Na -> analytic decay 30.8%
+    na_decay_band=(0.154, 0.462),     # [0.5x, 1.5x] of the analytic 30.8%
+    na_monotone_sigma_slack=1.0,
+    integration_min_ratio=2.38,       # 0.8 x the 2.97 pure-linear superposition at 200 ms spacing
+    integration_linear_prediction=2.97,
+)
+
+
+def evaluate_f_prime_gates(m):
+    """Five gates on one f' candidate.  `m` carries the measured quantities; all five must pass."""
+    g = F_GATES
+    floor = max(g["measurable_sigma_mult"] * float(m["sigma_rest_K_mM"]), g["measurable_abs_floor_mM"])
+    ratio = float(m["integration_ratio_5th_over_1st"])
+    gates = {
+        "measurable": dict(ok=bool(float(m["dK_peak_single_mM"]) >= floor),
+                           value=float(m["dK_peak_single_mM"]), threshold=floor,
+                           sigma_rest=float(m["sigma_rest_K_mM"]),
+                           rule="single-event peak dK_o >= max(5*sigma_rest, 0.15 mM)"),
+        "safe": dict(ok=bool(float(m["dK_peak_single_mM"]) <= g["safe_ceiling_mM"]),
+                     value=float(m["dK_peak_single_mM"]), threshold=g["safe_ceiling_mM"],
+                     rule="a SINGLE interictal event must not push the membrane 30% of V_th"),
+        "recovery_K": dict(ok=bool(m["k_returns_within_1sigma_3s"]),
+                           value=float(m["k_residual_after_3s_in_sigma"]),
+                           threshold=g["k_recovery_sigma"],
+                           rule="back inside 1 sigma of this voxel's resting mean within 3 s"),
+        "recovery_Na": dict(
+            ok=bool(m["na_excess_monotone_nonincreasing"]
+                    and g["na_decay_band"][0] <= float(m["na_excess_decay_frac_20s"])
+                    <= g["na_decay_band"][1]),
+            value=float(m["na_excess_decay_frac_20s"]), band=list(g["na_decay_band"]),
+            monotone=bool(m["na_excess_monotone_nonincreasing"]),
+            rule="event-INDUCED excess (vs each cell's own pre-kick baseline) decays 15.4-46.2% "
+                 "in 20 s and never rises after the peak"),
+        "integration": dict(ok=bool(ratio >= g["integration_min_ratio"]),
+                            value=ratio, threshold=g["integration_min_ratio"],
+                            linear_prediction=g["integration_linear_prediction"],
+                            ratio_vs_linear=ratio / g["integration_linear_prediction"],
+                            supralinear=bool(ratio > g["integration_linear_prediction"]),
+                            rule="5th/1st peak dK_o >= 2.38; only a ratio ABOVE 2.97 is "
+                                 "supralinear -- passing 2.38 alone is NOT evidence of it"),
+    }
+    return dict(admissible=all(v["ok"] for v in gates.values()), gates=gates, measured=m)
+
+
+def select_f_prime(rows):
+    """Tie-break: among admissible candidates take the one CLOSEST to f' = 1.0.
+
+    rev2's 'take the largest' would systematically bias toward stronger potassium positive
+    feedback -- exactly the direction that makes B3/B4 run away -- i.e. it would pre-bias the
+    mechanism conclusion through a tie-break rule.  1.0 is primary; 0.5 and 2.0 bracket it.
+    """
+    adm = [r for r in rows if r["admissible"]]
+    if not adm:
+        return dict(status="NO_GO_ION_SCALE", selected=None, rows=rows,
+                    reason="none of {0.5, 1.0, 2.0} passed all five gates; the candidate set may "
+                           "not be widened, the tie-break may not be changed and no gate may be "
+                           "relaxed (plan §15)")
+    best = min(adm, key=lambda r: (abs(r["f_prime"] - F_PRIME_PRIMARY), r["f_prime"]))
+    return dict(status="SELECTED", selected=best["f_prime"], n_admissible=len(adm), rows=rows,
+                tie_break="closest to f' = 1.0")
+
+
 MIN_SCOREABLE_EVENTS = 20      # spec §9 B-real hard precondition
 
 
