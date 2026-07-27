@@ -1,0 +1,56 @@
+{
+  "subject": "epilepsiae_384",
+  "coordinate_free_models": {
+    "node_bias": 0.34575888420757733,
+    "empirical_probability_markov": 0.3349552367812958,
+    "directed_logit_markov": 0.3349552367812958,
+    "symmetric_only": 0.3364923192395229,
+    "skew_only": 0.34643646109086573,
+    "symmetric_plus_skew": 0.3349552367812958,
+    "source_only": 0.36065756566948,
+    "last_2_ranks": 0.3312953173720423,
+    "last_3_ranks": 0.33377173858213766,
+    "unordered_full_prefix": 0.33868679542061475,
+    "ordered_full_prefix": 0.33212875630633654
+  },
+  "selected_history_decay": 0.25,
+  "history_validation_scores": {
+    "0.25": 0.34387632584628447,
+    "0.5": 0.34425955311146833,
+    "0.75": 0.3467948132341886
+  },
+  "physical_axis": {
+    "models": {
+      "node_bias": 0.3449834192668306,
+      "directed_logit_markov": 0.334179771840549,
+      "same_shaft_only": 0.34548840363511985,
+      "distance_only": 0.34788730114683375,
+      "same_shaft_plus_distance": 0.34592805330704696,
+      "physical_axis_residual": 0.34125867673416116,
+      "source_conditioned_axis": 0.34045618036093594
+    },
+    "axis": {
+      "subject": "epilepsiae_384",
+      "selected_axis_index": 12,
+      "axis_x": 0.7969168510214679,
+      "axis_y": -0.1751999341695868,
+      "axis_z": 0.578125,
+      "axis_pca1_abs_cosine": 0.28778692966747005,
+      "local_axis_frobenius_cosine": 0.9413225366696927,
+      "same_shaft_coefficient": 0.0263928795879909,
+      "distance_coefficient": 0.4023298946755735,
+      "geometry_same_coefficient": -0.1698035455358954,
+      "geometry_distance_coefficient": 0.5440663425172279,
+      "axis_excess_coefficient": -4.953608012327744,
+      "source_direction_beta": 1.271884230505364,
+      "source_projection_center": 2.8104173120941924,
+      "source_projection_iqr": 7.73680804329414,
+      "same_shaft_train_pair_mse": 0.2448382412670702,
+      "distance_train_pair_mse": 0.22878502947810553,
+      "geometry_train_pair_mse": 0.2241116875733125,
+      "axis_train_pair_mse": 0.19381685351659256
+    }
+  },
+  "input_sha256": "e0d88fdee36f91583b362c6f23cb6bb0f4a8df735e40bfd90505927cc8cf82f1",
+  "target_values_read": false
+}

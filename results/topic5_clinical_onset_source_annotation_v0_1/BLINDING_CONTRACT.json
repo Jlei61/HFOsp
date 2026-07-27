@@ -1,0 +1,18 @@
+{
+  "status": "LOCKED",
+  "reviewers_must_not_view": [
+    "RNN scores",
+    "Markov scores",
+    "transition decomposition scores",
+    "early-ictal energy values"
+  ],
+  "forbidden_substitutions": [
+    "SOZ",
+    "patient-level focus",
+    "A/B template source",
+    "energy-top contacts"
+  ],
+  "primary_acceptance": "reviewer agreement or expert adjudication plus exact contact join",
+  "ambiguous_cases": "exclude with explicit reason",
+  "target_values_read": false
+}

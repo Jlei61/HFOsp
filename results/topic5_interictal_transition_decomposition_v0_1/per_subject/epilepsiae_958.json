@@ -1,0 +1,56 @@
+{
+  "subject": "epilepsiae_958",
+  "coordinate_free_models": {
+    "node_bias": 0.3011833484933966,
+    "empirical_probability_markov": 0.28842173513527836,
+    "directed_logit_markov": 0.28842173513527836,
+    "symmetric_only": 0.28837828423065553,
+    "skew_only": 0.3014864807296932,
+    "symmetric_plus_skew": 0.28842173513527836,
+    "source_only": 0.30680815845531106,
+    "last_2_ranks": 0.27981852613511504,
+    "last_3_ranks": 0.2785326065952364,
+    "unordered_full_prefix": 0.282635692409852,
+    "ordered_full_prefix": 0.278607362669576
+  },
+  "selected_history_decay": 0.5,
+  "history_validation_scores": {
+    "0.25": 0.27438053580895844,
+    "0.5": 0.2713718181255901,
+    "0.75": 0.2719874020931881
+  },
+  "physical_axis": {
+    "models": {
+      "node_bias": 0.30202927798251145,
+      "directed_logit_markov": 0.2892676646243931,
+      "same_shaft_only": 0.3019699780145372,
+      "distance_only": 0.30486763346930595,
+      "same_shaft_plus_distance": 0.3042403006473651,
+      "physical_axis_residual": 0.30007202660201326,
+      "source_conditioned_axis": 0.30004430647811353
+    },
+    "axis": {
+      "subject": "epilepsiae_958",
+      "selected_axis_index": 0,
+      "axis_x": 0.17608480733726006,
+      "axis_y": 0.0,
+      "axis_z": 0.984375,
+      "axis_pca1_abs_cosine": 0.7958645454102127,
+      "local_axis_frobenius_cosine": 0.9227608541092649,
+      "same_shaft_coefficient": -0.009188423970687556,
+      "distance_coefficient": 0.6301153636275899,
+      "geometry_same_coefficient": -0.2983163301839505,
+      "geometry_distance_coefficient": 0.8701907579597952,
+      "axis_excess_coefficient": -8.803750303251304,
+      "source_direction_beta": 1.010011690236405,
+      "source_projection_center": -1.8518051662720878,
+      "source_projection_iqr": 20.49579019266274,
+      "same_shaft_train_pair_mse": 0.37920080152003977,
+      "distance_train_pair_mse": 0.35167016976072213,
+      "geometry_train_pair_mse": 0.3407149156549746,
+      "axis_train_pair_mse": 0.2968521492646308
+    }
+  },
+  "input_sha256": "b1b25dbc11bfee77b2fac9606e4520b3e100443d80e14dd02ebe1425ca988be3",
+  "target_values_read": false
+}

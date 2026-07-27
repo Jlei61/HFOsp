@@ -1,0 +1,22 @@
+{
+  "comparison": "directed_cross_shaft_beyond_local_geometry",
+  "n_patients": 20,
+  "n_physical_patients_total": 22,
+  "minimum_events": 20,
+  "minimum_prefixes": 50,
+  "excluded_subjects": [
+    "epilepsiae_139",
+    "yuquan_zhangjiaqi"
+  ],
+  "median_benefit": 0.015703259576449136,
+  "median_ci95": [
+    0.008932059179564772,
+    0.02344603500560391
+  ],
+  "n_positive": 19,
+  "wilcoxon_one_sided_p": 9.5367431640625e-06,
+  "bh_fdr_q": 1.3113021850585938e-05,
+  "fdr_family_size": 11,
+  "pass": true,
+  "role": "formal_cross_shaft_conditional_nonempty_likelihood_gate_with_positive_and_negative_contacts"
+}

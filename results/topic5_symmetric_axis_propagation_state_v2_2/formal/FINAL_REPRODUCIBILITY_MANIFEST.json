@@ -1,0 +1,39 @@
+{
+  "contract": "topic5_symmetric_axis_propagation_state_rnn",
+  "version": "2.2",
+  "status": "COMPLETE",
+  "interictal_pass": false,
+  "early_ictal_values_unlocked": false,
+  "source_metadata_ready": false,
+  "target_values_read": false,
+  "required_artifacts": {
+    "results/topic5_symmetric_axis_propagation_state_v2_2/provenance/upstream_manifest.json": "2ef951ec1b47eaf61b0292e6e69ebc10d126c44181d6479fa4cfef9c7ca3ee82",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/input_audit/INPUT_AUDIT_GATE.json": "148228b89ab3ee355bc48ffffa14f9a065ca2c4d575b6d15f4a583fbb9aa15ec",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/target_audit/TARGET_METADATA_GATE.json": "9b65d327ec45147a7bb1d9c8f311cae1b76145e63b3fe59dcd29bae475cbdf5d",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/target_audit/TARGET_VALUES_SEALED.json": "08c44a2e235e19cb179fd599c060add31a296b48ca10f4d8035b7c27e345af31",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/model_audit/MATHEMATICAL_MODEL_GATE.json": "79e4323bf80d07cdde5369485ffddac63cbbf7ac3bd9a22cd5d5e5994d3a8bc4",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/development/DEVELOPMENT_LOCK.json": "35ba96ed33d65dfdd563c0999bf7961cc79304d7dfca684837a08aaaff8193f3",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/PHYSICAL_AXIS_FORMAL_LOCK.json": "7bd2bad1aac779f240ff13ab4b2211864c18bd743503503137c783536ee1c2ad",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/ALL_SUBJECT_SEQUENCE_LOCK.json": "9813cdd3c6618fb1be5085ddb3217ceebdb7081c258718610bbf57ee425282f5",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/TRAINER_EPOCH_AUDIT.json": "be8bbf0a091f964ab9076d2f559d61c5b8479ddd9d716420820d7f1f0fc51da8",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/analysis/CLAIM1_STATUS.json": "ee60657b31d0878853692258d27f6a401d3f2276e99134dadc4463be3046c6df",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/analysis/claim1_sequence_predictability.csv": "905d8b84fdead91dedbc35fef4bd11a3b8acef224f64524c817f90d88d97c81a",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/analysis/CLAIM2_STATUS.json": "9537d6093243818cead4d0fbb7c00d251232442174e2de0b5dbcf85eac73f493",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/analysis/ALL_SUBJECT_SEQUENCE_STATUS.json": "2dc8e64ba9e397c36a704009c7c478973237568cb9e7e3196dbe8c9e53011184",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/analysis/AB_AXIS_READBACK_STATUS.json": "996035da43ddab24876bfe3268e305bee6137b35a29055160846324911539945",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/analysis/INTERICTAL_CLAIM_SUMMARY.json": "7c4510e37cc9b768b6062fad8693eaaf7948fec3b6d2d789772a1ba16f99aa02",
+    "results/paper-ready-figure/fig6_symmetric_axis_propagation_state_v2_2/fig6_symmetric_axis_propagation_state_v2_2_summary.json": "c9deffcffbdb8603d9942593df61c8f33a50297af6533807cfc3b5d84a42699d",
+    "results/paper-ready-figure/fig6_symmetric_axis_propagation_state_v2_2/figures/fig6_symmetric_axis_propagation_state_v2_2.png": "332fbeca342b35a3df8a6631fde26d43425cbc65c0d9143c1251daa75901c3df",
+    "results/paper-ready-figure/fig6_symmetric_axis_propagation_state_v2_2/figures/fig6_symmetric_axis_propagation_state_v2_2.pdf": "72db28d3d5ecb082a06a06a4ad01ba52b6fc16203fc1a1124ef5e8da5cfb6ae9",
+    "results/paper-ready-figure/fig6_symmetric_axis_propagation_state_v2_2/figures/README.md": "ff4445d3ac897029946844ef257251344cde5efec43ac6b0c1ea49e247d56e4e",
+    "results/topic5_symmetric_axis_propagation_state_v2_2/formal/launcher_logs/final_delivery_tests.log": "ca6dc77a9dd5e344b97f37269eb4c2f6311cbb3d6ba6e2b8194909b66f429e94"
+  },
+  "figure_summary_sha256": "c9deffcffbdb8603d9942593df61c8f33a50297af6533807cfc3b5d84a42699d",
+  "tests": {
+    "command": "pytest -q tests/test_topic5_*v2_2.py tests/test_plot_fig6_symmetric_axis_propagation_state_v2_2.py",
+    "status": "PASS",
+    "log": "results/topic5_symmetric_axis_propagation_state_v2_2/formal/launcher_logs/final_delivery_tests.log",
+    "log_sha256": "ca6dc77a9dd5e344b97f37269eb4c2f6311cbb3d6ba6e2b8194909b66f429e94"
+  },
+  "finished_unix": 1785110779.33231
+}
