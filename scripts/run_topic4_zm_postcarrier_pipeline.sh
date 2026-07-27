@@ -84,10 +84,10 @@ raise SystemExit(0 if ok else 1)
 PY
 }
 
-run_seed() {
+run_source() {
     local seed="$1"
     local log="$out/logs/postcarrier_seed${seed}.log"
-    echo "[postcarrier] $(date -Is) seed=$seed start" >>"$log"
+    echo "[postcarrier] $(date -Is) seed=$seed source start" >>"$log"
     if source_complete "$seed"; then
         echo "[postcarrier] $(date -Is) seed=$seed reuse source-rhythm audit" >>"$log"
     else
@@ -95,15 +95,22 @@ run_seed() {
             --phase source_rhythm --seed "$seed" --resolution dt --confirm-run \
             >>"$log" 2>&1
     fi
+    echo "[postcarrier] $(date -Is) seed=$seed source complete" >>"$log"
+}
+
+run_rank() {
+    local seed="$1"
+    local log="$out/logs/postcarrier_seed${seed}.log"
+    echo "[postcarrier] $(date -Is) seed=$seed rank start" >>"$log"
     python scripts/run_topic4_zm_branch_decision.py \
         --phase effective_rank --seed "$seed" --resolution dt --confirm-run \
         >>"$log" 2>&1
-    echo "[postcarrier] $(date -Is) seed=$seed complete" >>"$log"
+    echo "[postcarrier] $(date -Is) seed=$seed rank complete" >>"$log"
 }
 
-run_seed 1 &
+run_source 1 &
 pid1=$!
-run_seed 3 &
+run_source 3 &
 pid3=$!
 
 rc=0
@@ -115,6 +122,20 @@ if [[ "$rc" -ne 0 ]]; then
 fi
 
 python scripts/analyze_topic4_zm_source_rhythm.py >>"$coordinator_log" 2>&1
+
+run_rank 1 &
+pid1=$!
+run_rank 3 &
+pid3=$!
+
+rc=0
+wait "$pid1" || rc=$?
+wait "$pid3" || rc=$?
+if [[ "$rc" -ne 0 ]]; then
+    echo "[postcarrier] $(date -Is) rank worker failure rc=$rc" >>"$coordinator_log"
+    exit "$rc"
+fi
+
 python scripts/analyze_topic4_zm_effective_rank.py >>"$coordinator_log" 2>&1
 python scripts/plot_topic4_zm_branch_decision.py >>"$coordinator_log" 2>&1
 echo "[postcarrier] $(date -Is) complete" >>"$coordinator_log"
