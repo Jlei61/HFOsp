@@ -17,6 +17,8 @@ Phases (each is crash-safe and writes atomically under results/topic4_sef_hfo/zm
             stochastic operator tools. It cannot establish an ictal or observation-space claim.
   effective_rank
             Task 9A paired central differences along actual Z/M/S_G trajectory-field directions.
+  modal_operator
+            Task 9B matched E/I-voltage propagator selected by replicated source carrier type.
 
 Every phase pins the canonical config SHA, the engine SHAs, the state hash and the noise-bank SHA.
 OMP/MKL/OPENBLAS/NUMEXPR are forced to 1.
@@ -55,6 +57,7 @@ import src.topic4_zm_minimal_carrier as MC           # noqa: E402
 import src.topic4_zm_ictal_carrier as CG             # noqa: E402
 import src.topic4_zm_source_rhythm as SR             # noqa: E402
 import src.topic4_zm_effective_rank as ER             # noqa: E402
+import src.topic4_zm_modal_operator as MO              # noqa: E402
 
 OUT = os.path.join(_ROOT, "results", "topic4_sef_hfo", "zm_branch_decision")
 PHASE0 = os.path.join(OUT, "phase0")
@@ -70,6 +73,11 @@ RANK_COORDINATES = ("z", "m", "sg")
 RANK_OBSERVABLES = ("r_all", "A_active", "H_spatial", "E_vSEEG")
 RANK_DELTA = 0.05
 RANK_RESPONSE_MS = 1000.0
+MODAL_GRID = 16
+MODAL_MODE_ORDER = ("axial", "transverse", "isotropic", "core", "random")
+MODAL_TOTAL_ENERGY_MV2 = (12.8, 80.0, 320.0)
+MODAL_SETTLE_MS = 250.0
+MODAL_HELDOUT_MAX_ERROR = 0.20
 
 
 # ================================================================ helpers
@@ -1177,12 +1185,471 @@ def phase_effective_rank(ctx, resume=True):
     return manifest
 
 
+# ================================================================ phase: modal/operator audit (Task 9B)
+def _modal_mode_hash(modes):
+    h = hashlib.sha256()
+    for name in MODAL_MODE_ORDER:
+        value = np.ascontiguousarray(np.asarray(modes[name], np.float64))
+        h.update(name.encode())
+        h.update(str(value.shape).encode())
+        h.update(value.tobytes())
+    return h.hexdigest()
+
+
+def _modal_snapshot_run(ctx, state, horizons_ms):
+    horizons_ms = [float(value) for value in horizons_ms]
+    t0_step = int(np.asarray(state["t"]))
+    target_steps = [
+        t0_step + int(round(value / ctx["dt"])) for value in horizons_ms
+    ]
+    slow = make_slow(ctx, freeze_arm="freeze_all")
+    ck = CK.ZMCheckpoint(initial_state=state, snapshot_steps=target_steps)
+    result = run_segment(
+        ctx, slow, max(horizons_ms), ckpt=ck, dump_i_spikes=False
+    )
+    valid = bool(
+        result.get("runaway_early_stop_ms") is None
+        and all(step in ck.snapshots for step in target_steps)
+    )
+    return result, {
+        float(horizon): ck.snapshots.get(step)
+        for horizon, step in zip(horizons_ms, target_steps)
+    }, valid
+
+
+def phase_modal_operator(ctx, resume=True):
+    """Paired finite-time voltage propagators in the replicated carrier class."""
+
+    if ctx["resolution"] != "dt":
+        raise SystemExit("modal_operator runs at original dt after native confirmation")
+    source_summary_path = os.path.join(
+        OUT, "source_rhythm", "source_rhythm_summary.json"
+    )
+    source_summary = (
+        json.load(open(source_summary_path))
+        if os.path.exists(source_summary_path) else {}
+    )
+    if not MO.modal_probe_authorized(source_summary):
+        raise SystemExit(
+            "modal_operator requires a replicated fine-source carrier type"
+        )
+
+    seed = int(ctx["S"]["seed"])
+    carrier_type = source_summary["carrier_type"]
+    source_path = os.path.join(
+        OUT, "source_rhythm", "dt", f"seed{seed}", "source_rhythm.json"
+    )
+    source = json.load(open(source_path))
+    source_metrics = source.get("source_rhythm") or {}
+    frequency_hz = source_metrics.get("dominant_frequency_median_hz")
+    horizons_ms = MO.operator_horizons_ms(
+        carrier_type,
+        frequency_hz=(frequency_hz if carrier_type == "periodic" else None),
+        bin_ms=SOURCE_RHYTHM_BIN_MS,
+    )
+    tool = MO.route_operator_tool(carrier_type)
+
+    anchor_path = os.path.join(OUT, "anchors", f"seed{seed}", "anchor.json")
+    anchor = json.load(open(anchor_path))
+    captured = {
+        f"{row['bin_name']}__{row['fast_phase']}": row
+        for row in anchor.get("captured_states", [])
+    }
+    state_tag = "bounded_mid__peak"
+    if state_tag not in captured:
+        raise SystemExit(f"modal_operator missing {state_tag} anchor")
+    selected = captured[state_tag]
+    engine_sha = ctx["cfg_locked"]["engine_sha256"]["src/snn_engine/kick_probe.py"]
+    natural_state, natural_manifest = CK.load_state_npz(
+        os.path.join(_ROOT, selected["path"]),
+        expected_config_sha=ctx["cfg_sha"],
+        expected_engine_sha=engine_sha,
+        expected_dt=ctx["dt"],
+    )
+
+    root = os.path.join(OUT, "modal_operator", f"seed{seed}")
+    os.makedirs(root, exist_ok=True)
+    base_path = os.path.join(root, "settled_base_state.npz")
+    if resume and os.path.exists(base_path):
+        base_state, base_manifest = CK.load_state_npz(
+            base_path,
+            expected_config_sha=ctx["cfg_sha"],
+            expected_engine_sha=engine_sha,
+            expected_dt=ctx["dt"],
+        )
+    else:
+        bank = NB.build_noise_bank(
+            ctx["cfg_sha"], seed, int(selected["t_step"]), "noise_replay"
+        )
+        slow = make_slow(ctx, freeze_arm="freeze_all")
+        ck = CK.ZMCheckpoint(
+            initial_state=natural_state,
+            return_final_state=True,
+            rng_state=bank["rng_state"],
+        )
+        result = run_segment(ctx, slow, MODAL_SETTLE_MS, ckpt=ck)
+        if (
+            result.get("runaway_early_stop_ms") is not None
+            or ck.final_state is None
+            or ck.final_truncated
+        ):
+            raise RuntimeError("modal freeze_all settling did not yield a valid state")
+        base_state = ck.final_state
+        base_manifest = CK.save_state_npz(
+            base_state,
+            {
+                "config_sha": ctx["cfg_sha"],
+                "engine_sha": engine_sha,
+                "dt": ctx["dt"],
+                "seed": seed,
+                "phase": "modal_operator_settle",
+                "source_state_hash": natural_manifest["state_hash"],
+                "settle_ms": MODAL_SETTLE_MS,
+                "git_sha": ctx["runtime_git_sha"],
+                "runtime_started_at": ctx["runtime_started_at"],
+            },
+            base_path,
+        )
+
+    modes = MO.equal_energy_perturbations(
+        MODAL_GRID,
+        float(ctx["S"]["reg"]["theta_deg"]),
+        energy=1.0,
+        random_seed=seed,
+    )
+    basis = MO.spatial_basis_diagnostics(modes, MODAL_MODE_ORDER)
+    if not basis["well_conditioned"]:
+        raise RuntimeError("locked modal probe basis is ill-conditioned")
+    mode_sha = _modal_mode_hash(modes)
+    modes_path = os.path.join(root, "spatial_modes.npz")
+    save_npz_atomic(
+        modes_path,
+        **{name: np.asarray(modes[name], np.float64)
+           for name in MODAL_MODE_ORDER},
+    )
+    input_order = tuple(
+        [f"{name}_E" for name in MODAL_MODE_ORDER]
+        + [f"{name}_I" for name in MODAL_MODE_ORDER]
+    )
+
+    baseline_paths = {}
+    baseline_states = {}
+    baseline_valid = True
+    for horizon in horizons_ms:
+        path = os.path.join(root, f"baseline_h{horizon:g}ms.npz")
+        baseline_paths[horizon] = path
+        if not (resume and os.path.exists(path)):
+            baseline_valid = False
+            continue
+        try:
+            baseline_states[horizon], _ = CK.load_state_npz(
+                path,
+                expected_config_sha=ctx["cfg_sha"],
+                expected_engine_sha=engine_sha,
+                expected_dt=ctx["dt"],
+            )
+        except ValueError:
+            baseline_valid = False
+    if not baseline_valid:
+        result, snapshots, valid = _modal_snapshot_run(
+            ctx, base_state, horizons_ms
+        )
+        if not valid:
+            raise RuntimeError("unperturbed modal baseline did not complete")
+        baseline_states = {}
+        for horizon, state in snapshots.items():
+            path = baseline_paths[horizon]
+            CK.save_state_npz(
+                state,
+                {
+                    "config_sha": ctx["cfg_sha"],
+                    "engine_sha": engine_sha,
+                    "dt": ctx["dt"],
+                    "seed": seed,
+                    "phase": "modal_operator_baseline",
+                    "carrier_type": carrier_type,
+                    "horizon_ms": horizon,
+                    "base_state_hash": base_manifest["state_hash"],
+                    "git_sha": ctx["runtime_git_sha"],
+                },
+                path,
+            )
+            baseline_states[horizon] = state
+
+    heldout_modes = {
+        "heldout_combo_a": (
+            0.60 * modes["axial"] - 0.25 * modes["transverse"]
+            + 0.35 * modes["core"] + 0.15 * modes["random"]
+        ),
+        "heldout_combo_b": (
+            -0.20 * modes["axial"] + 0.55 * modes["isotropic"]
+            - 0.30 * modes["core"] + 0.25 * modes["random"]
+        ),
+    }
+    manifest_path = os.path.join(root, "modal_probes.json")
+    old_rows = {}
+    if resume and os.path.exists(manifest_path):
+        old = json.load(open(manifest_path))
+        if old.get("mode_sha") != mode_sha:
+            raise SystemExit("modal mode SHA changed; refusing mixed resume")
+        if old.get("base_state_hash") != base_manifest["state_hash"]:
+            raise SystemExit("modal base state changed; refusing mixed resume")
+        old_rows = {row["key"]: row for row in old.get("rows", [])}
+    rows = dict(old_rows)
+
+    def write_manifest():
+        payload = dict(
+            provenance(
+                ctx, phase="modal_operator", state_tag=state_tag,
+                carrier_type=carrier_type, operator_tool=tool,
+            ),
+            modal_operator_version=MO.MODAL_OPERATOR_VERSION,
+            source_summary_path=os.path.relpath(source_summary_path, _ROOT),
+            source_path=os.path.relpath(source_path, _ROOT),
+            source_state_hash=natural_manifest["state_hash"],
+            base_state_hash=base_manifest["state_hash"],
+            base_state_path=os.path.relpath(base_path, _ROOT),
+            mode_sha=mode_sha,
+            mode_path=os.path.relpath(modes_path, _ROOT),
+            mode_order=list(MODAL_MODE_ORDER),
+            input_order=list(input_order),
+            basis_diagnostics=basis,
+            horizons_ms=horizons_ms,
+            total_energy_mv2=list(MODAL_TOTAL_ENERGY_MV2),
+            heldout_max_relative_error=MODAL_HELDOUT_MAX_ERROR,
+            rows=sorted(rows.values(), key=lambda row: row["key"]),
+        )
+        write_json_atomic(manifest_path, payload)
+
+    probe_specs = []
+    for population in ("E", "I"):
+        for name in MODAL_MODE_ORDER:
+            probe_specs.append(("train", name, population, modes[name]))
+        for name, field in heldout_modes.items():
+            probe_specs.append(("heldout", name, population, field))
+
+    for kind, name, population, field in probe_specs:
+        for energy in MODAL_TOTAL_ENERGY_MV2:
+            amplitude = float(np.sqrt(energy))
+            for sign in (-1, 1):
+                key = (
+                    f"{kind}|{name}_{population}|E{energy:g}|"
+                    f"{'plus' if sign > 0 else 'minus'}"
+                )
+                previous = rows.get(key)
+                if (
+                    previous is not None
+                    and previous.get("completed") is True
+                    and previous.get("modal_operator_version")
+                    == MO.MODAL_OPERATOR_VERSION
+                ):
+                    continue
+                perturbed, delta_v = MO.apply_voltage_perturbation(
+                    base_state,
+                    field,
+                    ctx["S"]["posE"],
+                    ctx["S"]["posI"],
+                    L=ctx["S"]["L"],
+                    population=population,
+                    total_energy_mv2=energy,
+                    sign=sign,
+                )
+                input_projection = MO.project_voltage_state_difference(
+                    perturbed,
+                    base_state,
+                    ctx["S"]["posE"],
+                    ctx["S"]["posI"],
+                    L=ctx["S"]["L"],
+                    spatial_modes=modes,
+                    mode_order=MODAL_MODE_ORDER,
+                )
+                result, snapshots, valid = _modal_snapshot_run(
+                    ctx, perturbed, horizons_ms
+                )
+                responses = {}
+                if valid:
+                    for horizon in horizons_ms:
+                        projection = MO.project_voltage_state_difference(
+                            snapshots[horizon],
+                            baseline_states[horizon],
+                            ctx["S"]["posE"],
+                            ctx["S"]["posI"],
+                            L=ctx["S"]["L"],
+                            spatial_modes=modes,
+                            mode_order=MODAL_MODE_ORDER,
+                        )
+                        responses[f"{horizon:g}"] = (
+                            projection["coordinates"].tolist()
+                        )
+                rows[key] = {
+                    "key": key,
+                    "kind": kind,
+                    "input_mode": f"{name}_{population}",
+                    "population": population,
+                    "amplitude": amplitude,
+                    "total_energy_mv2": float(energy),
+                    "sign": int(sign),
+                    "input_coordinates": (
+                        input_projection["coordinates"].tolist()
+                    ),
+                    "input_energy_observed_mv2": float(np.sum(delta_v ** 2)),
+                    "bank_sha": base_manifest["state_hash"],
+                    "responses": responses,
+                    "completed": True,
+                    "response_valid": valid,
+                    "invalid_reason": (
+                        None if valid else
+                        ("runaway" if result.get("runaway_early_stop_ms") is not None
+                         else "missing_horizon_snapshot")
+                    ),
+                    "wall_s": round(float(result.get("wall_s", 0.0)), 1),
+                    "modal_operator_version": MO.MODAL_OPERATOR_VERSION,
+                }
+                write_manifest()
+                print(
+                    f"[modal] seed={seed} {key} valid={valid} "
+                    f"wall={result.get('wall_s', float('nan'))}s",
+                    flush=True,
+                )
+
+    arrays = {}
+    summaries = {}
+    heldout_error_rows = {float(h): [] for h in horizons_ms}
+    for horizon in horizons_ms:
+        hkey = f"{horizon:g}"
+        for energy in MODAL_TOTAL_ENERGY_MV2:
+            amplitude = float(np.sqrt(energy))
+            training = [
+                {**row, "response": row.get("responses", {}).get(hkey)}
+                for row in rows.values()
+                if row.get("kind") == "train"
+                and np.isclose(row.get("total_energy_mv2", np.nan), energy)
+                and row.get("response_valid")
+            ]
+            if len(training) != 2 * len(input_order):
+                continue
+            assembled = MO.assemble_central_propagator(
+                training, input_order=input_order, amplitude=amplitude
+            )
+            operator = assembled["operator"]
+            array_key = f"h{horizon:g}_E{energy:g}".replace(".", "p")
+            arrays[f"{array_key}_operator"] = operator
+            arrays[f"{array_key}_input_matrix"] = assembled["input_matrix"]
+            modal = MO.analyze_discrete_operator(
+                operator, dt_ms=horizon, horizon_ms=horizon
+            )
+            for name in (
+                "leading_right_mode", "leading_left_mode",
+                "optimal_input_mode", "optimal_output_mode",
+            ):
+                arrays[f"{array_key}_{name}"] = np.asarray(modal.pop(name))
+
+            heldout_errors = []
+            heldout_names = sorted({
+                row["input_mode"] for row in rows.values()
+                if row.get("kind") == "heldout"
+            })
+            for heldout_name in heldout_names:
+                pair = [
+                    row for row in rows.values()
+                    if row.get("kind") == "heldout"
+                    and row.get("input_mode") == heldout_name
+                    and np.isclose(row.get("total_energy_mv2", np.nan), energy)
+                    and row.get("response_valid")
+                ]
+                if len(pair) != 2:
+                    continue
+                plus = next(row for row in pair if row["sign"] == 1)
+                minus = next(row for row in pair if row["sign"] == -1)
+                x = (
+                    np.asarray(plus["input_coordinates"], float)
+                    - np.asarray(minus["input_coordinates"], float)
+                ) / 2.0
+                y = (
+                    np.asarray(plus["responses"][hkey], float)
+                    - np.asarray(minus["responses"][hkey], float)
+                ) / 2.0
+                denom = float(np.linalg.norm(y))
+                error = (
+                    float(np.linalg.norm(operator @ x - y) / denom)
+                    if denom > np.finfo(float).eps else float("inf")
+                )
+                heldout_errors.append(error)
+            median_error = (
+                float(np.median(heldout_errors))
+                if heldout_errors else float("inf")
+            )
+            heldout_error_rows[horizon].append(
+                {
+                    "amplitude": amplitude,
+                    "heldout_relative_error": median_error,
+                }
+            )
+            summaries[array_key] = {
+                "horizon_ms": horizon,
+                "total_energy_mv2": float(energy),
+                "amplitude_l2_mv": amplitude,
+                "input_condition_number": (
+                    assembled["input_condition_number"]
+                ),
+                "heldout_relative_errors": heldout_errors,
+                "heldout_median_relative_error": median_error,
+                "heldout_pass": bool(
+                    heldout_errors
+                    and max(heldout_errors) <= MODAL_HELDOUT_MAX_ERROR
+                ),
+                **modal,
+            }
+
+    linearity = {}
+    for horizon, error_rows in heldout_error_rows.items():
+        if error_rows:
+            linearity[f"{horizon:g}"] = MO.infer_linearity_range(
+                error_rows, max_relative_error=MODAL_HELDOUT_MAX_ERROR
+            )
+    operator_path = os.path.join(root, "modal_operators.npz")
+    if arrays:
+        save_npz_atomic(operator_path, **arrays)
+    manifest = json.load(open(manifest_path))
+    expected_rows = len(probe_specs) * len(MODAL_TOTAL_ENERGY_MV2) * 2
+    manifest["operator_path"] = (
+        os.path.relpath(operator_path, _ROOT) if arrays else None
+    )
+    manifest["operator_summaries"] = summaries
+    manifest["linearity_by_horizon"] = linearity
+    manifest["complete"] = bool(
+        len(rows) == expected_rows
+        and all(row.get("response_valid") for row in rows.values())
+        and bool(summaries)
+    )
+    manifest["scientific_pass"] = bool(
+        manifest["complete"]
+        and all(
+            summary.get("heldout_pass")
+            for summary in summaries.values()
+            if summary["total_energy_mv2"] == MODAL_TOTAL_ENERGY_MV2[0]
+        )
+    )
+    manifest["claim_boundary"] = (
+        "projected E/I voltage propagator and finite-time gain only; explanatory "
+        "diagnostic that cannot override carrier, entry, offset, or lifecycle gates"
+    )
+    write_json_atomic(manifest_path, manifest)
+    print(
+        f"[modal] seed={seed} complete={manifest['complete']} "
+        f"scientific_pass={manifest['scientific_pass']} -> {manifest_path}",
+        flush=True,
+    )
+    return manifest
+
+
 # ================================================================ CLI
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--phase", required=True,
                     choices=["anchor1", "anchor", "fork", "neighbourhood",
-                             "source_rhythm", "effective_rank", "smoke"])
+                             "source_rhythm", "effective_rank",
+                             "modal_operator", "smoke"])
     ap.add_argument("--seed", type=int, default=1)
     ap.add_argument("--T", type=float, default=15000.0)
     ap.add_argument("--confirm-run", action="store_true")
@@ -1204,8 +1671,10 @@ def main():
         raise SystemExit("refusing a multi-minute N=40000 run without --confirm-run")
     if a.phase == "neighbourhood" and a.resolution != "dt":
         raise SystemExit("neighbourhood is a discovery-dt phase; dt2 is confirmation-only")
-    if a.phase == "effective_rank" and a.resolution != "dt":
-        raise SystemExit("effective_rank runs at original dt after native dt/2 confirmation")
+    if a.phase in {"effective_rank", "modal_operator"} and a.resolution != "dt":
+        raise SystemExit(
+            f"{a.phase} runs at original dt after native dt/2 confirmation"
+        )
     if a.phase != "fork" and a.evidence_tier != "discovery":
         raise SystemExit("--evidence-tier applies only to --phase fork")
     if a.phase in {"source_rhythm", "effective_rank"}:
@@ -1215,6 +1684,18 @@ def main():
             raise SystemExit(
                 f"{a.phase} is not authorized until two-seed native carrier "
                 "confirmation passes"
+            )
+    if a.phase == "modal_operator":
+        source_summary_path = os.path.join(
+            OUT, "source_rhythm", "source_rhythm_summary.json"
+        )
+        source_summary = (
+            json.load(open(source_summary_path))
+            if os.path.exists(source_summary_path) else {}
+        )
+        if not MO.modal_probe_authorized(source_summary):
+            raise SystemExit(
+                "modal_operator requires a replicated fine-source carrier type"
             )
     ctx = build_context(
         a.seed, smoke=a.smoke or a.phase == "smoke", resolution=a.resolution
@@ -1240,6 +1721,8 @@ def main():
         )
     elif a.phase == "effective_rank":
         phase_effective_rank(ctx, resume=not a.no_resume)
+    elif a.phase == "modal_operator":
+        phase_modal_operator(ctx, resume=not a.no_resume)
     elif a.phase == "fork":
         phase_fork(ctx,
                    states_filter=[s.strip() for s in a.states.split(",")] if a.states else None,
