@@ -225,7 +225,9 @@ def phase_anchor1(ctx, T_ms, tag="anchor"):
     n_steps = res["E_spk_bool"].shape[0]
     met = segment_metrics(ctx, res)
     sc = slow_coords(slow, met["n_bins"], n_steps)
-    lfp_ds, fs = CG.decimate_lfp(res["lfp_trace"])
+    lfp_ds, fs = CG.decimate_lfp(
+        res["lfp_trace"], fs_in=CG.lfp_sample_hz(ctx["dt"])
+    )
     seed = ctx["S"]["seed"]
     base = os.path.join(OUT, "smoke" if ctx["smoke"] else ctx["anchor_root"])
     save_npz_atomic(os.path.join(base, f"{tag}_seed{seed}_traces.npz"),
@@ -278,7 +280,9 @@ def phase_anchor(ctx, T_ms):
     n_steps = res["E_spk_bool"].shape[0]
     met = segment_metrics(ctx, res)
     sc = slow_coords(slow, met["n_bins"], n_steps)
-    lfp_ds, fs = CG.decimate_lfp(res["lfp_trace"])
+    lfp_ds, fs = CG.decimate_lfp(
+        res["lfp_trace"], fs_in=CG.lfp_sample_hz(ctx["dt"])
+    )
     wall1 = time.time() - t0
     print(f"[anchor:p1] seed={seed} steps={n_steps} bins={met['n_bins']} "
           f"snaps={len(ck.snapshots)} wall={wall1:.0f}s rss={_rss_gb()}GB", flush=True)

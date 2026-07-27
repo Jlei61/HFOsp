@@ -37,6 +37,14 @@ PLATEAU_AREA_FRAC = 0.50       # saturated whole-field plateau: >= this frac of 
 
 
 # ================================================================ LFP / spectral (CM1-CM4)
+def lfp_sample_hz(dt_ms):
+    """Native per-step recorder sampling rate for an integration step in ms."""
+    dt_ms = float(dt_ms)
+    if not np.isfinite(dt_ms) or dt_ms <= 0:
+        raise ValueError("dt_ms must be finite and positive")
+    return 1000.0 / dt_ms
+
+
 def decimate_lfp(lfp, fs_in=LFP_SAMPLE_HZ, q=DECIMATE_Q):
     """10 kHz -> fs_in/q with an anti-alias FIR (scipy.signal.decimate). Returns (lfp_ds, fs_out)."""
     lfp = np.asarray(lfp, float)

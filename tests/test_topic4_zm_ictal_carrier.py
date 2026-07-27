@@ -32,6 +32,15 @@ def test_decimate_10k_to_2k_and_nyquist_gate():
     raise AssertionError("assert_nyquist must raise when Nyquist <= 150 Hz")
 
 
+def test_native_lfp_sample_rate_tracks_dt_for_resolution_confirmation():
+    assert C.lfp_sample_hz(0.1) == 10_000.0
+    assert C.lfp_sample_hz(0.05) == 20_000.0
+    x = np.ones((20_000, 2))
+    ds, fs_out = C.decimate_lfp(x, fs_in=C.lfp_sample_hz(0.05))
+    assert ds.shape == (4_000, 2)
+    assert fs_out == 4_000.0
+
+
 # ---------------------------------------------------------------- CM2-CM5 observed band envelopes
 def _rect_carrier(fs, dur_s, f=60.0, amp=1.0, dc=1.0):
     t = np.arange(int(dur_s * fs)) / fs
