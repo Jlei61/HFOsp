@@ -108,6 +108,16 @@ run_rank() {
     echo "[postcarrier] $(date -Is) seed=$seed rank complete" >>"$log"
 }
 
+run_modal() {
+    local seed="$1"
+    local log="$out/logs/postcarrier_seed${seed}.log"
+    echo "[postcarrier] $(date -Is) seed=$seed modal start" >>"$log"
+    python scripts/run_topic4_zm_branch_decision.py \
+        --phase modal_operator --seed "$seed" --resolution dt --confirm-run \
+        >>"$log" 2>&1
+    echo "[postcarrier] $(date -Is) seed=$seed modal complete" >>"$log"
+}
+
 run_source 1 &
 pid1=$!
 run_source 3 &
@@ -137,5 +147,38 @@ if [[ "$rc" -ne 0 ]]; then
 fi
 
 python scripts/analyze_topic4_zm_effective_rank.py >>"$coordinator_log" 2>&1
+
+if python - "$out/source_rhythm/source_rhythm_summary.json" <<'PY'
+import json
+import os
+import sys
+
+path = sys.argv[1]
+if not os.path.exists(path):
+    raise SystemExit(1)
+d = json.load(open(path))
+raise SystemExit(
+    0 if d.get("status") == "replicated"
+    and d.get("carrier_type") in {"fixed", "periodic", "stochastic"}
+    else 1
+)
+PY
+then
+    run_modal 1 &
+    pid1=$!
+    run_modal 3 &
+    pid3=$!
+    rc=0
+    wait "$pid1" || rc=$?
+    wait "$pid3" || rc=$?
+    if [[ "$rc" -ne 0 ]]; then
+        echo "[postcarrier] $(date -Is) modal worker failure rc=$rc" >>"$coordinator_log"
+        exit "$rc"
+    fi
+    python scripts/analyze_topic4_zm_modal_operator.py >>"$coordinator_log" 2>&1
+else
+    echo "[postcarrier] $(date -Is) modal skipped: source class unresolved" >>"$coordinator_log"
+fi
+
 python scripts/plot_topic4_zm_branch_decision.py >>"$coordinator_log" 2>&1
 echo "[postcarrier] $(date -Is) complete" >>"$coordinator_log"
