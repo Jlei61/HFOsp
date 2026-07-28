@@ -1541,8 +1541,18 @@ def probe_task(job):
     Na0, K0 = ions.Na_i_all.copy(), ions.K_o_grid.copy()
     mz = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**m.arm_c_pump_off_cfg()),
                     NE=S["NE"], core_mask_E=OLD.build_core_masks(S))
-    res, _ = m.run_arm_c(S, noise_seed=int(job["noise_seed"]), T_ms=float(job["T_ms"]),
-                         slow=IonHomeostaticMZAdapter(mz, ions), dump_i=False, verbose=False)
+    try:
+        res, _ = m.run_arm_c(S, noise_seed=int(job["noise_seed"]), T_ms=float(job["T_ms"]),
+                             slow=IonHomeostaticMZAdapter(mz, ions), dump_i=False, verbose=False)
+    except FloatingPointError as exc:
+        # A bias probe CAN destabilise the substrate; that is information, not a crash. Report it
+        # so the bounded Newton can avoid the region and the artifact records where it happened.
+        return dict(job=job, r_E=float("nan"), r_I=float("nan"),
+                    failed=f"{type(exc).__name__}: {exc}",
+                    Na_mean_start=float(Na0.mean()), K_mean_start=float(K0.mean()),
+                    Na_max_end=float(ions.Na_i_all.max()), K_max_end=float(ions.K_o_grid.max()),
+                    n_ion_updates=int(ions.n_updates), rate_field_sha256=sha,
+                    wall_s=round(time.time() - t0, 1))
     lo = int(round(m.PROBE_BURN_MS / m.DT))
     if lo >= np.asarray(res["rate_E"]).size:
         raise ValueError(f"probe T_ms={job['T_ms']} does not exceed the {m.PROBE_BURN_MS} ms "
@@ -1607,6 +1617,16 @@ def cmd_b2_bias(args):
         probes += res
         resource_log("b2_bias_jacobian_done")
         base, pE, pI, pEI = res
+        bad = [p["job"]["tag"] for p in res if not np.isfinite(p["r_E"])]
+        if bad:
+            payload = dict(status="UNRESOLVED_CALIBRATION", reason=
+                           f"probe(s) {bad} destabilised the substrate (ion guard band); the "
+                           f"Jacobian cannot be estimated. This is a calibrator failure and a "
+                           f"substrate-stability finding, NOT a mechanism NO-GO.",
+                           probes=res, generated=datetime.now(timezone.utc).isoformat(),
+                           f_prime=fp, q_ion=q_ion, bias_bounds=list(BIAS_BOUNDS))
+            _write_json(os.path.join(OUT, "b2_bias_calibration.json"), payload)
+            raise SystemExit(payload["reason"])
         J = np.array([[(pE["r_E"] - base["r_E"]) / d, (pI["r_E"] - base["r_E"]) / d],
                       [(pE["r_I"] - base["r_I"]) / d, (pI["r_I"] - base["r_I"]) / d]])
         lin_pred = np.array([base["r_E"], base["r_I"]]) + J @ np.array([d, d])

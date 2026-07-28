@@ -256,13 +256,15 @@ def fig_t7():
     """T7 sensor diagnostic.  This is the run that stopped the sprint, so it gets a figure even
     though it is not one of the three gate figures plan §12 lists -- the plan's list assumed T7
     would not be the terminal result."""
-    fs, aud = _load("b1_f_selection.json"), _load("b1_gate_reference_audit.json")
+    fs = _load("b1_f_selection_v2.json") or _load("b1_f_selection.json")
+    aud = _load("b1_gate_reference_audit.json")
     tp = os.path.join(OUT, "b1_f_selection_traces.npz")
     if not (fs and aud and os.path.exists(tp)):
         print("[plot] skip t7_sensor_diagnostic (missing input)")
         return
     z = np.load(tp)
-    G = fs["gates_definition"]
+    G = fs.get("hard_gates") or fs["gates_definition"]
+    v2 = "hard_gates" in fs
     rows = sorted(fs["rows"], key=lambda r: r["f_prime"])
     fps = [r["f_prime"] for r in rows]
     col = {0.5: "#7fb3d5", 1.0: BAD, 2.0: "#1f4e79"}
@@ -270,7 +272,7 @@ def fig_t7():
 
     # Q1: is there a usable amplitude window, and is any candidate inside it?
     dK = [r["measured"]["dK_peak_single_mM"] for r in rows]
-    floor = rows[0]["gates"]["measurable"]["threshold"]
+    floor = (G["measurable_abs_floor_mM"] if v2 else rows[0]["gates"]["measurable"]["threshold"])
     ax[0].axhspan(floor, G["safe_ceiling_mM"], color=OK, alpha=0.16, zorder=0)
     ax[0].axhline(floor, color="k", ls=":", lw=1.4)
     ax[0].axhline(G["safe_ceiling_mM"], color="k", ls="--", lw=1.4)
@@ -280,7 +282,8 @@ def fig_t7():
                       zorder=2)
         ax[0].scatter([r["f_prime"]], [v], s=140, color=col[r["f_prime"]], zorder=3,
                       edgecolor="k", linewidth=0.8)
-    ax[0].text(0.52, floor * 1.04, f"measurable floor {floor:.3f}", fontsize=7.5)
+    ax[0].text(0.52, floor * 1.06, f"measurable floor {floor:.2f}"
+               + (" (absolute only, T7.1)" if v2 else ""), fontsize=7.5)
     ax[0].text(0.52, G["safe_ceiling_mM"] * 1.03, f"safe ceiling {G['safe_ceiling_mM']}",
                fontsize=7.5)
     ax[0].set_xticks(fps)
@@ -294,23 +297,32 @@ def fig_t7():
     x = np.arange(len(fps))
     meas = [r["measured"]["na_excess_decay_frac_20s"] for r in rows]
     pred = [wp[f]["decay_20s_at_working_point"] for f in fps]
-    ax[1].bar(x - 0.22, meas, 0.4, color=[col[f] for f in fps], label="measured")
-    ax[1].bar(x + 0.22, pred, 0.4, color="none", edgecolor="k", hatch="///",
-              label="predicted at the WORKING point")
+    ax[1].bar(x - 0.28, meas, 0.26, color=[col[f] for f in fps], label="measured (coupled)")
+    clamp = [r["measured"].get("na_decay_frac_k_clamped", np.nan) for r in rows]
+    ax[1].bar(x, clamp, 0.26, color="none", edgecolor=OK, lw=1.6,
+              label=r"measured, $K_o$ clamped at $K_o^*(f')$")
+    pred2 = [r["measured"].get("na_decay_pred_coupled", np.nan) for r in rows]
+    ax[1].bar(x + 0.28, pred2 if v2 else pred, 0.26, color="none", edgecolor="k", hatch="///",
+              label="coupled-Jacobian prediction")
     ax[1].axhspan(*G["na_decay_band"], color=BAD, alpha=0.14)
     ax[1].axhline(aud["gate_reference"]["decay_20s"], color=BAD, ls="--", lw=1.8,
                   label="gate reference (linearised at REST)")
     ax[1].set_xticks(x, [f"f'={f}" for f in fps])
     ax[1].set_ylabel("event-induced Na excess decayed in 20 s")
-    ax[1].set_title("Na gate reference is anchored at rest", fontsize=10.5)
-    ax[1].legend(fontsize=7, frameon=False, loc="upper left")
-    ax[1].set_ylim(0, 1.0)
+    ax[1].set_title("Na recovery: reference and the K-clamp control", fontsize=10.5)
+    ax[1].legend(fontsize=6.4, frameon=False, loc="upper left", ncol=2, columnspacing=0.8)
+    ax[1].set_ylim(0, 1.45)
 
     # Q3: why does the monotonicity clause fail?
     st = float(z["f1.0_trace_stride_blocks"]) * float(z["f1.0_dt_ion_ms"]) * 1e-3
     for f in fps:
         e = z[f"f{f}_na_excess"]
         ax[2].plot(np.arange(e.size) * st, e, color=col[f], lw=1.3, label=f"f'={f}")
+        kc = f"f{f}_na_excess_k_clamped"
+        if kc in z:
+            ec = z[kc]
+            ax[2].plot(np.arange(ec.size) * st, ec, color=col[f], lw=1.0, ls=":",
+                       label=f"f'={f}, $K_o$ clamped")
     ax[2].axhline(0, color="k", lw=0.8)
     ax[2].set_xlabel("time after the event (s)")
     ax[2].set_ylabel("median event-induced Na excess (mM)")
@@ -339,7 +351,7 @@ def fig_t7():
     ax[3].plot([], [], "^", color="0.35", label=r"linear superposition ($\tau_{K_o}$ at workpoint)")
     ax[3].set_xlabel("time (s), five identical events 200 ms apart")
     ax[3].set_ylabel(r"$\Delta K_o$ at the event voxel (mM)")
-    ax[3].set_title("K accumulation is SUB-linear (open loop)", fontsize=10.5)
+    ax[3].set_title("K accumulation is SUB-linear (open loop, NON-BLOCKING)", fontsize=10.5)
     ax[3].legend(fontsize=7.5, frameon=False, loc="lower right")
     ax[3].grid(alpha=0.22)
     ax[3].text(0.03, 0.95, "increments 0.235 / 0.139 / 0.080 / 0.045\n"
