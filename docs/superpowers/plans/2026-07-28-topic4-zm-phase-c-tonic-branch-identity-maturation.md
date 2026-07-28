@@ -41,7 +41,12 @@ the locked contract. It does not mean the seizure-lifecycle mechanism succeeds.
 - [ ] Lock neuron/current panels by config-SHA hashing.
 - [ ] Lock all C0 thresholds, bootstrap settings, C1 coordinates, physical
   bounds, and resource guards from the spec.
-- [ ] Serialize one write-once manifest with input SHA256 values.
+- [ ] Serialize a non-production `phasec_input_manifest.json` first; coordinate
+  manifests point only to it, and the final production-authorized v1.3
+  manifest then locks the input plus native/\(dt/2\) coordinate file and
+  semantic SHAs. Test the two-stage chain for hash-cycle absence.
+- [ ] Lock independent \(dt/2\) configs/anchors/states for seeds 1/3, while
+  reusing native anatomy-panel IDs with the parent native config SHA.
 - [ ] Test that any missing/mutated seed, phase, noise, state, bound, or threshold
   fails closed.
 - [ ] Test that old aggregate traces cannot satisfy a raw-observable requirement.
@@ -67,17 +72,22 @@ manifest is immutable.
 - [ ] Implement the exact refractory-ceiling calculation from engine update
   semantics.
 - [ ] Add a fixture proving the E ceiling under the locked refractory update.
-- [ ] Stream per-neuron 250 ms spike counts without saving every full raster.
+- [ ] Reduce the guarded engine's one transient full-E raster in the atomic
+  child process; never persist it or retain it in the parent coordinator.
+  Measure a complete identity child's peak RSS before selecting concurrency.
 - [ ] Compute active-core/all-core/all-E `rho80`, active fractions, and
   refractory occupancy.
 - [ ] Record sparse ISIs and membrane/current traces only for locked panels.
 - [ ] Compute local CV2, 5/20/100 ms Fano factors, and threshold-distance
   distributions.
 - [ ] Compute 5 ms pairwise correlations and circular-shift nulls on the locked
-  panel.
+  panel, with exactly 100 draws saved and fail-closed checked.
 - [ ] Compute effective E/I/recurrent-E/net-current balance and lag.
 - [ ] Compute 1–2 ms E/I rates, PSD, virtual-SEEG metrics, active area, entropy,
   centroid motion, and kymograph.
+- [ ] Define active area from the locked 16×16 local E-rate grid
+  (`rate>=5 Hz`) over anatomy-occupied bins, at 25 ms for C0 and 2 ms for C1;
+  never substitute active-neuron fraction.
 - [ ] Synthetic-test asynchronous renewal, periodic refractory ceiling,
   synchronized oscillation, low-active-fraction hotspot, whole-sheet plateau,
   and pulse-train impostors.
@@ -170,9 +180,11 @@ fixture. There is no default identity.
 
 - [ ] Implement one atomic part per seed × state/phase × noise × diagnostic arm.
 - [ ] Validate manifest/config/state/noise SHA before every run.
-- [ ] Write outputs atomically and mark completion only after schema validation.
+- [ ] Publish immutable content-addressed NPZ files and use JSON as the atomic
+  completion marker, so an NPZ orphan cannot block resume.
 - [ ] Reject duplicate rows with different hashes.
-- [ ] Resume only missing or technically invalid cells.
+- [ ] Require `--resume` to reuse exact terminal cells; resume only missing or
+  explicitly invalid technical cells.
 - [ ] Add `--smoke`, `--manifest`, `--cell`, `--resume`, and explicit
   production-confirmation gates.
 - [ ] Run one short seed-1 smoke.
@@ -234,8 +246,17 @@ All Tasks 1–5 tests pass before any production launch.
 - [ ] Build four 50:50 same-phase early–mid/mid–late convex interpolants.
 - [ ] Fit seed-specific robust full-field bases using locked anchors only.
 - [ ] Align signs to forward trajectory/pathology axes deterministically.
+- [ ] Define the seven summaries using true pathology-axis z/m field
+  projections, not core-minus-surround differences.
 - [ ] Build the fixed ±0.25 robust-SD secondary shell along the locked
   non-tangent/pathology directions.
+- [ ] Build native seeds 1/3/4 and independent \(dt/2\) seeds 1/3 separately
+  from each resolution's own six full-field anchors; never interpolate native
+  fields/checkpoints to \(dt/2\).
+- [ ] Store all coordinate/basis floats as float64 and prove round-trip
+  semantic slow-state hashes are unchanged.
+- [ ] Record per-cell reconstruction error, standardized distance from the
+  piecewise anchor manifold, and the sign-alignment rule/fallback.
 - [ ] Apply hard/intrinsic and empirical physical bounds without clipping.
 - [ ] Record invalid cells and reconstruction distances.
 - [ ] Synthetic-test convexity, PCA sign determinism, intrinsic bounds,
@@ -266,6 +287,12 @@ production result.
   labels.
 - [ ] Implement the locked cycle/burst counts, modulation, occupancy,
   rest-dwell, interval-CV, and first-passage-null thresholds.
+- [ ] Require the joint refractory-saturation thresholds
+  `rho80>=0.50` and refractory-ISI fraction `>=0.80`.
+- [ ] Require each separated spatial zone to have occupancy `>=0.80`, and use
+  each seed's canonical `params.Rr` as the readout-kernel separation scale.
+- [ ] Require cross-fast-phase relative period agreement `<=0.20` for a
+  periodic carrier.
 - [ ] Require at least 5/6 run support, posterior median >0.8, and both fast
   phases for a positive cell.
 - [ ] Require two adjacent primary cells within seed for a window.
@@ -323,6 +350,41 @@ reachable-window or complete negative verdict.
 
 The shell remains sensitivity/extrapolation evidence. It cannot override a
 primary-convex negative or authorize slow-path reachability.
+
+---
+
+## Task 10A — Conditional C1 AI gain closure
+
+**Files**
+
+- Create `scripts/lock_topic4_zm_phasec1_gain_triggers.py`
+- Extend the C1 runner/analyzer and their tests.
+
+**Steps**
+
+- [ ] Finish the complete primary and shell base atlas before evaluating a
+  gain trigger.
+- [ ] Apply the locked spike-only AI screen to every cell.
+- [ ] Require at least 5/6 screen passes and at least 2/3 in each fast phase.
+- [ ] Write one immutable trigger manifest containing the base-atlas SHA,
+  Phase-C manifest SHA, slow-field SHA, triggering part SHAs, every expected
+  carrier gain arm, and reused C0 pre-entry denominator SHAs.
+- [ ] For every triggered cell, run
+  `0, ±0.05, ±0.10 mV` across both phases and all three future noises.
+- [ ] Use the C0 gain linearity, plateau/runaway, \(G_{\rm rel}\), bootstrap,
+  and provenance rules unchanged.
+- [ ] Label valid AI as `balanced_AI_tonic_cell`; keep it separate from
+  periodic/clonic maturation.
+- [ ] Label nonlinear/sign-inconsistent gain as
+  `tonic_gain_indeterminate`; missing/hash/truncation as
+  `C1_blocked_conditional_gain`.
+- [ ] Never trigger a new cell after the trigger manifest is written.
+
+**Gate**
+
+Conditional gain is not required to certify an already complete non-tonic
+maturation window.  Otherwise, any unresolved trigger blocks a complete
+negative or complete C1 identity atlas; it never defaults to `tonic_non_AI`.
 
 ---
 
@@ -458,6 +520,7 @@ Task 6      complete C0 production + conditional dt/2 confirmation
 Tasks 7–8   lock C1 coordinates + pure phenotype tests
 Task 9      complete primary-convex production
 Task 10     complete fixed secondary shell
+Task 10A    lock and execute conditional C1 AI gain, if triggered
 Task 11     seed-specific modal audit
 Task 12     fail-closed adjudication
 Tasks 13–14 figures, archive, regression, process cleanup

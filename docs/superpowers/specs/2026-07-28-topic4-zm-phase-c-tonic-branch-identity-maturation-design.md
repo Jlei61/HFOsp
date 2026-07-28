@@ -100,7 +100,23 @@ trajectory-transparent.
 
 ## 2. Locks written before production
 
-One immutable Phase-C manifest must contain:
+**Pre-production contract amendment (2026-07-28):** the lock is an acyclic
+two-stage chain, not one self-referential file:
+
+1. `phasec_input_manifest.json`
+   (`zm_phasec_input_v1_2026-07-28`,
+   `production_authorized=false`) locks all upstream states, panels,
+   thresholds, producer hashes, native configs and independent \(dt/2\)
+   configs/anchors;
+2. the native and \(dt/2\) coordinate manifests each point only to that input
+   manifest and lock their own lossless float64 NPZ file and semantic hashes;
+3. the sole production `phasec_manifest.json`
+   (`zm_phasec_contract_v1.3_2026-07-28`,
+   `production_authorized=true`) points forward to the input manifest and both
+   coordinate manifests, including per-resolution/per-seed NPZ file and
+   semantic hashes.
+
+The final immutable Phase-C manifest must contain:
 
 - this spec SHA, git SHA, engine SHA set, and upstream canonical-config SHAs;
 - exact state paths and state hashes;
@@ -116,6 +132,11 @@ One immutable Phase-C manifest must contain:
 
 The manifest is write-once. Reuse requires exact SHA agreement. Missing or
 mismatched fields yield a blocked verdict; no default is allowed.
+
+Production runners reject the input manifest.  Final locking fails closed if a
+coordinate manifest is absent or if any live production-producer hash differs
+from the input lock.  This ordering removes the Phase-C-manifest ↔ coordinate-
+manifest hash cycle.
 
 Production results from an old run may be reused only if its saved raw
 observables satisfy the new manifest exactly. Aggregate rates cannot substitute
@@ -179,6 +200,11 @@ The lock includes:
 If storage requires subsampling, the panel size and stratification are locked
 before the smoke run and shared across all arms. No neuron is selected from its
 observed firing rate after production.
+
+Native and independent \(dt/2\) runs reuse the same activity-independent
+anatomical neuron IDs.  The \(dt/2\) contract therefore records
+`panel_selection_config_sha` as the parent native configuration SHA; it never
+re-hashes/re-selects panels with the \(dt/2\) configuration SHA.
 
 ---
 
@@ -264,6 +290,11 @@ Required spike observables:
 - 5 ms pairwise spike-count correlations;
 - a circular-time-shift null preserving each neuron's rate and autocorrelation.
 
+The circular-shift null uses exactly 100 locked draws per block/pair stratum
+(`pairwise_shift_null_draws=100`), recorded in every raw observable artifact;
+missing or mismatched draw counts block C0 rather than silently changing the
+null resolution.
+
 The primary irregularity statistic is the seed/replicate median local `CV2`.
 The primary synchrony statistic is the median pairwise count correlation plus
 its position relative to the 97.5th percentile of the circular-shift null.
@@ -282,6 +313,13 @@ saturation:
 - active-area fraction, spatial entropy, active-centroid motion, core/surround
   rates, and axial kymograph;
 - input-output slope at both diagnostic amplitudes.
+
+`active-area fraction` is a spatial quantity, not the fraction of neurons that
+fired.  On the locked \(16\times16\) E-rate grid, a bin is active when its
+local mean E rate is at least 5 Hz.  The denominator is the set of
+anatomy-occupied E grid bins (the occupied-bin count and whether all 256 bins
+are occupied are stored explicitly).  C0 evaluates this at 25 ms; C1 applies
+the same rule to its 2 ms E-rate grid.
 
 Because the real observation reference remains incomplete, these diagnostics
 cannot promote a source label to an observation-matched ictal label.
@@ -445,6 +483,26 @@ a negative result.
 Shell positives are `nearby_extrapolated_candidate` only. They cannot be called
 a dynamically reachable maturation window.
 
+The seven-coordinate empirical envelope is exactly:
+
+\[
+(z_{\rm core},z_{\rm surround},\Delta z_{\parallel},
+  m_{\rm core},m_{\rm surround},\Delta m_{\parallel},S_G).
+\]
+
+Here the pathology axial coordinate \(a_i\) is centred and scaled to unit
+population SD, and
+\(\Delta z_{\parallel}=\sum_i a_i(z_i-\bar z)/\sum_i a_i^2\), with the
+analogous definition for \(m\).  These two coordinates are field projections;
+they are not core-minus-surround contrasts.  Definitions and engine units are
+stored in each coordinate manifest.
+
+The two non-tangent full-field modes are sign-aligned to the forward physical
+trajectory derivative.  If that inner product is numerically zero, a fixed
+activity-independent maximum-loading sign is used and explicitly flagged.
+Every cell records reconstruction error and standardized distance from the
+locked piecewise anchor manifold.
+
 ### 6.3 Physical-validity gate
 
 Every reconstructed field must satisfy:
@@ -462,6 +520,12 @@ Every reconstructed field must satisfy:
 Failure gives `invalid_physical_cell`. It is not silently projected, clipped,
 or replaced. An invalid shell cell blocks a complete shell-negative verdict
 but does not invalidate a complete primary-convex result.
+
+Coordinate NPZ slow states and basis arrays are stored losslessly as float64.
+The coordinate builder must prove semantic slow-state hash identity before and
+after NPZ round-trip. Native seeds `{1,3,4}` use their six native anchors;
+independent \(dt/2\) seeds `{1,3}` use their own six \(dt/2\) anchors. No
+native coordinate, field, or checkpoint is interpolated to \(dt/2\).
 
 ---
 
@@ -492,9 +556,35 @@ For a cell-level positive:
 
 `AI_tonic_window`:
 
+**Pre-production clarification (2026-07-28):** this label is replaced by
+`balanced_AI_tonic_cell`.  It:
+
 - passes the common gate;
-- satisfies the C0 AI criteria at that cell;
+- satisfies every spike-only C0 AI condition at that cell;
+- passes the same conditional \(G_{\rm rel}\), linearity, and uncertainty gate
+  as C0;
 - remains tonic at the population-envelope scale.
+
+It is a terminal identity in the C1 atlas, not a non-tonic maturation
+phenotype, and therefore cannot by itself support
+`maturation_window_at_primary_convex_states`.
+
+The C1 base matrix contains no gain perturbation.  After the complete base
+primary and shell atlas exists, a cell becomes a locked
+`spike_AI_screen_candidate` only if at least five of six base runs pass all
+non-gain AI conditions and both fast phases contribute at least two passes.
+All such cells are written once to `c1_gain_trigger_manifest.json` before any
+C1 gain result is viewed.  For every triggered cell, run the complete
+\(\{0,\pm0.05,\pm0.10\}\) mV carrier-gain set for both fast phases and all three
+future-noise continuations; reuse the SHA-matched C0 pre-entry gain denominator.
+No untriggered cell may be added later.
+
+- nonlinear/sign-inconsistent gain or perturbation-induced runaway yields
+  `tonic_gain_indeterminate` (scientific indeterminate, never zero gain);
+- missing, truncated, or provenance-invalid conditional gain yields
+  `C1_blocked_conditional_gain`;
+- a triggered unresolved/blocked cell prevents a complete C1 negative, but
+  cannot erase an independently complete periodic/clonic positive.
 
 `periodic_non_tonic_carrier`:
 
@@ -504,6 +594,7 @@ For a cell-level positive:
   \((P_{95}-P_{5})/\bar r\ge0.20\);
 - cycle-period CV is at most 0.20;
 - source phase structure is reproducible across the two fast initial phases.
+- the cross-phase relative period difference is at most 0.20.
 
 `clonic_or_bursting_carrier`:
 
@@ -521,6 +612,20 @@ temporal class. It requires:
 - first-passage spread greater than the 97.5th percentile of a simultaneous
   flash/permuted-position null;
 - reproducible direction or phase-gradient sign within seed.
+- each separated zone has carrier-state occupancy at least 0.80.
+
+`refractory_saturated` requires both active-core
+\(\rho_{80}\ge0.50\) and refractory-locked ISI fraction \(\ge0.80\);
+one threshold alone cannot create this label.
+
+The locked implementation fields are
+`c1_refractory_saturation_rho_min=0.50`,
+`c1_refractory_isi_fraction_min=0.80`,
+`c1_two_zone_occupancy_min=0.80`, and
+`c1_periodic_cross_phase_period_rel_diff_max=0.20`.
+The zone-separation scale is each seed's canonical
+`params.Rr` in mm, stored as `readout_kernel_width_mm`; it is never hard-coded
+from a guessed grid distance.
 
 Other run/cell classes are:
 
@@ -537,8 +642,9 @@ Other run/cell classes are:
 
 A `maturation_window_at_primary_convex_states` requires:
 
-- the same non-tonic phenotype in at least two adjacent primary cells within
-  seed;
+- the same registered non-tonic phenotype
+  (`periodic_non_tonic_carrier` or `clonic_or_bursting_carrier`) in at least
+  two adjacent primary cells within seed;
 - each cell passes the cell-level rule above;
 - the same aligned slow-field direction supports it in at least two of three
   seeds;
@@ -560,6 +666,8 @@ An isolated positive cell is `isolated_maturation_candidate`.
 - all ten locked primary cells per seed are physically valid;
 - every cell has both fast phases and all three future-noise continuations;
 - every run has a terminal scientific class;
+- every conditional-gain trigger has a terminal valid or scientific-
+  indeterminate result, and no triggered cell remains technically blocked;
 - no primary cell is missing, indeterminate, or representation-sensitive;
 - no seed contains an isolated or contiguous non-tonic positive.
 
@@ -644,15 +752,22 @@ No missing field may fall through to a positive or negative scientific verdict.
    retain the already accepted byte parity.
 3. One seed-1 smoke validates shape, units, refractory ceiling, panel identity,
    current signs, and output schema; smoke artifacts never enter production.
-4. Every cell is one atomic, hash-addressed part with exact state/noise/config
-   provenance.
+4. Every cell is one atomic JSON commit marker plus an immutable,
+   content-addressed NPZ with exact state/noise/config provenance.  An NPZ
+   orphaned before JSON publication cannot block an exact resume.
 5. Coordinator merge rejects duplicate/conflicting rows and missing expected
    cells.
-6. Resume runs only missing or explicitly invalid technical cells. Scientific
-   failures are never automatically rerun with changed settings.
-7. Do not store a full 40,000-neuron Boolean raster for every continuation.
-   Stream all-neuron counts and keep sparse spike times/fixed panels required by
-   the locked metrics.
+6. `--resume` is required to reuse exact terminal cells. Resume runs only
+   missing or explicitly invalid technical cells; scientific failures are
+   reused and never automatically rerun with changed settings.
+7. The guarded upstream engine currently returns one transient full-E Boolean
+   raster (and an opt-in I raster) per atomic continuation. Phase C may reduce
+   that single inherited raster in memory, but must never persist it or retain
+   multiple cells in the coordinator. Every cell exits after publishing only
+   reduced, content-addressed observables. Concurrency is therefore derived
+   from the measured peak RSS of a complete identity cell, not from a nominal
+   streaming-memory estimate. Removing the inherited raster would require a
+   separately reviewed guarded-engine change and is outside Phase C.
 8. Set
    `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=NUMEXPR_NUM_THREADS=1`.
 9. Start with one full SNN worker and measure peak RSS. Set:
@@ -688,6 +803,7 @@ Required machine-readable outputs:
 - C0 per-run/per-seed metrics and aggregate identity verdict;
 - ceiling/gain/ISI/correlation/current/spatial summaries;
 - primary and secondary C1 coordinate manifests;
+- write-once C1 conditional-gain trigger manifest and all triggered gain parts;
 - per-cell phenotype rows and coverage matrices;
 - seed-specific modal-routing and operator summaries;
 - one fail-closed Phase-C verdict with input SHAs;
