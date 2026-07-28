@@ -41,6 +41,195 @@ def test_smoke_namespace_cannot_match_a_production_part_or_summary_input():
     assert production_root == os.path.dirname(coordinator_path)
     assert smoke_root != production_root
 
+    c1_smoke = CELL._c1_base_relative_path(
+        "dt", 1, "primary_convex", "cell", "rising", "noise_replay",
+        smoke=True,
+    )
+    c1_production = CELL._c1_base_relative_path(
+        "dt", 1, "primary_convex", "cell", "rising", "noise_replay"
+    )
+    assert f"{os.sep}smoke{os.sep}" in c1_smoke
+    assert f"{os.sep}parts{os.sep}" not in c1_smoke
+    assert f"{os.sep}parts{os.sep}" in c1_production
+    assert c1_smoke != c1_production
+
+
+def _smoke_observable_arrays():
+    n_block = 2
+    n_time = 8
+    analysis_ids = np.arange(4)
+    pairwise_ids = np.arange(4)
+    return {
+        "rho80_active_core_by_block_window": np.zeros((n_block, 6)),
+        "block_isi_cv2_by_panel_neuron": np.zeros((n_block, 4)),
+        "block_refractory_isi_fraction_by_panel_neuron": np.zeros(
+            (n_block, 4)
+        ),
+        "pair_corr_by_block_and_pair": np.zeros((n_block, 6)),
+        "pair_null_median_by_block_and_draw": np.zeros(
+            (n_block, 3, 100)
+        ),
+        "pair_null_stratum_names": np.asarray(
+            ("core_core", "core_surround", "surround_surround")
+        ),
+        "active_area_fraction_by_block_window": np.zeros((n_block, 20)),
+        "spatial_grid_n_occupied_E": np.asarray(16),
+        "spatial_area_denominator": np.asarray(
+            "anatomy_occupied_E_grid_bins"
+        ),
+        "analysis_panel_E_ids": analysis_ids,
+        "pairwise_panel_E_ids": pairwise_ids,
+        "block_ms": np.asarray(500.0),
+        "ceiling_window_ms": np.asarray(250.0),
+        "ceiling_stride_ms": np.asarray(50.0),
+        "active_area_window_ms": np.asarray(25.0),
+        "pairwise_bin_ms": np.asarray(5.0),
+        "pairwise_null_draws": np.asarray(100),
+        "spatial_grid_n": np.asarray(16),
+        "raw_sample_time_ms": np.arange(n_time, dtype=float),
+        "effective_sample_time_ms": np.arange(n_time, dtype=float),
+        "raw_raw_ampa_core_mean_mV": np.ones(n_time),
+        "raw_raw_gaba_core_mean_mV": np.ones(n_time),
+        "effective_effective_excitation_core_mean_mV": np.ones(n_time),
+        "effective_effective_inhibition_z_core_mean_mV": np.ones(n_time),
+        "effective_adaptation_m_core_mean_mV": np.ones(n_time),
+        "effective_effective_outward_total_core_mean_mV": np.ones(n_time),
+        "E_rate_grid": np.zeros((n_time, 16, 16)),
+        "I_rate_grid": np.zeros((n_time, 16, 16)),
+        "global_E_rate_hz": np.zeros(n_time),
+        "global_I_rate_hz": np.zeros(n_time),
+        "fine_bin_ms": np.asarray(2.0),
+    }
+
+
+def test_smoke_requires_and_accepts_complete_hierarchical_schema():
+    complete = _smoke_observable_arrays()
+    kwargs = {
+        "analysis_ids": np.arange(4),
+        "pairwise_ids": np.arange(4),
+        "thresholds": {
+            "time_block_ms": 500.0,
+            "sliding_rate_window_ms": 250.0,
+            "sliding_rate_window_stride_ms": 50.0,
+            "active_area_window_ms": 25.0,
+            "pairwise_bin_ms": 5.0,
+            "pairwise_shift_null_draws": 100,
+            "spatial_grid_n": 16,
+        },
+    }
+    old_skipped_bootstrap = {
+        key: value for key, value in complete.items()
+        if key not in CELL.HIERARCHICAL_ARRAY_FIELDS
+        and key not in {"pair_null_stratum_names"}
+    }
+    assert not CELL._smoke_observables_complete(
+        old_skipped_bootstrap, **kwargs
+    )
+    assert CELL._smoke_observables_complete(complete, **kwargs)
+    bad_null = dict(
+        complete,
+        pair_null_median_by_block_and_draw=np.zeros((2, 100)),
+    )
+    assert not CELL._smoke_observables_complete(bad_null, **kwargs)
+    c1 = dict(complete)
+    c1.update({
+        "source_rate_hz": np.zeros(8),
+        "rest_mask": np.zeros(8, bool),
+        "active_area_fraction": np.zeros(8),
+        "kymograph": np.zeros((8, 4)),
+        "axis_positions": np.arange(4.0),
+        "bin_ms": np.asarray(2.0),
+    })
+    assert CELL._smoke_observables_complete(c1, c1=True, **kwargs)
+
+    one_block = {
+        key: (value[:1] if isinstance(value, np.ndarray) and value.ndim >= 1
+              and value.shape[0] == 2 else value)
+        for key, value in complete.items()
+    }
+    assert not CELL._smoke_observables_complete(one_block, **kwargs)
+    missing_current = dict(complete)
+    missing_current.pop("effective_adaptation_m_core_mean_mV")
+    assert not CELL._smoke_observables_complete(missing_current, **kwargs)
+    negative_outward = dict(
+        complete,
+        effective_effective_outward_total_core_mean_mV=-np.ones(8),
+    )
+    assert not CELL._smoke_observables_complete(negative_outward, **kwargs)
+    wrong_panel = dict(complete, analysis_panel_E_ids=np.asarray([0, 1, 2]))
+    assert not CELL._smoke_observables_complete(wrong_panel, **kwargs)
+    wrong_metadata = dict(complete, ceiling_stride_ms=np.asarray(25.0))
+    assert not CELL._smoke_observables_complete(wrong_metadata, **kwargs)
+    bad_grid = dict(complete, I_rate_grid=np.zeros((7, 16, 16)))
+    assert not CELL._smoke_observables_complete(bad_grid, **kwargs)
+    bad_c1 = dict(c1, kymograph=np.zeros((7, 4)))
+    assert not CELL._smoke_observables_complete(
+        bad_c1, c1=True, **kwargs
+    )
+
+
+def test_smoke_and_production_share_hierarchical_builder(monkeypatch):
+    expected = _smoke_observable_arrays()
+    observed = {}
+
+    def fake_builder(e, dt, tau_ref, **kwargs):
+        observed.update(
+            n_time=len(e),
+            dt=dt,
+            tau_ref=tau_ref,
+            kwargs=kwargs,
+        )
+        return expected
+
+    monkeypatch.setattr(CELL.PCM, "phasec_bootstrap_units", fake_builder)
+    ctx = {
+        "dt": 0.5,
+        "core": np.asarray([True, True, False, False]),
+        "S": {
+            "p": type("P", (), {"tau_ref_E": 2.0})(),
+            "posE": np.zeros((4, 2)),
+            "L": 20.0,
+        },
+    }
+    locks = {
+        "analysis_ids": np.arange(4),
+        "pairwise_ids": np.arange(4),
+    }
+    manifest = {
+        "thresholds": {
+            "time_block_ms": 500.0,
+            "sliding_rate_window_ms": 250.0,
+            "sliding_rate_window_stride_ms": 50.0,
+            "active_area_window_ms": 25.0,
+            "pairwise_bin_ms": 5.0,
+            "pairwise_shift_null_draws": 100,
+            "local_active_floor_hz": 5.0,
+            "spatial_grid_n": 16,
+        }
+    }
+    out = CELL._build_hierarchical_observables(
+        np.zeros((2000, 4), bool),
+        ctx,
+        locks,
+        manifest,
+        17,
+        technical_complete=True,
+    )
+    assert out is expected
+    assert observed["n_time"] == 2000
+    assert observed["kwargs"]["pairwise_null_seed"] == 17
+    assert observed["kwargs"]["pairwise_n_null"] == 100
+    assert observed["kwargs"]["ceiling_stride_ms"] == 50.0
+    assert observed["kwargs"]["active_area_window_ms"] == 25.0
+    assert CELL._build_hierarchical_observables(
+        np.zeros((2000, 4), bool),
+        ctx,
+        locks,
+        manifest,
+        17,
+        technical_complete=False,
+    ) is None
+
 
 def test_fixed_panels_are_manifest_sourced_and_fail_closed():
     ctx = {

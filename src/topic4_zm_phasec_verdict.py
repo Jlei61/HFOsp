@@ -410,10 +410,10 @@ def adjudicate_phasec(
             "maturation_window_at_primary_convex_states",
             "local_maturation_window_found_slow_path_audit_required",
             (
-                "contiguous_maturation_window_on_primary_reachable_path_"
+                "contiguous_maturation_window_at_primary_convex_states_"
                 "with_unresolved_source_identity"
                 if identity_unresolved
-                else "contiguous_maturation_window_on_primary_reachable_path"
+                else "contiguous_maturation_window_at_primary_convex_states"
             ),
         )
     if identity_unresolved:
@@ -465,7 +465,10 @@ def adjudicate_phasec(
         return result(
             "no_maturation_in_tested_primary_neighbourhood",
             route,
-            "complete_primary_negative_secondary_shell_explicitly_not_tested",
+            (
+                "complete_negative_in_empirically_supported_interpolation_"
+                "neighbourhood_secondary_shell_explicitly_not_tested"
+            ),
         )
     if shell_status != "complete":
         return result("secondary_shell_incomplete", "no_evidence", "unknown_shell_status")
@@ -480,7 +483,10 @@ def adjudicate_phasec(
         return result(
             "maturation_candidate_in_secondary_shell",
             route,
-            "secondary_shell_candidate_does_not_establish_primary_reachability",
+            (
+                "secondary_shell_candidate_does_not_establish_"
+                "primary_convex_state_support"
+            ),
         )
     if shell_kind == "isolated":
         return result(

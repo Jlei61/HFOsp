@@ -67,6 +67,14 @@ C1_DT2_CONFIRMATION_MANIFEST_PATH = os.path.join(
 C1_BASE_PART_SCHEMA = "zm_phasec1_base_part_v1_2026-07-28"
 C1_OBSERVABLES_SCHEMA = "zm_phasec1_observables_v1_2026-07-28"
 C1_GAIN_PART_SCHEMA = "zm_phasec1_conditional_gain_part_v1_2026-07-28"
+HIERARCHICAL_ARRAY_FIELDS = (
+    "rho80_active_core_by_block_window",
+    "block_isi_cv2_by_panel_neuron",
+    "block_refractory_isi_fraction_by_panel_neuron",
+    "pair_corr_by_block_and_pair",
+    "pair_null_median_by_block_and_draw",
+    "active_area_fraction_by_block_window",
+)
 
 
 def _rss_gb():
@@ -1175,6 +1183,253 @@ def _c0_cell_root(args, kind):
     )
 
 
+def _hierarchical_observables_complete(arrays, *, min_blocks=2):
+    """Fail closed on the compact hierarchical artifact shape."""
+    if not isinstance(arrays, dict):
+        return False
+    if any(key not in arrays for key in HIERARCHICAL_ARRAY_FIELDS):
+        return False
+    try:
+        rho = np.asarray(arrays["rho80_active_core_by_block_window"])
+        cv2 = np.asarray(arrays["block_isi_cv2_by_panel_neuron"])
+        ref = np.asarray(
+            arrays["block_refractory_isi_fraction_by_panel_neuron"]
+        )
+        pair = np.asarray(arrays["pair_corr_by_block_and_pair"])
+        null = np.asarray(
+            arrays["pair_null_median_by_block_and_draw"]
+        )
+        area = np.asarray(
+            arrays["active_area_fraction_by_block_window"]
+        )
+        names = tuple(
+            str(value) for value in np.asarray(
+                arrays["pair_null_stratum_names"]
+            ).ravel()
+        )
+    except (KeyError, TypeError, ValueError):
+        return False
+    n_block = rho.shape[0] if rho.ndim == 2 else 0
+    return bool(
+        n_block >= int(min_blocks)
+        and rho.shape[1:] == (6,)
+        and cv2.ndim == 2
+        and ref.shape == cv2.shape
+        and pair.ndim == 2
+        and area.ndim == 2
+        and area.shape[1] == 20
+        and all(value.shape[0] == n_block for value in (
+            cv2, ref, pair, null, area
+        ))
+        and null.shape == (n_block, 3, 100)
+        and names == PCM.PAIR_NULL_STRATUM_NAMES
+    )
+
+
+def _smoke_observables_complete(
+    arrays,
+    *,
+    c1=False,
+    analysis_ids,
+    pairwise_ids,
+    thresholds,
+):
+    """Require locked hierarchical, current, and spatial smoke schemas."""
+    fine = (
+        "source_rate_hz", "rest_mask", "active_area_fraction",
+        "kymograph", "axis_positions",
+    ) if c1 else (
+        "global_E_rate_hz", "global_I_rate_hz", "fine_bin_ms",
+    )
+    required = (
+        "E_rate_grid", "I_rate_grid", "spatial_grid_n_occupied_E",
+        "spatial_area_denominator", "raw_sample_time_ms",
+        "effective_sample_time_ms", "analysis_panel_E_ids",
+        "pairwise_panel_E_ids", "block_ms", "ceiling_window_ms",
+        "ceiling_stride_ms", "active_area_window_ms", "pairwise_bin_ms",
+        "pairwise_null_draws", "spatial_grid_n",
+        "raw_raw_ampa_core_mean_mV", "raw_raw_gaba_core_mean_mV",
+        "effective_effective_excitation_core_mean_mV",
+        "effective_effective_inhibition_z_core_mean_mV",
+        "effective_adaptation_m_core_mean_mV",
+        "effective_effective_outward_total_core_mean_mV",
+        *fine,
+    )
+    if (
+        not _hierarchical_observables_complete(arrays, min_blocks=2)
+        or any(key not in arrays for key in required)
+    ):
+        return False
+    try:
+        expected_scalars = {
+            "block_ms": float(thresholds["time_block_ms"]),
+            "ceiling_window_ms": float(
+                thresholds["sliding_rate_window_ms"]
+            ),
+            "ceiling_stride_ms": float(
+                thresholds["sliding_rate_window_stride_ms"]
+            ),
+            "active_area_window_ms": float(
+                thresholds["active_area_window_ms"]
+            ),
+            "pairwise_bin_ms": float(thresholds["pairwise_bin_ms"]),
+            "pairwise_null_draws": float(
+                thresholds["pairwise_shift_null_draws"]
+            ),
+            "spatial_grid_n": float(thresholds["spatial_grid_n"]),
+        }
+        if any(
+            np.asarray(arrays[key]).size != 1
+            or not np.isclose(
+                float(np.asarray(arrays[key]).item()), expected
+            )
+            for key, expected in expected_scalars.items()
+        ):
+            return False
+        if not np.array_equal(
+            np.asarray(arrays["analysis_panel_E_ids"], int),
+            np.asarray(analysis_ids, int),
+        ) or not np.array_equal(
+            np.asarray(arrays["pairwise_panel_E_ids"], int),
+            np.asarray(pairwise_ids, int),
+        ):
+            return False
+        if np.asarray(arrays["spatial_area_denominator"]).item() != (
+            "anatomy_occupied_E_grid_bins"
+        ):
+            return False
+
+        raw_time = np.asarray(arrays["raw_sample_time_ms"], float)
+        effective_time = np.asarray(
+            arrays["effective_sample_time_ms"], float
+        )
+        if (
+            raw_time.ndim != 1
+            or raw_time.size == 0
+            or effective_time.shape != raw_time.shape
+            or not np.isfinite(raw_time).all()
+            or not np.isfinite(effective_time).all()
+            or not np.allclose(raw_time, effective_time)
+        ):
+            return False
+        current_keys = (
+            "raw_raw_ampa_core_mean_mV",
+            "raw_raw_gaba_core_mean_mV",
+            "effective_effective_excitation_core_mean_mV",
+            "effective_effective_inhibition_z_core_mean_mV",
+            "effective_adaptation_m_core_mean_mV",
+            "effective_effective_outward_total_core_mean_mV",
+        )
+        currents = {
+            key: np.asarray(arrays[key], float) for key in current_keys
+        }
+        if any(
+            value.shape != raw_time.shape or not np.isfinite(value).all()
+            for value in currents.values()
+        ):
+            return False
+        outward_keys = (
+            "raw_raw_gaba_core_mean_mV",
+            "effective_effective_inhibition_z_core_mean_mV",
+            "effective_adaptation_m_core_mean_mV",
+            "effective_effective_outward_total_core_mean_mV",
+        )
+        if any(np.any(currents[key] < -1e-6) for key in outward_keys):
+            return False
+
+        e_grid = np.asarray(arrays["E_rate_grid"])
+        i_grid = np.asarray(arrays["I_rate_grid"])
+        grid_n = int(thresholds["spatial_grid_n"])
+        if (
+            e_grid.ndim != 3
+            or e_grid.shape != i_grid.shape
+            or e_grid.shape[0] == 0
+            or e_grid.shape[1:] != (grid_n, grid_n)
+            or not np.isfinite(e_grid).all()
+            or not np.isfinite(i_grid).all()
+        ):
+            return False
+        if c1:
+            n_time = e_grid.shape[0]
+            source = np.asarray(arrays["source_rate_hz"])
+            rest = np.asarray(arrays["rest_mask"])
+            area = np.asarray(arrays["active_area_fraction"])
+            kymo = np.asarray(arrays["kymograph"])
+            axis = np.asarray(arrays["axis_positions"])
+            return bool(
+                source.shape == (n_time,)
+                and rest.shape == (n_time,)
+                and rest.dtype == np.dtype(bool)
+                and area.shape == (n_time,)
+                and kymo.ndim == 2
+                and kymo.shape[0] == n_time
+                and axis.shape == (kymo.shape[1],)
+                and np.isfinite(source).all()
+                and np.isfinite(area).all()
+                and np.isfinite(kymo).all()
+                and np.isfinite(axis).all()
+                and np.asarray(arrays["bin_ms"]).size == 1
+                and np.isclose(
+                    float(np.asarray(arrays["bin_ms"]).item()),
+                    FINE_BIN_MS,
+                )
+            )
+        global_e = np.asarray(arrays["global_E_rate_hz"])
+        global_i = np.asarray(arrays["global_I_rate_hz"])
+        return bool(
+            global_e.shape == (e_grid.shape[0],)
+            and global_i.shape == global_e.shape
+            and np.isfinite(global_e).all()
+            and np.isfinite(global_i).all()
+            and np.asarray(arrays["fine_bin_ms"]).size == 1
+            and np.isclose(
+                float(np.asarray(arrays["fine_bin_ms"]).item()),
+                FINE_BIN_MS,
+            )
+        )
+    except (KeyError, TypeError, ValueError):
+        return False
+
+
+def _build_hierarchical_observables(
+    e, ctx, locks, manifest, pairwise_seed, *, technical_complete
+):
+    """Build identical hierarchical units for smoke and production runs."""
+    if not technical_complete:
+        return None
+    return PCM.phasec_bootstrap_units(
+        e,
+        ctx["dt"],
+        ctx["S"]["p"].tau_ref_E,
+        core_mask=ctx["core"],
+        analysis_panel_ids=locks["analysis_ids"],
+        pairwise_panel_ids=locks["pairwise_ids"],
+        positions=ctx["S"]["posE"],
+        L=ctx["S"]["L"],
+        block_ms=float(manifest["thresholds"]["time_block_ms"]),
+        pairwise_bin_ms=float(
+            manifest["thresholds"]["pairwise_bin_ms"]
+        ),
+        pairwise_n_null=int(
+            manifest["thresholds"]["pairwise_shift_null_draws"]
+        ),
+        ceiling_window_ms=float(
+            manifest["thresholds"]["sliding_rate_window_ms"]
+        ),
+        ceiling_stride_ms=float(
+            manifest["thresholds"]["sliding_rate_window_stride_ms"]
+        ),
+        active_area_window_ms=float(
+            manifest["thresholds"]["active_area_window_ms"]
+        ),
+        spatial_active_floor_hz=float(
+            manifest["thresholds"]["local_active_floor_hz"]
+        ),
+        n_grid=int(manifest["thresholds"]["spatial_grid_n"]),
+        pairwise_null_seed=pairwise_seed,
+    )
+
+
 def run_identity(args):
     ctx = R.build_context(args.seed, resolution=args.resolution)
     locks = _locked_inputs(args, ctx)
@@ -1193,7 +1448,9 @@ def run_identity(args):
     stride = max(1, int(round(CURRENT_STRIDE_MS / ctx["dt"])))
     recorder = PCO.PhaseCCurrentRecorder(ctx["rec"], ctx["core"], stride_steps=stride)
     burn_ms = 250.0 if args.smoke else IDENTITY_BURN_MS
-    measure_ms = 600.0 if args.smoke else IDENTITY_MEASURE_MS
+    # One second retains two complete 500-ms blocks, satisfying the existing
+    # hierarchical producer without weakening its production minimum.
+    measure_ms = 1000.0 if args.smoke else IDENTITY_MEASURE_MS
     if not args.smoke:
         if (
             burn_ms != manifest["c0"]["protocols"]["identity"]["burn_in_ms"]
@@ -1238,26 +1495,10 @@ def run_identity(args):
             analysis_panel_ids=locks["analysis_ids"],
             pairwise_panel_ids=locks["pairwise_ids"],
         )
-    if not args.smoke and technical_complete:
-        bootstrap_units = PCM.phasec_bootstrap_units(
-            e,
-            ctx["dt"],
-            ctx["S"]["p"].tau_ref_E,
-            core_mask=ctx["core"],
-            analysis_panel_ids=locks["analysis_ids"],
-            pairwise_panel_ids=locks["pairwise_ids"],
-            positions=ctx["S"]["posE"],
-            L=ctx["S"]["L"],
-            block_ms=float(manifest["thresholds"]["time_block_ms"]),
-            ceiling_window_ms=float(
-                manifest["thresholds"]["sliding_rate_window_ms"]
-            ),
-            spatial_active_floor_hz=float(
-                manifest["thresholds"]["local_active_floor_hz"]
-            ),
-            n_grid=int(manifest["thresholds"]["spatial_grid_n"]),
-            pairwise_null_seed=pairwise_seed,
-        )
+    bootstrap_units = _build_hierarchical_observables(
+        e, ctx, locks, manifest, pairwise_seed,
+        technical_complete=technical_complete,
+    )
     if i is not None and e.shape[0] >= int(round(512.0 / ctx["dt"])):
         fields = SR.bin_spikes_to_grid(
             e, i, ctx["S"]["posE"], ctx["S"]["posI"],
@@ -1323,7 +1564,19 @@ def run_identity(args):
         status = "scientific_failure"
         scientific_reason = "runaway"
         technical_reason = None
-    elif not technical_complete or bootstrap_units is None:
+    elif (
+        not technical_complete
+        or not _hierarchical_observables_complete(arrays, min_blocks=2)
+        or (
+            args.smoke
+            and not _smoke_observables_complete(
+                arrays,
+                analysis_ids=locks["analysis_ids"],
+                pairwise_ids=locks["pairwise_ids"],
+                thresholds=manifest["thresholds"],
+            )
+        )
+    ):
         status = "technical_invalid"
         scientific_reason = None
         technical_reason = "truncated_or_missing_observable"
@@ -1552,16 +1805,19 @@ def run_gain(args):
     )
 
 
-def _c1_base_relative_path(resolution, seed, tier, cell_id, phase, noise):
+def _c1_base_relative_path(
+    resolution, seed, tier, cell_id, phase, noise, *, smoke=False
+):
     return os.path.join(
         "results", "topic4_sef_hfo", "zm_phase_c_tonic_identity",
-        "parts", "c1_base", resolution, f"seed{int(seed)}", tier, cell_id,
+        "smoke" if smoke else "parts",
+        "c1_base", resolution, f"seed{int(seed)}", tier, cell_id,
         phase, noise, "phenotype.json",
     )
 
 
 def _c1_gain_relative_path(
-    resolution, seed, tier, cell_id, phase, noise, delta_mV
+    resolution, seed, tier, cell_id, phase, noise, delta_mV, *, smoke=False
 ):
     delta = float(delta_mV)
     label = (
@@ -1570,7 +1826,8 @@ def _c1_gain_relative_path(
     )
     return os.path.join(
         "results", "topic4_sef_hfo", "zm_phase_c_tonic_identity",
-        "parts", "c1_conditional_gain", resolution, f"seed{int(seed)}",
+        "smoke" if smoke else "parts",
+        "c1_conditional_gain", resolution, f"seed{int(seed)}",
         tier, cell_id, phase, noise, label, "gain.json",
     )
 
@@ -1701,7 +1958,7 @@ def run_c1_base(args):
     coordinate = locks["coordinate_cell"]
     relative = _c1_base_relative_path(
         args.resolution, args.seed, args.tier, args.cell_id,
-        args.phase, args.replicate,
+        args.phase, args.replicate, smoke=args.smoke,
     )
     path = os.path.join(ROOT, relative)
     root = os.path.dirname(path)
@@ -1744,7 +2001,7 @@ def run_c1_base(args):
     if not args.smoke and _reuse_or_fail(path, expected):
         return
     burn_ms = 250.0 if args.smoke else IDENTITY_BURN_MS
-    measure_ms = 600.0 if args.smoke else IDENTITY_MEASURE_MS
+    measure_ms = 1000.0 if args.smoke else IDENTITY_MEASURE_MS
     if not args.smoke and (
         burn_ms != manifest["c0"]["protocols"]["identity"]["burn_in_ms"]
         or measure_ms != manifest["c0"]["protocols"]["identity"]["measure_ms"]
@@ -1789,23 +2046,10 @@ def run_c1_base(args):
             analysis_panel_ids=locks["analysis_ids"],
             pairwise_panel_ids=locks["pairwise_ids"],
         )
-    if not args.smoke and technical_complete:
-        bootstrap_units = PCM.phasec_bootstrap_units(
-            e, ctx["dt"], ctx["S"]["p"].tau_ref_E,
-            core_mask=ctx["core"],
-            analysis_panel_ids=locks["analysis_ids"],
-            pairwise_panel_ids=locks["pairwise_ids"],
-            positions=ctx["S"]["posE"], L=ctx["S"]["L"],
-            block_ms=float(manifest["thresholds"]["time_block_ms"]),
-            ceiling_window_ms=float(
-                manifest["thresholds"]["sliding_rate_window_ms"]
-            ),
-            spatial_active_floor_hz=float(
-                manifest["thresholds"]["local_active_floor_hz"]
-            ),
-            n_grid=int(manifest["thresholds"]["spatial_grid_n"]),
-            pairwise_null_seed=pairwise_seed,
-        )
+    bootstrap_units = _build_hierarchical_observables(
+        e, ctx, locks, manifest, pairwise_seed,
+        technical_complete=technical_complete,
+    )
     raw_post = _postburn_trace(recorder.traces(dt_ms=ctx["dt"]), burn_ms)
     effective_post = _postburn_trace(
         effective_observer.traces(dt_ms=ctx["dt"]), burn_ms
@@ -1878,7 +2122,21 @@ def run_c1_base(args):
         status, scientific_reason, technical_reason = (
             "scientific_failure", "empirical_rest_dwell", None
         )
-    elif not technical_complete or bootstrap_units is None or fine is None:
+    elif (
+        not technical_complete
+        or fine is None
+        or not _hierarchical_observables_complete(arrays, min_blocks=2)
+        or (
+            args.smoke
+            and not _smoke_observables_complete(
+                arrays,
+                c1=True,
+                analysis_ids=locks["analysis_ids"],
+                pairwise_ids=locks["pairwise_ids"],
+                thresholds=manifest["thresholds"],
+            )
+        )
+    ):
         status, scientific_reason, technical_reason = (
             "technical_invalid", None, "truncated_or_missing_C1_observable"
         )
@@ -1964,7 +2222,7 @@ def run_c1_gain(args):
     delta = float(args.sign * args.delta_mV)
     relative = _c1_gain_relative_path(
         args.resolution, args.seed, args.tier, args.cell_id,
-        args.phase, args.replicate, delta,
+        args.phase, args.replicate, delta, smoke=args.smoke,
     )
     path = os.path.join(ROOT, relative)
     expected = {

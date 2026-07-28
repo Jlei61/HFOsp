@@ -160,6 +160,10 @@ def test_registered_primary_window_is_not_hidden_by_mixed_c0_identity():
     assert out["layers"]["source_identity"]["verdict"] == (
         "heterogeneous_or_unresolved"
     )
+    assert out["reason"] == (
+        "contiguous_maturation_window_at_primary_convex_states_"
+        "with_unresolved_source_identity"
+    )
     _assert_lifecycle_locked(out)
 
 
@@ -167,6 +171,9 @@ def test_primary_window_is_the_only_slow_path_authorization():
     out = _run(primary_verdict="local_maturation_window")
     assert out["verdict"] == "maturation_window_at_primary_convex_states"
     assert out["next_route"] == "local_maturation_window_found_slow_path_audit_required"
+    assert out["reason"] == (
+        "contiguous_maturation_window_at_primary_convex_states"
+    )
     _assert_lifecycle_locked(out)
 
 

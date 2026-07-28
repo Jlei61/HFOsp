@@ -1025,6 +1025,97 @@ def _adjacent_windows(cells, phenotype):
     return out
 
 
+def _primary_third_seed_compatibility(
+    cells, *, phenotype, direction, supporting_windows,
+):
+    """Fail closed on the non-majority seed for a primary C1 window.
+
+    A two-seed window is not allowed to overrule a contrary third-seed
+    *window*.  The comparison is made at the homologous adjacent cells of the
+    supporting window, rather than over all ten primary cells: tonic cells on
+    an unrelated trajectory are not evidence against the candidate.  A
+    non-supporting third seed is admissible only when every cell in one
+    homologous pair is either matching-complete or explicitly
+    probabilistically indeterminate, with at least one indeterminate cell.
+    Any non-tonic window with a different phenotype or aligned direction is
+    an opposite seed-level outcome and blocks the majority.
+    """
+    cells = list(cells)
+    if not cells:
+        return {
+            "compatible": False,
+            "disposition": "missing",
+            "reason": "third_seed_has_no_cell_evidence",
+        }
+    third_windows = [
+        window
+        for label in NON_TONIC_CLASSES
+        for window in _adjacent_windows(cells, label)
+    ]
+    opposite = [
+        window for window in third_windows
+        if window["phenotype"] != phenotype
+        or window["direction"] != direction
+    ]
+    if opposite:
+        return {
+            "compatible": False,
+            "disposition": "opposite_window",
+            "reason": (
+                "third_seed_has_different_phenotype_or_direction_window"
+            ),
+        }
+    by_id = {row["cell_id"]: row for row in cells}
+    homologous_pairs = {
+        tuple(window["cells"])
+        for window in supporting_windows
+        if window["phenotype"] == phenotype
+        and window["direction"] == direction
+    }
+    for pair in sorted(homologous_pairs):
+        pair_rows = [by_id.get(cell_id) for cell_id in pair]
+        explicit_indeterminate = [
+            row is not None
+            and row.get("status") == "indeterminate"
+            and row.get("cell_class")
+            == "probabilistically_indeterminate"
+            for row in pair_rows
+        ]
+        matching_complete = [
+            row is not None
+            and row.get("status") == "complete"
+            and row.get("cell_class") == phenotype
+            and row.get("path_direction") == direction
+            for row in pair_rows
+        ]
+        if (
+            all(
+                is_matching or is_indeterminate
+                for is_matching, is_indeterminate in zip(
+                    matching_complete, explicit_indeterminate
+                )
+            )
+            and any(explicit_indeterminate)
+        ):
+            return {
+                "compatible": True,
+                "disposition": "probabilistically_indeterminate",
+                "reason": (
+                    "third_seed_homologous_window_is_concordant_or_explicitly_"
+                    "probabilistically_indeterminate"
+                ),
+                "homologous_cells": list(pair),
+            }
+    return {
+        "compatible": False,
+        "disposition": "contradictory_or_unresolved_homologous_window",
+        "reason": (
+            "third_seed_homologous_window_is_not_concordant_or_explicitly_"
+            "probabilistically_indeterminate"
+        ),
+    }
+
+
 def adjudicate_tier(cell_rows, tier):
     """Adjudicate same-phenotype adjacency and cross-seed direction."""
     rows = [row for row in cell_rows if row["tier"] == tier]
@@ -1166,16 +1257,37 @@ def adjudicate_tier(cell_rows, tier):
                 for window in seed_rows[str(seed)]["windows"]
             )
         ]
-        incompatible = [
-            seed for seed in SEEDS
-            if seed not in supporting
-            and seed_rows[str(seed)]["saturation_runaway_only"]
-        ]
-        if len(supporting) >= 2 and not incompatible:
+        third_seed_assessment = {}
+        for seed in SEEDS:
+            if seed in supporting:
+                continue
+            supporting_windows = [
+                window
+                for supporting_seed in supporting
+                for window in seed_rows[str(supporting_seed)]["windows"]
+                if window["phenotype"] == phenotype
+                and window["direction"] == direction
+            ]
+            third_seed_assessment[str(seed)] = (
+                _primary_third_seed_compatibility(
+                    [row for row in rows if row["seed"] == seed],
+                    phenotype=phenotype,
+                    direction=direction,
+                    supporting_windows=supporting_windows,
+                )
+            )
+        if (
+            len(supporting) >= 2
+            and all(
+                assessment["compatible"]
+                for assessment in third_seed_assessment.values()
+            )
+        ):
             candidates.append({
                 "phenotype": phenotype,
                 "direction": direction,
                 "supporting_seeds": supporting,
+                "third_seed_assessment": third_seed_assessment,
             })
     any_window = any(row["windows"] for row in seed_rows.values())
     any_isolated = any(
@@ -1196,6 +1308,11 @@ def adjudicate_tier(cell_rows, tier):
         "status": status,
         "candidates": candidates,
         "seed_results": seed_rows,
+        "acceptance_semantics": (
+            "same_phenotype_and_direction_in_at_least_2_of_3_seeds;"
+            "every_remaining_seed_must_be_concordant_or_explicitly_"
+            "probabilistically_indeterminate"
+        ),
     }
 
 

@@ -6,6 +6,7 @@ from pathlib import Path
 import sys
 
 import numpy as np
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -274,6 +275,12 @@ def test_window_requires_same_non_tonic_class_and_preserves_shell_semantics():
                 "clonic_or_bursting_carrier",
             ),
         ])
+    # Two matching seeds cannot overrule a complete tonic phenotype in the
+    # third seed.
+    assert A.adjudicate_tier(
+        primary, "primary_convex"
+    )["status"] == "seed_heterogeneous_maturation"
+    primary[-1]["cell_class"] = "periodic_non_tonic_carrier"
     assert A.adjudicate_tier(
         primary, "primary_convex"
     )["status"] == "local_maturation_window"
@@ -298,6 +305,198 @@ def test_window_requires_same_non_tonic_class_and_preserves_shell_semantics():
     assert A.adjudicate_tier(
         mixed, "primary_convex"
     )["status"] == "isolated_maturation_candidate"
+
+
+def _two_seed_primary_window(third_labels, *, third_direction="forward"):
+    rows = []
+    for seed in (1, 3):
+        rows.extend([
+            _cell(
+                seed, "primary_convex", "rising", idx,
+                "periodic_non_tonic_carrier",
+            )
+            for idx in (0, 1)
+        ])
+    for idx, label in enumerate(third_labels):
+        row = _cell(
+            4, "primary_convex", "rising", idx, label,
+        )
+        row["path_direction"] = third_direction
+        rows.append(row)
+    return rows
+
+
+def test_primary_majority_allows_only_explicit_indeterminate_third_seed():
+    rows = _two_seed_primary_window([
+        "probabilistically_indeterminate",
+        "probabilistically_indeterminate",
+    ])
+    for row in rows:
+        if row["seed"] == 4:
+            row["status"] = "indeterminate"
+    out = A.adjudicate_tier(rows, "primary_convex")
+    assert out["status"] == "local_maturation_window"
+    candidate = out["candidates"][0]
+    assert candidate["supporting_seeds"] == [1, 3]
+    assert candidate["third_seed_assessment"]["4"]["disposition"] == (
+        "probabilistically_indeterminate"
+    )
+
+
+def test_primary_majority_allows_concordant_but_incomplete_third_seed():
+    rows = _two_seed_primary_window([
+        "periodic_non_tonic_carrier",
+        "probabilistically_indeterminate",
+    ])
+    rows[-1]["status"] = "indeterminate"
+    out = A.adjudicate_tier(rows, "primary_convex")
+    assert out["status"] == "local_maturation_window"
+    assert out["candidates"][0]["third_seed_assessment"]["4"][
+        "disposition"
+    ] == "probabilistically_indeterminate"
+
+
+def test_primary_majority_does_not_hide_tonic_cell_behind_concordant_cell():
+    rows = _two_seed_primary_window([
+        "periodic_non_tonic_carrier",
+        "tonic_non_AI",
+    ])
+    out = A.adjudicate_tier(rows, "primary_convex")
+    assert out["status"] == "seed_heterogeneous_maturation"
+    assert out["candidates"] == []
+
+
+def _ten_cell_primary_fixture(
+    third_pair,
+    *,
+    third_pair_direction="forward",
+    reverse_window=False,
+):
+    rows = []
+    for seed in A.SEEDS:
+        for trajectory in ("rising", "peak"):
+            for index in range(5):
+                label = "tonic_non_AI"
+                if trajectory == "rising" and index in (0, 1):
+                    if seed in (1, 3):
+                        label = "periodic_non_tonic_carrier"
+                    else:
+                        label = third_pair[index]
+                row = _cell(
+                    seed, "primary_convex", trajectory, index, label,
+                )
+                if (
+                    seed == 4 and trajectory == "rising"
+                    and index in (0, 1)
+                ):
+                    row["path_direction"] = third_pair_direction
+                    if label == "probabilistically_indeterminate":
+                        row["status"] = "indeterminate"
+                if (
+                    reverse_window and seed == 4
+                    and trajectory == "peak" and index in (0, 1)
+                ):
+                    row["cell_class"] = "periodic_non_tonic_carrier"
+                    row["path_direction"] = "reverse"
+                rows.append(row)
+    return rows
+
+
+def test_primary_real_ten_cell_indeterminate_pair_ignores_unrelated_tonic():
+    rows = _ten_cell_primary_fixture((
+        "probabilistically_indeterminate",
+        "probabilistically_indeterminate",
+    ))
+    out = A.adjudicate_tier(rows, "primary_convex")
+    assert out["status"] == "local_maturation_window"
+    assert out["candidates"][0]["supporting_seeds"] == [1, 3]
+    assessment = out["candidates"][0]["third_seed_assessment"]["4"]
+    assert assessment["disposition"] == "probabilistically_indeterminate"
+    assert assessment["homologous_cells"] == [
+        "primary_convex__rising__0",
+        "primary_convex__rising__1",
+    ]
+
+
+def test_primary_real_ten_cell_corresponding_tonic_pair_blocks():
+    out = A.adjudicate_tier(
+        _ten_cell_primary_fixture(("tonic_non_AI", "tonic_non_AI")),
+        "primary_convex",
+    )
+    assert out["status"] == "seed_heterogeneous_maturation"
+    assert out["candidates"] == []
+
+
+def test_primary_real_ten_cell_different_phenotype_pair_blocks():
+    out = A.adjudicate_tier(
+        _ten_cell_primary_fixture((
+            "clonic_or_bursting_carrier",
+            "clonic_or_bursting_carrier",
+        )),
+        "primary_convex",
+    )
+    assert out["status"] == "seed_heterogeneous_maturation"
+    assert out["candidates"] == []
+
+
+def test_primary_real_ten_cell_reverse_window_blocks():
+    out = A.adjudicate_tier(
+        _ten_cell_primary_fixture((
+            "probabilistically_indeterminate",
+            "probabilistically_indeterminate",
+        ), reverse_window=True),
+        "primary_convex",
+    )
+    assert out["status"] == "seed_heterogeneous_maturation"
+    assert out["candidates"] == []
+
+
+def test_primary_real_ten_cell_three_of_three_passes():
+    out = A.adjudicate_tier(
+        _ten_cell_primary_fixture((
+            "periodic_non_tonic_carrier",
+            "periodic_non_tonic_carrier",
+        )),
+        "primary_convex",
+    )
+    assert out["status"] == "local_maturation_window"
+    assert out["candidates"][0]["supporting_seeds"] == [1, 3, 4]
+
+
+@pytest.mark.parametrize(
+    "third_labels,third_direction",
+    [
+        (["periodic_non_tonic_carrier", "clonic_or_bursting_carrier"], "forward"),
+        (["periodic_non_tonic_carrier", "tonic_non_AI"], "forward"),
+        (["periodic_non_tonic_carrier", "refractory_saturated"], "forward"),
+        (["periodic_non_tonic_carrier", "runaway"], "forward"),
+        (["periodic_non_tonic_carrier", "periodic_non_tonic_carrier"], "reverse"),
+    ],
+)
+def test_primary_majority_rejects_contradictory_complete_third_seed(
+    third_labels, third_direction,
+):
+    out = A.adjudicate_tier(
+        _two_seed_primary_window(
+            third_labels, third_direction=third_direction,
+        ),
+        "primary_convex",
+    )
+    assert out["status"] == "seed_heterogeneous_maturation"
+    assert out["candidates"] == []
+
+
+def test_primary_majority_rejects_non_explicit_indeterminate_third_seed():
+    rows = _two_seed_primary_window([
+        "probabilistically_indeterminate",
+        "tonic_gain_indeterminate",
+    ])
+    for row in rows:
+        if row["seed"] == 4:
+            row["status"] = "indeterminate"
+    out = A.adjudicate_tier(rows, "primary_convex")
+    assert out["status"] == "seed_heterogeneous_maturation"
+    assert out["candidates"] == []
 
 
 def test_spatial_relay_modifier_requires_a_reproducible_direction():
