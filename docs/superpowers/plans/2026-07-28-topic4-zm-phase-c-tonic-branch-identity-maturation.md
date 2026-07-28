@@ -298,6 +298,9 @@ production result.
 - [ ] Require two adjacent primary cells within seed for a window.
 - [ ] Require the same aligned direction in at least 2/3 seeds with no opposite
   third-seed outcome.
+- [ ] Adjudicate the secondary shell separately: require the same non-tonic
+  phenotype at the same locked basis-direction/sign cell in at least 2/3
+  seeds; never apply primary `path_index+1` adjacency to shell points.
 - [ ] Keep primary-convex and secondary-shell verdicts separate.
 - [ ] Implement the complete 3-seed/10-primary-cell negative-coverage contract.
 - [ ] Make invalid/missing shell cells block only the shell-negative claim.

@@ -1,0 +1,989 @@
+"""Pure tests for the C1 atlas, window and conditional-gain glue."""
+from __future__ import annotations
+
+import json
+from pathlib import Path
+import sys
+
+import numpy as np
+
+
+ROOT = Path(__file__).resolve().parents[1]
+for path in (ROOT, ROOT / "scripts"):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
+
+import scripts.analyze_topic4_zm_phasec1 as A  # noqa: E402
+import scripts.lock_topic4_zm_phasec1_gain_triggers as L  # noqa: E402
+import src.topic4_zm_phasec_neighbourhood as N  # noqa: E402
+
+
+def _hierarchical(ai=True):
+    return {
+        "rho80_active_core_by_block_window": np.full(
+            (16, 6), 0.10 if ai else 0.40
+        ),
+        "block_isi_cv2_by_panel_neuron": np.full((16, 8), 0.80),
+        "block_refractory_isi_fraction_by_panel_neuron": np.full(
+            (16, 8), 0.10
+        ),
+        "pair_corr_by_block_and_pair": np.full((16, 12), 0.05),
+        "pair_null_median_by_block_and_draw": np.full((16, 3, 99), 0.20),
+        "pair_strata": np.resize(np.asarray([0, 1, 2], np.int8), 12),
+        "active_area_fraction_by_block_window": np.full((16, 20), 0.20),
+    }
+
+
+def _coordinate(cell_id="primary__rising__bounded_mid", tier="primary_convex"):
+    return {
+        "seed": 1,
+        "cell_id": cell_id,
+        "tier": tier,
+        "trajectory_id": "rising",
+        "path_index": 2,
+        "path_direction": "forward",
+        "state_sha256": "a" * 64,
+        "status": "valid",
+    }
+
+
+def _six_runs(label="tonic_non_AI", spike_pass=False):
+    phase = np.linspace(0.0, 2.0 * np.pi, 16, endpoint=False)
+    base_signature = np.column_stack([
+        np.sin(phase),
+        np.sin(phase + 0.4),
+        np.sin(phase + 0.9),
+        np.sin(phase + 1.4),
+    ])
+    rows = []
+    for phase in A.PHASES:
+        for noise in A.NOISES:
+            rows.append({
+                "seed": 1,
+                "phase": phase,
+                "noise": noise,
+                "status": "complete",
+                "terminal_class": label,
+                "path_direction": "forward",
+                "spike_ai_screen": {"pass": spike_pass},
+                "spatial_relay": {"is_spatial_relay": False},
+                "part_path": f"parts/{phase}/{noise}.json",
+                "part_sha256": "b" * 64,
+                "locked_arm_identity": {
+                    "schema": A.C1_BASE_PART_SCHEMA,
+                    "phasec_manifest_sha256": "c" * 64,
+                    "coordinate_manifest_sha256": "d" * 64,
+                    "coordinate_manifest_semantic_sha256": "8" * 64,
+                    "seed": 1,
+                    "cell_id": "primary__rising__bounded_mid",
+                    "tier": "primary_convex",
+                    "trajectory_id": "rising",
+                    "path_index": 2,
+                    "path_direction": "forward",
+                    "phase": phase,
+                    "noise": noise,
+                    "resolution": "dt",
+                    "slow_state_sha256": "a" * 64,
+                    "coordinate_npz_file_sha256": "6" * 64,
+                    "coordinate_npz_semantic_sha256": "7" * 64,
+                    "config_sha": "1" * 64,
+                    "fast_base_state_hash": "2" * 64,
+                    "state_file_sha256": "3" * 64,
+                    "noise_bank_sha": "4" * 64,
+                    "burn_in_ms": 500.0,
+                    "measure_ms": 8000.0,
+                },
+                "phenotype": {
+                    "temporal_diagnostics": {
+                        "periodic": {
+                            "median_period_ms": (
+                                50.0 if phase == "rising" else 55.0
+                            ),
+                            "source_phase_signature": {
+                                "status": "ok",
+                                "profile": np.roll(
+                                    base_signature,
+                                    2 if phase == "peak" else 0,
+                                    axis=0,
+                                ).tolist(),
+                            },
+                        }
+                    }
+                },
+            })
+    return rows
+
+
+def _cell(seed, tier, trajectory, index, label, cell_id=None):
+    return {
+        "seed": seed,
+        "tier": tier,
+        "trajectory_id": trajectory,
+        "path_index": index,
+        "path_direction": "forward",
+        "cell_id": cell_id or f"{tier}__{trajectory}__{index}",
+        "slow_state_sha256": "a" * 64,
+        "status": "complete",
+        "cell_class": label,
+        "gain_trigger_eligible": label == "spike_AI_screen_candidate",
+        "run_rows": _six_runs(
+            "tonic_non_AI",
+            spike_pass=label == "spike_AI_screen_candidate",
+        ),
+        "spike_ai_screen_support": {
+            "passes_locked_cell_gate": label == "spike_AI_screen_candidate",
+            "k": 6 if label == "spike_AI_screen_candidate" else 0,
+            "n": 6,
+            "posterior_median": (
+                0.95 if label == "spike_AI_screen_candidate" else 0.05
+            ),
+            "per_phase_pass_count": {
+                phase: (
+                    3 if label == "spike_AI_screen_candidate" else 0
+                )
+                for phase in A.PHASES
+            },
+        },
+    }
+
+
+def test_spike_ai_screen_is_the_c0_conjunction_without_gain():
+    passed = A.spike_ai_screen(
+        _hierarchical(ai=True), terminal_class="tonic_non_AI"
+    )
+    assert passed["pass"] is True
+    assert A.spike_ai_screen(
+        _hierarchical(ai=False), terminal_class="tonic_non_AI"
+    )["pass"] is False
+    assert A.spike_ai_screen(
+        _hierarchical(ai=True),
+        terminal_class="periodic_non_tonic_carrier",
+    )["pass"] is False
+
+
+def test_cell_gate_requires_five_of_six_and_two_per_phase():
+    rows = _six_runs("periodic_non_tonic_carrier")
+    rows[-1]["terminal_class"] = "tonic_non_AI"
+    out = A.aggregate_cell_rows(rows, _coordinate())
+    assert out["cell_class"] == "periodic_non_tonic_carrier"
+    support = out["terminal_support"]["periodic_non_tonic_carrier"]
+    assert (support["k"], support["n"]) == (5, 6)
+    assert support["posterior_median"] > 0.80
+    assert support["per_phase_pass_count"] == {"rising": 3, "peak": 2}
+    assert out["periodic_fast_phase_consistency"]["pass"] is True
+
+    rows[-2]["terminal_class"] = "tonic_non_AI"
+    out = A.aggregate_cell_rows(rows, _coordinate())
+    assert out["cell_class"] == "probabilistically_indeterminate"
+
+
+def test_periodic_window_fails_when_fast_phase_periods_disagree():
+    rows = _six_runs("periodic_non_tonic_carrier")
+    for row in rows:
+        if row["phase"] == "peak":
+            row["phenotype"]["temporal_diagnostics"]["periodic"][
+                "median_period_ms"
+            ] = 90.0
+    out = A.aggregate_cell_rows(rows, _coordinate())
+    assert out["cell_class"] == "probabilistically_indeterminate"
+    assert out["periodic_fast_phase_consistency"]["pass"] is False
+    assert (
+        out["terminal_support"]["periodic_non_tonic_carrier"][
+            "phase_consistency_blocked"
+        ]
+        is True
+    )
+
+
+def test_periodic_window_fails_when_source_phase_structure_disagrees():
+    rows = _six_runs("periodic_non_tonic_carrier")
+    phase = np.linspace(0.0, 2.0 * np.pi, 16, endpoint=False)
+    orthogonal = np.column_stack([
+        np.sin(2.0 * phase + offset)
+        for offset in (0.0, 0.3, 0.8, 1.1)
+    ])
+    for row in rows:
+        if row["phase"] == "peak":
+            row["phenotype"]["temporal_diagnostics"]["periodic"][
+                "source_phase_signature"
+            ]["profile"] = orthogonal.tolist()
+    out = A.aggregate_cell_rows(rows, _coordinate())
+    consistency = out["periodic_fast_phase_consistency"]
+    assert out["cell_class"] == "probabilistically_indeterminate"
+    assert consistency["pass"] is False
+    assert consistency["reason"] == "fast_phase_source_structure_differs"
+
+
+def test_periodic_source_phase_threshold_is_decisive(monkeypatch):
+    rows = _six_runs("periodic_non_tonic_carrier")
+    baseline = A._periodic_phase_consistency(rows)
+    similarity = baseline["source_phase_similarity_median"]
+    assert baseline["pass"] is True
+    monkeypatch.setattr(
+        A, "PERIODIC_PHASE_STRUCTURE_CORR_MIN",
+        min(1.01, similarity + 0.01),
+    )
+    assert A._periodic_phase_consistency(rows)["pass"] is False
+
+
+def test_whole_sheet_early_stop_is_not_a_refractory_diagnosis():
+    assert A._scientific_terminal("whole_sheet_plateau") == (
+        "probabilistically_indeterminate"
+    )
+
+
+def test_ai_tonic_never_forms_a_maturation_window():
+    cells = []
+    for seed in A.SEEDS:
+        for idx in range(3):
+            label = (
+                "spike_AI_screen_candidate" if idx in (0, 1)
+                else "tonic_non_AI"
+            )
+            cells.append(_cell(
+                seed, "primary_convex", "rising", idx, label
+            ))
+    out = A.adjudicate_tier(cells, "primary_convex")
+    assert out["status"] == "no_window"
+
+
+def test_window_requires_same_non_tonic_class_and_preserves_shell_semantics():
+    primary = []
+    shell = []
+    for seed in A.SEEDS:
+        primary.extend([
+            _cell(
+                seed, "primary_convex", "rising", 0,
+                "periodic_non_tonic_carrier",
+            ),
+            _cell(
+                seed, "primary_convex", "rising", 1,
+                (
+                    "periodic_non_tonic_carrier"
+                    if seed in (1, 3) else "tonic_non_AI"
+                ),
+            ),
+        ])
+        shell.extend([
+            _cell(
+                seed, "secondary_shell", "shell_a", 0,
+                "clonic_or_bursting_carrier",
+            ),
+            _cell(
+                seed, "secondary_shell", "shell_a", 1,
+                "clonic_or_bursting_carrier",
+            ),
+        ])
+    assert A.adjudicate_tier(
+        primary, "primary_convex"
+    )["status"] == "local_maturation_window"
+    assert A.adjudicate_tier(
+        shell, "secondary_shell"
+    )["status"] == "maturation_candidate_in_secondary_shell"
+
+    # Adjacent cells with different temporal classes are not a window.
+    mixed = [
+        _cell(
+            seed, "primary_convex", "rising", 0,
+            "periodic_non_tonic_carrier",
+        )
+        for seed in A.SEEDS
+    ] + [
+        _cell(
+            seed, "primary_convex", "rising", 1,
+            "clonic_or_bursting_carrier",
+        )
+        for seed in A.SEEDS
+    ]
+    assert A.adjudicate_tier(
+        mixed, "primary_convex"
+    )["status"] == "isolated_maturation_candidate"
+
+
+def test_spatial_relay_modifier_requires_a_reproducible_direction():
+    rows = _six_runs("periodic_non_tonic_carrier")
+    for index, row in enumerate(rows):
+        row["spatial_relay"] = {
+            "is_spatial_relay": True,
+            "direction_sign": 1 if index < 5 else -1,
+        }
+    out = A.aggregate_cell_rows(rows, _coordinate())
+    assert out["spatial_relay_modifier"]["supported"] is True
+    assert out["spatial_relay_modifier"]["support"]["direction_sign"] == 1
+
+    rows[4]["spatial_relay"]["direction_sign"] = -1
+    out = A.aggregate_cell_rows(rows, _coordinate())
+    assert out["spatial_relay_modifier"]["supported"] is False
+
+
+def test_real_shell_cells_replicate_same_cell_across_seeds_without_adjacency():
+    cell_id = N.SHELL_CELL_NAMES[0]
+    rows = [
+        _cell(
+            seed, "secondary_shell", "secondary_shell", 0,
+            "periodic_non_tonic_carrier", cell_id,
+        )
+        for seed in (1, 3)
+    ]
+    third = _cell(
+        4, "secondary_shell", "secondary_shell", 0,
+        "probabilistically_indeterminate", cell_id,
+    )
+    third["status"] = "indeterminate"
+    rows.append(third)
+    out = A.adjudicate_tier(rows, "secondary_shell")
+    assert out["status"] == "maturation_candidate_in_secondary_shell"
+    assert out["candidates"][0]["cell_id"] == cell_id
+    assert out["candidates"][0]["supporting_seeds"] == [1, 3]
+    assert out["primary_reachability_established"] is False
+
+
+def test_shell_single_seed_or_different_cells_do_not_replicate():
+    cell_a, cell_b = N.SHELL_CELL_NAMES[:2]
+    rows = [
+        _cell(
+            1, "secondary_shell", "secondary_shell", 0,
+            "clonic_or_bursting_carrier", cell_a,
+        ),
+        _cell(
+            3, "secondary_shell", "secondary_shell", 0,
+            "clonic_or_bursting_carrier", cell_b,
+        ),
+    ]
+    for seed in (4,):
+        for cell_id in (cell_a, cell_b):
+            row = _cell(
+                seed, "secondary_shell", "secondary_shell", 0,
+                "probabilistically_indeterminate", cell_id,
+            )
+            row["status"] = "indeterminate"
+            rows.append(row)
+    out = A.adjudicate_tier(rows, "secondary_shell")
+    assert out["status"] == "isolated_maturation_candidate"
+    assert out["candidates"] == []
+
+
+def test_complete_negative_is_fail_closed_by_conditional_gain():
+    cells = []
+    for seed in A.SEEDS:
+        for idx, cell_id in enumerate(N.PRIMARY_CELL_NAMES):
+            row = _cell(
+                seed, "primary_convex",
+                "rising" if idx < 5 else "peak", idx % 5,
+                "tonic_non_AI", cell_id,
+            )
+            row["conditional_gain"] = {"status": "not_triggered"}
+            cells.append(row)
+    ok, reason = A._strict_negative(cells, tier="primary_convex")
+    assert ok is True
+    assert reason == "complete_bounded_negative"
+
+    cells[0]["cell_class"] = "spike_AI_screen_candidate"
+    cells[0]["conditional_gain"] = {
+        "status": "C1_blocked_conditional_gain"
+    }
+    ok, reason = A._strict_negative(cells, tier="primary_convex")
+    assert ok is False
+    assert reason == "conditional_gain_not_terminal_resolved"
+
+    cells[0]["status"] = "indeterminate"
+    cells[0]["cell_class"] = "tonic_gain_indeterminate"
+    cells[0]["conditional_gain"] = {"status": "scientific_indeterminate"}
+    ok, _ = A._strict_negative(cells, tier="primary_convex")
+    assert ok is False
+
+
+def test_empty_trigger_manifest_must_be_locked_before_negative(tmp_path, monkeypatch):
+    monkeypatch.setattr(A, "ROOT", tmp_path)
+    base_path = tmp_path / "base_atlas.json"
+    base_path.write_text("{}\n")
+    base = {
+        "phasec_manifest_sha256": "a" * 64,
+        "phasec_manifest_file_sha256": "b" * 64,
+        "coordinate_manifest_sha256": "c" * 64,
+        "coordinate_manifest_semantic_sha256": "e" * 64,
+        "coordinate_manifest_file_sha256": "d" * 64,
+        "resolution": "dt",
+        "matrix": {"complete": True},
+        "cells": [],
+        "primary_base_adjudication": {
+            "tier": "primary_convex", "status": "no_window",
+            "candidates": [], "seed_results": {},
+        },
+        "secondary_shell_base_adjudication": {
+            "tier": "secondary_shell", "status": "no_window",
+            "candidates": [], "seed_results": {},
+        },
+        "claim_boundary": "test",
+    }
+    out = A.apply_conditional_gain(
+        base,
+        base_atlas_path=base_path,
+        trigger_manifest_path=tmp_path / "missing_trigger.json",
+    )
+    assert out["verdict"] == "C1_gain_trigger_not_locked"
+    assert out["reason"] == "write_once_trigger_decision_missing"
+
+
+def test_base_part_requires_exact_runtime_producer_map(tmp_path, monkeypatch):
+    monkeypatch.setattr(A, "ROOT", tmp_path)
+    path = tmp_path / "part.json"
+    phasec = {
+        "manifest_sha256": "c" * 64,
+        "provenance": {"producer_file_sha256": {"runner.py": "d" * 64}},
+        "per_seed": {
+            "1": {
+                "canonical_config_sha": "f" * 64,
+                "c0_carrier_states": {
+                    "rising": {
+                        "state": {
+                            "state_hash": "2" * 64,
+                            "file_sha256": "3" * 64,
+                        },
+                        "noise_banks": [{
+                            "replicate": "noise_replay",
+                            "bank_sha": "1" * 64,
+                        }],
+                    }
+                },
+            }
+        },
+    }
+    coord = {
+        "manifest_sha256": "e" * 64,
+        "semantic_sha256": "9" * 64,
+        "producer_file_sha256": {"builder.py": "7" * 64},
+        "seeds": {
+            "1": {
+                "config_sha": "f" * 64,
+                "npz_file_sha256": "8" * 64,
+                "npz_semantic_sha256": "6" * 64,
+            }
+        },
+    }
+    coordinate = _coordinate()
+    payload = {
+        "schema": A.C1_BASE_PART_SCHEMA,
+        "phasec_manifest_sha256": phasec["manifest_sha256"],
+        "phasec_manifest_file_sha256": "5" * 64,
+        "coordinate_manifest_sha256": coord["manifest_sha256"],
+        "coordinate_manifest_semantic_sha256": coord["semantic_sha256"],
+        "coordinate_manifest_file_sha256": "4" * 64,
+        "seed": 1,
+        "cell_id": coordinate["cell_id"],
+        "tier": coordinate["tier"],
+        "trajectory_id": coordinate["trajectory_id"],
+        "path_index": coordinate["path_index"],
+        "path_direction": coordinate["path_direction"],
+        "phase": "rising",
+        "noise": "noise_replay",
+        "resolution": "dt",
+        "slow_state_sha256": coordinate["state_sha256"],
+        "coordinate_npz_file_sha256": "8" * 64,
+        "coordinate_npz_semantic_sha256": "6" * 64,
+        "config_sha": "f" * 64,
+        "fast_base_state_hash": "2" * 64,
+        "state_file_sha256": "3" * 64,
+        "noise_bank_sha": "1" * 64,
+        "burn_in_ms": 500.0,
+        "measure_ms": 8000.0,
+        "status": "scientific_failure",
+        "scientific_end_reason": "runaway",
+        "runtime_provenance": {
+            "manifest_sha256": phasec["manifest_sha256"],
+            "manifest_file_sha256": "5" * 64,
+            "producer_sha256": {"runner.py": "x" * 64},
+            "state_file_sha256": "3" * 64,
+            "noise_bank_sha": "1" * 64,
+            "coordinate_manifest_sha256": coord["manifest_sha256"],
+            "coordinate_manifest_semantic_sha256": coord[
+                "semantic_sha256"
+            ],
+            "coordinate_manifest_file_sha256": "4" * 64,
+            "coordinate_npz_file_sha256": "8" * 64,
+            "coordinate_npz_semantic_sha256": "6" * 64,
+            "coordinate_producer_sha256": coord[
+                "producer_file_sha256"
+            ],
+        },
+    }
+    path.write_text(json.dumps(payload))
+    blocked = A.classify_base_part(
+        path,
+        coordinate=coordinate,
+        coordinate_manifest=coord,
+        phasec_manifest=phasec,
+        panels={},
+        seed=1,
+        phase="rising",
+        noise="noise_replay",
+        resolution="dt",
+        phasec_manifest_file_sha256="5" * 64,
+        coordinate_manifest_file_sha256="4" * 64,
+        coordinate_ref={
+            "file_sha256": "4" * 64,
+            "manifest_sha256": coord["manifest_sha256"],
+            "semantic_sha256": coord["semantic_sha256"],
+        },
+    )
+    assert blocked["status"] == "blocked"
+    assert blocked["reason"] == "runtime_provenance_mismatch:producer_sha256"
+
+    payload["runtime_provenance"]["producer_sha256"] = (
+        phasec["provenance"]["producer_file_sha256"]
+    )
+    payload["fast_base_state_hash"] = "x" * 64
+    path.write_text(json.dumps(payload))
+    fast_blocked = A.classify_base_part(
+        path,
+        coordinate=coordinate,
+        coordinate_manifest=coord,
+        phasec_manifest=phasec,
+        panels={},
+        seed=1,
+        phase="rising",
+        noise="noise_replay",
+        resolution="dt",
+        phasec_manifest_file_sha256="5" * 64,
+        coordinate_manifest_file_sha256="4" * 64,
+        coordinate_ref={
+            "file_sha256": "4" * 64,
+            "manifest_sha256": coord["manifest_sha256"],
+            "semantic_sha256": coord["semantic_sha256"],
+        },
+    )
+    assert fast_blocked["reason"] == (
+        "base_part_field_mismatch:fast_base_state_hash"
+    )
+    payload["fast_base_state_hash"] = "2" * 64
+    path.write_text(json.dumps(payload))
+    accepted = A.classify_base_part(
+        path,
+        coordinate=coordinate,
+        coordinate_manifest=coord,
+        phasec_manifest=phasec,
+        panels={},
+        seed=1,
+        phase="rising",
+        noise="noise_replay",
+        resolution="dt",
+        phasec_manifest_file_sha256="5" * 64,
+        coordinate_manifest_file_sha256="4" * 64,
+        coordinate_ref={
+            "file_sha256": "4" * 64,
+            "manifest_sha256": coord["manifest_sha256"],
+            "semantic_sha256": coord["semantic_sha256"],
+        },
+    )
+    assert accepted["status"] == "complete"
+    assert accepted["terminal_class"] == "runaway"
+
+
+def _base_atlas_with_trigger(tmp_path):
+    cells = []
+    for seed in A.SEEDS:
+        for idx, cell_id in enumerate(N.PRIMARY_CELL_NAMES):
+            label = (
+                "spike_AI_screen_candidate"
+                if seed == 1 and cell_id == "primary__rising__bounded_mid"
+                else "tonic_non_AI"
+            )
+            cells.append(_cell(
+                seed,
+                "primary_convex",
+                "rising" if idx < 5 else "peak",
+                idx % 5,
+                label,
+                cell_id,
+            ))
+        for idx, cell_id in enumerate(N.SHELL_CELL_NAMES):
+            cells.append(_cell(
+                seed,
+                "secondary_shell",
+                f"shell_{idx // 2}",
+                idx,
+                "tonic_non_AI",
+                cell_id,
+            ))
+    base = {
+        "schema": A.C1_BASE_ATLAS_SCHEMA,
+        "phasec_manifest_sha256": "c" * 64,
+        "phasec_manifest_file_sha256": "f" * 64,
+        "coordinate_manifest_sha256": "d" * 64,
+        "coordinate_manifest_semantic_sha256": "8" * 64,
+        "coordinate_manifest_file_sha256": "9" * 64,
+        "phasec_producer_file_sha256": {"runner.py": "1" * 64},
+        "coordinate_producer_file_sha256": {"builder.py": "2" * 64},
+        "coordinate_npz_provenance_by_seed": {
+            str(seed): {
+                "coordinate_npz_file_sha256": "6" * 64,
+                "coordinate_npz_semantic_sha256": "7" * 64,
+            }
+            for seed in A.SEEDS
+        },
+        "resolution": "dt",
+        "matrix": {"complete": True},
+        "cells": cells,
+        "primary_base_adjudication": {
+            "status": "no_window",
+            "tier": "primary_convex",
+        },
+        "secondary_shell_base_adjudication": {
+            "status": "no_window",
+            "tier": "secondary_shell",
+        },
+        "claim_boundary": "test",
+    }
+    path = tmp_path / "base.json"
+    path.write_text(json.dumps(base, sort_keys=True))
+    return base, path
+
+
+def _denominators(_resolution, _seed):
+    rows = []
+    for noise in A.NOISES:
+        for delta in L.DELTAS_MV:
+            path = Path(L.ROOT) / f"c0/{noise}/{delta}.json"
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(json.dumps({
+                "noise": noise, "delta": float(delta)
+            }, sort_keys=True))
+            rows.append({
+            "schema": "zm_phasec_gain_cell_v1",
+            "phasec_manifest_sha256": "c" * 64,
+            "phasec_manifest_file_sha256": "f" * 64,
+            "phasec_producer_file_sha256": {"runner.py": "1" * 64},
+            "resolution": _resolution,
+            "seed": int(_seed),
+            "state_tag": "pre_entry__natural",
+            "noise": noise,
+            "replicate": noise,
+            "delta_mV": float(delta),
+            "threshold_offset_mV": float(delta),
+            "signed_delta_abs_mV": abs(float(delta)),
+            "sign": int((delta > 0) - (delta < 0)),
+            "burn_in_ms": 500.0,
+            "measure_ms": 1000.0,
+            "config_sha": "1" * 64,
+            "fast_base_state_hash": "2" * 64,
+            "state_file_sha256": "3" * 64,
+            "noise_bank_sha": "4" * 64,
+            "path": str(path.relative_to(L.ROOT)),
+            "file_sha256": A._sha256(path),
+            })
+    return rows
+
+
+def test_trigger_manifest_is_write_once_and_contains_30_arms(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(A, "ROOT", tmp_path)
+    monkeypatch.setattr(A, "OUT", tmp_path / "results")
+    monkeypatch.setattr(L, "ROOT", tmp_path)
+    base, path = _base_atlas_with_trigger(tmp_path)
+
+    manifest = L.build_trigger_manifest(
+        base, base_atlas_path=path, denominator_provider=_denominators
+    )
+    assert manifest["n_triggered_cells"] == 1
+    assert len(
+        manifest["triggered_cells"][0]["expected_carrier_gain_arms"]
+    ) == 30
+    arm = manifest["triggered_cells"][0][
+        "expected_carrier_gain_arms"
+    ][0]
+    assert arm["fast_base_state_hash"] == "2" * 64
+    assert arm["state_file_sha256"] == "3" * 64
+    assert arm["noise_bank_sha"] == "4" * 64
+    assert arm["coordinate_npz_file_sha256"] == "6" * 64
+    assert arm["coordinate_npz_semantic_sha256"] == "7" * 64
+    output = tmp_path / "trigger.json"
+    assert N.write_json_once(output, manifest) == "created"
+    assert N.write_json_once(output, manifest) == "reused"
+    changed = dict(manifest)
+    changed["n_triggered_cells"] = 2
+    try:
+        N.write_json_once(output, changed)
+    except RuntimeError:
+        pass
+    else:
+        raise AssertionError("a write-once trigger manifest must reject drift")
+
+
+def test_missing_conditional_gain_blocks_negative_but_not_nontonic_positive(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(A, "ROOT", tmp_path)
+    monkeypatch.setattr(A, "OUT", tmp_path / "results")
+    monkeypatch.setattr(L, "ROOT", tmp_path)
+    base, path = _base_atlas_with_trigger(tmp_path)
+
+    trigger = L.build_trigger_manifest(
+        base, base_atlas_path=path, denominator_provider=_denominators
+    )
+    trigger_path = tmp_path / "trigger.json"
+    N.write_json_once(trigger_path, trigger)
+    out = A.apply_conditional_gain(
+        base, base_atlas_path=path, trigger_manifest_path=trigger_path
+    )
+    assert out["verdict"] == "C1_blocked_conditional_gain"
+
+    base["primary_base_adjudication"] = {
+        "status": "local_maturation_window",
+        "tier": "primary_convex",
+    }
+    path.write_text(json.dumps(base, sort_keys=True))
+    trigger = L.build_trigger_manifest(
+        base, base_atlas_path=path, denominator_provider=_denominators
+    )
+    trigger_path.unlink()
+    N.write_json_once(trigger_path, trigger)
+    out = A.apply_conditional_gain(
+        base, base_atlas_path=path, trigger_manifest_path=trigger_path
+    )
+    assert out["verdict"] == "primary_maturation_candidate_requires_dt2"
+    base["matrix"]["complete"] = False
+    path.write_text(json.dumps(base, sort_keys=True))
+    # The old trigger no longer matches the mutated base, so no trigger is
+    # supplied; a scientific window still cannot rescue technical coverage.
+    out = A.apply_conditional_gain(
+        base, base_atlas_path=path, trigger_manifest_path=tmp_path / "absent.json"
+    )
+    assert out["verdict"] == "C1_blocked_manifest"
+
+
+def test_scientific_gain_unresolved_is_not_coerced_to_zero_or_technical(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(A, "ROOT", tmp_path)
+    monkeypatch.setattr(A, "OUT", tmp_path / "results")
+    monkeypatch.setattr(L, "ROOT", tmp_path)
+    base, path = _base_atlas_with_trigger(tmp_path)
+    trigger = L.build_trigger_manifest(
+        base, base_atlas_path=path, denominator_provider=_denominators
+    )
+    trigger_path = tmp_path / "trigger.json"
+    N.write_json_once(trigger_path, trigger)
+    trigger_cell = trigger["triggered_cells"][0]
+    gain_path = A.gain_status_path(
+        "dt",
+        trigger_cell["seed"],
+        trigger_cell["tier"],
+        trigger_cell["cell_id"],
+    )
+    gain_path.parent.mkdir(parents=True, exist_ok=True)
+    carrier_hashes = {}
+    for arm in trigger_cell["expected_carrier_gain_arms"]:
+        arm_path = tmp_path / arm["path"]
+        arm_path.parent.mkdir(parents=True, exist_ok=True)
+        arm_path.write_text(json.dumps({
+            "path": arm["path"], "delta": arm["delta_mV"]
+        }, sort_keys=True))
+        carrier_hashes[arm["path"]] = A._sha256(arm_path)
+    payload = {
+        "schema": A.C1_GAIN_STATUS_SCHEMA,
+        "trigger_manifest_sha256": trigger["manifest_sha256"],
+        "trigger_manifest_file_sha256": A._sha256(trigger_path),
+        "phasec_manifest_sha256": trigger["phasec_manifest_sha256"],
+        "phasec_manifest_file_sha256": trigger[
+            "phasec_manifest_file_sha256"
+        ],
+        "coordinate_manifest_sha256": trigger[
+            "coordinate_manifest_sha256"
+        ],
+        "coordinate_manifest_semantic_sha256": trigger[
+            "coordinate_manifest_semantic_sha256"
+        ],
+        "coordinate_manifest_file_sha256": trigger[
+            "coordinate_manifest_file_sha256"
+        ],
+        "resolution": "dt",
+        "seed": trigger_cell["seed"],
+        "tier": trigger_cell["tier"],
+        "cell_id": trigger_cell["cell_id"],
+        "slow_state_sha256": trigger_cell["slow_state_sha256"],
+        "phasec_producer_file_sha256": trigger[
+            "phasec_producer_file_sha256"
+        ],
+        "coordinate_producer_file_sha256": trigger[
+            "coordinate_producer_file_sha256"
+        ],
+        "trigger_producer_file_sha256": trigger[
+            "producer_file_sha256"
+        ],
+        "gain_class": "tonic_gain_indeterminate",
+        "completed_arm_file_sha256": carrier_hashes,
+        "reused_c0_preentry_denominator_sha256": {
+            row["path"]: row["file_sha256"]
+            for row in trigger_cell["reused_c0_preentry_denominators"]
+        },
+    }
+    gain_path.write_text(json.dumps(payload))
+    out = A.apply_conditional_gain(
+        base, base_atlas_path=path, trigger_manifest_path=trigger_path
+    )
+    triggered = next(
+        row for row in out["cells"] if row["gain_trigger_eligible"]
+    )
+    assert triggered["conditional_gain"]["status"] == "scientific_indeterminate"
+    assert out["verdict"] == "C1_incomplete_or_indeterminate"
+
+    payload["gain_class"] = "balanced_AI_tonic_cell"
+    gain_path.write_text(json.dumps(payload))
+    out = A.apply_conditional_gain(
+        base, base_atlas_path=path, trigger_manifest_path=trigger_path
+    )
+    triggered = next(
+        row for row in out["cells"] if row["gain_trigger_eligible"]
+    )
+    assert triggered["cell_class"] == "balanced_AI_tonic_cell"
+    assert out["verdict"] == "no_maturation_in_tested_primary_neighbourhood"
+
+    # The final consumer must not trust a previously written status map.
+    first_arm = trigger_cell["expected_carrier_gain_arms"][0]["path"]
+    first_arm_path = tmp_path / first_arm
+    original_arm = first_arm_path.read_bytes()
+    first_arm_path.write_text("tampered\n")
+    out = A.apply_conditional_gain(
+        base, base_atlas_path=path, trigger_manifest_path=trigger_path
+    )
+    triggered = next(
+        row for row in out["cells"] if row["gain_trigger_eligible"]
+    )
+    assert (
+        triggered["conditional_gain"]["reason"]
+        == "conditional_gain_arm_file_hash_drift"
+    )
+
+    first_arm_path.write_bytes(original_arm)
+    first_denominator = trigger_cell[
+        "reused_c0_preentry_denominators"
+    ][0]["path"]
+    (tmp_path / first_denominator).write_text("tampered denominator\n")
+    out = A.apply_conditional_gain(
+        base, base_atlas_path=path, trigger_manifest_path=trigger_path
+    )
+    triggered = next(
+        row for row in out["cells"] if row["gain_trigger_eligible"]
+    )
+    assert (
+        triggered["conditional_gain"]["reason"]
+        == "conditional_gain_denominator_file_hash_drift"
+    )
+
+
+def test_resolution_gate_requires_same_homologous_window_in_two_seeds():
+    windows = {
+        str(seed): {
+            "windows": [{
+                "phenotype": "periodic_non_tonic_carrier",
+                "direction": "forward",
+                "cells": ["c1", "c2"],
+            }],
+        }
+        for seed in A.SEEDS
+    }
+    adjudication = {
+        "status": "local_maturation_window",
+        "candidates": [{
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "forward",
+            "supporting_seeds": [1, 3, 4],
+        }],
+        "seed_results": windows,
+    }
+    common = {
+        "schema": A.C1_SUMMARY_SCHEMA,
+        "phasec_manifest_sha256": "a" * 64,
+        "coordinate_manifest_sha256": "b" * 64,
+        "primary_adjudication": adjudication,
+        "secondary_shell_adjudication": {"status": "no_window"},
+        "claim_boundary": "test",
+    }
+    native = {
+        **common,
+        "resolution": "dt",
+        "verdict": "primary_maturation_candidate_requires_dt2",
+    }
+    assert A.combine_resolution_summaries(
+        native, None
+    )["verdict"] == "C1_window_pending_dt2"
+    dt2 = {
+        "schema": A.C1_DT2_CONFIRMATION_SUMMARY_SCHEMA,
+        "resolution": "dt2_confirmation_only",
+        "phasec_manifest_sha256": common["phasec_manifest_sha256"],
+        "verdict": "maturation_window_at_primary_convex_states",
+        "matches": [{
+            "tier": "primary_convex",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "forward",
+            "homologous_supporting_seeds": [1, 3],
+        }],
+    }
+    assert A.combine_resolution_summaries(
+        native, dt2
+    )["verdict"] == "maturation_window_at_primary_convex_states"
+
+    dt2["matches"] = []
+    dt2["verdict"] = "resolution_sensitive_maturation"
+    assert A.combine_resolution_summaries(
+        native, dt2
+    )["verdict"] == "resolution_sensitive_maturation"
+
+
+def test_dt2_selection_uses_only_two_native_supporting_homologous_seeds():
+    native = {
+        "primary_adjudication": {
+            "status": "local_maturation_window",
+            "candidates": [{
+                "phenotype": "periodic_non_tonic_carrier",
+                "direction": "forward",
+            }],
+            "seed_results": {
+                str(seed): {
+                    "windows": [{
+                        "phenotype": "periodic_non_tonic_carrier",
+                        "direction": "forward",
+                        "cells": ["c1", "c2"],
+                    }]
+                }
+                for seed in A.SEEDS
+            },
+        },
+        "secondary_shell_adjudication": {"status": "no_window"},
+    }
+    selected = A._native_positive_windows(native)
+    assert {row["seed"] for row in selected} == {1, 3}
+    assert all(row["cells"] == ["c1", "c2"] for row in selected)
+
+    native["primary_adjudication"]["seed_results"]["3"]["windows"] = []
+    assert A._native_positive_windows(native) == []
+
+
+def test_dt2_selection_preserves_single_cell_secondary_shell_semantics():
+    cell_id = N.SHELL_CELL_NAMES[0]
+    native = {
+        "primary_adjudication": {"status": "no_window"},
+        "secondary_shell_adjudication": {
+            "status": "maturation_candidate_in_secondary_shell",
+            "candidates": [{
+                "phenotype": "clonic_or_bursting_carrier",
+                "direction": cell_id,
+                "cell_id": cell_id,
+            }],
+            "seed_results": {
+                str(seed): {
+                    "windows": [{
+                        "phenotype": "clonic_or_bursting_carrier",
+                        "direction": cell_id,
+                        "cells": [cell_id],
+                    }]
+                }
+                for seed in (1, 3)
+            },
+        },
+    }
+    selected = A._native_positive_windows(native)
+    assert {row["seed"] for row in selected} == {1, 3}
+    assert all(row["tier"] == "secondary_shell" for row in selected)
+    assert all(row["cells"] == [cell_id] for row in selected)

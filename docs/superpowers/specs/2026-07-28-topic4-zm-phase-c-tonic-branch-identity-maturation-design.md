@@ -293,7 +293,10 @@ Required spike observables:
 The circular-shift null uses exactly 100 locked draws per block/pair stratum
 (`pairwise_shift_null_draws=100`), recorded in every raw observable artifact;
 missing or mismatched draw counts block C0 rather than silently changing the
-null resolution.
+null resolution. The locked strata are exactly `core_core`,
+`core_surround`, and `surround_surround`. Each observed stratum is compared
+with its matched 97.5th-percentile null; the maximum permitted observed-minus-
+null excess across strata is zero.
 
 The primary irregularity statistic is the seed/replicate median local `CV2`.
 The primary synchrony statistic is the median pairwise count correlation plus
@@ -385,8 +388,9 @@ A seed supports `balanced_AI_tonic_candidate` only when all hold:
 
 and:
 
-- median 5 ms pairwise count correlation is below the circular-shift-null
-  97.5th percentile;
+- each 5 ms pairwise-count stratum is below its matched circular-shift-null
+  97.5th percentile, with the hierarchical-bootstrap upper confidence bound of
+  the maximum stratum excess below zero;
 - its absolute median is below 0.10;
 - active-area fraction remains below the already locked whole-sheet plateau
   threshold of 0.50;
@@ -595,6 +599,13 @@ No untriggered cell may be added later.
 - cycle-period CV is at most 0.20;
 - source phase structure is reproducible across the two fast initial phases.
 - the cross-phase relative period difference is at most 0.20.
+- no empirical-rest dwell lasts at least 100 ms, and no more than 20% of
+  accepted cycles contain an empirical-rest reset;
+- the source-space phase signature is computed on 16 axial bins, removing its
+  DC component and normalising its global L2 norm. Across the two fast initial
+  phases, the median maximum-circular-shift correlation must be at least 0.80.
+  The circular shift removes an arbitrary global phase origin; it does not
+  permit reflecting or reordering the pathology axis.
 
 `clonic_or_bursting_carrier`:
 
@@ -622,7 +633,12 @@ The locked implementation fields are
 `c1_refractory_saturation_rho_min=0.50`,
 `c1_refractory_isi_fraction_min=0.80`,
 `c1_two_zone_occupancy_min=0.80`, and
-`c1_periodic_cross_phase_period_rel_diff_max=0.20`.
+`c1_periodic_cross_phase_period_rel_diff_max=0.20`,
+`c1_periodic_source_phase_bins=16`,
+`c1_periodic_source_phase_corr_min=0.80`,
+`c1_periodic_source_phase_alignment=maximum_circular_phase_shift`,
+`c1_periodic_rest_reset_fraction_max=0.20`, and
+`c1_rest_dwell_ms=100`.
 The zone-separation scale is each seed's canonical
 `params.Rr` in mm, stored as `readout_kernel_width_mm`; it is never hard-coded
 from a guessed grid distance.
@@ -652,8 +668,15 @@ A `maturation_window_at_primary_convex_states` requires:
   saturation/runaway-only result;
 - native and required \(dt/2\) confirmation agree.
 
-An otherwise identical positive confined to the secondary shell is:
-`maturation_candidate_in_secondary_shell`. It does not establish slow-path
+The secondary shell does not use primary-path adjacency because its eight
+locked points are four fixed basis directions at \(\pm0.25\) robust SD, not an
+ordered continuation path. A `maturation_candidate_in_secondary_shell`
+requires the same registered non-tonic phenotype at the same locked shell cell
+(same basis direction and sign) in at least two of three seeds. The third seed
+must be concordant or specifically `probabilistically_indeterminate`, not
+saturation/runaway-only. A positive at different shell cells across seeds, or
+in only one seed, is isolated rather than replicated. This shell result is
+extrapolative sensitivity evidence and does not establish slow-path
 reachability.
 
 An isolated positive cell is `isolated_maturation_candidate`.
