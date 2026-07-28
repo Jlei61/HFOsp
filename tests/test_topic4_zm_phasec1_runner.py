@@ -271,6 +271,16 @@ def test_resource_cap_keeps_reserves_and_never_exceeds_twelve(monkeypatch):
     assert COORD._resource_cap(args) == 0
 
 
+def test_swap_guard_has_bounded_jitter_allowance(monkeypatch):
+    baseline = 900_000
+    monkeypatch.setattr(COORD, "swap_used_kb", lambda: baseline + 1024)
+    assert COORD.swap_growth_exceeded(baseline, 64.0) is False
+    monkeypatch.setattr(
+        COORD, "swap_used_kb", lambda: baseline + 64 * 1024 + 1
+    )
+    assert COORD.swap_growth_exceeded(baseline, 64.0) is True
+
+
 def test_semantic_slow_hash_is_dtype_sensitive():
     z64 = np.asarray([0.1, 0.2], np.float64)
     m64 = np.asarray([1.0, 2.0], np.float64)

@@ -383,6 +383,11 @@ def _resource_cap(args):
     return min(cpu_cap, mem_cap, int(args.max_workers))
 
 
+def _swap_growth_exceeded(baseline_kb, limit_mb):
+    limit_kb = int(round(float(limit_mb) * 1024.0))
+    return swap_used_kb() - int(baseline_kb) > limit_kb
+
+
 def run(args):
     manifest = _load_json(MANIFEST_PATH)
     PCC.require_production_manifest(manifest)
@@ -391,6 +396,16 @@ def run(args):
     manifest_file_sha = _sha(MANIFEST_PATH)
     if not math.isfinite(args.worker_rss_gb) or args.worker_rss_gb <= 0:
         raise SystemExit("--worker-rss-gb must be a positive measured full-cell RSS")
+    if args.max_workers > 16 or args.wave_size > 16:
+        raise SystemExit("Phase-C0 hard cap is 16 workers per wave")
+    if args.reserve_gb < 96 or args.reserve_cpus < 8:
+        raise SystemExit("Phase-C0 requires reserve_gb>=96 and reserve_cpus>=8")
+    if (
+        not math.isfinite(args.max_swap_growth_mb)
+        or args.max_swap_growth_mb < 0
+        or args.max_swap_growth_mb > 256
+    ):
+        raise SystemExit("--max-swap-growth-mb must be within [0,256]")
     selected = tuple(x.strip() for x in args.phases.split(",") if x.strip())
     unknown = set(selected) - {"identity", "gain"}
     if unknown:
@@ -493,8 +508,10 @@ def run(args):
         env[name] = "1"
 
     while pending:
-        if swap_used_kb() > swap0_kb:
-            raise SystemExit("swap increased; stopping before the next wave")
+        if _swap_growth_exceeded(swap0_kb, args.max_swap_growth_mb):
+            raise SystemExit(
+                "swap growth exceeded tolerance before the next wave"
+            )
         wave_cap = _resource_cap(args)
         if wave_cap < 1:
             raise SystemExit("resource guard authorizes no next-wave worker")
@@ -504,7 +521,9 @@ def run(args):
         for row in wave:
             if (
                 mem_available_gb() < args.reserve_gb
-                or swap_used_kb() > swap0_kb
+                or _swap_growth_exceeded(
+                    swap0_kb, args.max_swap_growth_mb
+                )
             ):
                 pending[:0] = wave[len(running):]
                 break
@@ -538,7 +557,9 @@ def run(args):
             raise SystemExit("resource guard blocked the entire next wave")
         last_heartbeat = 0.0
         while running:
-            if swap_used_kb() > swap0_kb:
+            if _swap_growth_exceeded(
+                swap0_kb, args.max_swap_growth_mb
+            ):
                 for row in running:
                     row["proc"].terminate()
                 for row in running:
@@ -548,7 +569,9 @@ def run(args):
                         row["proc"].kill()
                         row["proc"].wait()
                     row["handle"].close()
-                raise SystemExit("swap increased while a wave was running")
+                raise SystemExit(
+                    "swap growth exceeded tolerance while a wave was running"
+                )
             next_running = []
             for row in running:
                 code = row["proc"].poll()
@@ -646,6 +669,7 @@ def run(args):
         "reserve_gb": args.reserve_gb,
         "swap_baseline_kb": swap0_kb,
         "swap_final_kb": swap_used_kb(),
+        "max_swap_growth_mb": args.max_swap_growth_mb,
         "resource_log_path": os.path.relpath(log_path, ROOT),
         "finished_at": time.time(),
     }
@@ -678,6 +702,14 @@ def main():
     parser.add_argument("--reserve-cpus", type=int, default=8)
     parser.add_argument("--reserve-gb", type=float, default=96.0)
     parser.add_argument("--poll-s", type=float, default=5.0)
+    parser.add_argument(
+        "--max-swap-growth-mb",
+        type=float,
+        default=64.0,
+        help=(
+            "bounded shared-host swap jitter allowance before fail-close"
+        ),
+    )
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--confirm-run", action="store_true")
     args = parser.parse_args()

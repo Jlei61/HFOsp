@@ -318,6 +318,18 @@ def test_resource_cap_never_forces_one_worker(monkeypatch):
     assert COORD._resource_cap(args) == 12
 
 
+def test_swap_guard_ignores_small_shared_host_jitter_but_fails_at_limit(
+    monkeypatch,
+):
+    baseline = 800_000
+    monkeypatch.setattr(COORD, "swap_used_kb", lambda: baseline + 2 * 1024)
+    assert COORD._swap_growth_exceeded(baseline, 64.0) is False
+    monkeypatch.setattr(
+        COORD, "swap_used_kb", lambda: baseline + 64 * 1024 + 1
+    )
+    assert COORD._swap_growth_exceeded(baseline, 64.0) is True
+
+
 def test_terminal_validator_requires_observable_hash_and_gain_blocks(
     tmp_path, monkeypatch
 ):

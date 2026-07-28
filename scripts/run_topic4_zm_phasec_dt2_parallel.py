@@ -150,6 +150,12 @@ def _run_c1(args):
         raise SystemExit("Phase-C dt2 requires >=96GB and >=8 CPU reserve")
     if not math.isfinite(args.worker_rss_gb) or args.worker_rss_gb <= 0:
         raise SystemExit("--worker-rss-gb must be a measured positive value")
+    if (
+        not math.isfinite(args.max_swap_growth_mb)
+        or args.max_swap_growth_mb < 0
+        or args.max_swap_growth_mb > 256
+    ):
+        raise SystemExit("--max-swap-growth-mb must be within [0,256]")
     manifest, selection, producer_locks = _manifest_and_selection()
     all_tasks = c1_tasks(manifest, selection)
     pending, skipped, conflicts = [], [], []
@@ -202,8 +208,10 @@ def _run_c1(args):
         flush=True,
     )
     while pending:
-        if C1.swap_used_kb() > swap0:
-            raise SystemExit("swap increased before next dt2 wave")
+        if C1.swap_growth_exceeded(swap0, args.max_swap_growth_mb):
+            raise SystemExit(
+                "swap growth exceeded tolerance before next dt2 wave"
+            )
         cap = C1._resource_cap(args)
         if cap < 1:
             raise SystemExit("resource guard authorizes no next dt2 wave")
@@ -216,7 +224,9 @@ def _run_c1(args):
         for task in wave:
             if (
                 C1.mem_available_gb() < args.reserve_gb
-                or C1.swap_used_kb() > swap0
+                or C1.swap_growth_exceeded(
+                    swap0, args.max_swap_growth_mb
+                )
             ):
                 pending[:0] = wave[len(running):]
                 break
@@ -243,7 +253,9 @@ def _run_c1(args):
             raise SystemExit("resource guard blocked the entire next dt2 wave")
         last_heartbeat = 0.0
         while running:
-            if C1.swap_used_kb() > swap0:
+            if C1.swap_growth_exceeded(
+                swap0, args.max_swap_growth_mb
+            ):
                 for task in running:
                     task["process"].terminate()
                 for task in running:
@@ -254,7 +266,8 @@ def _run_c1(args):
                         task["process"].wait()
                     task["handle"].close()
                 raise SystemExit(
-                    "swap increased; stopped only this coordinator's workers"
+                    "swap growth exceeded tolerance; stopped only this "
+                    "coordinator's workers"
                 )
             next_running = []
             for task in running:
@@ -332,6 +345,7 @@ def _run_c1(args):
         "reserve_cpus": args.reserve_cpus,
         "swap_baseline_kb": swap0,
         "swap_final_kb": C1.swap_used_kb(),
+        "max_swap_growth_mb": args.max_swap_growth_mb,
         "resource_log_path": str(resource_log.relative_to(ROOT)),
         "claim_boundary": (
             "conditional homologous source-space dt2 confirmation only; "
@@ -356,6 +370,10 @@ def main(argv=None):
     parser.add_argument("--reserve-gb", type=float, default=96.0)
     parser.add_argument("--reserve-cpus", type=int, default=8)
     parser.add_argument("--poll-s", type=float, default=5.0)
+    parser.add_argument(
+        "--max-swap-growth-mb", type=float, default=64.0,
+        help="bounded shared-host swap jitter allowance before fail-close",
+    )
     parser.add_argument("--resume", action="store_true")
     parser.add_argument("--confirm-run", action="store_true")
     args = parser.parse_args(argv)
