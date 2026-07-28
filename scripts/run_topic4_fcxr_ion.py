@@ -1576,11 +1576,11 @@ def cmd_b2_bias(args):
     with staged("b2-bias"):
         pre = preflight()
         gh = json.load(open(os.path.join(OUT, "gate_H.json")))
-        fs = json.load(open(os.path.join(OUT, "b1_f_selection.json")))
+        fs = json.load(open(os.path.join(OUT, "b1_f_selection_v2.json")))
         if gh["status"] != "PASS":
             raise SystemExit(f"Gate H is {gh['status']}: no 40k stage may run")
-        if fs["status"] != "SELECTED":
-            raise SystemExit(f"f' selection is {fs['status']}: B2 may not run")
+        if fs["status"] != "PROVISIONAL_CANDIDATE":
+            raise SystemExit(f"T7.1 selection is {fs['status']}: B2 may not run")
         gate = check_resource_gate("b2-bias")
         resource_log("b2_bias_gate", gate)
         if gate["status"] == "PAUSE":
@@ -1838,6 +1838,67 @@ def trajectory_task(job):
     return out
 
 
+CL_PROBE_T_MS = 4000.0
+CL_PROBE_T_KICK_MS = 2500.0
+CL_PROBE_SPACING_MS = 200.0
+CL_PROBE_KICK_BOOST = 3.0
+
+
+def closed_loop_integration_probe(job):
+    """Ruling 4: B2 must REPORT whether the closed loop overcomes the load-dependent clearance.
+
+    Matched counterpart to the open-loop integration diagnostic: two identical kicks 200 ms apart
+    on the 40k substrate with the ion layer LIVE at the frozen bias.  The open-loop diagnostic's
+    2nd/1st ratio is the comparison point; the linear-superposition reference uses tau_Ko at the
+    same working point.  Two kicks, not five, because the blessed engine exposes exactly two kick
+    times and it may not be modified.
+    """
+    m = sys.modules[__name__]
+    from src.snn_engine.ion_homeostasis import (                    # noqa: E402
+        IonHomeostasisConfig, IonHomeostaticMZAdapter, build_from_rate_field)
+    from mz_slow_vars import MZSlowVars, MZSlowVarsConfig           # noqa: E402
+    from kick_probe import simulate_kick                            # noqa: E402
+    import run_m4_phaseplane as PP                                  # noqa: E402
+    import run_topic4_mz_slowvars as OLD                            # noqa: E402
+
+    t0 = time.time()
+    rE, rI, voxel, sha = m._load_40k_rate_field()
+    rE, rI = rE * float(job["rate_scale_E"]), rI * float(job["rate_scale_I"])
+    S, _ = m._substrate(int(job["conn_seed"]))
+    cfg = IonHomeostasisConfig(q_ion=float(job["q_ion"]), n_grid=m.N_GRID_40K, dx_mm=m.DX_MM_40K,
+                               dt_ion_ms=m.DT_ION_MS, g_K_ion=ION.G_K_ION_REFERENCE,
+                               I_bias_E=float(job["I_bias_E"]), I_bias_I=float(job["I_bias_I"]),
+                               k_trace_stride=2)
+    ions = build_from_rate_field(S["N"], S["NE"], voxel, cfg, rE, rI)
+    mz = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**m.arm_c_pump_off_cfg()),
+                    NE=S["NE"], core_mask_E=OLD.build_core_masks(S))
+    p = dataclasses.replace(S["p"], T=m.CL_PROBE_T_MS, dt=m.DT)
+    S["net"]["rng"] = np.random.default_rng(int(job["noise_seed"]))
+    res = simulate_kick(p, S["net"], m.CL_PROBE_KICK_BOOST,
+                        slow=IonHomeostaticMZAdapter(mz, ions), kick_center=list(S["src_xy"]),
+                        r_kick=PP.R_KICK, t_kick=m.CL_PROBE_T_KICK_MS,
+                        t_kick2=m.CL_PROBE_T_KICK_MS + m.CL_PROBE_SPACING_MS,
+                        KICK_BOOST2=m.CL_PROBE_KICK_BOOST,
+                        V_th_per_neuron=S["vth"], early_stop_runaway=False, dump_i_spikes=False)
+
+    K = np.asarray(ions.k_trace).reshape(len(ions.k_trace), -1)
+    t = np.asarray(ions.k_trace_blocks) * m.DT_ION_MS
+    base = K[(t >= m.CL_PROBE_T_KICK_MS - 300.0) & (t < m.CL_PROBE_T_KICK_MS - 20.0)].mean(axis=0)
+    w1 = (t >= m.CL_PROBE_T_KICK_MS) & (t < m.CL_PROBE_T_KICK_MS + m.CL_PROBE_SPACING_MS)
+    w2 = (t >= m.CL_PROBE_T_KICK_MS + m.CL_PROBE_SPACING_MS) & \
+         (t < m.CL_PROBE_T_KICK_MS + 2 * m.CL_PROBE_SPACING_MS)
+    hot = int(np.argmax((K[w1] - base).max(axis=0)))
+    p1 = float((K[w1] - base)[:, hot].max())
+    p2 = float((K[w2] - base)[:, hot].max())
+    tau = float(job["tau_Ko_at_workpoint_s"])
+    linear = 1.0 + float(np.exp(-m.CL_PROBE_SPACING_MS * 1e-3 / tau))
+    return dict(job=job, hot_voxel=hot, peak1_mM=p1, peak2_mM=p2,
+                ratio_2nd_over_1st=(p2 / p1 if p1 > 0 else float("nan")),
+                linear_prediction_at_workpoint=linear,
+                mean_rate_E_hz=float(np.asarray(res["rate_E"], float).mean()),
+                K_max=float(K.max()), wall_s=round(time.time() - t0, 1))
+
+
 def cmd_b2_validate(args):
     if not args.confirm_run:
         raise SystemExit("b2-validate runs 40k trajectories; pass --confirm-run")
@@ -1867,6 +1928,28 @@ def cmd_b2_validate(args):
         second = trajectory_task(job(q1, "post_closure"))
         r0pp = second["pooled"]["mean_rate_hz"]
         rel = abs(r0pp - ION.R0_HZ) / ION.R0_HZ
+
+        # ruling 4: the closed-loop counterpart of the open-loop integration diagnostic
+        fs = json.load(open(os.path.join(OUT, "b1_f_selection_v2.json")))
+        row = next(r for r in fs["rows"] if r["f_prime"] == float(cal["f_prime"]))
+        cl = closed_loop_integration_probe(dict(
+            I_bias_E=bE, I_bias_I=bI, q_ion=q1, conn_seed=CONN_SEED_DEV, noise_seed=NOISE_DEV,
+            rate_scale_E=sE, rate_scale_I=sI,
+            tau_Ko_at_workpoint_s=row["measured"]["tau_Ko_at_workpoint_s"], tag="closed_loop"))
+        ol = row["measured"]["integration_peaks_mM"]
+        cl["open_loop_ratio_2nd_over_1st"] = float(ol[1] / ol[0]) if ol[0] > 0 else float("nan")
+        cl["closed_loop_exceeds_open_loop"] = bool(
+            cl["ratio_2nd_over_1st"] > cl["open_loop_ratio_2nd_over_1st"])
+        cl["interpretation"] = (
+            "matched 2-kick comparison at 200 ms. open-loop ratio comes from the SAME kernel "
+            "replayed with g_K_ion = 0; closed-loop is the live layer at the frozen bias. A "
+            "closed-loop ratio ABOVE the open-loop one means K -> E_K -> firing recovers some of "
+            "the accumulation the load-dependent clearance removes; it does NOT by itself mean "
+            "the loop is regenerative.")
+        print(f"[b2-validate] closed-loop 2nd/1st = {cl['ratio_2nd_over_1st']:.3f} vs open-loop "
+              f"{cl['open_loop_ratio_2nd_over_1st']:.3f} (linear@wp "
+              f"{cl['linear_prediction_at_workpoint']:.3f})", flush=True)
+
         payload = dict(
             generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
             frozen=dict(I_bias_E=bE, I_bias_I=bI, f_prime=cal["f_prime"], q_ion_final=q1),
@@ -1876,6 +1959,14 @@ def cmd_b2_validate(args):
                          rule="recompute q_ion exactly once, rerun, then FREEZE -- convergence may "
                               "not be pursued by further iteration (spec §7.1)"),
             runs=[first, second],
+            closed_loop_integration=cl,
+            b2_risk_register_answer=dict(
+                question="does closed-loop K -> E_K -> firing overcome the load-dependent "
+                         "clearance measured open loop? (T7.1 ruling 4)",
+                closed_loop_ratio=cl["ratio_2nd_over_1st"],
+                open_loop_ratio=cl["open_loop_ratio_2nd_over_1st"],
+                linear_at_workpoint=cl["linear_prediction_at_workpoint"],
+                answer=cl["interpretation"]),
             window_caveat=("11 s = 0.2 tau_Na. This run can only show that the ion state is stable "
                            "NEAR the initialization point; it does NOT show the system has reached "
                            "steady state. Inter-block trends are reported per cell and per voxel "
@@ -1966,7 +2057,7 @@ def cmd_b2_adjudicate(args):
         _write_json(os.path.join(OUT, "gate_B.json"), gb)
 
         gh = json.load(open(os.path.join(OUT, "gate_H.json")))
-        fs = json.load(open(os.path.join(OUT, "b1_f_selection.json")))
+        fs = json.load(open(os.path.join(OUT, "b1_f_selection_v2.json")))
         verdict = dict(
             generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
             sprint="FCXR-ION Phase B0-B2",
@@ -2002,7 +2093,7 @@ def write_manifest():
         p = os.path.join(OUT, name)
         return json.load(open(p)) if os.path.exists(p) else None
 
-    fs, cal, clo, gh, gb = (_maybe(n) for n in ("b1_f_selection.json", "b2_bias_calibration.json",
+    fs, cal, clo, gh, gb = (_maybe(n) for n in ("b1_f_selection_v2.json", "b2_bias_calibration.json",
                                                 "b2_closure_iteration.json", "gate_H.json",
                                                 "gate_B.json"))
     cfg_hash = hashlib.sha256(json.dumps(arm_c_pump_off_cfg(), sort_keys=True).encode()).hexdigest()
@@ -2054,7 +2145,8 @@ def write_status():
 
     pf, units, feas = _m("b0_artifact_preflight.json"), _m("b0_voltage_unit_audit.json"), \
         _m("b0_analytic_feasibility.json")
-    dp, gh, fs = _m("b0_direction_power.json"), _m("gate_H.json"), _m("b1_f_selection.json")
+    dp, gh = _m("b0_direction_power.json"), _m("gate_H.json")
+    fs = _m("b1_f_selection_v2.json") or _m("b1_f_selection.json")
     cal, clo, gb = _m("b2_bias_calibration.json"), _m("b2_closure_iteration.json"), _m("gate_B.json")
 
     def row(name, obj, key="status", extra=""):
@@ -2080,11 +2172,10 @@ def write_status():
              if dp else ""),
          row("Gate H (homeostasis + numerics)", gh,
              extra=f"primary tier {gh['primary_network']}" if gh else ""),
-         row("T7 f' selection", fs,
-             extra=(f"selected f' = {fs.get('selected_f_prime')}; canonical label withheld "
-                    f"(contract label had the protocol matched: "
-                    f"`{fs.get('contract_verdict_if_protocol_had_matched')}`) — the object measured "
-                    f"was not the object registered" if fs else "")),
+         row("T7.1 f' selection", fs,
+             extra=(f"selected f' = {fs.get('selected_f_prime')} (PROVISIONAL: chosen on an "
+                    f"open-loop scale diagnostic under the repaired gates; not a closed-loop "
+                    f"claim)" if fs else "")),
          row("T8 bias calibration", cal,
              extra=(f"bias=({cal['best']['I_bias_E']:+.3f}, {cal['best']['I_bias_I']:+.3f}), "
                     f"{cal['n_probes']} probes") if cal else ""),
