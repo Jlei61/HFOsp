@@ -1867,6 +1867,16 @@ def trajectory_task(job):
                    k_wave_peak_event_voxel_mM=peak_hot,
                    k_wave_peak_far_field_mM=peak_far,
                    k_wave_far_over_event=(peak_far / peak_hot) if peak_hot > 0 else float("nan"),
+                   k_wave_far_over_event_is_confounded=True,
+                   k_wave_caveat=(
+                       "NOT a valid whole-sheet-K-wave test while the ion state is still drifting. "
+                       "peak_far is the max over ALL far voxels across the WHOLE post-burn-in "
+                       "window against an early-window baseline, so a global upward drift alone "
+                       "drives it toward 1.0 with no wave present. Answering spec 11 stop "
+                       "condition 3 needs an EVENT-LOCKED comparison: dK at the event voxel vs far "
+                       "voxels in the same short window around that event, each against its own "
+                       "pre-event baseline. Not implemented; the stop condition is therefore "
+                       "UNANSWERED, not triggered."),
                    far_field_mm=m.FAR_FIELD_MM,
                    init_residual_q99_dNa=rep["q99_abs_dNa_dt"],
                    init_residual_q99_dKo=rep["q99_abs_dKo_dt"]),
@@ -2029,7 +2039,13 @@ def cmd_b2_validate(args):
             frozen=dict(I_bias_E=bE, I_bias_I=bI, f_prime=cal["f_prime"], q_ion_final=q1),
             closure=dict(r0_locked=ION.R0_HZ, r0_measured=r0p, q_ion_before=q0, q_ion_after=q1,
                          r0_after_closure=r0pp, rel_err=rel, tol=CLOSURE_REL_TOL,
-                         passed=bool(rel <= CLOSURE_REL_TOL), iterations=1,
+                         passed=closure_ok, iterations=1,
+                         status=("PASS" if closure_ok else "UNRESOLVED_CALIBRATION"),
+                         rate_residual_ok=bool(rel <= CLOSURE_REL_TOL),
+                         ion_trend_ok=ion_ok, ion_trend_q99=ion_q99,
+                         ion_trend_bound=ION.GATE_B_ION_BLOCK_DRIFT_MAX,
+                         gate_definition=("spec 7.1: E-rate residual <= 10% AND a non-significant "
+                                          "inter-block ion trend. BOTH are contract."),
                          rule="recompute q_ion exactly once, rerun, then FREEZE -- convergence may "
                               "not be pursued by further iteration (spec §7.1)"),
             runs=[first, second],
@@ -2260,22 +2276,28 @@ def write_status():
          row("T8 bias calibration", cal,
              extra=(f"bias=({cal['best']['I_bias_E']:+.3f}, {cal['best']['I_bias_I']:+.3f}), "
                     f"{cal['n_probes']} probes") if cal else ""),
-         row("closure iteration", (clo or {}).get("closure") if clo else None, key="passed",
-             extra=(f"|r0'-r0|/r0 = {clo['closure']['rel_err']:.4f}") if clo else ""),
+         row("closure iteration", (clo or {}).get("closure") if clo else None, key="status",
+             extra=(f"rate residual {clo['closure']['rel_err']:.4f} <= 0.10 OK; ion inter-block "
+                    f"trend q99 {clo['closure'].get('ion_trend_q99', float('nan')):.4f} vs bound "
+                    f"{clo['closure'].get('ion_trend_bound')} FAILS -- spec 7.1 requires BOTH"
+                    if clo else "")),
          row("Gate B (interictal substrate)", gb,
              extra=(f"B-real {gb['b_real']['n_direction_passing']}/"
                     f"{gb['b_real']['n_trajectories']}, B-model ok={gb['b_model']['ok']}")
              if gb else ""),
          "| lifecycle | `NOT TESTED` | B3/B4 not authorised |", "",
-         "## Why B2 is closed", "",
-         "Because **no `f'` was selected** — not because a mechanism was refuted. Two of the five "
-         "T7 gate references were shown to be anchored at rest, a state this layer by construction "
-         "never occupies, and the integration gate was measured with the K -> E_K -> firing loop "
-         "deliberately cut, so it characterises the clearance side only. Using an open-loop "
-         "diagnostic to block the phase whose purpose is to test the closed loop would be "
-         "self-sealing. Re-opening B2 needs a re-locked T7 contract "
-         "(`docs/superpowers/proposals/2026-07-28-topic4-fcxr-ion-T7_1-adjudication-repair.md`, "
-         "**not signed off**), not a relaxed gate.", "",
+         "## Why Gate B was not adjudicated", "",
+         "Because the **closure iteration did not pass**, and confirmatory trajectories at a "
+         "working point whose ion state is still moving would produce Gate B numbers that do not "
+         "mean what Gate B claims. The closure has two clauses (spec 7.1) and they split:", "",
+         "- **rate residual: PASS.** The two nuisance biases recovered the accepted interictal "
+         "rate to 1.8% (4.085 Hz against 4.158 Hz) from the 6.96 Hz the ion layer produces at zero "
+         "bias. That part of the route-B premise held.",
+         "- **ion inter-block trend: FAIL.** per-cell / per-voxel q99 |d/dt| = 0.084 / 0.259 mM/s "
+         "against a 0.05 bound, i.e. the ion state is still drifting at 11 s = 0.2 tau_Na.", "",
+         "Per plan section 15 an `UNRESOLVED_CALIBRATION` means the calibrator must be improved "
+         "**separately** -- it is explicitly NOT a mechanism NO-GO, and the legal bias box was "
+         "never bracketed (7 of 12 probes over +-0.5 mV inside +-2 mV).", "",
          "## Allowed statement", "",
          f"> {gb['allowed_statement']}" if gb else "> (Gate B has not been adjudicated.)", "",
          "## Not claimed", ""]

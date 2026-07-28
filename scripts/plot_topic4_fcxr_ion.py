@@ -304,14 +304,19 @@ def fig_t7():
     pred2 = [r["measured"].get("na_decay_pred_coupled", np.nan) for r in rows]
     ax[1].bar(x + 0.28, pred2 if v2 else pred, 0.26, color="none", edgecolor="k", hatch="///",
               label="coupled-Jacobian prediction")
-    ax[1].axhspan(*G["na_decay_band"], color=BAD, alpha=0.14)
+    if not v2:
+        ax[1].axhspan(*G["na_decay_band"], color=BAD, alpha=0.14)
     ax[1].axhline(aud["gate_reference"]["decay_20s"], color=BAD, ls="--", lw=1.8,
-                  label="gate reference (linearised at REST)")
+                  label="retired band centre (linearised at REST)")
+    if v2:
+        ax[1].axhline(G["na_net_decay_min_frac"], color=OK, ls=":", lw=1.6,
+                      label=f"T7.1: net decay >= {G['na_net_decay_min_frac']}")
     ax[1].set_xticks(x, [f"f'={f}" for f in fps])
     ax[1].set_ylabel("event-induced Na excess decayed in 20 s")
     ax[1].set_title("Na recovery: reference and the K-clamp control", fontsize=10.5)
-    ax[1].legend(fontsize=6.4, frameon=False, loc="upper left", ncol=2, columnspacing=0.8)
-    ax[1].set_ylim(0, 1.45)
+    ax[1].legend(fontsize=6.2, frameon=False, loc="upper center", ncol=2, columnspacing=0.8,
+                 bbox_to_anchor=(0.5, 1.02))
+    ax[1].set_ylim(0, 2.55)
 
     # Q3: why does the monotonicity clause fail?
     st = float(z["f1.0_trace_stride_blocks"]) * float(z["f1.0_dt_ion_ms"]) * 1e-3
@@ -327,11 +332,11 @@ def fig_t7():
     ax[2].set_xlabel("time after the event (s)")
     ax[2].set_ylabel("median event-induced Na excess (mM)")
     ax[2].set_title("Na excess: decay vs the monotonicity clause", fontsize=10.5)
-    ax[2].legend(fontsize=8, frameon=False)
+    ax[2].legend(fontsize=6.2, frameon=False, loc="upper right", ncol=2, columnspacing=0.8)
     ax[2].grid(alpha=0.22)
     e1 = z["f1.0_na_excess"]
     rough = float(np.mean(np.diff(e1) > 0))
-    ax[2].text(0.97, 0.93, f"f'=1.0: {100*rough:.0f}% of samples step UP; largest up-step\n"
+    ax[2].text(0.97, 0.42, f"f'=1.0: {100*rough:.0f}% of samples step UP; largest up-step\n"
                            f"is 16% of the peak (background events in the\nreplay land on the same "
                            f"cells). Smoothing to 1/2/5/10 s\ndoes NOT remove them. But NO candidate "
                            f"shows a net\nrise from peak to 20 s -- the clause fails on its\n"
@@ -351,7 +356,7 @@ def fig_t7():
     ax[3].plot([], [], "^", color="0.35", label=r"linear superposition ($\tau_{K_o}$ at workpoint)")
     ax[3].set_xlabel("time (s), five identical events 200 ms apart")
     ax[3].set_ylabel(r"$\Delta K_o$ at the event voxel (mM)")
-    ax[3].set_title("K accumulation is SUB-linear (open loop, NON-BLOCKING)", fontsize=10.5)
+    ax[3].set_title("K accumulation: SUB-linear (open loop, non-blocking)", fontsize=10.5)
     ax[3].legend(fontsize=7.5, frameon=False, loc="lower right")
     ax[3].grid(alpha=0.22)
     ax[3].text(0.03, 0.95, "increments 0.235 / 0.139 / 0.080 / 0.045\n"
