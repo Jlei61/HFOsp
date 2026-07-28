@@ -28,7 +28,7 @@ NPZ (``C1_OBSERVABLES_SCHEMA``):
 from __future__ import annotations
 
 import argparse
-from collections import Counter
+from collections import Counter, defaultdict
 import hashlib
 import json
 import os
@@ -730,6 +730,7 @@ def classify_base_part(
         "reason": "classified",
         "phenotype": result,
         "spike_ai_screen": spike,
+        "_hierarchical": hierarchical,
         "spatial_relay": result["spatial_relay"],
         "locked_arm_identity": expected,
         **evidence,
@@ -959,6 +960,49 @@ def aggregate_cell_rows(run_rows, coordinate):
         run_rows,
         lambda row: row.get("spike_ai_screen", {}).get("pass") is True,
     )
+    spike_ci = None
+    spike_ci_pass = False
+    if spike_support["passes_locked_cell_gate"]:
+        tonic_numeric = [
+            {
+                "phase": f"bounded_mid__{row['phase']}",
+                "hierarchical": row.get("_hierarchical"),
+                # Gain is intentionally tested only after this spike-only
+                # trigger; a neutral finite placeholder is required by the
+                # shared hierarchical bootstrap implementation.
+                "gain_ratio_samples": np.asarray([1.0]),
+            }
+            for row in run_rows
+            if row.get("status") == "complete"
+            and row.get("terminal_class") == "tonic_non_AI"
+            and isinstance(row.get("_hierarchical"), dict)
+        ]
+        try:
+            spike_ci = C0.hierarchical_seed_bootstrap(
+                tonic_numeric,
+                seed=(
+                    int(common["seed"]) * 1009
+                    + int(common["path_index"]) * 17
+                ),
+                n_boot=C0.N_BOOT,
+            )
+        except (KeyError, TypeError, ValueError) as exc:
+            spike_ci = {"status": "blocked", "reason": str(exc)}
+        if spike_ci.get("status") != "blocked":
+            spike_ci_pass = bool(
+                spike_ci["rho80_active_core"]["hi"] is not None
+                and spike_ci["rho80_active_core"]["hi"] <= 0.20
+                and spike_ci["isi_cv2_median"]["lo"] is not None
+                and spike_ci["isi_cv2_median"]["lo"] >= 0.70
+                and spike_ci["pairwise_observed_median"]["point"] is not None
+                and abs(
+                    spike_ci["pairwise_observed_median"]["point"]
+                ) < 0.10
+                and spike_ci["pairwise_stratum_max_excess"]["hi"] is not None
+                and spike_ci["pairwise_stratum_max_excess"]["hi"] < 0.0
+                and spike_ci["active_area_fraction"]["hi"] is not None
+                and spike_ci["active_area_fraction"]["hi"] < 0.50
+            )
     non_tonic = [
         label for label in NON_TONIC_CLASSES
         if terminal_support[label]["passes_locked_cell_gate"]
@@ -971,7 +1015,7 @@ def aggregate_cell_rows(run_rows, coordinate):
         status, cell_class = "blocked", "missing"
     elif len(non_tonic) == 1:
         status, cell_class = "complete", non_tonic[0]
-    elif spike_support["passes_locked_cell_gate"]:
+    elif spike_support["passes_locked_cell_gate"] and spike_ci_pass:
         status, cell_class = "complete", "spike_AI_screen_candidate"
     elif len(terminal) == 1:
         status, cell_class = "complete", terminal[0]
@@ -987,12 +1031,22 @@ def aggregate_cell_rows(run_rows, coordinate):
         ),
         "terminal_support": terminal_support,
         "periodic_fast_phase_consistency": periodic_consistency,
-        "spike_ai_screen_support": spike_support,
+        "spike_ai_screen_support": {
+            **spike_support,
+            "hierarchical_ci_pass": spike_ci_pass,
+        },
+        "spike_ai_hierarchical_ci": spike_ci,
         "spatial_relay_modifier": {
             "supported": relay_support["supported"],
             "support": relay_support,
         },
-        "run_rows": run_rows,
+        "run_rows": [
+            {
+                key: value for key, value in row.items()
+                if key != "_hierarchical"
+            }
+            for row in run_rows
+        ],
     }
 
 
@@ -2071,20 +2125,26 @@ def build_dt2_confirmation_manifest(
             coordinate = coordinate_cells.get(key)
             if coordinate is None or coordinate.get("status") != "valid":
                 raise ValueError(f"homologous dt2 coordinate missing/invalid: {key}")
-            selected_cells[key] = {
-                "seed": int(window["seed"]),
-                "tier": window["tier"],
-                "cell_id": cell_id,
-                "phenotype": window["phenotype"],
-                "direction": window["direction"],
-                "trajectory_id": coordinate["trajectory_id"],
-                "path_index": int(coordinate["path_index"]),
-                "path_direction": coordinate["path_direction"],
-                "slow_state_sha256": coordinate["state_sha256"],
-                **_coordinate_seed_provenance(
-                    dt2_coordinate, seed=window["seed"]
-                ),
-            }
+            if key not in selected_cells:
+                selected_cells[key] = {
+                    "seed": int(window["seed"]),
+                    "tier": window["tier"],
+                    "cell_id": cell_id,
+                    "phenotypes": [],
+                    "directions": [],
+                    "trajectory_id": coordinate["trajectory_id"],
+                    "path_index": int(coordinate["path_index"]),
+                    "path_direction": coordinate["path_direction"],
+                    "slow_state_sha256": coordinate["state_sha256"],
+                    **_coordinate_seed_provenance(
+                        dt2_coordinate, seed=window["seed"]
+                    ),
+                }
+            cell = selected_cells[key]
+            if window["phenotype"] not in cell["phenotypes"]:
+                cell["phenotypes"].append(window["phenotype"])
+            if window["direction"] not in cell["directions"]:
+                cell["directions"].append(window["direction"])
     expected_arms = []
     for cell in sorted(
         selected_cells.values(),
@@ -2135,37 +2195,39 @@ def build_dt2_confirmation_manifest(
                         cell["cell_id"], phase, noise,
                     )),
                 })
+    final_phasec_ref = {
+        "path": _relative(phasec_manifest_path),
+        "file_sha256": _sha256(phasec_manifest_path),
+        "manifest_sha256": phasec["manifest_sha256"],
+        "producer_file_sha256": phasec["provenance"][
+            "producer_file_sha256"
+        ],
+    }
+    coordinate_refs = {
+        "dt": {
+            **dt_ref,
+            "producer_file_sha256": dt_coordinate[
+                "producer_file_sha256"
+            ],
+        },
+        "dt2": {
+            **dt2_ref,
+            "producer_file_sha256": dt2_coordinate[
+                "producer_file_sha256"
+            ],
+        },
+    }
     payload = {
         "schema": C1_DT2_CONFIRMATION_SCHEMA,
         "resolution": "dt2",
         "selection_is_closed": True,
-        "final_phasec": {
-            "path": _relative(phasec_manifest_path),
-            "file_sha256": _sha256(phasec_manifest_path),
-            "manifest_sha256": phasec["manifest_sha256"],
-            "producer_file_sha256": phasec["provenance"][
-                "producer_file_sha256"
-            ],
-        },
+        "final_phasec": final_phasec_ref,
         "native_summary": {
             "path": _relative(native_summary_path),
             "file_sha256": _sha256(native_summary_path),
             "schema": native["schema"],
         },
-        "coordinate_manifests": {
-            "dt": {
-                **dt_ref,
-                "producer_file_sha256": dt_coordinate[
-                    "producer_file_sha256"
-                ],
-            },
-            "dt2": {
-                **dt2_ref,
-                "producer_file_sha256": dt2_coordinate[
-                    "producer_file_sha256"
-                ],
-            },
-        },
+        "coordinate_manifests": coordinate_refs,
         "selected_windows": windows,
         "selected_cells": list(sorted(
             selected_cells.values(),
@@ -2211,29 +2273,36 @@ def analyze_dt2_confirmation(
     phasec = _load_json(phasec_manifest_path)
     PCC.validate_manifest(phasec)
     _, coordinate, dt2_ref = _coordinate_path_from_final(phasec, "dt2")
-    _, _native_coordinate, dt_ref = _coordinate_path_from_final(
+    _, native_coordinate, dt_ref = _coordinate_path_from_final(
         phasec, "dt"
     )
     expected_phasec = {
         "path": _relative(phasec_manifest_path),
         "file_sha256": _sha256(phasec_manifest_path),
         "manifest_sha256": phasec["manifest_sha256"],
+        "producer_file_sha256": phasec["provenance"][
+            "producer_file_sha256"
+        ],
     }
     if selection.get("final_phasec") != expected_phasec:
         raise ValueError("dt2 selection/final Phase-C provenance mismatch")
     expected_coordinate = {
         **dt2_ref,
+        "producer_file_sha256": coordinate["producer_file_sha256"],
     }
     if selection.get("coordinate_manifests", {}).get(
         "dt2"
     ) != expected_coordinate:
         raise ValueError("dt2 selection/coordinate provenance mismatch")
-    if selection.get("coordinate_manifests", {}).get("dt") != dt_ref:
-        raise ValueError("dt2 selection/native-coordinate provenance mismatch")
-    if selection.get("coordinate_producer_file_sha256") != coordinate.get(
-        "producer_file_sha256"
+    expected_native_coordinate = {
+        **dt_ref,
+        "producer_file_sha256": native_coordinate["producer_file_sha256"],
+    }
+    if (
+        selection.get("coordinate_manifests", {}).get("dt")
+        != expected_native_coordinate
     ):
-        raise ValueError("dt2 selection/coordinate producer map mismatch")
+        raise ValueError("dt2 selection/native-coordinate provenance mismatch")
     native_ref = selection["native_summary"]
     native_path = ROOT / native_ref["path"]
     if (
@@ -2273,6 +2342,15 @@ def analyze_dt2_confirmation(
         raise ValueError("dt2 expected-arm matrix is incomplete or duplicated")
     cell_rows, technical_blockers = [], []
     for selected in selection["selected_cells"]:
+        if (
+            not isinstance(selected.get("phenotypes"), list)
+            or not selected["phenotypes"]
+            or not isinstance(selected.get("directions"), list)
+            or not selected["directions"]
+        ):
+            raise ValueError(
+                "dt2 selected cell lacks closed phenotype/direction semantics"
+            )
         key = (
             int(selected["seed"]), selected["tier"], selected["cell_id"]
         )

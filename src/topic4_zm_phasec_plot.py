@@ -347,7 +347,7 @@ def _validate_summary_contract(
     if key == "final":
         if value.get("schema") != FINAL_SCHEMA:
             return "final_schema_mismatch"
-        return _required_fields(
+        missing = _required_fields(
             value,
             (
                 "fine_verdict", "next_route", "layers",
@@ -358,6 +358,22 @@ def _validate_summary_contract(
             ),
             label="final",
         )
+        if missing is not None:
+            return missing
+        expected_boundary = {
+            "entry": "not_tested",
+            "offset": "not_tested",
+            "recovery_lifecycle": "not_established",
+            "phase_c2_authorized": False,
+            "actuator_authorized": False,
+        }
+        drift = [
+            key for key, expected in expected_boundary.items()
+            if value.get(key) != expected
+        ]
+        if drift:
+            return "final_claim_boundary_violation:" + ",".join(drift)
+        return None
     return f"unknown_summary_contract:{key}"
 
 
@@ -768,30 +784,30 @@ def _figure_irregularity(
         for row in sorted(seeds, key=lambda value: int(value.get("seed", -1))):
             seed = int(row.get("seed", -1))
             ci = row.get("hierarchical_ci") or {}
-            obs = ci.get("pairwise_observed_median") or {}
-            null = ci.get("pairwise_null_q97_5") or {}
-            obs_p, obs_lo, obs_hi = (_finite(obs.get(k)) for k in ("point", "lo", "hi"))
-            null_p = _finite(null.get("point"))
-            if obs_p is None or obs_lo is None or obs_hi is None or null_p is None:
+            excess = ci.get("pairwise_stratum_max_excess") or {}
+            point, lo, hi = (
+                _finite(excess.get(k)) for k in ("point", "lo", "hi")
+            )
+            if point is None or lo is None or hi is None:
                 continue
             axes[3].errorbar(
-                seed - 0.05,
-                obs_p,
-                yerr=[[obs_p - obs_lo], [obs_hi - obs_p]],
+                seed,
+                point,
+                yerr=[[point - lo], [hi - point]],
                 fmt="o",
                 color="#B2182B",
                 capsize=3,
             )
-            axes[3].scatter(seed + 0.05, null_p, marker="x", color="#2166AC")
             shown = True
         if not shown:
-            _blocked(axes[3], "pair/null CI unavailable")
+            _blocked(axes[3], "stratum max-excess CI unavailable")
         else:
-            axes[3].axhline(0, color="#777777", linewidth=0.7)
+            axes[3].axhline(
+                0, color="#777777", linestyle="--", linewidth=0.8,
+                label="all strata below null if UCB < 0",
+            )
             axes[3].set_xlabel("seed")
-            axes[3].set_ylabel("5-ms pair correlation")
-            axes[3].scatter([], [], color="#B2182B", label="observed")
-            axes[3].scatter([], [], marker="x", color="#2166AC", label="shift-null q97.5")
+            axes[3].set_ylabel("max stratum excess over null q97.5")
             axes[3].legend(frameon=False, fontsize=7)
     for ax, title in zip(
         axes, ("ISI irregularity", "refractory locking", "count variability", "pairwise null")
@@ -1013,6 +1029,7 @@ _CLASS_ORDER = (
     "missing",
     "rest_or_silence",
     "probabilistically_indeterminate",
+    "tonic_gain_indeterminate",
     "refractory_saturated",
     "tonic_non_AI",
     "spike_AI_screen_candidate",
@@ -1028,6 +1045,7 @@ _CLASS_COLORS = (
     "#E6E6E6",
     "#F7F7F7",
     "#FDD49E",
+    "#FDAE6B",
     "#D7301F",
     "#FC8D59",
     "#91BFDB",
@@ -1065,6 +1083,7 @@ def atlas_matrix(
     lookup: dict[tuple[int, str], Mapping[str, Any]] = {}
     duplicates: list[str] = []
     unexpected: list[str] = []
+    unknown_labels: list[str] = []
     for cell in c1.get("cells", []) or []:
         if not isinstance(cell, Mapping) or cell.get("tier") != tier:
             continue
@@ -1089,6 +1108,7 @@ def atlas_matrix(
                 continue
             label = _cell_final_class(cell)
             if label not in _CLASS_ORDER:
+                unknown_labels.append(f"{seed}:{cell_id}:{label}")
                 label = "missing"
             matrix[iy, ix] = _CLASS_ORDER.index(label)
             technical_complete += int(cell.get("status") == "complete")
@@ -1097,6 +1117,8 @@ def atlas_matrix(
         errors.append("duplicate:" + ",".join(sorted(duplicates)))
     if unexpected:
         errors.append("unexpected:" + ",".join(sorted(unexpected)))
+    if unknown_labels:
+        errors.append("unknown_label:" + ",".join(sorted(unknown_labels)))
     return {
         "matrix": matrix,
         "seeds": EXPECTED_SEEDS,
@@ -1530,9 +1552,10 @@ def _readme_text() -> str:
             "**关注点**：判断 tonic 支路更接近 refractory saturation 还是仍保留局部可增益性。"
         ),
         FIGURE_FILENAMES[1]: (
-            "并列展示 ISI CV2、refractory locking、20-ms Fano 和 pairwise shift-null。"
+            "并列展示 ISI CV2、refractory locking、20-ms Fano，以及三个空间 stratum 中"
+            "最不利的 pairwise observed-minus-shift-null q97.5 分层 95% CI。"
             "神经元或 pair 只用于 seed 内不确定性，图上不把它们当独立重复。\n\n"
-            "**关注点**：AI、周期锁定与相关性过强三种解释是否能被区分。"
+            "**关注点**：AI 判据要求 max-excess 的 CI 上界低于零；周期锁定与相关性过强不能被 pooled median 掩盖。"
         ),
         FIGURE_FILENAMES[2]: (
             "展示 raw synaptic 与 effective membrane-drive 的 E/I 分量、阈值距离、fine-rate、PSD 和 current-vSEEG proxy。"

@@ -9,9 +9,11 @@ from src.topic4_zm_phasec_plot import (
     BOUNDARY,
     EXPECTED_SEEDS,
     FIGURE_FILENAMES,
+    LoadedArtifact,
     PRIMARY_CELL_NAMES,
     SHELL_CELL_NAMES,
     _modal_route_kind,
+    _validate_summary_contract,
     align_current_vseeg,
     atlas_matrix,
     render_phasec_figures,
@@ -112,6 +114,7 @@ def _seed_row(seed, part_path):
             "refractory_isi_fraction": _ci(0.13, 0.08, 0.19),
             "pairwise_observed_median": _ci(0.03, 0.01, 0.05),
             "pairwise_null_q97_5": _ci(0.10, 0.08, 0.12),
+            "pairwise_stratum_max_excess": _ci(-0.07, -0.10, -0.03),
             "active_area_fraction": _ci(0.22, 0.18, 0.27),
         },
         "rows": [
@@ -220,6 +223,57 @@ def test_atlas_uses_locked_denominator_and_preserves_rest_and_missing():
     shell = atlas_matrix({"cells": []}, "secondary_shell")
     assert shell["matrix"].shape == (3, 8)
     assert shell["expected"] == 24
+
+
+def test_atlas_preserves_gain_indeterminate_and_fails_closed_on_unknown():
+    base = {
+        "seed": 1,
+        "tier": "primary_convex",
+        "cell_id": PRIMARY_CELL_NAMES[0],
+        "status": "complete",
+        "cell_class": "tonic_non_AI",
+    }
+    supported = {
+        **base,
+        "conditional_gain": {
+            "final_cell_class": "tonic_gain_indeterminate",
+        },
+    }
+    atlas = atlas_matrix({"cells": [supported]}, "primary_convex")
+    assert atlas["error"] is None
+    assert atlas["matrix"][0, 0] != atlas["matrix"][0, 1]
+
+    unknown = {
+        **base,
+        "conditional_gain": {"final_cell_class": "future_unknown_class"},
+    }
+    atlas = atlas_matrix({"cells": [unknown]}, "primary_convex")
+    assert "unknown_label:1:" in atlas["error"]
+    assert "future_unknown_class" in atlas["error"]
+
+
+def test_final_figure_contract_rejects_claim_boundary_drift():
+    final = {
+        "schema": "zm_phasec_final_adjudication_v1_2026-07-28",
+        "fine_verdict": "bounded_negative",
+        "next_route": "consult",
+        "layers": {},
+        "input_file_provenance": {},
+        "phasec_manifest_provenance": {},
+        "trigger_provenance": {},
+        "wrapper_provenance_issues": [],
+        "entry": "not_tested",
+        "offset": "not_tested",
+        "recovery_lifecycle": "not_established",
+        "phase_c2_authorized": False,
+        "actuator_authorized": False,
+    }
+    artifact = LoadedArtifact(Path("final.json"), "a" * 64, final, None)
+    assert _validate_summary_contract("final", artifact) is None
+    final["phase_c2_authorized"] = True
+    assert _validate_summary_contract("final", artifact) == (
+        "final_claim_boundary_violation:phase_c2_authorized"
+    )
 
 
 def test_current_vseeg_alignment_uses_physical_time():

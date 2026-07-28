@@ -839,6 +839,13 @@ def _nested_final_sources(
         path = tmp_path / f"{name}.json"
         _write_json(path, value)
         paths[name] = path
+    c0_gate.update({
+        "native_summary": str(paths["c0_native"]),
+        "native_summary_sha256": _sha(paths["c0_native"]),
+        "dt2_summary": None,
+        "dt2_summary_sha256": None,
+    })
+    _write_json(paths["c0_gate"], c0_gate)
     c1_gate = {
         "schema": "zm_phasec1_resolution_gate_v1_2026-07-28",
         "verdict": c1_gate_verdict,
@@ -930,6 +937,22 @@ def test_build_inputs_deterministically_splits_nested_c1_and_adjudicates(
     assert out["layers"]["source_identity"]["verdict"] == (
         "mixed_or_indeterminate_tonic_branch"
     )
+
+
+def test_build_inputs_rejects_stale_c0_resolution_gate(tmp_path):
+    paths, _phasec = _nested_final_sources(tmp_path)
+    native = json.loads(paths["c0_native"].read_text(encoding="utf-8"))
+    native["aggregate"]["verdict"] = "refractory_saturated_branch_supported"
+    _write_json(paths["c0_native"], native)
+    with pytest.raises(ValueError, match="C0 gate/native summary file SHA mismatch"):
+        ADJ.build_final_inputs(
+            phasec_manifest_path=paths["phasec"],
+            c0_gate_path=paths["c0_gate"],
+            c0_native_path=paths["c0_native"],
+            c1_gate_path=paths["c1_gate"],
+            c1_native_path=paths["c1_native"],
+            modal_path=paths["modal"],
+        )
 
 
 @pytest.mark.parametrize(

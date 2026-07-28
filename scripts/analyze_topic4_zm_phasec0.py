@@ -1274,9 +1274,13 @@ def finalize_resolution_gate():
             "schema": "zm_phasec_c0_resolution_gate_v1",
             **gate,
             "native_summary": os.path.relpath(native_path, ROOT),
+            "native_summary_sha256": _sha(native_path),
             "dt2_summary": (
                 os.path.relpath(dt2_path, ROOT)
                 if os.path.exists(dt2_path) else None
+            ),
+            "dt2_summary_sha256": (
+                _sha(dt2_path) if os.path.exists(dt2_path) else None
             ),
             "claim_boundary": (
                 "source-space identity only; no observation match, entry, "

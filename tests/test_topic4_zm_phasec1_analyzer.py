@@ -67,6 +67,7 @@ def _six_runs(label="tonic_non_AI", spike_pass=False):
                 "terminal_class": label,
                 "path_direction": "forward",
                 "spike_ai_screen": {"pass": spike_pass},
+                "_hierarchical": _hierarchical(ai=spike_pass),
                 "spatial_relay": {"is_spatial_relay": False},
                 "part_path": f"parts/{phase}/{noise}.json",
                 "part_sha256": "b" * 64,
@@ -127,10 +128,16 @@ def _cell(seed, tier, trajectory, index, label, cell_id=None):
         "status": "complete",
         "cell_class": label,
         "gain_trigger_eligible": label == "spike_AI_screen_candidate",
-        "run_rows": _six_runs(
-            "tonic_non_AI",
-            spike_pass=label == "spike_AI_screen_candidate",
-        ),
+        "run_rows": [
+            {
+                key: value for key, value in row.items()
+                if key != "_hierarchical"
+            }
+            for row in _six_runs(
+                "tonic_non_AI",
+                spike_pass=label == "spike_AI_screen_candidate",
+            )
+        ],
         "spike_ai_screen_support": {
             "passes_locked_cell_gate": label == "spike_AI_screen_candidate",
             "k": 6 if label == "spike_AI_screen_candidate" else 0,
@@ -176,6 +183,22 @@ def test_cell_gate_requires_five_of_six_and_two_per_phase():
     rows[-2]["terminal_class"] = "tonic_non_AI"
     out = A.aggregate_cell_rows(rows, _coordinate())
     assert out["cell_class"] == "probabilistically_indeterminate"
+
+
+def test_cell_ai_trigger_requires_hierarchical_uncertainty_gate(monkeypatch):
+    monkeypatch.setattr(A.C0, "N_BOOT", 100)
+    rows = _six_runs("tonic_non_AI", spike_pass=True)
+    out = A.aggregate_cell_rows(rows, _coordinate())
+    assert out["cell_class"] == "spike_AI_screen_candidate"
+    assert out["spike_ai_screen_support"]["hierarchical_ci_pass"] is True
+    assert out["spike_ai_hierarchical_ci"]["n_boot"] == 100
+
+    for row in rows:
+        row["_hierarchical"] = _hierarchical(ai=False)
+    out = A.aggregate_cell_rows(rows, _coordinate())
+    assert out["cell_class"] == "tonic_non_AI"
+    assert out["spike_ai_screen_support"]["passes_locked_cell_gate"] is True
+    assert out["spike_ai_screen_support"]["hierarchical_ci_pass"] is False
 
 
 def test_periodic_window_fails_when_fast_phase_periods_disagree():
@@ -1186,3 +1209,165 @@ def test_dt2_selection_preserves_single_cell_secondary_shell_semantics():
     assert {row["seed"] for row in selected} == {1, 3}
     assert all(row["tier"] == "secondary_shell" for row in selected)
     assert all(row["cells"] == [cell_id] for row in selected)
+
+
+def test_dt2_builder_lock_analyzer_round_trip(monkeypatch, tmp_path):
+    """A native positive must survive the real build/lock/analyze glue."""
+    def write_json(path, value):
+        Path(path).write_text(
+            json.dumps(value, sort_keys=True), encoding="utf-8"
+        )
+
+    phasec_path = tmp_path / "phasec.json"
+    native_path = tmp_path / "native.json"
+    selection_path = tmp_path / "selection.json"
+    producer_sha = "f" * 64
+    manifest_sha = "a" * 64
+    phasec = {
+        "production_authorized": True,
+        "manifest_sha256": manifest_sha,
+        "provenance": {"producer_file_sha256": producer_sha},
+    }
+    write_json(phasec_path, phasec)
+
+    phenotype = "periodic_non_tonic_carrier"
+    direction = "forward"
+    windows = {
+        str(seed): {
+            "windows": [{
+                "phenotype": phenotype,
+                "direction": direction,
+                "cells": ["c1", "c2"],
+            }],
+        }
+        for seed in A.DT2_SEEDS
+    }
+    native = {
+        "schema": A.C1_SUMMARY_SCHEMA,
+        "resolution": "dt",
+        "phasec_manifest_sha256": manifest_sha,
+        "phasec_manifest_file_sha256": A._sha256(phasec_path),
+        "coordinate_manifest_sha256": "1" * 64,
+        "coordinate_manifest_semantic_sha256": "2" * 64,
+        "coordinate_manifest_file_sha256": "3" * 64,
+        "primary_adjudication": {
+            "status": "local_maturation_window",
+            "candidates": [{
+                "phenotype": phenotype,
+                "direction": direction,
+            }],
+            "seed_results": windows,
+        },
+        "secondary_shell_adjudication": {"status": "no_window"},
+    }
+    write_json(native_path, native)
+
+    def coordinate(resolution):
+        ref = {
+            "path": str(tmp_path / f"coordinate_{resolution}.json"),
+            "file_sha256": "3" * 64 if resolution == "dt" else "4" * 64,
+            "manifest_sha256": "1" * 64 if resolution == "dt" else "5" * 64,
+            "semantic_sha256": "2" * 64 if resolution == "dt" else "6" * 64,
+        }
+        value = {
+            "manifest_sha256": ref["manifest_sha256"],
+            "semantic_sha256": ref["semantic_sha256"],
+            "producer_file_sha256": (
+                {"coordinate.py": "7" * 64}
+                if resolution == "dt"
+                else {"coordinate.py": "8" * 64}
+            ),
+            "seeds": {
+                str(seed): {
+                    "npz_file_sha256": "9" * 64,
+                    "npz_semantic_sha256": "b" * 64,
+                    "cells": [
+                        {
+                            "cell_id": cell_id,
+                            "tier": "primary_convex",
+                            "trajectory_id": "rising",
+                            "path_index": index,
+                            "path_direction": direction,
+                            "state_sha256": chr(99 + index) * 64,
+                            "status": "valid",
+                        }
+                        for index, cell_id in enumerate(("c1", "c2"))
+                    ],
+                }
+                for seed in A.DT2_SEEDS
+            },
+        }
+        return Path(ref["path"]), value, ref
+
+    coordinates = {
+        resolution: coordinate(resolution)
+        for resolution in ("dt", "dt2")
+    }
+    monkeypatch.setattr(A.PCC, "validate_manifest", lambda _value: None)
+    monkeypatch.setattr(
+        A,
+        "_coordinate_path_from_final",
+        lambda _phasec, resolution: coordinates[resolution],
+    )
+    monkeypatch.setattr(
+        A,
+        "_resolution_seed_inputs",
+        lambda *_args, **_kwargs: {
+            "config_sha": "c" * 64,
+            "fast_base_state_hash": "d" * 64,
+            "state_file_sha256": "e" * 64,
+            "noise_bank_sha": "f" * 64,
+        },
+    )
+    monkeypatch.setattr(A, "_relative", lambda path: str(Path(path).resolve()))
+
+    selection = A.build_dt2_confirmation_manifest(
+        native_summary_path=native_path,
+        phasec_manifest_path=phasec_path,
+    )
+    assert all(
+        row["phenotypes"] == [phenotype]
+        and row["directions"] == [direction]
+        for row in selection["selected_cells"]
+    )
+    write_json(selection_path, selection)
+
+    by_path = {
+        str((A.ROOT / arm["path"]).resolve()): arm
+        for arm in selection["expected_base_arms"]
+    }
+
+    def classify(path, **_kwargs):
+        arm = by_path[str(Path(path).resolve())]
+        identity = {
+            key: value for key, value in arm.items() if key != "path"
+        }
+        return {
+            "status": "complete",
+            "locked_arm_identity": identity,
+        }
+
+    monkeypatch.setattr(A.C0, "_load_panels", lambda: {})
+    monkeypatch.setattr(A, "classify_base_part", classify)
+    monkeypatch.setattr(
+        A,
+        "aggregate_cell_rows",
+        lambda _runs, coordinate_row: {
+            "seed": coordinate_row["seed"],
+            "tier": coordinate_row["tier"],
+            "cell_id": coordinate_row["cell_id"],
+            "status": "complete",
+            "cell_class": phenotype,
+        },
+    )
+    result = A.analyze_dt2_confirmation(
+        selection_manifest_path=selection_path,
+        phasec_manifest_path=phasec_path,
+    )
+    assert result["verdict"] == "maturation_window_at_primary_convex_states"
+    assert result["matches"] == [{
+        "tier": "primary_convex",
+        "phenotype": phenotype,
+        "direction": direction,
+        "homologous_supporting_seeds": list(A.DT2_SEEDS),
+    }]

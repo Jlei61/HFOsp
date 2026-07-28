@@ -280,12 +280,30 @@ def build_final_inputs(
     if modal.get("phasec_manifest_sha256") != manifest_sha:
         raise ValueError("modal summary parent manifest mismatch")
     c0_locked_native = c0_gate.get("native_summary")
-    if c0_locked_native is not None:
-        c0_locked_path = Path(str(c0_locked_native))
-        if not c0_locked_path.is_absolute():
-            c0_locked_path = ROOT / c0_locked_path
-        if c0_locked_path.resolve() != c0_native_path.resolve():
-            raise ValueError("C0 gate/native summary path mismatch")
+    if c0_locked_native is None:
+        raise ValueError("C0 gate lacks locked native summary provenance")
+    c0_locked_path = Path(str(c0_locked_native))
+    if not c0_locked_path.is_absolute():
+        c0_locked_path = ROOT / c0_locked_path
+    if c0_locked_path.resolve() != c0_native_path.resolve():
+        raise ValueError("C0 gate/native summary path mismatch")
+    if c0_gate.get("native_summary_sha256") != _sha(c0_native_path):
+        raise ValueError("C0 gate/native summary file SHA mismatch")
+    c0_dt2_ref = c0_gate.get("dt2_summary")
+    c0_dt2_sha = c0_gate.get("dt2_summary_sha256")
+    if c0_dt2_ref is None:
+        if c0_dt2_sha is not None:
+            raise ValueError("C0 gate has unpaired dt2 summary SHA")
+    else:
+        c0_dt2_path = Path(str(c0_dt2_ref))
+        if not c0_dt2_path.is_absolute():
+            c0_dt2_path = ROOT / c0_dt2_path
+        if (
+            not c0_dt2_path.is_file()
+            or not isinstance(c0_dt2_sha, str)
+            or c0_dt2_sha != _sha(c0_dt2_path)
+        ):
+            raise ValueError("C0 gate/dt2 summary file SHA mismatch")
     c1_locked_native = c1_gate.get("native_summary_path")
     if c1_locked_native is not None:
         c1_locked_path = Path(str(c1_locked_native))
