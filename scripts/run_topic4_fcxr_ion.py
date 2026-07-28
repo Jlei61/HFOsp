@@ -1694,10 +1694,15 @@ def cmd_b2_bias(args):
             if len(probes) >= MAX_PROBES:
                 break
 
-        best_err = max(abs(best["r_E"] - R_E_TARGET) / R_E_TARGET,
-                       abs(best["r_I"] - R_I_TARGET) / R_I_TARGET)
+        # Contract (spec 7.1): the closure hard gate is |r0' - r0|/r0 on the E rate. r_I is
+        # recorded and handed to Gate B as a check item (spec 7.1 line 207), NOT used as a gate
+        # here. max(E, I) stays the SEARCH objective -- it finds a better joint point -- but a
+        # verdict stricter than the contract would wrongly read as a failure.
+        best_err_E = abs(best["r_E"] - R_E_TARGET) / R_E_TARGET
+        best_err_I = abs(best["r_I"] - R_I_TARGET) / R_I_TARGET
+        best_err = max(best_err_E, best_err_I)
         if verdict is None:
-            verdict = "CALIBRATED" if best_err <= CLOSURE_REL_TOL else "UNRESOLVED_CALIBRATION"
+            verdict = "CALIBRATED" if best_err_E <= CLOSURE_REL_TOL else "UNRESOLVED_CALIBRATION"
         # NO_GO_BASELINE requires the legal box to be BRACKETED and shown to contain no solution.
         # A probe budget that ran out is a calibrator failure, never a mechanism conclusion.
         bracketed = False
@@ -1706,7 +1711,11 @@ def cmd_b2_bias(args):
             status=verdict, f_prime=fp, q_ion=q_ion,
             targets=dict(r_E_hz=R_E_TARGET, r_I_hz=R_I_TARGET, rel_tol=CLOSURE_REL_TOL),
             best=dict(I_bias_E=best["job"]["I_bias_E"], I_bias_I=best["job"]["I_bias_I"],
-                      r_E=best["r_E"], r_I=best["r_I"], rel_err=best_err),
+                      r_E=best["r_E"], r_I=best["r_I"], rel_err=best_err,
+                      rel_err_E=best_err_E, rel_err_I=best_err_I),
+            gating_rule=("spec 7.1: the closure hard gate is the E-rate residual "
+                         "|r0'-r0|/r0 <= 10%. r_I is recorded and handed to Gate B as a check "
+                         "item (spec 7.1), not gated here. max(E,I) remains the search objective."),
             jacobian=J.tolist(), linearity_max_err_hz=lin_err,
             n_probes=len(probes), max_probes=MAX_PROBES, probes=probes, history=history,
             bias_bounds=list(BIAS_BOUNDS), bias_delta=BIAS_DELTA,
@@ -1955,6 +1964,11 @@ def cmd_b2_validate(args):
         second = trajectory_task(job(q1, "post_closure"))
         r0pp = second["pooled"]["mean_rate_hz"]
         rel = abs(r0pp - ION.R0_HZ) / ION.R0_HZ
+        # spec 7.1: the closure gate is the E-rate residual AND a non-significant inter-block ion
+        # trend. The first implementation checked only the residual; both are contract.
+        ion_q99 = max(second["ion"]["q99_abs_dNa_dt"], second["ion"]["q99_abs_dKo_dt"])
+        ion_ok = bool(ion_q99 < ION.GATE_B_ION_BLOCK_DRIFT_MAX)
+        closure_ok = bool(rel <= CLOSURE_REL_TOL and ion_ok)
 
         # ruling 4: the closed-loop counterpart of the open-loop integration diagnostic
         fs = json.load(open(os.path.join(OUT, "b1_f_selection_v2.json")))
@@ -2000,9 +2014,10 @@ def cmd_b2_validate(args):
                            "(q95/q99/max); a flat population mean is not evidence."))
         _write_json(os.path.join(OUT, "b2_closure_iteration.json"), payload)
         print(f"[b2-validate] r0'={r0p:.4f} -> q_ion {q0:.5f}->{q1:.5f} -> r0''={r0pp:.4f} "
-              f"(rel {rel:.4f}, tol {CLOSURE_REL_TOL})  closure "
-              f"{'PASS' if rel <= CLOSURE_REL_TOL else 'FAIL'}")
-        if rel > CLOSURE_REL_TOL:
+              f"(rel {rel:.4f}, tol {CLOSURE_REL_TOL}; ion q99 {ion_q99:.4f} vs "
+              f"{ION.GATE_B_ION_BLOCK_DRIFT_MAX})  closure "
+              f"{'PASS' if closure_ok else 'UNRESOLVED_CALIBRATION'}")
+        if not closure_ok:
             _write_json(os.path.join(OUT, "UNRESOLVED_CALIBRATION.json"), payload)
             raise SystemExit(
                 "closure residual exceeds 10% -> UNRESOLVED_CALIBRATION. Per plan section 10 this "
