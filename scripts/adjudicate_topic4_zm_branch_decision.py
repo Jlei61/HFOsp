@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import argparse
 import glob
+import hashlib
 import json
 import os
 import subprocess
@@ -74,6 +75,72 @@ def verify_gates():
 
 def load_json(path, default=None):
     return json.load(open(path)) if os.path.exists(path) else default
+
+
+def sha256(path):
+    h = hashlib.sha256()
+    with open(path, "rb") as handle:
+        for chunk in iter(lambda: handle.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def phase_execution_status(
+    source_rhythm_summary,
+    rank_summary,
+    modal_summary,
+    entry_summary,
+    offset_summary,
+):
+    source_class_disagreement = bool(
+        (source_rhythm_summary or {}).get("status") == "class_disagreement"
+    )
+    status = {
+        "functional_rank": (
+            "completed_no_evidence"
+            if (rank_summary or {}).get("verdict", "").startswith("no_evidence")
+            else "completed"
+            if rank_summary
+            else "not_run"
+        ),
+        "modal_operator": (
+            "skipped_source_class_disagreement"
+            if source_class_disagreement
+            else "completed"
+            if modal_summary and int(modal_summary.get("n_complete_seeds", 0)) >= 2
+            else "not_run"
+        ),
+        "entry_boundary": (
+            "completed_unresolved"
+            if (entry_summary or {}).get("verdict", "").endswith("_unresolved")
+            else "completed"
+            if entry_summary
+            else "not_run"
+        ),
+        "offset_boundary": (
+            "completed_no_evidence"
+            if (offset_summary or {}).get("verdict") == "no_evidence"
+            else "completed"
+            if offset_summary
+            else "not_run"
+        ),
+        "exit_driver_selection": "not_authorized",
+    }
+    not_run = []
+    if status["functional_rank"] == "not_run":
+        not_run.append("Task 9A slow-coordinate functional rank")
+    if status["modal_operator"].startswith("skipped"):
+        not_run.append(
+            "Task 9B modal/operator audit (skipped: source-class disagreement)"
+        )
+    elif status["modal_operator"] == "not_run":
+        not_run.append("Task 9B modal/operator audit")
+    if status["entry_boundary"] == "not_run":
+        not_run.append("Task 10 Z-entry probability boundary")
+    if status["offset_boundary"] == "not_run":
+        not_run.append("Task 11 existing-coordinate offset boundary")
+    not_run.append("Task 12 matched offline exit-driver selection (not authorized)")
+    return status, not_run
 
 
 def main():
@@ -208,6 +275,46 @@ def main():
         OUT, "boundaries", "offset", "offset_boundary_summary.json"
     ))
     result = BV.apply_offset_status(result, offset_summary)
+    source_rhythm_path = os.path.join(
+        OUT, "source_rhythm", "source_rhythm_summary.json"
+    )
+    rank_path = os.path.join(
+        OUT, "effective_rank", "effective_rank_summary.json"
+    )
+    modal_path = os.path.join(
+        OUT, "modal_operator", "modal_operator_summary.json"
+    )
+    entry_path = os.path.join(
+        OUT, "boundaries", "entry", "entry_boundary_summary.json"
+    )
+    offset_path = os.path.join(
+        OUT, "boundaries", "offset", "offset_boundary_summary.json"
+    )
+    source_rhythm_summary = load_json(source_rhythm_path, {})
+    rank_summary = load_json(rank_path, {})
+    modal_summary = load_json(modal_path, {})
+    execution_status, conditional_not_run = phase_execution_status(
+        source_rhythm_summary,
+        rank_summary,
+        modal_summary,
+        entry_summary,
+        offset_summary,
+    )
+    phase_input_paths = [
+        source_rhythm_path,
+        rank_path,
+        modal_path,
+        entry_path,
+        offset_path,
+    ]
+    phase_inputs = [
+        {
+            "path": os.path.relpath(path, _ROOT),
+            "sha256": sha256(path),
+        }
+        for path in phase_input_paths
+        if os.path.exists(path)
+    ]
 
     out = dict(
         version=BV.VERDICT_VERSION, timestamp=time.strftime("%Y-%m-%dT%H:%M:%S"),
@@ -227,11 +334,13 @@ def main():
         neighbourhood=neighbourhood, confirmation=confirmation,
         confirmation_by_arm=confirmation_by_arm,
         n_long_confirmation_rows=len(long_rows), n_dt2_confirmation_rows=len(dt2_rows),
-        conditional_phases_not_run=[
-            "Task 9A slow-coordinate functional rank", "Task 9B modal/operator audit",
-            "Task 10 Z-entry probability boundary", "Task 11 existing-coordinate offset boundary",
-            "Task 12 matched offline exit-driver selection"]
-        if result["verdict"] != "carrier_at_visited_states" else [],
+        phase_execution_status=execution_status,
+        conditional_phases_not_run=conditional_not_run,
+        provenance={
+            "spec": (offset_summary or {}).get("spec"),
+            "canonical_config": (offset_summary or {}).get("canonical_config"),
+            "phase_inputs": phase_inputs,
+        },
         n_fork_rows=len(rows), n_neighbourhood_rows=len(nb_rows))
     os.makedirs(OUT, exist_ok=True)
     tmp = os.path.join(OUT, "branch_verdict.json.tmp")

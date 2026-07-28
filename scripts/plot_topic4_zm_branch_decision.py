@@ -924,14 +924,17 @@ def fig_neighbourhood():
 
 
 # ============================================================ Fig 7: phase completion
-def fig_phase_status(made):
+def _phase_status_rows():
+    """Return phase labels from scientific verdicts, not merely artifact counts."""
     v = _load(os.path.join(OUT, "branch_verdict.json"), {})
     coverage = v.get("coverage", {})
     n_cells_run = int(coverage.get("n_cells_planned_run", coverage.get("n_cells_run", 0)))
     n_cells_planned = int(coverage.get("n_cells_planned", 0))
     source_layer = (v.get("layers") or {}).get("source_space_carrier")
-    if source_layer in {"provisional_carrier_window", "source_space_carrier"}:
-        fork_status = "discovery complete"
+    if source_layer in {
+        "carrier_window", "provisional_carrier_window", "source_space_carrier"
+    }:
+        fork_status = "carrier window complete"
     else:
         fork_status = ("complete" if n_cells_planned and n_cells_run >= n_cells_planned
                        else "in progress" if n_cells_run else "not started")
@@ -939,6 +942,9 @@ def fig_phase_status(made):
     n_source_rhythm = len(glob.glob(os.path.join(
         OUT, "source_rhythm", "*", "seed*", "source_rhythm.json"
     )))
+    source_rhythm_summary = _load(os.path.join(
+        OUT, "source_rhythm", "source_rhythm_summary.json"
+    ), {})
     rank_summary = _load(os.path.join(
         OUT, "effective_rank", "effective_rank_summary.json"
     ), {})
@@ -957,6 +963,48 @@ def fig_phase_status(made):
         OUT, "boundaries", "offset", "offset_boundary_summary.json"
     ), {})
     n_offset_seed = int(offset_summary.get("n_complete_seeds", 0))
+    entry_verdict = entry_summary.get("verdict")
+    if entry_verdict == "conditional_Z_entry_boundary_crossed":
+        entry_status = "boundary crossed"
+    elif entry_verdict == "conditional_Z_entry_boundary_unresolved":
+        entry_status = "unresolved"
+    elif entry_verdict == "no_evidence":
+        entry_status = "no evidence"
+    else:
+        entry_status = (
+            "in progress" if n_entry_seed else "conditional / not authorized"
+        )
+    offset_verdict = offset_summary.get("verdict")
+    if offset_verdict in {
+        "M_sufficient_and_reached",
+        "M_SG_joint_offset_reached",
+        "M_Z_recovery_offset_reached",
+    }:
+        offset_status = "offset reached"
+    elif offset_verdict in {
+        "M_boundary_near_but_unreached",
+        "M_Z_recovery_boundary_exists_but_unreached",
+    }:
+        offset_status = "exists / unreached"
+    elif offset_verdict in {"M_shapes_but_no_offset_surface", "no_evidence"}:
+        offset_status = "no evidence: offset surface"
+    else:
+        offset_status = (
+            "in progress" if n_offset_seed else "conditional / not authorized"
+        )
+    if source_rhythm_summary.get("status") == "class_disagreement":
+        source_rhythm_status = "complete: class disagreement"
+        modal_status = "skipped: source-class disagreement"
+    else:
+        source_rhythm_status = (
+            "complete" if n_source_rhythm >= 2 else
+            "in progress" if n_source_rhythm else "conditional / not authorized"
+        )
+        modal_status = (
+            "complete" if n_modal_seed >= 2 else
+            "no evidence" if modal_summary.get("status") == "insufficient_seeds" else
+            "in progress" if n_modal_seed else "conditional / not authorized"
+        )
     neighbourhood = v.get("neighbourhood") or {}
     neighbourhood_status = (
         "complete" if neighbourhood.get("evidence_complete") is True
@@ -986,32 +1034,39 @@ def fig_phase_status(made):
         ("1A anchors", "complete" if len(v.get("eligible_seeds", [])) >= 3 else "in progress"),
         ("1B minimal-subsystem forks", fork_status),
         ("1B 20 s + native dt/2 confirm", confirmation_label),
-        ("1.5 carrier-type source audit",
-         "complete" if n_source_rhythm >= 2 else
-         "in progress" if n_source_rhythm else "conditional / not authorized"),
+        ("1.5 carrier-type source audit", source_rhythm_status),
         ("1C neighbourhood audit", neighbourhood_status),
         ("1.5A functional rank",
          "no evidence: central-pair boundary"
          if rank_summary.get("verdict") == "no_evidence_incomplete_central_pairs"
          else "complete" if rank_summary else
          "in progress" if n_rank_seed else "conditional / not authorized"),
-        ("1.5B modal / gain",
-         "complete" if n_modal_seed >= 2 else
-         "in progress" if n_modal_seed else "conditional / not authorized"),
-        ("2A Z-entry boundary",
-         "complete" if n_entry_seed >= 2 else
-         "in progress" if n_entry_seed else "conditional / not authorized"),
-        ("2B offset boundary",
-         "complete" if n_offset_seed >= 2 else
-         "in progress" if n_offset_seed else "conditional / not authorized"),
+        ("1.5B modal / gain", modal_status),
+        ("2A Z-entry boundary", entry_status),
+        ("2B offset boundary", offset_status),
         ("3 exit-driver comparison", "conditional / not authorized")]
+    return phases, v
+
+
+def fig_phase_status(made):
+    phases, v = _phase_status_rows()
     colors = {
         "complete": "#00798C",
         "discovery complete": "#00798C",
+        "carrier window complete": "#00798C",
+        "complete: class disagreement": "#7B5AA6",
+        "boundary crossed": "#00798C",
+        "offset reached": "#00798C",
+        "exists / unreached": "#7B5AA6",
         "in progress": "#EDAE49",
         "exploratory partial": "#7B5AA6",
         "blocked: returning-event windows": "#D1495B",
         "failed": "#D1495B",
+        "unresolved": "#7B5AA6",
+        "no evidence": "#B0B7C3",
+        "no evidence: central-pair boundary": "#B0B7C3",
+        "no evidence: offset surface": "#B0B7C3",
+        "skipped: source-class disagreement": "#B0B7C3",
         "not started": "#E3E5E8",
         "conditional / not authorized": "#E3E5E8",
     }
@@ -1020,12 +1075,17 @@ def fig_phase_status(made):
     ax.barh(y, [1] * len(phases), color=[colors[status] for _, status in phases])
     for i, (name, status) in enumerate(phases):
         dark = status in {
-            "complete", "discovery complete", "exploratory partial",
-            "blocked: returning-event windows", "failed"
+            "complete", "discovery complete", "carrier window complete",
+            "complete: class disagreement", "boundary crossed", "offset reached",
+            "exists / unreached", "exploratory partial",
+            "blocked: returning-event windows", "failed", "unresolved"
         }
         ax.text(0.02, i, name, va="center", fontsize=8.5,
                 color="white" if dark else "#444",
-                fontweight="bold" if status in {"complete", "discovery complete"} else "normal")
+                fontweight="bold" if status in {
+                    "complete", "discovery complete", "carrier window complete",
+                    "boundary crossed", "offset reached"
+                } else "normal")
         ax.text(0.98, i, status, va="center", ha="right",
                 fontsize=7.5, color="white" if dark else "#666")
     ax.set_yticks([])

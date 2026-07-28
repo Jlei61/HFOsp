@@ -1,8 +1,10 @@
 import numpy as np
 
 from src.topic4_zm_boundaries import (
+    adjudicate_offset_surface,
     boundary_reachability,
     bootstrap_half_boundary,
+    dynamic_offset_summary,
     half_boundary,
     hysteresis_summary,
     jeffreys_probability_curve,
@@ -208,3 +210,120 @@ def test_invalid_extrapolated_slow_field_is_rejected_not_clipped():
             early, late, 3.0, coordinates=("z",), nE=2,
             allow_extrapolation=True,
         )
+
+
+def _dynamic_rows(success_by_seed):
+    rows = []
+    for seed in (1, 3, 4):
+        k = int(success_by_seed.get(seed, 0))
+        for index, replicate in enumerate(
+            ("noise_replay", "noise_resample_1", "noise_resample_2")
+        ):
+            success = index < k
+            rows.append(
+                {
+                    "seed": seed,
+                    "replicate": replicate,
+                    "completed": True,
+                    "response_valid": True,
+                    "end_reason": (
+                        "dead_in_rest_basin" if success else "runaway"
+                    ),
+                }
+            )
+    return rows
+
+
+def _family_result(status="unbracketed", *, reached=False, near=False):
+    return {
+        "boundary": {"status": status},
+        "boundary_reached_by_actual_direction": bool(reached),
+        "boundary_in_locked_extension": bool(near),
+    }
+
+
+def test_dynamic_offset_requires_complete_cross_seed_support():
+    reached = dynamic_offset_summary(_dynamic_rows({1: 3, 3: 3, 4: 2}))
+    assert reached["coverage_complete"]
+    assert reached["reached"]
+    assert reached["supporting_seeds"] == [1, 3, 4]
+
+    one_seed = dynamic_offset_summary(_dynamic_rows({1: 3, 3: 0, 4: 0}))
+    assert one_seed["coverage_complete"]
+    assert not one_seed["reached"]
+    assert one_seed["supporting_seeds"] == [1]
+
+
+def test_dynamic_offset_missing_duplicate_or_foreign_cells_fail_closed():
+    missing_rows = _dynamic_rows({1: 3, 3: 3, 4: 3})[:-1]
+    assert not dynamic_offset_summary(missing_rows)["coverage_complete"]
+
+    duplicate_rows = _dynamic_rows({1: 3, 3: 3, 4: 3})
+    duplicate_rows.append(dict(duplicate_rows[0]))
+    assert not dynamic_offset_summary(duplicate_rows)["coverage_complete"]
+
+    foreign_rows = _dynamic_rows({1: 3, 3: 3, 4: 3})
+    foreign_rows.append(
+        {
+            "seed": 8,
+            "replicate": "noise_replay",
+            "completed": True,
+            "response_valid": True,
+            "end_reason": "dead_in_rest_basin",
+        }
+    )
+    assert not dynamic_offset_summary(foreign_rows)["coverage_complete"]
+
+
+def test_dynamic_runaway_is_not_safe_offset():
+    summary = dynamic_offset_summary(_dynamic_rows({}))
+    assert summary["coverage_complete"]
+    assert summary["all_runaway"]
+    assert not summary["reached"]
+    assert summary["posterior_offset_reached"]["k"] == 0
+
+
+def test_offset_adjudication_never_promotes_nonmonotonic_default():
+    families = {
+        "M_alone": _family_result(),
+        "M_SG": _family_result(),
+        "M_Z_recovery": _family_result("nonmonotonic"),
+    }
+    dynamic = dynamic_offset_summary(_dynamic_rows({}))
+    out = adjudicate_offset_surface(families, dynamic, contract_ok=True)
+    assert out["verdict"] == "no_evidence"
+    assert out["diagnostic_status"] == (
+        "static_M_Z_recovery_curve_nonmonotonic_dynamic_ZM_all_runaway"
+    )
+    assert out["reason_code"] == "ambiguous_static_surface"
+
+
+def test_static_mz_boundary_without_dynamic_reach_is_diagnostic_only():
+    families = {
+        "M_alone": _family_result(),
+        "M_SG": _family_result(),
+        "M_Z_recovery": _family_result("bracketed", reached=True),
+    }
+    out = adjudicate_offset_surface(
+        families,
+        dynamic_offset_summary(_dynamic_rows({})),
+        contract_ok=True,
+    )
+    assert out["verdict"] == "no_evidence"
+    assert out["diagnostic_status"] == (
+        "M_Z_recovery_boundary_exists_but_dynamically_unreached"
+    )
+
+
+def test_offset_adjudication_requires_contract_and_complete_dynamic_grid():
+    families = {
+        name: _family_result()
+        for name in ("M_alone", "M_SG", "M_Z_recovery")
+    }
+    dynamic = dynamic_offset_summary(_dynamic_rows({})[:-1])
+    assert adjudicate_offset_surface(
+        families, dynamic, contract_ok=True
+    )["verdict"] == "no_evidence"
+    assert adjudicate_offset_surface(
+        families, dynamic, contract_ok=False
+    )["diagnostic_status"] == "offset_contract_incomplete"

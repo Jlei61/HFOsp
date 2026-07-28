@@ -537,7 +537,14 @@ def summarize_continuation(run, locks, T_ms=T_CONT_MS):
     stationarity = MC.stationarity_gate(drift_by_coordinate)
     return dict(
         survived=bool(surv["survived"]), lifetime_ms=float(surv["lifetime_ms"]),
-        end_reason=surv["end_reason"] or run["end_reason"],
+        # The streaming runner applies the stronger terminal-state contract
+        # (for example, 1.5 s continuously inside the rest basin), whereas
+        # survival() classifies the first short rest return.  Keep both
+        # observations, but never let the latter erase a confirmed terminal
+        # state used by the offset/basin gates.
+        run_end_reason=run["end_reason"],
+        classifier_end_reason=surv["end_reason"],
+        end_reason=run["end_reason"] or surv["end_reason"],
         rest_returns=int(_count_rest_returns(d_post, MC.BIN_MS, locks["d_rest_thresh"],
                                              locks["rest_dwell_ms"])),
         d_rest_median=float(np.median(d_post)) if d_post.size else float("nan"),
@@ -2159,7 +2166,7 @@ def phase_offset_boundary(ctx, resume=True):
             "low_basin_persisted": bool(
                 initial_kind == "low"
                 and not remained
-                and summary["end_reason"] == "dead_in_rest_basin"
+                and summary["run_end_reason"] == "dead_in_rest_basin"
             ),
             "completed": True,
             "response_valid": True,

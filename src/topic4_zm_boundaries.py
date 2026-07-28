@@ -521,3 +521,242 @@ def hysteresis_summary(
         "minimum_normalized_separation": HYSTERESIS_MIN_NORMALIZED_SEPARATION,
         "boundary_version": BOUNDARY_VERSION,
     }
+
+
+def dynamic_offset_summary(
+    rows,
+    *,
+    required_seeds=(1, 3, 4),
+    required_replicates=(
+        "noise_replay",
+        "noise_resample_1",
+        "noise_resample_2",
+    ),
+):
+    """Summarise whether the *actual* dynamic Z/M flow reaches the rest basin.
+
+    Replicates are not treated as independent network seeds.  The locked
+    three-replicate set must be complete in every primary seed, and a positive
+    result needs support in at least two seeds as well as a pooled posterior
+    median above 0.8.  ``remained_carrier=False`` is deliberately insufficient:
+    runaway and fragmented rest returns are not safe offset.
+    """
+
+    required_seeds = tuple(int(seed) for seed in required_seeds)
+    required_replicates = tuple(str(rep) for rep in required_replicates)
+    expected = {
+        (seed, replicate)
+        for seed in required_seeds
+        for replicate in required_replicates
+    }
+    keyed = {}
+    reasons = []
+    for row in rows:
+        try:
+            key = (int(row["seed"]), str(row["replicate"]))
+        except (KeyError, TypeError, ValueError):
+            reasons.append("dynamic_row_missing_seed_or_replicate")
+            continue
+        if key in keyed:
+            reasons.append(f"duplicate_dynamic_cell:{key[0]}:{key[1]}")
+        keyed[key] = row
+    extra = sorted(set(keyed) - expected)
+    missing = sorted(expected - set(keyed))
+    if extra:
+        reasons.append(f"unexpected_dynamic_cells:{extra}")
+    if missing:
+        reasons.append(f"missing_dynamic_cells:{missing}")
+
+    per_seed = {}
+    pooled_outcomes = []
+    for seed in required_seeds:
+        seed_rows = [
+            keyed[(seed, replicate)]
+            for replicate in required_replicates
+            if (seed, replicate) in keyed
+        ]
+        invalid = [
+            row
+            for row in seed_rows
+            if not row.get("completed") or not row.get("response_valid")
+        ]
+        if invalid:
+            reasons.append(f"invalid_dynamic_rows:seed{seed}")
+        outcomes = [
+            bool(row.get("end_reason") == "dead_in_rest_basin")
+            for row in seed_rows
+            if row.get("completed") and row.get("response_valid")
+        ]
+        posterior = None
+        if outcomes:
+            # Local import avoids a module-level dependency cycle.
+            from src.topic4_zm_minimal_carrier import jeffreys_posterior
+
+            posterior = jeffreys_posterior(sum(outcomes), len(outcomes))
+            pooled_outcomes.extend(outcomes)
+        per_seed[str(seed)] = {
+            "k": int(sum(outcomes)),
+            "n": int(len(outcomes)),
+            "posterior": posterior,
+            "supports_offset": bool(
+                len(outcomes) == len(required_replicates)
+                and posterior is not None
+                and posterior["median"] > 0.5
+            ),
+            "end_reasons": [
+                row.get("end_reason")
+                for row in seed_rows
+                if row.get("completed") and row.get("response_valid")
+            ],
+        }
+
+    coverage_complete = bool(not reasons and set(keyed) == expected)
+    pooled = None
+    if pooled_outcomes:
+        from src.topic4_zm_minimal_carrier import jeffreys_posterior
+
+        pooled = jeffreys_posterior(
+            sum(pooled_outcomes), len(pooled_outcomes)
+        )
+    supporting_seeds = [
+        int(seed)
+        for seed, summary in per_seed.items()
+        if summary["supports_offset"]
+    ]
+    reached = bool(
+        coverage_complete
+        and pooled is not None
+        and pooled["median"] > 0.8
+        and len(supporting_seeds) >= 2
+    )
+    all_runaway = bool(
+        coverage_complete
+        and keyed
+        and all(
+            row.get("end_reason") == "runaway"
+            for row in keyed.values()
+        )
+    )
+    return {
+        "coverage_complete": coverage_complete,
+        "coverage_reasons": reasons,
+        "required_seeds": list(required_seeds),
+        "required_replicates": list(required_replicates),
+        "n_rows": len(keyed),
+        "per_seed": per_seed,
+        "supporting_seeds": supporting_seeds,
+        "posterior_offset_reached": pooled,
+        "reached": reached,
+        "all_runaway": all_runaway,
+        "definition": (
+            "dead_in_rest_basin under dynamic Z+M with the S_G family frozen"
+        ),
+    }
+
+
+def adjudicate_offset_surface(
+    family_results,
+    dynamic_summary,
+    *,
+    contract_ok,
+):
+    """Apply the Phase-2B outcome vocabulary without a catch-all positive.
+
+    Nonmonotonic, bootstrap-indeterminate, incomplete, or provenance-invalid
+    evidence remains ``no_evidence``.  A static M+Z-recovery boundary that the
+    actual dynamic flow misses is retained as a diagnostic only; it cannot
+    authorize calibration, Phase 3, or a lifecycle claim.
+    """
+
+    if not contract_ok:
+        return {
+            "verdict": "no_evidence",
+            "diagnostic_status": "offset_contract_incomplete",
+            "reason_code": "manifest_or_coverage_contract_failed",
+        }
+    required = ("M_alone", "M_SG", "M_Z_recovery")
+    if any(name not in family_results for name in required):
+        return {
+            "verdict": "no_evidence",
+            "diagnostic_status": "offset_family_missing",
+            "reason_code": "required_family_missing",
+        }
+    if not dynamic_summary.get("coverage_complete"):
+        return {
+            "verdict": "no_evidence",
+            "diagnostic_status": "dynamic_ZM_incomplete",
+            "reason_code": "dynamic_ZM_coverage_failed",
+        }
+
+    if family_results["M_alone"].get(
+        "boundary_reached_by_actual_direction"
+    ):
+        return {
+            "verdict": "M_sufficient_and_reached",
+            "diagnostic_status": "M_boundary_reached",
+            "reason_code": "registered_boundary_reached",
+        }
+    if family_results["M_SG"].get(
+        "boundary_reached_by_actual_direction"
+    ):
+        return {
+            "verdict": "M_SG_joint_offset_reached",
+            "diagnostic_status": "M_SG_boundary_reached",
+            "reason_code": "registered_boundary_reached",
+        }
+    mz_reached = family_results["M_Z_recovery"].get(
+        "boundary_reached_by_actual_direction"
+    )
+    if mz_reached and dynamic_summary.get("reached"):
+        return {
+            "verdict": "M_Z_recovery_offset_reached",
+            "diagnostic_status": "M_Z_recovery_boundary_dynamically_reached",
+            "reason_code": "registered_boundary_reached",
+        }
+    if any(
+        result.get("boundary_in_locked_extension")
+        for result in family_results.values()
+    ):
+        return {
+            "verdict": "M_boundary_near_but_unreached",
+            "diagnostic_status": "boundary_in_locked_extension",
+            "reason_code": "registered_near_boundary",
+        }
+    if mz_reached and not dynamic_summary.get("reached"):
+        return {
+            "verdict": "no_evidence",
+            "diagnostic_status": (
+                "M_Z_recovery_boundary_exists_but_dynamically_unreached"
+            ),
+            "reason_code": "static_boundary_not_reached_by_dynamic_flow",
+        }
+
+    statuses = {
+        name: (family_results[name].get("boundary") or {}).get("status")
+        for name in required
+    }
+    if dynamic_summary.get("all_runaway"):
+        if statuses["M_Z_recovery"] == "nonmonotonic":
+            diagnostic = (
+                "static_M_Z_recovery_curve_nonmonotonic_"
+                "dynamic_ZM_all_runaway"
+            )
+        else:
+            diagnostic = "dynamic_ZM_all_runaway"
+    else:
+        diagnostic = "offset_surface_unresolved"
+    ambiguous = {
+        name: status
+        for name, status in statuses.items()
+        if status in {None, "nonmonotonic", "bootstrap_indeterminate"}
+    }
+    return {
+        "verdict": "no_evidence",
+        "diagnostic_status": diagnostic,
+        "reason_code": (
+            "ambiguous_static_surface"
+            if ambiguous
+            else "no_preregistered_negative_predicate"
+        ),
+        "ambiguous_family_statuses": ambiguous,
+    }

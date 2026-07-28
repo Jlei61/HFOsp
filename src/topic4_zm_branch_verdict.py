@@ -365,6 +365,13 @@ def apply_offset_status(result, offset_summary):
     offset_verdict = offset_summary.get("verdict")
     if not offset_verdict or offset_verdict == "no_evidence":
         out["layers"]["offset"] = "existing_coordinate_offset_unresolved"
+        diagnostic = offset_summary.get("diagnostic_status")
+        if diagnostic:
+            out["layers"]["offset_diagnostic"] = diagnostic
+        out["reason"] = (
+            "the existing-coordinate offset audit remains fail-closed; "
+            "no calibration, Phase-3, or lifecycle branch is authorized"
+        )
         return out
 
     out["layers"]["offset"] = offset_verdict

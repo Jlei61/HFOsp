@@ -274,6 +274,26 @@ def test_offset_routing_static_unreached_boundary_fails_closed():
     assert "no calibration" in routed["reason"]
 
 
+def test_offset_no_evidence_keeps_diagnostic_but_authorizes_no_branch():
+    routed = BV.apply_offset_status(
+        _carrier_result_for_offset(),
+        {
+            "verdict": "no_evidence",
+            "n_complete_seeds": 3,
+            "diagnostic_status": (
+                "static_M_Z_recovery_curve_nonmonotonic_"
+                "dynamic_ZM_all_runaway"
+            ),
+        },
+    )
+    assert routed["verdict"] == "carrier_at_visited_states"
+    assert routed["layers"]["offset"] == "existing_coordinate_offset_unresolved"
+    assert routed["layers"]["offset_diagnostic"].endswith(
+        "dynamic_ZM_all_runaway"
+    )
+    assert "Phase-3" in routed["reason"]
+
+
 def test_coverage_report_names_what_was_not_run():
     rows = _rows([1], {"freeze_all": False}, bins=("bounded_mid",), phases=("peak",))
     cov = BV.coverage_report(_cells(rows), dict(seeds=[1, 3, 4], bins=list(BINS),

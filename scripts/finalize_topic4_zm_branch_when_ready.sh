@@ -18,6 +18,38 @@ out="results/topic4_sef_hfo/zm_branch_decision"
 log="$out/logs/finalize_when_ready.log"
 mkdir -p "$(dirname "$log")"
 
+# These tests cover the shard writers/coordinators added after the adjudicator's
+# original Phase-0 gate list.  Boundary/analyzer tests are discovered at the
+# moment the finalizer reaches adjudication, so a newly added analyzer test is
+# included without another stale hard-coded list.
+GATE_TESTS=(
+    tests/test_topic4_zm_branch_runner_diagnostics.py
+    tests/test_topic4_zm_entry_shards.py
+    tests/test_topic4_zm_entry_shard_coordinator.py
+    tests/test_topic4_zm_offset_shards.py
+    tests/test_topic4_zm_offset_shard_coordinator.py
+)
+
+append_gate_test_glob() {
+    local pattern="$1"
+    local path
+    while IFS= read -r path; do
+        GATE_TESTS+=("$path")
+    done < <(compgen -G "$pattern" || true)
+}
+
+run_fresh_gate_tests() {
+    append_gate_test_glob "tests/test_topic4_zm_*boundar*.py"
+    append_gate_test_glob "tests/test_topic4_zm_*analy*.py"
+    echo "[finalizer] $(date -Is) fresh shard/analyzer gates: ${GATE_TESTS[*]}" \
+        >>"$log"
+    if ! python -m pytest -q "${GATE_TESTS[@]}" >>"$log" 2>&1; then
+        echo "[finalizer] $(date -Is) P0: fresh shard/analyzer gates failed" \
+            >>"$log"
+        return 5
+    fi
+}
+
 json_true() {
     local path="$1"
     local field="$2"
@@ -119,6 +151,11 @@ python scripts/analyze_topic4_zm_entry_boundary.py >>"$log" 2>&1
 wait_phase offset_boundary boundaries/offset offset_probes.json complete
 python scripts/analyze_topic4_zm_offset_boundary.py >>"$log" 2>&1
 
-python scripts/adjudicate_topic4_zm_branch_decision.py >>"$log" 2>&1
+run_fresh_gate_tests
+python scripts/adjudicate_topic4_zm_branch_decision.py --verify-gates >>"$log" 2>&1
+if ! json_true "$out/phase0/gate_evidence.json" passed; then
+    echo "[finalizer] $(date -Is) P0: adjudicator fresh gates failed" >>"$log"
+    exit 5
+fi
 python scripts/plot_topic4_zm_branch_decision.py >>"$log" 2>&1
 echo "[finalizer] $(date -Is) complete" >>"$log"

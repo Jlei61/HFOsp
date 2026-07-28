@@ -4,6 +4,7 @@ import importlib.util
 import json
 import os
 
+import pytest
 
 _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -60,6 +61,43 @@ def test_offset_duplicate_comparison_ignores_runtime_only_fields():
     assert not MERGE._same_scientific_row(
         base, {**other, "remained_carrier": False}
     )
+
+
+def test_force_rerun_bypasses_complete_part_and_canonical_reuse(
+    tmp_path, monkeypatch
+):
+    part = tmp_path / "cell.json"
+    part.write_text(
+        json.dumps(
+            {
+                "complete": True,
+                "boundary_version": CELL.R.BD.BOUNDARY_VERSION,
+                "row": {
+                    "key": "M_alone|lambda=0|active|noise_replay",
+                },
+            }
+        )
+    )
+    monkeypatch.setattr(CELL, "_part_path", lambda *args: str(part))
+    monkeypatch.setattr(
+        CELL,
+        "_canonical_row",
+        lambda *args: pytest.fail("force rerun queried canonical cache"),
+    )
+
+    def _recompute(*args, **kwargs):
+        raise RuntimeError("recompute reached")
+
+    monkeypatch.setattr(CELL.R, "build_context", _recompute)
+    with pytest.raises(RuntimeError, match="recompute reached"):
+        CELL.run_cell(
+            1,
+            "M_alone",
+            0.0,
+            "active",
+            "noise_replay",
+            force_rerun=True,
+        )
 
 
 def test_offset_merger_can_close_unbracketed_all_offset_base(tmp_path, monkeypatch):

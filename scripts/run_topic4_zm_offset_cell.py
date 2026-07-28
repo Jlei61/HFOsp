@@ -107,6 +107,8 @@ def run_cell(
     lam: float | None,
     initial_kind: str,
     replicate: str,
+    *,
+    force_rerun: bool = False,
 ):
     if family not in {*R.OFFSET_FAMILIES, "dynamic_ZM"}:
         raise SystemExit(f"unknown locked family {family!r}")
@@ -134,7 +136,7 @@ def run_cell(
             raise SystemExit("initial kind must be active or low")
         key = f"{family}|lambda={lam:g}|{initial_kind}|{replicate}"
     path = _part_path(seed, family, lam, initial_kind, replicate)
-    if os.path.exists(path):
+    if os.path.exists(path) and not force_rerun:
         old = json.load(open(path))
         if (
             old.get("complete") is True
@@ -143,7 +145,7 @@ def run_cell(
         ):
             print(f"[offset-cell] already complete -> {path}", flush=True)
             return old
-    existing = _canonical_row(seed, key)
+    existing = None if force_rerun else _canonical_row(seed, key)
     if (
         existing is not None
         and existing.get("completed") is True
@@ -266,7 +268,7 @@ def run_cell(
                     "low_basin_persisted": bool(
                         initial_kind == "low"
                         and not remained
-                        and summary["end_reason"] == "dead_in_rest_basin"
+                        and summary["run_end_reason"] == "dead_in_rest_basin"
                     )
                 }
                 if family != "dynamic_ZM"
@@ -308,12 +310,25 @@ def main():
     parser.add_argument("--lambda", dest="lam", type=float)
     parser.add_argument("--initial-kind", default="active", choices=("active", "low"))
     parser.add_argument("--replicate", default=R.OFFSET_BASE_REPLICATE)
+    parser.add_argument(
+        "--force-rerun",
+        action="store_true",
+        help=(
+            "recompute this exact cell even when a complete part/canonical row "
+            "exists; used only for provenance-logged bug repair"
+        ),
+    )
     parser.add_argument("--confirm-run", action="store_true")
     args = parser.parse_args()
     if not args.confirm_run:
         raise SystemExit("refusing N=40000 offset cell without --confirm-run")
     run_cell(
-        args.seed, args.family, args.lam, args.initial_kind, args.replicate
+        args.seed,
+        args.family,
+        args.lam,
+        args.initial_kind,
+        args.replicate,
+        force_rerun=args.force_rerun,
     )
 
 
