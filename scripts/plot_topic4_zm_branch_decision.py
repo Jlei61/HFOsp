@@ -800,6 +800,16 @@ def fig_offset_boundary():
     fig, axes = plt.subplots(1, 3, figsize=(14.0, 4.0))
     colors = {"M_alone": "#D1495B", "M_SG": "#00798C",
               "M_Z_recovery": "#7B5AA6"}
+    line_styles = {
+        "M_alone": {"ls": "-", "marker": "o", "mfc": "white"},
+        "M_SG": {"ls": "--", "marker": "s", "mfc": "white"},
+        "M_Z_recovery": {"ls": "-", "marker": "^", "mfc": "#7B5AA6"},
+    }
+    annotation_offsets = {
+        "M_alone": (-7, 9),
+        "M_SG": (7, -13),
+        "M_Z_recovery": (0, 18),
+    }
 
     ax = axes[0]
     for family, result in families.items():
@@ -808,12 +818,21 @@ def fig_offset_boundary():
             continue
         q = np.asarray([row["q"] for row in curve], float)
         p = np.asarray([row["posterior_median"] for row in curve], float)
-        ax.plot(q, p, marker="o", color=colors[family], label=family)
+        style = line_styles[family]
+        ax.plot(
+            q,
+            p,
+            ls=style["ls"],
+            marker=style["marker"],
+            markerfacecolor=style["mfc"],
+            color=colors[family],
+            label=family,
+        )
         for row in curve:
             ax.annotate(
                 f"{int(row['k'])}/{int(row['n'])}",
                 (float(row["q"]), float(row["posterior_median"])),
-                xytext=(0, 6),
+                xytext=annotation_offsets[family],
                 textcoords="offset points",
                 ha="center",
                 fontsize=6,
@@ -830,13 +849,15 @@ def fig_offset_boundary():
            xlabel="existing-coordinate λ", ylabel="posterior P(remain carrier)")
     if summary.get("reason_code") == "ambiguous_static_surface":
         ax.text(
-            0.01,
-            0.02,
-            "adaptive n differs across λ; nonmonotonic curve is not a "
-            "resolved bifurcation",
+            0.03,
+            0.52,
+            "M+Z recovery: nonmonotonic\n"
+            "q½ unavailable; valid bootstrap = 0",
             transform=ax.transAxes,
             fontsize=6.5,
             color="#7B5AA6",
+            bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.88,
+                  "pad": 1.5},
         )
 
     ax = axes[1]
@@ -847,6 +868,9 @@ def fig_offset_boundary():
     ]
     ax.bar(np.arange(len(names)), values,
            color=[colors[name] for name in names])
+    for i, value in enumerate(values):
+        ax.text(i, max(float(value), 0.02), f"{float(value):.0f}",
+                ha="center", va="bottom", fontsize=7, color="#555")
     ax.set_xticks(np.arange(len(names)),
                   [name.replace("_", "\n") for name in names])
     ax.set_ylim(0, 1)
@@ -1103,7 +1127,7 @@ def fig_phase_status(made):
         "not run: carrier-found stop rule": "#E3E5E8",
         "conditional / not authorized": "#E3E5E8",
     }
-    fig, ax = plt.subplots(figsize=(7.5, 4.4))
+    fig, ax = plt.subplots(figsize=(7.5, 4.8))
     y = np.arange(len(phases))
     ax.barh(y, [1] * len(phases), color=[colors[status] for _, status in phases])
     for i, (name, status) in enumerate(phases):
@@ -1127,7 +1151,16 @@ def fig_phase_status(made):
     ax.spines[:].set_visible(False)
     ax.set_title(f"phase completion — verdict: {v.get('verdict', 'not adjudicated')}",
                  fontsize=10, loc="left", fontweight="bold")
-    fig.tight_layout()
+    fig.text(
+        0.5,
+        0.015,
+        "confirmed object: tonic source-space carrier  |  "
+        "observation blocked  |  lifecycle not established",
+        ha="center",
+        fontsize=7.2,
+        color="#555",
+    )
+    fig.tight_layout(rect=(0, 0.045, 1, 1))
     path = os.path.join(FIG, "phase_completion_status.png")
     fig.savefig(path, dpi=150)
     plt.close(fig)
@@ -1142,32 +1175,36 @@ FIGURE_NOTES = {
     ),
     "anchor_trajectory_bins.png": (
         "展示三个 primary seed 的 Z/M+S_G 自然轨迹，以及被选中的 slow-state bin 和"
-        " fast-phase snapshot。纵轴使用对数率，便于同时看到间期小事件和 bounded 段。",
-        "snapshot 必须来自自然轨迹；比较 early/mid/late 与 trough/rising/peak。"
+        " fast-phase snapshot。三个 seed 都出现随 z 耗竭而加密的间歇事件，为 frozen-state"
+        " 测试提供自然访问状态。",
+        "这是 fork 来源，不证明自然轨迹已经进入并退出有界 ictal state。"
     ),
     "carrier_subsystem_matrix.png": (
-        "展示已完成 fork cell 的 Jeffreys posterior carrier probability 与失败方式。"
-        "空白是未计算，?? 是 posterior/replica 尚未闭合；不能读成阴性。",
-        "只有同一 arm 在相邻 slow bins、两个 fast phases、至少两个 seeds 的兼容阳性"
-        "才能形成 carrier window。"
+        "展示 completed fork cell 的 Jeffreys carrier posterior 和失败类型；空白表示"
+        "未运行。freeze_all 在相邻 slow bins、多个 fast phases 和多个 seed 上形成兼容"
+        " carrier window，说明冻结慢状态后 fast network 可维持高活动支。",
+        "这是 visited frozen states 上的 source-space carrier，不证明动态 Z/M 会自然"
+        "到达或维持它。"
     ),
     "carrier_continuation_dynamics.png": (
-        "展示代表性 continuation 的全场率与到间期 basin 的距离。灰区是 burn-in，"
-        "虚线是 rest-distance threshold。",
-        "区分持续高活动支、返回间期、relaxation train 与 runaway；平坦高率支本身"
-        "不等于已经复现 ictal oscillation。"
+        "代表性 freeze_all continuation 在 burn-in 后维持约 151 Hz、CV 约 0.001 的"
+        "高率状态，并持续远离间期 rest basin。该结果确认了有界、持续的 tonic carrier"
+        " branch。",
+        "宏观率近乎平坦，不能称为 ictal oscillation、bursting orbit 或 limit cycle。"
     ),
     "native_confirmation_spatiotemporal_morphology.png": (
-        "把原生 dt/2 与 20 秒 confirmation 的 population rate、轴向时空图和多触点"
-        "虚拟电极读数并列。只有实际完成并保存完整 trace 的 confirmation 才会出现。",
-        "即使 source-space stationarity 通过，也要检查空间范围、传播/相位结构和触点"
-        "能量；全场 tonic fixed point 不能表述成有界 ictal oscillation。"
+        "并列展示 seed1/3 的原生 dt/2 8 秒与标准 dt 20 秒 confirmation，包括 population"
+        " rate、轴向 kymograph 和多触点 readout。长时轨迹保持约 136–160 Hz，宏观 source"
+        " rate 与空间分布近乎静止。",
+        "确认的是持续 tonic source-space carrier，不是传播性 ictal pattern；真实"
+        " observation reference 仍被阻断。"
     ),
     "fine_source_rhythm_and_phase_map.png": (
-        "展示 confirmation 通过后，从同一自然 snapshot 得到的 2 ms E/I source-rate field。"
-        "左图是全局 E/I，中央和右侧分别是主频局部振幅与相位。",
-        "判断高频成分是全局同步、局部相位错开还是不规则活动；该图只负责 operator 路由，"
-        "不等于 observation-space 或 ictal lifecycle 验收。"
+        "用细时间分辨率检查同一 carrier 的 E/I source rate、局部主频振幅和相位。seed1/3"
+        " 是 asynchronous/irregular candidate，seed4 是 phase-staggered periodic"
+        " candidate，跨 seed 分类不一致。",
+        "不能从单 seed 相位图外推统一 periodic attractor；class disagreement 使 modal"
+        " audit 按合同跳过。"
     ),
     "slow_coordinate_effective_rank.png": (
         "展示真实 early-to-late Z、M、S_G 场方向的中心配对覆盖。当前 M 方向在三个"
@@ -1209,7 +1246,7 @@ FIGURE_NOTES = {
     "phase_completion_status.png": (
         "展示 Rev3.1 各阶段完成度、阻断项和当前 fail-closed verdict。carrier window "
         "已在 source space 确认，但 observation、entry、offset 与 lifecycle 分层显示。",
-        "确认对象是 frozen-fast source-space carrier；offset unresolved，Phase 3 与"
+        "确认对象是 frozen-fast source-space carrier；offset no_evidence，Phase 3 与"
         " actuator 均未授权。"
     ),
 }
