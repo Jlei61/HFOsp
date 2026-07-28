@@ -1948,8 +1948,16 @@ def cmd_b2_validate(args):
             raise SystemExit(f"resource gate PAUSE: {gate}")
         bar = float(load_artifact("pump_event_bar")["event_bar"])
         bE, bI = cal["best"]["I_bias_E"], cal["best"]["I_bias_I"]
-        sE = cal["best"]["r_E"] / R_E_TARGET
-        sI = cal["best"]["r_I"] / R_I_TARGET
+        # Reproduce the SELECTED PROBE's condition exactly. The closure gate asks whether the
+        # calibrated point is stable; introducing a different pre-equilibrium scaling here would
+        # test a different condition, and with tau_Na = 54.4 s the initial ion state matters over
+        # an 11 s window.
+        sel_probe = min(cal["probes"], key=lambda p: abs(p["job"]["I_bias_E"] - bE)
+                        + abs(p["job"]["I_bias_I"] - bI))
+        sE = float(sel_probe["job"]["rate_scale_E"])
+        sI = float(sel_probe["job"]["rate_scale_I"])
+        print(f"[b2-validate] bias=({bE:+.4f},{bI:+.4f}) reproducing probe "
+              f"'{sel_probe['job']['tag']}' scales ({sE:.4f},{sI:.4f})", flush=True)
 
         def job(q, tag):
             return dict(I_bias_E=bE, I_bias_I=bI, q_ion=q, conn_seed=CONN_SEED_DEV,
@@ -1961,6 +1969,31 @@ def cmd_b2_validate(args):
         r0p = first["pooled"]["mean_rate_hz"]
         # EXACTLY ONE closure iteration, then freeze (spec §7.1)
         q1 = ION.q_ion_from_fprime(float(cal["f_prime"]), r0=r0p)
+        print(f"[b2-validate] r0'={r0p:.4f} Hz -> q_ion {q0:.5f} -> {q1:.5f}", flush=True)
+        # q_ion scales as 1/r0', so a suppressed r0' AMPLIFIES it and can leave the region where a
+        # bounded Na steady state exists at all. Check before spending the run, and report it as a
+        # closure failure with the reason rather than crashing in the initializer.
+        rEf, rIf, voxf, _ = _load_40k_rate_field()
+        try:
+            ION.heterogeneous_steady_state(rEf * sE, rIf * sI, voxf[:32000], voxf[32000:],
+                                           n_grid=N_GRID_40K, q_ion=q1, dx_mm=DX_MM_40K,
+                                           max_iter=2)
+        except ValueError as exc:
+            payload = dict(
+                generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+                frozen=dict(I_bias_E=bE, I_bias_I=bI, f_prime=cal["f_prime"], q_ion_final=None),
+                closure=dict(r0_locked=ION.R0_HZ, r0_measured=r0p, q_ion_before=q0,
+                             q_ion_after=q1, passed=False, status="UNRESOLVED_CALIBRATION",
+                             infeasible=str(exc),
+                             reason=("the one closure iteration recomputes q_ion as J_Na_0*f'/r0', "
+                                     "so a suppressed r0' amplifies it; at this r0' the amplified "
+                                     "q_ion admits NO bounded Na steady state for a large fraction "
+                                     "of cells. That is a limit of the closure FORMULA at a "
+                                     "suppressed working point, not a mechanism result.")),
+                runs=[first])
+            _write_json(os.path.join(OUT, "b2_closure_iteration.json"), payload)
+            _write_json(os.path.join(OUT, "UNRESOLVED_CALIBRATION.json"), payload)
+            raise SystemExit(payload["closure"]["reason"])
         second = trajectory_task(job(q1, "post_closure"))
         r0pp = second["pooled"]["mean_rate_hz"]
         rel = abs(r0pp - ION.R0_HZ) / ION.R0_HZ
