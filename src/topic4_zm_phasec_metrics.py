@@ -695,14 +695,29 @@ def phasec_bootstrap_units(
     )
     rho_block_windows = np.empty((nb, ceiling_starts.size), np.float32)
     ceiling_hz = 0.8 * refractory_ceiling_hz(tau_ref_ms, dt)
+    n_active_core = int(np.sum(active_core))
     for b in range(nb):
         for wi, start in enumerate(ceiling_starts):
-            rates = (
-                block[b, start:start + ceiling_bs, active_core].sum(
-                    axis=0, dtype=np.int32
+            # Index the time axis before applying the boolean neuron mask.
+            # Combining an integer, a slice, and an advanced boolean index in
+            # one expression moves the advanced axis to the front, silently
+            # producing (neuron, time) rather than (time, neuron).
+            window = block[b, start:start + ceiling_bs][:, active_core]
+            expected_shape = (ceiling_bs, n_active_core)
+            if window.shape != expected_shape:
+                raise RuntimeError(
+                    "active-core ceiling window has wrong axis order: "
+                    f"expected {expected_shape}, got {window.shape}"
                 )
+            rates = (
+                window.sum(axis=0, dtype=np.int32)
                 / (float(ceiling_window_ms) * 1e-3)
             )
+            if rates.shape != (n_active_core,):
+                raise RuntimeError(
+                    "active-core ceiling rates must be one value per neuron: "
+                    f"expected {(n_active_core,)}, got {rates.shape}"
+                )
             rho_block_windows[b, wi] = float(np.mean(rates >= ceiling_hz))
 
     panel_spikes = x[:, panel]

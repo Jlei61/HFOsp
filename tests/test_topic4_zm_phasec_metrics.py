@@ -149,6 +149,52 @@ def test_fixed_panels_are_activity_independent_and_bootstrap_units_are_compact()
     )
 
 
+def test_bootstrap_ceiling_windows_preserve_time_neuron_axis_and_block_truth():
+    """rho80 is computed per active-core neuron, never per time sample."""
+    steps_per_block = int(round(500.0 / DT))
+    x = np.zeros((2 * steps_per_block, 8), bool)
+    core = np.arange(8) < 4
+
+    # Block 0: every core neuron fires at exactly 80% of the implemented
+    # refractory ceiling (400 Hz), with phases staggered across neurons.
+    near_ceiling_period = int(round(2.5 / DT))
+    for neuron in np.flatnonzero(core):
+        x[neuron % near_ceiling_period:steps_per_block:
+          near_ceiling_period, neuron] = True
+
+    # Block 1: the same core neurons remain active (10 Hz) but are far below
+    # the ceiling.  Thus the root block x six-window truth is exactly 1 then 0.
+    quiet_period = int(round(100.0 / DT))
+    for neuron in np.flatnonzero(core):
+        start = steps_per_block + neuron
+        x[start::quiet_period, neuron] = True
+
+    # Keep surround members non-degenerate and ensure the fixed pair panel
+    # spans core-core, core-surround, and surround-surround strata.
+    for neuron in np.flatnonzero(~core):
+        x[neuron::int(round(25.0 / DT)), neuron] = True
+    positions = np.column_stack([
+        np.arange(8, dtype=float) % 4 + 0.5,
+        np.arange(8, dtype=float) // 4 + 0.5,
+    ])
+    units = phasec_bootstrap_units(
+        x,
+        DT,
+        TAU_REF,
+        core_mask=core,
+        analysis_panel_ids=np.arange(8),
+        pairwise_panel_ids=np.array([0, 1, 4, 5]),
+        positions=positions,
+        L=4.0,
+        pairwise_n_null=2,
+        n_grid=4,
+    )
+    rho = units["rho80_active_core_by_block_window"]
+    assert rho.shape == (2, 6)
+    assert np.array_equal(rho[0], np.ones(6))
+    assert np.array_equal(rho[1], np.zeros(6))
+
+
 def test_spatial_active_area_uses_rate_grid_not_active_neuron_fraction():
     n_grid = 4
     per_cell = 4
