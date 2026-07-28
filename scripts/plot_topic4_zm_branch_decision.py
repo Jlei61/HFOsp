@@ -809,6 +809,16 @@ def fig_offset_boundary():
         q = np.asarray([row["q"] for row in curve], float)
         p = np.asarray([row["posterior_median"] for row in curve], float)
         ax.plot(q, p, marker="o", color=colors[family], label=family)
+        for row in curve:
+            ax.annotate(
+                f"{int(row['k'])}/{int(row['n'])}",
+                (float(row["q"]), float(row["posterior_median"])),
+                xytext=(0, 6),
+                textcoords="offset points",
+                ha="center",
+                fontsize=6,
+                color=colors[family],
+            )
         q_half = result["boundary"].get("q_half")
         if q_half is not None:
             ax.axvline(q_half, color=colors[family], lw=0.8, alpha=0.7)
@@ -818,6 +828,16 @@ def fig_offset_boundary():
     ax.legend(fontsize=7, frameon=False)
     _style(ax, f"P_remain · {summary['verdict']}",
            xlabel="existing-coordinate λ", ylabel="posterior P(remain carrier)")
+    if summary.get("reason_code") == "ambiguous_static_surface":
+        ax.text(
+            0.01,
+            0.02,
+            "adaptive n differs across λ; nonmonotonic curve is not a "
+            "resolved bifurcation",
+            transform=ax.transAxes,
+            fontsize=6.5,
+            color="#7B5AA6",
+        )
 
     ax = axes[1]
     names = list(families)
@@ -846,6 +866,16 @@ def fig_offset_boundary():
     ax.set_xticks([0], ["dynamic Z+M\nS_G frozen"])
     _style(ax, "actual ODE realization",
            ylabel="Jeffreys P(offset to rest basin)")
+    if dynamic.get("all_runaway"):
+        ax.text(
+            0.5,
+            0.08,
+            f"0/{int(dynamic.get('n_rows', 0))} offset; all runaway",
+            transform=ax.transAxes,
+            ha="center",
+            fontsize=7,
+            color="#D1495B",
+        )
     fig.tight_layout()
     path = os.path.join(FIG, "existing_slow_coordinate_offset.png")
     fig.savefig(path, dpi=150)
@@ -1009,6 +1039,8 @@ def _phase_status_rows():
     neighbourhood_status = (
         "complete" if neighbourhood.get("evidence_complete") is True
         else "exploratory partial" if n_neighbourhood
+        else "not run: carrier-found stop rule"
+        if source_layer == "carrier_window"
         else "not started"
     )
     reference_status = (
@@ -1068,6 +1100,7 @@ def fig_phase_status(made):
         "no evidence: offset surface": "#B0B7C3",
         "skipped: source-class disagreement": "#B0B7C3",
         "not started": "#E3E5E8",
+        "not run: carrier-found stop rule": "#E3E5E8",
         "conditional / not authorized": "#E3E5E8",
     }
     fig, ax = plt.subplots(figsize=(7.5, 4.4))
@@ -1137,10 +1170,10 @@ FIGURE_NOTES = {
         "不等于 observation-space 或 ictal lifecycle 验收。"
     ),
     "slow_coordinate_effective_rank.png": (
-        "展示沿真实 early-to-late Z、M、S_G 场方向做配对中心差分后，标准化响应矩阵的"
-        "奇异值谱、各慢状态的 s2/s1 以及平均静态灵敏度。",
-        "判断这些既有慢变量在 carrier 附近是否只是局部共线；rank-1 不能外推成整个"
-        "慢流形一维。"
+        "展示真实 early-to-late Z、M、S_G 场方向的中心配对覆盖。当前 M 方向在三个"
+        " seed 均缺少满足物理边界的中央位移，因此没有 seed 可进入奇异值谱判决。",
+        "正式结果是 no_evidence_incomplete_central_pairs；这既不是 rank-1，也不是"
+        " rank-2/3 证据。"
     ),
     "trajectory_conditioned_modal_operator.png": (
         "展示按 fine-source carrier 类型选择的 E/I 膜电位有限时传播算子、held-out "
@@ -1151,17 +1184,17 @@ FIGURE_NOTES = {
     ),
     "conditional_z_entry_boundary.png": (
         "展示从 matched pre-entry fast state 出发，沿真实 pre-entry→carrier Z 场方向"
-        "插值时的 P_enter；M 和完整 S_G family 固定在 onset-adjacent 值。阴影为"
-        "Jeffreys/Bootstrap 不确定度。",
-        "只有 P=0.5 被实际采样点包围、bootstrap 稳定且真实 λ=0→1 方向穿越，才能写"
-        "conditional Z-entry boundary；它不是 Z 的全局充分性。"
+        "插值时的 P_enter；M 和完整 S_G family 固定在 onset-adjacent 值。误差条是"
+        "点级 Jeffreys 区间；本轮没有得到有效 boundary bootstrap。",
+        "所有采样点都位于高进入概率侧，P=0.5 未被包围，因此 entry boundary unresolved；"
+        "不能写成 Z 的全局充分性或已定位的 entry bifurcation。"
     ),
     "existing_slow_coordinate_offset.png": (
-        "比较 M、M+S_G 和 M+Z-recovery 三条真实慢场方向上的 P_remain=0.5 "
-        "边界，同时显示 matched-low basin 是否仍存在，以及动态 Z+M、固定 S_G 时"
-        "是否真正退入 rest basin。",
-        "offset 只表示离开 carrier；即使回到 rest basin，也不能自动写成原有间期事件"
-        "恢复，更不能单独构成完整 lifecycle。"
+        "比较 M、M+S_G 和 M+Z-recovery 三条真实慢场方向的 P_remain，并显示"
+        " matched-low basin 与动态 Z+M 实现。点旁 k/n 明示自适应扩增造成的覆盖不等；"
+        "当前正式 offset 结果为 no_evidence，dynamic Z/M 为 9/9 runaway。",
+        "static M+Z 的非单调曲线不能解释成已定位分岔；离开 carrier 也不等于返回原有"
+        "间期事件或建立完整 lifecycle。"
     ),
     "readout_impostor_discrimination.png": (
         "展示合成 broadband carrier、尖锐谐波 pulse train 与全局固定振荡器在"
@@ -1174,8 +1207,10 @@ FIGURE_NOTES = {
         "三种表示必须一致，才能在 Branch T 与 Branch F 之间作决定。"
     ),
     "phase_completion_status.png": (
-        "展示 Rev3.1 各阶段完成度、阻断项和当前 fail-closed verdict。",
-        "区分 complete、in progress、blocked 与 conditional/not authorized。"
+        "展示 Rev3.1 各阶段完成度、阻断项和当前 fail-closed verdict。carrier window "
+        "已在 source space 确认，但 observation、entry、offset 与 lifecycle 分层显示。",
+        "确认对象是 frozen-fast source-space carrier；offset unresolved，Phase 3 与"
+        " actuator 均未授权。"
     ),
 }
 

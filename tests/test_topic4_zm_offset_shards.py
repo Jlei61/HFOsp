@@ -100,6 +100,68 @@ def test_force_rerun_bypasses_complete_part_and_canonical_reuse(
         )
 
 
+def test_provenance_complete_end_reason_repair_supersedes_stale_canonical(
+    tmp_path, monkeypatch
+):
+    monkeypatch.setattr(MERGE.R, "OUT", str(tmp_path))
+    root = tmp_path / "boundaries" / "offset" / "seed1"
+    parts = root / "parts"
+    parts.mkdir(parents=True)
+    key = "M_Z_recovery|lambda=1|low|noise_replay"
+    old = {
+        "key": key,
+        "seed": 1,
+        "family": "M_Z_recovery",
+        "lambda": 1.0,
+        "initial_kind": "low",
+        "replicate": "noise_replay",
+        "bank_sha": "bank",
+        "remained_carrier": False,
+        "low_basin_persisted": False,
+        "completed": True,
+        "response_valid": True,
+        "boundary_version": MERGE.R.BD.BOUNDARY_VERSION,
+        "survived": False,
+        "stationarity_ok": False,
+        "end_reason": "rest_return",
+    }
+    (root / "offset_probes.json").write_text(
+        json.dumps(
+            {
+                "git_sha": "old",
+                "boundary_version": MERGE.R.BD.BOUNDARY_VERSION,
+                "source_state_hashes": {"state": "abc"},
+                "rows": [old],
+            }
+        )
+    )
+    repaired = {
+        **old,
+        "low_basin_persisted": True,
+        "end_reason": "dead_in_rest_basin",
+        "run_end_reason": "dead_in_rest_basin",
+        "classifier_end_reason": "rest_return",
+        "producer_git_sha": "repair-sha",
+    }
+    (parts / "repair.json").write_text(
+        json.dumps(
+            {
+                "complete": True,
+                "git_sha": "repair-sha",
+                "boundary_version": MERGE.R.BD.BOUNDARY_VERSION,
+                "source_state_hashes": {"state": "abc"},
+                "row": repaired,
+            }
+        )
+    )
+
+    out = MERGE.merge_seed(1)
+    merged = next(row for row in out["rows"] if row["key"] == key)
+    assert merged["run_end_reason"] == "dead_in_rest_basin"
+    assert merged["classifier_end_reason"] == "rest_return"
+    assert merged["low_basin_persisted"] is True
+
+
 def test_offset_merger_can_close_unbracketed_all_offset_base(tmp_path, monkeypatch):
     monkeypatch.setattr(MERGE.R, "OUT", str(tmp_path))
     root = tmp_path / "boundaries" / "offset" / "seed1"

@@ -161,6 +161,44 @@ def validate_offset_manifest_contract(manifests, anchors):
     }
 
 
+def summarize_basin_coexistence(active_rows, low_rows):
+    """Match active and low outcomes within the same seed and coordinate.
+
+    Pooling rows into a ``lambda -> outcome`` dictionary silently lets the
+    last seed overwrite the others.  Hysteresis/coexistence is a paired
+    within-seed question, so only locked replay cells with the same
+    ``(seed, lambda)`` may contribute.
+    """
+
+    active = {
+        (int(row["seed"]), float(row["lambda"])): bool(
+            row.get("remained_carrier")
+        )
+        for row in active_rows
+        if row.get("replicate") == BASE_REPLICATE
+    }
+    low = {
+        (int(row["seed"]), float(row["lambda"])): bool(
+            row.get("low_basin_persisted")
+        )
+        for row in low_rows
+        if row.get("replicate") == BASE_REPLICATE
+    }
+    cells = [
+        {"seed": seed, "lambda": level}
+        for seed, level in sorted(set(active) & set(low))
+        if active[(seed, level)] and low[(seed, level)]
+    ]
+    return {
+        "coexistence_cells": cells,
+        "coexistence_levels": sorted(
+            {float(cell["lambda"]) for cell in cells}
+        ),
+        "coexistence_seeds": sorted({int(cell["seed"]) for cell in cells}),
+        "basin_coexistence_observed": bool(cells),
+    }
+
+
 def main():
     paths = sorted(
         glob.glob(os.path.join(OUT, "boundaries", "offset", "seed*", "offset_probes.json"))
@@ -220,21 +258,7 @@ def main():
                 if row.get("family") == family
                 and row.get("initial_kind") == "low"
             ]
-            base_active_by_level = {
-                float(row["lambda"]): bool(row["remained_carrier"])
-                for row in active
-                if row.get("replicate") == "noise_replay"
-            }
-            base_low_by_level = {
-                float(row["lambda"]): bool(row.get("low_basin_persisted"))
-                for row in low
-                if row.get("replicate") == "noise_replay"
-            }
-            coexistence_levels = sorted(
-                level
-                for level in set(base_active_by_level) & set(base_low_by_level)
-                if base_active_by_level[level] and base_low_by_level[level]
-            )
+            coexistence = summarize_basin_coexistence(active, low)
             boundary_has_ci = bool(boundary.get("q_half_ci") is not None)
             q_half_ci = boundary.get("q_half_ci")
             boundary_within_actual_range = bool(
@@ -251,8 +275,7 @@ def main():
                     sum(bool(row.get("low_basin_persisted")) for row in low)
                     / len(low) if low else None
                 ),
-                "coexistence_levels": coexistence_levels,
-                "basin_coexistence_observed": bool(coexistence_levels),
+                **coexistence,
                 "boundary_has_bootstrap_ci": boundary_has_ci,
                 "boundary_within_actual_range": boundary_within_actual_range,
                 "boundary_reached_by_actual_direction": boundary_reached,

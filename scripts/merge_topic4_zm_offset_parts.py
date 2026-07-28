@@ -41,6 +41,24 @@ def _same_scientific_row(left, right):
     return all(left.get(key) == right.get(key) for key in _ROW_IDENTITY_FIELDS)
 
 
+def _is_end_reason_repair_part(part, row):
+    """Allow a provenance-complete rerun to supersede the stale reason fields.
+
+    Before commit 23ab26e1 the classifier's early ``rest_return`` could hide
+    the streaming runner's terminal ``dead_in_rest_basin``.  A repaired part
+    is identifiable without trusting filenames: it carries both raw and
+    classifier reasons, and its row-level producer SHA matches the enclosing
+    part SHA.  Every other conflicting duplicate still aborts the merge.
+    """
+
+    return bool(
+        "run_end_reason" in row
+        and "classifier_end_reason" in row
+        and row.get("producer_git_sha")
+        and row.get("producer_git_sha") == part.get("git_sha")
+    )
+
+
 def _cell(family, lam, initial_kind, replicate):
     return {
         "family": family,
@@ -91,11 +109,16 @@ def merge_seed(seed: int):
         if int(row.get("seed")) != int(seed):
             raise SystemExit(f"seed {seed}: foreign row {row.get('key')}")
         previous = rows.get(row["key"])
-        if previous is not None and not _same_scientific_row(previous, row):
+        is_repair = _is_end_reason_repair_part(part, row)
+        if (
+            previous is not None
+            and not _same_scientific_row(previous, row)
+            and not is_repair
+        ):
             raise SystemExit(
                 f"seed {seed}: conflicting duplicate row {row['key']}"
             )
-        rows[row["key"]] = previous or row
+        rows[row["key"]] = row if is_repair else previous or row
 
     pending = []
     family_brackets = {}

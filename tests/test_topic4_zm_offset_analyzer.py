@@ -135,3 +135,39 @@ def test_phase_execution_status_does_not_list_completed_fail_closed_analyses():
     assert not any("Task 11" in item for item in not_run)
     assert any("Task 9B" in item and "skipped" in item for item in not_run)
     assert any("Task 12" in item and "not authorized" in item for item in not_run)
+
+
+def test_basin_coexistence_is_paired_within_seed_not_overwritten_by_level():
+    active = [
+        {
+            "seed": 1,
+            "lambda": 1.0,
+            "replicate": "noise_replay",
+            "remained_carrier": True,
+        },
+        {
+            "seed": 3,
+            "lambda": 1.0,
+            "replicate": "noise_replay",
+            "remained_carrier": False,
+        },
+    ]
+    low = [
+        {
+            "seed": 1,
+            "lambda": 1.0,
+            "replicate": "noise_replay",
+            "low_basin_persisted": True,
+        },
+        {
+            "seed": 3,
+            "lambda": 1.0,
+            "replicate": "noise_replay",
+            "low_basin_persisted": False,
+        },
+    ]
+    out = A.summarize_basin_coexistence(active, low)
+    assert out["basin_coexistence_observed"]
+    assert out["coexistence_cells"] == [{"seed": 1, "lambda": 1.0}]
+    assert out["coexistence_levels"] == [1.0]
+    assert out["coexistence_seeds"] == [1]

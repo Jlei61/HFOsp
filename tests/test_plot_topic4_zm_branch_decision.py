@@ -57,6 +57,9 @@ def test_phase_status_renders_completed_and_no_evidence_semantics(
     phases, _ = plotter._phase_status_rows()
     statuses = dict(phases)
     assert statuses["1B minimal-subsystem forks"] == "carrier window complete"
+    assert statuses["1C neighbourhood audit"] == (
+        "not run: carrier-found stop rule"
+    )
     assert statuses["1.5A functional rank"] == (
         "no evidence: central-pair boundary"
     )
