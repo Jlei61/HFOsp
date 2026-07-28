@@ -899,6 +899,157 @@ def adjudicate_gate_B(runs, tolerances, *, template_layer):
                                 ion_net_drift_max=GATE_B_ION_NET_DRIFT_MAX))
 
 
+# =====================================================================================
+#  T7.1 -- adjudication repair (user rulings, 2026-07-28).  See
+#  docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-T7_1-lock.md
+# =====================================================================================
+# Ruling 1(a): the relative `5*sigma_rest` term is REMOVED.  sigma_rest is not instrument noise on
+#              this substrate -- it is the K background other real events leave behind -- and
+#              picking a smaller multiplier would only introduce a new arbitrary parameter.  The
+#              absolute floor carries the whole "the membrane must see it" intent.  Background
+#              distribution / matched-background SNR stay as DIAGNOSTICS, never as a hard gate.
+# Ruling 3:    per-sample monotonicity and smoothed-envelope monotonicity are both dropped.  Two
+#              conditions replace them: a clear NET decay from peak to 20 s, and a tail-window
+#              trend that is not persistently rising (transient up-jumps from background events
+#              are allowed by construction, since a slope over the window averages them out).
+# Ruling 4:    the integration ratio is a NON-BLOCKING diagnostic and a B2 risk register entry.
+F_GATES_V2 = dict(
+    measurable_abs_floor_mM=0.15,        # = 1 mV of E_K = 5.6% of V_th
+    safe_ceiling_mM=0.90,                # = 5.4 mV = 30% of V_th from ONE interictal event
+    k_recovery_window_s=3.0,             # 4.6 tau_Ko
+    k_recovery_sigma=1.0,
+    na_window_s=20.0,
+    na_net_decay_min_frac=0.10,          # "clear net decay": at least 10% of the peak is gone
+    na_tail_window_s=5.0,                # the last pre-registered tail window of the 20 s
+    na_tail_slope_t_max=2.0,             # not persistently rising: slope <= 0 or t-stat < 2
+)
+
+# Retained from the small-network contract (ruling 5): the NUMERICAL tests only.  Abolished: using
+# n1000/n4000 dynamic response to choose f', and any future "faithful reproduction" of that
+# small-network T7 -- a fixed E->E in-degree makes small-net dynamics differ from 40k, which
+# re-running cannot fix.
+SMALL_NET_CONTRACT_RETAINED = ("Gate H numerical tests", "occupancy", "empty-voxel fixed point",
+                               "finite-volume budget", "checkpoint/restart",
+                               "initialization residual", "historical failure evidence")
+SMALL_NET_CONTRACT_ABOLISHED = ("dynamic f' selection from n1000/n4000 response",
+                                "future faithful reproduction of the small-network T7")
+
+
+def coupled_working_point_jacobian(f_prime, *, r0=R0_HZ):
+    """2x2 Jacobian of the homogeneous (Na_i, K_o) system at this f''s own interictal working point.
+
+    Ruling 2: the Na reference must be computed on the COUPLED system.  Freezing K_o (as the first
+    audit did) understates the clearance, because an event raises K_o in the participating voxels
+    and I_pump rises with K_o as well as with Na.
+    """
+    q = q_ion_from_fprime(f_prime, r0=r0)
+    Na, Ko = interictal_steady_state(q, r0)
+    h = 1e-6
+    dIp_dNa = float((pump_flux(Na + h, Ko) - pump_flux(Na - h, Ko)) / (2 * h))
+    dIp_dK = float((pump_flux(Na, Ko + h) - pump_flux(Na, Ko - h)) / (2 * h))
+    dIg_dK = float((glia_uptake(Ko + h) - glia_uptake(Ko - h)) / (2 * h))
+    J = np.array([[-3.0 * dIp_dNa, -3.0 * dIp_dK],
+                  [-2.0 * BETA * dIp_dNa, -2.0 * BETA * dIp_dK - EPS - dIg_dK]])
+    return J, Na, Ko
+
+
+def coupled_na_decay_prediction(f_prime, dNa0, dK0, *, t_s=20.0, r0=R0_HZ):
+    """Predicted fraction of an event-induced Na excess cleared in `t_s`, propagating the measured
+    initial (dNa, dK) perturbation through the coupled Jacobian."""
+    from scipy.linalg import expm
+    J, Na, Ko = coupled_working_point_jacobian(f_prime, r0=r0)
+    v = np.array([float(dNa0), float(dK0)])
+    if abs(v[0]) < 1e-15:
+        return float("nan"), J, Na, Ko
+    out = expm(J * float(t_s)) @ v
+    return float(1.0 - out[0] / v[0]), J, Na, Ko
+
+
+def _tail_slope(y, dt_s, window_s):
+    """Least-squares slope of the final `window_s` of a trace, with its t statistic."""
+    n = max(3, int(round(window_s / dt_s)))
+    y = np.asarray(y, float)[-n:]
+    x = np.arange(y.size) * dt_s
+    A = np.vstack([x, np.ones_like(x)]).T
+    coef, res, *_ = np.linalg.lstsq(A, y, rcond=None)
+    slope = float(coef[0])
+    resid = y - A @ coef
+    dof = max(1, y.size - 2)
+    se = float(np.sqrt((resid @ resid) / dof / max(np.sum((x - x.mean()) ** 2), 1e-30)))
+    return slope, se, (slope / se if se > 0 else 0.0)
+
+
+def evaluate_f_prime_gates_v2(m):
+    """T7.1: FOUR hard gates (measurable / safe / K recovery / numerical validity) plus
+    non-blocking diagnostics.  Ruling 1(a), 3 and 4."""
+    g = F_GATES_V2
+    dK = float(m["dK_peak_single_mM"])
+    net = float(m["na_net_decay_frac"])
+    slope, se, tstat = m["na_tail_slope"], m["na_tail_slope_se"], m["na_tail_slope_t"]
+    hard = {
+        "measurable": dict(ok=bool(dK >= g["measurable_abs_floor_mM"]), value=dK,
+                           threshold=g["measurable_abs_floor_mM"],
+                           rule="single-event peak dK_o >= 0.15 mM (absolute floor only; the "
+                                "5*sigma_rest term was removed -- sigma_rest is the background "
+                                "other real events leave, not instrument noise)"),
+        "safe": dict(ok=bool(dK <= g["safe_ceiling_mM"]), value=dK,
+                     threshold=g["safe_ceiling_mM"],
+                     rule="a SINGLE interictal event must not push the membrane 30% of V_th"),
+        "recovery_K": dict(ok=bool(m["k_returns_within_1sigma_3s"]),
+                           value=float(m["k_residual_after_3s_in_sigma"]),
+                           threshold=g["k_recovery_sigma"],
+                           rule="back inside 1 sigma of this voxel's resting mean within 3 s"),
+        "numerical_validity": dict(ok=bool(m["numerically_valid"]),
+                                   detail=m.get("numerical_detail", ""),
+                                   rule="all concentrations positive and finite, no guard-band "
+                                        "collision anywhere in the sensor run or the replays"),
+    }
+    na_ok = bool(net >= g["na_net_decay_min_frac"] and (slope <= 0.0 or tstat < g["na_tail_slope_t_max"]))
+    diagnostics = {
+        "na_recovery": dict(
+            ok=na_ok, net_decay_frac=net, net_decay_min=g["na_net_decay_min_frac"],
+            tail_window_s=g["na_tail_window_s"], tail_slope=slope, tail_slope_se=se,
+            tail_slope_t=tstat, tail_not_persistently_rising=bool(slope <= 0.0 or tstat < 2.0),
+            coupled_prediction=m.get("na_decay_pred_coupled"),
+            k_clamped_measured=m.get("na_decay_frac_k_clamped"),
+            rule="clear net decay from peak to 20 s AND a tail-window trend that is not "
+                 "persistently rising; per-sample and smoothed-envelope monotonicity are both "
+                 "dropped (ruling 3). Magnitude vs the coupled-Jacobian prediction is reported as "
+                 "a diagnostic, not gated."),
+        "integration": dict(
+            value=float(m["integration_ratio_5th_over_1st"]),
+            linear_prediction_at_workpoint=m.get("integration_linear_at_workpoint"),
+            supralinear=bool(float(m["integration_ratio_5th_over_1st"])
+                             > float(m.get("integration_linear_at_workpoint") or np.inf)),
+            blocking=False,
+            rule="NON-BLOCKING (ruling 4). Measured open loop, so it characterises the clearance "
+                 "side only and may not gate B2. It is registered as a B2 pre-condition RISK: B2 "
+                 "must report whether closed-loop K -> E_K -> firing overcomes this "
+                 "load-dependent clearance."),
+        "background": dict(sigma_rest_mM=m.get("sigma_rest_K_mM"),
+                           matched_background_snr=m.get("matched_background_snr"),
+                           blocking=False,
+                           rule="reported for context only (ruling 1a)"),
+    }
+    return dict(admissible=all(v["ok"] for v in hard.values()), gates=hard,
+                diagnostics=diagnostics, measured=m)
+
+
+def select_f_prime_v2(rows):
+    """T7.1 selection.  The 40k sensor replay is now the REGISTERED scale-diagnostic protocol
+    (ruling 5), so it may produce a verdict -- but a PROVISIONAL candidate, not a canonical
+    mechanism decision."""
+    adm = [r for r in rows if r["admissible"]]
+    if not adm:
+        return dict(status="NO_ADMISSIBLE_SCALE", selected=None, rows=rows,
+                    reason="no candidate passed all four hard gates")
+    best = min(adm, key=lambda r: (abs(r["f_prime"] - F_PRIME_PRIMARY), r["f_prime"]))
+    return dict(status="PROVISIONAL_CANDIDATE", selected=best["f_prime"],
+                n_admissible=len(adm), rows=rows, tie_break="closest to f' = 1.0",
+                semantics=("PROVISIONAL: chosen on an open-loop scale diagnostic. It is the value "
+                           "B2 runs with; it is NOT a claim that the closed loop behaves well."))
+
+
 def withhold_canonical_verdict(sel, *, protocol_deviation, blocking_gates_are_open_loop):
     """A result obtained on a DIFFERENT experimental object may not inherit the canonical verdict
     of the contract it replaced (CLAUDE.md §5: the pre-registered tier is fixed at planning time).

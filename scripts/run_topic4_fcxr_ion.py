@@ -1049,7 +1049,7 @@ def _blk(ms):
 
 
 def _t7_replay(io_factory, cap, kernel, bg, n_bg_blocks, *, hot, participants, with_event=True,
-               settle_blocks=4000):
+               settle_blocks=4000, clamp_K=None):
     """Offline sensor replay: settle on background, optionally inject ONE recorded event kernel,
     then continue on background only.  Returns the K trace at `hot` and the median Na of the
     event's participants, sampled every block-group.
@@ -1061,24 +1061,36 @@ def _t7_replay(io_factory, cap, kernel, bg, n_bg_blocks, *, hot, participants, w
     """
     io = io_factory()
     nb = len(bg)
+
+    def _step(block):
+        io.replay_block(block)
+        if clamp_K is not None:                 # ruling 2: hold K at THIS f''s working point,
+            io.K_o_grid[:] = clamp_K            # removing the event-induced K excursion only
+            io._refresh_membrane_state()        # (the baseline working point is unchanged)
+
     for i in range(settle_blocks):
-        io.replay_block(cap[bg[i % nb]])
+        _step(cap[bg[i % nb]])
     K0 = float(io.K_o_grid.ravel()[hot])
     Na0 = io.Na_i_all[participants].copy()
-    Kt, Nat = [], []
-    if with_event:
-        for c in kernel:
-            io.replay_block(c)
-            Kt.append(float(io.K_o_grid.ravel()[hot]))
-            Nat.append(float(np.median(io.Na_i_all[participants] - Na0)))
-    for i in range(n_bg_blocks):
-        io.replay_block(cap[bg[(settle_blocks + i) % nb]])
+    Kt, Nat, Pt = [], [], []
+
+    def _sample():
         Kt.append(float(io.K_o_grid.ravel()[hot]))
         Nat.append(float(np.median(io.Na_i_all[participants] - Na0)))
-    return np.array(Kt), np.array(Nat), K0
+        Pt.append(float(np.mean(io.pump_flux_all[participants])))
+
+    if with_event:
+        for c in kernel:
+            _step(c)
+            _sample()
+    for i in range(n_bg_blocks):
+        _step(cap[bg[(settle_blocks + i) % nb]])
+        _sample()
+    return np.array(Kt), np.array(Nat), K0, np.array(Pt)
 
 
-def _t7_measure_40k(io_factory, io_live, cap, kernel, bg, events, hot, participants, sigma_rest):
+def _t7_measure_40k(io_factory, io_live, cap, kernel, bg, events, hot, participants,
+                    sigma_rest, f_prime):
     """The five pre-registered quantities, measured on REAL spontaneous interictal events."""
     dt_s = DT_ION_MS * 1e-3
     n20 = int(round(20.0 / dt_s))
@@ -1099,10 +1111,10 @@ def _t7_measure_40k(io_factory, io_live, cap, kernel, bg, events, hot, participa
     dK_med = float(np.median(peaks))
 
     # ---- recovery K + recovery Na: isolated-event replay against a background-only control ----
-    Ke, Nae, K0 = _t7_replay(io_factory, cap, kernel, bg, n20, hot=hot, participants=participants,
-                             with_event=True)
-    Kc, Nac, _ = _t7_replay(io_factory, cap, kernel, bg, n20, hot=hot, participants=participants,
-                            with_event=False)
+    Ke, Nae, K0, Pe = _t7_replay(io_factory, cap, kernel, bg, n20, hot=hot,
+                                 participants=participants, with_event=True)
+    Kc, Nac, _, Pc = _t7_replay(io_factory, cap, kernel, bg, n20, hot=hot,
+                                participants=participants, with_event=False)
     nk = len(kernel)
     # the event's own contribution = event replay minus the matched background-only control
     dK_ev = Ke[:len(Kc) + nk][nk:] - Kc[:len(Ke) - nk]
@@ -1138,8 +1150,41 @@ def _t7_measure_40k(io_factory, io_live, cap, kernel, bg, events, hot, participa
     cluster_trace = np.asarray(cluster_trace) - pre
     ratio = cpeaks[4] / cpeaks[0] if cpeaks[0] > 0 else float("nan")
 
+    # ---------------- T7.1 additions (user rulings 2026-07-28) ----------------
+    dt_s = DT_ION_MS * 1e-3
+    tail = exc[i_peak:i_end + 1]
+    net_decay = float((peak_val - exc[i_end]) / peak_val) if peak_val > 0 else float("nan")
+    slope, se, tstat = ION._tail_slope(tail, dt_s, ION.F_GATES_V2["na_tail_window_s"])
+
+    # ruling 2: K-clamp control at THIS f''s own working point K_o*(f'), NOT at rest 4.0
+    Jm, Na_star, Ko_star = ION.coupled_working_point_jacobian(f_prime)
+    Kec, Naec, _, Pec = _t7_replay(io_factory, cap, kernel, bg, n20, hot=hot,
+                                   participants=participants, with_event=True, clamp_K=Ko_star)
+    Kcc, Nacc, _, Pcc = _t7_replay(io_factory, cap, kernel, bg, n20, hot=hot,
+                                   participants=participants, with_event=False, clamp_K=Ko_star)
+    exc_c = Naec[:len(Nacc) + nk][nk:] - Nacc[:len(Naec) - nk]
+    ip_c = int(np.argmax(exc_c[:max(1, nk + 200)]))
+    pkc = float(exc_c[ip_c])
+    iec = min(ip_c + n20, len(exc_c) - 1)
+    decay_clamped = float((pkc - exc_c[iec]) / pkc) if pkc > 0 else float("nan")
+
+    # coupled-Jacobian prediction from the MEASURED initial perturbation
+    dK0_event = float(np.max(Ke[:nk]) - K0)
+    pred_coupled, _J, _Na, _Ko = ION.coupled_na_decay_prediction(f_prime, peak_val, dK0_event)
+    pred_frozen = float(1.0 - np.exp(20.0 * Jm[0, 0]))
+
+    tau_ko_wp = 1.0 / abs(Jm[1, 1])
+    lin_wp = float(sum(np.exp(-0.2 * k / tau_ko_wp) for k in range(5)))
+    numerically_valid = bool(np.all(np.isfinite(Ke)) and np.all(np.isfinite(Nae))
+                             and np.all(np.isfinite(Kec)) and np.all(np.isfinite(Naec))
+                             and float(np.min(Ke)) > 0.0)
+
     st = 5      # keep every 5th ion block (2.5 ms) -- ample for tau_Ko = 0.57 s
     traces = dict(K_event=Ke[::st].astype(np.float32), K_control=Kc[::st].astype(np.float32),
+                  na_excess_k_clamped=exc_c[::st].astype(np.float32),
+                  pump_event=Pe[::st].astype(np.float32),
+                  pump_control=Pc[::st].astype(np.float32),
+                  pump_event_k_clamped=Pec[::st].astype(np.float32),
                   na_excess=exc[::st].astype(np.float32),
                   na_event=Nae[::st].astype(np.float32), na_control=Nac[::st].astype(np.float32),
                   cluster_K=np.asarray(cluster_trace, np.float32),
@@ -1158,7 +1203,26 @@ def _t7_measure_40k(io_factory, io_live, cap, kernel, bg, events, hot, participa
                 na_n_participants=int(participants.size),
                 integration_peaks_mM=[float(p) for p in cpeaks],
                 integration_ratio_5th_over_1st=float(ratio),
-                cluster_spacing_ms=200.0, cluster_n=5)
+                cluster_spacing_ms=200.0, cluster_n=5,
+                # ---- T7.1 (user rulings 2026-07-28) ----
+                na_net_decay_frac=net_decay,
+                na_tail_slope=slope, na_tail_slope_se=se, na_tail_slope_t=tstat,
+                na_decay_pred_coupled=pred_coupled,
+                na_decay_pred_frozen_K=pred_frozen,
+                na_decay_frac_k_clamped=decay_clamped,
+                na_excess_peak_k_clamped_mM=pkc,
+                dK0_event_mM=dK0_event,
+                pump_mean_event_peak=float(np.max(Pe[:nk])),
+                pump_mean_control=float(np.mean(Pc)),
+                pump_mean_event_peak_k_clamped=float(np.max(Pec[:nk])),
+                working_point_Na_star=float(Na_star), working_point_K_o_star=float(Ko_star),
+                jacobian=[[float(v) for v in row] for row in Jm],
+                tau_Ko_at_workpoint_s=float(tau_ko_wp),
+                integration_linear_at_workpoint=lin_wp,
+                matched_background_snr=float(dK_med / max(sigma_rest, 1e-12)),
+                numerically_valid=numerically_valid,
+                numerical_detail=(f"K_min replay {float(np.min(Ke)):.4f} mM; all replay traces "
+                                  f"finite"))
 
 
 def cmd_b1_select_f(args):
@@ -1288,7 +1352,7 @@ def cmd_b1_select_f(args):
         rows, all_traces = [], {}
         for fp, io in instances.items():
             tr, m = _t7_measure_40k(lambda fp=fp: _mk(fp), io, cap, kernel, bg, events, hot,
-                                    participants, sigma_rest)
+                                    participants, sigma_rest, fp)
             all_traces.update({f"f{fp}_{k}": v for k, v in tr.items()})
             if not m["na_excess_measurable"]:
                 ev = dict(admissible=False, gates=dict(recovery_Na=dict(
@@ -1370,17 +1434,66 @@ def cmd_b1_select_f(args):
                           n_participants=int(participants.size), sigma_rest_mM=sigma_rest,
                           rate_field_sha256=field_sha),
             small_network_caveat=gh["small_network_caveat"])
+        # ---------------- T7.1: re-adjudicate the SAME measurements under the repaired gates ----
+        rows_v2 = []
+        for r in rows:
+            e2 = ION.evaluate_f_prime_gates_v2(r["measured"])
+            e2["f_prime"] = r["f_prime"]
+            e2["q_ion"] = r["q_ion"]
+            rows_v2.append(e2)
+            m = r["measured"]
+            print(f"[T7.1] f'={r['f_prime']}: admissible={e2['admissible']}  "
+                  f"dK={m['dK_peak_single_mM']:.4f} (floor 0.15, ceiling 0.90)  "
+                  f"net_decay={m['na_net_decay_frac']:.3f} "
+                  f"(coupled pred {m['na_decay_pred_coupled']:.3f}, "
+                  f"K-clamped {m['na_decay_frac_k_clamped']:.3f})  "
+                  f"tail_slope_t={m['na_tail_slope_t']:+.2f}  "
+                  f"ratio={m['integration_ratio_5th_over_1st']:.3f} "
+                  f"(linear@wp {m['integration_linear_at_workpoint']:.3f}, non-blocking)",
+                  flush=True)
+            for name, gg in e2["gates"].items():
+                if not gg["ok"]:
+                    print(f"      HARD-GATE FAIL {name}: {gg}", flush=True)
+        sel2 = ION.select_f_prime_v2(rows_v2)
+        _write_json(os.path.join(OUT, "b1_f_selection_v2.json"), dict(
+            generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+            contract="T7.1 (docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-T7_1-lock.md)",
+            status=sel2["status"], selected_f_prime=sel2["selected"],
+            semantics=sel2.get("semantics"), tie_break=sel2.get("tie_break"),
+            rows=rows_v2, hard_gates=ION.F_GATES_V2,
+            rulings=dict(
+                r1="5*sigma_rest removed; absolute 0.15 mM floor only; background is diagnostic",
+                r2="Na reference from the COUPLED working-point Jacobian; K-clamp control at "
+                   "K_o*(f'), not at rest",
+                r3="net decay from peak to 20 s + tail-window trend; per-sample and smoothed "
+                   "monotonicity both dropped",
+                r4="integration is NON-BLOCKING and becomes a B2 pre-condition risk register",
+                r5="the small-network contract is abolished for dynamic f' selection; its "
+                   "numerical tests are retained"),
+            b2_risk_register=dict(
+                item="open-loop K accumulation across 200 ms-spaced events is sub-linear",
+                measured={r["f_prime"]: r["measured"]["integration_ratio_5th_over_1st"]
+                          for r in rows},
+                linear_at_workpoint={r["f_prime"]: r["measured"]["integration_linear_at_workpoint"]
+                                     for r in rows},
+                b2_must_report="whether closed-loop K -> E_K -> firing overcomes this "
+                               "load-dependent clearance",
+                blocks_b2_entry=False),
+            small_net_contract=dict(retained=list(ION.SMALL_NET_CONTRACT_RETAINED),
+                                    abolished=list(ION.SMALL_NET_CONTRACT_ABOLISHED)),
+            protocol=payload["protocol"], measurement_mode=payload["measurement_mode"],
+            traces=os.path.join(OUT, "b1_f_selection_traces.npz")))
+        print(f"[T7.1] {sel2['status']}  selected f' = {sel2['selected']}")
+
         _write_json(os.path.join(OUT, "b1_f_selection.json"), payload)
         print(f"[b1-select-f] {sel['status']}  selected f' = {sel['selected']}  "
               f"(contract label had the protocol matched: "
               f"{sel['contract_verdict_if_protocol_had_matched']})")
-        if sel["selected"] is None:
-            _write_json(os.path.join(OUT, "UNRESOLVED_T7_PROTOCOL.json"), payload)
+        if sel2["selected"] is None:
+            _write_json(os.path.join(OUT, "NO_ADMISSIBLE_SCALE.json"), payload)
             raise SystemExit(
-                "T7 = UNRESOLVED_T7_PROTOCOL -- no f' was selected, so B2 stays closed. This is "
-                "NOT a mechanism NO-GO: the object measured was not the object registered, and "
-                "two of the five gate references were shown to be anchored at a state the layer "
-                "never occupies. Re-opening B2 needs a re-locked T7 contract, not a relaxed gate.")
+                "T7.1 = NO_ADMISSIBLE_SCALE -- no candidate passed the four repaired hard gates, "
+                "so B2 stays closed. Still NOT a mechanism NO-GO.")
     return 0
 
 

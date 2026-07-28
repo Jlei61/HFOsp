@@ -8,6 +8,7 @@ Tests are written BEFORE the implementation (plan §5/§6 "tests first").
 """
 from __future__ import annotations
 
+import json
 import os
 import sys
 
@@ -611,6 +612,121 @@ def test_gate_B_statements_keep_the_two_layers_apart():
                                 template_layer=_TPL)
     assert "did not recover" in rej["allowed_statement"]
     assert "refut" not in rej["allowed_statement"]
+
+
+# =====================================================================================
+#  T7.1 -- adjudication repair (user rulings 2026-07-28)
+# =====================================================================================
+def _m2(dK=0.30, net=0.5, slope=-1e-4, se=1e-5, ratio=1.78, valid=True):
+    return dict(dK_peak_single_mM=dK, na_net_decay_frac=net, na_tail_slope=slope,
+                na_tail_slope_se=se, na_tail_slope_t=slope / se,
+                k_returns_within_1sigma_3s=True, k_residual_after_3s_in_sigma=0.01,
+                numerically_valid=valid, integration_ratio_5th_over_1st=ratio,
+                integration_linear_at_workpoint=2.795, sigma_rest_K_mM=0.109)
+
+
+def test_v2_measurable_gate_drops_the_sigma_term_and_keeps_the_absolute_floor():
+    """Ruling 1(a): sigma_rest is the background other real events leave, not instrument noise."""
+    assert "measurable_sigma_mult" not in ION.F_GATES_V2
+    assert ION.F_GATES_V2["measurable_abs_floor_mM"] == 0.15
+    # 0.2867 failed the old 0.547 threshold; under the repaired gate it passes on the floor
+    out = ION.evaluate_f_prime_gates_v2(_m2(dK=0.2867))
+    assert out["gates"]["measurable"]["ok"] is True
+    assert out["gates"]["measurable"]["threshold"] == 0.15
+    assert ION.evaluate_f_prime_gates_v2(_m2(dK=0.10))["gates"]["measurable"]["ok"] is False
+
+
+def test_v2_safe_ceiling_still_binds():
+    assert ION.evaluate_f_prime_gates_v2(_m2(dK=1.15))["gates"]["safe"]["ok"] is False
+    assert ION.evaluate_f_prime_gates_v2(_m2(dK=0.574))["admissible"] is True
+
+
+def test_v2_integration_is_non_blocking():
+    """Ruling 4: an open-loop measurement may not gate the phase that tests the closed loop."""
+    out = ION.evaluate_f_prime_gates_v2(_m2(ratio=1.0))
+    assert out["admissible"] is True                       # a terrible ratio does NOT block
+    assert out["diagnostics"]["integration"]["blocking"] is False
+    assert "integration" not in out["gates"]
+    assert "risk" in out["diagnostics"]["integration"]["rule"].lower()
+
+
+def test_v2_background_is_diagnostic_only():
+    out = ION.evaluate_f_prime_gates_v2(_m2())
+    assert out["diagnostics"]["background"]["blocking"] is False
+    assert "background" not in out["gates"]
+
+
+def test_v2_na_recovery_uses_net_decay_and_tail_trend_not_monotonicity():
+    """Ruling 3: per-sample and smoothed-envelope monotonicity are both dropped."""
+    ok = ION.evaluate_f_prime_gates_v2(_m2(net=0.66, slope=-1e-4))["diagnostics"]["na_recovery"]
+    assert ok["ok"] is True
+    assert "monoton" not in json.dumps(ok["rule"]).replace("monotonicity are both", "")
+    # no clear net decay -> fails
+    assert not ION.evaluate_f_prime_gates_v2(
+        _m2(net=0.02))["diagnostics"]["na_recovery"]["ok"]
+    # persistently rising tail -> fails
+    assert not ION.evaluate_f_prime_gates_v2(
+        _m2(net=0.66, slope=+1e-3, se=1e-5))["diagnostics"]["na_recovery"]["ok"]
+    # a transient up-jump that leaves the SLOPE non-positive is tolerated
+    assert ION.evaluate_f_prime_gates_v2(
+        _m2(net=0.66, slope=-5e-5, se=1e-4))["diagnostics"]["na_recovery"]["ok"] is True
+
+
+def test_v2_na_recovery_is_not_a_hard_gate_but_numerical_validity_is():
+    assert "na_recovery" not in ION.evaluate_f_prime_gates_v2(_m2())["gates"]
+    assert ION.evaluate_f_prime_gates_v2(_m2(valid=False))["admissible"] is False
+
+
+def test_tail_slope_averages_over_transient_up_jumps():
+    dt = 0.0025
+    n = int(round(20.0 / dt))
+    y = 0.02 * np.exp(-np.arange(n) * dt / 30.0)
+    y[int(0.9 * n)] += 0.003                                # one big background up-jump
+    slope, se, t = ION._tail_slope(y, dt, 5.0)
+    assert slope < 0                                        # the trend still reads as decaying
+
+
+def test_coupled_jacobian_predicts_faster_decay_than_the_frozen_K_reference():
+    """Ruling 2: freezing K_o understates clearance, because I_pump rises with K_o too."""
+    for fp in (0.5, 1.0, 2.0):
+        J, Na, Ko = ION.coupled_working_point_jacobian(fp)
+        assert J.shape == (2, 2)
+        assert J[0, 0] < 0 and J[1, 1] < 0                  # both self-terms restoring
+        assert J[0, 1] < 0                                  # higher K_o clears Na faster
+        frozen = 1.0 - np.exp(20.0 * J[0, 0])
+        coupled, *_ = ION.coupled_na_decay_prediction(fp, 0.02, 0.30)
+        assert coupled > frozen                             # coupling speeds it up
+        assert np.isfinite(coupled) and coupled > 0.0
+
+
+def test_strong_co_elevated_K_can_predict_an_undershoot_and_is_not_clipped():
+    """A real property of the linearised coupled system, not a bug: J[0,1] < 0, so a large K
+    excursion drives Na down for as long as it lasts.  With the measured ratio (dK ~ 0.57 mM at
+    the event voxel vs dNa ~ 0.022 mM per cell) the prediction can exceed 100%, i.e. the excess is
+    driven BELOW baseline before recovering.  The predictor must report that, never clip it."""
+    weak, *_ = ION.coupled_na_decay_prediction(1.0, 0.02, 0.0)
+    strong, *_ = ION.coupled_na_decay_prediction(1.0, 0.02, 0.60)
+    assert weak < strong
+    assert strong > 1.0                                     # undershoot regime, reported not clipped
+    assert ION.coupled_na_decay_prediction(1.0, 0.02, 0.60, t_s=20.0)[0] == strong
+
+
+def test_v2_selection_returns_a_provisional_candidate_not_a_mechanism_verdict():
+    rows = [dict(f_prime=0.5, admissible=True), dict(f_prime=1.0, admissible=True),
+            dict(f_prime=2.0, admissible=False)]
+    out = ION.select_f_prime_v2(rows)
+    assert out["status"] == "PROVISIONAL_CANDIDATE" and out["selected"] == 1.0
+    assert "NOT a claim that the closed loop" in out["semantics"]
+    none = ION.select_f_prime_v2([dict(f_prime=f, admissible=False) for f in (0.5, 1.0, 2.0)])
+    assert none["status"] == "NO_ADMISSIBLE_SCALE" and none["selected"] is None
+
+
+def test_small_network_contract_records_what_survives_and_what_is_abolished():
+    """Ruling 5: the numerical tests survive; dynamic f' selection from the small nets does not."""
+    assert "Gate H numerical tests" in ION.SMALL_NET_CONTRACT_RETAINED
+    assert "empty-voxel fixed point" in ION.SMALL_NET_CONTRACT_RETAINED
+    assert any("dynamic f'" in s for s in ION.SMALL_NET_CONTRACT_ABOLISHED)
+    assert any("faithful reproduction" in s for s in ION.SMALL_NET_CONTRACT_ABOLISHED)
 
 
 def test_power_precondition_is_a_hard_gate():
