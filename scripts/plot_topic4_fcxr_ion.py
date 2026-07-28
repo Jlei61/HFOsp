@@ -252,8 +252,113 @@ def fig_gate_b():
     print("[plot] gate_B_interictal_substrate.png")
 
 
+def fig_t7():
+    """T7 sensor diagnostic.  This is the run that stopped the sprint, so it gets a figure even
+    though it is not one of the three gate figures plan §12 lists -- the plan's list assumed T7
+    would not be the terminal result."""
+    fs, aud = _load("b1_f_selection.json"), _load("b1_gate_reference_audit.json")
+    tp = os.path.join(OUT, "b1_f_selection_traces.npz")
+    if not (fs and aud and os.path.exists(tp)):
+        print("[plot] skip t7_sensor_diagnostic (missing input)")
+        return
+    z = np.load(tp)
+    G = fs["gates_definition"]
+    rows = sorted(fs["rows"], key=lambda r: r["f_prime"])
+    fps = [r["f_prime"] for r in rows]
+    col = {0.5: "#7fb3d5", 1.0: BAD, 2.0: "#1f4e79"}
+    fig, ax = plt.subplots(1, 4, figsize=(19.5, 4.7))
+
+    # Q1: is there a usable amplitude window, and is any candidate inside it?
+    dK = [r["measured"]["dK_peak_single_mM"] for r in rows]
+    floor = rows[0]["gates"]["measurable"]["threshold"]
+    ax[0].axhspan(floor, G["safe_ceiling_mM"], color=OK, alpha=0.16, zorder=0)
+    ax[0].axhline(floor, color="k", ls=":", lw=1.4)
+    ax[0].axhline(G["safe_ceiling_mM"], color="k", ls="--", lw=1.4)
+    for r, v in zip(rows, dK):
+        per = r["measured"]["dK_peak_per_event_mM"]
+        ax[0].scatter([r["f_prime"]] * len(per), per, s=16, color=col[r["f_prime"]], alpha=0.4,
+                      zorder=2)
+        ax[0].scatter([r["f_prime"]], [v], s=140, color=col[r["f_prime"]], zorder=3,
+                      edgecolor="k", linewidth=0.8)
+    ax[0].text(0.52, floor * 1.04, f"measurable floor {floor:.3f}", fontsize=7.5)
+    ax[0].text(0.52, G["safe_ceiling_mM"] * 1.03, f"safe ceiling {G['safe_ceiling_mM']}",
+               fontsize=7.5)
+    ax[0].set_xticks(fps)
+    ax[0].set_xlabel("f'")
+    ax[0].set_ylabel(r"single-event peak $\Delta K_o$  (mM)")
+    ax[0].set_title("amplitude window (dots = 22 real events)", fontsize=10.5)
+    ax[0].grid(alpha=0.22)
+
+    # Q2: is the Na gate's reference in the right place?
+    wp = {r["f_prime"]: r for r in aud["rows"]}
+    x = np.arange(len(fps))
+    meas = [r["measured"]["na_excess_decay_frac_20s"] for r in rows]
+    pred = [wp[f]["decay_20s_at_working_point"] for f in fps]
+    ax[1].bar(x - 0.22, meas, 0.4, color=[col[f] for f in fps], label="measured")
+    ax[1].bar(x + 0.22, pred, 0.4, color="none", edgecolor="k", hatch="///",
+              label="predicted at the WORKING point")
+    ax[1].axhspan(*G["na_decay_band"], color=BAD, alpha=0.14)
+    ax[1].axhline(aud["gate_reference"]["decay_20s"], color=BAD, ls="--", lw=1.8,
+                  label="gate reference (linearised at REST)")
+    ax[1].set_xticks(x, [f"f'={f}" for f in fps])
+    ax[1].set_ylabel("event-induced Na excess decayed in 20 s")
+    ax[1].set_title("Na gate reference is anchored at rest", fontsize=10.5)
+    ax[1].legend(fontsize=7, frameon=False, loc="upper left")
+    ax[1].set_ylim(0, 1.0)
+
+    # Q3: why does the monotonicity clause fail?
+    st = float(z["f1.0_trace_stride_blocks"]) * float(z["f1.0_dt_ion_ms"]) * 1e-3
+    for f in fps:
+        e = z[f"f{f}_na_excess"]
+        ax[2].plot(np.arange(e.size) * st, e, color=col[f], lw=1.3, label=f"f'={f}")
+    ax[2].axhline(0, color="k", lw=0.8)
+    ax[2].set_xlabel("time after the event (s)")
+    ax[2].set_ylabel("median event-induced Na excess (mM)")
+    ax[2].set_title("Na excess: decay vs the monotonicity clause", fontsize=10.5)
+    ax[2].legend(fontsize=8, frameon=False)
+    ax[2].grid(alpha=0.22)
+    e1 = z["f1.0_na_excess"]
+    rough = float(np.mean(np.diff(e1) > 0))
+    ax[2].text(0.97, 0.93, f"f'=1.0: {100*rough:.0f}% of samples step UP; largest up-step\n"
+                           f"is 16% of the peak (background events in the\nreplay land on the same "
+                           f"cells). Smoothing to 1/2/5/10 s\ndoes NOT remove them. But NO candidate "
+                           f"shows a net\nrise from peak to 20 s -- the clause fails on its\n"
+                           f"zero tolerance, not on re-accumulation.",
+               transform=ax[2].transAxes, ha="right", va="top", fontsize=6.6,
+               bbox=dict(fc="white", ec="0.7", alpha=0.92))
+
+    # Q4: does potassium accumulate across 200 ms-spaced events?
+    tr = z["f1.0_cluster_K"]
+    ax[3].plot(np.arange(tr.size) * float(z["f1.0_dt_ion_ms"]) * 1e-3, tr, color=BAD, lw=1.3)
+    pk = rows[fps.index(1.0)]["measured"]["integration_peaks_mM"]
+    lin = [pk[0] * sum(np.exp(-0.2 * j / 0.5704) for j in range(k + 1)) for k in range(5)]
+    for k in range(5):
+        ax[3].plot(0.2 * k + 0.1, pk[k], "o", color=BAD, ms=7, zorder=3)
+        ax[3].plot(0.2 * k + 0.1, lin[k], "^", color="0.35", ms=7, zorder=3)
+    ax[3].plot([], [], "o", color=BAD, label="measured peak")
+    ax[3].plot([], [], "^", color="0.35", label=r"linear superposition ($\tau_{K_o}$ at workpoint)")
+    ax[3].set_xlabel("time (s), five identical events 200 ms apart")
+    ax[3].set_ylabel(r"$\Delta K_o$ at the event voxel (mM)")
+    ax[3].set_title("K accumulation is SUB-linear (open loop)", fontsize=10.5)
+    ax[3].legend(fontsize=7.5, frameon=False, loc="lower right")
+    ax[3].grid(alpha=0.22)
+    ax[3].text(0.03, 0.95, "increments 0.235 / 0.139 / 0.080 / 0.045\n"
+                           "linear would give 0.451 / 0.318 / 0.224 / 0.158",
+               transform=ax[3].transAxes, va="top", fontsize=7,
+               bbox=dict(fc="white", ec="0.7", alpha=0.92))
+
+    fig.suptitle(f"T7 sensor diagnostic — {fs['status']} "
+                 f"(g_K_ion = 0: the K→E_K→firing loop is CUT, so panels 1 and 4 characterise the "
+                 f"clearance side only)", fontsize=11.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.92))
+    fig.savefig(os.path.join(FIG, "t7_sensor_diagnostic.png"), dpi=185)
+    plt.close(fig)
+    print("[plot] t7_sensor_diagnostic.png")
+
+
 if __name__ == "__main__":
     os.makedirs(FIG, exist_ok=True)
     fig_b0()
     fig_gate_h()
+    fig_t7()
     fig_gate_b()

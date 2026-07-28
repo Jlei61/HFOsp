@@ -493,6 +493,37 @@ def test_f_prime_all_three_failing_is_a_bounded_negative():
     assert out["status"] == "NO_GO_ION_SCALE" and out["selected"] is None
 
 
+def test_a_changed_protocol_may_not_inherit_the_canonical_verdict():
+    """CLAUDE.md §5: the pre-registered tier is fixed at planning time. A result measured on a
+    DIFFERENT object keeps its per-gate table but must not carry the contract's verdict label."""
+    rows = [dict(f_prime=f, admissible=False) for f in (0.5, 1.0, 2.0)]
+    contract = ION.select_f_prime(rows)
+    out = ION.withhold_canonical_verdict(contract, protocol_deviation="ran on 40k, not the "
+                                         "registered small network",
+                                         blocking_gates_are_open_loop="integration is open-loop")
+    assert out["status"] == "UNRESOLVED_T7_PROTOCOL"
+    assert out["selected"] is None
+    assert out["contract_verdict_if_protocol_had_matched"] == "NO_GO_ION_SCALE"
+    assert "NOT a mechanism NO-GO" in out["semantics"]
+    assert "not because a mechanism was refuted" in out["b2_entry"]
+    # the contract implementation itself must be left untouched for a future faithful run
+    assert ION.select_f_prime(rows)["status"] == "NO_GO_ION_SCALE"
+
+
+def test_withholding_also_applies_when_the_contract_would_have_selected():
+    """Withholding is about the OBJECT, not about the answer being unwelcome: a would-be SELECTED
+    verdict from a deviating protocol is withheld just the same."""
+    rows = [dict(f_prime=0.5, admissible=False), dict(f_prime=1.0, admissible=True),
+            dict(f_prime=2.0, admissible=False)]
+    contract = ION.select_f_prime(rows)
+    assert contract["status"] == "SELECTED" and contract["selected"] == 1.0
+    out = ION.withhold_canonical_verdict(contract, protocol_deviation="x",
+                                         blocking_gates_are_open_loop="y")
+    assert out["status"] == "UNRESOLVED_T7_PROTOCOL"
+    assert out["selected"] is None
+    assert out["contract_verdict_if_protocol_had_matched"] == "SELECTED"
+
+
 # =====================================================================================
 #  T9 -- Gate B adjudication (plan §11)
 # =====================================================================================

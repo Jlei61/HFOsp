@@ -899,6 +899,32 @@ def adjudicate_gate_B(runs, tolerances, *, template_layer):
                                 ion_net_drift_max=GATE_B_ION_NET_DRIFT_MAX))
 
 
+def withhold_canonical_verdict(sel, *, protocol_deviation, blocking_gates_are_open_loop):
+    """A result obtained on a DIFFERENT experimental object may not inherit the canonical verdict
+    of the contract it replaced (CLAUDE.md §5: the pre-registered tier is fixed at planning time).
+
+    `select_f_prime` implements the pre-registered small-network contract faithfully and is left
+    untouched, so a future faithful run still gets `NO_GO_ION_SCALE`.  This wrapper is what the
+    runner emits when the object changed: the per-gate table stands as a diagnostic, the canonical
+    label is withheld, and the reason is carried in the artifact rather than in prose only.
+    """
+    out = dict(sel)
+    out["contract_verdict_if_protocol_had_matched"] = sel["status"]
+    out["status"] = "UNRESOLVED_T7_PROTOCOL"
+    out["selected"] = None
+    out["verdict_withheld_because"] = protocol_deviation
+    out["blocking_gates_measured_open_loop"] = blocking_gates_are_open_loop
+    out["semantics"] = (
+        "UNRESOLVED_T7_PROTOCOL means: the five per-gate measurements below are valid AS A "
+        "DIAGNOSTIC on the object that was actually run, but they do not constitute the "
+        "pre-registered scale-selection decision, because that decision was registered against a "
+        "different object. It is NOT a mechanism NO-GO and must never be reported as one.")
+    out["b2_entry"] = (
+        "B2 stays closed because no f' was selected -- not because a mechanism was refuted. "
+        "Re-opening it requires a re-locked T7 contract, not a relaxed gate.")
+    return out
+
+
 MIN_SCOREABLE_EVENTS = 20      # spec §9 B-real hard precondition
 
 

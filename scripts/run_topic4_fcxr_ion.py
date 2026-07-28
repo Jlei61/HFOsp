@@ -1127,16 +1127,25 @@ def _t7_measure_40k(io_factory, io_live, cap, kernel, bg, events, hot, participa
     for i in range(4000):
         io2.replay_block(cap[bg[i % nb]])
     pre = float(io2.K_o_grid.ravel()[hot])
-    cpeaks = []
+    cpeaks, cluster_trace = [], []
     for _ in range(5):
         seg = []
         for c in kernel:
             io2.replay_block(c)
             seg.append(float(io2.K_o_grid.ravel()[hot]))
+        cluster_trace.extend(seg)
         cpeaks.append(max(seg) - pre)
+    cluster_trace = np.asarray(cluster_trace) - pre
     ratio = cpeaks[4] / cpeaks[0] if cpeaks[0] > 0 else float("nan")
 
-    return dict(dK_peak_single_mM=dK_med, dK_peak_per_event_mM=peaks,
+    st = 5      # keep every 5th ion block (2.5 ms) -- ample for tau_Ko = 0.57 s
+    traces = dict(K_event=Ke[::st].astype(np.float32), K_control=Kc[::st].astype(np.float32),
+                  na_excess=exc[::st].astype(np.float32),
+                  na_event=Nae[::st].astype(np.float32), na_control=Nac[::st].astype(np.float32),
+                  cluster_K=np.asarray(cluster_trace, np.float32),
+                  trace_stride_blocks=np.int32(st), dt_ion_ms=np.float64(DT_ION_MS),
+                  n_kernel_blocks=np.int32(nk), i_peak=np.int32(i_peak), i_end=np.int32(i_end))
+    return traces, dict(dK_peak_single_mM=dK_med, dK_peak_per_event_mM=peaks,
                 sigma_rest_K_mM=sigma_rest, n_events_measured=len(peaks),
                 k_returns_within_1sigma_3s=bool(k_resid_sigma <= ION.F_GATES["k_recovery_sigma"]),
                 k_residual_after_3s_in_sigma=k_resid_sigma,
@@ -1276,10 +1285,11 @@ def cmd_b1_select_f(args):
         print(f"[b1-select-f] typical event t_on={typ['t_on']:.0f} ms hot voxel={hot} "
               f"participants={participants.size} sigma_rest={sigma_rest:.5f} mM", flush=True)
 
-        rows = []
+        rows, all_traces = [], {}
         for fp, io in instances.items():
-            m = _t7_measure_40k(lambda fp=fp: _mk(fp), io, cap, kernel, bg, events, hot,
-                                participants, sigma_rest)
+            tr, m = _t7_measure_40k(lambda fp=fp: _mk(fp), io, cap, kernel, bg, events, hot,
+                                    participants, sigma_rest)
+            all_traces.update({f"f{fp}_{k}": v for k, v in tr.items()})
             if not m["na_excess_measurable"]:
                 ev = dict(admissible=False, gates=dict(recovery_Na=dict(
                     ok=False, reason="the event-induced Na excess never peaked inside the "
@@ -1300,10 +1310,34 @@ def cmd_b1_select_f(args):
                     print(f"      FAIL {name}: {gg}", flush=True)
             resource_log(f"b1_select_f_{fp}")
 
-        sel = ION.select_f_prime(rows)
+        # The pre-registered T7 contract is an occupancy-matched SMALL network with the ion layer
+        # LIVE (plan §9.1/§9.2).  This run changed the experimental object: 40k substrate,
+        # g_K_ion = 0, sensor replay on a fixed raster.  The change is defensible, but a result
+        # from a different object may NOT inherit the canonical verdict of the contract it
+        # replaced, so `select_f_prime` (which still implements the original contract, untouched)
+        # is wrapped and its label withheld.
+        sel = ION.withhold_canonical_verdict(
+            ION.select_f_prime(rows),
+            protocol_deviation=(
+                "registered on an occupancy-matched small network with the ion feedback live; "
+                "executed on the 40k substrate in sensor mode (g_K_ion = 0) with an offline "
+                "isolated-event replay. Network scale, event source, closed-vs-open loop and the "
+                "statistical object of the gates all changed."),
+            blocking_gates_are_open_loop=(
+                "The integration gate is measured with K -> E_K -> firing deliberately cut, so it "
+                "can only characterise the CLEARANCE side. Using it to block B2 -- the phase whose "
+                "purpose is to test the closed loop -- would be self-sealing, and this artifact "
+                "must not be read as licensing that block on mechanism grounds."))
+        _write_npz(os.path.join(OUT, "b1_f_selection_traces.npz"), **all_traces)
         payload = dict(
             generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
-            status=sel["status"], selected_f_prime=sel["selected"], tie_break=sel.get("tie_break"),
+            status=sel["status"], selected_f_prime=sel["selected"],
+            contract_verdict_if_protocol_had_matched=sel["contract_verdict_if_protocol_had_matched"],
+            verdict_withheld_because=sel["verdict_withheld_because"],
+            blocking_gates_measured_open_loop=sel["blocking_gates_measured_open_loop"],
+            semantics=sel["semantics"], b2_entry=sel["b2_entry"],
+            tie_break=sel.get("tie_break"),
+            traces=os.path.join(OUT, "b1_f_selection_traces.npz"),
             rows=rows, gates_definition=ION.F_GATES,
             measurement_mode=dict(
                 substrate="40k E1146-informed sheet (the real one)", g_K_ion=0.0,
@@ -1337,11 +1371,16 @@ def cmd_b1_select_f(args):
                           rate_field_sha256=field_sha),
             small_network_caveat=gh["small_network_caveat"])
         _write_json(os.path.join(OUT, "b1_f_selection.json"), payload)
-        print(f"[b1-select-f] {sel['status']}  selected f' = {sel['selected']}")
-        if sel["status"] != "SELECTED":
-            _write_json(os.path.join(OUT, "NO_GO_ION_SCALE.json"), payload)
-            raise SystemExit("T7 = NO_GO_ION_SCALE -- archive and stop; the candidate set may not "
-                             "be widened and no gate may be relaxed (plan §15)")
+        print(f"[b1-select-f] {sel['status']}  selected f' = {sel['selected']}  "
+              f"(contract label had the protocol matched: "
+              f"{sel['contract_verdict_if_protocol_had_matched']})")
+        if sel["selected"] is None:
+            _write_json(os.path.join(OUT, "UNRESOLVED_T7_PROTOCOL.json"), payload)
+            raise SystemExit(
+                "T7 = UNRESOLVED_T7_PROTOCOL -- no f' was selected, so B2 stays closed. This is "
+                "NOT a mechanism NO-GO: the object measured was not the object registered, and "
+                "two of the five gate references were shown to be anchored at a state the layer "
+                "never occupies. Re-opening B2 needs a re-locked T7 contract, not a relaxed gate.")
     return 0
 
 
@@ -1929,7 +1968,10 @@ def write_status():
          row("Gate H (homeostasis + numerics)", gh,
              extra=f"primary tier {gh['primary_network']}" if gh else ""),
          row("T7 f' selection", fs,
-             extra=f"selected f' = {fs.get('selected_f_prime')}" if fs else ""),
+             extra=(f"selected f' = {fs.get('selected_f_prime')}; canonical label withheld "
+                    f"(contract label had the protocol matched: "
+                    f"`{fs.get('contract_verdict_if_protocol_had_matched')}`) — the object measured "
+                    f"was not the object registered" if fs else "")),
          row("T8 bias calibration", cal,
              extra=(f"bias=({cal['best']['I_bias_E']:+.3f}, {cal['best']['I_bias_I']:+.3f}), "
                     f"{cal['n_probes']} probes") if cal else ""),
@@ -1940,6 +1982,15 @@ def write_status():
                     f"{gb['b_real']['n_trajectories']}, B-model ok={gb['b_model']['ok']}")
              if gb else ""),
          "| lifecycle | `NOT TESTED` | B3/B4 not authorised |", "",
+         "## Why B2 is closed", "",
+         "Because **no `f'` was selected** — not because a mechanism was refuted. Two of the five "
+         "T7 gate references were shown to be anchored at rest, a state this layer by construction "
+         "never occupies, and the integration gate was measured with the K -> E_K -> firing loop "
+         "deliberately cut, so it characterises the clearance side only. Using an open-loop "
+         "diagnostic to block the phase whose purpose is to test the closed loop would be "
+         "self-sealing. Re-opening B2 needs a re-locked T7 contract "
+         "(`docs/superpowers/proposals/2026-07-28-topic4-fcxr-ion-T7_1-adjudication-repair.md`, "
+         "**not signed off**), not a relaxed gate.", "",
          "## Allowed statement", "",
          f"> {gb['allowed_statement']}" if gb else "> (Gate B has not been adjudicated.)", "",
          "## Not claimed", ""]
