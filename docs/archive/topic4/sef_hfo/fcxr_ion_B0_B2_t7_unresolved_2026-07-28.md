@@ -100,8 +100,8 @@ runner 改为在协议偏离时**扣留** canonical label，输出 `UNRESOLVED_T
 | T4 解析可行性 | **PASS** | 逐值复现 spec §3.2 全表；`tau_Na` 54.42 s vs `tau_Ko` 0.6546 s（83×） |
 | T2 起始位点读出功率 | **PASS** | 见 §2.1 |
 | Gate H 稳态 + 数值合同 | **PASS** | 见 §2.2 |
-| T7 `f'` 选择 | **`NO_GO_ION_SCALE`** | 见 §3 |
-| T8 bias 重标定 / Gate B / confirmatory | **未执行** | 被 T7 停机条件锁死（plan §15） |
+| T7 `f'` 选择 | **`UNRESOLVED_T7_PROTOCOL`** | 见 §0.1 与 §3；canonical 判决被扣留（若协议未偏离本会得到 `NO_GO_ION_SCALE`） |
+| T8 bias 重标定 / Gate B / confirmatory | **未执行** | 当前没有 canonical selected `f'`；需重新锁定 T7.1 合同后才可进入（**不是**机制被否定） |
 | 生命周期 | **未测试** | B3/B4 未授权 |
 
 ### 2.1 T2：方向读出功率前置（一次 40k / 11 s，noise 202）
