@@ -1500,7 +1500,7 @@ def cmd_b1_select_f(args):
 # ================================================================== T8: 40k bias calibration
 BIAS_BOUNDS = (-2.0, 2.0)      # engine units = mV; V_th = 18, so +-11% of threshold (plan §10)
 BIAS_DELTA = 0.5               # finite-difference step
-PROBE_T_MS = 4000.0
+PROBE_T_MS = 4000.0          # overridable: --probe-t-ms (see cmd_b2_bias docstring)
 PROBE_BURN_MS = 1000.0
 MAX_PROBES = 12
 R_E_TARGET = ION.R0_HZ
@@ -1603,9 +1603,11 @@ def cmd_b2_bias(args):
               f"(siblings={plan['siblings']}, MemAvailable={plan['mem_available_gb']} GB)",
               flush=True)
 
+        probe_T = float(args.probe_t_ms or PROBE_T_MS)
+
         def job(be, bi, sE=1.0, sI=1.0, tag=""):
             return dict(I_bias_E=be, I_bias_I=bi, q_ion=q_ion, conn_seed=CONN_SEED_DEV,
-                        noise_seed=NOISE_DEV, T_ms=PROBE_T_MS, rate_scale_E=sE, rate_scale_I=sI,
+                        noise_seed=NOISE_DEV, T_ms=probe_T, rate_scale_E=sE, rate_scale_I=sI,
                         tag=tag)
 
         probes, history = [], []
@@ -1717,10 +1719,15 @@ def cmd_b2_bias(args):
                                        "mechanism conclusion",
                 NO_GO_BASELINE="only when the legal box is fully bracketed AND contains no "
                                "solution"),
-            probe_caveat=("4 s probes estimate the FAST rate response only. tau_Na = 54.4 s, so no "
-                          "probe here demonstrates that Na has reached steady state; that is what "
-                          "the 11 s validation run reports on, and even 11 s only shows stability "
-                          "near the initialization point."),
+            probe_T_ms=probe_T,
+            probe_caveat=("A probe shorter than the validation window estimates the FAST rate "
+                          "response only. tau_Na = 54.4 s, so no probe here demonstrates that Na "
+                          "has reached steady state; even the 11 s validation only shows stability "
+                          "near the initialization point. EXECUTION FINDING (2026-07-28): with the "
+                          "plan's 4 s probes the calibrator converged to 4.054 Hz but the 11 s "
+                          "validation at the SAME bias came back at 5.159 Hz, so the closure gate "
+                          "failed at 33%. The probe window must match the validation window; "
+                          "probe_T_ms records which was used."),
             workers=plan)
         _write_json(os.path.join(OUT, "b2_bias_calibration.json"), payload)
         print(f"[b2-bias] {verdict}  best bias=({best['job']['I_bias_E']:+.3f},"
@@ -1858,7 +1865,7 @@ def trajectory_task(job):
     return out
 
 
-CL_PROBE_T_MS = 4000.0
+CL_PROBE_T_MS = 4000.0          # overridable: --probe-t-ms (see cmd_b2_bias docstring)
 CL_PROBE_T_KICK_MS = 2500.0
 CL_PROBE_SPACING_MS = 200.0
 CL_PROBE_KICK_BOOST = 3.0
@@ -1996,7 +2003,13 @@ def cmd_b2_validate(args):
               f"(rel {rel:.4f}, tol {CLOSURE_REL_TOL})  closure "
               f"{'PASS' if rel <= CLOSURE_REL_TOL else 'FAIL'}")
         if rel > CLOSURE_REL_TOL:
-            raise SystemExit("closure residual exceeds 10%: NO-GO, do not iterate further")
+            _write_json(os.path.join(OUT, "UNRESOLVED_CALIBRATION.json"), payload)
+            raise SystemExit(
+                "closure residual exceeds 10% -> UNRESOLVED_CALIBRATION. Per plan section 10 this "
+                "is a CALIBRATOR failure, not a mechanism NO-GO: NO_GO_BASELINE would require the "
+                "legal [-2,+2] box to be bracketed and shown to contain no solution, and it was "
+                "not (7 of 12 probes, explored range +-0.5 mV). Do not iterate the closure further "
+                "-- fix the calibrator.")
     return 0
 
 
@@ -2263,6 +2276,9 @@ def main(argv=None):
     ap.add_argument("--confirm-run", action="store_true",
                     help="required for any stage that starts a simulation")
     ap.add_argument("--workers", type=int, default=1)
+    ap.add_argument("--probe-t-ms", type=float, default=None,
+                    help="bias-probe trajectory length; must match the validation window, "
+                         "otherwise the calibrator cannot see the tau_Na drift")
     ap.add_argument("--record-swap-baseline", action="store_true")
     a = ap.parse_args(argv)
     os.makedirs(OUT, exist_ok=True)
