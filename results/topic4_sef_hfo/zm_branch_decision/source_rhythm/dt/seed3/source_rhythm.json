@@ -1,0 +1,63 @@
+{
+  "git_sha": "62fe27f461434a0586884cb7b8ff73353c19ea51",
+  "runtime_started_at": "2026-07-27T23:37:07",
+  "config_sha": "1f9db4659ab370e61212e7e8d409e0ede8d08d19a1a3380453cfc3e63b051e92",
+  "seed": 3,
+  "dt": 0.1,
+  "resolution": "dt",
+  "engine_sha256": {
+    "src/snn_engine/kick_probe.py": "6e1c8986ec45ff0f3c44a538f865e0dd4fe47b9f5b6a73938cc0a7df64ddd479",
+    "src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+    "src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+    "src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+    "src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+    "src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47",
+    "src/snn_engine/slow_field.py": "6115c4cb779cdf657ada9d6573684637cb0fc71845b1cb972ca93572c7bb4c74",
+    "src/snn_engine/mz_slow_vars.py": "91068ef6920f095eed0f7cd1c36262ecec575ff96f8599ad6f1990963c87f20d"
+  },
+  "metrics_version": "zm_minimal_carrier_v1.1_2026-07-27_stationarity",
+  "state_schema": "zm_sim_state_v1",
+  "lockpoint": "zA_q75_tz5000__mA0p001_tau500",
+  "arm_kwargs": {
+    "use_SG": true,
+    "alpha_G": 16.0
+  },
+  "es_thresh_hz": 250.0,
+  "timestamp": "2026-07-27T23:54:30",
+  "peak_rss_gb": 6.8,
+  "mem_available_gb": 234.9,
+  "resource_log": "results/topic4_sef_hfo/zm_branch_decision/resource_log.jsonl",
+  "pid": 600970,
+  "phase": "source_rhythm",
+  "state_tag": "bounded_mid__peak",
+  "T_measure_ms": 2000.0,
+  "burn_in_ms": 250.0,
+  "source_rhythm_bin_ms": 2.0,
+  "state_hash": "a4f68ece9ddb161013751d3c1b8fde4b519e790c4013ed17d472ed408145fc29",
+  "state_path": "results/topic4_sef_hfo/zm_branch_decision/anchors/seed3/states/bounded_mid__peak_t124500.npz",
+  "bank_sha": "6f6ea5eff855ddb6ab71d133f00e3d9e13ad34685a6f2bc22a7bb04d18ff14c2",
+  "freeze_policy": {
+    "freeze_z": true,
+    "freeze_m": true,
+    "freeze_sg_family": true,
+    "freeze_sg_output_only": false,
+    "arm": "freeze_all"
+  },
+  "fields_path": "results/topic4_sef_hfo/zm_branch_decision/source_rhythm/dt/seed3/source_rhythm_fields.npz",
+  "source_rhythm": {
+    "source_rhythm_version": "zm_source_rhythm_v1_2026-07-27",
+    "source_temporal_class": "asynchronous_or_irregular_candidate",
+    "n_active_cells": 110,
+    "active_cell_fraction": 0.4296875,
+    "dominant_frequency_median_hz": 91.0,
+    "local_frequency_agreement": 0.01818181818181818,
+    "local_peak_fraction_median": 0.3773474059766821,
+    "local_phase_locking": 0.9804544227580273,
+    "global_modulation_fraction": 0.01803476944789695,
+    "global_peak_fraction": 0.012016384894450977,
+    "E_I_phase_lag_rad": 0.19292960892425728,
+    "claim_boundary": "descriptive fine source-space routing audit; periodic candidate still requires state-return/Floquet validation"
+  },
+  "wall_s": 939.0,
+  "evidence_value": "operator routing only"
+}

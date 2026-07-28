@@ -1,0 +1,25 @@
+{
+  "guarded_file": "src/snn_engine/kick_probe.py",
+  "old_sha256": "5faaedab37ab6208888607f70dc387f378b1ec9e51bfc21e29f0c81e80aa8b99",
+  "new_sha256": "6e1c8986ec45ff0f3c44a538f865e0dd4fe47b9f5b6a73938cc0a7df64ddd479",
+  "reason": "spec rev3.1 \u00a73.1: minimal off-by-default checkpoint/freeze hook (single new arg zm_ckpt=). Restore/capture/mean-input/external-drive-audit are gated; state packing lives in src/topic4_zm_checkpoint.py so the timestep update order stays single-source.",
+  "diff_stat": "src/snn_engine/kick_probe.py | 81 +++++++++++++++++++++++++++++++++++++++-----\n 1 file changed, 73 insertions(+), 8 deletions(-)",
+  "parity_evidence": {
+    "pre_edit_fixture": "tests/fixtures/topic4_zm_preedit_parity.npz (generated at old_sha256)",
+    "tests": [
+      "tests/test_topic4_zm_checkpoint_hook.py",
+      "tests/test_topic4_zm_exact_resume.py",
+      "tests/test_snn_shunting.py",
+      "tests/test_snn_gates.py",
+      "tests/test_zm_slow_field_parity.py",
+      "tests/test_a1c_feedback.py"
+    ],
+    "claims": [
+      "pre-edit vs post-edit default path byte-identical (raster/rates/lfp, 2 cases)",
+      "hook-enabled-but-idle consumes no RNG draw and changes nothing",
+      "split->save->restore->continue byte-identical at trough/rising/peak forks",
+      "byte parity does NOT waive re-blessing; this record is the re-bless"
+    ]
+  },
+  "git_sha": "661a39190b333a386593d7450812abea1b902fc3"
+}

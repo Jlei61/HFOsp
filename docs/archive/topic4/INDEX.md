@@ -11,6 +11,13 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- **2026-07-28 Z/M minimal-carrier branch decision**：
+  `sef_hfo/zm_minimal_carrier_branch_decision_2026-07-28.md`。结论 =
+  `carrier_at_visited_states`：自然轨迹访问过的慢状态在 `freeze_all` 后支持多 seed、
+  多快相位、相邻 slow-bin 的 source-space sustained tonic carrier；但 observation
+  reference 被阻断，entry boundary 未解，existing-coordinate offset = `no_evidence`，
+  dynamic Z/M 9/9 runaway。故 bounded ictal oscillation、offset/recovery lifecycle
+  未建立，Phase 3/actuator 不授权。
 - **2026-07-26 Z/M carrier–exit 机制线统一验收**：
   `sef_hfo/zm_carrier_exit_line_acceptance_2026-07-26.md`。结论 =
   `ACCEPT_BOUNDED_MECHANISM_NO_GO`：Z/M entry 到 runaway 成立；\(S_G\) 只形成低占空比

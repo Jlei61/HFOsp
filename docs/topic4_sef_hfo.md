@@ -24,20 +24,35 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
-> **Z/M carrier–exit 线验收（2026-07-26）**：正确 Z/M SNN 已验证
+> **Z/M minimal-carrier branch decision（2026-07-28）**：revision 3.1 已完成，
+> top-level verdict = `carrier_at_visited_states`。自然轨迹访问到的慢状态在
+> `freeze_all` 后支持跨 seed/快相位/相邻 slow-bin 的**源空间 sustained tonic carrier**，
+> 并通过 seeds 1/3 的 20 s 与独立 \(dt/2\) 确认；但这不是已经证明的 ictal oscillation
+> 或 limit cycle。细粒度 source rhythm 跨 seed 不一致，真实 returning-group-event
+> reference 缺失使 observation gate 保持 `blocked_reference_artifacts`；conditional
+> \(Z\)-entry boundary 未解，existing-coordinate offset 为 `no_evidence`，完整动态
+> Z/M 检验 9/9 runaway。故 recovery/lifecycle 仍为 `not_established`，Phase 3、\(P/A\)
+> actuator 和 \(M\) calibration 均不授权。当前安全口径是：**frozen visited-state
+> carrier 已确认；自然 entry→bounded ictal state→offset→interictal recovery 尚未建立**。
+> 结果归档：
+> `docs/archive/topic4/sef_hfo/zm_minimal_carrier_branch_decision_2026-07-28.md`；
+> machine verdict：
+> `results/topic4_sef_hfo/zm_branch_decision/branch_verdict.json`。
+>
+> **Z/M carrier–exit 上游线路验收（2026-07-26）**：正确 Z/M SNN 已验证
 > `returning interictal events → recruitment → runaway`；加入除法共享抑制 \(S_G\) 后，
 > runaway 被整形成**有界但低占空比的 recurrent burst train**，没有通过 revised v2.1
 > 持续 carrier 门；persistence-based \(H\) 与该载体驱动错配。并行的 matched-budget
 > 局部抑制降阶场完整 513-mode Floquet 谱均稳定（`both_stable`），不迁移 SNN。
-> 因而当前安全口径是：**entry 成立到 runaway；bounded ictal carrier、独立 offset 与
-> recovery 均未建立**。下一步不再先调终止器，而是在原 Z/M+\(S_G\) SNN 上用 canonical
+> 该轮安全口径是：**entry 成立到 runaway；自然轨迹上的 bounded ictal carrier、独立 offset 与
+> recovery 均未建立**。其下一步是在原 Z/M+\(S_G\) SNN 上用 canonical
 > checkpoint 做 probabilistic minimal-subsystem audit，区分 E/I、E/I+\(M\)、E/I+\(S_G\)、
 > E/I+\(M+S_G\) 的 stable/metastable carrier；visited state 失败后还要先查局部 slow manifold，
 > 再区分 Branch T（轨迹错过）与 Branch F（carrier 缺失）。carrier 成立后先做 slow-coordinate
 > functional rank，再审计 \(Z\)-entry 与 \(M\)、\(M+S_G\)、\(M+Z\)-recovery 的 joint offset；
 > 只有现有坐标均不足时才比较 local-load \(P\) 与 recruited-area \(A\)。
-> 统一验收：`docs/archive/topic4/sef_hfo/zm_carrier_exit_line_acceptance_2026-07-26.md`；
-> 修订 spec：`docs/superpowers/specs/2026-07-26-topic4-zm-minimal-carrier-branch-decision-design.md`。
+> 上游验收：`docs/archive/topic4/sef_hfo/zm_carrier_exit_line_acceptance_2026-07-26.md`；
+> revision 3.1 spec：`docs/superpowers/specs/2026-07-26-topic4-zm-minimal-carrier-branch-decision-design.md`。
 >
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >

@@ -1,0 +1,450 @@
+{
+  "verdict": "no_evidence",
+  "diagnostic_status": "static_M_Z_recovery_curve_nonmonotonic_dynamic_ZM_all_runaway",
+  "reason_code": "ambiguous_static_surface",
+  "ambiguous_family_statuses": {
+    "M_Z_recovery": "nonmonotonic"
+  },
+  "n_complete_seeds": 3,
+  "seeds": [
+    1,
+    3,
+    4
+  ],
+  "family_results": {
+    "M_alone": {
+      "boundary": {
+        "status": "unbracketed",
+        "q_half": null,
+        "direction": "decreasing",
+        "sampled_range": [
+          0.0,
+          1.0
+        ],
+        "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+        "curve": [
+          {
+            "q": 0.0,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          },
+          {
+            "q": 0.3333333333333333,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          },
+          {
+            "q": 0.6666666666666666,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          },
+          {
+            "q": 1.0,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          }
+        ],
+        "n_bootstrap": 2000,
+        "n_valid_bootstrap": 0,
+        "q_half_ci": null,
+        "bootstrap_structure": "hierarchical_seed_then_replicate",
+        "n_clusters": 3
+      },
+      "actual_0_to_1_crossing": {
+        "crossed": false,
+        "direction_ok": false
+      },
+      "reachability": {
+        "reached": false,
+        "reason": "boundary_or_uncertainty_unresolved",
+        "crossing": null,
+        "within_reachable_range": false,
+        "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27"
+      },
+      "n_active_rows": 12,
+      "n_low_rows": 12,
+      "low_basin_persistence_fraction": 0.0,
+      "coexistence_cells": [],
+      "coexistence_levels": [],
+      "coexistence_seeds": [],
+      "basin_coexistence_observed": false,
+      "boundary_has_bootstrap_ci": false,
+      "boundary_within_actual_range": false,
+      "boundary_reached_by_actual_direction": false,
+      "boundary_in_locked_extension": false
+    },
+    "M_SG": {
+      "boundary": {
+        "status": "unbracketed",
+        "q_half": null,
+        "direction": "decreasing",
+        "sampled_range": [
+          0.0,
+          1.0
+        ],
+        "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+        "curve": [
+          {
+            "q": 0.0,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          },
+          {
+            "q": 0.3333333333333333,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          },
+          {
+            "q": 0.6666666666666666,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          },
+          {
+            "q": 1.0,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          }
+        ],
+        "n_bootstrap": 2000,
+        "n_valid_bootstrap": 0,
+        "q_half_ci": null,
+        "bootstrap_structure": "hierarchical_seed_then_replicate",
+        "n_clusters": 3
+      },
+      "actual_0_to_1_crossing": {
+        "crossed": false,
+        "direction_ok": false
+      },
+      "reachability": {
+        "reached": false,
+        "reason": "boundary_or_uncertainty_unresolved",
+        "crossing": null,
+        "within_reachable_range": false,
+        "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27"
+      },
+      "n_active_rows": 12,
+      "n_low_rows": 12,
+      "low_basin_persistence_fraction": 0.0,
+      "coexistence_cells": [],
+      "coexistence_levels": [],
+      "coexistence_seeds": [],
+      "basin_coexistence_observed": false,
+      "boundary_has_bootstrap_ci": false,
+      "boundary_within_actual_range": false,
+      "boundary_reached_by_actual_direction": false,
+      "boundary_in_locked_extension": false
+    },
+    "M_Z_recovery": {
+      "boundary": {
+        "status": "nonmonotonic",
+        "q_half": null,
+        "direction": "decreasing",
+        "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+        "curve": [
+          {
+            "q": 0.0,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          },
+          {
+            "q": 0.3333333333333333,
+            "n": 3,
+            "k": 3,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9326217269725904,
+            "posterior_mean": 0.875,
+            "posterior_ci": [
+              0.46441675695704965,
+              0.9998493639745635
+            ]
+          },
+          {
+            "q": 0.6666666666666666,
+            "n": 7,
+            "k": 7,
+            "success_fraction": 1.0,
+            "posterior_median": 0.9691329086728979,
+            "posterior_mean": 0.9375,
+            "posterior_ci": [
+              0.7075638263376901,
+              0.9999323135357562
+            ]
+          },
+          {
+            "q": 1.0,
+            "n": 7,
+            "k": 1,
+            "success_fraction": 0.14285714285714285,
+            "posterior_median": 0.1610068102709987,
+            "posterior_mean": 0.1875,
+            "posterior_ci": [
+              0.0158765242127468,
+              0.5007974616190776
+            ]
+          },
+          {
+            "q": 1.25,
+            "n": 1,
+            "k": 1,
+            "success_fraction": 1.0,
+            "posterior_median": 0.8368060145916072,
+            "posterior_mean": 0.75,
+            "posterior_ci": [
+              0.1467463163095751,
+              0.9996144190192441
+            ]
+          }
+        ],
+        "n_bootstrap": 2000,
+        "n_valid_bootstrap": 0,
+        "q_half_ci": null,
+        "bootstrap_structure": "hierarchical_seed_then_replicate",
+        "n_clusters": 3
+      },
+      "actual_0_to_1_crossing": {
+        "crossed": false,
+        "direction_ok": false
+      },
+      "reachability": {
+        "reached": false,
+        "reason": "boundary_or_uncertainty_unresolved",
+        "crossing": null,
+        "within_reachable_range": false,
+        "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27"
+      },
+      "n_active_rows": 21,
+      "n_low_rows": 12,
+      "low_basin_persistence_fraction": 0.0,
+      "coexistence_cells": [],
+      "coexistence_levels": [],
+      "coexistence_seeds": [],
+      "basin_coexistence_observed": false,
+      "boundary_has_bootstrap_ci": false,
+      "boundary_within_actual_range": false,
+      "boundary_reached_by_actual_direction": false,
+      "boundary_in_locked_extension": false
+    }
+  },
+  "dynamic_ZM": {
+    "coverage_complete": true,
+    "coverage_reasons": [],
+    "required_seeds": [
+      1,
+      3,
+      4
+    ],
+    "required_replicates": [
+      "noise_replay",
+      "noise_resample_1",
+      "noise_resample_2"
+    ],
+    "n_rows": 9,
+    "per_seed": {
+      "1": {
+        "k": 0,
+        "n": 3,
+        "posterior": {
+          "k": 0,
+          "n": 3,
+          "median": 0.06737827302740962,
+          "mean": 0.125,
+          "lo": 0.0001506360254365687,
+          "hi": 0.5355832430429502,
+          "cred": 0.95,
+          "mass_above": {
+            "0.3": 0.12687036692367049,
+            "0.8": 0.0011337831033596535
+          }
+        },
+        "supports_offset": false,
+        "end_reasons": [
+          "runaway",
+          "runaway",
+          "runaway"
+        ]
+      },
+      "3": {
+        "k": 0,
+        "n": 3,
+        "posterior": {
+          "k": 0,
+          "n": 3,
+          "median": 0.06737827302740962,
+          "mean": 0.125,
+          "lo": 0.0001506360254365687,
+          "hi": 0.5355832430429502,
+          "cred": 0.95,
+          "mass_above": {
+            "0.3": 0.12687036692367049,
+            "0.8": 0.0011337831033596535
+          }
+        },
+        "supports_offset": false,
+        "end_reasons": [
+          "runaway",
+          "runaway",
+          "runaway"
+        ]
+      },
+      "4": {
+        "k": 0,
+        "n": 3,
+        "posterior": {
+          "k": 0,
+          "n": 3,
+          "median": 0.06737827302740962,
+          "mean": 0.125,
+          "lo": 0.0001506360254365687,
+          "hi": 0.5355832430429502,
+          "cred": 0.95,
+          "mass_above": {
+            "0.3": 0.12687036692367049,
+            "0.8": 0.0011337831033596535
+          }
+        },
+        "supports_offset": false,
+        "end_reasons": [
+          "runaway",
+          "runaway",
+          "runaway"
+        ]
+      }
+    },
+    "supporting_seeds": [],
+    "posterior_offset_reached": {
+      "k": 0,
+      "n": 9,
+      "median": 0.024281187474235293,
+      "mean": 0.05,
+      "lo": 5.306405341849292e-05,
+      "hi": 0.23761009863290306,
+      "cred": 0.95,
+      "mass_above": {
+        "0.3": 0.010162572120690494,
+        "0.8": 4.571438028122543e-08
+      }
+    },
+    "reached": false,
+    "all_runaway": true,
+    "definition": "dead_in_rest_basin under dynamic Z+M with the S_G family frozen"
+  },
+  "contract_audit": {
+    "passed": true,
+    "reasons": [],
+    "required_seeds": [
+      1,
+      3,
+      4
+    ],
+    "required_base_cells_per_seed": 24,
+    "row_counts": {
+      "1": 33,
+      "3": 30,
+      "4": 33
+    },
+    "producer_git_sha_note": "legacy rows may lack row-level producer_git_sha; manifest contributing_git_shas remain provenance only, never positive evidence"
+  },
+  "inputs": [
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/offset/seed1/offset_probes.json",
+      "sha256": "67f49524f4389ea1f57dc5014a965131fdabf93121ee889f99ad1d5cdce19494"
+    },
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/offset/seed3/offset_probes.json",
+      "sha256": "6b91efd02d755de372476671b6e90019fe7a25048ca18bade98a95c648026db4"
+    },
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/offset/seed4/offset_probes.json",
+      "sha256": "28e789400d005876cdbc97e0b0d49d581acac66ffdd335f1c42381e56584b0df"
+    }
+  ],
+  "anchor_inputs": [
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/anchors/seed1/anchor.json",
+      "sha256": "adbfed7fdeeff055c34ea9a641ddc012ed07d916de58d7156eb992093eaa20dd"
+    },
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/anchors/seed3/anchor.json",
+      "sha256": "351ef5e324e5c79bd6f33668f55c5e9d2b1f5f048739df39f8fc6a696ad506fd"
+    },
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/anchors/seed4/anchor.json",
+      "sha256": "549dac7b932e561c8ff5f601fd89fb1bea8e9febe7449d87e4d632d20be7754a"
+    }
+  ],
+  "spec": {
+    "path": "docs/superpowers/specs/2026-07-26-topic4-zm-minimal-carrier-branch-decision-design.md",
+    "sha256": "e8d2b29703603568ce31ce3b3d3c04bf07fc23a4fd3526640160d6461080b30e"
+  },
+  "canonical_config": {
+    "path": "results/topic4_sef_hfo/zm_branch_decision/phase0/canonical_config.json",
+    "sha256": "00e401925fe5897c13fde797c187ff631da1cce2135475fbaf93c700e25f5929"
+  },
+  "analysis_git_sha": "ca0b7fb718657a011327832e13b652808dc5fd4e",
+  "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+  "timestamp": "2026-07-28T11:53:22",
+  "claim_boundary": "offset from the carrier basin only; dead/rest return is not returning interictal-event recovery and does not establish lifecycle"
+}

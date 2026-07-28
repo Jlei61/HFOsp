@@ -1,5 +1,14 @@
 # Z/M carrier–exit 机制线验收（2026-07-26）
 
+> **Forward status（2026-07-28）**：本文是 minimal-carrier audit 之前的上游线路验收，
+> 历史结论不删除。后续 exact checkpoint/freeze 分析已在自然轨迹访问过的慢状态上确认
+> `freeze_all` source-space sustained tonic carrier，top verdict =
+> `carrier_at_visited_states`；这不与本文“自然 Z/M+\(S_G\) 轨迹没有通过持续 carrier 门”
+> 冲突，因为两轮检验的对象分别是 frozen fast subsystem 与动态慢流。最新结果仍未通过
+> observation gate，entry boundary 未解，offset = `no_evidence`，dynamic Z/M 9/9
+> runaway，recovery/lifecycle 未建立，Phase 3/actuator 不授权。最新归档：
+> `docs/archive/topic4/sef_hfo/zm_minimal_carrier_branch_decision_2026-07-28.md`。
+
 ## 0. 一句话判决
 
 **验收既有线路为一个边界清楚、工程证据完整的机制性 NO-GO；不验收为 ictal

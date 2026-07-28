@@ -1,0 +1,2181 @@
+{
+  "version": "zm_branch_verdict_v1.4_2026-07-28_offset_routing",
+  "timestamp": "2026-07-28T11:55:12",
+  "git_sha": "ca0b7fb718657a011327832e13b652808dc5fd4e",
+  "verdict": "carrier_at_visited_states",
+  "layers": {
+    "state_gate": "ok",
+    "exact_resume": "ok",
+    "anchors": {
+      "eligible_seeds": [
+        1,
+        3,
+        4
+      ],
+      "n_eligible": 3
+    },
+    "source_space_carrier": "carrier_window",
+    "observation_space_carrier": "blocked_reference_artifacts",
+    "carrier_confirmation": "passed",
+    "entry": "conditional_Z_boundary_unresolved",
+    "offset": "existing_coordinate_offset_unresolved",
+    "recovery_lifecycle": "not_established",
+    "offset_diagnostic": "static_M_Z_recovery_curve_nonmonotonic_dynamic_ZM_all_runaway"
+  },
+  "reason": "the existing-coordinate offset audit remains fail-closed; no calibration, Phase-3, or lifecycle branch is authorized",
+  "observation_layer_blocked": true,
+  "actuator_authorized": false,
+  "reference_artifacts": "blocked",
+  "gates": {
+    "returncode": 0,
+    "summary": "202 passed, 4 warnings in 106.60s (0:01:46)",
+    "tests": [
+      "tests/test_topic4_zm_fork_state.py",
+      "tests/test_topic4_zm_checkpoint_hook.py",
+      "tests/test_topic4_zm_exact_resume.py",
+      "tests/test_topic4_zm_noise_bank.py",
+      "tests/test_topic4_zm_minimal_carrier.py",
+      "tests/test_topic4_zm_branch_verdict.py",
+      "tests/test_topic4_zm_neighbourhood.py",
+      "tests/test_topic4_zm_empirical_carrier.py",
+      "tests/test_snn_shunting.py",
+      "tests/test_topic4_zm_ictal_carrier.py",
+      "tests/test_topic4_zm_branch_runner_diagnostics.py",
+      "tests/test_topic4_zm_carrier_morphology.py",
+      "tests/test_topic4_zm_source_rhythm.py",
+      "tests/test_topic4_zm_effective_rank.py",
+      "tests/test_topic4_zm_modal_operator.py",
+      "tests/test_topic4_zm_boundaries.py",
+      "tests/test_snn_gates.py",
+      "tests/test_zm_slow_field_parity.py",
+      "tests/test_a1c_feedback.py"
+    ],
+    "wall_s": 107.2,
+    "timestamp": "2026-07-28T11:55:12",
+    "passed": true
+  },
+  "state_inventory": {
+    "status": "ok",
+    "inventory_version": "zm_state_inventory_v1_2026-07-26",
+    "n_rows": 38,
+    "n_simulator_rows": 33,
+    "unclassified": {},
+    "problems": [],
+    "engine_scopes": {
+      "simulate_kick": 132,
+      "SpatialSlowField.__init__": 68,
+      "SpatialSlowField.apply_currents": 2,
+      "SpatialSlowField.step": 47
+    }
+  },
+  "engine_guard_change": {
+    "guarded_file": "src/snn_engine/kick_probe.py",
+    "old_sha256": "5faaedab37ab6208888607f70dc387f378b1ec9e51bfc21e29f0c81e80aa8b99",
+    "new_sha256": "6e1c8986ec45ff0f3c44a538f865e0dd4fe47b9f5b6a73938cc0a7df64ddd479",
+    "reason": "spec rev3.1 \u00a73.1: minimal off-by-default checkpoint/freeze hook (single new arg zm_ckpt=). Restore/capture/mean-input/external-drive-audit are gated; state packing lives in src/topic4_zm_checkpoint.py so the timestep update order stays single-source.",
+    "diff_stat": "src/snn_engine/kick_probe.py | 81 +++++++++++++++++++++++++++++++++++++++-----\n 1 file changed, 73 insertions(+), 8 deletions(-)",
+    "parity_evidence": {
+      "pre_edit_fixture": "tests/fixtures/topic4_zm_preedit_parity.npz (generated at old_sha256)",
+      "tests": [
+        "tests/test_topic4_zm_checkpoint_hook.py",
+        "tests/test_topic4_zm_exact_resume.py",
+        "tests/test_snn_shunting.py",
+        "tests/test_snn_gates.py",
+        "tests/test_zm_slow_field_parity.py",
+        "tests/test_a1c_feedback.py"
+      ],
+      "claims": [
+        "pre-edit vs post-edit default path byte-identical (raster/rates/lfp, 2 cases)",
+        "hook-enabled-but-idle consumes no RNG draw and changes nothing",
+        "split->save->restore->continue byte-identical at trough/rising/peak forks",
+        "byte parity does NOT waive re-blessing; this record is the re-bless"
+      ]
+    },
+    "git_sha": "661a39190b333a386593d7450812abea1b902fc3"
+  },
+  "anchors": {
+    "1": {
+      "eligible": true,
+      "reasons": [],
+      "bounded_ms": 6300.0,
+      "escalation_ms": 8700.0,
+      "n_states": 11,
+      "returning_events": {
+        "n_events": 15,
+        "median_duration_ms": 75.0,
+        "median_peak_hz": 68.58024691358025
+      },
+      "config_sha": "32e40e1eb4c9c9ffb9e1d0c850949a1554e5a8e2a25acd32883e97363d8d2a03"
+    },
+    "3": {
+      "eligible": true,
+      "reasons": [],
+      "bounded_ms": 5125.0,
+      "escalation_ms": 9875.0,
+      "n_states": 11,
+      "returning_events": {
+        "n_events": 15,
+        "median_duration_ms": 75.0,
+        "median_peak_hz": 69.6333638863428
+      },
+      "config_sha": "1f9db4659ab370e61212e7e8d409e0ede8d08d19a1a3380453cfc3e63b051e92"
+    },
+    "4": {
+      "eligible": true,
+      "reasons": [],
+      "bounded_ms": 8675.0,
+      "escalation_ms": 6325.0,
+      "n_states": 11,
+      "returning_events": {
+        "n_events": 8,
+        "median_duration_ms": 50.0,
+        "median_peak_hz": 46.91433566433567
+      },
+      "config_sha": "527202a8f300d11b6a51815d0204b989cc3f74b1add0c107049815dc18ac7fcc"
+    }
+  },
+  "eligible_seeds": [
+    1,
+    3,
+    4
+  ],
+  "per_arm": {
+    "freeze_all": {
+      "status": "carrier_window",
+      "positive_cells": 9,
+      "seeds": [
+        1,
+        3,
+        4
+      ],
+      "phases": [
+        "peak",
+        "rising"
+      ],
+      "bins": [
+        "bounded_early",
+        "bounded_mid"
+      ],
+      "adjacent_bins": true,
+      "is_control_arm": false,
+      "compatible_witnesses": [
+        {
+          "bins": [
+            "bounded_early",
+            "bounded_mid"
+          ],
+          "phases": [
+            "peak",
+            "rising"
+          ],
+          "seeds": [
+            1,
+            3
+          ]
+        }
+      ],
+      "unmet": []
+    },
+    "freeze_z": {
+      "status": "no_carrier",
+      "positive_cells": 0,
+      "seeds": [],
+      "phases": [],
+      "bins": [],
+      "adjacent_bins": false,
+      "is_control_arm": false,
+      "compatible_witnesses": [],
+      "unmet": [
+        "needs>=2 seeds",
+        "needs>=2 fast phases",
+        "needs compatible support in the same adjacent bins and phases"
+      ]
+    },
+    "freeze_zm": {
+      "status": "no_carrier",
+      "positive_cells": 0,
+      "seeds": [],
+      "phases": [],
+      "bins": [],
+      "adjacent_bins": false,
+      "is_control_arm": false,
+      "compatible_witnesses": [],
+      "unmet": [
+        "needs>=2 seeds",
+        "needs>=2 fast phases",
+        "needs compatible support in the same adjacent bins and phases"
+      ]
+    },
+    "freeze_zsg": {
+      "status": "no_carrier",
+      "positive_cells": 0,
+      "seeds": [],
+      "phases": [],
+      "bins": [],
+      "adjacent_bins": false,
+      "is_control_arm": false,
+      "compatible_witnesses": [],
+      "unmet": [
+        "needs>=2 seeds",
+        "needs>=2 fast phases",
+        "needs compatible support in the same adjacent bins and phases"
+      ]
+    }
+  },
+  "smallest_positive_subsystem": [
+    "carrier_fast_only"
+  ],
+  "entry_boundary": {
+    "verdict": "conditional_Z_entry_boundary_unresolved",
+    "n_complete_seeds": 3,
+    "seeds": [
+      1,
+      3,
+      4
+    ],
+    "n_rows": 23,
+    "boundary": {
+      "status": "nonmonotonic",
+      "q_half": null,
+      "direction": "increasing",
+      "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+      "curve": [
+        {
+          "q": 0.0,
+          "n": 7,
+          "k": 5,
+          "success_fraction": 0.7142857142857143,
+          "posterior_median": 0.7037569092620708,
+          "posterior_mean": 0.6875,
+          "posterior_ci": [
+            0.352338345040579,
+            0.9352717330505166
+          ]
+        },
+        {
+          "q": 0.25,
+          "n": 7,
+          "k": 7,
+          "success_fraction": 1.0,
+          "posterior_median": 0.9691329086728979,
+          "posterior_mean": 0.9375,
+          "posterior_ci": [
+            0.7075638263376901,
+            0.9999323135357562
+          ]
+        },
+        {
+          "q": 0.5,
+          "n": 3,
+          "k": 3,
+          "success_fraction": 1.0,
+          "posterior_median": 0.9326217269725904,
+          "posterior_mean": 0.875,
+          "posterior_ci": [
+            0.46441675695704965,
+            0.9998493639745635
+          ]
+        },
+        {
+          "q": 0.75,
+          "n": 3,
+          "k": 3,
+          "success_fraction": 1.0,
+          "posterior_median": 0.9326217269725904,
+          "posterior_mean": 0.875,
+          "posterior_ci": [
+            0.46441675695704965,
+            0.9998493639745635
+          ]
+        },
+        {
+          "q": 1.0,
+          "n": 3,
+          "k": 3,
+          "success_fraction": 1.0,
+          "posterior_median": 0.9326217269725904,
+          "posterior_mean": 0.875,
+          "posterior_ci": [
+            0.46441675695704965,
+            0.9998493639745635
+          ]
+        }
+      ],
+      "n_bootstrap": 2000,
+      "n_valid_bootstrap": 0,
+      "q_half_ci": null,
+      "bootstrap_structure": "hierarchical_seed_then_replicate",
+      "n_clusters": 3
+    },
+    "trajectory_crossing": {
+      "crossed": false,
+      "direction_ok": false
+    },
+    "reachability": {
+      "reached": false,
+      "reason": "boundary_or_uncertainty_unresolved",
+      "crossing": null,
+      "within_reachable_range": false,
+      "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27"
+    },
+    "end_reason_counts": {
+      "survived": 23
+    },
+    "coordinate_family": "conditional_z_slice",
+    "inputs": [
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/entry/seed1/entry_probes.json",
+        "sha256": "ed54912079fc5b071b800f7ffb5887060db4586b766b755563584a981656a01c"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/entry/seed3/entry_probes.json",
+        "sha256": "b538c2aa366e57201701a54cbdd69e07f70f952c40c168c8be4a7e72dc9ee989"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/entry/seed4/entry_probes.json",
+        "sha256": "855ca5850b7c24eac72d52d7ed0e4b712f4bed033f18e60bf5e672e227f9ef9e"
+      }
+    ],
+    "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+    "timestamp": "2026-07-28T11:53:21",
+    "claim_boundary": "conditional actual-field Z slice with onset-context M/S_G held; not global Z sufficiency and not offset/recovery/lifecycle evidence"
+  },
+  "offset_boundary": {
+    "verdict": "no_evidence",
+    "diagnostic_status": "static_M_Z_recovery_curve_nonmonotonic_dynamic_ZM_all_runaway",
+    "reason_code": "ambiguous_static_surface",
+    "ambiguous_family_statuses": {
+      "M_Z_recovery": "nonmonotonic"
+    },
+    "n_complete_seeds": 3,
+    "seeds": [
+      1,
+      3,
+      4
+    ],
+    "family_results": {
+      "M_alone": {
+        "boundary": {
+          "status": "unbracketed",
+          "q_half": null,
+          "direction": "decreasing",
+          "sampled_range": [
+            0.0,
+            1.0
+          ],
+          "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+          "curve": [
+            {
+              "q": 0.0,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            },
+            {
+              "q": 0.3333333333333333,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            },
+            {
+              "q": 0.6666666666666666,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            },
+            {
+              "q": 1.0,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            }
+          ],
+          "n_bootstrap": 2000,
+          "n_valid_bootstrap": 0,
+          "q_half_ci": null,
+          "bootstrap_structure": "hierarchical_seed_then_replicate",
+          "n_clusters": 3
+        },
+        "actual_0_to_1_crossing": {
+          "crossed": false,
+          "direction_ok": false
+        },
+        "reachability": {
+          "reached": false,
+          "reason": "boundary_or_uncertainty_unresolved",
+          "crossing": null,
+          "within_reachable_range": false,
+          "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27"
+        },
+        "n_active_rows": 12,
+        "n_low_rows": 12,
+        "low_basin_persistence_fraction": 0.0,
+        "coexistence_cells": [],
+        "coexistence_levels": [],
+        "coexistence_seeds": [],
+        "basin_coexistence_observed": false,
+        "boundary_has_bootstrap_ci": false,
+        "boundary_within_actual_range": false,
+        "boundary_reached_by_actual_direction": false,
+        "boundary_in_locked_extension": false
+      },
+      "M_SG": {
+        "boundary": {
+          "status": "unbracketed",
+          "q_half": null,
+          "direction": "decreasing",
+          "sampled_range": [
+            0.0,
+            1.0
+          ],
+          "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+          "curve": [
+            {
+              "q": 0.0,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            },
+            {
+              "q": 0.3333333333333333,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            },
+            {
+              "q": 0.6666666666666666,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            },
+            {
+              "q": 1.0,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            }
+          ],
+          "n_bootstrap": 2000,
+          "n_valid_bootstrap": 0,
+          "q_half_ci": null,
+          "bootstrap_structure": "hierarchical_seed_then_replicate",
+          "n_clusters": 3
+        },
+        "actual_0_to_1_crossing": {
+          "crossed": false,
+          "direction_ok": false
+        },
+        "reachability": {
+          "reached": false,
+          "reason": "boundary_or_uncertainty_unresolved",
+          "crossing": null,
+          "within_reachable_range": false,
+          "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27"
+        },
+        "n_active_rows": 12,
+        "n_low_rows": 12,
+        "low_basin_persistence_fraction": 0.0,
+        "coexistence_cells": [],
+        "coexistence_levels": [],
+        "coexistence_seeds": [],
+        "basin_coexistence_observed": false,
+        "boundary_has_bootstrap_ci": false,
+        "boundary_within_actual_range": false,
+        "boundary_reached_by_actual_direction": false,
+        "boundary_in_locked_extension": false
+      },
+      "M_Z_recovery": {
+        "boundary": {
+          "status": "nonmonotonic",
+          "q_half": null,
+          "direction": "decreasing",
+          "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+          "curve": [
+            {
+              "q": 0.0,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            },
+            {
+              "q": 0.3333333333333333,
+              "n": 3,
+              "k": 3,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9326217269725904,
+              "posterior_mean": 0.875,
+              "posterior_ci": [
+                0.46441675695704965,
+                0.9998493639745635
+              ]
+            },
+            {
+              "q": 0.6666666666666666,
+              "n": 7,
+              "k": 7,
+              "success_fraction": 1.0,
+              "posterior_median": 0.9691329086728979,
+              "posterior_mean": 0.9375,
+              "posterior_ci": [
+                0.7075638263376901,
+                0.9999323135357562
+              ]
+            },
+            {
+              "q": 1.0,
+              "n": 7,
+              "k": 1,
+              "success_fraction": 0.14285714285714285,
+              "posterior_median": 0.1610068102709987,
+              "posterior_mean": 0.1875,
+              "posterior_ci": [
+                0.0158765242127468,
+                0.5007974616190776
+              ]
+            },
+            {
+              "q": 1.25,
+              "n": 1,
+              "k": 1,
+              "success_fraction": 1.0,
+              "posterior_median": 0.8368060145916072,
+              "posterior_mean": 0.75,
+              "posterior_ci": [
+                0.1467463163095751,
+                0.9996144190192441
+              ]
+            }
+          ],
+          "n_bootstrap": 2000,
+          "n_valid_bootstrap": 0,
+          "q_half_ci": null,
+          "bootstrap_structure": "hierarchical_seed_then_replicate",
+          "n_clusters": 3
+        },
+        "actual_0_to_1_crossing": {
+          "crossed": false,
+          "direction_ok": false
+        },
+        "reachability": {
+          "reached": false,
+          "reason": "boundary_or_uncertainty_unresolved",
+          "crossing": null,
+          "within_reachable_range": false,
+          "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27"
+        },
+        "n_active_rows": 21,
+        "n_low_rows": 12,
+        "low_basin_persistence_fraction": 0.0,
+        "coexistence_cells": [],
+        "coexistence_levels": [],
+        "coexistence_seeds": [],
+        "basin_coexistence_observed": false,
+        "boundary_has_bootstrap_ci": false,
+        "boundary_within_actual_range": false,
+        "boundary_reached_by_actual_direction": false,
+        "boundary_in_locked_extension": false
+      }
+    },
+    "dynamic_ZM": {
+      "coverage_complete": true,
+      "coverage_reasons": [],
+      "required_seeds": [
+        1,
+        3,
+        4
+      ],
+      "required_replicates": [
+        "noise_replay",
+        "noise_resample_1",
+        "noise_resample_2"
+      ],
+      "n_rows": 9,
+      "per_seed": {
+        "1": {
+          "k": 0,
+          "n": 3,
+          "posterior": {
+            "k": 0,
+            "n": 3,
+            "median": 0.06737827302740962,
+            "mean": 0.125,
+            "lo": 0.0001506360254365687,
+            "hi": 0.5355832430429502,
+            "cred": 0.95,
+            "mass_above": {
+              "0.3": 0.12687036692367049,
+              "0.8": 0.0011337831033596535
+            }
+          },
+          "supports_offset": false,
+          "end_reasons": [
+            "runaway",
+            "runaway",
+            "runaway"
+          ]
+        },
+        "3": {
+          "k": 0,
+          "n": 3,
+          "posterior": {
+            "k": 0,
+            "n": 3,
+            "median": 0.06737827302740962,
+            "mean": 0.125,
+            "lo": 0.0001506360254365687,
+            "hi": 0.5355832430429502,
+            "cred": 0.95,
+            "mass_above": {
+              "0.3": 0.12687036692367049,
+              "0.8": 0.0011337831033596535
+            }
+          },
+          "supports_offset": false,
+          "end_reasons": [
+            "runaway",
+            "runaway",
+            "runaway"
+          ]
+        },
+        "4": {
+          "k": 0,
+          "n": 3,
+          "posterior": {
+            "k": 0,
+            "n": 3,
+            "median": 0.06737827302740962,
+            "mean": 0.125,
+            "lo": 0.0001506360254365687,
+            "hi": 0.5355832430429502,
+            "cred": 0.95,
+            "mass_above": {
+              "0.3": 0.12687036692367049,
+              "0.8": 0.0011337831033596535
+            }
+          },
+          "supports_offset": false,
+          "end_reasons": [
+            "runaway",
+            "runaway",
+            "runaway"
+          ]
+        }
+      },
+      "supporting_seeds": [],
+      "posterior_offset_reached": {
+        "k": 0,
+        "n": 9,
+        "median": 0.024281187474235293,
+        "mean": 0.05,
+        "lo": 5.306405341849292e-05,
+        "hi": 0.23761009863290306,
+        "cred": 0.95,
+        "mass_above": {
+          "0.3": 0.010162572120690494,
+          "0.8": 4.571438028122543e-08
+        }
+      },
+      "reached": false,
+      "all_runaway": true,
+      "definition": "dead_in_rest_basin under dynamic Z+M with the S_G family frozen"
+    },
+    "contract_audit": {
+      "passed": true,
+      "reasons": [],
+      "required_seeds": [
+        1,
+        3,
+        4
+      ],
+      "required_base_cells_per_seed": 24,
+      "row_counts": {
+        "1": 33,
+        "3": 30,
+        "4": 33
+      },
+      "producer_git_sha_note": "legacy rows may lack row-level producer_git_sha; manifest contributing_git_shas remain provenance only, never positive evidence"
+    },
+    "inputs": [
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/offset/seed1/offset_probes.json",
+        "sha256": "67f49524f4389ea1f57dc5014a965131fdabf93121ee889f99ad1d5cdce19494"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/offset/seed3/offset_probes.json",
+        "sha256": "6b91efd02d755de372476671b6e90019fe7a25048ca18bade98a95c648026db4"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/offset/seed4/offset_probes.json",
+        "sha256": "28e789400d005876cdbc97e0b0d49d581acac66ffdd335f1c42381e56584b0df"
+      }
+    ],
+    "anchor_inputs": [
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/anchors/seed1/anchor.json",
+        "sha256": "adbfed7fdeeff055c34ea9a641ddc012ed07d916de58d7156eb992093eaa20dd"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/anchors/seed3/anchor.json",
+        "sha256": "351ef5e324e5c79bd6f33668f55c5e9d2b1f5f048739df39f8fc6a696ad506fd"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/anchors/seed4/anchor.json",
+        "sha256": "549dac7b932e561c8ff5f601fd89fb1bea8e9febe7449d87e4d632d20be7754a"
+      }
+    ],
+    "spec": {
+      "path": "docs/superpowers/specs/2026-07-26-topic4-zm-minimal-carrier-branch-decision-design.md",
+      "sha256": "e8d2b29703603568ce31ce3b3d3c04bf07fc23a4fd3526640160d6461080b30e"
+    },
+    "canonical_config": {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/phase0/canonical_config.json",
+      "sha256": "00e401925fe5897c13fde797c187ff631da1cce2135475fbaf93c700e25f5929"
+    },
+    "analysis_git_sha": "ca0b7fb718657a011327832e13b652808dc5fd4e",
+    "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+    "timestamp": "2026-07-28T11:53:22",
+    "claim_boundary": "offset from the carrier basin only; dead/rest return is not returning interictal-event recovery and does not establish lifecycle"
+  },
+  "coverage": {
+    "seeds_run": [
+      1,
+      3,
+      4
+    ],
+    "bins_run": [
+      "bounded_early",
+      "bounded_mid"
+    ],
+    "phases_run": [
+      "peak",
+      "rising",
+      "trough"
+    ],
+    "arms_run": [
+      "freeze_all",
+      "freeze_z",
+      "freeze_zm",
+      "freeze_zsg"
+    ],
+    "n_cells_run": 17,
+    "n_cells_planned_run": 11,
+    "n_cells_extra": 6,
+    "extra_cells": [
+      {
+        "seed": 1,
+        "bin_name": "bounded_early",
+        "fast_phase": "peak",
+        "arm": "freeze_all"
+      },
+      {
+        "seed": 1,
+        "bin_name": "bounded_early",
+        "fast_phase": "rising",
+        "arm": "freeze_all"
+      },
+      {
+        "seed": 1,
+        "bin_name": "bounded_mid",
+        "fast_phase": "rising",
+        "arm": "freeze_all"
+      },
+      {
+        "seed": 3,
+        "bin_name": "bounded_early",
+        "fast_phase": "peak",
+        "arm": "freeze_all"
+      },
+      {
+        "seed": 3,
+        "bin_name": "bounded_early",
+        "fast_phase": "rising",
+        "arm": "freeze_all"
+      },
+      {
+        "seed": 3,
+        "bin_name": "bounded_mid",
+        "fast_phase": "rising",
+        "arm": "freeze_all"
+      }
+    ],
+    "n_cells_planned": 24,
+    "not_run": [
+      {
+        "seed": 1,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_zm"
+      },
+      {
+        "seed": 1,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_zsg"
+      },
+      {
+        "seed": 1,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_z"
+      },
+      {
+        "seed": 3,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_zm"
+      },
+      {
+        "seed": 3,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_zsg"
+      },
+      {
+        "seed": 3,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_z"
+      },
+      {
+        "seed": 4,
+        "bin_name": "bounded_mid",
+        "fast_phase": "trough",
+        "arm": "freeze_all"
+      },
+      {
+        "seed": 4,
+        "bin_name": "bounded_mid",
+        "fast_phase": "trough",
+        "arm": "freeze_zm"
+      },
+      {
+        "seed": 4,
+        "bin_name": "bounded_mid",
+        "fast_phase": "trough",
+        "arm": "freeze_zsg"
+      },
+      {
+        "seed": 4,
+        "bin_name": "bounded_mid",
+        "fast_phase": "trough",
+        "arm": "freeze_z"
+      },
+      {
+        "seed": 4,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_zm"
+      },
+      {
+        "seed": 4,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_zsg"
+      },
+      {
+        "seed": 4,
+        "bin_name": "bounded_mid",
+        "fast_phase": "peak",
+        "arm": "freeze_z"
+      }
+    ],
+    "n_not_run": 13,
+    "declared_ladder": {
+      "seeds": [
+        1,
+        3,
+        4
+      ],
+      "bins": [
+        "bounded_mid"
+      ],
+      "phases": [
+        "trough",
+        "peak"
+      ],
+      "arms": [
+        "freeze_all",
+        "freeze_zm",
+        "freeze_zsg",
+        "freeze_z"
+      ]
+    },
+    "spec_full_matrix": {
+      "seeds_run": [
+        1,
+        3,
+        4
+      ],
+      "bins_run": [
+        "bounded_early",
+        "bounded_mid"
+      ],
+      "phases_run": [
+        "peak",
+        "rising",
+        "trough"
+      ],
+      "arms_run": [
+        "freeze_all",
+        "freeze_z",
+        "freeze_zm",
+        "freeze_zsg"
+      ],
+      "n_cells_run": 17,
+      "n_cells_planned_run": 17,
+      "n_cells_extra": 0,
+      "extra_cells": [],
+      "n_cells_planned": 162,
+      "not_run": [
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 1,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 3,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_early",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_mid",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "trough",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "rising",
+          "arm": "dynamic_z_only"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_all"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_zm"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_zsg"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "freeze_z"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "dynamic_replay"
+        },
+        {
+          "seed": 4,
+          "bin_name": "bounded_late",
+          "fast_phase": "peak",
+          "arm": "dynamic_z_only"
+        }
+      ],
+      "n_not_run": 145
+    }
+  },
+  "cells": [
+    {
+      "seed": 1,
+      "bin_name": "bounded_early",
+      "fast_phase": "peak",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    },
+    {
+      "seed": 1,
+      "bin_name": "bounded_early",
+      "fast_phase": "rising",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    },
+    {
+      "seed": 1,
+      "bin_name": "bounded_mid",
+      "fast_phase": "peak",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    },
+    {
+      "seed": 1,
+      "bin_name": "bounded_mid",
+      "fast_phase": "rising",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    },
+    {
+      "seed": 1,
+      "bin_name": "bounded_mid",
+      "fast_phase": "trough",
+      "arm": "freeze_all",
+      "klass": "transient_carrier_like",
+      "k": 0,
+      "n": 3,
+      "p_median": 0.067,
+      "p_lo": 0.0,
+      "p_hi": 0.536,
+      "is_control_arm": false
+    },
+    {
+      "seed": 1,
+      "bin_name": "bounded_mid",
+      "fast_phase": "trough",
+      "arm": "freeze_z",
+      "klass": "hfo_like_relaxation_train",
+      "k": 0,
+      "n": 3,
+      "p_median": 0.067,
+      "p_lo": 0.0,
+      "p_hi": 0.536,
+      "is_control_arm": false
+    },
+    {
+      "seed": 1,
+      "bin_name": "bounded_mid",
+      "fast_phase": "trough",
+      "arm": "freeze_zm",
+      "klass": "hfo_like_relaxation_train",
+      "k": 0,
+      "n": 3,
+      "p_median": 0.067,
+      "p_lo": 0.0,
+      "p_hi": 0.536,
+      "is_control_arm": false
+    },
+    {
+      "seed": 1,
+      "bin_name": "bounded_mid",
+      "fast_phase": "trough",
+      "arm": "freeze_zsg",
+      "klass": "transient_carrier_like",
+      "k": 0,
+      "n": 3,
+      "p_median": 0.067,
+      "p_lo": 0.0,
+      "p_hi": 0.536,
+      "is_control_arm": false
+    },
+    {
+      "seed": 3,
+      "bin_name": "bounded_early",
+      "fast_phase": "peak",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    },
+    {
+      "seed": 3,
+      "bin_name": "bounded_early",
+      "fast_phase": "rising",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    },
+    {
+      "seed": 3,
+      "bin_name": "bounded_mid",
+      "fast_phase": "peak",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    },
+    {
+      "seed": 3,
+      "bin_name": "bounded_mid",
+      "fast_phase": "rising",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    },
+    {
+      "seed": 3,
+      "bin_name": "bounded_mid",
+      "fast_phase": "trough",
+      "arm": "freeze_all",
+      "klass": "transient_carrier_like",
+      "k": 0,
+      "n": 3,
+      "p_median": 0.067,
+      "p_lo": 0.0,
+      "p_hi": 0.536,
+      "is_control_arm": false
+    },
+    {
+      "seed": 3,
+      "bin_name": "bounded_mid",
+      "fast_phase": "trough",
+      "arm": "freeze_z",
+      "klass": "hfo_like_relaxation_train",
+      "k": 0,
+      "n": 3,
+      "p_median": 0.067,
+      "p_lo": 0.0,
+      "p_hi": 0.536,
+      "is_control_arm": false
+    },
+    {
+      "seed": 3,
+      "bin_name": "bounded_mid",
+      "fast_phase": "trough",
+      "arm": "freeze_zm",
+      "klass": "hfo_like_relaxation_train",
+      "k": 0,
+      "n": 3,
+      "p_median": 0.067,
+      "p_lo": 0.0,
+      "p_hi": 0.536,
+      "is_control_arm": false
+    },
+    {
+      "seed": 3,
+      "bin_name": "bounded_mid",
+      "fast_phase": "trough",
+      "arm": "freeze_zsg",
+      "klass": "transient_carrier_like",
+      "k": 0,
+      "n": 3,
+      "p_median": 0.067,
+      "p_lo": 0.0,
+      "p_hi": 0.536,
+      "is_control_arm": false
+    },
+    {
+      "seed": 4,
+      "bin_name": "bounded_mid",
+      "fast_phase": "peak",
+      "arm": "freeze_all",
+      "klass": "stable_carrier",
+      "k": 3,
+      "n": 3,
+      "p_median": 0.933,
+      "p_lo": 0.464,
+      "p_hi": 1.0,
+      "is_control_arm": false
+    }
+  ],
+  "neighbourhood": null,
+  "confirmation": {
+    "status": "passed",
+    "arm": "freeze_all",
+    "central_state": "bounded_mid__peak",
+    "min_seeds": 2,
+    "long_horizon_ms": 20000.0,
+    "dt2_horizon_ms": 8000.0,
+    "long_horizon_seeds": [
+      1,
+      3
+    ],
+    "dt2_seeds": [
+      1,
+      3
+    ],
+    "complete_seeds": [
+      1,
+      3
+    ],
+    "seeds_passed": [
+      1,
+      3
+    ],
+    "failed_seeds": []
+  },
+  "confirmation_by_arm": {
+    "freeze_all": {
+      "status": "passed",
+      "arm": "freeze_all",
+      "central_state": "bounded_mid__peak",
+      "min_seeds": 2,
+      "long_horizon_ms": 20000.0,
+      "dt2_horizon_ms": 8000.0,
+      "long_horizon_seeds": [
+        1,
+        3
+      ],
+      "dt2_seeds": [
+        1,
+        3
+      ],
+      "complete_seeds": [
+        1,
+        3
+      ],
+      "seeds_passed": [
+        1,
+        3
+      ],
+      "failed_seeds": []
+    }
+  },
+  "n_long_confirmation_rows": 2,
+  "n_dt2_confirmation_rows": 2,
+  "phase_execution_status": {
+    "functional_rank": "completed_no_evidence",
+    "modal_operator": "skipped_source_class_disagreement",
+    "entry_boundary": "completed_unresolved",
+    "offset_boundary": "completed_no_evidence",
+    "exit_driver_selection": "not_authorized"
+  },
+  "conditional_phases_not_run": [
+    "Task 9B modal/operator audit (skipped: source-class disagreement)",
+    "Task 12 matched offline exit-driver selection (not authorized)"
+  ],
+  "provenance": {
+    "spec": {
+      "path": "docs/superpowers/specs/2026-07-26-topic4-zm-minimal-carrier-branch-decision-design.md",
+      "sha256": "e8d2b29703603568ce31ce3b3d3c04bf07fc23a4fd3526640160d6461080b30e"
+    },
+    "canonical_config": {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/phase0/canonical_config.json",
+      "sha256": "00e401925fe5897c13fde797c187ff631da1cce2135475fbaf93c700e25f5929"
+    },
+    "phase_inputs": [
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/source_rhythm/source_rhythm_summary.json",
+        "sha256": "ab6f58638487b88acbc3f191f010f1387f076b3064fac0646f1af9cde62ff857"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/effective_rank/effective_rank_summary.json",
+        "sha256": "6264a5e1c2c70eb24100394467e10e967e2c7655d432137239b7fee5c349712a"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/modal_operator/modal_operator_summary.json",
+        "sha256": "c3575592a8249b9171273e10992919da1422c15141a754bd9960bc8540ce803d"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/entry/entry_boundary_summary.json",
+        "sha256": "f92ba729b679a5974ab5c553100c0aafd01a0029bbcea19c66dda05aaaf40d49"
+      },
+      {
+        "path": "results/topic4_sef_hfo/zm_branch_decision/boundaries/offset/offset_boundary_summary.json",
+        "sha256": "4da6b88f5736e2bb4a4d78f91ed78697643b8c699091858a16df7cc9b30e0a22"
+      }
+    ]
+  },
+  "n_fork_rows": 51,
+  "n_neighbourhood_rows": 0
+}

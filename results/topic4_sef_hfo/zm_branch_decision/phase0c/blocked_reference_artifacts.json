@@ -1,0 +1,86 @@
+{
+  "version": "zm_empirical_carrier_v1_2026-07-26",
+  "timestamp": "2026-07-27T01:40:57",
+  "git_sha": "3f30631d9fbda56b68268394a09e9d52e5b4e918",
+  "seizure_inventory": "/home/honglab/leijiaxin/HFOsp/results/epilepsiae_seizure_inventory.csv",
+  "seizure_inventory_sha256": "e40b68126de58b7c800fcfda0a6ae9274ced3b9c64a43500fa0e8b5e7160072b",
+  "geometry": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_twoend_equal_tsrc_s3.npz",
+  "geometry_sha256": "f7dcaf473468bbbc40d866c633ed78d9301442fb379188b08bed0f2e103bd2f4",
+  "returning_event_index": null,
+  "returning_event_index_sha256": null,
+  "resolved_early_ictal_windows": [
+    {
+      "kind": "early_ictal",
+      "seizure_id": "114600000102",
+      "stem": "/mnt/epilepsia_data/inv/pat_114602/adm_1146102/rec_114600102/114600102_0011",
+      "crop_start_sec": 2215.3164060115814,
+      "duration_sec": 30.0,
+      "fs": 1024.0,
+      "onset_epoch": 1240530409.316406,
+      "pre_s": 5.0
+    },
+    {
+      "kind": "early_ictal",
+      "seizure_id": "114600100102",
+      "stem": "/mnt/epilepsia_data/inv/pat_114602/adm_1146102/rec_114600102/114600102_0013",
+      "crop_start_sec": 2137.7861330509186,
+      "duration_sec": 30.0,
+      "fs": 1024.0,
+      "onset_epoch": 1240537533.786133,
+      "pre_s": 5.0
+    },
+    {
+      "kind": "early_ictal",
+      "seizure_id": "114600200102",
+      "stem": "/mnt/epilepsia_data/inv/pat_114602/adm_1146102/rec_114600102/114600102_0014",
+      "crop_start_sec": 1434.5722661018372,
+      "duration_sec": 30.0,
+      "fs": 1024.0,
+      "onset_epoch": 1240540431.572266,
+      "pre_s": 5.0
+    },
+    {
+      "kind": "early_ictal",
+      "seizure_id": "114600300102",
+      "stem": "/mnt/epilepsia_data/inv/pat_114602/adm_1146102/rec_114600102/114600102_0014",
+      "crop_start_sec": 3111.3681640625,
+      "duration_sec": 30.0,
+      "fs": 1024.0,
+      "onset_epoch": 1240542108.368164,
+      "pre_s": 5.0
+    },
+    {
+      "kind": "early_ictal",
+      "seizure_id": "114600400102",
+      "stem": "/mnt/epilepsia_data/inv/pat_114602/adm_1146102/rec_114600102/114600102_0020",
+      "crop_start_sec": 146.21093797683716,
+      "duration_sec": 30.0,
+      "fs": 1024.0,
+      "onset_epoch": 1240559100.210938,
+      "pre_s": 5.0
+    },
+    {
+      "kind": "early_ictal",
+      "seizure_id": "114600500102",
+      "stem": "/mnt/epilepsia_data/inv/pat_114602/adm_1146102/rec_114600102/114600102_0020",
+      "crop_start_sec": 2474.375,
+      "duration_sec": 30.0,
+      "fs": 1024.0,
+      "onset_epoch": 1240561428.375,
+      "pre_s": 5.0
+    }
+  ],
+  "contract": {
+    "sufficient": false,
+    "min_n": 3,
+    "n_early_ictal": 6,
+    "n_returning_group_events": 0,
+    "geometry_path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/field_swap_subject_snn/figdata_epilepsiae_1146_twoend_equal_tsrc_s3.npz",
+    "missing": [
+      "returning_group_event_windows<3"
+    ],
+    "forbidden_substitution": "generic seizure-free background cannot replace returning group events"
+  },
+  "verdict": "blocked_reference_artifacts",
+  "reason": "The early-ictal raw windows and E1146 geometry are resolvable, but no canonical real returning-group-event SEEG-window index was supplied. Generic background and model interictal traces are forbidden substitutes."
+}

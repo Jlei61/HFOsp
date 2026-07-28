@@ -1,0 +1,82 @@
+{
+  "analysis_git_sha": "ca0b7fb718657a011327832e13b652808dc5fd4e",
+  "claim_boundary": "full Z/M/S_G functional rank is not identifiable when fewer than two seeds provide complete physical central pairs; this is missing rank evidence, not rank-1 or rank-2 evidence",
+  "coverage": [
+    {
+      "analysis_complete": false,
+      "invalid_by_coordinate": {
+        "m": 4
+      },
+      "invalid_reasons": {
+        "central_pair_unavailable:m: no valid central displacement above min_delta": 4
+      },
+      "n_completed_rows": 18,
+      "n_rows": 18,
+      "n_valid_rows": 14,
+      "probe_matrix_complete": true,
+      "seed": 1,
+      "valid_by_coordinate": {
+        "m": 2,
+        "sg": 6,
+        "z": 6
+      }
+    },
+    {
+      "analysis_complete": false,
+      "invalid_by_coordinate": {
+        "m": 4
+      },
+      "invalid_reasons": {
+        "central_pair_unavailable:m: no valid central displacement above min_delta": 4
+      },
+      "n_completed_rows": 18,
+      "n_rows": 18,
+      "n_valid_rows": 14,
+      "probe_matrix_complete": true,
+      "seed": 3,
+      "valid_by_coordinate": {
+        "m": 2,
+        "sg": 6,
+        "z": 6
+      }
+    },
+    {
+      "analysis_complete": false,
+      "invalid_by_coordinate": {
+        "m": 6
+      },
+      "invalid_reasons": {
+        "central_pair_unavailable:m: no valid central displacement above min_delta": 6
+      },
+      "n_completed_rows": 18,
+      "n_rows": 18,
+      "n_valid_rows": 12,
+      "probe_matrix_complete": true,
+      "seed": 4,
+      "valid_by_coordinate": {
+        "sg": 6,
+        "z": 6
+      }
+    }
+  ],
+  "created_at": "2026-07-28T11:53:20+08:00",
+  "effective_rank_version": "zm_effective_rank_v1.1_2026-07-27",
+  "n_seed_microstates": 0,
+  "n_seeds": 0,
+  "seeds": [],
+  "sources": [
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/effective_rank/seed1/rank_probes.json",
+      "sha256": "05b577012b9a438a2945cf61415ed4e1efb787d4c37404b0a07230bdce7b6ac0"
+    },
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/effective_rank/seed3/rank_probes.json",
+      "sha256": "d53feb554289f487412c996531f33215a20b18981cb63504ae4b7cb50bf2e8fe"
+    },
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/effective_rank/seed4/rank_probes.json",
+      "sha256": "79f7fbaa4b22cd575232eb5727621b1d39cbd37bf1d5d01c50dacd4f6f2a9437"
+    }
+  ],
+  "verdict": "no_evidence_incomplete_central_pairs"
+}

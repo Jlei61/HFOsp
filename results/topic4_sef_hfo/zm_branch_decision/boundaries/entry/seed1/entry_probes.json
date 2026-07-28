@@ -1,0 +1,396 @@
+{
+  "git_sha": "b8dc49ac81f8aa0918dd8be34264d47ab4064809",
+  "runtime_started_at": "2026-07-28T01:28:02",
+  "config_sha": "32e40e1eb4c9c9ffb9e1d0c850949a1554e5a8e2a25acd32883e97363d8d2a03",
+  "seed": 1,
+  "dt": 0.1,
+  "resolution": "dt",
+  "engine_sha256": {
+    "src/snn_engine/kick_probe.py": "6e1c8986ec45ff0f3c44a538f865e0dd4fe47b9f5b6a73938cc0a7df64ddd479",
+    "src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+    "src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+    "src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+    "src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+    "src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47",
+    "src/snn_engine/slow_field.py": "6115c4cb779cdf657ada9d6573684637cb0fc71845b1cb972ca93572c7bb4c74",
+    "src/snn_engine/mz_slow_vars.py": "91068ef6920f095eed0f7cd1c36262ecec575ff96f8599ad6f1990963c87f20d"
+  },
+  "metrics_version": "zm_minimal_carrier_v1.1_2026-07-27_stationarity",
+  "state_schema": "zm_sim_state_v1",
+  "lockpoint": "zA_q75_tz5000__mA0p001_tau500",
+  "arm_kwargs": {
+    "use_SG": true,
+    "alpha_G": 16.0
+  },
+  "es_thresh_hz": 250.0,
+  "timestamp": "2026-07-28T04:35:46",
+  "peak_rss_gb": 6.8,
+  "mem_available_gb": 157.3,
+  "resource_log": "results/topic4_sef_hfo/zm_branch_decision/resource_log.jsonl",
+  "pid": 646860,
+  "phase": "entry_boundary",
+  "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+  "coordinate_family": "conditional_z_slice",
+  "scientific_assumption": "interpolate the actual pre-entry-to-carrier z field while holding M and the full S_G family at onset-adjacent values",
+  "starting_fast_state": "pre_entry__natural",
+  "source_state_hashes": {
+    "pre_entry__natural": "7a79b3dc493b870e47a9e57efed97f572ff9e79d0feec8869a454a5a35ff7b5d",
+    "onset_adjacent__natural": "a05e986547eb0e9012d4bbc71f95a08f5949c545c2525b4cdb3d4ea2d675b17d",
+    "bounded_mid__peak": "01c11e1f7c0234b8f217c470a9c849e07708d048969031506579853a421f83a9"
+  },
+  "levels": [
+    0.0,
+    0.25,
+    0.5,
+    0.75,
+    1.0
+  ],
+  "response_ms": 8000.0,
+  "base_replicate": "noise_replay",
+  "expansion_replicates": [
+    "noise_resample_1",
+    "noise_resample_2"
+  ],
+  "rows": [
+    {
+      "key": "lambda=0.25|noise_replay",
+      "seed": 1,
+      "lambda": 0.25,
+      "replicate": "noise_replay",
+      "bank_sha": "11d914f728d7dcc9c25bf41a9c89141ead7a9e624df50308fd2656fac8763870",
+      "entered_carrier": true,
+      "completed": true,
+      "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+      "z_core_mean": 0.49515145332915605,
+      "z_surround_mean": 0.754842632218286,
+      "survived": true,
+      "lifetime_ms": 8000.0,
+      "end_reason": null,
+      "rest_returns": 0,
+      "d_rest_median": 12.73133841307294,
+      "d_rest_min": 11.069899832364209,
+      "A_active_mean": 0.42453310546875,
+      "A_active_max": 0.43775,
+      "r_all_mean_hz": 156.5036171875,
+      "r_all_peak_hz": 157.78625,
+      "r_all_cv": 0.011795241853316927,
+      "r_all_p2p_hz": 23.955000000000013,
+      "morphology_label": "tonic_at_25ms",
+      "H_spatial_mean": 0.8480845919541181,
+      "n_grid_active_mean": 149.625,
+      "spatial_extent_fraction": 0.58447265625,
+      "E_vSEEG_mean": 1428.326697561685,
+      "duty_cycle": 1.0,
+      "drift_A": {
+        "slope_per_s": -2.605967274112177e-06,
+        "rel_drift": -0.0009810592121009213,
+        "cv": 0.0018548527761521035,
+        "variance_ratio": 0.9271589114325443
+      },
+      "drift_E": {
+        "slope_per_s": -0.007687063477864385,
+        "rel_drift": -0.000860380445291952,
+        "cv": 0.0015117813791769269,
+        "variance_ratio": 1.670836393145261
+      },
+      "drift_m": {
+        "slope_per_s": -1.2219176263957395e-17,
+        "rel_drift": -1.637151963028885e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "drift_S_G": {
+        "slope_per_s": -2.3865578640541786e-20,
+        "rel_drift": -2.9628301637531435e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "stationarity_ok": true,
+      "stationarity": {
+        "passed": true,
+        "reasons": [],
+        "max_abs_rel_drift": 0.5,
+        "max_variance_ratio": 4.0
+      },
+      "burn_in_ms": 250.0,
+      "n_bins_post_burn": 320,
+      "wall_s": 6184.7
+    },
+    {
+      "key": "lambda=0.5|noise_replay",
+      "seed": 1,
+      "lambda": 0.5,
+      "replicate": "noise_replay",
+      "bank_sha": "11d914f728d7dcc9c25bf41a9c89141ead7a9e624df50308fd2656fac8763870",
+      "entered_carrier": true,
+      "completed": true,
+      "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+      "producer_git_sha": "a4a216cf4f04f7fe50b1730de0c6a509d3255792",
+      "z_core_mean": 0.46542926130733436,
+      "z_surround_mean": 0.7374483762929831,
+      "survived": true,
+      "lifetime_ms": 8000.0,
+      "end_reason": null,
+      "rest_returns": 0,
+      "d_rest_median": 13.754048791877802,
+      "d_rest_min": 12.556737648010772,
+      "A_active_mean": 0.450542578125,
+      "A_active_max": 0.467,
+      "r_all_mean_hz": 170.12227734375,
+      "r_all_peak_hz": 171.48125,
+      "r_all_cv": 0.007200884281002744,
+      "r_all_p2p_hz": 17.465000000000003,
+      "morphology_label": "tonic_at_25ms",
+      "H_spatial_mean": 0.8589649833180667,
+      "n_grid_active_mean": 151.08125,
+      "spatial_extent_fraction": 0.5901611328125,
+      "E_vSEEG_mean": 1508.4352494402908,
+      "duty_cycle": 1.0,
+      "drift_A": {
+        "slope_per_s": -3.1585096097491832e-06,
+        "rel_drift": -0.0011208695219553928,
+        "cv": 0.0018074094752077358,
+        "variance_ratio": 0.7201780685018618
+      },
+      "drift_E": {
+        "slope_per_s": -0.010718459604233484,
+        "rel_drift": -0.0011361382165550147,
+        "cv": 0.0012533805885757952,
+        "variance_ratio": 0.8773417918660694
+      },
+      "drift_m": {
+        "slope_per_s": -1.2219176263957395e-17,
+        "rel_drift": -1.637151963028885e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "drift_S_G": {
+        "slope_per_s": -2.3865578640541786e-20,
+        "rel_drift": -2.9628301637531435e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "stationarity_ok": true,
+      "stationarity": {
+        "passed": true,
+        "reasons": [],
+        "max_abs_rel_drift": 0.5,
+        "max_variance_ratio": 4.0
+      },
+      "burn_in_ms": 250.0,
+      "n_bins_post_burn": 320,
+      "wall_s": 7537.6
+    },
+    {
+      "key": "lambda=0.75|noise_replay",
+      "seed": 1,
+      "lambda": 0.75,
+      "replicate": "noise_replay",
+      "bank_sha": "11d914f728d7dcc9c25bf41a9c89141ead7a9e624df50308fd2656fac8763870",
+      "entered_carrier": true,
+      "completed": true,
+      "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+      "producer_git_sha": "a4a216cf4f04f7fe50b1730de0c6a509d3255792",
+      "z_core_mean": 0.43570706928551267,
+      "z_surround_mean": 0.7200541203676799,
+      "survived": true,
+      "lifetime_ms": 8000.0,
+      "end_reason": null,
+      "rest_returns": 0,
+      "d_rest_median": 14.598551081261267,
+      "d_rest_min": 13.670497852382509,
+      "A_active_mean": 0.4710172851562501,
+      "A_active_max": 0.48884375,
+      "r_all_mean_hz": 181.44697265624998,
+      "r_all_peak_hz": 182.83874999999998,
+      "r_all_cv": 0.004610751841857696,
+      "r_all_p2p_hz": 13.467499999999973,
+      "morphology_label": "tonic_at_25ms",
+      "H_spatial_mean": 0.8660544015818378,
+      "n_grid_active_mean": 159.2375,
+      "spatial_extent_fraction": 0.622021484375,
+      "E_vSEEG_mean": 1570.5050498108362,
+      "duty_cycle": 1.0,
+      "drift_A": {
+        "slope_per_s": -1.8605615697869663e-06,
+        "rel_drift": -0.0006317426618852583,
+        "cv": 0.00137422995671735,
+        "variance_ratio": 0.7227933373818841
+      },
+      "drift_E": {
+        "slope_per_s": -0.00446499220057405,
+        "rel_drift": -0.0004547894210612509,
+        "cv": 0.0010139447021403133,
+        "variance_ratio": 0.8624102364774163
+      },
+      "drift_m": {
+        "slope_per_s": -1.2219176263957395e-17,
+        "rel_drift": -1.637151963028885e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "drift_S_G": {
+        "slope_per_s": -2.3865578640541786e-20,
+        "rel_drift": -2.9628301637531435e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "stationarity_ok": true,
+      "stationarity": {
+        "passed": true,
+        "reasons": [],
+        "max_abs_rel_drift": 0.5,
+        "max_variance_ratio": 4.0
+      },
+      "burn_in_ms": 250.0,
+      "n_bins_post_burn": 320,
+      "wall_s": 6823.1
+    },
+    {
+      "key": "lambda=0|noise_replay",
+      "seed": 1,
+      "lambda": 0.0,
+      "replicate": "noise_replay",
+      "bank_sha": "11d914f728d7dcc9c25bf41a9c89141ead7a9e624df50308fd2656fac8763870",
+      "entered_carrier": true,
+      "completed": true,
+      "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+      "z_core_mean": 0.5248736453509778,
+      "z_surround_mean": 0.7722368881435892,
+      "survived": true,
+      "lifetime_ms": 8000.0,
+      "end_reason": null,
+      "rest_returns": 0,
+      "d_rest_median": 11.512549917278749,
+      "d_rest_min": 9.22465462441277,
+      "A_active_mean": 0.39435693359375,
+      "A_active_max": 0.4001875,
+      "r_all_mean_hz": 140.39322265625,
+      "r_all_peak_hz": 143.61249999999998,
+      "r_all_cv": 0.019635531802447953,
+      "r_all_p2p_hz": 34.63374999999998,
+      "morphology_label": "tonic_at_25ms",
+      "H_spatial_mean": 0.8338957562508863,
+      "n_grid_active_mean": 149.18125,
+      "spatial_extent_fraction": 0.5827392578125,
+      "E_vSEEG_mean": 1319.6247826716829,
+      "duty_cycle": 1.0,
+      "drift_A": {
+        "slope_per_s": -1.6066301418020252e-06,
+        "rel_drift": -0.000650859625415132,
+        "cv": 0.002518500561983469,
+        "variance_ratio": 1.0291577182821305
+      },
+      "drift_E": {
+        "slope_per_s": -0.006626806102448978,
+        "rel_drift": -0.0008023955090608699,
+        "cv": 0.0020969453482698147,
+        "variance_ratio": 0.9723421339572618
+      },
+      "drift_m": {
+        "slope_per_s": -1.2219176263957395e-17,
+        "rel_drift": -1.637151963028885e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "drift_S_G": {
+        "slope_per_s": -2.3865578640541786e-20,
+        "rel_drift": -2.9628301637531435e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "stationarity_ok": true,
+      "stationarity": {
+        "passed": true,
+        "reasons": [],
+        "max_abs_rel_drift": 0.5,
+        "max_variance_ratio": 4.0
+      },
+      "burn_in_ms": 250.0,
+      "n_bins_post_burn": 320,
+      "wall_s": 4961.4
+    },
+    {
+      "key": "lambda=1|noise_replay",
+      "seed": 1,
+      "lambda": 1.0,
+      "replicate": "noise_replay",
+      "bank_sha": "11d914f728d7dcc9c25bf41a9c89141ead7a9e624df50308fd2656fac8763870",
+      "entered_carrier": true,
+      "completed": true,
+      "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27",
+      "producer_git_sha": "a4a216cf4f04f7fe50b1730de0c6a509d3255792",
+      "z_core_mean": 0.405984877263691,
+      "z_surround_mean": 0.7026598644423769,
+      "survived": true,
+      "lifetime_ms": 8000.0,
+      "end_reason": null,
+      "rest_returns": 0,
+      "d_rest_median": 15.447782174500611,
+      "d_rest_min": 14.682251370589364,
+      "A_active_mean": 0.49032558593750003,
+      "A_active_max": 0.50559375,
+      "r_all_mean_hz": 192.88735546875,
+      "r_all_peak_hz": 193.6925,
+      "r_all_cv": 0.00344369026696471,
+      "r_all_p2p_hz": 10.579999999999984,
+      "morphology_label": "tonic_at_25ms",
+      "H_spatial_mean": 0.8730672140788943,
+      "n_grid_active_mean": 159.96875,
+      "spatial_extent_fraction": 0.6248779296875,
+      "E_vSEEG_mean": 1626.9581734513135,
+      "duty_cycle": 1.0,
+      "drift_A": {
+        "slope_per_s": -1.4219152847773715e-06,
+        "rel_drift": -0.00046385826970381,
+        "cv": 0.0011575629579503263,
+        "variance_ratio": 0.5329239822655041
+      },
+      "drift_E": {
+        "slope_per_s": -0.0017387579584602546,
+        "rel_drift": -0.00017096280998996145,
+        "cv": 0.0006705862548963109,
+        "variance_ratio": 0.9162218354632012
+      },
+      "drift_m": {
+        "slope_per_s": -1.2219176263957395e-17,
+        "rel_drift": -1.637151963028885e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "drift_S_G": {
+        "slope_per_s": -2.3865578640541786e-20,
+        "rel_drift": -2.9628301637531435e-16,
+        "cv": 0.0,
+        "variance_ratio": 0.0
+      },
+      "stationarity_ok": true,
+      "stationarity": {
+        "passed": true,
+        "reasons": [],
+        "max_abs_rel_drift": 0.5,
+        "max_variance_ratio": 4.0
+      },
+      "burn_in_ms": 250.0,
+      "n_bins_post_burn": 320,
+      "wall_s": 8396.0
+    }
+  ],
+  "cheap_bracket": {
+    "status": "unbracketed",
+    "q_half": null,
+    "direction": "increasing",
+    "sampled_range": [
+      0.0,
+      1.0
+    ],
+    "boundary_version": "zm_probability_boundaries_v1.1_2026-07-27"
+  },
+  "pending_cells": [],
+  "complete": true,
+  "contributing_git_shas": [
+    "a4a216cf4f04f7fe50b1730de0c6a509d3255792",
+    "b8dc49ac81f8aa0918dd8be34264d47ab4064809"
+  ],
+  "claim_boundary": "conditional Z-entry slice on the observed trajectory context; no offset, recovery, observation match, or lifecycle implication"
+}

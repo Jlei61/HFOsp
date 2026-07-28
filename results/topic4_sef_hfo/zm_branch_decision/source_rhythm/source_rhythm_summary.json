@@ -1,0 +1,36 @@
+{
+  "status": "class_disagreement",
+  "carrier_type": null,
+  "seed_classes": {
+    "1": "asynchronous_or_irregular_candidate",
+    "3": "asynchronous_or_irregular_candidate",
+    "4": "phase_staggered_periodic_candidate"
+  },
+  "seed_carrier_types": {
+    "1": "stochastic",
+    "3": "stochastic",
+    "4": "periodic"
+  },
+  "source_rhythm_version": "zm_source_rhythm_v1_2026-07-27",
+  "authorized": true,
+  "inputs": [
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/source_rhythm/dt/seed1/source_rhythm.json",
+      "sha256": "a57902afd3245c1bf88cb87b055e743c9c3793ba04fbf7d70a24752e25dd8d0b",
+      "seed": 1
+    },
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/source_rhythm/dt/seed3/source_rhythm.json",
+      "sha256": "b000a26e1a8ed7ffbcbd9b714ba76af501341a93a99f622e7c1a4508ce36b52f",
+      "seed": 3
+    },
+    {
+      "path": "results/topic4_sef_hfo/zm_branch_decision/source_rhythm/dt/seed4/source_rhythm.json",
+      "sha256": "78359446bb0bcecbcabd90bf02198eb5fce1a7fb11c82d752104a08dbfae1eef",
+      "seed": 4
+    }
+  ],
+  "timestamp": "2026-07-28T00:47:25",
+  "branch_verdict_path": "results/topic4_sef_hfo/zm_branch_decision/branch_verdict.json",
+  "claim_boundary": "replicated fine-source operator routing only; not observation matching, ictal identity, entry, offset, or lifecycle evidence"
+}
