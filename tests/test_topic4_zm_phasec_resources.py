@@ -171,15 +171,18 @@ def test_process_swap_tolerates_proc_teardown_between_read_and_parse(
     assert status.reads == 2
 
 
-def test_process_swap_treats_zombie_as_exited_unavailable(monkeypatch):
-    class ZombieStatus:
+@pytest.mark.parametrize("state", ("Z (zombie)", "X (dead)", "x (dead)"))
+def test_process_swap_treats_terminal_task_as_exited_unavailable(
+    monkeypatch, state,
+):
+    class TerminalStatus:
         def read_text(self, **_kwargs):
-            return "Name:\tpython\nState:\tZ (zombie)\n"
+            return f"Name:\tpython\nState:\t{state}\n"
 
         def exists(self):
             return True
 
-    monkeypatch.setattr(R, "Path", lambda _value: ZombieStatus())
+    monkeypatch.setattr(R, "Path", lambda _value: TerminalStatus())
     assert R.process_swap_kb(12) is None
 
 
