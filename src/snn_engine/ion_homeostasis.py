@@ -60,6 +60,7 @@ class IonHomeostasisConfig:
     k_trace_stride: int = 0            # >0: keep the K_o grid every N ion blocks (T7 measurement)
     na_snapshot_blocks: tuple = ()     # ion-block indices at which to keep the full Na_i field
     capture_counts_range: tuple = ()   # (b0, b1): keep per-cell spike counts for these ion blocks
+    freeze_membrane_from_block: int = 0  # >0: hold membrane_current() at its value from this block
 
     def __post_init__(self):
         if self.q_ion <= 0.0:
@@ -106,6 +107,7 @@ class IonHomeostasis:
         self.na_snapshots = {}
         self._na_snapshot_at = set(int(b) for b in cfg.na_snapshot_blocks)
         self.captured_counts = [] if cfg.capture_counts_range else None
+        self._frozen_current = None
         self._refresh_membrane_state()
 
     # ------------------------------------------------------------------ derived membrane state
@@ -117,7 +119,15 @@ class IonHomeostasis:
         self.E_K_all = E_K(K_cell, K_i_from_Na_i(self.Na_i_all))
 
     def membrane_current(self):
-        """g_K_ion*(E_K - E_K_0) - eta_pump*(I_pump - I_pump_0), in engine drive units, per cell."""
+        """g_K_ion*(E_K - E_K_0) - eta_pump*(I_pump - I_pump_0), in engine drive units, per cell.
+
+        When `freeze_membrane_from_block` is armed the value is held at what it was at that block.
+        That is the OPEN arm of the matched control (B2.1 spec 2.3): the event-induced dE_K stops
+        reaching the membrane, while the frozen vector keeps the pre-kick working point exactly.
+        The ion state itself keeps evolving, so K peaks remain measurable in both arms.
+        """
+        if self._frozen_current is not None:
+            return self._frozen_current
         cur = self.cfg.g_K_ion * (self.E_K_all - E_K_0)
         if self.cfg.eta_pump:
             cur = cur - self.cfg.eta_pump * (self.pump_flux_all - I_PUMP_0)
@@ -172,6 +182,10 @@ class IonHomeostasis:
         self.n_updates += 1
         self._check_bounds()
         self._refresh_membrane_state()
+        if (self.cfg.freeze_membrane_from_block
+                and self.n_updates >= self.cfg.freeze_membrane_from_block
+                and self._frozen_current is None):
+            self._frozen_current = (self.cfg.g_K_ion * (self.E_K_all - E_K_0)).copy()
         if self.trace is not None:
             self.trace.append(dict(n=self.n_updates, Na_mean=float(self.Na_i_all.mean()),
                                    K_mean=float(self.K_o_grid.mean()),

@@ -729,6 +729,120 @@ def test_small_network_contract_records_what_survives_and_what_is_abolished():
     assert any("faithful reproduction" in s for s in ION.SMALL_NET_CONTRACT_ABOLISHED)
 
 
+# =====================================================================================
+#  B2.1 -- calibration-instrument repair (spec 2026-07-28-topic4-fcxr-ion-B2_1-lock.md)
+# =====================================================================================
+def test_signed_slope_recovers_a_known_ramp():
+    dt = 0.1
+    t = np.arange(200) * dt
+    y = np.stack([3.0 + 0.02 * t, 5.0 - 0.007 * t, np.full_like(t, 9.0)], axis=1)
+    s = ION.signed_secular_slope(y, dt)
+    assert s == pytest.approx([0.02, -0.007, 0.0], abs=1e-12)
+
+
+def test_signed_slope_separates_a_stationary_but_EVENTFUL_series_from_a_drifting_one():
+    """THE discriminating test, and the whole reason B2.1 exists.
+
+    A statistically stationary trace that keeps getting event-driven excursions has NO secular
+    trend, but its q99 of |first differences| is large. The old gate read that as drift.
+    """
+    rng = np.random.default_rng(0)
+    dt, n = 0.1, 1000
+    base = np.full(n, 20.0)
+    for k in range(0, n, 40):                       # an event every 4 s, fully relaxing
+        base[k:k + 8] += 0.35 * np.exp(-np.arange(min(8, n - k)) / 3.0)
+    stationary = base[:, None]
+    drifting = (base + 0.02 * np.arange(n) * dt)[:, None]
+
+    s_stat = abs(float(ION.signed_secular_slope(stationary, dt)[0]))
+    s_drift = float(ION.signed_secular_slope(drifting, dt)[0])
+    fd_stat = float(np.quantile(np.abs(np.diff(stationary[:, 0])) / dt, 0.99))
+
+    assert s_stat < 1e-3                            # no secular trend, correctly
+    assert s_drift == pytest.approx(0.02, abs=1e-3)  # the real drift, recovered
+    assert fd_stat > 100 * s_stat                   # the OLD statistic is huge on the SAME trace
+    assert fd_stat > 0.5
+
+
+def test_slope_stats_reports_q95_q99_and_the_signed_mean():
+    rng = np.random.default_rng(1)
+    slopes = rng.normal(0.0, 1e-3, 5000)
+    st = ION.slope_stats(slopes)
+    assert st["q99_abs"] > st["q95_abs"] > 0
+    assert abs(st["mean_signed"]) < 1e-4
+    assert st["max_abs"] >= st["q99_abs"]
+
+
+def test_b2_1_slope_bounds_are_derived_from_the_interictal_excursion():
+    """The bound is 10% of each variable's own interictal excursion over the 10 s window --
+    derived, not hand-picked, and locked before any signed-slope measurement existed."""
+    q = ION.q_ion_from_fprime(1.0)
+    Na, Ko = ION.interictal_steady_state(q, ION.R0_HZ)
+    assert ION.B2_1_SLOPE_BOUND_NA == pytest.approx(0.10 * (Na - ION.NA_I0) / 10.0, rel=1e-2)
+    assert ION.B2_1_SLOPE_BOUND_K == pytest.approx(0.10 * (Ko - ION.K_O0) / 10.0, rel=1e-2)
+    assert ION.B2_1_SLOPE_BOUND_NA > ION.B2_1_SLOPE_BOUND_K      # Na excursion is much larger
+
+
+def test_rate_shrinkage_pulls_noisy_cells_toward_their_voxel_and_leaves_confident_ones():
+    voxel = np.array([0, 0, 0, 1, 1, 1])
+    counts = np.array([2.0, 40.0, 60.0, 2.0, 40.0, 60.0])       # 10 s window -> Hz = counts/10
+    r = ION.shrink_rate_field(counts, voxel, window_s=10.0, n_voxels=2, n0=20.0)
+    raw = counts / 10.0
+    vox0 = raw[:3].mean()
+    # the 2-spike cell is pulled most of the way to its voxel mean
+    assert abs(r[0] - vox0) < abs(raw[0] - vox0) * 0.15
+    # the 60-spike cell keeps most of its own rate
+    assert abs(r[2] - raw[2]) < abs(raw[2] - vox0) * 0.3
+    assert r.shape == counts.shape
+
+
+def test_rate_shrinkage_treats_E_and_I_separately():
+    """E and I baselines differ; pooling them would drag I cells toward the E mean."""
+    voxel = np.array([0, 0, 0, 0])
+    countsE = np.array([40.0, 40.0])
+    countsI = np.array([100.0, 100.0])
+    rE = ION.shrink_rate_field(countsE, voxel[:2], window_s=10.0, n_voxels=1, n0=20.0)
+    rI = ION.shrink_rate_field(countsI, voxel[2:], window_s=10.0, n_voxels=1, n0=20.0)
+    assert rE == pytest.approx([4.0, 4.0])
+    assert rI == pytest.approx([10.0, 10.0])
+
+
+def test_damped_update_moves_half_way_and_is_capped():
+    cur = np.array([4.0, 8.0])
+    meas = np.array([6.0, 4.0])
+    nxt = ION.damped_rate_update(cur, meas, alpha=0.5)
+    assert nxt == pytest.approx([5.0, 6.0])
+    assert ION.B2_1_MAX_UPDATES == 3
+    assert ION.B2_1_ALPHA == 0.5
+
+
+def test_b2_1_adjudication_needs_both_rate_convergence_and_the_slope_bound():
+    ok = dict(rate_rel_change=0.02, slope_q99_Na=1e-3, slope_q99_K=1e-4, n_updates=2,
+              independent_window=True)
+    assert ION.adjudicate_b2_1_selfconsistency(ok)["status"] == "CONVERGED"
+    assert ION.adjudicate_b2_1_selfconsistency(
+        dict(ok, rate_rel_change=0.2))["status"] == "NOT_CONVERGED"
+    assert ION.adjudicate_b2_1_selfconsistency(
+        dict(ok, slope_q99_Na=0.5))["status"] == "NOT_CONVERGED"
+    # a result measured on the SAME window used to derive the field does not count
+    assert ION.adjudicate_b2_1_selfconsistency(
+        dict(ok, independent_window=False))["status"] == "NOT_CONVERGED"
+
+
+def test_matched_control_is_void_when_the_drive_is_not_comparable():
+    """spec 2.3: if spike counts / participating cells differ between arms, the comparison is
+    void -- no reading of the feedback may be taken from the ratio."""
+    good = ION.adjudicate_matched_control(
+        closed=dict(spikes=[1000, 1010], participants=[500, 505], peaks=[0.7, 0.9]),
+        open_=dict(spikes=[1005, 1002], participants=[502, 500], peaks=[0.7, 0.8]))
+    assert good["status"] == "COMPARABLE"
+    bad = ION.adjudicate_matched_control(
+        closed=dict(spikes=[1000, 3000], participants=[500, 1500], peaks=[0.7, 1.9]),
+        open_=dict(spikes=[1005, 1002], participants=[502, 500], peaks=[0.7, 0.8]))
+    assert bad["status"] == "UNRESOLVED_MATCHED_CONTROL"
+    assert "ratio" not in bad
+
+
 def test_power_precondition_is_a_hard_gate():
     """n_scoreable < 20 -> INSUFFICIENT_POWER; the function must NOT hand back a usable threshold."""
     bad = ION.direction_power_gate(dict(n_scoreable=7, frac_A=0.5, frac_B=0.5))

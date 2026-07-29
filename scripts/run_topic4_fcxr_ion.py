@@ -1568,6 +1568,10 @@ def probe_task(job):
                init_residual_q99_dNa=rep["q99_abs_dNa_dt"],
                init_residual_q99_dKo=rep["q99_abs_dKo_dt"],
                rate_field_sha256=sha, wall_s=round(time.time() - t0, 1))
+    # per-cell counts over the SAME post-burn-in window, for the B2.1 self-consistent loop
+    lo0, hi0 = blocks[0][0], blocks[-1][1]
+    out["per_cell_counts_E"] = res["E_spk_bool"][lo0:hi0].sum(axis=0).astype(int).tolist()
+    out["per_cell_counts_I"] = res["I_spk_bool"][lo0:hi0].sum(axis=0).astype(int).tolist()
     return out
 
 
@@ -1749,6 +1753,7 @@ def cmd_b2_bias(args):
 
 # ================================================================== T9: full 11 s trajectory
 K_TRACE_STRIDE = 20            # ion blocks -> 10 ms K_o frames
+NA_SNAPSHOT_MS = 100.0         # B2.1 spec 2.1: dense Na sampling for the signed-slope fit
 FAR_FIELD_MM = 5.0             # "far from the event" for the whole-sheet K-wave check
 
 
@@ -1766,13 +1771,20 @@ def trajectory_task(job):
 
     t0 = time.time()
     rE, rI, voxel, sha = m._load_40k_rate_field()
-    rE = rE * float(job["rate_scale_E"])
-    rI = rI * float(job["rate_scale_I"])
+    ov = job.get("rate_field_override")
+    if ov is not None:               # B2.1: a self-consistent ions-ON field replaces the scaling
+        rE = np.asarray(ov["rate_E"], float)
+        rI = np.asarray(ov["rate_I"], float)
+    else:
+        rE = rE * float(job["rate_scale_E"])
+        rI = rI * float(job["rate_scale_I"])
     S, PP = m._substrate(int(job["conn_seed"]))
     n_steps = int(round(float(job["T_ms"]) / m.DT))
     blocks = m.block_edges(n_steps)
-    na_blocks = tuple(int(round(b * m.DT / m.DT_ION_MS)) for b, _ in blocks) + \
-                (int(round(blocks[-1][1] * m.DT / m.DT_ION_MS)) - 1,)
+    b_lo = int(round(blocks[0][0] * m.DT / m.DT_ION_MS))
+    b_hi = int(round(blocks[-1][1] * m.DT / m.DT_ION_MS)) - 1
+    na_stride = int(round(m.NA_SNAPSHOT_MS / m.DT_ION_MS))     # B2.1 spec 2.1: dense sampling
+    na_blocks = tuple(range(b_lo, b_hi + 1, na_stride))
     cfg = IonHomeostasisConfig(q_ion=float(job["q_ion"]), n_grid=m.N_GRID_40K, dx_mm=m.DX_MM_40K,
                                dt_ion_ms=m.DT_ION_MS, g_K_ion=ION.G_K_ION_REFERENCE,
                                I_bias_E=float(job["I_bias_E"]), I_bias_I=float(job["I_bias_I"]),
@@ -1781,7 +1793,7 @@ def trajectory_task(job):
     mz = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**m.arm_c_pump_off_cfg()),
                     NE=S["NE"], core_mask_E=OLD.build_core_masks(S))
     res, _ = m.run_arm_c(S, noise_seed=int(job["noise_seed"]), T_ms=float(job["T_ms"]),
-                         slow=IonHomeostaticMZAdapter(mz, ions), dump_i=False, verbose=False)
+                         slow=IonHomeostaticMZAdapter(mz, ions), dump_i=True, verbose=False)
 
     posE = np.asarray(S["posE"], float)
     A, B = np.asarray(S["src_xy"], float), np.asarray(S["snk_xy"], float)
@@ -1830,12 +1842,14 @@ def trajectory_task(job):
     Na = np.stack([ions.na_snapshots[b] for b in snaps])
     dt_blk = (snaps[1] - snaps[0]) * m.DT_ION_MS * 1e-3
     dNa = np.abs(np.diff(Na, axis=0)) / dt_blk
+    slope_Na = ION.slope_stats(ION.signed_secular_slope(Na, dt_blk))
     Kt = np.asarray(ions.k_trace)
     kb = np.asarray(ions.k_trace_blocks) * m.DT_ION_MS
     keep = kb >= m.BURN_IN_MS
     Kp = Kt.reshape(Kt.shape[0], -1)[keep]
     dK = np.abs(np.diff(Kp[::int(max(1, Kp.shape[0] // 6))], axis=0)) / \
         (float(job["T_ms"]) * 1e-3 / 6.0)
+    slope_K = ION.slope_stats(ION.signed_secular_slope(Kp, m.K_TRACE_STRIDE * m.DT_ION_MS * 1e-3))
 
     # whole-sheet K wave check: for the largest event, event voxel vs far field
     ng = m.N_GRID_40K
@@ -1851,6 +1865,12 @@ def trajectory_task(job):
     out = dict(job=job, pooled=pooled, block_metrics=blk,
                n_events_total=len(all_ev),
                ion=dict(
+                   # ---- B2.1 GATE quantity: signed secular slope (spec 2.1) ----
+                   slope_Na=slope_Na, slope_K=slope_K,
+                   slope_q99_Na=slope_Na["q99_abs"], slope_q99_K=slope_K["q99_abs"],
+                   slope_bound_Na=ION.B2_1_SLOPE_BOUND_NA, slope_bound_K=ION.B2_1_SLOPE_BOUND_K,
+                   n_na_snapshots=int(Na.shape[0]), na_snapshot_dt_s=float(dt_blk),
+                   # ---- superseded first-difference statistic, kept as a DIAGNOSTIC only ----
                    q95_abs_dNa_dt=float(np.quantile(dNa, 0.95)),
                    q99_abs_dNa_dt=float(np.quantile(dNa, 0.99)),
                    max_abs_dNa_dt=float(dNa.max()),
@@ -1881,6 +1901,10 @@ def trajectory_task(job):
                    init_residual_q99_dNa=rep["q99_abs_dNa_dt"],
                    init_residual_q99_dKo=rep["q99_abs_dKo_dt"]),
                rate_field_sha256=sha, wall_s=round(time.time() - t0, 1))
+    # per-cell counts over the SAME post-burn-in window, for the B2.1 self-consistent loop
+    lo0, hi0 = blocks[0][0], blocks[-1][1]
+    out["per_cell_counts_E"] = res["E_spk_bool"][lo0:hi0].sum(axis=0).astype(int).tolist()
+    out["per_cell_counts_I"] = res["I_spk_bool"][lo0:hi0].sum(axis=0).astype(int).tolist()
     return out
 
 
@@ -1909,12 +1933,18 @@ def closed_loop_integration_probe(job):
 
     t0 = time.time()
     rE, rI, voxel, sha = m._load_40k_rate_field()
-    rE, rI = rE * float(job["rate_scale_E"]), rI * float(job["rate_scale_I"])
+    ov = job.get("rate_field_override")
+    if ov is not None:
+        rE, rI = np.asarray(ov["rate_E"], float), np.asarray(ov["rate_I"], float)
+    else:
+        rE, rI = rE * float(job["rate_scale_E"]), rI * float(job["rate_scale_I"])
     S, _ = m._substrate(int(job["conn_seed"]))
     cfg = IonHomeostasisConfig(q_ion=float(job["q_ion"]), n_grid=m.N_GRID_40K, dx_mm=m.DX_MM_40K,
                                dt_ion_ms=m.DT_ION_MS, g_K_ion=ION.G_K_ION_REFERENCE,
                                I_bias_E=float(job["I_bias_E"]), I_bias_I=float(job["I_bias_I"]),
-                               k_trace_stride=2)
+                               k_trace_stride=2,
+                               freeze_membrane_from_block=int(job.get(
+                                   "freeze_membrane_from_block", 0)))
     ions = build_from_rate_field(S["N"], S["NE"], voxel, cfg, rE, rI)
     mz = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**m.arm_c_pump_off_cfg()),
                     NE=S["NE"], core_mask_E=OLD.build_core_masks(S))
@@ -1926,6 +1956,15 @@ def closed_loop_integration_probe(job):
                         t_kick2=m.CL_PROBE_T_KICK_MS + m.CL_PROBE_SPACING_MS,
                         KICK_BOOST2=m.CL_PROBE_KICK_BOOST,
                         V_th_per_neuron=S["vth"], early_stop_runaway=False, dump_i_spikes=False)
+    # drive readout: without it the two arms cannot be shown to be comparable (spec 2.3)
+    spk = res["E_spk_bool"]
+    kick_spikes, kick_parts = [], []
+    for j in range(2):
+        a = int(round((m.CL_PROBE_T_KICK_MS + j * m.CL_PROBE_SPACING_MS) / m.DT))
+        b = int(round((m.CL_PROBE_T_KICK_MS + (j + 1) * m.CL_PROBE_SPACING_MS) / m.DT))
+        seg = spk[a:b]
+        kick_spikes.append(int(seg.sum()))
+        kick_parts.append(int(seg.any(axis=0).sum()))
 
     K = np.asarray(ions.k_trace).reshape(len(ions.k_trace), -1)
     t = np.asarray(ions.k_trace_blocks) * m.DT_ION_MS
@@ -1939,6 +1978,7 @@ def closed_loop_integration_probe(job):
     tau = float(job["tau_Ko_at_workpoint_s"])
     linear = 1.0 + float(np.exp(-m.CL_PROBE_SPACING_MS * 1e-3 / tau))
     return dict(job=job, hot_voxel=hot, peak1_mM=p1, peak2_mM=p2,
+                kick_spikes=kick_spikes, kick_participants=kick_parts,
                 ratio_2nd_over_1st=(p2 / p1 if p1 > 0 else float("nan")),
                 linear_prediction_at_workpoint=linear,
                 mean_rate_E_hz=float(np.asarray(res["rate_E"], float).mean()),
@@ -2009,8 +2049,12 @@ def cmd_b2_validate(args):
         rel = abs(r0pp - ION.R0_HZ) / ION.R0_HZ
         # spec 7.1: the closure gate is the E-rate residual AND a non-significant inter-block ion
         # trend. The first implementation checked only the residual; both are contract.
-        ion_q99 = max(second["ion"]["q99_abs_dNa_dt"], second["ion"]["q99_abs_dKo_dt"])
-        ion_ok = bool(ion_q99 < ION.GATE_B_ION_BLOCK_DRIFT_MAX)
+        # B2.1 spec 2.1: the gate quantity is the SIGNED SECULAR SLOPE, each against its own
+        # bound; the first-difference q99 is retained only as a diagnostic.
+        ion_ok = bool(second["ion"]["slope_q99_Na"] < ION.B2_1_SLOPE_BOUND_NA
+                      and second["ion"]["slope_q99_K"] < ION.B2_1_SLOPE_BOUND_K)
+        ion_q99 = max(second["ion"]["slope_q99_Na"] / ION.B2_1_SLOPE_BOUND_NA,
+                      second["ion"]["slope_q99_K"] / ION.B2_1_SLOPE_BOUND_K)
         closure_ok = bool(rel <= CLOSURE_REL_TOL and ion_ok)
 
         # ruling 4: the closed-loop counterpart of the open-loop integration diagnostic
@@ -2042,8 +2086,11 @@ def cmd_b2_validate(args):
                          passed=closure_ok, iterations=1,
                          status=("PASS" if closure_ok else "UNRESOLVED_CALIBRATION"),
                          rate_residual_ok=bool(rel <= CLOSURE_REL_TOL),
-                         ion_trend_ok=ion_ok, ion_trend_q99=ion_q99,
-                         ion_trend_bound=ION.GATE_B_ION_BLOCK_DRIFT_MAX,
+                         ion_trend_ok=ion_ok, ion_trend_worst_ratio_to_bound=ion_q99,
+                         slope_q99_Na=second["ion"]["slope_q99_Na"],
+                         slope_q99_K=second["ion"]["slope_q99_K"],
+                         slope_bound_Na=ION.B2_1_SLOPE_BOUND_NA,
+                         slope_bound_K=ION.B2_1_SLOPE_BOUND_K,
                          gate_definition=("spec 7.1: E-rate residual <= 10% AND a non-significant "
                                           "inter-block ion trend. BOTH are contract."),
                          rule="recompute q_ion exactly once, rerun, then FREEZE -- convergence may "
@@ -2069,8 +2116,11 @@ def cmd_b2_validate(args):
         if not closure_ok:
             failed = ([] if rel <= CLOSURE_REL_TOL else [f"E-rate residual {rel:.4f} > "
                                                         f"{CLOSURE_REL_TOL}"]) + \
-                     ([] if ion_ok else [f"ion inter-block statistic q99 {ion_q99:.4f} >= "
-                                         f"{ION.GATE_B_ION_BLOCK_DRIFT_MAX}"])
+                     ([] if ion_ok else [f"signed secular slope q99: Na "
+                                f"{second['ion']['slope_q99_Na']:.3e} vs "
+                                f"{ION.B2_1_SLOPE_BOUND_NA:.3e}, K "
+                                f"{second['ion']['slope_q99_K']:.3e} vs "
+                                f"{ION.B2_1_SLOPE_BOUND_K:.3e}"])
             reason = ("closure -> UNRESOLVED_CALIBRATION. Failing clause(s): " + "; ".join(failed)
                       + ". Per plan section 10 this is a CALIBRATOR failure, not a mechanism "
                       "NO-GO: NO_GO_BASELINE would require the legal [-2,+2] box to be bracketed "
@@ -2125,6 +2175,187 @@ def cmd_b2_confirm(args):
                          code_commit=pre["code_commit"], frozen=fz, runs=runs,
                          note="bias and q_ion were frozen on the development seed; these six "
                               "trajectories were NOT used for tuning", workers=plan))
+    return 0
+
+
+# ================================================================== B2.1 (spec 2026-07-28 lock)
+def cmd_b2_ionsoff_control(args):
+    """B2.1 spec 3: the SAME-SEED ions-off control, so 'the ion layer raises the rate by X%'
+    becomes a matched comparison instead of one across noise202 and noise401."""
+    if not args.confirm_run:
+        raise SystemExit("b2-ionsoff-control runs a 40k trajectory; pass --confirm-run")
+    with staged("b2-ionsoff-control", dict(noise_seed=NOISE_DEV)):
+        pre = preflight()
+        gate = check_resource_gate("b2-ionsoff-control")
+        if gate["status"] == "PAUSE":
+            raise SystemExit(f"resource gate PAUSE: {gate}")
+        S, _ = _substrate(CONN_SEED_DEV)
+        res, _ = run_arm_c(S, noise_seed=NOISE_DEV, T_ms=T_MS, dump_i=True, verbose=False)
+        n_steps = res["E_spk_bool"].shape[0]
+        blocks = block_edges(n_steps)
+        rate = np.asarray(res["rate_E"], float)
+        rI = np.asarray(res["rate_I"], float)
+        rE_m = float(np.mean([rate[lo:hi].mean() for lo, hi in blocks]))
+        rI_m = float(np.mean([rI[lo:hi].mean() for lo, hi in blocks]))
+        cal = json.load(open(os.path.join(OUT, "b2_bias_calibration.json")))
+        base = next(p for p in cal["probes"] if p["job"]["tag"] == "base")
+        payload = dict(
+            generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+            noise_seed=NOISE_DEV, conn_seed=CONN_SEED_DEV, T_ms=T_MS, ions="OFF",
+            r_E=rE_m, r_I=rI_m,
+            matched_ions_on_zero_bias=dict(r_E=base["r_E"], r_I=base["r_I"],
+                                           tag=base["job"]["tag"]),
+            ion_layer_rate_change=dict(
+                r_E_rel=(base["r_E"] - rE_m) / rE_m, r_I_rel=(base["r_I"] - rI_m) / rI_m,
+                note="SAME noise seed and connectivity, ions off vs ions on at zero bias -- this "
+                     "is the matched causal comparison the earlier 6.960-vs-4.158 number was not"),
+            locked_target_r0=ION.R0_HZ,
+            ions_off_vs_locked_target=dict(rel=(rE_m - ION.R0_HZ) / ION.R0_HZ,
+                                           note="noise401 ions-off vs the noise202 locked r0; a "
+                                                "seed-to-seed difference, not an ion effect"))
+        _write_json(os.path.join(OUT, "b2_1_ionsoff_control.json"), payload)
+        print(f"[b2-ionsoff-control] ions OFF noise401: r_E={rE_m:.4f} r_I={rI_m:.4f}; "
+              f"ions ON zero bias: r_E={base['r_E']:.4f} r_I={base['r_I']:.4f}  -> "
+              f"ion effect on r_E = {100*payload['ion_layer_rate_change']['r_E_rel']:+.1f}%")
+    return 0
+
+
+def cmd_b2_selfconsistent(args):
+    """B2.1 spec 2.2: damped self-consistent ions-on rate-field initialization.
+
+    r -> ionic equilibrium -> live network -> r'.  Shrink, damp, iterate at most
+    B2_1_MAX_UPDATES times, then judge the ion slope on a trajectory that was NOT used to derive
+    its own initialization (true by construction: each run is initialized from the PREVIOUS one).
+    q_ion and both biases are FROZEN throughout.
+    """
+    if not args.confirm_run:
+        raise SystemExit("b2-selfconsistent runs up to 4 40k trajectories; pass --confirm-run")
+    with staged("b2-selfconsistent"):
+        pre = preflight()
+        cal = json.load(open(os.path.join(OUT, "b2_bias_calibration.json")))
+        if cal["status"] != "CALIBRATED":
+            raise SystemExit(f"b2-bias is {cal['status']}: B2.1 self-consistency may not run")
+        gate = check_resource_gate("b2-selfconsistent")
+        if gate["status"] == "PAUSE":
+            raise SystemExit(f"resource gate PAUSE: {gate}")
+
+        bE, bI = cal["best"]["I_bias_E"], cal["best"]["I_bias_I"]
+        q_ion = ION.q_ion_from_fprime(float(cal["f_prime"]))
+        rE0, rI0, voxel, sha = _load_40k_rate_field()
+        NE = int(rE0.size)
+        nv = N_GRID_40K ** 2
+        cur_E, cur_I = rE0.copy(), rI0.copy()          # iteration 0 = the pump-off field
+        win_s = N_BLOCKS * BLOCK_MS / 1000.0
+        history, prev_field_source = [], "pump-off (spec 4.2c original)"
+
+        for k in range(ION.B2_1_MAX_UPDATES + 1):
+            job = dict(I_bias_E=bE, I_bias_I=bI, q_ion=q_ion, conn_seed=CONN_SEED_DEV,
+                       noise_seed=NOISE_DEV, T_ms=T_MS, rate_scale_E=1.0, rate_scale_I=1.0,
+                       event_bar=float(load_artifact("pump_event_bar")["event_bar"]),
+                       tag=f"selfconsistent_iter{k}",
+                       rate_field_override=dict(rate_E=cur_E.tolist(), rate_I=cur_I.tolist()))
+            r = trajectory_task(job)
+            meas_E = ION.shrink_rate_field(np.asarray(r["per_cell_counts_E"], float),
+                                           voxel[:NE], window_s=win_s, n_voxels=nv)
+            meas_I = ION.shrink_rate_field(np.asarray(r["per_cell_counts_I"], float),
+                                           voxel[NE:], window_s=win_s, n_voxels=nv)
+            rel = float(np.max(np.abs(np.concatenate([meas_E, meas_I])
+                                      - np.concatenate([cur_E, cur_I])))
+                        / np.mean(np.concatenate([cur_E, cur_I])))
+            history.append(dict(
+                iteration=k, field_source=prev_field_source, rate_rel_change=rel,
+                mean_rate_E_hz=r["pooled"]["mean_rate_hz"],
+                slope_q99_Na=r["ion"]["slope_q99_Na"], slope_q99_K=r["ion"]["slope_q99_K"],
+                slope_mean_signed_Na=r["ion"]["slope_Na"]["mean_signed"],
+                slope_mean_signed_K=r["ion"]["slope_K"]["mean_signed"],
+                first_difference_q99_Na=r["ion"]["q99_abs_dNa_dt"],
+                n_events=r["pooled"]["n_events"], n_scoreable=r["pooled"]["n_scoreable"]))
+            print(f"[b2-selfconsistent] iter{k}: rate_rel_change={rel:.4f} "
+                  f"r_E={r['pooled']['mean_rate_hz']:.4f} "
+                  f"slope_q99 Na={r['ion']['slope_q99_Na']:.3e} "
+                  f"(bound {ION.B2_1_SLOPE_BOUND_NA:.3e}) "
+                  f"K={r['ion']['slope_q99_K']:.3e} (bound {ION.B2_1_SLOPE_BOUND_K:.3e})",
+                  flush=True)
+            resource_log(f"selfconsistent_iter{k}")
+            verdict = ION.adjudicate_b2_1_selfconsistency(dict(
+                rate_rel_change=rel, slope_q99_Na=r["ion"]["slope_q99_Na"],
+                slope_q99_K=r["ion"]["slope_q99_K"], n_updates=k,
+                independent_window=bool(k > 0)))
+            if verdict["status"] == "CONVERGED" and k > 0:
+                break
+            if k == ION.B2_1_MAX_UPDATES:
+                break
+            cur_E = ION.damped_rate_update(cur_E, meas_E)
+            cur_I = ION.damped_rate_update(cur_I, meas_I)
+            prev_field_source = f"damped update from iter{k} (alpha={ION.B2_1_ALPHA})"
+
+        payload = dict(
+            generated=datetime.now(timezone.utc).isoformat(), code_commit=pre["code_commit"],
+            contract="docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md",
+            status=verdict["status"], verdict=verdict, history=history,
+            frozen=dict(I_bias_E=bE, I_bias_I=bI, q_ion=q_ion, f_prime=cal["f_prime"],
+                        note="q_ion and both biases were frozen for the whole loop (spec 2.2)"),
+            shrinkage=dict(n0=ION.B2_1_SHRINK_N0, alpha=ION.B2_1_ALPHA,
+                           max_updates=ION.B2_1_MAX_UPDATES),
+            source_rate_field_sha256=sha,
+            converged_rate_field=dict(rate_E=cur_E.tolist(), rate_I=cur_I.tolist()))
+        _write_json(os.path.join(OUT, "b2_1_selfconsistent.json"), payload)
+        print(f"[b2-selfconsistent] {verdict['status']} after {len(history)} trajectories")
+        if verdict["status"] != "CONVERGED":
+            raise SystemExit(
+                "B2.1 self-consistency NOT_CONVERGED -- the calibration instrument is still not "
+                "sound, so the B2 closure may not be re-run and Gate B stays closed. Do not widen "
+                "the slope bound or the update cap.")
+    return 0
+
+
+def cmd_b2_matched_control(args):
+    """B2.1 spec 2.3: the two arms differ ONLY in whether the event-induced dE_K reaches the
+    membrane.  The open arm freezes membrane_current() at its pre-kick value, which both cuts the
+    event-induced feedback and holds the pre-kick working point exactly."""
+    if not args.confirm_run:
+        raise SystemExit("b2-matched-control runs two 40k probes; pass --confirm-run")
+    with staged("b2-matched-control"):
+        pre = preflight()
+        sc = json.load(open(os.path.join(OUT, "b2_1_selfconsistent.json")))
+        if sc["status"] != "CONVERGED":
+            raise SystemExit(f"B2.1 self-consistency is {sc['status']}: matched control may not run")
+        fz = sc["frozen"]
+        base = dict(I_bias_E=fz["I_bias_E"], I_bias_I=fz["I_bias_I"], q_ion=fz["q_ion"],
+                    conn_seed=CONN_SEED_DEV, noise_seed=NOISE_DEV,
+                    rate_field_override=sc["converged_rate_field"],
+                    tau_Ko_at_workpoint_s=float(next(
+                        r for r in json.load(open(os.path.join(OUT, "b1_f_selection_v2.json")))
+                        ["rows"] if r["f_prime"] == float(fz["f_prime"])
+                    )["measured"]["tau_Ko_at_workpoint_s"]))
+        freeze_block = int(round((CL_PROBE_T_KICK_MS - 50.0) / DT_ION_MS))
+        arms = {}
+        for tag, fb in (("closed", 0), ("open", freeze_block)):
+            arms[tag] = closed_loop_integration_probe(
+                dict(base, tag=tag, freeze_membrane_from_block=fb))
+            a = arms[tag]
+            print(f"[b2-matched-control] {tag}: peaks {a['peak1_mM']:.4f}/{a['peak2_mM']:.4f} "
+                  f"spikes {a.get('kick_spikes')} participants {a.get('kick_participants')}",
+                  flush=True)
+        v = ION.adjudicate_matched_control(
+            closed=dict(spikes=arms["closed"]["kick_spikes"],
+                        participants=arms["closed"]["kick_participants"],
+                        peaks=[arms["closed"]["peak1_mM"], arms["closed"]["peak2_mM"]]),
+            open_=dict(spikes=arms["open"]["kick_spikes"],
+                       participants=arms["open"]["kick_participants"],
+                       peaks=[arms["open"]["peak1_mM"], arms["open"]["peak2_mM"]]))
+        v.update(generated=datetime.now(timezone.utc).isoformat(),
+                 code_commit=pre["code_commit"],
+                 contract="docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md",
+                 design=("both arms share q_ion, bias, initial ion field, noise seed, kick times, "
+                         "strength and radius; the OPEN arm freezes membrane_current() at the "
+                         "block before the first kick, which cuts the event-induced dE_K while "
+                         "holding the pre-kick working point"),
+                 arms=arms)
+        _write_json(os.path.join(OUT, "b2_1_matched_control.json"), v)
+        print(f"[b2-matched-control] {v['status']}"
+              + (f"  closed {v['ratio']['closed_2nd_over_1st']:.3f} vs open "
+                 f"{v['ratio']['open_2nd_over_1st']:.3f}" if "ratio" in v else ""))
     return 0
 
 
@@ -2365,6 +2596,9 @@ STAGES = {
     "b2-bias": cmd_b2_bias,
     "b2-validate": cmd_b2_validate,
     "b2-confirm": cmd_b2_confirm,
+    "b2-ionsoff-control": cmd_b2_ionsoff_control,
+    "b2-selfconsistent": cmd_b2_selfconsistent,
+    "b2-matched-control": cmd_b2_matched_control,
     "b2-adjudicate": cmd_b2_adjudicate,
     "manifest": cmd_manifest,
 }

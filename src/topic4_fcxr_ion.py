@@ -1050,6 +1050,120 @@ def select_f_prime_v2(rows):
                            "B2 runs with; it is NOT a claim that the closed loop behaves well."))
 
 
+# =====================================================================================
+#  B2.1 -- calibration-instrument repair
+#  docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md
+# =====================================================================================
+def _b2_1_bound(excursion, frac=0.10, window_s=10.0):
+    """spec 2.1: the secular drift may move a variable by at most `frac` of its OWN interictal
+    excursion over the measurement window."""
+    return frac * excursion / window_s
+
+
+_Q1 = q_ion_from_fprime(F_PRIME_PRIMARY)
+_NA_STAR, _KO_STAR = interictal_steady_state(_Q1, R0_HZ)
+B2_1_SLOPE_BOUND_NA = _b2_1_bound(_NA_STAR - NA_I0)      # 2.07e-2 mM/s
+B2_1_SLOPE_BOUND_K = _b2_1_bound(_KO_STAR - K_O0)        # 1.09e-3 mM/s
+B2_1_RATE_REL_TOL = 0.05
+B2_1_ALPHA = 0.5
+B2_1_MAX_UPDATES = 3
+B2_1_SHRINK_N0 = 20.0        # spikes at which a cell's own count and its voxel weigh equally
+B2_1_DRIVE_TOL = 0.15        # arms are comparable if spikes / participants agree within 15%
+
+
+def signed_secular_slope(series, dt_s):
+    """Least-squares SIGNED slope of every column of `series` (T, N) against time, in unit/s.
+
+    This is the estimator the slow-countdown gate needs.  The q99 of |first differences| it
+    replaces is a FLUCTUATION MAGNITUDE: on a substrate firing 2.2 interictal events per second
+    every event contributes to it, so it stays large in a statistically stationary state.  A
+    least-squares slope cancels those back-and-forth excursions and keeps only the one-way part.
+    """
+    y = np.asarray(series, float)
+    if y.ndim == 1:
+        y = y[:, None]
+    t = np.arange(y.shape[0]) * float(dt_s)
+    tc = t - t.mean()
+    denom = float(tc @ tc)
+    if denom <= 0:
+        raise ValueError("need at least two distinct time points to fit a slope")
+    return (tc @ (y - y.mean(axis=0))) / denom
+
+
+def slope_stats(slopes):
+    a = np.abs(np.asarray(slopes, float))
+    return dict(q95_abs=float(np.quantile(a, 0.95)), q99_abs=float(np.quantile(a, 0.99)),
+                max_abs=float(a.max()), mean_signed=float(np.mean(slopes)),
+                median_signed=float(np.median(slopes)), n=int(a.size))
+
+
+def shrink_rate_field(counts, voxel, *, window_s, n_voxels, n0=B2_1_SHRINK_N0):
+    """Shrink each cell's measured rate toward its voxel mean (spec 2.2).
+
+    An 11 s window gives a 4 Hz cell about 40 spikes -- a 16% relative standard error -- so raw
+    per-cell rates would pour sampling noise into the initial ion state.  Weight
+    w = n / (n + n0) means a cell with n0 spikes trusts itself and its neighbourhood equally.
+    Call SEPARATELY for E and I: their baselines differ, and pooling would drag I toward E.
+    """
+    c = np.asarray(counts, float)
+    v = np.asarray(voxel, int)
+    rate = c / float(window_s)
+    tot = np.bincount(v, weights=rate, minlength=n_voxels)
+    num = np.bincount(v, minlength=n_voxels).astype(float)
+    vox_mean = np.divide(tot, num, out=np.zeros_like(tot), where=num > 0)
+    w = c / (c + float(n0))
+    return w * rate + (1.0 - w) * vox_mean[v]
+
+
+def damped_rate_update(current, measured, alpha=B2_1_ALPHA):
+    """r^(k+1) = r^(k) + alpha * (measured - r^(k))  (spec 2.2)."""
+    return np.asarray(current, float) + float(alpha) * (np.asarray(measured, float)
+                                                        - np.asarray(current, float))
+
+
+def adjudicate_b2_1_selfconsistency(m):
+    """Both clauses of spec 2.2, and the slope must come from an INDEPENDENT window."""
+    checks = dict(
+        rate_converged=dict(ok=bool(m["rate_rel_change"] < B2_1_RATE_REL_TOL),
+                            value=m["rate_rel_change"], threshold=B2_1_RATE_REL_TOL),
+        slope_Na=dict(ok=bool(m["slope_q99_Na"] < B2_1_SLOPE_BOUND_NA),
+                      value=m["slope_q99_Na"], threshold=B2_1_SLOPE_BOUND_NA),
+        slope_K=dict(ok=bool(m["slope_q99_K"] < B2_1_SLOPE_BOUND_K),
+                     value=m["slope_q99_K"], threshold=B2_1_SLOPE_BOUND_K),
+        independent_window=dict(ok=bool(m["independent_window"]),
+                                rule="the slope must be measured on a trajectory NOT used to "
+                                     "derive the rate field"),
+    )
+    ok = all(v["ok"] for v in checks.values())
+    return dict(status="CONVERGED" if ok else "NOT_CONVERGED", checks=checks,
+                n_updates=m.get("n_updates"), max_updates=B2_1_MAX_UPDATES,
+                semantics=("CONVERGED means the calibration INSTRUMENT is sound. It licenses "
+                           "re-running the B2 closure; it is not a statement about the mechanism."))
+
+
+def adjudicate_matched_control(closed, open_):
+    """spec 2.3: the two arms must deliver a comparable drive, or the comparison is void."""
+    def _rel(a, b):
+        a, b = np.asarray(a, float), np.asarray(b, float)
+        return float(np.max(np.abs(a - b) / np.maximum(np.abs(b), 1e-12)))
+
+    d_spk = _rel(closed["spikes"], open_["spikes"])
+    d_par = _rel(closed["participants"], open_["participants"])
+    comparable = bool(d_spk <= B2_1_DRIVE_TOL and d_par <= B2_1_DRIVE_TOL)
+    out = dict(status="COMPARABLE" if comparable else "UNRESOLVED_MATCHED_CONTROL",
+               drive_rel_diff_spikes=d_spk, drive_rel_diff_participants=d_par,
+               tolerance=B2_1_DRIVE_TOL, closed=closed, open=open_)
+    if not comparable:
+        out["reason"] = ("the arms did not deliver a comparable drive, so no reading of the "
+                         "feedback may be taken from the peak ratio")
+        return out
+    cp, op = np.asarray(closed["peaks"], float), np.asarray(open_["peaks"], float)
+    out["ratio"] = dict(closed_2nd_over_1st=float(cp[1] / cp[0]),
+                        open_2nd_over_1st=float(op[1] / op[0]),
+                        closed_exceeds_open=bool(cp[1] / cp[0] > op[1] / op[0]))
+    return out
+
+
 def withhold_canonical_verdict(sel, *, protocol_deviation, blocking_gates_are_open_loop):
     """A result obtained on a DIFFERENT experimental object may not inherit the canonical verdict
     of the contract it replaced (CLAUDE.md §5: the pre-registered tier is fixed at planning time).
