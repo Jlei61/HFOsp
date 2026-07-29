@@ -829,16 +829,46 @@ def test_b2_1_adjudication_needs_both_rate_convergence_and_the_slope_bound():
         dict(ok, independent_window=False))["status"] == "NOT_CONVERGED"
 
 
-def test_matched_control_is_void_when_the_drive_is_not_comparable():
-    """spec 2.3: if spike counts / participating cells differ between arms, the comparison is
-    void -- no reading of the feedback may be taken from the ratio."""
-    good = ION.adjudicate_matched_control(
-        closed=dict(spikes=[1000, 1010], participants=[500, 505], peaks=[0.7, 0.9]),
-        open_=dict(spikes=[1005, 1002], participants=[502, 500], peaks=[0.7, 0.8]))
-    assert good["status"] == "COMPARABLE"
+def test_matched_control_validity_is_structural_and_the_FIRST_kick_is_the_sanity_check():
+    """The arms are bit-identical up to the freeze block, so validity is STRUCTURAL. The first
+    kick's response is the sanity check; later kicks are where the feedback is allowed to act."""
+    out = ION.adjudicate_matched_control(
+        closed=dict(spikes=[1000, 1020], participants=[500, 710], peaks=[0.68, 0.67]),
+        open_=dict(spikes=[1005, 1002], participants=[502, 560], peaks=[0.65, 0.83]),
+        structurally_identical_until_freeze=True)
+    assert out["status"] == "COMPARABLE"
+    assert out["ratio"]["closed_2nd_over_1st"] < out["ratio"]["open_2nd_over_1st"]
+    # the LATE divergence is reported as the effect, not as a matching failure
+    assert out["effect"]["participants_rel_diff_by_kick"][1] > 0.2
+    assert out["sanity"]["kick1_participants_rel_diff"] < 0.15
+
+
+def test_matched_control_a_late_divergence_must_NOT_void_the_comparison():
+    """Regression on my own mis-specification: pooling both kicks into one max voided the control
+    exactly when the feedback effect was largest -- a criterion that cannot tell 'control broken'
+    from 'effect present' is not a validity criterion."""
+    out = ION.adjudicate_matched_control(
+        closed=dict(spikes=[1000, 1020], participants=[500, 1500], peaks=[0.7, 0.7]),
+        open_=dict(spikes=[1005, 1002], participants=[502, 500], peaks=[0.7, 0.9]),
+        structurally_identical_until_freeze=True)
+    assert out["status"] == "COMPARABLE"
+    assert "ratio" in out
+
+
+def test_matched_control_is_void_when_the_FIRST_kick_already_disagrees():
     bad = ION.adjudicate_matched_control(
-        closed=dict(spikes=[1000, 3000], participants=[500, 1500], peaks=[0.7, 1.9]),
-        open_=dict(spikes=[1005, 1002], participants=[502, 500], peaks=[0.7, 0.8]))
+        closed=dict(spikes=[3000, 3100], participants=[1500, 1600], peaks=[1.9, 2.0]),
+        open_=dict(spikes=[1005, 1002], participants=[502, 500], peaks=[0.7, 0.8]),
+        structurally_identical_until_freeze=True)
+    assert bad["status"] == "UNRESOLVED_MATCHED_CONTROL"
+    assert "ratio" not in bad
+
+
+def test_matched_control_is_void_without_the_structural_guarantee():
+    bad = ION.adjudicate_matched_control(
+        closed=dict(spikes=[1000, 1010], participants=[500, 505], peaks=[0.7, 0.9]),
+        open_=dict(spikes=[1005, 1002], participants=[502, 500], peaks=[0.7, 0.8]),
+        structurally_identical_until_freeze=False)
     assert bad["status"] == "UNRESOLVED_MATCHED_CONTROL"
     assert "ratio" not in bad
 

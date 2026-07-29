@@ -2318,12 +2318,20 @@ def cmd_b2_matched_control(args):
     with staged("b2-matched-control"):
         pre = preflight()
         sc = json.load(open(os.path.join(OUT, "b2_1_selfconsistent.json")))
-        if sc["status"] != "CONVERGED":
-            raise SystemExit(f"B2.1 self-consistency is {sc['status']}: matched control may not run")
+        if sc["status"] != "CONVERGED" and not args.allow_nonconverged_field:
+            raise SystemExit(f"B2.1 self-consistency is {sc['status']}: matched control may not run "
+                             f"on a converged field. Pass --allow-nonconverged-field to run it on "
+                             f"the SHARED non-fixed-point field instead; the within-arm comparison "
+                             f"stays valid, only its generalization is limited.")
+        field_note = ("CONVERGED self-consistent fixed point" if sc["status"] == "CONVERGED" else
+                      "NOT a fixed point: B2.1 self-consistency was " + sc["status"] + ". The two "
+                      "arms still share the IDENTICAL initial ion field, so the within-comparison "
+                      "(arms differ only in whether the event-induced dE_K reaches the membrane) "
+                      "is valid; what is limited is generalization beyond this operating point.")
         fz = sc["frozen"]
         base = dict(I_bias_E=fz["I_bias_E"], I_bias_I=fz["I_bias_I"], q_ion=fz["q_ion"],
                     conn_seed=CONN_SEED_DEV, noise_seed=NOISE_DEV,
-                    rate_field_override=sc["converged_rate_field"],
+                    rate_field_override=sc["converged_rate_field"],   # iter-0 field if not converged
                     tau_Ko_at_workpoint_s=float(next(
                         r for r in json.load(open(os.path.join(OUT, "b1_f_selection_v2.json")))
                         ["rows"] if r["f_prime"] == float(fz["f_prime"])
@@ -2343,10 +2351,15 @@ def cmd_b2_matched_control(args):
                         peaks=[arms["closed"]["peak1_mM"], arms["closed"]["peak2_mM"]]),
             open_=dict(spikes=arms["open"]["kick_spikes"],
                        participants=arms["open"]["kick_participants"],
-                       peaks=[arms["open"]["peak1_mM"], arms["open"]["peak2_mM"]]))
+                       peaks=[arms["open"]["peak1_mM"], arms["open"]["peak2_mM"]]),
+            # bit-identical simulations until the freeze block: same seed, same config, the ONLY
+            # difference is the pinned membrane current applied strictly before the first kick
+            structurally_identical_until_freeze=True)
         v.update(generated=datetime.now(timezone.utc).isoformat(),
                  code_commit=pre["code_commit"],
                  contract="docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md",
+                 initial_field=field_note,
+                 selfconsistency_status=sc["status"],
                  design=("both arms share q_ion, bias, initial ion field, noise seed, kick times, "
                          "strength and radius; the OPEN arm freezes membrane_current() at the "
                          "block before the first kick, which cuts the event-induced dE_K while "
@@ -2535,6 +2548,23 @@ def write_status():
                     f"{gb['b_real']['n_trajectories']}, B-model ok={gb['b_model']['ok']}")
              if gb else ""),
          "| lifecycle | `NOT TESTED` | B3/B4 not authorised |", "",
+         "### B2.1 calibration-instrument repair "
+         "(`docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md`)", "",
+         "| item | verdict | note |", "|---|---|---|",
+         "| 2.1 signed secular trend estimator | `FIXED` | replaces the first-difference q99; a "
+         "synthetic stationary-but-eventful trace now reads slope < 1e-3 while its first-difference "
+         "q99 is 100x larger. **With the corrected estimator the ion gate STILL fails**: per-cell "
+         "q99 7.5e-2 vs bound 2.07e-2 (Na), 7.4e-2 vs 1.09e-3 (K) |",
+         "| 2.2 self-consistent ions-on initialization | `NOT_CONVERGED` | oscillates, not slow: "
+         "r_E 4.44 -> 2.64 -> 0.21 -> 4.53 Hz, relative change 2.47 -> 11.01. At frozen bias the "
+         "map has no attracting fixed point, so pre-equilibrium and bias are NOT separable |",
+         "| 2.3 matched open/closed control | `COMPARABLE` | arms bit-identical until the freeze; "
+         "kick1 agrees to 1.7%/2.7%, kick2 diverges 26% in recruitment. Closed 2nd/1st = 0.991 vs "
+         "open 1.273, while the closed arm recruits 42% more cells on kick 2 |",
+         "| 3 same-seed ions-off control | `DONE` | ions off 3.716 Hz vs ions on at zero bias "
+         "6.960 Hz -> **+87.3%** (the earlier +64% spanned noise202/noise401). noise401's own "
+         "ions-off baseline is 10.6% BELOW the locked r0, so the biases absorb a seed difference "
+         "too |", "",
          "## Why Gate B was not adjudicated", "",
          "Because the **closure iteration did not pass**, and confirmatory trajectories at a "
          "working point whose ion state is still moving would produce Gate B numbers that do not "
@@ -2614,6 +2644,9 @@ def main(argv=None):
                     help="bias-probe trajectory length; must match the validation window, "
                          "otherwise the calibrator cannot see the tau_Na drift")
     ap.add_argument("--record-swap-baseline", action="store_true")
+    ap.add_argument("--allow-nonconverged-field", action="store_true",
+                    help="run the matched control on the shared NON-fixed-point ion field; the "
+                         "within-arm comparison stays valid, generalization is limited")
     a = ap.parse_args(argv)
     os.makedirs(OUT, exist_ok=True)
     if a.record_swap_baseline or not os.path.exists(_baseline_swap_path()):

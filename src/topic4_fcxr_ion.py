@@ -1141,21 +1141,46 @@ def adjudicate_b2_1_selfconsistency(m):
                            "re-running the B2 closure; it is not a statement about the mechanism."))
 
 
-def adjudicate_matched_control(closed, open_):
-    """spec 2.3: the two arms must deliver a comparable drive, or the comparison is void."""
-    def _rel(a, b):
-        a, b = np.asarray(a, float), np.asarray(b, float)
-        return float(np.max(np.abs(a - b) / np.maximum(np.abs(b), 1e-12)))
+def adjudicate_matched_control(closed, open_, *, structurally_identical_until_freeze):
+    """spec 2.3, corrected 2026-07-28 after the first execution exposed a mis-specification.
 
-    d_spk = _rel(closed["spikes"], open_["spikes"])
-    d_par = _rel(closed["participants"], open_["participants"])
-    comparable = bool(d_spk <= B2_1_DRIVE_TOL and d_par <= B2_1_DRIVE_TOL)
-    out = dict(status="COMPARABLE" if comparable else "UNRESOLVED_MATCHED_CONTROL",
-               drive_rel_diff_spikes=d_spk, drive_rel_diff_participants=d_par,
-               tolerance=B2_1_DRIVE_TOL, closed=closed, open=open_)
-    if not comparable:
-        out["reason"] = ("the arms did not deliver a comparable drive, so no reading of the "
-                         "feedback may be taken from the peak ratio")
+    Validity here is STRUCTURAL, not response-based: the two arms are bit-identical simulations up
+    to the freeze block (same q_ion, bias, initial ion field, seed, kick times / strength / radius;
+    the only change is that the open arm pins `membrane_current()` from a block strictly before the
+    first kick).  Every later difference is therefore attributable to the one factor that differs.
+
+    The FIRST kick's response is a SANITY check that nothing pathological happened.  Later kicks
+    are where the between-event feedback is allowed to act, so a divergence there is the EFFECT.
+
+    The original rule pooled all kicks into one max and voided the comparison on it.  That is not a
+    validity criterion: it declares the control broken exactly when the feedback matters most,
+    which cannot distinguish 'the control is broken' from 'the effect is present'.
+    """
+    def _by_kick(a, b):
+        a, b = np.asarray(a, float), np.asarray(b, float)
+        return list(np.abs(a - b) / np.maximum(np.abs(b), 1e-12))
+
+    spk = _by_kick(closed["spikes"], open_["spikes"])
+    par = _by_kick(closed["participants"], open_["participants"])
+    sane = bool(spk[0] <= B2_1_DRIVE_TOL and par[0] <= B2_1_DRIVE_TOL)
+    ok = bool(structurally_identical_until_freeze and sane)
+    out = dict(status="COMPARABLE" if ok else "UNRESOLVED_MATCHED_CONTROL",
+               structurally_identical_until_freeze=bool(structurally_identical_until_freeze),
+               sanity=dict(kick1_spikes_rel_diff=spk[0], kick1_participants_rel_diff=par[0],
+                           tolerance=B2_1_DRIVE_TOL, ok=sane,
+                           rule="the first kick's response must agree; the arms are identical up "
+                                "to the freeze, so a large disagreement already at kick 1 would "
+                                "mean something pathological, not feedback"),
+               effect=dict(spikes_rel_diff_by_kick=spk, participants_rel_diff_by_kick=par,
+                           rule="differences from the SECOND kick on are the feedback effect and "
+                                "must NOT void the comparison"),
+               closed=closed, open=open_)
+    if not ok:
+        out["reason"] = (("the arms were not structurally identical up to the freeze block"
+                          if not structurally_identical_until_freeze else
+                          "the FIRST kick's response already disagreed, so the arms did not start "
+                          "comparably") + "; no reading of the feedback may be taken from the "
+                         "peak ratio")
         return out
     cp, op = np.asarray(closed["peaks"], float), np.asarray(open_["peaks"], float)
     out["ratio"] = dict(closed_2nd_over_1st=float(cp[1] / cp[0]),
