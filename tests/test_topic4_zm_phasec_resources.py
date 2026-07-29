@@ -149,6 +149,53 @@ def test_exited_pid_is_unavailable_not_a_zero_live_sample(monkeypatch):
     assert set(audit) == {"11"}
 
 
+def test_process_swap_tolerates_proc_teardown_between_read_and_parse(
+    monkeypatch,
+):
+    class VanishingStatus:
+        def __init__(self):
+            self.reads = 0
+
+        def read_text(self, **_kwargs):
+            self.reads += 1
+            if self.reads == 1:
+                return ""
+            raise FileNotFoundError
+
+        def exists(self):
+            return self.reads < 2
+
+    status = VanishingStatus()
+    monkeypatch.setattr(R, "Path", lambda _value: status)
+    assert R.process_swap_kb(12) is None
+    assert status.reads == 2
+
+
+def test_process_swap_treats_zombie_as_exited_unavailable(monkeypatch):
+    class ZombieStatus:
+        def read_text(self, **_kwargs):
+            return "Name:\tpython\nState:\tZ (zombie)\n"
+
+        def exists(self):
+            return True
+
+    monkeypatch.setattr(R, "Path", lambda _value: ZombieStatus())
+    assert R.process_swap_kb(12) is None
+
+
+def test_process_swap_still_fails_for_malformed_live_status(monkeypatch):
+    class MalformedLiveStatus:
+        def read_text(self, **_kwargs):
+            return "Name:\tpython\nVmRSS:\t100 kB\n"
+
+        def exists(self):
+            return True
+
+    monkeypatch.setattr(R, "Path", lambda _value: MalformedLiveStatus())
+    with pytest.raises(RuntimeError, match="live process 12"):
+        R.process_swap_kb(12)
+
+
 def test_coordinator_identity_requires_both_environment_fields(monkeypatch):
     monkeypatch.delenv(R.COORDINATOR_RUN_ENV, raising=False)
     monkeypatch.delenv(R.COORDINATOR_TOKEN_ENV, raising=False)

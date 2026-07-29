@@ -34,23 +34,42 @@ def parse_process_swap_kb(status_text: str) -> int:
     raise RuntimeError("process status lacks a readable VmSwap field")
 
 
+def _process_status_is_zombie(status_text: str) -> bool:
+    for line in str(status_text).splitlines():
+        if line.startswith("State:"):
+            fields = line.split()
+            return len(fields) >= 2 and fields[1] == "Z"
+    return False
+
+
 def process_swap_kb(pid: int) -> Optional[int]:
     """Return one live process' VmSwap in KiB, or ``None`` once it exited.
 
     An exited process is *unavailable*, not a zero-valued live sample.
-    Malformed status for a process whose status file still exists fails closed.
+    ``/proc`` may disappear between opening and parsing the status file when a
+    worker exits.  Retry that teardown race once; malformed status for a
+    process whose status file still exists after the retry fails closed.
     """
     status = Path(f"/proc/{int(pid)}/status")
-    try:
-        text = status.read_text(encoding="utf-8")
-    except FileNotFoundError:
+    last_error = None
+    for _attempt in range(2):
+        try:
+            text = status.read_text(encoding="utf-8")
+        except FileNotFoundError:
+            return None
+        try:
+            return parse_process_swap_kb(text)
+        except RuntimeError as exc:
+            last_error = exc
+            if _process_status_is_zombie(text):
+                return None
+            if not status.exists():
+                return None
+    if not status.exists():
         return None
-    try:
-        return parse_process_swap_kb(text)
-    except RuntimeError as exc:
-        raise RuntimeError(
-            f"live process {pid} lacks a readable VmSwap field"
-        ) from exc
+    raise RuntimeError(
+        f"live process {pid} lacks a readable VmSwap field"
+    ) from last_error
 
 
 def worker_swap_snapshot(pids: Iterable[int]) -> dict:
