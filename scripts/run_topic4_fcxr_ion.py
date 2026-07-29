@@ -2067,13 +2067,21 @@ def cmd_b2_validate(args):
               f"{ION.GATE_B_ION_BLOCK_DRIFT_MAX})  closure "
               f"{'PASS' if closure_ok else 'UNRESOLVED_CALIBRATION'}")
         if not closure_ok:
+            failed = ([] if rel <= CLOSURE_REL_TOL else [f"E-rate residual {rel:.4f} > "
+                                                        f"{CLOSURE_REL_TOL}"]) + \
+                     ([] if ion_ok else [f"ion inter-block statistic q99 {ion_q99:.4f} >= "
+                                         f"{ION.GATE_B_ION_BLOCK_DRIFT_MAX}"])
+            reason = ("closure -> UNRESOLVED_CALIBRATION. Failing clause(s): " + "; ".join(failed)
+                      + ". Per plan section 10 this is a CALIBRATOR failure, not a mechanism "
+                      "NO-GO: NO_GO_BASELINE would require the legal [-2,+2] box to be bracketed "
+                      "and shown to contain no solution, and it was not. Do not iterate the "
+                      "closure further -- fix the calibrator.")
+            payload["closure"]["failing_clauses"] = failed
+            payload["closure"]["reason"] = reason
+            # ONE final payload feeds every canonical file, so they cannot disagree.
+            _write_json(os.path.join(OUT, "b2_closure_iteration.json"), payload)
             _write_json(os.path.join(OUT, "UNRESOLVED_CALIBRATION.json"), payload)
-            raise SystemExit(
-                "closure residual exceeds 10% -> UNRESOLVED_CALIBRATION. Per plan section 10 this "
-                "is a CALIBRATOR failure, not a mechanism NO-GO: NO_GO_BASELINE would require the "
-                "legal [-2,+2] box to be bracketed and shown to contain no solution, and it was "
-                "not (7 of 12 probes, explored range +-0.5 mV). Do not iterate the closure further "
-                "-- fix the calibrator.")
+            raise SystemExit(reason)
     return 0
 
 
@@ -2223,7 +2231,17 @@ def write_manifest():
         baseline_rate_field=dict(path=fld, sha256=_sha(fld) if os.path.exists(fld) else None),
         gates=dict(gate_H=(gh or {}).get("status"), gate_B=(gb or {}).get("status"),
                    f_selection=(fs or {}).get("status"),
-                   bias_calibration=(cal or {}).get("status")),
+                   bias_calibration=(cal or {}).get("status"),
+                   closure=((clo or {}).get("closure") or {}).get("status"),
+                   closure_failing_clauses=((clo or {}).get("closure") or {}).get(
+                       "failing_clauses")),
+        known_metric_limits=dict(
+            ion_trend_q99=("q99 of |first differences| -- a FLUCTUATION MAGNITUDE, not a secular "
+                           "trend; does not approach zero while interictal events continue"),
+            closed_vs_open_loop=("NOT a matched control: the arms differ in q_ion, drive and "
+                                 "recruitment, so no causal reading of the feedback is licensed"),
+            k_wave_far_over_event=("confounded by global drift; spec 11 stop condition 3 is "
+                                   "UNANSWERED, not triggered")),
         resources=dict(mem_available_gb_now=round(avail, 2), swap_used_gb_now=round(swap, 3),
                        baseline=json.load(open(_baseline_swap_path()))
                        if os.path.exists(_baseline_swap_path()) else None,
@@ -2290,14 +2308,26 @@ def write_status():
          "Because the **closure iteration did not pass**, and confirmatory trajectories at a "
          "working point whose ion state is still moving would produce Gate B numbers that do not "
          "mean what Gate B claims. The closure has two clauses (spec 7.1) and they split:", "",
-         "- **rate residual: PASS.** The two nuisance biases recovered the accepted interictal "
-         "rate to 1.8% (4.085 Hz against 4.158 Hz) from the 6.96 Hz the ion layer produces at zero "
-         "bias. That part of the route-B premise held.",
-         "- **ion inter-block trend: FAIL.** per-cell / per-voxel q99 |d/dt| = 0.084 / 0.259 mM/s "
-         "against a 0.05 bound, i.e. the ion state is still drifting at 11 s = 0.2 tau_Na.", "",
+         "- **rate residual: PASS.** The two nuisance biases brought the E-POPULATION MEAN rate "
+         "to within 1.8% of the locked target (4.085 Hz against 4.158 Hz), on ONE development "
+         "window. Not yet accepted: r_I (still 10.3% high), event rate / IEI / duration / "
+         "participation, the two-core initiation split, and seed robustness -- so this is NOT "
+         "'the interictal working point is recovered'. The zero-bias 6.96 Hz is from noise401 "
+         "while the 4.158 Hz target is from noise202, so the +64% is not yet a matched causal "
+         "comparison either.",
+         "- **ion inter-block statistic: FAIL.** per-cell / per-voxel q99 of |first differences| "
+         "= 0.084 / 0.259 mM/s against a 0.05 bound. NOTE what this number is and is not: it is a "
+         "FLUCTUATION MAGNITUDE, not a secular trend, and ordinary interictal events keep feeding "
+         "it even in a statistically stationary state. The Na population mean moved only "
+         "-0.0026 mM/s net over the same window, about 33x smaller. The safe statement is 'this "
+         "trajectory did not pass the existing q99 first-difference gate', NOT 'the ion field is "
+         "drifting at 0.26 mM/s'.", "",
          "Per plan section 15 an `UNRESOLVED_CALIBRATION` means the calibrator must be improved "
          "**separately** -- it is explicitly NOT a mechanism NO-GO, and the legal bias box was "
-         "never bracketed (7 of 12 probes over +-0.5 mV inside +-2 mV).", "",
+         "never bracketed (7 of 12 probes over +-0.5 mV inside +-2 mV). The repair is scoped in "
+         "`docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md`.", "",
+         "The closed-vs-open-loop comparison this sprint owed is also NOT answered: the two arms "
+         "differed in q_ion, drive and recruitment, so `UNRESOLVED_MATCHED_CONTROL`.", "",
          "## Allowed statement", "",
          f"> {gb['allowed_statement']}" if gb else "> (Gate B has not been adjudicated.)", "",
          "## Not claimed", ""]
