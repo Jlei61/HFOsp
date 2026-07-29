@@ -34,7 +34,7 @@ import numpy as np
 from scipy.stats import beta as beta_dist
 
 
-PHASEC_NEIGHBOURHOOD_VERSION = "zm_phasec_neighbourhood_v1.2_2026-07-28"
+PHASEC_NEIGHBOURHOOD_VERSION = "zm_phasec_neighbourhood_v1.3_2026-07-29"
 PRIMARY_STAGES = ("bounded_early", "bounded_mid", "bounded_late")
 SHELL_STEP_SD = 0.25
 ENVELOPE_IQR_PAD = 0.25
@@ -292,6 +292,60 @@ def build_primary_convex_path(
 ):
     """Build the locked ten-cell rising/peak full-field convex paths."""
     states = _nested_observed(observed_by_phase)
+
+    def anchor_status(state, source):
+        """Validate an exact observed anchor against intrinsic bounds only.
+
+        The percentile envelopes describe extrapolation away from the six
+        source fields.  They cannot make one of those source fields
+        ``invalid_physical``.  Exact identity is checked before the empirical
+        envelope is demoted to an audit annotation.
+        """
+        state_hash = slow_state_sha256(state)
+        source_hash = slow_state_sha256(source)
+        if state_hash != source_hash or not np.array_equal(
+            _pack(state), _pack(source)
+        ):
+            raise AssertionError("exact primary anchor/source identity drift")
+        hard = physical_status(state)
+        empirical = physical_status(
+            state,
+            full_field_envelope=(
+                None if envelopes is None else envelopes["full_field"]
+            ),
+            summary_envelope=(
+                None if envelopes is None else envelopes["summary7"]
+            ),
+            core_mask=core_mask,
+            axis_coord=axis_coord,
+        )
+        return {
+            **hard,
+            "validity_contract": "exact_observed_anchor_hard_bounds_only",
+            "exact_observed_anchor": True,
+            "source_slow_state_sha256": source_hash,
+            "empirical_envelope_reasons": list(empirical["reasons"]),
+        }
+
+    def midpoint_status(state):
+        return {
+            **physical_status(
+                state,
+                full_field_envelope=(
+                    None if envelopes is None else envelopes["full_field"]
+                ),
+                summary_envelope=(
+                    None if envelopes is None else envelopes["summary7"]
+                ),
+                core_mask=core_mask,
+                axis_coord=axis_coord,
+            ),
+            "validity_contract": "convex_midpoint_hard_plus_empirical_envelopes",
+            "exact_observed_anchor": False,
+            "source_slow_state_sha256": None,
+            "empirical_envelope_reasons": [],
+        }
+
     rows = []
     for phase in DEFAULT_PHASES:
         path_index = 0
@@ -299,16 +353,10 @@ def build_primary_convex_path(
             a, b = _pack(states[phase][left]), _pack(states[phase][right])
             for lam in (0.0, 0.5):
                 state = _unpack((1.0 - lam) * a + lam * b, len(states[phase][left]["z"]))
-                valid = physical_status(
-                    state,
-                    full_field_envelope=(
-                        None if envelopes is None else envelopes["full_field"]
-                    ),
-                    summary_envelope=(
-                        None if envelopes is None else envelopes["summary7"]
-                    ),
-                    core_mask=core_mask,
-                    axis_coord=axis_coord,
+                valid = (
+                    anchor_status(state, states[phase][left])
+                    if lam == 0.0
+                    else midpoint_status(state)
                 )
                 rows.append({
                     "cell_id": (
@@ -331,17 +379,7 @@ def build_primary_convex_path(
                 })
                 path_index += 1
         final = states[phase][PRIMARY_STAGES[-1]]
-        valid = physical_status(
-            final,
-            full_field_envelope=(
-                None if envelopes is None else envelopes["full_field"]
-            ),
-            summary_envelope=(
-                None if envelopes is None else envelopes["summary7"]
-            ),
-            core_mask=core_mask,
-            axis_coord=axis_coord,
-        )
+        valid = anchor_status(final, states[phase][PRIMARY_STAGES[-1]])
         rows.append({
             "cell_id": f"primary__{phase}__{PRIMARY_STAGES[-1]}",
             "kind": "primary_convex",
@@ -640,6 +678,10 @@ def build_secondary_shell(
                 "sign": sign,
                 "step_robust_sd": float(step_sd),
                 "projection_robust_sd": projection_sd,
+                "validity_contract": (
+                    "shell_hard_plus_empirical_envelopes"
+                ),
+                "exact_observed_anchor": False,
                 "state": state,
                 **valid,
             })
@@ -737,12 +779,27 @@ def build_coordinate_set(
                 basis_vectors=reconstruction_basis,
             )
         )
+        if cell.get("exact_observed_anchor"):
+            distance = cell["standardized_distance_from_anchor_manifold"]
+            if not np.isfinite(distance) or distance > 1e-12:
+                raise AssertionError(
+                    "exact observed anchor is not on the source manifold"
+                )
+            if (
+                slow_state_sha256(cell["state"])
+                != cell["source_slow_state_sha256"]
+            ):
+                raise AssertionError(
+                    "exact observed anchor slow-state hash drift"
+                )
+            cell["exact_observed_anchor_verified"] = True
     return {
         "version": PHASEC_NEIGHBOURHOOD_VERSION,
         "primary": primary,
         "secondary_shell": shell,
         "basis": basis,
         "geometry": {
+            "core_mask": np.asarray(core_mask, bool).reshape(-1).copy(),
             "axis_coord": standardized_axis,
             "perpendicular_coord": geometry["perpendicular_coord"],
         },
@@ -806,6 +863,9 @@ def coordinate_array_payload(coordinates):
         ),
         "axis_coord": np.asarray(
             coordinates["geometry"]["axis_coord"], np.float64
+        ),
+        "core_mask": np.asarray(
+            coordinates["geometry"]["core_mask"], bool
         ),
         "perpendicular_coord": np.asarray(
             coordinates["geometry"]["perpendicular_coord"], np.float64

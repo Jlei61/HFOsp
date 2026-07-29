@@ -2,12 +2,21 @@ import json
 from pathlib import Path
 from types import SimpleNamespace
 
+import numpy as np
 import pytest
 
+import scripts.analyze_topic4_zm_phasec1 as A
 import scripts.lock_topic4_zm_phasec1_dt2_confirmation as L
 import scripts.run_topic4_zm_phasec0_parallel as C0
 import scripts.run_topic4_zm_phasec_dt2_parallel as D
 import scripts.run_topic4_zm_phasec_cell as CELL
+
+
+def test_c1_production_rss_floor_is_locked():
+    assert D.C1.MIN_MEASURED_WORKER_RSS_GB == {
+        "base": 8.18,
+        "gain": 8.18,
+    }
 
 
 def _panel():
@@ -136,6 +145,7 @@ def _native_summary():
         "phasec_manifest_sha256": "m" * 64,
         "phasec_manifest_file_sha256": None,
         "coordinate_manifest_sha256": "2" * 64,
+        "coordinate_manifest_semantic_sha256": "3" * 64,
         "coordinate_manifest_file_sha256": "1" * 64,
         "primary_adjudication": adjudication,
         "secondary_shell_adjudication": {
@@ -353,6 +363,15 @@ def test_dt2_confirmation_rejects_native_summary_from_other_gain_trigger(
             native_summary_path=summary_path,
             gain_trigger_path=tmp_path / "trigger.json",
         )
+    summary["gain_trigger_manifest_sha256"] = "g" * 64
+    summary["coordinate_manifest_semantic_sha256"] = "wrong"
+    summary_path.write_text(json.dumps(summary))
+    with pytest.raises(RuntimeError, match="parent provenance"):
+        L.build_payload(
+            phasec_path=phasec,
+            native_summary_path=summary_path,
+            gain_trigger_path=tmp_path / "trigger.json",
+        )
 
 
 def test_dt2_confirmation_lock_fails_without_two_independent_supporting_seeds():
@@ -414,6 +433,259 @@ def test_dt2_c1_tasks_are_exact_closed_selection(monkeypatch):
     selection["expected_base_arms"].append(dict(arm))
     with pytest.raises(RuntimeError, match="duplicate"):
         D.c1_tasks(manifest, selection)
+
+
+def test_dedicated_dt2_lock_round_trips_runner_output_and_analyzer(
+    tmp_path, monkeypatch
+):
+    """One dedicated payload is consumable by every C1/dt2 stage."""
+    def write_coordinate(path, body):
+        semantic_sha = L._object_sha(body)
+        with_semantic = {**body, "semantic_sha256": semantic_sha}
+        coordinate = {
+            **with_semantic,
+            "manifest_sha256": L._object_sha(with_semantic),
+        }
+        path.write_text(json.dumps(coordinate), encoding="utf-8")
+        ref = {
+            "path": str(path.resolve()),
+            "file_sha256": L._sha(path),
+            "manifest_sha256": coordinate["manifest_sha256"],
+            "semantic_sha256": semantic_sha,
+        }
+        return coordinate, ref
+
+    manifest = _manifest()
+    dt_coordinate, dt_ref = write_coordinate(
+        tmp_path / "coordinate-dt.json",
+        {
+            "resolution": "dt",
+            "producer_file_sha256": {"coordinate-dt.py": "a" * 64},
+            "seeds": {},
+        },
+    )
+    raw_dt2 = _coordinate()
+    dt2_coordinate, dt2_ref = write_coordinate(
+        tmp_path / "coordinate-dt2.json",
+        {
+            key: value for key, value in raw_dt2.items()
+            if key not in {"manifest_sha256", "semantic_sha256"}
+        },
+    )
+    manifest.update({
+        "production_authorized": True,
+        "provenance": {
+            "producer_file_sha256": {"phasec.py": "p" * 64}
+        },
+        "c1": {"coordinate_manifests": {"dt": dt_ref, "dt2": dt2_ref}},
+    })
+    phasec_path = tmp_path / "phasec.json"
+    phasec_path.write_text(json.dumps(manifest), encoding="utf-8")
+
+    trigger_body = {
+        "schema": L.GAIN_TRIGGER_SCHEMA,
+        "selection_is_closed": True,
+        "resolution": "dt",
+        "phasec_manifest_sha256": manifest["manifest_sha256"],
+        "phasec_manifest_file_sha256": L._sha(phasec_path),
+        "coordinate_manifest_sha256": dt_ref["manifest_sha256"],
+        "coordinate_manifest_semantic_sha256": dt_ref["semantic_sha256"],
+        "coordinate_manifest_file_sha256": dt_ref["file_sha256"],
+        "phasec_producer_file_sha256": manifest["provenance"][
+            "producer_file_sha256"
+        ],
+        "coordinate_producer_file_sha256": dt_coordinate[
+            "producer_file_sha256"
+        ],
+        "producer_file_sha256": manifest["provenance"][
+            "producer_file_sha256"
+        ],
+    }
+    trigger = {
+        **trigger_body,
+        "manifest_sha256": L._object_sha(trigger_body),
+    }
+    trigger_path = tmp_path / "gain-trigger.json"
+    trigger_path.write_text(json.dumps(trigger), encoding="utf-8")
+    native = _native_summary()
+    native.update({
+        "phasec_manifest_file_sha256": L._sha(phasec_path),
+        "coordinate_manifest_sha256": dt_ref["manifest_sha256"],
+        "coordinate_manifest_file_sha256": dt_ref["file_sha256"],
+        "coordinate_manifest_semantic_sha256": dt_ref[
+            "semantic_sha256"
+        ],
+        "gain_trigger_manifest_sha256": trigger["manifest_sha256"],
+    })
+    native_path = tmp_path / "native.json"
+    native_path.write_text(json.dumps(native), encoding="utf-8")
+
+    coordinates = {
+        "dt": (Path(dt_ref["path"]), dt_coordinate, dt_ref),
+        "dt2": (Path(dt2_ref["path"]), dt2_coordinate, dt2_ref),
+    }
+    monkeypatch.setattr(L.PCC, "validate_manifest", lambda _value: None)
+    monkeypatch.setattr(L, "_rel", lambda path: str(Path(path).resolve()))
+
+    selection = L.build_payload(
+        phasec_path=phasec_path,
+        native_summary_path=native_path,
+        gain_trigger_path=trigger_path,
+    )
+    selection_path = tmp_path / "selection.json"
+    selection_path.write_text(json.dumps(selection), encoding="utf-8")
+
+    producer_locks = manifest["provenance"]["producer_file_sha256"]
+    monkeypatch.setattr(D, "PHASEC_MANIFEST_PATH", phasec_path)
+    monkeypatch.setattr(D, "CONFIRMATION_PATH", selection_path)
+    monkeypatch.setattr(
+        D.PCC, "require_production_manifest", lambda _value: None
+    )
+    monkeypatch.setattr(
+        D.C1, "_validate_live_producers", lambda _value: producer_locks
+    )
+    runner_manifest, runner_selection, runner_producers = (
+        D._manifest_and_selection()
+    )
+    assert runner_selection == selection
+    assert runner_producers == producer_locks
+    tasks = D.c1_tasks(runner_manifest, runner_selection)
+    assert len(tasks) == len(selection["expected_base_arms"]) == 24
+    assert all(
+        {
+            key: value
+            for key, value in task["expected"].items()
+            if not key.startswith("dt2_confirmation_manifest_")
+        }
+        == {
+            key: value
+            for key, value in arm.items()
+            if key != "path"
+        }
+        for task, arm in zip(tasks, selection["expected_base_arms"])
+    )
+
+    task = dict(tasks[0])
+    task["output"] = str(tmp_path / "part.json")
+    observables_path = tmp_path / "observables.npz"
+    np.savez(observables_path, placeholder=np.asarray([0], dtype=np.int8))
+    payload = {
+        **task["expected"],
+        "status": "scientific_failure",
+        "scientific_end_reason": "runaway",
+        "dt_ms": 0.05,
+        "observables_path": str(observables_path.resolve()),
+        "observables_sha256": D.C1._sha(observables_path),
+        "runtime_provenance": {
+            "producer_sha256": manifest["provenance"][
+                "producer_file_sha256"
+            ],
+            "self_vm_swap_kb_at_publish": 0,
+            "manifest_sha256": manifest["manifest_sha256"],
+            "coordinate_manifest_sha256": dt2_ref["manifest_sha256"],
+            "coordinate_producer_sha256": dt2_coordinate[
+                "producer_file_sha256"
+            ],
+            "dt2_confirmation_manifest_sha256": selection[
+                "manifest_sha256"
+            ],
+            "dt2_confirmation_manifest_file_sha256": D.C1._sha(
+                selection_path
+            ),
+            "coordinate_npz_file_sha256": task["expected"][
+                "coordinate_npz_file_sha256"
+            ],
+            "coordinate_npz_semantic_sha256": task["expected"][
+                "coordinate_npz_semantic_sha256"
+            ],
+        },
+    }
+    Path(task["output"]).write_text(json.dumps(payload), encoding="utf-8")
+    valid, reason, _ = D.validate_c1_output(
+        task["output"],
+        task,
+        producer_locks=producer_locks,
+    )
+    assert (valid, reason) == (True, "valid")
+    task["coordinator_run_id"] = "run-1"
+    task["coordinator_launch_token"] = "token-1"
+    payload["runtime_provenance"].update({
+        "coordinator_run_id": "run-1",
+        "coordinator_launch_token": "token-1",
+    })
+    Path(task["output"]).write_text(json.dumps(payload), encoding="utf-8")
+    assert D.validate_c1_output(
+        task["output"], task, producer_locks=producer_locks
+    )[:2] == (True, "valid")
+    payload["runtime_provenance"]["coordinator_run_id"] = "wrong"
+    Path(task["output"]).write_text(json.dumps(payload), encoding="utf-8")
+    assert D.validate_c1_output(
+        task["output"], task, producer_locks=producer_locks
+    )[:2] == (False, "runtime_coordinator_identity_mismatch")
+
+    monkeypatch.setattr(A.PCC, "validate_manifest", lambda _value: None)
+    monkeypatch.setattr(
+        A,
+        "_coordinate_path_from_final",
+        lambda _phasec, resolution: coordinates[resolution],
+    )
+    monkeypatch.setattr(A, "_relative", lambda path: str(Path(path).resolve()))
+    monkeypatch.setattr(A.C0, "_load_panels", lambda: {})
+    by_path = {
+        str((A.ROOT / arm["path"]).resolve()): arm
+        for arm in selection["expected_base_arms"]
+    }
+
+    def classify(path, **_kwargs):
+        arm = by_path[str(Path(path).resolve())]
+        return {
+            "status": "complete",
+            "locked_arm_identity": {
+                key: value for key, value in arm.items() if key != "path"
+            },
+        }
+
+    monkeypatch.setattr(A, "classify_base_part", classify)
+    monkeypatch.setattr(
+        A,
+        "aggregate_cell_rows",
+        lambda _runs, coordinate_row: {
+            "seed": coordinate_row["seed"],
+            "tier": coordinate_row["tier"],
+            "cell_id": coordinate_row["cell_id"],
+            "status": "complete",
+            "cell_class": "periodic_non_tonic_carrier",
+        },
+    )
+    result = A.analyze_dt2_confirmation(
+        selection_manifest_path=selection_path,
+        phasec_manifest_path=phasec_path,
+    )
+    assert result["verdict"] == "maturation_window_at_primary_convex_states"
+    assert result["matrix"] == {
+        "expected_arms": 24,
+        "technically_blocked": 0,
+        "complete": True,
+    }
+
+    native["coordinate_manifest_semantic_sha256"] = "0" * 64
+    native_path.write_text(json.dumps(native), encoding="utf-8")
+    drifted_selection = {
+        **selection,
+        "native_summary": {
+            **selection["native_summary"],
+            "file_sha256": L._sha(native_path),
+        },
+    }
+    drifted_selection["manifest_sha256"] = L._object_sha({
+        key: value for key, value in drifted_selection.items()
+        if key != "manifest_sha256"
+    })
+    selection_path.write_text(
+        json.dumps(drifted_selection), encoding="utf-8"
+    )
+    with pytest.raises(RuntimeError, match="native-summary parent drift"):
+        D._manifest_and_selection()
 
 
 def test_c1_observables_lock_readout_kernel_width():

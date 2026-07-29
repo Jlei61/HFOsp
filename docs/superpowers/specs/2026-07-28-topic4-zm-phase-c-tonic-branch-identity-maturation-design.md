@@ -1,6 +1,24 @@
 # Z/M Phase C — tonic-branch identity and carrier maturation design
 
-**Status: LOCKED FOR PHASE C0–C1 ONLY (2026-07-28).**
+**Status: LOCKED FOR PHASE C0–C1 ONLY (2026-07-28; feasibility
+amendment 2026-07-29, before any C1 phenotype result).**
+
+The 2026-07-29 amendment closes five production-feasibility defects found
+before C1 simulation: (i) an exact observed anchor cannot be rejected by a
+quantile envelope estimated from the same anchors; (ii) the dedicated C1
+\(dt/2\) selection must be the single payload consumed by both runner and
+analyzer; and (iii) swap safety is process-specific, while bounded shared-host
+swap jitter is only a launch/abort tolerance; (iv) only seeds `{1,3}` have
+independent \(dt/2\) substrates, so a native result supported by another
+two-seed combination is not resolution-confirmed; and (v) the locked pairwise
+panel is a dependent design census, not an IID bootstrap axis. No scientific threshold,
+phenotype rule, neighbourhood displacement, E→E connection, or observed SNN
+outcome was changed. Before any Phase-C production identity result, this made
+the pairwise uncertainty axis explicit: many pairs share a neuron, so the panel
+is held fixed in the bootstrap; only 500 ms blocks, circular-null draws,
+analysis-panel neurons, and continuations are resampled. This avoids treating
+overlapping pairs as independent pseudoreplicates and preserves the original
+stratum-level point estimator and the zero excess threshold.
 
 Upstream branch-decision:
 `docs/superpowers/specs/2026-07-26-topic4-zm-minimal-carrier-branch-decision-design.md`.
@@ -138,6 +156,14 @@ coordinate manifest is absent or if any live production-producer hash differs
 from the input lock.  This ordering removes the Phase-C-manifest ↔ coordinate-
 manifest hash cycle.
 
+The pre-amendment root manifests
+`phasec_manifest.json=4b0f9a76…`,
+`phasec1_coordinate_manifest_dt.json=61df061a…`, and
+`phasec1_coordinate_manifest_dt2.json=3dd9cff1…` do not contain the final
+coverage-attestation chain and are not production authority. They must be
+preserved under `invalidated/` and rebuilt from the live post-amendment
+producers before any production run.
+
 Production results from an old run may be reused only if its saved raw
 observables satisfy the new manifest exactly. Aggregate rates cannot substitute
 for missing single-neuron spike, refractory, membrane, or current observables.
@@ -176,9 +202,16 @@ replace the C0 replication matrix.
 
 ### 3.2 Resolution confirmation
 
-Any aggregate C0 identity supported at native \(dt\) receives an independently
-generated \(dt/2\) homologous-anchor confirmation in at least two supporting
-seeds. A native-\(dt\) checkpoint is never interpolated to \(dt/2\).
+Only seeds `{1,3}` have independently generated \(dt/2\) substrates. A native
+C0 identity can receive positive resolution confirmation only when seeds 1 and
+3 both support that same native identity and both homologous \(dt/2\) runs
+agree. A native result supported by seeds `{1,4}` or `{3,4}` may remain a valid
+native-\(dt\) observation, but it receives the layer-local status
+`resolution_confirmation_unavailable` and maps to insufficient evidence for an
+aggregate supported identity. It is not a scientific negative and is not
+`resolution_sensitive_identity`.
+
+A native-\(dt\) checkpoint is never interpolated to \(dt/2\).
 
 Native/\(dt/2\) disagreement yields `resolution_sensitive_identity`, not a
 positive identity label.
@@ -249,6 +282,14 @@ f_{\rm ref}
 =P\!\left(\mathrm{ISI}\le\tau_{\rm ref,E}+2dt\right).
 \]
 
+The decisive \(f_{\rm ref}\) pools ISI-event numerator and denominator counts
+within the locked active-core analysis stratum. Surround and all-panel pooled
+ratios are supportive diagnostics only; they must not dilute the active-core
+saturation test. The producer stores numerator and denominator separately for
+every 500 ms block and each locked `core`/`surround` stratum. Bootstrap draws
+recompute the ratio after resampling blocks; a median of per-neuron fractions
+is not this probability.
+
 ### 4.2 Paired local-susceptibility audit
 
 From the same snapshot and future-noise stream, use the engine's existing
@@ -301,6 +342,20 @@ null excess across strata is zero.
 The primary irregularity statistic is the seed/replicate median local `CV2`.
 The primary synchrony statistic is the median pairwise count correlation plus
 its position relative to the 97.5th percentile of the circular-shift null.
+The complete activity-independent pair panel and its three strata are a fixed
+design census, not an IID sample: pairs overlap in their constituent neurons.
+The analyzer therefore never resamples pair indices. The observed and null
+statistics always use the same full panel after resampling their shared 500 ms
+block axis and the 100 null-draw axis. Within each stratum the analyzer first
+takes the fixed-pair median inside each sampled block, then the median across
+sampled blocks. For each null draw the producer has already taken the same
+fixed-pair median inside each block; the analyzer next takes its median across
+the sampled blocks and only then evaluates \(Q_{0.975}\) along the 100-draw
+axis. Block and null-draw axes are never flattened into one pseudo-sample.
+This retains the locked estimator
+\(\operatorname{median}_b\operatorname{median}_p(r_{b,p})-
+Q_{0.975,d}[\operatorname{median}_b
+\operatorname{median}_p(r^{\rm null}_{b,p,d})]\).
 
 ### 4.4 Required supportive diagnostics
 
@@ -329,14 +384,20 @@ cannot promote a source label to an observation-matched ictal label.
 
 ### 4.5 Uncertainty
 
-Use a preregistered hierarchical bootstrap with 5,000 draws:
+Use the locked, pre-production-amended hierarchical bootstrap with 5,000
+draws:
 
 1. resample 500 ms time blocks within continuation;
-2. resample neurons/pairs within the locked spatial strata;
-3. resample the six fast-phase × future-noise continuations within seed.
+2. resample analysis-panel neurons within the locked core/surround strata for
+   single-neuron CV2; recompute active-core \(f_{\rm ref}\) as the pooled
+   numerator/denominator ratio over the resampled 500 ms blocks;
+3. hold the complete dependent pair panel fixed and resample its 100 matched
+   circular-null draws;
+4. resample the six fast-phase × future-noise continuations within seed.
 
 Report seed-specific point estimates and 95% intervals. Seeds are the top-level
-replication unit; neuron and time samples never inflate the seed count.
+replication unit; neuron and time samples never inflate the seed count, and
+overlapping neuron pairs are never treated as independent replicates.
 
 ---
 
@@ -423,10 +484,14 @@ An aggregate C0 identity requires:
 - the same supported identity in at least two of three eligible seeds;
 - the remaining seed is indeterminate or supports the same identity;
 - no seed supports the opposite identity;
+- native seeds 1 and 3 are both among the supporting seeds;
 - required \(dt/2\) confirmation agrees.
 
 Opposite seed identities yield `seed_heterogeneous_identity`. Majority voting
-must not erase a mechanistically opposite third seed.
+must not erase a mechanistically opposite third seed. A concordant native
+two-seed result that does not include both seeds 1 and 3 is
+`resolution_confirmation_unavailable`, not a positive, negative, or
+resolution-sensitive aggregate identity.
 
 ---
 
@@ -509,7 +574,15 @@ locked piecewise anchor manifold.
 
 ### 6.3 Physical-validity gate
 
-Every reconstructed field must satisfy:
+The six exact actual anchor fields are not reconstructions. Their state hash
+must equal the locked upstream anchor, their anchor distance must be exactly
+zero, and they must satisfy finite/no-clipping plus the intrinsic hard domain
+\(z_i\in[0,1]\), \(m_i\ge0\), and \(S_G\in[0,S_{\max}]\). They are not tested
+against a 0.5–99.5 percentile envelope estimated from those same six anchors:
+such a circular gate necessarily rejects the training-set extremes and does
+not diagnose physical invalidity.
+
+Every reconstructed midpoint or shell field must satisfy:
 
 - no clipping;
 - \(z_i\in[0,1]\), matching the actual Z/M engine clamp;
@@ -524,6 +597,23 @@ Every reconstructed field must satisfy:
 Failure gives `invalid_physical_cell`. It is not silently projected, clipped,
 or replaced. An invalid shell cell blocks a complete shell-negative verdict
 but does not invalidate a complete primary-convex result.
+
+Before any C1 SNN launch, a fail-closed coverage-feasibility audit must prove:
+
+- all 30 native exact-anchor/convex-primary cells are valid;
+- all 20 independent \(dt/2\) exact-anchor/convex-primary cells are valid;
+- at least one preregistered adjacent primary pair has homologous support in
+  both \(dt/2\) seeds;
+- shell cells retain the original empirical-envelope and hard-domain gates,
+  including any genuine \(m<0\) or \(z\notin[0,1]\) invalidity.
+
+The pre-production feasibility audit found only 4/24 physically valid native
+shell cells and 2/16 physically valid \(dt/2\) shell cells. The final relock
+must recompute and record these counts rather than copy them. If these counts
+remain incomplete, the shell cannot support
+`no_maturation_in_tested_secondary_shell`; it remains a coverage-limited,
+extrapolative sensitivity layer. The fixed shell must not be widened, clipped,
+projected, or otherwise changed to rescue coverage.
 
 Coordinate NPZ slow states and basis arrays are stored losslessly as float64.
 The coordinate builder must prove semantic slow-state hash identity before and
@@ -666,7 +756,15 @@ A `maturation_window_at_primary_convex_states` requires:
   seeds;
 - the third seed is either concordant or indeterminate, not an opposite
   saturation/runaway-only result;
+- native seeds 1 and 3 both support the same homologous window;
 - native and required \(dt/2\) confirmation agree.
+
+A native positive supported by a two-seed combination that does not include
+both seeds 1 and 3 receives `resolution_confirmation_unavailable`. It is not a
+confirmed maturation window, not a bounded negative, and not
+`resolution_sensitive_maturation`. The latter is reserved for an eligible
+homologous native positive that is actually contradicted by completed
+\(dt/2\) evidence.
 
 The secondary shell does not use primary-path adjacency because its eight
 locked points are four fixed basis directions at \(\pm0.25\) robust SD, not an
@@ -677,7 +775,20 @@ must be concordant or specifically `probabilistically_indeterminate`, not
 saturation/runaway-only. A positive at different shell cells across seeds, or
 in only one seed, is isolated rather than replicated. This shell result is
 extrapolative sensitivity evidence and does not establish slow-path
-reachability.
+reachability. Resolution confirmation uses the same fixed seeds `{1,3}` rule:
+a shell candidate not supported natively by both seeds is
+`resolution_confirmation_unavailable`, not a confirmed shell candidate.
+
+The resolution artifact closes primary and shell independently. It must emit
+both `primary_gate` and `shell_gate`, each with exactly one of `confirmed`,
+`contradicted`, `indeterminate`, `blocked`, or `not_required`. Final inputs
+consume only their own layer gate: a confirmed primary window cannot promote,
+complete, or erase an indeterminate/blocked shell, and the converse is also
+forbidden. The legacy top-level C1 verdict is only a reporting summary of
+these two layer-local gates. When C0 identity is mixed and primary C1 is
+negative, a closed shell positive, isolated candidate, or heterogeneous
+result remains explicitly reportable as sensitivity evidence; it is not
+hidden by the C0 mixed label and never becomes primary reachability evidence.
 
 An isolated positive cell is `isolated_maturation_candidate`.
 
@@ -700,6 +811,10 @@ It does not prove the SNN has no other carrier.
 `no_maturation_in_tested_secondary_shell` additionally requires every locked
 valid shell cell and all replication to complete. Invalid/missing shell cells
 yield `secondary_shell_incomplete`, never a negative.
+
+The independent \(dt/2\) coordinate atlas is a feasibility and
+positive-confirmation substrate, not a second full negative atlas. A complete
+native primary negative does not require executing all \(dt/2\) cells.
 
 Coarse/full-field/pathology-axis disagreement yields
 `representation_sensitive_maturation`. Seed disagreement yields
@@ -764,6 +879,9 @@ Every verdict must separately carry:
 - `actuator_authorized=false`.
 
 No missing field may fall through to a positive or negative scientific verdict.
+Layer-local `resolution_confirmation_unavailable` maps to insufficient
+evidence/`no_evidence` at the top level; it must remain distinguishable from
+`resolution_sensitive_identity` and `representation_sensitive_maturation`.
 
 ---
 
@@ -808,13 +926,40 @@ No missing field may fall through to a positive or negative scientific verdict.
    \]
 
    Recompute before each launch wave.
-10. Keep at least 96 GB `MemAvailable`, require zero swap growth, and stop
-    launches immediately if either guard fails.
+10. Keep at least 96 GB `MemAvailable`. Sample every live Phase-C worker's
+    `VmSwap` at a locked cadence no slower than 5 s and record a final
+    self-snapshot immediately before publishing every terminal part; any
+    observed worker swap is an immediate fail-close. The allowed claim is
+    therefore “no worker swap was observed at the locked samples and the
+    pre-publish self-snapshot”, not an unobserved kernel peak claim. An exited
+    PID or a post-exit zero cannot substitute for that pre-publish snapshot.
+    Shared-host swap is logged separately and may fluctuate by at most 64 MiB
+    from the coordinator baseline before launches stop, because unrelated
+    resident pages can be reclaimed while Phase-C workers remain unswapped.
 11. Durable resource logs record PID, command, phase/cell, wall time, RSS,
-    `MemAvailable`, swap, exit status, and artifact SHA.
-12. Crashed cells are resumable; no monolithic all-grid process is allowed.
+    `MemAvailable`, swap, exit status, and artifact SHA. Every production part
+    also has one immutable adjacent resource receipt, bound to the part SHA,
+    manifest, task key, coordinator run/launch token, live-sample count and
+    pre-publish self-snapshot. Scientific analyzers and final adjudication
+    fail closed unless every consumed part has a valid receipt.
+12. Part JSON and its resource receipt are two write-once publications. If a
+    coordinator crashes after the part becomes visible but before the receipt
+    is published, that unreceipted part is technical-invalid and cannot be
+    reused. Recovery must move the part, its content-addressed observables and
+    any partial receipt together into an `invalidated/` lineage before the
+    identical task is relaunched. A receipt may be published after a normal
+    worker exit only by the same coordinator from that launch token's complete
+    live audit plus the worker-published pre-publication self-snapshot; it must
+    never be reconstructed later from an unobserved or incomplete audit.
+    Crashed cells are otherwise resumable; no monolithic all-grid process is
+    allowed.
 13. Peer-worktree processes are inventoried before launch and are never killed
     by this line.
+14. A C1 \(dt/2\) positive-resolution confirmation has one canonical,
+    write-once selection manifest. Its exact payload and file hash are consumed
+    by the dedicated lock, task enumerator, cell runner, and analyzer. A real
+    lock→enumerate→validate→analyze integration test is required; separate
+    unit tests of incompatible payload variants do not satisfy this rule.
 
 ---
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import atexit
 import hashlib
 import json
 import math
@@ -10,6 +11,7 @@ import os
 import subprocess
 import sys
 import time
+import uuid
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -17,6 +19,8 @@ if ROOT not in sys.path:
     sys.path.insert(0, ROOT)
 
 import src.topic4_zm_phasec_contract as PCC  # noqa: E402
+import src.topic4_zm_phasec_metrics as PCM  # noqa: E402
+import src.topic4_zm_phasec_resources as PRES  # noqa: E402
 
 
 OUT = os.path.join(
@@ -30,6 +34,7 @@ NOISES = ("noise_replay", "noise_resample_1", "noise_resample_2")
 GAIN_STATES = ("pre_entry__natural",) + PHASES
 DELTAS = (0.05, 0.10)
 TERMINAL_STATUSES = {"complete", "scientific_failure"}
+MIN_MEASURED_WORKER_RSS_GB = {"identity": 7.23, "gain": 6.90}
 
 
 def _sha(path):
@@ -275,6 +280,7 @@ def validate_terminal_output(path, task):
         or provenance.get("manifest_sha256")
         != task["expected"].get("manifest_sha256")
         or not isinstance(provenance.get("producer_sha256"), dict)
+        or provenance.get("self_vm_swap_kb_at_publish") != 0
     ):
         return False, "invalid_runtime_provenance", payload
     producer_locks = task.get("producer_locks")
@@ -283,6 +289,12 @@ def validate_terminal_output(path, task):
         and provenance.get("producer_sha256") != producer_locks
     ):
         return False, "runtime_producer_hash_mismatch", payload
+    if task.get("coordinator_run_id") is not None and (
+        provenance.get("coordinator_run_id") != task["coordinator_run_id"]
+        or provenance.get("coordinator_launch_token")
+        != task.get("coordinator_launch_token")
+    ):
+        return False, "runtime_coordinator_identity_mismatch", payload
     if task["kind"] == "identity":
         observables = payload.get("observables_path")
         expected_sha = payload.get("observables_sha256")
@@ -303,7 +315,9 @@ def validate_terminal_output(path, task):
                         "hierarchical_schema",
                         "rho80_active_core_by_block_window",
                         "block_isi_cv2_by_panel_neuron",
-                        "block_refractory_isi_fraction_by_panel_neuron",
+                        "block_refractory_isi_numerator_by_stratum",
+                        "block_refractory_isi_denominator_by_stratum",
+                        "refractory_isi_stratum_names",
                         "pair_corr_by_block_and_pair",
                         "pair_null_median_by_block_and_draw",
                         "active_area_fraction_by_block_window",
@@ -316,6 +330,12 @@ def validate_terminal_output(path, task):
                     }
                     if not required.issubset(z.files):
                         return False, "missing_hierarchical_arrays", payload
+                    if str(
+                        __import__("numpy").asarray(
+                            z["hierarchical_schema"]
+                        ).reshape(()).item()
+                    ) != PCM.HIERARCHICAL_STATS_VERSION:
+                        return False, "hierarchical_schema_mismatch", payload
             except (OSError, ValueError) as exc:
                 return False, f"invalid_observables:{exc}", payload
     else:
@@ -388,6 +408,12 @@ def _swap_growth_exceeded(baseline_kb, limit_mb):
     return swap_used_kb() - int(baseline_kb) > limit_kb
 
 
+def _worker_swap_snapshot(running):
+    return PRES.worker_swap_snapshot(
+        row["proc"].pid for row in running
+    )
+
+
 def run(args):
     manifest = _load_json(MANIFEST_PATH)
     PCC.require_production_manifest(manifest)
@@ -406,10 +432,43 @@ def run(args):
         or args.max_swap_growth_mb > 256
     ):
         raise SystemExit("--max-swap-growth-mb must be within [0,256]")
+    resources = manifest["resources"]
+    expected_host_swap_mb = (
+        float(resources["host_swap_growth_tolerance_bytes"])
+        / (1024.0 * 1024.0)
+    )
+    if not math.isclose(
+        float(args.max_swap_growth_mb), expected_host_swap_mb,
+        rel_tol=0.0, abs_tol=1e-12,
+    ):
+        raise SystemExit(
+            "--max-swap-growth-mb must equal the locked shared-host "
+            f"tolerance ({expected_host_swap_mb:g} MiB)"
+        )
+    worker_swap_allowed = int(
+        resources["worker_swap_sampled_allowed_bytes"]
+    )
+    if (
+        not math.isfinite(args.poll_s)
+        or args.poll_s <= 0
+        or args.poll_s > float(resources["worker_swap_poll_max_s"])
+    ):
+        raise SystemExit(
+            "--poll-s must be positive and no slower than the locked "
+            f"{resources['worker_swap_poll_max_s']:g}s worker-swap cadence"
+        )
     selected = tuple(x.strip() for x in args.phases.split(",") if x.strip())
     unknown = set(selected) - {"identity", "gain"}
-    if unknown:
+    if unknown or not selected:
         raise SystemExit(f"unknown phases: {sorted(unknown)}")
+    required_worker_rss = max(
+        MIN_MEASURED_WORKER_RSS_GB[phase] for phase in selected
+    )
+    if float(args.worker_rss_gb) < required_worker_rss:
+        raise SystemExit(
+            "--worker-rss-gb cannot be lower than the locked measured "
+            f"value for {selected}: {required_worker_rss:g} GB"
+        )
     resolution = getattr(args, "resolution", "dt")
     if resolution not in SEEDS_BY_RESOLUTION:
         raise SystemExit(f"unknown Phase-C resolution: {resolution}")
@@ -460,11 +519,30 @@ def run(args):
         valid, reason, payload = validate_terminal_output(row["output"], row)
         if valid:
             if getattr(args, "resume", False):
-                skipped.append({
-                    "key": row["key"],
-                    "artifact_sha256": _sha(row["output"]),
-                    "peak_rss_gb": payload.get("peak_rss_gb"),
-                })
+                receipt_path = PRES.resource_receipt_path(row["output"])
+                audit_ok, audit_reason, receipt = (
+                    PRES.validate_resource_receipt(
+                        receipt_path,
+                        artifact_path=row["output"],
+                        artifact_root=ROOT,
+                        manifest_sha256=manifest_sha,
+                        task_key=row["key"],
+                    )
+                )
+                if audit_ok:
+                    skipped.append({
+                        "key": row["key"],
+                        "artifact_sha256": _sha(row["output"]),
+                        "peak_rss_gb": payload.get("peak_rss_gb"),
+                        "resource_receipt_path": os.path.relpath(
+                            receipt_path, ROOT
+                        ),
+                        "resource_receipt_sha256": receipt["receipt_sha256"],
+                    })
+                else:
+                    invalid_existing.append({
+                        "path": row["output"], "reason": audit_reason
+                    })
             else:
                 invalid_existing.append({
                     "path": row["output"],
@@ -494,6 +572,10 @@ def run(args):
     n_launched = 0
     failures = []
     completed = []
+    worker_swap_peak_kb = 0
+    worker_swap_audit = {}
+    owned_running = []
+    cleanup_state = {"finalized": False}
     print(
         f"[phasec0] expected={len(all_tasks)} skipped={len(skipped)} "
         f"pending={len(pending)} cap={initial_cap} "
@@ -507,6 +589,60 @@ def run(args):
     ):
         env[name] = "1"
 
+    def _cleanup_at_exit():
+        if cleanup_state["finalized"]:
+            return
+        try:
+            if owned_running:
+                _append(log_path, {
+                    "event": "abort_cleanup",
+                    "run_id": run_id,
+                    "time": time.time(),
+                    "reason": "coordinator_exit_or_exception",
+                    "owned_pids": [
+                        row["proc"].pid for row in owned_running
+                    ],
+                    "mem_available_gb": mem_available_gb(),
+                    "swap_used_kb": swap_used_kb(),
+                })
+                PRES.terminate_owned_workers(owned_running)
+            partial_path = os.path.join(
+                OUT, "coordinator_runs", resolution,
+                f"phasec0_partial_abort_{run_id}.json",
+            )
+            _publish_json_once(partial_path, {
+                "schema": "zm_phasec0_coordinator_partial_abort_v1",
+                "run_id": run_id,
+                "manifest_sha256": manifest_sha,
+                "resolution": resolution,
+                "n_expected": len(all_tasks),
+                "n_skipped_valid": len(skipped),
+                "n_launched": n_launched,
+                "n_completed_before_abort": len(completed),
+                "n_pending_at_abort": max(
+                    0, len(all_tasks) - len(skipped) - len(completed)
+                ),
+                "n_queue_pending_at_abort": len(pending),
+                "n_owned_inflight_at_abort": len(owned_running),
+                "owned_pids_at_cleanup": [
+                    row["proc"].pid for row in owned_running
+                ],
+                "worker_swap_sampled_observed_max_kb": worker_swap_peak_kb,
+                "worker_swap_audit_by_launch_token": worker_swap_audit,
+                "resource_log_path": os.path.relpath(log_path, ROOT),
+                "evidence_scope": (
+                    "partial abort record; sampled VmSwap plus any available "
+                    "pre-publish child self snapshots, not kernel peaks"
+                ),
+                "finished_at": time.time(),
+            })
+        except Exception:
+            # Interpreter shutdown must still finish after best-effort cleanup.
+            PRES.terminate_owned_workers(owned_running)
+
+    atexit.register(_cleanup_at_exit)
+    previous_signal_handlers = PRES.install_coordinator_signal_handlers()
+
     while pending:
         if _swap_growth_exceeded(swap0_kb, args.max_swap_growth_mb):
             raise SystemExit(
@@ -518,6 +654,7 @@ def run(args):
         wave_n = min(len(pending), wave_cap, int(args.wave_size))
         wave = [pending.pop(0) for _ in range(wave_n)]
         running = []
+        owned_running[:] = running
         for row in wave:
             if (
                 mem_available_gb() < args.reserve_gb
@@ -530,16 +667,54 @@ def run(args):
             safe_key = row["key"].replace("|", "__").replace("/", "_")
             log_file = os.path.join(logs_root, safe_key + ".log")
             handle = open(log_file, "x", encoding="utf-8")
-            proc = subprocess.Popen(
-                row["cmd"], cwd=ROOT, stdout=handle,
-                stderr=subprocess.STDOUT, env=env,
-            )
-            n_launched += 1
-            item = {
-                **row, "proc": proc, "handle": handle,
-                "log": log_file, "started": time.time(),
-            }
-            running.append(item)
+            launch_token = uuid.uuid4().hex
+            child_env = dict(env)
+            child_env[PRES.COORDINATOR_RUN_ENV] = run_id
+            child_env[PRES.COORDINATOR_TOKEN_ENV] = launch_token
+            previous_mask = PRES.block_coordinator_termination_signals()
+            proc = None
+            item = None
+            try:
+                proc = subprocess.Popen(
+                    row["cmd"], cwd=ROOT, stdout=handle,
+                    stderr=subprocess.STDOUT, env=child_env,
+                )
+                launched_at = time.time()
+                item = {
+                    **row, "proc": proc, "handle": handle,
+                    "log": log_file, "started": launched_at,
+                    "coordinator_run_id": run_id,
+                    "coordinator_launch_token": launch_token,
+                }
+                running.append(item)
+                owned_running[:] = running
+                PRES.register_worker_swap_audit(
+                    worker_swap_audit,
+                    pid=proc.pid,
+                    task_key=row["key"],
+                    run_id=run_id,
+                    launch_token=launch_token,
+                    launched_at=launched_at,
+                )
+                n_launched += 1
+            except BaseException:
+                if proc is None:
+                    handle.close()
+                else:
+                    PRES.terminate_owned_workers([
+                        item or {"proc": proc, "handle": handle}
+                    ])
+                _append(log_path, {
+                    "event": "abort",
+                    "run_id": run_id,
+                    "time": time.time(),
+                    "reason": "worker_launch_failed",
+                    "key": row["key"],
+                })
+                PRES.terminate_owned_workers(running)
+                raise
+            finally:
+                PRES.restore_coordinator_signal_mask(previous_mask)
             _append(log_path, {
                 "event": "launch",
                 "run_id": run_id,
@@ -557,18 +732,53 @@ def run(args):
             raise SystemExit("resource guard blocked the entire next wave")
         last_heartbeat = 0.0
         while running:
+            worker_swap = _worker_swap_snapshot(running)
+            sampled_at = time.time()
+            PRES.update_worker_swap_audit(
+                worker_swap_audit,
+                worker_swap,
+                sampled_at=sampled_at,
+                audit_key_by_pid={
+                    str(row["proc"].pid): row["coordinator_launch_token"]
+                    for row in running
+                },
+            )
+            worker_swap_peak_kb = max(
+                worker_swap_peak_kb,
+                int(worker_swap["worker_swap_max_kb"]),
+            )
+            if worker_swap["worker_swap_max_kb"] * 1024 > worker_swap_allowed:
+                _append(log_path, {
+                    "event": "abort", "run_id": run_id,
+                    "time": time.time(),
+                    "reason": "worker_sampled_swap_nonzero",
+                    **worker_swap,
+                })
+                PRES.terminate_owned_workers(running)
+                raise SystemExit(
+                    "a Phase-C worker acquired VmSwap; run invalidated"
+                )
+            if mem_available_gb() < float(args.reserve_gb):
+                _append(log_path, {
+                    "event": "abort", "run_id": run_id,
+                    "time": time.time(),
+                    "reason": "mem_available_below_reserve",
+                    "mem_available_gb": mem_available_gb(),
+                })
+                PRES.terminate_owned_workers(running)
+                raise SystemExit(
+                    "MemAvailable fell below the locked running-wave reserve"
+                )
             if _swap_growth_exceeded(
                 swap0_kb, args.max_swap_growth_mb
             ):
-                for row in running:
-                    row["proc"].terminate()
-                for row in running:
-                    try:
-                        row["proc"].wait(timeout=10)
-                    except subprocess.TimeoutExpired:
-                        row["proc"].kill()
-                        row["proc"].wait()
-                    row["handle"].close()
+                _append(log_path, {
+                    "event": "abort", "run_id": run_id,
+                    "time": time.time(),
+                    "reason": "shared_host_swap_growth",
+                    "swap_used_kb": swap_used_kb(),
+                })
+                PRES.terminate_owned_workers(running)
                 raise SystemExit(
                     "swap growth exceeded tolerance while a wave was running"
                 )
@@ -582,7 +792,51 @@ def run(args):
                 valid, reason, payload = validate_terminal_output(
                     row["output"], row
                 )
+                final_swap = (
+                    payload.get("runtime_provenance", {}).get(
+                        "self_vm_swap_kb_at_publish"
+                    )
+                    if isinstance(payload, dict) else None
+                )
+                if isinstance(final_swap, int):
+                    worker_swap_peak_kb = max(
+                        worker_swap_peak_kb, final_swap
+                    )
+                    PRES.record_final_worker_swap(
+                        worker_swap_audit,
+                        pid=row["proc"].pid,
+                        launch_token=row["coordinator_launch_token"],
+                        value_kb=final_swap,
+                        sampled_at=time.time(),
+                    )
                 ok = code == 0 and valid
+                receipt_path = PRES.resource_receipt_path(row["output"])
+                if ok:
+                    try:
+                        receipt = PRES.build_resource_receipt(
+                            artifact_path=row["output"],
+                            artifact_root=ROOT,
+                            artifact_sha256=_sha(row["output"]),
+                            manifest_sha256=manifest_sha,
+                            task_key=row["key"],
+                            run_id=run_id,
+                            launch_token=row["coordinator_launch_token"],
+                            pid=row["proc"].pid,
+                            audit_row=worker_swap_audit.get(
+                                row["coordinator_launch_token"], {}
+                            ),
+                            sampled_allowed_bytes=worker_swap_allowed,
+                        )
+                        PRES.publish_resource_receipt_once(
+                            receipt_path, receipt
+                        )
+                    except Exception as exc:
+                        ok = False
+                        valid = False
+                        reason = (
+                            "resource_receipt_failure:"
+                            f"{type(exc).__name__}:{exc}"
+                        )
                 finish = {
                     "event": "finish",
                     "run_id": run_id,
@@ -625,6 +879,7 @@ def run(args):
                     flush=True,
                 )
             running = next_running
+            owned_running[:] = running
             if running:
                 now = time.time()
                 if now - last_heartbeat >= 30.0:
@@ -640,6 +895,7 @@ def run(args):
                         "n_launched": n_launched,
                         "mem_available_gb": mem_available_gb(),
                         "swap_used_kb": swap_used_kb(),
+                        **worker_swap,
                     })
                     last_heartbeat = now
                 time.sleep(args.poll_s)
@@ -657,6 +913,7 @@ def run(args):
         "phases": list(selected),
         "n_expected": len(all_tasks),
         "n_skipped_valid": len(skipped),
+        "skipped_valid": skipped,
         "n_launched": n_launched,
         "n_completed_this_run": len(completed),
         "n_pending_after_stop": len(pending),
@@ -669,7 +926,11 @@ def run(args):
         "reserve_gb": args.reserve_gb,
         "swap_baseline_kb": swap0_kb,
         "swap_final_kb": swap_used_kb(),
-        "max_swap_growth_mb": args.max_swap_growth_mb,
+        "host_swap_growth_tolerance_mb": args.max_swap_growth_mb,
+        "worker_swap_sampled_allowed_bytes": worker_swap_allowed,
+        "worker_swap_observed_max_kb": worker_swap_peak_kb,
+        "worker_swap_poll_s": args.poll_s,
+        "worker_swap_audit_by_launch_token": worker_swap_audit,
         "resource_log_path": os.path.relpath(log_path, ROOT),
         "finished_at": time.time(),
     }
@@ -678,6 +939,10 @@ def run(args):
         f"phasec0_summary_{run_id}.json"
     )
     _publish_json_once(path, summary)
+    cleanup_state["finalized"] = True
+    owned_running.clear()
+    PRES.restore_signal_handlers(previous_signal_handlers)
+    atexit.unregister(_cleanup_at_exit)
     if failures or pending:
         raise SystemExit(
             f"Phase-C0 stopped with failures/pending; see {path}"

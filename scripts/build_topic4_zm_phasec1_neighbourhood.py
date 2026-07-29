@@ -167,7 +167,7 @@ def _load_observed(source, ne, dt_ms):
 
 
 def _cell_metadata(cell, row):
-    return {
+    value = {
         "cell_id": cell["cell_id"],
         "tier": cell["kind"],
         "array_row": int(row),
@@ -189,6 +189,58 @@ def _cell_metadata(cell, row):
             cell["reconstruction_error_standardized_rms"]
         ),
     }
+    value["validity_contract"] = cell.get("validity_contract")
+    value["exact_observed_anchor"] = bool(
+        cell.get("exact_observed_anchor", False)
+    )
+    if cell["kind"] == "primary_convex":
+        value.update({
+            "exact_observed_anchor_verified": bool(
+                cell.get("exact_observed_anchor_verified", False)
+            ),
+            "source_slow_state_sha256": cell.get(
+                "source_slow_state_sha256"
+            ),
+            "source_state_ref": cell.get("source_state_ref"),
+            "empirical_envelope_reasons": list(
+                cell.get("empirical_envelope_reasons", [])
+            ),
+        })
+    return value
+
+
+def _verify_exact_anchor_lineage(coordinates, input_rows):
+    """Bind every hard-bound-only primary anchor to its immutable source."""
+    sources = {
+        (row["phase"], row["stage"]): row for row in input_rows
+    }
+    exact = [
+        cell for cell in coordinates["primary"]
+        if cell.get("exact_observed_anchor")
+    ]
+    if len(exact) != len(N.DEFAULT_PHASES) * len(N.PRIMARY_STAGES):
+        raise RuntimeError("exact primary anchor coverage is not 2 phases x 3")
+    for cell in exact:
+        key = (cell["trajectory_id"], cell["left_stage"])
+        source = sources.get(key)
+        if source is None:
+            raise RuntimeError(f"exact primary source row missing: {key}")
+        state_sha = N.slow_state_sha256(cell["state"])
+        if (
+            cell.get("source_slow_state_sha256") != source[
+                "slow_state_sha256"
+            ]
+            or state_sha != source["slow_state_sha256"]
+            or cell.get("exact_observed_anchor_verified") is not True
+            or cell["standardized_distance_from_anchor_manifold"] > 1e-12
+        ):
+            raise RuntimeError(f"exact primary source lineage drift: {key}")
+        cell["source_state_ref"] = {
+            field: source[field]
+            for field in (
+                "path", "file_sha256", "state_hash", "slow_state_sha256"
+            )
+        }
 
 
 def _seed_coordinates(resolution, seed, source, geometry):
@@ -201,6 +253,7 @@ def _seed_coordinates(resolution, seed, source, geometry):
         axis_coord=geometry["along"],
         perpendicular_coord=geometry["perpendicular"],
     )
+    _verify_exact_anchor_lineage(coordinates, input_rows)
     arrays = N.coordinate_array_payload(coordinates)
     npz_bytes = N.deterministic_npz_bytes(arrays)
     npz_path = COORD_DIR / resolution / f"seed{seed}.npz"
@@ -332,6 +385,9 @@ def build_resolution(
             "lifecycle_established": False,
         },
     }
+    semantic_payload["coverage_attestation"] = (
+        _resolution_coverage_attestation(semantic_payload)
+    )
     manifest = dict(semantic_payload)
     manifest["semantic_sha256"] = N.sha256_bytes(
         N.canonical_json_bytes(semantic_payload)
@@ -352,11 +408,260 @@ def build_all(resolutions=("dt", "dt2"), *, allow_virtual_input=False):
         for seed in SEEDS_BY_RESOLUTION[resolution]
     })
     geometry_by_seed = {seed: _geometry(seed) for seed in required_seeds}
-    return {
+    built = {
         resolution: build_resolution(
             parent, parent_input_file_sha, resolution, geometry_by_seed
         )
         for resolution in resolutions
+    }
+    if set(resolutions) == {"dt", "dt2"}:
+        cross = _cross_resolution_coverage_attestation(built)
+        for resolution in ("dt", "dt2"):
+            manifest, payloads = built[resolution]
+            manifest["cross_resolution_coverage_attestation"] = cross
+            built[resolution] = (
+                _rehash_coordinate_manifest(manifest), payloads
+            )
+        assess_coverage_feasibility(built)
+    return built
+
+
+def _valid_primary_pairs(seed_row):
+    rows = {
+        (cell["trajectory_id"], int(cell["path_index"])): cell
+        for cell in seed_row["cells"]
+        if cell["tier"] == "primary_convex" and cell["status"] == "valid"
+    }
+    pairs = set()
+    for phase in N.DEFAULT_PHASES:
+        for index in range(4):
+            left = rows.get((phase, index))
+            right = rows.get((phase, index + 1))
+            if left is not None and right is not None:
+                pairs.add((left["cell_id"], right["cell_id"]))
+    return pairs
+
+
+def _resolution_coverage_attestation(manifest):
+    resolution = manifest["resolution"]
+    expected_seeds = (1, 3, 4) if resolution == "dt" else (1, 3)
+    expected_primary = len(expected_seeds) * len(N.PRIMARY_CELL_NAMES)
+    expected_exact = len(expected_seeds) * (
+        len(N.DEFAULT_PHASES) * len(N.PRIMARY_STAGES)
+    )
+    expected_midpoints = expected_primary - expected_exact
+    expected_shell = len(expected_seeds) * len(N.SHELL_CELL_NAMES)
+    cells = [
+        cell for seed in expected_seeds
+        for cell in manifest["seeds"][str(seed)]["cells"]
+    ]
+    primary = [cell for cell in cells if cell["tier"] == "primary_convex"]
+    shell = [cell for cell in cells if cell["tier"] == "secondary_shell"]
+    exact = [cell for cell in primary if cell["exact_observed_anchor"]]
+    midpoints = [
+        cell for cell in primary if not cell["exact_observed_anchor"]
+    ]
+    exact_lineage = []
+    for seed in expected_seeds:
+        for cell in manifest["seeds"][str(seed)]["cells"]:
+            if (
+                cell["tier"] != "primary_convex"
+                or not cell["exact_observed_anchor"]
+            ):
+                continue
+            source = cell.get("source_state_ref") or {}
+            exact_lineage.append({
+                "seed": seed,
+                "cell_id": cell["cell_id"],
+                "state_sha256": cell["state_sha256"],
+                "source_slow_state_sha256": cell.get(
+                    "source_slow_state_sha256"
+                ),
+                "source_state_hash": source.get("state_hash"),
+                "source_file_sha256": source.get("file_sha256"),
+                "manifold_distance": float(
+                    cell["standardized_distance_from_anchor_manifold"]
+                ),
+            })
+    return {
+        "schema": "zm_phasec1_coordinate_coverage_attestation_v1_2026-07-29",
+        "resolution": resolution,
+        "expected_seeds": list(expected_seeds),
+        "primary_expected": expected_primary,
+        "primary_valid": sum(
+            cell["status"] == "valid" for cell in primary
+        ),
+        "exact_anchor_expected": expected_exact,
+        "exact_anchor_verified": sum(
+            cell.get("exact_observed_anchor_verified") is True
+            and cell.get("validity_contract")
+            == "exact_observed_anchor_hard_bounds_only"
+            for cell in exact
+        ),
+        "exact_anchor_lineage": exact_lineage,
+        "midpoint_expected": expected_midpoints,
+        "midpoint_empirical_contract_count": sum(
+            cell.get("validity_contract")
+            == "convex_midpoint_hard_plus_empirical_envelopes"
+            for cell in midpoints
+        ),
+        "shell_expected": expected_shell,
+        "shell_empirical_contract_count": sum(
+            cell.get("validity_contract")
+            == "shell_hard_plus_empirical_envelopes"
+            for cell in shell
+        ),
+        "shell_invalid_retained": sum(
+            cell["status"] == "invalid_physical" for cell in shell
+        ),
+        "valid_adjacent_primary_pairs_by_seed": {
+            str(seed): [
+                list(pair) for pair in sorted(
+                    _valid_primary_pairs(manifest["seeds"][str(seed)])
+                )
+            ]
+            for seed in expected_seeds
+        },
+    }
+
+
+def _cross_resolution_coverage_attestation(built):
+    manifests = {
+        resolution: built[resolution][0] for resolution in ("dt", "dt2")
+    }
+    required = [
+        ("dt", seed) for seed in (1, 3, 4)
+    ] + [
+        ("dt2", seed) for seed in (1, 3)
+    ]
+    pairs = set.intersection(*(
+        _valid_primary_pairs(manifests[resolution]["seeds"][str(seed)])
+        for resolution, seed in required
+    ))
+    return {
+        "schema": (
+            "zm_phasec1_cross_resolution_coverage_attestation_v1_2026-07-29"
+        ),
+        "required_resolution_seeds": [
+            {"resolution": resolution, "seed": seed}
+            for resolution, seed in required
+        ],
+        "native_primary_valid": sum(
+            manifest["coverage_attestation"]["primary_valid"]
+            for resolution, manifest in manifests.items()
+            if resolution == "dt"
+        ),
+        "dt2_primary_valid": sum(
+            manifest["coverage_attestation"]["primary_valid"]
+            for resolution, manifest in manifests.items()
+            if resolution == "dt2"
+        ),
+        "homologous_adjacent_primary_pairs": [
+            list(pair) for pair in sorted(pairs)
+        ],
+        "identifiable": bool(pairs),
+    }
+
+
+def _rehash_coordinate_manifest(manifest):
+    semantic_body = {
+        key: value for key, value in manifest.items()
+        if key not in {"manifest_sha256", "semantic_sha256"}
+    }
+    value = dict(semantic_body)
+    value["semantic_sha256"] = N.sha256_bytes(
+        N.canonical_json_bytes(semantic_body)
+    )
+    value["manifest_sha256"] = N.sha256_bytes(
+        N.canonical_json_bytes(value)
+    )
+    return value
+
+
+def assess_coverage_feasibility(built):
+    """Fail before C1 SNN work if the locked grid cannot answer either arm."""
+    manifests = {
+        resolution: built[resolution][0] for resolution in ("dt", "dt2")
+    }
+    expected_primary = {"dt": 30, "dt2": 20}
+    primary_valid = {}
+    shell_invalid = {}
+    for resolution, manifest in manifests.items():
+        expected_attestation = _resolution_coverage_attestation(manifest)
+        if manifest.get("coverage_attestation") != expected_attestation:
+            raise RuntimeError(
+                f"{resolution} C1 coverage attestation drift"
+            )
+        for seed, seed_row in manifest["seeds"].items():
+            cells = sorted(
+                seed_row["cells"], key=lambda cell: int(cell["array_row"])
+            )
+            names = [cell["cell_id"] for cell in cells]
+            expected_names = list(N.PRIMARY_CELL_NAMES) + list(
+                N.SHELL_CELL_NAMES
+            )
+            if names != expected_names or len(set(names)) != len(names):
+                raise RuntimeError(
+                    f"{resolution}/seed{seed} canonical cell inventory drift"
+                )
+            for index, cell in enumerate(cells[:len(N.PRIMARY_CELL_NAMES)]):
+                phase_index = index % 5
+                phase = N.DEFAULT_PHASES[index // 5]
+                expected_exact = phase_index in {0, 2, 4}
+                if (
+                    cell["tier"] != "primary_convex"
+                    or cell["trajectory_id"] != phase
+                    or int(cell["path_index"]) != phase_index
+                    or bool(cell["exact_observed_anchor"]) != expected_exact
+                ):
+                    raise RuntimeError(
+                        f"{resolution}/seed{seed}/{cell['cell_id']} "
+                        "canonical primary identity drift"
+                    )
+        primary_valid[resolution] = sum(
+            cell["status"] == "valid"
+            for seed in manifest["seeds"].values()
+            for cell in seed["cells"]
+            if cell["tier"] == "primary_convex"
+        )
+        shell_invalid[resolution] = sum(
+            cell["status"] == "invalid_physical"
+            for seed in manifest["seeds"].values()
+            for cell in seed["cells"]
+            if cell["tier"] == "secondary_shell"
+        )
+        if primary_valid[resolution] != expected_primary[resolution]:
+            raise RuntimeError(
+                f"C1 primary coverage is structurally incomplete at "
+                f"{resolution}: {primary_valid[resolution]}/"
+                f"{expected_primary[resolution]}"
+            )
+    required_rows = [
+        manifests["dt"]["seeds"][str(seed)] for seed in (1, 3, 4)
+    ] + [
+        manifests["dt2"]["seeds"][str(seed)] for seed in (1, 3)
+    ]
+    homologous_pairs = set.intersection(
+        *(_valid_primary_pairs(row) for row in required_rows)
+    )
+    if not homologous_pairs:
+        raise RuntimeError(
+            "C1 has no homologous adjacent primary pair across native and dt2"
+        )
+    cross = _cross_resolution_coverage_attestation(built)
+    if any(
+        manifest.get("cross_resolution_coverage_attestation") != cross
+        for manifest in manifests.values()
+    ):
+        raise RuntimeError("cross-resolution C1 coverage attestation drift")
+    return {
+        "status": "identifiable",
+        "primary_valid": primary_valid,
+        "primary_expected": expected_primary,
+        "shell_invalid_retained": shell_invalid,
+        "homologous_adjacent_primary_pairs": [
+            list(pair) for pair in sorted(homologous_pairs)
+        ],
     }
 
 
@@ -375,9 +680,14 @@ def main(argv=None):
     built = build_all(
         resolutions, allow_virtual_input=bool(args.check_only)
     )
+    feasibility = (
+        assess_coverage_feasibility(built)
+        if set(resolutions) == {"dt", "dt2"} else None
+    )
     if args.check_only:
         print(json.dumps({
             "status": "validated",
+            "coverage_feasibility": feasibility,
             "resolutions": {
                 resolution: {
                     "manifest_sha256": manifest["manifest_sha256"],

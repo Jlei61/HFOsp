@@ -201,6 +201,347 @@ def _sha(path):
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def _write_production_part(
+    path,
+    part,
+    *,
+    manifest_sha256,
+    task_key,
+    producer_sha256,
+):
+    """Publish a synthetic part with its immutable adjacent resource receipt."""
+
+    token = "test-" + hashlib.sha256(str(path).encode()).hexdigest()[:16]
+    runtime = dict(part.get("runtime_provenance", {}))
+    runtime.update({
+        "manifest_sha256": manifest_sha256,
+        "producer_sha256": producer_sha256,
+        "coordinator_run_id": "modal-test-coordinator",
+        "coordinator_launch_token": token,
+        "self_pid_at_publish": 12345,
+        "self_vm_swap_kb_at_publish": 0,
+    })
+    manifest_field = (
+        "manifest_sha256"
+        if part.get("schema") == "zm_phasec_identity_cell_v1"
+        else "phasec_manifest_sha256"
+    )
+    part = {
+        **part,
+        manifest_field: manifest_sha256,
+        "runtime_provenance": runtime,
+    }
+    _write_json(path, part)
+    audit = {
+        "pid": 12345,
+        "task_key": task_key,
+        "coordinator_run_id": "modal-test-coordinator",
+        "coordinator_launch_token": token,
+        "n_samples": 1,
+        "first_sample_at": 1.0,
+        "last_sample_at": 1.0,
+        "observed_max_kb": 0,
+        "final_publish_swap_kb": 0,
+    }
+    receipt = ANALYZE.PRES.build_resource_receipt(
+        artifact_path=path,
+        artifact_root=ANALYZE.ROOT,
+        artifact_sha256=_sha(path),
+        manifest_sha256=manifest_sha256,
+        task_key=task_key,
+        run_id="modal-test-coordinator",
+        launch_token=token,
+        pid=12345,
+        audit_row=audit,
+        sampled_allowed_bytes=0,
+    )
+    ANALYZE.PRES.publish_resource_receipt_once(
+        ANALYZE.PRES.resource_receipt_path(path), receipt
+    )
+    return part
+
+
+def _resource_index_fixture(tmp_path):
+    """Two non-modal parts with auxiliary observables and valid receipts."""
+    manifest_sha = "a" * 64
+    tasks = []
+    for index, role in enumerate(("numerator", "denominator")):
+        obs = tmp_path / f"resource_obs_{index}.npz"
+        np.savez(obs, value=np.asarray([index], np.int16))
+        part_path = tmp_path / f"resource_part_{index}.json"
+        task_key = f"resource-test-{index}"
+        part = {
+            "schema": "zm_phasec1_base_part_v1_2026-07-28",
+            "status": "complete",
+            "seed": 1,
+            "tier": "primary_convex",
+            "cell_id": f"cell-{index}",
+            "phase": "rising",
+            "noise": f"noise-{index}",
+            "resolution": "dt",
+            "observables_path": str(obs),
+            "observables_sha256": _sha(obs),
+        }
+        _write_production_part(
+            part_path,
+            part,
+            manifest_sha256=manifest_sha,
+            task_key=task_key,
+            producer_sha256={"runner.py": "b" * 64},
+        )
+        tasks.append((task_key, part_path, role))
+    index = ADJ.C1.build_resource_receipt_index(
+        tasks, manifest_sha256=manifest_sha
+    )
+    return {"manifest_sha256": manifest_sha}, {
+        "resource_receipt_index": index
+    }, tasks
+
+
+def test_final_resource_index_rejects_deleted_nonmodal_receipt(
+    tmp_path, monkeypatch
+):
+    phasec, summary, tasks = _resource_index_fixture(tmp_path)
+    monkeypatch.setattr(
+        ADJ, "_expected_resource_tasks",
+        lambda *_args, **_kwargs: tasks,
+    )
+    assert ADJ._resource_index_issues(
+        "c1_native", summary, phasec
+    ) == []
+    ADJ.PRES.resource_receipt_path(tasks[1][1]).unlink()
+    issues = ADJ._resource_index_issues(
+        "c1_native", summary, phasec
+    )
+    assert any("resource_live_binding_failure" in row for row in issues)
+
+    summary_path = tmp_path / "resource_summary.json"
+    _write_json(summary_path, summary)
+    audit = {
+        "status": "complete",
+        "issues": [],
+        "summary_sources": {
+            "synthetic": ADJ._resource_source_ref(
+                "c1_native", summary_path, summary
+            )
+        },
+    }
+    artifacts = {
+        "c0": {
+            "verdict": "balanced_AI_tonic_candidate_supported",
+            "resource_receipt_audit": audit,
+        },
+        "c1_primary": {
+            "verdict": "no_local_maturation_window",
+            "resource_receipt_audit": audit,
+        },
+        "c1_shell": {
+            "verdict": "not_tested",
+            "resource_receipt_audit": audit,
+        },
+        "modal": {"verdict": "descriptive_only", "status": "complete"},
+        "coverage": {
+            "c0": {"status": "complete"},
+            "c1_primary": {"status": "complete"},
+            "c1_shell": {"status": "not_tested"},
+            "modal": {"status": "complete"},
+            "resource_receipt_audit": audit,
+        },
+    }
+    paths = {}
+    for name, value in artifacts.items():
+        path = tmp_path / f"final_{name}.json"
+        _write_json(path, value)
+        paths[name] = path
+    phasec_body = {
+        "per_seed": {"1": {"canonical_config_sha": "b" * 64}},
+        "provenance": {"producer_file_sha256": {"x.py": "c" * 64}},
+    }
+    phasec_path = tmp_path / "final_phasec.json"
+    _write_json(phasec_path, {
+        **phasec_body,
+        "manifest_sha256": ADJ._canonical_sha(phasec_body),
+    })
+    trigger_body = {
+        "selection_is_closed": True,
+        "phasec_manifest_sha256": ADJ._canonical_sha(phasec_body),
+        "producer_file_sha256": {"trigger.py": "d" * 64},
+    }
+    trigger_path = tmp_path / "final_trigger.json"
+    _write_json(trigger_path, {
+        **trigger_body,
+        "manifest_sha256": ADJ._canonical_sha(trigger_body),
+    })
+    monkeypatch.setattr(
+        ADJ, "_final_resource_source_contract", lambda *_: []
+    )
+    final = ADJ.adjudicate_files(
+        c0_path=paths["c0"],
+        c1_primary_path=paths["c1_primary"],
+        c1_shell_path=paths["c1_shell"],
+        modal_path=paths["modal"],
+        coverage_path=paths["coverage"],
+        trigger_path=trigger_path,
+        phasec_manifest_path=phasec_path,
+    )
+    assert final["verdict"] == "no_evidence"
+    assert any(
+        "resource_receipt_audit_live_failure" in row
+        for row in final["wrapper_provenance_issues"]
+    )
+
+
+@pytest.mark.parametrize("mutation", ("part_swap", "aux_swap"))
+def test_final_resource_index_rejects_part_or_aux_swap(
+    tmp_path, monkeypatch, mutation
+):
+    phasec, summary, tasks = _resource_index_fixture(tmp_path)
+    monkeypatch.setattr(
+        ADJ, "_expected_resource_tasks",
+        lambda *_args, **_kwargs: tasks,
+    )
+    entries = summary["resource_receipt_index"]["entries"]
+    if mutation == "part_swap":
+        left, right = tasks[0][1], tasks[1][1]
+    else:
+        left = ADJ._resolve(entries[0]["aux_observables_path"])
+        right = ADJ._resolve(entries[1]["aux_observables_path"])
+    left_bytes, right_bytes = left.read_bytes(), right.read_bytes()
+    left.write_bytes(right_bytes)
+    right.write_bytes(left_bytes)
+    issues = ADJ._resource_index_issues(
+        "c1_native", summary, phasec
+    )
+    assert any(
+        "resource_live_binding" in row for row in issues
+    )
+
+
+def test_final_resource_index_requires_reused_denominator_role(
+    tmp_path, monkeypatch
+):
+    phasec, summary, tasks = _resource_index_fixture(tmp_path)
+    numerator_only = ADJ.C1.build_resource_receipt_index(
+        tasks[:1], manifest_sha256=phasec["manifest_sha256"]
+    )
+    summary["resource_receipt_index"] = numerator_only
+    monkeypatch.setattr(
+        ADJ, "_expected_resource_tasks",
+        lambda *_args, **_kwargs: tasks,
+    )
+    issues = ADJ._resource_index_issues(
+        "c1_native", summary, phasec
+    )
+    assert any("resource_unique_task_set_mismatch" in row for row in issues)
+    assert any(
+        "resource_logical_consumption_set_mismatch" in row
+        for row in issues
+    )
+
+
+def _modal_run_fixture(tmp_path, *, resolution="dt", suffix="one"):
+    manifest_sha = "a" * 64
+    obs_path = tmp_path / f"{suffix}.npz"
+    np.savez(
+        obs_path,
+        phasec1_observables_schema=np.asarray("schema"),
+        bin_ms=np.asarray(2.0),
+        **_observables(7),
+    )
+    part_path = tmp_path / f"{suffix}.json"
+    prefix = "base" if resolution == "dt" else "dt2"
+    task_key = (
+        f"{prefix}|s1|primary_convex|cell_a|rising|noise_replay"
+    )
+    part = _write_production_part(
+        part_path,
+        {
+            "schema": "zm_phasec1_base_part_v1_2026-07-28",
+            "status": "complete",
+            "seed": 1,
+            "tier": "primary_convex",
+            "cell_id": "cell_a",
+            "phase": "rising",
+            "noise": "noise_replay",
+            "resolution": resolution,
+            "observables_path": str(obs_path),
+            "observables_sha256": _sha(obs_path),
+        },
+        manifest_sha256=manifest_sha,
+        task_key=task_key,
+        producer_sha256={"runner.py": "b" * 64},
+    )
+    run = {
+        "phase": "rising",
+        "noise": "noise_replay",
+        "role": "fit",
+        "part_path": str(part_path),
+        "part_file_sha256": _sha(part_path),
+        "part_semantic_sha256": ANALYZE._artifact_semantic_sha(part),
+        "observables_path": str(obs_path),
+        "observables_file_sha256": _sha(obs_path),
+        "observables_semantic_sha256": ANALYZE._semantic_npz_sha(obs_path),
+        "runtime_producer_file_sha256": {"runner.py": "b" * 64},
+        **ANALYZE._validate_and_lock_resource_receipt(
+            part_path,
+            part,
+            phasec_manifest_sha256=manifest_sha,
+        ),
+    }
+    return manifest_sha, part_path, run
+
+
+def test_modal_task_key_supports_c0_native_c1_and_dt2_c1():
+    assert ANALYZE._production_task_key({
+        "schema": "zm_phasec_identity_cell_v1",
+        "seed": 3,
+        "state_tag": "peak__natural",
+        "replicate": "noise_repeat",
+    }) == "identity|s3|peak__natural|noise_repeat"
+    common = {
+        "schema": "zm_phasec1_base_part_v1_2026-07-28",
+        "seed": 1,
+        "tier": "primary_convex",
+        "cell_id": "cell_a",
+        "phase": "rising",
+        "noise": "noise_replay",
+    }
+    assert ANALYZE._production_task_key({
+        **common, "resolution": "dt",
+    }) == "base|s1|primary_convex|cell_a|rising|noise_replay"
+    assert ANALYZE._production_task_key({
+        **common, "resolution": "dt2",
+    }) == "dt2|s1|primary_convex|cell_a|rising|noise_replay"
+
+
+@pytest.mark.parametrize("mutation", ("delete", "tamper", "swap"))
+def test_modal_load_fails_closed_on_resource_receipt_mutation(
+    tmp_path, mutation
+):
+    manifest_sha, part_path, run = _modal_run_fixture(tmp_path)
+    receipt_path = ANALYZE.PRES.resource_receipt_path(part_path)
+    if mutation == "delete":
+        receipt_path.unlink()
+    elif mutation == "tamper":
+        receipt = json.loads(receipt_path.read_text())
+        receipt["task_key"] = "tampered"
+        _write_json(receipt_path, receipt)
+    else:
+        _, other_part, _ = _modal_run_fixture(
+            tmp_path, resolution="dt2", suffix="other"
+        )
+        receipt_path.write_bytes(
+            ANALYZE.PRES.resource_receipt_path(other_part).read_bytes()
+        )
+    with pytest.raises(ValueError, match="resource receipt invalid"):
+        ANALYZE._load_observables(
+            run,
+            expected_seed=1,
+            expected_cell="cell_a",
+            phasec_manifest_sha256=manifest_sha,
+        )
+
+
 def test_analyzer_rejects_mutated_representative_npz(tmp_path, monkeypatch):
     monkeypatch.setattr(ANALYZE.PCC, "validate_manifest", lambda _: None)
     producer = tmp_path / "producer.py"
@@ -248,16 +589,30 @@ def test_analyzer_rejects_mutated_representative_npz(tmp_path, monkeypatch):
         )
         part_path = tmp_path / f"part{index}.json"
         part = {
+            "schema": "zm_phasec_identity_cell_v1",
             "status": "complete",
             "seed": 1,
             "cell_id": None,
+            "state_tag": "rising",
+            "replicate": noise,
+            "resolution": "dt",
             "phase": "rising",
             "noise": noise,
             "observables_path": str(obs_path),
             "observables_sha256": _sha(obs_path),
-            "runtime_provenance": {"producer_sha256": {"runner.py": "b" * 64}},
         }
-        _write_json(part_path, part)
+        part = _write_production_part(
+            part_path,
+            part,
+            manifest_sha256=phasec["manifest_sha256"],
+            task_key=f"identity|s1|rising|{noise}",
+            producer_sha256={"runner.py": "b" * 64},
+        )
+        receipt_lock = ANALYZE._validate_and_lock_resource_receipt(
+            part_path,
+            part,
+            phasec_manifest_sha256=phasec["manifest_sha256"],
+        )
         runs.append({
             "phase": "rising",
             "noise": noise,
@@ -273,6 +628,7 @@ def test_analyzer_rejects_mutated_representative_npz(tmp_path, monkeypatch):
             "runtime_producer_file_sha256": {
                 "runner.py": "b" * 64
             },
+            **receipt_lock,
         })
     selection_body = {
         "schema": ANALYZE.SELECTION_SCHEMA,
@@ -349,7 +705,7 @@ def test_analyzer_rejects_mutated_representative_npz(tmp_path, monkeypatch):
         if key != "manifest_sha256"
     })
     _write_json(selection_path, changed_selection)
-    with pytest.raises(ValueError, match="observables semantic SHA"):
+    with pytest.raises(ValueError, match="resource receipt invalid"):
         ANALYZE.analyze(
             phasec_manifest_path=paths["phasec_manifest"],
             c0_gate_path=paths["c0_resolution_gate"],
@@ -392,6 +748,8 @@ def test_write_once_builder_is_deterministic_and_c0_ai_does_not_need_c1_positive
         "schema": ANALYZE.C1_GATE_SCHEMA,
         "verdict": "no_maturation_in_tested_primary_neighbourhood",
         "resolution_gate": "not_required_without_native_window",
+        "primary_gate": {"status": "not_required"},
+        "shell_gate": {"status": "not_required"},
     }
     cells = []
     for tier, cell_id in (
@@ -411,18 +769,26 @@ def test_write_once_builder_is_deterministic_and_c0_ai_does_not_need_c1_positive
                 )
                 part_path = tmp_path / f"{cell_id}_{phase}_{noise}.json"
                 part = {
+                    "schema": "zm_phasec1_base_part_v1_2026-07-28",
                     "status": "complete",
                     "seed": 1,
+                    "tier": tier,
                     "cell_id": cell_id,
                     "phase": phase,
                     "noise": noise,
+                    "resolution": "dt",
                     "observables_path": str(obs_path),
                     "observables_sha256": _sha(obs_path),
-                    "runtime_provenance": {
-                        "producer_sha256": {str(producer): _sha(producer)}
-                    },
                 }
-                _write_json(part_path, part)
+                part = _write_production_part(
+                    part_path,
+                    part,
+                    manifest_sha256=phasec["manifest_sha256"],
+                    task_key=(
+                        f"base|s1|{tier}|{cell_id}|{phase}|{noise}"
+                    ),
+                    producer_sha256={str(producer): _sha(producer)},
+                )
                 run_rows.append({
                     "status": "complete",
                     "phase": phase,
@@ -532,6 +898,8 @@ def test_write_once_builder_is_deterministic_and_c0_ai_does_not_need_c1_positive
                 "schema": ANALYZE.C1_GATE_SCHEMA,
                 "verdict": "no_maturation_in_tested_primary_neighbourhood",
                 "resolution_gate": "not_required_without_native_window",
+                "primary_gate": {"status": "not_required"},
+                "shell_gate": {"status": "not_required"},
             },
             "C0 resolution gate",
         ),
@@ -544,6 +912,8 @@ def test_write_once_builder_is_deterministic_and_c0_ai_does_not_need_c1_positive
             {
                 "schema": ANALYZE.C1_GATE_SCHEMA,
                 "verdict": "C1_window_pending_dt2",
+                "primary_gate": {"status": "indeterminate"},
+                "shell_gate": {"status": "not_required"},
             },
             "C1 resolution gate",
         ),
@@ -556,6 +926,8 @@ def test_write_once_builder_is_deterministic_and_c0_ai_does_not_need_c1_positive
             {
                 "schema": ANALYZE.C1_GATE_SCHEMA,
                 "verdict": "C1_blocked_resolution_gate",
+                "primary_gate": {"status": "blocked"},
+                "shell_gate": {"status": "not_required"},
             },
             "C1 resolution gate",
         ),
@@ -568,6 +940,8 @@ def test_write_once_builder_is_deterministic_and_c0_ai_does_not_need_c1_positive
                 "schema": ANALYZE.C1_GATE_SCHEMA,
                 "verdict": "no_maturation_in_tested_primary_neighbourhood",
                 "resolution_gate": "not_required_without_native_window",
+                "primary_gate": {"status": "not_required"},
+                "shell_gate": {"status": "not_required"},
             },
             "C0 resolution gate",
         ),
@@ -593,6 +967,8 @@ def test_modal_lock_rejects_nonterminal_resolution_gates(
                 "schema": ANALYZE.C1_GATE_SCHEMA,
                 "verdict": "seed_heterogeneous_maturation",
                 "resolution_gate": "not_required_without_native_window",
+                "primary_gate": {"status": "not_required"},
+                "shell_gate": {"status": "not_required"},
             },
         ),
         (
@@ -603,6 +979,8 @@ def test_modal_lock_rejects_nonterminal_resolution_gates(
             {
                 "schema": ANALYZE.C1_GATE_SCHEMA,
                 "verdict": "resolution_sensitive_maturation",
+                "primary_gate": {"status": "contradicted"},
+                "shell_gate": {"status": "not_required"},
             },
         ),
     ),
@@ -716,8 +1094,12 @@ def test_adjudication_wrapper_rehashes_inputs_and_modal_cannot_change_verdict(tm
 
 
 def test_complete_mixed_c0_does_not_hide_preregistered_primary_window(
-    tmp_path,
+    tmp_path, monkeypatch,
 ):
+    monkeypatch.setattr(ADJ, "_audit_resource_sources", lambda *_: [])
+    monkeypatch.setattr(
+        ADJ, "_final_resource_source_contract", lambda *_: []
+    )
     artifacts = {
         "c0": {
             "verdict": "heterogeneous_or_unresolved",
@@ -729,12 +1111,17 @@ def test_complete_mixed_c0_does_not_hide_preregistered_primary_window(
         "c1_primary": {"verdict": "local_maturation_window"},
         "c1_shell": {"verdict": "not_tested"},
         "modal": {"verdict": "seed_specific", "status": "partial"},
-        "coverage": {
+            "coverage": {
             "c0": {"status": "complete"},
             "c1_primary": {"status": "complete"},
             "c1_shell": {"status": "not_tested"},
-            "modal": {"status": "partial"},
-        },
+                "modal": {"status": "partial"},
+                "resource_receipt_audit": {
+                    "status": "complete",
+                    "issues": [],
+                    "summary_sources": {"synthetic": {}},
+                },
+            },
     }
     paths = {}
     for name, value in artifacts.items():
@@ -802,6 +1189,7 @@ def _nested_final_sources(
     c0_native = {
         "schema": "zm_phasec_c0_summary_v1",
         "manifest_sha256": phasec["manifest_sha256"],
+        "resolution": "dt",
         "aggregate": {
             "verdict": "mixed_or_indeterminate_tonic_branch",
             "seed_classes": {
@@ -839,6 +1227,10 @@ def _nested_final_sources(
         path = tmp_path / f"{name}.json"
         _write_json(path, value)
         paths[name] = path
+    c0_native["manifest_file_sha256"] = _sha(paths["phasec"])
+    _write_json(paths["c0_native"], c0_native)
+    c1_native["phasec_manifest_file_sha256"] = _sha(paths["phasec"])
+    _write_json(paths["c1_native"], c1_native)
     c0_gate.update({
         "native_summary": str(paths["c0_native"]),
         "native_summary_sha256": _sha(paths["c0_native"]),
@@ -847,7 +1239,7 @@ def _nested_final_sources(
     })
     _write_json(paths["c0_gate"], c0_gate)
     c1_gate = {
-        "schema": "zm_phasec1_resolution_gate_v1_2026-07-28",
+        "schema": "zm_phasec1_resolution_gate_v2_2026-07-29",
         "verdict": c1_gate_verdict,
         "resolution_gate": (
             "passed"
@@ -857,16 +1249,81 @@ def _nested_final_sources(
         "native_summary_path": str(paths["c1_native"]),
         "native_summary_sha256": _sha(paths["c1_native"]),
     }
+    if c1_gate_verdict == "maturation_window_at_primary_convex_states":
+        c1_gate["primary_gate"] = {"status": "confirmed"}
+        c1_gate["shell_gate"] = {"status": "not_required"}
+    elif c1_gate_verdict == "maturation_candidate_in_secondary_shell":
+        c1_gate["primary_gate"] = {"status": "not_required"}
+        c1_gate["shell_gate"] = {"status": "confirmed"}
+    elif c1_gate_verdict == "resolution_sensitive_maturation":
+        if c1_gate_reason and "secondary" in c1_gate_reason:
+            c1_gate["primary_gate"] = {"status": "not_required"}
+            c1_gate["shell_gate"] = {"status": "contradicted"}
+        else:
+            c1_gate["primary_gate"] = {"status": "contradicted"}
+            c1_gate["shell_gate"] = {"status": "not_required"}
+    elif c1_gate_verdict == "C1_window_pending_dt2":
+        c1_gate["primary_gate"] = {"status": "indeterminate"}
+        c1_gate["shell_gate"] = {"status": "not_required"}
+    elif c1_gate_verdict == "C1_blocked_resolution_gate":
+        c1_gate["primary_gate"] = {"status": "blocked"}
+        c1_gate["shell_gate"] = {"status": "not_required"}
+    else:
+        c1_gate["primary_gate"] = {"status": "not_required"}
+        c1_gate["shell_gate"] = {"status": "not_required"}
+    if c1_gate_verdict in {
+        "maturation_window_at_primary_convex_states",
+        "maturation_candidate_in_secondary_shell",
+        "resolution_sensitive_maturation",
+    }:
+        dt2_summary = {
+            "schema": (
+                "zm_phasec1_dt2_confirmation_summary_v1_2026-07-28"
+            ),
+            "resolution": "dt2_confirmation_only",
+            "phasec_manifest_sha256": phasec["manifest_sha256"],
+            "phasec_manifest_file_sha256": _sha(paths["phasec"]),
+            "verdict": c1_gate_verdict,
+        }
+        paths["c1_dt2"] = tmp_path / "c1_dt2.json"
+        _write_json(paths["c1_dt2"], dt2_summary)
+        c1_gate.update({
+            "dt2_summary_path": str(paths["c1_dt2"]),
+            "dt2_summary_sha256": _sha(paths["c1_dt2"]),
+        })
+    else:
+        c1_gate.update({
+            "dt2_summary_path": None,
+            "dt2_summary_sha256": None,
+        })
+    paths["c1_gate"] = tmp_path / "c1_gate.json"
+    _write_json(paths["c1_gate"], c1_gate)
+    modal_inputs = {
+        "phasec_manifest": (paths["phasec"], phasec),
+        "c0_resolution_gate": (paths["c0_gate"], c0_gate),
+        "c0_native_summary": (paths["c0_native"], c0_native),
+        "c1_resolution_gate": (paths["c1_gate"], c1_gate),
+        "c1_native_summary": (paths["c1_native"], c1_native),
+    }
     modal = {
         "schema": "zm_phasec_modal_summary_v1_2026-07-28",
         "status": "partial",
         "verdict": "seed_specific_modal_audit_partial",
         "phasec_manifest_sha256": phasec["manifest_sha256"],
+        "input_provenance": {
+            name: {
+                "file_sha256": _sha(path),
+                "semantic_sha256": ADJ._canonical_sha(value),
+                "schema": value.get("schema"),
+                "parent_phasec_manifest_sha256": phasec[
+                    "manifest_sha256"
+                ],
+            }
+            for name, (path, value) in modal_inputs.items()
+        },
     }
-    for name, value in (("c1_gate", c1_gate), ("modal", modal)):
-        path = tmp_path / f"{name}.json"
-        _write_json(path, value)
-        paths[name] = path
+    paths["modal"] = tmp_path / "modal.json"
+    _write_json(paths["modal"], modal)
     return paths, phasec
 
 
@@ -885,8 +1342,9 @@ def _closed_trigger(tmp_path, phasec):
 
 
 def test_build_inputs_deterministically_splits_nested_c1_and_adjudicates(
-    tmp_path,
+    tmp_path, monkeypatch,
 ):
+    monkeypatch.setattr(ADJ, "_audit_resource_sources", lambda *_: [])
     paths, phasec = _nested_final_sources(tmp_path)
     inputs = ADJ.build_final_inputs(
         phasec_manifest_path=paths["phasec"],
@@ -939,6 +1397,32 @@ def test_build_inputs_deterministically_splits_nested_c1_and_adjudicates(
     )
 
 
+def test_final_inputs_consume_primary_and_shell_resolution_gates_separately():
+    native = {
+        "primary_adjudication": {
+            "status": "local_maturation_window",
+            "strict_negative": False,
+        },
+        "secondary_shell_adjudication": {
+            "status": "maturation_candidate_in_secondary_shell",
+            "strict_negative": False,
+        },
+    }
+    gate = {
+        "verdict": "maturation_window_at_primary_convex_states",
+        "primary_gate": {"status": "confirmed"},
+        "shell_gate": {"status": "indeterminate"},
+    }
+    primary, shell, primary_coverage, shell_coverage = (
+        ADJ._c1_final_inputs(gate, native, common={})
+    )
+    assert primary["verdict"] == "local_maturation_window"
+    assert primary_coverage == "complete"
+    assert shell["verdict"] == "insufficient_coverage"
+    assert shell_coverage == "incomplete"
+    assert shell["layer_resolution_gate"]["status"] == "indeterminate"
+
+
 def test_build_inputs_rejects_stale_c0_resolution_gate(tmp_path):
     paths, _phasec = _nested_final_sources(tmp_path)
     native = json.loads(paths["c0_native"].read_text(encoding="utf-8"))
@@ -955,13 +1439,138 @@ def test_build_inputs_rejects_stale_c0_resolution_gate(tmp_path):
         )
 
 
+def test_build_inputs_rejects_c0_schema_parent_and_modal_source_drift(tmp_path):
+    paths, _phasec = _nested_final_sources(tmp_path)
+    native = json.loads(paths["c0_native"].read_text(encoding="utf-8"))
+    native["manifest_file_sha256"] = "0" * 64
+    _write_json(paths["c0_native"], native)
+    gate = json.loads(paths["c0_gate"].read_text(encoding="utf-8"))
+    gate["native_summary_sha256"] = _sha(paths["c0_native"])
+    _write_json(paths["c0_gate"], gate)
+    with pytest.raises(ValueError, match="C0 native summary parent"):
+        ADJ.build_final_inputs(
+            phasec_manifest_path=paths["phasec"],
+            c0_gate_path=paths["c0_gate"],
+            c0_native_path=paths["c0_native"],
+            c1_gate_path=paths["c1_gate"],
+            c1_native_path=paths["c1_native"],
+            modal_path=paths["modal"],
+        )
+
+    schema_dir = tmp_path / "schema"
+    schema_dir.mkdir()
+    paths, _phasec = _nested_final_sources(schema_dir)
+    gate = json.loads(paths["c0_gate"].read_text(encoding="utf-8"))
+    gate["schema"] = "wrong"
+    _write_json(paths["c0_gate"], gate)
+    with pytest.raises(ValueError, match="C0 resolution gate schema"):
+        ADJ.build_final_inputs(
+            phasec_manifest_path=paths["phasec"],
+            c0_gate_path=paths["c0_gate"],
+            c0_native_path=paths["c0_native"],
+            c1_gate_path=paths["c1_gate"],
+            c1_native_path=paths["c1_native"],
+            modal_path=paths["modal"],
+        )
+
+    modal_dir = tmp_path / "modal-drift"
+    modal_dir.mkdir()
+    paths, _phasec = _nested_final_sources(modal_dir)
+    gate = json.loads(paths["c0_gate"].read_text(encoding="utf-8"))
+    gate["diagnostic_drift"] = True
+    _write_json(paths["c0_gate"], gate)
+    with pytest.raises(
+        ValueError, match="modal/c0_resolution_gate input provenance mismatch"
+    ):
+        ADJ.build_final_inputs(
+            phasec_manifest_path=paths["phasec"],
+            c0_gate_path=paths["c0_gate"],
+            c0_native_path=paths["c0_native"],
+            c1_gate_path=paths["c1_gate"],
+            c1_native_path=paths["c1_native"],
+            modal_path=paths["modal"],
+        )
+
+
+def test_build_inputs_requires_locked_c1_native_and_dt2_provenance(tmp_path):
+    paths, _phasec = _nested_final_sources(tmp_path)
+    gate = json.loads(paths["c1_gate"].read_text(encoding="utf-8"))
+    gate.pop("native_summary_sha256")
+    _write_json(paths["c1_gate"], gate)
+    with pytest.raises(
+        ValueError, match="C1 gate lacks locked native summary provenance"
+    ):
+        ADJ.build_final_inputs(
+            phasec_manifest_path=paths["phasec"],
+            c0_gate_path=paths["c0_gate"],
+            c0_native_path=paths["c0_native"],
+            c1_gate_path=paths["c1_gate"],
+            c1_native_path=paths["c1_native"],
+            modal_path=paths["modal"],
+        )
+
+    (tmp_path / "missing-dt2").mkdir()
+    paths, _phasec = _nested_final_sources(tmp_path / "missing-dt2")
+    gate = json.loads(paths["c1_gate"].read_text(encoding="utf-8"))
+    gate["dt2_summary_path"] = None
+    gate["dt2_summary_sha256"] = None
+    _write_json(paths["c1_gate"], gate)
+    with pytest.raises(
+        ValueError,
+        match="terminal resolution verdict lacks dt2 summary provenance",
+    ):
+        ADJ.build_final_inputs(
+            phasec_manifest_path=paths["phasec"],
+            c0_gate_path=paths["c0_gate"],
+            c0_native_path=paths["c0_native"],
+            c1_gate_path=paths["c1_gate"],
+            c1_native_path=paths["c1_native"],
+            modal_path=paths["modal"],
+        )
+
+    (tmp_path / "drifted-dt2").mkdir()
+    paths, _phasec = _nested_final_sources(tmp_path / "drifted-dt2")
+    with paths["c1_dt2"].open("a", encoding="utf-8") as handle:
+        handle.write(" ")
+    with pytest.raises(
+        ValueError, match="C1 gate/dt2 summary file SHA mismatch"
+    ):
+        ADJ.build_final_inputs(
+            phasec_manifest_path=paths["phasec"],
+            c0_gate_path=paths["c0_gate"],
+            c0_native_path=paths["c0_native"],
+            c1_gate_path=paths["c1_gate"],
+            c1_native_path=paths["c1_native"],
+            modal_path=paths["modal"],
+        )
+
+
+def test_build_inputs_rejects_legacy_c1_gate_without_layer_closures(tmp_path):
+    paths, _phasec = _nested_final_sources(tmp_path)
+    gate = json.loads(paths["c1_gate"].read_text(encoding="utf-8"))
+    gate.pop("shell_gate")
+    _write_json(paths["c1_gate"], gate)
+    with pytest.raises(
+        ValueError, match="lacks closed layer gates"
+    ):
+        ADJ.build_final_inputs(
+            phasec_manifest_path=paths["phasec"],
+            c0_gate_path=paths["c0_gate"],
+            c0_native_path=paths["c0_native"],
+            c1_gate_path=paths["c1_gate"],
+            c1_native_path=paths["c1_native"],
+            modal_path=paths["modal"],
+        )
+
+
 @pytest.mark.parametrize(
     "gate_verdict",
     ("C1_window_pending_dt2", "C1_blocked_resolution_gate"),
 )
 def test_build_inputs_never_turns_pending_or_blocked_dt2_into_a_result(
-    tmp_path, gate_verdict,
+    tmp_path, gate_verdict, monkeypatch,
 ):
+    monkeypatch.setattr(ADJ, "_audit_resource_sources", lambda *_: [])
     paths, phasec = _nested_final_sources(
         tmp_path, c1_gate_verdict=gate_verdict
     )
@@ -975,8 +1584,11 @@ def test_build_inputs_never_turns_pending_or_blocked_dt2_into_a_result(
     )
     assert inputs["c1_primary"]["verdict"] == "C1_blocked_manifest"
     assert inputs["coverage"]["c1_primary"]["status"] == "blocked_manifest"
-    assert inputs["c1_shell"]["verdict"] == "not_tested"
-    assert inputs["coverage"]["c1_shell"]["status"] == "not_tested"
+    assert inputs["c1_shell"]["verdict"] == "insufficient_coverage"
+    assert inputs["coverage"]["c1_shell"]["status"] == "incomplete"
+    assert inputs["c1_shell"]["layer_resolution_gate"]["status"] == (
+        "not_required"
+    )
     assert "maturation" not in inputs["c1_primary"]["verdict"].lower()
     assert "no_local_maturation" not in inputs["c1_primary"]["verdict"]
     written = ADJ.write_final_inputs(tmp_path / "inputs", inputs)

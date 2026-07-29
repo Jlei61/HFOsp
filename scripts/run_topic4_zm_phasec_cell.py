@@ -37,6 +37,7 @@ import scripts.run_topic4_zm_branch_decision as R  # noqa: E402
 import src.topic4_zm_checkpoint as CK  # noqa: E402
 import src.topic4_zm_noise_bank as NB  # noqa: E402
 import src.topic4_zm_phasec_contract as PCC  # noqa: E402
+import src.topic4_zm_phasec_resources as PRES  # noqa: E402
 import src.topic4_zm_phasec_metrics as PCM  # noqa: E402
 import src.topic4_zm_phasec_observation as PCO  # noqa: E402
 import src.topic4_zm_source_rhythm as SR  # noqa: E402
@@ -70,7 +71,8 @@ C1_GAIN_PART_SCHEMA = "zm_phasec1_conditional_gain_part_v1_2026-07-28"
 HIERARCHICAL_ARRAY_FIELDS = (
     "rho80_active_core_by_block_window",
     "block_isi_cv2_by_panel_neuron",
-    "block_refractory_isi_fraction_by_panel_neuron",
+    "block_refractory_isi_numerator_by_stratum",
+    "block_refractory_isi_denominator_by_stratum",
     "pair_corr_by_block_and_pair",
     "pair_null_median_by_block_and_draw",
     "active_area_fraction_by_block_window",
@@ -1143,12 +1145,19 @@ def _runtime_provenance(args, ctx, locks):
     sources = tuple(sorted(
         locks["manifest"]["provenance"]["producer_file_sha256"]
     ))
+    coordinator = PRES.coordinator_identity_from_env()
     return {
         "manifest_path": locks["manifest_path"],
         "manifest_sha256": locks["manifest_sha256"],
         "manifest_file_sha256": locks["manifest_file_sha256"],
         "runtime_git_sha": ctx["runtime_git_sha"],
         "runtime_started_at": ctx["runtime_started_at"],
+        "self_pid_at_publish": os.getpid(),
+        "self_vm_swap_kb_at_publish": PRES.process_swap_kb(os.getpid()),
+        "self_vm_swap_sample_semantics": (
+            "pre-publish child self snapshot; not a kernel peak"
+        ),
+        **coordinator,
         "command": [sys.executable, *sys.argv],
         "cwd": os.path.abspath(os.getcwd()),
         "producer_sha256": {
@@ -1192,8 +1201,11 @@ def _hierarchical_observables_complete(arrays, *, min_blocks=2):
     try:
         rho = np.asarray(arrays["rho80_active_core_by_block_window"])
         cv2 = np.asarray(arrays["block_isi_cv2_by_panel_neuron"])
-        ref = np.asarray(
-            arrays["block_refractory_isi_fraction_by_panel_neuron"]
+        ref_numerator = np.asarray(
+            arrays["block_refractory_isi_numerator_by_stratum"]
+        )
+        ref_denominator = np.asarray(
+            arrays["block_refractory_isi_denominator_by_stratum"]
         )
         pair = np.asarray(arrays["pair_corr_by_block_and_pair"])
         null = np.asarray(
@@ -1207,6 +1219,11 @@ def _hierarchical_observables_complete(arrays, *, min_blocks=2):
                 arrays["pair_null_stratum_names"]
             ).ravel()
         )
+        refractory_names = tuple(
+            str(value) for value in np.asarray(
+                arrays["refractory_isi_stratum_names"]
+            ).ravel()
+        )
     except (KeyError, TypeError, ValueError):
         return False
     n_block = rho.shape[0] if rho.ndim == 2 else 0
@@ -1214,15 +1231,21 @@ def _hierarchical_observables_complete(arrays, *, min_blocks=2):
         n_block >= int(min_blocks)
         and rho.shape[1:] == (6,)
         and cv2.ndim == 2
-        and ref.shape == cv2.shape
+        and ref_numerator.shape == (n_block, 2)
+        and ref_denominator.shape == ref_numerator.shape
+        and np.issubdtype(ref_numerator.dtype, np.integer)
+        and np.issubdtype(ref_denominator.dtype, np.integer)
+        and np.all(ref_numerator >= 0)
+        and np.all(ref_numerator <= ref_denominator)
         and pair.ndim == 2
         and area.ndim == 2
         and area.shape[1] == 20
         and all(value.shape[0] == n_block for value in (
-            cv2, ref, pair, null, area
+            cv2, ref_numerator, ref_denominator, pair, null, area
         ))
         and null.shape == (n_block, 3, 100)
         and names == PCM.PAIR_NULL_STRATUM_NAMES
+        and refractory_names == PCM.REFRACTORY_ISI_STRATUM_NAMES
     )
 
 
@@ -1242,7 +1265,8 @@ def _smoke_observables_complete(
         "global_E_rate_hz", "global_I_rate_hz", "fine_bin_ms",
     )
     required = (
-        "E_rate_grid", "I_rate_grid", "spatial_grid_n_occupied_E",
+        "hierarchical_schema", "E_rate_grid", "I_rate_grid",
+        "spatial_grid_n_occupied_E",
         "spatial_area_denominator", "raw_sample_time_ms",
         "effective_sample_time_ms", "analysis_panel_E_ids",
         "pairwise_panel_E_ids", "block_ms", "ceiling_window_ms",
@@ -1285,6 +1309,10 @@ def _smoke_observables_complete(
             )
             for key, expected in expected_scalars.items()
         ):
+            return False
+        if str(np.asarray(
+            arrays["hierarchical_schema"]
+        ).reshape(()).item()) != PCM.HIERARCHICAL_STATS_VERSION:
             return False
         if not np.array_equal(
             np.asarray(arrays["analysis_panel_E_ids"], int),
@@ -1533,7 +1561,7 @@ def run_identity(args):
 
     arrays = {
         "hierarchical_schema": np.asarray(
-            "zm_phasec_hierarchical_stats_v1_2026-07-28"
+            PCM.HIERARCHICAL_STATS_VERSION
         ),
         "panel_sha256": np.asarray(locks["panel_row"]["panel_sha256"]),
         "raw_sample_time_ms": np.asarray(raw_post["sample_time_ms"], np.float32),
@@ -2075,7 +2103,7 @@ def run_c1_base(args):
     arrays = {
         "phasec1_observables_schema": np.asarray(C1_OBSERVABLES_SCHEMA),
         "hierarchical_schema": np.asarray(
-            "zm_phasec_hierarchical_stats_v1_2026-07-28"
+            PCM.HIERARCHICAL_STATS_VERSION
         ),
         "panel_sha256": np.asarray(locks["panel_row"]["panel_sha256"]),
         "bin_ms": np.asarray(FINE_BIN_MS),

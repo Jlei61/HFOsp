@@ -17,6 +17,7 @@ if ROOT not in sys.path:
 
 import src.topic4_zm_phasec_metrics as PCM  # noqa: E402
 import src.topic4_zm_phasec_contract as PCC  # noqa: E402
+import src.topic4_zm_phasec_resources as PRES  # noqa: E402
 
 
 OUT = os.path.join(
@@ -30,18 +31,25 @@ DELTAS = (0.05, 0.10)
 N_BOOT = 5000
 MANIFEST_PATH = os.path.join(OUT, "phasec_manifest.json")
 PANELS_PATH = os.path.join(OUT, "phasec_panels.json")
-HIERARCHICAL_SCHEMA = "zm_phasec_hierarchical_stats_v1_2026-07-28"
+HIERARCHICAL_SCHEMA = PCM.HIERARCHICAL_STATS_VERSION
+RESOURCE_RECEIPT_INDEX_SCHEMA = (
+    "zm_phasec_resource_receipt_index_v1_2026-07-29"
+)
 TIME_BLOCK_MS = 500.0
 HIERARCHICAL_ARRAY_FIELDS = (
     "rho80_active_core_by_block_window",
     "block_isi_cv2_by_panel_neuron",
-    "block_refractory_isi_fraction_by_panel_neuron",
+    "block_refractory_isi_numerator_by_stratum",
+    "block_refractory_isi_denominator_by_stratum",
     "pair_corr_by_block_and_pair",
     "pair_null_median_by_block_and_draw",
     "active_area_fraction_by_block_window",
 )
 PANEL_ARRAY_FIELDS = ("analysis_panel_E_ids", "pairwise_panel_E_ids")
-PAIR_NULL_META_FIELDS = ("pair_null_stratum_names",)
+PAIR_NULL_META_FIELDS = (
+    "pair_null_stratum_names",
+    "refractory_isi_stratum_names",
+)
 SPATIAL_META_FIELDS = (
     "spatial_grid_n_occupied_E",
     "spatial_grid_all_E_bins_occupied",
@@ -170,7 +178,12 @@ def _load_hierarchical_npz(row, *, expected_panel=None):
                     str(value) for value in np.asarray(
                         z["pair_null_stratum_names"]
                     ).ravel()
-                )
+                ),
+                "refractory_isi_stratum_names": tuple(
+                    str(value) for value in np.asarray(
+                        z["refractory_isi_stratum_names"]
+                    ).ravel()
+                ),
             }
     except (OSError, ValueError, TypeError) as exc:
         return {"status": "blocked", "reason": f"invalid_observables_npz:{exc}"}
@@ -190,10 +203,31 @@ def _load_hierarchical_npz(row, *, expected_panel=None):
         block_count = value.shape[0] if block_count is None else block_count
         if value.shape[0] != block_count:
             return {"status": "blocked", "reason": "inconsistent_block_count"}
-    ref_fraction = arrays["block_refractory_isi_fraction_by_panel_neuron"]
     cv2 = arrays["block_isi_cv2_by_panel_neuron"]
-    if cv2.shape != ref_fraction.shape:
-        return {"status": "blocked", "reason": "cv2_ref_shape_mismatch"}
+    ref_numerator = arrays[
+        "block_refractory_isi_numerator_by_stratum"
+    ]
+    ref_denominator = arrays[
+        "block_refractory_isi_denominator_by_stratum"
+    ]
+    expected_ref_shape = (
+        int(block_count), len(PCM.REFRACTORY_ISI_STRATUM_NAMES)
+    )
+    if (
+        ref_numerator.shape != expected_ref_shape
+        or ref_denominator.shape != expected_ref_shape
+    ):
+        return {"status": "blocked", "reason": "refractory_count_shape_mismatch"}
+    if (
+        not np.all(np.isfinite(ref_numerator))
+        or not np.all(np.isfinite(ref_denominator))
+        or np.any(ref_numerator < 0)
+        or np.any(ref_denominator < 0)
+        or np.any(ref_numerator > ref_denominator)
+        or not np.all(ref_numerator == np.floor(ref_numerator))
+        or not np.all(ref_denominator == np.floor(ref_denominator))
+    ):
+        return {"status": "blocked", "reason": "invalid_refractory_isi_counts"}
     if arrays["rho80_active_core_by_block_window"].shape[1] != 6:
         return {"status": "blocked", "reason": "rho250_window_count_mismatch"}
     if arrays["active_area_fraction_by_block_window"].shape[1] != 20:
@@ -203,6 +237,10 @@ def _load_hierarchical_npz(row, *, expected_panel=None):
         return {"status": "blocked", "reason": "pairwise_null_draw_count_mismatch"}
     if pair_null_meta["pair_null_stratum_names"] != PCM.PAIR_NULL_STRATUM_NAMES:
         return {"status": "blocked", "reason": "pairwise_null_strata_mismatch"}
+    if pair_null_meta["refractory_isi_stratum_names"] != (
+        PCM.REFRACTORY_ISI_STRATUM_NAMES
+    ):
+        return {"status": "blocked", "reason": "refractory_isi_strata_mismatch"}
     n_grid = int(HIERARCHICAL_SCALAR_LOCKS["spatial_grid_n"])
     n_occupied = int(spatial_meta["spatial_grid_n_occupied_E"])
     if not 1 <= n_occupied <= n_grid * n_grid:
@@ -215,10 +253,6 @@ def _load_hierarchical_npz(row, *, expected_panel=None):
         "anatomy_occupied_E_grid_bins"
     ):
         return {"status": "blocked", "reason": "spatial_area_denominator_mismatch"}
-    if np.any(np.isfinite(ref_fraction) & (
-        (ref_fraction < 0) | (ref_fraction > 1)
-    )):
-        return {"status": "blocked", "reason": "invalid_refractory_fraction"}
     if expected_panel is not None:
         expected_ids = {
             "analysis_panel_E_ids": np.asarray(
@@ -295,6 +329,129 @@ def _gain_path(resolution, seed, state, noise, delta, sign):
     )
 
 
+def _resource_receipt_ref(path, *, manifest_sha256, task_key):
+    """Return one live-validated immutable part/receipt binding."""
+    receipt_path = PRES.resource_receipt_path(path)
+    valid, reason, receipt = PRES.validate_resource_receipt(
+        receipt_path,
+        artifact_path=path,
+        artifact_root=ROOT,
+        manifest_sha256=manifest_sha256,
+        task_key=task_key,
+    )
+    if not valid or not isinstance(receipt, dict):
+        raise ValueError(reason)
+    part = _load(path)
+    ref = {
+        "task_key": str(task_key),
+        "part_path": os.path.relpath(path, ROOT),
+        "part_file_sha256": _sha256(path),
+        "resource_receipt_path": os.path.relpath(receipt_path, ROOT),
+        "resource_receipt_file_sha256": _sha256(receipt_path),
+        "resource_receipt_sha256": receipt["receipt_sha256"],
+    }
+    aux_ref = part.get("observables_path")
+    aux_sha = part.get("observables_sha256")
+    if aux_ref is not None or aux_sha is not None:
+        aux_path = _resolve_artifact(aux_ref)
+        if (
+            not aux_path.is_file()
+            or not isinstance(aux_sha, str)
+            or _sha256(aux_path) != aux_sha
+        ):
+            raise ValueError("resource_index_aux_observables_drift")
+        ref.update({
+            "aux_observables_path": os.path.relpath(aux_path, ROOT),
+            "aux_observables_file_sha256": aux_sha,
+        })
+    return ref
+
+
+def _resource_receipt_failure(path, *, manifest_sha256, task_key):
+    """Return the technical resource-audit failure for one production part."""
+    try:
+        _resource_receipt_ref(
+            path,
+            manifest_sha256=manifest_sha256,
+            task_key=task_key,
+        )
+    except (OSError, TypeError, ValueError) as exc:
+        return str(exc)
+    return None
+
+
+def build_resource_receipt_index(tasks, *, manifest_sha256):
+    """Build a canonical full-part resource index without hiding blockers."""
+    entries = []
+    issues = []
+    seen = set()
+    logical = []
+    normalized = [
+        (
+            str(row[0]),
+            row[1],
+            str(row[2]) if len(row) > 2 else "unspecified",
+        )
+        for row in tasks
+    ]
+    for task_key, path, role in sorted(
+        normalized, key=lambda row: (row[0], row[2])
+    ):
+        logical.append({"task_key": task_key, "role": role})
+        task_key = str(task_key)
+        path = str(path)
+        if task_key in seen:
+            issues.append({
+                "task_key": task_key,
+                "part_path": os.path.relpath(path, ROOT),
+                "reason": "duplicate_resource_task_key",
+            })
+            continue
+        seen.add(task_key)
+        if not os.path.isfile(path):
+            issues.append({
+                "task_key": task_key,
+                "part_path": os.path.relpath(path, ROOT),
+                "reason": "missing_part",
+            })
+            continue
+        try:
+            entries.append(_resource_receipt_ref(
+                path,
+                manifest_sha256=manifest_sha256,
+                task_key=task_key,
+            ))
+        except (OSError, TypeError, ValueError) as exc:
+            issues.append({
+                "task_key": task_key,
+                "part_path": os.path.relpath(path, ROOT),
+                "reason": str(exc),
+            })
+    body = {
+        "schema": RESOURCE_RECEIPT_INDEX_SCHEMA,
+        "manifest_sha256": str(manifest_sha256),
+        "status": "complete" if not issues else "incomplete",
+        "expected_task_count": len(seen),
+        "validated_entry_count": len(entries),
+        "expected_logical_consumption_count": len(logical),
+        "logical_consumptions": logical,
+        "entries": entries,
+        "issues": issues,
+    }
+    return {**body, "index_sha256": _object_sha(body)}
+
+
+def _identity_task_key(seed, phase, noise):
+    return f"identity|s{seed}|{phase}|{noise}"
+
+
+def _gain_task_key(seed, state, noise, delta, sign):
+    return (
+        f"gain|s{seed}|{state}|{noise}|"
+        f"d{float(delta):g}|{int(sign):+d}"
+    )
+
+
 def expected_paths(resolution, seeds):
     identities = [
         _identity_path(resolution, seed, phase, noise)
@@ -310,6 +467,36 @@ def expected_paths(resolution, seeds):
         for seed in seeds for state in GAIN_STATES for noise in NOISES
     ]
     return identities, gains
+
+
+def expected_resource_tasks(resolution, seeds):
+    """Return the exact C0 part universe consumed by one summary."""
+    tasks = [
+        (
+            _identity_task_key(seed, phase, noise),
+            _identity_path(resolution, seed, phase, noise),
+            "c0_identity",
+        )
+        for seed in seeds for phase in PHASES for noise in NOISES
+    ]
+    tasks.extend(
+        (
+            _gain_task_key(seed, state, noise, delta, sign),
+            _gain_path(resolution, seed, state, noise, delta, sign),
+            "c0_gain",
+        )
+        for seed in seeds for state in GAIN_STATES for noise in NOISES
+        for delta in DELTAS for sign in (-1, 1)
+    )
+    tasks.extend(
+        (
+            _gain_task_key(seed, state, noise, 0.0, 0),
+            _gain_path(resolution, seed, state, noise, 0.0, 0),
+            "c0_gain",
+        )
+        for seed in seeds for state in GAIN_STATES for noise in NOISES
+    )
+    return tasks
 
 
 def _finite_median(values):
@@ -332,7 +519,13 @@ def _stratified_resample_indices(n_items, strata, rng):
 
 
 def _matched_pair_summary(pair, null, pair_strata):
-    """Compare each observed pair stratum only with its matched shift null."""
+    """Compare each fixed-pair stratum with its matched shift-null draws.
+
+    The null statistic is defined per circular-shift draw.  For every draw we
+    first aggregate over the (possibly bootstrap-resampled) 500-ms blocks,
+    then take Q0.975 only along the draw axis.  Flattening block and draw axes
+    would make blocks act like extra null draws and changes the estimand.
+    """
     pair = np.asarray(pair, float)
     null = np.asarray(null, float)
     strata = np.asarray(pair_strata, np.int8)
@@ -348,17 +541,29 @@ def _matched_pair_summary(pair, null, pair_strata):
     for stratum in range(len(PCM.PAIR_NULL_STRATUM_NAMES)):
         obs = pair[:, strata == stratum]
         nul = null[:, stratum, :]
-        obs_median = _finite_median(obs)
-        nul_finite = nul[np.isfinite(nul)]
+        # Symmetric block estimator: the fixed-pair panel is reduced within
+        # each shared block first.  The producer has already performed that
+        # same pair reduction for every null draw.
+        observed_by_block = np.asarray(
+            [_finite_median(row) for row in obs], float
+        )
+        obs_median = _finite_median(observed_by_block)
+        null_by_draw = np.asarray(
+            [_finite_median(nul[:, draw]) for draw in range(nul.shape[1])],
+            float,
+        )
+        null_by_draw = null_by_draw[np.isfinite(null_by_draw)]
         q975 = (
-            float(np.percentile(nul_finite, 97.5))
-            if nul_finite.size else np.nan
+            float(np.percentile(null_by_draw, 97.5))
+            if null_by_draw.size else np.nan
         )
         observed.append(obs_median)
         null_q.append(q975)
         excess.append(obs_median - q975)
     return {
-        "pairwise_observed_median": _finite_median(pair),
+        "pairwise_observed_median": _finite_median([
+            _finite_median(row) for row in pair
+        ]),
         "pairwise_null_q97_5": _finite_median(null_q),
         "pairwise_stratum_max_excess": (
             float(np.max(excess))
@@ -367,12 +572,56 @@ def _matched_pair_summary(pair, null, pair_strata):
     }
 
 
+def _pooled_refractory_isi_probability(
+    numerator, denominator, block=None, *, stratum="core"
+):
+    """Return P(ISI<=tau_ref+2dt) from pooled event counts.
+
+    The core/surround columns are fixed anatomical strata, not equal-weight
+    observations.  The decisive C0/C1 statistic uses the active-core analysis
+    stratum; surround and all-panel ratios are supportive diagnostics only.
+    """
+    numerator = np.asarray(numerator, float)
+    denominator = np.asarray(denominator, float)
+    if (
+        numerator.ndim != 2
+        or denominator.shape != numerator.shape
+        or numerator.shape[1] != len(PCM.REFRACTORY_ISI_STRATUM_NAMES)
+        or not np.all(np.isfinite(numerator))
+        or not np.all(np.isfinite(denominator))
+        or np.any(numerator < 0)
+        or np.any(denominator < 0)
+        or np.any(numerator > denominator)
+    ):
+        raise ValueError("invalid pooled refractory-ISI sufficient statistics")
+    if block is not None:
+        index = np.asarray(block, int)
+        if index.ndim != 1 or np.any(index < 0) or np.any(index >= numerator.shape[0]):
+            raise ValueError("invalid refractory-ISI block bootstrap index")
+        numerator = numerator[index]
+        denominator = denominator[index]
+    try:
+        if stratum == "all":
+            selected = slice(None)
+        else:
+            selected = PCM.REFRACTORY_ISI_STRATUM_NAMES.index(str(stratum))
+    except ValueError as exc:
+        raise ValueError(f"unknown refractory-ISI stratum: {stratum}") from exc
+    numerator = numerator[:, selected]
+    denominator = denominator[:, selected]
+    total = float(np.sum(denominator))
+    return float(np.sum(numerator) / total) if total > 0 else np.nan
+
+
 def _continuation_point(run):
     h = run["hierarchical"]
     rho = np.asarray(h["rho80_active_core_by_block_window"], float)
     cv2 = np.asarray(h["block_isi_cv2_by_panel_neuron"], float)
-    ref = np.asarray(
-        h["block_refractory_isi_fraction_by_panel_neuron"], float
+    ref_numerator = np.asarray(
+        h["block_refractory_isi_numerator_by_stratum"], float
+    )
+    ref_denominator = np.asarray(
+        h["block_refractory_isi_denominator_by_stratum"], float
     )
     pair = np.asarray(h["pair_corr_by_block_and_pair"], float)
     null = np.asarray(h["pair_null_median_by_block_and_draw"], float)
@@ -381,23 +630,42 @@ def _continuation_point(run):
     pair_summary = _matched_pair_summary(
         pair, null, h.get("pair_strata")
     )
+    ref_surround = _pooled_refractory_isi_probability(
+        ref_numerator, ref_denominator, stratum="surround"
+    )
+    ref_all = _pooled_refractory_isi_probability(
+        ref_numerator, ref_denominator, stratum="all"
+    )
     return {
         "rho80_active_core": _finite_median(rho),
         "gain_relative_to_preentry": _finite_median(gain),
         "isi_cv2_median": _finite_median(cv2),
-        "refractory_isi_fraction": _finite_median(ref),
+        "refractory_isi_fraction": _pooled_refractory_isi_probability(
+            ref_numerator, ref_denominator, stratum="core"
+        ),
+        "refractory_isi_fraction_surround_supportive":
+            (float(ref_surround) if np.isfinite(ref_surround) else None),
+        "refractory_isi_fraction_all_panel_supportive":
+            (float(ref_all) if np.isfinite(ref_all) else None),
         **pair_summary,
         "active_area_fraction": _finite_median(area),
     }
 
 
 def _resample_continuation(run, rng):
-    """One within-continuation draw: blocks, then locked neurons/pairs."""
+    """One draw: blocks/null draws, plus locked analysis neurons.
+
+    Pairwise correlations use the entire fixed pair panel as a design census.
+    Pairs share neurons and are therefore not an IID bootstrap axis.
+    """
     h = run["hierarchical"]
     rho = np.asarray(h["rho80_active_core_by_block_window"], float)
     cv2 = np.asarray(h["block_isi_cv2_by_panel_neuron"], float)
-    ref = np.asarray(
-        h["block_refractory_isi_fraction_by_panel_neuron"], float
+    ref_numerator = np.asarray(
+        h["block_refractory_isi_numerator_by_stratum"], float
+    )
+    ref_denominator = np.asarray(
+        h["block_refractory_isi_denominator_by_stratum"], float
     )
     pair = np.asarray(h["pair_corr_by_block_and_pair"], float)
     null = np.asarray(h["pair_null_median_by_block_and_draw"], float)
@@ -411,22 +679,16 @@ def _resample_continuation(run, rng):
     cv_neuron = _stratified_resample_indices(
         cv2.shape[1], analysis_strata, rng
     )
-    ref_neuron = _stratified_resample_indices(
-        ref.shape[1], analysis_strata, rng
-    )
-    pairs = _stratified_resample_indices(pair.shape[1], pair_strata, rng)
-    null_draws = rng.integers(0, null.shape[2], size=null.shape[2])
-
     cv_draw = cv2[np.ix_(block, cv_neuron)]
-    ref_draw = ref[np.ix_(block, ref_neuron)]
-    pair_draw = pair[np.ix_(block, pairs)]
+    pair_draw = pair[block, :]
+    null_draws = rng.integers(0, null.shape[2], size=null.shape[2])
     null_draw = null[np.ix_(
         block,
         np.arange(null.shape[1], dtype=int),
         null_draws,
     )]
     pair_summary = _matched_pair_summary(
-        pair_draw, null_draw, np.asarray(pair_strata, np.int8)[pairs]
+        pair_draw, null_draw, np.asarray(pair_strata, np.int8)
     )
     gain_finite = gain[np.isfinite(gain)]
     gain_draw = (
@@ -439,7 +701,9 @@ def _resample_continuation(run, rng):
         "rho80_active_core": _finite_median(rho[block, :]),
         "gain_relative_to_preentry": _finite_median(gain_draw),
         "isi_cv2_median": _finite_median(cv_draw),
-        "refractory_isi_fraction": _finite_median(ref_draw),
+        "refractory_isi_fraction": _pooled_refractory_isi_probability(
+            ref_numerator, ref_denominator, block=block, stratum="core"
+        ),
         **pair_summary,
         "active_area_fraction": _finite_median(area[block, :]),
     }
@@ -459,9 +723,13 @@ def _interval(point, draws):
 def hierarchical_seed_bootstrap(runs, *, seed, n_boot=N_BOOT):
     """Three-level bootstrap locked by spec §4.5.
 
-    Each selected continuation first resamples 500-ms blocks, then neurons or
-    pairs within its fixed panel.  Six continuations are finally resampled
-    within seed.  Seeds are never pooled inside this function.
+    Each selected continuation first resamples 500-ms blocks.  Analysis-panel
+    neurons are resampled within locked core/surround strata for CV2;
+    active-core f_ref is recomputed from pooled ISI-event counts over those
+    blocks.  The pair panel is a complete, dependent design census (pairs
+    share neurons), so it is held fixed while circular-null draws are
+    resampled.  Six continuations are finally resampled within seed.  Seeds
+    are never pooled inside this function.
     """
     by_phase = {
         phase: [index for index, run in enumerate(runs)
@@ -515,7 +783,9 @@ def hierarchical_seed_bootstrap(runs, *, seed, n_boot=N_BOOT):
     }
     out.update({
         "structure": (
-            "500ms_blocks_then_locked_neurons_or_pairs_then_continuations"
+            "500ms_blocks_then_cv2_neurons_pooled_core_isi_counts_"
+            "and_null_draws_"
+            "with_fixed_pair_census_then_continuations"
         ),
         "n_numeric_continuations": len(runs),
         "n_drawn_continuations": len(PHASES) * len(NOISES),
@@ -537,7 +807,17 @@ def classify_run_joint(run):
         return {"klass": "blocked", "reason": f"invalid_sufficient_stats:{exc}"}
     if run.get("gain_unresolved"):
         return {"klass": "mixed", "reason": "gain_unresolved", **values}
-    if not np.all(np.isfinite(list(values.values()))):
+    decisive_keys = (
+        "rho80_active_core",
+        "gain_relative_to_preentry",
+        "isi_cv2_median",
+        "refractory_isi_fraction",
+        "pairwise_observed_median",
+        "pairwise_null_q97_5",
+        "pairwise_stratum_max_excess",
+        "active_area_fraction",
+    )
+    if not np.all(np.isfinite([values[key] for key in decisive_keys])):
         return {"klass": "blocked", "reason": "nonfinite_joint_metric"}
     if (
         run.get("runaway")
@@ -686,6 +966,15 @@ def combine_resolution_summaries(native, dt2):
         }
     label = positive[verdict]
     supporting = set(native_agg.get("supporting_seeds") or [])
+    if not {1, 3}.issubset(supporting):
+        return {
+            "verdict": "C0_no_evidence",
+            "reason": "resolution_confirmation_unavailable",
+            "resolution_gate": "insufficient_homologous_native_support",
+            "native_verdict": verdict,
+            "native_supporting_seeds": sorted(supporting),
+            "required_dt2_seeds": [1, 3],
+        }
     by_seed = {
         int(row["seed"]): row
         for row in (dt2 or {}).get("seed_rows", [])
@@ -709,9 +998,11 @@ def combine_resolution_summaries(native, dt2):
     if len(agreeing) < 2:
         return {
             "verdict": "C0_no_evidence",
-            "reason": "insufficient_homologous_dt2_confirmation",
+            "reason": "resolution_confirmation_unavailable",
+            "resolution_gate": "insufficient_homologous_dt2_confirmation",
             "native_verdict": verdict,
             "agreeing_seeds": sorted(agreeing),
+            "required_dt2_seeds": [1, 3],
         }
     return {
         "verdict": verdict,
@@ -884,6 +1175,17 @@ def _gain_for(resolution, seed, state, noise, manifest):
             "linearity_pass": False,
         }
     baseline = _load(baseline_path)
+    receipt_failure = _resource_receipt_failure(
+        baseline_path,
+        manifest_sha256=manifest_sha,
+        task_key=_gain_task_key(seed, state, noise, 0.0, 0),
+    )
+    if receipt_failure is not None:
+        return {
+            "status": receipt_failure,
+            "failure_kind": "technical",
+            "linearity_pass": False,
+        }
     status = _validate_gain_payload(
         baseline, manifest=manifest, manifest_file_sha=manifest_file_sha,
         seed=seed, state=state, noise=noise, resolution=resolution,
@@ -908,7 +1210,22 @@ def _gain_for(resolution, seed, state, noise, manifest):
                 "linearity_pass": False,
             }
         minus, plus = _load(minus_path), _load(plus_path)
-        for arm in (minus, plus):
+        for arm, arm_path, sign in (
+            (minus, minus_path, -1), (plus, plus_path, +1)
+        ):
+            receipt_failure = _resource_receipt_failure(
+                arm_path,
+                manifest_sha256=manifest_sha,
+                task_key=_gain_task_key(
+                    seed, state, noise, delta, sign
+                ),
+            )
+            if receipt_failure is not None:
+                return {
+                    "status": receipt_failure,
+                    "failure_kind": "technical",
+                    "linearity_pass": False,
+                }
             status = _validate_gain_payload(
                 arm, manifest=manifest,
                 manifest_file_sha=manifest_file_sha, seed=seed, state=state,
@@ -1076,6 +1393,17 @@ def _seed_summary(resolution, seed, manifest, panels):
                     "reason": f"missing:{os.path.relpath(path, ROOT)}",
                 }
             row = _load(path)
+            receipt_failure = _resource_receipt_failure(
+                path,
+                manifest_sha256=manifest["manifest_sha256"],
+                task_key=_identity_task_key(seed, phase, noise),
+            )
+            if receipt_failure is not None:
+                return {
+                    "seed": seed,
+                    "klass": "C0_blocked_observables",
+                    "reason": f"{phase}/{noise}:{receipt_failure}",
+                }
             kind, reason = _validate_identity_payload(
                 row, manifest=manifest,
                 manifest_file_sha=manifest_file_sha, panels=panels,
@@ -1116,7 +1444,8 @@ def _seed_summary(resolution, seed, manifest, panels):
                     ),
                 }
             loaded = _load_hierarchical_npz(
-                row, expected_panel=panels["seeds"][str(seed)]
+                row,
+                expected_panel=panels["seeds"][str(seed)],
             )
             if loaded["status"] != "ok":
                 return {
@@ -1217,6 +1546,7 @@ def analyze(resolution="dt", seeds=SEEDS):
     panels = _load_panels()
     manifest_sha = manifest["manifest_sha256"]
     identity_paths, gain_paths = expected_paths(resolution, seeds)
+    resource_tasks = expected_resource_tasks(resolution, seeds)
     missing = [path for path in identity_paths + gain_paths if not os.path.exists(path)]
     if missing:
         seed_rows = []
@@ -1233,6 +1563,7 @@ def analyze(resolution="dt", seeds=SEEDS):
     payload = {
         "schema": "zm_phasec_c0_summary_v1",
         "manifest_sha256": manifest_sha,
+        "manifest_file_sha256": _sha256(MANIFEST_PATH),
         "panel_manifest_sha256": panels["manifest_sha256"],
         "resolution": resolution,
         "expected_identity_parts": len(identity_paths),
@@ -1242,6 +1573,9 @@ def analyze(resolution="dt", seeds=SEEDS):
         "seed_rows": seed_rows,
         "aggregate": aggregate,
         "bootstrap_draws": N_BOOT,
+        "resource_receipt_index": build_resource_receipt_index(
+            resource_tasks, manifest_sha256=manifest_sha
+        ),
         "claim_boundary": (
             "source-space identity only; no observation match, entry, offset, "
             "recovery, actuator, or lifecycle claim"
@@ -1274,13 +1608,13 @@ def finalize_resolution_gate():
             "schema": "zm_phasec_c0_resolution_gate_v1",
             **gate,
             "native_summary": os.path.relpath(native_path, ROOT),
-            "native_summary_sha256": _sha(native_path),
+            "native_summary_sha256": _sha256(native_path),
             "dt2_summary": (
                 os.path.relpath(dt2_path, ROOT)
                 if os.path.exists(dt2_path) else None
             ),
             "dt2_summary_sha256": (
-                _sha(dt2_path) if os.path.exists(dt2_path) else None
+                _sha256(dt2_path) if os.path.exists(dt2_path) else None
             ),
             "claim_boundary": (
                 "source-space identity only; no observation match, entry, "

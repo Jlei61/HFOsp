@@ -257,6 +257,8 @@ def build_payload(
         or summary.get("phasec_manifest_file_sha256") != _sha(phasec_path)
         or summary.get("coordinate_manifest_sha256")
         != manifest["c1"]["coordinate_manifests"]["dt"]["manifest_sha256"]
+        or summary.get("coordinate_manifest_semantic_sha256")
+        != manifest["c1"]["coordinate_manifests"]["dt"]["semantic_sha256"]
         or summary.get("coordinate_manifest_file_sha256")
         != manifest["c1"]["coordinate_manifests"]["dt"]["file_sha256"]
     ):

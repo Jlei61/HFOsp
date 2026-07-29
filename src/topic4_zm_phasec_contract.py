@@ -21,6 +21,7 @@ from typing import Any, Mapping
 import numpy as np
 
 from src.topic4_zm_noise_bank import PAIRED_REPLICATES, build_noise_bank
+import src.topic4_zm_phasec_neighbourhood as PHASEC_N
 
 
 PHASEC_INPUT_VERSION = "zm_phasec_input_v1_2026-07-28"
@@ -96,6 +97,11 @@ PRODUCTION_PRODUCER_PATHS = (
     Path("scripts/lock_topic4_zm_phasec.py"),
     Path("scripts/lock_topic4_zm_phasec_panels.py"),
     Path("scripts/build_topic4_zm_phasec1_neighbourhood.py"),
+    Path("scripts/run_topic4_zm_branch_decision.py"),
+    Path("scripts/run_m4_phaseplane.py"),
+    Path("scripts/run_m4_dynamic_qi.py"),
+    Path("scripts/run_sef_hfo_snn_cm_spontaneous_readout.py"),
+    Path("scripts/run_zm_snn_native_exit.py"),
     Path("scripts/run_topic4_zm_phasec_cell.py"),
     Path("scripts/run_topic4_zm_phasec0_parallel.py"),
     Path("scripts/run_topic4_zm_phasec1_parallel.py"),
@@ -116,6 +122,35 @@ PRODUCTION_PRODUCER_PATHS = (
     Path("src/topic4_zm_phasec_neighbourhood.py"),
     Path("src/topic4_zm_phasec_modal.py"),
     Path("src/topic4_zm_phasec_plot.py"),
+    Path("src/topic4_zm_phasec_resources.py"),
+    Path("src/topic4_zm_checkpoint.py"),
+    Path("src/topic4_zm_noise_bank.py"),
+    Path("src/topic4_zm_source_rhythm.py"),
+    Path("src/topic4_zm_ictal_carrier.py"),
+    Path("src/topic4_zm_carrier_verdict.py"),
+    Path("src/topic4_zm_fork_state.py"),
+    Path("src/topic4_zm_minimal_carrier.py"),
+    Path("src/topic4_zm_effective_rank.py"),
+    Path("src/topic4_zm_modal_operator.py"),
+    Path("src/topic4_zm_boundaries.py"),
+    Path("src/sef_hfo_heterogeneity.py"),
+    Path("src/sef_hfo_subject_placement.py"),
+    Path("src/sef_hfo_m4_metrics.py"),
+    Path("src/sef_hfo_m4_phaseplane.py"),
+    Path("src/sef_hfo_m4_termination.py"),
+    Path("src/snn_engine/kick_probe.py"),
+    Path("src/snn_engine/lfp.py"),
+    Path("src/snn_engine/slow_field.py"),
+)
+CANONICAL_ENGINE_RUNTIME_PATHS = (
+    Path("src/snn_engine/kick_probe.py"),
+    Path("src/snn_engine/params.py"),
+    Path("src/snn_engine/model.py"),
+    Path("src/snn_engine/connectivity.py"),
+    Path("src/snn_engine/connectivity_rot.py"),
+    Path("src/snn_engine/lfp.py"),
+    Path("src/snn_engine/slow_field.py"),
+    Path("src/snn_engine/mz_slow_vars.py"),
 )
 
 
@@ -447,7 +482,13 @@ def _resources() -> dict:
         "mem_available_reserve_gb": 96.0,
         "worker_rss_safety_factor": 1.25,
         "logical_cpu_reserve": 8,
-        "swap_growth_allowed_bytes": 0,
+        "worker_swap_sampled_allowed_bytes": 0,
+        "worker_swap_poll_max_s": 5.0,
+        "host_swap_growth_tolerance_bytes": 64 * 1024 * 1024,
+        "swap_monitor_scope": (
+            "periodic per-worker VmSwap samples plus pre-publish child self "
+            "snapshot; not a kernel peak; bounded shared-host jitter only"
+        ),
         "thread_env": {
             "OMP_NUM_THREADS": "1",
             "MKL_NUM_THREADS": "1",
@@ -461,6 +502,24 @@ def _resources() -> dict:
         "atomic_part_per_cell": True,
         "resume_policy": "missing_or_technical_invalid_only",
     }
+
+
+def _validate_canonical_engine_closure(
+    seed_config: Mapping[str, Any], *, root: Path, seed: int
+) -> None:
+    """Require the upstream config to lock every live SNN runtime module."""
+    engine = seed_config.get("config", {}).get("engine_sha256")
+    expected = {str(path) for path in CANONICAL_ENGINE_RUNTIME_PATHS}
+    _require(
+        isinstance(engine, Mapping) and set(engine) == expected,
+        f"seed {seed} canonical engine closure drift",
+    )
+    for relative in CANONICAL_ENGINE_RUNTIME_PATHS:
+        path = root / relative
+        _require(
+            path.is_file() and engine[str(relative)] == sha256_file(path),
+            f"seed {seed} live engine hash drift: {relative}",
+        )
 
 
 def build_input_manifest(root: Path | str) -> dict:
@@ -499,6 +558,9 @@ def build_input_manifest(root: Path | str) -> dict:
         _require(
             isinstance(config_sha, str) and len(config_sha) == 64,
             f"seed {seed} canonical config_sha is invalid",
+        )
+        _validate_canonical_engine_closure(
+            seed_cfg, root=root, seed=seed
         )
         anchor_path = upstream / f"anchors/seed{seed}/anchor.json"
         anchor = _read_json(anchor_path)
@@ -812,6 +874,10 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
         manifest["manifest_sha256"] == expected_sha,
         "manifest self-hash mismatch",
     )
+    _require(
+        manifest.get("resources") == _resources(),
+        "Phase-C resource contract drift",
+    )
     c0 = manifest["c0"]
     _require(c0["seeds"] == list(PRIMARY_SEEDS), "C0 seed drift")
     _require(c0["fast_phases"] == list(FAST_PHASES), "C0 phase drift")
@@ -994,6 +1060,49 @@ def validate_manifest(manifest: Mapping[str, Any]) -> None:
             and sorted(int(k) for k in semantic_map["dt2"]) == [1, 3],
             "final coordinate NPZ resolution/seed coverage drift",
         )
+        coverage = manifest["c1"].get(
+            "coordinate_coverage_attestation"
+        )
+        expected_resolution_seeds = [
+            {"resolution": "dt", "seed": seed} for seed in PRIMARY_SEEDS
+        ] + [
+            {"resolution": "dt2", "seed": seed} for seed in (1, 3)
+        ]
+        canonical_pairs = {
+            (
+                PRIMARY_CELL_NAMES[offset + index],
+                PRIMARY_CELL_NAMES[offset + index + 1],
+            )
+            for offset in (0, 5) for index in range(4)
+        }
+        claimed_pairs = (
+            coverage.get("homologous_adjacent_primary_pairs", [])
+            if isinstance(coverage, Mapping) else []
+        )
+        _require(
+            isinstance(coverage, Mapping)
+            and coverage.get("schema")
+            == (
+                "zm_phasec1_cross_resolution_coverage_attestation_v1_"
+                "2026-07-29"
+            )
+            and coverage.get("required_resolution_seeds")
+            == expected_resolution_seeds
+            and coverage.get("native_primary_valid") == 30
+            and coverage.get("dt2_primary_valid") == 20
+            and coverage.get("identifiable") is True
+            and isinstance(claimed_pairs, list)
+            and bool(claimed_pairs)
+            and all(
+                isinstance(pair, list)
+                and len(pair) == 2
+                and all(isinstance(name, str) for name in pair)
+                for pair in claimed_pairs
+            )
+            and len({tuple(pair) for pair in claimed_pairs}) == len(claimed_pairs)
+            and all(tuple(pair) in canonical_pairs for pair in claimed_pairs),
+            "final C1 coordinate coverage attestation drift",
+        )
 
 
 def require_production_manifest(manifest: Mapping[str, Any]) -> None:
@@ -1019,6 +1128,428 @@ def _semantic_npz_sha(path: Path) -> str:
     except (OSError, ValueError) as exc:
         raise ContractInputError(f"cannot validate coordinate NPZ {path}: {exc}") from exc
     return h.hexdigest()
+
+
+def _coordinate_valid_pairs(seed_row):
+    cells = {
+        (cell["trajectory_id"], int(cell["path_index"])): cell
+        for cell in seed_row["cells"]
+        if cell["tier"] == "primary_convex"
+        and cell["status"] == "valid"
+    }
+    pairs = set()
+    for phase in FAST_PHASES:
+        for index in range(4):
+            left = cells.get((phase, index))
+            right = cells.get((phase, index + 1))
+            if left is not None and right is not None:
+                pairs.add((left["cell_id"], right["cell_id"]))
+    return pairs
+
+
+def _slow_state_sha(z, m, sg):
+    h = hashlib.sha256()
+    for name, value in (("z", z), ("m", m)):
+        array = np.ascontiguousarray(np.asarray(value, np.float64))
+        h.update(f"{name}|{array.dtype.str}|{array.shape}|".encode("utf-8"))
+        h.update(array.tobytes())
+    h.update(f"S_G|{float(sg):.17g}".encode("utf-8"))
+    return h.hexdigest()
+
+
+def _resolved_locked_path(root: Path, relative: str, *, label: str) -> Path:
+    """Resolve one contract path without permitting an escape from ``root``."""
+    _require(isinstance(relative, str) and bool(relative), f"{label} path missing")
+    path = (root / relative).resolve()
+    try:
+        path.relative_to(root.resolve())
+    except ValueError as exc:
+        raise ContractInputError(f"{label} path escapes repository root") from exc
+    _require(path.is_file(), f"{label} file missing: {relative}")
+    return path
+
+
+def _authoritative_coordinate_sources(
+    input_manifest: Mapping[str, Any],
+    *,
+    root: Path,
+    resolution: str,
+    seed: int,
+    n_e: int,
+) -> tuple[dict[tuple[str, str], dict], dict[str, dict[str, dict]]]:
+    """Load the six immutable input slow fields for one resolution and seed."""
+    native = input_manifest["per_seed"][str(seed)]
+    authority = (
+        native
+        if resolution == "dt"
+        else native["resolution_confirmations"]["dt2"]
+    )
+    refs = authority.get("c1_source_states", [])
+    _require(len(refs) == 6, f"{resolution}/seed{seed} authoritative source coverage drift")
+    by_key = {}
+    observed = {phase: {} for phase in FAST_PHASES}
+    for ref in refs:
+        key = (ref.get("fast_phase"), ref.get("bin_name"))
+        _require(
+            key[0] in FAST_PHASES and key[1] in PRIMARY_STAGES
+            and key not in by_key,
+            f"{resolution}/seed{seed} authoritative source identity drift",
+        )
+        path = _resolved_locked_path(
+            root, ref.get("path"), label=f"{resolution}/seed{seed}/{key} source"
+        )
+        _require(
+            ref.get("file_sha256") == sha256_file(path),
+            f"{resolution}/seed{seed}/{key} authoritative source file drift",
+        )
+        try:
+            with np.load(path, allow_pickle=False) as data:
+                z = np.asarray(data["slow.z"], np.float64)
+                m = np.asarray(data["slow.m"], np.float64)
+                sg = float(np.asarray(data["slow.S_G"]))
+                source_n_e = int(
+                    np.asarray(data["slow._I_I_last"]).reshape(-1).size
+                )
+        except (KeyError, OSError, ValueError) as exc:
+            raise ContractInputError(
+                f"cannot load {resolution}/seed{seed}/{key} authoritative slow field: {exc}"
+            ) from exc
+        _require(
+            source_n_e == n_e
+            and z.ndim == 1 and m.ndim == 1
+            and z.size >= n_e and m.size >= n_e,
+            f"{resolution}/seed{seed}/{key} authoritative slow-field shape drift",
+        )
+        state = {
+            "z": np.ascontiguousarray(z[:n_e]),
+            "m": np.ascontiguousarray(m[:n_e]),
+            "S_G": sg,
+        }
+        locked = {
+            "phase": key[0],
+            "stage": key[1],
+            "path": ref["path"],
+            "file_sha256": ref["file_sha256"],
+            "state_hash": ref["state_hash"],
+            "slow_state_sha256": _slow_state_sha(
+                state["z"], state["m"], state["S_G"]
+            ),
+            "state": state,
+        }
+        by_key[key] = locked
+        observed[key[0]][key[1]] = state
+    _require(
+        set(by_key) == {
+            (phase, stage) for phase in FAST_PHASES for stage in PRIMARY_STAGES
+        },
+        f"{resolution}/seed{seed} authoritative source matrix drift",
+    )
+    return by_key, observed
+
+
+def _canonical_coordinate_identity() -> dict[str, dict[str, Any]]:
+    """Return the immutable identity of all ten primary and eight shell cells."""
+    out = {}
+    for phase in FAST_PHASES:
+        phase_offset = 0 if phase == FAST_PHASES[0] else 5
+        for path_index, name in enumerate(PRIMARY_CELL_NAMES[phase_offset:phase_offset + 5]):
+            out[name] = {
+                "tier": "primary_convex",
+                "trajectory_id": phase,
+                "path_index": path_index,
+                "exact_observed_anchor": path_index in {0, 2, 4},
+                "validity_contract": (
+                    "exact_observed_anchor_hard_bounds_only"
+                    if path_index in {0, 2, 4}
+                    else "convex_midpoint_hard_plus_empirical_envelopes"
+                ),
+            }
+    for name in SHELL_CELL_NAMES:
+        out[name] = {
+            "tier": "secondary_shell",
+            "trajectory_id": "secondary_shell",
+            "path_index": 0,
+            "exact_observed_anchor": False,
+            "validity_contract": "shell_hard_plus_empirical_envelopes",
+        }
+    return out
+
+
+def _expected_coordinate_attestation(
+    coordinate,
+    *,
+    root,
+    input_manifest,
+):
+    """Recompute the authorization-critical coordinate coverage facts."""
+    resolution = coordinate["resolution"]
+    expected_seeds = PRIMARY_SEEDS if resolution == "dt" else (1, 3)
+    canonical_identity = _canonical_coordinate_identity()
+    canonical_names = list(PRIMARY_CELL_NAMES) + list(SHELL_CELL_NAMES)
+    exact_lineage = []
+    primary, exact, midpoints, shell = [], [], [], []
+    for seed in expected_seeds:
+        row = coordinate["seeds"][str(seed)]
+        cells = row.get("cells", [])
+        _require(
+            len(cells) == len(PRIMARY_CELL_NAMES) + len(SHELL_CELL_NAMES),
+            f"{resolution}/seed{seed} coordinate cell inventory drift",
+        )
+        cells = sorted(cells, key=lambda cell: int(cell["array_row"]))
+        _require(
+            [int(cell["array_row"]) for cell in cells]
+            == list(range(len(cells))),
+            f"{resolution}/seed{seed} coordinate array-row drift",
+        )
+        _require(
+            [cell.get("cell_id") for cell in cells] == canonical_names
+            and len({cell.get("cell_id") for cell in cells}) == len(canonical_names),
+            f"{resolution}/seed{seed} canonical cell inventory drift",
+        )
+        for cell in cells:
+            expected_identity = canonical_identity[cell["cell_id"]]
+            _require(
+                all(cell.get(key) == value for key, value in expected_identity.items()),
+                f"{resolution}/seed{seed}/{cell['cell_id']} canonical identity drift",
+            )
+        n_e = int(row.get("n_E", -1))
+        _require(n_e > 0, f"{resolution}/seed{seed} n_E missing")
+        source_by_key, observed = _authoritative_coordinate_sources(
+            input_manifest,
+            root=root,
+            resolution=resolution,
+            seed=seed,
+            n_e=n_e,
+        )
+        claimed_sources = row.get("input_states", [])
+        _require(
+            len(claimed_sources) == 6
+            and len({
+                (item.get("phase"), item.get("stage"))
+                for item in claimed_sources
+            }) == 6,
+            f"{resolution}/seed{seed} coordinate source inventory drift",
+        )
+        claimed_by_key = {
+            (item.get("phase"), item.get("stage")): item
+            for item in claimed_sources
+        }
+        _require(
+            set(claimed_by_key) == set(source_by_key),
+            f"{resolution}/seed{seed} coordinate/authoritative source matrix drift",
+        )
+        for key, source in source_by_key.items():
+            claimed_source = claimed_by_key[key]
+            _require(
+                claimed_source == {
+                    field: source[field]
+                    for field in (
+                        "phase", "stage", "path", "file_sha256",
+                        "state_hash", "slow_state_sha256",
+                    )
+                },
+                f"{resolution}/seed{seed}/{key} coordinate source provenance drift",
+            )
+        npz_path = _resolved_locked_path(
+            root, row["npz_path"], label=f"{resolution}/seed{seed} coordinate NPZ"
+        )
+        with np.load(npz_path, allow_pickle=False) as data:
+            required_arrays = {
+                "cell_ids", "tiers", "status", "z", "m", "S_G", "summary7",
+                "core_mask", "axis_coord", "perpendicular_coord",
+                "standardized_distance_from_anchor_manifold",
+            }
+            _require(
+                required_arrays.issubset(data.files),
+                f"{resolution}/seed{seed} coordinate NPZ array contract drift",
+            )
+            _require(
+                data["cell_ids"].tolist()
+                == [cell["cell_id"] for cell in cells]
+                and data["tiers"].tolist()
+                == [cell["tier"] for cell in cells]
+                and data["status"].tolist()
+                == [cell["status"] for cell in cells],
+                f"{resolution}/seed{seed} coordinate JSON/NPZ identity drift",
+            )
+            _require(
+                data["z"].shape == (len(cells), n_e)
+                and data["m"].shape == (len(cells), n_e)
+                and data["S_G"].shape == (len(cells),)
+                and data["summary7"].shape == (len(cells), 7),
+                f"{resolution}/seed{seed} coordinate NPZ slow-field shape drift",
+            )
+            core_mask = np.asarray(data["core_mask"], bool)
+            axis_coord = np.asarray(data["axis_coord"], np.float64)
+            perpendicular_coord = np.asarray(
+                data["perpendicular_coord"], np.float64
+            )
+            _require(
+                core_mask.shape == (n_e,) and core_mask.any() and not core_mask.all()
+                and axis_coord.shape == (n_e,)
+                and perpendicular_coord.shape == (n_e,),
+                f"{resolution}/seed{seed} coordinate geometry shape drift",
+            )
+            observed_list = [
+                observed[phase][stage]
+                for phase in FAST_PHASES for stage in PRIMARY_STAGES
+            ]
+            envelopes = PHASEC_N.fit_physical_envelopes(
+                observed_list, core_mask, axis_coord
+            )
+            expected_primary = PHASEC_N.build_primary_convex_path(
+                observed,
+                core_mask=core_mask,
+                axis_coord=axis_coord,
+                envelopes=envelopes,
+            )
+            expected_cells = {
+                cell["cell_id"]: cell
+                for cell in expected_primary
+            }
+            for index, cell in enumerate(cells):
+                is_primary = cell["tier"] == "primary_convex"
+                actual_state = {
+                    "z": np.asarray(data["z"][index], np.float64),
+                    "m": np.asarray(data["m"][index], np.float64),
+                    "S_G": float(data["S_G"][index]),
+                }
+                if is_primary:
+                    expected_cell = expected_cells[cell["cell_id"]]
+                    expected_state = expected_cell["state"]
+                    expected_cell = {
+                        **expected_cell,
+                        "summary7": PHASEC_N.summary7(
+                            expected_state, core_mask, axis_coord
+                        ),
+                    }
+                    _require(
+                        np.array_equal(actual_state["z"], expected_state["z"])
+                        and np.array_equal(actual_state["m"], expected_state["m"])
+                        and actual_state["S_G"] == float(expected_state["S_G"]),
+                        f"{resolution}/seed{seed}/{cell['cell_id']} canonical state drift",
+                    )
+                else:
+                    # The shell directions also depend on canonical spatial
+                    # geometry.  Here the authorization-critical question is
+                    # whether the stored request was classified by the same
+                    # hard+empirical physical gate; shell reachability remains
+                    # an explicitly secondary, coverage-limited sensitivity.
+                    expected_cell = {
+                        **PHASEC_N.physical_status(
+                            actual_state,
+                            full_field_envelope=envelopes["full_field"],
+                            summary_envelope=envelopes["summary7"],
+                            core_mask=core_mask,
+                            axis_coord=axis_coord,
+                        ),
+                        "summary7": PHASEC_N.summary7(
+                            actual_state, core_mask, axis_coord
+                        ),
+                    }
+                _require(
+                    cell.get("status") == expected_cell["status"]
+                    and cell.get("reasons") == list(expected_cell["reasons"])
+                    and cell.get("clipped") is False
+                    and cell.get("state_sha256")
+                    == _slow_state_sha(
+                        data["z"][index], data["m"][index], data["S_G"][index]
+                    )
+                    and np.allclose(
+                        np.asarray(cell.get("summary7"), np.float64),
+                        expected_cell["summary7"],
+                        rtol=0.0, atol=1e-12,
+                    )
+                    and np.allclose(
+                        data["summary7"][index], expected_cell["summary7"],
+                        rtol=0.0, atol=1e-12,
+                    ),
+                    f"{resolution}/seed{seed}/{cell['cell_id']} physical gate drift",
+                )
+                if cell["tier"] == "primary_convex":
+                    primary.append(cell)
+                    if cell.get("exact_observed_anchor"):
+                        exact.append(cell)
+                        stage = cell["cell_id"].split("__")[-1]
+                        source = source_by_key.get(
+                            (cell["trajectory_id"], stage)
+                        )
+                        state_sha = _slow_state_sha(
+                            data["z"][index],
+                            data["m"][index],
+                            data["S_G"][index],
+                        )
+                        distance = float(
+                            data[
+                                "standardized_distance_from_anchor_manifold"
+                            ][index]
+                        )
+                        _require(
+                            isinstance(source, Mapping)
+                            and cell.get("source_state_ref") == {
+                                key: source[key] for key in (
+                                    "path", "file_sha256", "state_hash",
+                                    "slow_state_sha256",
+                                )
+                            }
+                            and cell.get("state_sha256") == state_sha
+                            and cell.get("source_slow_state_sha256")
+                            == state_sha == source["slow_state_sha256"]
+                            and cell.get("exact_observed_anchor_verified")
+                            is True
+                            and cell.get("validity_contract")
+                            == "exact_observed_anchor_hard_bounds_only"
+                            and cell.get("status") == "valid"
+                            and cell.get("reasons") == []
+                            and np.isfinite(distance)
+                            and distance <= 1e-12,
+                            f"{resolution}/seed{seed} exact-anchor lineage/"
+                            "contract drift",
+                        )
+                        exact_lineage.append({
+                            "seed": seed,
+                            "cell_id": cell["cell_id"],
+                            "state_sha256": state_sha,
+                            "source_slow_state_sha256": state_sha,
+                            "source_state_hash": source["state_hash"],
+                            "source_file_sha256": source["file_sha256"],
+                            "manifold_distance": float(
+                                cell[
+                                    "standardized_distance_from_anchor_manifold"
+                                ]
+                            ),
+                        })
+                    else:
+                        midpoints.append(cell)
+                else:
+                    shell.append(cell)
+    return {
+        "schema": "zm_phasec1_coordinate_coverage_attestation_v1_2026-07-29",
+        "resolution": resolution,
+        "expected_seeds": list(expected_seeds),
+        "primary_expected": len(expected_seeds) * len(PRIMARY_CELL_NAMES),
+        "primary_valid": sum(cell["status"] == "valid" for cell in primary),
+        "exact_anchor_expected": len(expected_seeds) * 6,
+        "exact_anchor_verified": len(exact),
+        "exact_anchor_lineage": exact_lineage,
+        "midpoint_expected": len(expected_seeds) * 4,
+        "midpoint_empirical_contract_count": len(midpoints),
+        "shell_expected": len(expected_seeds) * len(SHELL_CELL_NAMES),
+        "shell_empirical_contract_count": len(shell),
+        "shell_invalid_retained": sum(
+            cell["status"] == "invalid_physical" for cell in shell
+        ),
+        "valid_adjacent_primary_pairs_by_seed": {
+            str(seed): [
+                list(pair) for pair in sorted(
+                    _coordinate_valid_pairs(
+                        coordinate["seeds"][str(seed)]
+                    )
+                )
+            ]
+            for seed in expected_seeds
+        },
+    }
 
 
 def validate_coordinate_manifest(
@@ -1094,6 +1625,24 @@ def validate_coordinate_manifest(
             == native["canonical_config_sha"],
             f"{resolution}/seed{seed} coordinate anatomy-panel drift",
         )
+    expected_attestation = _expected_coordinate_attestation(
+        coordinate, root=root, input_manifest=input_manifest
+    )
+    _require(
+        coordinate.get("coverage_attestation") == expected_attestation,
+        f"{resolution} coordinate coverage attestation drift",
+    )
+    _require(
+        expected_attestation["primary_valid"]
+        == expected_attestation["primary_expected"]
+        and expected_attestation["exact_anchor_verified"]
+        == expected_attestation["exact_anchor_expected"]
+        and expected_attestation["midpoint_empirical_contract_count"]
+        == expected_attestation["midpoint_expected"]
+        and expected_attestation["shell_empirical_contract_count"]
+        == expected_attestation["shell_expected"],
+        f"{resolution} coordinate coverage is not authorization-complete",
+    )
 
 
 def build_final_manifest(
@@ -1129,6 +1678,7 @@ def build_final_manifest(
         else coordinate_paths
     )
     coordinate_refs = {}
+    coordinates = {}
     npz_file_by_resolution = {}
     npz_semantic_by_resolution = {}
     for resolution in ("dt", "dt2"):
@@ -1148,6 +1698,7 @@ def build_final_manifest(
             coordinate["resolution"] == resolution,
             f"{resolution} coordinate path contains wrong resolution",
         )
+        coordinates[resolution] = coordinate
         coordinate_refs[resolution] = {
             "path": _relative(path, root),
             "file_sha256": sha256_file(path),
@@ -1162,6 +1713,46 @@ def build_final_manifest(
             str(seed): row["npz_semantic_sha256"]
             for seed, row in coordinate["seeds"].items()
         }
+    required_resolution_seeds = [
+        ("dt", seed) for seed in PRIMARY_SEEDS
+    ] + [("dt2", seed) for seed in (1, 3)]
+    homologous_pairs = set.intersection(*(
+        _coordinate_valid_pairs(
+            coordinates[resolution]["seeds"][str(seed)]
+        )
+        for resolution, seed in required_resolution_seeds
+    ))
+    coverage_attestation = {
+        "schema": (
+            "zm_phasec1_cross_resolution_coverage_attestation_v1_2026-07-29"
+        ),
+        "required_resolution_seeds": [
+            {"resolution": resolution, "seed": seed}
+            for resolution, seed in required_resolution_seeds
+        ],
+        "native_primary_valid": coordinates["dt"][
+            "coverage_attestation"
+        ]["primary_valid"],
+        "dt2_primary_valid": coordinates["dt2"][
+            "coverage_attestation"
+        ]["primary_valid"],
+        "homologous_adjacent_primary_pairs": [
+            list(pair) for pair in sorted(homologous_pairs)
+        ],
+        "identifiable": bool(homologous_pairs),
+    }
+    _require(
+        coverage_attestation["native_primary_valid"] == 30
+        and coverage_attestation["dt2_primary_valid"] == 20
+        and coverage_attestation["identifiable"],
+        "cross-resolution C1 coverage is not authorization-complete",
+    )
+    for resolution, coordinate in coordinates.items():
+        _require(
+            coordinate.get("cross_resolution_coverage_attestation")
+            == coverage_attestation,
+            f"{resolution} cross-resolution coverage attestation drift",
+        )
     payload = {
         k: json.loads(json.dumps(v))
         for k, v in input_manifest.items()
@@ -1181,6 +1772,7 @@ def build_final_manifest(
     payload["c1"]["coordinate_npz_semantic_sha256_by_seed_by_resolution"] = (
         npz_semantic_by_resolution
     )
+    payload["c1"]["coordinate_coverage_attestation"] = coverage_attestation
     final = dict(payload)
     final["manifest_sha256"] = _object_sha(payload)
     validate_manifest(final)

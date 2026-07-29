@@ -135,6 +135,11 @@ def test_fixed_panels_are_activity_independent_and_bootstrap_units_are_compact()
     assert units["refractory_isi_fraction_by_panel_neuron"].shape == (40,)
     assert units["block_isi_cv2_by_panel_neuron"].shape == (4, 40)
     assert units["block_refractory_isi_fraction_by_panel_neuron"].shape == (4, 40)
+    assert units["block_refractory_isi_numerator_by_stratum"].shape == (4, 2)
+    assert units["block_refractory_isi_denominator_by_stratum"].shape == (4, 2)
+    assert tuple(units["refractory_isi_stratum_names"]) == (
+        "core", "surround"
+    )
     assert units["active_grid_fraction_by_block"].shape == (4,)
     assert units["active_area_fraction_by_block_window"].shape == (4, 20)
     assert units["pair_corr_by_block_and_pair"].shape == (4, 120)
@@ -193,6 +198,48 @@ def test_bootstrap_ceiling_windows_preserve_time_neuron_axis_and_block_truth():
     assert rho.shape == (2, 6)
     assert np.array_equal(rho[0], np.ones(6))
     assert np.array_equal(rho[1], np.zeros(6))
+
+
+def test_pooled_refractory_probability_units_are_event_weighted_and_keep_cross_block_isi():
+    """f_ref sufficient statistics count ISIs, not per-neuron fractions."""
+    steps_per_block = int(round(500.0 / DT))
+    x = np.zeros((2 * steps_per_block, 4), bool)
+    # Core neuron 0 supplies many refractory-near intervals.  Surround neuron
+    # 2 supplies only two long intervals, including one crossing 500 ms.
+    x[::int(round(4.0 / DT)), 0] = True
+    for step in (0, steps_per_block - 2, steps_per_block + 2):
+        x[step, 2] = True
+    # Keep the other fixed-pair neurons non-degenerate.
+    x[::int(round(25.0 / DT)), 1] = True
+    x[::int(round(30.0 / DT)), 3] = True
+    core = np.asarray([True, True, False, False])
+    pos = np.asarray([[0.5, 0.5], [1.5, 0.5], [0.5, 1.5], [1.5, 1.5]])
+    units = phasec_bootstrap_units(
+        x,
+        DT,
+        TAU_REF,
+        core_mask=core,
+        analysis_panel_ids=np.arange(4),
+        pairwise_panel_ids=np.arange(4),
+        positions=pos,
+        L=2.0,
+        pairwise_n_null=2,
+        n_grid=2,
+    )
+    numerator = units["block_refractory_isi_numerator_by_stratum"]
+    denominator = units["block_refractory_isi_denominator_by_stratum"]
+    direct_num = np.zeros(2, int)
+    direct_den = np.zeros(2, int)
+    for neuron in range(4):
+        times = np.flatnonzero(x[:, neuron]) * DT
+        intervals = np.diff(times)
+        stratum = 0 if core[neuron] else 1
+        direct_num[stratum] += int(np.sum(intervals <= TAU_REF + 2 * DT))
+        direct_den[stratum] += int(intervals.size)
+    np.testing.assert_array_equal(numerator.sum(axis=0), direct_num)
+    np.testing.assert_array_equal(denominator.sum(axis=0), direct_den)
+    # The cross-boundary surround interval is retained exactly once.
+    assert denominator[1, 1] >= 1
 
 
 def test_spatial_active_area_uses_rate_grid_not_active_neuron_fraction():

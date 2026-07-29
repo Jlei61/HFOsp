@@ -10,6 +10,7 @@ if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
 import src.topic4_zm_phasec_neighbourhood as C  # noqa: E402
+import scripts.build_topic4_zm_phasec1_neighbourhood as B  # noqa: E402
 
 
 def _observed():
@@ -112,6 +113,183 @@ def test_primary_names_and_two_phases_match_the_locked_ten_cells():
     assert [r["cell_id"] for r in rows[5:]] == [
         x.replace("rising", "peak") for x in C.PRIMARY_CELL_NAMES[:5]
     ]
+
+
+def test_exact_observed_anchors_use_hard_bounds_but_midpoints_keep_envelope():
+    obs = _observed()
+    core = np.array([True, False, False])
+    axis = np.array([-1.0, 0.0, 1.0])
+    observed = [
+        obs[p][s] for p in C.DEFAULT_PHASES for s in C.PRIMARY_STAGES
+    ]
+    env = C.fit_physical_envelopes(observed, core, axis)
+    # Deliberately exclude one exact source and the adjacent midpoint from the
+    # empirical envelope without violating intrinsic z/m/S_G bounds.
+    lo, hi = (value.copy() for value in env["full_field"])
+    hi[0] = 0.79
+    env = {**env, "full_field": (lo, hi)}
+    rows = C.build_primary_convex_path(
+        obs, core_mask=core, axis_coord=axis, envelopes=env
+    )
+    anchor = rows[0]
+    midpoint = rows[1]
+    assert anchor["status"] == "valid"
+    assert anchor["exact_observed_anchor"] is True
+    assert anchor["validity_contract"] == (
+        "exact_observed_anchor_hard_bounds_only"
+    )
+    assert "full_field_percentile_envelope" in anchor[
+        "empirical_envelope_reasons"
+    ]
+    assert midpoint["status"] == "invalid_physical"
+    assert midpoint["exact_observed_anchor"] is False
+    assert "full_field_percentile_envelope" in midpoint["reasons"]
+
+
+def test_coordinate_set_verifies_exact_anchor_hash_and_zero_manifold_distance():
+    obs = _observed()
+    obs["rising"]["bounded_mid"]["z"] += np.array([0.01, -0.02, 0.03])
+    obs["rising"]["bounded_late"]["m"] += np.array([0.04, -0.01, 0.02])
+    obs["peak"]["bounded_early"]["z"] += np.array([-0.02, 0.03, -0.01])
+    obs["peak"]["bounded_mid"]["m"] += np.array([0.02, 0.01, -0.03])
+    coords = C.build_coordinate_set(
+        obs,
+        core_mask=np.array([True, False, False]),
+        axis_coord=np.array([-1.0, 0.0, 1.0]),
+        perpendicular_coord=np.array([1.0, -2.0, 1.0]),
+    )
+    anchors = [
+        row for row in coords["primary"] if row["exact_observed_anchor"]
+    ]
+    assert len(anchors) == 6
+    assert all(row["exact_observed_anchor_verified"] for row in anchors)
+    assert all(
+        row["standardized_distance_from_anchor_manifold"] <= 1e-12
+        for row in anchors
+    )
+    assert all(
+        C.slow_state_sha256(row["state"])
+        == row["source_slow_state_sha256"]
+        for row in anchors
+    )
+    input_rows = []
+    for phase in C.DEFAULT_PHASES:
+        for stage in C.PRIMARY_STAGES:
+            input_rows.append({
+                "phase": phase,
+                "stage": stage,
+                "path": f"{phase}/{stage}.npz",
+                "file_sha256": f"file-{phase}-{stage}",
+                "state_hash": f"state-{phase}-{stage}",
+                "slow_state_sha256": C.slow_state_sha256(
+                    obs[phase][stage]
+                ),
+            })
+    B._verify_exact_anchor_lineage(coords, input_rows)
+    assert all(
+        set(row["source_state_ref"]) == {
+            "path", "file_sha256", "state_hash", "slow_state_sha256"
+        }
+        for row in anchors
+    )
+
+
+def test_cross_resolution_coverage_gate_requires_complete_primary_and_overlap():
+    def seed_row(seed, *, invalidate_shell=True):
+        cells = []
+        for phase in C.DEFAULT_PHASES:
+            for index in range(5):
+                cells.append({
+                    "tier": "primary_convex",
+                    "trajectory_id": phase,
+                    "path_index": index,
+                    "cell_id": C.PRIMARY_CELL_NAMES[
+                        (0 if phase == "rising" else 5) + index
+                    ],
+                    "status": "valid",
+                    "exact_observed_anchor": index in {0, 2, 4},
+                    "exact_observed_anchor_verified": index in {0, 2, 4},
+                    "validity_contract": (
+                        "exact_observed_anchor_hard_bounds_only"
+                        if index in {0, 2, 4}
+                        else "convex_midpoint_hard_plus_empirical_envelopes"
+                    ),
+                    "state_sha256": f"state-{seed}-{phase}-{index}",
+                    "source_slow_state_sha256": (
+                        f"state-{seed}-{phase}-{index}"
+                        if index in {0, 2, 4} else None
+                    ),
+                    "source_state_ref": (
+                        {
+                            "path": f"seed{seed}/{phase}/{index}.npz",
+                            "file_sha256": f"file-{seed}-{phase}-{index}",
+                            "state_hash": f"checkpoint-{seed}-{phase}-{index}",
+                            "slow_state_sha256": f"state-{seed}-{phase}-{index}",
+                        }
+                        if index in {0, 2, 4} else None
+                    ),
+                    "standardized_distance_from_anchor_manifold": (
+                        0.0 if index in {0, 2, 4} else 0.1
+                    ),
+                })
+        for cell_id in C.SHELL_CELL_NAMES:
+            cells.append({
+                "tier": "secondary_shell",
+                "trajectory_id": "secondary_shell",
+                "path_index": 0,
+                "cell_id": cell_id,
+                "status": (
+                    "invalid_physical" if invalidate_shell else "valid"
+                ),
+                "exact_observed_anchor": False,
+                "validity_contract": "shell_hard_plus_empirical_envelopes",
+            })
+        for array_row, cell in enumerate(cells):
+            cell["array_row"] = array_row
+        return {"seed": seed, "cells": cells}
+
+    built = {
+        "dt": ({
+            "resolution": "dt",
+            "seeds": {
+                str(seed): seed_row(seed) for seed in (1, 3, 4)
+            }
+        }, []),
+        "dt2": ({
+            "resolution": "dt2",
+            "seeds": {
+                str(seed): seed_row(seed) for seed in (1, 3)
+            }
+        }, []),
+    }
+    for manifest, _ in built.values():
+        manifest["coverage_attestation"] = (
+            B._resolution_coverage_attestation(manifest)
+        )
+    cross = B._cross_resolution_coverage_attestation(built)
+    for manifest, _ in built.values():
+        manifest["cross_resolution_coverage_attestation"] = cross
+    gate = B.assess_coverage_feasibility(built)
+    assert gate["status"] == "identifiable"
+    assert gate["primary_valid"] == {"dt": 30, "dt2": 20}
+    assert gate["shell_invalid_retained"] == {"dt": 24, "dt2": 16}
+    assert gate["homologous_adjacent_primary_pairs"]
+
+    built["dt2"][0]["seeds"]["3"]["cells"][0]["status"] = (
+        "invalid_physical"
+    )
+    built["dt2"][0]["coverage_attestation"] = (
+        B._resolution_coverage_attestation(built["dt2"][0])
+    )
+    cross = B._cross_resolution_coverage_attestation(built)
+    for manifest, _ in built.values():
+        manifest["cross_resolution_coverage_attestation"] = cross
+    try:
+        B.assess_coverage_feasibility(built)
+    except RuntimeError as exc:
+        assert "structurally incomplete" in str(exc)
+    else:
+        raise AssertionError("incomplete primary coverage must fail closed")
 
 
 def test_physical_gate_checks_hard_full_field_and_summary_envelopes_without_clipping():
@@ -218,6 +396,10 @@ def test_coordinate_payload_is_float64_and_roundtrip_state_hash_is_lossless():
         "axis_coord", "perpendicular_coord",
     ):
         assert arrays[key].dtype == np.float64
+    assert arrays["core_mask"].dtype == np.bool_
+    np.testing.assert_array_equal(
+        arrays["core_mask"], np.array([True, False, False])
+    )
     encoded = C.deterministic_npz_bytes(arrays)
     with np.load(BytesIO(encoded), allow_pickle=False) as roundtrip:
         cells = list(coords["primary"]) + list(coords["secondary_shell"])

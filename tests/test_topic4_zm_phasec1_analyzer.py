@@ -17,6 +17,57 @@ for path in (ROOT, ROOT / "scripts"):
 import scripts.analyze_topic4_zm_phasec1 as A  # noqa: E402
 import scripts.lock_topic4_zm_phasec1_gain_triggers as L  # noqa: E402
 import src.topic4_zm_phasec_neighbourhood as N  # noqa: E402
+import src.topic4_zm_phasec_resources as PRES  # noqa: E402
+
+
+def _write_receipted_part(path, payload, *, manifest_sha256, task_key):
+    path = Path(path)
+    token = "test-" + str(abs(hash((str(path), task_key))))
+    runtime = dict(payload.get("runtime_provenance", {}))
+    runtime.update({
+        "coordinator_run_id": "c1-analyzer-test",
+        "coordinator_launch_token": token,
+        "self_pid_at_publish": 12345,
+        "self_vm_swap_kb_at_publish": 0,
+    })
+    payload = {**payload, "runtime_provenance": runtime}
+    path.write_text(json.dumps(payload, sort_keys=True))
+    audit = {
+        "pid": 12345,
+        "task_key": task_key,
+        "coordinator_run_id": "c1-analyzer-test",
+        "coordinator_launch_token": token,
+        "n_samples": 1,
+        "first_sample_at": 1.0,
+        "last_sample_at": 1.0,
+        "observed_max_kb": 0,
+        "final_publish_swap_kb": 0,
+    }
+    receipt = PRES.build_resource_receipt(
+        artifact_path=path,
+        artifact_root=A.ROOT,
+        artifact_sha256=A._sha256(path),
+        manifest_sha256=manifest_sha256,
+        task_key=task_key,
+        run_id="c1-analyzer-test",
+        launch_token=token,
+        pid=12345,
+        audit_row=audit,
+        sampled_allowed_bytes=0,
+    )
+    receipt_path = PRES.resource_receipt_path(path)
+    if receipt_path.exists():
+        valid, reason, _ = PRES.validate_resource_receipt(
+            receipt_path,
+            artifact_path=path,
+            artifact_root=A.ROOT,
+            manifest_sha256=manifest_sha256,
+            task_key=task_key,
+        )
+        assert valid, reason
+    else:
+        PRES.publish_resource_receipt_once(receipt_path, receipt)
+    return payload
 
 
 def _hierarchical(ai=True):
@@ -25,9 +76,13 @@ def _hierarchical(ai=True):
             (16, 6), 0.10 if ai else 0.40
         ),
         "block_isi_cv2_by_panel_neuron": np.full((16, 8), 0.80),
-        "block_refractory_isi_fraction_by_panel_neuron": np.full(
-            (16, 8), 0.10
+        "block_refractory_isi_numerator_by_stratum": np.full(
+            (16, 2), 10, np.int64
         ),
+        "block_refractory_isi_denominator_by_stratum": np.full(
+            (16, 2), 100, np.int64
+        ),
+        "refractory_isi_stratum_names": ("core", "surround"),
         "pair_corr_by_block_and_pair": np.full((16, 12), 0.05),
         "pair_null_median_by_block_and_draw": np.full((16, 3, 99), 0.20),
         "pair_strata": np.resize(np.asarray([0, 1, 2], np.int8), 12),
@@ -366,6 +421,30 @@ def test_primary_majority_allows_only_explicit_indeterminate_third_seed():
     )
 
 
+def test_primary_non_dt2_seed_pair_is_confirmation_unavailable():
+    rows = []
+    for seed in (1, 4):
+        rows.extend([
+            _cell(
+                seed, "primary_convex", "rising", idx,
+                "periodic_non_tonic_carrier",
+            )
+            for idx in (0, 1)
+        ])
+    for idx in (0, 1):
+        row = _cell(
+            3, "primary_convex", "rising", idx,
+            "probabilistically_indeterminate",
+        )
+        row["status"] = "indeterminate"
+        rows.append(row)
+    out = A.adjudicate_tier(rows, "primary_convex")
+    assert out["status"] == "resolution_confirmation_unavailable"
+    assert out["dt2_eligible_candidates"] == []
+    assert out["candidates"][0]["supporting_seeds"] == [1, 4]
+    assert out["candidates"][0]["dt2_eligible"] is False
+
+
 def test_primary_majority_allows_concordant_but_incomplete_third_seed():
     rows = _two_seed_primary_window([
         "periodic_non_tonic_carrier",
@@ -484,6 +563,25 @@ def test_primary_real_ten_cell_three_of_three_passes():
     )
     assert out["status"] == "local_maturation_window"
     assert out["candidates"][0]["supporting_seeds"] == [1, 3, 4]
+
+
+def test_primary_shifted_windows_across_dt2_seeds_are_not_homologous():
+    rows = _ten_cell_primary_fixture((
+        "probabilistically_indeterminate",
+        "probabilistically_indeterminate",
+    ))
+    for row in rows:
+        if (
+            row["seed"] == 3
+            and row["trajectory_id"] == "rising"
+        ):
+            row["cell_class"] = (
+                "periodic_non_tonic_carrier"
+                if row["path_index"] in (3, 4) else "tonic_non_AI"
+            )
+    out = A.adjudicate_tier(rows, "primary_convex")
+    assert out["status"] == "seed_heterogeneous_maturation"
+    assert out["candidates"] == []
 
 
 @pytest.mark.parametrize(
@@ -779,6 +877,31 @@ def test_base_part_requires_exact_runtime_producer_map(tmp_path, monkeypatch):
     )
     payload["fast_base_state_hash"] = "2" * 64
     path.write_text(json.dumps(payload))
+    receipt_blocked = A.classify_base_part(
+        path,
+        coordinate=coordinate,
+        coordinate_manifest=coord,
+        phasec_manifest=phasec,
+        panels={},
+        seed=1,
+        phase="rising",
+        noise="noise_replay",
+        resolution="dt",
+        phasec_manifest_file_sha256="5" * 64,
+        coordinate_manifest_file_sha256="4" * 64,
+        coordinate_ref={
+            "file_sha256": "4" * 64,
+            "manifest_sha256": coord["manifest_sha256"],
+            "semantic_sha256": coord["semantic_sha256"],
+        },
+    )
+    assert receipt_blocked["status"] == "blocked"
+    assert receipt_blocked["reason"] == "missing_resource_audit_receipt"
+
+    monkeypatch.setattr(
+        A, "_resource_receipt_failure",
+        lambda _path, *, manifest_sha256, task_key: None,
+    )
     accepted = A.classify_base_part(
         path,
         coordinate=coordinate,
@@ -867,10 +990,7 @@ def _denominators(_resolution, _seed):
         for delta in L.DELTAS_MV:
             path = Path(L.ROOT) / f"c0/{noise}/{delta}.json"
             path.parent.mkdir(parents=True, exist_ok=True)
-            path.write_text(json.dumps({
-                "noise": noise, "delta": float(delta)
-            }, sort_keys=True))
-            rows.append({
+            row = {
             "schema": "zm_phasec_gain_cell_v1",
             "phasec_manifest_sha256": "c" * 64,
             "phasec_manifest_file_sha256": "f" * 64,
@@ -891,8 +1011,22 @@ def _denominators(_resolution, _seed):
             "state_file_sha256": "3" * 64,
             "noise_bank_sha": "4" * 64,
             "path": str(path.relative_to(L.ROOT)),
-            "file_sha256": A._sha256(path),
-            })
+            }
+            task_key = A.C0._gain_task_key(
+                int(_seed),
+                row["state_tag"],
+                row["replicate"],
+                row["signed_delta_abs_mV"],
+                row["sign"],
+            )
+            _write_receipted_part(
+                path,
+                {"noise": noise, "delta": float(delta)},
+                manifest_sha256=row["phasec_manifest_sha256"],
+                task_key=task_key,
+            )
+            row["file_sha256"] = A._sha256(path)
+            rows.append(row)
     return rows
 
 
@@ -995,13 +1129,45 @@ def test_scientific_gain_unresolved_is_not_coerced_to_zero_or_technical(
     )
     gain_path.parent.mkdir(parents=True, exist_ok=True)
     carrier_hashes = {}
+    resource_tasks = []
     for arm in trigger_cell["expected_carrier_gain_arms"]:
         arm_path = tmp_path / arm["path"]
         arm_path.parent.mkdir(parents=True, exist_ok=True)
-        arm_path.write_text(json.dumps({
-            "path": arm["path"], "delta": arm["delta_mV"]
-        }, sort_keys=True))
+        task_key = (
+            f"gain|s{arm['seed']}|{arm['tier']}|{arm['cell_id']}|"
+            f"{arm['phase']}|{arm['noise']}|"
+            f"{float(arm['delta_mV']):+g}"
+        )
+        _write_receipted_part(
+            arm_path,
+            {"path": arm["path"], "delta": arm["delta_mV"]},
+            manifest_sha256=trigger["phasec_manifest_sha256"],
+            task_key=task_key,
+        )
         carrier_hashes[arm["path"]] = A._sha256(arm_path)
+        resource_tasks.append((
+            task_key,
+            arm_path,
+            (
+                f"c1_gain_numerator|s{trigger_cell['seed']}|"
+                f"{trigger_cell['tier']}|{trigger_cell['cell_id']}"
+            ),
+        ))
+    for ref in trigger_cell["reused_c0_preentry_denominators"]:
+        resource_tasks.append((
+            A.C0._gain_task_key(
+                int(ref["seed"]),
+                ref["state_tag"],
+                ref["replicate"],
+                float(ref["signed_delta_abs_mV"]),
+                int(ref["sign"]),
+            ),
+            tmp_path / ref["path"],
+            (
+                f"c1_gain_preentry_denominator|s{trigger_cell['seed']}|"
+                f"{trigger_cell['tier']}|{trigger_cell['cell_id']}"
+            ),
+        ))
     payload = {
         "schema": A.C1_GAIN_STATUS_SCHEMA,
         "trigger_manifest_sha256": trigger["manifest_sha256"],
@@ -1039,7 +1205,26 @@ def test_scientific_gain_unresolved_is_not_coerced_to_zero_or_technical(
             row["path"]: row["file_sha256"]
             for row in trigger_cell["reused_c0_preentry_denominators"]
         },
+        "resource_receipt_index": A.build_resource_receipt_index(
+            resource_tasks,
+            manifest_sha256=trigger["phasec_manifest_sha256"],
+        ),
     }
+    assert payload["resource_receipt_index"]["expected_task_count"] == 45
+    assert (
+        payload["resource_receipt_index"][
+            "expected_logical_consumption_count"
+        ]
+        == 45
+    )
+    roles = [
+        row["role"]
+        for row in payload["resource_receipt_index"][
+            "logical_consumptions"
+        ]
+    ]
+    assert sum("numerator" in role for role in roles) == 30
+    assert sum("denominator" in role for role in roles) == 15
     gain_path.write_text(json.dumps(payload))
     out = A.apply_conditional_gain(
         base, base_atlas_path=path, trigger_manifest_path=trigger_path
@@ -1110,6 +1295,7 @@ def test_resolution_gate_requires_same_homologous_window_in_two_seeds():
         "candidates": [{
             "phenotype": "periodic_non_tonic_carrier",
             "direction": "forward",
+            "homologous_cells": ["c1", "c2"],
             "supporting_seeds": [1, 3, 4],
         }],
         "seed_results": windows,
@@ -1130,6 +1316,20 @@ def test_resolution_gate_requires_same_homologous_window_in_two_seeds():
     assert A.combine_resolution_summaries(
         native, None
     )["verdict"] == "C1_window_pending_dt2"
+    unavailable_native = json.loads(json.dumps(native))
+    unavailable_native["primary_adjudication"]["candidates"][0][
+        "supporting_seeds"
+    ] = [1, 4]
+    unavailable = A.combine_resolution_summaries(
+        unavailable_native, None
+    )
+    assert unavailable["verdict"] == "C1_blocked_resolution_gate"
+    assert unavailable["reason"] == "resolution_confirmation_unavailable"
+    assert unavailable["resolution_gate"] == (
+        "insufficient_homologous_native_support"
+    )
+    assert unavailable["primary_gate"]["status"] == "blocked"
+    assert unavailable["shell_gate"]["status"] == "not_required"
     dt2 = {
         "schema": A.C1_DT2_CONFIRMATION_SUMMARY_SCHEMA,
         "resolution": "dt2_confirmation_only",
@@ -1139,18 +1339,169 @@ def test_resolution_gate_requires_same_homologous_window_in_two_seeds():
             "tier": "primary_convex",
             "phenotype": "periodic_non_tonic_carrier",
             "direction": "forward",
+            "homologous_cells": ["c1", "c2"],
             "homologous_supporting_seeds": [1, 3],
         }],
     }
     assert A.combine_resolution_summaries(
         native, dt2
-    )["verdict"] == "maturation_window_at_primary_convex_states"
+    )["primary_gate"]["status"] == "confirmed"
+
+    dt2["matches"] = []
+    dt2["verdict"] = "C1_window_pending_dt2"
+    indeterminate = A.combine_resolution_summaries(native, dt2)
+    assert indeterminate["verdict"] == "C1_window_pending_dt2"
+    assert indeterminate["resolution_gate"] == (
+        "scientifically_indeterminate_dt2_confirmation"
+    )
 
     dt2["matches"] = []
     dt2["verdict"] = "resolution_sensitive_maturation"
+    dt2["label_assessments"] = [{
+        "tier": "primary_convex",
+        "phenotype": "periodic_non_tonic_carrier",
+        "direction": "forward",
+        "closure": "terminal_contradiction",
+    }]
     assert A.combine_resolution_summaries(
         native, dt2
     )["verdict"] == "resolution_sensitive_maturation"
+    assert A.combine_resolution_summaries(
+        native, dt2
+    )["primary_gate"]["status"] == "contradicted"
+
+
+def test_primary_confirmation_cannot_close_indeterminate_shell_gate():
+    def adjudication(status, tier):
+        direction = "forward" if tier == "primary_convex" else "shell_a"
+        return {
+            "status": status,
+            "candidates": [{
+                "phenotype": "periodic_non_tonic_carrier",
+                "direction": direction,
+                "homologous_cells": (
+                    ["c1", "c2"]
+                    if tier == "primary_convex" else [direction]
+                ),
+                "supporting_seeds": [1, 3],
+            }],
+        }
+
+    native = {
+        "schema": A.C1_SUMMARY_SCHEMA,
+        "phasec_manifest_sha256": "a" * 64,
+        "phasec_manifest_file_sha256": "b" * 64,
+        "primary_adjudication": adjudication(
+            A.PRIMARY_POSITIVE_STATUS, "primary_convex"
+        ),
+        "secondary_shell_adjudication": adjudication(
+            A.SHELL_POSITIVE_STATUS, "secondary_shell"
+        ),
+        "verdict": "primary_maturation_candidate_requires_dt2",
+        "claim_boundary": "test",
+    }
+    dt2 = {
+        "schema": A.C1_DT2_CONFIRMATION_SUMMARY_SCHEMA,
+        "resolution": "dt2_confirmation_only",
+        "phasec_manifest_sha256": "a" * 64,
+        "phasec_manifest_file_sha256": "b" * 64,
+        "matches": [{
+            "tier": "primary_convex",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "forward",
+            "homologous_cells": ["c1", "c2"],
+            "homologous_supporting_seeds": [1, 3],
+        }],
+        "label_assessments": [{
+            "tier": "secondary_shell",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "shell_a",
+            "closure": "scientific_indeterminate",
+        }],
+        "technical_blockers": [],
+    }
+    out = A.combine_resolution_summaries(native, dt2)
+    assert out["primary_gate"]["status"] == "confirmed"
+    assert out["shell_gate"]["status"] == "indeterminate"
+    assert out["verdict"] == "maturation_window_at_primary_convex_states"
+
+
+def test_dt2_multi_candidate_closure_keeps_unresolved_label_pending():
+    rows = [
+        {
+            "tier": "secondary_shell",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "shell_a",
+            "cells": ["shell_a"],
+            "assessment": "terminal_contradiction",
+        },
+        {
+            "tier": "secondary_shell",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "shell_b",
+            "cells": ["shell_b"],
+            "assessment": "scientific_indeterminate",
+        },
+    ]
+    verdict, labels = A._close_dt2_candidate_labels(rows, [], [])
+    assert verdict == "C1_window_pending_dt2"
+    assert {row["closure"] for row in labels} == {
+        "terminal_contradiction", "scientific_indeterminate"
+    }
+
+    rows[1]["assessment"] = "terminal_contradiction"
+    verdict, labels = A._close_dt2_candidate_labels(rows, [], [])
+    assert verdict == "resolution_sensitive_maturation"
+    assert all(row["closure"] == "terminal_contradiction" for row in labels)
+
+
+def test_dt2_shifted_primary_windows_do_not_match():
+    confirmed = [
+        {
+            "tier": "primary_convex",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "forward",
+            "seed": 1,
+            "cells": ["c0", "c1"],
+        },
+        {
+            "tier": "primary_convex",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "forward",
+            "seed": 3,
+            "cells": ["c3", "c4"],
+        },
+    ]
+    assert A._homologous_window_matches(confirmed) == []
+
+
+def test_dt2_same_label_contradiction_plus_indeterminate_window_is_pending():
+    rows = [
+        {
+            "tier": "primary_convex",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "forward",
+            "cells": ["c0", "c1"],
+            "assessment": "terminal_contradiction",
+        },
+        {
+            "tier": "primary_convex",
+            "phenotype": "periodic_non_tonic_carrier",
+            "direction": "forward",
+            "cells": ["c2", "c3"],
+            "assessment": "scientific_indeterminate",
+        },
+    ]
+    verdict, labels = A._close_dt2_candidate_labels(rows, [], [])
+    assert verdict == "C1_window_pending_dt2"
+    assert labels[0]["closure"] == "scientific_indeterminate"
+    assert {
+        tuple(row["homologous_cells"]): row["closure"]
+        for row in labels[0]["homologous_windows"]
+    } == {
+        ("c0", "c1"): "terminal_contradiction",
+        ("c2", "c3"): "scientific_indeterminate",
+    }
 
 
 def test_dt2_selection_uses_only_two_native_supporting_homologous_seeds():
@@ -1212,162 +1563,25 @@ def test_dt2_selection_preserves_single_cell_secondary_shell_semantics():
 
 
 def test_dt2_builder_lock_analyzer_round_trip(monkeypatch, tmp_path):
-    """A native positive must survive the real build/lock/analyze glue."""
-    def write_json(path, value):
-        Path(path).write_text(
-            json.dumps(value, sort_keys=True), encoding="utf-8"
-        )
+    """The legacy analyzer entry point must only delegate to the dedicated lock."""
+    expected = {"manifest_sha256": "a" * 64}
+    seen = {}
 
+    def build_payload(**kwargs):
+        seen.update(kwargs)
+        return expected
+
+    monkeypatch.setattr(A.DT2LOCK, "build_payload", build_payload)
     phasec_path = tmp_path / "phasec.json"
     native_path = tmp_path / "native.json"
-    selection_path = tmp_path / "selection.json"
-    producer_sha = "f" * 64
-    manifest_sha = "a" * 64
-    phasec = {
-        "production_authorized": True,
-        "manifest_sha256": manifest_sha,
-        "provenance": {"producer_file_sha256": producer_sha},
-    }
-    write_json(phasec_path, phasec)
-
-    phenotype = "periodic_non_tonic_carrier"
-    direction = "forward"
-    windows = {
-        str(seed): {
-            "windows": [{
-                "phenotype": phenotype,
-                "direction": direction,
-                "cells": ["c1", "c2"],
-            }],
-        }
-        for seed in A.DT2_SEEDS
-    }
-    native = {
-        "schema": A.C1_SUMMARY_SCHEMA,
-        "resolution": "dt",
-        "phasec_manifest_sha256": manifest_sha,
-        "phasec_manifest_file_sha256": A._sha256(phasec_path),
-        "coordinate_manifest_sha256": "1" * 64,
-        "coordinate_manifest_semantic_sha256": "2" * 64,
-        "coordinate_manifest_file_sha256": "3" * 64,
-        "primary_adjudication": {
-            "status": "local_maturation_window",
-            "candidates": [{
-                "phenotype": phenotype,
-                "direction": direction,
-            }],
-            "seed_results": windows,
-        },
-        "secondary_shell_adjudication": {"status": "no_window"},
-    }
-    write_json(native_path, native)
-
-    def coordinate(resolution):
-        ref = {
-            "path": str(tmp_path / f"coordinate_{resolution}.json"),
-            "file_sha256": "3" * 64 if resolution == "dt" else "4" * 64,
-            "manifest_sha256": "1" * 64 if resolution == "dt" else "5" * 64,
-            "semantic_sha256": "2" * 64 if resolution == "dt" else "6" * 64,
-        }
-        value = {
-            "manifest_sha256": ref["manifest_sha256"],
-            "semantic_sha256": ref["semantic_sha256"],
-            "producer_file_sha256": (
-                {"coordinate.py": "7" * 64}
-                if resolution == "dt"
-                else {"coordinate.py": "8" * 64}
-            ),
-            "seeds": {
-                str(seed): {
-                    "npz_file_sha256": "9" * 64,
-                    "npz_semantic_sha256": "b" * 64,
-                    "cells": [
-                        {
-                            "cell_id": cell_id,
-                            "tier": "primary_convex",
-                            "trajectory_id": "rising",
-                            "path_index": index,
-                            "path_direction": direction,
-                            "state_sha256": chr(99 + index) * 64,
-                            "status": "valid",
-                        }
-                        for index, cell_id in enumerate(("c1", "c2"))
-                    ],
-                }
-                for seed in A.DT2_SEEDS
-            },
-        }
-        return Path(ref["path"]), value, ref
-
-    coordinates = {
-        resolution: coordinate(resolution)
-        for resolution in ("dt", "dt2")
-    }
-    monkeypatch.setattr(A.PCC, "validate_manifest", lambda _value: None)
-    monkeypatch.setattr(
-        A,
-        "_coordinate_path_from_final",
-        lambda _phasec, resolution: coordinates[resolution],
-    )
-    monkeypatch.setattr(
-        A,
-        "_resolution_seed_inputs",
-        lambda *_args, **_kwargs: {
-            "config_sha": "c" * 64,
-            "fast_base_state_hash": "d" * 64,
-            "state_file_sha256": "e" * 64,
-            "noise_bank_sha": "f" * 64,
-        },
-    )
-    monkeypatch.setattr(A, "_relative", lambda path: str(Path(path).resolve()))
-
-    selection = A.build_dt2_confirmation_manifest(
+    trigger_path = tmp_path / "trigger.json"
+    assert A.build_dt2_confirmation_manifest(
         native_summary_path=native_path,
         phasec_manifest_path=phasec_path,
-    )
-    assert all(
-        row["phenotypes"] == [phenotype]
-        and row["directions"] == [direction]
-        for row in selection["selected_cells"]
-    )
-    write_json(selection_path, selection)
-
-    by_path = {
-        str((A.ROOT / arm["path"]).resolve()): arm
-        for arm in selection["expected_base_arms"]
+        gain_trigger_path=trigger_path,
+    ) is expected
+    assert seen == {
+        "phasec_path": phasec_path,
+        "native_summary_path": native_path,
+        "gain_trigger_path": trigger_path,
     }
-
-    def classify(path, **_kwargs):
-        arm = by_path[str(Path(path).resolve())]
-        identity = {
-            key: value for key, value in arm.items() if key != "path"
-        }
-        return {
-            "status": "complete",
-            "locked_arm_identity": identity,
-        }
-
-    monkeypatch.setattr(A.C0, "_load_panels", lambda: {})
-    monkeypatch.setattr(A, "classify_base_part", classify)
-    monkeypatch.setattr(
-        A,
-        "aggregate_cell_rows",
-        lambda _runs, coordinate_row: {
-            "seed": coordinate_row["seed"],
-            "tier": coordinate_row["tier"],
-            "cell_id": coordinate_row["cell_id"],
-            "status": "complete",
-            "cell_class": phenotype,
-        },
-    )
-    result = A.analyze_dt2_confirmation(
-        selection_manifest_path=selection_path,
-        phasec_manifest_path=phasec_path,
-    )
-    assert result["verdict"] == "maturation_window_at_primary_convex_states"
-    assert result["matches"] == [{
-        "tier": "primary_convex",
-        "phenotype": phenotype,
-        "direction": direction,
-        "homologous_supporting_seeds": list(A.DT2_SEEDS),
-    }]

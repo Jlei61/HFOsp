@@ -191,6 +191,30 @@ def test_shell_positive_never_promotes_primary_reachability():
     _assert_lifecycle_locked(out)
 
 
+@pytest.mark.parametrize(
+    "shell_verdict,expected",
+    [
+        ("local_maturation_window", "maturation_candidate_in_secondary_shell"),
+        ("isolated_maturation_candidate", "isolated_maturation_candidate"),
+        ("seed_heterogeneous_maturation", "seed_heterogeneous_maturation"),
+    ],
+)
+def test_mixed_c0_does_not_hide_closed_secondary_shell_structure(
+    shell_verdict, expected,
+):
+    out = _run(
+        c0_verdict="heterogeneous_or_unresolved",
+        primary_verdict="no_local_maturation_window",
+        shell_verdict=shell_verdict,
+    )
+    assert out["verdict"] == expected
+    assert out["next_route"] == "mixed_identity_requires_refinement"
+    assert out["layers"]["source_identity"]["verdict"] == (
+        "heterogeneous_or_unresolved"
+    )
+    _assert_lifecycle_locked(out)
+
+
 def test_balanced_tonic_plus_complete_negative_routes_to_independent_mechanism():
     out = _run()
     assert out["verdict"] == "no_maturation_in_tested_secondary_shell"

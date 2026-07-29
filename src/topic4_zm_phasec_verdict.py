@@ -416,12 +416,6 @@ def adjudicate_phasec(
                 else "contiguous_maturation_window_at_primary_convex_states"
             ),
         )
-    if identity_unresolved:
-        return result(
-            identity,
-            "mixed_identity_requires_refinement",
-            "C0_identity_not_mechanistically_resolved",
-        )
     if primary_kind == "isolated":
         return result(
             "isolated_maturation_candidate",
@@ -444,6 +438,22 @@ def adjudicate_phasec(
         return result("no_evidence", "no_evidence", "primary_C1_not_adjudicated")
 
     shell_status = statuses["c1_shell"]
+    # A mixed C0 identity limits mechanistic interpretation, but it must not
+    # erase a separately closed secondary-shell result.  The shell remains a
+    # sensitivity layer and never authorizes the primary slow path.
+    shell_has_reportable_structure = (
+        shell_status == "complete"
+        and shell_kind in {
+            "positive", "isolated", "representation_sensitive",
+            "seed_heterogeneous",
+        }
+    )
+    if identity_unresolved and not shell_has_reportable_structure:
+        return result(
+            identity,
+            "mixed_identity_requires_refinement",
+            "C0_identity_not_mechanistically_resolved",
+        )
     if shell_status == "incomplete":
         return result(
             "secondary_shell_incomplete",

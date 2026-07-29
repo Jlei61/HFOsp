@@ -26,11 +26,13 @@ from scipy.stats import beta
 
 
 PHASEC_METRICS_VERSION = "zm_phasec_metrics_v1_2026-07-28"
+HIERARCHICAL_STATS_VERSION = "zm_phasec_hierarchical_stats_v2_2026-07-29"
 PAIR_NULL_STRATUM_NAMES = (
     "core_core",
     "core_surround",
     "surround_surround",
 )
+REFRACTORY_ISI_STRATUM_NAMES = ("core", "surround")
 
 
 @dataclass(frozen=True)
@@ -725,12 +727,35 @@ def phasec_bootstrap_units(
     ref_fraction = np.full(panel.size, np.nan)
     block_cv2 = np.full((nb, panel.size), np.nan, np.float32)
     block_ref_fraction = np.full((nb, panel.size), np.nan, np.float32)
+    # f_ref is the pooled-ISI probability from spec §4.1.  A median of
+    # per-neuron fractions gives every neuron equal weight and is not that
+    # estimand.  Keep the legacy per-neuron array only as a descriptive
+    # diagnostic, and save event-count sufficient statistics separately.
+    # Assign each ISI exactly once to the 500-ms block containing its second
+    # spike so that intervals crossing a block boundary are retained.
+    ref_numerator = np.zeros(
+        (nb, len(REFRACTORY_ISI_STRATUM_NAMES)), np.int64
+    )
+    ref_denominator = np.zeros_like(ref_numerator)
+    panel_is_core = core[panel]
+    ref_limit_ms = float(tau_ref_ms) + 2.0 * dt
     for j in range(panel.size):
-        times = np.flatnonzero(panel_spikes[:, j]).astype(float) * dt
+        spike_steps = np.flatnonzero(panel_spikes[:, j])
+        times = spike_steps.astype(float) * dt
         intervals = np.diff(times)
         if intervals.size >= 5:
-            ref_fraction[j] = float(
-                np.mean(intervals <= float(tau_ref_ms) + 2.0 * dt)
+            ref_fraction[j] = float(np.mean(intervals <= ref_limit_ms))
+        if intervals.size:
+            ending_blocks = spike_steps[1:] // bs
+            retained = ending_blocks < nb
+            stratum = 0 if panel_is_core[j] else 1
+            np.add.at(
+                ref_denominator[:, stratum], ending_blocks[retained], 1
+            )
+            np.add.at(
+                ref_numerator[:, stratum],
+                ending_blocks[retained],
+                (intervals[retained] <= ref_limit_ms).astype(np.int64),
             )
         for b in range(nb):
             block_times = np.flatnonzero(block[b, :, panel[j]]).astype(float) * dt
@@ -746,7 +771,7 @@ def phasec_bootstrap_units(
             )
             block_cv2[b, j] = float(np.nanmean(cv2_values))
             block_ref_fraction[b, j] = float(
-                np.mean(block_isi <= float(tau_ref_ms) + 2.0 * dt)
+                np.mean(block_isi <= ref_limit_ms)
             )
 
     pair_bs = int(round(float(pairwise_bin_ms) / dt))
@@ -877,6 +902,11 @@ def phasec_bootstrap_units(
             ref_fraction, np.float32
         ),
         "block_refractory_isi_fraction_by_panel_neuron": block_ref_fraction,
+        "block_refractory_isi_numerator_by_stratum": ref_numerator,
+        "block_refractory_isi_denominator_by_stratum": ref_denominator,
+        "refractory_isi_stratum_names": np.asarray(
+            REFRACTORY_ISI_STRATUM_NAMES
+        ),
         "active_grid_fraction_by_block": np.asarray(
             active_grid_blocks, np.float32
         ),

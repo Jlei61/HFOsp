@@ -48,6 +48,7 @@ import scripts.lock_topic4_zm_phasec1_dt2_confirmation as DT2LOCK  # noqa: E402
 import src.topic4_zm_phasec_contract as PCC  # noqa: E402
 import src.topic4_zm_phasec_neighbourhood as N  # noqa: E402
 import src.topic4_zm_phasec_phenotype as P  # noqa: E402
+import src.topic4_zm_phasec_resources as PRES  # noqa: E402
 
 
 OUT = ROOT / "results/topic4_sef_hfo/zm_phase_c_tonic_identity"
@@ -70,13 +71,14 @@ C1_BASE_PART_SCHEMA = "zm_phasec1_base_part_v1_2026-07-28"
 C1_OBSERVABLES_SCHEMA = "zm_phasec1_observables_v1_2026-07-28"
 C1_BASE_ATLAS_SCHEMA = "zm_phasec1_base_atlas_v1_2026-07-28"
 C1_SUMMARY_SCHEMA = "zm_phasec1_summary_v1_2026-07-28"
-C1_RESOLUTION_GATE_SCHEMA = "zm_phasec1_resolution_gate_v1_2026-07-28"
+C1_RESOLUTION_GATE_SCHEMA = "zm_phasec1_resolution_gate_v2_2026-07-29"
 C1_GAIN_STATUS_SCHEMA = "zm_phasec1_conditional_gain_status_v1_2026-07-28"
 C1_GAIN_TRIGGER_SCHEMA = "zm_phasec1_gain_trigger_manifest_v1_2026-07-28"
 C1_DT2_CONFIRMATION_SCHEMA = DT2LOCK.SCHEMA
 C1_DT2_CONFIRMATION_SUMMARY_SCHEMA = (
     "zm_phasec1_dt2_confirmation_summary_v1_2026-07-28"
 )
+RESOURCE_RECEIPT_INDEX_SCHEMA = C0.RESOURCE_RECEIPT_INDEX_SCHEMA
 PERIODIC_PHASE_MEDIAN_REL_DIFF_MAX = 0.20
 PERIODIC_PHASE_STRUCTURE_CORR_MIN = 0.80
 
@@ -145,6 +147,239 @@ def _validate_self_hash(value, *, label):
 
 def _relative(path):
     return str(Path(path).resolve().relative_to(ROOT.resolve()))
+
+
+def _base_task_key(
+    *, resolution, seed, tier, cell_id, phase, noise
+):
+    if resolution == "dt2":
+        return f"dt2|s{seed}|{tier}|{cell_id}|{phase}|{noise}"
+    return f"base|s{seed}|{tier}|{cell_id}|{phase}|{noise}"
+
+
+def _resource_receipt_ref(path, *, manifest_sha256, task_key):
+    """Return one live-validated immutable part/receipt binding."""
+    path = Path(path)
+    receipt_path = PRES.resource_receipt_path(path)
+    valid, reason, receipt = PRES.validate_resource_receipt(
+        receipt_path,
+        artifact_path=path,
+        artifact_root=ROOT,
+        manifest_sha256=manifest_sha256,
+        task_key=task_key,
+    )
+    if not valid or not isinstance(receipt, dict):
+        raise ValueError(reason)
+    part = _load_json(path)
+    ref = {
+        "task_key": str(task_key),
+        "part_path": os.path.relpath(path, ROOT),
+        "part_file_sha256": _sha256(path),
+        "resource_receipt_path": os.path.relpath(receipt_path, ROOT),
+        "resource_receipt_file_sha256": _sha256(receipt_path),
+        "resource_receipt_sha256": receipt["receipt_sha256"],
+    }
+    aux_ref = part.get("observables_path")
+    aux_sha = part.get("observables_sha256")
+    if aux_ref is not None or aux_sha is not None:
+        aux_path = Path(str(aux_ref))
+        if not aux_path.is_absolute():
+            aux_path = ROOT / aux_path
+        if (
+            not aux_path.is_file()
+            or not isinstance(aux_sha, str)
+            or _sha256(aux_path) != aux_sha
+        ):
+            raise ValueError("resource_index_aux_observables_drift")
+        ref.update({
+            "aux_observables_path": os.path.relpath(aux_path, ROOT),
+            "aux_observables_file_sha256": aux_sha,
+        })
+    return ref
+
+
+def _resource_receipt_failure(path, *, manifest_sha256, task_key):
+    """Return a technical resource-audit failure for one production part."""
+    try:
+        _resource_receipt_ref(
+            path,
+            manifest_sha256=manifest_sha256,
+            task_key=task_key,
+        )
+    except (OSError, TypeError, ValueError) as exc:
+        return str(exc)
+    return None
+
+
+def build_resource_receipt_index(tasks, *, manifest_sha256):
+    """Build a canonical full-part resource index without hiding blockers."""
+    entries = []
+    issues = []
+    seen = set()
+    logical = []
+    normalized = [
+        (
+            str(row[0]),
+            row[1],
+            str(row[2]) if len(row) > 2 else "unspecified",
+        )
+        for row in tasks
+    ]
+    for task_key, path, role in sorted(
+        normalized, key=lambda row: (row[0], row[2])
+    ):
+        logical.append({"task_key": task_key, "role": role})
+        path = Path(path)
+        if task_key in seen:
+            issues.append({
+                "task_key": task_key,
+                "part_path": os.path.relpath(path, ROOT),
+                "reason": "duplicate_resource_task_key",
+            })
+            continue
+        seen.add(task_key)
+        if not path.is_file():
+            issues.append({
+                "task_key": task_key,
+                "part_path": os.path.relpath(path, ROOT),
+                "reason": "missing_part",
+            })
+            continue
+        try:
+            entries.append(_resource_receipt_ref(
+                path,
+                manifest_sha256=manifest_sha256,
+                task_key=task_key,
+            ))
+        except (OSError, TypeError, ValueError) as exc:
+            issues.append({
+                "task_key": task_key,
+                "part_path": os.path.relpath(path, ROOT),
+                "reason": str(exc),
+            })
+    body = {
+        "schema": RESOURCE_RECEIPT_INDEX_SCHEMA,
+        "manifest_sha256": str(manifest_sha256),
+        "status": "complete" if not issues else "incomplete",
+        "expected_task_count": len(seen),
+        "validated_entry_count": len(entries),
+        "expected_logical_consumption_count": len(logical),
+        "logical_consumptions": logical,
+        "entries": entries,
+        "issues": issues,
+    }
+    return {**body, "index_sha256": _object_sha(body)}
+
+
+def merge_resource_receipt_indexes(indexes, *, manifest_sha256):
+    """Merge already canonical indexes, de-duplicating shared C0 denominators."""
+    tasks = {}
+    logical = []
+    issues = []
+    for index in indexes:
+        if not isinstance(index, dict):
+            continue
+        if (
+            index.get("schema") != RESOURCE_RECEIPT_INDEX_SCHEMA
+            or index.get("manifest_sha256") != manifest_sha256
+        ):
+            issues.append({
+                "task_key": None,
+                "part_path": None,
+                "reason": "invalid_child_resource_receipt_index",
+            })
+            continue
+        body = {
+            key: value for key, value in index.items()
+            if key != "index_sha256"
+        }
+        if index.get("index_sha256") != _object_sha(body):
+            issues.append({
+                "task_key": None,
+                "part_path": None,
+                "reason": "child_resource_receipt_index_self_hash_mismatch",
+            })
+            continue
+        issues.extend(index.get("issues", []))
+        logical.extend(index.get("logical_consumptions", []))
+        for entry in index.get("entries", []):
+            key = entry.get("task_key")
+            if key in tasks and tasks[key] != entry:
+                issues.append({
+                    "task_key": key,
+                    "part_path": entry.get("part_path"),
+                    "reason": "conflicting_resource_receipt_index_entry",
+                })
+            else:
+                tasks[key] = entry
+    entries = [tasks[key] for key in sorted(tasks)]
+    body = {
+        "schema": RESOURCE_RECEIPT_INDEX_SCHEMA,
+        "manifest_sha256": str(manifest_sha256),
+        "status": "complete" if not issues else "incomplete",
+        "expected_task_count": len(entries),
+        "validated_entry_count": len(entries),
+        "expected_logical_consumption_count": len(logical),
+        "logical_consumptions": logical,
+        "entries": entries,
+        "issues": issues,
+    }
+    return {**body, "index_sha256": _object_sha(body)}
+
+
+def resource_receipt_index_failure(index, *, manifest_sha256):
+    """Revalidate a canonical index and every live part/receipt binding."""
+    if not isinstance(index, dict):
+        return "missing_resource_receipt_index"
+    body = {
+        key: value for key, value in index.items()
+        if key != "index_sha256"
+    }
+    if (
+        index.get("schema") != RESOURCE_RECEIPT_INDEX_SCHEMA
+        or index.get("manifest_sha256") != manifest_sha256
+        or index.get("index_sha256") != _object_sha(body)
+        or index.get("status") != "complete"
+        or index.get("issues") != []
+    ):
+        return "invalid_or_incomplete_resource_receipt_index"
+    entries = index.get("entries")
+    logical = index.get("logical_consumptions")
+    if (
+        not isinstance(entries, list)
+        or index.get("expected_task_count") != len(entries)
+        or index.get("validated_entry_count") != len(entries)
+        or not isinstance(logical, list)
+        or index.get("expected_logical_consumption_count") != len(logical)
+    ):
+        return "resource_receipt_index_count_mismatch"
+    seen = set()
+    for entry in entries:
+        if not isinstance(entry, dict):
+            return "invalid_resource_receipt_index_entry"
+        task_key = entry.get("task_key")
+        if not isinstance(task_key, str) or task_key in seen:
+            return "duplicate_or_invalid_resource_receipt_task"
+        seen.add(task_key)
+        part = ROOT / str(entry.get("part_path", ""))
+        try:
+            current = _resource_receipt_ref(
+                part,
+                manifest_sha256=manifest_sha256,
+                task_key=task_key,
+            )
+        except (OSError, TypeError, ValueError) as exc:
+            return f"resource_receipt_index_live_failure:{exc}"
+        if current != entry:
+            return "resource_receipt_index_live_binding_mismatch"
+    if any(
+        not isinstance(row, dict)
+        or row.get("task_key") not in seen
+        or not isinstance(row.get("role"), str)
+        for row in logical
+    ):
+        return "resource_receipt_index_logical_consumption_mismatch"
+    return None
 
 
 def _coordinate_path_from_final(phasec_manifest, resolution):
@@ -637,6 +872,25 @@ def classify_base_part(
             ),
             **evidence,
         }
+    receipt_failure = _resource_receipt_failure(
+        path,
+        manifest_sha256=phasec_manifest["manifest_sha256"],
+        task_key=_base_task_key(
+            resolution=resolution,
+            seed=seed,
+            tier=coordinate["tier"],
+            cell_id=coordinate["cell_id"],
+            phase=phase,
+            noise=noise,
+        ),
+    )
+    if receipt_failure is not None:
+        return {
+            "status": "blocked",
+            "terminal_class": "missing",
+            "reason": receipt_failure,
+            **evidence,
+        }
     if part.get("status") != "complete":
         terminal = _scientific_terminal(part.get("scientific_end_reason"))
         if terminal is None:
@@ -677,19 +931,29 @@ def classify_base_part(
             "reason": hierarchical["reason"],
             **evidence,
         }
-    refractory = np.asarray(
-        hierarchical["block_refractory_isi_fraction_by_panel_neuron"],
-        float,
-    )
-    finite_refractory = refractory[np.isfinite(refractory)]
-    if finite_refractory.size == 0:
+    try:
+        refractory_fraction = C0._pooled_refractory_isi_probability(
+            hierarchical[
+                "block_refractory_isi_numerator_by_stratum"
+            ],
+            hierarchical[
+                "block_refractory_isi_denominator_by_stratum"
+            ],
+        )
+    except (KeyError, TypeError, ValueError) as exc:
         return {
             "status": "blocked",
             "terminal_class": "missing",
-            "reason": "missing_refractory_fraction",
+            "reason": f"invalid_refractory_isi_counts:{exc}",
             **evidence,
         }
-    refractory_fraction = float(np.median(finite_refractory))
+    if not np.isfinite(refractory_fraction):
+        return {
+            "status": "blocked",
+            "terminal_class": "missing",
+            "reason": "missing_refractory_isi_counts",
+            **evidence,
+        }
     try:
         result = P.classify_phasec_run(
             phenotype_arrays["E_rate_grid"],
@@ -1236,7 +1500,9 @@ def adjudicate_tier(cell_rows, tier):
                     # locked cell ID encodes basis direction and sign.
                     "direction": cell_id,
                     "cell_id": cell_id,
+                    "homologous_cells": [cell_id],
                     "supporting_seeds": supporting,
+                    "dt2_eligible": set(DT2_SEEDS).issubset(supporting),
                 }
                 candidates.append(candidate)
                 for seed in supporting:
@@ -1253,8 +1519,13 @@ def adjudicate_tier(cell_rows, tier):
         any_isolated = any(
             row["isolated_non_tonic_cells"] for row in seed_rows.values()
         )
-        if candidates:
+        eligible_candidates = [
+            row for row in candidates if row["dt2_eligible"]
+        ]
+        if eligible_candidates:
             status = SHELL_POSITIVE_STATUS
+        elif candidates:
+            status = "resolution_confirmation_unavailable"
         elif any_isolated:
             status = "isolated_maturation_candidate"
         else:
@@ -1263,6 +1534,7 @@ def adjudicate_tier(cell_rows, tier):
             "tier": tier,
             "status": status,
             "candidates": candidates,
+            "dt2_eligible_candidates": eligible_candidates,
             "seed_results": seed_rows,
             "acceptance_semantics": (
                 "same_locked_shell_cell_and_phenotype_across_at_least_2_of_3_seeds"
@@ -1299,15 +1571,20 @@ def adjudicate_tier(cell_rows, tier):
 
     candidates = []
     keys = {
-        (window["phenotype"], window["direction"])
+        (
+            window["phenotype"],
+            window["direction"],
+            tuple(window["cells"]),
+        )
         for row in seed_rows.values() for window in row["windows"]
     }
-    for phenotype, direction in sorted(keys):
+    for phenotype, direction, homologous_cells in sorted(keys):
         supporting = [
             seed for seed in SEEDS
             if any(
                 window["phenotype"] == phenotype
                 and window["direction"] == direction
+                and tuple(window["cells"]) == homologous_cells
                 for window in seed_rows[str(seed)]["windows"]
             )
         ]
@@ -1321,6 +1598,7 @@ def adjudicate_tier(cell_rows, tier):
                 for window in seed_rows[str(supporting_seed)]["windows"]
                 if window["phenotype"] == phenotype
                 and window["direction"] == direction
+                and tuple(window["cells"]) == homologous_cells
             ]
             third_seed_assessment[str(seed)] = (
                 _primary_third_seed_compatibility(
@@ -1340,17 +1618,28 @@ def adjudicate_tier(cell_rows, tier):
             candidates.append({
                 "phenotype": phenotype,
                 "direction": direction,
+                "homologous_cells": list(homologous_cells),
                 "supporting_seeds": supporting,
                 "third_seed_assessment": third_seed_assessment,
+                "dt2_eligible": set(DT2_SEEDS).issubset(supporting),
             })
     any_window = any(row["windows"] for row in seed_rows.values())
     any_isolated = any(
         row["isolated_non_tonic_cells"] for row in seed_rows.values()
     )
-    if len(candidates) == 1:
+    eligible_candidates = [
+        row for row in candidates if row["dt2_eligible"]
+    ]
+    eligible_labels = {
+        (row["phenotype"], row["direction"])
+        for row in eligible_candidates
+    }
+    if len(eligible_labels) == 1:
         status = PRIMARY_POSITIVE_STATUS
-    elif len(candidates) > 1:
+    elif len(eligible_labels) > 1:
         status = "seed_heterogeneous_maturation"
+    elif candidates:
+        status = "resolution_confirmation_unavailable"
     elif any_window:
         status = "seed_heterogeneous_maturation"
     elif any_isolated:
@@ -1361,9 +1650,11 @@ def adjudicate_tier(cell_rows, tier):
         "tier": tier,
         "status": status,
         "candidates": candidates,
+        "dt2_eligible_candidates": eligible_candidates,
         "seed_results": seed_rows,
         "acceptance_semantics": (
-            "same_phenotype_and_direction_in_at_least_2_of_3_seeds;"
+            "same_phenotype_direction_and_homologous_cells_in_at_least_"
+            "2_of_3_seeds;"
             "every_remaining_seed_must_be_concordant_or_explicitly_"
             "probabilistically_indeterminate"
         ),
@@ -1490,6 +1781,7 @@ def build_base_atlas(
     )
     cells = []
     part_counts = Counter()
+    resource_tasks = []
     for (seed, tier, cell_id), cell in sorted(coordinates.items()):
         if cell["status"] != "valid":
             cells.append(aggregate_cell_rows([], cell))
@@ -1500,6 +1792,18 @@ def build_base_atlas(
                 path = base_part_path(
                     resolution, seed, tier, cell_id, phase, noise
                 )
+                resource_tasks.append((
+                    _base_task_key(
+                        resolution=resolution,
+                        seed=seed,
+                        tier=tier,
+                        cell_id=cell_id,
+                        phase=phase,
+                        noise=noise,
+                    ),
+                    path,
+                    "c1_base" if resolution == "dt" else "c1_dt2_base",
+                ))
                 classified = classify_base_part(
                     path,
                     coordinate=cell,
@@ -1563,6 +1867,10 @@ def build_base_atlas(
         "runner_observables_schema": C1_OBSERVABLES_SCHEMA,
         "matrix": matrix,
         "part_status_counts": dict(part_counts),
+        "resource_receipt_index": build_resource_receipt_index(
+            resource_tasks,
+            manifest_sha256=phasec["manifest_sha256"],
+        ),
         "cells": cells,
         "primary_base_adjudication": primary,
         "secondary_shell_base_adjudication": shell,
@@ -1754,6 +2062,18 @@ def _gain_status_for(
             "gain_status_path": _relative(path),
             "final_cell_class": "missing",
         }
+    resource_index = row.get("resource_receipt_index")
+    resource_failure = resource_receipt_index_failure(
+        resource_index,
+        manifest_sha256=trigger["phasec_manifest_sha256"],
+    )
+    if resource_failure is not None:
+        return {
+            "status": "C1_blocked_conditional_gain",
+            "reason": resource_failure,
+            "gain_status_path": _relative(path),
+            "final_cell_class": "missing",
+        }
     gain_class = row.get("gain_class")
     if gain_class not in {
         "balanced_AI_tonic_cell",
@@ -1774,6 +2094,7 @@ def _gain_status_for(
         "gain_status_path": _relative(path),
         "gain_status_sha256": _sha256(path),
         "final_cell_class": gain_class,
+        "resource_receipt_index": resource_index,
     }
 
 
@@ -1910,7 +2231,18 @@ def apply_conditional_gain(
             "reason": "write_once_trigger_decision_missing",
             "claim_boundary": base_atlas["claim_boundary"],
         }
-    if primary_base["status"] == PRIMARY_POSITIVE_STATUS:
+    if (
+        primary_base["status"] == "resolution_confirmation_unavailable"
+        or shell_base["status"] == "resolution_confirmation_unavailable"
+    ):
+        verdict = "C1_blocked_resolution_gate"
+        unavailable_tier = (
+            "primary_convex"
+            if primary_base["status"]
+            == "resolution_confirmation_unavailable"
+            else "secondary_shell"
+        )
+    elif primary_base["status"] == PRIMARY_POSITIVE_STATUS:
         verdict = (
             "primary_maturation_candidate_requires_dt2"
             if base_atlas["resolution"] == "dt"
@@ -1991,6 +2323,14 @@ def apply_conditional_gain(
             "claim_boundary": base_atlas["claim_boundary"],
         }
     # A complete non-tonic positive is independent of conditional AI gain.
+    extra = {}
+    if verdict == "C1_blocked_resolution_gate":
+        extra = {
+            "reason": "resolution_confirmation_unavailable",
+            "resolution_gate": "insufficient_homologous_native_support",
+            "unavailable_tier": unavailable_tier,
+            "required_dt2_seeds": list(DT2_SEEDS),
+        }
     return {
         "schema": C1_SUMMARY_SCHEMA,
         "phasec_manifest_sha256": base_atlas["phasec_manifest_sha256"],
@@ -2016,6 +2356,7 @@ def apply_conditional_gain(
         "primary_adjudication": primary_base,
         "secondary_shell_adjudication": shell_base,
         "verdict": verdict,
+        **extra,
         "claim_boundary": base_atlas["claim_boundary"],
     }
 
@@ -2081,175 +2422,27 @@ def build_dt2_confirmation_manifest(
     *,
     native_summary_path=None,
     phasec_manifest_path=PHASEC_MANIFEST,
+    gain_trigger_path=GAIN_TRIGGER_MANIFEST,
 ):
-    """Lock the homologous subset required by a native positive window."""
-    native_summary_path = Path(
-        native_summary_path or OUT / "phasec1_summary_dt.json"
-    )
-    phasec_manifest_path = Path(phasec_manifest_path)
-    phasec = _load_json(phasec_manifest_path)
-    PCC.validate_manifest(phasec)
-    native = _load_json(native_summary_path)
-    if (
-        phasec.get("production_authorized") is not True
-        or native.get("schema") != C1_SUMMARY_SCHEMA
-        or native.get("resolution") != "dt"
-    ):
-        raise ValueError("dt2 confirmation requires final Phase-C and native dt summary")
-    _, dt_coordinate, dt_ref = _coordinate_path_from_final(phasec, "dt")
-    _, dt2_coordinate, dt2_ref = _coordinate_path_from_final(phasec, "dt2")
-    if (
-        native.get("phasec_manifest_sha256") != phasec["manifest_sha256"]
-        or native.get("phasec_manifest_file_sha256")
-        != _sha256(phasec_manifest_path)
-        or native.get("coordinate_manifest_sha256")
-        != dt_ref["manifest_sha256"]
-        or native.get("coordinate_manifest_semantic_sha256")
-        != dt_ref["semantic_sha256"]
-        or native.get("coordinate_manifest_file_sha256")
-        != dt_ref["file_sha256"]
-    ):
-        raise ValueError("native summary/final Phase-C provenance mismatch")
-    windows = _native_positive_windows(native)
-    if not windows:
-        raise ValueError(
-            "native positive lacks two homologous dt2-enabled supporting seeds"
-        )
-    coordinate_cells = _cell_inventory(
-        dt2_coordinate, expected_seeds=DT2_SEEDS
-    )
-    selected_cells = {}
-    for window in windows:
-        for cell_id in window["cells"]:
-            key = (window["seed"], window["tier"], cell_id)
-            coordinate = coordinate_cells.get(key)
-            if coordinate is None or coordinate.get("status") != "valid":
-                raise ValueError(f"homologous dt2 coordinate missing/invalid: {key}")
-            if key not in selected_cells:
-                selected_cells[key] = {
-                    "seed": int(window["seed"]),
-                    "tier": window["tier"],
-                    "cell_id": cell_id,
-                    "phenotypes": [],
-                    "directions": [],
-                    "trajectory_id": coordinate["trajectory_id"],
-                    "path_index": int(coordinate["path_index"]),
-                    "path_direction": coordinate["path_direction"],
-                    "slow_state_sha256": coordinate["state_sha256"],
-                    **_coordinate_seed_provenance(
-                        dt2_coordinate, seed=window["seed"]
-                    ),
-                }
-            cell = selected_cells[key]
-            if window["phenotype"] not in cell["phenotypes"]:
-                cell["phenotypes"].append(window["phenotype"])
-            if window["direction"] not in cell["directions"]:
-                cell["directions"].append(window["direction"])
-    expected_arms = []
-    for cell in sorted(
-        selected_cells.values(),
-        key=lambda row: (row["seed"], row["tier"], row["cell_id"]),
-    ):
-        for phase in PHASES:
-            for noise in NOISES:
-                fast = _resolution_seed_inputs(
-                    phasec, resolution="dt2", seed=cell["seed"],
-                    phase=phase, noise=noise,
-                )
-                expected_arms.append({
-                    "schema": C1_BASE_PART_SCHEMA,
-                    "phasec_manifest_sha256": phasec["manifest_sha256"],
-                    "phasec_manifest_file_sha256": _sha256(
-                        phasec_manifest_path
-                    ),
-                    "coordinate_manifest_sha256": dt2_ref[
-                        "manifest_sha256"
-                    ],
-                    "coordinate_manifest_semantic_sha256": dt2_ref[
-                        "semantic_sha256"
-                    ],
-                    "coordinate_manifest_file_sha256": dt2_ref[
-                        "file_sha256"
-                    ],
-                    "coordinate_npz_file_sha256": cell[
-                        "coordinate_npz_file_sha256"
-                    ],
-                    "coordinate_npz_semantic_sha256": cell[
-                        "coordinate_npz_semantic_sha256"
-                    ],
-                    "seed": cell["seed"],
-                    "tier": cell["tier"],
-                    "cell_id": cell["cell_id"],
-                    "trajectory_id": cell["trajectory_id"],
-                    "path_index": cell["path_index"],
-                    "path_direction": cell["path_direction"],
-                    "phase": phase,
-                    "noise": noise,
-                    "resolution": "dt2",
-                    "slow_state_sha256": cell["slow_state_sha256"],
-                    **fast,
-                    "burn_in_ms": 500.0,
-                    "measure_ms": 8000.0,
-                    "path": _relative(base_part_path(
-                        "dt2", cell["seed"], cell["tier"],
-                        cell["cell_id"], phase, noise,
-                    )),
-                })
-    final_phasec_ref = {
-        "path": _relative(phasec_manifest_path),
-        "file_sha256": _sha256(phasec_manifest_path),
-        "manifest_sha256": phasec["manifest_sha256"],
-        "producer_file_sha256": phasec["provenance"][
-            "producer_file_sha256"
-        ],
-    }
-    coordinate_refs = {
-        "dt": {
-            **dt_ref,
-            "producer_file_sha256": dt_coordinate[
-                "producer_file_sha256"
-            ],
-        },
-        "dt2": {
-            **dt2_ref,
-            "producer_file_sha256": dt2_coordinate[
-                "producer_file_sha256"
-            ],
-        },
-    }
-    payload = {
-        "schema": C1_DT2_CONFIRMATION_SCHEMA,
-        "resolution": "dt2",
-        "selection_is_closed": True,
-        "final_phasec": final_phasec_ref,
-        "native_summary": {
-            "path": _relative(native_summary_path),
-            "file_sha256": _sha256(native_summary_path),
-            "schema": native["schema"],
-        },
-        "coordinate_manifests": coordinate_refs,
-        "selected_windows": windows,
-        "selected_cells": list(sorted(
-            selected_cells.values(),
-            key=lambda row: (row["seed"], row["tier"], row["cell_id"]),
-        )),
-        "expected_base_arms": expected_arms,
-        "required_supporting_seeds": list(DT2_SEEDS),
-        "claim_boundary": (
-            "homologous resolution confirmation of a native frozen-state "
-            "non-tonic window only; never a full dt2 atlas or lifecycle"
+    """Compatibility entry point for the one canonical dedicated lock."""
+    return DT2LOCK.build_payload(
+        phasec_path=phasec_manifest_path,
+        native_summary_path=(
+            native_summary_path or OUT / "phasec1_summary_dt.json"
         ),
-    }
-    out = dict(payload)
-    out["manifest_sha256"] = _object_sha(payload)
-    return out
+        gain_trigger_path=gain_trigger_path,
+    )
 
 
 def lock_dt2_confirmation_manifest(
-    *, native_summary_path=None, output_path=DT2_CONFIRMATION_MANIFEST
+    *,
+    native_summary_path=None,
+    output_path=DT2_CONFIRMATION_MANIFEST,
+    gain_trigger_path=GAIN_TRIGGER_MANIFEST,
 ):
     payload = build_dt2_confirmation_manifest(
-        native_summary_path=native_summary_path
+        native_summary_path=native_summary_path,
+        gain_trigger_path=gain_trigger_path,
     )
     return payload, N.write_json_once(output_path, payload)
 
@@ -2273,36 +2466,52 @@ def analyze_dt2_confirmation(
     phasec = _load_json(phasec_manifest_path)
     PCC.validate_manifest(phasec)
     _, coordinate, dt2_ref = _coordinate_path_from_final(phasec, "dt2")
-    _, native_coordinate, dt_ref = _coordinate_path_from_final(
+    _, _, dt_ref = _coordinate_path_from_final(
         phasec, "dt"
     )
     expected_phasec = {
         "path": _relative(phasec_manifest_path),
         "file_sha256": _sha256(phasec_manifest_path),
         "manifest_sha256": phasec["manifest_sha256"],
-        "producer_file_sha256": phasec["provenance"][
-            "producer_file_sha256"
-        ],
     }
     if selection.get("final_phasec") != expected_phasec:
         raise ValueError("dt2 selection/final Phase-C provenance mismatch")
-    expected_coordinate = {
-        **dt2_ref,
-        "producer_file_sha256": coordinate["producer_file_sha256"],
-    }
+    expected_coordinate = dict(dt2_ref)
     if selection.get("coordinate_manifests", {}).get(
         "dt2"
     ) != expected_coordinate:
         raise ValueError("dt2 selection/coordinate provenance mismatch")
-    expected_native_coordinate = {
-        **dt_ref,
-        "producer_file_sha256": native_coordinate["producer_file_sha256"],
-    }
+    expected_native_coordinate = dict(dt_ref)
     if (
         selection.get("coordinate_manifests", {}).get("dt")
         != expected_native_coordinate
     ):
         raise ValueError("dt2 selection/native-coordinate provenance mismatch")
+    if (
+        selection.get("coordinate_producer_file_sha256")
+        != coordinate.get("producer_file_sha256")
+    ):
+        raise ValueError("dt2 selection/coordinate producer provenance mismatch")
+    trigger_ref = selection.get("gain_trigger_manifest")
+    if not isinstance(trigger_ref, dict):
+        raise ValueError("dt2 selection lacks canonical gain-trigger provenance")
+    trigger_path = ROOT / str(trigger_ref.get("path", ""))
+    try:
+        trigger = DT2LOCK._validate_gain_trigger(
+            trigger_path, phasec, phasec_manifest_path
+        )
+    except (OSError, RuntimeError, ValueError) as exc:
+        raise ValueError(
+            f"dt2 selection/gain-trigger provenance mismatch: {exc}"
+        ) from exc
+    expected_trigger = {
+        "path": _relative(trigger_path),
+        "file_sha256": _sha256(trigger_path),
+        "manifest_sha256": trigger["manifest_sha256"],
+        "selection_is_closed": True,
+    }
+    if trigger_ref != expected_trigger:
+        raise ValueError("dt2 selection/gain-trigger provenance mismatch")
     native_ref = selection["native_summary"]
     native_path = ROOT / native_ref["path"]
     if (
@@ -2324,6 +2533,8 @@ def analyze_dt2_confirmation(
         != dt_ref["semantic_sha256"]
         or native.get("coordinate_manifest_file_sha256")
         != dt_ref["file_sha256"]
+        or native.get("gain_trigger_manifest_sha256")
+        != trigger["manifest_sha256"]
     ):
         raise ValueError("native summary semantic provenance mismatch")
     panels = C0._load_panels()
@@ -2425,43 +2636,99 @@ def analyze_dt2_confirmation(
                 "key": list(key), "reason": "cell_base_evidence_blocked"
             })
     confirmed = []
+    window_assessments = []
+    scientific_indeterminate_windows = []
+    terminal_contradictions = []
     for window in selection["selected_windows"]:
-        matching = [
-            row for row in cell_rows
+        rows_by_cell = {
+            row["cell_id"]: row
+            for row in cell_rows
             if row["seed"] == window["seed"]
             and row["tier"] == window["tier"]
             and row["cell_id"] in window["cells"]
-            and row["status"] == "complete"
-            and row["cell_class"] == window["phenotype"]
-        ]
-        expected_cells = 2 if window["tier"] == "primary_convex" else 1
-        if len(matching) == expected_cells:
-            confirmed.append(window)
-    label_seeds = defaultdict(set)
-    for row in confirmed:
-        label_seeds[
-            (row["tier"], row["phenotype"], row["direction"])
-        ].add(row["seed"])
-    matches = [
-        {
-            "tier": label[0],
-            "phenotype": label[1],
-            "direction": label[2],
-            "homologous_supporting_seeds": sorted(seeds),
         }
-        for label, seeds in sorted(label_seeds.items())
-        if set(seeds) >= set(DT2_SEEDS)
-    ]
-    if technical_blockers:
-        verdict = "C1_blocked_resolution_gate"
-    elif matches:
-        verdict = (
-            "maturation_window_at_primary_convex_states"
-            if any(row["tier"] == "primary_convex" for row in matches)
-            else "maturation_candidate_in_secondary_shell"
-        )
-    else:
-        verdict = "resolution_sensitive_maturation"
+        expected_cells = 2 if window["tier"] == "primary_convex" else 1
+        selected_rows = [
+            rows_by_cell.get(cell_id) for cell_id in window["cells"]
+        ]
+        if len(window["cells"]) != expected_cells or any(
+            row is None for row in selected_rows
+        ):
+            technical_blockers.append({
+                "key": [
+                    window["seed"], window["tier"], *window["cells"]
+                ],
+                "reason": "selected_window_cell_evidence_missing",
+            })
+            assessment = "technical_block"
+        elif any(row["status"] == "blocked" for row in selected_rows):
+            assessment = "technical_block"
+        elif any(
+            row["status"] == "complete"
+            and row["cell_class"] != window["phenotype"]
+            for row in selected_rows
+        ):
+            # One completed, nonmatching member is sufficient to contradict
+            # the preregistered adjacent/same-cell window at this resolution.
+            assessment = "terminal_contradiction"
+        elif any(row["status"] != "complete" for row in selected_rows):
+            # A scientifically indeterminate cell is not evidence that the
+            # native window changes identity at dt/2.
+            assessment = "scientific_indeterminate"
+        elif all(
+            row["cell_class"] == window["phenotype"]
+            for row in selected_rows
+        ):
+            assessment = "confirmed"
+        else:
+            assessment = "scientific_indeterminate"
+        window_row = {
+            **window,
+            "assessment": assessment,
+            "observed_cell_classes": {
+                cell_id: (
+                    None if rows_by_cell.get(cell_id) is None
+                    else rows_by_cell[cell_id].get("cell_class")
+                )
+                for cell_id in window["cells"]
+            },
+            "observed_cell_statuses": {
+                cell_id: (
+                    None if rows_by_cell.get(cell_id) is None
+                    else rows_by_cell[cell_id].get("status")
+                )
+                for cell_id in window["cells"]
+            },
+        }
+        window_assessments.append(window_row)
+        if assessment == "confirmed":
+            confirmed.append(window)
+        elif assessment == "terminal_contradiction":
+            terminal_contradictions.append(window_row)
+        elif assessment == "scientific_indeterminate":
+            scientific_indeterminate_windows.append(window_row)
+    matches = _homologous_window_matches(confirmed)
+    verdict, label_assessments = _close_dt2_candidate_labels(
+        window_assessments, matches, technical_blockers
+    )
+    resource_index = build_resource_receipt_index(
+        [
+            (
+                _base_task_key(
+                    resolution="dt2",
+                    seed=int(arm["seed"]),
+                    tier=arm["tier"],
+                    cell_id=arm["cell_id"],
+                    phase=arm["phase"],
+                    noise=arm["noise"],
+                ),
+                ROOT / arm["path"],
+                "c1_dt2_base",
+            )
+            for arm in expected_arms.values()
+        ],
+        manifest_sha256=phasec["manifest_sha256"],
+    )
     return {
         "schema": C1_DT2_CONFIRMATION_SUMMARY_SCHEMA,
         "selection_manifest_path": _relative(selection_manifest_path),
@@ -2484,11 +2751,53 @@ def analyze_dt2_confirmation(
         },
         "cells": cell_rows,
         "confirmed_windows": confirmed,
+        "window_assessments": window_assessments,
+        "label_assessments": label_assessments,
         "matches": matches,
         "technical_blockers": technical_blockers,
+        "terminal_contradictions": terminal_contradictions,
+        "resource_receipt_index": resource_index,
+        "scientific_indeterminate_windows": (
+            scientific_indeterminate_windows
+        ),
         "verdict": verdict,
+        "reason": (
+            "dt2_confirmation_subset_technical_block"
+            if technical_blockers else
+            "homologous_dt2_window_confirmed"
+            if matches else
+            "completed_dt2_terminal_contradiction"
+            if verdict == "resolution_sensitive_maturation" else
+            "dt2_scientifically_indeterminate"
+        ),
         "claim_boundary": selection["claim_boundary"],
     }
+
+
+def _homologous_window_matches(confirmed):
+    """Return only exact-cell windows confirmed in both locked dt2 seeds."""
+    window_seeds = defaultdict(set)
+    for row in confirmed:
+        window_seeds[
+            (
+                row["tier"],
+                row["phenotype"],
+                row["direction"],
+                tuple(row["cells"]),
+            )
+        ].add(row["seed"])
+    matches = [
+        {
+            "tier": window[0],
+            "phenotype": window[1],
+            "direction": window[2],
+            "homologous_cells": list(window[3]),
+            "homologous_supporting_seeds": sorted(seeds),
+        }
+        for window, seeds in sorted(window_seeds.items())
+        if set(seeds) >= set(DT2_SEEDS)
+    ]
+    return matches
 
 
 def _window_support_keys(adjudication):
@@ -2529,23 +2838,172 @@ def _resolution_match(native_adjudication, dt2_adjudication):
     return matches
 
 
-def combine_resolution_summaries(native, dt2):
-    """Apply the preregistered homologous dt/2 confirmation gate."""
-    if native.get("schema") != C1_SUMMARY_SCHEMA:
+def _close_dt2_candidate_labels(window_assessments, matches, technical_blockers):
+    """Close homologous windows first, then their phenotype/direction label.
+
+    A primary label may have several preregistered adjacent windows.  One
+    contradicted window cannot turn a different unresolved homologous window
+    into a negative; the label is contradicted only when every one of its
+    homologous windows is terminally contradicted.
+    """
+    by_window = defaultdict(list)
+    for row in window_assessments:
+        window = (
+            row.get("tier"),
+            row.get("phenotype"),
+            row.get("direction"),
+            tuple(row.get("cells") or []),
+        )
+        by_window[window].append(str(row.get("assessment")))
+    matched_windows = {
+        (
+            row.get("tier"),
+            row.get("phenotype"),
+            row.get("direction"),
+            tuple(row.get("homologous_cells") or []),
+        )
+        for row in matches
+    }
+    window_rows = []
+    for window, assessments in sorted(by_window.items()):
+        if window in matched_windows:
+            closure = "confirmed"
+        elif "technical_block" in assessments:
+            closure = "technical_block"
+        elif "terminal_contradiction" in assessments:
+            # Both fixed dt2 seeds are required.  One terminal mismatch makes
+            # this exact homologous window unable to achieve 2/2 support.
+            closure = "terminal_contradiction"
+        else:
+            closure = "scientific_indeterminate"
+        window_rows.append({
+            "tier": window[0],
+            "phenotype": window[1],
+            "direction": window[2],
+            "homologous_cells": list(window[3]),
+            "window_assessments": assessments,
+            "closure": closure,
+        })
+
+    by_label = defaultdict(list)
+    for row in window_rows:
+        by_label[
+            (row["tier"], row["phenotype"], row["direction"])
+        ].append(row)
+    labels = []
+    for label, windows in sorted(by_label.items()):
+        closures = {row["closure"] for row in windows}
+        if "confirmed" in closures:
+            closure = "confirmed"
+        elif "technical_block" in closures:
+            closure = "technical_block"
+        elif "scientific_indeterminate" in closures:
+            closure = "scientific_indeterminate"
+        elif closures == {"terminal_contradiction"}:
+            closure = "terminal_contradiction"
+        else:
+            closure = "scientific_indeterminate"
+        labels.append({
+            "tier": label[0],
+            "phenotype": label[1],
+            "direction": label[2],
+            "homologous_windows": windows,
+            "closure": closure,
+        })
+    if technical_blockers or any(
+        row["closure"] == "technical_block" for row in labels
+    ):
+        verdict = "C1_blocked_resolution_gate"
+    elif matches:
+        verdict = (
+            "maturation_window_at_primary_convex_states"
+            if any(row.get("tier") == "primary_convex" for row in matches)
+            else "maturation_candidate_in_secondary_shell"
+        )
+    elif any(
+        row["closure"] == "scientific_indeterminate" for row in labels
+    ):
+        verdict = "C1_window_pending_dt2"
+    elif labels and all(
+        row["closure"] == "terminal_contradiction" for row in labels
+    ):
+        verdict = "resolution_sensitive_maturation"
+    else:
+        verdict = "C1_window_pending_dt2"
+    return verdict, labels
+
+
+def _layer_resolution_gate(native, dt2, *, tier, adjudication_key):
+    """Close one C1 layer without borrowing evidence from the other layer."""
+    adjudication = native.get(adjudication_key)
+    if not isinstance(adjudication, dict):
         return {
-            "schema": C1_RESOLUTION_GATE_SCHEMA,
-            "verdict": "C1_blocked_resolution_gate",
-            "reason": "missing_or_invalid_native_summary",
+            "tier": tier,
+            "status": "blocked",
+            "reason": "missing_native_layer_adjudication",
         }
-    primary_native = native["primary_adjudication"]
-    shell_native = native["secondary_shell_adjudication"]
-    needs_primary = primary_native["status"] == PRIMARY_POSITIVE_STATUS
-    needs_shell = shell_native["status"] == SHELL_POSITIVE_STATUS
-    if not needs_primary and not needs_shell:
+    positive_status = (
+        PRIMARY_POSITIVE_STATUS
+        if tier == "primary_convex" else SHELL_POSITIVE_STATUS
+    )
+    native_status = adjudication.get("status")
+    if native_status == "resolution_confirmation_unavailable":
         return {
-            "schema": C1_RESOLUTION_GATE_SCHEMA,
-            "verdict": native["verdict"],
-            "resolution_gate": "not_required_without_native_window",
+            "tier": tier,
+            "status": "blocked",
+            "native_status": native_status,
+            "reason": "resolution_confirmation_unavailable",
+            "required_dt2_seeds": list(DT2_SEEDS),
+        }
+    if native_status != positive_status:
+        return {
+            "tier": tier,
+            "status": "not_required",
+            "native_status": native_status,
+            "reason": "native_layer_has_no_positive_window",
+        }
+
+    required = set(DT2_SEEDS)
+    eligible = [
+        row for row in adjudication.get("candidates", [])
+        if required.issubset(set(row.get("supporting_seeds") or []))
+        and isinstance(row.get("homologous_cells"), list)
+        and bool(row["homologous_cells"])
+    ]
+    if not eligible:
+        return {
+            "tier": tier,
+            "status": "blocked",
+            "native_status": native_status,
+            "reason": "resolution_confirmation_unavailable",
+            "required_dt2_seeds": sorted(required),
+        }
+    eligible_windows = {
+        (
+            str(row.get("phenotype")),
+            str(row.get("direction")),
+            tuple(row["homologous_cells"]),
+        )
+        for row in eligible
+    }
+    eligible_labels = {
+        (phenotype, direction)
+        for phenotype, direction, _cells in eligible_windows
+    }
+    common = {
+        "tier": tier,
+        "native_status": native_status,
+        "required_dt2_seeds": sorted(required),
+        "eligible_labels": [
+            {"phenotype": phenotype, "direction": direction}
+            for phenotype, direction in sorted(eligible_labels)
+        ],
+    }
+    if dt2 is None:
+        return {
+            **common,
+            "status": "indeterminate",
+            "reason": "dt2_summary_missing",
         }
     if (
         not isinstance(dt2, dict)
@@ -2557,50 +3015,146 @@ def combine_resolution_summaries(native, dt2):
         != native.get("phasec_manifest_file_sha256")
     ):
         return {
-            "schema": C1_RESOLUTION_GATE_SCHEMA,
-            "verdict": "C1_window_pending_dt2",
-            "reason": "missing_or_nonhomologous_dt2_summary",
+            **common,
+            "status": "blocked",
+            "reason": "nonhomologous_or_invalid_dt2_summary",
         }
-    if dt2.get("verdict") == "C1_blocked_resolution_gate":
-        return {
-            "schema": C1_RESOLUTION_GATE_SCHEMA,
-            "verdict": "C1_blocked_resolution_gate",
-            "reason": "dt2_confirmation_subset_technical_block",
-        }
-    if needs_primary:
-        matches = [
-            row for row in dt2.get("matches", [])
-            if row.get("tier") == "primary_convex"
-        ]
-        if matches:
-            return {
-                "schema": C1_RESOLUTION_GATE_SCHEMA,
-                "verdict": "maturation_window_at_primary_convex_states",
-                "resolution_gate": "passed",
-                "matches": matches,
-                "claim_boundary": native["claim_boundary"],
-            }
-        return {
-            "schema": C1_RESOLUTION_GATE_SCHEMA,
-            "verdict": "resolution_sensitive_maturation",
-            "reason": "primary_window_not_reproduced_at_homologous_dt2",
-        }
+
     matches = [
         row for row in dt2.get("matches", [])
-        if row.get("tier") == "secondary_shell"
+        if row.get("tier") == tier
+        and (
+            str(row.get("phenotype")),
+            str(row.get("direction")),
+            tuple(row.get("homologous_cells") or []),
+        ) in eligible_windows
+        and required.issubset(
+            set(row.get("homologous_supporting_seeds") or [])
+        )
     ]
     if matches:
         return {
-            "schema": C1_RESOLUTION_GATE_SCHEMA,
-            "verdict": "maturation_candidate_in_secondary_shell",
-            "resolution_gate": "passed",
+            **common,
+            "status": "confirmed",
+            "reason": "homologous_dt2_window_confirmed",
             "matches": matches,
-            "claim_boundary": native["claim_boundary"],
+        }
+
+    label_rows = [
+        row for row in dt2.get("label_assessments", [])
+        if row.get("tier") == tier
+        and (str(row.get("phenotype")), str(row.get("direction")))
+        in eligible_labels
+    ]
+    technical = [
+        row for row in dt2.get("technical_blockers", [])
+        if (
+            isinstance(row.get("key"), list)
+            and len(row["key"]) >= 2
+            and row["key"][1] == tier
+        )
+    ]
+    closures = {str(row.get("closure")) for row in label_rows}
+    if technical or "technical_block" in closures:
+        return {
+            **common,
+            "status": "blocked",
+            "reason": "dt2_layer_technical_block",
+            "label_assessments": label_rows,
+        }
+    if label_rows and closures == {"terminal_contradiction"}:
+        return {
+            **common,
+            "status": "contradicted",
+            "reason": "native_window_not_reproduced_at_homologous_dt2",
+            "label_assessments": label_rows,
         }
     return {
+        **common,
+        "status": "indeterminate",
+        "reason": "dt2_layer_scientifically_indeterminate",
+        "label_assessments": label_rows,
+    }
+
+
+def combine_resolution_summaries(native, dt2):
+    """Apply independent preregistered dt/2 gates to primary and shell."""
+    if native.get("schema") != C1_SUMMARY_SCHEMA:
+        return {
+            "schema": C1_RESOLUTION_GATE_SCHEMA,
+            "verdict": "C1_blocked_resolution_gate",
+            "reason": "missing_or_invalid_native_summary",
+            "primary_gate": {
+                "tier": "primary_convex",
+                "status": "blocked",
+                "reason": "missing_or_invalid_native_summary",
+            },
+            "shell_gate": {
+                "tier": "secondary_shell",
+                "status": "blocked",
+                "reason": "missing_or_invalid_native_summary",
+            },
+        }
+    primary_gate = _layer_resolution_gate(
+        native, dt2,
+        tier="primary_convex",
+        adjudication_key="primary_adjudication",
+    )
+    shell_gate = _layer_resolution_gate(
+        native, dt2,
+        tier="secondary_shell",
+        adjudication_key="secondary_shell_adjudication",
+    )
+    statuses = {
+        primary_gate["status"], shell_gate["status"]
+    }
+    if primary_gate["status"] == "confirmed":
+        verdict = "maturation_window_at_primary_convex_states"
+        resolution_gate = "passed"
+        reason = "primary_window_confirmed_at_homologous_dt2"
+    elif shell_gate["status"] == "confirmed":
+        verdict = "maturation_candidate_in_secondary_shell"
+        resolution_gate = "passed"
+        reason = "secondary_shell_window_confirmed_at_homologous_dt2"
+    elif "blocked" in statuses:
+        verdict = "C1_blocked_resolution_gate"
+        blocked_reasons = [
+            row.get("reason")
+            for row in (primary_gate, shell_gate)
+            if row.get("status") == "blocked"
+        ]
+        reason = str(blocked_reasons[0])
+        resolution_gate = (
+            "insufficient_homologous_native_support"
+            if "resolution_confirmation_unavailable" in blocked_reasons
+            else "layer_specific_resolution_block"
+        )
+    elif "indeterminate" in statuses:
+        verdict = "C1_window_pending_dt2"
+        resolution_gate = "scientifically_indeterminate_dt2_confirmation"
+        reason = "dt2_scientifically_indeterminate"
+    elif "contradicted" in statuses:
+        verdict = "resolution_sensitive_maturation"
+        resolution_gate = "passed"
+        reason = "one_or_more_layer_windows_contradicted_at_homologous_dt2"
+    else:
+        verdict = native["verdict"]
+        resolution_gate = "not_required_without_native_window"
+        reason = "no_native_positive_window_requires_dt2"
+    matches = [
+        row
+        for layer_gate in (primary_gate, shell_gate)
+        for row in layer_gate.get("matches", [])
+    ]
+    return {
         "schema": C1_RESOLUTION_GATE_SCHEMA,
-        "verdict": "resolution_sensitive_maturation",
-        "reason": "secondary_shell_window_not_reproduced_at_homologous_dt2",
+        "verdict": verdict,
+        "resolution_gate": resolution_gate,
+        "reason": reason,
+        "primary_gate": primary_gate,
+        "shell_gate": shell_gate,
+        "matches": matches,
+        "claim_boundary": native.get("claim_boundary"),
     }
 
 
@@ -2641,6 +3195,18 @@ def analyze(resolution="dt"):
     base_path = OUT / f"phasec1_base_atlas_{resolution}.json"
     _write_json(base_path, base)
     summary = apply_conditional_gain(base, base_atlas_path=base_path)
+    summary["resource_receipt_index"] = merge_resource_receipt_indexes(
+        [base["resource_receipt_index"]] + [
+            row.get("conditional_gain", {}).get(
+                "resource_receipt_index"
+            )
+            for row in summary.get("cells", [])
+            if row.get("conditional_gain", {}).get(
+                "resource_receipt_index"
+            ) is not None
+        ],
+        manifest_sha256=base["phasec_manifest_sha256"],
+    )
     summary_path = OUT / f"phasec1_summary_{resolution}.json"
     _write_json(summary_path, summary)
     print(json.dumps({

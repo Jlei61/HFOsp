@@ -239,6 +239,20 @@ def _carrier_curves(
                 if not path.is_file():
                     raise RuntimeError(f"missing conditional-gain part: {path}")
                 part = _load(path)
+                receipt_failure = C1._resource_receipt_failure(
+                    path,
+                    manifest_sha256=trigger["phasec_manifest_sha256"],
+                    task_key=(
+                        f"gain|s{ref['seed']}|{ref['tier']}|"
+                        f"{ref['cell_id']}|{ref['phase']}|"
+                        f"{ref['noise']}|{float(ref['delta_mV']):+g}"
+                    ),
+                )
+                if receipt_failure is not None:
+                    raise RuntimeError(
+                        "conditional-gain resource audit failed:"
+                        + receipt_failure
+                    )
                 _validate_carrier_part(
                     part,
                     ref,
@@ -297,6 +311,22 @@ def _denominator_curves(selected, trigger):
             if not path.is_file() or C1._sha256(path) != ref["file_sha256"]:
                 raise RuntimeError(f"C0 denominator provenance drift: {path}")
             part = _load(path)
+            receipt_failure = C1._resource_receipt_failure(
+                path,
+                manifest_sha256=trigger["phasec_manifest_sha256"],
+                task_key=C1.C0._gain_task_key(
+                    int(ref["seed"]),
+                    ref["state_tag"],
+                    ref["replicate"],
+                    float(ref["signed_delta_abs_mV"]),
+                    int(ref["sign"]),
+                ),
+            )
+            if receipt_failure is not None:
+                raise RuntimeError(
+                    "C0 denominator resource audit failed:"
+                    + receipt_failure
+                )
             expected = {
                 "schema": ref["schema"],
                 "manifest_sha256": ref["phasec_manifest_sha256"],
@@ -441,6 +471,50 @@ def analyze_triggered_cell(
         coordinate_seed_provenance=coordinate_seed_provenance,
     )
     denominator, denominator_files = _denominator_curves(selected, trigger)
+    resource_tasks = [
+        (
+            (
+                f"gain|s{ref['seed']}|{ref['tier']}|{ref['cell_id']}|"
+                f"{ref['phase']}|{ref['noise']}|"
+                f"{float(ref['delta_mV']):+g}"
+            ),
+            ROOT / ref["path"],
+            (
+                f"c1_gain_numerator|s{selected['seed']}|"
+                f"{selected['tier']}|{selected['cell_id']}"
+            ),
+        )
+        for ref in selected["expected_carrier_gain_arms"]
+    ]
+    resource_tasks.extend(
+        (
+            C1.C0._gain_task_key(
+                int(ref["seed"]),
+                ref["state_tag"],
+                ref["replicate"],
+                float(ref["signed_delta_abs_mV"]),
+                int(ref["sign"]),
+            ),
+            ROOT / ref["path"],
+            (
+                f"c1_gain_preentry_denominator|s{selected['seed']}|"
+                f"{selected['tier']}|{selected['cell_id']}"
+            ),
+        )
+        for ref in selected["reused_c0_preentry_denominators"]
+    )
+    resource_index = C1.build_resource_receipt_index(
+        resource_tasks,
+        manifest_sha256=trigger["phasec_manifest_sha256"],
+    )
+    resource_failure = C1.resource_receipt_index_failure(
+        resource_index,
+        manifest_sha256=trigger["phasec_manifest_sha256"],
+    )
+    if resource_failure is not None:
+        raise RuntimeError(
+            "conditional-gain resource index failed:" + resource_failure
+        )
     ratio_rows, scientific = _ratio_rows(carrier, denominator)
     if scientific:
         gain_class = "tonic_gain_indeterminate"
@@ -511,6 +585,7 @@ def analyze_triggered_cell(
         "preentry_curve_by_noise": denominator,
         "completed_arm_file_sha256": carrier_files,
         "reused_c0_preentry_denominator_sha256": denominator_files,
+        "resource_receipt_index": resource_index,
         "claim_boundary": (
             "conditional frozen-state gain only; not maturation, entry, "
             "offset, recovery, actuator efficacy, or lifecycle"

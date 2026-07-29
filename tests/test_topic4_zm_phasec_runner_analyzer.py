@@ -107,3 +107,18 @@ def test_phasec0_missing_part_fails_closed(tmp_path, monkeypatch):
         A.OUT = old
     assert out["aggregate"]["verdict"] == "C0_no_evidence"
     assert out["n_missing"] == 153
+
+
+def test_phasec0_production_part_requires_resource_receipt(tmp_path):
+    part = tmp_path / "identity.json"
+    _write(part, {"status": "scientific_failure"})
+    assert A._resource_receipt_failure(
+        part,
+        manifest_sha256="m",
+        task_key=A._identity_task_key(
+            1, "bounded_mid__rising", "noise_replay"
+        ),
+    ) == "missing_resource_audit_receipt"
+    assert A._gain_task_key(
+        1, "pre_entry__natural", "noise_replay", 0.05, -1
+    ) == "gain|s1|pre_entry__natural|noise_replay|d0.05|-1"

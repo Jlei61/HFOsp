@@ -12,6 +12,29 @@ def _write_json(path, payload):
         json.dump(payload, handle)
 
 
+def test_finalize_resolution_gate_hashes_present_native_and_dt2(
+    tmp_path, monkeypatch,
+):
+    monkeypatch.setattr(A, "OUT", str(tmp_path))
+    native_path = tmp_path / "c0_identity_summary_dt.json"
+    dt2_path = tmp_path / "c0_identity_summary_dt2.json"
+    _write_json(str(native_path), {"resolution": "dt"})
+    _write_json(str(dt2_path), {"resolution": "dt2"})
+    monkeypatch.setattr(
+        A,
+        "combine_resolution_summaries",
+        lambda native, dt2: {
+            "verdict": "C0_resolution_confirmed",
+            "resolution_gate": "passed",
+        },
+    )
+
+    payload = A.finalize_resolution_gate()
+
+    assert payload["native_summary_sha256"] == A._sha256(str(native_path))
+    assert payload["dt2_summary_sha256"] == A._sha256(str(dt2_path))
+
+
 def _real_fixture(
     tmp_path, monkeypatch, seed_classes, *, corrupt_seed=None,
     null_draw_mismatch_seed=None,
@@ -22,6 +45,10 @@ def _real_fixture(
     monkeypatch.setattr(A, "MANIFEST_PATH", str(tmp_path / "phasec_manifest.json"))
     monkeypatch.setattr(A, "PANELS_PATH", str(tmp_path / "phasec_panels.json"))
     monkeypatch.setattr(A.PCC, "validate_manifest", lambda value: None)
+    monkeypatch.setattr(
+        A, "_resource_receipt_failure",
+        lambda _path, *, manifest_sha256, task_key: None,
+    )
     manifest = {
         "manifest_sha256": "locked-manifest",
         "provenance": {
@@ -116,8 +143,13 @@ def _real_fixture(
                     "pairwise_null_draws": np.asarray(100),
                     "rho80_active_core_by_block_window": np.full((16, 6), rho),
                     "block_isi_cv2_by_panel_neuron": np.full((16, 4), cv2),
-                    "block_refractory_isi_fraction_by_panel_neuron":
-                        np.full((16, 4), ref),
+                    "block_refractory_isi_numerator_by_stratum":
+                        np.full((16, 2), int(round(ref * 100)), np.int64),
+                    "block_refractory_isi_denominator_by_stratum":
+                        np.full((16, 2), 100, np.int64),
+                    "refractory_isi_stratum_names": np.asarray(
+                        A.PCM.REFRACTORY_ISI_STRATUM_NAMES
+                    ),
                     "pair_corr_by_block_and_pair": np.zeros((16, 6)),
                     "pair_null_median_by_block_and_draw": np.full(
                         (16, 3, 100), 0.05
@@ -236,9 +268,14 @@ def _hier_run(*, phase, rho, gain, cv2, ref, corr=0.0, null=0.05, area=0.25):
             "block_isi_cv2_by_panel_neuron": np.full(
                 (n_block, n_neuron), cv2, dtype=float
             ),
-            "block_refractory_isi_fraction_by_panel_neuron": np.full(
-                (n_block, n_neuron), ref, dtype=float
+            "block_refractory_isi_numerator_by_stratum": np.full(
+                (n_block, 2), int(round(ref * 100)), dtype=np.int64
             ),
+            "block_refractory_isi_denominator_by_stratum": np.full(
+                (n_block, 2), 100, dtype=np.int64
+            ),
+            "refractory_isi_stratum_names":
+                A.PCM.REFRACTORY_ISI_STRATUM_NAMES,
             "pair_corr_by_block_and_pair": np.full(
                 (n_block, n_pair), corr, dtype=float
             ),
@@ -259,7 +296,7 @@ def _hier_run(*, phase, rho, gain, cv2, ref, corr=0.0, null=0.05, area=0.25):
     }
 
 
-def test_hierarchical_bootstrap_uses_block_neuron_pair_and_continuation_levels():
+def test_hierarchical_bootstrap_uses_block_neuron_null_and_continuation_levels():
     runs = [
         _hier_run(
             phase=phase, rho=0.05, gain=0.9, cv2=0.95, ref=0.05
@@ -271,11 +308,49 @@ def test_hierarchical_bootstrap_uses_block_neuron_pair_and_continuation_levels()
     out2 = A.hierarchical_seed_bootstrap(runs, seed=13, n_boot=300)
     assert out1 == out2
     assert out1["structure"] == (
-        "500ms_blocks_then_locked_neurons_or_pairs_then_continuations"
+        "500ms_blocks_then_cv2_neurons_pooled_core_isi_counts_"
+        "and_null_draws_"
+        "with_fixed_pair_census_then_continuations"
     )
     assert out1["rho80_active_core"]["hi"] < 0.20
     assert out1["gain_relative_to_preentry"]["lo"] > 0.50
     assert out1["isi_cv2_median"]["lo"] > 0.70
+
+
+def test_c0_pair_bootstrap_holds_dependent_fixed_panel_as_census(monkeypatch):
+    """Changing pair-resample RNG calls must not perturb pair summaries."""
+    runs = [
+        _hier_run(
+            phase=phase, rho=0.05, gain=0.9, cv2=0.95, ref=0.05
+        )
+        for phase in A.PHASES
+        for _ in range(3)
+    ]
+    for run in runs:
+        h = run["hierarchical"]
+        h["pair_corr_by_block_and_pair"][:] = np.linspace(
+            -0.08, 0.08, h["pair_corr_by_block_and_pair"].shape[1]
+        )
+        h["pair_null_median_by_block_and_draw"][:] = 0.05
+    original = A._stratified_resample_indices
+    calls = []
+
+    def reject_pair_axis(n_items, strata, rng):
+        calls.append(int(n_items))
+        if int(n_items) == 20:
+            raise AssertionError("dependent pair census was resampled")
+        return original(n_items, strata, rng)
+
+    monkeypatch.setattr(A, "_stratified_resample_indices", reject_pair_axis)
+    out = A.hierarchical_seed_bootstrap(runs, seed=19, n_boot=200)
+    assert 12 in calls
+    assert 20 not in calls
+    assert out["structure"] == (
+        "500ms_blocks_then_cv2_neurons_pooled_core_isi_counts_"
+        "and_null_draws_"
+        "with_fixed_pair_census_then_continuations"
+    )
+    assert out["pairwise_stratum_max_excess"]["hi"] < 0.0
 
 
 def test_missing_hierarchical_npz_field_fails_closed(tmp_path):
@@ -349,6 +424,68 @@ def test_ai_pair_null_is_matched_within_each_core_surround_stratum():
     assert abs(point["pairwise_observed_median"]) < 0.10
     assert point["pairwise_stratum_max_excess"] > 0.0
     assert A.classify_run_joint(run)["klass"] == "mixed"
+
+
+def test_pair_estimator_reduces_fixed_pairs_within_block_before_null_draw_quantile():
+    """Block heterogeneity must not turn blocks into extra null draws."""
+    strata = np.asarray([0, 0, 0, 1, 2], np.int8)
+    pair = np.asarray([
+        [0.0, 0.0, 1.0, 0.0, 0.0],
+        [0.5, 0.5, 0.5, 0.0, 0.0],
+    ])
+    null = np.full((2, 3, 100), 0.10)
+    # For stratum 0, eight draws contain one high block each.  Correct
+    # block-first aggregation gives 0.5 for those draws; flattening block and
+    # draw axes would instead return a 97.5th percentile of 1.0.
+    null[:, 0, :] = 0.0
+    null[0, 0, :4] = 1.0
+    null[1, 0, 4:8] = 1.0
+    out = A._matched_pair_summary(pair, null, strata)
+    # Overall observed: block medians 0 and 0.5, then median across blocks.
+    assert np.isclose(out["pairwise_observed_median"], 0.25)
+    # Stratum-0 observed is also 0.25 and its matched null Q.975 is 0.5.
+    assert out["pairwise_stratum_max_excess"] < 0.0
+
+
+def test_decisive_refractory_probability_pools_core_isi_events_only():
+    run = _hier_run(
+        phase=A.PHASES[0], rho=0.8, gain=0.9, cv2=0.1, ref=0.0
+    )
+    h = run["hierarchical"]
+    h["block_refractory_isi_numerator_by_stratum"][:, 0] = 90
+    h["block_refractory_isi_denominator_by_stratum"][:, 0] = 100
+    h["block_refractory_isi_numerator_by_stratum"][:, 1] = 0
+    h["block_refractory_isi_denominator_by_stratum"][:, 1] = 900
+    point = A._continuation_point(run)
+    assert np.isclose(point["refractory_isi_fraction"], 0.90)
+    assert np.isclose(
+        point["refractory_isi_fraction_surround_supportive"], 0.0
+    )
+    assert np.isclose(
+        point["refractory_isi_fraction_all_panel_supportive"], 0.09
+    )
+    # Pooling core+surround would erase the registered active-core saturation
+    # consequence; the decisive classifier must not do that.
+    assert A.classify_run_joint(run)["klass"] == (
+        "refractory_saturated_branch"
+    )
+
+
+def test_refractory_block_bootstrap_recomputes_ratio_from_sampled_counts():
+    numerator = np.asarray([[9, 0], [0, 0]], float)
+    denominator = np.asarray([[10, 100], [90, 100]], float)
+    assert np.isclose(
+        A._pooled_refractory_isi_probability(
+            numerator, denominator, block=np.asarray([0, 0]), stratum="core"
+        ),
+        0.9,
+    )
+    assert np.isclose(
+        A._pooled_refractory_isi_probability(
+            numerator, denominator, block=np.asarray([1, 1]), stratum="core"
+        ),
+        0.0,
+    )
 
 
 def test_phase_rule_is_two_of_three_complete_joint_runs():
@@ -469,6 +606,13 @@ def test_resolution_glue_requires_two_homologous_supporting_seeds():
     dt2["seed_rows"][1]["klass"] = "refractory_saturated_branch"
     assert A.combine_resolution_summaries(native, dt2)["verdict"] == (
         "resolution_sensitive_identity"
+    )
+    native["aggregate"]["supporting_seeds"] = [1, 4]
+    unavailable = A.combine_resolution_summaries(native, None)
+    assert unavailable["verdict"] == "C0_no_evidence"
+    assert unavailable["reason"] == "resolution_confirmation_unavailable"
+    assert unavailable["resolution_gate"] == (
+        "insufficient_homologous_native_support"
     )
 
 

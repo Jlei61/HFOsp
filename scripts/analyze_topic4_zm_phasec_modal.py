@@ -25,6 +25,7 @@ if str(ROOT) not in sys.path:
 
 import src.topic4_zm_phasec_contract as PCC  # noqa: E402
 import src.topic4_zm_phasec_modal as M  # noqa: E402
+import src.topic4_zm_phasec_resources as PRES  # noqa: E402
 
 
 SELECTION_SCHEMA = "zm_phasec_modal_representatives_v1_2026-07-28"
@@ -45,7 +46,7 @@ DEFAULT_SELECTION = (
 )
 
 C0_GATE_SCHEMA = "zm_phasec_c0_resolution_gate_v1"
-C1_GATE_SCHEMA = "zm_phasec1_resolution_gate_v1_2026-07-28"
+C1_GATE_SCHEMA = "zm_phasec1_resolution_gate_v2_2026-07-29"
 C0_POSITIVE = {
     "refractory_saturated_branch_supported",
     "balanced_AI_tonic_candidate_supported",
@@ -105,6 +106,83 @@ def _artifact_semantic_sha(value: Mapping[str, Any]) -> str:
     return M.canonical_sha256(value)
 
 
+def _production_task_key(part: Mapping[str, Any]) -> str:
+    """Reconstruct the coordinator task key from one immutable part.
+
+    Modal representatives can originate from either the C0 identity matrix or
+    the native/dt2 C1 base matrix.  The receipt is only meaningful when its
+    task identity is independently derivable from the selected artifact.
+    """
+
+    schema = part.get("schema")
+    seed = int(part.get("seed", -1))
+    if schema == "zm_phasec_identity_cell_v1":
+        state = part.get("state_tag")
+        noise = part.get("replicate")
+        if seed < 0 or not isinstance(state, str) or not isinstance(noise, str):
+            raise ValueError("selected C0 identity part lacks task-key fields")
+        return f"identity|s{seed}|{state}|{noise}"
+    if schema == "zm_phasec1_base_part_v1_2026-07-28":
+        tier = part.get("tier")
+        cell_id = part.get("cell_id")
+        phase = part.get("phase")
+        noise = part.get("noise")
+        resolution = part.get("resolution")
+        if (
+            seed < 0
+            or resolution not in {"dt", "dt2"}
+            or not all(
+                isinstance(value, str) and value
+                for value in (tier, cell_id, phase, noise)
+            )
+        ):
+            raise ValueError("selected C1 base part lacks task-key fields")
+        prefix = "base" if resolution == "dt" else "dt2"
+        return f"{prefix}|s{seed}|{tier}|{cell_id}|{phase}|{noise}"
+    raise ValueError(f"unsupported modal production part schema: {schema!r}")
+
+
+def _validate_and_lock_resource_receipt(
+    part_path: Path,
+    part: Mapping[str, Any],
+    *,
+    phasec_manifest_sha256: str,
+) -> dict[str, str]:
+    """Validate the adjacent receipt and return its immutable run lock."""
+
+    task_key = _production_task_key(part)
+    declared_manifest = (
+        part.get("manifest_sha256")
+        if part.get("schema") == "zm_phasec_identity_cell_v1"
+        else part.get("phasec_manifest_sha256")
+    )
+    runtime = part.get("runtime_provenance")
+    if (
+        declared_manifest != phasec_manifest_sha256
+        or not isinstance(runtime, Mapping)
+        or runtime.get("manifest_sha256") != phasec_manifest_sha256
+    ):
+        raise ValueError(
+            "selected modal part/receipt parent manifest provenance mismatch"
+        )
+    receipt_path = PRES.resource_receipt_path(part_path)
+    ok, reason, receipt = PRES.validate_resource_receipt(
+        receipt_path,
+        artifact_path=part_path,
+        artifact_root=ROOT,
+        manifest_sha256=phasec_manifest_sha256,
+        task_key=task_key,
+    )
+    if not ok or not isinstance(receipt, dict):
+        raise ValueError(f"selected modal part resource receipt invalid: {reason}")
+    return {
+        "resource_task_key": task_key,
+        "resource_receipt_path": _relative(receipt_path),
+        "resource_receipt_file_sha256": _sha(receipt_path),
+        "resource_receipt_sha256": str(receipt["receipt_sha256"]),
+    }
+
+
 def _validate_terminal_resolution_gates(
     c0_gate: Mapping[str, Any], c1_gate: Mapping[str, Any]
 ) -> None:
@@ -127,20 +205,38 @@ def _validate_terminal_resolution_gates(
             "C0 resolution gate is pending, blocked, no-evidence, or not terminal"
         )
 
-    c1_verdict = c1_gate.get("verdict")
-    c1_resolution = c1_gate.get("resolution_gate")
     if c1_gate.get("schema") != C1_GATE_SCHEMA:
         raise ValueError("C1 resolution gate schema is not final")
-    if c1_verdict in C1_POSITIVE:
-        c1_terminal = c1_resolution == "passed"
-    elif c1_verdict in C1_NOT_REQUIRED:
+    layer_gates = [
+        c1_gate.get("primary_gate"), c1_gate.get("shell_gate")
+    ]
+    c1_verdict = c1_gate.get("verdict")
+    primary_gate, shell_gate = layer_gates
+    structurally_closed = all(
+        isinstance(row, Mapping)
+        and row.get("status") in {
+            "confirmed", "contradicted", "indeterminate",
+            "blocked", "not_required",
+        }
+        for row in layer_gates
+    )
+    if c1_verdict == "maturation_window_at_primary_convex_states":
         c1_terminal = (
-            c1_resolution == "not_required_without_native_window"
+            structurally_closed
+            and primary_gate.get("status") == "confirmed"
+        )
+    elif c1_verdict == "maturation_candidate_in_secondary_shell":
+        c1_terminal = (
+            structurally_closed
+            and shell_gate.get("status") == "confirmed"
         )
     else:
         c1_terminal = (
-            c1_verdict == "resolution_sensitive_maturation"
-            and c1_resolution is None
+            structurally_closed
+            and all(
+                row.get("status") in {"contradicted", "not_required"}
+                for row in layer_gates
+            )
         )
     if not c1_terminal:
         raise ValueError(
@@ -158,6 +254,9 @@ def _selection_producer_locks() -> dict[str, str]:
         ),
         "src/topic4_zm_modal_operator.py": _sha(
             CODE_ROOT / "src/topic4_zm_modal_operator.py"
+        ),
+        "src/topic4_zm_phasec_resources.py": _sha(
+            CODE_ROOT / "src/topic4_zm_phasec_resources.py"
         ),
     }
 
@@ -220,7 +319,11 @@ def _c1_cell(
 
 
 def _load_observables(
-    run: Mapping[str, Any], *, expected_seed: int, expected_cell: str | None
+    run: Mapping[str, Any],
+    *,
+    expected_seed: int,
+    expected_cell: str | None,
+    phasec_manifest_sha256: str,
 ) -> dict[str, Any]:
     part_path = Path(str(run.get("part_path", "")))
     if not part_path.is_absolute():
@@ -233,14 +336,32 @@ def _load_observables(
     part = _read(part_path)
     if _artifact_semantic_sha(part) != run.get("part_semantic_sha256"):
         raise ValueError("representative part semantic SHA mismatch")
+    phase = part.get("phase", part.get("state_tag"))
+    noise = part.get("noise", part.get("replicate"))
     if (
         int(part.get("seed", -1)) != int(expected_seed)
         or (expected_cell is not None and part.get("cell_id") != expected_cell)
-        or part.get("phase") != run.get("phase")
-        or part.get("noise") != run.get("noise")
+        or phase != run.get("phase")
+        or noise != run.get("noise")
         or part.get("observables_sha256") != run.get("observables_file_sha256")
     ):
         raise ValueError("representative part identity/provenance mismatch")
+    current_receipt_lock = _validate_and_lock_resource_receipt(
+        part_path,
+        part,
+        phasec_manifest_sha256=phasec_manifest_sha256,
+    )
+    locked_receipt = {
+        key: run.get(key)
+        for key in (
+            "resource_task_key",
+            "resource_receipt_path",
+            "resource_receipt_file_sha256",
+            "resource_receipt_sha256",
+        )
+    }
+    if current_receipt_lock != locked_receipt:
+        raise ValueError("representative resource receipt differs from run lock")
     part_observables = Path(str(part.get("observables_path", "")))
     if not part_observables.is_absolute():
         part_observables = ROOT / part_observables
@@ -380,7 +501,11 @@ def _candidate_cells(
 
 
 def _lock_representative_run(
-    row: Mapping[str, Any], *, seed: int, cell_id: str
+    row: Mapping[str, Any],
+    *,
+    seed: int,
+    cell_id: str,
+    phasec_manifest_sha256: str,
 ) -> dict[str, Any]:
     part_path = Path(str(row.get("part_path", "")))
     if not part_path.is_absolute():
@@ -410,6 +535,11 @@ def _lock_representative_run(
     producers = part.get("runtime_provenance", {}).get("producer_sha256")
     if not isinstance(producers, dict) or not producers:
         raise ValueError("selected modal part lacks runtime producer locks")
+    receipt_lock = _validate_and_lock_resource_receipt(
+        part_path,
+        part,
+        phasec_manifest_sha256=phasec_manifest_sha256,
+    )
     return {
         "phase": str(row["phase"]),
         "noise": str(row["noise"]),
@@ -420,6 +550,7 @@ def _lock_representative_run(
         "observables_file_sha256": _sha(obs_path),
         "observables_semantic_sha256": _semantic_npz_sha(obs_path),
         "runtime_producer_file_sha256": producers,
+        **receipt_lock,
     }
 
 
@@ -427,6 +558,7 @@ def _run_triplet(
     cell: Mapping[str, Any],
     *,
     seed: int,
+    phasec_manifest_sha256: str,
 ) -> tuple[list[dict[str, Any]], str]:
     complete = [
         row for row in cell.get("run_rows", [])
@@ -455,6 +587,7 @@ def _run_triplet(
                 by_noise[noise],
                 seed=seed,
                 cell_id=str(cell["cell_id"]),
+                phasec_manifest_sha256=phasec_manifest_sha256,
             )
             for noise in selected_noise
         ]
@@ -547,7 +680,11 @@ def build_representative_manifest(
         )
         cell = cells[0] if cells else None
         runs, selection_reason = (
-            _run_triplet(cell, seed=seed)
+            _run_triplet(
+                cell,
+                seed=seed,
+                phasec_manifest_sha256=phasec["manifest_sha256"],
+            )
             if cell is not None else ([], "no_complete_C1_representative_cell")
         )
         selected_phase = runs[0]["phase"] if runs else None
@@ -715,7 +852,10 @@ def analyze(
         run_provenance = []
         for run in selected.get("runs", []):
             loaded = _load_observables(
-                run, expected_seed=seed, expected_cell=selected.get("cell_id")
+                run,
+                expected_seed=seed,
+                expected_cell=selected.get("cell_id"),
+                phasec_manifest_sha256=phasec["manifest_sha256"],
             )
             loaded_runs.append(loaded)
             run_provenance.append({
@@ -726,6 +866,9 @@ def analyze(
                     "observables_path", "observables_file_sha256",
                     "observables_semantic_sha256",
                     "runtime_producer_file_sha256",
+                    "resource_task_key", "resource_receipt_path",
+                    "resource_receipt_file_sha256",
+                    "resource_receipt_sha256",
                     "part_runtime_provenance",
                 )
             })
@@ -782,6 +925,9 @@ def analyze(
             ),
             str((CODE_ROOT / "src/topic4_zm_modal_operator.py").relative_to(CODE_ROOT)): _sha(
                 CODE_ROOT / "src/topic4_zm_modal_operator.py"
+            ),
+            str((CODE_ROOT / "src/topic4_zm_phasec_resources.py").relative_to(CODE_ROOT)): _sha(
+                CODE_ROOT / "src/topic4_zm_phasec_resources.py"
             ),
         },
         "claim_boundary": (

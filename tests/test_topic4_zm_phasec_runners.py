@@ -60,11 +60,18 @@ def _smoke_observable_arrays():
     analysis_ids = np.arange(4)
     pairwise_ids = np.arange(4)
     return {
+        "hierarchical_schema": np.asarray(
+            CELL.PCM.HIERARCHICAL_STATS_VERSION
+        ),
         "rho80_active_core_by_block_window": np.zeros((n_block, 6)),
         "block_isi_cv2_by_panel_neuron": np.zeros((n_block, 4)),
-        "block_refractory_isi_fraction_by_panel_neuron": np.zeros(
-            (n_block, 4)
+        "block_refractory_isi_numerator_by_stratum": np.zeros(
+            (n_block, 2), dtype=np.int64
         ),
+        "block_refractory_isi_denominator_by_stratum": np.ones(
+            (n_block, 2), dtype=np.int64
+        ),
+        "refractory_isi_stratum_names": np.asarray(("core", "surround")),
         "pair_corr_by_block_and_pair": np.zeros((n_block, 6)),
         "pair_null_median_by_block_and_draw": np.zeros(
             (n_block, 3, 100)
@@ -120,12 +127,21 @@ def test_smoke_requires_and_accepts_complete_hierarchical_schema():
     old_skipped_bootstrap = {
         key: value for key, value in complete.items()
         if key not in CELL.HIERARCHICAL_ARRAY_FIELDS
-        and key not in {"pair_null_stratum_names"}
+        and key not in {
+            "pair_null_stratum_names", "refractory_isi_stratum_names"
+        }
     }
     assert not CELL._smoke_observables_complete(
         old_skipped_bootstrap, **kwargs
     )
     assert CELL._smoke_observables_complete(complete, **kwargs)
+    old_schema = dict(
+        complete,
+        hierarchical_schema=np.asarray(
+            "zm_phasec_hierarchical_stats_v1_2026-07-28"
+        ),
+    )
+    assert not CELL._smoke_observables_complete(old_schema, **kwargs)
     bad_null = dict(
         complete,
         pair_null_median_by_block_and_draw=np.zeros((2, 100)),
@@ -330,6 +346,13 @@ def test_swap_guard_ignores_small_shared_host_jitter_but_fails_at_limit(
     assert COORD._swap_growth_exceeded(baseline, 64.0) is True
 
 
+def test_production_rss_floor_is_not_below_measured_cells():
+    assert COORD.MIN_MEASURED_WORKER_RSS_GB == {
+        "identity": 7.23,
+        "gain": 6.90,
+    }
+
+
 def test_terminal_validator_requires_observable_hash_and_gain_blocks(
     tmp_path, monkeypatch
 ):
@@ -338,12 +361,18 @@ def test_terminal_validator_requires_observable_hash_and_gain_blocks(
     np.savez_compressed(
         observables,
         hierarchical_schema=np.asarray(
-            "zm_phasec_hierarchical_stats_v1_2026-07-28"
+            CELL.PCM.HIERARCHICAL_STATS_VERSION
         ),
         pairwise_null_draws=np.asarray(100),
         rho80_active_core_by_block_window=np.zeros((16, 6)),
         block_isi_cv2_by_panel_neuron=np.zeros((16, 4)),
-        block_refractory_isi_fraction_by_panel_neuron=np.zeros((16, 4)),
+        block_refractory_isi_numerator_by_stratum=np.zeros(
+            (16, 2), dtype=np.int64
+        ),
+        block_refractory_isi_denominator_by_stratum=np.ones(
+            (16, 2), dtype=np.int64
+        ),
+        refractory_isi_stratum_names=np.asarray(("core", "surround")),
         pair_corr_by_block_and_pair=np.zeros((16, 6)),
         pair_null_median_by_block_and_draw=np.zeros((16, 3, 100)),
         pair_null_stratum_names=np.asarray(
@@ -367,10 +396,11 @@ def test_terminal_validator_requires_observable_hash_and_gain_blocks(
             "whole_sheet_plateau": False,
             "empirical_rest_dwell": False,
         },
-        "runtime_provenance": {
-            "manifest_sha256": "m",
-            "producer_sha256": {"producer.py": "p"},
-        },
+            "runtime_provenance": {
+                "manifest_sha256": "m",
+                "producer_sha256": {"producer.py": "p"},
+                "self_vm_swap_kb_at_publish": 0,
+            },
     }
     identity_path = tmp_path / "identity.json"
     identity = {
@@ -399,6 +429,42 @@ def test_terminal_validator_requires_observable_hash_and_gain_blocks(
         str(identity_path), task
     )
     assert valid, reason
+    with np.load(observables, allow_pickle=False) as data:
+        arrays = {key: np.asarray(data[key]) for key in data.files}
+    arrays["hierarchical_schema"] = np.asarray(
+        "zm_phasec_hierarchical_stats_v1_2026-07-28"
+    )
+    np.savez_compressed(observables, **arrays)
+    identity["observables_sha256"] = COORD._sha(observables)
+    identity_path.write_text(json.dumps(identity))
+    assert COORD.validate_terminal_output(
+        str(identity_path), task
+    )[:2] == (False, "hierarchical_schema_mismatch")
+    arrays["hierarchical_schema"] = np.asarray(
+        CELL.PCM.HIERARCHICAL_STATS_VERSION
+    )
+    np.savez_compressed(observables, **arrays)
+    identity["observables_sha256"] = COORD._sha(observables)
+    identity_path.write_text(json.dumps(identity))
+    task["coordinator_run_id"] = "run-1"
+    task["coordinator_launch_token"] = "token-1"
+    identity["runtime_provenance"].update({
+        "coordinator_run_id": "run-1",
+        "coordinator_launch_token": "token-1",
+    })
+    identity_path.write_text(json.dumps(identity))
+    assert COORD.validate_terminal_output(
+        str(identity_path), task
+    )[:2] == (True, "valid_terminal")
+    identity["runtime_provenance"]["coordinator_launch_token"] = "wrong"
+    identity_path.write_text(json.dumps(identity))
+    assert COORD.validate_terminal_output(
+        str(identity_path), task
+    )[:2] == (False, "runtime_coordinator_identity_mismatch")
+    task.pop("coordinator_run_id")
+    task.pop("coordinator_launch_token")
+    identity["runtime_provenance"].pop("coordinator_run_id")
+    identity["runtime_provenance"].pop("coordinator_launch_token")
     identity["observables_sha256"] = "bad"
     identity_path.write_text(json.dumps(identity))
     assert COORD.validate_terminal_output(

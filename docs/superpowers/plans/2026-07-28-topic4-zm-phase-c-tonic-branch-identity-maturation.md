@@ -47,6 +47,10 @@ the locked contract. It does not mean the seizure-lifecycle mechanism succeeds.
   semantic SHAs. Test the two-stage chain for hash-cycle absence.
 - [ ] Lock independent \(dt/2\) configs/anchors/states for seeds 1/3, while
   reusing native anatomy-panel IDs with the parent native config SHA.
+- [ ] Move the stale pre-amendment `4b0f9a76…` final manifest and its
+  `61df061a…`/`3dd9cff1…` coordinate locks under `invalidated/`; rebuild the
+  complete input → coordinate → final coverage-attestation chain from the
+  stable live producers before production.
 - [ ] Test that any missing/mutated seed, phase, noise, state, bound, or threshold
   fails closed.
 - [ ] Test that old aggregate traces cannot satisfy a raw-observable requirement.
@@ -78,10 +82,19 @@ manifest is immutable.
 - [ ] Compute active-core/all-core/all-E `rho80`, active fractions, and
   refractory occupancy.
 - [ ] Record sparse ISIs and membrane/current traces only for locked panels.
+- [ ] Save \(f_{\rm ref}\) as per-500 ms block ×
+  `{core,surround}` ISI numerator/denominator counts. Use the pooled
+  active-core ratio for the decisive gate; surround/all-panel ratios are
+  supportive and per-neuron fraction medians are forbidden substitutes.
 - [ ] Compute local CV2, 5/20/100 ms Fano factors, and threshold-distance
   distributions.
 - [ ] Compute 5 ms pairwise correlations and circular-shift nulls on the locked
   panel, with exactly 100 draws saved and fail-closed checked.
+- [ ] Treat the activity-independent pair panel as a fixed dependent design
+  census: do not bootstrap overlapping pair indices; retain the original
+  stratum median-minus-shift-null-q97.5 estimator. Reduce fixed pairs within
+  each sampled block first, then blocks; for the null, take q97.5 only after
+  the same block aggregation along each of the 100 draw columns.
 - [ ] Compute effective E/I/recurrent-E/net-current balance and lag.
 - [ ] Compute 1–2 ms E/I rates, PSD, virtual-SEEG metrics, active area, entropy,
   centroid motion, and kymograph.
@@ -142,6 +155,11 @@ An unresolved or nonlinear gain is never coerced to zero.
 **Steps**
 
 - [ ] Implement the 5,000-draw hierarchical bootstrap.
+- [ ] Resample 500 ms blocks, CV2 analysis-panel neurons, null draws, and
+  continuations, while holding the overlapping fixed pair panel/strata as a
+  census to avoid pair pseudoreplication. Recompute active-core
+  \(f_{\rm ref}\) from the sampled count numerator/denominator rather than
+  resampling or taking medians of per-neuron fractions.
 - [ ] Produce seed-specific CIs without treating neurons/time bins as seeds.
 - [ ] Implement exact saturation thresholds:
   `LCB(rho80)>=0.50` plus
@@ -185,12 +203,33 @@ fixture. There is no default identity.
 - [ ] Reject duplicate rows with different hashes.
 - [ ] Require `--resume` to reuse exact terminal cells; resume only missing or
   explicitly invalid technical cells.
+- [ ] Bind every production part to an immutable adjacent resource receipt and
+  require analyzers/final adjudication to revalidate the complete receipt
+  index. If a crash leaves a part without its receipt, move the part,
+  observables, and partial receipt together to `invalidated/` before rerunning;
+  never reconstruct a receipt after the worker has exited unless the same
+  coordinator still holds that launch token's complete live audit and the
+  worker-published pre-publication self-snapshot.
 - [ ] Add `--smoke`, `--manifest`, `--cell`, `--resume`, and explicit
   production-confirmation gates.
 - [ ] Run one short seed-1 smoke.
 - [ ] Verify units, shapes, panel IDs, current signs, ceiling calculation,
   future-noise reuse, and memory estimate.
 - [ ] Keep smoke artifacts in a non-production namespace.
+
+Production order is fixed:
+
+1. Write the input lock, build both coordinate locks, then write the final
+   Phase-C lock.
+2. Run and analyze native C0; run dt/2 only when the native two-seed gate
+   requires it, then finalize the C0 resolution gate.
+3. Run C1 base, analyze once to create the base atlas, and write the
+   gain-trigger manifest even when it is an explicit closed-empty selection.
+4. Run conditional C1 gain and analyze C1 a second time. The first-pass
+   `C1_gain_trigger_not_locked` state is routing metadata, never a scientific
+   verdict.
+5. Run and analyze the locked C1 dt/2 subset only when required, finalize the
+   C1 resolution gate, then perform modal and final adjudication.
 
 **Gate**
 
@@ -213,13 +252,22 @@ All Tasks 1–5 tests pass before any production launch.
 - [ ] Compute `W_max` from the spec, reserving 96 GB and eight logical CPUs.
 - [ ] Launch the maximum safe number of independent cells up to `W_max`.
 - [ ] Monitor RSS, `MemAvailable`, swap, progress, logs, and artifact growth.
-- [ ] Stop new launches on low-memory or swap-growth guard; do not kill peer
-  worktree processes.
+- [ ] Stop new launches below 96 GB `MemAvailable`, on any sampled Phase-C
+  worker `VmSwap>0`, or when shared-host swap growth exceeds the separately
+  logged 64 MiB jitter tolerance. Lock worker polling to at most 5 s, retain
+  per-PID sample counts/maxima plus a self-snapshot immediately before each
+  terminal-part publish, and do not kill peer-worktree processes. Report only
+  sampled/pre-publish absence of worker swap; never call it an unobserved
+  kernel peak, and never replace the pre-publish snapshot with a post-exit
+  zero.
 - [ ] Resume crashed technical cells with identical hashes.
 - [ ] Merge only after the expected-cell matrix is complete.
 - [ ] Run the C0 analyzer without changing any threshold.
-- [ ] If C0 supports an identity, run independent homologous \(dt/2\)
-  confirmations in at least two supporting seeds.
+- [ ] If C0 supports an identity natively, require seeds 1 and 3 to be among
+  its native supporters before running their independent homologous \(dt/2\)
+  confirmations. A `{1,4}` or `{3,4}` native support pair is
+  `resolution_confirmation_unavailable`/insufficient evidence, not a
+  scientific negative or resolution-sensitive result.
 
 **Stopping rules**
 
@@ -259,11 +307,28 @@ All Tasks 1–5 tests pass before any production launch.
   piecewise anchor manifold, and the sign-alignment rule/fallback.
 - [ ] Apply hard/intrinsic and empirical physical bounds without clipping.
 - [ ] Record invalid cells and reconstruction distances.
+- [ ] Treat exact observed anchors as non-reconstructed empirical cells:
+  require exact source-state/hash identity, zero anchor distance, finite values,
+  and intrinsic hard-domain validity, but do not apply the circular empirical
+  quantile envelope fitted from those same anchors.
+- [ ] Keep the empirical quantile envelope unchanged for convex midpoints and
+  the fixed shell; never waive genuine shell \(m<0\) or \(z\) hard-bound
+  violations.
+- [ ] Before any C1 SNN launch, fail closed unless native primary coverage is
+  30/30, independent \(dt/2\) primary coverage is 20/20, and at least one
+  homologous adjacent primary pair is available in both \(dt/2\) seeds.
+- [ ] Recompute and lock shell coverage. The pre-production audit found only
+  4/24 valid native and 2/16 valid \(dt/2\) shell cells; if the final relock
+  confirms incomplete coverage, preclude a complete shell-negative verdict
+  while retaining the valid cells as extrapolative sensitivity.
 - [ ] Synthetic-test convexity, PCA sign determinism, intrinsic bounds,
   empirical envelopes, no-clipping, and seed-local basis separation.
 - [ ] Mutation-test accidental cross-seed PCA fitting and independent scalar
   field scaling.
 - [ ] Write the full coordinate manifest before any C1 SNN result exists.
+- [ ] Use one canonical write-once C1 \(dt/2\) selection payload through the
+  dedicated lock, coordinator enumeration, cell validation, and analyzer; add
+  a true end-to-end integration test across all four stages.
 
 **Gate**
 
@@ -298,10 +363,18 @@ production result.
 - [ ] Require two adjacent primary cells within seed for a window.
 - [ ] Require the same aligned direction in at least 2/3 seeds with no opposite
   third-seed outcome.
+- [ ] Require both native seeds 1 and 3 to support a positive primary or shell
+  window before \(dt/2\) confirmation. Other native 2/3 support combinations
+  are `resolution_confirmation_unavailable`, not scientific negatives and not
+  resolution-sensitive outcomes.
 - [ ] Adjudicate the secondary shell separately: require the same non-tonic
   phenotype at the same locked basis-direction/sign cell in at least 2/3
   seeds; never apply primary `path_index+1` adjacency to shell points.
 - [ ] Keep primary-convex and secondary-shell verdicts separate.
+- [ ] Emit independent `primary_gate` and `shell_gate` resolution closures
+  (`confirmed|contradicted|indeterminate|blocked|not_required`); each final
+  input consumes only its own layer gate, while the top-level C1 verdict is
+  summary-only.
 - [ ] Implement the complete 3-seed/10-primary-cell negative-coverage contract.
 - [ ] Make invalid/missing shell cells block only the shell-negative claim.
 - [ ] Implement representation-sensitive and seed-heterogeneous outcomes.
@@ -309,6 +382,9 @@ production result.
   shell-only candidate, bounded negative, and incomplete matrix.
 - [ ] Mutation-test that shell positives cannot become primary reachable
   positives.
+- [ ] Regression-test that primary confirmation cannot silently complete an
+  indeterminate shell, and that mixed C0 plus primary-negative preserves a
+  closed shell positive/isolated/heterogeneous sensitivity result.
 
 **Gate**
 
@@ -352,7 +428,10 @@ reachable-window or complete negative verdict.
 **Stopping rule**
 
 The shell remains sensitivity/extrapolation evidence. It cannot override a
-primary-convex negative or authorize slow-path reachability.
+primary-convex negative or authorize slow-path reachability. Any invalid locked
+shell cell makes the shell layer coverage-limited and blocks
+`no_maturation_in_tested_secondary_shell`; it does not block a complete
+primary-convex conclusion.
 
 ---
 
@@ -492,11 +571,23 @@ Modal evidence cannot change the C0/C1 phenotype verdict.
 - [ ] Rerun the pure adjudicator from immutable machine artifacts.
 - [ ] Verify production coverage, input SHAs, resource logs, and exact expected
   cells.
-- [ ] Verify no residual Phase-C process and no swap growth.
+- [ ] Verify no residual Phase-C process, no observed `VmSwap` at the locked
+  per-worker samples/immediate pre-publish self-snapshots, and bounded/logged
+  shared-host jitter; do not relabel sampled absence as a kernel peak
+  measurement or use a post-exit zero as evidence.
 - [ ] Run `git diff --check` and markdown-link checks.
 - [ ] Archive: question, methods, C0 identity, C1 primary, C1 shell,
   seed-specific modal results, allowed/forbidden claims, engineering evidence,
   exact verdict, and next-spec boundary.
+- [ ] Report primary and shell layers separately. If shell validity remains
+  incomplete, state `secondary_shell_incomplete`/coverage-limited explicitly
+  and never write a shell-negative conclusion.
+- [ ] Report `resolution_confirmation_unavailable` as insufficient evidence
+  whenever a native positive lacks joint seed-1/seed-3 support; do not convert
+  it to a scientific negative or resolution sensitivity.
+- [ ] Read reporting priority from the layer-local resolution gates. Never let
+  a mixed C0 summary hide a closed secondary-shell structure, and never let
+  that shell structure authorize primary reachability.
 - [ ] State explicitly that C0/C1 acceptance does not establish lifecycle.
 - [ ] Commit in logical code/test, production-verdict, and docs/figure batches.
 
