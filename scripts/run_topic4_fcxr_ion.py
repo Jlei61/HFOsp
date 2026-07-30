@@ -2469,14 +2469,63 @@ def cmd_b2_adjudicate(args):
     return 0
 
 
+def _maybe(name):
+    p = os.path.join(OUT, name)
+    return json.load(open(p)) if os.path.exists(p) else None
+
+
+def _b2_1_manifest_layer():
+    """The B2.1 close-out layer.  Kept separate from `gates` so the historical B2 verdict
+    (`UNRESOLVED_CALIBRATION`, judged under the first-difference gate) stays readable next to the
+    B2.1 re-judgement under the corrected signed-slope gate."""
+    sc = _maybe("b2_1_selfconsistent.json")
+    mc = _maybe("b2_1_matched_control.json")
+    io = _maybe("b2_1_ionsoff_control.json")
+    h = (sc or {}).get("history") or []
+    return dict(
+        contract="docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md",
+        archive="docs/archive/topic4/sef_hfo/fcxr_ion_B2_1_calibration_repair_2026-07-28.md",
+        figure="figures/b2_1_calibration_repair.png",
+        ion_stationarity=dict(
+            estimator="signed least-squares secular slope per cell / per voxel over the full "
+                      "post-burn-in window; REPLACES the B2 first-difference q99",
+            bound_Na_mM_s=ION.B2_1_SLOPE_BOUND_NA, bound_K_mM_s=ION.B2_1_SLOPE_BOUND_K,
+            q99_Na=[e.get("slope_q99_Na") for e in h], q99_K=[e.get("slope_q99_K") for e in h],
+            verdict="FAILS at every update; the population mean sits BELOW the bound while the "
+                    "per-cell distribution sits above it (cells drift in opposite directions)"),
+        self_consistency=dict(
+            status=(sc or {}).get("status"),
+            gate_statistic="max_i |r^(k+1)_i - r^(k)_i| / mean(r)  (spec 2.2, damped step)",
+            gate=ION.B2_1_RATE_REL_TOL,
+            max_rel=[(e.get("change") or {}).get("max_rel") for e in h],
+            q99_rel=[(e.get("change") or {}).get("q99_rel") for e in h],
+            q95_rel=[(e.get("change") or {}).get("q95_rel") for e in h],
+            mean_rate_E_hz=[e.get("mean_rate_E_hz") for e in h],
+            reading="the PRE-REGISTERED scheme did not converge. The max is non-monotone but q95 "
+                    "and q99 increase strictly and the smallest q95 is still 8x the gate. This is "
+                    "NOT evidence that no fixed point exists."),
+        matched_control=dict(
+            status=(mc or {}).get("status"),
+            validity="STRUCTURAL: the arms are bit-identical simulations until the freeze block",
+            window_1_sanity="matches on every measure (peak 3.6%, spikes 1.7%, cells 2.7%, "
+                            "voxels 0.9%, radius 0.7%; same argmax at 2682 ms)",
+            window_2_effect="closed peak 19% LOWER, cells +26%, RMS radius +24%, occupied voxels "
+                            "+22%, burst onset 48 ms later",
+            allowed_statement="dynamic K feedback raised global recruitment in the later window "
+                              "without raising the local peak at the same hot voxel, and the "
+                              "extra recruitment was accompanied by a larger spatial extent"),
+        ions_off_control=dict(
+            same_seed_effect_r_E=((io or {}).get("ion_layer_rate_change") or {}).get("r_E_rel"),
+            note="the earlier +64% spanned two noise seeds and is superseded by this same-seed "
+                 "comparison"),
+        not_done=["B2 closure not re-run", "Gate B not adjudicated",
+                  "noise seeds 402/403/404 never run", "lifecycle never tested"])
+
+
 def write_manifest():
     """run_manifest.json -- every field the plan §12 lists."""
     pre = preflight(write=False)
     fld = os.path.join(OUT, "b0_baseline_rate_field.npz")
-
-    def _maybe(name):
-        p = os.path.join(OUT, name)
-        return json.load(open(p)) if os.path.exists(p) else None
 
     fs, cal, clo, gh, gb = (_maybe(n) for n in ("b1_f_selection_v2.json", "b2_bias_calibration.json",
                                                 "b2_closure_iteration.json", "gate_H.json",
@@ -2515,13 +2564,23 @@ def write_manifest():
                    closure=((clo or {}).get("closure") or {}).get("status"),
                    closure_failing_clauses=((clo or {}).get("closure") or {}).get(
                        "failing_clauses")),
+        b2_1_layer=_b2_1_manifest_layer(),
         known_metric_limits=dict(
-            ion_trend_q99=("q99 of |first differences| -- a FLUCTUATION MAGNITUDE, not a secular "
-                           "trend; does not approach zero while interictal events continue"),
-            closed_vs_open_loop=("NOT a matched control: the arms differ in q_ion, drive and "
-                                 "recruitment, so no causal reading of the feedback is licensed"),
             k_wave_far_over_event=("confounded by global drift; spec 11 stop condition 3 is "
-                                   "UNANSWERED, not triggered")),
+                                   "UNANSWERED, not triggered"),
+            matched_control_scope=("single seed, single kick pair; the two 200 ms windows contain "
+                                   "spontaneous bursts so peak1/peak2 are WINDOW MAXIMA not evoked "
+                                   "amplitudes; the shared initial ion field is NOT a fixed point "
+                                   "(B2.1 2.2 NOT_CONVERGED); no propagation delay, no onset "
+                                   "gradient and no virtual-electrode coverage were measured, so "
+                                   "no propagation reading is licensed"),
+            superseded=dict(
+                ion_trend_q99=("HISTORICAL, B2 layer only: q99 of |first differences| is a "
+                               "FLUCTUATION MAGNITUDE, not a secular trend. SUPERSEDED by the "
+                               "B2.1 signed-slope gate -- see b2_1_layer.ion_stationarity"),
+                closed_vs_open_loop=("HISTORICAL, B2 layer only: those arms differed in q_ion, "
+                                     "drive and recruitment. SUPERSEDED by the B2.1 structurally "
+                                     "matched pair -- see b2_1_layer.matched_control"))),
         resources=dict(mem_available_gb_now=round(avail, 2), swap_used_gb_now=round(swap, 3),
                        baseline=json.load(open(_baseline_swap_path()))
                        if os.path.exists(_baseline_swap_path()) else None,
