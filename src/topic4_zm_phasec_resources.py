@@ -92,7 +92,11 @@ def worker_swap_snapshot(pids: Iterable[int]) -> dict:
     }
 
 
-def worker_process_swap_snapshot(processes: Iterable[object]) -> dict:
+def worker_process_swap_snapshot(
+    processes: Iterable[object],
+    *,
+    published_terminal_pids: Iterable[int] = (),
+) -> dict:
     """Sample owned live workers without mistaking exit teardown for corruption.
 
     ``Popen.poll`` is the coordinator's authoritative liveness check.  A child
@@ -101,10 +105,14 @@ def worker_process_swap_snapshot(processes: Iterable[object]) -> dict:
     fields.  Re-poll before treating that record as malformed.  A process that
     remains live after the second poll still fails closed.
     """
+    published = {int(pid) for pid in published_terminal_pids}
     by_pid = {}
     unavailable = []
     unique = {int(process.pid): process for process in processes}
     for pid, process in sorted(unique.items()):
+        if pid in published:
+            unavailable.append(str(pid))
+            continue
         if process.poll() is not None:
             unavailable.append(str(pid))
             continue

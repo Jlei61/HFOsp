@@ -13,6 +13,38 @@ import scripts.run_topic4_zm_phasec1_parallel as COORD
 import scripts.analyze_topic4_zm_phasec1_gain as GAIN
 
 
+def test_c1_worker_swap_skips_valid_published_terminal_artifact(
+    tmp_path, monkeypatch
+):
+    output = tmp_path / "terminal.json"
+    output.write_text("{}")
+
+    class Process:
+        pid = 31
+
+    captured = {}
+
+    def validator(path, task, *, producer_locks):
+        assert producer_locks == {"runner.py": "a" * 64}
+        return True, "valid", {}
+
+    def fake_snapshot(processes, *, published_terminal_pids=()):
+        captured["pids"] = [process.pid for process in processes]
+        captured["published"] = set(published_terminal_pids)
+        return {"worker_swap_total_kb": 0}
+
+    monkeypatch.setattr(
+        COORD.PRES, "worker_process_swap_snapshot", fake_snapshot
+    )
+    result = COORD.worker_swap_snapshot(
+        [{"output": str(output), "process": Process()}],
+        producer_locks={"runner.py": "a" * 64},
+        validator=validator,
+    )
+    assert result == {"worker_swap_total_kb": 0}
+    assert captured == {"pids": [31], "published": {31}}
+
+
 def _self_hashed(payload):
     out = dict(payload)
     out["manifest_sha256"] = CELL._object_sha(payload)

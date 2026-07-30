@@ -193,6 +193,30 @@ def test_owned_malformed_live_process_still_fails_closed(monkeypatch):
         R.worker_process_swap_snapshot([Process()])
 
 
+def test_published_terminal_process_is_not_resampled(monkeypatch):
+    class Process:
+        pid = 12
+
+        def poll(self):
+            return None
+
+    monkeypatch.setattr(
+        R, "process_swap_kb",
+        lambda _pid: (_ for _ in ()).throw(
+            AssertionError("published terminal process was resampled")
+        ),
+    )
+    snapshot = R.worker_process_swap_snapshot(
+        [Process()], published_terminal_pids={12}
+    )
+    assert snapshot == {
+        "worker_swap_kb_by_pid": {},
+        "worker_swap_unavailable_pids": ["12"],
+        "worker_swap_total_kb": 0,
+        "worker_swap_max_kb": 0,
+    }
+
+
 def test_process_swap_tolerates_proc_teardown_between_read_and_parse(
     monkeypatch,
 ):

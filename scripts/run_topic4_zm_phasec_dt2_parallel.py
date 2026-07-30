@@ -457,7 +457,11 @@ def _run_c1(args):
             raise SystemExit("resource guard blocked the entire next dt2 wave")
         last_heartbeat = 0.0
         while running:
-            worker_swap = C1.worker_swap_snapshot(running)
+            worker_swap = C1.worker_swap_snapshot(
+                running,
+                producer_locks=producer_locks,
+                validator=validate_c1_output,
+            )
             sampled_at = time.time()
             C1.PRES.update_worker_swap_audit(
                 worker_swap_audit,

@@ -451,9 +451,22 @@ def swap_growth_exceeded(baseline_kb, limit_mb):
     return swap_used_kb() - int(baseline_kb) > limit_kb
 
 
-def worker_swap_snapshot(running):
+def worker_swap_snapshot(
+    running, *, producer_locks=None, validator=validate_terminal_output
+):
+    published_terminal_pids = set()
+    if producer_locks is not None:
+        for row in running:
+            if not os.path.isfile(row["output"]):
+                continue
+            valid, _reason, _payload = validator(
+                row["output"], row, producer_locks=producer_locks
+            )
+            if valid:
+                published_terminal_pids.add(row["process"].pid)
     return PRES.worker_process_swap_snapshot(
-        row["process"] for row in running
+        (row["process"] for row in running),
+        published_terminal_pids=published_terminal_pids,
     )
 
 
@@ -753,7 +766,9 @@ def run(args):
             raise SystemExit("resource guard blocked the entire next wave")
         last_heartbeat = 0.0
         while running:
-            worker_swap = worker_swap_snapshot(running)
+            worker_swap = worker_swap_snapshot(
+                running, producer_locks=producer_locks
+            )
             sampled_at = time.time()
             PRES.update_worker_swap_audit(
                 worker_swap_audit,

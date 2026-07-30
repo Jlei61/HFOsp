@@ -8,6 +8,37 @@ import scripts.run_topic4_zm_phasec_cell as CELL
 import scripts.run_topic4_zm_phasec0_parallel as COORD
 
 
+def test_c0_worker_swap_skips_valid_published_terminal_artifact(
+    tmp_path, monkeypatch
+):
+    output = tmp_path / "terminal.json"
+    output.write_text("{}")
+
+    class Process:
+        pid = 12
+
+    captured = {}
+    monkeypatch.setattr(
+        COORD,
+        "validate_terminal_output",
+        lambda path, task: (True, "valid", {}),
+    )
+
+    def fake_snapshot(processes, *, published_terminal_pids=()):
+        captured["pids"] = [process.pid for process in processes]
+        captured["published"] = set(published_terminal_pids)
+        return {"worker_swap_total_kb": 0}
+
+    monkeypatch.setattr(
+        COORD.PRES, "worker_process_swap_snapshot", fake_snapshot
+    )
+    result = COORD._worker_swap_snapshot(
+        [{"output": str(output), "proc": Process()}]
+    )
+    assert result == {"worker_swap_total_kb": 0}
+    assert captured == {"pids": [12], "published": {12}}
+
+
 def test_phasec_matrix_includes_exact_zero_and_is_unique():
     rows = COORD.tasks(("identity", "gain"))
     assert len(rows) == 18 + 135

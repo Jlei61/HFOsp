@@ -409,8 +409,18 @@ def _swap_growth_exceeded(baseline_kb, limit_mb):
 
 
 def _worker_swap_snapshot(running):
+    published_terminal_pids = set()
+    for row in running:
+        if not os.path.isfile(row["output"]):
+            continue
+        valid, _reason, _payload = validate_terminal_output(
+            row["output"], row
+        )
+        if valid:
+            published_terminal_pids.add(row["proc"].pid)
     return PRES.worker_process_swap_snapshot(
-        row["proc"] for row in running
+        (row["proc"] for row in running),
+        published_terminal_pids=published_terminal_pids,
     )
 
 
