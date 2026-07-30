@@ -281,7 +281,7 @@ def main() -> None:
     ax_d.text(
         0.98,
         0.96,
-        f"Local readout retention = {retention:.2f}\\n(rank-step units)",
+        f"Local readout retention = {retention:.2f}\n(rank-step units)",
         transform=ax_d.transAxes,
         ha="right",
         va="top",

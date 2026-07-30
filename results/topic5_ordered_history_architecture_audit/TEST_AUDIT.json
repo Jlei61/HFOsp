@@ -1,0 +1,93 @@
+{
+  "contract": "topic5_ordered_history_architecture_audit_v0_1",
+  "timestamp": "2026-07-29T04:56:19+08:00",
+  "status": "PASS",
+  "environment": {
+    "conda_env": "cuda_env",
+    "note": "The same environment family used by the formal launchers was used for the final test rerun."
+  },
+  "tests": {
+    "command": "pytest -q tests/test_topic5_rank_distribution_model.py tests/test_topic5_rnn_internal_state.py tests/test_topic5_static_scaffold_validation.py tests/test_topic5_scaffold_reliability.py",
+    "passed": 37,
+    "failed": 0,
+    "python_compile": "PASS",
+    "shell_syntax": "PASS",
+    "scoped_git_diff_check": "PASS"
+  },
+  "formal_cell_audit": {
+    "fixed_hidden_architectures": {
+      "expected": 204,
+      "complete": 204
+    },
+    "selected_matched_rank_shuffle": {
+      "expected": 102,
+      "complete": 102
+    },
+    "history_interventions": {
+      "expected": 102,
+      "complete": 102
+    },
+    "parameter_matched_sensitivity": {
+      "expected": 204,
+      "complete": 204
+    }
+  },
+  "independent_recomputation": {
+    "linear_state_vs_unordered": {
+      "n_patients": 34,
+      "median_nll_gain": 0.025718509825526037,
+      "n_positive": 26,
+      "wilcoxon_greater_p": 0.000053107098210603,
+      "matches_summary": true
+    },
+    "linear_state_vs_matched_rank_shuffle": {
+      "n_patients": 34,
+      "median_nll_gain": 0.04193227015928158,
+      "n_positive": 31,
+      "wilcoxon_greater_p": 0.00000018702121451497078,
+      "matches_summary": true
+    },
+    "gru_vs_unordered": {
+      "n_patients": 34,
+      "median_nll_gain": 0.010615375427526552,
+      "n_positive": 21,
+      "wilcoxon_greater_p": 0.056309308274649084,
+      "matches_summary": true
+    },
+    "selected_reverse_prefix_cost": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0356675386428833,
+      "n_positive": 32,
+      "wilcoxon_greater_p": 0.0000000005820766091346741,
+      "matches_summary": true
+    },
+    "early_ictal_ordered_minus_matched_shuffle": {
+      "n_patients": 12,
+      "median_absolute_partial_r_difference": 0.00849974348892825,
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.6044921875,
+      "matches_summary": true
+    }
+  },
+  "runtime_audit": {
+    "error_log_hits": 0,
+    "oom_hits": 0,
+    "minimum_available_memory_gb_across_formal_stages": 136.2538948059082,
+    "maximum_gpu_memory_used_mb_across_formal_stages": 1746.0,
+    "maximum_gpu_temperature_c": 62.0
+  },
+  "target_seal": {
+    "architecture_selection_target_values_read": false,
+    "history_intervention_target_values_read": false,
+    "early_ictal_target_reused_after_freeze": true
+  },
+  "visual_qa": {
+    "status": "PASS",
+    "png_width": 4526,
+    "png_height": 2686,
+    "six_panels_present": true,
+    "cross_architecture_boundary_visible": true,
+    "early_ictal_negative_boundary_visible": true,
+    "continuous_time_or_biological_manifold_claim_present": false
+  }
+}

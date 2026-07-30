@@ -1,0 +1,1964 @@
+{
+  "contract": "topic5_rnn_internal_state_reduction_v0_1_early_ictal_readback",
+  "status": "COMPLETE",
+  "strict_clinical_onset_cohort": {
+    "n_patients": 16,
+    "n_seizures": 106,
+    "dataset": "epilepsiae",
+    "window_sec": [
+      0,
+      10
+    ],
+    "band_hz": [
+      1,
+      150
+    ],
+    "yuquan_eeg_onset_in_primary": false
+  },
+  "fixed_readouts": [
+    "participation",
+    "endpoint_joint_mass"
+  ],
+  "primary_null": "5000 coherent within-patient all-contact permutations",
+  "anatomical_sensitivity": "5000 coherent within-shaft permutations; eligibility reported per patient",
+  "target_opening_context": "same strict target was already opened in v2.5; this is mechanism decomposition, not independent confirmation",
+  "five_field_omnibus_sensitivity_source": "results/topic5_rnn_bidirectional_cross_model_audit_v2_5/STATIC_TRANSFER_SUMMARY.json",
+  "five_field_omnibus_full_history": {
+    "absolute_similarity": {
+      "n": 16,
+      "median": 0.5773809523809523,
+      "bootstrap_ci95": [
+        0.49999999999999994,
+        0.7501623376623235
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 1.52587890625e-05
+    },
+    "all_contact_margin": {
+      "n": 16,
+      "median": 0.21764705882352936,
+      "bootstrap_ci95": [
+        0.059523809523809534,
+        0.35714285714285715
+      ],
+      "n_positive": 15,
+      "wilcoxon_greater_p": 0.0003274791716928477
+    }
+  },
+  "cohort_metrics": {
+    "empirical_rank_distribution__endpoint_joint_mass__absolute_rho": {
+      "n": 16,
+      "median": 0.35059523809523807,
+      "bootstrap_ci95": [
+        0.2245098039215686,
+        0.4833632631534589
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "empirical_rank_distribution__endpoint_joint_mass__all_contact_margin": {
+      "n": 16,
+      "median": 0.08333333333333333,
+      "bootstrap_ci95": [
+        0.023809523809523836,
+        0.21643336231761912
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.003143310546875,
+      "alternative": "greater"
+    },
+    "empirical_rank_distribution__endpoint_joint_mass__within_shaft_margin": {
+      "n": 16,
+      "median": 0.07261904761904762,
+      "bootstrap_ci95": [
+        -0.01818181818181816,
+        0.17941176470588235
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.014495849609375,
+      "alternative": "greater"
+    },
+    "empirical_rank_distribution__participation__absolute_rho": {
+      "n": 16,
+      "median": 0.3577380952380952,
+      "bootstrap_ci95": [
+        0.3,
+        0.5999999999999999
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "empirical_rank_distribution__participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.10465686274509801,
+      "bootstrap_ci95": [
+        0.06785714285714284,
+        0.34999999999999987
+      ],
+      "n_positive": 15,
+      "wilcoxon_p": 4.57763671875e-05,
+      "alternative": "greater"
+    },
+    "empirical_rank_distribution__participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.08720088710865916,
+      "bootstrap_ci95": [
+        0.033333333333333326,
+        0.22524509803921564
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0007368904219375711,
+      "alternative": "greater"
+    },
+    "full_history_gru__endpoint_joint_mass__absolute_rho": {
+      "n": 16,
+      "median": 0.4386363636363636,
+      "bootstrap_ci95": [
+        0.25,
+        0.5
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "full_history_gru__endpoint_joint_mass__all_contact_margin": {
+      "n": 16,
+      "median": 0.21428571428571427,
+      "bootstrap_ci95": [
+        0.057142857142857134,
+        0.25
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.0006561279296875,
+      "alternative": "greater"
+    },
+    "full_history_gru__endpoint_joint_mass__within_shaft_margin": {
+      "n": 16,
+      "median": 0.08079836829836831,
+      "bootstrap_ci95": [
+        0.0,
+        0.1785714285714286
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.003159260776841249,
+      "alternative": "greater"
+    },
+    "full_history_gru__participation__absolute_rho": {
+      "n": 16,
+      "median": 0.4454751131221719,
+      "bootstrap_ci95": [
+        0.3515151515151515,
+        0.6190476190476191
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "full_history_gru__participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.21428571428571425,
+      "bootstrap_ci95": [
+        0.12941176470588237,
+        0.37237762237762234
+      ],
+      "n_positive": 14,
+      "wilcoxon_p": 0.000152587890625,
+      "alternative": "greater"
+    },
+    "full_history_gru__participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.1441176470588235,
+      "bootstrap_ci95": [
+        0.02097902097902099,
+        0.2519607843137255
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0002899169921875,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled1__probability_contrast__absolute_rho": {
+      "n": 16,
+      "median": 0.3512254901960784,
+      "bootstrap_ci95": [
+        0.25995670995670994,
+        0.45357142857142857
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled1__probability_contrast__all_contact_margin": {
+      "n": 16,
+      "median": 0.10357142857142854,
+      "bootstrap_ci95": [
+        0.024458874458874458,
+        0.2785714285714286
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.003814697265625,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled1__probability_contrast__within_shaft_margin": {
+      "n": 16,
+      "median": 0.07386363636363637,
+      "bootstrap_ci95": [
+        -0.020979020979020935,
+        0.19705882352941176
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.037191466533728956,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled1__probability_contrast_residual_participation__absolute_rho": {
+      "n": 16,
+      "median": 0.44047619047619047,
+      "bootstrap_ci95": [
+        0.2909090909090909,
+        0.49090909090909096
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled1__probability_contrast_residual_participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.14880952380952384,
+      "bootstrap_ci95": [
+        0.06071428571428569,
+        0.23776223776223776
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0008392333984375,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled1__probability_contrast_residual_participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.07386363636363635,
+      "bootstrap_ci95": [
+        -0.023529411764705882,
+        0.18333333333333335
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.01337827681223382,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled2__probability_contrast__absolute_rho": {
+      "n": 16,
+      "median": 0.3408088235294118,
+      "bootstrap_ci95": [
+        0.2857142857142857,
+        0.5244755244755245
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled2__probability_contrast__all_contact_margin": {
+      "n": 16,
+      "median": 0.12916666666666665,
+      "bootstrap_ci95": [
+        0.0357142857142857,
+        0.23809523809523808
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0032032451110836847,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled2__probability_contrast__within_shaft_margin": {
+      "n": 16,
+      "median": 0.05654345654345655,
+      "bootstrap_ci95": [
+        0.02286096256684493,
+        0.12500000000000003
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.012481689453125,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled2__probability_contrast_residual_participation__absolute_rho": {
+      "n": 16,
+      "median": 0.34464285714285714,
+      "bootstrap_ci95": [
+        0.2857142857142857,
+        0.5416666666666666
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled2__probability_contrast_residual_participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.1527310924369748,
+      "bootstrap_ci95": [
+        0.0,
+        0.24166666666666664
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.0037991115410316227,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_output_coupled2__probability_contrast_residual_participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.10259740259740259,
+      "bootstrap_ci95": [
+        -0.00588235294117645,
+        0.17598039215686276
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.017800356079440204,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca1__probability_contrast__absolute_rho": {
+      "n": 16,
+      "median": 0.3773109243697479,
+      "bootstrap_ci95": [
+        0.31666666666666665,
+        0.44166666666666665
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca1__probability_contrast__all_contact_margin": {
+      "n": 16,
+      "median": 0.11309523809523808,
+      "bootstrap_ci95": [
+        0.06547619047619047,
+        0.1985294117647059
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0006561279296875,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca1__probability_contrast__within_shaft_margin": {
+      "n": 16,
+      "median": 0.08363095238095238,
+      "bootstrap_ci95": [
+        0.035714285714285754,
+        0.14285714285714282
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0003814697265625,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca1__probability_contrast_residual_participation__absolute_rho": {
+      "n": 16,
+      "median": 0.36834733893557425,
+      "bootstrap_ci95": [
+        0.24999999999999997,
+        0.4928571428571429
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca1__probability_contrast_residual_participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.1619047619047619,
+      "bootstrap_ci95": [
+        -0.035714285714285726,
+        0.296969696969697
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.0065460205078125,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca1__probability_contrast_residual_participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.062184873949579805,
+      "bootstrap_ci95": [
+        -0.07142857142857142,
+        0.16764705882352943
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.0648651123046875,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca2__probability_contrast__absolute_rho": {
+      "n": 16,
+      "median": 0.39180672268907557,
+      "bootstrap_ci95": [
+        0.24318181818181817,
+        0.45714285714285713
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca2__probability_contrast__all_contact_margin": {
+      "n": 16,
+      "median": 0.11517857142857138,
+      "bootstrap_ci95": [
+        0.008441558441558417,
+        0.2447552447552448
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.0106964111328125,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca2__probability_contrast__within_shaft_margin": {
+      "n": 16,
+      "median": 0.07297077922077921,
+      "bootstrap_ci95": [
+        -0.04895104895104896,
+        0.14302083333331903
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.0522918701171875,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca2__probability_contrast_residual_participation__absolute_rho": {
+      "n": 16,
+      "median": 0.40822510822510816,
+      "bootstrap_ci95": [
+        0.3006993006993007,
+        0.5035714285714286
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 0.00021840451160574153,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca2__probability_contrast_residual_participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.15235389610389607,
+      "bootstrap_ci95": [
+        0.0839160839160839,
+        0.22499999999999992
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.001678466796875,
+      "alternative": "greater"
+    },
+    "internal_full_history_gru_pca2__probability_contrast_residual_participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.12589285714285708,
+      "bootstrap_ci95": [
+        0.04090909090909091,
+        0.21428571428571425
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.009283356139867098,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled1__probability_contrast__absolute_rho": {
+      "n": 16,
+      "median": 0.3562628547922666,
+      "bootstrap_ci95": [
+        0.2642857142857143,
+        0.4997502497502498
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled1__probability_contrast__all_contact_margin": {
+      "n": 16,
+      "median": 0.14076340326340325,
+      "bootstrap_ci95": [
+        0.04356060606060608,
+        0.26130952380952377
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0020904541015625,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled1__probability_contrast__within_shaft_margin": {
+      "n": 16,
+      "median": 0.03674242424242424,
+      "bootstrap_ci95": [
+        -0.024999999999999967,
+        0.17857142857142855
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.046399339548612716,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled1__probability_contrast_residual_participation__absolute_rho": {
+      "n": 16,
+      "median": 0.2759453781512605,
+      "bootstrap_ci95": [
+        0.1583333333333333,
+        0.46060606060606063
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 0.00021840451160574153,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled1__probability_contrast_residual_participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.08151260504201678,
+      "bootstrap_ci95": [
+        -0.11666666666666667,
+        0.17234848484848486
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.1612548828125,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled1__probability_contrast_residual_participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.05003085150143974,
+      "bootstrap_ci95": [
+        -0.04545454545454544,
+        0.1071428571428571
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.201873779296875,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled2__probability_contrast__absolute_rho": {
+      "n": 16,
+      "median": 0.2851890756302521,
+      "bootstrap_ci95": [
+        0.2375,
+        0.38409090909090904
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 0.00021840451160574153,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled2__probability_contrast__all_contact_margin": {
+      "n": 16,
+      "median": 0.09999999999999999,
+      "bootstrap_ci95": [
+        -0.035714285714285726,
+        0.14044117647058824
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.08526365542169534,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled2__probability_contrast__within_shaft_margin": {
+      "n": 16,
+      "median": 0.08169642857142857,
+      "bootstrap_ci95": [
+        -0.07058823529411765,
+        0.1393939393939394
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.16289458149301356,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled2__probability_contrast_residual_participation__absolute_rho": {
+      "n": 16,
+      "median": 0.30654761904761907,
+      "bootstrap_ci95": [
+        0.24999999999999997,
+        0.4424242424242424
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled2__probability_contrast_residual_participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.093006993006993,
+      "bootstrap_ci95": [
+        -0.002941176470588225,
+        0.175
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.014495849609375,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_output_coupled2__probability_contrast_residual_participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.12159090909090908,
+      "bootstrap_ci95": [
+        -0.035714285714285726,
+        0.17748917748917747
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.07781773037901928,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca1__probability_contrast__absolute_rho": {
+      "n": 16,
+      "median": 0.3081932773109244,
+      "bootstrap_ci95": [
+        0.20238095238095238,
+        0.49999999999999994
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca1__probability_contrast__all_contact_margin": {
+      "n": 16,
+      "median": 0.12920168067226892,
+      "bootstrap_ci95": [
+        -0.024999999999999994,
+        0.219030969030969
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.014922879663929873,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca1__probability_contrast__within_shaft_margin": {
+      "n": 16,
+      "median": 0.0619747899159664,
+      "bootstrap_ci95": [
+        -0.038235294117647034,
+        0.19047619047619047
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.03914614707320492,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca1__probability_contrast_residual_participation__absolute_rho": {
+      "n": 16,
+      "median": 0.1818627450980392,
+      "bootstrap_ci95": [
+        0.15476190476190477,
+        0.32167832167832167
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca1__probability_contrast_residual_participation__all_contact_margin": {
+      "n": 16,
+      "median": -0.003361344537815128,
+      "bootstrap_ci95": [
+        -0.130952380952381,
+        0.1048951048951049
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.6282196044921875,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca1__probability_contrast_residual_participation__within_shaft_margin": {
+      "n": 16,
+      "median": -0.006993006993007006,
+      "bootstrap_ci95": [
+        -0.11904761904761904,
+        0.06666666666666665
+      ],
+      "n_positive": 7,
+      "wilcoxon_p": 0.7150084463683128,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca2__probability_contrast__absolute_rho": {
+      "n": 16,
+      "median": 0.316504329004329,
+      "bootstrap_ci95": [
+        0.21666666666666665,
+        0.5357142857142857
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca2__probability_contrast__all_contact_margin": {
+      "n": 16,
+      "median": 0.09986631016042782,
+      "bootstrap_ci95": [
+        -0.02058823529411763,
+        0.25
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.0106964111328125,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca2__probability_contrast__within_shaft_margin": {
+      "n": 16,
+      "median": 0.025890775890775874,
+      "bootstrap_ci95": [
+        -0.04411764705882354,
+        0.14493839493839494
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.105712890625,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca2__probability_contrast_residual_participation__absolute_rho": {
+      "n": 16,
+      "median": 0.2875,
+      "bootstrap_ci95": [
+        0.17857142857142855,
+        0.3776223776223776
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca2__probability_contrast_residual_participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.012500000000000011,
+      "bootstrap_ci95": [
+        -0.047619047619047616,
+        0.1071428571428571
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.18134297041760644,
+      "alternative": "greater"
+    },
+    "internal_rank_shuffle_gru_pca2__probability_contrast_residual_participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.015530303030303033,
+      "bootstrap_ci95": [
+        -0.037500000000000006,
+        0.09090909090909088
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.21631297451006987,
+      "alternative": "greater"
+    },
+    "last_set_first_order__endpoint_joint_mass__absolute_rho": {
+      "n": 16,
+      "median": 0.41538461538461535,
+      "bootstrap_ci95": [
+        0.29166666666666663,
+        0.575
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "last_set_first_order__endpoint_joint_mass__all_contact_margin": {
+      "n": 16,
+      "median": 0.20854145854145853,
+      "bootstrap_ci95": [
+        0.0357142857142857,
+        0.3571428571428571
+      ],
+      "n_positive": 14,
+      "wilcoxon_p": 0.00038741683887137917,
+      "alternative": "greater"
+    },
+    "last_set_first_order__endpoint_joint_mass__within_shaft_margin": {
+      "n": 16,
+      "median": 0.11190476190476192,
+      "bootstrap_ci95": [
+        0.021428571428571408,
+        0.23725490196078428
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.0022570264274585704,
+      "alternative": "greater"
+    },
+    "last_set_first_order__participation__absolute_rho": {
+      "n": 16,
+      "median": 0.4250514191690662,
+      "bootstrap_ci95": [
+        0.30952380952380953,
+        0.6071428571428571
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "last_set_first_order__participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.19656177156177157,
+      "bootstrap_ci95": [
+        0.06477591036414566,
+        0.3214285714285714
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0008392333984375,
+      "alternative": "greater"
+    },
+    "last_set_first_order__participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.12007575757575754,
+      "bootstrap_ci95": [
+        -0.008928571428571397,
+        0.25
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.0065460205078125,
+      "alternative": "greater"
+    },
+    "rank_shuffle_gru__endpoint_joint_mass__absolute_rho": {
+      "n": 16,
+      "median": 0.42380952380952375,
+      "bootstrap_ci95": [
+        0.2976190476190476,
+        0.5916666666666666
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "rank_shuffle_gru__endpoint_joint_mass__all_contact_margin": {
+      "n": 16,
+      "median": 0.15898268398268398,
+      "bootstrap_ci95": [
+        0.07803660631485314,
+        0.34166666666666656
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0006031581187146499,
+      "alternative": "greater"
+    },
+    "rank_shuffle_gru__endpoint_joint_mass__within_shaft_margin": {
+      "n": 16,
+      "median": 0.1054112554112554,
+      "bootstrap_ci95": [
+        0.03214285714285717,
+        0.23749999999999996
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.0022570264274585704,
+      "alternative": "greater"
+    },
+    "rank_shuffle_gru__participation__absolute_rho": {
+      "n": 16,
+      "median": 0.4428938708350473,
+      "bootstrap_ci95": [
+        0.2976190476190476,
+        0.5916666666666666
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "rank_shuffle_gru__participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.2313811188811189,
+      "bootstrap_ci95": [
+        0.10787047381589893,
+        0.34166666666666656
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0006031581187146499,
+      "alternative": "greater"
+    },
+    "rank_shuffle_gru__participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.11096440810512206,
+      "bootstrap_ci95": [
+        0.034118558055702075,
+        0.25
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0006031581187146499,
+      "alternative": "greater"
+    },
+    "static_contact_hazard__endpoint_joint_mass__absolute_rho": {
+      "n": 16,
+      "median": 0.4125,
+      "bootstrap_ci95": [
+        0.35654761904761906,
+        0.5571095571095571
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "static_contact_hazard__endpoint_joint_mass__all_contact_margin": {
+      "n": 16,
+      "median": 0.178921568627451,
+      "bootstrap_ci95": [
+        0.0714285714285714,
+        0.3142857142857143
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0003814697265625,
+      "alternative": "greater"
+    },
+    "static_contact_hazard__endpoint_joint_mass__within_shaft_margin": {
+      "n": 16,
+      "median": 0.09012605042016805,
+      "bootstrap_ci95": [
+        0.0,
+        0.2115546218487395
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.002324716909904271,
+      "alternative": "greater"
+    },
+    "static_contact_hazard__participation__absolute_rho": {
+      "n": 16,
+      "median": 0.4411130536130536,
+      "bootstrap_ci95": [
+        0.3214285714285714,
+        0.5773809523809523
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "static_contact_hazard__participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.20714285714285713,
+      "bootstrap_ci95": [
+        0.0357142857142857,
+        0.309733893557423
+      ],
+      "n_positive": 14,
+      "wilcoxon_p": 0.0003814697265625,
+      "alternative": "greater"
+    },
+    "static_contact_hazard__participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.09362745098039213,
+      "bootstrap_ci95": [
+        0.02797202797202797,
+        0.2113095238095238
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.0005035400390625,
+      "alternative": "greater"
+    },
+    "unordered_prefix__endpoint_joint_mass__absolute_rho": {
+      "n": 16,
+      "median": 0.38946078431372544,
+      "bootstrap_ci95": [
+        0.2857142857142857,
+        0.5585248085248085
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 0.00021840451160574153,
+      "alternative": "greater"
+    },
+    "unordered_prefix__endpoint_joint_mass__all_contact_margin": {
+      "n": 16,
+      "median": 0.16374875124875124,
+      "bootstrap_ci95": [
+        0.06911764705882352,
+        0.3145021645021645
+      ],
+      "n_positive": 14,
+      "wilcoxon_p": 7.62939453125e-05,
+      "alternative": "greater"
+    },
+    "unordered_prefix__endpoint_joint_mass__within_shaft_margin": {
+      "n": 16,
+      "median": 0.09285714285714285,
+      "bootstrap_ci95": [
+        0.0354464285714288,
+        0.1944741532976827
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.0011647198399171662,
+      "alternative": "greater"
+    },
+    "unordered_prefix__participation__absolute_rho": {
+      "n": 16,
+      "median": 0.38725490196078427,
+      "bootstrap_ci95": [
+        0.3214285714285714,
+        0.5714285714285714
+      ],
+      "n_positive": 16,
+      "wilcoxon_p": 1.52587890625e-05,
+      "alternative": "greater"
+    },
+    "unordered_prefix__participation__all_contact_margin": {
+      "n": 16,
+      "median": 0.16769480519480517,
+      "bootstrap_ci95": [
+        0.04999999999999999,
+        0.3051948051948052
+      ],
+      "n_positive": 14,
+      "wilcoxon_p": 7.62939453125e-05,
+      "alternative": "greater"
+    },
+    "unordered_prefix__participation__within_shaft_margin": {
+      "n": 16,
+      "median": 0.10938375350140056,
+      "bootstrap_ci95": [
+        0.026600517237418853,
+        0.1785714285714286
+      ],
+      "n_positive": 14,
+      "wilcoxon_p": 0.0005606127504279248,
+      "alternative": "greater"
+    }
+  },
+  "paired_comparisons": [
+    {
+      "field": "participation",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "static_contact_hazard",
+      "n": 16,
+      "median": 0.0,
+      "bootstrap_ci95": [
+        -0.023214285714285715,
+        0.03529411764705881
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.23845327748379197,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.29806659685473996
+    },
+    {
+      "field": "participation",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "unordered_prefix",
+      "n": 16,
+      "median": 0.031022408963585435,
+      "bootstrap_ci95": [
+        -0.0035714285714285865,
+        0.06071428571428572
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.061928760638626006,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.1564418212036054
+    },
+    {
+      "field": "participation",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "last_set_first_order",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.008963585434173638,
+        0.06320346320346323
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.09906145587698362,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.16510242646163936
+    },
+    {
+      "field": "participation",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "rank_shuffle_gru",
+      "n": 16,
+      "median": -0.008957219251336912,
+      "bootstrap_ci95": [
+        -0.04761904761904767,
+        0.08333333333333331
+      ],
+      "n_positive": 7,
+      "wilcoxon_p": 0.3909759521484375,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.3909759521484375
+    },
+    {
+      "field": "participation",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "empirical_rank_distribution",
+      "n": 16,
+      "median": 0.04174595768886204,
+      "bootstrap_ci95": [
+        -0.0714285714285714,
+        0.12941176470588234
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.06257672848144216,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.1564418212036054
+    },
+    {
+      "field": "participation",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "static_contact_hazard",
+      "n": 16,
+      "median": 0.0,
+      "bootstrap_ci95": [
+        -0.02121212121212121,
+        0.032352941176470584
+      ],
+      "n_positive": 7,
+      "wilcoxon_p": 0.2400884449530385,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.3001105561912981
+    },
+    {
+      "field": "participation",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "unordered_prefix",
+      "n": 16,
+      "median": 0.029982517482517512,
+      "bootstrap_ci95": [
+        -0.0059523809523809035,
+        0.06176470588235293
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.07007303073420625,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.14404029094618853
+    },
+    {
+      "field": "participation",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "last_set_first_order",
+      "n": 16,
+      "median": 0.010427807486631024,
+      "bootstrap_ci95": [
+        -0.008928571428571452,
+        0.06471861471861474
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.08642417456771312,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.14404029094618853
+    },
+    {
+      "field": "participation",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "rank_shuffle_gru",
+      "n": 16,
+      "median": -0.008957219251336898,
+      "bootstrap_ci95": [
+        -0.0454545454545455,
+        0.09166666666666662
+      ],
+      "n_positive": 7,
+      "wilcoxon_p": 0.4301300048828125,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.4301300048828125
+    },
+    {
+      "field": "participation",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "empirical_rank_distribution",
+      "n": 16,
+      "median": 0.047160002189176056,
+      "bootstrap_ci95": [
+        -0.05714285714285705,
+        0.12941176470588234
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.0522918701171875,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.14404029094618853
+    },
+    {
+      "field": "participation",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "static_contact_hazard",
+      "n": 16,
+      "median": 0.0,
+      "bootstrap_ci95": [
+        -0.018648018648018627,
+        0.033333333333333354
+      ],
+      "n_positive": 7,
+      "wilcoxon_p": 0.3416195358132955,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.4101400490497519
+    },
+    {
+      "field": "participation",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "unordered_prefix",
+      "n": 16,
+      "median": 0.009448884448884476,
+      "bootstrap_ci95": [
+        -0.015160897979348803,
+        0.04999999999999999
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.09906145587698362,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.24765363969245904
+    },
+    {
+      "field": "participation",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "last_set_first_order",
+      "n": 16,
+      "median": 0.0014705882352941818,
+      "bootstrap_ci95": [
+        -0.004545454545454533,
+        0.033333333333333326
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.0885570204317988,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.24765363969245904
+    },
+    {
+      "field": "participation",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "rank_shuffle_gru",
+      "n": 16,
+      "median": -0.00909090909090908,
+      "bootstrap_ci95": [
+        -0.05319680319680317,
+        0.06428571428571428
+      ],
+      "n_positive": 7,
+      "wilcoxon_p": 0.41014004904975193,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.4101400490497519
+    },
+    {
+      "field": "participation",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "empirical_rank_distribution",
+      "n": 16,
+      "median": 0.00875350140056022,
+      "bootstrap_ci95": [
+        -0.03928571428571426,
+        0.07738095238095236
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.2165985107421875,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.3609975179036458
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "static_contact_hazard",
+      "n": 16,
+      "median": 0.011011904761904778,
+      "bootstrap_ci95": [
+        -0.032834821428571366,
+        0.0507352941176471
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.3528594970703125,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8387451171875
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "unordered_prefix",
+      "n": 16,
+      "median": 0.0,
+      "bootstrap_ci95": [
+        -0.024999999999999994,
+        0.025000000000000022
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.5555965227813765,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8387451171875
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "last_set_first_order",
+      "n": 16,
+      "median": -0.008957219251336884,
+      "bootstrap_ci95": [
+        -0.06704545454545455,
+        0.035714285714285754
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.7949480342808185,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8387451171875
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "rank_shuffle_gru",
+      "n": 16,
+      "median": -0.0329004329004329,
+      "bootstrap_ci95": [
+        -0.09523809523809523,
+        0.033333333333333326
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.8387451171875,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8387451171875
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "absolute_rho",
+      "left": "full_history_gru",
+      "right": "empirical_rank_distribution",
+      "n": 16,
+      "median": -0.008333333333333304,
+      "bootstrap_ci95": [
+        -0.035714285714285754,
+        0.03179489189979404
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.6218352854054201,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8387451171875
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "static_contact_hazard",
+      "n": 16,
+      "median": 0.011011904761904778,
+      "bootstrap_ci95": [
+        -0.03273809523809526,
+        0.0507352941176471
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.3528594970703125,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8258056640625
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "unordered_prefix",
+      "n": 16,
+      "median": 0.0,
+      "bootstrap_ci95": [
+        -0.026785714285714288,
+        0.025000000000000022
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.6234238176170428,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8258056640625
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "last_set_first_order",
+      "n": 16,
+      "median": -0.010427807486630997,
+      "bootstrap_ci95": [
+        -0.07661064425770309,
+        0.035714285714285754
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.8028770663946114,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8258056640625
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "rank_shuffle_gru",
+      "n": 16,
+      "median": -0.0329004329004329,
+      "bootstrap_ci95": [
+        -0.09523809523809518,
+        0.033333333333333326
+      ],
+      "n_positive": 7,
+      "wilcoxon_p": 0.8258056640625,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8258056640625
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "all_contact_margin",
+      "left": "full_history_gru",
+      "right": "empirical_rank_distribution",
+      "n": 16,
+      "median": -0.0002328961171529642,
+      "bootstrap_ci95": [
+        -0.03273809523809523,
+        0.035714285714285726
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.47735377710913834,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.8258056640625
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "static_contact_hazard",
+      "n": 16,
+      "median": 0.0017857142857142794,
+      "bootstrap_ci95": [
+        -0.027272727272727254,
+        0.035714285714285754
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.47735377710913834,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.9114429795682012
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "unordered_prefix",
+      "n": 16,
+      "median": -0.011764705882352927,
+      "bootstrap_ci95": [
+        -0.05714285714285716,
+        0.012121212121212144
+      ],
+      "n_positive": 6,
+      "wilcoxon_p": 0.9114429795682012,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.9114429795682012
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "last_set_first_order",
+      "n": 16,
+      "median": -0.015043290043290039,
+      "bootstrap_ci95": [
+        -0.06764705882352937,
+        0.014015151515151536
+      ],
+      "n_positive": 4,
+      "wilcoxon_p": 0.8597345498739629,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.9114429795682012
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "rank_shuffle_gru",
+      "n": 16,
+      "median": -0.031493506493506476,
+      "bootstrap_ci95": [
+        -0.08823529411764702,
+        0.050000000000000044
+      ],
+      "n_positive": 7,
+      "wilcoxon_p": 0.7886135660830336,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.9114429795682012
+    },
+    {
+      "field": "endpoint_joint_mass",
+      "metric": "within_shaft_margin",
+      "left": "full_history_gru",
+      "right": "empirical_rank_distribution",
+      "n": 16,
+      "median": -0.01645021645021641,
+      "bootstrap_ci95": [
+        -0.05,
+        0.02053571428571427
+      ],
+      "n_positive": 5,
+      "wilcoxon_p": 0.8028770663946114,
+      "alternative": "greater",
+      "family_bh_fdr_q": 0.9114429795682012
+    }
+  ],
+  "internal_full_vs_rank_shuffle": [
+    {
+      "field": "probability_contrast",
+      "direction_type": "pca",
+      "direction_index": 1,
+      "metric": "absolute_rho",
+      "left": "internal_full_history_gru_pca1",
+      "right": "internal_rank_shuffle_gru_pca1",
+      "n": 16,
+      "median": 0.03529411764705881,
+      "bootstrap_ci95": [
+        -0.057142857142857106,
+        0.1048951048951049
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.28503044178149073,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.3800405890419876
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "pca",
+      "direction_index": 1,
+      "metric": "all_contact_margin",
+      "left": "internal_full_history_gru_pca1",
+      "right": "internal_rank_shuffle_gru_pca1",
+      "n": 16,
+      "median": 0.03578431372549018,
+      "bootstrap_ci95": [
+        -0.057142857142857106,
+        0.09790209790209792
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.28503044178149073,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.4456990559895833
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "pca",
+      "direction_index": 1,
+      "metric": "within_shaft_margin",
+      "left": "internal_full_history_gru_pca1",
+      "right": "internal_rank_shuffle_gru_pca1",
+      "n": 16,
+      "median": 0.028273809523809534,
+      "bootstrap_ci95": [
+        -0.07692307692307698,
+        0.1107142857142857
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.36663569541061036,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.5472615559895834
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "pca",
+      "direction_index": 2,
+      "metric": "absolute_rho",
+      "left": "internal_full_history_gru_pca2",
+      "right": "internal_rank_shuffle_gru_pca2",
+      "n": 16,
+      "median": -0.00476190476190478,
+      "bootstrap_ci95": [
+        -0.11428571428571432,
+        0.11888111888111891
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.5514373049455475,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.5514373049455475
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "pca",
+      "direction_index": 2,
+      "metric": "all_contact_margin",
+      "left": "internal_full_history_gru_pca2",
+      "right": "internal_rank_shuffle_gru_pca2",
+      "n": 16,
+      "median": 0.0008928571428571119,
+      "bootstrap_ci95": [
+        -0.1071428571428572,
+        0.10944055944055944
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.5309173801047447,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.5309173801047447
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "pca",
+      "direction_index": 2,
+      "metric": "within_shaft_margin",
+      "left": "internal_full_history_gru_pca2",
+      "right": "internal_rank_shuffle_gru_pca2",
+      "n": 16,
+      "median": -0.021813725490196084,
+      "bootstrap_ci95": [
+        -0.1071428571428572,
+        0.1
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.5718205067564824,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.5718205067564824
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "output_coupled",
+      "direction_index": 1,
+      "metric": "absolute_rho",
+      "left": "internal_full_history_gru_output_coupled1",
+      "right": "internal_rank_shuffle_gru_output_coupled1",
+      "n": 16,
+      "median": 0.012500000000000025,
+      "bootstrap_ci95": [
+        -0.035714285714285754,
+        0.09166666666666662
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.28094482421875,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.3800405890419876
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "output_coupled",
+      "direction_index": 1,
+      "metric": "all_contact_margin",
+      "left": "internal_full_history_gru_output_coupled1",
+      "right": "internal_rank_shuffle_gru_output_coupled1",
+      "n": 16,
+      "median": 0.013636363636363641,
+      "bootstrap_ci95": [
+        -0.051785714285714296,
+        0.09285714285714289
+      ],
+      "n_positive": 8,
+      "wilcoxon_p": 0.3342742919921875,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.4456990559895833
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "output_coupled",
+      "direction_index": 1,
+      "metric": "within_shaft_margin",
+      "left": "internal_full_history_gru_output_coupled1",
+      "right": "internal_rank_shuffle_gru_output_coupled1",
+      "n": 16,
+      "median": 0.021590909090909077,
+      "bootstrap_ci95": [
+        -0.07142857142857145,
+        0.07142857142857148
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.4104461669921875,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.5472615559895834
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "output_coupled",
+      "direction_index": 2,
+      "metric": "absolute_rho",
+      "left": "internal_full_history_gru_output_coupled2",
+      "right": "internal_rank_shuffle_gru_output_coupled2",
+      "n": 16,
+      "median": 0.05148809523809522,
+      "bootstrap_ci95": [
+        -0.04166666666666674,
+        0.1042291042291042
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.09572320178525401,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.3800405890419876
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "output_coupled",
+      "direction_index": 2,
+      "metric": "all_contact_margin",
+      "left": "internal_full_history_gru_output_coupled2",
+      "right": "internal_rank_shuffle_gru_output_coupled2",
+      "n": 16,
+      "median": 0.0502801120448179,
+      "bootstrap_ci95": [
+        -0.04545454545454547,
+        0.11159465534465536
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.096405029296875,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.3856201171875
+    },
+    {
+      "field": "probability_contrast",
+      "direction_type": "output_coupled",
+      "direction_index": 2,
+      "metric": "within_shaft_margin",
+      "left": "internal_full_history_gru_output_coupled2",
+      "right": "internal_rank_shuffle_gru_output_coupled2",
+      "n": 16,
+      "median": 0.029761904761904753,
+      "bootstrap_ci95": [
+        -0.050000000000000044,
+        0.06428571428571428
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.23187255859375,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.5472615559895834
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "pca",
+      "direction_index": 1,
+      "metric": "absolute_rho",
+      "left": "internal_full_history_gru_pca1",
+      "right": "internal_rank_shuffle_gru_pca1",
+      "n": 16,
+      "median": 0.173686974789916,
+      "bootstrap_ci95": [
+        0.07142857142857142,
+        0.22377622377622375
+      ],
+      "n_positive": 14,
+      "wilcoxon_p": 0.001678466796875,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.0067138671875
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "pca",
+      "direction_index": 1,
+      "metric": "all_contact_margin",
+      "left": "internal_full_history_gru_pca1",
+      "right": "internal_rank_shuffle_gru_pca1",
+      "n": 16,
+      "median": 0.17605042016806724,
+      "bootstrap_ci95": [
+        0.06666666666666665,
+        0.23076923076923073
+      ],
+      "n_positive": 14,
+      "wilcoxon_p": 0.0013427734375,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.00537109375
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "pca",
+      "direction_index": 1,
+      "metric": "within_shaft_margin",
+      "left": "internal_full_history_gru_pca1",
+      "right": "internal_rank_shuffle_gru_pca1",
+      "n": 16,
+      "median": 0.1268716577540107,
+      "bootstrap_ci95": [
+        0.031468531468531444,
+        0.17142857142857143
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.00775146484375,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.031005859375
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "pca",
+      "direction_index": 2,
+      "metric": "absolute_rho",
+      "left": "internal_full_history_gru_pca2",
+      "right": "internal_rank_shuffle_gru_pca2",
+      "n": 16,
+      "median": 0.0959033613445378,
+      "bootstrap_ci95": [
+        0.009090909090909094,
+        0.16363636363636364
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.00622665202309257,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.01245330404618514
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "pca",
+      "direction_index": 2,
+      "metric": "all_contact_margin",
+      "left": "internal_full_history_gru_pca2",
+      "right": "internal_rank_shuffle_gru_pca2",
+      "n": 16,
+      "median": 0.09768907563025209,
+      "bootstrap_ci95": [
+        0.009090909090909094,
+        0.16363636363636364
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.004492498827607797,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.008984997655215593
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "pca",
+      "direction_index": 2,
+      "metric": "within_shaft_margin",
+      "left": "internal_full_history_gru_pca2",
+      "right": "internal_rank_shuffle_gru_pca2",
+      "n": 16,
+      "median": 0.09474789915966385,
+      "bootstrap_ci95": [
+        0.0,
+        0.1575757575757576
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.017800356079440204,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.03560071215888041
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "output_coupled",
+      "direction_index": 1,
+      "metric": "absolute_rho",
+      "left": "internal_full_history_gru_output_coupled1",
+      "right": "internal_rank_shuffle_gru_output_coupled1",
+      "n": 16,
+      "median": 0.038961038961038974,
+      "bootstrap_ci95": [
+        -0.016666666666666607,
+        0.14285714285714285
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.04394127473865881,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.058588366318211745
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "output_coupled",
+      "direction_index": 1,
+      "metric": "all_contact_margin",
+      "left": "internal_full_history_gru_output_coupled1",
+      "right": "internal_rank_shuffle_gru_output_coupled1",
+      "n": 16,
+      "median": 0.038961038961038974,
+      "bootstrap_ci95": [
+        -0.013986013986014012,
+        0.14285714285714285
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.030446330950476257,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.040595107933968345
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "output_coupled",
+      "direction_index": 1,
+      "metric": "within_shaft_margin",
+      "left": "internal_full_history_gru_output_coupled1",
+      "right": "internal_rank_shuffle_gru_output_coupled1",
+      "n": 16,
+      "median": 0.02302489177489178,
+      "bootstrap_ci95": [
+        -0.02380952380952378,
+        0.1333333333333334
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.1156005859375,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.15413411458333334
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "output_coupled",
+      "direction_index": 2,
+      "metric": "absolute_rho",
+      "left": "internal_full_history_gru_output_coupled2",
+      "right": "internal_rank_shuffle_gru_output_coupled2",
+      "n": 16,
+      "median": 0.03154761904761902,
+      "bootstrap_ci95": [
+        -0.018181818181818188,
+        0.14285714285714285
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.1164895540906073,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.1164895540906073
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "output_coupled",
+      "direction_index": 2,
+      "metric": "all_contact_margin",
+      "left": "internal_full_history_gru_output_coupled2",
+      "right": "internal_rank_shuffle_gru_output_coupled2",
+      "n": 16,
+      "median": 0.03154761904761902,
+      "bootstrap_ci95": [
+        -0.018181818181818188,
+        0.09523809523809523
+      ],
+      "n_positive": 10,
+      "wilcoxon_p": 0.12799425583506907,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.12799425583506907
+    },
+    {
+      "field": "probability_contrast_residual_participation",
+      "direction_type": "output_coupled",
+      "direction_index": 2,
+      "metric": "within_shaft_margin",
+      "left": "internal_full_history_gru_output_coupled2",
+      "right": "internal_rank_shuffle_gru_output_coupled2",
+      "n": 16,
+      "median": 0.03214285714285717,
+      "bootstrap_ci95": [
+        -0.027272727272727282,
+        0.0968137254901961
+      ],
+      "n_positive": 9,
+      "wilcoxon_p": 0.1741943359375,
+      "alternative": "greater",
+      "direction_family_bh_fdr_q": 0.1741943359375
+    }
+  ],
+  "alternating_seizure_validation": [
+    {
+      "direction_index": 1,
+      "seizure_split": "alternating_a",
+      "metric": "all_contact_margin",
+      "n": 16,
+      "median": 0.08676470588235298,
+      "bootstrap_ci95": [
+        0.010119047619047639,
+        0.15454545454545454
+      ],
+      "n_positive": 12,
+      "wilcoxon_p": 0.013079311749190943,
+      "alternative": "greater"
+    },
+    {
+      "direction_index": 1,
+      "seizure_split": "alternating_b",
+      "metric": "all_contact_margin",
+      "n": 14,
+      "median": 0.1851190476190476,
+      "bootstrap_ci95": [
+        0.10909090909090907,
+        0.3259103641456583
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.013853924679039932,
+      "alternative": "greater"
+    },
+    {
+      "direction_index": 1,
+      "seizure_split": "a_vs_b_patient_spearman",
+      "metric": "all_contact_margin",
+      "n": 14,
+      "median": -0.03520354165444462,
+      "n_positive": 9
+    },
+    {
+      "direction_index": 2,
+      "seizure_split": "alternating_a",
+      "metric": "all_contact_margin",
+      "n": 16,
+      "median": 0.10357142857142856,
+      "bootstrap_ci95": [
+        0.05073529411764707,
+        0.14295319264068426
+      ],
+      "n_positive": 13,
+      "wilcoxon_p": 0.004492498827607797,
+      "alternative": "greater"
+    },
+    {
+      "direction_index": 2,
+      "seizure_split": "alternating_b",
+      "metric": "all_contact_margin",
+      "n": 14,
+      "median": 0.07813852813852813,
+      "bootstrap_ci95": [
+        0.023214285714285715,
+        0.16249999999999998
+      ],
+      "n_positive": 11,
+      "wilcoxon_p": 0.01763916015625,
+      "alternative": "greater"
+    },
+    {
+      "direction_index": 2,
+      "seizure_split": "a_vs_b_patient_spearman",
+      "metric": "all_contact_margin",
+      "n": 14,
+      "median": 0.12087912087912088,
+      "n_positive": 10
+    }
+  ]
+}

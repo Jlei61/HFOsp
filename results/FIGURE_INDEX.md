@@ -7,7 +7,7 @@
 > per-subject / per-seizure 的诊断图（占全部图的 ~75%）不在本索引里逐一列出——它们藏在各目录的
 > `per_subject/` `per_seizure/` `subjects/` 子目录中，是单被试核对用，不是结论图。
 >
-> 最近更新：2026-07-17。新增结论图目录时，请在对应 topic 表里补一行。
+> 最近更新：2026-07-30。新增结论图目录时，请在对应 topic 表里补一行。
 >
 > **画新图前先看可视化标准** → [`docs/figure_style_guide.md`](../docs/figure_style_guide.md)：
 > 每类反复出现的图（时序模板 / swap 节点 / 几何传播 / 事件时序 / 机制模型）的固定布局 + 配色 + 轴约定。
@@ -28,6 +28,10 @@
 | 4 观测层 | [topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/stage2_summary.png](topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/) | 虚拟 SEEG 把模型读回成方向/模板 |
 | 5 ictal 回响 | [topic5_ictal_template_echo/figures/echo_anchor_not_path.png](topic5_ictal_template_echo/figures/) | 发作期通道顺序是否回响间期模板（共享粗锚 vs 具体路径） |
 | 5 桥接 | [topic1_topic5_bridge/figures/q1prime_cohort_effect.png](topic1_topic5_bridge/figures/) | Topic 1 模板 × Topic 5 亚型 的队列效应 |
+| 5 bounded sequence | [topic5_interictal_scaffold_reliability_history_necessity/figures/topic5_scaffold_reliability_history_necessity_v0_1.png](topic5_interictal_scaffold_reliability_history_necessity/figures/) | 34人 target-blind：participation scaffold 可重复；真实顺序增量集中在最近2–3个 rank set，full history 不超过 H3 |
+| 5 minimal sequence closeout | [paper-ready-figure/fig_topic5_minimal_sequence_kernel_closeout/figures/topic5_minimal_sequence_kernel_closeout.png](paper-ready-figure/fig_topic5_minimal_sequence_kernel_closeout/figures/) | 当前 canonical bounded figure：稳定 contact scaffold + 当前/前一 rank 的短程 contact 修正；第三 rank 主要预测 STOP，ordered residual 的 early-ictal 增量与真实时间 state 均未建立 |
+| 5 contact topography | [paper-ready-figure/fig6_static_contact_topography/figures/fig6_static_contact_topography.png](paper-ready-figure/fig6_static_contact_topography/figures/) | Supplementary boundary control：间期 contact topography 与 early-ictal energy 有 reused-target 的 orientation-free 静态对应；fixed positive direction 与 GRU-specific 跨状态增量未建立 |
+| 5 ordered-history audit | [paper-ready-figure/fig6_ordered_history_architecture_audit/figures/fig6_ordered_history_architecture_audit.png](paper-ready-figure/fig6_ordered_history_architecture_audit/figures/) | 34人 target-blind 架构与顺序控制：linear-state 利用事件内顺序，但跨架构稳定性仅 1/7；冻结 ordered residual 对 clinical-onset early-ictal field 的条件增量未建立 |
 | 5 V2 state 层 | [topic5_ictal_recruitment/v2_criticality/figures/phase2_state_layer_alignment.png](topic5_ictal_recruitment/v2_criticality/figures/) | 发作前"变脆状态"是否沿间期 HFO 几何排布（EXPLORATORY，偏阴性；动力学 leg 0/16 显著）|
 | 5 子型×方向 | [topic5_ictal_recruitment/subtype_direction/figures/cohort_C_to_A_connection_broadband.png](topic5_ictal_recruitment/subtype_direction/figures/) | C 线：发作子型是否决定激活方向 + 与 A 线奇偶不稳的连接（队列不可行/无信号） |
 | 5 方向两类 | [topic5_ictal_recruitment/directional_clustering/figures/epilepsiae_442__classes_vs_interictal_hist_broadband.png](topic5_ictal_recruitment/directional_clustering/figures/) | 发作方向无监督两类是否对应间期 A/B（6 ECoG 全无 two_class_mapped；442 真两堆但对不齐；防自欺 null） |
@@ -136,7 +140,10 @@
 
 | 目录 | 内容 |
 |---|---|
-| [paper-ready-figure/fig6_structured_rank_rnn/figures/](paper-ready-figure/fig6_structured_rank_rnn/figures/) | **Figure 6 structured path-mode graph RNN 正式 bounded-negative（34 人 × 3 seeds × 5 conditions，510 runs）**：A 模型结构；B E1146 heldout 触点参与概率与完整 rank distribution；C 四个主对照；D 结构损伤；E event-rank 内部状态；F 预注册决策。局部 next-set NLL 可学，但两个自由生成主终点和 graph/mode 必要性均未过门；clinical-onset `[0,10] s`、`1–150 Hz` target 未读取。producer `scripts/paper_figures/plot_fig6_structured_rank_rnn.py`。 |
+| [paper-ready-figure/fig6_structured_rank_rnn/figures/](paper-ready-figure/fig6_structured_rank_rnn/figures/) | **历史 Figure 6 structured path-mode graph RNN bounded-negative（34 人 × 3 seeds × 5 conditions，510 runs）**：局部 next-set NLL 可学，但自由生成与 graph/mode necessity 未过门。该图不再是当前主文 Figure 6 候选，只保留旧模型谱系。 |
+| [topic5_symmetric_axis_propagation_state_v2_2/closeout_v2_2_1/figures/](topic5_symmetric_axis_propagation_state_v2_2/closeout_v2_2_1/figures/) | **v2.2.1 supplementary bounded-negative diagnostic**：A 同一 22 人 Markov/isotropic/axis 相对 node-bias；B next-set cardinality calibration；C local/axis kernel 共线性与 operator distance；D learned axis–PCA1 与 gamma→0 的实际 logit change。Markov 21/22 阳性，而 full/isotropic 均仅 1/22 阳性；真实 set size=1、模型预测约1.65。结论只限当前非负线性单状态 observation mapping，不进入主文 Figure 6。 |
+| [topic5_interictal_transition_decomposition_v0_1/figures/](topic5_interictal_transition_decomposition_v0_1/figures/) | **v2.3 设计依据 / supplementary transition decomposition**：A Markov 相对 node、local geometry 与 cross-shaft control；B symmetric residual 与额外 skew；C axis-aligned residual 与微小 source modulation，并显式显示 axis coefficient 正负；D last-rank 与 ordered multi-step history。正式 gate 允许起草最小 v2.3，但 14/22 axis coefficient 为负、source增益极小，不能写成正向病理轴恢复或 early-ictal transfer。 |
+| [topic5_symmetric_axis_competitive_propagation_v2_3/figures/](topic5_symmetric_axis_competitive_propagation_v2_3/figures/) | **v2.3 formal / bounded computational result**：A 精确结构模型；B 22/22 full>node；C history通过但 delayed competition失败；D full-axis、matched-axis 与 source term 均未过置信区间门；E 结构模型恢复 ordered-history Markov cohort-median benefit 的约58%；F 冻结解释门。只支持 rank sequence 自监督可预测性，不支持 physical-axis recovery、latent-state mechanism 或 early-ictal transfer。 |
 | [data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/](data_driven_soz/layer_a_ictal_er_rank/atlas_v2_3/figures/) | ictal ER-onset timing atlas（per_seizure：全 371 张横向布局[上gamma/下broad，左raw/右heatmap，y轴对齐]，Epilepsiae 339 + Yuquan 32，EEG-zoom ±90s，z-ER bin=0.1s 与 field 一致；见 figures/README.md） |
 | [data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/](data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/) | PR-1 z-ER 子型聚类（per-subject 在子目录） |
 | [topic5_ictal_template_echo/figures/](topic5_ictal_template_echo/figures/) | Stage 1 ictal-template-echo（anchor vs path） |

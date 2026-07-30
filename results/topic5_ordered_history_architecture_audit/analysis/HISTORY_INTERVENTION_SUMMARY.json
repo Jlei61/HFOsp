@@ -1,0 +1,656 @@
+{
+  "contract": "topic5_ordered_history_architecture_audit_v0_1",
+  "status": "TARGET_BLIND_HISTORY_INTERVENTIONS_COMPLETE",
+  "n_patients": 34,
+  "n_seeds": 3,
+  "models": [
+    "full_history_gru",
+    "selected_ordered"
+  ],
+  "interventions": [
+    "reverse_prefix",
+    "drop_earliest",
+    "reset_after_rank_0",
+    "reset_after_rank_1",
+    "reset_after_rank_2"
+  ],
+  "summaries": {
+    "full_history_gru__drop_earliest__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.013997912406921387,
+      "bootstrap_ci95": [
+        0.0052962303161625535,
+        0.0326080322265625
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 1.2493692338466644e-06
+    },
+    "full_history_gru__drop_earliest__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__drop_earliest__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.07887232120236043,
+      "bootstrap_ci95": [
+        0.05606933044296136,
+        0.10161018157117785
+      ],
+      "n_positive": 30,
+      "wilcoxon_greater_p": 1.4726538211107254e-08
+    },
+    "full_history_gru__drop_earliest__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.009009590330061434,
+      "bootstrap_ci95": [
+        0.0006030635456637512,
+        0.01504902212995729
+      ],
+      "n_positive": 23,
+      "wilcoxon_greater_p": 0.09823699580738321
+    },
+    "full_history_gru__drop_earliest__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.01801683667589693,
+      "bootstrap_ci95": [
+        -0.02960572869020517,
+        -0.007411174708464974
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.9961535178008489
+    },
+    "full_history_gru__drop_earliest__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0017476249891815732,
+      "bootstrap_ci95": [
+        -0.004557048708176081,
+        0.023967377490756503
+      ],
+      "n_positive": 19,
+      "wilcoxon_greater_p": 0.03905761381611228
+    },
+    "full_history_gru__reset_after_rank_0__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.013997912406921387,
+      "bootstrap_ci95": [
+        0.0052962303161625535,
+        0.0326080322265625
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 1.2493692338466644e-06
+    },
+    "full_history_gru__reset_after_rank_0__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__reset_after_rank_0__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.07887232120236043,
+      "bootstrap_ci95": [
+        0.05606933044296136,
+        0.10161018157117785
+      ],
+      "n_positive": 30,
+      "wilcoxon_greater_p": 1.4726538211107254e-08
+    },
+    "full_history_gru__reset_after_rank_0__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.009009590330061434,
+      "bootstrap_ci95": [
+        0.0006030635456637512,
+        0.01504902212995729
+      ],
+      "n_positive": 23,
+      "wilcoxon_greater_p": 0.09823699580738321
+    },
+    "full_history_gru__reset_after_rank_0__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.01801683667589693,
+      "bootstrap_ci95": [
+        -0.02960572869020517,
+        -0.009363384663872543
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.9961535178008489
+    },
+    "full_history_gru__reset_after_rank_0__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0017476249891815732,
+      "bootstrap_ci95": [
+        -0.004557048708176081,
+        0.023967377490756503
+      ],
+      "n_positive": 19,
+      "wilcoxon_greater_p": 0.03905761381611228
+    },
+    "full_history_gru__reset_after_rank_1__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.032867372035980114,
+      "bootstrap_ci95": [
+        0.0055811405181884766,
+        0.06625115871429443
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 2.2854655981063843e-06
+    },
+    "full_history_gru__reset_after_rank_1__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__reset_after_rank_1__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__reset_after_rank_1__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.07094987684392051,
+      "bootstrap_ci95": [
+        0.05826921173715838,
+        0.10867637333520808
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 2.5029294192790985e-09
+    },
+    "full_history_gru__reset_after_rank_1__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.011135561781296821,
+      "bootstrap_ci95": [
+        -0.028472379257118652,
+        0.019607846846245724
+      ],
+      "n_positive": 15,
+      "wilcoxon_greater_p": 0.6635355857433751
+    },
+    "full_history_gru__reset_after_rank_1__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.016922801351715866,
+      "bootstrap_ci95": [
+        -0.005513684416673215,
+        0.10466219206396832
+      ],
+      "n_positive": 21,
+      "wilcoxon_greater_p": 0.0024350828025490046
+    },
+    "full_history_gru__reset_after_rank_2__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.06294304132461548,
+      "bootstrap_ci95": [
+        0.013138771057128906,
+        0.13769233226776123
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 1.1026859283447266e-06
+    },
+    "full_history_gru__reset_after_rank_2__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__reset_after_rank_2__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__reset_after_rank_2__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__reset_after_rank_2__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.06181342450311289,
+      "bootstrap_ci95": [
+        0.04170213225138131,
+        0.10145398214375545
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 2.601882442831993e-08
+    },
+    "full_history_gru__reset_after_rank_2__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0645804845763045,
+      "bootstrap_ci95": [
+        5.26319819122989e-05,
+        0.25610965120959495
+      ],
+      "n_positive": 23,
+      "wilcoxon_greater_p": 0.00025074149016290903
+    },
+    "full_history_gru__reverse_prefix__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.029976546764374,
+      "bootstrap_ci95": [
+        0.015211820602416992,
+        0.04758286476135298
+      ],
+      "n_positive": 32,
+      "wilcoxon_greater_p": 8.149072527885437e-10
+    },
+    "full_history_gru__reverse_prefix__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__reverse_prefix__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "full_history_gru__reverse_prefix__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.004342936443126666,
+      "bootstrap_ci95": [
+        0.0015711274735672465,
+        0.01043708004871946
+      ],
+      "n_positive": 25,
+      "wilcoxon_greater_p": 0.0024350828025490046
+    },
+    "full_history_gru__reverse_prefix__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.010677206651932059,
+      "bootstrap_ci95": [
+        0.008221435546875266,
+        0.022147694058194833
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 5.771289579570293e-07
+    },
+    "full_history_gru__reverse_prefix__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.05372292570166848,
+      "bootstrap_ci95": [
+        0.0365142979709252,
+        0.06770748400217386
+      ],
+      "n_positive": 34,
+      "wilcoxon_greater_p": 5.820766091346741e-11
+    },
+    "selected_ordered__drop_earliest__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.006801545619964489,
+      "bootstrap_ci95": [
+        0.0036308765411372512,
+        0.008491992950439453
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 1.1721975170075893e-05
+    },
+    "selected_ordered__drop_earliest__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__drop_earliest__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.07678989572631523,
+      "bootstrap_ci95": [
+        0.06601474039470001,
+        0.10422427624874642
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 3.836466930806637e-07
+    },
+    "selected_ordered__drop_earliest__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.007358425095362664,
+      "bootstrap_ci95": [
+        -0.015566300022271218,
+        0.00909086293668615
+      ],
+      "n_positive": 15,
+      "wilcoxon_greater_p": 0.7817643851158209
+    },
+    "selected_ordered__drop_earliest__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.019967335666423502,
+      "bootstrap_ci95": [
+        -0.026040216719218634,
+        -0.009853784511152153
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.9996090272907168
+    },
+    "selected_ordered__drop_earliest__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.0019934118314590688,
+      "bootstrap_ci95": [
+        -0.004851453521187876,
+        8.354376797647944e-05
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.6938281381153502
+    },
+    "selected_ordered__reset_after_rank_0__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.006801545619964489,
+      "bootstrap_ci95": [
+        0.0036308765411372512,
+        0.008491992950439453
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 1.1721975170075893e-05
+    },
+    "selected_ordered__reset_after_rank_0__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__reset_after_rank_0__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.07678989572631523,
+      "bootstrap_ci95": [
+        0.06601474039470001,
+        0.10422427624874642
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 3.836466930806637e-07
+    },
+    "selected_ordered__reset_after_rank_0__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.007358425095362664,
+      "bootstrap_ci95": [
+        -0.015566300022271218,
+        0.00909086293668615
+      ],
+      "n_positive": 15,
+      "wilcoxon_greater_p": 0.7817643851158209
+    },
+    "selected_ordered__reset_after_rank_0__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.019967335666423502,
+      "bootstrap_ci95": [
+        -0.026040216719218634,
+        -0.009853784511152153
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.9996090272907168
+    },
+    "selected_ordered__reset_after_rank_0__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.0019934118314590688,
+      "bootstrap_ci95": [
+        -0.004851453521187876,
+        0.0008530159956550154
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.6938281381153502
+    },
+    "selected_ordered__reset_after_rank_1__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.007628142833709606,
+      "bootstrap_ci95": [
+        0.0031037330627436965,
+        0.02768838405609131
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 2.8837239369750023e-06
+    },
+    "selected_ordered__reset_after_rank_1__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__reset_after_rank_1__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__reset_after_rank_1__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0749546264909795,
+      "bootstrap_ci95": [
+        0.043761281134407914,
+        0.10071092334595733
+      ],
+      "n_positive": 27,
+      "wilcoxon_greater_p": 1.581897959113121e-05
+    },
+    "selected_ordered__reset_after_rank_1__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.022381934095457967,
+      "bootstrap_ci95": [
+        -0.03568196079408992,
+        0.00124444854393424
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.9786918095778674
+    },
+    "selected_ordered__reset_after_rank_1__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": -0.0006659054828448419,
+      "bootstrap_ci95": [
+        -0.006442079989159577,
+        0.013047745254814114
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 0.175802749581635
+    },
+    "selected_ordered__reset_after_rank_2__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.02053588628768932,
+      "bootstrap_ci95": [
+        0.0036706924438476562,
+        0.09408318996429443
+      ],
+      "n_positive": 27,
+      "wilcoxon_greater_p": 1.0587798897176981e-05
+    },
+    "selected_ordered__reset_after_rank_2__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__reset_after_rank_2__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__reset_after_rank_2__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__reset_after_rank_2__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.04859619353038802,
+      "bootstrap_ci95": [
+        0.02674081631671621,
+        0.07825784886136944
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 6.894971011206508e-05
+    },
+    "selected_ordered__reset_after_rank_2__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0028813249251696815,
+      "bootstrap_ci95": [
+        -0.005570951497659848,
+        0.12461142333724307
+      ],
+      "n_positive": 19,
+      "wilcoxon_greater_p": 0.011876732693053782
+    },
+    "selected_ordered__reverse_prefix__heldout_event_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0356675386428833,
+      "bootstrap_ci95": [
+        0.01782321929931663,
+        0.049179315567017046
+      ],
+      "n_positive": 32,
+      "wilcoxon_greater_p": 5.820766091346741e-10
+    },
+    "selected_ordered__reverse_prefix__step0_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__reverse_prefix__step1_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.0,
+      "bootstrap_ci95": [
+        0.0,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": NaN
+    },
+    "selected_ordered__reverse_prefix__step2_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.004797734036555923,
+      "bootstrap_ci95": [
+        0.0017680483489947996,
+        0.0068207969961240345
+      ],
+      "n_positive": 25,
+      "wilcoxon_greater_p": 0.0001341943279840052
+    },
+    "selected_ordered__reverse_prefix__step3_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.012990507048920685,
+      "bootstrap_ci95": [
+        0.007030674543161197,
+        0.01676631962874453
+      ],
+      "n_positive": 29,
+      "wilcoxon_greater_p": 4.526169504970312e-06
+    },
+    "selected_ordered__reverse_prefix__step4plus_prefix_balanced_nll": {
+      "n_patients": 34,
+      "median_nll_cost": 0.04861059285260949,
+      "bootstrap_ci95": [
+        0.028780810941349433,
+        0.08527059725821884
+      ],
+      "n_positive": 33,
+      "wilcoxon_greater_p": 1.7462298274040222e-10
+    }
+  },
+  "readout_relevant_local_memory": {
+    "readout_retention_median": {
+      "n_patients": 34,
+      "median": 0.5074894770912841,
+      "bootstrap_ci95": [
+        0.5057826932213317,
+        0.5079088848766161
+      ]
+    },
+    "readout_alignment_median": {
+      "n_patients": 34,
+      "median": 0.9997027132118752,
+      "bootstrap_ci95": [
+        0.9996701781238082,
+        0.9997440485717888
+      ]
+    },
+    "state_gain_median": {
+      "n_patients": 34,
+      "median": 0.5036118798053553,
+      "bootstrap_ci95": [
+        0.503040272769536,
+        0.5045022529357851
+      ]
+    },
+    "local_spectral_radius_median": {
+      "n_patients": 34,
+      "median": 0.5266037285327911,
+      "bootstrap_ci95": [
+        0.5260588526725769,
+        0.5273705124855042
+      ]
+    }
+  },
+  "target_values_read": false,
+  "early_ictal_target_arrays_deserialized": false,
+  "interpretation": "positive cost shows that the fitted event-indexed state uses the intervened history; it is not a biological time-constant estimate"
+}

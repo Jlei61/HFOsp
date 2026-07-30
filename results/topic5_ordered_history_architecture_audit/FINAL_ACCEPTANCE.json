@@ -1,0 +1,336 @@
+{
+  "contract": "topic5_ordered_history_architecture_audit_v0_1",
+  "status": "COMPLETE_LAYERED_ORDER_AND_CROSS_STATE_AUDIT",
+  "overall_scientific_verdict": "WITHIN_EVENT_ORDER_SUPPORTED_IN_SELECTED_LINEAR_STATE_BUT_CROSS_ARCHITECTURE_STABILITY_AND_EARLY_ICTAL_INCREMENT_NOT_ESTABLISHED",
+  "execution": {
+    "temporal_pairing_audit_complete": true,
+    "interictal_patients": 34,
+    "architecture_seeds": 3,
+    "new_architecture_cells": 204,
+    "selected_shuffle_cells": 102,
+    "intervention_cells": 102,
+    "parameter_matched_sensitivity_cells": 204,
+    "strict_early_ictal_patients": 16,
+    "strict_early_ictal_seizures": 106,
+    "distinct_causal_preseizure_histories": 46,
+    "early_ictal_target_reused": true,
+    "launcher_status": {
+      "fixed_hidden_architectures": {
+        "status": "COMPLETE",
+        "expected_cells": 204,
+        "completed_cells": 204,
+        "exit_code": 0
+      },
+      "selected_matched_rank_shuffle": {
+        "status": "COMPLETE",
+        "selected_architecture": "linear_state",
+        "expected_cells": 102,
+        "completed_cells": 102,
+        "exit_code": 0
+      },
+      "history_interventions": {
+        "status": "COMPLETE",
+        "expected_cells": 102,
+        "completed_cells": 102,
+        "exit_code": 0
+      },
+      "parameter_matched_sensitivity": {
+        "status": "COMPLETE",
+        "expected_cells": 204,
+        "completed_cells": 204,
+        "exit_code": 0
+      }
+    },
+    "resource_audit": {
+      "fixed_hidden_architectures": {
+        "n_samples": 226,
+        "minimum_memory_available_gb": 136.2538948059082,
+        "maximum_gpu_memory_used_mb": 1732.0,
+        "maximum_gpu_utilization_percent": 99.0,
+        "maximum_gpu_temperature_c": 62.0
+      },
+      "selected_matched_rank_shuffle": {
+        "n_samples": 122,
+        "minimum_memory_available_gb": 145.19680404663086,
+        "maximum_gpu_memory_used_mb": 1714.0,
+        "maximum_gpu_utilization_percent": 99.0,
+        "maximum_gpu_temperature_c": 61.0
+      },
+      "parameter_matched_sensitivity": {
+        "n_samples": 213,
+        "minimum_memory_available_gb": 138.46458435058594,
+        "maximum_gpu_memory_used_mb": 1746.0,
+        "maximum_gpu_utilization_percent": 99.0,
+        "maximum_gpu_temperature_c": 61.0
+      },
+      "history_interventions": {
+        "n_samples": 34,
+        "minimum_memory_available_gb": 138.54152297973633,
+        "maximum_gpu_memory_used_mb": 1178.0,
+        "maximum_gpu_utilization_percent": 99.0,
+        "maximum_gpu_temperature_c": 61.0
+      }
+    }
+  },
+  "scientific_acceptance": {
+    "within_event_ordered_history": {
+      "selected_vs_unordered": "SUPPORTED",
+      "selected_vs_matched_rank_shuffle": "SUPPORTED",
+      "interpretation": "supported for the target-blind selected linear-state model; architecture-dependent because the preregistered cross-architecture requirement was not met"
+    },
+    "cross_architecture_stability": {
+      "n_supported_recurrent_families": 1,
+      "n_tested_recurrent_families": 7,
+      "preregistered_requirement": "at least two recurrent families must survive family-wise inference and the selected model must survive the matched within-event order null",
+      "status": "NOT_ESTABLISHED",
+      "per_family": {
+        "linear_state": "SUPPORTED",
+        "vanilla_rnn": "POSITIVE_DIRECTION_NOT_GROUP_SIGNIFICANT",
+        "full_history_gru": "POSITIVE_DIRECTION_NOT_GROUP_SIGNIFICANT",
+        "low_rank_r0": "POSITIVE_DIRECTION_NOT_GROUP_SIGNIFICANT",
+        "low_rank_r1": "NO_POSITIVE_INCREMENT",
+        "low_rank_r2": "POSITIVE_DIRECTION_NOT_GROUP_SIGNIFICANT",
+        "low_rank_r4": "POSITIVE_DIRECTION_NOT_GROUP_SIGNIFICANT"
+      }
+    },
+    "selected_non_gru_architecture": "linear_state",
+    "selected_vs_static": {
+      "n_patients": 34,
+      "median_gain": 0.08318528816713155,
+      "ci95": [
+        0.06335827674131389,
+        0.09697180676724715
+      ],
+      "n_positive": 33,
+      "wilcoxon_greater_p": 1.9208528101444244e-09
+    },
+    "selected_vs_last_set": {
+      "n_patients": 34,
+      "median_gain": 0.04460613682943371,
+      "ci95": [
+        0.032706887771686066,
+        0.07405420048561961
+      ],
+      "n_positive": 34,
+      "wilcoxon_greater_p": 5.820766091346741e-11
+    },
+    "selected_vs_unordered": {
+      "n_patients": 34,
+      "median_gain": 0.025718509825526037,
+      "ci95": [
+        0.006326891111736788,
+        0.04801464683554135
+      ],
+      "n_positive": 26,
+      "wilcoxon_greater_p": 5.3107098210603e-05,
+      "selection_corrected_maxT_p": 0.00031999360012799745
+    },
+    "selected_vs_matched_rank_shuffle": {
+      "n_patients": 34,
+      "median_gain": 0.04193227015928158,
+      "ci95": [
+        0.03210859377457931,
+        0.05131551689571756
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 1.8702121451497078e-07
+    },
+    "gru_vs_unordered": {
+      "n_patients": 34,
+      "median_gain": 0.010615375427526552,
+      "ci95": [
+        -0.002603272596995332,
+        0.02688822153419901
+      ],
+      "n_positive": 21,
+      "wilcoxon_greater_p": 0.056309308274649084,
+      "selection_corrected_maxT_p": 0.18315633687326255
+    },
+    "gru_vs_rank_shuffle": {
+      "n_patients": 34,
+      "median_gain": 0.030642926033082052,
+      "ci95": [
+        0.01873376350922351,
+        0.0386880405206349
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 0.00025074149016290903
+    },
+    "early_ictal_conditional_increment": "NOT_ESTABLISHED",
+    "early_ictal_primary_effects": {
+      "ordered_absolute_margin_beyond_static_plus_unordered": {
+        "n_patients": 12,
+        "median": 0.034617801162581785,
+        "bootstrap_ci95": [
+          -0.13647049139425702,
+          0.10632300355197959
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p": 0.51513671875
+      },
+      "ordered_minus_matched_rank_shuffle_absolute_partial_r": {
+        "conditioning": "static_plus_unordered",
+        "metric": "absolute_rho",
+        "left": "selected_ordered",
+        "right": "selected_rank_shuffle",
+        "n_patients": 12,
+        "median": 0.00849974348892825,
+        "bootstrap_ci95": [
+          -0.26243195174039147,
+          0.14058328554630384
+        ],
+        "n_positive": 6,
+        "wilcoxon_greater_p": 0.6044921875
+      }
+    },
+    "bounded_history_depth": {
+      "history2_over_history1": {
+        "median": 0.01717523522100084,
+        "ci95": [
+          0.011683256608867154,
+          0.02404102462492297
+        ],
+        "wilcoxon_two_sided_p": 1.009204424917698e-06,
+        "n_positive": 32,
+        "n_patients": 34
+      },
+      "history3_over_history2": {
+        "median": 0.011329764981649504,
+        "ci95": [
+          0.008920358733440548,
+          0.015386991742728728
+        ],
+        "wilcoxon_two_sided_p": 2.9453076422214508e-08,
+        "n_positive": 29,
+        "n_patients": 34
+      },
+      "full_over_history3": {
+        "median": -0.0009507639463539608,
+        "ci95": [
+          -0.005065963347560931,
+          0.003462366684389817
+        ],
+        "wilcoxon_two_sided_p": 0.43647122976835817,
+        "n_positive": 16,
+        "n_patients": 34
+      },
+      "history3_ordered_over_matched_shuffle": {
+        "status": "complete",
+        "n_patients": 34,
+        "n_seeds": 3,
+        "n_folds": 102,
+        "median_ordered_gain": 0.02608094675926087,
+        "ordered_gain_ci95": [
+          0.016831866123886548,
+          0.03478029919254455
+        ],
+        "wilcoxon_two_sided_p": 0.0036093484377488494,
+        "n_positive": 27,
+        "matched_order_sensitivity_supported": true,
+        "denominator_failures": [],
+        "coverage_failures": [],
+        "single_input_fingerprint_set": true,
+        "ictal_target_read": false
+      },
+      "interpretation": "the useful ordered memory is concentrated in the latest two to three within-event rank sets"
+    },
+    "hidden_dimension_boundary": {
+      "ordered_gru_effective_rank_median": 1.8784193846879007,
+      "rank_shuffle_gru_effective_rank_median": 1.3357728639398208,
+      "interpretation": "low effective dimension is shared by the order-shuffled control and is therefore descriptive, not evidence for a biological low-dimensional manifold"
+    },
+    "readout_relevant_local_memory": {
+      "readout_retention_median": {
+        "n_patients": 34,
+        "median": 0.5074894770912841,
+        "bootstrap_ci95": [
+          0.5057826932213317,
+          0.5079088848766161
+        ]
+      },
+      "readout_alignment_median": {
+        "n_patients": 34,
+        "median": 0.9997027132118752,
+        "bootstrap_ci95": [
+          0.9996701781238082,
+          0.9997440485717888
+        ]
+      },
+      "state_gain_median": {
+        "n_patients": 34,
+        "median": 0.5036118798053553,
+        "bootstrap_ci95": [
+          0.503040272769536,
+          0.5045022529357851
+        ]
+      },
+      "local_spectral_radius_median": {
+        "n_patients": 34,
+        "median": 0.5266037285327911,
+        "bootstrap_ci95": [
+          0.5260588526725769,
+          0.5273705124855042
+        ]
+      }
+    },
+    "across_event_preseizure_dynamics": "NOT_PRIMARY_DUE_TO_PSEUDOREPLICATION_AND_SPARSE_DISTINCT_HISTORIES",
+    "parameter_matched_sensitivity": {
+      "linear_state_parammatched_h64": {
+        "control": "linear_state_parammatched_h64",
+        "hidden_size": 64,
+        "n_parameters": 10158,
+        "median_nll_gain_vs_unordered": 0.02701042762501349,
+        "ci95": [
+          0.003796675470140176,
+          0.0426498857515103
+        ],
+        "n_positive_of_34": 24,
+        "wilcoxon_greater_p": 8.89542861841619e-05,
+        "holm_p": 0.0001779085723683238
+      },
+      "vanilla_rnn_parammatched_h48": {
+        "control": "vanilla_rnn_parammatched_h48",
+        "hidden_size": 48,
+        "n_parameters": 10318,
+        "median_nll_gain_vs_unordered": 0.0061062047226857485,
+        "ci95": [
+          -0.0008099378044925665,
+          0.020579210590155324
+        ],
+        "n_positive_of_34": 21,
+        "wilcoxon_greater_p": 0.06465386855416,
+        "holm_p": 0.06465386855416
+      }
+    }
+  },
+  "claim": "The audit quantifies, separately for each recurrent family, whether ordered recruitment steps improve held-out prediction over an unordered prefix and a matched order shuffle. Evidence is reported as patient-level effect sizes and uncertainty rather than compressed into a global go/no-go gate.",
+  "cross_state_claim": "The frozen ordered-history residual is evaluated for incremental sign-free early-ictal contact-field correspondence beyond static and unordered fields within the reused clinical-onset cohort; its effect size and uncertainty are retained whether or not the group threshold is crossed.",
+  "forbidden_overinterpretations": [
+    "two-dimensional biological seizure manifold",
+    "cell-level E/I identity of hidden units",
+    "continuous-time biological slow variable or recovery constant",
+    "seizure-specific forecasting from a patient-static field",
+    "independent validation using the reused early-ictal target"
+  ],
+  "paper_position": "supplementary data-driven sequence-identification and boundary result between empirical interictal propagation and the separate SNN mechanism layer",
+  "artifacts": {
+    "results/topic5_ordered_history_architecture_audit/input_audit/PAIRING_AUDIT.json": "83c09ff56b87797425f9ea473a71e6bdf2336fdd632cbe9a6b15ce8a437bd483",
+    "results/topic5_ordered_history_architecture_audit/analysis/ARCHITECTURE_SUMMARY.json": "0f90e0a01007263cd908ff88dfc9c786008f6b0e51d25967d118239deb7b5a2a",
+    "results/topic5_ordered_history_architecture_audit/analysis/HISTORY_INTERVENTION_SUMMARY.json": "d60776be6844f6a530ce7895041a1d94c414ce164196f02939796c6dfa6b6b0b",
+    "results/topic5_ordered_history_architecture_audit/analysis/EARLY_ICTAL_CONDITIONAL_SUMMARY.json": "4b976bf623741dbc5603d23165d5afb20c8a9b64b7ab4b4e5285268cfcbab715",
+    "results/topic5_ordered_history_architecture_audit/analysis/PARAMETER_MATCHED_SENSITIVITY.json": "1176322186bb02f63dcf1f5a3ec2673ffe577c661276a1f7e7f1c0417cd1d606",
+    "results/topic5_ordered_history_architecture_audit/TEST_AUDIT.json": "5e6570f910e13681a6d8b663636ce9c28abbe7b6b903a170fc3af3fc138a9902",
+    "results/paper-ready-figure/fig6_ordered_history_architecture_audit/figures/fig6_ordered_history_architecture_audit.png": "24af77b7215c9d148f051080fc112553a38baf7de9cae9883dc44fdef001ec45",
+    "results/topic5_interictal_scaffold_reliability_history_necessity/history_runs_v0_1/history_necessity_summary.json": "fb1a6b5cebfd8dc19853ac5d456be90835184d35d756309294ab2a411d47d0b8",
+    "results/topic5_interictal_scaffold_reliability_history_necessity/history3_rank_shuffle_runs_v0_1/history3_rank_shuffle_summary.json": "66ff930f7ef01b2a8e7d76e695107514d0b519bf4e2576df60b7eb0e5b44d9ac",
+    "results/topic5_rnn_internal_state_reduction/INTERICTAL_SUMMARY.json": "02fbf4a6028076addbfbfa51d04f426b0ee65f013169f6154c998163877a6220",
+    "results/topic5_ordered_history_architecture_audit/formal/architecture_controls_formal_20260729/LAUNCHER_DONE.json": "e4169fa151e18de8ed0eb1e6f8ff8203a856619e561b9a675502ebe3bf06a6c1",
+    "results/topic5_ordered_history_architecture_audit/rank_shuffle/selected_architecture_rank_shuffle_20260729/LAUNCHER_DONE.json": "e78e9de6e50d9d4cbf8f6e6acb72d65d8dec81296610eb35f318257af0c71fbe",
+    "results/topic5_ordered_history_architecture_audit/interventions/selected_history_interventions_20260729/LAUNCHER_DONE.json": "ab8b899b61ccbebe37a294921883d4d61fd25c798a9e9e288df5bf71f6211117",
+    "results/topic5_ordered_history_architecture_audit/parameter_matched/parameter_matched_formal_20260729/LAUNCHER_DONE.json": "e4169fa151e18de8ed0eb1e6f8ff8203a856619e561b9a675502ebe3bf06a6c1",
+    "results/topic5_ordered_history_architecture_audit/formal/architecture_controls_formal_20260729/resource_log.csv": "281dbfd2ecaa8beb6082d66120fea106b9a19c581edab54a6de56ff0e32112d4",
+    "results/topic5_ordered_history_architecture_audit/rank_shuffle/selected_architecture_rank_shuffle_20260729/resource_log.csv": "6aafc8b89cd6285aeda9c626b3de89f760afd9e567c7b20778669f576af5f7c0",
+    "results/topic5_ordered_history_architecture_audit/parameter_matched/parameter_matched_formal_20260729/resource_log.csv": "f5fa0e5e09dbcb1586237411ad1ac0bd94c55db584b4314e651ef1f9ae2e22e7",
+    "results/topic5_ordered_history_architecture_audit/interventions/selected_history_interventions_20260729/resource_log.csv": "ea8fe7686b88ce4417455e76e3154188a5f1192b851437d86652579d527ebee1"
+  }
+}

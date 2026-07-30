@@ -1,0 +1,211 @@
+{
+  "contract": "topic5_static_scaffold_fixed_readout_validation_v0_1",
+  "status": "PASS_WITH_BOUNDED_STATIC_CONCLUSION",
+  "execution": {
+    "n_patients": 16,
+    "n_seizures": 106,
+    "teacher_forced_cells": 96,
+    "teacher_forced_cells_target_blind_and_fingerprint_valid": 96,
+    "patient_metric_rows": {
+      "phase1": 480,
+      "phase2": 560,
+      "phase3": 160
+    },
+    "baseline_power_included": true,
+    "target_reused_not_independent_confirmation": true
+  },
+  "scientific_acceptance": {
+    "formal_ordered_history_gain": {
+      "status": "SUPPORTED_VS_RANK_SHUFFLE_NOT_BEST_NONRECURRENT",
+      "full_vs_rank_shuffle_heldout_nll": {
+        "n": 34,
+        "median": 0.04076792447508164,
+        "n_positive": 27,
+        "wilcoxon_greater_p": 0.00025074149016290903
+      },
+      "full_vs_strongest_nonrecurrent_heldout_nll": {
+        "n": 34,
+        "median": 0.00101446270809425,
+        "n_positive": 17,
+        "wilcoxon_greater_p": 0.43964656232856214
+      },
+      "boundary": "true event order improves heldout NLL over a GRU trained on rank-shuffled events, but the full-history GRU does not outperform the best nonrecurrent prefix model"
+    },
+    "order_perturbation_sensitivity": {
+      "status": "SUPPORTED_AS_MODEL_USAGE_DIAGNOSTIC",
+      "matched_shuffle_nll_cost": {
+        "n": 34,
+        "median": 0.0100398549028505,
+        "n_positive": 32,
+        "wilcoxon_greater_p": 1.7869751900434494e-08
+      },
+      "boundary": "evaluation-time sensitivity shows that the trained full GRU uses order and is complementary to the separately trained rank-shuffle comparison"
+    },
+    "static_signed_correspondence": {
+      "status": "NOT_ESTABLISHED",
+      "full_gru_all_contact": {
+        "n": 16,
+        "median": 0.2425770308123249,
+        "n_positive": 11,
+        "wilcoxon_greater_p": 0.1261138916015625
+      }
+    },
+    "static_sign_free_morphology": {
+      "status": "SUPPORTED_WITHIN_REUSED_TARGET_DATASET",
+      "full_gru_all_contact": {
+        "n": 16,
+        "median": 0.21547619047619038,
+        "n_positive": 14,
+        "wilcoxon_greater_p": 0.000152587890625
+      },
+      "raw_train80_all_contact": {
+        "n": 16,
+        "median": 0.1962703962703962,
+        "n_positive": 13,
+        "wilcoxon_greater_p": 0.0006561279296875
+      },
+      "raw_train80_within_shaft": {
+        "n": 16,
+        "median": 0.0788690476190475,
+        "n_positive": 12,
+        "wilcoxon_greater_p": 0.001312255859375
+      },
+      "raw_train80_geometry_smooth": {
+        "n": 13,
+        "median": 0.0999999999999999,
+        "n_positive": 9,
+        "wilcoxon_greater_p": 0.0340576171875
+      },
+      "boundary": "the bridge is a patient-specific sign-free static contact morphology, not a fixed positive field direction"
+    },
+    "gru_specific_static_increment": {
+      "status": "NOT_ESTABLISHED",
+      "full_minus_best_regularized": {
+        "n": 16,
+        "median": 0.011904761904761918,
+        "n_positive": 8,
+        "wilcoxon_greater_p": 0.1082763671875
+      },
+      "full_minus_rank_shuffle": {
+        "n": 16,
+        "median": -0.002941176470588225,
+        "n_positive": 7,
+        "wilcoxon_greater_p": 0.35986328125
+      },
+      "full_field_vs_best_regularized_spearman": {
+        "n": 16,
+        "median": 0.941125541125541,
+        "n_positive": 16,
+        "wilcoxon_greater_p": 1.52587890625e-05
+      }
+    },
+    "free_rollout_specific_increment": {
+      "status": "EXPLORATORY",
+      "full_free_minus_teacher_forced": {
+        "n": 16,
+        "median": 0.12871148459383752,
+        "n_positive": 12,
+        "wilcoxon_greater_p": 0.001007080078125
+      },
+      "boundary": "a free-vs-teacher difference cannot establish ordered dynamics unless it also exceeds rank-shuffle and regularized static baselines"
+    },
+    "single_confound_robustness": {
+      "status": "SENSITIVITY_ONLY",
+      "metrics": {
+        "within_shaft_position__raw_train80_participation": {
+          "n": 16,
+          "median": 0.15245032218166849,
+          "n_positive": 12,
+          "wilcoxon_greater_p": 0.0054931640625
+        },
+        "within_shaft_position__full_history_gru": {
+          "n": 16,
+          "median": 0.20356105576063593,
+          "n_positive": 13,
+          "wilcoxon_greater_p": 0.001068115234375
+        },
+        "geometry_pc1__raw_train80_participation": {
+          "n": 13,
+          "median": 0.2896439438567612,
+          "n_positive": 10,
+          "wilcoxon_greater_p": 0.0052490234375
+        },
+        "geometry_pc1__full_history_gru": {
+          "n": 13,
+          "median": 0.2773842490476643,
+          "n_positive": 11,
+          "wilcoxon_greater_p": 0.001220703125
+        },
+        "soz_indicator__raw_train80_participation": {
+          "n": 11,
+          "median": 0.1253547908422779,
+          "n_positive": 8,
+          "wilcoxon_greater_p": 0.0068359375
+        },
+        "soz_indicator__full_history_gru": {
+          "n": 11,
+          "median": 0.2377032352757555,
+          "n_positive": 9,
+          "wilcoxon_greater_p": 0.00341796875
+        },
+        "baseline_band_power__raw_train80_participation": {
+          "n": 16,
+          "median": 0.2784371263219826,
+          "n_positive": 15,
+          "wilcoxon_greater_p": 4.57763671875e-05
+        },
+        "baseline_band_power__full_history_gru": {
+          "n": 16,
+          "median": 0.28071025279627493,
+          "n_positive": 15,
+          "wilcoxon_greater_p": 4.57763671875e-05
+        },
+        "broadband_1_250__raw_train80_participation": {
+          "n": 16,
+          "median": 0.2507823892794391,
+          "n_positive": 15,
+          "wilcoxon_greater_p": 4.57763671875e-05
+        },
+        "broadband_1_250__full_history_gru": {
+          "n": 16,
+          "median": 0.2845678839491731,
+          "n_positive": 15,
+          "wilcoxon_greater_p": 4.57763671875e-05
+        },
+        "raw_participation__raw_train80_participation": {
+          "n": 0,
+          "median": NaN,
+          "n_positive": 0,
+          "wilcoxon_greater_p": 1.0
+        },
+        "raw_participation__full_history_gru": {
+          "n": 16,
+          "median": 0.1085487557163686,
+          "n_positive": 11,
+          "wilcoxon_greater_p": 0.0045928955078125
+        }
+      },
+      "unresolved": [
+        "GM/WM label",
+        "artifact/rejection rate"
+      ]
+    },
+    "physical_axis_or_dynamic_seizure_replay": {
+      "status": "NOT_TESTED_BY_THIS_CONTRACT"
+    }
+  },
+  "artifact_hashes": {
+    "INPUT_AUDIT.json": "4e5971641d217def5ebff225019d084a7a4c37afe84d69d59769317e16fa0810",
+    "BASELINE_FREEZE.json": "ef588529ee91befeb115b03c23e6f5f4945cbf68aa94cc44f584bd96e27417ce",
+    "PHASE1_EXISTING_FIELDS_SUMMARY.json": "8f697ed8e02f6a45b3c920608209c000efd4b18b9752dc00a8ff0c52254dc89a",
+    "PHASE2_REGULARIZED_BASELINE_SUMMARY.json": "d601e2dcf11a2e2aee7cbb08ca6c5b244c598006d657d76b8d21fd6f47271d6a",
+    "PHASE3_TEACHER_FORCED_SUMMARY.json": "f1ae48c00035ad8c2dbfdf1067bd2848ed7d0316f70837a0025455119ae18d59",
+    "PHASE4_CONTACT_CONFOUND_SUMMARY.json": "57e9a0aff5c0b818e6c5b8e2bec25a162c5f9a184a85d5bad5a00c6e49586779",
+    "BASELINE_POWER_CONFOUND_AUDIT.json": "fb68a509306189da2365181afac62c6764c81351faf83c8980e03cb77dec4198"
+  },
+  "next_goal_recommendation": {
+    "status": "DO_NOT_START_NEW_EARLY_ICTAL_RNN_DYNAMICS_MODEL",
+    "reason": "true event order improves heldout NLL over rank-shuffle, but full history does not outperform history-3 or the strongest nonrecurrent prefix model, and no GRU-specific static transfer increment was established",
+    "recommended": "close out unbounded RNN and structured-axis tuning, retain history-3 as the bounded sequence reference, and prioritize independent contact-topography replication"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "status": "PASS",
+  "expected_cells": 102,
+  "complete_cells": 102,
+  "expected_condition_rows": 714,
+  "condition_rows": 714,
+  "patients": 34,
+  "seeds": [
+    20260725,
+    20260726,
+    20260727
+  ],
+  "conditions": [
+    "constant_stop",
+    "full_constructive",
+    "history_h1",
+    "history_h2",
+    "no_termination",
+    "static_only",
+    "static_shuffle"
+  ],
+  "ictal_target_read": false,
+  "ab_or_axis_used_during_rollout": false,
+  "readback_computed_after_frozen_rollout": true,
+  "engineering_errors": []
+}

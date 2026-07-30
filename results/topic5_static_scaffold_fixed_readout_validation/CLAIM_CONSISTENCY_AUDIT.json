@@ -1,0 +1,16 @@
+{
+  "contract": "topic5_static_contact_topography_claim_audit_v1_0",
+  "status": "PASS",
+  "one_sentence_argument": "Patient-specific interictal contact topography corresponds to early-ictal energy up to polarity, while ordered GRU shows no detectable independent heldout or cross-state increment.",
+  "n_files_scanned": 21,
+  "n_occurrences": 20,
+  "classification_counts": {
+    "SAFE_BOUNDARY_OR_NEGATION": 14,
+    "DIFFERENT_EMPIRICAL_CONTRACT": 3,
+    "HISTORICAL_MODEL_STAGE": 3
+  },
+  "n_unsafe_current_claims": 0,
+  "unsafe_current_claims": [],
+  "primary_manuscript_source": "docs/paper-draft/figure6_static_contact_topography_bounded_result.md",
+  "audit_csv": "results/topic5_static_scaffold_fixed_readout_validation/claim_consistency_audit.csv"
+}

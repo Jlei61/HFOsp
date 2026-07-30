@@ -1,0 +1,25 @@
+{
+  "figure": "fig6_static_contact_topography",
+  "title": "Interictal contact topography shows static cross-state correspondence and order information without a GRU-specific static-field increment",
+  "status": "supplementary_boundary_control",
+  "scientific_panels": {
+    "A": "target-sealed fixed-field cross-state contract",
+    "B": "formal heldout full-vs-rank-shuffle gain alongside matched order-perturbation sensitivity, 34 patients",
+    "C": "pre-specified positive signed early-ictal readout, 16 patients",
+    "D": "orientation-free morphology under all-contact, within-shaft, and smooth-field nulls; absolute correlation permits similar or reversed contact ordering",
+    "E": "full-GRU static increment over target-free and history controls",
+    "F": "one-confound-at-a-time partial-rank morphology versus residual permutation null; not multivariable causal adjustment"
+  },
+  "claim_boundary": "True event order improves heldout NLL over a separately trained rank-shuffle GRU, but the full-history GRU does not outperform the strongest nonrecurrent prefix comparator; interictal participation and early-ictal energy show orientation-free contact-topography correspondence that is also present in nonrecurrent fields; absolute correlation does not establish positive replay, a physical axis or dynamic seizure propagation.",
+  "target_reused_not_independent_confirmation": true,
+  "primary_signed_direction_supported": false,
+  "ordered_history_vs_rank_shuffle_supported": true,
+  "ordered_history_static_increment_established": false,
+  "inputs": [
+    "results/topic5_rnn_internal_state_reduction/interictal_order_full_vs_rank_shuffle.csv",
+    "results/topic5_static_scaffold_fixed_readout_validation/phase1_existing_fields_patient_metrics.csv",
+    "results/topic5_static_scaffold_fixed_readout_validation/phase2_regularized_baseline_patient_metrics.csv",
+    "results/topic5_static_scaffold_fixed_readout_validation/phase3_teacher_forced_patient_metrics.csv",
+    "results/topic5_static_scaffold_fixed_readout_validation/phase4_contact_confound_partial_scores.csv"
+  ]
+}

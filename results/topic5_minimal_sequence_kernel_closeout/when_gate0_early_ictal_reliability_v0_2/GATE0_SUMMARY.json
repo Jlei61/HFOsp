@@ -1,0 +1,46 @@
+{
+  "status": "COMPLETE",
+  "contract": "topic5_minimal_sequence_kernel_closeout_v0_2",
+  "strict_target": {
+    "band_hz": [
+      1,
+      150
+    ],
+    "window_sec": [
+      0,
+      10
+    ],
+    "n_patients": 16,
+    "n_seizures": 106,
+    "patients_with_at_least_4_seizures": 5,
+    "patient_mean_split_half_rho_median": 0.8205396813929126,
+    "seizure_specific_residual_reliability": "UNIDENTIFIABLE_FROM_ONE_AGGREGATED_FIELD_PER_SEIZURE"
+  },
+  "time_resolved_proxy": {
+    "band_hz": [
+      1,
+      45
+    ],
+    "halves_sec": [
+      [
+        0,
+        5
+      ],
+      [
+        5,
+        10
+      ]
+    ],
+    "n_patients": 5,
+    "patient_mean_half_rho_median": 0.9063107322183289,
+    "residual_matched_minus_mismatched_median": 0.7173285271663192,
+    "residual_matched_minus_mismatched_bootstrap_ci95": [
+      0.41392190152801356,
+      0.9193673839771845
+    ],
+    "proxy_reliability_lower_bound_above_zero": true
+  },
+  "gate0_verdict": "BLOCKED_EXACT_BB150_SEIZURE_RESIDUAL_RELIABILITY_UNIDENTIFIABLE",
+  "interpretation": "Patient-mean target stability and a BB45 within-seizure proxy are reported separately. The proxy cannot unlock seizure-specific BB150 dynamic prediction.",
+  "target_values_read": true
+}

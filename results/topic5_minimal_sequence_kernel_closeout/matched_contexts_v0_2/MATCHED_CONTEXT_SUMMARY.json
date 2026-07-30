@@ -1,0 +1,30 @@
+{
+  "status": "COMPLETE",
+  "contract": "topic5_minimal_sequence_kernel_closeout_v0_2",
+  "target_values_read": false,
+  "support_rule": "at_least_20_patients_with_50_heldout_decisions",
+  "support": [
+    {
+      "history_horizon": 2,
+      "n_patients_total": 34,
+      "n_patients_ge_50_decisions": 33,
+      "support_gate_pass": true,
+      "median_ordered_gain_nats": -0.01841248249787444,
+      "median_ordered_gain_bits": -0.02656359719013829,
+      "positive_patients": 11,
+      "wilcoxon_p_two_sided": 0.0003724645357578993,
+      "sign_p_two_sided": 0.08014331245794892
+    },
+    {
+      "history_horizon": 3,
+      "n_patients_total": 34,
+      "n_patients_ge_50_decisions": 31,
+      "support_gate_pass": true,
+      "median_ordered_gain_nats": -0.06358554243494972,
+      "median_ordered_gain_bits": -0.09173454674313672,
+      "positive_patients": 5,
+      "wilcoxon_p_two_sided": 3.4635886549949646e-06,
+      "sign_p_two_sided": 0.00019219517707824707
+    }
+  ]
+}

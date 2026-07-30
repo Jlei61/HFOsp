@@ -1,0 +1,21 @@
+{
+  "status": "PAPER_READY_CANDIDATE",
+  "selected_architecture": "linear_state",
+  "best_low_rank_displayed": "low_rank_r2",
+  "n_interictal_patients": 34,
+  "n_early_ictal_patients": 16,
+  "n_early_ictal_seizures": 106,
+  "cross_architecture_status": "NOT_ESTABLISHED_1_OF_7",
+  "early_ictal_conditional_increment_status": "NOT_ESTABLISHED",
+  "representative_subject": "epilepsiae_1146",
+  "representative_selection": "pre-existing manuscript representative, not target-selected",
+  "panels": {
+    "A": "exact within-event task and temporal semantics",
+    "B": "patient-level NLL increment over unordered prefix by architecture",
+    "C": "matched within-event rank-order null",
+    "D": "history intervention cost",
+    "E": "conditional early-ictal morphology beyond static and unordered fields",
+    "F": "representative frozen fields and readout-relevant ordered residual"
+  },
+  "claim_boundary": "event-indexed predictive history coordinate; early-ictal target is reused and static; no biological time constant or independent manifold validation"
+}

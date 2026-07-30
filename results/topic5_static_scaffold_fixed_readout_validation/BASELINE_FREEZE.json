@@ -1,0 +1,46 @@
+{
+  "contract": "topic5_static_scaffold_fixed_readout_validation_v0_1",
+  "phase": "target_free_regularized_baseline_freeze",
+  "status": "COMPLETE",
+  "target_values_read": false,
+  "early_ictal_arrays_deserialized": false,
+  "n_patients": 16,
+  "n_estimators": 7,
+  "primary_field": "participation",
+  "selection_partition": "chronological train60/validation20 within train80",
+  "refit_partition": "chronological train80",
+  "candidate_concentrations": [
+    0.0,
+    0.5,
+    1.0,
+    2.0,
+    5.0,
+    10.0,
+    20.0,
+    50.0,
+    100.0,
+    200.0,
+    500.0,
+    1000.0,
+    2000.0
+  ],
+  "candidate_laplacian_penalties": [
+    0.0,
+    0.01,
+    0.03,
+    0.1,
+    0.3,
+    1.0,
+    3.0,
+    10.0,
+    30.0
+  ],
+  "candidate_low_ranks": [
+    1,
+    2,
+    3,
+    4
+  ],
+  "manifest_sha256": "2d284d2be368f9e666c0b3578fd12cb3c29e56d71b66717967184154565b8026",
+  "selection_sha256": "7efa0f46cac191239f26e514f1bd7c33ef63d034779111f4dc58420ca54499ec"
+}

@@ -1,0 +1,47 @@
+{
+  "contract": "topic5_static_scaffold_fixed_readout_validation_v0_1",
+  "status": "INPUTS_AUDITED",
+  "target_values_read": false,
+  "early_ictal_arrays_deserialized": false,
+  "strict_clinical_onset": {
+    "n_patients": 16,
+    "n_seizures": 106,
+    "window_sec": [
+      0,
+      10
+    ],
+    "band_hz": [
+      1,
+      150
+    ],
+    "dataset": "epilepsiae"
+  },
+  "availability": {
+    "all_model_fields_available": 16,
+    "within_shaft_circular_eligible": 16,
+    "within_shaft_reversal_eligible": 16,
+    "shaft_label_permutation_eligible": 2,
+    "geometry_complete_joined": 13,
+    "geometry_smooth_eligible": 13,
+    "prefix_participation_available": 16,
+    "shaft_position_available": 16,
+    "contact_spacing_constructible": 16,
+    "soz_labels_available": 13,
+    "baseline_band_power_cached": 0,
+    "gm_wm_label_available": 0,
+    "artifact_rejection_rate_available": 0,
+    "all_strict_target_keys_present": 16
+  },
+  "constructible_without_new_raw_data": {
+    "beta_binomial_participation": true,
+    "laplacian_smoothed_participation": true,
+    "dirichlet_contact_rank_histogram": true,
+    "low_rank_nonrecurrent_contact_rank_estimator": true,
+    "teacher_forced_one_step_field": true
+  },
+  "not_currently_available_and_not_to_be_imputed": [
+    "GM/WM labels",
+    "artifact/rejection rate"
+  ],
+  "baseline_power": "not cached; reconstructible from raw seizure windows with the existing build_topic5_v2_confound_maps.py producer, but must be tracked as a separate long-running data task"
+}

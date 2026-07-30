@@ -1,0 +1,62 @@
+{
+  "contract": "topic5_external_clinical_onset_replication_protocol_v1_0",
+  "status": "READY_BUT_BLOCKED_NO_INDEPENDENT_PATIENT_COHORT",
+  "metadata_only": true,
+  "target_values_read": false,
+  "n_cached_subjects": 20,
+  "n_current_target_subjects": 16,
+  "n_potential_independent_subjects": 0,
+  "n_potential_independent_seizures": 0,
+  "current_target": {
+    "n_patients": 16,
+    "n_seizures": 106,
+    "time_reference": "clinical_onset",
+    "window_sec": [
+      0,
+      10
+    ],
+    "band_hz": [
+      1,
+      150
+    ]
+  },
+  "independent_unit": "previously target-unread patient",
+  "current_patient_new_seizures": "within-patient stability only; not patient-level external replication",
+  "frozen_pipeline_not_old_patient_weights": {
+    "frozen": [
+      "model architecture and hidden size",
+      "loss and seeds",
+      "chronological split",
+      "field definition",
+      "regularizer candidates and validation selection rule",
+      "target window and band",
+      "nulls, statistics, exclusions and endpoint hierarchy"
+    ],
+    "allowed_on_new_patient_interictal_data_only": [
+      "raw participation estimation",
+      "target-free regularized field selection and refit",
+      "patient-specific GRU and contact calibration"
+    ]
+  },
+  "replication_endpoints": [
+    "orientation-free within-shaft morphology margin",
+    "signed direction and sign heterogeneity",
+    "GRU increment over best target-free static and rank-shuffle controls"
+  ],
+  "equivalence_margin_static": 0.05,
+  "acquisition_routes": [
+    {
+      "priority": 1,
+      "route": "complete exact clinical-onset annotation, homogeneous target and contact join for currently unused cached patients"
+    },
+    {
+      "priority": 2,
+      "route": "add previously unanalyzed Epilepsiae or hospital clinical-onset patients"
+    },
+    {
+      "priority": 3,
+      "route": "prospectively establish seizure-level onset annotation, target production and interictal event processing"
+    }
+  ],
+  "decision": "Do not reuse the current target as replication. Wait for a new exact clinical-onset patient cohort and apply the frozen workflow without ictal-target-guided fitting."
+}

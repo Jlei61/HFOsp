@@ -1,0 +1,77 @@
+{
+  "contract": "topic5_ordered_history_architecture_audit_v0_1",
+  "status": "REPRODUCIBLE_RUN_MANIFEST",
+  "launcher_status": {
+    "fixed_hidden_architectures": {
+      "status": "COMPLETE",
+      "expected_cells": 204,
+      "completed_cells": 204,
+      "exit_code": 0
+    },
+    "selected_matched_rank_shuffle": {
+      "status": "COMPLETE",
+      "selected_architecture": "linear_state",
+      "expected_cells": 102,
+      "completed_cells": 102,
+      "exit_code": 0
+    },
+    "history_interventions": {
+      "status": "COMPLETE",
+      "expected_cells": 102,
+      "completed_cells": 102,
+      "exit_code": 0
+    },
+    "parameter_matched_sensitivity": {
+      "status": "COMPLETE",
+      "expected_cells": 204,
+      "completed_cells": 204,
+      "exit_code": 0
+    }
+  },
+  "target_seal": {
+    "architecture_selection_target_values_read": false,
+    "history_intervention_target_values_read": false,
+    "early_ictal_target_reused": true
+  },
+  "producer_sha256": {
+    "docs/superpowers/specs/2026-07-29-topic5-ordered-history-architecture-audit-v0_1.md": "ce5141ecd319a97cec2a224743878c2591230383150bd66b02b3f2edbd167002",
+    "docs/superpowers/plans/2026-07-29-topic5-ordered-history-architecture-audit-v0_1.md": "29f510ce87cffa747ce28f00be7ad04756cf5a9f189cbe4983ac5180edc17e56",
+    "scripts/audit_topic5_ordered_history_pairing_v0_1.py": "6112c2a7ee6dcf9d5d517abdebf298dd32458c544c75a950e816c6a695dac8da",
+    "scripts/train_topic5_architecture_control_v0_1.py": "d4a68b364f5deac3750b7934e141948eca3d7656a91e8470c8e21bcc232074f1",
+    "scripts/summarize_topic5_ordered_history_architecture_v0_1.py": "ad9f95095e7dfa809b52520811cfb3a25fabf0ee3ada2dd3e59c7ce7dc7e6eba",
+    "scripts/run_topic5_selected_history_interventions_v0_1.py": "7781cad10b7a05748d45a8c35e4df7f2e5ab16e862f486a5c26ad741eb8d27ab",
+    "scripts/summarize_topic5_selected_history_interventions_v0_1.py": "0a2e7ab6cab10a8c16118da690683a72094508293315c8dda3d3856efca7ca55",
+    "scripts/summarize_topic5_parameter_matched_architecture_v0_1.py": "ce61ba8e7208210702ae46db7d8af6c55e870ca7731a81f4956db0adad1086f5",
+    "scripts/analyze_topic5_ordered_history_early_ictal_increment_v0_1.py": "a2d43d3c4ebdbcfd71067e44a4082f39764ebf3d083a643953fbb33424776980",
+    "scripts/paper_figures/plot_topic5_ordered_history_architecture_audit_v0_1.py": "ddd020e8db028890e79653f5b5df27a00d20cd762d49cabde1c044604a9550f2",
+    "scripts/build_topic5_ordered_history_final_acceptance_v0_1.py": "166a4255b5aa8e59a8744014080dcf041079cb8734e629d789963a16f081e7e1",
+    "scripts/run_topic5_architecture_controls_v0_1.sh": "2eeeacafc9db8fdde5a2f0f1fcbc72c89e6de373275390d4dd1e4d354e37a323",
+    "scripts/run_topic5_selected_architecture_shuffle_v0_1.sh": "1b6367f485c9a47e59c3f46ca88a6195279dcb50b6e8c0450f9377caa9d4036d",
+    "scripts/run_topic5_parameter_matched_architecture_sensitivity_v0_1.sh": "72598d218a39ffbdba4eae63d33a53f755d8864f68a6f09dfae29b89ab687907",
+    "scripts/run_topic5_selected_history_interventions_v0_1.sh": "b31303279f4cddfa6789bdb933d96772eb6deeb5364c4a7bd867f09a3e6dab78",
+    "src/topic5_rank_distribution.py": "5de16334ae7464d88cb1d9686a7e831e635a4b305423356bc7ea068d6a376aa4",
+    "src/topic5_rnn_internal_state.py": "cfa52f550d99fc82f386a9b263a572c84293411ac6cbd7635957e3840ce9015f",
+    "config/topic5_interictal_rank_distribution_v0_4.yaml": "186bb0ba38d192a10b0e388edfc8303780fb47c1564af3041fce374357b37399",
+    "results/topic5_interictal_rank_distribution/dataset_v0_4/dataset_manifest.json": "8bed46286219362d360a6f6f75232cc729bffea2a1b5824e87cc0cad0f27381d"
+  },
+  "accepted_artifact_sha256": {
+    "results/topic5_ordered_history_architecture_audit/input_audit/PAIRING_AUDIT.json": "83c09ff56b87797425f9ea473a71e6bdf2336fdd632cbe9a6b15ce8a437bd483",
+    "results/topic5_ordered_history_architecture_audit/analysis/ARCHITECTURE_SUMMARY.json": "0f90e0a01007263cd908ff88dfc9c786008f6b0e51d25967d118239deb7b5a2a",
+    "results/topic5_ordered_history_architecture_audit/analysis/HISTORY_INTERVENTION_SUMMARY.json": "d60776be6844f6a530ce7895041a1d94c414ce164196f02939796c6dfa6b6b0b",
+    "results/topic5_ordered_history_architecture_audit/analysis/EARLY_ICTAL_CONDITIONAL_SUMMARY.json": "4b976bf623741dbc5603d23165d5afb20c8a9b64b7ab4b4e5285268cfcbab715",
+    "results/topic5_ordered_history_architecture_audit/analysis/PARAMETER_MATCHED_SENSITIVITY.json": "1176322186bb02f63dcf1f5a3ec2673ffe577c661276a1f7e7f1c0417cd1d606",
+    "results/topic5_ordered_history_architecture_audit/TEST_AUDIT.json": "5e6570f910e13681a6d8b663636ce9c28abbe7b6b903a170fc3af3fc138a9902",
+    "results/paper-ready-figure/fig6_ordered_history_architecture_audit/figures/fig6_ordered_history_architecture_audit.png": "24af77b7215c9d148f051080fc112553a38baf7de9cae9883dc44fdef001ec45",
+    "results/topic5_interictal_scaffold_reliability_history_necessity/history_runs_v0_1/history_necessity_summary.json": "fb1a6b5cebfd8dc19853ac5d456be90835184d35d756309294ab2a411d47d0b8",
+    "results/topic5_interictal_scaffold_reliability_history_necessity/history3_rank_shuffle_runs_v0_1/history3_rank_shuffle_summary.json": "66ff930f7ef01b2a8e7d76e695107514d0b519bf4e2576df60b7eb0e5b44d9ac",
+    "results/topic5_rnn_internal_state_reduction/INTERICTAL_SUMMARY.json": "02fbf4a6028076addbfbfa51d04f426b0ee65f013169f6154c998163877a6220",
+    "results/topic5_ordered_history_architecture_audit/formal/architecture_controls_formal_20260729/LAUNCHER_DONE.json": "e4169fa151e18de8ed0eb1e6f8ff8203a856619e561b9a675502ebe3bf06a6c1",
+    "results/topic5_ordered_history_architecture_audit/rank_shuffle/selected_architecture_rank_shuffle_20260729/LAUNCHER_DONE.json": "e78e9de6e50d9d4cbf8f6e6acb72d65d8dec81296610eb35f318257af0c71fbe",
+    "results/topic5_ordered_history_architecture_audit/interventions/selected_history_interventions_20260729/LAUNCHER_DONE.json": "ab8b899b61ccbebe37a294921883d4d61fd25c798a9e9e288df5bf71f6211117",
+    "results/topic5_ordered_history_architecture_audit/parameter_matched/parameter_matched_formal_20260729/LAUNCHER_DONE.json": "e4169fa151e18de8ed0eb1e6f8ff8203a856619e561b9a675502ebe3bf06a6c1",
+    "results/topic5_ordered_history_architecture_audit/formal/architecture_controls_formal_20260729/resource_log.csv": "281dbfd2ecaa8beb6082d66120fea106b9a19c581edab54a6de56ff0e32112d4",
+    "results/topic5_ordered_history_architecture_audit/rank_shuffle/selected_architecture_rank_shuffle_20260729/resource_log.csv": "6aafc8b89cd6285aeda9c626b3de89f760afd9e567c7b20778669f576af5f7c0",
+    "results/topic5_ordered_history_architecture_audit/parameter_matched/parameter_matched_formal_20260729/resource_log.csv": "f5fa0e5e09dbcb1586237411ad1ac0bd94c55db584b4314e651ef1f9ae2e22e7",
+    "results/topic5_ordered_history_architecture_audit/interventions/selected_history_interventions_20260729/resource_log.csv": "ea8fe7686b88ce4417455e76e3154188a5f1192b851437d86652579d527ebee1"
+  }
+}

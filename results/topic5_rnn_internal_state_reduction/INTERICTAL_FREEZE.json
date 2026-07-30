@@ -1,0 +1,20 @@
+{
+  "contract": "topic5_rnn_internal_state_reduction_v0_1_interictal_freeze",
+  "status": "FROZEN",
+  "n_subjects": 34,
+  "n_seeds": 3,
+  "directions": {
+    "pca": "top two train60 variance directions",
+    "output_coupled": "top two right singular vectors of centered contact decoder loading",
+    "sign": "positive correlation with train80 interictal participation; no ictal target used",
+    "primary_amplitude_sd": 0.5
+  },
+  "fixed_target_readouts_after_freeze": [
+    "participation",
+    "endpoint_joint_mass"
+  ],
+  "omnibus_sensitivity": "five frozen fields with reselection inside null",
+  "summary_sha256": "02fbf4a6028076addbfbfa51d04f426b0ee65f013169f6154c998163877a6220",
+  "target_values_read": false,
+  "early_ictal_arrays_deserialized": false
+}

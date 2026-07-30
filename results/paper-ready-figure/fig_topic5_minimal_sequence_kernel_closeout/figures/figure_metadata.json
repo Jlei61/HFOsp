@@ -1,0 +1,60 @@
+{
+  "status": "COMPLETE",
+  "contract": "topic5_minimal_sequence_kernel_closeout_v0_2",
+  "main": {
+    "B": {
+      "n_eligible": 33
+    },
+    "C": {
+      "comparisons": [
+        "history2_minus_history1",
+        "history3_minus_history2",
+        "full_minus_history3"
+      ]
+    },
+    "D": {
+      "models": [
+        "GRU",
+        "rate RNN",
+        "LR-0",
+        "LR-1",
+        "LR-2",
+        "LR-4",
+        "linear state",
+        "FIR-H3"
+      ]
+    },
+    "E": {
+      "hankel_median_cumulative_first6": [
+        0.8735024331339583,
+        0.9869825444919973,
+        0.9990549354859962,
+        0.9999626225674116,
+        0.9999971241178643,
+        0.9999998004236788
+      ]
+    },
+    "F": {
+      "n_per_category": [
+        16,
+        16,
+        14,
+        12
+      ]
+    }
+  },
+  "audit": {
+    "rank_tolerances_ms": [
+      0.0,
+      1.0,
+      2.0,
+      5.0,
+      10.0
+    ],
+    "gate0_exact_eligible_patients": 5,
+    "gate1_patients": 34
+  },
+  "scientific_position": "Extended Data or Supplementary bounded computational result",
+  "where_how_when_separated": true,
+  "target_values_used_only_in_cross_state_and_gate0_panels": true
+}

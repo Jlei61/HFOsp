@@ -1,0 +1,263 @@
+{
+  "contract": "topic5_ordered_history_architecture_audit_v0_1",
+  "status": "TARGET_SEALED_ARCHITECTURE_AND_MATCHED_SHUFFLE_COMPLETE",
+  "target_values_read": false,
+  "early_ictal_target_arrays_deserialized": false,
+  "n_patients": 34,
+  "seeds": [
+    20260725,
+    20260726,
+    20260727
+  ],
+  "comparisons": {
+    "linear_state_vs_static_contact_hazard": {
+      "n_patients": 34,
+      "median_gain": 0.08318528816713155,
+      "ci95": [
+        0.06335827674131389,
+        0.09697180676724715
+      ],
+      "n_positive": 33,
+      "wilcoxon_greater_p": 1.9208528101444244e-09
+    },
+    "linear_state_vs_last_set_first_order": {
+      "n_patients": 34,
+      "median_gain": 0.04460613682943371,
+      "ci95": [
+        0.032706887771686066,
+        0.07405420048561961
+      ],
+      "n_positive": 34,
+      "wilcoxon_greater_p": 5.820766091346741e-11
+    },
+    "linear_state_vs_unordered_prefix": {
+      "n_patients": 34,
+      "median_gain": 0.025718509825526037,
+      "ci95": [
+        0.006326891111736788,
+        0.04801464683554135
+      ],
+      "n_positive": 26,
+      "wilcoxon_greater_p": 5.3107098210603e-05,
+      "selection_corrected_maxT_p": 0.00031999360012799745
+    },
+    "vanilla_rnn_vs_static_contact_hazard": {
+      "n_patients": 34,
+      "median_gain": 0.04894846039983225,
+      "ci95": [
+        0.017210416427696273,
+        0.08104224211843647
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 3.233377356082201e-06
+    },
+    "vanilla_rnn_vs_last_set_first_order": {
+      "n_patients": 34,
+      "median_gain": 0.029868903151127335,
+      "ci95": [
+        0.01121929925047495,
+        0.040260554049021485
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 7.51122715882957e-05
+    },
+    "vanilla_rnn_vs_unordered_prefix": {
+      "n_patients": 34,
+      "median_gain": 0.0007603129375116646,
+      "ci95": [
+        -0.017025573070984956,
+        0.01808349409178467
+      ],
+      "n_positive": 17,
+      "wilcoxon_greater_p": 0.4263704519835301,
+      "selection_corrected_maxT_p": 0.886562268754625
+    },
+    "full_history_gru_vs_static_contact_hazard": {
+      "n_patients": 34,
+      "median_gain": 0.06022173404163367,
+      "ci95": [
+        0.03644335394104292,
+        0.08682884624884135
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 8.61327862367034e-06
+    },
+    "full_history_gru_vs_last_set_first_order": {
+      "n_patients": 34,
+      "median_gain": 0.040670107323194205,
+      "ci95": [
+        0.032203105112528996,
+        0.0519254054663314
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 6.894971011206508e-05
+    },
+    "full_history_gru_vs_unordered_prefix": {
+      "n_patients": 34,
+      "median_gain": 0.010615375427526552,
+      "ci95": [
+        -0.002603272596995332,
+        0.02688822153419901
+      ],
+      "n_positive": 21,
+      "wilcoxon_greater_p": 0.056309308274649084,
+      "selection_corrected_maxT_p": 0.18315633687326255
+    },
+    "low_rank_r0_vs_static_contact_hazard": {
+      "n_patients": 34,
+      "median_gain": 0.05893408043201509,
+      "ci95": [
+        0.047527974027987474,
+        0.08540863118926656
+      ],
+      "n_positive": 33,
+      "wilcoxon_greater_p": 1.8702121451497078e-07
+    },
+    "low_rank_r0_vs_last_set_first_order": {
+      "n_patients": 34,
+      "median_gain": 0.04413987517978324,
+      "ci95": [
+        0.03334077942327518,
+        0.05434981895529689
+      ],
+      "n_positive": 32,
+      "wilcoxon_greater_p": 3.336463123559952e-07
+    },
+    "low_rank_r0_vs_unordered_prefix": {
+      "n_patients": 34,
+      "median_gain": 0.015756336981665786,
+      "ci95": [
+        -0.007063078614106599,
+        0.023258718755031493
+      ],
+      "n_positive": 20,
+      "wilcoxon_greater_p": 0.02130819042213261,
+      "selection_corrected_maxT_p": 0.052038959220815584
+    },
+    "low_rank_r1_vs_static_contact_hazard": {
+      "n_patients": 34,
+      "median_gain": 0.06437630710595665,
+      "ci95": [
+        0.03464750945568085,
+        0.07355327061984829
+      ],
+      "n_positive": 30,
+      "wilcoxon_greater_p": 1.6094418242573738e-07
+    },
+    "low_rank_r1_vs_last_set_first_order": {
+      "n_patients": 34,
+      "median_gain": 0.030695376361754123,
+      "ci95": [
+        0.022229389597972382,
+        0.041768178228121844
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 5.2619725465774536e-08
+    },
+    "low_rank_r1_vs_unordered_prefix": {
+      "n_patients": 34,
+      "median_gain": -0.0032885635138751868,
+      "ci95": [
+        -0.012403939407198417,
+        0.016821977657508036
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 0.30617186188464984,
+      "selection_corrected_maxT_p": 0.9723005539889202
+    },
+    "low_rank_r2_vs_static_contact_hazard": {
+      "n_patients": 34,
+      "median_gain": 0.05956712482578075,
+      "ci95": [
+        0.045445821570150535,
+        0.08154598238589261
+      ],
+      "n_positive": 33,
+      "wilcoxon_greater_p": 1.1845258995890617e-07
+    },
+    "low_rank_r2_vs_last_set_first_order": {
+      "n_patients": 34,
+      "median_gain": 0.04448397684510752,
+      "ci95": [
+        0.0322541303122188,
+        0.05028133796159184
+      ],
+      "n_positive": 33,
+      "wilcoxon_greater_p": 7.974449545145035e-09
+    },
+    "low_rank_r2_vs_unordered_prefix": {
+      "n_patients": 34,
+      "median_gain": 0.013822728124883166,
+      "ci95": [
+        0.005913920671255735,
+        0.029804176648138725
+      ],
+      "n_positive": 25,
+      "wilcoxon_greater_p": 0.0019178013899363577,
+      "selection_corrected_maxT_p": 0.08361832763344733
+    },
+    "low_rank_r4_vs_static_contact_hazard": {
+      "n_patients": 34,
+      "median_gain": 0.05915096884329163,
+      "ci95": [
+        0.036528900589090973,
+        0.08059987922715273
+      ],
+      "n_positive": 30,
+      "wilcoxon_greater_p": 7.512862794101238e-07
+    },
+    "low_rank_r4_vs_last_set_first_order": {
+      "n_patients": 34,
+      "median_gain": 0.03950248136223311,
+      "ci95": [
+        0.016717119190574614,
+        0.050831950248724
+      ],
+      "n_positive": 29,
+      "wilcoxon_greater_p": 1.0587798897176981e-05
+    },
+    "low_rank_r4_vs_unordered_prefix": {
+      "n_patients": 34,
+      "median_gain": 0.0037811165897517762,
+      "ci95": [
+        -0.008476713538013492,
+        0.010267766854150429
+      ],
+      "n_positive": 18,
+      "wilcoxon_greater_p": 0.30617186188464984,
+      "selection_corrected_maxT_p": 0.6883462330753385
+    },
+    "full_history_gru_vs_rank_shuffle_gru": {
+      "n_patients": 34,
+      "median_gain": 0.030642926033082052,
+      "ci95": [
+        0.01873376350922351,
+        0.0386880405206349
+      ],
+      "n_positive": 28,
+      "wilcoxon_greater_p": 0.00025074149016290903
+    },
+    "linear_state_vs_matched_within_event_rank_shuffle": {
+      "n_patients": 34,
+      "median_gain": 0.04193227015928158,
+      "ci95": [
+        0.03210859377457931,
+        0.05131551689571756
+      ],
+      "n_positive": 31,
+      "wilcoxon_greater_p": 1.8702121451497078e-07
+    }
+  },
+  "architecture_family_inference": {
+    "method": "joint patient sign flips; maximum patient-median NLL gain across 7 preregistered recurrent families",
+    "n_draws": 50000,
+    "reference": "unordered_prefix"
+  },
+  "target_blind_best_non_gru": {
+    "control": "linear_state",
+    "selection_rule": "largest patient-median heldout NLL gain over unordered_prefix; cohort median NLL breaks exact ties",
+    "matched_within_event_rank_shuffle_required": true,
+    "matched_within_event_rank_shuffle_complete": true
+  },
+  "claim_boundary": "rank-step history is evaluated inside one interictal group event; no continuous-time or biological slow-state claim is permitted"
+}

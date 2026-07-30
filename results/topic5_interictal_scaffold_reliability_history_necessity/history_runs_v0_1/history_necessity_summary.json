@@ -1,0 +1,87 @@
+{
+  "status": "complete",
+  "n_patients": 34,
+  "n_seeds": 3,
+  "n_formal_folds": 102,
+  "n_new_models": 306,
+  "contrasts": {
+    "gain_history2_over_history1": {
+      "median": 0.01717523522100084,
+      "ci95": [
+        0.011683256608867154,
+        0.02404102462492297
+      ],
+      "wilcoxon_two_sided_p": 1.009204424917698e-06,
+      "n_positive": 32,
+      "n_patients": 34
+    },
+    "gain_history3_over_history2": {
+      "median": 0.011329764981649504,
+      "ci95": [
+        0.008920358733440548,
+        0.015386991742728728
+      ],
+      "wilcoxon_two_sided_p": 2.9453076422214508e-08,
+      "n_positive": 29,
+      "n_patients": 34
+    },
+    "gain_full_over_history3": {
+      "median": -0.0009507639463539608,
+      "ci95": [
+        -0.005065963347560931,
+        0.003462366684389817
+      ],
+      "wilcoxon_two_sided_p": 0.43647122976835817,
+      "n_positive": 16,
+      "n_patients": 34
+    },
+    "gain_full_over_first_order": {
+      "median": 0.03584601186416725,
+      "ci95": [
+        0.024609103177984704,
+        0.04947462328343555
+      ],
+      "wilcoxon_two_sided_p": 5.13752456754446e-06,
+      "n_positive": 30,
+      "n_patients": 34
+    },
+    "gain_full_over_rank_shuffle": {
+      "median": 0.040767924475081596,
+      "ci95": [
+        0.015422440568026108,
+        0.04879877741679639
+      ],
+      "wilcoxon_two_sided_p": 0.0005014829803258181,
+      "n_positive": 27,
+      "n_patients": 34
+    },
+    "gain_history1_over_first_order": {
+      "median": 0.007899483567236798,
+      "ci95": [
+        0.0026850699564144875,
+        0.01565942992602043
+      ],
+      "wilcoxon_two_sided_p": 0.006141410209238529,
+      "n_positive": 24,
+      "n_patients": 34
+    },
+    "gain_full_over_unordered": {
+      "median": 0.013633609453389317,
+      "ci95": [
+        -0.0035267411798669546,
+        0.027158624119563157
+      ],
+      "wilcoxon_two_sided_p": 0.07811522763222456,
+      "n_positive": 19,
+      "n_patients": 34
+    }
+  },
+  "short_multistep_history_supported": true,
+  "history_beyond_three_supported": false,
+  "full_history_composite_supported": false,
+  "coverage_failures": [],
+  "denominator_failures": [],
+  "single_input_fingerprint_set": true,
+  "maximum_gpu_peak_allocated_bytes": 445306880,
+  "ictal_target_read": false
+}
