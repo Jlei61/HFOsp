@@ -1,0 +1,84 @@
+contract:
+  name: topic5_fig6_interictal_operator_static_readout_v0_3
+  version: "0.3"
+  source_spec: docs/superpowers/specs/2026-07-24-topic5-interictal-operator-static-ictal-readout-design.md
+  ictal_target_adjudication: docs/archive/topic5/fig6_ictal_target_temporal_adjudication_2026-07-24.md
+  masked_rank_required: true
+  seizure_target_read_before_stage_b_forbidden: true
+  inter_event_interval_forbidden: true
+
+cohort:
+  masked_subject_index: results/interictal_propagation_masked/per_subject
+  candidate_prefix_attrition: results/topic5_state_conditioned_predictor/fit2_prefix_scaffold/prefix_field_attrition.csv
+  candidate_prefix_records: results/topic5_state_conditioned_predictor/fit2_prefix_scaffold/per_subject
+  accepted_strict_bb150_event_table: results/topic5_state_conditioned_predictor/fit12_clinical_bb150/fit2/fig6_fit2_clinical_onset_scaffold_event.csv
+  accepted_bb150_cache_root: results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150
+  datasets: [epilepsiae, yuquan]
+  candidate_subjects_expected: 13
+  candidate_strict_seizures_expected: 71
+  calibration_hours: 12
+  seizure_guard_post_minutes: 120
+  heldout_calibration_fraction: 0.80
+  min_participants: 3
+  min_recruitment_sets: 2
+  min_train_events: 100
+  min_eval_events: 25
+
+event_encoding:
+  # Raw spectrogram centroids are continuous. Phase 0 audits near ties at
+  # 1/2/5/10 ms, but the primary dataset merges exact ties only. A non-zero
+  # tolerance requires a new frozen measurement-resolution adjudication.
+  tie_tolerance_seconds: 0.0
+  near_tie_audit_ms: [1.0, 2.0, 5.0, 10.0]
+  rank_normalization: participating_contacts_only_zero_to_one
+  nonparticipant_value: .nan
+  minimum_prefix_sets: 1
+
+contact_features:
+  use_prefix_participation_support: true
+  use_centered_geometry: true
+  use_within_shaft_position: true
+  use_channel_or_patient_string_id: false
+  allow_missing_geometry: true
+  allow_epilepsiae_voxel_fallback: false
+
+stage_a:
+  architecture: contact_query_gru
+  hidden_sizes: [32, 64]
+  contact_embedding_dim: 32
+  contact_encoder_hidden: 32
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  batch_size: 256
+  max_epochs: 200
+  smoke_epochs: 6
+  calibration_epochs: 30
+  early_stopping_patience: 20
+  gradient_clip: 1.0
+  steps_per_epoch: 256
+  calibration_steps_per_epoch: 64
+  seeds: [20260724, 20260725, 20260726]
+  loss_weights:
+    next_set: 1.0
+    stop: 0.5
+    remaining_participation: 0.25
+    suffix_rank: 0.5
+  baseline_laplace_alpha: 0.5
+  patient_bootstrap_draws: 5000
+
+resources:
+  conda_env: cuda_env
+  device: cuda
+  gpu_memory_fraction: 0.80
+  cpu_threads: 16
+  dataloader_workers: 4
+  max_batch_contacts: 8192
+  min_mem_available_gb: 24
+  max_swap_used_gb: 1.5
+
+outputs:
+  root: results/topic5_interictal_operator_static_readout
+  dataset: results/topic5_interictal_operator_static_readout/dataset_v0_3
+  runs: results/topic5_interictal_operator_static_readout/runs
+  stage_a: results/topic5_interictal_operator_static_readout/stage_a
+  figures: results/topic5_interictal_operator_static_readout/figures

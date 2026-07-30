@@ -274,6 +274,88 @@ if nn is not None:
             )
 
 
+    class WindowedHistorySequenceGRU(FullHistorySequenceGRU):
+        """Matched GRU that replays only the latest ``history_window`` sets.
+
+        The candidate mask and scalar prefix progress remain causal functions
+        of the complete observed prefix.  Contact identity enters the hidden
+        state only through the requested trailing window.
+        """
+
+        def __init__(
+            self,
+            contact_feature_dim: int,
+            *,
+            history_window: int,
+            **kwargs,
+        ):
+            super().__init__(contact_feature_dim, **kwargs)
+            if int(history_window) < 1:
+                raise ValueError("history_window must be a positive integer")
+            self.history_window = int(history_window)
+
+        def forward(
+            self,
+            contact_features: Tensor,
+            contact_mask: Tensor,
+            group_ids: Tensor,
+            group_count: Tensor,
+            local_offset: Tensor,
+        ) -> Dict[str, Tensor]:
+            embedding, encoder_input = self._encode(contact_features, local_offset)
+            max_groups = int(group_count.max().item())
+            action_logits = []
+            stop_logits = []
+            candidate_masks = []
+            for step in range(max_groups + 1):
+                recruited = (
+                    (group_ids >= 0) & (group_ids < step) & contact_mask
+                )
+                hidden = self._initial_hidden(embedding, contact_mask)
+                replay_start = max(0, step - self.history_window)
+                for replay_step in range(replay_start, step):
+                    current = (group_ids == replay_step) & contact_mask
+                    active = (group_count > replay_step).unsqueeze(1)
+                    recruited_at_replay = (
+                        (group_ids >= 0)
+                        & (group_ids <= replay_step)
+                        & contact_mask
+                    )
+                    updated_hidden = self._advance(
+                        embedding,
+                        current,
+                        recruited_at_replay,
+                        hidden,
+                        contact_mask,
+                    )
+                    hidden = torch.where(active, updated_hidden, hidden)
+                candidate = contact_mask & ~recruited
+                action, stop = self._decode(
+                    embedding, encoder_input, hidden, candidate
+                )
+                action_logits.append(action)
+                stop_logits.append(stop)
+                candidate_masks.append(candidate)
+            return {
+                "contact_logits": torch.stack(action_logits, dim=1),
+                "stop_logits": torch.stack(stop_logits, dim=1),
+                "candidate_mask": torch.stack(candidate_masks, dim=1),
+            }
+
+        def _rollout_hidden(
+            self,
+            embedding: Tensor,
+            contact_mask: Tensor,
+            recruited: Tensor,
+            last_set: Tensor,
+            hidden: Optional[Tensor],
+        ) -> Tensor:
+            raise RuntimeError(
+                "WindowedHistorySequenceGRU is frozen for teacher-forced "
+                "history-necessity evaluation; free rollout is not defined"
+            )
+
+
     class LowRankLeakySequenceRNN(_ContactSequenceBase):
         """Leaky RNN with stable diagonal decay plus rank-r recurrence."""
 
@@ -472,6 +554,195 @@ if nn is not None:
                 "u_output_loading": hidden_to_contact @ self.mode_u,
                 "v_output_loading": hidden_to_contact @ self.mode_v,
             }
+
+
+    class LinearStateSequenceRNN(_ContactSequenceBase):
+        """Stable diagonal linear state-space control.
+
+        The recurrence is linear in the previous hidden state and the current
+        rank-set token.  Persistence is constrained to ``(0, 0.995)``.  The
+        shared contact encoder remains nonlinear so this control changes the
+        history operator, not the frozen observation interface.
+        """
+
+        def __init__(self, contact_feature_dim: int, **kwargs):
+            super().__init__(contact_feature_dim, **kwargs)
+            self.input_projection = nn.Linear(
+                self.contact_embedding_dim + 2, self.hidden_size
+            )
+            self.raw_persistence = nn.Parameter(
+                torch.zeros(self.hidden_size)
+            )
+
+        @property
+        def persistence(self) -> Tensor:
+            return 0.995 * torch.sigmoid(self.raw_persistence)
+
+        def _advance(
+            self,
+            embedding: Tensor,
+            current_set: Tensor,
+            recruited: Tensor,
+            hidden: Tensor,
+            contact_mask: Tensor,
+        ) -> Tensor:
+            weight = current_set.to(embedding.dtype).unsqueeze(-1)
+            token = (embedding * weight).sum(1) / weight.sum(1).clamp_min(1.0)
+            denominator = contact_mask.sum(1).clamp_min(1).to(embedding.dtype)
+            progress = recruited.sum(1).to(embedding.dtype) / denominator
+            new_fraction = current_set.sum(1).to(embedding.dtype) / denominator
+            external = self.input_projection(
+                torch.cat(
+                    [token, progress[:, None], new_fraction[:, None]], dim=1
+                )
+            )
+            return self.persistence * hidden + external
+
+        def forward(
+            self,
+            contact_features: Tensor,
+            contact_mask: Tensor,
+            group_ids: Tensor,
+            group_count: Tensor,
+            local_offset: Tensor,
+        ) -> Dict[str, Tensor]:
+            embedding, encoder_input = self._encode(contact_features, local_offset)
+            hidden = self._initial_hidden(embedding, contact_mask)
+            recruited = torch.zeros_like(contact_mask)
+            max_groups = int(group_count.max().item())
+            action_logits = []
+            stop_logits = []
+            candidate_masks = []
+            for step in range(max_groups + 1):
+                candidate = contact_mask & ~recruited
+                action, stop = self._decode(
+                    embedding, encoder_input, hidden, candidate
+                )
+                action_logits.append(action)
+                stop_logits.append(stop)
+                candidate_masks.append(candidate)
+                if step == max_groups:
+                    break
+                current = (group_ids == step) & contact_mask
+                active = (group_count > step).unsqueeze(1)
+                updated_recruited = recruited | current
+                updated_hidden = self._advance(
+                    embedding,
+                    current,
+                    updated_recruited,
+                    hidden,
+                    contact_mask,
+                )
+                hidden = torch.where(active, updated_hidden, hidden)
+                recruited = torch.where(active, updated_recruited, recruited)
+            return {
+                "contact_logits": torch.stack(action_logits, dim=1),
+                "stop_logits": torch.stack(stop_logits, dim=1),
+                "candidate_mask": torch.stack(candidate_masks, dim=1),
+            }
+
+        def _rollout_hidden(
+            self,
+            embedding: Tensor,
+            contact_mask: Tensor,
+            recruited: Tensor,
+            last_set: Tensor,
+            hidden: Optional[Tensor],
+        ) -> Tensor:
+            if hidden is None:
+                return self._initial_hidden(embedding, contact_mask)
+            return self._advance(
+                embedding, last_set, recruited, hidden, contact_mask
+            )
+
+
+    class VanillaRateSequenceRNN(_ContactSequenceBase):
+        """Matched tanh rate-RNN control without GRU gates."""
+
+        def __init__(self, contact_feature_dim: int, **kwargs):
+            super().__init__(contact_feature_dim, **kwargs)
+            self.rnn = nn.RNNCell(
+                self.contact_embedding_dim + 2,
+                self.hidden_size,
+                nonlinearity="tanh",
+            )
+
+        def _advance(
+            self,
+            embedding: Tensor,
+            current_set: Tensor,
+            recruited: Tensor,
+            hidden: Tensor,
+            contact_mask: Tensor,
+        ) -> Tensor:
+            weight = current_set.to(embedding.dtype).unsqueeze(-1)
+            token = (embedding * weight).sum(1) / weight.sum(1).clamp_min(1.0)
+            denominator = contact_mask.sum(1).clamp_min(1).to(embedding.dtype)
+            progress = recruited.sum(1).to(embedding.dtype) / denominator
+            new_fraction = current_set.sum(1).to(embedding.dtype) / denominator
+            return self.rnn(
+                torch.cat(
+                    [token, progress[:, None], new_fraction[:, None]], dim=1
+                ),
+                hidden,
+            )
+
+        def forward(
+            self,
+            contact_features: Tensor,
+            contact_mask: Tensor,
+            group_ids: Tensor,
+            group_count: Tensor,
+            local_offset: Tensor,
+        ) -> Dict[str, Tensor]:
+            embedding, encoder_input = self._encode(contact_features, local_offset)
+            hidden = self._initial_hidden(embedding, contact_mask)
+            recruited = torch.zeros_like(contact_mask)
+            max_groups = int(group_count.max().item())
+            action_logits = []
+            stop_logits = []
+            candidate_masks = []
+            for step in range(max_groups + 1):
+                candidate = contact_mask & ~recruited
+                action, stop = self._decode(
+                    embedding, encoder_input, hidden, candidate
+                )
+                action_logits.append(action)
+                stop_logits.append(stop)
+                candidate_masks.append(candidate)
+                if step == max_groups:
+                    break
+                current = (group_ids == step) & contact_mask
+                active = (group_count > step).unsqueeze(1)
+                updated_recruited = recruited | current
+                updated_hidden = self._advance(
+                    embedding,
+                    current,
+                    updated_recruited,
+                    hidden,
+                    contact_mask,
+                )
+                hidden = torch.where(active, updated_hidden, hidden)
+                recruited = torch.where(active, updated_recruited, recruited)
+            return {
+                "contact_logits": torch.stack(action_logits, dim=1),
+                "stop_logits": torch.stack(stop_logits, dim=1),
+                "candidate_mask": torch.stack(candidate_masks, dim=1),
+            }
+
+        def _rollout_hidden(
+            self,
+            embedding: Tensor,
+            contact_mask: Tensor,
+            recruited: Tensor,
+            last_set: Tensor,
+            hidden: Optional[Tensor],
+        ) -> Tensor:
+            if hidden is None:
+                return self._initial_hidden(embedding, contact_mask)
+            return self._advance(
+                embedding, last_set, recruited, hidden, contact_mask
+            )
 
 
     class StaticSequenceContactQuery(_ContactSequenceBase):

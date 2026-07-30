@@ -1,0 +1,109 @@
+contract:
+  name: interictal_to_early_ictal_state_conditioned_spatial_predictor_v1
+  source_spec: /home/honglab/leijiaxin/.codex/attachments/30523157-6b77-4437-8fc7-57442cee7f66/pasted-text.txt
+  source_spec_sha256: 81ed32fdf4e806a952b4dda9240386c3ebd674751d6d4efe105dcfad29ea28d9
+  masked_rank_required: true
+  target_driven_mirror_forbidden: true
+  target_driven_template_max_forbidden: true
+
+cohort:
+  parent_event_table: results/topic5_ictal_recruitment/tspectral_field_concordance/clinical_onset_gradient_field_cohort_stat_event.csv
+  eligibility_audit: results/topic5_ictal_recruitment/t0_eligibility_audit.csv
+  epilepsiae_inventory: results/epilepsiae_seizure_inventory.csv
+  yuquan_inventory: results/dataset_inventory/yuquan_seizure_inventory.csv
+  calibration_hours: 12
+  calibration_sensitivity_hours: [6, 24]
+  calibration_min_events: 500
+  calibration_min_cluster_fraction: 0.10
+  calibration_min_seed_ami: 0.70
+  calibration_min_split_axis_correlation: 0.50
+  seizure_guard_pre_minutes: 30
+  seizure_guard_post_minutes: 120
+  min_axis_contacts: 6
+  min_history_events: 20
+
+history:
+  primary_lookback_minutes: 60
+  primary_cutoff_minutes: 5
+  lookback_sensitivity_minutes: [15, 30, 60, 120]
+  cutoff_sensitivity_minutes: [1, 5, 15, 30]
+  max_events_per_history: 2048
+
+target:
+  primary_band: [1, 8]
+  sensitivity_bands:
+    broad_1_150: [1, 150]
+    gamma_30_80: [30, 80]
+    high_gamma_80_150: [80, 150]
+  primary_alignment: eeg_onset
+  primary_window_seconds: [0, 10]
+  baseline_window_seconds: [-120, -90]
+  clinical_onset_sensitivity_only: true
+  min_common_contacts: 4
+  min_baseline_bins: 150
+
+event_features:
+  names:
+    - signed_direction
+    - participation_fraction
+    - axial_centroid
+    - axial_width
+    - hfo_frequency_centroid
+    - propagation_duration
+    - log_inter_event_interval
+  hfo_energy_status: unavailable_in_accepted_lagpat_artifact
+  hfo_energy_policy: omit_and_report_not_frequency_as_energy
+  add_axis_bins: false
+
+model:
+  n_axis_positions: 12
+  excitatory_units_per_position: 4
+  inhibitory_units_per_position: 1
+  ranks: [0, 1, 2, 3, 4]
+  effective_low_rank_primary: true
+  strict_dale_confirmation: true
+  ablation_variants: [no_slow, no_local_inhibition, no_local, strict_dale]
+  tau_seconds: 30
+  tau_slow_seconds: 900
+  integration_max_step_seconds: 30
+  integration_max_substeps: 32
+  state_clip: 8
+  sequence_length: 256
+  pretrain_epochs_smoke: 3
+  pretrain_epochs_final: 20
+  pretrain_batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  gru_hidden_size: 12
+  gru_max_epochs: 100
+  gru_patience: 12
+  seeds: [20260724, 20260725, 20260726]
+
+validation:
+  outer_split: leave_one_subject_out
+  inner_split: leave_one_subject_out
+  rank_selection: one_standard_error_smallest_rank
+  probe_alpha_grid: [0.001, 0.01, 0.1, 1, 10, 100]
+  bootstrap_draws: 5000
+  event_order_shuffle_required: true
+  history_pairing_null_required: true
+  within_shaft_rank_null_required: true
+
+resources:
+  conda_env: cuda_env
+  device: cuda
+  gpu_memory_fraction: 0.85
+  dataloader_workers: 4
+  cpu_threads: 16
+  min_mem_available_gb: 32
+  min_disk_available_gb: 40
+  max_swap_used_gb: 1.5
+
+outputs:
+  root: results/topic5_state_conditioned_predictor
+  target_cache: results/topic5_state_conditioned_predictor/target_cache
+  dataset: results/topic5_state_conditioned_predictor/dataset
+  runs: results/topic5_state_conditioned_predictor/runs
+  figures: results/topic5_state_conditioned_predictor/figures
+  paper_ready: results/paper-ready-figure/fig6_state_conditioned_predictor
