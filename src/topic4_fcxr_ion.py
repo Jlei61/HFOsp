@@ -1121,6 +1121,48 @@ def damped_rate_update(current, measured, alpha=B2_1_ALPHA):
                                                         - np.asarray(current, float))
 
 
+def damped_field_change(current, measured, alpha=B2_1_ALPHA):
+    """The spec 2.2 convergence quantity: `max_i |r^(k+1)_i - r^(k)_i| / mean(r^(k))`.
+
+    `r^(k+1)` is the DAMPED update, so the step is alpha * (measured - current), not the raw
+    measurement difference.  The first implementation compared the undamped measurement, which
+    reports exactly 1/alpha times too much; `undamped_max_rel` is kept so the two are comparable.
+
+    The gate statistic stays `max` because spec 2.2 locks it and spec 4 forbids relaxing a
+    threshold after seeing the data.  q95/q99 are reported ALONGSIDE, because a max over ~40k
+    cells normalised by a population mean can be driven by a sparse tail, and the reader needs to
+    see whether it is.
+    """
+    cur = np.asarray(current, float)
+    step = np.abs(damped_rate_update(cur, measured, alpha) - cur)
+    raw = np.abs(np.asarray(measured, float) - cur)
+    denom = float(np.mean(cur))
+    return dict(alpha=float(alpha), mean_current=denom,
+                max_rel=float(step.max()) / denom,
+                q99_rel=float(np.quantile(step, 0.99)) / denom,
+                q95_rel=float(np.quantile(step, 0.95)) / denom,
+                undamped_max_rel=float(raw.max()) / denom)
+
+
+def active_voxel_count(dk_map, *, frac):
+    """How many voxels rose to at least `frac` of THIS event's own peak excess potassium.
+
+    Relative to the event's own peak, so the count measures spatial extent rather than amplitude:
+    an event twice as strong everywhere has the same count.
+    """
+    d = np.asarray(dk_map, float)
+    peak = float(d.max())
+    return 0 if peak <= 0 else int(np.count_nonzero(d >= frac * peak))
+
+
+def recruitment_radius_mm(pos, participating, *, center):
+    """RMS distance of the participating cells from the kick centre.  NaN if nobody participated."""
+    sel = np.asarray(pos, float)[np.asarray(participating, bool)]
+    if sel.shape[0] == 0:
+        return float("nan")
+    return float(np.sqrt(np.mean(np.sum((sel - np.asarray(center, float)) ** 2, axis=1))))
+
+
 def adjudicate_b2_1_selfconsistency(m):
     """Both clauses of spec 2.2, and the slope must come from an INDEPENDENT window."""
     checks = dict(

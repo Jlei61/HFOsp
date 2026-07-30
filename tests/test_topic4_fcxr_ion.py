@@ -882,3 +882,57 @@ def test_power_precondition_is_a_hard_gate():
     assert one_sided["status"] == "INSUFFICIENT_POWER"
     ok = ION.direction_power_gate(dict(n_scoreable=44, frac_A=0.7, frac_B=0.3))
     assert ok["status"] == "PASS"
+
+
+# --- B2.1 review 4 (2026-07-28): the convergence quantity is the DAMPED step -------------------
+# The spec 2.2 gate is `max_i |r^(k+1)_i - r^(k)_i| / mean(r)`.  The first implementation compared
+# the UNDAMPED measurement against the current field, which reports exactly 1/alpha times too much.
+
+def test_convergence_change_is_the_DAMPED_step_not_the_raw_measurement():
+    cur = np.full(100, 4.0)
+    meas = np.full(100, 8.0)                       # measurement is 2x the current field
+    ch = ION.damped_field_change(cur, meas, alpha=0.5)
+    # r^(k+1) = 4 + 0.5*(8-4) = 6, so the step is 2.0 and mean(r^(k)) is 4.0
+    assert ch["max_rel"] == pytest.approx(0.5)
+    # the pre-fix expression max|meas-cur|/mean(cur) would have said 1.0
+    assert ch["max_rel"] != pytest.approx(1.0)
+    assert ch["undamped_max_rel"] == pytest.approx(1.0)
+
+
+def test_convergence_change_reports_q95_q99_alongside_the_contract_max():
+    cur = np.full(1000, 2.0)
+    meas = cur.copy()
+    meas[:10] = 202.0                              # a 1% sparse tail that dominates the max
+    ch = ION.damped_field_change(cur, meas, alpha=0.5)
+    assert ch["max_rel"] == pytest.approx(50.0)    # the gate statistic is contract-locked to max
+    assert ch["q95_rel"] == pytest.approx(0.0)     # ... and 95% of cells did not move at all
+    assert ch["q99_rel"] < ch["max_rel"]
+
+
+def test_convergence_change_is_the_gate_statistic_and_alpha_is_recorded():
+    ch = ION.damped_field_change(np.full(10, 1.0), np.full(10, 3.0), alpha=0.25)
+    assert ch["alpha"] == 0.25 and ch["max_rel"] == pytest.approx(0.5)
+
+
+# --- B2.1 review 4: spatial readouts, so "recruitment" is not silently read as "spatial spread" --
+
+def test_active_voxel_count_is_relative_to_that_events_own_peak():
+    dk = np.array([1.0, 0.6, 0.4, 0.2, 0.0])
+    assert ION.active_voxel_count(dk, frac=0.5) == 2      # 1.0 and 0.6
+    assert ION.active_voxel_count(dk * 10.0, frac=0.5) == 2   # scale-free by construction
+
+
+def test_active_voxel_count_is_zero_when_nothing_rose():
+    assert ION.active_voxel_count(np.zeros(16), frac=0.25) == 0
+
+
+def test_recruitment_radius_is_rms_distance_from_the_kick_centre():
+    pos = np.array([[3.0, 4.0], [0.0, 0.0], [100.0, 100.0]])
+    part = np.array([True, True, False])
+    r = ION.recruitment_radius_mm(pos, part, center=(0.0, 0.0))
+    assert r == pytest.approx(np.sqrt((25.0 + 0.0) / 2))
+
+
+def test_recruitment_radius_is_nan_when_nobody_participated():
+    r = ION.recruitment_radius_mm(np.zeros((4, 2)), np.zeros(4, bool), center=(0.0, 0.0))
+    assert np.isnan(r)

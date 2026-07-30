@@ -1975,6 +1975,21 @@ def closed_loop_integration_probe(job):
     hot = int(np.argmax((K[w1] - base).max(axis=0)))
     p1 = float((K[w1] - base)[:, hot].max())
     p2 = float((K[w2] - base)[:, hot].max())
+    # spatial readout: participant COUNT alone cannot distinguish "more cells in the same place"
+    # from "the same activity spread wider", so record extent explicitly (descriptive, no null)
+    posE = np.asarray(S["posE"], float)
+    dk_maps, spatial = [], []
+    for j, w in enumerate((w1, w2)):
+        a = int(round((m.CL_PROBE_T_KICK_MS + j * m.CL_PROBE_SPACING_MS) / m.DT))
+        b = int(round((m.CL_PROBE_T_KICK_MS + (j + 1) * m.CL_PROBE_SPACING_MS) / m.DT))
+        part = spk[a:b].any(axis=0)
+        dk = (K[w] - base).max(axis=0)
+        dk_maps.append([round(float(x), 6) for x in dk])
+        spatial.append(dict(
+            active_voxels_25pct=ION.active_voxel_count(dk, frac=0.25),
+            active_voxels_50pct=ION.active_voxel_count(dk, frac=0.50),
+            participant_voxels=int(np.unique(voxel[:S["NE"]][part]).size),
+            recruit_radius_mm=ION.recruitment_radius_mm(posE, part, center=S["src_xy"])))
     tau = float(job["tau_Ko_at_workpoint_s"])
     linear = 1.0 + float(np.exp(-m.CL_PROBE_SPACING_MS * 1e-3 / tau))
     return dict(job=job, hot_voxel=hot, peak1_mM=p1, peak2_mM=p2,
@@ -1982,6 +1997,9 @@ def closed_loop_integration_probe(job):
                 ratio_2nd_over_1st=(p2 / p1 if p1 > 0 else float("nan")),
                 linear_prediction_at_workpoint=linear,
                 mean_rate_E_hz=float(np.asarray(res["rate_E"], float).mean()),
+                spatial=spatial, dk_map_per_kick=dk_maps,
+                k_trace_hot=[round(float(x), 6) for x in (K[:, hot] - base[hot])],
+                k_trace_t_ms=[float(x) for x in t],
                 K_max=float(K.max()), wall_s=round(time.time() - t0, 1))
 
 
@@ -2259,18 +2277,22 @@ def cmd_b2_selfconsistent(args):
                                            voxel[:NE], window_s=win_s, n_voxels=nv)
             meas_I = ION.shrink_rate_field(np.asarray(r["per_cell_counts_I"], float),
                                            voxel[NE:], window_s=win_s, n_voxels=nv)
-            rel = float(np.max(np.abs(np.concatenate([meas_E, meas_I])
-                                      - np.concatenate([cur_E, cur_I])))
-                        / np.mean(np.concatenate([cur_E, cur_I])))
+            chg = ION.damped_field_change(np.concatenate([cur_E, cur_I]),
+                                          np.concatenate([meas_E, meas_I]))
+            rel = chg["max_rel"]          # spec 2.2 gate statistic, contract-locked to the max
             history.append(dict(
                 iteration=k, field_source=prev_field_source, rate_rel_change=rel,
+                change=chg, mean_rate_I_hz=float(np.mean(meas_I)),
+                slope_Na=r["ion"]["slope_Na"], slope_K=r["ion"]["slope_K"],
                 mean_rate_E_hz=r["pooled"]["mean_rate_hz"],
                 slope_q99_Na=r["ion"]["slope_q99_Na"], slope_q99_K=r["ion"]["slope_q99_K"],
                 slope_mean_signed_Na=r["ion"]["slope_Na"]["mean_signed"],
                 slope_mean_signed_K=r["ion"]["slope_K"]["mean_signed"],
                 first_difference_q99_Na=r["ion"]["q99_abs_dNa_dt"],
                 n_events=r["pooled"]["n_events"], n_scoreable=r["pooled"]["n_scoreable"]))
-            print(f"[b2-selfconsistent] iter{k}: rate_rel_change={rel:.4f} "
+            print(f"[b2-selfconsistent] iter{k}: damped max={rel:.4f} "
+                  f"(q99={chg['q99_rel']:.4f} q95={chg['q95_rel']:.4f}; "
+                  f"undamped max={chg['undamped_max_rel']:.4f}) "
                   f"r_E={r['pooled']['mean_rate_hz']:.4f} "
                   f"slope_q99 Na={r['ion']['slope_q99_Na']:.3e} "
                   f"(bound {ION.B2_1_SLOPE_BOUND_NA:.3e}) "
@@ -2298,7 +2320,10 @@ def cmd_b2_selfconsistent(args):
             shrinkage=dict(n0=ION.B2_1_SHRINK_N0, alpha=ION.B2_1_ALPHA,
                            max_updates=ION.B2_1_MAX_UPDATES),
             source_rate_field_sha256=sha,
-            converged_rate_field=dict(rate_E=cur_E.tolist(), rate_I=cur_I.tolist()))
+            converged_rate_field=dict(rate_E=cur_E.tolist(), rate_I=cur_I.tolist()),
+            converged_rate_field_note=("the field the LAST iteration ran on. Named for the "
+                                       "converged case; when NOT_CONVERGED it is simply the final "
+                                       "iterate, and carries no fixed-point claim."))
         _write_json(os.path.join(OUT, "b2_1_selfconsistent.json"), payload)
         print(f"[b2-selfconsistent] {verdict['status']} after {len(history)} trajectories")
         if verdict["status"] != "CONVERGED":
@@ -2331,7 +2356,10 @@ def cmd_b2_matched_control(args):
         fz = sc["frozen"]
         base = dict(I_bias_E=fz["I_bias_E"], I_bias_I=fz["I_bias_I"], q_ion=fz["q_ion"],
                     conn_seed=CONN_SEED_DEV, noise_seed=NOISE_DEV,
-                    rate_field_override=sc["converged_rate_field"],   # iter-0 field if not converged
+                    # NOT the iter-0 field when non-converged: the loop updates cur_* at the end
+                    # of every iteration except the last, so this is the field the LAST iteration
+                    # ran on.  Either way both arms share it bit-for-bit, which is what 2.3 needs.
+                    rate_field_override=sc["converged_rate_field"],
                     tau_Ko_at_workpoint_s=float(next(
                         r for r in json.load(open(os.path.join(OUT, "b1_f_selection_v2.json")))
                         ["rows"] if r["f_prime"] == float(fz["f_prime"])
@@ -2343,7 +2371,9 @@ def cmd_b2_matched_control(args):
                 dict(base, tag=tag, freeze_membrane_from_block=fb))
             a = arms[tag]
             print(f"[b2-matched-control] {tag}: peaks {a['peak1_mM']:.4f}/{a['peak2_mM']:.4f} "
-                  f"spikes {a.get('kick_spikes')} participants {a.get('kick_participants')}",
+                  f"spikes {a.get('kick_spikes')} participants {a.get('kick_participants')} "
+                  f"active_vox25 {[x['active_voxels_25pct'] for x in a['spatial']]} "
+                  f"radius_mm {[round(x['recruit_radius_mm'], 3) for x in a['spatial']]}",
                   flush=True)
         v = ION.adjudicate_matched_control(
             closed=dict(spikes=arms["closed"]["kick_spikes"],
@@ -2359,6 +2389,12 @@ def cmd_b2_matched_control(args):
                  code_commit=pre["code_commit"],
                  contract="docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md",
                  initial_field=field_note,
+                 spatial_extent={t: arms[t]["spatial"] for t in ("closed", "open")},
+                 spatial_note=("descriptive, single seed, no null. active_voxels_* counts voxels "
+                               "reaching that fraction of THAT kick's own peak excess K; "
+                               "recruit_radius_mm is the RMS distance of participating E cells "
+                               "from the kick centre. Recorded so that a rise in participant "
+                               "COUNT is not read as spatial spread without evidence."),
                  selfconsistency_status=sc["status"],
                  design=("both arms share q_ion, bias, initial ion field, noise seed, kick times, "
                          "strength and radius; the OPEN arm freezes membrane_current() at the "
@@ -2587,8 +2623,10 @@ def write_status():
          "**separately** -- it is explicitly NOT a mechanism NO-GO, and the legal bias box was "
          "never bracketed (7 of 12 probes over +-0.5 mV inside +-2 mV). The repair is scoped in "
          "`docs/superpowers/specs/2026-07-28-topic4-fcxr-ion-B2_1-lock.md`.", "",
-         "The closed-vs-open-loop comparison this sprint owed is also NOT answered: the two arms "
-         "differed in q_ion, drive and recruitment, so `UNRESOLVED_MATCHED_CONTROL`.", "",
+         "The closed-vs-open-loop comparison this sprint owed was NOT answerable at the time of "
+         "that adjudication (the two arms differed in q_ion, drive and recruitment). B2.1 section "
+         "2.3 replaced it with a structurally matched pair and ANSWERED it -- see the B2.1 table "
+         "above and `figures/b2_1_calibration_repair.png`.", "",
          "## Allowed statement", "",
          f"> {gb['allowed_statement']}" if gb else "> (Gate B has not been adjudicated.)", "",
          "## Not claimed", ""]

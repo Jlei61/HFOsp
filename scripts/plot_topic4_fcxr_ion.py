@@ -373,9 +373,114 @@ def fig_t7():
     print("[plot] t7_sensor_diagnostic.png")
 
 
+def fig_b2_1():
+    """B2.1 calibration-instrument repair.  Four independent questions (CLAUDE.md 7):
+
+    1  does the self-consistent iteration converge?          -> convergence quantity + r_E
+    2  is the ion field stationary?                          -> signed slope ladder vs bounds
+    3  does the K feedback change the 2nd event in TIME?     -> hot-voxel excess K, both arms
+    4  does it change the 2nd event in SPACE?                -> per-voxel excess-K difference map
+    """
+    sc, mc = _load("b2_1_selfconsistent.json"), _load("b2_1_matched_control.json")
+    if sc is None or mc is None or "spatial_extent" not in mc:
+        print("[plot] b2_1_calibration_repair.png SKIPPED (inputs missing)")
+        return
+    import src.topic4_fcxr_ion as ION                                        # noqa: E402
+    h = sc["history"]
+    it = [x["iteration"] for x in h]
+    fig, ax = plt.subplots(1, 4, figsize=(20.5, 4.6))
+
+    # 1 -- convergence
+    a = ax[0]
+    for key, lab, c, ls in (("max_rel", "max  (spec 2.2 gate statistic)", BAD, "-"),
+                            ("q99_rel", "q99", MID, "--"), ("q95_rel", "q95", "#8a8a8a", ":")):
+        a.plot(it, [x["change"][key] for x in h], "o" + ls, color=c, lw=1.8, ms=5, label=lab)
+    a.axhline(ION.B2_1_RATE_REL_TOL, color=OK, lw=1.4, ls="-.",
+              label=f"convergence gate {ION.B2_1_RATE_REL_TOL}")
+    a.set_yscale("log"); a.set_xticks(it)
+    a.set_xlabel("update"); a.set_ylabel("damped step  |r$^{(k+1)}$−r$^{(k)}$| / mean(r)")
+    a.legend(fontsize=6.6, loc="lower left")
+    b = a.twinx()
+    b.plot(it, [x["mean_rate_E_hz"] for x in h], "s-", color="#c98a20", lw=1.6, ms=5)
+    b.set_ylabel("population r$_E$  (Hz, orange)", color="#c98a20")
+    b.tick_params(axis="y", colors="#c98a20")
+    a.set_title(f"1  self-consistent iteration — {sc['status']}\n"
+                f"r$_E$ swings {min(x['mean_rate_E_hz'] for x in h):.2f}–"
+                f"{max(x['mean_rate_E_hz'] for x in h):.2f} Hz; the step never approaches the gate",
+                fontsize=9)
+
+    # 2 -- ion stationarity
+    a = ax[1]
+    w, off = 0.36, 0.19
+    for i, (spec, bound, c) in enumerate((("slope_Na", ION.B2_1_SLOPE_BOUND_NA, "#3b6ea5"),
+                                          ("slope_K", ION.B2_1_SLOPE_BOUND_K, "#a5533b"))):
+        x = np.arange(len(it)) + (i - 0.5) * off * 2
+        a.bar(x, [e[spec]["q99_abs"] for e in h], w, color=c, alpha=0.85,
+              label=f"{spec.split('_')[1]}  q99")
+        a.plot(x, [e[spec]["q95_abs"] for e in h], "_", color="0.25", ms=13, mew=1.6)
+        a.axhline(bound, color=c, ls="--", lw=1.3)
+        a.text(len(it) - 0.42, bound * 1.12, f"{spec.split('_')[1]} bound", color=c, fontsize=6.6)
+    a.set_yscale("log"); a.set_xticks(np.arange(len(it))); a.set_xticklabels(it)
+    a.set_xlabel("update"); a.set_ylabel("|signed secular slope|  (mM/s)")
+    a.legend(fontsize=6.8, loc="upper left")
+    a.set_title("2  ion stationarity — corrected estimator, still FAILS\n"
+                "bars q99, ticks q95; every update is over both bounds", fontsize=9)
+
+    # 3 -- temporal effect
+    a = ax[2]
+    for tag, c in (("closed", BAD), ("open", MID)):
+        arm = mc["arms"][tag]
+        a.plot(np.asarray(arm["k_trace_t_ms"]) / 1000.0, arm["k_trace_hot"], color=c, lw=1.5,
+               label=f"{tag}  peak2/peak1 = {arm['ratio_2nd_over_1st']:.3f}")
+    import run_topic4_fcxr_ion as RUN                                     # noqa: E402
+    for j in (0, 1):
+        a.axvline((RUN.CL_PROBE_T_KICK_MS + j * RUN.CL_PROBE_SPACING_MS) / 1000.0,
+                  color="0.55", lw=1.0, ls=":")
+    a.axvline((RUN.CL_PROBE_T_KICK_MS - 50.0) / 1000.0, color="#c98a20", lw=1.2, ls="--")
+    a.text((RUN.CL_PROBE_T_KICK_MS - 50.0) / 1000.0, a.get_ylim()[1], " freeze", color="#c98a20",
+           fontsize=6.6, va="top")
+    a.set_xlabel("time (s)"); a.set_ylabel("excess K$_o$ at the hot voxel (mM)")
+    a.legend(fontsize=7.4, loc="upper left")
+    a.set_title(f"3  same hot voxel ({mc['arms']['closed']['hot_voxel']}) in BOTH arms\n"
+                "live feedback does NOT stack a higher 2nd peak; the frozen control does",
+                fontsize=9)
+
+    # 4 -- spatial effect
+    a = ax[3]
+    ng = int(np.sqrt(len(mc["arms"]["closed"]["dk_map_per_kick"][1])))
+    d = (np.asarray(mc["arms"]["closed"]["dk_map_per_kick"][1]).reshape(ng, ng)
+         - np.asarray(mc["arms"]["open"]["dk_map_per_kick"][1]).reshape(ng, ng))
+    v = float(np.abs(d).max())
+    im = a.imshow(d, cmap="RdBu_r", vmin=-v, vmax=v, origin="lower")
+    fig.colorbar(im, ax=a, fraction=0.046).set_label("excess K$_o$, kick 2:  closed − open (mM)",
+                                                     fontsize=7.5)
+    sp = mc["spatial_extent"]
+    a.set_xticks([]); a.set_yticks([])
+    a.text(0.02, 0.98, "\n".join(
+        [f"{t:>6}  kick2: {sp[t][1]['active_voxels_25pct']:>4} voxels >25% peak,  "
+         f"radius {sp[t][1]['recruit_radius_mm']:.2f} mm,  {sp[t][1]['participant_voxels']} "
+         f"occupied" for t in ("closed", "open")]
+        + [f"       kick1: closed {sp['closed'][0]['active_voxels_25pct']} vox / "
+           f"{sp['closed'][0]['recruit_radius_mm']:.2f} mm,  open "
+           f"{sp['open'][0]['active_voxels_25pct']} vox / "
+           f"{sp['open'][0]['recruit_radius_mm']:.2f} mm"]),
+        transform=a.transAxes, va="top", fontsize=6.6, family="monospace",
+        bbox=dict(fc="white", ec="0.7", alpha=0.93))
+    a.set_title("4  spatial extent of the 2nd event  (descriptive, 1 seed, no null)", fontsize=9)
+
+    fig.suptitle("FCXR-ION B2.1 calibration-instrument repair — "
+                 f"self-consistency {sc['status']}, matched control {mc['status']}. "
+                 "Gate B NOT adjudicated.", fontsize=11.5)
+    fig.tight_layout(rect=(0, 0, 1, 0.9))
+    fig.savefig(os.path.join(FIG, "b2_1_calibration_repair.png"), dpi=185)
+    plt.close(fig)
+    print("[plot] b2_1_calibration_repair.png")
+
+
 if __name__ == "__main__":
     os.makedirs(FIG, exist_ok=True)
     fig_b0()
     fig_gate_h()
     fig_t7()
     fig_gate_b()
+    fig_b2_1()
