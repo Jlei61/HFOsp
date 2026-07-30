@@ -1,6 +1,12 @@
 # FCXR-HYB1：职责分离的 `Z – δK – X`（– `M`）生命周期设计
 
-日期：2026-07-29 · 状态：**DESIGN LOCK CANDIDATE（未执行；需签核）**
+日期：2026-07-29 · 状态：**DESIGN LOCK — 可执行**（2026-07-29 按审阅补全；执行细节见
+`docs/superpowers/plans/2026-07-29-topic4-fcxr-hyb1.md`，两者冲突时以 plan 为准）
+
+> **本 spec 是"为什么这样设计"，plan 是"锁死的数值与判据"。** 审阅要求在任何 HYB1 结果出现之前
+> 锁死的四组内容——activity-excess K 的独立场定义与 baseline-preservation gate、Z 的可辨识单轴、
+> Z 的非对称恢复、修正后的七门——全部写在 plan 的 §2 / §3 / §4 / §5，**不得**拿本 spec 原来那
+> 88 行的候选版本直接开跑。
 
 前置：`docs/archive/topic4/sef_hfo/mz_fcxr_lc1_bounded_negative_2026-07-23.md`（零件全部验证 +
 两档夹住中间档）、`docs/archive/topic4/sef_hfo/fcxr_ion_B2_1_calibration_repair_2026-07-28.md`
