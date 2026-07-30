@@ -1,5 +1,9 @@
 # Figure 6 RNN axis/static-transfer bounded-negative draft
 
+> **Historical model-stage record.** 当前 manuscript-facing Supplementary
+> 版本为 `figure6_static_contact_topography_bounded_result.md`。本文件不再作为
+> current RNN/static-transfer claim source。
+
 ## One-sentence argument
 
 In patient-specific interictal rank sequences, a low-capacity recurrent model

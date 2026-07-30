@@ -1,7 +1,14 @@
 # Topic 5 / Figure 6：symmetric-axis E/I system identification RNN v2.0
 
 **日期**：2026-07-26
-**状态**：待执行的冻结设计合同
+**状态**：**SUPERSEDED；禁止执行**
+**替代合同**：
+`2026-07-26-topic5-symmetric-axis-propagation-state-rnn-v2_2.md`
+
+> v2.0 因重复设置 SNN recovery、把 early-ictal energy bridge 改成 ictal-prefix
+> completion、且 recurrent equations/parameter identifiability 未完全冻结而撤回。
+> 以下内容只保留审计，不得据此启动仿真。
+
 **上游结论**：v0.7/v0.9/v1.0 已冻结为 bounded negative；不得继续 K sweep 或
 event-persistent path-mode 优化。
 **目的**：从间期 contact-rank 序列辨识一个患者特异、近似对称、轴向各向异性的共同

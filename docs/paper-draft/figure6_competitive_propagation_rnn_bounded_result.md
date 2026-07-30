@@ -1,5 +1,9 @@
 # Interictal sequences are predictably structured but do not identify a physical-axis mechanism
 
+> **Historical model-stage record.** 当前 manuscript-facing Supplementary
+> 版本为 `figure6_static_contact_topography_bounded_result.md`。本文件只保留
+> competitive-RNN 阶段的实现与边界。
+
 We next asked whether the ordered contact recruitment observed within interictal
 population events could identify a compact recurrent mechanism. We trained a
 patient-specific recurrent observation model directly on masked contact-rank
