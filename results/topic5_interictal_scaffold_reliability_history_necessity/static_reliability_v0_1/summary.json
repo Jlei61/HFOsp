@@ -1,0 +1,67 @@
+{
+  "status": "complete",
+  "n_patients": 34,
+  "n_epilepsiae": 18,
+  "n_yuquan": 16,
+  "primary": {
+    "metric": "train80_vs_heldout20_contact_spearman",
+    "median": 0.8926007326007326,
+    "ci95": [
+      0.8678571428571429,
+      0.9363136863136863
+    ],
+    "n_positive": 34,
+    "wilcoxon_greater_p": 1.8246286932632965e-07
+  },
+  "structured_null_excess": {
+    "n_patients": 33,
+    "median": 0.6852941176470588,
+    "ci95": [
+      0.5362033885642898,
+      0.7272727272727273
+    ],
+    "n_positive": 33,
+    "wilcoxon_greater_p": 1.1641532182693481e-10,
+    "n_patient_null_p_lt_0_05": 31
+  },
+  "median_chronological_half_rho": 0.9074688357993921,
+  "median_odd_even_rho": 0.9966968315319387,
+  "config_sha256": "9d057c19b10c60ad0726d29f7eb9df3f6763f5651557ee7d69b389ff75f9898b",
+  "input_fingerprints": {
+    "epilepsiae_1073": "9651a41bb5da46092dfcd6991b3994c1bd202f27f574d6db303906f405b88724",
+    "epilepsiae_1077": "74e1d410317be0568a507301fffa99363988314585dcda01bfe9764646c358e2",
+    "epilepsiae_1084": "5be7ee1c65fa7210f78def9fbcbc578bbbf15e17599af481dc9efffa92e6f527",
+    "epilepsiae_1096": "a3b0fc749d66f44f6df74c04faf30bbc8a18afbba4da909cda4efc6a7a5ad44b",
+    "epilepsiae_1125": "d360650c0aa9eef5ed18df769f42fb40674bddb2bc3a2e2508c9802540a28881",
+    "epilepsiae_1146": "03b3ab78f442654cca717f489b1b46d8cadf663a5b16a1d132e87464eaa01362",
+    "epilepsiae_1150": "9f54ff02f58eb235e93be1d378b48aba86d9e4b4a4f483556786311ca272e89c",
+    "epilepsiae_139": "35c57def380a805db117cf49d4714884c092f803f0a9d93833046562bf70d420",
+    "epilepsiae_253": "69d872ff84d3e5950a501c00202e405ede5a6c863723697371ae496c13de1e35",
+    "epilepsiae_384": "e0d88fdee36f91583b362c6f23cb6bb0f4a8df735e40bfd90505927cc8cf82f1",
+    "epilepsiae_442": "61478f93fa30cd453f45b8748362d9674c4439d51af4f708890b57cd67f56843",
+    "epilepsiae_548": "ba7d0572bc4b47114986cda519da5dc2ce2dae433560f169b1bfc8b4bc6a1b23",
+    "epilepsiae_583": "ce1d5abe13df6de8c96c44f4a0590b3ba70682effaf3b5b46124fb8e5e2c9ad4",
+    "epilepsiae_590": "f6141bc6ddae524d76e79a82d23a9590882715f235f5d33f40d346697b7b3c11",
+    "epilepsiae_620": "a718015e389644dcf9c33021e2c553ebc433182d12190c5ed328dfaebbaf3a5f",
+    "epilepsiae_635": "6cb42fd1680a3cd21a20f314f2dd26f6fd05c64a7473547f238465e9ea333194",
+    "epilepsiae_922": "e1ed0adfdfc9a7a430f576b8e6c10135cf5fd514c0abb0da5b6014e9a019351f",
+    "epilepsiae_958": "b1b25dbc11bfee77b2fac9606e4520b3e100443d80e14dd02ebe1425ca988be3",
+    "yuquan_chengshuai": "a79770cb688475d3bede349bbc1595a5683d9df733561af96679deaa26b7157e",
+    "yuquan_chenziyang": "7e05d808772c559ad6c42a81eeb138e4af3da3f071d5243e527b96911a6b04cd",
+    "yuquan_gaolan": "9d45f87b3c785080c0fdcd400ba33e2810e4eb518f6ce2696e931bfcb59f4436",
+    "yuquan_hanyuxuan": "1d333737d7350f5acf05c99b2277f453f9352e0f562d20960c44ae0ce3140452",
+    "yuquan_huanghanwen": "7803bb5e819b668280ad99cfccec8fc1693d6c2589d85d80a95a93a4199fd560",
+    "yuquan_litengsheng": "fbc6e19f31d31f8c6fdeb52e736df0678f2611cea699f5c7a636da961f14af96",
+    "yuquan_liyouran": "2136c7a6f3853604b0e7ca141e86ca063e26cdb21199caea37200aaf2757e178",
+    "yuquan_pengzihang": "03ae17f0cab713ae36d45a42e27d7880f544b705bd325e6cfc0b09ab6a366f04",
+    "yuquan_songzishuo": "615731af01ed9a51547fd49047c958a862ffb48256d444438010a48523c303ab",
+    "yuquan_sunyuanxin": "2b96764185fec370693b0899d5edf6307a9edfe6969ee6610b04d05e2b0609ae",
+    "yuquan_wangyiyang": "b7a8d3f2af82877b13730661804435dab4bae0d1f985f2d64f6f0848beb0cb08",
+    "yuquan_xuxinyi": "abd7bb25d5d9dc3197037d162ec9dad581d6e5ed5cdc0819f115c52366eb1bda",
+    "yuquan_zhangbichen": "118a322321e32e14aa89e62f5ee91dc11d91ff09ef3ebd39a5cbb431dcf9159c",
+    "yuquan_zhangjiaqi": "eb1eded4657d106f606a3b1a78fb6e96d209e9444652bb15a20d8111d7c46151",
+    "yuquan_zhangkexuan": "5022e5521225ca6e9f51ae6d656e742df5e92ae9a980e51374603245e33929d3",
+    "yuquan_zhaochenxi": "a988bf8bf0359edf667f4e781547f0e5346acc3365c34ec98627141b6238caf6"
+  },
+  "ictal_target_read": false
+}

@@ -1,0 +1,63 @@
+contract:
+  name: topic5_static_scaffold_reliability_history_necessity_v0_1
+  version: '0.1'
+  source_spec: docs/superpowers/specs/2026-07-28-topic5-static-scaffold-reliability-history-necessity-v0_1.md
+  ictal_target_read: false
+  ab_label_read: false
+  inter_event_interval_read: false
+inputs:
+  dataset: results/topic5_interictal_rank_distribution/dataset_v0_4
+  frozen_formal: results/topic5_interictal_rank_distribution/runs/formal_multiseed_20260725_v1
+  selected_hyperparameters: results/topic5_interictal_rank_distribution/runs/tuning_20260725_v1/selection/selected_hyperparameters.json
+cohort:
+  expected_subjects: 34
+  expected_epilepsiae: 18
+  expected_yuquan: 16
+  split: chronological_train80_heldout20
+static_reliability:
+  event_counts:
+  - 25
+  - 50
+  - 100
+  - 200
+  - 500
+  - 1000
+  - 2000
+  subsamples_per_count: 200
+  null_mode: within_shaft_circular
+  null_draws: 5000
+  seed: 20260728
+history_necessity:
+  history_windows:
+  - 1
+  - 2
+  - 3
+  seeds:
+  - 20260725
+  - 20260726
+  - 20260727
+  hidden_size: 32
+  learning_rate: 0.001
+  local_learning_rate: 0.002
+  local_offset_dim: 4
+  batch_events: 1024
+  coverage_shared_cycles: 1
+  coverage_calibration_cycles: 4
+  coverage_updates_per_patient: 8
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  contact_embedding_dim: 32
+  contact_encoder_hidden: 32
+resources:
+  conda_env: cuda_env
+  device: cuda
+  cpu_threads_per_process: 8
+  max_parallel_gpu_processes: 6
+  gpu_memory_fraction_per_process: 0.14
+  min_mem_available_gb: 32
+  monitor_interval_seconds: 30
+outputs:
+  root: results/topic5_interictal_scaffold_reliability_history_necessity
+  static_reliability: results/topic5_interictal_scaffold_reliability_history_necessity/static_reliability_v0_1
+  history_runs: results/topic5_interictal_scaffold_reliability_history_necessity/history_runs_v0_1
+  figures: results/topic5_interictal_scaffold_reliability_history_necessity/figures

@@ -1,0 +1,58 @@
+{
+  "contract": "topic5_constructive_event_generation_v0_1",
+  "gate_a": {
+    "status": "PASS",
+    "complete_cells": 102,
+    "engineering_errors": []
+  },
+  "gate_b": {
+    "status": "FAIL",
+    "b1_ordered_over_static": false,
+    "b2_empirical_fidelity": false,
+    "b3_termination_necessity": true,
+    "n_patients_two_of_three_local_endpoints_within_empirical": 9,
+    "required_patients": 17,
+    "termination_conditions": {
+      "constant_stop": true,
+      "no_termination": true
+    }
+  },
+  "gate_c": {
+    "status": "LOCKED_NOT_EVALUATED",
+    "diagnostic_numeric_pass": false,
+    "c1_full_over_static": false,
+    "c2_within_empirical": false,
+    "c3_bidirectional_support": true,
+    "n_eligible": 22,
+    "eligible_subjects": [
+      "epilepsiae_1077",
+      "epilepsiae_1084",
+      "epilepsiae_1096",
+      "epilepsiae_1146",
+      "epilepsiae_1150",
+      "epilepsiae_139",
+      "epilepsiae_253",
+      "epilepsiae_384",
+      "epilepsiae_583",
+      "epilepsiae_590",
+      "epilepsiae_620",
+      "epilepsiae_922",
+      "epilepsiae_958",
+      "yuquan_huanghanwen",
+      "yuquan_litengsheng",
+      "yuquan_liyouran",
+      "yuquan_pengzihang",
+      "yuquan_songzishuo",
+      "yuquan_xuxinyi",
+      "yuquan_zhangjiaqi",
+      "yuquan_zhangkexuan",
+      "yuquan_zhaochenxi"
+    ],
+    "n_both_template_axis_within_empirical": 2,
+    "n_generated_bidirectional_support": 22
+  },
+  "snn_fingerprint": {
+    "status": "LOCKED_BY_HUMAN_SUFFICIENCY_GATE"
+  },
+  "safe_claim": "one_step_order_information_does_not_establish_free_running_generation"
+}

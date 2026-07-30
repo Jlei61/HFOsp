@@ -1,0 +1,645 @@
+{
+  "contract": "topic5_ordered_history_architecture_audit_v0_1",
+  "status": "COMPLETE",
+  "selected_architecture": "linear_state",
+  "n_patients": 16,
+  "n_seizures": 106,
+  "target": {
+    "time_reference": "clinical_onset",
+    "window_sec": [
+      0,
+      10
+    ],
+    "band_hz": [
+      1,
+      150
+    ],
+    "target_reused_not_independent_confirmation": true
+  },
+  "estimand": "partial rank correspondence of the frozen ordered teacher-forced contact field after static participation and unordered-prefix fields; operational proxy, not a direct mutual-information estimate",
+  "conditional_early_ictal_increment_status": "NOT_ESTABLISHED",
+  "cohort_summaries": {
+    "full_history_gru__static_only__signed_rho": {
+      "n_patients": 15,
+      "median": -0.1240846457468168,
+      "bootstrap_ci95": [
+        -0.2749633406650373,
+        0.09280323373346182
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.8204345703125
+    },
+    "full_history_gru__static_only__absolute_rho": {
+      "n_patients": 15,
+      "median": 0.21719855395785898,
+      "bootstrap_ci95": [
+        0.16876418660058112,
+        0.44125218061458815
+      ],
+      "n_positive": 15,
+      "wilcoxon_greater_p": 3.0517578125e-05
+    },
+    "full_history_gru__static_only__signed_margin": {
+      "n_patients": 15,
+      "median": -0.1272531847022325,
+      "bootstrap_ci95": [
+        -0.22024742723634727,
+        0.07786887118745059
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.834869384765625
+    },
+    "full_history_gru__static_only__absolute_margin": {
+      "n_patients": 15,
+      "median": -0.03463368892754565,
+      "bootstrap_ci95": [
+        -0.11100565190452111,
+        0.12161516556278096
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.64013671875
+    },
+    "full_history_gru__static_only__rank_residual_fraction": {
+      "n_patients": 15,
+      "median": 0.39087091261910967,
+      "bootstrap_ci95": [
+        0.18140589569160998,
+        0.5555555555555556
+      ],
+      "n_positive": 15,
+      "wilcoxon_greater_p": 3.0517578125e-05
+    },
+    "full_history_gru__static_plus_unordered__signed_rho": {
+      "n_patients": 13,
+      "median": 0.23532355641512004,
+      "bootstrap_ci95": [
+        -0.09166243414027864,
+        0.26037170973446205
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.108154296875
+    },
+    "full_history_gru__static_plus_unordered__absolute_rho": {
+      "n_patients": 13,
+      "median": 0.40188775332723253,
+      "bootstrap_ci95": [
+        0.26037170973446205,
+        0.4728898678132294
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.0001220703125
+    },
+    "full_history_gru__static_plus_unordered__signed_margin": {
+      "n_patients": 13,
+      "median": 0.18916882279468566,
+      "bootstrap_ci95": [
+        -0.07011705771801481,
+        0.2429554343139825
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.095458984375
+    },
+    "full_history_gru__static_plus_unordered__absolute_margin": {
+      "n_patients": 13,
+      "median": 0.1050462502006762,
+      "bootstrap_ci95": [
+        -0.029066706165202905,
+        0.17413401250017846
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.054931640625
+    },
+    "full_history_gru__static_plus_unordered__rank_residual_fraction": {
+      "n_patients": 13,
+      "median": 0.0789648608842844,
+      "bootstrap_ci95": [
+        0.04595016954150081,
+        0.1789915966386555
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.0001220703125
+    },
+    "full_history_gru__static_unordered_plus_matched_shuffle__signed_rho": {
+      "n_patients": 11,
+      "median": 0.14775683036408468,
+      "bootstrap_ci95": [
+        -0.5811877117829867,
+        0.35567413720866503
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.48291015625
+    },
+    "full_history_gru__static_unordered_plus_matched_shuffle__absolute_rho": {
+      "n_patients": 11,
+      "median": 0.4295943448033358,
+      "bootstrap_ci95": [
+        0.2630120434692184,
+        0.5819421876369189
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.00048828125
+    },
+    "full_history_gru__static_unordered_plus_matched_shuffle__signed_margin": {
+      "n_patients": 11,
+      "median": 0.13759977934725914,
+      "bootstrap_ci95": [
+        -0.5876728452043902,
+        0.3472666247229087
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.51708984375
+    },
+    "full_history_gru__static_unordered_plus_matched_shuffle__absolute_margin": {
+      "n_patients": 11,
+      "median": 0.13946196433393632,
+      "bootstrap_ci95": [
+        -0.016712542132837988,
+        0.22941684097877843
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.01611328125
+    },
+    "full_history_gru__static_unordered_plus_matched_shuffle__rank_residual_fraction": {
+      "n_patients": 11,
+      "median": 0.04621355510945416,
+      "bootstrap_ci95": [
+        0.030431547619047643,
+        0.08382420971472629
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.00048828125
+    },
+    "selected_ordered__static_only__signed_rho": {
+      "n_patients": 14,
+      "median": -0.1418123009787719,
+      "bootstrap_ci95": [
+        -0.19552577228962328,
+        0.0249178623894842
+      ],
+      "n_positive": 4,
+      "wilcoxon_greater_p": 0.9234619140625
+    },
+    "selected_ordered__static_only__absolute_rho": {
+      "n_patients": 14,
+      "median": 0.2112073814586674,
+      "bootstrap_ci95": [
+        0.16666666666666669,
+        0.33331418788288886
+      ],
+      "n_positive": 14,
+      "wilcoxon_greater_p": 6.103515625e-05
+    },
+    "selected_ordered__static_only__signed_margin": {
+      "n_patients": 14,
+      "median": -0.1394923335482936,
+      "bootstrap_ci95": [
+        -0.19908976660295322,
+        0.016932598071788117
+      ],
+      "n_positive": 4,
+      "wilcoxon_greater_p": 0.9405517578125
+    },
+    "selected_ordered__static_only__absolute_margin": {
+      "n_patients": 14,
+      "median": -0.03990906044008616,
+      "bootstrap_ci95": [
+        -0.11309692156273196,
+        0.03772635313398983
+      ],
+      "n_positive": 4,
+      "wilcoxon_greater_p": 0.83709716796875
+    },
+    "selected_ordered__static_only__rank_residual_fraction": {
+      "n_patients": 14,
+      "median": 0.4137862707510801,
+      "bootstrap_ci95": [
+        0.20975056689342403,
+        0.48979591836734704
+      ],
+      "n_positive": 14,
+      "wilcoxon_greater_p": 6.103515625e-05
+    },
+    "selected_ordered__static_plus_unordered__signed_rho": {
+      "n_patients": 12,
+      "median": 0.019262121272983906,
+      "bootstrap_ci95": [
+        -0.1154425463072801,
+        0.26598577871968315
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.3955078125
+    },
+    "selected_ordered__static_plus_unordered__absolute_rho": {
+      "n_patients": 12,
+      "median": 0.31694742974906315,
+      "bootstrap_ci95": [
+        0.12986877537516425,
+        0.35990532588670615
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.000244140625
+    },
+    "selected_ordered__static_plus_unordered__signed_margin": {
+      "n_patients": 12,
+      "median": 0.022014320149920382,
+      "bootstrap_ci95": [
+        -0.11242480105059456,
+        0.25486806272597534
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.3955078125
+    },
+    "selected_ordered__static_plus_unordered__absolute_margin": {
+      "n_patients": 12,
+      "median": 0.034617801162581785,
+      "bootstrap_ci95": [
+        -0.13647049139425702,
+        0.10632300355197959
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.51513671875
+    },
+    "selected_ordered__static_plus_unordered__rank_residual_fraction": {
+      "n_patients": 12,
+      "median": 0.10525858242611277,
+      "bootstrap_ci95": [
+        0.028372088867444904,
+        0.23452266850479636
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.000244140625
+    },
+    "selected_ordered__static_unordered_plus_matched_shuffle__signed_rho": {
+      "n_patients": 11,
+      "median": 0.12545183169790616,
+      "bootstrap_ci95": [
+        -0.18945832496709528,
+        0.32408460398343325
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.259765625
+    },
+    "selected_ordered__static_unordered_plus_matched_shuffle__absolute_rho": {
+      "n_patients": 11,
+      "median": 0.3475241357219231,
+      "bootstrap_ci95": [
+        0.1736412832089475,
+        0.4165932610550151
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.00048828125
+    },
+    "selected_ordered__static_unordered_plus_matched_shuffle__signed_margin": {
+      "n_patients": 11,
+      "median": 0.1390932280767602,
+      "bootstrap_ci95": [
+        -0.21584711868454245,
+        0.33245252566852856
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.259765625
+    },
+    "selected_ordered__static_unordered_plus_matched_shuffle__absolute_margin": {
+      "n_patients": 11,
+      "median": 0.04886803160428849,
+      "bootstrap_ci95": [
+        -0.09639067705957502,
+        0.12909127590844544
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.28857421875
+    },
+    "selected_ordered__static_unordered_plus_matched_shuffle__rank_residual_fraction": {
+      "n_patients": 11,
+      "median": 0.04884766566244632,
+      "bootstrap_ci95": [
+        0.013034819897084049,
+        0.15008507790842177
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.00048828125
+    },
+    "selected_rank_shuffle__static_only__signed_rho": {
+      "n_patients": 16,
+      "median": -0.19077422314981846,
+      "bootstrap_ci95": [
+        -0.3981119381746655,
+        0.3807089650570021
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.6657257080078125
+    },
+    "selected_rank_shuffle__static_only__absolute_rho": {
+      "n_patients": 16,
+      "median": 0.4142537595641879,
+      "bootstrap_ci95": [
+        0.3442928445701109,
+        0.5121449988534679
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 1.52587890625e-05
+    },
+    "selected_rank_shuffle__static_only__signed_margin": {
+      "n_patients": 16,
+      "median": -0.1919155239687208,
+      "bootstrap_ci95": [
+        -0.4031428615786192,
+        0.385926118358222
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.6839141845703125
+    },
+    "selected_rank_shuffle__static_only__absolute_margin": {
+      "n_patients": 16,
+      "median": 0.19594813468401645,
+      "bootstrap_ci95": [
+        0.0405200026513991,
+        0.2283960668830542
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.0020904541015625
+    },
+    "selected_rank_shuffle__static_only__rank_residual_fraction": {
+      "n_patients": 16,
+      "median": 0.4131884158622126,
+      "bootstrap_ci95": [
+        0.2025974025974026,
+        0.7058627752176139
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 1.52587890625e-05
+    },
+    "selected_rank_shuffle__static_plus_unordered__signed_rho": {
+      "n_patients": 15,
+      "median": -0.06980562845086766,
+      "bootstrap_ci95": [
+        -0.23489912447696554,
+        0.4409030506093736
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.64013671875
+    },
+    "selected_rank_shuffle__static_plus_unordered__absolute_rho": {
+      "n_patients": 15,
+      "median": 0.3813931853924354,
+      "bootstrap_ci95": [
+        0.16866996022183167,
+        0.5564379483798262
+      ],
+      "n_positive": 15,
+      "wilcoxon_greater_p": 3.0517578125e-05
+    },
+    "selected_rank_shuffle__static_plus_unordered__signed_margin": {
+      "n_patients": 15,
+      "median": -0.07078408138715878,
+      "bootstrap_ci95": [
+        -0.22781293957783713,
+        0.46731076942990196
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.64013671875
+    },
+    "selected_rank_shuffle__static_plus_unordered__absolute_margin": {
+      "n_patients": 15,
+      "median": 0.04317301396697881,
+      "bootstrap_ci95": [
+        -0.07582165626078521,
+        0.2712892513033149
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.114654541015625
+    },
+    "selected_rank_shuffle__static_plus_unordered__rank_residual_fraction": {
+      "n_patients": 15,
+      "median": 0.11092436974789914,
+      "bootstrap_ci95": [
+        0.08273809523809522,
+        0.2534798971091143
+      ],
+      "n_positive": 15,
+      "wilcoxon_greater_p": 3.0517578125e-05
+    },
+    "unordered_prefix__static_only__signed_rho": {
+      "n_patients": 16,
+      "median": -0.19586441218962025,
+      "bootstrap_ci95": [
+        -0.33265789267696577,
+        0.21298526850147687
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.76812744140625
+    },
+    "unordered_prefix__static_only__absolute_rho": {
+      "n_patients": 16,
+      "median": 0.35851774613427556,
+      "bootstrap_ci95": [
+        0.28791399136746504,
+        0.4102564102564105
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 1.52587890625e-05
+    },
+    "unordered_prefix__static_only__signed_margin": {
+      "n_patients": 16,
+      "median": -0.19750800614449987,
+      "bootstrap_ci95": [
+        -0.33508283150776375,
+        0.25159438493792696
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.752288818359375
+    },
+    "unordered_prefix__static_only__absolute_margin": {
+      "n_patients": 16,
+      "median": 0.09541107433260332,
+      "bootstrap_ci95": [
+        -0.007657476597773438,
+        0.14687156857825945
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.02215576171875
+    },
+    "unordered_prefix__static_only__rank_residual_fraction": {
+      "n_patients": 16,
+      "median": 0.32957821300563234,
+      "bootstrap_ci95": [
+        0.13775510204081634,
+        0.4957983193277311
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 1.52587890625e-05
+    }
+  },
+  "paired_comparisons": [
+    {
+      "conditioning": "static_only",
+      "metric": "absolute_rho",
+      "left": "selected_ordered",
+      "right": "selected_rank_shuffle",
+      "n_patients": 14,
+      "median": -0.1486434189459649,
+      "bootstrap_ci95": [
+        -0.28560035019997865,
+        -0.009043742218436582
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.9976752830900957
+    },
+    {
+      "conditioning": "static_only",
+      "metric": "absolute_rho",
+      "left": "selected_ordered",
+      "right": "unordered_prefix",
+      "n_patients": 14,
+      "median": -0.098548340529179,
+      "bootstrap_ci95": [
+        -0.1606314326733744,
+        -2.7755575615628914e-17
+      ],
+      "n_positive": 3,
+      "wilcoxon_greater_p": 0.9957275390625
+    },
+    {
+      "conditioning": "static_only",
+      "metric": "absolute_rho",
+      "left": "selected_ordered",
+      "right": "full_history_gru",
+      "n_patients": 13,
+      "median": 0.01104926439453377,
+      "bootstrap_ci95": [
+        -0.08500307109451508,
+        0.02676158568904216
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.5269775390625
+    },
+    {
+      "conditioning": "static_only",
+      "metric": "signed_rho",
+      "left": "selected_ordered",
+      "right": "selected_rank_shuffle",
+      "n_patients": 14,
+      "median": 0.03453236935956827,
+      "bootstrap_ci95": [
+        -0.03879692442129705,
+        0.25605606014210947
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.12060546875
+    },
+    {
+      "conditioning": "static_only",
+      "metric": "signed_rho",
+      "left": "selected_ordered",
+      "right": "unordered_prefix",
+      "n_patients": 14,
+      "median": 0.033899058985796184,
+      "bootstrap_ci95": [
+        -0.05615695966657344,
+        0.09488480817186558
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.2315673828125
+    },
+    {
+      "conditioning": "static_only",
+      "metric": "signed_rho",
+      "left": "selected_ordered",
+      "right": "full_history_gru",
+      "n_patients": 13,
+      "median": -2.220446049250313e-16,
+      "bootstrap_ci95": [
+        -0.08280569635821439,
+        0.09220188237449278
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.63232421875
+    },
+    {
+      "conditioning": "static_plus_unordered",
+      "metric": "absolute_rho",
+      "left": "selected_ordered",
+      "right": "selected_rank_shuffle",
+      "n_patients": 12,
+      "median": 0.00849974348892825,
+      "bootstrap_ci95": [
+        -0.26243195174039147,
+        0.14058328554630384
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.6044921875
+    },
+    {
+      "conditioning": "static_plus_unordered",
+      "metric": "absolute_rho",
+      "left": "selected_ordered",
+      "right": "full_history_gru",
+      "n_patients": 10,
+      "median": -0.04348667020915238,
+      "bootstrap_ci95": [
+        -0.12951145901531408,
+        0.08253324337874496
+      ],
+      "n_positive": 4,
+      "wilcoxon_greater_p": 0.6875
+    },
+    {
+      "conditioning": "static_plus_unordered",
+      "metric": "signed_rho",
+      "left": "selected_ordered",
+      "right": "selected_rank_shuffle",
+      "n_patients": 12,
+      "median": 0.17578777839925425,
+      "bootstrap_ci95": [
+        -0.04133797493869654,
+        0.41833815518359974
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.133056640625
+    },
+    {
+      "conditioning": "static_plus_unordered",
+      "metric": "signed_rho",
+      "left": "selected_ordered",
+      "right": "full_history_gru",
+      "n_patients": 10,
+      "median": 0.008032573396898668,
+      "bootstrap_ci95": [
+        -0.12951145901531408,
+        0.08253324337874496
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.5390625
+    },
+    {
+      "conditioning": "static_unordered_plus_matched_shuffle",
+      "metric": "absolute_rho",
+      "left": "selected_ordered",
+      "right": "full_history_gru",
+      "n_patients": 9,
+      "median": -0.0759933275295186,
+      "bootstrap_ci95": [
+        -0.2163071502159612,
+        0.07191767910654867
+      ],
+      "n_positive": 3,
+      "wilcoxon_greater_p": 0.91796875
+    },
+    {
+      "conditioning": "static_unordered_plus_matched_shuffle",
+      "metric": "signed_rho",
+      "left": "selected_ordered",
+      "right": "full_history_gru",
+      "n_patients": 9,
+      "median": 0.10769584839701293,
+      "bootstrap_ci95": [
+        -0.09820997662961994,
+        0.1988457954164581
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.08203125
+    }
+  ],
+  "across_event_history_target_branch": "NOT_RUN_AS_PRIMARY: only 46 distinct causal histories among 106 seizures and only 6 patients with at least three distinct histories",
+  "claim_boundary": "static cross-state contact morphology only; no seizure-specific forecast, continuous-time dynamics, or biological slow-state claim"
+}

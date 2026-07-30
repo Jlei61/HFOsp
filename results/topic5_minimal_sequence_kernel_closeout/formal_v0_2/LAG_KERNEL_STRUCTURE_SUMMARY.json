@@ -1,0 +1,46 @@
+{
+  "status": "COMPLETE",
+  "contract": "topic5_minimal_sequence_kernel_closeout_v0_2",
+  "tier": "secondary_structure_audit",
+  "n_patient_seed": 102,
+  "axis_analysis": "NOT_RUN_NO_INDEPENDENT_AXIS_USED_IN_THIS_CLOSEOUT",
+  "summary": [
+    {
+      "lag": 0,
+      "n_same_shaft_estimable": 32,
+      "same_minus_cross_abs_median": 0.1131643423526234,
+      "same_minus_cross_positive": 30,
+      "same_minus_cross_wilcoxon_two_sided": 1.1781230568885803e-07,
+      "n_geometry_estimable": 28,
+      "distance_vs_abs_spearman_median": -0.4417593554563596
+    },
+    {
+      "lag": 1,
+      "n_same_shaft_estimable": 32,
+      "same_minus_cross_abs_median": 0.05656128924836745,
+      "same_minus_cross_positive": 29,
+      "same_minus_cross_wilcoxon_two_sided": 2.0815059542655945e-07,
+      "n_geometry_estimable": 28,
+      "distance_vs_abs_spearman_median": -0.4304805414018452
+    },
+    {
+      "lag": 2,
+      "n_same_shaft_estimable": 32,
+      "same_minus_cross_abs_median": 0.02728653228539904,
+      "same_minus_cross_positive": 28,
+      "same_minus_cross_wilcoxon_two_sided": 2.980232238769531e-07,
+      "n_geometry_estimable": 28,
+      "distance_vs_abs_spearman_median": -0.41703524367344913
+    },
+    {
+      "lag": 3,
+      "n_same_shaft_estimable": 32,
+      "same_minus_cross_abs_median": 0.012586694304546751,
+      "same_minus_cross_positive": 28,
+      "same_minus_cross_wilcoxon_two_sided": 9.476207196712494e-07,
+      "n_geometry_estimable": 28,
+      "distance_vs_abs_spearman_median": -0.390533612249591
+    }
+  ],
+  "target_values_read": false
+}

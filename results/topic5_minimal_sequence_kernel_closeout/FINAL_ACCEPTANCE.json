@@ -1,0 +1,83 @@
+{
+  "status": "COMPLETE_BOUNDED_RESULT",
+  "contract": "topic5_minimal_sequence_kernel_closeout_v0_2",
+  "completed_at": "2026-07-30",
+  "scientific_position": "EXTENDED_DATA_OR_SUPPLEMENTARY_BOUNDED_COMPUTATIONAL_RESULT",
+  "execution": {
+    "formal_rescore_cells": 102,
+    "fir_h3_cells": 102,
+    "subjects": 34,
+    "seeds_per_subject": 3,
+    "decision_contract_verified": true,
+    "maximum_nll_reconstruction_error": 9.5367431640625e-07,
+    "fir_baseline_frozen_all_cells": true,
+    "fir_decision_counts_match_all_comparisons": true,
+    "within_event_target_values_read": false,
+    "oom_events": 0
+  },
+  "where": {
+    "verdict": "SUPPORTED",
+    "claim": "Patient-specific contact recruitment priors are stable across chronological train-heldout splits and account for the established patient-mean early-ictal field association.",
+    "train_heldout_spearman_median": 0.8926,
+    "structured_null_positive_patients": "33/33"
+  },
+  "how": {
+    "verdict": "SUPPORTED_WITH_NARROW_SCOPE",
+    "claim": "Ordered within-event history contains a small short-range increment for next-contact choice beyond the unordered prefix; the identifiable increment is concentrated in the current and preceding rank sets.",
+    "h2_minus_h1_contact_gain_nats": 0.0110,
+    "h2_minus_h1_positive_patients": "28/34",
+    "h2_minus_h1_wilcoxon_p": 0.0001635,
+    "h3_minus_h2_contact_gain_nats": 0.00151,
+    "h3_minus_h2_contact_wilcoxon_p": 0.1207,
+    "h3_minus_h2_stop_gain_nats": 0.00978,
+    "h3_minus_h2_stop_positive_patients": "34/34",
+    "h3_minus_rank_shuffle_contact_gain_nats": 0.02955,
+    "h3_minus_rank_shuffle_positive_patients": "30/34",
+    "h3_minus_rank_shuffle_wilcoxon_p": 0.000193,
+    "linear_minus_unordered_contact_gain_nats": 0.00951,
+    "linear_minus_unordered_contact_wilcoxon_p": 0.01123,
+    "lag_removal_contact_loss_nats": {
+      "K0": 0.03891,
+      "K1": 0.00684,
+      "K2": 0.00158,
+      "K3_plus": 0.00018
+    },
+    "fir_h3_minus_unordered_contact_gain_nats": 0.00499,
+    "fir_h3_minus_unordered_contact_wilcoxon_p": 0.4265,
+    "fir_h3_minus_linear_total_gain_nats": -0.02349,
+    "fir_h3_minus_linear_total_wilcoxon_p": 0.00218,
+    "cross_dataset_bidirectional_confirmation": false,
+    "rank_tolerance_supported_range_ms": "0_to_2_only"
+  },
+  "when": {
+    "verdict": "SEPARATE_BRANCH_NOT_ESTABLISHED",
+    "claim": "The event-reset within-event model does not test real-time seizure entry.",
+    "gate0": "BLOCKED_EXACT_BB150_SEIZURE_RESIDUAL_RELIABILITY_UNIDENTIFIABLE",
+    "strict_target_patients": 16,
+    "strict_target_seizures": 106,
+    "strict_target_patients_with_at_least_4_seizures": 5,
+    "patient_mean_split_half_rho_median": 0.82054,
+    "gate1": "PROVISIONAL_COHORT_SIGNAL_NOT_REPLICATED_ACROSS_DATASETS",
+    "time_state_minus_best_nonstate_gain_nats": 0.00438,
+    "time_state_minus_best_nonstate_wilcoxon_p": 0.01184,
+    "replicated_in_both_datasets": false
+  },
+  "cross_state": {
+    "verdict": "PRIMARILY_STATIC",
+    "static_field_absolute_association_margin": 0.1061,
+    "static_field_positive_patients": "15/16",
+    "ordered_minus_unordered_after_static_median": -0.09855,
+    "true_order_minus_shuffle_after_static_unordered_median": 0.00850,
+    "true_order_minus_shuffle_wilcoxon_p": 0.604
+  },
+  "allowed_claim": "A stable patient-specific contact recruitment scaffold is supplemented by a small, short-range within-event ordered transition correction. This correction is concentrated in the current and preceding rank sets and is not established as a unique recurrent mechanism, a real-time seizure state, or an incremental predictor of the patient-mean early-ictal field.",
+  "forbidden_claims": [
+    "The RNN recovered a biological seizure manifold.",
+    "The learned rank-step persistence is a biological time constant.",
+    "Ordered within-event history predicts seizure timing.",
+    "The ordered residual independently explains early-ictal recruitment.",
+    "The selected model was independently confirmed in both datasets.",
+    "A two-dimensional brain state was identified from the Hankel spectrum."
+  ],
+  "next_action": "Freeze the within-event architecture search. If pursued, build a separate IEI-aware inter-event study only after constructing a reliable seizure-specific 1-150 Hz early-ictal residual target."
+}

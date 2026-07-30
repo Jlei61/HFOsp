@@ -1,0 +1,155 @@
+{
+  "contract": "topic5_rnn_internal_state_v0_1_postreview_acceptance",
+  "status": "PASS_WITH_SCIENTIFIC_REFRAMING",
+  "execution_integrity": {
+    "contract": "topic5_rnn_internal_state_reduction_v0_1",
+    "status": "PASS",
+    "completeness": {
+      "extraction_cells": {
+        "expected": 102,
+        "found": 102,
+        "complete": 102,
+        "target_blind_certified": 102
+      },
+      "subject_analyses": {
+        "expected": 34,
+        "found": 34,
+        "complete": 34,
+        "target_blind_certified": 34
+      },
+      "perturbation_cells": {
+        "expected": 102,
+        "found": 102,
+        "complete": 102,
+        "target_blind_certified": 102
+      },
+      "random_subspace_cells": {
+        "expected": 102,
+        "found": 102,
+        "complete": 102,
+        "target_blind_certified": 102
+      }
+    },
+    "nll_reproduction": {
+      "n_cells_times_controls": 204,
+      "same_denominator_rows": 126,
+      "deterministically_sampled_rows": 78,
+      "maximum_absolute_difference_same_denominator": 6.769718918775425e-08,
+      "maximum_absolute_difference_sampled_denominator": 0.011221608831100571,
+      "tolerance": 1e-06,
+      "interpretation": "Exact reproduction is required only when the frozen run and state extraction score the same heldout events. Larger patients use a deterministic 2048-event extraction sample; their difference is reported but is not numerical drift."
+    },
+    "strict_early_ictal": {
+      "n_patients": 16,
+      "n_seizures": 106,
+      "dataset": "epilepsiae",
+      "window_sec": [
+        0,
+        10
+      ],
+      "band_hz": [
+        1,
+        150
+      ],
+      "yuquan_eeg_onset_in_primary": false
+    },
+    "figures_readme_exists": true
+  },
+  "scientific_acceptance": {
+    "interictal_order_sensitivity": {
+      "status": "SUPPORTED",
+      "matched_order_shuffle_full_minus_rank_shuffle": {
+        "n": 34,
+        "median": 0.0100398549028505,
+        "n_positive": 32,
+        "wilcoxon_greater_p": 1.7869751900434494e-08
+      }
+    },
+    "static_contact_correspondence": {
+      "status": "SUPPORTED_WITHIN_REUSED_DATASET",
+      "fixed_participation": {
+        "n": 16,
+        "median_absolute_rho": 0.4454751131221719,
+        "median_all_contact_margin": 0.2142857142857142,
+        "n_positive_all_contact_margin": 14,
+        "signed_rho_retained_but_signed_null_not_yet_implemented": true
+      }
+    },
+    "gru_specific_static_increment": {
+      "status": "NOT_ESTABLISHED",
+      "fixed_participation_all_contact_margin": {
+        "full_minus_static_contact_hazard": {
+          "n": 16,
+          "median": 0.0,
+          "n_positive": 7,
+          "wilcoxon_greater_p": 0.2400884449530385
+        },
+        "full_minus_unordered_prefix": {
+          "n": 16,
+          "median": 0.029982517482517554,
+          "n_positive": 10,
+          "wilcoxon_greater_p": 0.07007303073420625
+        },
+        "full_minus_last_set_first_order": {
+          "n": 16,
+          "median": 0.010427807486631007,
+          "n_positive": 10,
+          "wilcoxon_greater_p": 0.08642417456771312
+        },
+        "full_minus_rank_shuffle_gru": {
+          "n": 16,
+          "median": -0.0089572192513369,
+          "n_positive": 7,
+          "wilcoxon_greater_p": 0.4301300048828125
+        }
+      }
+    },
+    "ordered_state_early_ictal_readback": {
+      "status": "EXPLORATORY_TARGET_REUSED",
+      "participation_residualized_pc_fields": {
+        "all_contact_margin_pc1": {
+          "n": 16,
+          "median": 0.1760504201680672,
+          "n_positive": 14,
+          "fdr_q": 0.00537109375
+        },
+        "within_shaft_margin_pc1": {
+          "n": 16,
+          "median": 0.1268716577540107,
+          "n_positive": 12,
+          "fdr_q": 0.031005859375
+        },
+        "all_contact_margin_pc2": {
+          "n": 16,
+          "median": 0.097689075630252,
+          "n_positive": 12,
+          "fdr_q": 0.0089849976552155
+        },
+        "within_shaft_margin_pc2": {
+          "n": 16,
+          "median": 0.0947478991596638,
+          "n_positive": 11,
+          "fdr_q": 0.0356007121588804
+        }
+      },
+      "independent_confirmation": false
+    },
+    "physical_axis_or_dynamic_seizure_mechanism": {
+      "status": "NOT_SUPPORTED_BY_CURRENT_MODEL_FAMILY",
+      "interpretation": "This does not deny a patient pathological axis; it only prevents attributing the static bridge to the current axis/history/source parameterization."
+    }
+  },
+  "review_items": {
+    "per_seizure_five_field_oracle_primary": "RESOLVED_FIXED_FIELDS_USED",
+    "signed_primary_and_signed_null": "OPEN_NEXT_CONTRACT",
+    "shaft_preserving_nulls": "PARTIAL_GENERIC_WITHIN_SHAFT_ONLY",
+    "geometry_smooth_null": "OPEN_NEXT_CONTRACT",
+    "regularized_nonrecurrent_baselines": "OPEN_NEXT_CONTRACT",
+    "free_vs_teacher_forced_field": "OPEN_NEXT_CONTRACT",
+    "static_contact_confound_control": "OPEN_NEXT_CONTRACT",
+    "off_manifold_pca_perturbation": "DOWNGRADED_NOT_USED_AS_PRIMARY_EVIDENCE",
+    "target_reuse_disclosure": "RESOLVED_EXPLICIT"
+  },
+  "next_contract": "interictal_early_ictal_static_scaffold_fixed_readout_validation_v0_1",
+  "figure_status": "supplementary_exploratory_candidate"
+}

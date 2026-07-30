@@ -1,0 +1,44 @@
+{
+  "contract": "topic5_static_scaffold_fixed_readout_validation_v0_1",
+  "phase": "baseline_power_and_contact_confound_map_merge",
+  "status": "COMPLETE",
+  "n_patients": 16,
+  "source_shards": {
+    "results/topic5_static_scaffold_fixed_readout_validation/confound_map_shards/shard0/broad/phase1_confound_maps.json": "732705b3cae3172b447cb258238a07c44cc381b93c7ccb052265d9a839171aae",
+    "results/topic5_static_scaffold_fixed_readout_validation/confound_map_shards/shard2/broad/phase1_confound_maps.json": "a3ca6b9dc81d368b2a3eff6b30019a9991d086ab1c3e8b1e8d23318b7daf0f66",
+    "results/topic5_static_scaffold_fixed_readout_validation/confound_map_fast/epilepsiae_1084/broad/phase1_confound_maps.json": "a87e1e3ffbfc777964ecf939fd2e5c4c8eee98d3a08718df073146cec98acb41",
+    "results/topic5_static_scaffold_fixed_readout_validation/confound_map_fast/epilepsiae_1146/broad/phase1_confound_maps.json": "d0b91c417c1243c04197e5a9ea93a19868b12b50fac8347199882e7b9850f423",
+    "results/topic5_static_scaffold_fixed_readout_validation/confound_map_fast/epilepsiae_253/broad/phase1_confound_maps.json": "ec291c4b155521833360076ef15d8fd93c481c2b63192b2d4a0dc77578225150",
+    "results/topic5_static_scaffold_fixed_readout_validation/confound_map_fast/epilepsiae_548/broad/phase1_confound_maps.json": "41ec8ee8cf671f8d7df63a3b2c04726d0693a89d32d18b32c73322c5807638ca",
+    "results/topic5_static_scaffold_fixed_readout_validation/confound_map_fast/epilepsiae_635/broad/phase1_confound_maps.json": "254f0790dcc844597e1fa1891b4bea9ea22e40fb3369bd6e9af23e36dcd6fb67"
+  },
+  "merged_sha256": "468da475718c732627d27a49593088732114aacb012d679e4362f4e70aab5886",
+  "coverage": {
+    "hfo_rate": {
+      "any_exact_join": 16,
+      "at_least_six_exact": 16,
+      "all_model_contacts": 16
+    },
+    "baseline_band_power": {
+      "any_exact_join": 16,
+      "at_least_six_exact": 16,
+      "all_model_contacts": 16
+    },
+    "broadband_1_250": {
+      "any_exact_join": 16,
+      "at_least_six_exact": 16,
+      "all_model_contacts": 16
+    },
+    "shaft_position": {
+      "any_exact_join": 13,
+      "at_least_six_exact": 13,
+      "all_model_contacts": 11
+    },
+    "soz": {
+      "any_exact_join": 13,
+      "at_least_six_exact": 13,
+      "all_model_contacts": 12
+    }
+  },
+  "target_values_read": false
+}

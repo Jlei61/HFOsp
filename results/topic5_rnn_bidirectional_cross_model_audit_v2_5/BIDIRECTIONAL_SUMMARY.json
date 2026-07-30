@@ -1,0 +1,61 @@
+{
+  "contract": "topic5_ab_independent_bidirectional_axis_audit_v2_5",
+  "status": "COMPLETE",
+  "n_physical_axis_patients": 22,
+  "n_bilateral_min20_eligible": 22,
+  "axis_definition": "train80 transition-residual selection among 32 sign-free candidates",
+  "ab_used_for_selection_or_primary_test": false,
+  "primary_logic": "both source sides must be informative; patient score is the weaker side",
+  "metrics": {
+    "balanced_inward_displacement": {
+      "n": 22,
+      "median": 0.17958229033874173,
+      "bootstrap_ci95": [
+        0.11022840186066632,
+        0.23570838782714393
+      ],
+      "n_positive": 21,
+      "wilcoxon_greater_p": 4.76837158203125e-07
+    },
+    "selected_axis_displacement_margin": {
+      "n": 22,
+      "median": 0.02375591573812763,
+      "bootstrap_ci95": [
+        -0.04409872882851326,
+        0.050161148264044296
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.47463488578796387
+    },
+    "balanced_axis_benefit": {
+      "n": 22,
+      "median": 1.325035968824384e-05,
+      "bootstrap_ci95": [
+        -0.00020236764751735414,
+        0.0004242028743322024
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.26175546646118164
+    },
+    "balanced_source_benefit": {
+      "n": 22,
+      "median": -0.0001773941729362738,
+      "bootstrap_ci95": [
+        -0.001241244187724977,
+        -7.706935293350092e-05
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.9998190402984619
+    },
+    "balanced_full_over_isotropic": {
+      "n": 22,
+      "median": -0.00021184958122100195,
+      "bootstrap_ci95": [
+        -0.0009724914923662231,
+        0.0004047076339657174
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.5631978511810303
+    }
+  }
+}

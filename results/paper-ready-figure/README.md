@@ -97,6 +97,29 @@
 - `fig5_core_model_s3_brakeoff/` — **Fig5**：模型底物可产生自发双向传播、虚拟 SEEG 可读出方向
   （只支持"能产生 + 可读方向"，不单独证明真实病人机制）。脚本 `plot_fig5_core_model_s3_brakeoff.py`。
 
+## Fig6 — RNN / contact-field computational supplements
+
+- `fig_topic5_minimal_sequence_kernel_closeout/` — **当前最小序列结构收口图**：主六联图把
+  where（稳定 contact scaffold）、how（contact choice 只需当前和前一 rank；第三 rank
+  主要改善 STOP）和 when（现有 event-reset 模型不检验真实时间）明确分开；辅助三联图
+  报告 0–2 ms timing sensitivity、early-ictal target reliability gate 与 IEI-aware
+  跨事件 feasibility。结论为 supplementary bounded result；不支持脑流形、真实时间慢状态
+  或 ordered residual 的 early-ictal 增量。producer 为
+  `scripts/paper_figures/plot_topic5_minimal_sequence_kernel_closeout_v0_2.py`。
+- `fig6_static_contact_topography/` — 六块固定验收图：target-sealed contact-field 合同、
+  formal heldout order gain 与 matched perturbation 的区别、signed primary、sign-free spatial
+  morphology、full GRU 相对静态/一阶/打乱对照的增量，以及 contact-confound sensitivity。
+  当前只支持患者特异 interictal contact topography 与 early-ictal energy 的
+  orientation-free static correspondence；不支持 GRU-specific recurrent-order increment、
+  自动 physical-axis 恢复或 seizure trajectory prediction。脚本
+  `scripts/paper_figures/plot_fig6_static_scaffold_fixed_readout.py`。
+- `fig6_ordered_history_architecture_audit/` — 六块顺序信息与架构控制图：精确定义事件内
+  rank-step state、比较 static/unordered/linear/rate/GRU/low-rank、匹配 rank-shuffle、
+  reverse/drop/reset 干预、clinical-onset early-ictal 条件增量和预先固定的 E1146 contact
+  field。target-blind linear-state 有 heldout 顺序增量，但 7 个预注册递归家族仅 1 个通过
+  family-wise inference；early-ictal 条件增量未建立。producer 为
+  `scripts/paper_figures/plot_topic5_ordered_history_architecture_audit_v0_1.py`。
+
 ## 模型机制诊断图（M3A-v2.x，visual diagnostic，非主图 claim）
 
 > 这些是 M3A-v2 慢变量场闭环 screen（一致 NEGATIVE）的目视诊断图。统计判读以 sweep + 归档

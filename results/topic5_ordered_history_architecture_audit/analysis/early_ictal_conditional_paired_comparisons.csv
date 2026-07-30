@@ -1,0 +1,13 @@
+conditioning,metric,left,right,n_patients,median,bootstrap_ci95,n_positive,wilcoxon_greater_p
+static_only,absolute_rho,selected_ordered,selected_rank_shuffle,14,-0.1486434189459649,"[-0.28560035019997865, -0.009043742218436582]",1,0.9976752830900957
+static_only,absolute_rho,selected_ordered,unordered_prefix,14,-0.098548340529179,"[-0.1606314326733744, -2.7755575615628914e-17]",3,0.9957275390625
+static_only,absolute_rho,selected_ordered,full_history_gru,13,0.01104926439453377,"[-0.08500307109451508, 0.02676158568904216]",8,0.5269775390625
+static_only,signed_rho,selected_ordered,selected_rank_shuffle,14,0.03453236935956827,"[-0.03879692442129705, 0.25605606014210947]",9,0.12060546875
+static_only,signed_rho,selected_ordered,unordered_prefix,14,0.033899058985796184,"[-0.05615695966657344, 0.09488480817186558]",8,0.2315673828125
+static_only,signed_rho,selected_ordered,full_history_gru,13,-2.220446049250313e-16,"[-0.08280569635821439, 0.09220188237449278]",6,0.63232421875
+static_plus_unordered,absolute_rho,selected_ordered,selected_rank_shuffle,12,0.00849974348892825,"[-0.26243195174039147, 0.14058328554630384]",6,0.6044921875
+static_plus_unordered,absolute_rho,selected_ordered,full_history_gru,10,-0.04348667020915238,"[-0.12951145901531408, 0.08253324337874496]",4,0.6875
+static_plus_unordered,signed_rho,selected_ordered,selected_rank_shuffle,12,0.17578777839925425,"[-0.04133797493869654, 0.41833815518359974]",8,0.133056640625
+static_plus_unordered,signed_rho,selected_ordered,full_history_gru,10,0.008032573396898668,"[-0.12951145901531408, 0.08253324337874496]",5,0.5390625
+static_unordered_plus_matched_shuffle,absolute_rho,selected_ordered,full_history_gru,9,-0.0759933275295186,"[-0.2163071502159612, 0.07191767910654867]",3,0.91796875
+static_unordered_plus_matched_shuffle,signed_rho,selected_ordered,full_history_gru,9,0.10769584839701293,"[-0.09820997662961994, 0.1988457954164581]",6,0.08203125

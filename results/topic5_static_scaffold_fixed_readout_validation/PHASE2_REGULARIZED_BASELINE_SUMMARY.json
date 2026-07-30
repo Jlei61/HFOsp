@@ -1,0 +1,2712 @@
+{
+  "contract": "topic5_static_scaffold_fixed_readout_validation_v0_1",
+  "phase": "regularized_baseline_fixed_target_evaluation",
+  "status": "COMPLETE",
+  "target_context": "same 16-patient/106-seizure target previously opened; baseline choice was frozen target-free before this phase",
+  "primary_field": "participation",
+  "primary_metric": "positive signed Spearman",
+  "n_draws": 5000,
+  "n_patients": 16,
+  "n_seizures": 106,
+  "cohort_metrics": {
+    "best_validation_regularized_participation__all_contact__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12436974789915967,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "best_validation_regularized_participation__all_contact__signed_margin": {
+      "n": 16,
+      "median": 0.12909663865546217,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "best_validation_regularized_participation__all_contact__absolute_margin": {
+      "n": 16,
+      "median": 0.19627039627039627,
+      "bootstrap_ci95": [
+        0.0714285714285714,
+        0.29166666666666663
+      ],
+      "n_positive": 14,
+      "wilcoxon_greater_p": 0.0002899169921875
+    },
+    "best_validation_regularized_participation__equal_size_shaft_profile__observed_signed_rho": {
+      "n": 2,
+      "median": 0.462202380952381,
+      "bootstrap_ci95": [
+        0.09107142857142858,
+        0.8333333333333334
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.25
+    },
+    "best_validation_regularized_participation__equal_size_shaft_profile__signed_margin": {
+      "n": 2,
+      "median": 0.12053571428571429,
+      "bootstrap_ci95": [
+        0.0,
+        0.24107142857142858
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "best_validation_regularized_participation__equal_size_shaft_profile__absolute_margin": {
+      "n": 2,
+      "median": 0.023214285714285715,
+      "bootstrap_ci95": [
+        0.0,
+        0.04642857142857143
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "best_validation_regularized_participation__geometry_smooth_rbf__observed_signed_rho": {
+      "n": 13,
+      "median": 0.10588235294117647,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5499999999999999
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "best_validation_regularized_participation__geometry_smooth_rbf__signed_margin": {
+      "n": 13,
+      "median": 0.10588235294117647,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5583333333333332
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "best_validation_regularized_participation__geometry_smooth_rbf__absolute_margin": {
+      "n": 13,
+      "median": 0.09999999999999998,
+      "bootstrap_ci95": [
+        -0.027272727272727254,
+        0.28571428571428575
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.01953125
+    },
+    "best_validation_regularized_participation__within_shaft_circular__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12436974789915967,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "best_validation_regularized_participation__within_shaft_circular__signed_margin": {
+      "n": 16,
+      "median": 0.09523809523809523,
+      "bootstrap_ci95": [
+        -0.13095238095238093,
+        0.21934731934731933
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.247711181640625
+    },
+    "best_validation_regularized_participation__within_shaft_circular__absolute_margin": {
+      "n": 16,
+      "median": 0.08422619047619048,
+      "bootstrap_ci95": [
+        0.04166666666666663,
+        0.17857142857142855
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.001081116330400846
+    },
+    "best_validation_regularized_participation__within_shaft_dihedral__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12436974789915967,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "best_validation_regularized_participation__within_shaft_dihedral__signed_margin": {
+      "n": 16,
+      "median": 0.09172077922077923,
+      "bootstrap_ci95": [
+        -0.09999999999999998,
+        0.22634032634032636
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.1612548828125
+    },
+    "best_validation_regularized_participation__within_shaft_dihedral__absolute_margin": {
+      "n": 16,
+      "median": 0.07991071428571433,
+      "bootstrap_ci95": [
+        0.01666666666666672,
+        0.17857142857142855
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.001081116330400846
+    },
+    "beta_binomial_participation__all_contact__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "beta_binomial_participation__all_contact__signed_margin": {
+      "n": 16,
+      "median": 0.1299894957983193,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "beta_binomial_participation__all_contact__absolute_margin": {
+      "n": 16,
+      "median": 0.19627039627039627,
+      "bootstrap_ci95": [
+        0.0714285714285714,
+        0.30952380952380953
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.0006561279296875
+    },
+    "beta_binomial_participation__equal_size_shaft_profile__observed_signed_rho": {
+      "n": 2,
+      "median": 0.4157738095238095,
+      "bootstrap_ci95": [
+        0.06964285714285715,
+        0.7619047619047619
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.25
+    },
+    "beta_binomial_participation__equal_size_shaft_profile__signed_margin": {
+      "n": 2,
+      "median": 0.10892857142857143,
+      "bootstrap_ci95": [
+        0.0,
+        0.21785714285714286
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "beta_binomial_participation__equal_size_shaft_profile__absolute_margin": {
+      "n": 2,
+      "median": 0.01696428571428571,
+      "bootstrap_ci95": [
+        0.0,
+        0.03392857142857142
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "beta_binomial_participation__geometry_smooth_rbf__observed_signed_rho": {
+      "n": 13,
+      "median": 0.10588235294117647,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "beta_binomial_participation__geometry_smooth_rbf__signed_margin": {
+      "n": 13,
+      "median": 0.10588235294117647,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5999999999999999
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1527099609375
+    },
+    "beta_binomial_participation__geometry_smooth_rbf__absolute_margin": {
+      "n": 13,
+      "median": 0.09999999999999998,
+      "bootstrap_ci95": [
+        -0.027272727272727254,
+        0.2857142857142857
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.0340576171875
+    },
+    "beta_binomial_participation__within_shaft_circular__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "beta_binomial_participation__within_shaft_circular__signed_margin": {
+      "n": 16,
+      "median": 0.08720238095238095,
+      "bootstrap_ci95": [
+        -0.13095238095238093,
+        0.18874464077582226
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.226656720706493
+    },
+    "beta_binomial_participation__within_shaft_circular__absolute_margin": {
+      "n": 16,
+      "median": 0.07886904761904756,
+      "bootstrap_ci95": [
+        0.03146853146853146,
+        0.17916666666666664
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.0022570264274585704
+    },
+    "beta_binomial_participation__within_shaft_dihedral__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "beta_binomial_participation__within_shaft_dihedral__signed_margin": {
+      "n": 16,
+      "median": 0.0827922077922078,
+      "bootstrap_ci95": [
+        -0.09999999999999998,
+        0.19117647058823528
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.1877288818359375
+    },
+    "beta_binomial_participation__within_shaft_dihedral__absolute_margin": {
+      "n": 16,
+      "median": 0.07514360639360636,
+      "bootstrap_ci95": [
+        0.016666666666666663,
+        0.17857142857142855
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.0018861197872369936
+    },
+    "dirichlet_rank_participation__all_contact__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "dirichlet_rank_participation__all_contact__signed_margin": {
+      "n": 16,
+      "median": 0.1299894957983193,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "dirichlet_rank_participation__all_contact__absolute_margin": {
+      "n": 16,
+      "median": 0.19627039627039627,
+      "bootstrap_ci95": [
+        0.0714285714285714,
+        0.30952380952380953
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.0006561279296875
+    },
+    "dirichlet_rank_participation__equal_size_shaft_profile__observed_signed_rho": {
+      "n": 2,
+      "median": 0.4157738095238095,
+      "bootstrap_ci95": [
+        0.06964285714285715,
+        0.7619047619047619
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.25
+    },
+    "dirichlet_rank_participation__equal_size_shaft_profile__signed_margin": {
+      "n": 2,
+      "median": 0.10892857142857143,
+      "bootstrap_ci95": [
+        0.0,
+        0.21785714285714286
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "dirichlet_rank_participation__equal_size_shaft_profile__absolute_margin": {
+      "n": 2,
+      "median": 0.01696428571428571,
+      "bootstrap_ci95": [
+        0.0,
+        0.03392857142857142
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "dirichlet_rank_participation__geometry_smooth_rbf__observed_signed_rho": {
+      "n": 13,
+      "median": 0.10588235294117647,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "dirichlet_rank_participation__geometry_smooth_rbf__signed_margin": {
+      "n": 13,
+      "median": 0.10588235294117647,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5999999999999999
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1527099609375
+    },
+    "dirichlet_rank_participation__geometry_smooth_rbf__absolute_margin": {
+      "n": 13,
+      "median": 0.09999999999999998,
+      "bootstrap_ci95": [
+        -0.027272727272727254,
+        0.2857142857142857
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.0340576171875
+    },
+    "dirichlet_rank_participation__within_shaft_circular__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "dirichlet_rank_participation__within_shaft_circular__signed_margin": {
+      "n": 16,
+      "median": 0.08720238095238095,
+      "bootstrap_ci95": [
+        -0.13095238095238093,
+        0.1823529411764706
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.226656720706493
+    },
+    "dirichlet_rank_participation__within_shaft_circular__absolute_margin": {
+      "n": 16,
+      "median": 0.07886904761904756,
+      "bootstrap_ci95": [
+        0.03303571428571428,
+        0.17916666666666664
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.0022570264274585704
+    },
+    "dirichlet_rank_participation__within_shaft_dihedral__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "dirichlet_rank_participation__within_shaft_dihedral__signed_margin": {
+      "n": 16,
+      "median": 0.0827922077922078,
+      "bootstrap_ci95": [
+        -0.09999999999999998,
+        0.19117647058823528
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.1877288818359375
+    },
+    "dirichlet_rank_participation__within_shaft_dihedral__absolute_margin": {
+      "n": 16,
+      "median": 0.07514360639360636,
+      "bootstrap_ci95": [
+        0.016666666666666663,
+        0.17857142857142855
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.0018861197872369936
+    },
+    "geometry_laplacian_participation__all_contact__observed_signed_rho": {
+      "n": 13,
+      "median": 0.06964285714285715,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "geometry_laplacian_participation__all_contact__signed_margin": {
+      "n": 13,
+      "median": 0.07352941176470588,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "geometry_laplacian_participation__all_contact__absolute_margin": {
+      "n": 13,
+      "median": 0.23333333333333334,
+      "bootstrap_ci95": [
+        0.0714285714285714,
+        0.33333333333333326
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.0030517578125
+    },
+    "geometry_laplacian_participation__equal_size_shaft_profile__observed_signed_rho": {
+      "n": 2,
+      "median": 0.45148809523809524,
+      "bootstrap_ci95": [
+        0.06964285714285715,
+        0.8333333333333334
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.25
+    },
+    "geometry_laplacian_participation__equal_size_shaft_profile__signed_margin": {
+      "n": 2,
+      "median": 0.10892857142857143,
+      "bootstrap_ci95": [
+        0.0,
+        0.21785714285714286
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "geometry_laplacian_participation__equal_size_shaft_profile__absolute_margin": {
+      "n": 2,
+      "median": 0.01696428571428571,
+      "bootstrap_ci95": [
+        0.0,
+        0.03392857142857142
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "geometry_laplacian_participation__geometry_smooth_rbf__observed_signed_rho": {
+      "n": 13,
+      "median": 0.06964285714285715,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "geometry_laplacian_participation__geometry_smooth_rbf__signed_margin": {
+      "n": 13,
+      "median": 0.075,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5999999999999999
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1527099609375
+    },
+    "geometry_laplacian_participation__geometry_smooth_rbf__absolute_margin": {
+      "n": 13,
+      "median": 0.09999999999999998,
+      "bootstrap_ci95": [
+        -0.027272727272727254,
+        0.28571428571428575
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.0390625
+    },
+    "geometry_laplacian_participation__within_shaft_circular__observed_signed_rho": {
+      "n": 13,
+      "median": 0.06964285714285715,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "geometry_laplacian_participation__within_shaft_circular__signed_margin": {
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.23333333333333328,
+        0.17857142857142858
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.3177490234375
+    },
+    "geometry_laplacian_participation__within_shaft_circular__absolute_margin": {
+      "n": 13,
+      "median": 0.09166666666666656,
+      "bootstrap_ci95": [
+        0.04166666666666663,
+        0.20833333333333331
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.008056640625
+    },
+    "geometry_laplacian_participation__within_shaft_dihedral__observed_signed_rho": {
+      "n": 13,
+      "median": 0.06964285714285715,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "geometry_laplacian_participation__within_shaft_dihedral__signed_margin": {
+      "n": 13,
+      "median": 0.07272727272727274,
+      "bootstrap_ci95": [
+        -0.09999999999999998,
+        0.17941176470588235
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.2708740234375
+    },
+    "geometry_laplacian_participation__within_shaft_dihedral__absolute_margin": {
+      "n": 13,
+      "median": 0.08035714285714282,
+      "bootstrap_ci95": [
+        0.01666666666666672,
+        0.17857142857142855
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.006103515625
+    },
+    "low_rank_logit_participation__all_contact__observed_signed_rho": {
+      "n": 16,
+      "median": 0.11696428571428572,
+      "bootstrap_ci95": [
+        -0.1888111888111888,
+        0.44999999999999996
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "low_rank_logit_participation__all_contact__signed_margin": {
+      "n": 16,
+      "median": 0.11875,
+      "bootstrap_ci95": [
+        -0.1888111888111888,
+        0.44999999999999996
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "low_rank_logit_participation__all_contact__absolute_margin": {
+      "n": 16,
+      "median": 0.18324592074592075,
+      "bootstrap_ci95": [
+        0.0714285714285714,
+        0.30952380952380953
+      ],
+      "n_positive": 14,
+      "wilcoxon_greater_p": 0.0002899169921875
+    },
+    "low_rank_logit_participation__equal_size_shaft_profile__observed_signed_rho": {
+      "n": 2,
+      "median": 0.4264880952380952,
+      "bootstrap_ci95": [
+        0.09107142857142858,
+        0.7619047619047619
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.25
+    },
+    "low_rank_logit_participation__equal_size_shaft_profile__signed_margin": {
+      "n": 2,
+      "median": 0.12053571428571429,
+      "bootstrap_ci95": [
+        0.0,
+        0.24107142857142858
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "low_rank_logit_participation__equal_size_shaft_profile__absolute_margin": {
+      "n": 2,
+      "median": 0.023214285714285715,
+      "bootstrap_ci95": [
+        0.0,
+        0.04642857142857143
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "low_rank_logit_participation__geometry_smooth_rbf__observed_signed_rho": {
+      "n": 13,
+      "median": 0.09107142857142858,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "low_rank_logit_participation__geometry_smooth_rbf__signed_margin": {
+      "n": 13,
+      "median": 0.09642857142857143,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5999999999999999
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1568603515625
+    },
+    "low_rank_logit_participation__geometry_smooth_rbf__absolute_margin": {
+      "n": 13,
+      "median": 0.16666666666666663,
+      "bootstrap_ci95": [
+        -0.027272727272727254,
+        0.2857142857142857
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.02392578125
+    },
+    "low_rank_logit_participation__within_shaft_circular__observed_signed_rho": {
+      "n": 16,
+      "median": 0.11696428571428572,
+      "bootstrap_ci95": [
+        -0.1888111888111888,
+        0.44999999999999996
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "low_rank_logit_participation__within_shaft_circular__signed_margin": {
+      "n": 16,
+      "median": 0.12000499500499501,
+      "bootstrap_ci95": [
+        -0.13095238095238093,
+        0.17976827094474152
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.201873779296875
+    },
+    "low_rank_logit_participation__within_shaft_circular__absolute_margin": {
+      "n": 16,
+      "median": 0.09166666666666662,
+      "bootstrap_ci95": [
+        0.038392857142857145,
+        0.15595238095238095
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.0015714642655828017
+    },
+    "low_rank_logit_participation__within_shaft_dihedral__observed_signed_rho": {
+      "n": 16,
+      "median": 0.11696428571428572,
+      "bootstrap_ci95": [
+        -0.1888111888111888,
+        0.44999999999999996
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "low_rank_logit_participation__within_shaft_dihedral__signed_margin": {
+      "n": 16,
+      "median": 0.10952380952380952,
+      "bootstrap_ci95": [
+        -0.10714285714285715,
+        0.17855477855477855
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.1741943359375
+    },
+    "low_rank_logit_participation__within_shaft_dihedral__absolute_margin": {
+      "n": 16,
+      "median": 0.08586309523809524,
+      "bootstrap_ci95": [
+        0.04761904761904756,
+        0.16764705882352937
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.0015714642655828017
+    },
+    "raw_train80_participation__all_contact__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4002232142856948
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "raw_train80_participation__all_contact__signed_margin": {
+      "n": 16,
+      "median": 0.1299894957983193,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "raw_train80_participation__all_contact__absolute_margin": {
+      "n": 16,
+      "median": 0.19627039627039627,
+      "bootstrap_ci95": [
+        0.0714285714285714,
+        0.30952380952380953
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.0006561279296875
+    },
+    "raw_train80_participation__equal_size_shaft_profile__observed_signed_rho": {
+      "n": 2,
+      "median": 0.4157738095238095,
+      "bootstrap_ci95": [
+        0.06964285714285715,
+        0.7619047619047619
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.25
+    },
+    "raw_train80_participation__equal_size_shaft_profile__signed_margin": {
+      "n": 2,
+      "median": 0.10892857142857143,
+      "bootstrap_ci95": [
+        0.0,
+        0.21785714285714286
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "raw_train80_participation__equal_size_shaft_profile__absolute_margin": {
+      "n": 2,
+      "median": 0.01696428571428571,
+      "bootstrap_ci95": [
+        0.0,
+        0.03392857142857142
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "raw_train80_participation__geometry_smooth_rbf__observed_signed_rho": {
+      "n": 13,
+      "median": 0.10588235294117647,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5916666666666666
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "raw_train80_participation__geometry_smooth_rbf__signed_margin": {
+      "n": 13,
+      "median": 0.10588235294117647,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5999999999999999
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1527099609375
+    },
+    "raw_train80_participation__geometry_smooth_rbf__absolute_margin": {
+      "n": 13,
+      "median": 0.09999999999999998,
+      "bootstrap_ci95": [
+        -0.027272727272727254,
+        0.2857142857142857
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.0340576171875
+    },
+    "raw_train80_participation__within_shaft_circular__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "raw_train80_participation__within_shaft_circular__signed_margin": {
+      "n": 16,
+      "median": 0.08720238095238095,
+      "bootstrap_ci95": [
+        -0.13095238095238093,
+        0.2317099567099567
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.226656720706493
+    },
+    "raw_train80_participation__within_shaft_circular__absolute_margin": {
+      "n": 16,
+      "median": 0.07886904761904756,
+      "bootstrap_ci95": [
+        0.04166666666666663,
+        0.17916666666666664
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.0022570264274585704
+    },
+    "raw_train80_participation__within_shaft_dihedral__observed_signed_rho": {
+      "n": 16,
+      "median": 0.12615546218487395,
+      "bootstrap_ci95": [
+        -0.17482517482517482,
+        0.4089285714285714
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.14892578125
+    },
+    "raw_train80_participation__within_shaft_dihedral__signed_margin": {
+      "n": 16,
+      "median": 0.0827922077922078,
+      "bootstrap_ci95": [
+        -0.09999999999999998,
+        0.22634032634032636
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.1877288818359375
+    },
+    "raw_train80_participation__within_shaft_dihedral__absolute_margin": {
+      "n": 16,
+      "median": 0.07514360639360636,
+      "bootstrap_ci95": [
+        0.016666666666666663,
+        0.17857142857142855
+      ],
+      "n_positive": 12,
+      "wilcoxon_greater_p": 0.0018861197872369936
+    },
+    "shaft_laplacian_participation__all_contact__observed_signed_rho": {
+      "n": 16,
+      "median": 0.10803571428571429,
+      "bootstrap_ci95": [
+        -0.27972027972027974,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.1612548828125
+    },
+    "shaft_laplacian_participation__all_contact__signed_margin": {
+      "n": 16,
+      "median": 0.10892857142857143,
+      "bootstrap_ci95": [
+        -0.27972027972027974,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.1612548828125
+    },
+    "shaft_laplacian_participation__all_contact__absolute_margin": {
+      "n": 16,
+      "median": 0.15780885780885784,
+      "bootstrap_ci95": [
+        0.0714285714285714,
+        0.29166666666666663
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.0006561279296875
+    },
+    "shaft_laplacian_participation__equal_size_shaft_profile__observed_signed_rho": {
+      "n": 2,
+      "median": 0.4395833333333333,
+      "bootstrap_ci95": [
+        0.06964285714285715,
+        0.8095238095238095
+      ],
+      "n_positive": 2,
+      "wilcoxon_greater_p": 0.25
+    },
+    "shaft_laplacian_participation__equal_size_shaft_profile__signed_margin": {
+      "n": 2,
+      "median": 0.10892857142857143,
+      "bootstrap_ci95": [
+        0.0,
+        0.21785714285714286
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "shaft_laplacian_participation__equal_size_shaft_profile__absolute_margin": {
+      "n": 2,
+      "median": 0.01696428571428571,
+      "bootstrap_ci95": [
+        0.0,
+        0.03392857142857142
+      ],
+      "n_positive": 1,
+      "wilcoxon_greater_p": 0.5
+    },
+    "shaft_laplacian_participation__geometry_smooth_rbf__observed_signed_rho": {
+      "n": 13,
+      "median": 0.06964285714285715,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5499999999999999
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "shaft_laplacian_participation__geometry_smooth_rbf__signed_margin": {
+      "n": 13,
+      "median": 0.075,
+      "bootstrap_ci95": [
+        -0.3571428571428571,
+        0.5583333333333332
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.1697998046875
+    },
+    "shaft_laplacian_participation__geometry_smooth_rbf__absolute_margin": {
+      "n": 13,
+      "median": 0.09999999999999998,
+      "bootstrap_ci95": [
+        -0.027272727272727254,
+        0.28571428571428575
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.0286865234375
+    },
+    "shaft_laplacian_participation__within_shaft_circular__observed_signed_rho": {
+      "n": 16,
+      "median": 0.10803571428571429,
+      "bootstrap_ci95": [
+        -0.27972027972027974,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.1612548828125
+    },
+    "shaft_laplacian_participation__within_shaft_circular__signed_margin": {
+      "n": 16,
+      "median": 0.0871212121212121,
+      "bootstrap_ci95": [
+        -0.13095238095238093,
+        0.18787878787878787
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.28094482421875
+    },
+    "shaft_laplacian_participation__within_shaft_circular__absolute_margin": {
+      "n": 16,
+      "median": 0.07886904761904762,
+      "bootstrap_ci95": [
+        0.0,
+        0.17857142857142855
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.0037991115410316227
+    },
+    "shaft_laplacian_participation__within_shaft_dihedral__observed_signed_rho": {
+      "n": 16,
+      "median": 0.10803571428571429,
+      "bootstrap_ci95": [
+        -0.27972027972027974,
+        0.4
+      ],
+      "n_positive": 10,
+      "wilcoxon_greater_p": 0.1612548828125
+    },
+    "shaft_laplacian_participation__within_shaft_dihedral__signed_margin": {
+      "n": 16,
+      "median": 0.07832167832167833,
+      "bootstrap_ci95": [
+        -0.09999999999999998,
+        0.18449404761903787
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.23187255859375
+    },
+    "shaft_laplacian_participation__within_shaft_dihedral__absolute_margin": {
+      "n": 16,
+      "median": 0.07589285714285711,
+      "bootstrap_ci95": [
+        0.0,
+        0.17857142857142855
+      ],
+      "n_positive": 11,
+      "wilcoxon_greater_p": 0.0037991115410316227
+    }
+  },
+  "full_gru_paired_comparisons": [
+    {
+      "null_mode": "all_contact",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.054931640625,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.15014493981266208,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04195804195804187,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.10573819610840524,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": 0.014775910364145647,
+      "bootstrap_ci95": [
+        -0.039393939393939426,
+        0.1166666666666667
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.1671384275132088,
+      "family_bh_fdr_q": 0.1671384275132088
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": 0.01624649859943976,
+      "bootstrap_ci95": [
+        -0.039393939393939426,
+        0.1166666666666667
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.1671384275132088,
+      "family_bh_fdr_q": 0.1671384275132088
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": 0.01624649859943976,
+      "bootstrap_ci95": [
+        -0.039393939393939426,
+        0.1166666666666667
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.1671384275132088,
+      "family_bh_fdr_q": 0.1671384275132088
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.054931640625,
+      "family_bh_fdr_q": 0.1671384275132088
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": 0.014285714285714277,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.11428571428571432
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.1359738119973677,
+      "family_bh_fdr_q": 0.1671384275132088
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": 0.01624649859943976,
+      "bootstrap_ci95": [
+        -0.039393939393939426,
+        0.1166666666666667
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.1671384275132088,
+      "family_bh_fdr_q": 0.1671384275132088
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": 0.01624649859943976,
+      "bootstrap_ci95": [
+        -0.039393939393939426,
+        0.1166666666666667
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.09572320178525401,
+      "family_bh_fdr_q": 0.1671384275132088
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": 0.011904761904761918,
+      "bootstrap_ci95": [
+        -0.02121212121212121,
+        0.11428571428571432
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.10573819610840524,
+      "family_bh_fdr_q": 0.12228460668890895
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": 0.011904761904761918,
+      "bootstrap_ci95": [
+        -0.021212121212121265,
+        0.11428571428571432
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.12228460668890895,
+      "family_bh_fdr_q": 0.12228460668890895
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": 0.011904761904761918,
+      "bootstrap_ci95": [
+        -0.02121212121212121,
+        0.11428571428571432
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.12228460668890895,
+      "family_bh_fdr_q": 0.12228460668890895
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.02380952380952378,
+      "bootstrap_ci95": [
+        -0.0117647058823529,
+        0.1428571428571428
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.07568359375,
+      "family_bh_fdr_q": 0.12228460668890895
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": 0.011904761904761918,
+      "bootstrap_ci95": [
+        -0.0117647058823529,
+        0.11428571428571432
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.07372539240311932,
+      "family_bh_fdr_q": 0.12228460668890895
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": 0.011904761904761918,
+      "bootstrap_ci95": [
+        -0.021212121212121265,
+        0.11428571428571432
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.12228460668890895,
+      "family_bh_fdr_q": 0.12228460668890895
+    },
+    {
+      "null_mode": "all_contact",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": 0.011904761904761918,
+      "bootstrap_ci95": [
+        -0.011904761904761973,
+        0.11726190476190469
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.08642417456771312,
+      "family_bh_fdr_q": 0.12228460668890895
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 2,
+      "median": -0.07232142857142865,
+      "bootstrap_ci95": [
+        -0.07321428571428579,
+        -0.07142857142857151
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 2,
+      "median": -0.025892857142857172,
+      "bootstrap_ci95": [
+        -0.051785714285714345,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 2,
+      "median": -0.025892857142857172,
+      "bootstrap_ci95": [
+        -0.051785714285714345,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 2,
+      "median": -0.06160714285714293,
+      "bootstrap_ci95": [
+        -0.07142857142857151,
+        -0.051785714285714345
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 2,
+      "median": -0.036607142857142894,
+      "bootstrap_ci95": [
+        -0.07321428571428579,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 2,
+      "median": -0.025892857142857172,
+      "bootstrap_ci95": [
+        -0.051785714285714345,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 2,
+      "median": -0.04970238095238101,
+      "bootstrap_ci95": [
+        -0.051785714285714345,
+        -0.04761904761904767
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 2,
+      "median": -0.10892857142857143,
+      "bootstrap_ci95": [
+        -0.21785714285714286,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 2,
+      "median": -0.09732142857142859,
+      "bootstrap_ci95": [
+        -0.19464285714285717,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 2,
+      "median": -0.09732142857142859,
+      "bootstrap_ci95": [
+        -0.19464285714285717,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 2,
+      "median": -0.09732142857142859,
+      "bootstrap_ci95": [
+        -0.19464285714285717,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 2,
+      "median": -0.10892857142857143,
+      "bootstrap_ci95": [
+        -0.21785714285714286,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 2,
+      "median": -0.09732142857142859,
+      "bootstrap_ci95": [
+        -0.19464285714285717,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 2,
+      "median": -0.09732142857142859,
+      "bootstrap_ci95": [
+        -0.19464285714285717,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 2,
+      "median": -0.014285714285714315,
+      "bootstrap_ci95": [
+        -0.02857142857142863,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 2,
+      "median": -0.00803571428571431,
+      "bootstrap_ci95": [
+        -0.01607142857142862,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 2,
+      "median": -0.00803571428571431,
+      "bootstrap_ci95": [
+        -0.01607142857142862,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 2,
+      "median": -0.00803571428571431,
+      "bootstrap_ci95": [
+        -0.01607142857142862,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 2,
+      "median": -0.014285714285714315,
+      "bootstrap_ci95": [
+        -0.02857142857142863,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 2,
+      "median": -0.00803571428571431,
+      "bootstrap_ci95": [
+        -0.01607142857142862,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "equal_size_shaft_profile",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 2,
+      "median": -0.00803571428571431,
+      "bootstrap_ci95": [
+        -0.01607142857142862,
+        0.0
+      ],
+      "n_positive": 0,
+      "wilcoxon_greater_p": 1.0,
+      "family_bh_fdr_q": 1.0
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.064697265625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.064697265625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.064697265625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.054931640625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 13,
+      "median": 0.016666666666666663,
+      "bootstrap_ci95": [
+        0.0,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.0615234375,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.064697265625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.054931640625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13529411764705884
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.064697265625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13529411764705884
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.064697265625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13529411764705884
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.064697265625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.054931640625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 13,
+      "median": 0.02058823529411763,
+      "bootstrap_ci95": [
+        0.0,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.0615234375,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13529411764705884
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.064697265625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.054931640625,
+      "family_bh_fdr_q": 0.064697265625
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 13,
+      "median": 0.04761904761904756,
+      "bootstrap_ci95": [
+        -5.551115123125783e-17,
+        0.1428571428571428
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.046142578125,
+      "family_bh_fdr_q": 0.07568359375
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 13,
+      "median": 0.04761904761904756,
+      "bootstrap_ci95": [
+        -0.02058823529411774,
+        0.1428571428571428
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.0732421875,
+      "family_bh_fdr_q": 0.07568359375
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 13,
+      "median": 0.04761904761904756,
+      "bootstrap_ci95": [
+        -0.02058823529411774,
+        0.1428571428571428
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.0732421875,
+      "family_bh_fdr_q": 0.07568359375
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.04761904761904756,
+      "bootstrap_ci95": [
+        -0.009090909090909045,
+        0.1428571428571428
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.07568359375,
+      "family_bh_fdr_q": 0.07568359375
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 13,
+      "median": 0.02380952380952378,
+      "bootstrap_ci95": [
+        0.0,
+        0.1428571428571428
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.031982421875,
+      "family_bh_fdr_q": 0.07568359375
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 13,
+      "median": 0.04761904761904756,
+      "bootstrap_ci95": [
+        -0.02058823529411774,
+        0.1428571428571428
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.0732421875,
+      "family_bh_fdr_q": 0.07568359375
+    },
+    {
+      "null_mode": "geometry_smooth_rbf",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 13,
+      "median": 0.04761904761904756,
+      "bootstrap_ci95": [
+        -0.02058823529411774,
+        0.1428571428571428
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.07568359375,
+      "family_bh_fdr_q": 0.07568359375
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.054931640625,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.15014493981266208,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04195804195804187,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.10573819610840524,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": 0.005952380952380938,
+      "bootstrap_ci95": [
+        -0.05594405594405592,
+        0.07058823529411762
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.3528594970703125,
+      "family_bh_fdr_q": 0.4499664306640625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": 0.005952380952380935,
+      "bootstrap_ci95": [
+        -0.07857142857142858,
+        0.07058823529411762
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.4499664306640625,
+      "family_bh_fdr_q": 0.4499664306640625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": 0.005952380952380935,
+      "bootstrap_ci95": [
+        -0.07857142857142858,
+        0.07058823529411762
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.4499664306640625,
+      "family_bh_fdr_q": 0.4499664306640625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.04761904761904767,
+      "bootstrap_ci95": [
+        -0.035294117647058865,
+        0.09999999999999998
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.1697998046875,
+      "family_bh_fdr_q": 0.4499664306640625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": 0.004166666666666652,
+      "bootstrap_ci95": [
+        -0.035294117647058865,
+        0.054545454545454466
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.3342742919921875,
+      "family_bh_fdr_q": 0.4499664306640625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": 0.005952380952380935,
+      "bootstrap_ci95": [
+        -0.07857142857142858,
+        0.07380952380952382
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.4499664306640625,
+      "family_bh_fdr_q": 0.4499664306640625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": 0.009448884448884476,
+      "bootstrap_ci95": [
+        -0.03578921078921078,
+        0.09999999999999998
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.1877288818359375,
+      "family_bh_fdr_q": 0.4499664306640625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": -0.02099567099567097,
+      "bootstrap_ci95": [
+        -0.03638028638028638,
+        0.07142857142857134
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.5895538330078125,
+      "family_bh_fdr_q": 0.6090240478515625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": -0.01938502673796788,
+      "bootstrap_ci95": [
+        -0.04895104895104892,
+        0.07142857142857134
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.6090240478515625,
+      "family_bh_fdr_q": 0.6090240478515625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": -0.01938502673796788,
+      "bootstrap_ci95": [
+        -0.04895104895104892,
+        0.07142857142857134
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.6090240478515625,
+      "family_bh_fdr_q": 0.6090240478515625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": -0.0181818181818181,
+      "bootstrap_ci95": [
+        -0.02380952380952401,
+        0.09166666666666667
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.36767578125,
+      "family_bh_fdr_q": 0.6090240478515625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": -0.005952380952380931,
+      "bootstrap_ci95": [
+        -0.02693140193140187,
+        0.04166666666666663
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.530059814453125,
+      "family_bh_fdr_q": 0.6090240478515625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": -0.01938502673796788,
+      "bootstrap_ci95": [
+        -0.04895104895104892,
+        0.07142857142857134
+      ],
+      "n_positive": 5,
+      "wilcoxon_greater_p": 0.6090240478515625,
+      "family_bh_fdr_q": 0.6090240478515625
+    },
+    {
+      "null_mode": "within_shaft_circular",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": -0.005952380952380987,
+      "bootstrap_ci95": [
+        -0.02727272727272724,
+        0.07142857142857134
+      ],
+      "n_positive": 6,
+      "wilcoxon_greater_p": 0.4104461669921875,
+      "family_bh_fdr_q": 0.6090240478515625
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.08333333333333331,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.13636363636363627
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.054931640625,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.023809523809523836,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.15014493981266208,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04848484848484852,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "observed_signed_rho",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": 0.00735294117647059,
+      "bootstrap_ci95": [
+        -0.04195804195804187,
+        0.1166666666666667
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.10573819610840524,
+      "family_bh_fdr_q": 0.18174397349075794
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": 0.011764705882352955,
+      "bootstrap_ci95": [
+        -0.06993006993006994,
+        0.04545454545454536
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.47735377710913834,
+      "family_bh_fdr_q": 0.47735377710913834
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": 0.011764705882352924,
+      "bootstrap_ci95": [
+        -0.06964285714285716,
+        0.04761904761904762
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.4301300048828125,
+      "family_bh_fdr_q": 0.47735377710913834
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": 0.011764705882352924,
+      "bootstrap_ci95": [
+        -0.06964285714285716,
+        0.04761904761904762
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.4301300048828125,
+      "family_bh_fdr_q": 0.47735377710913834
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.02499999999999998,
+      "bootstrap_ci95": [
+        -0.02380952380952401,
+        0.0714285714285714
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.2119140625,
+      "family_bh_fdr_q": 0.47735377710913834
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": 0.011904761904761925,
+      "bootstrap_ci95": [
+        -0.02647058823529408,
+        0.0647058823529412
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.2660649442083106,
+      "family_bh_fdr_q": 0.47735377710913834
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": 0.011764705882352924,
+      "bootstrap_ci95": [
+        -0.06964285714285716,
+        0.04761904761904762
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.4301300048828125,
+      "family_bh_fdr_q": 0.47735377710913834
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "signed_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": 0.018897768897768924,
+      "bootstrap_ci95": [
+        -0.03482142857142858,
+        0.0714285714285714
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.24776044152830756,
+      "family_bh_fdr_q": 0.47735377710913834
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "best_validation_regularized_participation",
+      "n": 16,
+      "median": 0.005952380952380959,
+      "bootstrap_ci95": [
+        -0.036363636363636404,
+        0.07142857142857134
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.19712293360538863,
+      "family_bh_fdr_q": 0.23187255859375
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "beta_binomial_participation",
+      "n": 16,
+      "median": 0.005952380952380928,
+      "bootstrap_ci95": [
+        -0.0357142857142857,
+        0.07142857142857134
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.23187255859375,
+      "family_bh_fdr_q": 0.23187255859375
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "dirichlet_rank_participation",
+      "n": 16,
+      "median": 0.005952380952380928,
+      "bootstrap_ci95": [
+        -0.0357142857142857,
+        0.07142857142857134
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.23187255859375,
+      "family_bh_fdr_q": 0.23187255859375
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "geometry_laplacian_participation",
+      "n": 13,
+      "median": 0.023809523809523725,
+      "bootstrap_ci95": [
+        -0.02380952380952401,
+        0.11666666666666659
+      ],
+      "n_positive": 7,
+      "wilcoxon_greater_p": 0.11669921875,
+      "family_bh_fdr_q": 0.23187255859375
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "low_rank_logit_participation",
+      "n": 16,
+      "median": 0.005952380952380959,
+      "bootstrap_ci95": [
+        -0.0181818181818181,
+        0.05714285714285716
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.18174397349075794,
+      "family_bh_fdr_q": 0.23187255859375
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "raw_train80_participation",
+      "n": 16,
+      "median": 0.005952380952380928,
+      "bootstrap_ci95": [
+        -0.0357142857142857,
+        0.07142857142857134
+      ],
+      "n_positive": 8,
+      "wilcoxon_greater_p": 0.23187255859375,
+      "family_bh_fdr_q": 0.23187255859375
+    },
+    {
+      "null_mode": "within_shaft_dihedral",
+      "metric": "absolute_margin",
+      "left": "full_history_gru",
+      "right": "shaft_laplacian_participation",
+      "n": 16,
+      "median": 0.01785714285714282,
+      "bootstrap_ci95": [
+        -0.0238095238095239,
+        0.07142857142857134
+      ],
+      "n_positive": 9,
+      "wilcoxon_greater_p": 0.10573819610840524,
+      "family_bh_fdr_q": 0.23187255859375
+    }
+  ],
+  "field_similarity_to_full_gru": {
+    "best_validation_regularized_participation": {
+      "n": 16,
+      "median": 0.9411255411255411,
+      "bootstrap_ci95": [
+        0.8642857142857141,
+        0.9571428571428573
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 1.52587890625e-05
+    },
+    "beta_binomial_participation": {
+      "n": 16,
+      "median": 0.9339826839826841,
+      "bootstrap_ci95": [
+        0.8642857142857141,
+        0.9735294117647059
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 0.00021840451160574153
+    },
+    "dirichlet_rank_participation": {
+      "n": 16,
+      "median": 0.9339826839826841,
+      "bootstrap_ci95": [
+        0.8642857142857141,
+        0.9735294117647059
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 0.00021840451160574153
+    },
+    "geometry_laplacian_participation": {
+      "n": 13,
+      "median": 0.942857142857143,
+      "bootstrap_ci95": [
+        0.8499999999999999,
+        0.9523809523809524
+      ],
+      "n_positive": 13,
+      "wilcoxon_greater_p": 0.0001220703125
+    },
+    "low_rank_logit_participation": {
+      "n": 16,
+      "median": 0.9333333333333332,
+      "bootstrap_ci95": [
+        0.8642857142857141,
+        0.9527310924369748
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 0.00021840451160574153
+    },
+    "raw_train80_participation": {
+      "n": 16,
+      "median": 0.9339826839826841,
+      "bootstrap_ci95": [
+        0.8642857142857141,
+        0.9735294117647059
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 0.00021840451160574153
+    },
+    "shaft_laplacian_participation": {
+      "n": 16,
+      "median": 0.9319327731092438,
+      "bootstrap_ci95": [
+        0.8642857142857141,
+        0.9642857142857145
+      ],
+      "n_positive": 16,
+      "wilcoxon_greater_p": 0.00021840451160574153
+    }
+  }
+}

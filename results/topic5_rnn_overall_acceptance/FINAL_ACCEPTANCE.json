@@ -1,0 +1,307 @@
+{
+  "contract": "topic5_rnn_overall_acceptance_v1_0",
+  "status": "ACCEPTED_AS_BOUNDED_SUPPLEMENTARY_COMPUTATIONAL_RESULT",
+  "date": "2026-07-28",
+  "scope": "interictal rank-sequence self-supervision, structured-RNN falsification, and reused-target early-ictal static readout",
+  "execution_integrity": {
+    "status": "PASS",
+    "components": {
+      "persistent_path_mode": {
+        "status": "COMPLETE_BOUNDED_NEGATIVE",
+        "n_patients": 34,
+        "n_seeds": 3,
+        "n_runs": 510,
+        "ictal_target_read": false
+      },
+      "competitive_structured_rnn": {
+        "status": "COMPLETE_TO_PREREGISTERED_STOP",
+        "n_patients": 22,
+        "n_seeds": 3,
+        "target_values_read": false
+      },
+      "linear_symmetric_observation_model": {
+        "status": "COMPLETE_BOUNDED_NEGATIVE",
+        "n_patients": 22,
+        "target_values_read": false
+      },
+      "transition_signal_decomposition": {
+        "status": "COMPLETE",
+        "decision_at_time": "GO_V2_3_RNN",
+        "coordinate_free_patients": 31,
+        "physical_axis_patients": 22,
+        "target_values_read": false
+      },
+      "axis_selection_and_static_readout": {
+        "axis_selection_status": "FAIL",
+        "axis_selection_target_read": false,
+        "static_readout_status": "COMPLETE",
+        "static_readout_target_read": true
+      },
+      "internal_state_reduction": {
+        "status": "PASS_WITH_SCIENTIFIC_REFRAMING",
+        "n_interictal_patients": 34,
+        "n_early_ictal_patients": 16,
+        "n_seizures": 106
+      },
+      "fixed_static_readout": {
+        "status": "PASS_WITH_BOUNDED_STATIC_CONCLUSION",
+        "n_patients": 16,
+        "n_seizures": 106,
+        "target_reused_not_independent_confirmation": true
+      },
+      "finite_history": {
+        "status": "COMPLETE",
+        "n_patients": 34,
+        "n_seeds": 3,
+        "n_new_models": 408,
+        "ictal_target_read": false
+      },
+      "unconstrained_full_rank_reference": {
+        "status": "complete",
+        "n_patients": 34,
+        "n_seeds": 3,
+        "ictal_target_read": false
+      },
+      "low_rank_sweep": {
+        "status": "complete",
+        "n_patients": 34,
+        "n_seeds": 3,
+        "ranks": [
+          0,
+          1,
+          2,
+          3,
+          4
+        ],
+        "ictal_target_read": false
+      }
+    }
+  },
+  "scientific_acceptance": {
+    "static_interictal_contact_scaffold": {
+      "status": "SUPPORTED_TARGET_BLIND",
+      "estimand": "train80_vs_heldout20_contact_participation_spearman",
+      "n": 34,
+      "median": 0.8926007326007326,
+      "ci95": [
+        0.8678571428571429,
+        0.9363136863136863
+      ],
+      "n_positive": 34,
+      "wilcoxon_greater_p": 1.8246286932632965e-07,
+      "boundary": "a reproducible participation topography, not a full rank distribution, physical axis, or propagation direction"
+    },
+    "short_ordered_history": {
+      "status": "SUPPORTED_TARGET_BLIND",
+      "history2_over_history1": {
+        "median": 0.01717523522100084,
+        "ci95": [
+          0.011683256608867154,
+          0.02404102462492297
+        ],
+        "wilcoxon_two_sided_p": 1.009204424917698e-06,
+        "n_positive": 32,
+        "n_patients": 34
+      },
+      "history3_over_history2": {
+        "median": 0.011329764981649504,
+        "ci95": [
+          0.008920358733440548,
+          0.015386991742728728
+        ],
+        "wilcoxon_two_sided_p": 2.9453076422214508e-08,
+        "n_positive": 29,
+        "n_patients": 34
+      },
+      "ordered_h3_over_matched_shuffle": {
+        "median": 0.02608094675926087,
+        "ci95": [
+          0.016831866123886548,
+          0.03478029919254455
+        ],
+        "n_positive": 27,
+        "n_patients": 34,
+        "wilcoxon_two_sided_p": 0.0036093484377488494
+      },
+      "boundary": "the useful sequence memory is concentrated in the latest two to three rank sets"
+    },
+    "unbounded_full_history": {
+      "status": "NOT_SUPPORTED",
+      "full_over_history3": {
+        "median": -0.0009507639463539608,
+        "ci95": [
+          -0.005065963347560931,
+          0.003462366684389817
+        ],
+        "wilcoxon_two_sided_p": 0.43647122976835817,
+        "n_positive": 16,
+        "n_patients": 34
+      },
+      "full_over_strongest_nonrecurrent": {
+        "n": 34,
+        "median": 0.00101446270809425,
+        "n_positive": 17,
+        "wilcoxon_greater_p": 0.43964656232856214
+      },
+      "boundary": "full-history GRU is not required and is not the accepted mechanistic object"
+    },
+    "positive_low_rank_recurrent_modes": {
+      "status": "NOT_SUPPORTED_BY_TESTED_PARAMETERIZATION",
+      "minimum_distribution_sufficient_rank": null,
+      "positive_mode_behavioral_support": false,
+      "rank1_loading_seed_similarity": 0.04394198894889963,
+      "boundary": "rank-0 retained diagonal recurrent memory, so this sweep is a sensitivity analysis and not a clean low-rank mechanism test"
+    },
+    "structured_path_or_axis_mechanism": {
+      "status": "NOT_SUPPORTED_BY_CURRENT_MODEL_FAMILIES",
+      "linear_symmetric_predictive_adequacy": "FAIL",
+      "persistent_path_comparison_gate": false,
+      "persistent_path_structure_gate": false,
+      "competition_state": "FAIL",
+      "physical_axis": "FAIL",
+      "source_conditioned_direction": "FAIL",
+      "axis_readback_construct_validity": "FAIL",
+      "boundary": "failure applies to the tested observation mappings; it does not prove that patients lack a pathological axis"
+    },
+    "empirical_transition_signal": {
+      "status": "SUPPORTED_AS_TARGET_BLIND_DESIGN_DIAGNOSTIC",
+      "decomposition_decision_at_time": "GO_V2_3_RNN",
+      "go_conditions": {
+        "directed_beyond_local_geometry_and_cross_shaft": true,
+        "symmetric_residual_over_node": true,
+        "axis_beyond_local_geometry": true,
+        "source_direction_beyond_axis": true,
+        "ordered_history_over_last_rank": true
+      },
+      "later_structured_model_outcome": "v2.3 predictive history passed, but competition, matched axis, and source-conditioned direction failed",
+      "boundary": "the decomposition justified testing v2.3; it is not independent evidence that the v2.3 mechanism is correct"
+    },
+    "early_ictal_static_contact_morphology": {
+      "status": "SUPPORTED_WITHIN_REUSED_TARGET_DATASET",
+      "target": "clinical onset [0,10] s, 1-150 Hz baseline-normalized contact energy",
+      "n_patients": 16,
+      "n_seizures": 106,
+      "full_gru_sign_free": {
+        "n": 16,
+        "median": 0.21547619047619038,
+        "n_positive": 14,
+        "wilcoxon_greater_p": 0.000152587890625
+      },
+      "raw_train80_sign_free": {
+        "n": 16,
+        "median": 0.1962703962703962,
+        "n_positive": 13,
+        "wilcoxon_greater_p": 0.0006561279296875
+      },
+      "boundary": "internal same-dataset sign-free contact morphology, not a fixed positive field direction or independent transfer confirmation"
+    },
+    "fixed_positive_cross_state_direction": {
+      "status": "NOT_ESTABLISHED",
+      "full_gru_all_contact": {
+        "n": 16,
+        "median": 0.2425770308123249,
+        "n_positive": 11,
+        "wilcoxon_greater_p": 0.1261138916015625
+      }
+    },
+    "gru_specific_static_transfer": {
+      "status": "NOT_ESTABLISHED",
+      "full_minus_best_regularized": {
+        "n": 16,
+        "median": 0.011904761904761918,
+        "n_positive": 8,
+        "wilcoxon_greater_p": 0.1082763671875
+      },
+      "full_minus_rank_shuffle": {
+        "n": 16,
+        "median": -0.002941176470588225,
+        "n_positive": 7,
+        "wilcoxon_greater_p": 0.35986328125
+      }
+    },
+    "dynamic_seizure_prediction_or_replay": {
+      "status": "NOT_TESTED_AND_NOT_ALLOWED",
+      "reason": "the accepted target is a static early-ictal contact field; exact per-seizure onset-source metadata are unavailable for source-conditioned dynamic transfer"
+    }
+  },
+  "paper_acceptance": {
+    "tier": "SUPPLEMENTARY_BOUNDED_COMPUTATIONAL_RESULT",
+    "canonical_claim": "Interictal group events define a reproducible patient-specific contact scaffold and contain order-dependent information over the latest two to three rank sets. The same dataset shows orientation-free static correspondence with early-ictal contact energy, but this correspondence is not specific to a GRU and the tested path, axis, competition, and source mechanisms are unsupported.",
+    "canonical_report": "docs/archive/topic5/rnn_overall_integrated_acceptance_2026-07-28.md",
+    "canonical_manuscript_source": "docs/paper-draft/figure6_static_contact_topography_bounded_result.md",
+    "figures": [
+      "results/topic5_interictal_scaffold_reliability_history_necessity/figures/topic5_scaffold_reliability_history_necessity_v0_1.png",
+      "results/paper-ready-figure/fig6_static_contact_topography/figures/fig6_static_contact_topography.png"
+    ]
+  },
+  "next_action": {
+    "freeze_current_rnn_families": true,
+    "do_not_tune": [
+      "full-history GRU",
+      "persistent path-mode graph",
+      "symmetric-axis kernel",
+      "competition trace",
+      "source-direction term"
+    ],
+    "accepted_reference_model": "history_3_gru",
+    "independent_confirmation_required_for": [
+      "early-ictal static contact correspondence",
+      "ordered-state early-ictal readback"
+    ],
+    "do_not_start": "new early-ictal dynamic RNN or seizure predictor on the reused target cohort"
+  },
+  "source_artifacts": {
+    "path_mode": {
+      "path": "results/topic5_structured_axis_graph/formal_persistent_path_mode_v1_0/analysis/formal_gate_summary.json",
+      "sha256": "e3b3aabe7136c5e26d9b75271c8fa1bd148b0c248d28355db53b51e06fe705ee"
+    },
+    "competitive": {
+      "path": "results/topic5_symmetric_axis_competitive_propagation_v2_3/formal/FORMAL_GATE_STATUS.json",
+      "sha256": "f29fc2ff93453117a475f13d00976c66319a2ddc3aea6395c7a0b6db0934ec0e"
+    },
+    "linear_symmetric_closeout": {
+      "path": "results/topic5_symmetric_axis_propagation_state_v2_2/closeout_v2_2_1/CLOSEOUT_STATUS.json",
+      "sha256": "4200ddb7c96c5ff318db413370b9cffc2708bf2750eb5c72de37eaf93fdfd430"
+    },
+    "transition_decomposition": {
+      "path": "results/topic5_interictal_transition_decomposition_v0_1/DECOMPOSITION_STATUS.json",
+      "sha256": "f86de2b0e517d66c4e0f90e3a3a57627c32a713c7e1e87b88188236f3ab79afd"
+    },
+    "axis_selection": {
+      "path": "results/topic5_rnn_axis_positive_static_transfer_v2_4/formal/AXIS_SELECTION_GATE_STATUS.json",
+      "sha256": "19e0beeaf61676a02c87cbf7461705ab3dc8fbfeb7702e7cb7df7fa4a50a0725"
+    },
+    "axis_static_readout": {
+      "path": "results/topic5_rnn_axis_positive_static_transfer_v2_4/static_readout/STATIC_READOUT_GATE_STATUS.json",
+      "sha256": "9abb42e204f01e75ba1e61cf73f2a0dc653c3ef45197c59f2c12ec8edef6f1b9"
+    },
+    "internal_state": {
+      "path": "results/topic5_rnn_internal_state_reduction/FINAL_STATUS.json",
+      "sha256": "021f8cdad0580ceb2370eceaa8e5a31b9124ea6b37aab2ed188498d207d16275"
+    },
+    "fixed_static": {
+      "path": "results/topic5_static_scaffold_fixed_readout_validation/FINAL_ACCEPTANCE.json",
+      "sha256": "a2093b352b428010f70ce3d6ecfe5297672eac7c5c8bb5a50d851b91bd7a0819"
+    },
+    "static_reliability": {
+      "path": "results/topic5_interictal_scaffold_reliability_history_necessity/static_reliability_v0_1/summary.json",
+      "sha256": "a9f7fad653703dc32a3020b4b9eedb778324567106aa63ba2f0db9d0e719044a"
+    },
+    "history_depth": {
+      "path": "results/topic5_interictal_scaffold_reliability_history_necessity/history_runs_v0_1/history_necessity_summary.json",
+      "sha256": "fb1a6b5cebfd8dc19853ac5d456be90835184d35d756309294ab2a411d47d0b8"
+    },
+    "matched_h3_shuffle": {
+      "path": "results/topic5_interictal_scaffold_reliability_history_necessity/history3_rank_shuffle_runs_v0_1/history3_rank_shuffle_summary.json",
+      "sha256": "66ff930f7ef01b2a8e7d76e695107514d0b519bf4e2576df60b7eb0e5b44d9ac"
+    },
+    "full_rank_reference": {
+      "path": "results/topic5_interictal_rank_distribution/full_rank_reference_analysis/full_rank_reference_summary.json",
+      "sha256": "853006782e9e045360a5163241358b268149da0afb64441d86cd11bf80e5e523"
+    },
+    "low_rank_sweep": {
+      "path": "results/topic5_low_rank_dynamics/analysis/structured_rank_sweep_v1/analysis_summary.json",
+      "sha256": "fe44e83fbd37ed58f81497201fe212db68c64ad19acdff2c4f5a0ed714c5e2a5"
+    }
+  }
+}

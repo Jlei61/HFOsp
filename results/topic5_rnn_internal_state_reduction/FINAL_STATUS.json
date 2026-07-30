@@ -1,0 +1,64 @@
+{
+  "status": "COMPLETE",
+  "postreview_status": "PASS_WITH_SCIENTIFIC_REFRAMING",
+  "postreview_acceptance": "results/topic5_rnn_internal_state_reduction/POSTREVIEW_ACCEPTANCE.json",
+  "audit": {
+    "contract": "topic5_rnn_internal_state_reduction_v0_1",
+    "status": "PASS",
+    "completeness": {
+      "extraction_cells": {
+        "expected": 102,
+        "found": 102,
+        "complete": 102,
+        "target_blind_certified": 102
+      },
+      "subject_analyses": {
+        "expected": 34,
+        "found": 34,
+        "complete": 34,
+        "target_blind_certified": 34
+      },
+      "perturbation_cells": {
+        "expected": 102,
+        "found": 102,
+        "complete": 102,
+        "target_blind_certified": 102
+      },
+      "random_subspace_cells": {
+        "expected": 102,
+        "found": 102,
+        "complete": 102,
+        "target_blind_certified": 102
+      }
+    },
+    "nll_reproduction": {
+      "n_cells_times_controls": 204,
+      "same_denominator_rows": 126,
+      "deterministically_sampled_rows": 78,
+      "maximum_absolute_difference_same_denominator": 6.769718918775425e-08,
+      "maximum_absolute_difference_sampled_denominator": 0.011221608831100571,
+      "tolerance": 1e-06,
+      "interpretation": "Exact reproduction is required only when the frozen run and state extraction score the same heldout events. Larger patients use a deterministic 2048-event extraction sample; their difference is reported but is not numerical drift."
+    },
+    "strict_early_ictal": {
+      "n_patients": 16,
+      "n_seizures": 106,
+      "dataset": "epilepsiae",
+      "window_sec": [
+        0,
+        10
+      ],
+      "band_hz": [
+        1,
+        150
+      ],
+      "yuquan_eeg_onset_in_primary": false
+    },
+    "figures_readme_exists": true
+  },
+  "interictal_summary": "results/topic5_rnn_internal_state_reduction/INTERICTAL_SUMMARY.json",
+  "sensitivity_summary": "results/topic5_rnn_internal_state_reduction/INTERICTAL_SENSITIVITY_SUMMARY.json",
+  "eventfirst_field_summary": "results/topic5_rnn_internal_state_reduction/INTERICTAL_EVENTFIRST_FIELD_SUMMARY.json",
+  "early_ictal_summary": "results/topic5_rnn_internal_state_reduction/EARLY_ICTAL_READBACK_SUMMARY.json",
+  "paper_ready_figure": "results/paper-ready-figure/fig6_rnn_internal_state_reduction/figures/fig6_rnn_internal_state_reduction.png"
+}

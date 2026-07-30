@@ -1,0 +1,19 @@
+metric,left,right,n,median,bootstrap_ci95,n_positive,wilcoxon_greater_p,ordinary_family_bh_fdr_q
+observed_max_abs_rho,full_history_gru,static_contact_hazard,16,0.07738095238095238,"[0.04999999999999999, 0.14285714285714285]",15,3.0517578125e-05,0.000152587890625
+observed_max_abs_rho,full_history_gru,unordered_prefix,16,0.026136363636363708,"[0.0, 0.07142857142857145]",10,0.043430040758120375,0.045001427635158596
+observed_max_abs_rho,full_history_gru,last_set_first_order,16,0.02232142857142852,"[-0.008333333333333304, 0.1071428571428572]",9,0.045001427635158596,0.045001427635158596
+observed_max_abs_rho,full_history_gru,rank_shuffle_gru,16,0.07328431372549016,"[0.0, 0.12916666666666665]",10,0.009283356139867098,0.023208390349667745
+observed_max_abs_rho,full_history_gru,empirical_rank_distribution,16,0.05887445887445886,"[0.0, 0.09275763050087074]",11,0.03457198694875947,0.045001427635158596
+observed_max_abs_rho,structured_full,structured_no_history,11,0.0,"[0.0, 0.008823529411764675]",3,0.3125,
+observed_max_abs_rho,structured_axis_no_source,structured_local_isotropic,11,0.0,"[-0.0016388338681005976, 0.0]",1,0.6875,
+observed_max_abs_rho,structured_full,structured_axis_no_source,11,0.0,"[0.0, 0.009090909090909094]",4,0.21875,
+observed_max_abs_rho,structured_full,structured_node_only,11,0.0,"[-0.03214285714285714, 0.10833333333333339]",5,0.150390625,
+all_contact_margin,full_history_gru,static_contact_hazard,16,0.03729946524064168,"[0.0045297432917004166, 0.10714285714285698]",13,0.0015714642655828017,0.006732081270800942
+all_contact_margin,full_history_gru,unordered_prefix,16,0.024025974025974034,"[-0.008333333333333193, 0.057142857142857106]",9,0.07781773037901928,0.12969621729836547
+all_contact_margin,full_history_gru,last_set_first_order,16,0.0035714285714285587,"[-0.03030303030303033, 0.059523809523809534]",8,0.16526783635392062,0.20658479544240077
+all_contact_margin,full_history_gru,rank_shuffle_gru,16,0.01813725490196076,"[-0.07142857142857145, 0.0714285714285714]",9,0.46908261989525535,0.46908261989525535
+all_contact_margin,full_history_gru,empirical_rank_distribution,16,0.06612554112554112,"[0.03011318021429149, 0.14314339616859673]",13,0.0026928325083203767,0.006732081270800942
+all_contact_margin,structured_full,structured_no_history,11,0.0,"[-0.008333333333333304, 0.0]",2,0.71875,
+all_contact_margin,structured_axis_no_source,structured_local_isotropic,11,0.0,"[-0.0016388338681005976, 0.0]",1,0.6875,
+all_contact_margin,structured_full,structured_axis_no_source,11,0.0,"[0.0, 0.009090909090909094]",5,0.15625,
+all_contact_margin,structured_full,structured_node_only,11,0.0,"[-0.02380952380952378, 0.1166666666666667]",5,0.3125,

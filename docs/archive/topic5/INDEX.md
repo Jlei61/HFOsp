@@ -6,13 +6,68 @@
 
 ## 主线（network-axis pivot）
 
-### `persistent_path_mode_rnn_closeout_and_v2_pivot_2026-07-26.md` — **Figure 6 旧 RNN 收口与 v2.0 系统辨识转向**
+### `rnn_stage_acceptance_and_training_sufficiency_2026-07-30.md` — **当前 RNN 阶段性总入口：科学验收通过，训练充分性仍开放**
+- 已接受对象为稳定 static contact scaffold + 短程 within-event ordered information；linear-state 可改善 heldout next-contact，并在自由生成中恢复局部 transition fingerprint。
+- 完整 suffix rank/precedence 和双向 axis read-back 未恢复，但该阴性目前只限 frozen teacher-forced training contract。正式模型仅一轮 exact coverage，最终 linear-state 未独立调 learning rate / training budget，也未用 self-fed rollout loss。
+- 下一轮只允许做 convergence 与 objective-sufficiency 审计；执行 prompt 见 `docs/superpowers/plans/2026-07-30-topic5-rnn-training-sufficiency-agent-prompt.md`。
+
+### `minimal_sequence_kernel_closeout_v0_2_report_2026-07-30.md` — **where / how / when 分层后的最小序列结构最终验收**
+- 34 人 × 3 seeds 的同分母重评分将 heldout likelihood 精确拆为 contact choice 与 STOP：contact identity 的增量集中在当前和前一 rank，第三 rank 主要改善 STOP；更早历史无额外 contact 信息。
+- 可识别对象改为 linear-state 的输入—输出 lag kernel \(K_k=CA^kB\)。显式 FIR-H3 未优于无序基线，固定方向跨数据集确认失败；patient-mean early-ictal association 仍主要来自 static scaffold。
+- `when` 已隔离为新分支：exact 1–150 Hz seizure residual 可靠性当前不可辨识，IEI-aware Gate 1 仅有未跨两数据集复现的 cohort feasibility signal。本轮定位固定为 Extended Data / Supplementary bounded result。
+
+### `ordered_history_architecture_audit_v0_1_report_2026-07-29.md` — **最新 RNN 条件信息、架构与跨状态综合验收**
+- 34 人 × 3 seeds 的 target-blind 架构审计显示：linear-state 相对 unordered-prefix 的患者中位 NLL 增益为 0.0257（26/34，7-family maxT P=0.00032），相对同架构 rank-shuffle 为 0.0419（31/34）；容量匹配后 linear 结果保留。
+- 但 7 个预注册递归家族仅 linear-state 通过 family-wise inference，故顺序证据具有架构依赖性；clinical-onset `[0,10] s`、`1–150 Hz` reused target 上，ordered residual 超越 static + unordered 与 matched shuffle 的条件增量均未建立。当前只进入 supplementary sequence-identification / boundary result，不支持脑流形、真实时间慢变量或逐发作预测。
+
+### `rnn_overall_integrated_acceptance_2026-07-28.md` — **上一版 RNN 总验收基线（已由 2026-07-29 架构审计细化）**
+- 统一收口 full-rank、low-rank、persistent path、symmetric-axis、competitive/source、internal-state、fixed early-ictal readout 与 H1/H2/H3 history-necessity 全部分支。
+- 最终接受对象为 target-blind 的稳定 interictal participation scaffold + 最近 2–3 个 rank set 的有序短历史；early-ictal 只保留 reused-target 的 sign-free static morphology。full history、正 low-rank mode、path/axis/competition/source 和 GRU-specific static transfer 均未建立。
+- 机器可读状态：`results/topic5_rnn_overall_acceptance/FINAL_ACCEPTANCE.json`；论文层级固定为 `SUPPLEMENTARY_BOUNDED_COMPUTATIONAL_RESULT`。
+
+### `interictal_scaffold_reliability_history_necessity_v0_1_report_2026-07-28.md` — **34人 target-blind 静态可靠性与 H1/H2/H3 历史必要性**
+- train80–heldout20 participation field Spearman 中位 0.893，34/34 为正；约 200 个事件时 30/34 已接近 full train80 estimate。
+- H2>H1、H3>H2、ordered H3>matched H3 shuffle 均通过；full history 不超过 H3。accepted sequence reference 因此锁为 H3，不再扩大 GRU 历史。
+
+### `static_scaffold_fixed_readout_validation_v0_1_report_2026-07-28.md` — **静态 contact topography 分项验收：跨状态形态保留，GRU-specific 增量未建立**
+- strict clinical-onset 16 人/106 seizures 的 participation readout、signed primary、强空间 null、target-free regularized baseline、teacher/free 分解和 baseline-power confound audit 已全部完成。
+- orientation-free contact morphology 在 within-shaft 与 geometry-smooth null 下保留；真实顺序相对 rank-shuffle 有 heldout 增益，但 positive signed direction、unbounded-history necessity 和 GRU-specific static increment 均未建立。等待真正独立 clinical-onset patient cohort 复制。
+
+### `static_contact_topography_claim_consistency_audit_2026-07-28.md` — **当前论文口径全文一致性审计**
+- 扫描 21 个 manuscript-facing 文件，20 处敏感表述全部归入明确边界/否定、其他经验合同或历史模型阶段，`UNSAFE_CURRENT_CLAIM=0`。
+- 当前唯一 Figure 6 source 为 `docs/paper-draft/figure6_static_contact_topography_bounded_result.md`；早期 RNN 版本只保留为 provenance。
+
+### `rnn_postreview_closeout_and_static_scaffold_goal_2026-07-28.md` — **RNN 审阅后收口与 fixed signed scaffold 新 goal**
+- 上一 goal 经复核拆成 static contact topography、interictal order sensitivity 和 target-reused state read-back 三层；Figure 降为补充探索性候选，structured-axis RNN 冻结。
+- 新 fixed participation Phase 1 显示 absolute morphology margin 稳定，但 positive signed margin 在 all-contact、within-shaft 与 geometry-smooth null 下均有明显患者异质性；已启动正则化非递归 baseline、teacher-forced/free-rollout 和 confound 分解。
+
+### `rnn_internal_state_reduction_v0_1_report_2026-07-28.md` — **静态 scaffold、ordered-history 诊断与探索性 state read-back 分层**
+- 冻结 34 人 × 3 seeds 既有 GRU，102/102 hidden extraction、扰动和随机子空间单元全部完成；真实 prefix 顺序打乱对 ordered GRU 的 NLL 影响显著大于 rank-shuffle，对应 32/34 患者为正。
+- strict clinical-onset 16 人/106 seizures 中，固定 participation 支持静态 contact scaffold，但 full GRU 未稳定超过 static/unordered/rank-shuffle；去 participation 后的 PC1/PC2 迁移仅作 target-reused exploratory candidate。下一步先做 fixed signed readout、强空间 null 和正则化非递归基线。
+
+### `symmetric_axis_competitive_propagation_rnn_v2_3_result_2026-07-27.md` — **categorical RNN 可预测，但 physical-axis 机制门失败**
+- 22 人 × 3 seeds × 5 conditions 的 330 个正式模型全部完成；full 相对 node bias 22/22 为正，history 相对 instantaneous 18/22 为正。
+- delayed competition、matched physical axis 与 source-conditioned direction 均未过冻结门；模型约恢复 ordered-history Markov cohort-median benefit 的 58%，不开放 latent-state 解释或 early-ictal transfer。
+
+### `interictal_transition_signal_decomposition_v0_1_result_2026-07-27.md` — **Markov transition signal 分解与 v2.3 开发许可**
+- 31 人显示 symmetric、跨局部几何且依赖 ordered multi-step history 的 heldout transition signal；22 人 physical-axis residual通过，但 source-conditioned增益很小且 14/22 axis coefficient 为负。
+- 冻结决策为允许起草最小 v2.3 recurrent observation model，不是 shared anatomical axis 或 early-ictal transfer 的机制结论。
+
+### `symmetric_axis_propagation_state_v2_2_1_closeout_2026-07-27.md` — **symmetric-axis propagation-state RNN 按预注册停止点收口**
+- 66/66 formal runs 审计完整；Claim 1/2 为已执行失败，Claim 3/4 为 `LOCKED_NOT_RUN`，early-ictal transfer 同时受间期 gate 与 0 exact source metadata 阻断。
+- 在同一 22 人 heldout 合同下，Markov 21/22 优于 node-bias，而 full/isotropic 均仅 1/22 为正；校准显示 next-set size 1.00 被预测为约 1.65，local/axis kernel 中位 Frobenius cosine 0.979。结论只限“当前非负线性单状态 observation mapping 不足”，不否定共享病理轴。
+
+### `persistent_path_mode_rnn_closeout_and_v2_pivot_2026-07-26.md` — **Figure 6 旧 RNN 收口与 v2.2 propagation-state 转向**
 - 冻结 v0.7/v0.9/v1.0：局部历史可学，但离散、event-persistent path mode 不是合适科学对象；不再调 K、hidden size 或开放发作期 target。
-- 下一版改为共同的近似对称轴向 scaffold + event source + excitation/restraint state；先过 SNN 真值恢复，再做 34 人纯间期条件预测和 gated clinical-onset 动态迁移。
+- 下一版改为共同的近似对称 effective scaffold + observed source + 单一 propagation state + scalar STOP；三位 geometry-complete development 后以 22 人做 physical-axis formal，跨状态主任务回到 clinical-onset early-ictal energy field。
 
 ### `persistent_path_mode_rnn_formal_result_2026-07-26.md` — **Figure 6 正式 34 人 structured graph RNN bounded-negative**
 - 34 人 × 3 seeds × 5 conditions 的 510 个 LOSO runs 全部完成；局部 next-set NLL 可学，但 participation 与完整 rank distribution 的自由生成主门未通过。
 - graph / mode-collapse 结构必要性未成立，path-direction posterior 保持高熵；按预注册合同不读取 clinical-onset 发作期 target。给出可保留口径、禁止口径和若重开时必须修改的训练目标。
+
+### `fig6_interictal_operator_phase0_stagea_pilot_2026-07-24.md` — **Figure 6 计算桥：selected h64 的 Stage-A engineering screen 停止于 suffix-static gate**
+- 以 masked contact-rank 的单事件 prefix→suffix/STOP 任务训练 contact-query GRU；40/40 患者、532,793 个间期事件通过数据与泄漏审计，Stage A 不读取 ictal values。
+- 13 折 target-free one-SE 选择 h64；13 人 one-seed screen 中 next-set 对 strongest static 的患者级 CI 为正，但 suffix 中位为负且 CI 跨 0；两项均 13/13 超过 rank-shuffle。按 stop rule 不启动正式三 seed gate、Mode recovery 或 ictal readout。
 
 ### `fig3a_raw_spectral_context_acceptance_2026-07-18.md` — **Fig3-A 正式画图合同与验收**
 - 锁定 E1146 seizure 7 的 raw SEEG + SCL9 TFR + 四频带 2×2 布局、严格时间轴对齐、row-shared y 轴、clinical-onset shading 和可/不可报告边界。

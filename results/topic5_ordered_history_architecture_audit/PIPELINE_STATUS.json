@@ -1,0 +1,66 @@
+{
+  "timestamp_utc": "2026-07-28T20:48:12.813089+00:00",
+  "status": "COMPLETE",
+  "stages": {
+    "fixed_hidden_architectures": {
+      "expected_cells": 204,
+      "completed_cells": 204,
+      "launcher": {
+        "status": "COMPLETE",
+        "expected_cells": 204,
+        "completed_cells": 204,
+        "exit_code": 0
+      },
+      "started": true
+    },
+    "selected_matched_rank_shuffle": {
+      "expected_cells": 102,
+      "completed_cells": 102,
+      "launcher": {
+        "status": "COMPLETE",
+        "selected_architecture": "linear_state",
+        "expected_cells": 102,
+        "completed_cells": 102,
+        "exit_code": 0
+      },
+      "started": true
+    },
+    "history_interventions": {
+      "expected_cells": 102,
+      "completed_cells": 102,
+      "launcher": {
+        "status": "COMPLETE",
+        "expected_cells": 102,
+        "completed_cells": 102,
+        "exit_code": 0
+      },
+      "started": true
+    },
+    "parameter_matched_sensitivity": {
+      "expected_cells": 204,
+      "completed_cells": 204,
+      "launcher": {
+        "status": "COMPLETE",
+        "expected_cells": 204,
+        "completed_cells": 204,
+        "exit_code": 0
+      },
+      "started": true
+    }
+  },
+  "products": {
+    "architecture_summary": true,
+    "history_intervention_summary": true,
+    "early_ictal_conditional_summary": true,
+    "parameter_matched_summary": true,
+    "paper_figure": true,
+    "final_acceptance": true
+  },
+  "recent_error_hits": [],
+  "memory_available_gb": 143.61636352539062,
+  "gpu": {
+    "memory_used_mb": 15.0,
+    "utilization_percent": 0.0,
+    "temperature_c": 49.0
+  }
+}

@@ -4,6 +4,26 @@ This directory contains scripts used to generate manuscript-facing figures.
 Keep final figure scripts here rather than scattering one-off plotting code in
 the top-level `scripts/` directory.
 
+## Topic 5 Minimal Sequence Kernel Closeout
+
+Formal entry point:
+
+```bash
+conda run -n cuda_env python scripts/paper_figures/plot_topic5_minimal_sequence_kernel_closeout_v0_2.py
+```
+
+Default output:
+
+```text
+results/paper-ready-figure/fig_topic5_minimal_sequence_kernel_closeout/figures/
+```
+
+The main six-panel figure separates stable contact recruitment (`where`),
+within-event contact/STOP memory (`how`), and the boundary to real-time
+inter-event state (`when`). The companion audit figure contains timing
+tolerance and feasibility gates; neither figure supports a biological hidden
+manifold or seizure-timing claim.
+
 ## Fig1-A HFO Group Event Demo
 
 Formal entry point:
