@@ -149,6 +149,50 @@ def test_exited_pid_is_unavailable_not_a_zero_live_sample(monkeypatch):
     assert set(audit) == {"11"}
 
 
+def test_owned_process_exit_between_poll_and_proc_parse_is_unavailable(
+    monkeypatch,
+):
+    class Process:
+        pid = 12
+
+        def __init__(self):
+            self.polls = iter((None, 0))
+
+        def poll(self):
+            return next(self.polls)
+
+    monkeypatch.setattr(
+        R, "process_swap_kb",
+        lambda _pid: (_ for _ in ()).throw(
+            RuntimeError("status lacks VmSwap")
+        ),
+    )
+    snapshot = R.worker_process_swap_snapshot([Process()])
+    assert snapshot == {
+        "worker_swap_kb_by_pid": {},
+        "worker_swap_unavailable_pids": ["12"],
+        "worker_swap_total_kb": 0,
+        "worker_swap_max_kb": 0,
+    }
+
+
+def test_owned_malformed_live_process_still_fails_closed(monkeypatch):
+    class Process:
+        pid = 12
+
+        def poll(self):
+            return None
+
+    monkeypatch.setattr(
+        R, "process_swap_kb",
+        lambda _pid: (_ for _ in ()).throw(
+            RuntimeError("status lacks VmSwap")
+        ),
+    )
+    with pytest.raises(RuntimeError, match="status lacks VmSwap"):
+        R.worker_process_swap_snapshot([Process()])
+
+
 def test_process_swap_tolerates_proc_teardown_between_read_and_parse(
     monkeypatch,
 ):

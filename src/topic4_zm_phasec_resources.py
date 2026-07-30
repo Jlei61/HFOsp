@@ -92,6 +92,42 @@ def worker_swap_snapshot(pids: Iterable[int]) -> dict:
     }
 
 
+def worker_process_swap_snapshot(processes: Iterable[object]) -> dict:
+    """Sample owned live workers without mistaking exit teardown for corruption.
+
+    ``Popen.poll`` is the coordinator's authoritative liveness check.  A child
+    can exit after the first poll but before ``/proc/<pid>/status`` is parsed;
+    in that narrow window Linux may retain a status record without memory
+    fields.  Re-poll before treating that record as malformed.  A process that
+    remains live after the second poll still fails closed.
+    """
+    by_pid = {}
+    unavailable = []
+    unique = {int(process.pid): process for process in processes}
+    for pid, process in sorted(unique.items()):
+        if process.poll() is not None:
+            unavailable.append(str(pid))
+            continue
+        try:
+            value = process_swap_kb(pid)
+        except RuntimeError:
+            if process.poll() is not None:
+                unavailable.append(str(pid))
+                continue
+            raise
+        if value is None:
+            unavailable.append(str(pid))
+        else:
+            by_pid[str(pid)] = int(value)
+    values = list(by_pid.values())
+    return {
+        "worker_swap_kb_by_pid": by_pid,
+        "worker_swap_unavailable_pids": unavailable,
+        "worker_swap_total_kb": int(sum(values)),
+        "worker_swap_max_kb": int(max(values, default=0)),
+    }
+
+
 def worker_swap_exceeded(pids: Iterable[int], allowed_bytes: int = 0) -> bool:
     """Whether any Phase-C worker exceeds its locked swap allowance."""
     allowed_kb = int(allowed_bytes) // 1024

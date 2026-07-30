@@ -452,8 +452,8 @@ def swap_growth_exceeded(baseline_kb, limit_mb):
 
 
 def worker_swap_snapshot(running):
-    return PRES.worker_swap_snapshot(
-        row["process"].pid for row in running
+    return PRES.worker_process_swap_snapshot(
+        row["process"] for row in running
     )
 
 
