@@ -1,11 +1,16 @@
 # Topic 5 / Figure 6 v2.0 execution plan
 
+> **状态：SUPERSEDED；禁止执行。**
+> 替代计划：
+> `docs/superpowers/plans/2026-07-26-topic5-symmetric-axis-propagation-state-rnn-v2_2.md`。
+> v2.0 的 SNN benchmark、Gate 0 和 ictal-prefix primary 均已撤回。
+
 > **先读**：
 > 1. `docs/archive/topic5/persistent_path_mode_rnn_closeout_and_v2_pivot_2026-07-26.md`
 > 2. `docs/superpowers/specs/2026-07-26-topic5-symmetric-axis-ei-system-identification-v2_0.md`
 > 3. `docs/paper-draft/figure4_subject_specific_snn.md`
 >
-> 本计划只实现 v2.0。v0.7/v0.9/v1.0 已冻结，不得继续调参。
+> 以下内容只保留审计，不得启动。v0.7/v0.9/v1.0 已冻结，不得继续调参。
 
 ## 0. 执行原则
 

@@ -1,5 +1,9 @@
 # Figure 6：structured path-mode RNN 的正式 34 人阴性边界
 
+> **Historical model-stage record.** 当前 manuscript-facing Supplementary
+> 版本为 `figure6_static_contact_topography_bounded_result.md`。本文件仅保留
+> path-mode 模型谱系与其当时的 sealed-target stop decision，不应单独用于当前摘要、正文或图注。
+
 > **正式状态（v1.0）**：34 位患者 × 3 seeds × 5 conditions，共 510 个 LOSO
 > runs 全部完成。触点参与概率与完整 rank distribution 的联合主门未通过，路径图与
 > 多路径结构的必要性门也未通过。按预注册合同，clinical-onset 发作期目标保持封存。
@@ -173,11 +177,14 @@ leave-one-subject-out runs.
 
 本模型不再重开 hidden size、学习率、seed 或 K 的优化。下一版已经改成不同的科学对象：
 从间期 rank prefix 反推一个患者特异、近似对称的轴向 scaffold，以事件第一 rank set
-表示 source，并用受符号约束的局部 excitation/restraint state 预测下一触点与
-prefix-conditioned future rank。所有跨触点信息必须通过同一个对称图算子，不再设置
+表示 source，并用单一 propagation state 与 scalar STOP 预测下一触点及吸收式
+first-arrival distribution。所有跨触点信息必须通过同一个对称图算子，不再设置
 event-persistent path identity，也不以无条件自由生成分布作为主要阻断门。
 
-新模型必须先在已知真轴和各向异性的 SNN synthetic benchmark 上完成参数恢复，再进入
-人体纯间期 pilot；只有 conditional prediction、轴必要性/稳定性和同一 scaffold
-双向性同时通过，才允许打开 clinical-onset 发作期动态迁移。详细合同见
-`docs/superpowers/specs/2026-07-26-topic5-symmetric-axis-ei-system-identification-v2_0.md`。
+新模型不再重复 SNN 参数恢复。三位 geometry-complete development subjects 用于有限
+objective 选择；22 位 development-excluded geometry-complete 患者承担 physical-axis
+formal，31 人全队列只作 coordinate-free sequence sensitivity，不为缺坐标患者创造
+latent-axis fallback。跨状态 primary 恢复为 frozen interictal rollout 对既有
+clinical-onset `[0,10] s`、`1–150 Hz` early-ictal energy field 的预测，dynamic
+recruitment rank 只作 secondary。详细合同见
+`docs/superpowers/specs/2026-07-26-topic5-symmetric-axis-propagation-state-rnn-v2_2.md`。

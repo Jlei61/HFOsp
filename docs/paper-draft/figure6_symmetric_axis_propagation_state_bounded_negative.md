@@ -1,6 +1,10 @@
 # Computational supplement: limits of direct symmetric-axis system identification
 
-> 当前定位：supplementary bounded-negative result，不进入主文 Figure 6。  
+> **Historical model-stage record.** 当前 manuscript-facing Supplementary
+> 版本为 `figure6_static_contact_topography_bounded_result.md`。本文件只说明
+> v2.2 observation mapping 的有界阴性结果。
+
+> 当前定位：supplementary bounded-negative result，不进入主文 Figure 6。
 > 冻结证据：v2.2.1 closeout，22 位 development-excluded geometry-complete
 > patients，3 seeds。
 
@@ -90,4 +94,3 @@ The four-panel closeout diagnostic may be used in Supplementary Results:
 
 不要把原六块 Figure 6 作为主文图继续使用；其中 Claim 3/4 和 transfer 是按 stop
 rule 锁定，不是阴性 data panels。
-
