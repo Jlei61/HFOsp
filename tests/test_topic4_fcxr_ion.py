@@ -936,3 +936,31 @@ def test_recruitment_radius_is_rms_distance_from_the_kick_centre():
 def test_recruitment_radius_is_nan_when_nobody_participated():
     r = ION.recruitment_radius_mm(np.zeros((4, 2)), np.zeros(4, bool), center=(0.0, 0.0))
     assert np.isnan(r)
+
+
+# --- B2.1 close-out: the analysis windows are NOT clean single-kick responses -------------------
+
+def test_detect_k_rises_finds_each_monotone_climb_above_the_threshold():
+    t = np.arange(0.0, 400.0, 1.0)
+    y = np.zeros_like(t)
+    y[50:100] = np.linspace(0, 0.6, 50)       # rise 1
+    y[100:150] = np.linspace(0.6, 0.1, 50)    # decay
+    y[150:200] = np.linspace(0.1, 0.7, 50)    # rise 2
+    y[200:] = 0.7
+    r = ION.detect_k_rises(t, y, min_climb=0.10)
+    assert len(r) == 2
+    assert r[0]["t_start_ms"] == pytest.approx(50.0) and r[0]["climb_mM"] == pytest.approx(0.6)
+    assert r[1]["t_start_ms"] == pytest.approx(150.0)
+
+
+def test_detect_k_rises_ignores_ripples_below_the_threshold():
+    t = np.arange(0.0, 200.0, 1.0)
+    y = 0.02 * np.sin(t / 3.0)
+    assert ION.detect_k_rises(t, y, min_climb=0.10) == []
+
+
+def test_detect_k_rises_reports_the_peak_time_not_just_the_onset():
+    t = np.arange(0.0, 100.0, 1.0)
+    y = np.concatenate([np.linspace(0, 0.5, 30), np.linspace(0.5, 0.0, 70)])
+    r = ION.detect_k_rises(t, y, min_climb=0.10)
+    assert len(r) == 1 and r[0]["t_peak_ms"] == pytest.approx(29.0)

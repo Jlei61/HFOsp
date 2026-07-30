@@ -2591,12 +2591,16 @@ def write_status():
          "synthetic stationary-but-eventful trace now reads slope < 1e-3 while its first-difference "
          "q99 is 100x larger. **With the corrected estimator the ion gate STILL fails**: per-cell "
          "q99 7.5e-2 vs bound 2.07e-2 (Na), 7.4e-2 vs 1.09e-3 (K) |",
-         "| 2.2 self-consistent ions-on initialization | `NOT_CONVERGED` | oscillates, not slow: "
-         "r_E 4.44 -> 2.64 -> 0.21 -> 4.53 Hz, relative change 2.47 -> 11.01. At frozen bias the "
-         "map has no attracting fixed point, so pre-equilibrium and bias are NOT separable |",
-         "| 2.3 matched open/closed control | `COMPARABLE` | arms bit-identical until the freeze; "
-         "kick1 agrees to 1.7%/2.7%, kick2 diverges 26% in recruitment. Closed 2nd/1st = 0.991 vs "
-         "open 1.273, while the closed arm recruits 42% more cells on kick 2 |",
+         "| 2.2 self-consistent ions-on initialization | `NOT_CONVERGED` | the PRE-REGISTERED "
+         "scheme (alpha=0.5, <=3 updates, frozen bias) did not converge: contract-exact damped "
+         "step 1.233 / 0.985 / 3.020 / 5.505 vs gate 0.05, r_E swinging 0.21-4.53 Hz. The max is "
+         "NOT monotone but q95 and q99 are, and the smallest q95 (0.394) is still 8x the gate, so "
+         "this is not a sparse-tail artefact. **Not** evidence that no fixed point exists |",
+         "| 2.3 matched open/closed control | `COMPARABLE` | arms bit-identical until the freeze. "
+         "Window 1 matches on every measure (peak 3.6%, spikes 1.7%, cells 2.7%, voxels 0.9%, "
+         "radius 0.7%, same argmax at 2682 ms). Window 2: closed peak 19% LOWER, cells +26%, RMS "
+         "radius +24%, occupied voxels +22%, burst onset 48 ms later. Caveat: the 200 ms windows "
+         "contain spontaneous bursts, so peak1/peak2 are WINDOW MAXIMA, not evoked amplitudes |",
          "| 3 same-seed ions-off control | `DONE` | ions off 3.716 Hz vs ions on at zero bias "
          "6.960 Hz -> **+87.3%** (the earlier +64% spanned noise202/noise401). noise401's own "
          "ions-off baseline is 10.6% BELOW the locked r0, so the biases absorb a seed difference "

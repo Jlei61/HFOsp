@@ -386,93 +386,117 @@ def fig_b2_1():
         print("[plot] b2_1_calibration_repair.png SKIPPED (inputs missing)")
         return
     import src.topic4_fcxr_ion as ION                                        # noqa: E402
+    import run_topic4_fcxr_ion as RUN                                        # noqa: E402
     h = sc["history"]
     it = [x["iteration"] for x in h]
-    fig, ax = plt.subplots(1, 4, figsize=(20.5, 4.6))
+    fig, axes = plt.subplots(2, 2, figsize=(13.6, 9.6))
+    ax = axes.ravel()
 
-    # 1 -- convergence
+    # 1 -- does the iteration converge?
     a = ax[0]
     for key, lab, c, ls in (("max_rel", "max  (spec 2.2 gate statistic)", BAD, "-"),
                             ("q99_rel", "q99", MID, "--"), ("q95_rel", "q95", "#8a8a8a", ":")):
         a.plot(it, [x["change"][key] for x in h], "o" + ls, color=c, lw=1.8, ms=5, label=lab)
-    a.axhline(ION.B2_1_RATE_REL_TOL, color=OK, lw=1.4, ls="-.",
+    a.axhline(ION.B2_1_RATE_REL_TOL, color=OK, lw=1.5, ls="-.",
               label=f"convergence gate {ION.B2_1_RATE_REL_TOL}")
     a.set_yscale("log"); a.set_xticks(it)
-    a.set_xlabel("update"); a.set_ylabel("damped step  |r$^{(k+1)}$−r$^{(k)}$| / mean(r)")
-    a.legend(fontsize=6.6, loc="lower left")
+    a.set_ylim(bottom=ION.B2_1_RATE_REL_TOL / 3.6)
+    a.set_xlabel("update  k"); a.set_ylabel(r"damped step  $|r^{(k+1)}-r^{(k)}|$ / mean(r)")
+    a.legend(fontsize=7.2, loc="lower center", ncol=2, framealpha=0.93)
     b = a.twinx()
-    b.plot(it, [x["mean_rate_E_hz"] for x in h], "s-", color="#c98a20", lw=1.6, ms=5)
-    b.set_ylabel("population r$_E$  (Hz, orange)", color="#c98a20")
+    b.plot(it, [x["mean_rate_E_hz"] for x in h], "s-", color="#c98a20", lw=1.7, ms=6)
+    b.set_ylabel(r"population $r_E$  (Hz)  — orange squares", color="#c98a20")
     b.tick_params(axis="y", colors="#c98a20")
+    lo = min(x["mean_rate_E_hz"] for x in h); hi = max(x["mean_rate_E_hz"] for x in h)
+    b.set_ylim(-0.30 * hi, 1.22 * hi)
     a.set_title(f"1  self-consistent iteration — {sc['status']}\n"
-                f"r$_E$ swings {min(x['mean_rate_E_hz'] for x in h):.2f}–"
-                f"{max(x['mean_rate_E_hz'] for x in h):.2f} Hz; the step never approaches the gate",
-                fontsize=9)
+                f"even q95 stays far above the gate, so this is not a sparse-tail artefact;\n"
+                fr"$r_E$ swings {lo:.2f}–{hi:.2f} Hz at frozen bias", fontsize=9)
 
-    # 2 -- ion stationarity
+    # 2 -- is the ion field stationary?
     a = ax[1]
-    w, off = 0.36, 0.19
+    floor = ION.B2_1_SLOPE_BOUND_K / 30.0
     for i, (spec, bound, c) in enumerate((("slope_Na", ION.B2_1_SLOPE_BOUND_NA, "#3b6ea5"),
                                           ("slope_K", ION.B2_1_SLOPE_BOUND_K, "#a5533b"))):
-        x = np.arange(len(it)) + (i - 0.5) * off * 2
-        a.bar(x, [e[spec]["q99_abs"] for e in h], w, color=c, alpha=0.85,
-              label=f"{spec.split('_')[1]}  q99")
-        a.plot(x, [e[spec]["q95_abs"] for e in h], "_", color="0.25", ms=13, mew=1.6)
-        a.axhline(bound, color=c, ls="--", lw=1.3)
-        a.text(len(it) - 0.42, bound * 1.12, f"{spec.split('_')[1]} bound", color=c, fontsize=6.6)
-    a.set_yscale("log"); a.set_xticks(np.arange(len(it))); a.set_xticklabels(it)
-    a.set_xlabel("update"); a.set_ylabel("|signed secular slope|  (mM/s)")
-    a.legend(fontsize=6.8, loc="upper left")
+        x = np.arange(len(it)) + (i - 0.5) * 0.34
+        nm = spec.split("_")[1]
+        a.vlines(x, [e[spec]["q95_abs"] for e in h], [e[spec]["max_abs"] for e in h],
+                 color=c, lw=6, alpha=0.30)
+        a.plot(x, [e[spec]["q99_abs"] for e in h], "o", color=c, ms=6.5)
+        a.plot(x, [max(abs(e[spec]["mean_signed"]), floor) for e in h], "x", color=c, ms=8, mew=2)
+        a.axhline(bound, color=c, ls="--", lw=1.4)
+        a.text(len(it) - 0.62, bound * 1.18, f"{nm} stationarity bound", color=c, fontsize=7)
+    a.set_yscale("log")
+    a.set_ylim(floor * 0.6, 4.5 * max(max(e[s2]["max_abs"] for e in h)
+                                      for s2 in ("slope_Na", "slope_K")))
+    a.set_xticks(np.arange(len(it))); a.set_xticklabels(it)
+    a.set_xlabel("update  k"); a.set_ylabel("|signed secular slope|  (mM/s)")
+    a.text(0.5, 0.985, "bar = q95 to max        \u25cf per-cell q99        "
+                       "\u2715 |population mean|", transform=a.transAxes, ha="center", va="top",
+           fontsize=7.6, bbox=dict(fc="white", ec="0.75", alpha=0.93))
     a.set_title("2  ion stationarity — corrected estimator, still FAILS\n"
-                "bars q99, ticks q95; every update is over both bounds", fontsize=9)
+                "the per-cell distribution sits ABOVE the bound while the population mean sits\n"
+                "BELOW it: cells drift in opposite directions and cancel", fontsize=9)
 
-    # 3 -- temporal effect
+    # 3 -- does the feedback change the 2nd window's burst in time?
     a = ax[2]
+    t_k, sp_ms = RUN.CL_PROBE_T_KICK_MS, RUN.CL_PROBE_SPACING_MS
+    bs = mc.get("burst_structure", {})
     for tag, c in (("closed", BAD), ("open", MID)):
         arm = mc["arms"][tag]
-        a.plot(np.asarray(arm["k_trace_t_ms"]) / 1000.0, arm["k_trace_hot"], color=c, lw=1.5,
-               label=f"{tag}  peak2/peak1 = {arm['ratio_2nd_over_1st']:.3f}")
-    import run_topic4_fcxr_ion as RUN                                     # noqa: E402
+        a.plot(np.asarray(arm["k_trace_t_ms"]), arm["k_trace_hot"], color=c, lw=1.7,
+               label=f"{tag}   window-2 max {arm['peak2_mM']:.4f} mM")
+        for w in bs.get(tag, {}).get("windows", []):
+            for r in w["rises"]:
+                a.plot(r["t_start_ms"], r["peak_mM"] - r["climb_mM"], "^", color=c, ms=6,
+                       clip_on=False)
+    a.set_xlim(t_k - 130.0, t_k + 2.2 * sp_ms)
+    a.axhline(0.0, color="0.8", lw=0.9)
     for j in (0, 1):
-        a.axvline((RUN.CL_PROBE_T_KICK_MS + j * RUN.CL_PROBE_SPACING_MS) / 1000.0,
-                  color="0.55", lw=1.0, ls=":")
-    a.axvline((RUN.CL_PROBE_T_KICK_MS - 50.0) / 1000.0, color="#c98a20", lw=1.2, ls="--")
-    a.text((RUN.CL_PROBE_T_KICK_MS - 50.0) / 1000.0, a.get_ylim()[1], " freeze", color="#c98a20",
-           fontsize=6.6, va="top")
-    a.set_xlabel("time (s)"); a.set_ylabel("excess K$_o$ at the hot voxel (mM)")
-    a.legend(fontsize=7.4, loc="upper left")
-    a.set_title(f"3  same hot voxel ({mc['arms']['closed']['hot_voxel']}) in BOTH arms\n"
-                "live feedback does NOT stack a higher 2nd peak; the frozen control does",
-                fontsize=9)
+        a.axvline(t_k + j * sp_ms, color="0.55", lw=1.1, ls=":")
+        a.text(t_k + j * sp_ms, a.get_ylim()[1], f" kick{j + 1}", color="0.4", fontsize=7.4,
+               va="top")
+    a.axvline(t_k + 2 * sp_ms, color="0.75", lw=0.9, ls=":")
+    a.axvline(t_k - 50.0, color="#c98a20", lw=1.3, ls="--")
+    a.text(t_k - 54.0, a.get_ylim()[1], "freeze\n(open arm) ", color="#c98a20", fontsize=7.4,
+           va="top", ha="right")
+    a.set_xlabel("time (ms)"); a.set_ylabel("K$_o$ at the hot voxel, minus its pre-kick mean (mM)")
+    a.legend(fontsize=7.8, loc="lower right", framealpha=0.93)
+    a.set_title(f"3  same hot voxel ({mc['arms']['closed']['hot_voxel']}) in both arms.  "
+                "\u25b2 = burst onset\n"
+                "the 200 ms windows are NOT clean kick responses: window 1 holds two bursts,\n"
+                "window 2 one that starts 117 ms (open) / 165 ms (closed) after kick 2",
+                fontsize=8.6)
 
-    # 4 -- spatial effect
+    # 4 -- does it change window 2 in space?
     a = ax[3]
-    ng = int(np.sqrt(len(mc["arms"]["closed"]["dk_map_per_kick"][1])))
+    ng = int(round(np.sqrt(len(mc["arms"]["closed"]["dk_map_per_kick"][1]))))
     d = (np.asarray(mc["arms"]["closed"]["dk_map_per_kick"][1]).reshape(ng, ng)
          - np.asarray(mc["arms"]["open"]["dk_map_per_kick"][1]).reshape(ng, ng))
-    v = float(np.abs(d).max())
+    v = float(np.abs(d).max()) or 1.0
     im = a.imshow(d, cmap="RdBu_r", vmin=-v, vmax=v, origin="lower")
-    fig.colorbar(im, ax=a, fraction=0.046).set_label("excess K$_o$, kick 2:  closed − open (mM)",
-                                                     fontsize=7.5)
+    fig.colorbar(im, ax=a, fraction=0.046, pad=0.03).set_label(
+        "window-2 peak excess K$_o$:  closed − open  (mM)", fontsize=8)
     sp = mc["spatial_extent"]
     a.set_xticks([]); a.set_yticks([])
-    a.text(0.02, 0.98, "\n".join(
-        [f"{t:>6}  kick2: {sp[t][1]['active_voxels_25pct']:>4} voxels >25% peak,  "
-         f"radius {sp[t][1]['recruit_radius_mm']:.2f} mm,  {sp[t][1]['participant_voxels']} "
-         f"occupied" for t in ("closed", "open")]
-        + [f"       kick1: closed {sp['closed'][0]['active_voxels_25pct']} vox / "
-           f"{sp['closed'][0]['recruit_radius_mm']:.2f} mm,  open "
-           f"{sp['open'][0]['active_voxels_25pct']} vox / "
-           f"{sp['open'][0]['recruit_radius_mm']:.2f} mm"]),
-        transform=a.transAxes, va="top", fontsize=6.6, family="monospace",
-        bbox=dict(fc="white", ec="0.7", alpha=0.93))
-    a.set_title("4  spatial extent of the 2nd event  (descriptive, 1 seed, no null)", fontsize=9)
+    rows = [f"{'':10}{'vox>25%':>9}{'vox>50%':>9}{'radius mm':>11}{'occupied':>10}"]
+    for t in ("closed", "open"):
+        for j, nm in ((0, "win1"), (1, "win2")):
+            e = sp[t][j]
+            rows.append(f"{t[:6] + ' ' + nm:<12}{e['active_voxels_25pct']:>7}"
+                        f"{e['active_voxels_50pct']:>9}{e['recruit_radius_mm']:>11.2f}"
+                        f"{e['participant_voxels']:>10}")
+    a.text(0.0, -0.05, "\n".join(rows), transform=a.transAxes, va="top", fontsize=7.4,
+           family="monospace")
+    a.set_title("4  spatial extent in window 2 — broader and flatter with live feedback\n"
+                "radius +24%, occupied voxels +22%, but the same count at 25% of each\n"
+                "event's OWN peak  (descriptive: one seed, one kick pair, no null)", fontsize=8.6)
 
     fig.suptitle("FCXR-ION B2.1 calibration-instrument repair — "
-                 f"self-consistency {sc['status']}, matched control {mc['status']}. "
-                 "Gate B NOT adjudicated.", fontsize=11.5)
-    fig.tight_layout(rect=(0, 0, 1, 0.9))
-    fig.savefig(os.path.join(FIG, "b2_1_calibration_repair.png"), dpi=185)
+                 f"self-consistency {sc['status']}, matched control {mc['status']}.  "
+                 "Gate B NOT adjudicated.", fontsize=12)
+    fig.tight_layout(rect=(0, 0.05, 1, 0.955))
+    fig.savefig(os.path.join(FIG, "b2_1_calibration_repair.png"), dpi=175)
     plt.close(fig)
     print("[plot] b2_1_calibration_repair.png")
 

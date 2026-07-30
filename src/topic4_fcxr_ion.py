@@ -1163,6 +1163,29 @@ def recruitment_radius_mm(pos, participating, *, center):
     return float(np.sqrt(np.mean(np.sum((sel - np.asarray(center, float)) ** 2, axis=1))))
 
 
+def detect_k_rises(t_ms, y, *, min_climb):
+    """Every monotone climb in a potassium trace whose total rise exceeds `min_climb`.
+
+    Needed because the two 200 ms analysis windows in spec 2.3 turned out NOT to contain one
+    kick response each: the network also fires its own bursts, so a window maximum is not an
+    evoked amplitude.  Reporting the burst structure is what keeps that distinction visible.
+    """
+    t, v = np.asarray(t_ms, float), np.asarray(y, float)
+    out, start = [], None
+    for i, d in enumerate(np.diff(v)):
+        if d > 0 and start is None:
+            start = i
+        elif d <= 0 and start is not None:
+            if v[i] - v[start] > min_climb:
+                out.append(dict(t_start_ms=float(t[start]), t_peak_ms=float(t[i]),
+                                climb_mM=float(v[i] - v[start]), peak_mM=float(v[i])))
+            start = None
+    if start is not None and v[-1] - v[start] > min_climb:
+        out.append(dict(t_start_ms=float(t[start]), t_peak_ms=float(t[-1]),
+                        climb_mM=float(v[-1] - v[start]), peak_mM=float(v[-1])))
+    return out
+
+
 def adjudicate_b2_1_selfconsistency(m):
     """Both clauses of spec 2.2, and the slope must come from an INDEPENDENT window."""
     checks = dict(
