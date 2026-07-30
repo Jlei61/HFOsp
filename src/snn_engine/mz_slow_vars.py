@@ -88,6 +88,8 @@ class MZSlowVarsConfig:
     use_z: bool = False            # OFF by default -> byte parity with slow=None
     use_m: bool = False            # OFF by default -> byte parity with slow=None
     tau_z: float = 5000.0          # ms   inhibitory-efficacy recovery/depletion time constant (CALIBRATION)
+    tau_z_down: "float | None" = None  # FCXR-HYB1: asymmetric Z depletion tau (z_inf<z); None+None -> symmetric tau_z
+    tau_z_up: "float | None" = None    # FCXR-HYB1: asymmetric Z recovery tau (z_inf>=z)
     I_th_EI: float = 0.0           # E-cell GABA current depletion threshold (CALIBRATION)
     tau_adp: float = 2000.0        # ms   adaptation decay time constant (CALIBRATION)
     eta_m: float = 0.0             # adaptation current per unit m (CALIBRATION)
@@ -535,7 +537,16 @@ class MZSlowVars:
             # z_inf = H(I_th_EI - I_I): 1 iff I_I < I_th_EI (strict); I_I >= I_th_EI -> 0 (deplete)
             z_inf_E = (self._z_sensor_last_E < c.I_th_EI).astype(float)
             zE = self.z[self.is_E]
-            zE = zE + (dt / c.tau_z) * (z_inf_E - zE)
+            if c.tau_z_down is None and c.tau_z_up is None:
+                zE = zE + (dt / c.tau_z) * (z_inf_E - zE)                      # symmetric (byte-parity)
+            else:
+                # FCXR-HYB1 asymmetric, mirroring the accepted asymmetric relay above: deplete
+                # (z_inf<z, i.e. the GABA sensor is still above threshold = HIGH LOAD) on
+                # tau_z_down; recover (z_inf>=z, the load has fallen back) on tau_z_up.  Still a
+                # first-order relaxation -- there is NO instantaneous reset.  Equal taus reduce
+                # exactly to the symmetric line above.
+                tau_sel = np.where(z_inf_E < zE, c.tau_z_down, c.tau_z_up)
+                zE = zE + (dt / tau_sel) * (z_inf_E - zE)
             self.z[self.is_E] = np.clip(zE, 0.0, 1.0)          # z in [0,1]
         if c.use_m and (c.m_enable_ms is None or self._step_i * dt >= c.m_enable_ms):
             # FCXR-HEO2: before m_enable_ms both decay AND accumulation are skipped -> m stays 0 (its init
@@ -778,6 +789,12 @@ class MZSlowVars:
             raise ValueError("max_total_conductance must be positive")
         if c.use_z and c.tau_z <= 0.0:
             raise ValueError("use_z requires tau_z>0")
+        # FCXR-HYB1 asymmetric Z kinetics: both-or-neither + positive (same rule as the relay)
+        if (c.tau_z_down is not None) or (c.tau_z_up is not None):
+            if c.tau_z_down is None or c.tau_z_up is None:
+                raise ValueError("asymmetric Z kinetics require BOTH tau_z_down and tau_z_up (or neither)")
+            if c.tau_z_down <= 0.0 or c.tau_z_up <= 0.0:
+                raise ValueError("tau_z_down and tau_z_up must be > 0 (asymmetric Z kinetics)")
         if c.z_frozen_E is not None:
             zf = np.asarray(c.z_frozen_E, float)
             if zf.ndim != 1 or not np.all(np.isfinite(zf)) or zf.min() < 0.0 or zf.max() > 1.0:
