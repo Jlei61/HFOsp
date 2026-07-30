@@ -402,7 +402,8 @@ def _reduce(res, mz, dk, S, band=None, frozen_bar=None):
                                                                  H.RUNAWAY_RATE_HZ))
     if dk is not None:
         tr = np.asarray(dk.trace, float) if dk.trace else np.zeros((1, 4))
-        out["dk"] = dict(duty=dk.duty_cycle(), running_max=dk.dK_running_max,
+        out["dk"] = dict(duty=dk.duty_cycle(), frac_over=dk.frac_over_amplitude(),
+                         running_max=dk.dK_running_max,
                          mean_series=tr[:, 1].tolist(), max_series=tr[:, 2].tolist(),
                          extent_series=tr[:, 3].tolist(),
                          q99=float(np.quantile(tr[:, 2], 0.99)) if tr.shape[0] > 4 else 0.0)
@@ -454,7 +455,8 @@ def cmd_baseline(args):
                     print(f"[baseline] seed{seed} dK={'on' if on else 'off'}: "
                           f"label={rows[-1]['label']} n_ret={rows[-1]['n_returning']} "
                           f"iei_cv={rows[-1]['iei_cv']:.3f} duty={rows[-1]['dk'].get('duty',0):.4f} "
-                          f"dKq99={rows[-1]['dk'].get('q99',0):.4g} "
+                          f"fracOver={rows[-1]['dk'].get('frac_over',0):.5f} "
+                          f"maxq99={rows[-1]['dk'].get('q99',0):.4g} "
                           f"({rows[-1]['wall_s']}s)", flush=True)
             verdicts = {}
             for seed in seeds:
@@ -462,7 +464,9 @@ def cmd_baseline(args):
                 on = next(r for r in rows if r["seed"] == seed and r["dk_on"])
                 lo, hi = off["band"]["event_rate_lo"], off["band"]["event_rate_hi"]
                 verdicts[f"seed{seed}"] = H.adjudicate_baseline_preservation(dict(
-                    dk_duty=on["dk"].get("duty", 0.0), dk_q99_mM=on["dk"].get("q99", 0.0),
+                    dk_duty=on["dk"].get("duty", 0.0),
+                    dk_frac_over=on["dk"].get("frac_over", 0.0),
+                    dk_spatial_max_q99_mM=on["dk"].get("q99", 0.0),
                     event_rate_in_band=bool(lo <= on["event_rate_hz"] <= max(hi, lo + 1e-9)),
                     iei_cv_in_band=bool(abs(on["iei_cv"] - off["iei_cv"]) <= 0.5 * max(off["iei_cv"], 1e-9)),
                     iei_cv=on["iei_cv"],

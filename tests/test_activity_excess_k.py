@@ -226,3 +226,29 @@ def test_background_envelope_is_the_registered_quantile_per_voxel():
     load = np.stack([np.arange(100.0), np.arange(100.0) * 2], axis=1)
     b = AK.background_envelope(load, 0.99)
     assert b[1] == pytest.approx(2 * b[0], rel=1e-9)
+
+
+def test_amplitude_tail_probability_is_over_occupied_voxels_and_streams_exactly():
+    """plan 2.5's q99_{t,v}(dK) <= A is exactly P_{t,v}(dK > A) <= 0.01; empty voxels are a
+    sampling gap and must not dilute the denominator."""
+    N = 8
+    voxel = np.zeros(N, np.int32)
+    lay = AK.ActivityExcessK(N, voxel, _cfg(dk_bounds=(-1e-9, 1e6), amplitude_probe_mM=1e-6))
+    assert lay.frac_over_amplitude() == 0.0
+    for _ in range(3):
+        lay.accumulate(np.ones(N, bool)); lay.update()
+    assert lay.frac_over_amplitude() == pytest.approx(1.0)     # 1 occupied voxel, always over
+
+
+def test_amplitude_tail_survives_snapshot_restart():
+    a, _ = _layer(); b, _ = _layer()
+    rng = np.random.default_rng(9)
+    spikes = [rng.random(a.N) < 0.05 for _ in range(30)]
+    for s in spikes:
+        a.accumulate(s); a.update()
+    for s in spikes[:12]:
+        b.accumulate(s); b.update()
+    c, _ = _layer(); c.load_state_dict(b.state_dict())
+    for s in spikes[12:]:
+        c.accumulate(s); c.update()
+    assert c.frac_over_amplitude() == pytest.approx(a.frac_over_amplitude())

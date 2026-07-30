@@ -56,6 +56,7 @@ class ActivityExcessKConfig:
     g_dK: float = 1.0                     # B2.1 anchor
     enabled: bool = True
     dk_bounds: tuple = (-1e-9, 12.0)      # mM; the low edge is a numerical tripwire, not a floor
+    amplitude_probe_mM: float = 0.05      # plan 2.5: test P_{t,v}(dK > this) <= 1 - Q_BG exactly
     trace_stride: int = 2                 # ion blocks between recorded trace points
     snapshot_blocks: tuple = ()           # ion-block indices at which to keep a full dK map
     record_load: bool = False             # plan 2.1 sensor probe: keep the per-voxel load series
@@ -139,6 +140,12 @@ class ActivityExcessK:
         self.duty_num = 0.0                          # running mean of 1[load > b_v] over (t, voxel)
         self.duty_den = 0.0
         self.dK_running_max = 0.0
+        # plan 2.5 asks for q99 over (t, voxel) JOINTLY.  Per-block quantiles cannot be pooled
+        # exactly, but "q99_{t,v}(dK) <= A" IS exactly "P_{t,v}(dK > A) <= 0.01", and that is
+        # streamable.  Counting it directly avoids substituting the much harsher time-q99 of the
+        # per-block spatial MAX.
+        self.over_num = 0.0
+        self.over_den = 0.0
 
     # ---------------------------------------------------------------- engine-facing
     def membrane_current(self):
@@ -178,6 +185,9 @@ class ActivityExcessK:
                 f"dK left [{lo}, {hi}] at block {self.n_updates}: "
                 f"min={float(np.nanmin(flat)):.4g} max={float(np.nanmax(flat)):.4g}")
         self.dK_running_max = max(self.dK_running_max, float(flat.max()))
+        occ = self.occupied
+        self.over_num += float(np.count_nonzero(flat[occ] > cfg.amplitude_probe_mM))
+        self.over_den += float(np.count_nonzero(occ))
 
         self._cur = membrane_current_from_dK(flat[self.cell_voxel], cfg.g_dK) if cfg.enabled \
             else np.zeros(self.N, float)
@@ -193,10 +203,16 @@ class ActivityExcessK:
     def duty_cycle(self):
         return (self.duty_num / self.duty_den) if self.duty_den > 0 else 0.0
 
+    def frac_over_amplitude(self):
+        """P_{t,v}(dK > amplitude_probe_mM) over OCCUPIED voxels -- the plan 2.5 amplitude clause
+        expressed as the tail probability it is exactly equivalent to."""
+        return (self.over_num / self.over_den) if self.over_den > 0 else 0.0
+
     def state_dict(self):
         return dict(dK_grid=self.dK_grid.copy(), n_updates=self.n_updates,
                     counts=self._counts.copy(), acc_ms=self._acc_ms,
                     duty_num=self.duty_num, duty_den=self.duty_den,
+                    over_num=self.over_num, over_den=self.over_den,
                     dK_running_max=self.dK_running_max)
 
     def load_state_dict(self, s):
@@ -206,6 +222,8 @@ class ActivityExcessK:
         self._acc_ms = float(s["acc_ms"])
         self.duty_num = float(s["duty_num"])
         self.duty_den = float(s["duty_den"])
+        self.over_num = float(s.get("over_num", 0.0))
+        self.over_den = float(s.get("over_den", 0.0))
         self.dK_running_max = float(s["dK_running_max"])
         self._cur = membrane_current_from_dK(self.dK_grid.ravel()[self.cell_voxel],
                                              self.cfg.g_dK) if self.cfg.enabled \

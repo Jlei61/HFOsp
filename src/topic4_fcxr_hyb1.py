@@ -151,8 +151,13 @@ def adjudicate_baseline_preservation(m):
     c = dict(
         dk_duty=dict(ok=bool(m["dk_duty"] <= BASE_DUTY_MAX), value=m["dk_duty"],
                      threshold=BASE_DUTY_MAX),
-        dk_q99_mM=dict(ok=bool(m["dk_q99_mM"] <= BASE_DK_Q99_MAX_MM), value=m["dk_q99_mM"],
-                       threshold=BASE_DK_Q99_MAX_MM),
+        dk_amplitude=dict(
+            # plan 2.5 writes q99_{t,v}(dK) <= 0.05 mM.  That is EXACTLY P_{t,v}(dK > 0.05) <= 0.01,
+            # which is streamable; the time-q99 of the per-block spatial MAX is a different and
+            # much harsher statistic and must not be substituted for it.
+            ok=bool(m["dk_frac_over"] <= 1.0 - Q_BG), value=m["dk_frac_over"],
+            threshold=1.0 - Q_BG, amplitude_mM=BASE_DK_Q99_MAX_MM,
+            spatial_max_q99_mM=m.get("dk_spatial_max_q99_mM")),
         event_rate_in_band=dict(ok=bool(m["event_rate_in_band"])),
         iei_cv_in_band=dict(ok=bool(m["iei_cv_in_band"] and m["iei_cv"] >= IEI_CV_MIN),
                             value=m["iei_cv"], floor=IEI_CV_MIN),

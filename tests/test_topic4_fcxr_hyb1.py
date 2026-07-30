@@ -147,7 +147,7 @@ def test_z_axis_survival_must_be_monotone_in_the_threshold():
 
 # --------------------------------------------------------------- plan 2.5 baseline preservation
 def _base_ok(**over):
-    m = dict(dk_duty=0.005, dk_q99_mM=0.001, event_rate_in_band=True, iei_cv_in_band=True,
+    m = dict(dk_duty=0.005, dk_frac_over=0.001, event_rate_in_band=True, iei_cv_in_band=True,
              iei_cv=0.9, duration_in_band=True, participation_in_band=True,
              clip_frac_max=0.0, numerical_unsafe=False)
     m.update(over)
@@ -164,8 +164,18 @@ def test_baseline_disturbed_when_the_excess_field_is_active_too_often():
 
 
 def test_baseline_disturbed_when_interictal_potassium_rises():
-    v = H.adjudicate_baseline_preservation(_base_ok(dk_q99_mM=0.4))
+    v = H.adjudicate_baseline_preservation(_base_ok(dk_frac_over=0.25))
     assert v["status"] == "STOP_BASELINE_DISTURBED"
+
+
+def test_the_amplitude_clause_is_the_JOINT_tail_probability_not_the_spatial_max():
+    """q99_{t,v}(dK) <= A is exactly P_{t,v}(dK > A) <= 0.01.  The time-q99 of the per-block
+    spatial max is a different, far harsher statistic; recording the distinction because the first
+    implementation used it and would have failed a baseline that the contract accepts."""
+    v = H.adjudicate_baseline_preservation(_base_ok(dk_frac_over=0.004,
+                                                    dk_spatial_max_q99_mM=0.47))
+    assert v["status"] == "BASELINE_PRESERVED"
+    assert v["checks"]["dk_amplitude"]["spatial_max_q99_mM"] == 0.47
 
 
 def test_baseline_disturbed_when_the_interictal_train_becomes_regular():
