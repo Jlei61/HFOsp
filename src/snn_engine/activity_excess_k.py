@@ -58,6 +58,7 @@ class ActivityExcessKConfig:
     dk_bounds: tuple = (-1e-9, 12.0)      # mM; the low edge is a numerical tripwire, not a floor
     trace_stride: int = 2                 # ion blocks between recorded trace points
     snapshot_blocks: tuple = ()           # ion-block indices at which to keep a full dK map
+    record_load: bool = False             # plan 2.1 sensor probe: keep the per-voxel load series
 
 
 def deadband_positive(u, eps):
@@ -70,7 +71,11 @@ def deadband_positive(u, eps):
     u = np.asarray(u, float)
     if not (eps > 0):
         raise ValueError("eps must be > 0")
-    return np.where(u > 0.0, u * u / (u + eps), 0.0)
+    out = np.zeros_like(u)
+    pos = u > 0.0
+    up = u[pos]
+    out[pos] = up * up / (up + eps)      # evaluated only where positive: b_v may be +inf (probe)
+    return out
 
 
 def excess_source(load_hz, b_v, eps, q_K):
@@ -129,6 +134,7 @@ class ActivityExcessK:
         self.n_updates = 0
         self.trace = []
         self.snapshots = {}
+        self.load_trace = [] if cfg.record_load else None
         self._cur = np.zeros(self.N, float)          # membrane current, refreshed per ion block
         self.duty_num = 0.0                          # running mean of 1[load > b_v] over (t, voxel)
         self.duty_den = 0.0
@@ -157,6 +163,8 @@ class ActivityExcessK:
         np.divide(self._counts, self.n_per_voxel * blk_s, out=load, where=self.occupied)
         self._counts[:] = 0.0
 
+        if self.load_trace is not None:
+            self.load_trace.append(load.astype(np.float32))
         act = load > np.asarray(cfg.b_v)
         self.duty_num += float(np.count_nonzero(act & self.occupied))
         self.duty_den += float(np.count_nonzero(self.occupied))

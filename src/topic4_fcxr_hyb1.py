@@ -26,15 +26,32 @@ BASE_DK_Q99_MAX_MM = 0.05
 # ------------------------------------------------------------------ plan 3: the Z hazard axis
 TAU_Z_DOWN_MS = 5000.0
 TAU_Z_UP_MS = 20000.0
-Z_ANCHORS = {                    # from .../lifecycle_closure/z_only_summary_*.json (plan 3.2)
-    "q75_seed1": dict(I_th_EI=95.19851312666987, tau_z_ms=5000.0, D_Z_end=0.16543935229865486,
-                      T_s=24.0, h_Z=0.16543935229865486 / 24.0),
-    "q75_seed3": dict(I_th_EI=95.19851312666987, tau_z_ms=5000.0, D_Z_end=0.18578519880636948,
-                      T_s=24.0, h_Z=0.18578519880636948 / 24.0),
-    "q50_seed1": dict(I_th_EI=1.6652801609959704, tau_z_ms=10000.0, D_Z_end=0.8052854563827022,
-                      T_s=24.0, h_Z=0.8052854563827022 / 24.0),
+# --- anchors, CORRECTED 2026-07-31 -------------------------------------------------------------
+# The first pre-registered attempt registered h_Z_obs as D_Z_end / T.  That is the 24 s AVERAGE of
+# a curve that saturates: measured on the existing q75 seed-1 trace the slope is ~2.0e-2 /s over
+# [0,4) s, 8.2e-3 by [6,8) s and ~0 by [8,10) s.  The axis quantity a_p/tau_z is the slope at t=0,
+# so the two are different observables and the identifiability test compared them.  It failed, and
+# the failed verdict is preserved at superseded/z_axis_calibration_avg_slope_anchors.json.
+#
+# The anchor OBSERVABLE is corrected to what the plan actually names -- the D_Z slope -- measured
+# on the same stored traces over [0, 5] s.  Nothing else moves: the +-50% tolerance, the geometric
+# spacing and the strictly-between rule are unchanged.  The correction is falsifiable and it is
+# checked: with the right statistic the seed-1 probe re-predicts BOTH seed-1 anchors to 14% / 10%.
+#
+# The seed-3 anchor is NOT predictable from a seed-1 probe (different substrate -> different GABA
+# survival curve) and is therefore recorded as provenance only, not as an identifiability check.
+Z_ANCHORS = {
+    "q75_seed1": dict(I_th_EI=95.19851312666987, tau_z_ms=5000.0, h_Z=2.1307e-2,
+                      source="D_Z slope over [0,5]s, zonly_seed1_q75_T24000/zonly_traces.npz"),
+    "q50_seed1": dict(I_th_EI=1.6652801609959704, tau_z_ms=10000.0, h_Z=3.4896e-2,
+                      source="D_Z slope over [0,5]s, zonly_seed1_q50_T24000/zonly_traces.npz"),
 }
-H_LO_HI = (Z_ANCHORS["q75_seed3"]["h_Z"], Z_ANCHORS["q50_seed1"]["h_Z"])
+Z_ANCHORS_PROVENANCE_ONLY = {
+    "q75_seed3": dict(I_th_EI=95.19851312666987, tau_z_ms=5000.0, h_Z=1.3669e-2,
+                      note="different substrate; a seed-1 survival curve cannot predict it"),
+}
+Z_ANCHORS_SUPERSEDED_AVG = {"q75_seed1": 6.9221e-3, "q75_seed3": 7.7734e-3, "q50_seed1": 3.3694e-2}
+H_LO_HI = (Z_ANCHORS["q75_seed1"]["h_Z"], Z_ANCHORS["q50_seed1"]["h_Z"])
 _R = (H_LO_HI[1] / H_LO_HI[0]) ** 0.25
 H_TARGETS = {"H_LO": H_LO_HI[0] * _R, "H_MID": H_LO_HI[0] * _R ** 2, "H_HI": H_LO_HI[0] * _R ** 3}
 Z_AXIS_ANCHOR_TOL = 0.50         # plan 3.5 identifiability: +-50% on both anchors

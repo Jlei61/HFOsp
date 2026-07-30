@@ -103,6 +103,34 @@ def test_hazard_levels_are_geometrically_spaced_so_no_level_hugs_an_anchor():
     assert v[1] / v[0] == pytest.approx(v[2] / v[1], rel=1e-9)
 
 
+def test_the_anchor_observable_is_the_D_Z_SLOPE_not_the_run_average():
+    """Regression on the error the first pre-registered attempt made.  D_Z saturates, so its 24 s
+    average is ~3x below its initial slope; comparing an exact t=0 prediction against that average
+    is a dimensional mismatch, not a finding about the model."""
+    q75 = H.Z_ANCHORS["q75_seed1"]["h_Z"] / H.Z_ANCHORS_SUPERSEDED_AVG["q75_seed1"]
+    q50 = H.Z_ANCHORS["q50_seed1"]["h_Z"] / H.Z_ANCHORS_SUPERSEDED_AVG["q50_seed1"]
+    # q75 saturates hard within the run (slope ~3x its own average); q50 barely does (~1.04x).
+    # That asymmetry is exactly why the mis-specified comparison failed on q75 alone -- so the
+    # failure was never evidence about the survival curve.
+    assert q75 > 2.5 and q50 == pytest.approx(1.0, abs=0.1)
+    for k in H.Z_ANCHORS:
+        assert "slope" in H.Z_ANCHORS[k]["source"]
+
+
+def test_the_seed3_anchor_is_provenance_only_not_an_identifiability_check():
+    """A seed-1 survival curve cannot predict a seed-3 substrate; keeping it as a gate would fail
+    the axis for a reason that has nothing to do with identifiability."""
+    assert "q75_seed3" not in H.Z_ANCHORS
+    assert "q75_seed3" in H.Z_ANCHORS_PROVENANCE_ONLY
+
+
+def test_the_corrected_bracket_is_much_narrower_than_the_superseded_one():
+    """Recorded because it changes what the screen can learn: on the correct statistic q75 and q50
+    differ by 1.6x in INITIAL hazard, not 4.3x -- what really differs is how fast the depletion
+    self-limits."""
+    assert H.H_LO_HI[1] / H.H_LO_HI[0] == pytest.approx(1.638, abs=0.01)
+
+
 def test_z_axis_is_blocked_when_the_probe_cannot_reproduce_the_anchors():
     """A sensor distribution concentrated far below both anchors predicts ~zero hazard for each,
     which must block the axis instead of silently producing three thresholds."""
