@@ -9,6 +9,7 @@ Stages
   calibration   seed1 then seed3, 24 s sensor-only.  Locks b_v / GAP / tau_R / Q_on / Q_scale and
                 stores the per-cell GABA sensor for the S_Z replay.  Each seed also IS its own
                 Gate B0 ELR-off arm.  THE ONLY 40k RUNS AUTHORISED BEFORE calibration_lock.json.
+  finalize      global tau_R from the MIN cross-seed GAP_05 + per-seed Q_on re-derivation.  No sim.
   zaxis         offline S_Z replay from the stored sensor.  No sim.
 """
 from __future__ import annotations
@@ -397,9 +398,19 @@ def cmd_finalize(args):
                        f"({per[seed]['tau_R_ms']:.2f} ms); the recorded load was not retained, so "
                        f"it could NOT be re-derived at the global tau_R")
                 ok = ok and abs(per[seed]["tau_R_ms"] - tau_R) < 1e-9
+            # b_v is quantised: one spike in a voxel-block is n_cells_per_voxel / dt_R Hz, so b_v
+            # can only be an integer multiple of that.  About half of all occupied voxels sit just
+            # below the 99th-percentile boundary and get b_v = 0, which makes the MEDIAN an
+            # uninformative summary (it flips between 0 and one quantum on a ~50/50 split).  Report
+            # the zero fraction instead -- and note what it MEANS: in those voxels the deadband does
+            # no work and Q_on is the only gate, i.e. the two-stage gate collapses to one stage.
+            bo = b_v[occ]
+            quantum = float(np.min(bo[bo > 0])) if np.any(bo > 0) else float("nan")
             seeds_out[f"seed{seed}"] = dict(
                 Q_on=q_on, Q_scale=q_on, eps_q=H2.EPS_Q_FRAC * q_on, eps_s=eps_s,
-                b_v_median=float(np.median(b_v[occ])), n_occupied=int(occ.sum()),
+                b_v_median=float(np.median(bo)), b_v_zero_frac=float(np.mean(bo == 0.0)),
+                b_v_quantum_hz=quantum, b_v_mean=float(bo.mean()), b_v_max=float(bo.max()),
+                n_occupied=int(occ.sum()),
                 gap_05_ms=gap05[seed], gap_01_ms=per[seed]["gap_ms"]["q01"],
                 gap_min_ms=per[seed]["gap_ms"]["min"], n_events=per[seed]["n_events"],
                 Q_on_source=src, artifact=f"calibration_seed{seed}.npz")
@@ -422,7 +433,14 @@ def cmd_finalize(args):
             b0_off_arm={f"seed{s}": per[s]["b0_off_arm"] for s in SEEDS},
             inputs_sha256=json.load(open(os.path.join(OUT, "preflight.json")))["inputs"],
             note=("tau_R is GLOBAL (min cross-seed GAP_05); b_v / Q_on / Q_scale are PER SEED "
-                  "under the identical frozen rule, so the rule is out-of-sample on seed3"))
+                  "under the identical frozen rule, so the rule is out-of-sample on seed3"),
+            deadband_coverage_note=(
+                "About half of all occupied voxels have b_v = 0 (they fire in under 1% of 0.5 ms "
+                "blocks), so in that half the deadband provides no protection and Q_on is the only "
+                "gate -- the two-stage gate collapses to one stage there. b_v is also quantised to "
+                "multiples of one spike per voxel-block, which is why its MEDIAN is uninformative "
+                "and flips between 0 and one quantum across seeds on a ~50/50 split. Recorded "
+                "BEFORE Gate B0 and Gate A0 run; Q_BG is NOT adjusted."))
         _jw(os.path.join(OUT, "calibration_lock.json"), lock)
         _end("finalize", ok, status=lock["status"])
         print(f"[finalize] {lock['status']}  GAP05 per seed {gap05}  lock={gap05_lock:.1f} ms  "
@@ -436,19 +454,63 @@ def cmd_finalize(args):
         raise
 
 
+# ------------------------------------------------------------------ S_Z response axis (offline)
+def cmd_zaxis(args):
+    """plan 6: open-loop cumulative-depletion coordinate, replayed offline on the STORED per-cell
+    GABA sensor from the seed-1 calibration run.  No simulation.
+
+    Scope, restated where it is computed: a frozen replay cannot express self-limitation, and if a
+    cell's above/below-threshold status never changes then S_Z is strictly proportional to the t=0
+    hazard.  What it adds is time-occupancy above threshold.  It is a parameter coordinate for
+    spacing three Z points; it predicts nothing about closed-loop branching.
+    """
+    _begin("zaxis")
+    try:
+        lock_p = os.path.join(OUT, "calibration_lock.json")
+        if not os.path.exists(lock_p):
+            raise SystemExit("calibration_lock.json missing: run finalize first (plan section 1)")
+        z = np.load(os.path.join(OUT, "calibration_seed1.npz"))
+        sensor = np.asarray(z["sensor"], float)              # (n_frame, NE)
+        p_i = np.asarray(z["p_i"], float)[:sensor.shape[1]]
+        dt = float(z["sensor_dt_ms"])
+        T_cal = sensor.shape[0] * dt
+        v = H2.adjudicate_z_response_axis(sensor, p_i, dt_ms=dt)
+        v.update(generated=datetime.now(timezone.utc).isoformat(), code_commit=FCXR._git_sha(),
+                 seed=1, sensor_frames=int(sensor.shape[0]), sensor_dt_ms=dt, T_cal_ms=T_cal,
+                 C_analytic=H2.c_analytic(T_cal, H2.TAU_Z_DOWN_MS),
+                 hyb1_levels_for_comparison={"H_LO": 96.30, "H_MID": 72.35, "H_HI": 46.80},
+                 hyb1_caveat=("HYB1's H_LO landed ON q75 (ratio 0.996) and was therefore NOT an "
+                              "interior level; state explicitly whether the new 25% point does too"))
+        _jw(os.path.join(OUT, "z_response_axis.json"), v)
+        ok = v["status"] == "Z_RESPONSE_AXIS_LOCKED"
+        if not ok:
+            _jw(os.path.join(OUT, "DESIGN_BLOCKED_Z_RESPONSE_AXIS.json"), v)
+        _end("zaxis", ok, status=v["status"])
+        msg = f"[zaxis] {v['status']}  T_cal={T_cal:.0f} ms  C={v['C_analytic']:.3f}"
+        if ok:
+            msg += ("  S_Z q75=%.4f q50=%.4f  " % (v["S_Z_q75"], v["S_Z_q50"]) +
+                    "  ".join(f"{k}: I_th={x['I_th_EI']:.2f}" for k, x in v["levels"].items()))
+        print(msg, flush=True)
+        return 0 if ok else 2
+    except BaseException as e:
+        _end("zaxis", False, error=repr(e))
+        raise
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="FCXR-HYB2 runner (dt=0.05, no kick)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("preflight")
     sub.add_parser("finalize")
+    sub.add_parser("zaxis")
     c = sub.add_parser("calibration")
     c.add_argument("--seed", type=int, required=True, choices=list(SEEDS))
     c.add_argument("--confirm-run", action="store_true")
     args = ap.parse_args(argv)
-    if args.cmd not in ("preflight", "finalize") and not args.confirm_run:
+    if args.cmd not in ("preflight", "finalize", "zaxis") and not args.confirm_run:
         raise SystemExit("REFUSING: simulations require --confirm-run")
     return {"preflight": cmd_preflight, "calibration": cmd_calibration,
-            "finalize": cmd_finalize}[args.cmd](args)
+            "finalize": cmd_finalize, "zaxis": cmd_zaxis}[args.cmd](args)
 
 
 if __name__ == "__main__":
