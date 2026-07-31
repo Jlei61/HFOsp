@@ -100,10 +100,10 @@ def main() -> None:
     if manifest["manifest_sha256"] != "a40225184201fba663aa41eb148211514300bb8187d823b97e7c0e51fae7c2d6":
         raise RuntimeError("Phase-D v1.1 input lock drift")
 
-    seeds = {int(row["seed"]) for row in manifest["source_panel"]}
-    if seeds != {1}:
-        raise RuntimeError(f"unexpected source seeds: {sorted(seeds)}")
-    ctx = R.build_context(1)
+    source_seed = int(manifest["source"]["seed"])
+    if source_seed != 1:
+        raise RuntimeError(f"unexpected source seed: {source_seed}")
+    ctx = R.build_context(source_seed)
     rows = []
     for row in manifest["source_panel"]:
         row_id = (row["bin_name"], row["fast_phase"])
