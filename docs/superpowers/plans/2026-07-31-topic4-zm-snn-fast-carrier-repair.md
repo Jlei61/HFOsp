@@ -62,8 +62,10 @@ lifecycle.
 - [ ] Load the Phase-C manifest, coordinate manifest and machine futility
   verdict; require their self-hashes and the 59-run evidence-set hashes to
   validate.
-- [ ] Resolve exactly three seed-1 source states: pre-entry,
-  `bounded_mid`, and `bounded_late`, each with the two registered fast phases.
+- [ ] Resolve the exact seed-1 source-state panel: one real
+  `pre_entry__natural` checkpoint plus rising/peak checkpoints for
+  `bounded_mid` and `bounded_late`. Pre-entry uses two locked future-noise
+  repeats; it is never relabelled as a nonexistent rising/peak state.
 - [ ] Record source config SHA, source engine SHA, state hash, anatomy hash,
   connectivity hash, threshold-field hash, future-noise-bank hash and
   checkpoint time.

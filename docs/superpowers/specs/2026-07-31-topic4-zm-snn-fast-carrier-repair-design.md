@@ -413,7 +413,13 @@ Use exactly three seed-1 frozen slow states:
 2. Phase-C bounded-mid tonic checkpoint;
 3. Phase-C bounded-late tonic checkpoint.
 
-Each state uses two fast phases and one replayed future-noise stream for the first pass. Duration is 4 s post-fork, long enough to contain at least 20 cycles at 5 Hz and to reject transient onset ringing.
+The pre-entry reference has one real `natural` fast snapshot and is repeated
+with two locked paired future-noise streams for baseline/trigger control. It is
+not relabelled as rising or peak. Bounded-mid and bounded-late each use their
+two real Phase-C fast snapshots (`rising`, `peak`) and one replayed
+future-noise stream for the first carrier pass. Duration is 4 s post-fork,
+long enough to contain at least 20 cycles at 5 Hz and to reject transient onset
+ringing.
 
 ### 8.2 Trigger and controls
 
