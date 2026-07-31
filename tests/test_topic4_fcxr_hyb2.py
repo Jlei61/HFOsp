@@ -375,3 +375,67 @@ def test_b0_reduction_reuses_the_HYB1_IEI_CV_floor():
     assert "H1_IEI_CV_MIN" in seg
     assert "cv >= 0.5" not in seg and "cv>=0.5" not in seg
     assert "cv >= H1_IEI_CV_MIN" in seg
+
+
+# ---------------------------------------------------------------- Q_on / clause 2-3 contract
+# Both regressions come from Gate B0's first run (2026-07-31), where the shipped code deviated from
+# the locked contract in two independent ways and the deviations only surfaced after a 35 min run.
+
+def test_event_peak_values_uses_every_event_not_just_the_calibration_half():
+    """plan 4.2: Q_on := 1.10 * max over ALL events.  CAL_SPLIT_FRAC governs b_v (plan 4.1), NOT
+    Q_on.  The shipped loop restricted peaks to `on < n_half * blk` at BOTH call sites, which made
+    seed1's Q_on 1.51x too small and broke the by-construction argument plan 7.1 rests on."""
+    n_t, n_v = 400, 3
+    q = np.zeros((n_t, n_v))
+    q[10, 0] = 5.0                        # first half
+    q[300, 1] = 40.0                      # second half -- must NOT be missed
+    occ = np.array([True, True, False])
+    peaks = H2.event_peak_values(q, [5.0, 150.0], occ, tau_R_ms=1.0, dt_ms=0.5)
+    assert max(peaks) == pytest.approx(40.0)
+    assert H2.q_on_from_event_peaks(peaks) == pytest.approx(44.0)
+
+
+def test_event_peak_values_ignores_unoccupied_voxels():
+    q = np.zeros((100, 3))
+    q[4, 2] = 999.0
+    peaks = H2.event_peak_values(q, [1.0], np.array([True, True, False]), tau_R_ms=1.0, dt_ms=0.5)
+    assert max(peaks) == pytest.approx(0.0)
+
+
+def test_b0_envelope_statistics_is_a_joint_quantile_not_a_spatial_max():
+    """plan 7.1 clause 2 asks for the q99 across (events x occupied voxels).  Reducing each block to
+    max_v q_v first and taking the q99 of THAT is a different, much larger statistic -- the same
+    error class as the B2.1 amplitude clause.  Here 1 voxel in 100 is hot, so the joint q99 must sit
+    near the cold value while a spatial max would return the hot one.
+
+    The hot fraction is 0.2% (1 voxel in 500), deliberately WELL below the 1% the q99 cuts at: at
+    exactly 1% the quantile interpolates across the cold/hot boundary and the test would assert a
+    number that depends on numpy's interpolation rule rather than on the statistic being right.
+    """
+    pre = []
+    for _ in range(8):
+        w = np.full((4, 500), 1.0)
+        w[:, 0] = 500.0
+        pre.append(w)
+    out = H2.b0_envelope_statistics(pre, Q_on=1000.0)
+    assert out["pre_onset_residual_frac"] == pytest.approx(1.0 / 1000.0, rel=1e-6)
+    assert out["pre_onset_residual_frac"] < 0.1        # a spatial max would give 0.5
+    assert out["n_joint_samples"] == 8 * 4 * 500
+
+
+def test_b0_envelope_statistics_drift_is_a_difference_over_the_same_statistic():
+    pre = [np.full((4, 50), 10.0) for _ in range(8)] + [np.full((4, 50), 30.0) for _ in range(8)]
+    out = H2.b0_envelope_statistics(pre, Q_on=100.0)
+    assert out["q_floor_drift"] == pytest.approx(0.20, rel=1e-6)
+    assert out["floor_first"] == pytest.approx(10.0)
+    assert out["floor_last"] == pytest.approx(30.0)
+
+
+def test_b0_envelope_statistics_reports_insufficient_below_four_events():
+    out = H2.b0_envelope_statistics([np.ones((4, 10))] * 3, Q_on=1.0)
+    assert out["insufficient"] and np.isnan(out["pre_onset_residual_frac"])
+
+
+def test_b0_envelope_statistics_rejects_nonpositive_Q_on():
+    with pytest.raises(ValueError):
+        H2.b0_envelope_statistics([np.ones((4, 10))] * 8, Q_on=0.0)

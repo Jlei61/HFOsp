@@ -98,6 +98,60 @@ def residual(gap_ms, tau_R_ms):
     return float(np.exp(-float(gap_ms) / float(tau_R_ms)))
 
 
+def event_peak_values(q_tv, onsets_ms, occupied, tau_R_ms, dt_ms):
+    """q_v peak inside each event window, over ALL events and occupied voxels (plan 4.2).
+
+    ONE function with TWO call sites (calibration pass 2 and finalize) because the first
+    implementation duplicated this loop and both copies carried the same defect: they restricted
+    the peak search to `onsets < CAL_SPLIT_FRAC * T`.  CAL_SPLIT_FRAC governs `b_v` (plan 4.1
+    estimates the background envelope on the calibration half); plan 4.2 says pass 2 replays
+    "the same record" and takes `max_{event, occupied voxel}`, with no half-restriction.  The
+    deviation made Q_on 1.51x too small on seed1, which in turn broke the by-construction argument
+    that plan 7.1 uses to declare clauses 1 and 2 non-independent.
+    """
+    q = np.asarray(q_tv, float)
+    occ = np.asarray(occupied, bool)
+    span = int(round(3.0 * float(tau_R_ms) / float(dt_ms))) + 1
+    out = []
+    for t_on in np.asarray(onsets_ms, float):
+        a0 = int(t_on / float(dt_ms))
+        a1 = min(q.shape[0], a0 + span)
+        if a1 > a0:
+            out.append(float(q[a0:a1][:, occ].max()))
+    return out
+
+
+def b0_envelope_statistics(pre_windows, Q_on):
+    """plan 7.1 clauses 2 and 3, on the JOINT (event x block x occupied voxel) pool.
+
+    `pre_windows` is one 2-D array (n_block, n_occupied_voxel) per event, covering the 2 ms
+    immediately before that event's onset.
+
+    The contract says "q99 across events x occupied voxels".  The first implementation reduced each
+    block to `max_v q_v` first and took the q99 of THAT -- a maximum over ~1000 voxels is not a 99th
+    percentile over them, and it ran 2x high on seed1.  Same error class as the B2.1 amplitude
+    clause (time-q99 of a spatial max instead of the joint tail); the fix is the same.
+
+    Clause 3 aggregates the SAME per-event statistic so the two clauses cannot disagree about what
+    "the floor" means.
+    """
+    Q = float(Q_on)
+    if not (Q > 0):
+        raise ValueError("Q_on must be > 0")
+    per_event = [np.asarray(w, float).ravel() for w in pre_windows if np.asarray(w).size]
+    if len(per_event) < 4:
+        return dict(pre_onset_residual_frac=float("nan"), q_floor_drift=float("nan"),
+                    n_pre_onset=len(per_event), insufficient=True)
+    joint = np.concatenate(per_event)
+    floors = np.asarray([float(np.quantile(e, 0.99)) for e in per_event])
+    k = max(2, floors.size // 4)
+    return dict(pre_onset_residual_frac=float(np.quantile(joint, 0.99) / Q),
+                q_floor_drift=float((floors[-k:].mean() - floors[:k].mean()) / Q),
+                floor_first=float(floors[:k].mean()), floor_last=float(floors[-k:].mean()),
+                n_pre_onset=int(floors.size), segment_k=int(k),
+                n_joint_samples=int(joint.size), insufficient=False)
+
+
 def q_on_from_event_peaks(peaks):
     p = np.asarray(peaks, float)
     if p.size == 0:

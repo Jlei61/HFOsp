@@ -291,13 +291,7 @@ def cmd_calibration(args):
 
             # ---- pass 2: offline envelope replay -> per-event peaks -> Q_on
             q_tv = _replay_q(load, b_v, eps_s, tau_R, occupied)
-            blk = H2.DT_R_MS
-            peaks = []
-            for t_on in on[on < n_half * blk]:
-                a0 = int(t_on / blk)
-                a1 = min(q_tv.shape[0], a0 + int(round(3.0 * tau_R / blk)) + 1)
-                if a1 > a0:
-                    peaks.append(float(q_tv[a0:a1][:, occupied].max()))
+            peaks = H2.event_peak_values(q_tv, on, occupied, tau_R, H2.DT_R_MS)
             q_on = H2.q_on_from_event_peaks(peaks) if peaks else 0.0
             cal = H2.adjudicate_calibration(dict(T_event_guard_ms=H2.T_EVENT_GUARD_MS,
                                                  gap_05_ms=g05, gap_01_ms=g01, gap_min_ms=gmin,
@@ -383,22 +377,28 @@ def cmd_finalize(args):
             load_p = os.path.join(OUT, f"load_seed{seed}.npy")
             if os.path.exists(load_p):
                 q_tv = _replay_q(np.load(load_p, mmap_mode="r"), b_v, eps_s, tau_R, occ)
-                blk = H2.DT_R_MS
-                n_half = q_tv.shape[0] // 2
-                peaks = []
-                for t_on in on[on < n_half * blk]:
-                    a0 = int(t_on / blk)
-                    a1 = min(q_tv.shape[0], a0 + int(round(3.0 * tau_R / blk)) + 1)
-                    if a1 > a0:
-                        peaks.append(float(q_tv[a0:a1][:, occ].max()))
+                peaks = H2.event_peak_values(q_tv, on, occ, tau_R, H2.DT_R_MS)
                 q_on = H2.q_on_from_event_peaks(peaks)
                 src = "re-derived at the global tau_R from the recorded load"
+            elif abs(per[seed]["tau_R_ms"] - tau_R) < 1e-9:
+                # No recorded load, but `q_max_series` IS the full-record max over occupied voxels
+                # at this seed's own tau_R -- and that tau_R equals the global one (this seed set
+                # it, being the min-GAP_05 seed).  So max over event windows of that series is
+                # exactly max_{event, occupied voxel}: an exact re-derivation, not a carried-over
+                # value.  It matters because the stored per-seed Q_on came from the superseded
+                # first-half-only loop; here it happens to agree, but agreeing by luck is not a
+                # provenance any downstream gate should rest on.
+                q_on = H2.q_on_from_event_peaks(
+                    H2.event_peak_values(np.asarray(z["q_max_series"], float)[:, None], on,
+                                         np.array([True]), tau_R, H2.DT_R_MS))
+                src = ("re-derived from the stored q_max_series (no recorded load; this seed's own "
+                       "tau_R already equals the global tau_R, so the series is at the right tau_R)")
             else:
                 q_on = float(per[seed]["Q_on"])
                 src = (f"per-seed value at that seed's own tau_R "
-                       f"({per[seed]['tau_R_ms']:.2f} ms); the recorded load was not retained, so "
-                       f"it could NOT be re-derived at the global tau_R")
-                ok = ok and abs(per[seed]["tau_R_ms"] - tau_R) < 1e-9
+                       f"({per[seed]['tau_R_ms']:.2f} ms); the recorded load was not retained AND "
+                       f"that tau_R differs from the global one, so it could NOT be re-derived")
+                ok = False
             # b_v is quantised: one spike in a voxel-block is n_cells_per_voxel / dt_R Hz, so b_v
             # can only be an integer multiple of that.  About half of all occupied voxels sit just
             # below the 99th-percentile boundary and get b_v = 0, which makes the MEDIAN an
@@ -456,31 +456,6 @@ def cmd_finalize(args):
 
 
 # ------------------------------------------------------------------ Gate B0 (ELR-on arm)
-def _b0_q_statistics(q_trace, onsets_ms, Q_on):
-    """plan 7.1 clauses 2 and 3, both on q_v (never on R_evt, which is identically 0 interictally).
-
-    Clause 2: q99 across events of max_v q_v inside the 2 ms window immediately BEFORE the next
-    onset -- not the whole gap, because right after an event ends q_v is high by construction and
-    a gap-wide statistic would measure the start of the decay, not the residual.
-    Clause 3: (last-segment floor - first-segment floor) / Q_on, a DIFFERENCE, because a ratio is
-    unstable when the first floor is near zero.
-    """
-    t = np.asarray([r[0] for r in q_trace], float) * H2.DT_R_MS
-    qmax = np.asarray([r[1] for r in q_trace], float)
-    on = np.asarray(onsets_ms, float)
-    w = H2.B0_PRE_ONSET_WINDOW_MS
-    pre = [float(qmax[(t >= o - w) & (t < o)].max()) for o in on if np.any((t >= o - w) & (t < o))]
-    pre = np.asarray(pre, float)
-    if pre.size < 4:
-        return dict(pre_onset_residual_frac=float("nan"), q_floor_drift=float("nan"),
-                    n_pre_onset=int(pre.size), insufficient=True)
-    k = max(2, pre.size // 4)
-    return dict(pre_onset_residual_frac=float(np.quantile(pre, 0.99) / Q_on),
-                q_floor_drift=float((pre[-k:].mean() - pre[:k].mean()) / Q_on),
-                floor_first=float(pre[:k].mean()), floor_last=float(pre[-k:].mean()),
-                n_pre_onset=int(pre.size), segment_k=int(k), insufficient=False)
-
-
 def _b0_metrics(*, active_occupancy, q_stats, on_events, on_onsets, off_durations_ms,
                 off_onsets_ms, band, T_ms, numerical, label):
     """Assemble the Gate B0 measurement dict.  Pure: no simulation, no file IO, so the reduction
@@ -542,7 +517,7 @@ def cmd_gate_b0(args):
             cfg = ELR.ELRConfig(b_v=z["b_v"], eps_s=k["eps_s"], tau_R_ms=lock["tau_R_ms"],
                                 Q_on=k["Q_on"], Q_scale=k["Q_scale"], eps_q=k["eps_q"],
                                 I_R_max=lock["I_R_max"], n_grid=N_GRID, dt_R_ms=H2.DT_R_MS,
-                                enabled=True, record_load=False, record_q_trace=True)
+                                enabled=True, record_load=True, record_q_trace=True)
             elr = ELR.EventLimitedRecruitment(S["N"], _voxel_map(S), cfg)
 
             t0 = time.time()
@@ -560,7 +535,18 @@ def cmd_gate_b0(args):
             del res
             gc.collect()
 
-            qs = _b0_q_statistics(elr.q_trace, on, k["Q_on"])
+            # Clauses 2 and 3 want PER-VOXEL q inside each pre-onset window ("q99 across events x
+            # occupied voxels").  The scalar q_trace cannot supply that, so replay the recorded load
+            # offline exactly as calibration pass 2 does.
+            q_tv = _replay_q(np.stack(elr.load_trace), z["b_v"], k["eps_s"],
+                             lock["tau_R_ms"], elr.occupied)
+            w = int(round(H2.B0_PRE_ONSET_WINDOW_MS / H2.DT_R_MS))
+            pre_windows = [q_tv[int(t_on / H2.DT_R_MS) - w:int(t_on / H2.DT_R_MS)][:, elr.occupied]
+                           for t_on in on if int(t_on / H2.DT_R_MS) - w >= 0]
+            qs = H2.b0_envelope_statistics(pre_windows, k["Q_on"])
+            del q_tv, pre_windows
+            elr.load_trace = None
+            gc.collect()
             m = _b0_metrics(
                 active_occupancy=elr.active_occupancy(), q_stats=qs,
                 on_events=ret, on_onsets=on,
