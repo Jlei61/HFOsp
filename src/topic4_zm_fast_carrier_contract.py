@@ -24,7 +24,7 @@ from src.topic4_zm_checkpoint import load_state_npz, read_manifest
 from src.topic4_zm_noise_bank import build_noise_bank
 
 
-INPUT_SCHEMA = "zm_fast_carrier_input_v1.4_2026-07-31"
+INPUT_SCHEMA = "zm_fast_carrier_input_v1.5_2026-07-31"
 IMPLEMENTATION_START_GIT_SHA = "12add24f"
 SOURCE_SEED = 1
 SOURCE_DT_MS = 0.1
@@ -62,24 +62,23 @@ CALIBRATION_AMENDMENT = Path(
 )
 DEFAULT_INPUT_OUTPUT = Path(
     "results/topic4_sef_hfo/zm_fast_carrier_repair/"
-    "phaseD_input_manifest_v1_4.json"
+    "phaseD_input_manifest_v1_5.json"
 )
 SUPERSEDED_INPUT_LOCK = {
     "path": (
         "results/topic4_sef_hfo/zm_fast_carrier_repair/"
-        "phaseD_input_manifest_v1_3.json"
+        "phaseD_input_manifest_v1_4.json"
     ),
     "file_sha256": (
-        "ff9f7a5de8dbbd00821d9044144c9054a2b30c6b90f11422654672f0ec54db40"
+        "833b7ba8a36bc782d44e9c144c92ea67e7b69235cbc3f4a6c333043c94c00524"
     ),
     "manifest_sha256": (
-        "db3401164b851479f75a709969410f159f6c5c8586465fe328076c613ad6bc45"
+        "c454a84c8610e7b5d8a56bad37b947dbbc74d006326cbe443e73d06def5f249f"
     ),
     "reason": (
-        "v1.3 binds amendment revision 2; revision 3 corrects the behavioral "
-        "baseline from a freeze-all late checkpoint to the canonical dynamic "
-        "Z/M pre-entry window after that freeze was shown to contain only "
-        "sub-Hz fluctuations rather than source-scale IEDs"
+        "v1.4 predates the pre-result first-spike dominance stop; v1.5 binds "
+        "that cheap gate, while source states, dynamic pre-entry reference, "
+        "arms and conductance scale lattice remain unchanged"
     ),
     "production_authorized": False,
 }

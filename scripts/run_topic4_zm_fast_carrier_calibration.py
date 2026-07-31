@@ -25,7 +25,7 @@ from src import topic4_zm_fast_carrier_state as ST  # noqa: E402
 from src import topic4_zm_noise_bank as NB  # noqa: E402
 
 
-INPUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_4.json"
+INPUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_5.json"
 AMENDMENT = ROOT / "docs/superpowers/specs/2026-07-31-topic4-zm-fast-carrier-baseline-anchor-amendment.md"
 OUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/calibration"
 PRODUCTION_T_MS = 8500.0
