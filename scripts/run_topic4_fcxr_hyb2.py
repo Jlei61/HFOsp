@@ -568,13 +568,15 @@ def cmd_gate_b0(args):
                 off_onsets_ms=np.asarray(z["onsets_ms"], float),
                 band=base["band"], T_ms=T_CAL_MS, numerical=num, label=lc["label"])
             v = H2.adjudicate_gate_B0(m)
+            d = m["event_stats_detail"]
             v.update(seed=args.seed, generated=datetime.now(timezone.utc).isoformat(),
                      code_commit=FCXR._git_sha(), T_ms=T_CAL_MS, wall_s=wall,
                      peak_rss_gb=round(_rss_gb(), 2), measured=m, q_stats=qs,
                      elr_config=dict(tau_R_ms=lock["tau_R_ms"], Q_on=k["Q_on"],
                                      Q_scale=k["Q_scale"], eps_s=k["eps_s"], eps_q=k["eps_q"],
                                      I_R_max=lock["I_R_max"]),
-                     off_arm=dict(label=off["b0_off_arm"]["label"], n_events=len(off_dur),
+                     off_arm=dict(label=off["b0_off_arm"]["label"],
+                                  n_events=d["off_n_events"],
                                   source=f"calibration_seed{args.seed}.json"),
                      q_max_running=elr.q_running_max, t_gate_ms=elr.t_gate_ms())
             _jw(os.path.join(OUT, f"gate_b0_seed{args.seed}.json"), v)
@@ -582,10 +584,13 @@ def cmd_gate_b0(args):
             if not ok:
                 _jw(os.path.join(OUT, f"STOP_ELR_BASELINE_VISIBLE_seed{args.seed}.json"), v)
             _end(f"gateB0_s{args.seed}", ok, status=v["status"], wall_s=wall)
-            print(f"[gateB0] seed{args.seed} {v['status']}  occ={m['active_occupancy']:.5f} "
-                  f"resid={m['pre_onset_residual_frac']:.5f} drift={m['q_floor_drift']:+.5f}  "
-                  f"n_ev {len(off_dur)}->{len(ret)}  IEI_CV {off_cv:.3f}->{cv:.3f}  "
-                  f"label={lc['label']}  qmax={elr.q_running_max:.2f} (Q_on {k['Q_on']:.1f})  "
+            print(f"[gateB0] seed{args.seed} {v['status']}  "
+                  f"occ={m['active_occupancy']:.5f} resid={m['pre_onset_residual_frac']:.5f} "
+                  f"drift={m['q_floor_drift']:+.5f}  "
+                  f"n_ev {d['off_n_events']}->{d['n_events']}  "
+                  f"IEI_CV {d['off_iei_cv']:.3f}->{d['iei_cv']:.3f}  "
+                  f"dur {d['off_duration_median_ms']:.1f}->{d['duration_median_ms']:.1f} ms  "
+                  f"label={d['label']}  qmax={elr.q_running_max:.2f} (Q_on {k['Q_on']:.1f})  "
                   f"({wall}s)", flush=True)
             return 0 if ok else 2
         except BaseException as e:
