@@ -49,6 +49,7 @@ from kick_probe import simulate_kick                    # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig   # noqa: E402
 import src.snn_engine.event_limited_recruitment as ELR  # noqa: E402
 import src.topic4_fcxr_hyb2 as H2                       # noqa: E402
+from src.topic4_fcxr_hyb1 import IEI_CV_MIN as H1_IEI_CV_MIN   # noqa: E402  reuse, do not redefine
 from src.topic4_mz_fcxr_dynamics import (               # noqa: E402
     rolling_rate_upper, load_onset_depletion_pi, assert_field_substrate_aligned,
 )
@@ -454,6 +455,130 @@ def cmd_finalize(args):
         raise
 
 
+# ------------------------------------------------------------------ Gate B0 (ELR-on arm)
+def _b0_q_statistics(q_trace, onsets_ms, Q_on):
+    """plan 7.1 clauses 2 and 3, both on q_v (never on R_evt, which is identically 0 interictally).
+
+    Clause 2: q99 across events of max_v q_v inside the 2 ms window immediately BEFORE the next
+    onset -- not the whole gap, because right after an event ends q_v is high by construction and
+    a gap-wide statistic would measure the start of the decay, not the residual.
+    Clause 3: (last-segment floor - first-segment floor) / Q_on, a DIFFERENCE, because a ratio is
+    unstable when the first floor is near zero.
+    """
+    t = np.asarray([r[0] for r in q_trace], float) * H2.DT_R_MS
+    qmax = np.asarray([r[1] for r in q_trace], float)
+    on = np.asarray(onsets_ms, float)
+    w = H2.B0_PRE_ONSET_WINDOW_MS
+    pre = [float(qmax[(t >= o - w) & (t < o)].max()) for o in on if np.any((t >= o - w) & (t < o))]
+    pre = np.asarray(pre, float)
+    if pre.size < 4:
+        return dict(pre_onset_residual_frac=float("nan"), q_floor_drift=float("nan"),
+                    n_pre_onset=int(pre.size), insufficient=True)
+    k = max(2, pre.size // 4)
+    return dict(pre_onset_residual_frac=float(np.quantile(pre, 0.99) / Q_on),
+                q_floor_drift=float((pre[-k:].mean() - pre[:k].mean()) / Q_on),
+                floor_first=float(pre[:k].mean()), floor_last=float(pre[-k:].mean()),
+                n_pre_onset=int(pre.size), segment_k=int(k), insufficient=False)
+
+
+def cmd_gate_b0(args):
+    """One ELR-ON 24 s run per seed; the ELR-off arm is the calibration run of the same seed."""
+    with _stage_lock(f"gateB0_s{args.seed}"):
+        FCXR._assert_engine_blessed()
+        _begin(f"gateB0_s{args.seed}", T=T_CAL_MS, seed=args.seed)
+        swap_base = LC._swap_used_mb()
+        try:
+            lock = json.load(open(os.path.join(OUT, "calibration_lock.json")))
+            if lock["status"] != "CALIBRATION_LOCK":
+                raise SystemExit(f"calibration is {lock['status']}: Gate B0 may not run")
+            k = lock["seeds"][f"seed{args.seed}"]
+            off = json.load(open(os.path.join(OUT, f"calibration_seed{args.seed}.json")))
+            base = json.load(open(INPUTS[f"lc1_baseline_seed{args.seed}"]))
+            z = np.load(os.path.join(OUT, f"calibration_seed{args.seed}.npz"))
+
+            st, info = _guard(f"gateB0_s{args.seed}_start", swap_base)
+            if st == "hard":
+                raise SystemExit(f"resource hard-stop before start: {info}")
+            S = PP.build_substrate(args.seed)
+            cfg = ELR.ELRConfig(b_v=z["b_v"], eps_s=k["eps_s"], tau_R_ms=lock["tau_R_ms"],
+                                Q_on=k["Q_on"], Q_scale=k["Q_scale"], eps_q=k["eps_q"],
+                                I_R_max=lock["I_R_max"], n_grid=N_GRID, dt_R_ms=H2.DT_R_MS,
+                                enabled=True, record_load=False, record_q_trace=True)
+            elr = ELR.EventLimitedRecruitment(S["N"], _voxel_map(S), cfg)
+
+            t0 = time.time()
+            res, mz, _ = _run_sensor_only(S, args.seed, T_CAL_MS, elr)
+            wall = round(time.time() - t0, 1)
+
+            bar = float(off["frozen_event_bar"])          # the SAME frozen bar as the off arm
+            ret, on, offs, af, af_bin, floor = _events_with_offsets(res, bar)
+            rate = np.asarray(res["rate_E"], float)
+            num = LC._numerical(S, res, mz, DT)
+            roll_hi = rolling_rate_upper(rate, DT)
+            win = build_windows(rate, DT, af, af_bin, roll_hi, ret, LC.LC_WIN_MS,
+                                event_lookback_ms=LC.LC_LOOKBACK_MS, finite=num["finite"])
+            lc = classify_lifecycle(win, base["band"])
+            del res
+            gc.collect()
+
+            qs = _b0_q_statistics(elr.q_trace, on, k["Q_on"])
+            iei = np.diff(np.sort(on)) if on.size > 2 else np.zeros(0)
+            cv = float(iei.std() / iei.mean()) if iei.size and iei.mean() > 0 else 0.0
+            dur = np.array([e["dur_ms"] for e in ret], float)
+            par = np.array([e["peak_ext"] for e in ret], float)
+            off_dur = np.asarray(off["event_durations_ms"], float)
+            off_on = np.asarray(z["onsets_ms"], float)
+            off_iei = np.diff(np.sort(off_on))
+            off_cv = float(off_iei.std() / off_iei.mean()) if off_iei.size else 0.0
+            lo, hi = base["band"]["event_rate_lo"], base["band"]["event_rate_hi"]
+            rate_hz = len(ret) / (T_CAL_MS / 1000.0)
+            in_band = dict(
+                event_rate=bool(lo <= rate_hz <= max(hi, lo + 1e-9)),
+                iei_cv=bool(cv >= H1_IEI_CV_MIN
+                            and abs(cv - off_cv) <= 0.5 * max(off_cv, 1e-9)),
+                duration=bool(abs(np.median(dur) - np.median(off_dur))
+                              <= 0.5 * max(np.median(off_dur), 1e-9)) if dur.size else False,
+                participation=bool(len(ret) > 0),
+                not_silent=bool(len(ret) > 0))
+            m = dict(active_occupancy=elr.active_occupancy(),
+                     pre_onset_residual_frac=qs["pre_onset_residual_frac"],
+                     q_floor_drift=qs["q_floor_drift"],
+                     event_stats_in_band=all(in_band.values()),
+                     event_stats_detail=dict(**in_band, event_rate_hz=rate_hz,
+                                             off_event_rate_hz=len(off_dur) / (T_CAL_MS / 1000.0),
+                                             iei_cv=cv, off_iei_cv=off_cv,
+                                             duration_median_ms=float(np.median(dur)) if dur.size else 0.0,
+                                             off_duration_median_ms=float(np.median(off_dur)),
+                                             participation_median=float(np.median(par)) if par.size else 0.0,
+                                             n_events=len(ret), off_n_events=len(off_dur),
+                                             band=[lo, hi], label=lc["label"]),
+                     clip_frac_max=num["clip_frac_max"], numerical_unsafe=num["numerical_unsafe"])
+            v = H2.adjudicate_gate_B0(m)
+            v.update(seed=args.seed, generated=datetime.now(timezone.utc).isoformat(),
+                     code_commit=FCXR._git_sha(), T_ms=T_CAL_MS, wall_s=wall,
+                     peak_rss_gb=round(_rss_gb(), 2), measured=m, q_stats=qs,
+                     elr_config=dict(tau_R_ms=lock["tau_R_ms"], Q_on=k["Q_on"],
+                                     Q_scale=k["Q_scale"], eps_s=k["eps_s"], eps_q=k["eps_q"],
+                                     I_R_max=lock["I_R_max"]),
+                     off_arm=dict(label=off["b0_off_arm"]["label"], n_events=len(off_dur),
+                                  source=f"calibration_seed{args.seed}.json"),
+                     q_max_running=elr.q_running_max, t_gate_ms=elr.t_gate_ms())
+            _jw(os.path.join(OUT, f"gate_b0_seed{args.seed}.json"), v)
+            ok = v["status"] == "BASELINE_INVISIBLE"
+            if not ok:
+                _jw(os.path.join(OUT, f"STOP_ELR_BASELINE_VISIBLE_seed{args.seed}.json"), v)
+            _end(f"gateB0_s{args.seed}", ok, status=v["status"], wall_s=wall)
+            print(f"[gateB0] seed{args.seed} {v['status']}  occ={m['active_occupancy']:.5f} "
+                  f"resid={m['pre_onset_residual_frac']:.5f} drift={m['q_floor_drift']:+.5f}  "
+                  f"n_ev {len(off_dur)}->{len(ret)}  IEI_CV {off_cv:.3f}->{cv:.3f}  "
+                  f"label={lc['label']}  qmax={elr.q_running_max:.2f} (Q_on {k['Q_on']:.1f})  "
+                  f"({wall}s)", flush=True)
+            return 0 if ok else 2
+        except BaseException as e:
+            _end(f"gateB0_s{args.seed}", False, error=repr(e))
+            raise
+
+
 # ------------------------------------------------------------------ S_Z response axis (offline)
 def cmd_zaxis(args):
     """plan 6: open-loop cumulative-depletion coordinate, replayed offline on the STORED per-cell
@@ -503,14 +628,16 @@ def main(argv=None):
     sub.add_parser("preflight")
     sub.add_parser("finalize")
     sub.add_parser("zaxis")
-    c = sub.add_parser("calibration")
-    c.add_argument("--seed", type=int, required=True, choices=list(SEEDS))
-    c.add_argument("--confirm-run", action="store_true")
+    for nm in ("calibration", "gate-b0"):
+        c = sub.add_parser(nm)
+        c.add_argument("--seed", type=int, required=True, choices=list(SEEDS))
+        c.add_argument("--confirm-run", action="store_true")
     args = ap.parse_args(argv)
     if args.cmd not in ("preflight", "finalize", "zaxis") and not args.confirm_run:
         raise SystemExit("REFUSING: simulations require --confirm-run")
     return {"preflight": cmd_preflight, "calibration": cmd_calibration,
-            "finalize": cmd_finalize, "zaxis": cmd_zaxis}[args.cmd](args)
+            "finalize": cmd_finalize, "zaxis": cmd_zaxis,
+            "gate-b0": cmd_gate_b0}[args.cmd](args)
 
 
 if __name__ == "__main__":
