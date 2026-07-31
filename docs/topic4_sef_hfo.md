@@ -24,6 +24,20 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
+> **Z/M Phase C post-result futility stop（2026-07-31）**：C0 已完成；C1 在用户授权停止前完成
+> seed-1 primary 59/60 continuations。whole-sheet runaway scope 修正后 59/59 都是
+> `tonic_non_AI`：pathology-core 约 436–443 Hz、all-sheet 约 140–160 Hz，fine-rate
+> modulation 仅 0.025–0.045（注册非-tonic 门 0.20）。9 个 cell 为 6/6 阴，最后一个
+> 为 5/6 阴；即使唯一缺失 run 阳性，10/10 cell 也都达不到 5/6，故要求 seed 1+3
+> 同时成立的 primary maturation GO 已逻辑不可达。状态锁为
+> `post_result_futility_stopped_incomplete`，**不是**三 seed 完整 bounded negative。
+> 结论：frozen \(Z/M/S_G\) 坐标只在局部高率低调制 tonic fast branch 上移动工作点；
+> 下一步转独立 Phase D fast-carrier repair，只改 inhibitory/membrane feedback，E→E
+> 完全冻结。归档：
+> `docs/archive/topic4/sef_hfo/zm_phase_c_tonic_identity_futility_2026-07-31.md`；
+> 新 spec：
+> `docs/superpowers/specs/2026-07-31-topic4-zm-snn-fast-carrier-repair-design.md`。
+>
 > **Z/M minimal-carrier branch decision（2026-07-28）**：revision 3.1 已完成，
 > top-level verdict = `carrier_at_visited_states`。自然轨迹访问到的慢状态在
 > `freeze_all` 后支持跨 seed/快相位/相邻 slow-bin 的**源空间 sustained tonic carrier**，
