@@ -1,9 +1,14 @@
 # FCXR-HYB1 实施计划 —— `Z – activity-excess K – X`（– `M`）生命周期
 
-日期：2026-07-29 · 分支 `codex/topic4-fcxr-hyb1` · 基点 `efce58a6`
+日期：2026-07-29 · 分支 `codex/topic4-fcxr-hyb1` · 基点 `efce58a6` ·
+状态：**已执行并在 H1 收口：`STOP_BASELINE_DISTURBED`**
 Spec：`docs/superpowers/specs/2026-07-29-topic4-fcxr-hyb1-design.md`（本计划把它补到可执行）
 
 **本文件在任何 HYB1 结果出现之前锁死。之后只允许追加"执行结果"，不允许改判据、阈值或档位。**
+
+> 2026-07-31 执行结果：
+> `docs/archive/topic4/sef_hfo/fcxr_hyb1_baseline_disturbed_2026-07-31.md`。本计划保持不可变；
+> 下一代机制必须使用新的 spec/plan，不得把 HYB1 的 H1 失败改写掉。
 
 ---
 

@@ -1,7 +1,12 @@
 # FCXR-HYB1：职责分离的 `Z – δK – X`（– `M`）生命周期设计
 
-日期：2026-07-29 · 状态：**DESIGN LOCK — 可执行**（2026-07-29 按审阅补全；执行细节见
-`docs/superpowers/plans/2026-07-29-topic4-fcxr-hyb1.md`，两者冲突时以 plan 为准）
+日期：2026-07-29 · 状态：**已执行并在 H1 收口：`STOP_BASELINE_DISTURBED`**
+
+> **审计冻结（2026-07-31）**：本设计已经按锁定合同执行，两个 seed 均在 baseline-preservation
+> gate 失败；H2–H5 从未运行。本文件保留为预注册记录，不再事后改写方程或门。下一代事件尺度招募
+> 机制另见
+> `docs/superpowers/specs/2026-07-31-topic4-fcxr-hyb2-event-limited-recruitment-design.md`
+> （`DESIGN LOCK CANDIDATE`）。
 
 > **本 spec 是"为什么这样设计"，plan 是"锁死的数值与判据"。** 审阅要求在任何 HYB1 结果出现之前
 > 锁死的四组内容——activity-excess K 的独立场定义与 baseline-preservation gate、Z 的可辨识单轴、
