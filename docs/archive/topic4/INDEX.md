@@ -11,6 +11,15 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- **2026-07-31 Z/M Phase C post-result futility stop**：
+  `sef_hfo/zm_phase_c_tonic_identity_futility_2026-07-31.md`。seed-1 primary
+  59/60 continuations 经 whole-sheet runaway scope 修正后为 59/59
+  `tonic_non_AI`；10/10 cell 即使补上唯一缺失 run 也不可能达到 5/6
+  non-tonic 门，因此注册 primary GO 已逻辑不可达。状态是
+  `post_result_futility_stopped_incomplete`，不是完整三-seed negative。下一节点为
+  `docs/superpowers/specs/2026-07-31-topic4-zm-snn-fast-carrier-repair-design.md`：
+  E→E 冻结，只改 conductance local/global GABA、\(m\)-sAHP membrane coupling 与
+  预注册 dynamic-threshold fast feedback。
 - **2026-07-28 Z/M minimal-carrier branch decision**：
   `sef_hfo/zm_minimal_carrier_branch_decision_2026-07-28.md`。结论 =
   `carrier_at_visited_states`：自然轨迹访问过的慢状态在 `freeze_all` 后支持多 seed、
