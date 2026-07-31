@@ -109,30 +109,30 @@ arm A and fail-closed for every incompatible fixture.
 
 **Steps**
 
-- [ ] Implement \(g_L=1,C=\tau_{m,E}\),
+- [x] Implement \(g_L=1,C=\tau_{m,E}\),
   \(E_L=E_K=0,E_I=V_{\rm reset},E_E=2V_\theta-V_{\rm reset}\).
-- [ ] Implement the analytic current-tangent anchor at \(V_{\rm ref}\):
+- [x] Implement the analytic current-tangent anchor at \(V_{\rm ref}\):
   \(\kappa_E^0=(E_E-V_{\rm ref})^{-1}\),
   \(\kappa_I^0=(V_{\rm ref}-E_I)^{-1}\),
   \(g_M^0=\eta_m/(V_{\rm ref}-E_K)\).
-- [ ] Validate \(E_E>V_{\rm ref}>E_I\ge E_K\), finite non-negative inputs,
+- [x] Validate \(E_E>V_{\rm ref}>E_I\ge E_K\), finite non-negative inputs,
   gamma in `[0,1]`, and calibration scales in `[0.8,1.2]`.
-- [ ] Use already-filtered local GABA:
+- [x] Use already-filtered local GABA:
   \(g_I^G=\langle g_I^L\rangle_E\), with no second low-pass.
-- [ ] Implement primary all-GABA z scaling and the registered local-only-z
+- [x] Implement primary all-GABA z scaling and the registered local-only-z
   sensitivity as distinct configs.
-- [ ] Return \(V_\infty,\tau_{\rm eff},I_{\rm exc},I_{\rm inh},I_{\rm sAHP}\)
+- [x] Return \(V_\infty,\tau_{\rm eff},I_{\rm exc},I_{\rm inh},I_{\rm sAHP}\)
   for observation without retaining full time-by-neuron arrays.
-- [ ] Preserve the current update exactly on I cells.
-- [ ] Test the analytic tangent against
+- [x] Preserve the current update exactly on I cells.
+- [x] Test the analytic tangent against
   `I_E-I_I-eta_m*m` at \(V_{\rm ref}\).
-- [ ] Test signs and monotonicity:
+- [x] Test signs and monotonicity:
   more GABA lowers \(V_\infty\) and \(\tau_{\rm eff}\);
   \(z\downarrow\) disinhibits; \(m\uparrow\) lowers \(V_\infty\).
-- [ ] Test uniform-state local/global budget identity and heterogeneous-state
+- [x] Test uniform-state local/global budget identity and heterogeneous-state
   spatial-rank difference.
-- [ ] Test exact exponential update against a high-accuracy scalar ODE.
-- [ ] Mutation-test direct insertion of mV drives into the denominator,
+- [x] Test exact exponential update against the closed-form scalar solution.
+- [x] Mutation-test direct insertion of mV drives into the denominator,
   double filtering of global GABA and double z/m application.
 
 **Gate**
@@ -265,6 +265,11 @@ is invalid and stops.
   returning-event count/rate, source ordering, two-source geometry,
   \(V_\infty\), E/I effective charge ratio, \(\tau_{\rm eff}\), prevention and
   all-sheet plateau.
+- [ ] Verify that active/free-E \(V_\infty>E_I\) during the carrier-supporting
+  portions of the reference. If this is not true, report the fraction and do
+  not interpret increasing GABA conductance as a uniformly hyperpolarizing
+  feedback; reversal-clamped shunting may raise sub-reversal \(V_\infty\)
+  while still shortening \(\tau_{\rm eff}\).
 - [ ] Use lexicographic objective order and deterministic distance-to-
   `(1,1,1)` tie-break from the spec.
 - [ ] Reject settings that suppress returning events, create a baseline
