@@ -481,6 +481,45 @@ def _b0_q_statistics(q_trace, onsets_ms, Q_on):
                 n_pre_onset=int(pre.size), segment_k=int(k), insufficient=False)
 
 
+def _b0_metrics(*, active_occupancy, q_stats, on_events, on_onsets, off_durations_ms,
+                off_onsets_ms, band, T_ms, numerical, label):
+    """Assemble the Gate B0 measurement dict.  Pure: no simulation, no file IO, so the reduction
+    of a 40 minute run is unit-testable without running it."""
+    def _cv(t):
+        t = np.sort(np.asarray(t, float))
+        d = np.diff(t)
+        return float(d.std() / d.mean()) if d.size and d.mean() > 0 else 0.0
+
+    dur = np.array([e["dur_ms"] for e in on_events], float)
+    par = np.array([e["peak_ext"] for e in on_events], float)
+    cv, off_cv = _cv(on_onsets), _cv(off_onsets_ms)
+    lo, hi = band["event_rate_lo"], band["event_rate_hi"]
+    rate_hz = len(on_events) / (float(T_ms) / 1000.0)
+    off_rate_hz = off_durations_ms.size / (float(T_ms) / 1000.0)
+    off_dur_med = float(np.median(off_durations_ms)) if off_durations_ms.size else 0.0
+    clauses = dict(
+        event_rate=bool(lo <= rate_hz <= max(hi, lo + 1e-9)),
+        iei_cv=bool(cv >= H1_IEI_CV_MIN and abs(cv - off_cv) <= 0.5 * max(off_cv, 1e-9)),
+        duration=bool(dur.size > 0 and abs(float(np.median(dur)) - off_dur_med)
+                      <= 0.5 * max(off_dur_med, 1e-9)),
+        participation=bool(par.size > 0),
+        not_silent=bool(len(on_events) > 0))
+    return dict(
+        active_occupancy=active_occupancy,
+        pre_onset_residual_frac=q_stats["pre_onset_residual_frac"],
+        q_floor_drift=q_stats["q_floor_drift"],
+        event_stats_in_band=all(clauses.values()),
+        event_stats_detail=dict(
+            clauses=clauses, event_rate_hz=rate_hz, off_event_rate_hz=off_rate_hz,
+            iei_cv=cv, off_iei_cv=off_cv,
+            duration_median_ms=float(np.median(dur)) if dur.size else 0.0,
+            off_duration_median_ms=off_dur_med,
+            participation_median=float(np.median(par)) if par.size else 0.0,
+            n_events=len(on_events), off_n_events=int(off_durations_ms.size),
+            band=[lo, hi], label=label),
+        clip_frac_max=numerical["clip_frac_max"], numerical_unsafe=numerical["numerical_unsafe"])
+
+
 def cmd_gate_b0(args):
     """One ELR-ON 24 s run per seed; the ELR-off arm is the calibration run of the same seed."""
     with _stage_lock(f"gateB0_s{args.seed}"):
@@ -522,37 +561,12 @@ def cmd_gate_b0(args):
             gc.collect()
 
             qs = _b0_q_statistics(elr.q_trace, on, k["Q_on"])
-            iei = np.diff(np.sort(on)) if on.size > 2 else np.zeros(0)
-            cv = float(iei.std() / iei.mean()) if iei.size and iei.mean() > 0 else 0.0
-            dur = np.array([e["dur_ms"] for e in ret], float)
-            par = np.array([e["peak_ext"] for e in ret], float)
-            off_dur = np.asarray(off["event_durations_ms"], float)
-            off_on = np.asarray(z["onsets_ms"], float)
-            off_iei = np.diff(np.sort(off_on))
-            off_cv = float(off_iei.std() / off_iei.mean()) if off_iei.size else 0.0
-            lo, hi = base["band"]["event_rate_lo"], base["band"]["event_rate_hi"]
-            rate_hz = len(ret) / (T_CAL_MS / 1000.0)
-            in_band = dict(
-                event_rate=bool(lo <= rate_hz <= max(hi, lo + 1e-9)),
-                iei_cv=bool(cv >= H1_IEI_CV_MIN
-                            and abs(cv - off_cv) <= 0.5 * max(off_cv, 1e-9)),
-                duration=bool(abs(np.median(dur) - np.median(off_dur))
-                              <= 0.5 * max(np.median(off_dur), 1e-9)) if dur.size else False,
-                participation=bool(len(ret) > 0),
-                not_silent=bool(len(ret) > 0))
-            m = dict(active_occupancy=elr.active_occupancy(),
-                     pre_onset_residual_frac=qs["pre_onset_residual_frac"],
-                     q_floor_drift=qs["q_floor_drift"],
-                     event_stats_in_band=all(in_band.values()),
-                     event_stats_detail=dict(**in_band, event_rate_hz=rate_hz,
-                                             off_event_rate_hz=len(off_dur) / (T_CAL_MS / 1000.0),
-                                             iei_cv=cv, off_iei_cv=off_cv,
-                                             duration_median_ms=float(np.median(dur)) if dur.size else 0.0,
-                                             off_duration_median_ms=float(np.median(off_dur)),
-                                             participation_median=float(np.median(par)) if par.size else 0.0,
-                                             n_events=len(ret), off_n_events=len(off_dur),
-                                             band=[lo, hi], label=lc["label"]),
-                     clip_frac_max=num["clip_frac_max"], numerical_unsafe=num["numerical_unsafe"])
+            m = _b0_metrics(
+                active_occupancy=elr.active_occupancy(), q_stats=qs,
+                on_events=ret, on_onsets=on,
+                off_durations_ms=np.asarray(off["event_durations_ms"], float),
+                off_onsets_ms=np.asarray(z["onsets_ms"], float),
+                band=base["band"], T_ms=T_CAL_MS, numerical=num, label=lc["label"])
             v = H2.adjudicate_gate_B0(m)
             v.update(seed=args.seed, generated=datetime.now(timezone.utc).isoformat(),
                      code_commit=FCXR._git_sha(), T_ms=T_CAL_MS, wall_s=wall,

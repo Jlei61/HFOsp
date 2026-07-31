@@ -304,3 +304,74 @@ def test_the_seven_gates_and_bad_data_regressions_are_reused_not_reimplemented()
                post_participation=0.0, post_silent=True)
     v = H1.adjudicate_lifecycle(q75, spatial_leg="PASS")
     assert v["status"] == "NOT_A_CANDIDATE" and "3_bounded_high_state" in v["failed"]
+
+
+# --------------------------------------------------------------- Gate B0 reduction (pure)
+def _b0_metrics():
+    """Load the runner's pure reduction by source, without importing the heavy engine modules."""
+    import types
+    src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "scripts", "run_topic4_fcxr_hyb2.py")).read()
+    seg = src[src.index("def _b0_metrics("):src.index("def cmd_gate_b0(")]
+    ns = dict(np=np, H1_IEI_CV_MIN=H1.IEI_CV_MIN)
+    exec(compile(seg, "<b0_metrics>", "exec"), ns)
+    return ns["_b0_metrics"]
+
+
+def _b0_inputs(**over):
+    rng = np.random.default_rng(0)
+    on = np.cumsum(rng.uniform(200.0, 900.0, 34))
+    ev = [dict(dur_ms=10.0 + rng.uniform(-2, 2), peak_ext=0.045) for _ in on]
+    d = dict(active_occupancy=0.002,
+             q_stats=dict(pre_onset_residual_frac=0.003, q_floor_drift=0.001),
+             on_events=ev, on_onsets=on,
+             off_durations_ms=np.full(34, 10.0), off_onsets_ms=on.copy(),
+             band=dict(event_rate_lo=0.154, event_rate_hi=4.478), T_ms=24000.0,
+             numerical=dict(clip_frac_max=0.0, numerical_unsafe=False),
+             label="INTERICTAL_BASELINE")
+    d.update(over)
+    return d
+
+
+def test_b0_reduction_runs_without_a_keyword_collision():
+    """Regression: `in_band` already carried an `iei_cv` key and the caller passed `iei_cv=` again,
+    raising TypeError AFTER a 41 minute simulation had already finished.  The reduction is now a
+    pure function, so the same mistake is caught in milliseconds."""
+    m = _b0_metrics()(**_b0_inputs())
+    assert set(m) == {"active_occupancy", "pre_onset_residual_frac", "q_floor_drift",
+                      "event_stats_in_band", "event_stats_detail", "clip_frac_max",
+                      "numerical_unsafe"}
+    assert set(m["event_stats_detail"]["clauses"]) == {
+        "event_rate", "iei_cv", "duration", "participation", "not_silent"}
+    assert m["event_stats_detail"]["iei_cv"] == m["event_stats_detail"]["off_iei_cv"]
+
+
+def test_b0_reduction_output_feeds_the_adjudicator_unchanged():
+    m = _b0_metrics()(**_b0_inputs())
+    assert H2.adjudicate_gate_B0(m)["status"] in ("BASELINE_INVISIBLE",
+                                                  "STOP_ELR_BASELINE_VISIBLE")
+
+
+def test_b0_reduction_fails_the_event_clause_when_the_train_thins_out():
+    inp = _b0_inputs()
+    inp["on_events"] = inp["on_events"][:8]
+    inp["on_onsets"] = inp["on_onsets"][:8]
+    m = _b0_metrics()(**inp)
+    assert m["event_stats_detail"]["n_events"] == 8
+    assert m["event_stats_detail"]["event_rate_hz"] < m["event_stats_detail"]["off_event_rate_hz"]
+
+
+def test_b0_reduction_fails_the_iei_clause_on_a_clock_like_train():
+    inp = _b0_inputs(on_onsets=np.arange(34) * 500.0)
+    m = _b0_metrics()(**inp)
+    assert not m["event_stats_detail"]["clauses"]["iei_cv"] and not m["event_stats_in_band"]
+
+
+def test_b0_reduction_reuses_the_HYB1_IEI_CV_floor():
+    src = open(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                            "scripts", "run_topic4_fcxr_hyb2.py")).read()
+    seg = src[src.index("def _b0_metrics("):src.index("def cmd_gate_b0(")]
+    # the CV FLOOR must come from HYB1; the 0.5 that does appear is the +-50% band tolerance
+    assert "H1_IEI_CV_MIN" in seg
+    assert "cv >= 0.5" not in seg and "cv>=0.5" not in seg
+    assert "cv >= H1_IEI_CV_MIN" in seg
