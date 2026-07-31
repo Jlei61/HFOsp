@@ -27,6 +27,7 @@ from src import topic4_zm_phasec_phenotype_v2 as P2  # noqa: E402
 
 ANALYSIS_VERSION = "zm_phasec1_analysis_v2_runaway_scope_2026-07-31"
 AMENDMENT = V1.OUT / "phasec_analysis_amendment.json"
+_INSTALLED = False
 
 # Re-export the pure interfaces used by the dedicated v2 regression tests.
 C1_OBSERVABLES_SCHEMA = V1.C1_OBSERVABLES_SCHEMA
@@ -180,6 +181,9 @@ def _bind_analysis_provenance(payload):
 
 def _install_v2():
     """Patch only the current offline analysis process."""
+    global _INSTALLED
+    if _INSTALLED:
+        return
     V1.P = P2
     V1._load_phenotype_arrays = _load_phenotype_arrays
 
@@ -204,6 +208,7 @@ def _install_v2():
     V1.apply_conditional_gain = apply
     V1.analyze_dt2_confirmation = dt2
     V1.combine_resolution_summaries = combine
+    _INSTALLED = True
 
 
 def main(argv=None):
