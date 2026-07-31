@@ -175,7 +175,21 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # ---- M4: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
     # path). Tracks the recurrent (delay-ring) component of I_E separately so the shared pool can DIVIDE
     # only recurrent E input; the combined I_E accumulation below is untouched (byte-parity). ----
-    track_rec = bool(getattr(getattr(slow, "cfg", None), "use_SG", False))
+    conductance_on = bool(
+        slow is not None
+        and hasattr(slow, "uses_zm_conductance")
+        and slow.uses_zm_conductance()
+    )
+    if conductance_on:
+        cond_cfg = slow.zm_conductance_config()
+        if float(cond_cfg.tau_m_E) != float(p.tau_m_E):
+            raise ValueError(
+                "conductance tau_m_E must match the simulator E-cell tau_m_E"
+            )
+    track_rec = bool(
+        getattr(getattr(slow, "cfg", None), "use_SG", False)
+        or conductance_on
+    )
     if track_rec:
         s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
     ring_sE = np.zeros((M, N))
@@ -237,6 +251,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # optional current-based LFP (|I_E|+|I_I| forward model) at custom sites (Increment-2/3)
     lfp_trace = (np.zeros((nsteps, len(lfp_recorder.sites)))
                  if lfp_recorder is not None else None)
+    lfp_current_proxy_trace = (
+        np.zeros((nsteps, len(lfp_recorder.sites)))
+        if lfp_recorder is not None and conductance_on
+        else None
+    )
     # ---- M4-2: x_dep depression trace (gated; OFF -> no alloc -> byte-parity). Arm 0 (STD off) emits 1.0. ----
     if dump_ee_std_trace:
         xdep_mean = np.zeros(nsteps); xdep_min = np.zeros(nsteps)
@@ -325,12 +344,27 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         I_I = s_I + (I_I - s_I) * decay_II
         if track_rec:
             I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
-        if lfp_trace is not None:                       # current-based LFP at custom sites
+        if lfp_trace is not None and not conductance_on:  # current-based LFP at custom sites
             lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
 
         # slow layer off (slow=None)
+        conductance_state = None
         if slow is not None:
-            if track_rec:
+            if conductance_on:
+                # Phase-D: raw drives enter the unit-safe conductance membrane
+                # directly.  Do NOT first apply z/m or the old S_G divisor.
+                conductance_state = slow.zm_conductance_step(
+                    V, I_E, I_I, decay_V
+                )
+                if lfp_trace is not None:
+                    lfp_trace[t] = lfp_recorder.sample(
+                        conductance_state["I_exc"],
+                        conductance_state["I_inh"],
+                    )
+                    lfp_current_proxy_trace[t] = lfp_recorder.sample(
+                        I_E, I_I
+                    )
+            elif track_rec:
                 I_net = slow.apply_currents(I_E, I_I, labels, I_E_rec)
             else:
                 I_net = slow.apply_currents(I_E, I_I, labels)
@@ -356,7 +390,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             # OTHER "slow" implementers (FrozenSlowVars/SlowVars, RegionalResource) have no a-shunt
             # concept, so hasattr guards them onto the literal parity path below (plan-correction for
             # polymorphic slow=; mirrors the getattr(...,'use_SG',False) duck-typing a few lines up).
-            if hasattr(slow, "uses_shunt") and slow.uses_shunt():
+            if conductance_on:
+                Vtmp = conductance_state["V_next"]
+            elif hasattr(slow, "uses_shunt") and slow.uses_shunt():
                 g = np.zeros_like(V)
                 g[:slow.nE] = slow.shunt_g_at_E()                  # E-only; I cells g=0 -> parity
                 V_inf = (I_net + g * E_A) / (1.0 + g)              # a NEVER divides signed net (reversal-clamped)
@@ -485,6 +521,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             I_spk_bool = I_spk_bool[:nsteps]
         if lfp_trace is not None:
             lfp_trace = lfp_trace[:nsteps]
+        if lfp_current_proxy_trace is not None:
+            lfp_current_proxy_trace = lfp_current_proxy_trace[:nsteps]
         if dump_ee_std_trace:
             xdep_mean = xdep_mean[:nsteps]; xdep_min = xdep_min[:nsteps]
             if xdep_mask_mean is not None:
@@ -500,6 +538,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         n_inside=int(kick_mask.sum()), n_outside=int(outside_mask.sum()),
         NE=NE, nu_theta=nu_theta, wall_s=time.time() - t0,
         lfp_trace=lfp_trace,                                    # (nsteps, n_sites) or None
+        lfp_current_proxy_trace=lfp_current_proxy_trace,
         lfp_sites=(None if lfp_recorder is None else lfp_recorder.sites),
     )
     if zm_ckpt is not None:

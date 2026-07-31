@@ -34,6 +34,10 @@ import numpy as np
 from src.sef_hfo_field import isotropic_gaussian, convolve_periodic
 from src.topic4_m3a_v2_2_sensors import global_M, global_B, global_participation, chi_G  # §B6 sensors
 from src.sef_hfo_m4_load_shunt import LoadShuntParams, load_shunt_step  # M4-3A n->a load/shunt ODE
+from src.snn_engine.zm_conductance import (
+    ZMConductanceConfig,
+    conductance_membrane_step,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -168,6 +172,21 @@ class SpatialSlowFieldConfig:
     use_phi: bool = False       # OFF -> threshold() is a literal passthrough
     tau_phi: float = 100.0      # ms, exact exponential recovery
     delta_phi: float = 0.0      # mV added after each E spike
+    # ---- Phase-D unit-safe conductance membrane (OFF by default).
+    # The existing mV-equivalent drives are converted by kappa before entering
+    # a conductance sum; the old S_G recurrent-E divisor is forbidden here. ----
+    use_zm_conductance: bool = False
+    cond_kappa_E: float = 0.1
+    cond_kappa_I: float = 0.25
+    cond_g_M: float = 0.001 / 15.0
+    cond_gamma: float = 0.0
+    cond_z_spares_global: bool = False
+    cond_g_L: float = 1.0
+    cond_E_L: float = 0.0
+    cond_E_E: float = 25.0
+    cond_E_I: float = 11.0
+    cond_E_K: float = 0.0
+    cond_tau_m_E: float = 20.0
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -263,6 +282,43 @@ class SpatialSlowFieldConfig:
                 raise ValueError(
                     f"delta_phi must be >= 0 when use_phi, got {self.delta_phi}"
                 )
+        if self.use_zm_conductance:
+            if not self.use_z or not self.use_m:
+                raise ValueError(
+                    "use_zm_conductance requires use_z=True and use_m=True"
+                )
+            forbidden = {
+                "use_qI": self.use_qI,
+                "use_gK": self.use_gK,
+                "use_hG": self.use_hG,
+                "use_SG": self.use_SG,
+                "use_A": self.use_A,
+                "use_persist": self.use_persist,
+                "use_H": self.use_H,
+            }
+            active = [name for name, value in forbidden.items() if value]
+            if active:
+                raise ValueError(
+                    "use_zm_conductance requires the clean Z/M substrate; "
+                    f"disable {active}"
+                )
+            self.zm_conductance_config().validate()
+
+    def zm_conductance_config(self) -> ZMConductanceConfig:
+        """Materialise the pure, immutable conductance configuration."""
+        return ZMConductanceConfig(
+            kappa_E=self.cond_kappa_E,
+            kappa_I=self.cond_kappa_I,
+            g_M=self.cond_g_M,
+            gamma=self.cond_gamma,
+            z_spares_global=self.cond_z_spares_global,
+            g_L=self.cond_g_L,
+            E_L=self.cond_E_L,
+            E_E=self.cond_E_E,
+            E_I=self.cond_E_I,
+            E_K=self.cond_E_K,
+            tau_m_E=self.cond_tau_m_E,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -416,6 +472,58 @@ class SpatialSlowField:
         self.phi_increment = np.zeros(self.N, dtype=float)
         self.trace_phi_mean = []; self.trace_phi_max = []
         self.trace_phi_core_mean = []; self.trace_phi_surround_mean = []
+        self.trace_cond_vinf_mean = []; self.trace_cond_tau_eff_mean = []
+        self.trace_cond_gE_mean = []; self.trace_cond_gI_local_mean = []
+        self.trace_cond_gI_global = []; self.trace_cond_gI_eff_mean = []
+        self.trace_cond_gMm_mean = []
+        self.trace_cond_Iexc_mean = []; self.trace_cond_Iinh_mean = []
+        self.trace_cond_Isahp_mean = []
+
+    def uses_zm_conductance(self) -> bool:
+        """True only for the explicit Phase-D conductance arm."""
+        return bool(self.cfg.use_zm_conductance)
+
+    def zm_conductance_config(self) -> ZMConductanceConfig:
+        return self.cfg.zm_conductance_config()
+
+    def zm_conductance_step(self, V, I_E, I_I, decay_V):
+        """Delegate one membrane step to the tested pure conductance module.
+
+        Raw pre-z GABA is stashed for the original z sensor before any
+        conductance scaling.  Neither ``apply_currents`` nor the old S_G
+        recurrent-E divisor is involved.
+        """
+        if not self.uses_zm_conductance():
+            raise RuntimeError("Z/M conductance membrane is not enabled")
+        self._I_I_last = np.asarray(I_I, dtype=float)[:self.nE].copy()
+        out = conductance_membrane_step(
+            V,
+            I_E,
+            I_I,
+            self.z,
+            self.m,
+            decay_V,
+            self.is_E,
+            self.zm_conductance_config(),
+        )
+        e = self.is_E
+        self.trace_cond_vinf_mean.append(float(out["V_inf"][e].mean()))
+        self.trace_cond_tau_eff_mean.append(
+            float(out["tau_eff_ms"][e].mean())
+        )
+        self.trace_cond_gE_mean.append(float(out["g_E"][e].mean()))
+        self.trace_cond_gI_local_mean.append(
+            float(out["g_I_local"][e].mean())
+        )
+        self.trace_cond_gI_global.append(float(out["g_I_global"]))
+        self.trace_cond_gI_eff_mean.append(
+            float(out["g_I_eff"][e].mean())
+        )
+        self.trace_cond_gMm_mean.append(float(out["g_Mm"][e].mean()))
+        self.trace_cond_Iexc_mean.append(float(out["I_exc"][e].mean()))
+        self.trace_cond_Iinh_mean.append(float(out["I_inh"][e].mean()))
+        self.trace_cond_Isahp_mean.append(float(out["I_sahp"][e].mean()))
+        return out
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
