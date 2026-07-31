@@ -216,6 +216,7 @@ def _run(args) -> None:
         "dt_ms": float(ctx["dt"]),
         "runaway_early_stop_ms": result.get("runaway_early_stop_ms"),
         "n_steps_observed": int(result["E_spk_bool"].shape[0]),
+        "total_e_spikes": int(np.sum(result["E_spk_bool"], dtype=np.int64)),
         "median_e_rate_hz": float(np.median(metrics["r_all"])),
         "returning_events": events,
         "peak_active_fraction": float(np.max(metrics["A_active"])),

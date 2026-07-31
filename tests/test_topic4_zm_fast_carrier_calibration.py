@@ -160,3 +160,26 @@ def test_whole_sheet_plateau_requires_sustained_broad_activity():
     assert C.whole_sheet_plateau(arrays) is False
     arrays["active_fraction"][3:23] = 0.7
     assert C.whole_sheet_plateau(arrays) is True
+
+
+def test_zero_spike_dominance_stop_requires_all_three_inhibitory_scales():
+    rows = [
+        {
+            "scale_E": 1.2,
+            "scale_I": scale_I,
+            "scale_M": 1.0,
+            "external_drive_sha256": "d" * 64,
+            "total_e_spikes": 0,
+            "returning_event_count": 0,
+            "peak_active_fraction": 0.0,
+            "runaway_early_stop_ms": None,
+        }
+        for scale_I in C.SCALE_VALUES
+    ]
+    out = C.zero_spike_dominance_stop(rows)
+    assert out["stop"] is True
+    active = copy.deepcopy(rows)
+    active[1]["total_e_spikes"] = 1
+    assert C.zero_spike_dominance_stop(active)["stop"] is False
+    with pytest.raises(C.CalibrationError, match="identity drift"):
+        C.zero_spike_dominance_stop(rows[:-1])

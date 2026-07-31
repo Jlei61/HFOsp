@@ -312,6 +312,47 @@ def build_calibration_row(
     }
 
 
+def zero_spike_dominance_stop(rows: Iterable[Mapping[str, Any]]) -> dict:
+    """Cheap proof that no lattice cell can emit its first E spike.
+
+    Before the first E spike, ``m=0`` and the I-population/raw-z trajectory is
+    identical for fixed ``scale_I``.  The maximum registered excitatory scale
+    therefore upper-bounds first-spike reachability; all three inhibitory
+    scales are enumerated and the M scale is irrelevant while m is zero.
+    """
+    rows = list(rows)
+    expected = {(1.2, scale_I, 1.0) for scale_I in SCALE_VALUES}
+    identities = {
+        (float(row["scale_E"]), float(row["scale_I"]), float(row["scale_M"]))
+        for row in rows
+    }
+    _require(identities == expected and len(rows) == 3, "dominance panel identity drift")
+    _require(
+        len({row["external_drive_sha256"] for row in rows}) == 1,
+        "dominance panel future-noise mismatch",
+    )
+    zero = all(
+        int(row["total_e_spikes"]) == 0
+        and int(row["returning_event_count"]) == 0
+        and float(row["peak_active_fraction"]) == 0.0
+        and row["runaway_early_stop_ms"] is None
+        for row in rows
+    )
+    return {
+        "stop": bool(zero),
+        "verdict": (
+            "NO_GO_baseline_calibration_failed_zero_spike_dominance"
+            if zero
+            else "continue_full_lattice"
+        ),
+        "proof_scope": "first_E_spike_reachability_only",
+        "enumerated_scale_I": list(SCALE_VALUES),
+        "max_scale_E": 1.2,
+        "scale_M_irrelevant_before_first_E_spike": True,
+        "n_rows": len(rows),
+    }
+
+
 def adjudicate_row(row: Mapping[str, Any]) -> dict:
     """Apply the six ordered baseline-preservation constraints to one row."""
     required = {
@@ -431,4 +472,5 @@ __all__ = [
     "select_calibration",
     "trajectory_signature",
     "whole_sheet_plateau",
+    "zero_spike_dominance_stop",
 ]

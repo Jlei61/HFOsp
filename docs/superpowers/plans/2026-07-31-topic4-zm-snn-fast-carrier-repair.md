@@ -286,6 +286,10 @@ is invalid and stops.
   while still shortening \(\tau_{\rm eff}\).
 - [ ] Use lexicographic objective order and deterministic distance-to-
   `(1,1,1)` tie-break from the spec.
+- [ ] Cheap-first, run the locked first-spike dominance panel
+  `(s_E=1.2, s_I={0.8,1.0,1.2}, s_M=1.0)`. Stop the 27-cell lattice only if
+  all three full-window runs have exactly zero E spikes; otherwise complete
+  all 27 cells.
 - [ ] Reject settings that suppress returning events, create a baseline
   plateau or fail any hard constraint.
 - [ ] Write one content-addressed, write-once calibration lock before opening

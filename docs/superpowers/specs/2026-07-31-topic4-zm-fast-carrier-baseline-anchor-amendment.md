@@ -124,5 +124,23 @@ E samples above
   `NO_GO_baseline_calibration_failed`. Reversals or scale bounds must not be
   changed after that result.
 
+### 4.1 Cheap first-spike dominance stop
+
+Before opening the full 27-cell lattice, run
+\((s_E,s_I,s_M)=(1.2,\{0.8,1.0,1.2\},1.0)\) for the complete 8.5 s paired
+window. If all three produce exactly zero E spikes, the full lattice stops as
+`NO_GO_baseline_calibration_failed_zero_spike_dominance`:
+
+- before the first E spike, \(m=0\), so \(s_M\) has no effect;
+- for fixed \(s_I\), raw I input and the z-sensor trajectory are identical
+  until that first E spike;
+- while \(V<E_E\), \(s_E=1.2\) is the registered upper bound on excitatory
+  conductance and hence on first-spike reachability;
+- all registered \(s_I\) values are explicitly enumerated.
+
+If any of the three arms emits an E spike, this stop is invalid and all 27
+cells must run. This stop proves prevention only; it says nothing about carrier
+morphology or lifecycle.
+
 The amendment therefore repairs an impossible initialization without adding a
 candidate parameter or relaxing the scientific gate.
