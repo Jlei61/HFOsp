@@ -24,7 +24,7 @@ from src.topic4_zm_checkpoint import load_state_npz, read_manifest
 from src.topic4_zm_noise_bank import build_noise_bank
 
 
-INPUT_SCHEMA = "zm_fast_carrier_input_v1.1_2026-07-31"
+INPUT_SCHEMA = "zm_fast_carrier_input_v1.2_2026-07-31"
 IMPLEMENTATION_START_GIT_SHA = "12add24f"
 SOURCE_SEED = 1
 SOURCE_DT_MS = 0.1
@@ -56,25 +56,29 @@ PLAN = Path(
     "docs/superpowers/plans/"
     "2026-07-31-topic4-zm-snn-fast-carrier-repair.md"
 )
+CALIBRATION_AMENDMENT = Path(
+    "docs/superpowers/specs/"
+    "2026-07-31-topic4-zm-fast-carrier-baseline-anchor-amendment.md"
+)
 DEFAULT_INPUT_OUTPUT = Path(
     "results/topic4_sef_hfo/zm_fast_carrier_repair/"
-    "phaseD_input_manifest_v1_1.json"
+    "phaseD_input_manifest_v1_2.json"
 )
 SUPERSEDED_INPUT_LOCK = {
     "path": (
         "results/topic4_sef_hfo/zm_fast_carrier_repair/"
-        "phaseD_input_manifest.json"
+        "phaseD_input_manifest_v1_1.json"
     ),
     "file_sha256": (
-        "43b9aaa39fe6f7639798651fda58bcb1068122b916e4b79920f5982a609b1067"
+        "a60d70ac5bbc3d0bb6353943bc874e109ef9c6ff667581c8214128bfd7027c0d"
     ),
     "manifest_sha256": (
-        "38eec097427c86e4e4c4c887c181af55910a1051fe733fb588ceb93488ae41a3"
+        "a40225184201fba663aa41eb148211514300bb8187d823b97e7c0e51fae7c2d6"
     ),
     "reason": (
-        "v1 declared an E-only length-32000 phi array; the running threshold "
-        "and checkpoint schema require a length-40000 vector with an exactly "
-        "zero I-cell tail"
+        "v1.1 predates the locked baseline magnitude-anchor amendment and "
+        "therefore binds the superseded signed-point calibration plan; source "
+        "states, arm identities and the length-40000 phi migration are unchanged"
     ),
     "production_authorized": False,
 }
@@ -493,6 +497,10 @@ def build_input_manifest(root: Path | str) -> dict:
             "spec_file_sha256": sha256_file(root / SPEC),
             "plan_path": str(PLAN),
             "plan_file_sha256": sha256_file(root / PLAN),
+            "calibration_amendment_path": str(CALIBRATION_AMENDMENT),
+            "calibration_amendment_file_sha256": sha256_file(
+                root / CALIBRATION_AMENDMENT
+            ),
         },
         "source": {
             "seed": SOURCE_SEED,

@@ -7,11 +7,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
-import subprocess
 import sys
-import time
-
-import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -20,12 +16,13 @@ if str(ROOT) not in sys.path:
 from src import topic4_zm_checkpoint as CK  # noqa: E402
 from src import topic4_zm_fast_carrier_contract as C  # noqa: E402
 from src import topic4_zm_fast_carrier_state as S  # noqa: E402
+from src import topic4_zm_fast_carrier_runtime as RT  # noqa: E402
 from scripts import run_topic4_zm_branch_decision as R  # noqa: E402
 
 
 DEFAULT_INPUT = (
     ROOT
-    / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_1.json"
+    / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_2.json"
 )
 DEFAULT_OUTPUT = (
     ROOT
@@ -43,57 +40,6 @@ def _canonical_sha(payload: dict) -> str:
         allow_nan=False,
     ).encode("utf-8")
     return hashlib.sha256(raw).hexdigest()
-
-
-def _git_sha() -> str:
-    return subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-    ).strip()
-
-
-def _build_source_locked_context(manifest: dict) -> dict:
-    """Rebuild static substrate from the old lock without rewriting that lock.
-
-    ``R.build_context`` intentionally refuses a historic config after guarded
-    engine evolution.  Phase D instead treats the old config as source
-    provenance and records the new runtime separately.
-    """
-    source = manifest["source"]
-    lock = json.loads((ROOT / source["canonical_config_path"]).read_text())
-    seed = int(source["seed"])
-    parent = lock["seeds"][str(seed)]
-    if parent["config_sha"] != source["canonical_config_sha"]:
-        raise RuntimeError("source canonical seed lock drift")
-    dt = float(source["dt_ms"])
-    static = R.PP.build_substrate(seed=seed, dt=dt)
-    static["seed"] = seed
-    static["I_th_EI"] = float(parent["config"]["I_th_EI"])
-    montage = static["reg"]["montage_sheet"]
-    recorder = R.LFPRecorder(
-        static["p"],
-        static["net"]["pos"],
-        static["net"]["labels"],
-        sites=np.asarray(montage.contacts, float),
-    )
-    core = R.ZM._core_mask_E(static)
-    along, _ = R.CG.axis_transverse_coords(
-        static["posE"], static["src_xy"], static["axis_unit"]
-    )
-    return {
-        "S": static,
-        "rec": recorder,
-        "core": core,
-        "axis": along,
-        "contacts": list(montage.names),
-        "cfg_locked": parent["config"],
-        "cfg_sha": parent["config_sha"],
-        "smoke": False,
-        "resolution": "dt",
-        "dt": dt,
-        "anchor_root": "anchors",
-        "runtime_git_sha": _git_sha(),
-        "runtime_started_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-    }
 
 
 def _run_once(ctx: dict, state: dict) -> tuple[dict, dict, str]:
@@ -145,13 +91,10 @@ def main() -> None:
 
     manifest = json.loads(args.input.read_text())
     C.validate_input_manifest(manifest, ROOT)
-    if manifest["manifest_sha256"] != "a40225184201fba663aa41eb148211514300bb8187d823b97e7c0e51fae7c2d6":
-        raise RuntimeError("Phase-D v1.1 input lock drift")
-
     source_seed = int(manifest["source"]["seed"])
     if source_seed != 1:
         raise RuntimeError(f"unexpected source seed: {source_seed}")
-    ctx = _build_source_locked_context(manifest)
+    ctx = RT.build_source_locked_context(ROOT, manifest, R)
     rows = []
     for row in manifest["source_panel"]:
         row_id = (row["bin_name"], row["fast_phase"])
@@ -195,7 +138,7 @@ def main() -> None:
         "input_path": str(args.input.resolve().relative_to(ROOT)),
         "input_file_sha256": C.sha256_file(args.input),
         "input_manifest_sha256": manifest["manifest_sha256"],
-        "runtime_git_sha": _git_sha(),
+        "runtime_git_sha": RT.git_sha(ROOT),
         "duration_ms": DURATION_MS,
         "comparison": "byte_exact_all_observables_slow_traces_and_final_state",
         "excluded_non_scientific_fields": ["wall_s"],
