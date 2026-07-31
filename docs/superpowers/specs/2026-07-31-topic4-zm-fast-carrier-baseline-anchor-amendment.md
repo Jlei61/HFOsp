@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-31
 
-**Status:** LOCKED PRE-RESULT AMENDMENT
+**Status:** LOCKED PRE-RESULT AMENDMENT — revision 2
 
 **Parent design:** `2026-07-31-topic4-zm-snn-fast-carrier-repair-design.md`
 
@@ -34,43 +34,66 @@ before any B/C/D carrier outcome was opened. The exact 500 ms migration result
 is `armA_migration_equivalence.json`, manifest SHA
 `b777ca15a22b1f05f04af9e667f75a34eceaec49392ac5e83804cc3311bb56c0`.
 
-## 2. Locked replacement anchor
+## 2. Why a scalar distribution median is still insufficient
 
-Keep all reversals, arms, scale bounds and acceptance gates unchanged. Replace
-the invalid signed point anchor only. On free E cells in the locked pre-entry
-checkpoint define
+Revision 1 used the median absolute reversal driving force. A 50 ms
+pre-entry-only smoke test showed that this is positive but does not match the
+actual Arm-A effective charge: Arm A has already divided recurrent excitation
+by its locked \(S_G\), whereas the conductance arm intentionally removes that
+legacy divisor. The central anchor therefore had an I/E charge ratio far above
+the reference. No bounded-mid/late carrier outcome was inspected.
+
+The final anchor must match the *effective charge terms* at the source
+checkpoint, not only an unweighted voltage statistic.
+
+## 3. Locked replacement anchor
+
+Keep all reversals, arms, scale bounds and acceptance gates unchanged. On free
+E cells in the locked pre-entry checkpoint define the Arm-A effective
+excitatory drive
 
 \[
-D_E=\operatorname{median}(E_E-V_i),
+I^{E,A}_i=I^E_i-
+I^{E,\mathrm{rec}}_i\frac{\alpha_G S_G}{1+\alpha_G S_G},
 \]
 
 \[
-D_I=\operatorname{median}|V_i-E_I|,
-\qquad
-D_M=\operatorname{median}|V_i-E_K|.
+\widetilde I^I_i=(1-\gamma)I^I_i+\gamma\langle I^I\rangle.
 \]
 
-The positive baseline magnitude anchor is
+The positive effective-charge anchor is
 
 \[
-\kappa_E^{(0)}=D_E^{-1},\qquad
-\kappa_I^{(0)}=D_I^{-1},\qquad
-g_M^{(0)}=\eta_m D_M^{-1}.
+\kappa_E^{(0)}=
+\frac{\langle|I^{E,A}|\rangle}
+{\langle|I^E(E_E-V)|\rangle},
 \]
 
-For the locked checkpoint this gives approximately
+\[
+\kappa_I^{(0)}=
+\frac{\langle|zI^I|\rangle}
+{\langle|z\widetilde I^I(E_I-V)|\rangle},
+\]
 
-- \(D_E=15.1839\) mV and \(\kappa_E^{(0)}=0.06586\);
-- \(D_I=3.23893\) mV and \(\kappa_I^{(0)}=0.30874\);
-- \(D_M=12.7753\) mV and \(g_M^{(0)}=7.8276\times10^{-5}\).
+\[
+g_M^{(0)}=
+\frac{\eta_m\langle|m|\rangle}
+{\langle|m(E_K-V)|\rangle}.
+\]
 
-This anchor matches the robust magnitude scale of the old voltage drives. It
-does **not** claim pointwise current-sign equivalence below a reversal. Every
-calibration artifact must report the fractions of free/active E samples above
+For the locked checkpoint and primary \(\gamma=1/6\), this gives approximately
+\(\kappa_E^{(0)}=0.0291741\), \(\kappa_I^{(0)}=0.0168780\), and
+\(g_M^{(0)}=1.76217\times10^{-5}\). At scale `(1,1,1)`, the three mean
+absolute charge terms equal their Arm-A targets to numerical precision before
+the continuation starts.
+
+This anchor does **not** claim pointwise current-sign equivalence below a
+reversal. Every calibration artifact must report the fractions of free/active
+E samples above
 \(E_I\) and \(E_K\), together with \(V_\infty\) and
 \(\tau_{\mathrm{eff}}\).
 
-## 3. What remains locked
+## 4. What remains locked
 
 - \(E_L=E_K=0\), \(E_I=11\), \(E_E=25\) mV are unchanged.
 - The deterministic scale lattice remains

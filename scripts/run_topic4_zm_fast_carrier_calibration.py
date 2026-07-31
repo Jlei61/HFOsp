@@ -25,7 +25,7 @@ from src import topic4_zm_fast_carrier_state as ST  # noqa: E402
 from src import topic4_zm_noise_bank as NB  # noqa: E402
 
 
-INPUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_2.json"
+INPUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_3.json"
 AMENDMENT = ROOT / "docs/superpowers/specs/2026-07-31-topic4-zm-fast-carrier-baseline-anchor-amendment.md"
 OUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/calibration"
 PRODUCTION_T_MS = 4000.0
@@ -35,6 +35,18 @@ REPLICATES = ("noise_replay", "noise_resample_1")
 def _canonical_sha(payload: dict) -> str:
     raw = json.dumps(payload, sort_keys=True, separators=(",", ":"), allow_nan=False).encode()
     return hashlib.sha256(raw).hexdigest()
+
+
+def _json_safe(value):
+    if isinstance(value, dict):
+        return {key: _json_safe(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, np.generic):
+        value = value.item()
+    if isinstance(value, float) and not np.isfinite(value):
+        return None
+    return value
 
 
 def _sha(path: Path) -> str:
@@ -225,6 +237,7 @@ def _run(args) -> None:
         "candidate_outcomes_accessed": False,
         "production_authorized": False,
     }
+    body = _json_safe(body)
     payload = {**body, "manifest_sha256": _canonical_sha(body)}
     _write_json(json_path, payload)
     print(json_path)

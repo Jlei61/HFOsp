@@ -60,8 +60,12 @@ def build_source_locked_context(root: Path, manifest: dict, runner: Any) -> dict
 class DiagnosticSlowWrapper:
     """Observation-only wrapper; every numerical method delegates literally."""
 
-    def __init__(self, inner):
+    def __init__(self, inner, *, diagnostic_stride_steps: int = 100):
         object.__setattr__(self, "inner", inner)
+        if int(diagnostic_stride_steps) < 1:
+            raise ValueError("diagnostic_stride_steps must be >=1")
+        object.__setattr__(self, "diagnostic_stride_steps", int(diagnostic_stride_steps))
+        object.__setattr__(self, "_step_index", 0)
         object.__setattr__(self, "trace_vinf_median", [])
         object.__setattr__(self, "trace_tau_eff_median", [])
         object.__setattr__(self, "trace_exc_charge_mean", [])
@@ -80,6 +84,8 @@ class DiagnosticSlowWrapper:
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         out = self.inner.apply_currents(I_E, I_I, labels, I_E_rec)
+        if self._step_index % self.diagnostic_stride_steps:
+            return out
         n_e = int(self.inner.nE)
         cfg = self.inner.cfg
         exc = np.asarray(I_E, float)[:n_e].copy()
@@ -102,6 +108,8 @@ class DiagnosticSlowWrapper:
 
     def zm_conductance_step(self, V, I_E, I_I, decay_V):
         out = self.inner.zm_conductance_step(V, I_E, I_I, decay_V)
+        if self._step_index % self.diagnostic_stride_steps:
+            return out
         e = self.inner.is_E
         cfg = self.inner.zm_conductance_config()
         self.trace_vinf_median.append(float(np.median(out["V_inf"][e])))
@@ -111,6 +119,9 @@ class DiagnosticSlowWrapper:
         self.trace_vinf_above_EI.append(float(np.mean(out["V_inf"][e] > cfg.E_I)))
         self.trace_v_above_EI.append(float(np.mean(np.asarray(V)[e] > cfg.E_I)))
         return out
+
+    def advance_step(self):
+        object.__setattr__(self, "_step_index", self._step_index + 1)
 
     def diagnostic_summary(self) -> dict:
         def median(name):
@@ -128,7 +139,42 @@ class DiagnosticSlowWrapper:
             "median_fraction_vinf_above_EI": median("trace_vinf_above_EI"),
             "median_fraction_v_above_EI": median("trace_v_above_EI"),
             "n_steps": len(self.trace_vinf_median),
+            "diagnostic_stride_steps": self.diagnostic_stride_steps,
+            "n_simulation_steps_seen": self._step_index,
         }
+
+
+class FrozenAllNoStepWrapper:
+    """Zero-copy freeze-all semantics for z/m/S_G with phi disabled.
+
+    ``FreezeWrapper`` must execute and undo ``step`` for partially frozen
+    scientific arms.  Calibration freezes every evolving slow coordinate, so
+    running that update only to copy back 40k-element fields is equivalent but
+    prohibitively expensive.  This wrapper keeps current/threshold reads live
+    and makes only the slow update a no-op.
+    """
+
+    def __init__(self, inner):
+        self.inner = inner
+        if bool(getattr(inner.cfg, "use_phi", False)):
+            raise ValueError("zero-copy freeze-all cannot freeze an enabled dynamic threshold")
+
+    def __getattr__(self, name):
+        return getattr(self.inner, name)
+
+    def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
+        return self.inner.apply_currents(I_E, I_I, labels, I_E_rec)
+
+    def threshold(self, V_th_base):
+        return self.inner.threshold(V_th_base)
+
+    def zm_conductance_step(self, V, I_E, I_I, decay_V):
+        return self.inner.zm_conductance_step(V, I_E, I_I, decay_V)
+
+    def step(self, spk, labels, dt):
+        if hasattr(self.inner, "advance_step"):
+            self.inner.advance_step()
+        return None
 
 
 def make_frozen_diagnostic_slow(
@@ -167,14 +213,13 @@ def make_frozen_diagnostic_slow(
         cfg=cfg,
     )
     diagnostic = DiagnosticSlowWrapper(base)
-    frozen = runner.FS.FreezeWrapper(
-        diagnostic, runner.FS.FreezePolicy.for_arm("freeze_all")
-    )
+    frozen = FrozenAllNoStepWrapper(diagnostic)
     return frozen, diagnostic
 
 
 __all__ = [
     "DiagnosticSlowWrapper",
+    "FrozenAllNoStepWrapper",
     "build_source_locked_context",
     "git_sha",
     "make_frozen_diagnostic_slow",

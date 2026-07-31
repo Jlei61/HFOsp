@@ -35,6 +35,12 @@ def test_reference_anchor_uses_only_free_E_and_records_crossing():
     state = {
         "V": np.array([8.0, 10.0, 12.0, 14.0, 5.0, 7.0]),
         "ref": np.array([0, 0, 2, 0, 0, 0]),
+        "I_E": np.array([4.0, 5.0, 6.0, 7.0, 1.0, 1.0]),
+        "I_E_rec": np.array([1.0, 1.0, 1.0, 1.0, 0.0, 0.0]),
+        "I_I": np.array([2.0, 2.5, 3.0, 3.5, 1.0, 1.0]),
+        "slow.z": np.ones(6),
+        "slow.m": np.ones(6),
+        "slow.S_G": np.asarray(0.1),
     }
     out = C.build_reference_anchor(
         state, n_e=4, v_th_median=18.0, v_reset=11.0, eta_m=0.001
@@ -42,11 +48,21 @@ def test_reference_anchor_uses_only_free_E_and_records_crossing():
     assert out["n_free_e"] == 3
     assert out["candidate_outcomes_accessed"] is False
     assert out["diagnostics"]["fraction_V_above_EI"] == pytest.approx(1 / 3)
+    assert out["diagnostics"]["central_anchor_exact_at_source_snapshot"] is True
     assert len(out["scale_lattice"]) == 27
 
 
 def test_candidate_config_applies_only_locked_literal_scales():
-    state = {"V": np.array([8.0, 10.0, 12.0]), "ref": np.zeros(3)}
+    state = {
+        "V": np.array([8.0, 10.0, 12.0]),
+        "ref": np.zeros(3),
+        "I_E": np.array([4.0, 5.0, 6.0]),
+        "I_E_rec": np.ones(3),
+        "I_I": np.array([2.0, 2.5, 3.0]),
+        "slow.z": np.ones(3),
+        "slow.m": np.ones(3),
+        "slow.S_G": np.asarray(0.1),
+    }
     ref = C.build_reference_anchor(
         state, n_e=3, v_th_median=18.0, v_reset=11.0, eta_m=0.001
     )

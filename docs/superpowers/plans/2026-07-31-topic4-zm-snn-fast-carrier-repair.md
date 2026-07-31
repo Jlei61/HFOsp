@@ -264,12 +264,12 @@ is invalid and stops.
 
 - [ ] Measure the locked free-E voltage distribution in the pre-entry state,
   before candidate runs. Report reversal-crossing fractions explicitly.
-- [ ] Build the positive distribution-magnitude anchor from
-  \(D_E=\operatorname{median}(E_E-V)\),
-  \(D_I=\operatorname{median}|V-E_I|\), and
-  \(D_M=\operatorname{median}|V-E_K|\), then construct the deterministic
-  `[0.8,1.2]^3` scale-factor lattice. Do not claim signed pointwise current
-  equivalence below a reversal.
+- [ ] Build the positive effective-charge-weighted anchor from the locked
+  Arm-A excitation after its existing \(S_G\) divisor, the primary
+  \(\gamma=1/6\) GABA mixture and the M term, then construct the deterministic
+  `[0.8,1.2]^3` scale-factor lattice. The central anchor must match all three
+  mean absolute charge terms at the source snapshot. Do not claim signed
+  pointwise current equivalence below a reversal.
 - [ ] Evaluate only slow-off baseline criteria:
   returning-event count/rate, source ordering, two-source geometry,
   \(V_\infty\), E/I effective charge ratio, \(\tau_{\rm eff}\), prevention and

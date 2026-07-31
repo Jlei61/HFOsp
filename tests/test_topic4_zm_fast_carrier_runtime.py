@@ -5,7 +5,10 @@ from types import SimpleNamespace
 
 import numpy as np
 
-from src.topic4_zm_fast_carrier_runtime import DiagnosticSlowWrapper
+from src.topic4_zm_fast_carrier_runtime import (
+    DiagnosticSlowWrapper,
+    FrozenAllNoStepWrapper,
+)
 
 
 class _CurrentInner:
@@ -49,3 +52,28 @@ def test_wrapper_forwards_state_writes_to_inner():
     wrapped = DiagnosticSlowWrapper(_CurrentInner())
     wrapped.S_G = 0.25
     assert wrapped.inner.S_G == 0.25
+
+
+def test_zero_copy_freeze_all_skips_step_but_keeps_reads_live():
+    inner = _CurrentInner()
+    inner.cfg.use_phi = False
+    calls = []
+    inner.step = lambda *args: calls.append(args)
+    diagnostic = DiagnosticSlowWrapper(inner)
+    frozen = FrozenAllNoStepWrapper(diagnostic)
+    frozen.step(np.array([True]), np.array([0]), 0.1)
+    assert calls == []
+    got = frozen.apply_currents(
+        np.array([6.0, 8.0, 4.0]),
+        np.array([2.0, 4.0, 1.0]),
+        None,
+        np.array([2.0, 2.0, 1.0]),
+    )
+    assert got.shape == (3,)
+
+
+def test_zero_copy_freeze_refuses_dynamic_phi():
+    inner = _CurrentInner()
+    inner.cfg.use_phi = True
+    with np.testing.assert_raises_regex(ValueError, "dynamic threshold"):
+        FrozenAllNoStepWrapper(inner)

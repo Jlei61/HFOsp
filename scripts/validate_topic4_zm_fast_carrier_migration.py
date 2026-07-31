@@ -22,7 +22,7 @@ from scripts import run_topic4_zm_branch_decision as R  # noqa: E402
 
 DEFAULT_INPUT = (
     ROOT
-    / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_2.json"
+    / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_3.json"
 )
 DEFAULT_OUTPUT = (
     ROOT
