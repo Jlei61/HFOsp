@@ -301,6 +301,8 @@ def cmd_calibration(args):
                                                  gap_05_ms=g05, gap_01_ms=g01, gap_min_ms=gmin,
                                                  Q_on=q_on, Q_scale=q_on))
 
+            np.save(os.path.join(OUT, f"load_seed{args.seed}.npy"),
+                    load.astype(np.float32))
             np.savez_compressed(
                 os.path.join(OUT, f"calibration_seed{args.seed}.npz"),
                 b_v=b_v, eps_s=np.float64(eps_s), occupied=occupied,
@@ -342,17 +344,111 @@ def cmd_calibration(args):
             raise
 
 
+# ------------------------------------------------------------------ finalize (offline)
+def cmd_finalize(args):
+    """Global tau_R from the MINIMUM cross-seed GAP_05 (plan 3.6), then re-derive each seed's
+    Q_on at that tau_R by replaying the RECORDED load.  Fully offline: no simulation."""
+    _begin("finalize")
+    try:
+        per = {}
+        for seed in SEEDS:
+            jp = os.path.join(OUT, f"calibration_seed{seed}.json")
+            if not os.path.exists(jp):
+                raise SystemExit(f"missing {jp}: run calibration --seed {seed} first")
+            j = json.load(open(jp))
+            if j["status"] != "CALIBRATION_LOCKED":
+                raise SystemExit(f"seed{seed} is {j['status']}: finalize refuses to proceed")
+            per[seed] = j
+
+        gap05 = {s: per[s]["gap_ms"]["q05"] for s in SEEDS}
+        gap05_lock = min(gap05.values())
+        tr = H2.tau_R_from_timescale(H2.T_EVENT_GUARD_MS, gap05_lock)
+        if not tr["feasible"]:
+            v = dict(status="DESIGN_BLOCKED_EVENT_TIMESCALE", tau=tr, gap_05_per_seed=gap05)
+            _jw(os.path.join(OUT, "DESIGN_BLOCKED_EVENT_TIMESCALE.json"), v)
+            _end("finalize", False, **v)
+            return 2
+        tau_R = tr["tau_R_ms"]
+
+        seeds_out, ok = {}, True
+        for seed in SEEDS:
+            z = np.load(os.path.join(OUT, f"calibration_seed{seed}.npz"))
+            b_v, eps_s, occ = z["b_v"], float(z["eps_s"]), z["occupied"].astype(bool)
+            on = z["onsets_ms"]
+            # the recorded load is not re-stored (it is large); replay from the q_max series is not
+            # enough, so the per-seed npz keeps what IS needed: we recompute Q_on from the stored
+            # per-event peaks ONLY when tau_R is unchanged, otherwise we must reload the load.
+            load_p = os.path.join(OUT, f"load_seed{seed}.npy")
+            if os.path.exists(load_p):
+                q_tv = _replay_q(np.load(load_p, mmap_mode="r"), b_v, eps_s, tau_R, occ)
+                blk = H2.DT_R_MS
+                n_half = q_tv.shape[0] // 2
+                peaks = []
+                for t_on in on[on < n_half * blk]:
+                    a0 = int(t_on / blk)
+                    a1 = min(q_tv.shape[0], a0 + int(round(3.0 * tau_R / blk)) + 1)
+                    if a1 > a0:
+                        peaks.append(float(q_tv[a0:a1][:, occ].max()))
+                q_on = H2.q_on_from_event_peaks(peaks)
+                src = "re-derived at the global tau_R from the recorded load"
+            else:
+                q_on = float(per[seed]["Q_on"])
+                src = (f"per-seed value at that seed's own tau_R "
+                       f"({per[seed]['tau_R_ms']:.2f} ms); the recorded load was not retained, so "
+                       f"it could NOT be re-derived at the global tau_R")
+                ok = ok and abs(per[seed]["tau_R_ms"] - tau_R) < 1e-9
+            seeds_out[f"seed{seed}"] = dict(
+                Q_on=q_on, Q_scale=q_on, eps_q=H2.EPS_Q_FRAC * q_on, eps_s=eps_s,
+                b_v_median=float(np.median(b_v[occ])), n_occupied=int(occ.sum()),
+                gap_05_ms=gap05[seed], gap_01_ms=per[seed]["gap_ms"]["q01"],
+                gap_min_ms=per[seed]["gap_ms"]["min"], n_events=per[seed]["n_events"],
+                Q_on_source=src, artifact=f"calibration_seed{seed}.npz")
+
+        lock = dict(
+            status="CALIBRATION_LOCK" if ok else "CALIBRATION_LOCK_INCOMPLETE",
+            generated=datetime.now(timezone.utc).isoformat(), code_commit=FCXR._git_sha(),
+            plan="docs/superpowers/plans/2026-07-31-topic4-fcxr-hyb2.md",
+            T_event_guard_ms=H2.T_EVENT_GUARD_MS, gap_05_per_seed=gap05,
+            gap_05_lock_ms=gap05_lock, gap_05_lock_rule="min over seeds (plan 3.6)",
+            tau_R_ms=tau_R, tau_interval=tr["interval"], headroom_ms=tr["headroom_ms"],
+            residual={k: H2.residual(v, tau_R) for k, v in
+                      dict(gap_05=gap05_lock,
+                           gap_01=min(per[s]["gap_ms"]["q01"] for s in SEEDS),
+                           gap_min=min(per[s]["gap_ms"]["min"] for s in SEEDS)).items()},
+            I_R_max=H2.I_R_MAX, dt_R_ms=H2.DT_R_MS, Q_BG=H2.Q_BG,
+            eps_s_rule="0.10 * median_v(b_v), per seed",
+            eps_q_rule="0.10 * Q_on, per seed", Q_scale_rule="Q_scale := Q_on (plan 4.3)",
+            seeds=seeds_out,
+            b0_off_arm={f"seed{s}": per[s]["b0_off_arm"] for s in SEEDS},
+            inputs_sha256=json.load(open(os.path.join(OUT, "preflight.json")))["inputs"],
+            note=("tau_R is GLOBAL (min cross-seed GAP_05); b_v / Q_on / Q_scale are PER SEED "
+                  "under the identical frozen rule, so the rule is out-of-sample on seed3"))
+        _jw(os.path.join(OUT, "calibration_lock.json"), lock)
+        _end("finalize", ok, status=lock["status"])
+        print(f"[finalize] {lock['status']}  GAP05 per seed {gap05}  lock={gap05_lock:.1f} ms  "
+              f"tau_R={tau_R:.2f} ms  headroom={tr['headroom_ms']:.2f}  "
+              f"residual={ {k: round(v,5) for k,v in lock['residual'].items()} }  "
+              + "  ".join(f"Q_on[s{s}]={seeds_out[f'seed{s}']['Q_on']:.2f}" for s in SEEDS),
+              flush=True)
+        return 0 if ok else 2
+    except BaseException as e:
+        _end("finalize", False, error=repr(e))
+        raise
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="FCXR-HYB2 runner (dt=0.05, no kick)")
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("preflight")
+    sub.add_parser("finalize")
     c = sub.add_parser("calibration")
     c.add_argument("--seed", type=int, required=True, choices=list(SEEDS))
     c.add_argument("--confirm-run", action="store_true")
     args = ap.parse_args(argv)
-    if args.cmd != "preflight" and not args.confirm_run:
+    if args.cmd not in ("preflight", "finalize") and not args.confirm_run:
         raise SystemExit("REFUSING: simulations require --confirm-run")
-    return {"preflight": cmd_preflight, "calibration": cmd_calibration}[args.cmd](args)
+    return {"preflight": cmd_preflight, "calibration": cmd_calibration,
+            "finalize": cmd_finalize}[args.cmd](args)
 
 
 if __name__ == "__main__":
