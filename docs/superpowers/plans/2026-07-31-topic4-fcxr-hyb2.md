@@ -26,9 +26,16 @@ HYB1 否掉的是"**用 0.65 秒的浓度记忆承载招募**"——它和间期
 
 ## 1. 授权边界（先说清楚，避免与"不得进 40k"自相矛盾）
 
-本 plan 授权 **恰好一条** 40k 运行：**§5.1 的 24 s sensor-only calibration run**。
-它的产物写进独立的 `calibration_lock.json`。**在那份 lock 落盘并回填附录 A 之前，
-其余任何 40k 运行（B0 / A0 / 12 格 / 生命周期）一律不得启动。**
+本 plan 授权 **恰好一个 calibration stage**，该 stage 包含 **seed1 与 seed3 两条依次执行的
+24 s sensor-only 轨迹**：
+
+1. 先跑 **seed1**。**seed1 未过时间尺度门或 `CALIBRATION_INVALID` → 不提交 seed3**；
+2. seed1 过后再跑 **seed3**；
+3. **两条各自**按同一条冻结规则算**自己的** `b_v / Q_on / Q_scale`（见 §4.1）；
+4. **两条各自兼作对应 seed 的 Gate B0 ELR-off 臂**，不重复跑。
+
+产物写进独立的 `calibration_lock.json`。**在那份 lock 落盘并回填附录 A 之前，
+其余任何 40k 运行（B0 的 ELR-on 臂 / A0 / 12 格 / 生命周期）一律不得启动。**
 
 ---
 

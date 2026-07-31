@@ -208,8 +208,13 @@ $$
 4. 后续不得因 lifecycle 结果降低 `Q_on`。
 
 HYB1 只保存了 `b_v/load_mean`，没有保存完整逐体素 load time series。因而允许在 selection rule
-先锁死后，新增**一条无反馈、无 Z/X/M、无 kick 的 sensor-only calibration run**来落盘所需流式
+先锁死后，新增**一个 sensor-only calibration stage**（无反馈、无 Z/X/M、无 kick）来落盘所需流式
 峰值统计；它不是 actuator/lifecycle run，不得据其结果修改 selection rule。
+
+> **该 stage 含 seed1 与 seed3 两条依次执行的 24 s 轨迹**：先 seed1，未过门则不提交 seed3；
+> **两条各自**用同一条冻结规则算**自己的** `b_v / Q_on / Q_scale`（seed3 是不同连接底座，
+> 沿用 seed1 的逐体素 `b_v` 会造成空间错配，使失败无法归因——见 plan §4.1）；
+> **两条各自兼作对应 seed 的 Gate B0 ELR-off 臂**。
 
 这不是“把所有 IED 都增强”；它只允许**Z 已经把一次事件推到超出 accepted interictal envelope**
 之后，ELR 才介入招募。
