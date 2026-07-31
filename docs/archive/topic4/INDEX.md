@@ -11,6 +11,13 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- **2026-08-01 Z/M Phase C completion audit**：
+  `sef_hfo/zm_phase_c_completion_audit_2026-08-01.md`。结论 =
+  `ACCEPT_PHASEC_POST_RESULT_FUTILITY_STOP`：C0 的 153/153 parts、固定 panel、
+  5000-draw 分层 bootstrap 与 resource provenance 完整；C1 保持诚实的
+  59/60 seed-1 primary post-result futility stop，不补写为三-seed complete
+  negative。历史 production SHA 上 266 tests 通过；当前 Phase-D HEAD 的历史
+  contract 测试已改为验证 closed manifest 并明确拒绝 live-engine re-bless。
 - **2026-07-31 Z/M Phase C post-result futility stop**：
   `sef_hfo/zm_phase_c_tonic_identity_futility_2026-07-31.md`。seed-1 primary
   59/60 continuations 经 whole-sheet runaway scope 修正后为 59/59
