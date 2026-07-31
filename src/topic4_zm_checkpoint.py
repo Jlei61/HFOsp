@@ -28,7 +28,10 @@ _ENGINE_OPT_ARRAYS = ("s_E_rec", "I_E_rec", "x_dep")
 #: engine scalars
 _ENGINE_SCALARS = ("xi", "t", "_es_ema", "_es_run", "r_ema")
 #: slow-layer arrays / scalars (names are the SpatialSlowField attributes)
-_SLOW_ARRAYS = ("z", "m", "_I_I_last", "rE", "rI", "rE_fast", "q_I", "g_K", "p", "n_load", "a_shunt")
+_SLOW_ARRAYS = (
+    "z", "m", "phi_increment", "_I_I_last", "rE", "rI", "rE_fast",
+    "q_I", "g_K", "p", "n_load", "a_shunt",
+)
 _SLOW_SCALARS = ("mu_G", "S_G", "h_G", "H", "_t")
 
 

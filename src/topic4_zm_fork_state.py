@@ -189,6 +189,11 @@ def build_state_inventory():
              "freezable_z", "direct", "per-E inhibitory efficacy; scales I_I on E cells"),
         _row("slow.m", "slow_zm", "(N,)", "float64", "tau_adp 500 ms", "simulator", False, True,
              "freezable_m", "direct", "per-E adaptation; current eta_m*m subtracted"),
+        _row("slow.phi_increment", "fast_adaptation", "(N,)", "float64",
+             "tau_phi 60-160 ms", "simulator", False, True,
+             "dynamic", "none",
+             "gated by use_phi=False in this Phase-C inventory; direct in Phase-D arm D "
+             "and remains dynamic in frozen Z/M forks"),
         _row("slow._I_I_last", "slow_zm", "(NE,)", "float64", "step", "simulator", False, True,
              "freezable_z", "none",
              "E-cell I_I stashed by apply_currents for the z_inf Heaviside. INTRA-step scratch: "

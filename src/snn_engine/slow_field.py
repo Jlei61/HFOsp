@@ -162,6 +162,12 @@ class SpatialSlowFieldConfig:
     I_th_EI: float = 0.0       # z_inf = H(I_th_EI - I_I): z depletes where E-cell inhibitory current I_I >= I_th_EI
     tau_adp: float = 2000.0    # ms, m (adaptation) decay time
     eta_m: float = 0.0         # adaptation-current strength (mV per unit m)
+    # ---- Phase-D fast carrier: E-only dynamic-threshold INCREMENT.
+    # This is not the legacy absolute-threshold SlowVars.phi. The heterogeneous
+    # V_th substrate remains the base and phi_increment is added on top. ----
+    use_phi: bool = False       # OFF -> threshold() is a literal passthrough
+    tau_phi: float = 100.0      # ms, exact exponential recovery
+    delta_phi: float = 0.0      # mV added after each E spike
 
     def validate(self) -> None:
         """Raise ValueError on any breached structural invariant (§B5.2-B5.3):
@@ -248,6 +254,15 @@ class SpatialSlowFieldConfig:
                 raise ValueError(f"tau_adp must be > 0 when use_m, got {self.tau_adp}")
             if self.eta_m < 0.0:
                 raise ValueError(f"eta_m must be >= 0 when use_m, got {self.eta_m}")
+        if self.use_phi:
+            if self.tau_phi <= 0.0:
+                raise ValueError(
+                    f"tau_phi must be > 0 when use_phi, got {self.tau_phi}"
+                )
+            if self.delta_phi < 0.0:
+                raise ValueError(
+                    f"delta_phi must be >= 0 when use_phi, got {self.delta_phi}"
+                )
 
 
 # ---------------------------------------------------------------------------
@@ -397,6 +412,10 @@ class SpatialSlowField:
         self.trace_z_core_mean = []; self.trace_z_surround_mean = []
         self.trace_m_mean = []; self.trace_m_max = []
         self.trace_m_core_mean = []; self.trace_m_surround_mean = []
+        # ---- Phase-D dynamic threshold increment (E-only, fast) ----
+        self.phi_increment = np.zeros(self.N, dtype=float)
+        self.trace_phi_mean = []; self.trace_phi_max = []
+        self.trace_phi_core_mean = []; self.trace_phi_surround_mean = []
 
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
         """I_net = I_E - q_I(x_i,t)*I_I - eta_K*g_K(x_i,t) - eta_G*h_G for E cells; I_E - I_I for I cells.
@@ -464,9 +483,10 @@ class SpatialSlowField:
         return np.clip(self.cfg.alpha_A * aE, 0.0, self.cfg.g_A_max)
 
     def threshold(self, V_th_base):
-        """Protocol passthrough: v2 rides the heterogeneous core threshold unchanged
-        (like RegionalResource.threshold)."""
-        return V_th_base
+        """Return heterogeneous base threshold plus the E-only increment."""
+        if not self.cfg.use_phi:
+            return V_th_base
+        return np.asarray(V_th_base, dtype=float) + self.phi_increment
 
     def step(self, spk, labels, dt):
         """Advance the fields one dt: (1) EMA-update r_E,r_I from this step's spikes,
@@ -476,6 +496,22 @@ class SpatialSlowField:
         q_I/g_K are read directly in apply_currents (no per-neuron cache). Task 5."""
         cfg = self.cfg
         spk = np.asarray(spk, bool)
+        if cfg.use_phi:
+            # Exact decay between spikes, then the post-spike jump. I-cell
+            # entries stay exactly zero and never enter the E threshold.
+            phiE = self.phi_increment[:self.nE]
+            phiE *= np.exp(-dt / cfg.tau_phi)
+            phiE[spk[:self.nE]] += cfg.delta_phi
+            self.phi_increment[self.nE:] = 0.0
+            self.trace_phi_mean.append(float(phiE.mean()))
+            self.trace_phi_max.append(float(phiE.max()))
+            if self._core_mask_E is not None:
+                self.trace_phi_core_mean.append(
+                    float(phiE[self._core_mask_E].mean())
+                )
+                self.trace_phi_surround_mean.append(
+                    float(phiE[~self._core_mask_E].mean())
+                )
         if cfg.use_z:                                            # Z/M z_i update (ported byte-identical from mz_slow_vars.py)
             z_inf_E = (self._I_I_last < cfg.I_th_EI).astype(float)   # z_inf = H(I_th_EI - I_I): 1 iff I_I < I_th_EI (strict)
             zE = self.z[self.is_E]
