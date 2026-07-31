@@ -26,6 +26,7 @@ def _row(scales, **overrides):
         "tau_eff_ratio": 0.8,
         "prevention": False,
         "whole_sheet_plateau": False,
+        "runaway_early_stop_ms": None,
     }
     row.update(overrides)
     return row
@@ -120,3 +121,42 @@ def test_incomplete_duplicate_or_candidate_leak_fails_closed():
     leaked[0]["data_scope"] = "bounded_mid"
     with pytest.raises(C.CalibrationError, match="leaked"):
         C.select_calibration(leaked)
+
+
+def _trajectory_arrays():
+    n = 40
+    core = np.zeros(n)
+    source = np.zeros(n)
+    sink = np.zeros(n)
+    lfp = np.ones((n, 4))
+    for lo in (5, 22):
+        core[lo:lo + 5] = [20, 60, 80, 60, 20]
+        source[lo:lo + 5] = [20, 70, 50, 20, 5]
+        sink[lo:lo + 5] = [5, 20, 50, 70, 20]
+        for contact in range(4):
+            lfp[lo + min(contact, 4), contact] = 10.0
+    return {
+        "r_core": core,
+        "r_source": source,
+        "r_sink": sink,
+        "lfp_abs_binned": lfp,
+        "r_all": np.zeros(n),
+        "active_fraction": np.zeros(n),
+    }
+
+
+def test_trajectory_signature_recovers_order_and_two_source_geometry():
+    arrays = _trajectory_arrays()
+    signature = C.trajectory_signature(arrays)
+    assert signature["n_events"] == 2
+    compared = C.compare_trajectory_signatures(signature, signature)
+    assert compared["event_order_preserved"] is True
+    assert compared["two_source_geometry_readable"] is True
+    assert compared["median_contact_order_correlation"] == pytest.approx(1.0)
+
+
+def test_whole_sheet_plateau_requires_sustained_broad_activity():
+    arrays = _trajectory_arrays()
+    assert C.whole_sheet_plateau(arrays) is False
+    arrays["active_fraction"][3:23] = 0.7
+    assert C.whole_sheet_plateau(arrays) is True

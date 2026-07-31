@@ -142,6 +142,176 @@ def candidate_config(reference: Mapping[str, Any], scales: Iterable[float]) -> d
     return base
 
 
+def event_windows(r_core, *, bin_ms: float = 25.0) -> list[tuple[int, int]]:
+    """Return the same half-amplitude returning-event windows as the source lock."""
+    trace = np.asarray(r_core, float)
+    width = max(1, int(round(100.0 / float(bin_ms))))
+    smooth = np.convolve(trace, np.ones(width) / width, mode="same")
+    if smooth.size < 4:
+        return []
+    baseline = float(np.percentile(smooth, 20))
+    amplitude = float(np.max(smooth) - baseline)
+    if amplitude <= 1e-12:
+        return []
+    on = smooth >= baseline + 0.5 * amplitude
+    windows, start = [], None
+    for index, active in enumerate(on):
+        if active and start is None:
+            start = index
+        elif not active and start is not None:
+            windows.append((start, index))
+            start = None
+    if start is not None:
+        windows.append((start, on.size))
+    return windows
+
+
+def trajectory_signature(arrays: Mapping[str, Any], *, bin_ms: float = 25.0) -> dict:
+    """Event order and two-source readability from one saved baseline trace."""
+    required = ("r_core", "r_source", "r_sink", "lfp_abs_binned")
+    _require(all(key in arrays for key in required), "trajectory signature arrays missing")
+    core = np.asarray(arrays["r_core"], float)
+    source = np.asarray(arrays["r_source"], float)
+    sink = np.asarray(arrays["r_sink"], float)
+    lfp = np.asarray(arrays["lfp_abs_binned"], float)
+    _require(source.shape == sink.shape == core.shape, "source/sink/core shape mismatch")
+    _require(lfp.ndim == 2 and lfp.shape[0] == core.size, "LFP/bin shape mismatch")
+    windows = event_windows(core, bin_ms=bin_ms)
+    baseline = np.percentile(lfp, 20, axis=0)
+    baseline = np.maximum(baseline, np.finfo(float).eps)
+    events = []
+    for lo, hi in windows:
+        src_peak = int(lo + np.argmax(source[lo:hi]))
+        sink_peak = int(lo + np.argmax(sink[lo:hi]))
+        contact_peaks = lo + np.argmax(lfp[lo:hi], axis=0)
+        order = np.argsort(np.argsort(contact_peaks, kind="stable"), kind="stable")
+        gain = np.mean(lfp[lo:hi], axis=0) / baseline
+        events.append(
+            {
+                "lo_bin": int(lo),
+                "hi_bin": int(hi),
+                "direction": int(np.sign(sink_peak - src_peak)),
+                "contact_order": order.astype(int).tolist(),
+                "source_peak_hz": float(np.max(source[lo:hi])),
+                "sink_peak_hz": float(np.max(sink[lo:hi])),
+                "median_contact_gain": float(np.median(gain)),
+            }
+        )
+    return {"n_events": len(events), "events": events, "bin_ms": float(bin_ms)}
+
+
+def compare_trajectory_signatures(reference: Mapping[str, Any], candidate: Mapping[str, Any]) -> dict:
+    """Paired event-order and two-source gates without amplitude-unit matching."""
+    ref_events = list(reference.get("events", []))
+    can_events = list(candidate.get("events", []))
+    n = min(len(ref_events), len(can_events))
+    if n == 0:
+        return {
+            "event_order_preserved": False,
+            "two_source_geometry_readable": False,
+            "median_contact_order_correlation": None,
+            "direction_agreement": None,
+            "n_paired_events": 0,
+        }
+    correlations, directions = [], []
+    for ref, can in zip(ref_events[:n], can_events[:n], strict=True):
+        left = np.asarray(ref["contact_order"], float)
+        right = np.asarray(can["contact_order"], float)
+        _require(left.shape == right.shape and left.size >= 2, "contact-order shape drift")
+        corr = float(np.corrcoef(left, right)[0, 1])
+        correlations.append(corr if np.isfinite(corr) else 0.0)
+        directions.append(int(ref["direction"]) == int(can["direction"]))
+    ref_src = np.median([event["source_peak_hz"] for event in ref_events[:n]])
+    ref_sink = np.median([event["sink_peak_hz"] for event in ref_events[:n]])
+    can_src = np.median([event["source_peak_hz"] for event in can_events[:n]])
+    can_sink = np.median([event["sink_peak_hz"] for event in can_events[:n]])
+    can_gain = np.median([event["median_contact_gain"] for event in can_events[:n]])
+    median_corr = float(np.median(correlations))
+    direction_agreement = float(np.mean(directions))
+    return {
+        "event_order_preserved": bool(median_corr >= 0.5 and direction_agreement >= 0.5),
+        "two_source_geometry_readable": bool(
+            can_gain >= 1.5
+            and can_src >= 0.5 * max(ref_src, 1e-12)
+            and can_sink >= 0.5 * max(ref_sink, 1e-12)
+        ),
+        "median_contact_order_correlation": median_corr,
+        "direction_agreement": direction_agreement,
+        "candidate_median_contact_gain": float(can_gain),
+        "source_peak_ratio": float(can_src / max(ref_src, 1e-12)),
+        "sink_peak_ratio": float(can_sink / max(ref_sink, 1e-12)),
+        "n_paired_events": int(n),
+    }
+
+
+def whole_sheet_plateau(arrays: Mapping[str, Any], *, bin_ms: float = 25.0) -> bool:
+    """Baseline failure: broad high-rate activity sustained for 500 ms."""
+    rate = np.asarray(arrays["r_all"], float)
+    active = np.asarray(arrays["active_fraction"], float)
+    _require(rate.shape == active.shape, "rate/active-fraction shape mismatch")
+    above = (active >= 0.5) | ((rate >= 100.0) & (active >= 0.2))
+    need = max(1, int(round(500.0 / float(bin_ms))))
+    run = 0
+    for flag in above:
+        run = run + 1 if flag else 0
+        if run >= need:
+            return True
+    return False
+
+
+def build_calibration_row(
+    reference_receipt: Mapping[str, Any],
+    reference_arrays: Mapping[str, Any],
+    candidate_receipt: Mapping[str, Any],
+    candidate_arrays: Mapping[str, Any],
+) -> dict:
+    """Convert one paired dynamic-pre-entry run into the selector schema."""
+    _require(reference_receipt["mode"] == "reference", "reference receipt mode drift")
+    _require(candidate_receipt["mode"] == "cell", "candidate receipt mode drift")
+    _require(
+        reference_receipt["external_drive_sha256"]
+        == candidate_receipt["external_drive_sha256"],
+        "paired external drive mismatch",
+    )
+    ref_events = reference_receipt["returning_events"]
+    can_events = candidate_receipt["returning_events"]
+    _require(
+        int(ref_events["n_events"]) >= 10
+        and float(ref_events["median_peak_hz"]) >= 20.0,
+        "reference lacks source-scale returning IEDs",
+    )
+    signatures = compare_trajectory_signatures(
+        trajectory_signature(reference_arrays), trajectory_signature(candidate_arrays)
+    )
+    ref_diag = reference_receipt["diagnostics"]
+    can_diag = candidate_receipt["diagnostics"]
+    ref_rate = float(reference_receipt["median_e_rate_hz"])
+    ref_count = int(ref_events["n_events"])
+    ref_charge = float(ref_diag["effective_inhibitory_to_excitatory_charge_ratio"])
+    scales = candidate_receipt["scales"]
+    return {
+        "scale_E": float(scales[0]),
+        "scale_I": float(scales[1]),
+        "scale_M": float(scales[2]),
+        "data_scope": "dynamic_preentry_t0_to_8500ms_only",
+        "baseline_reference_sha256": reference_receipt["manifest_sha256"],
+        "median_e_rate_ratio": float(candidate_receipt["median_e_rate_hz"]) / max(ref_rate, 1e-12),
+        "returning_event_count_ratio": int(can_events["n_events"]) / max(ref_count, 1),
+        "returning_event_count": int(can_events["n_events"]),
+        "event_order_preserved": signatures["event_order_preserved"],
+        "two_source_geometry_readable": signatures["two_source_geometry_readable"],
+        "vinf_error_mv": float(can_diag["median_vinf_mv"] - ref_diag["median_vinf_mv"]),
+        "charge_ratio_relative_error": float(
+            can_diag["effective_inhibitory_to_excitatory_charge_ratio"] / max(ref_charge, 1e-12) - 1.0
+        ),
+        "tau_eff_ratio": float(can_diag["median_tau_eff_ms"] / 20.0),
+        "prevention": int(can_events["n_events"]) == 0,
+        "whole_sheet_plateau": whole_sheet_plateau(candidate_arrays),
+        "trajectory_comparison": signatures,
+        "runaway_early_stop_ms": candidate_receipt["runaway_early_stop_ms"],
+    }
+
+
 def adjudicate_row(row: Mapping[str, Any]) -> dict:
     """Apply the six ordered baseline-preservation constraints to one row."""
     required = {
@@ -160,6 +330,7 @@ def adjudicate_row(row: Mapping[str, Any]) -> dict:
         "tau_eff_ratio",
         "prevention",
         "whole_sheet_plateau",
+        "runaway_early_stop_ms",
     }
     missing = required - set(row)
     _require(not missing, f"calibration row missing fields: {sorted(missing)}")
@@ -193,6 +364,8 @@ def adjudicate_row(row: Mapping[str, Any]) -> dict:
         reasons.append("tau_eff_ratio_outside_0p25_1p0")
     if bool(row["whole_sheet_plateau"]):
         reasons.append("baseline_whole_sheet_plateau")
+    if row["runaway_early_stop_ms"] is not None:
+        reasons.append("baseline_runaway")
     distance = float(np.linalg.norm(np.asarray(scales) - 1.0))
     objective = (
         max(rate_error, count_error),
@@ -251,6 +424,11 @@ __all__ = [
     "adjudicate_row",
     "build_reference_anchor",
     "candidate_config",
+    "build_calibration_row",
+    "compare_trajectory_signatures",
+    "event_windows",
     "scale_lattice",
     "select_calibration",
+    "trajectory_signature",
+    "whole_sheet_plateau",
 ]
