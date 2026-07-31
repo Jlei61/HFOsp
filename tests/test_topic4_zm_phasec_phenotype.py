@@ -9,6 +9,7 @@ if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
 import src.topic4_zm_phasec_phenotype as P  # noqa: E402
+import src.topic4_zm_phasec_phenotype_v2 as P2  # noqa: E402
 
 
 BIN_MS = 2.0
@@ -33,6 +34,24 @@ def _classify(source, **kwargs):
     kymograph[:, 2:5] = np.asarray(source)[:, None]
     kymograph[:, 8:11] = np.asarray(source)[:, None]
     return P.classify_phasec_run(
+        E,
+        I,
+        bin_ms=BIN_MS,
+        source_rate_hz=source,
+        active_area_fraction=area,
+        kymograph=kymograph,
+        axis_positions=np.linspace(-6, 6, 12),
+        readout_kernel_width_mm=0.278,
+        **kwargs,
+    )
+
+
+def _classify_v2(source, **kwargs):
+    E, I, area = _grids(source)
+    kymograph = np.zeros((len(source), 12), float)
+    kymograph[:, 2:5] = np.asarray(source)[:, None]
+    kymograph[:, 8:11] = np.asarray(source)[:, None]
+    return P2.classify_phasec_run(
         E,
         I,
         bin_ms=BIN_MS,
@@ -135,6 +154,38 @@ def test_rest_runaway_and_saturation_preempt_bounded_labels():
         refractory_fraction=0.90,
     )
     assert out["phenotype"] == "refractory_saturated"
+
+
+def test_local_high_rate_uses_all_sheet_rate_for_runaway_gate():
+    """A bounded focal carrier must not be called whole-network runaway.
+
+    ``source_rate_hz`` is the pathology-core trace used for temporal
+    morphology.  The registered 250-Hz runaway ceiling has whole-network
+    semantics, so it must use the separately recorded all-sheet E rate.
+    """
+    source = np.full(N, 440.0)
+    bounded = _classify_v2(
+        source,
+        all_sheet_rate_hz=np.full(120, 150.0),
+        all_sheet_bin_ms=25.0,
+        saturation_fraction=1.0,
+        refractory_fraction=0.15,
+    )
+    assert bounded["phenotype"] == "tonic_non_AI"
+    assert bounded["bounded_gate"]["runaway_rate_scope"] == "all_sheet_E"
+    assert bounded["bounded_gate"]["source_mean_hz"] == 440.0
+    assert bounded["bounded_gate"]["runaway_rate_mean_hz"] == 150.0
+    assert bounded["bounded_gate"]["runaway_rate_bin_ms"] == 25.0
+
+    whole_network = _classify_v2(
+        source,
+        all_sheet_rate_hz=np.full(120, 280.0),
+        all_sheet_bin_ms=25.0,
+        saturation_fraction=1.0,
+        refractory_fraction=0.15,
+    )
+    assert whole_network["phenotype"] == "runaway"
+    assert whole_network["bounded_gate"]["runaway_rate_scope"] == "all_sheet_E"
 
 
 def test_bounded_but_drifting_candidate_fails_stationarity_gate():

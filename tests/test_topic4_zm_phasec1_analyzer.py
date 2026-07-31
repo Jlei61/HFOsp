@@ -15,6 +15,7 @@ for path in (ROOT, ROOT / "scripts"):
         sys.path.insert(0, str(path))
 
 import scripts.analyze_topic4_zm_phasec1 as A  # noqa: E402
+import scripts.analyze_topic4_zm_phasec1_v2 as A2  # noqa: E402
 import scripts.lock_topic4_zm_phasec1_gain_triggers as L  # noqa: E402
 import src.topic4_zm_phasec_neighbourhood as N  # noqa: E402
 import src.topic4_zm_phasec_resources as PRES  # noqa: E402
@@ -101,6 +102,50 @@ def _coordinate(cell_id="primary__rising__bounded_mid", tier="primary_convex"):
         "state_sha256": "a" * 64,
         "status": "valid",
     }
+
+
+def test_phenotype_loader_requires_separate_all_sheet_runaway_trace(
+    tmp_path, monkeypatch
+):
+    """Core morphology and whole-sheet runaway must remain separate signals."""
+    monkeypatch.setattr(A2, "ROOT", tmp_path)
+    path = tmp_path / "observables.npz"
+    n = 16
+    base = {
+        "phasec1_observables_schema": np.asarray(A2.C1_OBSERVABLES_SCHEMA),
+        "bin_ms": np.asarray(2.0),
+        "E_rate_grid": np.zeros((n, 2, 2), np.float32),
+        "I_rate_grid": np.zeros((n, 2, 2), np.float32),
+        "source_rate_hz": np.full(n, 440.0, np.float32),
+        "rest_mask": np.zeros(n, bool),
+        "active_area_fraction": np.full(n, 0.25, np.float32),
+        "kymograph": np.zeros((n, 4), np.float32),
+        "axis_positions": np.arange(4, dtype=np.float32),
+        "readout_kernel_width_mm": np.asarray(0.278),
+    }
+    np.savez_compressed(path, **base)
+    part = {
+        "observables_path": str(path),
+        "observables_sha256": A2._sha256(path),
+    }
+    blocked = A2._load_phenotype_arrays(part)
+    assert blocked["status"] == "blocked"
+    assert blocked["reason"] == (
+        "missing_phenotype_npz_fields:carrier_gate_r_all_hz,"
+        "carrier_gate_bin_ms"
+    )
+
+    np.savez_compressed(
+        path,
+        **base,
+        carrier_gate_r_all_hz=np.full(4, 150.0, np.float32),
+        carrier_gate_bin_ms=np.asarray(25.0),
+    )
+    part["observables_sha256"] = A2._sha256(path)
+    loaded = A2._load_phenotype_arrays(part)
+    assert loaded["status"] == "ok"
+    assert loaded["all_sheet_rate_hz"].shape == (4,)
+    assert loaded["all_sheet_bin_ms"] == 25.0
 
 
 def _six_runs(label="tonic_non_AI", spike_pass=False):
