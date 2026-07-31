@@ -593,6 +593,145 @@ def cmd_gate_b0(args):
             raise
 
 
+# ------------------------------------------------------------------ Gate A0 (actuator efficacy)
+A0_T_MS = 9000.0                      # plan 5.2: 9 s, not 6 -- q50 reaches dense ~3 s, ictal ~6 s
+A0_Z = dict(I_th_EI=1.6652801609959704, tau_z=10000.0)     # LC1 q50, the ONLY authorised input
+
+
+def _a0_window_readout(res, S, elr, t_gate_ms, window_ms):
+    """Recruitment extent inside [t_gate, t_gate+window].  Same three measures as B2.1."""
+    spk = res["E_spk_bool"]
+    a = int(round(t_gate_ms / DT))
+    b = min(spk.shape[0], int(round((t_gate_ms + window_ms) / DT)))
+    part = spk[a:b].any(axis=0)
+    posE = np.asarray(S["posE"], float)
+    sel = posE[part]
+    rad = float(np.sqrt(np.mean(np.sum((sel - np.asarray(S["src_xy"], float)) ** 2, axis=1)))) \
+        if sel.shape[0] else float("nan")
+    vox = _voxel_map(S)[:S["NE"]]
+    return dict(window_participants=int(part.sum()), recruitment_radius_mm=rad,
+                participant_voxels=int(np.unique(vox[part]).size),
+                window_ms=[t_gate_ms, t_gate_ms + window_ms])
+
+
+def cmd_gate_a0(args):
+    """One arm per invocation so the two can occupy two workers.  ELR-ON and ELR-OFF are the SAME
+    deterministic simulation up to t_gate; the off arm zeroes only the membrane current and keeps
+    q_v evolving, so t_gate is a counterfactual sensor tracked identically in both."""
+    arm = args.arm
+    with _stage_lock(f"gateA0_{arm}"):
+        FCXR._assert_engine_blessed()
+        _begin(f"gateA0_{arm}", T=A0_T_MS, arm=arm)
+        swap_base = LC._swap_used_mb()
+        try:
+            for s_ in SEEDS:
+                gp = os.path.join(OUT, f"gate_b0_seed{s_}.json")
+                if not os.path.exists(gp):
+                    raise SystemExit(f"missing {gp}: Gate B0 must pass on both seeds first")
+                if json.load(open(gp))["status"] != "BASELINE_INVISIBLE":
+                    raise SystemExit(f"Gate B0 seed{s_} did not pass: A0 may not run")
+            lock = json.load(open(os.path.join(OUT, "calibration_lock.json")))
+            k = lock["seeds"]["seed1"]
+            z = np.load(os.path.join(OUT, "calibration_seed1.npz"))
+
+            st, info = _guard(f"gateA0_{arm}_start", swap_base)
+            if st == "hard":
+                raise SystemExit(f"resource hard-stop before start: {info}")
+            S = PP.build_substrate(1)
+            cfg_elr = ELR.ELRConfig(b_v=z["b_v"], eps_s=k["eps_s"], tau_R_ms=lock["tau_R_ms"],
+                                    Q_on=k["Q_on"], Q_scale=k["Q_scale"], eps_q=k["eps_q"],
+                                    I_R_max=lock["I_R_max"], n_grid=N_GRID, dt_R_ms=H2.DT_R_MS,
+                                    enabled=(arm == "on"), record_q_trace=True)
+            elr = ELR.EventLimitedRecruitment(S["N"], _voxel_map(S), cfg_elr)
+            cfg = LC._slowoff_cfg()
+            cfg.update(use_z=True, tau_z=A0_Z["tau_z"], I_th_EI=A0_Z["I_th_EI"], record_calib=True)
+
+            import dataclasses as _dc
+            p = _dc.replace(S["p"], T=A0_T_MS, dt=DT)
+            mz = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**cfg), NE=S["NE"],
+                            core_mask_E=OLD.build_core_masks(S))
+            S["net"]["rng"] = np.random.default_rng(1)
+            t0 = time.time()
+            res = simulate_kick(p, S["net"], 0.0, slow=ELR.ELRMZAdapter(mz, elr),
+                                kick_center=list(S["src_xy"]), r_kick=PP.R_KICK, t_kick=1e9,
+                                V_th_per_neuron=S["vth"], early_stop_runaway=False)
+            wall = round(time.time() - t0, 1)
+
+            num = LC._numerical(S, res, mz, DT)
+            rate = np.asarray(res["rate_E"], float)
+            end_rate = float(rate[-int(1000.0 / DT):].mean())
+            tg = elr.t_gate_ms()
+            read = _a0_window_readout(res, S, elr, tg, H2.A0_WINDOW_MS) if tg is not None else {}
+            del res
+            gc.collect()
+
+            payload = dict(arm=arm, generated=datetime.now(timezone.utc).isoformat(),
+                           code_commit=FCXR._git_sha(), T_ms=A0_T_MS, wall_s=wall,
+                           peak_rss_gb=round(_rss_gb(), 2), z_config=A0_Z,
+                           elr_enabled=(arm == "on"), t_gate_ms=tg,
+                           ms_after_t_gate=(A0_T_MS - tg) if tg is not None else 0.0,
+                           crossed_Q_on=bool(tg is not None), q_max=elr.q_running_max,
+                           Q_on=k["Q_on"], max_R_evt=float(
+                               ELR.recruit_current(np.array([elr.q_running_max]), cfg_elr)[0]),
+                           end_rate_hz=end_rate,
+                           early_stopped=bool(end_rate >= H2.A0_RUNAWAY_HZ),
+                           clip_frac_max=num["clip_frac_max"], finite=num["finite"],
+                           numerical=num, n_E=int(S["NE"]),
+                           n_occupied_voxels=int(elr.occupied.sum()), **read)
+            _jw(os.path.join(OUT, f"gate_a0_arm_{arm}.json"), payload)
+            _end(f"gateA0_{arm}", True, arm=arm, t_gate_ms=tg, wall_s=wall)
+            print(f"[gateA0:{arm}] t_gate={tg} ms  q_max={elr.q_running_max:.1f} "
+                  f"(Q_on {k['Q_on']:.1f})  R_evt_max={payload['max_R_evt']:.3f} "
+                  f"(I_R_max {lock['I_R_max']:.3f})  end_rate={end_rate:.1f} Hz  "
+                  f"parts={read.get('window_participants')} rad={read.get('recruitment_radius_mm')} "
+                  f"vox={read.get('participant_voxels')}  ({wall}s)", flush=True)
+            return 0
+        except BaseException as e:
+            _end(f"gateA0_{arm}", False, error=repr(e))
+            raise
+
+
+def cmd_gate_a0_adjudicate(args):
+    """Offline: combine the two arms under the three-way verdict.  No simulation."""
+    _begin("gateA0_adjudicate")
+    try:
+        arms = {a: json.load(open(os.path.join(OUT, f"gate_a0_arm_{a}.json")))
+                for a in ("off", "on")}
+        if arms["off"]["t_gate_ms"] != arms["on"]["t_gate_ms"]:
+            raise SystemExit(f"t_gate differs between arms "
+                             f"({arms['off']['t_gate_ms']} vs {arms['on']['t_gate_ms']}): the "
+                             f"counterfactual sensor is NOT identical, the comparison is void")
+        keys = ("window_participants", "recruitment_radius_mm", "participant_voxels")
+        m = dict(crossed_Q_on=arms["on"]["crossed_Q_on"],
+                 ms_after_t_gate=arms["on"]["ms_after_t_gate"],
+                 n_E=arms["on"]["n_E"], n_occupied_voxels=arms["on"]["n_occupied_voxels"],
+                 off=dict(**{k: arms["off"].get(k) for k in keys},
+                          end_rate_hz=arms["off"]["end_rate_hz"],
+                          early_stopped=arms["off"]["early_stopped"]),
+                 on={k: arms["on"].get(k) for k in keys},
+                 max_R_evt=arms["on"]["max_R_evt"], clip_frac_max=arms["on"]["clip_frac_max"],
+                 finite=arms["on"]["finite"])
+        v = H2.adjudicate_gate_A0(m)
+        v.update(generated=datetime.now(timezone.utc).isoformat(), code_commit=FCXR._git_sha(),
+                 measured=m, arms={a: dict(t_gate_ms=arms[a]["t_gate_ms"], wall_s=arms[a]["wall_s"],
+                                           end_rate_hz=arms[a]["end_rate_hz"],
+                                           q_max=arms[a]["q_max"]) for a in ("off", "on")},
+                 t_gate_identical=True)
+        _jw(os.path.join(OUT, "gate_a0.json"), v)
+        ok = v["status"] == "A0_RECRUITMENT_EFFECTIVE"
+        if not ok:
+            _jw(os.path.join(OUT, f"{v['status']}.json"), v)
+        _end("gateA0_adjudicate", ok, status=v["status"])
+        print(f"[gateA0] {v['status']}" + (f"  relative={ {k: round(x,4) for k,x in v['relative'].items()} }"
+                                           f"  {v['n_measures_up']}/{len(v['relative'])} up"
+                                           if "relative" in v else f"  {v.get('note','')}"),
+              flush=True)
+        return 0 if ok else 2
+    except BaseException as e:
+        _end("gateA0_adjudicate", False, error=repr(e))
+        raise
+
+
 # ------------------------------------------------------------------ S_Z response axis (offline)
 def cmd_zaxis(args):
     """plan 6: open-loop cumulative-depletion coordinate, replayed offline on the STORED per-cell
@@ -642,16 +781,22 @@ def main(argv=None):
     sub.add_parser("preflight")
     sub.add_parser("finalize")
     sub.add_parser("zaxis")
+    sub.add_parser("gate-a0-adjudicate")
+    a = sub.add_parser("gate-a0")
+    a.add_argument("--arm", choices=["off", "on"], required=True)
+    a.add_argument("--confirm-run", action="store_true")
     for nm in ("calibration", "gate-b0"):
         c = sub.add_parser(nm)
         c.add_argument("--seed", type=int, required=True, choices=list(SEEDS))
         c.add_argument("--confirm-run", action="store_true")
     args = ap.parse_args(argv)
-    if args.cmd not in ("preflight", "finalize", "zaxis") and not args.confirm_run:
+    if args.cmd not in ("preflight", "finalize", "zaxis", "gate-a0-adjudicate") \
+            and not args.confirm_run:
         raise SystemExit("REFUSING: simulations require --confirm-run")
     return {"preflight": cmd_preflight, "calibration": cmd_calibration,
             "finalize": cmd_finalize, "zaxis": cmd_zaxis,
-            "gate-b0": cmd_gate_b0}[args.cmd](args)
+            "gate-b0": cmd_gate_b0, "gate-a0": cmd_gate_a0,
+            "gate-a0-adjudicate": cmd_gate_a0_adjudicate}[args.cmd](args)
 
 
 if __name__ == "__main__":
