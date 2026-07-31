@@ -24,7 +24,7 @@ from src.topic4_zm_checkpoint import load_state_npz, read_manifest
 from src.topic4_zm_noise_bank import build_noise_bank
 
 
-INPUT_SCHEMA = "zm_fast_carrier_input_v1_2026-07-31"
+INPUT_SCHEMA = "zm_fast_carrier_input_v1.1_2026-07-31"
 IMPLEMENTATION_START_GIT_SHA = "12add24f"
 SOURCE_SEED = 1
 SOURCE_DT_MS = 0.1
@@ -58,8 +58,26 @@ PLAN = Path(
 )
 DEFAULT_INPUT_OUTPUT = Path(
     "results/topic4_sef_hfo/zm_fast_carrier_repair/"
-    "phaseD_input_manifest.json"
+    "phaseD_input_manifest_v1_1.json"
 )
+SUPERSEDED_INPUT_LOCK = {
+    "path": (
+        "results/topic4_sef_hfo/zm_fast_carrier_repair/"
+        "phaseD_input_manifest.json"
+    ),
+    "file_sha256": (
+        "43b9aaa39fe6f7639798651fda58bcb1068122b916e4b79920f5982a609b1067"
+    ),
+    "manifest_sha256": (
+        "38eec097427c86e4e4c4c887c181af55910a1051fe733fb588ceb93488ae41a3"
+    ),
+    "reason": (
+        "v1 declared an E-only length-32000 phi array; the running threshold "
+        "and checkpoint schema require a length-40000 vector with an exactly "
+        "zero I-cell tail"
+    ),
+    "production_authorized": False,
+}
 
 SOURCE_CARRIED_FIELDS = (
     "I_E",
@@ -468,6 +486,7 @@ def build_input_manifest(root: Path | str) -> dict:
     body = {
         "schema": INPUT_SCHEMA,
         "production_authorized": False,
+        "supersedes_input_lock": SUPERSEDED_INPUT_LOCK,
         "implementation_start_git_sha": IMPLEMENTATION_START_GIT_SHA,
         "locked_documents": {
             "spec_path": str(SPEC),
@@ -506,13 +525,14 @@ def build_input_manifest(root: Path | str) -> dict:
         "state_migration": {
             "source_schema": "zm_sim_state_v1",
             "target_schema": "zm_fast_carrier_state_v1",
+            "population_sizes": {"N": 40000, "NE": 32000, "NI": 8000},
             "carried_fields": list(SOURCE_CARRIED_FIELDS),
             "inserted_fields": {
                 "slow.phi_increment": {
                     "dtype": "float64",
-                    "shape": [32000],
+                    "shape": [40000],
                     "fill": 0.0,
-                    "target": "E_only",
+                    "target": "E_active_I_exact_zero",
                 }
             },
             "source_config_sha_preserved": True,

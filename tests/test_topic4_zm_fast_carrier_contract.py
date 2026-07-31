@@ -94,12 +94,17 @@ def test_source_states_and_futility_evidence_are_reverified_from_disk(manifest):
 def test_migration_is_explicit_and_inserts_only_zero_phi(manifest):
     migration = manifest["state_migration"]
     assert migration["source_schema"] == "zm_sim_state_v1"
+    assert migration["population_sizes"] == {
+        "N": 40000,
+        "NE": 32000,
+        "NI": 8000,
+    }
     assert migration["inserted_fields"] == {
         "slow.phi_increment": {
             "dtype": "float64",
             "fill": 0.0,
-            "shape": [32000],
-            "target": "E_only",
+            "shape": [40000],
+            "target": "E_active_I_exact_zero",
         }
     }
     assert "ring_sE" in migration["carried_fields"]
