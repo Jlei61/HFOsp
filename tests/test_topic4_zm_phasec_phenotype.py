@@ -188,6 +188,22 @@ def test_local_high_rate_uses_all_sheet_rate_for_runaway_gate():
     assert whole_network["bounded_gate"]["runaway_rate_scope"] == "all_sheet_E"
 
 
+def test_v2_source_fallback_preserves_v1_phenotype_and_gate():
+    sources = [
+        np.full(N, 75.0),
+        np.linspace(40.0, 300.0, N),
+        80.0 + 30.0 * np.sin(
+            2.0 * np.pi * np.arange(N) * BIN_MS / 50.0
+        ),
+    ]
+    for source in sources:
+        before = _classify(source)
+        after = _classify_v2(source)
+        assert after["phenotype"] == before["phenotype"]
+        for key, value in before["bounded_gate"].items():
+            assert after["bounded_gate"][key] == value
+
+
 def test_bounded_but_drifting_candidate_fails_stationarity_gate():
     source = np.linspace(40.0, 130.0, N)
     out = _classify(source)
