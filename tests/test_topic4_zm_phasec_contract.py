@@ -6,6 +6,7 @@ import hashlib
 import json
 from pathlib import Path
 import tempfile
+from unittest import mock
 
 import numpy as np
 import pytest
@@ -20,6 +21,10 @@ import scripts.build_topic4_zm_phasec1_neighbourhood as B
 
 
 ROOT = Path(__file__).resolve().parents[1]
+LOCKED_INPUT_MANIFEST = (
+    ROOT / "results/topic4_sef_hfo/zm_phase_c_tonic_identity"
+    / "phasec_input_manifest.json"
+)
 EXPECTED_RUNTIME_CLOSURE = {
     "scripts/run_topic4_zm_branch_decision.py",
     "scripts/run_m4_phaseplane.py",
@@ -46,7 +51,42 @@ EXPECTED_RUNTIME_CLOSURE = {
 
 @pytest.fixture(scope="module")
 def manifest():
-    return C.build_manifest(ROOT)
+    return _build_live_or_load_closed_manifest()
+
+
+def _build_live_or_load_closed_manifest():
+    """Exercise the live builder only while its historical engine is live.
+
+    Phase C deliberately bound the complete producer closure.  Later opt-in
+    Phase-D engine work must make a new Phase-C build fail, but it must not make
+    the already-closed manifest's pure validation and mutation tests unusable.
+    """
+    try:
+        return C.build_manifest(ROOT)
+    except C.ContractInputError as exc:
+        if "live engine hash drift" not in str(exc):
+            raise
+        if not LOCKED_INPUT_MANIFEST.is_file():
+            pytest.skip("closed Phase-C input manifest is unavailable")
+        value = json.loads(LOCKED_INPUT_MANIFEST.read_text())
+        C.validate_manifest(value)
+        return value
+
+
+def _live_engine_closure_matches() -> bool:
+    canonical = json.loads(
+        (
+            ROOT / C.DEFAULT_UPSTREAM_ROOT / "phase0/canonical_config.json"
+        ).read_text()
+    )
+    return all(
+        (ROOT / relative).is_file()
+        and canonical["seeds"][str(seed)]["config"]["engine_sha256"][
+            str(relative)
+        ] == C.sha256_file(ROOT / relative)
+        for seed in C.PRIMARY_SEEDS
+        for relative in C.CANONICAL_ENGINE_RUNTIME_PATHS
+    )
 
 
 def _rehash(d):
@@ -61,7 +101,7 @@ def _rehash(d):
 
 
 def test_real_inputs_build_a_deterministic_complete_contract(manifest):
-    again = C.build_manifest(ROOT)
+    again = _build_live_or_load_closed_manifest()
     assert again == manifest
     assert manifest["schema"] == C.PHASEC_INPUT_VERSION
     assert manifest["production_authorized"] is False
@@ -158,9 +198,21 @@ def test_canonical_engine_closure_is_independently_complete_and_fail_closed():
     for seed in C.PRIMARY_SEEDS:
         seed_config = canonical["seeds"][str(seed)]
         assert set(seed_config["config"]["engine_sha256"]) == expected
-        C._validate_canonical_engine_closure(
-            seed_config, root=ROOT, seed=seed
+        live_matches = all(
+            (ROOT / relative).is_file()
+            and seed_config["config"]["engine_sha256"][str(relative)]
+            == C.sha256_file(ROOT / relative)
+            for relative in C.CANONICAL_ENGINE_RUNTIME_PATHS
         )
+        if live_matches:
+            C._validate_canonical_engine_closure(
+                seed_config, root=ROOT, seed=seed
+            )
+        else:
+            with pytest.raises(C.ContractInputError, match="live engine hash drift"):
+                C._validate_canonical_engine_closure(
+                    seed_config, root=ROOT, seed=seed
+                )
     mutated = copy.deepcopy(canonical["seeds"]["1"])
     mutated["config"]["engine_sha256"].pop(
         "src/snn_engine/mz_slow_vars.py"
@@ -210,7 +262,7 @@ def test_build_is_read_only_for_upstream_config_and_anchors():
         ROOT / C.PANEL_PATH,
     ]
     before = {p: C.sha256_file(p) for p in paths}
-    C.build_manifest(ROOT)
+    _build_live_or_load_closed_manifest()
     after = {p: C.sha256_file(p) for p in paths}
     assert before == after
 
@@ -526,11 +578,26 @@ def coordinate_bundle(manifest):
             for resolution in ("dt", "dt2")
         }
         _attach_cross_attestation(coordinate_paths)
-        final = C.build_final_manifest(
-            ROOT,
-            input_path=input_path,
-            coordinate_paths=coordinate_paths,
-        )
+        if _live_engine_closure_matches():
+            final = C.build_final_manifest(
+                ROOT,
+                input_path=input_path,
+                coordinate_paths=coordinate_paths,
+            )
+        else:
+            # The final-lock builder must still be mutation-tested after a
+            # later opt-in engine extension, but it must consume the exact
+            # closed input manifest rather than silently re-bless live files.
+            with mock.patch.object(
+                C,
+                "build_input_manifest",
+                return_value=copy.deepcopy(manifest),
+            ):
+                final = C.build_final_manifest(
+                    ROOT,
+                    input_path=input_path,
+                    coordinate_paths=coordinate_paths,
+                )
         yield {
             "directory": directory,
             "input_path": input_path,
