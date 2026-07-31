@@ -140,3 +140,25 @@ def test_transformation_record_contains_field_level_fingerprints(
         assert set(row) == {"dtype", "shape", "sha256"}
         assert len(row["sha256"]) == 64
     json.dumps(record, allow_nan=False)
+
+
+def test_observable_fingerprint_is_exact_and_excludes_only_wall_time():
+    base = {
+        "rate": np.asarray([1.0, 2.0], dtype=np.float32),
+        "spikes": np.asarray([[True, False]], dtype=bool),
+        "runaway": None,
+        "count": 2,
+        "wall_s": 1.0,
+    }
+    same = copy.deepcopy(base)
+    same["wall_s"] = 99.0
+    assert S.fingerprint_observables(base) == S.fingerprint_observables(same)
+    changed = copy.deepcopy(base)
+    changed["rate"][1] = np.nextafter(changed["rate"][1], np.float32(3.0))
+    assert S.fingerprint_observables(base) != S.fingerprint_observables(changed)
+
+
+def test_exact_continuation_comparator_fails_closed():
+    S.require_exact_continuation({"x": 1}, {"x": 1}, label="arm A")
+    with pytest.raises(S.StateMigrationError, match="byte-identical"):
+        S.require_exact_continuation({"x": 1}, {"x": 2}, label="arm A")

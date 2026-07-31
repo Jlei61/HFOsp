@@ -45,6 +45,47 @@ def _array_fingerprint(value: Any) -> dict:
     }
 
 
+def fingerprint_observables(
+    result: Mapping[str, Any], *, excluded: tuple[str, ...] = ("wall_s",)
+) -> dict:
+    """Content fingerprints for exact continuation outputs.
+
+    Wall-clock duration is deliberately excluded; every scientific observable,
+    including the realised external-input trace when present, remains load
+    bearing.
+    """
+    out = {}
+    for key in sorted(set(result) - set(excluded)):
+        value = result[key]
+        if value is None:
+            out[key] = {"kind": "none"}
+        elif isinstance(value, (str, bool, int, float, np.generic)):
+            out[key] = {
+                "kind": "scalar",
+                "value": value.item() if isinstance(value, np.generic) else value,
+            }
+        else:
+            out[key] = {"kind": "array", **_array_fingerprint(value)}
+    return out
+
+
+def fingerprint_slow_traces(slow: Any) -> dict:
+    """Hash all diagnostic trace buffers without prescribing their names."""
+    inner = getattr(slow, "inner", slow)
+    return {
+        key: _array_fingerprint(value)
+        for key, value in sorted(vars(inner).items())
+        if key.startswith("trace_")
+    }
+
+
+def require_exact_continuation(
+    reference: Mapping[str, Any], migrated: Mapping[str, Any], *, label: str
+) -> None:
+    """Fail closed if two continuation fingerprint trees differ anywhere."""
+    _require(reference == migrated, f"{label} is not byte-identical after migration")
+
+
 def _shallow_validate_manifest(manifest: Mapping[str, Any]) -> None:
     _require(manifest.get("schema") == C.INPUT_SCHEMA, "input schema drift")
     claimed = manifest.get("manifest_sha256")
@@ -174,6 +215,9 @@ def load_and_migrate(
 
 __all__ = [
     "StateMigrationError",
+    "fingerprint_observables",
+    "fingerprint_slow_traces",
     "load_and_migrate",
     "migrate_state",
+    "require_exact_continuation",
 ]
