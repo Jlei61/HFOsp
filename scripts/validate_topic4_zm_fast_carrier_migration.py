@@ -9,6 +9,9 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
+
+import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -46,6 +49,51 @@ def _git_sha() -> str:
     return subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
     ).strip()
+
+
+def _build_source_locked_context(manifest: dict) -> dict:
+    """Rebuild static substrate from the old lock without rewriting that lock.
+
+    ``R.build_context`` intentionally refuses a historic config after guarded
+    engine evolution.  Phase D instead treats the old config as source
+    provenance and records the new runtime separately.
+    """
+    source = manifest["source"]
+    lock = json.loads((ROOT / source["canonical_config_path"]).read_text())
+    seed = int(source["seed"])
+    parent = lock["seeds"][str(seed)]
+    if parent["config_sha"] != source["canonical_config_sha"]:
+        raise RuntimeError("source canonical seed lock drift")
+    dt = float(source["dt_ms"])
+    static = R.PP.build_substrate(seed=seed, dt=dt)
+    static["seed"] = seed
+    static["I_th_EI"] = float(parent["config"]["I_th_EI"])
+    montage = static["reg"]["montage_sheet"]
+    recorder = R.LFPRecorder(
+        static["p"],
+        static["net"]["pos"],
+        static["net"]["labels"],
+        sites=np.asarray(montage.contacts, float),
+    )
+    core = R.ZM._core_mask_E(static)
+    along, _ = R.CG.axis_transverse_coords(
+        static["posE"], static["src_xy"], static["axis_unit"]
+    )
+    return {
+        "S": static,
+        "rec": recorder,
+        "core": core,
+        "axis": along,
+        "contacts": list(montage.names),
+        "cfg_locked": parent["config"],
+        "cfg_sha": parent["config_sha"],
+        "smoke": False,
+        "resolution": "dt",
+        "dt": dt,
+        "anchor_root": "anchors",
+        "runtime_git_sha": _git_sha(),
+        "runtime_started_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
+    }
 
 
 def _run_once(ctx: dict, state: dict) -> tuple[dict, dict, str]:
@@ -103,7 +151,7 @@ def main() -> None:
     source_seed = int(manifest["source"]["seed"])
     if source_seed != 1:
         raise RuntimeError(f"unexpected source seed: {source_seed}")
-    ctx = R.build_context(source_seed)
+    ctx = _build_source_locked_context(manifest)
     rows = []
     for row in manifest["source_panel"]:
         row_id = (row["bin_name"], row["fast_phase"])
