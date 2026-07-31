@@ -383,13 +383,30 @@ HYB2 把记忆缩短约 **24 倍**、把扩散**删掉**、另加了 deadband / 
 六个 blessed 文件 sha256。
 
 - `OMP_NUM_THREADS = OPENBLAS_NUM_THREADS = MKL_NUM_THREADS = NUMEXPR_NUM_THREADS = 1`；
-- **`T ≥ 20 s`：严格 1 worker**（§8 的阶段 2、4、6-24s、7、8 全部落在这一档）；
-- `T < 20 s`：最多 2 worker，且**提交前**必须核 sibling 40k ≤ 2、`MemAvailable ≥ 96 GiB`
-  **且** ≥ 2 × 实测单 run peak RSS、swap 不增长；
+- **worker 上限（2026-07-31 修订，用户明确授权 + 实测依据；这是**工程**规则不是科学门）**：
+  - `T ≥ 20 s`：**≤ 4 worker**（原为 1）；
+  - `T < 20 s`：**≤ 6 worker**（原为 2）；
+  - **每次提交前**仍必须核 `MemAvailable ≥ 96 GiB` **且** ≥ 2 × 实测单 run peak RSS、swap 不增长。
+
+  **实测依据**（2026-07-31 15:2x UTC）：单条 24 s run 峰值 RSS **20.2 GB**；`MemAvailable` 234 GB；
+  按 §9 自己的 96 GiB 底线，`floor((234 − 96) / 20.2) = 6`。取 **4**（`T ≥ 20 s`）留约 57 GB
+  额外余量给 sibling 反弹——早先同一台机器上有过两个 5.6 GB 的 sibling 40k。
+  `T < 20 s` 的 14 s 短屏 raster 只有 8.3 GB（24 s 是 14.3 GB），峰值约 13 GB，6 × 13 = 78 GB，
+  同样在底线之上。
+
+  > **原来的 `T ≥ 20 s → 1 worker` 从来不是内存实测得出的**，是沿用 LC1 的惯例。
+  > 现在有了实测峰值，按 §9 自己的底线公式重新定档。**科学门一条未动。**
 - swap 相对本 sprint baseline：**> +256 MiB 停止提交新任务**；**> +512 MiB 且继续增长** →
   只终止**自己最新的**任务并写 `RESOURCE_PAUSED.json`；
 - **不杀任何 sibling / user 进程**；
 - 每个 run 写 `resource_log.jsonl`；
+- **常驻看门狗（2026-07-31 新增）** `scripts/hyb2_resource_watchdog.py`：每 15 s 轮询
+  `MemAvailable` 与 swap，写 `watchdog.jsonl`。原先 §9 的这些阈值**只在 stage 入口查一次**，
+  抓不到运行中途才发生的越界。看门狗规则：
+  - `MemAvailable < 96 GiB` **或** swap delta > +512 MiB 且连续两次仍在涨 → **只对自己最新的那条
+    run 发 SIGTERM**，写 `RESOURCE_PAUSED.json` 并退出；
+  - swap delta > +256 MiB → 写 `STOP_SUBMITTING.flag`，不杀任何东西；
+  - **只匹配 `run_topic4_fcxr_hyb2.py`**，**永不**触碰 sibling / 用户进程，**永不** SIGKILL。
 - 长任务一律：
 
 ```
