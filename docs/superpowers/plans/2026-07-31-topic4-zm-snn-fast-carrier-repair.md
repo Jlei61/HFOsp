@@ -2,9 +2,12 @@
 
 **Date:** 2026-07-31
 
-**Status:** executable plan for the locked design; production not yet authorized
+**Status:** execution in progress; source migration gate passed
 
 **Spec:** `docs/superpowers/specs/2026-07-31-topic4-zm-snn-fast-carrier-repair-design.md`
+
+**Pre-result calibration amendment:**
+`docs/superpowers/specs/2026-07-31-topic4-zm-fast-carrier-baseline-anchor-amendment.md`
 
 ## Goal
 
@@ -259,10 +262,14 @@ is invalid and stops.
 
 **Steps**
 
-- [ ] Measure \(V_{\rm ref}\) from free E cells in the locked slow-off
-  pre-entry state, before candidate runs.
-- [ ] Build the analytic anchor and the deterministic `[0.8,1.2]^3`
-  scale-factor lattice.
+- [ ] Measure the locked free-E voltage distribution in the pre-entry state,
+  before candidate runs. Report reversal-crossing fractions explicitly.
+- [ ] Build the positive distribution-magnitude anchor from
+  \(D_E=\operatorname{median}(E_E-V)\),
+  \(D_I=\operatorname{median}|V-E_I|\), and
+  \(D_M=\operatorname{median}|V-E_K|\), then construct the deterministic
+  `[0.8,1.2]^3` scale-factor lattice. Do not claim signed pointwise current
+  equivalence below a reversal.
 - [ ] Evaluate only slow-off baseline criteria:
   returning-event count/rate, source ordering, two-source geometry,
   \(V_\infty\), E/I effective charge ratio, \(\tau_{\rm eff}\), prevention and

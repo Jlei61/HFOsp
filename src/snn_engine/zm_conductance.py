@@ -127,6 +127,103 @@ def analytic_anchor(
     return cfg.validate()
 
 
+def distribution_magnitude_anchor(
+    *,
+    V_free,
+    V_th_median,
+    V_reset,
+    eta_m,
+    gamma=0.0,
+    z_spares_global=False,
+    scale_E=1.0,
+    scale_I=1.0,
+    scale_M=1.0,
+    E_L=0.0,
+    tau_m_E=20.0,
+):
+    """Positive baseline anchor when the voltage distribution crosses reversals.
+
+    The historic current model can drive free cells below ``E_I`` and ``E_K``.
+    A signed point-tangent there would require a negative conductance.  This
+    anchor instead matches the median *magnitude* of each reversal driving
+    force on the locked baseline distribution.  It does not claim pointwise
+    sign equivalence; the returned diagnostics make that limitation explicit
+    and the empirical baseline-preservation gate remains decisive.
+    """
+    voltage = np.asarray(V_free, dtype=float)
+    if voltage.ndim != 1 or voltage.size < 2:
+        raise ValueError("V_free must be a one-dimensional baseline sample")
+    if not np.all(np.isfinite(voltage)):
+        raise ValueError("V_free must be finite")
+    for name, value in {
+        "V_th_median": V_th_median,
+        "V_reset": V_reset,
+        "eta_m": eta_m,
+        "gamma": gamma,
+        "scale_E": scale_E,
+        "scale_I": scale_I,
+        "scale_M": scale_M,
+        "E_L": E_L,
+        "tau_m_E": tau_m_E,
+    }.items():
+        if not np.isfinite(value):
+            raise ValueError(f"{name} must be finite")
+    for name, value in {
+        "scale_E": scale_E,
+        "scale_I": scale_I,
+        "scale_M": scale_M,
+    }.items():
+        if not 0.8 <= float(value) <= 1.2:
+            raise ValueError(f"{name} must be in [0.8,1.2], got {value}")
+    if not 0.0 <= float(gamma) <= 1.0:
+        raise ValueError(f"gamma must be in [0,1], got {gamma}")
+    if float(eta_m) < 0.0:
+        raise ValueError(f"eta_m must be >= 0, got {eta_m}")
+
+    E_E = 2.0 * float(V_th_median) - float(V_reset)
+    E_I = float(V_reset)
+    E_K = float(E_L)
+    d_E = float(np.median(E_E - voltage))
+    d_I = float(np.median(np.abs(voltage - E_I)))
+    d_M = float(np.median(np.abs(voltage - E_K)))
+    if min(d_E, d_I, d_M) <= 0.0:
+        raise ValueError(
+            f"baseline driving-force magnitudes must be >0, got {d_E}, {d_I}, {d_M}"
+        )
+    if np.any(voltage >= E_E):
+        raise ValueError("baseline V_free reaches/exceeds the excitatory reversal")
+
+    cfg = ZMConductanceConfig(
+        kappa_E=float(scale_E) / d_E,
+        kappa_I=float(scale_I) / d_I,
+        g_M=float(scale_M) * float(eta_m) / d_M,
+        gamma=float(gamma),
+        z_spares_global=bool(z_spares_global),
+        g_L=1.0,
+        E_L=float(E_L),
+        E_E=E_E,
+        E_I=E_I,
+        E_K=E_K,
+        tau_m_E=float(tau_m_E),
+    ).validate()
+    diagnostics = {
+        "definition": "median_baseline_reversal_driving_force_magnitude",
+        "n_free_e": int(voltage.size),
+        "V_free_percentiles_mv": {
+            str(q): float(np.percentile(voltage, q))
+            for q in (5, 25, 50, 75, 95)
+        },
+        "driving_force_median_mv": {"E": d_E, "I": d_I, "M": d_M},
+        "fraction_V_above_EI": float(np.mean(voltage > E_I)),
+        "fraction_V_above_EK": float(np.mean(voltage > E_K)),
+        "signed_point_tangent_feasible_at_median": bool(
+            float(np.median(voltage)) > E_I
+        ),
+        "pointwise_sign_equivalence_claimed": False,
+    }
+    return cfg, diagnostics
+
+
 def _vectors(*values):
     arrays = [np.asarray(value) for value in values]
     shape = arrays[0].shape

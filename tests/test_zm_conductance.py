@@ -10,6 +10,7 @@ from src.snn_engine.zm_conductance import (
     conductance_currents,
     conductance_membrane_step,
     decompose_conductances,
+    distribution_magnitude_anchor,
 )
 
 
@@ -170,6 +171,62 @@ def test_mV_drives_are_converted_and_global_is_an_instantaneous_mean():
     )
     np.testing.assert_allclose(out["g_I_eff"], expected)
     assert not hasattr(cfg, "tau_G")
+
+
+def test_distribution_anchor_stays_positive_across_gaba_reversal():
+    voltage = np.array([-2.0, 8.0, 10.0, 12.0, 14.0])
+    cfg, diag = distribution_magnitude_anchor(
+        V_free=voltage,
+        V_th_median=18.0,
+        V_reset=11.0,
+        eta_m=0.001,
+    )
+    assert cfg.kappa_E > 0.0
+    assert cfg.kappa_I > 0.0
+    assert cfg.g_M > 0.0
+    assert diag["signed_point_tangent_feasible_at_median"] is False
+    assert diag["pointwise_sign_equivalence_claimed"] is False
+    assert diag["fraction_V_above_EI"] == pytest.approx(0.4)
+    assert cfg.kappa_I == pytest.approx(1.0 / np.median(np.abs(voltage - 11.0)))
+
+
+def test_distribution_anchor_scale_panel_is_bounded_and_literal():
+    voltage = np.array([8.0, 10.0, 12.0, 14.0])
+    base, _ = distribution_magnitude_anchor(
+        V_free=voltage,
+        V_th_median=18.0,
+        V_reset=11.0,
+        eta_m=0.001,
+    )
+    scaled, _ = distribution_magnitude_anchor(
+        V_free=voltage,
+        V_th_median=18.0,
+        V_reset=11.0,
+        eta_m=0.001,
+        scale_E=0.8,
+        scale_I=1.2,
+        scale_M=0.8,
+    )
+    assert scaled.kappa_E == pytest.approx(0.8 * base.kappa_E)
+    assert scaled.kappa_I == pytest.approx(1.2 * base.kappa_I)
+    assert scaled.g_M == pytest.approx(0.8 * base.g_M)
+
+
+def test_distribution_anchor_rejects_invalid_baseline_samples():
+    with pytest.raises(ValueError, match="one-dimensional"):
+        distribution_magnitude_anchor(
+            V_free=np.ones((2, 2)),
+            V_th_median=18.0,
+            V_reset=11.0,
+            eta_m=0.001,
+        )
+    with pytest.raises(ValueError, match="reaches/exceeds"):
+        distribution_magnitude_anchor(
+            V_free=np.array([10.0, 25.0]),
+            V_th_median=18.0,
+            V_reset=11.0,
+            eta_m=0.001,
+        )
 
 
 @pytest.mark.parametrize(
