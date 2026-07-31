@@ -180,6 +180,11 @@ $$
 
 `τ_R` 的唯一选择规则必须在 plan 中预注册。建议取可行区间的几何中点；不得扫描 `τ_R` 找好结果。
 
+> **补锁（2026-07-31，seed3 出数之前）**：`τ_R` 是**全局**常数，`GAP_05` 取**跨 seed 的最小值**
+> （与 `T_event,guard` 取跨 seed 最大值同向保守）；`b_v/Q_on/Q_scale` 仍是**逐 seed** 的。
+> `Q_on` 依赖 `τ_R`，故锁定全局 `τ_R` 后两 seed 的 `Q_on` 都用它**离线重算**（无新仿真）。
+> 详见 plan §3.6。
+
 **零仿真可行性预审（非最终锁值）**：现有 LC1 baseline contract 给出 pooled
 pooled 事件时长 q90 = 15 ms；用已保存的 6 ms rate trace 按原 event bar 重建得到近似
 `IEI_05 = 169.5 ms`。

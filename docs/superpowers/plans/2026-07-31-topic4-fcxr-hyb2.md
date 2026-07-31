@@ -115,6 +115,26 @@ $$\tau_R := \sqrt{T_{\mathrm{event,guard}}\cdot \frac{GAP_{05}}{\ln 100}}$$
   必须在 manifest 里显式记录余量；
 - 区间为空 → **`DESIGN_BLOCKED_EVENT_TIMESCALE`**，停止，**不许**调 baseline、不许跳到 40k。
 
+### 3.6 `τ_R` 是**全局**常数，取跨 seed 的**最小** `GAP_05`（2026-07-31 补锁，在 seed3 出数之前）
+
+原文只给了单条 `τ_R` 公式，没说 seed1 与 seed3 的 `GAP_05` 不同时用哪个——**这是欠定义**。
+按与 `T_event_guard` 相同的保守方向补锁：
+
+$$GAP_{05}^{\text{lock}} := \min_{\text{seed}\in\{1,3\}} GAP_{05}^{(\text{seed})},
+\qquad \tau_R := \sqrt{T_{\mathrm{event,guard}}\cdot GAP_{05}^{\text{lock}}/\ln 100}$$
+
+理由：`T_event,guard` 取两 seed 的**最大**事件时长（`τ_R` 必须装得下最长的事件），
+所以 `GAP_05` 必须取两 seed 的**最小**（`τ_R` 必须清得干净最紧的空白）。两端都取保守方向。
+
+**`τ_R` 是全局的、`b_v/Q_on/Q_scale` 是逐 seed 的**（§4.1）：前者是这块组织的事件时间尺度，
+后者是各自底座的背景。`Q_on` 依赖 `τ_R`，所以锁定 `τ_R` 之后**两个 seed 的 `Q_on` 都用全局
+`τ_R` 重算**——重算是**纯离线重放已记录的 load，不需要任何新仿真**。
+
+**已测（seed1，canonical）**：`GAP_05 = 225.4 ms`（`GAP_01 = 206.7`、`GAP_min = 199.0`），
+远大于预审用下采样 rate trace 得到的 `IEI_05 = 169.5 ms`——**那个近似是低估**，
+这正是 plan 要求从 canonical onsets/offsets 重算、不得沿用下采样值的原因。
+seed1 单独的区间是 `[22.0, 48.94]`、`τ_R = 32.81 ms`、余量 **26.94 ms**（预审估的是 10.03）。
+
 ### 3.5 必须一并写入 manifest 的尾部残留（**不许藏**）
 
 `exp(−GAP/τ_R)` 在四处：**`GAP_05`、`GAP_01`、实测最短 `GAP`**，以及 `GAP = 40 ms`。
