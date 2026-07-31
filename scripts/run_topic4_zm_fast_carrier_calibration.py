@@ -25,10 +25,10 @@ from src import topic4_zm_fast_carrier_state as ST  # noqa: E402
 from src import topic4_zm_noise_bank as NB  # noqa: E402
 
 
-INPUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_3.json"
+INPUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_4.json"
 AMENDMENT = ROOT / "docs/superpowers/specs/2026-07-31-topic4-zm-fast-carrier-baseline-anchor-amendment.md"
 OUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/calibration"
-PRODUCTION_T_MS = 4000.0
+PRODUCTION_T_MS = 8500.0
 REPLICATES = ("noise_replay", "noise_resample_1")
 
 
@@ -133,24 +133,16 @@ def _run(args) -> None:
     if args.mode == "cell":
         conductance = CAL.candidate_config(reference, scales)
         conductance["gamma"] = 1.0 / 6.0
-    slow, diagnostic = RT.make_frozen_diagnostic_slow(
+    slow, diagnostic = RT.make_dynamic_diagnostic_slow(
         ctx, R, conductance_config=conductance
     )
-    source_row = manifest["source_panel"][0]
     bank = NB.build_noise_bank(
         manifest["source"]["canonical_config_sha"],
         manifest["source"]["seed"],
-        source_row["t_step"],
+        0,
         args.replicate,
     )
-    locked_bank = next(
-        row for row in source_row["first_pass_noise_banks"]
-        if row["replicate"] == args.replicate
-    )
-    if bank["bank_sha"] != locked_bank["bank_sha"]:
-        raise RuntimeError("future-noise bank drift")
     controller = CK.ZMCheckpoint(
-        initial_state=state,
         ext_mean_only=bank["ext_mean_only"],
         dump_ext=True,
         rng_state=bank["rng_state"],
@@ -199,20 +191,22 @@ def _run(args) -> None:
         if args.mode == "reference"
         else f"sE{args.scale_E:g}_sI{args.scale_I:g}_sM{args.scale_M:g}__{args.replicate}"
     )
-    root = OUT / ("smoke" if args.smoke else "production")
+    root = OUT / ("smoke_dynamic" if args.smoke else "dynamic_preentry")
     npz_path = root / f"{stem}.npz"
     json_path = root / f"{stem}.json"
     _write_npz(npz_path, arrays)
     body = {
         "schema": "zm_fast_carrier_calibration_cell_v1_2026-07-31",
         "mode": args.mode,
-        "data_scope": "pre_entry_only",
+        "data_scope": "dynamic_preentry_t0_to_8500ms_only",
         "input_manifest_sha256": manifest["manifest_sha256"],
         "input_file_sha256": _sha(INPUT),
         "amendment_file_sha256": _sha(AMENDMENT),
         "runtime_git_sha": RT.git_sha(ROOT),
         "source_state_hash": transformation["source_state_hash"],
         "migrated_state_hash": transformation["migrated_state_hash"],
+        "source_state_role": "coefficient_anchor_only_not_initial_state",
+        "simulation_initial_state": "canonical_t0_z1_m0_SG0",
         "reference_anchor": reference,
         "scales": None if scales is None else list(scales),
         "conductance_config": conductance,

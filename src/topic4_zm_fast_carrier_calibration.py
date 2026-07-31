@@ -165,7 +165,10 @@ def adjudicate_row(row: Mapping[str, Any]) -> dict:
     _require(not missing, f"calibration row missing fields: {sorted(missing)}")
     scales = tuple(float(row[key]) for key in ("scale_E", "scale_I", "scale_M"))
     _require(scales in scale_lattice(), f"unregistered scale triplet: {scales}")
-    _require(row["data_scope"] == "pre_entry_only", "candidate-state data leaked into calibration")
+    _require(
+        row["data_scope"] == "dynamic_preentry_t0_to_8500ms_only",
+        "candidate-state data leaked into calibration",
+    )
     rate_error = abs(float(row["median_e_rate_ratio"]) - 1.0)
     count_error = abs(float(row["returning_event_count_ratio"]) - 1.0)
     vinf_error = abs(float(row["vinf_error_mv"]))

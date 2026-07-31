@@ -24,7 +24,7 @@ from src.topic4_zm_checkpoint import load_state_npz, read_manifest
 from src.topic4_zm_noise_bank import build_noise_bank
 
 
-INPUT_SCHEMA = "zm_fast_carrier_input_v1.3_2026-07-31"
+INPUT_SCHEMA = "zm_fast_carrier_input_v1.4_2026-07-31"
 IMPLEMENTATION_START_GIT_SHA = "12add24f"
 SOURCE_SEED = 1
 SOURCE_DT_MS = 0.1
@@ -62,24 +62,24 @@ CALIBRATION_AMENDMENT = Path(
 )
 DEFAULT_INPUT_OUTPUT = Path(
     "results/topic4_sef_hfo/zm_fast_carrier_repair/"
-    "phaseD_input_manifest_v1_3.json"
+    "phaseD_input_manifest_v1_4.json"
 )
 SUPERSEDED_INPUT_LOCK = {
     "path": (
         "results/topic4_sef_hfo/zm_fast_carrier_repair/"
-        "phaseD_input_manifest_v1_2.json"
+        "phaseD_input_manifest_v1_3.json"
     ),
     "file_sha256": (
-        "fc1d3831228207171f05daf61b5467eaa6f1995d6c31b1466545e3f079556d13"
+        "ff9f7a5de8dbbd00821d9044144c9054a2b30c6b90f11422654672f0ec54db40"
     ),
     "manifest_sha256": (
-        "4297f9a40fe4afe19b2634c1ade3e593969e72d9af3a4b49867162739f003731"
+        "db3401164b851479f75a709969410f159f6c5c8586465fe328076c613ad6bc45"
     ),
     "reason": (
-        "v1.2 binds amendment revision 1; revision 2 replaces the unweighted "
-        "median magnitude with an effective-charge-weighted anchor after a "
-        "pre-entry-only smoke exposed the omitted Arm-A S_G divisor; source "
-        "states, arms and migration remain unchanged"
+        "v1.3 binds amendment revision 2; revision 3 corrects the behavioral "
+        "baseline from a freeze-all late checkpoint to the canonical dynamic "
+        "Z/M pre-entry window after that freeze was shown to contain only "
+        "sub-Hz fluctuations rather than source-scale IEDs"
     ),
     "production_authorized": False,
 }

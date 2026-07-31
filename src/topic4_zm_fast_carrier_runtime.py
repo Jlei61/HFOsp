@@ -123,6 +123,10 @@ class DiagnosticSlowWrapper:
     def advance_step(self):
         object.__setattr__(self, "_step_index", self._step_index + 1)
 
+    def step(self, spk, labels, dt):
+        self.inner.step(spk, labels, dt)
+        self.advance_step()
+
     def diagnostic_summary(self) -> dict:
         def median(name):
             values = np.asarray(getattr(self, name), float)
@@ -217,10 +221,50 @@ def make_frozen_diagnostic_slow(
     return frozen, diagnostic
 
 
+def make_dynamic_diagnostic_slow(
+    ctx: dict,
+    runner: Any,
+    *,
+    conductance_config: dict | None,
+):
+    """Build a dynamic Z/M baseline or conductance arm from canonical t=0."""
+    if conductance_config is None:
+        cfg = runner.ZM._zm_cfg(ctx["S"]["I_th_EI"], **runner.ARM_KWARGS)
+    else:
+        cfg = runner.ZM._zm_cfg(ctx["S"]["I_th_EI"], use_SG=False, alpha_G=0.0)
+        cfg = dataclasses.replace(
+            cfg,
+            use_zm_conductance=True,
+            cond_kappa_E=float(conductance_config["kappa_E"]),
+            cond_kappa_I=float(conductance_config["kappa_I"]),
+            cond_g_M=float(conductance_config["g_M"]),
+            cond_gamma=float(conductance_config["gamma"]),
+            cond_z_spares_global=bool(conductance_config["z_spares_global"]),
+            cond_g_L=float(conductance_config["g_L"]),
+            cond_E_L=float(conductance_config["E_L"]),
+            cond_E_E=float(conductance_config["E_E"]),
+            cond_E_I=float(conductance_config["E_I"]),
+            cond_E_K=float(conductance_config["E_K"]),
+            cond_tau_m_E=float(conductance_config["tau_m_E"]),
+        )
+    base = runner.SpatialSlowField(
+        ctx["S"]["N"],
+        18.0,
+        ctx["S"]["posE"],
+        ctx["S"]["posI"],
+        ctx["S"]["L"],
+        core_mask_E=ctx["core"],
+        cfg=cfg,
+    )
+    diagnostic = DiagnosticSlowWrapper(base)
+    return diagnostic, diagnostic
+
+
 __all__ = [
     "DiagnosticSlowWrapper",
     "FrozenAllNoStepWrapper",
     "build_source_locked_context",
     "git_sha",
+    "make_dynamic_diagnostic_slow",
     "make_frozen_diagnostic_slow",
 ]

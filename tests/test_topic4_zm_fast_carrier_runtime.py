@@ -77,3 +77,14 @@ def test_zero_copy_freeze_refuses_dynamic_phi():
     inner.cfg.use_phi = True
     with np.testing.assert_raises_regex(ValueError, "dynamic threshold"):
         FrozenAllNoStepWrapper(inner)
+
+
+def test_dynamic_diagnostic_step_delegates_and_advances_counter():
+    inner = _CurrentInner()
+    inner.cfg.use_phi = False
+    calls = []
+    inner.step = lambda *args: calls.append(args)
+    diagnostic = DiagnosticSlowWrapper(inner)
+    diagnostic.step(np.array([True]), np.array([0]), 0.1)
+    assert len(calls) == 1
+    assert diagnostic._step_index == 1

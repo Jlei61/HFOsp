@@ -2,7 +2,7 @@
 
 **Date:** 2026-07-31
 
-**Status:** LOCKED PRE-RESULT AMENDMENT — revision 2
+**Status:** LOCKED PRE-RESULT AMENDMENT — revision 3
 
 **Parent design:** `2026-07-31-topic4-zm-snn-fast-carrier-repair-design.md`
 
@@ -45,6 +45,22 @@ the reference. No bounded-mid/late carrier outcome was inspected.
 
 The final anchor must match the *effective charge terms* at the source
 checkpoint, not only an unweighted voltage statistic.
+
+### 2.1 Baseline behavior must remain dynamic
+
+A subsequent 4 s freeze-all reference check produced only sub-1.5 Hz core
+fluctuations. Those are not the returning IEDs in the source anchor (15 events,
+median core peak 68.58 Hz before the 8.7 s escalation). Freezing the pre-entry
+slow coordinates therefore removes the very baseline behavior calibration is
+supposed to preserve.
+
+The coefficient anchor below remains locked to `pre_entry__natural`. Baseline
+behavior, however, is evaluated from the canonical \(t=0\) state with the
+original Z/M dynamics enabled, using the exact replay noise, and stops at
+8.5 s before the source escalation at 8.7 s. The conductance calibration cells
+use the same initial network, dynamic Z/M equations and future noise. The old
+4 s freeze-all outputs are retained only as a superseded semantic diagnostic
+and cannot enter the calibration verdict.
 
 ## 3. Locked replacement anchor
 
@@ -98,8 +114,9 @@ E samples above
 - \(E_L=E_K=0\), \(E_I=11\), \(E_E=25\) mV are unchanged.
 - The deterministic scale lattice remains
   \((s_E,s_I,s_M)\in\{0.8,1.0,1.2\}^3\).
-- Calibration still uses only the pre-entry baseline before any bounded-state
-  B/C/D outcome is inspected.
+- Calibration behavior uses only the canonical dynamic pre-entry window
+  \([0,8.5]\) s before any bounded-state B/C/D outcome is inspected; the
+  coefficient anchor alone uses the locked `pre_entry__natural` checkpoint.
 - Returning-event rate/count, event ordering, two-source geometry,
   \(V_\infty\), effective charge ratio, \(\tau_{\mathrm{eff}}\), prevention
   and plateau criteria remain hard gates.

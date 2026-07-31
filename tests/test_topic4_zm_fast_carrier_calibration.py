@@ -14,7 +14,7 @@ def _row(scales, **overrides):
         "scale_E": scales[0],
         "scale_I": scales[1],
         "scale_M": scales[2],
-        "data_scope": "pre_entry_only",
+        "data_scope": "dynamic_preentry_t0_to_8500ms_only",
         "baseline_reference_sha256": "a" * 64,
         "median_e_rate_ratio": 1.0,
         "returning_event_count_ratio": 1.0,

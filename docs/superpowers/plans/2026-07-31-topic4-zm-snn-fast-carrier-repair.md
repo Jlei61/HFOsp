@@ -270,10 +270,15 @@ is invalid and stops.
   `[0.8,1.2]^3` scale-factor lattice. The central anchor must match all three
   mean absolute charge terms at the source snapshot. Do not claim signed
   pointwise current equivalence below a reversal.
-- [ ] Evaluate only slow-off baseline criteria:
+- [ ] Evaluate only dynamic pre-entry baseline criteria:
   returning-event count/rate, source ordering, two-source geometry,
   \(V_\infty\), E/I effective charge ratio, \(\tau_{\rm eff}\), prevention and
   all-sheet plateau.
+- [ ] Behavioral preservation uses the canonical dynamic-Z/M source window
+  from 0 to 8.5 s (before the locked 8.7 s escalation), not a freeze-all
+  continuation of the late pre-entry checkpoint. Require the source-scale IED
+  floor (15 events; median core peak about 68.6 Hz) so sub-Hz fluctuations
+  cannot be relabelled as returning events.
 - [ ] Verify that active/free-E \(V_\infty>E_I\) during the carrier-supporting
   portions of the reference. If this is not true, report the fraction and do
   not interpret increasing GABA conductance as a uniformly hyperpolarizing
