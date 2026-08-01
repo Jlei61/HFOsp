@@ -91,13 +91,17 @@ def replay_h(g_a, tau_ms, dt_ms, h0=None):
     h = np.zeros(g.shape[1], dtype=float) if h0 is None else np.asarray(h0, dtype=float).copy()
     if h.shape != (g.shape[1],) or not np.all(np.isfinite(h)) or np.any(h < 0.0):
         raise ValueError("h0 must be finite, nonnegative and match the cell dimension")
-    out = np.empty_like(g, dtype=np.float32)
     decay = float(np.exp(-dt_ms / tau_ms))
     gain = 1.0 - decay
-    for t in range(g.shape[0]):
-        # out[t] is h(t-) used by the membrane; g[t] only updates the next row's state.
-        out[t] = h
-        h = decay * h + gain * g[t]
+    # scipy's compiled lfilter computes the post-update state y[t]=decay*y[t-1]+gain*g[t].
+    # Shift it by one row so out[t] remains h(t-), matching the membrane's causal convention.
+    from scipy.signal import lfilter
+    y, _zf = lfilter([gain], [1.0, -decay], g, axis=0, zi=(decay * h)[None, :])
+    out = np.empty_like(g, dtype=np.float32)
+    if g.shape[0]:
+        out[0] = h
+        out[1:] = y[:-1]
+        h = np.asarray(y[-1], float)
     return out, h
 
 
