@@ -365,13 +365,26 @@ def baseline_referenced_intensity(rms, baseline_bins, episode_slice):
     cand = power[episode_slice]
     if base.size == 0 or cand.size == 0:
         return {"status": "unavailable"}
-    eps = np.finfo(float).eps
-    baseline_median = np.median(base, axis=0)
-    candidate_median = np.median(cand, axis=0)
-    gain_db = 10.0 * np.log10((candidate_median + eps) / (baseline_median + eps))
-    threshold = baseline_median * (10.0 ** (6.0 / 10.0))
-    above = cand > threshold[None, :]
-    normalized_integral = float(np.mean(cand / np.maximum(baseline_median, eps)))
+    # Normalize after integrating power within each contact.  Dividing every
+    # time bin by a near-zero event-free value produces arbitrarily large
+    # ratios for quiet contacts and rewards sparse bursts.  Contacts with an
+    # exactly zero baseline are explicitly unavailable rather than epsilon-
+    # promoted to infinite gain.
+    baseline_power = np.mean(base, axis=0)
+    candidate_power = np.mean(cand, axis=0)
+    floor = max(float(np.max(baseline_power)) * 1e-12, np.finfo(float).tiny)
+    valid = baseline_power > floor
+    if not np.any(valid):
+        return {
+            "status": "zero_power_event_free_baseline",
+            "n_valid_baseline_contacts": 0,
+        }
+    gain_db = 10.0 * np.log10(candidate_power[valid] / baseline_power[valid])
+    threshold = baseline_power[valid] * (10.0 ** (6.0 / 10.0))
+    above = cand[:, valid] > threshold[None, :]
+    normalized_integral = float(
+        np.sum(candidate_power[valid]) / np.sum(baseline_power[valid])
+    )
     return {
         "status": "ok",
         "median_gain_db_across_contacts": float(np.median(gain_db)),
@@ -379,8 +392,10 @@ def baseline_referenced_intensity(rms, baseline_bins, episode_slice):
         "active_contact_fraction_6db": float(np.mean(gain_db >= 6.0)),
         "occupancy_above_6db": float(np.mean(above)),
         "normalized_integrated_energy_per_s": normalized_integral,
-        "candidate_energy_median": float(np.median(cand)),
-        "baseline_energy_median": float(np.median(base)),
+        "candidate_energy_median": float(np.median(candidate_power[valid])),
+        "baseline_energy_median": float(np.median(baseline_power[valid])),
+        "n_valid_baseline_contacts": int(np.sum(valid)),
+        "n_total_contacts": int(valid.size),
     }
 
 

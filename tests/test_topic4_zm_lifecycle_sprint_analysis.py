@@ -31,6 +31,19 @@ def test_baseline_referenced_intensity_distinguishes_sustained_gain():
     assert got["normalized_integrated_energy_per_s"] == 100.0
 
 
+def test_baseline_referenced_intensity_does_not_epsilon_promote_zero_contact():
+    rms = np.ones((40, 2))
+    rms[:20, 1] = 0.0
+    rms[20:, 0] = 2.0
+    rms[20:, 1] = 100.0
+    baseline = np.zeros(40, bool)
+    baseline[:20] = True
+    got = A.baseline_referenced_intensity(rms, baseline, slice(20, 40))
+    assert got["n_valid_baseline_contacts"] == 1
+    assert got["normalized_integrated_energy_per_s"] == pytest.approx(4.0)
+    assert got["max_gain_db_across_contacts"] == pytest.approx(10 * np.log10(4.0))
+
+
 def test_contact_rms_uses_event_free_baseline_mean():
     raw = np.zeros((400, 1))
     raw[200:] = 4.0
