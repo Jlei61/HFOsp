@@ -692,7 +692,19 @@ def _readjudicate_q_diagnostics(seed, k, lock):
 
 # ------------------------------------------------------------------ Gate A0 (actuator efficacy)
 A0_T_MS = 9000.0                      # plan 5.2: 9 s, not 6 -- q50 reaches dense ~3 s, ictal ~6 s
-A0_Z = dict(I_th_EI=1.6652801609959704, tau_z=10000.0)     # LC1 q50, the ONLY authorised input
+# plan rev2 (2026-08-01): A0's original input, LC1 q50, is the STRONGEST point on the whole locked
+# S_Z axis (S_Z = 0.4079 against q75's 0.1718), which is why its off arm saturated the recruitment
+# ceiling.  A0 now runs at the three levels section 6 locked for the screen -- all weaker, all
+# pre-registered before any A0 result existed, no new free parameter.  The primary verdict is taken
+# at the WEAKEST eligible level, a rule fixed in plan rev2 before these runs and decidable from the
+# off arm alone, so it cannot be steered by the on-vs-off comparison.
+A0_Z_LEVELS = {
+    "q50": dict(I_th_EI=1.6652801609959704, tau_z=10000.0, S_Z=0.4078684565664285),
+    "S75": dict(I_th_EI=3.65534894749967, tau_z=10000.0, S_Z=0.35969830488396864),
+    "S50": dict(I_th_EI=13.605692880018168, tau_z=10000.0, S_Z=0.2882185004778396),
+    "S25": dict(I_th_EI=37.486518318062565, tau_z=10000.0, S_Z=0.2315062193563353),
+}
+A0_LADDER = ("S25", "S50", "S75")      # weakest first; the primary is the weakest eligible one
 
 
 def _a0_window_readout(res, S, elr, t_gate_ms, window_ms):
@@ -715,10 +727,12 @@ def cmd_gate_a0(args):
     """One arm per invocation so the two can occupy two workers.  ELR-ON and ELR-OFF are the SAME
     deterministic simulation up to t_gate; the off arm zeroes only the membrane current and keeps
     q_v evolving, so t_gate is a counterfactual sensor tracked identically in both."""
-    arm = args.arm
-    with _stage_lock(f"gateA0_{arm}"):
+    arm, lvl = args.arm, args.z_level
+    A0_Z = A0_Z_LEVELS[lvl]
+    tag = f"{arm}_{lvl}"
+    with _stage_lock(f"gateA0_{tag}"):
         FCXR._assert_engine_blessed()
-        _begin(f"gateA0_{arm}", T=A0_T_MS, arm=arm)
+        _begin(f"gateA0_{tag}", T=A0_T_MS, arm=arm, z_level=lvl)
         swap_base = LC._swap_used_mb()
         try:
             for s_ in SEEDS:
@@ -731,7 +745,7 @@ def cmd_gate_a0(args):
             k = lock["seeds"]["seed1"]
             z = np.load(os.path.join(OUT, "calibration_seed1.npz"))
 
-            st, info = _guard(f"gateA0_{arm}_start", swap_base)
+            st, info = _guard(f"gateA0_{tag}_start", swap_base)
             if st == "hard":
                 raise SystemExit(f"resource hard-stop before start: {info}")
             S = PP.build_substrate(1)
@@ -764,7 +778,7 @@ def cmd_gate_a0(args):
 
             payload = dict(arm=arm, generated=datetime.now(timezone.utc).isoformat(),
                            code_commit=FCXR._git_sha(), T_ms=A0_T_MS, wall_s=wall,
-                           peak_rss_gb=round(_rss_gb(), 2), z_config=A0_Z,
+                           peak_rss_gb=round(_rss_gb(), 2), z_config=A0_Z, z_level=lvl,
                            elr_enabled=(arm == "on"), t_gate_ms=tg,
                            ms_after_t_gate=(A0_T_MS - tg) if tg is not None else 0.0,
                            crossed_Q_on=bool(tg is not None), q_max=elr.q_running_max,
@@ -775,8 +789,8 @@ def cmd_gate_a0(args):
                            clip_frac_max=num["clip_frac_max"], finite=num["finite"],
                            numerical=num, n_E=int(S["NE"]),
                            n_occupied_voxels=int(elr.occupied.sum()), **read)
-            _jw(os.path.join(OUT, f"gate_a0_arm_{arm}.json"), payload)
-            _end(f"gateA0_{arm}", True, arm=arm, t_gate_ms=tg, wall_s=wall)
+            _jw(os.path.join(OUT, f"gate_a0_arm_{tag}.json"), payload)
+            _end(f"gateA0_{tag}", True, arm=arm, z_level=lvl, t_gate_ms=tg, wall_s=wall)
             print(f"[gateA0:{arm}] t_gate={tg} ms  q_max={elr.q_running_max:.1f} "
                   f"(Q_on {k['Q_on']:.1f})  R_evt_max={payload['max_R_evt']:.3f} "
                   f"(I_R_max {lock['I_R_max']:.3f})  end_rate={end_rate:.1f} Hz  "
@@ -784,52 +798,10 @@ def cmd_gate_a0(args):
                   f"vox={read.get('participant_voxels')}  ({wall}s)", flush=True)
             return 0
         except BaseException as e:
-            _end(f"gateA0_{arm}", False, error=repr(e))
+            _end(f"gateA0_{tag}", False, error=repr(e))
             raise
 
 
-def cmd_gate_a0_adjudicate(args):
-    """Offline: combine the two arms under the three-way verdict.  No simulation."""
-    _begin("gateA0_adjudicate")
-    try:
-        arms = {a: json.load(open(os.path.join(OUT, f"gate_a0_arm_{a}.json")))
-                for a in ("off", "on")}
-        if arms["off"]["t_gate_ms"] != arms["on"]["t_gate_ms"]:
-            raise SystemExit(f"t_gate differs between arms "
-                             f"({arms['off']['t_gate_ms']} vs {arms['on']['t_gate_ms']}): the "
-                             f"counterfactual sensor is NOT identical, the comparison is void")
-        keys = ("window_participants", "recruitment_radius_mm", "participant_voxels")
-        m = dict(crossed_Q_on=arms["on"]["crossed_Q_on"],
-                 ms_after_t_gate=arms["on"]["ms_after_t_gate"],
-                 n_E=arms["on"]["n_E"], n_occupied_voxels=arms["on"]["n_occupied_voxels"],
-                 off=dict(**{k: arms["off"].get(k) for k in keys},
-                          end_rate_hz=arms["off"]["end_rate_hz"],
-                          early_stopped=arms["off"]["early_stopped"]),
-                 on={k: arms["on"].get(k) for k in keys},
-                 max_R_evt=arms["on"]["max_R_evt"], clip_frac_max=arms["on"]["clip_frac_max"],
-                 finite=arms["on"]["finite"])
-        v = H2.adjudicate_gate_A0(m)
-        v.update(generated=datetime.now(timezone.utc).isoformat(), code_commit=FCXR._git_sha(),
-                 measured=m, arms={a: dict(t_gate_ms=arms[a]["t_gate_ms"], wall_s=arms[a]["wall_s"],
-                                           end_rate_hz=arms[a]["end_rate_hz"],
-                                           q_max=arms[a]["q_max"]) for a in ("off", "on")},
-                 t_gate_identical=True)
-        _jw(os.path.join(OUT, "gate_a0.json"), v)
-        ok = v["status"] == "A0_RECRUITMENT_EFFECTIVE"
-        if not ok:
-            _jw(os.path.join(OUT, f"{v['status']}.json"), v)
-        _end("gateA0_adjudicate", ok, status=v["status"])
-        print(f"[gateA0] {v['status']}" + (f"  relative={ {k: round(x,4) for k,x in v['relative'].items()} }"
-                                           f"  {v['n_measures_up']}/{len(v['relative'])} up"
-                                           if "relative" in v else f"  {v.get('note','')}"),
-              flush=True)
-        return 0 if ok else 2
-    except BaseException as e:
-        _end("gateA0_adjudicate", False, error=repr(e))
-        raise
-
-
-# ------------------------------------------------------------------ S_Z response axis (offline)
 def cmd_zaxis(args):
     """plan 6: open-loop cumulative-depletion coordinate, replayed offline on the STORED per-cell
     GABA sensor from the seed-1 calibration run.  No simulation.
@@ -872,6 +844,69 @@ def cmd_zaxis(args):
         raise
 
 
+def cmd_gate_a0_adjudicate(args):
+    """Offline: three-way verdict per level, then plan rev2's weakest-eligible rule.  No simulation.
+
+    The rule was fixed before these runs and is decidable from the OFF arm alone -- the ceiling is
+    an off-arm recruitment property and input-sufficiency is "did q cross Q_on, with >= 1000 ms of
+    window left".  Neither consults the on-vs-off comparison, so selecting the level cannot steer
+    the >=10% efficacy judgement.  Every level is reported whatever it returns.
+    """
+    _begin("gateA0_adjudicate")
+    try:
+        per, missing = {}, []
+        for lvl in A0_LADDER:
+            paths = {a: os.path.join(OUT, f"gate_a0_arm_{a}_{lvl}.json") for a in ("off", "on")}
+            if not all(os.path.exists(p) for p in paths.values()):
+                missing.append(lvl)
+                continue
+            arms = {a: json.load(open(p)) for a, p in paths.items()}
+            off, on = arms["off"], arms["on"]
+            if abs(off["t_gate_ms"] - on["t_gate_ms"]) > 1e-9:
+                raise SystemExit(f"{lvl}: arms diverged before t_gate "
+                                 f"({off['t_gate_ms']} vs {on['t_gate_ms']})")
+            m = dict(crossed_Q_on=on["crossed_Q_on"], ms_after_t_gate=on["ms_after_t_gate"],
+                     n_E=on["n_E"], n_occupied_voxels=on["n_occupied_voxels"],
+                     off=off, on=on, max_R_evt=on["max_R_evt"],
+                     clip_frac_max=max(off["clip_frac_max"], on["clip_frac_max"]),
+                     finite=off["finite"] and on["finite"])
+            v = H2.adjudicate_gate_A0(m)
+            v.update(z_level=lvl, S_Z=A0_Z_LEVELS[lvl]["S_Z"],
+                     I_th_EI=A0_Z_LEVELS[lvl]["I_th_EI"], t_gate_ms=off["t_gate_ms"],
+                     off_participant_voxels=off["participant_voxels"],
+                     off_window_participants=off["window_participants"])
+            per[lvl] = v
+        eligible = [l for l in A0_LADDER
+                    if l in per and per[l]["status"] not in ("A0_INPUT_INSUFFICIENT",
+                                                             "A0_CEILING_CONFOUNDED")]
+        primary = eligible[0] if eligible else None      # A0_LADDER is weakest-first
+        out = dict(status=per[primary]["status"] if primary else "A0_UNDECIDABLE_ALL_LEVELS",
+                   primary_level=primary, per_level={l: per[l] for l in per}, missing=missing,
+                   rule=("plan rev2: the primary verdict is the WEAKEST eligible level; eligibility "
+                         "is decidable from the off arm alone, so it cannot steer the efficacy call"),
+                   ladder=list(A0_LADDER), generated=datetime.now(timezone.utc).isoformat(),
+                   code_commit=FCXR._git_sha())
+        if not primary:
+            out["note"] = ("no locked level left headroom or reached the actuator; A0 closes as "
+                           "undecidable -- do NOT lower further, widen the window or move the "
+                           "ceiling clause")
+        _jw(os.path.join(OUT, "gate_a0.json"), out)
+        for l in A0_LADDER:
+            if l in per:
+                p_ = per[l]
+                print(f"[gateA0] {l} (S_Z={A0_Z_LEVELS[l]['S_Z']:.4f}, "
+                      f"I_th_EI={A0_Z_LEVELS[l]['I_th_EI']:.3f})  {p_['status']}"
+                      f"   off vox {p_['off_participant_voxels']}/"
+                      f"{per[l].get('n_occupied_voxels', 1024)}"
+                      f"  off cells {p_['off_window_participants']}", flush=True)
+        print(f"[gateA0] PRIMARY = {primary or 'none'}  ->  {out['status']}", flush=True)
+        _end("gateA0_adjudicate", primary is not None, status=out["status"], primary=primary)
+        return 0 if primary else 2
+    except BaseException as e:
+        _end("gateA0_adjudicate", False, error=repr(e))
+        raise
+
+
 def main(argv=None):
     ap = argparse.ArgumentParser(description="FCXR-HYB2 runner (dt=0.05, no kick)")
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -882,6 +917,7 @@ def main(argv=None):
     sub.add_parser("gate-b0-readjudicate")
     a = sub.add_parser("gate-a0")
     a.add_argument("--arm", choices=["off", "on"], required=True)
+    a.add_argument("--z-level", choices=list(A0_Z_LEVELS), required=True)
     a.add_argument("--confirm-run", action="store_true")
     for nm in ("calibration", "gate-b0"):
         c = sub.add_parser(nm)
