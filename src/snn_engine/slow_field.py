@@ -172,6 +172,16 @@ class SpatialSlowFieldConfig:
     use_phi: bool = False       # OFF -> threshold() is a literal passthrough
     tau_phi: float = 100.0      # ms, exact exponential recovery
     delta_phi: float = 0.0      # mV added after each E spike
+    # ---- lifecycle prototype: local inhibitory-state mechanisms (OFF by default).
+    # I->E depression is presynaptic and therefore coupled at the inhibitory
+    # delay-ring scatter, not as a postsynaptic scalar in apply_currents. ----
+    use_i2e_depression: bool = False
+    tau_i2e_depression: float = 300.0  # ms, recovery of per-I-neuron resource toward one
+    U_i2e_depression: float = 0.0      # fractional resource use per I spike
+    d_i2e_min: float = 0.20            # safety floor; I->I edges are never scaled
+    use_i_adaptation: bool = False
+    tau_i_adaptation: float = 300.0    # ms, exact recovery of I threshold increment
+    delta_i_adaptation: float = 0.0    # mV added after each I spike
     # ---- Phase-D unit-safe conductance membrane (OFF by default).
     # The existing mV-equivalent drives are converted by kappa before entering
     # a conductance sum; the old S_G recurrent-E divisor is forbidden here. ----
@@ -282,6 +292,18 @@ class SpatialSlowFieldConfig:
                 raise ValueError(
                     f"delta_phi must be >= 0 when use_phi, got {self.delta_phi}"
                 )
+        if self.use_i2e_depression:
+            if self.tau_i2e_depression <= 0.0:
+                raise ValueError("tau_i2e_depression must be > 0")
+            if not (0.0 <= self.U_i2e_depression < 1.0):
+                raise ValueError("U_i2e_depression must lie in [0,1)")
+            if not (0.0 < self.d_i2e_min <= 1.0):
+                raise ValueError("d_i2e_min must lie in (0,1]")
+        if self.use_i_adaptation:
+            if self.tau_i_adaptation <= 0.0:
+                raise ValueError("tau_i_adaptation must be > 0")
+            if self.delta_i_adaptation < 0.0:
+                raise ValueError("delta_i_adaptation must be >= 0")
         if self.use_zm_conductance:
             if not self.use_z or not self.use_m:
                 raise ValueError(
@@ -337,6 +359,20 @@ def aq_drive(rE, rI, eta_E, eta_I):
     it). Factored out + unit-pinned so `step` cannot silently drop the r_I term and degrade
     into pure-E depletion. Implemented per the plan (Task 5)."""
     return eta_E * np.asarray(rE, float) + eta_I * np.asarray(rI, float)
+
+
+def recover_i2e_resource(resource, dt_ms, tau_ms):
+    """Exact between-spike recovery for tau*d' = 1-d."""
+    d = np.asarray(resource, dtype=float)
+    return 1.0 - (1.0 - d) * np.exp(-float(dt_ms) / float(tau_ms))
+
+
+def deplete_i2e_resource(resource, use_fraction, d_min):
+    """Multiplicative presynaptic use with a strictly positive safety floor."""
+    return np.maximum(
+        np.asarray(resource, dtype=float) * (1.0 - float(use_fraction)),
+        float(d_min),
+    )
 
 
 def psi_recruit(r, r0, r50, n):
@@ -401,7 +437,8 @@ class SpatialSlowField:
         self.cfg.validate()
         if self.cfg.use_A:
             self._load_shunt_params().validate()   # Task 1 LoadShuntParams.validate(), never auto-invoked otherwise
-        self.N = int(N); self.nE = int(np.asarray(posE).shape[0]); self.L = float(L)
+        self.N = int(N); self.nE = int(np.asarray(posE).shape[0])
+        self.nI = int(np.asarray(posI).shape[0]); self.L = float(L)
         self.posE = np.asarray(posE, float); self.posI = np.asarray(posI, float)
         n = self.cfg.n_grid
         self.q_I = np.full((n, n), self.cfg.q_init, dtype=float)
@@ -472,6 +509,11 @@ class SpatialSlowField:
         self.phi_increment = np.zeros(self.N, dtype=float)
         self.trace_phi_mean = []; self.trace_phi_max = []
         self.trace_phi_core_mean = []; self.trace_phi_surround_mean = []
+        # ---- lifecycle prototype inhibitory state (all off-path values are neutral) ----
+        self.i2e_resource = np.ones(self.nI, dtype=float)
+        self.i_adaptation_increment = np.zeros(self.N, dtype=float)
+        self.trace_i2e_resource_mean = []; self.trace_i2e_resource_min = []
+        self.trace_i_adaptation_mean = []; self.trace_i_adaptation_max = []
         self.trace_cond_vinf_mean = []; self.trace_cond_tau_eff_mean = []
         self.trace_cond_gE_mean = []; self.trace_cond_gI_local_mean = []
         self.trace_cond_gI_global = []; self.trace_cond_gI_eff_mean = []
@@ -591,10 +633,34 @@ class SpatialSlowField:
         return np.clip(self.cfg.alpha_A * aE, 0.0, self.cfg.g_A_max)
 
     def threshold(self, V_th_base):
-        """Return heterogeneous base threshold plus the E-only increment."""
-        if not self.cfg.use_phi:
+        """Return the heterogeneous substrate plus enabled E/I increments."""
+        if not self.cfg.use_phi and not self.cfg.use_i_adaptation:
             return V_th_base
-        return np.asarray(V_th_base, dtype=float) + self.phi_increment
+        return (
+            np.asarray(V_th_base, dtype=float)
+            + self.phi_increment
+            + self.i_adaptation_increment
+        )
+
+    def uses_i2e_depression(self) -> bool:
+        return bool(self.cfg.use_i2e_depression)
+
+    def i2e_resource_at_sources(self, source_indices) -> np.ndarray:
+        """Presynaptic availability immediately before the current I-spike use."""
+        if not self.uses_i2e_depression():
+            return np.ones(len(source_indices), dtype=float)
+        return self.i2e_resource[np.asarray(source_indices, dtype=int)]
+
+    def consume_i2e_sources(self, source_indices) -> None:
+        """Apply one multiplicative resource use per firing I neuron."""
+        if not self.uses_i2e_depression():
+            return
+        idx = np.asarray(source_indices, dtype=int)
+        self.i2e_resource[idx] = deplete_i2e_resource(
+            self.i2e_resource[idx],
+            self.cfg.U_i2e_depression,
+            self.cfg.d_i2e_min,
+        )
 
     def step(self, spk, labels, dt):
         """Advance the fields one dt: (1) EMA-update r_E,r_I from this step's spikes,
@@ -604,6 +670,12 @@ class SpatialSlowField:
         q_I/g_K are read directly in apply_currents (no per-neuron cache). Task 5."""
         cfg = self.cfg
         spk = np.asarray(spk, bool)
+        if cfg.use_i2e_depression:
+            self.i2e_resource[:] = recover_i2e_resource(
+                self.i2e_resource, dt, cfg.tau_i2e_depression
+            )
+            self.trace_i2e_resource_mean.append(float(self.i2e_resource.mean()))
+            self.trace_i2e_resource_min.append(float(self.i2e_resource.min()))
         if cfg.use_phi:
             # Exact decay between spikes, then the post-spike jump. I-cell
             # entries stay exactly zero and never enter the E threshold.
@@ -620,6 +692,13 @@ class SpatialSlowField:
                 self.trace_phi_surround_mean.append(
                     float(phiE[~self._core_mask_E].mean())
                 )
+        if cfg.use_i_adaptation:
+            aI = self.i_adaptation_increment[self.nE:]
+            aI *= np.exp(-dt / cfg.tau_i_adaptation)
+            aI[spk[self.nE:]] += cfg.delta_i_adaptation
+            self.i_adaptation_increment[:self.nE] = 0.0
+            self.trace_i_adaptation_mean.append(float(aI.mean()))
+            self.trace_i_adaptation_max.append(float(aI.max()))
         if cfg.use_z:                                            # Z/M z_i update (ported byte-identical from mz_slow_vars.py)
             z_inf_E = (self._I_I_last < cfg.I_th_EI).astype(float)   # z_inf = H(I_th_EI - I_I): 1 iff I_I < I_th_EI (strict)
             zE = self.z[self.is_E]

@@ -30,7 +30,7 @@ _SCRIPTS = os.path.join(ROOT, "scripts")
 _ENGINE = os.path.join(ROOT, "src", "snn_engine")
 
 SCHEMA_VERSION = "zm_fork_state_v1"
-INVENTORY_VERSION = "zm_state_inventory_v1_2026-07-26"
+INVENTORY_VERSION = "zm_state_inventory_v2_2026-08-01"
 
 #: every engine file whose bytes can change the trajectory (the 6 blessed + the slow layer)
 GUARDED_ENGINE_FILES = (
@@ -194,6 +194,14 @@ def build_state_inventory():
              "dynamic", "none",
              "gated by use_phi=False in this Phase-C inventory; direct in Phase-D arm D "
              "and remains dynamic in frozen Z/M forks"),
+        _row("slow.i2e_resource", "fast_inhibitory_state", "(NI,)", "float64",
+             "tau_i2e_depression 100-600 ms", "simulator", False, True,
+             "dynamic", "direct",
+             "presynaptic availability scaling I->E edges only; neutral at one when disabled"),
+        _row("slow.i_adaptation_increment", "fast_inhibitory_state", "(N,)", "float64",
+             "tau_i_adaptation 100-600 ms", "simulator", False, True,
+             "dynamic", "direct",
+             "I-cell threshold increment; E-cell entries remain exactly zero"),
         _row("slow._I_I_last", "slow_zm", "(NE,)", "float64", "step", "simulator", False, True,
              "freezable_z", "none",
              "E-cell I_I stashed by apply_currents for the z_inf Heaviside. INTRA-step scratch: "
@@ -285,6 +293,7 @@ _KICK_DERIVED = {
     "g_w", "nu_theta", "nu_sig_const", "nu_signal_fn", "sigma_n_inv_ms", "sigma_xi", "ou_a", "ou_b",
     "center", "is_E", "dist_c", "rk", "tk", "kick_mask", "outside_mask", "e_gaba", "E_A",
     "ee_std_on", "x_rec_f", "track_rec", "fb_dyn", "fb_static", "fb_on", "alpha_fb", "inv_dt_ms",
+    "conductance_on", "cond_cfg", "i2e_dep_on",
     "_es_alpha", "_es_dur", "fb_override_trace", "base_vth", "rate_E_hz", "rate_I_hz", "res",
     # Z/M branch-decision checkpoint hook: controller handle + its hoisted gate flags. All are
     # functions of the `zm_ckpt=` argument; `t_start` comes from the restored snapshot's absolute
@@ -295,7 +304,8 @@ _KICK_DERIVED = {
 _KICK_OBSERVER = {
     "rate_E", "rate_I", "spk_t", "spk_i", "ras_keepE", "ras_keepI", "ras_keep", "ras_mask",
     "spk_inside", "spk_outside", "E_spk_bool", "I_spk_bool", "_peak_act", "I_E_peak", "I_I_peak",
-    "lfp_trace", "I_global_trace", "xdep_mean", "xdep_min", "xdep_mask_mean", "t0",
+    "lfp_trace", "lfp_current_proxy_trace", "I_global_trace", "xdep_mean", "xdep_min",
+    "xdep_mask_mean", "t0",
     # written only in the same statement that breaks the loop -> nothing to carry across a
     # checkpoint; it is the truncation MARKER reported as runaway_early_stop_ms.
     "_stop_t",
@@ -303,18 +313,19 @@ _KICK_OBSERVER = {
 #: fully overwritten before every use within a timestep -> nothing to carry across a checkpoint
 _KICK_TEMP = {
     "tm", "nu_now", "nu_vec", "ext", "slot", "I_net", "V_th_eff", "Vtmp", "V_inf", "free", "spk",
-    "idx", "st", "cnt", "tot", "spE", "spI", "x_per_edge", "w_eff", "ig_t", "I_fb", "_na", "_tgt",
-    "g", "_", "tg",
+    "idx", "st", "cnt", "tot", "spE", "spI", "x_per_edge", "d_per_edge", "w_eff",
+    "conductance_state", "ig_t", "I_fb", "_na", "_tgt", "g", "_", "tg",
 }
 #: true simulator state carried by the snapshot (names as they appear in `simulate_kick`)
 _KICK_STATE = {"V", "ref", "s_E", "I_E", "s_I", "I_I", "s_E_rec", "I_E_rec", "ring_sE", "ring_sI",
                "xi", "t", "x_dep", "r_ema", "_es_ema", "_es_run"}
 
 #: SpatialSlowField attributes that are pure functions of cfg/geometry
-_SLOW_DERIVED = {"cfg", "N", "nE", "L", "posE", "posI", "_Kq", "_Kk", "_Kn", "_Kp", "_alpha_a",
+_SLOW_DERIVED = {"cfg", "N", "nE", "nI", "L", "posE", "posI", "_Kq", "_Kk", "_Kn", "_Kp", "_alpha_a",
                  "_alpha_s", "_ixE", "_iyE", "_ixE_core", "_iyE_core", "_ixE_surr", "_iyE_surr",
                  "_core_mask_E", "is_E", "hG_script"}
-_SLOW_STATE = {"z", "m", "_I_I_last", "rE", "rI", "rE_fast", "mu_G", "S_G", "q_I", "g_K", "p",
+_SLOW_STATE = {"z", "m", "phi_increment", "i2e_resource", "i_adaptation_increment",
+               "_I_I_last", "rE", "rI", "rE_fast", "mu_G", "S_G", "q_I", "g_K", "p",
                "n_load", "a_shunt", "h_G", "H", "_t"}
 
 

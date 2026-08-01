@@ -40,6 +40,24 @@ def test_initial_panel_is_exactly_six_unique_dynamic_threshold_points():
         assert values[tau, 0.30] == pytest.approx(2.0 * values[tau, 0.15])
 
 
+def test_i2e_target_mapping_caps_only_the_nonphysical_corner():
+    capped = DEV.i2e_use_from_target(100.0, 0.35)
+    assert capped["U_nominal"] > 1.0
+    assert capped["U_applied"] == pytest.approx(0.95)
+    assert capped["use_was_capped"] is True
+    assert capped["d_star_attainable_at_reference_rate"] > 0.35
+
+    physical = DEV.i2e_use_from_target(600.0, 0.75)
+    assert 0.0 < physical["U_applied"] < 0.95
+    assert physical["use_was_capped"] is False
+    assert physical["d_star_attainable_at_reference_rate"] == pytest.approx(0.75)
+
+
+def test_i_adaptation_calibration_uses_inhibitory_threshold_gap():
+    expected = 0.25 * 7.0 / (0.300 * DEV.RACE_I_REFERENCE_RATE_HZ)
+    assert DEV.delta_i_adaptation_mV(300.0, 0.25) == pytest.approx(expected)
+
+
 @pytest.mark.parametrize(
     "tau,fraction,gap,rate",
     [

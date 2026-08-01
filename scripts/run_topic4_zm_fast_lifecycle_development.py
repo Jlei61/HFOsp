@@ -54,6 +54,15 @@ FINE_BIN_MS = 2.0
 COARSE_BIN_MS = 25.0
 PRODUCTION_T_MS = 6000.0
 PRODUCTION_BURN_MS = 1000.0
+RACE_STATE = "bounded_mid__peak"
+RACE_PHI_TAU_MS = 60.0
+RACE_PHI_FRACTION = 0.15
+RACE_I_REFERENCE_RATE_HZ = 11.790075302124023
+RACE_TAU_D_MS = (100.0, 300.0, 600.0)
+RACE_D_STAR = (0.35, 0.55, 0.75)
+RACE_TAU_I_MS = (100.0, 300.0, 600.0)
+RACE_F_I = (0.10, 0.25)
+RACE_ARMS = ("native", "phi", "i2e", "iadapt", "combined")
 
 
 def delta_phi_mV(
@@ -70,6 +79,41 @@ def delta_phi_mV(
     if not 0 < float(fraction) < 1:
         raise ValueError("fraction must lie strictly between zero and one")
     return float(fraction) * float(gap_mV) / (tau_s * float(rate_hz))
+
+
+def i2e_use_from_target(
+    tau_ms: float,
+    d_star: float,
+    *,
+    rate_hz: float = RACE_I_REFERENCE_RATE_HZ,
+    maximum_use: float = 0.95,
+) -> dict:
+    """Map a nominal steady resource to a physical multiplicative use rate."""
+    tau_s = float(tau_ms) / 1000.0
+    if tau_s <= 0 or float(rate_hz) <= 0:
+        raise ValueError("tau and I reference rate must be positive")
+    if not 0 < float(d_star) < 1:
+        raise ValueError("d_star must lie strictly between zero and one")
+    nominal = (1.0 / float(d_star) - 1.0) / (tau_s * float(rate_hz))
+    applied = min(float(maximum_use), nominal)
+    attainable = 1.0 / (1.0 + applied * tau_s * float(rate_hz))
+    return {
+        "U_nominal": float(nominal),
+        "U_applied": float(applied),
+        "use_was_capped": bool(applied != nominal),
+        "d_star_nominal": float(d_star),
+        "d_star_attainable_at_reference_rate": float(attainable),
+    }
+
+
+def delta_i_adaptation_mV(
+    tau_ms: float,
+    fraction: float,
+    *,
+    gap_mV: float = 7.0,
+    rate_hz: float = RACE_I_REFERENCE_RATE_HZ,
+) -> float:
+    return delta_phi_mV(tau_ms, fraction, gap_mV=gap_mV, rate_hz=rate_hz)
 
 
 def _sha(path: Path) -> str:
@@ -195,17 +239,72 @@ def _modulation(trace: np.ndarray) -> dict:
     }
 
 
-def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float):
+def _mechanism_kwargs(args: argparse.Namespace, ctx: dict) -> tuple[dict, dict]:
+    """Return config edits and an auditable parameter receipt for one race arm."""
+    if args.command == "cell":
+        return {}, {"arm": "phi", "strength_scale": 1.0}
+    arm = str(args.arm)
+    if arm not in RACE_ARMS:
+        raise ValueError(f"unknown race arm {arm}")
+    use_phi = arm != "native"
+    edits = {"use_phi": use_phi}
+    receipt = {"arm": arm, "strength_scale": 0.5 if arm == "combined" else 1.0}
+    if arm in {"i2e", "combined"}:
+        if args.tau_D_ms is None or args.d_star is None:
+            raise ValueError(f"{arm} requires tau_D_ms and d_star")
+        dep = i2e_use_from_target(args.tau_D_ms, args.d_star)
+        scale = receipt["strength_scale"]
+        edits.update(
+            use_i2e_depression=True,
+            tau_i2e_depression=float(args.tau_D_ms),
+            U_i2e_depression=float(scale * dep["U_applied"]),
+            d_i2e_min=0.20,
+        )
+        receipt["i2e_depression"] = {
+            **dep,
+            "U_applied_after_strength_scale": float(scale * dep["U_applied"]),
+            "tau_D_ms": float(args.tau_D_ms),
+            "d_min": 0.20,
+        }
+    if arm in {"iadapt", "combined"}:
+        if args.tau_aI_ms is None or args.f_aI is None:
+            raise ValueError(f"{arm} requires tau_aI_ms and f_aI")
+        gap_i = float(ctx["S"]["p"].V_th - ctx["S"]["p"].V_reset)
+        delta_i = delta_i_adaptation_mV(
+            args.tau_aI_ms, args.f_aI, gap_mV=gap_i
+        )
+        scale = receipt["strength_scale"]
+        edits.update(
+            use_i_adaptation=True,
+            tau_i_adaptation=float(args.tau_aI_ms),
+            delta_i_adaptation=float(scale * delta_i),
+        )
+        receipt["i_adaptation"] = {
+            "tau_aI_ms": float(args.tau_aI_ms),
+            "f_aI": float(args.f_aI),
+            "delta_mV_per_spike_nominal": float(delta_i),
+            "delta_mV_per_spike_after_strength_scale": float(scale * delta_i),
+            "I_threshold_gap_mV": gap_i,
+            "I_reference_rate_hz": RACE_I_REFERENCE_RATE_HZ,
+        }
+    return edits, receipt
+
+
+def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
     gap = float(R.PP.CORE_MEAN - ctx["S"]["p"].V_reset)
     delta = delta_phi_mV(tau_phi_ms, fraction, gap_mV=gap)
     cfg = R.ZM._zm_cfg(ctx["S"]["I_th_EI"], **R.ARM_KWARGS)
-    cfg = dataclasses.replace(
-        cfg,
-        use_zm_conductance=False,
-        use_phi=True,
-        tau_phi=float(tau_phi_ms),
-        delta_phi=float(delta),
-    )
+    edits, receipt = ({}, {"arm": "phi", "strength_scale": 1.0})
+    if args is not None:
+        edits, receipt = _mechanism_kwargs(args, ctx)
+    values = {
+        "use_zm_conductance": False,
+        "use_phi": True,
+        "tau_phi": float(tau_phi_ms),
+        "delta_phi": float(delta),
+    }
+    values.update(edits)
+    cfg = dataclasses.replace(cfg, **values)
     base = R.SpatialSlowField(
         ctx["S"]["N"], 18.0, ctx["S"]["posE"], ctx["S"]["posI"],
         ctx["S"]["L"], core_mask_E=ctx["core"], cfg=cfg,
@@ -216,7 +315,7 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float):
     slow = R.FS.FreezeWrapper(
         diagnostic, R.FS.FreezePolicy.for_arm("freeze_zm")
     )
-    return slow, diagnostic, delta
+    return slow, diagnostic, delta, receipt
 
 
 def run_cell(args: argparse.Namespace) -> Path:
@@ -224,7 +323,24 @@ def run_cell(args: argparse.Namespace) -> Path:
         raise RuntimeError(f"production duration must be {PRODUCTION_T_MS:g} ms")
     if not args.smoke and float(args.burn_ms) != PRODUCTION_BURN_MS:
         raise RuntimeError(f"production burn must be {PRODUCTION_BURN_MS:g} ms")
-    if float(args.tau_phi_ms) not in TAUS_MS or float(args.fraction) not in FRACTIONS:
+    race = args.command == "race-cell"
+    if race:
+        if args.state != RACE_STATE:
+            raise RuntimeError(f"mechanism race is locked to {RACE_STATE}")
+        if (
+            float(args.tau_phi_ms) != RACE_PHI_TAU_MS
+            or float(args.fraction) != RACE_PHI_FRACTION
+        ):
+            raise RuntimeError("mechanism race phi coordinate drift")
+        if args.tau_D_ms is not None and float(args.tau_D_ms) not in RACE_TAU_D_MS:
+            raise RuntimeError("tau_D lies outside the registered race panel")
+        if args.d_star is not None and float(args.d_star) not in RACE_D_STAR:
+            raise RuntimeError("d_star lies outside the registered race panel")
+        if args.tau_aI_ms is not None and float(args.tau_aI_ms) not in RACE_TAU_I_MS:
+            raise RuntimeError("tau_aI lies outside the registered race panel")
+        if args.f_aI is not None and float(args.f_aI) not in RACE_F_I:
+            raise RuntimeError("f_aI lies outside the registered race panel")
+    elif float(args.tau_phi_ms) not in TAUS_MS or float(args.fraction) not in FRACTIONS:
         raise RuntimeError("cell lies outside the initial six-point phi panel")
 
     manifest = json.loads(INPUT.read_text())
@@ -252,7 +368,9 @@ def run_cell(args: argparse.Namespace) -> Path:
     if locked_banks["noise_replay"]["bank_sha"] != bank["bank_sha"]:
         raise RuntimeError("future-noise bank drift")
 
-    slow, diagnostic, delta = _make_slow(ctx, args.tau_phi_ms, args.fraction)
+    slow, diagnostic, delta, mechanism = _make_slow(
+        ctx, args.tau_phi_ms, args.fraction, args=args
+    )
     z0 = np.array(state["slow.z"], copy=True)
     m0 = np.array(state["slow.m"], copy=True)
     sg0 = float(np.asarray(state["slow.S_G"]))
@@ -297,6 +415,12 @@ def run_cell(args: argparse.Namespace) -> Path:
         raise RuntimeError(f"freeze_zm drifted: z={z_drift} m={m_drift}")
     if np.count_nonzero(phi_i) != 0:
         raise RuntimeError("I-cell phi became nonzero")
+    i_adaptation = np.asarray(diagnostic.i_adaptation_increment, float)
+    if np.count_nonzero(i_adaptation[: ctx["S"]["NE"]]) != 0:
+        raise RuntimeError("E-cell I-adaptation increment became nonzero")
+    i2e_resource = np.asarray(diagnostic.i2e_resource, float)
+    if np.any(i2e_resource < 0.20 - 1e-12) or np.any(i2e_resource > 1.0 + 1e-12):
+        raise RuntimeError("I->E resource left its registered bounds")
 
     arrays = {
         "fine_time_ms": np.asarray(fine["t_ms"], np.float32),
@@ -320,21 +444,41 @@ def run_cell(args: argparse.Namespace) -> Path:
         "trace_S_G": np.asarray(diagnostic.trace_SG, np.float32),
         "trace_m_core_mean": np.asarray(diagnostic.trace_m_core_mean, np.float32),
         "trace_z_core_mean": np.asarray(diagnostic.trace_z_core_mean, np.float32),
+        "trace_i2e_resource_mean": np.asarray(
+            diagnostic.trace_i2e_resource_mean, np.float32
+        ),
+        "trace_i2e_resource_min": np.asarray(
+            diagnostic.trace_i2e_resource_min, np.float32
+        ),
+        "trace_i_adaptation_mean": np.asarray(
+            diagnostic.trace_i_adaptation_mean, np.float32
+        ),
+        "trace_i_adaptation_max": np.asarray(
+            diagnostic.trace_i_adaptation_max, np.float32
+        ),
     }
-    namespace = "smoke" if args.smoke else "discovery"
-    stem = f"{args.state}__tau{args.tau_phi_ms:g}__f{args.fraction:g}"
+    namespace = "smoke" if args.smoke else ("race" if race else "discovery")
+    if race:
+        stem = str(args.arm)
+        if args.arm in {"i2e", "combined"}:
+            stem += f"__tauD{args.tau_D_ms:g}__d{args.d_star:g}"
+        if args.arm in {"iadapt", "combined"}:
+            stem += f"__tauI{args.tau_aI_ms:g}__fI{args.f_aI:g}"
+    else:
+        stem = f"{args.state}__tau{args.tau_phi_ms:g}__f{args.fraction:g}"
     root = OUT / namespace / "seed1" / stem
     npz_path = root / "traces.npz"
     json_path = root / "summary.json"
     _write_npz_once(npz_path, arrays)
     payload = {
         "schema": "zm_fast_lifecycle_development_cell_v1_2026-08-01",
-        "stage": "A_branch_intervention",
+        "stage": "mechanism_race" if race else "A_branch_intervention",
         "semantic_scope": "branch_intervention_not_reachability",
         "seed": 1,
         "state": args.state,
         "tau_phi_ms": float(args.tau_phi_ms),
         "fraction": float(args.fraction),
+        "mechanism": mechanism,
         "delta_phi_mV_per_spike": float(delta),
         "reference_rate_hz": REFERENCE_RATE_HZ,
         "threshold_gap_mV": float(R.PP.CORE_MEAN - ctx["S"]["p"].V_reset),
@@ -353,6 +497,17 @@ def run_cell(args: argparse.Namespace) -> Path:
         "phi_final_mean_mV": float(np.mean(phi_e)),
         "phi_final_max_mV": float(np.max(phi_e)),
         "phi_i_nonzero": int(np.count_nonzero(phi_i)),
+        "i_adaptation_E_nonzero": int(
+            np.count_nonzero(i_adaptation[: ctx["S"]["NE"]])
+        ),
+        "i_adaptation_final_mean_mV": float(
+            np.mean(i_adaptation[ctx["S"]["NE"] :])
+        ),
+        "i_adaptation_final_max_mV": float(
+            np.max(i_adaptation[ctx["S"]["NE"] :])
+        ),
+        "i2e_resource_final_mean": float(np.mean(i2e_resource)),
+        "i2e_resource_final_min": float(np.min(i2e_resource)),
         "z_max_abs_drift": z_drift,
         "m_max_abs_drift": m_drift,
         "S_G_initial": sg0,
@@ -384,6 +539,8 @@ def run_cell(args: argparse.Namespace) -> Path:
         "all_E_mean_hz": payload["all_E_modulation"]["mean_hz"],
         "rho80": payload["core_rho80_active_fraction"],
         "phi_mean": payload["phi_final_mean_mV"],
+        "dI_mean": payload["i2e_resource_final_mean"],
+        "aI_mean": payload["i_adaptation_final_mean_mV"],
         "S_G_final": payload["S_G_final"],
         "runaway_ms": payload["runaway_early_stop_ms"],
         "wall_s": payload["wall_s"],
@@ -394,10 +551,15 @@ def run_cell(args: argparse.Namespace) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("cell",))
-    parser.add_argument("--state", choices=STATES, required=True)
-    parser.add_argument("--tau-phi-ms", type=float, choices=TAUS_MS, required=True)
-    parser.add_argument("--fraction", type=float, choices=FRACTIONS, required=True)
+    parser.add_argument("command", choices=("cell", "race-cell"))
+    parser.add_argument("--state", choices=STATES, default=RACE_STATE)
+    parser.add_argument("--tau-phi-ms", type=float, default=RACE_PHI_TAU_MS)
+    parser.add_argument("--fraction", type=float, default=RACE_PHI_FRACTION)
+    parser.add_argument("--arm", choices=RACE_ARMS, default="phi")
+    parser.add_argument("--tau-D-ms", type=float, dest="tau_D_ms")
+    parser.add_argument("--d-star", type=float)
+    parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
+    parser.add_argument("--f-aI", type=float, dest="f_aI")
     parser.add_argument("--T-ms", type=float, default=PRODUCTION_T_MS)
     parser.add_argument("--burn-ms", type=float, default=PRODUCTION_BURN_MS)
     parser.add_argument("--smoke", action="store_true")

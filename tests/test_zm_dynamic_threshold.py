@@ -1,10 +1,18 @@
 """TDD for the Phase-D E-only dynamic-threshold increment."""
 from __future__ import annotations
 
+import sys
 import numpy as np
 import pytest
 
-from src.snn_engine.slow_field import SpatialSlowField, SpatialSlowFieldConfig
+sys.path.insert(0, "src/snn_engine")
+from kick_probe import i2e_depression_apply  # noqa: E402
+from src.snn_engine.slow_field import (
+    SpatialSlowField,
+    SpatialSlowFieldConfig,
+    deplete_i2e_resource,
+    recover_i2e_resource,
+)
 from src.topic4_zm_checkpoint import capture_slow, restore_slow
 from src.topic4_zm_fork_state import FreezePolicy, FreezeWrapper
 
@@ -134,3 +142,61 @@ def test_phi_traces_exist_only_when_enabled_and_are_core_aware():
     assert disabled.trace_phi_core_mean == []
     assert disabled.trace_phi_surround_mean == []
 
+
+def test_inhibitory_state_config_rejects_nonphysical_parameters():
+    with pytest.raises(ValueError, match="U_i2e_depression"):
+        SpatialSlowFieldConfig(
+            use_i2e_depression=True, U_i2e_depression=1.0
+        ).validate()
+    with pytest.raises(ValueError, match="d_i2e_min"):
+        SpatialSlowFieldConfig(
+            use_i2e_depression=True, d_i2e_min=0.0
+        ).validate()
+    with pytest.raises(ValueError, match="tau_i_adaptation"):
+        SpatialSlowFieldConfig(
+            use_i_adaptation=True, tau_i_adaptation=0.0
+        ).validate()
+
+
+def test_i2e_resource_recovery_use_and_floor_are_exact():
+    recovered = recover_i2e_resource(np.array([0.2, 0.7]), 0.1, 100.0)
+    expected = 1.0 - (1.0 - np.array([0.2, 0.7])) * np.exp(-0.1 / 100.0)
+    np.testing.assert_allclose(recovered, expected, atol=0, rtol=1e-15)
+    used = deplete_i2e_resource(recovered, 0.95, 0.20)
+    np.testing.assert_array_equal(used, np.array([0.20, 0.20]))
+
+
+def test_i_adaptation_changes_only_i_thresholds():
+    slow = _field(use_phi=False)
+    slow.cfg.use_i_adaptation = True
+    slow.cfg.tau_i_adaptation = 100.0
+    slow.cfg.delta_i_adaptation = 1.25
+    slow.step(np.array([True, False, False, False, True, False]), None, 0.1)
+    np.testing.assert_array_equal(slow.i_adaptation_increment[:4], np.zeros(4))
+    np.testing.assert_array_equal(slow.i_adaptation_increment[4:], [1.25, 0.0])
+    np.testing.assert_array_equal(
+        slow.threshold(np.full(6, 18.0)), [18, 18, 18, 18, 19.25, 18]
+    )
+
+
+def test_i2e_depression_scales_only_edges_onto_e():
+    weights = np.array([2.0, 3.0, 5.0, 7.0])
+    targets = np.array([0, 3, 4, 5])
+    resource = np.array([0.4, 0.6, 0.2, 0.8])
+    got = i2e_depression_apply(weights, targets, resource, NE=4)
+    np.testing.assert_allclose(got, [0.8, 1.8, 5.0, 7.0], rtol=0, atol=1e-15)
+
+
+def test_checkpoint_roundtrip_preserves_both_inhibitory_states():
+    source = _field(use_phi=False)
+    source.i2e_resource[:] = [0.3, 0.8]
+    source.i_adaptation_increment[4:] = [0.7, 1.1]
+    state = capture_slow(source)
+    assert "slow.i2e_resource" in state
+    assert "slow.i_adaptation_increment" in state
+    target = _field(use_phi=False)
+    restore_slow(target, state)
+    np.testing.assert_array_equal(target.i2e_resource, source.i2e_resource)
+    np.testing.assert_array_equal(
+        target.i_adaptation_increment, source.i_adaptation_increment
+    )

@@ -70,6 +70,13 @@ def ee_std_apply(a_w, a_dst, x_per_edge, NE):
     return a_w * np.where(a_dst < NE, x_per_edge, 1.0)
 
 
+def i2e_depression_apply(g_w, g_dst, d_per_edge, NE):
+    """Scale inhibitory edges onto E by presynaptic resource; spare I->I."""
+    return np.asarray(g_w) * np.where(
+        np.asarray(g_dst) < int(NE), np.asarray(d_per_edge), 1.0
+    )
+
+
 def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba_scale=0.0):
     """One LIF membrane update. Default (shunt_gaba=False) = current-based LIF, BIT-IDENTICAL
     to the pre-2026-06-19 engine: V_inf = I_E - I_I; V -> V_inf + (V - V_inf)*decay_V.
@@ -192,6 +199,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     )
     if track_rec:
         s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
+    i2e_dep_on = bool(
+        slow is not None
+        and hasattr(slow, "uses_i2e_depression")
+        and slow.uses_i2e_depression()
+    )
     ring_sE = np.zeros((M, N))
     ring_sI = np.zeros((M, N))
 
@@ -479,7 +491,26 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                 if tot:
                     idx = (np.arange(tot) - np.repeat(np.cumsum(cnt) - cnt, cnt)
                            + np.repeat(st, cnt))
-                    np.add.at(ring_sI, ((tg + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
+                    if i2e_dep_on:
+                        # Presynaptic resource scales only I->E edges.  I->I
+                        # weights remain native, preserving inhibitory local
+                        # containment while active I sources transiently lose
+                        # efficacy onto E cells.
+                        d_per_edge = np.repeat(
+                            slow.i2e_resource_at_sources(spI), cnt
+                        )
+                        w_eff = i2e_depression_apply(
+                            g_w[idx], g_dst[idx], d_per_edge, NE
+                        )
+                        np.add.at(
+                            ring_sI,
+                            ((tg + g_dly[idx]) % M, g_dst[idx]),
+                            w_eff,
+                        )
+                    else:
+                        np.add.at(ring_sI, ((tg + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
+                if i2e_dep_on:
+                    slow.consume_i2e_sources(spI)
 
         if verbose and (t % max(1, nsteps // 5) == 0):
             print(f"  sim {t}/{nsteps}  ({tm:.0f} ms)  "
