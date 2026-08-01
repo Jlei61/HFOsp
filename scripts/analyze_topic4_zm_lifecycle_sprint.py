@@ -524,10 +524,16 @@ def _flat(row):
 def main():
     roots = [p for p in sorted(IN_ROOT.glob("*")) if (p / "summary.json").is_file()]
     rows = [analyze_one(root) for root in roots]
+    adaptation_path = OUT_ROOT / "batch1_adaptation_decisions.json"
+    adaptation = (
+        json.loads(adaptation_path.read_text()).get("decisions", [])
+        if adaptation_path.is_file() else []
+    )
     payload = {
         "schema": "topic4_zm_lifecycle_sprint_phase_map_v1_2026-08-02",
         "semantic_scope": "seed1_development_multiobjective_not_acceptance",
         "n_runs": len(rows),
+        "adaptation_decisions": adaptation,
         "rows": rows,
     }
     OUT_ROOT.mkdir(parents=True, exist_ok=True)
