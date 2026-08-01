@@ -677,3 +677,81 @@ def test_unknown_objective_and_optimizer_are_rejected(records):
     subset = [records[key] for key in sorted(records)[:2]]
     with pytest.raises(ValueError, match="weight decay 0"):
         _train(subset, batch_size=16, optimizer="adam", weight_decay=1e-4)
+
+
+@pytest.mark.parametrize("mode", ["ordered", "frozen", "shuffled"])
+def test_native_rollout_history_modes_are_matched(records, mode):
+    """The ablation must change only what the state is fed, nothing else."""
+    from src.topic5_training_sufficiency import paired_native_rollout
+
+    record = records[sorted(records)[0]]
+    device = torch.device("cpu")
+    observed = np.asarray(record.group_ids[record.eval_indices], dtype=np.int16)
+    source = observed == 0
+    uniforms = np.random.default_rng(12).random((observed.shape[0], N_CONTACTS))
+    features = torch.as_tensor(
+        record.contact_features, dtype=torch.float32, device=device
+    ).unsqueeze(0)
+    mask = torch.ones((1, N_CONTACTS), dtype=torch.bool, device=device)
+    offset = torch.zeros((N_CONTACTS, 2))
+
+    groups, counts = paired_native_rollout(
+        _model(), features, mask, offset, source, uniforms,
+        history_mode=mode, history_seed=5,
+    )
+    # the revealed source and the contiguous-rank contract hold in every arm
+    assert np.all(groups[source] == 0)
+    for event, length in zip(groups, counts):
+        present = np.sort(event[event >= 0])
+        assert present.tolist() == list(range(int(length)))
+
+    again, again_counts = paired_native_rollout(
+        _model(), features, mask, offset, source, uniforms,
+        history_mode=mode, history_seed=5,
+    )
+    np.testing.assert_array_equal(groups, again)
+    np.testing.assert_array_equal(counts, again_counts)
+
+
+def test_native_rollout_history_modes_actually_differ(records):
+    from src.topic5_training_sufficiency import paired_native_rollout
+
+    record = records[sorted(records)[0]]
+    device = torch.device("cpu")
+    observed = np.asarray(record.group_ids[record.eval_indices], dtype=np.int16)
+    source = observed == 0
+    # bias the inverse-CDF draws away from the STOP action so events run long
+    # enough for a shuffled history to have anything to shuffle
+    uniforms = 0.5 + 0.5 * np.random.default_rng(13).random(
+        (observed.shape[0], N_CONTACTS)
+    )
+    features = torch.as_tensor(
+        record.contact_features, dtype=torch.float32, device=device
+    ).unsqueeze(0)
+    mask = torch.ones((1, N_CONTACTS), dtype=torch.bool, device=device)
+    offset = torch.zeros((N_CONTACTS, 2))
+    def _state_coupled_model():
+        # an untrained toy model is dominated by its per-contact bias, so the
+        # hidden state barely reaches the output; amplify the state-to-output
+        # path so the ablation has something observable to change
+        model = _model()
+        with torch.no_grad():
+            model.action_query.weight.mul_(50.0)
+            model.stop_head.bias.fill_(-20.0)  # keep events running
+        return model
+
+    runs = {
+        mode: paired_native_rollout(
+            _state_coupled_model(), features, mask, offset, source, uniforms,
+            history_mode=mode, history_seed=5,
+        )[0]
+        for mode in ("ordered", "frozen", "shuffled")
+    }
+    assert not np.array_equal(runs["ordered"], runs["frozen"])
+    assert not np.array_equal(runs["ordered"], runs["shuffled"])
+
+    with pytest.raises(ValueError):
+        paired_native_rollout(
+            _model(), features, mask, offset, source, uniforms,
+            history_mode="mystery",
+        )

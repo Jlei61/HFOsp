@@ -4,7 +4,7 @@
 冻结 spec：`docs/superpowers/specs/2026-07-30-topic5-rnn-training-sufficiency-v0_1.md`
 上游：`docs/archive/topic5/rnn_stage_acceptance_and_training_sufficiency_2026-07-30.md` §7
 
-状态：`ACCEPTED_TRAINING_SUFFICIENCY_CLOSED_GENERATION_BAR_STILL_NOT_MET`
+状态：`ACCEPTED_PRIOR_BUDGET_INSUFFICIENT_PLATEAU_NOT_REACHED_GENERATION_GATE_NOT_MET`
 
 ## 0. 这一轮只问两件事
 
@@ -319,7 +319,59 @@ LOSO-development 结构，4 目标 × 3 seeds × 34 folds = **408 单元，零�
 一步预测 −0.0193（4/34，P=3.0×10⁻⁸），其余端点无显著差异。Phase C 的结论在外层留出
 数据上原样成立。
 
-### 5.4 用上一轮自己的预注册验收标准重新评分
+### 5.4 两台发生器回答不同的问题（双 estimand）
+
+审阅意见指出：两台发生器不是"对错"关系，而是两个不同的被估量。本轮采纳该定位。
+
+| | 回答的问题 | 定位 |
+|---|---|---|
+| **模型自身联合分布**（`native_model`） | 这个模型作为一个生成过程，能否生成完整事件 | **模型生成能力的主读出** |
+| **复合发生器**（`full_constructive`） | 静态骨架 + 冻结顺序残差的**分解式**读出 | 保留为历史可比性与顺序残差分解的**敏感性** |
+
+因此：
+
+- **不能**再把复合发生器下的阴性直接解释为"这个 RNN 不能生成事件"；
+- **但**预注册的 17/34 门槛依然有效，而模型自身读出也只有 13–14/34，
+  所以**整场生成主门仍然没有通过**。
+
+### 5.5 匹配消融：模型自身读出的改善有多少来自事件内顺序
+
+模型自身读出相对复合发生器同时重新引入了三样东西：事件内顺序历史、模型自己的触点偏好、
+模型自己的结束头。因此不能把它的整场改善直接归因于顺序历史。
+
+本消融**不重训**：固定同一个收敛 checkpoint、同一个真实首触点、同一批随机数、同一个
+decoder、同一个结束头、同样的候选屏蔽，只改**喂进递归状态的东西**。
+`ordered` 臂在 **102/102 单元逐位复现** Phase D 的模型自身 rollout（正确性验证）。
+
+| 喂给状态的历史 | 相邻步 r ↑ | 名次 W1 ↓ | 成对先后 r ↑ | 参与 ↓ | 长度 W1 ↓ | 终止 ↓ |
+|---|---:|---:|---:|---:|---:|---:|
+| **真实顺序** | **0.8669** | **0.0497** | **0.8035** | **0.0681** | **0.0477** | **0.0714** |
+| 冻结（首触点之后不再更新状态） | 0.6141 | 0.0819 | 0.7525 | 0.3309 | 0.3336 | 0.2149 |
+| 打乱（有历史，身份随机） | 0.7378 | 0.0701 | 0.6270 | 0.1126 | 0.0948 | 0.0791 |
+
+逐患者配对（n=34，正值 = 真实顺序更好）：
+
+| 端点 | vs 冻结 | vs **打乱**（身份匹配对照） |
+|---|---:|---:|
+| 相邻步 r | +0.1843（34/34，1.2×10⁻¹⁰） | **+0.1221（34/34，1.2×10⁻¹⁰）** |
+| 名次分布 W1 | +0.0266（31/34，1.1×10⁻⁷） | **+0.0115（28/34，1.9×10⁻⁶）** |
+| 成对先后 r | +0.0336（23/34，**p=0.121，不显著**） | **+0.1661（27/34，1.9×10⁻⁵）** |
+| 参与误差 | +0.2481（34/34，1.2×10⁻¹⁰） | **+0.0379（24/34，4.7×10⁻⁵）** |
+| 事件长度 W1 | +0.2833（34/34，1.2×10⁻¹⁰） | **+0.0487（29/34，1.9×10⁻⁶）** |
+| 终止误差 | +0.1474（34/34，1.2×10⁻¹⁰） | +0.0082（18/34，p=0.029） |
+
+**必须同时记住的两点**：
+
+1. **冻结臂不是身份匹配的对照**。冻结状态同时切掉了进度计数器，所以事件长度与终止
+   必然崩掉（0.3336 / 0.2149）——那反映的是"状态携带进度"，不是"顺序身份有用"。
+2. **打乱臂才是匹配对照**（保留每步一个触点的进度、只毁掉身份对应）。对它，真实顺序在
+   五个端点上都显著更优，因此**模型自身读出的整场改善确实有一部分来自事件内顺序历史**。
+
+**但成对先后这一项要收窄**：相对冻结臂只 +0.034 且不显著（23/34，p=0.121），说明那 0.80 的
+成对顺序保真度**大部分来自静态解码结构（触点嵌入 + 局部偏移 + 已揭示的首触点），
+不是来自事件内历史**。顺序历史的作用是让它**不比乱喂历史更差**，而不是把它从 0.75 抬到 0.80。
+
+### 5.6 用上一轮自己的预注册验收标准重新评分
 
 判据（上一轮原文）：一位患者若在**参与误差、名次分布、成对先后误差**三项中至少两项落入
 "真实留出事件前后两半互比"误差的 **+10%** 以内，即算通过；队列门槛 **17/34**。
@@ -350,17 +402,34 @@ LOSO-development 结构，4 目标 × 3 seeds × 34 folds = **408 单元，零�
 | 预注册结果 | 判定 |
 |---|---|
 | **结果 1**：更多训练只改善一步预测，不改善自由生成 | **仅在上一轮的复合读出方式下成立**；用模型自身的读出方式，自由生成的每一个端点都显著改善 |
-| **结果 2**：rollout-aware 改善完整事件且不伤一步预测 | **否决**。三个目标全部同时伤害两者，且呈单调剂量反应 |
+| **结果 2**：rollout-aware 改善完整事件且不伤一步预测 | **在测试的三个目标上否决**。三者全部同时伤害两者，且呈单调剂量反应；这不等于所有曝光偏差修正都无效 |
 | **结果 3**：增加覆盖轮数后一步预测与自由生成都显著改善 | **成立**（模型自身读出方式；6 个端点全部显著，两队列同向） |
 | **结果 4**：所有条件仍只改善局部转移 | **否**——整场事件的名次分布、成对先后、参与、长度全部改善 |
+
+### 推荐的论文核心段落（英文，采纳审阅建议）
+
+> Under the previously frozen training budget, the linear-state model was substantially
+> under-optimized: extended training reduced held-out next-contact NLL by 0.134 nats per
+> decision in all 34 patients. When events were sampled from the model's own joint
+> next-contact and STOP distribution, extended training improved every evaluated
+> whole-event metric across both cohorts, whereas the earlier composite generator produced
+> an opposing trend, revealing a readout-dependent bias. A matched ablation on the same
+> checkpoint, random numbers and decoder showed that ordered within-event history
+> contributed to this improvement relative to an identity-shuffled history control.
+> Nevertheless, only 13-14 of 34 patients met the preregistered empirical-fidelity
+> criterion, below the threshold of 17, and the optimization plateau criterion was not
+> reached within eight passes. Thus, ordered interictal history supports improved event
+> generation under the model-native readout, but the present linear-state model does not
+> yet reproduce complete event distributions at empirical reliability.
 
 ### 一句话科学结论
 
 > 上一版"完整事件生成阴性"里，有两个可分离的成分：一部分来自**训练不足**（已发表配置
 > 比收敛配置差 0.134 nats/decision，34/34 患者），另一部分来自**读出方式**（用于评价的
 > 静态骨架＋顺序残差复合发生器，会随模型变好而系统性变差）。两者都修正之后，自由生成
-> 的每一项整场指标都显著改善，但**仍未达到"与真实数据自身前后半一样接近"的预注册门槛
-> （13–14/34，门槛 17/34）**。曝光偏差不是原阴性的原因：三种 rollout-aware 目标同时
+> 的每一项整场指标都显著改善（其中一部分确实来自事件内顺序历史——身份匹配的打乱对照在五个
+> 端点上都显著更差；但成对先后的绝对水平主要由静态解码结构承担），**仍未达到"与真实数据
+> 自身前后半一样接近"的预注册门槛（13–14/34，门槛 17/34）**。曝光偏差不是原阴性的原因：三种 rollout-aware 目标同时
 > 损害局部预测与整场生成。
 
 ### 训练充分性是否关闭
@@ -463,8 +532,10 @@ P=1.16×10⁻¹⁰，LOSO 结构确认）。容量（hidden 64）不是限制、
 
 - 事实：三个 rollout-aware 目标（每 2 步自喂、每 3 步自喂、渐增 schedule）在
   development 与外层留出上都同时**损害**局部预测与整场生成，且呈单调剂量反应。
-- 修订形式：可以写"we tested and excluded exposure bias as an explanation"，并给出
-  一步预测护栏全部失守的数字。这是一个**阳性的排除**，不是未做的检查。
+- 修订形式：可以写 "Three tested rollout-aware objectives failed to improve free generation and
+  consistently degraded one-step prediction, arguing against exposure bias as the
+  dominant explanation."**不能**写 "we excluded exposure bias" —— 三个 intervention
+  失败不能推出所有曝光偏差修正都无效。
 
 **R10｜禁止的新写法。**
 
@@ -510,7 +581,7 @@ P=1.16×10⁻¹⁰，LOSO 结构确认）。容量（hidden 64）不是限制、
 - **已发表模型复现**：102/102 个参照单元从归档 checkpoint 复算的留出 NLL 与归档值最大
   偏差 3.0×10⁻⁷、中位 6.2×10⁻⁸。
 - **配对随机数对齐**：`static_only` rollout 在所有训练条件下逐位相同（差值恰为 0）。
-- **失败 / OOM / NaN**：**全程 0**。1,062 个训练/评估单元，无一失败、无一 OOM、无 NaN。
+- **失败 / OOM / NaN**：**全程 0**。1,068 个训练/评估单元，无一失败、无一 OOM、无 NaN。
   峰值资源：GPU allocated ≤ 0.204 GB、RSS ≤ 1.45 GB（单进程）。
 - **测试**：新增 24 项定向测试全部通过；Topic 5 RNN 相关 20 个测试文件共 **172 项全部通过**。
 

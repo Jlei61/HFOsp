@@ -1,0 +1,188 @@
+{
+  "contract": "topic5_rnn_training_sufficiency_v0_1_native_history_ablation",
+  "question": "does the model-native whole-event improvement come from ordered within-event history, or from re-introducing the model's own contact bias and STOP head?",
+  "condition": "converged_teacher_forced",
+  "history_modes": [
+    "ordered",
+    "frozen",
+    "shuffled"
+  ],
+  "held_fixed": [
+    "checkpoint",
+    "revealed first rank set",
+    "uniform random numbers",
+    "decoder",
+    "STOP head",
+    "candidate masking"
+  ],
+  "n_cells": 102,
+  "n_patients": 34,
+  "ordered_arm_reproduces_phase_d": {
+    "n_cells": 102,
+    "group_ids_identical": 102,
+    "group_count_identical": 102,
+    "all_identical": true
+  },
+  "descriptive_patient_median": {
+    "ordered": {
+      "transition_correlation": 0.8668834471930014,
+      "suffix_rank_wasserstein": 0.049715494697213834,
+      "suffix_precedence_correlation": 0.8034917263030668,
+      "suffix_participation_mae": 0.06813217735118061,
+      "event_length_wasserstein": 0.04771033174135296,
+      "stop_hazard_mae": 0.0714098656672667
+    },
+    "frozen": {
+      "transition_correlation": 0.6140906205003169,
+      "suffix_rank_wasserstein": 0.0819406795694182,
+      "suffix_precedence_correlation": 0.7525452027088123,
+      "suffix_participation_mae": 0.3309042155973231,
+      "event_length_wasserstein": 0.33362080923749526,
+      "stop_hazard_mae": 0.21492316321519586
+    },
+    "shuffled": {
+      "transition_correlation": 0.7378182578344501,
+      "suffix_rank_wasserstein": 0.07013805589201762,
+      "suffix_precedence_correlation": 0.6270049624014553,
+      "suffix_participation_mae": 0.11255937382112094,
+      "event_length_wasserstein": 0.09476717758434208,
+      "stop_hazard_mae": 0.07909877593621317
+    }
+  },
+  "paired_tests": {
+    "ordered__vs__frozen": {
+      "transition_correlation": {
+        "n_patients": 34,
+        "median_gain": 0.18427926574225492,
+        "bootstrap_ci_median_gain": [
+          0.16031266129671595,
+          0.20786211543247823
+        ],
+        "n_improved": 34,
+        "wilcoxon_p": 1.1641532182693481e-10
+      },
+      "suffix_rank_wasserstein": {
+        "n_patients": 34,
+        "median_gain": 0.02661566127083234,
+        "bootstrap_ci_median_gain": [
+          0.017746556695924287,
+          0.032204988200347714
+        ],
+        "n_improved": 31,
+        "wilcoxon_p": 1.0523945093154907e-07
+      },
+      "suffix_precedence_correlation": {
+        "n_patients": 34,
+        "median_gain": 0.03358613558304596,
+        "bootstrap_ci_median_gain": [
+          0.000875588851722342,
+          0.08138809521137491
+        ],
+        "n_improved": 23,
+        "wilcoxon_p": 0.12074384978041053
+      },
+      "suffix_participation_mae": {
+        "n_patients": 34,
+        "median_gain": 0.2480622114839287,
+        "bootstrap_ci_median_gain": [
+          0.23546511627906977,
+          0.2693288197927115
+        ],
+        "n_improved": 34,
+        "wilcoxon_p": 1.1641532182693481e-10
+      },
+      "event_length_wasserstein": {
+        "n_patients": 34,
+        "median_gain": 0.28327195064546395,
+        "bootstrap_ci_median_gain": [
+          0.2577999283518638,
+          0.30347141939502786
+        ],
+        "n_improved": 34,
+        "wilcoxon_p": 1.1641532182693481e-10
+      },
+      "stop_hazard_mae": {
+        "n_patients": 34,
+        "median_gain": 0.14738310513688646,
+        "bootstrap_ci_median_gain": [
+          0.12226782639903062,
+          0.18220174349966836
+        ],
+        "n_improved": 34,
+        "wilcoxon_p": 1.1641532182693481e-10
+      }
+    },
+    "ordered__vs__shuffled": {
+      "transition_correlation": {
+        "n_patients": 34,
+        "median_gain": 0.12206276955084217,
+        "bootstrap_ci_median_gain": [
+          0.09366898621912945,
+          0.1401366257133967
+        ],
+        "n_improved": 34,
+        "wilcoxon_p": 1.1641532182693481e-10
+      },
+      "suffix_rank_wasserstein": {
+        "n_patients": 34,
+        "median_gain": 0.011518421718945319,
+        "bootstrap_ci_median_gain": [
+          0.00739462946244171,
+          0.023737922589608412
+        ],
+        "n_improved": 28,
+        "wilcoxon_p": 1.9435537979006767e-06
+      },
+      "suffix_precedence_correlation": {
+        "n_patients": 34,
+        "median_gain": 0.1661346755582593,
+        "bootstrap_ci_median_gain": [
+          0.06987309582645829,
+          0.19684984767968583
+        ],
+        "n_improved": 27,
+        "wilcoxon_p": 1.910841092467308e-05
+      },
+      "suffix_participation_mae": {
+        "n_patients": 34,
+        "median_gain": 0.03789484834690274,
+        "bootstrap_ci_median_gain": [
+          0.007584197590882087,
+          0.04785754034501949
+        ],
+        "n_improved": 24,
+        "wilcoxon_p": 4.660175181925297e-05
+      },
+      "event_length_wasserstein": {
+        "n_patients": 34,
+        "median_gain": 0.04867592856172705,
+        "bootstrap_ci_median_gain": [
+          0.019696611038781696,
+          0.07507858331702025
+        ],
+        "n_improved": 29,
+        "wilcoxon_p": 1.9435537979006767e-06
+      },
+      "stop_hazard_mae": {
+        "n_patients": 34,
+        "median_gain": 0.008236789354872712,
+        "bootstrap_ci_median_gain": [
+          -0.004480990376244803,
+          0.047089890423556116
+        ],
+        "n_improved": 18,
+        "wilcoxon_p": 0.02860867523122579
+      }
+    }
+  },
+  "runtime_seconds": 107.71970510482788,
+  "environment": {
+    "git_commit": "e561705874d2561e63e64c4360ccc011ed6194d1",
+    "hostname": "dell-PowerEdge-R740",
+    "python": "3.11.5",
+    "torch": "2.5.1+cu124",
+    "cuda": "12.4",
+    "cuda_device": "NVIDIA GeForce RTX 3090"
+  },
+  "ictal_target_read": false
+}
