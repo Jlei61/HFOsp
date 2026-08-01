@@ -122,11 +122,10 @@ def _command(row):
     return cmd
 
 
-def run_batch(max_workers, min_mem_gb, poll_s):
-    manifest_path = OUT / "batch1_manifest.json"
-    manifest = json.loads(manifest_path.read_text()) if manifest_path.exists() else build_manifest()
-    _atomic_json(manifest_path, manifest)
-    ledger_path = OUT / "batch1_run_ledger.json"
+def run_manifest(manifest_path, ledger_path, max_workers, min_mem_gb, poll_s):
+    manifest_path = Path(manifest_path)
+    ledger_path = Path(ledger_path)
+    manifest = json.loads(manifest_path.read_text())
     ledger = {
         "schema": "topic4_zm_lifecycle_sprint_ledger_v1_2026-08-02",
         "started_at_utc": _now(),
@@ -189,6 +188,16 @@ def run_batch(max_workers, min_mem_gb, poll_s):
     ledger["status"] = "complete"
     _atomic_json(ledger_path, ledger)
     return ledger_path
+
+
+def run_batch(max_workers, min_mem_gb, poll_s):
+    manifest_path = OUT / "batch1_manifest.json"
+    if not manifest_path.exists():
+        _atomic_json(manifest_path, build_manifest())
+    return run_manifest(
+        manifest_path, OUT / "batch1_run_ledger.json",
+        max_workers, min_mem_gb, poll_s,
+    )
 
 
 def main():
