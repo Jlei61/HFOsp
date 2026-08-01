@@ -354,6 +354,7 @@ def _dynamic_semantics(summary, arrays):
     envelope, energy_all = _race_energy(
         arrays["lfp_raw_synaptic_proxy"], float(arrays["lfp_fs_hz"])
     )
+    baseline_energy_q90 = float(np.percentile(envelope[:max(4, nbase)], 90))
     e0 = 0 if onset_bin is None else onset_bin
     e1 = len(envelope) if offset_bin is None else min(len(envelope), offset_bin)
     _, energy_episode = _race_energy(
@@ -389,6 +390,15 @@ def _dynamic_semantics(summary, arrays):
         "core_surround_correlation": _safe_corr(core, surround),
         "whole_trace_energy": energy_all,
         "candidate_episode_energy": energy_episode,
+        "baseline_energy_q90": baseline_energy_q90,
+        "candidate_floor_gain_over_baseline_q90": (
+            None if energy_episode.get("energy_q10") is None
+            else float(energy_episode["energy_q10"] / max(baseline_energy_q90, 1e-12))
+        ),
+        "candidate_q90_gain_over_baseline_q90": (
+            None if energy_episode.get("energy_q90") is None
+            else float(energy_episode["energy_q90"] / max(baseline_energy_q90, 1e-12))
+        ),
         "vseeg_envelope": envelope,
     }
 
