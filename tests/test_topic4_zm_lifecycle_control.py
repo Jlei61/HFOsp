@@ -51,3 +51,12 @@ def test_control_response_and_u_ref_enforce_drop_without_long_silence():
     assert got["calibration_target_met"] is True
     rows = [{"control_uplift_mV": 1.0, "control_response": got}]
     assert A.choose_u_ref(rows)["u_ref_mV"] == 1.0
+
+
+def test_control_waves_are_interleaved_across_candidates():
+    candidates = [_candidate() for _ in range(4)]
+    for index, row in enumerate(candidates):
+        row["config_id"] = f"c{index}"
+    calibration = R.build_calibration_manifest({"rows": candidates})
+    assert {row["selection_rank"] for row in calibration["rows"][:4]} == {0, 1, 2, 3}
+    assert {row["control_uplift_mV"] for row in calibration["rows"][:4]} == {0.25}

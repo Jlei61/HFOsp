@@ -51,11 +51,14 @@ def _selected(payload):
 
 
 def build_calibration_manifest(selection, *, T_ms=20000.0):
-    rows = []
+    prepared = []
     for rank, source in enumerate(_selected(selection)):
         base, t0 = _candidate_config(source)
         source_id = source.get("config_id", source.get("stem", f"selected_{rank}"))
-        for uplift in CALIBRATION_UPLIFTS_MV:
+        prepared.append((rank, base, t0, source_id))
+    rows = []
+    for uplift in CALIBRATION_UPLIFTS_MV:
+        for rank, base, t0, source_id in prepared:
             row = {
                 "family": "control_u_ref_calibration",
                 "selection_rank": rank,
@@ -80,15 +83,18 @@ def build_calibration_manifest(selection, *, T_ms=20000.0):
 def build_dose_manifest(selection, calibration, *, T_ms=20000.0):
     decision_rows = calibration.get("calibration_decisions", calibration.get("rows", []))
     refs = {int(row["selection_rank"]): row for row in decision_rows}
-    rows = []
+    prepared = []
     for rank, source in enumerate(_selected(selection)):
         if rank not in refs or refs[rank].get("u_ref_mV") is None:
             raise ValueError(f"selection rank {rank} has no calibrated u_ref")
         base, t0 = _candidate_config(source)
         source_id = source.get("config_id", source.get("stem", f"selected_{rank}"))
         u_ref = float(refs[rank]["u_ref_mV"])
-        for multiplier in DOSE_MULTIPLIERS:
-            for duration in DOSE_DURATIONS_MS:
+        prepared.append((rank, base, t0, source_id, u_ref))
+    rows = []
+    for multiplier in DOSE_MULTIPLIERS:
+        for duration in DOSE_DURATIONS_MS:
+            for rank, base, t0, source_id, u_ref in prepared:
                 row = {
                     "family": "finite_control_dose",
                     "selection_rank": rank,
