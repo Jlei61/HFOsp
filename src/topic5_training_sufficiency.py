@@ -297,6 +297,8 @@ if torch is not None:
         local_offset: "torch.Tensor",
         source_mask: np.ndarray,
         uniforms: np.ndarray,
+        history_mode: str = "ordered",
+        history_seed: int = 0,
     ):
         """The model's *own* free run from a revealed first rank set.
 
@@ -309,9 +311,27 @@ if torch is not None:
 
         Sampling is inverse-CDF from ``uniforms`` so that different models
         consume identical random numbers.
+
+        ``history_mode`` supplies the matched ablation that separates ordered
+        history from everything else the model-native readout re-introduces
+        (its own contact bias, its own STOP head, its own decoder):
+
+        ``ordered``
+            the state advances with the contact the model just emitted.
+        ``frozen``
+            the state stops advancing after the revealed first rank set, so the
+            decoder and STOP head are unchanged but carry no within-event
+            history.
+        ``shuffled``
+            the state advances with a uniformly drawn eligible contact instead
+            of the emitted one, preserving progress and token type while
+            destroying the identity correspondence.
         """
         from src.topic5_constructive_event_generator import categorical_from_uniform
 
+        if history_mode not in {"ordered", "frozen", "shuffled"}:
+            raise ValueError(f"unknown history mode: {history_mode}")
+        history_rng = np.random.default_rng(int(history_seed))
         source = np.asarray(source_mask, dtype=bool)
         random_uniforms = np.asarray(uniforms, dtype=np.float64)
         n_events, n_contacts = source.shape
@@ -366,7 +386,27 @@ if torch is not None:
                 count[rows] += 1
             alive = alive & chose_contact
             recruited = recruited | new_set
-            updated = model._advance(embedding, new_set, recruited, hidden, mask)
+            if history_mode == "frozen":
+                continue
+            fed_set = new_set
+            if history_mode == "shuffled":
+                # a uniformly drawn eligible contact replaces the emitted one;
+                # progress and token type are preserved, identity is not
+                eligible = (mask & ~recruited).cpu().numpy()
+                fed_set = torch.zeros_like(recruited)
+                rows = np.flatnonzero(alive & eligible.any(1))
+                if rows.size:
+                    picked = np.asarray(
+                        [
+                            history_rng.choice(np.flatnonzero(eligible[row]))
+                            for row in rows
+                        ]
+                    )
+                    fed_set[
+                        torch.as_tensor(rows, dtype=torch.long, device=device),
+                        torch.as_tensor(picked, dtype=torch.long, device=device),
+                    ] = True
+            updated = model._advance(embedding, fed_set, recruited, hidden, mask)
             hidden = torch.where(
                 torch.as_tensor(alive, device=device).unsqueeze(1), updated, hidden
             )

@@ -43,9 +43,9 @@ OBJECTIVE_LABELS = {
     "static_only": "Static scaffold only",
 }
 CONDITION_LABELS = {
-    "current_teacher_forced_reference": "Frozen budget",
-    "converged_teacher_forced": "Converged budget",
-    "best_rollout_aware": "Rollout-aware",
+    "current_teacher_forced_reference": "Previous frozen budget",
+    "converged_teacher_forced": "Extended-training budget",
+    "best_rollout_aware": "Rollout-aware objective",
     "static_only": "Static scaffold only",
 }
 ENDPOINT_LABELS = {
@@ -164,7 +164,7 @@ def figure_convergence(args) -> None:
         value = float(frozen.patient_median_contact_choice_nll.iloc[0])
         ax.plot([1], [value], marker="*", markersize=11, color="black", zorder=5)
         ax.annotate(
-            "published training budget",
+            "previously frozen training budget",
             xy=(1, value),
             xytext=(1.5, value + 0.020),
             fontsize=7,
