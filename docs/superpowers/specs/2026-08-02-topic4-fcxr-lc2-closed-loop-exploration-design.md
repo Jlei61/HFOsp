@@ -199,6 +199,16 @@ Recovery means return to the pre-event statistical neighbourhood (event rate, IE
 participation and direction), not exact slow-variable reset. Narrowband/common-mode high activity is
 allowed at Core candidate tier and deferred to later `M_i` morphology work.
 
+Within this bounded execution budget, E5 is limited to the best frozen candidate and 20 s. It reuses
+the accepted LC1 q75 entry calibration (`I_th_EI=95.19851312666987`, `tau_z=5000 ms`) and the LC1
+termination-authority relay (`x_min=0.1`, `tau_y=120 ms`, `tau_x_down=1000 ms`,
+`tau_x_up=10000 ms`, `K_y=5`, `y_gate=76.63856219587187`, Hill n=4). The matched X-off arm keeps the
+same sensor and scatter path but freezes source availability at one. No intermediate Z hazard is
+authorized in this first pilot; failure of q75 entry is reported as `dynamic_z_misses_h_basin`.
+Returning-IED recovery requires at least 8 s of post-offset exposure and, relative to the accepted seed1
+baseline, event rate, median duration and median participation each within `[0.5,2.0]x`; post-event IEI
+CV must be >=0.30.  A mere late event or low mean rate is not recovery.
+
 ## 7. Labels and claim boundary
 
 Allowed outputs include:

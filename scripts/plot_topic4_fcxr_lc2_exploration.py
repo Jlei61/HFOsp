@@ -163,7 +163,33 @@ def plot_forks():
     return True
 
 
-def write_readme(screen=False, forks=False):
+def plot_dynamic():
+    path = os.path.join(OUT, "dynamic_pilot.json")
+    if not os.path.isfile(path):
+        return False
+    d = _json("dynamic_pilot.json")
+    rows = d["rows"]
+    if not rows:
+        return False
+    fig, ax = plt.subplots(3, 1, figsize=(9.0, 6.2), constrained_layout=True, sharex=True)
+    colors = {"X_on": RUST, "X_off_matched_sensor": BLUE}
+    for r in rows:
+        t = np.arange(len(r["rate_trace"])) * r["trace_dt_ms"] / 1000.0
+        lab = r["arm"].replace("_matched_sensor", "")
+        ax[0].plot(t, r["rate_trace"], color=colors[r["arm"]], lw=0.8, alpha=0.85, label=lab)
+        ax[1].plot(t, r["h_trace"], color=colors[r["arm"]], lw=1.0)
+        ax[2].plot(t, 1.0 - np.asarray(r["x_trace"]), color=colors[r["arm"]], lw=1.0,
+                   ls="-" if r["arm"] == "X_on" else "--")
+    ax[0].axhline(20, color=GREY, lw=0.8, ls=":")
+    ax[0].set_ylabel("E rate (Hz)"); ax[1].set_ylabel("mean H")
+    ax[2].set_ylabel("X depletion"); ax[2].set_xlabel("time (s)")
+    ax[0].legend(frameon=False, ncol=2, loc="upper right")
+    ax[0].set_title("dynamic Z/H/X no-kick pilot", loc="left", fontsize=10)
+    _save(fig, "dynamic_pilot")
+    return True
+
+
+def write_readme(screen=False, forks=False, dynamic=False):
     text = """### r1_sensor_characterization.png
 
 这张图把 HEO2 旧参考轨迹拆成两个活动段和中间的 rest-like gap，并同时给出虚拟 SEEG 与局部 recurrent-drive support。它说明旧的完整窗口不能被当成一段连续高态，但活动段仍提供了闭环 H 的候选传感范围。
@@ -192,6 +218,14 @@ def write_readme(screen=False, forks=False):
 
 **关注点**：C 与 B 是否真正分离，以及 X 是否消灭高态而不是把所有条件一起压低。
 """
+    if dynamic:
+        text += """
+### dynamic_pilot.png
+
+同一个 frozen-geometry 候选接回动态 Z/H/X 后，比较 X-on 与保留传感器但冻结 relay availability 的 matched X-off。生命周期只按无 kick onset、X 因果延长/终止和至少 8 秒 returning-IED 统计恢复判定。
+
+**关注点**：X-on 是否先于 X-off 离开高态，以及末段是否恢复到发作前的稀疏不规则事件邻域。
+"""
     os.makedirs(FIG, exist_ok=True)
     with open(os.path.join(FIG, "README.md"), "w") as f:
         f.write(text.strip() + "\n")
@@ -202,7 +236,8 @@ def main():
     plot_r1_pareto()
     has_screen = plot_screen()
     has_forks = plot_forks()
-    write_readme(has_screen, has_forks)
+    has_dynamic = plot_dynamic()
+    write_readme(has_screen, has_forks, has_dynamic)
 
 
 if __name__ == "__main__":

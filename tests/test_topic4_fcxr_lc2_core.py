@@ -162,3 +162,42 @@ def test_frozen_fork_window_classifier_separates_low_and_high():
                              dt=1.0, window_ms=100.0)
     assert low["low_like"] and not low["high_like"]
     assert high["high_like"] and not high["low_like"]
+
+
+def _load_dynamic_runner():
+    path = os.path.join(ROOT, "scripts", "run_topic4_fcxr_lc2_dynamic.py")
+    spec = importlib.util.spec_from_file_location("_lc2_dynamic_import_smoke", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_dynamic_runner_locks_accepted_x_authority_and_q75_entry():
+    d = _load_dynamic_runner()
+    assert d.Z_CFG == dict(regime="q75", I_th_EI=95.19851312666987, tau_z=5000.0)
+    assert d.X_CFG["tau_x_down"] < d.Z_CFG["tau_z"] <= d.X_CFG["tau_x_up"]
+    assert d.MAX_DYNAMIC_CANDIDATES == 1
+
+
+def test_dynamic_lifecycle_readout_finds_sustained_interval_not_brief_pulse():
+    d = _load_dynamic_runner()
+    rate = np.zeros(4000)  # dt=1 ms
+    rate[200:300] = 100.0  # too brief
+    rate[1000:2600] = 40.0
+    got = d.lifecycle_readout(rate, 1.0, [])
+    assert len(got["high_intervals_ms"]) == 1
+    assert got["onset_ms"] is not None and got["offset_ms"] is not None
+
+
+def test_dynamic_recovery_requires_statistics_not_one_late_event():
+    d = _load_dynamic_runner()
+    baseline = dict(n_returning=10, T=10000.0,
+                    event_durations_ms=[10.0] * 10, event_participation=[0.05] * 10)
+    one = [dict(t_on_ms=11000.0, dur_ms=10.0, peak_ext=0.05, returned=True)]
+    got = d.recovery_stats(one, offset_ms=2000.0, T_ms=20000.0, baseline=baseline)
+    assert not got["statistical_neighbourhood_match"]
+    many = [dict(t_on_ms=float(t), dur_ms=10.0, peak_ext=0.05, returned=True)
+            for t in (3000, 3400, 5000, 5400, 7000, 7400, 9000, 9400,
+                      11000, 11400, 13000, 13400, 15000, 15400, 17000, 17400, 19000, 19400)]
+    got = d.recovery_stats(many, offset_ms=2000.0, T_ms=20000.0, baseline=baseline)
+    assert got["statistical_neighbourhood_match"]

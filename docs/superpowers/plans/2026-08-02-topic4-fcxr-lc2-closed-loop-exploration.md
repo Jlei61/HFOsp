@@ -100,9 +100,9 @@ ceiling branch, X load insufficient, isolated point, or replicated window.
 ## 6. E5 — dynamic pilot
 
 Unlocked only by `H_X_FROZEN_GEOMETRY_CANDIDATE`. Use the existing LC1 Z/X equations without changing
-their forms. Start from the slower q75-like Z calibration first because it preserves an interictal window;
-if it misses entry, one pre-registered intermediate hazard derived geometrically between q75 and q50 is
-allowed. No other Z scan is allowed.
+their forms. This execution uses only the exact q75 Z calibration plus the accepted q50 termination-
+authority X kinetics listed in the spec. The previously contemplated intermediate hazard is deferred:
+its mapping was not numerically locked before the sprint, so it cannot be invented after seeing q75.
 
 Run nominal X-on and matched X-off for 20–30 s, one worker, detached. If onset occurs, record the first
 onset snapshot for matched causal comparison. A lifecycle candidate must be kick-free and satisfy the
