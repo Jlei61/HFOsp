@@ -308,7 +308,12 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
     if dynamic:
         if float(args.g_M) <= 0.0:
             raise ValueError("g_M must be positive")
+        if float(args.g_Z) < 1.0:
+            raise ValueError("g_Z must be >= 1")
         values["eta_m"] = float(cfg.eta_m) * float(args.g_M)
+        # Entry-only contingency: g_Z changes the speed along the native Z
+        # coordinate, not its nullcline or its inhibitory sign.
+        values["tau_z"] = float(cfg.tau_z) / float(args.g_Z)
         if args.tau_M_ms is not None:
             if float(args.tau_M_ms) <= 0.0:
                 raise ValueError("tau_M_ms must be positive")
@@ -319,6 +324,8 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             "eta_m_applied": float(values["eta_m"]),
             "tau_M_ms": float(values.get("tau_adp", cfg.tau_adp)),
             "g_Z": float(args.g_Z),
+            "tau_Z_native_ms": float(cfg.tau_z),
+            "tau_Z_applied_ms": float(values["tau_z"]),
         }
     cfg = dataclasses.replace(cfg, **values)
     base = R.SpatialSlowField(
@@ -349,10 +356,8 @@ def run_cell(args: argparse.Namespace) -> Path:
             raise RuntimeError("dynamic prototype duration must be 30000 or 60000 ms")
         if float(args.burn_ms) not in (1000.0, 2000.0):
             raise RuntimeError("dynamic prototype equilibration must be 1000 or 2000 ms")
-        if float(args.g_Z) != 1.0:
-            raise RuntimeError(
-                "g_Z scaling is deferred unless the native dynamic arm has no onset"
-            )
+        if float(args.g_Z) not in (1.0, 1.25, 1.5):
+            raise RuntimeError("g_Z lies outside the onset-contingency panel")
     else:
         if not args.smoke and float(args.T_ms) != PRODUCTION_T_MS:
             raise RuntimeError(f"production duration must be {PRODUCTION_T_MS:g} ms")
@@ -511,6 +516,8 @@ def run_cell(args: argparse.Namespace) -> Path:
         stem = _mechanism_stem(args)
         if dynamic:
             stem += f"__T{float(args.T_ms) / 1000:g}s"
+            if float(args.g_Z) != 1.0:
+                stem += f"__gZ{args.g_Z:g}"
         if dynamic and (float(args.g_M) != 1.0 or args.tau_M_ms is not None):
             stem += f"__gM{args.g_M:g}"
             if args.tau_M_ms is not None:
