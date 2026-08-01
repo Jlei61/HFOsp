@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import csv
+from functools import lru_cache
 import json
 from pathlib import Path
 import sys
@@ -19,6 +20,9 @@ from scripts import analyze_topic4_zm_fast_lifecycle_development as A  # noqa: E
 IN_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_sprint/seed1"
 OUT_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_sprint"
 BIN_MS = 25.0
+RETURN_REFERENCE = (
+    ROOT / "results/topic4_sef_hfo/zm_branch_decision/anchors/seed1"
+)
 
 
 def contact_rms_from_baseline(raw, fs_hz, baseline_bins, *, bin_ms=BIN_MS):
@@ -84,6 +88,239 @@ def detect_episode(core_rate, baseline_bins, *, bin_ms=BIN_MS):
     }
 
 
+def returning_event_windows(
+    core_rate, *, threshold_hz, lo_bin=0, hi_bin=None, smooth_ms=0.0,
+):
+    """Segment discrete events above a threshold frozen outside the candidate.
+
+    The caller must supply the threshold from the seed-1 pre-escalation anchor.
+    A post-offset fragment is therefore not allowed to define its own amplitude
+    and promote itself to a returning event.
+    """
+    core = np.asarray(core_rate, float)
+    hi = core.size if hi_bin is None else min(core.size, int(hi_bin))
+    lo = max(0, int(lo_bin))
+    work = core
+    if float(smooth_ms) > 0:
+        work = A._moving_mean(core, max(1, int(round(float(smooth_ms) / BIN_MS))))
+    on = work >= float(threshold_hz)
+    windows = []
+    start = None
+    for index in range(lo, hi):
+        if on[index] and start is None:
+            start = index
+        elif not on[index] and start is not None:
+            windows.append((start, index))
+            start = None
+    if start is not None:
+        windows.append((start, hi))
+    return windows
+
+
+def returning_event_features(
+    core_rate, surround_rate, active_fraction, kymo_axial, contact_rms,
+    windows, *, bin_ms=BIN_MS,
+):
+    """Extract morphology and geometry for candidate returning events."""
+    core = np.asarray(core_rate, float)
+    surround = np.asarray(surround_rate, float)
+    active = np.asarray(active_fraction, float)
+    kymo = np.asarray(kymo_axial, float)
+    rms = None if contact_rms is None else np.asarray(contact_rms, float)
+    feats = []
+    axis = np.arange(kymo.shape[0], dtype=float)
+    for lo, hi in windows:
+        lo, hi = int(lo), int(hi)
+        if hi <= lo or lo >= core.size:
+            continue
+        hi = min(hi, core.size)
+        mode = np.mean(kymo[:, lo:hi], axis=1) if kymo.size else np.zeros(1)
+        centroids = []
+        for column in kymo[:, lo:hi].T:
+            total = float(np.sum(column))
+            centroids.append(float(axis @ column / total) if total > 0 else np.nan)
+        valid = np.asarray(centroids, float)
+        valid = valid[np.isfinite(valid)]
+        direction = 0
+        if valid.size >= 2:
+            delta = float(np.mean(valid[-max(1, valid.size // 2):])
+                          - np.mean(valid[:max(1, valid.size // 2)]))
+            direction = int(np.sign(delta))
+        contact_order = []
+        if rms is not None and rms.ndim == 2 and lo < rms.shape[0]:
+            local = rms[lo:min(hi, rms.shape[0])]
+            if local.size:
+                peak_bins = np.argmax(local, axis=0)
+                contact_order = np.argsort(
+                    np.argsort(peak_bins, kind="stable"), kind="stable"
+                ).astype(int).tolist()
+        feats.append({
+            "onset_ms": float(lo * bin_ms),
+            "duration_ms": float((hi - lo) * bin_ms),
+            "peak_core_hz": float(np.max(core[lo:hi])),
+            "active_fraction": float(np.mean(active[lo:hi])),
+            "core_surround_ratio": float(
+                np.mean(core[lo:hi]) / max(np.mean(surround[lo:hi]), 1e-9)
+            ),
+            "spatial_mode": np.asarray(mode, float).tolist(),
+            "axial_direction": direction,
+            "contact_order": contact_order,
+        })
+    return feats
+
+
+def _corr(left, right):
+    left, right = np.asarray(left, float), np.asarray(right, float)
+    if left.shape != right.shape or left.size < 2:
+        return None
+    if np.std(left) <= 1e-12 or np.std(right) <= 1e-12:
+        return 1.0 if np.array_equal(left, right) else 0.0
+    return float(np.corrcoef(left, right)[0, 1])
+
+
+def match_returning_events(reference, post, *, min_post=3, tol_frac=0.6):
+    """Separate one plausible returning event from distribution-level recovery.
+
+    This is a development diagnostic.  `single_event_candidate` is the sprint's
+    first-return target; `distribution_recovered` is deliberately stronger and
+    requires at least three post-offset events with matched cadence and geometry.
+    """
+    reference, post = list(reference), list(post)
+    if not reference:
+        return {
+            "status": "reference_unavailable", "n_reference": 0,
+            "n_post": len(post), "single_event_candidate": False,
+            "distribution_recovered": False,
+        }
+    keys = ("duration_ms", "peak_core_hz", "active_fraction", "core_surround_ratio")
+    ref_med = {key: float(np.median([row[key] for row in reference])) for key in keys}
+    ref_mode = np.mean([np.asarray(row["spatial_mode"], float) for row in reference], axis=0)
+    ref_dirs = {int(row["axial_direction"]) for row in reference if int(row["axial_direction"]) != 0}
+    ref_orders = [row["contact_order"] for row in reference if row.get("contact_order")]
+
+    individual = []
+    for row in post:
+        ratios = {
+            key: float(row[key]) / max(ref_med[key], 1e-12) for key in keys
+        }
+        morphology_ok = all(1.0 - tol_frac <= value <= 1.0 + tol_frac
+                            for value in ratios.values())
+        mode = np.asarray(row["spatial_mode"], float)
+        mode_cos = float(ref_mode @ mode / (
+            np.linalg.norm(ref_mode) * np.linalg.norm(mode) + 1e-12
+        ))
+        contact_corrs = [
+            value for value in (_corr(order, row.get("contact_order", []))
+                                for order in ref_orders) if value is not None
+        ]
+        best_contact_corr = max(contact_corrs) if contact_corrs else None
+        direction_ok = (not ref_dirs or int(row["axial_direction"]) in ref_dirs)
+        geometry_ok = (
+            mode_cos >= 0.5 and direction_ok
+            and (best_contact_corr is None or best_contact_corr >= 0.3)
+        )
+        individual.append({
+            "onset_ms": row["onset_ms"], "ratios": ratios,
+            "spatial_mode_cosine": mode_cos,
+            "best_contact_order_correlation": best_contact_corr,
+            "direction_ok": bool(direction_ok),
+            "matches": bool(morphology_ok and geometry_ok),
+        })
+    single = any(row["matches"] for row in individual)
+
+    per_metric = {}
+    for key in keys:
+        post_med = float(np.median([row[key] for row in post])) if post else None
+        ratio = None if post_med is None else post_med / max(ref_med[key], 1e-12)
+        per_metric[key] = {
+            "reference_median": ref_med[key], "post_median": post_med,
+            "ratio": ratio,
+            "ok": bool(ratio is not None and 1.0 - tol_frac <= ratio <= 1.0 + tol_frac),
+        }
+    ref_iei = np.diff([row["onset_ms"] for row in reference])
+    post_iei = np.diff([row["onset_ms"] for row in post])
+    iei_ratio = None
+    if ref_iei.size and post_iei.size:
+        iei_ratio = float(np.median(post_iei) / max(np.median(ref_iei), 1e-12))
+    per_metric["iei"] = {
+        "reference_median_ms": float(np.median(ref_iei)) if ref_iei.size else None,
+        "post_median_ms": float(np.median(post_iei)) if post_iei.size else None,
+        "ratio": iei_ratio,
+        "ok": bool(iei_ratio is not None and 1.0 - tol_frac <= iei_ratio <= 1.0 + tol_frac),
+    }
+    recovered = (
+        len(post) >= int(min_post) and single
+        and all(row["ok"] for row in per_metric.values())
+    )
+    return {
+        "status": "ok", "n_reference": len(reference), "n_post": len(post),
+        "single_event_candidate": bool(single),
+        "distribution_recovered": bool(recovered),
+        "per_metric": per_metric, "individual": individual,
+        "claim_boundary": (
+            "single event is a development candidate; distribution recovery requires >=3 "
+            "events and is not a multi-seed lifecycle claim"
+        ),
+    }
+
+
+@lru_cache(maxsize=1)
+def load_returning_reference():
+    """Load the frozen 15-event pre-escalation reference from the parent trajectory."""
+    anchor = json.loads((RETURN_REFERENCE / "anchor.json").read_text())
+    hi = int(anchor["selection"]["eligibility"]["escalation_bin"])
+    with np.load(RETURN_REFERENCE / "anchor_traces.npz", allow_pickle=False) as data:
+        core = np.asarray(data["r_core"], float)
+        surround = np.asarray(data["r_surround"], float)
+        active = np.asarray(data["A_active"], float)
+        kymo = np.asarray(data["kymo_axial"], float)
+        baseline = event_free_baseline_bins(core, max_ms=hi * BIN_MS)
+        rms, status = contact_rms_from_baseline(
+            data["lfp"], float(data["lfp_fs"]), baseline
+        )
+    smooth = A._moving_mean(core[:hi], int(round(100.0 / BIN_MS)))
+    base = float(np.percentile(smooth, 20))
+    threshold = float(base + 0.5 * (np.max(smooth) - base))
+    windows = returning_event_windows(
+        core, threshold_hz=threshold, hi_bin=hi, smooth_ms=100.0
+    )
+    feats = returning_event_features(
+        core, surround, active, kymo, rms, windows
+    )
+    return {
+        "status": status, "threshold_hz": threshold,
+        "n_events": len(feats), "events": feats,
+        "source": str((RETURN_REFERENCE / "anchor_traces.npz").relative_to(ROOT)),
+    }
+
+
+def returning_recovery(arrays, contact_rms, offset_bin):
+    reference = load_returning_reference()
+    if offset_bin is None:
+        return {
+            "status": "no_offset", "single_event_candidate": False,
+            "distribution_recovered": False,
+            "reference": {key: value for key, value in reference.items() if key != "events"},
+        }
+    start = int(offset_bin) + int(round(500.0 / BIN_MS))
+    core = np.asarray(arrays["coarse_core_rate_hz"], float)
+    windows = returning_event_windows(
+        core, threshold_hz=reference["threshold_hz"], lo_bin=start,
+        smooth_ms=100.0,
+    )
+    post = returning_event_features(
+        core, arrays["coarse_surround_rate_hz"], arrays["coarse_active_fraction"],
+        arrays["coarse_kymo_axial"], contact_rms, windows,
+    )
+    match = match_returning_events(reference["events"], post)
+    match.update({
+        "post_offset_search_start_ms": float(start * BIN_MS),
+        "post_event_candidates": post,
+        "reference": {key: value for key, value in reference.items() if key != "events"},
+    })
+    return match
+
+
 def baseline_referenced_intensity(rms, baseline_bins, episode_slice):
     if rms is None:
         return {"status": "unavailable"}
@@ -137,6 +374,7 @@ def analyze_one(root):
     e0 = 0 if onset is None else int(onset)
     e1 = len(core) if offset is None else int(offset)
     intensity = baseline_referenced_intensity(rms, baseline, slice(e0, e1))
+    recovery = returning_recovery(a, rms, offset)
     post0 = min(e1, e0 + int(round(1000.0 / BIN_MS)))
     post = core[post0:e1]
     post_cv = float(np.std(post) / max(np.mean(post), 1e-12)) if post.size else None
@@ -192,6 +430,7 @@ def analyze_one(root):
         "n_event_free_baseline_bins": int(baseline.sum()),
         "episode": episode,
         "intensity": intensity,
+        "recovery": recovery,
         "post_entry_core_cv": post_cv,
         "post_entry_spectral_entropy": post_entropy,
         "post_entry_active_fraction_slope_s": active_slope,
@@ -219,6 +458,9 @@ def _flat(row):
         "energy_gain_db": row["intensity"].get("median_gain_db_across_contacts"),
         "energy_6db_occupancy": row["intensity"].get("occupancy_above_6db"),
         "integrated_energy": row["intensity"].get("normalized_integrated_energy_per_s"),
+        "returning_event_candidate": row["recovery"].get("single_event_candidate"),
+        "returning_event_distribution_recovered": row["recovery"].get("distribution_recovered"),
+        "n_post_offset_event_candidates": row["recovery"].get("n_post"),
         "core_cv": row["post_entry_core_cv"],
         "spatial_rank": row["within_episode_spatial"].get("spatial_effective_rank"),
         "centroid_excursion": row["within_episode_spatial"].get("centroid_excursion_bins"),

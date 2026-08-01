@@ -40,3 +40,56 @@ def test_contact_rms_uses_event_free_baseline_mean():
     baseline[:] = True
     rms, status = A.contact_rms_from_baseline(raw, 1000.0, baseline, bin_ms=100.0)
     assert status == "ok" and rms.shape == (4, 1)
+
+
+def _event_fixture():
+    core = np.zeros(80)
+    surround = np.ones(80)
+    active = np.zeros(80)
+    kymo = np.zeros((4, 80))
+    rms = np.ones((80, 3))
+    for lo in (8, 24, 40, 56):
+        core[lo:lo + 3] = (40.0, 70.0, 45.0)
+        active[lo:lo + 3] = 0.2
+        kymo[:, lo:lo + 3] = np.asarray(
+            [[1.0, 0.5, 0.0], [0.5, 1.0, 0.5], [0.0, 0.5, 1.0], [0.0, 0.0, 0.5]]
+        )
+        rms[lo:lo + 3] = np.asarray(
+            [[4.0, 2.0, 1.0], [2.0, 4.0, 2.0], [1.0, 2.0, 4.0]]
+        )
+    return core, surround, active, kymo, rms
+
+
+def test_returning_event_features_preserve_spatial_and_contact_order():
+    core, surround, active, kymo, rms = _event_fixture()
+    windows = A.returning_event_windows(core, threshold_hz=30.0)
+    feats = A.returning_event_features(
+        core, surround, active, kymo, rms, windows, bin_ms=25.0
+    )
+    assert len(feats) == 4
+    assert feats[0]["duration_ms"] == 75.0
+    assert feats[0]["peak_core_hz"] == 70.0
+    assert feats[0]["axial_direction"] == 1
+    assert feats[0]["contact_order"] == [0, 1, 2]
+
+
+def test_returning_event_match_separates_single_candidate_from_distribution_recovery():
+    core, surround, active, kymo, rms = _event_fixture()
+    windows = A.returning_event_windows(core, threshold_hz=30.0)
+    ref = A.returning_event_features(core, surround, active, kymo, rms, windows)
+    one = A.match_returning_events(ref, ref[:1])
+    assert one["single_event_candidate"] is True
+    assert one["distribution_recovered"] is False
+    recovered = A.match_returning_events(ref, ref[:3])
+    assert recovered["single_event_candidate"] is True
+    assert recovered["distribution_recovered"] is True
+
+
+def test_returning_event_match_rejects_wrong_long_high_rate_fragment():
+    core, surround, active, kymo, rms = _event_fixture()
+    windows = A.returning_event_windows(core, threshold_hz=30.0)
+    ref = A.returning_event_features(core, surround, active, kymo, rms, windows)
+    wrong = [dict(ref[0], duration_ms=500.0, peak_core_hz=250.0)]
+    got = A.match_returning_events(ref, wrong)
+    assert got["single_event_candidate"] is False
+    assert got["distribution_recovered"] is False
