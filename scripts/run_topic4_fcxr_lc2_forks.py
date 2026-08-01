@@ -295,7 +295,10 @@ def _run_row(row):
     stride = max(1, int(round(10.0 / DT)))
     finite = bool(np.all(np.isfinite(rate)) and np.all(np.isfinite(h)))
     clip = float(np.max(slow.trace_conductance_clip_frac))
-    numerical = bool((not finite) or clip > 0.0 or res["runaway_early_stop_ms"] is not None)
+    tau_ratio_min = float(np.min(slow.trace_tau_eff_ratio_min))
+    tau_eff_min_ms = float(p.tau_m_E * tau_ratio_min)
+    numerical = bool((not finite) or clip > 0.0 or tau_eff_min_ms < 2.0 * DT
+                     or res["runaway_early_stop_ms"] is not None)
     gA = np.asarray(slow.trace_gA_raw_lc2_mean, float)
     if gA.size == rate.size and np.var(gA) > 0:
         gain_proxy = float(np.cov(gA, rate, ddof=0)[0, 1] / np.var(gA))
@@ -304,7 +307,7 @@ def _run_row(row):
     return dict(
         **row, finite=finite, numerical_failure=numerical, clip_frac_max=clip,
         runaway_early_stop_ms=res["runaway_early_stop_ms"],
-        tau_eff_ratio_min=float(np.min(slow.trace_tau_eff_ratio_min)), state_tail_1s=state,
+        tau_eff_ratio_min=tau_ratio_min, tau_eff_min_ms=tau_eff_min_ms, state_tail_1s=state,
         post_offset_required_ms=required_low_ms, state_required_low_window=post,
         mean_rate_hz=float(np.mean(rate)), max_rate_hz=float(np.max(rate)),
         h_end=float(h[-1]), h_max=float(np.max(slow.trace_h_lc2_max)),
