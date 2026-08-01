@@ -8,11 +8,15 @@ from __future__ import annotations
 
 import argparse
 import csv
+import dataclasses
 import json
 import os
+import resource
 import subprocess
 import sys
+import time
 import traceback
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime, timezone
 
 import numpy as np
@@ -23,6 +27,13 @@ sys.path.insert(0, ROOT)
 sys.path.insert(0, os.path.join(ROOT, "scripts"))
 
 import run_topic4_mz_fcxr as FCXR  # noqa: E402
+import run_m4_phaseplane as PP  # noqa: E402
+import run_topic4_mz_slowvars as OLD  # noqa: E402
+from kick_probe import simulate_kick  # noqa: E402
+from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
+from src.topic4_fcxr_dynamics import (  # noqa: E402
+    load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field,
+)
 from src.topic4_fcxr_lc2_core import (  # noqa: E402
     sha256_file, replay_h, sustained_latch_score, empirical_false_latch_threshold,
     pareto_mask, select_sensor_candidates,
@@ -47,6 +58,7 @@ BOOTSTRAP_SEED = 20260802
 K_RATIOS = (0.05, 0.10, 0.20)
 RHO_FRACS = (0.10, 0.20, 0.35, 0.50, 0.70)
 X_DEPLETION_LEVELS = (0.128, 0.214)
+DT = 0.05
 ENGINE_FILES = (
     "src/snn_engine/kick_probe.py", "src/snn_engine/params.py", "src/snn_engine/model.py",
     "src/snn_engine/connectivity.py", "src/snn_engine/connectivity_rot.py", "src/snn_engine/lfp.py",
@@ -64,6 +76,17 @@ def _load_json(path):
 
 def _git_head():
     return subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+
+
+def _rss_gib():
+    return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0
+
+
+def _meminfo():
+    with open("/proc/meminfo") as f:
+        x = {line.split(":", 1)[0]: float(line.split()[1]) for line in f}
+    return dict(mem_available_gib=x["MemAvailable"] / 1024.0 / 1024.0,
+                swap_used_mib=(x["SwapTotal"] - x["SwapFree"]) / 1024.0)
 
 
 def cmd_lock(_args):
@@ -205,7 +228,10 @@ def _block_duty_ci(h, time_idx, cell_mask, block_id, theta, rng):
     boots = np.empty(BOOTSTRAP_N)
     for k in range(BOOTSTRAP_N):
         boots[k] = np.mean(vals[rng.integers(0, vals.size, vals.size)])
-    return float(np.mean(h[np.ix_(time_idx, cells)] > theta)), float(np.quantile(boots, .05)), float(np.quantile(boots, .95))
+    # The registered estimand gives each 50 ms x spatial block equal weight.  Returning the raw
+    # cell-time mean here would mix estimands and can place the point estimate outside its own CI when
+    # spatial blocks contain unequal sampled-cell counts.
+    return float(np.mean(vals)), float(np.quantile(boots, .05)), float(np.quantile(boots, .95))
 
 
 def _latch_scores(hb, events):
@@ -303,11 +329,184 @@ def cmd_r1_characterize(_args):
                     support_bar=support_bar.astype(np.float32))
     csv_path = os.path.join(OUT, "r1_sensor_pareto.csv")
     with open(csv_path, "w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(out_rows[0]))
+        w = csv.DictWriter(f, fieldnames=list(out_rows[0]), lineterminator="\n")
         w.writeheader(); w.writerows(out_rows)
     FCXR._write_json(os.path.join(OUT, "E1_DONE.json"),
                      dict(stage="E1", status=summary["status"], candidates=len(selected), finished=_now()))
     print(json.dumps(summary, indent=2))
+
+
+def cmd_screen_manifest(_args):
+    src = os.path.join(OUT, "r1_resegmentation_summary.json")
+    if not os.path.isfile(src):
+        raise SystemExit("E1 characterization is required before the screen manifest")
+    candidates = _load_json(src)["selected_candidates"]
+    rows = []
+    for c in candidates:
+        for kr in K_RATIOS:
+            for rf in RHO_FRACS:
+                cid = c["candidate_id"]
+                rows.append(dict(
+                    index=len(rows), run_id=f"{cid}_k{int(round(kr*100)):02d}_r{int(round(rf*100)):02d}",
+                    candidate_id=cid, tau_ms=float(c["tau_ms"]), theta=float(c["theta"]),
+                    false_latch_fraction=float(c["false_latch_fraction"]),
+                    k_ratio=float(kr), k=float(kr * c["theta"]), rho_fraction=float(rf),
+                    rho=float(rf * 21.6), D=0.15, h_init_scale=2.0, T_ms=1000.0,
+                    connection_seed=1, noise_seed=401, x_mode="off", M=False, coop_A=0.0,
+                ))
+    payload = dict(status="LOCKED", stage="E3_SCREEN", code_head=_git_head(), rows=rows,
+                   n_rows=len(rows), created=_now())
+    FCXR._write_json(os.path.join(OUT, "h_loop_screen_manifest.json"), payload)
+    print(json.dumps(dict(status=payload["status"], n_rows=len(rows), code_head=payload["code_head"]), indent=2))
+
+
+_SCREEN_SUBSTRATE = None
+
+
+def _screen_substrate():
+    global _SCREEN_SUBSTRATE
+    if _SCREEN_SUBSTRATE is None:
+        _SCREEN_SUBSTRATE = PP.build_substrate(1)
+    return _SCREEN_SUBSTRATE
+
+
+def _run_screen_row(row):
+    S = _screen_substrate()
+    pk = load_onset_depletion_pi(P_FIELD)
+    assert_field_substrate_aligned(pk, S)
+    theta = float(row["theta"])
+    cfg = FCXR._fc_cfg(1.0, ff_conductance=False, rec_conductance=True,
+                       fail_on_clip=False, rec_sat_g=21.6)
+    cfg.update(
+        coop_A=0.0, use_m=False, use_x=False,
+        z_frozen_E=frozen_z_field(pk["p_i"], float(row["D"])),
+        use_h_lc2=True, tau_h_lc2=float(row["tau_ms"]), theta_h_lc2=theta,
+        k_h_lc2=float(row["k"]), rho_h_lc2=float(row["rho"]),
+        h_lc2_init_E=np.full(S["NE"], float(row["h_init_scale"]) * theta),
+    )
+    p = dataclasses.replace(S["p"], T=float(row["T_ms"]), dt=DT)
+    slow = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**cfg), NE=S["NE"],
+                      core_mask_E=OLD.build_core_masks(S))
+    S["net"]["rng"] = np.random.default_rng(int(row["noise_seed"]))
+    t0 = time.time()
+    res = simulate_kick(
+        p, S["net"], 0.0, slow=slow, kick_center=list(S["src_xy"]), r_kick=PP.R_KICK,
+        t_kick=1e9, V_th_per_neuron=S["vth"], early_stop_runaway=True,
+        es_thresh_hz=300.0, es_dur_ms=100.0)
+    wall = time.time() - t0
+    rate = np.asarray(res["rate_E"], float)
+    n_tail = min(rate.size, int(round(250.0 / DT)))
+    tail_rate = rate[-n_tail:]
+    tail_bool = np.asarray(res["E_spk_bool"][-n_tail:], bool)
+    per_cell_hz = tail_bool.sum(axis=0) / (n_tail * DT * 1e-3)
+    ceiling_hz = 0.8 * (1000.0 / float(p.tau_ref_E))
+    ceiling_frac = float(np.mean(per_cell_hz >= ceiling_hz))
+    htrace = np.asarray(slow.trace_h_lc2_mean, float)
+    n_h = min(htrace.size, n_tail)
+    ht = htrace[-n_h:]
+    x = np.arange(n_h, dtype=float) * DT
+    slope_per_ms = float(np.polyfit(x, ht, 1)[0]) if n_h >= 2 else float("nan")
+    slope_per_s = 1000.0 * slope_per_ms
+    slope_floor = -0.05 * max(float(np.mean(ht)), theta)
+    clip = float(np.max(slow.trace_conductance_clip_frac))
+    finite = bool(np.all(np.isfinite(rate)) and np.all(np.isfinite(ht)))
+    numerical = (not finite) or clip > 0.0 or res["runaway_early_stop_ms"] is not None
+    if numerical:
+        label = "numerical_failure"
+    elif ceiling_frac >= 0.05:
+        label = "saturated_tonic"
+    elif float(np.mean(tail_rate)) >= 20.0 and slope_per_s >= slope_floor:
+        label = "screen_survivor"
+    elif float(row["tau_ms"]) > 500.0 and float(np.mean(tail_rate)) >= 20.0:
+        label = "unresolved_1s"
+    else:
+        label = "decay_low"
+    stride = max(1, int(round(10.0 / DT)))
+    return dict(
+        **row, label=label, finite=finite, runaway_early_stop_ms=res["runaway_early_stop_ms"],
+        mean_rate_hz=float(np.mean(rate)), tail_rate_hz=float(np.mean(tail_rate)),
+        tail_rate_sd_hz=float(np.std(tail_rate)), max_rate_hz=float(np.max(rate)),
+        tail_h_mean=float(np.mean(ht)), tail_h_slope_per_s=slope_per_s,
+        tail_h_slope_floor=slope_floor, tail_gH_mean=float(np.mean(slow.trace_gH_lc2_mean[-n_h:])),
+        tail_gA_mean=float(np.mean(slow.trace_gA_raw_lc2_mean[-n_h:])),
+        ceiling_hz=ceiling_hz, refractory_ceiling_fraction=ceiling_frac,
+        clip_frac_max=clip, tau_eff_ratio_min=float(np.min(slow.trace_tau_eff_ratio_min)),
+        wall_s=round(wall, 2), peak_rss_gib=round(_rss_gib(), 3),
+        trace_dt_ms=10.0, rate_trace=rate[::stride].astype(float).tolist(),
+        h_trace=htrace[::stride].astype(float).tolist(),
+        gH_trace=np.asarray(slow.trace_gH_lc2_mean, float)[::stride].tolist(),
+        finished=_now(),
+    )
+
+
+def _screen_cell_path(row):
+    return os.path.join(OUT, "screen_cells", f"{row['run_id']}.json")
+
+
+def _screen_worker(row):
+    path = _screen_cell_path(row)
+    if os.path.isfile(path):
+        return _load_json(path)
+    out = _run_screen_row(row)
+    FCXR._write_json(path, out)
+    return out
+
+
+def _load_screen_manifest():
+    path = os.path.join(OUT, "h_loop_screen_manifest.json")
+    if not os.path.isfile(path):
+        raise SystemExit("run screen-manifest first")
+    return _load_json(path)
+
+
+def cmd_screen_one(args):
+    if not args.confirm_run:
+        raise SystemExit("screen-one requires --confirm-run")
+    FCXR._assert_engine_blessed()
+    manifest = _load_screen_manifest()
+    row = manifest["rows"][int(args.index)]
+    os.makedirs(os.path.join(OUT, "screen_cells"), exist_ok=True)
+    print(json.dumps(_screen_worker(row), indent=2))
+
+
+def cmd_screen_all(args):
+    if not args.confirm_run:
+        raise SystemExit("screen-all requires --confirm-run")
+    FCXR._assert_engine_blessed()
+    manifest = _load_screen_manifest()
+    rows = manifest["rows"]
+    os.makedirs(os.path.join(OUT, "screen_cells"), exist_ok=True)
+    before = _meminfo()
+    if before["mem_available_gib"] < 96.0:
+        raise SystemExit(f"OOM safety stop: MemAvailable={before['mem_available_gib']:.1f} GiB")
+    running = os.path.join(OUT, "E3_RUNNING.json")
+    FCXR._write_json(running, dict(stage="E3", pid=os.getpid(), workers=int(args.workers),
+                                  n_rows=len(rows), resource_before=before, started=_now()))
+    results = []
+    try:
+        with ProcessPoolExecutor(max_workers=int(args.workers)) as ex:
+            fut = {ex.submit(_screen_worker, row): row for row in rows}
+            for j, f in enumerate(as_completed(fut), 1):
+                out = f.result(); results.append(out)
+                print(f"[E3] {j}/{len(rows)} {out['run_id']} -> {out['label']} "
+                      f"tail={out['tail_rate_hz']:.1f}Hz RSS={out['peak_rss_gib']:.2f}GiB", flush=True)
+                now = _meminfo()
+                if now["swap_used_mib"] - before["swap_used_mib"] >= 512.0:
+                    raise MemoryError(f"swap hard stop: before={before}, now={now}")
+        results.sort(key=lambda r: int(r["index"]))
+        counts = {k: sum(r["label"] == k for r in results) for k in
+                  ("screen_survivor", "unresolved_1s", "decay_low", "saturated_tonic", "numerical_failure")}
+        payload = dict(stage="E3", status="COMPLETE", n_rows=len(results), counts=counts,
+                       rows=results, resource_before=before, resource_after=_meminfo(), finished=_now())
+        FCXR._write_json(os.path.join(OUT, "h_loop_screen.json"), payload)
+        FCXR._write_json(os.path.join(OUT, "E3_DONE.json"),
+                         dict(stage="E3", status="COMPLETE", counts=counts, finished=_now()))
+        if os.path.exists(running):
+            os.remove(running)
+    except Exception as exc:
+        FCXR._write_json(os.path.join(OUT, "E3_FAILED.json"),
+                         dict(stage="E3", error=repr(exc), traceback=traceback.format_exc(), failed=_now()))
+        raise
 
 
 def main():
@@ -315,10 +514,17 @@ def main():
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("lock")
     sub.add_parser("r1-characterize")
+    sub.add_parser("screen-manifest")
+    one = sub.add_parser("screen-one")
+    one.add_argument("--index", type=int, required=True)
+    one.add_argument("--confirm-run", action="store_true")
+    allp = sub.add_parser("screen-all")
+    allp.add_argument("--workers", type=int, choices=(1, 2), default=1)
+    allp.add_argument("--confirm-run", action="store_true")
     args = ap.parse_args()
     if args.cmd == "lock":
         cmd_lock(args)
-    else:
+    elif args.cmd == "r1-characterize":
         os.makedirs(OUT, exist_ok=True)
         running = os.path.join(OUT, "E1_RUNNING.json")
         FCXR._write_json(running, dict(stage="E1", pid=os.getpid(), started=_now()))
@@ -331,6 +537,12 @@ def main():
                              dict(stage="E1", error=repr(exc), traceback=traceback.format_exc(),
                                   failed=_now()))
             raise
+    elif args.cmd == "screen-manifest":
+        cmd_screen_manifest(args)
+    elif args.cmd == "screen-one":
+        cmd_screen_one(args)
+    else:
+        cmd_screen_all(args)
 
 
 if __name__ == "__main__":

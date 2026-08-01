@@ -245,3 +245,31 @@ def test_contiguous_true_intervals_is_deterministic():
     assert contiguous_true_intervals([False, True, True, False, True], [5, 10, 20, 40, 80]) == [
         (10.0, 20.0), (80.0, 80.0)
     ]
+
+
+def test_frozen_x_field_is_invariant_while_sensor_y_still_records_activity():
+    xf = np.array([1.0, 0.8, 0.5, 0.2])
+    cfg = _cfg(use_x=True, x_relay_frozen_E=xf, rho_h_lc2=0.0)
+    mz = _slow(cfg, snapshot_steps={0: "frozen"})
+    spk = np.array([True, False, True, False, False, False])
+    for _ in range(4):
+        np.testing.assert_array_equal(mz.ee_relay_send, xf)
+        mz.step(spk, None, 1.0)
+        np.testing.assert_array_equal(mz.x_relay, xf)
+    assert np.any(mz.y > 0.0)
+    np.testing.assert_array_equal(mz.snapshots["frozen"]["x_E"], xf)
+
+
+@pytest.mark.parametrize("field", [
+    np.array([1.0, 0.5, 0.2]),
+    np.array([1.0, np.nan, 0.5, 0.2]),
+    np.array([1.0, 1.1, 0.5, 0.2]),
+])
+def test_frozen_x_field_rejects_wrong_shape_nonfinite_or_out_of_range(field):
+    with pytest.raises(ValueError, match="x_relay_frozen_E"):
+        _slow(_cfg(use_x=True, x_relay_frozen_E=field))
+
+
+def test_frozen_x_field_requires_the_real_relay_path():
+    with pytest.raises(ValueError, match="requires use_x"):
+        _slow(_cfg(use_x=False, x_relay_frozen_E=np.ones(4)))

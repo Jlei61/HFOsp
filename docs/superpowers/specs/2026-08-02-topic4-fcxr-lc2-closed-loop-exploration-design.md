@@ -115,7 +115,10 @@ rho_H/g_sat  = {0.10, 0.20, 0.35, 0.50, 0.70}
 At frozen susceptible depletion `D=0.15`, start `h_E=2*theta` uniformly as an upper-bound basin probe;
 `X=off`, `M=off`, `coop_A=0`. Run 1 s with the same connection and noise seed. A screening candidate
 must be finite, have zero hard clip, tail rate ≥20 Hz, refractory-ceiling fraction <5%, and non-negative
-tail H slope within numerical tolerance. A 1 s positive is only `screen_survivor`, never a basin claim.
+tail H slope within numerical tolerance. Tail is the final 250 ms; the exact slope tolerance is
+`slope_per_s >= -0.05*max(tail_h_mean,theta)`, i.e. no more than 5% decay per second. Refractory ceiling
+is per-cell tail rate ≥80% of `1000/tau_ref_E`. A 1 s positive is only `screen_survivor`, never a basin
+claim.
 
 Complete all registered combinations unless parity/snapshot fails, numerical state is corrupted, OOM
 safety fires, or the 10 h exploration budget is reached. A negative point does not stop the grid.

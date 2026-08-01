@@ -155,6 +155,7 @@ class MZSlowVarsConfig:
     rho_h_lc2: float = 0.0         # added pre-tanh recurrent conductance amplitude
     h_lc2_init_E: "np.ndarray | None" = None  # frozen-fork/restart field; shape (NE,), finite and >=0
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
+    x_relay_frozen_E: "np.ndarray | None" = None  # LC2 dev fork: fixed source availability field, same E->E scatter path
     tau_y: float = 120.0           # ms  persistence sensor time constant
     tau_x: float = 1000.0          # ms  relay availability time constant (symmetric; used when tau_x_down/up are None)
     tau_x_down: "float | None" = None  # FCXR-LC1: asymmetric relay depletion tau (x_inf<x); None+None -> symmetric tau_x
@@ -280,6 +281,12 @@ class MZSlowVars:
         self.y = np.zeros(self.NE)
         self.x_relay = np.ones(self.NE)
         self.ee_relay_send = np.ones(self.NE)
+        if self.cfg.x_relay_frozen_E is not None:
+            xf = np.asarray(self.cfg.x_relay_frozen_E, float)
+            if xf.shape != (self.NE,) or not np.all(np.isfinite(xf)) or np.any((xf < 0.0) | (xf > 1.0)):
+                raise ValueError(f"x_relay_frozen_E must be a finite field of shape ({self.NE},) in [0,1]")
+            self.x_relay[:] = xf
+            self.ee_relay_send[:] = xf
         # LC2 H is E-target local and is allocated only when requested.  ``_h_source_lc2_E`` is the
         # CURRENT step's post-X, pre-tanh gA_raw cached by membrane_terms; step() consumes it only after
         # the membrane update, enforcing h(t-) -> membrane and gA(t) -> h(t+dt).
@@ -596,18 +603,24 @@ class MZSlowVars:
             # y_j: exact decay + per-E-spike jump of 1000/tau_y -> a Hz-unit local persistence sensor.
             self.y *= np.exp(-dt / c.tau_y)
             self.y[spkE] += 1000.0 / c.tau_y
+            if c.x_relay_frozen_E is not None:
+                # Developmental frozen-X fork: retain the real activity sensor y for diagnostics, but
+                # keep the source-level relay availability fixed.  The scatter at the next frame reads
+                # precisely this field through ee_relay_send; no additive X current is introduced.
+                pass
             # x_j: relax toward x_inf(y) = 1 - (1-x_min)*Hill([y-y_gate]_+; K_y, n).  x stays in [0,1].
-            u = np.maximum(self.y - c.y_gate, 0.0)
-            un = u ** c.hill_n
-            hill = un / (c.K_y ** c.hill_n + un)
-            x_inf = 1.0 - (1.0 - c.x_min) * hill
-            if c.tau_x_down is None and c.tau_x_up is None:
-                self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))   # symmetric (byte-parity)
             else:
-                # FCXR-LC1 asymmetric: deplete (x_inf<x) on tau_x_down, recover (x_inf>=x) on tau_x_up.
-                # Equal taus reduce EXACTLY to the symmetric relaxation above (per-element factor identical).
-                tau_sel = np.where(x_inf < self.x_relay, c.tau_x_down, c.tau_x_up)
-                self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / tau_sel))
+                u = np.maximum(self.y - c.y_gate, 0.0)
+                un = u ** c.hill_n
+                hill = un / (c.K_y ** c.hill_n + un)
+                x_inf = 1.0 - (1.0 - c.x_min) * hill
+                if c.tau_x_down is None and c.tau_x_up is None:
+                    self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))   # symmetric (byte-parity)
+                else:
+                    # FCXR-LC1 asymmetric: deplete (x_inf<x) on tau_x_down, recover (x_inf>=x) on tau_x_up.
+                    # Equal taus reduce EXACTLY to the symmetric relaxation above (per-element factor identical).
+                    tau_sel = np.where(x_inf < self.x_relay, c.tau_x_down, c.tau_x_up)
+                    self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / tau_sel))
         if c.use_h_lc2:
             # Exact first-order update under the piecewise-constant post-X gA_raw sampled by the membrane
             # this frame.  Because this runs after membrane_terms, gA_raw,n cannot feed back until n+1.
@@ -979,6 +992,12 @@ class MZSlowVars:
                     raise ValueError("asymmetric relay kinetics require BOTH tau_x_down and tau_x_up (or neither)")
                 if c.tau_x_down <= 0.0 or c.tau_x_up <= 0.0:
                     raise ValueError("tau_x_down and tau_x_up must be > 0 (asymmetric relay kinetics)")
+            if c.x_relay_frozen_E is not None:
+                xf = np.asarray(c.x_relay_frozen_E, float)
+                if xf.ndim != 1 or not np.all(np.isfinite(xf)) or np.any((xf < 0.0) | (xf > 1.0)):
+                    raise ValueError("x_relay_frozen_E must be a finite 1-D field in [0,1]")
+        elif c.x_relay_frozen_E is not None:
+            raise ValueError("x_relay_frozen_E requires use_x=True")
         # ---- FCXR pump lifecycle (per-E activity-dependent load u_i + electrogenic pump) ----
         if not c.use_pump:
             if (c.pump_sensor_only or c.pump_Imax > 0.0 or c.pump_record_calibration
