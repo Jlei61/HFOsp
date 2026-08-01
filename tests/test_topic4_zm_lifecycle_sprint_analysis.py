@@ -26,9 +26,9 @@ def test_baseline_referenced_intensity_distinguishes_sustained_gain():
     baseline = np.zeros(40, bool)
     baseline[:20] = True
     got = A.baseline_referenced_intensity(rms, baseline, slice(20, 40))
-    assert got["median_gain_db_across_contacts"] == pytest.approx(10.0)
+    assert got["median_gain_db_across_contacts"] == pytest.approx(20.0)
     assert got["occupancy_above_6db"] == 1.0
-    assert got["normalized_integrated_energy_per_s"] == 10.0
+    assert got["normalized_integrated_energy_per_s"] == 100.0
 
 
 def test_contact_rms_uses_event_free_baseline_mean():

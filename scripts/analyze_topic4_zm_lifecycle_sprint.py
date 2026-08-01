@@ -324,8 +324,12 @@ def returning_recovery(arrays, contact_rms, offset_bin):
 def baseline_referenced_intensity(rms, baseline_bins, episode_slice):
     if rms is None:
         return {"status": "unavailable"}
-    base = rms[np.asarray(baseline_bins, bool)[:len(rms)]]
-    cand = rms[episode_slice]
+    # RMS is an amplitude.  Square it before using the 10*log10 power rule;
+    # applying 10*log10 directly to RMS would halve every dB gain and turn the
+    # +6 dB threshold from a 2x RMS ratio into an incorrect 4x ratio.
+    power = np.asarray(rms, float) ** 2
+    base = power[np.asarray(baseline_bins, bool)[:len(power)]]
+    cand = power[episode_slice]
     if base.size == 0 or cand.size == 0:
         return {"status": "unavailable"}
     eps = np.finfo(float).eps
