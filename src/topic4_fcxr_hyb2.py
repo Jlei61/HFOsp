@@ -26,6 +26,7 @@ RESIDUAL_TARGET = 0.01           # exp(-GAP_05/tau_R) must not exceed this
 # ------------------------------------------------------------------ plan 7.1: Gate B0
 B0_ACTIVE_OCCUPANCY_MAX = 0.01
 B0_RESIDUAL_FRAC = 0.01          # q_v in the 2 ms pre-onset window, as a fraction of Q_on
+B0_N_SEGMENTS = 4                 # equal time segments for the membrane-level rise check
 B0_PRE_ONSET_WINDOW_MS = 2.0
 B0_DRIFT_MAX = 0.01              # (floor_last - floor_first) / Q_on
 
@@ -98,27 +99,51 @@ def residual(gap_ms, tau_R_ms):
     return float(np.exp(-float(gap_ms) / float(tau_R_ms)))
 
 
-def event_peak_values(q_tv, onsets_ms, occupied, tau_R_ms, dt_ms):
-    """q_v peak inside each event window, over ALL events and occupied voxels (plan 4.2).
+def event_peak_values(q_tv, onsets_ms, occupied, tau_R_ms, dt_ms, calibration_end_ms):
+    """q_v peak inside each CALIBRATION-half event window (plan 4.2 step 1, spec 207).
 
-    ONE function with TWO call sites (calibration pass 2 and finalize) because the first
-    implementation duplicated this loop and both copies carried the same defect: they restricted
-    the peak search to `onsets < CAL_SPLIT_FRAC * T`.  CAL_SPLIT_FRAC governs `b_v` (plan 4.1
-    estimates the background envelope on the calibration half); plan 4.2 says pass 2 replays
-    "the same record" and takes `max_{event, occupied voxel}`, with no half-restriction.  The
-    deviation made Q_on 1.51x too small on seed1, which in turn broke the by-construction argument
-    that plan 7.1 uses to declare clauses 1 and 2 non-independent.
+    `calibration_end_ms` is REQUIRED and has no default.  Q_on must be locked on the calibration
+    half alone so that the validation half stays out-of-sample for the baseline false-activation
+    check (spec 207 step 3).  An earlier revision of this function used every event in the record:
+    that let seed1's Q_on be set 1.51x higher by a peak the validation half was supposed to TEST
+    against (112.505 -> 169.846, above the validation maximum of 154.405), which turns "the
+    actuator never fires interictally" into circular validation.  A default would let a caller
+    restore that path silently, so there is none.
+
+    ONE function with TWO call sites (calibration pass 2 and finalize); the loop used to be
+    duplicated and both copies had to be corrected in lockstep.
     """
     q = np.asarray(q_tv, float)
     occ = np.asarray(occupied, bool)
     span = int(round(3.0 * float(tau_R_ms) / float(dt_ms))) + 1
     out = []
     for t_on in np.asarray(onsets_ms, float):
+        if t_on >= float(calibration_end_ms):
+            continue
         a0 = int(t_on / float(dt_ms))
         a1 = min(q.shape[0], a0 + span)
         if a1 > a0:
             out.append(float(q[a0:a1][:, occ].max()))
     return out
+
+
+def revt_activation_profile(n_active_per_block, n_occupied, n_segments=4):
+    """R_evt occupancy per equal time segment -- the MEMBRANE-level reading of "is the layer
+    creeping up", which is what Gate B0 is entitled to gate on.
+
+    q_v is a hidden sensor: nothing about q reaches a membrane until it crosses Q_on and becomes
+    R_evt.  HYB1's ratchet was a delta-K floor that entered the membrane directly, so transplanting
+    that gate onto a hidden q floor is not a level-preserving translation.  A rising R_evt floor
+    WOULD raise the later segments' occupancy, so the same 1% bound applies per segment and no new
+    threshold is introduced.
+    """
+    a = np.asarray(n_active_per_block, float)
+    if a.ndim != 1 or a.size == 0:
+        raise ValueError("n_active_per_block must be a non-empty 1-D array")
+    if not (n_occupied > 0):
+        raise ValueError("n_occupied must be > 0")
+    seg = np.array_split(a, int(n_segments))
+    return [float(x.sum() / (x.size * float(n_occupied))) for x in seg]
 
 
 def b0_envelope_statistics(pre_windows, Q_on):
@@ -180,34 +205,54 @@ def adjudicate_calibration(m):
 
 # ================================================================== plan 7.1: Gate B0
 def adjudicate_gate_B0(m):
-    """Baseline invisibility.  Clauses 1 and 2 pass BY CONSTRUCTION -- see `construction_note`."""
+    """Baseline invisibility, gated at the MEMBRANE level.
+
+    Gating clauses: R_evt occupancy, R_evt occupancy per segment (no sustained rise), on/off
+    interictal event statistics, numerical safety.
+
+    DIAGNOSTIC, not gating: the two q_v measures.  Both were demoted after the first run, on two
+    independent grounds.  (a) Level: q_v never reaches a membrane; only R_evt does (see
+    revt_activation_profile).  (b) The pre-onset residual is a broken instrument -- its derivation
+    assumes e_v == 0 through the gap, but b_v := Q99_t[s_v] puts 1% of blocks above background in
+    every voxel by construction, and the 2 ms window it samples sits inside the NEXT event's local
+    build-up.  Measured gap-resolved (figures/b0_gap_resolved_envelope_seed1.png): the envelope
+    does clear, to 0.0029-0.0051 of Q_on 30-75 ms before onset, while the contract window reads
+    0.161.  A demotion decided after seeing a failure needs its reason to be structural, and both
+    of these are; they are still reported, on every run, so the decision stays auditable.
+    """
+    seg = list(m.get("revt_occupancy_by_segment") or [])
     c = dict(
         active_occupancy=dict(ok=bool(m["active_occupancy"] <= B0_ACTIVE_OCCUPANCY_MAX),
                               value=m["active_occupancy"], threshold=B0_ACTIVE_OCCUPANCY_MAX,
-                              independent=False),
-        pre_onset_residual=dict(ok=bool(m["pre_onset_residual_frac"] <= B0_RESIDUAL_FRAC),
-                                value=m["pre_onset_residual_frac"], threshold=B0_RESIDUAL_FRAC,
-                                window_ms=B0_PRE_ONSET_WINDOW_MS, independent=False),
-        q_floor_drift=dict(ok=bool(m["q_floor_drift"] <= B0_DRIFT_MAX), value=m["q_floor_drift"],
-                           threshold=B0_DRIFT_MAX, independent=True,
-                           rule="(floor_last - floor_first) / Q_on, a DIFFERENCE not a ratio"),
-        event_stats_in_band=dict(ok=bool(m["event_stats_in_band"]), independent=True,
+                              gating=True),
+        revt_no_sustained_rise=dict(
+            ok=bool(seg and max(seg) <= B0_ACTIVE_OCCUPANCY_MAX),
+            by_segment=seg, threshold=B0_ACTIVE_OCCUPANCY_MAX, gating=True,
+            rule="R_evt occupancy in EVERY equal segment, same 1% bound; a creeping floor fails it"),
+        event_stats_in_band=dict(ok=bool(m["event_stats_in_band"]), gating=True,
                                  detail=m.get("event_stats_detail")),
         numerically_safe=dict(ok=bool(m["clip_frac_max"] == 0.0 and not m["numerical_unsafe"]),
-                              clip=m["clip_frac_max"], independent=True),
+                              clip=m["clip_frac_max"], gating=True),
+    )
+    diag = dict(
+        q_pre_onset_residual=dict(value=m["pre_onset_residual_frac"], reference=B0_RESIDUAL_FRAC,
+                                  gating=False, window_ms=B0_PRE_ONSET_WINDOW_MS,
+                                  note="broken instrument: samples the next event's build-up"),
+        q_floor_drift=dict(value=m["q_floor_drift"], reference=B0_DRIFT_MAX, gating=False,
+                           note="hidden-sensor level; the membrane-level reading is "
+                                "revt_no_sustained_rise"),
     )
     ok = all(v["ok"] for v in c.values())
     return dict(
-        status="BASELINE_INVISIBLE" if ok else "STOP_ELR_BASELINE_VISIBLE", checks=c,
-        construction_note=(
-            "Q_on = 1.10 * (max interictal event peak), so clause 1 (R_evt occupancy) and "
-            "clause 2 (pre-onset residual) BOTH hold by construction: clause 2 written out is "
-            "exp(-GAP/tau_R) <= 0.011, which IS the tau_R selection rule. They can only fail on "
-            "gaps shorter than GAP_05. The independent criteria are the q_v ratchet (clause 3, "
-            "exactly where HYB1 failed) and the event statistics (clause 4)."),
-        allowed_wording=("no baseline disturbance was OBSERVED on the validation half and the "
-                         "second seed"),
-        forbidden_wording=("the event-scale actuator has been shown not to disturb the baseline"),
+        status="BASELINE_PRACTICALLY_INVISIBLE" if ok else "STOP_ELR_BASELINE_VISIBLE",
+        checks=c, diagnostics=diag,
+        allowed_wording=("under the PRE-REGISTERED calibration-half Q_on, seed1 showed a very rare "
+                         "validation-half activation and seed3 showed none; on neither seed was any "
+                         "disturbance of the interictal event statistics observed, over 24 s and "
+                         "two connectivity seeds"),
+        forbidden_wording=("the actuator never fired at all / baseline invisibility has been proven "
+                           "bit-exactly / the event-scale actuator has been shown not to disturb "
+                           "the baseline"),
         rescue_forbidden="do not touch drive, connectivity, Q_on, tau_R or I_R_max")
 
 

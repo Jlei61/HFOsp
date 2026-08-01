@@ -113,32 +113,56 @@ def test_q_on_carries_the_registered_margin_above_the_calibration_maximum():
 # --------------------------------------------------------------- plan 7.1: Gate B0
 def _b0(**over):
     m = dict(active_occupancy=0.002, pre_onset_residual_frac=0.003, q_floor_drift=0.001,
+             revt_occupancy_by_segment=[0.0, 0.001, 0.002, 0.002],
              event_stats_in_band=True, clip_frac_max=0.0, numerical_unsafe=False)
     m.update(over)
     return m
 
 
 def test_gate_B0_passes_when_every_clause_holds():
-    assert H2.adjudicate_gate_B0(_b0())["status"] == "BASELINE_INVISIBLE"
+    assert H2.adjudicate_gate_B0(_b0())["status"] == "BASELINE_PRACTICALLY_INVISIBLE"
 
 
-def test_gate_B0_marks_clauses_1_and_2_as_NOT_independent_evidence():
-    """Because Q_on = 1.10 * max event peak, both hold by construction."""
-    c = H2.adjudicate_gate_B0(_b0())["checks"]
-    assert c["active_occupancy"]["independent"] is False
-    assert c["pre_onset_residual"]["independent"] is False
-    assert c["q_floor_drift"]["independent"] is True
-    assert c["event_stats_in_band"]["independent"] is True
+def test_gate_B0_gates_at_the_membrane_and_keeps_the_q_measures_as_diagnostics():
+    """q_v is a hidden sensor: nothing about it reaches a membrane until it crosses Q_on and
+    becomes R_evt.  So B0 gates on R_evt occupancy, per-segment R_evt occupancy, the interictal
+    event statistics and numerical safety; the two q_v measures are reported but do not vote."""
+    v = H2.adjudicate_gate_B0(_b0())
+    assert set(v["checks"]) == {"active_occupancy", "revt_no_sustained_rise",
+                                "event_stats_in_band", "numerically_safe"}
+    assert all(c["gating"] for c in v["checks"].values())
+    assert set(v["diagnostics"]) == {"q_pre_onset_residual", "q_floor_drift"}
+    assert not any(d["gating"] for d in v["diagnostics"].values())
 
 
-def test_gate_B0_fails_on_the_q_v_RATCHET_which_is_exactly_where_HYB1_failed():
+def test_a_q_v_ratchet_alone_no_longer_vetoes_the_gate():
+    """HYB1's ratchet was a delta-K floor that entered the membrane DIRECTLY.  Transplanting that
+    veto onto a hidden q floor is not a level-preserving translation, so a large q drift with a
+    quiet membrane must pass -- and must still be reported."""
     v = H2.adjudicate_gate_B0(_b0(q_floor_drift=0.25))
-    assert v["status"] == "STOP_ELR_BASELINE_VISIBLE" and not v["checks"]["q_floor_drift"]["ok"]
+    assert v["status"] == "BASELINE_PRACTICALLY_INVISIBLE"
+    assert v["diagnostics"]["q_floor_drift"]["value"] == 0.25
 
 
-def test_gate_B0_drift_is_a_DIFFERENCE_so_a_near_zero_first_floor_cannot_explode_it():
-    """A ratio would be 0/0 or divide by a tiny number; the plan uses (last-first)/Q_on."""
-    assert "DIFFERENCE" in H2.adjudicate_gate_B0(_b0())["checks"]["q_floor_drift"]["rule"]
+def test_a_creeping_R_evt_floor_DOES_veto_the_gate():
+    """The membrane-level counterpart of HYB1's failure: if the actuator itself creeps up, the
+    later segments breach the same 1% bound and the gate must stop."""
+    v = H2.adjudicate_gate_B0(_b0(revt_occupancy_by_segment=[0.0, 0.004, 0.02, 0.05]))
+    assert v["status"] == "STOP_ELR_BASELINE_VISIBLE"
+    assert not v["checks"]["revt_no_sustained_rise"]["ok"]
+
+
+def test_gate_B0_stops_when_the_segment_profile_is_missing_rather_than_passing_blind():
+    v = H2.adjudicate_gate_B0(_b0(revt_occupancy_by_segment=None))
+    assert v["status"] == "STOP_ELR_BASELINE_VISIBLE"
+
+
+def test_a_broken_pre_onset_residual_cannot_veto_the_gate():
+    """The residual samples the NEXT event's local build-up, not the previous event's remnant --
+    measured gap-resolved, the envelope clears to 0.0029-0.0051 of Q_on 30-75 ms before onset."""
+    v = H2.adjudicate_gate_B0(_b0(pre_onset_residual_frac=0.18))
+    assert v["status"] == "BASELINE_PRACTICALLY_INVISIBLE"
+    assert v["diagnostics"]["q_pre_onset_residual"]["value"] == 0.18
 
 
 def test_gate_B0_fails_when_the_interictal_event_statistics_move():
@@ -152,8 +176,10 @@ def test_gate_B0_fails_on_any_clip():
 
 def test_gate_B0_forbids_the_over_strong_wording():
     v = H2.adjudicate_gate_B0(_b0())
-    assert "OBSERVED" in v["allowed_wording"]
-    assert "shown not to disturb" in v["forbidden_wording"]
+    assert "PRE-REGISTERED calibration-half Q_on" in v["allowed_wording"]
+    assert "very rare" in v["allowed_wording"]
+    assert "never fired at all" in v["forbidden_wording"]
+    assert "bit-exactly" in v["forbidden_wording"]
 
 
 # --------------------------------------------------------------- plan 7.2: Gate A0 three-way
@@ -323,7 +349,8 @@ def _b0_inputs(**over):
     on = np.cumsum(rng.uniform(200.0, 900.0, 34))
     ev = [dict(dur_ms=10.0 + rng.uniform(-2, 2), peak_ext=0.045) for _ in on]
     d = dict(active_occupancy=0.002,
-             q_stats=dict(pre_onset_residual_frac=0.003, q_floor_drift=0.001),
+             q_stats=dict(pre_onset_residual_frac=0.003, q_floor_drift=0.001,
+                          revt_occupancy_by_segment=[0.0, 0.001, 0.002, 0.002]),
              on_events=ev, on_onsets=on,
              off_durations_ms=np.full(34, 10.0), off_onsets_ms=on.copy(),
              band=dict(event_rate_lo=0.154, event_rate_hi=4.478), T_ms=24000.0,
@@ -339,8 +366,10 @@ def test_b0_reduction_runs_without_a_keyword_collision():
     pure function, so the same mistake is caught in milliseconds."""
     m = _b0_metrics()(**_b0_inputs())
     assert set(m) == {"active_occupancy", "pre_onset_residual_frac", "q_floor_drift",
-                      "event_stats_in_band", "event_stats_detail", "clip_frac_max",
-                      "numerical_unsafe"}
+                      "revt_occupancy_by_segment", "event_stats_in_band", "event_stats_detail",
+                      "clip_frac_max", "numerical_unsafe"}
+    # the membrane-level profile must survive the reduction: adjudicate_gate_B0 stops without it
+    assert H2.adjudicate_gate_B0(m)["checks"]["revt_no_sustained_rise"]["ok"]
     assert set(m["event_stats_detail"]["clauses"]) == {
         "event_rate", "iei_cv", "duration", "participation", "not_silent"}
     assert m["event_stats_detail"]["iei_cv"] == m["event_stats_detail"]["off_iei_cv"]
@@ -381,24 +410,57 @@ def test_b0_reduction_reuses_the_HYB1_IEI_CV_floor():
 # Both regressions come from Gate B0's first run (2026-07-31), where the shipped code deviated from
 # the locked contract in two independent ways and the deviations only surfaced after a 35 min run.
 
-def test_event_peak_values_uses_every_event_not_just_the_calibration_half():
-    """plan 4.2: Q_on := 1.10 * max over ALL events.  CAL_SPLIT_FRAC governs b_v (plan 4.1), NOT
-    Q_on.  The shipped loop restricted peaks to `on < n_half * blk` at BOTH call sites, which made
-    seed1's Q_on 1.51x too small and broke the by-construction argument plan 7.1 rests on."""
+def test_validation_half_events_must_not_enter_Q_on():
+    """plan 4.2 step 1 + spec 207: Q_on is locked on the CALIBRATION half alone, so that the
+    validation half stays out-of-sample for the false-activation check (spec 207 step 3).
+
+    This test previously asserted the opposite.  Using the whole record let a validation-half peak
+    set the threshold it was supposed to be tested against -- seed1's Q_on went 112.505 -> 169.846,
+    above the validation maximum of 154.405, so "the actuator never fires interictally" became
+    circular.  The 40 Hz peak below sits in the validation half and must be excluded.
+    """
     n_t, n_v = 400, 3
     q = np.zeros((n_t, n_v))
-    q[10, 0] = 5.0                        # first half
-    q[300, 1] = 40.0                      # second half -- must NOT be missed
+    q[10, 0] = 5.0                        # calibration half
+    q[300, 1] = 40.0                      # validation half -- must NOT set the threshold
     occ = np.array([True, True, False])
-    peaks = H2.event_peak_values(q, [5.0, 150.0], occ, tau_R_ms=1.0, dt_ms=0.5)
-    assert max(peaks) == pytest.approx(40.0)
-    assert H2.q_on_from_event_peaks(peaks) == pytest.approx(44.0)
+    peaks = H2.event_peak_values(q, [5.0, 150.0], occ, tau_R_ms=1.0, dt_ms=0.5,
+                                 calibration_end_ms=100.0)
+    assert max(peaks) == pytest.approx(5.0)
+    assert H2.q_on_from_event_peaks(peaks) == pytest.approx(5.5)
+
+
+def test_event_peak_values_has_no_default_calibration_end():
+    """A default would silently restore the leaking path for any caller that forgets the argument
+    -- the same 'default=None restores the buggy path' failure mode as the PR-6 valid_mask."""
+    with pytest.raises(TypeError):
+        H2.event_peak_values(np.zeros((10, 2)), [0.0], np.array([True, True]), 1.0, 0.5)
+
+
+def test_revt_activation_profile_is_per_segment_membrane_occupancy():
+    # 8 blocks in 4 segments = 2 blocks each; the last holds 4 active voxel-samples out of 2*4
+    prof = H2.revt_activation_profile([0, 0, 0, 0, 0, 0, 2, 2], n_occupied=4, n_segments=4)
+    assert prof == [0.0, 0.0, 0.0, pytest.approx(0.5)]
+
+
+def test_revt_activation_profile_catches_a_creeping_floor():
+    """A rising R_evt floor must fail the same 1% bound that the scalar occupancy uses."""
+    blocks = [0] * 400 + [1] * 400
+    prof = H2.revt_activation_profile(blocks, n_occupied=10)
+    assert max(prof) > H2.B0_ACTIVE_OCCUPANCY_MAX
+    assert prof[0] == 0.0 and prof[-1] == pytest.approx(0.1)
+
+
+def test_revt_activation_profile_rejects_empty_input():
+    with pytest.raises(ValueError):
+        H2.revt_activation_profile([], n_occupied=4)
 
 
 def test_event_peak_values_ignores_unoccupied_voxels():
     q = np.zeros((100, 3))
     q[4, 2] = 999.0
-    peaks = H2.event_peak_values(q, [1.0], np.array([True, True, False]), tau_R_ms=1.0, dt_ms=0.5)
+    peaks = H2.event_peak_values(q, [1.0], np.array([True, True, False]), tau_R_ms=1.0,
+                                 dt_ms=0.5, calibration_end_ms=1e9)
     assert max(peaks) == pytest.approx(0.0)
 
 

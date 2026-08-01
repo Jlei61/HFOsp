@@ -291,7 +291,8 @@ def cmd_calibration(args):
 
             # ---- pass 2: offline envelope replay -> per-event peaks -> Q_on
             q_tv = _replay_q(load, b_v, eps_s, tau_R, occupied)
-            peaks = H2.event_peak_values(q_tv, on, occupied, tau_R, H2.DT_R_MS)
+            peaks = H2.event_peak_values(q_tv, on, occupied, tau_R, H2.DT_R_MS,
+                                         calibration_end_ms=n_half * H2.DT_R_MS)
             q_on = H2.q_on_from_event_peaks(peaks) if peaks else 0.0
             cal = H2.adjudicate_calibration(dict(T_event_guard_ms=H2.T_EVENT_GUARD_MS,
                                                  gap_05_ms=g05, gap_01_ms=g01, gap_min_ms=gmin,
@@ -377,22 +378,30 @@ def cmd_finalize(args):
             load_p = os.path.join(OUT, f"load_seed{seed}.npy")
             if os.path.exists(load_p):
                 q_tv = _replay_q(np.load(load_p, mmap_mode="r"), b_v, eps_s, tau_R, occ)
-                peaks = H2.event_peak_values(q_tv, on, occ, tau_R, H2.DT_R_MS)
+                peaks = H2.event_peak_values(
+                    q_tv, on, occ, tau_R, H2.DT_R_MS,
+                    calibration_end_ms=q_tv.shape[0] * H2.CAL_SPLIT_FRAC * H2.DT_R_MS)
                 q_on = H2.q_on_from_event_peaks(peaks)
                 src = "re-derived at the global tau_R from the recorded load"
             elif abs(per[seed]["tau_R_ms"] - tau_R) < 1e-9:
-                # No recorded load, but `q_max_series` IS the full-record max over occupied voxels
-                # at this seed's own tau_R -- and that tau_R equals the global one (this seed set
-                # it, being the min-GAP_05 seed).  So max over event windows of that series is
-                # exactly max_{event, occupied voxel}: an exact re-derivation, not a carried-over
-                # value.  It matters because the stored per-seed Q_on came from the superseded
-                # first-half-only loop; here it happens to agree, but agreeing by luck is not a
-                # provenance any downstream gate should rest on.
-                q_on = H2.q_on_from_event_peaks(
-                    H2.event_peak_values(np.asarray(z["q_max_series"], float)[:, None], on,
-                                         np.array([True]), tau_R, H2.DT_R_MS))
-                src = ("re-derived from the stored q_max_series (no recorded load; this seed's own "
-                       "tau_R already equals the global tau_R, so the series is at the right tau_R)")
+                # No recorded load.  This seed's own tau_R already equals the global one (it is the
+                # min-GAP_05 seed), so its stored Q_on is at the right tau_R and needs no
+                # re-derivation -- but "the stored number happens to be right" is not a provenance
+                # a gate should rest on, so it is CROSS-CHECKED against an independent derivation
+                # from q_max_series (the full-record max over occupied voxels, restricted here to
+                # the calibration half like every other path).  That series is stored float32, so
+                # the check carries a float32 tolerance and the exact float64 value is the one used.
+                qms = np.asarray(z["q_max_series"], float)
+                chk = H2.q_on_from_event_peaks(
+                    H2.event_peak_values(qms[:, None], on, np.array([True]), tau_R, H2.DT_R_MS,
+                                         calibration_end_ms=qms.size * H2.CAL_SPLIT_FRAC
+                                         * H2.DT_R_MS))
+                q_on = float(per[seed]["Q_on"])
+                rel = abs(chk - q_on) / max(q_on, 1e-12)
+                if rel > 1e-5:
+                    ok = False
+                src = (f"stored float64 value, cross-checked against an independent q_max_series "
+                       f"derivation ({chk:.6f}, relative difference {rel:.2e}, float32 round-trip)")
             else:
                 q_on = float(per[seed]["Q_on"])
                 src = (f"per-seed value at that seed's own tau_R "
@@ -483,6 +492,7 @@ def _b0_metrics(*, active_occupancy, q_stats, on_events, on_onsets, off_duration
         active_occupancy=active_occupancy,
         pre_onset_residual_frac=q_stats["pre_onset_residual_frac"],
         q_floor_drift=q_stats["q_floor_drift"],
+        revt_occupancy_by_segment=q_stats.get("revt_occupancy_by_segment"),
         event_stats_in_band=all(clauses.values()),
         event_stats_detail=dict(
             clauses=clauses, event_rate_hz=rate_hz, off_event_rate_hz=off_rate_hz,
@@ -544,6 +554,8 @@ def cmd_gate_b0(args):
             pre_windows = [q_tv[int(t_on / H2.DT_R_MS) - w:int(t_on / H2.DT_R_MS)][:, elr.occupied]
                            for t_on in on if int(t_on / H2.DT_R_MS) - w >= 0]
             qs = H2.b0_envelope_statistics(pre_windows, k["Q_on"])
+            qs["revt_occupancy_by_segment"] = H2.revt_activation_profile(
+                [r[3] for r in elr.q_trace], int(elr.occupied.sum()))
             del q_tv, pre_windows
             elr.load_trace = None
             gc.collect()
@@ -582,6 +594,100 @@ def cmd_gate_b0(args):
         except BaseException as e:
             _end(f"gateB0_s{args.seed}", False, error=repr(e))
             raise
+
+
+def cmd_gate_b0_readjudicate(args):
+    """Re-adjudicate Gate B0 offline, at the PRE-REGISTERED calibration-half Q_on.  No simulation.
+
+    Why this exists instead of a third pair of 35 minute runs.  The runs that used the
+    pre-registered thresholds already exist -- seed1 at Q_on = 112.505 and seed3 at 173.429 -- and
+    were archived under superseded/ when a later revision wrongly widened Q_on to the whole record.
+    That revision is reverted; the runs it produced are the ones now superseded.  Re-running 40k
+    baseline would consume 70 minutes to reproduce numbers that are already on disk from a
+    deterministic pipeline.
+
+    seed3 is the SAME TRAJECTORY in both runs: its Q_on was 173.429 either way and its q never
+    reached it, so no actuator current was ever added and the two runs cannot differ.  Its q
+    diagnostics are therefore taken from the later run, which used the contract's joint
+    (event x voxel) statistic.
+
+    seed1 differs between the runs, and the pre-registered run is the valid one.  Its q
+    diagnostics are recomputed here from the recorded calibration load -- the open-loop sensor arm,
+    which is what the layer sees before it acts -- and are labelled as such.  They are diagnostics,
+    not gating clauses, so the distinction changes nothing in the verdict.
+
+    R_evt occupancy per segment is derived EXACTLY, not estimated: `t_gate_ms` is the first block at
+    which any voxel crosses Q_on, so R_evt is identically zero before it, and every segment earlier
+    than t_gate has occupancy exactly 0.  The remaining occupancy is the whole recorded total
+    concentrated in the segments from t_gate on.
+    """
+    _begin("gateB0_readjudicate")
+    lock = json.load(open(os.path.join(OUT, "calibration_lock.json")))
+    out = {}
+    for seed in SEEDS:
+        src = os.path.join(OUT, "superseded", f"gate_b0_seed{seed}.json")
+        old = json.load(open(src))
+        k = lock["seeds"][f"seed{seed}"]
+        if abs(old["elr_config"]["Q_on"] - k["Q_on"]) > 1e-9:
+            raise SystemExit(f"seed{seed}: archived run used Q_on={old['elr_config']['Q_on']}, "
+                             f"lock says {k['Q_on']} -- refusing to re-adjudicate a run that did "
+                             f"not use the pre-registered threshold")
+        n_seg = H2.B0_N_SEGMENTS
+        occ_total = float(old["checks"]["active_occupancy"]["value"])
+        tg = old["t_gate_ms"]
+        if tg is None:
+            seg = [0.0] * n_seg
+        else:
+            first = min(int(tg / (old["T_ms"] / n_seg)), n_seg - 1)
+            seg = [0.0] * first + [occ_total * n_seg / (n_seg - first)] * (n_seg - first)
+        qd = _readjudicate_q_diagnostics(seed, k, lock)
+        m = dict(active_occupancy=occ_total, revt_occupancy_by_segment=seg,
+                 pre_onset_residual_frac=qd["pre_onset_residual_frac"],
+                 q_floor_drift=qd["q_floor_drift"],
+                 event_stats_in_band=old["checks"]["event_stats_in_band"]["ok"],
+                 event_stats_detail=old["checks"]["event_stats_in_band"]["detail"],
+                 clip_frac_max=old["checks"]["numerically_safe"]["clip"],
+                 numerical_unsafe=not old["checks"]["numerically_safe"]["ok"])
+        v = H2.adjudicate_gate_B0(m)
+        v.update(seed=seed, generated=datetime.now(timezone.utc).isoformat(),
+                 code_commit=FCXR._git_sha(), Q_on=k["Q_on"], T_ms=old["T_ms"],
+                 q_max_running=old["q_max_running"], t_gate_ms=tg,
+                 q_diagnostic_source=qd["source"], measured=m,
+                 provenance=dict(simulation=src, simulation_commit=old["code_commit"],
+                                 readjudicated_offline=True,
+                                 reason="the pre-registered calibration-half Q_on run"))
+        _jw(os.path.join(OUT, f"gate_b0_seed{seed}.json"), v)
+        out[f"seed{seed}"] = v["status"]
+        print(f"[gateB0*] seed{seed} {v['status']}  Q_on={k['Q_on']:.3f}  occ={occ_total:.3e}  "
+              f"seg={[round(x, 6) for x in seg]}  q_resid={qd['pre_onset_residual_frac']:.5f} "
+              f"q_drift={qd['q_floor_drift']:+.5f} (both DIAGNOSTIC)", flush=True)
+    ok = all(v == "BASELINE_PRACTICALLY_INVISIBLE" for v in out.values())
+    _end("gateB0_readjudicate", ok, **out)
+    return 0 if ok else 2
+
+
+def _readjudicate_q_diagnostics(seed, k, lock):
+    """seed3: reuse the later run (same trajectory, contract statistic, same Q_on).
+    seed1: recompute from the recorded calibration load, the open-loop sensor arm."""
+    later = os.path.join(OUT, "superseded", f"gate_b0_seed{seed}_fullrecord_Q_on.json")
+    load_p = os.path.join(OUT, f"load_seed{seed}.npy")
+    if os.path.exists(load_p):
+        z = np.load(os.path.join(OUT, f"calibration_seed{seed}.npz"))
+        occ = z["occupied"].astype(bool)
+        q_tv = _replay_q(np.load(load_p, mmap_mode="r"), z["b_v"], float(z["eps_s"]),
+                         lock["tau_R_ms"], occ)
+        w = int(round(H2.B0_PRE_ONSET_WINDOW_MS / H2.DT_R_MS))
+        pre = [q_tv[int(t / H2.DT_R_MS) - w:int(t / H2.DT_R_MS)][:, occ]
+               for t in z["onsets_ms"] if int(t / H2.DT_R_MS) - w >= 0]
+        d = H2.b0_envelope_statistics(pre, k["Q_on"])
+        d["source"] = ("recomputed offline from the recorded calibration load (open-loop sensor "
+                       "arm) at the pre-registered Q_on")
+        return d
+    d = json.load(open(later))["measured"]
+    return dict(pre_onset_residual_frac=d["pre_onset_residual_frac"],
+                q_floor_drift=d["q_floor_drift"],
+                source=("from the later run, which is the SAME trajectory for this seed (identical "
+                        "Q_on, threshold never reached, so no current was ever added)"))
 
 
 # ------------------------------------------------------------------ Gate A0 (actuator efficacy)
@@ -773,6 +879,7 @@ def main(argv=None):
     sub.add_parser("finalize")
     sub.add_parser("zaxis")
     sub.add_parser("gate-a0-adjudicate")
+    sub.add_parser("gate-b0-readjudicate")
     a = sub.add_parser("gate-a0")
     a.add_argument("--arm", choices=["off", "on"], required=True)
     a.add_argument("--confirm-run", action="store_true")
@@ -781,13 +888,14 @@ def main(argv=None):
         c.add_argument("--seed", type=int, required=True, choices=list(SEEDS))
         c.add_argument("--confirm-run", action="store_true")
     args = ap.parse_args(argv)
-    if args.cmd not in ("preflight", "finalize", "zaxis", "gate-a0-adjudicate") \
-            and not args.confirm_run:
+    if args.cmd not in ("preflight", "finalize", "zaxis", "gate-a0-adjudicate",
+                        "gate-b0-readjudicate") and not args.confirm_run:
         raise SystemExit("REFUSING: simulations require --confirm-run")
     return {"preflight": cmd_preflight, "calibration": cmd_calibration,
             "finalize": cmd_finalize, "zaxis": cmd_zaxis,
             "gate-b0": cmd_gate_b0, "gate-a0": cmd_gate_a0,
-            "gate-a0-adjudicate": cmd_gate_a0_adjudicate}[args.cmd](args)
+            "gate-a0-adjudicate": cmd_gate_a0_adjudicate,
+            "gate-b0-readjudicate": cmd_gate_b0_readjudicate}[args.cmd](args)
 
 
 if __name__ == "__main__":
