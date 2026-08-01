@@ -58,8 +58,9 @@ class RawGASampler:
         if self._count == self.stride_steps:
             avg = self._acc / float(self.stride_steps)
             self._sampled.append(avg[self.sample_idx_e].astype(np.float32))
+            q50, q90, q99 = np.quantile(avg, [0.50, 0.90, 0.99])
             self._summary.append(np.asarray([
-                avg.mean(), np.quantile(avg, 0.50), np.quantile(avg, 0.90), np.quantile(avg, 0.99)
+                avg.mean(), q50, q90, q99
             ], dtype=np.float32))
             self._acc.fill(0.0)
             self._count = 0

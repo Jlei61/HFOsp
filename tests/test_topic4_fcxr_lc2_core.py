@@ -1,0 +1,43 @@
+"""Synthetic gate tests for the LC2-Core sensor adjudication."""
+import os
+import sys
+
+import numpy as np
+
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, ROOT)
+sys.path.insert(0, os.path.join(ROOT, "scripts"))
+
+import run_topic4_fcxr_lc2_core as R  # noqa: E402
+
+
+def test_event_peak_matrix_uses_returning_ieds_only():
+    h = np.zeros((100, 3), float)
+    h[10:21] = [1.0, 2.0, 3.0]
+    h[40:51] = 99.0
+    events = [
+        dict(t_on_ms=10.0, t_off_ms=20.0, returned=True),
+        dict(t_on_ms=40.0, t_off_ms=50.0, returned=False),
+    ]
+    got = R._event_peak_matrix(h, events)
+    np.testing.assert_array_equal(got, np.array([[1.0, 2.0, 3.0]]))
+
+
+def test_high_trough_is_temporal_q10_per_cell_then_population_q10():
+    h = np.tile(np.arange(1.0, 5.0), (300, 1))
+    h[:30] = 0.0  # excluded by the locked established window
+    got = R._high_trough_by_cell(h, 50.0, 250.0)
+    np.testing.assert_array_equal(got, np.arange(1.0, 5.0))
+    assert np.quantile(got, 0.10) == 1.3
+
+
+def test_bootstrap_gate_separates_clean_synthetic_low_and_high():
+    low = np.full((8, 256), 1.0)
+    h1 = np.full(256, 3.0)
+    h2 = np.full(256, 2.5)
+    b = R._bootstrap_bounds(low, h1, h2, tau_index=0)
+    assert b["L_upper95"] == 1.0
+    assert b["HEO1_lower95"] == 3.0
+    assert b["HEO2_lower95"] == 2.5
+

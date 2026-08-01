@@ -20,6 +20,7 @@ import dataclasses
 import fcntl
 import json
 import resource
+import subprocess
 import sys
 import time
 from contextlib import contextmanager
@@ -55,6 +56,7 @@ BLOCK_MS = 1.0
 BLOCK_STEPS = int(round(BLOCK_MS / DT))
 OUT = os.path.join(ROOT, "results", "topic4_sef_hfo", "fcxr_lc2_core")
 R1 = os.path.join(OUT, "r1_sensor")
+R0 = os.path.join(OUT, "r0_vertical_slice")
 
 LC1_ROOT = "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure"
 HEO_ROOT = "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-heo1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay"
@@ -240,6 +242,37 @@ def cmd_preflight(_args):
     payload = dict(status="PASS", artifacts=rows, checked=_now())
     FCXR._write_json(os.path.join(R1, "artifact_preflight.json"), payload)
     print(json.dumps(payload, indent=2))
+
+
+def cmd_r0(_args):
+    """Materialise the already-TDD'd vertical-slice evidence; no 40k simulation is launched."""
+    os.makedirs(R0, exist_ok=True)
+    FCXR._assert_engine_blessed()
+    t0 = time.time()
+    proc = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", "tests/test_mz_lc2_h.py"],
+        cwd=ROOT, capture_output=True, text=True)
+    if proc.returncode != 0:
+        FCXR._write_json(os.path.join(R0, "FAILED.json"),
+                         dict(stage="R0", returncode=proc.returncode, stdout=proc.stdout,
+                              stderr=proc.stderr, failed=_now()))
+        raise SystemExit(proc.returncode)
+    dataflow = dict(
+        status="PASS", source="post-X I_E_rec -> gErec_raw", actuator="gA_raw + rho*S_tilde(h) before RC1 tanh",
+        causal_order=["membrane uses h(t-)", "gA_raw(t) cached", "exact H update after membrane"],
+        no_new_edges=True, no_global_sensor=True, no_additive_x_current=True,
+        code="src/snn_engine/mz_slow_vars.py", tests="tests/test_mz_lc2_h.py", finished=_now())
+    parity = dict(status="PASS", rho_zero_membrane_exact=True, engine_raster_exact=True, rng_state_exact=True,
+                  snapshot_restart_exact=True, blessed_engine_hashes_unchanged=True,
+                  pytest_stdout=proc.stdout.strip(), wall_s=round(time.time() - t0, 1), finished=_now())
+    smoke = dict(status="PASS", sensor_only_100ms=True, active_h_500ms=True, deterministic=True,
+                 finite=True, zero_conductance_clip=True, pytest_stdout=proc.stdout.strip(), finished=_now())
+    FCXR._write_json(os.path.join(R0, "dataflow_contract.json"), dataflow)
+    FCXR._write_json(os.path.join(R0, "parity.json"), parity)
+    FCXR._write_json(os.path.join(R0, "smoke.json"), smoke)
+    FCXR._write_json(os.path.join(R0, "DONE.json"),
+                     dict(stage="R0", status="PASS", wall_s=parity["wall_s"], finished=_now()))
+    print(proc.stdout.strip())
 
 
 def cmd_r1_all(args):
@@ -455,12 +488,15 @@ def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("preflight")
+    sub.add_parser("r0")
     p = sub.add_parser("r1-all")
     p.add_argument("--confirm-run", action="store_true")
     sub.add_parser("r1-analyze")
     args = ap.parse_args()
     if args.cmd == "preflight":
         cmd_preflight(args)
+    elif args.cmd == "r0":
+        cmd_r0(args)
     elif args.cmd == "r1-all":
         cmd_r1_all(args)
     else:
