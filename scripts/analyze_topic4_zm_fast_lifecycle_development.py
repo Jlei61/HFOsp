@@ -28,6 +28,7 @@ from src import topic4_zm_phasec_phenotype as PH  # noqa: E402
 
 IN_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/discovery/seed1"
 RACE_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/race/seed1"
+DYNAMIC_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/dynamic/seed1"
 OUT_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development"
 STATES = (
     "bounded_mid__rising", "bounded_mid__peak",
@@ -306,6 +307,164 @@ def _plot_race(ranking):
     plt.close(fig)
 
 
+def _moving_mean(x, bins):
+    x = np.asarray(x, float)
+    if bins <= 1:
+        return x.copy()
+    return np.convolve(x, np.ones(int(bins)) / int(bins), mode="same")
+
+
+def _first_sustained(mask, bins, start=0):
+    x = np.asarray(mask, bool)
+    n = int(bins)
+    if n < 1 or x.size < n:
+        return None
+    run = np.convolve(x.astype(np.int16), np.ones(n, np.int16), mode="valid")
+    hits = np.flatnonzero((run == n) & (np.arange(run.size) >= int(start)))
+    return None if not hits.size else int(hits[0])
+
+
+def _dynamic_semantics(summary, arrays):
+    """Descriptive onset/offset/recovery semantics, deliberately not a new gate."""
+    bin_ms = 25.0
+    core = np.asarray(arrays["coarse_core_rate_hz"], float)
+    surround = np.asarray(arrays["coarse_surround_rate_hz"], float)
+    nbase = min(core.size, int(round(float(summary["equilibration_ms"]) / bin_ms)))
+    baseline = core[:max(4, nbase)]
+    med = float(np.median(baseline))
+    mad = float(1.4826 * np.median(np.abs(baseline - med)))
+    ictal_threshold = max(50.0, med + 3.0 * mad)
+    smooth = _moving_mean(core, int(round(500.0 / bin_ms)))
+    onset_bin = _first_sustained(
+        smooth >= ictal_threshold, int(round(250.0 / bin_ms)), start=nbase // 2
+    )
+    offset_bin = None
+    recovery_threshold = max(25.0, med + 1.5 * mad)
+    if onset_bin is not None:
+        offset_bin = _first_sustained(
+            smooth <= recovery_threshold,
+            int(round(1000.0 / bin_ms)),
+            start=onset_bin + int(round(500.0 / bin_ms)),
+        )
+    tail_start = offset_bin if offset_bin is not None else max(0, core.size - int(5000 / bin_ms))
+    tail = core[tail_start:]
+    event_mask = tail >= max(35.0, med + 2.0 * mad)
+    tail_events = _merged_episodes(event_mask, gap_bins=2)
+    tail_events = [ep for ep in tail_events if (ep[1] - ep[0]) * bin_ms >= 25.0]
+    envelope, energy_all = _race_energy(
+        arrays["lfp_raw_synaptic_proxy"], float(arrays["lfp_fs_hz"])
+    )
+    e0 = 0 if onset_bin is None else onset_bin
+    e1 = len(envelope) if offset_bin is None else min(len(envelope), offset_bin)
+    _, energy_episode = _race_energy(
+        arrays["lfp_raw_synaptic_proxy"][
+            int(e0 * bin_ms / 0.1): int(e1 * bin_ms / 0.1)
+        ],
+        float(arrays["lfp_fs_hz"]),
+    ) if e1 > e0 else (np.zeros(0), {"energy_floor_F": None, "deep_gap_G": None})
+    if summary.get("runaway_early_stop_ms") is not None:
+        label = "onset_to_runaway"
+    elif onset_bin is None:
+        label = "no_detected_onset"
+    elif offset_bin is None:
+        label = "onset_persistent_to_end"
+    elif tail_events:
+        label = "onset_offset_returning_events_candidate"
+    else:
+        label = "onset_offset_quiet_tail"
+    return {
+        "trajectory_semantics": label,
+        "baseline_core_median_hz": med,
+        "baseline_core_mad_hz": mad,
+        "ictal_threshold_hz": ictal_threshold,
+        "recovery_threshold_hz": recovery_threshold,
+        "onset_ms_after_warm_start": None if onset_bin is None else onset_bin * bin_ms,
+        "offset_ms_after_warm_start": None if offset_bin is None else offset_bin * bin_ms,
+        "episode_duration_ms": (
+            None if onset_bin is None or offset_bin is None
+            else (offset_bin - onset_bin) * bin_ms
+        ),
+        "tail_returning_event_count": len(tail_events),
+        "tail_core_mean_hz": float(np.mean(tail)) if tail.size else None,
+        "core_surround_correlation": _safe_corr(core, surround),
+        "whole_trace_energy": energy_all,
+        "candidate_episode_energy": energy_episode,
+        "vseeg_envelope": envelope,
+    }
+
+
+def analyze_dynamic():
+    rows = []
+    for root in sorted(DYNAMIC_ROOT.glob("*")):
+        sp, tp = root / "summary.json", root / "traces.npz"
+        if not sp.is_file() or not tp.is_file():
+            continue
+        summary = json.loads(sp.read_text())
+        with np.load(tp, allow_pickle=False) as data:
+            arrays = {key: np.asarray(data[key]) for key in data.files}
+        semantics = _dynamic_semantics(summary, arrays)
+        rows.append({
+            "stem": root.name,
+            "mechanism": summary.get("mechanism"),
+            "observed_ms": summary["observed_ms"],
+            "z_initial_core_mean": float(arrays["trace_z_core_mean"][0]),
+            "z_final_core_mean": float(arrays["trace_z_core_mean"][-1]),
+            "m_initial_core_mean": float(arrays["trace_m_core_mean"][0]),
+            "m_final_core_mean": float(arrays["trace_m_core_mean"][-1]),
+            **{k: v for k, v in semantics.items() if k != "vseeg_envelope"},
+            "summary_path": str(sp.relative_to(ROOT)),
+            "trace_path": str(tp.relative_to(ROOT)),
+            "_arrays": arrays,
+            "_envelope": semantics["vseeg_envelope"],
+        })
+    if not rows:
+        raise SystemExit("no dynamic lifecycle prototypes found")
+    public = lambda row: {k: v for k, v in row.items() if not k.startswith("_")}
+    payload = {
+        "schema": "zm_fast_lifecycle_dynamic_prototype_v1_2026-08-01",
+        "semantic_scope": "seed1_descriptive_prototype_not_lifecycle_acceptance",
+        "n_runs": len(rows),
+        "runs": [public(row) for row in rows],
+    }
+    (OUT_ROOT / "dynamic_lifecycle_summary.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    _plot_dynamic(rows)
+    return payload
+
+
+def _plot_dynamic(rows):
+    fig, axes = plt.subplots(len(rows), 4, figsize=(15, 3.0 * len(rows)), squeeze=False,
+                             constrained_layout=True)
+    for i, row in enumerate(rows):
+        a, env = row["_arrays"], row["_envelope"]
+        t = np.asarray(a["fine_time_ms"]) / 1000.0
+        axes[i, 0].plot(t, a["fine_core_rate_hz"], color="#B2182B", lw=.5)
+        axes[i, 0].plot(t, a["fine_surround_rate_hz"], color="#2166AC", lw=.4)
+        axes[i, 0].set_title(row["stem"] + "\n" + row["trajectory_semantics"], loc="left", fontsize=8)
+        te = np.arange(env.size) * .025
+        axes[i, 1].plot(te, env, color="#E66101", lw=.6)
+        axes[i, 1].set_title("virtual-SEEG energy", loc="left", fontsize=8)
+        axes[i, 2].imshow(
+            a["coarse_kymo_axial"], origin="lower", aspect="auto", cmap="magma",
+            extent=(0, a["coarse_kymo_axial"].shape[1] * .025, 0, 24),
+        )
+        axes[i, 2].set_title("pathological-axis activity", loc="left", fontsize=8)
+        stride = max(1, len(a["trace_z_core_mean"]) // 3000)
+        ts = np.arange(len(a["trace_z_core_mean"]))[::stride] * .0001
+        axes[i, 3].plot(ts, a["trace_z_core_mean"][::stride], color="#1B9E77", lw=.7, label="z core")
+        m = a["trace_m_core_mean"][::stride]
+        axes[i, 3].plot(ts, m / max(1.0, float(np.max(m))), color="#6A3D9A", lw=.7, label="m core / max")
+        axes[i, 3].legend(frameon=False, fontsize=7)
+        axes[i, 3].set_title("dynamic Z/M slow flow", loc="left", fontsize=8)
+    for ax in axes[-1]:
+        ax.set_xlabel("time after pre-entry warm start (s)")
+    fig.suptitle("Full dynamic Z/M lifecycle prototypes — seed 1 diagnostic", fontweight="bold")
+    path = OUT_ROOT / "figures/fig_dynamic_lifecycle_prototypes.png"
+    fig.savefig(path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
+
+
 def diagnose(summary, arrays):
     core = np.asarray(arrays["fine_core_rate_hz"], float)
     surround = np.asarray(arrays["fine_surround_rate_hz"], float)
@@ -558,7 +717,17 @@ def plot(rows, ranking):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--race", action="store_true")
+    parser.add_argument("--dynamic", action="store_true")
     args = parser.parse_args()
+    if args.dynamic:
+        payload = analyze_dynamic()
+        print(json.dumps({
+            "n_runs": payload["n_runs"],
+            "semantics": {
+                row["stem"]: row["trajectory_semantics"] for row in payload["runs"]
+            },
+        }, sort_keys=True))
+        return
     if args.race:
         payload = analyze_race()
         print(json.dumps({
