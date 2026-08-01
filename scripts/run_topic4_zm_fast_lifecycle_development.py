@@ -353,6 +353,11 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += f"__tauI{args.tau_aI_ms:g}__fI{args.f_aI:g}"
     if args.strength_scale is not None:
         stem += f"__s{args.strength_scale:g}"
+    if args.control_uplift_mV > 0:
+        stem += (
+            f"__ctl{args.control_target}__u{args.control_uplift_mV:g}"
+            f"__t{args.control_t0_ms:g}__dur{args.control_duration_ms:g}"
+        )
     return stem
 
 
@@ -373,6 +378,17 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         allowed_gz = (0.8, 1.0, 1.25) if args.command == "sprint-cell" else (1.0, 1.25, 1.5)
         if float(args.g_Z) not in allowed_gz:
             raise RuntimeError("g_Z lies outside the onset-contingency panel")
+        if float(args.control_uplift_mV) < 0.0:
+            raise RuntimeError("control_uplift_mV must be nonnegative")
+        if float(args.control_uplift_mV) > 0.0:
+            if args.command != "sprint-cell":
+                raise RuntimeError("finite control is only available in sprint-cell")
+            if args.control_t0_ms is None or float(args.control_t0_ms) <= 0.0:
+                raise RuntimeError("active control requires positive control_t0_ms")
+            if not 0.0 < float(args.control_duration_ms) <= 500.0:
+                raise RuntimeError("control duration must lie in (0,500] ms")
+            if float(args.control_t0_ms) + float(args.control_duration_ms) >= float(args.T_ms):
+                raise RuntimeError("control pulse must end before the trajectory ends")
     else:
         if not args.smoke and float(args.T_ms) != PRODUCTION_T_MS:
             raise RuntimeError(f"production duration must be {PRODUCTION_T_MS:g} ms")
@@ -390,6 +406,10 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         if args.command == "sprint-cell":
             if args.arm not in {"i2e", "combined"}:
                 raise RuntimeError("sprint-cell requires i2e or combined")
+            if float(args.g_M) not in (0.0, 1.0, 3.0, 10.0, 30.0):
+                raise RuntimeError("sprint g_M lies outside {0,1,3,10,30}")
+            if args.tau_M_ms is not None and float(args.tau_M_ms) not in (500.0, 2000.0):
+                raise RuntimeError("sprint tau_M must be 500 or 2000 ms")
             if not 300.0 <= float(args.tau_D_ms) <= 850.0:
                 raise RuntimeError("sprint tau_D must lie in [300,850] ms")
             if not 0.55 <= float(args.d_star) <= 0.85:
@@ -461,6 +481,23 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         ext_mean_only=bank["ext_mean_only"],
     )
 
+    perturb = None
+    if float(args.control_uplift_mV) > 0.0:
+        target = np.zeros(ctx["S"]["N"], dtype=bool)
+        if args.control_target == "all_E":
+            target[:ctx["S"]["NE"]] = True
+        elif args.control_target == "core_E":
+            target[:ctx["S"]["NE"]] = np.asarray(ctx["core"], bool)
+        else:  # parser choice is the first guard; keep runner fail-closed.
+            raise RuntimeError(f"unknown control target {args.control_target!r}")
+        perturb = {
+            "kind": "inhibitory_pulse",
+            "t0": float(args.control_t0_ms),
+            "t1": float(args.control_t0_ms) + float(args.control_duration_ms),
+            "val": float(args.control_uplift_mV),
+            "target_mask": target,
+        }
+
     started = time.time()
     result = R.run_segment(
         ctx,
@@ -470,6 +507,7 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         fresh_rng=True,
         dump_i_spikes=True,
         dump_lfp_components=True,
+        perturb=perturb,
     )
     e_all = np.asarray(result["E_spk_bool"], bool)
     i_all = np.asarray(result["I_spk_bool"], bool)
@@ -589,6 +627,15 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         "tau_phi_ms": float(args.tau_phi_ms),
         "fraction": float(args.fraction),
         "mechanism": mechanism,
+        "finite_control": (
+            None if perturb is None else {
+                "kind": "E_threshold_uplift",
+                "target": args.control_target,
+                "t0_ms": float(args.control_t0_ms),
+                "duration_ms": float(args.control_duration_ms),
+                "uplift_mV": float(args.control_uplift_mV),
+            }
+        ),
         "delta_phi_mV_per_spike": float(delta),
         "reference_rate_hz": REFERENCE_RATE_HZ,
         "threshold_gap_mV": float(R.PP.CORE_MEAN - ctx["S"]["p"].V_reset),
@@ -674,6 +721,10 @@ def main() -> None:
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
     parser.add_argument("--strength-scale", type=float)
+    parser.add_argument("--control-uplift-mV", type=float, default=0.0)
+    parser.add_argument("--control-t0-ms", type=float)
+    parser.add_argument("--control-duration-ms", type=float, default=50.0)
+    parser.add_argument("--control-target", choices=("all_E", "core_E"), default="all_E")
     parser.add_argument("--g-M", type=float, dest="g_M", default=1.0)
     parser.add_argument("--tau-M-ms", type=float, dest="tau_M_ms")
     parser.add_argument("--g-Z", type=float, dest="g_Z", default=1.0)
