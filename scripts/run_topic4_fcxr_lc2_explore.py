@@ -460,6 +460,12 @@ def _load_screen_manifest():
     return _load_json(path)
 
 
+def screen_submission_order(rows):
+    """Breadth-first resource order; never changes the locked grid or canonical row indices."""
+    return sorted(rows, key=lambda r: (float(r["rho_fraction"]), float(r["k_ratio"]),
+                                       str(r["candidate_id"]), int(r["index"])))
+
+
 def cmd_screen_one(args):
     if not args.confirm_run:
         raise SystemExit("screen-one requires --confirm-run")
@@ -476,6 +482,7 @@ def cmd_screen_all(args):
     FCXR._assert_engine_blessed()
     manifest = _load_screen_manifest()
     rows = manifest["rows"]
+    submit_rows = screen_submission_order(rows)
     os.makedirs(os.path.join(OUT, "screen_cells"), exist_ok=True)
     before = _meminfo()
     if before["mem_available_gib"] < 96.0:
@@ -485,11 +492,12 @@ def cmd_screen_all(args):
         raise SystemExit(f"OOM safety stop: workers={args.workers} exceeds measured-RSS cap={max_by_mem}")
     running = os.path.join(OUT, "E3_RUNNING.json")
     FCXR._write_json(running, dict(stage="E3", pid=os.getpid(), workers=int(args.workers),
-                                  n_rows=len(rows), resource_before=before, started=_now()))
+                                  n_rows=len(rows), submission_order="rho_k_candidate_breadth_first",
+                                  resource_before=before, started=_now()))
     results = []
     try:
         with ProcessPoolExecutor(max_workers=int(args.workers)) as ex:
-            fut = {ex.submit(_screen_worker, row): row for row in rows}
+            fut = {ex.submit(_screen_worker, row): row for row in submit_rows}
             for j, f in enumerate(as_completed(fut), 1):
                 out = f.result(); results.append(out)
                 print(f"[E3] {j}/{len(rows)} {out['run_id']} -> {out['label']} "

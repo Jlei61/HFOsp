@@ -122,6 +122,9 @@ claim.
 
 Complete all registered combinations unless parity/snapshot fails, numerical state is corrupted, OOM
 safety fires, or the 10 h exploration budget is reached. A negative point does not stop the grid.
+The immutable 90-row manifest retains its canonical indices, while resource submission is breadth-first
+by `rho`, `k`, then H candidate.  This order is fixed independently of outcomes so a budget terminal does
+not spend all coverage on the first sensor family.
 
 ## 5. Frozen basin and X forks
 

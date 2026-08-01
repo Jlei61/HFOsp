@@ -69,7 +69,9 @@ Create one manifest row per candidate/k/rho combination before launch. Each run:
 First run measures RSS and wall time.  It measured 6.793 GiB while MemAvailable remained 182.5 GiB on
 an 80-CPU host.  The spec resource formula therefore unlocks four E3 workers while retaining at least
 96 GiB; E4 stays at two until separately timed.  The launcher writes per-cell outputs and an aggregate
-sentinel, and a resumed launcher skips completed cells.
+sentinel, and a resumed launcher skips completed cells.  Submission is breadth-first by rho, k, then H
+candidate so a 10 h resource terminal preserves cross-candidate coverage; canonical manifest rows and
+indices are unchanged.
 
 Classify every row as `decay_low`, `screen_survivor`, `saturated_tonic`, `numerical_failure`, or
 `unresolved_1s`. Do not call a survivor a basin.

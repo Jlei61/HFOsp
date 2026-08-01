@@ -111,6 +111,12 @@ def test_closed_loop_exploration_cli_imports_all_runtime_dependencies():
     spec.loader.exec_module(module)
     assert callable(module.cmd_screen_manifest)
     assert module.SCREEN_WORKER_CHOICES == (1, 2, 3, 4)
+    rows = [dict(index=i, candidate_id=c, rho_fraction=r, k_ratio=k)
+            for i, (c, r, k) in enumerate((("H1", .2, .05), ("H2", .1, .05),
+                                            ("H1", .1, .05), ("H1", .1, .1)))]
+    got = module.screen_submission_order(rows)
+    assert [(x["rho_fraction"], x["k_ratio"], x["candidate_id"]) for x in got] == [
+        (.1, .05, "H1"), (.1, .05, "H2"), (.1, .1, "H1"), (.2, .05, "H1")]
 
 
 def _load_fork_runner():
