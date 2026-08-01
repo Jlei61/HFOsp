@@ -31,7 +31,7 @@ import run_m4_phaseplane as PP  # noqa: E402
 import run_topic4_mz_slowvars as OLD  # noqa: E402
 from kick_probe import simulate_kick  # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
-from src.topic4_fcxr_dynamics import (  # noqa: E402
+from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
     load_onset_depletion_pi, assert_field_substrate_aligned, frozen_z_field,
 )
 from src.topic4_fcxr_lc2_core import (  # noqa: E402

@@ -1,5 +1,6 @@
 """Synthetic gate tests for the LC2-Core sensor adjudication."""
 import os
+import importlib.util
 import sys
 
 import numpy as np
@@ -100,3 +101,12 @@ def test_pareto_and_role_selection_are_deterministic_and_unique():
     ids = [(r["tau_ms"], r["theta"]) for r in chosen]
     assert len(ids) == len(set(ids)) == 2  # fewer than max_n is legal when the Pareto set is smaller
     assert ids[0] == (100.0, 2.0)  # locked fastest non-dominated p_false=0 role
+
+
+def test_closed_loop_exploration_cli_imports_all_runtime_dependencies():
+    """Catch stale module names before a 40k stage is submitted."""
+    path = os.path.join(ROOT, "scripts", "run_topic4_fcxr_lc2_explore.py")
+    spec = importlib.util.spec_from_file_location("_lc2_explore_import_smoke", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    assert callable(module.cmd_screen_manifest)
