@@ -2,13 +2,17 @@
 
 日期：2026-08-01
 
-状态：**IMPLEMENTATION PLAN CANDIDATE — 未授权执行**
+状态：**SUPERSEDED — DO NOT EXECUTE**
 
 分支：`codex/topic4-fcxr-lc2`
 
 基点：`3c2fc86a`（FCXR-HYB2 正式收口）
 
 Spec：`docs/superpowers/specs/2026-08-01-topic4-fcxr-lc2-hysteretic-carrier-design.md`
+
+> **2026-08-01 审阅收口**：本 plan 的 T1–T12 瀑布顺序不再授权。核心发现改由
+> `docs/superpowers/plans/2026-08-01-topic4-fcxr-lc2-core.md` 执行；患者 morphology/空间/确认性工作
+> 只有 Core positive 后才另写 plan。以下正文保留为审计，不得选择性执行其中某一 stage。
 
 > **spec 与 plan 冲突 = execution blocker。** 不设“spec 优先”或“plan 优先”；发现冲突必须先同步
 > 修订两份文件并重新审阅。本文只落实 spec 授权的 Phase 0–3，不扩大科学范围。

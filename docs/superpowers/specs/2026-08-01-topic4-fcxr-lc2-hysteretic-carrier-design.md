@@ -2,11 +2,19 @@
 
 日期：2026-08-01
 
-状态：**DESIGN LOCK CANDIDATE — REVIEW REQUIRED BEFORE EXECUTION**
+状态：**REVISION REQUIRED — DO NOT EXECUTE — SUPERSEDED BY LC2-CORE**
 
 中文名：**FCXR-LC2：局部迟滞高态—持续负荷终止—间期统计恢复**
 
 Plan：`docs/superpowers/plans/2026-08-01-topic4-fcxr-lc2-phase0-phase3.md`
+
+> **2026-08-01 审阅收口**：本文件把 H/X/Z 核心机制发现、M/空间/患者表型确认和完整工程确认
+> 串成同一关键路径，且 reduced X 曾写成与 SNN presynaptic relay 不同构的加性负电流。因此本版
+> **不得执行**。可执行的核心问题已迁移到
+> `docs/superpowers/specs/2026-08-01-topic4-fcxr-lc2-core-design.md`；M_i、E1146 morphology、空间招募
+> 和确认性分析迁移到
+> `docs/superpowers/specs/2026-08-01-topic4-fcxr-lc2-phenotype-deferred-design.md`。以下正文只保留为
+> 设计审计记录，不再具有参数或 gate 授权力。
 
 > **代际边界**：LC2 从 FCXR-HYB2 的正式收口提交 `3c2fc86a` 分出；它不是 HYB3。
 > HYB2 已 `EXECUTED · CLOSED`，不得在本分支降低 Z、移动 A0 窗口、提高 occupied-volume
