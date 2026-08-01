@@ -256,6 +256,9 @@ def match_returning_events(reference, post, *, min_post=3, tol_frac=0.6):
             "matches": bool(morphology_ok and geometry_ok),
         })
     single = any(row["matches"] for row in individual)
+    match_fraction = (
+        float(np.mean([row["matches"] for row in individual])) if individual else 0.0
+    )
 
     per_metric = {}
     for key in keys:
@@ -278,13 +281,14 @@ def match_returning_events(reference, post, *, min_post=3, tol_frac=0.6):
         "ok": bool(iei_ratio is not None and 1.0 - tol_frac <= iei_ratio <= 1.0 + tol_frac),
     }
     recovered = (
-        len(post) >= int(min_post) and single
+        len(post) >= int(min_post) and match_fraction >= 0.5
         and all(row["ok"] for row in per_metric.values())
     )
     return {
         "status": "ok", "n_reference": len(reference), "n_post": len(post),
         "single_event_candidate": bool(single),
         "distribution_recovered": bool(recovered),
+        "matched_event_fraction": match_fraction,
         "per_metric": per_metric, "individual": individual,
         "claim_boundary": (
             "single event is a development candidate; distribution recovery requires >=3 "
