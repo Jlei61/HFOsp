@@ -58,11 +58,21 @@ def build_manifest(selection, *, T_ms=20000.0):
     selected = list(selection.get("selected", selection.get("rows", [])))
     if len(selected) != 4:
         raise ValueError("M panel requires exactly four selected fast phenotypes")
+    prepared = [
+        (
+            rank,
+            _fast_config(source),
+            source.get("config_id", source.get("stem", f"selected_{rank}")),
+        )
+        for rank, source in enumerate(selected)
+    ]
     rows = []
-    for rank, source in enumerate(selected):
-        fast = _fast_config(source)
-        source_id = source.get("config_id", source.get("stem", f"selected_{rank}"))
-        for g_m, tau_m in M_COORDS:
+    # Coordinate-major ordering makes each 8-worker wave scientifically
+    # interpretable across all four phenotypes.  In particular, wave 1 contains
+    # every g_M=0 paired control and every native g_M=1,tau_M=500 trajectory,
+    # rather than spending eight slots on a single phenotype.
+    for g_m, tau_m in M_COORDS:
+        for rank, fast, source_id in prepared:
             row = {
                 "family": "m_response_panel", "selection_rank": rank,
                 "source_fast_id": source_id, **fast,

@@ -34,3 +34,11 @@ def test_m_panel_command_is_a_twenty_second_dynamic_sprint():
     cmd = M.B._command(manifest["rows"][0])
     assert "sprint-cell" in cmd
     assert cmd[cmd.index("--T-ms") + 1] == "20000.0"
+
+
+def test_first_worker_wave_pairs_all_phenotypes_at_gm0_and_native_m():
+    rows = M.build_manifest({"rows": [_selected(i) for i in range(4)]})["rows"][:8]
+    assert {row["selection_rank"] for row in rows[:4]} == {0, 1, 2, 3}
+    assert {(row["g_M"], row["tau_M_ms"]) for row in rows[:4]} == {(0.0, 500.0)}
+    assert {row["selection_rank"] for row in rows[4:]} == {0, 1, 2, 3}
+    assert {(row["g_M"], row["tau_M_ms"]) for row in rows[4:]} == {(1.0, 500.0)}
