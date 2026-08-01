@@ -1,8 +1,11 @@
 # FCXR-LC2 — SNN-calibrated hysteretic carrier, delayed-load offset, and interictal recovery
 
-日期：2026-08-01  
-状态：**DESIGN LOCK CANDIDATE — REVIEW REQUIRED BEFORE EXECUTION**  
-中文名：**FCXR-LC2：局部迟滞高态—持续负荷终止—间期统计恢复**  
+日期：2026-08-01
+
+状态：**DESIGN LOCK CANDIDATE — REVIEW REQUIRED BEFORE EXECUTION**
+
+中文名：**FCXR-LC2：局部迟滞高态—持续负荷终止—间期统计恢复**
+
 Plan：`docs/superpowers/plans/2026-08-01-topic4-fcxr-lc2-phase0-phase3.md`
 
 > **代际边界**：LC2 从 FCXR-HYB2 的正式收口提交 `3c2fc86a` 分出；它不是 HYB3。
