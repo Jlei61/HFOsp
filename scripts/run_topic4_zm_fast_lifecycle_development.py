@@ -304,6 +304,22 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
         "delta_phi": float(delta),
     }
     values.update(edits)
+    dynamic = args is not None and args.command == "dynamic-cell"
+    if dynamic:
+        if float(args.g_M) <= 0.0:
+            raise ValueError("g_M must be positive")
+        values["eta_m"] = float(cfg.eta_m) * float(args.g_M)
+        if args.tau_M_ms is not None:
+            if float(args.tau_M_ms) <= 0.0:
+                raise ValueError("tau_M_ms must be positive")
+            values["tau_adp"] = float(args.tau_M_ms)
+        receipt["dynamic_slow_flow"] = {
+            "g_M": float(args.g_M),
+            "eta_m_native": float(cfg.eta_m),
+            "eta_m_applied": float(values["eta_m"]),
+            "tau_M_ms": float(values.get("tau_adp", cfg.tau_adp)),
+            "g_Z": float(args.g_Z),
+        }
     cfg = dataclasses.replace(cfg, **values)
     base = R.SpatialSlowField(
         ctx["S"]["N"], 18.0, ctx["S"]["posE"], ctx["S"]["posI"],
@@ -312,26 +328,45 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
     diagnostic = RT.DiagnosticSlowWrapper(
         base, diagnostic_stride_steps=max(1, int(round(1.0 / ctx["dt"])))
     )
-    slow = R.FS.FreezeWrapper(
-        diagnostic, R.FS.FreezePolicy.for_arm("freeze_zm")
-    )
+    policy = "dynamic_replay" if dynamic else "freeze_zm"
+    slow = R.FS.FreezeWrapper(diagnostic, R.FS.FreezePolicy.for_arm(policy))
     return slow, diagnostic, delta, receipt
 
 
+def _mechanism_stem(args: argparse.Namespace) -> str:
+    stem = str(args.arm)
+    if args.arm in {"i2e", "combined"}:
+        stem += f"__tauD{args.tau_D_ms:g}__d{args.d_star:g}"
+    if args.arm in {"iadapt", "combined"}:
+        stem += f"__tauI{args.tau_aI_ms:g}__fI{args.f_aI:g}"
+    return stem
+
+
 def run_cell(args: argparse.Namespace) -> Path:
-    if not args.smoke and float(args.T_ms) != PRODUCTION_T_MS:
-        raise RuntimeError(f"production duration must be {PRODUCTION_T_MS:g} ms")
-    if not args.smoke and float(args.burn_ms) != PRODUCTION_BURN_MS:
-        raise RuntimeError(f"production burn must be {PRODUCTION_BURN_MS:g} ms")
+    dynamic = args.command == "dynamic-cell"
+    if dynamic:
+        if float(args.T_ms) not in (30000.0, 60000.0):
+            raise RuntimeError("dynamic prototype duration must be 30000 or 60000 ms")
+        if float(args.burn_ms) not in (1000.0, 2000.0):
+            raise RuntimeError("dynamic prototype equilibration must be 1000 or 2000 ms")
+        if float(args.g_Z) != 1.0:
+            raise RuntimeError(
+                "g_Z scaling is deferred unless the native dynamic arm has no onset"
+            )
+    else:
+        if not args.smoke and float(args.T_ms) != PRODUCTION_T_MS:
+            raise RuntimeError(f"production duration must be {PRODUCTION_T_MS:g} ms")
+        if not args.smoke and float(args.burn_ms) != PRODUCTION_BURN_MS:
+            raise RuntimeError(f"production burn must be {PRODUCTION_BURN_MS:g} ms")
     race = args.command == "race-cell"
-    if race:
+    if race or dynamic:
         if args.state != RACE_STATE:
             raise RuntimeError(f"mechanism race is locked to {RACE_STATE}")
         if (
             float(args.tau_phi_ms) != RACE_PHI_TAU_MS
             or float(args.fraction) != RACE_PHI_FRACTION
         ):
-            raise RuntimeError("mechanism race phi coordinate drift")
+            raise RuntimeError("lifecycle prototype phi coordinate drift")
         if args.tau_D_ms is not None and float(args.tau_D_ms) not in RACE_TAU_D_MS:
             raise RuntimeError("tau_D lies outside the registered race panel")
         if args.d_star is not None and float(args.d_star) not in RACE_D_STAR:
@@ -348,12 +383,19 @@ def run_cell(args: argparse.Namespace) -> Path:
     locked_rate = float(futility["seed1_primary_futility"]["core_rate_mean_hz"]["median"])
     if locked_rate != REFERENCE_RATE_HZ:
         raise RuntimeError("Phase-C reference-rate drift")
-    row = _source_row(manifest, args.state)
+    source_id = ("pre_entry", "natural") if dynamic else _state_parts(args.state)
+    rows = [
+        item for item in manifest["source_panel"]
+        if (item["bin_name"], item["fast_phase"]) == source_id
+    ]
+    if len(rows) != 1:
+        raise RuntimeError(f"source {source_id!r} does not resolve exactly once")
+    row = rows[0]
     ctx = RT.build_source_locked_context(ROOT, manifest, R)
     state, transformation = ST.load_and_migrate(
         ROOT,
         manifest,
-        row_id=_state_parts(args.state),
+        row_id=source_id,
         contract_already_validated=True,
     )
     if np.count_nonzero(state["slow.phi_increment"]) != 0:
@@ -391,7 +433,11 @@ def run_cell(args: argparse.Namespace) -> Path:
     )
     e_all = np.asarray(result["E_spk_bool"], bool)
     i_all = np.asarray(result["I_spk_bool"], bool)
-    burn_steps = min(e_all.shape[0], int(round(float(args.burn_ms) / ctx["dt"])))
+    # Keep the dynamic arm's neutral-state equilibration in the saved trace:
+    # it is the genuine pre-onset part of the lifecycle, not disposable burn-in.
+    burn_steps = 0 if dynamic else min(
+        e_all.shape[0], int(round(float(args.burn_ms) / ctx["dt"]))
+    )
     e = e_all[burn_steps:]
     i = i_all[burn_steps:]
     lfp = np.asarray(result["lfp_trace"], float)[burn_steps:]
@@ -411,7 +457,7 @@ def run_cell(args: argparse.Namespace) -> Path:
     phi_i = np.asarray(diagnostic.phi_increment[ctx["S"]["NE"] :], float)
     z_drift = float(np.max(np.abs(np.asarray(diagnostic.z) - z0)))
     m_drift = float(np.max(np.abs(np.asarray(diagnostic.m) - m0)))
-    if z_drift > 0 or m_drift > 0:
+    if not dynamic and (z_drift > 0 or m_drift > 0):
         raise RuntimeError(f"freeze_zm drifted: z={z_drift} m={m_drift}")
     if np.count_nonzero(phi_i) != 0:
         raise RuntimeError("I-cell phi became nonzero")
@@ -457,13 +503,18 @@ def run_cell(args: argparse.Namespace) -> Path:
             diagnostic.trace_i_adaptation_max, np.float32
         ),
     }
-    namespace = "smoke" if args.smoke else ("race" if race else "discovery")
-    if race:
-        stem = str(args.arm)
-        if args.arm in {"i2e", "combined"}:
-            stem += f"__tauD{args.tau_D_ms:g}__d{args.d_star:g}"
-        if args.arm in {"iadapt", "combined"}:
-            stem += f"__tauI{args.tau_aI_ms:g}__fI{args.f_aI:g}"
+    namespace = (
+        "smoke" if args.smoke else
+        ("dynamic" if dynamic else ("race" if race else "discovery"))
+    )
+    if race or dynamic:
+        stem = _mechanism_stem(args)
+        if dynamic:
+            stem += f"__T{float(args.T_ms) / 1000:g}s"
+        if dynamic and (float(args.g_M) != 1.0 or args.tau_M_ms is not None):
+            stem += f"__gM{args.g_M:g}"
+            if args.tau_M_ms is not None:
+                stem += f"__tauM{args.tau_M_ms:g}"
     else:
         stem = f"{args.state}__tau{args.tau_phi_ms:g}__f{args.fraction:g}"
     root = OUT / namespace / "seed1" / stem
@@ -472,10 +523,20 @@ def run_cell(args: argparse.Namespace) -> Path:
     _write_npz_once(npz_path, arrays)
     payload = {
         "schema": "zm_fast_lifecycle_development_cell_v1_2026-08-01",
-        "stage": "mechanism_race" if race else "A_branch_intervention",
-        "semantic_scope": "branch_intervention_not_reachability",
+        "stage": (
+            "dynamic_lifecycle_prototype" if dynamic else
+            ("mechanism_race" if race else "A_branch_intervention")
+        ),
+        "semantic_scope": (
+            "seed1_dynamic_entry_offset_recovery_prototype" if dynamic else
+            "branch_intervention_not_reachability"
+        ),
         "seed": 1,
-        "state": args.state,
+        "state": "pre_entry__natural" if dynamic else args.state,
+        "source_t_ms": float(row["t_ms"]),
+        "native_onset_reference_t_ms": 8700.0,
+        "warm_start_to_native_onset_ms": float(8700.0 - row["t_ms"]),
+        "equilibration_ms": float(args.burn_ms) if dynamic else None,
         "tau_phi_ms": float(args.tau_phi_ms),
         "fraction": float(args.fraction),
         "mechanism": mechanism,
@@ -492,7 +553,9 @@ def run_cell(args: argparse.Namespace) -> Path:
         "noise_bank_sha256": bank["bank_sha"],
         "runtime_git_sha": RT.git_sha(ROOT),
         "use_zm_conductance": False,
-        "freeze_policy": R.FS.FreezePolicy.for_arm("freeze_zm").as_dict(),
+        "freeze_policy": R.FS.FreezePolicy.for_arm(
+            "dynamic_replay" if dynamic else "freeze_zm"
+        ).as_dict(),
         "phi_initial_nonzero": 0,
         "phi_final_mean_mV": float(np.mean(phi_e)),
         "phi_final_max_mV": float(np.max(phi_e)),
@@ -551,7 +614,7 @@ def run_cell(args: argparse.Namespace) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("cell", "race-cell"))
+    parser.add_argument("command", choices=("cell", "race-cell", "dynamic-cell"))
     parser.add_argument("--state", choices=STATES, default=RACE_STATE)
     parser.add_argument("--tau-phi-ms", type=float, default=RACE_PHI_TAU_MS)
     parser.add_argument("--fraction", type=float, default=RACE_PHI_FRACTION)
@@ -560,6 +623,9 @@ def main() -> None:
     parser.add_argument("--d-star", type=float)
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
+    parser.add_argument("--g-M", type=float, dest="g_M", default=1.0)
+    parser.add_argument("--tau-M-ms", type=float, dest="tau_M_ms")
+    parser.add_argument("--g-Z", type=float, dest="g_Z", default=1.0)
     parser.add_argument("--T-ms", type=float, default=PRODUCTION_T_MS)
     parser.add_argument("--burn-ms", type=float, default=PRODUCTION_BURN_MS)
     parser.add_argument("--smoke", action="store_true")

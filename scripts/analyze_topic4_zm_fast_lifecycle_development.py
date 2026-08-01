@@ -6,6 +6,7 @@ not certify reachability, offset, recovery, or a lifecycle.
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 from pathlib import Path
@@ -26,6 +27,7 @@ from src import topic4_zm_phasec_phenotype as PH  # noqa: E402
 
 
 IN_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/discovery/seed1"
+RACE_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/race/seed1"
 OUT_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development"
 STATES = (
     "bounded_mid__rising", "bounded_mid__peak",
@@ -71,6 +73,237 @@ def _vseeg_energy(lfp, fs_hz):
             / max(np.mean(envelope), 1e-12)
         ),
     }
+
+
+def _race_energy(lfp, fs_hz):
+    """The locked race readout: 25-ms vSEEG RMS and Q10/Q90 support."""
+    x = np.asarray(lfp, float)
+    if x.ndim == 1:
+        x = x[:, None]
+    bs = max(1, int(round(0.025 * float(fs_hz))))
+    n = x.shape[0] // bs * bs
+    if n == 0:
+        return np.zeros(0), {"energy_floor_F": None, "deep_gap_G": None}
+    x = x[:n] - np.mean(x[:n], axis=0, keepdims=True)
+    rms = np.sqrt(np.mean(x.reshape(-1, bs, x.shape[1]) ** 2, axis=1))
+    envelope = np.mean(rms, axis=1)
+    q10, q90 = np.percentile(envelope, [10, 90])
+    return envelope, {
+        "energy_q10": float(q10),
+        "energy_q90": float(q90),
+        "energy_floor_F": float(q10 / max(q90, 1e-12)),
+        "deep_gap_G": float(np.mean(envelope < 0.25 * max(q90, 1e-12))),
+    }
+
+
+def _merged_episodes(mask, gap_bins):
+    idx = np.flatnonzero(np.asarray(mask, bool))
+    if not idx.size:
+        return []
+    out, start, previous = [], int(idx[0]), int(idx[0])
+    for value in idx[1:]:
+        value = int(value)
+        if value - previous > int(gap_bins) + 1:
+            out.append((start, previous + 1))
+            start = value
+        previous = value
+    out.append((start, previous + 1))
+    return out
+
+
+def _packet_axial_relay(kymograph_axis_time, core_rate, *, bin_ms=25.0):
+    """Continuous packet-wise first-passage score; flashes score near zero."""
+    K = np.asarray(kymograph_axis_time, float).T
+    rate = np.asarray(core_rate, float).ravel()
+    if K.ndim != 2 or K.shape[0] != rate.size or K.shape[1] < 4:
+        return {"packet_axial_relay_R": 0.0, "n_packets": 0, "n_valid_packets": 0}
+    r10, r90 = np.percentile(rate, [10, 90])
+    active = rate >= r10 + 0.25 * max(r90 - r10, 1e-12)
+    episodes = _merged_episodes(active, gap_bins=max(1, int(round(50.0 / bin_ms))))
+    lo = np.percentile(K, 10, axis=0)
+    hi = np.percentile(K, 95, axis=0)
+    threshold = lo + 0.35 * (hi - lo)
+    scores, signs = [], []
+    for i0, i1 in episodes:
+        packet = K[i0:i1]
+        if packet.shape[0] < 2:
+            continue
+        crossed = packet >= threshold[None, :]
+        idx = np.flatnonzero(np.any(crossed, axis=0))
+        if idx.size < 4:
+            continue
+        first = np.array([np.flatnonzero(crossed[:, j])[0] for j in idx], float)
+        temporal_span = float(np.ptp(first))
+        if temporal_span < 1.0:
+            scores.append(0.0)
+            continue
+        rho = float(np.corrcoef(np.arange(idx.size, dtype=float), first)[0, 1])
+        if not np.isfinite(rho):
+            continue
+        spatial_span = float(np.ptp(idx) / max(1, K.shape[1] - 1))
+        temporal_score = min(1.0, temporal_span / 2.0)
+        earliest = int(np.min(first))
+        flash_fraction = float(np.mean(crossed[earliest, idx]))
+        scores.append(abs(rho) * spatial_span * temporal_score * (1.0 - flash_fraction))
+        signs.append(int(np.sign(rho)))
+    if not scores:
+        value, consistency = 0.0, 0.0
+    else:
+        nonzero = [s for s in signs if s]
+        consistency = (
+            max(nonzero.count(-1), nonzero.count(1)) / len(nonzero)
+            if nonzero else 0.0
+        )
+        value = float(np.mean(scores) * consistency)
+    return {
+        "packet_axial_relay_R": value,
+        "n_packets": len(episodes),
+        "n_valid_packets": len(scores),
+        "direction_consistency": float(consistency),
+        "packet_scores": [float(x) for x in scores],
+    }
+
+
+def _minmax(rows, key):
+    values = np.array([float(row[key]) for row in rows], float)
+    lo, hi = float(np.min(values)), float(np.max(values))
+    if hi - lo <= 1e-12:
+        return np.full(values.size, 0.5)
+    return (values - lo) / (hi - lo)
+
+
+def analyze_race():
+    """Rank all active bounded mechanism arms without turning this into a gate."""
+    rows = []
+    for root in sorted(RACE_ROOT.glob("*")):
+        summary_path, trace_path = root / "summary.json", root / "traces.npz"
+        if not summary_path.is_file() or not trace_path.is_file():
+            continue
+        summary = json.loads(summary_path.read_text())
+        with np.load(trace_path, allow_pickle=False) as data:
+            arrays = {key: np.asarray(data[key]) for key in data.files}
+        envelope, energy = _race_energy(
+            arrays["lfp_raw_synaptic_proxy"], float(arrays["lfp_fs_hz"])
+        )
+        core = np.asarray(arrays["fine_core_rate_hz"], float)
+        surround = np.asarray(arrays["fine_surround_rate_hz"], float)
+        coarse = np.asarray(arrays["coarse_core_rate_hz"], float)
+        q10, q90 = np.percentile(coarse, [10, 90])
+        episodes = _merged_episodes(
+            coarse >= q10 + 0.25 * max(q90 - q10, 1e-12), gap_bins=2
+        )
+        episode_occupancy = (
+            max((i1 - i0) for i0, i1 in episodes) / coarse.size if episodes else 0.0
+        )
+        relay = _packet_axial_relay(arrays["coarse_kymo_axial"], coarse)
+        corr = _safe_corr(core, surround)
+        runaway = summary.get("runaway_early_stop_ms") is not None
+        silent = float(summary["core_modulation"]["mean_hz"]) < 2.0
+        rows.append({
+            "stem": root.name,
+            "mechanism": summary.get("mechanism"),
+            "excluded": bool(runaway or silent),
+            "exclusion_reason": "runaway" if runaway else ("silence" if silent else None),
+            "core_mean_hz": float(summary["core_modulation"]["mean_hz"]),
+            "all_E_mean_hz": float(summary["all_E_modulation"]["mean_hz"]),
+            "peak_active_fraction": float(summary["peak_active_fraction"]),
+            "core_surround_correlation": float(corr) if corr is not None else 1.0,
+            "episode_occupancy_O": float(episode_occupancy),
+            **energy,
+            **relay,
+            "summary_path": str(summary_path.relative_to(ROOT)),
+            "trace_path": str(trace_path.relative_to(ROOT)),
+            "_arrays": arrays,
+            "_envelope": envelope,
+        })
+    valid = [row for row in rows if not row["excluded"]]
+    if not valid:
+        raise SystemExit("mechanism race has no active bounded arms")
+    desirability = {
+        "F_norm": _minmax(valid, "energy_floor_F"),
+        "one_minus_G_norm": _minmax(
+            [{"v": 1.0 - row["deep_gap_G"]} for row in valid], "v"
+        ),
+        "one_minus_rho_norm": _minmax(
+            [{"v": 1.0 - row["core_surround_correlation"]} for row in valid], "v"
+        ),
+        "R_axis_norm": _minmax(valid, "packet_axial_relay_R"),
+        "O_episode_norm": _minmax(valid, "episode_occupancy_O"),
+    }
+    for i, row in enumerate(valid):
+        for name, values in desirability.items():
+            row[name] = float(values[i])
+        row["J"] = float(
+            1.5 * row["F_norm"]
+            + row["one_minus_G_norm"]
+            + row["one_minus_rho_norm"]
+            + 1.5 * row["R_axis_norm"]
+            + 0.5 * row["O_episode_norm"]
+        )
+    for row in rows:
+        if row["excluded"]:
+            row["J"] = None
+    ranking = sorted(valid, key=lambda row: row["J"], reverse=True)
+    public = lambda row: {k: v for k, v in row.items() if not k.startswith("_")}
+    payload = {
+        "schema": "zm_fast_lifecycle_mechanism_race_v1_2026-08-01",
+        "semantic_scope": "seed1_frozen_branch_continuous_ranking_not_lifecycle",
+        "score": "J=1.5F+1(1-G)+1(1-rho)+1.5R_axis+0.5O_episode after arm-wise min-max normalization",
+        "exclusion": "runaway_or_core_mean_below_2Hz_only",
+        "n_expected": 21 if any(
+            row["stem"].startswith("combined__") for row in rows
+        ) else 17,
+        "n_observed": len(rows),
+        "n_ranked": len(ranking),
+        "ranking": [public(row) for row in ranking],
+        "excluded": [public(row) for row in rows if row["excluded"]],
+    }
+    OUT_ROOT.mkdir(parents=True, exist_ok=True)
+    (OUT_ROOT / "mechanism_race_ranking.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    fields = sorted({k for row in payload["ranking"] + payload["excluded"] for k in row})
+    with (OUT_ROOT / "mechanism_race_ranking.csv").open("w", newline="") as stream:
+        writer = csv.DictWriter(stream, fieldnames=fields)
+        writer.writeheader()
+        writer.writerows(payload["ranking"] + payload["excluded"])
+    _plot_race(ranking)
+    return payload
+
+
+def _plot_race(ranking):
+    n = min(6, len(ranking))
+    fig, axes = plt.subplots(n, 3, figsize=(13.5, 2.2 * n), squeeze=False, constrained_layout=True)
+    for i, row in enumerate(ranking[:n]):
+        arrays, env = row["_arrays"], row["_envelope"]
+        t = 1.0 + np.asarray(arrays["fine_time_ms"]) / 1000.0
+        axes[i, 0].plot(t, arrays["fine_core_rate_hz"], color="#B2182B", lw=.55)
+        axes[i, 0].plot(t, arrays["fine_surround_rate_hz"], color="#2166AC", lw=.45)
+        axes[i, 0].set_ylabel(f"#{i+1}  J={row['J']:.2f}\nHz")
+        te = 1.0 + np.arange(env.size) * .025
+        axes[i, 1].plot(te, env, color="#E66101", lw=.65)
+        axes[i, 2].imshow(
+            arrays["coarse_kymo_axial"], origin="lower", aspect="auto", cmap="magma",
+            extent=(1, 1 + arrays["coarse_kymo_axial"].shape[1] * .025, 0, 24),
+        )
+        axes[i, 0].set_title(row["stem"], loc="left", fontsize=9)
+        axes[i, 1].set_title(
+            f"F={row['energy_floor_F']:.2f}, G={row['deep_gap_G']:.2f}, rho={row['core_surround_correlation']:.2f}",
+            loc="left", fontsize=8,
+        )
+        axes[i, 2].set_title(
+            f"Raxis={row['packet_axial_relay_R']:.2f}, O={row['episode_occupancy_O']:.2f}",
+            loc="left", fontsize=8,
+        )
+    for ax in axes[-1]:
+        ax.set_xlabel("time after frozen checkpoint (s)")
+    axes[0, 0].set_title("core/surround · " + axes[0, 0].get_title(), loc="left", fontsize=9)
+    fig.suptitle("Seed-1 fast inhibitory mechanism race — diagnostic ranking", fontweight="bold")
+    figures = OUT_ROOT / "figures"
+    figures.mkdir(parents=True, exist_ok=True)
+    path = figures / "fig_mechanism_race_diagnostic.png"
+    fig.savefig(path, dpi=200, bbox_inches="tight")
+    plt.close(fig)
 
 
 def diagnose(summary, arrays):
@@ -323,6 +556,17 @@ def plot(rows, ranking):
 
 
 def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--race", action="store_true")
+    args = parser.parse_args()
+    if args.race:
+        payload = analyze_race()
+        print(json.dumps({
+            "n_observed": payload["n_observed"],
+            "n_ranked": payload["n_ranked"],
+            "top": [row["stem"] for row in payload["ranking"][:5]],
+        }, sort_keys=True))
+        return
     rows = load_rows()
     payload, ranking = write_outputs(rows)
     if not ranking:
