@@ -145,6 +145,39 @@ def cmd_manifest(_args):
                           finalists=[r["run_id"] for r in selected], code_head=payload["code_head"]), indent=2))
 
 
+def cmd_provisional_manifest(_args):
+    """Direct, pre-ordered weak+adjacent forks while the redundant high-init grid continues."""
+    selected = []
+    for run_id in ("H1_k05_r10", "H1_k05_r20"):
+        path = os.path.join(OUT, "screen_cells", run_id + ".json")
+        if not os.path.isfile(path):
+            raise SystemExit(f"required direct screen cell is missing: {run_id}")
+        row = _load_json(path)
+        if row.get("label") != "screen_survivor":
+            raise SystemExit(f"required direct screen cell is not a survivor: {run_id}")
+        selected.append(dict(row, tail_local_gain_proxy=local_gain_proxy(row)))
+    rows = []
+    for rank, cand in enumerate(selected, 1):
+        for arm, D, h_scale, x_dep in ARMS:
+            rows.append(dict(
+                index=len(rows), finalist_rank=rank, candidate_id=cand["candidate_id"],
+                candidate_run_id=cand["run_id"], arm=arm, tau_ms=float(cand["tau_ms"]),
+                theta=float(cand["theta"]), k=float(cand["k"]), rho=float(cand["rho"]),
+                k_ratio=float(cand["k_ratio"]), rho_fraction=float(cand["rho_fraction"]),
+                D=float(D), h_init_scale=float(h_scale), x_depletion=float(x_dep),
+                x_availability=float(1.0 - x_dep), T_ms=_duration_ms(cand["tau_ms"], arm),
+                connection_seed=1, noise_seed=401, no_kick=True, M=False, coop_A=0.0,
+            ))
+    payload = dict(stage="E4_FROZEN_FORKS", status="PROVISIONAL_DIRECT_BUDGET",
+                   code_head=_git_head(), selection_rule="preordered_min_rho_plus_adjacent_rho",
+                   selected_finalists=selected, n_finalists=len(selected), rows=rows,
+                   n_rows=len(rows), created=_now(),
+                   claim_boundary="developmental direct fork; canonical only after complete E3 reselection")
+    FCXR._write_json(os.path.join(OUT, "frozen_fork_manifest.json"), payload)
+    print(json.dumps(dict(status=payload["status"], n_finalists=2, n_rows=len(rows),
+                          finalists=[r["run_id"] for r in selected], code_head=payload["code_head"]), indent=2))
+
+
 _SUBSTRATE = None
 _P_PACK = None
 
@@ -345,6 +378,7 @@ def cmd_all(args):
         raise SystemExit("--confirm-run is required")
     FCXR._assert_engine_blessed()
     m = _load_json(os.path.join(OUT, "frozen_fork_manifest.json"))
+    canonical = m.get("status") == "LOCKED"
     rows = m["rows"]
     os.makedirs(os.path.join(OUT, "frozen_fork_cells"), exist_ok=True)
     before = _meminfo()
@@ -369,12 +403,15 @@ def cmd_all(args):
                     raise MemoryError(f"swap hard stop: before={before}, now={now}")
         results.sort(key=lambda r: int(r["index"]))
         verdicts = _aggregate(results)
-        payload = dict(stage="E4", status="COMPLETE", n_rows=len(results), rows=results,
+        payload = dict(stage="E4", status="COMPLETE" if canonical else "PROVISIONAL_COMPLETE",
+                       manifest_status=m.get("status"), n_rows=len(results), rows=results,
                        candidate_verdicts=verdicts, resource_before=before,
                        resource_after=_meminfo(), finished=_now())
-        FCXR._write_json(os.path.join(OUT, "frozen_fork_map.json"), payload)
-        FCXR._write_json(os.path.join(OUT, "E4_DONE.json"),
-                         dict(stage="E4", status="COMPLETE", candidate_verdicts=verdicts,
+        map_name = "frozen_fork_map.json" if canonical else "frozen_fork_map_provisional.json"
+        done_name = "E4_DONE.json" if canonical else "E4_PROVISIONAL_DONE.json"
+        FCXR._write_json(os.path.join(OUT, map_name), payload)
+        FCXR._write_json(os.path.join(OUT, done_name),
+                         dict(stage="E4", status=payload["status"], candidate_verdicts=verdicts,
                               finished=_now()))
         if os.path.exists(running):
             os.remove(running)
@@ -388,6 +425,7 @@ def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("manifest")
+    sub.add_parser("provisional-manifest")
     one = sub.add_parser("one")
     one.add_argument("--index", type=int, required=True)
     one.add_argument("--confirm-run", action="store_true")
@@ -397,6 +435,8 @@ def main():
     args = ap.parse_args()
     if args.cmd == "manifest":
         cmd_manifest(args)
+    elif args.cmd == "provisional-manifest":
+        cmd_provisional_manifest(args)
     elif args.cmd == "one":
         cmd_one(args)
     else:

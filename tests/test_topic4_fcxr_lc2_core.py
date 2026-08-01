@@ -134,6 +134,7 @@ def test_frozen_fork_runner_imports_and_locks_arm_specific_duration():
     assert f._duration_ms(2000.0, "C") == 5000.0
     assert f._duration_ms(500.0, "D1") == 3000.0
     assert f._duration_ms(2000.0, "D2") == 8000.0
+    assert callable(f.cmd_provisional_manifest)
 
 
 def test_frozen_fork_finalist_selection_includes_an_adjacent_survivor():

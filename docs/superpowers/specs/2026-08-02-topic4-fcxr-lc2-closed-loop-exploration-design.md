@@ -145,6 +145,12 @@ The local-gain ordering proxy is fixed as
 one-grid neighbour in `rho` (then `k`) is inserted before the remaining sorted points.  This ordering is
 developmental prioritisation only; it is not a scientific score.
 
+If the measured high-init screen becomes gate-saturated and therefore identical across sensor families,
+the pre-ordered minimum-rho H1 point plus its one-step rho neighbour may enter provisional A/B/C/D forks
+while the full screen continues.  This is a time-budget diagnostic, selected by the locked order rather
+than a favourable morphology.  It becomes canonical only if the completed E3 ordering selects the same
+points; otherwise it remains a labelled developmental fork.
+
 Run matched fresh-noise forks (same seed/RNG reset).  A/B/C use
 `min(5 s,max(2 s,5*tau_H))`.  Because the D arms must observe offset *and* a post-offset low interval,
 they use `min(8 s,max(3 s,4*tau_H))`; this longer D-only cap is fixed before any fork outcome is read.

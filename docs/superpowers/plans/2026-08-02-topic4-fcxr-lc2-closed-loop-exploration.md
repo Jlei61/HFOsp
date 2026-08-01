@@ -91,6 +91,11 @@ available one-step rho/k neighbour immediately after the top point, and lock the
 spec's final-window `low_like`/`high_like` definitions.  These rules must be unit-tested before the
 manifest is created.
 
+The measured minimum-rho high-init rows were identical across H sensor families because the gate was
+saturated.  While E3 continues, launch H1 at minimum rho plus its adjacent rho as explicitly provisional
+direct forks.  Keep the same per-cell filenames so a later canonical manifest can reuse them only if its
+completed ordering agrees; do not promote a provisional result on its own.
+
 - one adjacent rho step (prefer lower; otherwise higher);
 - noise stream 402, frozen before launch and not used to tune parameters.
 
