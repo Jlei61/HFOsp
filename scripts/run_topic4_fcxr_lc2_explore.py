@@ -58,6 +58,7 @@ BOOTSTRAP_SEED = 20260802
 K_RATIOS = (0.05, 0.10, 0.20)
 RHO_FRACS = (0.10, 0.20, 0.35, 0.50, 0.70)
 X_DEPLETION_LEVELS = (0.128, 0.214)
+SCREEN_WORKER_CHOICES = (1, 2, 3, 4)
 DT = 0.05
 ENGINE_FILES = (
     "src/snn_engine/kick_probe.py", "src/snn_engine/params.py", "src/snn_engine/model.py",
@@ -479,6 +480,9 @@ def cmd_screen_all(args):
     before = _meminfo()
     if before["mem_available_gib"] < 96.0:
         raise SystemExit(f"OOM safety stop: MemAvailable={before['mem_available_gib']:.1f} GiB")
+    max_by_mem = int(np.floor((before["mem_available_gib"] - 96.0) / 6.793))
+    if int(args.workers) > max_by_mem:
+        raise SystemExit(f"OOM safety stop: workers={args.workers} exceeds measured-RSS cap={max_by_mem}")
     running = os.path.join(OUT, "E3_RUNNING.json")
     FCXR._write_json(running, dict(stage="E3", pid=os.getpid(), workers=int(args.workers),
                                   n_rows=len(rows), resource_before=before, started=_now()))
@@ -519,7 +523,7 @@ def main():
     one.add_argument("--index", type=int, required=True)
     one.add_argument("--confirm-run", action="store_true")
     allp = sub.add_parser("screen-all")
-    allp.add_argument("--workers", type=int, choices=(1, 2), default=1)
+    allp.add_argument("--workers", type=int, choices=SCREEN_WORKER_CHOICES, default=1)
     allp.add_argument("--confirm-run", action="store_true")
     args = ap.parse_args()
     if args.cmd == "lock":

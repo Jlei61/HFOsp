@@ -218,7 +218,12 @@ recruitment or cohort replication.
   off-by-default frozen-X field.
 - New paths require TDD, off-by-default byte parity, exact frozen-X scatter effect and deterministic
   restart tests.
-- T≥20 s: strictly one worker. Short 40k screens/forks: at most two workers after single-run RSS timing.
+- T>=20 s: strictly one worker.  The first short 40k run must measure RSS.  Subsequent E3 screen workers
+  are capped at four and additionally by
+  `floor((MemAvailable_start-96 GiB)/single_run_peak_RSS)`; E4 forks remain capped at two because their
+  longer state matrices have not yet been timed.  This resource-only amendment was locked after the
+  first E3 smoke measured 6.793 GiB with 182.5 GiB still available on an 80-CPU host; it does not depend
+  on the scientific label of that row.
 - Start a second worker only if `MemAvailable >= 96 GiB + 2*1.35*RSS_single` and swap is stable.
 - OMP/OpenBLAS/MKL/NUMEXPR = 1. Swap +256 MiB stops submission; +512 MiB and rising terminates only the
   newest task-owned worker. Never touch sibling processes/worktrees.

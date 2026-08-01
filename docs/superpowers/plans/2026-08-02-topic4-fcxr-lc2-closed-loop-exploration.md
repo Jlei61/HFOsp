@@ -66,8 +66,10 @@ Create one manifest row per candidate/k/rho combination before launch. Each run:
   guard and must be reported;
 - save scalar traces and compact per-cell tail summaries, not N×T matrices.
 
-First run measures RSS and wall time. Use one worker by default; unlock worker 2 only through the spec
-resource formula. The launcher writes per-cell RUNNING/DONE/FAILED and aggregate sentinel.
+First run measures RSS and wall time.  It measured 6.793 GiB while MemAvailable remained 182.5 GiB on
+an 80-CPU host.  The spec resource formula therefore unlocks four E3 workers while retaining at least
+96 GiB; E4 stays at two until separately timed.  The launcher writes per-cell outputs and an aggregate
+sentinel, and a resumed launcher skips completed cells.
 
 Classify every row as `decay_low`, `screen_survivor`, `saturated_tonic`, `numerical_failure`, or
 `unresolved_1s`. Do not call a survivor a basin.

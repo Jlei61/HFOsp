@@ -110,6 +110,7 @@ def test_closed_loop_exploration_cli_imports_all_runtime_dependencies():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     assert callable(module.cmd_screen_manifest)
+    assert module.SCREEN_WORKER_CHOICES == (1, 2, 3, 4)
 
 
 def _load_fork_runner():
