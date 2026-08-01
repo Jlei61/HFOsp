@@ -2,11 +2,16 @@
 from __future__ import annotations
 
 import sys
+from types import SimpleNamespace
 import numpy as np
 import pytest
 
 sys.path.insert(0, "src/snn_engine")
-from kick_probe import i2e_depression_apply  # noqa: E402
+from kick_probe import (  # noqa: E402
+    i2e_depression_apply,
+    scatter_i2e_emissions_at_spike_time,
+)
+from lfp import LFPRecorder  # noqa: E402
 from src.snn_engine.slow_field import (
     SpatialSlowField,
     SpatialSlowFieldConfig,
@@ -185,6 +190,39 @@ def test_i2e_depression_scales_only_edges_onto_e():
     resource = np.array([0.4, 0.6, 0.2, 0.8])
     got = i2e_depression_apply(weights, targets, resource, NE=4)
     np.testing.assert_allclose(got, [0.8, 1.8, 5.0, 7.0], rtol=0, atol=1e-15)
+
+
+def test_i2e_delay_ring_freezes_resource_at_each_emission_time():
+    """Two spikes from one I source keep their launch amplitudes in flight."""
+    ring = np.zeros((12, 2), dtype=float)
+    weights = np.array([10.0, 7.0])
+    targets = np.array([0, 1])  # one E and one I target from the same I source
+    first = scatter_i2e_emissions_at_spike_time(
+        ring, np.array([3, 3]), targets, weights,
+        np.array([0.8, 0.8]), NE=1,
+    )
+    second = scatter_i2e_emissions_at_spike_time(
+        ring, np.array([7, 7]), targets, weights,
+        np.array([0.4, 0.4]), NE=1,
+    )
+    current_resource_at_arrival = 0.1
+
+    np.testing.assert_array_equal(first, [8.0, 7.0])
+    np.testing.assert_array_equal(second, [4.0, 7.0])
+    np.testing.assert_array_equal(ring[3], [8.0, 7.0])
+    np.testing.assert_array_equal(ring[7], [4.0, 7.0])
+    assert current_resource_at_arrival not in ring
+
+
+def test_lfp_component_readout_sums_exactly_to_legacy_total():
+    p = SimpleNamespace(Rr=10.0, rx=1.0)
+    pos = np.array([[0.0, 0.0], [1.0, 0.0], [0.5, 0.5]])
+    labels = np.array([0, 0, 1])
+    rec = LFPRecorder(p, pos, labels, sites=np.array([[0.5, 0.0]]))
+    I_E = np.array([2.0, -4.0, 99.0])
+    I_I = np.array([-3.0, 5.0, 99.0])
+    exc, inh = rec.sample_components(I_E, I_I)
+    np.testing.assert_allclose(rec.sample(I_E, I_I), exc + inh, rtol=1e-15, atol=1e-15)
 
 
 def test_checkpoint_roundtrip_preserves_both_inhibitory_states():

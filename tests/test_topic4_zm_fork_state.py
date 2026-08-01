@@ -19,7 +19,8 @@ import src.topic4_zm_fork_state as FS  # noqa: E402
 
 # ---------------------------------------------------------------- inventory schema
 REQUIRED_ROW_FIELDS = {"name", "category", "shape", "dtype", "time_scale", "role",
-                       "dt_dependent", "snapshot", "freeze_semantics", "current_effect"}
+                       "dt_dependent", "snapshot", "freeze_semantics", "current_effect",
+                       "activation_gate"}
 
 
 def test_inventory_rows_have_all_required_fields():
@@ -29,7 +30,11 @@ def test_inventory_rows_have_all_required_fields():
         missing = REQUIRED_ROW_FIELDS - set(r)
         assert not missing, f"{r.get('name')} missing inventory fields {missing}"
         assert r["role"] in ("simulator", "observer")
-        assert r["current_effect"] in ("direct", "indirect", "none")
+        assert r["current_effect"] in (
+            "direct", "indirect", "conditional_direct", "none"
+        )
+        if r["current_effect"] == "conditional_direct":
+            assert r["activation_gate"]
         assert r["freeze_semantics"] in FS.FREEZE_SEMANTICS
 
 
@@ -44,6 +49,17 @@ def test_observer_rows_cannot_claim_membrane_current_effect():
     bad = dict(FS.build_state_inventory()[0])
     bad.update(name="fake_observer", role="observer", current_effect="direct")
     with pytest.raises(ValueError, match="observer"):
+        FS.validate_inventory([bad])
+
+
+def test_conditional_current_effect_requires_an_activation_gate():
+    bad = dict(FS.build_state_inventory()[0])
+    bad.update(
+        name="conditional_without_gate",
+        current_effect="conditional_direct",
+        activation_gate=None,
+    )
+    with pytest.raises(ValueError, match="activation_gate"):
         FS.validate_inventory([bad])
 
 

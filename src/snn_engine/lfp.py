@@ -66,8 +66,21 @@ class LFPRecorder:
 
     def sample(self, I_E, I_I):
         """Return one LFP value per site (uses E-neuron currents only)."""
-        g = np.abs(I_E[:self.NE]) + np.abs(I_I[:self.NE])     # g(j,t), j in E
+        # Keep the historical operation order for byte parity: add currents
+        # per neuron first, then take the spatial dot product.
+        g = np.abs(I_E[:self.NE]) + np.abs(I_I[:self.NE])
         out = np.empty(len(self.sites))
         for k in range(len(self.sites)):
             out[k] = np.dot(self._w[k], g[self._idx[k]])
         return out
+
+    def sample_components(self, I_E, I_I):
+        """Return separate excitatory and inhibitory current contributions."""
+        g_exc = np.abs(I_E[:self.NE])
+        g_inh = np.abs(I_I[:self.NE])
+        exc = np.empty(len(self.sites))
+        inh = np.empty(len(self.sites))
+        for k in range(len(self.sites)):
+            exc[k] = np.dot(self._w[k], g_exc[self._idx[k]])
+            inh[k] = np.dot(self._w[k], g_inh[self._idx[k]])
+        return exc, inh

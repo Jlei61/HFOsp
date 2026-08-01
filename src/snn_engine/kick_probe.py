@@ -77,6 +77,26 @@ def i2e_depression_apply(g_w, g_dst, d_per_edge, NE):
     )
 
 
+def scatter_i2e_emissions_at_spike_time(
+    ring_sI, arrival_slots, targets, weights, resources_at_emission, NE
+):
+    """Enqueue I events after fixing their amplitude at I-spike emission.
+
+    The effective weight, not a reference to the live resource, enters the
+    delay ring. Later resource changes cannot reweight an event in flight.
+    """
+    effective = i2e_depression_apply(
+        weights, targets, resources_at_emission, NE
+    )
+    np.add.at(
+        ring_sI,
+        (np.asarray(arrival_slots, dtype=np.int64),
+         np.asarray(targets, dtype=np.int64)),
+        effective,
+    )
+    return effective
+
+
 def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba_scale=0.0):
     """One LIF membrane update. Default (shunt_gaba=False) = current-based LIF, BIT-IDENTICAL
     to the pre-2026-06-19 engine: V_inf = I_E - I_I; V -> V_inf + (V - V_inf)*decay_V.
@@ -103,6 +123,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
+                  dump_lfp_components=False,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None,
                   zm_ckpt=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
@@ -268,6 +289,14 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         if lfp_recorder is not None and conductance_on
         else None
     )
+    lfp_exc_trace = (
+        np.zeros((nsteps, len(lfp_recorder.sites)))
+        if lfp_recorder is not None and dump_lfp_components else None
+    )
+    lfp_inh_trace = (
+        np.zeros((nsteps, len(lfp_recorder.sites)))
+        if lfp_recorder is not None and dump_lfp_components else None
+    )
     # ---- M4-2: x_dep depression trace (gated; OFF -> no alloc -> byte-parity). Arm 0 (STD off) emits 1.0. ----
     if dump_ee_std_trace:
         xdep_mean = np.zeros(nsteps); xdep_min = np.zeros(nsteps)
@@ -358,6 +387,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
         if lfp_trace is not None and not conductance_on:  # current-based LFP at custom sites
             lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
+            if dump_lfp_components:
+                lfp_exc_trace[t], lfp_inh_trace[t] = lfp_recorder.sample_components(I_E, I_I)
 
         # slow layer off (slow=None)
         conductance_state = None
@@ -499,13 +530,13 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                         d_per_edge = np.repeat(
                             slow.i2e_resource_at_sources(spI), cnt
                         )
-                        w_eff = i2e_depression_apply(
-                            g_w[idx], g_dst[idx], d_per_edge, NE
-                        )
-                        np.add.at(
+                        w_eff = scatter_i2e_emissions_at_spike_time(
                             ring_sI,
-                            ((tg + g_dly[idx]) % M, g_dst[idx]),
-                            w_eff,
+                            (tg + g_dly[idx]) % M,
+                            g_dst[idx],
+                            g_w[idx],
+                            d_per_edge,
+                            NE,
                         )
                     else:
                         np.add.at(ring_sI, ((tg + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
@@ -554,6 +585,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             lfp_trace = lfp_trace[:nsteps]
         if lfp_current_proxy_trace is not None:
             lfp_current_proxy_trace = lfp_current_proxy_trace[:nsteps]
+        if lfp_exc_trace is not None:
+            lfp_exc_trace = lfp_exc_trace[:nsteps]
+            lfp_inh_trace = lfp_inh_trace[:nsteps]
         if dump_ee_std_trace:
             xdep_mean = xdep_mean[:nsteps]; xdep_min = xdep_min[:nsteps]
             if xdep_mask_mean is not None:
@@ -570,6 +604,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         NE=NE, nu_theta=nu_theta, wall_s=time.time() - t0,
         lfp_trace=lfp_trace,                                    # (nsteps, n_sites) or None
         lfp_current_proxy_trace=lfp_current_proxy_trace,
+        lfp_exc_trace=lfp_exc_trace,
+        lfp_inh_trace=lfp_inh_trace,
         lfp_sites=(None if lfp_recorder is None else lfp_recorder.sites),
     )
     if zm_ckpt is not None:

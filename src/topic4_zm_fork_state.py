@@ -30,7 +30,7 @@ _SCRIPTS = os.path.join(ROOT, "scripts")
 _ENGINE = os.path.join(ROOT, "src", "snn_engine")
 
 SCHEMA_VERSION = "zm_fork_state_v1"
-INVENTORY_VERSION = "zm_state_inventory_v2_2026-08-01"
+INVENTORY_VERSION = "zm_state_inventory_v3_conditional_2026-08-02"
 
 #: every engine file whose bytes can change the trajectory (the 6 blessed + the slow layer)
 GUARDED_ENGINE_FILES = (
@@ -132,10 +132,11 @@ def build_canonical_config(seed, I_th_EI, *, arm_kwargs=None, dt=None, resolve_p
 
 # ================================================================= state inventory
 def _row(name, category, shape, dtype, time_scale, role, dt_dependent, snapshot,
-         freeze_semantics, current_effect, note=""):
+         freeze_semantics, current_effect, note="", activation_gate=None):
     return dict(name=name, category=category, shape=shape, dtype=dtype, time_scale=time_scale,
                 role=role, dt_dependent=bool(dt_dependent), snapshot=bool(snapshot),
-                freeze_semantics=freeze_semantics, current_effect=current_effect, note=note)
+                freeze_semantics=freeze_semantics, current_effect=current_effect,
+                activation_gate=activation_gate, note=note)
 
 
 def build_state_inventory():
@@ -196,12 +197,14 @@ def build_state_inventory():
              "and remains dynamic in frozen Z/M forks"),
         _row("slow.i2e_resource", "fast_inhibitory_state", "(NI,)", "float64",
              "tau_i2e_depression 100-600 ms", "simulator", False, True,
-             "dynamic", "direct",
-             "presynaptic availability scaling I->E edges only; neutral at one when disabled"),
+             "dynamic", "conditional_direct",
+             "presynaptic availability scaling I->E edges only; neutral at one when disabled",
+             activation_gate="use_i2e_depression"),
         _row("slow.i_adaptation_increment", "fast_inhibitory_state", "(N,)", "float64",
              "tau_i_adaptation 100-600 ms", "simulator", False, True,
-             "dynamic", "direct",
-             "I-cell threshold increment; E-cell entries remain exactly zero"),
+             "dynamic", "conditional_direct",
+             "I-cell threshold increment; E-cell entries remain exactly zero",
+             activation_gate="use_i_adaptation"),
         _row("slow._I_I_last", "slow_zm", "(NE,)", "float64", "step", "simulator", False, True,
              "freezable_z", "none",
              "E-cell I_I stashed by apply_currents for the z_inf Heaviside. INTRA-step scratch: "
@@ -252,6 +255,10 @@ def build_state_inventory():
              "not_applicable", "none",
              "current-based virtual SEEG; LFPRecorder is MEMORYLESS (weighted sum of |I_E|+|I_I|), "
              "so it has no filter state to carry across a restore -- continuity is structural"),
+        _row("lfp_exc_trace", "observer", "(nsteps,n_sites)", "float64", "step", "observer", True, False,
+             "not_applicable", "none", "excitatory-current contribution to lfp_trace"),
+        _row("lfp_inh_trace", "observer", "(nsteps,n_sites)", "float64", "step", "observer", True, False,
+             "not_applicable", "none", "inhibitory-current contribution to lfp_trace"),
         _row("slow.trace_*", "observer", "(nsteps,)", "float64", "step", "observer", True, False,
              "not_applicable", "none", "slow-layer trace lists; read-only mirrors of the state above"),
     ]
@@ -270,8 +277,17 @@ def validate_inventory(rows):
         seen.add(r["name"])
         if r["role"] not in ("simulator", "observer"):
             raise ValueError(f"{r['name']}: role must be simulator|observer")
-        if r["current_effect"] not in ("direct", "indirect", "none"):
-            raise ValueError(f"{r['name']}: current_effect must be direct|indirect|none")
+        if r["current_effect"] not in (
+            "direct", "indirect", "conditional_direct", "none"
+        ):
+            raise ValueError(
+                f"{r['name']}: current_effect must be "
+                "direct|indirect|conditional_direct|none"
+            )
+        if r["current_effect"] == "conditional_direct" and not r.get("activation_gate"):
+            raise ValueError(
+                f"{r['name']}: conditional_direct requires activation_gate"
+            )
         if r["freeze_semantics"] not in FREEZE_SEMANTICS:
             raise ValueError(f"{r['name']}: unknown freeze_semantics {r['freeze_semantics']!r}")
         if r["role"] == "observer" and r["current_effect"] != "none":
@@ -304,7 +320,8 @@ _KICK_DERIVED = {
 _KICK_OBSERVER = {
     "rate_E", "rate_I", "spk_t", "spk_i", "ras_keepE", "ras_keepI", "ras_keep", "ras_mask",
     "spk_inside", "spk_outside", "E_spk_bool", "I_spk_bool", "_peak_act", "I_E_peak", "I_I_peak",
-    "lfp_trace", "lfp_current_proxy_trace", "I_global_trace", "xdep_mean", "xdep_min",
+    "lfp_trace", "lfp_current_proxy_trace", "lfp_exc_trace", "lfp_inh_trace",
+    "I_global_trace", "xdep_mean", "xdep_min",
     "xdep_mask_mean", "t0",
     # written only in the same statement that breaks the loop -> nothing to carry across a
     # checkpoint; it is the truncation MARKER reported as runaway_early_stop_ms.

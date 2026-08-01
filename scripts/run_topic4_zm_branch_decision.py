@@ -205,7 +205,8 @@ def make_slow(ctx, freeze_arm=None):
     return slow
 
 
-def run_segment(ctx, slow, T_ms, *, ckpt=None, fresh_rng=True, dump_i_spikes=False):
+def run_segment(ctx, slow, T_ms, *, ckpt=None, fresh_rng=True, dump_i_spikes=False,
+                dump_lfp_components=False):
     S = ctx["S"]
     p = dataclasses.replace(S["p"], T=float(T_ms))
     if fresh_rng:
@@ -214,7 +215,8 @@ def run_segment(ctx, slow, T_ms, *, ckpt=None, fresh_rng=True, dump_i_spikes=Fal
                          r_kick=PP.R_KICK, t_kick=1e9, V_th_per_neuron=S["vth"], verbose=False,
                          lfp_recorder=ctx["rec"], early_stop_runaway=True,
                          es_thresh_hz=ES_THRESH_HZ, es_dur_ms=100.0,
-                         dump_i_spikes=dump_i_spikes, zm_ckpt=ckpt)
+                         dump_i_spikes=dump_i_spikes,
+                         dump_lfp_components=dump_lfp_components, zm_ckpt=ckpt)
 
 
 def segment_metrics(ctx, res, *, bin_ms=MC.BIN_MS):

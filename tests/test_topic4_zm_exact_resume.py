@@ -169,6 +169,11 @@ def test_every_current_affecting_state_is_load_bearing(reference):
         if row["current_effect"] in ("direct", "indirect"):
             assert differs, f"{key}: inventory says current-affecting but corrupting it changed nothing"
             checked += 1
+        elif row["current_effect"] == "conditional_direct":
+            assert not differs, (
+                f"{key}: {row['activation_gate']} is disabled in this reference, "
+                "but the inactive state changed the raster"
+            )
         else:
             assert not differs, f"{key}: inventory says current_effect=none but it changed the raster"
     assert checked >= 10, f"only {checked} current-affecting fields exercised"
