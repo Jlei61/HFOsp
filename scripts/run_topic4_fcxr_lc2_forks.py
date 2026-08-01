@@ -47,6 +47,7 @@ ARMS = (
     ("D1", 0.15, 2.0, 0.128),
     ("D2", 0.15, 2.0, 0.214),
 )
+MAX_FINALISTS_UNDER_MEASURED_BUDGET = 2
 
 
 def _now():
@@ -121,7 +122,7 @@ def cmd_manifest(_args):
     screen = _load_json(screen_path)
     if screen.get("status") != "COMPLETE" or len(screen.get("rows", [])) != 90:
         raise SystemExit("E3 screen is incomplete")
-    selected = select_finalists(screen["rows"], 6)
+    selected = select_finalists(screen["rows"], MAX_FINALISTS_UNDER_MEASURED_BUDGET)
     rows = []
     for rank, cand in enumerate(selected, 1):
         for arm, D, h_scale, x_dep in ARMS:
@@ -136,7 +137,8 @@ def cmd_manifest(_args):
             ))
     payload = dict(stage="E4_FROZEN_FORKS", status="LOCKED", code_head=_git_head(),
                    screen_code_head=_load_json(os.path.join(OUT, "h_loop_screen_manifest.json"))["code_head"],
-                   selected_finalists=selected, n_finalists=len(selected), rows=rows,
+                   selected_finalists=selected, n_finalists=len(selected),
+                   max_finalists_under_measured_budget=MAX_FINALISTS_UNDER_MEASURED_BUDGET, rows=rows,
                    n_rows=len(rows), created=_now())
     FCXR._write_json(os.path.join(OUT, "frozen_fork_manifest.json"), payload)
     print(json.dumps(dict(status="LOCKED", n_finalists=len(selected), n_rows=len(rows),

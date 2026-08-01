@@ -125,7 +125,10 @@ safety fires, or the 10 h exploration budget is reached. A negative point does n
 
 ## 5. Frozen basin and X forks
 
-Take at most six screen survivors using the following ordering, not a weighted score:
+Take at most six screen survivors using the following ordering, not a weighted score.  The measured E3
+throughput (593.64--790.16 s for a 1 s 40k trajectory) fixes this 8--10 h execution to the best point plus
+one adjacent survivor (`max_finalists=2`); this resource allocation was made before the remaining screen
+outcomes and must not be expanded from a favourable fork result:
 
 1. finite sustained tail;
 2. lower ceiling fraction;

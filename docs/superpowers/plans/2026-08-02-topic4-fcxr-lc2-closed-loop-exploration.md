@@ -76,7 +76,10 @@ Classify every row as `decay_low`, `screen_survivor`, `saturated_tonic`, `numeri
 
 ## 5. E4 — frozen forks
 
-For at most six ordered survivors, run A-low/A-high/B/C/D1/D2. A/B/C duration is
+The original ceiling is six ordered survivors.  Measured E3 wall time fixes this execution to the best
+survivor plus one adjacent point (two finalists total) so that direct basin/X forks remain inside the
+10 h sprint instead of spending the entire budget on the screen.  Run A-low/A-high/B/C/D1/D2 for those
+two points. A/B/C duration is
 `min(5000,max(2000,5*tau_H)) ms`; D1/D2 duration is
 `min(8000,max(3000,4*tau_H)) ms`, so the termination probe can include its locked post-offset window.
 An insufficient post-offset observation is unresolved, not negative. Use matched RNG reset. For candidates that satisfy A/B/C/D, run:

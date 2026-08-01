@@ -123,6 +123,7 @@ def _load_fork_runner():
 
 def test_frozen_fork_runner_imports_and_locks_arm_specific_duration():
     f = _load_fork_runner()
+    assert f.MAX_FINALISTS_UNDER_MEASURED_BUDGET == 2
     assert f._duration_ms(500.0, "C") == 2500.0
     assert f._duration_ms(2000.0, "C") == 5000.0
     assert f._duration_ms(500.0, "D1") == 3000.0
