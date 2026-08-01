@@ -1,34 +1,42 @@
-# Topic 4 Z/M lifecycle roadmap — D1 fast ictal-carrier existence design
+# Topic 4 Z/M fast-dynamics discovery and lifecycle vertical-slice design
 
 **Date:** 2026-08-01
-**Status:** LOCKED FOR D1 ONLY
-**Parent evidence:** Phase C post-result futility stop; Phase D conductance baseline-gate NO-GO
+**Revision:** 2 — post-development-strategy review
+**Status:** DEVELOPMENT SCREEN + EARLY LIFECYCLE VERTICAL SLICE
 **Independent line:** E→E graph, weights, kernel, anisotropy, STD and plasticity remain immutable
 
-## 0. Decision and scope
+## 0. Decision
 
-The scientific objective is one fixed-parameter SNN that can eventually support
+The scientific objective remains one fixed-parameter SNN that can eventually
+support
 
 \[
 \mathcal I\xrightarrow{Z}\mathcal S
 \xrightarrow{M}\mathcal P\xrightarrow{\mathrm{recovery}}\mathcal I,
 \]
 
-where \(\mathcal I\) is the returning, irregular interictal regime, \(\mathcal S\)
-is a bounded and spatially structured ictal carrier, and \(\mathcal P\) is a
-postictal recovery corridor.  A finite control input may later shorten the
-\(\mathcal S\to\mathcal P\) transition, but may not create recovery by reset.
+with a finite control input able to shorten an existing pathological episode
+without resetting the network.
 
-This spec authorizes only **D1: fast-carrier existence on frozen slow states**.
-It does not authorize endogenous entry, native offset, recovery, stimulation or
-shared-scaffold causality.  D2–D6 are roadmap nodes and require separate specs.
+Revision 1 incorrectly treated model development as a confirmation pipeline.  It
+required a deeply perturbation-returning frozen fast attractor, completely
+serialised carrier, entry, offset, recovery and control, and placed extensive
+observation/provenance infrastructure before the first informative SNN run.
 
-The immediate question is:
+Revision 2 keeps the E-only dynamic-threshold hypothesis, but changes the order:
 
-> On the unchanged anisotropic Z/M SNN scaffold, can one baseline-compatible,
-> neuron-local fast membrane feedback convert the Phase-C high-rate tonic branch
-> into a sustained, bounded, perturbation-returning and virtual-SEEG-readable
-> non-tonic carrier?
+1. **Stage A — fast-dynamics discovery:** immediately expose what \(\phi\) does
+   to the old tonic branch;
+2. **Stage B — reachable lifecycle vertical slice:** put the best phenotypes
+   back into their own fixed-parameter trajectory from interictal baseline and
+   examine entry, native-exit tendency, controlled exit and recovery together;
+3. **Stage C — locked confirmation:** only a lifecycle-compatible candidate
+   earns multi-seed/noise, \(dt/2\), real-data sidecar, ablation and publication
+   infrastructure.
+
+This is not an autonomous-lifecycle confirmation spec.  It is a bounded
+development experiment designed to decide quickly whether the \(\phi\) mechanism
+is worth confirming or whether the fast inhibitory/membrane class must change.
 
 ## 1. Accepted upstream evidence
 
@@ -37,401 +45,386 @@ The immediate question is:
 Accepted as `ACCEPT_PHASEC_POST_RESULT_FUTILITY_STOP`:
 
 - C0 completed 153/153 tasks across seeds 1/3/4;
-- all three seeds were `mixed_or_indeterminate_tonic_branch`;
 - C1 completed 59/60 seed-1 primary continuations;
 - corrected-v2 classified 59/59 as `tonic_non_AI`;
-- modulation depth was 0.025–0.045 versus the registered non-tonic minimum 0.20;
-- the one missing run cannot rescue any 5/6 cell or the seed-1-and-3 primary GO.
+- modulation depth was 0.025–0.045 versus the registered 0.20 marker;
+- the missing run cannot rescue the registered C1 GO.
 
-This rejects further expansion of the same frozen \(Z/M/S_G\) morphology grid.
-It is not a three-seed bounded negative and does not prove carrier non-existence.
+This stops further expansion of the same frozen \(Z/M/S_G\) morphology grid.  It
+is not a three-seed negative and does not prove carrier non-existence.
 
 ### 1.2 Phase D
 
 Accepted as `NO_GO_baseline_calibration_failed_zero_spike_dominance`:
 
-- the off-by-default conductance membrane, GABA conductance decomposition, sAHP
-  representation and E-only threshold increment were implemented;
-- five real state migrations and Arm-A continuation were byte-identical;
-- the registered conductance replacement suppressed all E spikes during the
-  8.5 s dynamic interictal baseline, so carrier arms were never opened.
+- conductance, sAHP and dynamic-threshold hooks were implemented;
+- current-based Arm-A state migration retained byte identity;
+- the registered all-time conductance replacement eliminated E spikes during
+  the dynamic interictal baseline, so carrier arms never ran.
 
-This rejects that registered all-time conductance replacement.  It does not test
-the dynamic-threshold mechanism by itself.
+This rejects that conductance replacement.  It does not test the E-only
+dynamic-threshold mechanism on the original current-based Z/M substrate.
 
-### 1.3 Lifecycle scale diagnostics
+### 1.3 Scale diagnostics
 
-The 2026-08-01 calculations are retained as diagnostics, not a hard gate:
+The small \(m\) scale, latch-like \(z\) direction, short post-drive \(S_G\)
+memory and high Phase-C refractory occupancy remain design risks, not
+mathematical non-existence conditions.
 
-- current \(m\) scale is small relative to the single-cell reset gap;
-- \(z\) cannot be the sole offset coordinate;
-- \(S_G\) provides little post-activity memory;
-- the Phase-C tonic core has high refractory occupancy.
+## 2. Locked substrate and independence boundary
 
-None is a mathematical carrier/lifecycle non-existence proof.  D1 GO/NO-GO is
-determined only by the behavioral and state-space gates below.
+Use the exact current-based per-neuron Z/M family:
 
-## 2. Lifecycle roadmap and authorization firewall
-
-The full roadmap is fixed in this order:
-
-1. **D1 — fast carrier:** frozen \(z,m\); establish an observation-consistent,
-   bounded, spatially structured fast carrier.
-2. **D2 — endogenous entry:** release \(z\); repeated returning events must alter
-   onset hazard and enter the same D1 carrier without kick/timer/switch.
-3. **D3 — native offset:** on the confirmed carrier, test whether \(m\) supplies
-   an activity-dependent exit boundary; only then consider one backup variable.
-4. **D4 — postictal recovery and multicycle:** return to the same distribution of
-   interictal events and repeat at fixed parameters.
-5. **D5 — controllable termination:** a finite, matched-energy intervention must
-   shorten an existing native lifecycle by pushing it into the native recovery
-   corridor, without reset or permanent silence.
-6. **D6 — shared-scaffold causality:** rotate/weaken/randomize the pathological
-   connection axis and separate geometry, entry, duration and recovery roles.
-
-No D1 artifact may emit a positive field for D2–D6.
-
-## 3. Locked substrate
-
-Reuse the exact current-based per-neuron Z/M family:
-
-- E1146 `twoend_equal` two-dimensional anisotropic E/I SNN;
+- E1146 `twoend_equal` 2-D anisotropic E/I SNN;
 - \(N_E=32000\), \(N_I=8000\), \(L=20\) mm;
 - existing heterogeneous two-core threshold substrate;
 - per-neuron \(z_i,m_i\), `use_qI=False`, `use_gK=False`;
 - \(\tau_z=5000\) ms, \(\tau_m=500\) ms, \(\eta_m=0.001\);
-- existing recurrent-only \(S_G\), \(\alpha_G=16\), \(\tau_S=80\) ms;
-- calibrated seeds `{1,3,4}` and their existing exact checkpoint/noise lineage;
-- original virtual-SEEG montage and pathology axis;
-- current-based membrane and synaptic current semantics.
+- recurrent-only \(S_G\), \(\alpha_G=16\), \(\tau_S=80\) ms;
+- original virtual-electrode montage, pathology axis, delays and noise law;
+- current-based membrane and synaptic-current semantics.
 
-Locked against change in D1:
+Locked throughout Stages A and B:
 
-- all E→E edges, weights, kernel, anisotropy, orientation, STD and plasticity;
-- E/I external drives and noise law;
-- \(I_{th,EI}\), \(z/m\) equations and their constants;
-- refractory periods, base thresholds and reset values;
-- virtual-electrode geometry and carrier-gate thresholds;
-- carrier observation windows after the input manifest is locked.
+- all E→E edges, weights, anisotropy, orientation, STD and plasticity;
+- external E/I drives and noise statistics;
+- \(z/m\) equations and constants;
+- base thresholds, reset and refractory periods;
+- virtual-electrode geometry.
 
-The Phase-D conductance path remains in the engine but is disabled throughout D1.
-No conductance homotopy is a rescue arm in this spec.
+The Phase-D conductance path stays disabled.  No conductance homotopy or E→E
+rescue is allowed on this line.
 
-## 4. The single new mechanism under test
+## 3. Mechanism under development
 
-D1 tests the already implemented, E-only, per-neuron threshold increment:
+The primary mechanism is the already implemented E-only per-neuron threshold
+increment
 
 \[
 \dot\phi_i=-\frac{\phi_i}{\tau_\phi}
 +\Delta_\phi\sum_k\delta(t-t_i^k),
-\qquad
-V_{\theta,i}(t)=V^0_{\theta,i}+\phi_i(t).
+\qquad V_{\theta,i}=V^0_{\theta,i}+\phi_i.
 \]
 
-Properties:
+- \(\phi_i\) is local to one E neuron;
+- I-cell thresholds remain unchanged;
+- no global activity sensor, spatial recruitment mask or ictal-only equation is
+  introduced;
+- `use_phi=False` must preserve the existing path;
+- in a genuine reachable trajectory, the same equation is active from \(t=0\).
 
-- \(\phi_i\) is local to one E neuron; no spatial mask or global activity sensor;
-- I-cell thresholds are unchanged;
-- \(\phi_i=0\) is the exact baseline model state;
-- the same equation is active from \(t=0\); no onset detector, timer or parameter
-  switch is allowed;
-- in D1 carrier forks, \(z_i,m_i\) are frozen but \(\phi_i\) remains dynamic;
-- \(S_G\) is treated as a pre-existing 80 ms fast/intermediate loop and remains
-  dynamic in the primary arm.  A frozen-\(S_G\) candidate ablation is required.
-
-The hypothesis is not “AI is correct.”  The hypothesis is that neuron-local
-threshold recovery can break the tonic fixed branch into a bounded population
-carrier while spatial heterogeneity prevents whole-sheet synchronous reset.
-
-## 5. Locked parameter panel
-
-Use the six settings registered before the unexecuted Phase-D carrier stage:
+The initial panel is
 
 \[
 \tau_\phi\in\{60,100,160\}\ \mathrm{ms},
-\qquad f_\phi\in\{0.15,0.30\}.
+\qquad f_\phi\in\{0.15,0.30\},
 \]
 
-At the locked seed-1 Phase-C tonic reference \(r_{core,ref}\), define
+with
 
 \[
-\Delta_\phi\left(\frac{\tau_\phi}{1000}\right)r_{core,ref}
+\Delta_\phi
+\left(\frac{\tau_\phi}{1000}\right)
+r_{\mathrm{core,ref}}
 =f_\phi(V_\theta-V_{reset}).
 \]
 
-Here \(\tau_\phi\) is stored in ms and \(r_{core,ref}\) in Hz; the explicit
-factor of 1000 is mandatory.  Thus \(\Delta_\phi\) is the mV increment per E
-spike.  The implementation and manifest must record both the source units and
-the converted \(\tau_\phi\) in seconds; a dimensionally inconsistent value is
-an input-contract failure, not a runnable setting.
+The `/1000` conversion is mandatory because \(\tau_\phi\) is stored in ms and
+rate in Hz.  The six points represent two steady feedback strengths across three
+recovery times; they are an initial discovery panel, not an exhaustive test of
+dynamic threshold.
 
-The resulting six numerical \(\Delta_\phi\) values are written before any D1
-candidate run and reused unchanged for all seeds.  They are not recalibrated per
-seed and no intermediate value is added after results are seen.
+## 4. Two distinct state semantics
 
-The analytic preflight must report, but not adjudicate:
+### 4.1 Arm A — branch-intervention fork
 
-- predicted tonic steady threshold shift;
-- residual fraction \(e^{-T_{IED}/\tau_\phi}\) across the locked baseline IED
-  interval distribution;
-- exact `phi=0` default-path parity;
-- maximum observed \(\phi\) in baseline and carrier forks.
-
-## 6. Minimal arms
-
-| Arm | Slow state | \(S_G\) | \(\phi\) | Purpose |
-|---|---|---|---|---|
-| `A_native` | dynamic for baseline; frozen \(z,m\) for carrier fork | dynamic | off | exact current-based control |
-| `B_phi` | same as A | dynamic | one of six locked settings | primary D1 mechanism |
-| `B_phi_SGclamp` | frozen \(z,m\) | frozen at checkpoint value | candidate setting | whether dynamic \(S_G\) is required |
-| `B_phi_noSG` | frozen \(z,m\) | uncoupled, \(\alpha_G=0\) | candidate setting | whether containment is required |
-
-The two ablations run only for settings that pass the seed-1 unperturbed carrier
-screen.  They explain the mechanism; they cannot rescue a failed `B_phi` setting.
-
-Forbidden D1 arms:
-
-- conductance replacement or conductance homotopy;
-- changes to \(m\), \(z\), \(S_G\) constants;
-- H, P, q_I, g_K, pump, chloride or reset variables;
-- E→E tuning;
-- stimulation/termination optimization;
-- large slow-state morphology grids.
-
-## 7. Phase 0 — observation target lock
-
-Before any candidate is inspected, write one immutable observation contract.
-
-### 7.1 Existing operational carrier gate
-
-Reuse `carrier_gate_v2.1_revised_2026-07-24` unchanged.  Its hard semantics are:
-
-- source and virtual-SEEG macroepisode duration at least 2 s;
-- occupancy at least 0.80;
-- no full-return gap longer than 250 ms;
-- no runaway, saturated sheet or simultaneous whole-field flash;
-- at least two sustained 30–80 Hz contacts with temporally overlapping
-  80–150 Hz or 1–150 Hz enhancement;
-- real duration/duty/energy/spatial-extent separation from returning events;
-- axial first-passage recruitment rather than a simultaneous flash.
-
-### 7.2 Real-data reference sidecar
-
-Freeze a descriptive, single-seizure reference from the already accepted
-E1146 seizure-7 Fig3-A lineage:
-
-- CAR reference, 15 locked contacts, `SCL9` spectral anchor;
-- baseline `[-120,-90)` s;
-- clinical early-ictal window `[0,10)` s;
-- bands 30–80, 80–150 and 1–150 Hz;
-- duration above 6 dB, occupancy, maximum gap, mean/peak dB, active-contact
-  fraction, dominant frequency and spectral entropy.
-
-The current accepted summary already reports clinical `[0,10)` means of about
-23.34 dB (30–80 Hz), 11.48 dB (80–150 Hz) and 16.22 dB (1–150 Hz) on SCL9.
-The new sidecar must derive the remaining features from the same raw lineage
-before D1 outcomes are opened.
-
-Because this is one representative seizure and the model LFP proxy is rectified
-current amplitude, the sidecar is a directional observation comparator, not a
-patient-level fitted likelihood.  D1 may claim `virtual_seeg_carrier_candidate`,
-not `patient_matched_seizure`.
-
-If the real reference cannot be rebuilt from its locked source, D1 stops as
-`BLOCKED_observation_reference` rather than silently dropping the observation
-layer.
-
-## 8. Phase 1 — dynamic interictal baseline preservation
-
-For every one of the six `B_phi` settings, run canonical dynamic Z/M from \(t=0\)
-through the locked 8.5 s pre-escalation window with replay noise first.
-
-A setting is baseline-eligible only if, relative to paired `A_native`:
-
-- returning-event count, median duration and median core peak each stay within
-  ±20%;
-- at least one event from each registered core remains readable;
-- event-order/pathology-axis sign is unchanged;
-- all-sheet mean rate and peak active fraction stay within ±20%;
-- no prevention, whole-sheet plateau or runaway occurs;
-- post-event \(\phi\) decays to at most 10% of its event peak before the next
-  returning event in at least 80% of eligible intervals.
-
-Settings failing baseline are invalid, not carrier negatives.  If all six fail,
-emit `NO_GO_D1_baseline_not_preserved` and stop.
-
-## 9. Phase 2 — seed-1 frozen-state carrier screen
-
-Use exactly four Phase-C forks:
+Load the four old Phase-C checkpoints:
 
 - `bounded_mid__rising`;
 - `bounded_mid__peak`;
 - `bounded_late__rising`;
 - `bounded_late__peak`.
 
-Freeze the complete per-neuron \(z_i,m_i\) fields with membrane effects active.
-Initialize \(\phi_i=0\), let dynamic \(S_G\) and \(\phi_i\) evolve, and use the
-locked replay future noise.  There is no onset kick in this screen.
+Freeze their \(z_i,m_i\) fields, initialise \(\phi_i=0\), and allow fast E/I,
+dynamic \(S_G\), delays and \(\phi\) to evolve.
 
-Each run lasts 6 s: 1 s burn-in followed by a 5 s adjudication window.  A transient
-ringing response during burn-in cannot pass.
+This arm asks only:
 
-Cheap-first stop:
+> When \(\phi\) is introduced at an old tonic state, does it leave tonic,
+> fragment, relay, oscillate, silence or run away?
 
-- run all baseline-eligible settings on bounded-mid rising/peak;
-- a setting survives only if both phases pass the complete run-level source and
-  virtual-SEEG gate;
-- only survivors run bounded-late rising/peak;
-- if no setting survives both checkpoints, emit
-  `NO_GO_D1_fast_carrier_not_formed` and stop before additional seeds.
+It is an intervention diagnostic.  Because the old checkpoint was generated by
+a no-\(\phi\) history, this arm cannot establish fixed-parameter reachability.
 
-No near-miss parameter may be added.
+### 4.2 Arm B — reachable dynamic trajectory
 
-## 10. Carrier acceptance
+Start from the original interictal initial condition with \(\phi\), \(z\), \(m\)
+and \(S_G\) all active from \(t=0\).  Save this model's own state history and
+checkpoints.  No old fast state is spliced onto it.
 
-### 10.1 Primary endpoints
+Only Arm B may support:
 
-A run-level D1 carrier must satisfy all of the following:
+- `reachable_carrier_candidate`;
+- spontaneous-onset claims;
+- native-offset tendency;
+- controlled-exit pilot;
+- recovery to returning events.
 
-1. **bounded persistence:** full 5 s analysis without runaway, silence or sheet
-   plateau; sustained macroepisode ≥2 s, occupancy ≥0.80, gap ≤250 ms;
-2. **non-tonic structure:** modulation depth ≥0.20 with either reproducible
-   periodic/clonic organization or spatially relayed activity; AI is not required;
-3. **virtual-SEEG carrier:** full revised v2.1 Gate B, including overlapping
-   low-gamma/high-frequency enhancement and 4-D separation from returning events;
-4. **spatial organization:** at least two separated zones, local-to-extended
-   recruitment, no simultaneous flash, reproducible axial latency/phase sign;
-5. **not microscopic hard saturation:** the candidate must not satisfy the locked
-   combined refractory-saturation definition.  AI/regularity metrics are reported
-   only as secondary mechanistic descriptors.
+## 5. Stage A — fast-dynamics discovery
 
-### 10.2 Fixed perturbation-return test
+### 5.1 Minimal sanity before compute
 
-Before candidate outcomes are inspected, calibrate one 50 ms **uniform E-threshold
-uplift** on `A_native` `bounded_mid__rising`.  During the pulse only,
-\(V^0_{\theta,i}\mapsto V^0_{\theta,i}+u_{pert}\) for every E cell; I thresholds,
-all currents, slow variables and RNG state are untouched.  Use a deterministic
-bisection to find the smallest uplift reducing paired core spikes by 50–70%
-without ≥100 ms all-sheet rest.  Freeze its amplitude and apply it at exactly
-3.0 s after every fork (1 s burn-in + 2 s established analysis).  The spatial
-mask is always all E cells; no candidate-specific mask or timing is allowed.
+Before the 24-cell matrix, verify only:
 
-For every survivor:
+1. correct Hz/ms \(\Delta_\phi\) calculation;
+2. `use_phi=False` parity;
+3. E-only action and exact I-cell zeros;
+4. exponential decay plus one jump per E spike;
+5. frozen \(z,m\) do not drift in Arm A.
 
-- apply the pulse after ≥1 s of established carrier;
-- remove it without resetting any fast/slow/RNG state;
-- require return within 1 s to the same carrier class;
-- median period/frequency must agree within 20%;
-- spatial phase-sign must agree and phase-profile circular correlation must be
-  at least 0.80.
+Do not build a new real-data loader, generic parallel coordinator, full verdict
+framework or formal figure package before this matrix.
 
-Survival without return is `metastable_survival`, not attractor support.
-This pulse is a state-space perturbation diagnostic only.  It is not D5
-stimulation and cannot support a controllable-termination claim.
+### 5.2 Discovery matrix
 
-### 10.3 Seed-1 setting decision
+Run seed 1, the six initial phi points, the four old checkpoints and one replay
+future-noise bank: 24 production-scale continuations.  Each run is 6 s with the
+first 1 s treated as switch-on transient and the following 5 s described.
 
-A setting passes seed 1 only if:
+Save only the traces needed to identify dynamics:
 
-- bounded-mid rising and peak both pass;
-- bounded-late rising and peak both pass or one checkpoint passes while the
-  adjacent checkpoint is technically indeterminate rather than tonic/runaway;
-- the perturbation-return test passes in both fast phases;
-- the same setting passed the dynamic interictal baseline gate.
+- core, surround, E and I population rates;
+- modulation depth and event/gap structure;
+- refractory occupancy;
+- \(\phi\), \(S_G\) and frozen \(z/m\) checks;
+- spatial active fraction, axial recruitment and kymograph;
+- existing virtual-SEEG proxy and band-energy readout.
 
-## 11. Replication and numerical confirmation
+### 5.3 Phenotype taxonomy
 
-Only seed-1 survivors are replicated.
+Every run receives one descriptive phenotype:
 
-For seeds 1, 3 and 4:
+| Phenotype | Meaning | Development response |
+|---|---|---|
+| `tonic` | adaptation did not leave the old branch | stronger adjacent gain only if a boundary is visible |
+| `burst_train` | tonic broken but full-return gaps remain | adjacent time-scale refinement |
+| `spatially_relayed_carrier` | bounded, sustained and spatially staggered | promote immediately to Stage B |
+| `metastable_carrier_like` | finite carrier-like episode or perturbable state | promote to Stage B; do not reject for lack of return |
+| `silence` | adaptation too strong | weaker adjacent gain only if paired with an active neighbor |
+| `whole_sheet_oscillation` | common-mode synchrony dominates | diagnose fast inhibition; do not retune E→E |
+| `runaway` | containment failed | phi alone is insufficient at this state |
+| `technical_invalid` | provenance/numerical failure | rerun identically; never classify scientifically |
 
-- two fast phases × three locked future-noise continuations;
-- cell support requires at least 5/6 passes and at least 2/3 per fast phase;
-- seeds 1 and 3 must both support the same setting/checkpoint carrier class;
-- seed 4 must be concordant or indeterminate, not opposite silence/runaway;
-- independent \(dt/2\) on seeds 1 and 3 must preserve carrier class and median
-  frequency within 20%;
-- perturbation return must replicate on seeds 1 and 3.
+The existing v2.1 carrier gate is reported as an operational descriptor and
+ranking aid.  It is not the sole Stage-A gate.  AI is secondary.
 
-Only this stage may emit `fast_ictal_carrier_supported`.
+### 5.4 Limited local refinement
 
-## 12. Verdict vocabulary
+One bounded refinement round is allowed only when the initial matrix reveals a
+coherent boundary or carrier-like near miss.
 
-Allowed D1 verdicts:
+- stronger-gain neighbor: \(f_\phi=0.45\);
+- weaker-gain neighbor: \(f_\phi=0.075\);
+- faster-time neighbor: \(\tau_\phi=40\) ms;
+- slower-time neighbor: \(\tau_\phi=240\) ms.
 
-- `BLOCKED_input_or_observation_reference`;
-- `NO_GO_D1_baseline_not_preserved`;
-- `NO_GO_D1_fast_carrier_not_formed`;
-- `NO_GO_D1_hfo_like_burst_train`;
-- `NO_GO_D1_tonic_or_saturated`;
-- `metastable_survival_without_return`;
-- `resolution_sensitive_fast_carrier`;
-- `seed_heterogeneous_fast_carrier`;
-- `virtual_seeg_carrier_candidate_seed1`;
-- `fast_ictal_carrier_supported`.
+At most one point is opened per justified boundary direction and no more than
+four new parameter combinations total.  The partner \(f_\phi\) or \(\tau_\phi\)
+is chosen from the closest initial-panel cell before the new run is launched and
+recorded in a discovery amendment.  No second refinement round is allowed.
 
-Every verdict must separately store:
+If whole-sheet synchrony dominates every active phi point, one predeclared
+fast-inhibition diagnostic may be used at the best phi point:
 
-- `interictal_baseline_preserved`;
-- `source_carrier`;
-- `virtual_seeg_carrier`;
-- `spatial_pattern`;
-- `perturbation_return`;
-- `real_reference_comparison`;
-- `entry=not_tested`;
-- `offset=not_tested`;
-- `recovery=not_tested`;
-- `control=not_tested`;
-- `lifecycle=not_established`.
+\[
+\tau_{d,GABA}\in\{12,24\}\ \mathrm{ms}
+\quad\text{versus canonical }18\ \mathrm{ms}.
+\]
 
-## 13. Engineering and resource contract
+This is a two-direction mechanism diagnostic, not a new grid and not a positive
+claim.  E→E remains untouched.  Any surviving combined candidate must later pass
+its own baseline and ablation tests.
 
-- Reuse the tested `phi_increment` hook; no new guarded-engine mechanism should
-  be needed unless audit proves an observation is missing.
-- `use_phi=False` must retain byte parity and historical `BASELINE_SHA`.
-- One immutable input manifest binds source checkpoints, exact RNG states,
-  parameter grid, observation target, thresholds, code SHAs and panel IDs.
-- Atomic per-run NPZ + JSON + resource receipt; resume only missing or technical-
-  invalid runs; scientific failures are never retuned automatically.
-- Set `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=NUMEXPR_NUM_THREADS=1`.
-- Measure one complete worker before parallel launch; keep at least 96 GB
-  `MemAvailable`, reserve 8 logical CPUs, and use the existing 1.25× RSS formula.
-- Sample worker `VmSwap` at least every 5 s and require a zero pre-publish snapshot.
-- Never kill or alter peer-worktree processes.
+### 5.5 Stage-A selection
 
-## 14. Required outputs and figure boundary
+Promote at most two candidates.  Ranking prioritises:
 
-Root: `results/topic4_sef_hfo/zm_d1_fast_ictal_carrier/`.
+1. bounded non-tonic activity without hard refractory saturation;
+2. spatial relay/local-to-extended recruitment over common mode;
+3. sustained virtual-SEEG occupancy/energy rather than isolated HFO bursts;
+4. distance from both silence and runaway boundaries;
+5. distinct candidates if two different phenotypes survive.
 
-Required machine outputs:
+If the registered panel and allowed refinement contain no carrier-like state,
+emit only
 
-- immutable D1 input manifest;
-- real-data reference lock and provenance;
-- baseline-preservation matrix;
-- seed-1 carrier screen;
-- fixed perturbation lock and return matrix;
-- conditional multi-seed and \(dt/2\) summary;
-- one fail-closed D1 verdict.
+`NO_CARRIER_IN_REGISTERED_PHI_PANEL_AND_TESTED_STATES`.
 
-Required figures:
+This is not a mechanism-class no-go.
 
-1. baseline event preservation and \(\phi\) decay;
-2. arm/control source rate, E/I lag, virtual-SEEG energy and spatial kymograph;
-3. perturbation-return phase portrait / return map;
-4. parameter/checkpoint/seed coverage and verdict.
+## 6. Stage B — reachable lifecycle vertical slice
 
-All figure directories require Chinese `README.md`.  No Figure-5 lifecycle layout
-is authorized unless a later D4 multicycle lifecycle passes.  D1 figures are
-carrier-existence diagnostics only.
+Stage B runs before multi-seed confirmation.  For each of the top one or two
+Stage-A candidates, start Arm B from interictal baseline with all equations
+active from \(t=0\).
 
-## 15. Final claim boundary
+### 6.1 Baseline evaluation
 
-If D1 passes, the strongest allowed statement is:
+Hard failures are limited to:
 
-> On the unchanged anisotropic per-neuron Z/M SNN scaffold, a registered
-> neuron-local threshold-recovery feedback supports a replicated, bounded,
-> perturbation-returning and virtual-SEEG-readable fast ictal-carrier candidate
-> at frozen slow states.
+- persistent silence;
+- runaway or whole-sheet plateau before a carrier can form;
+- complete loss of returning events from both cores;
+- loss of the pathology-axis recruitment geometry or conversion to simultaneous
+  whole-sheet flash.
 
-D1 cannot establish spontaneous entry, native offset, postictal recovery,
-multicycle dynamics, stimulation efficacy or a complete ictal lifecycle.
+The following are continuous deviation scores, not discovery vetoes:
+
+- event count and inter-event interval;
+- event duration and amplitude;
+- all-sheet rate and active fraction;
+- core balance;
+- \(\phi\) carryover between events.
+
+The former ±20% rules and “\(\phi\) below 10% in 80% of intervals” are deferred
+to Stage-C distributional validation.
+
+### 6.2 Reachability and carrier identity
+
+Run long enough to include the original escalation window and at least 10 s
+after the first sustained high-activity episode, with a maximum developmental
+horizon of 30 s.  Continuously checkpoint or retain a rolling state buffer; do
+not turn \(\phi\) on at onset.
+
+Ask:
+
+1. do returning interictal events remain before escalation?
+2. does the system enter the same phenotype family found in Arm A?
+3. is the carrier bounded and spatially organised rather than tonic/common-mode?
+4. what are the directions of \(\dot z\), \(\dot m\), \(\dot\phi\) and \(\dot S_G\)
+   during onset, maintenance and decline?
+
+A failed identity match means the frozen branch phenotype was unreachable; it
+cannot be rescued by Arm-A replication.
+
+If no matching high-activity episode occurs within the 30 s development horizon,
+record `no_reachable_entry_within_development_horizon`.  This is a finite-horizon
+development result, not proof that the carrier basin is globally unreachable.
+
+### 6.3 Native and controlled exit in parallel
+
+From matched reachable carrier states, fork two developmental branches:
+
+**Native branch:** no intervention; measure whether activity terminates, whether
+\(m\) moves toward an exit boundary, and whether returning events reappear.
+
+**Controlled branch:** apply a 50 ms E-threshold uplift without resetting any
+state.  Use doses
+
+\[
+u/(V_\theta-V_{reset})\in\{0,0.05,0.10,0.20\}
+\]
+
+at two fixed spatial scopes: the active pathological core and all E cells.  Use
+the same saved carrier state and the three already available future-noise
+continuations (replay plus two resamples) for paired comparisons.  Record,
+rather than gate on, the descriptive pilot fractions
+
+\[
+P(\mathrm{return}\mid u),\qquad P(\mathrm{exit}\mid u),
+\]
+
+plus silence, rebound, recovery time and subsequent returning events.
+With only one seed and three future-noise continuations these are susceptibility
+descriptors, not control-efficacy estimates.
+
+The control fork may be state-triggered because it is explicitly an
+intervention experiment; the uncontrolled trajectory may not use a detector to
+change its equations.
+
+### 6.4 Stage-B development outcomes
+
+Allowed outcomes are:
+
+- `unreachable_frozen_phenotype`;
+- `no_reachable_entry_within_development_horizon`;
+- `reachable_carrier_no_exit_route`;
+- `reachable_native_offset_no_recovery`;
+- `spontaneous_onset_with_controllable_termination_candidate`;
+- `autonomous_lifecycle_candidate`;
+- `suppression_without_recovery`;
+- `lifecycle_compatible_candidate`.
+
+A metastable episode may be a positive lifecycle candidate.  Failure to return
+after a strong perturbation is not a carrier-existence failure.  Conversely,
+permanent silence after control is suppression, not recovery.
+
+## 7. Stage C — locked confirmation
+
+Only `lifecycle_compatible_candidate`,
+`spontaneous_onset_with_controllable_termination_candidate`, or
+`autonomous_lifecycle_candidate` may open Stage C.
+
+Before confirmation:
+
+- freeze the candidate equations and parameters;
+- freeze validation seeds/noise/windows/phenotype definitions;
+- rebuild and hash the representative E1146 seizure-7 Fig3-A observation
+  sidecar;
+- freeze sham and matched-energy control conditions;
+- freeze ablations and resource policy.
+
+Then perform:
+
+- seeds 1/3/4 and multiple future-noise continuations;
+- independent \(dt/2\) confirmation;
+- longer pre/post interictal distribution comparison;
+- real-data virtual-SEEG comparison;
+- \(\phi\), \(S_G\) and any fast-I backup ablations;
+- native-versus-controlled exit dose response;
+- formal resource receipts, archive and paper-facing diagnostic figures.
+
+The real-data sidecar is required for Stage-C claims but must not block Stage A
+or Stage B mechanism development.
+
+## 8. Claim boundaries
+
+Stage A can claim only:
+
+> Introducing E-only dynamic threshold at old Phase-C tonic checkpoints produced
+> the observed phenotype map on the registered seed-1 panel.
+
+Stage B can claim only the explicit development outcome.  In particular:
+
+- controlled exit without native offset is not an autonomous lifecycle;
+- offset without returning events is not recovery;
+- an Arm-A phenotype is not reachable until reproduced on Arm B;
+- one-seed vertical slices are candidates, not robust mechanisms.
+
+Only Stage C may support a replicated carrier/lifecycle/control statement.
+
+## 9. Resource and output contract
+
+Stage A reuses existing state loading, carrier analysis and Phase-C resource
+helpers.  Do not build a new generic scheduler or verdict package.
+
+- set OMP/MKL/OpenBLAS/NumExpr threads to one;
+- measure one worker before bounded parallel launch;
+- retain at least 96 GB `MemAvailable` and eight logical CPUs;
+- never kill or modify peer-worktree processes;
+- publish each run atomically with a minimal JSON provenance record;
+- resume missing or technical-invalid cells only.
+
+Development root:
+
+`results/topic4_sef_hfo/zm_fast_lifecycle_development/`.
+
+Required before Stage B:
+
+1. one phenotype matrix JSON/CSV;
+2. one compact diagnostic figure with representative traces and spatial maps;
+3. a short Chinese `figures/README.md`;
+4. a candidate/refinement decision record.
+
+Formal multi-panel figures and archive-grade evidence packaging are deferred to
+Stage C.

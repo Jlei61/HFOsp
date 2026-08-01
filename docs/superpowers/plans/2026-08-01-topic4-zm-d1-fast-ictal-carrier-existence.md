@@ -1,500 +1,329 @@
-# Topic 4 Z/M D1 fast ictal-carrier existence — implementation plan
+# Topic 4 Z/M fast dynamics → lifecycle vertical slice — implementation plan
 
 **Date:** 2026-08-01
-**Status:** READY TO EXECUTE AFTER REVIEW COMMIT
-**Scope:** D1 only; frozen-slow fast-carrier existence on the unchanged current-based Z/M SNN
+**Revision:** 2 — development-first execution
+**Status:** READY FOR DEVELOPMENT EXECUTION
 **Spec:** `docs/superpowers/specs/2026-08-01-topic4-zm-d1-fast-ictal-carrier-existence-design.md`
 
 ## Goal
 
-Test one minimal, already implemented mechanism: whether an E-only per-neuron
-dynamic-threshold increment can turn the Phase-C tonic high-rate continuation
-into a bounded, non-tonic, spatially structured, perturbation-returning and
-virtual-SEEG-readable fast carrier while preserving the original dynamic
-interictal baseline.
+Reduce the main scientific uncertainty quickly:
 
-The plan does **not** test spontaneous entry, native offset, postictal recovery,
-multicycle behavior, stimulation efficacy or the full ictal lifecycle.  A D1 GO
-only opens a later D2 spec.
+1. what does E-only dynamic threshold actually do to the Phase-C tonic branch?
+2. is any resulting carrier-like state reachable when \(\phi,z,m,S_G\) all run
+   from interictal baseline?
+3. once reachable, does it show a native-exit tendency or a finite-control route
+   back to returning events?
 
-## Fixed scientific and engineering boundaries
+This plan deliberately separates discovery from confirmation.  It does not
+build a new production evidence system before the first SNN result.
 
-- Use the exact E1146 `twoend_equal` current-based per-neuron Z/M substrate:
-  `NE=32000`, `NI=8000`, `tau_z=5000 ms`, `tau_adp=500 ms`, `eta_m=0.001`,
-  recurrent-only `S_G` with `alpha_G=16` and `tau_S=80 ms`.
-- Keep E→E graph, weights, anisotropy, orientation, STD/plasticity, external
-  drive/noise law, base thresholds, resets and electrode geometry immutable.
-- Disable the Phase-D conductance path.  Do not reopen its calibration lattice.
-- The only new active mechanism is existing `slow_field.py` `phi_increment`:
-  E-only spike jumps plus exact exponential recovery.
-- Use the six locked settings `tau_phi={60,100,160} ms × f_phi={0.15,0.30}`.
-  Convert Hz and ms correctly:
+## Reuse before creating
 
-  `delta_phi_mV = f_phi * (V_th - V_reset) / ((tau_phi_ms/1000) * r_core_ref_hz)`.
+Reuse these existing components:
 
-- AI is not a primary acceptance requirement.  The primary object is an
-  observation-consistent virtual-SEEG carrier with bounded non-tonic and spatial
-  dynamics.
-- No candidate-dependent threshold, window, mask, parameter insertion or
-  automatic retuning is allowed.
-- Every positive/negative cell must be resumable, provenance-bound and paired to
-  its exact checkpoint and future-noise bank.
+- `src/snn_engine/slow_field.py` — tested `phi_increment` hook;
+- `src/topic4_zm_fast_carrier_state.py` — old-checkpoint migration;
+- `src/topic4_zm_fast_carrier_runtime.py` — frozen-state runtime helpers;
+- `scripts/run_topic4_zm_phasec_cell.py` — SNN/state/noise/readout path;
+- `src/topic4_zm_carrier_gate_v2.py` — operational carrier descriptors;
+- Phase-C resource measurement and crash-safe per-cell patterns.
 
-## Stop hierarchy
+Create at most one thin runner, one thin analyzer/plotter and one focused test
+file during Stages A/B:
 
-Stop at the earliest applicable state:
+- `scripts/run_topic4_zm_fast_lifecycle_development.py`;
+- `scripts/analyze_topic4_zm_fast_lifecycle_development.py`;
+- `tests/test_topic4_zm_fast_lifecycle_development.py`.
 
-1. missing/changed source or real-data reference →
-   `BLOCKED_input_or_observation_reference`;
-2. all six phi settings fail baseline preservation →
-   `NO_GO_D1_baseline_not_preserved`;
-3. no seed-1 setting passes both bounded-mid phases →
-   `NO_GO_D1_fast_carrier_not_formed`;
-4. survivors are burst trains, tonic/saturated, non-spatial, fail vSEEG or fail
-   perturbation return → the corresponding registered D1 negative;
-5. only seed-1 passes → `virtual_seeg_carrier_candidate_seed1`;
-6. replication, `dt/2` and perturbation return all pass →
-   `fast_ictal_carrier_supported`.
+Do not create a separate observation package, general coordinator, multi-module
+verdict framework or paper figure suite until Stage C is opened.
 
-No stop state may be relabeled as entry, offset, recovery, control or lifecycle.
+## Fixed resource discipline
+
+- `OMP_NUM_THREADS=MKL_NUM_THREADS=OPENBLAS_NUM_THREADS=NUMEXPR_NUM_THREADS=1`;
+- measure one production worker first;
+- compute worker count from measured RSS with the existing 1.25× margin;
+- retain at least 96 GB `MemAvailable` and eight logical CPUs;
+- never kill or modify peer-worktree processes;
+- one atomic NPZ + minimal JSON per run;
+- resume only missing or technical-invalid cells.
 
 ---
 
-## Task 1 — Close the upstream scientific audit
+## Task 1 — Minimal mechanism sanity, then stop engineering
 
-**Files**
+**Time/compute target:** less than one focused coding block; no production SNN.
 
-- `src/topic4_lifecycle_feasibility.py`
-- `scripts/run_topic4_lifecycle_feasibility.py`
-- `tests/test_topic4_lifecycle_feasibility.py`
-- `docs/archive/topic4/sef_hfo/zm_lifecycle_feasibility_screen_2026-08-01.md`
-- `docs/topic4_sef_hfo.md`
-- `docs/paper_overview.md`
+### Required tests
 
-- [ ] Keep the four scale calculations, but label them design-risk diagnostics.
-- [ ] Remove every executable or prose path that converts them into a proof that
-  the registered substrate cannot support a carrier or lifecycle.
-- [ ] Unit-test that the machine verdict is only `diagnostic_risks_present` or
-  `no_diagnostic_flags` and that all lifecycle fields remain unestablished.
-- [ ] Run:
+- [ ] Verify
 
-  ```bash
-  python -m pytest -q tests/test_topic4_lifecycle_feasibility.py
-  python scripts/run_topic4_lifecycle_feasibility.py
-  ```
+  `delta_phi = f_phi * gap / ((tau_phi_ms/1000) * r_core_ref_hz)`
 
-- [ ] Confirm the JSON version and archive wording agree exactly.
-- [ ] Commit this audit independently before any D1 execution code.
+  against a hand calculation; a factor-1000 error must fail.
+- [ ] Verify `use_phi=False` parity using the existing historical test, not a new
+  re-bless.
+- [ ] Verify enabled phi affects E thresholds only; I entries remain exact zero.
+- [ ] Verify one E spike gives one `delta_phi` jump and decay is
+  `exp(-dt/tau_phi)`.
+- [ ] Verify Arm-A freeze holds only \(z,m\) fixed; \(S_G\), phi, fast E/I,
+  delays and future noise remain active.
+- [ ] Verify Arm-A initial phi is zero and label it
+  `branch_intervention_not_reachability` in every output.
 
-**Acceptance:** engineering-green diagnostics with no hard non-existence claim.
+### Minimal implementation
 
-## Task 2 — Lock D1 source, mechanism and unit contract
+- [ ] Add only the wrapper code necessary to pass one of the six phi settings
+  into the existing current-based runtime.
+- [ ] Reject `use_zm_conductance=True` and any E→E semantic-hash change.
+- [ ] Add a `--smoke` output root that cannot be consumed by development runs.
 
-**Create**
-
-- `src/topic4_zm_d1_contract.py`
-- `scripts/lock_topic4_zm_d1.py`
-- `tests/test_topic4_zm_d1_contract.py`
-
-**Reuse/read only**
-
-- `src/topic4_zm_fast_carrier_contract.py`
-- `src/topic4_zm_fast_carrier_state.py`
-- `results/topic4_sef_hfo/zm_phase_c_tonic_identity/phasec_input_manifest.json`
-- `results/topic4_sef_hfo/zm_phase_c_tonic_identity/phasec_futility_verdict.json`
-- `results/topic4_sef_hfo/zm_branch_decision/phase0/canonical_config.json`
-
-- [ ] Write failing tests for exact seed `{1,3,4}` source hashes, source state
-  names, population sizes, Z/M constants, E→E semantic hashes and disabled
-  conductance path.
-- [ ] Make the manifest fail closed if Phase-C evidence claims more than 59/60
-  seed-1 C1 runs or a full three-seed negative.
-- [ ] Implement the six phi rows using the explicit `tau_ms/1000` conversion;
-  store source units, converted seconds, reference rate and resulting mV/spike.
-- [ ] Test against a hand calculation so a factor-1000 regression fails.
-- [ ] Hash the spec, plan, source checkpoints, exact noise banks, gate version,
-  observation lock and parameter rows.
-- [ ] Make publication write-once and idempotent only for identical content.
-- [ ] Emit all D2–D6 fields as `not_tested` / `not_established`.
-
-**Command**
-
-```bash
-python -m pytest -q tests/test_topic4_zm_d1_contract.py
-python scripts/lock_topic4_zm_d1.py --check-only
-```
-
-**Acceptance:** one immutable D1 manifest; no SNN run is authorized before it
-exists and validates from disk.
-
-## Task 3 — Build and freeze the real-data observation sidecar
-
-**Create**
-
-- `src/topic4_zm_d1_observation.py`
-- `scripts/lock_topic4_zm_d1_observation.py`
-- `tests/test_topic4_zm_d1_observation.py`
-
-**Canonical lineage**
-
-- `scripts/paper_figures/plot_fig3_raw_spectral_context.py`
-- `results/paper-ready-figure/fig3a_raw_spectral_context/figures/epilepsiae_1146_seizure_07_raw_spectral_context_summary.json`
-
-- [ ] Reuse the same raw loader, CAR transform, 15 contacts, `SCL9`, frequency
-  bands, baseline `[-120,-90)` and clinical `[0,10)` window.
-- [ ] Recompute, do not hand-copy: duration above 6 dB, occupancy, maximum gap,
-  mean/peak dB, active-contact fraction, dominant frequency and spectral entropy
-  for 30–80, 80–150 and 1–150 Hz.
-- [ ] Preserve the accepted means as a cross-check: about 23.34, 11.48 and
-  16.22 dB respectively.  Fail if recomputation drifts outside a documented
-  numerical tolerance.
-- [ ] Store raw source path/hash, seizure ID, contact ordering, sampling rate,
-  reference, code hash and exact feature definitions.
-- [ ] Unit-test time masks, dB baseline, gap calculation, entropy and a missing
-  source fail-closed path using synthetic arrays.
-- [ ] State explicitly that this is a representative descriptive comparator,
-  not a patient likelihood or cohort range.
-
-**Command**
-
-```bash
-python -m pytest -q tests/test_topic4_zm_d1_observation.py
-python scripts/lock_topic4_zm_d1_observation.py --check-only
-```
-
-**Acceptance:** immutable observation sidecar or a blocking verdict.  The D1
-carrier run must not silently fall back to source-rate-only classification.
-
-## Task 4 — Audit the existing phi hook and state migration
-
-**Modify only if an audit proves necessary**
-
-- `src/topic4_zm_fast_carrier_state.py`
-- `src/topic4_zm_fast_carrier_runtime.py`
-- `src/snn_engine/slow_field.py`
-
-**Tests**
-
-- `tests/test_zm_dynamic_threshold.py`
-- `tests/test_topic4_zm_fast_carrier_state.py`
-- `tests/test_topic4_zm_fast_carrier_runtime.py`
-- new `tests/test_topic4_zm_d1_runtime.py`
-
-- [ ] Prove `use_phi=False` returns the base threshold object/value unchanged
-  and preserves the historical baseline hash.
-- [ ] Prove enabled phi is E-only, I entries remain exact zero, decay is
-  `exp(-dt/tau_phi)`, and every E spike adds exactly `delta_phi` once.
-- [ ] Prove `slow.phi_increment` is the only inserted state field and is zero at
-  dynamic-baseline start and frozen-state fork start.
-- [ ] Prove the current-based path is used and `use_zm_conductance=False`.
-- [ ] Prove frozen D1 means only `z` and `m` are frozen: membrane effects,
-  `S_G`, phi, fast E/I state, delays and noise remain active.
-- [ ] Add the uniform E-threshold diagnostic offset outside persistent state for
-  the 50 ms return probe only; it must not alter I thresholds or write a state
-  reset.
-- [ ] Do not edit guarded E→E files.  If the hook is already sufficient, leave
-  engine code untouched and add only tests/wrapper code.
-
-**Command**
+### Command
 
 ```bash
 python -m pytest -q \
   tests/test_zm_dynamic_threshold.py \
   tests/test_topic4_zm_fast_carrier_state.py \
   tests/test_topic4_zm_fast_carrier_runtime.py \
-  tests/test_topic4_zm_d1_runtime.py
+  tests/test_topic4_zm_fast_lifecycle_development.py
 ```
 
-**Acceptance:** byte-parity off path and scientifically exact enabled path.
+**Hard checkpoint:** once these tests pass, start Task 2.  Do not add real-data,
+verdict, archive or formal plotting infrastructure here.
 
-## Task 5 — Implement dynamic-interictal baseline preservation
+## Task 2 — Immediately run the 24-cell phenotype discovery matrix
 
-**Create**
+**Scientific question:** can \(\phi\) break the tonic branch, and what does it
+produce instead?
 
-- `src/topic4_zm_d1_baseline.py`
-- `scripts/run_topic4_zm_d1_baseline.py`
-- `tests/test_topic4_zm_d1_baseline.py`
+### Locked matrix
 
-- [ ] Write pure analyzers for paired event count, median duration, median core
-  peak, all-sheet mean rate, peak active fraction, two-core readability,
-  pathology-axis sign and phi inter-event decay.
-- [ ] Use the exact native 8.5 s window and paired replay noise; do not infer a
-  new onset window from candidate traces.
-- [ ] Implement every ±20% and 80%-interval criterion literally and separately.
-- [ ] Distinguish `invalid_baseline_setting` from a carrier negative.
-- [ ] Save binned core/source/sink rates, all-sheet active fraction, virtual-SEEG
-  traces, phi core/surround/maximum traces and resource receipt.
-- [ ] Synthetic tests must catch prevention, changed event order, one-core loss,
-  silent sheet, excessive phi carryover and false pass from division by zero.
+- seed: 1;
+- checkpoints: `bounded_mid__rising`, `bounded_mid__peak`,
+  `bounded_late__rising`, `bounded_late__peak`;
+- phi panel: `tau_phi={60,100,160} ms × f_phi={0.15,0.30}`;
+- future noise: paired replay only;
+- duration: 6 s, with 1 s switch-on transient and 5 s description;
+- current-based membrane; dynamic \(S_G\); frozen \(z,m\); phi starts at zero.
 
-**Command**
+### Runner outputs
 
-```bash
-python -m pytest -q tests/test_topic4_zm_d1_baseline.py
-python scripts/run_topic4_zm_d1_baseline.py --smoke --seed 1 --row 0
-```
+- [ ] Reuse existing state/noise hashes and readout code.
+- [ ] Save core/surround/E/I rate, all-sheet active fraction, refractory
+  occupancy, phi/\(S_G\), spatial bins/kymograph and existing vSEEG proxy.
+- [ ] Write one minimal provenance JSON: seed, checkpoint, noise, parameter row,
+  code SHA, source hash, status and resource peak.
+- [ ] Quarantine partial output; exact valid reruns are idempotent.
 
-**Acceptance:** the smoke run is written to a smoke-only path and can never be
-consumed by the production verdict.
+### Phenotype analyzer
 
-## Task 6 — Implement frozen-state carrier runner
+- [ ] Classify each cell as `tonic`, `burst_train`,
+  `spatially_relayed_carrier`, `metastable_carrier_like`, `silence`,
+  `whole_sheet_oscillation`, `runaway` or `technical_invalid`.
+- [ ] Report modulation, persistence/gaps, refractory occupancy, axial latency,
+  spatial active fraction and v2.1 operational gate fields separately.
+- [ ] Do not require perturbation return, real-data sidecar or AI.
+- [ ] Produce one phenotype-matrix CSV/JSON and one compact diagnostic figure
+  containing representative rate, phi, vSEEG and kymograph traces.
+- [ ] Write a short Chinese `figures/README.md` after the figure exists.
 
-**Create**
+### Execution
 
-- `src/topic4_zm_d1_runner.py`
-- `scripts/run_topic4_zm_d1_carrier.py`
-- `tests/test_topic4_zm_d1_runner.py`
-
-- [ ] Load only the four locked Phase-C states:
-  `bounded_mid__{rising,peak}` and `bounded_late__{rising,peak}`.
-- [ ] Validate complete state/RNG/checkpoint hashes before allocation.
-- [ ] Freeze per-neuron z and m values with their membrane effects active;
-  initialize phi to zero; keep dynamic `S_G` and exact delay rings.
-- [ ] Run 6 s: 1 s burn-in + 5 s adjudication, with no onset kick.
-- [ ] Save enough raw/binned state to recompute all source, vSEEG, spatial,
-  saturation, E/I-lag and phi metrics offline.
-- [ ] Atomically publish NPZ, JSON and resource receipt.  Existing valid output
-  is immutable; incomplete output is quarantined, never overwritten in place.
-- [ ] Tests must catch wrong fork, wrong fast phase, z/m drift, phi nonzero start,
-  noise reuse drift and adjudication leakage from burn-in.
-
-**Command**
-
-```bash
-python -m pytest -q tests/test_topic4_zm_d1_runner.py
-python scripts/run_topic4_zm_d1_carrier.py --smoke --seed 1 \
-  --state bounded_mid__rising --row 0
-```
-
-## Task 7 — Implement carrier and spatial adjudication
-
-**Create**
-
-- `src/topic4_zm_d1_metrics.py`
-- `tests/test_topic4_zm_d1_metrics.py`
-
-**Reuse**
-
-- `src/topic4_zm_carrier_gate_v2.py`
-- Phase-C corrected-v2 saturation and morphology helpers where contracts match
-
-- [ ] Call `carrier_gate_v2.1_revised_2026-07-24` rather than reimplementing it.
-- [ ] Compute bounded persistence, occupancy, gap, modulation depth, periodic or
-  relayed organization, full vSEEG Gate B, two-zone recruitment, axial
-  first-passage, simultaneous-flash rejection and combined refractory saturation.
-- [ ] Keep source carrier, virtual-SEEG carrier, spatial pattern, microscopic
-  saturation and real-reference comparison as separate fields.
-- [ ] AI/regularity is secondary and cannot veto an otherwise valid carrier.
-- [ ] Distinguish HFO-like burst train, tonic/saturated, whole-sheet flash,
-  silence, runaway and technically indeterminate traces.
-- [ ] Synthetic fixtures must include at least: valid relayed carrier, valid
-  non-AI carrier, burst train, tonic plateau, whole-sheet flash, runaway and a
-  quiet-contact dB artifact.
-
-**Command**
-
-```bash
-python -m pytest -q \
-  tests/test_topic4_zm_carrier_gate_v2.py \
-  tests/test_topic4_zm_d1_metrics.py
-```
-
-**Acceptance:** a positive requires all primary layers, not a firing-rate label.
-
-## Task 8 — Lock and implement the perturbation-return test
-
-**Create**
-
-- `src/topic4_zm_d1_return.py`
-- `scripts/lock_topic4_zm_d1_perturbation.py`
-- `tests/test_topic4_zm_d1_return.py`
-
-- [ ] Before opening candidate outcomes, calibrate on `A_native`
-  `bounded_mid__rising` only.
-- [ ] Use deterministic bisection for the smallest all-E 50 ms threshold uplift
-  causing 50–70% paired core-spike reduction without ≥100 ms all-sheet rest.
-- [ ] Freeze amplitude, all-E mask and exact fork-relative time 3.0 s.
-- [ ] Implement return within 1 s, median period/frequency within 20%, same axial
-  phase sign and phase-profile circular correlation ≥0.80.
-- [ ] Keep `metastable_survival_without_return` distinct from attractor support.
-- [ ] Prove the pulse does not touch z, m, phi state, currents, RNG or I thresholds.
-- [ ] Label it a state-space robustness probe, never D5 control.
-
-**Command**
-
-```bash
-python -m pytest -q tests/test_topic4_zm_d1_return.py
-python scripts/lock_topic4_zm_d1_perturbation.py --check-only
-```
-
-## Task 9 — Build the fail-closed verdict and coverage model
-
-**Create**
-
-- `src/topic4_zm_d1_verdict.py`
-- `tests/test_topic4_zm_d1_verdict.py`
-
-- [ ] Encode the stop hierarchy at the top of this plan as a pure function.
-- [ ] Require both bounded-mid phases before opening bounded-late.
-- [ ] Require the registered seed-1 adjacent-checkpoint rule and both-phase
-  perturbation returns.
-- [ ] For replication require 5/6 per seed cell, ≥2/3 per fast phase, seeds 1
-  and 3 support, seed 4 non-opposite, seeds 1/3 `dt/2`, and replicated return.
-- [ ] A missing required artifact is `no_evidence`/blocked, never a scientific
-  negative and never a default positive/negative enum.
-- [ ] Ensure smoke, superseded, invalidated and technical-failure outputs cannot
-  enter production coverage.
-- [ ] Store all D2–D6 fields literally as not tested.
-
-**Command**
-
-```bash
-python -m pytest -q tests/test_topic4_zm_d1_verdict.py
-```
-
-## Task 10 — Add adaptive parallel execution and resource receipts
-
-**Create**
-
-- `scripts/run_topic4_zm_d1_parallel.py`
-- `tests/test_topic4_zm_d1_parallel.py`
-
-**Reuse**
-
-- `src/topic4_zm_phasec_resources.py`
-- Phase-C crash-safe coordinator patterns
-
-- [ ] Run one complete production-sized worker before parallel launch and record
-  peak RSS, elapsed time, `VmSwap`, host memory and CPU count.
-- [ ] Compute concurrency as the minimum of: 12 workers, available-memory
-  budget using the existing 1.25× formula with 96 GB reserve, and logical CPUs
-  minus 8.  Never hard-code 12 as safe.
-- [ ] Set OMP/MKL/OpenBLAS/NumExpr threads to one in parent and workers.
-- [ ] Poll process liveness and `VmSwap` at least every 5 s; stop launching new
-  cells if reserve is breached, but do not kill peer-worktree processes.
-- [ ] Resume only missing/technical-invalid cells.  Scientific failures remain
-  terminal and cannot trigger retuning.
-- [ ] Persist a coordinator receipt after every terminal cell so network loss is
-  recoverable.
-- [ ] Unit-test stale PID, partial file, mixed smoke/production, peer PID and
-  memory-reserve calculations.
-
-**Command**
-
-```bash
-python -m pytest -q tests/test_topic4_zm_d1_parallel.py
-```
-
-## Task 11 — Execute the cheap-first baseline gate
-
-- [ ] Publish the real-data lock, perturbation lock and D1 manifest first.
-- [ ] Run `A_native` and one production-sized phi row for resource calibration.
-- [ ] Launch the remaining six paired seed-1 dynamic-baseline rows with adaptive
-  concurrency.
-- [ ] Analyze and publish `baseline_preservation_matrix.json`.
-- [ ] If all six fail, publish `NO_GO_D1_baseline_not_preserved`, generate the
-  baseline figure/README and stop all carrier execution.
-- [ ] If one or more pass, freeze the eligible row list before looking at carrier
-  outcomes.
-
-**Production command shape**
+First measure one complete cell, then launch as many workers as the measured RSS
+allows under the fixed reserve:
 
 ```bash
 OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 \
 NUMEXPR_NUM_THREADS=1 \
-python scripts/run_topic4_zm_d1_parallel.py --phase baseline --confirm-run
+python scripts/run_topic4_zm_fast_lifecycle_development.py \
+  discovery --confirm-run --workers auto
+
+python scripts/analyze_topic4_zm_fast_lifecycle_development.py discovery
 ```
 
-## Task 12 — Execute seed-1 carrier and return gates
+### Required stage report
 
-- [ ] Run every baseline-eligible row on bounded-mid rising and peak.
-- [ ] Analyze each cell immediately, but do not change the panel.
-- [ ] Only rows passing both mid phases proceed to bounded-late rising and peak.
-- [ ] If no row survives, publish the correct D1 negative and stop.
-- [ ] For survivors, run the fixed perturbation return on both phases and then
-  candidate-only `S_G` clamp / no-`S_G` ablations.
-- [ ] Freeze the seed-1 survivor list and verdict before replication.
+Before additional implementation, record:
+
+- which phenotypes occurred;
+- whether a tonic→burst/carrier→silence boundary is visible;
+- top zero, one or two Stage-B candidates;
+- whether one bounded local refinement direction is justified.
+
+If every valid cell remains tonic/runaway/silent without a coherent boundary,
+stop the phi-only line as
+
+`NO_CARRIER_IN_REGISTERED_PHI_PANEL_AND_TESTED_STATES`.
+
+Do not generalise this to all dynamic-threshold mechanisms.
+
+## Task 3 — One bounded refinement round, only if earned
+
+Open this task only if Task 2 finds a coherent boundary or carrier-like near
+miss.  The decision and nearest parent cell must be written before each new run.
+
+### Allowed neighbors
+
+- tonic near active boundary → one stronger point with `f_phi=0.45`;
+- silence next to an active phenotype → one weaker point with `f_phi=0.075`;
+- burst-train time-scale boundary → one `tau_phi=40` or `240 ms` neighbor;
+- total added combinations ≤4;
+- no second refinement round.
+
+If active cells are dominated specifically by whole-sheet synchrony, the only
+backup is the predeclared GABA-decay diagnostic at the best phi cell:
+
+- canonical `tau_d_GABA=18 ms`;
+- diagnostic neighbors `12 ms` and `24 ms`;
+- no E→E change and no broader inhibitory grid.
+
+### Execution
 
 ```bash
-python scripts/run_topic4_zm_d1_parallel.py --phase carrier-seed1 --confirm-run
-python scripts/analyze_topic4_zm_d1.py --phase seed1
+python scripts/run_topic4_zm_fast_lifecycle_development.py \
+  refine --decision-json <locked_decision.json> --confirm-run --workers auto
+python scripts/analyze_topic4_zm_fast_lifecycle_development.py refine
 ```
 
-## Task 13 — Conditional replication and numerical confirmation
+### Selection
 
-Run only if Task 12 has a seed-1 survivor.
+Promote at most two candidates, prioritising:
 
-- [ ] For seeds 1, 3, 4 run two fast phases × three locked future-noise banks.
-- [ ] Do not recalibrate delta-phi by seed.
-- [ ] Run independent `dt/2` confirmations for seeds 1 and 3.
-- [ ] Replicate fixed perturbation return on seeds 1 and 3.
-- [ ] Apply the exact replication rule in Task 9 and publish one final verdict.
-- [ ] If the class changes at `dt/2`, emit `resolution_sensitive_fast_carrier`.
+1. bounded non-tonic dynamics without refractory hard saturation;
+2. spatial relay over common-mode synchrony;
+3. sustained vSEEG occupancy/energy over isolated burst spikes;
+4. distance from silence/runaway boundaries;
+5. distinct phenotypes when two candidates survive.
+
+Freeze only the selected candidates for Task 4.  Discovery neighbors cannot be
+silently added to later confirmation panels.
+
+## Task 4 — Run the end-to-end reachable lifecycle vertical slice
+
+**This is the route-decision experiment.**  Run it before multi-seed, \(dt/2\),
+real-data rebuilding or formal archive work.
+
+### 4.1 Reachable trajectory
+
+For each top candidate:
+
+- [ ] start from the original interictal initial condition;
+- [ ] enable \(\phi,z,m,S_G\) from \(t=0\) with fixed equations and parameters;
+- [ ] do not load old fast states or initialise phi at an ictal checkpoint;
+- [ ] run through the original escalation window and at least 10 s after the
+  first sustained high-activity episode, capped at 30 s for development;
+- [ ] keep rolling/full checkpoints sufficient to fork a matched reachable
+  carrier state without changing the uncontrolled trajectory.
+
+### 4.2 Baseline assessment
+
+Hard failure only for:
+
+- persistent silence;
+- pre-carrier runaway or whole-sheet plateau;
+- complete loss of returning events from both cores;
+- loss of pathology-axis geometry or simultaneous whole-sheet flash.
+
+Report event count, intervals, duration, amplitude, all-sheet rate, core balance
+and phi carryover as continuous deviations.  Do not apply the old ±20% or 10%
+phi-decay hard gates during development.
+
+### 4.3 Identity and slow-flow assessment
+
+- [ ] Determine whether the reachable trajectory enters the same phenotype
+  family as the old-checkpoint discovery arm.
+- [ ] Report \(z,m,\phi,S_G\) trajectories and derivatives through interictal,
+  entry, maintenance and decline.
+- [ ] An Arm-A candidate not reproduced here is
+  `unreachable_frozen_phenotype`, irrespective of replication on old states.
+- [ ] If no candidate episode occurs by 30 s, label it
+  `no_reachable_entry_within_development_horizon`, not global unreachability.
+
+### 4.4 Native and controlled exit branches
+
+From identical reachable carrier checkpoints/RNG state:
+
+**Native:** continue without intervention.
+
+**Controlled:** apply a 50 ms E-threshold uplift with
+
+`dose/gap={0,0.05,0.10,0.20}`
+
+at the active pathological core and at all E cells.  Record return, exit,
+permanent silence, rebound, recovery time and returning events.  This is a
+developmental susceptibility map, not an efficacy claim.
+
+For each site/dose, use replay plus the two existing resampled future-noise
+continuations from the same reachable state.  Report descriptive fractions over
+these three continuations; do not attach inferential confidence or call them
+control-efficacy probabilities.
+
+Do not require a candidate to return after the pulse.  Estimate/describe
+`P(return|u)` and `P(exit|u)` across the paired forks.  A controllable
+metastable episode is allowed to survive route selection.
+
+### 4.5 Vertical-slice outcomes
+
+Publish exactly one of:
+
+- `unreachable_frozen_phenotype`;
+- `no_reachable_entry_within_development_horizon`;
+- `reachable_carrier_no_exit_route`;
+- `reachable_native_offset_no_recovery`;
+- `suppression_without_recovery`;
+- `spontaneous_onset_with_controllable_termination_candidate`;
+- `autonomous_lifecycle_candidate`;
+- `lifecycle_compatible_candidate`.
+
+The last three open Task 5.  A candidate with controlled exit but no native
+offset is scientifically distinct from an autonomous lifecycle and must remain
+labelled that way.
+
+### Execution
 
 ```bash
-python scripts/run_topic4_zm_d1_parallel.py --phase replicate --confirm-run
-python scripts/run_topic4_zm_d1_parallel.py --phase dt2 --confirm-run
-python scripts/analyze_topic4_zm_d1.py --phase final
+python scripts/run_topic4_zm_fast_lifecycle_development.py \
+  vertical-slice --candidate-json <selected_candidates.json> \
+  --confirm-run --workers auto
+python scripts/analyze_topic4_zm_fast_lifecycle_development.py vertical-slice
 ```
 
-## Task 14 — Figures, archive, documentation and final acceptance
+## Task 5 — Conditional locked confirmation
 
-**Create**
+Do not implement or execute this task unless Task 4 opens it.
 
-- `scripts/plot_topic4_zm_d1.py`
-- `tests/test_topic4_zm_d1_plot.py`
-- `results/topic4_sef_hfo/zm_d1_fast_ictal_carrier/figures/README.md`
-- `docs/archive/topic4/sef_hfo/zm_d1_fast_ictal_carrier_2026-08-01.md`
+### Lock before confirmation
 
-**Modify**
+- [ ] candidate equations and parameter values;
+- [ ] seeds 1/3/4 and future-noise panel;
+- [ ] full observation and phenotype definitions;
+- [ ] representative E1146 seizure-7 Fig3-A sidecar and provenance;
+- [ ] native/control/sham/matched-energy conditions;
+- [ ] ablations and \(dt/2\) cells;
+- [ ] resource/coverage policy and claim vocabulary.
 
-- `docs/topic4_sef_hfo.md`
-- `docs/paper_overview.md`
-- `docs/archive/topic4/INDEX.md`
+### Confirmation experiments
 
-- [ ] Plot baseline preservation + phi decay; source/E-I/vSEEG/spatial carrier;
-  perturbation return; and complete coverage/verdict.
-- [ ] Follow `docs/figure_style_guide.md` Topic-4 rules.  These are diagnostic
-  carrier figures, not a Figure-5 lifecycle claim.
-- [ ] Create the Chinese figure README after actual figures exist, with one
-  `### filename` block and a final `**关注点**：` line per figure.
-- [ ] Archive what was tested/how/verdict/claim boundary/ablation/resource and
-  exact unresolved lifecycle legs.
-- [ ] Keep Phase C, Phase D, diagnostic review and D1 evidence separate.
-- [ ] Run visual QA on every PNG, not only file-existence tests.
+- [ ] reproduce the reachable carrier/lifecycle phenotype across seeds/noise;
+- [ ] confirm at \(dt/2\);
+- [ ] compare pre- and post-event interictal distributions on longer runs;
+- [ ] run vSEEG real-data comparison;
+- [ ] ablate phi, dynamic \(S_G\), and any selected fast-I backup;
+- [ ] test native versus controlled exit with sham and matched energy;
+- [ ] only now build the immutable manifest, formal verdict, archive and
+  paper-facing diagnostic figure set.
 
-**Final verification**
+The exact confirmatory thresholds must be written after Task 4 candidate
+selection but before any validation seed/noise output is opened.  Discovery data
+cannot count as confirmation.
 
-```bash
-python -m pytest -q \
-  tests/test_topic4_lifecycle_feasibility.py \
-  tests/test_zm_dynamic_threshold.py \
-  tests/test_topic4_zm_carrier_gate_v2.py \
-  tests/test_topic4_zm_d1_contract.py \
-  tests/test_topic4_zm_d1_observation.py \
-  tests/test_topic4_zm_d1_runtime.py \
-  tests/test_topic4_zm_d1_baseline.py \
-  tests/test_topic4_zm_d1_runner.py \
-  tests/test_topic4_zm_d1_metrics.py \
-  tests/test_topic4_zm_d1_return.py \
-  tests/test_topic4_zm_d1_verdict.py \
-  tests/test_topic4_zm_d1_parallel.py \
-  tests/test_topic4_zm_d1_plot.py
+## Commit checkpoints
 
-git status --short
-ps -eo pid,ppid,rss,etime,args | rg 'topic4_zm_d1|run_topic4_zm' || true
-```
+1. `docs(topic4): revise fast-carrier route to development vertical slice`
+2. `feat(topic4): run phi phenotype discovery on frozen tonic states`
+3. conditional `feat(topic4): map reachable carrier exit susceptibility`
+4. conditional `docs(topic4): lock lifecycle candidate confirmation`
 
-## Required commit sequence
-
-1. `fix(topic4): downgrade lifecycle scale screen to diagnostics`
-2. `docs(topic4): lock D1 fast-carrier spec and execution plan`
-3. `feat(topic4): lock D1 inputs and observation reference`
-4. `feat(topic4): implement D1 baseline and frozen-carrier runners`
-5. `feat(topic4): adjudicate D1 carrier and perturbation return`
-6. `docs(topic4): archive D1 fast-carrier verdict`
-
-Do not combine unreviewed scientific outputs with infrastructure commits.  Do
-not push or merge unless explicitly authorized.  A clean worktree and green
-tests establish engineering closure; the final JSON gate establishes the D1
-scientific verdict.
+Do not push or merge unless explicitly authorised.  A green Task-1 test suite is
+engineering readiness; Task-2 and Task-4 results determine scientific progress.

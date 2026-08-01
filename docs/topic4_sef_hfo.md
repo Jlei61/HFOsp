@@ -37,14 +37,16 @@
 > `results/topic4_sef_hfo/zm_lifecycle_feasibility/feasibility_verdict.json`；归档
 > `docs/archive/topic4/sef_hfo/zm_lifecycle_feasibility_screen_2026-08-01.md`。
 >
-> **下一节点 D1 fast-carrier existence（2026-08-01，spec/plan 已锁，尚未执行）**：完整路线
-> 固定为 D1 carrier → D2 endogenous entry → D3 native offset → D4 recovery/multicycle →
-> D5 control → D6 shared-scaffold causality；本轮只授权 D1。D1 回到通过 baseline 的原
-> current-based per-neuron Z/M SNN，冻结 E→E 与全部慢变量方程，只测试已实现但未被 Phase D
-> 单独运行的 E-only per-neuron dynamic-threshold increment。先过 8.5 s dynamic interictal
-> baseline preservation，再在四个 Phase-C visited states 上做 frozen \(z/m\) carrier、真实
-> Fig3-A observation sidecar、空间招募与固定扰动返回门；不把 AI 设为唯一 carrier，也不把
-> 扰动返回称为治疗控制。Hz–ms 标定显式使用 \(\tau_\phi/1000\)。spec =
+> **下一节点 fast dynamics → lifecycle vertical slice（2026-08-01，rev2，尚未执行）**：rev1
+> 把 development 问题写成了过重的确认性 D1 gate，并错误要求强扰动后必须返回同一 carrier；
+> 现已改为三阶段。Stage A 立即运行 seed-1 的 6 个 \(\phi\) 参数 × 4 个旧 Phase-C checkpoint，
+> 只作 branch-intervention phenotype discovery；允许一次最多 4 点的有界局部 refinement。
+> Stage B 在 multi-seed 前，把 top 1–2 候选放回 \(\phi/z/m/S_G\) 从间期起全动态的自身轨迹，
+> 同时测试 reachability、native-exit tendency、有限控制退出和 returning-event recovery。
+> Stage C 只对 lifecycle-compatible candidate 做真实 Fig3-A sidecar、多 seed/noise、\(dt/2\)、
+> ablation 和正式归档。baseline 仅 silence/runaway/双 core 事件全失/轴丢失为 development hard
+> failure；旧 ±20% 与扰动返回不再是 discovery gate。E→E 与 conductance 路线仍冻结；Hz–ms
+> 标定继续显式使用 \(\tau_\phi/1000\)。spec =
 > `docs/superpowers/specs/2026-08-01-topic4-zm-d1-fast-ictal-carrier-existence-design.md`；plan =
 > `docs/superpowers/plans/2026-08-01-topic4-zm-d1-fast-ictal-carrier-existence.md`。
 >
@@ -60,8 +62,8 @@
 > 不存在、不能写局部/全局 GABA 空间结构已被否证，更不能写 entry/offset/recovery/lifecycle。
 > 该轮曾自评下一节点为 baseline-preserving state-dependent homotopy
 > \(\lambda_i=\Lambda(1-z_i)\)；2026-08-01 复核后未采用，因为这会继续扩展未保 baseline 的
-> conductance 路线。当前 D1 改为先单独检验已经存在、default-off parity 已通过但
-> baseline preservation 仍待实测的 dynamic-threshold hook（见上方锁定 spec/plan）。归档：
+> conductance 路线。当前 rev2 先用该 default-off parity 已通过的 dynamic-threshold hook
+> 做最小 phenotype discovery，再立即进入 reachable vertical slice（见上方 spec/plan）。归档：
 > `docs/archive/topic4/sef_hfo/zm_fast_carrier_repair_phaseD_2026-07-31.md`。
 >
 > **Z/M Phase C post-result futility stop（2026-07-31）**：C0 已完成；C1 在用户授权停止前完成
