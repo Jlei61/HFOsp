@@ -11,6 +11,15 @@
 **SEF-HFO**（Spatial Excitability Field model for interictal HFO propagation）：
 
 - 主文档：`docs/topic4_sef_hfo.md`
+- **2026-08-01 Z/M lifecycle 量级诊断复核 + D1 新节点**：
+  `sef_hfo/zm_lifecycle_feasibility_screen_2026-08-01.md` 撤回旧的
+  `infeasible_registered_substrate` / “4/4 算术证明不可能”语义；四项量级只保留为
+  design-risk diagnostics。后续路线锁为 D1 carrier → D2 entry → D3 offset → D4
+  recovery/multicycle → D5 control → D6 shared-scaffold causality；当前只授权冻结 slow
+  state 下的 D1。spec =
+  `docs/superpowers/specs/2026-08-01-topic4-zm-d1-fast-ictal-carrier-existence-design.md`；
+  plan =
+  `docs/superpowers/plans/2026-08-01-topic4-zm-d1-fast-ictal-carrier-existence.md`。
 - **2026-08-01 Z/M Phase C completion audit**：
   `sef_hfo/zm_phase_c_completion_audit_2026-08-01.md`。结论 =
   `ACCEPT_PHASEC_POST_RESULT_FUTILITY_STOP`：C0 的 153/153 parts、固定 panel、

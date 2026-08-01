@@ -24,6 +24,46 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
+> **Z/M 生命周期量级诊断复核（2026-08-01）**：Phase A–D 与 FCXR-HYB1 暴露出四个可在
+> 跑前计算的 design risks：① 当前 \(m\) 的 refractory-capped current scale 为 0.25 mV，
+> 相对 reset→threshold gap 较小；② \(z\) 在 ictal state 中继续向耗竭方向走，不能同时承担
+> sole-offset coordinate；③ \(S_G\) 的 post-activity decay 只有 80 ms，不能单独提供长
+> postictal memory；④ Phase-C tonic core 约 439 Hz，靠近 500 Hz refractory ceiling。
+> 初版把这四项错误提升成“4/4 算术不可能”的硬门；复核后已撤回：小电流仍可能跨网络
+> 分岔、80 ms driven feedback 可影响多秒状态、高均值不排除向下 modulation，且 entry latch
+> 可以由独立 offset variable 补足。当前机器输出只允许 `diagnostic_risks_present`，**不允许**
+> `infeasible`，也不授权或阻止仿真。真正的 GO/NO-GO 必须来自 dynamic baseline、frozen-state
+> carrier、扰动返回和 observation gates。实现 `src/topic4_lifecycle_feasibility.py`；诊断
+> `results/topic4_sef_hfo/zm_lifecycle_feasibility/feasibility_verdict.json`；归档
+> `docs/archive/topic4/sef_hfo/zm_lifecycle_feasibility_screen_2026-08-01.md`。
+>
+> **下一节点 D1 fast-carrier existence（2026-08-01，spec/plan 已锁，尚未执行）**：完整路线
+> 固定为 D1 carrier → D2 endogenous entry → D3 native offset → D4 recovery/multicycle →
+> D5 control → D6 shared-scaffold causality；本轮只授权 D1。D1 回到通过 baseline 的原
+> current-based per-neuron Z/M SNN，冻结 E→E 与全部慢变量方程，只测试已实现但未被 Phase D
+> 单独运行的 E-only per-neuron dynamic-threshold increment。先过 8.5 s dynamic interictal
+> baseline preservation，再在四个 Phase-C visited states 上做 frozen \(z/m\) carrier、真实
+> Fig3-A observation sidecar、空间招募与固定扰动返回门；不把 AI 设为唯一 carrier，也不把
+> 扰动返回称为治疗控制。Hz–ms 标定显式使用 \(\tau_\phi/1000\)。spec =
+> `docs/superpowers/specs/2026-08-01-topic4-zm-d1-fast-ictal-carrier-existence-design.md`；plan =
+> `docs/superpowers/plans/2026-08-01-topic4-zm-d1-fast-ictal-carrier-existence.md`。
+>
+> **Z/M Phase D fast-carrier repair —— baseline gate NO-GO（2026-07-31）**：Phase D 在正确的
+> per-neuron Z/M 空间 SNN 上落地了 conductance 膜、\(z\) 对 GABA conductance 的缩放、
+> \(m\) 作为 \(E_K\) sAHP、以及 E-only 的 60–160 ms dynamic threshold；五个 Phase-C
+> checkpoint 的状态迁移与旧 current-based Arm-A **逐位一致**，off-by-default 路径
+> byte-parity 保持。但在锁定的 reversals、effective-charge anchor 与 \([0.8,1.2]\)
+> scale 范围内，**最有利于 E 放电的三格（\(s_E=1.2\)）在 8.5 s 内 E spike 数为 0**
+> （同窗 current-based reference 为 810,045），median \(V_{\infty}\) 从 11.97 mV 掉到
+> 7.65 mV。本轮因此终止在 **baseline preservation 门**：新膜律没有保住原来的间期发生器，
+> B/C/D carrier arm 未获准运行。不能写 conductance inhibition 普遍失败、不能写 carrier
+> 不存在、不能写局部/全局 GABA 空间结构已被否证，更不能写 entry/offset/recovery/lifecycle。
+> 该轮曾自评下一节点为 baseline-preserving state-dependent homotopy
+> \(\lambda_i=\Lambda(1-z_i)\)；2026-08-01 复核后未采用，因为这会继续扩展未保 baseline 的
+> conductance 路线。当前 D1 改为先单独检验已经存在、default-off parity 已通过但
+> baseline preservation 仍待实测的 dynamic-threshold hook（见上方锁定 spec/plan）。归档：
+> `docs/archive/topic4/sef_hfo/zm_fast_carrier_repair_phaseD_2026-07-31.md`。
+>
 > **Z/M Phase C post-result futility stop（2026-07-31）**：C0 已完成；C1 在用户授权停止前完成
 > seed-1 primary 59/60 continuations。whole-sheet runaway scope 修正后 59/59 都是
 > `tonic_non_AI`：pathology-core 约 436–443 Hz、all-sheet 约 140–160 Hz，fine-rate
@@ -33,9 +73,11 @@
 > `post_result_futility_stopped_incomplete`，**不是**三 seed 完整 bounded negative。
 > 结论：frozen \(Z/M/S_G\) 坐标只在局部高率低调制 tonic fast branch 上移动工作点；
 > 下一步转独立 Phase D fast-carrier repair，只改 inhibitory/membrane feedback，E→E
-> 完全冻结。归档：
+> 完全冻结。**（该 Phase D 已于 2026-07-31 执行完毕并在 baseline gate 返回 NO-GO，
+> 见上方条目；此处保留的是 Phase C 当时的下一步判断，不是当前计划。）** 归档：
 > `docs/archive/topic4/sef_hfo/zm_phase_c_tonic_identity_futility_2026-07-31.md`；
-> 新 spec：
+> 完整验收边界：`docs/archive/topic4/sef_hfo/zm_phase_c_completion_audit_2026-08-01.md`；
+> 该轮 spec：
 > `docs/superpowers/specs/2026-07-31-topic4-zm-snn-fast-carrier-repair-design.md`。
 >
 > **Z/M minimal-carrier branch decision（2026-07-28）**：revision 3.1 已完成，
@@ -931,6 +973,8 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 ## 13. 历史文档索引
 
+- **生命周期量级诊断复核（2026-08-01）**：`docs/archive/topic4/sef_hfo/zm_lifecycle_feasibility_screen_2026-08-01.md` —— 保留刹车尺度 / slow-variable direction / post-activity hold / refractory headroom 四项定量风险，但撤回“4/4 算术不可能”的硬门。机器只输出 diagnostic flags；科学 GO/NO-GO 仍由行为和状态空间实验决定。实现 = `src/topic4_lifecycle_feasibility.py` + `scripts/run_topic4_lifecycle_feasibility.py`。
+- **Z/M carrier→lifecycle 线（2026-07-24 → 2026-08-01，全部未建立 lifecycle）**：`zm_ictal_carrier_gate_2026-07-24.md`（HFO burst train 非 carrier）→ `zm_carrier_exit_line_acceptance_2026-07-26.md`（entry→runaway 成立；\(S_G\) 只 bound 不 terminate）→ `zm_minimal_carrier_branch_decision_2026-07-28.md`（frozen visited-state carrier 确认，entry/offset/recovery 未建立）→ `zm_phase_c_tonic_identity_futility_2026-07-31.md` + `zm_phase_c_completion_audit_2026-08-01.md`（post-result futility stop，非完整 bounded negative）→ `zm_fast_carrier_repair_phaseD_2026-07-31.md`（baseline gate NO-GO，零放电）。
 - `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md` —— **病理→中观→参数映射纪律 + 首轮调参 plan**（连接性 E→E 核「定往哪传」+ E 阈值异质性「定哪里点着」，LIF/SNN 并行）；framework §2 / §7.3 / §8.4 的可执行细化；癫痫方向锚 Rich/Huberfeld/Lepeu
 - `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md` —— **CURRENT v2 plan**，SEF-HFO 主模型路线（线性稳定性 → rate field → LIF SNN → 慢变量桥接）
 - **cm-SNN 观测层（Step 4 spiking 执行线，探索性）**：
