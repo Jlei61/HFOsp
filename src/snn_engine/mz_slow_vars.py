@@ -250,6 +250,9 @@ class MZSlowVars:
         # runner AFTER construction; None -> never called -> byte parity. Pure side-effect: it only
         # reduces the already-computed E-cell components onto the electrode weights.
         self.seeg_observer = None
+        # LC2 R1 raw recurrent-conductance observer.  Assigned after construction by the dedicated
+        # runner; None is the byte-parity default.  It reads gErec_raw only and cannot write state.
+        self.h_lc2_observer = None
         if self.cfg.use_pump:
             if self.cfg.pump_u_init_E is not None:              # start equilibrated (no startup transient)
                 u0 = np.asarray(self.cfg.pump_u_init_E, float)
@@ -473,6 +476,8 @@ class MZSlowVars:
                 gEff = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_ffE
             if c.rec_conductance:
                 gErec_raw = c.c_E * I_recE / denomE
+                if self.h_lc2_observer is not None:
+                    self.h_lc2_observer.sample(gErec_raw, self._step_i)
                 if c.use_h_lc2:
                     # LC2: I_E_rec has ALREADY passed through the presynaptic X relay and delay/filter
                     # path.  Cache precisely this raw, pre-saturation conductance as the NEXT H source.

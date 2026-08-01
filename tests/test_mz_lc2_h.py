@@ -14,11 +14,13 @@ import pytest
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(ROOT, "src", "snn_engine"))
+sys.path.insert(0, ROOT)
 
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig, lc2_h_gate  # noqa: E402
 from params import Params  # noqa: E402
 from connectivity import place_neurons, build_connectivity  # noqa: E402
 from kick_probe import simulate_kick  # noqa: E402
+from src.topic4_fcxr_lc2_core import RawGASampler, replay_h, contiguous_true_intervals  # noqa: E402
 
 
 def _cfg(**kw):
@@ -202,3 +204,44 @@ def test_lc2_h_active_500ms_smoke_is_deterministic_finite_and_bounded():
     assert max(sa.trace_gH_lc2_max) > 0.0
     assert max(sa.trace_conductance_clip_frac) == 0.0
     np.testing.assert_array_equal(sa.h_lc2_E, sb.h_lc2_E)
+
+
+def test_raw_ga_sampler_block_averages_without_full_time_matrix():
+    obs = RawGASampler(4, np.array([0, 3]), stride_steps=2)
+    obs.sample(np.array([0.0, 1.0, 2.0, 3.0]), 0)
+    obs.sample(np.array([2.0, 3.0, 4.0, 5.0]), 1)
+    obs.sample(np.ones(4), 2)  # incomplete trailing block is retained only as a count
+    a = obs.arrays()
+    np.testing.assert_array_equal(a["gA_sampled"], np.array([[1.0, 4.0]], np.float32))
+    np.testing.assert_allclose(a["gA_population_summary"][0], [2.5, 2.5, 3.7, 3.97])
+    assert a["n_pending_steps"].item() == 1
+
+
+def test_raw_ga_sampler_hook_reads_pre_tanh_source_without_enabling_h():
+    mz = _slow(_cfg(use_h_lc2=False, rho_h_lc2=0.0))
+    obs = RawGASampler(4, np.array([0, 1, 2, 3]), stride_steps=2)
+    mz.h_lc2_observer = obs
+    args = _inputs(raw=(1.0, 0.5, 0.0, 2.0))
+    out0 = mz.membrane_terms(*args[:2], I_E_rec=args[2])
+    mz.step(np.zeros(6, bool), None, 0.1)
+    out1 = mz.membrane_terms(*args[:2], I_E_rec=args[2])
+    np.testing.assert_array_equal(obs.arrays()["gA_sampled"][0], np.array([1.0, 0.5, 0.0, 2.0]))
+    expected = 10.0 * np.tanh(np.array([1.0, 0.5, 0.0, 2.0]) / 10.0)
+    np.testing.assert_allclose(out0[1][:4], expected)
+    np.testing.assert_array_equal(out0[1], out1[1])
+
+
+def test_offline_h_replay_matches_causal_exact_update():
+    g = np.array([[1.0, 2.0], [3.0, 4.0], [0.0, 0.0]])
+    out, end = replay_h(g, tau_ms=10.0, dt_ms=1.0)
+    decay = np.exp(-0.1)
+    np.testing.assert_array_equal(out[0], np.zeros(2))
+    np.testing.assert_allclose(out[1], (1.0 - decay) * g[0], rtol=1e-7)
+    expected_end = decay * (decay * ((1.0 - decay) * g[0]) + (1.0 - decay) * g[1])
+    np.testing.assert_allclose(end, expected_end)
+
+
+def test_contiguous_true_intervals_is_deterministic():
+    assert contiguous_true_intervals([False, True, True, False, True], [5, 10, 20, 40, 80]) == [
+        (10.0, 20.0), (80.0, 80.0)
+    ]
