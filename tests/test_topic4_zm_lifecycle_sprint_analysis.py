@@ -20,6 +20,15 @@ def test_event_free_baseline_rejects_initial_high_rate_event():
     assert not mask[20:28].any()
 
 
+def test_event_free_baseline_does_not_absorb_very_early_persistent_entry():
+    core = np.r_[np.zeros(8), np.full(80, 120.0)]
+    mask = A.event_free_baseline_bins(core)
+    assert mask[:8].all()
+    assert not mask[8:].any()
+    got = A.detect_episode(core, mask)
+    assert got["onset_bin"] is not None
+
+
 def test_baseline_referenced_intensity_distinguishes_sustained_gain():
     rms = np.ones((40, 2))
     rms[20:] = 10.0

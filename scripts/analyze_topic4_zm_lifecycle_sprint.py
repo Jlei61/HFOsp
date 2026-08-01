@@ -47,8 +47,15 @@ def event_free_baseline_bins(core_rate, *, max_ms=1200.0, bin_ms=BIN_MS):
     if n < 4:
         return np.zeros(core.size, bool)
     x = core[:n]
-    med = float(np.median(x))
-    mad = float(1.4826 * np.median(np.abs(x - med)))
+    # A fast mechanism can advance entry into the first few hundred ms.  The
+    # whole-window median would then call the newly formed high state its own
+    # baseline and erase onset.  Estimate the quiet distribution from the
+    # lower part of the same arm/window; this still forbids borrowing another
+    # mechanism's baseline while excluding obvious early IED/high-state bins.
+    n_low = max(4, int(np.ceil(0.20 * x.size)))
+    low = np.partition(x, n_low - 1)[:n_low]
+    med = float(np.median(low))
+    mad = float(1.4826 * np.median(np.abs(low - med)))
     threshold = max(10.0, med + 2.5 * mad)
     mask = np.zeros(core.size, bool)
     mask[:n] = x <= threshold
