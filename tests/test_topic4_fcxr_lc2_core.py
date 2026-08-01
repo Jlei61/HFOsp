@@ -110,3 +110,47 @@ def test_closed_loop_exploration_cli_imports_all_runtime_dependencies():
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     assert callable(module.cmd_screen_manifest)
+
+
+def _load_fork_runner():
+    path = os.path.join(ROOT, "scripts", "run_topic4_fcxr_lc2_forks.py")
+    spec = importlib.util.spec_from_file_location("_lc2_fork_import_smoke", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_frozen_fork_runner_imports_and_locks_arm_specific_duration():
+    f = _load_fork_runner()
+    assert f._duration_ms(500.0, "C") == 2500.0
+    assert f._duration_ms(2000.0, "C") == 5000.0
+    assert f._duration_ms(500.0, "D1") == 3000.0
+    assert f._duration_ms(2000.0, "D2") == 8000.0
+
+
+def test_frozen_fork_finalist_selection_includes_an_adjacent_survivor():
+    f = _load_fork_runner()
+    base = dict(label="screen_survivor", candidate_id="H1", tau_ms=500.0,
+                false_latch_fraction=0.0, refractory_ceiling_fraction=0.0,
+                tail_gH_mean=2.0, tail_gA_mean=4.0, k_ratio=0.05)
+    rows = [
+        dict(base, run_id="anchor", rho=2.16, rho_fraction=0.10),
+        dict(base, run_id="adjacent", rho=4.32, rho_fraction=0.20),
+        dict(base, run_id="far", rho=10.8, rho_fraction=0.50),
+    ]
+    got = f.select_finalists(rows, max_n=3)
+    assert [r["run_id"] for r in got[:2]] == ["anchor", "adjacent"]
+
+
+def test_frozen_fork_window_classifier_separates_low_and_high():
+    f = _load_fork_runner()
+    low = f._window_metrics(np.full(100, 5.0), np.zeros((100, 4), bool),
+                            np.full(100, 0.2), theta=1.0, tau_ref=2.0,
+                            dt=1.0, window_ms=100.0)
+    high_spk = np.zeros((100, 4), bool)
+    high_spk[::5] = True
+    high = f._window_metrics(np.full(100, 40.0), high_spk,
+                             np.full(100, 2.0), theta=1.0, tau_ref=2.0,
+                             dt=1.0, window_ms=100.0)
+    assert low["low_like"] and not low["high_like"]
+    assert high["high_like"] and not high["low_like"]

@@ -134,8 +134,14 @@ Take at most six screen survivors using the following ordering, not a weighted s
 5. smaller baseline H carryover;
 6. an adjacent `(theta or rho)` survivor.
 
-Run matched fresh-noise forks (same seed/RNG reset) for at least `max(2 s,5*tau_H)` and cap development
-runs at 5 s:
+The local-gain ordering proxy is fixed as
+`tail_gH_mean/max(tail_gA_mean,1e-12)`.  After the best sorted survivor is selected, its first available
+one-grid neighbour in `rho` (then `k`) is inserted before the remaining sorted points.  This ordering is
+developmental prioritisation only; it is not a scientific score.
+
+Run matched fresh-noise forks (same seed/RNG reset).  A/B/C use
+`min(5 s,max(2 s,5*tau_H))`.  Because the D arms must observe offset *and* a post-offset low interval,
+they use `min(8 s,max(3 s,4*tau_H))`; this longer D-only cap is fixed before any fork outcome is read.
 
 | arm | depletion | h init | X relay availability | question |
 |---|---|---|---|---|
@@ -150,9 +156,16 @@ The D arms are developmental uniform-load upper bounds derived from the accepted
 are not spatial-X confirmation. Implement them as a frozen per-E relay field through the same E→E scatter
 path. No additive X current is allowed.
 
+Fork state labels use the final 1 s unless the D post-offset window below is longer.  `high_like` requires
+mean rate >=20 Hz, rate occupancy above 20 Hz >=0.25, mean H >=theta, and the same 5%/s H-slope tolerance
+as the screen.  `low_like` requires mean rate <20 Hz, high-rate occupancy <0.20, and mean H <theta.
+The deliberate 0.20--0.25 occupancy gap is `unresolved`, not silently assigned.  Any non-finite value,
+hard clip, or early numerical guard invalidates the complete matched fork set.
+
 `H_BASIN_CANDIDATE` requires A-low/A-high/B to end in the same low statistical state, C to remain in a
 distinct finite non-ceiling state after burn-in, and at least D1 or D2 to return to the matched low state
-for `max(1 s,3*tau_H)`. One adjacent theta/rho point and a second noise stream are required for
+for `max(1 s,3*tau_H)`.  If the observed offset leaves less than that much recorded time, the D arm is
+`unresolved_post_offset_window`, never a pass or a fail. One adjacent theta/rho point and a second noise stream are required for
 `H_X_FROZEN_GEOMETRY_REPLICATED`.
 
 Record rate, H/gH/gA, X, clip/tau ratio, single-cell rate/ISI summary, ceiling fraction, pairwise sample

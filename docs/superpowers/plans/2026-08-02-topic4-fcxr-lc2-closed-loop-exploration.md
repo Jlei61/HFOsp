@@ -74,8 +74,15 @@ Classify every row as `decay_low`, `screen_survivor`, `saturated_tonic`, `numeri
 
 ## 5. E4 — frozen forks
 
-For at most six ordered survivors, run A-low/A-high/B/C/D1/D2. Duration is
-`min(5000,max(2000,5*tau_H)) ms`. Use matched RNG reset. For candidates that satisfy A/B/C/D, run:
+For at most six ordered survivors, run A-low/A-high/B/C/D1/D2. A/B/C duration is
+`min(5000,max(2000,5*tau_H)) ms`; D1/D2 duration is
+`min(8000,max(3000,4*tau_H)) ms`, so the termination probe can include its locked post-offset window.
+An insufficient post-offset observation is unresolved, not negative. Use matched RNG reset. For candidates that satisfy A/B/C/D, run:
+
+Before launch, lock the finalist ordering proxy to `tail_gH_mean/max(tail_gA_mean,1e-12)`, insert one
+available one-step rho/k neighbour immediately after the top point, and lock the fork labels to the
+spec's final-window `low_like`/`high_like` definitions.  These rules must be unit-tested before the
+manifest is created.
 
 - one adjacent rho step (prefer lower; otherwise higher);
 - noise stream 402, frozen before launch and not used to tune parameters.
