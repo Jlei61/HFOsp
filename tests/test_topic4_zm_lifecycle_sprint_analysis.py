@@ -93,3 +93,26 @@ def test_returning_event_match_rejects_wrong_long_high_rate_fragment():
     got = A.match_returning_events(ref, wrong)
     assert got["single_event_candidate"] is False
     assert got["distribution_recovered"] is False
+
+
+def test_episode_detector_rejects_transient_lull_and_keeps_later_durable_offset():
+    core = np.r_[
+        np.zeros(80), np.full(120, 90.0), np.zeros(60),
+        np.full(100, 90.0), np.zeros(120),
+    ]
+    baseline = np.zeros(core.size, bool)
+    baseline[:60] = True
+    got = A.detect_episode(core, baseline)
+    assert got["status"] == "onset_durable_offset"
+    assert got["offset_bin"] is not None
+    assert len(got["transient_offset_bins"]) == 1
+    assert len(got["rapid_reentry_bins"]) == 1
+
+
+def test_episode_detector_does_not_call_trace_truncation_an_offset():
+    core = np.r_[np.zeros(80), np.full(120, 90.0), np.zeros(35)]
+    baseline = np.zeros(core.size, bool)
+    baseline[:60] = True
+    got = A.detect_episode(core, baseline)
+    assert got["status"] == "offset_unconfirmed_at_trace_end"
+    assert got["offset_bin"] is None

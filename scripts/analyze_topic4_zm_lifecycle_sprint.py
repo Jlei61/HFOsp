@@ -70,13 +70,39 @@ def detect_episode(core_rate, baseline_bins, *, bin_ms=BIN_MS):
         start=int(round(500.0 / bin_ms)),
     )
     offset = None
+    transient_offsets = []
+    rapid_reentries = []
+    status = "no_onset"
     if onset is not None:
-        offset = A._first_sustained(
-            smooth <= recovery_threshold, int(round(500.0 / bin_ms)),
-            start=onset + int(round(1000.0 / bin_ms)),
-        )
+        status = "onset_persistent"
+        need_low = int(round(500.0 / bin_ms))
+        need_high = int(round(250.0 / bin_ms))
+        min_tail = int(round(1000.0 / bin_ms))
+        rapid_horizon = int(round(2000.0 / bin_ms))
+        search = onset + int(round(1000.0 / bin_ms))
+        while search < core.size:
+            candidate = A._first_sustained(
+                smooth <= recovery_threshold, need_low, start=search,
+            )
+            if candidate is None:
+                break
+            reentry = A._first_sustained(
+                smooth >= onset_threshold, need_high,
+                start=candidate + need_low,
+            )
+            if reentry is not None and reentry <= candidate + rapid_horizon:
+                transient_offsets.append(int(candidate))
+                rapid_reentries.append(int(reentry))
+                search = reentry + need_high
+                continue
+            if core.size - candidate < min_tail:
+                status = "offset_unconfirmed_at_trace_end"
+                break
+            offset = int(candidate)
+            status = "onset_durable_offset"
+            break
     return {
-        "status": "onset" if onset is not None else "no_onset",
+        "status": status,
         "baseline_core_median_hz": med,
         "baseline_core_mad_hz": mad,
         "onset_threshold_hz": onset_threshold,
@@ -85,6 +111,9 @@ def detect_episode(core_rate, baseline_bins, *, bin_ms=BIN_MS):
         "offset_bin": offset,
         "onset_ms": None if onset is None else onset * bin_ms,
         "offset_ms": None if offset is None else offset * bin_ms,
+        "transient_offset_bins": transient_offsets,
+        "rapid_reentry_bins": rapid_reentries,
+        "offset_confirmation_rule": "500ms low, no 250ms high re-entry within 2s, >=1s observed tail",
     }
 
 
