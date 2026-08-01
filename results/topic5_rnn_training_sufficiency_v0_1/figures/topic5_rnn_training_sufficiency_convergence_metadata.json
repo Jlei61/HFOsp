@@ -1,0 +1,14 @@
+{
+  "figure": "training sufficiency convergence audit",
+  "panels": {
+    "A": "held-out next-contact NLL versus training passes",
+    "B": "paired per-patient improvement versus the 0.002 plateau rule",
+    "C": "held-out minus training NLL",
+    "D": "learning-rate and optimiser sensitivity at the selected budget"
+  },
+  "primary_endpoint": "validation contact-choice NLL, nats per decision",
+  "aggregation": "seeds averaged inside a patient, patient median across patients",
+  "data": "train80 inner training and inner validation only",
+  "outer_heldout_read": false,
+  "ictal_target_read": false
+}

@@ -1,0 +1,10 @@
+condition,generator,n_patients,n_patients_clearing_rule,preregistered_bar,clears_preregistered_bar,suffix_participation_mae__n_within,suffix_participation_mae__median_ratio,suffix_rank_wasserstein__n_within,suffix_rank_wasserstein__median_ratio,suffix_precedence_mae__n_within,suffix_precedence_mae__median_ratio,n_clearing_epilepsiae,n_patients_epilepsiae,n_clearing_yuquan,n_patients_yuquan
+best_rollout_aware,full_constructive,34,7,17,False,4,2.100346873172348,6,2.7547306155590237,6,2.636426948729258,3,18,4,16
+converged_teacher_forced,full_constructive,34,7,17,False,5,1.9808576085414342,7,2.4720492751431986,6,2.6025041075404007,3,18,4,16
+current_teacher_forced_reference,full_constructive,34,9,17,False,10,1.3535346910341346,9,2.372695214973553,8,2.405443060408116,4,18,5,16
+best_rollout_aware,native_model,34,14,17,False,15,1.2766766160365468,13,1.4353453101608162,15,1.2656109788342185,5,18,9,16
+converged_teacher_forced,native_model,34,13,17,False,13,1.3239167397725127,12,1.4406537858852477,14,1.2368319153478102,6,18,7,16
+current_teacher_forced_reference,native_model,34,10,17,False,7,1.7229871803779164,10,2.3633447665014082,10,1.9862519913381593,5,18,5,16
+best_rollout_aware,static_only,34,10,17,False,12,1.3357572494438963,10,2.336559682615343,10,2.1944199092756342,5,18,5,16
+converged_teacher_forced,static_only,34,10,17,False,12,1.3357572494438963,10,2.336559682615343,10,2.1944199092756342,5,18,5,16
+current_teacher_forced_reference,static_only,34,10,17,False,12,1.3357572494438963,10,2.336559682615343,10,2.1944199092756342,5,18,5,16

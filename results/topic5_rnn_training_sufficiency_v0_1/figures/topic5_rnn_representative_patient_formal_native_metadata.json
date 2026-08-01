@@ -1,0 +1,12 @@
+{
+  "figure": "representative patient, observed versus freely generated events",
+  "phase": "d",
+  "generator": "native_model",
+  "condition": "converged_teacher_forced",
+  "subject": "epilepsiae_1084",
+  "subject_selection": "the patient whose transition correlation is closest to the cohort median for this condition; not the best patient",
+  "seed_directory": "results/topic5_rnn_training_sufficiency_v0_1/formal/converged_teacher_forced/seed_20260725",
+  "n_events": 1464,
+  "outer_heldout_read": true,
+  "ictal_target_read": false
+}

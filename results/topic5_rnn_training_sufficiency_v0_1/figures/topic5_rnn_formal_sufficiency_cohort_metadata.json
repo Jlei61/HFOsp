@@ -1,0 +1,20 @@
+{
+  "figure": "phase d cohort stratification",
+  "reference_condition": "current_teacher_forced_reference",
+  "strata": [
+    "epilepsiae",
+    "yuquan",
+    "combined"
+  ],
+  "endpoints": [
+    "transition_correlation",
+    "suffix_rank_wasserstein",
+    "suffix_precedence_correlation",
+    "suffix_participation_mae",
+    "event_length_wasserstein",
+    "likelihood_contact_choice_nll"
+  ],
+  "normalisation": "median paired gain divided by the reference median level",
+  "outer_heldout_read": true,
+  "ictal_target_read": false
+}

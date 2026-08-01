@@ -1,0 +1,107 @@
+{
+  "status": "COMPLETE",
+  "contract": "topic5_rnn_training_sufficiency_v0_1_phase_a",
+  "generated_from": {
+    "formal_root": "results/topic5_ordered_history_architecture_audit/formal/architecture_controls_formal_20260729",
+    "dataset_root": "results/topic5_interictal_rank_distribution/dataset_v0_4",
+    "frozen_launcher": "scripts/run_topic5_architecture_controls_v0_1.sh"
+  },
+  "environment": {
+    "git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+    "hostname": "dell-PowerEdge-R740",
+    "python": "3.11.5"
+  },
+  "sealed_dataset": {
+    "n_subjects_ok": 34,
+    "n_events_ok": 864163,
+    "target_values_read": false,
+    "ab_or_kmeans_labels_read": false,
+    "split_contract": "chronological first 80% calibration, last 20% held out",
+    "n_train_events": 691314,
+    "n_eval_events": 172849
+  },
+  "frozen_launcher_arguments": {
+    "batch_size": 1024,
+    "shared_cycles": 1,
+    "calibration_cycles": 4,
+    "updates_per_patient": 8
+  },
+  "optimizer_loop_structure": {
+    "loop_variables": [
+      "cycle",
+      "record",
+      "batch_start"
+    ],
+    "optimizer_step_loop_depth": [
+      3
+    ],
+    "backward_loop_depth": [
+      4
+    ],
+    "zero_grad_loop_depth": [
+      3
+    ],
+    "backward_is_strictly_deeper_than_step": true,
+    "zero_grad_matches_step_depth": true,
+    "chunk_loop_is_innermost_over_batch_size": true
+  },
+  "per_fold": {
+    "n_folds_audited": 204,
+    "n_linear_state_folds": 102,
+    "architectures": [
+      "linear_state",
+      "vanilla_rnn"
+    ],
+    "seeds": [
+      20260725,
+      20260726,
+      20260727
+    ],
+    "n_outer_training_patients": [
+      33
+    ]
+  },
+  "shared_core_optimizer": {
+    "coverage_cycles": [
+      1
+    ],
+    "updates_per_patient": [
+      8
+    ],
+    "optimizer_steps_per_fold_median": 264.0,
+    "optimizer_steps_match_patients_times_updates": true,
+    "events_per_update_median_of_folds": 816.0,
+    "events_per_update_max_across_folds": 14034,
+    "gradient_clip_threshold": 1.0,
+    "gradient_clip_fraction_median": 0.2765151515151515,
+    "gradient_clip_fraction_max": 0.4393939393939394
+  },
+  "heldout_local_offset_optimizer": {
+    "calibration_cycles": [
+      4
+    ],
+    "optimizer_steps_per_fold_median": 32.0,
+    "gradient_clip_fraction_median": 0.0
+  },
+  "batch_size_is_memory_chunk_only": {
+    "verdict": true,
+    "chunk_size": 1024,
+    "n_folds_with_more_backward_chunks_than_steps": 102,
+    "n_folds": 102,
+    "shared_backward_chunks_median": 816.0,
+    "shared_optimizer_steps_median": 264.0,
+    "static_evidence": "backward() sits inside the batch_start chunk loop while optimizer.step() sits in the segment loop",
+    "loss_normalisation": "next_set_stop_loss returns an event-mean, and chunks are accumulated with weight len(chunk)/len(segment); the weighted sum therefore equals the segment event-mean exactly",
+    "numerical_parity_experiment": "phase B3"
+  },
+  "teacher_forced_unroll": {
+    "rank_steps_median_of_patients": 7.0,
+    "rank_steps_max_across_patients": 52,
+    "decisions_median_of_patients": 8.0,
+    "decisions_max_across_patients": 53,
+    "total_train_decisions": 5448027,
+    "total_eval_decisions": 1318682
+  },
+  "ictal_target_read": false,
+  "outer_heldout_read": false
+}

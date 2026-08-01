@@ -1,0 +1,23 @@
+{
+  "figure": "phase d free-generation audit",
+  "generator": "native_model",
+  "generator_description": "the model's own joint next-contact and STOP distribution",
+  "reference_condition": "current_teacher_forced_reference",
+  "conditions": [
+    "current_teacher_forced_reference",
+    "converged_teacher_forced",
+    "best_rollout_aware"
+  ],
+  "panels": {
+    "A": "Local step-to-step order",
+    "B": "Rank distribution of the whole event",
+    "C": "Which contact precedes which",
+    "D": "Which contacts take part",
+    "E": "How long the event runs",
+    "F": "One-step accuracy (guard)"
+  },
+  "marks": "one dot per patient, grey lines connect the same patient across conditions, black bar is the patient median",
+  "aggregation": "seeds averaged inside a patient, patient as the unit",
+  "outer_heldout_read": true,
+  "ictal_target_read": false
+}

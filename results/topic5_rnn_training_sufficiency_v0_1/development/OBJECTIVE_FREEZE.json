@@ -1,0 +1,160 @@
+{
+  "status": "FROZEN",
+  "contract": "topic5_rnn_training_sufficiency_v0_1_objective_freeze",
+  "reference_condition": "objective_teacher_forced_one_step",
+  "selected_rollout_aware_objective": "scheduled_sampling",
+  "selection_rule": "most generation endpoints improved over teacher forcing among objectives whose one-step contact-choice NLL is not degraded by more than 0.002 nats/decision",
+  "any_objective_passed_the_one_step_guard": false,
+  "scores": {
+    "objective_scheduled_sampling": {
+      "n_generation_endpoints_better": 1,
+      "n_generation_endpoints": 6,
+      "detail": {
+        "transition_correlation": {
+          "condition": 0.7305589604824205,
+          "reference": 0.7654665098027085,
+          "better": false
+        },
+        "suffix_rank_wasserstein": {
+          "condition": 0.11961697043708999,
+          "reference": 0.11131221814408954,
+          "better": false
+        },
+        "suffix_precedence_correlation": {
+          "condition": 0.06932060688160191,
+          "reference": 0.076012184418685,
+          "better": false
+        },
+        "suffix_precedence_mae": {
+          "condition": 0.20140197142346777,
+          "reference": 0.18623458402747173,
+          "better": false
+        },
+        "suffix_participation_mae": {
+          "condition": 0.11521752193810195,
+          "reference": 0.1173538408279351,
+          "better": true
+        },
+        "event_length_wasserstein": {
+          "condition": 0.0237425872451507,
+          "reference": 0.0237425872451507,
+          "better": false
+        }
+      },
+      "one_step_contact_choice_nll": 1.7041624983151755,
+      "reference_one_step_contact_choice_nll": 1.69114617506663,
+      "one_step_not_degraded": false
+    },
+    "objective_self_fed_2step": {
+      "n_generation_endpoints_better": 1,
+      "n_generation_endpoints": 6,
+      "detail": {
+        "transition_correlation": {
+          "condition": 0.7216017335976883,
+          "reference": 0.7654665098027085,
+          "better": false
+        },
+        "suffix_rank_wasserstein": {
+          "condition": 0.12470456870703746,
+          "reference": 0.11131221814408954,
+          "better": false
+        },
+        "suffix_precedence_correlation": {
+          "condition": 0.19601095351654718,
+          "reference": 0.076012184418685,
+          "better": true
+        },
+        "suffix_precedence_mae": {
+          "condition": 0.20474290831441289,
+          "reference": 0.18623458402747173,
+          "better": false
+        },
+        "suffix_participation_mae": {
+          "condition": 0.12088942654680676,
+          "reference": 0.1173538408279351,
+          "better": false
+        },
+        "event_length_wasserstein": {
+          "condition": 0.0237425872451507,
+          "reference": 0.0237425872451507,
+          "better": false
+        }
+      },
+      "one_step_contact_choice_nll": 1.7178773482640584,
+      "reference_one_step_contact_choice_nll": 1.69114617506663,
+      "one_step_not_degraded": false
+    },
+    "objective_self_fed_3step": {
+      "n_generation_endpoints_better": 1,
+      "n_generation_endpoints": 6,
+      "detail": {
+        "transition_correlation": {
+          "condition": 0.6851382457925403,
+          "reference": 0.7654665098027085,
+          "better": false
+        },
+        "suffix_rank_wasserstein": {
+          "condition": 0.12308502448350472,
+          "reference": 0.11131221814408954,
+          "better": false
+        },
+        "suffix_precedence_correlation": {
+          "condition": 0.17370038616171968,
+          "reference": 0.076012184418685,
+          "better": true
+        },
+        "suffix_precedence_mae": {
+          "condition": 0.2022027617431671,
+          "reference": 0.18623458402747173,
+          "better": false
+        },
+        "suffix_participation_mae": {
+          "condition": 0.11922254479491237,
+          "reference": 0.1173538408279351,
+          "better": false
+        },
+        "event_length_wasserstein": {
+          "condition": 0.0237425872451507,
+          "reference": 0.0237425872451507,
+          "better": false
+        }
+      },
+      "one_step_contact_choice_nll": 1.7364750305811563,
+      "reference_one_step_contact_choice_nll": 1.69114617506663,
+      "one_step_not_degraded": false
+    }
+  },
+  "frozen_training_budget": {
+    "model": "LinearStateSequenceRNN",
+    "hidden_size": 32,
+    "shared_coverage_cycles": 7,
+    "updates_per_patient": 32,
+    "heldout_offset_calibration_cycles": 8,
+    "learning_rate": 0.0003,
+    "optimizer": "adamw",
+    "weight_decay": 0.0,
+    "gradient_clip": 1.0,
+    "memory_chunk_size": 1024,
+    "local_offset_dim": 4,
+    "objective": "teacher_forced_one_step"
+  },
+  "data_ranges_read_for_selection": {
+    "events": "train80 inner training and inner validation only",
+    "outer_heldout20_read": false,
+    "ictal_target_read": false,
+    "rollout_loss_weights_tuned_on_heldout_suffix": false,
+    "ab_or_axis_used": false
+  },
+  "seal_audit": {
+    "n_cells_checked": 762,
+    "all_sealed": true
+  },
+  "environment": {
+    "git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+    "hostname": "dell-PowerEdge-R740",
+    "python": "3.11.5",
+    "torch": "2.5.1+cu124",
+    "cuda": "12.4",
+    "cuda_device": "NVIDIA GeForce RTX 3090"
+  }
+}

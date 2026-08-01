@@ -1,0 +1,1758 @@
+{
+  "status": "ACCEPTED",
+  "contract": "topic5_rnn_training_sufficiency_v0_1",
+  "spec": "docs/superpowers/specs/2026-07-30-topic5-rnn-training-sufficiency-v0_1.md",
+  "phases": {
+    "b1_budget": {
+      "present": true,
+      "n_run_summaries": 12,
+      "n_done_markers": 12,
+      "launcher_status": "COMPLETE",
+      "launcher_expected_cells": 12,
+      "launcher_failed_cells": [],
+      "ictal_target_seal_intact": true,
+      "n_cells_reading_outer_heldout": 0,
+      "runtime_seconds_total": 4899.01683139801,
+      "runtime_seconds_median": 405.1793097257614,
+      "gpu_peak_allocated_gb_max": 0.170686464,
+      "peak_rss_gb_max": 1.3037033081054688,
+      "logs_with_oom": [],
+      "logs_with_nan_text": []
+    },
+    "b1_budget_extended": {
+      "present": true,
+      "n_run_summaries": 6,
+      "n_done_markers": 6,
+      "launcher_status": "COMPLETE",
+      "launcher_expected_cells": 6,
+      "launcher_failed_cells": [],
+      "ictal_target_seal_intact": true,
+      "n_cells_reading_outer_heldout": 0,
+      "runtime_seconds_total": 6649.271341085434,
+      "runtime_seconds_median": 1117.2345250844955,
+      "gpu_peak_allocated_gb_max": 0.098473472,
+      "peak_rss_gb_max": 1.2980537414550781,
+      "logs_with_oom": [],
+      "logs_with_nan_text": []
+    },
+    "b2_learning_rate": {
+      "present": true,
+      "n_run_summaries": 27,
+      "n_done_markers": 27,
+      "launcher_status": "COMPLETE",
+      "launcher_expected_cells": 27,
+      "launcher_failed_cells": [],
+      "ictal_target_seal_intact": true,
+      "n_cells_reading_outer_heldout": 0,
+      "runtime_seconds_total": 26442.25436115265,
+      "runtime_seconds_median": 977.6462652683258,
+      "gpu_peak_allocated_gb_max": 0.096171008,
+      "peak_rss_gb_max": 1.3077659606933594,
+      "logs_with_oom": [],
+      "logs_with_nan_text": []
+    },
+    "b3_chunk_parity": {
+      "present": true,
+      "n_run_summaries": 2,
+      "n_done_markers": 2,
+      "launcher_status": "COMPLETE",
+      "launcher_expected_cells": 2,
+      "launcher_failed_cells": [],
+      "ictal_target_seal_intact": true,
+      "n_cells_reading_outer_heldout": 0,
+      "runtime_seconds_total": 2344.86457490921,
+      "runtime_seconds_median": 1172.432287454605,
+      "gpu_peak_allocated_gb_max": 0.096171008,
+      "peak_rss_gb_max": 1.2880668640136719,
+      "logs_with_oom": [],
+      "logs_with_nan_text": []
+    },
+    "b1c_loso_confirm": {
+      "present": true,
+      "n_run_summaries": 306,
+      "n_done_markers": 306,
+      "launcher_status": "COMPLETE",
+      "launcher_expected_cells": 306,
+      "launcher_failed_cells": [],
+      "ictal_target_seal_intact": true,
+      "n_cells_reading_outer_heldout": 0,
+      "runtime_seconds_total": 371063.98420763016,
+      "runtime_seconds_median": 1262.7862215042114,
+      "gpu_peak_allocated_gb_max": 0.165659136,
+      "peak_rss_gb_max": 1.3760299682617188,
+      "logs_with_oom": [],
+      "logs_with_nan_text": []
+    },
+    "c_objectives": {
+      "present": true,
+      "n_run_summaries": 408,
+      "n_done_markers": 408,
+      "launcher_status": "COMPLETE",
+      "launcher_expected_cells": 408,
+      "launcher_failed_cells": [],
+      "ictal_target_seal_intact": true,
+      "n_cells_reading_outer_heldout": 0,
+      "runtime_seconds_total": 1056863.9453232288,
+      "runtime_seconds_median": 2606.5696098804474,
+      "gpu_peak_allocated_gb_max": 0.122937344,
+      "peak_rss_gb_max": 1.4296188354492188,
+      "logs_with_oom": [],
+      "logs_with_nan_text": []
+    },
+    "reproducibility": {
+      "present": true,
+      "n_run_summaries": 1,
+      "n_done_markers": 1,
+      "launcher_status": null,
+      "launcher_expected_cells": null,
+      "launcher_failed_cells": [],
+      "ictal_target_seal_intact": true,
+      "n_cells_reading_outer_heldout": 0,
+      "runtime_seconds_total": 251.10901427268982,
+      "runtime_seconds_median": 251.10901427268982,
+      "gpu_peak_allocated_gb_max": 0.165520384,
+      "peak_rss_gb_max": 1.2672271728515625,
+      "logs_with_oom": [],
+      "logs_with_nan_text": []
+    },
+    "formal": {
+      "present": true,
+      "n_run_summaries": 306,
+      "n_done_markers": 306,
+      "launcher_status": "COMPLETE",
+      "launcher_expected_cells": 306,
+      "launcher_failed_cells": [],
+      "ictal_target_seal_intact": true,
+      "n_cells_reading_outer_heldout": 306,
+      "runtime_seconds_total": 534371.915910244,
+      "runtime_seconds_median": 2259.464663743973,
+      "gpu_peak_allocated_gb_max": 0.203997184,
+      "peak_rss_gb_max": 1.4497108459472656,
+      "logs_with_oom": [],
+      "logs_with_nan_text": []
+    }
+  },
+  "incomplete_phases": [],
+  "failed_cells": {},
+  "phases_with_broken_seal": [],
+  "phases_with_oom": {},
+  "outer_heldout_read_outside_the_formal_phase": {},
+  "metric_health": {
+    "b1c_cell_metrics.csv": {
+      "n_rows": 612,
+      "columns_with_non_finite_values": {}
+    },
+    "c_cell_metrics.csv": {
+      "n_rows": 1632,
+      "columns_with_non_finite_values": {
+        "whole_participation_mae": 408,
+        "whole_rank_wasserstein": 408,
+        "whole_precedence_mae": 408,
+        "whole_precedence_correlation": 408,
+        "whole_participant_count_mean_error": 408,
+        "whole_event_length_mean_error": 408,
+        "suffix_participation_mae": 408,
+        "suffix_rank_wasserstein": 408,
+        "suffix_precedence_mae": 408,
+        "suffix_precedence_correlation": 408,
+        "suffix_participant_count_mean_error": 408,
+        "suffix_event_length_mean_error": 408,
+        "transition_mae": 408,
+        "transition_correlation": 408,
+        "event_length_wasserstein": 408,
+        "stop_hazard_mae": 408,
+        "generated_zero_suffix_fraction": 408
+      }
+    },
+    "d_cell_metrics.csv": {
+      "n_rows": 1224,
+      "columns_with_non_finite_values": {
+        "whole_participation_mae": 306,
+        "whole_rank_wasserstein": 306,
+        "whole_precedence_mae": 306,
+        "whole_precedence_correlation": 306,
+        "whole_participant_count_mean_error": 306,
+        "whole_event_length_mean_error": 306,
+        "suffix_participation_mae": 306,
+        "suffix_rank_wasserstein": 306,
+        "suffix_precedence_mae": 306,
+        "suffix_precedence_correlation": 306,
+        "suffix_participant_count_mean_error": 306,
+        "suffix_event_length_mean_error": 306,
+        "transition_mae": 306,
+        "transition_correlation": 306,
+        "event_length_wasserstein": 306,
+        "stop_hazard_mae": 306,
+        "generated_zero_suffix_fraction": 306
+      }
+    }
+  },
+  "training_semantics_audit": {
+    "status": "COMPLETE",
+    "contract": "topic5_rnn_training_sufficiency_v0_1_phase_a",
+    "generated_from": {
+      "formal_root": "results/topic5_ordered_history_architecture_audit/formal/architecture_controls_formal_20260729",
+      "dataset_root": "results/topic5_interictal_rank_distribution/dataset_v0_4",
+      "frozen_launcher": "scripts/run_topic5_architecture_controls_v0_1.sh"
+    },
+    "environment": {
+      "git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+      "hostname": "dell-PowerEdge-R740",
+      "python": "3.11.5"
+    },
+    "sealed_dataset": {
+      "n_subjects_ok": 34,
+      "n_events_ok": 864163,
+      "target_values_read": false,
+      "ab_or_kmeans_labels_read": false,
+      "split_contract": "chronological first 80% calibration, last 20% held out",
+      "n_train_events": 691314,
+      "n_eval_events": 172849
+    },
+    "frozen_launcher_arguments": {
+      "batch_size": 1024,
+      "shared_cycles": 1,
+      "calibration_cycles": 4,
+      "updates_per_patient": 8
+    },
+    "optimizer_loop_structure": {
+      "loop_variables": [
+        "cycle",
+        "record",
+        "batch_start"
+      ],
+      "optimizer_step_loop_depth": [
+        3
+      ],
+      "backward_loop_depth": [
+        4
+      ],
+      "zero_grad_loop_depth": [
+        3
+      ],
+      "backward_is_strictly_deeper_than_step": true,
+      "zero_grad_matches_step_depth": true,
+      "chunk_loop_is_innermost_over_batch_size": true
+    },
+    "per_fold": {
+      "n_folds_audited": 204,
+      "n_linear_state_folds": 102,
+      "architectures": [
+        "linear_state",
+        "vanilla_rnn"
+      ],
+      "seeds": [
+        20260725,
+        20260726,
+        20260727
+      ],
+      "n_outer_training_patients": [
+        33
+      ]
+    },
+    "shared_core_optimizer": {
+      "coverage_cycles": [
+        1
+      ],
+      "updates_per_patient": [
+        8
+      ],
+      "optimizer_steps_per_fold_median": 264.0,
+      "optimizer_steps_match_patients_times_updates": true,
+      "events_per_update_median_of_folds": 816.0,
+      "events_per_update_max_across_folds": 14034,
+      "gradient_clip_threshold": 1.0,
+      "gradient_clip_fraction_median": 0.2765151515151515,
+      "gradient_clip_fraction_max": 0.4393939393939394
+    },
+    "heldout_local_offset_optimizer": {
+      "calibration_cycles": [
+        4
+      ],
+      "optimizer_steps_per_fold_median": 32.0,
+      "gradient_clip_fraction_median": 0.0
+    },
+    "batch_size_is_memory_chunk_only": {
+      "verdict": true,
+      "chunk_size": 1024,
+      "n_folds_with_more_backward_chunks_than_steps": 102,
+      "n_folds": 102,
+      "shared_backward_chunks_median": 816.0,
+      "shared_optimizer_steps_median": 264.0,
+      "static_evidence": "backward() sits inside the batch_start chunk loop while optimizer.step() sits in the segment loop",
+      "loss_normalisation": "next_set_stop_loss returns an event-mean, and chunks are accumulated with weight len(chunk)/len(segment); the weighted sum therefore equals the segment event-mean exactly",
+      "numerical_parity_experiment": "phase B3"
+    },
+    "teacher_forced_unroll": {
+      "rank_steps_median_of_patients": 7.0,
+      "rank_steps_max_across_patients": 52,
+      "decisions_median_of_patients": 8.0,
+      "decisions_max_across_patients": 53,
+      "total_train_decisions": 5448027,
+      "total_eval_decisions": 1318682
+    },
+    "ictal_target_read": false,
+    "outer_heldout_read": false
+  },
+  "freezes": {
+    "HYPERPARAMETER_FREEZE.json": {
+      "status": "FROZEN",
+      "contract": "topic5_rnn_training_sufficiency_v0_1_hyperparameter_freeze",
+      "selected": {
+        "model": "LinearStateSequenceRNN",
+        "hidden_size": 32,
+        "shared_coverage_cycles": 7,
+        "updates_per_patient": 32,
+        "heldout_offset_calibration_cycles": 8,
+        "learning_rate": 0.0003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "gradient_clip": 1.0,
+        "memory_chunk_size": 1024,
+        "local_offset_dim": 4,
+        "objective": "teacher_forced_one_step"
+      },
+      "evidence": {
+        "b1_training_budget": {
+          "best_mean_config": {
+            "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+            "coverage_cycle": 4,
+            "patient_median_contact_choice_nll": 1.7237842082977295
+          },
+          "n_within_one_standard_error": 2,
+          "arms": [
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 1,
+              "patient_median_contact_choice_nll": 1.7815168301264448,
+              "optimizer_steps_total": 1088,
+              "paired_mean_difference": 0.09348203154171218,
+              "paired_se_difference": 0.01261241418730329,
+              "paired_n_worse_than_reference": 32,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 2,
+              "patient_median_contact_choice_nll": 1.8067061305046082,
+              "optimizer_steps_total": 2176,
+              "paired_mean_difference": 0.04618464264215211,
+              "paired_se_difference": 0.008229461944445404,
+              "paired_n_worse_than_reference": 29,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 3,
+              "patient_median_contact_choice_nll": 1.7340270678202312,
+              "optimizer_steps_total": 3264,
+              "paired_mean_difference": 0.0017339224908866505,
+              "paired_se_difference": 0.00541085255748339,
+              "paired_n_worse_than_reference": 17,
+              "within_one_standard_error_of_best": true
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 4,
+              "patient_median_contact_choice_nll": 1.7237842082977295,
+              "optimizer_steps_total": 4352,
+              "paired_mean_difference": 0.0,
+              "paired_se_difference": 0.0,
+              "paired_n_worse_than_reference": 0,
+              "within_one_standard_error_of_best": true
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 1,
+              "patient_median_contact_choice_nll": 1.827854037284851,
+              "optimizer_steps_total": 1088,
+              "paired_mean_difference": 0.11227907503352447,
+              "paired_se_difference": 0.01287262210882421,
+              "paired_n_worse_than_reference": 34,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 2,
+              "patient_median_contact_choice_nll": 1.8169741233189902,
+              "optimizer_steps_total": 2176,
+              "paired_mean_difference": 0.05618269303265739,
+              "paired_se_difference": 0.01084804809982609,
+              "paired_n_worse_than_reference": 30,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 3,
+              "patient_median_contact_choice_nll": 1.783300797144572,
+              "optimizer_steps_total": 3264,
+              "paired_mean_difference": 0.014929584428375853,
+              "paired_se_difference": 0.008163406244692223,
+              "paired_n_worse_than_reference": 17,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 4,
+              "patient_median_contact_choice_nll": 1.7533256212870278,
+              "optimizer_steps_total": 4352,
+              "paired_mean_difference": 0.015580904250051463,
+              "paired_se_difference": 0.0052172466036460585,
+              "paired_n_worse_than_reference": 24,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 1,
+              "patient_median_contact_choice_nll": 1.8516947229703267,
+              "optimizer_steps_total": 272,
+              "paired_mean_difference": 0.10006735839095773,
+              "paired_se_difference": 0.015491523037129647,
+              "paired_n_worse_than_reference": 30,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 2,
+              "patient_median_contact_choice_nll": 1.8302733500798545,
+              "optimizer_steps_total": 544,
+              "paired_mean_difference": 0.08374361547769288,
+              "paired_se_difference": 0.012850178618527225,
+              "paired_n_worse_than_reference": 32,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 3,
+              "patient_median_contact_choice_nll": 1.8057491580645242,
+              "optimizer_steps_total": 816,
+              "paired_mean_difference": 0.0635420668358896,
+              "paired_se_difference": 0.010811941218336259,
+              "paired_n_worse_than_reference": 28,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 4,
+              "patient_median_contact_choice_nll": 1.7917797168095906,
+              "optimizer_steps_total": 1088,
+              "paired_mean_difference": 0.05567053252575444,
+              "paired_se_difference": 0.008627428948642704,
+              "paired_n_worse_than_reference": 28,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 1,
+              "patient_median_contact_choice_nll": 1.8589233756065369,
+              "optimizer_steps_total": 272,
+              "paired_mean_difference": 0.11210417280010147,
+              "paired_se_difference": 0.01512850706695717,
+              "paired_n_worse_than_reference": 32,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 2,
+              "patient_median_contact_choice_nll": 1.848525563875834,
+              "optimizer_steps_total": 544,
+              "paired_mean_difference": 0.09755705501518999,
+              "paired_se_difference": 0.012654659784621596,
+              "paired_n_worse_than_reference": 34,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 3,
+              "patient_median_contact_choice_nll": 1.8125181992848716,
+              "optimizer_steps_total": 816,
+              "paired_mean_difference": 0.06879307358872656,
+              "paired_se_difference": 0.010951584787364856,
+              "paired_n_worse_than_reference": 30,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 4,
+              "patient_median_contact_choice_nll": 1.791606068611145,
+              "optimizer_steps_total": 1088,
+              "paired_mean_difference": 0.0615497219796274,
+              "paired_se_difference": 0.009654044145348192,
+              "paired_n_worse_than_reference": 30,
+              "within_one_standard_error_of_best": false
+            }
+          ],
+          "selected": {
+            "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+            "coverage_cycle": 3,
+            "updates_per_patient": 32,
+            "hidden_size": 32,
+            "learning_rate": 0.001,
+            "optimizer": "adamw",
+            "weight_decay": 0.0001,
+            "batch_size": 1024,
+            "objective": "teacher_forced_one_step",
+            "optimizer_steps_total": 3264,
+            "patient_median_contact_choice_nll": 1.7340270678202312,
+            "seed_patient_median_sd": 0.015621135102699128,
+            "paired_mean_difference_vs_best": 0.0017339224908866505,
+            "paired_se_difference_vs_best": 0.00541085255748339
+          },
+          "selection_rule": "patient-median validation contact-choice NLL; an arm is eligible when its paired mean difference against the best arm is within one standard error of that paired difference; the cheapest eligible optimizer budget wins",
+          "phase": "b1",
+          "n_configs": 4,
+          "plateau": [
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 4,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": -0.000590523084004646,
+              "improvements": "[0.034537434577941895, 0.043900032838185665, -0.000590523084004646]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.034537434577941895, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.043900032838185665, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.000590523084004646, \"n_patients_improved\": 17, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 4,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": -0.0020595590273538855,
+              "improvements": "[0.0326961874961853, 0.040714144706726074, -0.0020595590273538855]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.0326961874961853, \"n_patients_improved\": 25, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.040714144706726074, \"n_patients_improved\": 31, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.0020595590273538855, \"n_patients_improved\": 15, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 4,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.0013828476270039136,
+              "improvements": "[0.015398462613423702, 0.018609444300333733, 0.0013828476270039136]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.015398462613423702, \"n_patients_improved\": 25, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.018609444300333733, \"n_patients_improved\": 25, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": 0.0013828476270039136, \"n_patients_improved\": 18, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 4,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": -0.00571044286092115,
+              "improvements": "[0.006763339042663574, 0.02182439963022864, -0.00571044286092115]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.006763339042663574, \"n_patients_improved\": 20, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.02182439963022864, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.00571044286092115, \"n_patients_improved\": 15, \"n_patients\": 34}]",
+              "threshold": 0.002
+            }
+          ],
+          "data_read": "train80 inner training and inner validation only; outer heldout20 sealed",
+          "ictal_target_read": false
+        },
+        "b1x_extended_budget": {
+          "best_mean_config": {
+            "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+            "coverage_cycle": 8,
+            "patient_median_contact_choice_nll": 1.7058302164077759
+          },
+          "n_within_one_standard_error": 3,
+          "arms": [
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 1,
+              "patient_median_contact_choice_nll": 1.7815168301264448,
+              "optimizer_steps_total": 1088,
+              "paired_mean_difference": 0.13335452477137252,
+              "paired_se_difference": 0.014724507443496003,
+              "paired_n_worse_than_reference": 34,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 2,
+              "patient_median_contact_choice_nll": 1.8067061305046082,
+              "optimizer_steps_total": 2176,
+              "paired_mean_difference": 0.0860571358718124,
+              "paired_se_difference": 0.01001218880959998,
+              "paired_n_worse_than_reference": 33,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 3,
+              "patient_median_contact_choice_nll": 1.7340270678202312,
+              "optimizer_steps_total": 3264,
+              "paired_mean_difference": 0.041606415720546956,
+              "paired_se_difference": 0.007962808148083431,
+              "paired_n_worse_than_reference": 27,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 4,
+              "patient_median_contact_choice_nll": 1.7237842082977295,
+              "optimizer_steps_total": 4352,
+              "paired_mean_difference": 0.0398724932296603,
+              "paired_se_difference": 0.006818572829806887,
+              "paired_n_worse_than_reference": 29,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 5,
+              "patient_median_contact_choice_nll": 1.7193319598833718,
+              "optimizer_steps_total": 5440,
+              "paired_mean_difference": 0.02518352573993156,
+              "paired_se_difference": 0.005482310751839731,
+              "paired_n_worse_than_reference": 26,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 6,
+              "patient_median_contact_choice_nll": 1.7183855772018433,
+              "optimizer_steps_total": 6528,
+              "paired_mean_difference": 0.011198494948592812,
+              "paired_se_difference": 0.006007786872447816,
+              "paired_n_worse_than_reference": 20,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 7,
+              "patient_median_contact_choice_nll": 1.7070452570915222,
+              "optimizer_steps_total": 7616,
+              "paired_mean_difference": -0.000605004675248103,
+              "paired_se_difference": 0.003914983927042986,
+              "paired_n_worse_than_reference": 13,
+              "within_one_standard_error_of_best": true
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 8,
+              "patient_median_contact_choice_nll": 1.7058302164077759,
+              "optimizer_steps_total": 8704,
+              "paired_mean_difference": 0.0,
+              "paired_se_difference": 0.0,
+              "paired_n_worse_than_reference": 0,
+              "within_one_standard_error_of_best": true
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 1,
+              "patient_median_contact_choice_nll": 1.827854037284851,
+              "optimizer_steps_total": 1088,
+              "paired_mean_difference": 0.15215156826318474,
+              "paired_se_difference": 0.015372951661274132,
+              "paired_n_worse_than_reference": 34,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 2,
+              "patient_median_contact_choice_nll": 1.8169741233189902,
+              "optimizer_steps_total": 2176,
+              "paired_mean_difference": 0.09605518626231768,
+              "paired_se_difference": 0.011694611426896555,
+              "paired_n_worse_than_reference": 33,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 3,
+              "patient_median_contact_choice_nll": 1.783300797144572,
+              "optimizer_steps_total": 3264,
+              "paired_mean_difference": 0.05480207765803616,
+              "paired_se_difference": 0.01008855882350797,
+              "paired_n_worse_than_reference": 30,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 4,
+              "patient_median_contact_choice_nll": 1.7533256212870278,
+              "optimizer_steps_total": 4352,
+              "paired_mean_difference": 0.055453397479711765,
+              "paired_se_difference": 0.008459868877288541,
+              "paired_n_worse_than_reference": 31,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 5,
+              "patient_median_contact_choice_nll": 1.7336346904436746,
+              "optimizer_steps_total": 5440,
+              "paired_mean_difference": 0.023616083696776716,
+              "paired_se_difference": 0.005164969827193716,
+              "paired_n_worse_than_reference": 26,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 6,
+              "patient_median_contact_choice_nll": 1.7595850626627605,
+              "optimizer_steps_total": 6528,
+              "paired_mean_difference": 0.028387767427107847,
+              "paired_se_difference": 0.006847423977937971,
+              "paired_n_worse_than_reference": 29,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 7,
+              "patient_median_contact_choice_nll": 1.717534820238749,
+              "optimizer_steps_total": 7616,
+              "paired_mean_difference": 0.0070854565676520915,
+              "paired_se_difference": 0.004391366789117073,
+              "paired_n_worse_than_reference": 20,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 8,
+              "patient_median_contact_choice_nll": 1.7119671305020652,
+              "optimizer_steps_total": 8704,
+              "paired_mean_difference": -0.00749727323943493,
+              "paired_se_difference": 0.0026775612303893584,
+              "paired_n_worse_than_reference": 11,
+              "within_one_standard_error_of_best": true
+            }
+          ],
+          "selected": {
+            "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+            "coverage_cycle": 7,
+            "updates_per_patient": 32,
+            "hidden_size": 32,
+            "learning_rate": 0.001,
+            "optimizer": "adamw",
+            "weight_decay": 0.0001,
+            "batch_size": 1024,
+            "objective": "teacher_forced_one_step",
+            "optimizer_steps_total": 7616,
+            "patient_median_contact_choice_nll": 1.7070452570915222,
+            "seed_patient_median_sd": 0.005476798501042298,
+            "paired_mean_difference_vs_best": -0.000605004675248103,
+            "paired_se_difference_vs_best": 0.003914983927042986
+          },
+          "selection_rule": "patient-median validation contact-choice NLL; an arm is eligible when its paired mean difference against the best arm is within one standard error of that paired difference; the cheapest eligible optimizer budget wins",
+          "selection_restricted_to_final_cycle": false,
+          "phase": "b1x",
+          "n_configs": 2,
+          "plateau": [
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 8,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": -0.005190551280975231,
+              "improvements": "[0.034537434577941895, 0.043900032838185665, -0.000590523084004646, 0.008709410826365227, 0.011285146077473884, 0.012584229310353745, -0.005190551280975231]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.034537434577941895, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.043900032838185665, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.000590523084004646, \"n_patients_improved\": 17, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": 0.008709410826365227, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.011285146077473884, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.012584229310353745, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 7, \"to_cycle\": 8, \"patient_median_improvement\": -0.005190551280975231, \"n_patients_improved\": 13, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 8,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.013165871302286858,
+              "improvements": "[0.0326961874961853, 0.040714144706726074, -0.0020595590273538855, 0.026988526185353745, -0.003778398036956898, 0.023477375507354625, 0.013165871302286858]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.0326961874961853, \"n_patients_improved\": 25, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.040714144706726074, \"n_patients_improved\": 31, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.0020595590273538855, \"n_patients_improved\": 15, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": 0.026988526185353745, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": -0.003778398036956898, \"n_patients_improved\": 13, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.023477375507354625, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 7, \"to_cycle\": 8, \"patient_median_improvement\": 0.013165871302286858, \"n_patients_improved\": 24, \"n_patients\": 34}]",
+              "threshold": 0.002
+            }
+          ],
+          "data_read": "train80 inner training and inner validation only; outer heldout20 sealed",
+          "ictal_target_read": false
+        },
+        "b2_learning_rate_and_optimizer": {
+          "best_mean_config": {
+            "config_key": "u32_h32_lr0.0003_adamw_wd0_b1024_teacher_forced_one_step",
+            "coverage_cycle": 7,
+            "patient_median_contact_choice_nll": 1.6910775303840637
+          },
+          "n_within_one_standard_error": 1,
+          "arms": [
+            {
+              "config_key": "u32_h32_lr0.0003_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 7,
+              "patient_median_contact_choice_nll": 1.6910854379336038,
+              "optimizer_steps_total": 7616,
+              "paired_mean_difference": 7.98819111844912e-06,
+              "paired_se_difference": 2.3530267741599326e-06,
+              "paired_n_worse_than_reference": 24,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.0003_adamw_wd0_b1024_teacher_forced_one_step",
+              "coverage_cycle": 7,
+              "patient_median_contact_choice_nll": 1.6910775303840637,
+              "optimizer_steps_total": 7616,
+              "paired_mean_difference": 0.0,
+              "paired_se_difference": 0.0,
+              "paired_n_worse_than_reference": 0,
+              "within_one_standard_error_of_best": true
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 7,
+              "patient_median_contact_choice_nll": 1.7070452570915222,
+              "optimizer_steps_total": 7616,
+              "paired_mean_difference": 0.01972123688342527,
+              "paired_se_difference": 0.003642371244258367,
+              "paired_n_worse_than_reference": 30,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0_b1024_teacher_forced_one_step",
+              "coverage_cycle": 7,
+              "patient_median_contact_choice_nll": 1.7070485750834146,
+              "optimizer_steps_total": 7616,
+              "paired_mean_difference": 0.019712950669082956,
+              "paired_se_difference": 0.003641632138699597,
+              "paired_n_worse_than_reference": 30,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.003_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "coverage_cycle": 7,
+              "patient_median_contact_choice_nll": 1.7085784673690796,
+              "optimizer_steps_total": 7616,
+              "paired_mean_difference": 0.030083212197995656,
+              "paired_se_difference": 0.004330741282809808,
+              "paired_n_worse_than_reference": 34,
+              "within_one_standard_error_of_best": false
+            },
+            {
+              "config_key": "u32_h32_lr0.003_adamw_wd0_b1024_teacher_forced_one_step",
+              "coverage_cycle": 7,
+              "patient_median_contact_choice_nll": 1.708200772603353,
+              "optimizer_steps_total": 7616,
+              "paired_mean_difference": 0.028495707932640557,
+              "paired_se_difference": 0.004212205579702576,
+              "paired_n_worse_than_reference": 34,
+              "within_one_standard_error_of_best": false
+            }
+          ],
+          "selected": {
+            "config_key": "u32_h32_lr0.0003_adamw_wd0_b1024_teacher_forced_one_step",
+            "coverage_cycle": 7,
+            "updates_per_patient": 32,
+            "hidden_size": 32,
+            "learning_rate": 0.0003,
+            "optimizer": "adamw",
+            "weight_decay": 0.0,
+            "batch_size": 1024,
+            "objective": "teacher_forced_one_step",
+            "optimizer_steps_total": 7616,
+            "patient_median_contact_choice_nll": 1.6910775303840637,
+            "seed_patient_median_sd": 0.002996546508619058,
+            "paired_mean_difference_vs_best": 0.0,
+            "paired_se_difference_vs_best": 0.0
+          },
+          "selection_rule": "patient-median validation contact-choice NLL; an arm is eligible when its paired mean difference against the best arm is within one standard error of that paired difference; the cheapest eligible optimizer budget wins",
+          "selection_restricted_to_final_cycle": true,
+          "optimizer_sensitivity_not_eligible_for_selection": [
+            {
+              "config_key": "u32_h32_lr0.0003_adam_wd0_b1024_teacher_forced_one_step",
+              "cfg_learning_rate": 0.0003,
+              "cfg_optimizer": "adam",
+              "cfg_weight_decay": 0.0,
+              "patient_median_contact_choice_nll": 1.6910775303840637,
+              "seed_patient_median_sd": 0.002996546508619058
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adam_wd0_b1024_teacher_forced_one_step",
+              "cfg_learning_rate": 0.001,
+              "cfg_optimizer": "adam",
+              "cfg_weight_decay": 0.0,
+              "patient_median_contact_choice_nll": 1.7070485750834146,
+              "seed_patient_median_sd": 0.005472233590250007
+            },
+            {
+              "config_key": "u32_h32_lr0.003_adam_wd0_b1024_teacher_forced_one_step",
+              "cfg_learning_rate": 0.003,
+              "cfg_optimizer": "adam",
+              "cfg_weight_decay": 0.0,
+              "patient_median_contact_choice_nll": 1.708200772603353,
+              "seed_patient_median_sd": 0.00238961156307965
+            }
+          ],
+          "phase": "b2",
+          "n_configs": 6,
+          "plateau": [
+            {
+              "config_key": "u32_h32_lr0.0003_adam_wd0_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.005589663982391357,
+              "improvements": "[0.0483777324358623, 0.03384111324946093, 0.027226388454437256, 0.006414532661437877, 0.016475637753804562, 0.005589663982391357]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.0483777324358623, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.03384111324946093, \"n_patients_improved\": 32, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": 0.027226388454437256, \"n_patients_improved\": 33, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": 0.006414532661437877, \"n_patients_improved\": 24, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.016475637753804562, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.005589663982391357, \"n_patients_improved\": 26, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h32_lr0.0003_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.0055846373240151514,
+              "improvements": "[0.04837268590927124, 0.03382434447606408, 0.0272217790285747, 0.006413201491038079, 0.01645805438359571, 0.0055846373240151514]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.04837268590927124, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.03382434447606408, \"n_patients_improved\": 32, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": 0.0272217790285747, \"n_patients_improved\": 33, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": 0.006413201491038079, \"n_patients_improved\": 24, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.01645805438359571, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.0055846373240151514, \"n_patients_improved\": 26, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h32_lr0.0003_adamw_wd0_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.005589663982391357,
+              "improvements": "[0.0483777324358623, 0.03384111324946093, 0.027226388454437256, 0.006414532661437877, 0.016475637753804562, 0.005589663982391357]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.0483777324358623, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.03384111324946093, \"n_patients_improved\": 32, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": 0.027226388454437256, \"n_patients_improved\": 33, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": 0.006414532661437877, \"n_patients_improved\": 24, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.016475637753804562, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.005589663982391357, \"n_patients_improved\": 26, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adam_wd0_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.012587865193684822,
+              "improvements": "[0.034562091032664055, 0.04390382766723655, -0.0005951722462971265, 0.008725166320800892, 0.011282304922739739, 0.012587865193684822]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.034562091032664055, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.04390382766723655, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.0005951722462971265, \"n_patients_improved\": 17, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": 0.008725166320800892, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.011282304922739739, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.012587865193684822, \"n_patients_improved\": 27, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.012584229310353745,
+              "improvements": "[0.034537434577941895, 0.043900032838185665, -0.000590523084004646, 0.008709410826365227, 0.011285146077473884, 0.012584229310353745]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.034537434577941895, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.043900032838185665, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.000590523084004646, \"n_patients_improved\": 17, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": 0.008709410826365227, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.011285146077473884, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.012584229310353745, \"n_patients_improved\": 27, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h32_lr0.001_adamw_wd0_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.012587865193684822,
+              "improvements": "[0.034562091032664055, 0.04390382766723655, -0.0005951722462971265, 0.008725166320800892, 0.011282304922739739, 0.012587865193684822]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.034562091032664055, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.04390382766723655, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.0005951722462971265, \"n_patients_improved\": 17, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": 0.008725166320800892, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.011282304922739739, \"n_patients_improved\": 27, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.012587865193684822, \"n_patients_improved\": 27, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h32_lr0.003_adam_wd0_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.001868605613708274,
+              "improvements": "[0.03875503937403357, 0.06514503558476747, 0.009385426839192745, -0.0022934675216675915, 0.0348564783732096, 0.001868605613708274]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.03875503937403357, \"n_patients_improved\": 24, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.06514503558476747, \"n_patients_improved\": 30, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": 0.009385426839192745, \"n_patients_improved\": 20, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": -0.0022934675216675915, \"n_patients_improved\": 16, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.0348564783732096, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.001868605613708274, \"n_patients_improved\": 21, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h32_lr0.003_adamw_wd0.0001_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.0014616847038269043,
+              "improvements": "[0.0429247021675111, 0.06351844469706214, 0.009959359963734982, -0.00653982162475597, 0.03734475374221791, 0.0014616847038269043]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.0429247021675111, \"n_patients_improved\": 24, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.06351844469706214, \"n_patients_improved\": 30, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": 0.009959359963734982, \"n_patients_improved\": 21, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": -0.00653982162475597, \"n_patients_improved\": 14, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.03734475374221791, \"n_patients_improved\": 30, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.0014616847038269043, \"n_patients_improved\": 17, \"n_patients\": 34}]",
+              "threshold": 0.002
+            },
+            {
+              "config_key": "u32_h32_lr0.003_adamw_wd0_b1024_teacher_forced_one_step",
+              "max_cycle": 7,
+              "plateau_reached": false,
+              "plateau_at_cycle": null,
+              "final_improvement": 0.001868605613708274,
+              "improvements": "[0.03875503937403357, 0.06514503558476747, 0.009385426839192745, -0.0022934675216675915, 0.0348564783732096, 0.001868605613708274]",
+              "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.03875503937403357, \"n_patients_improved\": 24, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.06514503558476747, \"n_patients_improved\": 30, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": 0.009385426839192745, \"n_patients_improved\": 20, \"n_patients\": 34}, {\"from_cycle\": 4, \"to_cycle\": 5, \"patient_median_improvement\": -0.0022934675216675915, \"n_patients_improved\": 16, \"n_patients\": 34}, {\"from_cycle\": 5, \"to_cycle\": 6, \"patient_median_improvement\": 0.0348564783732096, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 6, \"to_cycle\": 7, \"patient_median_improvement\": 0.001868605613708274, \"n_patients_improved\": 21, \"n_patients\": 34}]",
+              "threshold": 0.002
+            }
+          ],
+          "data_read": "train80 inner training and inner validation only; outer heldout20 sealed",
+          "ictal_target_read": false
+        },
+        "b3_chunk_parity": {
+          "final_cycle": 7,
+          "max_absolute_parameter_difference": 5.21540641784668e-07,
+          "max_absolute_offset_difference": 6.332993507385254e-07,
+          "per_parameter_max_difference": {
+            "raw_persistence": 4.172325134277344e-07,
+            "contact_encoder.0.weight": 5.066394805908203e-07,
+            "contact_encoder.0.bias": 1.564621925354004e-07,
+            "contact_encoder.2.weight": 3.5762786865234375e-07,
+            "contact_encoder.2.bias": 3.2782554626464844e-07,
+            "contact_encoder.3.weight": 4.76837158203125e-07,
+            "contact_encoder.3.bias": 1.7508864402770996e-07,
+            "initial_state.weight": 5.21540641784668e-07,
+            "initial_state.bias": 1.4901161193847656e-07,
+            "action_query.weight": 3.427267074584961e-07,
+            "action_query.bias": 1.7136335372924805e-07,
+            "action_bias.weight": 2.980232238769531e-07,
+            "action_bias.bias": 5.2619725465774536e-08,
+            "stop_head.weight": 1.9371509552001953e-07,
+            "stop_head.bias": 4.284083843231201e-08,
+            "input_projection.weight": 3.2782554626464844e-07,
+            "input_projection.bias": 1.1920928955078125e-07
+          },
+          "patient_median_contact_choice_nll": {
+            "1024": 1.6910675764083862,
+            "512": 1.691067397594452
+          },
+          "validation_nll_difference": 1.7881393432617188e-07,
+          "optimizer_steps": {
+            "1024": 7616,
+            "512": 7616
+          },
+          "backward_chunks": {
+            "1024": 10080,
+            "512": 13664
+          },
+          "update_boundaries_identical": true,
+          "chunking_actually_differed": true,
+          "tolerance": 0.0001,
+          "parity_pass": true
+        },
+        "b1c_loso_development_confirmation": {
+          "best_arm": {
+            "arm": "loso_dev_c7_u32__offset8",
+            "condition": "loso_dev_c7_u32",
+            "cycles": 7,
+            "updates_per_patient": 32,
+            "offset_cycles": 8,
+            "patient_median_contact_choice_nll": 1.6921128630638123
+          },
+          "arms": [
+            {
+              "arm": "loso_dev_c1_u8__offset4",
+              "condition": "loso_dev_c1_u8",
+              "cycles": 1,
+              "updates_per_patient": 8,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_contact_choice_nll",
+              "n_patients": 34,
+              "patient_median": 1.8678316275278726,
+              "patient_mean": 1.9641762270646936
+            },
+            {
+              "arm": "loso_dev_c1_u8__offset4",
+              "condition": "loso_dev_c1_u8",
+              "cycles": 1,
+              "updates_per_patient": 8,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_event_total_nll",
+              "n_patients": 34,
+              "patient_median": 1.8701987663904827,
+              "patient_mean": 1.9825111884696813
+            },
+            {
+              "arm": "loso_dev_c1_u8__offset4",
+              "condition": "loso_dev_c1_u8",
+              "cycles": 1,
+              "updates_per_patient": 8,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_stop_contribution_nll",
+              "n_patients": 34,
+              "patient_median": 0.24766028920809424,
+              "patient_mean": 0.2353383551771734
+            },
+            {
+              "arm": "loso_dev_c1_u8__offset8",
+              "condition": "loso_dev_c1_u8",
+              "cycles": 1,
+              "updates_per_patient": 8,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_contact_choice_nll",
+              "n_patients": 34,
+              "patient_median": 1.84498659769694,
+              "patient_mean": 1.9573136205766715
+            },
+            {
+              "arm": "loso_dev_c1_u8__offset8",
+              "condition": "loso_dev_c1_u8",
+              "cycles": 1,
+              "updates_per_patient": 8,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_event_total_nll",
+              "n_patients": 34,
+              "patient_median": 1.8570147156715393,
+              "patient_mean": 1.9739260731958874
+            },
+            {
+              "arm": "loso_dev_c1_u8__offset8",
+              "condition": "loso_dev_c1_u8",
+              "cycles": 1,
+              "updates_per_patient": 8,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_stop_contribution_nll",
+              "n_patients": 34,
+              "patient_median": 0.2441785037517547,
+              "patient_mean": 0.23275389398137727
+            },
+            {
+              "arm": "loso_dev_c4_u32__offset4",
+              "condition": "loso_dev_c4_u32",
+              "cycles": 4,
+              "updates_per_patient": 32,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_contact_choice_nll",
+              "n_patients": 34,
+              "patient_median": 1.7162500023841858,
+              "patient_mean": 1.8146374494421718
+            },
+            {
+              "arm": "loso_dev_c4_u32__offset4",
+              "condition": "loso_dev_c4_u32",
+              "cycles": 4,
+              "updates_per_patient": 32,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_event_total_nll",
+              "n_patients": 34,
+              "patient_median": 1.6813298463821411,
+              "patient_mean": 1.8165147877206989
+            },
+            {
+              "arm": "loso_dev_c4_u32__offset4",
+              "condition": "loso_dev_c4_u32",
+              "cycles": 4,
+              "updates_per_patient": 32,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_stop_contribution_nll",
+              "n_patients": 34,
+              "patient_median": 0.19621548056602478,
+              "patient_mean": 0.20237291998722973
+            },
+            {
+              "arm": "loso_dev_c4_u32__offset8",
+              "condition": "loso_dev_c4_u32",
+              "cycles": 4,
+              "updates_per_patient": 32,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_contact_choice_nll",
+              "n_patients": 34,
+              "patient_median": 1.7068851788838706,
+              "patient_mean": 1.8033845623334248
+            },
+            {
+              "arm": "loso_dev_c4_u32__offset8",
+              "condition": "loso_dev_c4_u32",
+              "cycles": 4,
+              "updates_per_patient": 32,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_event_total_nll",
+              "n_patients": 34,
+              "patient_median": 1.6714789867401123,
+              "patient_mean": 1.8023714154374364
+            },
+            {
+              "arm": "loso_dev_c4_u32__offset8",
+              "condition": "loso_dev_c4_u32",
+              "cycles": 4,
+              "updates_per_patient": 32,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_stop_contribution_nll",
+              "n_patients": 34,
+              "patient_median": 0.19558277229468027,
+              "patient_mean": 0.198281790988118
+            },
+            {
+              "arm": "loso_dev_c7_u32__offset4",
+              "condition": "loso_dev_c7_u32",
+              "cycles": 7,
+              "updates_per_patient": 32,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_contact_choice_nll",
+              "n_patients": 34,
+              "patient_median": 1.7006070613861084,
+              "patient_mean": 1.799440604798934
+            },
+            {
+              "arm": "loso_dev_c7_u32__offset4",
+              "condition": "loso_dev_c7_u32",
+              "cycles": 7,
+              "updates_per_patient": 32,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_event_total_nll",
+              "n_patients": 34,
+              "patient_median": 1.6687540411949158,
+              "patient_mean": 1.7974567647073783
+            },
+            {
+              "arm": "loso_dev_c7_u32__offset4",
+              "condition": "loso_dev_c7_u32",
+              "cycles": 7,
+              "updates_per_patient": 32,
+              "offset_cycles": 4,
+              "endpoint": "likelihood_stop_contribution_nll",
+              "n_patients": 34,
+              "patient_median": 0.1937415202458699,
+              "patient_mean": 0.19711328356289395
+            },
+            {
+              "arm": "loso_dev_c7_u32__offset8",
+              "condition": "loso_dev_c7_u32",
+              "cycles": 7,
+              "updates_per_patient": 32,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_contact_choice_nll",
+              "n_patients": 34,
+              "patient_median": 1.6921128630638123,
+              "patient_mean": 1.7898200563355986
+            },
+            {
+              "arm": "loso_dev_c7_u32__offset8",
+              "condition": "loso_dev_c7_u32",
+              "cycles": 7,
+              "updates_per_patient": 32,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_event_total_nll",
+              "n_patients": 34,
+              "patient_median": 1.6605693101882935,
+              "patient_mean": 1.7853062877468033
+            },
+            {
+              "arm": "loso_dev_c7_u32__offset8",
+              "condition": "loso_dev_c7_u32",
+              "cycles": 7,
+              "updates_per_patient": 32,
+              "offset_cycles": 8,
+              "endpoint": "likelihood_stop_contribution_nll",
+              "n_patients": 34,
+              "patient_median": 0.1941851104299227,
+              "patient_mean": 0.19359294712251304
+            }
+          ],
+          "paired_vs_best": {
+            "loso_dev_c7_u32__offset8__vs__loso_dev_c1_u8__offset4": {
+              "n_patients": 34,
+              "median_gain": 0.13404413064320908,
+              "mean_gain": 0.1743561707290949,
+              "bootstrap_ci_median_gain": [
+                0.08624108632405592,
+                0.19908412297566747
+              ],
+              "n_improved": 34,
+              "n_worse": 0,
+              "fraction_improved": 1.0,
+              "rank_biserial_correlation": 1.0,
+              "wilcoxon_p": 1.1641532182693481e-10,
+              "treatment_median": 1.6921128630638123,
+              "reference_median": 1.8678316275278726,
+              "subjects": [
+                "epilepsiae_1073",
+                "epilepsiae_1077",
+                "epilepsiae_1084",
+                "epilepsiae_1096",
+                "epilepsiae_1125",
+                "epilepsiae_1146",
+                "epilepsiae_1150",
+                "epilepsiae_139",
+                "epilepsiae_253",
+                "epilepsiae_384",
+                "epilepsiae_442",
+                "epilepsiae_548",
+                "epilepsiae_583",
+                "epilepsiae_590",
+                "epilepsiae_620",
+                "epilepsiae_635",
+                "epilepsiae_922",
+                "epilepsiae_958",
+                "yuquan_chengshuai",
+                "yuquan_chenziyang",
+                "yuquan_gaolan",
+                "yuquan_hanyuxuan",
+                "yuquan_huanghanwen",
+                "yuquan_litengsheng",
+                "yuquan_liyouran",
+                "yuquan_pengzihang",
+                "yuquan_songzishuo",
+                "yuquan_sunyuanxin",
+                "yuquan_wangyiyang",
+                "yuquan_xuxinyi",
+                "yuquan_zhangbichen",
+                "yuquan_zhangjiaqi",
+                "yuquan_zhangkexuan",
+                "yuquan_zhaochenxi"
+              ]
+            },
+            "loso_dev_c7_u32__offset8__vs__loso_dev_c1_u8__offset8": {
+              "n_patients": 34,
+              "median_gain": 0.1296247045199076,
+              "mean_gain": 0.16749356424107267,
+              "bootstrap_ci_median_gain": [
+                0.08321579297383619,
+                0.1961681842803955
+              ],
+              "n_improved": 34,
+              "n_worse": 0,
+              "fraction_improved": 1.0,
+              "rank_biserial_correlation": 1.0,
+              "wilcoxon_p": 1.1641532182693481e-10,
+              "treatment_median": 1.6921128630638123,
+              "reference_median": 1.84498659769694,
+              "subjects": [
+                "epilepsiae_1073",
+                "epilepsiae_1077",
+                "epilepsiae_1084",
+                "epilepsiae_1096",
+                "epilepsiae_1125",
+                "epilepsiae_1146",
+                "epilepsiae_1150",
+                "epilepsiae_139",
+                "epilepsiae_253",
+                "epilepsiae_384",
+                "epilepsiae_442",
+                "epilepsiae_548",
+                "epilepsiae_583",
+                "epilepsiae_590",
+                "epilepsiae_620",
+                "epilepsiae_635",
+                "epilepsiae_922",
+                "epilepsiae_958",
+                "yuquan_chengshuai",
+                "yuquan_chenziyang",
+                "yuquan_gaolan",
+                "yuquan_hanyuxuan",
+                "yuquan_huanghanwen",
+                "yuquan_litengsheng",
+                "yuquan_liyouran",
+                "yuquan_pengzihang",
+                "yuquan_songzishuo",
+                "yuquan_sunyuanxin",
+                "yuquan_wangyiyang",
+                "yuquan_xuxinyi",
+                "yuquan_zhangbichen",
+                "yuquan_zhangjiaqi",
+                "yuquan_zhangkexuan",
+                "yuquan_zhaochenxi"
+              ]
+            },
+            "loso_dev_c7_u32__offset8__vs__loso_dev_c4_u32__offset4": {
+              "n_patients": 34,
+              "median_gain": 0.019736886024474987,
+              "mean_gain": 0.02481739310657276,
+              "bootstrap_ci_median_gain": [
+                0.010293006896972656,
+                0.032246947288513184
+              ],
+              "n_improved": 30,
+              "n_worse": 4,
+              "fraction_improved": 0.8823529411764706,
+              "rank_biserial_correlation": 0.9596638655462185,
+              "wilcoxon_p": 8.149072527885437e-09,
+              "treatment_median": 1.6921128630638123,
+              "reference_median": 1.7162500023841858,
+              "subjects": [
+                "epilepsiae_1073",
+                "epilepsiae_1077",
+                "epilepsiae_1084",
+                "epilepsiae_1096",
+                "epilepsiae_1125",
+                "epilepsiae_1146",
+                "epilepsiae_1150",
+                "epilepsiae_139",
+                "epilepsiae_253",
+                "epilepsiae_384",
+                "epilepsiae_442",
+                "epilepsiae_548",
+                "epilepsiae_583",
+                "epilepsiae_590",
+                "epilepsiae_620",
+                "epilepsiae_635",
+                "epilepsiae_922",
+                "epilepsiae_958",
+                "yuquan_chengshuai",
+                "yuquan_chenziyang",
+                "yuquan_gaolan",
+                "yuquan_hanyuxuan",
+                "yuquan_huanghanwen",
+                "yuquan_litengsheng",
+                "yuquan_liyouran",
+                "yuquan_pengzihang",
+                "yuquan_songzishuo",
+                "yuquan_sunyuanxin",
+                "yuquan_wangyiyang",
+                "yuquan_xuxinyi",
+                "yuquan_zhangbichen",
+                "yuquan_zhangjiaqi",
+                "yuquan_zhangkexuan",
+                "yuquan_zhaochenxi"
+              ]
+            },
+            "loso_dev_c7_u32__offset8__vs__loso_dev_c4_u32__offset8": {
+              "n_patients": 34,
+              "median_gain": 0.008483747641245598,
+              "mean_gain": 0.013564505997826071,
+              "bootstrap_ci_median_gain": [
+                0.004215200742085701,
+                0.0164906779925027
+              ],
+              "n_improved": 30,
+              "n_worse": 4,
+              "fraction_improved": 0.8823529411764706,
+              "rank_biserial_correlation": 0.8991596638655462,
+              "wilcoxon_p": 2.3690517991781235e-07,
+              "treatment_median": 1.6921128630638123,
+              "reference_median": 1.7068851788838706,
+              "subjects": [
+                "epilepsiae_1073",
+                "epilepsiae_1077",
+                "epilepsiae_1084",
+                "epilepsiae_1096",
+                "epilepsiae_1125",
+                "epilepsiae_1146",
+                "epilepsiae_1150",
+                "epilepsiae_139",
+                "epilepsiae_253",
+                "epilepsiae_384",
+                "epilepsiae_442",
+                "epilepsiae_548",
+                "epilepsiae_583",
+                "epilepsiae_590",
+                "epilepsiae_620",
+                "epilepsiae_635",
+                "epilepsiae_922",
+                "epilepsiae_958",
+                "yuquan_chengshuai",
+                "yuquan_chenziyang",
+                "yuquan_gaolan",
+                "yuquan_hanyuxuan",
+                "yuquan_huanghanwen",
+                "yuquan_litengsheng",
+                "yuquan_liyouran",
+                "yuquan_pengzihang",
+                "yuquan_songzishuo",
+                "yuquan_sunyuanxin",
+                "yuquan_wangyiyang",
+                "yuquan_xuxinyi",
+                "yuquan_zhangbichen",
+                "yuquan_zhangjiaqi",
+                "yuquan_zhangkexuan",
+                "yuquan_zhaochenxi"
+              ]
+            },
+            "loso_dev_c7_u32__offset8__vs__loso_dev_c7_u32__offset4": {
+              "n_patients": 34,
+              "median_gain": 0.006530801455179702,
+              "mean_gain": 0.009620548463335194,
+              "bootstrap_ci_median_gain": [
+                0.0035589933395385742,
+                0.012514948844909668
+              ],
+              "n_improved": 30,
+              "n_worse": 4,
+              "fraction_improved": 0.8823529411764706,
+              "rank_biserial_correlation": 0.865546218487395,
+              "wilcoxon_p": 1.009204424917698e-06,
+              "treatment_median": 1.6921128630638123,
+              "reference_median": 1.7006070613861084,
+              "subjects": [
+                "epilepsiae_1073",
+                "epilepsiae_1077",
+                "epilepsiae_1084",
+                "epilepsiae_1096",
+                "epilepsiae_1125",
+                "epilepsiae_1146",
+                "epilepsiae_1150",
+                "epilepsiae_139",
+                "epilepsiae_253",
+                "epilepsiae_384",
+                "epilepsiae_442",
+                "epilepsiae_548",
+                "epilepsiae_583",
+                "epilepsiae_590",
+                "epilepsiae_620",
+                "epilepsiae_635",
+                "epilepsiae_922",
+                "epilepsiae_958",
+                "yuquan_chengshuai",
+                "yuquan_chenziyang",
+                "yuquan_gaolan",
+                "yuquan_hanyuxuan",
+                "yuquan_huanghanwen",
+                "yuquan_litengsheng",
+                "yuquan_liyouran",
+                "yuquan_pengzihang",
+                "yuquan_songzishuo",
+                "yuquan_sunyuanxin",
+                "yuquan_wangyiyang",
+                "yuquan_xuxinyi",
+                "yuquan_zhangbichen",
+                "yuquan_zhangjiaqi",
+                "yuquan_zhangkexuan",
+                "yuquan_zhaochenxi"
+              ]
+            }
+          }
+        }
+      },
+      "data_ranges_read_for_selection": {
+        "cohort": "all 34 sealed patients",
+        "events": "train80 only, split into a chronological inner-training first 90% and an inner-validation last 10%",
+        "outer_heldout20_read": false,
+        "ictal_target_read": false,
+        "ab_labels_read": false,
+        "physical_axis_read": false,
+        "soz_read": false,
+        "inter_event_interval_read": false,
+        "seizure_labels_read": false
+      },
+      "seal_audit": {
+        "n_cells_checked": 354,
+        "all_sealed": true
+      },
+      "environment": {
+        "git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+        "hostname": "dell-PowerEdge-R740",
+        "python": "3.11.5",
+        "torch": "2.5.1+cu124",
+        "cuda": "12.4",
+        "cuda_device": "NVIDIA GeForce RTX 3090"
+      }
+    },
+    "OBJECTIVE_FREEZE.json": {
+      "status": "FROZEN",
+      "contract": "topic5_rnn_training_sufficiency_v0_1_objective_freeze",
+      "reference_condition": "objective_teacher_forced_one_step",
+      "selected_rollout_aware_objective": "scheduled_sampling",
+      "selection_rule": "most generation endpoints improved over teacher forcing among objectives whose one-step contact-choice NLL is not degraded by more than 0.002 nats/decision",
+      "any_objective_passed_the_one_step_guard": false,
+      "scores": {
+        "objective_scheduled_sampling": {
+          "n_generation_endpoints_better": 1,
+          "n_generation_endpoints": 6,
+          "detail": {
+            "transition_correlation": {
+              "condition": 0.7305589604824205,
+              "reference": 0.7654665098027085,
+              "better": false
+            },
+            "suffix_rank_wasserstein": {
+              "condition": 0.11961697043708999,
+              "reference": 0.11131221814408954,
+              "better": false
+            },
+            "suffix_precedence_correlation": {
+              "condition": 0.06932060688160191,
+              "reference": 0.076012184418685,
+              "better": false
+            },
+            "suffix_precedence_mae": {
+              "condition": 0.20140197142346777,
+              "reference": 0.18623458402747173,
+              "better": false
+            },
+            "suffix_participation_mae": {
+              "condition": 0.11521752193810195,
+              "reference": 0.1173538408279351,
+              "better": true
+            },
+            "event_length_wasserstein": {
+              "condition": 0.0237425872451507,
+              "reference": 0.0237425872451507,
+              "better": false
+            }
+          },
+          "one_step_contact_choice_nll": 1.7041624983151755,
+          "reference_one_step_contact_choice_nll": 1.69114617506663,
+          "one_step_not_degraded": false
+        },
+        "objective_self_fed_2step": {
+          "n_generation_endpoints_better": 1,
+          "n_generation_endpoints": 6,
+          "detail": {
+            "transition_correlation": {
+              "condition": 0.7216017335976883,
+              "reference": 0.7654665098027085,
+              "better": false
+            },
+            "suffix_rank_wasserstein": {
+              "condition": 0.12470456870703746,
+              "reference": 0.11131221814408954,
+              "better": false
+            },
+            "suffix_precedence_correlation": {
+              "condition": 0.19601095351654718,
+              "reference": 0.076012184418685,
+              "better": true
+            },
+            "suffix_precedence_mae": {
+              "condition": 0.20474290831441289,
+              "reference": 0.18623458402747173,
+              "better": false
+            },
+            "suffix_participation_mae": {
+              "condition": 0.12088942654680676,
+              "reference": 0.1173538408279351,
+              "better": false
+            },
+            "event_length_wasserstein": {
+              "condition": 0.0237425872451507,
+              "reference": 0.0237425872451507,
+              "better": false
+            }
+          },
+          "one_step_contact_choice_nll": 1.7178773482640584,
+          "reference_one_step_contact_choice_nll": 1.69114617506663,
+          "one_step_not_degraded": false
+        },
+        "objective_self_fed_3step": {
+          "n_generation_endpoints_better": 1,
+          "n_generation_endpoints": 6,
+          "detail": {
+            "transition_correlation": {
+              "condition": 0.6851382457925403,
+              "reference": 0.7654665098027085,
+              "better": false
+            },
+            "suffix_rank_wasserstein": {
+              "condition": 0.12308502448350472,
+              "reference": 0.11131221814408954,
+              "better": false
+            },
+            "suffix_precedence_correlation": {
+              "condition": 0.17370038616171968,
+              "reference": 0.076012184418685,
+              "better": true
+            },
+            "suffix_precedence_mae": {
+              "condition": 0.2022027617431671,
+              "reference": 0.18623458402747173,
+              "better": false
+            },
+            "suffix_participation_mae": {
+              "condition": 0.11922254479491237,
+              "reference": 0.1173538408279351,
+              "better": false
+            },
+            "event_length_wasserstein": {
+              "condition": 0.0237425872451507,
+              "reference": 0.0237425872451507,
+              "better": false
+            }
+          },
+          "one_step_contact_choice_nll": 1.7364750305811563,
+          "reference_one_step_contact_choice_nll": 1.69114617506663,
+          "one_step_not_degraded": false
+        }
+      },
+      "frozen_training_budget": {
+        "model": "LinearStateSequenceRNN",
+        "hidden_size": 32,
+        "shared_coverage_cycles": 7,
+        "updates_per_patient": 32,
+        "heldout_offset_calibration_cycles": 8,
+        "learning_rate": 0.0003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "gradient_clip": 1.0,
+        "memory_chunk_size": 1024,
+        "local_offset_dim": 4,
+        "objective": "teacher_forced_one_step"
+      },
+      "data_ranges_read_for_selection": {
+        "events": "train80 inner training and inner validation only",
+        "outer_heldout20_read": false,
+        "ictal_target_read": false,
+        "rollout_loss_weights_tuned_on_heldout_suffix": false,
+        "ab_or_axis_used": false
+      },
+      "seal_audit": {
+        "n_cells_checked": 762,
+        "all_sealed": true
+      },
+      "environment": {
+        "git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+        "hostname": "dell-PowerEdge-R740",
+        "python": "3.11.5",
+        "torch": "2.5.1+cu124",
+        "cuda": "12.4",
+        "cuda_device": "NVIDIA GeForce RTX 3090"
+      }
+    }
+  },
+  "reproducibility": {
+    "REPRODUCIBILITY.json": {
+      "contract": "topic5_rnn_training_sufficiency_v0_1_reproducibility",
+      "question": "does an identical seed reproduce the run bit for bit after the logging-synchronisation optimisation?",
+      "configuration": {
+        "cycles": 4,
+        "updates_per_patient": 8,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step",
+        "local_offset_dim": 4,
+        "inner_validation_fraction_of_first80": 0.1
+      },
+      "original_git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+      "reproduced_git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+      "code_change_between_runs": "device-side accumulation of logging scalars; no change to any numerical operation that enters the gradient or the parameters",
+      "per_cycle": [
+        {
+          "coverage_cycle": 1,
+          "original": 1.843045175075531,
+          "reproduced": 1.843045175075531,
+          "identical": true
+        },
+        {
+          "coverage_cycle": 2,
+          "original": 1.8038264513015747,
+          "reproduced": 1.8038264513015747,
+          "identical": true
+        },
+        {
+          "coverage_cycle": 3,
+          "original": 1.8182901740074158,
+          "reproduced": 1.8182901740074158,
+          "identical": true
+        },
+        {
+          "coverage_cycle": 4,
+          "original": 1.7895936965942383,
+          "reproduced": 1.7895936965942383,
+          "identical": true
+        }
+      ],
+      "all_cycles_identical": true,
+      "n_optimizer_steps_identical": true,
+      "runtime_seconds": {
+        "original": 310.94075202941895,
+        "reproduced": 251.10901427268982
+      },
+      "speedup": 1.23826997182887
+    },
+    "NESTED_CYCLE_READOUT.json": {
+      "contract": "topic5_rnn_training_sufficiency_v0_1_nested_cycle_readout",
+      "question": "reading budgets {1,2,4} from one longer run must be exact, not approximate: cycles 1-4 of the 8-cycle run must reproduce the standalone 4-cycle run",
+      "n_compared_patient_cycle_seed_rows": 816,
+      "budgets_compared": [
+        {
+          "updates_per_patient": 32,
+          "hidden_size": 32
+        },
+        {
+          "updates_per_patient": 32,
+          "hidden_size": 64
+        }
+      ],
+      "seeds": [
+        20260725,
+        20260726,
+        20260727
+      ],
+      "max_absolute_difference": 0.0,
+      "n_exactly_identical": 816,
+      "nested_readout_exact": true
+    }
+  },
+  "environment": {
+    "git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+    "hostname": "dell-PowerEdge-R740",
+    "python": "3.11.5",
+    "torch": "2.5.1+cu124",
+    "cuda": "12.4",
+    "cuda_device": "NVIDIA GeForce RTX 3090"
+  }
+}
