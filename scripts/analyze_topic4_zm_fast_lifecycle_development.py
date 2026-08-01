@@ -30,6 +30,7 @@ IN_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/discovery
 RACE_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/race/seed1"
 DYNAMIC_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/dynamic/seed1"
 OUT_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development"
+FINE_BIN_MS = 2.0
 STATES = (
     "bounded_mid__rising", "bounded_mid__peak",
     "bounded_late__rising", "bounded_late__peak",
@@ -270,6 +271,176 @@ def analyze_race():
         writer.writerows(payload["ranking"] + payload["excluded"])
     _plot_race(ranking)
     return payload
+
+
+def _conditional_corr(x, y, *, sigma_min=1.0):
+    """Correlation is undefined when either trace has negligible variance."""
+    x, y = np.asarray(x, float), np.asarray(y, float)
+    sx, sy = float(np.std(x)), float(np.std(y))
+    if min(sx, sy) <= float(sigma_min):
+        return {
+            "value": None,
+            "status": "low_variance_undefined",
+            "std_core_hz": sx,
+            "std_surround_hz": sy,
+        }
+    return {
+        "value": _safe_corr(x, y),
+        "status": "defined",
+        "std_core_hz": sx,
+        "std_surround_hz": sy,
+    }
+
+
+def _post_entry_spatial_metrics(kymo_axis_time, *, bin_ms=25.0, skip_ms=1000.0):
+    """Describe within-state spatial motion after excluding entry recruitment."""
+    K = np.asarray(kymo_axis_time, float).T  # time x axis
+    skip = int(round(float(skip_ms) / float(bin_ms)))
+    K = K[min(skip, max(0, K.shape[0] - 2)):]
+    if K.ndim != 2 or K.shape[0] < 2 or K.shape[1] < 2:
+        return {"status": "insufficient_post_entry_samples"}
+    Kp = np.maximum(K, 0.0)
+    axis = np.arange(K.shape[1], dtype=float)
+    denom = Kp.sum(axis=1)
+    valid = denom > 1e-12
+    centroid = np.full(K.shape[0], np.nan)
+    centroid[valid] = (Kp[valid] @ axis) / denom[valid]
+    finite = centroid[np.isfinite(centroid)]
+    excursion = (
+        float(np.percentile(finite, 95) - np.percentile(finite, 5))
+        if finite.size else None
+    )
+    velocity = (
+        float(np.median(np.abs(np.diff(finite))) / (float(bin_ms) / 1000.0))
+        if finite.size > 1 else None
+    )
+    centered = K - np.mean(K, axis=0, keepdims=True)
+    singular = np.linalg.svd(centered, compute_uv=False)
+    power = singular ** 2
+    total = float(power.sum())
+    if total <= 1e-12:
+        pc1 = None
+        erank = None
+        status = "spatial_variance_too_low"
+    else:
+        p = power / total
+        pc1 = float(p[0])
+        erank = float(np.exp(-np.sum(p[p > 0] * np.log(p[p > 0]))))
+        status = "ok"
+    return {
+        "status": status,
+        "post_entry_skip_ms": float(skip_ms),
+        "centroid_excursion_bins": excursion,
+        "centroid_median_speed_bins_s": velocity,
+        "common_mode_pc1_fraction": pc1,
+        "spatial_effective_rank": erank,
+    }
+
+
+def _pareto_indices(rows, keys):
+    values = np.asarray([[float(row[k]) for k in keys] for row in rows], float)
+    keep = []
+    for i, point in enumerate(values):
+        dominated = any(
+            j != i and np.all(other >= point) and np.any(other > point)
+            for j, other in enumerate(values)
+        )
+        if not dominated:
+            keep.append(i)
+    return keep
+
+
+def analyze_race_v2():
+    """Reanalyse the frozen race without a scalar score or invented baseline."""
+    rows = []
+    for root in sorted(RACE_ROOT.glob("*")):
+        sp, tp = root / "summary.json", root / "traces.npz"
+        if not sp.is_file() or not tp.is_file():
+            continue
+        summary = json.loads(sp.read_text())
+        with np.load(tp, allow_pickle=False) as data:
+            a = {key: np.asarray(data[key]) for key in data.files}
+        envelope, energy = _race_energy(
+            a["lfp_raw_synaptic_proxy"], float(a["lfp_fs_hz"])
+        )
+        skip_fine = min(
+            len(a["fine_core_rate_hz"]) - 1,
+            int(round(1000.0 / FINE_BIN_MS)),
+        )
+        core = np.asarray(a["fine_core_rate_hz"], float)[skip_fine:]
+        surround = np.asarray(a["fine_surround_rate_hz"], float)[skip_fine:]
+        spatial = _post_entry_spatial_metrics(a["coarse_kymo_axial"])
+        relay = _packet_axial_relay(
+            np.asarray(a["coarse_kymo_axial"])[:, int(round(1000 / 25)):],
+            np.asarray(a["coarse_core_rate_hz"])[int(round(1000 / 25)):],
+        )
+        corr = _conditional_corr(core, surround)
+        energy_mean = float(np.mean(envelope))
+        energy_median = float(np.median(envelope))
+        core_cv = float(np.std(core) / max(np.mean(core), 1e-12))
+        rows.append({
+            "stem": root.name,
+            "mechanism": summary.get("mechanism"),
+            "terminal_status": (
+                "scientific_early_stop" if summary.get("runaway_early_stop_ms") is not None
+                else "success"
+            ),
+            "event_free_baseline_status": "unavailable_in_frozen_branch_artifact",
+            "delta_E50_db": None,
+            "occupancy_above_6db": None,
+            "energy_median_absolute": energy_median,
+            "energy_integral_per_second": energy_mean,
+            "energy_q10": energy["energy_q10"],
+            "energy_q90": energy["energy_q90"],
+            "deep_gap_fraction": energy["deep_gap_G"],
+            "post_entry_core_cv": core_cv,
+            "post_entry_core_mean_hz": float(np.mean(core)),
+            "core_surround_correlation": corr,
+            "within_state_packet_relay": relay,
+            "within_state_spatial": spatial,
+            "readout_decomposition_status": "unavailable_in_legacy_artifact",
+            "summary_path": str(sp.relative_to(ROOT)),
+            "trace_path": str(tp.relative_to(ROOT)),
+        })
+    eligible = [
+        row for row in rows
+        if row["terminal_status"] == "success"
+        and row["post_entry_core_mean_hz"] >= 2.0
+    ]
+    for row in eligible:
+        spatial = row["within_state_spatial"]
+        row["pareto_energy"] = float(np.log1p(row["energy_median_absolute"]))
+        row["pareto_continuity"] = 1.0 - float(row["deep_gap_fraction"])
+        row["pareto_temporal_structure"] = min(2.0, row["post_entry_core_cv"])
+        row["pareto_spatial_rank"] = float(spatial.get("spatial_effective_rank") or 1.0)
+        row["pareto_centroid_motion"] = float(spatial.get("centroid_excursion_bins") or 0.0)
+    keys = (
+        "pareto_energy", "pareto_continuity", "pareto_temporal_structure",
+        "pareto_spatial_rank", "pareto_centroid_motion",
+    )
+    front = [_json_public(eligible[i]) for i in _pareto_indices(eligible, keys)]
+    payload = {
+        "schema": "zm_fast_lifecycle_mechanism_race_v2_2026-08-02",
+        "semantic_scope": "offline_frozen_branch_reanalysis_not_dynamic_candidate_ranking",
+        "selection": "multiobjective_pareto_no_scalar_J",
+        "baseline_limitation": (
+            "legacy frozen-branch artifacts contain no mechanism-matched event-free baseline; "
+            "delta_E50_db and occupancy_above_6db are intentionally null"
+        ),
+        "correlation_sigma_min_hz": 1.0,
+        "n_rows": len(rows),
+        "n_pareto": len(front),
+        "pareto_front": front,
+        "rows": [_json_public(row) for row in rows],
+    }
+    (OUT_ROOT / "mechanism_race_ranking_v2.json").write_text(
+        json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    return payload
+
+
+def _json_public(row):
+    return {k: v for k, v in row.items() if not k.startswith("_")}
 
 
 def _plot_race(ranking):
@@ -727,8 +898,17 @@ def plot(rows, ranking):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--race", action="store_true")
+    parser.add_argument("--race-v2", action="store_true")
     parser.add_argument("--dynamic", action="store_true")
     args = parser.parse_args()
+    if args.race_v2:
+        payload = analyze_race_v2()
+        print(json.dumps({
+            "n_rows": payload["n_rows"],
+            "n_pareto": payload["n_pareto"],
+            "baseline_limitation": payload["baseline_limitation"],
+        }, sort_keys=True))
+        return
     if args.dynamic:
         payload = analyze_dynamic()
         print(json.dumps({

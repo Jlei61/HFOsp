@@ -103,3 +103,35 @@ def test_vseeg_energy_floor_separates_continuous_carrier_from_pulse_train():
     assert continuous_metrics["energy_gap_fraction"] == 0.0
     assert pulsed_metrics["energy_floor_fraction"] < 1e-12
     assert pulsed_metrics["energy_gap_fraction"] > 0.70
+
+
+def test_low_variance_surround_makes_correlation_undefined():
+    import numpy as np
+
+    out = ANALYSIS._conditional_corr(
+        np.linspace(0, 10, 100), np.full(100, 3.0), sigma_min=1.0
+    )
+    assert out["status"] == "low_variance_undefined"
+    assert out["value"] is None
+
+
+def test_post_entry_spatial_metrics_ignore_entry_flash():
+    import numpy as np
+
+    kymo = np.zeros((8, 80), dtype=float)
+    kymo[:, :40] = np.arange(8)[:, None] + 1.0
+    kymo[3, 40:] = 1.0
+    got = ANALYSIS._post_entry_spatial_metrics(
+        kymo, bin_ms=25.0, skip_ms=1000.0
+    )
+    assert got["centroid_excursion_bins"] == 0.0
+    assert got["status"] == "spatial_variance_too_low"
+
+
+def test_pareto_front_keeps_distinct_non_dominated_phenotypes():
+    rows = [
+        {"energy": 10.0, "motion": 0.0},
+        {"energy": 3.0, "motion": 5.0},
+        {"energy": 2.0, "motion": 1.0},
+    ]
+    assert ANALYSIS._pareto_indices(rows, ("energy", "motion")) == [0, 1]
