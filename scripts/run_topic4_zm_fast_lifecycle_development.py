@@ -350,6 +350,7 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
 
 
 def run_cell(args: argparse.Namespace) -> Path:
+    launch_git_sha = RT.git_sha(ROOT)
     dynamic = args.command == "dynamic-cell"
     if dynamic:
         if float(args.T_ms) not in (30000.0, 60000.0):
@@ -558,7 +559,8 @@ def run_cell(args: argparse.Namespace) -> Path:
         "migrated_state_hash": transformation["migrated_state_hash"],
         "source_file_sha256": row["file_sha256"],
         "noise_bank_sha256": bank["bank_sha"],
-        "runtime_git_sha": RT.git_sha(ROOT),
+        "runtime_git_sha": launch_git_sha,
+        "git_sha_capture_semantics": "captured_before_context_build_and_simulation",
         "use_zm_conductance": False,
         "freeze_policy": R.FS.FreezePolicy.for_arm(
             "dynamic_replay" if dynamic else "freeze_zm"
