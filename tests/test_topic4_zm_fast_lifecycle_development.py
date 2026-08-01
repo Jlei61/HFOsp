@@ -14,6 +14,14 @@ DEV = importlib.util.module_from_spec(SPEC)
 assert SPEC.loader is not None
 SPEC.loader.exec_module(DEV)
 
+ANALYSIS_SCRIPT = ROOT / "scripts/analyze_topic4_zm_fast_lifecycle_development.py"
+ANALYSIS_SPEC = importlib.util.spec_from_file_location(
+    "analyze_zm_fast_lifecycle_development", ANALYSIS_SCRIPT
+)
+ANALYSIS = importlib.util.module_from_spec(ANALYSIS_SPEC)
+assert ANALYSIS_SPEC.loader is not None
+ANALYSIS_SPEC.loader.exec_module(ANALYSIS)
+
 
 def test_delta_phi_uses_seconds_and_locked_phase_c_rate():
     expected = 0.30 * 6.5 / (0.100 * DEV.REFERENCE_RATE_HZ)
@@ -57,3 +65,23 @@ def test_state_tags_are_the_locked_four_phase_c_checkpoints():
     assert DEV._state_parts("bounded_late__peak") == ("bounded_late", "peak")
     with pytest.raises(ValueError):
         DEV._state_parts("unregistered__peak")
+
+
+def test_vseeg_energy_floor_separates_continuous_carrier_from_pulse_train():
+    import numpy as np
+
+    fs = 1000.0
+    t = np.arange(5000) / fs
+    continuous = np.sin(2 * np.pi * 40 * t)[:, None]
+    pulsed = continuous.copy()
+    gate = np.zeros_like(t, dtype=bool)
+    for start in range(0, len(t), 500):
+        gate[start:start + 50] = True
+    pulsed *= gate[:, None]
+
+    _, continuous_metrics = ANALYSIS._vseeg_energy(continuous, fs)
+    _, pulsed_metrics = ANALYSIS._vseeg_energy(pulsed, fs)
+    assert continuous_metrics["energy_floor_fraction"] > 0.90
+    assert continuous_metrics["energy_gap_fraction"] == 0.0
+    assert pulsed_metrics["energy_floor_fraction"] < 1e-12
+    assert pulsed_metrics["energy_gap_fraction"] > 0.70
