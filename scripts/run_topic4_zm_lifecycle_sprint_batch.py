@@ -119,6 +119,13 @@ def _command(row):
     ]
     if row["arm"] == "combined":
         cmd += ["--tau-aI-ms", str(row["tau_aI_ms"]), "--f-aI", str(row["f_aI"])]
+    if float(row.get("control_uplift_mV", 0.0)) > 0.0:
+        cmd += [
+            "--control-uplift-mV", str(row["control_uplift_mV"]),
+            "--control-t0-ms", str(row["control_t0_ms"]),
+            "--control-duration-ms", str(row["control_duration_ms"]),
+            "--control-target", str(row.get("control_target", "all_E")),
+        ]
     return cmd
 
 

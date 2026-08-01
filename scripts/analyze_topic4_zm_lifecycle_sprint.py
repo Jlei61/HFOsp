@@ -476,6 +476,7 @@ def analyze_one(root):
     return {
         "stem": root.name,
         "mechanism": summary["mechanism"],
+        "finite_control": summary.get("finite_control"),
         "terminal_status": "scientific_early_stop" if runaway else "success",
         "phenotype": phenotype,
         "baseline_status": baseline_status,
@@ -496,6 +497,8 @@ def analyze_one(root):
 
 
 def _flat(row):
+    slow = row["mechanism"].get("dynamic_slow_flow", {})
+    control = row.get("finite_control") or {}
     return {
         "stem": row["stem"],
         "terminal_status": row["terminal_status"],
@@ -505,6 +508,13 @@ def _flat(row):
         "tau_I_ms": row["mechanism"].get("i_adaptation", {}).get("tau_aI_ms"),
         "f_I": row["mechanism"].get("i_adaptation", {}).get("f_aI"),
         "strength_scale": row["mechanism"].get("strength_scale"),
+        "g_M": slow.get("g_M"),
+        "tau_M_ms": slow.get("tau_M_ms"),
+        "g_Z": slow.get("g_Z"),
+        "control_target": control.get("target"),
+        "control_t0_ms": control.get("t0_ms"),
+        "control_duration_ms": control.get("duration_ms"),
+        "control_uplift_mV": control.get("uplift_mV"),
         "onset_ms": row["episode"].get("onset_ms"),
         "offset_ms": row["episode"].get("offset_ms"),
         "energy_gain_db": row["intensity"].get("median_gain_db_across_contacts"),
