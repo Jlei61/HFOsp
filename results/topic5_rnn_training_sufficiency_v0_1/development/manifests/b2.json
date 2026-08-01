@@ -1,0 +1,412 @@
+{
+  "phase": "b2_learning_rate",
+  "root": "results/topic5_rnn_training_sufficiency_v0_1/development/b2_learning_rate",
+  "notes": "AdamW primary, Adam is the single optimizer sensitivity at wd=0",
+  "cells": [
+    {
+      "cell": "c7_u32_h32_lr0.0003_adamw_wd0_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.0003_adamw_wd0_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.0003_adamw_wd0_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adamw_wd0_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adamw_wd0_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adamw_wd0_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adamw_wd0_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adamw_wd0_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adamw_wd0_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.0003_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.0003_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.0003_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adamw_wd0.0001_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adamw",
+        "weight_decay": 0.0001,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.0003_adam_wd0_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.0003_adam_wd0_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.0003_adam_wd0_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.0003,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adam_wd0_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adam_wd0_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.001_adam_wd0_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.001,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adam_wd0_b1024_teacher_forced_one_step/seed_20260725",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260725,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adam_wd0_b1024_teacher_forced_one_step/seed_20260726",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260726,
+        "objective": "teacher_forced_one_step"
+      }
+    },
+    {
+      "cell": "c7_u32_h32_lr0.003_adam_wd0_b1024_teacher_forced_one_step/seed_20260727",
+      "script": "development",
+      "args": {
+        "cycles": 7,
+        "updates_per_patient": 32,
+        "hidden_size": 32,
+        "learning_rate": 0.003,
+        "optimizer": "adam",
+        "weight_decay": 0.0,
+        "batch_size": 1024,
+        "seed": 20260727,
+        "objective": "teacher_forced_one_step"
+      }
+    }
+  ]
+}

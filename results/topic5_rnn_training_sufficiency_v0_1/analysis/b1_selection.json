@@ -1,0 +1,233 @@
+{
+  "best_mean_config": {
+    "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+    "coverage_cycle": 4,
+    "patient_median_contact_choice_nll": 1.7237842082977295
+  },
+  "n_within_one_standard_error": 2,
+  "arms": [
+    {
+      "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 1,
+      "patient_median_contact_choice_nll": 1.7815168301264448,
+      "optimizer_steps_total": 1088,
+      "paired_mean_difference": 0.09348203154171218,
+      "paired_se_difference": 0.01261241418730329,
+      "paired_n_worse_than_reference": 32,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 2,
+      "patient_median_contact_choice_nll": 1.8067061305046082,
+      "optimizer_steps_total": 2176,
+      "paired_mean_difference": 0.04618464264215211,
+      "paired_se_difference": 0.008229461944445404,
+      "paired_n_worse_than_reference": 29,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 3,
+      "patient_median_contact_choice_nll": 1.7340270678202312,
+      "optimizer_steps_total": 3264,
+      "paired_mean_difference": 0.0017339224908866505,
+      "paired_se_difference": 0.00541085255748339,
+      "paired_n_worse_than_reference": 17,
+      "within_one_standard_error_of_best": true
+    },
+    {
+      "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 4,
+      "patient_median_contact_choice_nll": 1.7237842082977295,
+      "optimizer_steps_total": 4352,
+      "paired_mean_difference": 0.0,
+      "paired_se_difference": 0.0,
+      "paired_n_worse_than_reference": 0,
+      "within_one_standard_error_of_best": true
+    },
+    {
+      "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 1,
+      "patient_median_contact_choice_nll": 1.827854037284851,
+      "optimizer_steps_total": 1088,
+      "paired_mean_difference": 0.11227907503352447,
+      "paired_se_difference": 0.01287262210882421,
+      "paired_n_worse_than_reference": 34,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 2,
+      "patient_median_contact_choice_nll": 1.8169741233189902,
+      "optimizer_steps_total": 2176,
+      "paired_mean_difference": 0.05618269303265739,
+      "paired_se_difference": 0.01084804809982609,
+      "paired_n_worse_than_reference": 30,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 3,
+      "patient_median_contact_choice_nll": 1.783300797144572,
+      "optimizer_steps_total": 3264,
+      "paired_mean_difference": 0.014929584428375853,
+      "paired_se_difference": 0.008163406244692223,
+      "paired_n_worse_than_reference": 17,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 4,
+      "patient_median_contact_choice_nll": 1.7533256212870278,
+      "optimizer_steps_total": 4352,
+      "paired_mean_difference": 0.015580904250051463,
+      "paired_se_difference": 0.0052172466036460585,
+      "paired_n_worse_than_reference": 24,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 1,
+      "patient_median_contact_choice_nll": 1.8516947229703267,
+      "optimizer_steps_total": 272,
+      "paired_mean_difference": 0.10006735839095773,
+      "paired_se_difference": 0.015491523037129647,
+      "paired_n_worse_than_reference": 30,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 2,
+      "patient_median_contact_choice_nll": 1.8302733500798545,
+      "optimizer_steps_total": 544,
+      "paired_mean_difference": 0.08374361547769288,
+      "paired_se_difference": 0.012850178618527225,
+      "paired_n_worse_than_reference": 32,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 3,
+      "patient_median_contact_choice_nll": 1.8057491580645242,
+      "optimizer_steps_total": 816,
+      "paired_mean_difference": 0.0635420668358896,
+      "paired_se_difference": 0.010811941218336259,
+      "paired_n_worse_than_reference": 28,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 4,
+      "patient_median_contact_choice_nll": 1.7917797168095906,
+      "optimizer_steps_total": 1088,
+      "paired_mean_difference": 0.05567053252575444,
+      "paired_se_difference": 0.008627428948642704,
+      "paired_n_worse_than_reference": 28,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 1,
+      "patient_median_contact_choice_nll": 1.8589233756065369,
+      "optimizer_steps_total": 272,
+      "paired_mean_difference": 0.11210417280010147,
+      "paired_se_difference": 0.01512850706695717,
+      "paired_n_worse_than_reference": 32,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 2,
+      "patient_median_contact_choice_nll": 1.848525563875834,
+      "optimizer_steps_total": 544,
+      "paired_mean_difference": 0.09755705501518999,
+      "paired_se_difference": 0.012654659784621596,
+      "paired_n_worse_than_reference": 34,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 3,
+      "patient_median_contact_choice_nll": 1.8125181992848716,
+      "optimizer_steps_total": 816,
+      "paired_mean_difference": 0.06879307358872656,
+      "paired_se_difference": 0.010951584787364856,
+      "paired_n_worse_than_reference": 30,
+      "within_one_standard_error_of_best": false
+    },
+    {
+      "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "coverage_cycle": 4,
+      "patient_median_contact_choice_nll": 1.791606068611145,
+      "optimizer_steps_total": 1088,
+      "paired_mean_difference": 0.0615497219796274,
+      "paired_se_difference": 0.009654044145348192,
+      "paired_n_worse_than_reference": 30,
+      "within_one_standard_error_of_best": false
+    }
+  ],
+  "selected": {
+    "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+    "coverage_cycle": 3,
+    "updates_per_patient": 32,
+    "hidden_size": 32,
+    "learning_rate": 0.001,
+    "optimizer": "adamw",
+    "weight_decay": 0.0001,
+    "batch_size": 1024,
+    "objective": "teacher_forced_one_step",
+    "optimizer_steps_total": 3264,
+    "patient_median_contact_choice_nll": 1.7340270678202312,
+    "seed_patient_median_sd": 0.015621135102699128,
+    "paired_mean_difference_vs_best": 0.0017339224908866505,
+    "paired_se_difference_vs_best": 0.00541085255748339
+  },
+  "selection_rule": "patient-median validation contact-choice NLL; an arm is eligible when its paired mean difference against the best arm is within one standard error of that paired difference; the cheapest eligible optimizer budget wins",
+  "phase": "b1",
+  "n_configs": 4,
+  "plateau": [
+    {
+      "config_key": "u32_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "max_cycle": 4,
+      "plateau_reached": false,
+      "plateau_at_cycle": null,
+      "final_improvement": -0.000590523084004646,
+      "improvements": "[0.034537434577941895, 0.043900032838185665, -0.000590523084004646]",
+      "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.034537434577941895, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.043900032838185665, \"n_patients_improved\": 29, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.000590523084004646, \"n_patients_improved\": 17, \"n_patients\": 34}]",
+      "threshold": 0.002
+    },
+    {
+      "config_key": "u32_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "max_cycle": 4,
+      "plateau_reached": false,
+      "plateau_at_cycle": null,
+      "final_improvement": -0.0020595590273538855,
+      "improvements": "[0.0326961874961853, 0.040714144706726074, -0.0020595590273538855]",
+      "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.0326961874961853, \"n_patients_improved\": 25, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.040714144706726074, \"n_patients_improved\": 31, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.0020595590273538855, \"n_patients_improved\": 15, \"n_patients\": 34}]",
+      "threshold": 0.002
+    },
+    {
+      "config_key": "u8_h32_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "max_cycle": 4,
+      "plateau_reached": false,
+      "plateau_at_cycle": null,
+      "final_improvement": 0.0013828476270039136,
+      "improvements": "[0.015398462613423702, 0.018609444300333733, 0.0013828476270039136]",
+      "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.015398462613423702, \"n_patients_improved\": 25, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.018609444300333733, \"n_patients_improved\": 25, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": 0.0013828476270039136, \"n_patients_improved\": 18, \"n_patients\": 34}]",
+      "threshold": 0.002
+    },
+    {
+      "config_key": "u8_h64_lr0.001_adamw_wd0.0001_b1024_teacher_forced_one_step",
+      "max_cycle": 4,
+      "plateau_reached": false,
+      "plateau_at_cycle": null,
+      "final_improvement": -0.00571044286092115,
+      "improvements": "[0.006763339042663574, 0.02182439963022864, -0.00571044286092115]",
+      "improvement_detail": "[{\"from_cycle\": 1, \"to_cycle\": 2, \"patient_median_improvement\": 0.006763339042663574, \"n_patients_improved\": 20, \"n_patients\": 34}, {\"from_cycle\": 2, \"to_cycle\": 3, \"patient_median_improvement\": 0.02182439963022864, \"n_patients_improved\": 28, \"n_patients\": 34}, {\"from_cycle\": 3, \"to_cycle\": 4, \"patient_median_improvement\": -0.00571044286092115, \"n_patients_improved\": 15, \"n_patients\": 34}]",
+      "threshold": 0.002
+    }
+  ],
+  "data_read": "train80 inner training and inner validation only; outer heldout20 sealed",
+  "ictal_target_read": false
+}

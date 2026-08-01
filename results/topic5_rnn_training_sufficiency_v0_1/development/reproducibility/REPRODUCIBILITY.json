@@ -1,0 +1,53 @@
+{
+  "contract": "topic5_rnn_training_sufficiency_v0_1_reproducibility",
+  "question": "does an identical seed reproduce the run bit for bit after the logging-synchronisation optimisation?",
+  "configuration": {
+    "cycles": 4,
+    "updates_per_patient": 8,
+    "hidden_size": 32,
+    "learning_rate": 0.001,
+    "optimizer": "adamw",
+    "weight_decay": 0.0001,
+    "batch_size": 1024,
+    "seed": 20260725,
+    "objective": "teacher_forced_one_step",
+    "local_offset_dim": 4,
+    "inner_validation_fraction_of_first80": 0.1
+  },
+  "original_git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+  "reproduced_git_commit": "ded98d329ed95a3a2b8f926fb17b44b9f31502f5",
+  "code_change_between_runs": "device-side accumulation of logging scalars; no change to any numerical operation that enters the gradient or the parameters",
+  "per_cycle": [
+    {
+      "coverage_cycle": 1,
+      "original": 1.843045175075531,
+      "reproduced": 1.843045175075531,
+      "identical": true
+    },
+    {
+      "coverage_cycle": 2,
+      "original": 1.8038264513015747,
+      "reproduced": 1.8038264513015747,
+      "identical": true
+    },
+    {
+      "coverage_cycle": 3,
+      "original": 1.8182901740074158,
+      "reproduced": 1.8182901740074158,
+      "identical": true
+    },
+    {
+      "coverage_cycle": 4,
+      "original": 1.7895936965942383,
+      "reproduced": 1.7895936965942383,
+      "identical": true
+    }
+  ],
+  "all_cycles_identical": true,
+  "n_optimizer_steps_identical": true,
+  "runtime_seconds": {
+    "original": 310.94075202941895,
+    "reproduced": 251.10901427268982
+  },
+  "speedup": 1.23826997182887
+}

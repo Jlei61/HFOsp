@@ -1,0 +1,41 @@
+{
+  "final_cycle": 7,
+  "max_absolute_parameter_difference": 5.21540641784668e-07,
+  "max_absolute_offset_difference": 6.332993507385254e-07,
+  "per_parameter_max_difference": {
+    "raw_persistence": 4.172325134277344e-07,
+    "contact_encoder.0.weight": 5.066394805908203e-07,
+    "contact_encoder.0.bias": 1.564621925354004e-07,
+    "contact_encoder.2.weight": 3.5762786865234375e-07,
+    "contact_encoder.2.bias": 3.2782554626464844e-07,
+    "contact_encoder.3.weight": 4.76837158203125e-07,
+    "contact_encoder.3.bias": 1.7508864402770996e-07,
+    "initial_state.weight": 5.21540641784668e-07,
+    "initial_state.bias": 1.4901161193847656e-07,
+    "action_query.weight": 3.427267074584961e-07,
+    "action_query.bias": 1.7136335372924805e-07,
+    "action_bias.weight": 2.980232238769531e-07,
+    "action_bias.bias": 5.2619725465774536e-08,
+    "stop_head.weight": 1.9371509552001953e-07,
+    "stop_head.bias": 4.284083843231201e-08,
+    "input_projection.weight": 3.2782554626464844e-07,
+    "input_projection.bias": 1.1920928955078125e-07
+  },
+  "patient_median_contact_choice_nll": {
+    "1024": 1.6910675764083862,
+    "512": 1.691067397594452
+  },
+  "validation_nll_difference": 1.7881393432617188e-07,
+  "optimizer_steps": {
+    "1024": 7616,
+    "512": 7616
+  },
+  "backward_chunks": {
+    "1024": 10080,
+    "512": 13664
+  },
+  "update_boundaries_identical": true,
+  "chunking_actually_differed": true,
+  "tolerance": 0.0001,
+  "parity_pass": true
+}

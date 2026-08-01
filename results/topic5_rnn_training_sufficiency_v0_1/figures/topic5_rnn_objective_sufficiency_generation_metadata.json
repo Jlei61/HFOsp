@@ -1,0 +1,24 @@
+{
+  "figure": "phase c free-generation audit",
+  "generator": "full_constructive",
+  "generator_description": "constructive generator (static scaffold + ordered residual + empirical STOP)",
+  "reference_condition": "objective_teacher_forced_one_step",
+  "conditions": [
+    "objective_teacher_forced_one_step",
+    "objective_self_fed_2step",
+    "objective_self_fed_3step",
+    "objective_scheduled_sampling"
+  ],
+  "panels": {
+    "A": "Local step-to-step order",
+    "B": "Rank distribution of the whole event",
+    "C": "Which contact precedes which",
+    "D": "Which contacts take part",
+    "E": "How long the event runs",
+    "F": "One-step accuracy (guard)"
+  },
+  "marks": "one dot per patient, grey lines connect the same patient across conditions, black bar is the patient median",
+  "aggregation": "seeds averaged inside a patient, patient as the unit",
+  "outer_heldout_read": false,
+  "ictal_target_read": false
+}

@@ -1,0 +1,23 @@
+{
+  "contract": "topic5_rnn_training_sufficiency_v0_1_nested_cycle_readout",
+  "question": "reading budgets {1,2,4} from one longer run must be exact, not approximate: cycles 1-4 of the 8-cycle run must reproduce the standalone 4-cycle run",
+  "n_compared_patient_cycle_seed_rows": 816,
+  "budgets_compared": [
+    {
+      "updates_per_patient": 32,
+      "hidden_size": 32
+    },
+    {
+      "updates_per_patient": 32,
+      "hidden_size": 64
+    }
+  ],
+  "seeds": [
+    20260725,
+    20260726,
+    20260727
+  ],
+  "max_absolute_difference": 0.0,
+  "n_exactly_identical": 816,
+  "nested_readout_exact": true
+}
