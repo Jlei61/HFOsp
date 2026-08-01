@@ -6,6 +6,33 @@
 
 ## 主线（network-axis pivot）
 
+### `stable_interaction_identifiability_v2_1_multiround_2026-07-31.md` — **RNNv2.1 五轮结构审计：single fixed graph 在 4 位可辨识患者中 bounded negative**
+- 修正 test endpoint-specific oracle Gate，不增加模型容量，完成 D1 baseline/envelope/diversity、D2 M2 operator、D4 unseen-start、D3 real-minus-null split stability 和 D0 patient-matched sensitivity+specificity。
+- D0 为 4/6 PASS；这 4 位 human real-minus-null stability 全为负。另 2 位分别因 sensitivity 与 fixed-vs-mixture specificity 不足保持未裁决。
+- Unseen-start NLL 5/6 改善，但 precedence 仅 2/6；不授权 shared-backbone modulation、event drive、process noise 或 full 34-patient 扩展。SNN 不参与 Gate。
+
+### `stable_interaction_graph_rnn_v2_development_2026-07-31.md` — **SIG-RNN v2 development：feedback 有增量；稳定结构尚未裁决**
+- 通用 12-contact synthetic feedback graph 在独立 graph/event seeds、9,600 个训练事件和未改阈值下通过工程校准；首轮 2,400-event G0-A 失败仍原样保留，未事后改门。
+- 六患者中 SIG1 相对匹配 phase-only noGraph 的 NLL 与自由生成 precedence 均为 6/6 改善；但相对每位患者最强的 phase-matched mixture 或 latent time template，两端点同时改善仅 1/6。
+- 旧 `G1` 实际是在 development test 上分别为 NLL 和 precedence 选择最小值的 endpoint-specific oracle stress test；它只能说明 current single fixed graph 未取得已见分布预测优势，不能裁决 stable structure。
+- v2.1 已重开 patient-matched identifiability、chronological observable stability 和 unseen-start/compositional generalization；在这些结构特异实验完成前不扩 34 人，也不加 event drive/process noise。SNN 与 RNN 独立，SNN 不在任何 RNN Gate 中。
+
+### `shared_propagation_field_rnn_multiround_review_2026-07-31.md` — **v0.1 七轮复核：输出不反馈的 autonomous trajectory 未被选择**
+- 六患者 development 中，M4 相对 M3 在 10%–100% nested learning curve 六档均为 0/6，`d={2,4,6}` 也均为 0/6；该结果只约束由第一 rank 初始化、生成 contact 不反馈 latent state 的 deterministic autonomous latent-trajectory null。
+- 既有 SNN Round 5 只作 exploratory compatibility check：legacy artifacts 未满足同条件 nested event-count / `N_min` 合同，且 first-rank lookup 已形成捷径，因此不能据此判 G0 正或负。
+- v0.1 按窄合同完成 bounded negative；不解释 latent weight，不否定稳定 contact interaction，也不参与 human-to-SNN mechanism mapping。
+
+### `shared_propagation_field_rnn_ladder_pilot_2026-07-30.md` — **RNNv2 自主 shared-field 六患者公平比较 bounded negative**
+- 六名 target-blind development patients × 3 seeds × 8 models 全部训练充分；M4 虽超过 static 6/6、stationary M1 5/6，但相对 phase-matched mixture 与低维时间模板均为 0/6，M4-phase 也只在 2/6 超过模板。
+- 旧 train80 内新增独立 development test、checkpoint/provenance、低学习率自动复核、重复 IWAE/prior-predictive 与多次自由 rollout；旧 heldout20 未读取。按 stop rule 不扩到 34 人。
+- SNN 仅审计既有 source/sink/paired artifacts，未重跑；方向由低阈值 kernel/core 位置产生，isotropic 不是方向消失 null。该审计后续已从 RNN Gate 中删除，不能评分 G0。
+
+### `rnn_training_and_objective_sufficiency_v0_1_report_2026-07-30.md` — **训练充分性关闭；整场生成阴性拆成"训练不足"+"读出方式"两个成分**
+- 1,062 个单元零失败。已发表训练预算比收敛预算差 **0.134 nats/decision（34/34 人，P=1.16e-10，LOSO 结构确认）**，约为既有顺序增量（0.0257）的 5 倍；容量、优化器家族、权重衰减、显存分块均已排除为限制因素，学习率仍是限制（3e-4 优于已发表的 1e-3，位于预注册网格边缘）。跑到预注册上限 8 遍仍未满足连续两遍改善 <0.002 的收敛判据，故只能写"接近收敛"，**不得写"已收敛"**。
+- **曝光偏差被正式排除**：三个 rollout-aware 目标（每 2 步 / 每 3 步自喂、渐增 schedule）在 development 与外层留出上都同时损害局部预测与整场生成，呈单调剂量反应，一步预测护栏全部失守。
+- **方法学更正**：上一轮用来评价生成的复合发生器（静态骨架＋顺序残差＋经验终止）**随模型变好而系统性变差**——外层留出上收敛模型经它读出后成对先后相关塌到 0.014（不用历史的静态对照 0.184）。改用模型自身联合分布读出，六个整场端点全部显著改善（30–33/34，两队列同向）。
+- **预注册整场门槛仍未达到**：用上一轮自己的标准重评分，上一轮 9/34（本轮精确复现）、静态对照 10/34、收敛+模型自身读出 13/34、rollout-aware+模型自身读出 14/34，门槛 17/34。**不得写"RNN 自由生成了真实的完整双向传播事件"。**
+
 ### `rnn_stage_acceptance_and_training_sufficiency_2026-07-30.md` — **当前 RNN 阶段性总入口：科学验收通过，训练充分性仍开放**
 - 已接受对象为稳定 static contact scaffold + 短程 within-event ordered information；linear-state 可改善 heldout next-contact，并在自由生成中恢复局部 transition fingerprint。
 - 完整 suffix rank/precedence 和双向 axis read-back 未恢复，但该阴性目前只限 frozen teacher-forced training contract。正式模型仅一轮 exact coverage，最终 linear-state 未独立调 learning rate / training budget，也未用 self-fed rollout loss。
@@ -69,6 +96,13 @@
 - 以 masked contact-rank 的单事件 prefix→suffix/STOP 任务训练 contact-query GRU；40/40 患者、532,793 个间期事件通过数据与泄漏审计，Stage A 不读取 ictal values。
 - 13 折 target-free one-SE 选择 h64；13 人 one-seed screen 中 next-set 对 strongest static 的患者级 CI 为正，但 suffix 中位为负且 CI 跨 0；两项均 13/13 超过 rank-shuffle。按 stop rule 不启动正式三 seed gate、Mode recovery 或 ictal readout。
 
+### `fig3_ictal_gradient_r3_full_recompute_handoff_2026-07-18.md` — **当前执行合同：Figure 3 发作相关 gradient R3 全量重算**
+- 以正式 n=17 / 167 seizures 为唯一母清单，统一使用 outcome-independent adaptive 81×81 gradient grid、subject-fixed sigma、corrected mirror abs-max、shared-else-own maxAB 与 coherent all-contact null；R2 只作同输入 paired sensitivity。
+- Stage 1 重算 cohort Data-vs-Null 与七频带 inheritance/specificity；Stage 2 更新 Fig3-B R3 score provenance，并在 Fig3-C 仍保留时同步重算 7 名 shared-only 轨迹和 spatial null。配套回填表 `fig3_ictal_gradient_r3_full_recompute_run_form_2026-07-18.md`。
+
+### `field_concordance_multiband_unified_handoff_2026-07-18.md` — **SUPERSEDED：旧 R2 七频带合同**
+- 该版本虽锁定 n=17 / 167 parent cohort、共同 permutation 与 subject-first fold，但 primary metric 仍是 contact-evaluated R2；只保留 provenance，不再执行。旧 form 同样作废。
+
 ### `fig3a_raw_spectral_context_acceptance_2026-07-18.md` — **Fig3-A 正式画图合同与验收**
 - 锁定 E1146 seizure 7 的 raw SEEG + SCL9 TFR + 四频带 2×2 布局、严格时间轴对齐、row-shared y 轴、clinical-onset shading 和可/不可报告边界。
 - canonical producer：`scripts/paper_figures/plot_fig3_raw_spectral_context.py`；输出：`results/paper-ready-figure/fig3a_raw_spectral_context/figures/`。
@@ -106,3 +140,6 @@
 - `bridge_q1prime/bridge_q1prime_results_2026-05-10.md` + `q1prime_overnight_exploration_2026-05-10.md` — Q1′ case-series（INDETERMINATE）
 - `echo_gate/stage1_proxy_triage_2026-06-08.md` — **Stage 1** ER 代理 echo gate：= 共享粗锚，非 specific-path-replay
 - `dynamic_echo/stage2b_sentinel_2026-06-12.md` — **Stage 2b** early-ictal 动态模板 echo sentinel：**gate NOT PASSED**（B=500 n=3）；有模板相关结构但非稳定早期路径复演 → 粗解剖/杆级锚为主；未进 cohort。（Stage 2 first-onset recruitment 量错失败，未单独归档，见此文档"谱系"段）
+### `constructive_event_generation_sufficiency_v0_1_report_2026-07-30.md` — **局部 transition 可生成，但完整双向事件充分性 Gate 失败**
+- 34 人 × 3 seeds 的 102 个 source-conditioned free-running 单元全部完成；history 改善 first-order transition fingerprint，但不改善 suffix rank/precedence，只有 9/34 人至少两项达到人体 split-half 经验范围。
+- 独立 rank-progress STOP 在 34/34 人必要；22 位 train-only 双模态+物理轴合格患者中，history 未改善 template 或 signed-axis fidelity。Gate C 与 SNN bridge 按合同锁定。
