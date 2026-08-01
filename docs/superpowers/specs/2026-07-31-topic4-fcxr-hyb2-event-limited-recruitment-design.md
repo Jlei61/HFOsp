@@ -1,15 +1,19 @@
 # FCXR-HYB2：事件尺度、有界幅度的自主招募层
 
-日期：2026-07-31 · 状态：**DESIGN LOCK CANDIDATE**（已过一轮审阅；六处订正见正文 ⚠️ 块）
+日期：2026-07-31 · 最终状态（2026-08-01）：**EXECUTED · CLOSED · DO NOT REOPEN**
 Plan：`docs/superpowers/plans/2026-07-31-topic4-fcxr-hyb2.md`
+
+> **执行终局**：Gate B0 两 seed 均为 `BASELINE_PRACTICALLY_INVISIBLE`；Gate A0 在 q50 以及
+> 运行前锁定的 S25/S50/S75 三档均被空间天花板混淆，最终为
+> `A0_UNDECIDABLE_ALL_LEVELS`。12 格短屏、长窗七门、M 与 confirmatory 均未解锁。
+> 本 spec 不再通过降低 Z、移动窗口、放宽 90% 天花板或增加空间指标来“救活”。最终证据见
+> `docs/archive/topic4/sef_hfo/fcxr_hyb2_a0_undecidable_2026-08-01.md`。
 
 > **spec 与 plan 冲突 = 执行 blocker。** 不设"谁优先"——发现冲突必须**先同步修订两份文件**再执行。
 > （原先写的"以 plan 为准"会让两份合同悄悄分叉，已撤回。）
 
-> 升 `DESIGN LOCK` 的条件 = plan 附录 A 的待回填项全部落定。
-> 目前已锁两项：**`T_event,guard` = 22.0 ms**（LC1 24 s 冻结 bar，两 seed 事件时长**最大值**；
-> 旧名 `T_event,90` 是错的——22.0 不是 q90）、
-> `I_R,max = 4.134151260609386`（逐位复现）。其余待 §5.1 那条 calibration run。
+> 历史说明：执行前 `DESIGN LOCK` 的升级条件是 plan 附录 A 全部回填。该条件随后完成并进入执行；
+> 上面的 `CLOSED` 是执行终局，不是新的设计候选状态。
 
 前代与证据：
 

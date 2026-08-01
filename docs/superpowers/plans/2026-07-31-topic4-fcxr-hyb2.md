@@ -1,14 +1,19 @@
 # FCXR-HYB2 实施计划 —— 事件尺度、有界幅度的自主招募层（ELR）
 
-日期：2026-07-31（**rev2，二轮审阅后**） · 分支 `codex/topic4-fcxr-hyb2`（**待建**）
-**基点 `50f90c59`**（= 含 HYB2 spec + 本 plan 的那个 commit；**不是 `9c5c5b16`**，从那里开分支会
-把 spec 与 plan 一起丢掉）
+日期：2026-07-31（rev2） · 最终状态（2026-08-01）：**EXECUTED · CLOSED · PRE-REGISTERED STOP**
+· 分支 `codex/topic4-fcxr-hyb2` · 最终提交 `47ce16ae`
 
 Spec：`docs/superpowers/specs/2026-07-31-topic4-fcxr-hyb2-event-limited-recruitment-design.md`
 
 > **spec 与 plan 冲突 = 执行 blocker。** 不设"谁优先"；发现冲突必须**先同步修订两份文件**再执行。
 
 **本文件在任何 HYB2 结果出现之前锁死。之后只允许追加"执行结果"，不允许改判据、阈值或档位。**
+
+> **执行结果追加**：Q_on calibration/validation 泄漏经审阅修复后，Gate B0 两 seed 通过。
+> q50 A0 首先触发 `A0_CEILING_CONFOUNDED`；rev2 在新运行前锁定 S25/S50/S75 和“最弱 eligible”
+> 规则，三档仍分别占据 923/925/924 of 1024 体素，全部越过 90% ceiling，故终局为
+> `A0_UNDECIDABLE_ALL_LEVELS`。按本 plan 停机，后续阶段未运行。本计划不再修订或扩参；最终归档：
+> `docs/archive/topic4/sef_hfo/fcxr_hyb2_a0_undecidable_2026-08-01.md`。
 
 前代不可改写：`docs/archive/topic4/sef_hfo/fcxr_hyb1_baseline_disturbed_2026-07-31.md`
 （`STOP_BASELINE_DISTURBED`）。HYB1 的 spec/plan 已标记为已执行并收口，**不得回填**。
