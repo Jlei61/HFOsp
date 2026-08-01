@@ -459,6 +459,9 @@ def cmd_r1_analyze(_args):
         FCXR._write_json(os.path.join(R1, "h_sensor_separability.json"), verdict)
         FCXR._write_json(os.path.join(OUT, "candidate_verdict.json"),
                          dict(stage="R1", verdict="H_SENSOR_NOT_SEPARABLE", finished=_now()))
+        FCXR._write_json(os.path.join(R1, "ANALYSIS_DONE.json"),
+                         dict(stage="R1_ANALYSIS", status="H_SENSOR_NOT_SEPARABLE",
+                              feasible_intervals_ms=[], finished=_now()))
         print("[R1 analyze] H_SENSOR_NOT_SEPARABLE", flush=True)
         return
 
@@ -496,6 +499,74 @@ def cmd_r1_analyze(_args):
           f"L={L:.4g} U={U:.4g} theta={theta:.4g} k={k:.4g}", flush=True)
 
 
+def _r1_scoped_adjudication(sensor, replays):
+    """Re-scope the strict open-loop classifier without changing any measured value.
+
+    The full-window HEO2 statistic includes an offset-like gap and is retained as a bridge stress
+    test.  It is not allowed to adjudicate the untested closed-loop H basin geometry.
+    """
+    rows = sensor["rows"]
+    tau = np.asarray([r["tau_ms"] for r in rows], float)
+    h1 = np.asarray([r["HEO1_lower95"] > r["L_upper95"] for r in rows], bool)
+    h2 = np.asarray([r["HEO2_lower95"] > r["L_upper95"] for r in rows], bool)
+    h1_margin = np.asarray([r["HEO1_lower95"] - r["L_upper95"] for r in rows], float)
+    h2_margin = np.asarray([r["HEO2_lower95"] - r["L_upper95"] for r in rows], float)
+    joint_margin = np.minimum(h1_margin, h2_margin)
+    events = replays["heo2"]["events"]
+    returned = [e for e in events if e.get("returned", False)]
+    gap_ms = None
+    if len(returned) >= 2:
+        gap_ms = float(returned[1]["t_on_ms"] - returned[0]["t_off_ms"])
+    return dict(
+        canonical_status="R1_IMPLEMENTATION_ACCEPTED",
+        labels=[
+            "R1_IMPLEMENTATION_ACCEPTED",
+            "R1_SUSTAINED_CONTROL_SEPARABLE" if np.any(h1) else "R1_SUSTAINED_CONTROL_NOT_SEPARABLE",
+            "R1_ACTIVE_BOUT_REANALYSIS_REQUIRED",
+            "R1_LONG_REST_GAP_NOT_BRIDGED" if not np.any(h2) else "R1_LONG_REST_GAP_BRIDGED",
+            "R1_CLOSED_LOOP_H_GEOMETRY_UNTESTED",
+            "R2_CLOSED_LOOP_EXPLORATION_AUTHORIZED",
+        ],
+        raw_strict_full_window_status=sensor["status"],
+        strict_full_window_is_hard_gate=False,
+        heo1_only_bootstrap_intervals_ms=contiguous_true_intervals(h1, tau),
+        heo2_full_window_bootstrap_intervals_ms=contiguous_true_intervals(h2, tau),
+        heo1_best=dict(tau_ms=float(tau[np.argmax(h1_margin)]),
+                       margin=float(np.max(h1_margin))),
+        heo2_full_window_best=dict(tau_ms=float(tau[np.argmax(h2_margin)]),
+                                   margin=float(np.max(h2_margin))),
+        joint_best=dict(tau_ms=float(tau[np.argmax(joint_margin)]),
+                        margin=float(np.max(joint_margin))),
+        heo2_first_rest_like_gap_ms=gap_ms,
+        interpretation=(
+            "The local post-X recurrent-drive persistence state separates returning IEDs from the "
+            "HEO1 sustained control on a finite tau range, but cannot bridge the HEO2 full-window "
+            "offset-like gap under the strict zero-overlap criterion. Closed-loop H geometry is untested."
+        ),
+    )
+
+
+def cmd_r1_adjudicate(_args):
+    path = os.path.join(R1, "h_sensor_separability.json")
+    replay_path = os.path.join(R1, "REPLAYS_DONE.json")
+    if not (os.path.isfile(path) and os.path.isfile(replay_path)):
+        raise SystemExit("R1 analysis and replay artifacts are required before adjudication")
+    sensor = json.load(open(path))
+    replay_rows = {r["state"]: r for r in json.load(open(replay_path))["rows"]}
+    out = _r1_scoped_adjudication(sensor, replay_rows)
+    out["adjudicated"] = _now()
+    FCXR._write_json(os.path.join(R1, "r1_stage_acceptance.json"), out)
+    FCXR._write_json(os.path.join(OUT, "candidate_verdict.json"),
+                     dict(stage="R1", verdict=out["canonical_status"], labels=out["labels"],
+                          raw_strict_full_window_status=out["raw_strict_full_window_status"],
+                          next_stage="R1_RECHARACTERIZATION_THEN_R2_CLOSED_LOOP", finished=_now()))
+    FCXR._write_json(os.path.join(R1, "ANALYSIS_DONE.json"),
+                     dict(stage="R1_ANALYSIS", status=out["canonical_status"],
+                          raw_strict_full_window_status=out["raw_strict_full_window_status"],
+                          finished=_now()))
+    print(json.dumps(out, indent=2))
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -504,6 +575,7 @@ def main():
     p = sub.add_parser("r1-all")
     p.add_argument("--confirm-run", action="store_true")
     sub.add_parser("r1-analyze")
+    sub.add_parser("r1-adjudicate")
     args = ap.parse_args()
     if args.cmd == "preflight":
         cmd_preflight(args)
@@ -511,8 +583,10 @@ def main():
         cmd_r0(args)
     elif args.cmd == "r1-all":
         cmd_r1_all(args)
-    else:
+    elif args.cmd == "r1-analyze":
         cmd_r1_analyze(args)
+    else:
+        cmd_r1_adjudicate(args)
 
 
 if __name__ == "__main__":

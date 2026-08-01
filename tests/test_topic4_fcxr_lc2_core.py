@@ -41,3 +41,23 @@ def test_bootstrap_gate_separates_clean_synthetic_low_and_high():
     assert b["HEO1_lower95"] == 3.0
     assert b["HEO2_lower95"] == 2.5
 
+
+def test_r1_scoped_adjudication_does_not_turn_gap_failure_into_loop_no_go():
+    sensor = {
+        "status": "H_SENSOR_NOT_SEPARABLE",
+        "rows": [
+            dict(tau_ms=100.0, L_upper95=2.0, HEO1_lower95=1.0, HEO2_lower95=0.2),
+            dict(tau_ms=300.0, L_upper95=1.0, HEO1_lower95=1.5, HEO2_lower95=0.3),
+        ],
+    }
+    replays = {"heo2": {"events": [
+        dict(t_on_ms=100.0, t_off_ms=500.0, returned=True),
+        dict(t_on_ms=1500.0, t_off_ms=1700.0, returned=True),
+    ]}}
+    got = R._r1_scoped_adjudication(sensor, replays)
+    assert got["canonical_status"] == "R1_IMPLEMENTATION_ACCEPTED"
+    assert "R1_SUSTAINED_CONTROL_SEPARABLE" in got["labels"]
+    assert "R1_LONG_REST_GAP_NOT_BRIDGED" in got["labels"]
+    assert "R1_CLOSED_LOOP_H_GEOMETRY_UNTESTED" in got["labels"]
+    assert "H_LOOP_NO_BISTABILITY" not in got["labels"]
+    assert got["heo2_first_rest_like_gap_ms"] == 1000.0
