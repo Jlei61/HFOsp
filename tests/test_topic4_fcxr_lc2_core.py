@@ -165,6 +165,24 @@ def test_frozen_fork_window_classifier_separates_low_and_high():
     assert high["high_like"] and not high["low_like"]
 
 
+def test_frozen_fork_candidate_label_requires_selective_basin_and_x_removal():
+    f = _load_fork_runner()
+    low = dict(low_like=True, high_like=False)
+    high = dict(low_like=False, high_like=True)
+    def row(arm, tail, post=None):
+        return dict(arm=arm, numerical_failure=False, state_tail_1s=tail,
+                    state_required_low_window=post or tail)
+    rows = [row("A_low", low), row("A_high", low), row("B", low), row("C", high),
+            row("D1", low), row("D2", high)]
+    assert f.classify_candidate(rows)["label"] == "H_BASIN_CANDIDATE"
+    bad_healthy = [dict(r) for r in rows]
+    bad_healthy[1] = row("A_high", high)
+    assert f.classify_candidate(bad_healthy)["label"] == "healthy_false_high_basin"
+    no_x = [dict(r) for r in rows]
+    no_x[4] = row("D1", high); no_x[5] = row("D2", high)
+    assert f.classify_candidate(no_x)["label"] == "x_load_does_not_remove_high"
+
+
 def _load_dynamic_runner():
     path = os.path.join(ROOT, "scripts", "run_topic4_fcxr_lc2_dynamic.py")
     spec = importlib.util.spec_from_file_location("_lc2_dynamic_import_smoke", path)
