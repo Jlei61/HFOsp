@@ -501,3 +501,9 @@ def test_b0_envelope_statistics_reports_insufficient_below_four_events():
 def test_b0_envelope_statistics_rejects_nonpositive_Q_on():
     with pytest.raises(ValueError):
         H2.b0_envelope_statistics([np.ones((4, 10))] * 8, Q_on=0.0)
+
+
+def test_the_B0_pass_status_is_a_single_shared_constant():
+    """Gate A0's precondition kept checking the retired name after B0's status was renamed, so
+    both arms refused to start.  One constant, referenced by producer and consumer alike."""
+    assert H2.adjudicate_gate_B0(_b0())["status"] == H2.B0_PASS_STATUS

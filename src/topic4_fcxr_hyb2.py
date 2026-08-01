@@ -26,6 +26,8 @@ RESIDUAL_TARGET = 0.01           # exp(-GAP_05/tau_R) must not exceed this
 # ------------------------------------------------------------------ plan 7.1: Gate B0
 B0_ACTIVE_OCCUPANCY_MAX = 0.01
 B0_RESIDUAL_FRAC = 0.01          # q_v in the 2 ms pre-onset window, as a fraction of Q_on
+B0_PASS_STATUS = "BASELINE_PRACTICALLY_INVISIBLE"   # one name, so a downstream gate cannot
+                                                    # silently keep checking a retired one
 B0_N_SEGMENTS = 4                 # equal time segments for the membrane-level rise check
 B0_PRE_ONSET_WINDOW_MS = 2.0
 B0_DRIFT_MAX = 0.01              # (floor_last - floor_first) / Q_on
@@ -244,7 +246,7 @@ def adjudicate_gate_B0(m):
     )
     ok = all(v["ok"] for v in c.values())
     return dict(
-        status="BASELINE_PRACTICALLY_INVISIBLE" if ok else "STOP_ELR_BASELINE_VISIBLE",
+        status=B0_PASS_STATUS if ok else "STOP_ELR_BASELINE_VISIBLE",
         checks=c, diagnostics=diag,
         allowed_wording=("under the PRE-REGISTERED calibration-half Q_on, seed1 showed a very rare "
                          "validation-half activation and seed3 showed none; on neither seed was any "

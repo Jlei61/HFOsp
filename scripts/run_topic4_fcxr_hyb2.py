@@ -725,7 +725,7 @@ def cmd_gate_a0(args):
                 gp = os.path.join(OUT, f"gate_b0_seed{s_}.json")
                 if not os.path.exists(gp):
                     raise SystemExit(f"missing {gp}: Gate B0 must pass on both seeds first")
-                if json.load(open(gp))["status"] != "BASELINE_INVISIBLE":
+                if json.load(open(gp))["status"] != H2.B0_PASS_STATUS:
                     raise SystemExit(f"Gate B0 seed{s_} did not pass: A0 may not run")
             lock = json.load(open(os.path.join(OUT, "calibration_lock.json")))
             k = lock["seeds"]["seed1"]
