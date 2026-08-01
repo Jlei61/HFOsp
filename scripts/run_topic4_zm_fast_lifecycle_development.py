@@ -36,6 +36,7 @@ from src import topic4_zm_fast_carrier_runtime as RT  # noqa: E402
 from src import topic4_zm_fast_carrier_state as ST  # noqa: E402
 from src import topic4_zm_ictal_carrier as IC  # noqa: E402
 from src import topic4_zm_noise_bank as NB  # noqa: E402
+from src import topic4_lifecycle_worker_receipt as WR  # noqa: E402
 
 
 INPUT = ROOT / "results/topic4_sef_hfo/zm_fast_carrier_repair/phaseD_input_manifest_v1_5.json"
@@ -248,7 +249,11 @@ def _mechanism_kwargs(args: argparse.Namespace, ctx: dict) -> tuple[dict, dict]:
         raise ValueError(f"unknown race arm {arm}")
     use_phi = arm != "native"
     edits = {"use_phi": use_phi}
-    receipt = {"arm": arm, "strength_scale": 0.5 if arm == "combined" else 1.0}
+    default_scale = 0.5 if arm == "combined" and args.command != "sprint-cell" else 1.0
+    scale = default_scale if args.strength_scale is None else float(args.strength_scale)
+    if not 0.0 < scale <= 1.0:
+        raise ValueError("strength_scale must lie in (0, 1]")
+    receipt = {"arm": arm, "strength_scale": scale}
     if arm in {"i2e", "combined"}:
         if args.tau_D_ms is None or args.d_star is None:
             raise ValueError(f"{arm} requires tau_D_ms and d_star")
@@ -304,12 +309,12 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
         "delta_phi": float(delta),
     }
     values.update(edits)
-    dynamic = args is not None and args.command == "dynamic-cell"
+    dynamic = args is not None and args.command in {"dynamic-cell", "sprint-cell"}
     if dynamic:
-        if float(args.g_M) <= 0.0:
-            raise ValueError("g_M must be positive")
-        if float(args.g_Z) < 1.0:
-            raise ValueError("g_Z must be >= 1")
+        if float(args.g_M) < 0.0:
+            raise ValueError("g_M must be nonnegative")
+        if float(args.g_Z) <= 0.0:
+            raise ValueError("g_Z must be positive")
         values["eta_m"] = float(cfg.eta_m) * float(args.g_M)
         # Entry-only contingency: g_Z changes the speed along the native Z
         # coordinate, not its nullcline or its inhibitory sign.
@@ -346,18 +351,27 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += f"__tauD{args.tau_D_ms:g}__d{args.d_star:g}"
     if args.arm in {"iadapt", "combined"}:
         stem += f"__tauI{args.tau_aI_ms:g}__fI{args.f_aI:g}"
+    if args.strength_scale is not None:
+        stem += f"__s{args.strength_scale:g}"
     return stem
 
 
-def run_cell(args: argparse.Namespace) -> Path:
+def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
     launch_git_sha = RT.git_sha(ROOT)
-    dynamic = args.command == "dynamic-cell"
+    dynamic = args.command in {"dynamic-cell", "sprint-cell"}
     if dynamic:
-        if float(args.T_ms) not in (30000.0, 60000.0):
-            raise RuntimeError("dynamic prototype duration must be 30000 or 60000 ms")
-        if float(args.burn_ms) not in (1000.0, 2000.0):
+        allowed_T = (
+            (12000.0, 20000.0, 30000.0, 45000.0, 60000.0)
+            if args.command == "sprint-cell" else (30000.0, 60000.0)
+        )
+        if args.smoke and not 0.0 < float(args.T_ms) <= 1000.0:
+            raise RuntimeError("dynamic smoke duration must lie in (0,1000] ms")
+        if not args.smoke and float(args.T_ms) not in allowed_T:
+            raise RuntimeError(f"dynamic prototype duration must be one of {allowed_T}")
+        if not args.smoke and float(args.burn_ms) not in (1000.0, 2000.0):
             raise RuntimeError("dynamic prototype equilibration must be 1000 or 2000 ms")
-        if float(args.g_Z) not in (1.0, 1.25, 1.5):
+        allowed_gz = (0.8, 1.0, 1.25) if args.command == "sprint-cell" else (1.0, 1.25, 1.5)
+        if float(args.g_Z) not in allowed_gz:
             raise RuntimeError("g_Z lies outside the onset-contingency panel")
     else:
         if not args.smoke and float(args.T_ms) != PRODUCTION_T_MS:
@@ -373,14 +387,27 @@ def run_cell(args: argparse.Namespace) -> Path:
             or float(args.fraction) != RACE_PHI_FRACTION
         ):
             raise RuntimeError("lifecycle prototype phi coordinate drift")
-        if args.tau_D_ms is not None and float(args.tau_D_ms) not in RACE_TAU_D_MS:
-            raise RuntimeError("tau_D lies outside the registered race panel")
-        if args.d_star is not None and float(args.d_star) not in RACE_D_STAR:
-            raise RuntimeError("d_star lies outside the registered race panel")
-        if args.tau_aI_ms is not None and float(args.tau_aI_ms) not in RACE_TAU_I_MS:
-            raise RuntimeError("tau_aI lies outside the registered race panel")
-        if args.f_aI is not None and float(args.f_aI) not in RACE_F_I:
-            raise RuntimeError("f_aI lies outside the registered race panel")
+        if args.command == "sprint-cell":
+            if args.arm not in {"i2e", "combined"}:
+                raise RuntimeError("sprint-cell requires i2e or combined")
+            if not 300.0 <= float(args.tau_D_ms) <= 850.0:
+                raise RuntimeError("sprint tau_D must lie in [300,850] ms")
+            if not 0.55 <= float(args.d_star) <= 0.85:
+                raise RuntimeError("sprint d_star must lie in [0.55,0.85]")
+            if args.arm == "combined":
+                if not 60.0 <= float(args.tau_aI_ms) <= 350.0:
+                    raise RuntimeError("sprint tau_aI must lie in [60,350] ms")
+                if not 0.0 <= float(args.f_aI) <= 0.12:
+                    raise RuntimeError("sprint f_aI must lie in [0,0.12]")
+        else:
+            if args.tau_D_ms is not None and float(args.tau_D_ms) not in RACE_TAU_D_MS:
+                raise RuntimeError("tau_D lies outside the registered race panel")
+            if args.d_star is not None and float(args.d_star) not in RACE_D_STAR:
+                raise RuntimeError("d_star lies outside the registered race panel")
+            if args.tau_aI_ms is not None and float(args.tau_aI_ms) not in RACE_TAU_I_MS:
+                raise RuntimeError("tau_aI lies outside the registered race panel")
+            if args.f_aI is not None and float(args.f_aI) not in RACE_F_I:
+                raise RuntimeError("f_aI lies outside the registered race panel")
     elif float(args.tau_phi_ms) not in TAUS_MS or float(args.fraction) not in FRACTIONS:
         raise RuntimeError("cell lies outside the initial six-point phi panel")
 
@@ -404,6 +431,12 @@ def run_cell(args: argparse.Namespace) -> Path:
         row_id=source_id,
         contract_already_validated=True,
     )
+    if worker_receipt is not None:
+        worker_receipt.update_context(
+            checkpoint_hash=transformation["source_state_hash"],
+            source_t_ms=float(row["t_ms"]),
+            source_file_sha256=row["file_sha256"],
+        )
     if np.count_nonzero(state["slow.phi_increment"]) != 0:
         raise RuntimeError("branch-intervention phi must start at exact zero")
     bank = NB.build_noise_bank(
@@ -436,6 +469,7 @@ def run_cell(args: argparse.Namespace) -> Path:
         ckpt=controller,
         fresh_rng=True,
         dump_i_spikes=True,
+        dump_lfp_components=True,
     )
     e_all = np.asarray(result["E_spk_bool"], bool)
     i_all = np.asarray(result["I_spk_bool"], bool)
@@ -488,6 +522,8 @@ def run_cell(args: argparse.Namespace) -> Path:
         "coarse_spatial_entropy": np.asarray(coarse["H_spatial"], np.float32),
         "coarse_kymo_axial": np.asarray(coarse["kymo_axial"], np.float32),
         "lfp_raw_synaptic_proxy": np.asarray(lfp, np.float32),
+        "lfp_exc_synaptic_proxy": np.asarray(result["lfp_exc_trace"], np.float32)[burn_steps:],
+        "lfp_inh_synaptic_proxy": np.asarray(result["lfp_inh_trace"], np.float32)[burn_steps:],
         "lfp_fs_hz": np.asarray(1000.0 / ctx["dt"]),
         "trace_phi_mean": np.asarray(diagnostic.trace_phi_mean, np.float32),
         "trace_phi_max": np.asarray(diagnostic.trace_phi_max, np.float32),
@@ -511,7 +547,8 @@ def run_cell(args: argparse.Namespace) -> Path:
     }
     namespace = (
         "smoke" if args.smoke else
-        ("dynamic" if dynamic else ("race" if race else "discovery"))
+        ("lifecycle_sprint" if args.command == "sprint-cell" else
+         ("dynamic" if dynamic else ("race" if race else "discovery")))
     )
     if race or dynamic:
         stem = _mechanism_stem(args)
@@ -532,12 +569,16 @@ def run_cell(args: argparse.Namespace) -> Path:
     payload = {
         "schema": "zm_fast_lifecycle_development_cell_v1_2026-08-01",
         "stage": (
-            "dynamic_lifecycle_prototype" if dynamic else
+            "joint_dynamic_lifecycle_sprint" if args.command == "sprint-cell" else
+            ("dynamic_lifecycle_prototype" if dynamic else
             ("mechanism_race" if race else "A_branch_intervention")
+            )
         ),
         "semantic_scope": (
-            "seed1_dynamic_entry_offset_recovery_prototype" if dynamic else
+            "seed1_joint_fast_M_control_development" if args.command == "sprint-cell" else
+            ("seed1_dynamic_entry_offset_recovery_prototype" if dynamic else
             "branch_intervention_not_reachability"
+            )
         ),
         "seed": 1,
         "state": "pre_entry__natural" if dynamic else args.state,
@@ -623,7 +664,7 @@ def run_cell(args: argparse.Namespace) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("command", choices=("cell", "race-cell", "dynamic-cell"))
+    parser.add_argument("command", choices=("cell", "race-cell", "dynamic-cell", "sprint-cell"))
     parser.add_argument("--state", choices=STATES, default=RACE_STATE)
     parser.add_argument("--tau-phi-ms", type=float, default=RACE_PHI_TAU_MS)
     parser.add_argument("--fraction", type=float, default=RACE_PHI_FRACTION)
@@ -632,6 +673,7 @@ def main() -> None:
     parser.add_argument("--d-star", type=float)
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
+    parser.add_argument("--strength-scale", type=float)
     parser.add_argument("--g-M", type=float, dest="g_M", default=1.0)
     parser.add_argument("--tau-M-ms", type=float, dest="tau_M_ms")
     parser.add_argument("--g-Z", type=float, dest="g_Z", default=1.0)
@@ -642,7 +684,25 @@ def main() -> None:
     args = parser.parse_args()
     if not args.confirm_run:
         raise SystemExit("refusing SNN development run without --confirm-run")
-    run_cell(args)
+    config_text = json.dumps(vars(args), sort_keys=True, separators=(",", ":"))
+    config_hash = hashlib.sha256(config_text.encode()).hexdigest()
+    receipt_path = (
+        OUT / "worker_receipts" /
+        f"{args.command}__{config_hash[:16]}.json"
+    )
+    with WR.WorkerReceipt(
+        receipt_path,
+        config_hash=config_hash,
+        git_sha=RT.git_sha(ROOT),
+        command=" ".join(sys.argv),
+    ) as receipt:
+        artifact = run_cell(args, worker_receipt=receipt)
+        result = json.loads(artifact.read_text())
+        terminal = (
+            "scientific_early_stop"
+            if result.get("runaway_early_stop_ms") is not None else "success"
+        )
+        receipt.finish(terminal, artifact_path=str(artifact.relative_to(ROOT)))
 
 
 if __name__ == "__main__":
