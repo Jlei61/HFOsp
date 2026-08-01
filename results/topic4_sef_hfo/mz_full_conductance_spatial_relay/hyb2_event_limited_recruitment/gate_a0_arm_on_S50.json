@@ -1,0 +1,40 @@
+{
+  "arm": "on",
+  "generated": "2026-08-01T09:22:53.150488+00:00",
+  "code_commit": "00b424f2",
+  "T_ms": 9000.0,
+  "wall_s": 1139.2,
+  "peak_rss_gb": 11.07,
+  "z_config": {
+    "I_th_EI": 13.605692880018168,
+    "tau_z": 10000.0,
+    "S_Z": 0.2882185004778396
+  },
+  "z_level": "S50",
+  "elr_enabled": true,
+  "t_gate_ms": 1510.5,
+  "ms_after_t_gate": 7489.5,
+  "crossed_Q_on": true,
+  "q_max": 160.14367275149695,
+  "Q_on": 112.50469568958786,
+  "max_R_evt": 1.3632237086034624,
+  "end_rate_hz": 6.12134375,
+  "early_stopped": false,
+  "clip_frac_max": 0.0,
+  "finite": true,
+  "numerical": {
+    "finite": true,
+    "tau_eff_min_ms": 0.2764429215026268,
+    "clip_frac_max": 0.0,
+    "numerical_unsafe": false
+  },
+  "n_E": 32000,
+  "n_occupied_voxels": 1024,
+  "window_participants": 18969,
+  "recruitment_radius_mm": 9.596740625897022,
+  "participant_voxels": 925,
+  "window_ms": [
+    1510.5,
+    2510.5
+  ]
+}
