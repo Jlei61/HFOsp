@@ -105,6 +105,15 @@ def choose_u_ref(rows):
         nonsilencing,
         key=lambda row: abs(row["control_response"]["fractional_core_drop"] - 0.60),
     )
+    if float(chosen["control_response"]["fractional_core_drop"]) <= 0.0:
+        return {
+            "status": "uncalibrated_no_paired_drop",
+            "u_ref_mV": None,
+            "maximum_observed_fractional_drop": float(max(
+                row["control_response"]["fractional_core_drop"]
+                for row in nonsilencing
+            )),
+        }
     return {
         "status": "nearest_nonsilencing_outside_target",
         "u_ref_mV": chosen["control_uplift_mV"],

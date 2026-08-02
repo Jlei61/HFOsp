@@ -86,6 +86,47 @@ def test_control_response_rejects_precontrol_pair_drift():
     assert got["calibration_target_met"] is False
 
 
+def test_u_ref_is_not_invented_when_every_paired_drop_is_zero():
+    rows = [
+        {
+            "control_uplift_mV": uplift,
+            "control_response": {
+                "calibration_target_met": False,
+                "fractional_core_drop": 0.0,
+                "longest_global_zero_rate_ms": 2.0,
+            },
+        }
+        for uplift in (0.25, 0.5, 1.0, 2.0, 4.0)
+    ]
+    got = A.choose_u_ref(rows)
+    assert got["status"] == "uncalibrated_no_paired_drop"
+    assert got["u_ref_mV"] is None
+
+
+def test_u_ref_keeps_a_positive_nearest_nonsilencing_response():
+    rows = [
+        {
+            "control_uplift_mV": 1.0,
+            "control_response": {
+                "calibration_target_met": False,
+                "fractional_core_drop": 0.1,
+                "longest_global_zero_rate_ms": 2.0,
+            },
+        },
+        {
+            "control_uplift_mV": 2.0,
+            "control_response": {
+                "calibration_target_met": False,
+                "fractional_core_drop": 0.3,
+                "longest_global_zero_rate_ms": 2.0,
+            },
+        },
+    ]
+    got = A.choose_u_ref(rows)
+    assert got["status"] == "nearest_nonsilencing_outside_target"
+    assert got["u_ref_mV"] == 2.0
+
+
 def test_control_waves_are_interleaved_across_candidates():
     candidates = [_candidate() for _ in range(4)]
     for index, row in enumerate(candidates):
