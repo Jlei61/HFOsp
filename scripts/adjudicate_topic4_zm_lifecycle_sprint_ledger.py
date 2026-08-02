@@ -42,6 +42,20 @@ def _sha256(path):
     return digest.hexdigest()
 
 
+def _summary_receipt(path):
+    if path is None or not path.is_file():
+        return {}
+    summary = json.loads(path.read_text())
+    return {
+        "wall_s": summary.get("wall_s"),
+        "peak_rss_gb": summary.get("peak_rss_gb"),
+        "runtime_git_sha": summary.get("runtime_git_sha"),
+        "runaway_early_stop_ms": summary.get("runaway_early_stop_ms"),
+        "finite_control": summary.get("finite_control"),
+        "observed_ms": summary.get("observed_ms"),
+    }
+
+
 def adjudicate(raw, decisions):
     cancelled = {
         config_id
@@ -65,6 +79,7 @@ def adjudicate(raw, decisions):
                 scientific_evidence_eligible=True,
                 artifact_path=str(artifact.relative_to(ROOT)),
                 artifact_sha256=_sha256(artifact) if artifact.is_file() else None,
+                **_summary_receipt(artifact),
             )
         elif status == "pending":
             row.update(
