@@ -81,3 +81,24 @@ def test_paired_m_continuous_response_preserves_censored_state_effects():
     assert got["ratio_core_mean_hz"] == pytest.approx(0.6)
     assert got["delta_median_energy_gain_db"] == -5.0
     assert got["delta_z_core_final"] == pytest.approx(0.2)
+
+
+def test_tail_metrics_do_not_call_a_branch_transition_sustained_spatial_dynamics(tmp_path):
+    n = 240
+    core = np.r_[np.tile([0.0, 400.0], 60), np.full(120, 100.0)]
+    all_e = np.r_[np.tile([0.0, 100.0], 60), np.full(120, 20.0)]
+    kymo = np.zeros((24, n), float)
+    for index in range(120):
+        kymo[index % 24, index] = 100.0
+    kymo[18:22, 120:] = 50.0
+    np.savez(
+        tmp_path / "traces.npz",
+        coarse_core_rate_hz=core,
+        coarse_all_e_rate_hz=all_e,
+        coarse_kymo_axial=kymo,
+    )
+    got = M._tail_state_metrics(tmp_path, tail_ms=3000.0)
+    assert got["label"] == "tonic_tail"
+    assert got["core_mean_hz"] == 100.0
+    assert got["spatial_effective_rank"] is None
+    assert got["status"] == "spatial_variance_too_low"

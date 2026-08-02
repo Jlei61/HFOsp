@@ -20,6 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from scripts import analyze_topic4_zm_lifecycle_sprint as A  # noqa: E402
+from scripts import analyze_topic4_zm_fast_lifecycle_development as FAST  # noqa: E402
 
 
 OUT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_sprint"
@@ -120,7 +121,57 @@ def paired_m_continuous_response(row, baseline):
         out[f"delta_{key}"] = (
             None if value is None or reference is None else float(value) - float(reference)
         )
+    row_tail = row.get("tail_state", {})
+    base_tail = baseline.get("tail_state", {})
+    for key in (
+        "core_mean_hz", "all_E_mean_hz", "core_cv",
+        "spatial_effective_rank", "common_mode_pc1_fraction",
+    ):
+        value = row_tail.get(key)
+        reference = base_tail.get(key)
+        out[f"delta_tail_{key}"] = (
+            None if value is None or reference is None else float(value) - float(reference)
+        )
+        if key in {"core_mean_hz", "all_E_mean_hz"}:
+            out[f"ratio_tail_{key}"] = (
+                None if value is None or reference in (None, 0) else float(value) / float(reference)
+            )
     return out
+
+
+def _tail_state_metrics(root, *, tail_ms=3000.0):
+    """Describe the terminal state separately from earlier branch transitions."""
+    with np.load(root / "traces.npz", allow_pickle=False) as data:
+        core = np.asarray(data["coarse_core_rate_hz"], float)
+        all_e = np.asarray(data["coarse_all_e_rate_hz"], float)
+        kymo = np.asarray(data["coarse_kymo_axial"], float)
+    bins = min(core.size, max(2, int(round(float(tail_ms) / 25.0))))
+    core_tail = core[-bins:]
+    all_tail = all_e[-bins:]
+    kymo_tail = kymo[:, -bins:]
+    core_mean = float(np.mean(core_tail))
+    core_cv = float(np.std(core_tail) / max(abs(core_mean), 1e-12))
+    spatial = FAST._post_entry_spatial_metrics(kymo_tail, skip_ms=0.0)
+    pc1 = spatial.get("common_mode_pc1_fraction")
+    if core_mean < 2.0:
+        label = "silent_tail"
+    elif core_cv < 0.15:
+        label = "tonic_tail"
+    elif pc1 is not None and pc1 >= 0.90:
+        label = "common_mode_bursty_tail"
+    else:
+        label = "modulated_or_mixed_tail"
+    return {
+        "tail_ms": float(bins * 25.0),
+        "label": label,
+        "core_mean_hz": core_mean,
+        "all_E_mean_hz": float(np.mean(all_tail)),
+        "core_cv": core_cv,
+        **{key: spatial.get(key) for key in (
+            "spatial_effective_rank", "common_mode_pc1_fraction",
+            "centroid_excursion_bins", "centroid_median_speed_bins_s", "status",
+        )},
+    }
 
 
 def _trace_metrics(root, episode):
@@ -213,6 +264,7 @@ def build_surface(manifest, analyses, summaries):
             recovery = analysis["recovery"]
             trace_root = IN_ROOT / analysis["stem"]
             slow_trace = _trace_metrics(trace_root, analysis["episode"])
+            tail_state = _tail_state_metrics(trace_root)
             rows.append({
                 **config,
                 "status": "complete",
@@ -236,6 +288,7 @@ def build_surface(manifest, analyses, summaries):
                 "spatial_effective_rank": analysis["within_episode_spatial"].get("spatial_effective_rank"),
                 "common_mode_pc1_fraction": analysis["within_episode_spatial"].get("common_mode_pc1_fraction"),
                 "slow_trace": slow_trace,
+                "tail_state": tail_state,
                 "summary_path": analysis["summary_path"],
             })
     for rank in range(manifest["n_selected_fast_phenotypes"]):
@@ -279,6 +332,12 @@ def _flat(row):
         delta_median_energy_gain_db=response.get("delta_median_energy_gain_db"),
         delta_energy_occupancy_6db=response.get("delta_energy_occupancy_6db"),
         delta_z_core_final=response.get("delta_z_core_final"),
+        tail_label=row.get("tail_state", {}).get("label"),
+        tail_core_mean_hz=row.get("tail_state", {}).get("core_mean_hz"),
+        tail_core_cv=row.get("tail_state", {}).get("core_cv"),
+        tail_spatial_effective_rank=row.get("tail_state", {}).get("spatial_effective_rank"),
+        tail_common_mode_pc1_fraction=row.get("tail_state", {}).get("common_mode_pc1_fraction"),
+        ratio_tail_core_mean_hz=response.get("ratio_tail_core_mean_hz"),
     )
     return out
 
