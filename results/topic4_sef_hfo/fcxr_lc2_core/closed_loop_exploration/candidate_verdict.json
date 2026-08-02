@@ -1,0 +1,124 @@
+{
+  "stage": "E6",
+  "status": "COMPLETE_BOUNDED_NEGATIVE",
+  "verdict": "H_FROZEN_GEOMETRY_NO_GO_HEALTHY_BASELINE_DISTURBED",
+  "labels": [
+    "SENSOR_CHARACTERIZATION_COMPLETED",
+    "H_LOOP_SCREEN_COMPLETED_DEVELOPMENTAL_ONLY",
+    "H_HEALTHY_BASELINE_DESTABILIZED",
+    "H_SELECTIVE_LOW_HIGH_BASIN_NOT_FOUND",
+    "X_OBSERVED_LOAD_INSUFFICIENT_FOR_TESTED_H_BRANCH",
+    "DYNAMIC_ZHX_NOT_UNLOCKED",
+    "LIFECYCLE_NOT_TESTED"
+  ],
+  "scientific_scope": {
+    "allowed": "The tested post-X local H loop converts returning activity into a finite high branch, but does so already at healthy D=0; within the two locked finalists it does not provide susceptibility-selective low/high basin geometry. The two accepted LC1 frozen X-load upper bounds do not return that tested branch to the interictal workpoint.",
+    "forbidden": [
+      "H cannot ever support bistability",
+      "X lacks termination authority in general",
+      "a Z/H/X lifecycle was tested",
+      "a seizure carrier, limit cycle, or E1146 phenotype was established"
+    ]
+  },
+  "r1": {
+    "sensor_rows": 100,
+    "pareto_rows": 31,
+    "selected_candidates": 6,
+    "recruited_support_fraction": 0.12890625,
+    "gap_label": "rest_like",
+    "gap_duration_ms": 1066.0
+  },
+  "e3": {
+    "n_rows": 90,
+    "counts": {
+      "screen_survivor": 52,
+      "unresolved_1s": 0,
+      "decay_low": 0,
+      "saturated_tonic": 38,
+      "numerical_failure": 0
+    },
+    "interpretation": "The uniform 2theta high-init probe is gate-saturated at weak k and primarily orders rho; screen_survivor is not basin evidence."
+  },
+  "e4": {
+    "canonical_finalists": [
+      "H6_k05_r10",
+      "H6_k10_r10"
+    ],
+    "candidate_verdicts": [
+      {
+        "candidate_run_id": "H6_k05_r10",
+        "label": "healthy_baseline_disturbed",
+        "safe": true,
+        "matched_low_states": false,
+        "finite_high_state": true,
+        "x_return_arms": []
+      },
+      {
+        "candidate_run_id": "H6_k10_r10",
+        "label": "healthy_baseline_disturbed",
+        "safe": true,
+        "matched_low_states": false,
+        "finite_high_state": true,
+        "x_return_arms": []
+      }
+    ],
+    "healthy_A_low_workpoint_labels": [
+      "FINITE_HIGH_ORBIT",
+      "FINITE_HIGH_ORBIT"
+    ],
+    "healthy_A_low_tail_rate_hz": [
+      84.239625,
+      78.15065625
+    ],
+    "susceptible_C_workpoint_labels": [
+      "FINITE_HIGH_ORBIT",
+      "FINITE_HIGH_ORBIT"
+    ],
+    "x_arm_workpoint_labels": [
+      "FINITE_HIGH_FIXED",
+      "FINITE_HIGH_FIXED",
+      "FINITE_HIGH_FIXED",
+      "FINITE_HIGH_FIXED"
+    ],
+    "x_arm_tail_rate_hz": [
+      97.63475,
+      94.92028125,
+      97.62428125,
+      94.935
+    ],
+    "numerical_failures": 0
+  },
+  "e5": {
+    "status": "NOT_UNLOCKED",
+    "reason": "No H_X_FROZEN_GEOMETRY_CANDIDATE survived E4.",
+    "noise_402_opened": false
+  },
+  "resources": {
+    "screen_peak_rss_gib": 6.793,
+    "fork_peak_rss_gib": 7.214,
+    "e3_workers_max": 4,
+    "e4_workers_max": 2,
+    "t_ge_20s_workers": 0,
+    "e3_elapsed_hours": 5.758436305963745,
+    "screen_to_forks_elapsed_hours": 8.050143103114225,
+    "max_observed_swap_delta_mib": 0.5,
+    "watchdog_statuses": [
+      "TARGET_EXITED",
+      "TARGET_EXITED"
+    ]
+  },
+  "provenance": {
+    "design_commit": "8a4dad00",
+    "runtime_fork_source_sha256": "2af5cc6c30457f7aaaa6f2e4ceae55e24999a41dd6928e0a946b98f25d341d64",
+    "runtime_fork_source_committed_as": "d8122f1c98583a18bff2564bd4769983742ab73b",
+    "engine_hashes": {
+      "src/snn_engine/kick_probe.py": "febba30005cb42ce0a80e9d133a2c661121ad639d58a035b7914425e1b7994d2",
+      "src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+      "src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+      "src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+      "src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+      "src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+    }
+  },
+  "finished": "2026-08-02T03:16:45.984155+00:00"
+}
