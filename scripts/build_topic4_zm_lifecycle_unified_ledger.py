@@ -60,6 +60,42 @@ def merge_adjudicated_ledgers(named_ledgers):
     return rows
 
 
+def _analysis_readout(row):
+    out = {
+        key: row.get(key) for key in (
+            "phenotype", "onset_ms", "offset_ms", "episode_duration_ms",
+            "causal_exit_candidate", "causal_control_exit_candidate",
+            "returning_event_candidate", "returning_distribution_recovered",
+            "median_energy_gain_db", "energy_occupancy_6db",
+            "spatial_effective_rank", "common_mode_pc1_fraction",
+            "exit_latency_from_control_ms", "rapid_reentry_count",
+        ) if key in row
+    }
+    tail = row.get("tail_state") or {}
+    slow = row.get("slow_trace") or {}
+    m_effect = row.get("causal_M_effect") or {}
+    control_effect = row.get("causal_control_effect") or {}
+    control_response = row.get("control_response") or {}
+    out.update({
+        "tail_state_label": tail.get("label"),
+        "tail_core_mean_hz": tail.get("core_mean_hz"),
+        "tail_all_E_mean_hz": tail.get("all_E_mean_hz"),
+        "tail_deep_gap_fraction": tail.get("deep_gap_fraction"),
+        "tail_common_mode_pc1_fraction": tail.get("common_mode_pc1_fraction"),
+        "z_core_at_offset": slow.get("z_core_at_offset"),
+        "z_core_final": slow.get("z_core_final"),
+        "z_core_post_offset_recovery": slow.get("z_core_post_offset_recovery"),
+        "m_at_offset": slow.get("m_at_offset"),
+        "m_peak": slow.get("m_peak"),
+        "M_effect_status": m_effect.get("status"),
+        "control_effect_status": control_effect.get("status"),
+        "paired_control_drop_fraction": control_response.get("fractional_core_drop"),
+        "precontrol_pair_identical": control_response.get("precontrol_pair_identical"),
+        "control_calibration_target_met": control_response.get("calibration_target_met"),
+    })
+    return out
+
+
 def _analysis_indexes():
     by_config = {}
     by_summary = {}
@@ -81,16 +117,7 @@ def _analysis_indexes():
         for row in payload.get("rows", []):
             if row.get("status") != "complete" or row.get("config_id") is None:
                 continue
-            by_config[row["config_id"]] = {
-                key: row.get(key) for key in (
-                    "phenotype", "onset_ms", "offset_ms", "episode_duration_ms",
-                    "causal_exit_candidate", "causal_control_exit_candidate",
-                    "returning_event_candidate", "returning_distribution_recovered",
-                    "median_energy_gain_db", "energy_occupancy_6db",
-                    "spatial_effective_rank", "common_mode_pc1_fraction",
-                    "exit_latency_from_control_ms", "rapid_reentry_count",
-                ) if key in row
-            }
+            by_config[row["config_id"]] = _analysis_readout(row)
     return by_config, by_summary
 
 

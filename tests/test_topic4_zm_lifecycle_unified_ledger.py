@@ -34,3 +34,32 @@ def test_merge_preserves_stage_and_unique_config_count(monkeypatch):
     assert payload["n_unique_configs"] == 2
     assert payload["stage_counts"] == {"fast_phase_map": 1, "control_dose": 1}
     assert payload["status_counts"] == {"success": 1, "worker_failed": 1}
+
+
+def test_analysis_readout_keeps_exit_tail_recovery_and_paired_control_evidence():
+    got = U._analysis_readout({
+        "phenotype": "weak_or_fragmented",
+        "causal_exit_candidate": True,
+        "tail_state": {
+            "label": "deep_gap_burst_tail", "core_mean_hz": 21.8,
+            "all_E_mean_hz": 4.3, "deep_gap_fraction": 0.86,
+            "common_mode_pc1_fraction": 0.62,
+        },
+        "slow_trace": {
+            "z_core_at_offset": 0.53, "z_core_final": 0.65,
+            "z_core_post_offset_recovery": 0.12, "m_at_offset": 28.0,
+            "m_peak": 77.8,
+        },
+        "causal_M_effect": {"status": "offset_vs_censored_gM0"},
+        "causal_control_effect": {"status": "offset_advanced"},
+        "control_response": {
+            "fractional_core_drop": 0.6, "precontrol_pair_identical": True,
+            "calibration_target_met": True,
+        },
+    })
+    assert got["tail_state_label"] == "deep_gap_burst_tail"
+    assert got["tail_deep_gap_fraction"] == 0.86
+    assert got["z_core_post_offset_recovery"] == 0.12
+    assert got["M_effect_status"] == "offset_vs_censored_gM0"
+    assert got["paired_control_drop_fraction"] == 0.6
+    assert got["precontrol_pair_identical"] is True
