@@ -1,8 +1,13 @@
 # Topic 4 Z/M fast-inhibition × M × control lifecycle sprint
 
 **Date:** 2026-08-02  
-**Status:** active seed-1 development sprint  
+**Status:** completed bounded-negative seed-1 development sprint
 **Supersedes:** serial carrier-before-exit execution in the 2026-08-01 D1 spec
+
+**Final adjudication:** `NO_GO_FULL_ICTAL_LIFECYCLE`; the requested fallback
+deliverables (fast phase map, 36-cell M surface, finite-control dose response
+and unified auditable ledger) are complete.  See
+`docs/archive/topic4/sef_hfo/zm_fast_inhibition_m_control_lifecycle_sprint_2026-08-02.md`.
 
 ## Goal
 
