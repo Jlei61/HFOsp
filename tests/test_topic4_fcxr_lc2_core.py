@@ -169,9 +169,12 @@ def test_frozen_fork_candidate_label_requires_selective_basin_and_x_removal():
     f = _load_fork_runner()
     low = dict(low_like=True, high_like=False)
     high = dict(low_like=False, high_like=True)
-    def row(arm, tail, post=None):
+    def row(arm, tail, post=None, wp=None, wp_post=None):
         return dict(arm=arm, numerical_failure=False, state_tail_1s=tail,
-                    state_required_low_window=post or tail)
+                    state_required_low_window=post or tail,
+                    workpoint_label=wp or ("FINITE_HIGH_ORBIT" if tail["high_like"] else "INTERICTAL_WORKPOINT"),
+                    required_low_workpoint_label=wp_post or
+                    ("FINITE_HIGH_ORBIT" if (post or tail)["high_like"] else "INTERICTAL_WORKPOINT"))
     rows = [row("A_low", low), row("A_high", low), row("B", low), row("C", high),
             row("D1", low), row("D2", high)]
     assert f.classify_candidate(rows)["label"] == "H_BASIN_CANDIDATE"

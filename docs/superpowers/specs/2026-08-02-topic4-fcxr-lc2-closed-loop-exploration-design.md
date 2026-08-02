@@ -168,7 +168,11 @@ The D arms are developmental uniform-load upper bounds derived from the accepted
 are not spatial-X confirmation. Implement them as a frozen per-E relay field through the same E→E scatter
 path. No additive X current is allowed.
 
-Fork state labels use the final 1 s unless the D post-offset window below is longer.  `high_like` requires
+The canonical fork label reuses the accepted Stage-D 300 ms rolling-rate workpoint classifier and its
+seed1 empirical upper band (`roll_hi=9.7382291667 Hz`), evaluated over the final 2 s. A-low, A-high and B
+must each be `INTERICTAL_WORKPOINT`; C must be `FINITE_HIGH_FIXED` or `FINITE_HIGH_ORBIT`; the D recovery
+window must return to `INTERICTAL_WORKPOINT`. The following final-window quantities remain diagnostics,
+not the canonical low-state definition. `high_like` requires
 mean rate >=20 Hz, rate occupancy above 20 Hz >=0.25, mean H >=theta, and the same 5%/s H-slope tolerance
 as the screen.  `low_like` requires mean rate <20 Hz, high-rate occupancy <0.20, and mean H <theta.
 The deliberate 0.20--0.25 occupancy gap is `unresolved`, not silently assigned.  Any non-finite value,

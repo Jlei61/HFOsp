@@ -32,13 +32,18 @@ import run_topic4_fcxr_lc2_explore as E  # noqa: E402
 from kick_probe import simulate_kick  # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 from src.topic4_mz_fcxr_dynamics import (  # noqa: E402
-    assert_field_substrate_aligned, frozen_z_field, load_onset_depletion_pi,
+    assert_field_substrate_aligned, classify_run_workpoint, frozen_z_field,
+    load_onset_depletion_pi, workpoint_metrics,
 )
 
 
 OUT = E.OUT
 P_FIELD = E.P_FIELD
+BASELINE_CONTRACT = ("/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/"
+                     "topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/"
+                     "baseline_contract_seed1.json")
 DT = E.DT
+FORK_CONTRACT_VERSION = 2
 ARMS = (
     ("A_low", 0.0, 0.0, 0.0),
     ("A_high", 0.0, 2.0, 0.0),
@@ -299,16 +304,28 @@ def _run_row(row):
     tau_eff_min_ms = float(p.tau_m_E * tau_ratio_min)
     numerical = bool((not finite) or clip > 0.0 or tau_eff_min_ms < 2.0 * DT
                      or res["runaway_early_stop_ms"] is not None)
+    baseline = _load_json(BASELINE_CONTRACT)
+    analysis_start_ms = max(0.0, float(row["T_ms"]) - 2000.0)
+    wp = workpoint_metrics(rate, DT, float(baseline["roll_hi_hz"]), analysis_start_ms)
+    wp["numerical_unsafe"] = numerical
+    wp_label = classify_run_workpoint(wp)
+    npost = min(rate.size, max(1, int(round(required_low_ms / DT))))
+    wp_post = workpoint_metrics(rate[-npost:], DT, float(baseline["roll_hi_hz"]), 0.0)
+    wp_post["numerical_unsafe"] = numerical
+    wp_post_label = classify_run_workpoint(wp_post)
     gA = np.asarray(slow.trace_gA_raw_lc2_mean, float)
     if gA.size == rate.size and np.var(gA) > 0:
         gain_proxy = float(np.cov(gA, rate, ddof=0)[0, 1] / np.var(gA))
     else:
         gain_proxy = float("nan")
     return dict(
-        **row, finite=finite, numerical_failure=numerical, clip_frac_max=clip,
+        **row, fork_contract_version=FORK_CONTRACT_VERSION,
+        finite=finite, numerical_failure=numerical, clip_frac_max=clip,
         runaway_early_stop_ms=res["runaway_early_stop_ms"],
         tau_eff_ratio_min=tau_ratio_min, tau_eff_min_ms=tau_eff_min_ms, state_tail_1s=state,
         post_offset_required_ms=required_low_ms, state_required_low_window=post,
+        workpoint_metrics=wp, workpoint_label=wp_label,
+        required_low_workpoint_metrics=wp_post, required_low_workpoint_label=wp_post_label,
         mean_rate_hz=float(np.mean(rate)), max_rate_hz=float(np.max(rate)),
         h_end=float(h[-1]), h_max=float(np.max(slow.trace_h_lc2_max)),
         x_relay_mean=float(np.mean(slow.x_relay)), y_mean=float(np.mean(slow.y)),
@@ -327,7 +344,9 @@ def _run_row(row):
 def _worker(row):
     path = _fork_path(row)
     if os.path.isfile(path):
-        return _load_json(path)
+        prior = _load_json(path)
+        if prior.get("fork_contract_version") == FORK_CONTRACT_VERSION:
+            return prior
     out = _run_row(row)
     FCXR._write_json(path, out)
     return out
@@ -336,14 +355,18 @@ def _worker(row):
 def classify_candidate(arms):
     by = {r["arm"]: r for r in arms}
     safe = all(not r["numerical_failure"] for r in arms)
-    low_ok = safe and all(by[a]["state_tail_1s"]["low_like"] for a in ("A_low", "A_high", "B"))
-    high_ok = safe and by["C"]["state_tail_1s"]["high_like"]
-    x_low = [a for a in ("D1", "D2") if by[a]["state_required_low_window"]["low_like"]]
+    low_ok = safe and all(by[a].get("workpoint_label") == "INTERICTAL_WORKPOINT"
+                          for a in ("A_low", "A_high", "B"))
+    high_ok = safe and by["C"].get("workpoint_label") in ("FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT")
+    x_low = [a for a in ("D1", "D2")
+             if by[a].get("required_low_workpoint_label") == "INTERICTAL_WORKPOINT"]
     if not safe:
         label = "numerical_failure"
-    elif not by["A_high"]["state_tail_1s"]["low_like"]:
+    elif by["A_low"].get("workpoint_label") != "INTERICTAL_WORKPOINT":
+        label = "healthy_baseline_disturbed"
+    elif by["A_high"].get("workpoint_label") != "INTERICTAL_WORKPOINT":
         label = "healthy_false_high_basin"
-    elif not by["B"]["state_tail_1s"]["low_like"]:
+    elif by["B"].get("workpoint_label") != "INTERICTAL_WORKPOINT":
         label = "susceptible_low_basin_missing"
     elif not high_ok:
         label = "no_finite_high_basin"
