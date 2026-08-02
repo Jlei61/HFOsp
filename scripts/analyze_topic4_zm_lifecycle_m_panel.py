@@ -156,22 +156,33 @@ def _tail_state_metrics(root, *, tail_ms=3000.0):
     kymo_tail = kymo[:, -bins:]
     core_mean = float(np.mean(core_tail))
     core_cv = float(np.std(core_tail) / max(abs(core_mean), 1e-12))
+    p95 = float(np.percentile(core_tail, 95))
+    deep_gap_threshold = max(5.0, 0.10 * p95)
+    deep_gap_fraction = float(np.mean(core_tail <= deep_gap_threshold))
     spatial = FAST._post_entry_spatial_metrics(kymo_tail, skip_ms=0.0)
     pc1 = spatial.get("common_mode_pc1_fraction")
     if core_mean < 2.0:
         label = "silent_tail"
+    elif deep_gap_fraction >= 0.10:
+        # Spatial rank can increase merely because successive isolated bursts
+        # have different amplitudes or loci.  A tail that repeatedly returns
+        # to a deep low-rate gap is still a burst train, not a continuous
+        # spatially relayed carrier.
+        label = "deep_gap_burst_tail"
     elif core_cv < 0.15:
         label = "tonic_tail"
     elif pc1 is not None and pc1 >= 0.90:
         label = "common_mode_bursty_tail"
     else:
-        label = "modulated_or_mixed_tail"
+        label = "continuous_modulated_or_mixed_tail"
     return {
         "tail_ms": float(bins * 25.0),
         "label": label,
         "core_mean_hz": core_mean,
         "all_E_mean_hz": float(np.mean(all_tail)),
         "core_cv": core_cv,
+        "deep_gap_threshold_hz": deep_gap_threshold,
+        "deep_gap_fraction": deep_gap_fraction,
         **{key: spatial.get(key) for key in (
             "spatial_effective_rank", "common_mode_pc1_fraction",
             "centroid_excursion_bins", "centroid_median_speed_bins_s", "status",

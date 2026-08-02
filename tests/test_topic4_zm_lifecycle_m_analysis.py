@@ -113,3 +113,22 @@ def test_tail_metrics_do_not_call_a_branch_transition_sustained_spatial_dynamics
     assert got["core_mean_hz"] == 100.0
     assert got["spatial_effective_rank"] is None
     assert got["status"] == "spatial_variance_too_low"
+
+
+def test_tail_metrics_prioritize_deep_gaps_over_apparent_spatial_rank(tmp_path):
+    n = 120
+    core = np.tile(np.r_[np.zeros(8), np.asarray([300.0, 450.0])], 12)
+    all_e = core * 0.2
+    kymo = np.zeros((24, n), float)
+    burst_bins = np.flatnonzero(core > 0)
+    for order, index in enumerate(burst_bins):
+        kymo[(3 * order) % 24, index] = core[index]
+    np.savez(
+        tmp_path / "traces.npz",
+        coarse_core_rate_hz=core,
+        coarse_all_e_rate_hz=all_e,
+        coarse_kymo_axial=kymo,
+    )
+    got = M._tail_state_metrics(tmp_path, tail_ms=3000.0)
+    assert got["deep_gap_fraction"] >= 0.1
+    assert got["label"] == "deep_gap_burst_tail"
