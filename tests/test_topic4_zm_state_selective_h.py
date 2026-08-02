@@ -4,6 +4,7 @@ import pytest
 from src.snn_engine.slow_field import (
     SpatialSlowField,
     SpatialSlowFieldConfig,
+    local_rate_field_hz,
     zero_baseline_sigmoid,
 )
 from src.topic4_zm_checkpoint import capture_slow, restore_slow
@@ -43,6 +44,14 @@ def test_zeta_gate_is_exactly_zero_at_healthy_baseline():
     assert out[0] == 0.0
     assert np.all(np.diff(out) > 0.0)
     assert np.all((out >= 0.0) & (out <= 1.0))
+
+
+def test_mode_h_sensor_converts_native_per_step_counts_to_hz():
+    # Four E neurons on a 2x2 grid means one neuron/cell.  A native field of
+    # 0.004 spikes per 0.1-ms step is therefore exactly 40 Hz.
+    native = np.full((2, 2), 0.004)
+    hz = local_rate_field_hz(native, dt_ms=0.1, n_population=4, n_grid=2)
+    np.testing.assert_allclose(hz, 40.0)
 
 
 def test_local_h_opens_with_z_depletion_and_closes_with_m():

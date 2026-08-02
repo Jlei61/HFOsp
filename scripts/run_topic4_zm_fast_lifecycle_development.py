@@ -653,8 +653,14 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         arrays.update({
             "trace_mode_H_mean": np.asarray(diagnostic.trace_mode_H_mean, np.float32),
             "trace_mode_H_max": np.asarray(diagnostic.trace_mode_H_max, np.float32),
+            "trace_mode_H_rate_max_hz": np.asarray(diagnostic.trace_mode_H_rate_max_hz, np.float32),
             "trace_mode_H_drive_mean": np.asarray(diagnostic.trace_mode_H_drive_mean, np.float32),
+            "trace_mode_H_drive_max": np.asarray(diagnostic.trace_mode_H_drive_max, np.float32),
             "trace_mode_H_gain_mean": np.asarray(diagnostic.trace_mode_H_gain_mean, np.float32),
+            "trace_mode_H_gain_max": np.asarray(diagnostic.trace_mode_H_gain_max, np.float32),
+            "trace_mode_H_gain_core_mean": np.asarray(
+                diagnostic.trace_mode_H_gain_core_mean, np.float32
+            ),
         })
     namespace = (
         "smoke" if args.smoke else

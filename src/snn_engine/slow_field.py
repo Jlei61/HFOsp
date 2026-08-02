@@ -404,6 +404,23 @@ def zero_baseline_sigmoid(x, center, slope):
     return np.clip(out, 0.0, 1.0)
 
 
+def local_rate_field_hz(rate_field, *, dt_ms, n_population, n_grid):
+    """Convert the legacy per-step grid count field to approximate local Hz.
+
+    ``firing_rate_field`` deliberately returns spatially smoothed spike counts
+    per integration step because the older q/S_G mechanisms were calibrated in
+    that native scale.  A threshold named in Hz must therefore divide by both
+    the step duration and the expected population per grid cell.  Positions are
+    near-uniform on this sheet; the conversion leaves all legacy fields intact.
+    """
+    if not np.isfinite(dt_ms) or float(dt_ms) <= 0.0:
+        raise ValueError("dt_ms must be finite and positive")
+    if int(n_population) <= 0 or int(n_grid) <= 0:
+        raise ValueError("n_population and n_grid must be positive")
+    neurons_per_cell = float(n_population) / float(int(n_grid) ** 2)
+    return np.asarray(rate_field, dtype=float) * (1000.0 / float(dt_ms)) / neurons_per_cell
+
+
 def aq_drive(rE, rI, eta_E, eta_I):
     """Pre-convolution q_I depletion drive: eta_E*r_E + eta_I*r_I (§B5.2). The inhibitory
     resource depletes mainly with inhibitory USE, so eta_I >= eta_E (config.validate enforces
@@ -559,7 +576,10 @@ class SpatialSlowField:
         # ---- local state-selective recurrent memory (allocated only on-path) ----
         self.mode_H = np.zeros((n, n), dtype=float) if self.cfg.use_mode_H else None
         self.trace_mode_H_mean = []; self.trace_mode_H_max = []
-        self.trace_mode_H_drive_mean = []; self.trace_mode_H_gain_mean = []
+        self.trace_mode_H_rate_max_hz = []
+        self.trace_mode_H_drive_mean = []; self.trace_mode_H_drive_max = []
+        self.trace_mode_H_gain_mean = []; self.trace_mode_H_gain_max = []
+        self.trace_mode_H_gain_core_mean = []
         # ---- Phase-D dynamic threshold increment (E-only, fast) ----
         self.phi_increment = np.zeros(self.N, dtype=float)
         self.trace_phi_mean = []; self.trace_phi_max = []
@@ -673,6 +693,11 @@ class SpatialSlowField:
                 else:  # sensor-only path: no new membrane arithmetic
                     gain = np.zeros(nE, dtype=float)
                 self.trace_mode_H_gain_mean.append(float(np.mean(gain)))
+                self.trace_mode_H_gain_max.append(float(np.max(gain)))
+                if self._core_mask_E is not None:
+                    self.trace_mode_H_gain_core_mean.append(
+                        float(np.mean(gain[self._core_mask_E]))
+                    )
             self.trace_Irec_mean.append(float(np.asarray(I_E_rec, float)[:nE].mean()))  # for matched-subtractive calib
         return out
 
@@ -807,15 +832,20 @@ class SpatialSlowField:
         self.rE += a * (rE_inst - self.rE)                            # EMA (§B5.1)
         self.rI += a * (rI_inst - self.rI)
         if cfg.use_mode_H:
+            rE_mode_hz = local_rate_field_hz(
+                self.rE, dt_ms=dt, n_population=self.nE, n_grid=cfg.n_grid
+            )
             drive_H = saturation(
-                self.rE, cfg.theta_mode_H_hz, cfg.half_mode_H_hz
+                rE_mode_hz, cfg.theta_mode_H_hz, cfg.half_mode_H_hz
             )
             alpha_H_mode = 1.0 - np.exp(-dt / cfg.tau_mode_H)
             self.mode_H += alpha_H_mode * (drive_H - self.mode_H)
             np.clip(self.mode_H, 0.0, 1.0, out=self.mode_H)
             self.trace_mode_H_mean.append(float(self.mode_H.mean()))
             self.trace_mode_H_max.append(float(self.mode_H.max()))
+            self.trace_mode_H_rate_max_hz.append(float(rE_mode_hz.max()))
             self.trace_mode_H_drive_mean.append(float(drive_H.mean()))
+            self.trace_mode_H_drive_max.append(float(drive_H.max()))
         if cfg.use_qI and cfg.k_q != 0.0:                            # §B5.2 (depletion ~ k_q*f*q_I)
             a_q = convolve_periodic(aq_drive(self.rE, self.rI, cfg.eta_E, cfg.eta_I), self._Kq)
             fq = saturation(a_q, cfg.a0_q, cfg.a50_q)
