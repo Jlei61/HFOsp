@@ -333,6 +333,28 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             "tau_Z_native_ms": float(cfg.tau_z),
             "tau_Z_applied_ms": float(values["tau_z"]),
         }
+        if bool(getattr(args, "use_mode_H", False)):
+            values.update({
+                "use_mode_H": True,
+                "tau_mode_H": float(args.tau_mode_H_ms),
+                "rho_mode_H": float(args.rho_mode_H),
+                "theta_mode_H_hz": float(args.theta_mode_H_hz),
+                "half_mode_H_hz": float(args.half_mode_H_hz),
+                "z_mode_base": float(args.z_mode_base),
+                "z_mode_susceptible": float(args.z_mode_susceptible),
+                "zeta_mode_center": float(args.zeta_mode_center),
+                "zeta_mode_slope": float(args.zeta_mode_slope),
+                "m_mode_half": float(args.m_mode_half),
+                "m_mode_power": float(args.m_mode_power),
+            })
+            receipt["state_selective_mode_H"] = {
+                key: values[key] for key in (
+                    "tau_mode_H", "rho_mode_H", "theta_mode_H_hz",
+                    "half_mode_H_hz", "z_mode_base", "z_mode_susceptible",
+                    "zeta_mode_center", "zeta_mode_slope", "m_mode_half",
+                    "m_mode_power",
+                )
+            }
     cfg = dataclasses.replace(cfg, **values)
     base = R.SpatialSlowField(
         ctx["S"]["N"], 18.0, ctx["S"]["posE"], ctx["S"]["posI"],
@@ -359,6 +381,11 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
             f"__ctl{args.control_target}__u{args.control_uplift_mV:g}"
             f"__t{args.control_t0_ms:g}__dur{args.control_duration_ms:g}"
             "__clkrel2"
+        )
+    if bool(getattr(args, "use_mode_H", False)):
+        stem += (
+            f"__modeH{args.rho_mode_H:g}t{args.tau_mode_H_ms:g}"
+            f"__mc{args.m_mode_half:g}"
         )
     return stem
 
@@ -622,6 +649,13 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             diagnostic.trace_i_adaptation_max, np.float32
         ),
     }
+    if diagnostic.cfg.use_mode_H:
+        arrays.update({
+            "trace_mode_H_mean": np.asarray(diagnostic.trace_mode_H_mean, np.float32),
+            "trace_mode_H_max": np.asarray(diagnostic.trace_mode_H_max, np.float32),
+            "trace_mode_H_drive_mean": np.asarray(diagnostic.trace_mode_H_drive_mean, np.float32),
+            "trace_mode_H_gain_mean": np.asarray(diagnostic.trace_mode_H_gain_mean, np.float32),
+        })
     namespace = (
         "smoke" if args.smoke else
         ("lifecycle_sprint" if args.command == "sprint-cell" else
@@ -714,6 +748,12 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         "m_max_abs_drift": m_drift,
         "S_G_initial": sg0,
         "S_G_final": float(diagnostic.S_G),
+        "mode_H_final_mean": (
+            float(diagnostic.mode_H.mean()) if diagnostic.cfg.use_mode_H else None
+        ),
+        "mode_H_final_max": (
+            float(diagnostic.mode_H.max()) if diagnostic.cfg.use_mode_H else None
+        ),
         "runaway_early_stop_ms": result.get("runaway_early_stop_ms"),
         "observed_ms": float(e_all.shape[0] * ctx["dt"]),
         "postburn_ms": float(e.shape[0] * ctx["dt"]),
@@ -770,6 +810,17 @@ def main() -> None:
     parser.add_argument("--g-M", type=float, dest="g_M", default=1.0)
     parser.add_argument("--tau-M-ms", type=float, dest="tau_M_ms")
     parser.add_argument("--g-Z", type=float, dest="g_Z", default=1.0)
+    parser.add_argument("--use-mode-H", action="store_true")
+    parser.add_argument("--rho-mode-H", type=float, default=0.0)
+    parser.add_argument("--tau-mode-H-ms", type=float, default=250.0)
+    parser.add_argument("--theta-mode-H-hz", type=float, default=40.0)
+    parser.add_argument("--half-mode-H-hz", type=float, default=40.0)
+    parser.add_argument("--z-mode-base", type=float, default=1.0)
+    parser.add_argument("--z-mode-susceptible", type=float, default=0.5)
+    parser.add_argument("--zeta-mode-center", type=float, default=0.5)
+    parser.add_argument("--zeta-mode-slope", type=float, default=0.1)
+    parser.add_argument("--m-mode-half", type=float, default=45.0)
+    parser.add_argument("--m-mode-power", type=float, default=4.0)
     parser.add_argument("--T-ms", type=float, default=PRODUCTION_T_MS)
     parser.add_argument("--burn-ms", type=float, default=PRODUCTION_BURN_MS)
     parser.add_argument("--smoke", action="store_true")

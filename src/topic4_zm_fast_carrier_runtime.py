@@ -92,8 +92,14 @@ class DiagnosticSlowWrapper:
         if cfg.use_SG and I_E_rec is not None:
             a_s = cfg.alpha_G * self.inner.S_G
             a_h = cfg.alpha_H * self.inner.H if cfg.use_H else 0.0
-            frac = (a_s + a_h) / (1.0 + a_s + a_h)
+            denom = 1.0 + a_s + a_h
+            frac = (a_s + a_h) / denom
             exc -= np.asarray(I_E_rec, float)[:n_e] * frac
+            if cfg.use_mode_H:
+                exc += (
+                    np.asarray(I_E_rec, float)[:n_e]
+                    * self.inner.mode_H_gain_at_E() / denom
+                )
             exc -= cfg.beta_SG * self.inner.S_G
         inh = np.asarray(I_I, float)[:n_e]
         if cfg.use_z:

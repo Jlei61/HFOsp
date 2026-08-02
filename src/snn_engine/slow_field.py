@@ -166,6 +166,22 @@ class SpatialSlowFieldConfig:
     I_th_EI: float = 0.0       # z_inf = H(I_th_EI - I_I): z depletes where E-cell inhibitory current I_I >= I_th_EI
     tau_adp: float = 2000.0    # ms, m (adaptation) decay time
     eta_m: float = 0.0         # adaptation-current strength (mV per unit m)
+    # ---- state-selective local recurrent feedback for the next lifecycle prototype.
+    # A local activity memory h_mode(x) is always causal and detector-free.  Its
+    # recurrent-E gain is exactly zero at healthy zeta=0, opens as z depletes,
+    # and closes as the native per-E M state accumulates:
+    # I_EE_eff = I_EE * (1 + rho*H*S_zeta*S_M) / (1 + alpha_G*S_G).
+    use_mode_H: bool = False
+    tau_mode_H: float = 250.0       # ms; bridges sub-second burst gaps
+    theta_mode_H_hz: float = 40.0   # local rE drive onset
+    half_mode_H_hz: float = 40.0    # drive half-saturation above onset
+    rho_mode_H: float = 0.0         # maximum multiplicative recurrent-E increment
+    z_mode_base: float = 1.0
+    z_mode_susceptible: float = 0.50
+    zeta_mode_center: float = 0.50
+    zeta_mode_slope: float = 0.10
+    m_mode_half: float = 45.0
+    m_mode_power: float = 4.0
     # ---- Phase-D fast carrier: E-only dynamic-threshold INCREMENT.
     # This is not the legacy absolute-threshold SlowVars.phi. The heterogeneous
     # V_th substrate remains the base and phi_increment is added on top. ----
@@ -283,6 +299,30 @@ class SpatialSlowFieldConfig:
                 raise ValueError(f"tau_adp must be > 0 when use_m, got {self.tau_adp}")
             if self.eta_m < 0.0:
                 raise ValueError(f"eta_m must be >= 0 when use_m, got {self.eta_m}")
+        if self.use_mode_H:
+            if not self.use_SG:
+                raise ValueError("use_mode_H requires use_SG so recurrent-only E current is available")
+            if not self.use_z or not self.use_m:
+                raise ValueError("use_mode_H requires the native Z and M coordinates")
+            positive = {
+                "tau_mode_H": self.tau_mode_H,
+                "half_mode_H_hz": self.half_mode_H_hz,
+                "zeta_mode_slope": self.zeta_mode_slope,
+                "m_mode_half": self.m_mode_half,
+                "m_mode_power": self.m_mode_power,
+            }
+            for name, value in positive.items():
+                if not np.isfinite(value) or value <= 0.0:
+                    raise ValueError(f"{name} must be finite and >0")
+            if not np.isfinite(self.theta_mode_H_hz) or self.theta_mode_H_hz < 0.0:
+                raise ValueError("theta_mode_H_hz must be finite and >=0")
+            if not np.isfinite(self.rho_mode_H) or self.rho_mode_H < 0.0:
+                raise ValueError("rho_mode_H must be finite and >=0")
+            if not (np.isfinite(self.z_mode_base) and np.isfinite(self.z_mode_susceptible)
+                    and self.z_mode_base > self.z_mode_susceptible):
+                raise ValueError("z_mode_base must exceed z_mode_susceptible")
+            if not np.isfinite(self.zeta_mode_center) or not 0.0 < self.zeta_mode_center < 1.0:
+                raise ValueError("zeta_mode_center must lie in (0,1)")
         if self.use_phi:
             if self.tau_phi <= 0.0:
                 raise ValueError(
@@ -351,6 +391,17 @@ def saturation(a, a0, a50):
     f -> 1 as a -> inf. Elementwise on arrays. Implemented per the plan (Task 2)."""
     x = np.maximum(np.asarray(a, dtype=float) - a0, 0.0)   # [a - a0]_+
     return x / (a50 + x)
+
+
+def zero_baseline_sigmoid(x, center, slope):
+    """Smooth susceptibility gate with the exact scientific baseline S(0)=0."""
+    x = np.asarray(x, dtype=float)
+    raw0 = 1.0 / (1.0 + np.exp(float(center) / float(slope)))
+    arg = np.clip((x - float(center)) / float(slope), -60.0, 60.0)
+    raw = 1.0 / (1.0 + np.exp(-arg))
+    out = (raw - raw0) / (1.0 - raw0)
+    out = np.where(x <= 0.0, 0.0, out)
+    return np.clip(out, 0.0, 1.0)
 
 
 def aq_drive(rE, rI, eta_E, eta_I):
@@ -505,6 +556,10 @@ class SpatialSlowField:
         self.trace_z_core_mean = []; self.trace_z_surround_mean = []
         self.trace_m_mean = []; self.trace_m_max = []
         self.trace_m_core_mean = []; self.trace_m_surround_mean = []
+        # ---- local state-selective recurrent memory (allocated only on-path) ----
+        self.mode_H = np.zeros((n, n), dtype=float) if self.cfg.use_mode_H else None
+        self.trace_mode_H_mean = []; self.trace_mode_H_max = []
+        self.trace_mode_H_drive_mean = []; self.trace_mode_H_gain_mean = []
         # ---- Phase-D dynamic threshold increment (E-only, fast) ----
         self.phi_increment = np.zeros(self.N, dtype=float)
         self.trace_phi_mean = []; self.trace_phi_max = []
@@ -605,12 +660,38 @@ class SpatialSlowField:
             aS = self.cfg.alpha_G * self.S_G
             if self.cfg.use_H:                                        # + containment memory H (Phase-3 vNext)
                 aH = self.cfg.alpha_H * self.H
-                frac = (aS + aH) / (1.0 + aS + aH)                    # I_EE/(1+alpha_G*S_G+alpha_H*H)
+                denom = 1.0 + aS + aH
+                frac = (aS + aH) / denom                              # I_EE/(1+alpha_G*S_G+alpha_H*H)
             else:
-                frac = aS / (1.0 + aS)                                # exact pre-H expression -> byte-parity
+                denom = 1.0 + aS
+                frac = aS / denom                                     # exact pre-H expression -> byte-parity
             out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + self.cfg.beta_SG * self.S_G
+            if self.cfg.use_mode_H:
+                if self.cfg.rho_mode_H > 0.0:
+                    gain = self.mode_H_gain_at_E()
+                    out[:nE] += np.asarray(I_E_rec, float)[:nE] * gain / denom
+                else:  # sensor-only path: no new membrane arithmetic
+                    gain = np.zeros(nE, dtype=float)
+                self.trace_mode_H_gain_mean.append(float(np.mean(gain)))
             self.trace_Irec_mean.append(float(np.asarray(I_E_rec, float)[:nE].mean()))  # for matched-subtractive calib
         return out
+
+    def mode_H_gain_at_E(self) -> np.ndarray:
+        """Current local recurrent-E gain; pure read of H, Z and M state."""
+        if not self.cfg.use_mode_H or self.cfg.rho_mode_H <= 0.0:
+            return np.zeros(self.nE, dtype=float)
+        zeta = np.clip(
+            (self.cfg.z_mode_base - self.z[:self.nE])
+            / (self.cfg.z_mode_base - self.cfg.z_mode_susceptible),
+            0.0, 1.0,
+        )
+        gate_z = zero_baseline_sigmoid(
+            zeta, self.cfg.zeta_mode_center, self.cfg.zeta_mode_slope
+        )
+        mE = self.m[:self.nE]
+        gate_m = 1.0 / (1.0 + (mE / self.cfg.m_mode_half) ** self.cfg.m_mode_power)
+        hE = self.mode_H[self._iyE, self._ixE]
+        return self.cfg.rho_mode_H * hE * gate_z * gate_m
 
     def _load_shunt_params(self):
         c = self.cfg
@@ -725,6 +806,16 @@ class SpatialSlowField:
         a = self._alpha_a
         self.rE += a * (rE_inst - self.rE)                            # EMA (§B5.1)
         self.rI += a * (rI_inst - self.rI)
+        if cfg.use_mode_H:
+            drive_H = saturation(
+                self.rE, cfg.theta_mode_H_hz, cfg.half_mode_H_hz
+            )
+            alpha_H_mode = 1.0 - np.exp(-dt / cfg.tau_mode_H)
+            self.mode_H += alpha_H_mode * (drive_H - self.mode_H)
+            np.clip(self.mode_H, 0.0, 1.0, out=self.mode_H)
+            self.trace_mode_H_mean.append(float(self.mode_H.mean()))
+            self.trace_mode_H_max.append(float(self.mode_H.max()))
+            self.trace_mode_H_drive_mean.append(float(drive_H.mean()))
         if cfg.use_qI and cfg.k_q != 0.0:                            # §B5.2 (depletion ~ k_q*f*q_I)
             a_q = convolve_periodic(aq_drive(self.rE, self.rI, cfg.eta_E, cfg.eta_I), self._Kq)
             fq = saturation(a_q, cfg.a0_q, cfg.a50_q)
