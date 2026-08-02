@@ -46,14 +46,44 @@ def test_control_manifests_lock_onset_plus_1500_and_six_doses():
 
 
 def test_control_response_and_u_ref_enforce_drop_without_long_silence():
-    core = np.full(1000, 100.0)
+    uncontrolled = np.full(1000, 100.0)
+    core = uncontrolled.copy()
     all_e = np.full(1000, 20.0)
-    core[500:550] = 40.0
-    got = A.control_response(core, all_e, t0_ms=1000.0, duration_ms=50.0)
+    core[500:525] = 40.0
+    got = A.control_response(
+        core, all_e, uncontrolled, t0_ms=1000.0, duration_ms=50.0,
+    )
     assert 0.5 <= got["fractional_core_drop"] <= 0.7
+    assert got["precontrol_pair_identical"] is True
     assert got["calibration_target_met"] is True
     rows = [{"control_uplift_mV": 1.0, "control_response": got}]
     assert A.choose_u_ref(rows)["u_ref_mV"] == 1.0
+
+
+def test_control_response_does_not_reward_a_matched_natural_burst_offset():
+    uncontrolled = np.full(1000, 100.0)
+    uncontrolled[500:525] = 20.0
+    core = uncontrolled.copy()
+    all_e = np.full(1000, 20.0)
+    got = A.control_response(
+        core, all_e, uncontrolled, t0_ms=1000.0, duration_ms=50.0,
+    )
+    assert got["fractional_core_drop"] == 0.0
+    assert got["calibration_target_met"] is False
+
+
+def test_control_response_rejects_precontrol_pair_drift():
+    uncontrolled = np.full(1000, 100.0)
+    core = uncontrolled.copy()
+    core[100] = 90.0
+    core[500:525] = 40.0
+    all_e = np.full(1000, 20.0)
+    got = A.control_response(
+        core, all_e, uncontrolled, t0_ms=1000.0, duration_ms=50.0,
+    )
+    assert got["fractional_core_drop"] == 0.6
+    assert got["precontrol_pair_identical"] is False
+    assert got["calibration_target_met"] is False
 
 
 def test_control_waves_are_interleaved_across_candidates():

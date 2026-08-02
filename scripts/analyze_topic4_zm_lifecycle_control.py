@@ -21,26 +21,45 @@ OUT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_spr
 IN_ROOT = OUT / "seed1"
 
 
-def control_response(fine_core, fine_all, *, t0_ms, duration_ms, bin_ms=2.0):
+def control_response(
+    fine_core,
+    fine_all,
+    uncontrolled_core,
+    *,
+    t0_ms,
+    duration_ms,
+    bin_ms=2.0,
+):
+    """Measure the pulse against its paired no-control continuation.
+
+    A bursty source may fall by itself immediately after the registered pulse
+    time.  Comparing the controlled response only with its own pre-pulse mean
+    would therefore reward a natural burst offset.  The calibration quantity
+    is the paired spike-count reduction over the actual pulse window, matching
+    the fixed-perturbation contract.  The pre-pulse trace is retained as a
+    deterministic future-noise/parity check and as a readable diagnostic.
+    """
     core = np.asarray(fine_core, float)
     all_e = np.asarray(fine_all, float)
+    uncontrolled = np.asarray(uncontrolled_core, float)
+    if uncontrolled.shape != core.shape:
+        raise ValueError("controlled and uncontrolled core traces must align")
     t0 = int(round(float(t0_ms) / bin_ms))
     t1 = int(round((float(t0_ms) + float(duration_ms)) / bin_ms))
+    if not 0 < t0 < t1 <= core.size:
+        raise ValueError("control window lies outside the paired traces")
     pre0 = max(0, t0 - int(round(500.0 / bin_ms)))
     post1 = min(core.size, t1 + int(round(200.0 / bin_ms)))
     baseline = float(np.mean(core[pre0:t0])) if t0 > pre0 else None
-    response = core[t0:post1]
-    if baseline is None or baseline <= 0 or response.size == 0:
-        drop = None
-    else:
-        smooth_n = max(1, int(round(50.0 / bin_ms)))
-        # Use valid windows: zero-padding at the ends would manufacture a
-        # large apparent rate drop even when the response is unchanged.
-        smooth = (
-            np.convolve(response, np.ones(smooth_n) / smooth_n, mode="valid")
-            if response.size >= smooth_n else np.asarray([np.mean(response)])
-        )
-        drop = float(1.0 - np.min(smooth) / baseline)
+    controlled_count_proxy = float(np.sum(core[t0:t1]))
+    uncontrolled_count_proxy = float(np.sum(uncontrolled[t0:t1]))
+    drop = (
+        None if uncontrolled_count_proxy <= 0.0 else
+        float(1.0 - controlled_count_proxy / uncontrolled_count_proxy)
+    )
+    prefix_delta = np.abs(core[:t0] - uncontrolled[:t0])
+    prefix_max_abs = float(np.max(prefix_delta)) if prefix_delta.size else 0.0
+    prefix_identical = bool(prefix_max_abs <= 1e-12)
     silent = all_e[t0:post1] <= 0.0
     longest = 0
     current = 0
@@ -49,10 +68,20 @@ def control_response(fine_core, fine_all, *, t0_ms, duration_ms, bin_ms=2.0):
         longest = max(longest, current)
     return {
         "pre_control_core_mean_hz": baseline,
+        "controlled_pulse_window_core_mean_hz": float(np.mean(core[t0:t1])),
+        "uncontrolled_pulse_window_core_mean_hz": float(
+            np.mean(uncontrolled[t0:t1])
+        ),
         "fractional_core_drop": drop,
+        "fractional_core_drop_definition": (
+            "1-controlled/uncontrolled paired core spike-count proxy in pulse window"
+        ),
+        "precontrol_pair_max_abs_hz": prefix_max_abs,
+        "precontrol_pair_identical": prefix_identical,
         "longest_global_zero_rate_ms": float(longest * bin_ms),
         "calibration_target_met": bool(
-            drop is not None and 0.50 <= drop <= 0.70 and longest * bin_ms <= 100.0
+            prefix_identical and drop is not None and 0.50 <= drop <= 0.70
+            and longest * bin_ms <= 100.0
         ),
     }
 
@@ -145,12 +174,23 @@ def analyze_manifest(manifest):
             rows.append({**config, "status": "missing"}); continue
         stem = hits[0]
         analysis, summary = analyses[stem], summaries[stem]
+        uncontrolled_summary = config.get("uncontrolled_summary_path")
+        if uncontrolled_summary is None:
+            rows.append({**config, "status": "uncontrolled_pair_missing"})
+            continue
+        uncontrolled_root = (ROOT / uncontrolled_summary).parent
+        uncontrolled_npz = uncontrolled_root / "traces.npz"
+        if not uncontrolled_npz.is_file():
+            rows.append({**config, "status": "uncontrolled_pair_missing"})
+            continue
         with np.load(IN_ROOT / stem / "traces.npz", allow_pickle=False) as data:
-            response = control_response(
-                data["fine_core_rate_hz"], data["fine_all_e_rate_hz"],
-                t0_ms=config["control_t0_ms"],
-                duration_ms=config["control_duration_ms"],
-            )
+            with np.load(uncontrolled_npz, allow_pickle=False) as uncontrolled:
+                response = control_response(
+                    data["fine_core_rate_hz"], data["fine_all_e_rate_hz"],
+                    uncontrolled["fine_core_rate_hz"],
+                    t0_ms=config["control_t0_ms"],
+                    duration_ms=config["control_duration_ms"],
+                )
         episode = analysis["episode"]
         row = {
             **config, "status": "complete", "stem": stem,
