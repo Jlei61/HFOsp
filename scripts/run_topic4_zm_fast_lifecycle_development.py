@@ -417,8 +417,12 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             (12000.0, 20000.0, 30000.0, 45000.0, 60000.0)
             if args.command == "sprint-cell" else (30000.0, 60000.0)
         )
-        if args.smoke and not 0.0 < float(args.T_ms) <= 1000.0:
-            raise RuntimeError("dynamic smoke duration must lie in (0,1000] ms")
+        # The pre-entry checkpoint precedes the native onset by 1.35 s.  A
+        # 1-s ceiling cannot exercise any activity-gated mechanism and can
+        # silently certify a dead sensor.  Keep the smoke short but long enough
+        # to cross the locked onset reference.
+        if args.smoke and not 0.0 < float(args.T_ms) <= 2500.0:
+            raise RuntimeError("dynamic smoke duration must lie in (0,2500] ms")
         if not args.smoke and float(args.T_ms) not in allowed_T:
             raise RuntimeError(f"dynamic prototype duration must be one of {allowed_T}")
         if not args.smoke and float(args.burn_ms) not in (1000.0, 2000.0):
