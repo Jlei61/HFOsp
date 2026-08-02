@@ -156,23 +156,61 @@ def plot_control_dose(payload, path):
     ranks = sorted({int(row["selection_rank"]) for row in rows})
     if not ranks:
         return False
-    fig, axes = plt.subplots(1, len(ranks), figsize=(3.2 * len(ranks), 3.2), squeeze=False, constrained_layout=True)
-    for axis, rank in zip(axes[0], ranks):
+    fig, axes = plt.subplots(
+        len(ranks), 2, figsize=(8.2, 3.2 * len(ranks)),
+        squeeze=False, constrained_layout=True,
+    )
+    duration_colors = {50.0: "#2166AC", 200.0: "#B2182B"}
+    for row_index, rank in enumerate(ranks):
         subset = [row for row in rows if int(row["selection_rank"]) == rank]
         durations = sorted({float(row["control_duration_ms"]) for row in subset})
-        multipliers = sorted({float(row.get("dose_multiplier", np.nan)) for row in subset})
-        grid = np.full((len(durations), len(multipliers)), np.nan)
-        for row in subset:
-            i = durations.index(float(row["control_duration_ms"]))
-            j = multipliers.index(float(row["dose_multiplier"]))
-            grid[i, j] = 2.0 if row.get("returning_event_candidate") else (
-                1.0 if row.get("causal_control_exit_candidate") else 0.0
+        for duration in durations:
+            series = sorted(
+                [row for row in subset if float(row["control_duration_ms"]) == duration],
+                key=lambda row: float(row["dose_multiplier"]),
             )
-        image = axis.imshow(grid, vmin=0, vmax=2, cmap=matplotlib.colors.ListedColormap(["#D9D9D9", "#F4A582", "#1B7837"]), aspect="auto")
-        axis.set_xticks(range(len(multipliers)), [f"{value:g}" for value in multipliers])
-        axis.set_yticks(range(len(durations)), [f"{value:g}" for value in durations])
-        axis.set(xlabel=r"dose / $u_{ref}$", ylabel="pulse duration (ms)", title=f"phenotype {rank}")
-    fig.colorbar(image, ax=axes.ravel().tolist(), ticks=[0, 1, 2], label="0 persistent | 1 exit | 2 returning event")
+            x = np.asarray([row["dose_multiplier"] for row in series], float)
+            drop = np.asarray([
+                row.get("control_response", {}).get("fractional_core_drop", np.nan)
+                for row in series
+            ], float)
+            dwell = np.asarray([
+                row.get("control_response", {}).get("longest_global_zero_rate_ms", np.nan)
+                for row in series
+            ], float)
+            color = duration_colors.get(duration, "#555555")
+            label = f"{duration:g} ms"
+            axes[row_index, 0].plot(x, drop, "o-", color=color, label=label)
+            axes[row_index, 1].plot(x, dwell, "o-", color=color, label=label)
+            for source, xv, yv in zip(series, x, dwell):
+                if source.get("causal_control_exit_candidate") and np.isfinite(yv):
+                    axes[row_index, 1].scatter(
+                        [xv], [yv], marker="*", s=100, color="#1B7837", zorder=5,
+                    )
+        n_exit = sum(bool(row.get("causal_control_exit_candidate")) for row in subset)
+        n_return = sum(bool(row.get("returning_event_candidate")) for row in subset)
+        axes[row_index, 0].axhline(0.5, color="#888888", linestyle="--", linewidth=0.8)
+        axes[row_index, 0].set_ylim(0.0, 1.05)
+        axes[row_index, 0].set(
+            xlabel=r"dose / $u_{ref}$",
+            ylabel="paired core spike-count reduction",
+        )
+        axes[row_index, 1].axhline(
+            100.0, color="#888888", linestyle="--", linewidth=0.8,
+            label="100 ms silencing guard",
+        )
+        axes[row_index, 1].set(
+            xlabel=r"dose / $u_{ref}$",
+            ylabel="longest global zero-rate dwell (ms)",
+        )
+        axes[row_index, 1].text(
+            0.02, 0.96, f"durable exits {n_exit}/{len(subset)}\nreturning events {n_return}/{len(subset)}",
+            transform=axes[row_index, 1].transAxes, va="top", ha="left", fontsize=8,
+        )
+    axes[0, 0].set_title("acute paired suppression", loc="left", fontweight="bold")
+    axes[0, 1].set_title("persistence after the pulse", loc="left", fontweight="bold")
+    axes[0, 0].legend(frameon=False, fontsize=8)
+    axes[0, 1].legend(frameon=False, fontsize=8, loc="lower right")
     fig.savefig(path, dpi=180)
     plt.close(fig)
     return True
@@ -283,8 +321,10 @@ def main():
             "绿色星号表示配对因果 offset，绿色空圈表示 returning-event candidate。\n\n**关注点**：M 是否形成连续剂量响应并把 Z 推向恢复，而不只是 prevention。"
         ),
         "control_dose_response.png": (
-            "每个格子对应有限阈值脉冲的剂量和时长：灰色为持续、橙色为配对因果退出、绿色为退出后出现 returning event。"
-            "该图只描述 seed-1 development control。\n\n**关注点**：是否存在非永久静默、且能回到间期事件的有限剂量窗。"
+            "左图给出有限阈值脉冲相对同 checkpoint、同 future noise 无控制轨迹的即时 core spike-count 降幅；"
+            "右图给出脉冲期间最长全场零放电时长，并标出 100 ms silencing guard。"
+            "该图只描述 seed-1 development control。\n\n**关注点**：即时抑制能否转化为持久退出；"
+            "若只随剂量增加而延长静默、脉冲后仍恢复原 burst train，则不是可控 lifecycle。"
         ),
     }
     # README is an inventory of the directory, not merely of figures touched
