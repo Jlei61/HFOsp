@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 
@@ -28,6 +29,7 @@ def test_successful_wave_overrides_earlier_not_run_row_with_same_config_id():
 
 def test_merge_preserves_stage_and_unique_config_count(monkeypatch):
     monkeypatch.setattr(U, "_analysis_indexes", lambda: ({}, {}))
+    monkeypatch.setattr(U, "native_long_run_rows", lambda: {})
     fast = {"rows": {"a": {"family": "depression_only_lhs", "adjudicated_status": "success"}}}
     control = {"rows": {"b": {"family": "finite_control_dose", "adjudicated_status": "worker_failed"}}}
     payload = U.build_payload([(Path("fast.json"), fast), (Path("control.json"), control)])
@@ -63,3 +65,35 @@ def test_analysis_readout_keeps_exit_tail_recovery_and_paired_control_evidence()
     assert got["M_effect_status"] == "offset_vs_censored_gM0"
     assert got["paired_control_drop_fraction"] == 0.6
     assert got["precontrol_pair_identical"] is True
+
+
+def test_native_long_run_is_joined_to_its_terminal_receipt(tmp_path, monkeypatch):
+    out = tmp_path / "results" / "lifecycle_sprint"
+    receipts = out.parent / "worker_receipts"
+    out.mkdir(parents=True)
+    receipts.mkdir(parents=True)
+    summary = "results/lifecycle_sprint/seed1/long/summary.json"
+    (out / "native_long45_analysis.json").write_text(json.dumps({
+        "summary_path": summary,
+        "phenotype": "weak_or_fragmented",
+        "episode": {"onset_ms": 500.0, "offset_ms": 5950.0},
+        "recovery": {
+            "single_event_candidate": True,
+            "distribution_recovered": False,
+            "n_post": 74,
+            "matched_event_fraction": 0.405,
+        },
+    }))
+    (receipts / "run.json").write_text(json.dumps({
+        "artifact_path": summary,
+        "config_hash": "abcdef1234567890",
+        "status": "success",
+        "terminal_time_utc": "2026-08-02T10:00:00+00:00",
+    }))
+    monkeypatch.setattr(U, "ROOT", tmp_path)
+    monkeypatch.setattr(U, "OUT", out)
+
+    rows = U.native_long_run_rows()
+    assert rows["abcdef123456"]["stage"] == "native_long_run"
+    assert rows["abcdef123456"]["scientific_readout"]["n_post_offset_event_candidates"] == 74
+    assert rows["abcdef123456"]["scientific_readout"]["returning_distribution_recovered"] is False

@@ -32,6 +32,8 @@ def _stage(row):
         return "control_calibration"
     if family == "finite_control_dose":
         return "control_dose"
+    if family == "native_long_run":
+        return "native_long_run"
     return "fast_phase_map"
 
 
@@ -131,8 +133,60 @@ def annotate_rows(rows):
     return rows
 
 
+def native_long_run_rows():
+    """Attach completed long-run evidence through its durable worker receipt."""
+    analysis_path = OUT / "native_long45_analysis.json"
+    analysis = _read(analysis_path)
+    if not analysis:
+        return {}
+    summary_path = analysis.get("summary_path")
+    receipts = []
+    for path in sorted((OUT.parent / "worker_receipts").glob("*.json")):
+        receipt = _read(path) or {}
+        if receipt.get("artifact_path") == summary_path:
+            receipts.append((path, receipt))
+    if not receipts:
+        return {}
+    path, receipt = max(receipts, key=lambda item: item[1].get("terminal_time_utc") or "")
+    config_id = receipt["config_hash"][:12]
+    episode = analysis.get("episode") or {}
+    recovery = analysis.get("recovery") or {}
+    intensity = analysis.get("intensity") or {}
+    spatial = analysis.get("within_episode_spatial") or {}
+    return {config_id: {
+        "config_id": config_id,
+        "family": "native_long_run",
+        "stage": "native_long_run",
+        "adjudicated_status": receipt.get("status"),
+        "artifact_path": summary_path,
+        "command": receipt.get("command"),
+        "git_sha": receipt.get("git_sha"),
+        "checkpoint_hash": receipt.get("checkpoint_hash"),
+        "source_file_sha256": receipt.get("source_file_sha256"),
+        "start_time_utc": receipt.get("start_time_utc"),
+        "terminal_time_utc": receipt.get("terminal_time_utc"),
+        "peak_rss_gb": receipt.get("peak_rss_gb"),
+        "source_ledger_paths": [str(path.relative_to(ROOT))],
+        "scientific_readout": {
+            "phenotype": analysis.get("phenotype"),
+            "onset_ms": episode.get("onset_ms"),
+            "offset_ms": episode.get("offset_ms"),
+            "episode_status": episode.get("status"),
+            "returning_event_candidate": recovery.get("single_event_candidate"),
+            "returning_distribution_recovered": recovery.get("distribution_recovered"),
+            "n_post_offset_event_candidates": recovery.get("n_post"),
+            "matched_event_fraction": recovery.get("matched_event_fraction"),
+            "median_energy_gain_db": intensity.get("median_gain_db_across_contacts"),
+            "energy_occupancy_6db": intensity.get("occupancy_above_6db"),
+            "spatial_effective_rank": spatial.get("spatial_effective_rank"),
+            "common_mode_pc1_fraction": spatial.get("common_mode_pc1_fraction"),
+        },
+    }}
+
+
 def build_payload(named_ledgers):
     rows = annotate_rows(merge_adjudicated_ledgers(named_ledgers))
+    rows.update(native_long_run_rows())
     counts = {}
     stages = {}
     for row in rows.values():
