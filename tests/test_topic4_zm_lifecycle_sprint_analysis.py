@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 import numpy as np
@@ -138,3 +139,16 @@ def test_episode_detector_does_not_call_trace_truncation_an_offset():
     got = A.detect_episode(core, baseline)
     assert got["status"] == "offset_unconfirmed_at_trace_end"
     assert got["offset_bin"] is None
+
+
+def test_single_trajectory_analysis_writes_separate_artifact(tmp_path, monkeypatch):
+    root = tmp_path / "run"
+    root.mkdir()
+    (root / "summary.json").write_text("{}\n")
+    (root / "traces.npz").write_bytes(b"fixture")
+    expected = {"stem": "run", "phenotype": "fixture"}
+    monkeypatch.setattr(A, "analyze_one", lambda path: expected)
+    output = tmp_path / "single.json"
+
+    assert A.write_single_analysis(root, output) == expected
+    assert json.loads(output.read_text()) == expected

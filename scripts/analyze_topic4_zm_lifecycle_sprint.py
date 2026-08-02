@@ -2,6 +2,7 @@
 """Online multi-objective analysis for the seed-1 joint lifecycle sprint."""
 from __future__ import annotations
 
+import argparse
 import csv
 from functools import lru_cache
 import json
@@ -538,7 +539,35 @@ def _flat(row):
     }
 
 
+def write_single_analysis(root: Path, output: Path):
+    """Analyze one completed trajectory without mutating the batch phase map."""
+    root = root.resolve()
+    if not (root / "summary.json").is_file() or not (root / "traces.npz").is_file():
+        raise FileNotFoundError(f"incomplete trajectory root: {root}")
+    row = analyze_one(root)
+    output.parent.mkdir(parents=True, exist_ok=True)
+    output.write_text(json.dumps(row, indent=2, sort_keys=True, allow_nan=False) + "\n")
+    return row
+
+
 def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--single-root", type=Path)
+    parser.add_argument("--single-output", type=Path)
+    args = parser.parse_args()
+    if args.single_root is not None:
+        if args.single_output is None:
+            raise SystemExit("--single-root requires --single-output")
+        row = write_single_analysis(args.single_root, args.single_output)
+        print(json.dumps({
+            "stem": row["stem"],
+            "phenotype": row["phenotype"],
+            "episode": row["episode"],
+            "recovery": row["recovery"],
+        }, sort_keys=True))
+        return
+    if args.single_output is not None:
+        raise SystemExit("--single-output requires --single-root")
     roots = [p for p in sorted(IN_ROOT.glob("*")) if (p / "summary.json").is_file()]
     rows = [analyze_one(root) for root in roots]
     adaptation_path = OUT_ROOT / "batch1_adaptation_decisions.json"
