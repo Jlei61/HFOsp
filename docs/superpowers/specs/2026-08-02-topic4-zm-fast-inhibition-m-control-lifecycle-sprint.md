@@ -52,6 +52,28 @@ not required in this sprint.
 5. Apply finite threshold-uplift control to promising persistent episodes.
 6. Long-run the best native and controlled conditions for 45–60 s.
 
+### Finite-control calibration lock
+
+This correction was locked before the first controlled trajectory completed.
+The control time is the first continuous 50 ms core-active window after
+measured onset plus 1500 ms; it is not placed in a burst trough.  Calibration
+uses threshold uplifts `0.25, 0.5, 1, 2, 4 mV` for 50 ms.
+
+The calibration response is the core spike-count reduction during the pulse
+window relative to the **paired no-control continuation at the identical
+time**, checkpoint and future-noise stream.  The controlled and no-control
+traces must be exactly identical before the pulse.  Comparing only against a
+pre-pulse mean is forbidden because a burst may naturally terminate after the
+pulse time.  The smallest uplift producing a 50--70% paired reduction without
+an all-sheet zero-rate dwell longer than 100 ms is `u_ref`; otherwise the
+nearest non-silencing dose is retained with an explicit outside-target label.
+
+The dose panel is `0.5, 1, 1.5 × u_ref` crossed with `50, 200 ms`.  A controlled
+offset counts only when it occurs after the pulse and either the paired
+no-control episode is right-censored or the controlled duration is at least
+1000 ms shorter.  Returning-event recovery is adjudicated separately and is
+never implied by an activity drop alone.
+
 ## Candidate description
 
 Every run retains five separate dimensions rather than one total score:
@@ -74,4 +96,3 @@ fields as unavailable.  They cannot borrow another mechanism's baseline.
   status;
 - no paper-ready figure, multi-seed confirmation or per-phenotype archive until
   a complete development lifecycle or final sprint adjudication exists.
-
