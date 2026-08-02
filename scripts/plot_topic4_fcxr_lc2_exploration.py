@@ -10,6 +10,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.colors import BoundaryNorm, ListedColormap
 
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -147,19 +148,100 @@ def plot_forks():
     arms = ["A_low", "A_high", "B", "C", "D1", "D2"]
     rate = np.full((len(cands), len(arms)), np.nan)
     h = np.full_like(rate, np.nan)
+    state = np.full_like(rate, np.nan)
+    labels = {
+        "INTERICTAL_WORKPOINT": 0,
+        "ELEVATED_EVENT_TRAIN": 1,
+        "FINITE_HIGH_ORBIT": 2,
+        "FINITE_HIGH_FIXED": 3,
+        "NUMERICAL_UNSAFE": 4,
+    }
     for r in rows:
         i, j = cands.index(r["candidate_run_id"]), arms.index(r["arm"])
         rate[i, j] = r["state_tail_1s"]["rate_mean_hz"]
         h[i, j] = r["state_tail_1s"]["h_mean"] / r["theta"]
-    fig, ax = plt.subplots(1, 2, figsize=(9.0, 3.5), constrained_layout=True)
-    for a, mat, title, lab in ((ax[0], rate, "a  tail activity", "rate (Hz)"),
-                               (ax[1], h, "b  normalized H state", r"$H/\theta_H$")):
-        im = a.imshow(mat, aspect="auto", cmap="magma")
-        a.set_xticks(range(len(arms)), arms, rotation=35, ha="right")
-        a.set_yticks(range(len(cands)), cands)
-        a.set_title(title, loc="left", fontsize=10)
-        fig.colorbar(im, ax=a, pad=0.02, label=lab)
+        state[i, j] = labels.get(r.get("workpoint_label"), 4)
+
+    fig = plt.figure(figsize=(12.2, 5.0), constrained_layout=True)
+    gs = fig.add_gridspec(2, 2, width_ratios=(1.0, 1.45), height_ratios=(1, 1))
+    ax_state = fig.add_subplot(gs[0, 0])
+    ax_rate = fig.add_subplot(gs[1, 0])
+    ax_trace = fig.add_subplot(gs[:, 1])
+
+    cmap = ListedColormap([BLUE, ORANGE, RUST, "#7C3AED", "black"])
+    norm = BoundaryNorm(np.arange(-0.5, 5.5, 1.0), cmap.N)
+    ax_state.imshow(state, aspect="auto", cmap=cmap, norm=norm)
+    short = {0: "IED", 1: "elev", 2: "orbit", 3: "fixed", 4: "unsafe"}
+    for i in range(state.shape[0]):
+        for j in range(state.shape[1]):
+            ax_state.text(j, i, short[int(state[i, j])], ha="center", va="center",
+                          fontsize=7, color="white" if state[i, j] >= 2 else "black")
+    ax_state.set_xticks(range(len(arms)), arms, rotation=30, ha="right")
+    ax_state.set_yticks(range(len(cands)), cands)
+    ax_state.set_title("a  empirical workpoint state", loc="left", fontsize=10)
+
+    im = ax_rate.imshow(rate, aspect="auto", cmap="magma", vmin=0)
+    for i in range(rate.shape[0]):
+        for j in range(rate.shape[1]):
+            ax_rate.text(j, i, f"{rate[i, j]:.0f}", ha="center", va="center", fontsize=7,
+                         color="white" if rate[i, j] < 60 else "black")
+    ax_rate.set_xticks(range(len(arms)), arms, rotation=30, ha="right")
+    ax_rate.set_yticks(range(len(cands)), cands)
+    ax_rate.set_title("b  final 1 s rate", loc="left", fontsize=10)
+    fig.colorbar(im, ax=ax_rate, pad=0.02, label="Hz")
+
+    focus = cands[0]
+    trace_arms = ["A_low", "B", "C", "D2"]
+    colors = {"A_low": BLUE, "B": ORANGE, "C": RUST, "D2": "#7C3AED"}
+    for arm in trace_arms:
+        r = next(x for x in rows if x["candidate_run_id"] == focus and x["arm"] == arm)
+        y = np.asarray(r["rate_trace"], float)
+        nroll = max(1, int(round(300.0 / float(r["trace_dt_ms"]))))
+        smooth = np.convolve(y, np.ones(nroll) / nroll, mode="valid")
+        t = (np.arange(smooth.size) + nroll - 1) * float(r["trace_dt_ms"]) / 1000.0
+        ax_trace.plot(t, smooth, lw=1.25, color=colors[arm], label=arm)
+    ax_trace.axhline(9.7382291667, color=GREY, lw=0.9, ls="--", label="interictal upper band")
+    ax_trace.set_xlabel("time (s)"); ax_trace.set_ylabel("300 ms rolling rate (Hz)")
+    ax_trace.set_title(f"c  {focus}: healthy self-escalation and failed X return", loc="left", fontsize=10)
+    ax_trace.legend(frameon=False, fontsize=8, ncol=2)
     _save(fig, "frozen_fork_map")
+    return True
+
+
+def plot_failure_taxonomy():
+    paths = ["r1_resegmentation_summary.json", "h_loop_screen.json",
+             "frozen_fork_map.json", "dynamic_pilot_manifest.json"]
+    if not all(os.path.isfile(os.path.join(OUT, x)) for x in paths):
+        return False
+    r1 = _json(paths[0]); screen = _json(paths[1]); forks = _json(paths[2]); dyn = _json(paths[3])
+    boxes = [
+        ("R1 sensor", f"{r1['pareto_n']} Pareto / {r1['rows_n']} rows\n"
+                      f"{len(r1['selected_candidates'])} locked candidates\n"
+                      "long rest gap not bridged", BLUE),
+        ("E3 high-init screen", f"{screen['counts']['screen_survivor']} survivors\n"
+                                f"{screen['counts']['saturated_tonic']} saturated-tonic\n"
+                                "upper bound, not basin evidence", ORANGE),
+        ("E4 frozen geometry", "2/2 healthy low starts\nleave IED state\n"
+                               "susceptible low/high do not separate\n"
+                               "D1/D2 X loads do not return low", RUST),
+        ("E5 dynamic Z/H/X", f"{dyn['status']}\nno legal frozen geometry\n"
+                             "lifecycle not tested", GREY),
+    ]
+    fig, ax = plt.subplots(figsize=(11.5, 3.2), constrained_layout=True)
+    ax.set_xlim(0, 1); ax.set_ylim(0, 1); ax.axis("off")
+    xs = np.linspace(0.03, 0.77, len(boxes))
+    w = 0.20
+    for i, ((title, body, color), x) in enumerate(zip(boxes, xs)):
+        rect = plt.Rectangle((x, .25), w, .52, facecolor="white", edgecolor=color, lw=2)
+        ax.add_patch(rect)
+        ax.text(x + .015, .69, title, fontsize=10, fontweight="bold", color=color, va="top")
+        ax.text(x + .015, .60, body, fontsize=7.8, va="top", linespacing=1.35)
+        if i < len(boxes) - 1:
+            ax.annotate("", xy=(xs[i + 1] - .012, .51), xytext=(x + w + .012, .51),
+                        arrowprops=dict(arrowstyle="-|>", lw=1.2, color="#4B5563"))
+    ax.text(.5, .10, "bounded negative: tested H creates a finite branch without susceptibility selectivity",
+            ha="center", va="center", fontsize=10, fontweight="bold")
+    _save(fig, "failure_taxonomy")
     return True
 
 
@@ -189,7 +271,7 @@ def plot_dynamic():
     return True
 
 
-def write_readme(screen=False, forks=False, dynamic=False):
+def write_readme(screen=False, forks=False, dynamic=False, taxonomy=False):
     text = """### r1_sensor_characterization.png
 
 这张图把 HEO2 旧参考轨迹拆成两个活动段和中间的 rest-like gap，并同时给出虚拟 SEEG 与局部 recurrent-drive support。它说明旧的完整窗口不能被当成一段连续高态，但活动段仍提供了闭环 H 的候选传感范围。
@@ -208,15 +290,15 @@ def write_readme(screen=False, forks=False, dynamic=False):
 
 六个 H 传感候选各自扫描平滑宽度与反馈强度。点的颜色是 1 s 开发标签，大小近似尾段活动率；`screen_survivor` 只表示值得延长，不能解释成双稳态或发作 carrier。
 
-**关注点**：看 survivor 是否形成局部参数窗口，以及高反馈是否转成 saturated tonic 或数值失败。
+**关注点**：90 格里有 52 个 survivor、38 个 saturated-tonic；弱反馈高初值已约 101 Hz，反馈增强后升到 275 Hz，说明这一步主要看见有限限幅，不是选择性迟滞。
 """
     if forks:
         text += """
 ### frozen_fork_map.png
 
-这张图并列 healthy low/high 初值、susceptible low/high 初值与两个冻结 X 负荷。只有 A-low/A-high/B 回低、C 保持有限高态、D1 或 D2 回低，才构成 frozen H/X geometry candidate。
+这张图并列 healthy low/high 初值、susceptible low/high 初值与两个冻结 X 负荷，并把经验工作点标签、尾段率和代表性 300 ms 平滑轨迹放在一起。两个正式候选的 A-low 都离开间期工作点；C 是有限高态，但 D1/D2 仍停在高态。
 
-**关注点**：C 与 B 是否真正分离，以及 X 是否消灭高态而不是把所有条件一起压低。
+**关注点**：失败发生在最前面的健康低态保持，且两档 X 只轻度降率、没有把高态送回间期工作点。
 """
     if dynamic:
         text += """
@@ -225,6 +307,14 @@ def write_readme(screen=False, forks=False, dynamic=False):
 同一个 frozen-geometry 候选接回动态 Z/H/X 后，比较 X-on 与保留传感器但冻结 relay availability 的 matched X-off。生命周期只按无 kick onset、X 因果延长/终止和至少 8 秒 returning-IED 统计恢复判定。
 
 **关注点**：X-on 是否先于 X-off 离开高态，以及末段是否恢复到发作前的稀疏不规则事件邻域。
+"""
+    if taxonomy:
+        text += """
+### failure_taxonomy.png
+
+这张图按真实执行顺序汇总 R1 传感器表征、E3 高初值 screen、E4 frozen geometry 和未解锁的 E5。它把开发性 survivor 与真正的 basin/termination 判据分开，避免把开环分类写成机制终局。
+
+**关注点**：本轮的 clean stop 是 H 在健康底座上自激，导致选择性 basin 几何不存在；因此 dynamic Z/H/X lifecycle 没有被测试。
 """
     os.makedirs(FIG, exist_ok=True)
     with open(os.path.join(FIG, "README.md"), "w") as f:
@@ -237,7 +327,8 @@ def main():
     has_screen = plot_screen()
     has_forks = plot_forks()
     has_dynamic = plot_dynamic()
-    write_readme(has_screen, has_forks, has_dynamic)
+    has_taxonomy = plot_failure_taxonomy()
+    write_readme(has_screen, has_forks, has_dynamic, has_taxonomy)
 
 
 if __name__ == "__main__":
