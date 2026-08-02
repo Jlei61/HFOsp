@@ -132,7 +132,8 @@ amplitude: acute suppression did not reach a persistent recovery basin.
 - the unified ledger contains 84 unique configurations: 64 successful runs,
   eight adaptive cancellations and twelve pre-registered not-run cells;
 - stage accounting is fast 36, M 36, calibration 5, dose 6 and native long-run 1;
-- 88 targeted Z/M lifecycle, control, checkpoint and ledger tests pass;
+- 107 targeted Z/M lifecycle, control, checkpoint, emission-delay, byte-parity
+  and ledger tests pass (four existing empty-core diagnostic warnings only);
 - no lifecycle simulation process remains.
 
 ## 8. Core artifacts
