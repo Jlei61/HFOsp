@@ -6,6 +6,7 @@ import argparse
 from datetime import datetime, timezone
 import hashlib
 import json
+import math
 import os
 from pathlib import Path
 import subprocess
@@ -129,6 +130,81 @@ def _command(row):
     return cmd
 
 
+def _expected_artifact_path(row):
+    stem = str(row["arm"])
+    if row["arm"] in {"i2e", "combined"}:
+        stem += f"__tauD{float(row['tau_D_ms']):g}__d{float(row['d_star']):g}"
+    if row["arm"] in {"iadapt", "combined"}:
+        stem += f"__tauI{float(row['tau_aI_ms']):g}__fI{float(row['f_aI']):g}"
+    stem += f"__s{float(row['strength_scale']):g}"
+    if float(row.get("control_uplift_mV", 0.0)) > 0.0:
+        stem += (
+            f"__ctl{row.get('control_target', 'all_E')}"
+            f"__u{float(row['control_uplift_mV']):g}"
+            f"__t{float(row['control_t0_ms']):g}"
+            f"__dur{float(row['control_duration_ms']):g}__clkrel2"
+        )
+    stem += f"__T{float(row['T_ms']) / 1000:g}s"
+    if float(row.get("g_Z", 1.0)) != 1.0:
+        stem += f"__gZ{float(row['g_Z']):g}"
+    if float(row.get("g_M", 1.0)) != 1.0 or row.get("tau_M_ms") is not None:
+        stem += f"__gM{float(row.get('g_M', 1.0)):g}"
+        if row.get("tau_M_ms") is not None:
+            stem += f"__tauM{float(row['tau_M_ms']):g}"
+    return OUT / "seed1" / stem / "summary.json"
+
+
+def _same_number(left, right):
+    try:
+        return math.isclose(float(left), float(right), rel_tol=0.0, abs_tol=1e-9)
+    except (TypeError, ValueError):
+        return False
+
+
+def _existing_artifact_matches(row, path=None):
+    """Validate scientific coordinates before reusing an immutable artifact."""
+    path = _expected_artifact_path(row) if path is None else Path(path)
+    if not path.is_file():
+        return False
+    try:
+        payload = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        return False
+    mechanism = payload.get("mechanism") or {}
+    slow = mechanism.get("dynamic_slow_flow") or {}
+    dep = mechanism.get("i2e_depression") or {}
+    iadapt = mechanism.get("i_adaptation") or {}
+    checks = [
+        mechanism.get("arm") == row.get("arm"),
+        _same_number(payload.get("T_ms"), row.get("T_ms")),
+        _same_number(payload.get("equilibration_ms"), row.get("burn_ms")),
+        _same_number(mechanism.get("strength_scale"), row.get("strength_scale")),
+        _same_number(dep.get("tau_D_ms"), row.get("tau_D_ms")),
+        _same_number(dep.get("d_star_nominal"), row.get("d_star")),
+        _same_number(slow.get("g_M"), row.get("g_M")),
+        _same_number(slow.get("tau_M_ms"), row.get("tau_M_ms")),
+        _same_number(slow.get("g_Z"), row.get("g_Z")),
+    ]
+    if row.get("arm") == "combined":
+        checks.extend([
+            _same_number(iadapt.get("tau_aI_ms"), row.get("tau_aI_ms")),
+            _same_number(iadapt.get("f_aI"), row.get("f_aI")),
+        ])
+    control = payload.get("finite_control")
+    if float(row.get("control_uplift_mV", 0.0)) > 0.0:
+        control = control or {}
+        checks.extend([
+            control.get("clock") == row.get("control_clock"),
+            control.get("target") == row.get("control_target", "all_E"),
+            _same_number(control.get("uplift_mV"), row.get("control_uplift_mV")),
+            _same_number(control.get("t0_ms"), row.get("control_t0_ms")),
+            _same_number(control.get("duration_ms"), row.get("control_duration_ms")),
+        ])
+    else:
+        checks.append(control is None)
+    return all(checks)
+
+
 def run_manifest(manifest_path, ledger_path, max_workers, min_mem_gb, poll_s):
     manifest_path = Path(manifest_path)
     ledger_path = Path(ledger_path)
@@ -171,6 +247,16 @@ def run_manifest(manifest_path, ledger_path, max_workers, min_mem_gb, poll_s):
         ]
         while pending and len(active) < int(max_workers) and _mem_available_gb() >= float(min_mem_gb):
             key, row = pending.pop(0)
+            artifact = _expected_artifact_path(row)
+            if _existing_artifact_matches(row, artifact):
+                row.update(
+                    status="success", returncode=0,
+                    terminal_time_utc=_now(), reused_existing_artifact=True,
+                    artifact_path=str(artifact.relative_to(ROOT)),
+                    command=_command(row),
+                )
+                _atomic_json(ledger_path, ledger)
+                continue
             log = logs / f"{key}.log"
             stream = log.open("a")
             cmd = _command(row)
