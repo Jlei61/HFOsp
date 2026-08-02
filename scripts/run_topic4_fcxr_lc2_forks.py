@@ -294,7 +294,11 @@ def _run_row(row):
     spk = np.asarray(res["E_spk_bool"], bool)
     h = np.asarray(slow.trace_h_lc2_mean, float)
     state = _window_metrics(rate, spk, h, theta, p.tau_ref_E, DT, 1000.0)
-    required_low_ms = max(1000.0, 3.0 * float(row["tau_ms"]))
+    # Historical frozen forks used a 1 s floor.  A downstream diagnostic may
+    # demand a longer causal return window, but the default must remain byte-
+    # for-byte equivalent for the already archived LC2 forks.
+    required_low_ms = max(float(row.get("required_low_min_ms", 1000.0)),
+                          3.0 * float(row["tau_ms"]))
     post = _window_metrics(rate, spk, h, theta, p.tau_ref_E, DT, required_low_ms)
     core, axis, off = _region_masks(S)
     stride = max(1, int(round(10.0 / DT)))

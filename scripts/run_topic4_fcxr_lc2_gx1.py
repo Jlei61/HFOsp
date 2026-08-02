@@ -37,7 +37,7 @@ OUT = os.path.join(ROOT, "results", "topic4_sef_hfo", "fcxr_lc2_core",
 LC2 = os.path.join(ROOT, "results", "topic4_sef_hfo", "fcxr_lc2_core",
                    "closed_loop_exploration")
 SCRIPT_REL = "scripts/run_topic4_fcxr_lc2_gx1.py"
-CONTRACT_VERSION = 1
+CONTRACT_VERSION = 2
 G_SAT = 21.6
 FAMILIES = {
     "H1": dict(tau_ms=522.0314431365073, theta_base=1.2594716548919684,
@@ -73,7 +73,14 @@ def _sha256(path):
 
 
 def _source_sha():
-    return _sha256(os.path.join(ROOT, SCRIPT_REL))
+    # The frozen-fork runner performs the actual full-resolution return-window
+    # classification, so it is part of the executable scientific contract.
+    h = hashlib.sha256()
+    for rel in (SCRIPT_REL, "scripts/run_topic4_fcxr_lc2_forks.py"):
+        with open(os.path.join(ROOT, rel), "rb") as f:
+            for block in iter(lambda: f.read(1 << 20), b""):
+                h.update(block)
+    return h.hexdigest()
 
 
 def _load(path):
@@ -238,6 +245,7 @@ def build_x_rows(strip_aggregate, noise_seed=401):
             k=float(K_RATIO * theta), rho_fraction=float(rho_fraction),
             rho=float(G_SAT * rho_fraction), D=0.15, h_init_scale=2.0,
             x_depletion=float(1.0 - x), x_availability=float(x),
+            required_low_min_ms=2000.0,
             T_ms=float(max(5000.0, 8.0 * tau)), connection_seed=1,
             noise_seed=int(noise_seed), no_kick=True, M=False, K=False, A=False,
             ELR=False, coop_A=0.0,

@@ -93,7 +93,13 @@ def test_x_manifest_uses_four_locked_availabilities_and_eight_tau_window():
     assert len({r["T_ms"] for r in rows}) == 1
     assert rows[0]["T_ms"] >= 8.0 * rows[0]["tau_ms"]
     assert rows[0]["anchor_source"] == "archived_H6_k05_r10_no_strip_window"
+    assert all(r["required_low_min_ms"] == 2000.0 for r in rows)
     assert all(r["M"] is r["K"] is r["A"] is r["ELR"] is False for r in rows)
+
+
+def test_frozen_fork_return_window_supports_a_stricter_downstream_floor():
+    text = (ROOT / "scripts" / "run_topic4_fcxr_lc2_forks.py").read_text()
+    assert 'row.get("required_low_min_ms", 1000.0)' in text
 
 
 def _xrow(x, wp, post=None, numerical=False):
