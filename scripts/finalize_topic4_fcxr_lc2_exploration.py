@@ -107,22 +107,34 @@ def build_verdict():
     return {
         "stage": "E6",
         "status": "COMPLETE_BOUNDED_NEGATIVE",
-        "verdict": "H_FROZEN_GEOMETRY_NO_GO_HEALTHY_BASELINE_DISTURBED",
+        "verdict": "H_BOUNDED_HIGH_POSITIVE_ONSET_OFFSET_CONTROL_NEGATIVE",
+        "legacy_failure_label": "H_FROZEN_GEOMETRY_NO_GO_HEALTHY_BASELINE_DISTURBED",
         "labels": [
             "SENSOR_CHARACTERIZATION_COMPLETED",
             "H_LOOP_SCREEN_COMPLETED_DEVELOPMENTAL_ONLY",
-            "H_HEALTHY_BASELINE_DESTABILIZED",
+            "H_BOUNDED_HIGH_STATE_GENERATION_POSITIVE",
+            "Z_SUSCEPTIBILITY_SELECTIVE_ONSET_CONTROL_NEGATIVE",
             "H_SELECTIVE_LOW_HIGH_BASIN_NOT_FOUND",
-            "X_OBSERVED_LOAD_INSUFFICIENT_FOR_TESTED_H_BRANCH",
+            "X_PHYSIOLOGICAL_LOAD_AMPLITUDE_CONTROL_POSITIVE",
+            "X_PHYSIOLOGICAL_LOAD_OFFSET_CONTROL_NEGATIVE",
             "DYNAMIC_ZHX_NOT_UNLOCKED",
             "LIFECYCLE_NOT_TESTED",
         ],
+        "component_verdicts": {
+            "bounded_high_state_generation": "POSITIVE",
+            "susceptibility_selective_onset": "NEGATIVE_FOR_TESTED_H_ARCHITECTURE",
+            "low_high_basin_coexistence": "NOT_FOUND",
+            "x_amplitude_control": "POSITIVE",
+            "x_state_transition_authority": "NEGATIVE_AT_TESTED_LC1_LOADS",
+            "dynamic_lifecycle": "NOT_TESTED",
+        },
         "scientific_scope": {
             "allowed": (
-                "The tested post-X local H loop converts returning activity into a finite high branch, "
-                "but does so already at healthy D=0; within the two locked finalists it does not provide "
-                "susceptibility-selective low/high basin geometry. The two accepted LC1 frozen X-load "
-                "upper bounds do not return that tested branch to the interictal workpoint."
+                "Bounded high-state generation is positive. In the tested post-X local H architecture, "
+                "healthy D=0 returning events can ignite the branch, so Z does not have susceptibility-"
+                "selective onset control. The two accepted LC1 frozen X loads reduce high-state amplitude "
+                "but do not return the tested branch to the interictal workpoint, so they do not have "
+                "offset state-transition authority over this branch."
             ),
             "forbidden": [
                 "H cannot ever support bistability",
@@ -204,11 +216,15 @@ def write_status(verdict):
         f"{counts['saturated_tonic']} saturated-tonic cells, but this high-initial-condition screen is "
         "not a basin test. In the canonical matched forks, both finalists self-escalated from low H on "
         "the healthy D=0 substrate. The susceptible low/high starts therefore did not establish a "
-        "selective bistable window, and neither accepted frozen X-load level returned the tested high "
-        "branch to the interictal workpoint.",
+        "selective bistable window. The tested H loop therefore establishes a finite bounded high state, "
+        "but Z has no selective onset control. Both accepted frozen X-load levels reduce its amplitude, "
+        "yet neither returns it to the interictal workpoint, so X has no offset state-transition authority "
+        "at those loads.",
         "",
         "## Claim boundary",
         "",
+        "The formal claim is: bounded high-state generation positive; susceptibility-selective onset and "
+        "X-controlled offset negative for the tested architecture and loads. "
         "This is a bounded negative for the two locked finalists and the tested post-X H architecture. "
         "It is not a global impossibility result for H, not a reversal of LC1 X termination authority, "
         "and not a dynamic lifecycle result. M, K, A and ELR were never introduced.",

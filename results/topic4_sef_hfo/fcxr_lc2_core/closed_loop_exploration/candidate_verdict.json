@@ -1,18 +1,29 @@
 {
   "stage": "E6",
   "status": "COMPLETE_BOUNDED_NEGATIVE",
-  "verdict": "H_FROZEN_GEOMETRY_NO_GO_HEALTHY_BASELINE_DISTURBED",
+  "verdict": "H_BOUNDED_HIGH_POSITIVE_ONSET_OFFSET_CONTROL_NEGATIVE",
+  "legacy_failure_label": "H_FROZEN_GEOMETRY_NO_GO_HEALTHY_BASELINE_DISTURBED",
   "labels": [
     "SENSOR_CHARACTERIZATION_COMPLETED",
     "H_LOOP_SCREEN_COMPLETED_DEVELOPMENTAL_ONLY",
-    "H_HEALTHY_BASELINE_DESTABILIZED",
+    "H_BOUNDED_HIGH_STATE_GENERATION_POSITIVE",
+    "Z_SUSCEPTIBILITY_SELECTIVE_ONSET_CONTROL_NEGATIVE",
     "H_SELECTIVE_LOW_HIGH_BASIN_NOT_FOUND",
-    "X_OBSERVED_LOAD_INSUFFICIENT_FOR_TESTED_H_BRANCH",
+    "X_PHYSIOLOGICAL_LOAD_AMPLITUDE_CONTROL_POSITIVE",
+    "X_PHYSIOLOGICAL_LOAD_OFFSET_CONTROL_NEGATIVE",
     "DYNAMIC_ZHX_NOT_UNLOCKED",
     "LIFECYCLE_NOT_TESTED"
   ],
+  "component_verdicts": {
+    "bounded_high_state_generation": "POSITIVE",
+    "susceptibility_selective_onset": "NEGATIVE_FOR_TESTED_H_ARCHITECTURE",
+    "low_high_basin_coexistence": "NOT_FOUND",
+    "x_amplitude_control": "POSITIVE",
+    "x_state_transition_authority": "NEGATIVE_AT_TESTED_LC1_LOADS",
+    "dynamic_lifecycle": "NOT_TESTED"
+  },
   "scientific_scope": {
-    "allowed": "The tested post-X local H loop converts returning activity into a finite high branch, but does so already at healthy D=0; within the two locked finalists it does not provide susceptibility-selective low/high basin geometry. The two accepted LC1 frozen X-load upper bounds do not return that tested branch to the interictal workpoint.",
+    "allowed": "Bounded high-state generation is positive. In the tested post-X local H architecture, healthy D=0 returning events can ignite the branch, so Z does not have susceptibility-selective onset control. The two accepted LC1 frozen X loads reduce high-state amplitude but do not return the tested branch to the interictal workpoint, so they do not have offset state-transition authority over this branch.",
     "forbidden": [
       "H cannot ever support bistability",
       "X lacks termination authority in general",
@@ -120,5 +131,5 @@
       "src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
     }
   },
-  "finished": "2026-08-02T03:16:45.984155+00:00"
+  "finished": "2026-08-02T08:37:00.498135+00:00"
 }

@@ -20,10 +20,10 @@
 
 这张图并列 healthy low/high 初值、susceptible low/high 初值与两个冻结 X 负荷，并把经验工作点标签、尾段率和代表性 300 ms 平滑轨迹放在一起。两个正式候选的 A-low 都离开间期工作点；C 是有限高态，但 D1/D2 仍停在高态。
 
-**关注点**：失败发生在最前面的健康低态保持，且两档 X 只轻度降率、没有把高态送回间期工作点。
+**关注点**：H 形成有界高态是正结果；失败在于 Z 没取得选择性 onset control，两档 X 只有 amplitude control、没有 offset state-transition authority。
 
 ### failure_taxonomy.png
 
 这张图按真实执行顺序汇总 R1 传感器表征、E3 高初值 screen、E4 frozen geometry 和未解锁的 E5。它把开发性 survivor 与真正的 basin/termination 判据分开，避免把开环分类写成机制终局。
 
-**关注点**：本轮的 clean stop 是 H 在健康底座上自激，导致选择性 basin 几何不存在；因此 dynamic Z/H/X lifecycle 没有被测试。
+**关注点**：正式口径是 bounded high-state generation positive；susceptibility-selective onset 与所测 LC1 负荷下的 X-controlled offset negative。dynamic Z/H/X lifecycle 没有被测试。

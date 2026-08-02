@@ -6,13 +6,23 @@
 
 ## 0. 结论先行
 
-本轮完整跑完了 R1 重新表征、90 格 H 高初值 screen，以及两组正式候选的 40k frozen H/X forks。最终判决为：
+本轮完整跑完了 R1 重新表征、90 格 H 高初值 screen，以及两组正式候选的 40k frozen H/X forks。修订后的主判决为：
 
 ```text
-H_FROZEN_GEOMETRY_NO_GO_HEALTHY_BASELINE_DISTURBED
+H_BOUNDED_HIGH_POSITIVE_ONSET_OFFSET_CONTROL_NEGATIVE
 ```
 
-这不是说 H 不能产生高态。相反，测试的局部 H 正反馈很容易产生**数值有界、非硬截断的持续高态**。问题是它在健康抑制状态 `D=0`、从 `H=0` 出发也会被正常间期事件逐步点燃；因此没有得到“健康时保留间期、抑制耗竭时才出现低/高双 basin”的选择性几何。两档来自 LC1 的冻结 X 负荷也只轻度降率，没有把这个高态送回间期工作点。
+更精确的分层结论是：
+
+```text
+bounded high-state generation                 = POSITIVE
+Z susceptibility-selective onset control      = NEGATIVE
+X amplitude control at tested LC1 loads       = POSITIVE
+X offset state-transition authority           = NEGATIVE
+dynamic lifecycle                              = NOT TESTED
+```
+
+测试的局部 H 正反馈很容易产生**数值有界、非硬截断的持续高态**，所以“高态做不出来”不是问题。问题是它在健康抑制状态 `D=0`、从 `H=0` 出发也会被正常间期事件逐步点燃；`Z/D` 只有定量调节，没有形成安全/易感的定性 onset boundary。两档来自 LC1 的冻结 X 负荷能把高态从约 102 Hz 降到 95–98 Hz，但没有把它送回间期工作点，因此只有 amplitude control，没有取得 offset control。
 
 所以 dynamic Z/H/X pilot 没有解锁。当前没有测试、也不能声称已经得到无 kick 的 onset–offset–returning-IED lifecycle。
 
@@ -75,13 +85,13 @@ rho_H/g_sat = {0.10, 0.20, 0.35, 0.50, 0.70}
 | arm | 科学问题 | 结果 |
 |---|---|---|
 | A-low：`D=0, H(0)=0` | 健康低态能否保留 | 两候选均变成 `FINITE_HIGH_ORBIT`；尾段 78.2 / 84.2 Hz |
-| A-high：`D=0, H(0)=2theta` | 健康底座能否拒绝高初值 | 均保持 finite high |
+| A-high：`D=0, H(0)=2theta` | Z 已恢复后高 H 能否自行消失 | 均保持约 84 Hz finite high；健康区不具备恢复性 |
 | B：`D=0.15, H(0)=0` | 易感低 basin 是否存在 | 均变成约 101–103 Hz 的 finite high |
 | C：`D=0.15, H(0)=2theta` | 易感高 basin 是否存在 | 均为约 102 Hz 的 finite high |
 | D1：C + `D_X=0.128` | 已观察 X 负荷能否消灭高态 | 尾段约 97.6 Hz，未回间期 |
 | D2：C + `D_X=0.214` | 更强已观察 X 负荷能否消灭高态 | 尾段约 94.9 Hz，未回间期 |
 
-所有 12 条正式轨迹数值有限、零 hard clip、零 numerical failure，refractory-ceiling fraction 为零。因此这不是 runaway 或数值天花板造成的假阳性；它是一个真实的有界高活动解，但不是我们需要的 susceptibility-selective carrier。
+所有 12 条正式轨迹数值有限、零 hard clip、零 numerical failure，refractory-ceiling fraction 为零。因此这不是 runaway 或数值天花板造成的假阳性；它是一个真实的有界高活动解，但不是我们需要的 susceptibility-selective carrier。B 常被分为 high fixed、C 常被分为 high orbit，提示 H 可能支持不止一种有界高态形态；这只是 `high fixed <-> high orbit` 的内部动力学差异，不是目标中的 `low <-> high` bistability。
 
 提前运行、后续保留为 developmental corroboration 的 H1 两点也一致：A-low 不再是接受的间期工作点，而是 `ELEVATED_EVENT_TRAIN`；其余高初值/易感/X 臂均保持 finite high。它们不参与 canonical 判决，但支持失败并非 H6 单点特例。
 
@@ -101,7 +111,7 @@ H actuator 本身不依赖 Z/depletion。正常 IED 已足以反复抬高 h；�
 
 在这两个测试 H 分支上，冻结 `D_X=0.128/0.214` 只能把尾段率从约 102 Hz 降到 95–98 Hz，没有返回间期工作点。因此允许写：
 
-> 已验收 LC1 量级的两档冻结 X 负荷，不足以消灭本轮测试的 H 高分支。
+> 已验收 LC1 量级的两档冻结 X 负荷对本轮 H 高分支具有 amplitude control，但不足以取得 offset state-transition authority。
 
 不能写成“X 没有终止 authority”。LC1 已经在另一种持续高态上验证过 X 的终止能力；本轮只是表明当前 H 正反馈相对该 X 量级过强，而且因为健康低态已经失败，X 结果不是一个完整、选择性 lifecycle 上的 offset 测试。
 
@@ -149,15 +159,48 @@ dynamic Z/H/X lifecycle = untested
 - “已经得到 seizure carrier、limit cycle、bistability 或 E1146 phenotype”；
 - 用 52 个 `screen_survivor` 代替 basin 证据。
 
-## 9. 下一步唯一机制建议
+## 9. 下一步：先做两个廉价结构诊断
 
-不要继续沿同一个 `rho_H` 强度轴补 40k 点。下一版应先让 H 的**闭环增益对 Z/depletion 有选择性**：健康 `D=0` 时 loop gain 必须小于 1，易感 `D≈0.15` 时才允许大于 1。最小可检验形式是给 H actuator 加一个平滑、局部的 susceptibility gate（例如由 local inhibitory depletion 或其膜去极化后果驱动），而不是全局 seizure label 或硬开关：
+不能从当前两组正式候选直接推出“必须增加显式 `S_D(D)`”。E3 的选择条件只是高初值能持续，因此遗漏一个更弱增益、更高阈值的自然 selectivity window 仍有可能。下一轮先做两个有明确停止条件的短诊断。
+
+### 9.1 现有方程的窄 selectivity strip
+
+只把 `rho_H` 延伸到当前最低值以下，并把 `theta_H` 小幅上移。每点只跑：
+
+```text
+D=0,    H_low  -> 必须回 interictal
+D=0.15, H_low  -> 必须回 interictal
+D=0.15, H_high -> 必须保持 finite high
+```
+
+如果存在一个非单点窗口，现有方程仍可用，不应增加新 coupling。如果限定 strip 内始终不存在，才允许写：RC1 中 Z 对 inhibition 的既有效应不足以给 H susceptibility selectivity。
+
+### 9.2 X 的 theoretical-max authority
+
+从同一个 susceptible high snapshot 出发，冻结：
+
+```text
+x_relay = {1.0, 0.5, 0.1, 0.0}
+```
+
+`x_relay=0` 只作结构因果 probe，不是生产参数。如果 0 仍不能在足够长窗口内回 low，说明 H current 绕过或脱离了 X 执行路径；如果 0 能回 low、而实际 LC1 可达负荷不能，则路径方向正确，缺的是动态范围。
+
+### 9.3 只有诊断确认后才改结构
+
+若入口和出口的结构缺口分别成立，才测试新的可证伪假设：
+
+```text
+D 决定 H loop 是否开放
+X 关闭 H 依赖的同一 recurrent path
+```
+
+一个候选 entry 形式是平滑局部 gate：
 
 ```text
 g_H,i = rho_H * S_H(h_i) * S_D(D_i)
 ```
 
-下一轮先在 frozen `D={0,0.15}` 的低成本两臂 continuation 上证明“健康低态保留 + 易感高态出现”，再测试 X。若这一步仍不能形成选择性窗口，才关闭当前 sigmoid-EMA H family，转 short-term facilitation 或 intrinsic conditional bistability；不要再把时间预算花在同一架构的 40k 强度网格上。
+但它必须被报告为新机制假设，而不是参数修复。offset 端不能只继续压旧 fast recurrent term；如果 H 表示同一 E→E recurrent path 的慢分量，X 必须能关闭完整 H-supported loop。下一阶段 spec 只授权前两项诊断；诊断结果未出前，不授权完整结构 2×2、dynamic lifecycle、M/K/A/ELR。
 
 ## 10. 产物
 

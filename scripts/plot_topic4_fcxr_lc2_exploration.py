@@ -202,7 +202,7 @@ def plot_forks():
         ax_trace.plot(t, smooth, lw=1.25, color=colors[arm], label=arm)
     ax_trace.axhline(9.7382291667, color=GREY, lw=0.9, ls="--", label="interictal upper band")
     ax_trace.set_xlabel("time (s)"); ax_trace.set_ylabel("300 ms rolling rate (Hz)")
-    ax_trace.set_title(f"c  {focus}: healthy self-escalation and failed X return", loc="left", fontsize=10)
+    ax_trace.set_title(f"c  {focus}: healthy ignition and X amplitude-only control", loc="left", fontsize=10)
     ax_trace.legend(frameon=False, fontsize=8, ncol=2)
     _save(fig, "frozen_fork_map")
     return True
@@ -221,9 +221,10 @@ def plot_failure_taxonomy():
         ("E3 high-init screen", f"{screen['counts']['screen_survivor']} survivors\n"
                                 f"{screen['counts']['saturated_tonic']} saturated-tonic\n"
                                 "upper bound, not basin evidence", ORANGE),
-        ("E4 frozen geometry", "2/2 healthy low starts\nleave IED state\n"
+        ("E4 frozen geometry", "bounded high state: positive\n"
+                               "Z-selective onset: negative\n"
                                "susceptible low/high do not separate\n"
-                               "D1/D2 X loads do not return low", RUST),
+                               "X offset: negative at tested loads", RUST),
         ("E5 dynamic Z/H/X", f"{dyn['status']}\nno legal frozen geometry\n"
                              "lifecycle not tested", GREY),
     ]
@@ -239,7 +240,7 @@ def plot_failure_taxonomy():
         if i < len(boxes) - 1:
             ax.annotate("", xy=(xs[i + 1] - .012, .51), xytext=(x + w + .012, .51),
                         arrowprops=dict(arrowstyle="-|>", lw=1.2, color="#4B5563"))
-    ax.text(.5, .10, "bounded negative: tested H creates a finite branch without susceptibility selectivity",
+    ax.text(.5, .10, "bounded high-state positive; susceptibility-selective onset and X-controlled offset negative",
             ha="center", va="center", fontsize=10, fontweight="bold")
     _save(fig, "failure_taxonomy")
     return True
@@ -298,7 +299,7 @@ def write_readme(screen=False, forks=False, dynamic=False, taxonomy=False):
 
 这张图并列 healthy low/high 初值、susceptible low/high 初值与两个冻结 X 负荷，并把经验工作点标签、尾段率和代表性 300 ms 平滑轨迹放在一起。两个正式候选的 A-low 都离开间期工作点；C 是有限高态，但 D1/D2 仍停在高态。
 
-**关注点**：失败发生在最前面的健康低态保持，且两档 X 只轻度降率、没有把高态送回间期工作点。
+**关注点**：H 形成有界高态是正结果；失败在于 Z 没取得选择性 onset control，两档 X 只有 amplitude control、没有 offset state-transition authority。
 """
     if dynamic:
         text += """
@@ -314,7 +315,7 @@ def write_readme(screen=False, forks=False, dynamic=False, taxonomy=False):
 
 这张图按真实执行顺序汇总 R1 传感器表征、E3 高初值 screen、E4 frozen geometry 和未解锁的 E5。它把开发性 survivor 与真正的 basin/termination 判据分开，避免把开环分类写成机制终局。
 
-**关注点**：本轮的 clean stop 是 H 在健康底座上自激，导致选择性 basin 几何不存在；因此 dynamic Z/H/X lifecycle 没有被测试。
+**关注点**：正式口径是 bounded high-state generation positive；susceptibility-selective onset 与所测 LC1 负荷下的 X-controlled offset negative。dynamic Z/H/X lifecycle 没有被测试。
 """
     os.makedirs(FIG, exist_ok=True)
     with open(os.path.join(FIG, "README.md"), "w") as f:
