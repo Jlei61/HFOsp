@@ -92,6 +92,37 @@ def paired_m_effect(row, baseline, *, minimum_advance_ms=1000.0):
     }
 
 
+def paired_m_continuous_response(row, baseline):
+    """Quantify M-dependent state changes even when both episodes are censored."""
+    if row is None or baseline is None:
+        return {"status": "pair_missing"}
+    keys = (
+        "core_mean_hz", "all_E_mean_hz", "median_energy_gain_db",
+        "energy_occupancy_6db", "post_entry_core_cv",
+        "spatial_effective_rank", "common_mode_pc1_fraction",
+    )
+    out = {"status": "paired"}
+    for key in keys:
+        value = row.get(key)
+        reference = baseline.get(key)
+        out[f"delta_{key}"] = (
+            None if value is None or reference is None else float(value) - float(reference)
+        )
+        if key in {"core_mean_hz", "all_E_mean_hz"}:
+            out[f"ratio_{key}"] = (
+                None if value is None or reference in (None, 0) else float(value) / float(reference)
+            )
+    row_trace = row.get("slow_trace", {})
+    base_trace = baseline.get("slow_trace", {})
+    for key in ("z_core_final", "z_core_minimum", "m_peak"):
+        value = row_trace.get(key)
+        reference = base_trace.get(key)
+        out[f"delta_{key}"] = (
+            None if value is None or reference is None else float(value) - float(reference)
+        )
+    return out
+
+
 def _trace_metrics(root, episode):
     with np.load(root / "traces.npz", allow_pickle=False) as data:
         arrays = {key: np.asarray(data[key], float) for key in (
@@ -99,6 +130,9 @@ def _trace_metrics(root, episode):
             "trace_phi_core_mean", "trace_i2e_resource_mean",
             "trace_i_adaptation_mean",
         ) if key in data.files}
+        fine_time = np.asarray(data["fine_time_ms"], float) if "fine_time_ms" in data.files else None
+        fine_core = np.asarray(data["fine_core_rate_hz"], float) if "fine_core_rate_hz" in data.files else None
+        fine_all = np.asarray(data["fine_all_e_rate_hz"], float) if "fine_all_e_rate_hz" in data.files else None
     trace = arrays.get("trace_m_core_mean", np.zeros(0))
     if trace.size == 0:
         return {"m_initial": None, "m_peak": None, "m_at_offset": None}
@@ -110,6 +144,15 @@ def _trace_metrics(root, episode):
         "m_at_offset": None if offset_idx is None else float(trace[offset_idx]),
         "m_final": float(trace[-1]),
     }
+    onset_ms = episode.get("onset_ms")
+    if onset_ms is not None and fine_time is not None:
+        mask = fine_time >= float(onset_ms)
+        result["post_onset_core_mean_hz"] = (
+            None if fine_core is None or not np.any(mask) else float(np.mean(fine_core[mask]))
+        )
+        result["post_onset_all_E_mean_hz"] = (
+            None if fine_all is None or not np.any(mask) else float(np.mean(fine_all[mask]))
+        )
     for key, values in arrays.items():
         if key == "trace_m_core_mean" or values.size == 0:
             continue
@@ -169,6 +212,7 @@ def build_surface(manifest, analyses, summaries):
             effect = paired_m_effect(analysis, baseline)
             recovery = analysis["recovery"]
             trace_root = IN_ROOT / analysis["stem"]
+            slow_trace = _trace_metrics(trace_root, analysis["episode"])
             rows.append({
                 **config,
                 "status": "complete",
@@ -187,16 +231,30 @@ def build_surface(manifest, analyses, summaries):
                 "median_energy_gain_db": analysis["intensity"].get("median_gain_db_across_contacts"),
                 "energy_occupancy_6db": analysis["intensity"].get("occupancy_above_6db"),
                 "post_entry_core_cv": analysis.get("post_entry_core_cv"),
+                "core_mean_hz": slow_trace.get("post_onset_core_mean_hz"),
+                "all_E_mean_hz": slow_trace.get("post_onset_all_E_mean_hz"),
                 "spatial_effective_rank": analysis["within_episode_spatial"].get("spatial_effective_rank"),
                 "common_mode_pc1_fraction": analysis["within_episode_spatial"].get("common_mode_pc1_fraction"),
-                "slow_trace": _trace_metrics(trace_root, analysis["episode"]),
+                "slow_trace": slow_trace,
                 "summary_path": analysis["summary_path"],
             })
+    for rank in range(manifest["n_selected_fast_phenotypes"]):
+        rank_rows = [row for row in rows if row["selection_rank"] == rank]
+        baseline = next(
+            (row for row in rank_rows if row.get("status") == "complete" and float(row["g_M"]) == 0.0),
+            None,
+        )
+        for row in rank_rows:
+            row["paired_M_response"] = paired_m_continuous_response(
+                row if row.get("status") == "complete" else None,
+                baseline,
+            )
     return rows
 
 
 def _flat(row):
     effect = row.get("causal_M_effect", {})
+    response = row.get("paired_M_response", {})
     trace = row.get("slow_trace", {})
     keys = (
         "config_id", "selection_rank", "source_fast_id", "arm", "g_M", "tau_M_ms",
@@ -204,6 +262,7 @@ def _flat(row):
         "duration_right_censored", "causal_exit_candidate", "returning_event_candidate",
         "returning_distribution_recovered", "median_energy_gain_db", "energy_occupancy_6db",
         "post_entry_core_cv", "spatial_effective_rank", "common_mode_pc1_fraction",
+        "core_mean_hz", "all_E_mean_hz",
     )
     out = {key: row.get(key) for key in keys}
     out.update(
@@ -213,6 +272,13 @@ def _flat(row):
         z_core_minimum=trace.get("z_core_minimum"),
         z_core_final=trace.get("z_core_final"),
         S_G_maximum=trace.get("S_G_maximum"),
+        delta_core_mean_hz=response.get("delta_core_mean_hz"),
+        ratio_core_mean_hz=response.get("ratio_core_mean_hz"),
+        delta_all_E_mean_hz=response.get("delta_all_E_mean_hz"),
+        ratio_all_E_mean_hz=response.get("ratio_all_E_mean_hz"),
+        delta_median_energy_gain_db=response.get("delta_median_energy_gain_db"),
+        delta_energy_occupancy_6db=response.get("delta_energy_occupancy_6db"),
+        delta_z_core_final=response.get("delta_z_core_final"),
     )
     return out
 

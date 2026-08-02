@@ -44,9 +44,40 @@ def test_slow_trace_metrics_record_offset_and_z_recovery(tmp_path):
         trace_phi_core_mean=np.asarray([0.0, 0.2, 0.1, 0.0]),
         trace_i2e_resource_mean=np.asarray([1.0, 0.8, 0.7, 0.9]),
         trace_i_adaptation_mean=np.asarray([0.0, 0.3, 0.2, 0.0]),
+        fine_time_ms=np.asarray([0.0, 1.0, 2.0, 3.0]),
+        fine_core_rate_hz=np.asarray([0.0, 10.0, 20.0, 30.0]),
+        fine_all_e_rate_hz=np.asarray([0.0, 2.0, 4.0, 6.0]),
     )
-    got = M._trace_metrics(tmp_path, {"offset_ms": 2.0})
+    got = M._trace_metrics(tmp_path, {"onset_ms": 2.0, "offset_ms": 2.0})
     assert got["m_peak"] == 3.0
     assert got["z_core_at_offset"] == 0.4
     assert got["z_core_post_offset_recovery"] == pytest.approx(0.3)
     assert got["S_G_maximum"] == 0.4
+    assert got["post_onset_core_mean_hz"] == 25.0
+    assert got["post_onset_all_E_mean_hz"] == 5.0
+
+
+def test_paired_m_continuous_response_preserves_censored_state_effects():
+    baseline = {
+        "core_mean_hz": 100.0,
+        "all_E_mean_hz": 40.0,
+        "median_energy_gain_db": 20.0,
+        "energy_occupancy_6db": 0.8,
+        "post_entry_core_cv": 0.2,
+        "spatial_effective_rank": 1.1,
+        "common_mode_pc1_fraction": 0.98,
+        "slow_trace": {"z_core_final": 0.1, "z_core_minimum": 0.05, "m_peak": 100.0},
+    }
+    treated = {
+        **baseline,
+        "core_mean_hz": 60.0,
+        "all_E_mean_hz": 20.0,
+        "median_energy_gain_db": 15.0,
+        "slow_trace": {"z_core_final": 0.3, "z_core_minimum": 0.1, "m_peak": 95.0},
+    }
+    got = M.paired_m_continuous_response(treated, baseline)
+    assert got["status"] == "paired"
+    assert got["delta_core_mean_hz"] == -40.0
+    assert got["ratio_core_mean_hz"] == pytest.approx(0.6)
+    assert got["delta_median_energy_gain_db"] == -5.0
+    assert got["delta_z_core_final"] == pytest.approx(0.2)
