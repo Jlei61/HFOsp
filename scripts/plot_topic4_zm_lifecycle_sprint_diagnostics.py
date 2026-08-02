@@ -287,12 +287,16 @@ def main():
             "该图只描述 seed-1 development control。\n\n**关注点**：是否存在非永久静默、且能回到间期事件的有限剂量窗。"
         ),
     }
-    text = [f"### {name}\n\n{descriptions[name]}" for name in generated if name in descriptions]
+    # README is an inventory of the directory, not merely of figures touched
+    # by this invocation.  A trajectory-only diagnostic call must not erase
+    # the descriptions of trajectories generated earlier in the sprint.
+    inventory = sorted({path.name for path in FIG.glob("*.png")} | set(generated))
+    text = [f"### {name}\n\n{descriptions[name]}" for name in inventory if name in descriptions]
     text += [
         f"### {name}\n\n单条全动态轨迹的核区/外围放电、虚拟电极能量、病理轴活动与 Z–M/fast-feedback 轨迹。"
         "该图用于诊断状态类型，不单独构成 lifecycle 验收。\n\n**关注点**：高能活动是否持续且具有空间组织，"
         "以及退出前 Z 与 M 是否形成方向相反的 slow flow。"
-        for name in generated if name.startswith("trajectory_")
+        for name in inventory if name.startswith("trajectory_")
     ]
     (FIG / "README.md").write_text("\n\n".join(text) + "\n")
     print(json.dumps({"generated": generated}, ensure_ascii=False))
