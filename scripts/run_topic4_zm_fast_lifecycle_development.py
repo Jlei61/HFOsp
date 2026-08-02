@@ -455,7 +455,9 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             raise RuntimeError(f"production burn must be {PRODUCTION_BURN_MS:g} ms")
     race = args.command == "race-cell"
     if race or dynamic:
-        if args.state != RACE_STATE:
+        if args.state != RACE_STATE and not (
+            dynamic and bool(getattr(args, "freeze_zm", False))
+        ):
             raise RuntimeError(f"mechanism race is locked to {RACE_STATE}")
         if (
             float(args.tau_phi_ms) != RACE_PHI_TAU_MS
