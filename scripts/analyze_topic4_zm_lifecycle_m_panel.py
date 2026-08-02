@@ -92,19 +92,49 @@ def paired_m_effect(row, baseline, *, minimum_advance_ms=1000.0):
     }
 
 
-def _m_trace_metrics(root, episode):
+def _trace_metrics(root, episode):
     with np.load(root / "traces.npz", allow_pickle=False) as data:
-        trace = np.asarray(data["trace_m_core_mean"], float)
+        arrays = {key: np.asarray(data[key], float) for key in (
+            "trace_m_core_mean", "trace_z_core_mean", "trace_S_G",
+            "trace_phi_core_mean", "trace_i2e_resource_mean",
+            "trace_i_adaptation_mean",
+        ) if key in data.files}
+    trace = arrays.get("trace_m_core_mean", np.zeros(0))
     if trace.size == 0:
         return {"m_initial": None, "m_peak": None, "m_at_offset": None}
     offset_ms = episode.get("offset_ms")
     offset_idx = None if offset_ms is None else min(trace.size - 1, int(round(offset_ms)))
-    return {
+    result = {
         "m_initial": float(trace[0]),
         "m_peak": float(np.max(trace)),
         "m_at_offset": None if offset_idx is None else float(trace[offset_idx]),
         "m_final": float(trace[-1]),
     }
+    for key, values in arrays.items():
+        if key == "trace_m_core_mean" or values.size == 0:
+            continue
+        label = {
+            "trace_z_core_mean": "z_core",
+            "trace_S_G": "S_G",
+            "trace_phi_core_mean": "phi_core",
+            "trace_i2e_resource_mean": "i2e_resource",
+            "trace_i_adaptation_mean": "i_adaptation",
+        }[key]
+        index = None if offset_idx is None else min(values.size - 1, offset_idx)
+        result.update({
+            f"{label}_initial": float(values[0]),
+            f"{label}_minimum": float(np.min(values)),
+            f"{label}_maximum": float(np.max(values)),
+            f"{label}_at_offset": None if index is None else float(values[index]),
+            f"{label}_final": float(values[-1]),
+        })
+    if offset_idx is not None and "trace_z_core_mean" in arrays:
+        z = arrays["trace_z_core_mean"]
+        index = min(z.size - 1, offset_idx)
+        result["z_core_post_offset_recovery"] = float(z[-1] - z[index])
+    else:
+        result["z_core_post_offset_recovery"] = None
+    return result
 
 
 def build_surface(manifest, analyses, summaries):
@@ -148,6 +178,8 @@ def build_surface(manifest, analyses, summaries):
                 "offset_ms": analysis["episode"].get("offset_ms"),
                 "episode_duration_ms": duration,
                 "duration_right_censored": censored,
+                "n_transient_offsets": len(analysis["episode"].get("transient_offset_bins", [])),
+                "n_rapid_reentries": len(analysis["episode"].get("rapid_reentry_bins", [])),
                 "causal_M_effect": effect,
                 "causal_exit_candidate": effect["causal_exit_candidate"],
                 "returning_event_candidate": recovery.get("single_event_candidate", False),
@@ -157,7 +189,7 @@ def build_surface(manifest, analyses, summaries):
                 "post_entry_core_cv": analysis.get("post_entry_core_cv"),
                 "spatial_effective_rank": analysis["within_episode_spatial"].get("spatial_effective_rank"),
                 "common_mode_pc1_fraction": analysis["within_episode_spatial"].get("common_mode_pc1_fraction"),
-                "m_trace": _m_trace_metrics(trace_root, analysis["episode"]),
+                "slow_trace": _trace_metrics(trace_root, analysis["episode"]),
                 "summary_path": analysis["summary_path"],
             })
     return rows
@@ -165,7 +197,7 @@ def build_surface(manifest, analyses, summaries):
 
 def _flat(row):
     effect = row.get("causal_M_effect", {})
-    trace = row.get("m_trace", {})
+    trace = row.get("slow_trace", {})
     keys = (
         "config_id", "selection_rank", "source_fast_id", "arm", "g_M", "tau_M_ms",
         "status", "stem", "phenotype", "onset_ms", "offset_ms", "episode_duration_ms",
@@ -178,6 +210,9 @@ def _flat(row):
         m_effect_status=effect.get("status"),
         duration_advance_ms=effect.get("duration_advance_ms"),
         m_peak=trace.get("m_peak"), m_at_offset=trace.get("m_at_offset"),
+        z_core_minimum=trace.get("z_core_minimum"),
+        z_core_final=trace.get("z_core_final"),
+        S_G_maximum=trace.get("S_G_maximum"),
     )
     return out
 
