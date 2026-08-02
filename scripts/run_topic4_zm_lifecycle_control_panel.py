@@ -68,7 +68,8 @@ def _selected(payload):
 
 def build_calibration_manifest(selection, *, T_ms=20000.0):
     prepared = []
-    for rank, source in enumerate(_selected(selection)):
+    for position, source in enumerate(_selected(selection)):
+        rank = int(source.get("selection_rank", position))
         base, t0, uncontrolled = _candidate_config(source)
         source_id = source.get("config_id", source.get("stem", f"selected_{rank}"))
         prepared.append((rank, base, t0, source_id, uncontrolled))
@@ -101,7 +102,8 @@ def build_dose_manifest(selection, calibration, *, T_ms=20000.0):
     decision_rows = calibration.get("calibration_decisions", calibration.get("rows", []))
     refs = {int(row["selection_rank"]): row for row in decision_rows}
     prepared = []
-    for rank, source in enumerate(_selected(selection)):
+    for position, source in enumerate(_selected(selection)):
+        rank = int(source.get("selection_rank", position))
         if rank not in refs or refs[rank].get("u_ref_mV") is None:
             raise ValueError(f"selection rank {rank} has no calibrated u_ref")
         base, t0, uncontrolled = _candidate_config(source)

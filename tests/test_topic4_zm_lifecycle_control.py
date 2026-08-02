@@ -110,3 +110,12 @@ def test_control_manifest_rejects_a_candidate_that_already_offsets():
     candidate = {**_candidate(), "offset_ms": 4000.0, "duration_right_censored": False}
     with np.testing.assert_raises_regex(ValueError, "must be persistent"):
         R.build_calibration_manifest({"rows": [candidate]})
+
+
+def test_control_manifest_preserves_original_m_selection_rank_for_subset_waves():
+    candidate = {**_candidate(), "selection_rank": 3}
+    calibration = R.build_calibration_manifest({"rows": [candidate]})
+    assert {row["selection_rank"] for row in calibration["rows"]} == {3}
+    decisions = {"calibration_decisions": [{"selection_rank": 3, "u_ref_mV": 1.0}]}
+    dose = R.build_dose_manifest({"rows": [candidate]}, decisions)
+    assert {row["selection_rank"] for row in dose["rows"]} == {3}

@@ -53,6 +53,13 @@ def test_selection_deprioritises_near_silencing_suppression():
     assert selected[0]["g_M"] == 3.0
 
 
+def test_selection_can_launch_an_original_rank_subset_without_renumbering():
+    surface = {"rows": [_row(0, 3.0, 0.65), _row(1, 3.0, 0.60)]}
+    selected = S.select_candidates(surface, selection_ranks=[1])
+    assert len(selected) == 1
+    assert selected[0]["selection_rank"] == 1
+
+
 def test_control_time_moves_from_a_lull_to_the_first_active_window():
     time = np.arange(0.0, 4000.0, 2.0)
     core = np.zeros(time.size)

@@ -46,9 +46,12 @@ def _priority(row):
     return (band, abs(ratio - 0.60), -float(row["g_M"]), float(row["tau_M_ms"]))
 
 
-def select_candidates(surface, *, max_candidates=4):
+def select_candidates(surface, *, max_candidates=4, selection_ranks=None):
     selected = []
     ranks = sorted({int(row["selection_rank"]) for row in surface.get("rows", [])})
+    if selection_ranks is not None:
+        allowed = {int(value) for value in selection_ranks}
+        ranks = [rank for rank in ranks if rank in allowed]
     for rank in ranks:
         candidates = [
             row for row in surface["rows"]
@@ -103,8 +106,10 @@ def attach_control_times(rows):
     return attached
 
 
-def build_selection(surface, *, source_path, max_candidates=4):
-    selected = select_candidates(surface, max_candidates=max_candidates)
+def build_selection(surface, *, source_path, max_candidates=4, selection_ranks=None):
+    selected = select_candidates(
+        surface, max_candidates=max_candidates, selection_ranks=selection_ranks,
+    )
     if not selected:
         raise ValueError("M response surface contains no persistent control-ready candidate")
     return {
@@ -125,12 +130,17 @@ def main():
     ap.add_argument("--surface-json", type=Path, default=OUT / "m_response_surface.json")
     ap.add_argument("--output", type=Path, default=OUT / "control_selection.json")
     ap.add_argument("--max-candidates", type=int, default=4)
+    ap.add_argument("--selection-ranks", help="optional comma-separated original M selection ranks")
     args = ap.parse_args()
     surface = json.loads(args.surface_json.read_text())
     payload = build_selection(
         surface,
         source_path=args.surface_json.relative_to(ROOT) if args.surface_json.is_absolute() else args.surface_json,
         max_candidates=args.max_candidates,
+        selection_ranks=(
+            None if not args.selection_ranks else
+            [int(value) for value in args.selection_ranks.split(",") if value.strip()]
+        ),
     )
     args.output.parent.mkdir(parents=True, exist_ok=True)
     args.output.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n")
