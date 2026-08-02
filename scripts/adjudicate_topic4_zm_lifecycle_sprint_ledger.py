@@ -9,6 +9,7 @@ before reaping them.
 from __future__ import annotations
 
 from datetime import datetime, timezone
+import argparse
 import hashlib
 import json
 from pathlib import Path
@@ -101,13 +102,26 @@ def adjudicate(raw, decisions):
 
 
 def main():
-    raw_path = OUT / "batch1_run_ledger.json"
-    decisions_path = OUT / "batch1_adaptation_decisions.json"
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--raw-ledger", type=Path, default=OUT / "batch1_run_ledger.json")
+    parser.add_argument(
+        "--decisions", type=Path, default=OUT / "batch1_adaptation_decisions.json"
+    )
+    parser.add_argument(
+        "--output", type=Path, default=OUT / "batch1_adjudicated_ledger.json"
+    )
+    args = parser.parse_args()
+    raw_path = args.raw_ledger.resolve()
+    decisions_path = args.decisions.resolve()
     payload = adjudicate(
         json.loads(raw_path.read_text()),
         json.loads(decisions_path.read_text()) if decisions_path.is_file() else {},
     )
-    path = OUT / "batch1_adjudicated_ledger.json"
+    payload["raw_ledger_path"] = str(raw_path.relative_to(ROOT))
+    payload["decisions_path"] = (
+        str(decisions_path.relative_to(ROOT)) if decisions_path.is_file() else None
+    )
+    path = args.output.resolve()
     path.write_text(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n")
     print(json.dumps(payload["status_counts"], sort_keys=True))
 
