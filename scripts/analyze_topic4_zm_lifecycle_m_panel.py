@@ -54,6 +54,11 @@ def row_matches_manifest(analysis, manifest_row):
     return all(_close(left, right) for left, right in checks)
 
 
+def is_uncontrolled_summary(summary):
+    """M-surface rows must never absorb finite-control continuations."""
+    return not bool(summary.get("finite_control"))
+
+
 def episode_duration_ms(row, observed_ms):
     episode = row["episode"]
     onset = episode.get("onset_ms")
@@ -241,6 +246,7 @@ def build_surface(manifest, analyses, summaries):
         candidates = [
             row for row in candidates
             if _close(summaries[row["stem"]].get("T_ms"), config["T_ms"])
+            and is_uncontrolled_summary(summaries[row["stem"]])
         ]
         if len(candidates) > 1:
             raise RuntimeError(f"ambiguous M-panel artifact for {config['config_id']}")

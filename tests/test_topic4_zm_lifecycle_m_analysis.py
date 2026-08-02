@@ -35,6 +35,17 @@ def test_m_effect_rejects_prevention_and_small_duration_shift():
     assert M.paired_m_effect(large, baseline)["causal_exit_candidate"] is True
 
 
+def test_m_surface_excludes_finite_control_artifacts_with_matching_m_parameters():
+    assert M.is_uncontrolled_summary({"finite_control": None}) is True
+    assert M.is_uncontrolled_summary({}) is True
+    assert M.is_uncontrolled_summary({
+        "finite_control": {
+            "target": "all_E", "t0_ms": 2520.0,
+            "duration_ms": 50.0, "uplift_mV": 0.25,
+        },
+    }) is False
+
+
 def test_slow_trace_metrics_record_offset_and_z_recovery(tmp_path):
     np.savez(
         tmp_path / "traces.npz",
