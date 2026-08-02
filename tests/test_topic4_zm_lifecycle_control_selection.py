@@ -1,6 +1,8 @@
 import importlib.util
 from pathlib import Path
 
+import numpy as np
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -49,3 +51,18 @@ def test_selection_deprioritises_near_silencing_suppression():
     surface = {"rows": [_row(0, 3.0, 0.65), _row(0, 10.0, 0.1)]}
     selected = S.select_candidates(surface)
     assert selected[0]["g_M"] == 3.0
+
+
+def test_control_time_moves_from_a_lull_to_the_first_active_window():
+    time = np.arange(0.0, 4000.0, 2.0)
+    core = np.zeros(time.size)
+    core[(time >= 2200.0) & (time < 2300.0)] = 100.0
+    got = S.choose_control_time(time, core, onset_ms=500.0)
+    assert got["control_t0_ms"] == 2200.0
+    assert got["uncontrolled_core_mean_hz_at_control"] == 100.0
+
+
+def test_control_time_rejects_a_persistent_label_without_an_active_window():
+    time = np.arange(0.0, 4000.0, 2.0)
+    with np.testing.assert_raises_regex(ValueError, "no 50-ms active"):
+        S.choose_control_time(time, np.zeros(time.size), onset_ms=500.0)

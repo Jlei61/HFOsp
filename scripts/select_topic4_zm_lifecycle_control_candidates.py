@@ -7,6 +7,8 @@ from datetime import datetime, timezone
 import json
 from pathlib import Path
 
+import numpy as np
+
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_sprint"
@@ -28,7 +30,7 @@ def control_ready(row):
 def _priority(row):
     """Prefer a partially suppressed, still-active state near the exit boundary."""
     response = row.get("paired_M_response", {})
-    ratio = response.get("ratio_core_mean_hz")
+    ratio = response.get("ratio_tail_core_mean_hz", response.get("ratio_core_mean_hz"))
     if ratio is None:
         # Missing continuous evidence is allowed only as a low-priority fallback.
         return (2, float("inf"), -float(row["g_M"]), float(row["tau_M_ms"]))
@@ -63,6 +65,44 @@ def select_candidates(surface, *, max_candidates=4):
     return selected[: int(max_candidates)]
 
 
+def choose_control_time(fine_time_ms, core_rate_hz, *, onset_ms, delay_ms=1500.0):
+    """Lock the first 50-ms active window after the registered post-onset delay."""
+    time = np.asarray(fine_time_ms, float)
+    core = np.asarray(core_rate_hz, float)
+    if time.shape != core.shape or time.size < 2:
+        raise ValueError("control timing requires aligned fine time/core-rate arrays")
+    dt = float(np.median(np.diff(time)))
+    window = max(1, int(round(50.0 / dt)))
+    smooth = np.convolve(core, np.ones(window) / window, mode="valid")
+    sustained = np.convolve((core >= 50.0).astype(np.int16), np.ones(window, np.int16), mode="valid") == window
+    candidate_time = time[:smooth.size]
+    earliest = float(onset_ms) + float(delay_ms)
+    hits = np.flatnonzero((candidate_time >= earliest) & sustained)
+    if not hits.size:
+        raise ValueError("persistent candidate has no 50-ms active control window after onset+delay")
+    index = int(hits[0])
+    return {
+        "control_t0_ms": float(candidate_time[index]),
+        "control_timing_rule": "first_50ms_mean_core_ge_50Hz_after_onset_plus_1500ms",
+        "uncontrolled_core_mean_hz_at_control": float(smooth[index]),
+    }
+
+
+def attach_control_times(rows):
+    attached = []
+    for row in rows:
+        summary_path = row.get("summary_path")
+        if summary_path is None:
+            raise ValueError("control candidate is missing its uncontrolled summary path")
+        trace_path = ROOT / Path(summary_path).parent / "traces.npz"
+        with np.load(trace_path, allow_pickle=False) as data:
+            timing = choose_control_time(
+                data["fine_time_ms"], data["fine_core_rate_hz"], onset_ms=row["onset_ms"],
+            )
+        attached.append({**row, **timing})
+    return attached
+
+
 def build_selection(surface, *, source_path, max_candidates=4):
     selected = select_candidates(surface, max_candidates=max_candidates)
     if not selected:
@@ -76,7 +116,7 @@ def build_selection(surface, *, source_path, max_candidates=4):
             "development; not carrier acceptance"
         ),
         "n_selected": len(selected),
-        "selected": selected,
+        "selected": attach_control_times(selected),
     }
 
 

@@ -42,6 +42,9 @@ def _candidate_config(row):
         raise ValueError("control candidate must have a measured uncontrolled onset")
     if row.get("offset_ms") is not None or row.get("duration_right_censored") is False:
         raise ValueError("control candidate must be persistent in its paired uncontrolled run")
+    t0 = float(row.get("control_t0_ms", float(onset) + 1500.0))
+    if t0 < float(onset) + 1500.0:
+        raise ValueError("control time must be at least 1500 ms after uncontrolled onset")
     uncontrolled = {
         "uncontrolled_source_candidate_id": row.get("config_id", row.get("stem")),
         "uncontrolled_onset_ms": float(onset),
@@ -50,8 +53,10 @@ def _candidate_config(row):
             row.get("duration_right_censored", row.get("offset_ms") is None)
         ),
         "uncontrolled_summary_path": row.get("summary_path"),
+        "control_timing_rule": row.get("control_timing_rule", "onset_plus_1500ms_fallback"),
+        "uncontrolled_core_mean_hz_at_control": row.get("uncontrolled_core_mean_hz_at_control"),
     }
-    return keep, float(onset) + 1500.0, uncontrolled
+    return keep, t0, uncontrolled
 
 
 def _selected(payload):
