@@ -83,6 +83,42 @@ def choose_u_ref(rows):
     }
 
 
+def paired_control_effect(row, *, minimum_advance_ms=1000.0):
+    """Require a durable post-pulse exit that precedes the paired no-control exit.
+
+    The selected source trajectory has the same checkpoint, future noise, fast
+    mechanism, and M coordinate.  A late natural offset therefore cannot be
+    relabelled as a control effect merely because it occurs after the pulse.
+    """
+    onset = row.get("onset_ms")
+    offset = row.get("offset_ms")
+    control_t0 = row.get("control_t0_ms")
+    if onset is None:
+        return {"status": "prevention_or_no_onset", "causal_control_exit_candidate": False}
+    if offset is None:
+        return {"status": "no_durable_offset", "causal_control_exit_candidate": False}
+    if control_t0 is None or float(offset) < float(control_t0):
+        return {"status": "offset_precedes_control", "causal_control_exit_candidate": False}
+    base_onset = row.get("uncontrolled_onset_ms")
+    base_offset = row.get("uncontrolled_offset_ms")
+    if base_onset is None:
+        return {"status": "uncontrolled_pair_missing", "causal_control_exit_candidate": False}
+    if base_offset is None:
+        return {
+            "status": "offset_vs_censored_uncontrolled",
+            "causal_control_exit_candidate": True,
+            "duration_advance_ms": None,
+        }
+    controlled_duration = float(offset) - float(onset)
+    uncontrolled_duration = float(base_offset) - float(base_onset)
+    advance = uncontrolled_duration - controlled_duration
+    return {
+        "status": "offset_advanced" if advance >= minimum_advance_ms else "offset_not_advanced",
+        "causal_control_exit_candidate": bool(advance >= minimum_advance_ms),
+        "duration_advance_ms": float(advance),
+    }
+
+
 def _match(analysis, config, summary):
     if not M.row_matches_manifest(analysis, config):
         return False
@@ -116,7 +152,7 @@ def analyze_manifest(manifest):
                 duration_ms=config["control_duration_ms"],
             )
         episode = analysis["episode"]
-        rows.append({
+        row = {
             **config, "status": "complete", "stem": stem,
             "phenotype": analysis["phenotype"],
             "onset_ms": episode.get("onset_ms"), "offset_ms": episode.get("offset_ms"),
@@ -133,7 +169,11 @@ def analyze_manifest(manifest):
             "returning_distribution_recovered": analysis["recovery"].get("distribution_recovered", False),
             "control_response": response,
             "summary_path": analysis["summary_path"],
-        })
+        }
+        effect = paired_control_effect(row)
+        row["causal_control_effect"] = effect
+        row["causal_control_exit_candidate"] = effect["causal_control_exit_candidate"]
+        rows.append(row)
     return rows
 
 
@@ -166,6 +206,9 @@ def main():
         complete = [row for row in rows if row["status"] == "complete"]
         payload.update(
             n_durable_control_exits=sum(row["durable_control_exit"] for row in complete),
+            n_causal_control_exit_candidates=sum(
+                row["causal_control_exit_candidate"] for row in complete
+            ),
             n_returning_event_candidates=sum(row["returning_event_candidate"] for row in complete),
             n_returning_distributions=sum(row["returning_distribution_recovered"] for row in complete),
         )
@@ -179,6 +222,7 @@ def main():
                 "config_id", "selection_rank", "source_candidate_id", "status", "stem",
                 "control_uplift_mV", "control_duration_ms", "phenotype", "onset_ms",
                 "offset_ms", "durable_control_exit", "exit_latency_from_control_ms",
+                "causal_control_exit_candidate",
                 "rapid_reentry_count", "returning_event_candidate",
                 "returning_distribution_recovered",
             )

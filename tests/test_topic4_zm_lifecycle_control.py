@@ -33,6 +33,9 @@ def test_control_manifests_lock_onset_plus_1500_and_six_doses():
     calibration = R.build_calibration_manifest(selection)
     assert len(calibration["rows"]) == 5
     assert {row["control_t0_ms"] for row in calibration["rows"]} == {2000.0}
+    assert calibration["rows"][0]["uncontrolled_onset_ms"] == 500.0
+    assert calibration["rows"][0]["uncontrolled_offset_ms"] is None
+    assert calibration["rows"][0]["uncontrolled_duration_right_censored"] is True
     decision = {"calibration_decisions": [{"selection_rank": 0, "u_ref_mV": 1.0}]}
     dose = R.build_dose_manifest(selection, decision)
     assert len(dose["rows"]) == 6
@@ -57,6 +60,47 @@ def test_control_waves_are_interleaved_across_candidates():
     candidates = [_candidate() for _ in range(4)]
     for index, row in enumerate(candidates):
         row["config_id"] = f"c{index}"
+        row["onset_ms"] = 500.0 + 100.0 * index
     calibration = R.build_calibration_manifest({"rows": candidates})
     assert {row["selection_rank"] for row in calibration["rows"][:4]} == {0, 1, 2, 3}
     assert {row["control_uplift_mV"] for row in calibration["rows"][:4]} == {0.25}
+    assert [row["uncontrolled_source_candidate_id"] for row in calibration["rows"][:4]] == [
+        "c0", "c1", "c2", "c3",
+    ]
+    assert [row["uncontrolled_onset_ms"] for row in calibration["rows"][:4]] == [
+        500.0, 600.0, 700.0, 800.0,
+    ]
+
+
+def test_control_exit_requires_advance_over_paired_uncontrolled_trajectory():
+    base = {
+        "onset_ms": 500.0,
+        "control_t0_ms": 2000.0,
+        "uncontrolled_onset_ms": 500.0,
+        "uncontrolled_offset_ms": None,
+    }
+    assert A.paired_control_effect({**base, "offset_ms": 3000.0}) == {
+        "status": "offset_vs_censored_uncontrolled",
+        "causal_control_exit_candidate": True,
+        "duration_advance_ms": None,
+    }
+    late_natural = {
+        **base,
+        "uncontrolled_offset_ms": 5000.0,
+        "offset_ms": 4500.0,
+    }
+    assert A.paired_control_effect(late_natural)["causal_control_exit_candidate"] is False
+    advanced = {**late_natural, "offset_ms": 3000.0}
+    assert A.paired_control_effect(advanced)["causal_control_exit_candidate"] is True
+
+
+def test_control_exit_before_pulse_is_not_causal():
+    got = A.paired_control_effect({
+        "onset_ms": 500.0,
+        "offset_ms": 1500.0,
+        "control_t0_ms": 2000.0,
+        "uncontrolled_onset_ms": 500.0,
+        "uncontrolled_offset_ms": None,
+    })
+    assert got["status"] == "offset_precedes_control"
+    assert got["causal_control_exit_candidate"] is False

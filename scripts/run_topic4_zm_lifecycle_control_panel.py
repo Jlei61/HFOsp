@@ -40,7 +40,16 @@ def _candidate_config(row):
     onset = row.get("onset_ms")
     if onset is None:
         raise ValueError("control candidate must have a measured uncontrolled onset")
-    return keep, float(onset) + 1500.0
+    uncontrolled = {
+        "uncontrolled_source_candidate_id": row.get("config_id", row.get("stem")),
+        "uncontrolled_onset_ms": float(onset),
+        "uncontrolled_offset_ms": row.get("offset_ms"),
+        "uncontrolled_duration_right_censored": bool(
+            row.get("duration_right_censored", row.get("offset_ms") is None)
+        ),
+        "uncontrolled_summary_path": row.get("summary_path"),
+    }
+    return keep, float(onset) + 1500.0, uncontrolled
 
 
 def _selected(payload):
@@ -53,17 +62,18 @@ def _selected(payload):
 def build_calibration_manifest(selection, *, T_ms=20000.0):
     prepared = []
     for rank, source in enumerate(_selected(selection)):
-        base, t0 = _candidate_config(source)
+        base, t0, uncontrolled = _candidate_config(source)
         source_id = source.get("config_id", source.get("stem", f"selected_{rank}"))
-        prepared.append((rank, base, t0, source_id))
+        prepared.append((rank, base, t0, source_id, uncontrolled))
     rows = []
     for uplift in CALIBRATION_UPLIFTS_MV:
-        for rank, base, t0, source_id in prepared:
+        for rank, base, t0, source_id, uncontrolled in prepared:
             row = {
                 "family": "control_u_ref_calibration",
                 "selection_rank": rank,
                 "source_candidate_id": source_id,
                 **base,
+                **uncontrolled,
                 "control_target": "all_E",
                 "control_t0_ms": t0,
                 "control_duration_ms": 50.0,
@@ -87,19 +97,20 @@ def build_dose_manifest(selection, calibration, *, T_ms=20000.0):
     for rank, source in enumerate(_selected(selection)):
         if rank not in refs or refs[rank].get("u_ref_mV") is None:
             raise ValueError(f"selection rank {rank} has no calibrated u_ref")
-        base, t0 = _candidate_config(source)
+        base, t0, uncontrolled = _candidate_config(source)
         source_id = source.get("config_id", source.get("stem", f"selected_{rank}"))
         u_ref = float(refs[rank]["u_ref_mV"])
-        prepared.append((rank, base, t0, source_id, u_ref))
+        prepared.append((rank, base, t0, source_id, u_ref, uncontrolled))
     rows = []
     for multiplier in DOSE_MULTIPLIERS:
         for duration in DOSE_DURATIONS_MS:
-            for rank, base, t0, source_id, u_ref in prepared:
+            for rank, base, t0, source_id, u_ref, uncontrolled in prepared:
                 row = {
                     "family": "finite_control_dose",
                     "selection_rank": rank,
                     "source_candidate_id": source_id,
                     **base,
+                    **uncontrolled,
                     "u_ref_mV": u_ref,
                     "dose_multiplier": multiplier,
                     "control_target": "all_E",
