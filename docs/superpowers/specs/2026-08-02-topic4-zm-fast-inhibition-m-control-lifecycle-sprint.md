@@ -78,6 +78,19 @@ no-control episode is right-censored or the controlled duration is at least
 1000 ms shorter.  Returning-event recovery is adjudicated separately and is
 never implied by an activity drop alone.
 
+### Control-clock correction
+
+This correction was locked after auditing the first five calibration artifacts
+and before any corrected control trajectory was launched.  Manifest `t0_ms` is
+time **after the pre-entry checkpoint**, but the resumed SNN engine advances on
+the checkpoint's absolute clock.  The runner must therefore apply the pulse at
+`source_t_ms + t0_ms`, store both the relative and absolute window, and require
+their relation during analysis.  The first five unversioned artifacts compared
+absolute engine time directly with relative `t0_ms`; their pulses never fired.
+They are invalid engineering artifacts, not a zero-effect control result.  All
+corrected artifacts use clock version
+`relative_to_pre_entry_checkpoint_v2` and a separate `__clkrel2` stem.
+
 ## Candidate description
 
 Every run retains five separate dimensions rather than one total score:

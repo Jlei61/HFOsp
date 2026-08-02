@@ -157,6 +157,22 @@ def paired_control_effect(row, *, minimum_advance_ms=1000.0):
     }
 
 
+def valid_control_clock(summary, config):
+    control = summary.get("finite_control") or {}
+    source_t_ms = summary.get("source_t_ms")
+    relative_t0_ms = config.get("control_t0_ms")
+    duration_ms = config.get("control_duration_ms")
+    if source_t_ms is None or relative_t0_ms is None or duration_ms is None:
+        return False
+    expected_t0 = float(source_t_ms) + float(relative_t0_ms)
+    expected_t1 = expected_t0 + float(duration_ms)
+    return (
+        control.get("clock") == config.get("control_clock")
+        and M._close(control.get("engine_t0_ms"), expected_t0)
+        and M._close(control.get("engine_t1_ms"), expected_t1)
+    )
+
+
 def _match(analysis, config, summary):
     if not M.row_matches_manifest(analysis, config):
         return False
@@ -164,6 +180,7 @@ def _match(analysis, config, summary):
     return (
         M._close(summary.get("T_ms"), config["T_ms"])
         and control.get("target") == config.get("control_target")
+        and valid_control_clock(summary, config)
         and M._close(control.get("t0_ms"), config.get("control_t0_ms"))
         and M._close(control.get("duration_ms"), config.get("control_duration_ms"))
         and M._close(control.get("uplift_mV"), config.get("control_uplift_mV"))

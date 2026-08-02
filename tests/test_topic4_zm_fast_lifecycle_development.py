@@ -58,6 +58,27 @@ def test_i_adaptation_calibration_uses_inhibitory_threshold_gap():
     assert DEV.delta_i_adaptation_mV(300.0, 0.25) == pytest.approx(expected)
 
 
+def test_control_window_is_shifted_from_branch_relative_to_engine_absolute_time():
+    t0, t1 = DEV.control_window_in_engine_time(
+        source_t_ms=7350.0,
+        relative_t0_ms=2520.0,
+        duration_ms=50.0,
+    )
+    assert t0 == pytest.approx(9870.0)
+    assert t1 == pytest.approx(9920.0)
+    assert t0 > 7350.0
+
+
+def test_control_artifact_stem_versions_the_clock_fix_away_from_invalid_runs():
+    args = type("Args", (), {
+        "arm": "i2e", "tau_D_ms": 300.7, "d_star": 0.7281,
+        "strength_scale": 1.0, "control_uplift_mV": 1.0,
+        "control_target": "all_E", "control_t0_ms": 2520.0,
+        "control_duration_ms": 50.0,
+    })()
+    assert DEV._mechanism_stem(args).endswith("__clkrel2")
+
+
 @pytest.mark.parametrize(
     "tau,fraction,gap,rate",
     [

@@ -36,6 +36,9 @@ def test_control_manifests_lock_onset_plus_1500_and_six_doses():
     assert calibration["rows"][0]["uncontrolled_onset_ms"] == 500.0
     assert calibration["rows"][0]["uncontrolled_offset_ms"] is None
     assert calibration["rows"][0]["uncontrolled_duration_right_censored"] is True
+    assert {row["control_clock"] for row in calibration["rows"]} == {
+        "relative_to_pre_entry_checkpoint_v2"
+    }
     decision = {"calibration_decisions": [{"selection_rank": 0, "u_ref_mV": 1.0}]}
     dose = R.build_dose_manifest(selection, decision)
     assert len(dose["rows"]) == 6
@@ -125,6 +128,28 @@ def test_u_ref_keeps_a_positive_nearest_nonsilencing_response():
     got = A.choose_u_ref(rows)
     assert got["status"] == "nearest_nonsilencing_outside_target"
     assert got["u_ref_mV"] == 2.0
+
+
+def test_control_analysis_rejects_unshifted_or_unversioned_engine_clock():
+    config = {
+        "control_clock": "relative_to_pre_entry_checkpoint_v2",
+        "control_t0_ms": 2520.0,
+        "control_duration_ms": 50.0,
+    }
+    valid = {
+        "source_t_ms": 7350.0,
+        "finite_control": {
+            "clock": "relative_to_pre_entry_checkpoint_v2",
+            "engine_t0_ms": 9870.0,
+            "engine_t1_ms": 9920.0,
+        },
+    }
+    assert A.valid_control_clock(valid, config) is True
+    invalid = {
+        "source_t_ms": 7350.0,
+        "finite_control": {"engine_t0_ms": 2520.0, "engine_t1_ms": 2570.0},
+    }
+    assert A.valid_control_clock(invalid, config) is False
 
 
 def test_control_waves_are_interleaved_across_candidates():

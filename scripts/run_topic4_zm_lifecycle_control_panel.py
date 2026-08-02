@@ -19,6 +19,7 @@ OUT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_spr
 CALIBRATION_UPLIFTS_MV = (0.25, 0.5, 1.0, 2.0, 4.0)
 DOSE_MULTIPLIERS = (0.5, 1.0, 1.5)
 DOSE_DURATIONS_MS = (50.0, 200.0)
+CONTROL_CLOCK_VERSION = "relative_to_pre_entry_checkpoint_v2"
 
 
 def _now():
@@ -83,6 +84,7 @@ def build_calibration_manifest(selection, *, T_ms=20000.0):
                 **base,
                 **uncontrolled,
                 "control_target": "all_E",
+                "control_clock": CONTROL_CLOCK_VERSION,
                 "control_t0_ms": t0,
                 "control_duration_ms": 50.0,
                 "control_uplift_mV": uplift,
@@ -123,6 +125,7 @@ def build_dose_manifest(selection, calibration, *, T_ms=20000.0):
                     "u_ref_mV": u_ref,
                     "dose_multiplier": multiplier,
                     "control_target": "all_E",
+                    "control_clock": CONTROL_CLOCK_VERSION,
                     "control_t0_ms": t0,
                     "control_duration_ms": duration,
                     "control_uplift_mV": multiplier * u_ref,

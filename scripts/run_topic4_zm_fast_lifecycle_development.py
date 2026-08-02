@@ -64,6 +64,7 @@ RACE_D_STAR = (0.35, 0.55, 0.75)
 RACE_TAU_I_MS = (100.0, 300.0, 600.0)
 RACE_F_I = (0.10, 0.25)
 RACE_ARMS = ("native", "phi", "i2e", "iadapt", "combined")
+CONTROL_CLOCK_VERSION = "relative_to_pre_entry_checkpoint_v2"
 
 
 def delta_phi_mV(
@@ -357,8 +358,28 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += (
             f"__ctl{args.control_target}__u{args.control_uplift_mV:g}"
             f"__t{args.control_t0_ms:g}__dur{args.control_duration_ms:g}"
+            "__clkrel2"
         )
     return stem
+
+
+def control_window_in_engine_time(
+    *, source_t_ms: float, relative_t0_ms: float, duration_ms: float
+) -> tuple[float, float]:
+    """Translate a branch-relative pulse window to the engine's absolute clock.
+
+    ``simulate_kick`` resumes the checkpoint's absolute timestep, whereas the
+    lifecycle traces and control manifests use time after the pre-entry fork.
+    Keeping this conversion at the runner boundary prevents a relative pulse
+    from silently falling before the resumed simulation begins.
+    """
+    source_t_ms = float(source_t_ms)
+    relative_t0_ms = float(relative_t0_ms)
+    duration_ms = float(duration_ms)
+    if source_t_ms < 0.0 or relative_t0_ms < 0.0 or duration_ms <= 0.0:
+        raise ValueError("control clock inputs must be nonnegative with positive duration")
+    t0 = source_t_ms + relative_t0_ms
+    return t0, t0 + duration_ms
 
 
 def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
@@ -482,6 +503,7 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
     )
 
     perturb = None
+    control_engine_window = None
     if float(args.control_uplift_mV) > 0.0:
         target = np.zeros(ctx["S"]["N"], dtype=bool)
         if args.control_target == "all_E":
@@ -490,10 +512,18 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             target[:ctx["S"]["NE"]] = np.asarray(ctx["core"], bool)
         else:  # parser choice is the first guard; keep runner fail-closed.
             raise RuntimeError(f"unknown control target {args.control_target!r}")
+        source_engine_t_ms = float(row["t_step"]) * float(ctx["dt"])
+        if not np.isclose(source_engine_t_ms, float(row["t_ms"]), atol=1e-9, rtol=0.0):
+            raise RuntimeError("checkpoint source time disagrees with source timestep")
+        control_engine_window = control_window_in_engine_time(
+            source_t_ms=source_engine_t_ms,
+            relative_t0_ms=float(args.control_t0_ms),
+            duration_ms=float(args.control_duration_ms),
+        )
         perturb = {
             "kind": "inhibitory_pulse",
-            "t0": float(args.control_t0_ms),
-            "t1": float(args.control_t0_ms) + float(args.control_duration_ms),
+            "t0": control_engine_window[0],
+            "t1": control_engine_window[1],
             "val": float(args.control_uplift_mV),
             "target_mask": target,
         }
@@ -632,6 +662,9 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
                 "kind": "E_threshold_uplift",
                 "target": args.control_target,
                 "t0_ms": float(args.control_t0_ms),
+                "clock": CONTROL_CLOCK_VERSION,
+                "engine_t0_ms": float(control_engine_window[0]),
+                "engine_t1_ms": float(control_engine_window[1]),
                 "duration_ms": float(args.control_duration_ms),
                 "uplift_mV": float(args.control_uplift_mV),
             }
