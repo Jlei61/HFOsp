@@ -49,8 +49,7 @@ STATES = (
     "bounded_late__peak",
 )
 FROZEN_MODE_STATES = (
-    "pre_entry__natural", "onset_adjacent__natural",
-    "bounded_early__rising", "bounded_early__peak",
+    "pre_entry__natural",
 ) + STATES
 TAUS_MS = (60.0, 100.0, 160.0)
 FRACTIONS = (0.15, 0.30)
