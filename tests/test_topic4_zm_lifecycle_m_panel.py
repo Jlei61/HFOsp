@@ -42,3 +42,17 @@ def test_first_worker_wave_pairs_all_phenotypes_at_gm0_and_native_m():
     assert {(row["g_M"], row["tau_M_ms"]) for row in rows[:4]} == {(0.0, 500.0)}
     assert {row["selection_rank"] for row in rows[4:]} == {0, 1, 2, 3}
     assert {(row["g_M"], row["tau_M_ms"]) for row in rows[4:]} == {(1.0, 500.0)}
+
+
+def test_coordinate_wave_keeps_four_phenotypes_per_coordinate():
+    full = M.build_manifest({"rows": [_selected(i) for i in range(4)]})
+    wave = M.select_coordinate_indices(full, [2, 3])
+    assert wave["n_configs"] == 8
+    assert {(row["g_M"], row["tau_M_ms"]) for row in wave["rows"]} == {
+        (1.0, 2000.0), (3.0, 500.0),
+    }
+    for coordinate in {(1.0, 2000.0), (3.0, 500.0)}:
+        assert {
+            row["selection_rank"] for row in wave["rows"]
+            if (row["g_M"], row["tau_M_ms"]) == coordinate
+        } == {0, 1, 2, 3}

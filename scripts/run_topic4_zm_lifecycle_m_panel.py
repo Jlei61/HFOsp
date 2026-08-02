@@ -91,6 +91,28 @@ def build_manifest(selection, *, T_ms=20000.0):
     }
 
 
+def select_coordinate_indices(manifest, indices):
+    """Return a coordinate-major execution wave without changing the full panel."""
+    wanted = {int(index) for index in indices}
+    if not wanted or not wanted.issubset(set(range(len(M_COORDS)))):
+        raise ValueError(f"coordinate indices must be within 0..{len(M_COORDS) - 1}")
+    coordinates = {M_COORDS[index] for index in wanted}
+    rows = [
+        row for row in manifest["rows"]
+        if (float(row["g_M"]), float(row["tau_M_ms"])) in coordinates
+    ]
+    out = dict(manifest)
+    out.update(
+        schema="topic4_zm_lifecycle_m_response_panel_wave_v1_2026-08-02",
+        parent_n_configs=manifest["n_configs"],
+        coordinate_indices=sorted(wanted),
+        coordinates=[{"g_M": M_COORDS[index][0], "tau_M_ms": M_COORDS[index][1]}
+                     for index in sorted(wanted)],
+        n_configs=len(rows), rows=rows,
+    )
+    return out
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--selection-json", type=Path, required=True)
@@ -98,17 +120,29 @@ def main():
     ap.add_argument("--max-workers", type=int, default=8)
     ap.add_argument("--min-mem-gb", type=float, default=90.0)
     ap.add_argument("--poll-s", type=float, default=30.0)
+    ap.add_argument(
+        "--coordinate-indices",
+        help="comma-separated M_COORDS indices for an independently ledgered wave",
+    )
     ap.add_argument("--manifest-only", action="store_true")
     args = ap.parse_args()
     selection = json.loads(args.selection_json.read_text())
     manifest = build_manifest(selection, T_ms=args.T_ms)
-    manifest_path = OUT / "m_panel_manifest.json"
+    if args.coordinate_indices:
+        indices = [int(value) for value in args.coordinate_indices.split(",")]
+        manifest = select_coordinate_indices(manifest, indices)
+        suffix = "_".join(str(index) for index in sorted(indices))
+        manifest_path = OUT / f"m_panel_wave_{suffix}_manifest.json"
+        ledger_path = OUT / f"m_panel_wave_{suffix}_run_ledger.json"
+    else:
+        manifest_path = OUT / "m_panel_manifest.json"
+        ledger_path = OUT / "m_panel_run_ledger.json"
     B._atomic_json(manifest_path, manifest)
     if args.manifest_only:
         print(manifest_path)
         return
     print(B.run_manifest(
-        manifest_path, OUT / "m_panel_run_ledger.json",
+        manifest_path, ledger_path,
         args.max_workers, args.min_mem_gb, args.poll_s,
     ))
 
