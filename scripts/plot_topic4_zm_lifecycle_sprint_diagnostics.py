@@ -19,11 +19,17 @@ if str(ROOT) not in sys.path:
 from scripts import analyze_topic4_zm_lifecycle_sprint as ANALYSIS  # noqa: E402
 OUT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_sprint"
 FIG = OUT / "figures"
+# Keys must be the labels `analyze_topic4_zm_lifecycle_sprint.analyze_one`
+# actually emits; a stale key silently draws its cells grey and drops them from
+# the legend instead of failing.
 PHENO_COLORS = {
     "relaxation_burst_train": "#2166AC",
     "spreading_plateau": "#D6604D",
-    "localized_tonic_patch": "#B2182B",
-    "structured_candidate": "#1B7837",
+    "tonic_patch": "#B2182B",
+    "structured_dynamic_candidate": "#1B7837",
+    "weak_or_fragmented": "#BBBBBB",
+    "no_onset": "#4D4D4D",
+    "runaway": "#762A83",
 }
 ROLE_NAMES = {
     0: "highest continuous energy",
@@ -35,6 +41,17 @@ ROLE_NAMES = {
 
 def _load(path):
     return json.loads(path.read_text()) if path.is_file() else None
+
+
+def m_current_mV(dynamic_slow_flow, m_trace):
+    """M current actually subtracted by the engine, in mV.
+
+    `eta_m_applied` already carries the `g_M` scaling applied in `_make_slow`,
+    and `SpatialSlowField.apply_currents` subtracts `eta_m * m`.  Re-applying
+    `g_M` here would report a curve `g_M` times too large.
+    """
+    eta_applied = float((dynamic_slow_flow or {}).get("eta_m_applied", 0.001))
+    return eta_applied * np.asarray(m_trace, float)
 
 
 def plot_fast_phase_map(payload, path):
@@ -201,7 +218,7 @@ def plot_control_dose(payload, path):
         )
         axes[row_index, 1].set(
             xlabel=r"dose / $u_{ref}$",
-            ylabel="longest global zero-rate dwell (ms)",
+            ylabel="longest all-E zero-rate dwell (ms)",
         )
         axes[row_index, 1].text(
             0.02, 0.96, f"durable exits {n_exit}/{len(subset)}\nreturning events {n_return}/{len(subset)}",
@@ -222,7 +239,7 @@ def plot_trajectory(root, path):
         arrays = {key: np.asarray(data[key]) for key in data.files}
     fine_t = np.asarray(arrays["fine_time_ms"], float) / 1000.0
     coarse_t = np.arange(arrays["coarse_core_rate_hz"].size) * 0.025
-    baseline = ANALYSIS.event_free_baseline_bins(arrays["coarse_core_rate_hz"])
+    baseline, _, _ = ANALYSIS.resolve_episode_baseline(arrays["coarse_core_rate_hz"])
     rms, rms_status = ANALYSIS.contact_rms_from_baseline(
         arrays["lfp_raw_synaptic_proxy"], float(arrays["lfp_fs_hz"]), baseline,
     )
@@ -268,8 +285,8 @@ def plot_trajectory(root, path):
     axes[3].legend(frameon=False, ncol=2, loc="upper right")
     ax_m = axes[3].twinx()
     mechanism = summary.get("mechanism", {}).get("dynamic_slow_flow", {})
-    m_current = float(mechanism.get("g_M", 1.0)) * float(mechanism.get("eta_m_applied", 0.001)) * arrays["trace_m_core_mean"]
-    ax_m.plot(trace_t, m_current, color="#6A3D9A", lw=0.75, label=r"$g_M\eta_m m$")
+    m_current = m_current_mV(mechanism, arrays["trace_m_core_mean"])
+    ax_m.plot(trace_t, m_current, color="#6A3D9A", lw=0.75, label=r"$\eta_M m$")
     ax_m.set_ylabel("M current (mV)", color="#6A3D9A")
     axes[3].set_title("Z–M slow flow", loc="left", fontsize=9, fontweight="bold")
 
@@ -322,7 +339,9 @@ def main():
         ),
         "control_dose_response.png": (
             "左图给出有限阈值脉冲相对同 checkpoint、同 future noise 无控制轨迹的即时 core spike-count 降幅；"
-            "右图给出脉冲期间最长全场零放电时长，并标出 100 ms silencing guard。"
+            "右图给出脉冲期间最长的兴奋细胞群（all-E）零放电时长，并标出 100 ms silencing guard——"
+            "阈值抬升只作用在兴奋细胞上，抑制细胞仍在放电，因此这不是整片网络静默。"
+            "每一行只对应**一个**被选中的持续状态，剂量×时长是同一条轨迹上的重复施加，不是独立样本。"
             "该图只描述 seed-1 development control。\n\n**关注点**：即时抑制能否转化为持久退出；"
             "若只随剂量增加而延长静默、脉冲后仍恢复原 burst train，则不是可控 lifecycle。"
         ),

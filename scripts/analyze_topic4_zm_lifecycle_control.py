@@ -60,6 +60,10 @@ def control_response(
     prefix_delta = np.abs(core[:t0] - uncontrolled[:t0])
     prefix_max_abs = float(np.max(prefix_delta)) if prefix_delta.size else 0.0
     prefix_identical = bool(prefix_max_abs <= 1e-12)
+    # `fine_all_e_rate_hz` is the excitatory population rate, so this dwell is a
+    # whole-E silence, not a whole-sheet silence: I cells keep their external
+    # drive and are not targeted by the E-threshold uplift.  Using the stricter
+    # E-only definition keeps the 100 ms silencing guard conservative.
     silent = all_e[t0:post1] <= 0.0
     longest = 0
     current = 0
@@ -79,6 +83,8 @@ def control_response(
         "precontrol_pair_max_abs_hz": prefix_max_abs,
         "precontrol_pair_identical": prefix_identical,
         "longest_global_zero_rate_ms": float(longest * bin_ms),
+        "longest_all_E_zero_rate_ms": float(longest * bin_ms),
+        "zero_rate_scope": "all_excitatory_population_not_whole_sheet",
         "calibration_target_met": bool(
             prefix_identical and drop is not None and 0.50 <= drop <= 0.70
             and longest * bin_ms <= 100.0

@@ -59,13 +59,40 @@ def test_slow_trace_metrics_record_offset_and_z_recovery(tmp_path):
         fine_core_rate_hz=np.asarray([0.0, 10.0, 20.0, 30.0]),
         fine_all_e_rate_hz=np.asarray([0.0, 2.0, 4.0, 6.0]),
     )
-    got = M._trace_metrics(tmp_path, {"onset_ms": 2.0, "offset_ms": 2.0})
+    got = M._trace_metrics(tmp_path, {"onset_ms": 2.0, "offset_ms": 2.0}, dt_ms=1.0)
     assert got["m_peak"] == 3.0
     assert got["z_core_at_offset"] == 0.4
     assert got["z_core_post_offset_recovery"] == pytest.approx(0.3)
     assert got["S_G_maximum"] == 0.4
     assert got["post_onset_core_mean_hz"] == 25.0
     assert got["post_onset_all_E_mean_hz"] == 5.0
+
+
+def test_slow_trace_offset_is_placed_on_the_step_grid_not_the_millisecond_grid(tmp_path):
+    """The z/m traces are per integration step; ms indexing reads 10x too early."""
+    z = np.linspace(1.0, 0.0, 51)
+    np.savez(
+        tmp_path / "traces.npz",
+        trace_m_core_mean=np.arange(51, dtype=float),
+        trace_z_core_mean=z,
+        fine_time_ms=np.arange(51, dtype=float),
+        fine_core_rate_hz=np.zeros(51),
+        fine_all_e_rate_hz=np.zeros(51),
+    )
+    got = M._trace_metrics(tmp_path, {"onset_ms": 0.0, "offset_ms": 3.0}, dt_ms=0.1)
+
+    assert got["offset_sample_index"] == 30
+    assert got["m_at_offset"] == 30.0          # ms indexing would return 3.0
+    assert got["z_core_at_offset"] == pytest.approx(z[30])
+    assert got["z_core_post_offset_recovery"] == pytest.approx(z[-1] - z[30])
+
+
+def test_slow_trace_metrics_refuse_an_unspecified_step_size(tmp_path):
+    np.savez(tmp_path / "traces.npz", trace_m_core_mean=np.arange(4, dtype=float))
+    with pytest.raises(TypeError):
+        M._trace_metrics(tmp_path, {"onset_ms": 0.0, "offset_ms": 1.0})
+    with pytest.raises(ValueError):
+        M._trace_metrics(tmp_path, {"onset_ms": 0.0, "offset_ms": 1.0}, dt_ms=0.0)
 
 
 def test_paired_m_continuous_response_preserves_censored_state_effects():

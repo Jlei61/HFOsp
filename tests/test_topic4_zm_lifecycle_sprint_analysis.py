@@ -30,6 +30,39 @@ def test_event_free_baseline_does_not_absorb_very_early_persistent_entry():
     assert got["onset_bin"] is not None
 
 
+def test_resolve_baseline_drops_intra_episode_gaps_of_a_burst_train():
+    """Deep gaps inside a burst train are sub-threshold but are not event-free."""
+    burst = np.tile(np.r_[np.full(5, 200.0), np.zeros(3)], 40)
+    core = np.r_[np.zeros(20), burst]
+    single = A.event_free_baseline_bins(core)
+    baseline, episode, audit = A.resolve_episode_baseline(core)
+
+    assert single[20:48].any()                       # first pass keeps burst-train gaps
+    assert audit["pass"] == "pre_onset_restricted"
+    assert audit["n_bins_dropped_after_onset"] > 0
+    assert not baseline[episode["onset_bin"]:].any()
+    assert baseline[:20].all()
+
+
+def test_resolve_baseline_keeps_the_single_pass_when_nothing_follows_onset():
+    core = np.r_[np.zeros(20), np.full(80, 120.0)]
+    baseline, episode, audit = A.resolve_episode_baseline(core)
+    assert audit["n_bins_dropped_after_onset"] == 0
+    assert audit["pass"] == "single_already_pre_onset"
+    assert baseline.sum() == A.event_free_baseline_bins(core).sum()
+
+
+def test_resolve_baseline_refuses_to_starve_itself_below_the_rms_minimum():
+    core = np.r_[
+        np.zeros(3), np.full(17, 300.0),
+        np.tile(np.r_[np.zeros(1), np.full(1, 300.0)], 40),
+    ]
+    baseline, _, audit = A.resolve_episode_baseline(core)
+    assert audit["pass"] == "single_insufficient_pre_onset_bins"
+    assert audit["n_pre_onset_bins"] < 4
+    assert baseline.sum() == A.event_free_baseline_bins(core).sum()
+
+
 def test_baseline_referenced_intensity_distinguishes_sustained_gain():
     rms = np.ones((40, 2))
     rms[20:] = 10.0
@@ -139,6 +172,49 @@ def test_episode_detector_does_not_call_trace_truncation_an_offset():
     got = A.detect_episode(core, baseline)
     assert got["status"] == "offset_unconfirmed_at_trace_end"
     assert got["offset_bin"] is None
+
+
+def test_phase_map_keeps_only_manifest_registered_fast_trajectories():
+    """M-surface forks and control panels share seed1/ and must not leak in."""
+    manifest = {"rows": [{
+        "config_id": "fast0", "family": "depression_only_lhs", "arm": "i2e",
+        "tau_D_ms": 300.7, "d_star": 0.7281, "strength_scale": 1.0,
+        "g_M": 1.0, "tau_M_ms": 500.0, "g_Z": 1.0, "T_ms": 12000.0,
+    }]}
+
+    def mechanism(tau_m, g_m):
+        return {
+            "arm": "i2e", "strength_scale": 1.0,
+            "i2e_depression": {"tau_D_ms": 300.7, "d_star_nominal": 0.7281},
+            "dynamic_slow_flow": {"g_M": g_m, "tau_M_ms": tau_m, "g_Z": 1.0},
+        }
+
+    analyses = [
+        {"stem": "fast", "mechanism": mechanism(500.0, 1.0)},
+        {"stem": "m_fork", "mechanism": mechanism(2000.0, 10.0)},
+        {"stem": "controlled", "mechanism": mechanism(500.0, 1.0)},
+    ]
+    summaries = {
+        "fast": {"T_ms": 12000.0},
+        "m_fork": {"T_ms": 20000.0},
+        "controlled": {"T_ms": 12000.0, "finite_control": {"uplift_mV": 4.0}},
+    }
+
+    rows, missing = A.select_batch_rows(manifest, analyses, summaries)
+    assert [row["stem"] for row in rows] == ["fast"]
+    assert rows[0]["config_id"] == "fast0"
+    assert missing == []
+
+
+def test_phase_map_reports_manifest_cells_without_a_trajectory():
+    manifest = {"rows": [{
+        "config_id": "not_run", "arm": "i2e", "tau_D_ms": 300.0, "d_star": 0.55,
+        "strength_scale": 1.0, "g_M": 1.0, "tau_M_ms": 500.0, "g_Z": 1.0,
+        "T_ms": 12000.0,
+    }]}
+    rows, missing = A.select_batch_rows(manifest, [], {})
+    assert rows == []
+    assert missing == ["not_run"]
 
 
 def test_single_trajectory_analysis_writes_separate_artifact(tmp_path, monkeypatch):

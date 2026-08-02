@@ -190,7 +190,17 @@ def _tail_state_metrics(root, *, tail_ms=3000.0):
     }
 
 
-def _trace_metrics(root, episode):
+def _trace_metrics(root, episode, *, dt_ms):
+    """Read the slow coordinates at the episode offset.
+
+    The z/m/S_G/phi/resource traces are appended once per integration step, not
+    once per millisecond, so the offset index is ``offset_ms / dt_ms``.  ``dt_ms``
+    is required: a default would silently restore the step-vs-millisecond error
+    that reads every ``*_at_offset`` field at one tenth of the intended time.
+    """
+    dt_ms = float(dt_ms)
+    if not dt_ms > 0.0:
+        raise ValueError("dt_ms must be positive to place the offset on the step grid")
     with np.load(root / "traces.npz", allow_pickle=False) as data:
         arrays = {key: np.asarray(data[key], float) for key in (
             "trace_m_core_mean", "trace_z_core_mean", "trace_S_G",
@@ -204,12 +214,17 @@ def _trace_metrics(root, episode):
     if trace.size == 0:
         return {"m_initial": None, "m_peak": None, "m_at_offset": None}
     offset_ms = episode.get("offset_ms")
-    offset_idx = None if offset_ms is None else min(trace.size - 1, int(round(offset_ms)))
+    offset_idx = (
+        None if offset_ms is None
+        else min(trace.size - 1, int(round(float(offset_ms) / dt_ms)))
+    )
     result = {
         "m_initial": float(trace[0]),
         "m_peak": float(np.max(trace)),
         "m_at_offset": None if offset_idx is None else float(trace[offset_idx]),
         "m_final": float(trace[-1]),
+        "slow_trace_dt_ms": dt_ms,
+        "offset_sample_index": offset_idx,
     }
     onset_ms = episode.get("onset_ms")
     if onset_ms is not None and fine_time is not None:
@@ -280,7 +295,9 @@ def build_surface(manifest, analyses, summaries):
             effect = paired_m_effect(analysis, baseline)
             recovery = analysis["recovery"]
             trace_root = IN_ROOT / analysis["stem"]
-            slow_trace = _trace_metrics(trace_root, analysis["episode"])
+            slow_trace = _trace_metrics(
+                trace_root, analysis["episode"], dt_ms=summary["dt_ms"],
+            )
             tail_state = _tail_state_metrics(trace_root)
             rows.append({
                 **config,

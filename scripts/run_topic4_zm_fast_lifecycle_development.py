@@ -515,6 +515,15 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         source_engine_t_ms = float(row["t_step"]) * float(ctx["dt"])
         if not np.isclose(source_engine_t_ms, float(row["t_ms"]), atol=1e-9, rtol=0.0):
             raise RuntimeError("checkpoint source time disagrees with source timestep")
+        # `simulate_kick` resumes from the *state's* absolute step, but the pulse
+        # window is built from the manifest's.  If those ever diverge the pulse
+        # lands at the wrong absolute time and still produces a plausible trace,
+        # so the equality is asserted rather than assumed.
+        if int(np.asarray(state["t"])) != int(row["t_step"]):
+            raise RuntimeError(
+                "resumed engine step differs from the manifest source timestep: "
+                f"{int(np.asarray(state['t']))} != {int(row['t_step'])}"
+            )
         control_engine_window = control_window_in_engine_time(
             source_t_ms=source_engine_t_ms,
             relative_t0_ms=float(args.control_t0_ms),

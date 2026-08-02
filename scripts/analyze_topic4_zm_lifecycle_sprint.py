@@ -125,6 +125,53 @@ def detect_episode(core_rate, baseline_bins, *, bin_ms=BIN_MS):
     }
 
 
+def resolve_episode_baseline(core_rate, *, bin_ms=BIN_MS):
+    """Estimate the event-free baseline, then re-estimate it strictly pre-onset.
+
+    `event_free_baseline_bins` only makes its *threshold* robust to an early
+    entry; every sub-threshold bin inside the first window still enters the mask.
+    In a relaxation-burst train the deep gaps between bursts are sub-threshold,
+    so a single pass references the episode against its own troughs and the
+    intensity fields stop being event-free-baseline referenced.  The second pass
+    keeps only bins before the detected onset and re-detects the episode from
+    them.  It is deliberately not applied to the frozen pre-escalation reference
+    window, which is interictal by construction.
+    """
+    first = event_free_baseline_bins(core_rate, bin_ms=bin_ms)
+    episode = detect_episode(core_rate, first, bin_ms=bin_ms)
+    onset = episode.get("onset_bin")
+    audit = {
+        "pass": "single_no_onset" if onset is None else "single_already_pre_onset",
+        "n_bins_first_pass": int(first.sum()),
+        "n_bins": int(first.sum()),
+        "n_bins_dropped_after_onset": 0,
+        "first_pass_onset_bin": onset,
+    }
+    if onset is None:
+        return first, episode, audit
+    second = first.copy()
+    second[int(onset):] = False
+    dropped = int(first.sum() - second.sum())
+    if dropped == 0:
+        return first, episode, audit
+    if int(second.sum()) < 4:
+        audit.update({
+            "pass": "single_insufficient_pre_onset_bins",
+            "n_pre_onset_bins": int(second.sum()),
+        })
+        return first, episode, audit
+    refined = detect_episode(core_rate, second, bin_ms=bin_ms)
+    audit.update(
+        {
+            "pass": "pre_onset_restricted",
+            "n_bins": int(second.sum()),
+            "n_bins_dropped_after_onset": dropped,
+            "refined_onset_bin": refined.get("onset_bin"),
+        }
+    )
+    return second, refined, audit
+
+
 def returning_event_windows(
     core_rate, *, threshold_hz, lo_bin=0, hi_bin=None, smooth_ms=0.0,
 ):
@@ -424,8 +471,7 @@ def analyze_one(root):
     with np.load(root / "traces.npz", allow_pickle=False) as data:
         a = {key: np.asarray(data[key]) for key in data.files}
     core = np.asarray(a["coarse_core_rate_hz"], float)
-    baseline = event_free_baseline_bins(core)
-    episode = detect_episode(core, baseline)
+    baseline, episode, baseline_audit = resolve_episode_baseline(core)
     rms, baseline_status = contact_rms_from_baseline(
         a["lfp_raw_synaptic_proxy"], float(a["lfp_fs_hz"]), baseline
     )
@@ -489,6 +535,7 @@ def analyze_one(root):
         "phenotype": phenotype,
         "baseline_status": baseline_status,
         "n_event_free_baseline_bins": int(baseline.sum()),
+        "event_free_baseline_audit": baseline_audit,
         "episode": episode,
         "intensity": intensity,
         "recovery": recovery,
@@ -539,6 +586,33 @@ def _flat(row):
     }
 
 
+def select_batch_rows(manifest, analyses, summaries):
+    """Keep only the trajectories the batch-1 manifest registered.
+
+    `seed1/` also holds the 20-s M-surface forks, the finite-control panels and
+    the 45-s follow-up.  Globbing the directory would silently grow the fast
+    phase map every time a later stage ran, so the phase map is resolved against
+    its own manifest exactly like the M surface is.
+    """
+    from scripts import analyze_topic4_zm_lifecycle_m_panel as MP  # cycle-safe: MP imports this module
+
+    selected, missing = [], []
+    for config in manifest["rows"]:
+        hits = [
+            row for row in analyses
+            if MP.row_matches_manifest(row, config)
+            and MP._close(summaries[row["stem"]].get("T_ms"), config["T_ms"])
+            and MP.is_uncontrolled_summary(summaries[row["stem"]])
+        ]
+        if len(hits) > 1:
+            raise RuntimeError(f"ambiguous fast phase-map artifact for {config['config_id']}")
+        if hits:
+            selected.append({**hits[0], "config_id": config["config_id"], "family": config.get("family")})
+        else:
+            missing.append(config["config_id"])
+    return selected, missing
+
+
 def write_single_analysis(root: Path, output: Path):
     """Analyze one completed trajectory without mutating the batch phase map."""
     root = root.resolve()
@@ -568,8 +642,16 @@ def main():
         return
     if args.single_output is not None:
         raise SystemExit("--single-output requires --single-root")
+    manifest_path = OUT_ROOT / "batch1_manifest.json"
+    if not manifest_path.is_file():
+        raise SystemExit(f"missing {manifest_path}")
+    manifest = json.loads(manifest_path.read_text())
     roots = [p for p in sorted(IN_ROOT.glob("*")) if (p / "summary.json").is_file()]
-    rows = [analyze_one(root) for root in roots]
+    analyses = [analyze_one(root) for root in roots]
+    summaries = {
+        root.name: json.loads((root / "summary.json").read_text()) for root in roots
+    }
+    rows, missing = select_batch_rows(manifest, analyses, summaries)
     adaptation_path = OUT_ROOT / "batch1_adaptation_decisions.json"
     adaptation = (
         json.loads(adaptation_path.read_text()).get("decisions", [])
@@ -578,7 +660,10 @@ def main():
     payload = {
         "schema": "topic4_zm_lifecycle_sprint_phase_map_v1_2026-08-02",
         "semantic_scope": "seed1_development_multiobjective_not_acceptance",
+        "manifest_path": str(manifest_path.relative_to(ROOT)),
+        "n_expected": len(manifest["rows"]),
         "n_runs": len(rows),
+        "unresolved_config_ids": missing,
         "adaptation_decisions": adaptation,
         "rows": rows,
     }
