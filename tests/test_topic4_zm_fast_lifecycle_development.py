@@ -102,8 +102,23 @@ def test_state_tags_are_the_locked_four_phase_c_checkpoints():
         "bounded_late__peak",
     )
     assert DEV._state_parts("bounded_late__peak") == ("bounded_late", "peak")
+    assert DEV._state_parts("pre_entry__natural") == ("pre_entry", "natural")
+    assert set(DEV.STATES).issubset(DEV.FROZEN_MODE_STATES)
     with pytest.raises(ValueError):
         DEV._state_parts("unregistered__peak")
+
+
+def test_frozen_mode_stem_carries_the_slow_state_identity():
+    args = type("Args", (), {
+        "arm": "i2e", "tau_D_ms": 300.7, "d_star": 0.7281,
+        "strength_scale": 1.0, "control_uplift_mV": 0.0,
+        "use_mode_H": True, "rho_mode_H": 0.5,
+        "tau_mode_H_ms": 250.0, "m_mode_half": 30.0,
+        "freeze_zm": True, "state": "pre_entry__natural",
+    })()
+    assert DEV._mechanism_stem(args).endswith(
+        "__modeH0.5t250__mc30__freeze_pre_entry__natural"
+    )
 
 
 def test_vseeg_energy_floor_separates_continuous_carrier_from_pulse_train():

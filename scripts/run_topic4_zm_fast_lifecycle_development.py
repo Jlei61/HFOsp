@@ -48,6 +48,10 @@ STATES = (
     "bounded_late__rising",
     "bounded_late__peak",
 )
+FROZEN_MODE_STATES = (
+    "pre_entry__natural", "onset_adjacent__natural",
+    "bounded_early__rising", "bounded_early__peak",
+) + STATES
 TAUS_MS = (60.0, 100.0, 160.0)
 FRACTIONS = (0.15, 0.30)
 REFERENCE_RATE_HZ = 439.22905756378174
@@ -182,7 +186,7 @@ def _write_npz_once(path: Path, arrays: dict) -> None:
 
 
 def _state_parts(state_tag: str) -> tuple[str, str]:
-    if state_tag not in STATES:
+    if state_tag not in FROZEN_MODE_STATES:
         raise ValueError(f"unregistered development state: {state_tag}")
     return tuple(state_tag.split("__", 1))
 
@@ -363,7 +367,8 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
     diagnostic = RT.DiagnosticSlowWrapper(
         base, diagnostic_stride_steps=max(1, int(round(1.0 / ctx["dt"])))
     )
-    policy = "dynamic_replay" if dynamic else "freeze_zm"
+    freeze_zm = bool(getattr(args, "freeze_zm", False)) if args is not None else False
+    policy = "dynamic_replay" if dynamic and not freeze_zm else "freeze_zm"
     slow = R.FS.FreezeWrapper(diagnostic, R.FS.FreezePolicy.for_arm(policy))
     return slow, diagnostic, delta, receipt
 
@@ -387,6 +392,8 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
             f"__modeH{args.rho_mode_H:g}t{args.tau_mode_H_ms:g}"
             f"__mc{args.m_mode_half:g}"
         )
+    if bool(getattr(args, "freeze_zm", False)):
+        stem += f"__freeze_{args.state}"
     return stem
 
 
@@ -488,7 +495,11 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
     locked_rate = float(futility["seed1_primary_futility"]["core_rate_mean_hz"]["median"])
     if locked_rate != REFERENCE_RATE_HZ:
         raise RuntimeError("Phase-C reference-rate drift")
-    source_id = ("pre_entry", "natural") if dynamic else _state_parts(args.state)
+    source_id = (
+        _state_parts(args.state)
+        if not dynamic or bool(getattr(args, "freeze_zm", False))
+        else ("pre_entry", "natural")
+    )
     rows = [
         item for item in manifest["source_panel"]
         if (item["bin_name"], item["fast_phase"]) == source_id
@@ -605,7 +616,7 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
     phi_i = np.asarray(diagnostic.phi_increment[ctx["S"]["NE"] :], float)
     z_drift = float(np.max(np.abs(np.asarray(diagnostic.z) - z0)))
     m_drift = float(np.max(np.abs(np.asarray(diagnostic.m) - m0)))
-    if not dynamic and (z_drift > 0 or m_drift > 0):
+    if (not dynamic or bool(getattr(args, "freeze_zm", False))) and (z_drift > 0 or m_drift > 0):
         raise RuntimeError(f"freeze_zm drifted: z={z_drift} m={m_drift}")
     if np.count_nonzero(phi_i) != 0:
         raise RuntimeError("I-cell phi became nonzero")
@@ -702,7 +713,11 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             )
         ),
         "seed": 1,
-        "state": "pre_entry__natural" if dynamic else args.state,
+        "state": (
+            args.state
+            if not dynamic or bool(getattr(args, "freeze_zm", False))
+            else "pre_entry__natural"
+        ),
         "source_t_ms": float(row["t_ms"]),
         "native_onset_reference_t_ms": 8700.0,
         "warm_start_to_native_onset_ms": float(8700.0 - row["t_ms"]),
@@ -737,7 +752,9 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         "git_sha_capture_semantics": "captured_before_context_build_and_simulation",
         "use_zm_conductance": False,
         "freeze_policy": R.FS.FreezePolicy.for_arm(
-            "dynamic_replay" if dynamic else "freeze_zm"
+            "freeze_zm"
+            if bool(getattr(args, "freeze_zm", False)) or not dynamic
+            else "dynamic_replay"
         ).as_dict(),
         "phi_initial_nonzero": 0,
         "phi_final_mean_mV": float(np.mean(phi_e)),
@@ -804,7 +821,7 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("command", choices=("cell", "race-cell", "dynamic-cell", "sprint-cell"))
-    parser.add_argument("--state", choices=STATES, default=RACE_STATE)
+    parser.add_argument("--state", choices=FROZEN_MODE_STATES, default=RACE_STATE)
     parser.add_argument("--tau-phi-ms", type=float, default=RACE_PHI_TAU_MS)
     parser.add_argument("--fraction", type=float, default=RACE_PHI_FRACTION)
     parser.add_argument("--arm", choices=RACE_ARMS, default="phi")
@@ -821,6 +838,10 @@ def main() -> None:
     parser.add_argument("--tau-M-ms", type=float, dest="tau_M_ms")
     parser.add_argument("--g-Z", type=float, dest="g_Z", default=1.0)
     parser.add_argument("--use-mode-H", action="store_true")
+    parser.add_argument(
+        "--freeze-zm", action="store_true",
+        help="freeze native z/m at --state while leaving fast E/I, S_G and mode-H dynamic",
+    )
     parser.add_argument("--rho-mode-H", type=float, default=0.0)
     parser.add_argument("--tau-mode-H-ms", type=float, default=250.0)
     parser.add_argument("--theta-mode-H-hz", type=float, default=40.0)
