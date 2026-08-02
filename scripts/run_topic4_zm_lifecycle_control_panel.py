@@ -40,6 +40,8 @@ def _candidate_config(row):
     onset = row.get("onset_ms")
     if onset is None:
         raise ValueError("control candidate must have a measured uncontrolled onset")
+    if row.get("offset_ms") is not None or row.get("duration_right_censored") is False:
+        raise ValueError("control candidate must be persistent in its paired uncontrolled run")
     uncontrolled = {
         "uncontrolled_source_candidate_id": row.get("config_id", row.get("stem")),
         "uncontrolled_onset_ms": float(onset),

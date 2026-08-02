@@ -104,3 +104,9 @@ def test_control_exit_before_pulse_is_not_causal():
     })
     assert got["status"] == "offset_precedes_control"
     assert got["causal_control_exit_candidate"] is False
+
+
+def test_control_manifest_rejects_a_candidate_that_already_offsets():
+    candidate = {**_candidate(), "offset_ms": 4000.0, "duration_right_censored": False}
+    with np.testing.assert_raises_regex(ValueError, "must be persistent"):
+        R.build_calibration_manifest({"rows": [candidate]})
