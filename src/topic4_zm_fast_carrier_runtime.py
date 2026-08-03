@@ -18,7 +18,15 @@ def git_sha(root: Path) -> str:
     ).strip()
 
 
-def rescale_i2e_delay_bins(net: dict, state: dict, *, n_e: int, scale: float):
+def rescale_i2e_delay_bins(
+    net: dict,
+    state: dict,
+    *,
+    n_e: int,
+    scale: float,
+    source_delay_cv: float = 0.0,
+    source_delay_seed: int = 0,
+):
     """Delay only GABA arrivals onto E cells and preserve in-flight arrivals.
 
     E->E weights and all graph edges remain unchanged.  Existing ring contents
@@ -26,21 +34,42 @@ def rescale_i2e_delay_bins(net: dict, state: dict, *, n_e: int, scale: float):
     point use the rescaled I->E delay bins.
     """
     scale = float(scale)
+    source_delay_cv = float(source_delay_cv)
     if not np.isfinite(scale) or scale < 1.0:
         raise ValueError("i2e delay scale must be finite and >=1")
-    if np.isclose(scale, 1.0):
+    if not np.isfinite(source_delay_cv) or source_delay_cv < 0.0:
+        raise ValueError("i2e source delay CV must be finite and >=0")
+    if np.isclose(scale, 1.0) and np.isclose(source_delay_cv, 0.0):
         return net, state, {"scale": 1.0, "changed": False}
     old_max = int(net["max_delay_steps"])
     old_m = old_max + 1
     gaba = net["gaba_by_delay"]
     ampa = net["ampa_by_delay"]
     n, n_i = gaba[0].shape
+    if np.isclose(source_delay_cv, 0.0):
+        source_factors = np.ones(n_i, dtype=float)
+    else:
+        sigma = np.sqrt(np.log1p(source_delay_cv ** 2))
+        rng = np.random.default_rng(int(source_delay_seed))
+        source_factors = np.exp(
+            sigma * rng.standard_normal(n_i) - 0.5 * sigma ** 2
+        )
+        source_factors /= np.mean(source_factors)
     row_e = np.zeros(n, dtype=float); row_e[: int(n_e)] = 1.0
     row_i = 1.0 - row_e
-    new_max = max(
-        old_max,
-        max(max(1, int(round(d * scale))) for d, matrix in enumerate(gaba) if matrix.nnz),
-    )
+    prospective_delays = [old_max]
+    for d, matrix in enumerate(gaba):
+        if not matrix.nnz:
+            continue
+        coo = matrix.tocoo()
+        to_e = coo.row < int(n_e)
+        if np.any(to_e):
+            prospective_delays.extend(
+                np.maximum(
+                    1, np.rint(d * scale * source_factors[coo.col[to_e]]).astype(int)
+                ).tolist()
+            )
+    new_max = max(prospective_delays)
     zero_g = sparse.csc_matrix((n, n_i), dtype=float)
     g_new = [zero_g.copy() for _ in range(new_max + 1)]
     for d, matrix in enumerate(gaba):
@@ -51,8 +80,17 @@ def rescale_i2e_delay_bins(net: dict, state: dict, *, n_e: int, scale: float):
         if to_i.nnz:
             g_new[d] = (g_new[d] + to_i).tocsc()
         if to_e.nnz:
-            new_d = max(1, int(round(d * scale)))
-            g_new[new_d] = (g_new[new_d] + to_e).tocsc()
+            coo = to_e.tocoo()
+            new_delays = np.maximum(
+                1, np.rint(d * scale * source_factors[coo.col]).astype(int)
+            )
+            for new_d in np.unique(new_delays):
+                keep = new_delays == new_d
+                moved = sparse.csc_matrix(
+                    (coo.data[keep], (coo.row[keep], coo.col[keep])),
+                    shape=coo.shape,
+                )
+                g_new[int(new_d)] = (g_new[int(new_d)] + moved).tocsc()
     zero_a = sparse.csc_matrix(ampa[0].shape, dtype=float)
     a_new = list(ampa) + [zero_a.copy() for _ in range(new_max + 1 - len(ampa))]
     net_new = dict(net)
@@ -71,8 +109,18 @@ def rescale_i2e_delay_bins(net: dict, state: dict, *, n_e: int, scale: float):
         for delta in range(old_m):
             new_ring[(t_abs + delta) % (new_max + 1)] += old_ring[(t_abs + delta) % old_m]
         state_new[key] = new_ring
+    factor_percentiles = np.percentile(source_factors, [5, 25, 50, 75, 95])
+    occupied_i2e_bins = [
+        d for d, matrix in enumerate(g_new)
+        if matrix[: int(n_e), :].nnz
+    ]
     return net_new, state_new, {
         "scale": scale,
+        "source_delay_cv_requested": source_delay_cv,
+        "source_delay_cv_realized": float(np.std(source_factors) / np.mean(source_factors)),
+        "source_delay_seed": int(source_delay_seed),
+        "source_factor_percentiles_5_25_50_75_95": factor_percentiles.tolist(),
+        "occupied_i2e_delay_bins": occupied_i2e_bins,
         "changed": True,
         "old_max_delay_steps": old_max,
         "new_max_delay_steps": new_max,

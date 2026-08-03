@@ -114,3 +114,72 @@ def test_i2e_delay_rescaling_moves_only_e_targets_and_preserves_inflight_offsets
     np.testing.assert_array_equal(new_state["ring_sE"][2], old_ring[2])
     np.testing.assert_array_equal(new_state["ring_sE"][3], old_ring[0])
     assert receipt["edges_unchanged"]
+
+
+def _delay_test_net():
+    zero_a = sparse.csc_matrix((4, 3))
+    zero_g = sparse.csc_matrix((4, 3))
+    gaba_d2 = sparse.csc_matrix(
+        (
+            [1.0, 2.0, 3.0, 5.0],
+            ([0, 1, 0, 3], [0, 1, 2, 2]),
+        ),
+        shape=(4, 3),
+    )
+    return {
+        "ampa_by_delay": [zero_a.copy() for _ in range(4)],
+        "gaba_by_delay": [zero_g.copy(), zero_g.copy(), gaba_d2, zero_g.copy()],
+        "max_delay_steps": 3,
+    }
+
+
+def test_i2e_source_delay_dispersion_is_deterministic_and_weight_preserving():
+    net = _delay_test_net()
+    old_ring = np.arange(16.0).reshape(4, 4)
+    state = {"t": np.asarray(2), "ring_sE": old_ring, "ring_sI": old_ring + 20}
+    a_net, a_state, a_receipt = rescale_i2e_delay_bins(
+        net, state, n_e=3, scale=3.0, source_delay_cv=0.5, source_delay_seed=7
+    )
+    b_net, b_state, b_receipt = rescale_i2e_delay_bins(
+        net, state, n_e=3, scale=3.0, source_delay_cv=0.5, source_delay_seed=7
+    )
+    assert a_receipt == b_receipt
+    assert len(a_receipt["occupied_i2e_delay_bins"]) >= 2
+    for ampa_old, ampa_new in zip(net["ampa_by_delay"], a_net["ampa_by_delay"][:4]):
+        np.testing.assert_array_equal(ampa_old.toarray(), ampa_new.toarray())
+    old_gaba = sum(net["gaba_by_delay"])
+    new_gaba = sum(a_net["gaba_by_delay"])
+    np.testing.assert_allclose(old_gaba.toarray(), new_gaba.toarray())
+    for x, y in zip(a_net["gaba_by_delay"], b_net["gaba_by_delay"]):
+        np.testing.assert_array_equal(x.toarray(), y.toarray())
+    np.testing.assert_array_equal(a_state["ring_sI"], b_state["ring_sI"])
+
+
+def test_i2e_source_delay_cv_zero_retains_uniform_rescaling():
+    net = _delay_test_net()
+    state = {
+        "t": np.asarray(0),
+        "ring_sE": np.zeros((4, 4)),
+        "ring_sI": np.zeros((4, 4)),
+    }
+    new_net, _, receipt = rescale_i2e_delay_bins(
+        net, state, n_e=3, scale=3.0, source_delay_cv=0.0, source_delay_seed=999
+    )
+    assert receipt["occupied_i2e_delay_bins"] == [6]
+    assert new_net["gaba_by_delay"][2][3, 2] == 5.0
+    assert new_net["gaba_by_delay"][6][0, 0] == 1.0
+    assert new_net["gaba_by_delay"][6][1, 1] == 2.0
+    assert new_net["gaba_by_delay"][6][0, 2] == 3.0
+
+
+def test_i2e_source_delay_dispersion_rejects_invalid_cv():
+    net = _delay_test_net()
+    state = {
+        "t": np.asarray(0),
+        "ring_sE": np.zeros((4, 4)),
+        "ring_sI": np.zeros((4, 4)),
+    }
+    with np.testing.assert_raises_regex(ValueError, "source delay CV"):
+        rescale_i2e_delay_bins(
+            net, state, n_e=3, scale=3.0, source_delay_cv=-0.1
+        )

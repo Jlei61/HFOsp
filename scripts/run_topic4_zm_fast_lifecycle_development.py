@@ -446,6 +446,8 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += f"__tauDcv{args.i2e_tau_cv:g}s{args.i2e_tau_seed:d}"
     if not np.isclose(float(getattr(args, "i2e_delay_scale", 1.0)), 1.0):
         stem += f"__i2edelay{args.i2e_delay_scale:g}"
+    if float(getattr(args, "i2e_delay_cv", 0.0)) > 0.0:
+        stem += f"__i2edelaycv{args.i2e_delay_cv:g}s{args.i2e_delay_seed:d}"
     if bool(getattr(args, "use_mode_M_divisive", False)):
         stem += (
             f"__mdiv{args.kappa_mode_M:g}"
@@ -586,10 +588,15 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         contract_already_validated=True,
     )
     delay_receipt = None
-    if not np.isclose(float(args.i2e_delay_scale), 1.0):
+    if (
+        not np.isclose(float(args.i2e_delay_scale), 1.0)
+        or float(args.i2e_delay_cv) > 0.0
+    ):
         ctx["S"]["net"], state, delay_receipt = RT.rescale_i2e_delay_bins(
             ctx["S"]["net"], state,
             n_e=int(ctx["S"]["NE"]), scale=float(args.i2e_delay_scale),
+            source_delay_cv=float(args.i2e_delay_cv),
+            source_delay_seed=int(args.i2e_delay_seed),
         )
         transformation["migrated_state_hash"] = CK.state_hash(state)
     if worker_receipt is not None:
@@ -944,6 +951,8 @@ def main() -> None:
     parser.add_argument("--i2e-tau-cv", type=float, default=0.0)
     parser.add_argument("--i2e-tau-seed", type=int, default=0)
     parser.add_argument("--i2e-delay-scale", type=float, default=1.0)
+    parser.add_argument("--i2e-delay-cv", type=float, default=0.0)
+    parser.add_argument("--i2e-delay-seed", type=int, default=0)
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
     parser.add_argument("--strength-scale", type=float)
