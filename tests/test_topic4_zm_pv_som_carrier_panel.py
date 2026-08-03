@@ -1,9 +1,11 @@
 from scripts.analyze_topic4_zm_conductance_homotopy import credible_carrier
-from scripts.analyze_topic4_zm_pv_som_carrier import _gap_spatial_class, _label
+from scripts.analyze_topic4_zm_pv_som_carrier import (
+    BASE_ORDER, _gap_spatial_class, _label, _split_arm, adjudicate,
+)
 
 
 def _summary(*, rho=.5, g_max=None, e_exc=60., down=250., common=0.,
-             som_tau_d=60., shunt=False):
+             som_tau_d=60., shunt=False, seed=1):
     """A locked PV/SOM arm; only the mode-H coordinates vary."""
     mode = {
         "rho_mode_H": rho,
@@ -20,6 +22,7 @@ def _summary(*, rho=.5, g_max=None, e_exc=60., down=250., common=0.,
         "som_slow_integrated_budget_fraction": .35,
         "som_recruit_delay_scale": 3.,
         "tau_d_som_ms": som_tau_d,
+        "seed": seed,
     }
     if shunt:
         subtype["slow_membrane_mode"] = "shunt"
@@ -69,9 +72,89 @@ def test_dose_series_refuses_arms_that_are_not_like_for_like():
     assert _label(_summary(rho=.25, g_max=.32)) is None
 
 
+def test_replicate_substrates_get_their_own_arm_identity():
+    """A different SOM wiring is a different substrate, not a duplicate arm."""
+    assert _label(_summary(rho=0., g_max=.32, seed=2)) == "persistent_g0.32__som2"
+    assert _label(_summary(rho=0., g_max=0., seed=3)) == "persistent_g0__som3"
+    assert _label(_summary(rho=0., g_max=.32)) == "persistent_g0.32"
+    # The multiplicative comparison panel was only ever run on one substrate,
+    # so a replicate must not be pooled into it under the same label.
+    assert _label(_summary(seed=2)) is None
+
+
+def test_dose_and_seed_are_recoverable_from_the_label():
+    dose, seed = _split_arm(_label(_summary(rho=0., g_max=.32, seed=2)))
+    assert (dose, seed) == (0.32, 2)
+    assert _split_arm(_label(_summary(rho=0., g_max=.04))) == (0.04, 1)
+
+
 def _row(*, gap=.7, pc1=.8, runaway=False):
     return {"post_onset_deep_gap_fraction": gap, "spatial_pc1": pc1,
             "runaway": runaway}
+
+
+def _panel(arms):
+    """Rows for {persistent arm label: passes gate}; the panel never passes."""
+    rows = {}
+    for label, ok in arms.items():
+        row = _row(gap=0. if ok else .7, pc1=.82)
+        row["credible_carrier"] = ok
+        row["gap_spatial_class"] = _gap_spatial_class(row)
+        rows[label] = row
+    for label in BASE_ORDER:
+        row = _row()
+        row["credible_carrier"] = False
+        row["gap_spatial_class"] = _gap_spatial_class(row)
+        rows[label] = row
+    return rows
+
+
+def test_single_substrate_pass_is_not_yet_a_replicated_carrier():
+    verdict = adjudicate(_panel({
+        "persistent_g0": False, "persistent_g0.32": True,
+    }))
+    assert verdict["verdict"] == "PERSISTENT_SLOW_EXCITATION_CARRIER_CANDIDATE"
+    assert verdict["passing_arms"] == ["persistent_g0.32"]
+
+
+def test_a_carrier_that_needs_one_particular_wiring_is_reported_as_such():
+    verdict = adjudicate(_panel({
+        "persistent_g0": False, "persistent_g0.32": True,
+        "persistent_g0__som2": False, "persistent_g0.32__som2": False,
+    }))
+    assert verdict["verdict"] == (
+        "PERSISTENT_SLOW_EXCITATION_CARRIER_IS_SUBSTRATE_DEPENDENT"
+    )
+    assert verdict["seed_replication"]["g0.32"]["seeds_tested"] == [1, 2]
+    assert verdict["seed_replication"]["g0.32"]["seeds_passing_gate"] == [1]
+
+
+def test_a_carrier_holding_on_every_tested_wiring_is_promoted():
+    verdict = adjudicate(_panel({
+        "persistent_g0": False, "persistent_g0.32": True,
+        "persistent_g0.32__som2": True, "persistent_g0.32__som3": True,
+    }))
+    assert verdict["verdict"] == (
+        "PERSISTENT_SLOW_EXCITATION_CARRIER_REPLICATES_ACROSS_SUBSTRATES"
+    )
+    assert verdict["seed_replication"]["g0.32"]["seeds_passing_gate"] == [1, 2, 3]
+
+
+def test_the_weakest_passing_dose_is_named_not_the_strongest():
+    verdict = adjudicate(_panel({
+        "persistent_g0": False, "persistent_g0.16": True,
+        "persistent_g0.32": True, "persistent_g0.64": True,
+    }))
+    assert verdict["weakest_passing_dose"] == 0.16
+
+
+def test_no_pass_anywhere_keeps_the_gap_verdict():
+    verdict = adjudicate(_panel({
+        "persistent_g0": False, "persistent_g0.04": False,
+        "persistent_g0.08": False,
+    }))
+    assert verdict["verdict"] == "PV_SOM_SPATIAL_PATTERN_WITH_TEMPORAL_GAPS"
+    assert verdict["weakest_passing_dose"] is None
 
 
 def test_gap_spatial_class_separates_the_two_failure_axes():

@@ -47,6 +47,7 @@ def _label(summary):
     down = float(mode.get("tau_mode_H_down", mode.get("tau_mode_H", 250.0)))
     common = float(mode.get("mode_H_common_subtraction", 0.0))
     som_tau_d = float(subtype.get("tau_d_som_ms", 60.0))
+    seed = int(subtype.get("seed", 1))
     # Runs predating the persistent-conductance commit carry no such key; 0 is
     # the literal parity path, so the default is the correct historical value.
     g_max = float(mode.get("mode_H_persistent_g_max", 0.0))
@@ -61,8 +62,9 @@ def _label(summary):
             and subtype.get("slow_membrane_mode") != "shunt"
         ):
             return None
-        return f"persistent_g{g_max:g}"
-    if not _close(mode.get("rho_mode_H"), 0.5):
+        return f"persistent_g{g_max:g}" + ("" if seed == 1 else f"__som{seed}")
+    # The multiplicative comparison panel only ever ran on the seed-1 wiring.
+    if seed != 1 or not _close(mode.get("rho_mode_H"), 0.5):
         return None
     if subtype.get("slow_membrane_mode") == "shunt":
         return "SOM_shunt" if _close(down, 250.0) and _close(som_tau_d, 60.0) else None
@@ -75,6 +77,12 @@ def _label(summary):
     if _close(down, 1500.0) and _close(common, 1.0) and _close(som_tau_d, 60.0):
         return "contrast_H1500"
     return None
+
+
+def _split_arm(label):
+    """Recover (persistent conductance dose, SOM wiring seed) from an arm label."""
+    dose, _, seed = label.removeprefix("persistent_g").partition("__som")
+    return float(dose), int(seed) if seed else 1
 
 
 def _gap_spatial_class(row):
@@ -90,6 +98,70 @@ def _gap_spatial_class(row):
     if filled:
         return "gaps_filled_spatially_distributed"
     return "common_mode_fragmented" if common else "fragmented_spatially_distributed"
+
+
+def adjudicate(rows):
+    """Adjudicate the locked panel; a pass on one wiring is not yet a carrier."""
+    persistent = sorted(
+        (key for key in rows if key.startswith("persistent_g")), key=_split_arm
+    )
+    passing = [
+        key for key in list(BASE_ORDER) + persistent
+        if key in rows and rows[key]["credible_carrier"]
+    ]
+    replication = {}
+    for key in persistent:
+        dose, seed = _split_arm(key)
+        entry = replication.setdefault(
+            f"g{dose:g}",
+            {"seeds_tested": [], "seeds_passing_gate": [], "classes": {}},
+        )
+        entry["seeds_tested"].append(seed)
+        if rows[key]["credible_carrier"]:
+            entry["seeds_passing_gate"].append(seed)
+        entry["classes"][str(seed)] = rows[key]["gap_spatial_class"]
+
+    passing_doses = sorted(
+        {_split_arm(key)[0] for key in passing if key.startswith("persistent_g")}
+    )
+    dosed = [key for key in persistent if _split_arm(key)[0] > 0.0]
+    if passing_doses:
+        entries = [replication[f"g{dose:g}"] for dose in passing_doses]
+        replicated = [
+            entry for entry in entries
+            if len(entry["seeds_tested"]) > 1
+            and len(entry["seeds_passing_gate"]) == len(entry["seeds_tested"])
+        ]
+        if replicated:
+            headline = "PERSISTENT_SLOW_EXCITATION_CARRIER_REPLICATES_ACROSS_SUBSTRATES"
+            coordinate = "none; advance to 12-s durability at the weakest replicated strength"
+        elif any(len(entry["seeds_tested"]) > 1 for entry in entries):
+            headline = "PERSISTENT_SLOW_EXCITATION_CARRIER_IS_SUBSTRATE_DEPENDENT"
+            coordinate = "the carrier needs one particular SOM wiring; do not advance to M"
+        else:
+            headline = "PERSISTENT_SLOW_EXCITATION_CARRIER_CANDIDATE"
+            coordinate = "none; advance to 12-s durability at the weakest passing strength"
+    elif passing:
+        headline = "PV_SOM_CARRIER_CANDIDATE"
+        coordinate = "none; advance to durability/M"
+    elif dosed and all(rows[key]["gap_spatial_class"] == "common_mode_plateau"
+                       for key in dosed):
+        headline = "PERSISTENT_SLOW_EXCITATION_FILLS_GAPS_AS_COMMON_MODE"
+        coordinate = "stop this mechanism; gap filling and spatial freedom are anti-correlated here"
+    else:
+        headline = "PV_SOM_SPATIAL_PATTERN_WITH_TEMPORAL_GAPS"
+        coordinate = "the PV/SOM relaxation-cycle timescale, not H amplitude or membrane form"
+    return {
+        "verdict": headline,
+        "passing_arms": passing,
+        "weakest_passing_dose": passing_doses[0] if passing_doses else None,
+        "seed_replication": replication,
+        "persistent_arm_classes": {
+            key: rows[key]["gap_spatial_class"] for key in persistent
+        },
+        "next_coordinate": coordinate,
+        "claim_boundary": "seed-1 frozen-Z/M 2.5-s mechanism panel",
+    }
 
 
 def _run_lengths(mask):
@@ -116,15 +188,17 @@ def main():
     if missing:
         raise RuntimeError(f"PV/SOM panel incomplete: {missing}")
     persistent = sorted(
-        (key for key in found if key.startswith("persistent_g")),
-        key=lambda key: float(key.removeprefix("persistent_g")),
+        (key for key in found if key.startswith("persistent_g")), key=_split_arm
     )
     if len(persistent) < 2:
         raise RuntimeError(f"persistent-H panel incomplete: {persistent}")
-    order = list(BASE_ORDER) + persistent
+    # Replicate substrates are adjudicated but not drawn; the panel figure
+    # compares mechanisms on one wiring so its rows stay like-for-like.
+    order = [key for key in persistent if _split_arm(key)[1] == 1]
+    order = list(BASE_ORDER) + order
 
     rows, arrays = {}, {}
-    for label in order:
+    for label in list(BASE_ORDER) + persistent:
         root, summary = found[label]
         row, array = _row(label, root, summary)
         row["core_mean_hz"] = float(summary["core_modulation"]["mean_hz"])
@@ -144,29 +218,7 @@ def main():
         row["gap_spatial_class"] = _gap_spatial_class(row)
         rows[label], arrays[label] = row, array
 
-    passing = [key for key in order if rows[key]["credible_carrier"]]
-    dosed = [key for key in persistent if float(key.removeprefix("persistent_g")) > 0.0]
-    passing_persistent = [key for key in passing if key in dosed]
-    classes = {key: rows[key]["gap_spatial_class"] for key in persistent}
-    if passing_persistent:
-        headline = "PERSISTENT_SLOW_EXCITATION_CARRIER_CANDIDATE"
-        coordinate = "none; advance to 12-s durability at the weakest passing strength"
-    elif passing:
-        headline = "PV_SOM_CARRIER_CANDIDATE"
-        coordinate = "none; advance to durability/M"
-    elif all(classes[key] == "common_mode_plateau" for key in dosed):
-        headline = "PERSISTENT_SLOW_EXCITATION_FILLS_GAPS_AS_COMMON_MODE"
-        coordinate = "stop this mechanism; gap filling and spatial freedom are anti-correlated here"
-    else:
-        headline = "PV_SOM_SPATIAL_PATTERN_WITH_TEMPORAL_GAPS"
-        coordinate = "the PV/SOM relaxation-cycle timescale, not H amplitude or membrane form"
-    verdict = {
-        "verdict": headline,
-        "passing_arms": passing,
-        "persistent_arm_classes": classes,
-        "next_coordinate": coordinate,
-        "claim_boundary": "seed-1 frozen-Z/M 2.5-s mechanism panel",
-    }
+    verdict = adjudicate(rows)
     payload = {
         "schema": "topic4_zm_pv_som_carrier_v1_2026-08-03",
         "verdict": verdict,
