@@ -22,6 +22,7 @@ import gc
 import hashlib
 import json
 import resource
+import signal
 import subprocess
 import sys
 import time
@@ -544,6 +545,9 @@ def _run_row(row):
         prior = _load_json(prior_path)
         if prior.get("row_id") == row["row_id"] and prior.get("status") == "COMPLETE":
             return prior
+    running_path = os.path.join(CELL_DIR, f"{row['row_id']}.RUNNING.json")
+    _write_json(running_path, dict(status="RUNNING", row_id=row["row_id"],
+                                   pid=os.getpid(), started_epoch=time.time(), started=_now()))
     S, fields, prepared = _worker_context()
     prep = prepared[(row["point_id"], row["state_kind"])]
     loaded = load_prepared_checkpoint(
@@ -608,6 +612,8 @@ def _run_row(row):
     _write_json(prior_path, result)
     _write_json(row["done_path"], dict(status="DONE", row_id=row["row_id"],
                                        output_sha256=_sha(prior_path), finished=_now()))
+    if os.path.exists(running_path):
+        os.replace(running_path, running_path.replace(".RUNNING.json", ".RUNNING.superseded.json"))
     del first, final, combined_spikes
     gc.collect()
     return result
@@ -675,15 +681,33 @@ def cmd_map(args):
         with ProcessPoolExecutor(max_workers=workers) as pool:
             active = {}
             cursor = 0
+            last_swap = swap0
             while cursor < len(pending_rows) or active:
                 mem = _meminfo()
                 swap_delta = mem["swap_used_mib"] - swap0
+                if swap_delta >= 512.0 and mem["swap_used_mib"] > last_swap:
+                    running = []
+                    for row_id in active.values():
+                        path = os.path.join(CELL_DIR, f"{row_id}.RUNNING.json")
+                        if os.path.isfile(path):
+                            rec = _load_json(path)
+                            running.append((float(rec["started_epoch"]), int(rec["pid"]), row_id))
+                    if running:
+                        _started, newest_pid, newest_row = max(running)
+                        os.kill(newest_pid, signal.SIGTERM)
+                        _resource_log("GEOMETRY_SWAP_HARD_STOP", swap_delta_mib=swap_delta,
+                                      terminated_pid=newest_pid, terminated_row=newest_row)
+                    raise RuntimeError(f"swap hard stop: +{swap_delta:.1f} MiB and rising")
+                last_swap = mem["swap_used_mib"]
                 allow_submit = swap_delta < 256.0 and mem["mem_available_gib"] >= 96.0
                 while allow_submit and cursor < len(pending_rows) and len(active) < workers:
                     row = pending_rows[cursor]; cursor += 1
                     active[pool.submit(_run_row, row)] = row["row_id"]
                 if not active:
-                    raise RuntimeError("resource gate stopped submissions with no active worker")
+                    _resource_log("GEOMETRY_SUBMISSION_PAUSED", swap_delta_mib=swap_delta,
+                                  cursor=cursor, n_rows=len(pending_rows))
+                    time.sleep(30.0)
+                    continue
                 done, _ = wait(active, return_when=FIRST_COMPLETED)
                 for future in done:
                     row_id = active.pop(future)
