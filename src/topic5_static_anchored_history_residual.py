@@ -54,7 +54,12 @@ def compose_static_residual(
 
 
 def soft_rank(value: Tensor, temperature: float = 0.1) -> Tensor:
-    """Differentiable rank with ascending-rank orientation."""
+    """Differentiable rank; the largest value receives rank ~1.
+
+    This is the opposite orientation to ``scipy.stats.rankdata`` on the target,
+    which is harmless because every downstream score takes the absolute
+    correlation, but the two must not be compared with a signed statistic.
+    """
 
     if value.ndim != 1:
         raise ValueError("soft_rank expects a one-dimensional contact field")

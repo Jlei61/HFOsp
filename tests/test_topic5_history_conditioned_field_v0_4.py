@@ -1,5 +1,7 @@
 import copy
+import dataclasses
 import json
+import time
 from pathlib import Path
 
 import numpy as np
@@ -8,9 +10,19 @@ import pytest
 import torch
 from scipy.stats import spearmanr
 
+from scripts.run_topic5_history_conditioned_field_fold_v0_4 import (
+    Example,
+    _anchor_penalty,
+    _batch_history_states,
+    _epoch_orders,
+    _order_shuffle_permutation,
+    _train_head_stage,
+    _train_joint_stage,
+)
 from scripts.summarize_topic5_history_conditioned_field_v0_4 import (
     _ensemble_true,
     _exact_signed_rank,
+    _seedwise_patient_score,
 )
 from src.topic5_history_rnn import TimeDecayHistoryGRU
 from src.topic5_static_anchored_history_residual import (
@@ -172,6 +184,186 @@ def test_exact_signed_rank_excludes_numerical_zero_ties():
     assert result["n_tie"] == 2
     assert result["n_nonzero"] == 2
     assert result["p_two_sided_exact"] == pytest.approx(0.5)
+
+
+CPU = torch.device("cpu")
+STAGE_CONFIG = {
+    "soft_rank_temperature": 0.1,
+    "soft_max_temperature": 0.05,
+    "lambda_gain": 1e-3,
+    "lambda_anchor_recurrent_only": 0.0,
+    "gradient_clip": 1e9,
+    "chunk_events": 32,
+}
+
+
+def _fake_example(
+    *,
+    n_events: int = 240,
+    n_contacts: int = 6,
+    feature_dim: int = 3,
+    contact_dim: int = 4,
+    seed: int = 0,
+    subject: str = "p1",
+    seizure_id: str = "s1",
+):
+    rng = np.random.default_rng(seed)
+    event_time = 1_000_000.0 + np.cumsum(rng.uniform(30.0, 900.0, n_events))
+    target = rng.normal(size=n_contacts)
+    return Example(
+        subject=subject,
+        seizure_id=seizure_id,
+        seizure_idx=0,
+        event_embedding=rng.normal(size=(n_events, feature_dim)).astype(np.float32),
+        event_time=event_time.astype(np.float64),
+        cutoff_time=float(event_time[-1] + 1800.0),
+        time_summary=rng.normal(size=10).astype(np.float32),
+        contact_embedding=rng.normal(size=(n_contacts, contact_dim)).astype(np.float32),
+        static_a=rng.normal(size=n_contacts).astype(np.float32),
+        static_b=rng.normal(size=n_contacts).astype(np.float32),
+        target_1_45=target.astype(np.float32),
+        target_rank_1_45=np.argsort(np.argsort(target)).astype(np.float32) + 1.0,
+        target_1_150=target.astype(np.float32),
+        contact_names=np.asarray([f"C{index}" for index in range(n_contacts)]),
+    )
+
+
+def test_order_shuffle_permutes_the_entire_causal_prefix():
+    """v0.2 permuted only the most recent 64 events; v0.4 §7.3 requires all of them."""
+
+    example = _fake_example(n_events=500)
+    orders = [_order_shuffle_permutation(example, seed=11, draw=draw) for draw in range(8)]
+    identity = np.arange(500)
+    for order in orders:
+        assert sorted(order.tolist()) == list(range(500))
+    moved_overall = np.mean([np.mean(order != identity) for order in orders])
+    moved_oldest_hundred = np.mean([np.mean(order[:100] != identity[:100]) for order in orders])
+    assert moved_overall > 0.95
+    assert moved_oldest_hundred > 0.95
+
+
+def test_order_shuffle_moves_identities_but_keeps_the_original_time_slots():
+    history = TimeDecayHistoryGRU(3, 4, initial_half_life_hours=2.0)
+    example = _fake_example(n_events=64)
+    order = _order_shuffle_permutation(example, seed=11, draw=0)
+    shuffled = _batch_history_states(
+        history, [example], device=CPU, chunk_events=16, orders=[order]
+    )
+    relabelled = dataclasses.replace(
+        example, event_embedding=example.event_embedding[order]
+    )
+    reference = _batch_history_states(history, [relabelled], device=CPU, chunk_events=16)
+    torch.testing.assert_close(shuffled, reference, rtol=0, atol=0)
+    true_order = _batch_history_states(history, [example], device=CPU, chunk_events=16)
+    assert torch.linalg.vector_norm(true_order - shuffled) > 1e-6
+
+
+def test_padded_batched_history_matches_single_unchunked_runs():
+    """Parity for the batched/padded path the formal run actually uses."""
+
+    history = TimeDecayHistoryGRU(3, 4, initial_half_life_hours=2.0)
+    examples = [
+        _fake_example(n_events=length, seed=index, seizure_id=f"s{index}")
+        for index, length in enumerate((37, 12, 100))
+    ]
+    chunked = _batch_history_states(history, examples, device=CPU, chunk_events=8)
+    single = torch.cat(
+        [
+            _batch_history_states(history, [example], device=CPU, chunk_events=10_000)
+            for example in examples
+        ]
+    )
+    torch.testing.assert_close(chunked, single, rtol=1e-5, atol=1e-6)
+
+
+def test_anchor_penalty_only_pulls_the_recurrent_parameters():
+    history = TimeDecayHistoryGRU(3, 4, initial_half_life_hours=2.0)
+    head = DualCandidateResidualHead(4, 5)
+    initial = {name: value.detach().clone() for name, value in history.named_parameters()}
+    with torch.no_grad():
+        for parameter in history.parameters():
+            parameter.add_(0.05)
+    _anchor_penalty(history, initial, 1.0).backward()
+    assert all(parameter.grad is None for parameter in head.parameters())
+    assert all(
+        parameter.grad is not None and torch.any(parameter.grad != 0)
+        for parameter in history.parameters()
+    )
+
+
+def test_m1_and_m3_stages_differ_only_in_recurrent_trainability():
+    """Identity perturbation: freeze M3's recurrent LR and it must reproduce M1.
+
+    Gradient clipping has to be disabled for the equality to be exact, which is
+    itself the point: the joint stage shares one clip budget between head and
+    recurrent parameters, so a binding clip is a second difference between the
+    two arms.
+    """
+
+    torch.manual_seed(3)
+    examples = [
+        _fake_example(n_events=40, seed=1, subject="p1", seizure_id="s1"),
+        _fake_example(n_events=25, seed=2, subject="p2", seizure_id="s1"),
+    ]
+    groups = {example.subject: [example] for example in examples}
+    orders = _epoch_orders(sorted(groups), 5, 2)
+    history_m1 = TimeDecayHistoryGRU(3, 4, initial_half_life_hours=2.0)
+    history_m3 = copy.deepcopy(history_m1)
+    frozen = {
+        subject: _batch_history_states(
+            history_m1, subject_examples, device=CPU, chunk_events=32
+        ).detach()
+        for subject, subject_examples in groups.items()
+    }
+    head_m1 = DualCandidateResidualHead(4, examples[0].contact_embedding.shape[1])
+    head_m3 = copy.deepcopy(head_m1)
+    optimizer_m1 = torch.optim.AdamW(head_m1.parameters(), lr=3e-4, weight_decay=0.0)
+    optimizer_m3 = torch.optim.AdamW(head_m3.parameters(), lr=3e-4, weight_decay=0.0)
+    optimizer_m3.add_param_group({"params": list(history_m3.parameters()), "lr": 0.0})
+    _train_head_stage(
+        head_m1,
+        optimizer_m1,
+        frozen,
+        groups,
+        orders,
+        stage="M1",
+        epoch_offset=0,
+        config=STAGE_CONFIG,
+        device=CPU,
+        started=time.time(),
+    )
+    _train_joint_stage(
+        head_m3,
+        history_m3,
+        optimizer_m3,
+        groups,
+        orders,
+        epoch_offset=0,
+        initial_history={
+            name: value.detach().clone() for name, value in history_m3.named_parameters()
+        },
+        config=STAGE_CONFIG,
+        device=CPU,
+        started=time.time(),
+    )
+    for (name, left), (_, right) in zip(
+        head_m1.named_parameters(), head_m3.named_parameters()
+    ):
+        torch.testing.assert_close(left, right, rtol=1e-6, atol=1e-8, msg=name)
+
+
+def test_seedwise_patient_score_matches_the_shuffle_arm_aggregation():
+    frame = pd.DataFrame(
+        [
+            {"subject": "p1", "seizure_id": "s1", "seed": 11, "model": "M3_JOINT_RNN", "maxab_1_45": 0.4},
+            {"subject": "p1", "seizure_id": "s2", "seed": 11, "model": "M3_JOINT_RNN", "maxab_1_45": 0.6},
+            {"subject": "p1", "seizure_id": "s1", "seed": 29, "model": "M3_JOINT_RNN", "maxab_1_45": 0.2},
+            {"subject": "p1", "seizure_id": "s2", "seed": 29, "model": "M3_JOINT_RNN", "maxab_1_45": 0.3},
+            {"subject": "p1", "seizure_id": "s1", "seed": 11, "model": "M0_STATIC_AB", "maxab_1_45": 0.9},
+        ]
+    )
+    value = _seedwise_patient_score(frame, "M3_JOINT_RNN")
+    assert value.loc["p1"] == pytest.approx(0.375)
 
 
 def test_frozen_static_loader_uses_exact_contact_names(tmp_path):

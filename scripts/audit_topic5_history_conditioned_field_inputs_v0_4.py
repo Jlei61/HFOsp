@@ -187,6 +187,9 @@ def main() -> None:
         raise RuntimeError("primary target sidecar is not 1-45 Hz")
     if list(map(float, meta150["payload"].get("band_broad_1_150", []))) != [1.0, 150.0]:
         raise RuntimeError("sensitivity target sidecar is not 1-150 Hz")
+    for label, meta in (("primary", meta45), ("sensitivity", meta150)):
+        if list(map(float, meta["payload"].get("t_window", []))) != [0.0, 10.0]:
+            raise RuntimeError(f"{label} target sidecar is not the [0,10] s onset window")
 
     all_rows: list[dict] = []
     subject_summaries = []

@@ -40,16 +40,17 @@ def main() -> None:
     seeds = [11, 29, 47]
     rows = []
     violations = []
-    normalized_na_markers = 0
-    for progress_log in (root / "logs").glob("train_epilepsiae_*_seed*.log"):
+    # The half-life column is intentionally absent for the head-only stages, so a
+    # bare ``NaN`` there is a json.dumps artefact, not a numerical failure.  The
+    # auditor only counts it -- it must never rewrite the artefacts it audits,
+    # otherwise the "no NaN" check becomes self-fulfilling and unreproducible.
+    inapplicable_half_life_markers = 0
+    for progress_log in sorted((root / "logs").glob("train_epilepsiae_*_seed*.log")):
         text = progress_log.read_text()
         marker = '"history_half_life_hours": NaN'
-        count = text.count(marker)
-        if count:
-            progress_log.write_text(text.replace(marker, '"history_half_life_hours": null'))
-            normalized_na_markers += count
-        if "NaN" in progress_log.read_text():
-            violations.append(f"unexpected NaN remains in progress log: {progress_log.name}")
+        inapplicable_half_life_markers += text.count(marker)
+        if "NaN" in text.replace(marker, ""):
+            violations.append(f"unexpected NaN in progress log: {progress_log.name}")
     m0_by_subject: dict[str, pd.DataFrame] = {}
     for seed in seeds:
         for subject in subjects:
@@ -177,7 +178,7 @@ def main() -> None:
             "elapsed_seconds_median": float(table.elapsed_seconds.median()) if len(table) else None,
             "elapsed_seconds_total_units": float(table.elapsed_seconds.sum()) if len(table) else None,
         },
-        "normalized_not_applicable_half_life_markers": normalized_na_markers,
+        "inapplicable_half_life_markers_counted_not_rewritten": inapplicable_half_life_markers,
         "note": "Scientific effect sizes are not acceptance gates and are evaluated only in the formal summary.",
     }
     table.to_csv(root / "ACCEPTANCE_UNIT_TABLE.csv", index=False)

@@ -1,19 +1,18 @@
 {
   "contract": "topic5_history_conditioned_field_refinement_v0_4",
-  "git_head": "c6dc650365623d58e520f25dfb11c844ed2d6384",
+  "git_head": "fd1134ef1a6377c7d42251f53e222729bd095c28",
   "worktree_dirty_entries": [
-    " M docs/archive/topic5/INDEX.md",
-    " M docs/paper-draft/README.md",
-    " M docs/topic5_seizure_subtyping.md",
-    "?? config/topic5_history_rnn_direct_early_ictal_transfer_v0_2.json",
-    "?? docs/archive/topic5/history_rnn_direct_early_ictal_transfer_v0_2_result_2026-08-02.md",
-    "?? docs/archive/topic5/history_rnn_early_ictal_field_v0_1_closeout_2026-08-02.md",
-    "?? docs/paper-draft/figure6_history_rnn_early_ictal_field_bounded_negative.md",
-    "?? docs/superpowers/plans/2026-08-01-topic5-history-rnn-early-ictal-field-v0_1.md",
-    "?? docs/superpowers/plans/2026-08-02-topic5-history-rnn-direct-early-ictal-transfer-v0_2.md",
-    "?? docs/superpowers/specs/2026-08-01-topic5-history-rnn-early-ictal-field-v0_1.md",
-    "?? docs/superpowers/specs/2026-08-02-topic5-history-rnn-direct-early-ictal-transfer-v0_2.md",
-    "?? scripts/audit_topic5_history_rnn_causal_prefix_v0_1.py",
+    " M results/topic5_history_conditioned_field_refinement_v0_4/ACCEPTANCE.json",
+    " M results/topic5_history_conditioned_field_refinement_v0_4/HISTORY_CONDITIONED_FIELD_SUMMARY.json",
+    " M results/topic5_history_conditioned_field_refinement_v0_4/history_conditioned_field_order_shuffle.csv.gz",
+    " M results/topic5_history_conditioned_field_refinement_v0_4/history_conditioned_field_patient_metrics.csv",
+    " M scripts/accept_topic5_history_conditioned_field_v0_4.py",
+    " M scripts/audit_topic5_history_conditioned_field_inputs_v0_4.py",
+    " M scripts/plot_topic5_history_conditioned_field_v0_4.py",
+    " M scripts/run_topic5_history_conditioned_field_fold_v0_4.py",
+    " M scripts/summarize_topic5_history_conditioned_field_v0_4.py",
+    " M src/topic5_static_anchored_history_residual.py",
+    " M tests/test_topic5_history_conditioned_field_v0_4.py",
     "?? scripts/audit_topic5_history_rnn_checkpoint_utilization_v0_2.py",
     "?? scripts/audit_topic5_history_rnn_direct_reproducibility_v0_2.py",
     "?? scripts/audit_topic5_history_rnn_gate1_order_controls_v0_1.py",
@@ -47,8 +46,7 @@
     "?? scripts/summarize_topic5_history_rnn_gate1_sequential_development_v0_1.py",
     "?? scripts/summarize_topic5_history_rnn_gate1_sequential_formal_v0_1.py",
     "?? scripts/watch_topic5_history_rnn_direct_c30_v0_2.sh",
-    "?? src/topic5_history_data.py",
-    "?? tests/test_topic5_history_rnn.py"
+    "?? src/topic5_history_data.py"
   ],
   "python": "3.11.5",
   "numpy": "1.26.4",
@@ -64,8 +62,8 @@
       "sha256": "dd252745bf2a47cde5144e38dd1d8bb846a2a46daf34dc0e17b97b4872fcba25"
     },
     "src/topic5_static_anchored_history_residual.py": {
-      "bytes": 9754,
-      "sha256": "feb0f525d89b5812e56484a1fd041215222f38b708e6785f72006d4207f5e754"
+      "bytes": 9991,
+      "sha256": "1a020c1961d4e7c9305a9a8f60320e2637334c85a5b87e8f583e14899301b019"
     },
     "src/topic5_history_rnn.py": {
       "bytes": 21802,
@@ -84,20 +82,20 @@
       "sha256": "f0a12f9a7741c298833587fb02b3025cb2eb1e28d9e98304a8904dc736845250"
     },
     "scripts/run_topic5_history_conditioned_field_fold_v0_4.py": {
-      "bytes": 32847,
-      "sha256": "666f97554401bb2f74a1bf281f1343a95fdaf2ba3c034f4d054d5eb95f016372"
+      "bytes": 33337,
+      "sha256": "86b4b8d415056825f338aa53991f3f5554b57537323423eb1d4900db9c7ff9bf"
     },
     "scripts/extract_topic5_history_conditioned_field_diagnostics_v0_4.py": {
       "bytes": 8251,
       "sha256": "76d7b543055f9321a20831da200cc913c52a9b0522e6d1d10c491200383ab578"
     },
     "scripts/accept_topic5_history_conditioned_field_v0_4.py": {
-      "bytes": 9920,
-      "sha256": "c28728002621d88d3defe96b1c087e76e0c7df830d8595b17665236ddbee0671"
+      "bytes": 10140,
+      "sha256": "bcb166dedcb50826322c9fb92c39e9b07bc9112f617a45fffbe8b83621266999"
     },
     "scripts/plot_topic5_history_conditioned_field_v0_4.py": {
-      "bytes": 18086,
-      "sha256": "a4783b20aca54a9243ed704dd86393116709fa0b53a4aab901959b214141878a"
+      "bytes": 18353,
+      "sha256": "ceafa21555d3e0420044e4f1c1eea5bfcc05a4700a2ad0072a4e7ade91cae9f4"
     },
     "scripts/report_topic5_history_conditioned_field_v0_4.py": {
       "bytes": 10913,
@@ -108,12 +106,12 @@
       "sha256": "833564c9ff8f6e6daded87587a95cf0b1e7b88e25adbf767e56070654bf2990d"
     },
     "scripts/summarize_topic5_history_conditioned_field_v0_4.py": {
-      "bytes": 26543,
-      "sha256": "1afd9a05467ba9f1b104af4c25eaa4c71a49ce5602ae0399109e6319a1cd081d"
+      "bytes": 28226,
+      "sha256": "9e7a55afc81e6679a2fdd79ceaf662aa08c6cd425af5d18adab2e6257ed9e888"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/ACCEPTANCE.json": {
-      "bytes": 993,
-      "sha256": "7acd4d84fac350ed94b0e0ef1c888bbee42971a3f22077a77d09f1bbdab089cf"
+      "bytes": 999,
+      "sha256": "48e938f171d270b3563d94d7cfdb054f81e3265210ee8b7e809a78c8d9ef0b36"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/ACCEPTANCE_UNIT_TABLE.csv": {
       "bytes": 4938,
@@ -132,8 +130,8 @@
       "sha256": "1d6af73a717a1a6ab5e7c32fe37377dd83625df30a3eb4e0bb8ae22b010b5d79"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/history_conditioned_field_patient_metrics.csv": {
-      "bytes": 8486,
-      "sha256": "145d9ff7463e5bdcc33a66c3357c2259fa6d2b2722d1e0cf1cea58bf3f2ad1fa"
+      "bytes": 9112,
+      "sha256": "aa69a822c226c2d06a173dede587e445fd9e8a09fef7de3dd61d4c53e4362416"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/history_conditioned_field_seed_metrics.csv": {
       "bytes": 25388,
@@ -141,7 +139,7 @@
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/history_conditioned_field_order_shuffle.csv.gz": {
       "bytes": 4358,
-      "sha256": "2f5210725b94591f818ca6ac5e99739c4af0f082e9a0914c5487c49874346f97"
+      "sha256": "516ade1cd79bdb67e7a0c4bab689f25119b396b97a1de033ab112cf5446035da"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/history_conditioned_field_history_swap.csv": {
       "bytes": 1281,
@@ -156,16 +154,16 @@
       "sha256": "adc78797c8d19b4253e788db492f76838a7ea4623c70a8f513c9bfb94c4f5b54"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/HISTORY_CONDITIONED_FIELD_SUMMARY.json": {
-      "bytes": 8950,
-      "sha256": "40a77a0db8e405e484d2a12f4bc31cec880ddeab7bebe7dee9b1e428f72704d3"
+      "bytes": 9885,
+      "sha256": "11d5277242767d8faa2b304b5f6392d237bf9ea2188c0d4db8b38b80506acde7"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/figures/history_conditioned_field_refinement_six_panel.png": {
-      "bytes": 901206,
-      "sha256": "86b4657fd538fc6a1dcafe37653e293add64a0bd38a4cb26ba5e8314441cf22f"
+      "bytes": 941051,
+      "sha256": "d3eb62f7d47c3defc622d81d13750f0eb0cb716efb38f9d22f22984ec6a0453e"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/figures/history_conditioned_field_refinement_six_panel.pdf": {
-      "bytes": 41111,
-      "sha256": "401f9df6af6f67b3f8e5783a5a55b6a825528bfe8a02acdbb512f04f047b4956"
+      "bytes": 41536,
+      "sha256": "bb60724892efbf358434df900108005ac897b67c27954a6f39525c2de613187d"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/figures/representative_history_refinement.png": {
       "bytes": 449352,
@@ -173,19 +171,19 @@
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/figures/representative_history_refinement.pdf": {
       "bytes": 25052,
-      "sha256": "1c26a92f2c2935a85533b081a71a2a64ec28d1670fc36edef854d995d43d2e76"
+      "sha256": "2c1595b685f1b51e4cef19ff8eae0795beea9d549edcb73990071270d683c56e"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/figures/FIGURE_SUMMARY.json": {
       "bytes": 802,
       "sha256": "b5d87ae87c276748c05a79ee3645bba5e5d88cd9791a4bf438c4dbc9518568b1"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/figures/README.md": {
-      "bytes": 1390,
-      "sha256": "805bb7a76a0f102a1b59deacb02e757c92eff3b2438baaa4e5cfbd94316e722e"
+      "bytes": 1729,
+      "sha256": "d3ee6c7a06880334dafd1696717dc606c1e263d17c3627815dc249ae8b2242cd"
     },
     "results/topic5_history_conditioned_field_refinement_v0_4/HISTORY_CONDITIONED_FIELD_REPORT.md": {
-      "bytes": 6785,
-      "sha256": "ed6da7721f69b2d858cdc886cd44c67830316e6d6235c8e27466c2b968fbb522"
+      "bytes": 9702,
+      "sha256": "babe010ac13680163ed970d3d609916b123e5426320223d5e2bbf076ef0f202e"
     }
   },
   "root": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_conditioned_field_refinement_v0_4"

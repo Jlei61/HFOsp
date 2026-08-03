@@ -436,6 +436,21 @@ def _train_m2(
     return logs
 
 
+def _order_shuffle_permutation(example: Example, *, seed: int, draw: int) -> np.ndarray:
+    """Permute event identities across the *complete* causal prefix.
+
+    Contract v0.4 §7.3 requires the whole prefix to be permuted; v0.2 shuffled
+    only the most recent 64 events, which left the shuffled arm and the true
+    arm sharing almost the same history.  The permutation length is therefore
+    always ``len(example.event_time)``.
+    """
+
+    rng = np.random.default_rng(
+        _stable_seed(f"v0.4-order:{seed}:{example.subject}:{example.seizure_id}:{draw}")
+    )
+    return rng.permutation(len(example.event_time))
+
+
 def _abs_spearman(candidate: np.ndarray, target: np.ndarray) -> float:
     if len(candidate) < 3 or np.std(candidate) <= 0 or np.std(target) <= 0:
         return float("nan")
@@ -542,10 +557,7 @@ def _evaluate(
 
     for example_index, example in enumerate(heldout):
         for draw in range(int(config["order_shuffle_draws"])):
-            rng = np.random.default_rng(
-                _stable_seed(f"v0.4-order:{seed}:{example.subject}:{example.seizure_id}:{draw}")
-            )
-            order = rng.permutation(len(example.event_time))
+            order = _order_shuffle_permutation(example, seed=seed, draw=draw)
             state = _batch_history_states(
                 m3_history,
                 [example],

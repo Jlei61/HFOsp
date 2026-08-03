@@ -24,6 +24,64 @@ def _comparison_line(name: str, result: dict) -> str:
     )
 
 
+def _training_fit(root: Path) -> dict[str, dict[str, float]]:
+    """Median in-sample soft-maxAB gain per training stage across all 45 units."""
+
+    per_unit: dict[str, list[tuple[float, float]]] = {}
+    for log_path in sorted(root.glob("per_subject/seed_*/*/training_log.csv")):
+        table = pd.read_csv(log_path)
+        for stage, group in table.groupby("stage"):
+            group = group.sort_values("epoch")
+            per_unit.setdefault(stage, []).append(
+                (float(group.soft_maxab.iloc[0]), float(group.soft_maxab.iloc[-1]))
+            )
+    return {
+        stage: {
+            "first": float(np.median([value[0] for value in values])),
+            "last": float(np.median([value[1] for value in values])),
+            "gain": float(np.median([value[1] - value[0] for value in values])),
+        }
+        for stage, values in per_unit.items()
+    }
+
+
+def _history_extent(root: Path, subjects: list[str]) -> dict[str, float]:
+    """Describe the causal prefixes the negative result actually covers."""
+
+    index = json.loads(
+        (root / "cache" / f"outer_{subjects[0]}" / "INDEX.json").read_text()
+    )
+    entries = [entry for entry in index["entries"] if entry["subject"] in set(subjects)]
+    events = np.asarray([entry["n_events"] for entry in entries], float)
+    span = np.asarray([entry["history_span_hours"] for entry in entries], float)
+    gap = np.asarray([entry["last_event_gap_hours"] for entry in entries], float)
+    return {
+        "n_seizures": len(entries),
+        "events_min": float(events.min()),
+        "events_median": float(np.median(events)),
+        "events_max": float(events.max()),
+        "span_hours_median": float(np.median(span)),
+        "gap_hours_median": float(np.median(gap)),
+    }
+
+
+def _shaft_span(root: Path) -> dict[str, float]:
+    """How many electrode shafts the scored contacts of each patient cover."""
+
+    table = pd.read_csv(
+        root / "history_conditioned_field_state_diagnostics.csv.gz",
+        usecols=["subject", "contact"],
+    )
+    table["shaft"] = table.contact.astype(str).str.replace(r"\d+$", "", regex=True)
+    per_subject = table.groupby("subject").shaft.nunique()
+    return {
+        "min": int(per_subject.min()),
+        "median": float(per_subject.median()),
+        "max": int(per_subject.max()),
+        "n_single_shaft": int((per_subject == 1).sum()),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -64,6 +122,10 @@ def main() -> None:
     static_group = summary["static_anchor_reproduction"]
     m3_null = summary["matched_channel_null"]["M3_JOINT_RNN"]
     sensitivity = comparisons["sensitivity_1_150_m3_minus_m0"]
+    order_matched = comparisons["true_minus_order_shuffle_seed_matched"]
+    fit = _training_fit(root)
+    extent = _history_extent(root, list(summary["cohort"]["patients"]))
+    shafts = _shaft_span(root)
     report = f"""# Topic 5：history-conditioned early-ictal field refinement v0.4 结果报告
 
 ## 一句话结论
@@ -84,6 +146,7 @@ def main() -> None:
 - M0 的患者中位 maxAB 为 **{static_median:.4f}**。
 - 相对每患者 5000 次 matched all-contact channel shuffle，患者中位 margin 为 **{static_margin:+.4f}**；{static_positive}/15 位高于各自 null median，{int(static.pass_null_p95.sum())}/15 位超过各自 p95；患者级 exact P={static_group['p_two_sided_exact']:.4g}。
 - 因此，本轮不是让 RNN 从零生成发作场，而是在一个已存在信息的静态 A/B 基底上检验历史增量。
+- **这个锚点的强度只对 all-contact 标签置换成立**。队列级显著来自 15 个患者 margin 的符号检验；单个患者只有 {int(static.pass_null_p95.sum())}/15 超过自己的 p95。评分触点跨 {shafts['min']}–{shafts['max']} 根电极杆（中位 {shafts['median']:.0f} 根，{shafts['n_single_shaft']} 位患者只有一根），所以本轮 null 没有把"同一根杆上相邻触点天然相似"这部分几何贡献扣掉；Topic 5 既往 peri-onset 工作已经显示 within-shaft null 会明显收紧这类对应。本轮把它当作"有信息的起点"，不当作静态场空间特异性的独立证明。
 
 ## 3. 四个模型
 
@@ -104,12 +167,29 @@ def main() -> None:
 
 这些对比分开报告，没有复合 hard gate。M3−M0 只回答“联合 history residual 是否改善静态场”；M3−M1 和 M3−M2 才决定这种改善是否需要改变 recurrent dynamics、以及是否超过简单时间汇总。
 
+### 4.1 训练集内确实学到了东西，只是没有迁移
+
+45 个单元的训练集 soft-maxAB 中位轨迹：
+
+| 训练阶段 | 起点 | 终点 | 中位增益 |
+|---|---:|---:|---:|
+| common frozen-recurrent head（30 epochs） | {fit['M1_M3_common_frozen_recurrent']['first']:.4f} | {fit['M1_M3_common_frozen_recurrent']['last']:.4f} | {fit['M1_M3_common_frozen_recurrent']['gain']:+.4f} |
+| M1 continuation（+30 epochs） | {fit['M1_frozen_recurrent_continuation']['first']:.4f} | {fit['M1_frozen_recurrent_continuation']['last']:.4f} | {fit['M1_frozen_recurrent_continuation']['gain']:+.4f} |
+| M3 joint（+30 epochs） | {fit['M3_joint']['first']:.4f} | {fit['M3_joint']['last']:.4f} | {fit['M3_joint']['gain']:+.4f} |
+| M2（60 epochs） | {fit['M2_time_aware_nonrecurrent']['first']:.4f} | {fit['M2_time_aware_nonrecurrent']['last']:.4f} | {fit['M2_time_aware_nonrecurrent']['gain']:+.4f} |
+
+因此本轮阴性不是“残差支路根本学不动”：每个模型在自己的 14 位训练患者上都把 soft-maxAB 推高了，只是这些增益没有迁移到留出患者。
+
+**M3−M1 必须带着这条限定读**：M3 在训练集上的增益（{fit['M3_joint']['gain']:+.4f}）低于 M1 continuation（{fit['M1_frozen_recurrent_continuation']['gain']:+.4f}），而两者起点相同、mini-batch 顺序相同、head 学习率相同。所以“留出集上 M3≈M1”与“联合微调 recurrent dynamics 在固定预算内更难优化”是混淆的，不能单独读成“改变 recurrent dynamics 没有价值”。可能的来源包括联合阶段的 state 每步都在移动，以及 head 与 GRU 共享同一个 gradient-clip 预算。
+
 ## 5. 历史是否真有特异性
 
 {_comparison_line('M3 true order−完整历史顺序打乱', order)}
 {_comparison_line('M3 correct history−同患者其他发作 history swap', swap)}
 
 顺序对照对整段 causal history 做事件身份置换并保留原时间槽，每个 seed 32 次；不是只洗最近 64 个事件。History-swap 保持患者、静态 A/B、contact set 和 target 不变，只替换成同患者另一场发作的历史；只有一场合格发作的患者不进入这一对比。
+
+**顺序对照的两臂聚合方式不完全对称**：正式 M3 分数先把三个 seed 的候选场逐 contact 平均再评分，而打乱臂每个 seed 抽自己的置换、只能先评分再平均。把真实臂也改成“逐 seed 评分再平均”后，同构口径给出中位差 {order_matched['median_delta']:+.4f}，{order_matched['n_positive']} 正 / {order_matched['n_negative']} 负 / {order_matched['n_tie']} 并列，exact P={order_matched['p_two_sided_exact']:.4g}（n={order_matched['n_patients']}）。两种口径结论一致：真实事件顺序没有优势。History-swap 臂本来就是 seed 场平均，与正式分数同构。
 
 ## 6. 绝对信息和频带敏感性
 
@@ -139,6 +219,9 @@ def main() -> None:
 3. 该任务预测发作早期空间场，不预测发作何时发生。
 4. 只有 correct-history 超过 within-patient swap，才把增量称为 seizure-matched；只有 true-order 超过整段 shuffle，才称为顺序特异。
 5. 6–16 个触点的评分分辨率较粗，患者级精确并列是预期现象，统计已使用 1e-9 tie band 和 exact sign-rank null。
+6. **这条阴性覆盖的历史尺度**：每次发作只读同一连续记录段内、cutoff 之前的事件，{extent['n_seizures']} 次发作的前缀事件数为 {extent['events_min']:.0f}–{extent['events_max']:.0f}（中位 {extent['events_median']:.0f}），跨度中位 {extent['span_hours_median']:.2f} h，最后一个事件到 cutoff 的间隔中位 {extent['gap_hours_median']:.2f} h；模型的时钟记忆半衰期中位约 {summary['training_diagnostics']['m3_half_life_hours_median']:.2f} h。因此本轮检验的是“发作前数小时之内的事件历史”，跨天或跨记录段的长程网络塑形不在被检验的模型族里。
+7. 队列级阴性由 15 位患者的符号检验支撑，其中 M3−M0 有 {primary['n_tie']} 位精确并列；本轮没有跑合成阳性对照，所以“检出真实增量的灵敏度下界”未被独立标定。
+8. 静态 A/B 的信息量只对 all-contact 标签置换 null 成立（见 §2），电极杆几何贡献未被扣除。
 
 ## 10. 产物
 

@@ -166,6 +166,23 @@
       "n_tie": 4,
       "n_nonzero": 11
     },
+    "true_minus_order_shuffle_seed_matched": {
+      "label": "M3 true-order - full-history shuffle (both arms scored per seed)",
+      "left": "m3_joint_rnn_seedwise_mean_1_45",
+      "right": "m3_order_shuffle_mean_1_45",
+      "n_patients": 15,
+      "median_delta": -0.0005580357142856984,
+      "mean_delta": -0.014639934888096656,
+      "bootstrap_95ci_median": [
+        -0.012934027777777801,
+        0.0
+      ],
+      "p_two_sided_exact": 0.123046875,
+      "n_positive": 3,
+      "n_negative": 8,
+      "n_tie": 4,
+      "n_nonzero": 11
+    },
     "correct_minus_history_swap": {
       "label": "M3 correct-history - within-patient swap",
       "left": "m3_joint_rnn_1_45",
@@ -257,7 +274,9 @@
   },
   "history_controls": {
     "order_shuffle": "32 full-history permutations per seed; time slots retained; patient control is the mean over 96 seed-draw realizations",
-    "within_patient_swap_n": 10
+    "order_shuffle_aggregation_note": "the shuffle arm averages per-seed scores while the formal M3 score ensembles the three seeds at field level; true_minus_order_shuffle_seed_matched repeats the contrast with both arms scored per seed and is the arm-for-arm isomorphic reading",
+    "within_patient_swap_n": 10,
+    "within_patient_swap_aggregation": "seed-mean candidate field, matching the formal M3 score"
   },
   "training_diagnostics": {
     "peak_gpu_memory_mb_max": 100.37060546875,

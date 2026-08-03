@@ -78,11 +78,6 @@ def _paired_delta_panel(
         )
         median = np.median(values)
         ax.plot([index - 0.22, index + 0.22], [median, median], color="black", lw=1.4, zorder=4)
-        ax.text(
-            index,
-            ax.get_ylim()[1] if ax.get_ylim()[1] > 0 else 0,
-            "",
-        )
         labels[index] = (
             f"{labels[index]}\nmed {median:+.3f}\n"
             f"P={result['p_two_sided_exact']:.3g}, n={result['n_patients']}"
@@ -95,13 +90,13 @@ def _paired_delta_panel(
 
 def _draw_task(ax: plt.Axes) -> None:
     ax.set_axis_off()
-    x = np.linspace(0.08, 0.72, 8)
+    x = np.linspace(0.24, 0.72, 8)
     gradients = [np.linspace(0, 1, 8), np.linspace(1, 0, 8)]
     for row, values in enumerate(gradients):
         y = 0.74 - row * 0.25
         ax.plot([x.min(), x.max()], [y, y], color="#D1D5DB", lw=1, zorder=0)
         ax.scatter(x, np.full_like(x, y), c=values, cmap="viridis", vmin=0, vmax=1, s=28, zorder=2)
-        ax.text(0.01, y, f"Static {'A' if row == 0 else 'B'}", va="center", ha="left")
+        ax.text(0.19, y, f"Static {'A' if row == 0 else 'B'}", va="center", ha="right")
     ax.annotate(
         "+ causal history residual",
         xy=(0.52, 0.31),
@@ -168,10 +163,10 @@ def _main_figure(root: Path, patient: pd.DataFrame, summary: dict, output: Path)
         3,
         left=0.075,
         right=0.985,
-        bottom=0.085,
+        bottom=0.135,
         top=0.955,
         wspace=0.46,
-        hspace=0.52,
+        hspace=0.60,
     )
     axes = [fig.add_subplot(grid[row, col]) for row in range(2) for col in range(3)]
 
@@ -187,8 +182,15 @@ def _main_figure(root: Path, patient: pd.DataFrame, summary: dict, output: Path)
     improved = y > x + 1e-9
     limits = [max(0, min(x.min(), y.min()) - 0.04), min(1, max(x.max(), y.max()) + 0.04)]
     ax.plot(limits, limits, color="#777777", lw=0.8, ls="--", zorder=1)
-    ax.scatter(x[~improved], y[~improved], s=24, color=COLORS["negative"], edgecolor="white", lw=0.4, label="no gain")
-    ax.scatter(x[improved], y[improved], s=24, color=COLORS["positive"], edgecolor="white", lw=0.4, label="M3 gain")
+    ax.scatter(
+        x[~improved], y[~improved], s=24, color=COLORS["negative"], edgecolor="white", lw=0.4,
+        label="M3 ≤ M0",
+    )
+    ax.scatter(
+        x[improved], y[improved], s=24, color=COLORS["positive"], edgecolor="white", lw=0.4,
+        label="M3 > M0",
+    )
+    ax.legend(loc="lower right", frameon=False, handletextpad=0.2, borderaxespad=0.2)
     ax.set(xlim=limits, ylim=limits, xlabel="M0 static maxAB", ylabel="M3 joint-RNN maxAB")
     primary = summary["comparisons"]["primary_m3_minus_m0"]
     ax.text(
@@ -227,6 +229,13 @@ def _main_figure(root: Path, patient: pd.DataFrame, summary: dict, output: Path)
             summary["comparisons"]["correct_minus_history_swap"],
         ],
     )
+    matched = summary["comparisons"]["true_minus_order_shuffle_seed_matched"]
+    ax.set_xlabel(
+        "Both arms scored per seed:\n"
+        f"True−shuffle med {matched['median_delta']:+.3f}, P={matched['p_two_sided_exact']:.3g}",
+        fontsize=5.6,
+        color="#555555",
+    )
     ax.set_title("Is any effect specific to true order\nand seizure-matched history?", loc="left", pad=5)
 
     ax = axes[5]
@@ -234,13 +243,14 @@ def _main_figure(root: Path, patient: pd.DataFrame, summary: dict, output: Path)
     for row in patient.itertuples(index=False):
         values = [getattr(row, column) for column in columns]
         ax.plot([0, 1], values, color="#D1D5DB", lw=0.65, zorder=1)
+    above_p95 = {}
     for index, (column, color, label) in enumerate(zip(columns, [COLORS["M0"], COLORS["M3"]], ["M0", "M3"])):
         values = patient[column].to_numpy(float)
         ax.scatter(np.full(len(values), index), values, s=20, color=color, edgecolor="white", lw=0.35, zorder=3)
         ax.plot([index - 0.20, index + 0.20], [np.median(values)] * 2, color="black", lw=1.3, zorder=4)
         model_name = "M0_STATIC_AB" if label == "M0" else "M3_JOINT_RNN"
         null = summary["matched_channel_null"][model_name]
-        ax.text(index, ax.get_ylim()[1] if ax.get_ylim()[1] else 0, "", fontsize=1)
+        above_p95[label] = f"{null['n_above_null_p95']}/{null['n_patients']}"
     sensitivity = summary["comparisons"]["sensitivity_1_150_m3_minus_m0"]
     ax.axhline(0, color="#333333", lw=0.8, ls="--")
     ax.set_xticks([0, 1], ["M0 static", "M3 joint RNN"])
@@ -248,7 +258,7 @@ def _main_figure(root: Path, patient: pd.DataFrame, summary: dict, output: Path)
     ax.text(
         0.02,
         0.98,
-        "Above p95: M0 5/15; M3 5/15\n"
+        f"Above p95: M0 {above_p95['M0']}; M3 {above_p95['M3']}\n"
         f"1–150 Hz: M3−M0 med {sensitivity['median_delta']:+.3f}",
         transform=ax.transAxes,
         ha="left",
@@ -256,13 +266,8 @@ def _main_figure(root: Path, patient: pd.DataFrame, summary: dict, output: Path)
         fontsize=5.8,
         bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.82, "pad": 0.8},
     )
-    ax.text(
-        0.98,
-        0.02,
-        "Target-blind static A/B;\nretrospective full record",
-        transform=ax.transAxes,
-        ha="right",
-        va="bottom",
+    ax.set_xlabel(
+        "All-contact label shuffle;\ntarget-blind but retrospective static A/B",
         fontsize=5.6,
         color="#555555",
     )
@@ -398,7 +403,7 @@ def main() -> None:
 
 ### history_conditioned_field_refinement_six_panel.png
 
-六联图依次展示集合值任务、四个嵌套模型、M3 相对静态 M0 的患者级变化、M3 相对冻结状态 M1 与非递归 M2 的增量、真实历史相对完整顺序打乱及同患者 history-swap 的变化，以及 M0/M3 超出 matched channel null 的绝对信息。主 endpoint 固定为 clinical onset 后 0–10 s、1–45 Hz contact-energy field；1–150 Hz 仅为 no-retrain sensitivity。静态 A/B 未读取发作早期 target，但来自全记录间期事件，因此整体分析是回顾性的，不是完全前瞻预测器。
+六联图依次展示集合值任务、四个嵌套模型、M3 相对静态 M0 的患者级变化、M3 相对冻结状态 M1 与非递归 M2 的增量、真实历史相对完整顺序打乱及同患者 history-swap 的变化，以及 M0/M3 超出 matched channel null 的绝对信息。主 endpoint 固定为 clinical onset 后 0–10 s、1–45 Hz contact-energy field；1–150 Hz 仅为 no-retrain sensitivity。静态 A/B 未读取发作早期 target，但来自全记录间期事件，因此整体分析是回顾性的，不是完全前瞻预测器。E 下方脚注给出把真实臂也改成"逐 seed 评分再平均"后的同构口径，用来确认顺序结论不依赖两臂聚合方式的差异。F 的 null 只打乱 all-contact 标签，没有扣除同一根电极杆上相邻触点的几何相似，所以它标定的是"起点有信息"，不是静态场的空间特异性证明。
 
 **关注点**：先看 C 的 M3−M0，再用 D/E 区分增量来自 recurrent dynamics、简单历史汇总、真实顺序还是发作匹配历史；F 检查模型是否只是在弱静态锚点附近做相对改善。
 

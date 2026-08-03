@@ -174,6 +174,20 @@ def _ensemble_true(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     return ensemble, pd.DataFrame(rows)
 
 
+def _seedwise_patient_score(seed_metrics: pd.DataFrame, model: str) -> pd.Series:
+    """Average the per-seed patient median instead of scoring a seed-mean field.
+
+    The formal model score ensembles the three seeds at *field* level before
+    scoring, but the order-shuffle control can only average *scores* (each seed
+    draws its own permutations).  Comparing those two directly is not
+    arm-for-arm isomorphic, so this seed-level score is reported alongside it.
+    """
+
+    subset = seed_metrics.loc[seed_metrics.model == model]
+    per_seed = subset.groupby(["subject", "seed"]).maxab_1_45.median()
+    return per_seed.groupby("subject").mean()
+
+
 def _score_order_control(raw: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     control = raw.loc[raw.model == "M3_ORDER_SHUFFLE_FULL_HISTORY"].copy()
     seizure_rows = []
@@ -396,6 +410,12 @@ def main() -> None:
     patient["delta_true_minus_order_shuffle_1_45"] = (
         patient.m3_joint_rnn_1_45 - patient.m3_order_shuffle_mean_1_45
     )
+    patient["m3_joint_rnn_seedwise_mean_1_45"] = patient.subject.map(
+        _seedwise_patient_score(seed_metrics, "M3_JOINT_RNN")
+    )
+    patient["delta_true_minus_order_shuffle_seed_matched_1_45"] = (
+        patient.m3_joint_rnn_seedwise_mean_1_45 - patient.m3_order_shuffle_mean_1_45
+    )
     patient["delta_correct_minus_history_swap_1_45"] = (
         patient.m3_joint_rnn_1_45 - patient.m3_history_swap_median_1_45
     )
@@ -450,6 +470,12 @@ def main() -> None:
         ),
         "true_minus_order_shuffle": _comparison(
             patient, "m3_joint_rnn_1_45", "m3_order_shuffle_mean_1_45", "M3 true-order - full-history shuffle"
+        ),
+        "true_minus_order_shuffle_seed_matched": _comparison(
+            patient,
+            "m3_joint_rnn_seedwise_mean_1_45",
+            "m3_order_shuffle_mean_1_45",
+            "M3 true-order - full-history shuffle (both arms scored per seed)",
         ),
         "correct_minus_history_swap": _comparison(
             patient, "m3_joint_rnn_1_45", "m3_history_swap_median_1_45", "M3 correct-history - within-patient swap"
@@ -537,7 +563,13 @@ def main() -> None:
         "matched_channel_null": channel_null_cohort,
         "history_controls": {
             "order_shuffle": "32 full-history permutations per seed; time slots retained; patient control is the mean over 96 seed-draw realizations",
+            "order_shuffle_aggregation_note": (
+                "the shuffle arm averages per-seed scores while the formal M3 score ensembles the three "
+                "seeds at field level; true_minus_order_shuffle_seed_matched repeats the contrast with "
+                "both arms scored per seed and is the arm-for-arm isomorphic reading"
+            ),
             "within_patient_swap_n": int(patient.m3_history_swap_median_1_45.notna().sum()),
+            "within_patient_swap_aggregation": "seed-mean candidate field, matching the formal M3 score",
         },
         "training_diagnostics": {
             "peak_gpu_memory_mb_max": float(max(done["peak_gpu_memory_mb"] for done in done_payloads)),
