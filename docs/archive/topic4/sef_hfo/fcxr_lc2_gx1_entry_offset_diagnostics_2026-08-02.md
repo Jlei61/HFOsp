@@ -53,4 +53,4 @@ gain**作为 entry 几何的下一条独立假说，同时把 X 动态范围作�
 - long stages used setsid/nohup, exact PID watchdogs, stage locks and sentinels;
 - S1 watchdog elapsed 5.933 h; X1 watchdog elapsed 1.008 h;
 - peak single-cell RSS 11.236 GiB; swap delta 0 MiB;
-- final commit and test counts are recorded in `run_manifest.json` after sign-off.
+- result archive commit and test counts are recorded in `run_manifest.json`.
