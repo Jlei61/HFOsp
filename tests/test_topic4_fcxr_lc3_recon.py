@@ -1,9 +1,25 @@
 """Pure contracts for LC3 no-kick reconnaissance."""
 from src.topic4_fcxr_lc3_recon import (
+    checkpoint_step_for_snapshot,
     nearest_snapshot_labels,
     reconnaissance_verdict,
     select_landmark_times,
 )
+
+
+def test_snapshot_after_update_maps_to_next_continuation_step():
+    assert checkpoint_step_for_snapshot({
+        "step": 17, "captured_after_update": True,
+    }) == 18
+
+
+def test_snapshot_checkpoint_mapping_fails_closed_on_wrong_causal_semantics():
+    import pytest
+
+    with pytest.raises(ValueError, match="captured after"):
+        checkpoint_step_for_snapshot({"step": 17, "captured_after_update": False})
+    with pytest.raises(ValueError, match="non-negative integer"):
+        checkpoint_step_for_snapshot({"step": -1, "captured_after_update": True})
 
 
 def test_no_onset_uses_only_final_landmark():

@@ -7,6 +7,21 @@ import numpy as np
 SCHEMA_VERSION = "fcxr-lc3-recon-1.0"
 
 
+def checkpoint_step_for_snapshot(snapshot: dict) -> int:
+    """Map a post-update slow snapshot to the matching continuation step."""
+
+    if not isinstance(snapshot, dict):
+        raise TypeError("snapshot must be a dict")
+    if snapshot.get("captured_after_update") is not True:
+        raise ValueError("snapshot must be captured after its registered update")
+    step = snapshot.get("step")
+    if not isinstance(step, (int, np.integer)) or int(step) < 0:
+        raise ValueError("snapshot step must be a non-negative integer")
+    # The slow snapshot is captured after update k; the complete loop state at
+    # that same physical instant has already advanced to continuation step k+1.
+    return int(step) + 1
+
+
 def select_landmark_times(lifecycle: dict, *, win_ms: float, total_ms: float) -> dict:
     """Deterministically map a window-level lifecycle result to snapshot times."""
 
@@ -67,4 +82,3 @@ def reconnaissance_verdict(*, lifecycle: dict, numerical_unsafe: bool,
         return ("RECON_RECOVERED_PATTERN" if x_activates_after_onset
                 else "RECON_RECOVERY_X_ORDER_UNRESOLVED")
     return "RECON_OTHER_COMPLETED"
-

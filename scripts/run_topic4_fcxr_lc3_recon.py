@@ -37,8 +37,13 @@ import run_topic4_mz_fcxr_lifecycle as LC1R  # noqa: E402
 import run_topic4_mz_slowvars as OLD  # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 from src.topic4_fcxr_lc3 import run_fcxr_loop  # noqa: E402
-from src.topic4_fcxr_lc3_geometry import H1_POINT_ID  # noqa: E402
+from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
+    H1_POINT_ID,
+    compact_checkpoint_diagnostics,
+    save_prepared_checkpoint,
+)
 from src.topic4_fcxr_lc3_recon import (  # noqa: E402
+    checkpoint_step_for_snapshot,
     nearest_snapshot_labels,
     reconnaissance_verdict,
     select_landmark_times,
@@ -190,6 +195,121 @@ def _assert_manifest():
     return m
 
 
+def _save_exact_landmark_states(*, row, selected, reference_snapshots,
+                                reference_rate_e, reference_rate_i,
+                                reference_spikes, point):
+    """Replay noise401 and persist complete, byte-matched landmark states.
+
+    Sparse slow-field snapshots are useful readouts but cannot seed a causal
+    perturbation: voltage, refractory counters, synaptic filters, delay rings and
+    RNG state also affect the response.  This primary-seed replay advances in
+    consecutive chunks and accepts a checkpoint only if rate, raster and all four
+    slow fields are byte-identical to the reconnaissance trajectory.
+    """
+
+    if int(row["noise_seed"]) != NOISES[0]:
+        return {}
+    if not selected:
+        raise RuntimeError("primary recon produced no selected landmarks")
+
+    grouped = {}
+    for landmark, choice in selected.items():
+        label = choice["snapshot_label"]
+        if label not in reference_snapshots:
+            raise RuntimeError(f"missing selected slow snapshot {label}")
+        snap = reference_snapshots[label]
+        stop_step = checkpoint_step_for_snapshot(snap)
+        grouped.setdefault(stop_step, []).append((landmark, choice, snap))
+
+    S = PP.build_substrate(1)
+    cfg = E01._dynamic_cfg(point)
+    slow = MZSlowVars(
+        S["N"], 18.0, MZSlowVarsConfig(**cfg), NE=S["NE"],
+        core_mask_E=OLD.build_core_masks(S), snapshot_steps=None,
+    )
+    S["net"]["rng"] = np.random.default_rng(int(row["noise_seed"]))
+    cursor = 0
+    state = None
+    records = {}
+    exact_dir = os.path.join(OUT, "exact_landmarks")
+    os.makedirs(exact_dir, exist_ok=True)
+
+    for stop_step in sorted(grouped):
+        if stop_step <= cursor or stop_step > len(reference_rate_e):
+            raise RuntimeError(
+                f"invalid exact landmark stop {stop_step}; cursor={cursor}, "
+                f"reference_steps={len(reference_rate_e)}")
+        n_steps = stop_step - cursor
+        p = dataclasses.replace(S["p"], T=n_steps * E01.DT, dt=E01.DT)
+        kwargs = dict(
+            n_steps=n_steps, capture_final=True, store_spikes=True,
+            v_th_per_neuron=S["vth"],
+        )
+        if state is None:
+            chunk = run_fcxr_loop(p, S["net"], slow=slow, **kwargs)
+        else:
+            chunk = run_fcxr_loop(p, S["net"], start=state, **kwargs)
+
+        parity = dict(
+            rate_E=bool(np.array_equal(
+                chunk["rate_E"], reference_rate_e[cursor:stop_step])),
+            rate_I=bool(np.array_equal(
+                chunk["rate_I"], reference_rate_i[cursor:stop_step])),
+            raster_E=bool(np.array_equal(
+                chunk["E_spk_bool"], reference_spikes[cursor:stop_step])),
+        )
+        if not all(parity.values()):
+            raise RuntimeError(f"exact landmark replay diverged at step {stop_step}: {parity}")
+        state = chunk["checkpoint"]
+        if int(state.t) != stop_step:
+            raise RuntimeError(f"checkpoint time mismatch {state.t} != {stop_step}")
+
+        field_parity = {}
+        for landmark, _choice, snap in grouped[stop_step]:
+            checks = dict(
+                D=bool(np.array_equal(
+                    1.0 - state.slow.z[:S["NE"]], 1.0 - np.asarray(snap["z_E"]))),
+                X=bool(np.array_equal(state.slow.x_relay, np.asarray(snap["x_E"]))),
+                H=bool(np.array_equal(state.slow.h_lc2_E, np.asarray(snap["h_E"]))),
+                Y=bool(np.array_equal(state.slow.y, np.asarray(snap["y_E"]))),
+            )
+            if not all(checks.values()):
+                raise RuntimeError(
+                    f"exact slow-field replay diverged at {landmark}/{stop_step}: {checks}")
+            field_parity[landmark] = checks
+
+        path = os.path.join(exact_dir, f"noise{row['noise_seed']}_step{stop_step}.pkl")
+        aliases = [name for name, _choice, _snap in grouped[stop_step]]
+        checkpoint = save_prepared_checkpoint(
+            path, state,
+            metadata=dict(
+                role="primary_dynamic_reconnaissance_landmark",
+                row_id=row["row_id"], noise_seed=int(row["noise_seed"]),
+                point_id=H1_POINT_ID, exact_step=stop_step,
+                exact_time_ms=stop_step * E01.DT, landmark_aliases=aliases,
+                no_kick=True, no_reset=True, no_parameter_step=True,
+                source_lock_git_head=_load(LOCK)["git_head"],
+            ),
+        )
+        for landmark, choice, snap in grouped[stop_step]:
+            records[landmark] = dict(
+                **checkpoint, exact_step=stop_step,
+                exact_time_ms=stop_step * E01.DT,
+                snapshot_step=int(snap["step"]),
+                snapshot_time_ms=float(choice["snapshot_time_ms"]),
+                target_time_ms=float(choice["target_time_ms"]),
+                output_parity=dict(parity), slow_field_parity=field_parity[landmark],
+            )
+        state = compact_checkpoint_diagnostics(state)
+        cursor = stop_step
+        del chunk
+        gc.collect()
+
+    del S, state
+    gc.collect()
+    return records
+
+
 def _run_once(row):
     out_json = row["output_path"]
     done_json = out_json.replace(".json", ".DONE.json")
@@ -289,6 +409,11 @@ def _run_once(row):
             D_regions={k: float(d_fields[i][mask].mean()) for k, mask in masks.items()},
             X_regions={k: float(x_fields[i][mask].mean()) for k, mask in masks.items()},
         ))
+    exact_landmarks = _save_exact_landmark_states(
+        row=row, selected=selected, reference_snapshots=slow_final.snapshots,
+        reference_rate_e=rate_e, reference_rate_i=rate_i,
+        reference_spikes=spikes, point=point,
+    )
     first_passage = np.full(S["NE"], np.nan, dtype=np.float32)
     if onset_ms is not None:
         i0 = int(round(onset_ms / E01.DT))
@@ -318,6 +443,9 @@ def _run_once(row):
         x_peak_depletion_ms=x_peak_ms, x_activates_after_onset=x_after,
         x_start=float(xtrace[0]) if xtrace.size else None,
         x_min=float(xtrace.min()) if xtrace.size else None,
+        exact_landmark_states=exact_landmarks,
+        exact_landmark_state_scope=("primary_noise401" if exact_landmarks
+                                    else "not_primary_seed"),
         events=[dict(t_on_ms=float(e["t_on"]), t_off_ms=float(e["t_off"]),
                      dur_ms=float(e["dur_ms"]), peak_ext=float(e["peak_ext"]),
                      returned=bool(e.get("returned", False))) for e in events],
