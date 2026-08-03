@@ -111,7 +111,7 @@ M3 STATIC_AB_PLUS_JOINT_RNN
 - 分叉后的 M1/M3 使用相同 mini-batch 顺序并继承同一 head optimizer state，使更新预算匹配；
 - EventRNN、contact embedding、normalization、static A/B 始终冻结；
 - anchor penalty 只覆盖 recurrent weights 和 decay；
-- gains 初始化为 `1e-3`；
+- gains 用近零不饱和的平方参数化约束在 `[0,1]`，初始化为 `1e-3`；
 - 记录初始化 output 相对 static 的差和夹角。
 
 ### 2.3 删除正式 zero-state arm

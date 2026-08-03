@@ -181,7 +181,7 @@ r^k=
 \quad k\in\{A,B\}.
 \]
 
-其中 \(g_k=\sigma(a_k)\in(0,1)\)，初始化为 \(10^{-3}\)。A/B gains 为 outer-fold training cohort 共享标量，不设 patient-specific gain。初始化时必须记录最终候选场与 static A/B 的 L2 差和夹角。工程测试中显式令 \(g=0\) 时，输出必须逐位等于规范化 static A/B。微小 residual 不能因单位化被放大。
+其中 \(g_k=\min(a_k^2,1)\in[0,1]\)，初始化为 \(10^{-3}\)。平方参数化用于避免 sigmoid 在近零初始化时梯度饱和，不改变 gain 的范围或科学含义。A/B gains 为 outer-fold training cohort 共享标量，不设 patient-specific gain。初始化时必须记录最终候选场与 static A/B 的 L2 差和夹角。工程测试中显式令 \(g=0\) 时，输出必须逐位等于规范化 static A/B。微小 residual 不能因单位化被放大。
 
 ### 5.2 M0：`STATIC_AB`
 
