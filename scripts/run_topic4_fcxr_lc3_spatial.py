@@ -74,9 +74,12 @@ SPATIAL_SOURCES = (
     "src/topic4_fcxr_lc3_spatial.py",
     "src/snn_engine/mz_slow_vars.py",
     "scripts/run_topic4_fcxr_lc3_spatial.py",
+    "scripts/run_topic4_fcxr_lc3_spatial_autopilot.sh",
     "docs/superpowers/specs/2026-08-03-topic4-fcxr-lc3-dx-spatial-instability-design.md",
     "docs/superpowers/plans/2026-08-03-topic4-fcxr-lc3-dx-spatial-instability.md",
 )
+
+_SPATIAL_SWAP_BASE_MIB = None
 
 
 def _now():
@@ -120,6 +123,19 @@ def _meminfo():
         swap_used_mib=(d["SwapTotal"] - d["SwapFree"]) / 1024.0,
         self_peak_rss_gib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0,
     )
+
+
+def _wait_before_new_arm():
+    """Honor the +256 MiB pause contract before starting another 40k arm."""
+
+    if _SPATIAL_SWAP_BASE_MIB is None:
+        raise RuntimeError("spatial swap baseline was not initialized")
+    while True:
+        mem = _meminfo()
+        if (mem["swap_used_mib"] - _SPATIAL_SWAP_BASE_MIB < 256.0
+                and mem["mem_available_gib"] >= 96.0):
+            return
+        time.sleep(30.0)
 
 
 @contextmanager
@@ -380,6 +396,7 @@ def _run_or_load_reduced(S, state, *, state_id, kind, pattern_name,
                                   resumed=True),
                 )
 
+    _wait_before_new_arm()
     out = _run_arm(S, state, pattern, amplitude)
     fields = rate_fields(out["E_spk_bool"], dt_ms=DT)
     active = out["E_spk_bool"].any(axis=0)
@@ -565,6 +582,7 @@ def _run_state(S, state_record, lock, masks, positive, basis):
 
 
 def cmd_all(args):
+    global _SPATIAL_SWAP_BASE_MIB
     if not args.confirm_run:
         raise SystemExit("40k spatial response requires --confirm-run")
     lock, _manifest = _assert_manifest()
@@ -572,6 +590,7 @@ def cmd_all(args):
         raise SystemExit("spatial response requires 128 GiB MemAvailable")
     masks, positive, basis = _load_patterns()
     S = PP.build_substrate(1)
+    _SPATIAL_SWAP_BASE_MIB = _meminfo()["swap_used_mib"]
     os.makedirs(CELL_DIR, exist_ok=True)
     t0 = time.time()
     with _stage_lock("spatial_all"):
