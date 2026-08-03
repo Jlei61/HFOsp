@@ -118,12 +118,14 @@ def test_collective_m_divisor_suppresses_base_recurrent_e_without_h():
     )
     slow.S_G = 0.0
     slow.m[:4] = 10.0
-    assert slow.mode_M_pool() == pytest.approx(1.0)
+    assert slow.mode_M_raw_pool() == pytest.approx(1.0)
+    assert slow.mode_M_pool() == pytest.approx(0.5)
     out = slow.apply_currents(
         np.full(6, 10.0), np.zeros(6), I_E_rec=np.full(6, 6.0)
     )
-    # recurrent component is 6/(1 + 2*1) = 2 mV; the non-recurrent 4 mV
-    # remains outside the divisor, giving 6 mV before the already-existing
+    # Hill activation is 0.5 at the reference, so recurrent component is
+    # 6/(1 + 2*0.5) = 3 mV; the non-recurrent 4 mV remains outside the
+    # divisor, giving 7 mV before the already-existing
     # eta_m*m = 0.01-mV additive M current.
-    np.testing.assert_allclose(out[:4], 5.99)
-    assert slow.trace_mode_M_divisor[-1] == pytest.approx(3.0)
+    np.testing.assert_allclose(out[:4], 6.99)
+    assert slow.trace_mode_M_divisor[-1] == pytest.approx(2.0)

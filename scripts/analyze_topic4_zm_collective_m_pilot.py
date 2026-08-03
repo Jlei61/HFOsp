@@ -45,6 +45,7 @@ def _label(summary: dict) -> str | None:
         and _close(slow.get("tau_M_ms"), 500.0)
         and _close(div.get("m_mode_div_ref"), 30.0)
         and _close(div.get("m_mode_div_power"), 4.0)
+        and _close(div.get("m_mode_div_hill_power"), 4.0)
     ):
         return None
     kappa = float(div["kappa_mode_M"])

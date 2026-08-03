@@ -190,6 +190,7 @@ class SpatialSlowFieldConfig:
     kappa_mode_M: float = 0.0
     m_mode_div_ref: float = 30.0
     m_mode_div_power: float = 4.0
+    m_mode_div_hill_power: float = 4.0
     # ---- Phase-D fast carrier: E-only dynamic-threshold INCREMENT.
     # This is not the legacy absolute-threshold SlowVars.phi. The heterogeneous
     # V_th substrate remains the base and phi_increment is added on top. ----
@@ -337,6 +338,7 @@ class SpatialSlowFieldConfig:
             for name, value in {
                 "m_mode_div_ref": self.m_mode_div_ref,
                 "m_mode_div_power": self.m_mode_div_power,
+                "m_mode_div_hill_power": self.m_mode_div_hill_power,
             }.items():
                 if not np.isfinite(value) or value <= 0.0:
                     raise ValueError(f"{name} must be finite and >0")
@@ -599,7 +601,7 @@ class SpatialSlowField:
         self.trace_mode_H_drive_mean = []; self.trace_mode_H_drive_max = []
         self.trace_mode_H_gain_mean = []; self.trace_mode_H_gain_max = []
         self.trace_mode_H_gain_core_mean = []
-        self.trace_mode_M_pool = []; self.trace_mode_M_divisor = []
+        self.trace_mode_M_raw_pool = []; self.trace_mode_M_pool = []; self.trace_mode_M_divisor = []
         # ---- Phase-D dynamic threshold increment (E-only, fast) ----
         self.phi_increment = np.zeros(self.N, dtype=float)
         self.trace_phi_mean = []; self.trace_phi_max = []
@@ -703,8 +705,10 @@ class SpatialSlowField:
             else:
                 aH = 0.0
             if self.cfg.use_mode_M_divisive:
+                raw_pool_M = self.mode_M_raw_pool()
                 pool_M = self.mode_M_pool()
                 aM = self.cfg.kappa_mode_M * pool_M
+                self.trace_mode_M_raw_pool.append(float(raw_pool_M))
                 self.trace_mode_M_pool.append(float(pool_M))
                 self.trace_mode_M_divisor.append(float(1.0 + aM))
             else:
@@ -744,7 +748,7 @@ class SpatialSlowField:
         hE = self.mode_H[self._iyE, self._ixE]
         return self.cfg.rho_mode_H * hE * gate_z * gate_m
 
-    def mode_M_pool(self) -> float:
+    def mode_M_raw_pool(self) -> float:
         """Mask-free p-norm of native E-cell M, normalised to a reference."""
         if not self.cfg.use_mode_M_divisive or self.cfg.kappa_mode_M <= 0.0:
             return 0.0
@@ -752,6 +756,13 @@ class SpatialSlowField:
         return float(np.mean(scaled ** self.cfg.m_mode_div_power)) ** (
             1.0 / self.cfg.m_mode_div_power
         )
+
+    def mode_M_pool(self) -> float:
+        """Low-baseline Hill activation of the collective native-M pool."""
+        raw = self.mode_M_raw_pool()
+        power = self.cfg.m_mode_div_hill_power
+        raised = raw ** power
+        return raised / (1.0 + raised)
 
     def _load_shunt_params(self):
         c = self.cfg

@@ -364,10 +364,12 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
                 "kappa_mode_M": float(args.kappa_mode_M),
                 "m_mode_div_ref": float(args.m_mode_div_ref),
                 "m_mode_div_power": float(args.m_mode_div_power),
+                "m_mode_div_hill_power": float(args.m_mode_div_hill_power),
             })
             receipt["collective_mode_M_divisive"] = {
                 key: values[key] for key in (
                     "kappa_mode_M", "m_mode_div_ref", "m_mode_div_power",
+                    "m_mode_div_hill_power",
                 )
             }
     cfg = dataclasses.replace(cfg, **values)
@@ -409,6 +411,7 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += (
             f"__mdiv{args.kappa_mode_M:g}"
             f"r{args.m_mode_div_ref:g}p{args.m_mode_div_power:g}"
+            f"h{args.m_mode_div_hill_power:g}"
         )
     return stem
 
@@ -697,6 +700,9 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         })
     if diagnostic.cfg.use_mode_M_divisive:
         arrays.update({
+            "trace_mode_M_raw_pool": np.asarray(
+                diagnostic.trace_mode_M_raw_pool, np.float32
+            ),
             "trace_mode_M_pool": np.asarray(diagnostic.trace_mode_M_pool, np.float32),
             "trace_mode_M_divisor": np.asarray(
                 diagnostic.trace_mode_M_divisor, np.float32
@@ -881,6 +887,7 @@ def main() -> None:
     parser.add_argument("--kappa-mode-M", type=float, default=0.0)
     parser.add_argument("--m-mode-div-ref", type=float, default=30.0)
     parser.add_argument("--m-mode-div-power", type=float, default=4.0)
+    parser.add_argument("--m-mode-div-hill-power", type=float, default=4.0)
     parser.add_argument("--T-ms", type=float, default=PRODUCTION_T_MS)
     parser.add_argument("--burn-ms", type=float, default=PRODUCTION_BURN_MS)
     parser.add_argument("--smoke", action="store_true")
