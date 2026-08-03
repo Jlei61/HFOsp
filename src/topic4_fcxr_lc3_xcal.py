@@ -69,6 +69,8 @@ def select_x_candidates(rows, *, max_candidates: int = 2):
 
     admissible = [row for row in rows
                   if row.get("numerical_safe")
+                  and row.get("low_label") == RETURN_LABEL
+                  and int(row.get("n_low_returning_events", 0)) >= 3
                   and row.get("ied_mean_a_x", -np.inf) > 0.9
                   and row.get("crossing_time_ms") is not None
                   and 1000.0 <= float(row["crossing_time_ms"]) <= 3000.0
@@ -77,3 +79,44 @@ def select_x_candidates(rows, *, max_candidates: int = 2):
         abs(float(row["crossing_time_ms"]) - 2000.0),
         -float(row["ied_mean_a_x"]), str(row["candidate_id"])))
     return admissible[:int(max_candidates)]
+
+
+def multivariate_statistical_return(pre, post):
+    """Require the recovered events to re-enter the full pre-onset neighbourhood."""
+
+    if pre is None or post is None or pre.get("n_events", 0) < 3 or post.get("n_events", 0) < 3:
+        return dict(pass_=False, reason="fewer_than_3_returning_events_in_pre_or_post")
+    ratios = {}
+    for key in ("event_rate_hz", "median_iei_ms", "median_duration_ms",
+                "median_participation", "median_compactness_mm"):
+        if pre.get(key) is None or post.get(key) is None or float(pre[key]) <= 0:
+            return dict(pass_=False, reason=f"undefined_{key}")
+        ratios[key] = float(post[key] / pre[key])
+    polarity_diff = abs(float(post["fraction_A"]) - float(pre["fraction_A"]))
+    passed = bool(
+        0.5 <= ratios["event_rate_hz"] <= 2.0
+        and 0.5 <= ratios["median_iei_ms"] <= 2.0
+        and 0.5 <= ratios["median_duration_ms"] <= 2.0
+        and 0.5 <= ratios["median_participation"] <= 2.0
+        and (2.0 / 3.0) <= ratios["median_compactness_mm"] <= 1.5
+        and polarity_diff <= 0.34)
+    return dict(pass_=passed, ratios=ratios, forward_fraction_abs_diff=polarity_diff)
+
+
+def lifecycle_candidate_gate(*, lifecycle_label: str, onset_ms, high_duration_ms,
+                             x_activates_after_onset: bool,
+                             postictal_suppression: bool, statistical_return: dict,
+                             numerical_unsafe: bool,
+                             refractory_ceiling_fraction: float):
+    clauses = dict(
+        recovered_label=lifecycle_label == "RECOVERED_INTERICTAL",
+        pre_onset_at_least_8s=onset_ms is not None and float(onset_ms) >= 8000.0,
+        bounded_high_1_to_5s=(high_duration_ms is not None
+                             and 1000.0 <= float(high_duration_ms) <= 5000.0),
+        x_after_onset=bool(x_activates_after_onset),
+        postictal_suppression=bool(postictal_suppression),
+        multivariate_statistical_return=bool(statistical_return.get("pass_", False)),
+        numerical_safe=not bool(numerical_unsafe),
+        non_tonic_ceiling=float(refractory_ceiling_fraction) < 0.05,
+    )
+    return dict(pass_=bool(all(clauses.values())), clauses=clauses)
