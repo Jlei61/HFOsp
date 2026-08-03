@@ -247,21 +247,32 @@ def _plot_lifecycle_candidate():
     return path
 
 
+def _overall_verdict(life, spatial):
+    """Combine independent axes without promoting a fallback spatial state."""
+
+    temporal = bool(life and life.get("status") == "TEMPORAL_LIFECYCLE_CANDIDATE")
+    spatial_canonical = bool(
+        spatial and spatial.get("canonical_spatial_interpretation_authorized", False))
+    axial = bool(
+        spatial_canonical
+        and any(label == "AXIAL_LOCAL_DIRECT_RESPONSE"
+                for label in spatial.get("state_labels", {}).values()))
+    if temporal and axial:
+        return "SPATIOTEMPORAL_LIFECYCLE_CANDIDATE"
+    if temporal and spatial and not spatial_canonical:
+        return "TEMPORAL_LIFECYCLE_CANDIDATE_SPATIAL_SUBSTITUTION_NONCANONICAL"
+    if temporal:
+        return "TEMPORAL_LIFECYCLE_POSITIVE_SPATIAL_MECHANISM_NOT_AXIAL"
+    return "NO_LIFECYCLE_CANDIDATE_IN_REGISTERED_LC3_PROGRAM"
+
+
 def _verdict_axes(geometry, brackets):
     e0 = _load(os.path.join(OUT, "prepared_state_contract.json"))
     recon = _existing(os.path.join(OUT, "reconnaissance_verdict.json"))
     spatial = _existing(os.path.join(OUT, "spatial_direct_response.json"))
     xcal = _existing(os.path.join(OUT, "x_calibration.json"))
     life = _existing(os.path.join(OUT, "lifecycle_verdict.json"))
-    temporal = bool(life and life.get("status") == "TEMPORAL_LIFECYCLE_CANDIDATE")
-    axial = bool(spatial and any(label == "AXIAL_LOCAL_DIRECT_RESPONSE"
-                                 for label in spatial.get("state_labels", {}).values()))
-    if temporal and axial:
-        overall = "SPATIOTEMPORAL_LIFECYCLE_CANDIDATE"
-    elif temporal:
-        overall = "TEMPORAL_LIFECYCLE_POSITIVE_SPATIAL_MECHANISM_NOT_AXIAL"
-    else:
-        overall = "NO_LIFECYCLE_CANDIDATE_IN_REGISTERED_LC3_PROGRAM"
+    overall = _overall_verdict(life, spatial)
     payload = dict(
         status="COMPLETE", overall=overall,
         exact_state=dict(status=e0["status"], clauses=e0["clauses"]),
