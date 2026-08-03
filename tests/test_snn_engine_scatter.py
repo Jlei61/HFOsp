@@ -14,6 +14,7 @@ from params import Params, compute_nu_theta          # noqa: E402
 from connectivity import place_neurons                # noqa: E402
 from connectivity_rot import build_connectivity_rot   # noqa: E402
 from kick_probe import _flatten_by_source, simulate_kick  # noqa: E402
+from src.topic4_zm_fast_carrier_runtime import build_dual_scale_i2e_gaba
 
 
 def _net(L=6.0, density=100.0, seed=1):
@@ -77,3 +78,39 @@ def test_simulate_kick_deterministic():
     b = simulate_kick(p, net, KICK_BOOST=boost, kick_center=[3, 3], r_kick=1.0)
     assert np.array_equal(a["E_spk_bool"], b["E_spk_bool"])
     assert np.array_equal(a["rate_E"], b["rate_E"])
+
+
+def test_dual_gaba_simulator_path_is_deterministic():
+    p, net, NE, NI = _net(L=3.0, density=50.0, seed=3)
+    p = type(p)(**{**p.__dict__, "T": 20.0})
+    m = net["max_delay_steps"] + 1
+    n = NE + NI
+    state = {
+        "t": np.asarray(0),
+        "ring_sE": np.zeros((m, n)),
+        "ring_sI": np.zeros((m, n)),
+    }
+    dual, _, receipt = build_dual_scale_i2e_gaba(
+        net,
+        state,
+        n_e=NE,
+        slow_fraction=0.35,
+        broad_sigma_mm=1.0,
+        broad_in_degree=8,
+        broad_candidate_count=24,
+        seed=5,
+        dt_ms=p.dt,
+        delay_dt_ms=p.delay_dt,
+        tau0_ms=p.tau0,
+        v_axon_mm_per_ms=p.v_axon,
+        tau_r_fast_ms=p.tau_r_GABA,
+        tau_r_slow_ms=4.0,
+        tau_d_slow_ms=60.0,
+    )
+    assert receipt["i2e_integrated_budget_max_relative_error"] < 1e-12
+    dual["rng"] = np.random.default_rng(11)
+    a = simulate_kick(p, dual, KICK_BOOST=0.0, t_kick=1e9)
+    dual["rng"] = np.random.default_rng(11)
+    b = simulate_kick(p, dual, KICK_BOOST=0.0, t_kick=1e9)
+    np.testing.assert_array_equal(a["E_spk_bool"], b["E_spk_bool"])
+    np.testing.assert_array_equal(a["rate_I"], b["rate_I"])

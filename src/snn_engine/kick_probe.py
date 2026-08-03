@@ -145,6 +145,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     pos = net["pos"]
     ampa = net["ampa_by_delay"]
     gaba = net["gaba_by_delay"]
+    gaba_slow = net.get("gaba_slow_by_delay")
+    dual_gaba_on = gaba_slow is not None
     M = net["max_delay_steps"] + 1
 
     dt = p.dt
@@ -155,6 +157,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     decay_IE = np.exp(-dt / p.tau_d_AMPA)
     decay_sI = np.exp(-dt / p.tau_r_GABA)
     decay_II = np.exp(-dt / p.tau_d_GABA)
+    if dual_gaba_on:
+        if len(gaba_slow) != M:
+            raise ValueError("dual GABA slow bins must match max_delay_steps")
+        decay_sI_slow = np.exp(-dt / float(net["gaba_slow_tau_r_ms"]))
+        decay_II_slow = np.exp(-dt / float(net["gaba_slow_tau_d_ms"]))
     tau_m = np.where(labels == 0, p.tau_m_E, p.tau_m_I).astype(np.float64)
     decay_V = np.exp(-dt / tau_m)
 
@@ -166,12 +173,22 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
     ampa_bins = [d for d in range(M) if ampa[d].nnz > 0]
     gaba_bins = [d for d in range(M) if gaba[d].nnz > 0]
+    gaba_slow_bins = (
+        [d for d in range(M) if gaba_slow[d].nnz > 0]
+        if dual_gaba_on else []
+    )
     # source-indexed flat edges for O(#firing-edges) scatter; cache on net (reused across runs)
     if "ampa_flat" not in net:
         net["ampa_flat"] = _flatten_by_source(ampa, ampa_bins, NE)
         net["gaba_flat"] = _flatten_by_source(gaba, gaba_bins, NI)
+    if dual_gaba_on and "gaba_slow_flat" not in net:
+        net["gaba_slow_flat"] = _flatten_by_source(
+            gaba_slow, gaba_slow_bins, NI
+        )
     a_indptr, a_dst, a_dly, a_w = net["ampa_flat"]
     g_indptr, g_dst, g_dly, g_w = net["gaba_flat"]
+    if dual_gaba_on:
+        gs_indptr, gs_dst, gs_dly, gs_w = net["gaba_slow_flat"]
 
     # ---- external drive scale ---- (identical to model.simulate)
     nu_theta, _, _ = compute_nu_theta(p)
@@ -200,6 +217,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     ref = np.zeros(N, dtype=np.int32)
     s_E = np.zeros(N); I_E = np.zeros(N)
     s_I = np.zeros(N); I_I = np.zeros(N)
+    if dual_gaba_on:
+        s_I_slow = np.zeros(N); I_I_slow = np.zeros(N)
     # ---- M4: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
     # path). Tracks the recurrent (delay-ring) component of I_E separately so the shared pool can DIVIDE
     # only recurrent E input; the combined I_E accumulation below is untouched (byte-parity). ----
@@ -233,6 +252,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     )
     ring_sE = np.zeros((M, N))
     ring_sI = np.zeros((M, N))
+    if dual_gaba_on:
+        ring_sI_slow = np.zeros((M, N))
 
     # ---- M1: presynaptic E->E short-term depression (default OFF; gated on ee_std_u>0 so the
     # default path is bit-identical to M0 -- no allocation, no new RNG draws, no float touches). ----
@@ -333,6 +354,14 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             s_E[:] = _st0["s_E"]; I_E[:] = _st0["I_E"]
             s_I[:] = _st0["s_I"]; I_I[:] = _st0["I_I"]
             ring_sE[:] = _st0["ring_sE"]; ring_sI[:] = _st0["ring_sI"]
+            if dual_gaba_on:
+                # A legacy checkpoint has no broad-slow history.  Starting the
+                # added channel at zero preserves the exact fork state; the
+                # old current then washes out under the local-fast kinetics.
+                if "s_I_slow" in _st0:
+                    s_I_slow[:] = _st0["s_I_slow"]
+                    I_I_slow[:] = _st0["I_I_slow"]
+                    ring_sI_slow[:] = _st0["ring_sI_slow"]
             xi = float(_st0["xi"]); t_start = int(_st0["t"])
             _es_ema = float(_st0["_es_ema"]); _es_run = int(_st0["_es_run"])
             if track_rec:
@@ -361,6 +390,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # ----- synaptic gating s: decay, recurrent arrivals, external -----
         s_E *= decay_sE
         s_I *= decay_sI
+        if dual_gaba_on:
+            s_I_slow *= decay_sI_slow
         slot = tg % M
         if track_rec:
             # HARD CONSTRAINT: read ring_sE[slot] HERE, BEFORE the next line clears it (ring_sE[slot]=0.0).
@@ -369,6 +400,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             s_E_rec += ring_sE[slot]                     # recurrent (E->E / E->I) arrivals only, pre-zeroing
         s_E += ring_sE[slot]; ring_sE[slot] = 0.0
         s_I += ring_sI[slot]; ring_sI[slot] = 0.0
+        if dual_gaba_on:
+            s_I_slow += ring_sI_slow[slot]
+            ring_sI_slow[slot] = 0.0
         if ee_std_on:
             x_dep += (1.0 - x_dep) * x_rec_f                 # M1: recover availability toward 1 each step
         # ===================== KICK: the only change vs model.simulate =====================
@@ -389,12 +423,19 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # ----- synaptic currents (low-pass of s) -----
         I_E = s_E + (I_E - s_E) * decay_IE
         I_I = s_I + (I_I - s_I) * decay_II
+        if dual_gaba_on:
+            I_I_slow = s_I_slow + (I_I_slow - s_I_slow) * decay_II_slow
+            I_I_effective = I_I + I_I_slow
+        else:
+            I_I_effective = I_I
         if track_rec:
             I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
         if lfp_trace is not None and not conductance_on:  # current-based LFP at custom sites
-            lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
+            lfp_trace[t] = lfp_recorder.sample(I_E, I_I_effective)
             if dump_lfp_components:
-                lfp_exc_trace[t], lfp_inh_trace[t] = lfp_recorder.sample_components(I_E, I_I)
+                lfp_exc_trace[t], lfp_inh_trace[t] = lfp_recorder.sample_components(
+                    I_E, I_I_effective
+                )
 
         # slow layer off (slow=None)
         conductance_state = None
@@ -404,7 +445,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                 # Phase-D: raw drives enter the unit-safe conductance membrane
                 # directly.  Do NOT first apply z/m or the old S_G divisor.
                 conductance_state = slow.zm_conductance_step(
-                    V, I_E, I_I, decay_V
+                    V, I_E, I_I_effective, decay_V
                 )
                 if lfp_trace is not None:
                     lfp_trace[t] = lfp_recorder.sample(
@@ -412,12 +453,12 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                         conductance_state["I_inh"],
                     )
                     lfp_current_proxy_trace[t] = lfp_recorder.sample(
-                        I_E, I_I
+                        I_E, I_I_effective
                     )
             elif track_rec:
-                I_net = slow.apply_currents(I_E, I_I, labels, I_E_rec)
+                I_net = slow.apply_currents(I_E, I_I_effective, labels, I_E_rec)
             else:
-                I_net = slow.apply_currents(I_E, I_I, labels)
+                I_net = slow.apply_currents(I_E, I_I_effective, labels)
             if conductance_homotopy_on:
                 I_E_homotopy = I_E
                 if (
@@ -432,7 +473,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                         I_E_rec[: slow.nE] * slow.mode_H_gain_at_E()
                     )
                 conductance_homotopy_state = slow.zm_conductance_homotopy_step(
-                    V, I_E_homotopy, I_I, I_net, decay_V
+                    V, I_E_homotopy, I_I_effective, I_net, decay_V
                 )
             # off-by-default hook: under slow, use the per-neuron threshold substrate when provided
             # (lets z/g_K ride a heterogeneous core); V_th_per_neuron=None -> uniform p.V_th (unchanged).
@@ -471,10 +512,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             # A1c: extra global inhibition on E cells -> effective inhibition (I_I + I_global) on E only.
             ig_t = feedback_gain * r_ema if fb_dyn else float(fb_override_trace[t])
             I_fb = np.where(is_E, ig_t, 0.0)
-            Vtmp = membrane_step(V, I_E, I_I + I_fb, decay_V,
+            Vtmp = membrane_step(V, I_E, I_I_effective + I_fb, decay_V,
                                  shunt_gaba=shunt_gaba, e_gaba=e_gaba, g_gaba_scale=g_gaba_scale)
         else:
-            Vtmp = membrane_step(V, I_E, I_I, decay_V,                # literal pre-edit call (gain=0 parity)
+            Vtmp = membrane_step(V, I_E, I_I_effective, decay_V,      # literal pre-edit call (gain=0 parity)
                                  shunt_gaba=shunt_gaba, e_gaba=e_gaba, g_gaba_scale=g_gaba_scale)
         V = np.where(free, Vtmp, p.V_reset)
         spk = free & (V >= (V_th_eff if np.isscalar(V_th_eff) else V_th_eff))
@@ -513,7 +554,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             if _na > _peak_act:
                 _peak_act = _na
                 I_E_peak = I_E.copy()
-                I_I_peak = I_I.copy()
+                I_I_peak = I_I_effective.copy()
         if spk.any():
             idx = np.where(spk & ras_mask)[0]
             if idx.size:
@@ -565,6 +606,34 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                         )
                     else:
                         np.add.at(ring_sI, ((tg + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
+                if dual_gaba_on:
+                    st_s = gs_indptr[spI]
+                    cnt_s = gs_indptr[spI + 1] - st_s
+                    tot_s = int(cnt_s.sum())
+                    if tot_s:
+                        idx_s = (
+                            np.arange(tot_s)
+                            - np.repeat(np.cumsum(cnt_s) - cnt_s, cnt_s)
+                            + np.repeat(st_s, cnt_s)
+                        )
+                        if i2e_dep_on:
+                            d_per_edge_s = np.repeat(
+                                slow.i2e_resource_at_sources(spI), cnt_s
+                            )
+                            scatter_i2e_emissions_at_spike_time(
+                                ring_sI_slow,
+                                (tg + gs_dly[idx_s]) % M,
+                                gs_dst[idx_s],
+                                gs_w[idx_s],
+                                d_per_edge_s,
+                                NE,
+                            )
+                        else:
+                            np.add.at(
+                                ring_sI_slow,
+                                ((tg + gs_dly[idx_s]) % M, gs_dst[idx_s]),
+                                gs_w[idx_s],
+                            )
                 if i2e_dep_on:
                     slow.consume_i2e_sources(spI)
 
@@ -583,6 +652,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                          s_E_rec=(s_E_rec if track_rec else None),
                          I_E_rec=(I_E_rec if track_rec else None),
                          x_dep=(x_dep if ee_std_on else None),
+                         s_I_slow=(s_I_slow if dual_gaba_on else None),
+                         I_I_slow=(I_I_slow if dual_gaba_on else None),
+                         ring_sI_slow=(ring_sI_slow if dual_gaba_on else None),
                          r_ema=(r_ema if fb_dyn else None))
 
     if zm_ckpt is not None and zm_ckpt.return_final_state:
@@ -597,6 +669,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                          s_E_rec=(s_E_rec if track_rec else None),
                          I_E_rec=(I_E_rec if track_rec else None),
                          x_dep=(x_dep if ee_std_on else None),
+                         s_I_slow=(s_I_slow if dual_gaba_on else None),
+                         I_I_slow=(I_I_slow if dual_gaba_on else None),
+                         ring_sI_slow=(ring_sI_slow if dual_gaba_on else None),
                          r_ema=(r_ema if fb_dyn else None))
 
     if _stop_t < nsteps:                                             # runaway early-stop: truncate per-step arrays

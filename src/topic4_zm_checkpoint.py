@@ -24,7 +24,10 @@ STATE_SCHEMA = "zm_sim_state_v1"
 #: engine arrays that always exist
 _ENGINE_ARRAYS = ("V", "ref", "s_E", "I_E", "s_I", "I_I", "ring_sE", "ring_sI")
 #: engine arrays that exist only when the matching feature is on
-_ENGINE_OPT_ARRAYS = ("s_E_rec", "I_E_rec", "x_dep")
+_ENGINE_OPT_ARRAYS = (
+    "s_E_rec", "I_E_rec", "x_dep",
+    "s_I_slow", "I_I_slow", "ring_sI_slow",
+)
 #: engine scalars
 _ENGINE_SCALARS = ("xi", "t", "_es_ema", "_es_run", "r_ema")
 #: slow-layer arrays / scalars (names are the SpatialSlowField attributes)

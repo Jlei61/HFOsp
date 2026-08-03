@@ -7,6 +7,7 @@ import numpy as np
 from scipy import sparse
 
 from src.topic4_zm_fast_carrier_runtime import (
+    build_dual_scale_i2e_gaba,
     DiagnosticSlowWrapper,
     FrozenAllNoStepWrapper,
     rescale_i2e_delay_bins,
@@ -182,4 +183,80 @@ def test_i2e_source_delay_dispersion_rejects_invalid_cv():
     with np.testing.assert_raises_regex(ValueError, "source delay CV"):
         rescale_i2e_delay_bins(
             net, state, n_e=3, scale=3.0, source_delay_cv=-0.1
+        )
+
+
+def test_dual_scale_gaba_preserves_ee_i2i_and_integrated_i2e_budget():
+    zero_a = sparse.csc_matrix((6, 4))
+    zero_g = sparse.csc_matrix((6, 2))
+    ampa_d1 = sparse.csc_matrix(([7.0], ([0], [1])), shape=(6, 4))
+    gaba_d1 = sparse.csc_matrix(
+        ([2.0, 4.0, 5.0], ([0, 2, 5], [0, 1, 1])), shape=(6, 2)
+    )
+    net = {
+        "pos": np.array([
+            [0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [3.0, 0.0],
+            [0.0, 1.0], [3.0, 1.0],
+        ]),
+        "ampa_by_delay": [zero_a.copy(), ampa_d1, zero_a.copy()],
+        "gaba_by_delay": [zero_g.copy(), gaba_d1, zero_g.copy()],
+        "max_delay_steps": 2,
+    }
+    ring = np.arange(18.0).reshape(3, 6)
+    state = {"t": np.asarray(1), "ring_sE": ring, "ring_sI": ring + 20}
+    new_net, new_state, receipt = build_dual_scale_i2e_gaba(
+        net,
+        state,
+        n_e=4,
+        slow_fraction=0.25,
+        broad_sigma_mm=2.0,
+        broad_in_degree=1,
+        broad_candidate_count=2,
+        seed=9,
+        dt_ms=0.1,
+        delay_dt_ms=0.1,
+        tau0_ms=0.1,
+        v_axon_mm_per_ms=1.0,
+        tau_r_fast_ms=1.0,
+        tau_r_slow_ms=4.0,
+        tau_d_slow_ms=60.0,
+    )
+    old_a = sum(net["ampa_by_delay"])
+    new_a = sum(new_net["ampa_by_delay"])
+    np.testing.assert_array_equal(old_a.toarray(), new_a.toarray())
+    old_g = sum(net["gaba_by_delay"])
+    fast_g = sum(new_net["gaba_by_delay"])
+    slow_g = sum(new_net["gaba_slow_by_delay"])
+    assert fast_g[5, 1] == old_g[5, 1]  # I->I is exact
+    old_budget = np.asarray(old_g[:4, :].sum(axis=1)).ravel()
+    matched = (
+        np.asarray(fast_g[:4, :].sum(axis=1)).ravel()
+        + 4.0 * np.asarray(slow_g[:4, :].sum(axis=1)).ravel()
+    )
+    np.testing.assert_allclose(matched, old_budget)
+    assert receipt["i2e_integrated_budget_max_relative_error"] < 1e-12
+    assert receipt["ee_ampa_untouched"] and receipt["i2i_gaba_untouched"]
+    # Ring padding may be required, but every pre-existing arrival offset is exact.
+    t_abs = int(state["t"])
+    for delta in range(3):
+        np.testing.assert_array_equal(
+            new_state["ring_sI"][(t_abs + delta) % new_state["ring_sI"].shape[0]],
+            state["ring_sI"][(t_abs + delta) % 3],
+        )
+
+
+def test_dual_scale_gaba_rejects_invalid_budget_fraction():
+    net = _delay_test_net()
+    net["pos"] = np.arange(8.0).reshape(4, 2)
+    state = {
+        "t": np.asarray(0),
+        "ring_sE": np.zeros((4, 4)),
+        "ring_sI": np.zeros((4, 4)),
+    }
+    with np.testing.assert_raises_regex(ValueError, "slow_fraction"):
+        build_dual_scale_i2e_gaba(
+            net, state, n_e=3, slow_fraction=1.0, broad_sigma_mm=1.0,
+            broad_in_degree=1, broad_candidate_count=1, seed=0, dt_ms=0.1,
+            delay_dt_ms=0.1, tau0_ms=0.1, v_axon_mm_per_ms=1.0,
+            tau_r_fast_ms=1.0, tau_r_slow_ms=4.0, tau_d_slow_ms=60.0,
         )

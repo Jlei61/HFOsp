@@ -10,6 +10,7 @@ from typing import Any
 
 import numpy as np
 from scipy import sparse
+from scipy.spatial import cKDTree
 
 
 def git_sha(root: Path) -> str:
@@ -126,6 +127,187 @@ def rescale_i2e_delay_bins(
         "new_max_delay_steps": new_max,
         "edges_unchanged": True,
         "existing_arrival_offsets_preserved": True,
+    }
+
+
+def build_dual_scale_i2e_gaba(
+    net: dict,
+    state: dict,
+    *,
+    n_e: int,
+    slow_fraction: float,
+    broad_sigma_mm: float,
+    broad_in_degree: int,
+    broad_candidate_count: int,
+    seed: int,
+    dt_ms: float,
+    delay_dt_ms: float,
+    tau0_ms: float,
+    v_axon_mm_per_ms: float,
+    tau_r_fast_ms: float,
+    tau_r_slow_ms: float,
+    tau_d_slow_ms: float,
+):
+    """Split the I->E inhibition budget into local-fast and broad-slow paths.
+
+    Existing E->E/AMPA and I->I edges are untouched.  For each E target, the
+    local I->E jump budget is multiplied by ``1-slow_fraction`` and a new broad
+    set of I sources receives the complementary *integrated* budget.  The slow
+    jump is rescaled by ``tau_r_fast/tau_r_slow`` because connectivity weights
+    encode the per-spike jump onto the synaptic rise variable.
+
+    Broad partners are sampled deterministically from a spatial candidate set
+    with an exponential kernel.  No simulator RNG state is consumed.
+    """
+    frac = float(slow_fraction)
+    sigma = float(broad_sigma_mm)
+    c_in = int(broad_in_degree)
+    c_cand = int(broad_candidate_count)
+    scalars = (
+        dt_ms, delay_dt_ms, tau0_ms, v_axon_mm_per_ms,
+        tau_r_fast_ms, tau_r_slow_ms, tau_d_slow_ms,
+    )
+    if not (0.0 < frac < 1.0):
+        raise ValueError("dual GABA slow_fraction must lie strictly between 0 and 1")
+    if not np.all(np.isfinite(scalars)) or min(scalars) <= 0.0:
+        raise ValueError("dual GABA time and velocity parameters must be finite and positive")
+    if not np.isfinite(sigma) or sigma <= 0.0:
+        raise ValueError("dual GABA broad_sigma_mm must be finite and positive")
+    if c_in < 1 or c_cand < c_in:
+        raise ValueError("dual GABA requires broad_candidate_count >= broad_in_degree >= 1")
+    if "gaba_slow_by_delay" in net:
+        raise ValueError("network already has a dual GABA slow channel")
+
+    gaba = net["gaba_by_delay"]
+    ampa = net["ampa_by_delay"]
+    n, n_i = gaba[0].shape
+    if int(n_e) <= 0 or int(n_e) >= n or n_i != n - int(n_e):
+        raise ValueError("dual GABA population dimensions are inconsistent")
+    pos = np.asarray(net["pos"], dtype=float)
+    pos_e, pos_i = pos[: int(n_e)], pos[int(n_e) :]
+
+    # Original per-target jump budget, before the local path is scaled.
+    original = sparse.csc_matrix((n, n_i), dtype=float)
+    for matrix in gaba:
+        original = (original + matrix).tocsc()
+    target_budget = np.asarray(original[: int(n_e), :].sum(axis=1)).ravel()
+
+    row_e = np.zeros(n, dtype=float)
+    row_e[: int(n_e)] = 1.0
+    row_i = 1.0 - row_e
+    local = []
+    for matrix in gaba:
+        to_e = matrix.multiply(row_e[:, None]) * (1.0 - frac)
+        to_i = matrix.multiply(row_i[:, None])
+        local.append((to_e + to_i).tocsc())
+
+    rng = np.random.default_rng(int(seed))
+    tree = cKDTree(pos_i)
+    rows, cols, weights, delays, broad_distances = [], [], [], [], []
+    k = min(c_cand, n_i)
+    jump_scale = frac * float(tau_r_fast_ms) / float(tau_r_slow_ms)
+    chunk = 512
+    for start in range(0, int(n_e), chunk):
+        stop = min(int(n_e), start + chunk)
+        dist, cand = tree.query(pos_e[start:stop], k=k)
+        dist = np.atleast_2d(dist)
+        cand = np.atleast_2d(cand)
+        for local_i, target in enumerate(range(start, stop)):
+            drow = np.asarray(dist[local_i], dtype=float)
+            crow = np.asarray(cand[local_i], dtype=np.int64)
+            kernel = np.exp(-drow / sigma)
+            keys = rng.standard_exponential(k) / np.maximum(kernel, np.finfo(float).tiny)
+            take = np.argpartition(keys, c_in - 1)[:c_in]
+            selected_d = drow[take]
+            selected_c = crow[take]
+            per_edge = target_budget[target] * jump_scale / c_in
+            rows.append(np.full(c_in, target, dtype=np.int64))
+            cols.append(selected_c)
+            weights.append(np.full(c_in, per_edge, dtype=float))
+            broad_distances.append(selected_d)
+            delay_ms = float(tau0_ms) + selected_d / float(v_axon_mm_per_ms)
+            step = max(1, int(round(float(delay_dt_ms) / float(dt_ms))))
+            delay_steps = (
+                np.maximum(1, np.rint(delay_ms / float(delay_dt_ms)).astype(int)) * step
+            )
+            delays.append(delay_steps)
+
+    rows_a = np.concatenate(rows)
+    cols_a = np.concatenate(cols)
+    weights_a = np.concatenate(weights)
+    delays_a = np.concatenate(delays)
+    new_max = max(int(net["max_delay_steps"]), int(np.max(delays_a)))
+    zero_g = sparse.csc_matrix((n, n_i), dtype=float)
+    slow = [zero_g.copy() for _ in range(new_max + 1)]
+    for delay in np.unique(delays_a):
+        keep = delays_a == delay
+        slow[int(delay)] = sparse.csc_matrix(
+            (weights_a[keep], (rows_a[keep], cols_a[keep])), shape=(n, n_i)
+        )
+    local.extend(zero_g.copy() for _ in range(new_max + 1 - len(local)))
+    zero_a = sparse.csc_matrix(ampa[0].shape, dtype=float)
+    ampa_new = list(ampa) + [zero_a.copy() for _ in range(new_max + 1 - len(ampa))]
+
+    net_new = dict(net)
+    for cache_key in ("gaba_flat", "gaba_slow_flat"):
+        net_new.pop(cache_key, None)
+    net_new.update(
+        ampa_by_delay=ampa_new,
+        gaba_by_delay=local,
+        gaba_slow_by_delay=slow,
+        gaba_slow_tau_r_ms=float(tau_r_slow_ms),
+        gaba_slow_tau_d_ms=float(tau_d_slow_ms),
+        max_delay_steps=new_max,
+    )
+
+    state_new = dict(state)
+    old_m = int(net["max_delay_steps"]) + 1
+    t_abs = int(np.asarray(state["t"]))
+    for key in ("ring_sE", "ring_sI"):
+        old_ring = np.asarray(state[key])
+        if old_ring.shape[0] != old_m:
+            raise ValueError(f"{key} has {old_ring.shape[0]} bins, expected {old_m}")
+        if new_max + 1 == old_m:
+            continue
+        new_ring = np.zeros((new_max + 1, old_ring.shape[1]), dtype=old_ring.dtype)
+        for delta in range(old_m):
+            new_ring[(t_abs + delta) % (new_max + 1)] += old_ring[(t_abs + delta) % old_m]
+        state_new[key] = new_ring
+
+    fast_total = sparse.csc_matrix((n, n_i), dtype=float)
+    slow_total = sparse.csc_matrix((n, n_i), dtype=float)
+    for matrix in local:
+        fast_total = (fast_total + matrix).tocsc()
+    for matrix in slow:
+        slow_total = (slow_total + matrix).tocsc()
+    matched = (
+        np.asarray(fast_total[: int(n_e), :].sum(axis=1)).ravel()
+        + np.asarray(slow_total[: int(n_e), :].sum(axis=1)).ravel()
+        * float(tau_r_slow_ms) / float(tau_r_fast_ms)
+    )
+    relative_error = np.max(
+        np.abs(matched - target_budget) / np.maximum(np.abs(target_budget), 1e-12)
+    )
+    return net_new, state_new, {
+        "changed": True,
+        "slow_fraction_integrated_budget": frac,
+        "broad_sigma_mm": sigma,
+        "broad_in_degree": c_in,
+        "broad_candidate_count": c_cand,
+        "seed": int(seed),
+        "tau_r_fast_ms": float(tau_r_fast_ms),
+        "tau_r_slow_ms": float(tau_r_slow_ms),
+        "tau_d_slow_ms": float(tau_d_slow_ms),
+        "broad_distance_percentiles_mm_5_25_50_75_95": np.percentile(
+            np.concatenate(broad_distances), [5, 25, 50, 75, 95]
+        ).tolist(),
+        "broad_edge_count": int(weights_a.size),
+        "i2e_integrated_budget_max_relative_error": float(relative_error),
+        "ee_ampa_untouched": True,
+        "i2i_gaba_untouched": True,
+        "existing_arrival_offsets_preserved": True,
+        "old_max_delay_steps": int(net["max_delay_steps"]),
+        "new_max_delay_steps": new_max,
     }
 
 

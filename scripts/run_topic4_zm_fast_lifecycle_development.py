@@ -448,6 +448,15 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += f"__i2edelay{args.i2e_delay_scale:g}"
     if float(getattr(args, "i2e_delay_cv", 0.0)) > 0.0:
         stem += f"__i2edelaycv{args.i2e_delay_cv:g}s{args.i2e_delay_seed:d}"
+    if bool(getattr(args, "use_dual_gaba", False)):
+        stem += (
+            f"__dualGf{args.dual_gaba_slow_fraction:g}"
+            f"sig{args.dual_gaba_sigma_mm:g}"
+            f"c{args.dual_gaba_in_degree:d}"
+            f"tr{args.dual_gaba_tau_r_ms:g}"
+            f"td{args.dual_gaba_tau_d_ms:g}"
+            f"s{args.dual_gaba_seed:d}"
+        )
     if bool(getattr(args, "use_mode_M_divisive", False)):
         stem += (
             f"__mdiv{args.kappa_mode_M:g}"
@@ -588,6 +597,7 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         contract_already_validated=True,
     )
     delay_receipt = None
+    dual_gaba_receipt = None
     if (
         not np.isclose(float(args.i2e_delay_scale), 1.0)
         or float(args.i2e_delay_cv) > 0.0
@@ -597,6 +607,26 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             n_e=int(ctx["S"]["NE"]), scale=float(args.i2e_delay_scale),
             source_delay_cv=float(args.i2e_delay_cv),
             source_delay_seed=int(args.i2e_delay_seed),
+        )
+        transformation["migrated_state_hash"] = CK.state_hash(state)
+    if bool(args.use_dual_gaba):
+        p = ctx["S"]["p"]
+        ctx["S"]["net"], state, dual_gaba_receipt = RT.build_dual_scale_i2e_gaba(
+            ctx["S"]["net"],
+            state,
+            n_e=int(ctx["S"]["NE"]),
+            slow_fraction=float(args.dual_gaba_slow_fraction),
+            broad_sigma_mm=float(args.dual_gaba_sigma_mm),
+            broad_in_degree=int(args.dual_gaba_in_degree),
+            broad_candidate_count=int(args.dual_gaba_candidate_count),
+            seed=int(args.dual_gaba_seed),
+            dt_ms=float(p.dt),
+            delay_dt_ms=float(p.delay_dt),
+            tau0_ms=float(p.tau0),
+            v_axon_mm_per_ms=float(p.v_axon),
+            tau_r_fast_ms=float(p.tau_r_GABA),
+            tau_r_slow_ms=float(args.dual_gaba_tau_r_ms),
+            tau_d_slow_ms=float(args.dual_gaba_tau_d_ms),
         )
         transformation["migrated_state_hash"] = CK.state_hash(state)
     if worker_receipt is not None:
@@ -622,6 +652,8 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
     )
     if delay_receipt is not None:
         mechanism["i2e_delay_rescaling"] = delay_receipt
+    if dual_gaba_receipt is not None:
+        mechanism["dual_scale_i2e_gaba"] = dual_gaba_receipt
     z0 = np.array(state["slow.z"], copy=True)
     m0 = np.array(state["slow.m"], copy=True)
     sg0 = float(np.asarray(state["slow.S_G"]))
@@ -953,6 +985,14 @@ def main() -> None:
     parser.add_argument("--i2e-delay-scale", type=float, default=1.0)
     parser.add_argument("--i2e-delay-cv", type=float, default=0.0)
     parser.add_argument("--i2e-delay-seed", type=int, default=0)
+    parser.add_argument("--use-dual-gaba", action="store_true")
+    parser.add_argument("--dual-gaba-slow-fraction", type=float, default=0.35)
+    parser.add_argument("--dual-gaba-sigma-mm", type=float, default=1.5)
+    parser.add_argument("--dual-gaba-in-degree", type=int, default=64)
+    parser.add_argument("--dual-gaba-candidate-count", type=int, default=256)
+    parser.add_argument("--dual-gaba-seed", type=int, default=0)
+    parser.add_argument("--dual-gaba-tau-r-ms", type=float, default=4.0)
+    parser.add_argument("--dual-gaba-tau-d-ms", type=float, default=60.0)
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
     parser.add_argument("--strength-scale", type=float)
