@@ -120,3 +120,29 @@ M45 的短臂一度看起来最接近联合门，但 12 s 轨迹证明它不是�
 - 分析器：`scripts/analyze_topic4_zm_phase_lag_lifecycle.py`、`scripts/analyze_topic4_zm_conductance_homotopy.py`
 
 所有新机制均 default-off；E→E topology/kernel/AR/direction/delay 未修改。
+
+## 9. 定向 fast-modal follow-up（同日）
+
+按“不再做标量网格”的约束，又做了三个单点因果测试，并与原 common-H 臂统一重算：
+
+| arm | gain dB | occupancy | deep gap | PC1 | rank | core Hz | rho80 | 结论 |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| common H | 41.2 | 0.799 | 0.000 | 0.985 | 1.09 | 396.5 | 0.465 | 连续但 common-mode 高率平台 |
+| I→E source-delay dispersion | 37.9 | 0.649 | 0.000 | 0.983 | 1.10 | 304.1 | 0.503 | 相位异质性未产生空间 orbit |
+| local-fast + broad-slow GABA | 31.1 | 0.335 | 0.750 | 0.984 | 1.10 | 100.7 | 0.000 | 降率但切成同步 burst train |
+| common-subtracted contrast H | 41.1 | 0.803 | 0.000 | 0.984 | 1.09 | 415.4 | 0.966 | hotspot saturation，不是模态选择 |
+
+四臂在同一严格 gate 下均失败，verdict 为
+`NO_CREDIBLE_CARRIER_IN_TARGETED_FAST_MODAL_PANEL`。这组结果把缺口进一步收缩：
+
+- 单纯分散同一 I 群的输出延迟不够；
+- 同一批 I spikes 驱动的快/慢双滤波只改变刹车强度和 burst 周期，不产生独立抑制相位；
+- 去掉 H 的均匀分量也不等于放大一个 dynamical eigenmode，它会把正反馈集中成局部饱和。
+
+因此下一步需要**两个真正独立的抑制性状态群**，而不是同一 I 群的两个滤波器。最小 SNN-native 候选是：在不改 E→E 的条件下，将现有 I 群确定性拆成 fast/local（PV-like）与 delayed/broad/slow（SOM-like）两群，使后者具有独立的 E→I 招募延迟和 I→E 输出通道。只有该结构在 frozen Z/M 下形成持续、非 rank-1、非饱和 carrier，才释放 M。
+
+新增交付：
+
+- 统一 verdict：`results/topic4_sef_hfo/zm_mode_lifecycle/targeted_fast_modal_summary.json`
+- 统一图：`results/topic4_sef_hfo/zm_mode_lifecycle/figures/targeted_fast_modal_mechanisms.png`
+- 分析器：`scripts/analyze_topic4_zm_modal_fast_mechanisms.py`
