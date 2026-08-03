@@ -463,6 +463,15 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
             f"td{args.dual_gaba_tau_d_ms:g}"
             f"s{args.dual_gaba_seed:d}"
         )
+    if bool(getattr(args, "use_inhibitory_subtypes", False)):
+        stem += (
+            f"__pvSOMq{args.som_source_fraction:g}"
+            f"f{args.som_slow_budget_fraction:g}"
+            f"sig{args.som_sigma_mm:g}c{args.som_in_degree:d}"
+            f"rd{args.som_recruit_delay_scale:g}"
+            f"tr{args.som_tau_r_ms:g}td{args.som_tau_d_ms:g}"
+            f"s{args.som_seed:d}"
+        )
     if bool(getattr(args, "use_mode_M_divisive", False)):
         stem += (
             f"__mdiv{args.kappa_mode_M:g}"
@@ -604,6 +613,9 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
     )
     delay_receipt = None
     dual_gaba_receipt = None
+    subtype_receipt = None
+    if bool(args.use_dual_gaba) and bool(args.use_inhibitory_subtypes):
+        raise RuntimeError("dual GABA and PV/SOM subtype transforms are mutually exclusive")
     if (
         not np.isclose(float(args.i2e_delay_scale), 1.0)
         or float(args.i2e_delay_cv) > 0.0
@@ -613,6 +625,28 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             n_e=int(ctx["S"]["NE"]), scale=float(args.i2e_delay_scale),
             source_delay_cv=float(args.i2e_delay_cv),
             source_delay_seed=int(args.i2e_delay_seed),
+        )
+        transformation["migrated_state_hash"] = CK.state_hash(state)
+    if bool(args.use_inhibitory_subtypes):
+        p = ctx["S"]["p"]
+        ctx["S"]["net"], state, subtype_receipt = RT.build_pv_som_inhibitory_subtypes(
+            ctx["S"]["net"],
+            state,
+            n_e=int(ctx["S"]["NE"]),
+            som_source_fraction=float(args.som_source_fraction),
+            som_slow_budget_fraction=float(args.som_slow_budget_fraction),
+            som_sigma_mm=float(args.som_sigma_mm),
+            som_in_degree=int(args.som_in_degree),
+            som_candidate_count=int(args.som_candidate_count),
+            som_recruit_delay_scale=float(args.som_recruit_delay_scale),
+            seed=int(args.som_seed),
+            dt_ms=float(p.dt),
+            delay_dt_ms=float(p.delay_dt),
+            tau0_ms=float(p.tau0),
+            v_axon_mm_per_ms=float(p.v_axon),
+            tau_r_fast_ms=float(p.tau_r_GABA),
+            tau_r_som_ms=float(args.som_tau_r_ms),
+            tau_d_som_ms=float(args.som_tau_d_ms),
         )
         transformation["migrated_state_hash"] = CK.state_hash(state)
     if bool(args.use_dual_gaba):
@@ -660,6 +694,8 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         mechanism["i2e_delay_rescaling"] = delay_receipt
     if dual_gaba_receipt is not None:
         mechanism["dual_scale_i2e_gaba"] = dual_gaba_receipt
+    if subtype_receipt is not None:
+        mechanism["pv_som_inhibitory_subtypes"] = subtype_receipt
     z0 = np.array(state["slow.z"], copy=True)
     m0 = np.array(state["slow.m"], copy=True)
     sg0 = float(np.asarray(state["slow.S_G"]))
@@ -999,6 +1035,16 @@ def main() -> None:
     parser.add_argument("--dual-gaba-seed", type=int, default=0)
     parser.add_argument("--dual-gaba-tau-r-ms", type=float, default=4.0)
     parser.add_argument("--dual-gaba-tau-d-ms", type=float, default=60.0)
+    parser.add_argument("--use-inhibitory-subtypes", action="store_true")
+    parser.add_argument("--som-source-fraction", type=float, default=0.25)
+    parser.add_argument("--som-slow-budget-fraction", type=float, default=0.35)
+    parser.add_argument("--som-sigma-mm", type=float, default=1.5)
+    parser.add_argument("--som-in-degree", type=int, default=64)
+    parser.add_argument("--som-candidate-count", type=int, default=256)
+    parser.add_argument("--som-recruit-delay-scale", type=float, default=3.0)
+    parser.add_argument("--som-seed", type=int, default=0)
+    parser.add_argument("--som-tau-r-ms", type=float, default=4.0)
+    parser.add_argument("--som-tau-d-ms", type=float, default=60.0)
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
     parser.add_argument("--strength-scale", type=float)

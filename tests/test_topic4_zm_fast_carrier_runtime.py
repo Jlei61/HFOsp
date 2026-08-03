@@ -8,6 +8,7 @@ from scipy import sparse
 
 from src.topic4_zm_fast_carrier_runtime import (
     build_dual_scale_i2e_gaba,
+    build_pv_som_inhibitory_subtypes,
     DiagnosticSlowWrapper,
     FrozenAllNoStepWrapper,
     rescale_i2e_delay_bins,
@@ -259,4 +260,61 @@ def test_dual_scale_gaba_rejects_invalid_budget_fraction():
             broad_in_degree=1, broad_candidate_count=1, seed=0, dt_ms=0.1,
             delay_dt_ms=0.1, tau0_ms=0.1, v_axon_mm_per_ms=1.0,
             tau_r_fast_ms=1.0, tau_r_slow_ms=4.0, tau_d_slow_ms=60.0,
+        )
+
+
+def test_pv_som_subtypes_preserve_ee_i2i_and_total_synaptic_budgets():
+    n, ne, ni = 6, 4, 2
+    zero_a = sparse.csc_matrix((n, ne))
+    zero_g = sparse.csc_matrix((n, ni))
+    ampa_d1 = sparse.csc_matrix(
+        ([7.0, 3.0, 4.0], ([0, 4, 5], [1, 0, 1])), shape=(n, ne)
+    )
+    g_rows, g_cols, g_data = [], [], []
+    for target in range(ne):
+        for source in range(ni):
+            g_rows.append(target); g_cols.append(source); g_data.append(2.0 + source)
+    g_rows.extend([4, 5]); g_cols.extend([0, 1]); g_data.extend([5.0, 6.0])
+    gaba_d1 = sparse.csc_matrix((g_data, (g_rows, g_cols)), shape=(n, ni))
+    net = {
+        "pos": np.array([
+            [0., 0.], [1., 0.], [2., 0.], [3., 0.],
+            [0., 1.], [3., 1.],
+        ]),
+        "ampa_by_delay": [zero_a.copy(), ampa_d1, zero_a.copy()],
+        "gaba_by_delay": [zero_g.copy(), gaba_d1, zero_g.copy()],
+        "max_delay_steps": 2,
+    }
+    ring = np.arange(18.0).reshape(3, 6)
+    state = {"t": np.asarray(1), "ring_sE": ring, "ring_sI": ring + 30}
+    out, new_state, receipt = build_pv_som_inhibitory_subtypes(
+        net, state, n_e=ne, som_source_fraction=0.5,
+        som_slow_budget_fraction=0.35, som_sigma_mm=2.0,
+        som_in_degree=1, som_candidate_count=1, som_recruit_delay_scale=3.0,
+        seed=4, dt_ms=0.1, delay_dt_ms=0.1, tau0_ms=0.1,
+        v_axon_mm_per_ms=1.0, tau_r_fast_ms=1.0,
+        tau_r_som_ms=4.0, tau_d_som_ms=60.0,
+    )
+    old_a = sum(net["ampa_by_delay"])
+    new_a = sum(out["ampa_by_delay"])
+    np.testing.assert_array_equal(old_a.toarray(), new_a.toarray())
+    # The E->E edge remains in its original delay bin; one E->SOM target moves.
+    assert out["ampa_by_delay"][1][0, 1] == 7.0
+    assert sum(x[4:, :].nnz for x in out["ampa_by_delay"][2:]) > 0
+    old_g = sum(net["gaba_by_delay"])
+    fast_g = sum(out["gaba_by_delay"])
+    slow_g = sum(out["gaba_slow_by_delay"])
+    np.testing.assert_array_equal(old_g[4:, :].toarray(), fast_g[4:, :].toarray())
+    old_budget = np.asarray(old_g[:ne, :].sum(axis=1)).ravel()
+    matched = (
+        np.asarray(fast_g[:ne, :].sum(axis=1)).ravel()
+        + 4.0 * np.asarray(slow_g[:ne, :].sum(axis=1)).ravel()
+    )
+    np.testing.assert_allclose(matched, old_budget)
+    assert receipt["i2e_integrated_budget_max_relative_error"] < 1e-12
+    t_abs = int(state["t"])
+    for delta in range(3):
+        np.testing.assert_array_equal(
+            new_state["ring_sE"][(t_abs + delta) % new_state["ring_sE"].shape[0]],
+            state["ring_sE"][(t_abs + delta) % 3],
         )

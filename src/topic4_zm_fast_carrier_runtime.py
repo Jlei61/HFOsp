@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import dataclasses
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -304,6 +305,240 @@ def build_dual_scale_i2e_gaba(
         "broad_edge_count": int(weights_a.size),
         "i2e_integrated_budget_max_relative_error": float(relative_error),
         "ee_ampa_untouched": True,
+        "i2i_gaba_untouched": True,
+        "existing_arrival_offsets_preserved": True,
+        "old_max_delay_steps": int(net["max_delay_steps"]),
+        "new_max_delay_steps": new_max,
+    }
+
+
+def build_pv_som_inhibitory_subtypes(
+    net: dict,
+    state: dict,
+    *,
+    n_e: int,
+    som_source_fraction: float,
+    som_slow_budget_fraction: float,
+    som_sigma_mm: float,
+    som_in_degree: int,
+    som_candidate_count: int,
+    som_recruit_delay_scale: float,
+    seed: int,
+    dt_ms: float,
+    delay_dt_ms: float,
+    tau0_ms: float,
+    v_axon_mm_per_ms: float,
+    tau_r_fast_ms: float,
+    tau_r_som_ms: float,
+    tau_d_som_ms: float,
+):
+    """Partition existing I cells into local-fast PV and delayed broad-slow SOM.
+
+    Unlike :func:`build_dual_scale_i2e_gaba`, the two output filters are driven
+    by disjoint inhibitory neurons.  E->SOM arrivals are delayed, PV keeps the
+    original local I->E path, and SOM gets a broad slow I->E path.  E->E and
+    I->I matrices are exact; I->E integrated budget is matched per E target.
+    """
+    f_som = float(som_source_fraction)
+    f_budget = float(som_slow_budget_fraction)
+    sigma = float(som_sigma_mm)
+    c_in, c_cand = int(som_in_degree), int(som_candidate_count)
+    recruit_scale = float(som_recruit_delay_scale)
+    positive = (
+        sigma, recruit_scale, dt_ms, delay_dt_ms, tau0_ms,
+        v_axon_mm_per_ms, tau_r_fast_ms, tau_r_som_ms, tau_d_som_ms,
+    )
+    if not (0.0 < f_som < 1.0 and 0.0 < f_budget < 1.0):
+        raise ValueError("PV/SOM fractions must lie strictly between 0 and 1")
+    if not np.all(np.isfinite(positive)) or min(positive) <= 0.0:
+        raise ValueError("PV/SOM spatial and temporal parameters must be positive")
+    if recruit_scale < 1.0:
+        raise ValueError("SOM recruit delay scale must be >=1")
+    if c_in < 1 or c_cand < c_in:
+        raise ValueError("SOM candidate count must be >= in-degree >=1")
+    if "gaba_slow_by_delay" in net:
+        raise ValueError("network already has a slow inhibitory channel")
+
+    gaba, ampa = net["gaba_by_delay"], net["ampa_by_delay"]
+    n, n_i = gaba[0].shape
+    if n_i != n - int(n_e):
+        raise ValueError("PV/SOM population dimensions are inconsistent")
+    rng = np.random.default_rng(int(seed))
+    n_som = max(1, min(n_i - 1, int(round(f_som * n_i))))
+    som_sources = np.sort(rng.choice(n_i, size=n_som, replace=False))
+    som_mask = np.zeros(n_i, dtype=bool)
+    som_mask[som_sources] = True
+    pv_mask = ~som_mask
+
+    original_g = sparse.csc_matrix((n, n_i), dtype=float)
+    for matrix in gaba:
+        original_g = (original_g + matrix).tocsc()
+    target_budget = np.asarray(original_g[: int(n_e), :].sum(axis=1)).ravel()
+    pv_budget = np.asarray(
+        original_g[: int(n_e), :].multiply(pv_mask[None, :]).sum(axis=1)
+    ).ravel()
+    if np.any((target_budget > 0.0) & (pv_budget <= 0.0)):
+        raise ValueError("an E target has no PV input to carry the local-fast budget")
+    pv_row_scale = np.divide(
+        (1.0 - f_budget) * target_budget,
+        pv_budget,
+        out=np.zeros_like(target_budget),
+        where=pv_budget > 0.0,
+    )
+
+    row_e = np.zeros(n, dtype=float)
+    row_e[: int(n_e)] = 1.0
+    row_i = 1.0 - row_e
+    local_g = []
+    for matrix in gaba:
+        pv_to_e = matrix.multiply(row_e[:, None]).multiply(pv_mask[None, :])
+        pv_to_e = pv_to_e.multiply(
+            np.concatenate([pv_row_scale, np.zeros(n - int(n_e))])[:, None]
+        )
+        to_i = matrix.multiply(row_i[:, None])
+        local_g.append((pv_to_e + to_i).tocsc())
+
+    pos = np.asarray(net["pos"], dtype=float)
+    pos_e, pos_i = pos[: int(n_e)], pos[int(n_e) :]
+    pos_som = pos_i[som_sources]
+    tree = cKDTree(pos_som)
+    k = min(c_cand, n_som)
+    if c_in > k:
+        raise ValueError("SOM in-degree exceeds the available SOM candidate population")
+    step = max(1, int(round(float(delay_dt_ms) / float(dt_ms))))
+    jump_scale = f_budget * float(tau_r_fast_ms) / float(tau_r_som_ms)
+    broad_rows, broad_cols, broad_w, broad_dly, broad_dist = [], [], [], [], []
+    chunk = 512
+    for start in range(0, int(n_e), chunk):
+        stop = min(int(n_e), start + chunk)
+        dist, cand_local = tree.query(pos_e[start:stop], k=k)
+        if k == 1:
+            dist = np.asarray(dist)[:, None]
+            cand_local = np.asarray(cand_local)[:, None]
+        for ii, target in enumerate(range(start, stop)):
+            drow = np.asarray(dist[ii], dtype=float)
+            crow_local = np.asarray(cand_local[ii], dtype=np.int64)
+            kernel = np.exp(-drow / sigma)
+            keys = rng.standard_exponential(k) / np.maximum(kernel, np.finfo(float).tiny)
+            take = np.argpartition(keys, c_in - 1)[:c_in]
+            selected_d = drow[take]
+            selected_src = som_sources[crow_local[take]]
+            broad_rows.append(np.full(c_in, target, dtype=np.int64))
+            broad_cols.append(selected_src)
+            broad_w.append(np.full(
+                c_in, target_budget[target] * jump_scale / c_in, dtype=float
+            ))
+            broad_dist.append(selected_d)
+            delay_ms = float(tau0_ms) + selected_d / float(v_axon_mm_per_ms)
+            broad_dly.append(
+                np.maximum(1, np.rint(delay_ms / float(delay_dt_ms)).astype(int)) * step
+            )
+    br = np.concatenate(broad_rows)
+    bc = np.concatenate(broad_cols)
+    bw = np.concatenate(broad_w)
+    bd = np.concatenate(broad_dly)
+
+    # Delay only E inputs arriving onto SOM cells.  E->E rows are never touched.
+    som_target_global = int(n_e) + som_sources
+    som_target_mask = np.zeros(n, dtype=bool)
+    som_target_mask[som_target_global] = True
+    moved_ampa = []
+    max_moved = int(net["max_delay_steps"])
+    for d, matrix in enumerate(ampa):
+        if not matrix.nnz:
+            continue
+        coo = matrix.tocoo()
+        move = som_target_mask[coo.row]
+        if np.any(move):
+            new_d = max(1, int(round(d * recruit_scale)))
+            max_moved = max(max_moved, new_d)
+            moved_ampa.append((new_d, coo.row[move], coo.col[move], coo.data[move]))
+    new_max = max(int(net["max_delay_steps"]), int(np.max(bd)), max_moved)
+    zero_a = sparse.csc_matrix(ampa[0].shape, dtype=float)
+    ampa_new = [zero_a.copy() for _ in range(new_max + 1)]
+    for d, matrix in enumerate(ampa):
+        if not matrix.nnz:
+            continue
+        unchanged = matrix.multiply((~som_target_mask)[:, None]).tocsc()
+        ampa_new[d] = (ampa_new[d] + unchanged).tocsc()
+    for new_d, rr, cc, ww in moved_ampa:
+        moved = sparse.csc_matrix((ww, (rr, cc)), shape=ampa[0].shape)
+        ampa_new[new_d] = (ampa_new[new_d] + moved).tocsc()
+
+    zero_g = sparse.csc_matrix((n, n_i), dtype=float)
+    local_g.extend(zero_g.copy() for _ in range(new_max + 1 - len(local_g)))
+    slow_g = [zero_g.copy() for _ in range(new_max + 1)]
+    for delay in np.unique(bd):
+        keep = bd == delay
+        slow_g[int(delay)] = sparse.csc_matrix(
+            (bw[keep], (br[keep], bc[keep])), shape=(n, n_i)
+        )
+
+    net_new = dict(net)
+    for cache_key in ("ampa_flat", "gaba_flat", "gaba_slow_flat"):
+        net_new.pop(cache_key, None)
+    net_new.update(
+        ampa_by_delay=ampa_new,
+        gaba_by_delay=local_g,
+        gaba_slow_by_delay=slow_g,
+        gaba_slow_tau_r_ms=float(tau_r_som_ms),
+        gaba_slow_tau_d_ms=float(tau_d_som_ms),
+        max_delay_steps=new_max,
+    )
+
+    state_new = dict(state)
+    old_m = int(net["max_delay_steps"]) + 1
+    t_abs = int(np.asarray(state["t"]))
+    for key in ("ring_sE", "ring_sI"):
+        old_ring = np.asarray(state[key])
+        if old_ring.shape[0] != old_m:
+            raise ValueError(f"{key} has {old_ring.shape[0]} bins, expected {old_m}")
+        if new_max + 1 == old_m:
+            continue
+        new_ring = np.zeros((new_max + 1, old_ring.shape[1]), dtype=old_ring.dtype)
+        for delta in range(old_m):
+            new_ring[(t_abs + delta) % (new_max + 1)] += old_ring[(t_abs + delta) % old_m]
+        state_new[key] = new_ring
+
+    fast_total = sum(local_g, sparse.csc_matrix((n, n_i), dtype=float))
+    slow_total = sum(slow_g, sparse.csc_matrix((n, n_i), dtype=float))
+    matched = (
+        np.asarray(fast_total[: int(n_e), :].sum(axis=1)).ravel()
+        + np.asarray(slow_total[: int(n_e), :].sum(axis=1)).ravel()
+        * float(tau_r_som_ms) / float(tau_r_fast_ms)
+    )
+    relative_error = np.max(
+        np.abs(matched - target_budget) / np.maximum(np.abs(target_budget), 1e-12)
+    )
+    old_ampa = sum(ampa, sparse.csc_matrix(ampa[0].shape, dtype=float))
+    new_ampa = sum(ampa_new, sparse.csc_matrix(ampa[0].shape, dtype=float))
+    if (old_ampa != new_ampa).nnz:
+        raise RuntimeError("PV/SOM transformation changed AMPA edges or weights")
+    return net_new, state_new, {
+        "changed": True,
+        "som_source_fraction_requested": f_som,
+        "som_source_fraction_realized": n_som / n_i,
+        "som_slow_integrated_budget_fraction": f_budget,
+        "som_sigma_mm": sigma,
+        "som_in_degree": c_in,
+        "som_candidate_count": c_cand,
+        "som_recruit_delay_scale": recruit_scale,
+        "tau_r_som_ms": float(tau_r_som_ms),
+        "tau_d_som_ms": float(tau_d_som_ms),
+        "seed": int(seed),
+        "som_membership_sha256": hashlib.sha256(
+            np.ascontiguousarray(som_sources).tobytes()
+        ).hexdigest(),
+        "som_broad_distance_percentiles_mm_5_25_50_75_95": np.percentile(
+            np.concatenate(broad_dist), [5, 25, 50, 75, 95]
+        ).tolist(),
+        "som_broad_edge_count": int(bw.size),
+        "pv_row_scale_percentiles_5_25_50_75_95": np.percentile(
+            pv_row_scale, [5, 25, 50, 75, 95]
+        ).tolist(),
+        "i2e_integrated_budget_max_relative_error": float(relative_error),
+        "ee_ampa_untouched": True,
+        "ampa_edges_and_weights_untouched": True,
         "i2i_gaba_untouched": True,
         "existing_arrival_offsets_preserved": True,
         "old_max_delay_steps": int(net["max_delay_steps"]),
