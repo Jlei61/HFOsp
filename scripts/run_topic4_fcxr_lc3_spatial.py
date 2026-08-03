@@ -449,10 +449,19 @@ def _positive_metrics(S, arm, sham, pattern, amplitude, regions):
     np.clip(grid_xy, 0, N_GRID - 1, out=grid_xy)
     new_voxels = int(np.unique(grid_xy[newly], axis=0).shape[0]) if newly.any() else 0
     fp = arm["first_passage"]
+    sham_fp = sham["first_passage"]
     fp_regions = {}
+    newly_fp_regions = {}
+    shared_shift_regions = {}
     for name, mask in regions.items():
         values = fp[mask & np.isfinite(fp)]
         fp_regions[name] = float(np.median(values)) if values.size else None
+        new_values = fp[mask & newly & np.isfinite(fp)]
+        newly_fp_regions[name] = (float(np.median(new_values))
+                                  if new_values.size else None)
+        shared = mask & arm_active & sham_active & np.isfinite(fp) & np.isfinite(sham_fp)
+        shifts = fp[shared] - sham_fp[shared]
+        shared_shift_regions[name] = (float(np.median(shifts)) if shifts.size else None)
     current = float(amplitude) * np.asarray(pattern, float)
     gains = {
         str(t): float(np.linalg.norm(arm_fields[t] - sham_fields[t])
@@ -465,6 +474,9 @@ def _positive_metrics(S, arm, sham, pattern, amplitude, regions):
         newly_recruited_area_mm2=float(new_voxels * (S["L"] / N_GRID) ** 2),
         arm_active_cells=int(arm_active.sum()), sham_active_cells=int(sham_active.sum()),
         first_passage_region_median_ms=fp_regions,
+        first_passage_scope="raw_arm_activity_including_background",
+        first_passage_newly_recruited_region_median_ms=newly_fp_regions,
+        shared_active_first_passage_shift_region_median_ms=shared_shift_regions,
         regional_rate_delta_hz=_region_rate_deltas(arm_fields, sham_fields, regions),
         max_population_rate_hz=arm["max_population_rate_hz"],
         refractory_ceiling_fraction=arm["refractory_ceiling_fraction"],

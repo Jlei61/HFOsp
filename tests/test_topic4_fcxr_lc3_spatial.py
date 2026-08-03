@@ -1,5 +1,7 @@
 import numpy as np
 import pytest
+import importlib.util
+from pathlib import Path
 
 from src.topic4_fcxr_lc3_spatial import (
     build_equal_local_masks,
@@ -10,6 +12,14 @@ from src.topic4_fcxr_lc3_spatial import (
     rate_fields,
     svd_summary,
 )
+
+
+def _runner_module():
+    path = Path(__file__).parents[1] / "scripts" / "run_topic4_fcxr_lc3_spatial.py"
+    spec = importlib.util.spec_from_file_location("run_topic4_fcxr_lc3_spatial", path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def _geometry():
@@ -64,3 +74,28 @@ def test_rate_fields_and_projected_svd_recover_identity_response():
     np.testing.assert_array_equal(matrices[50.0], np.eye(2))
     summary = svd_summary(matrices[50.0], names)
     assert summary["sigma_max"] == pytest.approx(1.0)
+
+
+def test_positive_first_passage_separates_new_recruitment_from_background():
+    runner = _runner_module()
+    times = runner.RESPONSE_TIMES_MS
+    zero_fields = {t: np.zeros(4) for t in times}
+    arm = dict(
+        fields=zero_fields, active=np.array([True, True, False, False]),
+        first_passage=np.array([5.0, 12.0, np.nan, np.nan]),
+        accounting={}, max_population_rate_hz=1.0,
+        refractory_ceiling_fraction=0.0, artifact={},
+    )
+    sham = dict(
+        fields=zero_fields, active=np.array([True, False, False, False]),
+        first_passage=np.array([10.0, np.nan, np.nan, np.nan]),
+        max_population_rate_hz=1.0, refractory_ceiling_fraction=0.0,
+    )
+    substrate = dict(posE=np.array([[0.0, 0.0], [1.0, 0.0],
+                                    [2.0, 0.0], [3.0, 0.0]]), L=20.0)
+    regions = {"all": np.ones(4, bool)}
+    metrics = runner._positive_metrics(
+        substrate, arm, sham, np.ones(4), 1.0, regions)
+    assert metrics["first_passage_newly_recruited_region_median_ms"]["all"] == 12.0
+    assert metrics["shared_active_first_passage_shift_region_median_ms"]["all"] == -5.0
+    assert metrics["first_passage_scope"] == "raw_arm_activity_including_background"
