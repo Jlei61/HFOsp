@@ -546,7 +546,14 @@ def _run_row(row):
     prior_path = _row_result_path(row)
     if os.path.isfile(prior_path) and os.path.isfile(row["done_path"]):
         prior = _load_json(prior_path)
-        if prior.get("row_id") == row["row_id"] and prior.get("status") == "COMPLETE":
+        done = _load_json(row["done_path"])
+        current_lock = _load_json(GEOMETRY_LOCK)
+        if (prior.get("row_id") == row["row_id"]
+                and prior.get("status") == "COMPLETE"
+                and prior.get("source_lock_git_head") == current_lock.get("git_head")
+                and prior.get("prepared_state_hash") == row["prepared_state_hash"]
+                and prior.get("d_field_sha256") == row["d_field_sha256"]
+                and done.get("output_sha256") == _sha(prior_path)):
             return prior
     running_path = os.path.join(CELL_DIR, f"{row['row_id']}.RUNNING.json")
     _write_json(running_path, dict(status="RUNNING", row_id=row["row_id"],

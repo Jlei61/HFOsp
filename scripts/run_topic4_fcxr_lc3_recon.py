@@ -316,7 +316,12 @@ def _run_once(row):
     done_json = out_json.replace(".json", ".DONE.json")
     if os.path.isfile(out_json) and os.path.isfile(done_json):
         prior = _load(out_json)
-        if prior.get("status") == "COMPLETE":
+        done = _load(done_json)
+        current_lock = _load(LOCK)
+        if (prior.get("status") == "COMPLETE"
+                and prior.get("row_id") == row["row_id"]
+                and prior.get("source_lock_git_head") == current_lock.get("git_head")
+                and done.get("output_sha256") == _sha(out_json)):
             return prior
     before = _meminfo()
     if before["mem_available_gib"] < 128.0:

@@ -305,6 +305,7 @@ def _calibration_run(S, low_base, high_base, candidate, boundary):
             hill_n=candidate.get("hill_n", 4), x_min=candidate.get("x_min", 0.1)))),
         low_max_rate_hz=float(np.max(low_out["rate_E"])),
         high_end_rate_hz=float(np.mean(high_out["rate_E"][-int(round(1000.0 / DT)):])),
+        source_lock_sha256=_sha(LOCK),
     )
     del low_out, high_out
     gc.collect()
@@ -370,7 +371,8 @@ def cmd_calibrate(args):
             path = os.path.join(CELL_DIR, f"{candidate['candidate_id']}.json")
             done = path.replace(".json", ".DONE.json")
             if os.path.isfile(path) and os.path.isfile(done) \
-                    and _load(done).get("output_sha256") == _sha(path):
+                    and _load(done).get("output_sha256") == _sha(path) \
+                    and _load(path).get("source_lock_sha256") == _sha(LOCK):
                 rows.append(_load(path)); continue
             _wait_submission(swap0)
             row = _calibration_run(S, low, high, candidate, boundary)
@@ -465,8 +467,10 @@ def _event_features(events, spikes, S, *, lo_ms, hi_ms):
 
 def _run_lifecycle_row(row):
     if os.path.isfile(row["output_path"]) and os.path.isfile(row["done_path"]):
-        if _load(row["done_path"]).get("output_sha256") == _sha(row["output_path"]):
-            return _load(row["output_path"])
+        prior = _load(row["output_path"])
+        if (_load(row["done_path"]).get("output_sha256") == _sha(row["output_path"])
+                and prior.get("source_lock_sha256") == _sha(LOCK)):
+            return prior
     before = _meminfo()
     if before["mem_available_gib"] < 128.0:
         raise RuntimeError("lifecycle row requires 128 GiB MemAvailable")
@@ -594,6 +598,7 @@ def _run_lifecycle_row(row):
         x_activates_after_onset=x_after, x_min=float(np.min(xtrace)) if xtrace.size else None,
         numerical=numerical, refractory_ceiling_fraction=ceiling,
         lifecycle_candidate=candidate_gate["pass_"], candidate_gate=candidate_gate,
+        source_lock_sha256=_sha(LOCK),
         field_landmarks=selected, fields_path=npz_path, fields_sha256=_sha(npz_path),
         wall_s=time.time() - t0, resources=dict(start=before, end=_meminfo()),
         finished=_now(),

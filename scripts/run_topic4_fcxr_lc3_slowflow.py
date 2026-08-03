@@ -103,6 +103,8 @@ def cmd_manifest(_args):
             source_resolved_label=src["resolved_label"], probe_ms=PROBE_MS,
             fit_start_ms=FIT_START_MS,
             output_path=os.path.join(OUT, "cells", f"{row_id}.json"),
+            done_path=os.path.join(OUT, "cells", f"{row_id}.DONE.json"),
+            geometry_map_sha256=_sha(path),
         ))
     payload = dict(
         status="LOCKED", schema="fcxr-lc3-slowflow-manifest-1.0", rows=rows,
@@ -134,9 +136,12 @@ def _slope(trace, start_i):
 
 
 def _run(row):
-    if os.path.isfile(row["output_path"]):
+    if os.path.isfile(row["output_path"]) and os.path.isfile(row["done_path"]):
         old = _load(row["output_path"])
-        if old.get("status") == "COMPLETE":
+        done = _load(row["done_path"])
+        if (old.get("status") == "COMPLETE"
+                and old.get("geometry_map_sha256") == row["geometry_map_sha256"]
+                and done.get("output_sha256") == _sha(row["output_path"])):
             return old
     S = PP.build_substrate(1)
     fields, _records = GEO._primary_fields()
@@ -191,6 +196,9 @@ def _run(row):
         finished=_now(),
     )
     _write(row["output_path"], record)
+    _write(row["done_path"], dict(
+        status="DONE", row_id=row["row_id"],
+        output_sha256=_sha(row["output_path"]), finished=_now()))
     return record
 
 
