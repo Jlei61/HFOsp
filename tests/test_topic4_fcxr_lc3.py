@@ -209,3 +209,39 @@ def test_incomplete_or_corrupted_checkpoint_fails_closed():
             bad, n=net["NE"] + net["NI"], ne=net["NE"],
             max_delay_steps=net["max_delay_steps"],
         )
+
+
+def test_every_stepping_runner_installs_the_noise_generator_on_its_substrate():
+    """build_substrate() omits net["rng"]; a substrate that steps must be given one.
+
+    Three separate LC3 stages shipped without it (geometry map worker, spatial
+    cmd_all, x_lifecycle cmd_calibrate) and each would only fail once its stage was
+    finally reached.  Any function that builds a substrate must either install the
+    generator or be listed here as provably non-stepping.
+    """
+
+    import ast
+
+    root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    # Functions that build a substrate purely for geometry/pattern bookkeeping.
+    non_stepping = {
+        ("run_topic4_fcxr_lc3_spatial.py", "cmd_lock"),  # derives I_ref from a stored state
+        ("run_topic4_fcxr_lc3_geometry.py", "cmd_field_audit"),  # region masks + field stats
+    }
+    runners = ["run_topic4_fcxr_lc3_geometry.py", "run_topic4_fcxr_lc3_recon.py",
+               "run_topic4_fcxr_lc3_spatial.py", "run_topic4_fcxr_lc3_x_lifecycle.py"]
+    offenders = []
+    for name in runners:
+        path = os.path.join(root, "scripts", name)
+        tree = ast.parse(open(path).read())
+        for node in ast.walk(tree):
+            if not isinstance(node, ast.FunctionDef):
+                continue
+            body = ast.dump(node)
+            if "build_substrate" not in body:
+                continue
+            installs = ("install_registered_noise_rng" in body
+                        or ("'rng'" in body or '"rng"' in body))
+            if not installs and (name, node.name) not in non_stepping:
+                offenders.append(f"{name}::{node.name}")
+    assert offenders == [], f"substrate built without a noise generator: {offenders}"

@@ -37,6 +37,7 @@ import run_topic4_fcxr_lc3_recon as RECON  # noqa: E402
 from src.topic4_fcxr_lc3 import clone_loop_state  # noqa: E402
 from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
     H1_POINT_ID,
+    install_registered_noise_rng,
     load_prepared_checkpoint,
 )
 from src.topic4_fcxr_lc3_perturb import run_fcxr_perturbation  # noqa: E402
@@ -602,6 +603,9 @@ def cmd_all(args):
         raise SystemExit("spatial response requires 128 GiB MemAvailable")
     masks, positive, basis = _load_patterns()
     S = PP.build_substrate(1)
+    # build_substrate omits the noise generator; run_fcxr_perturbation reads it before
+    # restoring the arm's state from its clone, so the substrate cannot step without it.
+    install_registered_noise_rng(S["net"])
     _SPATIAL_SWAP_BASE_MIB = _meminfo()["swap_used_mib"]
     os.makedirs(CELL_DIR, exist_ok=True)
     t0 = time.time()

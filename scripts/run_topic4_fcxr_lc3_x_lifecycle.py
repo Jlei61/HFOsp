@@ -44,6 +44,7 @@ from src.topic4_fcxr_lc3 import (  # noqa: E402
 )
 from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
     H1_POINT_ID,
+    install_registered_noise_rng,
     load_prepared_checkpoint,
 )
 from src.topic4_fcxr_lc3_xcal import (  # noqa: E402
@@ -346,6 +347,8 @@ def cmd_calibrate(args):
         raise SystemExit("X calibration requires 128 GiB MemAvailable")
     boundary = adjudication["selected_boundary"]
     S = PP.build_substrate(1)
+    # _calibration_run steps this substrate; build_substrate does not create net["rng"].
+    install_registered_noise_rng(S["net"])
     low, high = _calibration_states(boundary)
     sensor = _load(E01.ARTIFACTS["lc1_sensor"])
     current = _candidate_grid("BOUNDARY_ALREADY_REACHED_NO_RECALIBRATION_NEEDED", sensor)[0]
