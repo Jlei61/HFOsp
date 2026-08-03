@@ -117,7 +117,7 @@ def test_single_substrate_pass_is_not_yet_a_replicated_carrier():
     assert verdict["passing_arms"] == ["persistent_g0.32"]
 
 
-def test_a_carrier_that_needs_one_particular_wiring_is_reported_as_such():
+def test_a_wiring_with_no_passing_dose_at_all_is_substrate_dependent():
     verdict = adjudicate(_panel({
         "persistent_g0": False, "persistent_g0.32": True,
         "persistent_g0__som2": False, "persistent_g0.32__som2": False,
@@ -127,9 +127,24 @@ def test_a_carrier_that_needs_one_particular_wiring_is_reported_as_such():
     )
     assert verdict["seed_replication"]["g0.32"]["seeds_tested"] == [1, 2]
     assert verdict["seed_replication"]["g0.32"]["seeds_passing_gate"] == [1]
+    assert verdict["wirings_without_a_passing_dose"] == [2]
 
 
-def test_a_carrier_holding_on_every_tested_wiring_is_promoted():
+def test_a_wiring_that_passes_at_its_own_dose_is_not_substrate_dependent():
+    """Every wiring carries; only the dose that clears the gate moves."""
+    verdict = adjudicate(_panel({
+        "persistent_g0.32": True, "persistent_g0.4": False,
+        "persistent_g0.32__som2": True, "persistent_g0.4__som2": True,
+        "persistent_g0.32__som3": False, "persistent_g0.4__som3": True,
+    }))
+    assert verdict["verdict"] == (
+        "PERSISTENT_SLOW_EXCITATION_CARRIER_REPLICATES_AT_A_WIRING_SPECIFIC_DOSE"
+    )
+    assert verdict["wirings_without_a_passing_dose"] == []
+    assert verdict["passing_dose_per_wiring"] == {"1": 0.32, "2": 0.32, "3": 0.4}
+
+
+def test_one_dose_holding_on_every_tested_wiring_is_promoted():
     verdict = adjudicate(_panel({
         "persistent_g0": False, "persistent_g0.32": True,
         "persistent_g0.32__som2": True, "persistent_g0.32__som3": True,
@@ -138,6 +153,7 @@ def test_a_carrier_holding_on_every_tested_wiring_is_promoted():
         "PERSISTENT_SLOW_EXCITATION_CARRIER_REPLICATES_ACROSS_SUBSTRATES"
     )
     assert verdict["seed_replication"]["g0.32"]["seeds_passing_gate"] == [1, 2, 3]
+    assert verdict["passing_dose_per_wiring"] == {"1": 0.32, "2": 0.32, "3": 0.32}
 
 
 def test_the_weakest_passing_dose_is_named_not_the_strongest():

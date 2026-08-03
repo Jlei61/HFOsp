@@ -125,19 +125,35 @@ def adjudicate(rows):
         {_split_arm(key)[0] for key in passing if key.startswith("persistent_g")}
     )
     dosed = [key for key in persistent if _split_arm(key)[0] > 0.0]
+    wirings = sorted({_split_arm(key)[1] for key in dosed})
+    # A wiring carries if some dose clears the gate on it, which is a weaker
+    # and different claim from one dose clearing the gate on every wiring.
+    passing_dose_per_wiring = {}
+    for key in passing:
+        if not key.startswith("persistent_g"):
+            continue
+        dose, seed = _split_arm(key)
+        passing_dose_per_wiring[str(seed)] = min(
+            dose, passing_dose_per_wiring.get(str(seed), dose)
+        )
+    unsupported = [w for w in wirings if str(w) not in passing_dose_per_wiring]
     if passing_doses:
-        entries = [replication[f"g{dose:g}"] for dose in passing_doses]
-        replicated = [
-            entry for entry in entries
-            if len(entry["seeds_tested"]) > 1
-            and len(entry["seeds_passing_gate"]) == len(entry["seeds_tested"])
+        # One wiring makes "passes on every tested wiring" vacuously true.
+        transferable = [] if len(wirings) < 2 else [
+            dose for dose in passing_doses
+            if len(replication[f"g{dose:g}"]["seeds_passing_gate"]) == len(wirings)
         ]
-        if replicated:
+        if transferable:
             headline = "PERSISTENT_SLOW_EXCITATION_CARRIER_REPLICATES_ACROSS_SUBSTRATES"
             coordinate = "none; advance to 12-s durability at the weakest replicated strength"
-        elif any(len(entry["seeds_tested"]) > 1 for entry in entries):
+        elif unsupported:
             headline = "PERSISTENT_SLOW_EXCITATION_CARRIER_IS_SUBSTRATE_DEPENDENT"
-            coordinate = "the carrier needs one particular SOM wiring; do not advance to M"
+            coordinate = "at least one wiring has no passing dose; do not advance to M"
+        elif len(wirings) > 1:
+            headline = (
+                "PERSISTENT_SLOW_EXCITATION_CARRIER_REPLICATES_AT_A_WIRING_SPECIFIC_DOSE"
+            )
+            coordinate = "every wiring carries but the passing dose moves; durability decides"
         else:
             headline = "PERSISTENT_SLOW_EXCITATION_CARRIER_CANDIDATE"
             coordinate = "none; advance to 12-s durability at the weakest passing strength"
@@ -155,6 +171,8 @@ def adjudicate(rows):
         "verdict": headline,
         "passing_arms": passing,
         "weakest_passing_dose": passing_doses[0] if passing_doses else None,
+        "passing_dose_per_wiring": passing_dose_per_wiring,
+        "wirings_without_a_passing_dose": unsupported,
         "seed_replication": replication,
         "persistent_arm_classes": {
             key: rows[key]["gap_spatial_class"] for key in persistent
