@@ -354,7 +354,12 @@ def cmd_all(args):
         raise SystemExit("40k reconnaissance requires --confirm-run")
     manifest = _assert_manifest()
     with _stage_lock("recon_all"):
-        rows = [_run_once(row) for row in manifest["rows"]]
+        swap0 = _meminfo()["swap_used_mib"]
+        rows = []
+        for row in manifest["rows"]:
+            while _meminfo()["swap_used_mib"] - swap0 >= 256.0:
+                time.sleep(30.0)
+            rows.append(_run_once(row))
         payload = dict(
             status="COMPLETE", n_rows=3,
             verdict_counts={v: sum(r["verdict"] == v for r in rows)
