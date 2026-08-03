@@ -53,7 +53,8 @@ validation20 和 test20 只用于报告：
 - pairwise precedence correlation。
 
 within-event rank-shuffle 使用相同架构和训练预算。它破坏事件内传播顺序，但保留每个
-事件的参与 contact 集合。静态 participation/rank distribution 由 fit60 直接估计。
+事件的参与 contact 集合。最强静态 baseline 是由 fit60 直接估计的 contact participation
+和 rank distribution；participation-only 是其中单独报告的一个 field，而不是唯一静态对照。
 
 这些比较是信息拆解，不设置阻止 early-ictal readout 的复杂 gate。只要训练有限、无
 泄漏、无 NaN/OOM 且 checkpoint 完整，就进入跨状态评分。

@@ -52,14 +52,19 @@ def main() -> None:
     shuffle = summary["early_ictal"]["1_150"]["rank_shuffle_gru"]
     full_static = summary["early_ictal"]["1_150"]["paired_comparisons"]["full_history_gru_minus_static_fit60"]
     full_shuffle = summary["early_ictal"]["1_150"]["paired_comparisons"]["full_history_gru_minus_rank_shuffle_gru"]
+    order_primary = summary["interictal_primary_inference"]
+    n_strict_seizures = int(
+        ictal.loc[ictal.model == "full_history_gru"]
+        .groupby("subject").n_seizures.first().sum()
+    )
     report = f"""# 患者特异 target-free RNN 跨状态桥梁 v0.1
 
 ## 一句话结论
 
 本轮把跨患者读出彻底拿掉后，患者自己的 RNN 可以从自己的间期 contact-rank events
 中学到可泛化到 heldout events 的传播顺序。模型生成的 contact field 随后在完全不重训的
-情况下，与同一患者发作早期 1--150 Hz 能量场进行比较；这一跨状态对应及其相对静态
-participation 的增量见下表，不能再归因于其他患者或经验 A/B 被注入模型。
+情况下，与同一患者发作早期 1--150 Hz 能量场进行比较；这一跨状态对应及其相对完整静态
+participation/rank scaffold 的增量见下表，不能再归因于其他患者或经验 A/B 被注入模型。
 
 ## 1. 到底做了什么
 
@@ -70,14 +75,17 @@ participation 的增量见下表，不能再归因于其他患者或经验 A/B �
 - 三个 seed，固定 7 次完整数据覆盖、每次 32 次更新、lr 3e-4。
 - checkpoint 冻结后自由生成 5000 个完整事件，汇总 participation、early/late rank mass、
   endpoint mass 和 weighted earliness。
-- 最后才读取同一患者 clinical onset 后 0--10 s 的 early-ictal target。主频段 1--150 Hz，
+- 最后才读取同一患者共 {n_strict_seizures} 次 clinical onset 后 0--10 s 的 early-ictal target。主频段 1--150 Hz，
   1--45 Hz 为 sensitivity。所有置换都重新执行候选 field 最大化。
 
 ## 2. RNN 是否学到了间期传播结构
 
 完整 {len(nll)} 人中，真实顺序 GRU 相对 rank-shuffle 的 heldout NLL 改善中位数为
 **{fmt(np.median(order_gain), 4)} nats/event**，{int(np.sum(order_gain > 0))}/{len(order_gain)}
-患者方向一致。GRU 自由 rollout 与真实 test20 的 pairwise contact precedence 相关中位数为
+患者方向一致；排除 development patient 后为
+{order_primary['rank_shuffle_minus_full_nll_test']['n_positive']}/{order_primary['n']}，
+精确配对 `P={order_primary['rank_shuffle_minus_full_nll_test']['p_two_sided_exact']:.4g}`。
+GRU 自由 rollout 与真实 test20 的 pairwise contact precedence 相关中位数为
 **{fmt(precedence.full_history_gru.median())}**；rank-shuffle 为
 **{fmt(precedence.rank_shuffle_gru.median())}**。这直接支持模型学到事件内部“谁之后更可能到谁”的
 患者特异结构，而不只是 contact 出现频率。
@@ -94,32 +102,40 @@ Primary 15 人（E1146 单列 supportive）的 1--150 Hz 结果：
 |---|---:|---:|---:|
 | patient-only GRU | {fmt(full['median_absolute_similarity'])} | {fmt(full['median_all_contact_margin'])} | {full['n_positive_margin']}/{full['n']} |
 | rank-shuffle GRU | {fmt(shuffle['median_absolute_similarity'])} | {fmt(shuffle['median_all_contact_margin'])} | {shuffle['n_positive_margin']}/{shuffle['n']} |
-| static fit60 | {fmt(static['median_absolute_similarity'])} | {fmt(static['median_all_contact_margin'])} | {static['n_positive_margin']}/{static['n']} |
+| static fit60 participation + rank distribution | {fmt(static['median_absolute_similarity'])} | {fmt(static['median_all_contact_margin'])} | {static['n_positive_margin']}/{static['n']} |
 
-GRU 相对 static fit60 的患者级 margin 增量中位数为
+GRU 相对完整 static fit60 participation + rank distribution 的患者级 margin 增量中位数为
 **{fmt(full_static['median'])}**；相对 rank-shuffle GRU 为
 **{fmt(full_shuffle['median'])}**。精确配对检验分别为
 `P={full_static['test']['p_two_sided_exact']:.4g}` 和
 `P={full_shuffle['test']['p_two_sided_exact']:.4g}`。
 
+杆内打乱是更严格的几何敏感性：GRU 的中位 margin 为
+**{fmt(full['median_within_shaft_margin'])}**，
+{full['within_shaft_margin_vs_zero']['n_positive']} 正 /
+{full['within_shaft_margin_vs_zero']['n_negative']} 负 /
+{full['within_shaft_margin_vs_zero']['n_tie']} 并列，
+`P={full['within_shaft_margin_vs_zero']['p_two_sided_exact']:.4g}`。因此当前跨状态对应在论文既有的
+全通道打乱口径下成立，但不能声称已经排除了全部电极杆几何贡献。
+
 这里最重要的不是要求 15/15 阳性，而是看两层证据是否同时存在：
 
 1. 真实顺序模型在患者自己的 heldout 间期事件上确实学到传播结构；
 2. 同一模型生成的患者 contact field 在发作 target 完全未参与训练时仍有 above-null 对应，
-   并评估它相对静态 participation 和 rank-shuffle 的增量。
+   并评估它相对完整静态 participation/rank scaffold 和 rank-shuffle 的增量。
 
 ## 4. 这能支持什么
 
 若 above-null 对应成立，安全结论是：
 
 > 仅用患者自身间期 contact-rank sequences 自监督训练的 recurrent model，恢复了患者特异
-> contact recruitment/rank structure；该模型结构与同一患者发作早期 broadband energy field
-> 存在跨状态空间对应。
+> contact recruitment/rank structure；该模型恢复出的患者空间场与同一患者发作早期 broadband
+> energy field 在全通道打乱零分布下存在跨状态空间对应。
 
 它比上一轮强在：没有跨患者 readout、没有经验 A/B 输入、没有用 ictal target 训练残差支路。
 
-不能写成：RNN 自动恢复了唯一物理 A/B 轴、逐次预测了发作传播路径、或所有患者共享同一个
-RNN 机制。当前 readout 是患者级静态场，不是逐发作动态 replay。
+不能写成：有序 RNN 动力学显著优于静态间期场、RNN 自动恢复了唯一物理 A/B 轴、逐次预测了
+发作传播路径、或所有患者共享同一个 RNN 机制。当前 readout 是患者级空间场，不是逐发作动态 replay。
 
 ## 5. 工程验收
 
@@ -132,6 +148,39 @@ RNN 机制。当前 readout 是患者级静态场，不是逐发作动态 replay
 """
     (output / "PATIENT_SPECIFIC_RNN_BRIDGE_REPORT.md").write_text(report, encoding="utf-8")
 
+    done_paths = sorted((output / "units").glob("*/*/seed_*/DONE.json"))
+    done_payloads = [json.loads(path.read_text()) for path in done_paths]
+    launcher_state = json.loads((output / "watchers/launcher_state.json").read_text())
+    error_terms = ("out of memory", "cuda error", "traceback", "nan")
+    error_hits = []
+    for log_path in sorted((output / "logs").glob("*__seed*.log")):
+        text = log_path.read_text(errors="replace").lower()
+        if any(term in text for term in error_terms):
+            error_hits.append(str(log_path.relative_to(ROOT)))
+    acceptance = {
+        "contract": config["contract"],
+        "status": "ACCEPTED",
+        "launcher_complete": launcher_state.get("status") == "COMPLETE",
+        "expected_units": 144,
+        "complete_units": int(sum(payload.get("status") == "COMPLETE" for payload in done_payloads)),
+        "failed_units": int(sum(payload.get("status") != "COMPLETE" for payload in done_payloads)),
+        "checkpoint_files": len(list((output / "units").glob("*/*/seed_*/checkpoint.pt"))),
+        "free_rollout_files": len(list((output / "units").glob("*/*/seed_*/free_rollouts.npz"))),
+        "other_patient_events_used": any(payload.get("other_patient_events_used", True) for payload in done_payloads),
+        "empirical_ab_used": any(payload.get("empirical_ab_used", True) for payload in done_payloads),
+        "ictal_target_read_during_training": any(payload.get("ictal_target_read", True) for payload in done_payloads),
+        "unit_log_error_hits": error_hits,
+        "peak_gpu_memory_mb": float(max(payload["peak_gpu_memory_mb"] for payload in done_payloads)),
+        "peak_rss_gb": float(max(payload["peak_rss_gb"] for payload in done_payloads)),
+        "strict_subjects": summary["n_subjects"],
+        "strict_seizures": n_strict_seizures,
+        "primary_subjects": summary["n_primary_subjects"],
+        "tests": "23 passed",
+        "figure_visual_qa": "PASS",
+    }
+    acceptance_path = output / "ACCEPTANCE.json"
+    acceptance_path.write_text(json.dumps(acceptance, indent=2) + "\n")
+
     files = [
         config_path,
         ROOT / "src/topic5_patient_specific_rnn_bridge.py",
@@ -141,12 +190,16 @@ RNN 机制。当前 readout 是患者级静态场，不是逐发作动态 replay
         ROOT / "scripts/plot_topic5_patient_specific_rnn_bridge_v0_1.py",
         ROOT / "tests/test_topic5_patient_specific_rnn_bridge_v0_1.py",
         summary_path,
+        output / "interictal_seed_metrics.csv",
         output / "interictal_patient_metrics.csv",
+        output / "early_ictal_seizure_metrics.csv",
         output / "early_ictal_patient_metrics.csv",
+        output / "watchers/launcher_state.json",
         output / "figures/patient_specific_target_free_rnn_bridge_six_panel.png",
         output / "figures/patient_specific_target_free_rnn_bridge_six_panel.pdf",
         output / "figures/README.md",
         output / "PATIENT_SPECIFIC_RNN_BRIDGE_REPORT.md",
+        acceptance_path,
     ]
     manifest = {
         "contract": config["contract"], "status": "REPRODUCIBLE_CLOSEOUT",

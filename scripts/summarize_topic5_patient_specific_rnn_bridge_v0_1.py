@@ -248,6 +248,7 @@ def inference_summary(patients: pd.DataFrame) -> dict:
         for model in MODEL_ORDER:
             group = primary.loc[primary.model == model]
             values = group.all_contact_margin.to_numpy(float)
+            shaft_values = group.within_shaft_margin.to_numpy(float)
             summary[band][model] = {
                 "n": int(len(group)),
                 "median_absolute_similarity": finite_or_none(group.observed_max_abs_rho.median()),
@@ -256,8 +257,15 @@ def inference_summary(patients: pd.DataFrame) -> dict:
                 "n_negative_margin": int(np.sum(values < -1e-9)),
                 "n_tied_margin": int(np.sum(np.abs(values) <= 1e-9)),
                 "margin_vs_zero": _exact_signed_rank(values, tolerance=1e-9),
+                "median_within_shaft_margin": finite_or_none(np.median(shaft_values)),
+                "within_shaft_margin_vs_zero": _exact_signed_rank(
+                    shaft_values, tolerance=1e-9
+                ),
             }
         wide = primary.pivot(index="subject", columns="model", values="all_contact_margin")
+        shaft_wide = primary.pivot(
+            index="subject", columns="model", values="within_shaft_margin"
+        )
         comparisons = {}
         for left, right in (
             ("full_history_gru", "static_fit60"),
@@ -269,6 +277,13 @@ def inference_summary(patients: pd.DataFrame) -> dict:
             comparisons[f"{left}_minus_{right}"] = {
                 "n": int(len(values)), "median": finite_or_none(np.median(values)),
                 "test": _exact_signed_rank(values, tolerance=1e-9),
+                "within_shaft_median": finite_or_none(
+                    np.median((shaft_wide[left] - shaft_wide[right]).dropna().to_numpy(float))
+                ),
+                "within_shaft_test": _exact_signed_rank(
+                    (shaft_wide[left] - shaft_wide[right]).dropna().to_numpy(float),
+                    tolerance=1e-9,
+                ),
             }
         summary[band]["paired_comparisons"] = comparisons
     return summary
@@ -309,6 +324,26 @@ def main() -> None:
             for model, group in interictal_patient.groupby("model")
         },
         "early_ictal": inference_summary(patients),
+    }
+    primary_subjects = [
+        subject for subject in subjects
+        if subject != str(config["ictal_transfer"]["development_subject"])
+    ]
+    primary_interictal = interictal_patient.loc[
+        interictal_patient.subject.isin(primary_subjects)
+    ]
+    nll_wide = primary_interictal.pivot(
+        index="subject", columns="model", values="test_nll"
+    )
+    order_gain = (
+        nll_wide["rank_shuffle_gru"] - nll_wide["full_history_gru"]
+    ).dropna().to_numpy(float)
+    summary["interictal_primary_inference"] = {
+        "n": int(len(order_gain)),
+        "rank_shuffle_minus_full_nll_median": finite_or_none(np.median(order_gain)),
+        "rank_shuffle_minus_full_nll_test": _exact_signed_rank(
+            order_gain, tolerance=1e-9
+        ),
     }
     atomic_json(output / "PATIENT_SPECIFIC_RNN_BRIDGE_SUMMARY.json", summary)
     print(json.dumps(summary, indent=2))
