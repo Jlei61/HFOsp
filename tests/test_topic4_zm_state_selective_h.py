@@ -5,6 +5,7 @@ from src.snn_engine.slow_field import (
     SpatialSlowField,
     SpatialSlowFieldConfig,
     local_rate_field_hz,
+    recover_i2e_resource,
     zero_baseline_sigmoid,
 )
 from src.topic4_zm_checkpoint import capture_slow, restore_slow
@@ -160,3 +161,15 @@ def test_asymmetric_h_and_collective_m_memory_create_separate_timescales():
     )
     restore_slow(restored, state)
     assert restored.mode_M_memory == pytest.approx(slow.mode_M_memory)
+
+
+def test_quenched_i2e_recovery_heterogeneity_is_reproducible_and_zero_cv_is_exact():
+    resource = np.array([0.2, 0.5, 0.8])
+    scalar = recover_i2e_resource(resource, 1.0, 300.0)
+    vector_same = recover_i2e_resource(resource, 1.0, np.full(3, 300.0))
+    np.testing.assert_array_equal(scalar, vector_same)
+    a = _slow(i2e_tau_cv=0.3, i2e_tau_seed=7)
+    b = _slow(i2e_tau_cv=0.3, i2e_tau_seed=7)
+    np.testing.assert_array_equal(a.i2e_tau_recovery, b.i2e_tau_recovery)
+    assert np.std(a.i2e_tau_recovery) > 0.0
+    assert np.mean(a.i2e_tau_recovery) == pytest.approx(a.cfg.tau_i2e_depression)

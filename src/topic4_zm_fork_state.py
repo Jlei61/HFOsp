@@ -346,7 +346,7 @@ _KICK_STATE = {"V", "ref", "s_E", "I_E", "s_I", "I_I", "s_E_rec", "I_E_rec", "ri
 #: SpatialSlowField attributes that are pure functions of cfg/geometry
 _SLOW_DERIVED = {"cfg", "N", "nE", "nI", "L", "posE", "posI", "_Kq", "_Kk", "_Kn", "_Kp", "_alpha_a",
                  "_alpha_s", "_ixE", "_iyE", "_ixE_core", "_iyE_core", "_ixE_surr", "_iyE_surr",
-                 "_core_mask_E", "is_E", "hG_script"}
+                 "_core_mask_E", "is_E", "hG_script", "i2e_tau_recovery"}
 _SLOW_STATE = {"z", "m", "phi_increment", "i2e_resource", "i_adaptation_increment",
                "_I_I_last", "rE", "rI", "rE_fast", "mu_G", "S_G", "q_I", "g_K", "p",
                "n_load", "a_shunt", "h_G", "H", "mode_H", "mode_M_memory", "_t"}

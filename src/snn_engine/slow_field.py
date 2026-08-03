@@ -208,6 +208,8 @@ class SpatialSlowFieldConfig:
     tau_i2e_depression: float = 300.0  # ms, recovery of per-I-neuron resource toward one
     U_i2e_depression: float = 0.0      # fractional resource use per I spike
     d_i2e_min: float = 0.20            # safety floor; I->I edges are never scaled
+    i2e_tau_cv: float = 0.0            # quenched per-I recovery heterogeneity
+    i2e_tau_seed: int = 0
     use_i_adaptation: bool = False
     tau_i_adaptation: float = 300.0    # ms, exact recovery of I threshold increment
     delta_i_adaptation: float = 0.0    # mV added after each I spike
@@ -372,6 +374,8 @@ class SpatialSlowFieldConfig:
                 raise ValueError("U_i2e_depression must lie in [0,1)")
             if not (0.0 < self.d_i2e_min <= 1.0):
                 raise ValueError("d_i2e_min must lie in (0,1]")
+            if not np.isfinite(self.i2e_tau_cv) or self.i2e_tau_cv < 0.0:
+                raise ValueError("i2e_tau_cv must be finite and >=0")
         if self.use_i_adaptation:
             if self.tau_i_adaptation <= 0.0:
                 raise ValueError("tau_i_adaptation must be > 0")
@@ -465,7 +469,10 @@ def aq_drive(rE, rI, eta_E, eta_I):
 def recover_i2e_resource(resource, dt_ms, tau_ms):
     """Exact between-spike recovery for tau*d' = 1-d."""
     d = np.asarray(resource, dtype=float)
-    return 1.0 - (1.0 - d) * np.exp(-float(dt_ms) / float(tau_ms))
+    tau = np.asarray(tau_ms, dtype=float)
+    if np.any(tau <= 0.0) or not np.all(np.isfinite(tau)):
+        raise ValueError("tau_ms must be finite and >0")
+    return 1.0 - (1.0 - d) * np.exp(-float(dt_ms) / tau)
 
 
 def deplete_i2e_resource(resource, use_fraction, d_min):
@@ -622,6 +629,16 @@ class SpatialSlowField:
         self.trace_phi_core_mean = []; self.trace_phi_surround_mean = []
         # ---- lifecycle prototype inhibitory state (all off-path values are neutral) ----
         self.i2e_resource = np.ones(self.nI, dtype=float)
+        if self.cfg.i2e_tau_cv > 0.0:
+            rng_tau = np.random.default_rng(int(self.cfg.i2e_tau_seed))
+            sigma_tau = np.sqrt(np.log1p(self.cfg.i2e_tau_cv ** 2))
+            factors_tau = np.exp(
+                sigma_tau * rng_tau.standard_normal(self.nI) - 0.5 * sigma_tau ** 2
+            )
+            factors_tau /= factors_tau.mean()
+            self.i2e_tau_recovery = self.cfg.tau_i2e_depression * factors_tau
+        else:
+            self.i2e_tau_recovery = None
         self.i_adaptation_increment = np.zeros(self.N, dtype=float)
         self.trace_i2e_resource_mean = []; self.trace_i2e_resource_min = []
         self.trace_i_adaptation_mean = []; self.trace_i_adaptation_max = []
@@ -840,7 +857,11 @@ class SpatialSlowField:
         spk = np.asarray(spk, bool)
         if cfg.use_i2e_depression:
             self.i2e_resource[:] = recover_i2e_resource(
-                self.i2e_resource, dt, cfg.tau_i2e_depression
+                self.i2e_resource,
+                dt,
+                cfg.tau_i2e_depression
+                if self.i2e_tau_recovery is None
+                else self.i2e_tau_recovery,
             )
             self.trace_i2e_resource_mean.append(float(self.i2e_resource.mean()))
             self.trace_i2e_resource_min.append(float(self.i2e_resource.min()))

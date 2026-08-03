@@ -268,12 +268,16 @@ def _mechanism_kwargs(args: argparse.Namespace, ctx: dict) -> tuple[dict, dict]:
             tau_i2e_depression=float(args.tau_D_ms),
             U_i2e_depression=float(scale * dep["U_applied"]),
             d_i2e_min=0.20,
+            i2e_tau_cv=float(getattr(args, "i2e_tau_cv", 0.0)),
+            i2e_tau_seed=int(getattr(args, "i2e_tau_seed", 0)),
         )
         receipt["i2e_depression"] = {
             **dep,
             "U_applied_after_strength_scale": float(scale * dep["U_applied"]),
             "tau_D_ms": float(args.tau_D_ms),
             "d_min": 0.20,
+            "tau_recovery_cv": float(getattr(args, "i2e_tau_cv", 0.0)),
+            "tau_recovery_seed": int(getattr(args, "i2e_tau_seed", 0)),
         }
     if arm in {"iadapt", "combined"}:
         if args.tau_aI_ms is None or args.f_aI is None:
@@ -340,7 +344,9 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             values.update({
                 "use_mode_H": True,
                 "tau_mode_H": float(args.tau_mode_H_ms),
-                "tau_mode_H_down": float(args.tau_mode_H_down_ms),
+                "tau_mode_H_down": float(
+                    getattr(args, "tau_mode_H_down_ms", args.tau_mode_H_ms)
+                ),
                 "rho_mode_H": float(args.rho_mode_H),
                 "theta_mode_H_hz": float(args.theta_mode_H_hz),
                 "half_mode_H_hz": float(args.half_mode_H_hz),
@@ -407,12 +413,15 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
             "__clkrel2"
         )
     if bool(getattr(args, "use_mode_H", False)):
-        stem += (
-            f"__modeH{args.rho_mode_H:g}t{args.tau_mode_H_ms:g}"
-            f"d{args.tau_mode_H_down_ms:g}__mc{args.m_mode_half:g}"
-        )
+        tau_h_down = float(getattr(args, "tau_mode_H_down_ms", args.tau_mode_H_ms))
+        stem += f"__modeH{args.rho_mode_H:g}t{args.tau_mode_H_ms:g}"
+        if not np.isclose(tau_h_down, float(args.tau_mode_H_ms)):
+            stem += f"d{tau_h_down:g}"
+        stem += f"__mc{args.m_mode_half:g}"
     if bool(getattr(args, "freeze_zm", False)):
         stem += f"__freeze_{args.state}"
+    if float(getattr(args, "i2e_tau_cv", 0.0)) > 0.0:
+        stem += f"__tauDcv{args.i2e_tau_cv:g}s{args.i2e_tau_seed:d}"
     if bool(getattr(args, "use_mode_M_divisive", False)):
         stem += (
             f"__mdiv{args.kappa_mode_M:g}"
@@ -872,6 +881,8 @@ def main() -> None:
     parser.add_argument("--arm", choices=RACE_ARMS, default="phi")
     parser.add_argument("--tau-D-ms", type=float, dest="tau_D_ms")
     parser.add_argument("--d-star", type=float)
+    parser.add_argument("--i2e-tau-cv", type=float, default=0.0)
+    parser.add_argument("--i2e-tau-seed", type=int, default=0)
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
     parser.add_argument("--strength-scale", type=float)
