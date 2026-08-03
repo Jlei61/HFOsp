@@ -125,6 +125,14 @@ MemAvailable >= 96 GiB + 2*1.35*RSS_single
 swap stable and sibling reserve respected
 ```
 
+Amendment 2026-08-04 — the two-worker rule above is the floor, not the cap. Workers beyond two
+additionally require the worst-case extended-row budget to fit:
+
+```text
+n * 1.35 * 3 * RSS_single <= MemAvailable - 96 GiB
+n <= min(MAX_MAP_WORKERS = 8, cpu_count - 2)
+```
+
 Use a bounded producer with at most `n_workers` pending rows. Never submit the full map at once.
 
 ### 2.5 Geometry map
@@ -254,7 +262,7 @@ Test whether pre-onset response predicts the real onset core, polarity and early
 
 ## 11. Resource and nohup implementation
 
-- T <20 s: maximum two workers; T >=20 s: strict one worker.
+- T <20 s: maximum `MAX_MAP_WORKERS = 8` workers under the §2.4 sizing rule; T >=20 s: strict one worker.
 - Threads: OMP/OpenBLAS/MKL/NUMEXPR=1.
 - Swap baseline is sampled per stage. +256 MiB stops new submission; +512 MiB and rising terminates only
   the newest LC3 worker.

@@ -1,6 +1,7 @@
 """Pre-outcome contracts for the FCXR-LC3 102-row frozen geometry."""
 from __future__ import annotations
 
+import json
 import os
 import sys
 
@@ -14,16 +15,23 @@ from model import build_network
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig
 from params import Params
 from src.topic4_fcxr_lc3_geometry import (
+    EXTENDED_ROW_RSS_SCALE,
     H1_POINT_ID,
     H6_POINT_ID,
+    MAP_WORKER_MEM_FLOOR_GIB,
+    MAP_WORKER_RESERVE,
+    MAX_MAP_WORKERS,
     PRIMARY_D_LABELS,
     build_geometry_manifest_rows,
+    choose_map_workers,
     classify_geometry_tail,
     compact_checkpoint_diagnostics,
     configured_state_hash,
     extension_required,
+    geometry_manifest_summary,
     paired_field_shape_metrics,
     load_prepared_checkpoint,
+    prepared_state_is_reusable,
     save_prepared_checkpoint,
     validate_geometry_manifest,
 )
@@ -85,6 +93,104 @@ def test_manifest_is_exactly_84_primary_plus_18_sentinel_before_outcomes():
     assert len({r["row_id"] for r in rows}) == 102
     assert sum(r["sentinel"] for r in rows) == 18
     assert all(r["noise_seed"] == 401 and r["no_kick"] for r in rows)
+
+
+def test_manifest_summary_nests_the_audit_instead_of_shadowing_its_status():
+    rows = build_geometry_manifest_rows(
+        fields=_fields(), prepared_state_hashes=_states(), output_root="/tmp/lc3")
+    audit = validate_geometry_manifest(rows)
+    # The 2026-08-04 map launch died here: the audit already owns ``status``, so
+    # splatting it beside a second ``status`` raised TypeError *after* the 102-row
+    # manifest had been written.  The summary must keep both and stay serialisable.
+    with pytest.raises(TypeError):
+        dict(status="LOCKED", **audit)
+    summary = geometry_manifest_summary(audit)
+    assert summary["status"] == "LOCKED"
+    assert summary["audit"]["status"] == "PASS"
+    assert summary["audit"]["n_rows"] == 102
+    assert json.loads(json.dumps(summary)) == summary
+
+
+def _workers(mem_gib, rss_gib, *, swap=0.0, base=0.0, cpu=80):
+    return choose_map_workers(mem_available_gib=mem_gib, swap_used_mib=swap,
+                              swap_baseline_mib=base, single_rss_gib=rss_gib,
+                              cpu_count=cpu)
+
+
+def _registered_rule(mem_gib, rss_gib):
+    """The two-worker rule this function generalises; it is the guaranteed floor."""
+    return 2 if mem_gib >= MAP_WORKER_MEM_FLOOR_GIB + 2.0 * MAP_WORKER_RESERVE * rss_gib else 1
+
+
+def test_map_workers_never_fall_below_the_registered_two_worker_rule():
+    for mem_gib in (100.0, 140.0, 175.0, 225.0, 400.0):
+        for rss_gib in (2.0, 5.0, 10.0, 12.0):
+            assert _workers(mem_gib, rss_gib) >= _registered_rule(mem_gib, rss_gib)
+
+
+def test_map_workers_only_exceed_two_when_the_worst_case_row_still_fits():
+    for mem_gib in (100.0, 140.0, 175.0, 225.0, 400.0):
+        for rss_gib in (2.0, 5.0, 10.0, 12.0):
+            n = _workers(mem_gib, rss_gib)
+            assert 1 <= n <= MAX_MAP_WORKERS
+            if n > _registered_rule(mem_gib, rss_gib):
+                reserved = n * MAP_WORKER_RESERVE * EXTENDED_ROW_RSS_SCALE * rss_gib
+                assert reserved <= mem_gib - MAP_WORKER_MEM_FLOOR_GIB
+
+
+def test_map_workers_collapse_to_one_on_rising_swap_or_no_headroom():
+    assert _workers(225.0, 5.0, swap=1000.0, base=700.0) == 1   # +300 MiB swap
+    assert _workers(96.0, 5.0) == 1                              # exactly at the floor
+    assert _workers(60.0, 5.0) == 1                              # below the floor
+
+
+def test_map_workers_are_bounded_by_cpu_and_by_the_hard_cap():
+    assert _workers(4000.0, 1.0, cpu=6) == 4                     # cpu_count - 2
+    assert _workers(4000.0, 1.0, cpu=80) == MAX_MAP_WORKERS
+
+
+def test_map_workers_grow_with_memory_and_shrink_with_row_footprint():
+    assert _workers(140.0, 5.0) < _workers(225.0, 5.0)
+    assert _workers(225.0, 12.0) < _workers(225.0, 2.0)
+
+
+def test_map_workers_reject_non_finite_or_empty_inputs():
+    for bad in (dict(mem_gib=float("nan"), rss_gib=5.0),
+                dict(mem_gib=225.0, rss_gib=0.0),
+                dict(mem_gib=225.0, rss_gib=float("inf"))):
+        with pytest.raises(ValueError, match="finite positive"):
+            _workers(**bad)
+    with pytest.raises(ValueError, match="finite positive"):
+        _workers(225.0, 5.0, cpu=0)
+
+
+def _prepared_record(**over):
+    rec = dict(status="ACCEPTED_CANONICAL_STATE", point_id=H1_POINT_ID, state_kind="high",
+               checkpoint=dict(file_sha256="abc"))
+    rec.update(over)
+    return rec
+
+
+def test_accepted_prepared_state_is_resumed_instead_of_recomputed():
+    assert prepared_state_is_reusable(_prepared_record(), point_id=H1_POINT_ID,
+                                      state_kind="high", checkpoint_sha256="abc")
+    injected = _prepared_record(status="ACCEPTED_SENTINEL_INJECTED_LOW_STATE",
+                                point_id=H6_POINT_ID, state_kind="low")
+    assert prepared_state_is_reusable(injected, point_id=H6_POINT_ID,
+                                      state_kind="low", checkpoint_sha256="abc")
+
+
+@pytest.mark.parametrize("record,sha", [
+    (_prepared_record(status="PREPARED_STATE_UNRESOLVED"), "abc"),   # never reuse a reject
+    (_prepared_record(), "drifted"),                                 # checkpoint changed on disk
+    (_prepared_record(point_id=H6_POINT_ID), "abc"),                 # wrong point
+    (_prepared_record(state_kind="low"), "abc"),                     # wrong basin
+    (_prepared_record(checkpoint={}), "abc"),                        # no recorded hash
+    (None, "abc"),
+])
+def test_unresolved_or_drifted_prepared_state_is_never_reused(record, sha):
+    assert not prepared_state_is_reusable(record, point_id=H1_POINT_ID,
+                                          state_kind="high", checkpoint_sha256=sha)
 
 
 def test_manifest_fails_closed_on_missing_field_or_state_hash():

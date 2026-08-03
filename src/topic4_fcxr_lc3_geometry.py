@@ -39,6 +39,14 @@ SCREEN_TAIL_MS = 500.0
 EXTENDED_MS = 5000.0
 EXTENDED_TAIL_MS = 2000.0
 REFRACTORY_CEILING_FRACTION_MAX = 0.05
+MAX_MAP_WORKERS = 8
+MAP_WORKER_MEM_FLOOR_GIB = 96.0
+MAP_WORKER_RESERVE = 1.35
+MAP_WORKER_SWAP_DELTA_MIB = 256.0
+# The smoke row measures a 1.5 s screen.  An extended row transiently holds the
+# screen, the 3.5 s continuation and their concatenation at once, so each worker
+# is budgeted at this multiple of the smoke reading before the 1.35 reserve.
+EXTENDED_ROW_RSS_SCALE = 3.0
 
 
 def _hash_array(value) -> str:
@@ -238,6 +246,75 @@ def validate_geometry_manifest(rows: list[dict]) -> dict:
             raise ValueError("screen tail drift")
     return dict(status="PASS", n_rows=102, n_h1=84, n_h6=18,
                 n_low=51, n_high=51, schema=SCHEMA_VERSION)
+
+
+def geometry_manifest_summary(audit: dict) -> dict:
+    """Console summary for a locked manifest, nesting the audit under its own key.
+
+    The audit payload already owns a ``status`` field.  Splatting it beside a
+    second ``status`` raises ``TypeError`` *after* the manifest has been written,
+    which is how the 2026-08-04 map launch died with a complete manifest on disk.
+    """
+
+    if not isinstance(audit, dict):
+        raise ValueError("audit must be the validate_geometry_manifest payload")
+    return dict(status="LOCKED", audit=dict(audit))
+
+
+ACCEPTED_PREPARED_STATUSES = ("ACCEPTED_CANONICAL_STATE",
+                              "ACCEPTED_SENTINEL_INJECTED_LOW_STATE")
+
+
+def prepared_state_is_reusable(record, *, point_id, state_kind, checkpoint_sha256) -> bool:
+    """True when an accepted prepared state on disk may be resumed instead of re-run.
+
+    Preparation is the most expensive non-map stage (~25 min per 40k state), and
+    plan §11 only allows resuming from a valid DONE whose hash still matches.  An
+    unresolved or drifted record must be re-run, never silently reused.
+    """
+
+    if not isinstance(record, dict):
+        return False
+    if record.get("status") not in ACCEPTED_PREPARED_STATUSES:
+        return False
+    if record.get("point_id") != point_id or record.get("state_kind") != state_kind:
+        return False
+    stored = (record.get("checkpoint") or {}).get("file_sha256")
+    return bool(stored) and stored == checkpoint_sha256
+
+
+def choose_map_workers(*, mem_available_gib, swap_used_mib, swap_baseline_mib,
+                       single_rss_gib, cpu_count) -> int:
+    """Worker count for the geometry map: never below the originally registered rule.
+
+    ``single_rss_gib`` is the measured smoke-row peak for a 1.5 s screen.  Two
+    budgets are combined:
+
+    * the registered LC3 rule -- two workers once
+      ``mem_available >= floor + 2 * 1.35 * single_rss`` -- which is the floor of
+      what this function may return, so raising the cap can never slow the map
+      down relative to the locked contract;
+    * a worst-case budget that additionally reserves ``EXTENDED_ROW_RSS_SCALE``
+      times the smoke reading per worker, because an extended row transiently
+      holds the screen, the continuation and their concatenation at once.  Only
+      this budget may push the count *above* two.
+
+    Rising swap collapses the pool to a single worker.  Row results do not depend
+    on this number: every row restores its RNG bit-generator state from its
+    prepared checkpoint, so worker count and row order cannot change any outcome.
+    """
+
+    if not (np.isfinite(mem_available_gib) and np.isfinite(single_rss_gib)
+            and float(single_rss_gib) > 0.0 and int(cpu_count) >= 1):
+        raise ValueError("worker sizing needs finite positive memory and cpu inputs")
+    if float(swap_used_mib) - float(swap_baseline_mib) >= MAP_WORKER_SWAP_DELTA_MIB:
+        return 1
+    headroom = float(mem_available_gib) - MAP_WORKER_MEM_FLOOR_GIB
+    reserve = MAP_WORKER_RESERVE * float(single_rss_gib)
+    registered = 2 if headroom >= 2.0 * reserve else 1
+    worst_case = int(headroom // (EXTENDED_ROW_RSS_SCALE * reserve)) if headroom > 0.0 else 0
+    return max(1, min(MAX_MAP_WORKERS, max(registered, worst_case),
+                      max(1, int(cpu_count) - 2)))
 
 
 def paired_field_shape_metrics(a, b, *, support_epsilon: float = 1e-12) -> dict:

@@ -426,9 +426,16 @@ full core scientific goal.
 
 ## 12. Resource, detachment and provenance
 
-- T <20 s: at most two 40k workers; T >=20 s: exactly one worker.
+- T <20 s: up to `MAX_MAP_WORKERS = 8` 40k workers; T >=20 s: exactly one worker.
 - Before worker 2 require
-  `MemAvailable >= 96 GiB + 2*1.35*RSS_single` and stable swap.
+  `MemAvailable >= 96 GiB + 2*1.35*RSS_single` and stable swap. This stays the guaranteed
+  floor of the sizing rule.
+- Amendment 2026-08-04 (worker cap 2 -> 8): worker `n > 2` additionally requires
+  `n * 1.35 * 3 * RSS_single <= MemAvailable - 96 GiB`, where `RSS_single` is the measured
+  1.5 s smoke-row peak and the extra factor 3 covers an extended row transiently holding the
+  screen, the 3.5 s continuation and their concatenation. Also bounded by `cpu_count - 2`.
+  This is a resource amendment only: every row restores its RNG bit-generator state from its
+  prepared checkpoint, so worker count and row order cannot change any row outcome.
 - Use bounded submission with at most `n_workers` pending jobs. Swap +256 MiB stops new submission;
   +512 MiB and rising terminates only LC3's newest worker.
 - Pin OMP/OpenBLAS/MKL/NUMEXPR to one thread.

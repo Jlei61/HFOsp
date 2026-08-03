@@ -52,12 +52,15 @@ from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
     SCREEN_MS,
     SCREEN_TAIL_MS,
     build_geometry_manifest_rows,
+    choose_map_workers,
     classify_geometry_tail,
     compact_checkpoint_diagnostics,
     configured_state_hash,
     extension_required,
+    geometry_manifest_summary,
     load_prepared_checkpoint,
     paired_field_shape_metrics,
+    prepared_state_is_reusable,
     save_prepared_checkpoint,
     validate_geometry_manifest,
 )
@@ -426,6 +429,16 @@ def cmd_prepare(args):
     lock = _assert_lock()
     point_id = POINT_IDS[args.point]
     with _stage_lock(f"prepare_{args.point}_{args.state}"):
+        pkl_prior, json_prior = _prep_paths(point_id, args.state)
+        if os.path.isfile(pkl_prior) and os.path.isfile(json_prior):
+            prior = _load_json(json_prior)
+            if prepared_state_is_reusable(prior, point_id=point_id, state_kind=args.state,
+                                          checkpoint_sha256=_sha(pkl_prior)):
+                print(json.dumps(dict(status=f"RESUMED_{prior['status']}", point_id=point_id,
+                                      state=args.state,
+                                      classification=(prior.get("classification") or {}).get("label"),
+                                      checkpoint=prior["checkpoint"]), indent=2))
+                return
         if point_id == H6_POINT_ID and args.state == "low":
             record = _inject_h6_low(lock)
             print(json.dumps(record, indent=2)); return
@@ -520,7 +533,7 @@ def cmd_manifest(_args):
         created=_now(),
     )
     _write_json(MANIFEST, payload)
-    print(json.dumps(dict(status="LOCKED", **payload["audit"]), indent=2))
+    print(json.dumps(geometry_manifest_summary(payload["audit"]), indent=2))
 
 
 def _load_manifest():
@@ -659,9 +672,10 @@ def cmd_row(args):
 
 def _choose_workers(single_rss_gib, swap_baseline):
     mem = _meminfo()
-    need = 96.0 + 2.0 * 1.35 * float(single_rss_gib)
-    stable_swap = mem["swap_used_mib"] - float(swap_baseline) < 256.0
-    return 2 if mem["mem_available_gib"] >= need and stable_swap else 1
+    return choose_map_workers(
+        mem_available_gib=mem["mem_available_gib"], swap_used_mib=mem["swap_used_mib"],
+        swap_baseline_mib=float(swap_baseline), single_rss_gib=float(single_rss_gib),
+        cpu_count=os.cpu_count() or 2)
 
 
 def _aggregate(rows):
