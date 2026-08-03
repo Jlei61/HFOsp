@@ -1,8 +1,10 @@
 # Z/M 状态选择性模态与 conductance homotopy：阶段验收
 
-**日期：** 2026-08-03  
+**日期：** 2026-08-03（§10 为 2026-08-04 续记）  
 **分支：** `codex/topic4-m4-snn-native-exit`  
 **科学 verdict：** `NO_DURABLE_CREDIBLE_ICTAL_CARRIER`
+
+> §10 是同一 verdict 下的后续机制轮次，结论不变但把失效机制定位得更具体：局部持续慢兴奋 conductance 能稳定地消除 burst 间深间隙并保持 12 s 有界不失控，但它是**用消灭弛豫振荡换来的**——持续段是静止的高秩空间图样（末段放电起伏 ≤0.046、轴向 DMD 主模态 0 Hz 实模态），而不是 §7 要求的 non-tonic spatial orbit。
 
 ## 1. 一句话判断
 
@@ -146,3 +148,137 @@ M45 的短臂一度看起来最接近联合门，但 12 s 轨迹证明它不是�
 - 统一 verdict：`results/topic4_sef_hfo/zm_mode_lifecycle/targeted_fast_modal_summary.json`
 - 统一图：`results/topic4_sef_hfo/zm_mode_lifecycle/figures/targeted_fast_modal_mechanisms.png`
 - 分析器：`scripts/analyze_topic4_zm_modal_fast_mechanisms.py`
+
+## 10. 局部持续慢兴奋 conductance：剂量带、连接种子复现与冻结工作点扫描（2026-08-04）
+
+一句话：这个机制确实把 burst 之间的深间隙填掉了，但填掉的方式是**把弛豫振荡整个消灭、换成一个静止的高秩空间图样**，而不是在间隙里托住一个还在运动的 carrier；预注册 gate 分辨不出这两者，因为"深间隙 ≤ 0.20"这条对一条恒定放电给满分。
+
+### 10.1 机制与工程层
+
+`cd654801` 引入的机制是 opt-in、E-only 的局部慢兴奋性 conductance，复用既有 mode-H 状态与其 Z/M 门控：
+
+\[
+g_{H,i}=g_{H,\max}\,h_i\,S_\zeta(z_i)\,S_M(m_i),\qquad
+V_\infty=\frac{I_{net}+g_H E_{exc}}{1+g_H},\quad \tau_{eff}\propto(1+g_H)^{-1}
+\]
+
+`g_max=0` 严格走原 current-based 膜更新路径。本轮全部臂取 `rho_mode_H=0`，即关闭乘性 H、只留新机制，因此 `persistent_g0` 臂是本剂量序列自带的 matched control（H 传感器在跑，两条慢兴奋通路都不耦合）。
+
+分析器侧新增（均带 TDD，`tests/test_topic4_zm_pv_som_carrier_panel.py` 16 项、`tests/test_topic4_zm_carrier_state_specificity.py` 11 项）：
+
+- `_label` 接受 `rho=0` 剂量序列与 replicate SOM wiring；无 `mode_H_persistent_g_max` 键的历史 run 默认 0（parity path），不被丢弃；
+- `_gap_spatial_class` 从实测 gap 与 PC1 推导失效轴，不手工贴标签；
+- `adjudicate` 为纯函数，区分"单一剂量跨 wiring 通过 / 每个 wiring 各有通过剂量 / 某 wiring 无任何通过剂量"三种情形；
+- `sustained_core_cv` 报告末 1 s 放电相对起伏（**报告量，不入 gate**）。
+
+### 10.2 剂量带（wiring 1，冻结 `bounded_late__peak`，2.5 s，seed1）
+
+| g | gain dB | occ | gap | PC1 | rank | core Hz | CV(末1s) | 质心 bin/s | gate |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|
+| 0 | 30.02 | 0.346 | 0.700 | 0.737 | 1.902 | 86.6 | 1.840 | 65.5 | — |
+| 0.04 | 29.24 | 0.365 | 0.750 | 0.966 | 1.181 | 91.2 | 1.894 | 51.1 | — |
+| 0.08 | 27.99 | 0.410 | 0.625 | 0.943 | 1.299 | 93.1 | 1.420 | 73.4 | — |
+| 0.12 | 23.90 | 0.374 | 0.575 | 0.953 | 1.248 | 105.1 | 1.305 | 79.7 | — |
+| 0.16 | 28.20 | 0.408 | 0.550 | 0.952 | 1.252 | 108.0 | 1.239 | 90.9 | — |
+| 0.20 | 28.14 | 0.450 | 0.375 | 0.944 | 1.277 | 125.4 | 0.964 | 83.9 | — |
+| 0.24 | 29.25 | 0.443 | 0.400 | 0.936 | 1.300 | 133.2 | 0.994 | 84.3 | — |
+| 0.28 | 27.02 | 0.424 | 0.350 | 0.932 | 1.308 | 145.6 | 0.893 | 82.6 | — |
+| **0.32** | **25.21** | **0.547** | **0** | **0.823** | **2.114** | **187.0** | **0.048** | **7.7** | **PASS** |
+| 0.40 | 19.87 | 0.527 | 0 | 0.603 | 3.411 | 139.2 | 0.051 | 6.9 | — (gain) |
+| 0.48 | 18.77 | 0.672 | 0 | 0.497 | 6.096 | 206.6 | 0.044 | 3.9 | — (gain) |
+| 0.64 | 0.22 | 0.035 | 0.040 | 0.455 | 5.422 | 217.1 | 0.040 | 2.7 | — (gain, occ) |
+
+两条约束反向夹逼：能量占空要求强度往上，场增益要求强度往下。wiring 1 上 0.28 因间隙与占空不过、0.40 因增益 19.87 不过，实测**只有 0.32 一个采样点通过**；可行窗口的两个边界分别落在 (0.28, 0.32] 与 [0.32, 0.40) 内，未进一步细分。高剂量端（0.48/0.64）间隙填得更平、有效秩升到 5–6，但宏观场信号塌掉（增益 18.8→0.2 dB，占空 0.035）——高放电率下的去同步态，电极上读不出场。
+
+### 10.3 连接种子复现（g=0.32 与 0.40）
+
+| wiring | g=0.32 | g=0.40 |
+|---|---|---|
+| 1 | **PASS** | — (gain 19.87) |
+| 2 | **PASS** | **PASS** |
+| 3 | — (occ 0.4925) | **PASS** |
+
+三套 SOM 连接布线**各自都有能通过 gate 的剂量**（0.32 / 0.32 / 0.40），无 wiring 缺席。因此不能写成"carrier 依赖某一套特定连接"，正确表述是**能通过的剂量随连接布线移动**。每个 wiring 均配 `g=0` matched control，三条对照全部是 gap 0.75、CV≈1.9 的 burst train。
+
+机器 verdict：`PERSISTENT_SLOW_EXCITATION_CARRIER_REPLICATES_AT_A_WIRING_SPECIFIC_DOSE`。
+
+### 10.4 承重结果：过 gate 的方式是弛豫振荡消失，不是间隙被托住
+
+末 1 s 放电相对起伏在 g=0.28→0.32 之间发生一步跳变，且与 gate 结果完全共变：
+
+- g ≤ 0.28（全部不过）：CV 0.893–1.894，空间质心速度 51–91 bin/s；
+- g ≥ 0.32（含全部 4 条过 gate 臂）：CV 0.040–0.071，质心速度 2.7–20.8 bin/s。
+
+**全 panel 18 臂中没有任何一臂同时满足"gap ≤ 0.20"与"CV 与 burst 臂同量级"。** 冻结工作点扫描的时间序列（`carrier_state_specificity.png`）逐格印证同一形态：凡是过 gate 的臂，都是 burst 序列在窗口内被阻尼掉、收敛成一条平线。
+
+这暴露 gate 的一个结构性盲点：`post_onset_deep_gap_fraction ≤ 0.20` 对一条恒定放电取满分，因此 §7 最小要求里的 **"bounded non-tonic spatial orbit"** 的 non-tonic 一半从来没有被编进 gate。`sustained_core_cv` 作为报告量补上该缺口，**不修改预注册 gate**。
+
+### 10.5 冻结工作点扫描（固定 g=0.32，wiring 1）
+
+| 工作点 | 冻结 z | Z 门开度 | gap | PC1 | rank | core Hz | 慢兴奋 g 峰 | gate |
+|---|---:|---:|---:|---:|---:|---:|---:|---|
+| `bounded_mid__rising` | 0.408 | 0.993 | 0.100 | 0.867 | 1.627 | 174.5 | 0.2109 | — (occ) |
+| `bounded_mid__peak` | 0.406 | 0.993 | 0.325 | 0.967 | 1.180 | 161.7 | 0.1753 | — |
+| `bounded_late__rising` | 0.375 | 0.993 | 0 | 0.736 | 2.740 | 193.0 | 0.2115 | **PASS** |
+| `bounded_late__peak` | 0.373 | 0.993 | 0 | 0.823 | 2.114 | 187.0 | 0.1840 | **PASS** |
+| `pre_entry__natural` g=0.32 | 0.525 | **0.989** | 0.450 | 0.976 | 1.141 | 87.0 | 0.1216 | — |
+| `pre_entry__natural` g=0 | 0.525 | 0.989 | — | 1.000 | 1.000 | 54.3 | 0 | — |
+
+carrier 只覆盖轨迹的 **late 段**（`bounded_late__rising` / `__peak`），两个 `bounded_mid__*` 点不过。
+
+**已撤回的一次 over-claim**：本节初稿把 `pre_entry__natural` 当作间期基线，并把该点上机制仍有 66% 参与度（0.1216 vs 0.184）读作"Z 门在间期不关闭"。直接测量门开度后撤回：该点 z 已降至 0.525，Z 门开度 0.989，**面板五个工作点的门全部近乎全开（0.989–0.993）**，即本扫描**没有采样到任何位于门关闭侧的状态**，无从检验特异性。该点上机制参与度的差异来自活动驱动的 `h` 累积与 M 门，不是 Z 门。机器 verdict 相应改为 `CARRIER_ON_THE_LATE_ARC_SELECTIVITY_UNTESTED`，并在 `adjudicate` 中加入门开度前置判据，使分析器在门已开时**拒绝**给出特异性结论。
+
+需要注意 `pre_entry__natural` 是 onset 前约 1.35 s 的 pre-ictal checkpoint，不是 interictal baseline；要检验"进入"与"退出"，必须先注册一个 z 位于门以上的 checkpoint。
+
+### 10.6 12 s durability（全部 4 条过 gate 臂）
+
+四条 2.5 s 轨迹均通过 `_validate_short_prefix`，即短臂是长臂的逐位前缀（无时钟平移；dynamic run 的 equilibration 区间保留在轨迹内，与 §5 M45 长跑同一约定）。
+
+| arm | gain dB | occ | gap | PC1 | rank | core Hz | CV(末1s) | 质心 bin/s | 12 s gate | tail label |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---|---|
+| g=0.32 / w1 | 19.51 | 0.552 | 0 | 0.483 | 4.904 | 205.1 | 0.0388 | 1.94 | — (gain) | `tonic_tail` |
+| g=0.32 / w2 | 21.13 | 0.554 | 0 | 0.656 | 2.733 | 202.8 | 0.0372 | 1.97 | **PASS** | `tonic_tail` |
+| g=0.40 / w2 | 19.47 | 0.587 | 0 | 0.764 | 2.649 | 208.5 | 0.0461 | 0.90 | — (gain) | `tonic_tail` |
+| g=0.40 / w3 | 19.33 | 0.599 | 0 | 0.538 | 5.358 | 210.7 | 0.0433 | 1.61 | — (gain) | `tonic_tail` |
+
+四条**均无 runaway**。轴向 DMD 在四条上给出同一结论：leading mode 一律为 **0 Hz 实模态**，growth −1.60 至 −6.26 /s；`pathological_mode_candidate` 或本身即 0 Hz，或为 18–20 Hz 但 growth −25 至 −27 /s（强阻尼）。即持续段不存在自持的复模态/行波。
+
+`g=0.32 / w2` 是唯一在 12 s 仍形式上通过全部七条 gate 的臂，但其 `tail label` 为 `tonic_tail`、末段起伏 0.0372、空间质心速度 1.97 bin/s、leading DMD 0 Hz。它是一个**持久的不动点**，不是 carrier。
+
+另外四条的 gain 从 2.5 s 的 22–25 dB 一致降至 12 s 的 19.3–21.1 dB：2.5 s 窗口包含高幅 burst 瞬态，持续段本身的场幅度更低。这解释了为何 2.5 s 面板比 12 s 更容易过 gain gate。
+
+### 10.7 当前能写与不能写
+
+**能写**
+
+- 局部持续慢兴奋 conductance 能可靠地把 PV/SOM 衬底上的弛豫 burst train 转成**有界、空间非均匀（有效秩 2.6–5.4）、不饱和、12 s 不失控**的高活动态；
+- 该转变在 3 套 SOM 连接布线上均可复现，只是通过 gate 的强度随布线移动（0.32 / 0.32 / 0.40）；
+- 转变是**突变式**的：末段放电相对起伏在 g=0.28→0.32 之间从 0.893 跳到 0.048，空间质心速度从 82.6 掉到 7.7 bin/s；
+- 该态在轴向 DMD 下的主导模态是 0 Hz 实模态且被阻尼，持续段没有自持的复模态；
+- 两条 gate 反向夹逼可行强度：能量占空要求强度往上、场增益要求强度往下，高强度端因去同步导致宏观场信号塌掉（g=0.64：增益 0.22 dB、占空 0.035）。
+
+**不能写**
+
+- 不能写已获得 ictal carrier：唯一在 12 s 通过全部 gate 的臂 `g=0.32/w2` 末段是 `tonic_tail`、起伏 0.0372、质心速度 1.97 bin/s，动力学上是静止态；
+- 不能把"深间隙降到 0"写成"间隙被托住"：同一批数据显示间隙消失与振荡消失同时发生，且**没有任何一臂**同时满足 gap ≤ 0.20 与 burst 量级的起伏；
+- 不能声称该机制在间期关闭或不关闭：本轮五个冻结工作点的 Z 门开度全部在 0.989–0.993，面板内**不存在门关闭侧的状态**；
+- 不能把 `pre_entry__natural` 当作 interictal baseline（它是 onset 前约 1.35 s 的 pre-ictal checkpoint）；
+- 不能进入 M 因果 / native offset / stimulation：合格的 fast carrier 尚不存在，释放 Z/M 只会测到一个静止态被慢变量拖走。
+
+### 10.8 对下一步的约束
+
+§7 的最小要求仍未满足，且本轮把缺口定位得更准：不是"能量不够"或"空间自由度不够"，而是**持续高能与持续时间结构在本机制下互斥**。局部慢兴奋提供的是一个稳定不动点的吸引域，强度越大吸引越强；把振荡保住的唯一方式是把强度压回 0.28 以下，而那里间隙又回到 0.35 以上。
+
+因此下一个机制必须在**不依赖提高局部兴奋标量强度**的前提下，让持续段保留一个自持的时间尺度——即需要一个真正的慢负反馈与快正反馈之间的相位竞争，而不是再加一层局部正反馈。另需注册一个 z 位于 Z 门关闭侧的 checkpoint，否则"进入 / 退出"在任何后续面板里都无法检验。
+
+同时记录一条方法学缺口：预注册 gate 的 `post_onset_deep_gap_fraction ≤ 0.20` 对恒定放电取满分，§7 要求的 non-tonic 从未进入 gate。本轮以 `sustained_core_cv` 作为报告量补上，**未修改 gate**；后续若要把 non-tonic 提升为判据，需在下一份 plan 里预注册，不能事后追加。
+
+### 10.9 交付物
+
+- 面板 verdict：`results/topic4_sef_hfo/zm_mode_lifecycle/pv_som_carrier_summary.json`
+- 工作点扫描 verdict：`results/topic4_sef_hfo/zm_mode_lifecycle/carrier_state_specificity_summary.json`
+- 图：`figures/pv_som_carrier_panel.png`（15 行机制对照）、`figures/persistent_dose_response.png`（四条 gate + 非 gate 起伏诊断对剂量）、`figures/carrier_state_specificity.png`（工作点扫描）
+- 分析器：`scripts/analyze_topic4_zm_pv_som_carrier.py`、`scripts/analyze_topic4_zm_carrier_state_specificity.py`
+- 测试：`tests/test_topic4_zm_pv_som_carrier_panel.py`（16）、`tests/test_topic4_zm_carrier_state_specificity.py`（11）
+
+本轮共 22 条冻结轨迹（18 条 2.5 s + 4 条 12 s），全部 seed1 噪声、`--freeze-zm`；E→E topology/kernel/AR/direction/delay 未修改；新机制 default-off。
