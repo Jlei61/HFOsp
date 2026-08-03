@@ -50,3 +50,41 @@ def test_candidate_verdict_keeps_dynamic_and_morphology_unclaimed():
     assert out["dynamic_lifecycle_tested"] is False
     assert out["morphology_tested"] is False
     assert out["authorized_next_hypothesis"] == "CAUSAL_2X2_D_GATE_BY_SHARED_X_H_PATH"
+
+
+def test_entry_summary_does_not_upgrade_one_way_ignition_to_dual_basin():
+    g = _module()
+    def arm(name, label):
+        return {"arm": name, "workpoint_label": label}
+    strip = {
+        "verdict": "NO_NATURAL_SELECTIVITY_WINDOW_IN_LOCKED_STRIP",
+        "n_window_points": 0,
+        "point_rows": [{
+            "point_id": "H1_ts1.25_r025",
+            "arms": [arm("healthy_low", "INTERICTAL_WORKPOINT"),
+                     arm("susceptible_low", "FINITE_HIGH_ORBIT"),
+                     arm("susceptible_high", "FINITE_HIGH_FIXED")],
+        }],
+    }
+    out = g.summarize_entry_geometry(strip)
+    assert out["component_label"] == "D_SELECTIVE_ONE_WAY_IGNITION_WITHOUT_DUAL_BASIN"
+    assert out["natural_dual_basin_window"] is False
+    assert out["explicit_d_gate_status"].endswith("NOT_PROVEN_SUFFICIENT")
+
+
+def test_x_summary_reports_reachable_bracket_without_physiology_claim():
+    g = _module()
+    xmap = {
+        "returning_availabilities": [0.0, 0.1],
+        "rows": [
+            {"x_availability": 1.0, "required_low_workpoint_label": "FINITE_HIGH_ORBIT"},
+            {"x_availability": 0.5, "required_low_workpoint_label": "FINITE_HIGH_FIXED"},
+            {"x_availability": 0.1, "required_low_workpoint_label": "INTERICTAL_WORKPOINT"},
+            {"x_availability": 0.0, "required_low_workpoint_label": "INTERICTAL_WORKPOINT"},
+        ],
+    }
+    out = g.summarize_x_authority(xmap)
+    assert out["current_x_path_reachable"] is True
+    assert out["h_actuator_bypasses_x"] is False
+    assert out["experimental_return_bracket"] == [0.1, 0.5]
+    assert out["physiological_validity_of_returning_probe"] == "NOT_ESTABLISHED"

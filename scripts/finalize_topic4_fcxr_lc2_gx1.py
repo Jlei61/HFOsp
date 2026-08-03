@@ -13,6 +13,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap
+from matplotlib.patches import Patch
 import numpy as np
 
 
@@ -76,6 +77,60 @@ def choose_next_hypothesis(strip_verdict, x_verdict):
     return "MEASUREMENT_REPAIR_NO_STRUCTURAL_CLAIM"
 
 
+def summarize_entry_geometry(strip):
+    """Describe the strongest locked-strip component without upgrading it to a basin."""
+    points = list(strip.get("point_rows", []))
+    selective = []
+    for point in points:
+        arms = {a["arm"]: a for a in point.get("arms", []) if "arm" in a}
+        if set(arms) != {"healthy_low", "susceptible_low", "susceptible_high"}:
+            continue
+        healthy_low = arms["healthy_low"].get("workpoint_label") == "INTERICTAL_WORKPOINT"
+        susceptible_low_high = arms["susceptible_low"].get("workpoint_label") in (
+            "FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT")
+        susceptible_high_high = arms["susceptible_high"].get("workpoint_label") in (
+            "FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT")
+        if healthy_low and susceptible_low_high and susceptible_high_high:
+            selective.append(point["point_id"])
+    return dict(
+        component_label=("D_SELECTIVE_ONE_WAY_IGNITION_WITHOUT_DUAL_BASIN"
+                         if selective else "NO_D_SELECTIVE_IGNITION_COMPONENT"),
+        selective_one_way_points=selective,
+        natural_dual_basin_window=bool(strip.get("n_window_points", 0)),
+        explicit_d_gate_status=(
+            "AUTHORIZED_AS_FALSIFIABLE_HYPOTHESIS_NOT_PROVEN_SUFFICIENT"
+            if strip.get("verdict") == "NO_NATURAL_SELECTIVITY_WINDOW_IN_LOCKED_STRIP"
+            else "NOT_AUTHORIZED"),
+    )
+
+
+def summarize_x_authority(xmap):
+    rows = sorted((r for r in xmap.get("rows", []) if "x_availability" in r),
+                  key=lambda r: float(r["x_availability"]), reverse=True)
+    returning = sorted(float(v) for v in xmap.get("returning_availabilities", []))
+    nonreturning = sorted(
+        float(r["x_availability"]) for r in rows
+        if r.get("required_low_workpoint_label") != "INTERICTAL_WORKPOINT")
+    smallest_nonreturning_above = None
+    if returning:
+        ret_hi = max(returning)
+        above = [v for v in nonreturning if v > ret_hi]
+        smallest_nonreturning_above = min(above) if above else None
+    return dict(
+        current_x_path_reachable=bool(returning),
+        h_actuator_bypasses_x=False if returning else None,
+        largest_tested_returning_availability=max(returning) if returning else None,
+        smallest_tested_nonreturning_availability_above_return=(
+            smallest_nonreturning_above),
+        experimental_return_bracket=(
+            [max(returning), smallest_nonreturning_above]
+            if returning and smallest_nonreturning_above is not None else None),
+        archived_lc1_availability_levels=[0.872, 0.786],
+        archived_lc1_range_status="INSUFFICIENT_FOR_THIS_H_BRANCH",
+        physiological_validity_of_returning_probe="NOT_ESTABLISHED",
+    )
+
+
 def build_candidate_verdict(strip, xmap):
     rows = [a for p in strip["point_rows"] for a in p["arms"]] + list(xmap["rows"])
     safe = sum(not bool(r.get("numerical_failure", True)) for r in rows)
@@ -93,6 +148,8 @@ def build_candidate_verdict(strip, xmap):
         n_x_rows=int(xmap["n_rows"]),
         numerical_safe_rows=int(safe),
         numerical_total_rows=len(rows),
+        entry_geometry=summarize_entry_geometry(strip),
+        x_authority=summarize_x_authority(xmap),
         dynamic_lifecycle_tested=False,
         morphology_tested=False,
         forbidden_claims=[
@@ -115,7 +172,7 @@ def _style():
 
 def plot_strip(strip, path):
     _style()
-    fig, axes = plt.subplots(2, 3, figsize=(11.2, 6.3), constrained_layout=True)
+    fig, axes = plt.subplots(2, 3, figsize=(11.2, 6.7), constrained_layout=True)
     families = ("H1", "H6")
     rhos = (0.025, 0.05, 0.075)
     thetas = (1.0, 1.25)
@@ -153,8 +210,15 @@ def plot_strip(strip, path):
                 ax.set_ylabel(r"$\theta$ scale")
             if iy == 0:
                 ax.set_title(arm.replace("_", " "))
-    fig.suptitle(f"GX1 selectivity strip: {strip['verdict']}\ncell text = final-1 s rate (Hz)",
-                 fontsize=11, fontweight="bold")
+    fig.legend(handles=[
+        Patch(facecolor="#4c78a8", label="interictal workpoint"),
+        Patch(facecolor="#f2cf5b", label="elevated event train"),
+        Patch(facecolor="#d1495b", label="finite high state"),
+        Patch(facecolor="#777777", label="unresolved"),
+    ], loc="lower center", bbox_to_anchor=(0.5, -0.035), ncol=4,
+       frameon=False, fontsize=8)
+    fig.suptitle("GX1 entry strip: no natural low/high dual-basin window\n"
+                 "cell text = final-1 s rate (Hz)", fontsize=11, fontweight="bold")
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
@@ -205,7 +269,7 @@ def plot_logic(strip, xmap, path):
         (0.52, 0.55, "Natural selectivity\n+ maximal-X bypass",
          "Shared X/H path only", natural and not reachable),
         (0.05, 0.08, "No natural window\n+ X path reachable",
-         "Local D-gate only", (not natural) and reachable),
+         "Test local D-gate; calibrate X separately", (not natural) and reachable),
         (0.52, 0.08, "No natural window\n+ maximal-X bypass",
          "Causal 2x2: D gate x shared path", (not natural) and (not reachable)),
     ]
@@ -218,13 +282,17 @@ def plot_logic(strip, xmap, path):
         ax.text(x + 0.215, y + 0.09, action, ha="center", va="center", fontsize=8)
     ax.text(0.5, 0.98, "GX1 conditional mechanism logic", ha="center", va="top",
             fontsize=12, fontweight="bold")
-    ax.text(0.5, 0.01, f"Observed: {strip['verdict']} | {xmap['verdict']}",
-            ha="center", va="bottom", fontsize=8.5)
+    observed = ("Observed: no dual-basin window | X path reachable"
+                if (not natural) and reachable else
+                f"Observed: {strip['verdict']} | {xmap['verdict']}")
+    ax.text(0.5, 0.01, observed, ha="center", va="bottom", fontsize=8.5)
     fig.savefig(path, bbox_inches="tight")
     plt.close(fig)
 
 
 def _status(verdict):
+    entry = verdict["entry_geometry"]
+    xauth = verdict["x_authority"]
     return f"""# FCXR-LC2-GX1 status
 
 Status: **COMPLETE — frozen component diagnostic**
@@ -233,6 +301,10 @@ Status: **COMPLETE — frozen component diagnostic**
 - X1: `{verdict['x_authority_verdict']}`
 - Authorized next hypothesis: `{verdict['authorized_next_hypothesis']}`
 - Numerical safety: {verdict['numerical_safe_rows']}/{verdict['numerical_total_rows']} rows
+- Entry component: `{entry['component_label']}`
+- Natural low/high dual-basin window: **no**
+- X path reachable: **{str(xauth['current_x_path_reachable']).lower()}**; tested return bracket:
+  `{xauth['experimental_return_bracket']}`
 - Dynamic lifecycle: **not tested**
 - M/K/A/ELR: **not used**
 
@@ -242,6 +314,9 @@ interictal-ictal-interictal lifecycle or patient-like ictal morphology.
 
 
 def _archive(verdict, strip, xmap):
+    entry = verdict["entry_geometry"]
+    xauth = verdict["x_authority"]
+    xrows = {float(row["x_availability"]): row for row in xmap["rows"]}
     return f"""# FCXR-LC2-GX1 frozen entry/offset diagnostics — 2026-08-02
 
 ## 一句话结论
@@ -253,6 +328,19 @@ GX1 在不改方程、不接动态慢变量的条件下，分别检验现有 H �
   {strip['n_window_points']} 个点属于相邻窗）；
 - X1：`{xmap['verdict']}`；
 - 下一条获准检验的结构假说：`{verdict['authorized_next_hypothesis']}`。
+
+这不是一个笼统的双阴性。S1 在 H1、`theta_scale=1.25` 的三个 rho 点上都看到了同一分解：
+健康 `D=0/H_low` 保持约 4.2 Hz 的间期工作点，而易感 `D=0.15/H_low` 已经升到
+54.8--91.5 Hz；易感高初值也维持 58.7--87.6 Hz。也就是说，现有方程已经出现
+**D 选择性的单向点火**，但同一个易感 D 下低初值和高初值都落到高态，因此不是目标中的低/高
+双盆地。显式 D gate 只被授权为下一条可证伪假说，并未被本轮证明充分或唯一必要。
+
+X1 则给出清楚的权限括号：availability=1.0/0.5 仍为高态（尾段
+{xrows[1.0]['state_tail_1s']['rate_mean_hz']:.1f}/{xrows[0.5]['state_tail_1s']['rate_mean_hz']:.1f} Hz），
+0.1/0.0 在末段连续 2 s 回到间期（尾段
+{xrows[0.1]['state_tail_1s']['rate_mean_hz']:.3f}/{xrows[0.0]['state_tail_1s']['rate_mean_hz']:.3f} Hz）。
+所以 H 没有结构性绕过 X；当前路径可以终止，已观察 LC1 availability 0.872/0.786 的动态范围
+对这条 H 分支不足。0.1 只是理论实验臂，不具有生理标定资格。
 
 ## 测了什么
 
@@ -269,13 +357,22 @@ X1 从同一个解析高 H 初值出发，把 recurrent relay availability 冻�
 lifecycle，没有测试 M 形态、K 招募、A/ELR，也没有比较真实 E1146 ictal morphology。因此不能称为
 迟滞、双稳态、极限环或可恢复发作闭环。
 
+## 下一结构的授权边界
+
+预注册决策表落在“no natural window + X path reachable”。因此只授权将**局部 D-dependent H
+gain**作为 entry 几何的下一条独立假说，同时把 X 动态范围作为另一条独立校准问题。完整的
+`D gate × shared X/H path` 2×2 只在“no window + maximal-X bypass”时才有资格执行；本轮已经
+否定了 bypass 前提，所以随附 GX2 2×2 spec/plan 仅作条件性预案，当前不得执行。
+
 ## 工程与资源
 
 - strip trajectories: {strip['n_rows']}; X trajectories: {xmap['n_rows']};
 - numerical safe: {verdict['numerical_safe_rows']}/{verdict['numerical_total_rows']};
 - blessed engine files were checked by the execution lock;
 - long stages used setsid/nohup, exact PID watchdogs, stage locks and sentinels;
-- final commit and test counts are recorded in `run_manifest.json`.
+- S1 watchdog elapsed 5.933 h; X1 watchdog elapsed 1.008 h;
+- peak single-cell RSS 11.236 GiB; swap delta 0 MiB;
+- final commit and test counts are recorded in `run_manifest.json` after sign-off.
 """
 
 
@@ -299,18 +396,21 @@ def main():
 
 两行分别是 H1/H6，三列分别检验健康低初值、易感低初值和易感高初值；格内数字是末 1 秒平均率。
 颜色区分间期、升高事件串、有限高态和未解析结果。
-**关注点**：是否存在同一家族内相邻两点同时满足“两个低态不点燃、易感高态能维持”。
+**关注点**：没有一个点满足“两个低态不点燃、易感高态能维持”；H1 高阈值行显示的是健康低态
+保留、易感低态也点燃的单向 D 选择性，不要误读成双稳态。
 
 ### x_authority.png
 
 同一个易感高 H 初值下，比较四档 frozen relay availability 的 300 ms 平滑率与 H 轨迹。
 x=0 是理论最大权限因果探针，不代表生理可实现值。
-**关注点**：最大关断是否让末段连续至少 2 秒回到间期，而不只是出现短 trough。
+**关注点**：availability=0.1 已让末段连续至少 2 秒回到间期，说明通路可达；0.5 仍维持高态，
+故当前证据指向动态范围不足而不是 H 绕过 X。
 
 ### failure_logic.png
 
 把 S1 的自然选择窗结论与 X1 的路径权限结论组成决策表，橙色格表示当前数据落点。
-**关注点**：下一步获准检验的是参数范围、局部 D gate、共享 X/H 路径，还是两者的因果 2×2。
+**关注点**：当前落点只授权局部 D gate 作为 entry 假说，并把 X 范围单独处理；共享路径与完整
+2×2 当前未获授权。
 """
     _write_text(os.path.join(figures, "README.md"), readme)
     _write_json("candidate_verdict.json", verdict)
