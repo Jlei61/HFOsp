@@ -10,6 +10,7 @@ e1_pid="$1"
 result_root="results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability"
 python_bin="/home/honglab/leijiaxin/anaconda3/bin/python"
 runner="scripts/run_topic4_fcxr_lc3_geometry.py"
+slow_runner="scripts/run_topic4_fcxr_lc3_slowflow.py"
 
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
@@ -55,6 +56,8 @@ PY
 "$python_bin" "$runner" prepare --point H6 --state high --confirm-run
 "$python_bin" "$runner" manifest
 "$python_bin" "$runner" map --confirm-run
+"$python_bin" "$slow_runner" manifest
+"$python_bin" "$slow_runner" all --confirm-run
 
 "$python_bin" - "$result_root" <<'PY'
 import datetime, json, os, sys
