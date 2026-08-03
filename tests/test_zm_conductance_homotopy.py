@@ -78,6 +78,32 @@ def test_homotopy_contract_is_off_by_default_and_validated():
             use_gK=False,
             use_zm_conductance_homotopy=True,
         ).validate()
+
+
+def test_homotopy_allows_state_selective_recurrent_H_but_not_global_M_divisor():
+    SpatialSlowFieldConfig(
+        use_qI=False,
+        use_gK=False,
+        use_z=True,
+        use_m=True,
+        use_SG=True,
+        alpha_G=16.0,
+        use_mode_H=True,
+        rho_mode_H=2.0,
+        use_zm_conductance_homotopy=True,
+    ).validate()
+    with pytest.raises(ValueError, match="use_mode_M_divisive"):
+        SpatialSlowFieldConfig(
+            use_qI=False,
+            use_gK=False,
+            use_z=True,
+            use_m=True,
+            use_SG=True,
+            alpha_G=16.0,
+            use_mode_M_divisive=True,
+            kappa_mode_M=2.0,
+            use_zm_conductance_homotopy=True,
+        ).validate()
     with pytest.raises(ValueError, match="thresholds"):
         SpatialSlowFieldConfig(
             use_qI=False,
@@ -88,4 +114,3 @@ def test_homotopy_contract_is_off_by_default_and_validated():
             cond_homotopy_z_native=0.4,
             cond_homotopy_z_conductance=0.6,
         ).validate()
-

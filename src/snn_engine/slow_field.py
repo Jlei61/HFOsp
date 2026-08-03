@@ -424,7 +424,6 @@ class SpatialSlowFieldConfig:
                 "use_A": self.use_A,
                 "use_persist": self.use_persist,
                 "use_H": self.use_H,
-                "use_mode_H": self.use_mode_H,
                 "use_mode_M_divisive": self.use_mode_M_divisive,
             }
             active = [name for name, value in forbidden.items() if value]

@@ -419,8 +419,20 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             else:
                 I_net = slow.apply_currents(I_E, I_I, labels)
             if conductance_homotopy_on:
+                I_E_homotopy = I_E
+                if (
+                    getattr(slow.cfg, "use_mode_H", False)
+                    and slow.cfg.rho_mode_H > 0.0
+                ):
+                    # H acts only on recurrent E input.  The native branch has
+                    # already received the same gain in apply_currents(); the
+                    # conductance endpoint receives it before kappa_E mapping.
+                    I_E_homotopy = I_E.copy()
+                    I_E_homotopy[: slow.nE] += (
+                        I_E_rec[: slow.nE] * slow.mode_H_gain_at_E()
+                    )
                 conductance_homotopy_state = slow.zm_conductance_homotopy_step(
-                    V, I_E, I_I, I_net, decay_V
+                    V, I_E_homotopy, I_I, I_net, decay_V
                 )
             # off-by-default hook: under slow, use the per-neuron threshold substrate when provided
             # (lets z/g_K ride a heterogeneous core); V_th_per_neuron=None -> uniform p.V_th (unchanged).
