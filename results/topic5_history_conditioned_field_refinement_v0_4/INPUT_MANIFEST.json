@@ -1,0 +1,490 @@
+{
+  "status": "INPUT_CONTRACT_CONFIRMED",
+  "contract": "topic5_history_conditioned_field_refinement_v0_4",
+  "primary_endpoint": {
+    "alignment": "clinical_onset",
+    "window_seconds": [
+      0.0,
+      10.0
+    ],
+    "band_hz": [
+      1.0,
+      45.0
+    ],
+    "npz_key": "bb_auc__<seizure_idx>",
+    "source_root": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache"
+  },
+  "sensitivity_endpoint": {
+    "band_hz": [
+      1.0,
+      150.0
+    ],
+    "npz_key": "bb150_auc__<seizure_idx>",
+    "source_root": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150",
+    "training": "NO_RETRAIN"
+  },
+  "cohort": {
+    "development_engineering_only": "epilepsiae_1146",
+    "primary_subjects": [
+      "epilepsiae_1077",
+      "epilepsiae_1084",
+      "epilepsiae_1096",
+      "epilepsiae_1125",
+      "epilepsiae_1150",
+      "epilepsiae_139",
+      "epilepsiae_253",
+      "epilepsiae_384",
+      "epilepsiae_442",
+      "epilepsiae_548",
+      "epilepsiae_590",
+      "epilepsiae_620",
+      "epilepsiae_635",
+      "epilepsiae_922",
+      "epilepsiae_958"
+    ],
+    "n_primary_subjects": 15,
+    "n_primary_seizures": 31,
+    "contact_denominator_min": 6,
+    "contact_denominator_median": 9.0,
+    "contact_denominator_max": 16
+  },
+  "static_ab_boundary": {
+    "target_blind": true,
+    "retrospective_full_record": true,
+    "may_include_post_target_interictal_events": true,
+    "prospective_claim_allowed": false
+  },
+  "static_anchor_1_45": {
+    "patient_median_maxab": 0.5545454545454546,
+    "patient_median_margin_vs_channel_null": 0.15000000000000008,
+    "n_positive_margin": 11,
+    "n_tied_margin": 0,
+    "n_pass_individual_p95": 5
+  },
+  "source_files": {
+    "epilepsiae_1077:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_1077.npz",
+      "sha256": "74e1d410317be0568a507301fffa99363988314585dcda01bfe9764646c358e2"
+    },
+    "epilepsiae_1077:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_1077.npz",
+      "sha256": "3a6044155d414dcb21b8a1464fa3b9dc03afce37875b634ee70f836f7ee5be11"
+    },
+    "epilepsiae_1077:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1077.npz",
+      "sha256": "6ff3add94cabb73646a2953d0c2d67bc0a903419152a358f15ef10502286d4e0"
+    },
+    "epilepsiae_1077:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1077.json",
+      "sha256": "671bbc6167fb00ebf86950d3f7d95b54615aedffd25ff4455cafaad8b4fc7cdf"
+    },
+    "epilepsiae_1077:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1077.npz",
+      "sha256": "993b2099d74000649650be596ff6b5f1bc9a754b807b8c738eae30a074134176"
+    },
+    "epilepsiae_1077:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1077.json",
+      "sha256": "1cfcf736e1e0c31e373cf01591330694e7184f1006830f14097dd7c2053bbc0e"
+    },
+    "epilepsiae_1077:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1077.json",
+      "sha256": "08d676b86c5b3e8446bab94daf5f4da944dfb1b6574785039088cf7a28c4379a"
+    },
+    "epilepsiae_1084:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_1084.npz",
+      "sha256": "5be7ee1c65fa7210f78def9fbcbc578bbbf15e17599af481dc9efffa92e6f527"
+    },
+    "epilepsiae_1084:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_1084.npz",
+      "sha256": "6a350ab394eb4dd8fbd02437eb4489ec07dec1d872a2dd387e8f4b967ebbf6c6"
+    },
+    "epilepsiae_1084:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1084.npz",
+      "sha256": "0f70e398e13fa7b879b469530b2994a005820a24e77857f10a43c9df9288e68e"
+    },
+    "epilepsiae_1084:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1084.json",
+      "sha256": "d3e8ea74b817873f6e36d6d1da6536adff2209cd5355377c8b750d0bffbdaf3c"
+    },
+    "epilepsiae_1084:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1084.npz",
+      "sha256": "3bf07853a1b4a01c9229a4f13e0bc34f9e5c3ec325f5b7fa7a170ed49a18e9ce"
+    },
+    "epilepsiae_1084:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1084.json",
+      "sha256": "e59f61c263e78cc2487e260f1118ce0c4d7a0dfa14c89507a20160cf76468a93"
+    },
+    "epilepsiae_1084:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1084.json",
+      "sha256": "f1b9af90812693803ee7aede3407221c581fc0e0595eb330b1c71ae29623e38b"
+    },
+    "epilepsiae_1096:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_1096.npz",
+      "sha256": "a3b0fc749d66f44f6df74c04faf30bbc8a18afbba4da909cda4efc6a7a5ad44b"
+    },
+    "epilepsiae_1096:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_1096.npz",
+      "sha256": "71d99c2b4cabc6333a72fbf3f12af33b6d6ff87d1457b247d9dec5488dc9e97f"
+    },
+    "epilepsiae_1096:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1096.npz",
+      "sha256": "8e6c02c24b8c677522bd774f9fe894fc0e9f26cbb45e6479cf9da5c30e0d8a33"
+    },
+    "epilepsiae_1096:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1096.json",
+      "sha256": "60fcc68b14beec683313ae2af68e00e04796d84df7073cc6728d142394ff4c89"
+    },
+    "epilepsiae_1096:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1096.npz",
+      "sha256": "2bfa03d005015bfb2619fc004f39f1b4e45923e41e1595eb83dcb3842939ffe7"
+    },
+    "epilepsiae_1096:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1096.json",
+      "sha256": "750f939de6e84385a9c5bfdfe9ae2517590eeff877c6b7585ae417b5483ad850"
+    },
+    "epilepsiae_1096:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1096.json",
+      "sha256": "cc6ce888602f76c157d6e2f26644b7a4d6b831d471310ed05172c6c96cc2e98b"
+    },
+    "epilepsiae_1125:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_1125.npz",
+      "sha256": "d360650c0aa9eef5ed18df769f42fb40674bddb2bc3a2e2508c9802540a28881"
+    },
+    "epilepsiae_1125:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_1125.npz",
+      "sha256": "1366505bac7cdea36deeca0e6ab0bd34f34939d90406a3aefdae63dfcecc3c16"
+    },
+    "epilepsiae_1125:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1125.npz",
+      "sha256": "746486bc478602967acaa117b7e3a8900a441663981322b09f5d534c8c7624f0"
+    },
+    "epilepsiae_1125:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1125.json",
+      "sha256": "9d36bb02e4a5268cc57d16e55d7fdbd014c0569c5cd404085f76068c3da350e4"
+    },
+    "epilepsiae_1125:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1125.npz",
+      "sha256": "42da0ec5f23c73f8d547f2566c050bb5216ab151e9ad9b9eff8f8b784306d564"
+    },
+    "epilepsiae_1125:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1125.json",
+      "sha256": "ece6b290a498423b3096ff85a39d954bf71f91fb42e007ddc9754aa777d15c6e"
+    },
+    "epilepsiae_1125:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1125.json",
+      "sha256": "14ca1ae3a746701dd24e9bd18e6328b119512ddedd4576a67416bf0a91aa8023"
+    },
+    "epilepsiae_1150:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_1150.npz",
+      "sha256": "9f54ff02f58eb235e93be1d378b48aba86d9e4b4a4f483556786311ca272e89c"
+    },
+    "epilepsiae_1150:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_1150.npz",
+      "sha256": "c3b777921f97e536128e63687ea82ecdb841360f4af65ec5789eb0db9054d02c"
+    },
+    "epilepsiae_1150:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1150.npz",
+      "sha256": "382a74698e09653c2797faad5bd4b1c81dc2450f8d1881e5de4387497c281b07"
+    },
+    "epilepsiae_1150:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_1150.json",
+      "sha256": "9d0f66330cbd6c357d6467a04eff166ffa142af3cf2a9bee99a71529b3f4c30c"
+    },
+    "epilepsiae_1150:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1150.npz",
+      "sha256": "1d9ef37f57f2fc804492b473d84f15857066b514724e6a756d94fa145d1475d8"
+    },
+    "epilepsiae_1150:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_1150.json",
+      "sha256": "99d2fd9cfb3cef55243883cfc45e97d1fefcefec39959c928e811473cf00461e"
+    },
+    "epilepsiae_1150:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1150.json",
+      "sha256": "0a40a2ce642ea560f0428ee5a277e3f9e978a3b38de6cb442a08f8bfb8897126"
+    },
+    "epilepsiae_139:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_139.npz",
+      "sha256": "35c57def380a805db117cf49d4714884c092f803f0a9d93833046562bf70d420"
+    },
+    "epilepsiae_139:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_139.npz",
+      "sha256": "fbd346ffa544bf4e9acd5e1eb5a31d83e10b66da6c829f280abc710d442e1eab"
+    },
+    "epilepsiae_139:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_139.npz",
+      "sha256": "18f830a4a38d90678a6b4911e499f589d862ee8b9548697d15b2437c3eca7b3e"
+    },
+    "epilepsiae_139:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_139.json",
+      "sha256": "a5cc2de1e7e586d54e3452ba696b6b9c7ea4ac02cb73b18b7c128f8fa4dc7955"
+    },
+    "epilepsiae_139:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_139.npz",
+      "sha256": "fc05111833d67d3d1391a8458524ffff3a498e2e431142016f9b6f854755b9a9"
+    },
+    "epilepsiae_139:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_139.json",
+      "sha256": "75b42e359da857c5d47a4a6735e8863f6c3227958cff928aa6db664051747d47"
+    },
+    "epilepsiae_139:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_139.json",
+      "sha256": "8d511b932546aea9261033cb6735bf69098a1eb3f95ad7fb03127f67b7737592"
+    },
+    "epilepsiae_253:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_253.npz",
+      "sha256": "69d872ff84d3e5950a501c00202e405ede5a6c863723697371ae496c13de1e35"
+    },
+    "epilepsiae_253:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_253.npz",
+      "sha256": "5b2827b3b67734ef213e3219644eeec76d53f3f21ff5426a5acd92b8fbedbccc"
+    },
+    "epilepsiae_253:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_253.npz",
+      "sha256": "9b20361abc5d22b77e808b2790eda3034e35f663746e72f82657fef800fe6776"
+    },
+    "epilepsiae_253:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_253.json",
+      "sha256": "a9e0d5c5888574ac13eab46a0af147dd95d51ad5ee30b8611e476152ca61d2ee"
+    },
+    "epilepsiae_253:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_253.npz",
+      "sha256": "5d7a63f94cffedc50445ab447a3c357ad3eb623162a27123e27785eb28655700"
+    },
+    "epilepsiae_253:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_253.json",
+      "sha256": "7e378081f83e9b9592018ca22269955959c0e1c4331684d28f065ef96b50b07c"
+    },
+    "epilepsiae_253:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_253.json",
+      "sha256": "56aab3e1fe1a6a40061b861263e82d4b807935dbee434e1bc1f1937bacdc22df"
+    },
+    "epilepsiae_384:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_384.npz",
+      "sha256": "e0d88fdee36f91583b362c6f23cb6bb0f4a8df735e40bfd90505927cc8cf82f1"
+    },
+    "epilepsiae_384:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_384.npz",
+      "sha256": "d2dc04bf6b3515b22eccb64de4d6af3a69b77566177de8f03b54fe8e089ce5bf"
+    },
+    "epilepsiae_384:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_384.npz",
+      "sha256": "f9539388b668ddeb02bf0e4a2b953dcaf9de75bd4ea7ab21c6ac43e0fde0bdc4"
+    },
+    "epilepsiae_384:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_384.json",
+      "sha256": "64d56c9bf078fd3943758e2dd87c049455b1529d8b82fe8e518f22a658707560"
+    },
+    "epilepsiae_384:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_384.npz",
+      "sha256": "a87f751ac0f69c14359de3bd02217ac50252b2178359fac9a43d51865e76e376"
+    },
+    "epilepsiae_384:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_384.json",
+      "sha256": "8a05a593b3ee905c694031a62f603a406e2a9b752336f9b27b1d533f4d42fd9f"
+    },
+    "epilepsiae_384:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_384.json",
+      "sha256": "7d473fe6f671e35a74d220feb9110fb02c805111bab7d2696410008549d0a35e"
+    },
+    "epilepsiae_442:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_442.npz",
+      "sha256": "61478f93fa30cd453f45b8748362d9674c4439d51af4f708890b57cd67f56843"
+    },
+    "epilepsiae_442:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_442.npz",
+      "sha256": "bcabf5dd350cf9aeb12dc25a6dd824e4d8203ec49612fb3653d6c38f8ee6b96c"
+    },
+    "epilepsiae_442:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_442.npz",
+      "sha256": "9f78e84ada2518ab6bc2fdadcca2e96cfb9597a206ea18c3d9e74e771c4e84ad"
+    },
+    "epilepsiae_442:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_442.json",
+      "sha256": "70b7b0eb374d8317840f7840433209d8cd3e6dafe552d3232be74d2b872af9b6"
+    },
+    "epilepsiae_442:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_442.npz",
+      "sha256": "acb028742a150e86ed85f9e1ed209e0dcde8c490cc97ed46fc5e0507c87f0ad5"
+    },
+    "epilepsiae_442:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_442.json",
+      "sha256": "dd42a7af0e0aa201235c80be337a823411dcd367df9c2309a2040286425af784"
+    },
+    "epilepsiae_442:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_442.json",
+      "sha256": "cfa77c134f5d9b5c5805c95123c1d20759922878f79da8cb45f78b10aa72dde4"
+    },
+    "epilepsiae_548:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_548.npz",
+      "sha256": "ba7d0572bc4b47114986cda519da5dc2ce2dae433560f169b1bfc8b4bc6a1b23"
+    },
+    "epilepsiae_548:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_548.npz",
+      "sha256": "b4d882039ca72d27a26b5f5ebc45e370d37dfeb645dcdd47d32894fedae0188c"
+    },
+    "epilepsiae_548:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_548.npz",
+      "sha256": "cec3f6d704f2a97ace228003ec8979f82d3074268734b7496f39b306a99356f8"
+    },
+    "epilepsiae_548:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_548.json",
+      "sha256": "ea97e77db270461fff4e7c7e554981c077367d44f1fca8971a9154a4afb7d570"
+    },
+    "epilepsiae_548:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_548.npz",
+      "sha256": "f8c8662274d3808bf70404f5e2661ffab961d8647fb80fe7fd098404cfd433d7"
+    },
+    "epilepsiae_548:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_548.json",
+      "sha256": "f8c408ecdbf09215b41de3b47b5f315b30e0dc547aa8e1525936676da5365f6e"
+    },
+    "epilepsiae_548:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_548.json",
+      "sha256": "81d668c32004dcbe4c63f34d0c7d43ee577d2a10878db149933a7f3137aa267c"
+    },
+    "epilepsiae_590:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_590.npz",
+      "sha256": "f6141bc6ddae524d76e79a82d23a9590882715f235f5d33f40d346697b7b3c11"
+    },
+    "epilepsiae_590:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_590.npz",
+      "sha256": "d1f5f8c37b883dc0315e796e39b324108a9199d6d21006ff69120f6f4ed9a5a6"
+    },
+    "epilepsiae_590:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_590.npz",
+      "sha256": "7fad17417988e9163d514c34a5e1092341f3dba17457271e913582313ecfa648"
+    },
+    "epilepsiae_590:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_590.json",
+      "sha256": "bd5a0c5a0ea0bff432d773958d5160c76ade9e3b9c9feb3451b69265e0d2d790"
+    },
+    "epilepsiae_590:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_590.npz",
+      "sha256": "7a3fd2e8ae9d04720f5c7a2dd23197f545cc12e81618bbd77a63c22ce67f1823"
+    },
+    "epilepsiae_590:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_590.json",
+      "sha256": "caf1cb82d079ddc277220f559c0a935b194387ee088b3fe477b378276c8a424c"
+    },
+    "epilepsiae_590:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_590.json",
+      "sha256": "104dce974bcd79a5a39ecfea9c4a607dca9e42bb50f66cde53b9ae0f609245ed"
+    },
+    "epilepsiae_620:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_620.npz",
+      "sha256": "a718015e389644dcf9c33021e2c553ebc433182d12190c5ed328dfaebbaf3a5f"
+    },
+    "epilepsiae_620:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_620.npz",
+      "sha256": "459c0556baf0e1a577125bea6cdb9cf5c51c1efc5ed949b27da4f6c7d5f8e93b"
+    },
+    "epilepsiae_620:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_620.npz",
+      "sha256": "df3f19d045fb24396c41f2238e45154dd3927d7f7a723818d475461bdec884fc"
+    },
+    "epilepsiae_620:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_620.json",
+      "sha256": "39635333631b1916986dcc94ceb6f5ddc8bbca574d9628c416bdee94def5fb82"
+    },
+    "epilepsiae_620:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_620.npz",
+      "sha256": "61e6455d9792d6841fe142ca1b15cfad52178d05690ff39d3af9f8bcaf87fece"
+    },
+    "epilepsiae_620:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_620.json",
+      "sha256": "c71bd1ba54678718df992531d76b1daa2daaf36849dbb106e7a3528e85c4eb28"
+    },
+    "epilepsiae_620:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_620.json",
+      "sha256": "5b79019b1399caae0a6523470454766ee879dfdeb0d23b0829cc7eed30539cc6"
+    },
+    "epilepsiae_635:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_635.npz",
+      "sha256": "6cb42fd1680a3cd21a20f314f2dd26f6fd05c64a7473547f238465e9ea333194"
+    },
+    "epilepsiae_635:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_635.npz",
+      "sha256": "57ab33bc9c4e46e2f989e47f9db07820ceb271182d3eec6e70d35fa71ba1442c"
+    },
+    "epilepsiae_635:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_635.npz",
+      "sha256": "3874f5554bbd3e52a39b7d5cd9c748984df411ebc6112d8c2d203c1bec58950a"
+    },
+    "epilepsiae_635:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_635.json",
+      "sha256": "094a588ae901d0415ccf50f7faaa81795f37b82fbfb1f0a40398530126b6917f"
+    },
+    "epilepsiae_635:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_635.npz",
+      "sha256": "ddbcef5969d58261a9e93cf4a8c99bdf6abf7b1e8e938ecbfcf8cd0aa83cc8f2"
+    },
+    "epilepsiae_635:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_635.json",
+      "sha256": "2eef3b21a99e91bcd4fc8d5d735a3f35dc53bcbad24bb5cd54c6b537a433faef"
+    },
+    "epilepsiae_635:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_635.json",
+      "sha256": "a6a956970bf12a50a6eb1babb5357657e45053935aa448020f06830c26d96b52"
+    },
+    "epilepsiae_922:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_922.npz",
+      "sha256": "e1ed0adfdfc9a7a430f576b8e6c10135cf5fd514c0abb0da5b6014e9a019351f"
+    },
+    "epilepsiae_922:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_922.npz",
+      "sha256": "f6e7aff103d21938e6aeb8639115848b57bf3cc2d520949b2e9e6e553c64820f"
+    },
+    "epilepsiae_922:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_922.npz",
+      "sha256": "1fc6d05a395ec1b5597fb740deab059390034cff91e2e018c4d8955442772d51"
+    },
+    "epilepsiae_922:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_922.json",
+      "sha256": "0e76d9aea9bfe3204008b702b127620bc003603a26c48ed0189dff0c5b05666e"
+    },
+    "epilepsiae_922:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_922.npz",
+      "sha256": "d70ad8eec37300c387c23118e790e2104ef9fa7db06cf079f3331cbd2221ecc1"
+    },
+    "epilepsiae_922:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_922.json",
+      "sha256": "e2b7497842d2cd49ce98b56ddb279e7ea8245fe70c70e273d6842fe4b6138222"
+    },
+    "epilepsiae_922:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_922.json",
+      "sha256": "cf9b52a6422182712f3ade8a5599f70dbe6cb6adfb120afb1beebe085264b61e"
+    },
+    "epilepsiae_958:dataset": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_958.npz",
+      "sha256": "b1b25dbc11bfee77b2fac9606e4520b3e100443d80e14dd02ebe1425ca988be3"
+    },
+    "epilepsiae_958:timeline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/timeline/epilepsiae_958.npz",
+      "sha256": "f12d65001e90215bcab98a7a5757bf3159c93ad1bb1fbf4eacd5b7bbc0475a39"
+    },
+    "epilepsiae_958:target45": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_958.npz",
+      "sha256": "337ca36eec1d51e0db630d42ee6b9a4a767b9d2a89fc0150bf66badd639d2976"
+    },
+    "epilepsiae_958:target45_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache/epilepsiae_958.json",
+      "sha256": "7d6fd18ef27eec0894c72d043d49eeb7f77ea5d9f738baaa8961669067dade65"
+    },
+    "epilepsiae_958:target150": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_958.npz",
+      "sha256": "bbf39ab54500ae8eaed080574509a4aee02f129a9f3a7414964582549e39aadc"
+    },
+    "epilepsiae_958:target150_sidecar": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/topic5_ictal_recruitment/t0_feature_cache_bb150_1_150/epilepsiae_958.json",
+      "sha256": "d4b1e84522cfa81bfe3c475d4accec6d62b99d950acb5ba792cee3f850f1fb3b"
+    },
+    "epilepsiae_958:static_ab": {
+      "path": "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_958.json",
+      "sha256": "5771db4c81433fce168314f305854611913b70fa7f408a87c52b0c33afe5444e"
+    }
+  },
+  "inventory": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_rnn_early_ictal_field/g0_causal_prefix/seizure_causal_history_inventory.csv",
+    "sha256": "58842148ac77a662c91ddfe534a99f76902a1ef945c9a43b9a644ed7271a41c0"
+  }
+}
