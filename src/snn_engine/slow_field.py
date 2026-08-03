@@ -178,6 +178,12 @@ class SpatialSlowFieldConfig:
     theta_mode_H_hz: float = 40.0   # local rE drive onset
     half_mode_H_hz: float = 40.0    # drive half-saturation above onset
     rho_mode_H: float = 0.0         # maximum multiplicative recurrent-E increment
+    # Optional slow recurrent excitatory conductance.  Unlike rho_mode_H it
+    # remains a membrane drive when the fast AMPA trace I_EE is near zero, so
+    # it can bridge a PV/SOM relaxation-cycle gap.  It uses the same local H,
+    # native-Z susceptibility gate and native-M closing gate.
+    mode_H_persistent_g_max: float = 0.0
+    mode_H_persistent_e_exc: float = 60.0
     mode_H_common_subtraction: float = 0.0  # 0=native local H; 1=remove its E-population common mode
     z_mode_base: float = 1.0
     z_mode_susceptible: float = 0.50
@@ -341,6 +347,13 @@ class SpatialSlowFieldConfig:
                 raise ValueError("theta_mode_H_hz must be finite and >=0")
             if not np.isfinite(self.rho_mode_H) or self.rho_mode_H < 0.0:
                 raise ValueError("rho_mode_H must be finite and >=0")
+            if (
+                not np.isfinite(self.mode_H_persistent_g_max)
+                or self.mode_H_persistent_g_max < 0.0
+            ):
+                raise ValueError("mode_H_persistent_g_max must be finite and >=0")
+            if not np.isfinite(self.mode_H_persistent_e_exc):
+                raise ValueError("mode_H_persistent_e_exc must be finite")
             if (
                 not np.isfinite(self.mode_H_common_subtraction)
                 or not 0.0 <= self.mode_H_common_subtraction <= 1.0
@@ -665,6 +678,9 @@ class SpatialSlowField:
         self.trace_mode_H_drive_mean = []; self.trace_mode_H_drive_max = []
         self.trace_mode_H_gain_mean = []; self.trace_mode_H_gain_max = []
         self.trace_mode_H_gain_core_mean = []
+        self.trace_mode_H_persistent_g_mean = []
+        self.trace_mode_H_persistent_g_max = []
+        self.trace_mode_H_persistent_g_core_mean = []
         self.trace_mode_M_raw_pool = []; self.trace_mode_M_pool = []; self.trace_mode_M_divisor = []
         self.mode_M_memory = 0.0
         self.trace_mode_M_memory = []
@@ -848,12 +864,29 @@ class SpatialSlowField:
                     self.trace_mode_H_gain_core_mean.append(
                         float(np.mean(gain[self._core_mask_E]))
                     )
+                persistent_g = self.mode_H_persistent_g_at_E()
+                self.trace_mode_H_persistent_g_mean.append(
+                    float(np.mean(persistent_g))
+                )
+                self.trace_mode_H_persistent_g_max.append(
+                    float(np.max(persistent_g))
+                )
+                if self._core_mask_E is not None:
+                    self.trace_mode_H_persistent_g_core_mean.append(
+                        float(np.mean(persistent_g[self._core_mask_E]))
+                    )
             self.trace_Irec_mean.append(float(np.asarray(I_E_rec, float)[:nE].mean()))  # for matched-subtractive calib
         return out
 
     def mode_H_gain_at_E(self) -> np.ndarray:
         """Current local recurrent-E gain; pure read of H, Z and M state."""
         if not self.cfg.use_mode_H or self.cfg.rho_mode_H <= 0.0:
+            return np.zeros(self.nE, dtype=float)
+        return self.cfg.rho_mode_H * self.mode_H_activation_at_E()
+
+    def mode_H_activation_at_E(self) -> np.ndarray:
+        """Detector-free local H activation after native Z and M gating."""
+        if not self.cfg.use_mode_H:
             return np.zeros(self.nE, dtype=float)
         zeta = np.clip(
             (self.cfg.z_mode_base - self.z[:self.nE])
@@ -871,7 +904,19 @@ class SpatialSlowField:
                 hE - self.cfg.mode_H_common_subtraction * float(np.mean(hE)),
                 0.0,
             )
-        return self.cfg.rho_mode_H * hE * gate_z * gate_m
+        return hE * gate_z * gate_m
+
+    def mode_H_persistent_g_at_E(self) -> np.ndarray:
+        """Local slow excitatory conductance that survives fast-AMPA gaps."""
+        if (
+            not self.cfg.use_mode_H
+            or self.cfg.mode_H_persistent_g_max <= 0.0
+        ):
+            return np.zeros(self.nE, dtype=float)
+        return (
+            self.cfg.mode_H_persistent_g_max
+            * self.mode_H_activation_at_E()
+        )
 
     def mode_M_raw_pool(self) -> float:
         """Mask-free p-norm of native E-cell M, normalised to a reference."""

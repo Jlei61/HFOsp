@@ -1,5 +1,11 @@
+from pathlib import Path
+import sys
+
 import numpy as np
 import pytest
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT / "src" / "snn_engine"))
 
 from src.snn_engine.slow_field import (
     SpatialSlowField,
@@ -8,6 +14,7 @@ from src.snn_engine.slow_field import (
     recover_i2e_resource,
     zero_baseline_sigmoid,
 )
+from kick_probe import persistent_exc_membrane_step
 from src.topic4_zm_checkpoint import capture_slow, restore_slow
 
 
@@ -112,6 +119,34 @@ def test_sensor_only_rho_zero_is_membrane_identical_to_mode_h_off():
         sensor.apply_currents(I_E, I_I, I_E_rec=I_rec),
         off.apply_currents(I_E, I_I, I_E_rec=I_rec),
     )
+
+
+def test_persistent_mode_h_conductance_uses_same_z_m_gate_and_survives_zero_ampa():
+    slow = _slow(rho_mode_H=0.0, mode_H_persistent_g_max=0.1)
+    slow.mode_H[:] = 1.0
+    slow.z[:4] = np.array([1.0, 0.5, 0.5, 0.5])
+    slow.m[:4] = np.array([0.0, 0.0, 45.0, 90.0])
+    g = slow.mode_H_persistent_g_at_E()
+    assert g[0] == 0.0
+    assert g[1] > g[2] > g[3] > 0.0
+    V = np.full(6, 11.0)
+    I_net = np.full(6, 11.0)
+    out = persistent_exc_membrane_step(
+        V, I_net, np.full(6, 0.99), 4, g, e_exc=60.0
+    )
+    assert out[1] > out[2] > out[3] > out[0]
+    np.testing.assert_array_equal(out[4:], V[4:])
+
+
+def test_persistent_mode_h_zero_scale_is_exact_membrane_parity():
+    V = np.linspace(10.0, 12.0, 6)
+    I_net = np.linspace(9.0, 14.0, 6)
+    decay = np.linspace(0.98, 0.99, 6)
+    expected = I_net + (V - I_net) * decay
+    actual = persistent_exc_membrane_step(
+        V, I_net, decay, 4, np.zeros(4), e_exc=60.0
+    )
+    np.testing.assert_array_equal(actual, expected)
 
 
 def test_mode_h_is_causal_local_state_and_round_trips_checkpoint():

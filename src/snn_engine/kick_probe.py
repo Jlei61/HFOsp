@@ -131,6 +131,16 @@ def som_shunt_membrane_step(
     return V_inf + (np.asarray(V, dtype=float) - V_inf) * np.asarray(decay_V) ** (1.0 + g)
 
 
+def persistent_exc_membrane_step(
+    V, I_net, decay_V, n_e, g_e, *, e_exc
+):
+    """Apply a local E-only slow excitatory conductance to current-based LIF."""
+    g = np.zeros_like(V, dtype=float)
+    g[: int(n_e)] = np.maximum(np.asarray(g_e, dtype=float), 0.0)
+    V_inf = (np.asarray(I_net, dtype=float) + g * float(e_exc)) / (1.0 + g)
+    return V_inf + (np.asarray(V, dtype=float) - V_inf) * np.asarray(decay_V) ** (1.0 + g)
+
+
 def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   verbose=False, kick_center=None, lfp_recorder=None, r_kick=None, t_kick=None,
                   V_th_per_neuron=None, perturb=None,
@@ -251,8 +261,22 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         and hasattr(slow, "uses_zm_conductance_homotopy")
         and slow.uses_zm_conductance_homotopy()
     )
+    mode_h_persistent_on = bool(
+        slow is not None
+        and getattr(getattr(slow, "cfg", None), "use_mode_H", False)
+        and float(getattr(slow.cfg, "mode_H_persistent_g_max", 0.0)) > 0.0
+    )
     if slow_gaba_shunt_on and (conductance_on or conductance_homotopy_on):
         raise ValueError("SOM shunt cannot be combined with the whole-membrane conductance arms")
+    if mode_h_persistent_on and (
+        conductance_on
+        or conductance_homotopy_on
+        or slow_gaba_shunt_on
+        or (hasattr(slow, "uses_shunt") and slow.uses_shunt())
+    ):
+        raise ValueError(
+            "persistent mode-H conductance currently requires the current-based, non-shunt membrane arm"
+        )
     if conductance_on:
         cond_cfg = slow.zm_conductance_config()
         if float(cond_cfg.tau_m_E) != float(p.tau_m_E):
@@ -539,6 +563,15 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                     g_scale=float(net["gaba_slow_shunt_scale"]),
                     e_gaba=float(net["gaba_slow_e_gaba_mv"]),
                     z_e=z_e,
+                )
+            elif mode_h_persistent_on:
+                Vtmp = persistent_exc_membrane_step(
+                    V,
+                    I_net,
+                    decay_V,
+                    slow.nE,
+                    slow.mode_H_persistent_g_at_E(),
+                    e_exc=float(slow.cfg.mode_H_persistent_e_exc),
                 )
             elif hasattr(slow, "uses_shunt") and slow.uses_shunt():
                 g = np.zeros_like(V)

@@ -370,6 +370,12 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
                     getattr(args, "tau_mode_H_down_ms", args.tau_mode_H_ms)
                 ),
                 "rho_mode_H": float(args.rho_mode_H),
+                "mode_H_persistent_g_max": float(
+                    args.mode_H_persistent_g_max
+                ),
+                "mode_H_persistent_e_exc": float(
+                    args.mode_H_persistent_e_exc_mv
+                ),
                 "mode_H_common_subtraction": float(
                     args.mode_H_common_subtraction
                 ),
@@ -385,6 +391,7 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             receipt["state_selective_mode_H"] = {
                 key: values[key] for key in (
                     "tau_mode_H", "tau_mode_H_down", "rho_mode_H",
+                    "mode_H_persistent_g_max", "mode_H_persistent_e_exc",
                     "mode_H_common_subtraction", "theta_mode_H_hz",
                     "half_mode_H_hz", "z_mode_base", "z_mode_susceptible",
                     "zeta_mode_center", "zeta_mode_slope", "m_mode_half",
@@ -446,6 +453,11 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += f"__mc{args.m_mode_half:g}"
         if float(getattr(args, "mode_H_common_subtraction", 0.0)) > 0.0:
             stem += f"cs{args.mode_H_common_subtraction:g}"
+        if float(getattr(args, "mode_H_persistent_g_max", 0.0)) > 0.0:
+            stem += (
+                f"pg{args.mode_H_persistent_g_max:g}"
+                f"e{args.mode_H_persistent_e_exc_mv:g}"
+            )
     if bool(getattr(args, "freeze_zm", False)):
         stem += f"__freeze_{args.state}"
     if float(getattr(args, "i2e_tau_cv", 0.0)) > 0.0:
@@ -858,6 +870,15 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             "trace_mode_H_gain_core_mean": np.asarray(
                 diagnostic.trace_mode_H_gain_core_mean, np.float32
             ),
+            "trace_mode_H_persistent_g_mean": np.asarray(
+                diagnostic.trace_mode_H_persistent_g_mean, np.float32
+            ),
+            "trace_mode_H_persistent_g_max": np.asarray(
+                diagnostic.trace_mode_H_persistent_g_max, np.float32
+            ),
+            "trace_mode_H_persistent_g_core_mean": np.asarray(
+                diagnostic.trace_mode_H_persistent_g_core_mean, np.float32
+            ),
         })
     if diagnostic.cfg.use_mode_M_divisive:
         arrays.update({
@@ -1085,6 +1106,8 @@ def main() -> None:
         help="freeze native z/m at --state while leaving fast E/I, S_G and mode-H dynamic",
     )
     parser.add_argument("--rho-mode-H", type=float, default=0.0)
+    parser.add_argument("--mode-H-persistent-g-max", type=float, default=0.0)
+    parser.add_argument("--mode-H-persistent-e-exc-mv", type=float, default=60.0)
     parser.add_argument("--mode-H-common-subtraction", type=float, default=0.0)
     parser.add_argument("--tau-mode-H-ms", type=float, default=250.0)
     parser.add_argument("--tau-mode-H-down-ms", type=float, default=250.0)
