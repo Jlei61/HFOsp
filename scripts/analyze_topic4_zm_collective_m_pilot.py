@@ -74,30 +74,51 @@ def _offset(row: dict) -> bool:
     return row.get("offset_ms") is not None and not row.get("runaway", False)
 
 
+def _credible_carrier(row: dict) -> bool:
+    """Macro onset is necessary but cannot override energy/spatial semantics."""
+    gain = row.get("median_vseeg_gain_db")
+    occupancy = row.get("energy_occupancy_6db")
+    gap = row.get("post_onset_deep_gap_fraction")
+    pc1 = row.get("spatial_pc1")
+    return bool(
+        _entered(row)
+        and gain is not None and gain >= 20.0
+        and occupancy is not None and occupancy >= 0.50
+        and gap is not None and gap <= 0.20
+        and pc1 is not None and pc1 <= 0.95
+    )
+
+
 def _verdict(rows: dict[str, dict]) -> dict:
     h_rows = [row for key, row in rows.items() if key != "noH_mdiv4"]
-    entered = [row for row in h_rows if _entered(row)]
-    offset = [row for row in entered if _offset(row)]
+    macro_onset = [row for row in h_rows if _entered(row)]
+    carrier = [row for row in h_rows if _credible_carrier(row)]
+    offset = [row for row in carrier if _offset(row)]
     returned = [
         row for row in offset
         if row["returning_event"] or row["returning_distribution"]
     ]
-    if returned:
+    if not macro_onset:
+        verdict = "COLLECTIVE_M_PREVENTS_ENTRY"
+    elif not carrier:
+        verdict = "NO_CREDIBLE_ICTAL_CARRIER"
+    elif returned:
         verdict = "LIFECYCLE_CANDIDATE_SEED1"
     elif offset:
         verdict = "NATIVE_OFFSET_WITHOUT_INTERICTAL_RETURN"
-    elif entered:
+    elif carrier:
         verdict = "ENTRY_WITHOUT_NATIVE_OFFSET"
     else:
-        verdict = "COLLECTIVE_M_PREVENTS_ENTRY"
+        raise AssertionError("unreachable collective-M verdict state")
     return {
         "verdict": verdict,
-        "n_H_arms_entered": len(entered),
+        "n_H_arms_macro_onset": len(macro_onset),
+        "n_H_arms_credible_carrier": len(carrier),
         "n_H_arms_offset": len(offset),
         "n_H_arms_returned": len(returned),
         "noH_control_entered": _entered(rows["noH_mdiv4"]),
         "claim_boundary": (
-            "seed-1 three-arm mechanism pilot; lifecycle needs durable offset, returning "
+            "seed-1 seven-arm targeted mechanism panel; lifecycle needs a data-consistent carrier, durable offset, returning "
             "interictal statistics, healthy specificity, and locked-seed replication"
         ),
     }
