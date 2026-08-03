@@ -1,0 +1,50 @@
+{
+  "status": "COMPLETE",
+  "scientific_tier": "frozen_component_diagnostic",
+  "canonical_verdict": "GX1_ENTRY_OFFSET_DIAGNOSTIC_COMPLETE",
+  "selectivity_strip_verdict": "NO_NATURAL_SELECTIVITY_WINDOW_IN_LOCKED_STRIP",
+  "x_authority_verdict": "X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH",
+  "authorized_next_hypothesis": "LOCAL_D_DEPENDENT_H_GAIN_ONLY_X_RANGE_SEPARATE",
+  "n_strip_rows": 36,
+  "n_strip_points": 12,
+  "n_strip_pass": 0,
+  "n_strip_window_points": 0,
+  "n_x_rows": 4,
+  "numerical_safe_rows": 40,
+  "numerical_total_rows": 40,
+  "entry_geometry": {
+    "component_label": "D_SELECTIVE_ONE_WAY_IGNITION_WITHOUT_DUAL_BASIN",
+    "selective_one_way_points": [
+      "H1_ts1.25_r025",
+      "H1_ts1.25_r050",
+      "H1_ts1.25_r075"
+    ],
+    "natural_dual_basin_window": false,
+    "explicit_d_gate_status": "AUTHORIZED_AS_FALSIFIABLE_HYPOTHESIS_NOT_PROVEN_SUFFICIENT"
+  },
+  "x_authority": {
+    "current_x_path_reachable": true,
+    "h_actuator_bypasses_x": false,
+    "largest_tested_returning_availability": 0.1,
+    "smallest_tested_nonreturning_availability_above_return": 0.5,
+    "experimental_return_bracket": [
+      0.1,
+      0.5
+    ],
+    "archived_lc1_availability_levels": [
+      0.872,
+      0.786
+    ],
+    "archived_lc1_range_status": "INSUFFICIENT_FOR_THIS_H_BRANCH",
+    "physiological_validity_of_returning_probe": "NOT_ESTABLISHED"
+  },
+  "dynamic_lifecycle_tested": false,
+  "morphology_tested": false,
+  "forbidden_claims": [
+    "spontaneous seizure lifecycle",
+    "bistability or hysteresis from the frozen strip alone",
+    "physiological validity of x=0",
+    "patient-like ictal morphology"
+  ],
+  "finalized_at": "2026-08-03T04:37:40.202663+00:00"
+}

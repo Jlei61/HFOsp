@@ -1,0 +1,105 @@
+{
+  "status": "LOCKED",
+  "contract_version": 2,
+  "code_head": "f2f5e59f50c48992f97f1c2dc296e3dcf800bd67",
+  "source_sha256": "7732a819388201185e01936efbc136a2350d6700c4eadf1125a1663383464907",
+  "artifacts": {
+    "lc2_closeout": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/closed_loop_exploration/candidate_verdict.json",
+      "sha256": "1720c1f166f8ec66b4f2558460f3590e44b3f52c6393d7b367e481ee3174cf7d"
+    },
+    "r1_candidates": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/closed_loop_exploration/r1_resegmentation_summary.json",
+      "sha256": "bf96749590362cbc2d8ef5f7b5d1719930ed2c3e213265464abb6e29f2e87875"
+    },
+    "frozen_map": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/closed_loop_exploration/frozen_fork_map.json",
+      "sha256": "a1ff6fd9b6b510c6549989764623a471d61fc73943f23dc99616a2330bd51f1e"
+    },
+    "p_field": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/state_conditioned_susceptibility/snapshots/zA_q75_tz5000/seed_1.npz",
+      "sha256": "3d73db6801eb6e0b8741b37d813fcbedad21d3e4d79545bf705ae7d614275ae9"
+    },
+    "baseline_contract": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/baseline_contract_seed1.json",
+      "sha256": "fd3e0d05ef730c30a484a071046e6a92d8f5e775b2035646dc89f4b4e8367c53"
+    }
+  },
+  "engine_hashes": {
+    "src/snn_engine/kick_probe.py": "febba30005cb42ce0a80e9d133a2c661121ad639d58a035b7914425e1b7994d2",
+    "src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+    "src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+    "src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+    "src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+    "src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+  },
+  "strip": {
+    "families": {
+      "H1": {
+        "tau_ms": 522.0314431365073,
+        "theta_base": 1.2594716548919684,
+        "false_latch_fraction": 0.0
+      },
+      "H6": {
+        "tau_ms": 632.4555320336759,
+        "theta_base": 1.1122742295265198,
+        "false_latch_fraction": 0.2222222222222222
+      }
+    },
+    "theta_scales": [
+      1.0,
+      1.25
+    ],
+    "rho_fracs": [
+      0.025,
+      0.05,
+      0.075
+    ],
+    "k_ratio": 0.05,
+    "arms": [
+      [
+        "healthy_low",
+        0.0,
+        0.0
+      ],
+      [
+        "susceptible_low",
+        0.15,
+        0.0
+      ],
+      [
+        "susceptible_high",
+        0.15,
+        2.0
+      ]
+    ],
+    "T_ms": 4000.0,
+    "noise_seed": 401
+  },
+  "x_probe": {
+    "availabilities": [
+      1.0,
+      0.5,
+      0.1,
+      0.0
+    ],
+    "noise_seed": 401,
+    "duration_rule": "max(5000,8*tau_H)"
+  },
+  "locked_out": [
+    "dynamic_Z",
+    "dynamic_X",
+    "lifecycle",
+    "M",
+    "K",
+    "A",
+    "ELR",
+    "kick",
+    "new_EE_edges"
+  ],
+  "resource_at_lock": {
+    "mem_available_gib": 232.94060516357422,
+    "swap_used_mib": 665.21484375
+  },
+  "locked_at": "2026-08-02T08:40:50.828339+00:00"
+}
