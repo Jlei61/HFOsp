@@ -1,6 +1,6 @@
 # FCXR-LC2-GX2 — causal entry-gate × shared-offset-path architectures
 
-Status: **CONDITIONAL CONTINGENCY — NOT AUTHORIZED BY GX1**
+Status: **SUPERSEDED CONTINGENCY — NOT AUTHORIZED**
 
 Date: 2026-08-02
 Upstream: `2026-08-02-topic4-fcxr-lc2-gx1-entry-offset-diagnostics-design.md`
@@ -29,20 +29,24 @@ GX1 completed after this contingency was drafted and returned:
 
 ```text
 S1 = NO_NATURAL_SELECTIVITY_WINDOW_IN_LOCKED_STRIP
-X1 = X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH
+X1 = X_PATH_REACHABLE_RANGE_INSUFFICIENT
 authorized_next_hypothesis = LOCAL_D_DEPENDENT_H_GAIN_ONLY_X_RANGE_SEPARATE
 ```
 
 The maximal-bypass prerequisite is false: availability `0.1` and `0.0` both returned to the accepted
-interictal workpoint for the final 2 s, while `0.5` and `1.0` remained high. Therefore the full
+interictal workpoint for the final 2 s, while `0.5` and `1.0` remained high — as did the archived
+`0.872/0.786` frozen-relay loads at the same anchor, which is why the range, not the path, is what is
+missing. Therefore the full
 `D gate × shared X/H path` 2×2 below is **not authorized for execution**. It is retained as a
 pre-registered contingency only, so a future independent result that demonstrates maximal-X bypass
 cannot lead to a post-hoc architecture design.
 
-The currently authorized route is narrower and separable: test local D-dependent H gain as an entry
-geometry hypothesis, and calibrate/justify the X dynamic range independently. GX1 does not prove that a
-D gate is sufficient: H1 at high theta already showed D-selective one-way ignition, but did not preserve
-a susceptible low basin.
+The post-execution scientific review supersedes that routing. Same-`D` dual-basin geometry is not a
+necessary lifecycle condition, and the fixed-`D` X probe cannot adjudicate a coupled `D-X` offset.
+Therefore neither a local explicit D gate nor X-range retuning is currently authorized. The next
+executable program is FCXR-LC3, which first maps the unchanged H equation in the `D-a_X` plane and audits
+whether the transition is carried by an axial/local spatial instability. This GX2 document remains only
+as a non-executable record of the stronger structural contingency.
 
 ## 2. Locked scope
 

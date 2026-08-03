@@ -1,6 +1,6 @@
 # FCXR-LC2-GX2 structural-control 2×2 — IMPLEMENTATION PLAN
 
-Status: **CONDITIONAL CONTINGENCY — GX1 DID NOT AUTHORIZE EXECUTION**
+Status: **SUPERSEDED CONTINGENCY — DO NOT EXECUTE**
 
 Date: 2026-08-02
 Design: `docs/superpowers/specs/2026-08-02-topic4-fcxr-lc2-gx2-structural-control-design.md`
@@ -24,15 +24,18 @@ GX1 is complete, and its canonical decision is:
 
 ```text
 NO_NATURAL_SELECTIVITY_WINDOW_IN_LOCKED_STRIP
-+ X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH
++ X_PATH_REACHABLE_RANGE_INSUFFICIENT
 -> LOCAL_D_DEPENDENT_H_GAIN_ONLY_X_RANGE_SEPARATE
 ```
 
 Accordingly, **X0 currently fails by design** and X1--X4 must not run. The current H path is reachable
 under strong experimental relay depletion, so adding a shared X/H path would answer a failure that was
-not observed. This plan remains only as the required conditional 2×2 contingency. The next executable
-plan, if separately reviewed, must isolate local D-gated entry geometry from X dynamic-range
-calibration rather than combine them in this matrix.
+not observed. Reachable does **not** mean already sufficient: the returning arms are `0.1` and `0.0`,
+while the archived `0.872/0.786` loads at the same anchor stay high, which is why the X dynamic range is
+carried forward as an unresolved fixed-`D` observation. This plan remains only as the required
+conditional 2×2 contingency. The post-review executable route is LC3: first map the unchanged equation's
+coupled `D-a_X` state plane and spatial instability. It does not authorize local D-gated entry geometry,
+X retuning, or this matrix.
 
 ## 1. X0 — authorization
 
