@@ -115,6 +115,22 @@ def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba
     return V_inf + (V - V_inf) * decay_V ** (1.0 + g_I)
 
 
+def som_shunt_membrane_step(
+    V, I_net, I_slow, decay_V, is_E, *, g_scale, e_gaba, z_e=None
+):
+    """Apply the broad-slow SOM channel as an E-only GABA conductance."""
+    if float(g_scale) == 0.0:
+        return I_net + (V - I_net) * decay_V
+    g = np.zeros_like(V, dtype=float)
+    g[: int(np.count_nonzero(is_E))] = (
+        float(g_scale) * np.maximum(np.asarray(I_slow)[: np.count_nonzero(is_E)], 0.0)
+    )
+    if z_e is not None:
+        g[: np.count_nonzero(is_E)] *= np.asarray(z_e, dtype=float)
+    V_inf = (np.asarray(I_net, dtype=float) + g * float(e_gaba)) / (1.0 + g)
+    return V_inf + (np.asarray(V, dtype=float) - V_inf) * np.asarray(decay_V) ** (1.0 + g)
+
+
 def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   verbose=False, kick_center=None, lfp_recorder=None, r_kick=None, t_kick=None,
                   V_th_per_neuron=None, perturb=None,
@@ -147,6 +163,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     gaba = net["gaba_by_delay"]
     gaba_slow = net.get("gaba_slow_by_delay")
     dual_gaba_on = gaba_slow is not None
+    slow_gaba_shunt_on = bool(
+        dual_gaba_on and net.get("gaba_slow_membrane_mode", "current") == "shunt"
+    )
     M = net["max_delay_steps"] + 1
 
     dt = p.dt
@@ -232,6 +251,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         and hasattr(slow, "uses_zm_conductance_homotopy")
         and slow.uses_zm_conductance_homotopy()
     )
+    if slow_gaba_shunt_on and (conductance_on or conductance_homotopy_on):
+        raise ValueError("SOM shunt cannot be combined with the whole-membrane conductance arms")
     if conductance_on:
         cond_cfg = slow.zm_conductance_config()
         if float(cond_cfg.tau_m_E) != float(p.tau_m_E):
@@ -425,16 +446,18 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         I_I = s_I + (I_I - s_I) * decay_II
         if dual_gaba_on:
             I_I_slow = s_I_slow + (I_I_slow - s_I_slow) * decay_II_slow
-            I_I_effective = I_I + I_I_slow
+            I_I_lfp = I_I + I_I_slow
+            I_I_effective = I_I if slow_gaba_shunt_on else I_I_lfp
         else:
+            I_I_lfp = I_I
             I_I_effective = I_I
         if track_rec:
             I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
         if lfp_trace is not None and not conductance_on:  # current-based LFP at custom sites
-            lfp_trace[t] = lfp_recorder.sample(I_E, I_I_effective)
+            lfp_trace[t] = lfp_recorder.sample(I_E, I_I_lfp)
             if dump_lfp_components:
                 lfp_exc_trace[t], lfp_inh_trace[t] = lfp_recorder.sample_components(
-                    I_E, I_I_effective
+                    I_E, I_I_lfp
                 )
 
         # slow layer off (slow=None)
@@ -501,6 +524,22 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                 Vtmp = conductance_state["V_next"]
             elif conductance_homotopy_on:
                 Vtmp = conductance_homotopy_state["V_next"]
+            elif slow_gaba_shunt_on:
+                z_e = (
+                    slow.z[:NE]
+                    if getattr(getattr(slow, "cfg", None), "use_z", False)
+                    else None
+                )
+                Vtmp = som_shunt_membrane_step(
+                    V,
+                    I_net,
+                    I_I_slow,
+                    decay_V,
+                    is_E,
+                    g_scale=float(net["gaba_slow_shunt_scale"]),
+                    e_gaba=float(net["gaba_slow_e_gaba_mv"]),
+                    z_e=z_e,
+                )
             elif hasattr(slow, "uses_shunt") and slow.uses_shunt():
                 g = np.zeros_like(V)
                 g[:slow.nE] = slow.shunt_g_at_E()                  # E-only; I cells g=0 -> parity
@@ -554,7 +593,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             if _na > _peak_act:
                 _peak_act = _na
                 I_E_peak = I_E.copy()
-                I_I_peak = I_I_effective.copy()
+                I_I_peak = I_I_lfp.copy()
         if spk.any():
             idx = np.where(spk & ras_mask)[0]
             if idx.size:

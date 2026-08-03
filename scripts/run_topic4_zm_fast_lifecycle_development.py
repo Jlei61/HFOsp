@@ -472,6 +472,8 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
             f"tr{args.som_tau_r_ms:g}td{args.som_tau_d_ms:g}"
             f"s{args.som_seed:d}"
         )
+        if bool(getattr(args, "som_shunting", False)):
+            stem += f"sh{args.som_shunt_scale:g}eg{args.som_e_gaba_mv:g}"
     if bool(getattr(args, "use_mode_M_divisive", False)):
         stem += (
             f"__mdiv{args.kappa_mode_M:g}"
@@ -616,6 +618,14 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
     subtype_receipt = None
     if bool(args.use_dual_gaba) and bool(args.use_inhibitory_subtypes):
         raise RuntimeError("dual GABA and PV/SOM subtype transforms are mutually exclusive")
+    if bool(args.som_shunting) and not bool(args.use_inhibitory_subtypes):
+        raise RuntimeError("SOM shunting requires the PV/SOM subtype transform")
+    if (
+        not np.isfinite(float(args.som_shunt_scale))
+        or float(args.som_shunt_scale) < 0.0
+        or not np.isfinite(float(args.som_e_gaba_mv))
+    ):
+        raise RuntimeError("SOM shunt scale/reversal must be finite and scale >=0")
     if (
         not np.isclose(float(args.i2e_delay_scale), 1.0)
         or float(args.i2e_delay_cv) > 0.0
@@ -648,6 +658,17 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             tau_r_som_ms=float(args.som_tau_r_ms),
             tau_d_som_ms=float(args.som_tau_d_ms),
         )
+        if bool(args.som_shunting):
+            ctx["S"]["net"].update(
+                gaba_slow_membrane_mode="shunt",
+                gaba_slow_shunt_scale=float(args.som_shunt_scale),
+                gaba_slow_e_gaba_mv=float(args.som_e_gaba_mv),
+            )
+            subtype_receipt.update(
+                slow_membrane_mode="shunt",
+                som_shunt_scale=float(args.som_shunt_scale),
+                som_e_gaba_mv=float(args.som_e_gaba_mv),
+            )
         transformation["migrated_state_hash"] = CK.state_hash(state)
     if bool(args.use_dual_gaba):
         p = ctx["S"]["p"]
@@ -1045,6 +1066,9 @@ def main() -> None:
     parser.add_argument("--som-seed", type=int, default=0)
     parser.add_argument("--som-tau-r-ms", type=float, default=4.0)
     parser.add_argument("--som-tau-d-ms", type=float, default=60.0)
+    parser.add_argument("--som-shunting", action="store_true")
+    parser.add_argument("--som-shunt-scale", type=float, default=1.0)
+    parser.add_argument("--som-e-gaba-mv", type=float, default=11.0)
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
     parser.add_argument("--strength-scale", type=float)

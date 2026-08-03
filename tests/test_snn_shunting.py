@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.join(ROOT, "src", "snn_engine"))
 from params import Params
 from connectivity import place_neurons
 from connectivity_rot import build_connectivity_rot
-from kick_probe import simulate_kick, membrane_step
+from kick_probe import simulate_kick, membrane_step, som_shunt_membrane_step
 
 BASELINE_SHA = "da5fc18c27d5340a"
 
@@ -81,6 +81,28 @@ def test_shunting_changes_engine_spikes():
     cur = membrane_step(V, I_E, I_I, decay, shunt_gaba=False)
     sh = membrane_step(V, I_E, I_I, decay, shunt_gaba=True, e_gaba=11.0, g_gaba_scale=0.5)
     assert not np.allclose(cur, sh)
+
+
+def test_som_shunt_is_e_only_z_scaled_and_zero_scale_exact():
+    V = np.array([15.0, 15.0, 15.0])
+    I_net = np.array([24.0, 24.0, 6.0])
+    I_slow = np.array([4.0, 4.0, 9.0])
+    decay = np.full(3, 0.9)
+    is_E = np.array([True, True, False])
+    native = I_net + (V - I_net) * decay
+    np.testing.assert_array_equal(
+        som_shunt_membrane_step(
+            V, I_net, I_slow, decay, is_E,
+            g_scale=0.0, e_gaba=11.0, z_e=np.array([1.0, 0.5]),
+        ),
+        native,
+    )
+    out = som_shunt_membrane_step(
+        V, I_net, I_slow, decay, is_E,
+        g_scale=1.0, e_gaba=11.0, z_e=np.array([1.0, 0.5]),
+    )
+    assert out[0] < out[1] < native[1]
+    assert out[2] == native[2]
 
 
 # --- Task 3: shunting wired through simulate_kick (default-off parity is the safety gate).
