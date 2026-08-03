@@ -129,3 +129,34 @@ def test_collective_m_divisor_suppresses_base_recurrent_e_without_h():
     # eta_m*m = 0.01-mV additive M current.
     np.testing.assert_allclose(out[:4], 6.99)
     assert slow.trace_mode_M_divisor[-1] == pytest.approx(2.0)
+
+
+def test_asymmetric_h_and_collective_m_memory_create_separate_timescales():
+    slow = _slow(
+        tau_mode_H=10.0,
+        tau_mode_H_down=1000.0,
+        use_mode_M_divisive=True,
+        kappa_mode_M=2.0,
+        m_mode_div_ref=10.0,
+        m_mode_div_power=2.0,
+        use_mode_M_memory=True,
+        tau_mode_M_memory_up=1000.0,
+        tau_mode_M_memory_down=5000.0,
+        tau_adp=1e12,
+    )
+    slow.mode_H[:] = 1.0
+    slow.m[:4] = 10.0
+    slow.apply_currents(np.ones(6), np.zeros(6), I_E_rec=np.ones(6))
+    slow.step(np.zeros(6, dtype=bool), None, 1000.0)
+    # H used the slow decay arm and retained a finite memory across silence.
+    np.testing.assert_allclose(slow.mode_H, np.exp(-1.0), rtol=2e-3)
+    # M memory rose toward the instantaneous Hill drive (approximately 0.5),
+    # but remained a distinct slow state and round-trips in checkpoints.
+    assert 0.25 < slow.mode_M_memory < 0.40
+    state = capture_slow(slow)
+    restored = _slow(
+        use_mode_M_divisive=True,
+        use_mode_M_memory=True,
+    )
+    restore_slow(restored, state)
+    assert restored.mode_M_memory == pytest.approx(slow.mode_M_memory)

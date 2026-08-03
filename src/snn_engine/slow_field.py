@@ -173,6 +173,7 @@ class SpatialSlowFieldConfig:
     # I_EE_eff = I_EE * (1 + rho*H*S_zeta*S_M) / (1 + alpha_G*S_G).
     use_mode_H: bool = False
     tau_mode_H: float = 250.0       # ms; bridges sub-second burst gaps
+    tau_mode_H_down: float = 250.0  # ms; set slower than tau_mode_H to retain gain across gaps
     theta_mode_H_hz: float = 40.0   # local rE drive onset
     half_mode_H_hz: float = 40.0    # drive half-saturation above onset
     rho_mode_H: float = 0.0         # maximum multiplicative recurrent-E increment
@@ -191,6 +192,9 @@ class SpatialSlowFieldConfig:
     m_mode_div_ref: float = 30.0
     m_mode_div_power: float = 4.0
     m_mode_div_hill_power: float = 4.0
+    use_mode_M_memory: bool = False
+    tau_mode_M_memory_up: float = 3000.0
+    tau_mode_M_memory_down: float = 8000.0
     # ---- Phase-D fast carrier: E-only dynamic-threshold INCREMENT.
     # This is not the legacy absolute-threshold SlowVars.phi. The heterogeneous
     # V_th substrate remains the base and phi_increment is added on top. ----
@@ -315,6 +319,7 @@ class SpatialSlowFieldConfig:
                 raise ValueError("use_mode_H requires the native Z and M coordinates")
             positive = {
                 "tau_mode_H": self.tau_mode_H,
+                "tau_mode_H_down": self.tau_mode_H_down,
                 "half_mode_H_hz": self.half_mode_H_hz,
                 "zeta_mode_slope": self.zeta_mode_slope,
                 "m_mode_half": self.m_mode_half,
@@ -344,6 +349,13 @@ class SpatialSlowFieldConfig:
                     raise ValueError(f"{name} must be finite and >0")
             if not np.isfinite(self.kappa_mode_M) or self.kappa_mode_M < 0.0:
                 raise ValueError("kappa_mode_M must be finite and >=0")
+            if self.use_mode_M_memory:
+                for name, value in {
+                    "tau_mode_M_memory_up": self.tau_mode_M_memory_up,
+                    "tau_mode_M_memory_down": self.tau_mode_M_memory_down,
+                }.items():
+                    if not np.isfinite(value) or value <= 0.0:
+                        raise ValueError(f"{name} must be finite and >0")
         if self.use_phi:
             if self.tau_phi <= 0.0:
                 raise ValueError(
@@ -602,6 +614,8 @@ class SpatialSlowField:
         self.trace_mode_H_gain_mean = []; self.trace_mode_H_gain_max = []
         self.trace_mode_H_gain_core_mean = []
         self.trace_mode_M_raw_pool = []; self.trace_mode_M_pool = []; self.trace_mode_M_divisor = []
+        self.mode_M_memory = 0.0
+        self.trace_mode_M_memory = []
         # ---- Phase-D dynamic threshold increment (E-only, fast) ----
         self.phi_increment = np.zeros(self.N, dtype=float)
         self.trace_phi_mean = []; self.trace_phi_max = []
@@ -706,10 +720,12 @@ class SpatialSlowField:
                 aH = 0.0
             if self.cfg.use_mode_M_divisive:
                 raw_pool_M = self.mode_M_raw_pool()
-                pool_M = self.mode_M_pool()
+                drive_M = self.mode_M_pool()
+                pool_M = self.mode_M_memory if self.cfg.use_mode_M_memory else drive_M
                 aM = self.cfg.kappa_mode_M * pool_M
                 self.trace_mode_M_raw_pool.append(float(raw_pool_M))
-                self.trace_mode_M_pool.append(float(pool_M))
+                self.trace_mode_M_pool.append(float(drive_M))
+                self.trace_mode_M_memory.append(float(self.mode_M_memory))
                 self.trace_mode_M_divisor.append(float(1.0 + aM))
             else:
                 aM = 0.0
@@ -884,7 +900,10 @@ class SpatialSlowField:
             drive_H = saturation(
                 rE_mode_hz, cfg.theta_mode_H_hz, cfg.half_mode_H_hz
             )
-            alpha_H_mode = 1.0 - np.exp(-dt / cfg.tau_mode_H)
+            tau_H_mode = np.where(
+                drive_H > self.mode_H, cfg.tau_mode_H, cfg.tau_mode_H_down
+            )
+            alpha_H_mode = 1.0 - np.exp(-dt / tau_H_mode)
             self.mode_H += alpha_H_mode * (drive_H - self.mode_H)
             np.clip(self.mode_H, 0.0, 1.0, out=self.mode_H)
             self.trace_mode_H_mean.append(float(self.mode_H.mean()))
@@ -892,6 +911,16 @@ class SpatialSlowField:
             self.trace_mode_H_rate_max_hz.append(float(rE_mode_hz.max()))
             self.trace_mode_H_drive_mean.append(float(drive_H.mean()))
             self.trace_mode_H_drive_max.append(float(drive_H.max()))
+        if cfg.use_mode_M_divisive and cfg.use_mode_M_memory:
+            drive_M = self.mode_M_pool()
+            tau_M_memory = (
+                cfg.tau_mode_M_memory_up
+                if drive_M > self.mode_M_memory
+                else cfg.tau_mode_M_memory_down
+            )
+            alpha_M_memory = 1.0 - np.exp(-dt / tau_M_memory)
+            self.mode_M_memory += alpha_M_memory * (drive_M - self.mode_M_memory)
+            self.mode_M_memory = float(np.clip(self.mode_M_memory, 0.0, 1.0))
         if cfg.use_qI and cfg.k_q != 0.0:                            # §B5.2 (depletion ~ k_q*f*q_I)
             a_q = convolve_periodic(aq_drive(self.rE, self.rI, cfg.eta_E, cfg.eta_I), self._Kq)
             fq = saturation(a_q, cfg.a0_q, cfg.a50_q)

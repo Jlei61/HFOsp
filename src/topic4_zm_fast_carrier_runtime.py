@@ -93,7 +93,11 @@ class DiagnosticSlowWrapper:
             a_s = cfg.alpha_G * self.inner.S_G
             a_h = cfg.alpha_H * self.inner.H if cfg.use_H else 0.0
             a_m = (
-                cfg.kappa_mode_M * self.inner.mode_M_pool()
+                cfg.kappa_mode_M * (
+                    self.inner.mode_M_memory
+                    if getattr(cfg, "use_mode_M_memory", False)
+                    else self.inner.mode_M_pool()
+                )
                 if getattr(cfg, "use_mode_M_divisive", False) else 0.0
             )
             denom = 1.0 + a_s + a_h + a_m

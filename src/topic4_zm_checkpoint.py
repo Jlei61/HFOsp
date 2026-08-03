@@ -33,7 +33,7 @@ _SLOW_ARRAYS = (
     "_I_I_last", "rE", "rI", "rE_fast",
     "q_I", "g_K", "p", "n_load", "a_shunt", "mode_H",
 )
-_SLOW_SCALARS = ("mu_G", "S_G", "h_G", "H", "_t")
+_SLOW_SCALARS = ("mu_G", "S_G", "h_G", "H", "mode_M_memory", "_t")
 
 
 def _inner(slow):

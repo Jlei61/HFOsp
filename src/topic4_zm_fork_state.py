@@ -244,6 +244,9 @@ def build_state_inventory():
         _row("slow.mode_H", "slow_field", "(n_grid,n_grid)", "float64", "tau_mode_H", "simulator", False, True,
              "dynamic", "conditional_direct", "local activity memory; Z-gated and M-closed recurrent-E gain",
              activation_gate="use_mode_H"),
+        _row("slow.mode_M_memory", "slow_field", "scalar", "float64", "tau_mode_M_memory", "simulator", False, True,
+             "dynamic", "conditional_direct", "slow collective-M load on recurrent-E denominator",
+             activation_gate="use_mode_M_memory"),
         _row("slow._t", "slow_field", "scalar", "float64", "ms", "simulator", True, True,
              "always_constant", "none",
              "slow-layer clock; only read by hG_script and persist_onset_ms, both inactive here"),
@@ -346,7 +349,7 @@ _SLOW_DERIVED = {"cfg", "N", "nE", "nI", "L", "posE", "posI", "_Kq", "_Kk", "_Kn
                  "_core_mask_E", "is_E", "hG_script"}
 _SLOW_STATE = {"z", "m", "phi_increment", "i2e_resource", "i_adaptation_increment",
                "_I_I_last", "rE", "rI", "rE_fast", "mu_G", "S_G", "q_I", "g_K", "p",
-               "n_load", "a_shunt", "h_G", "H", "mode_H", "_t"}
+               "n_load", "a_shunt", "h_G", "H", "mode_H", "mode_M_memory", "_t"}
 
 
 # ================================================================= freeze policy (Task 3)

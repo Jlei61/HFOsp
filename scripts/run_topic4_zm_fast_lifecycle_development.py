@@ -340,6 +340,7 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             values.update({
                 "use_mode_H": True,
                 "tau_mode_H": float(args.tau_mode_H_ms),
+                "tau_mode_H_down": float(args.tau_mode_H_down_ms),
                 "rho_mode_H": float(args.rho_mode_H),
                 "theta_mode_H_hz": float(args.theta_mode_H_hz),
                 "half_mode_H_hz": float(args.half_mode_H_hz),
@@ -352,7 +353,7 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             })
             receipt["state_selective_mode_H"] = {
                 key: values[key] for key in (
-                    "tau_mode_H", "rho_mode_H", "theta_mode_H_hz",
+                    "tau_mode_H", "tau_mode_H_down", "rho_mode_H", "theta_mode_H_hz",
                     "half_mode_H_hz", "z_mode_base", "z_mode_susceptible",
                     "zeta_mode_center", "zeta_mode_slope", "m_mode_half",
                     "m_mode_power",
@@ -365,11 +366,16 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
                 "m_mode_div_ref": float(args.m_mode_div_ref),
                 "m_mode_div_power": float(args.m_mode_div_power),
                 "m_mode_div_hill_power": float(args.m_mode_div_hill_power),
+                "use_mode_M_memory": bool(args.use_mode_M_memory),
+                "tau_mode_M_memory_up": float(args.tau_mode_M_memory_up_ms),
+                "tau_mode_M_memory_down": float(args.tau_mode_M_memory_down_ms),
             })
             receipt["collective_mode_M_divisive"] = {
                 key: values[key] for key in (
                     "kappa_mode_M", "m_mode_div_ref", "m_mode_div_power",
                     "m_mode_div_hill_power",
+                    "use_mode_M_memory", "tau_mode_M_memory_up",
+                    "tau_mode_M_memory_down",
                 )
             }
     cfg = dataclasses.replace(cfg, **values)
@@ -403,7 +409,7 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
     if bool(getattr(args, "use_mode_H", False)):
         stem += (
             f"__modeH{args.rho_mode_H:g}t{args.tau_mode_H_ms:g}"
-            f"__mc{args.m_mode_half:g}"
+            f"d{args.tau_mode_H_down_ms:g}__mc{args.m_mode_half:g}"
         )
     if bool(getattr(args, "freeze_zm", False)):
         stem += f"__freeze_{args.state}"
@@ -413,6 +419,11 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
             f"r{args.m_mode_div_ref:g}p{args.m_mode_div_power:g}"
             f"h{args.m_mode_div_hill_power:g}"
         )
+        if bool(getattr(args, "use_mode_M_memory", False)):
+            stem += (
+                f"mem{args.tau_mode_M_memory_up_ms:g}"
+                f"d{args.tau_mode_M_memory_down_ms:g}"
+            )
     return stem
 
 
@@ -704,6 +715,9 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
                 diagnostic.trace_mode_M_raw_pool, np.float32
             ),
             "trace_mode_M_pool": np.asarray(diagnostic.trace_mode_M_pool, np.float32),
+            "trace_mode_M_memory": np.asarray(
+                diagnostic.trace_mode_M_memory, np.float32
+            ),
             "trace_mode_M_divisor": np.asarray(
                 diagnostic.trace_mode_M_divisor, np.float32
             ),
@@ -875,6 +889,7 @@ def main() -> None:
     )
     parser.add_argument("--rho-mode-H", type=float, default=0.0)
     parser.add_argument("--tau-mode-H-ms", type=float, default=250.0)
+    parser.add_argument("--tau-mode-H-down-ms", type=float, default=250.0)
     parser.add_argument("--theta-mode-H-hz", type=float, default=40.0)
     parser.add_argument("--half-mode-H-hz", type=float, default=40.0)
     parser.add_argument("--z-mode-base", type=float, default=1.0)
@@ -888,6 +903,9 @@ def main() -> None:
     parser.add_argument("--m-mode-div-ref", type=float, default=30.0)
     parser.add_argument("--m-mode-div-power", type=float, default=4.0)
     parser.add_argument("--m-mode-div-hill-power", type=float, default=4.0)
+    parser.add_argument("--use-mode-M-memory", action="store_true")
+    parser.add_argument("--tau-mode-M-memory-up-ms", type=float, default=3000.0)
+    parser.add_argument("--tau-mode-M-memory-down-ms", type=float, default=8000.0)
     parser.add_argument("--T-ms", type=float, default=PRODUCTION_T_MS)
     parser.add_argument("--burn-ms", type=float, default=PRODUCTION_BURN_MS)
     parser.add_argument("--smoke", action="store_true")

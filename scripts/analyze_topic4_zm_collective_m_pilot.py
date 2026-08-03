@@ -50,6 +50,7 @@ def _label(summary: dict) -> str | None:
         and _close(div.get("m_mode_div_ref"), 30.0)
         and _close(div.get("m_mode_div_power"), 4.0)
         and _close(div.get("m_mode_div_hill_power"), 4.0)
+        and not bool(div.get("use_mode_M_memory", False))
     ):
         return None
     kappa = float(div["kappa_mode_M"])
@@ -57,6 +58,8 @@ def _label(summary: dict) -> str | None:
     if mode is None and _close(kappa, 4.0):
         return "noH_mdiv4"
     if mode and _close(mode.get("m_mode_half"), 30.0):
+        if not _close(mode.get("tau_mode_H_down", 250.0), 250.0):
+            return None
         rho = float(mode.get("rho_mode_H"))
         if any(_close(kappa, value) for value in (2.0, 3.0, 4.0)):
             if _close(rho, 0.5):
