@@ -80,6 +80,7 @@ GEOMETRY_SOURCES = (
     "src/snn_engine/mz_slow_vars.py",
     "scripts/run_topic4_fcxr_lc3.py",
     "scripts/run_topic4_fcxr_lc3_geometry.py",
+    "scripts/run_topic4_fcxr_lc3_geometry_autopilot.sh",
     "docs/superpowers/specs/2026-08-03-topic4-fcxr-lc3-dx-spatial-instability-design.md",
     "docs/superpowers/plans/2026-08-03-topic4-fcxr-lc3-dx-spatial-instability.md",
 )
@@ -114,10 +115,24 @@ def _write_json(path, payload):
 def _meminfo():
     with open("/proc/meminfo") as f:
         d = {line.split(":", 1)[0]: float(line.split()[1]) for line in f}
+    sibling = 0
+    try:
+        ps = subprocess.check_output(["ps", "-eo", "pid=,args="], text=True)
+        for line in ps.splitlines():
+            parts = line.strip().split(None, 1)
+            if len(parts) != 2 or int(parts[0]) == os.getpid():
+                continue
+            cmd = parts[1]
+            if ("python" in cmd and "scripts/run_topic4" in cmd
+                    and "fcxr_lc3" not in cmd and "pytest" not in cmd):
+                sibling += 1
+    except Exception:
+        sibling = -1
     return dict(
         mem_available_gib=d["MemAvailable"] / 1024.0 / 1024.0,
         swap_used_mib=(d["SwapTotal"] - d["SwapFree"]) / 1024.0,
         self_peak_rss_gib=resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0,
+        sibling_topic4_python_count=sibling,
     )
 
 
