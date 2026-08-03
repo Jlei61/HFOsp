@@ -1,10 +1,22 @@
 {
   "status": "COMPLETE",
   "scientific_tier": "frozen_component_diagnostic",
-  "canonical_verdict": "GX1_ENTRY_OFFSET_DIAGNOSTIC_COMPLETE",
+  "canonical_verdict": "GX1_MECHANISM_MAP_ACCEPTED",
+  "mechanism_map_labels": [
+    "FINITE_H_HIGH_STATE_POSITIVE",
+    "D_SELECTIVE_ONSET_CANDIDATE",
+    "SAME_D_BISTABILITY_NOT_FOUND",
+    "X_OFFSET_PATH_REACHABLE",
+    "X_FIXED_D_DYNAMIC_RANGE_INSUFFICIENT",
+    "COUPLED_D_X_OFFSET_UNTESTED",
+    "DYNAMIC_LIFECYCLE_UNTESTED",
+    "SPATIAL_INSTABILITY_UNTESTED"
+  ],
   "selectivity_strip_verdict": "NO_NATURAL_SELECTIVITY_WINDOW_IN_LOCKED_STRIP",
-  "x_authority_verdict": "X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH",
-  "authorized_next_hypothesis": "LOCAL_D_DEPENDENT_H_GAIN_ONLY_X_RANGE_SEPARATE",
+  "x_authority_verdict": "X_PATH_REACHABLE_RANGE_INSUFFICIENT",
+  "preregistered_next_hypothesis": "LOCAL_D_DEPENDENT_H_GAIN_ONLY_X_RANGE_SEPARATE",
+  "authorized_next_program": "LC3_DX_STATE_PLANE_AND_SPATIAL_INSTABILITY_AUDIT",
+  "strategy_adjudication": "The GX1 same-D dual-basin gate was a local frozen-geometry diagnostic, not a necessary condition for a seizure lifecycle. Test the current H equation in the coupled D-X plane and audit the spatial instability before adding an explicit D gate.",
   "n_strip_rows": 36,
   "n_strip_points": 12,
   "n_strip_pass": 0,
@@ -20,7 +32,38 @@
       "H1_ts1.25_r075"
     ],
     "natural_dual_basin_window": false,
-    "explicit_d_gate_status": "AUTHORIZED_AS_FALSIFIABLE_HYPOTHESIS_NOT_PROVEN_SUFFICIENT"
+    "explicit_d_gate_status": "DEFERRED_PENDING_LC3_CURRENT_EQUATION_AUDIT",
+    "lifecycle_interpretation": "D_SELECTIVE_MONOSTABLE_ONSET_CANDIDATE",
+    "same_D_bistability_required_for_lifecycle": false
+  },
+  "strip_resolution": {
+    "per_arm": {
+      "healthy_low": {
+        "n_points": 12,
+        "n_distinct_tail_rates": 12,
+        "min_gate_over_run": 0.0,
+        "gate_pinned_open_whole_run": false
+      },
+      "susceptible_low": {
+        "n_points": 12,
+        "n_distinct_tail_rates": 12,
+        "min_gate_over_run": 0.0,
+        "gate_pinned_open_whole_run": false
+      },
+      "susceptible_high": {
+        "n_points": 12,
+        "n_distinct_tail_rates": 3,
+        "min_gate_over_run": 0.9999999898060814,
+        "gate_pinned_open_whole_run": true
+      }
+    },
+    "gate_pinned_arms": [
+      "susceptible_high"
+    ],
+    "arms_that_resolve_tau_and_theta": [
+      "healthy_low",
+      "susceptible_low"
+    ]
   },
   "x_authority": {
     "current_x_path_reachable": true,
@@ -31,20 +74,51 @@
       0.1,
       0.5
     ],
-    "archived_lc1_availability_levels": [
-      0.872,
-      0.786
+    "archived_relay_loads_at_this_anchor": [
+      {
+        "x_availability": 0.872,
+        "arm": "D1",
+        "required_low_workpoint_label": "FINITE_HIGH_ORBIT",
+        "returned_to_interictal": false,
+        "tail_rate_hz": 97.62428125
+      },
+      {
+        "x_availability": 0.786,
+        "arm": "D2",
+        "required_low_workpoint_label": "FINITE_HIGH_FIXED",
+        "returned_to_interictal": false,
+        "tail_rate_hz": 94.935
+      }
     ],
-    "archived_lc1_range_status": "INSUFFICIENT_FOR_THIS_H_BRANCH",
-    "physiological_validity_of_returning_probe": "NOT_ESTABLISHED"
+    "archived_relay_load_source": "LC2 E4 frozen_fork_map.json, same candidate_run_id",
+    "archived_range_status": "INSUFFICIENT_FOR_THIS_H_BRANCH",
+    "physiological_validity_of_returning_probe": "NOT_ESTABLISHED",
+    "fixed_D_dynamic_range_status": "INSUFFICIENT",
+    "coupled_D_X_offset_status": "UNTESTED"
+  },
+  "x_initial_condition": {
+    "h_initial": 2.2245484590530396,
+    "h_converged_at_full_availability": 6.8167105357515645,
+    "head_start_ratio": 3.064311999143119,
+    "extra_above_theta_decay_s_if_started_converged": 0.7082382981077257,
+    "run_duration_s": 5.059644256269407,
+    "required_low_window_s": 2.0,
+    "offset_tested_against": "analytic 2*theta head start, not the converged high branch",
+    "margin_ok": true
   },
   "dynamic_lifecycle_tested": false,
+  "spatial_instability_tested": false,
   "morphology_tested": false,
   "forbidden_claims": [
     "spontaneous seizure lifecycle",
     "bistability or hysteresis from the frozen strip alone",
-    "physiological validity of x=0",
-    "patient-like ictal morphology"
+    "physiological validity of x=0 or x=0.1",
+    "patient-like ictal morphology",
+    "12 independent susceptible-high conditions: the H gate is pinned open in that arm, so it resolves rho only and is blind to tau_H and theta_H",
+    "removal of a converged high branch: the offset arms start from an analytic 2*theta head start",
+    "same-D bistability is necessary for a seizure lifecycle",
+    "the current dynamic X range is insufficient in the coupled D-X system: only fixed-D was tested",
+    "the D-selective transition is axial or local: spatial instability was not tested"
   ],
-  "finalized_at": "2026-08-03T04:37:40.202663+00:00"
+  "finalized_at": "2026-08-03T07:45:05.713242+00:00"
 }

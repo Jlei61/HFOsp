@@ -10576,12 +10576,21 @@
       "gx1_contract_version": 2
     }
   ],
-  "verdict": "X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH",
+  "verdict": "X_PATH_REACHABLE_RANGE_INSUFFICIENT",
   "returning_availabilities": [
     0.0,
     0.1
   ],
   "smallest_tested_availability_returning": 0.0,
   "largest_tested_availability_returning": 0.1,
-  "finished": "2026-08-02T15:57:59.676007+00:00"
+  "smallest_nonzero_availability_returning": 0.1,
+  "archived_physiological_availabilities": [
+    0.872,
+    0.786
+  ],
+  "source_provenance": {
+    "manifest_source_sha256": "7732a819388201185e01936efbc136a2350d6700c4eadf1125a1663383464907",
+    "current_source_sha256": "fb41fd8c7c84b9cf4997411ff4f4ce20f2cbfa2cc125d173487e7ab67686f6bc"
+  },
+  "finished": "2026-08-03T07:38:42.874954+00:00"
 }

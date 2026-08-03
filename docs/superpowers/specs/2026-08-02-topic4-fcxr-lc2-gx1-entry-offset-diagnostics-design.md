@@ -1,6 +1,6 @@
 # FCXR-LC2-GX1 — susceptibility-selective entry and maximal-X offset diagnostics
 
-Status: **DESIGN LOCK**  
+Status: **EXECUTED — MECHANISM MAP ACCEPTED**
 Date: 2026-08-02  
 Upstream closeout: `docs/archive/topic4/sef_hfo/fcxr_lc2_closed_loop_exploration_2026-08-02.md`
 
@@ -151,6 +151,13 @@ X_AUTHORITY_UNRESOLVED
   call it physiological.
 - Numerical failure or insufficient post-offset exposure is unresolved.
 
+Post-run review clarification (2026-08-03, no change to the rule above): bullet 3 is a *reporting*
+requirement, not a competing verdict. A nonzero arm that returns only *below* the archived
+`0.872/0.786` loads still satisfies bullet 1, so the verdict stays
+`X_PATH_REACHABLE_RANGE_INSUFFICIENT`; `X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH` requires a
+returning arm at or above that archived band. The first implementation collapsed the two and is fixed
+in `classify_x_authority`.
+
 ## 5. Conditional next-structure logic
 
 GX1 itself does not implement a new structure. It only decides which hypothesis is legal next:
@@ -229,3 +236,39 @@ results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/
 
 Final archive must preserve every registered negative point and distinguish component positives from
 state-transition authority.
+
+## 9. Post-execution scientific adjudication (2026-08-03)
+
+The registered strip correctly answered its local question: no tested point preserved a susceptible
+low basin while also preserving a susceptible high basin at the same frozen `D`. That result is
+accepted, but same-`D` bistability is **not** a necessary condition for a seizure lifecycle. The H1
+high-threshold point also showed a different positive geometry:
+
+```text
+healthy recurrent input < theta_H < susceptible recurrent input
+healthy low -> interictal
+susceptible low/high -> finite high
+```
+
+This is retained as a `D_SELECTIVE_ONSET_CANDIDATE`, not a bistable attractor claim. Likewise, X1
+established a reachable offset path only at frozen `D=0.15`; it did not test whether partial X
+suppression plus subsequent Z recovery can jointly cross an offset boundary.
+
+The accepted GX1 labels are therefore:
+
+```text
+GX1_MECHANISM_MAP_ACCEPTED
+FINITE_H_HIGH_STATE_POSITIVE
+D_SELECTIVE_ONSET_CANDIDATE
+SAME_D_BISTABILITY_NOT_FOUND
+X_OFFSET_PATH_REACHABLE
+X_FIXED_D_DYNAMIC_RANGE_INSUFFICIENT
+COUPLED_D_X_OFFSET_UNTESTED
+DYNAMIC_LIFECYCLE_UNTESTED
+SPATIAL_INSTABILITY_UNTESTED
+```
+
+Section 5 remains the audit trail of the pre-registered routing rule. It no longer authorizes the next
+experiment. The superseding executable program is FCXR-LC3: map the current equation in the frozen
+`D-a_X` plane, audit the spatial instability early, and only then run a no-kick dynamic pilot. An
+explicit `D` gate, a changed `theta_H(D)`, a shared X/H path, K/A/ELR, and M morphology are deferred.

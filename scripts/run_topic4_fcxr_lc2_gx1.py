@@ -54,6 +54,8 @@ STRIP_ARMS = (
     ("susceptible_high", 0.15, 2.0),
 )
 X_AVAILABILITIES = (1.0, 0.5, 0.1, 0.0)
+RSS_SINGLE_FALLBACK_GIB = 7.214
+MECHANISM_MODULES = ("src/snn_engine/mz_slow_vars.py",)
 
 
 def _now():
@@ -175,6 +177,20 @@ def _strip_point_pass(arms):
                 susceptible_low_ok=susceptible_low, susceptible_high_ok=high_ok)
 
 
+def _measured_single_rss_gib():
+    """Spec section 7 sizes the second worker from the REMEASURED 4 s RSS, not the 3.16 s LC2 estimate."""
+    path = os.path.join(OUT, "resource_log.jsonl")
+    peaks = []
+    if os.path.isfile(path):
+        with open(path) as f:
+            for line in f:
+                try:
+                    peaks.append(float(json.loads(line)["peak_rss_gib"]))
+                except (ValueError, KeyError, TypeError):
+                    continue
+    return max(peaks + [RSS_SINGLE_FALLBACK_GIB])
+
+
 def _adjacent(a, b):
     if a["family"] != b["family"]:
         return False
@@ -201,16 +217,19 @@ def aggregate_strip(rows):
                 window_ids.update((a["point_id"], b["point_id"]))
     for p in point_rows:
         p["in_adjacent_window"] = p["point_id"] in window_ids
+    n_failed = sum(p["label"] in ("SELECTIVITY_STRIP_NUMERICAL_FAILURE", "INCOMPLETE_POINT")
+                   for p in point_rows)
     if window_ids:
         verdict = "NATURAL_SELECTIVITY_WINDOW_CANDIDATE"
     elif passed:
         verdict = "ISOLATED_SELECTIVITY_POINT"
-    elif any(p["label"] in ("SELECTIVITY_STRIP_NUMERICAL_FAILURE", "INCOMPLETE_POINT") for p in point_rows):
+    elif n_failed:
         verdict = "SELECTIVITY_STRIP_NUMERICAL_FAILURE"
     else:
         verdict = "NO_NATURAL_SELECTIVITY_WINDOW_IN_LOCKED_STRIP"
     return dict(verdict=verdict, n_points=len(point_rows), n_pass=len(passed),
-                n_window_points=len(window_ids), point_rows=point_rows)
+                n_window_points=len(window_ids), n_numerical_failure_points=n_failed,
+                point_rows=point_rows)
 
 
 def select_strip_anchor(aggregate):
@@ -253,7 +272,17 @@ def build_x_rows(strip_aggregate, noise_seed=401):
     return rows
 
 
-def classify_x_authority(rows):
+def archived_relay_availabilities(frozen_map, point_id):
+    """Read the comparison range from the same-anchor archived fork evidence."""
+    values = sorted({float(r["x_availability"]) for r in frozen_map.get("rows", [])
+                     if r.get("candidate_run_id") == point_id
+                     and 0.0 < float(r.get("x_availability", 1.0)) < 1.0}, reverse=True)
+    if not values:
+        raise ValueError(f"no archived relay load at anchor {point_id}")
+    return values
+
+
+def classify_x_authority(rows, archived_availabilities):
     by = {float(r["x_availability"]): r for r in rows}
     if set(by) != set(X_AVAILABILITIES):
         return dict(verdict="X_AUTHORITY_UNRESOLVED", reason="incomplete_manifest")
@@ -264,15 +293,33 @@ def classify_x_authority(rows):
         return dict(verdict="X_AUTHORITY_UNRESOLVED", reason="anchor_high_not_established")
     returning = sorted(x for x, r in by.items()
                        if r.get("required_low_workpoint_label") == "INTERICTAL_WORKPOINT")
+    nonzero = [x for x in returning if x > 0.0]
+    archived_availabilities = [float(v) for v in archived_availabilities]
+    if not archived_availabilities or any(not (0.0 < v < 1.0) for v in archived_availabilities):
+        return dict(verdict="X_AUTHORITY_UNRESOLVED", reason="invalid_archived_load_range")
+    physiological_floor = min(archived_availabilities)
     if 0.0 not in returning:
         verdict = "H_ACTUATOR_BYPASSES_X_AT_MAXIMAL_SHUTDOWN"
-    elif any(x > 0.0 for x in returning):
+    elif any(x >= physiological_floor for x in returning):
         verdict = "X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH"
     else:
+        # x=0 returns but every returning arm sits below the archived physiological loads: the path is
+        # reachable and the observed dynamic range is what is missing (spec 4.3 bullet 1).
         verdict = "X_PATH_REACHABLE_RANGE_INSUFFICIENT"
     return dict(verdict=verdict, returning_availabilities=returning,
                 smallest_tested_availability_returning=min(returning) if returning else None,
-                largest_tested_availability_returning=max(returning) if returning else None)
+                largest_tested_availability_returning=max(returning) if returning else None,
+                smallest_nonzero_availability_returning=min(nonzero) if nonzero else None,
+                archived_physiological_availabilities=archived_availabilities)
+
+
+def _archived_x_range(rows):
+    lock = _load(os.path.join(OUT, "execution_lock.json"))
+    frozen = _load(lock["artifacts"]["frozen_map"]["path"])
+    point_ids = {str(r["point_id"]) for r in rows}
+    if len(point_ids) != 1:
+        raise ValueError(f"X rows do not share one anchor: {sorted(point_ids)}")
+    return archived_relay_availabilities(frozen, next(iter(point_ids)))
 
 
 def _cell_path(stage, row):
@@ -307,8 +354,9 @@ def _run_all(stage, rows, workers):
     before = _meminfo()
     if before["mem_available_gib"] < 96.0:
         raise SystemExit(f"OOM safety stop: {before}")
-    if workers == 2 and before["mem_available_gib"] < 96.0 + 2 * 1.35 * 7.214:
-        raise SystemExit(f"OOM safety stop for second worker: {before}")
+    rss_single = _measured_single_rss_gib()
+    if workers == 2 and before["mem_available_gib"] < 96.0 + 2 * 1.35 * rss_single:
+        raise SystemExit(f"OOM safety stop for second worker (rss_single={rss_single:.3f} GiB): {before}")
     running = os.path.join(OUT, f"{stage}_RUNNING.json")
     done = os.path.join(OUT, f"{stage}_DONE.json")
     failed = os.path.join(OUT, f"{stage}_FAILED.json")
@@ -361,7 +409,12 @@ def cmd_lock(_args):
                        "p_field": dict(path=F.P_FIELD, sha256=_sha256(F.P_FIELD)),
                        "baseline_contract": dict(path=F.BASELINE_CONTRACT,
                                                  sha256=_sha256(F.BASELINE_CONTRACT)),
-                   }, engine_hashes=engine, strip=dict(families=FAMILIES,
+                   }, engine_hashes=engine,
+                   # The blessed set does not cover the module that implements the H gate and the frozen
+                   # relay, i.e. the mechanism actually under test.  Pin it here too.
+                   mechanism_module_hashes={rel: _sha256(os.path.join(ROOT, rel))
+                                            for rel in MECHANISM_MODULES},
+                   strip=dict(families=FAMILIES,
                        theta_scales=THETA_SCALES, rho_fracs=RHO_FRACS, k_ratio=K_RATIO,
                        arms=STRIP_ARMS, T_ms=4000.0, noise_seed=401),
                    x_probe=dict(availabilities=X_AVAILABILITIES, noise_seed=401,
@@ -382,6 +435,18 @@ def _manifest_rows(name):
     return m["rows"]
 
 
+def _aggregate_rows(name):
+    """Read-only re-derivation over already simulated cells.
+
+    Unlike `_manifest_rows` this does not refuse a drifted runner: re-classifying archived cells after a
+    post-hoc classifier correction must stay possible.  The drift is recorded in the payload instead of
+    being hidden, and no simulation can start from this path.
+    """
+    m = _load(os.path.join(OUT, name))
+    return m["rows"], dict(manifest_source_sha256=m.get("source_sha256"),
+                           current_source_sha256=_source_sha())
+
+
 def cmd_strip_manifest(_args):
     lock = _load(os.path.join(OUT, "execution_lock.json"))
     if lock.get("source_sha256") != _source_sha():
@@ -391,9 +456,9 @@ def cmd_strip_manifest(_args):
         row["gx1_source_sha256"] = lock["source_sha256"]
     payload = dict(stage="S1", status="LOCKED", contract_version=CONTRACT_VERSION,
                    code_head=_git_head(), source_sha256=lock["source_sha256"], n_rows=len(rows),
-                   n_points=12, rows=rows, created=_now())
+                   n_points=len({r["point_id"] for r in rows}), rows=rows, created=_now())
     _write(os.path.join(OUT, "selectivity_strip_manifest.json"), payload)
-    print(json.dumps(dict(status="LOCKED", n_rows=len(rows), n_points=12), indent=2))
+    print(json.dumps(dict(status="LOCKED", n_rows=len(rows), n_points=payload["n_points"]), indent=2))
 
 
 def cmd_one(stage, manifest, args):
@@ -417,24 +482,43 @@ def cmd_strip_all(args):
         _write(os.path.join(OUT, "selectivity_strip.json"), payload)
 
 
-def cmd_strip_aggregate(_args):
-    rows = _manifest_rows("selectivity_strip_manifest.json")
+def _reload_cells(stage, manifest):
+    rows, provenance = _aggregate_rows(manifest)
     results = []
     for row in rows:
-        path = _cell_path("S1", row)
+        path = _cell_path(stage, row)
         if not os.path.isfile(path):
-            raise SystemExit(f"missing strip cell: {path}")
+            raise SystemExit(f"missing {stage} cell: {path}")
         results.append(_load(path))
+    return results, provenance
+
+
+def cmd_strip_aggregate(_args):
+    results, provenance = _reload_cells("S1", "selectivity_strip_manifest.json")
     payload = dict(stage="S1", status="COMPLETE", n_rows=len(results),
-                   **aggregate_strip(results), finished=_now())
+                   **aggregate_strip(results), source_provenance=provenance, finished=_now())
     _write(os.path.join(OUT, "selectivity_strip.json"), payload)
-    print(json.dumps({k: payload[k] for k in ("verdict", "n_points", "n_pass", "n_window_points")}, indent=2))
+    print(json.dumps({k: payload[k] for k in ("verdict", "n_points", "n_pass", "n_window_points",
+                                              "n_numerical_failure_points")}, indent=2))
+
+
+def cmd_x_aggregate(_args):
+    results, provenance = _reload_cells("X1", "x_authority_manifest.json")
+    results.sort(key=lambda r: int(r["index"]))
+    verdict = classify_x_authority(results, _archived_x_range(results))
+    payload = dict(stage="X1", status="COMPLETE", n_rows=len(results), rows=results,
+                   **verdict, source_provenance=provenance, finished=_now())
+    _write(os.path.join(OUT, "x_authority_map.json"), payload)
+    print(json.dumps({k: v for k, v in verdict.items() if k != "rows"}, indent=2))
 
 
 def cmd_x_manifest(_args):
+    lock = _load(os.path.join(OUT, "execution_lock.json"))
+    if lock.get("source_sha256") != _source_sha():
+        raise SystemExit("runner source drifted after execution lock")
     strip = _load(os.path.join(OUT, "selectivity_strip.json"))
     rows = build_x_rows(strip)
-    source = _source_sha()
+    source = lock["source_sha256"]
     for row in rows:
         row["gx1_source_sha256"] = source
     payload = dict(stage="X1", status="LOCKED", contract_version=CONTRACT_VERSION,
@@ -451,7 +535,7 @@ def cmd_x_all(args):
     rows = _manifest_rows("x_authority_manifest.json")
     with _stage_lock("X1"):
         results = _run_all("X1", rows, int(args.workers))
-        verdict = classify_x_authority(results)
+        verdict = classify_x_authority(results, _archived_x_range(results))
         payload = dict(stage="X1", status="COMPLETE", n_rows=len(results), rows=results,
                        **verdict, finished=_now())
         _write(os.path.join(OUT, "x_authority_map.json"), payload)
@@ -465,6 +549,7 @@ def main():
     p = sub.add_parser("strip-one"); p.add_argument("--index", type=int, required=True); p.add_argument("--confirm-run", action="store_true")
     p = sub.add_parser("strip-all"); p.add_argument("--workers", type=int, choices=(1, 2), default=1); p.add_argument("--confirm-run", action="store_true")
     sub.add_parser("strip-aggregate")
+    sub.add_parser("x-aggregate")
     sub.add_parser("x-manifest")
     p = sub.add_parser("x-one"); p.add_argument("--index", type=int, required=True); p.add_argument("--confirm-run", action="store_true")
     p = sub.add_parser("x-all"); p.add_argument("--workers", type=int, choices=(1, 2), default=1); p.add_argument("--confirm-run", action="store_true")
@@ -474,6 +559,7 @@ def main():
     elif args.cmd == "strip-one": cmd_one("S1", "selectivity_strip_manifest.json", args)
     elif args.cmd == "strip-all": cmd_strip_all(args)
     elif args.cmd == "strip-aggregate": cmd_strip_aggregate(args)
+    elif args.cmd == "x-aggregate": cmd_x_aggregate(args)
     elif args.cmd == "x-manifest": cmd_x_manifest(args)
     elif args.cmd == "x-one": cmd_one("X1", "x_authority_manifest.json", args)
     else: cmd_x_all(args)

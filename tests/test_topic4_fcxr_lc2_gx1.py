@@ -112,14 +112,35 @@ def test_x_authority_verdict_distinguishes_range_from_maximal_bypass():
     high = "FINITE_HIGH_ORBIT"
     rows = [_xrow(1.0, high), _xrow(0.5, high), _xrow(0.1, high),
             _xrow(0.0, high, "INTERICTAL_WORKPOINT")]
-    assert g.classify_x_authority(rows)["verdict"] == "X_PATH_REACHABLE_RANGE_INSUFFICIENT"
+    assert g.classify_x_authority(rows, [0.872, 0.786])["verdict"] == "X_PATH_REACHABLE_RANGE_INSUFFICIENT"
 
     rows[-1] = _xrow(0.0, high)
-    assert g.classify_x_authority(rows)["verdict"] == "H_ACTUATOR_BYPASSES_X_AT_MAXIMAL_SHUTDOWN"
+    assert g.classify_x_authority(rows, [0.872, 0.786])["verdict"] == "H_ACTUATOR_BYPASSES_X_AT_MAXIMAL_SHUTDOWN"
 
-    rows[2] = _xrow(0.1, high, "INTERICTAL_WORKPOINT")
-    rows[3] = _xrow(0.0, high, "INTERICTAL_WORKPOINT")
-    assert g.classify_x_authority(rows)["verdict"] == "X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH"
+
+def test_sub_physiological_return_is_range_insufficient_not_already_reachable():
+    """0.1 lies far below the archived 0.872/0.786 loads, so it cannot mean the current path already
+    has offset authority (spec 4.3 bullet 1 vs bullet 3)."""
+    g = _module()
+    high = "FINITE_HIGH_ORBIT"
+    rows = [_xrow(1.0, high), _xrow(0.5, high),
+            _xrow(0.1, high, "INTERICTAL_WORKPOINT"),
+            _xrow(0.0, high, "INTERICTAL_WORKPOINT")]
+    out = g.classify_x_authority(rows, [0.872, 0.786])
+    assert out["verdict"] == "X_PATH_REACHABLE_RANGE_INSUFFICIENT"
+    assert out["smallest_nonzero_availability_returning"] == 0.1
+    assert out["archived_physiological_availabilities"] == [0.872, 0.786]
+
+
+def test_return_inside_the_archived_physiological_band_is_already_reachable():
+    """The already-reachable label fires only when a returning arm reaches the archived load band.  The
+    locked grid has no arm inside 0.786-0.872, so the band is lowered on this throwaway module copy."""
+    g = _module()
+    high = "FINITE_HIGH_ORBIT"
+    rows = [_xrow(1.0, high), _xrow(0.5, high, "INTERICTAL_WORKPOINT"),
+            _xrow(0.1, high, "INTERICTAL_WORKPOINT"),
+            _xrow(0.0, high, "INTERICTAL_WORKPOINT")]
+    assert g.classify_x_authority(rows, [0.5, 0.5])["verdict"] == "X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH"
 
 
 def test_x_authority_rejects_missing_high_anchor_or_numerical_failure():
@@ -128,6 +149,17 @@ def test_x_authority_rejects_missing_high_anchor_or_numerical_failure():
             _xrow(0.5, "INTERICTAL_WORKPOINT"),
             _xrow(0.1, "INTERICTAL_WORKPOINT"),
             _xrow(0.0, "INTERICTAL_WORKPOINT")]
-    assert g.classify_x_authority(rows)["reason"] == "anchor_high_not_established"
+    assert g.classify_x_authority(rows, [0.872, 0.786])["reason"] == "anchor_high_not_established"
     rows[0] = _xrow(1.0, "FINITE_HIGH_FIXED", numerical=True)
-    assert g.classify_x_authority(rows)["reason"] == "numerical_failure"
+    assert g.classify_x_authority(rows, [0.872, 0.786])["reason"] == "numerical_failure"
+
+
+def test_archived_x_range_is_derived_from_same_anchor_rows():
+    g = _module()
+    frozen = {"rows": [
+        dict(candidate_run_id="H6_k05_r10", x_availability=1.0),
+        dict(candidate_run_id="H6_k05_r10", x_availability=0.872),
+        dict(candidate_run_id="H6_k05_r10", x_availability=0.786),
+        dict(candidate_run_id="other", x_availability=0.6),
+    ]}
+    assert g.archived_relay_availabilities(frozen, "H6_k05_r10") == [0.872, 0.786]

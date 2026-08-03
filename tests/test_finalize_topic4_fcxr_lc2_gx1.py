@@ -48,8 +48,16 @@ def test_candidate_verdict_keeps_dynamic_and_morphology_unclaimed():
     out = g.build_candidate_verdict(strip, xmap)
     assert out["numerical_safe_rows"] == 7
     assert out["dynamic_lifecycle_tested"] is False
+    assert out["spatial_instability_tested"] is False
     assert out["morphology_tested"] is False
-    assert out["authorized_next_hypothesis"] == "CAUSAL_2X2_D_GATE_BY_SHARED_X_H_PATH"
+    assert out["canonical_verdict"] == "GX1_MECHANISM_MAP_ACCEPTED"
+    assert out["preregistered_next_hypothesis"] == "CAUSAL_2X2_D_GATE_BY_SHARED_X_H_PATH"
+    assert out["authorized_next_program"] == "LC3_DX_STATE_PLANE_AND_SPATIAL_INSTABILITY_AUDIT"
+    assert out["entry_geometry"]["same_D_bistability_required_for_lifecycle"] is False
+    assert out["entry_geometry"]["explicit_d_gate_status"] == \
+        "DEFERRED_PENDING_LC3_CURRENT_EQUATION_AUDIT"
+    assert out["x_authority"]["coupled_D_X_offset_status"] == "UNTESTED"
+    assert "D_SELECTIVE_ONSET_CANDIDATE" in out["mechanism_map_labels"]
 
 
 def test_entry_summary_does_not_upgrade_one_way_ignition_to_dual_basin():
@@ -72,9 +80,8 @@ def test_entry_summary_does_not_upgrade_one_way_ignition_to_dual_basin():
     assert out["explicit_d_gate_status"].endswith("NOT_PROVEN_SUFFICIENT")
 
 
-def test_x_summary_reports_reachable_bracket_without_physiology_claim():
-    g = _module()
-    xmap = {
+def _xmap():
+    return {
         "returning_availabilities": [0.0, 0.1],
         "rows": [
             {"x_availability": 1.0, "required_low_workpoint_label": "FINITE_HIGH_ORBIT"},
@@ -83,8 +90,74 @@ def test_x_summary_reports_reachable_bracket_without_physiology_claim():
             {"x_availability": 0.0, "required_low_workpoint_label": "INTERICTAL_WORKPOINT"},
         ],
     }
-    out = g.summarize_x_authority(xmap)
+
+
+def _forks_map(point_id="H6_k05_r10", labels=("FINITE_HIGH_ORBIT", "FINITE_HIGH_FIXED")):
+    return {"rows": [
+        {"candidate_run_id": point_id, "arm": "C", "x_availability": 1.0,
+         "required_low_workpoint_label": "FINITE_HIGH_FIXED",
+         "state_tail_1s": {"rate_mean_hz": 101.6}},
+        {"candidate_run_id": point_id, "arm": "D1", "x_availability": 0.872,
+         "required_low_workpoint_label": labels[0], "state_tail_1s": {"rate_mean_hz": 97.6}},
+        {"candidate_run_id": point_id, "arm": "D2", "x_availability": 0.786,
+         "required_low_workpoint_label": labels[1], "state_tail_1s": {"rate_mean_hz": 94.9}},
+        {"candidate_run_id": "other", "arm": "D1", "x_availability": 0.872,
+         "required_low_workpoint_label": "INTERICTAL_WORKPOINT",
+         "state_tail_1s": {"rate_mean_hz": 0.1}},
+    ]}
+
+
+def test_archived_relay_loads_are_read_from_the_matching_anchor_only():
+    g = _module()
+    loads = g.archived_relay_loads(_forks_map(), "H6_k05_r10")
+    assert [d["x_availability"] for d in loads] == [0.872, 0.786]   # x=1 is not a load arm
+    assert all(d["returned_to_interictal"] is False for d in loads)
+
+
+def test_x_summary_reports_reachable_bracket_without_physiology_claim():
+    g = _module()
+    out = g.summarize_x_authority(_xmap(), g.archived_relay_loads(_forks_map(), "H6_k05_r10"))
     assert out["current_x_path_reachable"] is True
     assert out["h_actuator_bypasses_x"] is False
     assert out["experimental_return_bracket"] == [0.1, 0.5]
     assert out["physiological_validity_of_returning_probe"] == "NOT_ESTABLISHED"
+    assert out["archived_range_status"] == "INSUFFICIENT_FOR_THIS_H_BRANCH"
+
+
+def test_archived_range_status_follows_the_archive_not_a_constant():
+    g = _module()
+    sufficient = _forks_map(labels=("INTERICTAL_WORKPOINT", "FINITE_HIGH_FIXED"))
+    out = g.summarize_x_authority(_xmap(), g.archived_relay_loads(sufficient, "H6_k05_r10"))
+    assert out["archived_range_status"] == "SUFFICIENT_FOR_THIS_H_BRANCH"
+    empty = g.summarize_x_authority(_xmap(), [])
+    assert empty["archived_range_status"] == "NO_ARCHIVED_LOAD_AT_THIS_ANCHOR"
+
+
+def test_strip_resolution_flags_the_pinned_gate_arm():
+    """A pinned-open gate means the arm resolves rho only, so it must not be counted as 12 conditions."""
+    g = _module()
+    def cell(arm, rho, rate, gate):
+        return {"arm": arm, "rho": rho, "gH_trace": [rho * gate, rho * gate],
+                "state_tail_1s": {"rate_mean_hz": rate}}
+    strip = {"point_rows": [
+        {"arms": [cell("healthy_low", 0.54, 4.2, 0.0), cell("susceptible_low", 0.54, 54.8, 0.0),
+                  cell("susceptible_high", 0.54, 58.66, 1.0)]},
+        {"arms": [cell("healthy_low", 0.54, 35.6, 0.7), cell("susceptible_low", 0.54, 62.1, 0.5),
+                  cell("susceptible_high", 0.54, 58.66, 1.0)]},
+    ]}
+    out = g.summarize_strip_resolution(strip)
+    assert out["gate_pinned_arms"] == ["susceptible_high"]
+    assert out["per_arm"]["susceptible_high"]["n_points"] == 2
+    assert out["per_arm"]["susceptible_high"]["n_distinct_tail_rates"] == 1
+    assert "healthy_low" in out["arms_that_resolve_tau_and_theta"]
+
+
+def test_x_initial_condition_records_the_head_start_gap():
+    g = _module()
+    xmap = {"rows": [{"x_availability": 1.0, "theta": 1.1123, "tau_ms": 632.4555,
+                      "h_init_scale": 2.0, "h_trace": [2.2245, 6.8167], "T_ms": 5059.6,
+                      "post_offset_required_ms": 2000.0}]}
+    out = g.summarize_x_initial_condition(xmap)
+    assert out["head_start_ratio"] > 3.0
+    assert 0.6 < out["extra_above_theta_decay_s_if_started_converged"] < 0.8
+    assert out["margin_ok"] is True
