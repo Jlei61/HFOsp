@@ -19,7 +19,7 @@ from scripts.analyze_topic4_zm_conductance_homotopy import credible_carrier  # n
 
 IN = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/smoke/seed1"
 OUT = ROOT / "results/topic4_sef_hfo/zm_mode_lifecycle"
-ORDER = (
+BASE_ORDER = (
     "current_H250",
     "current_SOM30",
     "current_H1500",
@@ -39,7 +39,6 @@ def _label(summary):
     if not subtype or not (
         summary.get("state") == "bounded_late__peak"
         and _close(summary.get("T_ms"), 2500.0)
-        and _close(mode.get("rho_mode_H"), 0.5)
         and _close(subtype.get("som_source_fraction_realized"), 0.25)
         and _close(subtype.get("som_slow_integrated_budget_fraction"), 0.35)
         and _close(subtype.get("som_recruit_delay_scale"), 3.0)
@@ -48,6 +47,23 @@ def _label(summary):
     down = float(mode.get("tau_mode_H_down", mode.get("tau_mode_H", 250.0)))
     common = float(mode.get("mode_H_common_subtraction", 0.0))
     som_tau_d = float(subtype.get("tau_d_som_ms", 60.0))
+    # Runs predating the persistent-conductance commit carry no such key; 0 is
+    # the literal parity path, so the default is the correct historical value.
+    g_max = float(mode.get("mode_H_persistent_g_max", 0.0))
+    # rho=0 is the persistent-conductance dose series; g=0 is its matched
+    # control, where the H sensor runs but neither slow-excitation path couples.
+    if _close(mode.get("rho_mode_H"), 0.0):
+        if not (
+            _close(mode.get("mode_H_persistent_e_exc"), 60.0)
+            and _close(down, 250.0)
+            and _close(common, 0.0)
+            and _close(som_tau_d, 60.0)
+            and subtype.get("slow_membrane_mode") != "shunt"
+        ):
+            return None
+        return f"persistent_g{g_max:g}"
+    if not _close(mode.get("rho_mode_H"), 0.5):
+        return None
     if subtype.get("slow_membrane_mode") == "shunt":
         return "SOM_shunt" if _close(down, 250.0) and _close(som_tau_d, 60.0) else None
     if _close(down, 250.0) and _close(common, 0.0) and _close(som_tau_d, 30.0):
@@ -59,6 +75,21 @@ def _label(summary):
     if _close(down, 1500.0) and _close(common, 1.0) and _close(som_tau_d, 60.0):
         return "contrast_H1500"
     return None
+
+
+def _gap_spatial_class(row):
+    """Mechanical readout of the two carrier failure axes; no hand-assigned label."""
+    if row["runaway"]:
+        return "runaway"
+    if row["post_onset_deep_gap_fraction"] is None or row["spatial_pc1"] is None:
+        return "no_episode"
+    filled = row["post_onset_deep_gap_fraction"] <= 0.20
+    common = row["spatial_pc1"] > 0.95
+    if filled and common:
+        return "common_mode_plateau"
+    if filled:
+        return "gaps_filled_spatially_distributed"
+    return "common_mode_fragmented" if common else "fragmented_spatially_distributed"
 
 
 def _run_lengths(mask):
@@ -81,12 +112,19 @@ def main():
             if label in found:
                 raise RuntimeError(f"duplicate PV/SOM arm: {label}")
             found[label] = (root, summary)
-    missing = sorted(set(ORDER).difference(found))
+    missing = sorted(set(BASE_ORDER).difference(found))
     if missing:
         raise RuntimeError(f"PV/SOM panel incomplete: {missing}")
+    persistent = sorted(
+        (key for key in found if key.startswith("persistent_g")),
+        key=lambda key: float(key.removeprefix("persistent_g")),
+    )
+    if len(persistent) < 2:
+        raise RuntimeError(f"persistent-H panel incomplete: {persistent}")
+    order = list(BASE_ORDER) + persistent
 
     rows, arrays = {}, {}
-    for label in ORDER:
+    for label in order:
         root, summary = found[label]
         row, array = _row(label, root, summary)
         row["core_mean_hz"] = float(summary["core_modulation"]["mean_hz"])
@@ -97,16 +135,36 @@ def main():
         off = _run_lengths(~active) * 2.0
         row["median_core_on_ms_at_50hz"] = float(np.median(on)) if on.size else 0.0
         row["median_core_off_ms_at_50hz"] = float(np.median(off)) if off.size else 0.0
+        for field, key in (
+            ("persistent_g_mean_peak", "trace_mode_H_persistent_g_mean"),
+            ("persistent_g_max_peak", "trace_mode_H_persistent_g_max"),
+            ("persistent_g_core_mean_peak", "trace_mode_H_persistent_g_core_mean"),
+        ):
+            row[field] = float(np.max(array.get(key, np.zeros(1))))
+        row["gap_spatial_class"] = _gap_spatial_class(row)
         rows[label], arrays[label] = row, array
 
-    passing = [key for key, row in rows.items() if row["credible_carrier"]]
+    passing = [key for key in order if rows[key]["credible_carrier"]]
+    dosed = [key for key in persistent if float(key.removeprefix("persistent_g")) > 0.0]
+    passing_persistent = [key for key in passing if key in dosed]
+    classes = {key: rows[key]["gap_spatial_class"] for key in persistent}
+    if passing_persistent:
+        headline = "PERSISTENT_SLOW_EXCITATION_CARRIER_CANDIDATE"
+        coordinate = "none; advance to 12-s durability at the weakest passing strength"
+    elif passing:
+        headline = "PV_SOM_CARRIER_CANDIDATE"
+        coordinate = "none; advance to durability/M"
+    elif all(classes[key] == "common_mode_plateau" for key in dosed):
+        headline = "PERSISTENT_SLOW_EXCITATION_FILLS_GAPS_AS_COMMON_MODE"
+        coordinate = "stop this mechanism; gap filling and spatial freedom are anti-correlated here"
+    else:
+        headline = "PV_SOM_SPATIAL_PATTERN_WITH_TEMPORAL_GAPS"
+        coordinate = "the PV/SOM relaxation-cycle timescale, not H amplitude or membrane form"
     verdict = {
-        "verdict": "PV_SOM_CARRIER_CANDIDATE" if passing else "PV_SOM_SPATIAL_PATTERN_WITH_TEMPORAL_GAPS",
+        "verdict": headline,
         "passing_arms": passing,
-        "next_coordinate": (
-            "none; advance to durability/M" if passing else
-            "the PV/SOM relaxation-cycle timescale, not H amplitude or membrane form"
-        ),
+        "persistent_arm_classes": classes,
+        "next_coordinate": coordinate,
         "claim_boundary": "seed-1 frozen-Z/M 2.5-s mechanism panel",
     }
     payload = {
@@ -119,8 +177,10 @@ def main():
         json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
 
-    fig, axes = plt.subplots(len(ORDER), 3, figsize=(15, 13), constrained_layout=True)
-    for ir, label in enumerate(ORDER):
+    fig, axes = plt.subplots(
+        len(order), 3, figsize=(15, 2.6 * len(order)), constrained_layout=True
+    )
+    for ir, label in enumerate(order):
         row, a = rows[label], arrays[label]
         axes[ir, 0].plot(a["fine_time_ms"] / 1000.0, a["fine_core_rate_hz"],
                          color="#d95f45", lw=0.7)
@@ -138,8 +198,15 @@ def main():
         axes[ir, 2].plot(t, a["trace_mode_H_gain_core_mean"], label="H gain core")
         axes[ir, 2].plot(t, a["trace_S_G"], label="S_G", alpha=.8)
         axes[ir, 2].set(xlabel="time (s)", ylabel="feedback state")
+        twin = axes[ir, 2].twinx()
+        g_core = a.get("trace_mode_H_persistent_g_core_mean", np.zeros(t.size))
+        twin.plot(t[:g_core.size], g_core, color="#2b7a5b", ls="--", lw=.9,
+                  label="persistent g core")
+        twin.set_ylabel("slow exc. g", color="#2b7a5b")
+        twin.tick_params(axis="y", labelcolor="#2b7a5b")
         if ir == 0:
-            axes[ir, 2].legend(frameon=False, fontsize=8)
+            axes[ir, 2].legend(frameon=False, fontsize=8, loc="upper left")
+            twin.legend(frameon=False, fontsize=8, loc="upper right")
     fig.suptitle(verdict["verdict"], fontsize=15)
     fig_dir = OUT / "figures"; fig_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(fig_dir / "pv_som_carrier_panel.png", dpi=170)
@@ -151,10 +218,13 @@ def main():
     if marker not in prior:
         readme.write_text(
             prior.rstrip() + "\n\n" + marker + "\n\n"
-            "比较 PV/SOM 独立抑制亚群下的原 H、单点 SOM 衰减缩短、慢衰减 H、"
-            "去 common-mode H 与 SOM conductance。"
-            "左列量化 burst/gap，中央展示轴向空间自由度，右列展示 H 与共享抑制状态。\n\n"
-            "**关注点**：PV/SOM 是否在保持低 PC1 的同时把事件间深间隙缩短到连续 ictal-energy 范围。\n"
+            "在 PV/SOM 独立抑制亚群衬底上统一比较两类局部慢兴奋机制："
+            "前五行是乘性 H（原 H、单点 SOM 衰减缩短、慢衰减 H、去 common-mode H、SOM conductance），"
+            "后面各行是新的局部慢兴奋性 conductance（乘性项关闭，只靠亚阈值记忆填补 burst 间隙）。"
+            "左列量化 burst/gap，中央展示轴向空间自由度，"
+            "右列同时给出 H 增益、共享抑制状态与慢兴奋 conductance（右轴虚线）。\n\n"
+            "**关注点**：填平深间隙与保住低 PC1 是否能同时成立；"
+            "只把间隙填平却把空间结构压成共模平台，不算 ictal carrier。\n"
         )
     print(json.dumps(verdict, indent=2))
 
