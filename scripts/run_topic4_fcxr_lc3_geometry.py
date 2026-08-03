@@ -57,6 +57,7 @@ from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
     configured_state_hash,
     extension_required,
     load_prepared_checkpoint,
+    paired_field_shape_metrics,
     save_prepared_checkpoint,
     validate_geometry_manifest,
 )
@@ -262,6 +263,7 @@ def cmd_field_audit(_args):
     if dlock.get("status") != "PASS":
         raise SystemExit("D-field lock is not PASS")
     families = {}
+    field_matrices = {}
     for family, rec in dlock["families"].items():
         if _sha(rec["output_path"]) != rec["output_sha256"]:
             raise RuntimeError(f"{family}: D-field file hash drift")
@@ -271,6 +273,8 @@ def cmd_field_audit(_args):
         with np.load(rec["output_path"], allow_pickle=False) as data:
             labels = [str(x) for x in data["labels"]]
             fields = np.asarray(data["D_fields"], dtype=float)
+        field_matrices[family] = {label: field.copy()
+                                  for label, field in zip(labels, fields)}
         source_rows = {row["label"]: row for row in rec["rows"]}
         rows = []
         for label, field in zip(labels, fields):
@@ -292,11 +296,22 @@ def cmd_field_audit(_args):
             source_sha256=rec["output_sha256"], rows=rows,
         )
         del S; gc.collect()
+    same_seed_shape = {
+        label: paired_field_shape_metrics(
+            field_matrices["seed1_q75"][label], field_matrices["seed1_q50"][label])
+        for label in E01.FIELD_LABELS
+    }
     payload = dict(
         status="PASS", schema="fcxr-lc3-d-field-spatial-audit-1.0",
         d_field_lock_sha256=_sha(dlock_path), band_half_width_mm=PP.CORE_R,
         region_contract="core A/B radius CORE_R; axial corridor width CORE_R; remainder off-axis",
-        families=families, completed=_now(),
+        families=families,
+        same_substrate_shape_comparison=dict(
+            pair="seed1_q75_vs_seed1_q50", matched_by="target mean D label",
+            cellwise_comparison_authorized=True, rows=same_seed_shape),
+        cross_seed_cellwise_comparison_authorized=False,
+        cross_seed_reason="different sampled cells and connectivity; compare distributions/regions only",
+        completed=_now(),
     )
     _write_json(D_FIELD_SPATIAL_AUDIT, payload)
     print(json.dumps(dict(status="PASS", families=list(families)), indent=2))

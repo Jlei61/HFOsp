@@ -22,10 +22,22 @@ from src.topic4_fcxr_lc3_geometry import (
     compact_checkpoint_diagnostics,
     configured_state_hash,
     extension_required,
+    paired_field_shape_metrics,
     load_prepared_checkpoint,
     save_prepared_checkpoint,
     validate_geometry_manifest,
 )
+
+
+def test_paired_field_shape_metrics_exposes_same_mean_different_support():
+    a = np.array([0.0, 0.0, 1.0, 1.0])
+    b = np.array([0.5, 0.5, 0.5, 0.5])
+    got = paired_field_shape_metrics(a, b)
+    assert got["support_fraction_a"] == 0.5
+    assert got["support_fraction_b"] == 1.0
+    assert got["support_jaccard"] == 0.5
+    assert got["relative_l2_difference"] > 0.0
+    assert got["pearson_cellwise"] is None
 from src.topic4_fcxr_lc3 import run_fcxr_loop
 
 

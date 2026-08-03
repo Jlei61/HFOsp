@@ -240,6 +240,35 @@ def validate_geometry_manifest(rows: list[dict]) -> dict:
                 n_low=51, n_high=51, schema=SCHEMA_VERSION)
 
 
+def paired_field_shape_metrics(a, b, *, support_epsilon: float = 1e-12) -> dict:
+    """Compare two fields only when they live on the same registered cells."""
+
+    a = np.asarray(a, dtype=float)
+    b = np.asarray(b, dtype=float)
+    if a.ndim != 1 or a.shape != b.shape or a.size == 0:
+        raise ValueError("paired fields must be non-empty matching 1-D arrays")
+    if not (np.all(np.isfinite(a)) and np.all(np.isfinite(b))):
+        raise ValueError("paired fields must be finite")
+    if not (np.isfinite(support_epsilon) and support_epsilon >= 0.0):
+        raise ValueError("support_epsilon must be finite and non-negative")
+    na, nb = float(np.linalg.norm(a)), float(np.linalg.norm(b))
+    cosine = float(np.dot(a, b) / (na * nb)) if na > 0.0 and nb > 0.0 else None
+    sa, sb = a > support_epsilon, b > support_epsilon
+    union = int(np.count_nonzero(sa | sb))
+    intersection = int(np.count_nonzero(sa & sb))
+    corr = (float(np.corrcoef(a, b)[0, 1])
+            if float(np.std(a)) > 0.0 and float(np.std(b)) > 0.0 else None)
+    return dict(
+        pearson_cellwise=corr, cosine_cellwise=cosine,
+        relative_l2_difference=float(np.linalg.norm(a - b) / max(na, nb, 1e-12)),
+        mean_absolute_difference=float(np.mean(np.abs(a - b))),
+        support_epsilon=float(support_epsilon),
+        support_fraction_a=float(np.mean(sa)), support_fraction_b=float(np.mean(sb)),
+        support_jaccard=(float(intersection / union) if union else 1.0),
+        same_cell_identity_required=True,
+    )
+
+
 def classify_geometry_tail(
     *,
     rate_hz,
