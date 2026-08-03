@@ -1,6 +1,6 @@
-# FCXR-LC3 D-X state plane and spatial instability — IMPLEMENTATION PLAN
+# FCXR-LC3 field-preserving lifecycle — IMPLEMENTATION PLAN
 
-Status: **IMPLEMENTATION PLAN — LOCKED, NOT STARTED**
+Status: **LC3 REVISION 1.1 — EXECUTION AUTHORIZED**
 
 Date: 2026-08-03
 
@@ -9,229 +9,273 @@ Design: `docs/superpowers/specs/2026-08-03-topic4-fcxr-lc3-dx-spatial-instabilit
 ## 0. Execution graph
 
 ```text
-T0 GX1 acceptance + artifact/hash preflight
- -> T1 D-axis derivation + complete registered manifests
- -> T2 exact prepared-state/fork contract
- -> T3 classifiers, spatial probes and bad-data tests
- -> T4 one-row resource smoke
- -> T5 complete 168-cell D-aX map
- -> T6 boundary extensions + empirical surfaces
- -> T7 spatial response and conditional operator audit
- -> Gate DX/SPATIAL
- -> T8 conditional X calibration
- -> T9 conditional no-kick lifecycle pilot
- -> T10 candidate-only causal ablations and confirmation
+E0 exact fork + artifact/hash/numerical contracts
+ -> E1 full D-field replay and 102-row geometry map
+ -> E2 boundary microstate/noise/field replication
+ -> E3 short Z/X slow-vector probes
+ -> E4 three no-kick dynamic reconnaissance runs
+      |                              |
+      +-> E5 direct spatial response+
+      +-> E6 X calibration when return boundary exists
+                         |
+                         v
+ E7 <=6-run dynamic lifecycle exploration
+ -> E8 candidate-only ablations/robustness/confirmation
+ -> E9 conditional projected/full operator formalization
  -> figures/archive/STATUS
  -> STOP for review
 ```
 
-T0--T7 are the main authorized diagnostic. T8--T10 are conditional and must not be launched merely
-because a rate trace looks promising.
+Geometry, dynamic trajectories and spatial response are parallel evidence axes. E4 always runs after E0
+engineering safety, even when geometry or spatial evidence is negative. Scientific labels route
+interpretation; only exact-state, numerical/resource and manifest/hash failures stop execution.
 
-## 1. T0 — close GX1 and lock evidence
+## 1. E0 — lock evidence and prove exact continuation
 
-1. Require a clean committed GX1 acceptance with canonical label `GX1_MECHANISM_MAP_ACCEPTED`.
-2. Verify the nine accepted mechanism labels and the corrected fixed-D X semantics.
-3. Resolve and hash the GX1 strip/X map, LC2 frozen-fork map, LC1 Z-only traces, baseline contract,
-   H mechanism module, runners and six blessed engine files.
-4. Fail loudly on missing cross-worktree artifacts or hash mismatch; never silently select a similarly
-   named file.
-5. Write `execution_lock.json` before code capable of a new 40k run is invoked.
+### 1.1 Preflight and execution lock
 
-Tests must prove that same-D bistability is not a lifecycle prerequisite and that GX2/D-gate execution
-remains unauthorized.
+Resolve paths from the GX1/LC2/LC1 artifacts named in the spec. Hash each exact file, the H/Z/X module,
+all new runners and the six blessed engine files. Verify the accepted GX1 labels and that GX2/D-gate
+execution remains unauthorized.
 
-## 2. T1 — derive axes and write the whole matrix first
+Write `execution_lock.json` before any new 40k simulation. Cross-worktree inputs are read-only.
+Missing, ambiguous or hash-drifted input fails loudly.
 
-Implement a zero-simulation command that reads only the three locked 24 s Z-only traces and applies the
-spec's burn-in/quantile rule. Unit-test pooling, quantiles, q99 maximum, ordering, NaN handling and sha256
-provenance. Write `dx_axis_lock.json`.
+### 1.2 Exact state inventory
 
-Then write all 168 rows of `state_plane_manifest.json` before running any cell. Each row contains:
+Inventory every mutable object in the 40k simulation: neuron voltage/refractory state, spike and delay
+buffers, recurrent/inhibitory currents, slow H/Z/X arrays, counters, RNG and adapter state. Implement an
+in-memory fork or complete checkpoint in a new LC3 runner without changing blessed engines.
 
-- H anchor ID and exact parameters read from GX1;
-- D label/value and a_X value;
-- prepared-state ID;
-- connection/noise seed;
-- 1.5 s screen duration/final-500 ms tail and possible 5 s/final-2 s extension status;
-- output path, expected sentinel and resource tier.
+Tests:
 
-Assert uniqueness and exact cardinality in tests. Do not inspect outcomes while constructing the grid.
+1. uninterrupted and forked continuations are byte-identical under matched controls;
+2. child forks do not alias arrays;
+3. D-only and X-only interventions change only the registered field at fork time;
+4. off paths are byte-identical to upstream;
+5. invalid shapes/ranges/NaNs fail before stepping;
+6. checkpoint metadata binds engine/module/source hashes.
 
-## 3. T2 — exact prepared-state infrastructure
+Write `prepared_state_contract.json`. Do not proceed to E1 scientific rows until it passes.
 
-Prefer an in-memory fork in a new non-blessed LC3 runner. If serialization is used, enumerate and test
-every mutable fast/slow/RNG field. Required tests:
+### 1.3 Pure adjudicators first
 
-1. baseline preparation lasts at least 8 s at `(D_healthy,a_X=1)` and passes the accepted interictal
-   contract;
-2. high preparation lasts at least `max(5 s,8 tau_H)` at `(D50,a_X=1)`, reaches a finite converged high
-   branch and is not merely `H=2 theta`;
-3. uninterrupted vs restored continuation has identical raster sha1, rate/H traces and final-state hash;
-4. two forks from one state remain independent after mutation;
-5. changing only D/a_X changes only the registered frozen controls at fork time;
-6. no blessed engine edit and all off-by-default paths preserve byte parity.
-
-Failure writes `EXACT_FORK_BLOCKED.json` and ends the sprint before T4.
-
-## 4. T3 — adjudicators and bad-data regression
-
-Build pure functions before simulations for:
+Before outcomes, test:
 
 - low/high/rest-like and fixed/orbit/irregular classification;
-- tail convergence and uncertainty;
-- empirical transition surfaces with boundary replication;
-- direct paired spatial-response metrics;
-- conditional operator validation and label withholding;
-- lifecycle and multivariate recovery classification.
+- canonical low/high microstate selectors;
+- boundary adjacency and empirical brackets;
+- three-axis verdict aggregation without science-induced early stop;
+- adaptive dynamic observation window;
+- direct positive and signed spatial probe accounting;
+- resource scheduler soft/hard swap behavior.
 
-Required synthetic bad data include: returning IEDs, pulse comb, tonic refractory plateau, burst-silence,
-global flash, transverse-first response, axial non-normal amplification without eigenvalue crossing,
-unstable DMD modes and a fake rate recovery with wrong IED statistics. The archived HEO1 global common
-mode must fail the spatial target if its compatible traces are available.
+Bad data include returning IED, tonic refractory plateau, burst-silence, global flash, transverse
+response, fake mean-rate recovery and unstable operator modes.
 
-## 5. T4 — single-row smoke and OOM decision
+## 2. E1 — acquire complete D fields and run primary geometry
 
-Run one full 1.5 s primary-H/healthy-D/a_X=1/low-prepared row. Require finite output, no clip, valid
-classifiers, exact sentinels and measured RSS/wall time.
+### 2.1 Two-pass field replay
 
-Only enable worker 2 if:
+Use archived scalar traces to lock target times before replay. Replay seed1-q75, seed1-q50 and
+seed3-q75 with the identical no-kick Z-only configurations and sparse `snapshot_steps`.
+
+For primary seed1-q75 capture q10/q30/q50/q70/q99 nearest-time fields. For the two replication runs
+capture nearest-mean fields relative to those primary targets. Also generate exact all-zero D and
+uniform-mean controls. Assert replay scalar parity at every selected time and write `d_field_lock.json`
+with complete provenance/checksums.
+
+Because these are 24 s runs, execute strictly one 40k worker under `setsid nohup` and the long-run
+resource contract. They may run sequentially; never overlap them with sibling long jobs.
+
+### 2.2 Prepared states
+
+Create and exact-fork:
+
+- canonical low after >=8 s accepted interictal activity;
+- canonical high after >=`max(5 s,8 tau_H)` at H1/D50/a_X=1;
+- H6 low/high sentinel preparations.
+
+Retain raw state hashes and validation traces.
+
+### 2.3 Write manifests before map execution
+
+Primary H1 manifest:
+
+```text
+6 D fields x 7 uniform a_X x 2 states = 84
+```
+
+H6 sentinel:
+
+```text
+3 D fields x 3 uniform a_X x 2 states = 18
+```
+
+Total `102` unique rows. Write them all before launching. Every row references a field checksum,
+state hash, noise, duration/tail, output path and sentinel.
+
+### 2.4 Smoke and bounded scheduler
+
+Run one H1/healthy/a_X=1/low row for 1.5 s. Measure actual RSS/wall, numerical margins and artifact
+completeness. Enable a second short worker only if:
 
 ```text
 MemAvailable >= 96 GiB + 2*1.35*RSS_single
-swap is stable
-no sibling pressure violates the reserve
+swap stable and sibling reserve respected
 ```
 
-Use a producer that submits at most `n_workers` pending rows. At swap delta +256 MiB, stop producing new
-rows and let active rows finish. At +512 MiB and rising, terminate only the newest LC3 worker, preserve
-its FAILED sentinel, and continue no further submission. Threads are pinned to one.
+Use a bounded producer with at most `n_workers` pending rows. Never submit the full map at once.
 
-## 6. T5 — complete frozen map
+### 2.5 Geometry map
 
-Launch with `setsid nohup`, exact PID/SID, stage flock and wall guard. Run breadth-first across H family,
-D, a_X and initial state so an interruption does not leave only one side of the map. A scientific
-negative does not stop the 168 rows.
+Run breadth-first over D/a_X/state, with H6 interleaved as sentinel. A scientific negative never stops
+the 102 rows. Each cell writes atomic raw summary, numerical evidence and DONE sentinel.
 
-Each row writes raw trace summary, classifier inputs, numerical diagnostics, resource record and a
-per-row DONE sentinel atomically. Resume skips only rows with valid DONE plus matching manifest/hash.
-Never trust a stale RUNNING file as completion.
+Aggregate entry, survival and return separately. Do not calculate a probability or P=0.5 contour yet.
 
-## 7. T6 — boundary replication and state-plane verdict
+## 3. E2 — boundary replication and spatial-field controls
 
-Freeze the boundary-selection code before opening the aggregate. Extend only:
+Freeze boundary selection rules before opening aggregate outcomes. Extend adjacent label changes and
+unresolved cells to 5 s.
 
-- adjacent cells with different low-start entry labels;
-- adjacent cells with different high-start survival labels;
-- unresolved convergence cells;
-- the nearest cells on a possible closed path.
+For each relevant H1 boundary run:
 
-Run 5 s extensions with development noise 401 and replicate required boundary cells with 405/406. Fit a
-P=0.5 empirical contour only where replication exists; otherwise report a bracket. Emit separate entry,
-survival and return maps before a joint path verdict.
+- low trough/pre-IED/post-IED states x noises 401/405/406;
+- high peak/trough states x noises 401/405/406;
+- primary D field plus matched q50 and seed3-q75 full fields;
+- uniform-D matched-mean control at sentinel boundary cells.
 
-Do not stop because same-D low/high starts converge. Do stop before dynamics if the current H has no
-closed or calibratable path.
+Only adequately replicated boundaries receive probability-like estimates; all others remain brackets.
+Record microstate and field effects separately.
 
-## 8. T7 — spatial instability audit
+Actual dynamic X-field controls are deferred until E4 captures X fields. After E4, add at relevant
+return boundaries: actual X, seed731 permutation and uniform same-mean fields. This is a sensitivity
+appendix to geometry, not post-hoc parameter selection.
 
-### 8.1 Lock landmarks and amplitudes
+## 4. E3 — short slow-vector field
 
-Select landmarks from the frozen map by deterministic rules, not visual appeal. Build exactly nine
-spatial patterns from geometry already locked upstream, with `spatial_control_seed=731`. Test the locked
-`{0.01,0.02,0.04}*I_ref` RMS ladder with 10 ms pulses in a healthy reference; freeze the largest linear
-amplitude before comparing landmark outcomes. Assert zero net current for all non-global patterns and
-equal RMS energy across all patterns.
+Select 12--20 landmarks by the locked rule. When brackets exist, sample both sides of entry and return;
+otherwise use the fixed 3x4 D/a_X grid.
 
-### 8.2 Run paired probes
+From matched prepared states unfreeze Z/X for 300 ms. Estimate 50--300 ms slopes for mean D/a_X and
+core/axis/off-axis field projections. Overlay vectors on geometric brackets, but label them local drift,
+not a closed orbit.
 
-For each landmark/pattern/amplitude, run `+epsilon`, `-epsilon` and sham with common random numbers.
-Coarse-grain to the fixed 16x16 E/I grid. Store direct finite-time gain and first-passage outputs at
-50/150/300/500 ms before any operator fitting.
-
-### 8.3 Operator is conditional
-
-Fit regularized projected operators over the locked ridge grid using nested held-out trials. Bootstrap
-across perturbation/noise repetitions and enforce the spec's R2/cosine/category gates. If held-out
-prediction or leading-mode stability fails, emit
-`OPERATOR_UNRESOLVED`; do not search another basis after seeing the result.
-
-The spatial gate uses direct causal responses. A stable operator can refine the interpretation but may
-not rescue a global/transverse direct-response failure.
-
-## 9. Gate after T7
-
-Continue only under either:
+Emit `slow_vector_field.json` and one of:
 
 ```text
-DX_CLOSED_REACHABLE_PATH_CANDIDATE
-or DX_OFFSET_SURFACE_PRESENT_X_CALIBRATION_REQUIRED
+DX_GEOMETRIC_PATH_PRESENT
+DX_GEOMETRIC_PATH_ABSENT
+DX_DYNAMIC_VECTOR_MISALIGNED
+DX_MAP_UNRESOLVED
 ```
 
-and either:
+This label does not authorize or block E4.
 
-```text
-AXIAL_OR_LOCAL_INSTABILITY_CANDIDATE
-or NONNORMAL_AXIAL_GAIN_CANDIDATE
-```
+## 5. E4 — three dynamic reconnaissance trajectories
 
-`GLOBAL_COMMON_MODE_FAILURE`, `TRANSVERSE_MODE_FAILURE`, `DX_NO_CLOSED_PATH_CURRENT_H`, numerical
-corruption or unresolved exact forks stop the sprint and route to a separate E/I-balance H-sensor spec.
+Write exactly three rows before running:
 
-## 10. T8 — conditional X calibration
+- H1 r025 only;
+- archived q75 Z and current unretuned LC1 X by artifact provenance;
+- connection seed1, noises 401/405/406;
+- no kick/reset/parameter step; M/K/A/ELR off.
 
-Use the measured `a_off(D)` surface and archived IED/high-state load traces. Before a grid, write an
-identifiability report choosing exactly one allowed two-knob pair. Run at most 3x3 points.
+Run one 40k worker. Minimum 32 s. At 20 s record onset-search status. If onset exists by 32 s, continue
+at least 12 s after onset and, after offset, until 8 s recovery or the 45 s cap. If no onset by 32 s,
+stop at 32 s.
 
-Select no more than two candidates that keep ordinary IED availability above 0.9 and reach the offset
-surface after 1--3 s high activity. Compute the minimum postictal decay needed to protect D recovery.
-No 40k dynamic trajectory is run during selection unless the required load summary cannot be obtained
-from an exact prepared-state fork; such a deviation must be registered before execution.
+Store full D_i/a_X,j snapshots at every available lifecycle landmark and record first-passage fields.
+These runs are completed reconnaissance regardless of outcome. They answer where the real slow path
+goes and which frozen projection assumptions fail.
 
-## 11. T9 — conditional no-kick lifecycle pilot
+## 6. E5 — direct spatial causality
 
-Write all nominal rows first: `H1_ts1.25_r025`, optional locked neighbour `H1_ts1.25_r050`, up to two X
-candidates and noises `{401,405,406}`, maximum 12 rows. Run exactly 32 s, strictly one 40k worker.
+Prefer exact states from E4: pre-onset, onset, early high and late-high/pre-offset. If unavailable,
+choose nearest map landmarks deterministically and mark the substitution.
 
-The aggregate reports separately:
+### 6.1 Positive recruitment
 
-- pre-onset returning-IED statistics;
-- D/onset order;
-- high-state boundedness and saturation diagnostics;
-- onset-to-X order;
-- X/D offset crossing;
-- postictal protection;
-- returning-IED multivariate distance.
+Build core A, core B, axial, transverse, global and shuffled-axial masks before responses. Equal-size
+local masks match cell count, positive charge, RMS and duration. Run separately labelled charge-matched
+and RMS-matched global controls. Use two healthy-safe amplitudes and 10 ms pulses.
 
-A transient high state, a reset-dependent recovery, or return of mean rate alone cannot pass.
+Primary outputs: first passage, newly recruited area, core polarity, axial/off-axis expansion and
+finite-time gain. Core A versus core B defines forward/reverse.
 
-## 12. T10 — candidate-only causal tests
+### 6.2 Signed projected response
 
-Only a frozen nominal candidate unlocks matched:
+Lock the 8--12 physical bases and seed731 random controls. Run +/-/sham with common random numbers at two
+linear amplitudes. Compute the low-dimensional response matrix at 50/150/300/500 ms and its SVD.
 
-- `Z-frozen`: no spontaneous onset expected;
-- `X-off`: high state significantly prolonged or no autonomous offset expected;
-- `H-off`: no equivalent bounded high state expected.
+Do not fit 512D DMD here. Emit spatial labels independently from temporal labels. Global/transverse or
+unresolved spatial results do not block E6/E7.
 
-After these pass, freeze parameters and run confirmation connection/noise seeds without reselection.
-Failure of confirmation is reported; it does not reopen tuning on those seeds.
+## 7. E6 — conditional X calibration
 
-## 13. Outputs, figures and archive
+If no high-state return/offset bracket exists, write `X_CALIBRATION_NOT_IDENTIFIABLE` and do not invent a
+target. E7 then cannot add retuned X candidates, but the unretuned reconnaissance remains valid.
 
-Use the result root and filenames in the spec. Generate `state_plane.png` and
-`spatial_instability.png` only from complete aggregate inputs. Generate `lifecycle_candidate.png` only
-when a candidate exists; no placeholder. After visual inspection, write `figures/README.md` in Chinese,
-2--4 sentences plus `关注点` per figure.
+If a bracket exists, combine `a_off(D)`, local drift and actual E4 trajectory. Preselect one
+two-knob family and run at most 3x3. Require IED mean availability >0.9 and high-state crossing in
+1--3 s. Select at most two candidates and derive postictal protection from measured D recovery.
 
-The archive must lead with:
+## 8. E7 — <=6 nominal lifecycle runs
 
-1. completed stage;
-2. temporal and spatial verdicts separately;
-3. safe scientific claim and forbidden claim;
-4. exact state/fork status;
-5. map counts and seed coverage;
-6. tests, hashes, resources, sentinels and residual processes;
-7. one next recommendation only.
+Only H1 r025 participates. Cross at most two E6 X candidates with noises 401/405/406. If no calibrated
+candidate exists, do not manufacture six rows; retain E4 as the dynamic result.
 
-Stop for review even if a complete lifecycle candidate is found. Do not add M morphology or make the
-paper-ready figure in this plan.
+Use the adaptive 32--45 s contract. Aggregate pre/onset/high/offset/post/recovery separately and require
+multivariate IED statistical return, not mean-rate return.
+
+Temporal and spatial outcomes remain separate. A temporal candidate is reported even when spatial
+mechanism is global or unresolved; it does not become a spatiotemporal candidate.
+
+## 9. E8 — candidate-only causality, robustness and confirmation
+
+Only after a nominal temporal candidate is frozen:
+
+1. Z-frozen, X-off and H-off matched ablations;
+2. H1 r050 robustness, not reselection;
+3. connection seed3 and noise 402/403/404 confirmation without tuning.
+
+Candidate failure on confirmation is reported and does not reopen parameter selection.
+
+## 10. E9 — conditional operator/eigenmode formalization
+
+Run only under a real onset, reproducible direct spatial contrast, or a need to distinguish eigenvalue
+softening from non-normal gain.
+
+First formalize the projected response operator with held-out trials and bootstrap. Only if stable,
+optionally fit the 16x16 E/I operator. Withhold eigenvalue/eigenvector claims on unstable fits.
+
+Test whether pre-onset response predicts the real onset core, polarity and early first-passage field.
+
+## 11. Resource and nohup implementation
+
+- T <20 s: maximum two workers; T >=20 s: strict one worker.
+- Threads: OMP/OpenBLAS/MKL/NUMEXPR=1.
+- Swap baseline is sampled per stage. +256 MiB stops new submission; +512 MiB and rising terminates only
+  the newest LC3 worker.
+- Every long stage: `setsid nohup`, exact launcher PID/SID, stage flock, wall guard, atomic
+  RUNNING/DONE/FAILED and per-row DONE files.
+- Resume only from valid DONE plus matching manifest/hash. Stale RUNNING is not completion.
+- Wait by PID. Never use `pgrep -f` and never signal sibling work.
+
+Before every 40k stage, log MemAvailable, swap, sibling 40k count and chosen worker limit. If the memory
+reserve fails, defer submission rather than changing the scientific matrix.
+
+## 12. Figures, archive and stop
+
+Generate only figures supported by completed evidence:
+
+1. field-preserving geometry and brackets;
+2. mean D-X path plus field drift;
+3. direct spatial response;
+4. lifecycle candidate only if one exists.
+
+Write Chinese `figures/README.md` after visual inspection. Archive stage completion, three-axis
+verdicts, exact-fork status, row/seed coverage, hashes, tests, resources and forbidden claims.
+
+Stop for review after the registered program. Do not add M morphology, K/A/ELR or final paper figures.
