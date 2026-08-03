@@ -23,9 +23,10 @@ def _is_persistent(row: dict) -> bool:
 
 def adjudicate_mode_h_pilot(rows: dict[str, dict]) -> dict:
     """Classify the fixed-anchor H pilot without promoting offset to recovery."""
-    required = {
-        "baseline", "rho05_gate", "rho05_nomgate", "rho1_gate", "rho1_nomgate"
-    }
+    # A negative result needs only the two actually engaged M-gated arms: if
+    # neither exits, a no-M-gate control cannot turn it into a lifecycle.  A
+    # positive causal-exit claim still requires the matched open-gate arm.
+    required = {"baseline", "rho05_mc30", "rho1_mc30"}
     missing = sorted(required.difference(rows))
     if missing:
         return {"version": VERSION, "verdict": "NO_EVIDENCE", "missing": missing}
@@ -42,14 +43,15 @@ def adjudicate_mode_h_pilot(rows: dict[str, dict]) -> dict:
         }
 
     causal_pairs = []
-    pairs = [
+    pairs = []
+    for strength, m_half, gated_key, open_key in (
         (0.5, 45.0, "rho05_gate", "rho05_nomgate"),
         (1.0, 45.0, "rho1_gate", "rho1_nomgate"),
-    ]
-    if "rho05_mc30" in rows:
-        pairs.append((0.5, 30.0, "rho05_mc30", "rho05_nomgate"))
-    if "rho1_mc30" in rows:
-        pairs.append((1.0, 30.0, "rho1_mc30", "rho1_nomgate"))
+        (0.5, 30.0, "rho05_mc30", "rho05_nomgate"),
+        (1.0, 30.0, "rho1_mc30", "rho1_nomgate"),
+    ):
+        if gated_key in rows and open_key in rows:
+            pairs.append((strength, m_half, gated_key, open_key))
     for strength, m_half, gated_key, open_key in pairs:
         gated, open_arm = rows[gated_key], rows[open_key]
         if _is_offset(gated) and _is_persistent(open_arm):
@@ -82,10 +84,28 @@ def adjudicate_mode_h_pilot(rows: dict[str, dict]) -> dict:
             ),
         }
 
+    open_control = {
+        "rho05_gate": "rho05_nomgate", "rho05_mc30": "rho05_nomgate",
+        "rho1_gate": "rho1_nomgate", "rho1_mc30": "rho1_nomgate",
+    }
+    observed_exit = [
+        key for key, row in rows.items()
+        if key in open_control and _is_offset(row) and open_control[key] not in rows
+    ]
+    if observed_exit:
+        return {
+            "version": VERSION,
+            "verdict": "EXIT_OBSERVED_MATCHED_CONTROL_PENDING",
+            "exit_arms": observed_exit,
+            "claim_boundary": "offset is not causal until the matched no-M-gate arm persists",
+        }
+
     baseline_gap = rows["baseline"].get("post_onset_deep_gap_fraction")
     bridged = []
-    gated_keys = ["rho05_gate", "rho1_gate"]
-    gated_keys += [key for key in ("rho05_mc30", "rho1_mc30") if key in rows]
+    gated_keys = [
+        key for key in ("rho05_gate", "rho1_gate", "rho05_mc30", "rho1_mc30")
+        if key in rows
+    ]
     for key in gated_keys:
         gap = rows[key].get("post_onset_deep_gap_fraction")
         if (
@@ -96,12 +116,10 @@ def adjudicate_mode_h_pilot(rows: dict[str, dict]) -> dict:
             bridged.append(key)
     contained = []
     comparison_pairs = [
-        ("rho05_gate", "rho05_nomgate"), ("rho1_gate", "rho1_nomgate")
-    ]
-    comparison_pairs += [
         (gated, open_arm) for gated, open_arm in (
+            ("rho05_gate", "rho05_nomgate"), ("rho1_gate", "rho1_nomgate"),
             ("rho05_mc30", "rho05_nomgate"), ("rho1_mc30", "rho1_nomgate")
-        ) if gated in rows
+        ) if gated in rows and open_arm in rows
     ]
     for gated_key, open_key in comparison_pairs:
         if not rows[gated_key].get("runaway") and rows[open_key].get("runaway"):

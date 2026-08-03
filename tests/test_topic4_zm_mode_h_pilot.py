@@ -17,6 +17,7 @@ def _panel():
         "baseline": _row(H_peak=0.0),
         "rho05_gate": _row(), "rho05_nomgate": _row(),
         "rho1_gate": _row(), "rho1_nomgate": _row(),
+        "rho05_mc30": _row(), "rho1_mc30": _row(),
     }
 
 
@@ -52,3 +53,21 @@ def test_tighter_m_gate_can_use_the_same_no_gate_control():
     verdict = adjudicate_mode_h_pilot(rows)
     assert verdict["verdict"] == "M_GATED_EXIT_WITHOUT_INTERICTAL_RETURN"
     assert verdict["causal_pairs"][0]["m_mode_half"] == 30.0
+
+
+def test_engaged_gated_arms_without_exit_are_already_a_negative_result():
+    rows = {
+        "baseline": _row(H_peak=0.0),
+        "rho05_mc30": _row(),
+        "rho1_mc30": _row(),
+    }
+    assert adjudicate_mode_h_pilot(rows)["verdict"] == "NO_LIFECYCLE_DIRECTION"
+
+
+def test_uncontrolled_offset_is_pending_not_causal():
+    rows = {
+        "baseline": _row(H_peak=0.0),
+        "rho05_mc30": _row(episode_status="onset_durable_offset", offset_ms=5000.0),
+        "rho1_mc30": _row(),
+    }
+    assert adjudicate_mode_h_pilot(rows)["verdict"] == "EXIT_OBSERVED_MATCHED_CONTROL_PENDING"

@@ -28,7 +28,8 @@ from src.topic4_zm_mode_h_pilot import adjudicate_mode_h_pilot  # noqa: E402
 
 IN_ROOT = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_sprint/seed1"
 OUT = ROOT / "results/topic4_sef_hfo/zm_mode_lifecycle"
-LABELS = (
+REQUIRED_LABELS = ("baseline", "rho05_mc30", "rho1_mc30")
+DISPLAY_ORDER = (
     "baseline", "rho025_gate", "rho05_gate", "rho05_mc30", "rho05_nomgate",
     "rho1_gate", "rho1_mc30", "rho1_nomgate",
 )
@@ -174,20 +175,25 @@ def main() -> None:
         label = _label(summary)
         if label is None:
             continue
+        if label != "baseline":
+            with np.load(root / "traces.npz", allow_pickle=False) as arrays:
+                # Pre-fix runs used a 40-Hz number directly on a per-step count
+                # field and therefore had an exactly dead sensor.  They remain
+                # archived but are not evidence for this pilot.
+                if "trace_mode_H_rate_max_hz" not in arrays.files:
+                    continue
         if label in found:
             raise RuntimeError(f"duplicate fixed-pilot arm: {label}")
         found[label] = (root, summary)
-    missing = sorted(set(LABELS).difference(found))
+    missing = sorted(set(REQUIRED_LABELS).difference(found))
     if missing:
         raise RuntimeError(f"fixed H pilot incomplete: {missing}")
 
     rows, arrays_by_label = {}, {}
-    for label in LABELS:
+    labels = [label for label in DISPLAY_ORDER if label in found]
+    for label in labels:
         rows[label], arrays_by_label[label] = _row(label, *found[label])
-    verdict = adjudicate_mode_h_pilot({key: rows[key] for key in (
-        "baseline", "rho05_gate", "rho05_mc30", "rho05_nomgate",
-        "rho1_gate", "rho1_mc30", "rho1_nomgate",
-    )})
+    verdict = adjudicate_mode_h_pilot(rows)
     summary = {
         "schema": "topic4_zm_state_selective_H_fixed_pilot_v1_2026-08-02",
         "git_sha_analysis": _git_sha(),
@@ -203,8 +209,10 @@ def main() -> None:
         json.dumps(summary, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
 
-    fig, axes = plt.subplots(len(LABELS), 3, figsize=(15, 3.0 * len(LABELS)), constrained_layout=True)
-    for ir, label in enumerate(LABELS):
+    fig, axes = plt.subplots(len(labels), 3, figsize=(15, 3.0 * len(labels)), constrained_layout=True)
+    if len(labels) == 1:
+        axes = axes[None, :]
+    for ir, label in enumerate(labels):
         row, a = rows[label], arrays_by_label[label]
         t = np.asarray(a["fine_time_ms"]) / 1000.0
         axes[ir, 0].plot(t, a["fine_core_rate_hz"], color="#d95f45", lw=0.8)
