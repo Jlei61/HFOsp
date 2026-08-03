@@ -57,6 +57,7 @@ MANIFEST = os.path.join(OUT, "manifest.json")
 NOISES = (401, 405, 406)
 T1_MS = 32000.0
 T_CAP_MS = 45000.0
+ONSET_CHECK_MS = 20000.0
 SNAP_MS = 250.0
 RECON_SOURCES = (
     "src/topic4_fcxr_lc3.py",
@@ -338,6 +339,15 @@ def _run_once(row):
         capture_final=True, store_spikes=True, v_th_per_neuron=S["vth"],
     )
     baseline = _load(E01.ARTIFACTS["lc1_baseline"])
+    n20 = int(round(ONSET_CHECK_MS / E01.DT))
+    first20 = dict(
+        rate_E=first["rate_E"][:n20], rate_I=first["rate_I"][:n20],
+        E_spk_bool=first["E_spk_bool"][:n20],
+    )
+    wins20, num20, _ = LC1R._reduce_run_windows(
+        first20, first["checkpoint"].slow, S, E01.DT,
+        float(baseline["frozen_event_bar"]), baseline["band"])
+    lifecycle20 = classify_lifecycle(wins20, baseline["band"])
     wins1, num1, _ = LC1R._reduce_run_windows(
         first, first["checkpoint"].slow, S, E01.DT,
         float(baseline["frozen_event_bar"]), baseline["band"])
@@ -439,6 +449,9 @@ def _run_once(row):
         point_id=H1_POINT_ID, Z="q75", X="unretuned_current_LC1",
         no_kick=True, no_reset=True, no_parameter_step=True,
         initial_32s_lifecycle=lifecycle1, lifecycle=lifecycle, verdict=verdict,
+        onset_search_20s=dict(
+            checkpoint_ms=ONSET_CHECK_MS, lifecycle=lifecycle20,
+            onset_seen=bool(lifecycle20.get("bout") is not None), numerical=num20),
         numerical=numerical, refractory_ceiling_fraction=ceiling_frac,
         x_peak_depletion_ms=x_peak_ms, x_activates_after_onset=x_after,
         x_start=float(xtrace[0]) if xtrace.size else None,

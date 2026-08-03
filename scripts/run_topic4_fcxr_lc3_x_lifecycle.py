@@ -71,6 +71,7 @@ T_LOW_MS = 8000.0
 T_HIGH_MS = 4000.0
 T1_MS = 32000.0
 T_CAP_MS = 45000.0
+ONSET_CHECK_MS = 20000.0
 SNAP_MS = 250.0
 SOURCES = (
     "src/topic4_fcxr_lc3.py",
@@ -491,6 +492,15 @@ def _run_lifecycle_row(row):
     first = run_fcxr_loop(
         p1, S["net"], slow=slow, n_steps=int(round(T1_MS / DT)),
         capture_final=True, store_spikes=True, v_th_per_neuron=S["vth"])
+    n20 = int(round(ONSET_CHECK_MS / DT))
+    first20 = dict(
+        rate_E=first["rate_E"][:n20], rate_I=first["rate_I"][:n20],
+        E_spk_bool=first["E_spk_bool"][:n20],
+    )
+    wins20, num20, _ = LC1R._reduce_run_windows(
+        first20, first["checkpoint"].slow, S, DT,
+        float(baseline["frozen_event_bar"]), baseline["band"])
+    lifecycle20 = classify_lifecycle(wins20, baseline["band"])
     wins1, _num1, _ = LC1R._reduce_run_windows(
         first, first["checkpoint"].slow, S, DT,
         float(baseline["frozen_event_bar"]), baseline["band"])
@@ -573,6 +583,9 @@ def _run_lifecycle_row(row):
         status="COMPLETE", row_id=row["row_id"], candidate=row["candidate"],
         connection_seed=1, noise_seed=row["noise_seed"], T_ms=total_ms,
         no_kick=True, no_reset=True, no_parameter_step=True,
+        onset_search_20s=dict(
+            checkpoint_ms=ONSET_CHECK_MS, lifecycle=lifecycle20,
+            onset_seen=bool(lifecycle20.get("bout") is not None), numerical=num20),
         lifecycle=lifecycle, onset_ms=onset_ms, offset_ms=offset_ms,
         high_duration_ms=high_ms, pre_statistics=pre, post_statistics=post,
         statistical_return=rest, postictal_suppression=postictal,
