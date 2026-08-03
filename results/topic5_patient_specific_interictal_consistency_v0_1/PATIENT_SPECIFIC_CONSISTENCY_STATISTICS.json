@@ -1,0 +1,154 @@
+{
+  "status": "COMPLETE",
+  "contract": "topic5_patient_specific_interictal_consistency_v0_1",
+  "metric_definitions": {
+    "interictal_prediction_consistency": "Pearson r across all directed contact-pair precedence probabilities: free RNN rollouts versus untouched chronological test20 events.",
+    "early_ictal_prediction_consistency": "Patient-level median max absolute Spearman rho between frozen RNN-derived contact fields and clinical-onset [0,10] s, 1-150 Hz energy fields; candidate maximization is repeated inside each channel-shuffle null draw."
+  },
+  "denominators": {
+    "interictal_full": 34,
+    "interictal_development_excluded": 31,
+    "early_ictal_target_eligible_full": 16,
+    "early_ictal_primary": 15,
+    "development_subjects": [
+      "epilepsiae_1073",
+      "epilepsiae_1146",
+      "yuquan_chenziyang"
+    ]
+  },
+  "interictal": {
+    "full_34_rnn_precedence_r_median": 0.8318142172191965,
+    "full_34_rank_shuffle_precedence_r_median": 0.0616845316053998,
+    "rnn_minus_rank_shuffle_full_34": {
+      "n": 34,
+      "median": 0.7524680181852255,
+      "bootstrap_ci95": [
+        0.6913421683038751,
+        0.847301739050458
+      ],
+      "n_positive": 31,
+      "n_negative": 3,
+      "n_tied": 0,
+      "p_two_sided": 2.9103830456733704e-09,
+      "test_method": "two-sided Wilcoxon signed-rank, scipy auto method"
+    },
+    "rnn_minus_rank_shuffle_development_excluded_31": {
+      "n": 31,
+      "median": 0.745396091295749,
+      "bootstrap_ci95": [
+        0.6626845585081691,
+        0.8236536439221857
+      ],
+      "n_positive": 28,
+      "n_negative": 3,
+      "n_tied": 0,
+      "p_two_sided": 2.3283064365386963e-08,
+      "test_method": "two-sided Wilcoxon signed-rank, scipy auto method"
+    },
+    "by_dataset": {
+      "epilepsiae": {
+        "n": 18,
+        "median": 0.7085879148119982,
+        "bootstrap_ci95": [
+          0.4469615336363031,
+          0.9999977715154771
+        ],
+        "n_positive": 15,
+        "n_negative": 3,
+        "n_tied": 0,
+        "p_two_sided": 0.00014495849609375,
+        "test_method": "exact sign-flip distribution of signed ranks"
+      },
+      "yuquan": {
+        "n": 16,
+        "median": 0.760731842292137,
+        "bootstrap_ci95": [
+          0.6984872133668152,
+          0.847301739050458
+        ],
+        "n_positive": 16,
+        "n_negative": 0,
+        "n_tied": 0,
+        "p_two_sided": 3.0517578125e-05,
+        "test_method": "exact sign-flip distribution of signed ranks"
+      }
+    }
+  },
+  "early_ictal": {
+    "full_16_rnn_abs_rho_median": 0.5865546218487394,
+    "full_16_null_median": 0.4583333333333332,
+    "rnn_minus_all_contact_null_full_16": {
+      "n": 16,
+      "median": 0.19940476190476197,
+      "bootstrap_ci95": [
+        0.07727272727272733,
+        0.3333333333333333
+      ],
+      "n_positive": 14,
+      "n_negative": 2,
+      "n_tied": 0,
+      "p_two_sided": 0.0155029296875,
+      "test_method": "exact sign-flip distribution of signed ranks"
+    },
+    "rnn_minus_all_contact_null_primary_15": {
+      "n": 15,
+      "median": 0.16666666666666674,
+      "bootstrap_ci95": [
+        0.06785714285714278,
+        0.3333333333333333
+      ],
+      "n_positive": 13,
+      "n_negative": 2,
+      "n_tied": 0,
+      "p_two_sided": 0.02557373046875,
+      "test_method": "exact sign-flip distribution of signed ranks"
+    },
+    "rnn_minus_within_shaft_null_primary_15": {
+      "n": 15,
+      "median": 0.07058823529411756,
+      "bootstrap_ci95": [
+        -0.04107142857142859,
+        0.2857142857142857
+      ],
+      "n_positive": 10,
+      "n_negative": 4,
+      "n_tied": 1,
+      "p_two_sided": 0.1490478515625,
+      "test_method": "exact sign-flip distribution of signed ranks"
+    }
+  },
+  "cross_metric_association": {
+    "full_16": {
+      "n": 16,
+      "spearman_rho": 0.19705882352941176,
+      "permutation_p_two_sided": 0.46209537904620956,
+      "permutations": 100000
+    },
+    "primary_15": {
+      "n": 15,
+      "spearman_rho": 0.1714285714285714,
+      "permutation_p_two_sided": 0.5435245647543524,
+      "permutations": 100000
+    }
+  },
+  "seals": {
+    "interictal_ictal_target_read": false,
+    "interictal_other_patient_events_used": false,
+    "empirical_ab_used": false
+  },
+  "sources": {
+    "extension_config": {
+      "path": "config/topic5_patient_specific_interictal_consistency_v0_1.yaml",
+      "sha256": "c57b78675492095f0f2508e45ef4f08d43655b1ce8acf0370de5effd9a6346ee"
+    },
+    "bridge_config": {
+      "path": "config/topic5_patient_specific_target_free_rnn_bridge_v0_1.yaml",
+      "sha256": "fedeb5ef3b271b9ec06f07f7304af26525a032e4a6553f5a4adab7b075969f8e"
+    },
+    "early_ictal_patient_metrics": {
+      "path": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/early_ictal_patient_metrics.csv",
+      "sha256": "74ad1b8fcc4a01d0af04b5f477f1b3adf36bed6abfa66c760400b1edf567034a"
+    },
+    "n_done_files": 204
+  }
+}

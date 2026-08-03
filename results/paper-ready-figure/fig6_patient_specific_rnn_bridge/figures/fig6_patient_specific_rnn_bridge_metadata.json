@@ -37,23 +37,45 @@
     ]
   },
   "cohort": {
-    "primary_n": 15,
-    "development_subject_excluded": "epilepsiae_1146",
-    "interictal_order": {
-      "n": 15,
-      "n_real_better": 14,
-      "median_rank_shuffle_minus_real_nll": 0.058641725957719215,
-      "exact_p_two_sided": 0.0001220703125
+    "interictal_prediction_consistency": {
+      "display_n": 34,
+      "formal_n": 31,
+      "n_formal_rnn_higher": 28,
+      "median_formal_rnn_minus_rank_shuffle_r": 0.745396091295749,
+      "p_two_sided": 2.3283064365386963e-08
     },
-    "early_ictal_1_150": {
-      "n": 15,
-      "n_observed_above_null_median": 13,
-      "median_observed_max_abs_rho": 0.5838235294117646,
-      "median_all_contact_null": 0.4583333333333332,
-      "median_margin": 0.16666666666666674,
-      "exact_p_two_sided": 0.02557373046875,
-      "within_shaft_exact_p_two_sided": 0.1490478515625,
-      "full_minus_static_exact_p_two_sided": 0.305419921875
+    "early_ictal_prediction_consistency": {
+      "display_n": 16,
+      "formal_n": 15,
+      "n_formal_observed_above_null": 13,
+      "median_formal_margin": 0.16666666666666674,
+      "p_two_sided": 0.02557373046875,
+      "within_shaft_p_two_sided": 0.1490478515625
+    },
+    "denominators": {
+      "interictal_full": 34,
+      "interictal_development_excluded": 31,
+      "early_ictal_target_eligible_full": 16,
+      "early_ictal_primary": 15,
+      "development_subjects": [
+        "epilepsiae_1073",
+        "epilepsiae_1146",
+        "yuquan_chenziyang"
+      ]
+    },
+    "cross_metric_association": {
+      "full_16": {
+        "n": 16,
+        "spearman_rho": 0.19705882352941176,
+        "permutation_p_two_sided": 0.46209537904620956,
+        "permutations": 100000
+      },
+      "primary_15": {
+        "n": 15,
+        "spearman_rho": 0.1714285714285714,
+        "permutation_p_two_sided": 0.5435245647543524,
+        "permutations": 100000
+      }
     }
   },
   "training_seal": {
@@ -69,6 +91,18 @@
     "summary": {
       "path": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/PATIENT_SPECIFIC_RNN_BRIDGE_SUMMARY.json",
       "sha256": "e55da823c5d28995f5fd9238b3c8fe8c8bce7e3eee98bc3c90c7919e5a554932"
+    },
+    "consistency_statistics": {
+      "path": "results/topic5_patient_specific_interictal_consistency_v0_1/PATIENT_SPECIFIC_CONSISTENCY_STATISTICS.json",
+      "sha256": "101e2bfba9682421297de0410593ecbb3edd739b6342e730b2805cc84c73aaec"
+    },
+    "consistency_metrics": {
+      "path": "results/topic5_patient_specific_interictal_consistency_v0_1/patient_specific_consistency_metrics.csv",
+      "sha256": "66d41fda6b16e77958ec429c57ba612e0671a772ac56f4478b9185f6f792dc3a"
+    },
+    "figure_cohort_metrics": {
+      "path": "results/paper-ready-figure/fig6_patient_specific_rnn_bridge/figures/fig6_patient_specific_rnn_bridge_cohort_metrics.csv",
+      "sha256": "ff685edb32e1234df3b877407d8a3fa661b825ae02b16a25cc8ba233ac6d8191"
     },
     "dataset_npz": {
       "path": "results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_620.npz",

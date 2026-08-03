@@ -41,6 +41,7 @@ from src.topic5_rank_distribution import pairwise_precedence  # noqa: E402
 
 SCHEMA_ID = "fig6_patient_specific_target_free_rnn_bridge_v1"
 OUT_DIR = ROOT / "results/paper-ready-figure/fig6_patient_specific_rnn_bridge/figures"
+CONSISTENCY_ROOT = ROOT / "results/topic5_patient_specific_interictal_consistency_v0_1"
 FIG_BASENAME = "fig6_patient_specific_rnn_bridge"
 REPRESENTATIVE = "epilepsiae_620"
 MODEL = "full_history_gru"
@@ -308,80 +309,169 @@ def _plot_contact_field(
     _clean_axis(ax)
 
 
-def _paired_nll_panel(ax: plt.Axes, interictal: pd.DataFrame, primary_subjects: set[str]) -> dict:
-    wide = (
-        interictal.loc[interictal.subject.isin(primary_subjects)]
-        .pivot(index="subject", columns="model", values="test_nll")
-        .dropna(subset=[CONTROL, MODEL])
+def _paired_interictal_consistency_panel(
+    ax: plt.Axes,
+    metrics: pd.DataFrame,
+    statistics: dict,
+) -> dict:
+    frame = metrics.sort_values(["development_subject", "dataset", "subject"]).copy()
+    shuffled = frame.interictal_rank_shuffle_precedence_r.to_numpy(float)
+    real = frame.interictal_rnn_precedence_r.to_numpy(float)
+    development = frame.development_subject.astype(bool).to_numpy()
+    for left, right, is_development in zip(shuffled, real, development):
+        ax.plot(
+            [0, 1],
+            [left, right],
+            color="0.76" if not is_development else "0.58",
+            lw=0.75,
+            ls="--" if is_development else "-",
+            alpha=0.78,
+            zorder=1,
+        )
+    rng = np.random.default_rng(620)
+    jitter = rng.normal(0, 0.024, len(frame))
+    for x, values, color in ((0, shuffled, CONTROL_COLOR), (1, real, MODEL_COLOR)):
+        ax.scatter(
+            x + jitter[~development],
+            values[~development],
+            s=23,
+            color=color,
+            edgecolor="white",
+            lw=0.45,
+            zorder=2,
+        )
+        ax.scatter(
+            x + jitter[development],
+            values[development],
+            s=29,
+            facecolor="white",
+            edgecolor=color,
+            lw=1.0,
+            zorder=3,
+        )
+    formal = frame.loc[~frame.development_subject.astype(bool)]
+    ax.plot(
+        [0, 1],
+        [formal.interictal_rank_shuffle_precedence_r.median(), formal.interictal_rnn_precedence_r.median()],
+        color="0.12",
+        lw=2.0,
+        marker="o",
+        ms=4,
+        zorder=4,
     )
-    shuffled = wide[CONTROL].to_numpy(float)
-    real = wide[MODEL].to_numpy(float)
-    for left, right in zip(shuffled, real):
-        ax.plot([0, 1], [left, right], color="0.78", lw=0.8, zorder=1)
-    ax.scatter(np.zeros(len(shuffled)), shuffled, s=28, color=CONTROL_COLOR, edgecolor="white", lw=0.5, zorder=2)
-    ax.scatter(np.ones(len(real)), real, s=30, color=MODEL_COLOR, edgecolor="white", lw=0.5, zorder=3)
-    ax.plot([0, 1], [np.median(shuffled), np.median(real)], color="0.15", lw=2.0, marker="o", ms=4, zorder=4)
-    ax.set_xticks([0, 1], ["Within-event\nranks shuffled", "Real rank\norder"])
-    ax.set_ylabel("Held-out event NLL  ↓")
-    ax.set_title("Real event order improves prediction", loc="left", fontweight="bold", pad=8)
+    result = statistics["interictal"]["rnn_minus_rank_shuffle_development_excluded_31"]
+    ax.axhline(0, color="0.88", lw=0.7, zorder=0)
+    ax.set_xticks([0, 1], ["Rank-shuffle\nRNN", "Real-order\nRNN"])
+    ax.set_ylabel("Rollout–heldout precedence consistency, r")
+    ax.set_ylim(-0.30, 1.06)
+    ax.set_title("Interictal prediction consistency (34 patients)", loc="left", fontweight="bold", pad=8)
     ax.text(
         0.03,
         0.04,
-        "14/15 patients\nmedian gain 0.059 nats/event\nexact P = 1.2 × 10⁻⁴",
+        f"formal n = {result['n']}: {result['n_positive']}/{result['n']} higher\n"
+        f"median Δr = {result['median']:.3f}; P = {result['p_two_sided']:.1e}\n"
+        "open symbols = development patients",
         transform=ax.transAxes,
-        fontsize=6.6,
+        fontsize=6.25,
         va="bottom",
     )
     _clean_axis(ax)
     _panel_label(ax, "d")
     return {
-        "n": int(len(wide)),
-        "n_real_better": int(np.sum(real < shuffled)),
-        "median_rank_shuffle_minus_real_nll": float(np.median(shuffled - real)),
+        "display_n": int(len(frame)),
+        "formal_n": int(len(formal)),
+        "n_formal_rnn_higher": int(result["n_positive"]),
+        "median_formal_rnn_minus_rank_shuffle_r": float(result["median"]),
+        "p_two_sided": float(result["p_two_sided"]),
     }
 
 
-def _paired_field_panel(ax: plt.Axes, primary: pd.DataFrame) -> dict:
-    frame = primary.loc[primary.model == MODEL].set_index("subject")
-    observed = frame.observed_max_abs_rho.to_numpy(float)
-    null = frame.all_contact_null_median.to_numpy(float)
-    for true, shuffled in zip(observed, null):
-        color = MODEL_COLOR if true > shuffled else "0.65"
-        ax.plot([0, 1], [shuffled, true], color=color, alpha=0.55, lw=0.85, zorder=1)
-    rng = np.random.default_rng(620)
+def _paired_early_ictal_consistency_panel(
+    ax: plt.Axes,
+    metrics: pd.DataFrame,
+    statistics: dict,
+) -> dict:
+    frame = metrics.loc[metrics.early_ictal_rnn_max_abs_rho.notna()].copy()
+    frame = frame.sort_values(["development_subject", "subject"])
+    observed = frame.early_ictal_rnn_max_abs_rho.to_numpy(float)
+    null = frame.early_ictal_all_contact_null_median.to_numpy(float)
+    development = frame.development_subject.astype(bool).to_numpy()
+    for true, shuffled, is_development in zip(observed, null, development):
+        color = MODEL_COLOR if true > shuffled else "0.68"
+        ax.plot(
+            [0, 1],
+            [shuffled, true],
+            color=color,
+            alpha=0.58,
+            lw=0.85,
+            ls="--" if is_development else "-",
+            zorder=1,
+        )
+    rng = np.random.default_rng(621)
     jitter = rng.normal(0, 0.025, len(frame))
-    ax.scatter(jitter, null, s=27, color=CONTROL_COLOR, edgecolor="white", lw=0.5, zorder=2)
-    ax.scatter(1 + jitter, observed, s=30, color=TARGET_COLOR, edgecolor="white", lw=0.5, zorder=3)
-    ax.plot([0, 1], [np.median(null), np.median(observed)], color="0.15", lw=2.0, marker="o", ms=4, zorder=4)
-    ax.set_xticks([0, 1], ["Channel-shuffle\nnull", "RNN-derived field\nvs early ictal"])
-    ax.set_ylabel(r"Same-patient field similarity, max $|\rho|$")
+    for x, values, color in ((0, null, CONTROL_COLOR), (1, observed, TARGET_COLOR)):
+        ax.scatter(
+            x + jitter[~development],
+            values[~development],
+            s=27,
+            color=color,
+            edgecolor="white",
+            lw=0.5,
+            zorder=2,
+        )
+        ax.scatter(
+            x + jitter[development],
+            values[development],
+            s=32,
+            facecolor="white",
+            edgecolor=color,
+            lw=1.0,
+            zorder=3,
+        )
+    formal = frame.loc[~frame.development_subject.astype(bool)]
+    ax.plot(
+        [0, 1],
+        [formal.early_ictal_all_contact_null_median.median(), formal.early_ictal_rnn_max_abs_rho.median()],
+        color="0.12",
+        lw=2.0,
+        marker="o",
+        ms=4,
+        zorder=4,
+    )
+    result = statistics["early_ictal"]["rnn_minus_all_contact_null_primary_15"]
+    within = statistics["early_ictal"]["rnn_minus_within_shaft_null_primary_15"]
+    ax.set_xticks([0, 1], ["Channel-shuffle\nnull", "RNN field vs\nearly ictal"])
+    ax.set_ylabel(r"Same-patient field consistency, max $|\rho|$")
     ax.set_ylim(0, 1.04)
-    ax.set_title("Target-free cross-state correspondence", loc="left", fontweight="bold", pad=8)
+    ax.set_title("Early-ictal consistency (16 eligible)", loc="left", fontweight="bold", pad=8)
     ax.text(
         0.03,
         0.96,
-        "13/15 patients above null\nexact P = 0.026",
+        f"formal n = {result['n']}: {result['n_positive']}/{result['n']} above null\n"
+        f"median margin = {result['median']:.3f}; P = {result['p_two_sided']:.3f}",
         transform=ax.transAxes,
-        fontsize=6.6,
+        fontsize=6.25,
         va="top",
     )
     ax.text(
         0.03,
         0.04,
-        "Stricter within-shaft sensitivity: n.s.\nIncrement over static scaffold: n.s.",
+        f"within-shaft sensitivity: P = {within['p_two_sided']:.3f}\n"
+        "open symbol = development patient",
         transform=ax.transAxes,
-        fontsize=6.0,
+        fontsize=5.9,
         color="0.35",
         va="bottom",
     )
     _clean_axis(ax)
     _panel_label(ax, "f")
     return {
-        "n": int(len(frame)),
-        "n_observed_above_null_median": int(np.sum(observed > null)),
-        "median_observed_max_abs_rho": float(np.median(observed)),
-        "median_all_contact_null": float(np.median(null)),
-        "median_margin": float(np.median(observed - null)),
+        "display_n": int(len(frame)),
+        "formal_n": int(len(formal)),
+        "n_formal_observed_above_null": int(result["n_positive"]),
+        "median_formal_margin": float(result["median"]),
+        "p_two_sided": float(result["p_two_sided"]),
+        "within_shaft_p_two_sided": float(within["p_two_sided"]),
     }
 
 
@@ -411,7 +501,14 @@ def main() -> None:
     interictal = pd.read_csv(output / "interictal_patient_metrics.csv")
     ictal = pd.read_csv(output / "early_ictal_patient_metrics.csv")
     primary = ictal.loc[(ictal.band == "1_150") & ~ictal.development_supportive.astype(bool)].copy()
-    primary_subjects = set(primary.subject.astype(str))
+    consistency_path = CONSISTENCY_ROOT / "PATIENT_SPECIFIC_CONSISTENCY_STATISTICS.json"
+    consistency_statistics = json.loads(consistency_path.read_text(encoding="utf-8"))
+    if consistency_statistics.get("status") != "COMPLETE":
+        raise RuntimeError("full-cohort consistency analysis is not complete")
+    consistency_metrics_path = CONSISTENCY_ROOT / "patient_specific_consistency_metrics.csv"
+    consistency_metrics = pd.read_csv(consistency_metrics_path)
+    if consistency_metrics.subject.nunique() != 34:
+        raise RuntimeError("full-cohort consistency table does not contain 34 patients")
 
     record = load_records(dataset_root)[subject]
     _, _, test_indices = chronological_60_20_20(record)
@@ -552,7 +649,9 @@ def main() -> None:
         _clean_axis(ax_c)
         _panel_label(ax_c, "c", x=-0.24)
 
-        nll_metadata = _paired_nll_panel(ax_d, interictal, primary_subjects)
+        interictal_metadata = _paired_interictal_consistency_panel(
+            ax_d, consistency_metrics, consistency_statistics
+        )
 
         _plot_contact_field(
             ax_e1,
@@ -594,7 +693,9 @@ def main() -> None:
         field_bar.set_label("Contact field rank", labelpad=-1)
         field_bar.ax.tick_params(length=0)
 
-        field_metadata = _paired_field_panel(ax_f, primary)
+        field_metadata = _paired_early_ictal_consistency_panel(
+            ax_f, consistency_metrics, consistency_statistics
+        )
 
         png = OUT_DIR / f"{FIG_BASENAME}.png"
         pdf = OUT_DIR / f"{FIG_BASENAME}.pdf"
@@ -602,6 +703,9 @@ def main() -> None:
         fig.savefig(png, dpi=300, facecolor="white")
         fig.savefig(pdf, facecolor="white")
         plt.close(fig)
+
+    cohort_metrics_path = OUT_DIR / f"{FIG_BASENAME}_cohort_metrics.csv"
+    consistency_metrics.to_csv(cohort_metrics_path, index=False)
 
     formal_subject_row = primary.loc[(primary.subject == subject) & (primary.model == MODEL)].iloc[0]
     metadata = {
@@ -637,18 +741,10 @@ def main() -> None:
             "contact_names": target_names.tolist(),
         },
         "cohort": {
-            "primary_n": int(summary["n_primary_subjects"]),
-            "development_subject_excluded": config["ictal_transfer"]["development_subject"],
-            "interictal_order": {
-                **nll_metadata,
-                "exact_p_two_sided": summary["interictal_primary_inference"]["rank_shuffle_minus_full_nll_test"]["p_two_sided_exact"],
-            },
-            "early_ictal_1_150": {
-                **field_metadata,
-                "exact_p_two_sided": summary["early_ictal"]["1_150"][MODEL]["margin_vs_zero"]["p_two_sided_exact"],
-                "within_shaft_exact_p_two_sided": summary["early_ictal"]["1_150"][MODEL]["within_shaft_margin_vs_zero"]["p_two_sided_exact"],
-                "full_minus_static_exact_p_two_sided": summary["early_ictal"]["1_150"]["paired_comparisons"]["full_history_gru_minus_static_fit60"]["test"]["p_two_sided_exact"],
-            },
+            "interictal_prediction_consistency": interictal_metadata,
+            "early_ictal_prediction_consistency": field_metadata,
+            "denominators": consistency_statistics["denominators"],
+            "cross_metric_association": consistency_statistics["cross_metric_association"],
         },
         "training_seal": {
             "other_patient_events_used": bool(summary["other_patient_events_used"]),
@@ -658,6 +754,18 @@ def main() -> None:
         "sources": {
             "config": {"path": _portable_path(args.config, ROOT), "sha256": _sha256(args.config)},
             "summary": {"path": _portable_path(summary_path, ROOT), "sha256": _sha256(summary_path)},
+            "consistency_statistics": {
+                "path": _portable_path(consistency_path, ROOT),
+                "sha256": _sha256(consistency_path),
+            },
+            "consistency_metrics": {
+                "path": _portable_path(consistency_metrics_path, ROOT),
+                "sha256": _sha256(consistency_metrics_path),
+            },
+            "figure_cohort_metrics": {
+                "path": _portable_path(cohort_metrics_path, ROOT),
+                "sha256": _sha256(cohort_metrics_path),
+            },
             "dataset_npz": {"path": _portable_path(record.path, artifact_root), "sha256": _sha256(record.path)},
             "rollout_npz": [
                 {"path": _portable_path(path, ROOT), "sha256": _sha256(path)} for path in rollout_paths
@@ -671,9 +779,9 @@ def main() -> None:
     metadata_path.write_text(json.dumps(metadata, indent=2, allow_nan=False) + "\n", encoding="utf-8")
     readme = f"""### {FIG_BASENAME}.png
 
-图 a–c 用 E620 的 untouched 间期 test events 与冻结 RNN 的自由生成事件直观对照：热图展示同一组触点上的双向传播排序，散点图定量比较真实与模型的 contact-pair 先后概率。图 d 汇总 15 名 primary 患者，真实 rank 顺序相对 within-event rank shuffle 在 14/15 名患者中改善 held-out prediction。图 e 将冻结模型生成的患者空间场与同患者两次 clinical-onset 后 0–10 s、1–150 Hz broadband energy 的中位场画在同一真实 contact plane；坐标只用于显示，不进入训练。图 f 给出队列级模型场与 early-ictal 场相对 all-contact channel-shuffle null 的比较，同时明确 within-shaft sensitivity 和相对完整静态 scaffold 的增量尚未显著。
+图 a–c 用 E620 的 untouched 间期 test events 与冻结 RNN 的自由生成事件直观对照：热图展示同一组触点上的双向传播排序，散点图定量比较真实与模型的 contact-pair 先后概率。图 d 显示全部 34 名患者的间期预测一致性：真实顺序 RNN 的自由生成与 held-out contact-pair 先后概率的一致性，和相同架构的 within-event rank-shuffle 对照成对比较；黑线和统计只用排除三名 development patients 后的 31 人。图 e 将冻结模型生成的患者空间场与同患者两次 clinical-onset 后 0–10 s、1–150 Hz broadband energy 的中位场画在同一真实 contact plane；坐标只用于显示，不进入训练。图 f 显示全部 16 名有 exact clinical-onset target 的患者，正式统计排除 E1146 后为 15 人；18 名无该靶标患者没有被当作阴性病例。
 
-**关注点**：前四个 panel 证明 RNN 学到的是患者自己的间期传播结构；后两个 panel 证明冻结后的模型场具有 target-free 跨状态对应，但不把它写成 GRU 独有或已排除全部电极杆几何的机制。
+**关注点**：间期一致性在 formal 31 人中 28/31 高于 rank-shuffle；early-ictal 一致性在 formal 15 人中 13/15 高于 all-contact channel-shuffle null。后者的 within-shaft sensitivity 仍未显著，因此结论限于 target-free 跨状态对应，不写成 GRU 独有、动态发作预测或已排除全部电极杆几何的机制。
 """
     (OUT_DIR / "README.md").write_text(readme, encoding="utf-8")
     print(json.dumps({"png": str(png), "pdf": str(pdf), "metadata": str(metadata_path)}, indent=2))

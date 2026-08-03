@@ -1,0 +1,1006 @@
+{
+  "status": "COMPLETE",
+  "n_total": 108,
+  "n_finished": 108,
+  "n_failed": 0,
+  "workers": 14,
+  "runtime_seconds": 371.9838399887085,
+  "subjects": [
+    "epilepsiae_1073",
+    "epilepsiae_583",
+    "yuquan_chengshuai",
+    "yuquan_chenziyang",
+    "yuquan_gaolan",
+    "yuquan_hanyuxuan",
+    "yuquan_huanghanwen",
+    "yuquan_litengsheng",
+    "yuquan_liyouran",
+    "yuquan_pengzihang",
+    "yuquan_songzishuo",
+    "yuquan_sunyuanxin",
+    "yuquan_wangyiyang",
+    "yuquan_xuxinyi",
+    "yuquan_zhangbichen",
+    "yuquan_zhangjiaqi",
+    "yuquan_zhangkexuan",
+    "yuquan_zhaochenxi"
+  ],
+  "models": [
+    "full_history_gru",
+    "rank_shuffle_gru"
+  ],
+  "completed": [
+    {
+      "subject": "epilepsiae_583",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.776338815689087,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_583__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.43186354637146,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_583__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.657301425933838,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_583__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.773176193237305,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_583__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.843850135803223,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_583__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_583",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.899821281433105,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_583__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_chenziyang",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 25.881373643875122,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chenziyang__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_chenziyang",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.494306325912476,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chenziyang__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 52.93613362312317,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chengshuai__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 53.88141679763794,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chengshuai__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_chenziyang",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 25.385619640350342,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chenziyang__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 53.19285798072815,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chengshuai__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_chenziyang",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 26.449337005615234,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chenziyang__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 54.210299491882324,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chengshuai__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_chenziyang",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 23.83835530281067,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chenziyang__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 55.72543001174927,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chengshuai__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_chenziyang",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 25.555917501449585,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chenziyang__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_chengshuai",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 58.53684067726135,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_chengshuai__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_gaolan",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 28.499707221984863,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_gaolan__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_gaolan",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.388375282287598,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_gaolan__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_gaolan",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 29.465396881103516,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_gaolan__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_gaolan",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.267574548721313,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_gaolan__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_gaolan",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 28.283632516860962,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_gaolan__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_gaolan",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.21158218383789,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_gaolan__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_hanyuxuan",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 40.29601740837097,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_hanyuxuan__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_hanyuxuan",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 40.80016374588013,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_hanyuxuan__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.338399648666382,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_huanghanwen__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.492393970489502,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_huanghanwen__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1073",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 138.6187903881073,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_1073__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.406885623931885,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_huanghanwen__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1073",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 140.41725087165833,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_1073__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_hanyuxuan",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.89863085746765,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_hanyuxuan__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_hanyuxuan",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.97772979736328,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_hanyuxuan__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_hanyuxuan",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 39.818838119506836,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_hanyuxuan__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_hanyuxuan",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 38.101330041885376,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_hanyuxuan__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.04075789451599,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_huanghanwen__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.613480806350708,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_huanghanwen__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1073",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 146.18201565742493,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_1073__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_huanghanwen",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.70995807647705,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_huanghanwen__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1073",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 149.28670930862427,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_1073__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1073",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 161.1939992904663,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_1073__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1073",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 174.93265795707703,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/epilepsiae_1073__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 32.9256112575531,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_liyouran__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 37.43284845352173,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_litengsheng__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.55177545547485,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_liyouran__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.65548777580261,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_litengsheng__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 31.77765154838562,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_liyouran__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 30.34427809715271,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_liyouran__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.795597553253174,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_litengsheng__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.171201944351196,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_litengsheng__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.96885013580322,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_litengsheng__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 31.73134684562683,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_liyouran__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_litengsheng",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.47511053085327,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_litengsheng__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_liyouran",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 29.843528747558594,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_liyouran__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_sunyuanxin",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 29.144309043884277,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_sunyuanxin__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_sunyuanxin",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 28.94048762321472,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_sunyuanxin__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 50.68891382217407,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_pengzihang__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 49.05240178108215,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_pengzihang__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 48.56298351287842,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_pengzihang__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 48.26195526123047,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_pengzihang__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 48.684792280197144,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_pengzihang__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_songzishuo",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 48.747578859329224,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_songzishuo__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_songzishuo",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 49.17411732673645,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_songzishuo__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_songzishuo",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 49.04125642776489,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_songzishuo__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_songzishuo",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 49.58018517494202,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_songzishuo__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_songzishuo",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 48.76450181007385,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_songzishuo__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_songzishuo",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 49.84373116493225,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_songzishuo__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_pengzihang",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 50.52705407142639,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_pengzihang__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_sunyuanxin",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.1569082736969,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_sunyuanxin__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_sunyuanxin",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 29.15730309486389,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_sunyuanxin__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_sunyuanxin",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 26.17556881904602,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_sunyuanxin__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_sunyuanxin",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 29.7823805809021,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_sunyuanxin__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 32.43530583381653,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_xuxinyi__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 32.89381790161133,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_xuxinyi__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.52819085121155,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_xuxinyi__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_wangyiyang",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 37.76874804496765,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_wangyiyang__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 35.21887445449829,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_xuxinyi__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_wangyiyang",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 38.043233156204224,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_wangyiyang__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_wangyiyang",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 37.11034154891968,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_wangyiyang__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_wangyiyang",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.9853835105896,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_wangyiyang__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_wangyiyang",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 38.74322295188904,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_wangyiyang__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 30.19216227531433,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_xuxinyi__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_wangyiyang",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 41.52699112892151,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_wangyiyang__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_xuxinyi",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.586570501327515,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_xuxinyi__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 52.649205446243286,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangkexuan__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 51.234790325164795,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangkexuan__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_zhangbichen",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 83.6611123085022,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangbichen__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_zhangbichen",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 79.68857431411743,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangbichen__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_zhangbichen",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 75.90679216384888,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangbichen__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_zhangbichen",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 76.81222105026245,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangbichen__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_zhangjiaqi",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 73.7186598777771,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangjiaqi__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_zhangbichen",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 75.6211290359497,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangbichen__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_zhangbichen",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 76.86790561676025,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangbichen__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_zhangjiaqi",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 74.95670890808105,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangjiaqi__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_zhangjiaqi",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 76.29935193061829,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangjiaqi__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_zhangjiaqi",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 75.65341472625732,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangjiaqi__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_zhangjiaqi",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 77.86842513084412,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangjiaqi__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_zhangjiaqi",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 85.97485089302063,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangjiaqi__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 42.6423921585083,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangkexuan__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 41.31090831756592,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangkexuan__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 42.421690702438354,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangkexuan__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.97407555580139,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhaochenxi__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.66956901550293,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhaochenxi__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.483805656433105,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhaochenxi__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 32.78265929222107,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhaochenxi__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.216795444488525,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhaochenxi__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "yuquan_zhaochenxi",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.194730043411255,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhaochenxi__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "yuquan_zhangkexuan",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 38.51220893859863,
+      "log": "results/topic5_patient_specific_interictal_consistency_v0_1/logs/yuquan_zhangkexuan__rank_shuffle_gru__seed47.log"
+    }
+  ]
+}
