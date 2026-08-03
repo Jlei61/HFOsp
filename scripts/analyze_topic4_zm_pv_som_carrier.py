@@ -164,6 +164,49 @@ def adjudicate(rows):
     }
 
 
+def _dose_response_figure(rows, path):
+    """Plot each gate against dose, so the surviving window is visible at all."""
+    series = {}
+    for key in rows:
+        if not key.startswith("persistent_g"):
+            continue
+        dose, seed = _split_arm(key)
+        series.setdefault(seed, []).append((dose, rows[key]))
+    for points in series.values():
+        points.sort()
+    panels = (
+        ("post_onset_deep_gap_fraction", "deep-gap fraction", 0.20, "below"),
+        ("median_vseeg_gain_db", "virtual-SEEG gain (dB)", 20.0, "above"),
+        ("energy_occupancy_6db", "energy occupancy", 0.50, "above"),
+        ("spatial_pc1", "spatial PC1 fraction", 0.95, "below"),
+    )
+    colors = {1: "#d95f45", 2: "#2b7a5b", 3: "#4a6fb5"}
+    fig, axes = plt.subplots(2, 2, figsize=(11, 7.5), constrained_layout=True)
+    for ax, (field, label, gate, side) in zip(axes.ravel(), panels):
+        for seed, points in sorted(series.items()):
+            doses = [dose for dose, _ in points]
+            values = [row[field] for _, row in points]
+            passing = [row["credible_carrier"] for _, row in points]
+            ax.plot(doses, values, "-", color=colors.get(seed, "#777"), lw=1.1,
+                    label=f"SOM wiring {seed}")
+            ax.scatter(doses, values, s=[46 if ok else 16 for ok in passing],
+                       facecolors=[colors.get(seed, "#777") if ok else "white"
+                                   for ok in passing],
+                       edgecolors=colors.get(seed, "#777"), zorder=3)
+        ax.axhline(gate, color="#333", ls=":", lw=1)
+        ax.annotate(f"gate ({'≤' if side == 'below' else '≥'} {gate:g})",
+                    xy=(0.99, gate), xycoords=("axes fraction", "data"),
+                    ha="right", va="bottom" if side == "above" else "top",
+                    fontsize=8, color="#333")
+        ax.set(xlabel="persistent slow excitatory conductance g", ylabel=label)
+    axes[0, 0].legend(frameon=False, fontsize=8)
+    fig.suptitle(
+        "filled marker = clears every gate simultaneously", fontsize=12
+    )
+    fig.savefig(path, dpi=170)
+    plt.close(fig)
+
+
 def _run_lengths(mask):
     x = np.asarray(mask, dtype=np.int8)
     edges = np.diff(np.pad(x, (1, 1)))
@@ -263,6 +306,7 @@ def main():
     fig_dir = OUT / "figures"; fig_dir.mkdir(parents=True, exist_ok=True)
     fig.savefig(fig_dir / "pv_som_carrier_panel.png", dpi=170)
     plt.close(fig)
+    _dose_response_figure(rows, fig_dir / "persistent_dose_response.png")
 
     readme = fig_dir / "README.md"
     prior = readme.read_text() if readme.exists() else ""
@@ -277,6 +321,16 @@ def main():
             "右列同时给出 H 增益、共享抑制状态与慢兴奋 conductance（右轴虚线）。\n\n"
             "**关注点**：填平深间隙与保住低 PC1 是否能同时成立；"
             "只把间隙填平却把空间结构压成共模平台，不算 ictal carrier。\n"
+        )
+    marker = "### persistent_dose_response.png"
+    prior = readme.read_text()
+    if marker not in prior:
+        readme.write_text(
+            prior.rstrip() + "\n\n" + marker + "\n\n"
+            "把四条判据分别对慢兴奋强度作图，每条连接种子一条线，"
+            "实心点表示该强度同时满足全部判据。虚线是各自的判据线。\n\n"
+            "**关注点**：时间连续性要求强度往上走，而场增益和能量占空要求强度往下走——"
+            "看这两侧是否把可行区间夹到只剩很窄一段，以及不同连接种子的可行区间是否重叠。\n"
         )
     print(json.dumps(verdict, indent=2))
 
