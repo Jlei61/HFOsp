@@ -24,6 +24,10 @@ from src.topic4_fcxr_lc3 import (  # noqa: E402
     state_hash,
     validate_loop_state,
 )
+from src.topic4_fcxr_lc3_perturb import (  # noqa: E402
+    current_accounting,
+    run_fcxr_perturbation,
+)
 
 
 def _case(seed=17, *, frozen=False):
@@ -107,6 +111,37 @@ def test_split_continuation_matches_uninterrupted_and_is_idempotent():
 
     np.testing.assert_array_equal(tails[0]["rate_E"], tails[1]["rate_E"])
     np.testing.assert_array_equal(tails[0]["E_spk_bool"], tails[1]["E_spk_bool"])
+
+
+def test_zero_current_perturbation_is_exact_continuation_byte_for_byte():
+    p, net, slow, vth = _case()
+    pre = run_fcxr_loop(
+        p, net, slow=slow, n_steps=80, capture_final=True,
+        store_spikes=True, v_th_per_neuron=vth,
+    )["checkpoint"]
+    n_steps = 120
+    ref = run_fcxr_loop(
+        p, net, start=clone_loop_state(pre), n_steps=n_steps,
+        capture_final=True, store_spikes=True, v_th_per_neuron=vth,
+    )
+    sham = run_fcxr_perturbation(
+        p, net, start=clone_loop_state(pre), n_steps=n_steps,
+        current_pattern=np.ones(net["NE"]), amplitude=0.0, pulse_steps=20,
+        capture_final=True, store_spikes=True, v_th_per_neuron=vth,
+    )
+    np.testing.assert_array_equal(sham["rate_E"], ref["rate_E"])
+    np.testing.assert_array_equal(sham["rate_I"], ref["rate_I"])
+    np.testing.assert_array_equal(sham["E_spk_bool"], ref["E_spk_bool"])
+    assert state_hash(sham["checkpoint"]) == state_hash(ref["checkpoint"])
+
+
+def test_current_accounting_separates_charge_and_rms():
+    got = current_accounting(
+        np.array([1.0, 1.0, 0.0, -1.0]), amplitude=2.0, duration_ms=10.0)
+    assert got["active_cell_count"] == 3
+    assert got["positive_charge"] == 40.0
+    assert got["negative_charge_magnitude"] == 20.0
+    assert got["rms_current"] == pytest.approx(np.sqrt(3.0))
 
 
 def test_child_forks_do_not_alias_mutable_state():
