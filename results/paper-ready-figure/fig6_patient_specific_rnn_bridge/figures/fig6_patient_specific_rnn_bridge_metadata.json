@@ -1,0 +1,102 @@
+{
+  "schema_id": "fig6_patient_specific_target_free_rnn_bridge_v1",
+  "figure": {
+    "png": "fig6_patient_specific_rnn_bridge.png",
+    "pdf": "fig6_patient_specific_rnn_bridge.pdf"
+  },
+  "scientific_claim": "A within-patient self-supervised recurrent model recovers patient-specific interictal contact-rank structure, and its frozen model-derived field shows target-free same-patient correspondence with early-ictal broadband energy.",
+  "representative": {
+    "subject": "epilepsiae_620",
+    "selection": "Illustrative joint-positive patient chosen for readable event and contact-space displays; all inference is carried by the primary cohort panels.",
+    "n_contacts": 9,
+    "n_test_events_total": 4482,
+    "n_rollout_events_total": 15000,
+    "n_events_displayed_per_heatmap": 160,
+    "display_filter": "at least four participating contacts on the largest shaft",
+    "event_sorting": "independent target-free direction sort within observed and rollout events",
+    "display_precedence_r": 0.9059129519088366,
+    "formal_three_seed_median_precedence_r": 0.89597651007752,
+    "selected_field": "weighted_earliness",
+    "display_field_sign": 1,
+    "display_abs_spearman_rho_against_two_seizure_median_target": 0.7666666666666667,
+    "formal_patient_observed_max_abs_rho": 0.7999999999999999,
+    "coordinate_space": "mni152_1mm",
+    "coordinate_units": "mm",
+    "coordinates_used_for_training": false,
+    "coordinates_used_for_display_only": true,
+    "contact_names": [
+      "HR3",
+      "HR4",
+      "HR5",
+      "HR6",
+      "HR7",
+      "HR8",
+      "HR9",
+      "HR10",
+      "TBA1"
+    ]
+  },
+  "cohort": {
+    "primary_n": 15,
+    "development_subject_excluded": "epilepsiae_1146",
+    "interictal_order": {
+      "n": 15,
+      "n_real_better": 14,
+      "median_rank_shuffle_minus_real_nll": 0.058641725957719215,
+      "exact_p_two_sided": 0.0001220703125
+    },
+    "early_ictal_1_150": {
+      "n": 15,
+      "n_observed_above_null_median": 13,
+      "median_observed_max_abs_rho": 0.5838235294117646,
+      "median_all_contact_null": 0.4583333333333332,
+      "median_margin": 0.16666666666666674,
+      "exact_p_two_sided": 0.02557373046875,
+      "within_shaft_exact_p_two_sided": 0.1490478515625,
+      "full_minus_static_exact_p_two_sided": 0.305419921875
+    }
+  },
+  "training_seal": {
+    "other_patient_events_used": false,
+    "empirical_ab_used": false,
+    "ictal_target_used_for_training": false
+  },
+  "sources": {
+    "config": {
+      "path": "config/topic5_patient_specific_target_free_rnn_bridge_v0_1.yaml",
+      "sha256": "fedeb5ef3b271b9ec06f07f7304af26525a032e4a6553f5a4adab7b075969f8e"
+    },
+    "summary": {
+      "path": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/PATIENT_SPECIFIC_RNN_BRIDGE_SUMMARY.json",
+      "sha256": "e55da823c5d28995f5fd9238b3c8fe8c8bce7e3eee98bc3c90c7919e5a554932"
+    },
+    "dataset_npz": {
+      "path": "results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject/epilepsiae_620.npz",
+      "sha256": "a718015e389644dcf9c33021e2c553ebc433182d12190c5ed328dfaebbaf3a5f"
+    },
+    "rollout_npz": [
+      {
+        "path": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/units/epilepsiae_620/full_history_gru/seed_11/free_rollouts.npz",
+        "sha256": "df6505dfa28a28f5d2f9e2c60fe6b032fa2eb1d0aeb5af7f0fa5201d785c3161"
+      },
+      {
+        "path": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/units/epilepsiae_620/full_history_gru/seed_29/free_rollouts.npz",
+        "sha256": "cbd72954f0f8f148ea9ceaa4d34b813eff7f1d3608c1d5df69ff52e930f16dfa"
+      },
+      {
+        "path": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/units/epilepsiae_620/full_history_gru/seed_47/free_rollouts.npz",
+        "sha256": "e4b72abe62728896ed73b9c5152e13fa53096ffbbe7ea274481a44ce82df4ad4"
+      }
+    ],
+    "early_ictal_target_npz": [
+      {
+        "path": "results/topic5_history_conditioned_field_refinement_v0_4/cache/outer_epilepsiae_620/epilepsiae_620__62000101102.npz",
+        "sha256": "bc218034bd2c4baff26d7fcad05c1a3bd4ff37a5323095a786147e69d1a9dc2c"
+      },
+      {
+        "path": "results/topic5_history_conditioned_field_refinement_v0_4/cache/outer_epilepsiae_620/epilepsiae_620__62000401102.npz",
+        "sha256": "8d0d5f0c5d671538f2303b14ba798af72bf8d23e6c583ce2d2870b56d73fa0a8"
+      }
+    ]
+  }
+}
