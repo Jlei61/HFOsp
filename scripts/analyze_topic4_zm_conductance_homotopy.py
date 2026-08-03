@@ -134,7 +134,63 @@ def _load_panel():
     return found, rows, arrays
 
 
-def _load_long():
+def _build_composite(short_root: Path, long_root: Path, long_summary: dict):
+    """Restore the first burn second from the deterministic short twin.
+
+    The production runner intentionally removes 1 s from fast/LFP readouts but
+    keeps all slow traces.  The short and long arms share checkpoint and noise,
+    so their overlap must be exact before it is legal to join them.
+    """
+    with np.load(short_root / "traces.npz", allow_pickle=False) as data:
+        short = {key: np.asarray(data[key]) for key in data.files}
+    with np.load(long_root / "traces.npz", allow_pickle=False) as data:
+        long = {key: np.asarray(data[key]) for key in data.files}
+    np.testing.assert_array_equal(
+        short["fine_core_rate_hz"][500:1250], long["fine_core_rate_hz"][:750]
+    )
+    np.testing.assert_array_equal(
+        short["coarse_kymo_axial"][:, 40:100],
+        long["coarse_kymo_axial"][:, :60],
+    )
+    np.testing.assert_array_equal(
+        short["lfp_raw_synaptic_proxy"][10000:25000],
+        long["lfp_raw_synaptic_proxy"][:15000],
+    )
+    out = {}
+    for key, value in long.items():
+        if key == "fine_time_ms":
+            out[key] = np.arange(value.size + 500, dtype=np.float32) * 2.0
+        elif key.startswith("fine_"):
+            out[key] = np.concatenate([short[key][:500], value], axis=0)
+        elif key.startswith("coarse_"):
+            axis = 1 if value.ndim == 2 else 0
+            prefix = short[key][:, :40] if axis == 1 else short[key][:40]
+            out[key] = np.concatenate([prefix, value], axis=axis)
+        elif key.startswith("lfp_") and key != "lfp_fs_hz":
+            out[key] = np.concatenate([short[key][:10000], value], axis=0)
+        else:
+            out[key] = value
+    root = OUT / "derived_composite_H_M45_long"
+    root.mkdir(parents=True, exist_ok=True)
+    np.savez_compressed(root / "traces.npz", **out)
+    summary = dict(long_summary)
+    summary.update({
+        "burn_ms": 0.0,
+        "observed_ms": 12000.0,
+        "postburn_ms": 12000.0,
+        "derived_composite": {
+            "first_1000ms_from": str(short_root.relative_to(ROOT)),
+            "remaining_11000ms_from": str(long_root.relative_to(ROOT)),
+            "overlap_exact": True,
+        },
+    })
+    (root / "summary.json").write_text(
+        json.dumps(summary, indent=2, sort_keys=True, allow_nan=False) + "\n"
+    )
+    return root, summary
+
+
+def _load_long(short_root: Path):
     matches = []
     for root in sorted((IN / "lifecycle_sprint/seed1").glob("*condhom_z0.52to0.48*")):
         sp, tp = root / "summary.json", root / "traces.npz"
@@ -148,6 +204,7 @@ def _load_long():
     if not matches:
         return None, None
     root, summary = matches[0]
+    root, summary = _build_composite(short_root, root, summary)
     row, arrays = _row("H_M45_long", root, summary)
     row["core_mean_hz"] = float(summary["core_modulation"]["mean_hz"])
     row["core_rho80_active_fraction"] = float(
@@ -157,8 +214,8 @@ def _load_long():
 
 
 def main():
-    _, rows, arrays = _load_panel()
-    long_row, long_arrays = _load_long()
+    found, rows, arrays = _load_panel()
+    long_row, long_arrays = _load_long(found["H_M45"][0])
     verdict = adjudicate(rows, long_row)
     payload = {
         "schema": "topic4_zm_conductance_homotopy_v1_2026-08-03",
