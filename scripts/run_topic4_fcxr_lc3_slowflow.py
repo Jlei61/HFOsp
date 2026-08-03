@@ -32,7 +32,10 @@ import run_m4_phaseplane as PP  # noqa: E402
 import run_topic4_fcxr_lc3 as E01  # noqa: E402
 import run_topic4_fcxr_lc3_geometry as GEO  # noqa: E402
 from src.topic4_fcxr_lc3 import replace_frozen_fields, run_fcxr_loop  # noqa: E402
-from src.topic4_fcxr_lc3_geometry import load_prepared_checkpoint  # noqa: E402
+from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
+    install_registered_noise_rng,
+    load_prepared_checkpoint,
+)
 from src.topic4_fcxr_lc3_slowflow import select_slowflow_landmarks  # noqa: E402
 
 
@@ -144,6 +147,8 @@ def _run(row):
                 and done.get("output_sha256") == _sha(row["output_path"])):
             return old
     S = PP.build_substrate(1)
+    # build_substrate omits the noise generator and this probe steps the network.
+    install_registered_noise_rng(S["net"])
     fields, _records = GEO._primary_fields()
     prepared = GEO._prepared_records()[(GEO.H1_POINT_ID, row["state_kind"])]
     payload = load_prepared_checkpoint(

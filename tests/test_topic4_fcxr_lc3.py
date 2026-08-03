@@ -221,15 +221,24 @@ def test_every_stepping_runner_installs_the_noise_generator_on_its_substrate():
     """
 
     import ast
+    import glob
 
     root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     # Functions that build a substrate purely for geometry/pattern bookkeeping.
     non_stepping = {
         ("run_topic4_fcxr_lc3_spatial.py", "cmd_lock"),  # derives I_ref from a stored state
         ("run_topic4_fcxr_lc3_geometry.py", "cmd_field_audit"),  # region masks + field stats
+        # Steps through the LC1 runner, which seeds net["rng"] itself from an explicit
+        # seed argument (run_topic4_mz_fcxr_lifecycle.py::_lc_run), so the bare
+        # substrate handed to it is correct.
+        ("run_topic4_fcxr_lc3.py", "_replay_family"),
     }
-    runners = ["run_topic4_fcxr_lc3_geometry.py", "run_topic4_fcxr_lc3_recon.py",
-               "run_topic4_fcxr_lc3_spatial.py", "run_topic4_fcxr_lc3_x_lifecycle.py"]
+    # Enumerate the runners instead of listing them: a hand-maintained list is exactly
+    # how the slow-flow stage slipped through and failed after the 102-row map had
+    # already completed.
+    runners = sorted(os.path.basename(p) for p in
+                     glob.glob(os.path.join(root, "scripts", "*topic4_fcxr_lc3*.py")))
+    assert len(runners) >= 5, f"runner discovery found only {runners}"
     offenders = []
     for name in runners:
         path = os.path.join(root, "scripts", name)
