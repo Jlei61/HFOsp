@@ -29,6 +29,8 @@ from src.topic4_fcxr_lc3_geometry import (
     configured_state_hash,
     extension_required,
     geometry_manifest_summary,
+    install_registered_noise_rng,
+    REGISTERED_NOISE_SEED,
     paired_field_shape_metrics,
     load_prepared_checkpoint,
     prepared_state_is_reusable,
@@ -46,7 +48,7 @@ def test_paired_field_shape_metrics_exposes_same_mean_different_support():
     assert got["support_jaccard"] == 0.5
     assert got["relative_l2_difference"] > 0.0
     assert got["pearson_cellwise"] is None
-from src.topic4_fcxr_lc3 import run_fcxr_loop
+from src.topic4_fcxr_lc3 import clone_loop_state, run_fcxr_loop
 
 
 def _case(seed=17, *, frozen=False):
@@ -287,3 +289,49 @@ def test_numerical_failure_has_priority_and_never_requests_extension():
 )
 def test_extension_rule_is_state_relative_and_outcome_independent(state, label, expected):
     assert extension_required(state_kind=state, label=label) is expected
+
+
+def test_registered_noise_rng_is_installed_with_the_manifest_seed():
+    net = install_registered_noise_rng({})
+    assert (net["rng"].standard_normal()
+            == np.random.default_rng(REGISTERED_NOISE_SEED).standard_normal())
+    rows = build_geometry_manifest_rows(
+        fields=_fields(), prepared_state_hashes=_states(), output_root="/tmp/lc3")
+    assert {r["noise_seed"] for r in rows} == {REGISTERED_NOISE_SEED}
+    with pytest.raises(ValueError, match="substrate network dict"):
+        install_registered_noise_rng(None)
+
+
+def test_substrate_without_a_noise_generator_cannot_step():
+    # build_substrate does not create net["rng"], so the geometry map's worker
+    # context has to install it; without this the very first map row dies here.
+    p, net, slow, vth = _case(frozen=True)
+    del net["rng"]
+    with pytest.raises(KeyError, match="rng"):
+        run_fcxr_loop(p, net, slow=slow, n_steps=5, capture_final=False,
+                      store_spikes=False, v_th_per_neuron=vth)
+    install_registered_noise_rng(net)
+    run_fcxr_loop(p, net, slow=slow, n_steps=5, capture_final=False,
+                  store_spikes=False, v_th_per_neuron=vth)
+
+
+def test_continuation_ignores_the_construction_seed_so_worker_count_cannot_move_a_row():
+    # Every map row is a continuation, and the loop overwrites the bit-generator
+    # state from its prepared checkpoint before its first draw.  This is what makes
+    # the map worker count and submission order a pure resource choice.
+    p0, net0, slow0, vth0 = _case(frozen=True)
+    start = run_fcxr_loop(p0, net0, slow=slow0, n_steps=40, capture_final=True,
+                          store_spikes=False, v_th_per_neuron=vth0)["checkpoint"]
+    outs = []
+    for noise_seed in (REGISTERED_NOISE_SEED, 999):
+        p, net, _slow, vth = _case(frozen=True)  # identical connectivity, different rng
+        install_registered_noise_rng(net, noise_seed=noise_seed)
+        # Each row deep-clones its start state, exactly as replace_frozen_fields does;
+        # stepping the same in-memory state twice would advance its slow counter.
+        outs.append(run_fcxr_loop(p, net, start=clone_loop_state(start), n_steps=40,
+                                  capture_final=True, store_spikes=True,
+                                  v_th_per_neuron=vth))
+    np.testing.assert_array_equal(outs[0]["rate_E"], outs[1]["rate_E"])
+    np.testing.assert_array_equal(outs[0]["E_spk_bool"], outs[1]["E_spk_bool"])
+    assert configured_state_hash(outs[0]["checkpoint"]) == configured_state_hash(
+        outs[1]["checkpoint"])

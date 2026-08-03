@@ -39,6 +39,7 @@ SCREEN_TAIL_MS = 500.0
 EXTENDED_MS = 5000.0
 EXTENDED_TAIL_MS = 2000.0
 REFRACTORY_CEILING_FRACTION_MAX = 0.05
+REGISTERED_NOISE_SEED = 401
 MAX_MAP_WORKERS = 8
 MAP_WORKER_MEM_FLOOR_GIB = 96.0
 MAP_WORKER_RESERVE = 1.35
@@ -170,7 +171,7 @@ def build_geometry_manifest_rows(
     fields: dict,
     prepared_state_hashes: dict,
     output_root: str,
-    noise_seed: int = 401,
+    noise_seed: int = REGISTERED_NOISE_SEED,
 ) -> list[dict]:
     """Return the pre-outcome 84 H1 + 18 H6 geometry rows.
 
@@ -259,6 +260,25 @@ def geometry_manifest_summary(audit: dict) -> dict:
     if not isinstance(audit, dict):
         raise ValueError("audit must be the validate_geometry_manifest payload")
     return dict(status="LOCKED", audit=dict(audit))
+
+
+def install_registered_noise_rng(net, *, noise_seed: int = REGISTERED_NOISE_SEED):
+    """Give a freshly built 40k substrate the registered noise generator.
+
+    ``build_substrate`` does not create ``net["rng"]``, and ``run_fcxr_loop`` reads
+    it before doing anything else, so a substrate without it cannot step at all --
+    which is how the first geometry map launch died on its own smoke row.
+
+    For a continuation (``start=``) the seed is inert: the loop overwrites the
+    bit-generator state from the checkpoint before its first draw.  It only picks
+    the realisation for a fresh run, and 401 is the seed every manifest row
+    records as ``noise_seed``.
+    """
+
+    if not isinstance(net, dict):
+        raise ValueError("net must be the substrate network dict")
+    net["rng"] = np.random.default_rng(int(noise_seed))
+    return net
 
 
 ACCEPTED_PREPARED_STATUSES = ("ACCEPTED_CANONICAL_STATE",

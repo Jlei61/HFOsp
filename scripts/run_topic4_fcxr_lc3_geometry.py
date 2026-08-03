@@ -59,6 +59,7 @@ from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
     configured_state_hash,
     extension_required,
     geometry_manifest_summary,
+    install_registered_noise_rng,
     load_prepared_checkpoint,
     paired_field_shape_metrics,
     prepared_state_is_reusable,
@@ -454,7 +455,7 @@ def cmd_prepare(args):
         T = float(PREP_MS[(point_id, args.state)])
         S = PP.build_substrate(1)
         p = dataclasses.replace(S["p"], T=T, dt=DT)
-        S["net"]["rng"] = np.random.default_rng(401)
+        install_registered_noise_rng(S["net"])
         t0 = time.time()
         out = run_fcxr_loop(
             p, S["net"], slow=_slow(S, cfg), n_steps=int(round(T / DT)),
@@ -557,6 +558,10 @@ def _worker_context():
     global _WORKER_SUBSTRATE, _WORKER_FIELDS, _WORKER_PREPARED
     if _WORKER_SUBSTRATE is None:
         _WORKER_SUBSTRATE = PP.build_substrate(1)
+        # build_substrate leaves out the noise generator; every row is a continuation
+        # that overwrites its state from the prepared checkpoint, but the loop still
+        # needs the object to exist before it can step.
+        install_registered_noise_rng(_WORKER_SUBSTRATE["net"])
         # Materialise flattened sparse scatter once per worker.
         from src.topic4_fcxr_lc3 import _constants
         _constants(_WORKER_SUBSTRATE["p"], _WORKER_SUBSTRATE["net"])
