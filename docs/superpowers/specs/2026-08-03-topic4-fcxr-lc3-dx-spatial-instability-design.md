@@ -431,10 +431,17 @@ full core scientific goal.
   `MemAvailable >= 96 GiB + 2*1.35*RSS_single` and stable swap. This stays the guaranteed
   floor of the sizing rule.
 - Amendment 2026-08-04 (worker cap 2 -> 8): worker `n > 2` additionally requires
-  `n * 1.35 * 3 * RSS_single <= MemAvailable - 96 GiB`, where `RSS_single` is the measured
-  1.5 s smoke-row peak and the extra factor 3 covers an extended row transiently holding the
-  screen, the 3.5 s continuation and their concatenation. Also bounded by `cpu_count - 2`.
-  This is a resource amendment only: every row restores its RNG bit-generator state from its
+  `n * 1.35 * EXTENDED_ROW_RSS_SCALE * RSS_single <= MemAvailable - 96 GiB`, where
+  `RSS_single` is the measured 1.5 s smoke-row peak and the extra factor covers an extended
+  row transiently holding the screen, the 3.5 s continuation and their concatenation. Also
+  bounded by `cpu_count - 2`. The count is recomputed on every scheduler round rather than
+  frozen after the smoke row, so a sibling job taking or releasing memory mid-map scales the
+  pool down or up; in-flight rows are never preempted.
+- `EXTENDED_ROW_RSS_SCALE = 2.0`, measured 2026-08-04: peak RSS is duration-driven, not
+  rate-driven (a 1.5 s row costs 6.79 GiB from either basin), splitting into a ~5.90 GiB base
+  plus ~0.596 GiB per simulated second. The worst-case extended row is 1.75x the smoke
+  reading; 2.0 keeps a 14% margin.
+- This is a resource amendment only: every row restores its RNG bit-generator state from its
   prepared checkpoint, so worker count and row order cannot change any row outcome.
 - Use bounded submission with at most `n_workers` pending jobs. Swap +256 MiB stops new submission;
   +512 MiB and rising terminates only LC3's newest worker.

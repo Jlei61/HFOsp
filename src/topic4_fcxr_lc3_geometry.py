@@ -47,7 +47,16 @@ MAP_WORKER_SWAP_DELTA_MIB = 256.0
 # The smoke row measures a 1.5 s screen.  An extended row transiently holds the
 # screen, the 3.5 s continuation and their concatenation at once, so each worker
 # is budgeted at this multiple of the smoke reading before the 1.35 reserve.
-EXTENDED_ROW_RSS_SCALE = 3.0
+#
+# Measured 2026-08-04 on the 40k substrate: peak RSS is duration-driven, not
+# rate-driven -- a 1.5 s row costs 6.79 GiB whether it starts low or high.  That
+# splits into a ~5.90 GiB fixed base plus ~0.596 GiB per simulated second of E
+# spike bools (32000 cells x 20 kHz x 1 byte).  The model reproduces every
+# observed run: 5.0 s -> 8.88 vs 8.66 measured, 5.06 s -> 8.91 vs 8.69, 10 s ->
+# 11.86 vs 11.74.  An extended row therefore peaks near
+# 5.90 + 0.89 + 2.08 + 2.98 = 11.85 GiB, i.e. 1.75x the smoke reading; 2.0 keeps
+# a 14% margin over that.
+EXTENDED_ROW_RSS_SCALE = 2.0
 
 
 def _hash_array(value) -> str:

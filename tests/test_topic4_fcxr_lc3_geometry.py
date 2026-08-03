@@ -335,3 +335,31 @@ def test_continuation_ignores_the_construction_seed_so_worker_count_cannot_move_
     np.testing.assert_array_equal(outs[0]["E_spk_bool"], outs[1]["E_spk_bool"])
     assert configured_state_hash(outs[0]["checkpoint"]) == configured_state_hash(
         outs[1]["checkpoint"])
+
+
+def test_two_leg_continuation_keeps_slow_traces_aligned_for_the_extended_tail():
+    """_run_row's 1.5 s -> 5 s extension indexes slow traces by the *combined* length.
+
+    On a label change the row continues from the first leg's checkpoint, concatenates
+    both legs' rate/spike arrays, sets n_steps to the combined length and then slices
+    the slow traces by that number.  Those traces must therefore already span both
+    legs; if they only covered the second leg the extended tail would be misaligned.
+    """
+
+    p, net, slow, vth = _case(frozen=True)
+    first = run_fcxr_loop(p, net, slow=slow, n_steps=30, capture_final=True,
+                          store_spikes=True, v_th_per_neuron=vth)
+    second = run_fcxr_loop(p, net, start=first["checkpoint"], n_steps=70,
+                           capture_final=True, store_spikes=True, v_th_per_neuron=vth)
+    combined_rate = np.concatenate([first["rate_E"], second["rate_E"]])
+    combined_spikes = np.concatenate([first["E_spk_bool"], second["E_spk_bool"]], axis=0)
+    total = int(combined_rate.size)
+    assert total == 100 and combined_spikes.shape[0] == 100
+
+    sl = second["checkpoint"].slow
+    for name in ("trace_h_lc2_mean", "trace_tau_eff_ratio_min",
+                 "trace_conductance_clip_frac"):
+        trace = np.asarray(getattr(sl, name), dtype=float)
+        assert trace.size >= total, f"{name} covers only {trace.size} of {total} steps"
+        tail = trace[-total:]
+        assert tail.size == total and np.all(np.isfinite(tail)), name

@@ -129,9 +129,14 @@ Amendment 2026-08-04 — the two-worker rule above is the floor, not the cap. Wo
 additionally require the worst-case extended-row budget to fit:
 
 ```text
-n * 1.35 * 3 * RSS_single <= MemAvailable - 96 GiB
+n * 1.35 * EXTENDED_ROW_RSS_SCALE * RSS_single <= MemAvailable - 96 GiB
+EXTENDED_ROW_RSS_SCALE = 2.0   # measured worst-case extended row is 1.75x the smoke row
 n <= min(MAX_MAP_WORKERS = 8, cpu_count - 2)
 ```
+
+`n` is recomputed on every scheduler round, not frozen after the smoke row, so a sibling job
+that takes or releases memory mid-map scales the pool down or up. In-flight rows are never
+preempted; the count only gates new submissions.
 
 Use a bounded producer with at most `n_workers` pending rows. Never submit the full map at once.
 
