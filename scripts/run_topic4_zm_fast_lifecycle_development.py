@@ -358,6 +358,18 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
                     "m_mode_power",
                 )
             }
+        if bool(getattr(args, "use_mode_M_divisive", False)):
+            values.update({
+                "use_mode_M_divisive": True,
+                "kappa_mode_M": float(args.kappa_mode_M),
+                "m_mode_div_ref": float(args.m_mode_div_ref),
+                "m_mode_div_power": float(args.m_mode_div_power),
+            })
+            receipt["collective_mode_M_divisive"] = {
+                key: values[key] for key in (
+                    "kappa_mode_M", "m_mode_div_ref", "m_mode_div_power",
+                )
+            }
     cfg = dataclasses.replace(cfg, **values)
     base = R.SpatialSlowField(
         ctx["S"]["N"], 18.0, ctx["S"]["posE"], ctx["S"]["posI"],
@@ -393,6 +405,11 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         )
     if bool(getattr(args, "freeze_zm", False)):
         stem += f"__freeze_{args.state}"
+    if bool(getattr(args, "use_mode_M_divisive", False)):
+        stem += (
+            f"__mdiv{args.kappa_mode_M:g}"
+            f"r{args.m_mode_div_ref:g}p{args.m_mode_div_power:g}"
+        )
     return stem
 
 
@@ -678,6 +695,13 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
                 diagnostic.trace_mode_H_gain_core_mean, np.float32
             ),
         })
+    if diagnostic.cfg.use_mode_M_divisive:
+        arrays.update({
+            "trace_mode_M_pool": np.asarray(diagnostic.trace_mode_M_pool, np.float32),
+            "trace_mode_M_divisor": np.asarray(
+                diagnostic.trace_mode_M_divisor, np.float32
+            ),
+        })
     namespace = (
         "smoke" if args.smoke else
         ("lifecycle_sprint" if args.command == "sprint-cell" else
@@ -853,6 +877,10 @@ def main() -> None:
     parser.add_argument("--zeta-mode-slope", type=float, default=0.1)
     parser.add_argument("--m-mode-half", type=float, default=45.0)
     parser.add_argument("--m-mode-power", type=float, default=4.0)
+    parser.add_argument("--use-mode-M-divisive", action="store_true")
+    parser.add_argument("--kappa-mode-M", type=float, default=0.0)
+    parser.add_argument("--m-mode-div-ref", type=float, default=30.0)
+    parser.add_argument("--m-mode-div-power", type=float, default=4.0)
     parser.add_argument("--T-ms", type=float, default=PRODUCTION_T_MS)
     parser.add_argument("--burn-ms", type=float, default=PRODUCTION_BURN_MS)
     parser.add_argument("--smoke", action="store_true")

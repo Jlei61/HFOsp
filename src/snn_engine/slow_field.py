@@ -182,6 +182,14 @@ class SpatialSlowFieldConfig:
     zeta_mode_slope: float = 0.10
     m_mode_half: float = 45.0
     m_mode_power: float = 4.0
+    # Optional collective M brake on the *same recurrent-E denominator*.
+    # The p-norm is detector-free and has no anatomical mask: recruited cells
+    # with high native m can stabilise the whole pathological mode instead of
+    # merely closing H locally and letting amplification escape to surround.
+    use_mode_M_divisive: bool = False
+    kappa_mode_M: float = 0.0
+    m_mode_div_ref: float = 30.0
+    m_mode_div_power: float = 4.0
     # ---- Phase-D fast carrier: E-only dynamic-threshold INCREMENT.
     # This is not the legacy absolute-threshold SlowVars.phi. The heterogeneous
     # V_th substrate remains the base and phi_increment is added on top. ----
@@ -323,6 +331,17 @@ class SpatialSlowFieldConfig:
                 raise ValueError("z_mode_base must exceed z_mode_susceptible")
             if not np.isfinite(self.zeta_mode_center) or not 0.0 < self.zeta_mode_center < 1.0:
                 raise ValueError("zeta_mode_center must lie in (0,1)")
+        if self.use_mode_M_divisive:
+            if not self.use_SG or not self.use_m:
+                raise ValueError("use_mode_M_divisive requires recurrent-only current and native M")
+            for name, value in {
+                "m_mode_div_ref": self.m_mode_div_ref,
+                "m_mode_div_power": self.m_mode_div_power,
+            }.items():
+                if not np.isfinite(value) or value <= 0.0:
+                    raise ValueError(f"{name} must be finite and >0")
+            if not np.isfinite(self.kappa_mode_M) or self.kappa_mode_M < 0.0:
+                raise ValueError("kappa_mode_M must be finite and >=0")
         if self.use_phi:
             if self.tau_phi <= 0.0:
                 raise ValueError(
@@ -580,6 +599,7 @@ class SpatialSlowField:
         self.trace_mode_H_drive_mean = []; self.trace_mode_H_drive_max = []
         self.trace_mode_H_gain_mean = []; self.trace_mode_H_gain_max = []
         self.trace_mode_H_gain_core_mean = []
+        self.trace_mode_M_pool = []; self.trace_mode_M_divisor = []
         # ---- Phase-D dynamic threshold increment (E-only, fast) ----
         self.phi_increment = np.zeros(self.N, dtype=float)
         self.trace_phi_mean = []; self.trace_phi_max = []
@@ -680,11 +700,17 @@ class SpatialSlowField:
             aS = self.cfg.alpha_G * self.S_G
             if self.cfg.use_H:                                        # + containment memory H (Phase-3 vNext)
                 aH = self.cfg.alpha_H * self.H
-                denom = 1.0 + aS + aH
-                frac = (aS + aH) / denom                              # I_EE/(1+alpha_G*S_G+alpha_H*H)
             else:
-                denom = 1.0 + aS
-                frac = aS / denom                                     # exact pre-H expression -> byte-parity
+                aH = 0.0
+            if self.cfg.use_mode_M_divisive:
+                pool_M = self.mode_M_pool()
+                aM = self.cfg.kappa_mode_M * pool_M
+                self.trace_mode_M_pool.append(float(pool_M))
+                self.trace_mode_M_divisor.append(float(1.0 + aM))
+            else:
+                aM = 0.0
+            denom = 1.0 + aS + aH + aM
+            frac = (aS + aH + aM) / denom
             out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + self.cfg.beta_SG * self.S_G
             if self.cfg.use_mode_H:
                 if self.cfg.rho_mode_H > 0.0:
@@ -717,6 +743,15 @@ class SpatialSlowField:
         gate_m = 1.0 / (1.0 + (mE / self.cfg.m_mode_half) ** self.cfg.m_mode_power)
         hE = self.mode_H[self._iyE, self._ixE]
         return self.cfg.rho_mode_H * hE * gate_z * gate_m
+
+    def mode_M_pool(self) -> float:
+        """Mask-free p-norm of native E-cell M, normalised to a reference."""
+        if not self.cfg.use_mode_M_divisive or self.cfg.kappa_mode_M <= 0.0:
+            return 0.0
+        scaled = np.maximum(self.m[:self.nE], 0.0) / self.cfg.m_mode_div_ref
+        return float(np.mean(scaled ** self.cfg.m_mode_div_power)) ** (
+            1.0 / self.cfg.m_mode_div_power
+        )
 
     def _load_shunt_params(self):
         c = self.cfg

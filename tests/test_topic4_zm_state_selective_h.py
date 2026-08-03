@@ -105,3 +105,25 @@ def test_mode_h_is_causal_local_state_and_round_trips_checkpoint():
 def test_mode_h_rejects_missing_native_coordinates():
     with pytest.raises(ValueError, match="requires the native Z and M"):
         _slow(use_z=False)
+
+
+def test_collective_m_divisor_suppresses_base_recurrent_e_without_h():
+    slow = _slow(
+        use_mode_H=False,
+        rho_mode_H=0.0,
+        use_mode_M_divisive=True,
+        kappa_mode_M=2.0,
+        m_mode_div_ref=10.0,
+        m_mode_div_power=2.0,
+    )
+    slow.S_G = 0.0
+    slow.m[:4] = 10.0
+    assert slow.mode_M_pool() == pytest.approx(1.0)
+    out = slow.apply_currents(
+        np.full(6, 10.0), np.zeros(6), I_E_rec=np.full(6, 6.0)
+    )
+    # recurrent component is 6/(1 + 2*1) = 2 mV; the non-recurrent 4 mV
+    # remains outside the divisor, giving 6 mV before the already-existing
+    # eta_m*m = 0.01-mV additive M current.
+    np.testing.assert_allclose(out[:4], 5.99)
+    assert slow.trace_mode_M_divisor[-1] == pytest.approx(3.0)
