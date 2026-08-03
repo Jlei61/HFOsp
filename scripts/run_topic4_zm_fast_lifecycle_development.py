@@ -422,6 +422,8 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += f"__freeze_{args.state}"
     if float(getattr(args, "i2e_tau_cv", 0.0)) > 0.0:
         stem += f"__tauDcv{args.i2e_tau_cv:g}s{args.i2e_tau_seed:d}"
+    if not np.isclose(float(getattr(args, "i2e_delay_scale", 1.0)), 1.0):
+        stem += f"__i2edelay{args.i2e_delay_scale:g}"
     if bool(getattr(args, "use_mode_M_divisive", False)):
         stem += (
             f"__mdiv{args.kappa_mode_M:g}"
@@ -555,6 +557,13 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         row_id=source_id,
         contract_already_validated=True,
     )
+    delay_receipt = None
+    if not np.isclose(float(args.i2e_delay_scale), 1.0):
+        ctx["S"]["net"], state, delay_receipt = RT.rescale_i2e_delay_bins(
+            ctx["S"]["net"], state,
+            n_e=int(ctx["S"]["NE"]), scale=float(args.i2e_delay_scale),
+        )
+        transformation["migrated_state_hash"] = CK.state_hash(state)
     if worker_receipt is not None:
         worker_receipt.update_context(
             checkpoint_hash=transformation["source_state_hash"],
@@ -576,6 +585,8 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
     slow, diagnostic, delta, mechanism = _make_slow(
         ctx, args.tau_phi_ms, args.fraction, args=args
     )
+    if delay_receipt is not None:
+        mechanism["i2e_delay_rescaling"] = delay_receipt
     z0 = np.array(state["slow.z"], copy=True)
     m0 = np.array(state["slow.m"], copy=True)
     sg0 = float(np.asarray(state["slow.S_G"]))
@@ -883,6 +894,7 @@ def main() -> None:
     parser.add_argument("--d-star", type=float)
     parser.add_argument("--i2e-tau-cv", type=float, default=0.0)
     parser.add_argument("--i2e-tau-seed", type=int, default=0)
+    parser.add_argument("--i2e-delay-scale", type=float, default=1.0)
     parser.add_argument("--tau-aI-ms", type=float, dest="tau_aI_ms")
     parser.add_argument("--f-aI", type=float, dest="f_aI")
     parser.add_argument("--strength-scale", type=float)

@@ -4,10 +4,12 @@ from __future__ import annotations
 from types import SimpleNamespace
 
 import numpy as np
+from scipy import sparse
 
 from src.topic4_zm_fast_carrier_runtime import (
     DiagnosticSlowWrapper,
     FrozenAllNoStepWrapper,
+    rescale_i2e_delay_bins,
 )
 
 
@@ -88,3 +90,27 @@ def test_dynamic_diagnostic_step_delegates_and_advances_counter():
     diagnostic.step(np.array([True]), np.array([0]), 0.1)
     assert len(calls) == 1
     assert diagnostic._step_index == 1
+
+
+def test_i2e_delay_rescaling_moves_only_e_targets_and_preserves_inflight_offsets():
+    zero_a = sparse.csc_matrix((3, 2))
+    zero_g = sparse.csc_matrix((3, 1))
+    gaba_d1 = sparse.csc_matrix(([2.0, 5.0], ([0, 2], [0, 0])), shape=(3, 1))
+    net = {
+        "ampa_by_delay": [zero_a.copy() for _ in range(3)],
+        "gaba_by_delay": [zero_g.copy(), gaba_d1, zero_g.copy()],
+        "max_delay_steps": 2,
+    }
+    old_ring = np.arange(9.0).reshape(3, 3)
+    state = {"t": np.asarray(1), "ring_sE": old_ring, "ring_sI": old_ring + 10}
+    new_net, new_state, receipt = rescale_i2e_delay_bins(
+        net, state, n_e=2, scale=3.0
+    )
+    assert new_net["max_delay_steps"] == 3
+    assert new_net["gaba_by_delay"][1][2, 0] == 5.0  # I target unchanged
+    assert new_net["gaba_by_delay"][1][0, 0] == 0.0
+    assert new_net["gaba_by_delay"][3][0, 0] == 2.0  # E target delayed
+    np.testing.assert_array_equal(new_state["ring_sE"][1], old_ring[1])
+    np.testing.assert_array_equal(new_state["ring_sE"][2], old_ring[2])
+    np.testing.assert_array_equal(new_state["ring_sE"][3], old_ring[0])
+    assert receipt["edges_unchanged"]

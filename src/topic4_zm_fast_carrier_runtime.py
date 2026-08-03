@@ -9,12 +9,76 @@ import time
 from typing import Any
 
 import numpy as np
+from scipy import sparse
 
 
 def git_sha(root: Path) -> str:
     return subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=root, text=True
     ).strip()
+
+
+def rescale_i2e_delay_bins(net: dict, state: dict, *, n_e: int, scale: float):
+    """Delay only GABA arrivals onto E cells and preserve in-flight arrivals.
+
+    E->E weights and all graph edges remain unchanged.  Existing ring contents
+    keep their original future arrival offset; only emissions after the branch
+    point use the rescaled I->E delay bins.
+    """
+    scale = float(scale)
+    if not np.isfinite(scale) or scale < 1.0:
+        raise ValueError("i2e delay scale must be finite and >=1")
+    if np.isclose(scale, 1.0):
+        return net, state, {"scale": 1.0, "changed": False}
+    old_max = int(net["max_delay_steps"])
+    old_m = old_max + 1
+    gaba = net["gaba_by_delay"]
+    ampa = net["ampa_by_delay"]
+    n, n_i = gaba[0].shape
+    row_e = np.zeros(n, dtype=float); row_e[: int(n_e)] = 1.0
+    row_i = 1.0 - row_e
+    new_max = max(
+        old_max,
+        max(max(1, int(round(d * scale))) for d, matrix in enumerate(gaba) if matrix.nnz),
+    )
+    zero_g = sparse.csc_matrix((n, n_i), dtype=float)
+    g_new = [zero_g.copy() for _ in range(new_max + 1)]
+    for d, matrix in enumerate(gaba):
+        if not matrix.nnz:
+            continue
+        to_e = matrix.multiply(row_e[:, None]).tocsc()
+        to_i = matrix.multiply(row_i[:, None]).tocsc()
+        if to_i.nnz:
+            g_new[d] = (g_new[d] + to_i).tocsc()
+        if to_e.nnz:
+            new_d = max(1, int(round(d * scale)))
+            g_new[new_d] = (g_new[new_d] + to_e).tocsc()
+    zero_a = sparse.csc_matrix(ampa[0].shape, dtype=float)
+    a_new = list(ampa) + [zero_a.copy() for _ in range(new_max + 1 - len(ampa))]
+    net_new = dict(net)
+    net_new.update(
+        ampa_by_delay=a_new,
+        gaba_by_delay=g_new,
+        max_delay_steps=new_max,
+    )
+    state_new = dict(state)
+    t_abs = int(np.asarray(state["t"]))
+    for key in ("ring_sE", "ring_sI"):
+        old_ring = np.asarray(state[key])
+        if old_ring.shape[0] != old_m:
+            raise ValueError(f"{key} has {old_ring.shape[0]} bins, expected {old_m}")
+        new_ring = np.zeros((new_max + 1, old_ring.shape[1]), dtype=old_ring.dtype)
+        for delta in range(old_m):
+            new_ring[(t_abs + delta) % (new_max + 1)] += old_ring[(t_abs + delta) % old_m]
+        state_new[key] = new_ring
+    return net_new, state_new, {
+        "scale": scale,
+        "changed": True,
+        "old_max_delay_steps": old_max,
+        "new_max_delay_steps": new_max,
+        "edges_unchanged": True,
+        "existing_arrival_offsets_preserved": True,
+    }
 
 
 def build_source_locked_context(root: Path, manifest: dict, runner: Any) -> dict:
