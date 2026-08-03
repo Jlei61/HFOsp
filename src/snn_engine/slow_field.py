@@ -178,6 +178,7 @@ class SpatialSlowFieldConfig:
     theta_mode_H_hz: float = 40.0   # local rE drive onset
     half_mode_H_hz: float = 40.0    # drive half-saturation above onset
     rho_mode_H: float = 0.0         # maximum multiplicative recurrent-E increment
+    mode_H_common_subtraction: float = 0.0  # 0=native local H; 1=remove its E-population common mode
     z_mode_base: float = 1.0
     z_mode_susceptible: float = 0.50
     zeta_mode_center: float = 0.50
@@ -340,6 +341,11 @@ class SpatialSlowFieldConfig:
                 raise ValueError("theta_mode_H_hz must be finite and >=0")
             if not np.isfinite(self.rho_mode_H) or self.rho_mode_H < 0.0:
                 raise ValueError("rho_mode_H must be finite and >=0")
+            if (
+                not np.isfinite(self.mode_H_common_subtraction)
+                or not 0.0 <= self.mode_H_common_subtraction <= 1.0
+            ):
+                raise ValueError("mode_H_common_subtraction must lie in [0,1]")
             if not (np.isfinite(self.z_mode_base) and np.isfinite(self.z_mode_susceptible)
                     and self.z_mode_base > self.z_mode_susceptible):
                 raise ValueError("z_mode_base must exceed z_mode_susceptible")
@@ -860,6 +866,11 @@ class SpatialSlowField:
         mE = self.m[:self.nE]
         gate_m = 1.0 / (1.0 + (mE / self.cfg.m_mode_half) ** self.cfg.m_mode_power)
         hE = self.mode_H[self._iyE, self._ixE]
+        if self.cfg.mode_H_common_subtraction > 0.0:
+            hE = np.maximum(
+                hE - self.cfg.mode_H_common_subtraction * float(np.mean(hE)),
+                0.0,
+            )
         return self.cfg.rho_mode_H * hE * gate_z * gate_m
 
     def mode_M_raw_pool(self) -> float:

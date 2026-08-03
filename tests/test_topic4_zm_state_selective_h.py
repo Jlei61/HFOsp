@@ -74,6 +74,30 @@ def test_local_h_opens_with_z_depletion_and_closes_with_m():
     assert out[2] > out[1]
 
 
+def test_mode_h_common_subtraction_rejects_uniform_gain_and_keeps_hotspot():
+    slow = _slow(mode_H_common_subtraction=1.0)
+    slow.z[:4] = 0.5
+    slow.m[:4] = 0.0
+    slow.mode_H[:] = 0.5
+    np.testing.assert_array_equal(slow.mode_H_gain_at_E(), np.zeros(4))
+    slow.mode_H[slow._iyE[0], slow._ixE[0]] = 1.0
+    gain = slow.mode_H_gain_at_E()
+    assert gain[0] > 0.0
+    assert np.count_nonzero(gain) == 1
+
+
+def test_mode_h_common_subtraction_zero_is_exact_legacy_gain():
+    explicit = _slow(mode_H_common_subtraction=0.0)
+    legacy = _slow()
+    for slow in (explicit, legacy):
+        slow.z[:4] = 0.5
+        slow.m[:4] = 0.0
+        slow.mode_H[slow._iyE, slow._ixE] = np.array([0.1, 0.2, 0.3, 0.4])
+    np.testing.assert_array_equal(
+        explicit.mode_H_gain_at_E(), legacy.mode_H_gain_at_E()
+    )
+
+
 def test_sensor_only_rho_zero_is_membrane_identical_to_mode_h_off():
     sensor = _slow(rho_mode_H=0.0)
     off = _slow(use_mode_H=False, rho_mode_H=0.0)

@@ -370,6 +370,9 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
                     getattr(args, "tau_mode_H_down_ms", args.tau_mode_H_ms)
                 ),
                 "rho_mode_H": float(args.rho_mode_H),
+                "mode_H_common_subtraction": float(
+                    args.mode_H_common_subtraction
+                ),
                 "theta_mode_H_hz": float(args.theta_mode_H_hz),
                 "half_mode_H_hz": float(args.half_mode_H_hz),
                 "z_mode_base": float(args.z_mode_base),
@@ -381,7 +384,8 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             })
             receipt["state_selective_mode_H"] = {
                 key: values[key] for key in (
-                    "tau_mode_H", "tau_mode_H_down", "rho_mode_H", "theta_mode_H_hz",
+                    "tau_mode_H", "tau_mode_H_down", "rho_mode_H",
+                    "mode_H_common_subtraction", "theta_mode_H_hz",
                     "half_mode_H_hz", "z_mode_base", "z_mode_susceptible",
                     "zeta_mode_center", "zeta_mode_slope", "m_mode_half",
                     "m_mode_power",
@@ -440,6 +444,8 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         if not np.isclose(tau_h_down, float(args.tau_mode_H_ms)):
             stem += f"d{tau_h_down:g}"
         stem += f"__mc{args.m_mode_half:g}"
+        if float(getattr(args, "mode_H_common_subtraction", 0.0)) > 0.0:
+            stem += f"cs{args.mode_H_common_subtraction:g}"
     if bool(getattr(args, "freeze_zm", False)):
         stem += f"__freeze_{args.state}"
     if float(getattr(args, "i2e_tau_cv", 0.0)) > 0.0:
@@ -1009,6 +1015,7 @@ def main() -> None:
         help="freeze native z/m at --state while leaving fast E/I, S_G and mode-H dynamic",
     )
     parser.add_argument("--rho-mode-H", type=float, default=0.0)
+    parser.add_argument("--mode-H-common-subtraction", type=float, default=0.0)
     parser.add_argument("--tau-mode-H-ms", type=float, default=250.0)
     parser.add_argument("--tau-mode-H-down-ms", type=float, default=250.0)
     parser.add_argument("--theta-mode-H-hz", type=float, default=40.0)
