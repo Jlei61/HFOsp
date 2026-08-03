@@ -98,6 +98,8 @@ def test_split_continuation_matches_uninterrupted_and_is_idempotent():
         np.testing.assert_array_equal(
             np.concatenate([pre["rate_E"], tail["rate_E"]]), ref["rate_E"])
         np.testing.assert_array_equal(
+            np.concatenate([pre["rate_I"], tail["rate_I"]]), ref["rate_I"])
+        np.testing.assert_array_equal(
             np.concatenate([pre["E_spk_bool"], tail["E_spk_bool"]], axis=0),
             ref["E_spk_bool"],
         )

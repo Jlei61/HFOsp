@@ -18,6 +18,7 @@ import argparse
 import copy
 import dataclasses
 import fcntl
+import gc
 import hashlib
 import json
 import resource
@@ -37,6 +38,7 @@ sys.path.insert(0, os.path.join(ROOT, "src", "snn_engine"))
 
 import run_m4_phaseplane as PP  # noqa: E402
 import run_topic4_mz_fcxr as FCXR  # noqa: E402
+import run_topic4_mz_fcxr_lifecycle as LC1R  # noqa: E402
 import run_topic4_mz_slowvars as OLD  # noqa: E402
 from kick_probe import simulate_kick  # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
@@ -85,6 +87,14 @@ ARTIFACTS = {
         LC1, "runs", "20260723T020801.390740Z_2615846_5c8b9fb_lifecycle_seed1_q50_xm0.1_td1000_tu10000_T12000",
         "lifecycle_traces.npz"),
 }
+
+FIELD_FAMILIES = {
+    "seed1_q75": dict(seed=1, regime="q75", artifact_key="z_seed1_q75"),
+    "seed1_q50": dict(seed=1, regime="q50", artifact_key="z_seed1_q50"),
+    "seed3_q75": dict(seed=3, regime="q75", artifact_key="z_seed3_q75"),
+}
+FIELD_LABELS = ("D10", "D30", "D50", "D70", "Dmax")
+FIELD_QUANTILES = (0.10, 0.30, 0.50, 0.70, 0.99)
 
 SOURCES = (
     "src/topic4_fcxr_lc3.py",
@@ -168,6 +178,18 @@ def _assert_lock_current():
     return lock
 
 
+def _assert_e0_current(lock):
+    path = os.path.join(OUT, "prepared_state_contract.json")
+    if not os.path.isfile(path):
+        raise SystemExit("missing prepared_state_contract.json; run E0 first")
+    e0 = json.load(open(path))
+    if e0.get("status") != "PASS":
+        raise SystemExit("E0 exact-state contract is not PASS")
+    if e0.get("source_lock_git_head") != lock.get("git_head"):
+        raise SystemExit("E0 was generated under a different source lock; rerun E0")
+    return e0
+
+
 def cmd_lock(_args):
     FCXR._assert_engine_blessed()
     missing = [p for p in ARTIFACTS.values() if not os.path.isfile(p)]
@@ -245,13 +267,14 @@ def _alias_audit(parent):
 
 
 def _field_replacement_audit(parent):
+    parent_before = state_hash(parent)
     ne = int(parent.slow.NE)
     d = np.linspace(0.0, 0.2, ne)
     x = np.linspace(0.6, 1.0, ne)
     d_child = replace_frozen_fields(parent, d_field=d)
     x_child = replace_frozen_fields(parent, x_field=x)
     return dict(
-        parent_unchanged=state_hash(parent) == state_hash(clone_loop_state(parent)),
+        parent_unchanged=state_hash(parent) == parent_before,
         d_exact=bool(np.array_equal(d_child.slow.z[:ne], 1.0 - d)),
         x_exact=bool(np.array_equal(x_child.slow.x_relay, x)
                      and np.array_equal(x_child.slow.ee_relay_send, x)),
@@ -311,17 +334,19 @@ def cmd_e0(args):
             store_spikes=True, v_th_per_neuron=S["vth"],
         )
         split_rate = np.concatenate([pre["rate_E"], tail["rate_E"]])
+        split_rate_i = np.concatenate([pre["rate_I"], tail["rate_I"]])
         split_spikes = np.concatenate([pre["E_spk_bool"], tail["E_spk_bool"]], axis=0)
 
         guarded_hash = _arr_hash(guarded["rate_E"], guarded["rate_I"], guarded["E_spk_bool"])
         full_hash = _arr_hash(full["rate_E"], full["rate_I"], full["E_spk_bool"])
-        split_hash = _arr_hash(split_rate, split_spikes)
+        split_hash = _arr_hash(split_rate, split_rate_i, split_spikes)
         field_audit = _field_replacement_audit(pre["checkpoint"])
         clauses = dict(
             guarded_vs_exact_rate=bool(np.array_equal(guarded["rate_E"], full["rate_E"])),
             guarded_vs_exact_i_rate=bool(np.array_equal(guarded["rate_I"], full["rate_I"])),
             guarded_vs_exact_raster=bool(np.array_equal(guarded["E_spk_bool"], full["E_spk_bool"])),
             split_vs_full_rate=bool(np.array_equal(split_rate, full["rate_E"])),
+            split_vs_full_i_rate=bool(np.array_equal(split_rate_i, full["rate_I"])),
             split_vs_full_raster=bool(np.array_equal(split_spikes, full["E_spk_bool"])),
             split_vs_full_final_state=bool(state_hash(tail["checkpoint"]) == state_hash(full["checkpoint"])),
             child_forks_nonaliasing=_alias_audit(pre["checkpoint"]),
@@ -357,17 +382,232 @@ def cmd_e0(args):
                               wall_s=after.get("wall_s"), peak_rss_gib=after["self_peak_rss_gib"]), indent=2))
 
 
+def _archived_scalar(family):
+    meta = FIELD_FAMILIES[family]
+    path = ARTIFACTS[meta["artifact_key"]]
+    with np.load(path) as d:
+        z_mean = np.asarray(d["z_mean"], dtype=float)
+        rate = np.asarray(d["rate_E"], dtype=float)
+        sample_dt = float(np.asarray(d["rate_dt_ms"]).ravel()[0])
+        dz_t = np.asarray(d["DZ_t_ms"], dtype=float)
+        dz = np.asarray(d["DZ"], dtype=float)
+    t = np.arange(z_mean.size, dtype=float) * sample_dt
+    return dict(path=path, z_mean=z_mean, d_mean=1.0 - z_mean, rate=rate,
+                sample_dt_ms=sample_dt, time_ms=t, DZ_t_ms=dz_t, DZ=dz)
+
+
+def _nearest_rows(d_mean, time_ms, targets, *, burn_ms=2000.0):
+    valid = np.flatnonzero(time_ms >= float(burn_ms))
+    if valid.size == 0:
+        raise ValueError("archived trace has no samples after burn-in")
+    rows = []
+    for label, target in zip(FIELD_LABELS, targets):
+        local = np.abs(d_mean[valid] - float(target))
+        idx = int(valid[int(np.argmin(local))])
+        rows.append(dict(label=label, target_mean_D=float(target), archive_index=idx,
+                         time_ms=float(time_ms[idx]), archive_mean_D=float(d_mean[idx])))
+    return rows
+
+
+def cmd_e1_targets(_args):
+    lock = _assert_lock_current()
+    _assert_e0_current(lock)
+    primary = _archived_scalar("seed1_q75")
+    use = primary["d_mean"][primary["time_ms"] >= 2000.0]
+    targets = np.quantile(use, FIELD_QUANTILES)
+    families = {}
+    for family in FIELD_FAMILIES:
+        scalar = _archived_scalar(family)
+        families[family] = dict(
+            source_path=scalar["path"], source_sha256=_sha(scalar["path"]),
+            sample_dt_ms=scalar["sample_dt_ms"],
+            rows=_nearest_rows(scalar["d_mean"], scalar["time_ms"], targets),
+        )
+    payload = dict(
+        status="TARGETS_LOCKED", schema="fcxr-lc3-d-field-targets-1.0",
+        primary_family="seed1_q75", burn_in_ms=2000.0,
+        scalar_coordinate="mean_D=1-z_mean",
+        quantiles={lab: q for lab, q in zip(FIELD_LABELS, FIELD_QUANTILES)},
+        target_means_D={lab: float(x) for lab, x in zip(FIELD_LABELS, targets)},
+        families=families, execution_lock_sha256=_sha(os.path.join(OUT, "execution_lock.json")),
+        git_head=lock["git_head"], locked_at=_now(),
+    )
+    _write_json(os.path.join(OUT, "d_field_targets.json"), payload)
+    print(json.dumps(dict(status=payload["status"], target_means_D=payload["target_means_D"],
+                          selected_times_ms={k: [r["time_ms"] for r in v["rows"]]
+                                             for k, v in families.items()}), indent=2))
+
+
+def _assert_targets_current(lock):
+    path = os.path.join(OUT, "d_field_targets.json")
+    if not os.path.isfile(path):
+        raise SystemExit("missing d_field_targets.json; run e1-targets first")
+    targets = json.load(open(path))
+    if targets.get("status") != "TARGETS_LOCKED" or targets.get("git_head") != lock.get("git_head"):
+        raise SystemExit("D-field targets do not match current execution lock")
+    return targets
+
+
+def _family_output(family):
+    return os.path.join(OUT, f"d_fields_{family}.npz")
+
+
+def _replay_family(family, lock, targets):
+    if family not in FIELD_FAMILIES:
+        raise ValueError(f"unknown family {family}")
+    meta = FIELD_FAMILIES[family]
+    done = os.path.join(OUT, f"E1_DONE_{family}.json")
+    if os.path.isfile(done) and os.path.isfile(_family_output(family)):
+        prior = json.load(open(done))
+        if (prior.get("source_lock_git_head") == lock["git_head"]
+                and prior.get("output_sha256") == _sha(_family_output(family))):
+            print(f"[E1] resume {family}: valid DONE", flush=True)
+            return prior
+
+    before = _resource_log(f"E1_{family}_START")
+    if before["mem_available_gib"] < 128.0:
+        raise RuntimeError(f"E1 resource gate: MemAvailable {before['mem_available_gib']:.1f} GiB <128")
+    running = os.path.join(OUT, f"E1_RUNNING_{family}.json")
+    _write_json(running, dict(status="RUNNING", family=family, pid=os.getpid(), started=_now(),
+                              resource=before, source_lock_git_head=lock["git_head"]))
+
+    family_rows = targets["families"][family]["rows"]
+    snapshot_steps = {int(round(float(r["time_ms"]) / DT)): str(r["label"]) for r in family_rows}
+    if len(snapshot_steps) != len(FIELD_LABELS):
+        raise RuntimeError(f"{family}: selected times collapse to duplicate integration steps")
+    scalar = _archived_scalar(family)
+    t0 = time.time()
+    S = PP.build_substrate(int(meta["seed"]))
+    res, slow = LC1R._lc_run(
+        S, LC1R._zonly_cfg(str(meta["regime"])), 24000.0,
+        seed=int(meta["seed"]), dt=DT, snapshot_steps=snapshot_steps,
+    )
+
+    stride = int(round(scalar["sample_dt_ms"] / DT))
+    z_replay = np.asarray(slow.trace_z_mean, dtype=float)[::stride]
+    rate_replay = np.asarray(res["rate_E"], dtype=float)[::stride]
+    z_exact = bool(np.array_equal(z_replay.astype(np.float32), scalar["z_mean"].astype(np.float32)))
+    rate_exact = bool(np.array_equal(rate_replay.astype(np.float32), scalar["rate"].astype(np.float32)))
+    if not (z_exact and rate_exact):
+        payload = dict(status="D_FIELD_REPLAY_UNRESOLVED", family=family,
+                       z_exact_float32=z_exact, rate_exact_float32=rate_exact,
+                       z_max_abs_diff=float(np.max(np.abs(z_replay - scalar["z_mean"]))),
+                       rate_max_abs_diff=float(np.max(np.abs(rate_replay - scalar["rate"]))),
+                       source_lock_git_head=lock["git_head"], finished=_now())
+        _write_json(os.path.join(OUT, f"D_FIELD_REPLAY_UNRESOLVED_{family}.json"), payload)
+        raise RuntimeError(f"{family}: archived scalar replay mismatch")
+
+    fields = []
+    rows = []
+    for row in family_rows:
+        snap = slow.snapshots.get(row["label"])
+        if snap is None:
+            raise RuntimeError(f"{family}: missing snapshot {row['label']}")
+        d = 1.0 - np.asarray(snap["z_E"], dtype=float)
+        fields.append(d)
+        rows.append(dict(
+            **row, replay_step=int(snap["step"]), replay_time_ms=float(snap["step"] * DT),
+            replay_mean_D=float(np.mean(d)), q05=float(np.quantile(d, 0.05)),
+            q50=float(np.quantile(d, 0.50)), q95=float(np.quantile(d, 0.95)),
+            field_l2=float(np.linalg.norm(d)), field_sha256=_arr_hash(d),
+        ))
+    fields = np.stack(fields)
+    FCXR._write_npz(
+        _family_output(family), D_fields=fields, labels=np.asarray(FIELD_LABELS),
+        times_ms=np.asarray([r["replay_time_ms"] for r in rows], dtype=float),
+        target_means_D=np.asarray([r["target_mean_D"] for r in rows], dtype=float),
+        replay_means_D=np.asarray([r["replay_mean_D"] for r in rows], dtype=float),
+    )
+    numerical = dict(
+        finite=bool(np.all(np.isfinite(fields)) and np.all(np.isfinite(res["rate_E"]))),
+        clip_frac_max=float(np.max(slow.trace_conductance_clip_frac)),
+        tau_eff_min_ms=float(S["p"].tau_m_E * np.min(slow.trace_tau_eff_ratio_min)),
+    )
+    safe = bool(numerical["finite"] and numerical["clip_frac_max"] == 0.0
+                and numerical["tau_eff_min_ms"] >= 2.0 * DT)
+    del res
+    gc.collect()
+    after = _resource_log(f"E1_{family}_DONE", wall_s=time.time() - t0, numerical_safe=safe)
+    payload = dict(
+        status="PASS" if safe else "NUMERICAL_BLOCKED", family=family,
+        connection_seed=int(meta["seed"]), noise_seed=int(meta["seed"]), regime=meta["regime"],
+        T_ms=24000.0, dt_ms=DT, scalar_replay=dict(z_exact_float32=z_exact,
+                                                    rate_exact_float32=rate_exact),
+        rows=rows, numerical=numerical, output_path=_family_output(family),
+        output_sha256=_sha(_family_output(family)), source_lock_git_head=lock["git_head"],
+        resources=dict(start=before, end=after), finished=_now(),
+    )
+    _write_json(done, payload)
+    if os.path.exists(running):
+        os.replace(running, os.path.join(OUT, f"E1_RUNNING_{family}.superseded.json"))
+    if not safe:
+        raise RuntimeError(f"{family}: numerical safety failure")
+    print(f"[E1] {family} PASS wall={after['wall_s']:.1f}s RSS={after['self_peak_rss_gib']:.2f}GiB",
+          flush=True)
+    return payload
+
+
+def _collect_d_field_lock(lock, targets):
+    families = {}
+    for family in FIELD_FAMILIES:
+        done = os.path.join(OUT, f"E1_DONE_{family}.json")
+        if not os.path.isfile(done) or not os.path.isfile(_family_output(family)):
+            return None
+        rec = json.load(open(done))
+        if rec.get("status") != "PASS" or rec.get("source_lock_git_head") != lock["git_head"]:
+            return None
+        if rec.get("output_sha256") != _sha(_family_output(family)):
+            raise RuntimeError(f"{family}: output hash mismatch at collection")
+        families[family] = rec
+    primary = families["seed1_q75"]
+    payload = dict(
+        status="PASS", schema="fcxr-lc3-d-field-lock-1.0",
+        primary_family="seed1_q75", primary_labels=["D_healthy", *FIELD_LABELS],
+        D_healthy=dict(kind="exact_all_zero_control", mean_D=0.0),
+        families={k: dict(output_path=v["output_path"], output_sha256=v["output_sha256"],
+                          rows=v["rows"], scalar_replay=v["scalar_replay"])
+                  for k, v in families.items()},
+        target_lock_sha256=_sha(os.path.join(OUT, "d_field_targets.json")),
+        execution_lock_sha256=_sha(os.path.join(OUT, "execution_lock.json")),
+        source_lock_git_head=lock["git_head"], completed=_now(),
+    )
+    _write_json(os.path.join(OUT, "d_field_lock.json"), payload)
+    return payload
+
+
+def cmd_e1_replay(args):
+    if not args.confirm_run:
+        raise SystemExit("E1 40k replay requires --confirm-run")
+    lock = _assert_lock_current()
+    _assert_e0_current(lock)
+    targets = _assert_targets_current(lock)
+    families = list(FIELD_FAMILIES) if args.family == "all" else [args.family]
+    with _stage_lock("e1_field_replay"):
+        rows = [_replay_family(family, lock, targets) for family in families]
+        collected = _collect_d_field_lock(lock, targets)
+    print(json.dumps(dict(status="PASS", completed=[r["family"] for r in rows],
+                          d_field_lock_complete=collected is not None), indent=2))
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
     sub.add_parser("lock")
     e0 = sub.add_parser("e0")
     e0.add_argument("--confirm-run", action="store_true")
+    sub.add_parser("e1-targets")
+    e1 = sub.add_parser("e1-replay")
+    e1.add_argument("--family", choices=[*FIELD_FAMILIES, "all"], default="all")
+    e1.add_argument("--confirm-run", action="store_true")
     args = ap.parse_args()
     if args.cmd == "lock":
         cmd_lock(args)
     elif args.cmd == "e0":
         cmd_e0(args)
+    elif args.cmd == "e1-targets":
+        cmd_e1_targets(args)
+    elif args.cmd == "e1-replay":
+        cmd_e1_replay(args)
 
 
 if __name__ == "__main__":
