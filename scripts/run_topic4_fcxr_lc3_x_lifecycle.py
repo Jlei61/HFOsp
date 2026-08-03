@@ -50,6 +50,7 @@ from src.topic4_fcxr_lc3_xcal import (  # noqa: E402
     choose_calibration_family,
     lifecycle_candidate_gate,
     multivariate_statistical_return,
+    postictal_suppression_gate,
     relay_x_inf,
     return_brackets,
     select_x_candidates,
@@ -440,12 +441,18 @@ def _event_features(events, spikes, S, *, lo_ms, hi_ms):
             t_on=float(event["t_on"]), duration_ms=float(event["dur_ms"]),
             participation=float(active.mean()), compactness_mm=compact, polarity=polarity))
     duration_s = max((hi_ms - lo_ms) * 1e-3, 1e-9)
+    s0 = max(0, int(round(lo_ms / DT)))
+    s1 = min(spikes.shape[0], int(round(hi_ms / DT)))
+    population_rate_hz = (
+        float(spikes[s0:s1].sum() / spikes.shape[1] / ((s1 - s0) * DT * 1e-3))
+        if s1 > s0 else None)
     onsets = np.asarray([row["t_on"] for row in rows], float)
     iei = np.diff(onsets) if onsets.size >= 2 else np.asarray([])
     def median(key):
         return float(np.median([row[key] for row in rows])) if rows else None
     return dict(
         n_events=len(rows), event_rate_hz=len(rows) / duration_s,
+        mean_population_rate_hz=population_rate_hz,
         median_iei_ms=float(np.median(iei)) if iei.size else None,
         median_duration_ms=median("duration_ms"),
         median_participation=median("participation"),
@@ -524,9 +531,13 @@ def _run_lifecycle_row(row):
     early_post_rate = (float(np.mean(rate_e[int(round(offset_ms / DT)):
                                                  int(round((offset_ms + 1000.0) / DT))]))
                        if offset_ms is not None and offset_ms + 1000.0 <= total_ms else None)
-    pre_rate = pre["event_rate_hz"] if pre is not None else None
-    postictal = bool(early_post_rate is not None and pre_rate is not None
-                     and early_post_rate <= max(float(baseline["band"]["roll_hi"]), 0.5 * pre_rate))
+    postictal_gate = postictal_suppression_gate(
+        early_post_population_rate_hz=(early_post_rate if early_post_rate is not None else np.nan),
+        pre_population_rate_hz=(pre["mean_population_rate_hz"]
+                                if pre is not None else np.nan),
+        fraction=0.5,
+    )
+    postictal = bool(postictal_gate["pass_"])
     ceiling = 0.0
     if bout is not None:
         i0 = int(round(onset_ms / DT)); i1 = min(spikes.shape[0], int(round(offset_ms / DT)))
@@ -565,6 +576,7 @@ def _run_lifecycle_row(row):
         lifecycle=lifecycle, onset_ms=onset_ms, offset_ms=offset_ms,
         high_duration_ms=high_ms, pre_statistics=pre, post_statistics=post,
         statistical_return=rest, postictal_suppression=postictal,
+        postictal_suppression_gate=postictal_gate,
         early_post_rate_hz=early_post_rate, x_peak_depletion_ms=x_peak_ms,
         x_activates_after_onset=x_after, x_min=float(np.min(xtrace)) if xtrace.size else None,
         numerical=numerical, refractory_ceiling_fraction=ceiling,

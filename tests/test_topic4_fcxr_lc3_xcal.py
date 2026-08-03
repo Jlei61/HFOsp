@@ -4,10 +4,24 @@ from src.topic4_fcxr_lc3_xcal import (
     choose_calibration_family,
     lifecycle_candidate_gate,
     multivariate_statistical_return,
+    postictal_suppression_gate,
     relay_x_inf,
     return_brackets,
     select_x_candidates,
 )
+
+
+def test_postictal_suppression_compares_population_rate_to_population_rate():
+    gate = postictal_suppression_gate(
+        early_post_population_rate_hz=1.9, pre_population_rate_hz=4.0)
+    assert gate["pass_"] is True
+    assert gate["threshold_population_rate_hz"] == 2.0
+    assert gate["comparable_quantity"] == "mean_population_rate_hz_per_E_cell"
+
+
+def test_postictal_suppression_rejects_missing_or_nonpositive_pre_rate():
+    assert postictal_suppression_gate(
+        early_post_population_rate_hz=0.0, pre_population_rate_hz=0.0)["pass_"] is False
 
 
 def test_return_bracket_requires_same_d_high_start_return_and_survival():

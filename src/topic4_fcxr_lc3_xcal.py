@@ -120,3 +120,24 @@ def lifecycle_candidate_gate(*, lifecycle_label: str, onset_ms, high_duration_ms
         non_tonic_ceiling=float(refractory_ceiling_fraction) < 0.05,
     )
     return dict(pass_=bool(all(clauses.values())), clauses=clauses)
+
+
+def postictal_suppression_gate(*, early_post_population_rate_hz,
+                               pre_population_rate_hz, fraction: float = 0.5):
+    """Compare like-for-like population rates for the early postictal dip."""
+
+    values = np.asarray(
+        [early_post_population_rate_hz, pre_population_rate_hz, fraction], dtype=float)
+    valid = bool(np.all(np.isfinite(values)) and pre_population_rate_hz > 0.0
+                 and 0.0 < fraction < 1.0)
+    threshold = (float(fraction * pre_population_rate_hz) if valid else None)
+    return dict(
+        pass_=bool(valid and early_post_population_rate_hz <= threshold),
+        early_post_population_rate_hz=(float(early_post_population_rate_hz)
+                                       if np.isfinite(values[0]) else None),
+        pre_population_rate_hz=(float(pre_population_rate_hz)
+                                if np.isfinite(values[1]) else None),
+        fraction=float(fraction) if np.isfinite(values[2]) else None,
+        threshold_population_rate_hz=threshold,
+        comparable_quantity="mean_population_rate_hz_per_E_cell",
+    )
