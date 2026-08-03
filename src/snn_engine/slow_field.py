@@ -37,6 +37,7 @@ from src.sef_hfo_m4_load_shunt import LoadShuntParams, load_shunt_step  # M4-3A 
 from src.snn_engine.zm_conductance import (
     ZMConductanceConfig,
     conductance_membrane_step,
+    state_dependent_homotopy_step,
 )
 
 
@@ -217,6 +218,11 @@ class SpatialSlowFieldConfig:
     # The existing mV-equivalent drives are converted by kappa before entering
     # a conductance sum; the old S_G recurrent-E divisor is forbidden here. ----
     use_zm_conductance: bool = False
+    # Phase-E baseline-preserving variant.  High-z cells retain the native
+    # current membrane exactly; only depleted cells cross to conductance form.
+    use_zm_conductance_homotopy: bool = False
+    cond_homotopy_z_native: float = 0.60
+    cond_homotopy_z_conductance: float = 0.40
     cond_kappa_E: float = 0.1
     cond_kappa_I: float = 0.25
     cond_g_M: float = 0.001 / 15.0
@@ -400,6 +406,40 @@ class SpatialSlowFieldConfig:
                 raise ValueError(
                     "use_zm_conductance requires the clean Z/M substrate; "
                     f"disable {active}"
+                )
+            self.zm_conductance_config().validate()
+        if self.use_zm_conductance_homotopy:
+            if self.use_zm_conductance:
+                raise ValueError(
+                    "full conductance and conductance homotopy are mutually exclusive"
+                )
+            if not self.use_z or not self.use_m:
+                raise ValueError(
+                    "use_zm_conductance_homotopy requires use_z=True and use_m=True"
+                )
+            forbidden = {
+                "use_qI": self.use_qI,
+                "use_gK": self.use_gK,
+                "use_hG": self.use_hG,
+                "use_A": self.use_A,
+                "use_persist": self.use_persist,
+                "use_H": self.use_H,
+                "use_mode_H": self.use_mode_H,
+                "use_mode_M_divisive": self.use_mode_M_divisive,
+            }
+            active = [name for name, value in forbidden.items() if value]
+            if active:
+                raise ValueError(
+                    "conductance homotopy requires the clean Z/M fast path; "
+                    f"disable {active}"
+                )
+            if not (
+                0.0 <= self.cond_homotopy_z_conductance
+                < self.cond_homotopy_z_native <= 1.0
+            ):
+                raise ValueError(
+                    "homotopy thresholds must satisfy 0 <= z_conductance < "
+                    "z_native <= 1"
                 )
             self.zm_conductance_config().validate()
 
@@ -648,10 +688,15 @@ class SpatialSlowField:
         self.trace_cond_gMm_mean = []
         self.trace_cond_Iexc_mean = []; self.trace_cond_Iinh_mean = []
         self.trace_cond_Isahp_mean = []
+        self.trace_cond_lambda_mean = []; self.trace_cond_lambda_max = []
+        self.trace_cond_lambda_core_mean = []
 
     def uses_zm_conductance(self) -> bool:
         """True only for the explicit Phase-D conductance arm."""
         return bool(self.cfg.use_zm_conductance)
+
+    def uses_zm_conductance_homotopy(self) -> bool:
+        return bool(self.cfg.use_zm_conductance_homotopy)
 
     def zm_conductance_config(self) -> ZMConductanceConfig:
         return self.cfg.zm_conductance_config()
@@ -689,6 +734,43 @@ class SpatialSlowField:
         self.trace_cond_gI_eff_mean.append(
             float(out["g_I_eff"][e].mean())
         )
+        self.trace_cond_gMm_mean.append(float(out["g_Mm"][e].mean()))
+        self.trace_cond_Iexc_mean.append(float(out["I_exc"][e].mean()))
+        self.trace_cond_Iinh_mean.append(float(out["I_inh"][e].mean()))
+        self.trace_cond_Isahp_mean.append(float(out["I_sahp"][e].mean()))
+        return out
+
+    def zm_conductance_homotopy_step(self, V, I_E, I_I, I_native, decay_V):
+        """Apply the Phase-E Z-gated vector-field homotopy and record it."""
+        if not self.uses_zm_conductance_homotopy():
+            raise RuntimeError("Z/M conductance homotopy is not enabled")
+        out = state_dependent_homotopy_step(
+            V,
+            I_E,
+            I_I,
+            I_native,
+            self.z,
+            self.m,
+            decay_V,
+            self.is_E,
+            self.zm_conductance_config(),
+            z_native=self.cfg.cond_homotopy_z_native,
+            z_conductance=self.cfg.cond_homotopy_z_conductance,
+        )
+        e = self.is_E
+        lam_e = out["lambda"][e]
+        self.trace_cond_lambda_mean.append(float(lam_e.mean()))
+        self.trace_cond_lambda_max.append(float(lam_e.max()))
+        if self._core_mask_E is not None:
+            self.trace_cond_lambda_core_mean.append(
+                float(lam_e[self._core_mask_E].mean())
+            )
+        self.trace_cond_vinf_mean.append(float(out["V_inf"][e].mean()))
+        self.trace_cond_tau_eff_mean.append(float(out["tau_eff_ms"][e].mean()))
+        self.trace_cond_gE_mean.append(float(out["g_E"][e].mean()))
+        self.trace_cond_gI_local_mean.append(float(out["g_I_local"][e].mean()))
+        self.trace_cond_gI_global.append(float(out["g_I_global"]))
+        self.trace_cond_gI_eff_mean.append(float(out["g_I_eff"][e].mean()))
         self.trace_cond_gMm_mean.append(float(out["g_Mm"][e].mean()))
         self.trace_cond_Iexc_mean.append(float(out["I_exc"][e].mean()))
         self.trace_cond_Iinh_mean.append(float(out["I_inh"][e].mean()))

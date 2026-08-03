@@ -76,6 +76,33 @@ def _slow(p, net, *, gamma=1 / 6, use_phi=False):
     )
 
 
+def _slow_homotopy(p, net):
+    cfg = SpatialSlowFieldConfig(
+        n_grid=8,
+        use_qI=False,
+        use_gK=False,
+        use_z=True,
+        use_m=True,
+        tau_z=5000.0,
+        I_th_EI=1.28,
+        tau_adp=500.0,
+        eta_m=0.001,
+        use_zm_conductance_homotopy=True,
+        cond_homotopy_z_native=0.6,
+        cond_homotopy_z_conductance=0.4,
+        cond_kappa_E=0.1,
+        cond_kappa_I=0.25,
+        cond_g_M=0.001 / 15.0,
+        cond_gamma=1 / 6,
+        cond_tau_m_E=20.0,
+    )
+    pos = net["pos"]
+    nE = net["NE"]
+    return SpatialSlowField(
+        nE + net["NI"], p.V_th, pos[:nE], pos[nE:], p.L, cfg=cfg
+    )
+
+
 def test_conductance_config_requires_the_clean_zm_substrate():
     with pytest.raises(ValueError, match="use_z"):
         SpatialSlowFieldConfig(
@@ -195,6 +222,25 @@ def test_dynamic_threshold_is_live_on_the_conductance_path():
     assert slow_on.trace_phi_max and max(slow_on.trace_phi_max) > 0.0
     assert on["E_spk_bool"].sum() < off["E_spk_bool"].sum()
     assert slow_off.trace_phi_max == []
+
+
+def test_state_dependent_homotopy_is_live_in_the_guarded_engine():
+    p, net = _build(T=40.0)
+    slow = _slow_homotopy(p, net)
+    slow.z[: net["NE"]] = 0.3
+    result = simulate_kick(
+        p,
+        net,
+        4.0,
+        slow=slow,
+        kick_center=np.array([0.5, 0.5]),
+        r_kick=0.3,
+        t_kick=20.0,
+        V_th_per_neuron=np.full(net["NE"] + net["NI"], 16.5),
+    )
+    assert result["E_spk_bool"].shape[0] == int(round(p.T / p.dt))
+    assert len(slow.trace_cond_lambda_mean) == result["E_spk_bool"].shape[0]
+    assert max(slow.trace_cond_lambda_max) == pytest.approx(1.0)
 
 
 def test_conductance_checkpoint_resume_is_bit_exact():

@@ -340,6 +340,28 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             "tau_Z_native_ms": float(cfg.tau_z),
             "tau_Z_applied_ms": float(values["tau_z"]),
         }
+        if bool(getattr(args, "use_zm_conductance_homotopy", False)):
+            values.update({
+                "use_zm_conductance_homotopy": True,
+                "cond_homotopy_z_native": float(args.homotopy_z_native),
+                "cond_homotopy_z_conductance": float(
+                    args.homotopy_z_conductance
+                ),
+                "cond_kappa_E": float(args.cond_kappa_E),
+                "cond_kappa_I": float(args.cond_kappa_I),
+                "cond_g_M": float(args.cond_g_M),
+                "cond_gamma": float(args.cond_gamma),
+            })
+            receipt["state_dependent_conductance_homotopy"] = {
+                key: values[key] for key in (
+                    "cond_homotopy_z_native",
+                    "cond_homotopy_z_conductance",
+                    "cond_kappa_E",
+                    "cond_kappa_I",
+                    "cond_g_M",
+                    "cond_gamma",
+                )
+            }
         if bool(getattr(args, "use_mode_H", False)):
             values.update({
                 "use_mode_H": True,
@@ -435,6 +457,12 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
                 f"mem{args.tau_mode_M_memory_up_ms:g}"
                 f"d{args.tau_mode_M_memory_down_ms:g}"
             )
+    if bool(getattr(args, "use_zm_conductance_homotopy", False)):
+        stem += (
+            f"__condhom_z{args.homotopy_z_native:g}"
+            f"to{args.homotopy_z_conductance:g}"
+            f"g{args.cond_gamma:g}"
+        )
     return stem
 
 
@@ -742,6 +770,24 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
                 diagnostic.trace_mode_M_divisor, np.float32
             ),
         })
+    if diagnostic.cfg.use_zm_conductance_homotopy:
+        arrays.update({
+            "trace_cond_lambda_mean": np.asarray(
+                diagnostic.trace_cond_lambda_mean, np.float32
+            ),
+            "trace_cond_lambda_max": np.asarray(
+                diagnostic.trace_cond_lambda_max, np.float32
+            ),
+            "trace_cond_lambda_core_mean": np.asarray(
+                diagnostic.trace_cond_lambda_core_mean, np.float32
+            ),
+            "trace_cond_vinf_mean": np.asarray(
+                diagnostic.trace_cond_vinf_mean, np.float32
+            ),
+            "trace_cond_tau_eff_mean": np.asarray(
+                diagnostic.trace_cond_tau_eff_mean, np.float32
+            ),
+        })
     namespace = (
         "smoke" if args.smoke else
         ("lifecycle_sprint" if args.command == "sprint-cell" else
@@ -816,6 +862,9 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         "runtime_git_sha": launch_git_sha,
         "git_sha_capture_semantics": "captured_before_context_build_and_simulation",
         "use_zm_conductance": False,
+        "use_zm_conductance_homotopy": bool(
+            diagnostic.cfg.use_zm_conductance_homotopy
+        ),
         "freeze_policy": R.FS.FreezePolicy.for_arm(
             "freeze_zm"
             if bool(getattr(args, "freeze_zm", False)) or not dynamic
@@ -929,6 +978,13 @@ def main() -> None:
     parser.add_argument("--use-mode-M-memory", action="store_true")
     parser.add_argument("--tau-mode-M-memory-up-ms", type=float, default=3000.0)
     parser.add_argument("--tau-mode-M-memory-down-ms", type=float, default=8000.0)
+    parser.add_argument("--use-zm-conductance-homotopy", action="store_true")
+    parser.add_argument("--homotopy-z-native", type=float, default=0.60)
+    parser.add_argument("--homotopy-z-conductance", type=float, default=0.40)
+    parser.add_argument("--cond-kappa-E", type=float, default=0.02917206399)
+    parser.add_argument("--cond-kappa-I", type=float, default=0.01687781464)
+    parser.add_argument("--cond-g-M", type=float, default=1.76213078e-5)
+    parser.add_argument("--cond-gamma", type=float, default=1.0 / 6.0)
     parser.add_argument("--T-ms", type=float, default=PRODUCTION_T_MS)
     parser.add_argument("--burn-ms", type=float, default=PRODUCTION_BURN_MS)
     parser.add_argument("--smoke", action="store_true")

@@ -208,6 +208,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         and hasattr(slow, "uses_zm_conductance")
         and slow.uses_zm_conductance()
     )
+    conductance_homotopy_on = bool(
+        slow is not None
+        and hasattr(slow, "uses_zm_conductance_homotopy")
+        and slow.uses_zm_conductance_homotopy()
+    )
     if conductance_on:
         cond_cfg = slow.zm_conductance_config()
         if float(cond_cfg.tau_m_E) != float(p.tau_m_E):
@@ -217,6 +222,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     track_rec = bool(
         getattr(getattr(slow, "cfg", None), "use_SG", False)
         or conductance_on
+        or conductance_homotopy_on
     )
     if track_rec:
         s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
@@ -392,6 +398,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
         # slow layer off (slow=None)
         conductance_state = None
+        conductance_homotopy_state = None
         if slow is not None:
             if conductance_on:
                 # Phase-D: raw drives enter the unit-safe conductance membrane
@@ -411,6 +418,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                 I_net = slow.apply_currents(I_E, I_I, labels, I_E_rec)
             else:
                 I_net = slow.apply_currents(I_E, I_I, labels)
+            if conductance_homotopy_on:
+                conductance_homotopy_state = slow.zm_conductance_homotopy_step(
+                    V, I_E, I_I, I_net, decay_V
+                )
             # off-by-default hook: under slow, use the per-neuron threshold substrate when provided
             # (lets z/g_K ride a heterogeneous core); V_th_per_neuron=None -> uniform p.V_th (unchanged).
             base_vth = p.V_th if V_th_per_neuron is None else V_th_per_neuron
@@ -435,6 +446,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             # polymorphic slow=; mirrors the getattr(...,'use_SG',False) duck-typing a few lines up).
             if conductance_on:
                 Vtmp = conductance_state["V_next"]
+            elif conductance_homotopy_on:
+                Vtmp = conductance_homotopy_state["V_next"]
             elif hasattr(slow, "uses_shunt") and slow.uses_shunt():
                 g = np.zeros_like(V)
                 g[:slow.nE] = slow.shunt_g_at_E()                  # E-only; I cells g=0 -> parity

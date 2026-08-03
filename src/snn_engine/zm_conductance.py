@@ -353,10 +353,80 @@ def conductance_membrane_step(
     }
 
 
+def state_dependent_homotopy_step(
+    V,
+    I_E,
+    I_I,
+    I_native,
+    z,
+    m,
+    decay_V,
+    is_E,
+    cfg,
+    *,
+    z_native,
+    z_conductance,
+):
+    """Blend the native and conductance vector fields only after Z depletion.
+
+    ``lambda=0`` is a literal native membrane step, while ``lambda=1`` is the
+    pure conductance step.  Between the two thresholds we blend the linear
+    membrane coefficients, not the already-updated voltages.  This implements
+
+    ``tau_m dV/dt = (1-lambda)(I_native-V) + lambda F_cond(V)``.
+
+    The explicit lambda-zero assignment is intentional: healthy/high-z cells
+    retain the historical arithmetic path exactly rather than merely up to a
+    floating-point tolerance.
+    """
+    cfg.validate()
+    V, I_E, I_I, I_native, z, m, decay_V, is_E = _vectors(
+        V, I_E, I_I, I_native, z, m, decay_V, is_E
+    )
+    is_E = is_E.astype(bool, copy=False)
+    if not 0.0 <= float(z_conductance) < float(z_native) <= 1.0:
+        raise ValueError(
+            "homotopy thresholds must satisfy 0 <= z_conductance < "
+            "z_native <= 1"
+        )
+    if np.any((decay_V <= 0.0) | (decay_V > 1.0)):
+        raise ValueError("decay_V must lie in (0,1]")
+
+    x = np.clip(
+        (float(z_native) - z) / (float(z_native) - float(z_conductance)),
+        0.0,
+        1.0,
+    )
+    lam = x * x * (3.0 - 2.0 * x)
+    lam[~is_E] = 0.0
+
+    cond = conductance_membrane_step(
+        V, I_E, I_I, z, m, decay_V, is_E, cfg
+    )
+    native_next = I_native + (V - I_native) * decay_V
+    V_next = native_next.copy()
+    active = is_E & (lam > 0.0)
+    if np.any(active):
+        a = (1.0 - lam[active]) + lam[active] * cond["g_sigma"][active]
+        b = (
+            (1.0 - lam[active]) * I_native[active]
+            + lam[active] * cond["g_sigma"][active] * cond["V_inf"][active]
+        )
+        v_inf = b / a
+        V_next[active] = v_inf + (V[active] - v_inf) * np.power(
+            decay_V[active], a
+        )
+    full = is_E & (lam == 1.0)
+    if np.any(full):
+        V_next[full] = cond["V_next"][full]
+    return {**cond, "V_next": V_next, "lambda": lam}
+
+
 __all__ = [
     "ZMConductanceConfig",
     "analytic_anchor",
     "decompose_conductances",
     "conductance_currents",
     "conductance_membrane_step",
+    "state_dependent_homotopy_step",
 ]
