@@ -1,0 +1,83 @@
+{
+  "contract": "topic5_patient_specific_target_free_rnn_bridge_v0_1",
+  "status": "REPRODUCIBLE_CLOSEOUT",
+  "python": "3.11.5",
+  "numpy": "1.26.4",
+  "pandas": "2.1.4",
+  "scipy": "1.16.3",
+  "torch": "2.5.1+cu124",
+  "files": {
+    "config/topic5_patient_specific_target_free_rnn_bridge_v0_1.yaml": {
+      "bytes": 1643,
+      "sha256": "fedeb5ef3b271b9ec06f07f7304af26525a032e4a6553f5a4adab7b075969f8e"
+    },
+    "src/topic5_patient_specific_rnn_bridge.py": {
+      "bytes": 4950,
+      "sha256": "1d3efd88a1df1ce34a4ec367d380b1c2d66e0e968135ccf53ff842eb44680f01"
+    },
+    "scripts/run_topic5_patient_specific_rnn_unit_v0_1.py": {
+      "bytes": 10062,
+      "sha256": "cd6cde87946c317ba49d34c76241865dd115aa7faead42428216677842004dd9"
+    },
+    "scripts/launch_topic5_patient_specific_rnn_v0_1.py": {
+      "bytes": 5006,
+      "sha256": "c3d332d6d9d4fdf88b66e0ff2d526b4fc75d3d9a707742e837dca97b9e20a58b"
+    },
+    "scripts/summarize_topic5_patient_specific_rnn_bridge_v0_1.py": {
+      "bytes": 17030,
+      "sha256": "ffffd67064838d78f58e01363d100b173c8984ba0b565f5b3136d9019f891562"
+    },
+    "scripts/plot_topic5_patient_specific_rnn_bridge_v0_1.py": {
+      "bytes": 12746,
+      "sha256": "a204503e24024e1007bbb37840f7a08897af29239d46b383e054460d692d190a"
+    },
+    "tests/test_topic5_patient_specific_rnn_bridge_v0_1.py": {
+      "bytes": 3531,
+      "sha256": "89221129373502af532844d3dcdbe55f031f21e5a967a1acb4dce48d6ae1a2a9"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/PATIENT_SPECIFIC_RNN_BRIDGE_SUMMARY.json": {
+      "bytes": 12998,
+      "sha256": "e55da823c5d28995f5fd9238b3c8fe8c8bce7e3eee98bc3c90c7919e5a554932"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/interictal_seed_metrics.csv": {
+      "bytes": 29153,
+      "sha256": "154a193b060d099d027cea7d209319c759e9ffe8740529bafe3ab0fde301d50c"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/interictal_patient_metrics.csv": {
+      "bytes": 10334,
+      "sha256": "a8c835dd433d872088baecb6248d040280f0b1cb34c2f91e7a9ac7da4af1400e"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/early_ictal_seizure_metrics.csv": {
+      "bytes": 105642,
+      "sha256": "477f3b0efd23d0bfe14f0ee0d7529d973ea98302fd5f7d8d390949ef3aa71f94"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/early_ictal_patient_metrics.csv": {
+      "bytes": 28697,
+      "sha256": "74ad1b8fcc4a01d0af04b5f477f1b3adf36bed6abfa66c760400b1edf567034a"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/watchers/launcher_state.json": {
+      "bytes": 45889,
+      "sha256": "377cb6e47f1f6857112f7090b9c5d081ad2de8dd699ce529b964b296ce9bd245"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/figures/patient_specific_target_free_rnn_bridge_six_panel.png": {
+      "bytes": 787255,
+      "sha256": "5b40ce1ff623d5ff18275fd3b809e5191dbda59f818b3cb22138b692007315a8"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/figures/patient_specific_target_free_rnn_bridge_six_panel.pdf": {
+      "bytes": 47553,
+      "sha256": "f0cc6743c1197023b7bdf4df8efa51a05b4ebf87b1173c9feea6c494999e8467"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/figures/README.md": {
+      "bytes": 794,
+      "sha256": "25ac4b133bf19a04cc5a50def73041467b7d3b4175516c714d8b6a11c1a13f2d"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/PATIENT_SPECIFIC_RNN_BRIDGE_REPORT.md": {
+      "bytes": 4419,
+      "sha256": "bef3d173933da52372ca079d30c2eb84a179e4cf8bd3eeb1dd2496f91f7a777e"
+    },
+    "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/ACCEPTANCE.json": {
+      "bytes": 599,
+      "sha256": "921d6f637c44cd628008845481477c82285d5b1b2b86e9bbd8e7567f30e3cd8c"
+    }
+  }
+}

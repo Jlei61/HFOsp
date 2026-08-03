@@ -6,6 +6,11 @@
 
 ## 主线（network-axis pivot）
 
+### `patient_specific_target_free_rnn_bridge_v0_1_result_2026-08-03.md` — **患者内 RNN 学到间期传播，并恢复与发作早期相关的患者空间场**
+- 每位患者只用自己的 masked interictal contact-rank events 独立自监督训练；16 人 × 3 模型 × 3 seeds 共 144 units，0 failure。Primary 15 人中，真实顺序 GRU 相对 rank-shuffle heldout NLL 在 14/15 人改善，exact P=0.000122；自由 rollout precedence 相关中位 0.775（rank-shuffle 0.052）。
+- checkpoint/rollout 冻结后才读取同一患者 `[0,10] s`、`1–150 Hz` early-ictal field。GRU 场 median max|rho|=0.584，相对 all-contact null 的 margin +0.167，13/15 为正，P=0.0256。该对应也见于完整 static fit60 与 rank-shuffle 场；GRU−static 增量 +0.025、P=0.305，within-shaft sensitivity P=0.149。
+- 安全结论是“患者内 RNN 恢复间期传播结构；其恢复的患者空间 scaffold 与发作早期场有 target-free 跨状态对应”，不是“有序 RNN dynamics 额外预测发作”或“自动恢复唯一 A/B 轴”。
+
 ### `history_conditioned_field_refinement_v0_4_result_2026-08-03.md` — **冻结静态 A/B 后的 causal-history 残差：正式无增益**
 - 15 名 development-excluded strict clinical-onset 患者、31 次发作完成 15 LOSO × 3 seeds；endpoint 与既有结果对齐为 `[0,10] s`、`1–45 Hz` contact-energy 的 sign-free maxAB，不要求唯一 A/B 或符号。
 - 静态 M0 本身保持信息：患者中位 maxAB 0.5545，相对 5000 次 matched all-contact channel null 的中位 margin +0.1500（11/15 正，exact P=0.01245）。
