@@ -82,6 +82,7 @@ GEOMETRY_SOURCES = (
     "scripts/run_topic4_fcxr_lc3.py",
     "scripts/run_topic4_fcxr_lc3_geometry.py",
     "scripts/run_topic4_fcxr_lc3_geometry_autopilot.sh",
+    "scripts/watch_topic4_fcxr_lc3_geometry.sh",
     "scripts/run_topic4_fcxr_lc3_slowflow.py",
     "src/topic4_fcxr_lc3_slowflow.py",
     "docs/superpowers/specs/2026-08-03-topic4-fcxr-lc3-dx-spatial-instability-design.md",
