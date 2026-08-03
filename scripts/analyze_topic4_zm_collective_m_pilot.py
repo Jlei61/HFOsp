@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """Adjudicate the fixed-anchor collective-M divisor pilot.
 
-This is intentionally a three-arm mechanism test, not a parameter sweep:
-H+Mdiv(kappa=2), H+Mdiv(kappa=4), and H-off+Mdiv(kappa=4).
+This is intentionally a small mechanism-balance panel, not a broad sweep:
+two H strengths by three M-divisor strengths, plus an H-off prevention control.
 """
 from __future__ import annotations
 
@@ -22,7 +22,11 @@ from scripts.analyze_topic4_zm_mode_h_pilot import _row  # noqa: E402
 
 IN = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_sprint/seed1"
 OUT = ROOT / "results/topic4_sef_hfo/zm_mode_lifecycle"
-ORDER = ("H_mdiv2", "H_mdiv4", "noH_mdiv4")
+ORDER = (
+    "H05_mdiv2", "H05_mdiv3", "H05_mdiv4",
+    "H1_mdiv2", "H1_mdiv3", "H1_mdiv4",
+    "noH_mdiv4",
+)
 
 
 def _close(x, y) -> bool:
@@ -52,11 +56,13 @@ def _label(summary: dict) -> str | None:
     mode = mech.get("state_selective_mode_H")
     if mode is None and _close(kappa, 4.0):
         return "noH_mdiv4"
-    if mode and _close(mode.get("rho_mode_H"), 0.5) and _close(mode.get("m_mode_half"), 30.0):
-        if _close(kappa, 2.0):
-            return "H_mdiv2"
-        if _close(kappa, 4.0):
-            return "H_mdiv4"
+    if mode and _close(mode.get("m_mode_half"), 30.0):
+        rho = float(mode.get("rho_mode_H"))
+        if any(_close(kappa, value) for value in (2.0, 3.0, 4.0)):
+            if _close(rho, 0.5):
+                return f"H05_mdiv{int(kappa)}"
+            if _close(rho, 1.0):
+                return f"H1_mdiv{int(kappa)}"
     return None
 
 
@@ -69,7 +75,7 @@ def _offset(row: dict) -> bool:
 
 
 def _verdict(rows: dict[str, dict]) -> dict:
-    h_rows = [rows["H_mdiv2"], rows["H_mdiv4"]]
+    h_rows = [row for key, row in rows.items() if key != "noH_mdiv4"]
     entered = [row for row in h_rows if _entered(row)]
     offset = [row for row in entered if _offset(row)]
     returned = [
@@ -135,7 +141,7 @@ def main() -> None:
         json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
 
-    fig, axes = plt.subplots(3, 4, figsize=(17, 9), constrained_layout=True)
+    fig, axes = plt.subplots(len(ORDER), 4, figsize=(17, 2.7 * len(ORDER)), constrained_layout=True)
     for ir, label in enumerate(ORDER):
         row, a = rows[label], arrays[label]
         tf = a["fine_time_ms"] / 1000.0
@@ -172,7 +178,7 @@ def main() -> None:
     if marker not in prior:
         readme.write_text(
             prior.rstrip() + "\n\n" + marker + "\n\n"
-            "固定 fast anchor 上比较 H+collective-M 两档强度及 H-off prevention 对照。"
+            "固定 fast anchor 上比较两档 H、三档 collective-M 及 H-off prevention 对照。"
             "四列依次为核心放电、病理轴时空图、Z/M/H 慢状态和 recurrent-E 的 M 分母。\n\n"
             "**关注点**：只有先进入有界高态、随后内生退出并恢复间期事件，才能升级为 lifecycle candidate；"
             "单纯阻止 onset 或降低瞬时放电都不算退出。\n"
