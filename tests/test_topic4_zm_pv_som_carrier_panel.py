@@ -1,6 +1,9 @@
+import numpy as np
+
 from scripts.analyze_topic4_zm_conductance_homotopy import credible_carrier
 from scripts.analyze_topic4_zm_pv_som_carrier import (
     BASE_ORDER, _gap_spatial_class, _label, _split_arm, adjudicate,
+    sustained_core_cv,
 )
 
 
@@ -184,6 +187,19 @@ def test_runaway_and_missing_episode_outrank_the_two_axes():
     assert _gap_spatial_class(_row(gap=0., pc1=.8, runaway=True)) == "runaway"
     assert _gap_spatial_class(_row(gap=None)) == "no_episode"
     assert _gap_spatial_class(_row(pc1=None)) == "no_episode"
+
+
+def test_sustained_variability_separates_a_burst_train_from_a_fixed_point():
+    """The gate reads a constant as perfectly continuous, so report the CV too."""
+    flat = np.full(500, 210.)
+    assert sustained_core_cv(flat) == 0.
+    bursty = np.tile(np.concatenate([np.zeros(40), np.full(10, 400.)]), 10)
+    assert sustained_core_cv(bursty) > 1.
+    # Only the final second counts, so an early transient must not mask a
+    # trajectory that has already fallen onto its fixed point.
+    settling = np.concatenate([np.tile([0., 400.], 500), np.full(500, 210.)])
+    assert sustained_core_cv(settling) == 0.
+    assert sustained_core_cv(np.zeros(10)) is None
 
 
 def test_class_boundaries_track_the_locked_carrier_gate():

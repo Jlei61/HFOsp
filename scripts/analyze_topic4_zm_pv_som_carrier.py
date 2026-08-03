@@ -79,6 +79,18 @@ def _label(summary):
     return None
 
 
+def sustained_core_cv(fine_core_rate_hz, window_ms=1000.0, bin_ms=2.0):
+    """Relative variability of the core rate over the final second.
+
+    The locked gate reads a perfectly flat rate as perfectly continuous, so a
+    fixed point and a gap-free carrier score identically on it.  This is the
+    diagnostic that tells them apart; it is reported, never gated on.
+    """
+    rate = np.asarray(fine_core_rate_hz, float)[-int(window_ms / bin_ms):]
+    mean = float(rate.mean()) if rate.size else 0.0
+    return float(rate.std() / mean) if mean > 0.0 else None
+
+
 def _split_arm(label):
     """Recover (persistent conductance dose, SOM wiring seed) from an arm label."""
     dose, _, seed = label.removeprefix("persistent_g").partition("__som")
@@ -197,9 +209,13 @@ def _dose_response_figure(rows, path):
         ("median_vseeg_gain_db", "virtual-SEEG gain (dB)", 20.0, "above"),
         ("energy_occupancy_6db", "energy occupancy", 0.50, "above"),
         ("spatial_pc1", "spatial PC1 fraction", 0.95, "below"),
+        # Not a gate: the gate above scores a fixed point as perfectly
+        # continuous, so this is what separates a carrier from a frozen state.
+        ("sustained_core_cv", "sustained core-rate CV (no gate)", None, None),
     )
     colors = {1: "#d95f45", 2: "#2b7a5b", 3: "#4a6fb5"}
-    fig, axes = plt.subplots(2, 2, figsize=(11, 7.5), constrained_layout=True)
+    fig, axes = plt.subplots(2, 3, figsize=(16, 7.5), constrained_layout=True)
+    axes.ravel()[-1].axis("off")
     for ax, (field, label, gate, side) in zip(axes.ravel(), panels):
         for seed, points in sorted(series.items()):
             doses = [dose for dose, _ in points]
@@ -211,11 +227,12 @@ def _dose_response_figure(rows, path):
                        facecolors=[colors.get(seed, "#777") if ok else "white"
                                    for ok in passing],
                        edgecolors=colors.get(seed, "#777"), zorder=3)
-        ax.axhline(gate, color="#333", ls=":", lw=1)
-        ax.annotate(f"gate ({'≤' if side == 'below' else '≥'} {gate:g})",
-                    xy=(0.99, gate), xycoords=("axes fraction", "data"),
-                    ha="right", va="bottom" if side == "above" else "top",
-                    fontsize=8, color="#333")
+        if gate is not None:
+            ax.axhline(gate, color="#333", ls=":", lw=1)
+            ax.annotate(f"gate ({'≤' if side == 'below' else '≥'} {gate:g})",
+                        xy=(0.99, gate), xycoords=("axes fraction", "data"),
+                        ha="right", va="bottom" if side == "above" else "top",
+                        fontsize=8, color="#333")
         ax.set(xlabel="persistent slow excitatory conductance g", ylabel=label)
     axes[0, 0].legend(frameon=False, fontsize=8)
     fig.suptitle(
@@ -277,6 +294,10 @@ def main():
         ):
             row[field] = float(np.max(array.get(key, np.zeros(1))))
         row["gap_spatial_class"] = _gap_spatial_class(row)
+        row["sustained_core_cv"] = sustained_core_cv(array["fine_core_rate_hz"])
+        row["sustained_centroid_speed_bins_s"] = row["tail"][
+            "centroid_median_speed_bins_s"
+        ]
         rows[label], arrays[label] = row, array
 
     verdict = adjudicate(rows)
@@ -345,10 +366,15 @@ def main():
     if marker not in prior:
         readme.write_text(
             prior.rstrip() + "\n\n" + marker + "\n\n"
-            "把四条判据分别对慢兴奋强度作图，每条连接种子一条线，"
-            "实心点表示该强度同时满足全部判据。虚线是各自的判据线。\n\n"
-            "**关注点**：时间连续性要求强度往上走，而场增益和能量占空要求强度往下走——"
-            "看这两侧是否把可行区间夹到只剩很窄一段，以及不同连接种子的可行区间是否重叠。\n"
+            "前四格把四条判据分别对慢兴奋强度作图，每条连接种子一条线，"
+            "实心点表示该强度同时满足全部判据，虚线是各自的判据线。"
+            "第五格不是判据，是末段放电的相对起伏——"
+            "判据把一条完全平的放电读成\"完美连续\"，只有这一格能把"
+            "真正还在动的 carrier 和已经停住的不动点分开。\n\n"
+            "**关注点**：时间连续性要求强度往上走，而场增益和能量占空要求强度往下走，"
+            "先看这两侧把可行区间夹成多宽、不同连接种子的可行区间是否重叠；"
+            "然后看所有实心点是不是都落在第五格的贴地段——"
+            "若是，则\"填平间隙\"其实是靠消灭振荡换来的。\n"
         )
     print(json.dumps(verdict, indent=2))
 
