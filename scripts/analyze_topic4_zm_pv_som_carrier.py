@@ -19,7 +19,13 @@ from scripts.analyze_topic4_zm_conductance_homotopy import credible_carrier  # n
 
 IN = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/smoke/seed1"
 OUT = ROOT / "results/topic4_sef_hfo/zm_mode_lifecycle"
-ORDER = ("current_H250", "current_H1500", "contrast_H1500", "SOM_shunt")
+ORDER = (
+    "current_H250",
+    "current_SOM30",
+    "current_H1500",
+    "contrast_H1500",
+    "SOM_shunt",
+)
 
 
 def _close(a, b):
@@ -41,13 +47,16 @@ def _label(summary):
         return None
     down = float(mode.get("tau_mode_H_down", mode.get("tau_mode_H", 250.0)))
     common = float(mode.get("mode_H_common_subtraction", 0.0))
+    som_tau_d = float(subtype.get("tau_d_som_ms", 60.0))
     if subtype.get("slow_membrane_mode") == "shunt":
-        return "SOM_shunt" if _close(down, 250.0) else None
-    if _close(down, 250.0) and _close(common, 0.0):
+        return "SOM_shunt" if _close(down, 250.0) and _close(som_tau_d, 60.0) else None
+    if _close(down, 250.0) and _close(common, 0.0) and _close(som_tau_d, 30.0):
+        return "current_SOM30"
+    if _close(down, 250.0) and _close(common, 0.0) and _close(som_tau_d, 60.0):
         return "current_H250"
-    if _close(down, 1500.0) and _close(common, 0.0):
+    if _close(down, 1500.0) and _close(common, 0.0) and _close(som_tau_d, 60.0):
         return "current_H1500"
-    if _close(down, 1500.0) and _close(common, 1.0):
+    if _close(down, 1500.0) and _close(common, 1.0) and _close(som_tau_d, 60.0):
         return "contrast_H1500"
     return None
 
@@ -110,7 +119,7 @@ def main():
         json.dumps(payload, indent=2, sort_keys=True, allow_nan=False) + "\n"
     )
 
-    fig, axes = plt.subplots(4, 3, figsize=(15, 10.5), constrained_layout=True)
+    fig, axes = plt.subplots(len(ORDER), 3, figsize=(15, 13), constrained_layout=True)
     for ir, label in enumerate(ORDER):
         row, a = rows[label], arrays[label]
         axes[ir, 0].plot(a["fine_time_ms"] / 1000.0, a["fine_core_rate_hz"],
@@ -142,7 +151,8 @@ def main():
     if marker not in prior:
         readme.write_text(
             prior.rstrip() + "\n\n" + marker + "\n\n"
-            "比较 PV/SOM 独立抑制亚群下的原 H、慢衰减 H、去 common-mode H 与 SOM conductance。"
+            "比较 PV/SOM 独立抑制亚群下的原 H、单点 SOM 衰减缩短、慢衰减 H、"
+            "去 common-mode H 与 SOM conductance。"
             "左列量化 burst/gap，中央展示轴向空间自由度，右列展示 H 与共享抑制状态。\n\n"
             "**关注点**：PV/SOM 是否在保持低 PC1 的同时把事件间深间隙缩短到连续 ictal-energy 范围。\n"
         )
