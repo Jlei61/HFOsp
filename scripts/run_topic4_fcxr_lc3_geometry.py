@@ -48,6 +48,7 @@ from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
     EXTENDED_TAIL_MS,
     H1_POINT_ID,
     H6_POINT_ID,
+    MAX_MAP_WORKERS,
     PRIMARY_D_LABELS,
     SCREEN_MS,
     SCREEN_TAIL_MS,
@@ -670,8 +671,12 @@ def cmd_row(args):
                           extended=out["extended"], wall_s=out["wall_s"]), indent=2))
 
 
-def _choose_workers(single_rss_gib, swap_baseline):
-    mem = _meminfo()
+def _cpu_bound():
+    return max(1, min(MAX_MAP_WORKERS, (os.cpu_count() or 2) - 2))
+
+
+def _choose_workers(single_rss_gib, swap_baseline, mem=None):
+    mem = _meminfo() if mem is None else mem
     return choose_map_workers(
         mem_available_gib=mem["mem_available_gib"], swap_used_mib=mem["swap_used_mib"],
         swap_baseline_mib=float(swap_baseline), single_rss_gib=float(single_rss_gib),
@@ -712,12 +717,18 @@ def cmd_map(args):
         smoke_id = f"{H1_POINT_ID}_D_healthy_aX1p00_low"
         smoke_row = next(row for row in manifest["rows"] if row["row_id"] == smoke_id)
         smoke = _run_row(smoke_row)
-        workers = _choose_workers(smoke["peak_rss_gib"], swap0)
+        single_rss_gib = float(smoke["peak_rss_gib"])
+        # The executor is built at the cpu bound but only ever fed the number of rows
+        # the *current* memory affords; a sibling job can take or free tens of GiB
+        # mid-map, so a count frozen at the smoke row would either waste the machine
+        # or overcommit it.  Extra pool slots cost nothing until a row is submitted.
+        pool_size = _cpu_bound()
+        workers = _choose_workers(single_rss_gib, swap0)
         _resource_log("GEOMETRY_SMOKE_DONE", row_id=smoke_id,
-                      single_rss_gib=smoke["peak_rss_gib"], workers=workers)
+                      single_rss_gib=single_rss_gib, workers=workers, pool_size=pool_size)
         pending_rows = [row for row in manifest["rows"] if row["row_id"] != smoke_id]
         results = [smoke]
-        with ProcessPoolExecutor(max_workers=workers) as pool:
+        with ProcessPoolExecutor(max_workers=pool_size) as pool:
             active = {}
             cursor = 0
             last_swap = swap0
@@ -738,6 +749,11 @@ def cmd_map(args):
                                       terminated_pid=newest_pid, terminated_row=newest_row)
                     raise RuntimeError(f"swap hard stop: +{swap_delta:.1f} MiB and rising")
                 last_swap = mem["swap_used_mib"]
+                resized = min(pool_size, _choose_workers(single_rss_gib, swap0, mem=mem))
+                if resized != workers:
+                    _resource_log("GEOMETRY_WORKERS_RESIZED", was=workers, now=resized,
+                                  single_rss_gib=single_rss_gib, in_flight=len(active))
+                    workers = resized
                 allow_submit = swap_delta < 256.0 and mem["mem_available_gib"] >= 96.0
                 while allow_submit and cursor < len(pending_rows) and len(active) < workers:
                     row = pending_rows[cursor]; cursor += 1
