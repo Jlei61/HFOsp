@@ -59,11 +59,29 @@ floor, so the miss replicates.
 The flip is all-or-none: 0.045 of relay depth takes the discharge from 72 Hz to 3 Hz,
 occupancy 1.000 to 0.000, the local feedback variable from 1.83 to 0.004.
 
-**Termination is not automatically over-suppression.** The 0.10 floor leaves 0.39 Hz,
-far below the canonical quiet state's 2.81 Hz, but 0.350 lands at 3.07 Hz — right at it.
-There is a window where the relay both stops the discharge and returns the tissue to its
-own interictal rate. Whether the event *distributions* also match is not established;
-that needs the event ledger applied to a terminating arm.
+**Retracted 2026-08-04 — the rates in that table are window artefacts.** An earlier
+version of this section read them as showing that 0.350 "lands at 3.07 Hz, right at the
+canonical 2.81 Hz, so there is a window where the relay both stops the discharge and
+returns the tissue to its own interictal rate." That is wrong. Those means are taken
+over the whole 5 s window, which begins with the collapse out of the discharge, and the
+collapse dominates them.
+
+Measured properly — 20 s with the first 2 s excluded as collapse, not interictal
+activity — the shallowest terminating clamp is silent:
+
+| clamp | mean rate over the 5 s window (collapse included) | post-collapse rate over 18 s | returning events |
+|---|---|---|---|
+| 0.380 | 8.73 Hz | **0.093 Hz** | **0 in 18 s** |
+
+Zero events is outside the frozen reference band of 0.086-3.15 events/s, and 0.093 Hz
+sits with the geometry map's quenched columns (0.04-0.06 Hz), not with the canonical
+quiet state's 2.81 Hz.
+
+The remaining clamps are running. If they agree, the structure at this wear is:
+**discharging above 0.395, silent below 0.380, with no interictal branch in between** —
+which would make the Stage-2 failure structural rather than a tuning problem. The
+seizure drives wear to a level at which there is no normal state left to return to, and
+recovery would have to come from wear falling back, not from the relay.
 
 Replacing the real relay field (mean 0.3945, spread 0.10-0.63) with a uniform clamp of
 the same mean did not change the outcome. That is not proof that spread never matters —
