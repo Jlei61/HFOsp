@@ -42,6 +42,10 @@ from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
     compact_checkpoint_diagnostics,
     save_prepared_checkpoint,
 )
+from src.topic4_fcxr_lc3_ledger import (  # noqa: E402
+    build_event_ledger,
+    snapshot_table,
+)
 from src.topic4_fcxr_lc3_recon import (  # noqa: E402
     checkpoint_step_for_snapshot,
     nearest_snapshot_labels,
@@ -415,6 +419,24 @@ def _run_once(row):
     h_fields = np.stack([np.asarray(s["h_E"], float) for s in snaps])
     y_fields = np.stack([np.asarray(s["y_E"], float) for s in snaps])
     masks = GEO._region_masks(S)
+    # Bearing measurement: how many events, carrying how much load, preceded onset.
+    # Every input is already in memory here -- the full-resolution rate, the 1 ms
+    # active fraction the detector ran on, and the complete 250 ms snapshot series.
+    # Only a handful of selected snapshots and a 200x-decimated rate reach disk
+    # otherwise, and an interictal event is 8-19 ms, so the dose is unrecoverable
+    # afterwards.  r_base is this run's own pre-onset quiet median, recorded in the
+    # ledger so the choice is auditable rather than implicit.
+    full_snapshot_table = snapshot_table(slow_final.snapshots, E01.DT, masks)
+    quiet_end = int(round(float(onset_ms if onset_ms is not None else total_ms) / E01.DT))
+    r_base_hz = float(np.median(rate_e[:max(quiet_end, 1)]))
+    event_ledger = build_event_ledger(
+        events=events, af=_af, af_bin_ms=_af_dt, floor_af=float(baseline["floor_af"]),
+        rate_hz=rate_e, dt_ms=E01.DT, r_base_hz=r_base_hz, table=full_snapshot_table,
+        onset_ms=onset_ms,
+        offset_ms=(None if bout is None
+                   else float((bout[1] + 1) * baseline["band"]["win_ms"])),
+        total_ms=total_ms,
+    )
     field_summaries = []
     for i, name in enumerate(names):
         field_summaries.append(dict(
@@ -446,6 +468,11 @@ def _run_once(row):
         D_fields=d_fields.astype(np.float32), X_fields=x_fields.astype(np.float32),
         H_fields=h_fields.astype(np.float32), Y_fields=y_fields.astype(np.float32),
         first_passage_from_onset_ms=first_passage,
+        snapshot_t_ms=np.asarray([r["t_ms"] for r in full_snapshot_table], np.float32),
+        **{f"snapshot_{var}_{region}":
+           np.asarray([r[var][region] for r in full_snapshot_table], np.float32)
+           for var in ("D", "H", "X", "y")
+           for region in ("core_A", "core_B", "axial", "off_axis", "all")},
     )
     after = _meminfo()
     record = dict(
@@ -457,6 +484,7 @@ def _run_once(row):
         onset_search_20s=dict(
             checkpoint_ms=ONSET_CHECK_MS, lifecycle=lifecycle20,
             onset_seen=bool(lifecycle20.get("bout") is not None), numerical=num20),
+        event_ledger=event_ledger,
         numerical=numerical, refractory_ceiling_fraction=ceiling_frac,
         x_peak_depletion_ms=x_peak_ms, x_activates_after_onset=x_after,
         x_start=float(xtrace[0]) if xtrace.size else None,
