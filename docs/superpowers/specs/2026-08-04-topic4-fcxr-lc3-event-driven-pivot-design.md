@@ -180,6 +180,44 @@ Open dynamic `X`. Scan `X` depletion strength / rise time and `X` recovery time.
 Targets: `X` roughly still during the IED phase; clear depletion once the high state
 starts; autonomous offset within 1-5 s; a protection window after offset.
 
+**Amendment 2026-08-04, measured on the first no-kick trajectory (noise 401).** The
+axes above are not the ones the evidence points at, and Stage 2 is gated on an
+arbitration before any of them is scanned.
+
+That trajectory ran an ictal bout from 5.0 s to the end of its 45 s record with no
+autonomous offset. Its 44.75 s state says:
+
+- `X` is neither slow nor still falling. `tau_x_down = 500 ms` is 80 time constants
+  inside a 40 s bout, and `X` has settled at its own set point, mean `0.394`. The
+  sensor mean never reaches its gate (`59.4 Hz` against `y_gate = 76.64 Hz`), so the
+  Hill drive never saturates. **Depth is the bottleneck, not speed**, and recovery
+  time never enters the picture because `X` never turns around.
+- **Every cell is already below the frozen map's `a_X = 0.65` return boundary** and
+  the bout persists regardless, so "`X` cannot brake hard enough" is not established
+  either.
+- What differs is `D`. The frozen map's wear axis spans mean `D` in `[0, 0.097]` --
+  the levels a 24 s interictal record reaches. The trajectory drove `D` to `0.663`,
+  6.8x beyond the map's largest level, and flattened it: the 2.8x core-versus-off-axis
+  enrichment present before onset was gone by 44.75 s, every region at `0.663`.
+
+The map cannot arbitrate because its domain does not contain the trajectory. A 2x2
+seeded from the byte-parity-verified late-bout state does, crossing `D` in
+`{observed 0.663, map maximum 0.097}` with `X` in `{observed field, the 0.10 x_min
+floor}`, each arm on the map's own screen/extend protocol and classifier so the
+outcomes sit on the same scale as the 102 map rows
+(`scripts/run_topic4_fcxr_lc3_dxprobe.py`).
+
+Routing, registered before the arms ran:
+
+- max-brake still high **and** map-`D` terminates -> `D` is the cause; `X` cannot
+  terminate at real wear levels at any depth, and Stage 2 scans how to **bound the `D`
+  excursion**, not `X`;
+- max-brake terminates -> `X` can terminate, and Stage 2 scans how `X` reaches that
+  depth naturally, i.e. `K_y` / `y_gate` / `x_min`, **not** `tau_x_down` or
+  `tau_x_up`;
+- control not high -> the frozen replica fails to reproduce the bout and the probe is
+  void; neither branch may be read.
+
 ### Stage 3 — recovery
 
 Acceptance is distributional, not "the mean rate came back". Compare against the frozen
