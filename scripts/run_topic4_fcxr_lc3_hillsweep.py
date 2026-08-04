@@ -139,22 +139,26 @@ def _arms(gates=Y_GATES, kys=K_YS):
             for g in gates for k in kys]
 
 
-def _arm_path(arm_id, extended_ms=EXTENDED_MS):
-    """Long-window re-runs write beside the registered ones, never over them."""
-    if float(extended_ms) == float(EXTENDED_MS):
-        return os.path.join(OUT, f"arm_{arm_id}.json")
-    return os.path.join(OUT, f"arm_{arm_id}_ext{int(round(float(extended_ms)))}ms.json")
+def _arm_path(arm_id, extended_ms=EXTENDED_MS, free_wear=False):
+    """Long-window and free-wear re-runs write beside the registered ones, never over."""
+    parts = [f"arm_{arm_id}"]
+    if float(extended_ms) != float(EXTENDED_MS):
+        parts.append(f"ext{int(round(float(extended_ms)))}ms")
+    if free_wear:
+        parts.append("freewear")
+    return os.path.join(OUT, "_".join(parts) + ".json")
 
 
 def _run_arm(arm):
     extended_ms = float(arm.get("extended_ms", EXTENDED_MS))
-    prior_path = _arm_path(arm["arm_id"], extended_ms)
+    free_wear = bool(arm.get("free_wear", False))
+    prior_path = _arm_path(arm["arm_id"], extended_ms, free_wear)
     if os.path.isfile(prior_path):
         prior = json.load(open(prior_path))
         if prior.get("resolved_label"):
             return prior
     S, seed, point = _context()
-    child = freeze_dynamic_state(seed, freeze_x=False)     # wear pinned where it landed
+    child = freeze_dynamic_state(seed, freeze_x=False, freeze_d=not free_wear)
     set_hill_placement(child, K_y=arm["K_y"], y_gate=arm["y_gate"])
 
     t0 = time.time()
@@ -184,11 +188,14 @@ def _run_arm(arm):
     slow = final["checkpoint"].slow
     n = int(final["n_steps"])
     xtrace = np.asarray(slow.trace_x_relay_mean[-n:], dtype=float)
+    zf = np.asarray(slow.z[:int(slow.NE)], dtype=float)
+    d_end = float(np.mean(1.0 - zf))
     terminated = resolved["label"] not in HIGH_LABELS
     x_min = float(xtrace.min()) if xtrace.size else float("nan")
     record = dict(
         arm_id=arm["arm_id"], y_gate=arm["y_gate"], K_y=arm["K_y"],
-        is_control=arm["is_control"],
+        is_control=arm["is_control"], free_wear=free_wear,
+        wear_start=0.6629, wear_end=d_end,
         resolved_label=resolved["label"], terminated=bool(terminated),
         x_mean_start=float(xtrace[0]) if xtrace.size else None,
         x_mean_min=x_min, x_mean_final=float(xtrace[-1]) if xtrace.size else None,
@@ -223,6 +230,11 @@ def main():
                     help="comma-separated gate positions, overriding the registered grid")
     ap.add_argument("--kys", default="",
                     help="comma-separated half-activations, overriding the registered grid")
+    ap.add_argument("--free-wear", action="store_true",
+                    help="let wear relax as well. Pinned wear was measured to be why the "
+                         "terminated tissue stays at 32-40 Hz: silenced, wear falls from "
+                         "0.663 to 0.014 in 20 s, so pinning it holds the tissue "
+                         "hyperexcitable long after the discharge has stopped")
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("40k Hill-placement sweep requires --confirm-run")
@@ -243,6 +255,7 @@ def main():
     arms = _arms(gates, kys)
     for arm in arms:
         arm["extended_ms"] = float(args.extended_ms)
+        arm["free_wear"] = bool(args.free_wear)
     if args.only.strip():
         want = {a.strip() for a in args.only.split(",") if a.strip()}
         unknown = want - {a["arm_id"] for a in arms}
@@ -311,7 +324,8 @@ def main():
                 rows.append(rec)
                 print(f"[hill] {len(rows)}/{len(arms)} {arm_id:22s} gate={rec['y_gate']:.2f} "
                       f"K_y={rec['K_y']:.2f} -> {rec['resolved_label']:22s} "
-                      f"x_min={rec['x_mean_min']:.4f} rate={rec['mean_rate_hz']:7.2f} Hz",
+                      f"x {rec['x_mean_min']:.3f}->{rec['x_mean_final']:.3f} "
+                      f"wear->{rec['wear_end']:.4f} rate={rec['mean_rate_hz']:7.2f} Hz",
                       flush=True)
 
     terminating = [r for r in rows if r["terminated"]]
