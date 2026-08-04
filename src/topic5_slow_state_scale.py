@@ -174,15 +174,15 @@ def window_state(
     Fewer than `min_resolved_families` resolved -> `UNRESOLVED_FAMILIES`, checked before
     any vote below.
 
-    **Per-family tests**, computed for every resolved family (fix C1 — both tests are
-    computed for every resolved family regardless of the other test's outcome, so the
-    two window-level votes below share one denominator, `n` = number of resolved
-    families):
+    **Per-family tests**, computed for every resolved family:
 
     - *above chance*: random-half **median** exceeds (strictly) contact-null's own 95th
       percentile (`q95`) — each family judged against its own null, never a
       shared/absolute threshold (§6.3: contact counts range ~8-16 in this cohort and a
       constant threshold would systematically penalise high-dimensional patients).
+
+    ... and, only for families that test above chance:
+
     - *chronology below alpha*: the chronological value is strictly less than the
       random-half distribution's `alpha`-quantile (`np.percentile(random_half, 100 *
       alpha)`).
@@ -196,7 +196,13 @@ def window_state(
        are above chance — this is the complement of "majority above chance", so a tie
        (e.g. 1-of-2, 2-of-4) or a minority also falls here, not into `RELIABLE`;
     3. among windows that passed step 2 (a majority above chance), `CHRONOLOGY_BREAK`
-       when a strict majority of resolved families show chronology below alpha;
+       when a strict majority of the **above-chance** resolved families (fix round 2,
+       Item A — deliberately a *different*, smaller denominator than step 2's "all
+       resolved families") show chronology below alpha, because a family that cannot be
+       told apart from its own contact-permuted null has no meaningful chronological
+       comparison to cast in the first place — its first-half-versus-second-half
+       difference is noise about a quantity that was never estimable, so it must not be
+       able to swing the break vote either way;
     4. `RELIABLE` only when step 2's majority was met and step 3's break-majority was
        not — i.e. `RELIABLE` requires having *reached* step 4, never a leftover default.
     """
@@ -205,7 +211,7 @@ def window_state(
     chronological = agreements["chronological"]
 
     above_chance: list[bool] = []
-    chrono_below_alpha: list[bool] = []
+    chrono_below_alpha: list[bool] = []  # only for families that ARE above chance
     for family in FAMILIES:
         rh = random_half.get(family) or []
         cn = contact_null.get(family) or []
@@ -219,10 +225,12 @@ def window_state(
 
         median_rh = float(np.median(rh))
         q95_null = float(np.percentile(cn, 95))
-        above_chance.append(median_rh > q95_null)
+        is_above_chance = median_rh > q95_null
+        above_chance.append(is_above_chance)
 
-        alpha_quantile = float(np.percentile(rh, 100.0 * float(alpha)))
-        chrono_below_alpha.append(float(chrono) < alpha_quantile)
+        if is_above_chance:
+            alpha_quantile = float(np.percentile(rh, 100.0 * float(alpha)))
+            chrono_below_alpha.append(float(chrono) < alpha_quantile)
 
     n = len(above_chance)
     if n < int(min_resolved_families):
@@ -231,7 +239,8 @@ def window_state(
     if not (sum(above_chance) * 2 > n):
         return BELOW
 
-    if sum(chrono_below_alpha) * 2 > n:
+    n_above_chance = len(chrono_below_alpha)
+    if sum(chrono_below_alpha) * 2 > n_above_chance:
         return BREAK
 
     return RELIABLE

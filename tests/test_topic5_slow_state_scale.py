@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 
 from src.topic5_slow_state_scale import (
     scale_states,
@@ -316,6 +317,112 @@ def test_a_family_with_too_few_finite_draws_does_not_count_as_resolved():
     )
 
 
+def test_a_below_chance_family_does_not_vote_on_the_chronology_break():
+    # fix round 2, Item A: the below-chance family ("participation") would itself flag
+    # a "break" if it were naively evaluated (its chronological value 0.05 sits below
+    # its own random-half alpha=0.05-quantile of 0.1), but it is below chance and must
+    # not be allowed to cast that vote at all. The two above-chance families
+    # ("mean_rank", "precedence") do NOT show a break. Result must be RELIABLE.
+    #
+    # NOTE (see report task-6-report.md, fix round 2 section, for the full derivation):
+    # with exactly 3 total resolved families and only 1 of them (the below-chance one)
+    # able to cast a "True" break vote, this composition cannot mathematically cross
+    # the OLD shared-denominator majority threshold either (strict majority of 3 needs
+    # >= 2 True votes; only 1 is achievable here) -- so restoring the shared
+    # denominator on THIS specific fixture does not, in fact, flip the result. That is
+    # reported honestly below rather than staged to "look like" a failing mutant.
+    # `test_a_below_chance_familys_true_flag_no_longer_tips_a_genuine_break_majority`
+    # right after this one uses a 3rd, genuinely above-chance-and-breaking family (the
+    # composition the reviewer's own bug illustration used) and DOES flip under the
+    # deliberate break; that is the test the round-2 break/revert ritual was run
+    # against.
+    agreements = {
+        "random_half": {
+            "participation": [0.1] * 20,
+            "mean_rank": [0.9] * 20,
+            "precedence": [0.8] * 20,
+        },
+        "chronological": {
+            "participation": 0.05,  # < 0.1 -> would flag "break" if it were voted
+            "mean_rank": 0.95,  # >= 0.9 -> not a break
+            "precedence": 0.85,  # >= 0.8 -> not a break
+        },
+        "contact_null": {
+            "participation": [0.5] * 20,  # q95=0.5, median 0.1 <= 0.5 -> below chance
+            "mean_rank": [0.1] * 20,  # q95=0.1, median 0.9 > 0.1 -> above chance
+            "precedence": [0.05] * 20,  # q95=0.05, median 0.8 > 0.05 -> above chance
+        },
+    }
+    assert (
+        window_state(agreements, alpha=0.05, min_resolved_families=2) == "RELIABLE"
+    )
+
+
+def test_a_below_chance_familys_true_flag_no_longer_tips_a_genuine_break_majority():
+    # fix round 2, Item A, supplementary test (added beyond the literal request; see
+    # task-6-report.md for why): mirrors the reviewer's own illustrative bug
+    # description -- one BELOW_CHANCE family whose own naive flag is True, one
+    # above-chance family that is NOT a break ("mean_rank"), one above-chance family
+    # that IS a break ("precedence"). Under the pre-Item-A shared denominator (n=3
+    # resolved families), the below-chance family's True flag combines with
+    # "precedence"'s True flag to reach 2-of-3, a majority, giving the wrong answer
+    # CHRONOLOGY_BREAK. Restricting the vote to the 2 above-chance families
+    # ("mean_rank"=False, "precedence"=True) gives 1-of-2, not a majority -> RELIABLE.
+    # This is the fixture the round-2 deliberate-break-and-revert ritual was run on,
+    # because it is the one that can actually distinguish the two denominators.
+    agreements = {
+        "random_half": {
+            "participation": [0.1] * 20,
+            "mean_rank": [0.9] * 20,
+            "precedence": [0.8] * 20,
+        },
+        "chronological": {
+            "participation": 0.05,  # below-chance family's own naive flag: True
+            "mean_rank": 0.95,  # above-chance, not a break
+            "precedence": 0.1,  # above-chance, IS a break
+        },
+        "contact_null": {
+            "participation": [0.5] * 20,
+            "mean_rank": [0.1] * 20,
+            "precedence": [0.05] * 20,
+        },
+    }
+    assert (
+        window_state(agreements, alpha=0.05, min_resolved_families=2) == "RELIABLE"
+    )
+
+
+def test_a_family_with_no_chronological_value_is_not_resolved_even_with_full_draws():
+    # fix round 2, Item B: "participation" has FULL random_half (20) and contact_null
+    # (20) -- both clear MIN_FINITE_DRAWS_FOR_RESOLUTION -- but chronological is None.
+    # Every fixture before this round that set chronological=None also starved that
+    # family's draw lists, so the `chrono is None` clause in the resolution gate was
+    # never exercised in isolation; a mutant deleting that clause passed all 18 prior
+    # tests. Only "mean_rank" is an ordinary fully-resolved family, so with
+    # min_resolved_families=2, only 1 family actually resolves -> UNRESOLVED_FAMILIES.
+    agreements = {
+        "random_half": {
+            "participation": [0.9] * 20,
+            "mean_rank": [0.9] * 20,
+            "precedence": [],
+        },
+        "chronological": {
+            "participation": None,
+            "mean_rank": 0.0,
+            "precedence": None,
+        },
+        "contact_null": {
+            "participation": [0.1] * 20,
+            "mean_rank": [0.1] * 20,
+            "precedence": [],
+        },
+    }
+    assert (
+        window_state(agreements, alpha=0.05, min_resolved_families=2)
+        == "UNRESOLVED_FAMILIES"
+    )
+
+
 # ---------------------------------------------------------------------------
 # scale_states
 # ---------------------------------------------------------------------------
@@ -327,3 +434,12 @@ def test_scale_states_returns_too_few_windows_below_the_minimum():
 
     five_windows = [R, R, R, R, B]
     assert scale_states(five_windows, min_windows=5) == R
+
+
+def test_scale_states_rejects_a_label_outside_the_known_alphabet():
+    # fix round 2, Item C: the ValueError in scale_states was made reachable in round 1
+    # (validated up front instead of an unreachable post-vote raise) but no test ever
+    # triggered it. min_windows=5 with exactly 5 states so the length gate is cleared
+    # and validation is actually reached.
+    with pytest.raises(ValueError, match="BOGUS_LABEL"):
+        scale_states([R, R, R, "BOGUS_LABEL", R], min_windows=5)
