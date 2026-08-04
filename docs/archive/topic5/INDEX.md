@@ -6,6 +6,15 @@
 
 ## 主线（network-axis pivot）
 
+### `source_conditioned_shared_scaffold_rnn_v0_3_result_2026-08-04.md` — **结构化 RNN 确实在用事件内顺序；但它的方向场没有跨状态优势，且"两个相反方向场"这一前提被实测推翻**
+- 34 人 × 3 模型 × 3 seeds = 306/306 完成，0 失败 / 0 显存溢出 / 0 非有限值。学习率经事后扩展网格定在内部极小值 3e-2（1.7828/1.7672/1.6880/1.6012/**1.5980**/1.5989）；**网格扩展是事后行为、且只在 structured 上调参后套用到对照臂**，两条限制必须随结论引用。
+- **间期阳性**：打乱事件内真实顺序后 structured 变差 **+0.0456**（33/34、P=3.5e-10；31 人确认 +0.0437、P=2.8e-9），比 v0.2 的 0.0001 大两个数量级；相对静态参与度基线 +0.1001（34/34）。相对稠密 GRU **−0.1205（0/34）**——按 plan 预注册**不作为下游门槛**，不得据此宣称结构化模型更好或更差。
+- **跨状态阴性**：primary（learned axis）规则下 structured 中位 margin +0.0180、P=0.404、**0/15 超过自身 95 分位**；同一队列里唯一稳定超过随机的是**静态参与度基线**（+0.1574、P=0.0013、5/15）。sensitivity（diffusion graph）规则下三者数值都抬高（structured +0.2340、P=6.1e-05），但**两套规则下 structured 都没赢过 ordinary**（P=0.79 / 0.98）。→ 没有证据表明方向结构比"平时哪里活跃"这个粗糙锚点更能对应发作早期能量。
+- **⚠️一个设计前提被实测推翻**：选 primary source pool 时只验证了"两端起点给出相反的方向标量"（±0.61–0.84 vs 0.03–0.28），未验证"两张场相反"。实测 `spearman(F⁻,F⁺)` 中位 **+0.042**、真正相反的仅 **2/34**（sensitivity 规则 −0.048、5/34）——**两套规则下场都没相反**，因为对称支架与参与度偏置主导更新、有符号流只是扰动。属 `CLAUDE.md` §6.3 层级合并错误；面板 D 与 README 已改为写出实测值。
+- **⚠️半个队列的三个 seed 没找到同一条轴**：符号对齐后 seed 间最小两两相关中位 0.592、**16/34 < 0.5、5/34 为负**；primary source pool 正由该 seed-ensemble 轴定义。该诊断量设计时即要求"报告而不作门槛"。
+- **⚠️Target seal 事件已留痕**（`TARGET_SEAL_INCIDENT.json`）：为避免制图在无人值守链末尾首次执行而做的排练，反序列化了 **E1146**（supportive-only、不进任何 primary P 值）的发作早期数值，早于最终轮 manifest 冻结。读取前全部哈希已冻结、读取后无任何选择发生；但**不可再声称"manifest 之前没有任何 target 值被反序列化过"**。
+- **未实现**：rollout-vs-test20 一致性三指标（participation / pairwise precedence / expected-rank distance）任何脚本都未实现，图统计 JSON 显式标 `not_implemented`。
+
 ### `patient_specific_target_free_rnn_bridge_v0_1_result_2026-08-03.md` — **患者内 RNN 学到间期传播，并恢复与发作早期相关的患者空间场**
 - 每位患者只用自己的 masked interictal contact-rank events 独立自监督训练；16 人 × 3 模型 × 3 seeds 共 144 units，0 failure。Primary 15 人中，真实顺序 GRU 相对 rank-shuffle heldout NLL 在 14/15 人改善，exact P=0.000122；自由 rollout precedence 相关中位 0.775（rank-shuffle 0.052）。
 - checkpoint/rollout 冻结后才读取同一患者 `[0,10] s`、`1–150 Hz` early-ictal field。GRU 场 median max|rho|=0.584，相对 all-contact null 的 margin +0.167，13/15 为正，P=0.0256。该对应也见于完整 static fit60 与 rank-shuffle 场；GRU−static 增量 +0.025、P=0.305，within-shaft sensitivity P=0.149。
