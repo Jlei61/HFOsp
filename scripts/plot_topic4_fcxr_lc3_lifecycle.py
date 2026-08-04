@@ -186,39 +186,58 @@ def figure_b(records, path):
     ledgers = {s: r for s, (k, r) in records.items() if k == "ledger"}
     if not ledgers:
         return None
-    fig, axes = plt.subplots(1, 3, figsize=(11.2, 3.5))
+    fig, axes = plt.subplots(1, 3, figsize=(11.4, 3.6))
     ax_mean, ax_region, ax_relay = axes
 
+    n_rise, d_swing, x_swing = 0, [], []
     for seed, rec in ledgers.items():
-        rows = [r for r in rec["event_ledger"]["events"] if r["phase"] == "pre_onset"]
+        rows = [r for r in rec["event_ledger"]["events"]
+                if r["phase"] == "pre_onset" and r["post"]]
         if not rows:
             continue
         idx = np.arange(1, len(rows) + 1)
-        ax_mean.plot(idx, [r["post"]["D"]["all"] for r in rows if r["post"]],
-                     "o-", ms=3, lw=1.3, color=SEED_COLOR[seed], label=f"noise {seed}")
-        ax_relay.plot(idx, [r["post"]["X"]["all"] for r in rows if r["post"]],
-                      "o-", ms=3, lw=1.3, color=SEED_COLOR[seed], label=f"noise {seed}")
+        d = [r["post"]["D"]["all"] for r in rows]
+        x = [r["post"]["X"]["all"] for r in rows]
+        ax_mean.plot(idx, d, "o-", ms=3, lw=1.3, color=SEED_COLOR[seed],
+                     label=f"noise {seed}")
+        ax_relay.plot(idx, x, "o-", ms=3, lw=1.3, color=SEED_COLOR[seed],
+                      label=f"noise {seed}")
+        n_rise += int(d[-1] > d[0])
+        d_swing.append(d[-1] - d[0])
+        x_swing.append(abs(x[-1] - x[0]))
+    n_seeds = len(d_swing)
     ax_mean.set_xlabel("event number before entry")
     ax_mean.set_ylabel("wear, whole array")
-    ax_mean.set_title("wear ratchets up event by event", loc="left")
+    ax_mean.set_title(f"wear rises across the train in {n_rise} of {n_seeds} seeds",
+                      loc="left")
     ax_mean.legend(frameon=False, fontsize=8)
 
     primary = ledgers.get(401, next(iter(ledgers.values())))
     rows = [r for r in primary["event_ledger"]["events"]
             if r["phase"] == "pre_onset" and r["post"]]
     idx = np.arange(1, len(rows) + 1)
+    gain = {}
     for region in ("core_A", "core_B", "axial", "off_axis"):
-        ax_region.plot(idx, [r["post"]["D"][region] for r in rows], "o-", ms=3, lw=1.3,
-                       color=REGION_COLOR[region], label=REGION_LABEL[region])
+        series = [r["post"]["D"][region] for r in rows]
+        gain[region] = series[-1] - series[0]
+        ax_region.plot(idx, series, "o-", ms=3, lw=1.3, color=REGION_COLOR[region],
+                       label=REGION_LABEL[region])
+    core = max(gain["core_A"], gain["core_B"])
+    rest = max(gain["axial"], gain["off_axis"])
+    ratio = core / rest if rest > 1e-12 else float("inf")
     ax_region.set_xlabel("event number before entry")
     ax_region.set_ylabel("wear")
-    ax_region.set_title("and it builds fastest in the two cores", loc="left")
+    ax_region.set_title(
+        (f"the cores gain {ratio:.1f}x what the rest does" if ratio >= 1.05 else
+         f"the cores gain {ratio:.2f}x the rest — no core lead"),
+        loc="left")
     ax_region.legend(frameon=False, fontsize=8)
 
     ax_relay.set_xlabel("event number before entry")
     ax_relay.set_ylabel("relay availability")
     ax_relay.set_ylim(0.0, 1.05)
-    ax_relay.set_title("while the relay does not move at all", loc="left")
+    ax_relay.set_title(f"the relay moves by at most {max(x_swing):.3f} over the train",
+                       loc="left")
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
