@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, FancyArrowPatch
 import numpy as np
 import pandas as pd
+import torch
 import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -35,8 +36,14 @@ if str(ROOT) not in sys.path:
 from scripts.run_topic5_shared_scaffold_rnn_unit_v0_2 import (  # noqa: E402
     load_one_patient_record,
 )
+from scripts.freeze_topic5_shared_scaffold_rollout_subject_v0_2 import (  # noqa: E402
+    load_model,
+)
 from src.topic5_patient_specific_rnn_bridge import (  # noqa: E402
     chronological_60_20_20,
+)
+from src.topic5_shared_scaffold_rollout import (  # noqa: E402
+    exact_conditional_k_subset_sample,
 )
 
 REPRESENTATIVE = "epilepsiae_1146"
@@ -53,9 +60,17 @@ MODEL_COLOR = {
     "structured": "#B2182B",
     "structured_rank_shuffle": "#E8B4B8",
 }
-MODE_COLOR = {"minus": "#B2182B", "plus": "#2166AC"}
-MODE_LABEL = {"minus": "Mode 1", "plus": "Mode 2"}
+# The patient's own two interictal propagation modes, read back from the
+# frozen clustering.  The model never saw these labels.
+MODE_KEYS = ("A", "B")
+MODE_COLOR = {"A": "#B2182B", "B": "#2166AC"}
+MODE_LABEL = {"A": "Mode A", "B": "Mode B"}
+PANEL_C_MODELS = ("static", "structured", "structured_rank_shuffle")
+PANEL_E_MODELS = ("static", "structured")
 N_DISPLAY_EVENTS = 220
+PROPAGATION_RECORD = Path(
+    "/home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject"
+)
 
 plt.rcParams.update(
     {
@@ -76,68 +91,77 @@ plt.rcParams.update(
 
 
 # ------------------------------------------------------------------ panel a
+def _style(ax):
+    """Repo convention: keep only the left and bottom spines."""
+    ax.spines["top"].set_visible(False)
+    ax.spines["right"].set_visible(False)
+
+
 def panel_a(ax):
-    """Input column, recurrent contact network, output column."""
+    """Contact sequence in, recurrent network, contact sequence out."""
 
     ax.set_axis_off()
     ax.set_xlim(0, 1)
     ax.set_ylim(0, 1)
+    cmap = plt.get_cmap("viridis")
+    n_contacts = 8
+    strip_w, strip_h = 0.085, 0.058
 
-    # --- input column: which contacts fired at this rank step
-    active = {1, 3, 4}
-    ys = 0.80 - np.arange(6) * 0.125
-    ax.scatter(np.full(6, 0.06), ys, s=24, marker="o",
-               c=["#444444" if i in active else "white" for i in range(6)],
-               edgecolors="#444444", linewidths=0.6, zorder=3)
-    ax.text(0.06, 0.90, "Contacts\nat rank $t$", ha="center", va="bottom", fontsize=6)
+    def strip(x0, y0, values, label):
+        for index, value in enumerate(values):
+            y = y0 - index * strip_h
+            face = "#DDDDDD" if value is None else cmap(value)
+            ax.add_patch(
+                plt.Rectangle((x0, y), strip_w, strip_h * 0.86, facecolor=face,
+                              edgecolor="white", linewidth=0.5, zorder=3)
+            )
+        ax.text(x0 + strip_w / 2, y0 + strip_h * 1.05, label, ha="center",
+                va="bottom", fontsize=6.2)
+        return [(x0, y0 - i * strip_h + strip_h * 0.43) for i in range(len(values))]
 
-    # --- recurrent network: neurons ordered along the learned signed axis
-    n_units = 7
-    xs = np.linspace(0.32, 0.66, n_units)
-    offsets = np.array([0.11, -0.06, 0.09, -0.11, 0.07, -0.07, 0.10])
-    positions = np.column_stack([xs, 0.47 + offsets])
+    seen_now = [0.0, 0.12, None, 0.30, None, None, None, None]
+    predicted = [0.0, 0.12, 0.55, 0.30, 0.72, 0.88, None, None]
+    left = strip(0.045, 0.735, seen_now, "observed\nso far")
+    right = strip(0.870, 0.735, predicted, "next\ncontacts")
 
-    # symmetric scaffold: undirected, weight falls with distance along the axis
+    # recurrent network inside one boundary
+    cx, cy, radius = 0.475, 0.50, 0.235
+    ax.add_patch(
+        plt.Circle((cx, cy), radius, facecolor="#F7F7F7", edgecolor="#333333",
+                   linewidth=0.9, zorder=1)
+    )
+    n_units = 9
+    angles = np.linspace(0.5 * np.pi, 2.5 * np.pi, n_units, endpoint=False)
+    ux = cx + 0.155 * np.cos(angles)
+    uy = cy + 0.155 * np.sin(angles)
+    axis_value = np.linspace(0.0, 1.0, n_units)
     for i in range(n_units):
         for j in range(i + 1, n_units):
-            weight = float(np.exp(-((xs[j] - xs[i]) / 0.18) ** 2))
-            if weight < 0.12:
+            gap = min(abs(i - j), n_units - abs(i - j))
+            weight = float(np.exp(-(gap / 2.4) ** 2))
+            if weight < 0.15:
                 continue
-            ax.plot(positions[[i, j], 0], positions[[i, j], 1], color="#B0B0B0",
-                    linewidth=0.3 + 1.4 * weight, alpha=0.7, zorder=1)
-    # signed flow: the single extra structured term, between the two ends only
-    for i, j in ((0, 6), (1, 5)):
+            ax.plot([ux[i], ux[j]], [uy[i], uy[j]], color="#B8B8B8",
+                    linewidth=0.25 + 1.1 * weight, alpha=0.75, zorder=2)
+    for i, j in ((0, n_units // 2), (1, n_units // 2 + 1)):
         ax.add_patch(
-            FancyArrowPatch(positions[i], positions[j], arrowstyle="-|>",
-                            mutation_scale=6, connectionstyle="arc3,rad=-0.28",
-                            linewidth=0.9, color=MODE_COLOR["minus"], zorder=2)
+            FancyArrowPatch((ux[i], uy[i]), (ux[j], uy[j]), arrowstyle="-|>",
+                            mutation_scale=6, connectionstyle="arc3,rad=0.30",
+                            linewidth=1.0, color=MODE_COLOR["A"], zorder=4)
         )
-    ax.scatter(positions[:, 0], positions[:, 1], s=52, marker="o",
-               c=np.linspace(0, 1, n_units), cmap="coolwarm",
-               edgecolors="#333333", linewidths=0.6, zorder=4)
-    ax.text(0.49, 0.955, "Recurrent contact network", ha="center", va="bottom", fontsize=6.5)
-    ax.annotate("", xy=(0.70, 0.15), xytext=(0.28, 0.15),
-                arrowprops=dict(arrowstyle="-|>", color="#777777", lw=0.5))
-    ax.text(0.49, 0.10, "one learned signed axis", ha="center", va="top",
-            fontsize=5.6, color="#777777")
-    ax.text(0.485, 0.275, "grey: shared symmetric scaffold", ha="right",
-            va="center", fontsize=5.5, color="#777777")
-    ax.text(0.505, 0.275, "red: signed flow, sign set by the first rank set",
-            ha="left", va="center", fontsize=5.5, color=MODE_COLOR["minus"])
+    ax.scatter(ux, uy, s=46, marker="o", c=axis_value, cmap="coolwarm",
+               edgecolors="#333333", linewidths=0.6, zorder=5)
+    ax.text(cx, cy + radius + 0.020, "recurrent contact network", ha="center",
+            va="bottom", fontsize=6.5)
 
-    # --- output column
-    labels = ("next contact", "stop", "set size")
-    out_ys = 0.66 - np.arange(3) * 0.16
-    ax.scatter(np.full(3, 0.86), out_ys, s=24, marker="o", c="white",
-               edgecolors="#444444", linewidths=0.6, zorder=3)
-    for y, label in zip(out_ys, labels):
-        ax.text(0.885, y, label, ha="left", va="center", fontsize=5.8)
-    ax.text(0.86, 0.90, "Rank $t\\!+\\!1$", ha="center", va="bottom", fontsize=6)
-
-    for x0, x1 in ((0.10, 0.27), (0.71, 0.83)):
+    for y in (0.62, 0.50, 0.38):
         ax.add_patch(
-            FancyArrowPatch((x0, 0.47), (x1, 0.47), arrowstyle="-|>",
-                            mutation_scale=7, linewidth=0.7, color="#333333", zorder=3)
+            FancyArrowPatch((0.145, y), (cx - radius - 0.012, y), arrowstyle="-|>",
+                            mutation_scale=6, linewidth=0.6, color="#555555", zorder=6)
+        )
+        ax.add_patch(
+            FancyArrowPatch((cx + radius + 0.012, y), (0.860, y), arrowstyle="-|>",
+                            mutation_scale=6, linewidth=0.6, color="#555555", zorder=6)
         )
 
 
@@ -152,53 +176,53 @@ def _rank_image(groups: np.ndarray, order: np.ndarray, n_events: int, seed: int)
     return np.where(image < 0, np.nan, image)
 
 
+def _rank_profile(groups: np.ndarray, order: np.ndarray):
+    """Median and interquartile spread of each contact's within-event rank."""
+
+    values = np.where(groups < 0, np.nan, groups).astype(float)[:, order]
+    with np.errstate(invalid="ignore"):
+        low, mid, high = np.nanpercentile(values, [25, 50, 75], axis=0)
+    return mid, low, high
+
+
 def panel_b(axes, profile_axes, observed, rollout, order, cbar_ax):
     cmap = plt.get_cmap("viridis").copy()
     cmap.set_bad("#DDDDDD")
     vmax = max(
         np.nanmax(image)
-        for side in ("minus", "plus")
-        for image in (observed[side]["image"], rollout[side]["image"])
+        for key in MODE_KEYS
+        for image in (observed[key]["image"], rollout[key]["image"])
     )
     handle = None
-    for row, side in enumerate(("minus", "plus")):
+    for row, key in enumerate(MODE_KEYS):
         for column, (source, title) in enumerate(
-            ((observed, "Observed held-out events"), (rollout, "Model rollout"))
+            ((observed, "Observed held-out events"), (rollout, "Model, same starts"))
         ):
             ax = axes[row][column]
-            image = source[side]["image"]
-            handle = ax.imshow(
-                image, aspect="auto", cmap=cmap, vmin=0, vmax=vmax,
-                interpolation="nearest",
-            )
+            handle = ax.imshow(source[key]["image"], aspect="auto", cmap=cmap,
+                               vmin=0, vmax=vmax, interpolation="nearest")
             ax.set_xticks([])
             if column == 0:
                 ax.set_yticks(range(len(order)))
-                ax.set_yticklabels(source[side]["names"], fontsize=4.4)
-                ax.set_ylabel(MODE_LABEL[side], color=MODE_COLOR[side], fontsize=6.5)
+                ax.set_yticklabels(source[key]["names"], fontsize=4.4)
+                ax.set_ylabel(MODE_LABEL[key], color=MODE_COLOR[key], fontsize=7)
             else:
                 ax.set_yticks([])
             if row == 0:
                 ax.set_title(title, fontsize=7)
-            ax.text(0.99, 0.02, f"n={source[side]['n_events']:,}",
-                    transform=ax.transAxes, ha="right", va="bottom", fontsize=5.2,
-                    color="#111111",
-                    bbox=dict(boxstyle="square,pad=0.15", facecolor="white",
-                              edgecolor="none", alpha=0.85))
-        # mean rank profile: does the model reproduce this mode's ordering?
         ax = profile_axes[row]
-        for source, style, label in (
-            (observed, "-", "observed"), (rollout, "--", "model"),
-        ):
-            profile = source[side]["profile"]
-            ax.plot(profile, np.arange(len(profile)), style, color=MODE_COLOR[side],
-                    linewidth=0.9, label=label)
+        rows = np.arange(len(order))
+        for source, style, width in ((observed, "-", 1.0), (rollout, "--", 1.0)):
+            mid, low, high = source[key]["profile"]
+            ax.fill_betweenx(rows, low, high, color=MODE_COLOR[key], alpha=0.13,
+                             linewidth=0)
+            ax.plot(mid, rows, style, color=MODE_COLOR[key], linewidth=width)
         ax.set_ylim(len(order) - 0.5, -0.5)
         ax.set_yticks([])
         ax.tick_params(labelsize=5)
-        ax.set_xlabel("mean rank", fontsize=5.8)
-        if row == 0:
-            ax.legend(frameon=False, fontsize=5, handlelength=1.2, loc="lower right")
+        _style(ax)
+        ax.spines["left"].set_visible(False)
+    profile_axes[-1].set_xlabel("rank", fontsize=6.5)
     axes[1][0].set_xlabel("Events", fontsize=6.5)
     axes[1][1].set_xlabel("Events", fontsize=6.5)
     bar = plt.colorbar(handle, cax=cbar_ax)
@@ -207,6 +231,18 @@ def panel_b(axes, profile_axes, observed, rollout, order, cbar_ax):
 
 
 # ------------------------------------------------------------------ panel c/e
+def _bracket(ax, left, right, level, text):
+    """Significance bracket drawn in axes coordinates above the data."""
+
+    ax.plot([left, left, right, right],
+            [level, level + 0.022, level + 0.022, level],
+            transform=ax.get_xaxis_transform(), color="#333333",
+            linewidth=0.5, clip_on=False)
+    ax.text((left + right) / 2, level + 0.030, text,
+            transform=ax.get_xaxis_transform(), ha="center", va="bottom",
+            fontsize=5.6, color="#333333", clip_on=False)
+
+
 def _paired(ax, wide, models, ylabel, seed):
     positions = np.arange(len(models), dtype=float)
     rng = np.random.default_rng(seed)
@@ -215,42 +251,52 @@ def _paired(ax, wide, models, ylabel, seed):
                 linewidth=0.3, alpha=0.7, zorder=1)
     for index, model in enumerate(models):
         values = wide[model].to_numpy(float)
-        jitter = rng.uniform(-0.08, 0.08, size=len(values))
+        jitter = rng.uniform(-0.07, 0.07, size=len(values))
         ax.scatter(positions[index] + jitter, values, s=5,
                    color=MODEL_COLOR[model], edgecolor="none", zorder=3)
-        ax.hlines(np.median(values), positions[index] - 0.24, positions[index] + 0.24,
+        ax.hlines(np.median(values), positions[index] - 0.22, positions[index] + 0.22,
                   color="#111111", linewidth=1.0, zorder=4)
     ax.set_xticks(positions)
     ax.set_xticklabels([MODEL_LABEL[m] for m in models], fontsize=6)
     ax.set_ylabel(ylabel, fontsize=6.5)
     ax.set_xlim(-0.5, len(models) - 0.5)
+    _style(ax)
 
 
 def panel_c(ax, patient: pd.DataFrame, stats: dict):
-    models = [m for m in MODEL_ORDER if m in set(patient.model)]
+    models = [m for m in PANEL_C_MODELS if m in set(patient.model)]
     wide = patient.pivot(index="subject", columns="model", values="contact_nll").dropna(
         subset=models
     )
-    _paired(ax, wide, models, "Held-out next-contact NLL", 4)
-    ax.set_title(
-        f"Interictal prediction, {len(wide)} patients", loc="left", fontweight="bold",
-        fontsize=7.5, pad=3,
-    )
+    _paired(ax, wide, models, "Next-contact NLL", 4)
+    ax.set_title(f"Interictal prediction, {len(wide)} patients", loc="left",
+                 fontweight="bold", fontsize=7.5, pad=22)
+    index = {model: position for position, model in enumerate(models)}
+    for comparator, level in (("static", 1.01), ("structured_rank_shuffle", 1.13)):
+        entry = stats["comparisons"].get(f"structured_vs_{comparator}__contact_nll")
+        if entry and entry.get("status") == "COMPLETE" and comparator in index:
+            _bracket(ax, index["structured"], index[comparator], level,
+                     f"P={entry['wilcoxon_two_sided_p']:.1e}")
 
 
 def panel_e(ax, patient: pd.DataFrame, cohort: dict, supportive: str):
-    models = [m for m in ("static", "ordinary_gru", "structured") if m in set(patient.model)]
+    models = [m for m in PANEL_E_MODELS if m in set(patient.model)]
     wide = patient.pivot(index="subject", columns="model", values="all_contact_margin")
     wide = wide.dropna(subset=models)
     primary = wide.drop(index=supportive, errors="ignore")
-    _paired(ax, primary, models, "Correspondence above\nits own shuffled null", 5)
+    _paired(ax, primary, models, "Above null", 5)
     if supportive in wide.index:
         ax.scatter(np.arange(len(models)), [wide.loc[supportive, m] for m in models],
                    s=12, facecolor="none", edgecolor="#B2182B", linewidth=0.7, zorder=5)
     ax.axhline(0.0, color="#777777", linewidth=0.5, linestyle=":")
     n_primary = cohort["model_statistics"]["structured"]["n_primary_patients"]
-    ax.set_title(f"Cross-state correspondence, {n_primary} patients", loc="left",
-                 fontweight="bold", fontsize=7.5, pad=3)
+    ax.set_title(f"Cross-state, {n_primary} patients", loc="left",
+                 fontweight="bold", fontsize=7.5, pad=12)
+    index = {model: position for position, model in enumerate(models)}
+    paired = cohort["paired_comparisons"].get("structured_vs_static_all_contact")
+    if paired and "static" in index and "structured" in index:
+        _bracket(ax, index["structured"], index["static"], 1.02,
+                 f"P={paired['exact_wilcoxon_greater_p']:.3g}")
 
 
 # ------------------------------------------------------------------ panel d
@@ -290,48 +336,130 @@ def panel_d(axes, cbar_axes, frozen_plane, fields, event_field):
 
 
 # --------------------------------------------------------------------- data
+def load_mode_labels(dataset_root: Path, record) -> np.ndarray:
+    """Join the frozen A/B cluster labels onto this dataset's events.
+
+    The clustering ran on the patient's full event set; the RNN dataset keeps
+    a chosen subset of blocks.  The two are joined through block identity and
+    the join is verified on event count and on every block's own time window,
+    because aligning these two arrays by position would silently mislabel
+    every event.
+    """
+
+    with np.load(dataset_root / "per_subject" / f"{REPRESENTATIVE}.npz",
+                 allow_pickle=False) as data:
+        selected = np.asarray(data["selected_block_ids"], dtype=int)
+        abs_time = np.asarray(data["event_abs_time"], dtype=float)
+    frozen = json.loads((PROPAGATION_RECORD / f"{REPRESENTATIVE}.json").read_text())
+    boundaries = {
+        int(block["block_id"]): block
+        for block in frozen["event_metadata"]["block_boundaries"]
+    }
+    labels = np.asarray(frozen["adaptive_cluster"]["labels"], dtype=int)
+    joined, offset = [], 0
+    for block_id in selected:
+        block = boundaries[int(block_id)]
+        count = int(block["n_events"])
+        window = abs_time[offset:offset + count]
+        if window.min() < float(block["block_start_epoch"]) - 1.0 or (
+            window.max() > float(block["block_end_epoch"]) + 1.0
+        ):
+            raise RuntimeError(f"block {block_id}: dataset events fall outside it")
+        joined.append(labels[int(block["start_event_idx"]):int(block["end_event_idx"])])
+        offset += count
+    joined = np.concatenate(joined)
+    if joined.size != abs_time.size:
+        raise RuntimeError("mode labels do not align with the dataset events")
+    return joined
+
+
+@torch.no_grad()
+def event_matched_rollouts(model, first_sets, *, horizon, seed, batch_size=512):
+    """Roll the model out from each observed event's own first rank set.
+
+    Display only.  Seeding every rollout from the event it is compared with
+    is what makes the two columns of panel b comparable; a fixed source pool
+    would force a constant first rank set the observed events do not have.
+    """
+
+    device = model.participation_bias.device
+    n_contacts = int(model.n_contacts)
+    sources = torch.as_tensor(np.asarray(first_sets), device=device, dtype=torch.bool)
+    generator = torch.Generator(device=device)
+    generator.manual_seed(int(seed))
+    model.eval()
+    produced = []
+    for start in range(0, int(sources.shape[0]), int(batch_size)):
+        current = sources[start:start + int(batch_size)].clone()
+        batch = int(current.shape[0])
+        seen = current.clone()
+        state = model.reset_state(batch_size=batch)
+        state = model.observe(
+            state, current,
+            active=torch.ones(batch, dtype=torch.bool, device=device),
+        )
+        groups = torch.full((batch, n_contacts), -1, dtype=torch.int16, device=device)
+        groups[current] = 0
+        alive = torch.ones(batch, dtype=torch.bool, device=device)
+        for step in range(1, int(horizon) + 1):
+            decision = model.decision(state, seen)
+            stop_probability = torch.sigmoid(decision["stop_logit"])
+            draw = torch.rand(batch, device=device, dtype=stop_probability.dtype,
+                              generator=generator)
+            stop = alive & ((draw < stop_probability) | ~decision["eligible"].any(dim=1))
+            continuing = alive & ~stop
+            next_set = torch.zeros_like(seen)
+            if torch.any(continuing):
+                rows = torch.where(continuing)[0]
+                probability = torch.softmax(decision["cardinality_logits"][rows], dim=1)
+                cardinality = torch.multinomial(
+                    probability, 1, generator=generator
+                ).squeeze(1) + 1
+                next_set[rows] = exact_conditional_k_subset_sample(
+                    node_logits=decision["node_logits"][rows],
+                    eligible=decision["eligible"][rows],
+                    cardinality=cardinality,
+                    generator=generator,
+                )
+                groups[next_set] = int(step)
+            state = model.observe(state, next_set, active=continuing)
+            seen = seen | next_set
+            alive = continuing
+            if not torch.any(alive):
+                break
+        produced.append(groups.cpu().numpy().astype(np.int64))
+    return np.concatenate(produced, axis=0)
+
+
 def build_panel_b_inputs(output: Path, dataset_root: Path, order_by: np.ndarray):
     record = load_one_patient_record(dataset_root, REPRESENTATIVE)
     _, _, test20 = chronological_60_20_20(record)
+    modes = load_mode_labels(dataset_root, record)[np.asarray(test20)]
+    groups = np.asarray(record.group_ids, dtype=np.int64)[np.asarray(test20)]
     freeze = output / "field_freeze" / "per_subject" / REPRESENTATIVE
     with np.load(freeze / "structured_fields.npz", allow_pickle=False) as data:
-        pools = {
-            side: np.asarray(data[f"source_{side}_indices"], dtype=int)
-            for side in ("minus", "plus")
-        }
         names = np.asarray(data["contact_names"]).astype(str)
+        horizon = int(data["horizon"])
     order = np.argsort(order_by)
-    observed_groups = np.asarray(record.group_ids, dtype=np.int64)[np.asarray(test20)]
 
-    def profile(groups):
-        values = np.where(groups < 0, np.nan, groups).astype(float)
-        with np.errstate(invalid="ignore"):
-            return np.nanmean(values[:, order], axis=0)
+    checkpoint_path = (
+        output / "per_subject" / REPRESENTATIVE / "structured" / "seed_11" / "checkpoint.pt"
+    )
+    _, model = load_model(checkpoint_path, device=torch.device("cpu"))
 
     observed, rollout = {}, {}
-    for side, own in pools.items():
-        other = pools["plus" if side == "minus" else "minus"]
-        first = observed_groups == 0
-        picked = observed_groups[
-            first[:, own].sum(axis=1) > first[:, other].sum(axis=1)
-        ]
-        observed[side] = {
-            "image": _rank_image(picked, order, N_DISPLAY_EVENTS, 11),
-            "profile": profile(picked),
-            "n_events": int(len(picked)),
-            "names": names[order],
-        }
-        stacked = []
-        for seed_dir in sorted((freeze / "per_seed" / "structured").glob("seed_*")):
-            with np.load(seed_dir / f"{side}.npz", allow_pickle=False) as data:
-                stacked.append(np.asarray(data["event_group_ids"], dtype=np.int64))
-        generated = np.concatenate(stacked, axis=0)
-        rollout[side] = {
-            "image": _rank_image(generated, order, N_DISPLAY_EVENTS, 12),
-            "profile": profile(generated),
-            "n_events": int(len(generated)),
-            "names": names[order],
-        }
+    for key, label in zip(MODE_KEYS, (0, 1)):
+        picked = groups[modes == label]
+        generated = event_matched_rollouts(
+            model, picked == 0, horizon=horizon, seed=90_001 + label
+        )
+        for store, source in ((observed, picked), (rollout, generated)):
+            store[key] = {
+                "image": _rank_image(source, order, N_DISPLAY_EVENTS, 11 + label),
+                "profile": _rank_profile(source, order),
+                "n_events": int(len(source)),
+                "names": names[order],
+            }
     return observed, rollout, order, names
 
 
@@ -402,13 +530,14 @@ def main() -> None:
     ictal_field = median_early_ictal_field(readout, names)
     opposition = directional_field_opposition(output)
 
-    figure = plt.figure(figsize=(7.09, 8.7))
+    figure = plt.figure(figsize=(7.09, 9.3))
 
-    a_ax = figure.add_axes([0.055, 0.855, 0.905, 0.125])
+    # a is square: 2.4 in on both sides of a 7.09 x 9.3 in canvas
+    a_ax = figure.add_axes([0.331, 0.700, 0.338, 0.258])
     panel_a(a_ax)
 
     b_left, b_wide, b_gap = 0.105, 0.300, 0.017
-    b_rows = ((0.610, 0.185), (0.395, 0.185))
+    b_rows = ((0.505, 0.150), (0.330, 0.150))
     b_axes, b_profiles = [], []
     for bottom, height in b_rows:
         b_axes.append([
@@ -418,22 +547,22 @@ def main() -> None:
         b_profiles.append(
             figure.add_axes([b_left + 2 * (b_wide + b_gap), bottom, 0.098, height])
         )
-    b_cbar = figure.add_axes([0.930, 0.470, 0.011, 0.180])
+    b_cbar = figure.add_axes([0.930, 0.375, 0.011, 0.150])
     panel_b(b_axes, b_profiles, observed, rollout, order, b_cbar)
     b_axes[0][0].annotate(
-        f"{REPRESENTATIVE.replace('epilepsiae_', 'E')}   two observed propagation modes",
-        xy=(0.0, 1.30), xycoords="axes fraction", fontsize=7.5, fontweight="bold",
+        f"{REPRESENTATIVE.replace('epilepsiae_', 'E')}   the patient's two interictal propagation modes",
+        xy=(0.0, 1.26), xycoords="axes fraction", fontsize=7.5, fontweight="bold",
         annotation_clip=False,
     )
 
-    d_axes = [figure.add_axes([0.105 + i * 0.205, 0.235, 0.175, 0.115]) for i in range(3)]
-    d_cbars = [figure.add_axes([0.735, 0.235, 0.010, 0.115]),
-               figure.add_axes([0.805, 0.235, 0.010, 0.115])]
+    d_axes = [figure.add_axes([0.105 + i * 0.205, 0.175, 0.175, 0.100]) for i in range(3)]
+    d_cbars = [figure.add_axes([0.735, 0.175, 0.010, 0.100]),
+               figure.add_axes([0.805, 0.175, 0.010, 0.100])]
     panel_d(
         d_axes, d_cbars, frozen_plane,
         [
-            ("Model field, start 1", field_minus, "viridis_r", MODE_COLOR["minus"]),
-            ("Model field, start 2", field_plus, "viridis_r", MODE_COLOR["plus"]),
+            ("Model field, start 1", field_minus, "viridis_r", MODE_COLOR["A"]),
+            ("Model field, start 2", field_plus, "viridis_r", MODE_COLOR["B"]),
             ("Early-ictal power", ictal_field, "Blues", "#111111"),
         ],
         _event_field,
@@ -441,24 +570,24 @@ def main() -> None:
     d_axes[0].annotate("Frozen model fields and the early-ictal field",
                        xy=(0.0, 1.13), xycoords="axes fraction", fontsize=7.5,
                        fontweight="bold", annotation_clip=False)
-    d_axes[1].text(
-        0.5, -0.34,
-        f"the two model fields are not opposites: $\\rho$={opposition[1]['median_rho']:+.2f} "
-        f"median, below $-0.5$ in {opposition[1]['n_opposite_below_minus_0p5']}/"
-        f"{opposition[1]['n_patients']} patients",
-        transform=d_axes[1].transAxes, ha="center", va="top", fontsize=5.5,
-        color="#B2182B",
+    figure.text(
+        0.855, 0.245,
+        "the two model fields\nare not opposites:\n"
+        f"$\\rho$={opposition[1]['median_rho']:+.2f} median,\n"
+        f"below $-0.5$ in "
+        f"{opposition[1]['n_opposite_below_minus_0p5']}/{opposition[1]['n_patients']}",
+        ha="left", va="top", fontsize=5.5, color="#B2182B",
     )
 
-    c_ax = figure.add_axes([0.105, 0.040, 0.345, 0.088])
+    c_ax = figure.add_axes([0.105, 0.030, 0.300, 0.068])
     panel_c(c_ax, patient_interictal, interictal_stats)
-    e_ax = figure.add_axes([0.615, 0.040, 0.280, 0.088])
+    e_ax = figure.add_axes([0.655, 0.030, 0.195, 0.068])
     panel_e(e_ax, patient_ictal, ictal_stats, str(readout["supportive_subject"]))
 
     for label, axis, offset in (
-        ("a", a_ax, (-0.045, 1.00)), ("b", b_axes[0][0], (-0.235, 1.30)),
-        ("c", c_ax, (-0.185, 1.34)), ("d", d_axes[0], (-0.290, 1.13)),
-        ("e", e_ax, (-0.230, 1.34)),
+        ("a", a_ax, (-0.120, 1.00)), ("b", b_axes[0][0], (-0.235, 1.26)),
+        ("c", c_ax, (-0.210, 1.42)), ("d", d_axes[0], (-0.290, 1.16)),
+        ("e", e_ax, (-0.300, 1.42)),
     ):
         axis.annotate(label, xy=offset, xycoords="axes fraction", fontsize=9,
                       fontweight="bold", annotation_clip=False)
@@ -484,11 +613,11 @@ def main() -> None:
     ).to_csv(figures_dir / "figure6_panelD_source_data.csv", index=False)
     pd.DataFrame(
         [
-            {"mode": MODE_LABEL[side], "source": source,
-             "n_events": payload[side]["n_events"],
-             **{f"mean_rank__{name}": value
-                for name, value in zip(payload[side]["names"], payload[side]["profile"])}}
-            for side in ("minus", "plus")
+            {"mode": MODE_LABEL[key], "source": source,
+             "n_events": payload[key]["n_events"],
+             **{f"median_rank__{name}": value
+                for name, value in zip(payload[key]["names"], payload[key]["profile"][0])}}
+            for key in MODE_KEYS
             for source, payload in (("observed", observed), ("model_rollout", rollout))
         ]
     ).to_csv(figures_dir / "figure6_panelB_source_data.csv", index=False)
@@ -497,10 +626,15 @@ def main() -> None:
         "representative_subject": REPRESENTATIVE,
         "representative_fixed_before_target_unseal": True,
         "panel_b_event_counts": {
-            MODE_LABEL[side]: {"observed": observed[side]["n_events"],
-                               "model_rollout": rollout[side]["n_events"]}
-            for side in ("minus", "plus")
+            MODE_LABEL[key]: {"observed": observed[key]["n_events"],
+                              "model_rollout": rollout[key]["n_events"]}
+            for key in MODE_KEYS
         },
+        "panel_b_mode_labels": (
+            "read back from the frozen interictal clustering; the model never "
+            "saw them, and model rollouts are seeded from each observed event's "
+            "own first rank set"
+        ),
         "panel_c": interictal_stats,
         "panel_d_directional_field_opposition": {
             "summary": opposition[1], "per_patient": opposition[0],
@@ -521,34 +655,36 @@ def main() -> None:
     (figures_dir / "README.md").write_text(
         "# Figure 6 图说明\n\n"
         "### topic5_figure6_source_conditioned_rnn.png / .pdf / .svg\n\n"
-        "a 是模型结构：左边是这一步观察到哪些触点在放电，中间是触点之间的循环网络"
-        "（灰线是所有触点共用的对称连接，红线是唯一那条有方向的连接，它的正负号由每场事件"
-        "最先放电的那几个触点决定），右边是模型每一步要输出的三件事。\n\n"
-        f"b 固定用 {REPRESENTATIVE.replace('epilepsiae_', 'E')}，上下两行是模型自己认定的"
-        "两个起点端。每一列是一场事件，颜色是该触点在这场事件里第几个放电（深紫最早、黄最晚），"
-        "灰色表示这场事件里它没参与。左列是留出集里真实观察到的事件，右列是冻结模型自主推演的事件，"
-        "最右是两者的平均先后次序曲线（实线观察、虚线模型）。\n\n"
-        "d 把两张冻结的模型场和同一患者发作早期的宽带能量场画在**同一套真实电极几何**上"
-        "（与既有的间期-发作共享场图同一个平面、同一套插值），圆点是真实触点位置。\n\n"
-        "c 与 e 是队列统计，只放数据不放解释文字。\n\n"
-        "**读图时必须知道的三件事**：\n\n"
-        f"1. b 右列模型事件顶部/底部那条纯深色带是**被我们强制指定的起点**"
-        f"（每次推演都从同一组触点出发），不是模型自己学出来的；观察事件没有这个约束。"
-        f"所以两列不能按逐格对应去读，只能比中间部分的走向。\n"
-        f"2. 模型确实产出了两套不同的推演（上下两行明显不同），但那**主要是因为我们给了不同起点**，"
-        f"不等于模型自发学到了两种模式。\n"
-        f"3. d 里两张模型场实测**高度相似而非相反**"
-        f"（全队列秩相关中位 {opposition_summary['median_rho']:+.2f}，"
-        f"真正相反的只有 {opposition_summary['n_opposite_below_minus_0p5']}/"
-        f"{opposition_summary['n_patients']} 人），不要按「两个相反方向场」去读。\n\n"
-        "**关注点**：b 中间部分观察与模型的走向是否一致（实线与虚线是否贴合）；"
-        "c 中结构化模型与打乱顺序对照是否分开；"
-        "e 中三个模型谁高于各自的随机基线——实测最简单的静态基线最高，"
-        "结构化模型没有把方向信息转化成跨状态优势。\n\n"
-        f"事件数：模式 1 观察 {counts['Mode 1']['observed']:,} / 模型 "
-        f"{counts['Mode 1']['model_rollout']:,}；模式 2 观察 "
-        f"{counts['Mode 2']['observed']:,} / 模型 {counts['Mode 2']['model_rollout']:,}。\n"
+        "a 模型结构。左边一列是到这一步为止已经观察到的触点，颜色就是下面各图同一套"
+        "先后次序色标（深紫最早、黄最晚），灰色表示还没出现；中间圆圈是触点之间的循环网络，"
+        "灰线是所有触点共用的对称连接、红线是唯一那条有方向的连接；右边一列是模型对下一步"
+        "各触点的预测。\n\n"
+        f"b 固定用 {REPRESENTATIVE.replace('epilepsiae_', 'E')}。上下两行是**这位患者自己的"
+        "两种间期传播模式**，模式标签来自已冻结的间期聚类，模型训练时从未见过它们。"
+        "每一列是一场事件，颜色是该触点在这场事件里第几个放电，灰色表示没参与。"
+        "左列是留出集里真实观察到的事件；右列是模型推演，且**每一场推演都从对应那场观察事件"
+        "自己的第一批触点出发**，所以两列起点一致、可以逐行对照走向。"
+        "最右是各触点先后次序的中位数与四分位区间（实线观察、虚线模型）。\n\n"
+        "d 两张冻结的模型场与同一患者发作早期宽带能量场，画在同一套真实电极几何上"
+        "（沿用既有间期-发作共享场图的平面与插值），圆点为真实触点位置。\n\n"
+        "c 与 e 是队列统计，横线为中位数，括号内为配对检验的 P 值。\n\n"
+        "**读图注意**：\n\n"
+        "1. c 中结构化模型同时优于静态基线与打乱顺序对照（两个 P 值均在图上），"
+        "说明它确实在用事件内的先后顺序。\n"
+        "2. e 的 P 值是「结构化优于静态」的单侧检验，接近 1 表示**方向相反**——"
+        "在跨状态这一步是静态基线更好，不要读成不显著。\n"
+        f"3. d 中两张模型场实测高度相似而非相反（全队列秩相关中位 "
+        f"{opposition_summary['median_rho']:+.2f}，真正相反仅 "
+        f"{opposition_summary['n_opposite_below_minus_0p5']}/"
+        f"{opposition_summary['n_patients']} 人）。\n\n"
+        "**关注点**：b 右列与左列的走向是否一致、实线与虚线是否贴合；"
+        "b 上下两行是否确实呈现两种不同的次序；"
+        "c 三者的高低与两个 P 值；e 中静态基线高于结构化模型这一事实。\n\n"
+        f"事件数：模式 A 观察 {counts['Mode A']['observed']:,} / 模型 "
+        f"{counts['Mode A']['model_rollout']:,}；模式 B 观察 "
+        f"{counts['Mode B']['observed']:,} / 模型 {counts['Mode B']['model_rollout']:,}。\n"
     )
+
     print(json.dumps({"status": "COMPLETE", "figure": str(stem.with_suffix(".png"))}))
 
 
