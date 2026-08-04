@@ -28,8 +28,18 @@ def test_sessions_use_metadata_bounds_not_event_bounds():
 
 
 def test_a_quiet_but_recorded_stretch_is_not_a_gap():
-    sessions = build_sessions([_seg("a", 0.0, 5000.0)], join_seconds=300.0)
-    assert session_gaps(sessions) == []
+    # two sessions far apart in metadata time, but first session has early events
+    # and second session has late events — gap must reflect metadata bounds, not event span
+    segments = [_seg("a", 0.0, 1000.0), _seg("b", 5000.0, 6000.0)]
+    sessions = assign_events(
+        build_sessions(segments, join_seconds=300.0),
+        np.array([100.0, 150.0, 5900.0, 5950.0]),
+        np.array(["a", "a", "b", "b"]),
+    )
+    gaps = session_gaps(sessions)
+    assert len(gaps) == 1
+    # metadata gap is 5000 - 1000 = 4000 seconds, not the event spread 5900 - 150
+    assert gaps[0]["metadata_gap_seconds"] == pytest.approx(4000.0)
 
 
 def test_metadata_gap_and_event_silence_are_reported_separately():
@@ -111,3 +121,47 @@ def test_block_size_below_two_is_rejected():
     )
     with pytest.raises(ValueError):
         build_blocks(sessions, block_events=1, event_times=times)
+
+
+def test_event_silence_is_none_when_a_session_has_no_events():
+    # one session with events, one with none; event_silence_seconds must be None
+    segments = [_seg("a", 0.0, 1000.0), _seg("b", 2000.0, 3000.0)]
+    sessions = assign_events(
+        build_sessions(segments, join_seconds=300.0),
+        np.array([100.0, 900.0]),  # only events in session a, none in b
+        np.array(["a", "a"]),
+    )
+    gaps = session_gaps(sessions)
+    assert len(gaps) == 1
+    gap = gaps[0]
+    # metadata gap is still a float
+    assert isinstance(gap["metadata_gap_seconds"], float)
+    assert gap["metadata_gap_seconds"] == pytest.approx(1000.0)
+    # event_silence_seconds must be None because session b has no events
+    assert gap["event_silence_seconds"] is None
+
+
+def test_a_session_dividing_evenly_is_omitted_from_dropped_remainders():
+    # a session with event count equal to a multiple of block_events has no remainder
+    segments = [_seg("a", 0.0, 100.0)]
+    times = np.arange(8.0)  # 8 events = 2 blocks of size 4 exactly
+    names = np.array(["a"] * 8)
+    sessions = assign_events(build_sessions(segments, join_seconds=300.0), times, names)
+    # should produce 2 blocks with 0 remainder
+    assert len(build_blocks(sessions, block_events=4, event_times=times)) == 2
+    # session should not appear in dropped_remainders at all
+    assert dropped_remainders(sessions, block_events=4) == []
+
+
+def test_a_session_shorter_than_one_block_reports_all_its_events_dropped():
+    # a session with fewer events than block_size has all events dropped
+    segments = [_seg("a", 0.0, 100.0)]
+    times = np.arange(3.0)  # 3 events < block_size of 4
+    names = np.array(["a"] * 3)
+    sessions = assign_events(build_sessions(segments, join_seconds=300.0), times, names)
+    # should produce 0 blocks
+    assert len(build_blocks(sessions, block_events=4, event_times=times)) == 0
+    # all 3 events should be reported as dropped
+    assert dropped_remainders(sessions, block_events=4) == [
+        {"session_index": 0, "n_dropped": 3}
+    ]

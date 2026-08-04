@@ -6,7 +6,9 @@ time with no events, not missing data.
 
 Two gap quantities are kept apart.  `metadata_gap_seconds` is unrecorded wall time.
 `event_silence_seconds` is the span between the last event of one session and the first
-of the next, and is always at least as large.  Neither ever means "no events occurred".
+of the next, and is always at least as large when both sessions have events.  A session
+with zero observed events has no defined event silence, so `event_silence_seconds` is None.
+Neither ever means "no events occurred".
 """
 from __future__ import annotations
 
@@ -80,6 +82,15 @@ def assign_events(
 
 
 def session_gaps(sessions: Sequence[Mapping[str, Any]]) -> list[dict[str, Any]]:
+    """Report gaps between consecutive sessions.
+
+    Returns a list of gap records with keys:
+    - left_session, right_session (int): session indices
+    - metadata_gap_seconds (float): unrecorded wall time between sessions
+    - event_silence_seconds (float | None): time span between last event of left session
+      and first event of right session. None if either session has zero observed events.
+    - observed_events_during_gap (bool): always False
+    """
     rows = []
     for left, right in zip(sessions, sessions[1:]):
         last = left.get("last_event_time")
