@@ -379,6 +379,7 @@ def main() -> None:
         "config_sha256": sha256(config_path),
         "source_sha256": sha256(Path(__file__)),
         "data_module_sha256": sha256(ROOT / "src/topic5_event_innovation_data.py"),
+        "source_intervals_module_sha256": sha256(ROOT / "src/topic5_source_intervals.py"),
         "dataset_manifest_path": str(manifest_path),
         "dataset_manifest_sha256": sha256(manifest_path),
         "old_heldout20_entered_into_analysis": False,
