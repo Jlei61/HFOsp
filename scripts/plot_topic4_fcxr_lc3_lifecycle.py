@@ -70,15 +70,36 @@ def _load(path):
         return json.load(fh)
 
 
+def _reproduction_verdicts():
+    """Corrected per-seed reproduction verdicts, when a re-adjudication exists."""
+    path = os.path.join(BASE, "entry_ledger", "reproduction_readjudicated.json")
+    if not os.path.isfile(path):
+        return {}
+    return {int(r["noise_seed"]): bool(r["corrected_verdict"])
+            for r in _load(path)["rows"]}
+
+
 def _entry_records():
-    """Ledger records if they landed, else the 45 s recon records."""
+    """Ledger records if they landed and reproduce, else the 45 s recon records.
+
+    A ledger that failed its reproduction guard is not a reading of the recorded
+    trajectory, so it does not get to stand in for one here.
+    """
+    corrected = _reproduction_verdicts()
     out = {}
     for path in sorted(glob.glob(os.path.join(BASE, "entry_ledger", "entry_noise*.json"))):
         if ".DONE." in path or ".RUNNING" in path:
             continue
         r = _load(path)
-        if r.get("status") == "COMPLETE":
-            out[int(r["noise_seed"])] = ("ledger", r)
+        if r.get("status") != "COMPLETE":
+            continue
+        seed = int(r["noise_seed"])
+        reproduces = corrected.get(seed, r.get("reproduces_recorded_trajectory"))
+        if reproduces:
+            out[seed] = ("ledger", r)
+        else:
+            print(f"  ledger for noise {seed} does not reproduce the recorded "
+                  f"trajectory; falling back to the 45 s record")
     for path in sorted(glob.glob(os.path.join(BASE, "dynamic_reconnaissance",
                                               "recon_noise*.json"))):
         if ".DONE." in path or ".RUNNING" in path:
