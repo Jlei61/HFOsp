@@ -129,6 +129,52 @@ def classify_entry(n_returning_before_onset, onset_ms) -> str:
     return "ONE_SHOT"
 
 
+def entry_from_record(record) -> dict:
+    """Entry summary for one reconnaissance row, from the ledger when it is present.
+
+    Rows produced before the ledger existed still carry the event list and the bout,
+    which is enough for the count and the class but not for the dose or the per-event
+    slow state.  Those are reported as ``None`` with the reason attached, so a
+    reconstructed summary can never be mistaken for a measured one.
+    """
+    ledger = record.get("event_ledger")
+    if ledger:
+        return dict(
+            source="ledger",
+            entry_class=ledger["entry_class"],
+            n_returning_before_onset=ledger["n_returning_before_onset"],
+            n_events_before_onset=ledger["n_events_before_onset"],
+            onset_ms=ledger["onset_ms"], offset_ms=ledger["offset_ms"],
+            Q_af_to_onset=ledger["Q_af_to_onset"],
+            Q_rate_to_onset=ledger["Q_rate_to_onset"],
+            first_non_returning_index=ledger["first_non_returning_index"],
+            unavailable=[],
+        )
+    bout = (record.get("lifecycle") or {}).get("bout")
+    win_ms = 1000.0
+    onset_ms = None if bout is None else float(bout[0]) * win_ms
+    offset_ms = None if bout is None else float(bout[1] + 1) * win_ms
+    events = record.get("events") or []
+    before = [e for e in events
+              if onset_ms is None or float(e["t_off_ms"]) < onset_ms]
+    n_ret = sum(1 for e in before if e.get("returned"))
+    non_ret = next((i for i, e in enumerate(events, start=1)
+                    if not e.get("returned")), None)
+    return dict(
+        source="reconstructed_from_events",
+        entry_class=classify_entry(n_ret, onset_ms),
+        n_returning_before_onset=n_ret, n_events_before_onset=len(before),
+        onset_ms=onset_ms, offset_ms=offset_ms,
+        Q_af_to_onset=None, Q_rate_to_onset=None,
+        first_non_returning_index=non_ret,
+        unavailable=[
+            "Q_af_to_onset / Q_rate_to_onset: the stored rate is decimated to 10 ms "
+            "and an interictal event is 8-19 ms",
+            "per-event regional D/H/X: only the selected landmark snapshots were kept",
+        ],
+    )
+
+
 def _delta(pre, post):
     if pre is None or post is None:
         return None

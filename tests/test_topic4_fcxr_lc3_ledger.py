@@ -17,6 +17,7 @@ from src.topic4_fcxr_lc3_ledger import (
     bracketing_snapshots,
     build_event_ledger,
     classify_entry,
+    entry_from_record,
     event_dose_af,
     event_dose_rate,
     regional_means,
@@ -238,3 +239,56 @@ def test_recon_runner_persists_the_ledger_and_the_full_snapshot_table():
     assert "build_event_ledger" in body
     assert "event_ledger" in body
     assert "snapshot_t_ms" in body
+
+
+# --- post-hoc entry summary from a completed row ---------------------------
+
+def _record(bout, returned_flags, onset_win_ms=1000.0):
+    events = [dict(t_on_ms=100.0 + 1000.0 * k, t_off_ms=110.0 + 1000.0 * k,
+                   dur_ms=10.0, peak_ext=0.05, returned=flag)
+              for k, flag in enumerate(returned_flags)]
+    return dict(lifecycle=dict(label="X", bout=bout), events=events)
+
+
+def test_entry_summary_is_reconstructed_when_a_row_predates_the_ledger():
+    # bout at window 5 -> onset 5000 ms; four returning events precede it.
+    got = entry_from_record(_record((5, 9), [True] * 4 + [False]))
+    assert got["source"] == "reconstructed_from_events"
+    assert got["onset_ms"] == 5000.0 and got["offset_ms"] == 10000.0
+    assert got["n_returning_before_onset"] == 4
+    assert got["entry_class"] == "CUMULATIVE"
+    assert got["first_non_returning_index"] == 5
+
+
+def test_reconstructed_entry_summary_never_fakes_the_dose():
+    got = entry_from_record(_record((5, 9), [True] * 4))
+    assert got["Q_af_to_onset"] is None and got["Q_rate_to_onset"] is None
+    assert any("decimated" in reason for reason in got["unavailable"])
+    assert any("landmark" in reason for reason in got["unavailable"])
+
+
+def test_a_bout_in_the_first_second_reads_as_one_shot_not_accumulation():
+    # The startup-transient signature: onset before any returning event completes.
+    got = entry_from_record(_record((1, 30), [True] * 6))
+    assert got["onset_ms"] == 1000.0
+    assert got["n_returning_before_onset"] == 1
+    assert got["entry_class"] == "ONE_SHOT"
+
+
+def test_entry_summary_prefers_the_ledger_when_the_row_has_one():
+    rec = _record((5, 9), [True] * 4)
+    rec["event_ledger"] = dict(
+        entry_class="AMBIGUOUS_2", n_returning_before_onset=2, n_events_before_onset=2,
+        onset_ms=5000.0, offset_ms=10000.0, Q_af_to_onset=1.25, Q_rate_to_onset=42.0,
+        first_non_returning_index=None)
+    got = entry_from_record(rec)
+    assert got["source"] == "ledger"
+    assert got["entry_class"] == "AMBIGUOUS_2"      # not recomputed from events
+    assert got["Q_af_to_onset"] == 1.25
+    assert got["unavailable"] == []
+
+
+def test_no_bout_reconstructs_as_no_onset():
+    got = entry_from_record(_record(None, [True] * 5))
+    assert got["onset_ms"] is None and got["entry_class"] == "NO_ONSET"
+    assert got["n_returning_before_onset"] == 5
