@@ -104,21 +104,37 @@ def figure_a(records, band, path):
     seeds = list(records)
     floor_gap = 1.0 / band["event_rate_hi"]
     ceil_gap = 1.0 / band["event_rate_lo"]
-    n_below, n_gaps, halves = 0, 0, []
-    for row, seed in enumerate(seeds):
+    trains = {}
+    for seed in seeds:
         kind, rec = records[seed]
         onset = _onset_ms(kind, rec)
-        ret = [e for e in rec["events"]
-               if e["returned"] and (onset is None or e["t_off_ms"] < onset)]
+        trains[seed] = (onset, [e for e in rec["events"]
+                                if e["returned"] and (onset is None
+                                                      or e["t_off_ms"] < onset)])
+    # Scaled over what these events actually span, not over the reference band:
+    # nearly all of them sit near the band's floor, so a band-relative scale
+    # compresses every bar into the bottom of its row and hides the one thing
+    # that does change.
+    every = [e["peak_ext"] for _, evs in trains.values() for e in evs]
+    lo, hi = min(every), max(every)
+    def _h(p):
+        return 0.78 * (0.10 + 0.90 * (p - lo) / (hi - lo))
+
+    n_below, n_gaps, halves, n_over, n_over_last = 0, 0, [], 0, 0
+    for row, seed in enumerate(seeds):
+        onset, ret = trains[seed]
         base = len(seeds) - 1 - row
-        span = band["part_hi"] - band["part_lo"]
-        for e in ret:
-            h = 0.80 * np.clip((e["peak_ext"] - band["part_lo"]) / span, 0.08, 1.0)
+        for k, e in enumerate(ret):
             t = (e["t_on_ms"] - onset) / 1000.0
-            ax1.plot([t, t], [base, base + h], color=SEED_COLOR[seed], lw=1.6,
-                     solid_capstyle="butt")
+            ax1.plot([t, t], [base, base + _h(e["peak_ext"])], color=SEED_COLOR[seed],
+                     lw=1.6, solid_capstyle="butt")
+            if e["peak_ext"] > band["part_hi"]:
+                n_over += 1
+                n_over_last += int(k >= len(ret) - 2)
         ax1.axhline(base, color="#d5d8dc", lw=0.7, zorder=0)
-        ax1.text(-7.05, base + 0.42, f"noise {seed} — {len(ret)} events",
+        ax1.plot([-5.5, 0.0], [base + _h(band["part_hi"])] * 2, color="#8fa3b8",
+                 lw=0.8, ls=(0, (4, 3)), zorder=1)
+        ax1.text(-7.15, base + 0.30, f"noise {seed}\n{len(ret)} events",
                  fontsize=8, color=SEED_COLOR[seed], va="center")
         gaps = np.diff([e["t_on_ms"] for e in ret]) / 1000.0
         if gaps.size:
@@ -128,15 +144,19 @@ def figure_a(records, band, path):
             n_gaps += gaps.size
             halves.append((gaps[:gaps.size // 2].mean(), gaps[gaps.size // 2:].mean()))
 
+    n_events = sum(len(evs) for _, evs in trains.values())
     ax1.axvline(0.0, color="#111111", lw=1.4)
     ax1.text(0.10, len(seeds) - 0.12, "enters the\nhigh state", fontsize=8,
              color="#111111", va="top")
-    ax1.set_xlim(-7.2, 1.3)
+    ax1.text(0.10, _h(band["part_hi"]), "largest event the quiet\nbaseline ever produced",
+             fontsize=7.2, color="#5d6d7e", va="center")
+    ax1.set_xlim(-7.4, 2.6)
     ax1.set_ylim(-0.12, len(seeds))
     ax1.set_yticks([])
     ax1.set_xlabel("time before the tissue enters the high state (s)")
-    ax1.set_title("A  every discrete event leading into entry; bar height is how much "
-                  "tissue joined in", loc="left")
+    ax1.set_title(f"A  the events leading into entry are ordinary-sized — "
+                  f"{n_events - n_over} of {n_events} stay inside the quiet baseline's "
+                  f"range", loc="left")
 
     ax2.axhspan(floor_gap, ceil_gap, color="#e4eaf0", zorder=0)
     ax2.axhline(floor_gap, color="#8fa3b8", lw=0.9, zorder=1)
@@ -148,9 +168,11 @@ def figure_a(records, band, path):
     ax2.set_ylim(0, 1.15)
     ax2.legend(frameon=False, fontsize=8, loc="upper right", ncol=3)
     shrink = sum(1 for a, b in halves if b < a)
-    ax2.set_title(f"the gaps shorten in {shrink} of {len(halves)} seeds, and "
-                  f"{n_below} of {n_gaps} gaps fall below anything the quiet baseline "
-                  f"produced", loc="left")
+    ax2.set_title(f"what changes is the timing — gaps shorten in {shrink} of "
+                  f"{len(halves)} seeds, {n_below} of {n_gaps} below the baseline floor",
+                  loc="left")
+    ax2.text(0.015, 0.06, f"all {n_over} oversized events are among the last two "
+             f"before entry", transform=ax2.transAxes, fontsize=7.6, color="#5d6d7e")
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
