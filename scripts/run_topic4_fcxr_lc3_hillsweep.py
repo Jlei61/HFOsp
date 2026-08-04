@@ -51,6 +51,7 @@ from src.topic4_fcxr_lc3_dxprobe import (  # noqa: E402
     set_hill_placement,
 )
 from src.topic4_fcxr_lc3_geometry import (  # noqa: E402
+    EXTENDED_ROW_RSS_SCALE,
     EXTENDED_MS,
     EXTENDED_TAIL_MS,
     H1_POINT_ID,
@@ -73,6 +74,12 @@ TERMINATION_X_UPPER = 0.395     # persists at and above this uniform depth
 TERMINATION_X_LOWER = 0.380     # terminates at and below it
 OBSERVED_X_MEAN = 0.3945
 HIGH_LABELS = ("FINITE_HIGH_FIXED", "FINITE_HIGH_ORBIT")
+# Measured on this substrate: E spike bools cost this much per simulated second
+# (32000 cells x 20 kHz x 1 byte).  An extended arm transiently holds the screen, the
+# continuation and their concatenation at once, so its footprint grows with the window
+# and the geometry map's fixed 2.0 factor - calibrated for a 5 s extension - would
+# under-budget a longer one by the ratio of the two windows.
+GIB_PER_SIM_SECOND = 0.596
 
 Y_GATES = (BASE_Y_GATE, 72.0, 68.0, 64.0, 60.0)
 K_YS = (BASE_K_Y, 4.0, 3.0)
@@ -125,18 +132,23 @@ def _tag(value):
     return f"{float(value):.2f}".replace(".", "p")
 
 
-def _arms():
+def _arms(gates=Y_GATES, kys=K_YS):
+    """Arm ids encode the placement, so a finer grid extends the same table."""
     return [dict(arm_id=f"gate{_tag(g)}_Ky{_tag(k)}", y_gate=float(g), K_y=float(k),
                  is_control=bool(g == BASE_Y_GATE and k == BASE_K_Y))
-            for g in Y_GATES for k in K_YS]
+            for g in gates for k in kys]
 
 
-def _arm_path(arm_id):
-    return os.path.join(OUT, f"arm_{arm_id}.json")
+def _arm_path(arm_id, extended_ms=EXTENDED_MS):
+    """Long-window re-runs write beside the registered ones, never over them."""
+    if float(extended_ms) == float(EXTENDED_MS):
+        return os.path.join(OUT, f"arm_{arm_id}.json")
+    return os.path.join(OUT, f"arm_{arm_id}_ext{int(round(float(extended_ms)))}ms.json")
 
 
 def _run_arm(arm):
-    prior_path = _arm_path(arm["arm_id"])
+    extended_ms = float(arm.get("extended_ms", EXTENDED_MS))
+    prior_path = _arm_path(arm["arm_id"], extended_ms)
     if os.path.isfile(prior_path):
         prior = json.load(open(prior_path))
         if prior.get("resolved_label"):
@@ -154,7 +166,7 @@ def _run_arm(arm):
     extended = extension_required(state_kind="high", label=cls1["label"])
     final, total_ms, cls2 = first, SCREEN_MS, None
     if extended:
-        extra = EXTENDED_MS - SCREEN_MS
+        extra = extended_ms - SCREEN_MS
         p2 = dataclasses.replace(S["p"], T=extra, dt=E01.DT)
         second = run_fcxr_loop(p2, S["net"], start=first["checkpoint"],
                                n_steps=int(round(extra / E01.DT)), capture_final=True,
@@ -165,8 +177,8 @@ def _run_arm(arm):
             [first["E_spk_bool"], second["E_spk_bool"]], axis=0)
         final["n_steps"] = final["rate_E"].size
         cls2 = GEO._tail_observables(final, S, point, tail_ms=EXTENDED_TAIL_MS,
-                                     analysis_start_ms=EXTENDED_MS - EXTENDED_TAIL_MS)
-        total_ms = EXTENDED_MS
+                                     analysis_start_ms=extended_ms - EXTENDED_TAIL_MS)
+        total_ms = extended_ms
     resolved = cls2 or cls1
 
     slow = final["checkpoint"].slow
@@ -187,6 +199,7 @@ def _run_arm(arm):
         h_mean=resolved["h_mean"], numerical_unsafe=resolved["numerical_unsafe"],
         mean_rate_hz=float(np.mean(final["rate_E"])),
         total_ms=float(total_ms), extended=bool(extended),
+        extended_ms_setting=float(extended_ms),
         initial_screen=cls1, extended_classification=cls2,
         wall_s=time.time() - t0, peak_rss_gib=_meminfo()["self_peak_rss_gib"],
         finished=_now(),
@@ -200,16 +213,49 @@ def _run_arm(arm):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--confirm-run", action="store_true")
+    ap.add_argument("--extended-ms", type=float, default=EXTENDED_MS,
+                    help="length of the extension leg; the registered 5000 ms ends before "
+                         "the gate-lowered arms finish falling, and their H slope projects "
+                         "the crossing 1.2-1.7 s beyond it")
+    ap.add_argument("--only", default="",
+                    help="comma-separated arm ids to run instead of the full grid")
+    ap.add_argument("--gates", default="",
+                    help="comma-separated gate positions, overriding the registered grid")
+    ap.add_argument("--kys", default="",
+                    help="comma-separated half-activations, overriding the registered grid")
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("40k Hill-placement sweep requires --confirm-run")
+    if args.extended_ms <= SCREEN_MS:
+        raise SystemExit(f"--extended-ms must exceed the {SCREEN_MS:.0f} ms screen")
     if not os.path.isfile(SEED_STATE):
         raise SystemExit(f"missing late-bout seed state: {SEED_STATE}")
     mem0 = _meminfo()
     if mem0["mem_available_gib"] < 96.0:
         raise SystemExit("sweep requires 96 GiB MemAvailable")
     os.makedirs(OUT, exist_ok=True)
-    arms = _arms()
+    gates = ([float(v) for v in args.gates.split(",") if v.strip()]
+             if args.gates.strip() else Y_GATES)
+    kys = ([float(v) for v in args.kys.split(",") if v.strip()]
+           if args.kys.strip() else K_YS)
+    if not all(v > 0 for v in gates) or not all(v > 0 for v in kys):
+        raise SystemExit("gate positions and half-activations must be positive")
+    arms = _arms(gates, kys)
+    for arm in arms:
+        arm["extended_ms"] = float(args.extended_ms)
+    if args.only.strip():
+        want = {a.strip() for a in args.only.split(",") if a.strip()}
+        unknown = want - {a["arm_id"] for a in arms}
+        if unknown:
+            raise SystemExit(f"unknown arm ids: {sorted(unknown)}")
+        arms = [a for a in arms if a["arm_id"] in want]
+    if not arms:
+        raise SystemExit("no arms selected")
+    # A custom grid or a subset need not contain the registered placement, but the
+    # first arm still has to run alone as the smoke row that sizes the pool.
+    if not any(a["is_control"] for a in arms):
+        arms = [dict(a) for a in arms]
+        arms[0]["is_control"] = True
     _write_json(os.path.join(OUT, "RUNNING.json"),
                 dict(status="RUNNING", pid=os.getpid(), n_arms=len(arms), started=_now()))
 
@@ -219,16 +265,26 @@ def main():
     smoke = _run_arm(control)
     single_rss = float(smoke["peak_rss_gib"])
     swap0 = mem0["swap_used_mib"]
+    # Worst case for THIS window, then divided by the helper's own fixed factor so the
+    # budget it reserves is 1.35 x that worst case rather than 1.35 x 2 x a smoke row
+    # measured without any extension.
+    extra_ms = float(args.extended_ms) - SCREEN_MS
+    worst_case_rss = single_rss + GIB_PER_SIM_SECOND * (extra_ms + float(args.extended_ms)) / 1000.0
+    sizing_rss = worst_case_rss / EXTENDED_ROW_RSS_SCALE
     workers = choose_map_workers(
         mem_available_gib=_meminfo()["mem_available_gib"], swap_used_mib=swap0,
-        swap_baseline_mib=swap0, single_rss_gib=single_rss, cpu_count=os.cpu_count() or 2)
+        swap_baseline_mib=swap0, single_rss_gib=sizing_rss, cpu_count=os.cpu_count() or 2)
     pool_size = max(workers, 1)
     print(f"[hill] control {smoke['resolved_label']} x_min={smoke['x_mean_min']:.4f} "
-          f"rss={single_rss:.1f} GiB -> {workers} workers", flush=True)
+          f"smoke_rss={single_rss:.1f} GiB worst_case={worst_case_rss:.1f} GiB "
+          f"(window {args.extended_ms:.0f} ms) -> {workers} workers", flush=True)
 
     pending = [a for a in arms if not a["is_control"]]
     rows = [smoke]
-    with ProcessPoolExecutor(max_workers=max(pool_size, 8)) as pool:
+    # Bound residency, not just submission: a spawned worker keeps its substrate and
+    # seed state (~6.5 GiB) even while idle, so an over-wide pool holds memory the
+    # submission gate cannot reclaim.
+    with ProcessPoolExecutor(max_workers=pool_size) as pool:
         active, cursor, last_swap = {}, 0, swap0
         while cursor < len(pending) or active:
             mem = _meminfo()
@@ -236,10 +292,10 @@ def main():
             if swap_delta >= 512.0 and mem["swap_used_mib"] > last_swap:
                 raise RuntimeError(f"swap hard stop: +{swap_delta:.1f} MiB and rising")
             last_swap = mem["swap_used_mib"]
-            workers = min(max(pool_size, 8), choose_map_workers(
+            workers = min(pool_size, choose_map_workers(
                 mem_available_gib=mem["mem_available_gib"],
                 swap_used_mib=mem["swap_used_mib"], swap_baseline_mib=swap0,
-                single_rss_gib=single_rss, cpu_count=os.cpu_count() or 2))
+                single_rss_gib=sizing_rss, cpu_count=os.cpu_count() or 2))
             allow = swap_delta < 256.0 and mem["mem_available_gib"] >= 96.0
             while allow and cursor < len(pending) and len(active) < workers:
                 arm = pending[cursor]
