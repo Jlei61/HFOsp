@@ -1,17 +1,26 @@
 #!/usr/bin/env python
 """Does a relay depth that stops the discharge also return the tissue to its own rhythm?
 
-Clamping the relay terminates: at 0.350 the mean population rate lands on 3.07 Hz
-against the canonical quiet state's 2.81 Hz, while the 0.10 floor over-suppresses to
-0.39 Hz. But a matching mean rate is one number. The registered gate asks for the
-interictal *statistical neighbourhood*, and the frozen LC1 baseline holds the reference
-sample it must be compared against: 34 returning events, 8-22 ms long, participation
-0.045-0.080, at 0.086-3.15 events per second.
+Clamping the relay terminates. Whether the tissue then behaves interictally is a
+separate question, and the frozen LC1 baseline holds the reference it has to be
+compared against: 34 returning events, 8-22 ms long, participation 0.045-0.080, at
+0.086-3.15 events per second.
 
 So this runs the terminating clamps long enough to accumulate a comparable sample and
 puts the events side by side with that reference. The first seconds are the collapse
 out of the discharge, not interictal activity, so they are excluded and the exclusion
 is recorded rather than assumed.
+
+Measured 2026-08-04: with wear pinned, every terminating clamp - 0.380, 0.350, 0.300
+and the 0.100 floor - produced zero returning events across 18 s. An earlier reading
+that 0.350 "lands at 3.07 Hz, right at the canonical 2.81" came from averaging over a
+5 s window that opens with the collapse out of a 72 Hz discharge; with the collapse
+excluded the same clamp sits at 0.093 Hz. At this wear the tissue discharges above
+0.395 and is silent below 0.380, with no interictal branch between.
+
+``--free-wear`` asks the obvious follow-up. Wear relaxes back whenever the inhibitory
+sensor falls below threshold, so a silenced tissue should shed it on its own; pinning
+wear may be the very reason nothing returns.
 
 Usage:
     python scripts/run_topic4_fcxr_lc3_returngate.py --confirm-run
@@ -114,13 +123,15 @@ def _quantile_overlap(sample, reference):
 
 
 def _run_arm(arm):
-    path = os.path.join(OUT, f"clamp_{_tag(arm['x'])}.json")
+    free_wear = bool(arm.get("free_wear", False))
+    suffix = "_freewear" if free_wear else ""
+    path = os.path.join(OUT, f"clamp_{_tag(arm['x'])}{suffix}.json")
     if os.path.isfile(path):
         prior = json.load(open(path))
         if prior.get("status") == "COMPLETE":
             return prior
     S, seed, baseline = _context()
-    child = freeze_dynamic_state(seed, x_field=float(arm["x"]))   # wear stays where it landed
+    child = freeze_dynamic_state(seed, x_field=float(arm["x"]), freeze_d=not free_wear)
     t0 = time.time()
     p = dataclasses.replace(S["p"], T=RUN_MS, dt=E01.DT)
     out = run_fcxr_loop(p, S["net"], start=child, n_steps=int(round(RUN_MS / E01.DT)),
@@ -139,6 +150,8 @@ def _run_arm(arm):
         onset_ms=None, offset_ms=None, total_ms=RUN_MS,
         r_base_definition=f"median population rate after the {SETTLE_MS:.0f} ms settle window")
 
+    zf = np.asarray(out["checkpoint"].slow.z[:int(out["checkpoint"].slow.NE)], float)
+    d_end = float(np.mean(1.0 - zf))
     ret = [e for e in settled if e["returned"]]
     dur = [float(e["dur_ms"]) for e in ret]
     part = [float(e["peak_ext"]) for e in ret]
@@ -148,7 +161,9 @@ def _run_arm(arm):
     band = baseline["band"]
     rate_per_s = len(ret) / window_s
     record = dict(
-        status="COMPLETE", x_clamp=float(arm["x"]), run_ms=RUN_MS, settle_ms=SETTLE_MS,
+        status="COMPLETE", x_clamp=float(arm["x"]), free_wear=free_wear,
+        wear_start=0.6629, wear_end=d_end,
+        run_ms=RUN_MS, settle_ms=SETTLE_MS,
         n_events=len(settled), n_returning=len(ret),
         event_rate_per_s=rate_per_s,
         mean_population_rate_hz=float(np.mean(out["rate_E"][int(round(SETTLE_MS / E01.DT)):])),
@@ -179,6 +194,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--confirm-run", action="store_true")
     ap.add_argument("--clamps", default="")
+    ap.add_argument("--free-wear", action="store_true",
+                    help="let wear relax instead of pinning it; a silenced tissue sheds "
+                         "wear on its own, so pinning it builds the answer into the setup")
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("40k return-gate probe requires --confirm-run")
@@ -190,7 +208,7 @@ def main():
     if mem0["mem_available_gib"] < 96.0:
         raise SystemExit("return-gate probe requires 96 GiB MemAvailable")
     os.makedirs(OUT, exist_ok=True)
-    arms = [dict(x=v) for v in clamps]
+    arms = [dict(x=v, free_wear=bool(args.free_wear)) for v in clamps]
     _write_json(os.path.join(OUT, "RUNNING.json"),
                 dict(status="RUNNING", pid=os.getpid(), n_arms=len(arms), started=_now()))
 
@@ -219,8 +237,8 @@ def main():
                 ins = rec["inside_reference"]
                 print(f"[return] clamp {x:.3f}: {rec['n_returning']} returning, "
                       f"{rec['event_rate_per_s']:.2f}/s (band {ins['event_rate_in_band']}), "
-                      f"dur inside {ins['duration_fraction']}, "
-                      f"part inside {ins['participation_fraction']}", flush=True)
+                      f"wear {rec['wear_start']:.3f}->{rec['wear_end']:.3f}, "
+                      f"dur inside {ins['duration_fraction']}", flush=True)
 
     aggregate = dict(
         status="COMPLETE", schema="fcxr-lc3-return-gate-1.0",

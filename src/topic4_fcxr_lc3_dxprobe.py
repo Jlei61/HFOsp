@@ -38,7 +38,8 @@ def _validated(field, ne, name):
     return a
 
 
-def freeze_dynamic_state(state, *, d_field=None, x_field=None, freeze_x=True):
+def freeze_dynamic_state(state, *, d_field=None, x_field=None, freeze_x=True,
+                         freeze_d=True):
     """Clone a dynamic state and hold its D and X fields fixed from here on.
 
     ``d_field`` / ``x_field`` may be a scalar or a per-E field; ``None`` freezes that
@@ -50,6 +51,11 @@ def freeze_dynamic_state(state, *, d_field=None, x_field=None, freeze_x=True):
     Hill.  That is what a Stage-2 arm needs: wear is pinned at the value the trajectory
     actually reached, so the only remaining question is whether a moved Hill lets X
     descend on its own to the depth that terminates.
+
+    ``freeze_d=False`` is its mirror and is needed for the recovery leg.  Wear relaxes
+    toward 1 - z_inf whenever the inhibitory sensor sits below its threshold, so a
+    silenced tissue should shed wear on its own; pinning it would build that answer into
+    the setup.
     """
 
     child = clone_loop_state(state)
@@ -61,8 +67,12 @@ def freeze_dynamic_state(state, *, d_field=None, x_field=None, freeze_x=True):
     if not np.all(np.isfinite(z)) or np.any((z < 0.0) | (z > 1.0)):
         raise ValueError("frozen z must be finite and within [0,1]")
     slow.z[:ne] = z
-    slow.cfg.z_frozen_E = z.copy()
-    slow.cfg.use_z = False          # the engine rejects a frozen field that still evolves
+    if freeze_d:
+        slow.cfg.z_frozen_E = z.copy()
+        slow.cfg.use_z = False      # the engine rejects a frozen field that still evolves
+    else:
+        slow.cfg.z_frozen_E = None
+        slow.cfg.use_z = True
 
     x = (np.asarray(slow.x_relay, dtype=float).copy() if x_field is None
          else _validated(x_field, ne, "x_field"))
