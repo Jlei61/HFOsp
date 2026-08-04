@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from scripts.analyze_topic4_zm_subtractive_pool_carrier import (
-    adjudicate, arm_key, modulation_band, spectral_peak,
+    adjudicate, arm_key, cv_block_profile, modulation_band, spectral_peak,
 )
 
 
@@ -62,6 +62,46 @@ def test_spectral_peak_finds_a_rhythm_and_reports_its_prominence():
     # A constant carries no rhythm, so the prominence must not manufacture one.
     flat_hz, flat_prom = spectral_peak(np.full(t.size, 200.0), fs=fs)
     assert flat_prom < 10.0
+
+
+def test_spectral_peak_does_not_read_a_ramp_as_a_rhythm():
+    """A monotone drift has no period; reporting one would invent the result."""
+    fs = 500.0
+    t = np.arange(0, 4.0, 1.0 / fs)
+    ramp = 150.0 + 60.0 * t / t[-1]
+    peak_hz, prominence = spectral_peak(ramp, fs=fs)
+    assert prominence < 10.0
+    # A rhythm riding on the same drift must still be found, at its own rate.
+    riding = ramp + 30.0 * np.sin(2 * np.pi * 18.0 * t)
+    peak_hz, prominence = spectral_peak(riding, fs=fs)
+    assert peak_hz == pytest.approx(18.0, abs=1.0)
+    assert prominence > 10.0
+
+
+def test_spectral_band_excludes_frequencies_the_window_cannot_resolve():
+    """Fewer than a few cycles in the window is not a measured frequency."""
+    fs = 500.0
+    one_second = np.zeros(int(fs))
+    # A 1 s window cannot support a 2 Hz claim under a five-cycle rule.
+    assert spectral_peak(one_second, fs=fs, min_cycles=5.0)[0] is None or (
+        spectral_peak(one_second, fs=fs, min_cycles=5.0)[0] >= 5.0
+    )
+    t = np.arange(0, 8.0, 1.0 / fs)
+    slow = 200.0 + 20.0 * np.sin(2 * np.pi * 3.0 * t)
+    # Eight seconds does support 3 Hz, so the same rule must admit it.
+    assert spectral_peak(slow, fs=fs, min_cycles=5.0)[0] == pytest.approx(3.0, abs=0.5)
+
+
+def test_cv_block_profile_shows_whether_modulation_decays():
+    fs = 500.0
+    t = np.arange(0, 6.0, 1.0 / fs)
+    sustained = 200.0 + 60.0 * np.sin(2 * np.pi * 10.0 * t)
+    profile = cv_block_profile(sustained, fs=fs, block_ms=2000.0)
+    assert len(profile) == 3
+    assert max(profile) - min(profile) < 0.05      # holds across the run
+    decaying = 200.0 + 60.0 * np.exp(-t) * np.sin(2 * np.pi * 10.0 * t)
+    decayed = cv_block_profile(decaying, fs=fs, block_ms=2000.0)
+    assert decayed[0] > 5.0 * decayed[-1]          # the rhythm dies out
 
 
 def _row(*, beta, g, gate7, cv, seed=1):

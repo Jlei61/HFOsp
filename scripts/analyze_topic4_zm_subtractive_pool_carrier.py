@@ -14,20 +14,23 @@ import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
-from scipy.signal import welch
+from scipy.signal import detrend, welch
 
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 from scripts.analyze_topic4_zm_mode_h_pilot import _row  # noqa: E402
-from scripts.analyze_topic4_zm_conductance_homotopy import credible_carrier  # noqa: E402
+from scripts.analyze_topic4_zm_conductance_homotopy import (  # noqa: E402
+    _validate_short_prefix, credible_carrier,
+)
 from scripts.analyze_topic4_zm_pv_som_carrier import (  # noqa: E402
     realized_removal_ratio, sustained_core_cv,
 )
 
 
 IN = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/smoke/seed1"
+LONG = ROOT / "results/topic4_sef_hfo/zm_fast_lifecycle_development/lifecycle_sprint/seed1"
 OUT = ROOT / "results/topic4_sef_hfo/zm_mode_lifecycle"
 SUBSTRATE_LEVELS = (0.0, 0.32)
 # Locked by the spec: below the first band the sustained rate is a flat line,
@@ -76,23 +79,50 @@ def modulation_band(cv):
     return "ambiguous" if cv <= CLEAN_FLOOR else "clean"
 
 
-def spectral_peak(sustained_rate, *, fs, band=(2.0, 200.0)):
+def spectral_peak(sustained_rate, *, fs, band=(1.0, 200.0), min_cycles=5.0):
     """Peak frequency of the sustained rate and how far it stands above the band.
 
-    Reported, never gated on: variability alone cannot separate a rhythm from
-    drift, and this is the quantity that says whether one frequency dominates.
+    Reported, never gated on.  A ramp has no period, so the trend is removed
+    before transforming; and a frequency the window holds only a cycle or two
+    of is not a measurement, so the band starts at `min_cycles` per window.
     """
     rate = np.asarray(sustained_rate, float)
-    rate = rate - rate.mean()
-    nperseg = min(rate.size, 1024)
+    if rate.size < 8:
+        return None, 0.0
+    scale = max(1.0, float(np.abs(rate).mean()))
+    rate = detrend(rate, type="linear")
+    # A pure ramp detrends to float residue, whose spectrum is arbitrary; a
+    # residual this far below the signal scale is not a rhythm.
+    if float(rate.std()) <= 1e-9 * scale:
+        return None, 0.0
+    nperseg = min(rate.size, 2048)
     freqs, power = welch(rate, fs=fs, nperseg=nperseg)
-    inside = (freqs >= band[0]) & (freqs <= band[1])
+    low = max(band[0], min_cycles * fs / rate.size)
+    inside = (freqs >= low) & (freqs <= band[1])
     if not inside.any() or power[inside].max() <= 0.0:
         return None, 0.0
     median = float(np.median(power[inside]))
     peak = int(np.argmax(power[inside]))
     prominence = float(power[inside][peak] / median) if median > 0.0 else float("inf")
     return float(freqs[inside][peak]), prominence
+
+
+def cv_block_profile(rate, *, fs, block_ms):
+    """Per-block relative variability, in order, over the whole trace.
+
+    A 2.5 s window cannot tell a sustained rhythm from a transient relaxing
+    back onto the fixed point.  This is the shape that can.
+    """
+    rate = np.asarray(rate, float)
+    width = int(round(block_ms * fs / 1000.0))
+    if width <= 1:
+        raise ValueError("block shorter than one sample")
+    out = []
+    for start in range(0, rate.size - width + 1, width):
+        block = rate[start:start + width]
+        mean = float(block.mean())
+        out.append(float(block.std() / mean) if mean > 0.0 else 0.0)
+    return out
 
 
 def adjudicate(rows):
@@ -193,7 +223,59 @@ def main():
             row["realized_removal_ratio"] = 0.0
         rows[key] = row
 
+    long_rows = {}
+    for key, (short_root, _) in sorted(found.items()):
+        stem = short_root.name.replace("__T2.5s__", "__T12s__")
+        root = LONG / stem
+        if not (root / "summary.json").is_file() or not (root / "traces.npz").is_file():
+            continue
+        summary = json.loads((root / "summary.json").read_text())
+        # No stitching and no clock shift: the smoke arm must be the literal
+        # opening of the long one, or the two are not the same trajectory.
+        _validate_short_prefix(short_root, root.resolve())
+        beta, g, seed = key
+        row, array = _row(f"long_b{beta:g}_g{g:g}_s{seed}", root.resolve(), summary)
+        row["core_mean_hz"] = float(summary["core_modulation"]["mean_hz"])
+        row["core_rho80_active_fraction"] = float(
+            summary["core_rho80_active_fraction"]
+        )
+        row["credible_carrier"] = credible_carrier(row)
+        row["beta_SG"], row["persistent_g"], row["som_seed"] = beta, g, seed
+        rate = np.asarray(array["fine_core_rate_hz"], float)
+        # Spec: the twelve-second arm reads clause 8 on its final two seconds.
+        row["sustained_core_cv"] = sustained_core_cv(rate, window_ms=2000.0)
+        row["modulation_band"] = modulation_band(row["sustained_core_cv"])
+        row["cv_block_profile"] = cv_block_profile(rate, fs=500.0, block_ms=2000.0)
+        peak_hz, prominence = spectral_peak(rate[-4000:], fs=500.0)
+        row["sustained_peak_hz"], row["sustained_peak_prominence"] = peak_hz, prominence
+        row["short_arm_is_bit_exact_prefix"] = True
+        long_rows[key] = row
+
     verdict = adjudicate(list(rows.values()))
+    verdict["durability"] = {
+        f"b{b:g}_g{g:g}_s{s}": {
+            "credible_carrier": r["credible_carrier"],
+            "modulation_band": r["modulation_band"],
+            "sustained_core_cv": r["sustained_core_cv"],
+            "cv_block_profile": r["cv_block_profile"],
+            "tail_label": r["tail"]["label"],
+            "dmd_leading_hz": (
+                None if not r["dmd"] else r["dmd"]["leading_mode"]["frequency_hz"]
+            ),
+        }
+        for (b, g, s), r in sorted(long_rows.items())
+    }
+    # A candidate that decays back onto the fixed point is not a carrier, and
+    # the 2.5 s window cannot see that, so the long arm overrides it.
+    sustained = [
+        key for key, r in long_rows.items()
+        if r["credible_carrier"] and r["modulation_band"] == "clean"
+    ]
+    if verdict["durability"] and not sustained:
+        verdict["verdict"] = "SUBTRACTIVE_POOL_MODULATION_IS_A_DECAYING_TRANSIENT"
+        verdict["next_coordinate"] = (
+            "every tested strength relaxes back onto the fixed point within 12 s"
+        )
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "subtractive_pool_carrier_summary.json").write_text(
         json.dumps(
@@ -201,6 +283,9 @@ def main():
                 "schema": "topic4_zm_subtractive_pool_carrier_v1_2026-08-04",
                 "verdict": verdict,
                 "rows": {f"b{b:g}_g{g:g}_s{s}": r for (b, g, s), r in rows.items()},
+                "long_rows": {
+                    f"b{b:g}_g{g:g}_s{s}": r for (b, g, s), r in long_rows.items()
+                },
             },
             indent=2, sort_keys=True, allow_nan=False,
         ) + "\n"
