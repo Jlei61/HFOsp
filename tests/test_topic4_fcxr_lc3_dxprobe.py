@@ -162,3 +162,49 @@ def test_a_compacted_seed_state_regrows_traces_the_classifier_can_slice():
         trace = np.asarray(getattr(slow, name), dtype=float)
         assert trace.size == n_steps, f"{name} has {trace.size} of {n_steps} steps"
         assert np.all(np.isfinite(trace))
+
+
+# --- Stage 2: wear pinned, relay left free under a moved Hill -----------------
+
+def test_freeze_x_false_pins_wear_but_leaves_the_relay_evolving():
+    from src.topic4_fcxr_lc3_dxprobe import set_hill_placement
+    p, net, vth, state = _dynamic_state()
+    child = freeze_dynamic_state(state, d_field=0.663, freeze_x=False)
+    assert child.slow.cfg.use_z is False and child.slow.cfg.z_frozen_E is not None
+    assert child.slow.cfg.x_relay_frozen_E is None, "X must stay free to descend"
+    ne = child.slow.NE
+    x0 = np.asarray(child.slow.x_relay).copy()
+    out = run_fcxr_loop(p, net, start=child, n_steps=400, capture_final=True,
+                        store_spikes=False, v_th_per_neuron=vth)
+    after = out["checkpoint"].slow
+    np.testing.assert_allclose(after.z[:ne], 1.0 - 0.663)      # wear stayed pinned
+    assert not np.allclose(after.x_relay, x0), "the relay did not move; the arm is vacuous"
+
+
+def test_lowering_the_hill_knobs_drives_the_relay_deeper():
+    # The whole Stage-2 premise: the same sensor drive must deplete X further once the
+    # Hill is moved.  If it did not, no setting of these knobs could ever help.
+    from src.topic4_fcxr_lc3_dxprobe import set_hill_placement
+
+    def final_x(K_y, y_gate):
+        p, net, vth, state = _dynamic_state()
+        child = freeze_dynamic_state(state, d_field=0.663, freeze_x=False)
+        set_hill_placement(child, K_y=K_y, y_gate=y_gate)
+        out = run_fcxr_loop(p, net, start=child, n_steps=600, capture_final=True,
+                            store_spikes=False, v_th_per_neuron=vth)
+        return float(np.mean(out["checkpoint"].slow.x_relay))
+
+    base = final_x(4.0, 2.0)                 # the small case's registered placement
+    deeper_gate = final_x(4.0, 0.5)          # gate lowered -> more cells above it
+    deeper_khalf = final_x(1.5, 2.0)         # half-activation lowered -> steeper Hill
+    assert deeper_gate < base, f"lowering the gate did not deepen X: {deeper_gate} vs {base}"
+    assert deeper_khalf < base, f"lowering K_y did not deepen X: {deeper_khalf} vs {base}"
+
+
+def test_hill_placement_rejects_impossible_knobs():
+    from src.topic4_fcxr_lc3_dxprobe import set_hill_placement
+    _p, _net, _vth, state = _dynamic_state()
+    with pytest.raises(ValueError, match="K_y"):
+        set_hill_placement(state, K_y=0.0)
+    with pytest.raises(ValueError, match="y_gate"):
+        set_hill_placement(state, y_gate=-1.0)

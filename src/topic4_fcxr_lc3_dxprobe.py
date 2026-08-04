@@ -38,13 +38,18 @@ def _validated(field, ne, name):
     return a
 
 
-def freeze_dynamic_state(state, *, d_field=None, x_field=None):
+def freeze_dynamic_state(state, *, d_field=None, x_field=None, freeze_x=True):
     """Clone a dynamic state and hold its D and X fields fixed from here on.
 
     ``d_field`` / ``x_field`` may be a scalar or a per-E field; ``None`` freezes that
     variable at whatever the state currently carries, which is what the control arm
     needs.  ``ee_relay_send`` is synchronised with X so the first resumed spike cannot
     scatter through a stale pre-freeze availability.
+
+    ``freeze_x=False`` installs the starting X but leaves it evolving under its own
+    Hill.  That is what a Stage-2 arm needs: wear is pinned at the value the trajectory
+    actually reached, so the only remaining question is whether a moved Hill lets X
+    descend on its own to the depth that terminates.
     """
 
     child = clone_loop_state(state)
@@ -63,9 +68,30 @@ def freeze_dynamic_state(state, *, d_field=None, x_field=None):
          else _validated(x_field, ne, "x_field"))
     slow.x_relay[:] = x
     slow.ee_relay_send[:] = x
-    slow.cfg.x_relay_frozen_E = x.copy()
     slow.cfg.use_x = True           # the frozen branch lives inside the use_x block
+    slow.cfg.x_relay_frozen_E = x.copy() if freeze_x else None
     return child
+
+
+def set_hill_placement(state, *, K_y=None, y_gate=None):
+    """Move where the relay's Hill sits, in place, on an already-cloned state.
+
+    ``x_inf = 1 - (1 - x_min) * Hill([y - y_gate]+ ; K_y, n)``.  Lowering either knob
+    deepens the set point X relaxes to for the same sensor drive.  This is the Stage-2
+    axis: the trajectory's X settled at 0.3945 while termination needs below ~0.38, and
+    the sensor mean never reached the registered gate, so the drive never saturated.
+    """
+
+    cfg = state.slow.cfg
+    if K_y is not None:
+        if not (np.isfinite(K_y) and float(K_y) > 0.0):
+            raise ValueError("K_y must be finite and positive")
+        cfg.K_y = float(K_y)
+    if y_gate is not None:
+        if not np.isfinite(y_gate) or float(y_gate) < 0.0:
+            raise ValueError("y_gate must be finite and non-negative")
+        cfg.y_gate = float(y_gate)
+    return state
 
 
 def probe_summary(*, arm_id, d_field, x_field, classification, total_ms, extended) -> dict:
