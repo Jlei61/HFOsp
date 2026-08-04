@@ -121,6 +121,38 @@ def test_frozen_mode_stem_carries_the_slow_state_identity():
     )
 
 
+def _subtractive_args(beta):
+    return type("Args", (), {
+        "arm": "i2e", "tau_D_ms": 300.7, "d_star": 0.7281,
+        "strength_scale": 1.0, "control_uplift_mV": 0.0,
+        "use_mode_H": False, "freeze_zm": True,
+        "state": "bounded_late__peak", "beta_SG": beta,
+    })()
+
+
+def test_subtractive_pool_strength_is_part_of_the_artifact_identity():
+    """Two subtractive strengths are two arms, not one overwritten artifact."""
+    assert "bSG" not in DEV._mechanism_stem(_subtractive_args(0.0))
+    weak = DEV._mechanism_stem(_subtractive_args(0.25))
+    strong = DEV._mechanism_stem(_subtractive_args(1.0))
+    assert "__bSG0.25" in weak and "__bSG1" in strong
+    assert weak != strong
+
+
+def test_subtractive_pool_off_leaves_the_stem_byte_identical_to_prior_runs():
+    """beta=0 is the literal pre-change path, so frozen artifacts must not move."""
+    args = type("Args", (), {
+        "arm": "i2e", "tau_D_ms": 300.7, "d_star": 0.7281,
+        "strength_scale": 1.0, "control_uplift_mV": 0.0,
+        "use_mode_H": True, "rho_mode_H": 0.5,
+        "tau_mode_H_ms": 250.0, "m_mode_half": 30.0,
+        "freeze_zm": True, "state": "pre_entry__natural", "beta_SG": 0.0,
+    })()
+    assert DEV._mechanism_stem(args).endswith(
+        "__modeH0.5t250__mc30__freeze_pre_entry__natural"
+    )
+
+
 def test_vseeg_energy_floor_separates_continuous_carrier_from_pulse_train():
     import numpy as np
 

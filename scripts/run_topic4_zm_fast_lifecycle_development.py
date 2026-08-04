@@ -362,6 +362,17 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
                     "cond_gamma",
                 )
             }
+        if float(getattr(args, "beta_SG", 0.0)) > 0.0:
+            # The pool already divides recurrent E; this adds the subtractive
+            # component the reduced field named as the missing ingredient for
+            # the mean field to have an orbit at all.  0 keeps the parity path.
+            values["beta_SG"] = float(args.beta_SG)
+            receipt["subtractive_pool"] = {
+                "beta_SG": float(args.beta_SG),
+                "alpha_G": float(cfg.alpha_G),
+                "tau_S_ms": float(cfg.tau_S),
+                "S_max": float(cfg.S_max),
+            }
         if bool(getattr(args, "use_mode_H", False)):
             values.update({
                 "use_mode_H": True,
@@ -458,6 +469,8 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
                 f"pg{args.mode_H_persistent_g_max:g}"
                 f"e{args.mode_H_persistent_e_exc_mv:g}"
             )
+    if float(getattr(args, "beta_SG", 0.0)) > 0.0:
+        stem += f"__bSG{args.beta_SG:g}"
     if bool(getattr(args, "freeze_zm", False)):
         stem += f"__freeze_{args.state}"
     if float(getattr(args, "i2e_tau_cv", 0.0)) > 0.0:
@@ -1131,6 +1144,10 @@ def main() -> None:
     parser.add_argument("--use-mode-M-memory", action="store_true")
     parser.add_argument("--tau-mode-M-memory-up-ms", type=float, default=3000.0)
     parser.add_argument("--tau-mode-M-memory-down-ms", type=float, default=8000.0)
+    parser.add_argument(
+        "--beta-SG", type=float, dest="beta_SG", default=0.0,
+        help="subtractive shared-pool current on E cells; 0 keeps the parity path",
+    )
     parser.add_argument("--use-zm-conductance-homotopy", action="store_true")
     parser.add_argument("--homotopy-z-native", type=float, default=0.60)
     parser.add_argument("--homotopy-z-conductance", type=float, default=0.40)
