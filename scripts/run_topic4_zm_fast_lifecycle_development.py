@@ -857,6 +857,10 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         "trace_i_adaptation_max": np.asarray(
             diagnostic.trace_i_adaptation_max, np.float32
         ),
+        # The pool's subtractive strength has to be set against the recurrent
+        # current it opposes, so that current has to leave the run measured
+        # rather than assumed.  The engine already collects it.
+        "trace_Irec_mean": np.asarray(diagnostic.trace_Irec_mean, np.float32),
     }
     if diagnostic.cfg.use_mode_H:
         arrays.update({
