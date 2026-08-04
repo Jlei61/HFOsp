@@ -49,7 +49,7 @@ def local_repertoire(
             support = int(both.sum())
             pair_index.append((i, j))
             pair_support.append(support)
-            if support < int(min_pair_count):
+            if support < int(min_pair_count) or support == 0:
                 precedence.append(np.nan)
                 continue
             left, right = groups[both, i], groups[both, j]
@@ -59,6 +59,7 @@ def local_repertoire(
 
     supported_contacts = int(np.sum(counts >= int(min_participation_count)))
     supported_pairs = int(np.sum(np.asarray(pair_support) >= int(min_pair_count)))
+    # 3 is the minimum set size on which a rank correlation is meaningful (matching _agree requirement)
     status = "RESOLVED"
     if supported_contacts < 3:
         status = "UNRESOLVED_TOO_FEW_CONTACTS"

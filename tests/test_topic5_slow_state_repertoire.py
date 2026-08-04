@@ -88,3 +88,47 @@ def test_reversed_orderings_disagree_maximally_on_rank():
 def test_a_single_resolved_family_cannot_stand_in_for_the_repertoire():
     assert resolved_families({"participation": 0.9, "mean_rank": None, "precedence": None}) == 1
     assert resolved_families({"participation": 0.9, "mean_rank": 0.8, "precedence": None}) == 2
+
+
+def test_status_is_resolved_when_contacts_and_pairs_clear_the_floors():
+    rank, part, gids = _block([0.1, 0.5, 0.9], [0, 1, 2], 20)
+    out = local_repertoire(rank, part, gids, min_participation_count=5, min_pair_count=5)
+    assert out["status"] == "RESOLVED"
+    assert out["n_supported_contacts"] >= 3
+    assert out["n_supported_pairs"] >= 3
+
+
+def test_status_reports_too_few_contacts_when_the_contact_floor_bites():
+    rank = np.tile(np.array([0.1, 0.5]), (20, 1))
+    gids = np.tile(np.array([0, 1], np.int16), (20, 1))
+    part = np.ones((20, 2), np.uint8)
+    out = local_repertoire(rank, part, gids, min_participation_count=5, min_pair_count=5)
+    assert out["status"] == "UNRESOLVED_TOO_FEW_CONTACTS"
+    assert out["n_supported_contacts"] < 3
+
+
+def test_status_reports_too_few_pairs_when_the_pair_floor_bites():
+    # 4 contacts: 0, 1 always participate; 2 in events 0-9; 3 in events 10-19
+    # All meet contact floor (5)
+    # Only pair (0,1) meets pair floor (11+): has 20 co-participations
+    # Others have 10 co-participations, below the floor of 11
+    rank = np.tile(np.array([0.1, 0.5, 0.9, 0.7]), (20, 1))
+    gids = np.tile(np.array([0, 1, 2, 3], np.int16), (20, 1))
+    part = np.ones((20, 4), np.uint8)
+    part[10:20, 2] = 0
+    part[0:10, 3] = 0
+    out = local_repertoire(rank, part, gids, min_participation_count=5, min_pair_count=11)
+    assert out["status"] == "UNRESOLVED_TOO_FEW_PAIRS"
+    assert out["n_supported_contacts"] >= 3
+    assert out["n_supported_pairs"] < 3
+
+
+def test_a_pair_with_no_co_participation_is_nan_even_with_a_zero_floor():
+    rank = np.tile(np.array([0.1, 0.5, 0.9]), (20, 1))
+    gids = np.tile(np.array([0, 1, 2], np.int16), (20, 1))
+    part = np.ones((20, 3), np.uint8)
+    part[0:10, 1] = 0
+    part[10:20, 2] = 0
+    # Pair (1, 2): never co-participate (support = 0)
+    out = local_repertoire(rank, part, gids, min_participation_count=5, min_pair_count=0)
+    assert np.isnan(out["precedence"][out["pair_index"].index((1, 2))])
