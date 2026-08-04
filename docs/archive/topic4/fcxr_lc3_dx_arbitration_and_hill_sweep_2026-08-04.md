@@ -75,13 +75,47 @@ activity — the shallowest terminating clamp is silent:
 
 Zero events is outside the frozen reference band of 0.086-3.15 events/s, and 0.093 Hz
 sits with the geometry map's quenched columns (0.04-0.06 Hz), not with the canonical
-quiet state's 2.81 Hz.
+quiet state's 2.81 Hz. All four clamps agree: 0.380, 0.350, 0.300 and the 0.100 floor
+each produce zero returning events across 18 s.
 
-The remaining clamps are running. If they agree, the structure at this wear is:
-**discharging above 0.395, silent below 0.380, with no interictal branch in between** —
-which would make the Stage-2 failure structural rather than a tuning problem. The
-seizure drives wear to a level at which there is no normal state left to return to, and
-recovery would have to come from wear falling back, not from the relay.
+**Second retraction, same day.** An intermediate reading of those four arms concluded
+that "at this wear the tissue discharges above 0.395 and is silent below 0.380, with no
+interictal branch in between", making the Stage-2 failure structural. That is also
+withdrawn, and for a reason worth carrying: **the clamp is what produces the silence.**
+
+The 12 s Hill arms have the relay free, and it does not stay down. It empties to
+0.26-0.28, the discharge collapses, and then — activity having fallen below the gate —
+it refills to **0.59-0.60**, well above the 0.3945 the trajectory sat at:
+
+| gate | relay start | minimum | final | tier at 12 s | rate |
+|---|---|---|---|---|---|
+| 76.64 | 0.3945 | 0.3902 | 0.3936 | high branch | 72.9 Hz |
+| 72.00 | 0.3945 | 0.2795 | **0.5960** | elevated event train | 40.7 Hz |
+| 68.00 | 0.3945 | 0.2716 | **0.5959** | elevated event train | 36.5 Hz |
+| 64.00 | 0.3945 | 0.2692 | **0.6043** | elevated event train | 32.8 Hz |
+| 60.00 | 0.3945 | 0.2620 | **0.5884** | elevated event train | 32.2 Hz |
+
+So the discharge does terminate and the relay does recover; what is left is an elevated
+event train, not silence and not the interictal rate. A clamped relay cannot refill, so
+the clamped arms measure the clamp rather than the tissue.
+
+Corrected picture:
+
+| condition | outcome at this wear |
+|---|---|
+| relay clamped (artificial) | discharge, or silence |
+| relay free, wear pinned | discharge at the registered gate; **32-40 Hz elevated train** once the gate moves |
+| relay free, wear free | being measured |
+
+The remaining gap — 32-40 Hz against a canonical 2.81 Hz — is plausibly the pinned wear
+itself, which is exactly what the free-wear arms test. Wear relaxes back whenever the
+inhibitory sensor falls below threshold, on a 5 s constant, so pinning it at the 0.663 a
+discharge produced may be the whole reason nothing returns to baseline.
+
+**The methodological lesson, twice in one day:** a constraint imposed to isolate a
+variable becomes part of the result. Averaging across a window that opens with a state
+transition measures the transition; clamping a variable that would otherwise recover
+measures the clamp.
 
 Replacing the real relay field (mean 0.3945, spread 0.10-0.63) with a uniform clamp of
 the same mean did not change the outcome. That is not proof that spread never matters —
