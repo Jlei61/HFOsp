@@ -46,13 +46,13 @@ import run_topic4_mz_slowvars as OLD  # noqa: E402
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 from src.topic4_fcxr_lc3 import run_fcxr_loop  # noqa: E402
 from src.topic4_fcxr_lc3_ledger import build_event_ledger, snapshot_table  # noqa: E402
+from src.topic4_fcxr_lc3_reproduction import events_reproduce  # noqa: E402
 from src.topic4_mz_fcxr_lifecycle import classify_lifecycle  # noqa: E402
 
 OUT = os.path.join(E01.OUT, "entry_ledger")
 T_MS = RECON.ONSET_CHECK_MS          # the recon runner's own 20 s checkpoint
 SNAP_MS = RECON.SNAP_MS
 H1_POINT_ID = RECON.H1_POINT_ID      # the point the recon runner actually ran
-EVENT_MATCH_TOL_MS = 1e-6
 
 
 def _recorded(noise):
@@ -62,22 +62,16 @@ def _recorded(noise):
 
 
 def _event_prefix_matches(fresh, recorded):
-    """Do the re-simulated events reproduce the recorded ones inside 20 s?
+    """Do the re-simulated events reproduce the recorded ones?
 
-    Only events that both runs could see are compared: the recorded list covers
-    45 s, this one 20 s, and an event straddling the cut is truncated here and
-    whole there, so the last one is excluded rather than counted as a mismatch.
+    Delegates to `src.topic4_fcxr_lc3_reproduction`. An earlier version filtered
+    both lists by "ends before the 20 s cut", which keeps the tail event this run
+    truncated while dropping the whole copy the 45 s run recorded, and so failed
+    two of three bit-identical seeds. The shared module stops the comparison one
+    longest-event margin short of the cut instead.
     """
-    ref = [e for e in recorded if e["t_off_ms"] < T_MS]
-    got = [e for e in fresh if float(e["t_off"]) < T_MS]
-    if len(ref) != len(got):
-        return False, f"event count {len(got)} vs recorded {len(ref)} inside {T_MS:.0f} ms"
-    for i, (a, b) in enumerate(zip(got, ref)):
-        for key, ref_key in (("t_on", "t_on_ms"), ("t_off", "t_off_ms"),
-                             ("dur_ms", "dur_ms"), ("peak_ext", "peak_ext")):
-            if abs(float(a[key]) - float(b[ref_key])) > EVENT_MATCH_TOL_MS:
-                return False, f"event {i} {key}: {float(a[key])!r} vs {float(b[ref_key])!r}"
-    return True, f"{len(got)} events reproduced exactly"
+    out = events_reproduce(fresh, recorded, cut_ms=T_MS)
+    return out["reproduces"], out["detail"]
 
 
 def _run(noise):
