@@ -222,22 +222,30 @@ def figure_b(records, path):
         gain[region] = series[-1] - series[0]
         ax_region.plot(idx, series, "o-", ms=3, lw=1.3, color=REGION_COLOR[region],
                        label=REGION_LABEL[region])
-    core = max(gain["core_A"], gain["core_B"])
-    rest = max(gain["axial"], gain["off_axis"])
-    ratio = core / rest if rest > 1e-12 else float("inf")
+    # Which regions lead is read off the data rather than assumed: the cores and
+    # the axis turn out to move together and it is off-axis tissue that lags, so
+    # grouping "cores against the rest" would hide the structure that is there.
+    fast = max(gain, key=gain.get)
+    slow = min(gain, key=gain.get)
+    ratio = gain[fast] / gain[slow] if gain[slow] > 1e-12 else float("inf")
     ax_region.set_xlabel("event number before entry")
     ax_region.set_ylabel("wear")
     ax_region.set_title(
-        (f"the cores gain {ratio:.1f}x what the rest does" if ratio >= 1.05 else
-         f"the cores gain {ratio:.2f}x the rest — no core lead"),
+        (f"it builds {ratio:.1f}x faster in {REGION_LABEL[fast]} than "
+         f"{REGION_LABEL[slow]}" if ratio >= 1.05 else
+         f"it builds evenly — fastest region only {ratio:.2f}x the slowest"),
         loc="left")
     ax_region.legend(frameon=False, fontsize=8)
 
     ax_relay.set_xlabel("event number before entry")
     ax_relay.set_ylabel("relay availability")
     ax_relay.set_ylim(0.0, 1.05)
-    ax_relay.set_title(f"the relay moves by at most {max(x_swing):.3f} over the train",
-                       loc="left")
+    swing = max(x_swing)
+    ax_relay.set_title(
+        ("the relay sits at 1.000 through every event" if swing < 5e-4 else
+         f"the relay moves by {swing:.3f} across the train"), loc="left")
+    ax_relay.text(0.03, 0.06, "measured at the snapshot bracketing each event",
+                  transform=ax_relay.transAxes, fontsize=7.2, color="#5d6d7e")
     fig.tight_layout()
     fig.savefig(path)
     plt.close(fig)
