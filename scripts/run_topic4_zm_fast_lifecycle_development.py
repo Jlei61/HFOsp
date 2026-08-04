@@ -874,6 +874,10 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         # current it opposes, so that current has to leave the run measured
         # rather than assumed.  The engine already collects it.
         "trace_Irec_mean": np.asarray(diagnostic.trace_Irec_mean, np.float32),
+        "trace_Irec_postdiv_mean": np.asarray(
+            diagnostic.trace_Irec_postdiv_mean, np.float32
+        ),
+        "trace_Isub_mean": np.asarray(diagnostic.trace_Isub_mean, np.float32),
     }
     if diagnostic.cfg.use_mode_H:
         arrays.update({

@@ -11,6 +11,7 @@ import os
 import sys
 
 import numpy as np
+import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "snn_engine"))
 from slow_field import SpatialSlowField, SpatialSlowFieldConfig  # noqa: E402
@@ -116,3 +117,47 @@ def test_H_sensor_invalid_raises():
     except ValueError as e:
         assert "H_sensor" in str(e); return
     raise AssertionError("invalid H_sensor must raise")
+
+
+def test_pool_traces_record_the_currents_the_membrane_actually_saw():
+    """Calibration is only honest if the dumped currents are the applied ones."""
+    N, NE = 60, 48
+    rng = np.random.default_rng(3)
+    posE = rng.random((NE, 2)) * 20.0
+    posI = rng.random((N - NE, 2)) * 20.0
+    beta = 0.75
+    c = SpatialSlowFieldConfig(use_qI=False, use_gK=False, use_SG=True,
+                               alpha_G=16.0, beta_SG=beta, use_persist=False)
+    c.validate()
+    sf = SpatialSlowField(N, 18.0, posE, posI, 20.0, cfg=c)
+    sf.S_G = 0.25
+    I_rec = np.full(N, 40.0)
+
+    before = np.zeros(N)
+    after = sf.apply_currents(before.copy(), np.zeros(N), I_E_rec=I_rec)
+
+    denom = 1.0 + c.alpha_G * sf.S_G
+    raw = sf.trace_Irec_mean[-1]
+    postdiv = sf.trace_Irec_postdiv_mean[-1]
+    sub = sf.trace_Isub_mean[-1]
+
+    assert raw == pytest.approx(40.0)
+    # What the divisive stage leaves is what the subtractive term competes with.
+    assert postdiv == pytest.approx(40.0 / denom)
+    assert sub == pytest.approx(beta * sf.S_G)
+    # The two dumped components must add up to the removal actually applied.
+    removed = float(before[:NE].mean() - after[:NE].mean())
+    assert removed == pytest.approx((raw - postdiv) + sub)
+
+
+def test_pool_subtractive_trace_is_zero_on_the_parity_path():
+    N, NE = 60, 48
+    rng = np.random.default_rng(4)
+    c = SpatialSlowFieldConfig(use_qI=False, use_gK=False, use_SG=True,
+                               alpha_G=16.0, use_persist=False)
+    c.validate()
+    sf = SpatialSlowField(N, 18.0, rng.random((NE, 2)) * 20.0,
+                          rng.random((N - NE, 2)) * 20.0, 20.0, cfg=c)
+    sf.S_G = 0.25
+    sf.apply_currents(np.zeros(N), np.zeros(N), I_E_rec=np.full(N, 40.0))
+    assert sf.trace_Isub_mean[-1] == 0.0

@@ -627,6 +627,8 @@ class SpatialSlowField:
         self.S_G = 0.0
         self.trace_muG = []; self.trace_SG = []; self.trace_AG = []
         self.trace_Irec_mean = []                                     # mean recurrent-E current (matched-subtractive calib)
+        self.trace_Irec_postdiv_mean = []                             # what survives the divisive stage; beta competes with THIS
+        self.trace_Isub_mean = []                                     # beta_SG*S_G actually subtracted this step
         if cfg.clamp_SG is not None:
             self.S_G = float(cfg.clamp_SG)                            # static-pool arm: S_G frozen from t=0
         self.trace_rEfast_max = []      # per-step spatial-max of rE_fast (for r50 sensor-scale calibration)
@@ -875,7 +877,12 @@ class SpatialSlowField:
                     self.trace_mode_H_persistent_g_core_mean.append(
                         float(np.mean(persistent_g[self._core_mask_E]))
                     )
-            self.trace_Irec_mean.append(float(np.asarray(I_E_rec, float)[:nE].mean()))  # for matched-subtractive calib
+            rec_mean = float(np.asarray(I_E_rec, float)[:nE].mean())
+            self.trace_Irec_mean.append(rec_mean)                      # for matched-subtractive calib
+            # Dumped from the same denom the membrane used, so the calibration
+            # stays exact when alpha_H or the M divisor are also on.
+            self.trace_Irec_postdiv_mean.append(rec_mean / denom)
+            self.trace_Isub_mean.append(float(self.cfg.beta_SG * self.S_G))
         return out
 
     def mode_H_gain_at_E(self) -> np.ndarray:

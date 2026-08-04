@@ -1,8 +1,10 @@
 import numpy as np
+import pytest
 
 from scripts.analyze_topic4_zm_conductance_homotopy import credible_carrier
 from scripts.analyze_topic4_zm_pv_som_carrier import (
     BASE_ORDER, _gap_spatial_class, _label, _split_arm, adjudicate,
+    realized_removal_ratio, subtractive_beta_for_fraction,
     sustained_core_cv,
 )
 
@@ -187,6 +189,42 @@ def test_runaway_and_missing_episode_outrank_the_two_axes():
     assert _gap_spatial_class(_row(gap=0., pc1=.8, runaway=True)) == "runaway"
     assert _gap_spatial_class(_row(gap=None)) == "no_episode"
     assert _gap_spatial_class(_row(pc1=None)) == "no_episode"
+
+
+def test_realized_removal_ratio_is_a_charge_ratio_not_a_median_ratio():
+    """A bursty arm's median current is not its charge; the ratio must integrate."""
+    # Nine silent steps and one large step: charge ratio is set by the sum.
+    post = np.array([0.] * 9 + [100.])
+    sub = np.full(10, 5.)
+    assert realized_removal_ratio(sub, post) == pytest.approx(50. / 100.)
+    # A median-based ratio would divide by 0 here, which is the failure this
+    # replaces; the charge ratio stays finite and correct.
+    assert np.median(post) == 0.
+    assert realized_removal_ratio(np.zeros(10), post) == 0.
+    assert realized_removal_ratio(sub, np.zeros(10)) is None
+
+
+def test_subtractive_strength_is_calibrated_on_post_divisive_charge():
+    """beta competes with what survives the divisive stage, not the raw current."""
+    raw = np.array([100.0, 100.0])
+    s_g = np.array([0.25, 0.25])
+    alpha = 16.0
+    # Divisive stage leaves 1/(1+16*0.25) = 1/5 of the recurrent current.
+    beta = subtractive_beta_for_fraction(0.5, raw, s_g, alpha_G=alpha)
+    assert beta == pytest.approx(0.5 * (100.0 / 5.0) / 0.25)
+    # Calibrating on the raw current would overstate beta by the same factor.
+    assert beta * 5.0 == pytest.approx(0.5 * 100.0 / 0.25)
+    # The ladder is proportional in f, so relative spacing is preserved.
+    assert subtractive_beta_for_fraction(1.0, raw, s_g, alpha_G=alpha) == (
+        pytest.approx(2.0 * beta)
+    )
+
+
+def test_calibration_refuses_a_window_with_no_pool_output():
+    with pytest.raises(ValueError):
+        subtractive_beta_for_fraction(
+            0.5, np.array([1.0, 1.0]), np.zeros(2), alpha_G=16.0
+        )
 
 
 def test_sustained_variability_separates_a_burst_train_from_a_fixed_point():

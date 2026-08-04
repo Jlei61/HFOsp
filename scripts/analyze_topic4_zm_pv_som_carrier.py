@@ -79,6 +79,36 @@ def _label(summary):
     return None
 
 
+def subtractive_beta_for_fraction(fraction, raw_recurrent, pool_output, *, alpha_G):
+    """Subtractive pool strength that removes `fraction` of the surviving drive.
+
+    The subtractive term competes with what is left *after* the divisive stage,
+    not with the raw recurrent current, and on a bursty arm the current is near
+    zero most of the time.  Both make a median-of-raw calibration wrong, so this
+    balances charge over the window instead: beta * sum(S_G) = f * sum(I_postdiv).
+    """
+    raw = np.asarray(raw_recurrent, float)
+    pool = np.asarray(pool_output, float)
+    if raw.shape != pool.shape:
+        raise ValueError(f"misaligned traces: {raw.shape} vs {pool.shape}")
+    pool_charge = float(pool.sum())
+    if pool_charge <= 0.0:
+        raise ValueError("pool output carries no charge in this window")
+    post_divisive = raw / (1.0 + float(alpha_G) * pool)
+    return float(fraction) * float(post_divisive.sum()) / pool_charge
+
+
+def realized_removal_ratio(subtractive_current, post_divisive_current):
+    """Charge actually removed by the pool over what survived the divisive stage.
+
+    One beta necessarily lands differently on two substrates, so this is what
+    makes the two rows of the factorial comparable after the fact.
+    """
+    sub = float(np.asarray(subtractive_current, float).sum())
+    post = float(np.asarray(post_divisive_current, float).sum())
+    return sub / post if post > 0.0 else None
+
+
 def sustained_core_cv(fine_core_rate_hz, window_ms=1000.0, bin_ms=2.0):
     """Relative variability of the core rate over the final second.
 
