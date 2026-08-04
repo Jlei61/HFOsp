@@ -215,7 +215,7 @@ V_\infty=\frac{I_{net}+g_H E_{exc}}{1+g_H},\quad \tau_{eff}\propto(1+g_H)^{-1}
 
 ### 10.5 冻结工作点扫描（固定 g=0.32，wiring 1）
 
-| 工作点 | 冻结 z | Z 门开度 | gap | PC1 | rank | core Hz | 慢兴奋 g 峰 | gate |
+| 工作点 | 冻结 z（**核心区**） | Z 门开度 | gap | PC1 | rank | core Hz | 慢兴奋 g 峰 | gate |
 |---|---:|---:|---:|---:|---:|---:|---:|---|
 | `bounded_mid__rising` | 0.408 | 0.993 | 0.100 | 0.867 | 1.627 | 174.5 | 0.2109 | — (occ) |
 | `bounded_mid__peak` | 0.406 | 0.993 | 0.325 | 0.967 | 1.180 | 161.7 | 0.1753 | — |
@@ -226,7 +226,7 @@ V_\infty=\frac{I_{net}+g_H E_{exc}}{1+g_H},\quad \tau_{eff}\propto(1+g_H)^{-1}
 
 carrier 只覆盖轨迹的 **late 段**（`bounded_late__rising` / `__peak`），两个 `bounded_mid__*` 点不过。
 
-**已撤回的一次 over-claim**：本节初稿把 `pre_entry__natural` 当作间期基线，并把该点上机制仍有 66% 参与度（0.1216 vs 0.184）读作"Z 门在间期不关闭"。直接测量门开度后撤回：该点 z 已降至 0.525，Z 门开度 0.989，**面板五个工作点的门全部近乎全开（0.989–0.993）**，即本扫描**没有采样到任何位于门关闭侧的状态**，无从检验特异性。该点上机制参与度的差异来自活动驱动的 `h` 累积与 M 门，不是 Z 门。机器 verdict 相应改为 `CARRIER_ON_THE_LATE_ARC_SELECTIVITY_UNTESTED`，并在 `adjudicate` 中加入门开度前置判据，使分析器在门已开时**拒绝**给出特异性结论。
+**已撤回的一次 over-claim**：本节初稿把 `pre_entry__natural` 当作间期基线，并把该点上机制仍有 66% 参与度（0.1216 vs 0.184）读作"Z 门在间期不关闭"。直接测量门开度后撤回：该点**核心区** z 已降至 0.525（全片 z=0.811；机制作用在有活动处，故门以核心区为准），Z 门开度 0.989，**面板五个工作点的门全部近乎全开（0.989–0.993）**，即本扫描**没有采样到任何位于门关闭侧的状态**，无从检验特异性。自然锚定轨迹（seed1, T=15 s）的核心区 z 由 1.0 降至 0.343，穿过门关闭阈 z=0.75 的时刻约在 t≈3175 ms，早于现有最早检查点（7350 ms）——因此关闭侧检查点是可注册的，见 2026-08-04 spec P0-c。该点上机制参与度的差异来自活动驱动的 `h` 累积与 M 门，不是 Z 门。机器 verdict 相应改为 `CARRIER_ON_THE_LATE_ARC_SELECTIVITY_UNTESTED`，并在 `adjudicate` 中加入门开度前置判据，使分析器在门已开时**拒绝**给出特异性结论。
 
 需要注意 `pre_entry__natural` 是 onset 前约 1.35 s 的 pre-ictal checkpoint，不是 interictal baseline；要检验"进入"与"退出"，必须先注册一个 z 位于门以上的 checkpoint。
 
