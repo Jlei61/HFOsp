@@ -88,6 +88,23 @@ def _meminfo():
                 swap_used_mib=(d["SwapTotal"] - d["SwapFree"]) / 1024.0)
 
 
+def _x_tag(value):
+    return f"{float(value):.3f}".replace(".", "p")
+
+
+def _ladder_arms(ne, x_values):
+    """Bracket the X depth that terminates at the observed wear, one uniform level each.
+
+    The 2x2 shows the trajectory's own X (mean 0.394) sustains the bout while the
+    0.10 floor kills it, so the termination threshold lies between them.  Where it
+    lies is what says whether the gap X has to close is small or large.
+    """
+    return [dict(arm_id=f"ladder_X{_x_tag(v)}", d=None, x=np.full(ne, float(v)),
+                 d_desc="observed late-bout field",
+                 x_desc=f"uniform {float(v):.3f}")
+            for v in x_values]
+
+
 def _arms(seed_slow, map_max_d):
     """The 2x2. ``None`` means 'freeze where the trajectory left it'."""
     ne = int(seed_slow.NE)
@@ -151,6 +168,9 @@ def _run_arm(S, point, seed_state, arm):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--confirm-run", action="store_true")
+    ap.add_argument("--x-ladder", default="",
+                    help="comma-separated uniform X levels to bracket the termination "
+                         "threshold at the observed wear, e.g. 0.35,0.30,0.25,0.20,0.15")
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("40k D/X arbitration probe requires --confirm-run")
@@ -164,6 +184,11 @@ def main():
     fields, _records = GEO._primary_fields()
     map_max_d = np.asarray(fields[MAP_MAX_D_LABEL], dtype=float)
     arms, observed_d, observed_x = _arms(seed_state.slow, map_max_d)
+    if args.x_ladder.strip():
+        levels = [float(v) for v in args.x_ladder.split(",") if v.strip()]
+        if not all(0.0 <= v <= 1.0 for v in levels):
+            raise SystemExit("--x-ladder levels must lie in [0,1]")
+        arms = _ladder_arms(int(seed_state.slow.NE), levels)
 
     S = PP.build_substrate(1)
     install_registered_noise_rng(S["net"])
@@ -195,13 +220,28 @@ def main():
         observed_D_mean=float(observed_d.mean()), observed_X_mean=float(observed_x.mean()),
         map_max_D_mean=float(map_max_d.mean()), x_floor=X_FLOOR,
         labels=by,
-        control_reproduces_the_bout=bool(by.get("control") in high),
-        x_can_terminate_at_observed_D=bool(by.get("max_brake") not in high),
-        x_would_have_terminated_at_mapped_D=bool(by.get("map_D") not in high),
         claim_boundary=("frozen arbitration seeded from one real late-bout state of one "
                         "noise seed; not a lifecycle result and not a parameter acceptance"),
         rows=rows, completed=_now(),
     )
+    if {"control", "max_brake", "map_D"} <= set(by):
+        aggregate.update(
+            control_reproduces_the_bout=bool(by["control"] in high),
+            x_can_terminate_at_observed_D=bool(by["max_brake"] not in high),
+            x_would_have_terminated_at_mapped_D=bool(by["map_D"] not in high),
+        )
+    ladder = sorted(((r["X_mean"], r["arm_id"], r["resolved_label"]) for r in rows
+                     if r["arm_id"].startswith("ladder_X")), reverse=True)
+    if ladder:
+        persists = [x for x, _a, lab in ladder if lab in high]
+        terminates = [x for x, _a, lab in ladder if lab not in high]
+        aggregate["termination_bracket"] = dict(
+            ladder=[dict(X=x, arm_id=a, label=lab) for x, a, lab in ladder],
+            lowest_X_that_still_persists=(min(persists) if persists else None),
+            highest_X_that_terminates=(max(terminates) if terminates else None),
+            note=("the trajectory's own X settled at "
+                  f"{float(observed_x.mean()):.3f} and its bout persisted"),
+        )
     _write_json(os.path.join(OUT, "dx_arbitration.json"), aggregate)
     running = os.path.join(OUT, "RUNNING.json")
     if os.path.exists(running):
