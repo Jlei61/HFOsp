@@ -19,6 +19,13 @@ export NUMEXPR_NUM_THREADS=1
 mkdir -p "$result_root"
 printf '%s\n' "$$" > "$result_root/spatial_autopilot.pid"
 
+# Wall guard sized from the measured cost of a 40k second, not by eye.  The E4
+# reconnaissance measured 2026-08-04: the 32 s main run took ~4 h of wall clock,
+# i.e. 320-450 s of wall per simulated second once spikes are stored for the whole
+# trajectory.  The guard exists to break a hang, not to schedule; rows and cells
+# resume from valid DONE files, so an over-long guard costs nothing while an
+# under-sized one destroys hours of completed work.  The previous value could not
+# cover the registered work of this stage and terminated it at 8 h.
 on_error() {
   code="$?"
   "$python_bin" - "$result_root" "$code" <<'PY'
@@ -64,7 +71,8 @@ while kill -0 "$sim_pid" 2>/dev/null; do
     kill -TERM "$sim_pid"
     wait "$sim_pid"
   fi
-  if (( $(date +%s) - start_epoch > 28800 )); then
+  # many 500 ms arms across states, amplitudes and bases; per-cell resume exists.
+  if (( $(date +%s) - start_epoch > 108000 )); then
     kill -TERM "$sim_pid"
     wait "$sim_pid"
   fi

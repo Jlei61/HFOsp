@@ -19,6 +19,13 @@ export NUMEXPR_NUM_THREADS=1
 mkdir -p "$result_root"
 printf '%s\n' "$$" > "$result_root/x_lifecycle_autopilot.pid"
 
+# Wall guard sized from the measured cost of a 40k second, not by eye.  The E4
+# reconnaissance measured 2026-08-04: the 32 s main run took ~4 h of wall clock,
+# i.e. 320-450 s of wall per simulated second once spikes are stored for the whole
+# trajectory.  The guard exists to break a hang, not to schedule; rows and cells
+# resume from valid DONE files, so an over-long guard costs nothing while an
+# under-sized one destroys hours of completed work.  The previous value could not
+# cover the registered work of this stage and terminated it at 12 h.
 on_error() {
   code="$?"
   "$python_bin" - "$result_root" "$code" <<'PY'
@@ -76,9 +83,11 @@ if not os.path.isfile(path) or json.load(open(path)).get("status") != "DONE":
 PY
 
 "$python_bin" "$runner" lock
-run_guarded x_calibration 43200 "$python_bin" "$runner" calibrate --confirm-run
+# <=10 candidates x (8 s low + 4 s high) ~= 15 h at the measured rate.
+run_guarded x_calibration 86400 "$python_bin" "$runner" calibrate --confirm-run
 "$python_bin" "$runner" lifecycle-manifest
-run_guarded lifecycle 57600 "$python_bin" "$runner" lifecycle --confirm-run
+# <=6 nominal runs x up to 45 s ~= 34 h at the measured rate.
+run_guarded lifecycle 180000 "$python_bin" "$runner" lifecycle --confirm-run
 
 "$python_bin" - "$result_root" <<'PY'
 import datetime, json, os, sys
