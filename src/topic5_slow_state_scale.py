@@ -9,6 +9,13 @@ random halves — where a window starts averaging over a state change.
 
 Scales with too few independent windows are skipped, not counted as failures, and a
 leading run of below-chance scales is expected rather than disqualifying.
+
+A dropped mid-grid scale (`UNRESOLVED_TOO_FEW_WINDOWS` or `UNRESOLVED_FAMILIES`) can
+fabricate apparent monotonicity: `select_scales` removes it before pattern matching, so it
+never sees what state that scale was actually in. A reported `N_break` or dwell interval
+whose two grid points are not adjacent in the original grid spans a dropped scale, and must
+be read together with which grid point was skipped rather than as if the grid were
+contiguous.
 """
 from __future__ import annotations
 
@@ -21,6 +28,17 @@ from src.topic5_slow_state_repertoire import FAMILIES, family_agreement, local_r
 BELOW, RELIABLE, BREAK = "BELOW_CHANCE", "RELIABLE", "CHRONOLOGY_BREAK"
 TOO_FEW = "UNRESOLVED_TOO_FEW_WINDOWS"
 UNRESOLVED_FAMILIES = "UNRESOLVED_FAMILIES"
+NOT_EVALUATED = (TOO_FEW, UNRESOLVED_FAMILIES)
+
+# I3 fix: a family must clear a minimum number of *finite* draws on both `random_half` and
+# `contact_null` before it counts as "resolved" in `window_state` -- a single finite null
+# draw makes its q95 trivially easy to beat, biasing toward RELIABLE and a smaller N_obs.
+# `window_state` receives only `agreements`/`alpha`/`min_resolved_families` (the frozen
+# Interfaces block), not `null_draws` itself, so `max(20, null_draws // 10)` is evaluated
+# here against the frozen config's `null_draws: 200` / `random_half_draws: 200`
+# (config/topic5_slow_state_v4_0.yaml) -> max(20, 200 // 10) = 20. If `null_draws` is ever
+# reconfigured away from 200 this constant does not auto-scale and must be revisited.
+MIN_FINITE_DRAWS_FOR_RESOLUTION = max(20, 200 // 10)
 
 
 def _local_repertoire_kwargs(floors: Mapping[str, int]) -> dict[str, int]:
@@ -138,67 +156,84 @@ def window_state(
 ) -> str:
     """One of BELOW_CHANCE / RELIABLE / CHRONOLOGY_BREAK / UNRESOLVED_FAMILIES (§6.3).
 
-    Per family, in order:
+    **Resolved.** A family counts as resolved only when ALL three hold:
 
-    1. **Resolved** only when both its `random_half` and `contact_null` lists are
-       non-empty — a family with either entirely empty (no draw produced a finite
-       agreement) cannot be tested and does not enter the vote below.
-    2. **Above chance** when the random-half *median* exceeds (strictly) the contact
-       null's own 95th percentile (`q95`) — each family judged against its own null,
-       never a shared/absolute threshold (§6.3: contact counts range ~8-16 in this
-       cohort and a constant threshold would systematically penalise high-dimensional
-       patients).
-    3. Not above chance -> that family's vote is `BELOW_CHANCE`.
-    4. Above chance -> `CHRONOLOGY_BREAK` when the chronological value sits below the
-       random-half distribution's `alpha`-quantile (`np.percentile(random_half, 100 *
-       alpha)`); otherwise `RELIABLE`. A family whose chronological value is `None`
-       (that specific split could not be computed) is never treated as break evidence —
-       absence of a comparison is not evidence a break occurred — so it defaults to
-       `RELIABLE` provided it cleared the above-chance test.
+    1. its `random_half` list has at least `MIN_FINITE_DRAWS_FOR_RESOLUTION` finite
+       values (fix I3 — a single finite null draw makes that draw's implied q95
+       trivially easy to beat; a near-empty null must not be usable as a chance floor);
+    2. its `contact_null` list also has at least `MIN_FINITE_DRAWS_FOR_RESOLUTION`
+       finite values, for the same reason;
+    3. its `chronological` value is not `None` (fix I7 — the conservative reading: a
+       family whose chronological split could not be computed is not evidence of
+       *anything*, above-chance or break, so it does not count as resolved at all,
+       rather than defaulting to "no break evidence" as an earlier revision did. This
+       biases the estimator toward *fewer* resolved families rather than toward a
+       later/wider `N_break`/dwell built partly on families that were never actually
+       compared chronologically).
 
-    Fewer than `min_resolved_families` resolved families short-circuits to
-    `UNRESOLVED_FAMILIES` before any vote is taken.
+    Fewer than `min_resolved_families` resolved -> `UNRESOLVED_FAMILIES`, checked before
+    any vote below.
 
-    Window-level verdict is by **strict majority** (more than half) of resolved
-    families' votes, checked `BELOW_CHANCE` then `CHRONOLOGY_BREAK`; anything short of a
-    majority for either defaults to `RELIABLE`. The brief states the majority rule
-    explicitly only for `CHRONOLOGY_BREAK` ("... in a majority of resolved families");
-    this extends the same rule to `BELOW_CHANCE` by symmetry as a controller-level
-    completion (not a separately specified plan clause), and treats "no majority for a
-    problem state" as `RELIABLE` rather than inventing a fifth label for a 3-family tie.
+    **Per-family tests**, computed for every resolved family (fix C1 — both tests are
+    computed for every resolved family regardless of the other test's outcome, so the
+    two window-level votes below share one denominator, `n` = number of resolved
+    families):
+
+    - *above chance*: random-half **median** exceeds (strictly) contact-null's own 95th
+      percentile (`q95`) — each family judged against its own null, never a
+      shared/absolute threshold (§6.3: contact counts range ~8-16 in this cohort and a
+      constant threshold would systematically penalise high-dimensional patients).
+    - *chronology below alpha*: the chronological value is strictly less than the
+      random-half distribution's `alpha`-quantile (`np.percentile(random_half, 100 *
+      alpha)`).
+
+    **Window-level verdict**, in this exhaustive, explicit precedence (fix C1 — RELIABLE
+    must never be a bare fallthrough for "neither majority was reached"; it requires
+    positive above-chance evidence):
+
+    1. fewer than `min_resolved_families` resolved -> `UNRESOLVED_FAMILIES`;
+    2. `BELOW_CHANCE` **unless** a strict majority (more than half) of resolved families
+       are above chance — this is the complement of "majority above chance", so a tie
+       (e.g. 1-of-2, 2-of-4) or a minority also falls here, not into `RELIABLE`;
+    3. among windows that passed step 2 (a majority above chance), `CHRONOLOGY_BREAK`
+       when a strict majority of resolved families show chronology below alpha;
+    4. `RELIABLE` only when step 2's majority was met and step 3's break-majority was
+       not — i.e. `RELIABLE` requires having *reached* step 4, never a leftover default.
     """
     random_half = agreements["random_half"]
     contact_null = agreements["contact_null"]
     chronological = agreements["chronological"]
 
-    labels: list[str] = []
+    above_chance: list[bool] = []
+    chrono_below_alpha: list[bool] = []
     for family in FAMILIES:
         rh = random_half.get(family) or []
         cn = contact_null.get(family) or []
-        if not rh or not cn:
-            continue  # unresolved: not enough draws to judge this family at all
+        chrono = chronological.get(family)
+        if (
+            len(rh) < MIN_FINITE_DRAWS_FOR_RESOLUTION
+            or len(cn) < MIN_FINITE_DRAWS_FOR_RESOLUTION
+            or chrono is None
+        ):
+            continue  # unresolved: not enough evidence to judge this family at all
 
         median_rh = float(np.median(rh))
         q95_null = float(np.percentile(cn, 95))
-        if median_rh <= q95_null:
-            labels.append(BELOW)
-            continue
+        above_chance.append(median_rh > q95_null)
 
-        chrono = chronological.get(family)
         alpha_quantile = float(np.percentile(rh, 100.0 * float(alpha)))
-        if chrono is not None and float(chrono) < alpha_quantile:
-            labels.append(BREAK)
-        else:
-            labels.append(RELIABLE)
+        chrono_below_alpha.append(float(chrono) < alpha_quantile)
 
-    if len(labels) < int(min_resolved_families):
+    n = len(above_chance)
+    if n < int(min_resolved_families):
         return UNRESOLVED_FAMILIES
 
-    n = len(labels)
-    if labels.count(BELOW) * 2 > n:
+    if not (sum(above_chance) * 2 > n):
         return BELOW
-    if labels.count(BREAK) * 2 > n:
+
+    if sum(chrono_below_alpha) * 2 > n:
         return BREAK
+
     return RELIABLE
 
 
@@ -209,30 +244,38 @@ def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:
     evaluated only with enough independent primary windows behind it, and is excluded
     from `select_scales`'s pattern rather than counted as a failure.
 
-    Otherwise the most frequent window state wins (plurality; with only two possible
-    contenders in the common `min_windows=5`-with-3-families setting this is usually a
-    true majority too, but the rule here is "most votes", not ">50%"). On an exact
-    tie between two or more states, the earliest in
-    `(BELOW_CHANCE, RELIABLE, CHRONOLOGY_BREAK, UNRESOLVED_FAMILIES)` wins — a
-    controller decision (task-6 ambiguity resolution) to keep the reduction
+    Otherwise the most frequent window state wins (majority; with only two possible
+    contenders in the common `min_windows=5`-with-3-families setting the most-frequent
+    label out of 5 is necessarily a true majority too, but the rule stated here is
+    "most votes", not literally ">50%"). On an exact tie between two or more states,
+    the earliest in `(BELOW_CHANCE, RELIABLE, CHRONOLOGY_BREAK, UNRESOLVED_FAMILIES)`
+    wins — a controller decision (task-6 ambiguity resolution) to keep the reduction
     deterministic, not a rule derived from the plan text.
+
+    Every element of `windows_states` is validated against this closed label set up
+    front, so an unrecognised state raises `ValueError` immediately rather than being
+    silently uncounted (the previous revision had a `raise` after the vote that could
+    never execute, because the vote itself only ever counted the 4 known labels).
     """
     states = list(windows_states)
     if len(states) < int(min_windows):
         return TOO_FEW
 
     order = (BELOW, RELIABLE, BREAK, UNRESOLVED_FAMILIES)
+    unknown = sorted(set(states) - set(order))
+    if unknown:
+        raise ValueError(f"unexpected window state(s) outside the closed label set: {unknown!r}")
+
     counts = {label: states.count(label) for label in order}
     best = max(counts.values())
     for label in order:
         if counts[label] == best:
             return label
-    raise ValueError(f"unexpected window state(s) outside the closed label set: {states!r}")
 
 
 def select_scales(states: Mapping[int, str]) -> dict[str, Any]:
     evaluated = [
-        (size, states[size]) for size in sorted(states) if states[size] != TOO_FEW
+        (size, states[size]) for size in sorted(states) if states[size] not in NOT_EVALUATED
     ]
     labels = [state for _, state in evaluated]
     empty = {

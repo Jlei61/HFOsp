@@ -1,5 +1,4 @@
 import numpy as np
-import pytest
 
 from src.topic5_slow_state_scale import (
     scale_states,
@@ -9,6 +8,7 @@ from src.topic5_slow_state_scale import (
 )
 
 B, R, C, F = "BELOW_CHANCE", "RELIABLE", "CHRONOLOGY_BREAK", "UNRESOLVED_TOO_FEW_WINDOWS"
+UF = "UNRESOLVED_FAMILIES"
 FAMILIES = ("participation", "mean_rank", "precedence")
 
 
@@ -67,6 +67,18 @@ def test_a_scale_gap_from_too_few_windows_does_not_break_monotonicity():
     assert out["status"] == "SCALE_RESOLVED"
     assert out["n_obs"] == 100
     assert out["n_break"] == 1000
+
+
+def test_an_unresolved_families_scale_is_dropped_not_counted_as_a_failure():
+    # fix round 1, C2: UNRESOLVED_FAMILIES must be dropped before pattern matching, the
+    # same as UNRESOLVED_TOO_FEW_WINDOWS -- otherwise a single unresolved scale (most
+    # likely at the smallest grid point, where the support floors bite hardest) throws
+    # the whole patient to UNRESOLVED_NONMONOTONE, exactly the failure mode the
+    # leading-below-chance rule exists to prevent.
+    out = select_scales({50: UF, 100: R, 200: R, 500: C})
+    assert out["status"] == "SCALE_RESOLVED"
+    assert out["n_obs"] == 100
+    assert out["n_break"] == 500
 
 
 # ---------------------------------------------------------------------------
@@ -145,6 +157,40 @@ def test_the_contact_null_permutes_contact_identity_not_event_order():
     )
 
 
+def test_window_agreements_accepts_the_raw_config_floor_spelling():
+    # fix round 1, I6: config/topic5_slow_state_v4_0.yaml spells the pair floor
+    # min_pair_coparticipation_count; local_repertoire's parameter is min_pair_count.
+    # Previously this was only checked by an ad-hoc `python -c` snippet, not a committed
+    # test. Same seed, same window -> the two spellings must produce byte-identical
+    # output, not just "no TypeError".
+    rank, participation, group_ids = _consistent_window()
+    raw_config_floors = {
+        "min_participation_count": 5,
+        "min_pair_coparticipation_count": 5,
+    }
+    renamed_floors = {"min_participation_count": 5, "min_pair_count": 5}
+
+    out_raw = window_agreements(
+        rank,
+        participation,
+        group_ids,
+        random_half_draws=8,
+        null_draws=6,
+        seed=7,
+        floors=raw_config_floors,
+    )
+    out_renamed = window_agreements(
+        rank,
+        participation,
+        group_ids,
+        random_half_draws=8,
+        null_draws=6,
+        seed=7,
+        floors=renamed_floors,
+    )
+    assert out_raw == out_renamed
+
+
 # ---------------------------------------------------------------------------
 # window_state — synthetic agreements dicts handed directly, per the task's
 # instruction not to route these through real data.
@@ -152,22 +198,35 @@ def test_the_contact_null_permutes_contact_identity_not_event_order():
 
 
 def test_window_state_is_below_chance_when_random_half_does_not_beat_the_null():
+    # fix round 1, I5: constant lists make every percentile of a list coincide, so this
+    # fixture could not tell a correct q95 threshold from a mutant reading q50 (both
+    # trivially equal the one repeated value). Rewritten with SPREAD distributions:
+    # contact_null's q50=0.45 and q95=0.855 genuinely differ (verified: np.percentile on
+    # list(np.linspace(0.0, 0.9, 200))), and random_half's median (0.60) sits strictly
+    # between them -- above chance under q50 (0.60 > 0.45), NOT above chance under the
+    # correct q95 (0.60 < 0.855). Only the correct threshold gives BELOW_CHANCE.
     agreements = {
-        "random_half": {family: [0.1] * 20 for family in FAMILIES},
-        "chronological": {family: None for family in FAMILIES},
-        "contact_null": {family: [0.5] * 20 for family in FAMILIES},
+        "random_half": {family: list(np.linspace(0.55, 0.65, 200)) for family in FAMILIES},
+        "chronological": {family: 0.6 for family in FAMILIES},
+        "contact_null": {family: list(np.linspace(0.0, 0.9, 200)) for family in FAMILIES},
     }
     assert window_state(agreements, alpha=0.05, min_resolved_families=2) == "BELOW_CHANCE"
 
 
 def test_window_state_is_chronology_break_when_the_chronological_value_sits_low():
+    # fix round 1, I5: rewritten with a SPREAD random_half and a non-default alpha=0.30
+    # so the test is sensitive to an "alpha ignored" mutant (e.g. one that hardcodes
+    # 100*alpha as 5 regardless of what is passed). random_half's true alpha=0.30
+    # quantile is 0.65 and its alpha=0.05 quantile is 0.525 (verified via
+    # np.percentile(list(np.linspace(0.5, 1.0, 200)), ...)); chronological=0.59 sits
+    # strictly between them, so only the CORRECT (passed) alpha=0.30 calls it a break.
     agreements = {
-        "random_half": {family: [0.9] * 20 for family in FAMILIES},
-        "chronological": {family: 0.0 for family in FAMILIES},
-        "contact_null": {family: [0.1] * 20 for family in FAMILIES},
+        "random_half": {family: list(np.linspace(0.5, 1.0, 200)) for family in FAMILIES},
+        "chronological": {family: 0.59 for family in FAMILIES},
+        "contact_null": {family: list(np.linspace(0.0, 0.1, 200)) for family in FAMILIES},
     }
     assert (
-        window_state(agreements, alpha=0.05, min_resolved_families=2)
+        window_state(agreements, alpha=0.30, min_resolved_families=2)
         == "CHRONOLOGY_BREAK"
     )
 
@@ -177,7 +236,7 @@ def test_window_state_is_unresolved_when_too_few_families_resolve():
         "random_half": {
             "participation": [],
             "mean_rank": [],
-            "precedence": [0.9] * 10,
+            "precedence": [0.9] * 20,
         },
         "chronological": {
             "participation": None,
@@ -187,11 +246,72 @@ def test_window_state_is_unresolved_when_too_few_families_resolve():
         "contact_null": {
             "participation": [],
             "mean_rank": [],
-            "precedence": [0.1] * 10,
+            "precedence": [0.1] * 20,
         },
     }
     assert (
         window_state(agreements, alpha=0.05, min_resolved_families=2)
+        == "UNRESOLVED_FAMILIES"
+    )
+
+
+def test_a_tied_window_is_not_called_reliable():
+    # fix round 1, C1: exactly two resolved families ("precedence" is left entirely
+    # empty so only "participation" and "mean_rank" resolve). "participation" is
+    # BELOW_CHANCE on its own (median 0.1 <= null q95 0.5) and "mean_rank" would be
+    # CHRONOLOGY_BREAK on its own (above chance, 0.9 > 0.1, and chronological 0.0 sits
+    # below any alpha-quantile of a constant-0.9 random_half). That is a 1-of-2 tie on
+    # "above chance", which the old fallthrough silently called RELIABLE. The correct
+    # precedence (BELOW_CHANCE unless a strict majority are above chance) must call this
+    # BELOW_CHANCE, never RELIABLE.
+    agreements = {
+        "random_half": {
+            "participation": [0.1] * 20,
+            "mean_rank": [0.9] * 20,
+            "precedence": [],
+        },
+        "chronological": {
+            "participation": 0.3,
+            "mean_rank": 0.0,
+            "precedence": None,
+        },
+        "contact_null": {
+            "participation": [0.5] * 20,
+            "mean_rank": [0.1] * 20,
+            "precedence": [],
+        },
+    }
+    result = window_state(agreements, alpha=0.05, min_resolved_families=2)
+    assert result != "RELIABLE"
+    assert result == "BELOW_CHANCE"
+
+
+def test_a_family_with_too_few_finite_draws_does_not_count_as_resolved():
+    # fix round 1, I3: "precedence" has a full contact_null (20) and a full
+    # chronological value, but only 5 finite random_half draws -- below
+    # MIN_FINITE_DRAWS_FOR_RESOLUTION (20) -- so it must not count as resolved even
+    # though it is not literally empty. With min_resolved_families=3 (all three
+    # families required), only "participation" and "mean_rank" actually resolve, so
+    # the window must be UNRESOLVED_FAMILIES.
+    agreements = {
+        "random_half": {
+            "participation": [0.9] * 20,
+            "mean_rank": [0.9] * 20,
+            "precedence": [0.9] * 5,
+        },
+        "chronological": {
+            "participation": 0.0,
+            "mean_rank": 0.0,
+            "precedence": 0.85,
+        },
+        "contact_null": {
+            "participation": [0.1] * 20,
+            "mean_rank": [0.1] * 20,
+            "precedence": [0.1] * 20,
+        },
+    }
+    assert (
+        window_state(agreements, alpha=0.05, min_resolved_families=3)
         == "UNRESOLVED_FAMILIES"
     )
 
