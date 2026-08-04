@@ -1,0 +1,45 @@
+contract: topic5_slow_state_two_timescale_v4_0
+dataset_root: results/topic5_interictal_rank_distribution/dataset_v0_4
+source_mapping_root: results/topic5_event_indexed_evolving_rank_field/development/input_audit/per_subject
+epilepsiae_block_inventory: results/epilepsiae_block_inventory.csv
+yuquan_block_inventory: results/dataset_inventory/yuquan_block_inventory.csv
+output_root: results/topic5_slow_state_two_timescale/v4_0
+
+session_join_seconds: 300.0
+event_window_grid: [50, 100, 200, 500, 1000, 2000]
+diagnostic_only_windows: [5000]
+clock_window_grid: [300, 900, 1800, 3600, 7200, 14400, 21600]
+min_windows_per_scale: 5
+
+min_events_for_descriptor: 20
+min_participation_count: 5
+min_pair_coparticipation_count: 5
+min_resolved_families: 2
+tie_tolerance_seconds: 0.0
+
+min_blocks_for_admission: 40
+split_fractions: [0.60, 0.20, 0.20]
+
+null_draws: 200
+random_half_draws: 200
+null_seed: 20260804
+alpha: 0.05
+multiplicity_correction: holm
+
+state_dimension_grid: [1, 2, 3, 4]
+geometry_cluster_grid: [2, 3, 4, 5]
+model_seeds: [11, 12, 13]
+default_workers: 8
+
+synthetic_grid:
+  n_states: [2, 3, 4, 5]
+  dwell_blocks: [2, 5, 10, 20, 50]
+  noise_levels: [0.2, 0.5, 1.0]
+  n_blocks: [40, 80, 160, 320]
+  seeds: [0, 1, 2, 3, 4]
+
+forbidden_inputs:
+  old_heldout20: true
+  ictal_or_snn: true
+  soz_or_geometry: true
+  ab_or_axis_labels: true
