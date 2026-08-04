@@ -109,6 +109,35 @@ def observed_arrival_by_side(record, test20, frozen):
     return out
 
 
+def directional_field_opposition(output: Path):
+    """How opposite the two frozen fields actually are, per patient.
+
+    The two source pools are built to drive opposite direction states, but
+    that is an input to the recursion, not a property of the field it emits.
+    Measuring the emitted fields is the only thing that licenses calling them
+    two directions, so the number is computed and reported rather than
+    assumed.
+    """
+
+    from scipy.stats import spearmanr
+
+    rows = []
+    for path in sorted((output / "field_freeze" / "per_subject").glob("*/structured_fields.npz")):
+        with np.load(path, allow_pickle=False) as data:
+            minus = np.asarray(data["field_minus"], dtype=float)
+            plus = np.asarray(data["field_plus"], dtype=float)
+        rows.append(
+            {"subject": path.parent.name, "rho_minus_plus": float(spearmanr(minus, plus).statistic)}
+        )
+    values = np.asarray([row["rho_minus_plus"] for row in rows], dtype=float)
+    return rows, {
+        "n_patients": int(len(rows)),
+        "median_rho": float(np.median(values)),
+        "n_opposite_below_minus_0p5": int(np.count_nonzero(values < -0.5)),
+        "n_negative": int(np.count_nonzero(values < 0.0)),
+    }
+
+
 def median_early_ictal_field(readout: dict, names: np.ndarray):
     """Patient-median early-ictal broadband field on the exact joined contacts."""
 
@@ -275,7 +304,7 @@ def panel_c(ax, patient: pd.DataFrame, stats: dict):
 
 
 # ------------------------------------------------------------------ panel D
-def panel_d(axes, cbar_axes, frozen, names, coordinate, joined_names, ictal):
+def panel_d(axes, cbar_axes, frozen, names, coordinate, joined_names, ictal, opposition):
     order = np.argsort(coordinate)
     ordered_names = names[order]
     rows = [
@@ -312,6 +341,21 @@ def panel_d(axes, cbar_axes, frozen, names, coordinate, joined_names, ictal):
     axes[0].set_title(
         "Frozen model fields and the same patient's early-ictal field",
         loc="left", fontweight="bold",
+    )
+    # The two starts drive opposite direction states, but the emitted fields
+    # are not opposite; stating the measured value keeps the panel from
+    # implying a reversal the data does not contain.
+    subject_rho = float(
+        [row["rho_minus_plus"] for row in opposition[0]
+         if row["subject"] == REPRESENTATIVE][0]
+    )
+    summary = opposition[1]
+    axes[-1].text(
+        0.0, -2.1,
+        f"The two model fields are not opposites: rank correlation {subject_rho:+.2f} here,\n"
+        f"median {summary['median_rho']:+.2f} over {summary['n_patients']} patients, "
+        f"below -0.5 in only {summary['n_opposite_below_minus_0p5']}.",
+        transform=axes[-1].transAxes, fontsize=5.9, va="top", ha="left", color="#B2182B",
     )
 
 
@@ -423,7 +467,8 @@ def main() -> None:
         ax.set_position([0.30, 0.375 - index * 0.036, 0.46, 0.028])
     d_cbars = [figure.add_axes([0.79, 0.339, 0.011, 0.064]),
                figure.add_axes([0.865, 0.339, 0.011, 0.028])]
-    panel_d(d_axes, d_cbars, frozen, names, coordinate, joined_names, ictal_field)
+    opposition = directional_field_opposition(output)
+    panel_d(d_axes, d_cbars, frozen, names, coordinate, joined_names, ictal_field, opposition)
 
     e_ax = figure.add_subplot(grid[3, 0:4])
     e_inset = figure.add_axes([0.795, 0.155, 0.155, 0.10])
@@ -468,6 +513,14 @@ def main() -> None:
             side: observed[side]["n_events"] for side in ("minus", "plus")
         },
         "panel_c": interictal_stats,
+        "panel_d_directional_field_opposition": {
+            "summary": opposition[1],
+            "per_patient": opposition[0],
+            "note": (
+                "the two source pools drive opposite direction states, but the "
+                "emitted fields are not opposite; this is measured, not assumed"
+            ),
+        },
         "panel_e": ictal_stats,
         "not_implemented": [
             "rollout-vs-test20 participation / pairwise precedence / expected-rank "
@@ -482,9 +535,13 @@ def main() -> None:
     (figures_dir / "README.md").write_text(
         "# Figure 6 图说明\n\n"
         "### topic5_figure6_source_conditioned_rnn.png / .pdf / .svg\n\n"
-        "五个面板讲一条链：模型长什么样、它能不能复现同一患者观察到的两种相反传播、"
-        "全队列预测得分、冻结下来的两张方向场与该患者发作早期能量场并排、"
+        "五个面板讲一条链：模型长什么样、它能不能复现同一患者从两个不同起点出发的传播、"
+        "全队列预测得分、冻结下来的两张场与该患者发作早期能量场并排、"
         "以及跨状态对应在整个主分析队列上的统计。\n\n"
+        "**一个必须先讲清的实测结果**：两个起点确实让模型内部的方向量取到相反符号，"
+        "但由此推演出来的两张空间场**并不是彼此相反的**（本患者秩相关见 d 面板注解，"
+        "全队列中位数接近 0）。所以本图不支持「同一支架给出两个相反方向场」这一说法，"
+        "d 面板画的是两张实际上高度相似的场。\n\n"
         "a 是结构示意：每位患者只学一条有方向的轴，同一对端点归属同时生成"
         "对称支架和有符号的流；每场事件由最先放电的那几个触点定下方向，"
         "方向在该事件内不再变。b 固定用 "
@@ -495,10 +552,11 @@ def main() -> None:
         "发作早期宽带能量场放在同一套触点排布上，两个方向都必须画出来。"
         "e 是主分析患者的跨状态对应强度，已减去各自的随机重排基线；"
         "空心红点是辅助患者，不进入任何 P 值。\n\n"
-        "**关注点**：b 左右两列的亮带走向是否一致、且上下两行方向相反；"
+        "**关注点**：b 左右两列的亮带走向是否一致（模型能否复现观察到的到达顺序）；"
         "c 中结构化模型与打乱顺序对照之间是否分开；"
-        "d 中两张模型场是否真的相反而不是几乎重合；"
-        "e 中结构化是否高于随机基线，以及它与普通模型的配对差是否跨过零。\n"
+        "d 中两张模型场实测高度相似，不要按「相反」去读；"
+        "e 中三个模型谁高于各自的随机基线——实测是最简单的静态基线最高，"
+        "结构化模型并没有把方向信息转化成跨状态优势。\n"
     )
     print(json.dumps({"status": "COMPLETE", "figure": str(stem.with_suffix(".png"))}))
 

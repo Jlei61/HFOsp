@@ -253,18 +253,30 @@ def main() -> None:
     full_seed_frame.to_csv(output / "interictal_seed_metrics.csv", index=False)
     patient.to_csv(output / "interictal_patient_metrics.csv", index=False)
 
-    comparisons: dict[str, Any] = {}
-    for metric, lower in (("contact_nll", True), ("top1_accuracy", False)):
-        for index, comparator in enumerate(("ordinary_gru", "static", "structured_rank_shuffle")):
-            key = f"structured_vs_{comparator}__{metric}"
-            comparisons[key] = paired_summary(
-                patient,
-                model_a="structured",
-                model_b=comparator,
-                metric=metric,
-                lower_is_better=lower,
-                seed=22_000 + index + (0 if metric == "contact_nll" else 100),
-            )
+    # The three patients used for the learning-rate audit are development
+    # data.  The 31 remaining patients never influenced any frozen choice, so
+    # they carry the confirmation; all 34 are reported as cohort description.
+    development = sorted(map(str, config["development_lr_audit"]["subjects"]))
+    confirmation = patient[~patient.subject.isin(development)]
+
+    def _comparisons(frame: pd.DataFrame, seed_base: int) -> dict[str, Any]:
+        built: dict[str, Any] = {}
+        for metric, lower in (("contact_nll", True), ("top1_accuracy", False)):
+            for index, comparator in enumerate(
+                ("ordinary_gru", "static", "structured_rank_shuffle")
+            ):
+                built[f"structured_vs_{comparator}__{metric}"] = paired_summary(
+                    frame,
+                    model_a="structured",
+                    model_b=comparator,
+                    metric=metric,
+                    lower_is_better=lower,
+                    seed=seed_base + index + (0 if metric == "contact_nll" else 100),
+                )
+        return built
+
+    comparisons = _comparisons(patient, 22_000)
+    confirmation_comparisons = _comparisons(confirmation, 23_000)
     summary = {
         "contract": config["contract"],
         "primary_endpoint": "test20 contact NLL conditioned on continue and observed cardinality",
@@ -282,6 +294,9 @@ def main() -> None:
             for model, group in patient.groupby("model")
         },
         "comparisons": comparisons,
+        "development_subjects": development,
+        "n_confirmation_subjects": int(confirmation.subject.nunique()),
+        "confirmation_comparisons": confirmation_comparisons,
     }
     atomic_json(output / "interictal_cohort_statistics.json", summary)
     print(json.dumps({"status": "COMPLETE", **{k: summary[k] for k in ("n_subjects", "n_seed_units", "complete")}}))
