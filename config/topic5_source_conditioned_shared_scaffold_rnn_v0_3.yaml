@@ -1,0 +1,88 @@
+contract: topic5_patient_specific_source_conditioned_shared_scaffold_rnn_v0_3
+dataset_artifact_root: /home/honglab/leijiaxin/HFOsp
+dataset_root: results/topic5_interictal_rank_distribution/dataset_v0_4
+output_root: results/topic5_patient_specific_source_conditioned_rnn_v0_3
+
+split:
+  fit_fraction: 0.60
+  validation_fraction: 0.20
+  test_fraction: 0.20
+
+models:
+  names: [structured, ordinary_gru, structured_rank_shuffle]
+  structured_low_rank: 2
+  structured_form: source_conditioned_symmetric_plus_skew_rank2
+  ordinary_hidden_size: 32
+
+training:
+  seeds: [11, 29, 47]
+  coverage_cycles: 7
+  optimizer_updates_per_cycle: 32
+  micro_batch_events: 256
+  learning_rate: 0.003
+  optimizer: AdamW
+  weight_decay: 0.0
+  gradient_clip: 1.0
+  loss_reduction: event_first
+  contact_weight: 1.0
+  cardinality_weight: 0.25
+  stop_weight: 0.25
+  checkpoint_metric: validation_contact_nll_per_continue_decision
+  hazard_pseudocount: 0.5
+
+development_lr_audit:
+  subjects: [epilepsiae_1073, epilepsiae_1146, yuquan_chenziyang]
+  learning_rates: [0.0003, 0.001, 0.003]
+  seed: 11
+  selection_metric: median_validation_contact_nll_across_three_patients
+  target_values_read: false
+
+rank_shuffle:
+  scope: fit60_only
+  operation: permute_observed_rank_labels_within_each_event
+  preserve_participation: true
+  validation_and_test_are_unshuffled: true
+
+rollout:
+  n_rollouts_per_seed: 5000
+  batch_size: 512
+  horizon_fit60_quantile: 0.90
+  horizon_min: 3
+  horizon_max: 12
+  endpoint_fraction: 0.25
+  source_operator: structured_seed_ensemble_mean
+  subset_sampler: exact_elementary_symmetric_dp
+  random_seed_base: 710003
+
+resources:
+  python: /home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python
+  device: cuda
+  cuda_devices: [0]
+  torch_num_threads: 1
+  gpu_memory_fraction_per_process: 0.08
+  default_workers: 12
+  monitor_interval_seconds: 300
+
+smoke:
+  subjects: [epilepsiae_1073, yuquan_chenziyang]
+  models: [structured, ordinary_gru]
+  seed: 11
+  fit_events: 512
+  validation_events: 256
+  test_events: 256
+  coverage_cycles: 1
+  optimizer_updates_per_cycle: 4
+  micro_batch_events: 64
+
+forbidden_inputs:
+  empirical_ab_fields: true
+  empirical_mean_rank: true
+  ictal_target_values: true
+  clinical_labels: true
+  other_patient_events: true
+
+allowed_inputs:
+  fit60_conditional_hazard_bias: true
+  contact_shaft_names: true
+  current_and_past_rank_sets: true
+  causal_observed_source_side: true

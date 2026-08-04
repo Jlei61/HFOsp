@@ -1,0 +1,29 @@
+contract: topic5_patient_specific_shared_scaffold_ictal_readout_v0_2
+field_contract: topic5_patient_specific_shared_scaffold_rnn_v0_2
+target_cache_root: /home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_conditioned_field_refinement_v0_4/cache
+output_root: results/topic5_patient_specific_shared_scaffold_rnn_v0_2
+
+primary_subjects:
+  - epilepsiae_1077
+  - epilepsiae_1084
+  - epilepsiae_1096
+  - epilepsiae_1125
+  - epilepsiae_1150
+  - epilepsiae_139
+  - epilepsiae_253
+  - epilepsiae_384
+  - epilepsiae_442
+  - epilepsiae_548
+  - epilepsiae_590
+  - epilepsiae_620
+  - epilepsiae_635
+  - epilepsiae_922
+  - epilepsiae_958
+supportive_subject: epilepsiae_1146
+
+target_key: target_1_150
+onset_window_seconds: [0.0, 10.0]
+band_hz: [1.0, 150.0]
+all_contact_permutations: 5000
+within_shaft_permutations: 5000
+minimum_exact_joined_contacts: 6
