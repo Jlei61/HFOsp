@@ -203,3 +203,28 @@ def test_pareto_front_keeps_distinct_non_dominated_phenotypes():
         {"energy": 2.0, "motion": 1.0},
     ]
     assert ANALYSIS._pareto_indices(rows, ("energy", "motion")) == [0, 1]
+
+
+def _adapt_args(tau_M, widen):
+    return type("Args", (), {
+        "arm": "i2e", "tau_D_ms": 300.7, "d_star": 0.7281,
+        "strength_scale": 1.0, "control_uplift_mV": 0.0,
+        "use_mode_H": False, "freeze_zm": False,
+        "state": "bounded_mid__peak", "beta_SG": 0.0,
+        "tau_M_ms": tau_M, "pilot_widen_tau_M": widen,
+    })()
+
+
+def test_widened_adaptation_timescale_is_opt_in_and_named_in_the_artifact():
+    """The registered panel keeps its lock; a pilot that leaves it says so."""
+    assert "tauMpilot" not in DEV._mechanism_stem(_adapt_args(2000.0, False))
+    assert "tauMpilot" in DEV._mechanism_stem(_adapt_args(25000.0, True))
+
+
+def test_the_registered_timescale_lock_still_refuses_a_silent_widening():
+    import pytest
+    args = _adapt_args(25000.0, False)
+    with pytest.raises(RuntimeError, match="tau_M"):
+        DEV._check_sprint_timescale(args)
+    DEV._check_sprint_timescale(_adapt_args(25000.0, True))     # declared -> allowed
+    DEV._check_sprint_timescale(_adapt_args(2000.0, False))     # inside the lock

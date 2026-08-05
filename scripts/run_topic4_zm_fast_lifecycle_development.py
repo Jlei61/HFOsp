@@ -184,6 +184,26 @@ def _write_npz_once(path: Path, arrays: dict) -> None:
             pass
 
 
+SPRINT_TAU_M_MS = (500.0, 2000.0)
+
+
+def _check_sprint_timescale(args) -> None:
+    """The registered sprint panel is locked to two adaptation timescales.
+
+    Both saturate within about 6 s, so neither can test whether a timescale
+    comparable to a seizure changes anything.  A pilot that needs to leave the
+    panel has to say so explicitly, and the artifact carries the tag.
+    """
+    tau = getattr(args, "tau_M_ms", None)
+    if tau is None or float(tau) in SPRINT_TAU_M_MS:
+        return
+    if not bool(getattr(args, "pilot_widen_tau_M", False)):
+        raise RuntimeError(
+            f"sprint tau_M must be one of {SPRINT_TAU_M_MS}; pass "
+            "--pilot-widen-tau-M to leave the registered panel on purpose"
+        )
+
+
 def _state_parts(state_tag: str) -> tuple[str, str]:
     if state_tag not in FROZEN_MODE_STATES:
         raise ValueError(f"unregistered development state: {state_tag}")
@@ -478,6 +498,8 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
         stem += f"__bSG{args.beta_SG:g}"
     if float(getattr(args, "beta_SG_ramp_per_s", 0.0)) != 0.0:
         stem += f"__bSGramp{args.beta_SG_ramp_per_s:g}"
+    if bool(getattr(args, "pilot_widen_tau_M", False)):
+        stem += f"__tauMpilot{float(getattr(args, 'tau_M_ms', 0.0)):g}"
     if bool(getattr(args, "freeze_zm", False)):
         stem += f"__freeze_{args.state}"
     if float(getattr(args, "i2e_tau_cv", 0.0)) > 0.0:
@@ -598,8 +620,7 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
                 raise RuntimeError("sprint-cell requires i2e or combined")
             if float(args.g_M) not in (0.0, 1.0, 3.0, 10.0, 30.0):
                 raise RuntimeError("sprint g_M lies outside {0,1,3,10,30}")
-            if args.tau_M_ms is not None and float(args.tau_M_ms) not in (500.0, 2000.0):
-                raise RuntimeError("sprint tau_M must be 500 or 2000 ms")
+            _check_sprint_timescale(args)
             if not 300.0 <= float(args.tau_D_ms) <= 850.0:
                 raise RuntimeError("sprint tau_D must lie in [300,850] ms")
             if not 0.55 <= float(args.d_star) <= 0.85:
