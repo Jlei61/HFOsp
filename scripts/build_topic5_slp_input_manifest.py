@@ -21,6 +21,10 @@ from typing import Any, Dict, List
 
 import numpy as np
 
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from src.topic5_shared_propagation_field import load_subject_rank_events, sha256_file
 
 ROOT = Path(__file__).resolve().parents[1]
