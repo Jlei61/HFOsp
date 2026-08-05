@@ -82,6 +82,36 @@ def test_an_unresolved_families_scale_is_dropped_not_counted_as_a_failure():
     assert out["n_break"] == 500
 
 
+def test_a_mixed_windows_scale_is_dropped_not_counted_as_a_failure():
+    # coordinator follow-up: the previous round's C2 defect recurring under a new
+    # label. UNRESOLVED_MIXED_WINDOWS (rev3 R3-B) is a scale that could not be decided,
+    # not a scale that failed -- it must be dropped before pattern matching exactly like
+    # UNRESOLVED_TOO_FEW_WINDOWS and UNRESOLVED_FAMILIES already are. Before this fix,
+    # NOT_EVALUATED did not include it, so this exact input produced
+    # UNRESOLVED_NONMONOTONE with n_obs=None -- one undecidable mid-grid scale throwing
+    # the whole patient away, exactly the failure mode the leading-below-chance rule and
+    # the original C2 fix exist to prevent.
+    out = select_scales(
+        {50: B, 100: R, 200: "UNRESOLVED_MIXED_WINDOWS", 500: R, 1000: C}
+    )
+    assert out["status"] == "SCALE_RESOLVED"
+    assert out["n_obs"] == 100
+    assert out["n_break"] == 1000
+
+
+def test_dropping_a_mixed_scale_cannot_fabricate_a_reliable_run_that_was_never_observed():
+    # the dropped scale must not silently extend the reliable run it sits inside: 200's
+    # true label is unknown (it was undecidable, not observed to be RELIABLE), so
+    # n_last_reliable must stay at the last CONFIRMED reliable grid point (100) and the
+    # dwell interval (100, 500) must carry that, not silently widen to (200, 500) or
+    # otherwise imply 200 was known to be reliable.
+    out = select_scales({50: B, 100: R, 200: "UNRESOLVED_MIXED_WINDOWS", 500: C})
+    assert out["status"] == "SCALE_RESOLVED"
+    assert out["n_obs"] == 100
+    assert out["n_last_reliable"] == 100
+    assert out["n_break"] == 500
+
+
 # ---------------------------------------------------------------------------
 # window_agreements — not given as code in the brief; tests below pin the
 # contract stated in the Interfaces block plus the task's explicit numeric

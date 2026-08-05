@@ -39,7 +39,17 @@ UNRESOLVED_MIXED_WINDOWS = "UNRESOLVED_MIXED_WINDOWS"
 # reach a judgement about this window at all, so it must be dropped before scale_states
 # counts anything, and must not be able to satisfy min_windows either.
 NON_EVALUABLE_WINDOW_STATES = (UNRESOLVED_FAMILIES, UNRESOLVED_FAMILY_DISCORDANCE)
-NOT_EVALUATED = (TOO_FEW, UNRESOLVED_FAMILIES)
+# rev3 follow-up (recurrence of fix round 1's C2 under a new label): a scale whose
+# windows could not reach a majority (UNRESOLVED_MIXED_WINDOWS) is undecided, not
+# failed, and must be dropped before select_scales pattern-matches, the same as
+# UNRESOLVED_TOO_FEW_WINDOWS and UNRESOLVED_FAMILIES already are -- otherwise one
+# undecidable mid-grid scale throws the whole patient to UNRESOLVED_NONMONOTONE.
+# UNRESOLVED_FAMILY_DISCORDANCE is deliberately NOT included here: it is a
+# window-level verdict (window_state's output), never a scale-level one -- scale_states
+# only ever returns TOO_FEW, BELOW, RELIABLE, BREAK, or UNRESOLVED_MIXED_WINDOWS, so it
+# can never reach select_scales as a value in its `states` mapping. Adding it here
+# would be dead defensive code for an input select_scales cannot receive.
+NOT_EVALUATED = (TOO_FEW, UNRESOLVED_FAMILIES, UNRESOLVED_MIXED_WINDOWS)
 
 # I3 fix: a family must clear a minimum number of *finite* draws on both `random_half` and
 # `contact_null` before it counts as "resolved" in `window_state` -- a single finite null
