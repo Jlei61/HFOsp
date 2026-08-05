@@ -28,6 +28,9 @@ from src.topic5_slow_state_repertoire import FAMILIES, family_agreement, local_r
 BELOW, RELIABLE, BREAK = "BELOW_CHANCE", "RELIABLE", "CHRONOLOGY_BREAK"
 TOO_FEW = "UNRESOLVED_TOO_FEW_WINDOWS"
 UNRESOLVED_FAMILIES = "UNRESOLVED_FAMILIES"
+# rev3 R3-A: a window whose above-chance families cannot agree among themselves on
+# whether chronology broke (an exact tie in the break vote) is discordant, not reliable.
+UNRESOLVED_FAMILY_DISCORDANCE = "UNRESOLVED_FAMILY_DISCORDANCE"
 NOT_EVALUATED = (TOO_FEW, UNRESOLVED_FAMILIES)
 
 # I3 fix: a family must clear a minimum number of *finite* draws on both `random_half` and
@@ -154,7 +157,8 @@ def window_agreements(
 def window_state(
     agreements: Mapping[str, Any], *, alpha: float, min_resolved_families: int
 ) -> str:
-    """One of BELOW_CHANCE / RELIABLE / CHRONOLOGY_BREAK / UNRESOLVED_FAMILIES (§6.3).
+    """One of BELOW_CHANCE / RELIABLE / CHRONOLOGY_BREAK / UNRESOLVED_FAMILIES /
+    UNRESOLVED_FAMILY_DISCORDANCE (§6.3).
 
     **Resolved.** A family counts as resolved only when ALL three hold:
 
@@ -203,8 +207,15 @@ def window_state(
        comparison to cast in the first place — its first-half-versus-second-half
        difference is noise about a quantity that was never estimable, so it must not be
        able to swing the break vote either way;
-    4. `RELIABLE` only when step 2's majority was met and step 3's break-majority was
-       not — i.e. `RELIABLE` requires having *reached* step 4, never a leftover default.
+    4. `RELIABLE` when a strict majority of the **same above-chance** denominator show
+       NO break — the complement of step 3 on that denominator;
+    5. `UNRESOLVED_FAMILY_DISCORDANCE` (rev3 R3-A) when neither step 3 nor step 4 reaches
+       a strict majority — an exact tie among the above-chance families' break votes
+       (e.g. 1-of-2, 2-of-4) is discordance among the families themselves, never
+       evidence of reliability. `RELIABLE` must never be a bare fallthrough for "the
+       break vote didn't reach a majority either way", the same C1 principle step 2
+       already applies to the above-chance vote: RELIABLE requires *reaching* step 4
+       via its own strict majority, not landing there because nothing else matched.
     """
     random_half = agreements["random_half"]
     contact_null = agreements["contact_null"]
@@ -240,10 +251,18 @@ def window_state(
         return BELOW
 
     n_above_chance = len(chrono_below_alpha)
-    if sum(chrono_below_alpha) * 2 > n_above_chance:
+    n_break_votes = sum(chrono_below_alpha)
+    if n_break_votes * 2 > n_above_chance:
         return BREAK
 
-    return RELIABLE
+    n_no_break_votes = n_above_chance - n_break_votes
+    if n_no_break_votes * 2 > n_above_chance:
+        return RELIABLE
+
+    # rev3 R3-A: neither a strict break-majority (step 3) nor a strict no-break-majority
+    # (step 4) was reached -- an exact tie among the above-chance families. This must
+    # not fall through to RELIABLE.
+    return UNRESOLVED_FAMILY_DISCORDANCE
 
 
 def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:

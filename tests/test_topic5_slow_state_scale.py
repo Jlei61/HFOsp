@@ -367,9 +367,17 @@ def test_a_below_chance_familys_true_flag_no_longer_tips_a_genuine_break_majorit
     # resolved families), the below-chance family's True flag combines with
     # "precedence"'s True flag to reach 2-of-3, a majority, giving the wrong answer
     # CHRONOLOGY_BREAK. Restricting the vote to the 2 above-chance families
-    # ("mean_rank"=False, "precedence"=True) gives 1-of-2, not a majority -> RELIABLE.
+    # ("mean_rank"=False, "precedence"=True) gives 1-of-2, not a majority for BREAK.
     # This is the fixture the round-2 deliberate-break-and-revert ritual was run on,
     # because it is the one that can actually distinguish the two denominators.
+    #
+    # rev3 R3-A update: 1-of-2 is also not a majority for "no break" -- it is an exact
+    # tie on the above-chance denominator. Round 2 called this RELIABLE (a bare
+    # fallthrough once BREAK was ruled out); that fallthrough is exactly the bug R3-A
+    # fixes. The correct verdict is UNRESOLVED_FAMILY_DISCORDANCE. The name of this test
+    # ("...no_longer_tips_a_genuine_break_majority") is still accurate -- the
+    # below-chance family's flag still cannot tip a BREAK verdict -- so only the
+    # asserted outcome changes, not what the test demonstrates.
     agreements = {
         "random_half": {
             "participation": [0.1] * 20,
@@ -387,9 +395,9 @@ def test_a_below_chance_familys_true_flag_no_longer_tips_a_genuine_break_majorit
             "precedence": [0.05] * 20,
         },
     }
-    assert (
-        window_state(agreements, alpha=0.05, min_resolved_families=2) == "RELIABLE"
-    )
+    result = window_state(agreements, alpha=0.05, min_resolved_families=2)
+    assert result != "CHRONOLOGY_BREAK"
+    assert result == "UNRESOLVED_FAMILY_DISCORDANCE"
 
 
 def test_a_family_with_no_chronological_value_is_not_resolved_even_with_full_draws():
@@ -421,6 +429,38 @@ def test_a_family_with_no_chronological_value_is_not_resolved_even_with_full_dra
         window_state(agreements, alpha=0.05, min_resolved_families=2)
         == "UNRESOLVED_FAMILIES"
     )
+
+
+def test_a_family_level_tie_is_discordance_not_reliable():
+    # rev3 R3-A: exactly two above-chance families ("mean_rank", "precedence";
+    # "participation" is left entirely unresolved so the above-chance denominator is
+    # exactly 2, not 3). "mean_rank" breaks (chronological 0.1 sits below its constant
+    # random_half's own alpha=0.05 quantile of 0.9); "precedence" does not (chronological
+    # 0.9 sits at/above its constant random_half's alpha=0.05 quantile of 0.8). That is a
+    # 1-of-2 split on the break vote -- neither a strict break-majority nor a strict
+    # no-break-majority -- so the old fallthrough-to-RELIABLE behaviour is wrong on this
+    # exact fixture: a family-level tie is discordance among the families, not evidence
+    # of reliability.
+    agreements = {
+        "random_half": {
+            "participation": [],
+            "mean_rank": [0.9] * 20,
+            "precedence": [0.8] * 20,
+        },
+        "chronological": {
+            "participation": None,
+            "mean_rank": 0.1,  # < 0.9 alpha-quantile -> break
+            "precedence": 0.9,  # >= 0.8 alpha-quantile -> not a break
+        },
+        "contact_null": {
+            "participation": [],
+            "mean_rank": [0.1] * 20,
+            "precedence": [0.05] * 20,
+        },
+    }
+    result = window_state(agreements, alpha=0.05, min_resolved_families=2)
+    assert result == "UNRESOLVED_FAMILY_DISCORDANCE"
+    assert result != "RELIABLE"
 
 
 # ---------------------------------------------------------------------------
