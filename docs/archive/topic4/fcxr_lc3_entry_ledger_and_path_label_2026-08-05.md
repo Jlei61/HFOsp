@@ -161,17 +161,30 @@ is judged by the lifecycle detector over the whole record, not by the map's tail
 classifier, because a cell that ignites at 5 s and self-terminates by 8 s settles
 quiet while having departed.
 
-| wear field | mean D | departs | tail |
-|---|---|---|---|
-| `D_healthy` | baseline | **not within 12 s** | interictal |
-| `D10` | 0.0473 | **7.0 s** | finite high orbit |
-| `D30` | 0.0678 | **5.0 s** | finite high fixed |
+| wear field | mean D | departs | tail | the 1500 ms screen said |
+|---|---|---|---|---|
+| `D_healthy` | baseline | **not within 12 s** | interictal | interictal workpoint |
+| `D10` | 0.0473 | **7.0 s** | finite high orbit | interictal workpoint |
+| `D30` | 0.0678 | **5.0 s** | finite high fixed | interictal workpoint |
+| `D50` | 0.0819 | **2.0 s** | finite high orbit | interictal workpoint |
+| `D70` | 0.0889 | **2.0 s** | finite high fixed | interictal workpoint |
+| `Dmax` | 0.0972 | **2.0 s** | finite high fixed | interictal workpoint |
 
-**The map was under-screened, and now there is direct evidence.** A frozen wear
-field at mean 0.047 departs on its own — the 1500 ms screen that called it an
-interictal workpoint was 4.7× shorter than the phenomenon. So an entry bracket
-does exist in the frozen geometry, between healthy wear and 0.047, and the
-higher the wear the shorter the latency.
+**Five of the six depart, and the screen called all six an interictal
+workpoint.** At full relay only healthy wear holds. Every level drawn from the
+interictal wear distribution is already on its way out; what differs is how long
+it takes, from 7 s down to a 2 s floor set by the detector needing a couple of
+1 s windows to call a bout. The map's quiet side at relay 1.00 is a screen
+artifact almost everywhere, and the screen was 4.7× shorter than the slowest of
+these departures.
+
+So the entry bracket sits between healthy wear and 0.047, and the whole
+interictal wear range above it is unstable rather than a set of workpoints.
+
+**This is what the trajectory walks.** Its relay reads 1.000 at the snapshot
+bracketing every pre-onset event, so it is on exactly this column of the map, and
+its whole-array wear climbs from near zero to 0.049, 0.054 and 0.034 — from the
+one level that holds into the range that does not.
 
 This **retracts a statement made earlier the same day** in this file's first
 draft: that no departure would mean entry needs wear in motion. Wear does not

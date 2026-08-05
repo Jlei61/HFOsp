@@ -337,12 +337,20 @@ def _arms(band):
         window = (f"watched {used:.1f} s"
                   + (f" of {float(budget) / 1000.0:.0f} s allowed"
                      if budget and float(budget) / 1000.0 > used + 1e-9 else ""))
+        # A bar that stops at "does not come back" beside a note reading
+        # "interictal workpoint" looks like a contradiction. It is not: the note
+        # is the workpoint tier and the bar is the registered stage, and these
+        # arms carry no event ledger, so their return is unmeasured rather than
+        # failed. Say which.
+        note = label.lower().replace("_", " ")
+        if st.get("return_measured") is False:
+            note += " — return not measured"
         arms.append(dict(
             group="wear held still, relay free", entry_observed=False,
             label=(f"relay curve {where}"
                    + (f", half-activation {r['K_y']:.0f}" if r.get("K_y") != 5.0 else "")
                    + f", {window}"),
-            stage=st["stage"], note=label.lower().replace("_", " ")))
+            stage=st["stage"], note=note))
 
     for path in sorted(glob.glob(os.path.join(BASE, "return_gate_probe",
                                               "clamp_*.json"))):
