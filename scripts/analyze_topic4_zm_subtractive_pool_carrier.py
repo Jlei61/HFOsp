@@ -44,7 +44,7 @@ def _close(a, b):
     return a is not None and np.isclose(float(a), float(b))
 
 
-def arm_key(summary):
+def _arm_key(summary, duration_ms):
     """(subtractive strength, persistent conductance, SOM wiring) or None."""
     mech = summary.get("mechanism", {})
     subtype = mech.get("pv_som_inhibitory_subtypes")
@@ -53,7 +53,7 @@ def arm_key(summary):
         return None
     g = float(mode.get("mode_H_persistent_g_max", 0.0))
     if not (
-        _close(summary.get("T_ms"), 2500.0)
+        _close(summary.get("T_ms"), duration_ms)
         and _close(mode.get("rho_mode_H"), 0.0)
         and _close(mode.get("mode_H_persistent_e_exc"), 60.0)
         and _close(mode.get("tau_mode_H_down"), 250.0)
@@ -68,6 +68,21 @@ def arm_key(summary):
         return None
     beta = float(mech.get("subtractive_pool", {}).get("beta_SG", 0.0))
     return beta, g, int(subtype.get("seed", 1))
+
+
+def arm_key(summary):
+    """Arms of the 2.5 s factorial."""
+    return _arm_key(summary, 2500.0)
+
+
+def long_arm_key(summary):
+    """Arms of the 12 s durability ladder.
+
+    Not every long arm has a short counterpart — the strengths that bracket the
+    branch change were only ever worth running long — and keying the long panel
+    off the short one would silently drop them.
+    """
+    return _arm_key(summary, 12000.0)
 
 
 def modulation_band(cv):
@@ -256,15 +271,19 @@ def main():
         rows[key] = row
 
     long_rows = {}
-    for key, (short_root, _) in sorted(found.items()):
-        stem = short_root.name.replace("__T2.5s__", "__T12s__")
-        root = LONG / stem
+    for root in sorted(LONG.glob("*pvSOM*")):
         if not (root / "summary.json").is_file() or not (root / "traces.npz").is_file():
             continue
         summary = json.loads((root / "summary.json").read_text())
-        # No stitching and no clock shift: the smoke arm must be the literal
-        # opening of the long one, or the two are not the same trajectory.
-        _validate_short_prefix(short_root, root.resolve())
+        key = long_arm_key(summary)
+        if key is None:
+            continue
+        short_root = found.get(key, (None,))[0]
+        if short_root is not None:
+            # No stitching and no clock shift: where a short arm exists it must
+            # be the literal opening of the long one, or they are not the same
+            # trajectory.
+            _validate_short_prefix(short_root, root.resolve())
         beta, g, seed = key
         row, array = _row(f"long_b{beta:g}_g{g:g}_s{seed}", root.resolve(), summary)
         row["core_mean_hz"] = float(summary["core_modulation"]["mean_hz"])
@@ -282,7 +301,7 @@ def main():
         row["sustained_peak_hz"], row["sustained_peak_prominence"] = peak_hz, prominence
         row["sustained_modulation_hz"] = modulation_amplitude_hz(rate[-4000:])
         row["long_run_class"] = long_run_class(row)
-        row["short_arm_is_bit_exact_prefix"] = True
+        row["short_arm_is_bit_exact_prefix"] = short_root is not None
         long_rows[key] = row
 
     verdict = adjudicate(list(rows.values()))

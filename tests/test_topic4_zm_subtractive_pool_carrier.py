@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 from scripts.analyze_topic4_zm_subtractive_pool_carrier import (
-    adjudicate, arm_key, cv_block_profile, long_run_class,
+    adjudicate, arm_key, cv_block_profile, long_arm_key, long_run_class,
     modulation_amplitude_hz, modulation_band, spectral_peak,
 )
 
@@ -141,6 +141,16 @@ def test_the_target_outcome_needs_modulation_continuity_and_every_gate():
     assert long_run_class(_long(
         profile=[0.5, 0.48, 0.51, 0.49, 0.50, 0.52], gap=0.05, gate7=False,
     )) == "persistent_modulated_below_gate"
+
+
+def test_long_arm_key_admits_a_run_with_no_short_counterpart():
+    """A 12 s arm run on its own is evidence; dropping it would hide half a ladder."""
+    assert long_arm_key(_summary(5.2228, 0.32, T_ms=12000.0)) == (5.2228, 0.32, 1)
+    # The short-window key still refuses it, so the two panels stay separate.
+    assert arm_key(_summary(5.2228, 0.32, T_ms=12000.0)) is None
+    # Everything else about the locked comparison still has to match.
+    assert long_arm_key(_summary(5.2228, 0.32, T_ms=12000.0, som_tau_d=30.)) is None
+    assert long_arm_key(_summary(5.2228, 0.32, T_ms=2500.0)) is None
 
 
 def test_modulation_amplitude_is_absolute_not_only_relative():
