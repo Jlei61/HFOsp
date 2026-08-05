@@ -84,6 +84,137 @@ Tests mirror each module as `tests/test_<module>.py`.
 
 ---
 
+## rev3 amendments — apply these before continuing
+
+The second design review (2026-08-05, verdict `CONDITIONAL_GO_TASK7_PHASE0`) found four
+contract defects and two engineering defects in the Tasks 1-6 implementation. Task 6 is
+`CONDITIONAL_ACCEPTED`; Phase 0 (Task 7) may run on all 34 once these land; **Phase 1 (Task 8)
+does not open until R3-C is implemented**. Spec rev3 §0 carries the same list.
+
+Every test below ships with its exact numeric fixture and the exact assertion, and every one
+carries a deliberate-break instruction. Three times in Tasks 5 and 6 a prose acceptance
+criterion was satisfied in form and defeated in substance, so a test nobody has watched fail
+is not accepted as evidence.
+
+### R3-A — `window_state`: a family tie is not reliability
+
+`src/topic5_slow_state_scale.py`. Among above-chance families the outcome is three-way:
+
+| chronology vote among above-chance families | window |
+| --- | --- |
+| strict majority say break | `CHRONOLOGY_BREAK` |
+| strict majority say no break | `RELIABLE` |
+| neither, a tie | `UNRESOLVED_FAMILY_DISCORDANCE` |
+
+Add the new label to the module's exported alphabet and to `scale_states`' known set.
+
+- [ ] Test `test_a_family_level_tie_is_discordance_not_reliable`: exactly two above-chance
+      families, one whose chronological value sits below its random-half `alpha` quantile and
+      one whose does not. Assert `== "UNRESOLVED_FAMILY_DISCORDANCE"`, and assert
+      `!= "RELIABLE"` on the same call.
+- [ ] Deliberate break: restore `return RELIABLE` as the final fallthrough, watch this test
+      FAIL, revert, watch it pass. Paste all four outputs.
+
+### R3-B — `scale_states`: majority, not mode
+
+- [ ] Drop `UNRESOLVED_FAMILIES`, `UNRESOLVED_FAMILY_DISCORDANCE` and any other non-evaluable
+      verdict before counting; they never vote.
+- [ ] Re-check `min_windows` against the SURVIVING evaluable count, not the original count.
+- [ ] Emit `BELOW_CHANCE` / `RELIABLE` / `CHRONOLOGY_BREAK` only on a strict majority of the
+      evaluable windows; otherwise emit `UNRESOLVED_MIXED_WINDOWS`.
+- [ ] Test `test_two_of_five_windows_cannot_name_a_scale`: input
+      `["RELIABLE","RELIABLE","CHRONOLOGY_BREAK","CHRONOLOGY_BREAK","UNRESOLVED_FAMILIES"]`
+      with `min_windows=4`. One unevaluable is dropped, leaving 4 evaluable, which still meets
+      the minimum; 2 of 4 is not a strict majority. Assert `"UNRESOLVED_MIXED_WINDOWS"`.
+- [ ] Test `test_a_three_way_split_is_mixed_not_the_modal_label`: input
+      `["RELIABLE","RELIABLE","BELOW_CHANCE","CHRONOLOGY_BREAK","UNRESOLVED_FAMILIES"]` with
+      `min_windows=4`. Assert `"UNRESOLVED_MIXED_WINDOWS"` — 2 of 4 is not a majority even
+      though `RELIABLE` is the mode.
+- [ ] Test `test_dropping_unevaluable_windows_can_take_a_scale_below_the_minimum`: input
+      `["RELIABLE","RELIABLE","RELIABLE","UNRESOLVED_FAMILIES","UNRESOLVED_FAMILIES"]` with
+      `min_windows=4`. Only 3 evaluable survive. Assert `"UNRESOLVED_TOO_FEW_WINDOWS"`, not
+      `"RELIABLE"`.
+- [ ] Deliberate break: restore the mode-with-tiebreak implementation, watch the first two
+      tests FAIL, revert, watch them pass.
+
+### R3-C — two scale curves, backbone and residual (BLOCKS TASK 8)
+
+Spec §6.6. The raw descriptors are dominated by the patient's stable backbone, so scale curves
+computed on them can re-prove the existing split-half result and present it as a slow-state
+timescale. `window_agreements` gains a `residualise` argument:
+
+- `residualise=False` — raw curve, quality control, yields `N_obs_backbone`.
+- `residualise=True` — the patient's global per-contact and per-pair main effects, estimated on
+  the TRAIN portion only and passed in, are subtracted from every window's descriptors before
+  the agreements are computed. Yields `N_obs_state`.
+
+Downstream: block size is `max(N_obs_backbone, N_obs_state)`; `N_break` comes from the residual
+chronology curve only. A patient whose residual is never estimable is `slow state not
+observable`, never `no stable network`.
+
+- [ ] `estimate_backbone(train_repertoires) -> dict` returning the per-contact and per-pair
+      main effects, fitted on train windows only.
+- [ ] Test `test_residualising_removes_a_constant_backbone_offset`: build 40 windows whose
+      participation and mean rank are a fixed backbone vector plus i.i.d. noise of scale 0.01.
+      Assert the raw `mean_rank` agreement median exceeds 0.95 while the residualised one falls
+      below 0.3 — the backbone alone produces near-perfect raw agreement that carries no
+      slow-state information.
+- [ ] Test `test_residualising_preserves_a_real_local_deviation`: same backbone, but windows
+      1-20 carry a systematic deviation `+0.5` on contacts 0-2 and windows 21-40 carry `-0.5`.
+      Assert the residualised chronological agreement across that boundary is negative while
+      the raw one stays above 0.8.
+- [ ] Test `test_the_backbone_is_estimated_on_train_windows_only`: change only the held-out
+      windows and assert `estimate_backbone` returns an identical result.
+- [ ] Deliberate break: fit the backbone on all windows instead of train only, watch the third
+      test FAIL, revert, watch it pass.
+
+### R3-D — three elapsed-time fields on a block
+
+`src/topic5_slow_state_sessions.py`. `delta_t_from_previous` is currently first-event minus
+previous-last-event, which is an inter-block inter-event interval, not the elapsed time between
+two slow-state observations. Replace it with three named fields:
+
+- `transition_delta_t` — block centre to block centre. This is what the transition consumes.
+- `inter_block_gap` — this block's first event minus the previous block's last event.
+- `metadata_gap_seconds` — unobserved wall time across a session boundary, or `None` within one
+  session.
+
+- [ ] Test `test_transition_delta_t_is_centre_to_centre_not_edge_to_edge`: one session, events
+      at `t = 0,1,2,3,10,11,12,13`, `block_events=4`. Block 0 spans 0-3 (centre 1.5), block 1
+      spans 10-13 (centre 11.5). Assert `transition_delta_t == 10.0` and
+      `inter_block_gap == 7.0`. These differ, so an implementation using either one for the
+      other fails.
+- [ ] Test `test_metadata_gap_is_none_within_one_session`: assert `metadata_gap_seconds is None`
+      for a block whose previous block is in the same session.
+- [ ] Deliberate break: set `transition_delta_t = inter_block_gap`, watch the first test FAIL,
+      revert, watch it pass.
+- [ ] Update every existing caller and test that referenced `delta_t_from_previous`.
+
+### R3-E — the inventory test measures the environment, not the code
+
+`tests/test_topic5_source_intervals.py::test_a_record_without_an_inventory_row_fails_loudly`
+reads `results/epilepsiae_block_inventory.csv`, a data artifact that is not in git. A clean
+checkout of this branch runs 109 tests and this one fails.
+
+- [ ] Rewrite it hermetically: build a two-row inventory CSV in `tmp_path` with the columns the
+      resolver requires, point the config at it, and assert `RuntimeError` for a record name
+      absent from that CSV.
+- [ ] Verify by running the file from a clean `git archive` extraction, not from the working
+      tree. Paste that command and its output.
+
+### R3-F — Task 7 must prove every event is placed exactly once
+
+Add to Task 7's contract, and to its tests:
+
+- [ ] Test `test_every_included_event_is_assigned_to_exactly_one_session`: the concatenation of
+      all sessions' `event_indices` is a permutation of the analysis-eligible index set — no
+      duplicate, no omission. Assert on sorted arrays, not on counts alone.
+- [ ] Test `test_every_blocked_event_is_assigned_to_exactly_one_block`: the concatenation of all
+      blocks' `event_indices` plus the dropped remainders equals the per-session event set.
+- [ ] Phase 0 output carries `phase_role = "coverage_only_no_slow_state_inference"`.
+
+---
+
 ## Task 1: Frozen configuration
 
 **Files:** Create `config/topic5_slow_state_v4_0.yaml`; Test `tests/test_topic5_slow_state_config.py`
