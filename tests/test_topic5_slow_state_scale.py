@@ -483,3 +483,32 @@ def test_scale_states_rejects_a_label_outside_the_known_alphabet():
     # and validation is actually reached.
     with pytest.raises(ValueError, match="BOGUS_LABEL"):
         scale_states([R, R, R, "BOGUS_LABEL", R], min_windows=5)
+
+
+def test_two_of_five_windows_cannot_name_a_scale():
+    # rev3 R3-B: one UNRESOLVED_FAMILIES window is dropped before counting, leaving 4
+    # evaluable windows (still >= min_windows=4). 2-of-4 RELIABLE and 2-of-4
+    # CHRONOLOGY_BREAK: neither reaches a strict majority of the evaluable count, so the
+    # old mode-with-tiebreak rule (which would have picked one of them by fixed order)
+    # must not name a scale state at all.
+    windows = [R, R, C, C, UF]
+    assert scale_states(windows, min_windows=4) == "UNRESOLVED_MIXED_WINDOWS"
+
+
+def test_a_three_way_split_is_mixed_not_the_modal_label():
+    # rev3 R3-B: drop the 1 UNRESOLVED_FAMILIES window, leaving 4 evaluable: R, R, B, C.
+    # RELIABLE is the mode (2 of 4) but 2-of-4 is not a strict majority -- the old
+    # mode-with-tiebreak rule would have returned RELIABLE anyway because it was the
+    # most frequent label, which is exactly the "reduction to the mode" this fix removes.
+    windows = [R, R, B, C, UF]
+    assert scale_states(windows, min_windows=4) == "UNRESOLVED_MIXED_WINDOWS"
+
+
+def test_dropping_unevaluable_windows_can_take_a_scale_below_the_minimum():
+    # rev3 R3-B: original length is 5 (>= min_windows=4), so a check against the
+    # ORIGINAL count would proceed to vote and find 3-of-3 RELIABLE unanimous. But 2 of
+    # the 5 are UNRESOLVED_FAMILIES and must be dropped before the minimum is checked,
+    # leaving only 3 evaluable windows -- below min_windows=4 -- so the correct answer is
+    # UNRESOLVED_TOO_FEW_WINDOWS, not a unanimous RELIABLE.
+    windows = [R, R, R, UF, UF]
+    assert scale_states(windows, min_windows=4) == "UNRESOLVED_TOO_FEW_WINDOWS"

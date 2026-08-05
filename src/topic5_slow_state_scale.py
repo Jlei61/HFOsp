@@ -31,6 +31,14 @@ UNRESOLVED_FAMILIES = "UNRESOLVED_FAMILIES"
 # rev3 R3-A: a window whose above-chance families cannot agree among themselves on
 # whether chronology broke (an exact tie in the break vote) is discordant, not reliable.
 UNRESOLVED_FAMILY_DISCORDANCE = "UNRESOLVED_FAMILY_DISCORDANCE"
+# rev3 R3-B: a scale whose evaluable windows cannot reach a strict majority on any one
+# of BELOW_CHANCE / RELIABLE / CHRONOLOGY_BREAK, after non-evaluable windows are
+# dropped and the minimum is re-checked against the surviving count.
+UNRESOLVED_MIXED_WINDOWS = "UNRESOLVED_MIXED_WINDOWS"
+# Window-level verdicts that carry no vote at the scale level: window_state could not
+# reach a judgement about this window at all, so it must be dropped before scale_states
+# counts anything, and must not be able to satisfy min_windows either.
+NON_EVALUABLE_WINDOW_STATES = (UNRESOLVED_FAMILIES, UNRESOLVED_FAMILY_DISCORDANCE)
 NOT_EVALUATED = (TOO_FEW, UNRESOLVED_FAMILIES)
 
 # I3 fix: a family must clear a minimum number of *finite* draws on both `random_half` and
@@ -268,37 +276,50 @@ def window_state(
 def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:
     """Majority state over one scale's independent primary windows (§6.4).
 
-    Fewer than `min_windows` windows -> `UNRESOLVED_TOO_FEW_WINDOWS`: a scale is
-    evaluated only with enough independent primary windows behind it, and is excluded
-    from `select_scales`'s pattern rather than counted as a failure.
+    rev3 R3-B: this used to reduce to the *mode* (most frequent label, tie-broken by a
+    fixed order) — a window state could win with as little as 2-of-5 support whenever
+    the other 3 were split across the remaining labels. That is not "most windows agree
+    on this scale's state"; it is "this was merely the largest minority". The rule is
+    now a strict majority of the *evaluable* windows, computed as follows:
 
-    Otherwise the most frequent window state wins (majority; with only two possible
-    contenders in the common `min_windows=5`-with-3-families setting the most-frequent
-    label out of 5 is necessarily a true majority too, but the rule stated here is
-    "most votes", not literally ">50%"). On an exact tie between two or more states,
-    the earliest in `(BELOW_CHANCE, RELIABLE, CHRONOLOGY_BREAK, UNRESOLVED_FAMILIES)`
-    wins — a controller decision (task-6 ambiguity resolution) to keep the reduction
-    deterministic, not a rule derived from the plan text.
-
-    Every element of `windows_states` is validated against this closed label set up
-    front, so an unrecognised state raises `ValueError` immediately rather than being
-    silently uncounted (the previous revision had a `raise` after the vote that could
-    never execute, because the vote itself only ever counted the 4 known labels).
+    1. Every element of `windows_states` is validated against this closed label set up
+       front, so an unrecognised state raises `ValueError` immediately rather than being
+       silently uncounted.
+    2. `UNRESOLVED_FAMILIES` and `UNRESOLVED_FAMILY_DISCORDANCE` windows never vote —
+       `window_state` reached no judgement about them at all, so they are dropped before
+       anything is counted (`NON_EVALUABLE_WINDOW_STATES`).
+    3. `min_windows` is re-checked against the SURVIVING evaluable count, not the
+       original `len(windows_states)` — dropping non-evaluable windows can itself take a
+       scale below the minimum, and that must read as `UNRESOLVED_TOO_FEW_WINDOWS`, not
+       as a vote among however few evaluable windows happen to remain.
+    4. `BELOW_CHANCE` / `RELIABLE` / `CHRONOLOGY_BREAK` is returned only on a strict
+       majority (more than half) of the evaluable windows. Otherwise —
+       `UNRESOLVED_MIXED_WINDOWS`: the evaluable windows exist and clear the minimum, but
+       cannot agree on a single scale state.
     """
     states = list(windows_states)
-    if len(states) < int(min_windows):
-        return TOO_FEW
 
-    order = (BELOW, RELIABLE, BREAK, UNRESOLVED_FAMILIES)
-    unknown = sorted(set(states) - set(order))
+    known = (
+        BELOW,
+        RELIABLE,
+        BREAK,
+        UNRESOLVED_FAMILIES,
+        UNRESOLVED_FAMILY_DISCORDANCE,
+        UNRESOLVED_MIXED_WINDOWS,
+    )
+    unknown = sorted(set(states) - set(known))
     if unknown:
         raise ValueError(f"unexpected window state(s) outside the closed label set: {unknown!r}")
 
-    counts = {label: states.count(label) for label in order}
-    best = max(counts.values())
-    for label in order:
-        if counts[label] == best:
+    evaluable = [state for state in states if state not in NON_EVALUABLE_WINDOW_STATES]
+    if len(evaluable) < int(min_windows):
+        return TOO_FEW
+
+    n = len(evaluable)
+    for label in (BELOW, RELIABLE, BREAK):
+        if evaluable.count(label) * 2 > n:
             return label
+    return UNRESOLVED_MIXED_WINDOWS
 
 
 def select_scales(states: Mapping[int, str]) -> dict[str, Any]:
