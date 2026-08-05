@@ -63,6 +63,18 @@ NOT_EVALUABLE = frozenset(
 # module constant into exactly one of the two sets and assert the sets never overlap.
 OUTPUT_ONLY_STATUSES = frozenset({UNRESOLVED_SCALE, UNRESOLVED_NONMONOTONE})
 
+# rev3 R3-C, deferred minor from the fix-round-4 ledger: `scale_states` used to validate
+# against a hand-written tuple that duplicated the alphabet, so adding a label to
+# NOT_EVALUABLE without also editing that tuple would make `scale_states` REJECT its own
+# upstream output -- the same drift family as the four recurrences NOT_EVALUABLE already
+# collapsed, in the one place the meta-test did not reach. Deriving it means one edit
+# still suffices. This deliberately also admits TOO_FEW, which the hand-written tuple
+# omitted: like every other member of NOT_EVALUABLE it is now dropped rather than raising,
+# which is the safe direction and the same "one superset is safe" argument NOT_EVALUABLE
+# is built on.
+DECIDED_STATES = (BELOW, RELIABLE, BREAK)
+KNOWN_WINDOW_STATES = frozenset(DECIDED_STATES) | NOT_EVALUABLE
+
 # I3 fix: a family must clear a minimum number of *finite* draws on both `random_half` and
 # `contact_null` before it counts as "resolved" in `window_state` -- a single finite null
 # draw makes its q95 trivially easy to beat, biasing toward RELIABLE and a smaller N_obs.
@@ -428,9 +440,11 @@ def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:
     on this scale's state"; it is "this was merely the largest minority". The rule is
     now a strict majority of the *evaluable* windows, computed as follows:
 
-    1. Every element of `windows_states` is validated against this closed label set up
+    1. Every element of `windows_states` is validated against `KNOWN_WINDOW_STATES` up
        front, so an unrecognised state raises `ValueError` immediately rather than being
-       silently uncounted.
+       silently uncounted. That set is *derived* from `DECIDED_STATES` and
+       `NOT_EVALUABLE` rather than restated, so a future label added to `NOT_EVALUABLE`
+       is accepted here in the same edit instead of being rejected as unknown.
     2. `UNRESOLVED_FAMILIES` and `UNRESOLVED_FAMILY_DISCORDANCE` windows never vote —
        `window_state` reached no judgement about them at all, so they are dropped before
        anything is counted (`NOT_EVALUABLE`, shared with `select_scales`).
@@ -445,15 +459,7 @@ def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:
     """
     states = list(windows_states)
 
-    known = (
-        BELOW,
-        RELIABLE,
-        BREAK,
-        UNRESOLVED_FAMILIES,
-        UNRESOLVED_FAMILY_DISCORDANCE,
-        UNRESOLVED_MIXED_WINDOWS,
-    )
-    unknown = sorted(set(states) - set(known))
+    unknown = sorted(set(states) - KNOWN_WINDOW_STATES)
     if unknown:
         raise ValueError(f"unexpected window state(s) outside the closed label set: {unknown!r}")
 
@@ -462,7 +468,7 @@ def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:
         return TOO_FEW
 
     n = len(evaluable)
-    for label in (BELOW, RELIABLE, BREAK):
+    for label in DECIDED_STATES:
         if evaluable.count(label) * 2 > n:
             return label
     return UNRESOLVED_MIXED_WINDOWS

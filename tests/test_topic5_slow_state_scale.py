@@ -797,3 +797,12 @@ def test_every_unresolved_constant_is_classified_exactly_once():
     assert not unclassified, f"unclassified unresolved constant(s): {sorted(unclassified)}"
 
     assert mod.NOT_EVALUABLE.isdisjoint(mod.OUTPUT_ONLY_STATUSES)
+
+    # rev3 R3-C: the same drift family in the one place the classification check above
+    # could not reach. `scale_states` validated against a hand-written tuple that
+    # duplicated the alphabet, so a label added to NOT_EVALUABLE but not to that tuple
+    # would make scale_states REJECT its own upstream output -- a fifth recurrence
+    # waiting to happen. Every member of NOT_EVALUABLE must be accepted (and dropped,
+    # which is why the three surviving RELIABLE windows still name the scale).
+    for label in sorted(mod.NOT_EVALUABLE):
+        assert mod.scale_states([R, R, R, label], min_windows=3) == R
