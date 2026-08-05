@@ -38,13 +38,31 @@ def test_interval_bounds_do_not_come_from_event_times():
         assert forbidden not in source, f"{forbidden} would reintroduce event-density bounds"
 
 
-def test_a_record_without_an_inventory_row_fails_loudly():
+def test_a_record_without_an_inventory_row_fails_loudly(tmp_path):
+    # rev3 R3-E: hermetic rewrite. The original version read
+    # results/epilepsiae_block_inventory.csv, a data artifact that is not tracked in
+    # git -- on a clean checkout that file does not exist and the resolver raises
+    # FileNotFoundError instead of RuntimeError, so pytest.raises(RuntimeError) does not
+    # match and the test fails. Building a two-row inventory in tmp_path removes that
+    # dependency on the environment entirely.
+    #
+    # _inventory_rows resolves the configured path as `ROOT / config[...]`; when
+    # config[...] is already absolute, pathlib's `/` operator discards ROOT and returns
+    # the absolute path unchanged, so pointing the config at the tmp_path CSV directly
+    # (no monkeypatching of ROOT) is sufficient to make this hermetic.
     from src.topic5_source_intervals import build_source_segments
+
+    inventory_path = tmp_path / "block_inventory.csv"
+    inventory_path.write_text(
+        "subject,block_stem,block_start_epoch,block_end_epoch,recording_id\n"
+        "9999,known_block_1,0.0,100.0,rec1\n"
+        "9999,known_block_2,100.0,200.0,rec1\n"
+    )
 
     with pytest.raises(RuntimeError):
         build_source_segments(
             "epilepsiae_9999",
             np.array(["ghost"]),
             np.array(["ghost"]),
-            {"epilepsiae_block_inventory": "results/epilepsiae_block_inventory.csv"},
+            {"epilepsiae_block_inventory": str(inventory_path)},
         )
