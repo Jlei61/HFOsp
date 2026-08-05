@@ -381,6 +381,24 @@ If the residual repertoire is never reliably estimable at any grid scale, the pa
 is **slow state not observable**, and explicitly **not** "the stable network does not exist".
 The backbone result stands on its own prior evidence and is not re-litigated here.
 
+**The residual curve's power depends strongly on contact count, and this changes how a negative
+verdict may be reported [rev3, measured during R3-C implementation].** Removing the backbone
+removes most of the signal that a rank correlation over a handful of contacts can carry, so the
+residual test is far weaker than the raw one at small montages. A probe during implementation
+put the residual above chance at 12 and 16 contacts and **not** above chance at 6, holding the
+injected deviation fixed. This cohort's contact counts run from about 8 to 16, so low-contact
+patients will systematically fail the residual test for reasons of power, not biology.
+
+Two consequences are binding:
+
+1. `slow state not observable` must **always** be reported together with that patient's
+   residual-curve power — the contact count and the smallest deviation the curve could have
+   detected. A bare count of how many patients were "not observable" is forbidden, because it
+   would read as evidence against slow states while mostly measuring montage size.
+2. Any cohort statement contrasting observable and non-observable patients must show the
+   contact-count distribution of both groups. If they differ, the contrast is confounded with
+   montage size and must be labelled as such.
+
 ## 7. State geometry and its nulls **[rev2]**
 
 Phase 1 emits a frozen `state_geometry` verdict per patient — `few_stable_clusters`,
