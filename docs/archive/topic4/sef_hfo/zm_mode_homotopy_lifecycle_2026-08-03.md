@@ -342,6 +342,27 @@ I^{EE,\mathrm{pool}}_i=\frac{I^{EE}_i}{1+\alpha_G S_G}-\beta_{SG}S_G,\qquad
 4. **仪器阳性对照成立**：不加干预的爆发串逐段起伏 1.65–1.88 全程平坦，且 DMD 在真有节律时报出 4.04/4.62 Hz 非零频率——"弱 β 是衰减"这个读数不是仪器读不出持续振荡。
 5. **机制**：`trace_S_G` 显示前两类归宿的池状态最终平成常数，只有持续爆发臂的池一直在振荡。**池一旦平衡，减法项就是恒定偏置，无法调制任何东西**——调制只存在于池仍在运动的那段。
 
+### 11.3b 转变性质：不连续切换，不是连续失稳
+
+在 β=3.917（落回不动点）与 β=7.834（持续）之间补了两点（5.223、6.529），得到完整的 12 s 强度梯：
+
+| β | 0 | 1.371 | 1.763 | 1.958 | 3.917 | **5.223** | 6.529 | 7.834 | 15.67 |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| 绝对摆幅 (Hz) | 8.6 | 8.7 | 8.2 | 8.4 | 10.5 | **126.7** | 128.7 | 129.5 | 124.4 |
+| 停止起伏用时 (s) | 4 | 4 | 4 | 4 | 6 | **never** | never | never | never |
+| 深间隙 | 0.000 | 0.000 | 0.000 | 0.005 | 0.057 | **0.305** | 0.326 | 0.348 | 0.429 |
+| DMD 主频 (Hz) | 0.00 | 0.00 | 0.00 | 0.00 | 0.00 | **3.86** | 3.95 | 4.04 | 4.62 |
+
+三个特征同时排除连续（超临界 Hopf 型）失稳：
+
+1. **摆幅是跳变**（10.5 → 126.7 Hz），不是从 0 连续长大；
+2. **瞬态时长不发散**（4,4,4,4,6 s 后直接到 12 s 上限），连续失稳应按 1/|β−β_c| 发散；
+3. **主频以有限值出现**（3.86 Hz），不是从 0 长起来，且此后只缓慢变化（3.86→4.62）。
+
+深间隙同样跳变（0.057 → 0.305）。
+
+**边界（不得越过）**：本梯度是**单一初始条件**的强度扫描。它排除了"同一个态被连续推失稳"，但**没有**检验双稳共存或迟滞——那需要在同一强度下从两种不同初始态起跑，而当前 runner 不落盘中途状态，无法构造。因此只能写"转变在测得的观测量上是不连续的"，**不得**写"存在双稳/迟滞"。
+
 ### 11.4 连接布线复现
 
 候选强度 β=1.763 在三套 SOM 连接上：布线 1 八条全过（2.5 s）、布线 2 已变回有间隙（0.200，占空 0.474 不过）、布线 3 仍是平线（起伏 0.068）。**候选不复现**，与本线一贯的"能过门的强度随布线移动"一致。
@@ -365,7 +386,8 @@ I^{EE,\mathrm{pool}}_i=\frac{I^{EE}_i}{1+\alpha_G S_G}-\beta_{SG}S_G,\qquad
 - 弱到中等强度只延长瞬态，系统仍落回同一不动点，且落回前的时长随强度增长；
 - 强强度维持的振荡**就是衬底原有的爆发串**，不是新轨道；
 - 连续性只能由局部慢兴奋供给，减法式单独（8 档）从不填间隙；
-- 因此在测过的范围内，**"持续高能 + 连续 + 非强直 + 有界"没有同时成立的参数窗口**。
+- 因此在测过的范围内，**"持续高能 + 连续 + 非强直 + 有界"没有同时成立的参数窗口**；
+- 该转变在测得的观测量上是**不连续的**：摆幅跳变、瞬态时长不发散、主频以有限值出现。
 
 **不能写**
 
@@ -374,7 +396,9 @@ I^{EE,\mathrm{pool}}_i=\frac{I^{EE}_i}{1+\alpha_G S_G}-\beta_{SG}S_G,\qquad
 - 不能写"所有减法强度都只是衰减瞬态"（对 β≥7.8 是错的）；
 - 不能写"减法式抑制被否证"——它确实改变了吸引子，只是没落在目标区间；
 - 不能用频谱相对突出度暗示节律（平线臂也能报出高突出度）；
-- 本轮全程冻结慢变量，任何臂即便过门也只是 frozen fast-state candidate。
+- 不能写"存在双稳/迟滞"——本轮只做了单一初始条件的强度扫描（见 §11.3b 边界）；
+- 本轮全程冻结慢变量，任何臂即便过门也只是 frozen fast-state candidate；
+- **不能据本轮任何产物制作"间期→发作→终止→恢复"的生命周期图**：缺自主进入（慢变量全程冻结）、缺合格持续载体、缺 M 驱动的内生退出、缺发作后不应期与返回间期分布。目标版式只能标注为 target layout。
 
 ### 11.7 下一步约束
 
@@ -385,8 +409,8 @@ I^{EE,\mathrm{pool}}_i=\frac{I^{EE}_i}{1+\alpha_G S_G}-\beta_{SG}S_G,\qquad
 ### 11.8 交付物
 
 - verdict：`results/topic4_sef_hfo/zm_mode_lifecycle/subtractive_pool_carrier_summary.json`（含 `durability` 三分类与 `candidate_arms_refuted_by_long_run`）
-- 图：`figures/subtractive_pool_dose_response.png`（判据对强度）、`figures/subtractive_branch_tradeoff.png`（三列机制失败诊断）
-- 分析器：`scripts/analyze_topic4_zm_subtractive_pool_carrier.py`；绘图：`scripts/plot_topic4_zm_subtractive_branch_tradeoff.py`
-- 测试：`tests/test_topic4_zm_subtractive_pool_carrier.py`（17）
+- 图：`figures/subtractive_pool_dose_response.png`（判据对强度）、`figures/subtractive_branch_tradeoff.png`（三列机制失败诊断）、`figures/subtractive_branch_diagram.png`（转变是否连续）
+- 分析器：`scripts/analyze_topic4_zm_subtractive_pool_carrier.py`；绘图：`scripts/plot_topic4_zm_subtractive_branch_tradeoff.py`、`scripts/plot_topic4_zm_subtractive_branch_diagram.py`
+- 测试：`tests/test_topic4_zm_subtractive_pool_carrier.py`（18）
 
-本轮共 26 条 2.5 s + 11 条 12 s 轨迹，seed1 噪声，`--freeze-zm` 全程；E→E 未修改；`beta_SG=0` 为逐位 parity。
+本轮共 26 条 2.5 s + 12 条 12 s 轨迹，seed1 噪声，`--freeze-zm` 全程；E→E 未修改；`beta_SG=0` 为逐位 parity。
