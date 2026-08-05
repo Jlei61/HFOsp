@@ -93,6 +93,99 @@ def _local_repertoire_kwargs(floors: Mapping[str, int]) -> dict[str, int]:
     }
 
 
+def _backbone_offset(values: np.ndarray) -> np.ndarray:
+    """The amount actually subtracted: the backbone where it exists, else zero.
+
+    Both halves of the nan contract come from this one line. A descriptor this window
+    could not estimate is `nan` and stays `nan` (`nan - anything` is `nan`), so
+    residualising never invents a number where the window had none. A descriptor the
+    *backbone* could not estimate contributes `0.0`, so residualising never destroys a
+    number the window did estimate — `nan` would silently drop that contact or pair out
+    of every agreement for the rest of the run.
+    """
+    values = np.asarray(values, dtype=float)
+    return np.where(np.isfinite(values), values, 0.0)
+
+
+def _permuted_pair_backbone(
+    pair_effects: np.ndarray,
+    pair_index: Sequence[tuple[int, int]],
+    contact_perm: np.ndarray,
+) -> np.ndarray:
+    """The pair main effects re-expressed in a contact-permuted column layout.
+
+    `local_repertoire` enumerates pairs as `i < j` over *array positions*. When the
+    contact-null permutes columns first, position `i` holds physical contact
+    `contact_perm[i]`, so the pair at layout position `(i, j)` is the physical ordered
+    pair `(a, b) = (contact_perm[i], contact_perm[j])` and its precedence is
+    `P(a before b)`. The backbone stores `P(a before b)` for `a < b` only, and
+    precedence is its own complement — `P(b before a) = 1 - P(a before b)` holds exactly
+    per window (earlier + tied/2 counts are complementary) and therefore also for the
+    mean over the windows that estimated both. So a pair the permutation reverses takes
+    `1 - effect`, which negates its residual; that reversal is part of what "contact
+    identity was scrambled" means and it is applied to the null side only.
+    """
+    lookup = {tuple(pair): position for position, pair in enumerate(pair_index)}
+    out = np.empty(len(pair_index), dtype=float)
+    for position, (i, j) in enumerate(pair_index):
+        a, b = int(contact_perm[i]), int(contact_perm[j])
+        out[position] = (
+            pair_effects[lookup[(a, b)]] if a < b else 1.0 - pair_effects[lookup[(b, a)]]
+        )
+    return out
+
+
+def _residualise_descriptors(
+    repertoire: Mapping[str, Any],
+    backbone: Mapping[str, Any],
+    *,
+    contact_perm: np.ndarray | None = None,
+) -> dict[str, Any]:
+    """One window's descriptors minus the patient's backbone main effects (§6.6).
+
+    `contact_perm` is the permutation `window_agreements` applied to the columns before
+    computing this repertoire, or `None`. It is **not** ignored: the main effect belongs
+    to a physical contact, so the backbone is reindexed by the same permutation and each
+    position has its own contact's effect removed. Subtracting position-wise instead
+    would leave the null side carrying a difference between two contacts' backbones
+    while the observed side carries none, and the two sides would no longer be the same
+    quantity.
+    """
+    n_contacts = len(np.asarray(repertoire["participation_rate"]))
+    n_pairs = len(np.asarray(repertoire["precedence"]))
+    if len(np.asarray(backbone["participation_rate"])) != n_contacts:
+        raise ValueError(
+            "backbone contact count does not match this window's — the backbone would be "
+            "subtracted from the wrong contacts"
+        )
+    if len(np.asarray(backbone["precedence"])) != n_pairs:
+        raise ValueError(
+            "backbone pair count does not match this window's — the backbone would be "
+            "subtracted from the wrong pairs"
+        )
+
+    contact_effects = {
+        family: np.asarray(backbone[family], dtype=float)
+        for family in ("participation_rate", "masked_mean_rank")
+    }
+    pair_effects = np.asarray(backbone["precedence"], dtype=float)
+    if contact_perm is not None:
+        contact_effects = {
+            family: values[contact_perm] for family, values in contact_effects.items()
+        }
+        pair_effects = _permuted_pair_backbone(
+            pair_effects, backbone["pair_index"], contact_perm
+        )
+
+    out = dict(repertoire)
+    for family, effects in contact_effects.items():
+        out[family] = np.asarray(repertoire[family], dtype=float) - _backbone_offset(effects)
+    out["precedence"] = np.asarray(repertoire["precedence"], dtype=float) - _backbone_offset(
+        pair_effects
+    )
+    return out
+
+
 def window_agreements(
     rank: np.ndarray,
     participation: np.ndarray,
@@ -102,6 +195,8 @@ def window_agreements(
     null_draws: int,
     seed: int,
     floors: Mapping[str, int],
+    residualise: bool = False,
+    backbone: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """The three agreements of one event window (§6.3).
 
@@ -127,7 +222,32 @@ def window_agreements(
     Every draw is taken from a single `numpy.random.default_rng(seed)` instance created
     once at the top of this function, so the whole function is deterministic given its
     inputs — no draw reseeds independently.
+
+    **`residualise` / `backbone` (rev3 R3-C, §6.6).** The raw descriptors are dominated
+    by the patient's stable backbone — the fixed source, relay and sink structure that
+    split-half and odd-even analyses established years ago. Run on them, a small window
+    looks reliable merely because the backbone reproduces and a large window may never
+    break because the backbone does not drift, so the scale curve would restate the known
+    backbone result as a slow-state timescale. Each patient therefore gets **two** curves
+    from this one function:
+
+    - `residualise=False` (default, behaviour unchanged) — the raw curve. Quality control
+      only: "can a window this size see this patient's stable repertoire at all". Yields
+      `N_obs_backbone`.
+    - `residualise=True` — `backbone` (from `estimate_backbone`, fitted on the TRAIN
+      windows only) is subtracted from **every** repertoire this function computes, on
+      both sides of every split and on the null side too, before any agreement is taken.
+      Yields `N_obs_state`, and `N_break` comes from this curve's chronological values.
+
+    `backbone` is ignored when `residualise=False`, so a caller may hold one backbone and
+    loop over both settings. `residualise=True` without a backbone raises rather than
+    silently returning the raw curve under the residual curve's name.
     """
+    if residualise and backbone is None:
+        raise ValueError(
+            "residualise=True needs a backbone — pass estimate_backbone(train_repertoires); "
+            "without one this would silently return the raw curve"
+        )
     rank = np.asarray(rank, dtype=float)
     participation = np.asarray(participation)
     group_ids = np.asarray(group_ids)
@@ -137,11 +257,15 @@ def window_agreements(
 
     def _repertoire(event_idx: np.ndarray, contact_perm: np.ndarray | None = None) -> dict[str, Any]:
         if contact_perm is None:
-            return local_repertoire(
+            out = local_repertoire(
                 rank[event_idx], participation[event_idx], group_ids[event_idx], **kwargs
             )
-        cols = np.ix_(event_idx, contact_perm)
-        return local_repertoire(rank[cols], participation[cols], group_ids[cols], **kwargs)
+        else:
+            cols = np.ix_(event_idx, contact_perm)
+            out = local_repertoire(rank[cols], participation[cols], group_ids[cols], **kwargs)
+        if not residualise:
+            return out
+        return _residualise_descriptors(out, backbone, contact_perm=contact_perm)
 
     def _random_half_split() -> tuple[np.ndarray, np.ndarray]:
         perm = rng.permutation(n_events)

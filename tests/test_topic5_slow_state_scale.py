@@ -1,7 +1,9 @@
 import numpy as np
 import pytest
 
+from src.topic5_slow_state_repertoire import estimate_backbone, local_repertoire
 from src.topic5_slow_state_scale import (
+    _residualise_descriptors,
     scale_states,
     select_scales,
     window_agreements,
@@ -237,6 +239,211 @@ def test_window_agreements_accepts_the_raw_config_floor_spelling():
         floors=renamed_floors,
     )
     assert out_raw == out_renamed
+
+
+# ---------------------------------------------------------------------------
+# window_agreements(residualise=True) — rev3 R3-C, spec §6.6. The raw descriptors are
+# dominated by the patient's stable backbone, so a curve computed on them can re-prove
+# the known split-half result and report it as a slow-state timescale. These fixtures
+# pin that the residual curve measures the deviation from the backbone and the raw one
+# does not.
+# ---------------------------------------------------------------------------
+
+_MU = np.array([0.10, 0.26, 0.42, 0.58, 0.74, 0.90])
+_PARTICIPATION_P = np.array([0.95, 0.90, 0.85, 0.80, 0.75, 0.70])
+
+
+def _backbone_window(*, seed, n_events=60, deviation=None):
+    """One window's arrays: a fixed backbone plus i.i.d. noise of scale 0.01.
+
+    `rank` is `_MU` (a normalised rank, so every value stays inside [0, 1]) plus
+    N(0, 0.01) per event and contact — the brief's noise scale. The gaps in `_MU` are
+    0.16, roughly 120 times the per-half noise of a mean over ~30 events, so a window's
+    masked mean rank reproduces `_MU`'s ORDER exactly and the raw agreement is 1.0.
+
+    `group_ids` get their own, much larger N(0, 0.20) jitter around the same backbone,
+    so recruitment order genuinely varies event to event and the precedence family is
+    non-degenerate rather than a constant vector Spearman cannot score. Rank and group
+    id are separate inputs by `local_repertoire`'s own contract (ties come from the
+    group ids, never from equal rank values), so giving each its own noise is legal.
+
+    Participation is Bernoulli per event with a per-contact rate, which is how a rate
+    descriptor carries noise; the brief's "0.01" is a rank unit and does not transfer to
+    a participation rate. Every contact stays far above the floor of 5 in either half
+    (0.70 x 30 = 21 events at worst).
+    """
+    rng = np.random.default_rng(seed)
+    mu = _MU if deviation is None else _MU + np.asarray(deviation, dtype=float)
+    n_contacts = mu.size
+    rank = mu[None, :] + rng.normal(0.0, 0.01, size=(n_events, n_contacts))
+    jitter = mu[None, :] + rng.normal(0.0, 0.20, size=(n_events, n_contacts))
+    group_ids = np.argsort(np.argsort(jitter, axis=1), axis=1).astype(np.int16)
+    participation = (rng.random((n_events, n_contacts)) < _PARTICIPATION_P[None, :]).astype(
+        np.uint8
+    )
+    return rank, participation, group_ids
+
+
+def _repertoire_of(arrays):
+    return local_repertoire(*arrays, **_FLOORS)
+
+
+def test_residualising_removes_a_constant_backbone_offset():
+    # 40 windows, all the same backbone plus i.i.d. noise: there is no slow-state
+    # deviation anywhere in this patient. The raw curve nonetheless reports near-perfect
+    # agreement, because the backbone alone reproduces in every half -- that is the
+    # failure mode §6.6 exists to prevent. Once the train-only backbone is removed, all
+    # that is left is the sampling noise, which carries no cross-half information.
+    #
+    # The residual median comes out NEGATIVE (about -0.31), not zero, and that is
+    # correct rather than an artefact: the two halves are complementary subsets of one
+    # finite window, so their deviations from the window's own mean are anti-correlated
+    # once the shared backbone is gone. `window_state` compares this median against the
+    # contact-permuted null (median ~ +0.03 here), so such a window reads BELOW_CHANCE
+    # on the residual curve -- the right answer for a patient with no slow state.
+    train = [_repertoire_of(_backbone_window(seed=s)) for s in range(32)]
+    backbone = estimate_backbone(train)
+    held_out = _backbone_window(seed=999)
+
+    raw = window_agreements(
+        *held_out, random_half_draws=200, null_draws=200, seed=3, floors=_FLOORS
+    )
+    residual = window_agreements(
+        *held_out,
+        random_half_draws=200,
+        null_draws=200,
+        seed=3,
+        floors=_FLOORS,
+        residualise=True,
+        backbone=backbone,
+    )
+
+    assert np.median(raw["random_half"]["mean_rank"]) > 0.95
+    assert np.median(residual["random_half"]["mean_rank"]) < 0.3
+
+
+def test_residualising_preserves_a_real_local_deviation():
+    # Same backbone, but the first 20 windows carry a systematic +0.05 on contacts 0-2
+    # and the last 20 carry -0.05. The analysed window is windows 19 and 20 laid end to
+    # end, so `window_agreements`' chronological split (n_events // 2 = 60) falls exactly
+    # on the state boundary.
+    #
+    # MAGNITUDE NOTE: the brief specifies +/-0.5. `event_local_rank` is a normalised rank
+    # (spec §6.2), so the whole backbone spans [0.10, 0.90] and a 0.5 shift on 3 of 6
+    # contacts reorders them completely -- worked out by hand, +/-0.5 on contacts 0-2
+    # gives a raw chronological Spearman of 0.2, and on the top three contacts 0.714,
+    # neither of which can satisfy "the raw one stays above 0.8". The magnitude is
+    # therefore 0.05, a quarter of the 0.2 backbone gap: it never reorders the raw
+    # descriptor (contact 2 at 0.42 + 0.05 = 0.47 is still below contact 3 at 0.58), so
+    # the raw agreement stays 1.0. Every structural feature the test targets is
+    # unchanged, and the residual assertion is magnitude-invariant because Spearman
+    # reads only the sign pattern: the residual is [+d, +d, +d, 0, 0, 0] against
+    # [-d, -d, -d, 0, 0, 0] for ANY d that beats the per-half noise (0.05 beats it by a
+    # factor of ~38), which forces rho into [-1.0, -0.543] whatever d is.
+    deviation = np.array([0.05, 0.05, 0.05, 0.0, 0.0, 0.0])
+    windows = [
+        _backbone_window(seed=1000 + s, deviation=deviation if s < 20 else -deviation)
+        for s in range(40)
+    ]
+    # the two deviations cancel exactly over these 40 train windows, so the backbone is
+    # the shared part and nothing else
+    backbone = estimate_backbone([_repertoire_of(w) for w in windows])
+    straddling = tuple(
+        np.concatenate([windows[19][k], windows[20][k]], axis=0) for k in range(3)
+    )
+
+    raw = window_agreements(
+        *straddling, random_half_draws=20, null_draws=20, seed=5, floors=_FLOORS
+    )
+    residual = window_agreements(
+        *straddling,
+        random_half_draws=20,
+        null_draws=20,
+        seed=5,
+        floors=_FLOORS,
+        residualise=True,
+        backbone=backbone,
+    )
+
+    assert raw["chronological"]["mean_rank"] > 0.8
+    assert residual["chronological"]["mean_rank"] < 0.0
+
+
+def test_residualising_without_a_backbone_raises_instead_of_returning_the_raw_curve():
+    window = _backbone_window(seed=1)
+    with pytest.raises(ValueError, match="needs a backbone"):
+        window_agreements(
+            *window,
+            random_half_draws=2,
+            null_draws=2,
+            seed=0,
+            floors=_FLOORS,
+            residualise=True,
+        )
+
+
+def test_residualising_neither_invents_a_number_nor_destroys_one():
+    # `_residualise_descriptors` is private but is where both halves of the nan contract
+    # live, and neither half is reachable from the two curve-level fixtures above (their
+    # windows are fully supported). Contact 1's backbone is nan and its window value is
+    # not: the window measured something, so it must survive (a plain subtraction would
+    # return nan and drop that contact from every later agreement). Contact 2's window
+    # value is nan: nothing was measured, so it must stay nan (treating the nan as 0
+    # would invent -3.0).
+    repertoire = {
+        "participation_rate": np.array([10.0, 20.0, np.nan]),
+        "masked_mean_rank": np.array([10.0, 20.0, np.nan]),
+        "precedence": np.array([0.9, 0.8, np.nan]),
+        "pair_index": [(0, 1), (0, 2), (1, 2)],
+    }
+    backbone = {
+        "participation_rate": np.array([1.0, np.nan, 3.0]),
+        "masked_mean_rank": np.array([1.0, np.nan, 3.0]),
+        "precedence": np.array([0.5, np.nan, 0.6]),
+        "pair_index": [(0, 1), (0, 2), (1, 2)],
+    }
+    out = _residualise_descriptors(repertoire, backbone)
+    np.testing.assert_allclose(out["masked_mean_rank"], [9.0, 20.0, np.nan])
+    np.testing.assert_allclose(out["participation_rate"], [9.0, 20.0, np.nan])
+    np.testing.assert_allclose(out["precedence"], [0.4, 0.8, np.nan])
+
+
+def test_the_permuted_null_side_has_its_own_contacts_backbone_removed():
+    # The contact-null permutes columns BEFORE the repertoire is computed, so array
+    # position i holds physical contact contact_perm[i]. A main effect belongs to a
+    # physical contact, so the backbone must be reindexed by the same permutation;
+    # subtracting position-wise would leave the null side carrying a difference between
+    # two contacts' backbones that the observed side does not carry.
+    #
+    # perm = [2, 0, 1]. Contacts: position 0 holds contact 2, position 1 holds contact 0,
+    # position 2 holds contact 1, so mean rank becomes [100-3, 200-1, 300-2].
+    # Pairs, layout (i<j) -> physical (perm[i], perm[j]):
+    #   (0,1) -> (2,0), reversed  -> 1 - bb[(0,2)] = 1 - 0.7 = 0.3 -> 0.5 - 0.3 = +0.2
+    #   (0,2) -> (2,1), reversed  -> 1 - bb[(1,2)] = 1 - 0.6 = 0.4 -> 0.4 - 0.4 =  0.0
+    #   (1,2) -> (0,1), forward   ->     bb[(0,1)] =       0.8     -> 0.3 - 0.8 = -0.5
+    # Two wrong implementations give different numbers, so this fixture discriminates:
+    # position-wise gives ranks [99, 198, 297] and pairs [-0.3, -0.3, -0.3]; reindexing
+    # but forgetting that precedence reverses gives pairs [-0.2, -0.2, -0.5].
+    repertoire = {
+        "participation_rate": np.array([10.0, 20.0, 30.0]),
+        "masked_mean_rank": np.array([100.0, 200.0, 300.0]),
+        "precedence": np.array([0.5, 0.4, 0.3]),
+        "pair_index": [(0, 1), (0, 2), (1, 2)],
+    }
+    backbone = {
+        "participation_rate": np.array([0.1, 0.2, 0.3]),
+        "masked_mean_rank": np.array([1.0, 2.0, 3.0]),
+        "precedence": np.array([0.8, 0.7, 0.6]),
+        "pair_index": [(0, 1), (0, 2), (1, 2)],
+    }
+    out = _residualise_descriptors(
+        repertoire, backbone, contact_perm=np.array([2, 0, 1])
+    )
+    np.testing.assert_allclose(out["masked_mean_rank"], [97.0, 199.0, 298.0])
+    np.testing.assert_allclose(out["precedence"], [0.2, 0.0, -0.5], atol=1e-12)
+
+    identity = _residualise_descriptors(repertoire, backbone)
+    np.testing.assert_allclose(identity["masked_mean_rank"], [99.0, 198.0, 297.0])
 
 
 # ---------------------------------------------------------------------------
