@@ -125,6 +125,38 @@ def cv_block_profile(rate, *, fs, block_ms):
     return out
 
 
+def modulation_amplitude_hz(rate):
+    """Absolute size of the sustained modulation, in Hz.
+
+    Relative peak prominence is misleading on its own: a nearly flat trace can
+    still put a large peak above its own low-amplitude residual.  This says how
+    big the swing actually is.
+    """
+    rate = np.asarray(rate, float)
+    return float(detrend(rate, type="linear").std()) if rate.size > 1 else 0.0
+
+
+def long_run_class(row):
+    """Which of the branches the twelve-second arm actually settled into.
+
+    Collapsing these would misreport the high-strength arms, which hold their
+    modulation for the whole run rather than relaxing back onto the point.
+    """
+    profile = list(row["cv_block_profile"])
+    if not profile:
+        return "no_profile"
+    started = modulation_band(max(profile)) == "clean"
+    ended = modulation_band(profile[-1]) == "clean"
+    if not ended:
+        return "decays_to_tonic_fixed_point" if started else "tonic_throughout"
+    if row["post_onset_deep_gap_fraction"] > 0.20:
+        return "persistent_deep_gap_burst_train"
+    return (
+        "continuous_modulated_carrier" if row["credible_carrier"]
+        else "persistent_modulated_below_gate"
+    )
+
+
 def adjudicate(rows):
     """Separate "the fixed point broke" from "a carrier cleared every gate"."""
     main = [r for r in rows if r["som_seed"] == 1 and r["persistent_g"] == 0.32]
@@ -248,15 +280,19 @@ def main():
         row["cv_block_profile"] = cv_block_profile(rate, fs=500.0, block_ms=2000.0)
         peak_hz, prominence = spectral_peak(rate[-4000:], fs=500.0)
         row["sustained_peak_hz"], row["sustained_peak_prominence"] = peak_hz, prominence
+        row["sustained_modulation_hz"] = modulation_amplitude_hz(rate[-4000:])
+        row["long_run_class"] = long_run_class(row)
         row["short_arm_is_bit_exact_prefix"] = True
         long_rows[key] = row
 
     verdict = adjudicate(list(rows.values()))
     verdict["durability"] = {
         f"b{b:g}_g{g:g}_s{s}": {
+            "long_run_class": r["long_run_class"],
             "credible_carrier": r["credible_carrier"],
-            "modulation_band": r["modulation_band"],
+            "post_onset_deep_gap_fraction": r["post_onset_deep_gap_fraction"],
             "sustained_core_cv": r["sustained_core_cv"],
+            "sustained_modulation_hz": r["sustained_modulation_hz"],
             "cv_block_profile": r["cv_block_profile"],
             "tail_label": r["tail"]["label"],
             "dmd_leading_hz": (
@@ -265,17 +301,44 @@ def main():
         }
         for (b, g, s), r in sorted(long_rows.items())
     }
-    # A candidate that decays back onto the fixed point is not a carrier, and
-    # the 2.5 s window cannot see that, so the long arm overrides it.
-    sustained = [
-        key for key, r in long_rows.items()
-        if r["credible_carrier"] and r["modulation_band"] == "clean"
+    # The twelve-second arms override the short verdict, and they do not all
+    # land in the same place: weak strengths relax back onto the point while
+    # strong ones hold their modulation as the deep-gap train the substrate
+    # already had.  Reporting one label for both would misstate half the panel.
+    # The short panel's candidates were read on a 2.5 s window; where the same
+    # arm has a long run that settles flat, the candidacy is refuted by its own
+    # trajectory and must not be left standing in the artifact.
+    verdict["candidate_arms_refuted_by_long_run"] = [
+        {"beta_SG": b, "som_seed": s, "long_run_class": long_rows[(b, g, s)]["long_run_class"]}
+        for (b, g, s) in sorted(long_rows)
+        if any(c["beta_SG"] == b and c["som_seed"] == s for c in verdict["candidate_arms"])
+        and long_rows[(b, g, s)]["long_run_class"] != "continuous_modulated_carrier"
     ]
-    if verdict["durability"] and not sustained:
-        verdict["verdict"] = "SUBTRACTIVE_POOL_MODULATION_IS_A_DECAYING_TRANSIENT"
-        verdict["next_coordinate"] = (
-            "every tested strength relaxes back onto the fixed point within 12 s"
-        )
+    main_long = {
+        key: r for key, r in long_rows.items() if key[1] == 0.32 and key[2] == 1
+    }
+    if main_long:
+        classes = {r["long_run_class"] for r in main_long.values()}
+        verdict["long_run_classes_seen"] = sorted(classes)
+        if "continuous_modulated_carrier" in classes:
+            verdict["verdict"] = "SUBTRACTIVE_POOL_CONTINUOUS_MODULATED_CARRIER"
+            verdict["next_coordinate"] = "replicate the carrier, then release Z/M"
+        elif {"decays_to_tonic_fixed_point", "tonic_throughout"} & classes and (
+            "persistent_deep_gap_burst_train" in classes
+        ):
+            verdict["verdict"] = "SUBTRACTIVE_POOL_SWITCHES_BRANCH_WITHOUT_AN_INTERMEDIATE_CARRIER"
+            verdict["next_coordinate"] = (
+                "weak strengths relax onto the tonic point and strong ones restore the "
+                "deep-gap train; no strength held both continuity and modulation"
+            )
+        elif "persistent_deep_gap_burst_train" in classes:
+            verdict["verdict"] = "SUBTRACTIVE_POOL_RESTORES_THE_DEEP_GAP_BURST_TRAIN"
+            verdict["next_coordinate"] = "the modulation it sustains is the gappy train, not a carrier"
+        else:
+            verdict["verdict"] = "SUBTRACTIVE_POOL_MODULATION_IS_A_DECAYING_TRANSIENT"
+            verdict["next_coordinate"] = (
+                "every tested strength relaxes back onto the fixed point within 12 s"
+            )
     OUT.mkdir(parents=True, exist_ok=True)
     (OUT / "subtractive_pool_carrier_summary.json").write_text(
         json.dumps(

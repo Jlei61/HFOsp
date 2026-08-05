@@ -2,7 +2,8 @@ import numpy as np
 import pytest
 
 from scripts.analyze_topic4_zm_subtractive_pool_carrier import (
-    adjudicate, arm_key, cv_block_profile, modulation_band, spectral_peak,
+    adjudicate, arm_key, cv_block_profile, long_run_class,
+    modulation_amplitude_hz, modulation_band, spectral_peak,
 )
 
 
@@ -102,6 +103,54 @@ def test_cv_block_profile_shows_whether_modulation_decays():
     decaying = 200.0 + 60.0 * np.exp(-t) * np.sin(2 * np.pi * 10.0 * t)
     decayed = cv_block_profile(decaying, fs=fs, block_ms=2000.0)
     assert decayed[0] > 5.0 * decayed[-1]          # the rhythm dies out
+
+
+def _long(*, profile, gap, gate7=True):
+    return {"cv_block_profile": profile, "post_onset_deep_gap_fraction": gap,
+            "credible_carrier": gate7}
+
+
+def test_a_sustained_burst_train_is_not_called_a_decay():
+    """High strength holds its modulation; calling that a decay is simply wrong."""
+    assert long_run_class(_long(
+        profile=[0.979, 0.916, 0.883, 0.900, 0.912, 0.873], gap=0.348, gate7=False,
+    )) == "persistent_deep_gap_burst_train"
+
+
+def test_a_transient_that_settles_flat_is_a_decay():
+    assert long_run_class(_long(
+        profile=[0.849, 0.173, 0.041, 0.043, 0.039, 0.038], gap=0.005,
+    )) == "decays_to_tonic_fixed_point"
+    # A longer transient is still a decay, not a different outcome.
+    assert long_run_class(_long(
+        profile=[0.908, 0.754, 0.078, 0.040, 0.036, 0.037], gap=0.057,
+    )) == "decays_to_tonic_fixed_point"
+
+
+def test_a_run_that_never_modulated_is_reported_as_such():
+    assert long_run_class(_long(
+        profile=[0.06, 0.04, 0.04, 0.04, 0.04, 0.04], gap=0.0,
+    )) == "tonic_throughout"
+
+
+def test_the_target_outcome_needs_modulation_continuity_and_every_gate():
+    assert long_run_class(_long(
+        profile=[0.5, 0.48, 0.51, 0.49, 0.50, 0.52], gap=0.05,
+    )) == "continuous_modulated_carrier"
+    # Continuous and modulated but failing a gate is not the target outcome.
+    assert long_run_class(_long(
+        profile=[0.5, 0.48, 0.51, 0.49, 0.50, 0.52], gap=0.05, gate7=False,
+    )) == "persistent_modulated_below_gate"
+
+
+def test_modulation_amplitude_is_absolute_not_only_relative():
+    """A large relative peak on a nearly flat trace is not a large rhythm."""
+    fs = 500.0
+    t = np.arange(0, 4.0, 1.0 / fs)
+    flat_ish = 200.0 + 0.5 * np.sin(2 * np.pi * 47.0 * t)
+    bursty = 100.0 + 90.0 * np.sin(2 * np.pi * 4.0 * t)
+    assert modulation_amplitude_hz(flat_ish) < 1.0
+    assert modulation_amplitude_hz(bursty) > 50.0
 
 
 def _row(*, beta, g, gate7, cv, seed=1):
