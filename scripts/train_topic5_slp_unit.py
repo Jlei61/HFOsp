@@ -47,6 +47,11 @@ DEFAULTS: Dict[str, Any] = {
     "edge_budget": 6.0,
     "knn_k": 6,
     "wiring_strength": 0.1,
+    # The budget term controls how MANY edges survive; the wiring term controls
+    # WHICH ones.  Left weak, the wiring term does both and drives the degree to
+    # zero, after which the model is only a per-contact bias and the structural
+    # question is vacuous.  Calibrated like the wiring term, against the task loss.
+    "edge_budget_strength": 0.5,
     "node_density": "spec",
     "batch_size": 256,
     "lr": 3e-3,
@@ -56,11 +61,11 @@ DEFAULTS: Dict[str, Any] = {
     # negative; every run here records whether it converged or hit the ceiling.
     "epochs_warmup": 10,
     "epochs_structure": 25,
-    "epochs_freeze": 30,
+    "epochs_freeze": 60,
     "temperature_start": 1.0,
     "temperature_end": 0.3,
     "stop_weight": 1.0,
-    "patience": 6,
+    "patience": 8,
     "min_relative_improvement": 1e-4,
     "max_batches_per_epoch": 120,
     "use_contact_bias": True,
@@ -102,7 +107,14 @@ def make_model(arm: str, cfg: Dict[str, Any], plane, nodes, operator, seed: int)
     return SLPModel(config)
 
 
-def evaluate(model, tensors, temperature, device, batch_size=512) -> Dict[str, float]:
+def evaluate(model, tensors, temperature, device, batch_size=512,
+             contact_subset=None) -> Dict[str, float]:
+    """``contact_subset`` restricts the likelihood to those contacts only.
+
+    Used by leave-contact-out, where the question is how well the model does at
+    positions it never trained on -- averaging those in with the trained
+    contacts would hide exactly the effect being tested.
+    """
     model.eval()
     n = tensors.x.shape[0]
     totals = {"next_bce": 0.0, "stop_bce": 0.0, "contact_nll": 0.0, "top1": 0.0}
@@ -112,12 +124,19 @@ def evaluate(model, tensors, temperature, device, batch_size=512) -> Dict[str, f
             chunk = slice(start, min(start + batch_size, n))
             batch = _slice(tensors, chunk).to(device)
             logits, stop = model(batch.x, batch.recruited, batch.valid, temperature)
+            available = batch.available
+            if contact_subset is not None:
+                keep = torch.zeros(available.shape[-1], dtype=torch.bool, device=device)
+                keep[torch.as_tensor(contact_subset, device=device)] = True
+                available = available & keep
             _, next_bce, stop_bce = next_set_stop_loss(
-                logits, stop, batch.target, batch.available, batch.valid, batch.is_last
+                logits, stop, batch.target, available, batch.valid, batch.is_last
             )
             predict = batch.valid & ~batch.is_last
-            nll = cardinality_conditioned_nll(logits, batch.target, batch.available, predict)
-            masked = logits.masked_fill(~batch.available, -1e9)
+            if contact_subset is not None:
+                predict = predict & (batch.target * available.float()).sum(-1).bool()
+            nll = cardinality_conditioned_nll(logits, batch.target, available, predict)
+            masked = logits.masked_fill(~available, -1e9)
             top1 = ((masked.argmax(-1)[..., None] ==
                      batch.target.argmax(-1)[..., None]) & predict[..., None]).float().sum()
             m = float(predict.float().sum())
@@ -138,9 +157,28 @@ def _slice(tensors, chunk):
     )
 
 
+def resolve_holdout(n_contacts: int, spec: str, seed: int) -> np.ndarray:
+    """Contacts withheld from training, for the leave-contact-out arm.
+
+    ``spec`` is either a comma-separated index list or ``auto:<fraction>``.  The
+    automatic choice is a fixed permutation of the contact order under the given
+    seed, so the same patient and seed always hold out the same contacts across
+    arms -- otherwise the two arms would be scored on different positions.
+    """
+    if not spec:
+        return np.array([], int)
+    if spec.startswith("auto:"):
+        fraction = float(spec.split(":", 1)[1])
+        k = max(2, int(round(fraction * n_contacts)))
+        rng = np.random.default_rng(seed)
+        return np.sort(rng.permutation(n_contacts)[:k])
+    return np.sort(np.array([int(v) for v in spec.split(",")], int))
+
+
 def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
                out_dir: Path, device: torch.device,
-               cache_root: Path | None = None) -> Dict[str, Any]:
+               cache_root: Path | None = None,
+               holdout_spec: str = "", holdout_mode: str = "weak") -> Dict[str, Any]:
     cache_root = cache_root or (OUT_ROOT / "cache")
     plane, nodes, operator, events, provenance = load_patient(subject, cache_root)
     group_ids = events["group_ids"]
@@ -150,6 +188,30 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
     for name, code in (("train", 0), ("validation", 1), ("test", 2)):
         idx = np.flatnonzero(split == code)
         partitions[name] = build_event_tensors(group_ids[idx])
+
+    n_contacts = int(provenance["n_contacts"])
+    holdout = resolve_holdout(n_contacts, holdout_spec, seed)
+    retained = np.setdiff1d(np.arange(n_contacts), holdout)
+    if len(holdout):
+        # The per-contact bias is a free parameter that a withheld contact has no
+        # way to learn, so the test is only well posed without it -- on BOTH
+        # compared arms.  Spec 7.1.
+        cfg = dict(cfg, use_contact_bias=False)
+        for name in ("train", "validation", "test"):
+            t = partitions[name]
+            keep = torch.ones(n_contacts, dtype=torch.bool)
+            keep[torch.as_tensor(holdout)] = False
+            available = t.available & keep if holdout_mode == "weak" else t.available
+            x = t.x.clone()
+            recruited = t.recruited.clone()
+            if holdout_mode == "strong":
+                x[..., holdout] = 0.0
+                recruited[..., holdout] = 0.0
+                available = t.available & keep
+            partitions[name] = type(t)(
+                x=x, recruited=recruited, available=available,
+                target=t.target, valid=t.valid, is_last=t.is_last,
+            )
 
     model = make_model(arm, cfg, plane, nodes, operator, seed).to(device)
     optimiser = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
@@ -167,6 +229,7 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
     t_start, t_end = float(cfg["temperature_start"]), float(cfg["temperature_end"])
 
     lambda_wire = 0.0
+    lambda_edge = 0.0
     log_rows = []
     best = {"validation_next_bce": float("inf"), "epoch": -1}
     best_state = None
@@ -184,7 +247,9 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
         else:
             phase, temperature, ramp = "freeze", t_end, 1.0
             if learnable and frozen_edges is None:
-                frozen_edges = model.graph.freeze_topology(temperature)
+                frozen_edges = model.graph.freeze_topology(
+                    temperature, float(cfg["edge_budget"])
+                )
                 model.graph.gate.log_alpha.requires_grad_(False)
 
         model.train()
@@ -205,9 +270,15 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
             wire = model.wiring_loss(temperature)
             budget = model.edge_budget_loss(temperature)
             if learnable and phase == "structure" and lambda_wire == 0.0 and float(wire) > 0:
-                # calibrate once: the requested fraction of the task loss
+                # calibrate both penalties once, each against the task loss, so
+                # neither silently swamps the other
                 lambda_wire = float(cfg["wiring_strength"]) * float(task) / float(wire)
-            loss = task + ramp * lambda_wire * wire + ramp * 0.01 * budget
+                # Priced per unit of squared degree error, NOT against the budget
+                # loss at calibration time -- the graph starts dense, so that
+                # loss is huge and normalising by it makes the term vanish
+                # exactly when the degree starts falling below target.
+                lambda_edge = float(cfg["edge_budget_strength"]) * float(task)
+            loss = task + ramp * lambda_wire * wire + ramp * lambda_edge * budget
             optimiser.zero_grad(set_to_none=True)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), 5.0)
@@ -217,7 +288,8 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
         validation = evaluate(model, partitions["validation"], temperature, device)
         row = {
             "epoch": epoch, "phase": phase, "temperature": temperature,
-            "lambda_wire": lambda_wire, "train_task": epoch_loss / max(n_batches, 1),
+            "lambda_wire": lambda_wire, "lambda_edge": lambda_edge,
+            "train_task": epoch_loss / max(n_batches, 1),
             **{f"validation_{k}": v for k, v in validation.items()},
         }
         if learnable:
@@ -247,6 +319,24 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
         model.load_state_dict(best_state)
     model.to(device)
     test = evaluate(model, partitions["test"], t_end, device)
+    holdout_metrics: Dict[str, float] = {}
+    if len(holdout):
+        clean = build_event_tensors(group_ids[split == 2])
+        if holdout_mode == "strong":
+            x = clean.x.clone(); rec = clean.recruited.clone()
+            x[..., holdout] = 0.0; rec[..., holdout] = 0.0
+            clean = type(clean)(x=x, recruited=rec, available=clean.available,
+                                target=clean.target, valid=clean.valid,
+                                is_last=clean.is_last)
+        held = evaluate(model, clean, t_end, device, contact_subset=holdout)
+        kept = evaluate(model, clean, t_end, device, contact_subset=retained)
+        holdout_metrics = {
+            **{f"heldout_contact_{k}": v for k, v in held.items()},
+            **{f"retained_contact_{k}": v for k, v in kept.items()},
+            "holdout_contacts": holdout.tolist(),
+            "holdout_mode": holdout_mode,
+            "n_holdout_contacts": int(len(holdout)),
+        }
 
     metrics: Dict[str, Any] = {
         "subject": subject, "arm": arm, "seed": seed,
@@ -264,6 +354,7 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
         **{f"test_{k}": v for k, v in test.items()},
         "validation_next_bce": best["validation_next_bce"],
         "lambda_wire": lambda_wire,
+        **holdout_metrics,
     }
 
     if arm in ("CONTACT_GRAPH_RNN", "LATENT_LEARNED_SPATIAL_RNN", "LATENT_FIXED_LOCAL_RNN",
@@ -324,6 +415,9 @@ def main() -> int:
     parser.add_argument("--out", type=Path, required=True)
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--cache-root", type=Path, default=None)
+    parser.add_argument("--holdout-contacts", default="",
+                        help="index list, or auto:<fraction>, withheld from training")
+    parser.add_argument("--holdout-mode", choices=("weak", "strong"), default="weak")
     args = parser.parse_args()
 
     cfg = dict(DEFAULTS)
@@ -338,12 +432,18 @@ def main() -> int:
 
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
+    effective = dict(cfg)
+    if args.holdout_contacts:
+        effective["use_contact_bias"] = False  # forced by spec 7.1
     (out_dir / "config.json").write_text(json.dumps(
-        {"subject": args.subject, "arm": args.arm, "seed": args.seed, **cfg}, indent=1
+        {"subject": args.subject, "arm": args.arm, "seed": args.seed,
+         "holdout_contacts": args.holdout_contacts,
+         "holdout_mode": args.holdout_mode, **effective}, indent=1
     ))
     try:
         metrics = train_unit(args.subject, args.arm, args.seed, cfg, out_dir,
-                             torch.device(args.device), args.cache_root)
+                             torch.device(args.device), args.cache_root,
+                             args.holdout_contacts, args.holdout_mode)
     except Exception as exc:  # noqa: BLE001 - a failed unit must not stop the cohort
         (out_dir / "FAILED.json").write_text(json.dumps(
             {"subject": args.subject, "arm": args.arm, "seed": args.seed,

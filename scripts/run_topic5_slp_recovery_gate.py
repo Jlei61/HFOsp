@@ -36,6 +36,10 @@ PYTHON = "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python"
 # usable structural claim would need.
 EDGE_AUC_FLOOR = 0.60
 FLOW_SIGN_AGREEMENT_FLOOR = 0.80
+# The third layer is weaker than either: not which edges exist, not which way the
+# field travels overall, but only whether nodes are ordered correctly by how far
+# along the axis their influence reaches.  Scored by a sign test across cells.
+FLOW_ORDER_BINOMIAL_ALPHA = 0.05
 
 
 def edge_auc(fitted: np.ndarray, true: np.ndarray) -> float:
@@ -128,12 +132,17 @@ def main() -> int:
     if not cells:
         raise SystemExit("no synthetic cell completed; the gate cannot be evaluated")
 
+    from scipy.stats import binomtest
+
     aucs = np.array([c["edge_auc"] for c in cells])
     sign_agreement = float(np.mean([c["flow_sign_agrees"] for c in cells]))
     rhos = np.array([c["flow_node_spearman"] for c in cells])
 
     edge_pass = bool(np.median(aucs) >= EDGE_AUC_FLOOR)
     flow_pass = bool(sign_agreement >= FLOW_SIGN_AGREEMENT_FLOOR)
+    n_positive = int((rhos > 0).sum())
+    order_p = float(binomtest(n_positive, len(rhos), 0.5, alternative="greater").pvalue)
+    order_pass = bool(order_p < FLOW_ORDER_BINOMIAL_ALPHA)
     verdict = {
         "contract": "topic5_slp_recovery_gate_v0_1",
         "subject": args.subject,
@@ -153,6 +162,23 @@ def main() -> int:
             "node_spearman_max": float(rhos.max()),
             "status": "RECOVERABLE" if flow_pass else "NOT_RECOVERABLE",
         },
+        "flow_ordering": {
+            "n_cells_positive": n_positive,
+            "n_cells": len(rhos),
+            "median_node_spearman": float(np.median(rhos)),
+            "sign_test_p": order_p,
+            "status": "RECOVERABLE" if order_pass else "NOT_RECOVERABLE",
+            "means": (
+                "the relative ordering of how far along the axis each node's "
+                "influence reaches is recovered; this is weaker than edge "
+                "identity and weaker than the global direction of travel"
+            ),
+        },
+        "reportable_layers": {
+            "edge_identity": edge_pass,
+            "global_axis_direction": flow_pass,
+            "node_flow_ordering": order_pass,
+        },
         "consequence": (
             "structure legs (H3 learned-vs-fixed topology, H4 patient-specific "
             "graphs, H5 targeted lesion) are reportable"
@@ -164,6 +190,13 @@ def main() -> int:
             "large equivalence class. Prediction legs H1, H1b and H2 are "
             "unaffected -- they ask whether the field predicts, not which edges "
             "carry it."
+            + (
+                " Node-level flow ORDERING is separately recoverable, so a cohort "
+                "comparison of where the field pushes hardest is defensible if it "
+                "is framed as relative ordering and never as the graph itself."
+                if order_pass else
+                " No structural layer survived, including node flow ordering."
+            )
         ),
         "cells": cells,
     }
