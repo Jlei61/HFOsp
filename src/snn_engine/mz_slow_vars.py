@@ -42,6 +42,10 @@ from dataclasses import dataclass
 import numpy as np
 
 
+GBA_SENSE_BIN_MS = 1.0   # ms; the detector's active-fraction bin, which the burst
+                         # sensor is normalised to so its gate is in measured units
+
+
 def cooperative_u_tilde(u, A_c, u_c, K_c, n):
     """FCXR-HEO1 cooperative recurrent-conductance gate (design lock 2026-07-24 §mechanism).
 
@@ -188,6 +192,19 @@ class MZSlowVarsConfig:
     pump_u_init_E: "np.ndarray | None" = None  # start the load at an equilibrated field (None -> zeros)
     pump_record_calibration: bool = False    # OBSERVER: cumulative per-cell sum phi(u) + spike counts
     pump_interventions: "list | None" = None  # scheduled INTEGER-step interventions (see _normalize_pump_interventions)
+    # ---- global-burst adaptation: a slow brake only seizure-scale recruitment can charge ----
+    # Keyed to HOW MUCH TISSUE an event recruits, never to how often events arrive.  Measured on
+    # this substrate, the smoulder that blocks recovery fires DENSER than the train that produces
+    # entry (212-282 ms between events against 255-372 ms), so any rate-keyed brake engages before
+    # entry rather than after it; recruitment separates cleanly instead -- the pre-entry train peaks
+    # at 0.095 of the array while the smoulder's median is 0.178-0.281 and the discharge's is 0.390.
+    use_gba: bool = False          # master switch; False -> no state allocated, no float touched (byte parity)
+    gba_gate: float = 0.15         # recruited fraction of E cells (1 ms equivalent) below which nothing charges
+    tau_gba_sense: float = 5.0     # ms  burst-sensor window; wider than the 1 ms bin it is
+                               # normalised to, so synchrony cannot fake a seizure-scale reading
+    tau_gba_charge: float = 2000.0   # ms  rise, fast enough to fill during a discharge
+    tau_gba_release: float = 30000.0  # ms  fall; MUST exceed tau_z or the brake lets go while wear still clears
+    eta_gba: float = 0.0           # adaptation current per unit supra-gate recruitment; 0 = sensor-only
 
 
 class MZSlowVars:
@@ -237,6 +254,11 @@ class MZSlowVars:
         self._eta_full = np.full(self.N, float(self.cfg.eta_m))
         self._eta_full[:self.NE] = self._eta_E
         self.phi = np.zeros(self.N)
+        # ---- global-burst adaptation state (allocated ONLY when use_gba; off -> None -> byte parity) ----
+        # Both are scalars: the trigger is a population property (how much of the array a single
+        # event recruits), so a per-cell state would claim a spatial resolution the sensor lacks.
+        self.gba_burst = 0.0 if self.cfg.use_gba else None   # recruited fraction, 1 ms equivalent
+        self.gba_a = 0.0 if self.cfg.use_gba else None       # the slow brake itself
         # ---- FCXR pump lifecycle state (allocated ONLY when use_pump; off -> None -> byte parity) ----
         self.u_pump_E = np.zeros(self.NE) if self.cfg.use_pump else None
         self.pump_phi_sum_E = None
@@ -373,12 +395,17 @@ class MZSlowVars:
         if self.cfg.record_calib:
             self._record_calib(I_E, I_I)                        # pure side-effect (does not alter return)
         ex = self._pump_excess_E()                              # None unless the pump reaches the membrane
-        if ex is None and not self.cfg.use_z and not self.cfg.use_m and self.cfg.z_frozen_E is None:
+        gba = self._gba_current()                               # 0.0 unless the brake is on AND charged
+        if (ex is None and gba == 0.0 and not self.cfg.use_z and not self.cfg.use_m
+                and self.cfg.z_frozen_E is None):
             return I_E - I_I                                    # EXACT byte-parity path (== membrane_step)
         inh = self.z * I_I if (self.cfg.use_z or self.cfg.z_frozen_E is not None) else I_I  # frozen z is applied
         I_net = I_E - inh
         if self.cfg.use_m:
             I_net = I_net - self._eta_full * self.m            # m==0 on I cells -> E-only adaptation current
+        if gba != 0.0:
+            I_net = I_net.copy()
+            I_net[:self.NE] -= gba                             # E-only, uniform: the trigger is a population property
         if ex is not None:
             I_net = I_net.copy()
             I_net[:self.NE] -= ex                              # E-only electrogenic pump (I cells untouched)
@@ -457,9 +484,16 @@ class MZSlowVars:
             I_inh_eff = local + global_part
 
         gI = c.gaba_gain * I_inh_eff / (c.v_match - c.e_gaba)
+        gba = self._gba_current()                                 # 0.0 unless the brake is on AND charged
         if c.use_m or c.m_frozen_E is not None:                   # FCXR-HEO2: frozen m also drives a static gM
             I_adap = self._eta_E * self.m[:self.NE]
+            if gba != 0.0:
+                I_adap = I_adap + gba
             gM = c.m_conductance_gain * I_adap / (c.v_match - c.e_k)
+        elif gba != 0.0:
+            # The brake shares the adaptation actuator, so it arrives as the same K-reversal
+            # conductance a spike-frequency adaptation would -- one actuator, two sensors.
+            gM = c.m_conductance_gain * gba / (c.v_match - c.e_k) * np.ones(self.NE, dtype=float)
         else:
             gM = np.zeros(self.NE, dtype=float)
 
@@ -594,6 +628,29 @@ class MZSlowVars:
     def step(self, spk, labels, dt):
         c = self.cfg
         spk = np.asarray(spk, bool)
+        if c.use_gba:
+            # Burst sensor: a leaky sum of the per-step recruited fraction, normalised by
+            # GBA_SENSE_BIN_MS / tau so that it reads "fraction of the array recruited per
+            # millisecond" whatever the window is -- the same number the detector reports as an
+            # event's peak extent, so the gate can be set from measured events directly and the
+            # window can be widened without rescaling it.
+            #
+            # The window is wider than that bin on purpose.  A leaky sum overshoots a perfectly
+            # synchronous input by 1/(1-exp(-bin/tau)); at tau equal to the bin that is 1.58x, so
+            # a 0.095 interictal event -- the largest measured -- would read 0.15 and trip a gate
+            # meant only for seizure-scale recruitment.  At 5 ms the overshoot is 1.10x.
+            self.gba_burst = (self.gba_burst * np.exp(-dt / c.tau_gba_sense)
+                              + (float(np.count_nonzero(spk[:self.NE])) / self.NE)
+                              * (GBA_SENSE_BIN_MS / c.tau_gba_sense))
+            excess = self.gba_burst - c.gba_gate
+            if excess < 0.0:
+                excess = 0.0
+            # Asymmetric, as the relay and the wear already are: rise while a discharge is
+            # recruiting the array, fall slowly enough to still be holding while wear clears.
+            tau = c.tau_gba_charge if excess > self.gba_a else c.tau_gba_release
+            self.gba_a += (excess - self.gba_a) * (1.0 - np.exp(-dt / tau))
+            if not (np.isfinite(self.gba_burst) and np.isfinite(self.gba_a)):
+                raise FloatingPointError("non-finite global-burst adaptation state")
         if c.use_x:
             # FCXR relay. CAUSAL: snapshot x_j(t-) BEFORE this frame's y/x update, so the engine scatter
             # sends the current spikes with the pre-spike relay availability (a single spike never weakens
@@ -669,6 +726,16 @@ class MZSlowVars:
         self._step_i += 1
 
     # ------------------------------------------------------------------ pump plugin (off by default)
+    def _gba_current(self):
+        """The brake's membrane effect, or exactly 0.0 when it is off, uncharged or sensor-only.
+
+        Returning a plain 0.0 rather than a zero array is what lets every caller keep its
+        byte-parity fast path on an `is 0.0` style test instead of an array comparison.
+        """
+        if not self.cfg.use_gba or self.cfg.eta_gba == 0.0 or self.gba_a == 0.0:
+            return 0.0
+        return float(self.cfg.eta_gba) * float(self.gba_a)
+
     def _pump_excess_E(self):
         """Baseline-centered electrogenic pump current on E cells at the CURRENT load u(t^-), or None
         when the pump must not reach the membrane (off / sensor-only / after a scheduled knockout).
@@ -888,6 +955,20 @@ class MZSlowVars:
             raise ValueError("MZ numeric configuration must be finite (max_total_conductance may be +inf)")
         if c.gaba_gain < 0.0 or c.m_conductance_gain < 0.0 or c.eta_m < 0.0:
             raise ValueError("conductance gains must be non-negative")
+        if c.use_gba:
+            if not (np.isfinite(c.gba_gate) and 0.0 <= c.gba_gate <= 1.0):
+                raise ValueError("gba_gate is a recruited fraction and must lie in [0,1]")
+            for nm, tau in (("tau_gba_sense", c.tau_gba_sense),
+                            ("tau_gba_charge", c.tau_gba_charge),
+                            ("tau_gba_release", c.tau_gba_release)):
+                if not (np.isfinite(tau) and tau > 0.0):
+                    raise ValueError(f"{nm} must be finite and positive")
+            if not (np.isfinite(c.eta_gba) and c.eta_gba >= 0.0):
+                raise ValueError("eta_gba must be finite and non-negative")
+        elif c.eta_gba != 0.0:
+            # A strength set with the brake off is a silently dead knob, which is how a
+            # mechanism gets reported as ineffective when it was never switched on.
+            raise ValueError("eta_gba requires use_gba=True")
         if c.v_match <= c.e_gaba or c.v_match <= c.e_k:
             raise ValueError("v_match must exceed e_gaba and e_k for positive force matching")
         if c.max_total_conductance <= 0.0:
