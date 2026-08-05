@@ -206,6 +206,76 @@ the moment its wear field is imposed; the trajectory's 5 s runs from the start o
 the recording, with wear climbing throughout. The clocks start at different
 events, so "the trajectory enters sooner" is not a statement these data support.
 
+## 4.1 Is the entry window a single point? No — and the two knobs trade off
+
+Nine cells, relay frozen at full availability so nothing can brake and entry is attributable
+to wear accumulating under the local feedback alone. 15 s each, 2.5× the slowest ignition at
+the registered point. The registered values sit at the centre.
+
+| wear time constant | feedback threshold ×0.90 | ×1.00 | ×1.10 |
+|---|---|---|---|
+| 2500 ms | 2 s / 4 events / dose 2.4 | 2 s / 4 / 2.3 | 6 s / 17 / 17.1 |
+| **5000 ms** (registered) | 2 s / 3 / 1.3 | **5 s / 13 / 7.7** | 11 s / 29 / 27.9 |
+| 10000 ms | 2 s / 3 / 1.3 | no entry in 15 s | no entry in 15 s |
+
+**Seven of nine enter, all of them cumulatively**, so the window is not a singleton. The
+registered centre cell reproduces the recorded trajectory's 5000 ms onset with 13 events
+against the trajectory's 12 and dose 7.7 against 7.3.
+
+The two knobs trade off along a diagonal: fast wear at the registered threshold and slow wear
+at a 10% lower threshold both give 2 s and 3–4 events. **The threshold sets how much
+accumulation is needed; the wear rate sets whether accumulation can get there inside the
+window.** Doubling the wear constant at the registered threshold puts entry out of reach of
+15 s; dropping the threshold 10% brings it back to 2 s.
+
+Dose scales with event count and the ratio *rises* with it — 0.43, 0.58, 0.61, 0.80, 0.96 per
+event from the 3-event to the 29-event cells — which is the same fact figure A reports from
+the other side: the events that immediately precede entry are the large ones.
+
+**Not licensed:** reading the 2 s cells against each other. Two seconds is the detector's
+floor, since it needs a couple of 1 s windows to call a bout, so four cells pile up there and
+their differences are below the measurement. And the whole grid is the entry leg of a
+relay-frozen subsystem, not the full model's window.
+
+**The registered centre cell does not reproduce the trajectory event for event** — only event
+1 matches, and they diverge from event 2 (1632 ms against 1857 ms) — while agreeing on onset
+time, entry class, event count and dose. The relay it pins at exactly 1.0 reads 0.999998 in
+the trajectory, so this is a 2e-6 perturbation reshuffling individual events while leaving the
+aggregate untouched. Individual event times here are chaotic; entry is not. Read the grid at
+the resolution of "enters / how many events / how much dose", never event by event.
+
+## 4.2 Where the loop actually breaks
+
+Both slow variables free, seeded from the late-bout state, 70 s, adjudicated by the registered
+return test rather than a workpoint label.
+
+| relay curve | terminates | returning events | rate | wear ends | relay ends | stage |
+|---|---|---|---|---|---|---|
+| gate 64 | yes, by 1 s | 325 over 69 s | 4.71/s | 0.0894 | 0.948 | stops, does not come back |
+| gate 60 | yes, by 1 s | 245 over 69 s | 3.55/s | 0.0923 | 0.963 | stops, does not come back |
+
+Both fail the return on **all three** criteria — rate, duration and participation. The 40 s
+version of the gate-64 arm had been read as reaching the interictal tier; that reading came
+from the last 2000 ms of its record, and 2 s is exactly how long a frozen field at its own
+final wear takes to depart. Given 69 s the tier is `UNRESOLVED`, not interictal.
+
+**The smoulder is a fixed point, not a slow decay.** 69 s is fourteen wear time constants; with
+no production the wear would be at 1e-6 and it sits at 0.089. Production balances decay. And
+0.089 is inside the range §4 shows departs after 2.0 s, so the tissue cannot be quiet there:
+the firing holds the wear up and the wear drives the firing.
+
+**Nothing keyed to event rate can break this.** The smoulder's inter-event interval is
+212–282 ms against 255–372 ms for the final gaps of the train that produces entry — the
+smoulder is *denser* than the pre-ictal train, so a rate threshold fires before entry rather
+than after it. What does separate them is recruitment: the pre-entry train peaks at 0.095 of
+the array, the smoulder's median is 0.178–0.281, the discharge's is 0.390. Across gates from
+0.12 to 0.25 the pre-entry train crosses zero times and the smoulder crosses 2–3.5 times a
+second.
+
+And the existing brake releases on exactly the wear time constant, 5000 ms both, so it lets go
+just as the wear is clearing — wear needs 3.2 s of quiet to fall from 0.089 to the lowest level
+that still departs, 7.5 s to reach the stable range, and the relay is half-released at 3.5 s.
+
 ## 5. How far anything got
 
 33 arms on disk: **9 stop at "entered, did not stop", 24 at "stopped, did not
