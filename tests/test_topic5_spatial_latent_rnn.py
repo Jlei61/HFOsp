@@ -387,14 +387,30 @@ def test_t13_topology_freeze_is_reproducible_and_sparsifies():
                 model.graph.n_nodes, model.graph.n_nodes
             )
         )
-    kept_a = model.graph.freeze_topology(temperature=0.5)
+    kept_a = model.graph.freeze_topology(temperature=0.5, edge_budget=6.0)
     mask_a = model.graph.frozen_mask.clone()
     model.graph.topology_frozen = False
-    kept_b = model.graph.freeze_topology(temperature=0.5)
+    kept_b = model.graph.freeze_topology(temperature=0.5, edge_budget=6.0)
     assert kept_a == kept_b
     np.testing.assert_array_equal(mask_a.numpy(), model.graph.frozen_mask.numpy())
     assert 0 < kept_a < model.graph.n_nodes ** 2
     assert not np.any(np.diag(model.graph.frozen_mask.numpy()))
+    # the frozen degree must equal the budget, not whatever a threshold happened
+    # to leave behind -- an all-weak-gates graph used to freeze to nothing
+    assert kept_a == pytest.approx(6.0 * model.graph.n_nodes, abs=1)
+
+
+def test_t13b_freeze_survives_a_uniformly_weak_gate_field():
+    """Every gate barely open must still leave a graph of the budgeted size."""
+    model, _, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN", seed=4)
+    with torch.no_grad():
+        model.graph.gate.log_alpha.fill_(-6.0)
+        model.graph.gate.log_alpha.add_(
+            0.01 * torch.randn_like(model.graph.gate.log_alpha)
+        )
+    kept = model.graph.freeze_topology(temperature=0.3, edge_budget=6.0)
+    assert kept == pytest.approx(6.0 * model.graph.n_nodes, abs=1)
+    assert float(model.graph.adjacency(0.3).abs().sum()) > 0.0
 
 
 def test_t14_identity_coordinate_shuffle_reproduces_the_compared_arm():

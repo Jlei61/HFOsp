@@ -132,22 +132,33 @@ class HardConcreteGate(nn.Module):
     dense graph; the wiring penalty then has to buy each edge back.
     """
 
+    # Once a gate's value hits the hard 0 of the stretch clamp its gradient dies
+    # and the edge can never be revived, so log_alpha is kept inside a range
+    # where the sigmoid still has slope.  Without this an over-strong penalty
+    # annihilates the graph in a couple of epochs and nothing can pull it back.
+    LOG_ALPHA_RANGE = (-4.0, 4.0)
+
     def __init__(self, shape: Sequence[int], init_log_alpha: float = 2.0):
         super().__init__()
         self.log_alpha = nn.Parameter(torch.full(tuple(shape), float(init_log_alpha)))
 
+    def _bounded(self) -> Tensor:
+        low, high = self.LOG_ALPHA_RANGE
+        return low + (high - low) * torch.sigmoid(self.log_alpha)
+
     def forward(self, temperature: float) -> Tensor:
+        log_alpha = self._bounded()
         if self.training:
-            u = torch.rand_like(self.log_alpha).clamp_(1e-6, 1 - 1e-6)
-            s = torch.sigmoid((torch.log(u) - torch.log1p(-u) + self.log_alpha) / temperature)
+            u = torch.rand_like(log_alpha).clamp_(1e-6, 1 - 1e-6)
+            s = torch.sigmoid((torch.log(u) - torch.log1p(-u) + log_alpha) / temperature)
         else:
-            s = torch.sigmoid(self.log_alpha / temperature)
+            s = torch.sigmoid(log_alpha / temperature)
         return (s * (HC_ZETA - HC_GAMMA) + HC_GAMMA).clamp(0.0, 1.0)
 
     def open_probability(self, temperature: float) -> Tensor:
         """``P(gate > 0)`` — the quantity the edge budget is written against."""
         return torch.sigmoid(
-            self.log_alpha - temperature * math.log(-HC_GAMMA / HC_ZETA)
+            self._bounded() - temperature * math.log(-HC_GAMMA / HC_ZETA)
         )
 
 
@@ -194,10 +205,14 @@ class GraphRecurrence(nn.Module):
     def adjacency(self, temperature: float) -> Tensor:
         weights = torch.tanh(self.weight) * self.no_self
         if self.learnable:
-            gate = self.gate(temperature)
             if self.topology_frozen:
-                gate = gate * self.frozen_mask
-            return weights * gate * self.mask
+                # Freezing means the retained edges are simply on and the rest
+                # are gone.  Keeping the gate factor here would multiply the
+                # survivors by their own near-zero opening probability and hand
+                # back an empty graph, which is what "fine-tune the retained
+                # weights" is meant to prevent.
+                return weights * self.frozen_mask
+            return weights * self.gate(temperature) * self.mask
         return weights * self.mask
 
     def message(self, h: Tensor, adjacency: Tensor) -> Tensor:
@@ -207,23 +222,45 @@ class GraphRecurrence(nn.Module):
         denominator = adjacency.abs().sum(dim=0).clamp_min(1e-6)
         return numerator / denominator.view(1, -1, 1)
 
-    def freeze_topology(self, temperature: float, threshold: float = 0.5) -> int:
+    def freeze_topology(self, temperature: float, edge_budget: float) -> int:
+        """Retain the budgeted number of edges, ranked by opening probability.
+
+        Thresholding at P > 0.5 looks natural and is wrong here.  The budget
+        constrains the SUM of opening probabilities, which many barely-open edges
+        satisfy just as well as a few reliably-open ones -- and the wiring term
+        prefers the former, because each weak edge carries less magnitude.  Under
+        a 0.5 threshold that entire graph then freezes to nothing.  Taking the
+        top-k makes the frozen degree equal the budget by construction and leaves
+        the wiring economy to decide which edges rank highest.
+        """
         if not self.learnable:
             return int(self.mask.sum().item())
         with torch.no_grad():
-            keep = (self.gate.open_probability(temperature) > threshold).float()
-            keep = keep * self.no_self
-            self.frozen_mask.copy_(keep)
+            score = self.gate.open_probability(temperature) * self.no_self
+            k = max(1, int(round(float(edge_budget) * self.n_nodes)))
+            flat = score.flatten()
+            keep_idx = torch.topk(flat, min(k, flat.numel())).indices
+            keep = torch.zeros_like(flat)
+            keep[keep_idx] = 1.0
+            self.frozen_mask.copy_(keep.view_as(score) * self.no_self)
         self.topology_frozen = True
-        return int(keep.sum().item())
+        return int(self.frozen_mask.sum().item())
 
     def edge_statistics(self, temperature: float) -> dict[str, float]:
         with torch.no_grad():
             adjacency = self.adjacency(temperature)
             live = (adjacency.abs() > 0).float()
+            soft = (
+                float((self.gate.open_probability(temperature) * self.no_self).sum().item()
+                      / self.n_nodes)
+                if self.learnable else float("nan")
+            )
             return {
                 "n_edges": float(live.sum().item()),
                 "mean_degree": float(live.sum().item() / self.n_nodes),
+                # the quantity the budget term actually controls; it can differ
+                # from mean_degree, and only logging the latter hides the drift
+                "budget_degree": soft,
                 "mean_abs_weight": float(
                     (adjacency.abs().sum() / live.sum().clamp_min(1)).item()
                 ),
@@ -353,7 +390,10 @@ class SLPModel(nn.Module):
             return torch.zeros((), device=self.contact_bias.device)
         gate = self.graph.gate.open_probability(temperature) * self.graph.no_self
         degree = gate.sum() / self.graph.n_nodes
-        return (degree - self.config.edge_budget) ** 2
+        # Quadratic near the target, linear far from it.  A plain square starts
+        # at (59 - 6)^2 on a dense graph, which swamps the task loss by three
+        # orders of magnitude and drives every gate straight through the floor.
+        return F.smooth_l1_loss(degree, torch.full_like(degree, self.config.edge_budget))
 
 
 def next_set_stop_loss(
@@ -371,6 +411,11 @@ def next_set_stop_loss(
     removed from both the likelihood and the normalisation -- that support mask
     is a deterministic property of the event, not something the model predicts.
     """
+    # A contact excluded from `available` is outside this model's scope -- it is
+    # already recruited, or withheld by leave-contact-out.  It must leave both
+    # the prediction and the target, otherwise its -inf logit is scored against a
+    # positive label and the loss diverges.
+    target = target * available.float()
     predict = valid & ~is_last
     masked = contact_logits.masked_fill(~available, NEG_INF)
     per_contact = F.binary_cross_entropy_with_logits(
@@ -399,6 +444,7 @@ def cardinality_conditioned_nll(
     Reported alongside the primary BCE so this run is comparable with the
     existing Topic 5 contact-NLL line.
     """
+    target = target * available.float()
     masked = contact_logits.masked_fill(~available, NEG_INF)
     log_prob = torch.log_softmax(masked, dim=-1)
     chosen = (log_prob * target).sum(-1)
