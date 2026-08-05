@@ -114,19 +114,24 @@ def test_delta_t_bridges_the_gap_rather_than_resetting_to_zero():
 
 
 def test_transition_delta_t_is_centre_to_centre_not_edge_to_edge():
-    # rev3 R3-D fixture, given verbatim: one session, events at t = 0,1,2,3,10,11,12,13,
-    # block_events=4. Block 0 spans 0-3 (centre 1.5), block 1 spans 10-13 (centre 11.5).
-    # transition_delta_t (centre-to-centre) and inter_block_gap (edge-to-edge) differ
-    # (10.0 vs 7.0), so an implementation using either formula for the other field fails.
-    segments = [_seg("a", 0.0, 20.0)]
-    times = np.array([0.0, 1.0, 2.0, 3.0, 10.0, 11.0, 12.0, 13.0])
+    # rev3 fix-round-4 ITEM 2: the original fixture (0,1,2,3,10,11,12,13) is symmetric
+    # within each block, so the mean, the midpoint of first-and-last, and the median all
+    # give the same 10.0 -- nothing in that fixture actually pinned "centre" to MEAN
+    # specifically. Re-fixtured with skewed blocks: block 0 = 0,1,2,30 (mean 8.25;
+    # first/last-midpoint (0+30)/2=15.0), block 1 = 100,101,102,103 (mean 101.5;
+    # first/last-midpoint (100+103)/2=101.5). transition_delta_t (mean-to-mean) ==
+    # 101.5-8.25 == 93.25; an implementation using first/last-midpoint instead would
+    # give 101.5-15.0 == 86.5. inter_block_gap (edge-to-edge, unaffected by this
+    # distinction) == 100.0-30.0 == 70.0, distinct from both of the above.
+    segments = [_seg("a", 0.0, 120.0)]
+    times = np.array([0.0, 1.0, 2.0, 30.0, 100.0, 101.0, 102.0, 103.0])
     names = np.array(["a"] * 8)
     sessions = assign_events(build_sessions(segments, join_seconds=300.0), times, names)
     blocks = build_blocks(sessions, block_events=4, event_times=times)
     assert blocks[0]["transition_delta_t"] is None
     assert blocks[0]["inter_block_gap"] is None
-    assert blocks[1]["transition_delta_t"] == pytest.approx(10.0)
-    assert blocks[1]["inter_block_gap"] == pytest.approx(7.0)
+    assert blocks[1]["transition_delta_t"] == pytest.approx(93.25)
+    assert blocks[1]["inter_block_gap"] == pytest.approx(70.0)
 
 
 def test_metadata_gap_is_none_within_one_session():
