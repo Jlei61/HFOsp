@@ -53,6 +53,21 @@ def run(subject: str, config: dict, tag: str, work: Path, seed: int = 1) -> dict
     return done
 
 
+def run_stage(jobs: list, work: Path, workers: int = 8) -> list:
+    """Run one stage's cells concurrently.
+
+    Stages stay sequential -- stage 2 needs stage 1's chosen microstep count --
+    but the cells inside a stage are independent, and running them one at a time
+    made the sweep the longest single item in the schedule.
+    """
+    from concurrent.futures import ThreadPoolExecutor
+
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = [pool.submit(run, subject, config, tag, work, seed)
+                   for subject, config, tag, seed in jobs]
+        return [f.result() for f in futures]
+
+
 def describe(row: dict) -> str:
     return (
         f"  {row['tag']:28s} val={row['validation_next_bce']:.4f} "
@@ -87,12 +102,12 @@ def main() -> int:
     record = {"stages": {}}
 
     print(f"stage 1: microsteps on {REPRESENTATIVE}", flush=True)
-    stage1 = []
-    for k in (1, 3, 6):
-        row = run(REPRESENTATIVE, {"microsteps": k}, f"K{k}", args.work)
-        if row:
-            stage1.append(row)
-            print(describe(row), flush=True)
+    stage1 = [r for r in run_stage(
+        [(REPRESENTATIVE, {"microsteps": k}, f"K{k}", 1) for k in (1, 3, 6)],
+        args.work,
+    ) if r]
+    for row in stage1:
+        print(describe(row), flush=True)
     if not stage1:
         raise SystemExit("stage 1 produced no usable cell")
     best_k = int(min(stage1, key=lambda r: r["validation_next_bce"])["config"]["microsteps"])
@@ -100,15 +115,15 @@ def main() -> int:
     print(f"  -> microsteps = {best_k}\n", flush=True)
 
     print(f"stage 2: wiring economy at K={best_k} on {REPRESENTATIVE}", flush=True)
-    stage2 = []
-    for strength in (0.03, 0.1, 0.3):
-        for budget in (4.0, 6.0):
-            config = {"microsteps": best_k, "wiring_strength": strength,
-                      "edge_budget": budget}
-            row = run(REPRESENTATIVE, config, f"w{strength}_b{budget:.0f}", args.work)
-            if row:
-                stage2.append(row)
-                print(describe(row), flush=True)
+    stage2 = [r for r in run_stage(
+        [(REPRESENTATIVE,
+          {"microsteps": best_k, "wiring_strength": strength, "edge_budget": budget},
+          f"w{strength}_b{budget:.0f}", 1)
+         for strength in (0.03, 0.1, 0.3) for budget in (4.0, 6.0)],
+        args.work,
+    ) if r]
+    for row in stage2:
+        print(describe(row), flush=True)
     if not stage2:
         raise SystemExit("stage 2 produced no usable cell")
     ranked = sorted(stage2, key=lambda r: r["validation_next_bce"])
@@ -124,16 +139,15 @@ def main() -> int:
     print(f"  -> finalists {[f['tag'] for f in finalists]}\n", flush=True)
 
     print("stage 3: finalists on the other development patients, 2 seeds", flush=True)
+    jobs = [(subject, f["config"], f["tag"], seed)
+            for f in finalists for subject in OTHER_DEVELOPMENT for seed in (1, 2)]
     stage3 = []
-    for finalist in finalists:
-        for subject in OTHER_DEVELOPMENT:
-            for seed in (1, 2):
-                row = run(subject, finalist["config"], finalist["tag"], args.work, seed)
-                if row:
-                    row["subject"] = subject
-                    stage3.append(row)
-                    print(f"  {finalist['tag']:20s} {subject:22s} seed{seed} "
-                          f"val={row['validation_next_bce']:.4f}", flush=True)
+    for (subject, _, tag, seed), row in zip(jobs, run_stage(jobs, args.work)):
+        if row:
+            row["subject"] = subject
+            stage3.append(row)
+            print(f"  {tag:20s} {subject:22s} seed{seed} "
+                  f"val={row['validation_next_bce']:.4f}", flush=True)
     record["stages"]["confirmation"] = {"rows": stage3}
 
     scores = {}

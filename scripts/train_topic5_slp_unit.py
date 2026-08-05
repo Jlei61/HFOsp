@@ -225,6 +225,14 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
     warmup, structure, freeze = (
         int(cfg["epochs_warmup"]), int(cfg["epochs_structure"]), int(cfg["epochs_freeze"])
     )
+    if not learnable:
+        # The three-phase schedule exists to form a topology.  An arm with no
+        # learnable graph has none to form, so forcing it through warm-up and
+        # structure before early stopping is even allowed just burns epochs.  It
+        # trains as one phase under the SAME stopping criterion and patience as
+        # every other arm, so the comparison stays like for like.
+        warmup, structure = 0, 0
+        freeze = int(cfg["epochs_warmup"]) + int(cfg["epochs_structure"]) + freeze
     total_epochs = warmup + structure + freeze
     t_start, t_end = float(cfg["temperature_start"]), float(cfg["temperature_end"])
 
