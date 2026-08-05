@@ -307,6 +307,37 @@ def _arms(band):
                              stage=st["stage"],
                              note="left" if r["departed"] else "never left"))
 
+    # The only arms whose return was actually measured against the reference event
+    # distribution rather than left unmeasured.
+    for path in sorted(glob.glob(os.path.join(BASE, "lifecycle_tail", "tail_gate*.json"))):
+        r = _load(path)
+        if r.get("status") != "COMPLETE":
+            continue
+        arms.append(dict(
+            group="nothing held still", entry_observed=False,
+            label=(f"relay curve moved to {r['y_gate']:.0f}, both free, "
+                   f"watched {r['run_ms'] / 1000:.0f} s"),
+            stage=r["stage"],
+            note=(f"{r['n_returning_after_offset']} events back over "
+                  f"{r['tail_window_s']:.0f} s at {r['tail_event_rate_hz']:.2f}/s; "
+                  f"wear ends {r['wear_end']:.3f}")))
+
+    # Entry with the relay frozen open, so nothing can brake: the parameter window.
+    for path in sorted(glob.glob(os.path.join(BASE, "stage1_entry_window", "cell_*.json"))):
+        r = _load(path)
+        if r.get("status") != "COMPLETE":
+            continue
+        arms.append(dict(
+            group="relay held open", entry_observed=True,
+            label=(f"wear constant {r['tau_z'] / 1000:.1f} s, feedback threshold "
+                   f"x{r['theta_scale']:.2f}"
+                   + ("  (registered)" if r["is_registered_cell"] else "")),
+            stage=r["stage"],
+            note=(f"{r['n_returning_before_onset']} events, entry at "
+                  f"{r['onset_ms'] / 1000:.0f} s" if r["onset_ms"]
+                  else f"{r['n_returning_before_onset']} events, no entry in "
+                       f"{r['run_ms'] / 1000:.0f} s")))
+
     # Per-arm files, not the aggregates: each aggregate holds only the arms of the
     # batch that wrote it last, so reading them would silently drop the earlier
     # sweeps whose per-arm records are still on disk.
@@ -379,11 +410,12 @@ def _arms(band):
 def figure_c(arms, path):
     """How far did each arm get, and what was held still to get it there?"""
     order = {g: i for i, g in enumerate(
-        ["nothing held still", "wear and relay held still",
+        ["nothing held still", "relay held open", "wear and relay held still",
          "wear held still, relay free", "relay clamped"])}
     arms = sorted(arms, key=lambda a: (order.get(a["group"], 9),
                                        -stage_index(a["stage"]), a["label"]))
     group_color = {"nothing held still": "#111111",
+                   "relay held open": "#1e8449",
                    "wear and relay held still": "#7f8c8d",
                    "wear held still, relay free": "#1b4f9c",
                    "relay clamped": "#b03a2e"}
@@ -393,7 +425,9 @@ def figure_c(arms, path):
         start = -0.42 if a["entry_observed"] else stage_index("ONSET_NO_OFFSET") - 0.42
         ax.barh(y, reach + 0.42 - start, left=start, height=0.62,
                 color=group_color[a["group"]],
-                alpha=1.0 if a["entry_observed"] else 0.45,
+                # 0.45 washed the black group into the grey one; the hatch already
+                # carries "entry was never tested", so the colour need not also fade.
+                alpha=1.0 if a["entry_observed"] else 0.72,
                 hatch=None if a["entry_observed"] else "//",
                 edgecolor="white", linewidth=0.6)
         ax.text(reach + 0.55, y, a["note"], va="center", fontsize=7.4, color="#566573")
