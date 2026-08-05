@@ -112,6 +112,23 @@ def test_dropping_a_mixed_scale_cannot_fabricate_a_reliable_run_that_was_never_o
     assert out["n_break"] == 500
 
 
+def test_family_discordance_reaching_select_scales_is_dropped_not_a_failure():
+    # coordinator fix-round-4, ITEM 1: UNRESOLVED_FAMILY_DISCORDANCE cannot currently be
+    # produced by scale_states (it is a window_state-level verdict only), so it cannot
+    # reach select_scales through the normal window_state -> scale_states -> select_scales
+    # pipeline today. But R3-C/R3-F will add the first real callers that may construct a
+    # `states` mapping some other way, and there was no test pinning the behaviour if it
+    # ever does arrive here -- this closes that gap directly, independent of how it gets
+    # there. Must be dropped exactly like UNRESOLVED_MIXED_WINDOWS already is, not treated
+    # as an observed, pattern-breaking state.
+    out = select_scales(
+        {50: B, 100: R, 200: "UNRESOLVED_FAMILY_DISCORDANCE", 500: R, 1000: C}
+    )
+    assert out["status"] == "SCALE_RESOLVED"
+    assert out["n_obs"] == 100
+    assert out["n_break"] == 1000
+
+
 # ---------------------------------------------------------------------------
 # window_agreements — not given as code in the brief; tests below pin the
 # contract stated in the Interfaces block plus the task's explicit numeric
@@ -509,8 +526,11 @@ def test_scale_states_returns_too_few_windows_below_the_minimum():
 def test_scale_states_rejects_a_label_outside_the_known_alphabet():
     # fix round 2, Item C: the ValueError in scale_states was made reachable in round 1
     # (validated up front instead of an unreachable post-vote raise) but no test ever
-    # triggered it. min_windows=5 with exactly 5 states so the length gate is cleared
-    # and validation is actually reached.
+    # triggered it. fix-round-4 ITEM 4 correction: validation runs unconditionally as
+    # the FIRST thing scale_states does, before the evaluable-count/min_windows gate --
+    # not after it, as this comment previously (incorrectly) said. min_windows=5 with
+    # exactly 5 states here is incidental, not load-bearing: the raise fires regardless
+    # of min_windows because nothing gates validation.
     with pytest.raises(ValueError, match="BOGUS_LABEL"):
         scale_states([R, R, R, "BOGUS_LABEL", R], min_windows=5)
 
@@ -542,3 +562,31 @@ def test_dropping_unevaluable_windows_can_take_a_scale_below_the_minimum():
     # UNRESOLVED_TOO_FEW_WINDOWS, not a unanimous RELIABLE.
     windows = [R, R, R, UF, UF]
     assert scale_states(windows, min_windows=4) == "UNRESOLVED_TOO_FEW_WINDOWS"
+
+
+# ---------------------------------------------------------------------------
+# meta-test — coordinator fix-round-4, ITEM 1. Four review rounds in a row found a
+# variant of the same defect: a new "unresolved"/"could not be decided" label was added
+# to the module's alphabet but not reliably added to every filter that needs to treat it
+# as non-evaluable. This test does not pin one input/output pair; it pins the STRUCTURAL
+# invariant that would have caught all four -- every such constant is classified into
+# exactly one of the two disjoint sets that consume the alphabet.
+# ---------------------------------------------------------------------------
+
+
+def test_every_unresolved_constant_is_classified_exactly_once():
+    import src.topic5_slow_state_scale as mod
+
+    candidates = {
+        value
+        for name, value in vars(mod).items()
+        if isinstance(value, str)
+        and (value.startswith("UNRESOLVED_") or value == mod.TOO_FEW)
+    }
+    assert candidates, "no UNRESOLVED_*/TOO_FEW string constants found -- fixture is stale"
+
+    classified = mod.NOT_EVALUABLE | mod.OUTPUT_ONLY_STATUSES
+    unclassified = candidates - classified
+    assert not unclassified, f"unclassified unresolved constant(s): {sorted(unclassified)}"
+
+    assert mod.NOT_EVALUABLE.isdisjoint(mod.OUTPUT_ONLY_STATUSES)

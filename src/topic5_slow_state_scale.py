@@ -35,21 +35,33 @@ UNRESOLVED_FAMILY_DISCORDANCE = "UNRESOLVED_FAMILY_DISCORDANCE"
 # of BELOW_CHANCE / RELIABLE / CHRONOLOGY_BREAK, after non-evaluable windows are
 # dropped and the minimum is re-checked against the surviving count.
 UNRESOLVED_MIXED_WINDOWS = "UNRESOLVED_MIXED_WINDOWS"
-# Window-level verdicts that carry no vote at the scale level: window_state could not
-# reach a judgement about this window at all, so it must be dropped before scale_states
-# counts anything, and must not be able to satisfy min_windows either.
-NON_EVALUABLE_WINDOW_STATES = (UNRESOLVED_FAMILIES, UNRESOLVED_FAMILY_DISCORDANCE)
-# rev3 follow-up (recurrence of fix round 1's C2 under a new label): a scale whose
-# windows could not reach a majority (UNRESOLVED_MIXED_WINDOWS) is undecided, not
-# failed, and must be dropped before select_scales pattern-matches, the same as
-# UNRESOLVED_TOO_FEW_WINDOWS and UNRESOLVED_FAMILIES already are -- otherwise one
-# undecidable mid-grid scale throws the whole patient to UNRESOLVED_NONMONOTONE.
-# UNRESOLVED_FAMILY_DISCORDANCE is deliberately NOT included here: it is a
-# window-level verdict (window_state's output), never a scale-level one -- scale_states
-# only ever returns TOO_FEW, BELOW, RELIABLE, BREAK, or UNRESOLVED_MIXED_WINDOWS, so it
-# can never reach select_scales as a value in its `states` mapping. Adding it here
-# would be dead defensive code for an input select_scales cannot receive.
-NOT_EVALUATED = (TOO_FEW, UNRESOLVED_FAMILIES, UNRESOLVED_MIXED_WINDOWS)
+# select_scales' own return `status` values. Never valid inputs anywhere -- not to
+# window_state, not to scale_states, not to select_scales itself -- only outputs.
+UNRESOLVED_SCALE = "UNRESOLVED_SCALE"
+UNRESOLVED_NONMONOTONE = "UNRESOLVED_NONMONOTONE"
+
+# fix-round-4, ITEM 1 (structural): ONE canonical set of every label that means "this
+# could not be decided", at any level -- window-level (window_state's output, consumed
+# by scale_states) or scale-level (scale_states' output, consumed by select_scales).
+# Before this round there were two separate lists with different membership
+# (the old NON_EVALUABLE_WINDOW_STATES lacked UNRESOLVED_MIXED_WINDOWS, the old
+# NOT_EVALUATED lacked UNRESOLVED_FAMILY_DISCORDANCE) and they drifted out of sync four
+# review rounds in a row: each new "unresolved" label was added to the alphabet and to
+# ONE filter, but not reliably to the other. `scale_states` and `select_scales` both
+# filter with this single set now. A label that cannot occur as an input at a given
+# level (e.g. UNRESOLVED_MIXED_WINDOWS can never legitimately reach scale_states,
+# because window_state never produces it) simply never matches anything there, so one
+# superset is safe, and adding a future "unresolved" label requires exactly one edit:
+# add it here.
+NOT_EVALUABLE = frozenset(
+    {TOO_FEW, UNRESOLVED_FAMILIES, UNRESOLVED_FAMILY_DISCORDANCE, UNRESOLVED_MIXED_WINDOWS}
+)
+# Disjoint from NOT_EVALUABLE by construction: these are never things a filter should
+# drop FROM an input, because they can never legitimately appear IN one -- they are
+# select_scales' own return statuses. Kept separately (rather than folded into
+# NOT_EVALUABLE) so the meta-test below can classify every "UNRESOLVED_*"/TOO_FEW
+# module constant into exactly one of the two sets and assert the sets never overlap.
+OUTPUT_ONLY_STATUSES = frozenset({UNRESOLVED_SCALE, UNRESOLVED_NONMONOTONE})
 
 # I3 fix: a family must clear a minimum number of *finite* draws on both `random_half` and
 # `contact_null` before it counts as "resolved" in `window_state` -- a single finite null
@@ -297,7 +309,7 @@ def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:
        silently uncounted.
     2. `UNRESOLVED_FAMILIES` and `UNRESOLVED_FAMILY_DISCORDANCE` windows never vote —
        `window_state` reached no judgement about them at all, so they are dropped before
-       anything is counted (`NON_EVALUABLE_WINDOW_STATES`).
+       anything is counted (`NOT_EVALUABLE`, shared with `select_scales`).
     3. `min_windows` is re-checked against the SURVIVING evaluable count, not the
        original `len(windows_states)` — dropping non-evaluable windows can itself take a
        scale below the minimum, and that must read as `UNRESOLVED_TOO_FEW_WINDOWS`, not
@@ -321,7 +333,7 @@ def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:
     if unknown:
         raise ValueError(f"unexpected window state(s) outside the closed label set: {unknown!r}")
 
-    evaluable = [state for state in states if state not in NON_EVALUABLE_WINDOW_STATES]
+    evaluable = [state for state in states if state not in NOT_EVALUABLE]
     if len(evaluable) < int(min_windows):
         return TOO_FEW
 
@@ -333,8 +345,17 @@ def scale_states(windows_states: Sequence[str], *, min_windows: int) -> str:
 
 
 def select_scales(states: Mapping[int, str]) -> dict[str, Any]:
+    """Pattern-match a monotone BELOW* RELIABLE+ BREAK* run over the evaluated scales.
+
+    Filters with the same `NOT_EVALUABLE` set `scale_states` uses to drop non-evaluable
+    window states -- a scale whose own state could not be decided (any member of
+    `NOT_EVALUABLE`) is dropped before pattern matching, not treated as an observed
+    state the monotone run must account for (fix-round-4 ITEM 1; this function and
+    `scale_states` used to filter with two separately-maintained lists that drifted out
+    of sync across four review rounds).
+    """
     evaluated = [
-        (size, states[size]) for size in sorted(states) if states[size] not in NOT_EVALUATED
+        (size, states[size]) for size in sorted(states) if states[size] not in NOT_EVALUABLE
     ]
     labels = [state for _, state in evaluated]
     empty = {
@@ -344,7 +365,7 @@ def select_scales(states: Mapping[int, str]) -> dict[str, Any]:
         "dwell_interval": None,
     }
     if RELIABLE not in labels:
-        return {**empty, "status": "UNRESOLVED_SCALE"}
+        return {**empty, "status": UNRESOLVED_SCALE}
 
     first = labels.index(RELIABLE)
     last = len(labels) - 1 - labels[::-1].index(RELIABLE)
@@ -352,7 +373,7 @@ def select_scales(states: Mapping[int, str]) -> dict[str, Any]:
     middle_ok = all(state == RELIABLE for state in labels[first : last + 1])
     trailing_ok = all(state == BREAK for state in labels[last + 1 :])
     if not (leading_ok and middle_ok and trailing_ok):
-        return {**empty, "status": "UNRESOLVED_NONMONOTONE"}
+        return {**empty, "status": UNRESOLVED_NONMONOTONE}
 
     n_obs = evaluated[first][0]
     n_last_reliable = evaluated[last][0]
