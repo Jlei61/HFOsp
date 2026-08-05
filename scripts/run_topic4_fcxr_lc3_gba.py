@@ -64,7 +64,8 @@ from src.topic4_fcxr_lc3_stage import (  # noqa: E402
 from src.topic4_mz_fcxr_lifecycle import classify_lifecycle  # noqa: E402
 
 OUT = os.path.join(E01.OUT, "global_burst_adaptation")
-RUN_MS = 70000.0        # entry (~5 s) + the discharge that charges the brake + time to come back
+RUN_MS = 60000.0        # entry (~5 s) + the discharge that charges the brake + time to come back;
+                        # sized to share the machine with another line already holding 114 GiB
 SNAP_MS = 250.0
 NOISE = 401
 GATE = 0.15             # recruited fraction; zero pre-entry crossings across 0.12-0.25
@@ -82,9 +83,9 @@ BASE_RSS_GIB = 5.9
 # ineffective when it was never switched on.  These three span "clearly something" to "strong".
 ARMS = (
     dict(arm="sensor_only", use_gba=True, eta_gba=0.0),     # byte-identical control + the sensor trace
-    dict(arm="act_g006", use_gba=True, eta_gba=15.0),       # ~0.06 of leak
+    dict(arm="act_g039", use_gba=True, eta_gba=100.0),      # ~0.39 of leak -- the clearest test
     dict(arm="act_g015", use_gba=True, eta_gba=40.0),       # ~0.15 of leak
-    dict(arm="act_g039", use_gba=True, eta_gba=100.0),      # ~0.39 of leak
+    dict(arm="act_g006", use_gba=True, eta_gba=15.0),       # ~0.06 of leak
 )
 _CTX = {}
 
