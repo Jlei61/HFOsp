@@ -1182,6 +1182,11 @@ def main() -> None:
         help="subtractive shared-pool current on E cells; 0 keeps the parity path",
     )
     parser.add_argument(
+        "--pilot-widen-tau-M", action="store_true", dest="pilot_widen_tau_M",
+        help="PILOT: allow an adaptation timescale outside the registered sprint "
+             "panel; the artifact name records that it left the panel",
+    )
+    parser.add_argument(
         "--beta-SG-ramp-per-s", type=float, dest="beta_SG_ramp_per_s", default=0.0,
         help="KINEMATIC PROBE: walk --beta-SG linearly at this rate per second. "
              "Open loop; nothing in the model generates it, so a run using it is "
