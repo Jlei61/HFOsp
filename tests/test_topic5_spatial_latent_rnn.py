@@ -10,7 +10,15 @@ from pathlib import Path
 
 import numpy as np
 import pytest
+import torch
 
+from src.topic5_spatial_latent_rnn import (
+    LATENT_ARMS,
+    ModelConfig,
+    SLPModel,
+    build_event_tensors,
+    next_set_stop_loss,
+)
 from src.topic5_virtual_seeg_operator import (
     MIN_NODES_PER_CONTACT,
     SUPPORT_SIGMA,
@@ -225,6 +233,252 @@ def test_t15_splits_are_disjoint_chronological_and_exclude_the_burned_heldout():
         n_used = len(train) + len(validation) + len(test)
         assert n_used <= patient["n_events_total"]
         assert test.max() < patient["n_events_total"]
+
+
+# --------------------------------------------------------------------------
+# T5 - T16 -- model contract
+# --------------------------------------------------------------------------
+
+def _toy_model(arm, seed=0, microsteps=3, hidden=4):
+    xy = _toy_plane(n_shafts=2, per_shaft=4, pitch=4.0)
+    sigma = kernel_sigma_mm(xy)
+    n_nodes, nodes, H, _ = resolve_node_count(xy, sigma, seed=0)
+    config = ModelConfig(
+        arm=arm,
+        n_contacts=len(xy),
+        n_nodes=n_nodes,
+        hidden=hidden,
+        microsteps=microsteps,
+        seed=seed,
+        normalised_distance=normalised_distance(nodes)
+        if arm != "CONTACT_GRAPH_RNN" else normalised_distance(xy),
+        fixed_edge_mask=knn_edge_mask(nodes, k=6),
+        observation_operator=H if arm in LATENT_ARMS else None,
+    )
+    return SLPModel(config), H, nodes, xy
+
+
+def _toy_events(n_events=6, n_contacts=8, seed=0):
+    rng = np.random.default_rng(seed)
+    ranks = np.full((n_events, n_contacts), -1, np.int16)
+    for e in range(n_events):
+        order = rng.permutation(n_contacts)[: rng.integers(3, n_contacts + 1)]
+        for t, c in enumerate(order):
+            ranks[e, c] = t
+    return ranks
+
+
+def test_event_tensors_encode_the_support_mask_and_stop_position():
+    ranks = np.array([[0, 1, 2, -1], [1, 0, -1, -1]], np.int16)
+    ev = build_event_tensors(ranks)
+    # event 0 runs three ranks, event 1 runs two
+    assert ev.valid[0].sum() == 3 and ev.valid[1].sum() == 2
+    assert bool(ev.is_last[0, 2]) and bool(ev.is_last[1, 1])
+    # a contact recruited at step t is no longer available at step t
+    assert not bool(ev.available[0, 0, 0])
+    assert bool(ev.available[0, 0, 1])
+    # target at step t is exactly rank t+1
+    np.testing.assert_array_equal(ev.target[0, 0].numpy(), [0, 1, 0, 0])
+
+
+def test_t5_latent_input_and_readout_use_the_same_operator():
+    model, H, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN")
+    # the module holds exactly one H buffer and both directions index it
+    buffers = [n for n, _ in model.named_buffers() if n.endswith("H")]
+    assert buffers == ["H"]
+    np.testing.assert_allclose(model.H.numpy(), H.astype(np.float32), atol=1e-7)
+
+
+def test_t6_zeroing_the_graph_degrades_the_latent_model_to_node_wise():
+    model, _, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN")
+    model.eval()
+    ev = build_event_tensors(_toy_events())
+    with torch.no_grad():
+        before = model(ev.x, ev.recruited, ev.valid)[0]
+        model.graph.weight.data.zero_()
+        after = model(ev.x, ev.recruited, ev.valid)[0]
+        # with A = 0 the message is identically zero, so a hand-run node-wise
+        # recurrence must reproduce the model exactly
+        state = model.initial_state(ev.x.shape[0], ev.x.device)
+        manual = []
+        for t in range(ev.x.shape[1]):
+            injection = torch.einsum("bc,cm->bm", ev.x[:, t], model.H)
+            for k in range(model.config.microsteps):
+                drive = injection if k == 0 else torch.zeros_like(injection)
+                state = model.cell(state, drive, torch.zeros_like(state))
+            emission = torch.nn.functional.softplus(model.emission(state).squeeze(-1))
+            manual.append(model.contact_bias + model.logit_scale *
+                          torch.einsum("bm,cm->bc", emission, model.H))
+        np.testing.assert_allclose(
+            after.numpy(), torch.stack(manual, 1).numpy(), atol=1e-5
+        )
+    assert not np.allclose(before.numpy(), after.numpy())
+
+
+def test_t7_no_dense_contact_to_contact_path_exists():
+    model, H, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN")
+    model.eval()
+    # a contact whose observation kernel shares no node with contact j cannot
+    # influence j within a single microstep once the graph is removed
+    model.graph.weight.data.zero_()
+    ev = build_event_tensors(_toy_events())
+    with torch.no_grad():
+        base = model(ev.x, ev.recruited, ev.valid)[0]
+        bumped = ev.x.clone()
+        bumped[:, 0, 0] = 1.0
+        moved = model(bumped, ev.recruited, ev.valid)[0]
+    changed = (moved - base).abs().sum(dim=(0, 1)).numpy() > 1e-6
+    shared_support = (H[0] > 0) @ (H.T > 0)
+    assert np.all(changed <= shared_support)
+
+
+def test_t8_node_coordinates_never_reach_the_prediction_head():
+    model, _, nodes, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN")
+    model.eval()
+    ev = build_event_tensors(_toy_events())
+    with torch.no_grad():
+        before = model(ev.x, ev.recruited, ev.valid)[0]
+        # permuting the wiring-cost geometry must not touch predictions
+        perm = np.random.default_rng(0).permutation(len(nodes))
+        model.edge_distance.copy_(model.edge_distance[np.ix_(perm, perm)])
+        after = model(ev.x, ev.recruited, ev.valid)[0]
+    np.testing.assert_allclose(before.numpy(), after.numpy(), atol=1e-12)
+
+
+def test_t9_single_microstep_matches_a_hand_computed_step():
+    model, _, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN", microsteps=1)
+    model.eval()
+    ev = build_event_tensors(_toy_events(n_events=2))
+    with torch.no_grad():
+        state = model.initial_state(2, ev.x.device)
+        adjacency = model.graph.adjacency(1.0)
+        injection = torch.einsum("bc,cm->bm", ev.x[:, 0], model.H)
+        phi = torch.tanh(state)
+        num = torch.einsum("bjd,ji->bid", phi, adjacency)
+        den = adjacency.abs().sum(0).clamp_min(1e-6).view(1, -1, 1)
+        manual_state = model.cell(state, injection, num / den)
+        emission = torch.nn.functional.softplus(model.emission(manual_state).squeeze(-1))
+        manual = model.contact_bias + model.logit_scale * torch.einsum(
+            "bm,cm->bc", emission, model.H
+        )
+        got = model(ev.x, ev.recruited, ev.valid)[0][:, 0]
+    np.testing.assert_allclose(got.numpy(), manual.numpy(), atol=1e-6)
+
+
+def test_t10_the_forward_pass_never_reads_a_future_rank():
+    model, _, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN")
+    model.eval()
+    ranks = _toy_events(n_events=4, seed=1)
+    ev = build_event_tensors(ranks)
+    with torch.no_grad():
+        base = model(ev.x, ev.recruited, ev.valid)[0]
+        scrambled = ev.x.clone()
+        scrambled[:, 2:] = scrambled[:, 2:].flip(dims=[1])
+        moved = model(scrambled, ev.recruited, ev.valid)[0]
+    # steps 0 and 1 saw no future information, so they must be untouched
+    np.testing.assert_allclose(base[:, :2].numpy(), moved[:, :2].numpy(), atol=1e-12)
+
+
+def test_t13_topology_freeze_is_reproducible_and_sparsifies():
+    model, _, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN", seed=3)
+    with torch.no_grad():
+        model.graph.gate.log_alpha.copy_(
+            torch.linspace(-4, 4, model.graph.n_nodes ** 2).view(
+                model.graph.n_nodes, model.graph.n_nodes
+            )
+        )
+    kept_a = model.graph.freeze_topology(temperature=0.5)
+    mask_a = model.graph.frozen_mask.clone()
+    model.graph.topology_frozen = False
+    kept_b = model.graph.freeze_topology(temperature=0.5)
+    assert kept_a == kept_b
+    np.testing.assert_array_equal(mask_a.numpy(), model.graph.frozen_mask.numpy())
+    assert 0 < kept_a < model.graph.n_nodes ** 2
+    assert not np.any(np.diag(model.graph.frozen_mask.numpy()))
+
+
+def test_t14_identity_coordinate_shuffle_reproduces_the_compared_arm():
+    """The ablation control must be isomorphic to the arm it is compared against.
+
+    An earlier Topic 5 round reported an order effect that came from a control
+    built differently from its own comparison arm; the identity permutation is
+    the cheap guard against repeating that.
+    """
+    model_a, _, nodes, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN", seed=11)
+    model_b, _, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN", seed=11)
+    identity = np.arange(len(nodes))
+    with torch.no_grad():
+        model_b.edge_distance.copy_(
+            torch.from_numpy(normalised_distance(nodes[identity]).astype(np.float32))
+        )
+    ev = build_event_tensors(_toy_events())
+    model_a.eval(); model_b.eval()
+    with torch.no_grad():
+        la = model_a(ev.x, ev.recruited, ev.valid)[0]
+        lb = model_b(ev.x, ev.recruited, ev.valid)[0]
+        wa = model_a.wiring_loss(1.0)
+        wb = model_b.wiring_loss(1.0)
+    np.testing.assert_array_equal(la.numpy(), lb.numpy())
+    assert float(wa) == float(wb)
+
+
+def test_t16_no_bias_variant_has_no_per_contact_parameter():
+    xy = _toy_plane(n_shafts=2, per_shaft=4, pitch=4.0)
+    sigma = kernel_sigma_mm(xy)
+    n_nodes, nodes, H, _ = resolve_node_count(xy, sigma, seed=0)
+    for arm, operator in (
+        ("CONTACT_GRAPH_RNN", None),
+        ("LATENT_LEARNED_SPATIAL_RNN", H),
+    ):
+        model = SLPModel(ModelConfig(
+            arm=arm, n_contacts=len(xy), n_nodes=n_nodes, use_contact_bias=False,
+            normalised_distance=normalised_distance(nodes if operator is not None else xy),
+            observation_operator=operator,
+        ))
+        model.eval()
+        ev = build_event_tensors(_toy_events())
+        with torch.no_grad():
+            model.contact_bias.add_(torch.randn_like(model.contact_bias))
+            perturbed = model(ev.x, ev.recruited, ev.valid)[0]
+            model.contact_bias.zero_()
+            clean = model(ev.x, ev.recruited, ev.valid)[0]
+        np.testing.assert_allclose(perturbed.numpy(), clean.numpy(), atol=1e-12)
+
+
+def test_loss_ignores_already_recruited_contacts():
+    ranks = np.array([[0, 1, 2, -1]], np.int16)
+    ev = build_event_tensors(ranks)
+    logits = torch.zeros_like(ev.x)
+    # a wild logit on an already-recruited contact must not move the loss
+    stop = torch.zeros(ev.valid.shape)
+    total_a, _, _ = next_set_stop_loss(
+        logits, stop, ev.target, ev.available, ev.valid, ev.is_last
+    )
+    logits2 = logits.clone()
+    logits2[0, 1, 0] = 50.0  # contact 0 was recruited at rank 0
+    total_b, _, _ = next_set_stop_loss(
+        logits2, stop, ev.target, ev.available, ev.valid, ev.is_last
+    )
+    assert float(total_a) == pytest.approx(float(total_b))
+
+
+def test_wiring_and_budget_losses_are_zero_for_non_learned_arms():
+    for arm in ("STATIC_CONTACT", "ORDINARY_GRU", "LATENT_FIXED_LOCAL_RNN"):
+        model, _, _, _ = _toy_model(arm)
+        assert float(model.wiring_loss(1.0)) == 0.0
+        assert float(model.edge_budget_loss(1.0)) == 0.0
+
+
+def test_wiring_loss_rises_when_long_edges_are_opened():
+    model, _, _, _ = _toy_model("LATENT_LEARNED_SPATIAL_RNN", seed=5)
+    with torch.no_grad():
+        model.graph.weight.data.fill_(0.5)
+        far = model.edge_distance > model.edge_distance.median()
+        model.graph.gate.log_alpha.data.fill_(-4.0)
+        short_cost = float(model.wiring_loss(1.0))
+        model.graph.gate.log_alpha.data[far] = 4.0
+        long_cost = float(model.wiring_loss(1.0))
+    assert long_cost > short_cost
 
 
 @pytestmark_cache

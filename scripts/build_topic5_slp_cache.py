@@ -16,6 +16,10 @@ from typing import Any, Dict
 
 import numpy as np
 
+import sys
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
 from src.topic5_shared_propagation_field import load_subject_rank_events, sha256_file
 from src.topic5_virtual_seeg_operator import (
     MIN_NODES_PER_CONTACT,
