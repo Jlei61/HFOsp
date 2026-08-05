@@ -98,6 +98,11 @@ class SpatialSlowFieldConfig:
     use_SG: bool = False       # master gate; False -> no pool alloc/evolution, apply_currents unchanged
     alpha_G: float = 0.0       # divisive strength: I_rec_E -> I_rec_E/(1+alpha_G*S_G)
     beta_SG: float = 0.0       # OPTIONAL small subtractive pool current (arm 1/3); NOT beta_G (h_G proxy)
+    # Kinematic probe only (default 0 -> literal parity): walks beta_SG linearly
+    # in time so a trajectory can be swept across the tonic/burst branch
+    # boundary. This is an open-loop ramp, NOT a mechanism: nothing in the model
+    # generates it, so a run using it can never be reported as a carrier.
+    beta_SG_ramp_per_s: float = 0.0
     r0_psi: float = 0.0        # Psi_G recruitment onset
     r50_psi: float = 1.0       # Psi_G half-recruitment
     n_psi: float = 2.0         # Psi_G steepness
@@ -629,6 +634,7 @@ class SpatialSlowField:
         self.trace_Irec_mean = []                                     # mean recurrent-E current (matched-subtractive calib)
         self.trace_Irec_postdiv_mean = []                             # what survives the divisive stage; beta competes with THIS
         self.trace_Isub_mean = []                                     # beta_SG*S_G actually subtracted this step
+        self.trace_beta_SG = []                                       # the strength in force this step (may be ramped)
         if cfg.clamp_SG is not None:
             self.S_G = float(cfg.clamp_SG)                            # static-pool arm: S_G frozen from t=0
         self.trace_rEfast_max = []      # per-step spatial-max of rE_fast (for r50 sensor-scale calibration)
@@ -853,7 +859,8 @@ class SpatialSlowField:
                 aM = 0.0
             denom = 1.0 + aS + aH + aM
             frac = (aS + aH + aM) / denom
-            out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + self.cfg.beta_SG * self.S_G
+            beta = self.beta_SG_now()
+            out[:nE] -= np.asarray(I_E_rec, float)[:nE] * frac + beta * self.S_G
             if self.cfg.use_mode_H:
                 if self.cfg.rho_mode_H > 0.0:
                     gain = self.mode_H_gain_at_E()
@@ -882,7 +889,8 @@ class SpatialSlowField:
             # Dumped from the same denom the membrane used, so the calibration
             # stays exact when alpha_H or the M divisor are also on.
             self.trace_Irec_postdiv_mean.append(rec_mean / denom)
-            self.trace_Isub_mean.append(float(self.cfg.beta_SG * self.S_G))
+            self.trace_beta_SG.append(beta)
+            self.trace_Isub_mean.append(float(beta * self.S_G))
         return out
 
     def mode_H_gain_at_E(self) -> np.ndarray:
@@ -924,6 +932,13 @@ class SpatialSlowField:
             self.cfg.mode_H_persistent_g_max
             * self.mode_H_activation_at_E()
         )
+
+    def beta_SG_now(self) -> float:
+        """Subtractive pool strength at the current time; static unless ramped."""
+        if self.cfg.beta_SG_ramp_per_s == 0.0:
+            return float(self.cfg.beta_SG)
+        walked = self.cfg.beta_SG + self.cfg.beta_SG_ramp_per_s * (self._t / 1000.0)
+        return float(max(0.0, walked))
 
     def mode_M_raw_pool(self) -> float:
         """Mask-free p-norm of native E-cell M, normalised to a reference."""

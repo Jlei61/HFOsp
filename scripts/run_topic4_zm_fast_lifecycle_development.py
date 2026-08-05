@@ -362,13 +362,18 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
                     "cond_gamma",
                 )
             }
-        if float(getattr(args, "beta_SG", 0.0)) > 0.0:
+        if float(getattr(args, "beta_SG", 0.0)) > 0.0 or float(
+            getattr(args, "beta_SG_ramp_per_s", 0.0)
+        ) != 0.0:
             # The pool already divides recurrent E; this adds the subtractive
             # component the reduced field named as the missing ingredient for
             # the mean field to have an orbit at all.  0 keeps the parity path.
             values["beta_SG"] = float(args.beta_SG)
+            values["beta_SG_ramp_per_s"] = float(args.beta_SG_ramp_per_s)
             receipt["subtractive_pool"] = {
                 "beta_SG": float(args.beta_SG),
+                "beta_SG_ramp_per_s": float(args.beta_SG_ramp_per_s),
+                "open_loop_kinematic_probe": bool(args.beta_SG_ramp_per_s != 0.0),
                 "alpha_G": float(cfg.alpha_G),
                 "tau_S_ms": float(cfg.tau_S),
                 "S_max": float(cfg.S_max),
@@ -471,6 +476,8 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
             )
     if float(getattr(args, "beta_SG", 0.0)) > 0.0:
         stem += f"__bSG{args.beta_SG:g}"
+    if float(getattr(args, "beta_SG_ramp_per_s", 0.0)) != 0.0:
+        stem += f"__bSGramp{args.beta_SG_ramp_per_s:g}"
     if bool(getattr(args, "freeze_zm", False)):
         stem += f"__freeze_{args.state}"
     if float(getattr(args, "i2e_tau_cv", 0.0)) > 0.0:
@@ -878,6 +885,7 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
             diagnostic.trace_Irec_postdiv_mean, np.float32
         ),
         "trace_Isub_mean": np.asarray(diagnostic.trace_Isub_mean, np.float32),
+        "trace_beta_SG": np.asarray(diagnostic.trace_beta_SG, np.float32),
     }
     if diagnostic.cfg.use_mode_H:
         arrays.update({
@@ -1151,6 +1159,12 @@ def main() -> None:
     parser.add_argument(
         "--beta-SG", type=float, dest="beta_SG", default=0.0,
         help="subtractive shared-pool current on E cells; 0 keeps the parity path",
+    )
+    parser.add_argument(
+        "--beta-SG-ramp-per-s", type=float, dest="beta_SG_ramp_per_s", default=0.0,
+        help="KINEMATIC PROBE: walk --beta-SG linearly at this rate per second. "
+             "Open loop; nothing in the model generates it, so a run using it is "
+             "a trajectory probe and never a carrier result.",
     )
     parser.add_argument("--use-zm-conductance-homotopy", action="store_true")
     parser.add_argument("--homotopy-z-native", type=float, default=0.60)

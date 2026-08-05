@@ -161,3 +161,56 @@ def test_pool_subtractive_trace_is_zero_on_the_parity_path():
     sf.S_G = 0.25
     sf.apply_currents(np.zeros(N), np.zeros(N), I_E_rec=np.full(N, 40.0))
     assert sf.trace_Isub_mean[-1] == 0.0
+
+
+def test_subtractive_ramp_is_off_by_default_and_linear_in_seconds():
+    c = SpatialSlowFieldConfig(use_qI=False, use_gK=False, use_SG=True,
+                               alpha_G=16.0, beta_SG=2.0, use_persist=False)
+    c.validate()
+    N, NE = 60, 48
+    rng = np.random.default_rng(7)
+    sf = SpatialSlowField(N, 18.0, rng.random((NE, 2)) * 20.0,
+                          rng.random((N - NE, 2)) * 20.0, 20.0, cfg=c)
+    sf._t = 3000.0
+    assert sf.beta_SG_now() == pytest.approx(2.0)     # no ramp -> the parity path
+
+    c.beta_SG_ramp_per_s = 1.5
+    sf._t = 0.0
+    assert sf.beta_SG_now() == pytest.approx(2.0)
+    sf._t = 4000.0
+    assert sf.beta_SG_now() == pytest.approx(2.0 + 1.5 * 4.0)
+
+
+def test_subtractive_ramp_cannot_drive_the_term_negative():
+    c = SpatialSlowFieldConfig(use_qI=False, use_gK=False, use_SG=True,
+                               alpha_G=16.0, beta_SG=1.0, use_persist=False,
+                               beta_SG_ramp_per_s=-1.0)
+    c.validate()
+    N, NE = 60, 48
+    rng = np.random.default_rng(8)
+    sf = SpatialSlowField(N, 18.0, rng.random((NE, 2)) * 20.0,
+                          rng.random((N - NE, 2)) * 20.0, 20.0, cfg=c)
+    sf._t = 10000.0
+    assert sf.beta_SG_now() == 0.0
+
+
+def test_the_ramped_value_is_the_one_the_membrane_used():
+    """Same invariant as the static case: what is dumped is what was applied."""
+    c = SpatialSlowFieldConfig(use_qI=False, use_gK=False, use_SG=True,
+                               alpha_G=16.0, beta_SG=0.0, use_persist=False,
+                               beta_SG_ramp_per_s=2.0)
+    c.validate()
+    N, NE = 60, 48
+    rng = np.random.default_rng(9)
+    sf = SpatialSlowField(N, 18.0, rng.random((NE, 2)) * 20.0,
+                          rng.random((N - NE, 2)) * 20.0, 20.0, cfg=c)
+    sf.S_G = 0.25
+    sf._t = 3000.0
+    before = np.zeros(N)
+    after = sf.apply_currents(before.copy(), np.zeros(N), I_E_rec=np.full(N, 40.0))
+    expected_beta = 2.0 * 3.0
+    assert sf.trace_beta_SG[-1] == pytest.approx(expected_beta)
+    assert sf.trace_Isub_mean[-1] == pytest.approx(expected_beta * sf.S_G)
+    removed = float(before[:NE].mean() - after[:NE].mean())
+    denom = 1.0 + c.alpha_G * sf.S_G
+    assert removed == pytest.approx(40.0 * (1 - 1 / denom) + expected_beta * sf.S_G)
