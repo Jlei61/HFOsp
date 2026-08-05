@@ -93,13 +93,53 @@ def test_the_first_block_after_a_gap_is_labelled_cross_gap():
 
 
 def test_delta_t_bridges_the_gap_rather_than_resetting_to_zero():
+    # rev3 R3-D: delta_t_from_previous is replaced by inter_block_gap (same
+    # first-event-minus-previous-last-event formula) plus transition_delta_t and
+    # metadata_gap_seconds.
     segments = [_seg("a", 0.0, 100.0), _seg("b", 10000.0, 10100.0)]
     times = np.concatenate([np.arange(4.0), 10000.0 + np.arange(4.0)])
     names = np.array(["a"] * 4 + ["b"] * 4)
     sessions = assign_events(build_sessions(segments, join_seconds=300.0), times, names)
     blocks = build_blocks(sessions, block_events=4, event_times=times)
-    assert blocks[0]["delta_t_from_previous"] is None
-    assert blocks[1]["delta_t_from_previous"] == pytest.approx(10000.0 - 3.0)
+    assert blocks[0]["inter_block_gap"] is None
+    assert blocks[1]["inter_block_gap"] == pytest.approx(10000.0 - 3.0)
+    # beyond the literal brief: the only fixture in this file with a genuine cross-
+    # session transition, so it is also the only place that can exercise
+    # metadata_gap_seconds' non-None numeric branch (session "a" metadata ends at
+    # 100.0, session "b" metadata starts at 10000.0 -- neither equals the event-time
+    # bound 3.0/10000.0 used by inter_block_gap, so a mutant that aliased
+    # metadata_gap_seconds to inter_block_gap would still be caught here).
+    assert blocks[0]["metadata_gap_seconds"] is None
+    assert blocks[1]["metadata_gap_seconds"] == pytest.approx(10000.0 - 100.0)
+
+
+def test_transition_delta_t_is_centre_to_centre_not_edge_to_edge():
+    # rev3 R3-D fixture, given verbatim: one session, events at t = 0,1,2,3,10,11,12,13,
+    # block_events=4. Block 0 spans 0-3 (centre 1.5), block 1 spans 10-13 (centre 11.5).
+    # transition_delta_t (centre-to-centre) and inter_block_gap (edge-to-edge) differ
+    # (10.0 vs 7.0), so an implementation using either formula for the other field fails.
+    segments = [_seg("a", 0.0, 20.0)]
+    times = np.array([0.0, 1.0, 2.0, 3.0, 10.0, 11.0, 12.0, 13.0])
+    names = np.array(["a"] * 8)
+    sessions = assign_events(build_sessions(segments, join_seconds=300.0), times, names)
+    blocks = build_blocks(sessions, block_events=4, event_times=times)
+    assert blocks[0]["transition_delta_t"] is None
+    assert blocks[0]["inter_block_gap"] is None
+    assert blocks[1]["transition_delta_t"] == pytest.approx(10.0)
+    assert blocks[1]["inter_block_gap"] == pytest.approx(7.0)
+
+
+def test_metadata_gap_is_none_within_one_session():
+    # rev3 R3-D: metadata_gap_seconds is None whenever the previous block is in the
+    # same session (ambiguity-resolution note) -- exercised here on a single-session,
+    # two-block fixture where transition_stratum is "within_session".
+    segments = [_seg("a", 0.0, 20.0)]
+    times = np.array([0.0, 1.0, 2.0, 3.0, 10.0, 11.0, 12.0, 13.0])
+    names = np.array(["a"] * 8)
+    sessions = assign_events(build_sessions(segments, join_seconds=300.0), times, names)
+    blocks = build_blocks(sessions, block_events=4, event_times=times)
+    assert blocks[1]["transition_stratum"] == "within_session"
+    assert blocks[1]["metadata_gap_seconds"] is None
 
 
 def test_session_remainders_are_dropped_and_counted_not_padded():

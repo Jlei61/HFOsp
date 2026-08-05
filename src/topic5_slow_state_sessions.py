@@ -115,6 +115,23 @@ def build_blocks(
     block_events: int,
     event_times: Sequence[float],
 ) -> list[dict[str, Any]]:
+    """Blocks of `block_events` consecutive events, never spanning a session boundary.
+
+    Three elapsed-time fields describe the transition from the previous block to this
+    one (rev3 R3-D; replaces the single, ambiguous `delta_t_from_previous`):
+
+    - `transition_delta_t` -- this block's centre (mean of its own event times) minus
+      the previous block's centre. This is what the slow-state transition consumes.
+    - `inter_block_gap` -- this block's first event minus the previous block's last
+      event (an inter-event interval, not a slow-state-observation interval).
+    - `metadata_gap_seconds` -- unrecorded wall time across a session boundary: the
+      current session's `t_start` minus the metadata `t_end` of whichever session the
+      *previous block* belonged to (skipping over any intervening session that
+      contributed zero blocks). `None` whenever the previous block is in the same
+      session -- including the very first block, which has no previous block at all.
+
+    All three are `None` for the first block of the sequence.
+    """
     size = int(block_events)
     if size < 2:
         raise ValueError("block_events must be at least 2")
@@ -122,21 +139,31 @@ def build_blocks(
     blocks: list[dict[str, Any]] = []
     previous_session: int | None = None
     previous_end: float | None = None
+    previous_centre: float | None = None
+    previous_session_end: float | None = None
     for session in sessions:
         indices = np.asarray(session["event_indices"])
+        session_start = float(session["t_start"])
+        session_end = float(session["t_end"])
         for start in range(0, indices.size - size + 1, size):
             member = indices[start : start + size]
-            t_start = float(times[member].min())
-            t_end = float(times[member].max())
+            block_times = times[member]
+            t_start = float(block_times.min())
+            t_end = float(block_times.max())
+            centre = float(block_times.mean())
             if previous_session is None:
-                stratum, delta = None, None
+                stratum = None
+                transition_delta_t = None
+                inter_block_gap = None
+                metadata_gap_seconds = None
             else:
-                stratum = (
-                    "within_session"
-                    if int(session["session_index"]) == previous_session
-                    else "cross_gap"
+                same_session = int(session["session_index"]) == previous_session
+                stratum = "within_session" if same_session else "cross_gap"
+                transition_delta_t = float(centre - previous_centre)
+                inter_block_gap = float(t_start - previous_end)
+                metadata_gap_seconds = (
+                    None if same_session else float(session_start - previous_session_end)
                 )
-                delta = float(t_start - previous_end)
             blocks.append(
                 {
                     "block_index": len(blocks),
@@ -144,12 +171,16 @@ def build_blocks(
                     "event_indices": member,
                     "t_start": t_start,
                     "t_end": t_end,
-                    "delta_t_from_previous": delta,
+                    "transition_delta_t": transition_delta_t,
+                    "inter_block_gap": inter_block_gap,
+                    "metadata_gap_seconds": metadata_gap_seconds,
                     "transition_stratum": stratum,
                 }
             )
             previous_session = int(session["session_index"])
             previous_end = t_end
+            previous_centre = centre
+            previous_session_end = session_end
     return blocks
 
 
