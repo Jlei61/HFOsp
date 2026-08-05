@@ -359,6 +359,10 @@ class MZSlowVars:
         # FCXR relay traces (appended only when cfg.use_x): sensor y_j (Hz) + relay availability x_j
         self.trace_gEff_mean = []; self.trace_gErec_mean = []
         self.trace_y_mean = []; self.trace_y_max = []
+        # Global-burst adaptation trace.  Without it an arm that still smoulders is
+        # uninterpretable: too weak, released too early, and never charged all look alike
+        # from the outcome alone.  Pure side-effect on Python lists -- no float is touched.
+        self.trace_gba_burst = []; self.trace_gba_a = []
         self.trace_x_relay_mean = []; self.trace_x_relay_min = []
         self.trace_coop_engaged_frac = []; self.trace_coop_H_mean = []   # FCXR-HEO1 (appended when coop_A>0)
         self.trace_h_lc2_mean = []; self.trace_h_lc2_max = []            # FCXR-LC2 (post-update H)
@@ -826,6 +830,9 @@ class MZSlowVars:
         self.trace_phi_mean.append(float(self.phi[self.is_E].mean()))
         self.trace_phi_max.append(float(self.phi[self.is_E].max()))
         self.trace_adap_current.append(float((self._eta_E * mE).mean()))
+        if self.cfg.use_gba:
+            self.trace_gba_burst.append(float(self.gba_burst))
+            self.trace_gba_a.append(float(self.gba_a))
         self.trace_I_EI_E_mean.append(float(self._I_I_last[self.is_E].mean()))
         ci, si = self.core_e_idx, self.surr_e_idx
         self.trace_z_core_mean.append(float(self.z[ci].mean()) if ci.size else float("nan"))
