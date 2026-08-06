@@ -177,3 +177,13 @@ def adversarial_gain(model, target, support, missing_rule):
         if np.isfinite(s) and np.isfinite(base) and s - base > best_gain:
             best_gain, worst = float(s - base), name
     return dict(base=float(base), gain=float(best_gain), worst_contact=worst)
+
+
+def candidate_key(n_dir, s_rank):
+    """Lexicographic fitness key: (n_dir, S_rank), larger is better.
+
+    CMA-ES consumes candidate ORDER, so the tiers separate without inventing a
+    rate-loss weight. Never compare S_rank across tiers (spec 5.3).
+    """
+    s = float(s_rank)
+    return (int(n_dir), s if np.isfinite(s) else -np.inf)

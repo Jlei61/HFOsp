@@ -132,3 +132,22 @@ def test_no_signed_event_falls_below_the_participation_floor():
         below += sum(1 for e in d.get("events", [])
                      if e.get("sign") is not None and e.get("n_part", 0) < 5)
     assert below == 0
+
+
+from src.topic4_core_field_scoring import candidate_key
+
+
+def test_two_directions_always_outrank_one_even_when_S_is_lower():
+    """The counterexample that killed scalar grading: one direction matching a
+    template perfectly scores 0.5; two directions whose best assignment is +1 and
+    -1 score 0."""
+    assert candidate_key(2, 0.0) > candidate_key(1, 0.5)
+
+
+def test_within_a_tier_the_better_match_ranks_higher():
+    assert candidate_key(2, 0.8) > candidate_key(2, 0.3)
+
+
+def test_no_direction_ranks_last_and_tolerates_nan():
+    assert candidate_key(0, float("nan")) < candidate_key(1, -0.9)
+    assert candidate_key(0, float("nan")) == candidate_key(0, float("nan"))
