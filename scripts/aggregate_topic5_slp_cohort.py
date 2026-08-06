@@ -61,27 +61,42 @@ def collect() -> list:
 
 
 def per_patient(rows: list, metric: str) -> dict:
-    """{arm: {subject: median across seeds}} plus a converged flag per cell."""
+    """{arm: {subject: {seed: value}}} plus a converged flag per patient."""
     table: dict = {}
     converged: dict = {}
     for row in rows:
-        table.setdefault(row["arm"], {}).setdefault(row["subject"], []).append(row[metric])
+        table.setdefault(row["arm"], {}).setdefault(row["subject"], {})[
+            int(row["seed"])] = row[metric]
         converged.setdefault(row["arm"], {}).setdefault(row["subject"], []).append(
             bool(row.get("converged", True))
         )
     return (
-        {arm: {s: float(np.median(v)) for s, v in subs.items()}
-         for arm, subs in table.items()},
+        table,
         {arm: {s: all(v) for s, v in subs.items()} for arm, subs in converged.items()},
     )
 
 
 def paired(values_a: dict, values_b: dict, subjects: list) -> dict:
-    """Positive delta means arm a beats arm b (the metric is a loss)."""
-    common = [s for s in subjects if s in values_a and s in values_b]
+    """Positive delta means arm a beats arm b (the metric is a loss).
+
+    Seeds are pooled inside a patient, but only the seeds present for BOTH arms.
+    Otherwise a patient can contribute a two-seed median on one side against a
+    one-seed value on the other, which quietly compares two different amounts of
+    averaging rather than two models.
+    """
+    common, delta = [], []
+    for subject in subjects:
+        if subject not in values_a or subject not in values_b:
+            continue
+        seeds = sorted(set(values_a[subject]) & set(values_b[subject]))
+        if not seeds:
+            continue
+        common.append(subject)
+        delta.append(float(np.median([values_b[subject][k] for k in seeds])
+                           - np.median([values_a[subject][k] for k in seeds])))
     if len(common) < 3:
         return {"status": "INSUFFICIENT", "n": len(common), "subjects": common}
-    delta = np.array([values_b[s] - values_a[s] for s in common])
+    delta = np.array(delta)
     rng = np.random.default_rng(20260806)
     boot = np.array([
         np.median(rng.choice(delta, len(delta), replace=True)) for _ in range(4000)
@@ -168,7 +183,8 @@ def main() -> int:
         common = [s for s in reference if s in n_contacts]
         if len(common) >= 5:
             rho = stats.spearmanr(
-                [n_contacts[s] for s in common], [reference[s] for s in common]
+                [n_contacts[s] for s in common],
+                [float(np.median(list(reference[s].values()))) for s in common],
             ).statistic
             scaling[metric] = {
                 "spearman_level_vs_contact_count": float(rho),
