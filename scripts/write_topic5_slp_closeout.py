@@ -89,12 +89,16 @@ def main() -> int:
                 f"(median {order['median_node_spearman']:+.2f}, sign test "
                 f"p={order['sign_test_p']:.3g}): "
                 f"**{order['status'].lower().replace('_', ' ')}**.\n")
-        add("So the connection-level questions in the design cannot be answered by this "
-            "model. Any per-patient graph it produces is one arbitrary member of a large "
-            "set that fit the data equally well, and comparing such graphs across patients "
-            "would be comparing optimiser noise. The prediction questions are unaffected: "
-            "they ask whether the field forecasts events, not which connections carry "
-            "them.\n")
+        add("So questions about the *identity* of the connections cannot be answered here. "
+            "Any per-patient graph is one arbitrary member of a large set that fit the data "
+            "equally well: comparing such graphs across patients, or deleting the "
+            "connections the model calls important, would be reading optimiser noise. Two "
+            "hypotheses fall to this — that patients differ in their graphs, and that the "
+            "specific connections are functionally necessary.\n")
+        add("What survives is every question about prediction, including whether *learning* "
+            "the connections beats fixing them to nearest neighbours. That comparison never "
+            "needs to know which connections are right, only whether the freedom to choose "
+            "them pays.\n")
 
     add("## 2. Cohort actually used\n")
     if manifest:
@@ -231,9 +235,17 @@ def main() -> int:
         "verdict_ladder": {
             "L1_recurrence_value": fmt(primary.get("H1", {}).get("all")),
             "L2_latent_substrate_value": fmt(primary.get("H1b_latent_learned", {}).get("all")),
-            "L3_learned_topology_value": "BLOCKED_BY_RECOVERY_GATE"
-            if gate and not gate["reportable_layers"]["edge_identity"] else
-            fmt(primary.get("H3", {}).get("all")),
+            # H3 asks whether LEARNING the graph predicts better than fixing it to
+            # nearest neighbours.  That is a prediction question and the recovery
+            # gate does not touch it: it says which edges are undetermined, not
+            # that learning them is worthless.  Only claims about the identity of
+            # the edges are blocked.
+            "L3_learned_topology_value": fmt(primary.get("H3", {}).get("all")),
+            "L3_scope": (
+                "whether learning the connections helps prediction; it is NOT a "
+                "claim that the learned connections are the right ones, which the "
+                "recovery gate rules out"
+            ),
             "L4_patient_specific_reproducibility": "BLOCKED_BY_RECOVERY_GATE",
             "L5_targeted_structural_necessity": "BLOCKED_BY_RECOVERY_GATE",
             "L6_mode_specific_routing": "NOT_RUN",
