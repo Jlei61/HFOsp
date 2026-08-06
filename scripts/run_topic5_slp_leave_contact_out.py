@@ -65,24 +65,28 @@ def main() -> int:
     parser.add_argument("--seeds", type=int, nargs="*", default=[1])
     parser.add_argument("--subjects", nargs="*", default=None)
     parser.add_argument("--workers", type=int, default=4)
+    parser.add_argument("--aggregate-only", action="store_true",
+                        help="summarise the units that already exist and write the "
+                             "outputs, without training anything further")
     args = parser.parse_args()
 
     manifest = json.loads((OUT / "INPUT_MANIFEST.json").read_text())
     subjects = args.subjects or manifest["frozen_cohort"]["primary"]
 
-    work: "queue.Queue" = queue.Queue()
-    for seed in args.seeds:
-        for subject in subjects:
-            for mode in MODES:
-                for arm in ARMS:
-                    work.put((subject, arm, mode, seed))
+    if not args.aggregate_only:
+        work: "queue.Queue" = queue.Queue()
+        for seed in args.seeds:
+            for subject in subjects:
+                for mode in MODES:
+                    for arm in ARMS:
+                        work.put((subject, arm, mode, seed))
 
-    threads = [threading.Thread(target=worker, args=(work, args.config, args.fraction),
-                                daemon=True) for _ in range(args.workers)]
-    for t in threads:
-        t.start()
-    for t in threads:
-        t.join()
+        threads = [threading.Thread(target=worker, args=(work, args.config, args.fraction),
+                                    daemon=True) for _ in range(args.workers)]
+        for t in threads:
+            t.start()
+        for t in threads:
+            t.join()
 
     rows = []
     for seed in args.seeds:
