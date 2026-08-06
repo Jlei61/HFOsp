@@ -26,7 +26,7 @@
 
 ## 完成度
 
-- 队列单元：计划 315，完成 48
+- 队列单元：计划 105，完成 105
 - 冻结配置：`{"microsteps": 6, "wiring_strength": 0.3, "edge_budget": 6.0}`
 
 （内部归档代号：SLP-RNN v0.1, RECOVERY_GATE.json, FROZEN_CONFIG.json, leave_contact_out_summary.json, static_baseline_verification.json）

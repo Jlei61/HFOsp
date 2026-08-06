@@ -8,6 +8,37 @@
 
 ## 0. Revision log
 
+**rev3 (2026-08-06, late execution)** — five amendments, each forced by something the
+run surfaced rather than by a change of mind:
+
+1. **H3 is not blocked.** rev2 read the recovery gate as removing three hypotheses. It
+   removes two. Whether *learning* the connections predicts better than fixing them to
+   nearest neighbours never needs the connections to be identified, only whether the freedom
+   to choose them pays. H4 and H5 stay blocked; H3 is reported with its scope stated.
+2. **The flow-ordering layer gets its own analysis (§7.3 below).** The gate certified it, and
+   it is the only structural question left askable. It needs a second seed, so it could not
+   run until seed 2 landed.
+3. **Two controls added.** A geometry shuffle, which trains the learned arm against permuted
+   node positions in the connection-cost term only, to test whether the spatial prior
+   constrains anything; and a fully connected latent arm as a ceiling, to separate the cost
+   of sparsity from the cost of the parameterisation.
+4. **Batch size scales with the patient.** A fixed batch made an epoch one gradient update
+   for a patient with 249 events and 68 for one with 69,000, so the epoch budget bought
+   wildly different amounts of optimisation. Every patient now gets at least eight updates
+   per epoch. Units fitted before this were discarded, not resumed.
+5. **Arms are paired only on seeds they share.** Seeds land unevenly; a two-seed median
+   against a one-seed value compares amounts of averaging as much as models.
+
+### 7.3 The flow-ordering readout [rev3]
+
+Licensed by the gate's third layer and by nothing else. For each patient the learned graph
+gives, per tissue unit, how far along the axis its outgoing influence reaches. Refitting the
+same patient from a different starting point tests whether that ordering is stable;
+comparing different patients — restricted to the same contact-count band, both interpolated
+onto a common normalised plane — tests whether it is theirs. Reported as relative ordering
+and never as the graph. Montage size must be matched, or patients that differ only in
+electrode count will look like patients that differ.
+
 **rev2 (2026-08-06, during execution)** — the identifiability precondition H0 returned its
 verdict before any patient result was read, and it removes three hypotheses from this run.
 Four amendments, all recorded before the cohort was aggregated:
