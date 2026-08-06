@@ -114,25 +114,15 @@ def main() -> int:
     summary = {"contract": "topic5_slp_leave_contact_out_v0_1",
                "holdout_fraction": args.fraction,
                "n_cells": len(rows), "comparisons": {}}
-    for mode in MODES:
-        by_arm = {}
-        for arm in ARMS:
-            per_subject = {}
-            for row in rows:
-                if row["arm"] == arm and row["mode"] == mode and row["heldout_next_bce"]:
-                    per_subject.setdefault(row["subject"], []).append(row["heldout_next_bce"])
-            by_arm[arm] = {s: float(np.median(v)) for s, v in per_subject.items()}
-        common = sorted(set(by_arm[ARMS[0]]) & set(by_arm[ARMS[1]]))
+    def paired(values_a: dict, values_b: dict, label: str) -> dict:
+        common = sorted(set(values_a) & set(values_b))
         if len(common) < 3:
-            summary["comparisons"][mode] = {"status": "INSUFFICIENT", "n": len(common)}
-            continue
-        # positive delta means the latent field wins at unseen contacts
-        delta = np.array([by_arm["CONTACT_GRAPH_RNN"][s]
-                          - by_arm["LATENT_LEARNED_SPATIAL_RNN"][s] for s in common])
+            return {"status": "INSUFFICIENT", "n": len(common)}
+        delta = np.array([values_a[s] - values_b[s] for s in common])
         rng = np.random.default_rng(20260806)
         boot = [float(np.median(rng.choice(delta, len(delta), replace=True)))
                 for _ in range(4000)]
-        summary["comparisons"][mode] = {
+        return {
             "status": "COMPLETE", "n": len(common), "subjects": common,
             "median_delta": float(np.median(delta)),
             "bootstrap_95ci": [float(np.percentile(boot, 2.5)),
@@ -140,11 +130,45 @@ def main() -> int:
             "n_positive": int((delta > 0).sum()),
             "wilcoxon_two_sided_p": float(stats.wilcoxon(delta).pvalue),
             "per_patient_delta": {s: float(d) for s, d in zip(common, delta)},
-            "positive_means": "latent field better at contacts it never trained on",
+            "positive_means": label,
         }
-        entry = summary["comparisons"][mode]
-        print(f"\n{mode:7s} n={entry['n']:2d} median={entry['median_delta']:+.4f} "
-              f"pos={entry['n_positive']}/{entry['n']} p={entry['wilcoxon_two_sided_p']:.3g}")
+
+    for mode in MODES:
+        held: dict = {}
+        degradation: dict = {}
+        for arm in ARMS:
+            per_held: dict = {}
+            per_degradation: dict = {}
+            for row in rows:
+                if row["arm"] == arm and row["mode"] == mode and row["heldout_next_bce"]:
+                    per_held.setdefault(row["subject"], []).append(row["heldout_next_bce"])
+                    per_degradation.setdefault(row["subject"], []).append(
+                        row["heldout_next_bce"] - row["retained_next_bce"])
+            held[arm] = {s: float(np.median(v)) for s, v in per_held.items()}
+            degradation[arm] = {s: float(np.median(v)) for s, v in per_degradation.items()}
+
+        entry = {
+            # Pre-registered primary: the raw score at withheld contacts.
+            "raw_heldout_score": paired(
+                held["CONTACT_GRAPH_RNN"], held["LATENT_LEARNED_SPATIAL_RNN"],
+                "latent field scores better at contacts it never trained on"),
+            # Added during execution.  The raw contrast is confounded by overall
+            # fit: without a per-contact bias the latent arm is worse everywhere,
+            # so comparing raw scores at withheld contacts mostly re-measures
+            # that. The within-arm degradation isolates the actual question --
+            # how much does each architecture lose at a position it never scored.
+            "degradation_from_retained_to_heldout": paired(
+                degradation["CONTACT_GRAPH_RNN"],
+                degradation["LATENT_LEARNED_SPATIAL_RNN"],
+                "latent field degrades less at contacts it never trained on"),
+        }
+        summary["comparisons"][mode] = entry
+        for name, block in entry.items():
+            if block.get("status") == "COMPLETE":
+                print(f"\n{mode:7s} {name:38s} n={block['n']:2d} "
+                      f"median={block['median_delta']:+.4f} "
+                      f"pos={block['n_positive']}/{block['n']} "
+                      f"p={block['wilcoxon_two_sided_p']:.3g}")
 
     (OUT / "leave_contact_out_summary.json").write_text(json.dumps(summary, indent=1))
     return 0

@@ -176,10 +176,14 @@ def panel_d(ax) -> None:
         ax.set_axis_off()
         return
     summary = json.loads(path.read_text())
+    # The degradation contrast, not the raw score: without a per-contact bias the
+    # latent arm sits lower everywhere, so a raw comparison at withheld contacts
+    # would mostly re-measure that rather than the ability to reach them.
+    key = "degradation_from_retained_to_heldout"
     modes = [m for m in ("weak", "strong")
-             if summary["comparisons"].get(m, {}).get("status") == "COMPLETE"]
+             if summary["comparisons"].get(m, {}).get(key, {}).get("status") == "COMPLETE"]
     for i, mode in enumerate(modes):
-        entry = summary["comparisons"][mode]
+        entry = summary["comparisons"][mode][key]
         deltas = np.array(list(entry["per_patient_delta"].values()))
         jitter = (np.random.default_rng(i).random(len(deltas)) - 0.5) * 0.24
         colour = np.where(deltas > 0, "#2a9d8f", "#d1495b")
@@ -190,7 +194,7 @@ def panel_d(ax) -> None:
     ax.set_xticks(range(len(modes)))
     ax.set_xticklabels(["Contact still visible\nin the sequence",
                         "Contact fully removed"][:len(modes)], fontsize=7)
-    ax.set_ylabel("Tissue field advantage at\ncontacts never trained on")
+    ax.set_ylabel("Tissue field loses less than the\ncontact model at unseen contacts")
     ax.set_title("D  Predicting where no electrode taught the model", loc="left")
 
 
