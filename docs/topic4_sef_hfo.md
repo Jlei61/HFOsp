@@ -779,6 +779,14 @@ B→A 胜出、A→B held-out 弱 → 只验证 B→A 分支。local participati
 bit-identical snapshot/resume + state-matched z 对照）。完整数值、长轴对照+LOO、时间演化、配对表、验收合同、声明边界见
 `docs/archive/topic4/sef_hfo/mz_early_field_bridge_v2_zm_tau500_2026-07-20.md` §10。
 
+**Figure 5 上半部分布局锁（2026-07-22）**：正式 producer 为
+`scripts/paper_figures/plot_fig_mz_early_bridge_v2.py`，正式输出为
+`results/paper-ready-figure/fig_mz_early_bridge_v2_zm_tau500/figures/fig_mz_early_bridge_v2_zm_tau500.{png,pdf}`。
+当前整张复合图作为 Figure 5 的上半部分定稿：上排为连续 30–80 Hz Virtual-SEEG + z–m 慢状态轨迹，下排为
+TB event order、early-onset energy、baseline mode 和 −120 ms early-onset mode。右侧 baseline panel 内的 spatial
+probe 仅是小扰动示意；两张 mode 仍是 frozen Jacobian leading-mode loading，不是固定 kick 的有限时间 response。
+Figure 5 下半部分另行设计；未明确解锁前，不再改变本 block 的布局、时间锚点、颜色和标签合同。
+
 ---
 
 ## 7. 模型支持 / 不支持的解释

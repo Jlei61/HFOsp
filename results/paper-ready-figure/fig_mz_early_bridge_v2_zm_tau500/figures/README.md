@@ -1,12 +1,14 @@
 # fig_mz_early_bridge_v2_zm_tau500 — 图说明（中文）
 
-本目录是 MZ early-field bridge **V2（z+m，τ_adp=500 ms）** 的 paper-ready 图。它和已冻结的 V1（只有去抑制 z）用**完全相同的图语**，只把中间那段自然轨迹从 z-only 换成 z+m，用来看"加了快速适应变量 m 之后，间期时序轴还能不能预测失控前的早期能量场"。
+本目录是 MZ early-field bridge **V2（z+m，τ_adp=500 ms）** 的 paper-ready 图。**2026-07-22 已锁定为 Figure 5 上半部分的正式布局**：当前整张复合图作为一个不可拆换的上半部 block，后续 Figure 5 下半部分另行设计与拼接；除非用户明确解锁，不再改变 panel 数量、相对宽度、时间锚点、标题、legend、colorbar、spatial-probe glyph 或坐标标签。主体沿用连续 readout + 双空间场图语，并在右列加入 z–m 慢状态轨迹和 baseline/early-onset frozen-q mode context。
 
 ### fig_mz_early_bridge_v2_zm_tau500.png
 
-上排是一条**连续的 z+m native Virtual-SEEG 轨迹**（seed1，非拼接）：橙色是 ICL 杆的 11 个触点、青色是 SCL 杆的 4 个触点。蓝窗是按固定规则选出的**一个间期样返回事件**（规则：t_recruit 之前、多数 slow-off 方向里最后一个合格事件，选取不看目标能量）；粉窗是 `t_recruit` 后 0–50 ms 的 **pre-t120 早期能量窗**；红虚线是 operational-runaway `t120`（此图显示时间标注为 1106 ms，对应绝对时间约 12956 ms）。下排只有两张与上方窗一一对应的 contact 场：左 = 蓝窗事件的**触点发放次序**（viridis，1 早→晚），右 = 粉窗的 **pre-t120 早期能量**（Blues）。两张场沿 E1146 长轴**同向抬升**（长轴右侧既是事件里更早、又是失控前能量更高），这就是"同一支架、状态依赖读出"的桥在 z+m 下仍然成立的直观证据。灰点只表示固定 E-neuron 几何背景，**不表示局部招募**；operational runaway 是模型代号、不是临床发作，virtual-LFP 30–80 Hz 能量不是临床宽带功率。正式统计仍来自 slow-off held-out 双向模板的 maxAB（不是图里这一例的描述性 earliness）。
+上排左侧是一条**连续的 z+m native Virtual-SEEG 轨迹**（seed1，非拼接）：橙色是 ICL 杆的 11 个触点、青色是 SCL 杆的 4 个触点；`Virtual-SEEG (30–80 Hz)` 放在纵轴，不再另设面板标题。右上角图例只保留两个真正需要解释的标记：红色 early onset 和蓝色 TB sample event，不再重复列出 ICL/SCL。蓝窗是按固定规则选出的**一个间期样返回事件**（规则：`t_recruit` 之前、多数 slow-off 方向里最后一个合格事件，选取不看目标能量）。红虚线定义为图中统一使用的 **early onset**，即 operational `t120 − 120 ms`（显示坐标约 986 ms，对应绝对时间约 12836.2 ms）；原先的粉色 shading 已删除。operational `t120=12956.2 ms` 只作为 provenance 保留在 metadata 中，不再画在图上。上排右侧是同一 z+m 条件的一条 seed1 自然慢状态轨迹：横轴为去抑制 `D=1-z̄`，纵轴为适应 `a`；深蓝轨迹越过红色虚线后进入极淡红区。图中的 `𝒮` 是**首次 operational-runaway crossing 的示意边界**，不是解析拟合或已证明的 separatrix。
 
-**关注点**：下排两张场的长轴梯度是否同向（间期时序轴是否预测 pre-runaway 能量），以及与 V1 z-only 主图对照——z+m 把 `t120` 从约 9.3 s 推后到约 13.0 s，但这条轴是否仍被保留。
+下排从左至右是**等宽排列**的四张空间图，横轴统一为 `TA shared axis (mm)`，最左图纵轴为 `y (mm)`：前两张分别为蓝窗事件的**触点发放次序**（viridis，rank 1 早→rank 11 晚）和 **early-onset energy**（Blues）；event-order 色条端点改为纯数字，并加宽两个中间色条与相邻 panel 的留白，避免端点数字侵入下一张图。能量窗仍使用原注册的 `t_recruit` 后 0–50 ms，换算到统一的 early-onset 时标后为 −55.7 至 −5.7 ms，因此位于红线前紧邻 early onset 的增强阶段。两张场沿 shared axis 同向抬升。右侧两张图是三 seed 平均的 frozen-q rate-field leading-mode loading，`Baseline mode` 近全局/各向同性（axis score 0.055，globality 0.985），`Early-onset mode −120 ms` 沿 shared axis 集中（axis score 0.860，globality 0.135），共用同一 magma 色标。Baseline panel 左上角新增一个灰度的局部 E-rate spatial probe 及输入箭头，**只用来示意如何对冻结空间系统施加小扰动**；leading mode 本身仍由 frozen Jacobian 求得，不是该特定 probe 的有限时间 response，也没有新增一次仿真。−120 ms 模式不是把 −100 ms 结果改标签，而是先在逐神经元层面对 −200 与 −100 ms 的 z 状态插值，再重新求 frozen-q operating point 和 leading mode；它仍是线性化 rate-field 的机制背景，不是从上方 z+m SNN trace 直接辨识出的 empirical full-SNN eigenmode，也不编码传播方向。灰点只表示固定 E-neuron 几何背景，**不表示局部招募**；operational runaway 是模型代号、不是临床发作，30–80 Hz virtual-SEEG readout 不是临床宽带功率。正式统计仍来自 slow-off held-out 双向模板的 maxAB（不是图里这一例的描述性 earliness）。
+
+**关注点**：先看红线处的 Virtual-SEEG 是否已出现清楚的早期增强，再看右上角单条慢轨迹是否从低 `D/a` 状态穿过 operational boundary；最后比较下排前两张场的长轴梯度是否同向，以及 mode 是否由 baseline 的近全局形态转为 −120 ms 的轴向集中。
 
 ### fig_mz_v1_v2_paired_diagnostic.png
 
