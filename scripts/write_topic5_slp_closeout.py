@@ -331,12 +331,26 @@ def main() -> int:
     add("- that the geometry could have been known before the recording.\n")
 
     add("## 7. Smallest next experiment\n")
-    add("Connection identity failed to recover even when the field was barely larger than "
-        "the contact set, so the limit is not simply that there are more tissue units than "
-        "electrodes. The next step is to ask what would be identifiable: fit the same field "
-        "with the graph replaced by a handful of parameters describing how far and in which "
-        "direction influence spreads, and check whether those few numbers recover on the "
-        "same synthetic data where the free graph did not.\n")
+    add("Three findings point the same way. Connection identity failed to recover even when "
+        "the field was barely larger than the contact set, so the limit is not simply that "
+        "there are more tissue units than electrodes. The connection cost visibly shortens "
+        "the connections it selects and changes nothing about what the model predicts. And "
+        "the ordering that does survive is nearly as similar between patients as within "
+        "one.\n")
+    add("Together those say the free graph has far more freedom than the data can pin down, "
+        "and that the part of it which is pinned down is close to generic. The next step is "
+        "not a better-regularised graph — it is fewer numbers. Replace the graph with a "
+        "handful of parameters describing how far influence spreads and how strongly it "
+        "favours one direction, then run the same identifiability check: do those few "
+        "numbers recover on synthetic data where the free graph did not? If they do, they "
+        "are the object worth estimating per patient, and the question of whether they "
+        "differ between patients becomes answerable. If they do not, the observation is too "
+        "sparse to support any spatial propagation model at this resolution, which is worth "
+        "knowing before another architecture is tried.\n")
+    add("One thing not to repeat: leave-contact-out was run in two conditions with neither "
+        "named primary, which cost the study its multiplicity budget for a question it only "
+        "needed to ask once. Pick the strong condition — the contact removed from the input "
+        "entirely — and test it alone.\n")
 
     (OUT / "CLOSEOUT_REPORT.md").write_text("\n".join(lines))
 
