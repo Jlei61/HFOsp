@@ -12,20 +12,32 @@ cd "$W" || exit 1
 export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 stamp() { echo "[$(date +%H:%M:%S)] $*"; }
 
+count_core() {
+  "$PY" - <<'COUNT'
+import json, os
+R = "results/topic5_spatial_latent_propagation_rnn_v0_1"
+subs = json.load(open(f"{R}/INPUT_MANIFEST.json"))["frozen_cohort"]["primary"]
+arms = ["STATIC_CONTACT", "ORDINARY_GRU", "CONTACT_GRAPH_RNN",
+        "LATENT_FIXED_LOCAL_RNN", "LATENT_LEARNED_SPATIAL_RNN"]
+print(sum(1 for s in subs for a in arms
+          if os.path.exists(f"{R}/per_subject/{s}/{a}/seed1/DONE.json")))
+COUNT
+}
+
 stamp "waiting for the 105-unit refit"
-while [ "$(find "$R/per_subject" -path "*/seed1/*" -name DONE.json 2>/dev/null | wc -l)" -lt 105 ]; do
+while [ "$(count_core)" -lt 105 ]; do
   if [ "$(pgrep -fc train_topic5_slp_unit || echo 0)" -eq 0 ]; then
-    stamp "trainers gone at $(find "$R/per_subject" -path "*/seed1/*" -name DONE.json | wc -l)/105; retrying stragglers"
+    stamp "trainers gone at $(count_core)/105; retrying stragglers"
     find "$R/per_subject" -name FAILED.json -delete 2>/dev/null
     "$PY" scripts/launch_topic5_slp_cohort.py --config "$CFG" \
       --arms STATIC_CONTACT ORDINARY_GRU CONTACT_GRAPH_RNN \
              LATENT_FIXED_LOCAL_RNN LATENT_LEARNED_SPATIAL_RNN \
       --seeds 1 --workers 5 >> "$R/refit_retry.log" 2>&1
-    [ "$(find "$R/per_subject" -path "*/seed1/*" -name DONE.json | wc -l)" -lt 105 ] && break
+    [ "$(count_core)" -lt 105 ] && break
   fi
   sleep 120
 done
-stamp "cohort at $(find "$R/per_subject" -path "*/seed1/*" -name DONE.json | wc -l)/105"
+stamp "cohort at $(count_core)/105"
 
 # Leave-contact-out trained its tissue-field arm under the old ceiling, and its
 # comparator did not, so any residual bias runs the same way as the cohort bias.
