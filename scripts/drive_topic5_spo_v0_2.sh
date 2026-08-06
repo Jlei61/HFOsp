@@ -70,6 +70,8 @@ $PY scripts/launch_topic5_spo_cohort.py \
 # --- analysis, figure, closeout, gate --------------------------------------
 stamp "aggregating"
 $PY scripts/analyse_topic5_spo_cohort.py >> "$R/analysis.log" 2>&1
+stamp "spatial scale"
+$PY scripts/check_topic5_spo_spatial_scale.py >> "$R/analysis.log" 2>&1
 stamp "figure"
 $PY scripts/plot_topic5_spo_figures.py >> "$R/analysis.log" 2>&1
 stamp "closeout"

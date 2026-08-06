@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results/topic5_spatial_propagation_operator_v0_2"
@@ -10,6 +11,10 @@ OUT = ROOT / "results/topic5_spatial_propagation_operator_v0_2"
 FORBIDDEN = ("anatomical connectivity", "conduction velocity", "mm/s",
              "proves the biological", "causal human brain network",
              "prospective geometry", "recovered the propagation graph")
+
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+from scripts.analyse_topic5_spo_cohort import NOT_NESTED  # noqa: E402
 
 
 def load(path: Path) -> dict:
@@ -50,11 +55,22 @@ def main() -> int:
         "GEOMETRY_STATUS": manifest.get("geometry_status", "UNKNOWN"),
         "TRAIN_ONLY_AXIS": manifest.get("train_only_axis", "UNKNOWN"),
     }
+    # A verdict on a comparison names the component that was released. The
+    # non-nested pair releases one and freezes another at the same time, so
+    # "SUPPORTED" there would name nothing; it is reported in the body and kept
+    # out of the frozen verdicts.
     for name, entry in ladder.items():
-        if entry.get("status") == "COMPLETE":
+        if entry.get("status") == "COMPLETE" and name not in NOT_NESTED:
             key = f"LADDER_{name.upper()}"
             status[key] = ("SUPPORTED" if entry["wilcoxon_two_sided_p"] < 0.05
                            and entry["median_delta"] > 0 else "NOT_SUPPORTED")
+    # A nested comparison can also come out significantly NEGATIVE, which is a
+    # different statement from "no evidence" and must not collapse into it.
+    for name, entry in ladder.items():
+        if (entry.get("status") == "COMPLETE" and name not in NOT_NESTED
+                and entry["wilcoxon_two_sided_p"] < 0.05
+                and entry["median_delta"] < 0):
+            status[f"LADDER_{name.upper()}"] = "WORSE_THAN_WITHOUT_IT"
     rel = stats.get("parameter_reliability", {})
     status["PATIENT_SPECIFIC_OPERATOR"] = (
         "SUPPORTED" if rel.get("status") == "COMPLETE"
@@ -143,7 +159,30 @@ def main() -> int:
                 f"{counts['hit_ceiling']} still improving at the ceiling")
         add("")
 
-    add("## 3. Is the fitted operator the patient's?\n")
+    add("## 3. Why the spatial rungs are flat\n")
+    scale = load(OUT / "spatial_scale_check.json")
+    if not scale:
+        add("Not measured.\n")
+    else:
+        add("Three results above point the same way and none of them explains "
+            "itself: the drift sign does not recover on data with a known answer, "
+            "switching transport off in a fitted model changes its predictions by "
+            "nothing, and refitting with transport released is slightly worse than "
+            "refitting without it.\n")
+        add(f"A contact does not sample a point. It averages over a disc of radius "
+            f"{scale['median_read_radius_mm']:.1f} mm, set by the contact spacing. "
+            f"Over a whole event the fitted field moves "
+            f"{scale['median_field_displacement_mm']:.1f} mm — "
+            f"{scale['median_displacement_over_read_radius']:.2f} of that radius, "
+            f"and below it in {scale['n_below_read_radius']} of "
+            f"{scale['n_patients']} patients.\n")
+        add("So the transport happens inside a single reading. This is a property "
+            "of the recording geometry, not evidence that propagation is absent, "
+            "and it is what would have to change for this model family to be "
+            "testable: contacts that read a smaller footprint, or events that run "
+            "long enough for the displacement to accumulate past one.\n")
+
+    add("## 4. Is the fitted operator the patient's?\n")
     if rel.get("status") == "COMPLETE":
         add(f"- median within-minus-between {rel['median_delta']:+.4f}, 95% CI "
             f"[{rel['bootstrap_95ci'][0]:+.4f}, {rel['bootstrap_95ci'][1]:+.4f}], "
@@ -155,7 +194,7 @@ def main() -> int:
         add(f"- {rel.get('status', 'not run')}")
     add("")
 
-    add("## 4. What breaks when a component is switched off\n")
+    add("## 5. What breaks when a component is switched off\n")
     add("The fitted operator is edited and rescored; nothing is retrained, so no")
     add("other parameter moves to compensate. These are operator edits in silico,")
     add("not lesions.\n")
@@ -167,7 +206,7 @@ def main() -> int:
                if entry.get("wilcoxon_two_sided_p") is not None else ""))
     add("")
 
-    add("## 5. Predicting a contact that was never trained on\n")
+    add("## 6. Predicting a contact that was never trained on\n")
     loco = stats.get("leave_contact_out", {})
     if loco.get("status") != "COMPLETE":
         add(f"Not available: {loco.get('status', 'not run')}.\n")
@@ -199,7 +238,7 @@ def main() -> int:
                     f"{entry['bootstrap_95ci'][1]:+.4f}]")
         add("")
 
-    add("## 6. Conditions on every number above\n")
+    add("## 7. Conditions on every number above\n")
     add(f"- geometry: {status['GEOMETRY_STATUS']}; train-only axis "
         f"{status['TRAIN_ONLY_AXIS']}")
     if manifest.get("train_only_axis_reason"):
@@ -218,7 +257,7 @@ def main() -> int:
     add("  speed or compared with one")
     add("")
 
-    add("## 7. Frozen status\n```text")
+    add("## 8. Frozen status\n```text")
     for key, value in status.items():
         add(f"{key}:\n{value}\n")
     add("```")
