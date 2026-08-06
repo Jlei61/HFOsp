@@ -302,6 +302,12 @@ def main() -> int:
             "set contains the next contact far less often than the retained set "
             "does, and 'not this one' is correspondingly easier. Only the arms "
             "are comparable, within a column.\n")
+        add(f"⚠ The floor arm's top-1 is not interpretable. Its withheld contacts "
+            "all carry exactly the same score, so taking the most probable one "
+            "reduces to taking the lowest-numbered one -- and contact numbers run "
+            "along a shaft, so that is weakly informative rather than blind. Its "
+            "loss is unaffected, because a proper score does not depend on how "
+            "ties break, and the loss is the metric the comparison runs on.\n")
         add(f"Floor arm: **{loco['floor_arm']}** — with the withheld contact's bias "
             "set to the average retained contact's, it assigns every withheld "
             "contact the same number and therefore knows nothing about them.\n")
