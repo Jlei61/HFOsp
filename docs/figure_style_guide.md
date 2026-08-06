@@ -133,6 +133,7 @@
   - **mechanism**：左 1 格，画底物和机制变量。必须标出关键连接 / 病理范围，例如 E->E 长轴作用范围、病灶核、虚拟电极位置。这个 panel 只解释“机制是什么”，不堆长说明文字。
   - **tempA source**：中间第 1 个方形 panel，画 tempA / source-A / 组合 A 的代表传播事件。点云颜色为传播起始相对时间，沿用 viridis `early → late`；红圈标病灶 / source 区，星号只标该事件的实际 source。
   - **tempB source**：中间第 2 个方形 panel，画 tempB / source-B / 组合 B 的代表传播事件。坐标轴、colormap、contact 标注必须与 tempA panel 完全一致，便于直接比较两种组合是否反向。
+  - **⚠️ 这两列按 source identity 分，不按"沿轴先后相关系数"的正负号分（2026-08-07 锁）**：选代表事件和放星号都必须**从该事件自己的逐细胞起始图导出**（起火点 = 最早放电的一小部分细胞的重心），不得用预设的核位置，也不得用相关系数符号当方向标签。原因：若事件是围着单个核摊开的**局部斑块**（未贯通两核），相关系数符号测的是"起火点哪一侧尾巴更长"，与"从哪儿起火"是两个问题——按符号选会把两次同侧起火的事件当成一正一反，星号与自己的起始图矛盾。实现与测试见 `src/topic4_fcxr_lc3_ignition.py` / `tests/test_topic4_fcxr_lc3_ignition.py`；起火点落在两核中间判不出的事件必须标"说不清"，不得硬塞给更近的一侧；某源区一次都没点火时，该列**保留几何**并写明"这一侧没有事件起火"，不画成空白框。
   - **electrode readout**：右侧宽 panel，画同一 montage 的多事件虚拟 SEEG train。只画 active contacts，y 轴为 contact，x 轴为 time；用不同颜色 shading 区分 forward / reverse clean propagation events，黑点/线标每个事件的 peak order。
 - **标题约定**：子图标题只用短名：`mechanism`、`tempA source`、`tempB source`；readout 不加长标题。必要统计写进 metadata/README，不压到图上。
 - **配色 / 渲染锁定**：
