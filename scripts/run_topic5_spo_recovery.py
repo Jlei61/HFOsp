@@ -220,8 +220,11 @@ def main() -> int:
 
     centres, shape, mask = build_grid(contacts, sigma)
     H = build_observation_operator(contacts, centres, sigma)
+    # microsteps is swept below; the guard runs at the first value so that it
+    # checks the generator the sweep actually starts from.
     base = dict(n_contacts=len(contacts), grid_shape=shape,
-                microsteps=args.microsteps, observation_operator=H, grid_mask=mask)
+                microsteps=args.microsteps[0], observation_operator=H,
+                grid_mask=mask)
     print(f"{args.subject}: {len(contacts)} contacts, grid {shape}, "
           f"{int(mask.sum())} cells in domain, event lengths "
           f"{lengths.min()}-{lengths.max()}")

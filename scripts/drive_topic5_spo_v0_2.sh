@@ -1,0 +1,71 @@
+#!/bin/bash
+# The whole v0.2 chain, in dependency order, detached.
+#
+# The recovery gate does NOT block the cohort. It decides which parameter-level
+# statements the closeout may make; the prediction ladder never needs to know a
+# true parameter value, so it runs either way. Treating a gate verdict as a stop
+# sign would throw away the question the version was built to answer.
+set -u
+W=/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-spo-rnn
+PY=/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python
+R=$W/results/topic5_spatial_propagation_operator_v0_2
+cd "$W" || exit 1
+export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTHONPATH="$W"
+stamp() { echo "[$(date +%H:%M:%S)] $*"; }
+
+count_done() {
+  find "$R/per_subject" -path '*/seed1/*' -name DONE.json 2>/dev/null | wc -l
+}
+count_running() { pgrep -fc "train_topic5_spo_unit\.py"; }
+
+# --- wait for the recovery gate, which is already running ------------------
+stamp "waiting for the recovery gate"
+while pgrep -f "run_topic5_spo_recovery\.py" > /dev/null; do sleep 60; done
+if [ -f "$R/synthetic/RECOVERY_GATE.json" ]; then
+  stamp "gate finished: $($PY -c "
+import json;g=json.load(open('$R/synthetic/RECOVERY_GATE.json'))
+print(' '.join(f\"{k.split('_')[0]}={g[k]['status']}\" for k in
+ ('drift_sign','anisotropy_ordering','recovery_strength_ordering')))")"
+else
+  stamp "gate produced no verdict file; the cohort still runs, the closeout will say so"
+fi
+
+# --- first seed, five variants, every patient -----------------------------
+stamp "cohort, first seed"
+$PY scripts/launch_topic5_spo_cohort.py --seeds 1 --workers 6 \
+  >> "$R/cohort_seed1.log" 2>&1
+
+attempt=0
+while [ "$(count_done)" -lt 105 ] && [ "$attempt" -lt 6 ]; do
+  attempt=$((attempt + 1))
+  stamp "retry $attempt at $(count_done)/105"
+  find "$R/per_subject" -name FAILED.json -delete 2>/dev/null
+  $PY scripts/launch_topic5_spo_cohort.py --seeds 1 --workers 3 \
+    >> "$R/cohort_retry.log" 2>&1
+done
+stamp "cohort at $(count_done)/105"
+
+# --- second seed, full operator only, for the reliability question ---------
+stamp "second seed, full operator"
+$PY scripts/launch_topic5_spo_cohort.py --variants ANISOTROPIC_RECOVERY \
+  --seeds 2 --workers 6 >> "$R/cohort_seed2.log" 2>&1 || true
+
+# --- leave-contact-out, strong condition only ------------------------------
+# One condition, named in advance. v0.1 ran two with neither primary and spent
+# its multiplicity budget on a question it only needed to ask once.
+stamp "leave-contact-out, strong condition"
+$PY scripts/launch_topic5_spo_cohort.py \
+  --variants ANISOTROPIC_RECOVERY FIELD_NULL --seeds 1 --workers 4 \
+  --holdout-fraction 0.25 --out-root "$R/leave_contact_out" \
+  >> "$R/loco.log" 2>&1 || true
+
+# --- analysis, figure, closeout, gate --------------------------------------
+stamp "aggregating"
+$PY scripts/analyse_topic5_spo_cohort.py >> "$R/analysis.log" 2>&1
+stamp "figure"
+$PY scripts/plot_topic5_spo_figures.py >> "$R/analysis.log" 2>&1
+stamp "closeout"
+$PY scripts/write_topic5_spo_closeout.py >> "$R/analysis.log" 2>&1
+$PY scripts/accept_topic5_spo_v0_2.py > "$R/ACCEPTANCE.txt" 2>&1
+stamp "DRIVER COMPLETE"
+cat "$R/ACCEPTANCE.txt"

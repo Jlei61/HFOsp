@@ -358,7 +358,17 @@ class SPOModel(nn.Module):
         out["effective_transverse_spread_per_rank"] = float(
             np.sqrt(max(2.0 * K * out["D_perp"], 0.0))
         )
+        # A coefficient sitting on the stability bound is censored, not
+        # estimated: the true value is somewhere at or above it and the ratio
+        # built from it is a bound too. Saying so is the difference between an
+        # estimate and a number that merely came out of the optimiser.
+        out["D_parallel_at_bound"] = bool(out["D_parallel"] > 0.98 * D_MAX)
+        out["D_perp_at_bound"] = bool(out["D_perp"] > 0.98 * D_MAX)
+        out["drift_at_bound"] = bool(abs(out["v"]) > 0.98 * V_MAX)
         out["anisotropy"] = float(out["D_parallel"] / max(out["D_perp"], 1e-9))
+        out["anisotropy_is_bounded_estimate"] = bool(
+            out["D_parallel_at_bound"] or out["D_perp_at_bound"]
+        )
         out["activation_persistence"] = float(1.0 / max(out["gamma_a"], 1e-9))
         out["recovery_strength"] = float(out["beta"] / max(out["gamma_r"], 1e-9))
         return out
