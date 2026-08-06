@@ -89,6 +89,7 @@ stamp "STAGE 5  aggregate, figures, closeout, acceptance"
 # destroying its own evidence.
 stamp "  failures surviving every retry: $(find "$R/per_subject" -name FAILED.json 2>/dev/null | wc -l)"
 "$PY" scripts/verify_topic5_slp_static_baseline.py >> "$R/orchestrator_final.log" 2>&1 || true
+"$PY" scripts/run_topic5_slp_flow_ordering.py >> "$R/orchestrator_final.log" 2>&1 || true
 "$PY" scripts/aggregate_topic5_slp_cohort.py >> "$R/orchestrator_final.log" 2>&1
 "$PY" scripts/run_topic5_slp_leave_contact_out.py --config "$CFG" --aggregate-only \
   >> "$R/orchestrator_final.log" 2>&1 || true

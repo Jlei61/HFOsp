@@ -42,6 +42,7 @@ def main() -> int:
     frozen = load(OUT / "development" / "FROZEN_CONFIG.json")
     sweep = load(OUT / "development" / "SWEEP_SUMMARY.json")
     baseline_check = load(OUT / "static_baseline_verification.json")
+    ordering = load(OUT / "flow_ordering.json")
     budget_probe = load(OUT / "convergence_bias_probe.json")
     shuffle = load(OUT / "geometry_shuffle_control.json")
 
@@ -262,6 +263,27 @@ def main() -> int:
             "comparison would be undefined at exactly the positions being tested.\n")
     else:
         add("Not run.\n")
+
+    add("## 5c. The one structural readout the gate leaves open\n")
+    if ordering and ordering.get("is_the_ordering_a_property_of_the_patient"):
+        block = ordering["is_the_ordering_a_property_of_the_patient"]
+        add("The recovery check found the identity of the connections unrecoverable and "
+            "the overall direction of travel unrecoverable, but the relative ordering of "
+            "how far each patch pushes along the axis recoverable. That leaves exactly one "
+            "structural question askable: is that ordering a property of the patient or of "
+            "the optimiser?\n")
+        add(f"- the same patient, refitted from a different starting point: "
+            f"{block['within_median']:+.3f}")
+        add(f"- different patients with comparably sized montages: "
+            f"{block['between_median']:+.3f}")
+        add(f"- difference {block['difference']:+.3f}, p={block['mannwhitney_greater_p']:.3g} "
+            f"over {ordering['within_patient']['n_pairs']} within-patient and "
+            f"{ordering['between_patient']['n_pairs']} between-patient pairs\n")
+        add(f"**{block['reading'].capitalize()}.** Note how high the between-patient "
+            f"similarity already is: whatever the ordering reflects is largely shared "
+            f"across patients rather than particular to one.\n")
+    else:
+        add("Not run, or too few patients had a second seed to compare against.\n")
 
     add("## 5b. What a negative here does and does not mean\n")
     add("If the tissue field turns out not to beat an unconstrained recurrent model, that is "
