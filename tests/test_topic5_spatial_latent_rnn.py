@@ -497,6 +497,26 @@ def test_wiring_loss_rises_when_long_edges_are_opened():
     assert long_cost > short_cost
 
 
+def test_batch_size_gives_every_patient_the_same_number_of_updates():
+    """The epoch budget must mean the same amount of optimisation for everyone.
+
+    A fixed batch counts gradient steps in units of epochs, which starves the
+    patients with few events: at 1024 a patient with 249 training events gets one
+    update per epoch. That is how half this cohort ended up fitted far from its
+    own optimum while the logs looked normal.
+    """
+    from scripts.train_topic5_slp_unit import MIN_BATCHES_PER_EPOCH
+
+    configured = 1024
+    for n_train in (249, 359, 1313, 4687, 12667, 69114):
+        batch = int(np.clip(n_train // MIN_BATCHES_PER_EPOCH, 32, configured))
+        batches_per_epoch = max(1, n_train // batch)
+        assert batches_per_epoch >= MIN_BATCHES_PER_EPOCH - 1, (
+            f"{n_train} training events give only {batches_per_epoch} updates per epoch"
+        )
+        assert batch <= configured
+
+
 @pytestmark_cache
 def test_ranks_are_dense_and_contacts_appear_at_most_once_per_event():
     for patient in _cached_patients():
