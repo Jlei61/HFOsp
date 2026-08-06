@@ -6,6 +6,22 @@
 
 ## 主线（network-axis pivot）
 
+### `patient_specific_target_free_rnn_bridge_v0_1_result_2026-08-03.md` — **患者内 RNN 学到间期传播，并恢复与发作早期相关的患者空间场**
+- 每位患者只用自己的 masked interictal contact-rank events 独立自监督训练；16 人 × 3 模型 × 3 seeds 共 144 units，0 failure。Primary 15 人中，真实顺序 GRU 相对 rank-shuffle heldout NLL 在 14/15 人改善，exact P=0.000122；自由 rollout precedence 相关中位 0.775（rank-shuffle 0.052）。
+- checkpoint/rollout 冻结后才读取同一患者 `[0,10] s`、`1–150 Hz` early-ictal field。GRU 场 median max|rho|=0.584，相对 all-contact null 的 margin +0.167，13/15 为正，P=0.0256。该对应也见于完整 static fit60 与 rank-shuffle 场；GRU−static 增量 +0.025、P=0.305，within-shaft sensitivity P=0.149。
+- 安全结论是“患者内 RNN 恢复间期传播结构；其恢复的患者空间 scaffold 与发作早期场有 target-free 跨状态对应”，不是“有序 RNN dynamics 额外预测发作”或“自动恢复唯一 A/B 轴”。
+
+### `history_conditioned_field_refinement_v0_4_result_2026-08-03.md` — **冻结静态 A/B 后的 causal-history 残差：正式无增益**
+- 15 名 development-excluded strict clinical-onset 患者、31 次发作完成 15 LOSO × 3 seeds；endpoint 与既有结果对齐为 `[0,10] s`、`1–45 Hz` contact-energy 的 sign-free maxAB，不要求唯一 A/B 或符号。
+- 静态 M0 本身保持信息：患者中位 maxAB 0.5545，相对 5000 次 matched all-contact channel null 的中位 margin +0.1500（11/15 正，exact P=0.01245）。
+- 联合 RNN M3−M0 中位 0（1 正/7 负/7 并列，P=0.0391）；M3 不优于冻结 state M1 或非递归时间汇总 M2。真实顺序−全历史打乱中位 −0.0006（P=0.1016），正确 history−同患者 seizure swap 中位 −0.0037（P=0.2969）。结论是静态跨状态 scaffold 保留，逐发作 history refinement 未建立；定位为 Supplementary bounded result。
+
+### `history_rnn_direct_early_ictal_transfer_v0_2_result_2026-08-02.md` — **跨事件 latent-state → early-ictal field：training-sensitive boundary**
+- 取消 next-event proxy 对 early-ictal target 的错误硬门，在 15 名 development-excluded strict clinical-onset 患者、31 次发作上完成 target-patient LOSO direct transfer；所有动态量逐发作从 onset−10 min 以前的 causal prefix 构建。每患者的场只覆盖 6–16 个骨架触点（中位 9），不是完整蒙太奇。
+- **2026-08-02 code review 后重跑**：顺序对照改为按合同打乱整段 causal prefix（先前只打乱最近 64 个事件，中位仅覆盖 20.6% 的历史），含并列的患者级 Wilcoxon 改用精确零分布。修正后**真实顺序在 c10 与 c30 都没有优势**（P=0.368 / 0.207），先前报告的 c10 顺序阳性撤回。
+- c10 仍有 HistoryRNN 相对 static+unordered 与 nonzero-state 两项阳性，c30 均未复现；c30 的 R2−M1 median Δρ=0.0571、P=0.138，zero-state P=0.138。科学标志仍随训练预算变化，不能把 c10 阳性写成稳定发现。
+- c10/c30 都未通过 absolute all-contact channel null，均只有 2/15 患者超过各自 null p95；c30 正确 history–seizure pairing P=0.527。整个模型阶梯（含 M0，中位 ρ=−0.214）绝对场都不超过零，阴性只覆盖“有符号、跨患者共享的 readout”这一族。最终状态为 `ACCEPTED_SUPPLEMENTARY_TRAINING_SENSITIVE_BOUNDARY`，不推翻既有 sign-free static morphology，也不支持“间期活动因果塑造网络”。
+
 ### `rnn_training_and_objective_sufficiency_v0_1_report_2026-07-30.md` — **训练充分性关闭；整场生成阴性拆成"训练不足"+"读出方式"两个成分**
 - 1,068 个单元零失败。上一轮冻结的训练预算比延长训练预算差 **0.134 nats/decision（34/34 人，P=1.16e-10，LOSO 结构确认）**，约为既有顺序增量（0.0257）的 5 倍；容量、优化器家族、权重衰减、显存分块均已排除为限制因素，学习率仍是限制（3e-4 优于上一轮的 1e-3，位于预注册网格边缘）。跑到预注册上限 8 遍仍未满足连续两遍改善 <0.002 的收敛判据，故只能写"接近 plateau"，**不得写"已收敛"**。
 - **测试的三种 rollout-aware 目标不支持曝光偏差作为主要解释**（不等于普遍排除）：每 2 步 / 每 3 步自喂与渐增 schedule 在 development 与外层留出上都同时损害局部预测与整场生成，呈单调剂量反应，一步预测护栏全部失守。

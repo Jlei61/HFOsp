@@ -1,0 +1,18 @@
+{
+  "contract": "topic5_history_conditioned_field_refinement_v0_4",
+  "main_figure": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-history-rnn-early-ictal/results/topic5_history_conditioned_field_refinement_v0_4/figures/history_conditioned_field_refinement_six_panel.png",
+  "representative": {
+    "selection_rule": "patient closest to cohort-median M3-M0 delta; seizure closest to that patient's median delta",
+    "subject": "epilepsiae_1096",
+    "seizure_id": 109600000102,
+    "patient_delta": 0.0,
+    "cohort_median_delta": 0.0
+  },
+  "primary_endpoint": "clinical_onset_[0,10]s_1-45Hz_contact_energy",
+  "static_boundary": {
+    "target_blind": true,
+    "retrospective_full_record": true,
+    "may_include_post_target_interictal_events": true,
+    "prospective_claim_allowed": false
+  }
+}

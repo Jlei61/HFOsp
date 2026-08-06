@@ -1,0 +1,1327 @@
+{
+  "status": "COMPLETE",
+  "n_total": 144,
+  "n_finished": 144,
+  "n_failed": 0,
+  "workers": 8,
+  "runtime_seconds": 1101.597671031952,
+  "subjects": [
+    "epilepsiae_1077",
+    "epilepsiae_1084",
+    "epilepsiae_1096",
+    "epilepsiae_1125",
+    "epilepsiae_1146",
+    "epilepsiae_1150",
+    "epilepsiae_139",
+    "epilepsiae_253",
+    "epilepsiae_384",
+    "epilepsiae_442",
+    "epilepsiae_548",
+    "epilepsiae_590",
+    "epilepsiae_620",
+    "epilepsiae_635",
+    "epilepsiae_922",
+    "epilepsiae_958"
+  ],
+  "models": [
+    "full_history_gru",
+    "linear_state",
+    "rank_shuffle_gru"
+  ],
+  "completed": [
+    {
+      "subject": "epilepsiae_1077",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 35.658348083496094,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 35.71594548225403,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": true
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.61552143096924,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 37.07929706573486,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 37.739479303359985,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 37.94912004470825,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 38.435004234313965,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 40.85727596282959,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.39475154876709,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1084__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 20.431129217147827,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1084__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.42586326599121,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1084__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 20.087098360061646,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1084__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.49724054336548,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1084__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.914666175842285,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1084__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.045230627059937,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1084__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1077",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 38.80209255218506,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1077__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1084",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.995083808898926,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1084__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 127.70980453491211,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 129.9186189174652,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 132.46247029304504,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 132.4204444885254,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 133.91506695747375,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 135.4328510761261,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 139.36091327667236,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 152.73713779449463,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 43.93852996826172,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 43.80404591560364,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 44.05088138580322,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 43.59470820426941,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 42.24104022979736,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 25.50840163230896,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 42.875616788864136,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.2539222240448,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 26.222588062286377,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 47.157097816467285,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 47.57518553733826,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1125",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 51.0884063243866,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1125__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 24.956772804260254,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 25.82909369468689,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 29.939080953598022,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 28.082970142364502,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 26.920743465423584,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.377057552337646,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 17.944955825805664,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.396443605422974,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1146",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.68995499610901,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1146__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 17.366325855255127,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 17.366344928741455,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.101577043533325,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.879335165023804,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.067153215408325,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_1150",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.517014026641846,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1150__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 17.031449794769287,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 17.270722150802612,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.086735486984253,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_1096",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 147.06391024589539,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_1096__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 16.7410991191864,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 16.96662998199463,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 16.93961763381958,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 17.205307006835938,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.418218851089478,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_139",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 17.62095832824707,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_139__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 57.540289878845215,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 53.99376916885376,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 57.27745056152344,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 58.3540723323822,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 54.69300675392151,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 54.11017322540283,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 55.626644134521484,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 61.850027561187744,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 32.50275158882141,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.11172389984131,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 35.00851631164551,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 35.788870096206665,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 32.94641828536987,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.20650601387024,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.95396137237549,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_253",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 61.04911756515503,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_253__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 23.529509782791138,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.799668312072754,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 26.406784296035767,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 24.454898595809937,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.10208535194397,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_384",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.114943742752075,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_384__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 23.928759574890137,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 26.021647453308105,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.48000478744507,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 25.66454291343689,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 21.810186862945557,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.960714101791382,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.824347496032715,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_442",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 28.656163692474365,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_442__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 20.512638807296753,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.03709053993225,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.268790245056152,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 23.574684143066406,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.85784673690796,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_548",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 26.38434147834778,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_548__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 24.762162685394287,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 24.078235626220703,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 26.3513605594635,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 22.984902381896973,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 23.822449684143066,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 25.079345226287842,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 24.519497394561768,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 25.30240750312805,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_590",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 27.300208806991577,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_590__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.531334400177,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 36.556798696517944,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 35.097065925598145,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.8350989818573,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 35.43078684806824,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.53752589225769,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.585613489151,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 33.81543850898743,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 34.95695972442627,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.99708604812622,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_620",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 35.13253355026245,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_620__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.71292734146118,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.983254194259644,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.100427865982056,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 18.515717029571533,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.62019443511963,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.589263677597046,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_635",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 19.58005976676941,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_635__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 95.75081276893616,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 96.2911024093628,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 95.86310076713562,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 95.49337530136108,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 96.06410121917725,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 105.42262363433838,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 104.28771567344666,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 101.15331411361694,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_922",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 105.79970455169678,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_922__rank_shuffle_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "linear_state",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 206.13522100448608,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__linear_state__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "full_history_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 219.19969391822815,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__full_history_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "full_history_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 219.60308170318604,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__full_history_gru__seed47.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "full_history_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 220.94338846206665,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__full_history_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "linear_state",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 227.3196837902069,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__linear_state__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "rank_shuffle_gru",
+      "seed": 11,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 220.09383940696716,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__rank_shuffle_gru__seed11.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "linear_state",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 230.38538932800293,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__linear_state__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "rank_shuffle_gru",
+      "seed": 29,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 231.9199481010437,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__rank_shuffle_gru__seed29.log"
+    },
+    {
+      "subject": "epilepsiae_958",
+      "model": "rank_shuffle_gru",
+      "seed": 47,
+      "returncode": 0,
+      "resumed": false,
+      "runtime_seconds": 203.5872015953064,
+      "log": "results/topic5_patient_specific_target_free_rnn_bridge_v0_1/logs/epilepsiae_958__rank_shuffle_gru__seed47.log"
+    }
+  ]
+}

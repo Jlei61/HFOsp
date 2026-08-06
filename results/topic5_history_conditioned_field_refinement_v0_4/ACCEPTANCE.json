@@ -1,0 +1,26 @@
+{
+  "status": "ACCEPTED",
+  "contract": "topic5_history_conditioned_field_refinement_v0_4",
+  "scope": "engineering_correctness_leakage_numerical_only_not_scientific_effect",
+  "formal_units_complete": 45,
+  "formal_units_expected": 45,
+  "failed_units": 0,
+  "violations": [],
+  "checks": {
+    "same_outer_encoder_coordinate": true,
+    "heldout_target_sealed": true,
+    "fixed_training_budget": true,
+    "finite_training_and_prediction_metrics": true,
+    "three_seed_static_and_target_identity": true,
+    "full_history_shuffle_and_swap_denominators": true,
+    "initial_static_anchor": true,
+    "state_and_raw_residual_diagnostics": true
+  },
+  "resource_summary": {
+    "peak_gpu_memory_mb_max": 100.37060546875,
+    "elapsed_seconds_median": 912.2423696517944,
+    "elapsed_seconds_total_units": 40403.79623126984
+  },
+  "inapplicable_half_life_markers_counted_not_rewritten": 0,
+  "note": "Scientific effect sizes are not acceptance gates and are evaluated only in the formal summary."
+}

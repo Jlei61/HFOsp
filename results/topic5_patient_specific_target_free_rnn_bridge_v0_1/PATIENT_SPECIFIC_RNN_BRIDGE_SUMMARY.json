@@ -1,0 +1,432 @@
+{
+  "status": "COMPLETE",
+  "contract": "topic5_patient_specific_target_free_rnn_bridge_v0_1",
+  "n_subjects": 16,
+  "n_primary_subjects": 15,
+  "n_supportive_development_subjects": 1,
+  "n_units": 144,
+  "n_failed_units": 0,
+  "other_patient_events_used": false,
+  "empirical_ab_used": false,
+  "ictal_target_used_for_training": false,
+  "interictal": {
+    "full_history_gru": {
+      "median_test_nll": 1.5405936271813285,
+      "median_precedence_correlation": 0.7754344653953896,
+      "median_rank_wasserstein": 0.0603310339831022
+    },
+    "linear_state": {
+      "median_test_nll": 1.5858962805341439,
+      "median_precedence_correlation": 0.8004893807315787,
+      "median_rank_wasserstein": 0.061460492585305775
+    },
+    "rank_shuffle_gru": {
+      "median_test_nll": 1.6213917675560165,
+      "median_precedence_correlation": 0.05174206455852043,
+      "median_rank_wasserstein": 0.09139644792804623
+    }
+  },
+  "early_ictal": {
+    "1_150": {
+      "full_history_gru": {
+        "n": 15,
+        "median_absolute_similarity": 0.5838235294117646,
+        "median_all_contact_margin": 0.16666666666666674,
+        "n_positive_margin": 13,
+        "n_negative_margin": 2,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.02557373046875,
+          "n_positive": 13,
+          "n_negative": 2,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.07058823529411762,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.1490478515625,
+          "n_positive": 10,
+          "n_negative": 4,
+          "n_tie": 1,
+          "n_nonzero": 14
+        }
+      },
+      "linear_state": {
+        "n": 15,
+        "median_absolute_similarity": 0.5714285714285714,
+        "median_all_contact_margin": 0.15833333333333333,
+        "n_positive_margin": 13,
+        "n_negative_margin": 2,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.012451171875,
+          "n_positive": 13,
+          "n_negative": 2,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.09166666666666667,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.118896484375,
+          "n_positive": 10,
+          "n_negative": 4,
+          "n_tie": 1,
+          "n_nonzero": 14
+        }
+      },
+      "rank_shuffle_gru": {
+        "n": 15,
+        "median_absolute_similarity": 0.4416666666666666,
+        "median_all_contact_margin": 0.15503110187627994,
+        "n_positive_margin": 13,
+        "n_negative_margin": 2,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.00537109375,
+          "n_positive": 13,
+          "n_negative": 2,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.1071428571428571,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.02154541015625,
+          "n_positive": 12,
+          "n_negative": 3,
+          "n_tie": 0,
+          "n_nonzero": 15
+        }
+      },
+      "static_fit60": {
+        "n": 15,
+        "median_absolute_similarity": 0.6071428571428571,
+        "median_all_contact_margin": 0.16666666666666674,
+        "n_positive_margin": 12,
+        "n_negative_margin": 2,
+        "n_tied_margin": 1,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.0157470703125,
+          "n_positive": 12,
+          "n_negative": 2,
+          "n_tie": 1,
+          "n_nonzero": 14
+        },
+        "median_within_shaft_margin": 0.025000000000000022,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.26123046875,
+          "n_positive": 8,
+          "n_negative": 6,
+          "n_tie": 1,
+          "n_nonzero": 14
+        }
+      },
+      "empirical_test20": {
+        "n": 15,
+        "median_absolute_similarity": 0.575,
+        "median_all_contact_margin": 0.17321428571428565,
+        "n_positive_margin": 14,
+        "n_negative_margin": 1,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.00836181640625,
+          "n_positive": 14,
+          "n_negative": 1,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.08529411764705885,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.067626953125,
+          "n_positive": 11,
+          "n_negative": 3,
+          "n_tie": 1,
+          "n_nonzero": 14
+        }
+      },
+      "paired_comparisons": {
+        "full_history_gru_minus_static_fit60": {
+          "n": 15,
+          "median": 0.025000000000000022,
+          "test": {
+            "p_two_sided_exact": 0.305419921875,
+            "n_positive": 9,
+            "n_negative": 4,
+            "n_tie": 2,
+            "n_nonzero": 13
+          },
+          "within_shaft_median": 0.010294117647058787,
+          "within_shaft_test": {
+            "p_two_sided_exact": 0.21630859375,
+            "n_positive": 10,
+            "n_negative": 3,
+            "n_tie": 2,
+            "n_nonzero": 13
+          }
+        },
+        "full_history_gru_minus_rank_shuffle_gru": {
+          "n": 15,
+          "median": -0.008333333333333304,
+          "test": {
+            "p_two_sided_exact": 0.5718994140625,
+            "n_positive": 7,
+            "n_negative": 8,
+            "n_tie": 0,
+            "n_nonzero": 15
+          },
+          "within_shaft_median": -0.05178571428571427,
+          "within_shaft_test": {
+            "p_two_sided_exact": 0.18328857421875,
+            "n_positive": 5,
+            "n_negative": 10,
+            "n_tie": 0,
+            "n_nonzero": 15
+          }
+        },
+        "full_history_gru_minus_linear_state": {
+          "n": 15,
+          "median": 0.0,
+          "test": {
+            "p_two_sided_exact": 0.5693359375,
+            "n_positive": 5,
+            "n_negative": 7,
+            "n_tie": 3,
+            "n_nonzero": 12
+          },
+          "within_shaft_median": -0.008333333333333248,
+          "within_shaft_test": {
+            "p_two_sided_exact": 0.19091796875,
+            "n_positive": 4,
+            "n_negative": 9,
+            "n_tie": 2,
+            "n_nonzero": 13
+          }
+        },
+        "full_history_gru_minus_empirical_test20": {
+          "n": 15,
+          "median": 0.017857142857142905,
+          "test": {
+            "p_two_sided_exact": 0.2412109375,
+            "n_positive": 9,
+            "n_negative": 5,
+            "n_tie": 1,
+            "n_nonzero": 14
+          },
+          "within_shaft_median": 0.0,
+          "within_shaft_test": {
+            "p_two_sided_exact": 0.946044921875,
+            "n_positive": 6,
+            "n_negative": 7,
+            "n_tie": 2,
+            "n_nonzero": 13
+          }
+        }
+      }
+    },
+    "1_45": {
+      "full_history_gru": {
+        "n": 15,
+        "median_absolute_similarity": 0.6205882352941177,
+        "median_all_contact_margin": 0.2142857142857142,
+        "n_positive_margin": 13,
+        "n_negative_margin": 2,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.02154541015625,
+          "n_positive": 13,
+          "n_negative": 2,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.06780835265991536,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.11761474609375,
+          "n_positive": 10,
+          "n_negative": 5,
+          "n_tie": 0,
+          "n_nonzero": 15
+        }
+      },
+      "linear_state": {
+        "n": 15,
+        "median_absolute_similarity": 0.6249999999999999,
+        "median_all_contact_margin": 0.16666666666666663,
+        "n_positive_margin": 13,
+        "n_negative_margin": 2,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.012451171875,
+          "n_positive": 13,
+          "n_negative": 2,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.09999999999999998,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.0877685546875,
+          "n_positive": 10,
+          "n_negative": 4,
+          "n_tie": 1,
+          "n_nonzero": 14
+        }
+      },
+      "rank_shuffle_gru": {
+        "n": 15,
+        "median_absolute_similarity": 0.4285714285714285,
+        "median_all_contact_margin": 0.1428571428571428,
+        "n_positive_margin": 13,
+        "n_negative_margin": 2,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.00537109375,
+          "n_positive": 13,
+          "n_negative": 2,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.09090909090909094,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.02154541015625,
+          "n_positive": 12,
+          "n_negative": 3,
+          "n_tie": 0,
+          "n_nonzero": 15
+        }
+      },
+      "static_fit60": {
+        "n": 15,
+        "median_absolute_similarity": 0.6161764705882353,
+        "median_all_contact_margin": 0.17500000000000004,
+        "n_positive_margin": 13,
+        "n_negative_margin": 2,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.012451171875,
+          "n_positive": 13,
+          "n_negative": 2,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.04166666666666663,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.1890869140625,
+          "n_positive": 9,
+          "n_negative": 5,
+          "n_tie": 1,
+          "n_nonzero": 14
+        }
+      },
+      "empirical_test20": {
+        "n": 15,
+        "median_absolute_similarity": 0.5714285714285714,
+        "median_all_contact_margin": 0.17500000000000004,
+        "n_positive_margin": 13,
+        "n_negative_margin": 2,
+        "n_tied_margin": 0,
+        "margin_vs_zero": {
+          "p_two_sided_exact": 0.01025390625,
+          "n_positive": 13,
+          "n_negative": 2,
+          "n_tie": 0,
+          "n_nonzero": 15
+        },
+        "median_within_shaft_margin": 0.07142857142857151,
+        "within_shaft_margin_vs_zero": {
+          "p_two_sided_exact": 0.0784912109375,
+          "n_positive": 11,
+          "n_negative": 3,
+          "n_tie": 1,
+          "n_nonzero": 14
+        }
+      },
+      "paired_comparisons": {
+        "full_history_gru_minus_static_fit60": {
+          "n": 15,
+          "median": 0.01666666666666672,
+          "test": {
+            "p_two_sided_exact": 0.167724609375,
+            "n_positive": 9,
+            "n_negative": 4,
+            "n_tie": 2,
+            "n_nonzero": 13
+          },
+          "within_shaft_median": 0.010714285714285732,
+          "within_shaft_test": {
+            "p_two_sided_exact": 0.2734375,
+            "n_positive": 9,
+            "n_negative": 4,
+            "n_tie": 2,
+            "n_nonzero": 13
+          }
+        },
+        "full_history_gru_minus_rank_shuffle_gru": {
+          "n": 15,
+          "median": 0.016666666666666774,
+          "test": {
+            "p_two_sided_exact": 0.57159423828125,
+            "n_positive": 8,
+            "n_negative": 7,
+            "n_tie": 0,
+            "n_nonzero": 15
+          },
+          "within_shaft_median": -0.05892857142857144,
+          "within_shaft_test": {
+            "p_two_sided_exact": 0.24688720703125,
+            "n_positive": 6,
+            "n_negative": 9,
+            "n_tie": 0,
+            "n_nonzero": 15
+          }
+        },
+        "full_history_gru_minus_linear_state": {
+          "n": 15,
+          "median": 0.0,
+          "test": {
+            "p_two_sided_exact": 0.4697265625,
+            "n_positive": 5,
+            "n_negative": 7,
+            "n_tie": 3,
+            "n_nonzero": 12
+          },
+          "within_shaft_median": -0.008333333333333248,
+          "within_shaft_test": {
+            "p_two_sided_exact": 0.305419921875,
+            "n_positive": 5,
+            "n_negative": 8,
+            "n_tie": 2,
+            "n_nonzero": 13
+          }
+        },
+        "full_history_gru_minus_empirical_test20": {
+          "n": 15,
+          "median": 0.017857142857142905,
+          "test": {
+            "p_two_sided_exact": 0.10400390625,
+            "n_positive": 11,
+            "n_negative": 3,
+            "n_tie": 1,
+            "n_nonzero": 14
+          },
+          "within_shaft_median": 5.551115123125783e-17,
+          "within_shaft_test": {
+            "p_two_sided_exact": 0.8984375,
+            "n_positive": 7,
+            "n_negative": 4,
+            "n_tie": 4,
+            "n_nonzero": 11
+          }
+        }
+      }
+    }
+  },
+  "interictal_primary_inference": {
+    "n": 15,
+    "rank_shuffle_minus_full_nll_median": 0.05864172595771944,
+    "rank_shuffle_minus_full_nll_test": {
+      "p_two_sided_exact": 0.0001220703125,
+      "n_positive": 14,
+      "n_negative": 1,
+      "n_tie": 0,
+      "n_nonzero": 15
+    }
+  }
+}

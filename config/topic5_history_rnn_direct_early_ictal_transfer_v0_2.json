@@ -1,0 +1,10 @@
+{
+  "status": "DIRECT_TRANSFER_AUTHORIZED_INDEPENDENT_OF_G1",
+  "endpoint": "clinical_onset_[0,10]s_1-150Hz_contact_energy",
+  "g1_role": "PARALLEL_PROXY_EVIDENCE_NOT_HARD_GATE",
+  "causal_guard_seconds": 600,
+  "primary_target_cohort": "15 development-excluded strict clinical-onset patients",
+  "supportive_target_cohort": "all 16 strict clinical-onset patients",
+  "spec": "docs/superpowers/specs/2026-08-02-topic5-history-rnn-direct-early-ictal-transfer-v0_2.md",
+  "authorization_reason": "The next-event proxy is not a logically necessary condition for direct early-ictal transfer."
+}

@@ -1,0 +1,331 @@
+{
+  "status": "COMPLETE",
+  "contract": "topic5_history_conditioned_field_refinement_v0_4",
+  "scientific_question": "Does causal interictal history improve frozen static A/B early-ictal field correspondence?",
+  "primary_endpoint": "clinical_onset_[0,10]s_1-45Hz_contact_energy",
+  "sensitivity_endpoint": "1-150Hz_no_retrain",
+  "aggregation": "seed-wise candidate-field mean -> seizure maxAB -> patient median -> cohort",
+  "cohort": {
+    "n_patients": 15,
+    "n_seizures": 31,
+    "patients": [
+      "epilepsiae_1077",
+      "epilepsiae_1084",
+      "epilepsiae_1096",
+      "epilepsiae_1125",
+      "epilepsiae_1150",
+      "epilepsiae_139",
+      "epilepsiae_253",
+      "epilepsiae_384",
+      "epilepsiae_442",
+      "epilepsiae_548",
+      "epilepsiae_590",
+      "epilepsiae_620",
+      "epilepsiae_635",
+      "epilepsiae_922",
+      "epilepsiae_958"
+    ],
+    "contact_denominator_min_median_max": [
+      6,
+      9.0,
+      16
+    ]
+  },
+  "completeness": {
+    "formal_units_complete": 45,
+    "formal_units_expected": 45,
+    "failed_units": 0,
+    "seeds": [
+      11,
+      29,
+      47
+    ]
+  },
+  "static_boundary": {
+    "target_blind": true,
+    "retrospective_full_record": true,
+    "may_include_post_target_interictal_events": true,
+    "prospective_claim_allowed": false
+  },
+  "static_anchor_reproduction": {
+    "n_patients": 15,
+    "patient_median_maxab": 0.5545454545454546,
+    "patient_median_channel_null": 0.3666666666666666,
+    "patient_median_margin": 0.15,
+    "bootstrap_95ci_median_margin": [
+      -0.0333333333333332,
+      0.3249999999999999
+    ],
+    "n_above_individual_p95": 5,
+    "p_two_sided_exact": 0.012451171875,
+    "n_positive": 11,
+    "n_negative": 4,
+    "n_tie": 0,
+    "n_nonzero": 15
+  },
+  "comparisons": {
+    "primary_m3_minus_m0": {
+      "label": "M3-M0",
+      "left": "m3_joint_rnn_1_45",
+      "right": "m0_static_ab_1_45",
+      "n_patients": 15,
+      "median_delta": 0.0,
+      "mean_delta": -0.017470291146761723,
+      "bootstrap_95ci_median": [
+        -0.04999999999999993,
+        0.0
+      ],
+      "p_two_sided_exact": 0.0390625,
+      "n_positive": 1,
+      "n_negative": 7,
+      "n_tie": 7,
+      "n_nonzero": 8
+    },
+    "m3_minus_m1": {
+      "label": "M3-M1",
+      "left": "m3_joint_rnn_1_45",
+      "right": "m1_frozen_history_head_1_45",
+      "n_patients": 15,
+      "median_delta": 0.0,
+      "mean_delta": 0.005568075715134548,
+      "bootstrap_95ci_median": [
+        0.0,
+        0.0
+      ],
+      "p_two_sided_exact": 0.8125,
+      "n_positive": 2,
+      "n_negative": 3,
+      "n_tie": 10,
+      "n_nonzero": 5
+    },
+    "m3_minus_m2": {
+      "label": "M3-M2",
+      "left": "m3_joint_rnn_1_45",
+      "right": "m2_time_aware_nonrecurrent_1_45",
+      "n_patients": 15,
+      "median_delta": -0.016666666666666663,
+      "mean_delta": -0.024264493676258374,
+      "bootstrap_95ci_median": [
+        -0.027272727272727226,
+        0.0
+      ],
+      "p_two_sided_exact": 0.0546875,
+      "n_positive": 1,
+      "n_negative": 8,
+      "n_tie": 6,
+      "n_nonzero": 9
+    },
+    "m1_minus_m0": {
+      "label": "M1-M0",
+      "left": "m1_frozen_history_head_1_45",
+      "right": "m0_static_ab_1_45",
+      "n_patients": 15,
+      "median_delta": 0.0,
+      "mean_delta": -0.023038366861896267,
+      "bootstrap_95ci_median": [
+        -0.047619047619047616,
+        0.0
+      ],
+      "p_two_sided_exact": 0.0546875,
+      "n_positive": 2,
+      "n_negative": 7,
+      "n_tie": 6,
+      "n_nonzero": 9
+    },
+    "m2_minus_m0": {
+      "label": "M2-M0",
+      "left": "m2_time_aware_nonrecurrent_1_45",
+      "right": "m0_static_ab_1_45",
+      "n_patients": 15,
+      "median_delta": 0.0,
+      "mean_delta": 0.0067942025294966514,
+      "bootstrap_95ci_median": [
+        0.0,
+        0.005882352941176561
+      ],
+      "p_two_sided_exact": 0.84375,
+      "n_positive": 5,
+      "n_negative": 3,
+      "n_tie": 7,
+      "n_nonzero": 8
+    },
+    "true_minus_order_shuffle": {
+      "label": "M3 true-order - full-history shuffle",
+      "left": "m3_joint_rnn_1_45",
+      "right": "m3_order_shuffle_mean_1_45",
+      "n_patients": 15,
+      "median_delta": -0.0006433823529411464,
+      "mean_delta": -0.015808341644738693,
+      "bootstrap_95ci_median": [
+        -0.01863839285714286,
+        0.0
+      ],
+      "p_two_sided_exact": 0.1015625,
+      "n_positive": 2,
+      "n_negative": 9,
+      "n_tie": 4,
+      "n_nonzero": 11
+    },
+    "true_minus_order_shuffle_seed_matched": {
+      "label": "M3 true-order - full-history shuffle (both arms scored per seed)",
+      "left": "m3_joint_rnn_seedwise_mean_1_45",
+      "right": "m3_order_shuffle_mean_1_45",
+      "n_patients": 15,
+      "median_delta": -0.0005580357142856984,
+      "mean_delta": -0.014639934888096656,
+      "bootstrap_95ci_median": [
+        -0.012934027777777801,
+        0.0
+      ],
+      "p_two_sided_exact": 0.123046875,
+      "n_positive": 3,
+      "n_negative": 8,
+      "n_tie": 4,
+      "n_nonzero": 11
+    },
+    "correct_minus_history_swap": {
+      "label": "M3 correct-history - within-patient swap",
+      "left": "m3_joint_rnn_1_45",
+      "right": "m3_history_swap_median_1_45",
+      "n_patients": 10,
+      "median_delta": -0.003676470588235281,
+      "mean_delta": -0.008525592055003802,
+      "bootstrap_95ci_median": [
+        -0.027272727272727226,
+        0.0014705882352941124
+      ],
+      "p_two_sided_exact": 0.296875,
+      "n_positive": 2,
+      "n_negative": 5,
+      "n_tie": 3,
+      "n_nonzero": 7
+    },
+    "sensitivity_1_150_m3_minus_m0": {
+      "label": "M3-M0 1-150Hz no-retrain",
+      "left": "m3_joint_rnn_1_150_no_retrain",
+      "right": "m0_static_ab_1_150_no_retrain",
+      "n_patients": 15,
+      "median_delta": 0.0,
+      "mean_delta": -0.008947457770987178,
+      "bootstrap_95ci_median": [
+        -0.03088235294117636,
+        0.0
+      ],
+      "p_two_sided_exact": 0.3125,
+      "n_positive": 2,
+      "n_negative": 6,
+      "n_tie": 7,
+      "n_nonzero": 8
+    }
+  },
+  "matched_channel_null": {
+    "M0_STATIC_AB": {
+      "n_patients": 15,
+      "median_observed": 0.5545454545454547,
+      "median_null": 0.3749999999999999,
+      "median_margin": 0.14999999999999997,
+      "n_above_null_median": 11,
+      "n_above_null_p95": 5,
+      "p_two_sided_exact": 0.01025390625,
+      "n_positive": 11,
+      "n_negative": 4,
+      "n_tie": 0,
+      "n_nonzero": 15
+    },
+    "M1_FROZEN_HISTORY_HEAD": {
+      "n_patients": 15,
+      "median_observed": 0.5470588235294118,
+      "median_null": 0.3749999999999999,
+      "median_margin": 0.10714285714285715,
+      "n_above_null_median": 10,
+      "n_above_null_p95": 5,
+      "p_two_sided_exact": 0.0301513671875,
+      "n_positive": 10,
+      "n_negative": 5,
+      "n_tie": 0,
+      "n_nonzero": 15
+    },
+    "M2_TIME_AWARE_NONRECURRENT": {
+      "n_patients": 15,
+      "median_observed": 0.5545454545454547,
+      "median_null": 0.3749999999999999,
+      "median_margin": 0.1166666666666667,
+      "n_above_null_median": 11,
+      "n_above_null_p95": 5,
+      "p_two_sided_exact": 0.012451171875,
+      "n_positive": 11,
+      "n_negative": 4,
+      "n_tie": 0,
+      "n_nonzero": 15
+    },
+    "M3_JOINT_RNN": {
+      "n_patients": 15,
+      "median_observed": 0.5470588235294118,
+      "median_null": 0.3666666666666667,
+      "median_margin": 0.10833333333333328,
+      "n_above_null_median": 11,
+      "n_above_null_p95": 5,
+      "p_two_sided_exact": 0.0301513671875,
+      "n_positive": 11,
+      "n_negative": 4,
+      "n_tie": 0,
+      "n_nonzero": 15
+    }
+  },
+  "history_controls": {
+    "order_shuffle": "32 full-history permutations per seed; time slots retained; patient control is the mean over 96 seed-draw realizations",
+    "order_shuffle_aggregation_note": "the shuffle arm averages per-seed scores while the formal M3 score ensembles the three seeds at field level; true_minus_order_shuffle_seed_matched repeats the contrast with both arms scored per seed and is the arm-for-arm isomorphic reading",
+    "within_patient_swap_n": 10,
+    "within_patient_swap_aggregation": "seed-mean candidate field, matching the formal M3 score"
+  },
+  "training_diagnostics": {
+    "peak_gpu_memory_mb_max": 100.37060546875,
+    "elapsed_seconds_median": 912.2423696517944,
+    "m3_half_life_hours_median": 2.112151622772217,
+    "final_gains_median": {
+      "m1": [
+        0.0748789831995964,
+        0.09508801251649857
+      ],
+      "m2": [
+        0.0780642032623291,
+        0.0984894335269928
+      ],
+      "m3": [
+        0.051574837416410446,
+        0.0720619410276413
+      ]
+    },
+    "heldout_state_and_field_change": {
+      "M1_FROZEN_HISTORY_HEAD": {
+        "state_norm_median": 1.3047701120376587,
+        "gain_a_median": 0.0748789831995964,
+        "gain_b_median": 0.0950880125164985,
+        "candidate_angle_a_median_degrees": 3.957056999206543,
+        "candidate_angle_b_median_degrees": 5.085931777954102
+      },
+      "M2_TIME_AWARE_NONRECURRENT": {
+        "state_norm_median": 1.1875214576721191,
+        "gain_a_median": 0.0780642032623291,
+        "gain_b_median": 0.0984894335269928,
+        "candidate_angle_a_median_degrees": 3.6721816062927246,
+        "candidate_angle_b_median_degrees": 5.135324478149414
+      },
+      "M3_JOINT_RNN": {
+        "state_norm_median": 1.3059035241603851,
+        "gain_a_median": 0.0515748374164104,
+        "gain_b_median": 0.0720619410276413,
+        "candidate_angle_a_median_degrees": 2.706024408340454,
+        "candidate_angle_b_median_degrees": 3.775222420692444
+      }
+    }
+  },
+  "interpretation_policy": "No composite gate; each contrast is reported independently.",
+  "prohibited_claims": [
+    "unique signed seizure-field prediction",
+    "seizure-time forecasting",
+    "causal shaping of seizure recruitment",
+    "cellular E/I interpretation of hidden units",
+    "fully prospective model"
+  ]
+}
