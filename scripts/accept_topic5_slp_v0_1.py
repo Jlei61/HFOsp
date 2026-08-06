@@ -79,8 +79,14 @@ def main() -> int:
     matrix = OUT / "EXPERIMENT_MATRIX.csv"
     coverage_ok = False
     detail = "missing"
-    if matrix.exists():
-        rows = [r for r in matrix.read_text().strip().splitlines()[1:] if r]
+    # The expected set is derived from the frozen cohort and the arm list, not
+    # from EXPERIMENT_MATRIX.csv: every launcher overwrites that file with its
+    # own subset, so a gate reading it would check whichever arms happened to run
+    # last and call partial coverage complete.
+    ARMS = ("STATIC_CONTACT", "ORDINARY_GRU", "CONTACT_GRAPH_RNN",
+            "LATENT_FIXED_LOCAL_RNN", "LATENT_LEARNED_SPATIAL_RNN")
+    if cohort:
+        rows = [f"{s},{a},1" for s in cohort for a in ARMS]
         done_rows = [
             r for r in rows
             if (OUT / "per_subject" / r.split(",")[0] / r.split(",")[1]
