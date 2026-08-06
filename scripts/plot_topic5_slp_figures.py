@@ -229,8 +229,8 @@ def main() -> int:
     plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5,
                          "axes.spines.top": False, "axes.spines.right": False})
 
-    fig = plt.figure(figsize=(11.5, 6.4))
-    grid = fig.add_gridspec(2, 3, hspace=0.45, wspace=0.38)
+    fig = plt.figure(figsize=(11.5, 7.4))
+    grid = fig.add_gridspec(2, 3, hspace=0.72, wspace=0.40)
     panel_a(fig.add_subplot(grid[0, 0]), args.subject)
     panel_b(fig.add_subplot(grid[0, 1]))
     panel_c(fig.add_subplot(grid[0, 2]))
