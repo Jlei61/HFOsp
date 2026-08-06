@@ -202,6 +202,16 @@ def main() -> int:
     else:
         add("Not run.\n")
 
+    add("## 5b. What a negative here does and does not mean\n")
+    add("If the tissue field turns out not to beat an unconstrained recurrent model, that is "
+        "a statement about this parameterisation at this fitting quality — not about whether "
+        "interictal propagation is spatial. The synthetic control settles the direction of "
+        "that caveat: on events generated *by* a known spatial graph, this model also "
+        "recovered less than an unconstrained recurrent model did. So the shortfall travels "
+        "with the model class, and reappears even when the spatial structure is real and "
+        "known. Reading a cohort negative as evidence against spatial propagation would be "
+        "reading the wrong object.\n")
+
     add("## 6. What may and may not be said\n")
     add("Supported, if the numbers above are positive: this patient's interictal events are "
         "predicted better by a model whose state lives in tissue and is read through a "
