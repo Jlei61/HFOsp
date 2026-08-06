@@ -1,0 +1,86 @@
+{
+  "seed": 4,
+  "direction_axis_mapping": {
+    "A_to_B": "low-axis(source-side) -> high-axis(sink-side); axis_unit = src_xy->snk_xy",
+    "src_xy": [
+      3.5135135135135127,
+      8.472279953280994
+    ],
+    "snk_xy": [
+      16.56558998022413,
+      8.47227995328099
+    ],
+    "axis_unit": [
+      1.0,
+      -2.721952853909272e-16
+    ],
+    "center": [
+      10.03955174686882,
+      8.472279953280992
+    ]
+  },
+  "n_returning_events": 39,
+  "n_eligible_events": 36,
+  "templates": {
+    "A_to_B": {
+      "contact": {
+        "n_events": 16,
+        "n_train": 8,
+        "n_heldout": 8,
+        "n_shared": 10,
+        "eligible": true,
+        "heldout_scores": [
+          0.6107893935757621,
+          0.9244023874976197,
+          0.26464670560556536,
+          0.6107893935757621,
+          0.8742671711966791,
+          0.9940297973880048,
+          0.6107893935757621,
+          0.8982196964349441
+        ],
+        "heldout_median": 0.7425282823862206,
+        "variance_ok": true
+      },
+      "source": {
+        "n_events": 16,
+        "n_train": 8,
+        "n_heldout": 8,
+        "n_shared": 204,
+        "eligible": true,
+        "heldout_median": 0.9745464200907619
+      }
+    },
+    "B_to_A": {
+      "contact": {
+        "n_events": 20,
+        "n_train": 10,
+        "n_heldout": 10,
+        "n_shared": 12,
+        "eligible": true,
+        "heldout_scores": [
+          1.0,
+          1.0,
+          0.9151515151515152,
+          1.0,
+          0.8095238095238096,
+          1.0,
+          1.0,
+          0.9720279720279721,
+          0.9930069930069931,
+          1.0
+        ],
+        "heldout_median": 1.0,
+        "variance_ok": true
+      },
+      "source": {
+        "n_events": 20,
+        "n_train": 10,
+        "n_heldout": 10,
+        "n_shared": 240,
+        "eligible": true,
+        "heldout_median": 0.7314113610532611
+      }
+    }
+  }
+}

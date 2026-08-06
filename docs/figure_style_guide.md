@@ -128,7 +128,17 @@
 
 - **通用四列示范图**：[`results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png`](../results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/core_model_s3_brakeoff.png)。这仍是普通间期 SNN readout 的默认语法，不再代表当前 Figure 5 的首选主论点。
 - **Figure 5 state-readout 候选**：[`results/paper-ready-figure/fig5_snn_state_readout/figures/fig5_candidate_E1146_snn_state_readout.png`](../results/paper-ready-figure/fig5_snn_state_readout/figures/fig5_candidate_E1146_snn_state_readout.png)；完整合同见 `docs/fig5_snn_state_readout_spec.md`。
-- **默认标准（SNN 仿真图都按这个画）**：`mechanism + tempA source + tempB source + electrode readout`。除非用户明确要求做诊断图、参数扫描图或 pipeline/KMeans 结果图，任何 SNN 相关主图 / paper-ready 图都不得回到旧的三行 Forward/Reverse/C 行堆叠布局。
+
+### Figure 5 上半部分定稿布局（MZ early-field bridge；2026-07-22 LOCKED）
+
+- **正式图与 producer**：[`results/paper-ready-figure/fig_mz_early_bridge_v2_zm_tau500/figures/fig_mz_early_bridge_v2_zm_tau500.png`](../results/paper-ready-figure/fig_mz_early_bridge_v2_zm_tau500/figures/fig_mz_early_bridge_v2_zm_tau500.png)，由 `scripts/paper_figures/plot_fig_mz_early_bridge_v2.py` 生成。
+- **Figure assignment**：当前整张复合图作为 **Figure 5 上半部分**；下半部分另行设计与拼接。最终组版可在 block 外加 panel letter，但不得拆换内部 panel。
+- **上排锁定**：左侧连续 z+m native Virtual-SEEG（30–80 Hz），红虚线为统一的 early onset = operational `t120−120 ms`，只保留 `early onset` 与 `TB sample event` legend；右侧为单条 z–m 慢状态轨迹和 operational boundary 示意。
+- **下排锁定**：四张等宽空间图依次为 `TB event order | Early-onset energy | Baseline mode | Early-onset mode −120 ms`；统一 `TA shared axis (mm)`，最左图保留 `y (mm)`；前两张各自使用窄 colorbar，后两张共用 mode colorbar。
+- **空间 probe**：Baseline mode 左上角保留灰度 localized E-rate spatial-probe glyph 和输入箭头。它只解释“小空间扰动如何进入冻结系统”，不是额外仿真；mode panel 是 frozen Jacobian leading-mode loading，不得改写为 fixed-kick response。
+- **冻结边界**：未获用户明确解锁，不改 panel 数、相对宽度、时间锚点、标题、legend、colormap、colorbar、probe glyph、电极布局或坐标标签。Figure 5 下半部分的新增内容不得反向挤压或重排这一上半部 block。
+
+- **默认标准（SNN 仿真图都按这个画）**：`mechanism + tempA source + tempB source + electrode readout`。上面已单独锁定的 Figure 5 上半部分是明确例外；除此之外，除非用户明确要求做诊断图、参数扫描图或 pipeline/KMeans 结果图，任何 SNN 相关主图 / paper-ready 图都不得回到旧的三行 Forward/Reverse/C 行堆叠布局。
 - **回答**：同一个 SNN 基底里，机制变量在哪里、两种特异性组合如何产生相反传播、同一虚拟 SEEG montage 是否能在电极 readout 中读出正/反事件。
 - **布局（单行 4 列）**：
   - **mechanism**：左 1 格，画底物和机制变量。必须标出关键连接 / 病理范围，例如 E->E 长轴作用范围、病灶核、虚拟电极位置。这个 panel 只解释“机制是什么”，不堆长说明文字。
