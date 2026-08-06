@@ -138,9 +138,24 @@ def main() -> int:
         "ceiling_dense_vs_recurrent": "a fully connected tissue field over an "
                                       "unconstrained recurrent model",
     }
+    # Everything here is a difference in the same loss, so the recurrence effect
+    # is the natural yardstick: it is the largest thing in the study and the one
+    # with the least ambiguous interpretation.  Without it a median of 1e-4 with
+    # p=0.03 reads as a finding rather than as nothing.
+    yardstick = ((primary.get("H1_recurrence") or {}).get("all") or {}).get("median_delta")
+    if yardstick:
+        add(f"For scale, the largest effect in the study is the first line below: "
+            f"{yardstick:+.4f}. Each later line also reports what fraction of that "
+            f"it represents, because a difference can be statistically detectable "
+            f"and numerically nil at the same time.\n")
+
     for key, label in naming.items():
         entry = primary.get(key, {})
-        add(f"- **{label}** — {fmt(entry.get('all'))}")
+        detail = fmt(entry.get("all"))
+        median = (entry.get("all") or {}).get("median_delta")
+        if yardstick and median is not None and key != "H1_recurrence":
+            detail += f" — {abs(median) / abs(yardstick):.1%} of the recurrence effect"
+        add(f"- **{label}** — {detail}")
         for stratum in ("planar", "well_sampled"):
             sub = entry.get(stratum)
             if sub and sub.get("status") == "COMPLETE":
