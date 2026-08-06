@@ -168,6 +168,29 @@ def main() -> int:
                 or not converged.get(arm_b, {}).get(s, True)
             )
             entry["patients_with_an_unconverged_arm"] = unconverged
+
+            # The trap this run fell into: one arm systematically runs out of
+            # epochs while the arm it is measured against does not, so the
+            # comparison partly measures convergence speed.  Nothing flagged it,
+            # and it manufactured a null for the arm the study was about.  A
+            # difference this large between the two arms' ceiling rates makes the
+            # comparison budget-confounded whatever the p value says.
+            def ceiling_rate(arm: str) -> float:
+                flags = [converged.get(arm, {}).get(s) for s in strata["all"]]
+                seen = [f for f in flags if f is not None]
+                return float(sum(1 for f in seen if not f) / len(seen)) if seen else 0.0
+
+            rate_a, rate_b = ceiling_rate(arm_a), ceiling_rate(arm_b)
+            entry["epoch_ceiling_rate"] = {arm_a: rate_a, arm_b: rate_b}
+            entry["budget_confounded"] = bool(abs(rate_a - rate_b) > 0.25)
+            if entry["budget_confounded"]:
+                entry["budget_confounded_note"] = (
+                    f"{arm_a if rate_a > rate_b else arm_b} ran out of epochs on "
+                    f"{max(rate_a, rate_b):.0%} of patients against "
+                    f"{min(rate_a, rate_b):.0%} for the other arm; this comparison "
+                    f"measures convergence speed as well as prediction and must not "
+                    f"carry a verdict"
+                )
             summary["comparisons"].setdefault(label, {})[name] = entry
 
     # How each metric scales with montage size.  The paired comparisons above are
