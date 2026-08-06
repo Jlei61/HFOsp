@@ -76,6 +76,14 @@ def main() -> int:
 
     def run(unit) -> None:
         subject, variant, seed = unit
+        # Checked again here, not only when the list was built. A launcher builds
+        # its todo once and then works through it for hours; a unit can be picked
+        # up elsewhere in between, and the list has no way to know. The trainer's
+        # own guard covers "finished elsewhere"; this covers "started elsewhere".
+        if is_running(subject, variant, seed, args.out_root):
+            print(f"[skip] {subject} {variant} seed{seed} started elsewhere",
+                  flush=True)
+            return
         command = [PY, str(ROOT / "scripts/train_topic5_spo_unit.py"),
                    "--subject", subject, "--variant", variant, "--seed", str(seed),
                    "--out-root", str(args.out_root)]
