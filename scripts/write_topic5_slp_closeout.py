@@ -43,6 +43,7 @@ def main() -> int:
     sweep = load(OUT / "development" / "SWEEP_SUMMARY.json")
     baseline_check = load(OUT / "static_baseline_verification.json")
     ordering = load(OUT / "flow_ordering.json")
+    seed_stability = load(OUT / "seed_stability.json")
     budget_probe = load(OUT / "convergence_bias_probe.json")
     shuffle = load(OUT / "geometry_shuffle_control.json")
 
@@ -213,6 +214,16 @@ def main() -> int:
         add("- longer-budget probe not available.")
     add("")
 
+    if seed_stability:
+        add("## 4bb. Would another starting point have changed it?\n")
+        add(f"Every headline comparison was redone using the first seed alone and then "
+            f"using every seed a patient has (seeds present: "
+            f"{seed_stability['seeds_present']}). Signs agree on "
+            f"{'all' if seed_stability['all_signs_agree'] else 'not all'} comparisons; "
+            f"verdicts agree on "
+            f"{'all' if seed_stability['all_verdicts_agree'] else 'not all'}. "
+            f"{seed_stability['reading'].capitalize()}.\n")
+
     if sweep:
         add("## 4c. What the swept settings actually changed\n")
         rows = sweep.get("stages", {}).get("wiring", {}).get("rows", [])
@@ -287,6 +298,16 @@ def main() -> int:
     else:
         add("Not run.\n")
 
+    add("## 5b. What a negative here does and does not mean\n")
+    add("If the tissue field turns out not to beat an unconstrained recurrent model, that is "
+        "a statement about this parameterisation at this fitting quality — not about whether "
+        "interictal propagation is spatial. The synthetic control settles the direction of "
+        "that caveat: on events generated *by* a known spatial graph, this model also "
+        "recovered less than an unconstrained recurrent model did. So the shortfall travels "
+        "with the model class, and reappears even when the spatial structure is real and "
+        "known. Reading a cohort negative as evidence against spatial propagation would be "
+        "reading the wrong object.\n")
+
     add("## 5c. The one structural readout the gate leaves open\n")
     if ordering and ordering.get("is_the_ordering_a_property_of_the_patient"):
         block = ordering["is_the_ordering_a_property_of_the_patient"]
@@ -307,16 +328,6 @@ def main() -> int:
             f"across patients rather than particular to one.\n")
     else:
         add("Not run, or too few patients had a second seed to compare against.\n")
-
-    add("## 5b. What a negative here does and does not mean\n")
-    add("If the tissue field turns out not to beat an unconstrained recurrent model, that is "
-        "a statement about this parameterisation at this fitting quality — not about whether "
-        "interictal propagation is spatial. The synthetic control settles the direction of "
-        "that caveat: on events generated *by* a known spatial graph, this model also "
-        "recovered less than an unconstrained recurrent model did. So the shortfall travels "
-        "with the model class, and reappears even when the spatial structure is real and "
-        "known. Reading a cohort negative as evidence against spatial propagation would be "
-        "reading the wrong object.\n")
 
     add("## 6. What may and may not be said\n")
     add("Supported, if the numbers above are positive: this patient's interictal events are "
