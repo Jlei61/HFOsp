@@ -171,7 +171,7 @@ a_"event" ="centroid" ("late " k_"dir"  " contacts" )-"centroid" ("early " k_"di
 默认 k_"dir" =3，因此方向估计要求事件至少包含 7 个参与触点。事件方向随后投影到 E-to-E 连接长轴，得到沿轴方向的正向或反向读出标签。
 慢变量扩展
 
-> **审阅注：本节原文保留，目前作为探索性补充方法；主文 SNN 使用不含慢变量扩展的基础模型。**
+> **审阅注（2026-07-19 更新）：** Fig. 4 的基础 SNN 仍使用不含慢变量的 scaffold；当前 Figure 5 候选则明确消费 (q_I) 耗竭进入 operational runaway 的连续轨迹，用于 `same scaffold, different state` 的 observation-layer readout。这个调整使 (q_I) 轨迹成为主图候选输入，但不把它升级为已验证的 seizure mechanism；当前候选不含终止/恢复，也不以 (g_K) rescue 作为已成立结论。
 
 慢变量扩展用于评估活动依赖状态变量如何改变同一 SNN 网络结构下的招募范围。模型在二维薄片上定义抑制资源场 q_I (x,t) 和恢复电流场 g_K (x,t)，并将其耦合到兴奋性神经元膜方程：
 
@@ -200,6 +200,8 @@ t_m=t_start+mΔt_pulse,  m=0,…,n_pulse-1.
 runaway onset 由平滑兴奋性群体发放率定义。将 R_E (t) 用 20 ms 窗口平滑为 R ̃_E (t)；若 R ̃_E (t) 在 100 ms 窗口内至少 80% 时间点超过 120 Hz，则该窗口起点记为 t_run：
 t_run=min┬t {t:1/T_sustain  ∫_t^(t+T_sustain)▒1 [R ̃_E (s)≥120] ds≥0.8},  T_sustain=100 ms.
 脉冲前慢状态用 q ‾_I (t_m^- )、q_I^min (t_m^- ) 和轴向 g ‾_K (t_m^- ) 记录；脉冲响应大小用 85 ms 窗口内参与兴奋性神经元比例定义。
+
+Figure 5 候选从同一条连续轨迹中选取 runaway 前最后一个 qualifying local event，并在该 exact event window 内按各虚拟触点 30–80 Hz burst-envelope peak latency 计算 recruitment rank。early-runaway readout 从 operational onset 开始，到 onset 后 100 ms、下一次外源 pulse 或记录结束三者中的最早时间为止；逐触点能量定义为该窗内 positive excess virtual-LFP 的均方值。两个场使用相同的患者 montage、注册平面和 contact order。该比较是单轨迹描述性机制桥，不是临床 broadband power、cohort 统计或完整发作分类。
 事件形态分类
 
 > **审阅注：四类标签是仿真操作性分类，不应写成临床发作分类器或已验证状态机制。**

@@ -19,6 +19,7 @@
 
 ## 计算模型
 
+- [Figure 5 候选：E1146 SNN state-dependent readout](../fig5_snn_state_readout_spec.md)：锁定同一连续轨迹、单次间期事件 order、early-runaway energy、E1146 montage 与 claim boundary。
 - [Figure 6：structured path-mode RNN 的正式 34 人阴性边界](figure6_persistent_path_mode_rnn_bounded_negative.md)：510 个 LOSO runs 已完成；局部 next-set NLL 可学，但自由生成触点分布与结构必要性均未过门，clinical-onset target 保持封存。
 
 ## 使用规则

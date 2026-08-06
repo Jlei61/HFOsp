@@ -24,6 +24,12 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
+> **Figure 5 candidate（2026-07-19）**：当前 paper-facing 候选使用 E1146 同一条连续
+> `q_I build-up → operational runaway` 轨迹，把 runaway 前一个 exact 单次群体事件的 contact recruitment
+> order 与 onset 后、下一 pulse 前的 early-runaway energy field 放在同一 registered plane 比较。它支持
+> `same scaffold, different state` 的 observation-layer feasibility bridge，但不改变 M4 对终止/恢复仍未闭合
+> 的判断。完整合同见 `docs/fig5_snn_state_readout_spec.md`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
@@ -752,6 +758,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 4. 为什么模板选择在已测试尺度上近似随机（→ 噪声决定每次从哪端点燃，短时间强配对不是必要机制）
 5. 为什么 event rate 和招募范围可受慢变量调制，而间期模板几何相对稳定（→ 局部资源耗竭调许可度，不改 E→E 连接轴）
 6. 为什么同一参数族在仿真中可能从局部轴向事件进入更大轴向招募并恢复（→ M3A pilot 支持 expanded axial recruitment；真正 ictal-like 仍需 axis-breaking/global gate）
+7. 为什么数据端可以观察到“间期较早触点在发作早期能量更强”的同 scaffold 读出（→ Figure 5 候选在一条 E1146 连续 q_I-depletion 轨迹上给出同向的 single-event rank 与 early-runaway energy；这是单轨迹可行性 bridge，不是 cohort 验证）
 
 ### 7.2 模型暂时**不支持**的强说法（写死 out-of-scope）
 
@@ -763,6 +770,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 6. ❌ 模板选择已经被证明完全独立（同上）
 7. ❌ 大范围但仍沿轴推进的 recruitment wave 已经等于发作
 8. ❌ A1b/A2 已经证明“间期短事件 → 发作样全局招募 → 恢复”的完整慢变量机制
+9. ❌ Figure 5 候选中的 operational runaway 已经等于临床发作，或 4/4 SCL contact peak 已经证明其下方局部组织被直接招募
 
 ### 7.3 文献 framing：具体机制多样，中观动力学收敛
 

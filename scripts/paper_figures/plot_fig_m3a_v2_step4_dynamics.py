@@ -2,7 +2,7 @@
 
 This script is intentionally diagnostic, not a new statistical sweep. It
 re-runs a small set of representative probes so the Step-4 negative result can
-be visually inspected with the same visual grammar as Fig5:
+be visually inspected with the common one-row four-column SNN grammar:
 
     mechanism | tempA source | tempB source | electrode readout
 

@@ -216,29 +216,31 @@ Panel A 只展示 raw shared-plane similarity trajectory；Panel B 只在 seizur
 
 **当前口径（诚实）**：E1146（ICL 密杆，能采到完整传播）成立，但不是机制证明。模型 readout 顺序与真实间期模板一致（Fig4C），但属单被试、读出级一致性，非因果/cohort。自发双向**与 seed 有关**（seed3 6 正/8 反；seed1/2 偏反向），分开驱动 source 5/0、sink 0/9。读出依赖 `k_dir=2`（病人电极稀疏放宽，载重参数）+ 真实几何 plane-fit。E958（稀疏栅格）阴性。不声称"真实病人机制被证明"；这是机制/读出可行性示意。
 
-### Fig5-Fig6: 间期活动作为推动者的模型与病例场景
+### Fig5-Fig6: 间期 scaffold 的 state-dependent readout 与机制边界
 
-当前机制证据还没有收口，因此 Fig5/6 先按建模工作组织。允许呈现几类可能病例场景，但必须清楚区分：
+Fig4 已经承担“患者特异性 SNN 能否复现稳定正反间期 readout”。Fig5 不再重复一张通用双向传播机制图，而是承接本文第二个核心论点：同一个间期 scaffold 在慢状态推进时，是否会在 runaway 早期产生与间期传播次序一致的空间能量增强。Fig6 再决定是否承载干预、恢复或病例场景；当前不能提前写成完整 seizure cycle。
 
-- 真实数据已经支持的 readout；
-- 模型能够复现或解释的 dynamics；
-- 仍然是假设、需要后续验证的机制。
+### Fig5 candidate: E1146 SNN state-dependent readout（2026-07-19）
 
-### Fig5-A: cm-SNN 自发双向 readout 机制示意
+**目的**：在同一条 E1146 连续 SNN 轨迹上，把一个明确的间期样单次群体事件 contact order 与 operational runaway onset 后、下一次外源 pulse 前的早期能量场并排展示，回答“同一固定 scaffold 是否在不同状态下产生一致的空间 readout”。
 
-**目的**：用最少 panel 展示同一个 stage-3 brake-off cm-SNN 底物如何产生正向和反向间期传播事件，并被同一虚拟 SEEG montage 读出。
+**当前候选版本**：
 
-**当前验收版本**：
-
-- 输出目录：`results/paper-ready-figure/fig5_core_model_s3_brakeoff/figures/`
-- 正式文件：`core_model_s3_brakeoff.png` / `core_model_s3_brakeoff.pdf`
-- 复现入口：`scripts/paper_figures/plot_fig5_core_model_s3_brakeoff.py`
-- 兼容输出：`results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/figures/core_model_s3_brakeoff.png`
-- 图形合同：按 SNN 仿真标准画法组织为 `mechanism + tempA source + tempB source + electrode readout`；左侧机制 panel 显式画出 E->E 长轴作用范围；中间两个方形 panel 分别展示两种特异性组合的代表传播；右侧 readout 用不同颜色阴影区分 forward / reverse clean propagation events。
+- canonical 输出目录：`results/paper-ready-figure/fig5_snn_state_readout/figures/`
+- candidate 文件：`fig5_candidate_E1146_snn_state_readout.png` / `.pdf`
+- computation producer：`scripts/run_topic4_m3_runaway_readout.py`
+- plotting-only producer：`scripts/paper_figures/plot_fig_topic4_early_recruitment_readout.py`
+- 完整科学与视觉合同：`docs/fig5_snn_state_readout_spec.md`
+- 上图：同一条 0–1500 ms signed 30–80 Hz virtual-SEEG；只标左下单次 TB event（535–620 ms）、operational runaway onset（1109.8 ms）和右下 early-runaway energy window（1109.8–1209.8 ms）。
+- 左下：15 contacts 按该 exact event 的 30–80 Hz burst-envelope peak latency 排成 `1..15` recruitment rank；`viridis` 深=早，并叠加同一事件真实发放神经元的 first-spike order。
+- 右下：15 contacts 的 onset-locked mean-squared positive excess virtual-LFP energy；`Blues` 深=高，并叠加该窗口真实发放神经元的 firing rate。
+- 当前单轨迹描述：earliness–energy Spearman=0.814；ICL source-distance–rank Spearman=0.764。四个 SCL contact 都有 readout peak，但 SCL-local E-neuron gate 为 0/4。
 
 **当前口径**：
 
-这张图只支持“模型底物可产生自发双向传播，并且虚拟 SEEG 可读出方向”。它不单独证明真实病人的机制，也不声称 M2 brake-off 已解决沿轴空间自限。
+这张 Figure 5 候选支持 `same scaffold, different state`：间期单事件较早的空间端，在 q_I 耗竭进入 operational runaway 的早期出现更强 readout。它仍是单模型、单 seed 的 observation-layer bridge；runaway 不是临床发作，当前没有发作终止/恢复，也没有解析 separatrix。安全表述是 `upper contacts participate in the group readout`，不能写成 SCL 下方局部组织已直接招募。
+
+**旧 Fig5-A 的新位置**：`fig5_core_model_s3_brakeoff` 保留为 Fig4/模型基线的通用双向传播素材和兼容输出，不再是当前 Figure 5 的首选主论点。它仍只说明模型可产生自发双向传播并被虚拟 SEEG 读出方向。
 
 ### M3A-v2 Step4 诊断图：低-q / gK closed-loop 负结果目视审阅
 

@@ -256,7 +256,7 @@ Current visual contract:
 - Null is the matched channel-shuffle median
 - interpretation: shared coarse field axis, not pointwise directional replay
 
-## Fig5-A Core Model Stage-3 Brake-Off
+## Interictal SNN baseline companion — former Fig5-A
 
 Formal entry point:
 
@@ -276,9 +276,13 @@ The script is plotting-only and consumes the existing Topic 4 SNN artifacts:
 - `results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/per_event/rep_s3_brakeoff_neg.npz`
 - `results/topic4_sef_hfo/observation_layer/snn_cm_spontaneous/per_event/rep_s3_brakeoff_pos.npz`
 
+This remains the accepted generic four-column interictal SNN baseline, but it is
+no longer the current Figure 5 candidate. Figure 5 now points to the E1146
+state-dependent readout described below.
+
 Current accepted visual contract:
 
-- manuscript panel label: `A`
+- manuscript panel label: no longer assigned; reuse in final assembly is pending
 - one-row SNN simulation standard: mechanism schematic, tempA source event, tempB source event, fused virtual-SEEG readout
 - mechanism panel explicitly marks the E->E long-axis range
 - readout event windows are shaded by direction: forward and reverse propagation events use different colors
@@ -414,7 +418,7 @@ two main figures; Fig4C/Fig4D are optional supplements.
 
 Default output: `results/paper-ready-figure/fig_subject_snn_epilepsiae_1146/figures/` (png + pdf + metadata + README).
 
-Same one-row-four-column SNN standard as Fig5, but the substrate is placed on the
+Same one-row-four-column interictal SNN standard, but the substrate is placed on the
 **patient's real electrode layout** (E1146 ICL strip). The two low-V_th cores are the
 **earliest-3 electrodes of each interictal template** (`template_source` placement in
 `src/sef_hfo_subject_placement.py`), real-geometry plane-fit (cores ~13 mm apart naturally,
@@ -435,6 +439,42 @@ Accepted contract / honesty:
   within-cluster tau = 0.939, shared-overlap corr = -0.69.
 - `k_dir=2` sparse-electrode readout (load-bearing relaxation vs the standard k_dir=3).
 - E958 (sparse subdural grid) is a negative case (events too local to read direction).
+
+### Figure 5 candidate — E1146 SNN state-dependent readout
+
+```bash
+python scripts/run_topic4_m3_runaway_readout.py
+python scripts/paper_figures/plot_fig_topic4_early_recruitment_readout.py
+```
+
+计算 runner 复用 accepted E1146 M3A-v2.1 `q_I build-up → runaway` 协议并物化连续 virtual-SEEG
+trace；当前 seed 的 operational runaway onset=1109.8 ms。上方完整显示 0–1500 ms，只额外标出两段
+与下图一一对应的时间窗：蓝灰色 535–620 ms 是左下使用的单次 TB event，浅红色 1109.8–1209.8 ms
+是右下 early-runaway energy window；不画 peak 点或传播连线。上图画 signed 30–80 Hz component，
+直接暴露约 50 Hz 的 burst cycles；每个触点按自身 runaway 前 95% absolute amplitude 做显示定标，
+runaway 不参与该尺度并允许被纵轴裁切。legend 独立成行。
+
+左下自动选择 transition-side `tempB` 的最后一个 qualifying local event（535 ms）。它不是多事件模板，
+也不是电极 variance：每个 virtual contact 在蓝灰窗内的 30–80 Hz burst-envelope peak latency 被排序为
+`1…15` recruitment rank，再投影成 field。因此四个 SCL 与十一个 ICL 都有 rank；colorbar 的最大值 15
+是参与 contact 数，不是 15 ms。右图仍使用完整 15-contact early-runaway energy。该单次轨迹的
+earliness–energy Spearman=0.814；ICL source-distance vs contact-rank Spearman=0.764，只作单轨迹描述。
+
+模型平面仅 20 mm，因此 field kernel 使用 3.0 mm，不机械照搬数据 Fig3-B 的 6 mm。平滑 wash 是
+virtual-SEEG contact readout；颗粒层直接来自同一 run 的 8,000 个 E neurons 和 `E_spk_bool`，不是把
+contact 插值反采样到神经元。左图彩色颗粒是同一个 535–620 ms TB event 中实际发放的神经元，颜色为
+first-spike early-to-late order；右图彩色颗粒是 early-runaway window 实际发放的神经元，颜色为逐神经元
+firing rate。灰色颗粒来自同一 run 的完整 8,000-neuron sampling，不是装饰性随机点；
+两图的 15 个电极统一使用黑色外边框，colorbar 紧贴自己的 field。两图不画 shaft connectors/core
+rings，先不输出 GIF。
+
+canonical candidate 输出：`results/paper-ready-figure/fig5_snn_state_readout/figures/fig5_candidate_E1146_snn_state_readout.{png,pdf}`，同目录另有 metadata JSON 与中文 README。兼容诊断副本可用 `--outdir results/topic4_sef_hfo/early_recruitment_readout/figures --stem epilepsiae_1146_runaway_field_readout` 生成。runaway onset 沿用现有
+120-Hz sustained-rate 操作定义，表示 q_I 耗竭驱动的失控转变；当前 artifact 没有独立求解析
+separatrix `q_I*`。virtual-LFP excess energy 也不是 raw clinical SEEG / broadband power。
+四个 SCL 都有单次事件的 virtual-contact burst peak，但 1.5-mm 邻域的局部 E-neuron 招募门未通过；
+因此安全表述是“upper contacts participate in the group readout”，不能写成“SCL 下方局部组织被直接招募”。
+
+这张图现在登记为 Figure 5 candidate，核心 argument 是 `same scaffold, different state`：同一条连续轨迹中的单次间期样事件顺序，与 operational runaway 早期能量梯度同向。它不是完整 seizure 复现；没有终止/恢复，不把单 seed Spearman 写成 cohort 或机制因果证据。完整合同见 `docs/fig5_snn_state_readout_spec.md`。
 
 ### Fig4C — real-vs-model interictal template consistency (E1146)
 

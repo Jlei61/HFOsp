@@ -23,11 +23,11 @@
 - **为什么严重**：频带、时间零点和时间平滑都会直接改变早期场一致性。
 - **怎么关**：预先锁定主版本，其余作为敏感性；同时锁定基线、支持阈值、all-contact/within-shaft null、患者内发作汇总和多重比较。
 
-### 4. 慢变量不能写成已验证的主机制
+### 4. 慢变量已进入 Figure 5 候选，但不能写成已验证的完整发作机制
 
-- **现状**：当前主 SNN 为 slow=None；\(q_I/g_K\) 是探索性 screen，且没有得到可控扩展后恢复，\(g_K\) 主要表现为抑制。
-- **为什么严重**：若与主模型连续书写，会把阴性探索误写成已支持的 ictal transition 机制。
-- **怎么关**：正文主 Methods 只写静态低阈值核心 + 各向异性连接；慢变量移入 Supplementary exploratory methods，并报告 bounded negative。
+- **现状**：Fig. 4 基础 SNN 仍为 `slow=None`；Figure 5 当前候选消费 \(q_I\) 耗竭进入 operational runaway 的连续轨迹，承担 `same scaffold, different state` 的 observation-layer bridge。\(g_K\) 未形成可靠 rescue，当前没有终止/恢复。
+- **为什么严重**：若不区分 Fig. 4 baseline、Fig. 5 state-readout candidate 和完整 seizure-cycle 机制，会把单 seed runaway 可视化误写成已验证的 ictal transition。
+- **怎么关**：正文可写 Figure 5 候选的 \(q_I\) 状态轨迹与读出定义；同时明确 runaway 是 sustained-rate 操作定义、不是临床发作或解析 separatrix，终止/恢复与机制 ablation 仍未闭合。\(g_K\) 阴性 screen 继续留在 Supplementary exploratory methods。
 
 ## P0-轴：source/sink 命名、swap 定义与 A/B 病理轴构建（2026-07-12 讨论新增）
 
@@ -134,6 +134,6 @@ D_AB 梯度可以对所有非退化 accepted A/B pair 计算；共同病理轴�
 2. Y19/Y20 的长期 outcome 应按 Engel、ILAE 还是原始自由文本报告？
 3. 发作场主频带是 1–45 Hz 还是 1–150 Hz？
 4. 发作时间零点用 EEG onset 还是 clinical onset？
-5. 慢变量是否同意只放 Supplementary exploratory methods，并明确阴性边界？
+5. Figure 5 最终定稿时，是否保留当前“\(q_I\) 轨迹进主图候选、完整慢变量机制与 \(g_K\) 阴性 screen 留 Supplementary”的分层？
 6. 能否提供 Yuquan 伦理批件或原始论文中的伦理原文用于最终核对？
 7. D_AB 梯度轴的强主张是否只限 reciprocal pair，其余 accepted pair 作为分层/敏感性？
