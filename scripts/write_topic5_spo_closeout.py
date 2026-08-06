@@ -8,9 +8,22 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results/topic5_spatial_propagation_operator_v0_2"
 
+# Literal tripwires against the overclaims this version makes easy. The last
+# three are new: with every spatial rung flat, the tempting summary is that the
+# process is not spatial. It does not say that -- the arm without transport still
+# injects and reads through the observation kernel, so it is already a
+# distance-based spatial model, just one with a fixed width. And the direction
+# blindness is a function of that width, not a property of nature, so it must not
+# be stated as absolute.
+#
+# Every phrase here is checked to be absent from the report's own prose. A guard
+# that trips on the sentence prohibiting the claim teaches you to weaken the
+# guard.
 FORBIDDEN = ("anatomical connectivity", "conduction velocity", "mm/s",
              "proves the biological", "causal human brain network",
-             "prospective geometry", "recovered the propagation graph")
+             "prospective geometry", "recovered the propagation graph",
+             "space does not matter", "not a spatial process",
+             "direction is unrecoverable")
 
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
