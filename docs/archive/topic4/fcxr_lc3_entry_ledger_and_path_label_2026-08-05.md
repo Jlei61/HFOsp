@@ -361,3 +361,61 @@ Added by this stage:
 - a frozen arm's `total_ms` as evidence of how long a **surviving** high branch
   was observed — a persisting branch never triggers the protocol's extension, so
   every such arm saw only the 1.5 s screen however long a budget it was given.
+
+---
+
+## 8. A brake only seizure-scale recruitment can charge (2026-08-06)
+
+§4.2 leaves the loop stuck at a fixed point the tissue cannot leave, and rules out a whole
+family of fixes: the smoulder fires *denser* than the train that produces entry, so anything
+keyed to how often events arrive engages before entry rather than after it. Recruitment is
+the variable that separates them — the pre-entry train peaks at 0.095 of the array, the
+smoulder's median is 0.178-0.281, the discharge's is 0.390, and across gates from 0.12 to
+0.25 the pre-entry train crosses zero times while the smoulder crosses 2-3.5 times a second.
+
+So the engine gained a slow brake gated on recruitment (`use_gba`, off by default; 276
+existing engine tests unchanged). Sensor: a leaky sum of the per-step recruited fraction,
+normalised to the detector's own 1 ms bin so its gate is in measured units. Slow variable:
+charges on 2 s, releases on 30 s. Actuator: the same potassium-reversal conductance a
+spike-frequency adaptation uses.
+
+Three design points are contracts, each forced by a number rather than chosen:
+
+- **Release must dominate wear decay.** The existing relay releases on 5000 ms, exactly
+  `tau_z`, which is why it lets go just as the wear is clearing; wear needs 3.2 s of quiet to
+  fall from 0.089 to the lowest level that still departs and 7.5 s to reach the stable range.
+- **The sensor window is wider than the bin it is normalised to.** A leaky sum overshoots
+  perfectly synchronous input by `1/(1-exp(-bin/tau))`, which at a 1 ms window is 1.58× —
+  enough for the largest measured interictal event to read at a gate meant for seizure-scale
+  recruitment. At 5 ms the overshoot is 1.10×.
+- **Strength is set from the brake's reachable ceiling, not from round numbers.** The ceiling
+  is the duty-weighted mean excess, so a faster charge cannot raise it; reconstructed offline
+  on the recorded trajectories it is ≈0.069. As the leak-relative conductance the membrane
+  sees, the first strengths tried were 0.008 and 0.023 — a run at those values would have
+  reported the brake ineffective when it was never switched on.
+
+Verified before the arms were trusted: the sensor never once reaches the gate during the
+pre-entry train on any of the three trajectories (peaks 0.050-0.082), so entry is untouched by
+construction; and on the live full-conductance path a charged brake adds exactly
+`eta*a/(v_match - e_k)` to the E-cell conductance, leaves I cells alone, and moves the
+steady-state E voltage from 4.40 to 3.28 against a threshold of 18.
+
+### 8.1 What cannot be predicted before the arms land
+
+The brake's equilibrium during a smoulder is **not** derivable from what is on disk, and an
+early attempt to derive it mixed two quantities. The discharge's mean supra-gate excess
+(0.0926) was computed from the reconstructed *sensor*; the smoulder's (0.1596) from *event
+peak extents*. The sensor is a 5 ms leaky average and reads systematically below an event's
+1 ms peak, so those two are not comparable and the apparent result — that the smoulder's
+balance point exceeds the discharge's — is an artefact of the mismatch, not a finding.
+
+Two further gaps sit behind it. The smoulder was characterised on arms whose relay curve had
+been moved, which is a different condition from these arms' registered curve; and no
+active-fraction series was saved for those arms, so the sensor cannot be reconstructed there
+at all. The numbers above are upper bounds on a quantity from a neighbouring condition, and
+nothing more.
+
+What the arms do decide is stated without a prediction attached: whether returning events
+land inside the frozen reference distribution, and if not, which of three failures produced
+the miss — the sensor never reached the gate, the brake let go while wear was still above the
+level that departs, or it held and the tissue smouldered through it.
