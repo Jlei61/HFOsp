@@ -8,6 +8,36 @@
 
 ## 0. Revision log
 
+**rev4 (2026-08-06, after the budget probe) — a reported result is withdrawn.**
+
+The probe existed to answer whether the epoch ceiling produced the negative. It answers
+yes, for the arm the negative is about.
+
+On all six probed patients the static and recurrent arms converge inside 180 epochs and
+gain 0.0000–0.0018 from a four-fold budget. The learned latent arm runs 157–316 epochs —
+always past the 95 it was allowed — and gains 0.005–0.080. Its deficit to the recurrent
+model shrinks from −0.065 to −0.025; its comparison against the static baseline moves from
++0.0001 to **+0.0530**.
+
+Withdrawn: **"the tissue field is indistinguishable from a static contact rate"**. That was
+an artefact of where training stopped. §9's own rule — a run that hit the ceiling carries no
+negative verdict — forbids reporting it, and the tissue-field arms hit the ceiling on 21 of
+35 units against 1 of 37 for the contact-node graph and 3 of 39 for the recurrent model.
+
+Survives, with a smaller magnitude: **the tissue field predicts worse than an unconstrained
+recurrent model**. The direction holds at both budgets; only the size changes.
+
+Action: both latent arms are refit at `epochs_freeze = 400`, with the stopping rule and
+patience unchanged so arms remain comparable — each trains until it stops improving rather
+than until a clock runs out. The truncated fits are retained under `per_subject_budget95/`
+as evidence. The further-seed stage is cancelled; it would only have added units at the
+wrong budget. Every cohort number involving a latent arm is superseded by the refit.
+
+**Lesson for the next version.** A single epoch budget shared by arms with very different
+convergence rates is not a fair comparison, it is a comparison of convergence rates. Either
+give each arm its own budget large enough to converge, or make convergence a pre-condition
+for the unit to enter the analysis at all.
+
 **rev3 (2026-08-06, late execution)** — five amendments, each forced by something the
 run surfaced rather than by a change of mind:
 
