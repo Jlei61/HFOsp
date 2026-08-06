@@ -114,9 +114,28 @@ def main() -> int:
             f"retrospective: it is not evidence that the geometry could have been known in "
             f"advance.\n")
 
+    # The matrix records the most recent launch, not the whole study, so count
+    # what is actually on disk as well -- otherwise the report understates the
+    # work by every seed that ran under an earlier launch.
+    on_disk = {}
+    if (OUT / "per_subject").exists():
+        for done_file in (OUT / "per_subject").rglob("DONE.json"):
+            on_disk.setdefault(done_file.parent.name, []).append(done_file)
+    still_failed = sorted(
+        p.parent.relative_to(OUT / "per_subject").as_posix()
+        for p in (OUT / "per_subject").rglob("FAILED.json")
+    ) if (OUT / "per_subject").exists() else []
+
     add("## 3. Runs completed\n")
-    add(f"- cohort units planned {planned}, completed {completed}"
-        + (f", failed {len(failed)}: {failed[:5]}" if failed else ""))
+    add(f"- first seed, the coverage every claim rests on: {planned} planned, "
+        f"{completed} completed"
+        + (f", {len(failed)} failed" if failed else ""))
+    if on_disk:
+        add("- units on disk by seed: "
+            + ", ".join(f"{k} {len(v)}" for k, v in sorted(on_disk.items())))
+    if still_failed:
+        add(f"- units that failed every retry, all on later best-effort seeds: "
+            f"{len(still_failed)} — {still_failed[:4]}")
     if frozen:
         add(f"- frozen configuration: `{json.dumps(frozen)}`")
         if sweep:
