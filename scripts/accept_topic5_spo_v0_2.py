@@ -99,11 +99,19 @@ def main() -> int:
     figures = OUT / "figures"
     pngs = list(figures.glob("*.png")) if figures.exists() else []
     loco = stats.get("leave_contact_out", {})
+    # Coverage is checked, not just completion. An aggregation that ran on four
+    # of twenty-one patients reports COMPLETE and reads as the whole cohort --
+    # the same shape as the v0.1 bug where the closeout took its coverage from a
+    # file every launcher overwrote and understated the run five-fold.
+    loco_n = min((e["n_patients"] for e in loco.get("absolute", {}).values()),
+                 default=0)
     results.append(check(
-        "leave-contact-out aggregated with a floor arm",
-        loco.get("status") == "COMPLETE" and bool(loco.get("over_floor")),
+        "leave-contact-out aggregated with a floor arm, over the whole cohort",
+        loco.get("status") == "COMPLETE" and bool(loco.get("over_floor"))
+        and loco_n >= len(cohort),
         f"status={loco.get('status', 'not run')}, "
-        f"arms={sorted(loco.get('absolute', {}))}"))
+        f"arms={sorted(loco.get('absolute', {}))}, "
+        f"thinnest arm covers {loco_n}/{len(cohort)} patients"))
     # The failure this guards against did not raise: withholding a contact from
     # every split left it out of the targets too, so the evaluation scored an
     # empty question and returned a near-perfect number.
