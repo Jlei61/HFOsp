@@ -107,12 +107,14 @@ def main() -> int:
     # The failure this guards against did not raise: withholding a contact from
     # every split left it out of the targets too, so the evaluation scored an
     # empty question and returned a near-perfect number.
+    absolute = loco.get("absolute", {})
+    empty = [a for a, e in absolute.items() if e["median_heldout_next_bce"] <= 1e-3]
     results.append(check(
         "held-out evaluation is not scoring an empty target set",
-        all(e["median_heldout_next_bce"] > 1e-3
-            for e in loco.get("absolute", {}).values()) if loco.get("absolute")
-        else False,
-        "a held-out loss at zero means the withheld contacts carry no positives"))
+        bool(absolute) and not empty,
+        "leave-contact-out has not run yet" if not absolute else
+        f"{empty} sit at zero: the withheld contacts carry no positives"
+        if empty else ""))
 
     results.append(check("figure rendered with a Chinese README",
                          bool(pngs) and (figures / "README.md").exists(),
