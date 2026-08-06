@@ -39,3 +39,67 @@ def partition_of_unity(s, kappa, sigma_s):
     logw -= logw.max(axis=1, keepdims=True)
     w = np.exp(logw)
     return w / w.sum(axis=1, keepdims=True)
+
+
+from scipy.special import expit
+from scipy.stats import truncnorm
+
+V_BASE = 18.0
+V_RESET = 11.0
+CORE_MEAN = 17.5
+CORE_STD = 1.0
+
+
+def sample_core_quantiles(n_E, seed):
+    """One uniform quantile per E neuron, drawn once and frozen. Position- and
+    field-independent, so every arm shares the same latent draw."""
+    return np.random.default_rng(int(seed)).uniform(0.0, 1.0, size=int(n_E))
+
+
+def core_thresholds(u, core_mean=CORE_MEAN, core_std=CORE_STD, v_reset=V_RESET):
+    """Truncated-normal inverse transform: same distribution as the engine's
+    rejection sampler, but deterministic per neuron. Bitwise reproduction of the
+    legacy draw is impossible -- rejection makes its stream position data-dependent."""
+    a = (float(v_reset) - float(core_mean)) / float(core_std)
+    return truncnorm.ppf(np.asarray(u, float), a=a, b=np.inf,
+                         loc=float(core_mean), scale=float(core_std))
+
+
+def signed_depth(v_core, v_base=V_BASE):
+    return float(v_base) - np.asarray(v_core, float)
+
+
+def project_to_budget(q, target_count, tau_h=TAU_H, eps=EPS, max_iter=200):
+    """Bisect lambda so that sum_i h_i == target_count.
+
+    h is strictly decreasing in lambda, so the root is unique. This is a
+    LEVEL-SET operation: the region's size is pinned by the budget and q only
+    sets its shape (spec 4.4).
+    """
+    q = np.asarray(q, float)
+    if not np.isfinite(q).all():
+        raise ValueError("project_to_budget: q contains non-finite values")
+    if (q + eps <= 0).any():
+        raise ValueError("project_to_budget: q + eps must be positive")
+    target = float(target_count)
+    if not np.isfinite(target) or not (0.0 < target < q.size):
+        raise ValueError(
+            f"project_to_budget: target_count must lie in (0, {q.size}), got {target}")
+
+    lq = np.log(q + eps)
+    lo, hi = lq.min() - 20.0, lq.max() + 20.0
+    for _ in range(max_iter):
+        lam = 0.5 * (lo + hi)
+        if expit((lq - lam) / tau_h).sum() > target:
+            lo = lam
+        else:
+            hi = lam
+    lam = 0.5 * (lo + hi)
+    return expit((lq - lam) / tau_h), lam
+
+
+def build_vth(h, d, n_total, n_E, v_base=V_BASE):
+    """Per-neuron threshold vector for the engine. I neurons keep baseline."""
+    vth = np.full(int(n_total), float(v_base))
+    vth[:int(n_E)] = float(v_base) - np.asarray(h, float) * np.asarray(d, float)
+    return vth
