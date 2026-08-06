@@ -151,3 +151,42 @@ def test_within_a_tier_the_better_match_ranks_higher():
 def test_no_direction_ranks_last_and_tolerates_nan():
     assert candidate_key(0, float("nan")) < candidate_key(1, -0.9)
     assert candidate_key(0, float("nan")) == candidate_key(0, float("nan"))
+
+
+from src.topic4_core_field_scoring import coverage_matched_axis_only
+
+
+def test_coverage_matched_axis_only_uses_exactly_the_models_contacts():
+    """Unmatched axis-only covers every contact by construction, so comparing it
+    with a sparse simulated arm under mean-rank filling penalises the arm for
+    coverage rather than for ordering. The matched version removes that."""
+    proj = {n: float(i) for i, n in enumerate(SUPPORT)}
+    model = {"forward": {"c1": 0.0, "c2": 1.0, "c3": 2.0},
+             "reverse": {"c4": 0.0, "c5": 1.0}, "n_dir": 2}
+    ao = coverage_matched_axis_only(model, proj)
+    assert set(ao["forward"]) == {"c1", "c2", "c3"}
+    assert set(ao["reverse"]) == {"c4", "c5"}
+
+
+def test_coverage_matched_axis_only_is_still_a_mirror_pair():
+    proj = {n: float(i) for i, n in enumerate(SUPPORT)}
+    model = {"forward": {n: 0.0 for n in SUPPORT},
+             "reverse": {n: 0.0 for n in SUPPORT}, "n_dir": 2}
+    ao = coverage_matched_axis_only(model, proj)
+    assert np.allclose([ao["forward"][n] for n in SUPPORT],
+                       [-ao["reverse"][n] for n in SUPPORT])
+
+
+def test_coverage_matched_axis_only_reports_the_models_coverage_not_one():
+    proj = {n: float(i) for i, n in enumerate(SUPPORT)}
+    model = {"forward": {"c1": 0.0, "c2": 1.0, "c3": 2.0},
+             "reverse": {"c4": 0.0, "c5": 1.0}, "n_dir": 2}
+    ao = coverage_matched_axis_only(model, proj, support=SUPPORT)
+    assert ao["coverage_forward"] == pytest.approx(3 / 6)
+    assert ao["coverage_reverse"] == pytest.approx(2 / 6)
+
+
+def test_coverage_matched_axis_only_needs_both_directions():
+    proj = {n: float(i) for i, n in enumerate(SUPPORT)}
+    one = {"forward": {"c1": 0.0, "c2": 1.0}, "reverse": {}, "n_dir": 1}
+    assert coverage_matched_axis_only(one, proj) is None

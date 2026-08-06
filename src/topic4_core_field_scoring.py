@@ -187,3 +187,27 @@ def candidate_key(n_dir, s_rank):
     """
     s = float(s_rank)
     return (int(n_dir), s if np.isfinite(s) else -np.inf)
+
+
+def coverage_matched_axis_only(model, axial_projection, support=None):
+    """axis-only templates restricted to EXACTLY the contacts `model` recruited.
+
+    The unmatched reference (axis_only_templates) covers every contact by
+    construction, while a simulated arm recruits 50-70% of them. Under
+    frozen-support mean-rank filling that difference dominates, so the two are not
+    comparable: the arm is penalised for sparse recruitment rather than for the
+    quality of its ordering. Matching the coverage isolates the ordering.
+
+    Returns None when the model lacks a direction -- there is nothing to match.
+    """
+    if model.get("n_dir", 0) < 2:
+        return None
+    fwd = {n: float(axial_projection[n]) for n in model["forward"] if n in axial_projection}
+    rev = {n: -float(axial_projection[n]) for n in model["reverse"] if n in axial_projection}
+    out = {"forward": fwd, "reverse": rev, "n_dir": 2}
+    n_sup = len(support) if support else max(len(fwd), len(rev), 1)
+    out["coverage_forward"] = len(fwd) / n_sup
+    out["coverage_reverse"] = len(rev) / n_sup
+    out["coverage_union"] = len(set(fwd) | set(rev)) / n_sup
+    out["mean_n_part"] = float(np.mean([len(fwd), len(rev)]))
+    return out
