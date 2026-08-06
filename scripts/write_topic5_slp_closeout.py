@@ -187,9 +187,24 @@ def main() -> int:
     add("")
 
     add("## 4b. Is the comparison fair?\n")
-    add("The static baseline reaches the epoch ceiling far more often than the recurrent "
-        "arm, and it does so in the direction that would flatter the recurrent arm. Two "
-        "checks, because a caveat would not settle it:\n")
+    # Which arms actually ran out of epochs, counted rather than asserted.  The
+    # asymmetry is the objection this section has to answer, and it is not the
+    # one the first draft named.
+    ceiling = {}
+    metrics_csv = OUT / "patient_prediction_metrics.csv"
+    if metrics_csv.exists():
+        for row in csv.DictReader(metrics_csv.open()):
+            hit = ceiling.setdefault(row["arm"], [0, 0])
+            hit[0 if row.get("converged") == "True" else 1] += 1
+    if ceiling:
+        add("Arms do not run out of epochs equally, and the ones that do are the ones "
+            "carrying the negative, so this has to be answered with measurements rather "
+            "than a caveat. Units that converged against units still improving when the "
+            "budget ran out:\n")
+        for arm, (converged, hit) in sorted(ceiling.items()):
+            add(f"- {arm}: {converged} converged, {hit} hit the ceiling")
+        add("")
+    add("Two checks:\n")
     if baseline_check:
         add(f"- the same constant-per-contact model was refitted with a second-order "
             f"optimiser and scored on the same held-out events. The cohort run sits "
