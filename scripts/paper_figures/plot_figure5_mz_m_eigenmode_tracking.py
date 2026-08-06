@@ -1,0 +1,431 @@
+"""Paper-ready candidate figures for Topic 4 MZ state-aligned finite-time spatial mode tracking.
+
+Design contract: docs/superpowers/specs/2026-07-21-topic4-mz-m-eigenmode-tracking-design.md §8.
+Reads results/topic4_sef_hfo/mz_m_eigenmode_tracking/ and renders:
+  Figure A  state-aligned fixed-kick tracking (baseline / approach_75 / settled_plateau maps + trajectory)
+  Figure B  finite-time mode tracking (identifiability strip + robust U1 + sigma_hat_1(T) + m-controls)
+
+This is the direct current-based MZ spiking network at the z+m plateau — NOT a rate-field surrogate,
+NOT exact eigenmodes. The empirical operator is shown ONLY where the strict low-k audit passes; an
+unresolved state is left BLANK (never drawn as gain 0). Fail-closed when a required sidecar is missing
+(spec §7 E20). Never touch the z-only Figure 5 directories.
+
+Visual contract (spec §8): width ~7.2in, 300 dpi, editable PDF text (fonttype=42), no suptitle, no
+background grid, short left panel letters. baseline = grey #555555, slow-state progression = a green
+ramp, settled plateau = dark green accent; NO red/blue (reserved for template A/B). Signed fields -> PuOr.
+"""
+import argparse
+import glob
+import json
+import os
+import sys
+
+import numpy as np
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.gridspec import GridSpec
+
+ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+OUT = os.path.join(ROOT, "results", "topic4_sef_hfo", "mz_m_eigenmode_tracking")
+CAND_DIR = os.path.join(ROOT, "results", "paper-ready-figure",
+                        "fig5_mz_m_eigenmode_tracking_candidate", "figures")
+
+STATE_ORDER = ["baseline", "approach_25", "approach_50", "approach_75", "settled_plateau"]
+STATE_COLOR = {"baseline": "#555555", "approach_25": "#a1d99b", "approach_50": "#74c476",
+               "approach_75": "#31a354", "settled_plateau": "#006d2c"}
+STATE_SHORT = {"baseline": "base", "approach_25": "a25", "approach_50": "a50",
+               "approach_75": "a75", "settled_plateau": "plat"}
+MAIN3 = ["baseline", "approach_75", "settled_plateau"]
+SIGNED, MAG = "PuOr", "magma"
+plt.rcParams.update({"pdf.fonttype": 42, "ps.fonttype": 42, "font.size": 8,
+                     "axes.linewidth": 0.6, "figure.dpi": 150})
+
+
+# ------------------------------------------------------------------ loaders (fail-closed / None if absent)
+def load_state(seed, state, out=OUT):
+    j = os.path.join(out, "per_seed", f"state_seed{seed}_{state}.json")
+    npz = os.path.join(out, "per_seed", f"arrays_seed{seed}_{state}.npz")
+    if not os.path.exists(j):
+        return None
+    d = dict(summary=json.load(open(j)), arr=(dict(np.load(npz, allow_pickle=True)) if os.path.exists(npz) else {}))
+    return d
+
+
+def load_registration(out=OUT):
+    p = os.path.join(out, "state_registration.json")
+    return json.load(open(p)) if os.path.exists(p) else None
+
+
+def load_traj(seed, out=OUT):
+    p = os.path.join(out, "per_seed", f"traj_seed{seed}.npz")
+    return dict(np.load(p)) if os.path.exists(p) else None
+
+
+def seeds_present(out=OUT):
+    ss = set()
+    for f in glob.glob(os.path.join(out, "per_seed", "state_seed*_baseline.json")):
+        ss.add(int(os.path.basename(f).split("seed")[1].split("_")[0]))
+    return sorted(ss)
+
+
+def require_registration(out=OUT):
+    reg = load_registration(out)
+    if reg is None:
+        raise SystemExit(f"[fig] missing state_registration.json in {out} (run `register` first)")
+    return reg
+
+
+def _letter(ax, s):
+    ax.text(-0.02, 1.06, s, transform=ax.transAxes, fontsize=11, fontweight="bold", ha="right", va="bottom")
+
+
+def _grididx(xy, n):
+    return (xy[0] / 5.0 + 0.5) * (n - 1), (xy[1] / 5.0 + 0.5) * (n - 1)
+
+
+def _signed_field(ax, field, *, vmax, title=None, src=None, snk=None, color="k"):
+    im = ax.imshow(np.asarray(field, float).T, origin="lower", cmap=SIGNED, vmin=-vmax, vmax=vmax, aspect="equal")
+    ax.set_xticks([]); ax.set_yticks([])
+    if title:
+        ax.set_title(title, fontsize=8, pad=2, color=color)
+    n = np.asarray(field).shape[0]
+    for xy, mk in ((src, "o"), (snk, "s")):
+        if xy is not None:
+            gx, gy = _grididx(xy, n)
+            ax.plot(gx, gy, mk, mfc="none", mec="k", mew=0.9, ms=5)
+    return im
+
+
+def _blank(ax, text="unresolved"):
+    ax.set_xticks([]); ax.set_yticks([])
+    ax.text(0.5, 0.5, text, transform=ax.transAxes, ha="center", va="center", fontsize=7, color="#999999")
+    for s in ax.spines.values():
+        s.set_edgecolor("#dddddd")
+
+
+# =============================================================== Figure A: state-aligned fixed-kick tracking
+def figure_a(seed, cfg, out=OUT):
+    reg = require_registration(out)
+    srec = reg["seeds"].get(str(seed))
+    if srec is None:
+        raise SystemExit(f"[figA] seed{seed} not registered")
+    data = {st: load_state(seed, st, out) for st in MAIN3}
+    if data["baseline"] is None:
+        raise SystemExit(f"[figA] missing baseline fixed-kick sidecar for seed{seed}")
+    centers = [float(c) for c in cfg["local_map_centers_ms"]]
+    src = data["baseline"]["summary"].get("src_g"); snk = data["baseline"]["summary"].get("snk_g")
+    have = [st for st in MAIN3 if data[st] and data[st]["summary"].get("resolved") and "fk_dmaps" in data[st]["arr"]]
+    dmax = max((np.nanmax(np.abs(data[st]["arr"]["fk_dmaps"])) for st in have), default=1.0) or 1.0
+
+    fig = plt.figure(figsize=(7.2, 6.4))
+    # top: D/a trajectory with 5 checkpoints
+    axT = fig.add_axes([0.09, 0.79, 0.86, 0.16])
+    tr = load_traj(seed, out)
+    if tr is not None:
+        axT.plot(tr["t_ms"] / 1000.0, tr["D_allE"], color="#333333", lw=0.8, zorder=1)
+        axTa = axT.twinx()
+        axTa.plot(tr["t_ms"] / 1000.0, tr["a_allE"], color="#b39ddb", lw=0.7, alpha=0.9, zorder=1)
+        axTa.set_ylabel("a (adapt.)", fontsize=7, color="#7e57c2"); axTa.tick_params(labelsize=6.5)
+    for st in STATE_ORDER:
+        d = srec["states"].get(st, {})
+        if d.get("branch_step") is not None:
+            axT.scatter([d["branch_step"] * 0.1 / 1000.0], [d["D"]], s=34, color=STATE_COLOR[st], zorder=3,
+                        edgecolor="k", linewidth=0.5, label=STATE_SHORT[st])
+    axT.set_xlabel("time (s)", fontsize=7.5); axT.set_ylabel("D = 1 − z̄", fontsize=7.5)
+    axT.tick_params(labelsize=6.5); axT.spines[["top"]].set_visible(False)
+    axT.legend(fontsize=6, ncol=5, loc="upper left", frameon=False, handletextpad=0.2, columnspacing=0.8)
+    axT.set_title(f"z+m plateau slow-state trajectory · seed {seed} (settled={srec.get('settled')})",
+                  fontsize=8, pad=3)
+    _letter(axT, "a")
+
+    # body: baseline / approach_75 / settled_plateau x 4 time maps
+    gsb = GridSpec(3, 5, figure=fig, width_ratios=[1, 1, 1, 1, 0.9], left=0.07, right=0.965,
+                   top=0.70, bottom=0.30, hspace=0.16, wspace=0.16)
+    im = None
+    for ri, st in enumerate(MAIN3):
+        d = data[st]
+        resolved = bool(d and d["summary"].get("resolved") and "fk_dmaps" in d["arr"])
+        for ci, c in enumerate(centers[:4]):
+            ax = fig.add_subplot(gsb[ri, ci])
+            if resolved:
+                im = _signed_field(ax, d["arr"]["fk_dmaps"][ci], vmax=dmax,
+                                   title=(f"{int(c)} ms" if ri == 0 else None), src=src, snk=snk)
+            else:
+                _blank(ax, "unresolved" if ci == 1 else "")
+            if ci == 0:
+                ax.set_ylabel(st.replace("_", "\n"), color=STATE_COLOR[st], fontsize=8, fontweight="bold")
+            if ri == 0 and ci == 0:
+                _letter(ax, "b")
+    if im is not None:
+        cax = fig.add_subplot(gsb[0:3, 4]); cax.set_axis_off()
+        fig.colorbar(im, ax=cax, fraction=0.5, pad=0.0).set_label("Δ E-rate (Hz)\nkick − control", fontsize=7)
+
+    # bottom: response-norm suppression (headline) + source/sink localization + arrival — all 5 states
+    gsc = GridSpec(1, 3, figure=fig, left=0.09, right=0.965, top=0.21, bottom=0.07, wspace=0.55)
+    ss = seeds_present(out)
+
+    def _series(getter):
+        out_v = {}
+        for st in STATE_ORDER:
+            vals = []
+            for s in ss:
+                ls = load_state(s, st, out)
+                if ls and ls["summary"].get("resolved"):
+                    v = getter(ls["summary"]["fixed_kick"])
+                    if v is not None:
+                        vals.append(v)
+            out_v[st] = vals
+        return out_v
+
+    # c: whole-field fixed-kick response norm across the 5 states — the suppression curve
+    axC = fig.add_subplot(gsc[0, 0])
+    norms = _series(lambda fk: fk.get("response_norm"))
+    for xi, st in enumerate(STATE_ORDER):
+        v = norms[st]
+        axC.scatter([xi] * len(v), v, color=STATE_COLOR[st], s=20, zorder=3)
+        if v:
+            axC.plot([xi - 0.28, xi + 0.28], [np.mean(v)] * 2, color=STATE_COLOR[st], lw=1.8)
+    axC.set_xticks(range(5)); axC.set_xticklabels([STATE_SHORT[s] for s in STATE_ORDER], fontsize=7)
+    axC.set_xlim(-0.6, 4.6); axC.set_ylabel("fixed-kick response\nnorm (Hz)", fontsize=7.5)
+    axC.spines[["top", "right"]].set_visible(False); _letter(axC, "c")
+
+    # d: source-core (filled) vs remote-sink (open) response — response stays local, never reaches sink
+    axD = fig.add_subplot(gsc[0, 1])
+    srcv = _series(lambda fk: fk["region"].get("source_core"))
+    snkv = _series(lambda fk: fk["region"].get("remote_sink"))
+    for xi, st in enumerate(STATE_ORDER):
+        if srcv[st]:
+            axD.scatter([xi] * len(srcv[st]), srcv[st], color=STATE_COLOR[st], s=20, marker="o", zorder=3)
+        if snkv[st]:
+            axD.scatter([xi] * len(snkv[st]), snkv[st], facecolor="none", edgecolor=STATE_COLOR[st],
+                        s=24, marker="s", linewidth=1.0, zorder=3)
+    axD.set_xticks(range(5)); axD.set_xticklabels([STATE_SHORT[s] for s in STATE_ORDER], fontsize=7)
+    axD.set_xlim(-0.6, 4.6); axD.set_ylabel("|Δ E-rate| (Hz)\n● source   □ sink", fontsize=7.5)
+    axD.spines[["top", "right"]].set_visible(False); _letter(axD, "d")
+
+    # e: arrival-time vs distance for any state with a qualified front (else honest blank)
+    axE = fig.add_subplot(gsc[0, 2])
+    plotted = False
+    for st in STATE_ORDER:
+        d = load_state(seed, st, out)
+        if not (d and d["summary"].get("resolved") and "fk_kymo" in d["arr"]):
+            continue
+        fit = d["summary"]["fixed_kick"].get("arrival_fit", {})
+        if not fit.get("eligible"):
+            continue
+        ky = d["arr"]["fk_kymo"]; dist = d["arr"]["fk_kymo_dist"]; times = d["arr"]["fk_kymo_times"]
+        thr = 0.1 * np.nanmax(np.abs(ky))
+        arr = np.array([times[np.argmax(np.abs(ky[:, p]) >= thr)] if np.any(np.abs(ky[:, p]) >= thr) else np.nan
+                        for p in range(ky.shape[1])])
+        ok = np.isfinite(arr)
+        axE.scatter(dist[ok], arr[ok], color=STATE_COLOR[st], s=18, zorder=3)
+        xs = np.array([dist[ok].min(), dist[ok].max()])
+        axE.plot(xs, fit["slope"] * xs + (arr[ok].mean() - fit["slope"] * dist[ok].mean()),
+                 color=STATE_COLOR[st], lw=1.3, label=f"{STATE_SHORT[st]} R²={fit['r2']:.2f}")
+        plotted = True
+    if plotted:
+        axE.legend(fontsize=6, frameon=False, loc="upper left")
+    else:
+        _blank(axE, "no qualified\naxial front")
+    axE.set_xlabel("axial dist. (src→sink)", fontsize=7.5); axE.set_ylabel("first-arrival (ms)", fontsize=7.5)
+    axE.spines[["top", "right"]].set_visible(False); _letter(axE, "e")
+
+    _save(fig, "figure5_mz_eigenmode_A_fixed_kick_tracking")
+
+
+# =============================================================== Figure B: finite-time mode tracking
+def _identifiability_strip(ax, rows, tol):
+    for xi, st in enumerate(STATE_ORDER):
+        seeds = sorted({s for (s, ss) in rows if ss == st})
+        for k, s in enumerate(seeds):
+            r = rows[(s, st)]
+            if r.get("discrepancy") is None:
+                continue
+            x = xi + (k - (len(seeds) - 1) / 2.0) * 0.16
+            lo, hi = sorted([r.get("disc_repeatA", np.nan), r.get("disc_repeatB", np.nan)])
+            ax.plot([x, x], [lo, hi], color=STATE_COLOR[st], lw=1.0, zorder=2)
+            ax.scatter([x], [r["discrepancy"]], s=24, zorder=3, linewidth=1.0,
+                       facecolor=(STATE_COLOR[st] if r.get("identifiable") else "none"), edgecolor=STATE_COLOR[st])
+    ax.axhline(tol, color="k", lw=0.9, ls="--")
+    ax.set_xticks(range(5)); ax.set_xticklabels([STATE_SHORT[s] for s in STATE_ORDER], fontsize=7)
+    ax.set_xlim(-0.5, 4.5); ax.set_ylabel("linearity discrepancy", fontsize=8)
+    ax.spines[["top", "right"]].set_visible(False)
+
+
+def _m_control_panel(ax, cfg, out):
+    """Per-seed m-mechanism contrast at the settled plateau: native vs reset/uniform/shuffle fixed-kick
+    response. IGNITION cases (m perturbation drives the field past the runaway rate) are drawn as a
+    capped hatched bar + a red ▲ — never as the raw off-scale norm (which would misread as a huge
+    linear response). The heterogeneity across seeds IS the finding, so it is shown per seed."""
+    from matplotlib.patches import Patch
+    ctrl_path = os.path.join(out, "controls_summary.json")
+    conds = cfg["m_controls"]["conditions"]
+    cc = {"native_zm": "#555555", "m_reset": "#d95f0e", "m_uniform": "#8c96c6", "m_shuffle": "#41ab5d"}
+    if not os.path.exists(ctrl_path):
+        _blank(ax, "m-controls\nnot run"); return
+    cr = json.load(open(ctrl_path))["rows"]
+    seeds = sorted(row["seed"] for row in cr)
+
+    def _cell(s, cond):
+        for row in cr:
+            if row["seed"] == s:
+                d = row["states"].get("settled_plateau", {})
+                return d.get(cond) if isinstance(d, dict) else None
+        return None
+
+    ni = [v["response_norm"] for s in seeds for c in conds
+          if (v := _cell(s, c)) and not v.get("ignition") and v.get("response_norm") is not None]
+    cap = (max(ni) * 1.28) if ni else 1.0
+    ncond = len(conds); w = 0.82 / ncond
+    any_ign = False
+    for si, s in enumerate(seeds):
+        for ci, cond in enumerate(conds):
+            v = _cell(s, cond)
+            if not isinstance(v, dict):
+                continue
+            x = si + (ci - (ncond - 1) / 2.0) * w
+            if v.get("ignition"):
+                ax.bar(x, cap, width=w * 0.9, color=cc[cond], hatch="////", edgecolor="k", lw=0.4, alpha=0.55)
+                ax.plot(x, cap * 0.99, marker="^", color="#d1001f", ms=5.5, zorder=6, clip_on=False)
+                any_ign = True
+            else:
+                ax.bar(x, v.get("response_norm", 0.0), width=w * 0.9, color=cc[cond])
+    ax.set_ylim(0, cap * 1.1)
+    ax.set_xticks(range(len(seeds))); ax.set_xticklabels([f"s{s}" for s in seeds], fontsize=7.5)
+    ax.set_ylabel("fixed-kick response norm\n— settled plateau (Hz)", fontsize=7.3)
+    ytop = 0.75 if any_ign else 0.99
+    if any_ign:
+        ax.text(0.02, 0.98, "▲ ignition (>120 Hz) when m perturbed", transform=ax.transAxes,
+                fontsize=6.0, va="top", color="#d1001f")
+    ax.legend(handles=[Patch(color=cc[c], label=c.replace("_zm", "").replace("m_", "")) for c in conds],
+              fontsize=5.6, frameon=False, ncol=2, loc="upper left", bbox_to_anchor=(0.0, ytop),
+              handlelength=1.0, columnspacing=0.8)
+    ax.spines[["top", "right"]].set_visible(False)
+
+
+def figure_b(cfg, out=OUT):
+    require_registration(out)
+    op_path = os.path.join(out, "operator_tracking_summary.json")
+    if not os.path.exists(op_path):
+        raise SystemExit("[figB] missing operator_tracking_summary.json (run `aggregate` first)")
+    op = json.load(open(op_path))
+    rows = {(r["seed"], r["state"]): r for r in op["rows"] if r.get("resolved")}
+    tol = float(op["tol"])
+    ident = [r for r in op["rows"] if r.get("identifiable")]
+    Tmid = int(round(cfg["T_windows_ms"][1]))
+    if ident:
+        _figure_b_full(op, rows, ident, tol, cfg, Tmid, out)
+    else:
+        _figure_b_bounded_negative(rows, tol, cfg, out)
+
+
+def _figure_b_bounded_negative(rows, tol, cfg, out):
+    """0 identifiable states -> compact honest layout (strip + m-controls + one note), NOT 4 blank boxes."""
+    fig = plt.figure(figsize=(7.4, 3.7))
+    gs = GridSpec(1, 2, figure=fig, width_ratios=[1.25, 1.15], left=0.085, right=0.97,
+                  top=0.8, bottom=0.24, wspace=0.42)
+    axA = fig.add_subplot(gs[0, 0])
+    _identifiability_strip(axA, rows, tol)
+    axA.text(4.4, tol, "15% gate", fontsize=6.6, va="center", ha="right")
+    axA.text(0.02, 0.98, f"0/{len(rows)} pass the strict gate\npoint=N16 · whisker=8+8 halves",
+             transform=axA.transAxes, fontsize=6.6, va="top")
+    axA.set_title("operator not robustly identifiable at any state → V₁/U₁/σ̂₁ and the\n"
+                  "cross-state mode trajectory are undefined (bounded-negative, not shown)",
+                  fontsize=7.0, pad=6)
+    axB = fig.add_subplot(gs[0, 1])
+    _m_control_panel(axB, cfg, out)                             # 2 self-evident panels: no letters (avoid title clash)
+    _save(fig, "figure5_mz_eigenmode_B_mode_tracking")
+
+
+def _figure_b_full(op, rows, ident, tol, cfg, Tmid, out):
+    """>=1 identifiable state -> full 6-panel mode-tracking layout."""
+    fig = plt.figure(figsize=(7.2, 5.6))
+    gs = GridSpec(2, 3, figure=fig, height_ratios=[1.0, 1.0], width_ratios=[1.35, 1, 1],
+                  left=0.085, right=0.965, top=0.9, bottom=0.1, hspace=0.5, wspace=0.45)
+    axA = fig.add_subplot(gs[0, 0]); _identifiability_strip(axA, rows, tol)
+    axA.text(4.05, tol, "15% gate", fontsize=6.4, va="center", ha="right")
+    axA.text(0.02, 0.98, f"robust {len(ident)}/{len(rows)} (filled)\npoint=N16 · whisker=8+8",
+             transform=axA.transAxes, fontsize=6.2, va="top"); _letter(axA, "a")
+
+    axB = fig.add_subplot(gs[0, 1])
+    r = sorted(ident, key=lambda x: x.get("discrepancy", 1))[0]
+    npz = os.path.join(out, "per_seed", f"arrays_seed{r['seed']}_{r['state']}.npz")
+    u1 = np.load(npz, allow_pickle=True).get(f"corr_u1_T{Tmid}") if os.path.exists(npz) else None
+    st0 = load_state(r["seed"], r["state"], out)
+    src = st0["summary"].get("src_g") if st0 else None
+    snk = st0["summary"].get("snk_g") if st0 else None
+    if u1 is not None:
+        _signed_field(axB, u1, vmax=(np.nanmax(np.abs(u1)) or 1.0), src=src, snk=snk,
+                      title=f"U₁ {STATE_SHORT[r['state']]} s{r['seed']}", color=STATE_COLOR[r["state"]])
+        axB.set_xlabel(f"axis={r.get(f'u1_axis_T{Tmid}'):+.2f} · corr={r.get(f'u1_corridor_T{Tmid}', float('nan')):.2f}",
+                       fontsize=6.6)
+    else:
+        _blank(axB)
+    _letter(axB, "b")
+
+    axC = fig.add_subplot(gs[0, 2])
+    Ts = [float(t) for t in cfg["T_windows_ms"]]
+    any_sig = False
+    for rr in ident:
+        ys = [rr.get(f"sigma1_T{int(t)}") for t in Ts]
+        if all(y is not None for y in ys):
+            axC.plot(Ts, ys, "-o", ms=3, color=STATE_COLOR[rr["state"]], lw=1.2,
+                     label=f"{STATE_SHORT[rr['state']]} s{rr['seed']}"); any_sig = True
+    if any_sig:
+        axC.legend(fontsize=5.6, frameon=False)
+    else:
+        _blank(axC, "σ̂₁ undefined")
+    axC.set_xlabel("T (ms)", fontsize=7.3); axC.set_ylabel("σ̂₁ (Hz / frac)", fontsize=7.3)
+    axC.spines[["top", "right"]].set_visible(False); _letter(axC, "c")
+
+    axD = fig.add_subplot(gs[1, 0])
+    mt = [r for r in op.get("mode_tracking", []) if r.get("both_identifiable")]
+    if mt:
+        labels = [r["pair"].replace("->", "→").replace("_", "") for r in mt]
+        axD.bar(range(len(mt)), [r["u1_overlap"] for r in mt], color="#31a354", width=0.6)
+        axD.set_xticks(range(len(mt))); axD.set_xticklabels(labels, fontsize=6, rotation=30, ha="right")
+        axD.set_ylim(0, 1); axD.set_ylabel("|U₁ overlap| (sign-inv.)", fontsize=7.3)
+    else:
+        _blank(axD, "no adjacent identifiable pair")
+    axD.spines[["top", "right"]].set_visible(False); _letter(axD, "d")
+
+    axE = fig.add_subplot(gs[1, 1])
+    got = False
+    for xi, st in enumerate(STATE_ORDER):
+        vals = [rows[(s, st)].get(f"u1_axis_T{Tmid}") for (s, ss) in rows if ss == st
+                and rows[(s, ss)].get("identifiable")]
+        vals = [v for v in vals if v is not None]
+        if vals:
+            axE.scatter([xi] * len(vals), vals, color=STATE_COLOR[st], s=22, zorder=3); got = True
+    axE.axhline(0, color="k", lw=0.6, ls=":")
+    if not got:
+        _blank(axE, "U₁ axis undefined")
+    axE.set_xticks(range(5)); axE.set_xticklabels([STATE_SHORT[s] for s in STATE_ORDER], fontsize=6.6)
+    axE.set_xlim(-0.5, 4.5); axE.set_ylim(-1.05, 1.05); axE.set_ylabel("U₁ axis alignment", fontsize=7.3)
+    axE.spines[["top", "right"]].set_visible(False); _letter(axE, "e")
+
+    axF = fig.add_subplot(gs[1, 2]); _m_control_panel(axF, cfg, out); _letter(axF, "f")
+    _save(fig, "figure5_mz_eigenmode_B_mode_tracking")
+
+
+def _save(fig, stem):
+    os.makedirs(CAND_DIR, exist_ok=True)
+    p = os.path.join(CAND_DIR, stem)
+    fig.savefig(p + ".png", dpi=300); fig.savefig(p + ".pdf"); plt.close(fig)
+    print(f"[fig] wrote {p}.png/.pdf", flush=True)
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--seed", type=int, default=1, help="seed for the Figure-A trajectory + maps")
+    args = ap.parse_args()
+    sys.path.insert(0, os.path.join(ROOT, "scripts"))
+    import yaml
+    cfg = yaml.safe_load(open(os.path.join(ROOT, "config", "topic4_mz_m_eigenmode_tracking.yaml")))
+    figure_a(args.seed, cfg)
+    figure_b(cfg)
+
+
+if __name__ == "__main__":
+    main()

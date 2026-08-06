@@ -1,0 +1,111 @@
+# Topic 4 — MZ full-SNN direct spatial mode dynamics.
+# Design contract (BINDING): docs/superpowers/specs/2026-07-19-topic4-mz-direct-spatial-modes-design.md
+#
+# Tier = model-side mechanism analysis. NOT seizure validation. Every phenotype is a detection label.
+# All parameters LOCKED before the target runs; nothing is tuned on a spatial-response result.
+# Onset anchors are READ from the onset-dynamics config, never re-estimated.
+
+schema_version: mz-direct-spatial-modes-1.0
+subject: epilepsiae_1146
+montage: narrow
+dt_ms: 0.1
+
+# --- candidates (cfg verbatim from mz_slowvars multiseed; onset anchors READ, never re-estimated) ---
+candidates:
+  primary:
+    label: zA_q75_tz5000
+    cfg: {use_z: true, use_m: false, I_th_EI: 95.19851312666987, tau_z: 5000.0}
+    onset_ms: {1: 9293.6, 3: 9499.3, 4: 9757.9}     # locked operational-runoff onset per seed
+  sensitivity:
+    label: zA_q50_tz10000
+    cfg: {use_z: true, use_m: false, I_th_EI: 1.6652801609959704, tau_z: 10000.0}
+    onset_ms: {1: 4937.0, 3: 4706.8, 4: 4861.5}
+
+seeds: [1, 3, 4]
+
+# --- primary temporal states (spec §1). Main figure compares baseline vs pre_onset only. ---
+baseline_ms: 1000.0
+mid_fraction: 0.50            # midpoint = 0.50 * locked runoff
+pre_onset_100_ms: 100.0      # pre_onset = locked runoff - 100 ms
+primary_states: [baseline, midpoint, pre_onset]
+main_compare: [baseline, pre_onset]
+
+# --- perturbation (spec §2.2/§2.3) ---
+I_EE_scale: 272.75518960107513          # from mz_slowvars calibration.json (amplitude reference)
+amplitude_ladder: [0.001, 0.0025, 0.005, 0.01]   # x I_EE_scale ; one eps selected for ALL cells
+current_dur_ms: 1.0                     # per-E additive-current pulse duration
+window_ms: 50.0                         # fork analysis window (fast-subsystem, z/m frozen)
+freeze_zm: true                         # PRIMARY: freeze z/m over the window (native-dynamic = secondary)
+linearity_tol: 0.15                     # eps qualifies if ||K(eps)-K(eps/2)||/||K(eps/2)|| <= tol
+linearity_audit_n_patterns: 16          # low-k subset used for the eps ladder audit (per state)
+
+# --- coarse grid readout (spec §2.5; reuse upstream operator geometry, NOT its rate-field operator) ---
+grid_n: 12
+grid_n_audit: 8
+L_phys: 20.0
+L_norm: 5.0
+center_phys: [10.0, 10.0]
+core_radius_norm: 0.375
+corridor_halfwidth_norm: 0.5
+
+# --- operator output windows + fixed-kick local-map windows ---
+T_windows_ms: [10.0, 30.0, 50.0]
+local_map_centers_ms: [5.0, 15.0, 30.0, 50.0]
+local_map_width_ms: 5.0
+
+# --- fixed localized kick (spec §3.1): source-core Gaussian POSITIVE current, fixed across states ---
+fixed_kick:
+  center: source
+  sigma_norm: 0.6
+  frac: 0.01                 # RMS = frac * I_EE_scale (pre-registered; sub-runaway verified at smoke)
+  kymograph_band_norm: 0.5
+  kymograph_n_pos: 12
+  arrival_thresh_fracs: [0.05, 0.10, 0.20]
+  arrival_min_peak_hz: 2.0     # response floor: below this kymo peak the front is quantization noise -> arrival ineligible
+
+# --- phase-paired Gabor probe scan (spec §3.3): derived from the empirical operator (M @ probe) ---
+gabor:
+  p_max: 4
+  sigma: 1.0
+  center: source
+  validate_forks: true       # spot-check: direct fork of the peak probe vs operator prediction
+
+# --- within-window saturation / right-censoring criterion ---
+# The fork analysis window is only window_ms (50 ms), so the onset-dynamics operational-runaway
+# criterion (120 Hz sustained >= 100 ms) CANNOT fire inside a fork (review 2026-07-20). Fork
+# saturation/right-censoring uses a WITHIN-WINDOW criterion (120 Hz sustained >= saturation_dur_ms)
+# that CAN fire; it is a within-window saturation flag, NOT the 100 ms operational-runaway.
+runaway_hz: 120.0
+saturation_dur_ms: 20.0
+runaway_dur_ms: 100.0        # reference only (onset-dynamics operational criterion; not used for forks)
+
+# --- z+m plateau + D-matched z-only controls (spec §1, P1) ---
+controls:
+  zm_plateau:
+    cfg: {use_z: true, use_m: true, I_th_EI: 95.19851312666987, tau_z: 5000.0}
+    A_target: 0.001
+    tau_adp_ms: 2000.0
+    peak_m_tau2000: 36.6036014019694        # eta_m = A_target * I_EE_scale / peak_m
+    plateau_window_ms: 500.0                 # choose the plateau checkpoint in the last 500 ms
+    settle_ms: 6000.0                        # start of the stable segment to search for the checkpoint
+
+# --- corrected identifiability audit (review 2026-07-20): the original single-trajectory / thin-input
+#     audit ran only on seed1 and could not separate quantization noise from true nonlinearity. This
+#     re-audit per (seed,state): balanced symmetric low-k modes, per-grid RMS matched to the fixed kick,
+#     ensemble-averaged over independent continuation-noise realizations. Only if it identifies a stable
+#     operator do we compute/plot V1/U1/sigma1. ---
+corrected_audit:
+  k_max: 1                    # balanced low-k: 1-D freqs {0,1} in BOTH axes -> 9 symmetric 2-D modes
+  n_realizations: 16          # -> N=4/8/16 convergence + two independent 8-realization repeats (review round-2)
+  strength_frac: 0.02         # per-cell RMS current = strength_frac * I_EE_scale (matched to the fixed-kick RMS scale)
+  realization_base_seed: 90001
+  # identifiable REQUIRES: full-N linearity discrepancy <= tol AND both independent 8-halves <= tol AND
+  # no fork saturated (within-window saturation gate). Per-realization K saved for post-hoc reproducibility.
+
+# --- parallelism ---
+workers: 12                   # COW-shared connectivity fork workers (each shares 13GB read-only + ~150MB/fork)
+
+# --- upstream artifacts (hashes recorded at run time into provenance) ---
+upstream:
+  onset_gap_summary: results/topic4_sef_hfo/mz_onset_dynamics/gap_dynamics_summary.json
+  calibration: results/topic4_sef_hfo/mz_slowvars/calibration.json

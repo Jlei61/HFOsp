@@ -1,0 +1,103 @@
+# Topic 4 — MZ full-SNN state-aligned finite-time spatial mode tracking.
+# Design contract (BINDING): docs/superpowers/specs/2026-07-21-topic4-mz-m-eigenmode-tracking-design.md
+#
+# Tier = model-side mechanism analysis. NOT seizure validation. Every phenotype is a detection label.
+# All parameters are the pre-registration lock (spec §9), FROZEN before any spatial-response result.
+# Work point + operator/kick geometry are READ from the accepted z+m plateau; nothing is tuned on a result.
+
+schema_version: mz-m-eigenmode-tracking-1.0
+subject: epilepsiae_1146
+montage: narrow
+dt_ms: 0.1
+seeds: [1, 3, 4]
+
+# --- z+m plateau work point (primary). eta_m computed via eta_m_from_frac at load time, never hardcoded. ---
+work_point:
+  label: zA_q75_tz5000_zm_plateau
+  use_z: true
+  use_m: true
+  I_th_EI: 95.19851312666987
+  tau_z: 5000.0
+  tau_adp_ms: 2000.0
+  A_target: 0.001
+  peak_m_tau2000: 36.6036014019694          # eta_m = A_target * I_EE_scale / peak_m (from calibration.json)
+
+# --- perturbation numerics (reused by DSM operator/kick/audit — key names MUST match the baseline cfg) ---
+I_EE_scale: 272.75518960107513              # from mz_slowvars calibration.json (amplitude reference)
+amplitude_ladder: [0.001, 0.0025, 0.005, 0.01]   # kept for the optional full-144 eps audit (NOT used in P2)
+current_dur_ms: 1.0                         # per-E additive-current pulse duration
+window_ms: 50.0                             # fork analysis window (fast-subsystem, z/m frozen)
+freeze_zm: true                             # PRIMARY: freeze z/m over the window
+linearity_tol: 0.15                         # strict identifiability tolerance
+linearity_audit_n_patterns: 16              # (only for the optional full-144 eps audit)
+
+# --- coarse grid readout geometry (reuse upstream operator geometry, NOT its rate-field operator) ---
+grid_n: 12
+grid_n_audit: 8
+L_phys: 20.0
+L_norm: 5.0
+center_phys: [10.0, 10.0]
+core_radius_norm: 0.375
+corridor_halfwidth_norm: 0.5
+
+# --- operator output + fixed-kick local-map windows ---
+T_windows_ms: [10.0, 30.0, 50.0]
+local_map_centers_ms: [5.0, 15.0, 30.0, 50.0]
+local_map_width_ms: 5.0
+
+# --- fixed localized kick (spec §4 P1): source-core Gaussian POSITIVE current, fixed across states ---
+fixed_kick:
+  center: source
+  sigma_norm: 0.6
+  frac: 0.01                                # RMS = frac * I_EE_scale
+  kymograph_band_norm: 0.5
+  kymograph_n_pos: 12
+  arrival_thresh_fracs: [0.05, 0.10, 0.20]
+  arrival_min_peak_hz: 2.0
+  arrival_r2_min: 0.5
+
+# --- within-window saturation / right-censoring criterion ---
+runaway_hz: 120.0
+saturation_dur_ms: 20.0
+runaway_dur_ms: 100.0                        # reference only (onset-dynamics criterion; not used for forks)
+
+# --- low-k strict identifiability audit (spec §4 P2; reused by DSM.corrected_operator_audit) ---
+corrected_audit:
+  k_max: 1                                   # balanced low-k -> 9 symmetric 2-D modes
+  n_realizations: 16                         # smoke uses 4; final uses 16 (two independent 8-halves)
+  strength_frac: 0.02                        # per-cell RMS current = strength_frac * I_EE_scale (matched to kick)
+  realization_base_seed: 91021               # distinct from the z-only baseline (90001)
+degeneracy_ratio: 1.05                       # sigma_hat_1/sigma_hat_2 below this -> track leading subspace (P3)
+
+# --- state registration (spec §3, frozen §9). Registration uses D/a/rate + time ONLY. ---
+state_registration:
+  replay_ms: 20000.0                         # 200000 steps; matches upstream traj NPZ for parity
+  downsample_ms: 5.0                         # parity-comparison bins (matches NPZ 4000 bins)
+  parity_rel_tol: 0.02                       # accept gate on relative deviation vs NPZ (raw abs-diff also logged)
+  baseline_ms: 1000.0
+  baseline_search_halfwidth_ms: 250.0
+  approach_fracs: [0.25, 0.50, 0.75]
+  approach_search_ms: 300.0                  # forward window from the first D-crossing; pick min-rate resting step
+  settle_tail_ms: 1000.0                     # settled_plateau tail window (end of the replay)
+  settled_D_ptp_max: 0.015
+  settled_a_ptp_max: 8.0e-5
+  settled_min_resting_frac: 0.30
+  D_onset_ref: 0.0873                        # elevated-band reference (D_plateau must exceed 0.5*this)
+  resting_win_ms: 20.0                       # DSM._resting_mask smoothing window
+  resting_k: 0.3                             # DSM._resting_mask floor fraction
+
+# --- minimal m-mechanism controls (spec §4 P4) ---
+m_controls:
+  states: [baseline, approach_75, settled_plateau]
+  conditions: [native_zm, m_reset, m_uniform, m_shuffle]
+  shuffle_seed: 20260721
+
+# --- parallelism ---
+workers: 8                                   # COW-shared connectivity fork workers (each shares ~13GB read-only)
+
+# --- upstream artifacts consumed (hashes recorded at run time into provenance) ---
+upstream:
+  onset_gap_summary: results/topic4_sef_hfo/mz_onset_dynamics/gap_dynamics_summary.json
+  onset_traj_dir: results/topic4_sef_hfo/mz_onset_dynamics/per_seed
+  onset_traj_template: traj_zA_q75_tz5000_A0.001_seed{seed}.npz
+  calibration: results/topic4_sef_hfo/mz_slowvars/calibration.json
