@@ -46,6 +46,28 @@ def load(subject: str):
     return grid, H, events
 
 
+def densify(rows: np.ndarray) -> np.ndarray:
+    """Close the gaps withholding a contact leaves in the rank sequence.
+
+    Removing a contact that joined at rank 3 leaves ranks 0,1,2,4,5 -- and the
+    tensor builder then creates a step where nobody is observed and nobody is
+    predicted. That step is an artefact of the holdout, not of the event, and it
+    teaches both arms that recruitment sometimes pauses. Remapping the surviving
+    ranks to be contiguous makes each row a valid event over the contacts that
+    remain, which is what the question actually asks about.
+    """
+    out = np.full_like(rows, -1)
+    for e, row in enumerate(rows):
+        present = np.unique(row[row >= 0])
+        if not len(present):
+            continue
+        remap = {int(v): i for i, v in enumerate(present)}
+        for contact, value in enumerate(row):
+            if value >= 0:
+                out[e, contact] = remap[int(value)]
+    return out
+
+
 def partition(events, holdout: np.ndarray | None):
     ranks, split = events["group_ids"], events["split"]
     out = {}
@@ -54,6 +76,7 @@ def partition(events, holdout: np.ndarray | None):
         if holdout is not None and len(holdout):
             rows = rows.copy()
             rows[:, holdout] = -1
+            rows = densify(rows)
         out[name] = build_event_tensors(rows)
     return out
 
