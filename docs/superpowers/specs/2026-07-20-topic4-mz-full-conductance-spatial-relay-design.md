@@ -2,9 +2,18 @@
 
 日期：2026-07-20
 
-状态：**DESIGN LOCK CANDIDATE — 先审阅，不启动 40k SNN**
+状态：**SUPERSEDED FOR NEXT EXECUTION（历史设计与实现审计保留）**
 
 分支：`codex/topic4-mz-conductance`
+
+> **2026-07-26 supersession**：本设计的 conductance 拆分、recurrent-only smooth saturation、
+> persistence sensor 与 X 因果合同已经完成实验检验；但 HEO1–H3.1b 最终只得到
+> **bounded coherent common-mode oscillatory branch**，LC1 的 X 可终止高活动却不能提供 Z 恢复与
+> postictal memory。本文的 “X-first lifecycle / phi-after-high-branch” 下游执行顺序不再是当前计划。
+> 线级验收见
+> `docs/archive/topic4/sef_hfo/mz_fcxr_heo_line_acceptance_2026-07-26.md`；
+> 下一阶段唯一设计入口改为
+> `docs/superpowers/specs/2026-07-26-topic4-mz-fcxr-pump-lifecycle-design.md`。
 
 ## 0. 一句话设计
 

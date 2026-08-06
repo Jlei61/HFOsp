@@ -42,6 +42,47 @@ from dataclasses import dataclass
 import numpy as np
 
 
+def cooperative_u_tilde(u, A_c, u_c, K_c, n):
+    """FCXR-HEO1 cooperative recurrent-conductance gate (design lock 2026-07-24 §mechanism).
+
+    Applied to the RAW recurrent conductance u = gErec_raw BEFORE the g_sat*tanh saturation.
+    OFF when A_c<=0 -> returns u unchanged (byte parity). For u<=u_c the excess is 0 -> H=0 ->
+    u_tilde = u*(1+0) = u exactly. Monotone non-decreasing, non-negative and finite in u>=0;
+    the boost is bounded by (1+A_c) since H<1. n is the Hill exponent (fixed n=4 this sprint).
+
+        H = relu(u-u_c)^n / (K_c^n + relu(u-u_c)^n) ;  u_tilde = u * (1 + A_c * H)
+    """
+    if A_c <= 0.0:
+        return u
+    excess = np.maximum(u - u_c, 0.0)
+    exc_n = excess ** n
+    H = exc_n / (K_c ** n + exc_n)
+    return u * (1.0 + A_c * H)
+
+
+def gerec_baseline_quantiles(counts, edges, qs):
+    """Quantiles of gErec_raw from the slow-off cumulative fixed-edge histogram (FCXR-HEO1 calibration).
+
+    Linear interpolation within the crossing bin. A quantile that falls in a trailing overflow bin
+    (edges[-1]=inf) returns +inf, so the runner widens the edge grid + re-runs F0 rather than locking
+    a bogus u_c. counts/edges come straight off MZSlowVars.gerec_hist_* + cfg.gerec_hist_edges."""
+    counts = np.asarray(counts, float)
+    edges = np.asarray(edges, float)
+    total = counts.sum()
+    if total <= 0:
+        raise ValueError("empty gErec histogram (no baseline samples)")
+    cum = np.cumsum(counts) / total
+    out = {}
+    for q in qs:
+        k = min(int(np.searchsorted(cum, q, side="left")), len(counts) - 1)
+        lo, hi = edges[k], edges[k + 1]
+        c_lo = cum[k - 1] if k > 0 else 0.0
+        c_hi = cum[k]
+        frac = 0.0 if c_hi <= c_lo else (q - c_lo) / (c_hi - c_lo)
+        out[float(q)] = float(lo + frac * (hi - lo))
+    return out
+
+
 @dataclass
 class MZSlowVarsConfig:
     use_z: bool = False            # OFF by default -> byte parity with slow=None
@@ -50,6 +91,12 @@ class MZSlowVarsConfig:
     I_th_EI: float = 0.0           # E-cell GABA current depletion threshold (CALIBRATION)
     tau_adp: float = 2000.0        # ms   adaptation decay time constant (CALIBRATION)
     eta_m: float = 0.0             # adaptation current per unit m (CALIBRATION)
+    m_enable_ms: "float | None" = None  # FCXR-HEO2: delayed adaptation onset — m stays 0 until step*dt>=this (None = from step 0)
+    m_frozen_E: "np.ndarray | None" = None  # FCXR-HEO2: static-K control — hold m frozen at this per-E field (requires use_m=False, full_conductance)
+    m_frozen_enable_ms: "float | None" = None  # FCXR-HEO2.1: delayed static-K — inject m_frozen_E only at step*dt>=this (None = t=0; requires m_frozen_E)
+    tau_adp_E: "np.ndarray | None" = None  # FCXR-HEO3: per-E-cell adaptation RECOVERY time (patchy field; None = scalar tau_adp)
+    eta_m_E: "np.ndarray | None" = None    # FCXR-HEO3: per-E-cell adaptation strength (None = scalar eta_m); pair with tau_adp_E as eta_i=eta0*tau0/tau_i to hold each cell's steady-state K load fixed
+    m_mean_field: bool = False             # FCXR-HEO3 control: replace per-cell m by the POPULATION MEAN each step (pure temporal modulation, no inter-cell differences)
     use_phi: bool = False          # optional Abbott-style spike-triggered threshold adaptation
     tau_phi: float = 100.0         # ms
     delta_phi: float = 0.0         # mV threshold increment per E spike
@@ -62,9 +109,18 @@ class MZSlowVarsConfig:
     ff_conductance: bool = True    # full_conductance: feedforward(external) AMPA as conductance, else additive c_E*I
     rec_conductance: bool = True   # full_conductance: recurrent E->E AMPA as conductance, else additive c_E*I
     rec_sat_g: float = 0.0         # FCXR-RC1 Stage C: >0 -> recurrent conductance smooth-saturates g_sat*tanh(g_raw/g_sat)
+    # ---- FCXR-HEO1: cooperative recurrent-conductance gate (all OFF by default -> RC1 byte parity) ----
+    coop_A: float = 0.0            # A_c: cooperative gain amplitude (0 -> gate off); acts on gErec_raw only
+    coop_uc: float = 0.0           # u_c: gErec_raw activation threshold (locked from slow-off baseline quantile)
+    coop_Kc: float = 0.0           # K_c: Hill half-activation above u_c (0.25*u_c)
+    coop_n: int = 4                # Hill exponent (fixed n=4)
+    record_gerec_hist: bool = False  # slow-off OBSERVER: cumulative fixed-edge gErec_raw histogram (overall/core/surround)
+    gerec_hist_edges: "np.ndarray | None" = None
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
     tau_y: float = 120.0           # ms  persistence sensor time constant
-    tau_x: float = 1000.0          # ms  relay availability time constant
+    tau_x: float = 1000.0          # ms  relay availability time constant (symmetric; used when tau_x_down/up are None)
+    tau_x_down: "float | None" = None  # FCXR-LC1: asymmetric relay depletion tau (x_inf<x); None+None -> symmetric tau_x
+    tau_x_up: "float | None" = None    # FCXR-LC1: asymmetric relay recovery tau (x_inf>=x)
     x_min: float = 0.0             # relay availability floor
     y_gate: float = 0.0            # Hz  sensor gate (locked from slow-off Q99.9)
     K_y: float = 5.0               # Hz  Hill half-activation above the gate
@@ -81,6 +137,18 @@ class MZSlowVarsConfig:
     calib_hist_edges: "np.ndarray | None" = None
     record_clip_identity: bool = False  # FCXR-RC1 clip audit: per-cell clip_count + max raw gErec/total (pure side-effect)
     z_frozen_E: "np.ndarray | None" = None  # FCXR Stage D: hold z_i frozen at this per-E field (requires use_z=False)
+    # ---- FCXR pump lifecycle: per-E activity-dependent load u_i + electrogenic pump (all OFF by default) ----
+    # u_i is an ACTIVITY-DEPENDENT INTRACELLULAR LOAD (Na/pump-inspired) -- never a Na concentration.
+    use_pump: bool = False         # master switch; False -> no state allocated, no float touched (byte parity)
+    pump_sensor_only: bool = False # u evolves but the membrane is byte-identical to pump-off (Imax must be 0)
+    pump_a_load: float = 0.0       # per-E-spike load jump (NOT scaled by dt)
+    pump_tau_ms: float = 0.0       # ms  pump-mediated load release time (clearance scaled by dt/tau_N)
+    pump_Imax: float = 0.0         # max electrogenic membrane effect; >0 requires pump_p0_E
+    pump_h: int = 3                # Hill exponent of phi(u)=u^h/(1+u^h); primary tier fixes 3
+    pump_p0_E: "np.ndarray | None" = None    # per-E baseline pump activation E_baseline[phi(u_i)] (shrunken)
+    pump_u_init_E: "np.ndarray | None" = None  # start the load at an equilibrated field (None -> zeros)
+    pump_record_calibration: bool = False    # OBSERVER: cumulative per-cell sum phi(u) + spike counts
+    pump_interventions: "list | None" = None  # scheduled INTEGER-step interventions (see _normalize_pump_interventions)
 
 
 class MZSlowVars:
@@ -113,7 +181,58 @@ class MZSlowVars:
                 raise ValueError(f"z_frozen_E must have length NE={self.NE}, got {zf.shape}")
             self.z[:self.NE] = zf                                 # I-cell z stays 1 (E-only clause)
         self.m = np.zeros(self.N)
+        self._m_frozen_cached = None
+        if self.cfg.m_frozen_E is not None:                       # FCXR-HEO2: hold E-cell m frozen (static-K)
+            mf = np.asarray(self.cfg.m_frozen_E, float)
+            if mf.shape != (self.NE,):
+                raise ValueError(f"m_frozen_E must have length NE={self.NE}, got {mf.shape}")
+            self._m_frozen_cached = mf                            # FCXR-HEO2.1: cache for (possibly delayed) inject
+            if self.cfg.m_frozen_enable_ms is None:
+                self.m[:self.NE] = mf                             # immediate static-K (I-cell m stays 0)
+            # else: leave m=0 until m_frozen_enable_ms, inject in step()
+        # FCXR-HEO3: per-E-cell adaptation fields (default = the scalars -> byte-parity)
+        self._eta_E = (np.full(self.NE, float(self.cfg.eta_m)) if self.cfg.eta_m_E is None
+                       else np.asarray(self.cfg.eta_m_E, float).copy())
+        self._tau_E = (np.full(self.NE, float(self.cfg.tau_adp)) if self.cfg.tau_adp_E is None
+                       else np.asarray(self.cfg.tau_adp_E, float).copy())
+        self._eta_full = np.full(self.N, float(self.cfg.eta_m))
+        self._eta_full[:self.NE] = self._eta_E
         self.phi = np.zeros(self.N)
+        # ---- FCXR pump lifecycle state (allocated ONLY when use_pump; off -> None -> byte parity) ----
+        self.u_pump_E = np.zeros(self.NE) if self.cfg.use_pump else None
+        self.pump_phi_sum_E = None
+        self.pump_spike_count_E = None
+        self.pump_phi_count = 0
+        self._pump_knockout_step = None                         # set by a scheduled current knockout
+        self._pump_set_load = {}                                # step -> field (one-shot load reset/injection)
+        self._pump_p0_E = None
+        self._pump_phi_last = None
+        self._pump_excess_last = None
+        # Non-blessed virtual-SEEG component observer (src/topic4_mz_fcxr_pump.py). Assigned by the
+        # runner AFTER construction; None -> never called -> byte parity. Pure side-effect: it only
+        # reduces the already-computed E-cell components onto the electrode weights.
+        self.seeg_observer = None
+        if self.cfg.use_pump:
+            if self.cfg.pump_u_init_E is not None:              # start equilibrated (no startup transient)
+                u0 = np.asarray(self.cfg.pump_u_init_E, float)
+                if u0.shape != (self.NE,) or not np.all(np.isfinite(u0)) or u0.min() < 0.0:
+                    raise ValueError(f"pump_u_init_E must be a finite field of shape ({self.NE},) with values >= 0")
+                self.u_pump_E[:] = u0
+            if self.cfg.pump_Imax > 0.0:                        # a live membrane effect NEEDS its baseline
+                if self.cfg.pump_p0_E is None:
+                    raise ValueError("pump_Imax>0 requires pump_p0_E (per-E baseline pump activation)")
+                p0 = np.asarray(self.cfg.pump_p0_E, float)
+                if p0.shape != (self.NE,) or not np.all(np.isfinite(p0)):
+                    raise ValueError(f"pump_p0_E must be a finite field of shape ({self.NE},), got {p0.shape}")
+                self._pump_p0_E = p0
+            if self.cfg.pump_record_calibration:
+                self.pump_phi_sum_E = np.zeros(self.NE)
+                self.pump_spike_count_E = np.zeros(self.NE, dtype=np.int64)
+            self._pump_knockout_step, self._pump_set_load = \
+                self._normalize_pump_interventions(self.cfg.pump_interventions)
+            for fld in self._pump_set_load.values():
+                if fld.shape != (self.NE,):
+                    raise ValueError(f"set_load field must have shape ({self.NE},), got {fld.shape}")
         # FCXR persistence sensor y_j (Hz) + presynaptic E->E relay availability x_j in [0,1] (E cells only).
         # ee_relay_send is the x_j(t-) snapshot the engine scatter reads BEFORE step() updates y/x this frame
         # (causal send scale). All three stay untouched unless cfg.use_x -> no effect on non-relay runs.
@@ -131,6 +250,8 @@ class MZSlowVars:
         self._gEff_mean_last = self._gErec_mean_last = 0.0   # FCXR AMPA conductance split (full_conductance)
         self._tau_ratio_mean_last = self._tau_ratio_min_last = 1.0
         self._clip_frac_last = 0.0
+        self._coop_engaged_frac_last = 0.0        # FCXR-HEO1: fraction of E cells with gErec_raw > u_c
+        self._coop_H_mean_last = 0.0              # FCXR-HEO1: mean cooperative Hill activation
         # off-by-default slow-state snapshot observer (design §4.3): copy z_E/m_E at registered
         # INTEGER steps only, AFTER the slow update; None -> no capture, exact simulation parity.
         self._snap_steps = self._normalize_snapshot_steps(snapshot_steps)
@@ -155,6 +276,11 @@ class MZSlowVars:
         self.trace_gEff_mean = []; self.trace_gErec_mean = []
         self.trace_y_mean = []; self.trace_y_max = []
         self.trace_x_relay_mean = []; self.trace_x_relay_min = []
+        self.trace_coop_engaged_frac = []; self.trace_coop_H_mean = []   # FCXR-HEO1 (appended when coop_A>0)
+        # FCXR pump traces (appended only when cfg.use_pump); excess traces only when it reaches the membrane
+        self.trace_u_mean = []; self.trace_u_max = []
+        self.trace_phi_pump_mean = []; self.trace_phi_pump_max = []
+        self.trace_pump_excess_mean = []; self.trace_pump_excess_max = []; self.trace_pump_excess_min = []
         # calibration observer (slow-off only): per-step histograms of E-cell I_I / I_E
         self.calib_hist_I_EI = []; self.calib_hist_I_EE = []
         # FCXR-RC1 clip-identity observer (pure side-effect; only allocated when record_clip_identity).
@@ -165,6 +291,13 @@ class MZSlowVars:
             self.max_raw_total = np.zeros(self.NE, dtype=float)   # peak pre-clip total conductance
             self.first_clip_step = np.full(self.NE, -1, dtype=np.int64)
             self.last_clip_step = np.full(self.NE, -1, dtype=np.int64)
+        if self.cfg.record_gerec_hist:                             # FCXR-HEO1 baseline calibration observer
+            if self.cfg.gerec_hist_edges is None:
+                raise ValueError("record_gerec_hist requires gerec_hist_edges")
+            nb = len(np.asarray(self.cfg.gerec_hist_edges)) - 1    # cumulative fixed-edge gErec_raw histograms
+            self.gerec_hist_overall = np.zeros(nb, dtype=np.int64)
+            self.gerec_hist_core = np.zeros(nb, dtype=np.int64)
+            self.gerec_hist_surround = np.zeros(nb, dtype=np.int64)
 
     # ------------------------------------------------------------------ hooks
     def apply_currents(self, I_E, I_I, labels=None, I_E_rec=None):
@@ -174,12 +307,16 @@ class MZSlowVars:
         self._z_sensor_last_E = np.asarray(I_I[:self.NE], float)
         if self.cfg.record_calib:
             self._record_calib(I_E, I_I)                        # pure side-effect (does not alter return)
-        if not self.cfg.use_z and not self.cfg.use_m and self.cfg.z_frozen_E is None:
+        ex = self._pump_excess_E()                              # None unless the pump reaches the membrane
+        if ex is None and not self.cfg.use_z and not self.cfg.use_m and self.cfg.z_frozen_E is None:
             return I_E - I_I                                    # EXACT byte-parity path (== membrane_step)
         inh = self.z * I_I if (self.cfg.use_z or self.cfg.z_frozen_E is not None) else I_I  # frozen z is applied
         I_net = I_E - inh
         if self.cfg.use_m:
-            I_net = I_net - self.cfg.eta_m * self.m            # m==0 on I cells -> E-only adaptation current
+            I_net = I_net - self._eta_full * self.m            # m==0 on I cells -> E-only adaptation current
+        if ex is not None:
+            I_net = I_net.copy()
+            I_net[:self.NE] -= ex                              # E-only electrogenic pump (I cells untouched)
         return I_net
 
     def uses_conductance_membrane(self):
@@ -255,8 +392,8 @@ class MZSlowVars:
             I_inh_eff = local + global_part
 
         gI = c.gaba_gain * I_inh_eff / (c.v_match - c.e_gaba)
-        if c.use_m:
-            I_adap = c.eta_m * self.m[:self.NE]
+        if c.use_m or c.m_frozen_E is not None:                   # FCXR-HEO2: frozen m also drives a static gM
+            I_adap = self._eta_E * self.m[:self.NE]
             gM = c.m_conductance_gain * I_adap / (c.v_match - c.e_k)
         else:
             gM = np.zeros(self.NE, dtype=float)
@@ -280,9 +417,13 @@ class MZSlowVars:
                 gEff = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_ffE
             if c.rec_conductance:
                 gErec_raw = c.c_E * I_recE / denomE
+                # FCXR-HEO1: cooperative gate boosts the RAW recurrent conductance in a mid-activity band
+                # BEFORE saturation. gErec_raw is kept raw (clip/histogram audit reads it below); coop_A=0
+                # -> u_tilde IS gErec_raw -> the saturation line stays byte-identical to FCXR-RC1.
+                u_tilde = cooperative_u_tilde(gErec_raw, c.coop_A, c.coop_uc, c.coop_Kc, c.coop_n)
                 # FCXR-RC1 Stage C: smooth-saturate the recurrent conductance (slope 1 at small input ->
                 # interictal workpoint preserved; saturates toward g_sat at high input -> no hard clip).
-                gErec = (c.rec_sat_g * np.tanh(gErec_raw / c.rec_sat_g)) if c.rec_sat_g > 0.0 else gErec_raw
+                gErec = (c.rec_sat_g * np.tanh(u_tilde / c.rec_sat_g)) if c.rec_sat_g > 0.0 else u_tilde
             else:
                 gErec_raw = np.zeros(self.NE, dtype=float)
                 gErec = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_recE
@@ -304,6 +445,13 @@ class MZSlowVars:
                 new = clip & (self.first_clip_step < 0)
                 self.first_clip_step[new] = t
                 self.last_clip_step[clip] = t
+        if c.record_gerec_hist:                   # FCXR-HEO1: pool slow-off gErec_raw distribution for u_c
+            self._record_gerec_hist(gErec_raw)
+        if c.coop_A > 0.0:                         # FCXR-HEO1 cooperative engagement diagnostics (pure side-effect)
+            _excess = np.maximum(gErec_raw - c.coop_uc, 0.0)
+            self._coop_engaged_frac_last = float(np.mean(_excess > 0.0)) if _excess.size else 0.0
+            _en = _excess ** c.coop_n
+            self._coop_H_mean_last = float(np.mean(_en / (c.coop_Kc ** c.coop_n + _en))) if _en.size else 0.0
         if np.any(clip):
             if c.fail_on_clip:
                 raise FloatingPointError(
@@ -325,6 +473,14 @@ class MZSlowVars:
         else:
             drive[:self.NE] = I_E[:self.NE]                   # partial: AMPA stays additive (byte-identical)
             g_rev[:self.NE] = gI * c.e_gaba + gM * c.e_k
+        ex_pump = self._pump_excess_E()                       # None -> no float touched (pump-off parity)
+        if self.seeg_observer is not None:                    # pure read of the final (post-clip) components
+            self.seeg_observer.sample(I_E, I_I, gE, gI, gM, ex_pump)
+        if ex_pump is not None:
+            # Electrogenic pump: an E-only CURRENT in the numerator of V_inf=(drive+g_rev)/(1+g_rel),
+            # i.e. tau_m dV/dt = ... - Imax*phi(u) + Imax*p0.  It is NOT a conductance: g_rel/g_rev
+            # (and hence tau_eff) are untouched, so the pump cannot shunt the membrane.
+            drive[:self.NE] -= ex_pump
         g_rel[:self.NE] = total
         if not (np.all(np.isfinite(drive)) and np.all(np.isfinite(g_rev))):
             raise FloatingPointError("non-finite MZ membrane term")
@@ -368,28 +524,123 @@ class MZSlowVars:
             un = u ** c.hill_n
             hill = un / (c.K_y ** c.hill_n + un)
             x_inf = 1.0 - (1.0 - c.x_min) * hill
-            self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))
+            if c.tau_x_down is None and c.tau_x_up is None:
+                self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))   # symmetric (byte-parity)
+            else:
+                # FCXR-LC1 asymmetric: deplete (x_inf<x) on tau_x_down, recover (x_inf>=x) on tau_x_up.
+                # Equal taus reduce EXACTLY to the symmetric relaxation above (per-element factor identical).
+                tau_sel = np.where(x_inf < self.x_relay, c.tau_x_down, c.tau_x_up)
+                self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / tau_sel))
         if c.use_z:
             # z_inf = H(I_th_EI - I_I): 1 iff I_I < I_th_EI (strict); I_I >= I_th_EI -> 0 (deplete)
             z_inf_E = (self._z_sensor_last_E < c.I_th_EI).astype(float)
             zE = self.z[self.is_E]
             zE = zE + (dt / c.tau_z) * (z_inf_E - zE)
             self.z[self.is_E] = np.clip(zE, 0.0, 1.0)          # z in [0,1]
-        if c.use_m:
+        if c.use_m and (c.m_enable_ms is None or self._step_i * dt >= c.m_enable_ms):
+            # FCXR-HEO2: before m_enable_ms both decay AND accumulation are skipped -> m stays 0 (its init
+            # value), so apply_currents/membrane_terms see no adaptation in the pre-enable window.
             mE = self.m[self.is_E]
-            mE = mE - (mE / c.tau_adp) * dt                    # decay
+            mE = mE - (mE / self._tau_E) * dt                  # decay (per-cell recovery time)
             self.m[self.is_E] = np.maximum(mE, 0.0)            # m >= 0
             self.m[spk & self.is_E] += 1.0                     # E spike -> +1 ; I spikes ignored (E-only)
+            if c.m_mean_field:                                 # FCXR-HEO3 control: no inter-cell differences
+                self.m[self.is_E] = self.m[self.is_E].mean()
+        if c.m_frozen_E is not None and c.m_frozen_enable_ms is not None and self._step_i * dt >= c.m_frozen_enable_ms:
+            self.m[:self.NE] = self._m_frozen_cached          # FCXR-HEO2.1: delayed static-K inject (idempotent)
         if c.use_phi:
             phiE = self.phi[self.is_E]
             phiE = phiE - (phiE / c.tau_phi) * dt
             self.phi[self.is_E] = np.maximum(phiE, 0.0)
             self.phi[spk & self.is_E] += c.delta_phi
+        if c.use_pump:
+            self._pump_step(spk, dt)
         self._record_traces(spk)
         # snapshot AFTER the slow update + trace record -> snapshots[label].z_E.mean() == trace_z_mean[step_i]
         if self._snap_steps is not None and self._step_i in self._snap_steps:
             self._capture(self._snap_steps[self._step_i])
         self._step_i += 1
+
+    # ------------------------------------------------------------------ pump plugin (off by default)
+    def _pump_excess_E(self):
+        """Baseline-centered electrogenic pump current on E cells at the CURRENT load u(t^-), or None
+        when the pump must not reach the membrane (off / sensor-only / after a scheduled knockout).
+
+        Formula pinned to src/topic4_mz_fcxr_pump.excess_pump_current by
+        tests/test_mz_slow_vars.py::test_membrane_uses_pre_step_load_and_step_applies_the_jump_after.
+        NO positive part: phi<p0 gives a negative excess (activation below the baseline reference).
+        """
+        c = self.cfg
+        if not c.use_pump or c.pump_sensor_only or c.pump_Imax <= 0.0:
+            self._pump_excess_last = None
+            return None
+        if self._pump_knockout_step is not None and self._step_i >= self._pump_knockout_step:
+            self._pump_excess_last = None                       # scheduled current knockout (u keeps evolving)
+            return None
+        uh = self.u_pump_E ** c.pump_h
+        ex = c.pump_Imax * (uh / (1.0 + uh) - self._pump_p0_E)
+        self._pump_excess_last = ex
+        return ex
+
+    def _pump_step(self, spk, dt):
+        """Load mass balance at the LOCKED causal order (spec §2.2): the membrane above already used
+        u(t^-); the clearance is evaluated at u(t^-) and the per-spike jump is added on top, so a
+        spike generated this step only reaches the pump current from the NEXT step.
+
+            u(t+dt) = max[0, u(t) + a_load*N_spike - (dt/tau_N)*phi(u(t))]
+
+        The jump carries no dt; the clearance carries dt/tau_N. A one-shot ``set_load`` intervention
+        registered for this step is applied LAST (first affected membrane call = step+1).
+        """
+        c = self.cfg
+        u = self.u_pump_E
+        if not np.all(np.isfinite(u)):                          # fail-fast: a blown-up candidate is failed
+            raise FloatingPointError("non-finite activity-dependent pump load u")
+        uh = u ** c.pump_h
+        phi = uh / (1.0 + uh)                                   # phi(u(t^-)) == what the membrane used
+        self._pump_phi_last = phi
+        spkE = spk[:self.NE]
+        if self.pump_phi_sum_E is not None:                     # calibration observer (pure side-effect)
+            self.pump_phi_sum_E += phi
+            self.pump_spike_count_E += spkE
+            self.pump_phi_count += 1
+        np.maximum(u + c.pump_a_load * spkE - (dt / c.pump_tau_ms) * phi, 0.0, out=u)
+        fld = self._pump_set_load.get(self._step_i)
+        if fld is not None:
+            np.copyto(u, fld)                                   # scheduled load reset / sufficiency injection
+
+    @staticmethod
+    def _normalize_pump_interventions(items):
+        """Validate scheduled interventions -> (knockout_step, {step: load_field}).
+
+        INTEGER steps only (no float-time equality). Two primitives, both prefix-preserving:
+          * ``pump_current_knockout``  membrane pump current = 0 from this step on; u keeps evolving.
+                                       First affected membrane call = this step.
+          * ``set_load``               one-shot u <- field at the END of this step (load reset,
+                                       sufficiency injection, uniform/shuffle matched controls).
+                                       First affected membrane call = this step + 1.
+        """
+        knockout, set_load = None, {}
+        for item in (items or []):
+            kind = item.get("kind")
+            step = item.get("step")
+            if not isinstance(step, (int, np.integer)) or bool(step != int(step)) or int(step) < 0:
+                raise ValueError(f"pump intervention step must be a non-negative integer, got {step!r}")
+            step = int(step)
+            if kind == "pump_current_knockout":
+                if knockout is not None:
+                    raise ValueError("at most one pump_current_knockout may be scheduled")
+                knockout = step
+            elif kind == "set_load":
+                fld = np.asarray(item["field"], float)
+                if fld.ndim != 1 or not np.all(np.isfinite(fld)) or fld.min() < 0.0:
+                    raise ValueError("set_load field must be a finite 1-D load field with values >= 0")
+                if step in set_load:
+                    raise ValueError(f"duplicate set_load intervention at step {step}")
+                set_load[step] = fld
+            else:
+                raise ValueError(f"unknown pump intervention kind {kind!r}")
+        return knockout, set_load
 
     # ------------------------------------------------------------------ traces
     def _record_traces(self, spk):
@@ -400,7 +651,7 @@ class MZSlowVars:
         self.trace_m_max.append(float(mE.max()))
         self.trace_phi_mean.append(float(self.phi[self.is_E].mean()))
         self.trace_phi_max.append(float(self.phi[self.is_E].max()))
-        self.trace_adap_current.append(float(self.cfg.eta_m * mE.mean()))
+        self.trace_adap_current.append(float((self._eta_E * mE).mean()))
         self.trace_I_EI_E_mean.append(float(self._I_I_last[self.is_E].mean()))
         ci, si = self.core_e_idx, self.surr_e_idx
         self.trace_z_core_mean.append(float(self.z[ci].mean()) if ci.size else float("nan"))
@@ -429,6 +680,21 @@ class MZSlowVars:
             self.trace_y_max.append(float(self.y.max()))
             self.trace_x_relay_mean.append(float(self.x_relay.mean()))
             self.trace_x_relay_min.append(float(self.x_relay.min()))
+        if self.cfg.coop_A > 0.0:                             # FCXR-HEO1 cooperative engagement (coop on only)
+            self.trace_coop_engaged_frac.append(float(self._coop_engaged_frac_last))
+            self.trace_coop_H_mean.append(float(self._coop_H_mean_last))
+        if self.cfg.use_pump:
+            # u is POST-update (same convention as z/m); phi/excess are the values the membrane
+            # actually USED at this step, i.e. evaluated at u(t^-) -- documented +-1 step offset.
+            self.trace_u_mean.append(float(self.u_pump_E.mean()))
+            self.trace_u_max.append(float(self.u_pump_E.max()))
+            self.trace_phi_pump_mean.append(float(self._pump_phi_last.mean()))
+            self.trace_phi_pump_max.append(float(self._pump_phi_last.max()))
+            ex = self._pump_excess_last
+            if ex is not None:                                # only when the pump reaches the membrane
+                self.trace_pump_excess_mean.append(float(ex.mean()))
+                self.trace_pump_excess_max.append(float(ex.max()))
+                self.trace_pump_excess_min.append(float(ex.min()))
 
     def _record_calib(self, I_E, I_I):
         edges = self.cfg.calib_hist_edges
@@ -438,6 +704,17 @@ class MZSlowVars:
         hE, _ = np.histogram(I_E[self.is_E], bins=edges)
         self.calib_hist_I_EI.append(hI.astype(np.int64))
         self.calib_hist_I_EE.append(hE.astype(np.int64))
+
+    def _record_gerec_hist(self, gErec_raw):
+        """FCXR-HEO1: accumulate the pooled (cell x step) gErec_raw distribution into fixed edges for
+        overall / core / surround E cells. Pure side-effect (never alters the trajectory)."""
+        edges = self.cfg.gerec_hist_edges
+        self.gerec_hist_overall += np.histogram(gErec_raw, bins=edges)[0].astype(np.int64)
+        ci, si = self.core_e_idx, self.surr_e_idx
+        if ci.size:
+            self.gerec_hist_core += np.histogram(gErec_raw[ci], bins=edges)[0].astype(np.int64)
+        if si.size:
+            self.gerec_hist_surround += np.histogram(gErec_raw[si], bins=edges)[0].astype(np.int64)
 
     # ------------------------------------------------------------------ snapshot observer (design §4.3)
     @staticmethod
@@ -457,11 +734,21 @@ class MZSlowVars:
         return norm
 
     def _capture(self, label):
-        """Copy ONLY z_E/m_E (E cells [:NE]) at the current step -> n_snapshots x NE (never n_steps x NE)."""
-        self.snapshots[label] = dict(
-            z_E=self.z[:self.NE].copy(), m_E=self.m[:self.NE].copy(),
-            step=int(self._step_i), captured_after_update=True,
-        )
+        """Copy ONLY z_E/m_E (E cells [:NE]) at the current step -> n_snapshots x NE (never n_steps x NE).
+        FCXR-LC1: also copy the E->E relay x_E and its persistence sensor y_E when the relay is active, so
+        D_X and regional (core/axis/off) x/y recruitment can be computed post-hoc from a few snapshots."""
+        snap = dict(z_E=self.z[:self.NE].copy(), m_E=self.m[:self.NE].copy(),
+                    step=int(self._step_i), captured_after_update=True)
+        if self.cfg.use_x:
+            snap["x_E"] = self.x_relay.copy()        # relay availability (length NE)
+            snap["y_E"] = self.y.copy()              # persistence sensor y_j (length NE)
+        if self.cfg.use_pump:
+            snap["u_E"] = self.u_pump_E.copy()       # activity-dependent load (length NE)
+            if self.pump_phi_sum_E is not None:      # CUMULATIVE sums -> per-block means by differencing
+                snap["pump_phi_sum_E"] = self.pump_phi_sum_E.copy()
+                snap["pump_spike_count_E"] = self.pump_spike_count_E.copy()
+                snap["pump_phi_count"] = int(self.pump_phi_count)
+        self.snapshots[label] = snap
 
     @property
     def n_steps_run(self):
@@ -499,6 +786,27 @@ class MZSlowVars:
                 raise ValueError("z_frozen_E (frozen field) requires use_z=False; a frozen field must not evolve")
         if c.use_m and c.tau_adp <= 0.0:
             raise ValueError("use_m requires tau_adp>0")
+        if c.m_enable_ms is not None and not c.use_m:
+            raise ValueError("m_enable_ms (delayed adaptation onset) requires use_m=True")
+        if c.m_frozen_E is not None:
+            if c.membrane_mode != "full_conductance":
+                raise ValueError("m_frozen_E (static-K control) requires membrane_mode='full_conductance'")
+            if c.use_m or c.m_enable_ms is not None:
+                raise ValueError("m_frozen_E requires use_m=False and m_enable_ms=None (a frozen field must not evolve)")
+            mf = np.asarray(c.m_frozen_E, float)
+            if mf.ndim != 1 or not np.all(np.isfinite(mf)) or mf.min() < 0.0:
+                raise ValueError("m_frozen_E must be a finite 1-D field with values >= 0")
+        if c.m_frozen_enable_ms is not None and c.m_frozen_E is None:
+            raise ValueError("m_frozen_enable_ms (delayed static-K) requires m_frozen_E")
+        for nm, fld, strict_pos in (("tau_adp_E", c.tau_adp_E, True), ("eta_m_E", c.eta_m_E, False)):
+            if fld is None:
+                continue
+            v = np.asarray(fld, float)
+            bad_sign = bool((v <= 0).any()) if strict_pos else bool((v < 0).any())
+            if v.ndim != 1 or not bool(np.all(np.isfinite(v))) or bad_sign:
+                raise ValueError(f"{nm} must be a finite 1-D field ({'>0' if strict_pos else '>=0'})")
+        if (c.tau_adp_E is not None or c.eta_m_E is not None or c.m_mean_field) and not c.use_m:
+            raise ValueError("tau_adp_E / eta_m_E / m_mean_field require use_m=True")
         if c.use_phi and (c.tau_phi <= 0.0 or c.delta_phi < 0.0):
             raise ValueError("use_phi requires tau_phi>0 and delta_phi>=0")
         if c.membrane_mode == "full_conductance":
@@ -512,6 +820,17 @@ class MZSlowVars:
             raise ValueError("rec_sat_g must be non-negative (0 = off)")
         if c.rec_sat_g > 0.0 and not (c.membrane_mode == "full_conductance" and c.rec_conductance):
             raise ValueError("rec_sat_g>0 (recurrent smooth saturation) requires full_conductance + rec_conductance")
+        if c.coop_A < 0.0:
+            raise ValueError("coop_A must be non-negative (0 = cooperative gate off)")
+        if c.coop_A > 0.0:
+            # cooperative gain with no saturation would be unbounded -> require the tanh anchor + recurrent path
+            if not (c.membrane_mode == "full_conductance" and c.rec_conductance and c.rec_sat_g > 0.0):
+                raise ValueError("coop_A>0 (cooperative recurrent gate) requires full_conductance + "
+                                 "rec_conductance + rec_sat_g>0 (bounded by saturation)")
+            if c.coop_uc <= 0.0 or c.coop_Kc <= 0.0:
+                raise ValueError("coop_A>0 requires coop_uc>0 and coop_Kc>0")
+            if int(c.coop_n) < 1:
+                raise ValueError("coop_A>0 requires coop_n>=1")
         if c.use_x:
             if c.membrane_mode != "full_conductance":
                 raise ValueError("use_x (E->E relay) requires membrane_mode='full_conductance'")
@@ -525,3 +844,26 @@ class MZSlowVars:
                 raise ValueError("use_x requires hill_n>=1")
             if not np.isfinite(c.y_gate):
                 raise ValueError("y_gate must be finite")
+            # FCXR-LC1 asymmetric relay kinetics: both-or-neither + positive (design invariant
+            # tau_x_down < tau_z <= tau_x_up is a RUN-parameter check enforced by the runner, not here).
+            if (c.tau_x_down is not None) or (c.tau_x_up is not None):
+                if c.tau_x_down is None or c.tau_x_up is None:
+                    raise ValueError("asymmetric relay kinetics require BOTH tau_x_down and tau_x_up (or neither)")
+                if c.tau_x_down <= 0.0 or c.tau_x_up <= 0.0:
+                    raise ValueError("tau_x_down and tau_x_up must be > 0 (asymmetric relay kinetics)")
+        # ---- FCXR pump lifecycle (per-E activity-dependent load u_i + electrogenic pump) ----
+        if not c.use_pump:
+            if (c.pump_sensor_only or c.pump_Imax > 0.0 or c.pump_record_calibration
+                    or c.pump_interventions or c.pump_u_init_E is not None):
+                raise ValueError("pump_* options require use_pump=True")
+        else:
+            if not (c.pump_tau_ms > 0.0 and np.isfinite(c.pump_tau_ms)):
+                raise ValueError("use_pump requires a finite pump_tau_ms>0 (load release time)")
+            if not (c.pump_a_load >= 0.0 and np.isfinite(c.pump_a_load)):
+                raise ValueError("pump_a_load must be finite and >= 0")
+            if not (c.pump_Imax >= 0.0 and np.isfinite(c.pump_Imax)):
+                raise ValueError("pump_Imax must be finite and >= 0")
+            if int(c.pump_h) < 1:
+                raise ValueError("pump_h must be >= 1 (primary tier fixes 3)")
+            if c.pump_sensor_only and c.pump_Imax > 0.0:
+                raise ValueError("pump_sensor_only requires pump_Imax=0 (the membrane must stay untouched)")
