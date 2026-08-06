@@ -27,6 +27,14 @@ def unit_dir(root: Path, subject: str, variant: str, seed: int) -> Path:
     return root / subject / variant / f"seed{seed}"
 
 
+def is_running(subject: str, variant: str, seed: int) -> bool:
+    """Is a trainer already working on this exact unit?"""
+    pattern = (f"train_topic5_spo_unit.py --subject {subject} "
+               f"--variant {variant} --seed {seed}")
+    return subprocess.run(["pgrep", "-f", pattern],
+                          capture_output=True).returncode == 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--variants", nargs="+", default=list(VARIANTS))
@@ -43,9 +51,17 @@ def main() -> int:
         (OUT / "INPUT_MANIFEST.json").read_text())["frozen_cohort"]["primary"]
 
     plan = [(s, v, seed) for s in subjects for v in args.variants for seed in args.seeds]
-    todo = [u for u in plan
-            if not (unit_dir(args.out_root, *u) / "DONE.json").exists()]
-    print(f"planned {len(plan)} units, {len(plan) - len(todo)} already done, "
+    pending = [u for u in plan
+               if not (unit_dir(args.out_root, *u) / "DONE.json").exists()]
+    # A unit with no DONE.json is not necessarily free -- a launcher from an
+    # earlier invocation may still have it in flight. Starting a second trainer
+    # on it wastes a core and lets two processes write the same DONE.json. This
+    # already happened once, and it surfaced as failure markers sitting beside
+    # completed units rather than as an error.
+    inflight = {u for u in pending if is_running(*u)}
+    todo = [u for u in pending if u not in inflight]
+    print(f"planned {len(plan)} units, {len(plan) - len(pending)} already done, "
+          f"{len(inflight)} already in flight elsewhere, "
           f"{len(todo)} to run, {args.workers} workers", flush=True)
 
     args.log.parent.mkdir(parents=True, exist_ok=True)

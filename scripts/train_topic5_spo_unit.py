@@ -179,6 +179,10 @@ def main() -> int:
 
     out_dir = args.out_root / args.subject / args.variant / f"seed{args.seed}"
     out_dir.mkdir(parents=True, exist_ok=True)
+    if (out_dir / "DONE.json").exists():
+        # Another launcher finished this unit while this one was queued.
+        print(f"{args.subject:24s} {args.variant:22s} seed{args.seed} already done")
+        return 0
     effective = dict(cfg, subject=args.subject, variant=args.variant, seed=args.seed,
                      holdout=None if holdout is None else holdout.tolist())
     (out_dir / "config.json").write_text(json.dumps(effective, indent=1))
@@ -258,7 +262,11 @@ def main() -> int:
             json.dumps(metrics["parameters"], indent=1))
         (out_dir / "training_log.json").write_text(json.dumps(history))
         (out_dir / "FAILED.json").unlink(missing_ok=True)
-        (out_dir / "DONE.json").write_text(json.dumps(metrics, indent=1))
+        # Atomic: two launchers can race on the same unit, and a half-written
+        # result file is far worse than a wasted core.
+        tmp = out_dir / "DONE.json.partial"
+        tmp.write_text(json.dumps(metrics, indent=1))
+        tmp.replace(out_dir / "DONE.json")
         print(f"{args.subject:24s} {args.variant:22s} seed{args.seed} "
               f"test_bce={metrics['test_next_bce']:.4f} "
               f"epochs={metrics['epochs_run']} converged={metrics['converged']}")

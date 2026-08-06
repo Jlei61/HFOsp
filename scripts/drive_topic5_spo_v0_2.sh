@@ -40,7 +40,7 @@ while [ "$(count_done)" -lt 105 ] && [ "$attempt" -lt 6 ]; do
   attempt=$((attempt + 1))
   stamp "retry $attempt at $(count_done)/105"
   find "$R/per_subject" -name FAILED.json -delete 2>/dev/null
-  $PY scripts/launch_topic5_spo_cohort.py --seeds 1 --workers 3 \
+  $PY scripts/launch_topic5_spo_cohort.py --seeds 1 --workers 16 \
     >> "$R/cohort_retry.log" 2>&1
 done
 stamp "cohort at $(count_done)/105"
@@ -48,7 +48,7 @@ stamp "cohort at $(count_done)/105"
 # --- second seed, full operator only, for the reliability question ---------
 stamp "second seed, full operator"
 $PY scripts/launch_topic5_spo_cohort.py --variants ANISOTROPIC_RECOVERY \
-  --seeds 2 --workers 6 >> "$R/cohort_seed2.log" 2>&1 || true
+  --seeds 2 --workers 16 >> "$R/cohort_seed2.log" 2>&1 || true
 
 # --- leave-contact-out, strong condition only ------------------------------
 # One condition, named in advance. v0.1 ran two with neither primary and spent
@@ -63,7 +63,7 @@ $PY scripts/launch_topic5_spo_cohort.py --variants ANISOTROPIC_RECOVERY \
 # explain it.
 stamp "leave-contact-out, strong condition"
 $PY scripts/launch_topic5_spo_cohort.py \
-  --variants ANISOTROPIC_RECOVERY FIELD_NULL STATIC --seeds 1 --workers 4 \
+  --variants ANISOTROPIC_RECOVERY FIELD_NULL STATIC --seeds 1 --workers 16 \
   --holdout-fraction 0.25 --out-root "$R/leave_contact_out" \
   >> "$R/loco.log" 2>&1 || true
 

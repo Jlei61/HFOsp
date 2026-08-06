@@ -116,13 +116,24 @@ def main() -> int:
     add("the more complex model wins.\n")
     for name, label in (
         ("field_over_static", "a field with decay and recovery, over a static rate"),
-        ("isotropic_over_field", "adding isotropic diffusion"),
+        ("transport_over_no_transport",
+         "letting activity move through space, on top of that same field"),
         ("drift_over_isotropic", "adding anisotropy and a signed drift"),
         ("recovery_over_drift", "adding the recovery field"),
         ("full_over_static", "the full operator over a static rate"),
     ):
         if name in ladder:
             add(describe(ladder[name], label))
+    add("")
+    add("Each row above is a nested pair, so the difference is attributable to the")
+    add("component that was released. One further comparison is NOT nested and is")
+    add("reported separately, because both a component gained and a component was")
+    add("lost across it:\n")
+    off = ladder.get("transport_no_recovery_over_recovery_no_transport")
+    if off:
+        add(describe(off, "transport without recovery, against recovery without "
+                          "transport -- which kind of memory matters, not what "
+                          "either component buys"))
     add("")
     convergence = stats.get("convergence", {})
     if convergence:
