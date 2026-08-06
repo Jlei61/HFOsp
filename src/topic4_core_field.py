@@ -117,13 +117,19 @@ ARM_NAMES = (
 )
 
 # Shape comparisons and the quantity each one must actually move (spec 4.4).
+# rms_axial and aspect are BOTH dominated by the inter-core separation, which is
+# 13.32 mm on the real geometry: two cores at +-6.66 mm have axial rms 6.71, and a
+# uniform strip over the 22.1 mm support has 22.14/sqrt(12) = 6.39. They coincide by
+# arithmetic accident, so neither metric can see the difference here. Core
+# concentration and transverse rms are uncontaminated and separate these fields by
+# 3.2x and 3.9x. Thresholds unchanged (2026-08-06, after the real-geometry pre-flight).
 SHAPE_CHECKS = {
     "B1": dict(a="manual_smooth", b="uniform_axial",
-               metric="rms_axial", kind="rel", threshold=0.20),
+               metric="core_concentration", kind="fold", threshold=0.20),
     "B2": dict(a="manual_smooth", b="width_wide",
-               metric="aspect", kind="rel", threshold=0.50),
+               metric="rms_transverse", kind="fold", threshold=0.50),
     "B3": dict(a="manual_smooth", b="width_narrow",
-               metric="aspect", kind="rel", threshold=0.50),
+               metric="rms_transverse", kind="fold", threshold=0.50),
     "B4": dict(a="manual_smooth", b="transverse_plus",
                metric="centroid_transverse", kind="abs", threshold=1.5),
 }
@@ -190,21 +196,32 @@ def arm_h(name, s, r, geom, target_count, manual_mask_E=None):
     return h
 
 
-def shape_metrics(h, s, r):
+def shape_metrics(h, s, r, core_centers_s=None, core_radius=1.5):
     """h-weighted geometry. Uses h, never h*d -- d is signed and h*d is not a
-    non-negative mass (spec 9 / P0-7)."""
+    non-negative mass (spec 9 / P0-7).
+
+    `core_concentration` is the share of h within `core_radius` of the nearer core
+    centre along the axis. Unlike rms_axial it is not dominated by the inter-core
+    separation, so it can tell a two-core field from a uniform corridor.
+    """
     h = np.asarray(h, float)
     w = h.sum()
     rms_ax = float(np.sqrt((h * np.asarray(s, float) ** 2).sum() / w))
     rms_tr = float(np.sqrt((h * np.asarray(r, float) ** 2).sum() / w))
-    return dict(rms_axial=rms_ax, rms_transverse=rms_tr,
-                aspect=rms_tr / rms_ax if rms_ax > 0 else np.inf,
-                centroid_transverse=float((h * np.asarray(r, float)).sum() / w),
-                centroid_axial=float((h * np.asarray(s, float)).sum() / w),
-                budget=float(w))
+    out = dict(rms_axial=rms_ax, rms_transverse=rms_tr,
+               aspect=rms_tr / rms_ax if rms_ax > 0 else np.inf,
+               centroid_transverse=float((h * np.asarray(r, float)).sum() / w),
+               centroid_axial=float((h * np.asarray(s, float)).sum() / w),
+               budget=float(w))
+    if core_centers_s is not None:
+        s_arr = np.asarray(s, float)
+        near = np.min(np.abs(s_arr[:, None] - np.asarray(core_centers_s, float)[None, :]),
+                      axis=1)
+        out["core_concentration"] = float((h * (near <= float(core_radius))).sum() / w)
+    return out
 
 
-def preflight_shape(h_by_arm, s, r, target_count, checks=None):
+def preflight_shape(h_by_arm, s, r, target_count, checks=None, sep=None):
     """Refuse to launch 96 simulations on a vacuous shape comparison.
 
     Only the B comparisons are checked. manual_hard and manual_projected SHOULD
@@ -213,11 +230,21 @@ def preflight_shape(h_by_arm, s, r, target_count, checks=None):
     never as the gate.
     """
     checks = checks or SHAPE_CHECKS
-    metrics = {name: shape_metrics(h, s, r) for name, h in h_by_arm.items()}
+    centers = None if sep is None else (-float(sep) / 2.0, +float(sep) / 2.0)
+    metrics = {name: shape_metrics(h, s, r, core_centers_s=centers)
+               for name, h in h_by_arm.items()}
     out, ok_all = {}, True
     for key, c in checks.items():
         ma, mb = metrics[c["a"]][c["metric"]], metrics[c["b"]][c["metric"]]
-        if c["kind"] == "rel":
+        if c["kind"] == "fold":
+            # "differ by X%" as a FOLD change: require max/min >= 1 + X.
+            # Encoding it as |a-b|/max would make 0.50 mean "exactly 2x", which is
+            # precisely what rho=0.5 / rho=2.0 produce -- a knife edge in both
+            # directions. The threshold NUMBERS are unchanged; only the arithmetic
+            # that turns them into a test is corrected (2026-08-06).
+            hi, lo = max(abs(ma), abs(mb)), max(min(abs(ma), abs(mb)), 1e-12)
+            observed = hi / lo - 1.0
+        elif c["kind"] == "rel":
             observed = abs(ma - mb) / max(abs(ma), abs(mb), 1e-12)
         else:
             observed = abs(ma - mb)

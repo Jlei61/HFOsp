@@ -189,7 +189,7 @@ def test_preflight_covers_shape_comparisons_only_and_excludes_the_equivalence_ar
     h_by_arm = {n: arm_h(n, s, r, _geom(), target, manual_mask_E=m)
                 for n in ARM_NAMES if n != "manual_hard"}
     h_by_arm["manual_hard"] = m.astype(float)
-    rep = preflight_shape(h_by_arm, s, r, target)
+    rep = preflight_shape(h_by_arm, s, r, target, sep=SEP)
     assert rep["ok"] is True
     assert set(rep["checks"]) == {"B1", "B2", "B3", "B4"}
 
@@ -201,6 +201,42 @@ def test_preflight_fails_when_a_shape_arm_collapses_onto_the_baseline():
                 for n in ARM_NAMES if n != "manual_hard"}
     h_by_arm["manual_hard"] = m.astype(float)
     h_by_arm["uniform_axial"] = h_by_arm["manual_smooth"].copy()   # collapse B1
-    rep = preflight_shape(h_by_arm, s, r, target)
+    rep = preflight_shape(h_by_arm, s, r, target, sep=SEP)
     assert rep["ok"] is False
     assert rep["checks"]["B1"]["ok"] is False
+
+
+def test_preflight_metrics_survive_the_real_inter_core_separation():
+    """Regression for the 2026-08-06 pre-flight failure.
+
+    On the real geometry (sep 13.32 mm, axial support 22.1 mm) two cores at
+    +-6.66 have axial rms 6.71 and a uniform strip has 22.14/sqrt(12) = 6.39, so
+    rms_axial -- and aspect, whose denominator it is -- go blind by arithmetic
+    accident. The mock sheet (sep 6, span 16) hid that. Core concentration and
+    transverse rms must still separate these fields here.
+    """
+    real_sep, lo, hi = 13.32, -12.70, 9.44
+    rng = np.random.default_rng(0)
+    pos = rng.uniform(0.0, 24.0, size=(32_000, 2))
+    s, r = pos[:, 0] - 12.0, pos[:, 1] - 12.0
+    geom = dict(sep=real_sep, s_support=(lo + 2.0, hi - 2.0), M=9,
+                sigma_perp=1.5, shift_mm=3.0)
+    m = (np.minimum((s - real_sep / 2) ** 2, (s + real_sep / 2) ** 2) + r ** 2) <= 1.5 ** 2
+    target = float(m.sum())
+    h_by_arm = {n: arm_h(n, s, r, geom, target, manual_mask_E=m)
+                for n in ARM_NAMES if n != "manual_hard"}
+    h_by_arm["manual_hard"] = m.astype(float)
+
+    centers = (-real_sep / 2, real_sep / 2)
+    sm = shape_metrics(h_by_arm["manual_smooth"], s, r, core_centers_s=centers)
+    ua = shape_metrics(h_by_arm["uniform_axial"], s, r, core_centers_s=centers)
+    # the metric that failed:
+    assert abs(sm["rms_axial"] - ua["rms_axial"]) / sm["rms_axial"] < 0.15
+    # the metric that replaced it:
+    assert sm["core_concentration"] > 2.0 * ua["core_concentration"]
+
+    wide = shape_metrics(h_by_arm["width_wide"], s, r, core_centers_s=centers)
+    narrow = shape_metrics(h_by_arm["width_narrow"], s, r, core_centers_s=centers)
+    assert wide["rms_transverse"] > 2.5 * narrow["rms_transverse"]
+
+    assert preflight_shape(h_by_arm, s, r, target, sep=real_sep)["ok"] is True

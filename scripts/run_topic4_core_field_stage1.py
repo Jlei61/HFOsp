@@ -62,7 +62,7 @@ def preflight(cfg):
     h_by_arm = {a: arm_h(a, s, r, geom, target, manual_mask_E=mask)
                 for a in ARM_NAMES if a != "manual_hard"}
     h_by_arm["manual_hard"] = mask.astype(float)
-    return preflight_shape(h_by_arm, s, r, target)
+    return preflight_shape(h_by_arm, s, r, target, sep=geom["sep"])
 
 
 def _seed_job(args):
