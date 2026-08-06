@@ -13,6 +13,7 @@ Plotting-only. No simulation is rerun and no GIF is produced.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -49,6 +50,7 @@ FIELD_GRID_N = 220
 FIELD_SIGMA_MM = 3.0
 LATENCY_CMAP = "viridis"
 ENERGY_CMAP = "Blues"
+MODE_CMAP = "magma"
 TEMPLATE_COLORS = {"TA": "#B2182B", "TB": "#2166AC"}
 INTERICTAL_EVENT_SHADE = "#6F9FD8"
 TRACE_OFF = 1.48
@@ -67,6 +69,55 @@ def _load_npz(path: Path):
     if not path.exists():
         raise FileNotFoundError(path)
     return np.load(path, allow_pickle=True)
+
+
+def _sha256(path: Path):
+    h = hashlib.sha256()
+    with path.open("rb") as f:
+        for block in iter(lambda: f.read(1024 * 1024), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def _load_mode_pair(arrays, summary):
+    """Three-seed mean leading-mode amplitude at baseline and pre-onset -100 ms.
+
+    These are frozen-q rate-field Jacobian loadings, not empirical full-SNN
+    perturbation modes.  All seeds must be resolved at both registered states;
+    otherwise the figure fails closed instead of silently changing the cohort.
+    """
+    labels = [str(x) for x in summary["labels"]]
+    wanted = {"baseline": "baseline_1000ms", "pre_onset": "pre_onset_100ms"}
+    idx = {name: labels.index(label) for name, label in wanted.items()}
+    seeds = [int(s) for s in summary["seeds"]]
+    fields = {name: [] for name in wanted}
+    records = {name: [] for name in wanted}
+    for seed in seeds:
+        resolved = np.asarray(arrays[f"{seed}__resolved"], bool)
+        cube = np.asarray(arrays[f"{seed}__fields"], float)
+        by_label = {
+            str(rec["label"]): rec for rec in summary["per_seed"][str(seed)]["records"]
+        }
+        for name, label in wanted.items():
+            ii = idx[name]
+            rec = by_label[label]
+            if not resolved[ii] or rec.get("op_status") != "resolved":
+                raise ValueError(f"mode panel requires resolved {label} for seed {seed}")
+            field = np.asarray(cube[ii], float)
+            if field.ndim != 2 or not np.isfinite(field).all() or np.linalg.norm(field) <= 0:
+                raise ValueError(f"invalid mode field for seed {seed}, {label}")
+            fields[name].append(field)
+            records[name].append(rec)
+    mean_fields = {name: np.mean(np.stack(vals), axis=0) for name, vals in fields.items()}
+    metrics = {
+        name: {
+            "axis_score_mean": float(np.mean([r["axis_score"] for r in records[name]])),
+            "globality_mean": float(np.mean([r["globality"] for r in records[name]])),
+            "time_to_runoff_ms": [float(r["time_to_runoff_ms"]) for r in records[name]],
+        }
+        for name in wanted
+    }
+    return mean_fields, metrics, seeds
 
 
 def _geometry(path: Path):
@@ -330,6 +381,32 @@ def _draw_field(
     )
 
 
+def _draw_mode_field(ax, field, xlim, ylim, *, title, vmax, show_y):
+    image = ax.imshow(
+        # The accepted rate-field producer stores [long-axis, transverse];
+        # imshow expects [row=y, column=x], hence the explicit transpose.
+        np.asarray(field, float).T,
+        origin="lower",
+        extent=[xlim[0], xlim[1], ylim[0], ylim[1]],
+        cmap=MODE_CMAP,
+        vmin=0.0,
+        vmax=float(vmax),
+        interpolation="nearest",
+        aspect="equal",
+        rasterized=True,
+    )
+    ax.set_xlim(*xlim)
+    ax.set_ylim(*ylim)
+    ax.set_title(title, fontsize=13.0, pad=7, fontweight="bold")
+    ax.set_xlabel("E1146 long axis (mm)", fontsize=11.0)
+    ax.tick_params(axis="both", labelsize=9.2, length=2.5)
+    if show_y:
+        ax.set_ylabel("transverse (mm)", fontsize=11.0)
+    else:
+        ax.tick_params(axis="y", left=False, labelleft=False)
+    return image
+
+
 def _legend_handles(names, template_label):
     shafts = sorted(set(_shaft(name) for name in names))
     return [
@@ -351,7 +428,16 @@ def _legend_handles(names, template_label):
     ]
 
 
-def _build_figure(arrays, summary, geometry_fd, geometry_names, sigma_mm):
+def _build_figure(
+    arrays,
+    summary,
+    geometry_fd,
+    geometry_names,
+    sigma_mm,
+    *,
+    mode_arrays=None,
+    mode_summary=None,
+):
     del summary
     array_names = [str(x) for x in arrays["contact_names"]]
     if array_names != geometry_names:
@@ -401,7 +487,8 @@ def _build_figure(arrays, summary, geometry_fd, geometry_names, sigma_mm):
     )
     scl_mask = np.asarray([name.startswith("SCL") for name in array_names], bool)
 
-    fig = plt.figure(figsize=(10.8, 8.25), facecolor="white")
+    has_modes = mode_arrays is not None and mode_summary is not None
+    fig = plt.figure(figsize=((16.4 if has_modes else 10.8), 8.25), facecolor="white")
     gs = gridspec.GridSpec(
         3,
         1,
@@ -428,7 +515,12 @@ def _build_figure(arrays, summary, geometry_fd, geometry_names, sigma_mm):
         columnspacing=1.6,
     )
 
-    lower = gs[2, 0].subgridspec(1, 2, wspace=0.19)
+    lower = gs[2, 0].subgridspec(
+        1,
+        (3 if has_modes else 2),
+        width_ratios=([1.0, 1.0, 1.78] if has_modes else [1.0, 1.0]),
+        wspace=(0.15 if has_modes else 0.19),
+    )
     left_pair = lower[0, 0].subgridspec(
         1, 2, width_ratios=[1.0, 0.045], wspace=0.035
     )
@@ -495,6 +587,47 @@ def _build_figure(arrays, summary, geometry_fd, geometry_names, sigma_mm):
     cb_r.ax.set_title("energy\n(×10⁶)", fontsize=9.0, pad=6)
     cb_r.ax.tick_params(labelsize=8.5, length=2.2)
 
+    mode_display = None
+    if has_modes:
+        mean_modes, mode_metrics, mode_seeds = _load_mode_pair(mode_arrays, mode_summary)
+        mode_group = lower[0, 2].subgridspec(
+            1, 3, width_ratios=[1.0, 1.0, 0.045], wspace=0.06
+        )
+        mode_vmax = float(max(np.max(mean_modes["baseline"]), np.max(mean_modes["pre_onset"])))
+        ax_mb = fig.add_subplot(mode_group[0, 0])
+        _draw_mode_field(
+            ax_mb,
+            mean_modes["baseline"],
+            xlim,
+            ylim,
+            title="Baseline mode",
+            vmax=mode_vmax,
+            show_y=False,
+        )
+        ax_mp = fig.add_subplot(mode_group[0, 1], sharey=ax_mb)
+        mode_map = _draw_mode_field(
+            ax_mp,
+            mean_modes["pre_onset"],
+            xlim,
+            ylim,
+            title="Pre-onset mode  −100 ms",
+            vmax=mode_vmax,
+            show_y=False,
+        )
+        cb_m = fig.colorbar(mode_map, cax=fig.add_subplot(mode_group[0, 2]))
+        cb_m.ax.set_title("mode\namplitude", fontsize=9.0, pad=6)
+        cb_m.ax.tick_params(labelsize=8.5, length=2.2)
+        mode_display = {
+            "contract": mode_summary["mode_contract"],
+            "model_contract": mode_summary["model_contract"],
+            "candidate": mode_summary["candidate"],
+            "seeds": mode_seeds,
+            "aggregation": "mean raw non-negative loading across three resolved seeds; shared color scale",
+            "states": mode_metrics,
+            "colormap": MODE_CMAP,
+            "display_vmax": mode_vmax,
+        }
+
     fig.suptitle("E1146", x=0.075, y=0.985, ha="left", fontsize=16.0, fontweight="bold")
     common = support & np.isfinite(energy_raw)
     relation = {
@@ -527,7 +660,7 @@ def _build_figure(arrays, summary, geometry_fd, geometry_names, sigma_mm):
         "energy_limits_raw": [float(np.nanmin(energy_raw)), float(np.nanmax(energy_raw))],
         "neuron_runaway_rate_display_cap_hz": neuron_rate_cap,
     }
-    return fig, top_stats, source, relation, display
+    return fig, top_stats, source, relation, display, mode_display
 
 
 def _write_sidecars(
@@ -543,6 +676,9 @@ def _write_sidecars(
     relation,
     display,
     sigma_mm,
+    mode_artifact_npz=None,
+    mode_artifact_json=None,
+    mode_display=None,
 ):
     template_label = display["template_label"]
     metadata = {
@@ -556,7 +692,13 @@ def _write_sidecars(
         ),
         "canonical_producer": "scripts/paper_figures/plot_fig_topic4_early_recruitment_readout.py",
         "computation_artifact": {"npz": str(artifact_npz), "json": str(artifact_json)},
-        "layout": "top continuous virtual-SEEG with one matched TB event; separate legend; bottom single-event contact rank and onset-locked runaway energy",
+        "layout": (
+            "top continuous virtual-SEEG with one matched TB event; separate legend; "
+            "bottom single-event contact rank, onset-locked runaway energy, and two "
+            "rate-field leading-mode context panels"
+            if mode_display is not None
+            else "top continuous virtual-SEEG with one matched TB event; separate legend; bottom single-event contact rank and onset-locked runaway energy"
+        ),
         "runaway": {
             **top_stats,
             "operational_definition": summary["runaway_onset"]["operational_definition"],
@@ -598,7 +740,24 @@ def _write_sidecars(
             "left_colormap": LATENCY_CMAP,
             "right_colormap": ENERGY_CMAP,
         },
-        "claim_boundary": summary["claim_boundary"],
+        "rate_field_mode_context": (
+            {
+                **mode_display,
+                "artifact_npz": str(mode_artifact_npz),
+                "artifact_json": str(mode_artifact_json),
+                "artifact_npz_sha256": _sha256(mode_artifact_npz),
+                "artifact_json_sha256": _sha256(mode_artifact_json),
+                "claim_boundary": (
+                    "frozen-q rate-field Jacobian loading; not an empirical full-SNN response mode, "
+                    "not propagation direction, and not a mode computed from the displayed M3 run"
+                ),
+            }
+            if mode_display is not None
+            else None
+        ),
+        "claim_boundary": summary["claim_boundary"] + ([
+            "the two added leading-mode panels are a frozen-q rate-field context layer, not empirical SNN eigenmodes from the displayed trajectory"
+        ] if mode_display is not None else []),
         "outputs": {"png": str(png), "pdf": str(pdf)},
     }
     meta = outdir / f"{stem}_metadata.json"
@@ -609,7 +768,9 @@ def _write_sidecars(
 
 上方是 M3A-v2.1 `q_I build-up → runaway` 的同一条连续 0–1500 ms virtual-SEEG。蓝色只标出左下图实际使用的单次 `{template_label}` 群体事件（{top_stats['interictal_event_start_ms']:.1f}–{top_stats['interictal_event_end_ms']:.1f} ms）；浅红色标出右下能量场实际平均的 {top_stats['energy_start_ms']:.1f}–{top_stats['energy_end_ms']:.1f} ms，红虚线是 operational runaway onset（{top_stats['runaway_start_ms']:.1f} ms）。不画 peak 点或传播连线。上图画 signed 30–80 Hz component；每个触点按自身 runaway 前 95% absolute amplitude 定标，runaway 不参与定标，超出纵轴的部分允许裁切。
 
-下方两图复用正式 Fig3-B 的成对 field 语法，并保留完整的 E1146 15-contact montage 和原注册平面。左图不是多事件模板，也不是 variance：它把蓝色窗内每个 virtual contact 的 30–80 Hz burst-envelope peak latency 排成 `1…N` recruitment rank，再投影到 field；`viridis` 深色更早。该事件有 {display['left_contact_value_n']} 个触点达到 readout 阈值，其余触点以空心电极显示。右图使用完整 {display['right_contact_value_n']} 个触点的 onset-locked mean-squared positive excess virtual-LFP energy，使用 `Blues`，深蓝更高。投影 kernel 为 {sigma_mm:.1f} mm。
+下方前两图复用正式 Fig3-B 的成对 field 语法，并保留完整的 E1146 15-contact montage 和原注册平面。左图不是多事件模板，也不是 variance：它把蓝色窗内每个 virtual contact 的 30–80 Hz burst-envelope peak latency 排成 `1…N` recruitment rank，再投影到 field；`viridis` 深色更早。该事件有 {display['left_contact_value_n']} 个触点达到 readout 阈值，其余触点以空心电极显示。右图使用完整 {display['right_contact_value_n']} 个触点的 onset-locked mean-squared positive excess virtual-LFP energy，使用 `Blues`，深蓝更高。投影 kernel 为 {sigma_mm:.1f} mm。
+
+{('下方最右两图是三 seed 的 frozen-q rate-field leading-mode loading：baseline 近全局/各向同性，pre-onset −100 ms 沿 E1146 长轴集中；两图使用同一色标。它们是线性化 rate-field 的机制背景，不是从上方这条 M3 SNN trace 直接辨识出的 empirical SNN eigenmode，也不编码传播方向。' if mode_display is not None else '')}
 
 平滑 wash 表示 virtual-SEEG contact readout；颗粒层直接来自同一仿真的 {display['neuron_n']} 个 E neurons。左侧彩色颗粒是同一个蓝色窗内实际发放的 {display['interictal_display_neuron_n']} 个神经元，颜色为各自 first-spike latency 的相对 early-to-late order；右侧彩色颗粒是 early-runaway window 内实际发放的 {display['runaway_active_neuron_n']} 个神经元，颜色来自逐神经元 firing rate。灰色颗粒是同一 run 的完整模拟 E-neuron 位置；两图完整 15-contact montage 均使用统一黑色外边框。
 
@@ -627,16 +788,28 @@ def main():
     ap.add_argument("--artifact-json", type=Path, default=DEFAULT_RUN / "m3_runaway_readout.json")
     ap.add_argument("--geometry-npz", type=Path, default=None)
     ap.add_argument("--field-sigma-mm", type=float, default=FIELD_SIGMA_MM)
+    ap.add_argument("--mode-artifact-npz", type=Path, default=None)
+    ap.add_argument("--mode-artifact-json", type=Path, default=None)
     ap.add_argument("--outdir", type=Path, default=DEFAULT_FIGURE_OUT)
     ap.add_argument("--stem", default=DEFAULT_STEM)
     args = ap.parse_args()
 
     summary = _load_json(args.artifact_json)
     arrays = _load_npz(args.artifact_npz)
+    if (args.mode_artifact_npz is None) != (args.mode_artifact_json is None):
+        raise ValueError("mode artifact NPZ and JSON must be provided together")
+    mode_arrays = _load_npz(args.mode_artifact_npz) if args.mode_artifact_npz else None
+    mode_summary = _load_json(args.mode_artifact_json) if args.mode_artifact_json else None
     geometry_path = args.geometry_npz or Path(summary["geometry_npz"])
     geometry_fd, names = _geometry(geometry_path)
-    fig, top_stats, source, relation, display = _build_figure(
-        arrays, summary, geometry_fd, names, args.field_sigma_mm
+    fig, top_stats, source, relation, display, mode_display = _build_figure(
+        arrays,
+        summary,
+        geometry_fd,
+        names,
+        args.field_sigma_mm,
+        mode_arrays=mode_arrays,
+        mode_summary=mode_summary,
     )
     args.outdir.mkdir(parents=True, exist_ok=True)
     png = args.outdir / f"{args.stem}.png"
@@ -657,6 +830,9 @@ def main():
         relation,
         display,
         args.field_sigma_mm,
+        mode_artifact_npz=args.mode_artifact_npz,
+        mode_artifact_json=args.mode_artifact_json,
+        mode_display=mode_display,
     )
     print(f"wrote {png}\nwrote {pdf}\nwrote {meta}\nwrote {args.outdir / 'README.md'}")
 

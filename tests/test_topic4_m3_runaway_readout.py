@@ -8,6 +8,7 @@ from scripts.paper_figures.plot_fig_topic4_early_recruitment_readout import (
     FIELD_SIGMA_MM,
     LATENCY_CMAP,
     TRACE_BAND_HZ,
+    _load_mode_pair,
     _normalize_minmax,
     _pre_runaway_burst_trace,
     _shared_template_plane,
@@ -119,3 +120,49 @@ def test_registered_plane_preserves_complete_e1146_layout_without_tb_mirroring()
     assert points[0, 0] > points[1, 0] > points[2, 0]
     assert xlim == (-10.0, 10.0)
     assert ylim == (-10.0, 10.0)
+
+
+def test_mode_pair_uses_same_three_seed_cohort_and_registered_states():
+    labels = ["baseline_1000ms", "pre_onset_100ms"]
+    arrays = {}
+    per_seed = {}
+    for seed, scale in [(1, 1.0), (3, 2.0), (4, 3.0)]:
+        arrays[f"{seed}__resolved"] = np.array([True, True])
+        arrays[f"{seed}__fields"] = np.stack(
+            [np.full((2, 2), scale), np.full((2, 2), 10.0 * scale)]
+        )
+        per_seed[str(seed)] = {
+            "records": [
+                {"label": labels[0], "op_status": "resolved", "axis_score": 0.1,
+                 "globality": 0.9, "time_to_runoff_ms": -4000.0},
+                {"label": labels[1], "op_status": "resolved", "axis_score": 0.8,
+                 "globality": 0.2, "time_to_runoff_ms": -100.0},
+            ]
+        }
+    summary = {"labels": labels, "seeds": [1, 3, 4], "per_seed": per_seed}
+    fields, metrics, seeds = _load_mode_pair(arrays, summary)
+    np.testing.assert_allclose(fields["baseline"], 2.0)
+    np.testing.assert_allclose(fields["pre_onset"], 20.0)
+    assert seeds == [1, 3, 4]
+    assert np.isclose(metrics["baseline"]["globality_mean"], 0.9)
+    assert np.isclose(metrics["pre_onset"]["axis_score_mean"], 0.8)
+
+
+def test_mode_pair_fails_closed_when_one_seed_is_unresolved():
+    labels = ["baseline_1000ms", "pre_onset_100ms"]
+    arrays = {
+        "1__resolved": np.array([True, False]),
+        "1__fields": np.ones((2, 2, 2)),
+    }
+    summary = {
+        "labels": labels,
+        "seeds": [1],
+        "per_seed": {"1": {"records": [
+            {"label": labels[0], "op_status": "resolved", "axis_score": 0.1,
+             "globality": 0.9, "time_to_runoff_ms": -4000.0},
+            {"label": labels[1], "op_status": "unresolved", "axis_score": None,
+             "globality": None, "time_to_runoff_ms": -100.0},
+        ]}},
+    }
+    with np.testing.assert_raises(ValueError):
+        _load_mode_pair(arrays, summary)
