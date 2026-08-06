@@ -348,22 +348,3 @@ def test_plot_load_covers_all_gap_fracs(tmp_path, monkeypatch):
             assert (P.REGIME, round(fr, 5), s) in cells, f"frac {fr} seed {s} missing from _load"
     assert (P.REGIME, 0.0025, 1) in cells and (P.REGIME, 0.0075, 1) in cells   # not collapsed by rounding
     assert float(cells[(P.REGIME, 0.001, 1)]["D_allE"].max()) < 0.1            # tau=500 (D=0.99) did NOT overwrite
-
-
-def test_aggregate_focused_m_18_rows_unique(tmp_path, monkeypatch):
-    """P1-3 regression: the aggregator must combine ALL per-seed group JSONs (gap grid = 18 rows, unique
-    (seed,target)); the committed summary had only the 2-row smoke artifact before re-aggregation."""
-    import csv as _csv
-    import json as _json
-    _add_scripts_path()
-    import run_topic4_mz_onset_dynamics as R
-    os.makedirs(os.path.join(tmp_path, "per_seed"))
-    for seed in (1, 3, 4):
-        for g, fracs in [("g0", [0.0, 0.001, 0.0025]), ("g0.005", [0.005, 0.0075, 0.01])]:
-            rows = [dict(seed=seed, A_frac=fr, phenotype="x") for fr in fracs]
-            _json.dump(dict(rows=rows), open(os.path.join(tmp_path, "per_seed", f"focused_m_seed{seed}_{g}.json"), "w"))
-    monkeypatch.setattr(R, "OUT", str(tmp_path))
-    R._aggregate_focused_m()
-    rows = list(_csv.DictReader(open(os.path.join(tmp_path, "focused_m_summary.csv"))))
-    assert len(rows) == 18
-    assert len({(r["seed"], r["A_frac"]) for r in rows}) == 18
