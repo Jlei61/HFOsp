@@ -123,6 +123,7 @@ def main() -> int:
     add("A positive number means the first model beats the second. The unit is the patient; "
         "seeds are pooled inside a patient and never counted as samples.\n")
     naming = {
+        "H1_recurrence": "an unconstrained recurrent model over a static contact rate",
         "H1": "contact-node graph over a static contact rate",
         "H1_latent": "tissue field over a static contact rate",
         "H1b_contact_graph": "contact-node graph over an unconstrained recurrent model",
@@ -150,7 +151,7 @@ def main() -> int:
             f"optimiser and scored on the same held-out events. The cohort run sits "
             f"{baseline_check['median_gap']:+.4f} from that optimum in the median and "
             f"{baseline_check['max_abs_gap']:.4f} at worst, against a reported advantage "
-            f"around {abs(((primary.get('H1_recurrence') or {}).get('all') or {}).get('median_delta', float('nan'))):.3f}. "
+            f"around {abs(((primary.get('H1_recurrence') or {}).get('all') or {}).get('median_delta') or float('nan')):.3f}. "
             f"Verdict: **{baseline_check['status'].lower().replace('_', ' ')}** — "
             f"{baseline_check['means']}.")
     else:
