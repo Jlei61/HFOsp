@@ -369,6 +369,14 @@ def main() -> int:
         "the connections it selects and changes nothing about what the model predicts. And "
         "the ordering that does survive is nearly as similar between patients as within "
         "one.\n")
+    ceiling = (primary.get("ceiling_dense_over_learned") or {}).get("all") or {}
+    if ceiling.get("status") == "COMPLETE":
+        add(f"A fourth finding narrows it further. Removing the sparsity constraint "
+            f"entirely — a fully connected field — does not help and slightly hurts "
+            f"({fmt(ceiling)}). So the shortfall is not the wiring economy holding the "
+            f"model back; it is what the model is, state on tissue units observed "
+            f"through a fixed local kernel. More graph freedom is the wrong direction.\n")
+
     add("Together those say the free graph has far more freedom than the data can pin down, "
         "and that the part of it which is pinned down is close to generic. The next step is "
         "not a better-regularised graph — it is fewer numbers. Replace the graph with a "
