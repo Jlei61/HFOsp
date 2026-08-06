@@ -64,8 +64,8 @@ from src.topic4_fcxr_lc3_stage import (  # noqa: E402
 from src.topic4_mz_fcxr_lifecycle import classify_lifecycle  # noqa: E402
 
 OUT = os.path.join(E01.OUT, "global_burst_adaptation")
-RUN_MS = 60000.0        # entry (~5 s) + the discharge that charges the brake + time to come back;
-                        # sized to share the machine with another line already holding 114 GiB
+RUN_MS = 70000.0        # entry (~5 s) + the discharge that charges the brake + time to come back;
+                        # the other line has finished, so all four arms fit in one round
 SNAP_MS = 250.0
 NOISE = 401
 GATE = 0.15             # recruited fraction; zero pre-entry crossings across 0.12-0.25
@@ -87,6 +87,13 @@ ARMS = (
     dict(arm="act_g015", use_gba=True, eta_gba=40.0),       # ~0.15 of leak
     dict(arm="act_g006", use_gba=True, eta_gba=15.0),       # ~0.06 of leak
 )
+def _write_npz(path, **arrays):
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    tmp = f"{path}.{os.getpid()}.tmp.npz"
+    np.savez_compressed(tmp, **arrays)
+    os.replace(tmp, path)
+
+
 _CTX = {}
 
 
@@ -155,26 +162,9 @@ def _run_arm(spec):
                             n_returning_before_onset=ledger["n_returning_before_onset"],
                             return_check=check)
 
-    # Diagnostics without which a still-smouldering arm cannot be told apart from a brake
-    # that never charged or one that let go too early.  af is the sensor's own input, so the
-    # sensor and brake can also be reconstructed offline and cross-checked against the engine.
     slow_f = run["checkpoint"].slow
     ne = int(slow_f.NE)
-    stride = max(1, int(round(10.0 / E01.DT)))
-    GEO._write_npz(
-        out_json.replace(".json", "_traces.npz"),
-        rate_dt_ms=np.asarray([10.0], np.float32),
-        rate_E=run["rate_E"][::stride].astype(np.float32),
-        af=np.asarray(af, np.float32), af_bin_ms=np.asarray([af_dt], np.float32),
-        gba_trace_dt_ms=np.asarray([10.0], np.float32),
-        gba_burst=np.asarray(slow_f.trace_gba_burst[::stride], np.float32),
-        gba_a=np.asarray(slow_f.trace_gba_a[::stride], np.float32),
-        snapshot_t_ms=np.asarray([r["t_ms"] for r in snapshot_table(
-            slow_f.snapshots, E01.DT, masks)], np.float32),
-        **{f"snapshot_{v}_{rg}": np.asarray(
-            [r[v][rg] for r in snapshot_table(slow_f.snapshots, E01.DT, masks)], np.float32)
-           for v in ("D", "H", "X", "y")
-           for rg in ("core_A", "core_B", "axial", "off_axis", "all")})
+    npz_path = out_json.replace(".json", "_traces.npz")
     record = dict(
         status="COMPLETE", arm=spec["arm"], use_gba=bool(spec["use_gba"]),
         eta_gba=float(spec["eta_gba"]), gba_gate=GATE,
@@ -193,7 +183,7 @@ def _run_arm(spec):
         gba_a_end=(None if slow_f.gba_a is None else float(slow_f.gba_a)),
         gba_a_max=(float(max(slow_f.trace_gba_a)) if slow_f.trace_gba_a else None),
         gba_burst_max=(float(max(slow_f.trace_gba_burst)) if slow_f.trace_gba_burst else None),
-        output_npz=out_json.replace(".json", "_traces.npz"),
+        output_npz=npz_path,
         max_rate=float(np.max(run["rate_E"])), mean_rate=float(np.mean(run["rate_E"])),
         event_ledger=ledger,
         claim_boundary=("one noise seed at one point; a closed loop here is a mechanism "
@@ -201,6 +191,27 @@ def _run_arm(spec):
         wall_s=time.time() - t0, peak_rss_gib=GEO._meminfo()["self_peak_rss_gib"],
         finished=GEO._now())
     GEO._write_json(out_json, record)
+    # Traces last, and never fatally.  They exist to tell apart the three ways a brake can
+    # leave a smoulder, but a six-hour simulation must not be lost to a diagnostic write --
+    # which is exactly what happened when this block ran before the record was on disk.
+    try:
+        table = snapshot_table(slow_f.snapshots, E01.DT, masks)
+        stride = max(1, int(round(10.0 / E01.DT)))
+        _write_npz(
+            npz_path,
+            rate_dt_ms=np.asarray([10.0], np.float32),
+            rate_E=run["rate_E"][::stride].astype(np.float32),
+            af=np.asarray(af, np.float32), af_bin_ms=np.asarray([af_dt], np.float32),
+            gba_trace_dt_ms=np.asarray([10.0], np.float32),
+            gba_burst=np.asarray(slow_f.trace_gba_burst[::stride], np.float32),
+            gba_a=np.asarray(slow_f.trace_gba_a[::stride], np.float32),
+            snapshot_t_ms=np.asarray([r["t_ms"] for r in table], np.float32),
+            **{f"snapshot_{v}_{rg}": np.asarray([r[v][rg] for r in table], np.float32)
+               for v in ("D", "H", "X", "y")
+               for rg in ("core_A", "core_B", "axial", "off_axis", "all")})
+    except Exception as exc:                                   # noqa: BLE001
+        print(f"[gba] {spec['arm']}: traces not written ({exc}); the record stands",
+              flush=True)
     del run, res
     gc.collect()
     return record
