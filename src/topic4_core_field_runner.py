@@ -117,3 +117,91 @@ def atomic_write_json(obj, path):
     with os.fdopen(fd, "w") as fh:
         json.dump(obj, fh)
     os.replace(tmp, path)
+
+
+def _placement(cfg):
+    """Frozen shared-plane montage, core centroids and axis. Never refits."""
+    from src.sef_hfo_subject_placement import (
+        gradient_shared_template_foci, register_to_sheet, template_source_foci)
+    m_real, _, _, _ = gradient_shared_template_foci(cfg["subject"], 3)
+    _, src_names, snk_names = template_source_foci(cfg["subject"], "narrow", 3)
+    reg = register_to_sheet(m_real, src_names, snk_names,
+                            L=cfg["engine"]["L"], target_inter_core_mm=None)
+    axis = reg["sink_centroid"] - reg["source_centroid"]
+    reg["axis_unit_vec"] = axis / np.linalg.norm(axis)
+    return reg
+
+
+def run_arm_on_network(arm, seed, cfg, net, NE, NI, reg, cmrun):
+    """One arm on an ALREADY-BUILT network. The caller owns the network so the
+    eight arms at a seed share one build (third-review P0-8).
+
+    k_dir and part_min are passed EXPLICITLY: read_event binds them from module
+    globals at def time, so mutating cmrun.KDIR does nothing (Stage 0 parity).
+    """
+    from kick_probe import simulate_kick
+    from lfp import LFPRecorder
+    from params import Params
+    from src.sef_hfo_events import detect_events
+    from src.sef_hfo_heterogeneity import sample_core_field
+    from src.sef_hfo_snn_adapter import snn_event_envelope
+    from src.topic4_core_field import (
+        arm_h, axis_coords, build_vth, core_thresholds, manual_mask,
+        sample_core_quantiles, signed_depth)
+
+    e = cfg["engine"]
+    msheet = reg["montage_sheet"]
+    src_xy, snk_xy = reg["source_centroid"], reg["sink_centroid"]
+    axis_unit = reg["axis_unit_vec"]
+    posE = net["pos"][:NE]
+    is_E = np.zeros(len(net["pos"]), bool); is_E[:NE] = True
+    mask = manual_mask(posE, src_xy, snk_xy, e["core_r"])
+
+    if arm == "manual_hard":
+        cf1 = sample_core_field(net["pos"], is_E, src_xy, e["core_r"],
+                                np.random.default_rng(seed + 7), core_mean=e["core_mean"],
+                                core_std=e["core_std"], base_mean=e["v_base"])
+        cf2 = sample_core_field(net["pos"], is_E, snk_xy, e["core_r"],
+                                np.random.default_rng(seed + 8), core_mean=e["core_mean"],
+                                core_std=e["core_std"], base_mean=e["v_base"])
+        vth = np.minimum(cf1["vth"], cf2["vth"])
+        h_sum = float(mask.sum())
+    else:
+        s, r = axis_coords(posE, reg["center"], axis_unit)
+        geom = dict(sep=float(np.linalg.norm(snk_xy - src_xy)),
+                    s_support=(float(s.min()) + cfg["field"]["AXIAL_MARGIN"],
+                               float(s.max()) - cfg["field"]["AXIAL_MARGIN"]),
+                    M=cfg["field"]["M"], sigma_perp=e["core_r"],
+                    shift_mm=cfg["field"]["SHIFT_MM"])
+        h = arm_h(arm, s, r, geom, float(cfg["N_core_manual"]), manual_mask_E=mask)
+        d = signed_depth(core_thresholds(
+            sample_core_quantiles(NE, cfg["quantile_seed"]), e["core_mean"], e["core_std"]),
+            e["v_base"])
+        vth = build_vth(h, d, n_total=NE + NI, n_E=NE, v_base=e["v_base"])
+        h_sum = float(h.sum())
+
+    p = Params(g=e["g"], L=e["L"], density=e["density"], T=cfg["duration_ms"],
+               dt=e["dt"], nu_ext_ratio=cmrun.DRIVE, seed=seed)
+    k_dir = int(e["k_dir"])
+    valid = cmrun.valid_mask(msheet, posE, e["L"], p.Rr)
+    rec = LFPRecorder(p, net["pos"], net["labels"], sites=msheet.contacts)
+    net["rng"] = np.random.default_rng(seed)
+    res = simulate_kick(p, net, KICK_BOOST=0.0, kick_center=list(reg["center"]),
+                        r_kick=e["core_r"], t_kick=1e9, V_th_per_neuron=vth,
+                        lfp_recorder=rec)
+    spk = res["E_spk_bool"]
+
+    af, bin_w = cmrun.active_fraction(spk, e["dt"], cmrun.BIN_MS)
+    nb0, nb1 = int(cmrun.BASELINE_MS[0] / bin_w), int(cmrun.BASELINE_MS[1] / bin_w)
+    floor = float(np.percentile(af[nb0:nb1], 95)) if nb1 > nb0 else float(af.min())
+    bar = floor + cmrun.CAL_FRAC * (float(af.max()) - floor)
+    events = detect_events(af, bin_w, event_on_frac=bar)
+    env_f, fdt, _ = snn_event_envelope(spk, posE, msheet, e["dt"])
+
+    recs = []
+    for ev in events:
+        rd = cmrun.read_event(env_f, fdt, msheet, valid, (ev["t_on"], ev["t_off"]),
+                              axis_unit, k_dir=k_dir, part_min=2 * k_dir + 1)
+        recs.append(dict(n_part=int(rd["n_part"]), sign=rd["sign"], ranks=rd["ranks"]))
+    return dict(arm=arm, seed=int(seed), events=recs, n_events=len(recs),
+                h_sum=h_sum, config_checksum=cfg["checksum"], provenance=provenance())
