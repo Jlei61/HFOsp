@@ -83,7 +83,11 @@ for seed in 2 3; do
 done
 
 stamp "STAGE 5  aggregate, figures, closeout, acceptance"
-retry_failures
+# Deliberately NOT clearing failures here. Every earlier stage retries them; a
+# marker that survives to this point is a unit that failed repeatedly, and the
+# acceptance gate has to see it. Deleting them first would make the gate pass by
+# destroying its own evidence.
+stamp "  failures surviving every retry: $(find "$R/per_subject" -name FAILED.json 2>/dev/null | wc -l)"
 "$PY" scripts/verify_topic5_slp_static_baseline.py >> "$R/orchestrator_final.log" 2>&1 || true
 "$PY" scripts/aggregate_topic5_slp_cohort.py >> "$R/orchestrator_final.log" 2>&1
 "$PY" scripts/run_topic5_slp_leave_contact_out.py --config "$CFG" --aggregate-only \
