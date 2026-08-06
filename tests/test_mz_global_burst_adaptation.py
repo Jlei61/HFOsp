@@ -31,6 +31,7 @@ import pytest
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "src", "snn_engine"))
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "scripts"))
 from mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 
 DT = 0.05
@@ -237,6 +238,57 @@ def test_an_uncharged_brake_takes_nothing():
     I_E = np.full(N, 10.0)
     I_I = np.zeros(N)
     assert np.array_equal(mz.apply_currents(I_E, I_I, labels=_labels()), I_E - I_I)
+
+
+# ---- the path the live configuration actually runs ---------------------------------------
+
+def _live_cfg(**over):
+    """The registered LC3 configuration, which is full_conductance -- not the current path."""
+    import run_topic4_fcxr_lc3 as E01
+    import run_topic4_fcxr_lc3_geometry as GEO
+    cfg = dict(E01._dynamic_cfg(GEO._point(GEO.H1_POINT_ID)))
+    cfg.update(over)
+    core = np.zeros(NE, bool)
+    core[:10] = True
+    return MZSlowVars(N, 18.0, MZSlowVarsConfig(**cfg), NE=NE, core_mask_E=core)
+
+
+def _terms(mz):
+    return mz.membrane_terms(np.full(N, 4.0), np.full(N, 1.0), labels=_labels(),
+                             I_E_rec=np.full(N, 2.0))
+
+
+def test_the_brake_reaches_the_conductance_membrane_too():
+    """The earlier actuator tests exercise the current path; the live config uses this one.
+
+    A brake that charged and traced but never reached the membrane would make the whole
+    experiment a silent no-op, with the trace showing it working.
+    """
+    off = _live_cfg()
+    on = _live_cfg(use_gba=True, gba_gate=0.15, eta_gba=100.0)
+    on.gba_a = 0.069                       # the ceiling measured on the recorded trajectories
+    _, g_off, _ = _terms(off)
+    _, g_on, _ = _terms(on)
+    assert g_on[:NE].mean() - g_off[:NE].mean() == pytest.approx(100.0 * 0.069 / 18.0, rel=1e-6)
+    assert np.array_equal(g_off[NE:], g_on[NE:]), "I cells must be untouched"
+
+
+def test_a_charged_brake_lowers_the_steady_state_voltage():
+    off = _live_cfg()
+    on = _live_cfg(use_gba=True, gba_gate=0.15, eta_gba=100.0)
+    on.gba_a = 0.069
+    d0, r0, v0 = _terms(off)
+    d1, r1, v1 = _terms(on)
+    quiet = ((d1 + v1) / (1.0 + r1))[:NE].mean()
+    loud = ((d0 + v0) / (1.0 + r0))[:NE].mean()
+    assert quiet < loud, "the brake must move E cells away from threshold, not toward it"
+
+
+def test_an_uncharged_brake_leaves_the_conductance_membrane_byte_identical():
+    off = _live_cfg()
+    on = _live_cfg(use_gba=True, gba_gate=0.15, eta_gba=100.0)
+    for a, b in zip(_terms(off), _terms(on)):
+        assert np.array_equal(a, b)
 
 
 # ---- fail closed --------------------------------------------------------------------------
