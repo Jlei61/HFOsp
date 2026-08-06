@@ -47,17 +47,24 @@ def main() -> int:
     budget_probe = load(OUT / "convergence_bias_probe.json")
     shuffle = load(OUT / "geometry_shuffle_control.json")
 
-    matrix = OUT / "EXPERIMENT_MATRIX.csv"
+    # Coverage is derived from the frozen cohort and the arm list, never from
+    # EXPERIMENT_MATRIX.csv: every launcher overwrites that file with its own
+    # subset, so the last one to run decides what the report calls "planned".
+    # Reading it made this report claim 21 units when 105 had run -- the same
+    # trap the acceptance gate was already fixed for.
+    CORE_ARMS = ("STATIC_CONTACT", "ORDINARY_GRU", "CONTACT_GRAPH_RNN",
+                 "LATENT_FIXED_LOCAL_RNN", "LATENT_LEARNED_SPATIAL_RNN")
+    cohort = (manifest or {}).get("frozen_cohort", {}).get("primary", [])
     planned = completed = 0
     failed = []
-    if matrix.exists():
-        for row in csv.DictReader(matrix.open()):
+    for subject in cohort:
+        for arm in CORE_ARMS:
             planned += 1
-            cell = OUT / "per_subject" / row["subject"] / row["arm"] / f"seed{row['seed']}"
+            cell = OUT / "per_subject" / subject / arm / "seed1"
             if (cell / "DONE.json").exists():
                 completed += 1
             elif (cell / "FAILED.json").exists():
-                failed.append(f"{row['subject']}/{row['arm']}/seed{row['seed']}")
+                failed.append(f"{subject}/{arm}/seed1")
 
     primary = (stats or {}).get("comparisons", {}).get("primary", {})
     lines = []

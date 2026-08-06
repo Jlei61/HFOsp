@@ -24,16 +24,43 @@ print(sum(1 for s in subs for a in arms
 COUNT
 }
 
+# The tail of the cohort is its largest patients, and running them at the
+# concurrency the small ones tolerated exhausted the GPU: fourteen units died of
+# out-of-memory in one pass, none of them for a reason that has anything to do
+# with the models. Every stage below therefore queues at WORKERS, not at the
+# rate the early cohort ran at.
+#
+# The retry list carries the dense ceiling arm as well. It is a pre-registered
+# control rather than a core arm, so count_core ignores it -- but four of its
+# patients died in the same out-of-memory pass, and a control that silently
+# drops a fifth of the cohort answers a weaker question than the one registered.
+WORKERS=2
+
+# pgrep -c already prints 0 when nothing matches, and it also exits 1.  Adding
+# "|| echo 0" therefore appends a SECOND zero, and the two-line result makes the
+# arithmetic test error out rather than compare -- so the retry below could
+# never fire and the run sat at 98/105 with nothing running.
+count_trainers() { pgrep -fc "train_topic5_slp_unit\.py"; }
+
 stamp "waiting for the 105-unit refit"
+attempt=0
 while [ "$(count_core)" -lt 105 ]; do
-  if [ "$(pgrep -fc train_topic5_slp_unit || echo 0)" -eq 0 ]; then
-    stamp "trainers gone at $(count_core)/105; retrying stragglers"
+  if [ "$(count_trainers)" -eq 0 ]; then
+    attempt=$((attempt + 1))
+    # An earlier version left this loop as soon as one retry ended short, which
+    # sent the summaries off against a 91-unit tree. Retry until the cohort is
+    # whole or the retries stop achieving anything.
+    if [ "$attempt" -gt 15 ]; then
+      stamp "giving up at $(count_core)/105 after $attempt retries; the gate records the gap"
+      break
+    fi
+    stamp "trainers gone at $(count_core)/105; retry $attempt at $WORKERS workers"
     find "$R/per_subject" -name FAILED.json -delete 2>/dev/null
     "$PY" scripts/launch_topic5_slp_cohort.py --config "$CFG" \
       --arms STATIC_CONTACT ORDINARY_GRU CONTACT_GRAPH_RNN \
              LATENT_FIXED_LOCAL_RNN LATENT_LEARNED_SPATIAL_RNN \
-      --seeds 1 --workers 5 >> "$R/refit_retry.log" 2>&1
-    [ "$(count_core)" -lt 105 ] && break
+             LATENT_DENSE_RNN \
+      --seeds 1 --workers "$WORKERS" >> "$R/refit_retry.log" 2>&1
   fi
   sleep 120
 done
@@ -48,7 +75,7 @@ stamp "cohort at $(count_core)/105"
 # licenses unanswerable.
 stamp "second seed for the learned arm, for the within-patient comparison"
 "$PY" scripts/launch_topic5_slp_cohort.py --config "$CFG" \
-  --arms LATENT_LEARNED_SPATIAL_RNN --seeds 2 --workers 5 \
+  --arms LATENT_LEARNED_SPATIAL_RNN --seeds 2 --workers "$WORKERS" \
   >> "$R/seed2_latent.log" 2>&1 || true
 
 stamp "leave-contact-out at the corrected budget"
@@ -56,7 +83,7 @@ if [ ! -d "$R/leave_contact_out_budget95" ] && [ -d "$R/leave_contact_out" ]; th
   mv "$R/leave_contact_out" "$R/leave_contact_out_budget95"
 fi
 "$PY" scripts/run_topic5_slp_leave_contact_out.py --config "$CFG" \
-  --fraction 0.25 --seeds 1 --workers 5 >> "$R/lco_refit.log" 2>&1 || true
+  --fraction 0.25 --seeds 1 --workers "$WORKERS" >> "$R/lco_refit.log" 2>&1 || true
 
 stamp "re-deriving every summary from the refit tree"
 "$PY" scripts/verify_topic5_slp_static_baseline.py >> "$R/finalise.log" 2>&1 || true

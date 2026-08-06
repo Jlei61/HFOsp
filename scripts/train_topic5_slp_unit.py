@@ -505,6 +505,12 @@ def main() -> int:
         (ROOT / "src/topic5_spatial_latent_rnn.py").read_bytes()
     ).hexdigest()
     metrics["code_sha256"] = code_hash
+    # Clear any marker left by an earlier attempt at this same unit.  Two
+    # launchers running over the same cohort will both start a unit that has no
+    # DONE.json yet; when one of the pair dies of GPU exhaustion it leaves a
+    # marker in the directory its twin is still training into, and the finished
+    # unit then looks failed for the rest of the run.
+    (out_dir / "FAILED.json").unlink(missing_ok=True)
     (out_dir / "DONE.json").write_text(json.dumps(metrics, indent=1))
     print(
         f"{args.subject:24s} {args.arm:28s} seed{args.seed} "

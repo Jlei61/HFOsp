@@ -125,8 +125,13 @@ def main() -> int:
     # 8b. Nothing left behind on the seed the claims rest on.  Later seeds are
     # explicitly best-effort, so a failure there is recorded rather than fatal --
     # but it must be recorded, not deleted.
+    # A marker beside a finished unit is not a failure: concurrent launchers can
+    # both start a unit that has no DONE.json yet, and the one that loses the
+    # race leaves a marker in the directory the survivor trained into.  Only a
+    # directory with no DONE.json is genuinely unfinished.
     stragglers = sorted(p.parent.relative_to(OUT / "per_subject").as_posix()
-                        for p in (OUT / "per_subject").rglob("FAILED.json")) \
+                        for p in (OUT / "per_subject").rglob("FAILED.json")
+                        if not (p.parent / "DONE.json").exists()) \
         if (OUT / "per_subject").exists() else []
     seed_one_failures = [s for s in stragglers if s.endswith("seed1")]
     later_failures = [s for s in stragglers if not s.endswith("seed1")]
