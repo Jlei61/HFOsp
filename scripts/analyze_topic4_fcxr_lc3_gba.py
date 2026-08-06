@@ -85,11 +85,26 @@ def _how_it_failed(rec, z):
                                 f"{end_ms/1000:.0f} s with wear still at {wear_end:.4f}")
 
 
+def _terminated(rec):
+    """A bout whose end IS the end of the record has not terminated.
+
+    The lifecycle detector reports `offset` as the window after the last ictal one, so a
+    discharge that simply runs out of recording gets an offset equal to the run length. Reading
+    that as a termination turns every non-terminating arm into a terminated one whose tail
+    happens to be zero seconds long -- which is exactly how the control arm, known never to
+    terminate, was first reported as "terminated and silenced".
+    """
+    if rec["offset_ms"] is None:
+        return False
+    return float(rec["offset_ms"]) < float(rec["run_ms"]) - 1e-9
+
+
 def _verdict(rec, z):
     if rec["onset_ms"] is None:
         return "blocked entry", "the tissue never entered, so nothing downstream was tested"
-    if rec["offset_ms"] is None:
-        return "never stopped", "entered and did not terminate inside the window"
+    if not _terminated(rec):
+        reasons = "; ".join(rec.get("lifecycle", {}).get("reasons", [])) or "no offset in the window"
+        return "never stopped", f"entered and did not terminate inside the window ({reasons})"
     chk = rec.get("return_check") or {}
     if chk.get("returned"):
         return "came back", "returning events inside the frozen reference distribution"
