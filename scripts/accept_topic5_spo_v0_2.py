@@ -107,6 +107,13 @@ def main() -> int:
     # The failure this guards against did not raise: withholding a contact from
     # every split left it out of the targets too, so the evaluation scored an
     # empty question and returned a near-perfect number.
+    results.append(check(
+        "every leave-contact-out arm withheld the same contacts",
+        loco.get("arms_withheld_the_same_contacts") is True
+        if loco.get("status") == "COMPLETE" else False,
+        "leave-contact-out has not run yet" if loco.get("status") != "COMPLETE"
+        else f"arms disagree on {loco.get('patients_where_arms_disagree')}"))
+
     absolute = loco.get("absolute", {})
     empty = [a for a, e in absolute.items() if e["median_heldout_next_bce"] <= 1e-3]
     results.append(check(

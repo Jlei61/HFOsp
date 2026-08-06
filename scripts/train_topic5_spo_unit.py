@@ -255,6 +255,10 @@ def main() -> int:
                 for key, value in evaluate(model, parts["test"], subset).items():
                     metrics[f"{label}_{key}"] = value
             metrics["n_holdout_contacts"] = int(len(holdout))
+            # Recorded so the arms can be checked against each other rather than
+            # trusted: a paired comparison across arms is meaningless if they
+            # withheld different contacts, and nothing else would reveal it.
+            metrics["holdout_contacts"] = [int(c) for c in holdout]
         metrics["parameters"] = model.parameter_estimates()
 
         torch.save(model.state_dict(), out_dir / "checkpoint.pt")

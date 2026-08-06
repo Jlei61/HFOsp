@@ -297,6 +297,15 @@ def leave_contact_out(subjects: list[str]) -> dict:
     heldout, retained = table("heldout_next_bce"), table("retained_next_bce")
     heldout_top1 = table("heldout_top1")
 
+    # The arms are compared patient by patient, which only means anything if they
+    # withheld the same contacts. They are drawn from the run seed alone, so they
+    # should agree -- checked against the data rather than the code.
+    withheld: dict[str, set] = {}
+    for r in rows:
+        if "holdout_contacts" in r:
+            withheld.setdefault(r["subject"], set()).add(tuple(r["holdout_contacts"]))
+    disagreeing = sorted(s for s, v in withheld.items() if len(v) > 1)
+
     report = {
         "status": "COMPLETE",
         "question": ("does the model predict a contact it never trained on, from "
@@ -309,6 +318,8 @@ def leave_contact_out(subjects: list[str]) -> dict:
                             "floor arm; relative degradation is not reported and "
                             "must not be substituted"),
         "floor_arm": HELDOUT_FLOOR,
+        "arms_withheld_the_same_contacts": not disagreeing,
+        "patients_where_arms_disagree": disagreeing,
         "n_units": len(rows),
         "absolute": {}, "over_floor": {},
     }
