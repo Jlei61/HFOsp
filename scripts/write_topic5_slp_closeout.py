@@ -43,6 +43,7 @@ def main() -> int:
     sweep = load(OUT / "development" / "SWEEP_SUMMARY.json")
     baseline_check = load(OUT / "static_baseline_verification.json")
     budget_probe = load(OUT / "convergence_bias_probe.json")
+    shuffle = load(OUT / "geometry_shuffle_control.json")
 
     matrix = OUT / "EXPERIMENT_MATRIX.csv"
     planned = completed = 0
@@ -199,6 +200,26 @@ def main() -> int:
         add("\nBoth models were trained without any per-contact parameter, because a contact "
             "held out of training has no way to learn one; without that change the "
             "comparison would be undefined at exactly the positions being tested.\n")
+    else:
+        add("Not run.\n")
+
+    add("## 4d. Does the spatial prior constrain anything?\n")
+    if shuffle:
+        add(f"The learned arm was trained twice per patient: once with the true node "
+            f"positions feeding the connection-cost term, once with those positions "
+            f"permuted. Everything else was identical, so the only change is which pairs "
+            f"the cost calls far apart.\n")
+        add(f"- real minus permuted geometry: median "
+            f"{shuffle['median_delta']:+.4f}, 95% CI "
+            f"[{shuffle['bootstrap_95ci'][0]:+.4f}, {shuffle['bootstrap_95ci'][1]:+.4f}], "
+            f"{shuffle['n_positive']}/{shuffle['n_patients']} patients, "
+            f"p={shuffle['wilcoxon_two_sided_p']:.3g}, over "
+            f"{shuffle['n_patients']} patients")
+        if shuffle.get("mean_edge_length_real") is not None:
+            add(f"- median connection length {shuffle['mean_edge_length_real']:.2f} with the "
+                f"real geometry against {shuffle['mean_edge_length_shuffled']:.2f} with it "
+                f"permuted, in units of the typical spacing between tissue units")
+        add(f"\n**{shuffle['reading'].capitalize()}.**\n")
     else:
         add("Not run.\n")
 
