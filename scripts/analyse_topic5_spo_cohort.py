@@ -174,7 +174,7 @@ def reliability(rows: list[dict]) -> dict:
 
 
 def geometry_confound(by_subject: dict) -> dict:
-    """How much of the between-patient spread is just the electrodes?
+    """How much of the between-patient spread is patient-level nuisance?
 
     The reliability test asks whether a patient's operator resembles itself more
     than someone else's. Two fits of one patient share their geometry, and every
@@ -215,10 +215,11 @@ def geometry_confound(by_subject: dict) -> dict:
         "status": "COMPLETE", "n_patients": len(descriptors),
         "per_parameter": worst,
         "strongest_absolute_spearman": float(strongest),
-        "reading": ("a fitted coefficient that tracks the electrode geometry this "
-                    "closely is not evidence of a patient-specific mechanism"
+        "descriptors": list(names),
+        "reading": ("a fitted coefficient that tracks a patient-level descriptor "
+                    "this closely is not evidence of a patient-specific mechanism"
                     if strongest >= 0.6 else
-                    "no single coefficient is strongly predicted by the geometry "
+                    "no single coefficient is strongly predicted by these "
                     "descriptors, which weakens but does not remove the confound"),
     }
 

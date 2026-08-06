@@ -214,7 +214,9 @@ def main() -> int:
     if _conf.get("status") == "COMPLETE":
         worst = max(_conf["per_parameter"].items(),
                     key=lambda kv: kv[1]["strongest_geometry_correlation"])
-        add(f"Measured: the coefficient most predicted by the electrodes is "
+        add(f"Measured against four patient-level descriptors that carry no "
+            f"mechanism -- grid pitch, read-kernel width, contact count and event "
+            f"length. The coefficient most predicted by one of them is "
             f"**{worst[0]}**, Spearman "
             f"{worst[1]['strongest_geometry_correlation']:.2f} with "
             f"{worst[1]['with'].replace('_', ' ')} across "
