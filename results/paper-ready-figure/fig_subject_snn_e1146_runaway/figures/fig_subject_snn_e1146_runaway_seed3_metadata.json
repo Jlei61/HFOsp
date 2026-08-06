@@ -1,0 +1,124 @@
+{
+  "figure": "E1146 subject SNN \u2014 lifecycle on the patient's geometry (seed 3)",
+  "layout": "single row: mechanism | tempA source | tempB source | electrode readout",
+  "subject": "epilepsiae_1146",
+  "montage": "narrow",
+  "connection_seed": 3,
+  "noise_seed": 401,
+  "run_ms": 45000.0,
+  "source_contacts": [
+    "SCL9",
+    "ICL9",
+    "ICL11"
+  ],
+  "sink_contacts": [
+    "ICL1",
+    "ICL2",
+    "ICL3"
+  ],
+  "n_contacts": 15,
+  "n_contacts_offsheet": 0,
+  "ran_away": true,
+  "onset_ms": 4000.0,
+  "interictal": {
+    "n_forward": 10,
+    "n_reverse": 0,
+    "n_undetermined": 0,
+    "bidirectional": false
+  },
+  "n_returning_before_onset": 10,
+  "entry_class": "CUMULATIVE",
+  "middle_columns": {
+    "keyed_by": "source identity: which of the two template source regions ignited",
+    "rule": "ignition = centroid of the earliest 10% of cells to fire; a region owns it when it is >=2x nearer than the other; the star marks the event's own ignition, not a core centre",
+    "picked": {
+      "tempA": null,
+      "tempB": 0
+    },
+    "per_event": [
+      {
+        "t_on_ms": 554.0,
+        "source": "b",
+        "dist_a_mm": 12.306374085123048,
+        "dist_b_mm": 0.7492622644418392,
+        "axis_corr": 0.4864705444881295
+      },
+      {
+        "t_on_ms": 1096.0,
+        "source": "b",
+        "dist_a_mm": 8.940381630376107,
+        "dist_b_mm": 4.119156689975623,
+        "axis_corr": 0.07425001347820767
+      },
+      {
+        "t_on_ms": 1928.0,
+        "source": "b",
+        "dist_a_mm": 12.151405083759323,
+        "dist_b_mm": 0.9054294922864596,
+        "axis_corr": 0.48110087553192227
+      },
+      {
+        "t_on_ms": 2145.0,
+        "source": "b",
+        "dist_a_mm": 11.913179285573547,
+        "dist_b_mm": 1.1422295110805278,
+        "axis_corr": 0.5874379163648819
+      },
+      {
+        "t_on_ms": 2445.0,
+        "source": "b",
+        "dist_a_mm": 11.671698918692048,
+        "dist_b_mm": 1.380948390341902,
+        "axis_corr": 0.6148698269780435
+      },
+      {
+        "t_on_ms": 2845.0,
+        "source": "b",
+        "dist_a_mm": 12.315241389794046,
+        "dist_b_mm": 0.750726317378377,
+        "axis_corr": 0.49680407670899035
+      },
+      {
+        "t_on_ms": 3182.0,
+        "source": "b",
+        "dist_a_mm": 9.112096659982159,
+        "dist_b_mm": 3.946885660908064,
+        "axis_corr": 0.49914185127205274
+      },
+      {
+        "t_on_ms": 3406.0,
+        "source": "b",
+        "dist_a_mm": 11.047203816411526,
+        "dist_b_mm": 2.0048728019256514,
+        "axis_corr": 0.6695149843331094
+      },
+      {
+        "t_on_ms": 3632.0,
+        "source": "b",
+        "dist_a_mm": 11.733515466858279,
+        "dist_b_mm": 1.3290372465674165,
+        "axis_corr": 0.5832357512975239
+      },
+      {
+        "t_on_ms": 3854.0,
+        "source": "b",
+        "dist_a_mm": 11.782791656964257,
+        "dist_b_mm": 1.272509798228864,
+        "axis_corr": 0.5960839343098793
+      }
+    ],
+    "n_from_a": 0,
+    "n_from_b": 10,
+    "n_unattributed": 0
+  },
+  "readout_kind": "spike-weighted per-contact rate using the montage's own distance weighting; NOT the current-based local field the subject figure uses",
+  "readout_window": "0 to entry + 3 s so the pre-entry events are legible; the discharge runs to the end of the 45 s record",
+  "readout_peak_marks": "a contact is marked in an event when its within-event peak reaches 0.3 of the largest contact peak in that event",
+  "readout_units": "each trace is the share of that contact's weighted neighbourhood recruited per 2 ms bin (contact weights sum to 1), so rows are comparable to each other and 1.0 means the whole neighbourhood fired",
+  "shaft_colours": "the subject's real shafts SCL and ICL, not a synthetic A/B pair",
+  "boundary": "model substrate + two source regions + virtual electrode readout; events of either source identity here do not establish the real patient's mechanism. Most pre-entry events are patches around one core, not transits between the two -- see middle_columns.per_event for each event's ignition distances",
+  "outputs": [
+    "results/paper-ready-figure/fig_subject_snn_e1146_runaway/figures/fig_subject_snn_e1146_runaway_seed3.png",
+    "results/paper-ready-figure/fig_subject_snn_e1146_runaway/figures/fig_subject_snn_e1146_runaway_seed3.pdf"
+  ]
+}
