@@ -69,15 +69,40 @@ def densify(rows: np.ndarray) -> np.ndarray:
 
 
 def partition(events, holdout: np.ndarray | None):
+    """Split into train / validation / test, honouring a contact holdout.
+
+    The holdout is asymmetric and it has to be. Training and monitoring must not
+    see the withheld contact at all, so it is deleted there and the surviving
+    ranks are closed up. But TEST must keep its true ranks, because the question
+    is whether the model predicts that contact's real participation -- and
+    deleting it from test instead asks whether the model can predict that a
+    contact we removed never appears, which it answers perfectly and for free.
+
+    In test the contact is still kept out of the INPUT: it does not drive the
+    state and it is not marked as recruited. That is the strong condition -- the
+    model has never seen this contact and cannot see it now, but is scored on
+    what it actually did.
+    """
     ranks, split = events["group_ids"], events["split"]
     out = {}
     for name, code in (("train", 0), ("validation", 1), ("test", 2)):
         rows = ranks[split == code]
-        if holdout is not None and len(holdout):
-            rows = rows.copy()
-            rows[:, holdout] = -1
-            rows = densify(rows)
-        out[name] = build_event_tensors(rows)
+        if holdout is None or not len(holdout):
+            out[name] = build_event_tensors(rows)
+            continue
+        if name == "test":
+            tensors = build_event_tensors(rows)          # targets keep the truth
+            index = torch.as_tensor(holdout, dtype=torch.long)
+            tensors.x[:, :, index] = 0.0                 # blind the input
+            tensors.recruited[:, :, index] = 0.0
+            # available is derived from recruited, so it must be rebuilt for the
+            # withheld columns: they are candidates at every step of the event.
+            tensors.available[:, :, index] = tensors.valid.unsqueeze(-1)
+            out[name] = tensors
+        else:
+            trimmed = rows.copy()
+            trimmed[:, holdout] = -1
+            out[name] = build_event_tensors(densify(trimmed))
     return out
 
 
