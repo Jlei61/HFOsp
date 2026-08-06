@@ -27,10 +27,17 @@ def unit_dir(root: Path, subject: str, variant: str, seed: int) -> Path:
     return root / subject / variant / f"seed{seed}"
 
 
-def is_running(subject: str, variant: str, seed: int) -> bool:
-    """Is a trainer already working on this exact unit?"""
+def is_running(subject: str, variant: str, seed: int, out_root: Path) -> bool:
+    """Is a trainer already working on this exact unit?
+
+    The output root is part of the identity. A cohort unit and a
+    leave-contact-out unit share subject, variant and seed and differ only in
+    where they write, so matching on the first three lets a running cohort unit
+    mask a leave-contact-out unit that has not started -- which silently drops it
+    unless a later pass happens to catch it.
+    """
     pattern = (f"train_topic5_spo_unit.py --subject {subject} "
-               f"--variant {variant} --seed {seed}")
+               f"--variant {variant} --seed {seed} --out-root {out_root}")
     return subprocess.run(["pgrep", "-f", pattern],
                           capture_output=True).returncode == 0
 
@@ -58,7 +65,7 @@ def main() -> int:
     # on it wastes a core and lets two processes write the same DONE.json. This
     # already happened once, and it surfaced as failure markers sitting beside
     # completed units rather than as an error.
-    inflight = {u for u in pending if is_running(*u)}
+    inflight = {u for u in pending if is_running(*u, args.out_root)}
     todo = [u for u in pending if u not in inflight]
     print(f"planned {len(plan)} units, {len(plan) - len(pending)} already done, "
           f"{len(inflight)} already in flight elsewhere, "
