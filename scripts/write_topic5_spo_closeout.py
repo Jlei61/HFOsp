@@ -190,6 +190,12 @@ def main() -> int:
             f"{against['n_patients']} patients, "
             f"p={against['wilcoxon_field_vs_recurrent_p']:.3g}")
         add(f"- {against['baseline_discrepancy']['reading']}")
+        conf = against.get("confound", {})
+        if conf:
+            add("")
+            add(f"⚠ The two are not a clean single-factor comparison: {conf['what']}. "
+                f"So {conf['consequence']}. {sentence(conf['direction_of_bias'])}. "
+                f"{sentence(conf['why_not_tested'])}.")
         add("")
 
     convergence = stats.get("convergence", {})

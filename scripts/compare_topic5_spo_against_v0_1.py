@@ -113,6 +113,23 @@ def main() -> int:
                 "field's own advantage; the cohort medians hold but individual "
                 "patients should not be read from this"),
         },
+        "confound": {
+            "what": ("the recurrent arm reads out through a free dense layer "
+                     "(nn.Linear to one logit per contact) while every field here "
+                     "must project through the fixed observation kernel"),
+            "consequence": ("the gap is recurrence AND readout together, not "
+                            "recurrence alone; some unknown part of the 91% the "
+                            "operator gives back may be the readout rather than "
+                            "the dynamics"),
+            "why_not_tested": ("testing it means a sixth arm -- the operator with "
+                               "a free readout -- which would change the "
+                               "pre-registered nested family this version froze. "
+                               "It is the natural first question for the next one"),
+            "direction_of_bias": ("against the operator: a free readout can only "
+                                  "help, so the operator's share is a lower bound "
+                                  "and the true share of the DYNAMICS could be "
+                                  "higher than 9%"),
+        },
         "per_patient": rows,
     }
     report["reading"] = (
@@ -123,7 +140,8 @@ def main() -> int:
         f"the field matches or exceeds the recurrent model in "
         f"{report['n_patients_where_field_matches_recurrent']} of {len(rows)} "
         "patients. Replacing the free graph with a propagation operator kept a "
-        "small fraction of what recurrence was buying")
+        "small fraction of what recurrence was buying -- though the recurrent arm "
+        "also had a free readout, so this is a lower bound on the operator's share")
 
     (OUT / "against_v0_1.json").write_text(json.dumps(report, indent=1))
     print(f"n={len(rows)}")
