@@ -160,6 +160,25 @@ def main() -> int:
                           "transport -- which kind of memory matters, not what "
                           "either component buys"))
     add("")
+    against = load(OUT / "against_v0_1.json")
+    if against.get("n_patients"):
+        add("### What the eight scalars kept\n")
+        add("v0.1 showed an unconstrained recurrent model beating a per-contact "
+            "rate, and every structural prior it tried giving that gain back. This "
+            "version replaced the structure with a propagation operator, so the "
+            "question it exists to answer is how much of that gain the operator "
+            "recovers.\n")
+        add(f"The two versions share {against['shared']}. Each is scored against "
+            "its own static baseline, so a shifted baseline cancels rather than "
+            "propagating.\n")
+        add(f"- {against['reading']}.")
+        add(f"- the operator matches the recurrent model in "
+            f"{against['n_patients_where_field_matches_recurrent']} of "
+            f"{against['n_patients']} patients, "
+            f"p={against['wilcoxon_field_vs_recurrent_p']:.3g}")
+        add(f"- {against['baseline_discrepancy']['reading']}")
+        add("")
+
     convergence = stats.get("convergence", {})
     if convergence:
         add("Every arm under one budget and one stopping rule:\n")

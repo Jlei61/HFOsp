@@ -70,6 +70,8 @@ $PY scripts/launch_topic5_spo_cohort.py \
 # --- analysis, figure, closeout, gate --------------------------------------
 stamp "aggregating"
 $PY scripts/analyse_topic5_spo_cohort.py >> "$R/analysis.log" 2>&1
+stamp "against v0.1"
+$PY scripts/compare_topic5_spo_against_v0_1.py >> "$R/analysis.log" 2>&1 || true
 stamp "kernel width sweep"
 $PY scripts/sweep_topic5_spo_kernel_width.py >> "$R/analysis.log" 2>&1 || true
 stamp "spatial scale"
