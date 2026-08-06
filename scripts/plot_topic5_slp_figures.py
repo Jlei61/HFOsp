@@ -46,21 +46,26 @@ def panel_a(ax, subject: str) -> None:
     H = np.load(OUT / "cache" / subject / "seeg_operator.npz")["H"]
     xy = plane["xy_mm"]
 
-    ax.scatter(nodes[:, 0], nodes[:, 1], s=14, c="0.78", marker="o",
+    ax.scatter(nodes[:, 0], nodes[:, 1], s=12, c="0.82", marker="o",
                linewidths=0, label="Tissue units", zorder=1)
     example = int(np.argmin(np.linalg.norm(xy - xy.mean(0), axis=1)))
     weight = H[example]
     seen = weight > 0
-    ax.scatter(nodes[seen, 0], nodes[seen, 1], s=30 + 260 * weight[seen] / weight.max(),
-               c=weight[seen], cmap="viridis", zorder=2)
-    ax.scatter(xy[:, 0], xy[:, 1], s=52, marker="s", facecolor="white",
-               edgecolor="0.15", linewidth=1.2, zorder=3, label="Recording contacts")
-    ax.scatter(xy[example, 0], xy[example, 1], s=95, marker="s", facecolor="#d1495b",
-               edgecolor="0.15", linewidth=1.2, zorder=4, label="Contact shown reading")
+    # Size alone carries the weight.  A colour bar here would collide with the
+    # next panel's axis label and the exact share is not the point of the panel.
+    ax.scatter(nodes[seen, 0], nodes[seen, 1],
+               s=18 + 200 * weight[seen] / weight.max(),
+               color="#3d5a80", alpha=0.75, linewidths=0, zorder=2,
+               label="Units it reads (size = share)")
+    ax.scatter(xy[:, 0], xy[:, 1], s=40, marker="s", facecolor="white",
+               edgecolor="0.15", linewidth=1.1, zorder=3, label="Recording contacts")
+    ax.scatter(xy[example, 0], xy[example, 1], s=80, marker="s", facecolor="#d1495b",
+               edgecolor="0.15", linewidth=1.1, zorder=4, label="Contact shown reading")
     ax.set_xlabel("Along propagation axis (mm)")
     ax.set_ylabel("Across axis (mm)")
     ax.set_title("A  A contact reads a patch of tissue, it is not a node", loc="left")
-    ax.legend(loc="upper left", frameon=False, fontsize=7)
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.24), ncol=2,
+              frameon=False, fontsize=6.5, handletextpad=0.3, columnspacing=1.0)
     ax.set_aspect("equal", adjustable="datalim")
 
 
@@ -78,16 +83,27 @@ def panel_b(ax) -> None:
         if row["test_next_bce"]:
             by_arm.setdefault(row["arm"], {}).setdefault(row["subject"], []).append(
                 float(row["test_next_bce"]))
-    arms = [a for a in ARM_ORDER if a in by_arm]
+    if "STATIC_CONTACT" not in by_arm:
+        ax.text(0.5, 0.5, "baseline arm missing", ha="center", va="center")
+        ax.set_axis_off()
+        return
+    # Paired differences from the static baseline, not raw error.  The raw level
+    # falls as the montage grows -- with more contacts most are absent at any
+    # step, so predicting absence is enough to look good -- which makes levels
+    # incomparable between patients.  The within-patient difference is not.
+    reference = {s: np.median(v) for s, v in by_arm["STATIC_CONTACT"].items()}
+    arms = [a for a in ARM_ORDER if a in by_arm and a != "STATIC_CONTACT"]
     for i, arm in enumerate(arms):
-        values = np.array([np.median(v) for v in by_arm[arm].values()])
+        subjects = [s for s in by_arm[arm] if s in reference]
+        values = np.array([reference[s] - np.median(by_arm[arm][s]) for s in subjects])
         jitter = (np.random.default_rng(i).random(len(values)) - 0.5) * 0.22
         ax.scatter(np.full(len(values), i) + jitter, values, s=18,
-                   color=ARM_COLOUR[arm], alpha=0.75, linewidths=0)
+                   color=ARM_COLOUR[arm], alpha=0.8, linewidths=0)
         ax.plot([i - 0.3, i + 0.3], [np.median(values)] * 2, color="0.15", lw=2)
+    ax.axhline(0.0, color="0.55", lw=1, ls=":")
     ax.set_xticks(range(len(arms)))
     ax.set_xticklabels([ARM_LABEL[a] for a in arms], rotation=18, ha="right", fontsize=7)
-    ax.set_ylabel("Held-out prediction error\n(lower is better)")
+    ax.set_ylabel("Improvement on the static\ncontact rate, same patient")
     ax.set_title("B  One point per patient, seeds pooled within patient", loc="left")
 
 
@@ -99,29 +115,58 @@ def panel_c(ax) -> None:
         return
     gate = json.loads(gate_path.read_text())
     cells = gate["cells"]
+    # The three layers are measured on different scales with different chance
+    # levels -- a ranking score against 0.5, a proportion against 0.5, and a
+    # correlation against 0.  Putting the raw numbers on one axis would invite
+    # comparisons that mean nothing, so each is rescaled so that its own chance
+    # sits at 0 and a perfect answer at 1.
+    n_cells = len(cells)
     layers = [
-        ("Which connections exist", [c["edge_auc"] for c in cells], 0.5,
-         gate["edge_identity"]["floor"]),
-        ("Which way activity travels", [float(c["flow_sign_agrees"]) for c in cells], 0.5,
-         gate["axis_direction"]["floor"]),
-        ("Relative order of push", [c["flow_node_spearman"] for c in cells], 0.0, None),
+        ("Which\nconnections\nexist", [c["edge_auc"] for c in cells], 0.5,
+         gate["edge_identity"]["floor"], "continuous"),
+        ("Which way\nactivity\ntravels", [float(c["flow_sign_agrees"]) for c in cells], 0.5,
+         gate["axis_direction"]["floor"], "proportion"),
+        ("Relative\norder of\npush", [c["flow_node_spearman"] for c in cells], 0.0,
+         None, "continuous"),
     ]
-    for i, (name, values, chance, floor) in enumerate(layers):
-        values = np.array(values, float)
-        jitter = (np.random.default_rng(i).random(len(values)) - 0.5) * 0.24
-        colour = "#2a9d8f" if (floor is None or np.median(values) >= floor) else "#d1495b"
-        ax.scatter(np.full(len(values), i) + jitter, values, s=26, color=colour,
-                   alpha=0.85, linewidths=0)
-        ax.plot([i - 0.3, i + 0.3], [np.median(values)] * 2, color="0.15", lw=2)
-        ax.plot([i - 0.34, i + 0.34], [chance] * 2, color="0.55", lw=1, ls=":")
+    lows, highs = [], []
+    for i, (name, raw, chance, floor, kind) in enumerate(layers):
+        raw = np.array(raw, float)
+        if kind == "proportion":
+            # Individual outcomes here are 0 or 1; drawing them as points would
+            # put half the cells off any sensible axis. The proportion with its
+            # binomial interval is the quantity that actually carries meaning.
+            from scipy.stats import binomtest
+            k = int(raw.sum())
+            interval = binomtest(k, n_cells, 0.5).proportion_ci()
+            centre = (k / n_cells - chance) / (1 - chance)
+            lo = (interval.low - chance) / (1 - chance)
+            hi = (interval.high - chance) / (1 - chance)
+            colour = "#2a9d8f" if (k / n_cells) >= floor else "#d1495b"
+            ax.errorbar([i], [centre], yerr=[[centre - lo], [hi - centre]],
+                        fmt="o", ms=6, color=colour, capsize=3, lw=1.2)
+            lows.append(lo); highs.append(hi)
+        else:
+            values = (raw - chance) / (1.0 - chance)
+            jitter = (np.random.default_rng(i).random(len(values)) - 0.5) * 0.24
+            passed = floor is None or np.median(raw) >= floor
+            colour = "#2a9d8f" if passed else "#d1495b"
+            ax.scatter(np.full(len(values), i) + jitter, values, s=26, color=colour,
+                       alpha=0.85, linewidths=0)
+            ax.plot([i - 0.3, i + 0.3], [np.median(values)] * 2, color="0.15", lw=2)
+            lows.append(values.min()); highs.append(values.max())
         if floor is not None:
-            ax.plot([i - 0.34, i + 0.34], [floor] * 2, color="0.15", lw=1, ls="--")
+            ax.plot([i - 0.34, i + 0.34], [(floor - chance) / (1 - chance)] * 2,
+                    color="0.25", lw=1.1, ls="--")
+    ax.axhline(0.0, color="0.55", lw=1, ls=":")
     ax.set_xticks(range(len(layers)))
-    ax.set_xticklabels([n for n, *_ in layers], rotation=18, ha="right", fontsize=7)
-    ax.set_ylabel("Recovered from data with\na known answer")
+    ax.set_xticklabels([n for n, *_ in layers], fontsize=6.5)
+    ax.set_ylabel("Recovered, rescaled so that\nchance is 0 and perfect is 1")
+    span = max(highs) - min(lows)
+    ax.set_ylim(min(lows) - 0.12 * span, max(highs) + 0.22 * span)
     ax.set_title("C  Only the weakest structural layer survives", loc="left")
-    ax.text(0.99, 0.02, "dotted = chance, dashed = required", transform=ax.transAxes,
-            ha="right", va="bottom", fontsize=6.5, color="0.35")
+    ax.text(0.02, 0.97, "dotted 0 = chance\ndashed = required to report",
+            transform=ax.transAxes, ha="left", va="top", fontsize=6.5, color="0.35")
 
 
 def panel_d(ax) -> None:
