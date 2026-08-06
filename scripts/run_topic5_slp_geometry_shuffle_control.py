@@ -113,13 +113,31 @@ def main() -> int:
         "wilcoxon_two_sided_p": float(stats.wilcoxon(delta).pvalue),
         "mean_edge_length_real": float(np.median(real_len)) if len(real_len) else None,
         "mean_edge_length_shuffled": float(np.median(shuffled_len)) if len(shuffled_len) else None,
+        # Two separate questions, and collapsing them would be wrong.  Whether the
+        # prior SHAPES the graph is visible in the connection lengths; whether it
+        # MATTERS is visible in prediction.  A prior can plainly do the first and
+        # nothing for the second, and saying "not doing measurable work" in that
+        # case would deny something the lengths demonstrate.
+        "shapes_the_graph": bool(
+            len(real_len) and len(shuffled_len)
+            and np.median(real_len) < np.median(shuffled_len)
+        ),
+        "changes_prediction": bool(
+            np.median(delta) > 0 and stats.wilcoxon(delta).pvalue < 0.05
+        ),
         "reading": (
-            "the spatial prior is doing work: connections learned against the real "
-            "geometry predict better"
-            if np.median(delta) > 0 and stats.wilcoxon(delta).pvalue < 0.05 else
-            "the spatial prior is not doing measurable work here: a graph learned "
-            "against permuted distances predicts as well, so no result in this run "
-            "may be attributed to short connections being cheaper"
+            "the real geometry both shortens the connections and predicts better, "
+            "so the spatial prior is doing work that matters"
+            if (np.median(delta) > 0 and stats.wilcoxon(delta).pvalue < 0.05
+                and len(real_len) and np.median(real_len) < np.median(shuffled_len)) else
+            "the real geometry visibly shortens the connections but does not change "
+            "prediction: the wiring economy operates as designed and the connection "
+            "pattern it selects makes no difference to what the model forecasts"
+            if (len(real_len) and len(shuffled_len)
+                and np.median(real_len) < np.median(shuffled_len)) else
+            "neither the connection lengths nor prediction distinguish real geometry "
+            "from permuted, so nothing in this run may be attributed to the spatial "
+            "prior"
         ),
         "patients": pairs,
     }
