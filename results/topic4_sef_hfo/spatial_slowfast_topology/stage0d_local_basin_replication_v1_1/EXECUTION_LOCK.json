@@ -1,0 +1,99 @@
+{
+  "schema_version": "topic4_stage0d_v1_1_execution_lock.v1",
+  "locked_before_numerical_execution": true,
+  "v1_immutable_inputs": {
+    "spec": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0d-local-basin-replication-design.md",
+      "expected_sha256": "21f45fb5d1f980a7001e605cc9f6f53c8aad2289996f5d898a08a1c615e55d89",
+      "observed_sha256": "21f45fb5d1f980a7001e605cc9f6f53c8aad2289996f5d898a08a1c615e55d89",
+      "pass": true
+    },
+    "config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0d.yaml",
+      "expected_sha256": "2413909ce3c5c51418ccdfb95685ac7d3e76b3aae7a051fc26ae966489258793",
+      "observed_sha256": "2413909ce3c5c51418ccdfb95685ac7d3e76b3aae7a051fc26ae966489258793",
+      "pass": true
+    },
+    "module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0d.py",
+      "expected_sha256": "7ded4464f77ac96c37c9669c9fb16b5b2c13eb66c75d0acce563ed58199952d7",
+      "observed_sha256": "7ded4464f77ac96c37c9669c9fb16b5b2c13eb66c75d0acce563ed58199952d7",
+      "pass": true
+    },
+    "runner": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0d.py",
+      "expected_sha256": "5bf87bc5a6d574f19072b4c3fae5dbc1d10a6205647b6c12afa90549b32388cb",
+      "observed_sha256": "5bf87bc5a6d574f19072b4c3fae5dbc1d10a6205647b6c12afa90549b32388cb",
+      "pass": true
+    },
+    "tests": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0d.py",
+      "expected_sha256": "6bac873d6100e0aa287884af363a2044ba774fc60c85e08acb34859f067826ed",
+      "observed_sha256": "6bac873d6100e0aa287884af363a2044ba774fc60c85e08acb34859f067826ed",
+      "pass": true
+    },
+    "summary": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/stage0d_local_basin_summary.json",
+      "expected_sha256": "0ac3084102e56085ddf6c4e3f8dfd5ace1e16214efb2a22bf7ad25739f4dfccd",
+      "observed_sha256": "0ac3084102e56085ddf6c4e3f8dfd5ace1e16214efb2a22bf7ad25739f4dfccd",
+      "pass": true
+    },
+    "fork_outcomes": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/fork_outcomes.json",
+      "expected_sha256": "dcba29655fd673503b0d462debf23dbfc456cb8f485477aa114e1c2854e26fee",
+      "observed_sha256": "dcba29655fd673503b0d462debf23dbfc456cb8f485477aa114e1c2854e26fee",
+      "pass": true
+    },
+    "phase_source": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/phase_source.json",
+      "expected_sha256": "f676c6f331cbaa1401ff348e014ded724aba22d4e6000c3ff50ffa9ea1e3cec9",
+      "observed_sha256": "f676c6f331cbaa1401ff348e014ded724aba22d4e6000c3ff50ffa9ea1e3cec9",
+      "pass": true
+    }
+  },
+  "v1_1_sources_pre_execution": {
+    "spec": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0d-local-basin-replication-v1_1-engineering-repair-design.md",
+      "sha256": "a3e075c9f1a5cab040bc94baf5bc399f03e9905bb2f6daeced867a083cf7fd63"
+    },
+    "config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0d_v1_1.yaml",
+      "sha256": "87173a62bc3e2bd3c972214da5fbe44b16a028f8063c2a33a7723a12d2ead860"
+    },
+    "module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0d_v1_1.py",
+      "sha256": "867b8e029bf706459a854e450c9c34d1973b965485ba978597bcdc0d9df069fa"
+    },
+    "runner": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0d_v1_1.py",
+      "sha256": "4d4c9838f19b357c25d94d9711dce972c9553592c95f3618d3cbc43ded6055b0"
+    },
+    "tests": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0d_v1_1.py",
+      "sha256": "34c2e37b08dbe51ee5a7a1f0ab6f996507f18a5e8bc5838c42549bd9d2b5f439"
+    }
+  },
+  "v1_1_sources_post_execution": {
+    "spec": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0d-local-basin-replication-v1_1-engineering-repair-design.md",
+      "sha256": "a3e075c9f1a5cab040bc94baf5bc399f03e9905bb2f6daeced867a083cf7fd63"
+    },
+    "config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0d_v1_1.yaml",
+      "sha256": "87173a62bc3e2bd3c972214da5fbe44b16a028f8063c2a33a7723a12d2ead860"
+    },
+    "module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0d_v1_1.py",
+      "sha256": "867b8e029bf706459a854e450c9c34d1973b965485ba978597bcdc0d9df069fa"
+    },
+    "runner": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0d_v1_1.py",
+      "sha256": "4d4c9838f19b357c25d94d9711dce972c9553592c95f3618d3cbc43ded6055b0"
+    },
+    "tests": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0d_v1_1.py",
+      "sha256": "34c2e37b08dbe51ee5a7a1f0ab6f996507f18a5e8bc5838c42549bd9d2b5f439"
+    }
+  },
+  "sources_unchanged_during_execution": true
+}

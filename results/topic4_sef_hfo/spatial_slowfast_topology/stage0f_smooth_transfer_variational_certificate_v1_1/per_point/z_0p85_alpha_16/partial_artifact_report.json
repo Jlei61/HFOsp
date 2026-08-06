@@ -1,0 +1,31 @@
+{
+  "schema_version": "topic4_stage0f_v1_1_point_artifact_report.v1",
+  "z": 0.85,
+  "alpha_G": 16.0,
+  "outcome": "periodic_orbit_derivative_unresolved",
+  "failed_gates": [
+    "base_whole_return_jv"
+  ],
+  "cycles_present": [
+    "base"
+  ],
+  "transfer_parity_rows_present": 0,
+  "variational_levels_present": [
+    "base"
+  ],
+  "variational_levels_valid": {
+    "base": true
+  },
+  "whole_return_jv_levels_present": [
+    "base"
+  ],
+  "whole_return_jv_valid_rows": {
+    "base": 2
+  },
+  "serialized_counts": {
+    "cycle_traces": 1,
+    "certificate_matrices": 3,
+    "certificate_multipliers": 24,
+    "whole_return_jv_arrays": 2
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "status": "paper-ready visual diagnostic; not a locked Figure 5 panel",
+  "figure": "results/paper-ready-figure/fig5_mz_divisive_current_stage/figures/fig5_candidate_E1146_mz_divisive_failure_summary.png",
+  "sources": {
+    "v2_summary": "results/topic4_sef_hfo/mz_divisive_lifecycle/runs/20260719T162035.230785Z_6ce230e_e1acc35592_slow_gate/summary.json",
+    "v2_strict_audit": "results/topic4_sef_hfo/mz_divisive_lifecycle/runs/20260719T162035.230785Z_6ce230e_e1acc35592_slow_gate/strict_audit.json",
+    "v2_trace": "results/topic4_sef_hfo/mz_divisive_lifecycle/runs/20260719T162035.230785Z_6ce230e_e1acc35592_slow_gate/traces_downsampled.npz",
+    "v3_summary": "results/topic4_sef_hfo/mz_divisive_lifecycle/runs/20260719T172358.336529Z_6ce230e_80a127d772_slow_gate_m/summary.json",
+    "v3_strict_audit": "results/topic4_sef_hfo/mz_divisive_lifecycle/runs/20260719T172358.336529Z_6ce230e_80a127d772_slow_gate_m/strict_audit.json",
+    "v3_trace": "results/topic4_sef_hfo/mz_divisive_lifecycle/runs/20260719T172358.336529Z_6ce230e_80a127d772_slow_gate_m/traces_downsampled.npz"
+  },
+  "v2": {
+    "retrospective_centered_onset_ms": 13856.0,
+    "causal_trailing_recruited_state": {
+      "status": "recruited_macrostate",
+      "onset_ms": 13976.0,
+      "confirmed_ms": 14976.0,
+      "episode_end_ms": 20000.0,
+      "duration_ms": 6024.0,
+      "reaches_record_end": true,
+      "envelope_support": "trailing_only",
+      "envelope_ms": 250.0,
+      "threshold_hz": 20.0,
+      "minimum_duration_ms": 1000.0
+    },
+    "causal_minus_centered_onset_ms": 120.0,
+    "duration_ms": 6144.0,
+    "burst_peak_hz": 5.045572916666666,
+    "returned": false,
+    "tail_slopes_per_s": {
+      "z_mean": -0.021822185036346475,
+      "z_min": -0.03339099759673199,
+      "m_mean": 0.0,
+      "adap": 0.0,
+      "SG": 0.004563529283021896,
+      "AG": 0.006766852491991602,
+      "TG": 0.03777763611054355,
+      "UTG": 0.04547566014660929
+    }
+  },
+  "v3": {
+    "verdict": "no_strict_lifecycle_candidate_in_locked_eta_ladder",
+    "eta_m": [
+      0.0,
+      0.00186,
+      0.00373,
+      0.00745,
+      0.01118,
+      0.01863
+    ],
+    "interpretation": "single_seed_scoped_no_go_not_universal_mechanism_rejection"
+  },
+  "claim_boundary": [
+    "single-seed operational sustained recruitment, not a settled ictal attractor",
+    "centered-envelope onset is retrospective; the plotted causal onset uses trailing samples only",
+    "linear M prevented a one-second recruited macrostate; it did not terminate an established state",
+    "this summary contains no spatial claim"
+  ]
+}

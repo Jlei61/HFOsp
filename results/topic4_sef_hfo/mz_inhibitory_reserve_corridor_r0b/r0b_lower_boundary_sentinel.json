@@ -1,0 +1,40 @@
+{
+  "status": "R0B_LOWER_RAMP_CONFIRMED_ANCHOR_BRACKET",
+  "gates": {
+    "sentinel_cartesian_product_complete": true,
+    "known_failure_anchor_cartesian_product_complete": true,
+    "known_failure_anchor_confirmed_in_canonical_r0b": true,
+    "at_least_one_failclosed_safe_anchor": true,
+    "unresolved_q_lies_strictly_between_confirmed_anchors": true
+  },
+  "q_axis": [
+    0.83,
+    0.8325
+  ],
+  "outcomes_by_q": {
+    "0.83": [
+      "LLL"
+    ],
+    "0.8325": [
+      "LLL"
+    ]
+  },
+  "highest_confirmed_failing_q": 0.825,
+  "lowest_confirmed_safe_q": 0.83,
+  "boundary_bracket_width": 0.0050000000000000044,
+  "unresolved_source_q": 0.8275,
+  "unresolved_source_reason": "base-dt Poincare closure 2.24-2.30e-5 exceeds the locked 2e-5 gate despite zero support/bound violations",
+  "input_sha256": {
+    "transfer_path": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+    "orbit_cycle_path": "3f2709a01451e9e1d9e135e454346e857771866c5eb3fa0d4c12a77cc5e073bf",
+    "orbit_summary_path": "8355b196b7adc1b942935f92acec1fb5d738ef59ff7e3aa8606ce3f7fe6b7c56"
+  },
+  "claim_boundary": [
+    "targeted dual-dt four-phase fixed-q ramp sentinel selected after R0b",
+    "the q=.825 failing anchor comes from the canonical R0b stress arm",
+    "q=.8275 is excluded as source-unresolved rather than relabeled safe or failed",
+    "the anchors bracket an unresolved interval; they do not prove a monotone dynamical boundary",
+    "this does not integrate reserve dynamics"
+  ],
+  "artifact": "results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_lower_boundary_sentinel.csv"
+}

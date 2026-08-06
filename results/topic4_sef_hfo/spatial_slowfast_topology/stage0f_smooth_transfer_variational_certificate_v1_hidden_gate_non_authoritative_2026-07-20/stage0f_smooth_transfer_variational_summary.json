@@ -1,0 +1,145 @@
+{
+  "schema_version": "topic4_stage0f_smooth_transfer_variational_certificate.v1",
+  "verdict": "STAGE0F_NUMERICAL_UNRESOLVED",
+  "engineering_pass": true,
+  "sources_and_inputs_unchanged": true,
+  "parameter_points": [
+    {
+      "z": 0.85,
+      "alpha_G": 15.0,
+      "outcome": "periodic_orbit_derivative_unresolved",
+      "derivative_certified": false,
+      "failed_gates": [
+        "base_smooth_shooting"
+      ],
+      "stage1_open": false,
+      "space_open": false,
+      "state_scales": [
+        0.09664087918647704,
+        0.20968907222492558,
+        0.08991575014683123,
+        0.1136875973370354,
+        0.08991575014683123,
+        0.1136875973370354,
+        0.0626940063369978,
+        0.7055566118233831,
+        0.35724527390695376
+      ],
+      "base_smooth_shooting": {
+        "pass": false,
+        "checks": {
+          "shooting_converged": true,
+          "fixed_point_residual": true,
+          "period_cv": true,
+          "cycle_valid": true,
+          "first_closure": true,
+          "second_closure": false,
+          "two_cycle_aligned": true
+        },
+        "residual_series": [
+          8.100271868220665e-05,
+          2.88844673533408e-08,
+          3.324915194074915e-12,
+          1.708972956244453e-15
+        ],
+        "period_series_ms": [
+          604.8208442250617,
+          604.8152831789282,
+          604.815284482363,
+          604.8152844822133
+        ],
+        "last_four_period_cv": 3.980755699913856e-06,
+        "closure_residual": 1.0986254718714341e-15,
+        "second_closure_residual": 1.5531345266793173e-06,
+        "aligned_cycle_residual": 1.2929374830195127e-05
+      }
+    },
+    {
+      "z": 0.85,
+      "alpha_G": 16.0,
+      "outcome": "periodic_orbit_derivative_unresolved",
+      "derivative_certified": false,
+      "failed_gates": [
+        "base_smooth_shooting"
+      ],
+      "stage1_open": false,
+      "space_open": false,
+      "state_scales": [
+        0.09434251230935006,
+        0.20705067882182449,
+        0.08795578698279181,
+        0.11177874649836085,
+        0.08795578698279181,
+        0.11177874649836085,
+        0.0613171992322944,
+        0.7000361871900492,
+        0.3526551620223682
+      ],
+      "base_smooth_shooting": {
+        "pass": false,
+        "checks": {
+          "shooting_converged": true,
+          "fixed_point_residual": true,
+          "period_cv": true,
+          "cycle_valid": true,
+          "first_closure": true,
+          "second_closure": false,
+          "two_cycle_aligned": true
+        },
+        "residual_series": [
+          8.263126676914367e-05,
+          6.806585202108807e-09,
+          4.5015035364803135e-13,
+          2.234773500025994e-15
+        ],
+        "period_series_ms": [
+          608.4417570015027,
+          608.435988804927,
+          608.4359890990216,
+          608.4359890990429
+        ],
+        "last_four_period_cv": 4.104970139936077e-06,
+        "closure_residual": 1.9864653333564392e-15,
+        "second_closure_residual": 1.663937898614717e-06,
+        "aligned_cycle_residual": 5.100334811267854e-05
+      }
+    }
+  ],
+  "resource_usage": {
+    "blas_threads": 1,
+    "peak_rss_gib": 0.17278671264648438,
+    "rss_limit_gib": 4.0,
+    "rss_pass": true,
+    "wall_seconds": 634.9920838559046
+  },
+  "smooth_transfer": {
+    "name": "orbit_local_cubic_exact_table",
+    "domain": {
+      "mu_min_mv": -160.0,
+      "mu_max_mv": 80.0,
+      "sigma_min_mv": 3.0,
+      "sigma_max_mv": 20.0
+    },
+    "mu_nodes": 1921,
+    "sigma_nodes": 273,
+    "fit_or_regularization": false,
+    "extrapolation": false
+  },
+  "figure_metadata": {
+    "png": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate/figures/stage0f_smooth_transfer_variational_certificate.png",
+    "pdf": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate/figures/stage0f_smooth_transfer_variational_certificate.pdf",
+    "multiplier_count_rendered": 0,
+    "panels": {
+      "A": "smooth exact-table periodic orbit",
+      "B": "spectral radius for chain-rule and two centered-RHS maps",
+      "C": "all transverse multipliers",
+      "D": "direct exact-Siegert value and derivative parity"
+    }
+  },
+  "scope": {
+    "stage1_open": false,
+    "spatial_simulation_open": false,
+    "parameter_search_performed": false,
+    "equations_changed": false
+  }
+}

@@ -1,0 +1,105 @@
+result_root: results/topic4_sef_hfo/mz_inhibitory_reserve_recovery_corridor
+
+mapping_summary_path: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/reserve_mapping_summary.json
+cycle_sensor_path: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_sensor_replay.npz
+cycle_measurements_path: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_use_measurements.csv
+event_sensor_path: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/fixed_event_sensor_raw.npz
+r0b_summary_path: results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_summary.json
+r0b_ramp_path: results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_smooth_ramp.csv
+
+input_sha256:
+  mapping_summary_path: 7bad797aef9b381fe2ecd3b9ee8a90dd5264c5c366c2457b073d0535153bdaa8
+  cycle_sensor_path: ac7e74278f63dbe14092be3cc1d7dc7e7182718313bad3528c75fd8c509389f1
+  cycle_measurements_path: cde2d7d4aa09f611d800bb014da5cb47e51b97acf8a91b0b1dd327b24df71e00
+  event_sensor_path: 923827f24ad3ff0105d5db94abe5079568755540c90e742da836374b3026a65b
+  r0b_summary_path: 54a49a4486a25a3b8c16a4da8f3b92769a6117d3ff494ef7d7a2d7cf40d0f54c
+  r0b_ramp_path: 5c2a1697f791ee03e2fc9d7224e10c28d1f9f7100e636542b9ff0e68aba971d3
+
+model:
+  q_rest: 0.90
+  q_hold_axis: [0.8400, 0.8425, 0.8450]
+  tau_recovery_s_axis: [20.0, 40.0, 50.0, 60.0, 70.0, 80.0, 90.0, 100.0, 120.0, 160.0]
+  preferred_tau_recovery_s: 80.0
+  preferred_q_hold: 0.8425
+  entry_fold_q: 0.8558315843088748
+  event_final_target_q: 0.8550
+
+calibration:
+  primary_cycle_phase: 0.0
+  primary_cycle_dt_ms: 0.125
+  q_reserve_search_lower: 0.75
+  q_reserve_upper_margin: 1.0e-5
+  tau_depletion_search_ms: [25.0, 3000.0]
+  tau_depletion_scan_points: 160
+  root_tolerance_q: 1.0e-9
+  maximum_bisection_iterations: 100
+
+locked_schedule:
+  onsets_ms: [1000.0, 3122.0, 5044.0, 6321.0, 7531.0, 10915.0]
+  stop_ms: 11035.0
+  expected_returning_events: 6
+
+integration:
+  event_scalar_substeps: [1, 2]
+
+sensitivity:
+  fixed_parameter_tau_recovery_s: [72.0, 88.0]
+  post_event_below_fold_margin_q: 0.0005
+
+schedule_probes:
+  template_source_onset_ms: 1000.0
+  template_stop_after_onset_ms: 120.0
+  stop_after_last_onset_ms: 120.0
+  isolated: [1000.0]
+  dense_1200ms: [1000.0, 2200.0, 3400.0, 4600.0, 5800.0, 7000.0]
+  sparse_3400ms: [1000.0, 4400.0, 7800.0, 11200.0, 14600.0, 18000.0]
+  heldout_seed_20260721: [1000.0, 2733.0, 3967.0, 5494.0, 7778.0, 10125.0]
+  heldout_seed_20260722: [1000.0, 6103.0, 8788.0, 10641.0, 12939.0, 14879.0]
+  heldout_seed_20260723: [1000.0, 2237.0, 3670.0, 10593.0, 11916.0, 12936.0]
+
+periodic_gate:
+  integrated_returns_per_window: 8
+  relative_phase_fractions: [0.0, 0.25, 0.50, 0.75]
+  source_dt_ms: [0.125, 0.0625]
+  minimum_q: 0.8325
+  maximum_q: 0.8500
+  maximum_abs_mean_minus_hold: 0.00125
+  maximum_per_return_multiplier: 0.90
+  maximum_closure_error: 1.0e-10
+
+entry_gate:
+  pre_last_margin_q: 0.00125
+
+handoff:
+  q_reset_safe: 0.885
+  q_recovery_report: 0.895
+  persistence_tau_ms: 750.0
+  persistence_start: 1.0
+  persistence_off: 0.03
+  reset_horizon_ms: 120000.0
+  tau_m_down_ms: 12000.0
+  additive_margin_mv: 0.025
+  additive_release_threshold_mv: 0.020
+  reporting_dt_ms: 1.0
+
+acceptance:
+  minimum_consecutive_tau_nodes: 3
+  required_qhold_count_per_tau: 3
+  short_coupled_tau_recovery_s: [60.0, 70.0, 80.0]
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  max_memory_gib: 1.0
+
+scope:
+  scalar_sensor_replay_only: true
+  analytic_postictal_handoff_only: true
+  thresholded_eligibility_used: false
+  coupled_fast_qm: false
+  autonomous_lifecycle: false
+  continuous_field: false
+  full_snn: false
+  ee_weight_change: false
+  ee_kernel_change: false
+  conductance_membrane: false

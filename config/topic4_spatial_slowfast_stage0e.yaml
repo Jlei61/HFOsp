@@ -1,0 +1,87 @@
+result_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit
+phase_source_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication
+transfer_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1
+
+locked_hashes:
+  phase_source_traces: c819aa83b926b53d771a4124d18c818aadc217ee21f57d873b1e7b897afb6397
+  phase_source_json: f676c6f331cbaa1401ff348e014ded724aba22d4e6000c3ff50ffa9ea1e3cec9
+  extra_fine_transfer: dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703
+  stage0c_module: 25b6538007d6974b44aa500f4f05929fa6f1d9ed48c6692d8acb1798180235ca
+  transfer_module: 48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed
+
+points:
+  - {z: 0.85, alpha_G: 15.0}
+  - {z: 0.85, alpha_G: 16.0}
+model: {w_ee_mult: 1.1, ratio: 1.0}
+seed: {source: stage0d_phase_source, phase_id: phase_050, phase_index: 2}
+
+section:
+  state_index: 8
+  state_name: S_G
+  level: 0.15
+  direction: upward
+  min_return_ms: 300.0
+  max_return_ms: 1200.0
+
+scout:
+  dt_ms: 0.125
+  duration_ms: 12000.0
+  save_stride: 1
+  minimum_returns: 12
+  waveform_phase_bins: 256
+
+shooting:
+  max_iterations: 20
+  residual_tolerance: 1.0e-6
+  period_cv_tolerance: 1.0e-3
+  aligned_cycle_residual_tolerance: 2.0e-3
+  scale_floor: 1.0e-3
+  final_monotone_count: 3
+
+floquet:
+  epsilon_relative: [1.0e-3, 3.0e-4, 1.0e-4]
+  epsilon_rho_range_max: 0.03
+  jacobian_relative_difference_max: 0.10
+  gradient_ratio_max: 1.25
+  gradient_additive_tolerance: 1.0e-3
+  dt_rho_difference_max: 0.05
+  minimum_unit_circle_margin: 0.05
+  uncertainty_multiplier: 3.0
+
+dt_half:
+  dt_ms: 0.0625
+  period_abs_ms: 1.0
+  period_relative: 0.005
+  aligned_waveform_residual: 0.03
+
+return_battery:
+  phases: [0.0, 0.25, 0.5, 0.75]
+  perturbation_fraction: 0.03
+  n_returns: 8
+  anchor_final_distance_max: 5.0e-4
+  family_median_ratio_max: 0.70
+  family_max_final_distance: 0.05
+  log_slope_max: 0.0
+  fast_directions:
+    - [1, -1, 1, -1, -1, 1]
+    - [1, 1, -1, -1, 1, -1]
+  pool_directions:
+    - [1, -1, 0]
+    - [-1, 0, 1]
+
+physical_acceptance:
+  finite_high_max_hz: 100.0
+  report_high_threshold_hz: 80.0
+  max_refractory_occupancy: 0.05
+
+resource_contract: {blas_threads: 1, max_memory_gib: 4.0}
+
+scope:
+  parameter_search: false
+  change_equations: false
+  change_transfer: false
+  fft_surrogate: false
+  noise: false
+  slow_variables: false
+  spatial_coupling: false
+  stage1: false

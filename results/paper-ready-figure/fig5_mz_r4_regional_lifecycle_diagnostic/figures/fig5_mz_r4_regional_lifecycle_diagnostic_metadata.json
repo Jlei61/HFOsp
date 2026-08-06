@@ -1,0 +1,104 @@
+{
+  "title": "R4 regional q-p-M hybrid lifecycle diagnostic",
+  "status": "R4_ACTUAL_ENTRY_REGIONAL_HYBRID_LIFECYCLE_CENTER_SUPPORTED",
+  "scientific_layer": "three_patch_fixed_bath_rate_model_diagnostic",
+  "inputs": {
+    "results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/segment_a_center_canary_trace.npz": "3ff79988e205f3cd9751c800103d87e976c8eae264bee7299b468dfc484d285b",
+    "results/topic4_sef_hfo/mz_actual_entry_lifecycle_closure/representative_traces_dt0p125.npz": "ae979c078bf0d84165e9a947a8e721a5aac7a420ff503a04cf980b4d57d3ce4b",
+    "results/topic4_sef_hfo/mz_actual_entry_lifecycle_closure/hybrid_endpoint_table.csv": "82fb9b1907aff17692ac5d06b226cf4cbf23c1b73773dbd32bfb35b346f3873d",
+    "results/topic4_sef_hfo/mz_actual_entry_lifecycle_closure/actual_entry_lifecycle_closure_summary.json": "c04d2580e2d5c0da46b5102a336f8631ab85d49702dbb3de4fd510e1ef9622c8"
+  },
+  "outputs": [
+    "results/paper-ready-figure/fig5_mz_r4_regional_lifecycle_diagnostic/figures/fig5_mz_r4_regional_lifecycle_diagnostic.png",
+    "results/paper-ready-figure/fig5_mz_r4_regional_lifecycle_diagnostic/figures/fig5_mz_r4_regional_lifecycle_diagnostic.pdf"
+  ],
+  "landmarks": {
+    "regional_entry_fold_q": 0.8558315843088748,
+    "entry_ms": 7620.0,
+    "latch_set_ms": 10234.0,
+    "termination_complete_ms": 11172.0,
+    "latch_reset_absolute_ms": 74117.30225332972,
+    "same_basin_absolute_ms": 311720.8753961687
+  },
+  "snapshot_proxy": "log10(1 + max(rE_fast_hz - source_baseline_hz, 0)^2), displayed piecewise-constant on the exact P3 masks",
+  "snapshots": [
+    {
+      "label": "IED-like peak",
+      "source": "source",
+      "time_ms": 1050.0,
+      "rE_fast_hz": [
+        58.823589235544205,
+        43.38207468390465,
+        1.9289017654955387
+      ]
+    },
+    {
+      "label": "entry",
+      "source": "source",
+      "time_ms": 7620.0,
+      "rE_fast_hz": [
+        41.89597815275192,
+        25.337427854537964,
+        8.044400252401829
+      ]
+    },
+    {
+      "label": "burst 1",
+      "source": "source",
+      "time_ms": 8857.0,
+      "rE_fast_hz": [
+        98.73802214860916,
+        61.20007112622261,
+        3.519876394420862
+      ]
+    },
+    {
+      "label": "burst 4",
+      "source": "source",
+      "time_ms": 10837.0,
+      "rE_fast_hz": [
+        108.00198465585709,
+        67.19441711902618,
+        4.685195628553629
+      ]
+    },
+    {
+      "label": "post-exit",
+      "source": "source",
+      "time_ms": 11172.0,
+      "rE_fast_hz": [
+        0.8019418455660343,
+        0.7762846653349698,
+        0.6601913482882082
+      ]
+    },
+    {
+      "label": "same-basin rest",
+      "source": "final",
+      "time_ms": 4000.0,
+      "rE_fast_hz": [
+        0.8231561514548957,
+        0.8207359351217747,
+        0.8112424984574318
+      ]
+    },
+    {
+      "label": "recovered IED-like",
+      "source": "late_fork",
+      "time_ms": 1050.0,
+      "rE_fast_hz": [
+        60.248587280511856,
+        44.107645750045776,
+        1.967110438272357
+      ]
+    }
+  ],
+  "claim_boundary": [
+    "regional rates are not virtual SEEG or LFP",
+    "piecewise-constant P3 snapshots are not a continuous emergent field or wavefront",
+    "registered core pulses trigger entry; zero-input spontaneous onset was not tested",
+    "the long recovery contains analytic bridges bracketed by full-fast sentinels",
+    "the recovered challenge is a same-basin state fork, not an uninterrupted spontaneous train",
+    "frozen regional exit evidence is sampled at q=.855/.850; the precise dynamic exit fold near q=.845 was not continued"
+  ]
+}

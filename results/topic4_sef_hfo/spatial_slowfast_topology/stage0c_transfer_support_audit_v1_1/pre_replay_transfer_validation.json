@@ -1,0 +1,53 @@
+{
+  "exact_reference": {
+    "pass": true,
+    "n_finite_canonical_comparisons": 94,
+    "n_nonfinite_canonical_extreme_points": 14,
+    "max_abs_rate_error_khz": 1.6653345369377348e-16,
+    "max_relative_rate_error_above_1e-12_khz": 1.3502448728986944e-15,
+    "extreme_low_mu_log_rate_finite": true,
+    "extreme_low_mu_monotone": true,
+    "endpoint_branch_log_rate_jump": 7.88556270947538e-07,
+    "mu_range_monotonicity_audit_mv": [
+      -2500.0,
+      -40.0
+    ]
+  },
+  "extra_fine_overlap": {
+    "transfer": "extra_fine",
+    "domain": {
+      "mu_mv": [
+        -40.0,
+        120.0
+      ],
+      "sigma_mv": [
+        0.5,
+        30.0
+      ]
+    },
+    "seed": 20260720,
+    "populations": [
+      {
+        "population": "E",
+        "n": 2048,
+        "max_abs_error_hz": 0.031062138168104665,
+        "p99_abs_error_hz": 0.0009026428199161891,
+        "max_relative_error_meaningful": 0.014246158115917541,
+        "p99_relative_error_meaningful": 0.0006219701559517456
+      },
+      {
+        "population": "I",
+        "n": 2048,
+        "max_abs_error_hz": 0.062124276336204994,
+        "p99_abs_error_hz": 0.0018052856398482683,
+        "max_relative_error_meaningful": 0.014246158115914006,
+        "p99_relative_error_meaningful": 0.0008410801006338444
+      }
+    ],
+    "pass": true,
+    "acceptance": {
+      "max_abs_error_hz": 0.25,
+      "p99_relative_error_meaningful": 0.02
+    }
+  }
+}

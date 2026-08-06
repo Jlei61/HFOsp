@@ -1,0 +1,59 @@
+result_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0a_oracle
+
+normal_form:
+  beta: 1.0
+  omega_hz: 1.0
+
+frozen_scan:
+  dt_s: 0.01
+  duration_s: 200.0
+  save_stride: 5
+  mu_values: [-0.35, -0.30, -0.275, -0.25, -0.225, -0.15, -0.10, -0.05, 0.0, 0.025, 0.05, 0.10, 0.15]
+  initial_radii: [0.02, 0.25, 0.55, 0.90, 1.40]
+  low_initial_radius: 0.02
+  high_initial_radius: 1.40
+  boundary_tolerance: 0.005
+
+classifier:
+  tail_fraction: 0.40
+  low_radius: 0.04
+  min_cycle_radius: 0.12
+  max_radial_cv: 0.06
+  max_relative_drift: 0.06
+  min_tail_cycles: 5.0
+  min_spectral_power_ratio: 0.50
+  ceiling_radius: 2.0
+  ceiling_margin_fraction: 0.02
+  max_ceiling_occupancy: 0.05
+
+slow_loop:
+  dt_s: 0.02
+  duration_s: 135.0
+  save_stride: 5
+  retrigger_duration_s: 120.0
+  retrigger_dt_s: 0.01
+  parameters:
+    mu_base: -0.18
+    permissivity_gain: 0.35
+    recovery_gain: 0.55
+    permissivity_target: 1.0
+    tau_permissivity_s: 40.0
+    recruited_permissivity_depletion_per_s: 0.05
+    tau_recovery_s: 10.0
+    recovery_gate_radius: 0.30
+    recovery_gate_width: 0.03
+    initial_radius: 0.02
+    initial_permissivity: 0.0
+    initial_recovery: 0.0
+    recruited_radius: 0.30
+    minimum_recruited_s: 5.0
+    return_radius: 0.05
+    minimum_return_s: 3.0
+    early_retrigger_delay_s: 1.0
+    late_retrigger_delay_s: 25.0
+    retrigger_radius: 0.90
+
+resource_contract:
+  max_cpus: 4
+  max_memory_gib: 4.0
+  blas_threads: 1

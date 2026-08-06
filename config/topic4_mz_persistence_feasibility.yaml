@@ -1,0 +1,94 @@
+result_root: results/topic4_sef_hfo/mz_persistence_feasibility
+
+current_capture_path: results/topic4_sef_hfo/mz_divisive_lifecycle/figure_capture/current_stage_capture.npz
+current_capture_json: results/topic4_sef_hfo/mz_divisive_lifecycle/figure_capture/current_stage_capture.json
+entry_exit_summary_path: results/topic4_sef_hfo/mz_entry_exit_nullclines/entry_exit_summary.json
+orbit_summary_path: results/topic4_sef_hfo/mz_additive_orbit_continuation/orbit_continuation_summary.json
+orbit_cycle_path: results/topic4_sef_hfo/mz_additive_orbit_continuation/cycle_states_and_traces.npz
+
+input_sha256:
+  current_capture_path: 4d3ebbc7cb0f5e465618e42f1d6c977861c3f1cd5240d989f0b5895269a4ba1d
+  current_capture_json: 3668a6e7c349f24f110864cbdfacbb5910bc23c2ffd592a7873dd878590edae0
+  entry_exit_summary_path: c2d4c3040695b79b046a347dd6ca68bbc05f131f89f520aa13044d374179d01f
+  orbit_summary_path: 8355b196b7adc1b942935f92acec1fb5d738ef59ff7e3aa8606ce3f7fe6b7c56
+  orbit_cycle_path: 3f2709a01451e9e1d9e135e454346e857771866c5eb3fa0d4c12a77cc5e073bf
+
+causal_onset:
+  envelope_ms: 250.0
+  threshold_hz: 20.0
+  minimum_duration_ms: 1000.0
+  expected_onset_ms: 13978.8
+
+persistence_gate_drive:
+  A0: 0.15
+  A50: 0.10
+  exponent: 4.0
+
+persistence:
+  primary_tau_p_ms: 750.0
+  tau_p_ms: [500.0, 750.0, 1000.0]
+  # Full causal pre-onset maximum and onset+2-s Q25 midpoint, derived before execution.
+  threshold_by_tau:
+    500.0: 0.07931503068934054
+    750.0: 0.07222870046052841
+    1000.0: 0.06676759803487306
+  threshold_validation_atol: 1.0e-8
+  post_quantile_delay_ms: 2000.0
+  post_quantile: 0.25
+
+phase_sensor:
+  source: alpha15_additive_continuation_A0_stable_cycle
+  alpha_G: 15.0
+  orbit_trace_key: A_0p00000
+  dt_ms: 0.125
+  phase_fractions: [0.0, 0.25, 0.50, 0.75]
+
+z_oracle:
+  z_start: 0.8744746730086702
+  depletion_occupancy: 0.5628164311381522
+  tau_z_ms: 10000.0
+
+effector:
+  tau_down_ms: 2000.0
+  unsafe_decay_fraction: 0.02
+  primary_gate_mode: memoryless
+  # Post-no-go mechanism diagnostic only; it cannot re-grade the primary.
+  diagnostic_gate_modes: [memoryless, latched_after_first_activation]
+
+arms:
+  - id: A0p9_tau125
+    Amax_mv: 0.9
+    tau_up_ms: 125.0
+  - id: A1p3_tau125
+    Amax_mv: 1.3
+    tau_up_ms: 125.0
+  - id: A1p6_tau200
+    Amax_mv: 1.6
+    tau_up_ms: 200.0
+  - id: A1p6_tau125
+    Amax_mv: 1.6
+    tau_up_ms: 125.0
+  - id: A1p6_tau100
+    Amax_mv: 1.6
+    tau_up_ms: 100.0
+
+acceptance:
+  cycle_count_semantics: A0_baseline_period_equivalents_not_dynamic_returns
+  minimum_cycles: 3.0
+  maximum_cycles: 5.0
+
+plot:
+  primary_arm_id: A1p6_tau125
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  max_memory_gib: 1.0
+
+scope:
+  full_fast_ode: false
+  full_snn: false
+  spatial_simulation: false
+  ee_weight_change: false
+  ee_relay: false
+  conductance_membrane: false

@@ -1,0 +1,305 @@
+{
+  "schema_version": "topic4_stage0f_v1_1_execution_lock.v1",
+  "locked_before_numerical_execution": true,
+  "upstream_inputs_pre_execution": {
+    "stage0e_summary": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/stage0e_poincare_floquet_summary.json",
+      "expected_sha256": "b478adc6b261eb6712c3c757777ba9441208a8dc2c159d2829e8450f66f4bca0",
+      "observed_sha256": "b478adc6b261eb6712c3c757777ba9441208a8dc2c159d2829e8450f66f4bca0",
+      "pass": true
+    },
+    "extra_fine_transfer": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz",
+      "expected_sha256": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+      "observed_sha256": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+      "pass": true
+    },
+    "stage0e_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0e.py",
+      "expected_sha256": "5c3ef24ffdc1f4d64962a3b3dc80dac2ab55d4c77ecfdca89ba6daf9dfb3c877",
+      "observed_sha256": "5c3ef24ffdc1f4d64962a3b3dc80dac2ab55d4c77ecfdca89ba6daf9dfb3c877",
+      "pass": true
+    },
+    "stage0c_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0c.py",
+      "expected_sha256": "25b6538007d6974b44aa500f4f05929fa6f1d9ed48c6692d8acb1798180235ca",
+      "observed_sha256": "25b6538007d6974b44aa500f4f05929fa6f1d9ed48c6692d8acb1798180235ca",
+      "pass": true
+    },
+    "transfer_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0c_transfer.py",
+      "expected_sha256": "48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed",
+      "observed_sha256": "48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed",
+      "pass": true
+    },
+    "sef_hfo_lif_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/sef_hfo_lif.py",
+      "expected_sha256": "d21e6441559906c7c4685c6523f20a91179577d3ef5c25aee71fa27e5efb92a4",
+      "observed_sha256": "d21e6441559906c7c4685c6523f20a91179577d3ef5c25aee71fa27e5efb92a4",
+      "pass": true
+    },
+    "atomic_helper_runner": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0c_transfer.py",
+      "expected_sha256": "36fbca9fd507d2501d942829a7698ee051088884454635dcfcf9bb19e6ffbe05",
+      "observed_sha256": "36fbca9fd507d2501d942829a7698ee051088884454635dcfcf9bb19e6ffbe05",
+      "pass": true
+    },
+    "stage0f_v1_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0f.py",
+      "expected_sha256": "7a2496f93f51c211539cc4356d7f57ccbc55a6124e4b402fe55f887329767eb3",
+      "observed_sha256": "7a2496f93f51c211539cc4356d7f57ccbc55a6124e4b402fe55f887329767eb3",
+      "pass": true
+    },
+    "stage0f_v1_execution_lock": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20/EXECUTION_LOCK.json",
+      "expected_sha256": "3eb744cf436cabe4592b308aeca9dff630a3c644a95e70c32e62dc63e035eb06",
+      "observed_sha256": "3eb744cf436cabe4592b308aeca9dff630a3c644a95e70c32e62dc63e035eb06",
+      "pass": true
+    },
+    "stage0f_v1_summary": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20/stage0f_smooth_transfer_variational_summary.json",
+      "expected_sha256": "030b9ffddc8df78b8fd72228f1796e7927d8d4847e5c18af3abeb3dcb207587a",
+      "observed_sha256": "030b9ffddc8df78b8fd72228f1796e7927d8d4847e5c18af3abeb3dcb207587a",
+      "pass": true
+    },
+    "stage0f_v1_alpha15_outcome": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20/per_point/z_0p85_alpha_15/point_outcome.json",
+      "expected_sha256": "5598c068efe219c1f244e1221bd8f235d78f9f867825ce9bb8399c29f23af46a",
+      "observed_sha256": "5598c068efe219c1f244e1221bd8f235d78f9f867825ce9bb8399c29f23af46a",
+      "pass": true
+    },
+    "stage0f_v1_alpha16_outcome": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20/per_point/z_0p85_alpha_16/point_outcome.json",
+      "expected_sha256": "6853f868675a4b4e811652fd29c16dd48659da811589a5f5f91a01a1678dc557",
+      "observed_sha256": "6853f868675a4b4e811652fd29c16dd48659da811589a5f5f91a01a1678dc557",
+      "pass": true
+    },
+    "alpha15_shooting": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/shooting_iterates.npz",
+      "expected_sha256": "0da44a5999a57a8f53e244ab23e29fe38a0dd9bedce36d7efdae900296b0a120",
+      "observed_sha256": "0da44a5999a57a8f53e244ab23e29fe38a0dd9bedce36d7efdae900296b0a120",
+      "pass": true
+    },
+    "alpha15_base_trace": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/base_cycle_trace.npz",
+      "expected_sha256": "eec8886a0dab52761e68eab0e01d85f53b3bcfd5056a2c73e9e22f2db510d700",
+      "observed_sha256": "eec8886a0dab52761e68eab0e01d85f53b3bcfd5056a2c73e9e22f2db510d700",
+      "pass": true
+    },
+    "alpha15_half_trace": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/half_cycle_trace.npz",
+      "expected_sha256": "cd304b6fcf3f6bf3d12dfc7fdcd64889923f743c01b0cf19be7619eec449fa0e",
+      "observed_sha256": "cd304b6fcf3f6bf3d12dfc7fdcd64889923f743c01b0cf19be7619eec449fa0e",
+      "pass": true
+    },
+    "alpha15_outcome": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/point_outcome.json",
+      "expected_sha256": "643991c3d63b8f861b81e4d87cb4040ff3abb8d06e419b927d4a352836e4660c",
+      "observed_sha256": "643991c3d63b8f861b81e4d87cb4040ff3abb8d06e419b927d4a352836e4660c",
+      "pass": true
+    },
+    "alpha16_shooting": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_16/shooting_iterates.npz",
+      "expected_sha256": "d3130ea6db6b65f912e2489aed3ecb5b86dbc42d79ff3edccfba0188194f7dc3",
+      "observed_sha256": "d3130ea6db6b65f912e2489aed3ecb5b86dbc42d79ff3edccfba0188194f7dc3",
+      "pass": true
+    },
+    "alpha16_base_trace": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_16/base_cycle_trace.npz",
+      "expected_sha256": "d1bc0553f85f12b0d425be10c809824e799eb71c94fd043546e0532be9dab531",
+      "observed_sha256": "d1bc0553f85f12b0d425be10c809824e799eb71c94fd043546e0532be9dab531",
+      "pass": true
+    },
+    "alpha16_half_trace": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_16/half_cycle_trace.npz",
+      "expected_sha256": "467f28402272334e98746ebd3c117fc83f24c86d6c7942f6fd6e6adde7291e02",
+      "observed_sha256": "467f28402272334e98746ebd3c117fc83f24c86d6c7942f6fd6e6adde7291e02",
+      "pass": true
+    },
+    "alpha16_outcome": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_16/point_outcome.json",
+      "expected_sha256": "1ff24defa3684195be1fd934ee57f46bed59c5f6fe3306642637bbd7e61506d6",
+      "observed_sha256": "1ff24defa3684195be1fd934ee57f46bed59c5f6fe3306642637bbd7e61506d6",
+      "pass": true
+    }
+  },
+  "stage0f_v1_1_sources_pre_execution": {
+    "spec": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0f-v1_1-engineering-repair-design.md",
+      "sha256": "de49dfb6192b794397f7888aac87851a2ded6db628e3f75dc2985b4529a0007c"
+    },
+    "config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0f_v1_1.yaml",
+      "sha256": "7034416fa30ea8e75bdbba2d4ffe052406b53bec0e44fb8431edd225f159ada6"
+    },
+    "module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0f_v1_1.py",
+      "sha256": "c63956722c7d74ef5e531568267e974fd67a4d18a447725ca4b25b04b13cab01"
+    },
+    "runner": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0f_v1_1.py",
+      "sha256": "2640868c28d281c1658291f1bcc986631973733d07c918bab10ef43e04cec661"
+    },
+    "tests": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0f_v1_1.py",
+      "sha256": "b697ec07af88904cbebbfc2b9b4d74bd96c431cb26510bc3d24b2a54ef9b1f49"
+    }
+  },
+  "numerical_environment_pre_execution": {
+    "python": "3.11.5",
+    "python_implementation": "CPython",
+    "numpy": "1.26.4",
+    "scipy": "1.13.1"
+  },
+  "upstream_inputs_post_execution": {
+    "stage0e_summary": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/stage0e_poincare_floquet_summary.json",
+      "expected_sha256": "b478adc6b261eb6712c3c757777ba9441208a8dc2c159d2829e8450f66f4bca0",
+      "observed_sha256": "b478adc6b261eb6712c3c757777ba9441208a8dc2c159d2829e8450f66f4bca0",
+      "pass": true
+    },
+    "extra_fine_transfer": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz",
+      "expected_sha256": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+      "observed_sha256": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+      "pass": true
+    },
+    "stage0e_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0e.py",
+      "expected_sha256": "5c3ef24ffdc1f4d64962a3b3dc80dac2ab55d4c77ecfdca89ba6daf9dfb3c877",
+      "observed_sha256": "5c3ef24ffdc1f4d64962a3b3dc80dac2ab55d4c77ecfdca89ba6daf9dfb3c877",
+      "pass": true
+    },
+    "stage0c_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0c.py",
+      "expected_sha256": "25b6538007d6974b44aa500f4f05929fa6f1d9ed48c6692d8acb1798180235ca",
+      "observed_sha256": "25b6538007d6974b44aa500f4f05929fa6f1d9ed48c6692d8acb1798180235ca",
+      "pass": true
+    },
+    "transfer_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0c_transfer.py",
+      "expected_sha256": "48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed",
+      "observed_sha256": "48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed",
+      "pass": true
+    },
+    "sef_hfo_lif_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/sef_hfo_lif.py",
+      "expected_sha256": "d21e6441559906c7c4685c6523f20a91179577d3ef5c25aee71fa27e5efb92a4",
+      "observed_sha256": "d21e6441559906c7c4685c6523f20a91179577d3ef5c25aee71fa27e5efb92a4",
+      "pass": true
+    },
+    "atomic_helper_runner": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0c_transfer.py",
+      "expected_sha256": "36fbca9fd507d2501d942829a7698ee051088884454635dcfcf9bb19e6ffbe05",
+      "observed_sha256": "36fbca9fd507d2501d942829a7698ee051088884454635dcfcf9bb19e6ffbe05",
+      "pass": true
+    },
+    "stage0f_v1_module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0f.py",
+      "expected_sha256": "7a2496f93f51c211539cc4356d7f57ccbc55a6124e4b402fe55f887329767eb3",
+      "observed_sha256": "7a2496f93f51c211539cc4356d7f57ccbc55a6124e4b402fe55f887329767eb3",
+      "pass": true
+    },
+    "stage0f_v1_execution_lock": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20/EXECUTION_LOCK.json",
+      "expected_sha256": "3eb744cf436cabe4592b308aeca9dff630a3c644a95e70c32e62dc63e035eb06",
+      "observed_sha256": "3eb744cf436cabe4592b308aeca9dff630a3c644a95e70c32e62dc63e035eb06",
+      "pass": true
+    },
+    "stage0f_v1_summary": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20/stage0f_smooth_transfer_variational_summary.json",
+      "expected_sha256": "030b9ffddc8df78b8fd72228f1796e7927d8d4847e5c18af3abeb3dcb207587a",
+      "observed_sha256": "030b9ffddc8df78b8fd72228f1796e7927d8d4847e5c18af3abeb3dcb207587a",
+      "pass": true
+    },
+    "stage0f_v1_alpha15_outcome": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20/per_point/z_0p85_alpha_15/point_outcome.json",
+      "expected_sha256": "5598c068efe219c1f244e1221bd8f235d78f9f867825ce9bb8399c29f23af46a",
+      "observed_sha256": "5598c068efe219c1f244e1221bd8f235d78f9f867825ce9bb8399c29f23af46a",
+      "pass": true
+    },
+    "stage0f_v1_alpha16_outcome": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_hidden_gate_non_authoritative_2026-07-20/per_point/z_0p85_alpha_16/point_outcome.json",
+      "expected_sha256": "6853f868675a4b4e811652fd29c16dd48659da811589a5f5f91a01a1678dc557",
+      "observed_sha256": "6853f868675a4b4e811652fd29c16dd48659da811589a5f5f91a01a1678dc557",
+      "pass": true
+    },
+    "alpha15_shooting": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/shooting_iterates.npz",
+      "expected_sha256": "0da44a5999a57a8f53e244ab23e29fe38a0dd9bedce36d7efdae900296b0a120",
+      "observed_sha256": "0da44a5999a57a8f53e244ab23e29fe38a0dd9bedce36d7efdae900296b0a120",
+      "pass": true
+    },
+    "alpha15_base_trace": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/base_cycle_trace.npz",
+      "expected_sha256": "eec8886a0dab52761e68eab0e01d85f53b3bcfd5056a2c73e9e22f2db510d700",
+      "observed_sha256": "eec8886a0dab52761e68eab0e01d85f53b3bcfd5056a2c73e9e22f2db510d700",
+      "pass": true
+    },
+    "alpha15_half_trace": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/half_cycle_trace.npz",
+      "expected_sha256": "cd304b6fcf3f6bf3d12dfc7fdcd64889923f743c01b0cf19be7619eec449fa0e",
+      "observed_sha256": "cd304b6fcf3f6bf3d12dfc7fdcd64889923f743c01b0cf19be7619eec449fa0e",
+      "pass": true
+    },
+    "alpha15_outcome": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/point_outcome.json",
+      "expected_sha256": "643991c3d63b8f861b81e4d87cb4040ff3abb8d06e419b927d4a352836e4660c",
+      "observed_sha256": "643991c3d63b8f861b81e4d87cb4040ff3abb8d06e419b927d4a352836e4660c",
+      "pass": true
+    },
+    "alpha16_shooting": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_16/shooting_iterates.npz",
+      "expected_sha256": "d3130ea6db6b65f912e2489aed3ecb5b86dbc42d79ff3edccfba0188194f7dc3",
+      "observed_sha256": "d3130ea6db6b65f912e2489aed3ecb5b86dbc42d79ff3edccfba0188194f7dc3",
+      "pass": true
+    },
+    "alpha16_base_trace": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_16/base_cycle_trace.npz",
+      "expected_sha256": "d1bc0553f85f12b0d425be10c809824e799eb71c94fd043546e0532be9dab531",
+      "observed_sha256": "d1bc0553f85f12b0d425be10c809824e799eb71c94fd043546e0532be9dab531",
+      "pass": true
+    },
+    "alpha16_half_trace": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_16/half_cycle_trace.npz",
+      "expected_sha256": "467f28402272334e98746ebd3c117fc83f24c86d6c7942f6fd6e6adde7291e02",
+      "observed_sha256": "467f28402272334e98746ebd3c117fc83f24c86d6c7942f6fd6e6adde7291e02",
+      "pass": true
+    },
+    "alpha16_outcome": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_16/point_outcome.json",
+      "expected_sha256": "1ff24defa3684195be1fd934ee57f46bed59c5f6fe3306642637bbd7e61506d6",
+      "observed_sha256": "1ff24defa3684195be1fd934ee57f46bed59c5f6fe3306642637bbd7e61506d6",
+      "pass": true
+    }
+  },
+  "stage0f_v1_1_sources_post_execution": {
+    "spec": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/docs/superpowers/specs/2026-07-20-topic4-stage0f-v1_1-engineering-repair-design.md",
+      "sha256": "de49dfb6192b794397f7888aac87851a2ded6db628e3f75dc2985b4529a0007c"
+    },
+    "config": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/config/topic4_spatial_slowfast_stage0f_v1_1.yaml",
+      "sha256": "7034416fa30ea8e75bdbba2d4ffe052406b53bec0e44fb8431edd225f159ada6"
+    },
+    "module": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/src/topic4_spatial_slowfast_stage0f_v1_1.py",
+      "sha256": "c63956722c7d74ef5e531568267e974fd67a4d18a447725ca4b25b04b13cab01"
+    },
+    "runner": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/scripts/run_topic4_spatial_slowfast_stage0f_v1_1.py",
+      "sha256": "2640868c28d281c1658291f1bcc986631973733d07c918bab10ef43e04cec661"
+    },
+    "tests": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/tests/test_topic4_spatial_slowfast_stage0f_v1_1.py",
+      "sha256": "b697ec07af88904cbebbfc2b9b4d74bd96c431cb26510bc3d24b2a54ef9b1f49"
+    }
+  },
+  "numerical_environment_post_execution": {
+    "python": "3.11.5",
+    "python_implementation": "CPython",
+    "numpy": "1.26.4",
+    "scipy": "1.13.1"
+  },
+  "all_inputs_and_sources_unchanged_during_execution": true
+}

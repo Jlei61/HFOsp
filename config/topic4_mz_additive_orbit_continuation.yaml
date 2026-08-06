@@ -1,0 +1,78 @@
+result_root: results/topic4_sef_hfo/mz_additive_orbit_continuation
+
+transfer_path: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz
+shooting_seed_path: results/topic4_sef_hfo/spatial_slowfast_topology/stage0e_poincare_floquet_audit/per_point/z_0p85_alpha_15/shooting_iterates.npz
+stage0f_summary_path: results/topic4_sef_hfo/spatial_slowfast_topology/stage0f_smooth_transfer_variational_certificate_v1_1/stage0f_v1_1_variational_summary.json
+entry_exit_summary_path: results/topic4_sef_hfo/mz_entry_exit_nullclines/entry_exit_summary.json
+
+input_sha256:
+  transfer_path: dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703
+  shooting_seed_path: 0da44a5999a57a8f53e244ab23e29fe38a0dd9bedce36d7efdae900296b0a120
+  stage0f_summary_path: fb672f49b0bf050ca334ec1490dc2847c70581ed6064eb5eca730c111dc31ff0
+  entry_exit_summary_path: c2d4c3040695b79b046a347dd6ca68bbc05f131f89f520aa13044d374179d01f
+
+model:
+  z: 0.85
+  alpha_G: 15.0
+  w_ee_mult: 1.1
+  ratio: 1.0
+
+smooth_transfer:
+  mu_min_mv: -160.0
+  mu_max_mv: 80.0
+  sigma_min_mv: 3.0
+  sigma_max_mv: 20.0
+  spline_degree_mu: 3
+  spline_degree_sigma: 3
+  smoothing: 0.0
+
+section:
+  state_index: 8
+  level: 0.15
+  direction: upward
+  min_return_ms: 300.0
+  max_return_ms: 12000.0
+
+# Directed continuation of the attracting branch. Failure only localizes loss of
+# this stable return-map object; it does not exclude a disconnected unstable cycle.
+additive_grid_mv:
+  [0.0, 0.10, 0.20, 0.25, 0.28, 0.30, 0.31, 0.312, 0.314,
+   0.315, 0.316, 0.3162, 0.31635, 0.3164, 0.31645, 0.31648,
+   0.31650, 0.31652, 0.31655, 0.31660, 0.317, 0.318, 0.320]
+
+shooting:
+  primary_dt_ms: 0.125
+  half_dt_ms: 0.0625
+  max_iterations: 20
+  minimum_iterations: 4
+  residual_tolerance: 1.0e-7
+  period_cv_tolerance: 1.0e-4
+  max_consecutive_failures: 3
+
+# New arm, pre-registered before execution. These values do not replace or
+# retroactively re-grade the frozen Stage0F-v1.1 epsilon gate.
+poincare_derivative:
+  points_mv: [0.0, 0.30, 0.31, 0.316]
+  epsilon_relative: [3.0e-4, 1.0e-4, 3.0e-5]
+  matrix_relative_difference_max: 0.05
+  spectral_radius_range_max: 0.02
+
+exact_transfer_checkpoints_mv: [0.0, 0.20, 0.30, 0.31, 0.315, 0.316, 0.3164]
+
+physical_acceptance:
+  finite_high_max_hz: 100.0
+  report_high_threshold_hz: 80.0
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  max_memory_gib: 2.0
+
+scope:
+  full_snn: false
+  slow_variables: false
+  spatial_simulation: false
+  ee_weight_change: false
+  ee_relay: false
+  unstable_cycle_exclusion: false
+  pseudo_arclength: false

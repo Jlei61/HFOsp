@@ -1,0 +1,88 @@
+result_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication_v1_1
+root_continuation: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_dynamic_divisive_pool/root_continuation.json
+v1_1_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1
+stage0d_v1_result_root: results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication
+stage0d_v1_config: config/topic4_spatial_slowfast_stage0d.yaml
+
+locked_hashes:
+  root_continuation: eb89514f62e127367774e1c849ec16f340ef2b4ac1713b3f57b6c9696ed4999f
+  extra_fine_transfer: dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703
+  v1_1_confirm_trace: 8151891d26dffefc9b87dc1fcf107269e515090277e8bf996c7e5a5e212e1579
+  transfer_module: 48ab839f6039134bfab22968d6deaad25011fbc654c206363341eef1bb1bc7ed
+
+stage0d_v1_immutable_hashes:
+  spec: 21f45fb5d1f980a7001e605cc9f6f53c8aad2289996f5d898a08a1c615e55d89
+  config: 2413909ce3c5c51418ccdfb95685ac7d3e76b3aae7a051fc26ae966489258793
+  module: 7ded4464f77ac96c37c9669c9fb16b5b2c13eb66c75d0acce563ed58199952d7
+  runner: 5bf87bc5a6d574f19072b4c3fae5dbc1d10a6205647b6c12afa90549b32388cb
+  tests: 6bac873d6100e0aa287884af363a2044ba774fc60c85e08acb34859f067826ed
+  summary: 0ac3084102e56085ddf6c4e3f8dfd5ace1e16214efb2a22bf7ad25739f4dfccd
+  fork_outcomes: dcba29655fd673503b0d462debf23dbfc456cb8f485477aa114e1c2854e26fee
+  phase_source: f676c6f331cbaa1401ff348e014ded724aba22d4e6000c3ff50ffa9ea1e3cec9
+
+centre: {z: 0.85, alpha_G: 16.0, initial_label: root_0_plus}
+parameter_grid:
+  z: [0.84, 0.85, 0.86]
+  alpha_G: [15.0, 16.0, 17.0]
+
+phase_source:
+  dt_ms: 0.125
+  duration_ms: 12000.0
+  save_stride: 40
+  tail_start_ms: 7200.0
+  peak_height_hz: 20.0
+  peak_prominence_hz: 10.0
+  peak_min_distance_ms: 300.0
+  phases: [0.0, 0.25, 0.5, 0.75]
+  parity_rate_atol_khz: 1.0e-7
+  parity_pool_atol: 1.0e-7
+
+battery:
+  perturbation_fraction: 0.03
+  histories: [phase_anchor, fast_plus, fast_minus, pool_plus, pool_minus]
+
+screen: {dt_ms: 0.25, duration_ms: 6000.0, save_stride: 20}
+confirm: {dt_ms: 0.125, duration_ms: 24000.0, save_stride: 40}
+dt_half: {dt_ms: 0.0625, duration_ms: 24000.0, save_stride: 80}
+
+classifier:
+  tail_fraction: 0.40
+  low_mean_hz: 5.0
+  finite_high_max_hz: 100.0
+  fixed_sd_floor_hz: 0.5
+  fixed_cv: 0.03
+  max_relative_drift: 0.08
+  max_abs_slope_hz_s: 1.0
+  min_oscillation_p2p_hz: 2.0
+  min_oscillation_cycles: 3.0
+  min_spectral_power_ratio: 0.20
+  refractory_margin_fraction: 0.05
+  max_refractory_occupancy: 0.05
+
+acceptance:
+  exact_max_abs_error_hz: 0.25
+  exact_p99_relative_error: 0.02
+  rate_abs_hz: 1.0
+  rate_relative: 0.10
+  frequency_abs_hz: 0.25
+  frequency_relative: 0.10
+  amplitude_abs_hz: 5.0
+  amplitude_relative: 0.10
+  minimum_off_orbit_histories: 2
+  minimum_perturbation_families: 2
+  minimum_phase_ids: 2
+
+repair:
+  confirm_dt_half_frequency_abs_hz: 0.25
+  confirm_dt_half_frequency_relative: 0.10
+  figure_b_empty_text: none passed locked gate
+
+resource_contract: {blas_threads: 1, max_memory_gib: 4.0}
+
+scope:
+  tune_other_parameters: false
+  noise: false
+  slow_variables: false
+  spatial_coupling: false
+  dynamic_phi: false
+  stage1: false

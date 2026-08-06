@@ -1,0 +1,337 @@
+{
+  "status": "R3_COUPLED_CLEAN_NO_GO_PREMATURE_EVENT5_ENTRY",
+  "decision": "stop_before_grid_and_reassess_coupled_event_map",
+  "gates": {
+    "events_1_to_5_do_not_cross_entry_fold": false,
+    "event_6_is_first_entry_event": false,
+    "preentry_m_zero_and_latch_off": true,
+    "at_least_four_pulse_free_returns_each_region": false,
+    "sustained_low_begins_only_after_fourth_return": false,
+    "finite_clean_exit_without_support_or_bounds_failure": true,
+    "latch_active_at_clean_exit": true,
+    "bath_is_fixed_mask_diagnostic": true
+  },
+  "entry_event_index": 5,
+  "entry_time_ms": 7620.0,
+  "latch_set_time_ms": 10233.375,
+  "clean_low_onset_ms": 11035.0,
+  "fourth_paired_return_time_ms": null,
+  "pulse_free_core_returns": 0,
+  "pulse_free_annulus_returns": 0,
+  "pulse_free_bath_returns": 0,
+  "pulse_free_core_return_times_ms": [],
+  "pulse_free_annulus_return_times_ms": [],
+  "first_support_failure_ms": null,
+  "first_bound_failure_ms": null,
+  "first_nonfinite_ms": null,
+  "support_violation_count": 0,
+  "state_bound_violation_count": 0,
+  "finite": true,
+  "active_at_end": true,
+  "final_latch_state": [
+    true,
+    true,
+    false
+  ],
+  "min_q_core": 0.8452489972114563,
+  "min_q_annulus": 0.8452489972114563,
+  "bath_q_max_abs_error": 2.384185793236071e-08,
+  "max_m_core": 0.2409701645374298,
+  "max_m_annulus": 0.2409701645374298,
+  "max_additive_core_mv": 0.38555226325988773,
+  "max_p_core": 0.16599683463573456,
+  "max_p_annulus": 0.1252421736717224,
+  "peak_rE_core_hz": 140.5716985464096,
+  "peak_rE_annulus_hz": 100.19149631261826,
+  "peak_rE_bath_hz": 18.91515776515007,
+  "scientific_layer": "real_coupled_regional_rate_patch_segment_A_center_canary_not_full_lifecycle",
+  "segments_executed": [
+    "A_center_canary"
+  ],
+  "segments_not_executed": [
+    "B_protected_recovery",
+    "C_true_latch_reset",
+    "D_natural_release",
+    "retrigger",
+    "ablations"
+  ],
+  "registered_paths_executed": 1,
+  "registered_paths_not_executed": 17,
+  "stop_rule_applied": true,
+  "center_parameters": {
+    "tau_slow_s": 90.0,
+    "q_hold": 0.8425,
+    "tau_fast_s": 20.0,
+    "dt_ms": 0.125,
+    "q_reserve": 0.8415605027325525,
+    "tau_depletion_ms": 278.35361262327285,
+    "tau_m_up_ms": 225.0,
+    "tau_m_down_ms": 12000.0,
+    "persistence_on": 0.115
+  },
+  "interictal_root": {
+    "rE_hz": 0.8108934281399697,
+    "rI_hz": 5.678646486900357,
+    "stability": "stable",
+    "leading_real_per_ms": -0.012499999999999999,
+    "leading_imag_per_ms": 0.0,
+    "residual_inf_khz": 2.430174117495909e-14
+  },
+  "geometry": {
+    "patch_names": [
+      "core",
+      "annulus",
+      "bath"
+    ],
+    "patch_cells": [
+      113,
+      112,
+      2079
+    ],
+    "patch_weights": [
+      0.04904513888888889,
+      0.04861111111111111,
+      0.90234375
+    ]
+  },
+  "trace_estimated_bytes": 2620131,
+  "trace_file_bytes": 573331,
+  "runtime_seconds": 93.71226346865296,
+  "peak_rss_kib": 321064,
+  "resource_gates": {
+    "trace_below_64_mib": true,
+    "peak_rss_below_1p5_gib": true,
+    "single_process_single_blas_contract": true
+  },
+  "input_sha256": {
+    "r3_summary_path": "bfcb0b4476c92361130b83d0b13ea75519aec5a60731cc52a30abd07fb3e9a1f",
+    "r2_summary_path": "34cc793e0b6a17b2377649b754aa073fe74c45b3705f6e45b42c503147c0f1d9",
+    "r2_mapping_path": "2b53c44588f3fc1cc44aeeda2b64c5a1ebf75a544b670c3ae855268fa3566664",
+    "r2_mapping_summary_path": "7bad797aef9b381fe2ecd3b9ee8a90dd5264c5c366c2457b073d0535153bdaa8",
+    "r2_cycle_sensor_path": "ac7e74278f63dbe14092be3cc1d7dc7e7182718313bad3528c75fd8c509389f1",
+    "r2_cycle_measurements_path": "cde2d7d4aa09f611d800bb014da5cb47e51b97acf8a91b0b1dd327b24df71e00",
+    "r2_event_sensor_path": "923827f24ad3ff0105d5db94abe5079568755540c90e742da836374b3026a65b",
+    "r2_r0b_summary_path": "54a49a4486a25a3b8c16a4da8f3b92769a6117d3ff494ef7d7a2d7cf40d0f54c",
+    "r2_r0b_ramp_path": "5c2a1697f791ee03e2fc9d7224e10c28d1f9f7100e636542b9ff0e68aba971d3",
+    "p3_summary_path": "6cf400c43cbe351a92496daba74c7f83907366202e9e73526b88b939539ddd70",
+    "transfer_path": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+    "orbit_cycle_path": "3f2709a01451e9e1d9e135e454346e857771866c5eb3fa0d4c12a77cc5e073bf",
+    "orbit_summary_path": "8355b196b7adc1b942935f92acec1fb5d738ef59ff7e3aa8606ce3f7fe6b7c56"
+  },
+  "claim_boundary": [
+    "the fixed background sequence drives the fifth-event entry; this is not zero-input spontaneous onset",
+    "the bath q coordinate is fixed by an imposed depletion mask and is only a diagnostic",
+    "the feed-forward R3 scalar/path oracle was necessary but did not preserve entry ordering after q-use feedback was closed",
+    "no E-E weight, E-E kernel, conductance, relay, delay, M timescale, latch threshold, or R2 mapping was changed"
+  ],
+  "artifacts": {
+    "summary": "results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/coupled_canary_summary.json",
+    "outcome_csv": "results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/segment_a_center_canary.csv",
+    "trace_npz": "results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/segment_a_center_canary_trace.npz",
+    "figure": "results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/figures/mz_m_gated_reserve_coupled_canary.png"
+  },
+  "config": {
+    "result_root": "results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary",
+    "r3_summary_path": "results/topic4_sef_hfo/mz_m_gated_reserve_recovery/m_gated_reserve_recovery_summary.json",
+    "r2_summary_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_recovery_corridor/recovery_corridor_summary.json",
+    "r2_mapping_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_recovery_corridor/recovery_corridor_mapping.csv",
+    "r2_mapping_summary_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/reserve_mapping_summary.json",
+    "r2_cycle_sensor_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_sensor_replay.npz",
+    "r2_cycle_measurements_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_use_measurements.csv",
+    "r2_event_sensor_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/fixed_event_sensor_raw.npz",
+    "r2_r0b_summary_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_summary.json",
+    "r2_r0b_ramp_path": "results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_smooth_ramp.csv",
+    "p3_summary_path": "results/topic4_sef_hfo/mz_spatial_autonomous_latch/autonomous_latch_summary.json",
+    "transfer_path": "results/topic4_sef_hfo/spatial_slowfast_topology/stage0c_transfer_support_audit_v1_1/extended_transfer_extra_fine.npz",
+    "orbit_cycle_path": "results/topic4_sef_hfo/mz_additive_orbit_continuation/cycle_states_and_traces.npz",
+    "orbit_summary_path": "results/topic4_sef_hfo/mz_additive_orbit_continuation/orbit_continuation_summary.json",
+    "input_sha256": {
+      "r3_summary_path": "bfcb0b4476c92361130b83d0b13ea75519aec5a60731cc52a30abd07fb3e9a1f",
+      "r2_summary_path": "34cc793e0b6a17b2377649b754aa073fe74c45b3705f6e45b42c503147c0f1d9",
+      "r2_mapping_path": "2b53c44588f3fc1cc44aeeda2b64c5a1ebf75a544b670c3ae855268fa3566664",
+      "r2_mapping_summary_path": "7bad797aef9b381fe2ecd3b9ee8a90dd5264c5c366c2457b073d0535153bdaa8",
+      "r2_cycle_sensor_path": "ac7e74278f63dbe14092be3cc1d7dc7e7182718313bad3528c75fd8c509389f1",
+      "r2_cycle_measurements_path": "cde2d7d4aa09f611d800bb014da5cb47e51b97acf8a91b0b1dd327b24df71e00",
+      "r2_event_sensor_path": "923827f24ad3ff0105d5db94abe5079568755540c90e742da836374b3026a65b",
+      "r2_r0b_summary_path": "54a49a4486a25a3b8c16a4da8f3b92769a6117d3ff494ef7d7a2d7cf40d0f54c",
+      "r2_r0b_ramp_path": "5c2a1697f791ee03e2fc9d7224e10c28d1f9f7100e636542b9ff0e68aba971d3",
+      "p3_summary_path": "6cf400c43cbe351a92496daba74c7f83907366202e9e73526b88b939539ddd70",
+      "transfer_path": "dd40a7b82e1ca5ca4a6fcf514b1e0c721242502e3806133295e4c4411bd4e703",
+      "orbit_cycle_path": "3f2709a01451e9e1d9e135e454346e857771866c5eb3fa0d4c12a77cc5e073bf",
+      "orbit_summary_path": "8355b196b7adc1b942935f92acec1fb5d738ef59ff7e3aa8606ce3f7fe6b7c56"
+    },
+    "model": {
+      "z_interictal": 0.9,
+      "alpha_G": 15.0,
+      "w_ee_mult": 1.1,
+      "ratio": 1.0,
+      "additive_max_mv": 1.6,
+      "pool_p": 1.0
+    },
+    "geometry": {
+      "source": "canonical_m3b_api_defaults",
+      "grid_n": 48,
+      "grid_L_mm": 12.0,
+      "core_radius_mm": 1.5,
+      "theta_deg": 45.0,
+      "partition": "core_equal_area_annulus_far_bath",
+      "boundary": "periodic_torus"
+    },
+    "smooth_transfer": {
+      "mu_min_mv": -160.0,
+      "mu_max_mv": 80.0,
+      "sigma_min_mv": 3.0,
+      "sigma_max_mv": 20.0,
+      "spline_degree_mu": 3,
+      "spline_degree_sigma": 3,
+      "smoothing": 0.0
+    },
+    "center_canary": {
+      "tau_slow_s": 90.0,
+      "q_hold": 0.8425,
+      "tau_fast_s": 20.0,
+      "dt_ms": 0.125,
+      "q_reserve": 0.8415605027325525,
+      "tau_depletion_ms": 278.35361262327285,
+      "tau_m_up_ms": 225.0,
+      "tau_m_down_ms": 12000.0,
+      "persistence_on": 0.115
+    },
+    "background_event_challenge": {
+      "generator": "shifted_exponential_fixed_seed_then_rounded_to_1ms",
+      "seed": 20260720,
+      "first_onset_ms": 1000.0,
+      "refractory_ms": 1200.0,
+      "exponential_scale_ms": 600.0,
+      "stop_before_ms": 12000.0,
+      "realized_onsets_ms": [
+        1000.0,
+        3122.0,
+        5044.0,
+        6321.0,
+        7531.0,
+        10915.0
+      ],
+      "duration_ms": 20.0,
+      "amplitude_mv": 3.0,
+      "profile_core_annulus_bath": [
+        1.0,
+        0.0,
+        0.0
+      ],
+      "pulse_free_analysis_start_ms": 11035.0
+    },
+    "slow_common": {
+      "z_rest": 0.9,
+      "inhibitory_use_threshold_khz": 0.004,
+      "inhibitory_use_width_khz": 0.004,
+      "tau_p_ms": 750.0,
+      "occupancy_threshold_khz": 0.02,
+      "occupancy_width_khz": 0.01,
+      "persistence_off": 0.03,
+      "recruitment_on": 0.6,
+      "low_reset_threshold_khz": 0.005,
+      "z_safe": 0.885,
+      "depletion_mask": [
+        1.0,
+        1.0,
+        0.0
+      ],
+      "pool_core_annulus_resource": true,
+      "pool_core_annulus_effector": true,
+      "enable_z": true,
+      "enable_m": true,
+      "enable_m_gated_z_recovery": true
+    },
+    "known_boundaries": {
+      "regional_entry_fold_q": 0.8558315843088748
+    },
+    "acceptance": {
+      "minimum_pulse_free_returns_each_region": 4,
+      "sustained_low_ms": 250.0,
+      "low_threshold_khz": 0.005,
+      "bath_peak_max_hz": 20.0,
+      "preentry_m_abs_tolerance": 1e-10,
+      "bath_q_abs_tolerance": 1e-07
+    },
+    "integration": {
+      "duration_ms": 20000.0,
+      "save_dt_ms": 1.0,
+      "section_level_rE_fast_khz": 0.02,
+      "rearm_level_rE_fast_khz": 0.015
+    },
+    "resource_contract": {
+      "processes": 1,
+      "blas_threads": 1,
+      "canary_count": 1,
+      "max_trace_bytes": 67108864,
+      "max_memory_gib": 1.5,
+      "full_registered_arm_count_if_unlocked": 18,
+      "launch_remaining_arms": false
+    },
+    "scope": {
+      "segment_a_center_canary_only": true,
+      "coupled_fast_qm": true,
+      "fixed_bath_resource_mask": true,
+      "segments_b_to_d": false,
+      "retrigger": false,
+      "ablation": false,
+      "grid": false,
+      "continuous_field": false,
+      "full_snn": false,
+      "ee_weight_change": false,
+      "ee_kernel_change": false,
+      "conductance_membrane": false,
+      "relay_change": false
+    }
+  },
+  "reclassified_without_fast_rerun": true,
+  "reclassification_reason": "fail-closed classifier now requires event-6 entry, a real latch set, and positive M before assigning the exact EARLY_M_EXIT status",
+  "event_min_regional_q": [
+    0.8858800530433655,
+    0.8745442032814026,
+    0.8659458160400391,
+    0.8594670295715332,
+    0.8547558784484863,
+    0.8452613949775696
+  ],
+  "actual_entry_aligned_diagnostic": {
+    "trigger_event_index": 5,
+    "trigger_event_end_ms": 7551.0,
+    "pulse_response_exclusion_ms": 100.0,
+    "actual_entry_aligned_analysis_start_ms": 7651.0,
+    "next_event_index": 6,
+    "next_event_onset_ms": 10915.0,
+    "core_return_times_ms": [
+      8826.344042851128,
+      9537.764235310608,
+      10170.459862132098,
+      10805.146520637734
+    ],
+    "annulus_return_times_ms": [
+      8833.603422234455,
+      9544.708046889462,
+      10177.268148296604,
+      10811.90418917302
+    ],
+    "paired_returns_before_next_event": 4,
+    "last_paired_return_time_ms": 10811.90418917302,
+    "latch_set_time_ms": 10233.375,
+    "post_last_return_additive_max_mv": 0.38555226325988773,
+    "additive_at_next_event_mv": 0.38555226325988773,
+    "next_event_regional_fast_peak_hz": 6.777951493859291,
+    "next_event_immediate_retrigger_suppressed": true,
+    "numeric_clean": true,
+    "descriptive_lifecycle_candidate": true,
+    "formal_acceptance_override": false,
+    "claim_boundary": "actual-entry-aligned descriptive candidate only; late recovery, same-basin return, and late retrigger were not tested"
+  },
+  "failure_code": "premature_event5_entry",
+  "preentry_max_abs_m": 0.0,
+  "interpretation": [
+    "R3 scalar preentry parity was a feed-forward sensor assumption, not a full coupled event-map result",
+    "once q feeds back onto the regional fast state, stronger event responses increase inhibitory use and event 5 crosses the entry fold at 7.620 s",
+    "the persistence latch then sets at 10.233 s and M suppresses the sixth event, leaving zero pulse-free section returns after the final pulse",
+    "the center canary is therefore a numerically clean event-ordering no-go, not an unresolved integration and not the preregistered early-M-exit phenotype"
+  ]
+}

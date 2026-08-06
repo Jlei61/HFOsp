@@ -1,0 +1,102 @@
+[
+  {
+    "z": 0.85,
+    "alpha_G": 15.0,
+    "outcome": "periodic_orbit_derivative_unresolved",
+    "derivative_certified": false,
+    "failed_gates": [
+      "base_smooth_shooting"
+    ],
+    "stage1_open": false,
+    "space_open": false,
+    "state_scales": [
+      0.09664087918647704,
+      0.20968907222492558,
+      0.08991575014683123,
+      0.1136875973370354,
+      0.08991575014683123,
+      0.1136875973370354,
+      0.0626940063369978,
+      0.7055566118233831,
+      0.35724527390695376
+    ],
+    "base_smooth_shooting": {
+      "pass": false,
+      "checks": {
+        "shooting_converged": true,
+        "fixed_point_residual": true,
+        "period_cv": true,
+        "cycle_valid": true,
+        "first_closure": true,
+        "second_closure": false,
+        "two_cycle_aligned": true
+      },
+      "residual_series": [
+        8.100271868220665e-05,
+        2.88844673533408e-08,
+        3.324915194074915e-12,
+        1.708972956244453e-15
+      ],
+      "period_series_ms": [
+        604.8208442250617,
+        604.8152831789282,
+        604.815284482363,
+        604.8152844822133
+      ],
+      "last_four_period_cv": 3.980755699913856e-06,
+      "closure_residual": 1.0986254718714341e-15,
+      "second_closure_residual": 1.5531345266793173e-06,
+      "aligned_cycle_residual": 1.2929374830195127e-05
+    }
+  },
+  {
+    "z": 0.85,
+    "alpha_G": 16.0,
+    "outcome": "periodic_orbit_derivative_unresolved",
+    "derivative_certified": false,
+    "failed_gates": [
+      "base_smooth_shooting"
+    ],
+    "stage1_open": false,
+    "space_open": false,
+    "state_scales": [
+      0.09434251230935006,
+      0.20705067882182449,
+      0.08795578698279181,
+      0.11177874649836085,
+      0.08795578698279181,
+      0.11177874649836085,
+      0.0613171992322944,
+      0.7000361871900492,
+      0.3526551620223682
+    ],
+    "base_smooth_shooting": {
+      "pass": false,
+      "checks": {
+        "shooting_converged": true,
+        "fixed_point_residual": true,
+        "period_cv": true,
+        "cycle_valid": true,
+        "first_closure": true,
+        "second_closure": false,
+        "two_cycle_aligned": true
+      },
+      "residual_series": [
+        8.263126676914367e-05,
+        6.806585202108807e-09,
+        4.5015035364803135e-13,
+        2.234773500025994e-15
+      ],
+      "period_series_ms": [
+        608.4417570015027,
+        608.435988804927,
+        608.4359890990216,
+        608.4359890990429
+      ],
+      "last_four_period_cv": 4.104970139936077e-06,
+      "closure_residual": 1.9864653333564392e-15,
+      "second_closure_residual": 1.663937898614717e-06,
+      "aligned_cycle_residual": 5.100334811267854e-05
+    }
+  }
+]

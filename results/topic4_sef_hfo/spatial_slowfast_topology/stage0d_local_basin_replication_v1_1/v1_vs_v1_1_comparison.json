@@ -1,0 +1,24 @@
+{
+  "schema_version": "topic4_stage0d_v1_vs_v1_1.v1",
+  "v1_summary": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-divisive-lifecycle/results/topic4_sef_hfo/spatial_slowfast_topology/stage0d_local_basin_replication/stage0d_local_basin_summary.json",
+  "v1_verdict": "STAGE0D_NO_REPLICATION_WITH_UNRESOLVED_TRAJECTORIES",
+  "v1_1_verdict": "STAGE0D_NO_REPLICATION_WITH_UNRESOLVED_TRAJECTORIES",
+  "verdict_changed": false,
+  "v1_final_status_counts": {
+    "numerical_unresolved": 175,
+    "candidate_survives": 5
+  },
+  "v1_1_final_status_counts": {
+    "numerical_unresolved": 175,
+    "candidate_survives": 5
+  },
+  "counts_changed": false,
+  "centre_open_basin_changed": false,
+  "compatible_neighbour_count_changed": false,
+  "n_aligned_histories": 180,
+  "n_fork_status_changes": 0,
+  "fork_status_changes": [],
+  "any_fork_status_changed": false,
+  "scientific_result_changed": false,
+  "interpretation_cn": "v1.1 修复了实现偏差，但最终 fork 状态、open-basin 判定和科学 verdict 均未改变。"
+}

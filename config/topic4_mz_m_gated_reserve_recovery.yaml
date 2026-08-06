@@ -1,0 +1,78 @@
+result_root: results/topic4_sef_hfo/mz_m_gated_reserve_recovery
+
+r2_summary_path: results/topic4_sef_hfo/mz_inhibitory_reserve_recovery_corridor/recovery_corridor_summary.json
+r2_event_path: results/topic4_sef_hfo/mz_inhibitory_reserve_recovery_corridor/recovery_corridor_event_entry.csv
+r2_periodic_path: results/topic4_sef_hfo/mz_inhibitory_reserve_recovery_corridor/recovery_corridor_periodic_oracle.csv
+r2_schedule_path: results/topic4_sef_hfo/mz_inhibitory_reserve_recovery_corridor/recovery_corridor_schedule_probes.csv
+r2_handoff_path: results/topic4_sef_hfo/mz_inhibitory_reserve_recovery_corridor/recovery_corridor_hybrid_handoff.csv
+r0b_config_path: config/topic4_mz_inhibitory_reserve_corridor_r0b.yaml
+r0b_summary_path: results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_summary.json
+r0b_source_path: results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_source_cco.csv
+r0b_ramp_path: results/topic4_sef_hfo/mz_inhibitory_reserve_corridor_r0b/r0b_smooth_ramp.csv
+cycle_sensor_path: results/topic4_sef_hfo/mz_inhibitory_reserve_mapping/cycle_sensor_replay.npz
+
+input_sha256:
+  r2_summary_path: 34cc793e0b6a17b2377649b754aa073fe74c45b3705f6e45b42c503147c0f1d9
+  r2_event_path: ae8fa6be626a193550fdebef4f7bbcf83dbb8fecfb601b732fcbc368a178c1ff
+  r2_periodic_path: d016360f19c6456b31023d61a6a49d725c30050fda6a9590625138f247f9a1b2
+  r2_schedule_path: dcdc4fa54862d52e288dde4212e0689c897ba7daa9c7dba836278afb48767e09
+  r2_handoff_path: b952849cb62a0719a2053ae57d0c85a5c9450813450bbd92ef6667d5e3b630d8
+  r0b_config_path: 905ef43d114046ecf6c701e86b6d4406113d4f4ec91295934a3723585bcbe2ac
+  r0b_summary_path: 54a49a4486a25a3b8c16a4da8f3b92769a6117d3ff494ef7d7a2d7cf40d0f54c
+  r0b_source_path: 28ac140e2626cd2527e8815ad5d749b91300cb981023fde3acf6d61823293848
+  r0b_ramp_path: 5c2a1697f791ee03e2fc9d7224e10c28d1f9f7100e636542b9ff0e68aba971d3
+  cycle_sensor_path: ac7e74278f63dbe14092be3cc1d7dc7e7182718313bad3528c75fd8c509389f1
+
+model:
+  q_rest: 0.90
+  entry_fold_q: 0.8558315843088748
+  q_hold_axis: [0.8400, 0.8425, 0.8450]
+  tau_slow_s_axis: [70.0, 80.0, 90.0, 100.0, 120.0, 160.0]
+  tau_fast_primary_s: 20.0
+  tau_fast_sensitivity_s: [15.0, 25.0]
+  additive_max_mv: 1.6
+
+sensor:
+  relative_phase_fractions: [0.0, 0.25, 0.50, 0.75]
+  source_dt_ms: [0.125, 0.0625]
+  save_dt_ms: 2.0
+  replay_dt_ms: 1.0
+  sustained_low_ms: 50.0
+  regional_low_threshold_khz: 0.005
+  final_additive_tolerance_mv: 0.002
+  maximum_q_excursion: 0.00125
+  dynamic_additive_margin_mv: 0.020
+
+handoff:
+  q_reset_safe: 0.885
+  persistence_tau_ms: 750.0
+  persistence_start: 1.0
+  persistence_off: 0.03
+  reset_horizon_ms: 120000.0
+  tau_m_down_ms: 12000.0
+  additive_release_threshold_mv: 0.020
+  reporting_dt_ms: 1.0
+
+acceptance:
+  required_corridor_tau_s: [80.0, 90.0, 100.0]
+  rejected_entry_tau_s: [70.0]
+  rejected_schedule_tau_s: [120.0, 160.0]
+  minimum_consecutive_tau_nodes: 3
+
+resource_contract:
+  processes: 1
+  blas_threads: 1
+  maximum_vectorized_forks: 24
+  max_trace_bytes_per_batch: 268435456
+  max_memory_gib: 1.5
+
+scope:
+  fixed_q_sensor_regenerated: true
+  scalar_path_oracle_only: true
+  coupled_fast_qm: false
+  continuous_field: false
+  full_snn: false
+  ee_weight_change: false
+  ee_kernel_change: false
+  conductance_membrane: false
+  relay_change: false

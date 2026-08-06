@@ -272,6 +272,263 @@ $$
 - $\tau_{\text{rec}}$：资源恢复时间常数。
 - $k_{\text{use}}$：活动使用资源的强度，是 M3A-A2 主扫旋钮。
 
+### B2.1. M4 regional q–p–M hybrid lifecycle（R4 rate-patch experimental node）
+
+> **状态（2026-07-21）**：本节记录 `topic4-mz-divisive-lifecycle` 独立线已经数值闭合的完整
+> R4 center equation。它是 P=3 core–annulus–bath rate-patch mechanism screen，**不是**本文件
+> A 节的 full SNN；没有修改 E→E weight/kernel/delay、conductance membrane 或 presynaptic relay。
+> 代码字段仍叫 `z`，本节为避免和空间坐标混淆统一记为 inhibitory resource $q$。
+
+#### B2.1.1 状态与空间投影
+
+每个区域 $r\in\{c=\mathrm{core},a=\mathrm{annulus},b=\mathrm{bath}\}$ 有 10 个连续状态：
+
+$$
+x_r=(r_{E,r},r_{I,r},s_{EE,r},s_{EI,r},s_{IE,r},s_{II,r},
+r^f_{E,r},q_r,p_r,m_r),
+$$
+
+全域再共享 $(\mu_G,S_G)$，故总维数为 $3\times10+2=32$。$K_{EE}$ 与 $K_I$ 是从 locked
+$48\times48$、12-mm periodic field 对 core、equal-area annulus、far bath 做 block-average 得到的
+row-stochastic spatial operators；row 是 target region、column 是 source region。三区面积权重为
+
+$$
+(w_c,w_a,w_b)=(113,112,2079)/2304.
+$$
+
+#### B2.1.2 快 rate–synapse 子系统
+
+$$
+\tau_E\dot r_{E,r}=-r_{E,r}+\Phi_E(\mu_{E,r},\sigma_{E,r}),
+\qquad \tau_E=20\ \mathrm{ms},
+$$
+
+$$
+\tau_I\dot r_{I,r}=-r_{I,r}+\Phi_I(\mu_{I,r},\sigma_{I,r}),
+\qquad \tau_I=10\ \mathrm{ms}.
+$$
+
+$\Phi_{E/I}$ 是 LIF Siegert transfer（输出单位 kHz）：
+
+$$
+\Phi_x(\mu,\sigma)=
+\left[
+\tau_{\mathrm{ref},x}+\tau_x\sqrt\pi
+\int_{(V_R-\mu)/\sigma}^{(V_\theta-\mu)/\sigma}
+e^{u^2}(1+\operatorname{erf}u)\,du
+\right]^{-1}.
+$$
+
+四个空间突触场为：
+
+$$
+\tau_A\dot s_{EE}=K_{EE}r_E-s_{EE},\qquad
+\tau_G\dot s_{EI}=K_Ir_I-s_{EI},
+$$
+
+$$
+\tau_A\dot s_{IE}=K_Ir_E-s_{IE},\qquad
+\tau_G\dot s_{II}=K_Ir_I-s_{II},
+$$
+
+其中 $\tau_A=3.5$ ms，$\tau_G=18$ ms。定义 shared recurrent-E divisor
+
+$$
+D(t)=1+\alpha_GS_G(t),\qquad \alpha_G=15,
+$$
+
+以及 $W_{EE}^{\mathrm{eff}}=1.1W_{EE}$、$W_{EI,r}^{\mathrm{eff}}=q_rW_{EI}$，输入矩为：
+
+$$
+\mu_{E,r}=
+\frac{\tau_EC_{EE}W_{EE}^{\mathrm{eff}}s_{EE,r}}{D}
+-\tau_EC_{EI}q_rW_{EI}s_{EI,r}
++\tau_EJ_E\nu_{\mathrm{ext}}
+-A_{\max}m_r+I_r^{\mathrm{pulse}},
+$$
+
+$$
+\sigma_{E,r}^2=
+\frac{\tau_EC_{EE}(W_{EE}^{\mathrm{eff}})^2s_{EE,r}}{D^2}
++\tau_EC_{EI}(q_rW_{EI})^2s_{EI,r}
++\tau_EJ_E^2\nu_{\mathrm{ext}},
+$$
+
+$$
+\mu_{I,r}=\tau_I(C_{IE}W_{IE}s_{IE,r}-C_{II}W_{II}s_{II,r})
++\tau_IJ_I\nu_{\mathrm{ext}},
+$$
+
+$$
+\sigma_{I,r}^2=
+\tau_I(C_{IE}W_{IE}^2s_{IE,r}+C_{II}W_{II}^2s_{II,r})
++\tau_IJ_I^2\nu_{\mathrm{ext}}.
+$$
+
+所以 R4 并非只有一个 additive current：$q$ 乘性改变 I→E mean/variance，$S_G$ 除性改变
+recurrent-E mean/variance，只有 $A_M=A_{\max}m$ 是 subtractive exit current。
+
+#### B2.1.3 inherited shared-pool containment 内环
+
+$$
+15\ \mathrm{ms}\,\dot r^f_{E,r}=r_{E,r}-r^f_{E,r},
+$$
+
+$$
+\psi(r)=\frac{[r-.005]_+^2}{.015^2+[r-.005]_+^2},
+\qquad a_G=\sum_rw_r\psi(r^f_{E,r}),
+$$
+
+$$
+30\ \mathrm{ms}\,\dot\mu_G=-\mu_G+a_G,
+\qquad
+80\ \mathrm{ms}\,\dot S_G=-S_G+\mu_G.
+$$
+
+低态中 $r_E^f<5$ Hz，故 $\psi=0$，shared pool 不制造 entry fold；fold 后它在几十毫秒内建立
+负反馈并把高支约束为 bounded core–annulus oscillation（CCO）。因此当前分工是：$q$ 打开入口，
+shared pool 形成有界 bursting 内环，M 负责退出。
+
+#### B2.1.4 slow sensors
+
+所有传感器使用 C1 compact smoothstep：
+
+$$
+H(x;\theta,w)=h^2(3-2h),\qquad
+h=\operatorname{clip}\left(\frac{x-\theta}{w},0,1\right).
+$$
+
+抑制使用量先按区域计算：
+
+$$
+U_r^{\mathrm{local}}=d_r
+H(s_{EI,r}-s^0_{EI,r};.004,.004),
+\qquad d=(1,1,0),
+$$
+
+再把 core/annulus 面积加权 pooling：
+
+$$
+U_c=U_a=
+\frac{w_cU_c^{\mathrm{local}}+w_aU_a^{\mathrm{local}}}{w_c+w_a}.
+$$
+
+fast occupancy 与 neighborhood recruitment 为：
+
+$$
+O_r=H(r^f_{E,r};.020,.010),\qquad R=K_{EE}O.
+$$
+
+$U$ 测量到达该区的 inhibitory synaptic use；$O$ 测量局部高活动；$R$ 要求该活动还通过既有
+空间 E kernel 招募邻域。三个 rate threshold 的单位均为 kHz。
+
+#### B2.1.5 inhibitory resource q
+
+core 与 annulus 的资源方程为：
+
+$$
+\dot q_r=
+r_{\mathrm{rec}}(\bar m)(q_0-q_r)
+-\frac{U_r}{\tau_D}(q_r-q_{\mathrm{res}}),
+\qquad r\in\{c,a\},
+$$
+
+$$
+r_{\mathrm{rec}}(\bar m)=
+\frac{1-\bar m}{\tau_{\mathrm{slow}}}
++\frac{\bar m}{\tau_{\mathrm{fast}}}.
+$$
+
+其中
+
+$$
+q_0=.90,\quad q_{\mathrm{res}}=.8415605,\quad
+\tau_D=.278354\ \mathrm{s},\quad
+\tau_{\mathrm{slow}}=90\ \mathrm{s},\quad
+\tau_{\mathrm{fast}}=20\ \mathrm{s}.
+$$
+
+第一项是把资源拉回 $q_0$ 的正向恢复力；第二项是使用依赖、把资源拉向 $q_{\mathrm{res}}$ 的负向
+耗竭力。bath 在当前 diagnostic 被强制 $\dot q_b=0$。冻结 $(\bar m,U)$ 后只有一个稳定 nullcline：
+
+$$
+q^*(\bar m,U)=
+\frac{r_{\mathrm{rec}}(\bar m)q_0+(U/\tau_D)q_{\mathrm{res}}}
+{r_{\mathrm{rec}}(\bar m)+U/\tau_D},
+\qquad
+\lambda_q=-\left[r_{\mathrm{rec}}(\bar m)+\frac{U}{\tau_D}\right]<0.
+$$
+
+所以 q 方程本身不产生 Hopf 或第二个稳定点；它只让慢轨迹跨越快子系统的 fold。
+
+#### B2.1.6 persistence、hybrid latch 与 M
+
+$$
+\tau_p\dot p_r=O_r-p_r,\qquad \tau_p=.75\ \mathrm{s}.
+$$
+
+$O_r$ 是建立 persistence 的正向力，$-p_r$ 是静息时的遗忘力。离散 latch
+$L\in\{0,1\}$ 使用 hysteretic guards：
+
+$$
+L:0\to1
+\quad\Longleftrightarrow\quad
+p_c,p_a\ge.115\ \text{且}\ R_c,R_a\ge.60,
+$$
+
+$$
+L:1\to0
+\quad\Longleftrightarrow\quad
+r^f_{E,c},r^f_{E,a}\le.005,\quad
+q_c,q_a\ge.885,\quad p_c,p_a\le.03.
+$$
+
+core/annulus pooled M 为：
+
+$$
+\dot{\bar m}=
+L\,O_cO_a\frac{1-\bar m}{.225\ \mathrm{s}}
+-(1-L)\frac{\bar m}{12\ \mathrm{s}},
+\qquad A_M=1.6\bar m\ \mathrm{mV}.
+$$
+
+当 $L=1$ 且两区都活跃时，M 向 1 建立；当 $L=1$ 但 bursting 已停止时 $\dot m=0$，M 被保持，
+形成 protected recovery window；只有 $L=0$ 后 M 才以 12 s 时间常数自然释放。这一中性保持段是
+R4 属于 hybrid controller、而不是平滑恢复电流的关键。
+
+#### B2.1.7 触发协议、fold 关系与验收边界
+
+登记的 interictal-like challenge 是 six-pulse core drive：
+
+$$
+I_r^{\mathrm{pulse}}(t)=3\ \mathrm{mV}
+\sum_{k=1}^{6}\mathbf 1_{[t_k,t_k+20\ \mathrm{ms})}(t)(1,0,0)_r,
+$$
+
+$$
+t_k=(1000,3122,5044,6321,7531,10915)\ \mathrm{ms}.
+$$
+
+该电流只加到 E-input mean，不加到 variance。第五次事件使 regional resource 穿过已求得的 localized
+real fold
+
+$$
+q_R^{SN}=.8558315843,
+$$
+
+随后出现 4 次 response-excluded core/annulus paired returns；latch 在约 10.234 s 打开，M 完成 finite
+fast exit。$q$ 恢复到 `.885` 后 latch 在约 74.117 s reset，M 再释放，约 311.7 s 回到原 LLL basin
+邻域。早 challenge 不重建 autonomous lifecycle，same-basin late challenge 又在 event 5 重建 4-return
+lifecycle。
+
+此前的 fold 图是冻结 $(q,A_M)$ 后快子系统的地形图；R4 是慢状态在该地形上实际走出的一条
+entry–burst–exit–reset loop。R4 没有创造新 fold，也没有证明 Hopf、SNIC、torus 或平滑 full-system
+limit cycle。精确 regional exit continuation 目前只有 $q=.855/.850$ 两点，实际 dynamic exit 发生在更深
+$q\approx.845$，因此只能写 **finite additive exit**，不能写“已精确穿过完整 exit-fold curve”。此外，
+20–312 s 恢复含 analytic slow bridges 与 full-fast sentinels，late challenge 是 same-basin state fork；
+结果不是零输入 spontaneous onset、连续空间 wavefront、Virtual-SEEG 或 full-SNN seizure lifecycle。
+完整验收见 `docs/archive/topic4/sef_hfo/mz_actual_entry_lifecycle_closure_2026-07-21.md`。
+
 ### B3. 状态坐标
 
 静态 E/I 比例：

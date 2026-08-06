@@ -256,6 +256,32 @@ Fig4 已经承担“患者特异性 SNN 能否复现稳定正反间期 readout�
 这两张图不把 pre-onset 写成 ictal state，不把 frozen-q 率场模式写成 full-SNN eigenmode，也不声称已经解释完整
 seizure cycle 或 recovery。
 
+### M4 MZ R3/R4 lifecycle 诊断图（archive-only，暂不进入 Fig5 主图）
+
+**目的**：把 inhibitory slow-path 的三个证据层分开，避免把 frozen/path oracle、coupled onset
+failure 和 actual-entry hybrid closure 混成一张“成功发作模型”图。
+
+**当前输出**：
+
+- R3 scalar/path：`results/topic4_sef_hfo/mz_m_gated_reserve_recovery/figures/mz_m_gated_reserve_recovery.png`
+- R3 coupled canary：`results/topic4_sef_hfo/mz_m_gated_reserve_coupled_canary/figures/mz_m_gated_reserve_coupled_canary.png`
+- R4 center closure：`results/topic4_sef_hfo/mz_actual_entry_lifecycle_closure/figures/mz_actual_entry_lifecycle_closure.png`
+- R4 paper-style regional diagnostic：`results/paper-ready-figure/fig5_mz_r4_regional_lifecycle_diagnostic/figures/fig5_mz_r4_regional_lifecycle_diagnostic.png`
+- producers：`scripts/run_topic4_mz_{m_gated_reserve_recovery,m_gated_reserve_coupled_canary,actual_entry_lifecycle_closure}.py`
+- R4 diagnostic renderer：`scripts/paper_figures/plot_fig5_mz_r4_regional_lifecycle_diagnostic.py`
+
+**当前口径**：
+
+R3 scalar/path 只说明 M-gated q recovery 在 frozen sensor 下形成必要 corridor；R3 coupled 说明真实
+q→fast feedback 把 entry 从 event 6 提前到 event 5，同时在 actual-entry-aligned window 中出现 4 次
+paired bursts；R4 从该真实末态继续，闭合真实 latch reset、M release、same-basin return 和
+protected/recovered 同挑战分离。R4 是 fixed-bath three-patch center-point **hybrid** existence proof。
+protected challenge 仍有 evoked crossings，只是不重建 response-excluded autonomous lifecycle。
+新增的 paper-style diagnostic 把 source、解析 bridge + full-fast sentinel、same-basin state 与 recovered
+challenge fork 显式分开；底部二维图只是 locked P3 masks 上的 piecewise-constant rate-energy proxy，不是
+Virtual-SEEG/LFP 或 continuous field。在 robust corridor、continuous space 和 full SNN 未通过前，这组图
+保持 archive/mechanism diagnostic，不占 Fig5 paper-ready 主 panel。
+
 ### M3A-v2 Step4 诊断图：低-q / gK closed-loop 负结果目视审阅
 
 **目的**：把 M3A-v2 Step4 的代表性动力学现象画成同一套 SNN 四列图，供目视检查：baseline 轴向事件、shallow low-q 无明显扩张、shallow low-q + gK suppress、deep low-q runaway、deep low-q + gK 仍不 rescue。
