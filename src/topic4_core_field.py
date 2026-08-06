@@ -103,3 +103,133 @@ def build_vth(h, d, n_total, n_E, v_base=V_BASE):
     vth = np.full(int(n_total), float(v_base))
     vth[:int(n_E)] = float(v_base) - np.asarray(h, float) * np.asarray(d, float)
     return vth
+
+
+ARM_NAMES = (
+    "manual_hard",        # legacy engine path (rejection sampler + np.minimum)
+    "manual_projected",   # SAME hard mask, latent-quantile draws  -> comparison A
+    "manual_smooth",      # smoothed two-core through the budget   -> baseline for B1-B4
+    "uniform_axial",
+    "width_wide",
+    "width_narrow",
+    "transverse_plus",
+    "transverse_minus",
+)
+
+# Shape comparisons and the quantity each one must actually move (spec 4.4).
+SHAPE_CHECKS = {
+    "B1": dict(a="manual_smooth", b="uniform_axial",
+               metric="rms_axial", kind="rel", threshold=0.20),
+    "B2": dict(a="manual_smooth", b="width_wide",
+               metric="aspect", kind="rel", threshold=0.50),
+    "B3": dict(a="manual_smooth", b="width_narrow",
+               metric="aspect", kind="rel", threshold=0.50),
+    "B4": dict(a="manual_smooth", b="transverse_plus",
+               metric="centroid_transverse", kind="abs", threshold=1.5),
+}
+
+
+def manual_mask(pos, src_xy, snk_xy, core_r):
+    """The legacy two-disk core mask, in sheet coordinates."""
+    pos = np.asarray(pos, float)
+    d = np.minimum(((pos - np.asarray(src_xy, float)) ** 2).sum(1),
+                   ((pos - np.asarray(snk_xy, float)) ** 2).sum(1))
+    return d <= float(core_r) ** 2
+
+
+def two_core_q(s, r, sep, rho=1.0, a0=A0, b0=B0, r_shift=0.0, eps=EPS):
+    """Two elliptical cores at s = +-sep/2, transverse offset r_shift.
+
+    rho is the FIXED-AREA aspect ratio (a = a0*rho, b = b0/rho), so it reshapes
+    the region instead of merely blurring its edge (spec 4.4).
+    """
+    a, b = float(a0) * float(rho), float(b0) / float(rho)
+    s = np.asarray(s, float)
+    rr = np.asarray(r, float) - float(r_shift)
+    q = np.zeros_like(s)
+    for c in (-float(sep) / 2.0, float(sep) / 2.0):
+        q = np.maximum(q, np.exp(-((s - c) ** 2 / (2 * a ** 2) + rr ** 2 / (2 * b ** 2))))
+    return q + eps
+
+
+def uniform_axial_q(s, r, kappa, sigma_s, sigma_perp, eps=EPS):
+    """Flat axial profile: pi_m == 1/M on a partition-of-unity basis."""
+    M = len(kappa)
+    profile = partition_of_unity(np.asarray(s, float), kappa, sigma_s) @ np.full(M, 1.0 / M)
+    return profile * np.exp(-np.asarray(r, float) ** 2 / (2 * float(sigma_perp) ** 2)) + eps
+
+
+def arm_h(name, s, r, geom, target_count, manual_mask_E=None):
+    """h field for one Stage 1 arm.
+
+    manual_hard is not built here (legacy engine path). manual_projected is the
+    hard mask verbatim -- it changes the DRAWS, not the geometry (spec 4.3.1).
+    """
+    if name == "manual_projected":
+        if manual_mask_E is None:
+            raise ValueError("manual_projected requires manual_mask_E")
+        return np.asarray(manual_mask_E, bool).astype(float)
+    sep = geom["sep"]
+    if name == "manual_smooth":
+        q = two_core_q(s, r, sep, rho=1.0)
+    elif name == "uniform_axial":
+        kappa = axial_basis_centers(geom["s_support"], geom["M"])
+        q = uniform_axial_q(s, r, kappa, SIGMA_S_FACTOR * (kappa[1] - kappa[0]),
+                            geom["sigma_perp"])
+    elif name == "width_wide":
+        q = two_core_q(s, r, sep, rho=0.5)
+    elif name == "width_narrow":
+        q = two_core_q(s, r, sep, rho=2.0)
+    elif name == "transverse_plus":
+        q = two_core_q(s, r, sep, rho=1.0, r_shift=+geom["shift_mm"])
+    elif name == "transverse_minus":
+        q = two_core_q(s, r, sep, rho=1.0, r_shift=-geom["shift_mm"])
+    else:
+        raise ValueError(f"arm_h does not build {name!r}")
+    h, _ = project_to_budget(q, target_count)
+    return h
+
+
+def shape_metrics(h, s, r):
+    """h-weighted geometry. Uses h, never h*d -- d is signed and h*d is not a
+    non-negative mass (spec 9 / P0-7)."""
+    h = np.asarray(h, float)
+    w = h.sum()
+    rms_ax = float(np.sqrt((h * np.asarray(s, float) ** 2).sum() / w))
+    rms_tr = float(np.sqrt((h * np.asarray(r, float) ** 2).sum() / w))
+    return dict(rms_axial=rms_ax, rms_transverse=rms_tr,
+                aspect=rms_tr / rms_ax if rms_ax > 0 else np.inf,
+                centroid_transverse=float((h * np.asarray(r, float)).sum() / w),
+                centroid_axial=float((h * np.asarray(s, float)).sum() / w),
+                budget=float(w))
+
+
+def preflight_shape(h_by_arm, s, r, target_count, checks=None):
+    """Refuse to launch 96 simulations on a vacuous shape comparison.
+
+    Only the B comparisons are checked. manual_hard and manual_projected SHOULD
+    be near-identical -- an all-pairs correlation gate would reject the correct
+    implementation (third-review P0-2). Correlation is reported as a diagnostic,
+    never as the gate.
+    """
+    checks = checks or SHAPE_CHECKS
+    metrics = {name: shape_metrics(h, s, r) for name, h in h_by_arm.items()}
+    out, ok_all = {}, True
+    for key, c in checks.items():
+        ma, mb = metrics[c["a"]][c["metric"]], metrics[c["b"]][c["metric"]]
+        if c["kind"] == "rel":
+            observed = abs(ma - mb) / max(abs(ma), abs(mb), 1e-12)
+        else:
+            observed = abs(ma - mb)
+        ok = bool(observed >= c["threshold"])
+        ok_all &= ok
+        out[key] = dict(ok=ok, a=c["a"], b=c["b"], metric=c["metric"],
+                        observed=float(observed), threshold=c["threshold"],
+                        correlation=float(np.corrcoef(h_by_arm[c["a"]],
+                                                      h_by_arm[c["b"]])[0, 1]))
+    budget_err = {n: abs(m["budget"] - target_count) / target_count
+                  for n, m in metrics.items()}
+    worst = max(budget_err.values())
+    ok_all &= bool(worst < 1e-6)
+    return dict(ok=bool(ok_all), checks=out, metrics=metrics,
+                worst_budget_error=float(worst))

@@ -105,3 +105,102 @@ def test_build_vth_places_baseline_outside_and_core_distribution_inside():
     assert vth.shape == (n_total,)
     assert np.allclose(vth[100:], 18.0)
     assert np.allclose(vth[:100], 18.0 - d[:100])
+
+
+from src.topic4_core_field import (
+    ARM_NAMES, arm_h, manual_mask, preflight_shape, shape_metrics,
+)
+
+SEP = 6.0
+
+
+def _mock_sheet(n=32_000, L=20.0, seed=0):
+    rng = np.random.default_rng(seed)
+    pos = rng.uniform(0.0, L, size=(n, 2))
+    return pos, pos[:, 0] - L / 2.0, pos[:, 1] - L / 2.0
+
+
+def _geom():
+    return dict(sep=SEP, s_support=(-8.0, 8.0), M=9, sigma_perp=1.5, shift_mm=3.0)
+
+
+def _mask(s, r, core_r=1.5):
+    """Cores sit at +-sep/2, matching two_core_q."""
+    return (np.minimum((s - SEP / 2) ** 2, (s + SEP / 2) ** 2) + r ** 2) <= core_r ** 2
+
+
+def test_there_are_eight_arms_including_both_manual_variants():
+    assert len(ARM_NAMES) == 8
+    for name in ("manual_hard", "manual_projected", "manual_smooth"):
+        assert name in ARM_NAMES
+
+
+def test_manual_projected_is_exactly_the_hard_mask():
+    """spec 4.3.1: manual_projected changes the DRAWS, not the mask. If it were a
+    smoothed field, comparison A would move three things at once."""
+    _, s, r = _mock_sheet()
+    m = _mask(s, r)
+    h = arm_h("manual_projected", s, r, _geom(), float(m.sum()), manual_mask_E=m)
+    assert np.array_equal(h, m.astype(float))
+
+
+def test_manual_smooth_is_close_to_but_not_identical_to_the_hard_mask():
+    _, s, r = _mock_sheet()
+    m = _mask(s, r)
+    h = arm_h("manual_smooth", s, r, _geom(), float(m.sum()), manual_mask_E=m)
+    assert np.corrcoef(h, m.astype(float))[0, 1] >= 0.9
+    assert not np.array_equal(h, m.astype(float))
+
+
+def test_all_arms_hit_the_same_budget():
+    _, s, r = _mock_sheet()
+    m = _mask(s, r)
+    for name in ARM_NAMES:
+        if name == "manual_hard":
+            continue
+        h = arm_h(name, s, r, _geom(), float(m.sum()), manual_mask_E=m)
+        assert abs(h.sum() - m.sum()) / m.sum() < 1e-6, name
+
+
+def test_width_arms_reshape_rather_than_blur():
+    """spec 4.4: bare sigma_perp only blurs the edge because the budget pins the
+    area; rho reshapes it at fixed a*b."""
+    _, s, r = _mock_sheet()
+    m = _mask(s, r); target = float(m.sum())
+    wide = arm_h("width_wide", s, r, _geom(), target, manual_mask_E=m)
+    narrow = arm_h("width_narrow", s, r, _geom(), target, manual_mask_E=m)
+    assert shape_metrics(wide, s, r)["rms_transverse"] > \
+           2.5 * shape_metrics(narrow, s, r)["rms_transverse"]
+
+
+def test_transverse_arms_are_mirror_images():
+    _, s, r = _mock_sheet()
+    m = _mask(s, r); target = float(m.sum())
+    plus = arm_h("transverse_plus", s, r, _geom(), target, manual_mask_E=m)
+    minus = arm_h("transverse_minus", s, -r, _geom(), target, manual_mask_E=_mask(s, -r))
+    assert np.corrcoef(plus, minus)[0, 1] > 0.999
+
+
+def test_preflight_covers_shape_comparisons_only_and_excludes_the_equivalence_arms():
+    """P0-2: manual_hard and manual_projected SHOULD be near-identical. An
+    all-pairs correlation gate would reject the correct implementation."""
+    _, s, r = _mock_sheet()
+    m = _mask(s, r); target = float(m.sum())
+    h_by_arm = {n: arm_h(n, s, r, _geom(), target, manual_mask_E=m)
+                for n in ARM_NAMES if n != "manual_hard"}
+    h_by_arm["manual_hard"] = m.astype(float)
+    rep = preflight_shape(h_by_arm, s, r, target)
+    assert rep["ok"] is True
+    assert set(rep["checks"]) == {"B1", "B2", "B3", "B4"}
+
+
+def test_preflight_fails_when_a_shape_arm_collapses_onto_the_baseline():
+    _, s, r = _mock_sheet()
+    m = _mask(s, r); target = float(m.sum())
+    h_by_arm = {n: arm_h(n, s, r, _geom(), target, manual_mask_E=m)
+                for n in ARM_NAMES if n != "manual_hard"}
+    h_by_arm["manual_hard"] = m.astype(float)
+    h_by_arm["uniform_axial"] = h_by_arm["manual_smooth"].copy()   # collapse B1
+    rep = preflight_shape(h_by_arm, s, r, target)
+    assert rep["ok"] is False
+    assert rep["checks"]["B1"]["ok"] is False
