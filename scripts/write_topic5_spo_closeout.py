@@ -297,6 +297,11 @@ def main() -> int:
             "A model that is worse everywhere falls less from its own baseline, so "
             "a relative comparison would hand it the win for the wrong reason; it "
             "is not reported here.\n")
+        add("The held-out and retained numbers are NOT comparable to each other. "
+            "A quarter of the contacts are withheld, so at any step the withheld "
+            "set contains the next contact far less often than the retained set "
+            "does, and 'not this one' is correspondingly easier. Only the arms "
+            "are comparable, within a column.\n")
         add(f"Floor arm: **{loco['floor_arm']}** — with the withheld contact's bias "
             "set to the average retained contact's, it assigns every withheld "
             "contact the same number and therefore knows nothing about them.\n")
