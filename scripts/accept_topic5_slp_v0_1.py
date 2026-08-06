@@ -81,14 +81,22 @@ def main() -> int:
     detail = "missing"
     if matrix.exists():
         rows = [r for r in matrix.read_text().strip().splitlines()[1:] if r]
-        done = sum(
-            1 for r in rows
+        done_rows = [
+            r for r in rows
             if (OUT / "per_subject" / r.split(",")[0] / r.split(",")[1]
                 / f"seed{r.split(',')[2]}" / "DONE.json").exists()
-        )
+        ]
+        # "Some units ran" is not coverage.  The bar is every arm on every
+        # cohort patient at the first seed, which is what the plan calls the
+        # minimum publishable matrix; further seeds are a bonus.
+        seed_one = {r.rsplit(",", 1)[0] for r in rows if r.endswith(",1")}
+        seed_one_done = {r.rsplit(",", 1)[0] for r in done_rows if r.endswith(",1")}
+        missing = sorted(seed_one - seed_one_done)
         summary_path = OUT / "patient_prediction_metrics.csv"
-        coverage_ok = summary_path.exists() and done > 0
-        detail = f"{done}/{len(rows)} units complete"
+        coverage_ok = summary_path.exists() and not missing
+        detail = (f"{len(done_rows)}/{len(rows)} units; seed 1 "
+                  f"{len(seed_one_done)}/{len(seed_one)}"
+                  + (f", missing e.g. {missing[:2]}" if missing else ""))
     results.append(check("cohort units run and aggregated", coverage_ok, detail))
 
     # 7. the mandatory guard arm is present for every patient that has any arm
