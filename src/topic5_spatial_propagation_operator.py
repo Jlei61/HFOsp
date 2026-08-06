@@ -323,13 +323,19 @@ class SPOModel(nn.Module):
 
     # -- free rollout ----------------------------------------------------
     @torch.no_grad()
-    def rollout(self, seed_set: Tensor, max_steps: int = 32,
-                threshold: float = 0.5) -> list[Tensor]:
+    def rollout(self, seed_set: Tensor, max_steps: int = 32) -> list[Tensor]:
         """Generate an event from a seed set with no teacher forcing.
 
         The model's own prediction becomes the next input, which is the only way
         to see whether the operator produces events shaped like the real ones
         rather than merely scoring the next step of a real one.
+
+        Exactly one contact joins at each rank in this data, so the next step is
+        the most probable contact not yet recruited. An earlier version took
+        every contact whose probability cleared 0.5, which is never met: with one
+        positive among a dozen candidates a calibrated probability sits near the
+        base rate, so nothing was ever selected and every rollout ended at its
+        first step. That reported the threshold's behaviour as the model's.
         """
         batch = seed_set.shape[0]
         state = self.initial_state(batch, seed_set.device)
@@ -346,8 +352,10 @@ class SPOModel(nn.Module):
                                 device=seed_set.device)
             state, logits, stop = self.step(state, x_t, recruited, t_norm)
             logits = logits.masked_fill(recruited > 0, NEG_INF)
-            x_t = (torch.sigmoid(logits) > threshold).float()
-            finished = (torch.sigmoid(stop) > 0.5) | (x_t.sum(-1) == 0)
+            x_t = torch.zeros_like(logits).scatter_(
+                1, logits.argmax(-1, keepdim=True), 1.0)
+            exhausted = recruited.sum(-1) >= recruited.shape[1]
+            finished = (torch.sigmoid(stop) > 0.5) | exhausted
             alive = alive & ~finished
             if not bool(alive.any()):
                 break

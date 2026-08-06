@@ -26,11 +26,11 @@ FULL = "ANISOTROPIC_RECOVERY"
 # Only nested pairs are drawn: a non-nested difference is two components moving
 # at once and cannot be labelled with either of them.
 LADDER_LABEL = {
-    "field_over_static": "A field with\nmemory",
-    "transport_over_no_transport": "+ spatial\ntransport",
-    "drift_over_isotropic": "+ anisotropy\nand drift",
-    "recovery_over_drift": "+ recovery\nfield",
-    "full_over_static": "Everything, over\na static rate",
+    "field_over_static": "a field with memory",
+    "transport_over_no_transport": "+ spatial transport",
+    "drift_over_isotropic": "+ anisotropy and drift",
+    "recovery_over_drift": "+ recovery field",
+    "full_over_static": "everything, vs a static rate",
 }
 
 
@@ -102,6 +102,9 @@ def panel_b(ax, subject: str) -> None:
     ax.set_ylabel("Fraction")
     ax.legend(frameon=False, fontsize=6.5)
     ax.set_title("B  Observed against free-running event length", loc="left", pad=14)
+    ax.text(0.0, 1.005, "free-running stops on the model's own stop head, or when "
+                        "every contact is recruited",
+            transform=ax.transAxes, fontsize=6, color="0.35", style="italic")
 
 
 def panel_c(ax) -> None:
@@ -123,7 +126,7 @@ def panel_c(ax) -> None:
     ax.axhline(0.0, color="0.55", lw=1, ls=":")
     ax.set_xticks(range(len(names)))
     ax.set_xticklabels([LADDER_LABEL[n] for n in names], fontsize=6.0,
-                       rotation=20, ha="right")
+                       rotation=32, ha="right", rotation_mode="anchor")
     ax.set_ylabel("Improvement on the previous\nmodel, same patient")
     ax.set_title("C  What each component buys", loc="left", pad=14)
 

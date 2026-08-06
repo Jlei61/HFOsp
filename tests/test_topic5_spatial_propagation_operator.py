@@ -198,7 +198,7 @@ def test_rollout_does_not_consume_ground_truth():
     # Check the signature and the executable body, not the prose: the docstring
     # legitimately contains the words this test is looking for.
     signature = inspect.signature(SPOModel.rollout)
-    assert set(signature.parameters) == {"self", "seed_set", "max_steps", "threshold"}
+    assert set(signature.parameters) == {"self", "seed_set", "max_steps"}
     body = inspect.getsource(SPOModel.rollout)
     body = body.split('"""')[2] if body.count('"""') >= 2 else body
     assert "target" not in body and "teacher" not in body
@@ -216,7 +216,7 @@ def test_a_contact_never_recruits_twice_in_a_rollout():
     model = _setup("ANISOTROPIC_RECOVERY")
     seed = torch.zeros(1, model.config.n_contacts)
     seed[0, 0] = 1.0
-    produced, _ = model.rollout(seed, max_steps=10, threshold=0.0)
+    produced, _ = model.rollout(seed, max_steps=10)
     stacked = torch.cat(produced, dim=0)
     assert stacked.sum(dim=0).max() <= 1.0
 
@@ -291,9 +291,39 @@ def test_rollout_stops_each_sequence_on_its_own():
     seeds = torch.zeros(2, c)
     seeds[0] = 1.0          # nothing left to recruit: must stop at once
     seeds[1, 0] = 1.0       # room to continue
-    produced, lengths = model.rollout(seeds, max_steps=8, threshold=0.0)
+    produced, lengths = model.rollout(seeds, max_steps=8)
     assert lengths.shape == (2,)
     assert int(lengths[0]) < int(lengths[1]), (
         f"a saturated sequence ran as long as an open one ({lengths.tolist()}); "
         "the batch is sharing a stopping decision"
+    )
+
+
+def test_rollout_recruits_exactly_one_contact_per_rank():
+    """A step that selects nobody is a bug, not a short event.
+
+    Exactly one contact joins at each rank in this data. The first version took
+    every contact whose probability cleared 0.5; with one positive among a dozen
+    candidates a calibrated probability sits near the base rate and never gets
+    there, so nothing was ever selected and every rollout ended at its first
+    step. The figure then showed the model generating only length-1 events,
+    which is the threshold's behaviour reported as the model's.
+
+    Both other rollout tests pass ``threshold=0.0``, so neither of them ever
+    exercised the selection rule that shipped.
+    """
+    model = _setup("ANISOTROPIC_RECOVERY")
+    with torch.no_grad():                       # never stop on its own accord
+        model.stop_head.weight.zero_()
+        model.stop_head.bias.fill_(-20.0)
+    seed = torch.zeros(1, model.config.n_contacts)
+    seed[0, 0] = 1.0
+    produced, lengths = model.rollout(seed, max_steps=5)
+    for step, selected in enumerate(produced[1:], start=1):
+        assert float(selected.sum()) == 1.0, (
+            f"step {step} recruited {float(selected.sum())} contacts; exactly one "
+            "joins per rank"
+        )
+    assert int(lengths[0]) > 1, (
+        "a rollout that cannot stop still ended immediately; nothing was selected"
     )

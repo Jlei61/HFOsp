@@ -45,7 +45,11 @@ def main() -> int:
 
     test = subprocess.run(
         [sys.executable, "-m", "pytest",
-         str(ROOT / "tests/test_topic5_spatial_propagation_operator.py"), "-q"],
+         # The holdout tests belong in the gate, not beside it: they guard the
+         # bug class that produced a publishable-looking number rather than an
+         # error, twice.
+         str(ROOT / "tests/test_topic5_spatial_propagation_operator.py"),
+         str(ROOT / "tests/test_topic5_spo_holdout.py"), "-q"],
         capture_output=True, text=True, cwd=ROOT)
     results.append(check("correctness suite green", test.returncode == 0,
                          test.stdout.strip().splitlines()[-1] if test.stdout else ""))
