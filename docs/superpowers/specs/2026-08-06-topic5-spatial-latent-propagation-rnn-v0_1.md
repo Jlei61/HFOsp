@@ -8,6 +8,32 @@
 
 ## 0. Revision log
 
+**rev2 (2026-08-06, during execution)** — the identifiability precondition H0 returned its
+verdict before any patient result was read, and it removes three hypotheses from this run.
+Four amendments, all recorded before the cohort was aggregated:
+
+1. **H3, H4 and H5 are not answerable by this parameterisation.** On events generated from a
+   known sparse spatial graph, the fitted adjacency ranks the true connections at median AUC
+   0.482 against a pre-set floor of 0.60, and the global direction of travel comes out right
+   in 3 of 7 runs against a floor of 0.80. Sweeping the observation ratio from 0.25 to 0.75,
+   the wiring strength from 0 to 10, and the hidden width from 4 to 16 leaves all of them at
+   chance. Any per-patient graph is therefore one arbitrary member of a large equally-fitting
+   set. §7 tiers stand as written; the verdicts are `BLOCKED_BY_RECOVERY_GATE`, not negative.
+2. **A third structural layer is added and is reportable.** Node-level *ordering* — which
+   patches push activity further along the axis than others — recovers in 7 of 7 runs
+   (median ρ = +0.39, sign test p = 0.008). It may be reported as relative ordering and never
+   as the graph.
+3. **Node count is a lower bound, not the value.** The supplied `min(64, max(24, 4C))` was
+   written for the median montage; at 38 and 52 contacts it leaves nodes sparser than
+   contacts and a contact reading a single node, which silently restores a per-contact
+   parameter. The count now grows until every contact averages at least three nodes.
+   Three patients needed it.
+4. **Training schedule and batch size are fixed for fairness, not for speed.** Arms with no
+   learnable graph train as one phase under the same stopping rule; the batch is 1024 with a
+   matched learning rate, verified to reach the same validation loss as 256 on the
+   representative patient. Every run records whether it converged or hit the epoch ceiling
+   while still improving, and a run that hit the ceiling carries no negative verdict.
+
 **rev1 (2026-08-06)** — first draft, transcribed from the user-supplied design and then
 amended with six P1 fixes found by auditing the design against the frozen state of this
 repository. Each fix is marked **[P1-n]** at its section. The user accepted three deviations

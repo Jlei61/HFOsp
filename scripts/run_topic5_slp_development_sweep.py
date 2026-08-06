@@ -165,7 +165,17 @@ def main() -> int:
             "all_converged": bool(all(r.get("converged", True) for r in rows_all)),
             "config": finalist["config"],
         }
-    winner = min(scores, key=lambda t: scores[t]["median_validation_next_bce"])
+    # The knee rule applies to the FINAL choice too, not only to stage 2.  Taking
+    # the lowest validation loss here would undo it: the finalists differ by well
+    # under one percent in prediction and by nearly two-fold in connection cost,
+    # so "lowest loss" silently buys a much more expensive graph for nothing and
+    # makes the wiring-economy question vacuous -- the exact outcome the plan
+    # pre-registered against.
+    winner = pareto_knee([
+        {"tag": tag, "validation_next_bce": s["median_validation_next_bce"],
+         "wiring_cost": s["median_wiring_cost"]}
+        for tag, s in scores.items()
+    ])["tag"]
     record["scores"] = scores
     record["frozen"] = {"tag": winner, **scores[winner]}
 

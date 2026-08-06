@@ -27,6 +27,7 @@ SECONDARY = "test_contact_nll"    # comparable with the existing Topic 5 line
 
 # Every comparison is written so that a POSITIVE delta means "a is better".
 COMPARISONS = [
+    ("H1_recurrence", "ORDINARY_GRU", "STATIC_CONTACT"),
     ("H1", "CONTACT_GRAPH_RNN", "STATIC_CONTACT"),
     ("H1b_contact_graph", "CONTACT_GRAPH_RNN", "ORDINARY_GRU"),
     ("H1b_latent_learned", "LATENT_LEARNED_SPATIAL_RNN", "ORDINARY_GRU"),

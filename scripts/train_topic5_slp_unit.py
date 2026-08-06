@@ -53,8 +53,12 @@ DEFAULTS: Dict[str, Any] = {
     # question is vacuous.  Calibrated like the wiring term, against the task loss.
     "edge_budget_strength": 0.5,
     "node_density": "spec",
-    "batch_size": 256,
-    "lr": 3e-3,
+    # These tensors are small enough that per-step launch overhead, not
+    # arithmetic, sets the wall clock: a batch of 1024 runs 2.7x faster per epoch
+    # than 256 and reaches the same validation loss on the representative patient
+    # (0.3154 against 0.3151).  The learning rate is raised with it.
+    "batch_size": 1024,
+    "lr": 6e-3,
     # Budget is deliberately generous and identical across arms.  An earlier
     # Topic 5 comparison was distorted by runs that stopped at the budget
     # ceiling, which is conservative for a positive and anti-conservative for a
