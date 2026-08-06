@@ -113,14 +113,49 @@
 
 ### 3d. 间期单事件包络传播 frame / GIF（Fig2-C 候选）
 
-- **唯一规范**：[`docs/fig2c_interictal_event_envelope_field_spec.md`](fig2c_interictal_event_envelope_field_spec.md)。之后所有“间期传播场 frame / event-envelope GIF”先读该文件；不要套用静态模板场 Fig2-E 的 viridis/rank 语法。
+- **唯一规范**：[`docs/fig2c_interictal_event_envelope_field_spec.md`](fig2c_interictal_event_envelope_field_spec.md)。之后所有“间期传播场 frame / event-envelope GIF”先读该文件；中间单事件 envelope field 不得套用 Fig2-E 的 viridis/rank 语法，只有最右群体模板参照场保留该语法。
 - **示范图**：[`results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png`](../results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png)。
 - **动态 sidecar**：同目录 `fig2c_candidate_E1146_interictal_event_envelope_field.gif`。
 - **复现入口**：`scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py --subject epilepsiae_1146`；core renderer 为 `scripts/plot_topic5_interictal_event_envelope_field.py`。
-- **视觉硬锁**：两行 TA/TB；左侧为方形 Fig1a readout，右侧为 6 个等高方形 frame；静态时间只到 +50 ms；包络用 `magma`，TA/TB 共享 `vmax`、各有等高 colorbar；TA 红/TB 蓝；标题只写匿名患者号；所有 frame 保留 x ticks。
+- **视觉硬锁**：每行按 `单事件 readout | 7 个 envelope frames | 冻结群体 template-rank field` 排列；readout 标题固定为 `Sample from TA/TB` 并在轴内靠右避开 colorbar，两行都写 `time (ms)`；x limits 取两次真实 STFT 窗的交集，不能在两端留无数据白条；静态时刻为 `−8, 0, +4, +15, +27, +38, +50 ms`。
+- **量纲硬锁**：中间 `magma` 表示单带 80–250 Hz Hilbert amplitude envelope 的 baseline robust-z，不得写成 energy/power；最右 `viridis` 表示冻结群体模板传播顺序，colorbar 顶部只写 `ranks` 并显示 artifact 实际 rank（E1146 为 0–14），端点分别写 early/late，不得再显示归一化 0–1。两幅模板场都写简短 `y (mm)`。
+- **解释边界**：最右 template field 只提供群体顺序参照，不能把左/中单事件升级成 template-free、cohort replay、二维 traveling-wave 或机制证据。
 - **数据硬锁**：frozen fingerprint/contact order/shared plane 不重拟合；单带 `return_hil_enve`；participant-only support；6 mm 只作 display kernel；GIF 与静态图使用同一 exemplar/几何/色标，2 ms biological step 与 playback fps 分开记录。
 - **适用范围硬锁**：这是单事件规范——TA/TB 每行各一个 exemplar。未来多事件 GIF 必须另立事件边界、事件间隔、逐事件 t0 和抽样合同，不得把 event train 塞进本 renderer。
 - **禁止**：不称 template-free，不把 Hilbert amplitude 写成 power，不把单被试两次事件写成 cohort 传播定律、跨未采样组织的 traveling wave 或机制证明。
+
+### 3e. Shared-axis TA–TB field 反向性队列行（Fig2-F 候选）
+
+- **示范图**：`results/paper-ready-figure/fig2_shared_field_reversal/figures/fig2_shared_field_reversal_last_row.png`。
+- **复现入口**：`scripts/paper_figures/plot_fig2_shared_field_reversal_row.py`；左侧场图必须复用
+  `scripts/plot_topic5_interictal_template_ab_fields.py` 的
+  `build_interictal_ab_panel_payloads()` + `draw_interictal_rank_field_panel()`，不得复制 painter。
+- **固定分母**：只纳入已有完整 `shared_a/shared_b` 且二维几何有效的患者；当前 n=12。不得按轴 cosine
+  正负、same/reversed 标签或 strict-stability 分组，也不得用 own field 补齐不同轴患者。
+- **固定 estimand**：每名患者在冻结 shared plane 上的 exact contact-evaluated TA/TB template fields
+  之间的 signed Pearson `r`。负值表示场组织反向；每个患者只贡献一个点。
+- **布局**：7.15 × 3.05 inch 全宽行。左侧4列固定为匿名投稿代号 E15、E14、E13、Y9，每列含 TA/TB 两幅
+  Viridis rank field；每对图严格共享冻结 shared plane、6 mm display bandwidth 和相同 x/y extent。
+  每个 panel 均显示物理毫米刻度，底行 xlabel=`Shared TA axis (mm)`；最左列 ylabel 分别写
+  `TA field / y (mm)` 与 `TB field / y (mm)`。场图不写总标题、不在轴内重复写 TA/TB，列标题只保留
+  加粗患者 ID。一个竖直 colorbar 放在场图最右侧并严格跨两行等高，顶部两行写
+  `Normalized / ranks`，归一化 rank 端点固定写作 `0 (early)` 和 `1 (late)`。左右两部分的 figure-level
+  x-label 必须使用同一个垂直坐标。
+  四个示例统一使用以各自触点 extent 中心为原点的 `50 × 60 mm` display-only 窗口；该裁切不得改变
+  shared axis、触点、rank、6 mm kernel 或统计。触点外圈用细白线，不能压过 field 色彩。右下科学标签
+  固定为 `TA–TB reversal vs spatial null (Δr)`，右侧上下两图和左侧场图保持紧凑但不得与 colorbar 文字重叠。
+  右上显示全部患者点、`r=0`、中位数和 IQR；右下只显示全触点 channel shuffle 的 centered
+  cohort-median null 和观测位置，不在图内重复写 `Full-contact shuffle`、`Δmedian` 或 P；精确统计放 caption、
+  metadata 和 README。
+  右上12个患者点必须全部标 Supplementary Tables S1/S2 的匿名投稿代号：Epilepsiae 必须按 legacy
+  manuscript cohort order 查表映射为 `E1–E20`，不得把数据库 subject number 直接加 `E`；Yuquan 必须
+  通过 private crosswalk 映射为 `Y1–Y20`。不得显示原始 subject folder/name，也不得只标4个示例患者。
+- **统计锁**：图内唯一 inferential P 是层级 full-contact-shuffle cohort-median-shift test；observed `r`
+  和 null 均由 exact frozen contact-evaluated fields 计算，不从 6 mm display-grid pixel 计算。配对 Wilcoxon
+  与 within-shaft 结果只写 metadata/README sensitivity，不用星号暗示它们通过。
+- **禁止**：不按 axis cosine / same-reversed / strict-stability 类型着色，不把4个显示案例称为独立代表性
+  样本，不把负相关解释为传播因果，也不把 `P_perm=0.018` 泛化为所有 null 或多数单患者显著。例子选择
+  规则、完整12人分布和对应 cohort null 必须同时出现。
 
 ---
 

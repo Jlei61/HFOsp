@@ -106,6 +106,9 @@ python scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py \
   --subject epilepsiae_1146
 ```
 
+For E1146 this command defaults to the accepted direction-qualified TB event 829; pass
+`--use-medoid-tb` only for the archived medoid sensitivity view.
+
 Default output:
 
 ```text
@@ -113,9 +116,14 @@ results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/
 ```
 
 This producer emits the same E1146 single-event representative material as PNG + vector PDF and a
-synchronized TA/TB GIF (one exemplar per row, not an event train). The static panel uses six frames through +50 ms; the GIF uses the same two exemplars,
-frozen geometry, participant-only support, 6 mm display kernel, `magma`, and shared A/B `vmax` at a
-2 ms biological step. Default playback is 12 fps; playback fps is metadata, not biological time.
+synchronized TA/TB GIF (one exemplar per row, not an event train). Each row is laid out as a narrow
+`Sample from TA/TB` readout, seven event-envelope frames including explicit 0 ms, and the frozen
+population TA/TB propagation-rank field. The event field uses participant-only support, a 6 mm
+display kernel, `magma`, and one shared A/B robust-z `vmax`; the static template field uses `viridis`
+with the frozen artifact's actual rank range (E1146: 0–14), `ranks` above each colorbar, and separate
+early/late endpoint text. The readout x limits use the common intersection of the two real STFT
+windows so neither row has an event-specific white edge strip. The GIF uses the same exemplars and geometry at a 2 ms biological step;
+default playback is 12 fps, which is display metadata rather than biological time.
 
 Future multi-event GIFs require a separate producer/spec for event boundaries, inter-event gaps,
 per-event t0 and sampling. Do not extend this single-event renderer by concatenating events.
@@ -126,6 +134,9 @@ screen before changing the canonical exemplar:
 ```bash
 python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
   --subject epilepsiae_1146 --top-k 500 --n-candidates 4
+
+python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
+  --subject epilepsiae_1146 --gif-event-pos 829 --mark-selected-for-fig2c
 ```
 
 The screen keeps TA, geometry, support, sigma, frame window and global field scale fixed. It ranks
@@ -133,7 +144,8 @@ raw centroid/envelope metrics rather than image pixels, requires usable particip
 shafts, and writes figures plus CSV/JSON under
 `results/paper-ready-figure/fig2c_interictal_event_envelope_field/tb_candidate_screen/`. A selected
 replacement is a direction-qualified illustrative exemplar, not an unconditional representative
-event; the screen never overwrites the canonical Fig2-C output.
+event. The explicit selection flag records the accepted representative TB event in screen metadata;
+it does not upgrade that single event to cohort evidence or overwrite the canonical Fig2-C output.
 
 Before changing any interictal event-field frame or GIF, read:
 
@@ -143,6 +155,32 @@ docs/fig2c_interictal_event_envelope_field_spec.md
 
 Do not copy the renderer or relabel this template-conditioned representative figure as template-free
 or cohort-level evidence.
+
+## Fig2-F Shared-field Reversal Last Row
+
+Formal entry point:
+
+```bash
+python scripts/paper_figures/plot_fig2_shared_field_reversal_row.py
+```
+
+Default output:
+
+```text
+results/paper-ready-figure/fig2_shared_field_reversal/figures/
+```
+
+This is a full-width Figure 2 last-row candidate. It includes all 12 patients with a frozen shared
+axis and supported 2-D geometry, with no same/reversed/different or strict-stability strata. The left
+block reuses the canonical interictal Viridis renderer for the locked manuscript IDs E15/E14/E13/Y9 negative-field
+examples, selected for legible 2-D geometry; E958 is excluded because its contacts are dense/tall and
+E1146 is not repeated after its earlier Figure 2 use. Patient IDs are the only column titles, physical-mm
+ticks remain visible, and one vertical normalized-rank colorbar spans both TA/TB rows. The upper-right
+strip contains all 12 patient-level signed r values plus
+median/IQR; the lower-right density reproduces the hierarchical full-contact-shuffle cohort-median
+null (`P_perm=0.01840`). Exact contact-evaluated fields, not display-grid pixels, define both observed
+r and the null. The extreme examples, complete cohort distribution and corresponding null must remain
+together so morphology selection cannot masquerade as prevalence or inference.
 
 ## Interictal Template A/B Direction Axis
 

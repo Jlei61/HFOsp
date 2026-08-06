@@ -1,0 +1,51 @@
+contract: topic5_event_innovation_impulse_response_v3_0
+dataset_root: results/topic5_interictal_rank_distribution/dataset_v0_4
+source_mapping_root: results/topic5_event_indexed_evolving_rank_field/development/input_audit/per_subject
+epilepsiae_block_inventory: results/epilepsiae_block_inventory.csv
+yuquan_block_inventory: results/dataset_inventory/yuquan_block_inventory.csv
+output_root: results/topic5_event_innovation_impulse_response/v3_0/phase0
+phase1_output_root: results/topic5_event_innovation_impulse_response/v3_0/phase1_measurement_validation_only
+innovation_output_root: results/topic5_event_innovation_impulse_response/v3_0/innovation_validation_only
+local_response_output_root: results/topic5_event_innovation_impulse_response/v3_0/local_response_validation_only
+cumulative_output_root: results/topic5_event_innovation_impulse_response/v3_0/cumulative_response_validation_only
+
+split_fractions: [0.60, 0.20, 0.20]
+pre_event_windows: [20, 40, 80]
+primary_pre_events: 20
+horizons: [5, 10, 20, 40]
+primary_horizon: 20
+cumulative_events: [5, 10, 20, 40]
+primary_cumulative_events: 20
+iei_decay_tau_seconds: [60.0, 300.0, 1800.0, 7200.0]
+dimensions: [1, 2, 3, 4, 6, 8, full]
+observer_dimensions: [1, 2, 3, 4]
+observer_alphas: [0.1, 1.0, 10.0, 100.0]
+observer_minimum_observations: 20
+innovation_null_draws: 100
+innovation_null_block_events: 20
+innovation_null_seed: 7301
+innovation_validity_max_rows: 10000
+local_projection_alphas: [0.1, 1.0, 10.0, 100.0]
+local_response_null_draws: 100
+local_response_null_seed: 7401
+local_response_block_sizes: [1, 2, 5, 10, 20, 40]
+local_response_safe_shift_multipliers: [2, 3, 4]
+cumulative_null_draws: 100
+cumulative_null_seed: 7501
+matched_donor_top_k: 5
+crossfit_splits: 4
+crossfit_embargo_events: 40
+crossfit_minimum_train_events: 80
+crossfit_minimum_validation_events: 20
+
+continuity:
+  maximum_gap_seconds: 2.0
+  maximum_overlap_seconds: 1.0
+  epilepsiae_group: recording_id
+  yuquan_group: subject
+
+forbidden_inputs:
+  old_heldout20: true
+  ab_or_axis_labels: true
+  geometry_or_soz: true
+  ictal_or_snn: true

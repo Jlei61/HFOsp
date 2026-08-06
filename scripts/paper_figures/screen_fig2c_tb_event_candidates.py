@@ -155,14 +155,25 @@ def _select_distinct_blocks(rows, n):
     return picked
 
 
-def _write_readme(figures_dir, selected, current, global_vmax):
+def _write_readme(
+    figures_dir, selected, current, global_vmax, *, selected_for_fig2c_event_pos=None,
+):
     blocks = []
     all_rows = [("current_reference", current)] + [
         (f"candidate_{i:02d}", row) for i, row in enumerate(selected, 1)
     ]
     for label, row in all_rows:
         filename = row["figure_name"]
-        status = "当前 Fig2-C TB 参照事件" if label == "current_reference" else "替代 TB 候选"
+        is_selected = (
+            selected_for_fig2c_event_pos is not None
+            and int(row["event_pos"]) == int(selected_for_fig2c_event_pos)
+        )
+        if is_selected:
+            status = "当前 Fig2-C 选定 TB 单事件"
+        elif label == "current_reference":
+            status = "旧 medoid TB 参照事件"
+        else:
+            status = "筛查保留 TB 候选"
         shaft_text = "、".join(
             f"{shaft} {count['n_usable']}/{count['n_participating']} usable"
             for shaft, count in row["shaft_counts"].items()
@@ -176,7 +187,11 @@ def _write_readme(figures_dir, selected, current, global_vmax):
             f"左端减右端质心时差={row['left_minus_right_centroid_ms']:.1f} ms；"
             f"两杆参与为 {shaft_text}。\n\n"
             f"**关注点**：只比较 TB 从 shared-axis 右端向左端的连续移动及中段是否断黑；"
-            f"本图是候选筛查，不自动替换正式 Fig2-C。"
+            + (
+                "该事件已锁为 Fig2-C representative single-event sample，不升级为群体证据。"
+                if is_selected else
+                "本图保留为选择 provenance，不自动替换正式 Fig2-C。"
+            )
         )
         if row.get("gif"):
             gif = row["gif"]
@@ -189,11 +204,19 @@ def _write_readme(figures_dir, selected, current, global_vmax):
                 f"**关注点**：观察 TB 两根杆参与时热区从 shared-axis 右端向中部/左端转移；"
                 f"播放速度不代表真实生物学时间倍率。"
             )
+    selection_text = (
+        f"当前锁定 TB event={int(selected_for_fig2c_event_pos)}；"
+        if selected_for_fig2c_event_pos is not None else
+        "当前尚未在 screen metadata 中锁定正式 candidate；"
+    )
     text = (
         "# Fig2-C E1146 TB 单事件候选筛查\n\n"
         "所有图固定同一个 TA exemplar，并锁定 frozen geometry、participant-only support、"
         f"6 mm display kernel、−8…+50 ms frame window 与全候选联合 vmax={global_vmax:.3f}。"
-        "候选按原始 readout 指标筛选，不读取渲染像素；当前正式 candidate 尚未被覆盖。\n\n"
+        "每行依次显示单事件 readout、含 0 ms 的 robust-z HFO envelope frames、以及冻结的 "
+        "viridis template propagation-rank field；readout 取两次真实 STFT 窗交集，rank colorbar "
+        "显示 artifact 实际数值。候选按原始 readout 指标筛选，不读取渲染"
+        f"像素；{selection_text}\n\n"
         + "\n".join(blocks)
     )
     path = Path(figures_dir) / "README.md"
@@ -206,6 +229,15 @@ def run(ds_sid="epilepsiae_1146", *, output_dir=DEFAULT_OUT, n_candidates=4, top
     if dataset != "epilepsiae":
         raise NotImplementedError("the raw candidate screen is wired for Epilepsiae only")
     output_dir = Path(output_dir)
+    previous_selection = None
+    previous_meta = output_dir / "tb_candidate_screen.json"
+    if previous_meta.exists():
+        try:
+            previous_selection = json.loads(
+                previous_meta.read_text(encoding="utf-8")
+            ).get("selected_for_fig2c_event_pos")
+        except (OSError, ValueError, TypeError):
+            previous_selection = None
     figures_dir = output_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
     for stale in figures_dir.glob("*.png"):
@@ -333,6 +365,13 @@ def run(ds_sid="epilepsiae_1146", *, output_dir=DEFAULT_OUT, n_candidates=4, top
         selected_event_positions=[int(r["event_pos"]) for r in selected],
         current_reference=current, selected=selected, all_ranked=ranking,
     )
+    selected_positions = {int(r["event_pos"]) for r in selected}
+    if previous_selection is not None and int(previous_selection) in selected_positions:
+        payload["selected_for_fig2c_event_pos"] = int(previous_selection)
+        payload["status"] = (
+            "candidate screen retained as selection provenance; selected TB event is locked "
+            "for the Fig2-C representative single-event panel"
+        )
     json_path = output_dir / "tb_candidate_screen.json"
     json_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     csv_path = output_dir / "tb_candidate_screen.csv"
@@ -341,7 +380,10 @@ def run(ds_sid="epilepsiae_1146", *, output_dir=DEFAULT_OUT, n_candidates=4, top
         writer = csv.DictWriter(fh, fieldnames=csv_fields, extrasaction="ignore")
         writer.writeheader()
         writer.writerows(ranking)
-    readme = _write_readme(figures_dir, selected, current, global_vmax)
+    readme = _write_readme(
+        figures_dir, selected, current, global_vmax,
+        selected_for_fig2c_event_pos=payload.get("selected_for_fig2c_event_pos"),
+    )
     print(f"[screen] selected {[r['event_pos'] for r in selected]}", flush=True)
     print(f"[screen] metadata {json_path}", flush=True)
     print(f"[screen] README {readme}", flush=True)
@@ -350,9 +392,9 @@ def run(ds_sid="epilepsiae_1146", *, output_dir=DEFAULT_OUT, n_candidates=4, top
 
 def render_candidate_gif(
     ds_sid, event_pos, *, output_dir=DEFAULT_OUT,
-    step_ms=GIF_STEP_MS, fps=GIF_FPS,
+    step_ms=GIF_STEP_MS, fps=GIF_FPS, mark_selected=False,
 ):
-    """Render one already-screened TB event without rebuilding the entire candidate screen."""
+    """Re-render one screened candidate as a matched static panel and GIF."""
     dataset, subject = ds_sid.split("_", 1)
     if dataset != "epilepsiae":
         raise NotImplementedError("the raw candidate GIF is wired for Epilepsiae only")
@@ -380,17 +422,31 @@ def render_candidate_gif(
     png_name = selected["figure_name"]
     gif_path = figures_dir / f"{Path(png_name).stem}.gif"
     display = payload["display_contract"]
+    static_meta = render(
+        ds_sid, fz, ta, tb, event_stats(ta, fz), event_stats(tb, fz),
+        figures_dir / png_name, support_mode="participant", dpi=150,
+        frame_window=display["frame_window_ms"],
+        vmax_override=float(display["global_vmax"]),
+    )
     gif_meta = render_gif(
         ds_sid, fz, ta, tb, event_stats(ta, fz), event_stats(tb, fz), gif_path,
         support_mode="participant", step_ms=float(step_ms), fps=float(fps),
         frame_window=display["frame_window_ms"],
         vmax_override=float(display["global_vmax"]),
     )
+    selected["static"] = static_meta
     selected["gif"] = gif_meta
+    if mark_selected:
+        payload["selected_for_fig2c_event_pos"] = int(event_pos)
+        payload["status"] = (
+            "candidate screen retained as selection provenance; selected TB event is locked "
+            "for the Fig2-C representative single-event panel"
+        )
     meta_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     _write_readme(
         figures_dir, payload["selected"], payload["current_reference"],
         float(display["global_vmax"]),
+        selected_for_fig2c_event_pos=payload.get("selected_for_fig2c_event_pos"),
     )
     print(f"[candidate-gif] {gif_path}", flush=True)
     return gif_meta
@@ -405,11 +461,16 @@ def main():
     ap.add_argument("--gif-event-pos", type=int)
     ap.add_argument("--gif-step-ms", type=float, default=GIF_STEP_MS)
     ap.add_argument("--gif-fps", type=float, default=GIF_FPS)
+    ap.add_argument(
+        "--mark-selected-for-fig2c", action="store_true",
+        help="lock --gif-event-pos as the representative Fig2-C TB single event in metadata",
+    )
     args = ap.parse_args()
     if args.gif_event_pos is not None:
         render_candidate_gif(
             args.subject, args.gif_event_pos, output_dir=args.output_dir,
             step_ms=args.gif_step_ms, fps=args.gif_fps,
+            mark_selected=args.mark_selected_for_fig2c,
         )
         return
     run(

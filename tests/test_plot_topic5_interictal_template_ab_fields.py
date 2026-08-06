@@ -1,4 +1,6 @@
 import numpy as np
+import pytest
+import scripts.plot_topic5_interictal_template_ab_fields as F
 
 from scripts.plot_topic5_interictal_template_ab_fields import (
     INTERICTAL_FIELD_FIGURE_CONTRACT,
@@ -56,6 +58,33 @@ def test_own_plane_b_sign_minimizes_same_contact_transverse_rmse():
     assert sign_a == 1
     assert sign_b == -1
     assert rmse < 0.11
+
+
+def test_panel_payload_preserves_actual_frozen_ranks(monkeypatch):
+    names = ["A1", "A2", "A3"]
+    record = {
+        "subject_id": "epilepsiae_test",
+        "axis_pair": {"relation": {"collinear": True}},
+        "interictal_field": {
+            "contact_order": names,
+            "rank_a": [2.0, 0.0, 1.0],
+            "rank_b": [0.0, 2.0, 1.0],
+            "planes": {"shared": {"scale_mm": 20.0, "w": [1.0, 0.0, 0.0]}},
+        },
+    }
+    model = {
+        "points": np.array([[-0.5, 0.0], [0.0, 0.0], [0.5, 0.0]]),
+        "support": np.ones(3), "sigma": 0.2,
+    }
+    monkeypatch.setattr(
+        F, "scorers_from_interictal_record",
+        lambda _record: {"shared_a": model, "shared_b": model},
+    )
+    dat_a, dat_b, mode = F.build_interictal_ab_panel_payloads(record)
+    assert mode == "shared"
+    assert dat_a["vals"] == pytest.approx([1.0, 0.0, 0.5])
+    assert dat_a["rank_values"] == pytest.approx([2.0, 0.0, 1.0])
+    assert dat_b["rank_values"] == pytest.approx([0.0, 2.0, 1.0])
 
 
 def test_private_yuquan_crosswalk_is_read_without_hard_coding_mapping(tmp_path):

@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""TA/TB own-field negative-similarity null analysis.
+"""Archived exploratory TA/TB own-field negative-similarity null analysis.
+
+This 26-subject own-field diagnostic is not the canonical shared-axis reversal
+test.  The current estimand is implemented by
+``run_topic5_shared_template_field_similarity.py`` and excludes patients for
+whom a shared plane is undefined.
 
 Two subject-specific spatial nulls are evaluated on the same 2D-eligible
 cohort and the same estimator:
@@ -254,8 +259,9 @@ def _cohort_summary(
     *,
     n_cohort_perm: int,
     base_seed: int,
+    observed_key: str = "observed_own_field_r",
 ) -> dict:
-    observed = np.asarray([row["observed_own_field_r"] for row in rows], dtype=float)
+    observed = np.asarray([row[observed_key] for row in rows], dtype=float)
     arrays = [null_arrays[row["subject_id"]][mode] for row in rows]
     centers = np.asarray([np.median(values) for values in arrays], dtype=float)
     observed_delta = float(np.median(observed - centers))
@@ -310,13 +316,13 @@ def _cohort_summary(
     }
 
 
-def _add_fdr(rows: list[dict]) -> None:
+def _add_fdr(rows: list[dict], *, observed_key: str = "observed_own_field_r") -> None:
     for mode in NULL_MODES:
         q_values = _bh_fdr(row[f"{mode}_p_negative"] for row in rows)
         for row, q_value in zip(rows, q_values):
             row[f"{mode}_q_bh"] = float(q_value)
             row[f"{mode}_fdr_significant_negative"] = bool(
-                row["observed_own_field_r"] < 0 and q_value < 0.05
+                row[observed_key] < 0 and q_value < 0.05
             )
 
 

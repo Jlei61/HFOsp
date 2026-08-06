@@ -605,21 +605,44 @@ def _exact_maxab(names, ds_sid, vals) -> float:
 # --------------------------------------------------------------------------
 # Figure + outputs.
 # --------------------------------------------------------------------------
-def _shade_runs(ax, x, mask, **kw):
-    """axvspan over each contiguous True run of `mask` (window-centered)."""
+def _true_run_bounds(x, mask):
+    """Yield plot bounds for contiguous True runs of a window-centred mask."""
     i, W = 0, len(mask)
     while i < W:
         if mask[i]:
             j = i
             while j < W and mask[j]:
                 j += 1
-            ax.axvspan(x[i] - STEP_SEC / 2, x[j - 1] + STEP_SEC / 2, **kw)
+            yield x[i] - STEP_SEC / 2, x[j - 1] + STEP_SEC / 2
             i = j
         else:
             i += 1
 
 
-def _plot(ds_sid: str, rows: list[dict], summary: dict, out_png: Path, out_pdf: Path) -> None:
+def _shade_runs(ax, x, mask, **kw):
+    """axvspan over each contiguous True run of `mask` (window-centered)."""
+    for lo, hi in _true_run_bounds(x, mask):
+        ax.axvspan(lo, hi, **kw)
+
+
+def _plot(
+    ds_sid: str,
+    rows: list[dict],
+    summary: dict,
+    out_png: Path,
+    out_pdf: Path,
+    *,
+    maxt_style: str = "triangles",
+) -> None:
+    """Render one peri-onset trajectory.
+
+    ``maxt_style="line"`` is the Fig3-C R3 paper grammar: adjacent
+    maxT-significant windows are joined into black horizontal segments.  The
+    legacy triangle grammar remains the default so rebuilding the older R2
+    diagnostic does not silently change its appearance.
+    """
+    if maxt_style not in {"triangles", "line"}:
+        raise ValueError(f"unknown maxt_style={maxt_style!r}")
     x = np.array([r["window_center_sec"] for r in rows], float)
     obs = np.array([r["obs_median_maxAB"] for r in rows], float)
     oq25 = np.array([r["obs_q25"] for r in rows], float)
@@ -633,6 +656,7 @@ def _plot(ds_sid: str, rows: list[dict], summary: dict, out_png: Path, out_pdf: 
     label = ds_sid.replace("epilepsiae_", "E").replace("yuquan_", "Y-")
     ws = summary["nulls"]["within_shaft"]
     ac = summary["nulls"]["all_contact"]
+    n_cluster_intervals = sum(1 for _ in _true_run_bounds(x, ws_clu))
 
     fig, ax = plt.subplots(figsize=(5.8, 3.5))
     # primary = within-shaft null band (stronger control)
@@ -649,8 +673,15 @@ def _plot(ds_sid: str, rows: list[dict], summary: dict, out_png: Path, out_pdf: 
         ax.axvspan(np.nan, np.nan, color=COL_OBS, alpha=0.11, lw=0, label="within-shaft cluster p<0.05")
     # maxT-significant windows vs within-shaft
     if ws_maxt.any():
-        ax.scatter(x[ws_maxt], np.full(ws_maxt.sum(), 0.965), marker="v", s=16,
-                   color=COL_WS, zorder=6, label="within-shaft maxT p<0.05")
+        if maxt_style == "line":
+            for lo, hi in _true_run_bounds(x, ws_maxt):
+                ax.plot([lo, hi], [0.972, 0.972], color="0.05", lw=2.4,
+                        solid_capstyle="butt", zorder=7)
+            ax.plot([], [], color="0.05", lw=2.4,
+                    label="within-shaft maxT-significant windows")
+        else:
+            ax.scatter(x[ws_maxt], np.full(ws_maxt.sum(), 0.965), marker="v", s=16,
+                       color=COL_WS, zorder=6, label="within-shaft maxT p<0.05")
     ax.axvline(0, color="0.30", ls="--", lw=0.9, zorder=0)
     ax.set_ylim(0.0, 1.0)
     ax.set_xlim(float(x.min()), float(x.max()))
@@ -661,8 +692,10 @@ def _plot(ds_sid: str, rows: list[dict], summary: dict, out_png: Path, out_pdf: 
     # subtitle: within-shaft (primary) corrected counts + all-contact pointwise for context
     ax.text(0.5, 1.015,
             f"{label} · {summary['n_seizures']} sz · R={summary['n_perm']} · within-shaft: "
-            f"cluster {ws['n_cluster_sig_windows']} / maxT {ws['n_maxt_p05']} / pointwise "
-            f"{ws['n_pointwise_p05']} win · all-contact pointwise {ac['n_pointwise_p05']}",
+            f"cluster-significant {ws['n_cluster_sig_windows']} windows "
+            f"({n_cluster_intervals} intervals) · maxT-significant {ws['n_maxt_p05']} windows "
+            f"· pointwise {ws['n_pointwise_p05']} windows · "
+            f"all-contact pointwise {ac['n_pointwise_p05']}",
             transform=ax.transAxes, ha="center", va="bottom", fontsize=7.3, color="0.35")
     ax.legend(frameon=False, loc="lower left", fontsize=6.8, handlelength=1.5, ncol=1,
               labelspacing=0.3)

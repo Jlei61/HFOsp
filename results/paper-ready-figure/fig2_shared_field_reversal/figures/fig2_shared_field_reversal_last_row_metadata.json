@@ -1,0 +1,145 @@
+{
+  "figure_role": "Figure 2 last-row candidate: shared-axis TA/TB field reversal",
+  "cohort": "shared_field_available and geometry_2d_supported",
+  "estimand": "signed Pearson r across exact contact-evaluated shared_a/shared_b template fields",
+  "grouping": "none",
+  "example_selection": "four locked negative-correlation cases selected for legible 2D geometry and visible field reversal; E958 excluded for dense/tall geometry and E1146 excluded because it is already used elsewhere in Figure 2",
+  "example_display_window_mm": {
+    "x_span": 50.0,
+    "y_span": 60.0,
+    "display_only": true
+  },
+  "examples": [
+    {
+      "subject_id": "epilepsiae_384",
+      "display_id": "E15",
+      "r": -0.4430218461779756,
+      "n_contacts": 9
+    },
+    {
+      "subject_id": "epilepsiae_548",
+      "display_id": "E14",
+      "r": -0.42386319404504363,
+      "n_contacts": 11
+    },
+    {
+      "subject_id": "epilepsiae_583",
+      "display_id": "E13",
+      "r": -0.28154327837294435,
+      "n_contacts": 7
+    },
+    {
+      "subject_id": "yuquan_zhaochenxi",
+      "display_id": "Y9",
+      "r": -0.7660637477467799,
+      "n_contacts": 26
+    }
+  ],
+  "distribution": {
+    "n": 12,
+    "n_negative": 8,
+    "median": -0.352703236208994,
+    "iqr": [
+      -0.6281317826223888,
+      0.16865980521884186
+    ],
+    "range": [
+      -0.7822348178708404,
+      0.6404025946102357
+    ]
+  },
+  "full_contact_shuffle": {
+    "n_subjects": 12,
+    "n_draws": 100000,
+    "observed_median_delta": -0.33883101779119507,
+    "null_median": 0.0004100914825914655,
+    "null_q025": -0.3190372353543671,
+    "null_q975": 0.3143461741455247,
+    "p_negative": 0.018399816001839982,
+    "test": "hierarchical full-contact-shuffle randomization of the centered subject-level cohort median; lower tail"
+  },
+  "statistical_sensitivities": {
+    "paired_wilcoxon_observed_less_than_subject_null_median_p": 0.088134765625,
+    "within_shaft_cohort_shift_p_negative": 0.8783612163878362
+  },
+  "subjects": [
+    {
+      "subject_id": "epilepsiae_958",
+      "display_id": "E3",
+      "r": -0.7822348178708404,
+      "n_contacts": 16
+    },
+    {
+      "subject_id": "yuquan_zhaochenxi",
+      "display_id": "Y9",
+      "r": -0.7660637477467799,
+      "n_contacts": 26
+    },
+    {
+      "subject_id": "epilepsiae_1084",
+      "display_id": "E2",
+      "r": -0.7382903784397877,
+      "n_contacts": 11
+    },
+    {
+      "subject_id": "epilepsiae_1146",
+      "display_id": "E10",
+      "r": -0.5914122506832558,
+      "n_contacts": 15
+    },
+    {
+      "subject_id": "epilepsiae_384",
+      "display_id": "E15",
+      "r": -0.4430218461779756,
+      "n_contacts": 9
+    },
+    {
+      "subject_id": "epilepsiae_548",
+      "display_id": "E14",
+      "r": -0.42386319404504363,
+      "n_contacts": 11
+    },
+    {
+      "subject_id": "epilepsiae_583",
+      "display_id": "E13",
+      "r": -0.28154327837294435,
+      "n_contacts": 7
+    },
+    {
+      "subject_id": "epilepsiae_590",
+      "display_id": "E5",
+      "r": -0.18917939539342737,
+      "n_contacts": 16
+    },
+    {
+      "subject_id": "yuquan_litengsheng",
+      "display_id": "Y15",
+      "r": 0.10257005058754429,
+      "n_contacts": 24
+    },
+    {
+      "subject_id": "yuquan_huanghanwen",
+      "display_id": "Y14",
+      "r": 0.3669290691127346,
+      "n_contacts": 10
+    },
+    {
+      "subject_id": "yuquan_chengshuai",
+      "display_id": "Y3",
+      "r": 0.6000654552437941,
+      "n_contacts": 8
+    },
+    {
+      "subject_id": "yuquan_pengzihang",
+      "display_id": "Y2",
+      "r": 0.6404025946102357,
+      "n_contacts": 12
+    }
+  ],
+  "display_boundary": "Left maps reuse the canonical 6-mm Viridis display renderer on each frozen shared plane; observed r and the null use the exact frozen contact-evaluated fields, not display-grid pixels. The four maps use a common 50x60-mm display window centered on their contact extents; this display crop does not alter axes, contacts, ranks or scoring. Examples are locked morphology illustrations selected among negative cases for legible geometry; the all-subject distribution carries the cohort view. The P value is the hierarchical full-contact-shuffle cohort-median-shift test; paired Wilcoxon and within-shaft results remain sensitivity statistics.",
+  "outputs": {
+    "png": "results/paper-ready-figure/fig2_shared_field_reversal/figures/fig2_shared_field_reversal_last_row.png",
+    "pdf": "results/paper-ready-figure/fig2_shared_field_reversal/figures/fig2_shared_field_reversal_last_row.pdf",
+    "cohort_null_npz": "results/paper-ready-figure/fig2_shared_field_reversal/fig2_shared_field_reversal_cohort_null.npz"
+  }
+}

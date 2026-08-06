@@ -258,6 +258,37 @@ def test_renderer_rejects_incomplete_window_grid(
         render._load_peri_onset(src, "epilepsiae_demo")
 
 
+def test_journal_clean_design_moves_titles_to_axes_and_omits_panel_text() -> None:
+    df = pd.DataFrame(_renderer_rows())
+    agg = render._agg(df)
+
+    fig = render._make_figure(
+        df,
+        agg,
+        subject_label="E-demo",
+        design_variant=render.DESIGN_JOURNAL_CLEAN,
+    )
+    try:
+        ax0, ax1 = fig.axes
+        assert ax0.get_title() == ""
+        assert ax1.get_title() == ""
+        assert len(ax0.texts) == 0
+        assert len(ax1.texts) == 0
+        assert not ax0.spines["top"].get_visible()
+        assert not ax0.spines["right"].get_visible()
+        assert not ax1.spines["top"].get_visible()
+        assert not ax1.spines["right"].get_visible()
+        assert ax0.get_ylabel().startswith("Field similarity")
+        assert "max" in ax0.get_ylabel()
+        assert ax1.get_ylabel() == "Signed field similarity, r"
+        assert ax0.get_xlabel() == "Time (s)"
+        assert ax1.get_xlabel() == "Time (s)"
+        assert len(fig.texts) == 0
+        assert fig.get_size_inches()[1] == pytest.approx(2.55)
+    finally:
+        render.plt.close(fig)
+
+
 def test_progress_index_cannot_look_complete(
     tmp_path: Path, monkeypatch
 ) -> None:

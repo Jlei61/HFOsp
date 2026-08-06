@@ -47,36 +47,49 @@
 固定为两行：上 TA、下 TB。每行从左到右：
 
 ```text
-Fig1a readout | readout colorbar | gap | 6 square field frames | field colorbar
+single-event readout | magnitude colorbar | gap | 7 envelope frames | envelope colorbar |
+gap | frozen template rank field | rank colorbar
 ```
 
 ### 4.1 左侧 readout
 
-- readout 与 field 等高，画布为方形；只显示本次事件参与且质心可用的触点。
+- readout 与 field 等高但横向更窄，`box_aspect=1.18`；只显示本次事件参与且质心可用的触点。
 - 触点按 frozen shared axis 排序，y tick 只写触点名，不追加 `+10`、`+1` 等坐标。
 - TA/TB 只作为最左列 y-label：TA `#B2182B`，TB `#2166AC`，粗体。
-- readout 顶部不再重复写 TA/TB，不写 rho/n；统计放 metadata/README。
-- 第一行不写 `time (ms)`，第二行保留。
-- 每行独立一条 `0–1` normalized-magnitude colorbar，并与 readout 等高；不写长竖排标签。
+- readout 顶部明确写 `Sample from TA` / `Sample from TB`，强调它是一次单事件而非完整模板；不写 rho/n。
+- 标题在 readout 内靠右对齐，不得伸入其右侧 colorbar 标签。
+- 上下两行都写 `time (ms)`。
+- 两行 x limits 取两次事件真实 STFT 记录窗的交集；不得用并集在 TA 左缘或 TB 右缘制造无数据白条，也不得裁掉任何已显示质心。
+- 每行独立一条 `0–1` colorbar，标签固定为 `Normalized magnitude`。
 - 质心轨迹 TA 用红、TB 用蓝，marker face 为金色 `#ffb000`。
 
 ### 4.2 右侧 field frames
 
 - 所有 frame 使用同一 frozen shared plane、物理毫米坐标、相同 x/y limits、`aspect="equal"`。
-- E1146 candidate 固定 6 帧：`−8, +4, +15, +27, +38, +50 ms`；`+50 ms` 后不进入静态 panel。
-- 其他患者使用 `_frame_window()`：前缘 8 ms、后缘最多 +50 ms，在窗口内均匀取 6 个不重复 frame。不得为了“更漂亮”手挑时刻。
+- E1146 candidate 固定 7 帧：`−8, 0, +4, +15, +27, +38, +50 ms`；`0 ms` 必须显式出现，`+50 ms` 后不进入静态 panel。
+- 其他患者使用 `_frame_window()`：前缘 8 ms、后缘最多 +50 ms；`_static_frame_times()` 保留六帧基础网格并插入 `0 ms`，总计 7 个不重复 frame。不得为了“更漂亮”手挑时刻。
 - 每个 field 都保留 x ticks；只在下排中央 frame 写共享 xlabel `shared TA axis (mm)`。
 - 左侧 field 只保留数值 y ticks，不重复 transverse 或 TA/TB y-label。
-- 包络使用 `magma`、`vmin=0`。TA/TB 各自有一条与本行 field 等高的 colorbar，但两条必须共享同一个 `vmax`。
+- 包络使用 `magma`、`vmin=0`。TA/TB 各自有一条与本行 field 等高的 colorbar，标签固定为 `HFO envelope (robust z)`；两条必须共享同一个 `vmax`。不得写成 energy/power。
 - `vmax` 从完整显示时间窗的 participant-only 包络联合 99th percentile 计算，不能只看 6 个离散 frame。
 - 参与触点画白色粗外圈；未参与触点只画灰色空心圈，不进入主图平滑。
 
-### 4.3 标题与字号
+### 4.3 最右冻结模板 rank field
+
+- 每行最右各放一幅冻结群体模板场，上 `TA template`、下 `TB template`；这两幅不是单事件场。
+- 必须调用 `build_interictal_ab_panel_payloads()` 和 `draw_interictal_rank_field_panel()`；不得从当前 exemplar 重拟合或复制平滑函数。
+- 与中间 event frames 使用同一 shared plane、contact order、物理毫米范围和 6 mm display kernel。
+- field 内部仍用冻结 rank 的线性 `viridis` 映射，但 colorbar 必须显示 artifact 中的实际 rank 数值（E1146 为 `0–14`），不得只报归一化 `0–1`；它不是毫秒时延。
+- 每行 colorbar 顶部标题只写 `ranks`，不在右侧放长竖排标题；数值 tick 保留实际 rank，最低/最高端分别附 `early` / `late`，不用括号。
+- TA/TB 两幅模板场都显示简写 y-label `y (mm)`；不得只给第一行，也不再写较长的 `transverse (mm)`。
+- 中间 `magma` 与最右 `viridis` 是两种不同物理量；不得共享 colorbar 或互换标签。
+
+### 4.4 标题与字号
 
 - 全图标题只写匿名患者号，例如 `E1146`，15 pt、粗体、左对齐。
 - frame 时间、TA/TB：12 pt；轴标签：12 pt；field/contact/colorbar ticks：8 pt；readout x ticks：9 pt。
-- readout、field 和两类 colorbar 的上下边缘必须严格对齐。
-- 当前 paper canvas 为 `12.5 × 4.9 inch`；PNG 150 dpi，同时输出矢量 PDF。
+- readout、event field、template field 和三类 colorbar 的上下边缘必须严格对齐。
+- 当前 paper canvas 为 `16.2 × 4.9 inch`；PNG 150 dpi，同时输出矢量 PDF。
 
 ## 5. TA/TB 动态 GIF
 
@@ -85,7 +98,8 @@ GIF 必须复用静态 candidate 的同一对 exemplar、participant mask、shar
 - 生物学时间：与静态图同一窗口，E1146 为 `−8…+50 ms`；
 - 生物学帧间隔：`2 ms`，共 30 帧；
 - 播放速度：默认 `12 fps`，只为观看，不代表真实时间倍率；
-- 每行左侧 readout 增加黑色虚线 cursor，必须与右侧当前 field 帧使用同一时间值；
+- 每行左侧 readout 增加黑色虚线 cursor，必须与中间当前 envelope field 帧使用同一时间值；
+- 最右 template rank field 在 GIF 中保持静态，只提供群体模板空间参照；
 - field title 显示当前相对时间；
 - GIF 循环播放，不在末尾加入新的数据帧；
 - metadata 必须分别记录 biological step 和 playback fps，禁止把二者混为一谈。
@@ -143,11 +157,17 @@ results/paper-ready-figure/fig2c_interictal_event_envelope_field/tb_candidate_sc
 representative event，也不能用它估计 TA/TB 方向出现率或效应量。中段完整性优先于 recording
 block 去重；同一 block 的不同事件允许并列进入候选屏，但最终主图仍只能选一次 TB 事件。
 
+当前 Fig2-C 已锁定 E1146 TB `event_pos=829`（candidate 4）：ICL 11/11、SCL 4/4 均参与且
+可用，沿 ICL 的质心-轴 Spearman 为 −0.900，中段 3/3 可用。它是经过上述门限筛查的
+`direction-qualified illustrative exemplar`；canonical paper producer 对 E1146 默认读取该
+event，只有显式传入 `--use-medoid-tb` 才回到旧 medoid。
+
 对已经进入候选屏的单个 TB 生成锁尺度 GIF：
 
 ```bash
 python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
-  --subject epilepsiae_1146 --gif-event-pos 829 --gif-step-ms 2 --gif-fps 12
+  --subject epilepsiae_1146 --gif-event-pos 829 --gif-step-ms 2 --gif-fps 12 \
+  --mark-selected-for-fig2c
 ```
 
 此模式不得重跑或改写候选排序，只重建固定 TA 和指定 TB 的原始信号，并复用 candidate-screen
@@ -173,7 +193,8 @@ JSON 中的 frozen fingerprint、frame window 和 global `vmax`。
 scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py，禁止复制 renderer
 另写一套。必须复用 frozen interictal artifact、fingerprint、contact order、shared plane、
 participant-only support、单带 return_hil_enve、Fig1a spectrogram helper、6 mm display kernel、
-magma 和 TA/TB 共同 vmax。静态图按 readout | cbar | gap | 6 square frames | cbar；GIF 用
+magma 和 TA/TB 共同 vmax。静态图按 single-event readout | cbar | 7 envelope frames | cbar |
+frozen template rank field | cbar；必须显式包含 0 ms，三个 colorbar 写明物理量。GIF 用
 同一 exemplar 和窗口，2 ms biological step，并记录独立 playback fps。输出后运行三组测试，
 目视 PNG/GIF，并更新 figures/README.md。claim 只能是 representative raw-envelope timing
 cross-check on a frozen interictal axis，不能写 template-free、cohort proof、traveling-wave proof
