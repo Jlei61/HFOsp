@@ -183,6 +183,18 @@ def main() -> int:
             "long enough for the displacement to accumulate past one.\n")
 
     add("## 4. Is the fitted operator the patient's?\n")
+    _rel = stats.get("parameter_reliability", {})
+    if _rel.get("caveat"):
+        add(f"Before the number: {_rel['caveat']}.\n")
+    _conf = _rel.get("geometry_confound", {})
+    if _conf.get("status") == "COMPLETE":
+        worst = max(_conf["per_parameter"].items(),
+                    key=lambda kv: kv[1]["strongest_geometry_correlation"])
+        add(f"Measured: the coefficient most predicted by the electrodes is "
+            f"**{worst[0]}**, Spearman "
+            f"{worst[1]['strongest_geometry_correlation']:.2f} with "
+            f"{worst[1]['with'].replace('_', ' ')} across "
+            f"{_conf['n_patients']} patients. {_conf['reading'].capitalize()}.\n")
     if rel.get("status") == "COMPLETE":
         add(f"- median within-minus-between {rel['median_delta']:+.4f}, 95% CI "
             f"[{rel['bootstrap_95ci'][0]:+.4f}, {rel['bootstrap_95ci'][1]:+.4f}], "

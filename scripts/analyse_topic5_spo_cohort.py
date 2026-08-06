@@ -164,7 +164,62 @@ def reliability(rows: list[dict]) -> dict:
                            float(np.percentile(boot, 97.5))],
         "n_positive": int((deltas > 0).sum()),
         "wilcoxon_exact_p": float(stats.wilcoxon(deltas, mode="exact").pvalue),
+        "geometry_confound": geometry_confound(by_subject),
+        "caveat": ("two fits of one patient share that patient's electrode "
+                   "geometry as well as their events, and the coefficients are "
+                   "expressed in grid cells, so a patient-specific fit is not by "
+                   "itself a patient-specific mechanism; see geometry_confound"),
         "per_patient": rows_out,
+    }
+
+
+def geometry_confound(by_subject: dict) -> dict:
+    """How much of the between-patient spread is just the electrodes?
+
+    The reliability test asks whether a patient's operator resembles itself more
+    than someone else's. Two fits of one patient share their geometry, and every
+    coefficient is in grid cells, so geometry alone would produce that result
+    with no mechanism behind it -- the same trap that made v0.1 report a
+    patient-specific propagation order which turned out to be node position.
+
+    This does not remove the confound. It measures it, so the closeout cannot
+    quietly claim more than the design supports.
+    """
+    descriptors, thetas = [], []
+    for subject, seeds in sorted(by_subject.items()):
+        cache = OUT / "cache" / subject
+        if not (cache / "grid.npz").exists():
+            continue
+        grid = np.load(cache / "grid.npz")
+        ranks = np.load(cache / "events.npz")["group_ids"]
+        pitch = float(np.median(np.diff(np.unique(np.round(grid["centres"][:, 0], 6)))))
+        descriptors.append([
+            pitch, float(grid["sigma_mm"][0]), float(ranks.shape[1]),
+            float(np.median([r[r >= 0].max() + 1 for r in ranks if (r >= 0).any()])),
+        ])
+        thetas.append(by_subject[subject][sorted(seeds)[0]])
+    if len(descriptors) < 6:
+        return {"status": "INSUFFICIENT", "n": len(descriptors)}
+    D, T = np.array(descriptors), np.stack(thetas)
+    names = ("grid_pitch_mm", "read_kernel_sigma_mm", "n_contacts",
+             "median_event_length")
+    worst = {}
+    for j, parameter in enumerate(PARAMETER_KEYS):
+        best = max(
+            ((abs(float(stats.spearmanr(D[:, i], T[:, j]).statistic)), names[i])
+             for i in range(D.shape[1])), key=lambda t: t[0])
+        worst[parameter] = {"strongest_geometry_correlation": best[0],
+                            "with": best[1]}
+    strongest = max(v["strongest_geometry_correlation"] for v in worst.values())
+    return {
+        "status": "COMPLETE", "n_patients": len(descriptors),
+        "per_parameter": worst,
+        "strongest_absolute_spearman": float(strongest),
+        "reading": ("a fitted coefficient that tracks the electrode geometry this "
+                    "closely is not evidence of a patient-specific mechanism"
+                    if strongest >= 0.6 else
+                    "no single coefficient is strongly predicted by the geometry "
+                    "descriptors, which weakens but does not remove the confound"),
     }
 
 
