@@ -214,3 +214,27 @@ def test_the_ramped_value_is_the_one_the_membrane_used():
     removed = float(before[:NE].mean() - after[:NE].mean())
     denom = 1.0 + c.alpha_G * sf.S_G
     assert removed == pytest.approx(40.0 * (1 - 1 / denom) + expected_beta * sf.S_G)
+
+
+def test_subtractive_ramp_measures_from_its_own_origin_not_the_restored_clock():
+    """The engine clock resumes the checkpoint's absolute time.
+
+    Measuring the ramp from zero would start it already far along -- the
+    bounded_late checkpoint alone is 14.1 s in -- so the origin is explicit.
+    """
+    c = SpatialSlowFieldConfig(use_qI=False, use_gK=False, use_SG=True,
+                               alpha_G=16.0, beta_SG=0.0, use_persist=False,
+                               beta_SG_ramp_per_s=2.0,
+                               beta_SG_ramp_t0_ms=14100.0)
+    c.validate()
+    N, NE = 60, 48
+    rng = np.random.default_rng(11)
+    sf = SpatialSlowField(N, 18.0, rng.random((NE, 2)) * 20.0,
+                          rng.random((N - NE, 2)) * 20.0, 20.0, cfg=c)
+    sf._t = 14100.0
+    assert sf.beta_SG_now() == pytest.approx(0.0)      # the run has just begun
+    sf._t = 14100.0 + 3000.0
+    assert sf.beta_SG_now() == pytest.approx(6.0)      # three seconds of ramp
+    # Anything before the origin holds the base value rather than going negative.
+    sf._t = 10000.0
+    assert sf.beta_SG_now() == pytest.approx(0.0)

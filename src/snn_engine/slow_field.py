@@ -103,6 +103,10 @@ class SpatialSlowFieldConfig:
     # boundary. This is an open-loop ramp, NOT a mechanism: nothing in the model
     # generates it, so a run using it can never be reported as a carrier.
     beta_SG_ramp_per_s: float = 0.0
+    # Origin of the ramp on the engine's absolute clock.  simulate_kick
+    # resumes the checkpoint's timestep, so measuring from zero would start
+    # the ramp already far along; the runner sets this to the source time.
+    beta_SG_ramp_t0_ms: float = 0.0
     r0_psi: float = 0.0        # Psi_G recruitment onset
     r50_psi: float = 1.0       # Psi_G half-recruitment
     n_psi: float = 2.0         # Psi_G steepness
@@ -937,8 +941,8 @@ class SpatialSlowField:
         """Subtractive pool strength at the current time; static unless ramped."""
         if self.cfg.beta_SG_ramp_per_s == 0.0:
             return float(self.cfg.beta_SG)
-        walked = self.cfg.beta_SG + self.cfg.beta_SG_ramp_per_s * (self._t / 1000.0)
-        return float(max(0.0, walked))
+        elapsed = max(0.0, self._t - self.cfg.beta_SG_ramp_t0_ms) / 1000.0
+        return float(max(0.0, self.cfg.beta_SG + self.cfg.beta_SG_ramp_per_s * elapsed))
 
     def mode_M_raw_pool(self) -> float:
         """Mask-free p-norm of native E-cell M, normalised to a reference."""

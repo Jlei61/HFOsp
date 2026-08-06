@@ -323,7 +323,8 @@ def _mechanism_kwargs(args: argparse.Namespace, ctx: dict) -> tuple[dict, dict]:
     return edits, receipt
 
 
-def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
+def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None,
+               source_t_ms: float = 0.0):
     gap = float(R.PP.CORE_MEAN - ctx["S"]["p"].V_reset)
     delta = delta_phi_mV(tau_phi_ms, fraction, gap_mV=gap)
     cfg = R.ZM._zm_cfg(ctx["S"]["I_th_EI"], **R.ARM_KWARGS)
@@ -390,9 +391,11 @@ def _make_slow(ctx: dict, tau_phi_ms: float, fraction: float, *, args=None):
             # the mean field to have an orbit at all.  0 keeps the parity path.
             values["beta_SG"] = float(args.beta_SG)
             values["beta_SG_ramp_per_s"] = float(args.beta_SG_ramp_per_s)
+            values["beta_SG_ramp_t0_ms"] = float(source_t_ms)
             receipt["subtractive_pool"] = {
                 "beta_SG": float(args.beta_SG),
                 "beta_SG_ramp_per_s": float(args.beta_SG_ramp_per_s),
+                "beta_SG_ramp_t0_ms": float(source_t_ms),
                 "open_loop_kinematic_probe": bool(args.beta_SG_ramp_per_s != 0.0),
                 "alpha_G": float(cfg.alpha_G),
                 "tau_S_ms": float(cfg.tau_S),
@@ -497,7 +500,7 @@ def _mechanism_stem(args: argparse.Namespace) -> str:
     if float(getattr(args, "beta_SG", 0.0)) > 0.0:
         stem += f"__bSG{args.beta_SG:g}"
     if float(getattr(args, "beta_SG_ramp_per_s", 0.0)) != 0.0:
-        stem += f"__bSGramp{args.beta_SG_ramp_per_s:g}"
+        stem += f"__bSGramp{args.beta_SG_ramp_per_s:g}__rampclk2"
     if bool(getattr(args, "pilot_widen_tau_M", False)):
         stem += f"__tauMpilot{float(getattr(args, 'tau_M_ms', 0.0)):g}"
     if bool(getattr(args, "freeze_zm", False)):
@@ -762,7 +765,8 @@ def run_cell(args: argparse.Namespace, *, worker_receipt=None) -> Path:
         raise RuntimeError("future-noise bank drift")
 
     slow, diagnostic, delta, mechanism = _make_slow(
-        ctx, args.tau_phi_ms, args.fraction, args=args
+        ctx, args.tau_phi_ms, args.fraction, args=args,
+        source_t_ms=float(row["t_ms"]),
     )
     if delay_receipt is not None:
         mechanism["i2e_delay_rescaling"] = delay_receipt
