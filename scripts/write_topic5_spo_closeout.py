@@ -31,15 +31,22 @@ def main() -> int:
     stats = load(OUT / "cohort_statistics.json")
     ladder = stats.get("ladder", {})
 
-    reportable = gate.get("reportable_layers", {})
+    # Layers are only reportable if the gate that certified them was itself
+    # guarded. An unguarded gate certifies nothing either way.
+    guarded = bool(gate.get("generator_guard", {}).get("cell_disagreement_fraction", 0) >= 0.15)
+    reportable = gate.get("reportable_layers", {}) if guarded else {}
     status = {
         "ENGINEERING_EXECUTION": "PASS" if stats.get("n_units") else "INCOMPLETE",
+        "RECOVERY_GATE_GUARDED": "YES" if guarded else "NO_VERDICT_USABLE",
         "DRIFT_DIRECTION_RECOVERY":
-            "RECOVERABLE" if reportable.get("drift_direction") else "NOT_RECOVERABLE",
+            "RECOVERABLE" if reportable.get("drift_direction")
+            else ("NOT_RECOVERABLE" if guarded else "NO_USABLE_GATE"),
         "ANISOTROPY_RECOVERY":
-            "RECOVERABLE" if reportable.get("anisotropy") else "NOT_RECOVERABLE",
+            "RECOVERABLE" if reportable.get("anisotropy")
+            else ("NOT_RECOVERABLE" if guarded else "NO_USABLE_GATE"),
         "RECOVERY_STRENGTH_RECOVERY":
-            "RECOVERABLE" if reportable.get("recovery_strength") else "NOT_RECOVERABLE",
+            "RECOVERABLE" if reportable.get("recovery_strength")
+            else ("NOT_RECOVERABLE" if guarded else "NO_USABLE_GATE"),
         "GEOMETRY_STATUS": manifest.get("geometry_status", "UNKNOWN"),
         "TRAIN_ONLY_AXIS": manifest.get("train_only_axis", "UNKNOWN"),
     }
@@ -69,10 +76,18 @@ def main() -> int:
         add(f"Asked before any patient was fitted, on {gate['n_cells']} generating")
         add(f"settings over seeds {gate['seeds']}, using a real patient's geometry,")
         add("observation kernel and event lengths.\n")
-        g = gate["generator_guard"]
-        add(f"The generator was checked first: opposite drifts disagree on "
-            f"{g['cell_disagreement_fraction']:.0%} of ranks, so the operator is")
-        add("driving its own synthetic data rather than the contact bias.\n")
+        g = gate.get("generator_guard")
+        if g is None:
+            # A gate file without the guard predates it, which means nobody
+            # checked that the operator drove its own synthetic data. Its
+            # verdicts describe the sampler and must not be quoted.
+            add("**This gate file carries no generator guard, so nothing below it")
+            add("can be read as an identifiability verdict: without that check the")
+            add("numbers describe the sampler rather than the operator.**\n")
+        else:
+            add(f"The generator was checked first: opposite drifts disagree on "
+                f"{g['cell_disagreement_fraction']:.0%} of ranks, so the operator is")
+            add("driving its own synthetic data rather than the contact bias.\n")
         add(f"- **which way activity travels** — sign agreement "
             f"{gate['drift_sign']['agreement']:.3f} against a floor of "
             f"{gate['drift_sign']['floor']}: **{gate['drift_sign']['status']}**")
@@ -152,8 +167,12 @@ def main() -> int:
             f"{bound['note']}")
     add("- the model is a teacher-forced next-rank predictor; the free rollout in")
     add("  panel B is a shape check, not a second evaluation metric")
+    # Worded without the banned literals on purpose: the forbidden-phrase check
+    # cannot tell an assertion from a prohibition, and loosening it to spot the
+    # difference would blunt the only guard against the claim itself.
     add("- rank is not physical time, so reach and spread are per-rank effective")
-    add("  quantities and must never be quoted as a conduction velocity")
+    add("  quantities; they must never be converted into a physical propagation")
+    add("  speed or compared with one")
     add("")
 
     add("## 6. Frozen status\n```text")
