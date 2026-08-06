@@ -215,14 +215,15 @@ def optimal_finite_time_perturbation(J, grid: Grid, T, N):
     eigenvector. Returns sigma1 (max finite-time E->E gain over all input fields), the optimal INPUT
     field V1 (n,n) and optimal OUTPUT field U1 (n,n) (signed; SVD sign is arbitrary but the +/- lobe
     structure is meaningful)."""
-    from scipy.sparse.linalg import expm_multiply
+    from src.spatial_perturbation_toolkit import finite_time_operator_svd
     B_E = np.zeros((6 * grid.size, N))
     B_E[:N, :] = np.eye(N)                                       # embed a unit E-rate field into rE rows
-    M = expm_multiply(np.asarray(J, float) * float(T), B_E)[:N, :]   # C_E exp(JT) B_E  (N x N)
-    U, s, Vh = np.linalg.svd(M)
-    return dict(sigma1=float(s[0]),
+    svd = finite_time_operator_svd(J, T, B_E, output_indices=slice(0, N))
+    s = svd["singular_values"]
+    return dict(sigma1=svd["sigma1"],
                 sigma_ratio=float(s[0] / s[1]) if s.size > 1 and s[1] > 0 else float("inf"),
-                v1_field=Vh[0, :].reshape(grid.n, grid.n), u1_field=U[:, 0].reshape(grid.n, grid.n),
+                v1_field=svd["optimal_input_coordinates"].reshape(grid.n, grid.n),
+                u1_field=svd["optimal_output"].reshape(grid.n, grid.n),
                 singular_values=s[:6].tolist())
 
 
@@ -254,25 +255,47 @@ def make_localized_kick(grid: Grid, center, sigma):
 
 def fixed_kick_evolution(J, grid: Grid, b_fixed, t_list, N):
     """{t: (n,n) rE response} of the FIXED kick under exp(J t), C_E readout (signed). t=0 -> the kick."""
-    from scipy.sparse.linalg import expm_multiply
-    out = {}
-    for t in t_list:
-        y = b_fixed if t <= 0 else expm_multiply(np.asarray(J, float) * float(t), b_fixed)
-        out[float(t)] = y[:N].reshape(grid.n, grid.n)
-    return out
+    from src.spatial_perturbation_toolkit import linear_response_timecourse
+    raw = linear_response_timecourse(J, b_fixed, t_list, output_indices=slice(0, N))
+    return {t: y.reshape(grid.n, grid.n) for t, y in raw.items()}
 
 
 def axial_kymograph(evolution, grid: Grid, y_axis, band):
     """(xs, ts, kymo[n_t, n_x]): |rE| response profile along x at y≈y_axis (averaged over the band
     |y-y_axis|<=band), stacked over time -> propagation along the source->sink axis."""
+    from src.spatial_perturbation_toolkit import axis_kymograph
     X, Y = grid.coords()
-    ycol = Y[0, :]
-    ymask = np.abs(ycol - y_axis) <= band
-    if not ymask.any():
-        ymask = np.abs(ycol - y_axis) <= (grid.L / grid.n)          # fall back to the nearest row
-    ts = sorted(evolution)
-    kymo = np.array([np.abs(evolution[t])[:, ymask].mean(axis=1) for t in ts])   # (n_t, n_x)
-    return X[:, 0].copy(), np.array(ts, float), kymo
+    return axis_kymograph(evolution, X, Y, axis_y=y_axis, band=band)
+
+
+def fixed_kick_readouts(evolution, grid: Grid, *, source_center, sink_center, region_radius,
+                        axis_y, axis_band, arrival_fraction=0.10):
+    """Reusable readouts for one fixed-kick response.
+
+    Returns fixed-input gain, source/sink regional RMS curves, an axial kymograph, and the
+    threshold-defined arrival-time slope. The latter is evidence for sequential recruitment only
+    when positive and reasonably linear; it is not labelled a wave speed by itself.
+    """
+    from src.spatial_perturbation_toolkit import (
+        response_gain_curve, region_response_curve, cumulative_response_ratio,
+        first_arrival_times, fit_arrival_time_distance,
+    )
+    X, Y = grid.coords()
+    src_mask = (X - source_center[0]) ** 2 + (Y - source_center[1]) ** 2 <= float(region_radius) ** 2
+    snk_mask = (X - sink_center[0]) ** 2 + (Y - sink_center[1]) ** 2 <= float(region_radius) ** 2
+    ts, gain = response_gain_curve(evolution)
+    _, src = region_response_curve(evolution, src_mask)
+    _, snk = region_response_curve(evolution, snk_mask)
+    xs, tk, kymo = axial_kymograph(evolution, grid, axis_y, axis_band)
+    arrival, threshold = first_arrival_times(kymo, tk, threshold_fraction=arrival_fraction)
+    fit = fit_arrival_time_distance(xs, arrival, source_position=source_center[0],
+                                    sink_position=sink_center[0])
+    ratio = np.divide(snk, src, out=np.full_like(snk, np.nan), where=src > 1e-15)
+    cumulative_ratio = cumulative_response_ratio(snk, src, ts)
+    return dict(times=ts, fixed_gain=gain, source_rms=src, sink_rms=snk,
+                sink_source_ratio=ratio, cumulative_sink_source_ratio=cumulative_ratio,
+                xs=xs, kymo_times=tk, kymograph=kymo, arrival_times=arrival,
+                arrival_threshold=float(threshold), arrival_fit=fit)
 
 
 # ---- post-onset autonomous dynamics (review 2026-07-19: limit cycle vs saturation) ----
@@ -480,6 +503,29 @@ def leading_eigenvalue(J, grid: Grid):
     lam = eig.eigenvalues[0]                                     # max Re (sorted desc)
     return dict(re=float(lam.real), im=float(abs(lam.imag)), is_complex=bool(abs(lam.imag) > 1e-3),
                 freq_hz=float(abs(lam.imag) / (2.0 * np.pi) * 1000.0))
+
+
+def leading_mode_snapshot(J, grid: Grid, *, theta=0.0, n_modes=6):
+    """Leading rate-branch eigenvalue plus its invariant-subspace E loading field.
+
+    The complex-conjugate pair is represented by one non-negative subspace-loading map, avoiding
+    arbitrary complex phase. This is an asymptotic Jacobian mode, not a finite-time optimal input or
+    a fixed-kick response.
+    """
+    eig = rate_eigenpairs(J, grid, n_modes=int(n_modes))
+    if eig.status != "resolved" or eig.eigenvalues.size == 0:
+        return None
+    idx = leading_subspace_indices(eig.eigenvalues)
+    field = pair_loading(eig.right, idx, grid)
+    lam = eig.eigenvalues[int(idx[0])]
+    return dict(
+        re=float(lam.real), im=float(abs(lam.imag)),
+        freq_hz=float(abs(lam.imag) / (2.0 * np.pi) * 1000.0),
+        is_complex=bool(abs(lam.imag) > 1e-3), field=field,
+        axis_score=float(elongation_axis_score(field, grid, theta)),
+        globality=float(globality(field, grid)), residual_right=float(eig.residual_right),
+        n_subspace_modes=len(idx),
+    )
 
 
 def summarize_state_susceptibility(zbar_field, grid: Grid, scaffold, probes, T_list, *,

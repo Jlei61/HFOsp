@@ -181,7 +181,8 @@ def test_leading_probe_subspace_svd_shapes():
 
 def test_fixed_kick_time_response():
     from src.topic4_state_conditioned_susceptibility import (
-        sigma1_vs_T, make_localized_kick, fixed_kick_evolution, axial_kymograph)
+        sigma1_vs_T, make_localized_kick, fixed_kick_evolution, axial_kymograph,
+        fixed_kick_readouts)
     grid = Grid(n=6, L=5.0)
     sc = _scaffold(grid, mu_core=0.5)
     op, J, _ = state_operator(np.ones((6, 6)), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05)
@@ -197,16 +198,24 @@ def test_fixed_kick_time_response():
     assert np.allclose(ev[0.0], b[:N].reshape(6, 6))                      # t=0 is the kick itself
     xs, ts, kymo = axial_kymograph(ev, grid, -0.38, band=0.5)
     assert kymo.shape == (3, 6) and np.all(kymo >= 0)                      # (n_t, n_x), |rE|>=0
+    read = fixed_kick_readouts(ev, grid, source_center=(-1.62, -0.38), sink_center=(1.64, -0.38),
+                               region_radius=0.6, axis_y=-0.38, axis_band=0.5)
+    assert read["fixed_gain"].shape == (3,) and read["sink_source_ratio"].shape == (3,)
+    assert read["arrival_times"].shape == (6,)
 
 
 def test_leading_eigenvalue_and_warmstart_continuation():
-    from src.topic4_state_conditioned_susceptibility import leading_eigenvalue
+    from src.topic4_state_conditioned_susceptibility import leading_eigenvalue, leading_mode_snapshot
     grid = Grid(n=6, L=5.0)
     sc = _scaffold(grid, mu_core=0.5)
     op, J, _ = state_operator(np.ones((6, 6)), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05)
     assert J is not None
     le = leading_eigenvalue(J, grid)
     assert le is not None and np.isfinite(le["re"]) and le["freq_hz"] >= 0 and le["im"] >= 0
+    mode = leading_mode_snapshot(J, grid, theta=0.0)
+    assert mode is not None and mode["field"].shape == (6, 6) and np.all(mode["field"] >= 0)
+    assert -1e-12 <= mode["globality"] <= 1 + 1e-12
+    assert -1 - 1e-12 <= mode["axis_score"] <= 1 + 1e-12
     # warm-start from the converged op reproduces the same fixed point (continuation branch tracking)
     op2, J2, _ = state_operator(np.ones((6, 6)), grid, sc, w_ee_mult=1.3, ratio=1.0, q_floor=0.05,
                                 init={"rE": op.rE, "rI": op.rI})

@@ -758,6 +758,12 @@ returning event contact field + pre-t120 contact-energy field；灰色神经元�
 counterfactual。没有这些对照，即使新增相图也只能叫动力学描述，不能升级为 causal bridge。完整数值、问题清单和
 V2 锁见 `docs/archive/topic4/sef_hfo/mz_early_field_bridge_2026-07-19.md` §10。
 
+Figure 5 同时登记两个**独立补充候选**，不塞入 V1 主画布：Supplementary 1 用同一个局部 kick 比较 baseline 与
+runoff 前 100 ms 的 frozen-q 率场响应；Supplementary 2 沿 MZ z-only 的真实慢状态时间戳展示领先 Jacobian mode
+由近全局转为沿轴并逐渐减弱阻尼。两者补的是 state-conditioned rate-field dynamics，不是 full-SNN eigenmode、
+ictal state 或完整 seizure cycle。输出位于 `results/paper-ready-figure/fig5_mz_spatial_dynamics_supplementary/figures/`，
+绘图合同见 `docs/figure5_supplementary_spatial_dynamics_spec.md`。
+
 ---
 
 ## 7. 模型支持 / 不支持的解释

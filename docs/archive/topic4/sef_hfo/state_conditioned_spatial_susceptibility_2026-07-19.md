@@ -26,12 +26,14 @@ The 6 guarded engine SHAs match the multiseed provenance exactly → replay repr
 ## 2. Method (reuse, not reinvent)
 
 1. **Snapshot observer** (`src/snn_engine/mz_slow_vars.py`, off-by-default, 6 guarded engine files
-   untouched): copies `z_E`/`m_E` at 5 pre-declared integer steps `round(t/dt)` AFTER the slow update;
+   untouched): copies `z_E`/`m_E` at registered integer steps `round(t/dt)` AFTER the slow update;
    `snapshot.z_E.mean() == trace_z_mean[step]` pins the index/time. States: baseline_1000ms,
-   mid_fraction=0.5·onset, pre_onset_500ms, pre_onset_100ms, onset.
+   mid_fraction=0.5·onset, pre-onset offsets 1000/750/500/300/200/100/50/20 ms, onset. The original
+   atlas estimand remains frozen to baseline/mid/pre500/pre100/onset; dense states are eigen-timecourse only.
 2. **Replay** (`scripts/run_topic4_state_conditioned_susceptibility.py capture-snapshots`): mirrors the
    locked `run_mz_cell` (same substrate, noise seed, spontaneous no-kick), adding the observer; gate =
-   onset within 5 ms + all-5-states + z∈[0,1] + m≡0 + I-cells pinned. All 3 seeds passed; onsets exact.
+   onset within 5 ms + all registered states + z∈[0,1] + m≡0 + I-cells pinned. All 3 seeds passed;
+   onsets exact (4937.0/4706.8/4861.5 ms).
 3. **Coarse mapping** (`src/topic4_state_conditioned_susceptibility.py`, pure): affine E1146
    [0,20]²→normalized L=5.0 square (axis horizontal → theta=0); bin z_E onto n=12 grid (occupancy 100%);
    `q(x)=clip(z_bar, 0.05, 1)` = the M3B inhibition-efficacy field (z_min_realized≈0.76 so q_floor never
@@ -145,26 +147,35 @@ claim (the claim is the resolved, converged pre-onset state).
 
 ### 4.5 Fixed-source-kick time response (review 2026-07-19; `time_response_summary.json` + `figures/time_response.png`)
 
-The review asked for a real time-response figure instead of compressed axial scores. Using the SAME
-source-core Gaussian kick `b_fixed` evolved under `exp(J_s t)` at each state (so the comparison isolates
-the state change, not each state's own optimal input):
+The final main figure compares only baseline and pre-onset 100 ms with the SAME source-core Gaussian
+kick. It contains no state-specific re-optimization. The fixed-kick E-rate norm never exceeds its t=0
+value in either state, so this particular Gaussian input is **not net amplified**. Nevertheless the
+pre-onset response is much more persistent and remotely recruited: cumulative sink/source response-energy
+ratio at 30 ms is **0.55 vs 0.10**, and at 100 ms **0.58 vs 0.12** (pre-onset vs baseline).
 
-- **A — σ1(T)** (max finite-time gain vs window, 3-seed median): at **baseline** σ1(T) monotonically
-  decays and never exceeds 1 (no input net-amplified at any window). At **pre-onset** it crosses 1 by
-  T≈5 ms and **peaks at T≈15 ms** (peak σ1 = 1.23 at pre_onset_500ms, **1.51** at pre_onset_100ms), then
-  self-limits. So the non-normal transient **peaks EARLIER (~15 ms)** than the T=30 ms window used in
-  §4.1–4.4 (the T=30 static maps are valid but past the peak), and its peak grows as z depletes.
-- **B — fixed-kick spatial evolution** (5/10/20/30/50/100 ms): the baseline kick stays localized at the
-  source and decays; the pre-onset kick spreads into a band ALONG the axis toward the sink (with sign
-  structure by ~30 ms).
-- **C — axial kymograph** (source→sink position × time × |rE|): baseline = source-localized decay (the
-  sink stays dark); pre-onset = the response extends along the axis, the sink lights up, and it persists
-  longer.
+The paper-facing main figure places the four spatial frames (5/15/30/50 ms) first, followed by the two
+axis-time plots and two compact scalar summaries; it contains no method paragraph or arrival overlay.
+A registered 10%-of-peak arrival threshold is retained in the numeric sidecar as the propagation diagnostic:
+baseline reaches only 3 source-to-sink cells (fit ineligible); pre-onset reaches 7, with
+`t_arrival = 4.97 ms/unit × distance + intercept`, R²=**0.89**. This supports **sequential axial
+recruitment**, but does not by itself prove a continuous wavefront (a dense connection kernel can still
+cause remote responses). Threshold sensitivity remains a future robustness item.
 
-Propagation reading: baseline = local decay; pre-onset = a transient axial spread with sink recruitment
-and slower self-limiting — the non-normal axial transient shown as DYNAMICS, not scores. (The diagnostic
-figure now shows only the 5 static state-map rows; this time-response figure replaces the old compressed
-axial-score row.)
+The old σ1(T) row is now a separate supplementary `operator_gain_envelope` figure: it permits each state
+to choose its own optimal input and therefore answers a different question. Baseline envelope decays;
+pre-onset crosses 1 by 5 ms and peaks at ~15 ms (σ1≈1.51). It is an upper bound, not the fixed-kick gain.
+
+### 4.5b Actual-time leading eigenmode (`eigenmode_timecourse_summary.json` + `figures/eigenmode_timecourse.png`)
+
+The alpha interpolation is no longer used for the main temporal claim. The instantaneous leading
+rate-branch Jacobian mode is computed at actual replayed MZ slow states: absolute 1000-ms baseline,
+mid-trajectory, and −1000/−750/−500/−300/−200/−100/−50/−20 ms to locked SNN runoff. The leading mode
+changes from near-static/global (baseline: frequency≈0, globality≈0.98, axis≈0.05) to a ~22–24 Hz,
+strongly axial, low-globality mode before runoff. Its Re rises from about −0.049 to −0.008 1/ms and its
+e-fold damping time increases from ~20 to >90 ms: **weaker damping/longer persistence**, not faster
+propagation. Adjacent-mode overlap is reported to expose the leading-mode identity switch rather than
+pretend one eigenvector rotates continuously. Seed 1 stays resolved to −20 ms; seeds 3/4 to −100 ms;
+onset remains blank/unresolved for all seeds.
 
 ### 4.6 Continuation pre_onset_100ms → onset: transition type (review 2026-07-19; `continuation_summary.json` + `figures/continuation.png`)
 

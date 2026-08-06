@@ -16,7 +16,7 @@
       "onset_match": true,
       "missing": [],
       "gate_pass": true,
-      "wall_s": 643.9,
+      "wall_s": 591.1,
       "src_xy": [
         3.5135135135135127,
         8.472279953280994
@@ -38,7 +38,7 @@
       "onset_match": true,
       "missing": [],
       "gate_pass": true,
-      "wall_s": 622.8,
+      "wall_s": 582.4,
       "src_xy": [
         3.5135135135135127,
         8.472279953280994
@@ -60,7 +60,7 @@
       "onset_match": true,
       "missing": [],
       "gate_pass": true,
-      "wall_s": 629.9,
+      "wall_s": 546.9,
       "src_xy": [
         3.5135135135135127,
         8.472279953280994
@@ -76,16 +76,12 @@
       "L": 20.0
     }
   ],
-  "git_sha": "66a4d93",
+  "git_sha": "6dc71c0",
   "argv": [
     "scripts/run_topic4_state_conditioned_susceptibility.py",
     "capture-snapshots",
-    "--candidate",
-    "zA_q50_tz10000",
-    "--seeds",
-    "1,3,4",
+    "--confirm-run",
     "--workers",
-    "2",
-    "--confirm-run"
+    "2"
   ]
 }

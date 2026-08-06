@@ -16,10 +16,11 @@ edit run_topic4_mz_slowvars.py. Pure mapping/probe/operator math lives in the im
 Subcommands:
   audit-inputs             verify artifact paths + engine-SHA parity, write snapshot_contract.json (no sim)
   smoke                    seed-1 short observer-vs-no-observer PARITY proof + wall/RSS (needs --confirm-run)
-  capture-snapshots        replay candidate seeds, snapshot z_E/m_E at 5 states -> snapshots/ (needs --confirm-run)
+  capture-snapshots        replay candidate seeds, snapshot z_E/m_E on the registered trajectory grid
   build-atlas              (Task 5) coarse-field -> operator -> probe atlas (needs --confirm-run)
   run-controls             (Task 5) real/uniform/rotate/shuffle/z-blocked controls (needs --confirm-run)
   run-nonlinear-spotchecks (Task 6) two-amplitude linear-regime check (needs --confirm-run)
+  plot-paper-ready        plotting-only export of Figure 5 Supplementary candidates 1/2
 """
 import os
 
@@ -50,11 +51,18 @@ from kick_probe import simulate_kick                     # noqa: E402
 
 DT = 0.1
 OUT_DIR = os.path.join(ROOT, "results", "topic4_sef_hfo", "state_conditioned_susceptibility")
+PAPER_FIG_DIR = os.path.join(
+    ROOT, "results", "paper-ready-figure", "fig5_mz_spatial_dynamics_supplementary", "figures")
 MZ_DIR = os.path.join(ROOT, "results", "topic4_sef_hfo", "mz_slowvars")
 SCHEMA_VERSION = "sccs-1.0"
 
-# Five pre-declared snapshot states (design §4.2). Times are per-seed except the fixed 1000 ms baseline.
-SNAP_STATES = ["baseline_1000ms", "mid_fraction", "pre_onset_500ms", "pre_onset_100ms", "onset"]
+# Original atlas states remain frozen so extending the actual-time trajectory does not silently expand
+# the expensive atlas/control estimand. Dense pre-onset captures are used only for the eigenmode
+# timecourse, whose x-axis is true milliseconds to the locked SNN runoff time (never interpolation alpha).
+ATLAS_STATES = ["baseline_1000ms", "mid_fraction", "pre_onset_500ms", "pre_onset_100ms", "onset"]
+EIGEN_OFFSETS_MS = (1000, 750, 500, 300, 200, 100, 50, 20)
+EIGEN_TIME_STATES = [f"pre_onset_{v}ms" for v in EIGEN_OFFSETS_MS] + ["onset"]
+SNAP_STATES = list(dict.fromkeys(ATLAS_STATES[:-1] + EIGEN_TIME_STATES))
 
 # capture runs a hair past onset (early_stop OFF) so the onset step is always reached and the runaway
 # is confirmed to persist; trajectory <= onset is byte-identical to the locked early_stop replay.
@@ -65,6 +73,18 @@ SNAP_CONVENTION = (
     "step counter is 0-based, one increment per simulate_kick iteration t; time_ms = step*dt; "
     "consistency: snapshot.z_E.mean() == mz.trace_z_mean[step]."
 )
+
+
+def _save_diagnostic_and_paper_figure(fig, diagnostic_stem, paper_stem):
+    """Save one accepted canvas under both analysis and manuscript-facing names."""
+    targets = (
+        (os.path.join(OUT_DIR, "figures"), diagnostic_stem),
+        (PAPER_FIG_DIR, paper_stem),
+    )
+    for directory, stem in targets:
+        os.makedirs(directory, exist_ok=True)
+        for ext in ("png", "pdf"):
+            fig.savefig(os.path.join(directory, f"{stem}.{ext}"), dpi=300, bbox_inches="tight")
 
 
 # ============================================================ provenance
@@ -109,13 +129,13 @@ def _load_locked_candidate(label):
 
 
 def _snapshot_times(onset):
-    return {
+    times = {
         "baseline_1000ms": 1000.0,
         "mid_fraction": 0.5 * float(onset),
-        "pre_onset_500ms": float(onset) - 500.0,
-        "pre_onset_100ms": float(onset) - 100.0,
         "onset": float(onset),
     }
+    times.update({f"pre_onset_{v}ms": float(onset) - float(v) for v in EIGEN_OFFSETS_MS})
+    return times
 
 
 def _snapshot_steps(onset, dt):
@@ -404,6 +424,8 @@ def cmd_build_atlas(args):
         labels = [str(x) for x in snap["snapshot_labels"]]
         per_state = {}
         for i, lab in enumerate(labels):
+            if lab not in ATLAS_STATES:
+                continue
             zbar, occ, fill = M.bin_neuron_state_to_grid(snap["z_E"][i], ctx["pos_norm"], ctx["grid"])
             out, arr = _summarize_field(M, zbar, ctx, cfg)
             out["occupancy_min"] = int(occ.min()); out["fill_fraction"] = float(fill.mean())
@@ -417,7 +439,8 @@ def cmd_build_atlas(args):
                                       eig=(per_state[lab].get("eigen") or {}).get("eig_residual_ok"),
                                       occupancy_min=per_state[lab]["occupancy_min"],
                                       fill_fraction=per_state[lab]["fill_fraction"]) for lab in per_state}
-        print(f"[build-atlas] seed {seed}: " + ", ".join(f"{l}={per_state[l]['op_status']}" for l in labels), flush=True)
+        print(f"[build-atlas] seed {seed}: " + ", ".join(
+            f"{l}={per_state[l]['op_status']}" for l in ATLAS_STATES if l in per_state), flush=True)
     # primary estimand: within-seed deltas + cross-seed median (design §6.2). Endpoint = last RESOLVED
     # state (pre_onset_100ms); baseline->onset is also reported but onset is the unresolved boundary.
     est_keys = ("axial_gain", "perp_gain", "global_gain", "peak_gain", "axis_minus_perp", "peak_k")
@@ -471,6 +494,8 @@ def cmd_run_controls(args):
         labels = [str(x) for x in snap["snapshot_labels"]]
         per_state = {}
         for i, lab in enumerate(labels):
+            if lab not in ATLAS_STATES:
+                continue
             zbar, _, _ = M.bin_neuron_state_to_grid(snap["z_E"][i], ctx["pos_norm"], ctx["grid"])
             variants = M.make_state_controls(zbar, ctx["grid"], shuffle_seed=cfg["shuffle_seed"])
             per_ctrl = {}
@@ -481,7 +506,7 @@ def cmd_run_controls(args):
                     arrays_out[f"{seed}__{lab}__{cn}__q_field"] = np.asarray(arr["q_field"])
             per_state[lab] = per_ctrl
         per_seed[str(seed)] = per_state
-        print(f"[run-controls] seed {seed}: {len(labels)} states x {len(control_names)} controls done", flush=True)
+        print(f"[run-controls] seed {seed}: {len(per_state)} atlas states x {len(control_names)} controls done", flush=True)
     # AR1 isotropic control at baseline+onset (design §7): does axial preference vanish?
     ar1 = {}
     for seed in seeds:
@@ -619,19 +644,24 @@ def _plot_convergence(med, grid_ns, states):
 
 
 def cmd_run_time_response(args):
-    """Fixed-source-kick time-response (review 2026-07-19): the SAME source-core Gaussian kick evolved
-    under exp(J_s t) at each state, so the comparison isolates the state change. Panels A sigma1(T),
-    B spatial evolution, C axial kymograph. 3-seed median."""
+    """Final fixed-source-kick figure: baseline vs pre-onset 100 ms, same input in both states.
+
+    The main figure contains only fixed-input readouts. The state-specific optimal-input envelope
+    sigma1(T) is saved separately, because it answers a different operator question.
+    """
     import src.topic4_state_conditioned_susceptibility as M
+    from src.spatial_perturbation_toolkit import first_arrival_times, fit_arrival_time_distance
     cfg = _load_cfg()
     label = args.candidate or "zA_q50_tz10000"
     seeds = [int(s) for s in args.seeds.split(",")] if args.seeds else sorted(_load_locked_candidate(label)["onsets"])
-    STATES = ["baseline_1000ms", "pre_onset_500ms", "pre_onset_100ms"]
+    STATES = ["baseline_1000ms", "pre_onset_100ms"]
     T_sigma = [float(t) for t in range(0, 151, 5)]
-    t_maps = [5.0, 10.0, 20.0, 30.0, 50.0, 100.0]
-    t_kymo = [float(t) for t in range(0, 101, 4)]
+    t_maps = [5.0, 15.0, 30.0, 50.0]
+    t_kymo = sorted(set([float(t) for t in range(0, 101, 2)] + t_maps))
     kick_sigma = 0.6
-    acc = {st: dict(sigma=[], maps=[], kymo=[]) for st in STATES}
+    arrival_fraction = 0.10
+    acc = {st: dict(sigma=[], maps=[], kymo=[], gain=[], source=[], sink=[], ratio=[], cumulative_ratio=[])
+           for st in STATES}
     xs_ref = y_axis = None
     for seed in seeds:
         snap = _load_snapshot(label, seed)
@@ -647,11 +677,19 @@ def cmd_run_time_response(args):
             if J is None:
                 continue
             acc[st]["sigma"].append(M.sigma1_vs_T(J, ctx["grid"], T_sigma, N))
-            acc[st]["maps"].append(np.stack([M.fixed_kick_evolution(J, ctx["grid"], b_fixed, t_maps, N)[t]
-                                             for t in t_maps]))
-            xs_ref, _, kymo = M.axial_kymograph(M.fixed_kick_evolution(J, ctx["grid"], b_fixed, t_kymo, N),
-                                                ctx["grid"], y_axis, band=0.5)
-            acc[st]["kymo"].append(kymo)
+            evolution = M.fixed_kick_evolution(J, ctx["grid"], b_fixed, t_kymo, N)
+            read = M.fixed_kick_readouts(
+                evolution, ctx["grid"], source_center=ctx["src_norm"], sink_center=ctx["snk_norm"],
+                region_radius=cfg["core_radius_norm"], axis_y=y_axis, axis_band=0.5,
+                arrival_fraction=arrival_fraction)
+            acc[st]["maps"].append(np.stack([evolution[t] for t in t_maps]))
+            acc[st]["kymo"].append(read["kymograph"])
+            acc[st]["gain"].append(read["fixed_gain"])
+            acc[st]["source"].append(read["source_rms"])
+            acc[st]["sink"].append(read["sink_rms"])
+            acc[st]["ratio"].append(read["sink_source_ratio"])
+            acc[st]["cumulative_ratio"].append(read["cumulative_sink_source_ratio"])
+            xs_ref = read["xs"]
         print(f"[time-response] seed {seed} done", flush=True)
     out_arrays, summary = {}, {}
     for st in STATES:
@@ -660,10 +698,33 @@ def cmd_run_time_response(args):
         sig = np.median(np.stack(acc[st]["sigma"]), axis=0)
         out_arrays[f"{st}__sigma1_T"] = sig
         out_arrays[f"{st}__maps"] = np.median(np.stack(acc[st]["maps"]), axis=0)
-        out_arrays[f"{st}__kymo"] = np.median(np.stack(acc[st]["kymo"]), axis=0)
+        kymo = np.median(np.stack(acc[st]["kymo"]), axis=0)
+        gain = np.median(np.stack(acc[st]["gain"]), axis=0)
+        source = np.median(np.stack(acc[st]["source"]), axis=0)
+        sink = np.median(np.stack(acc[st]["sink"]), axis=0)
+        ratio_curve = np.nanmedian(np.stack(acc[st]["ratio"]), axis=0)
+        cumulative_ratio = np.nanmedian(np.stack(acc[st]["cumulative_ratio"]), axis=0)
+        arrival, threshold = first_arrival_times(kymo, t_kymo, threshold_fraction=arrival_fraction)
+        fit = fit_arrival_time_distance(xs_ref, arrival, source_position=float(ctx["src_norm"][0]),
+                                        sink_position=float(ctx["snk_norm"][0]))
+        out_arrays[f"{st}__kymo"] = kymo
+        out_arrays[f"{st}__fixed_gain"] = gain
+        out_arrays[f"{st}__source_rms"] = source
+        out_arrays[f"{st}__sink_rms"] = sink
+        out_arrays[f"{st}__sink_source_ratio"] = ratio_curve
+        out_arrays[f"{st}__cumulative_sink_source_ratio"] = cumulative_ratio
+        out_arrays[f"{st}__arrival_ms"] = arrival
         cross = next((T_sigma[i] for i, v in enumerate(sig) if v > 1.0), None)
         ip = int(np.argmax(sig))
-        summary[st] = dict(sigma1_cross1_ms=cross, sigma1_peak=float(sig[ip]), T_peak_ms=T_sigma[ip])
+        ig = int(np.nanargmax(gain))
+        summary[st] = dict(
+            fixed_kick_gain_peak=float(gain[ig]), fixed_kick_gain_peak_ms=float(t_kymo[ig]),
+            instantaneous_sink_source_ratio_at_30ms=float(ratio_curve[t_kymo.index(30.0)]),
+            cumulative_sink_source_ratio_at_30ms=float(cumulative_ratio[t_kymo.index(30.0)]),
+            cumulative_sink_source_ratio_at_100ms=float(cumulative_ratio[-1]),
+            arrival_threshold=float(threshold),
+            arrival_fit=fit, operator_envelope=dict(sigma1_cross1_ms=cross,
+                                                     sigma1_peak=float(sig[ip]), T_peak_ms=T_sigma[ip]))
     out_arrays.update(T_sigma=np.array(T_sigma), t_maps=np.array(t_maps), t_kymo=np.array(t_kymo),
                       xs=xs_ref, y_axis=np.array([y_axis]),
                       src_x=np.array([float(ctx["src_norm"][0])]), snk_x=np.array([float(ctx["snk_norm"][0])]))
@@ -671,10 +732,16 @@ def cmd_run_time_response(args):
     _atomic_json(os.path.join(OUT_DIR, "time_response_summary.json"),
                  dict(schema_version=SCHEMA_VERSION, candidate=label, seeds=seeds, states=STATES,
                       kick_sigma=kick_sigma, kick_center="source_core", per_state=summary,
-                      note="FIXED source-core Gaussian kick evolved under exp(J_s t); same kick across "
-                           "states isolates the state change.", git_sha=_git_sha(), argv=sys.argv))
+                      arrival_threshold_fraction=arrival_fraction,
+                      model_contract="MZ z-only trajectory-derived frozen-q M3B rate-field susceptibility; "
+                                     "not old qI/gK and not a direct perturbation of the full MZ SNN",
+                      note="Main figure: FIXED source-core Gaussian kick evolved under exp(J_s t). "
+                           "Operator sigma1(T) envelope is saved separately and is not the fixed-kick gain. "
+                           "Arrival slope is threshold-defined evidence for sequential recruitment, not proof "
+                           "of a continuous wavefront.", git_sha=_git_sha(), argv=sys.argv))
     _plot_time_response(out_arrays, STATES, cfg)
-    print(f"[time-response] -> time_response_summary.json + figures/time_response.png ; {summary}", flush=True)
+    print(f"[time-response] -> time_response_summary.json + figures/time_response.png + "
+          f"operator_gain_envelope.png ; {summary}", flush=True)
 
 
 def _plot_time_response(a, states, cfg):
@@ -682,55 +749,303 @@ def _plot_time_response(a, states, cfg):
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     from matplotlib.gridspec import GridSpec
+    from matplotlib.lines import Line2D
+    plt.rcParams.update({
+        "font.size": 9.0, "axes.titlesize": 10.0, "axes.labelsize": 9.5,
+        "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 8.2,
+        "pdf.fonttype": 42, "ps.fonttype": 42,
+    })
     t_maps = a["t_maps"]; xs = a["xs"]; tk = a["t_kymo"]
     src_x, snk_x, half = float(a["src_x"][0]), float(a["snk_x"][0]), float(cfg["L_norm"]) / 2
-    short = {"baseline_1000ms": "baseline", "pre_onset_500ms": "pre-onset -500ms", "pre_onset_100ms": "pre-onset -100ms"}
-    cols = {"baseline_1000ms": "#2166ac", "pre_onset_500ms": "#b35806", "pre_onset_100ms": "#1b7837"}
+    short = {"baseline_1000ms": "Baseline", "pre_onset_100ms": "Pre-onset"}
+    # Avoid the manuscript's template-A/template-B red/blue semantic colors for state identity.
+    cols = {"baseline_1000ms": "#555555", "pre_onset_100ms": "#C88719"}
     avail = [st for st in states if f"{st}__sigma1_T" in a]
-    fig = plt.figure(figsize=(15, 15))
-    gs = GridSpec(5, 6, figure=fig, hspace=0.5, wspace=0.18, height_ratios=[1.25, 1, 1, 1, 1.35],
-                  top=0.95, bottom=0.05, left=0.06, right=0.965)
-    # panel A: sigma1(T)
-    axA = fig.add_subplot(gs[0, :])
-    for st in avail:
-        axA.plot(a["T_sigma"], a[f"{st}__sigma1_T"], "-o", color=cols[st], ms=3, lw=2, label=short[st])
-    axA.axhline(1.0, color="0.5", ls=":", lw=1); axA.text(2, 1.02, "gain=1", fontsize=8, color="0.4")
-    axA.set_xlabel("finite-time window T (ms)"); axA.set_ylabel("sigma1(T) = max finite-time gain")
-    axA.set_title("A: max finite-time gain sigma1(T) per state (3-seed median) — when/whether some input is net-amplified", fontsize=10.5)
-    axA.legend(fontsize=9); axA.grid(alpha=0.25)
-    # panel B: fixed-kick spatial evolution (states x times), shared signed norm
+    fig = plt.figure(figsize=(7.2, 7.8))
+    gs = GridSpec(4, 9, figure=fig, hspace=0.46, wspace=0.36,
+                  height_ratios=[1.0, 1.0, 1.08, 0.92],
+                  width_ratios=[1, 1, 1, 1, 1, 1, 1, 1, 0.13],
+                  top=0.975, bottom=0.075, left=0.085, right=0.955)
+
+    def _clean(ax):
+        ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
+        ax.tick_params(length=3, width=0.8)
+
+    # a: same fixed kick, spatial response first.
     mmax = max([np.abs(a[f"{st}__maps"]).max() for st in avail] + [1e-12])
     for r, st in enumerate(avail):
         maps = a[f"{st}__maps"]
         for c, t in enumerate(t_maps):
-            ax = fig.add_subplot(gs[1 + r, c])
-            im = ax.imshow(maps[c].T, origin="lower", extent=[-half, half, -half, half], cmap="RdBu_r",
+            ax = fig.add_subplot(gs[r, 2 * c:2 * c + 2])
+            im = ax.imshow(maps[c].T, origin="lower", extent=[-half, half, -half, half], cmap="PuOr_r",
                            vmin=-mmax, vmax=mmax, aspect="equal")
-            ax.plot(src_x, float(a["y_axis"][0]), "^", color="k", ms=5); ax.plot(snk_x, float(a["y_axis"][0]), "v", color="k", ms=5)
+            ax.plot(src_x, float(a["y_axis"][0]), "^", color="k", ms=4.2)
+            ax.plot(snk_x, float(a["y_axis"][0]), "v", color="k", ms=4.2)
             ax.set_xticks([]); ax.set_yticks([])
             if r == 0:
-                ax.set_title(f"{int(t)} ms", fontsize=9)
+                ax.set_title(f"{int(t)} ms", pad=3)
             if c == 0:
-                ax.set_ylabel(short[st], fontsize=8.5, color=cols[st])
-    fig.text(0.5, 0.735, "B: SAME source-core kick evolved  C_E exp(J_s t) b_fixed  "
-             "(rows=state, cols=time; shared signed color; ^=source v=sink)", ha="center", fontsize=10.5)
-    # panel C: axial kymographs (position along source->sink axis x time)
+                ax.set_ylabel(short[st], color=cols[st], fontweight="semibold", labelpad=5)
+            if r == 0 and c == 0:
+                ax.text(-0.28, 1.08, "a", transform=ax.transAxes, fontsize=11, fontweight="bold")
+    cax_map = fig.add_subplot(gs[0:2, 8])
+    cb = fig.colorbar(im, cax=cax_map)
+    cb.set_label(r"$\Delta r_E$", labelpad=2); cb.ax.tick_params(labelsize=7.5, length=2)
+
+    # b-c: axis-time responses. Arrival fits remain in the numeric sidecar.
     kmax = max([a[f"{st}__kymo"].max() for st in avail] + [1e-12])
     for c, st in enumerate(avail):
-        ax = fig.add_subplot(gs[4, 2 * c:2 * c + 2])
-        im = ax.imshow(a[f"{st}__kymo"], origin="lower", aspect="auto", cmap="inferno", vmin=0, vmax=kmax,
-                       extent=[xs.min(), xs.max(), tk.min(), tk.max()])
-        ax.axvline(src_x, color="w", ls="--", lw=0.8); ax.axvline(snk_x, color="w", ls=":", lw=0.8)
-        ax.set_title(f"C: {short[st]} kymograph", fontsize=9.5, color=cols[st])
-        ax.set_xlabel("position along axis (source ^ .. sink :)");
+        ax = fig.add_subplot(gs[2, 4 * c:4 * c + 4])
+        imk = ax.imshow(a[f"{st}__kymo"].T, origin="lower", aspect="auto", cmap="magma",
+                        vmin=0, vmax=kmax, extent=[tk.min(), tk.max(), xs.min(), xs.max()])
+        ax.axhline(src_x, color="w", ls="--", lw=0.8); ax.axhline(snk_x, color="w", ls=":", lw=0.8)
+        ax.set_title(short[st], color=cols[st], fontweight="semibold", pad=3)
+        ax.set_xlabel("Time (ms)")
         if c == 0:
-            ax.set_ylabel("time (ms)")
-        if c == len(avail) - 1:
-            fig.colorbar(im, ax=ax, fraction=0.05, pad=0.03).set_label("|rE| response (shared)", fontsize=8)
-    fig.suptitle("Topic 4 — fixed-kick TIME RESPONSE (propagation dynamics)  (candidate %s; NOT a seizure)"
-                 % (cfg.get("_candidate", "zA_q50_tz10000")), fontsize=12.5, y=0.985)
+            ax.set_ylabel("Axis position")
+        else:
+            ax.set_yticklabels([])
+        ax.text(-0.12, 1.06, ("b" if c == 0 else "c"), transform=ax.transAxes,
+                fontsize=11, fontweight="bold")
+    cax_k = fig.add_subplot(gs[2, 8])
+    cbk = fig.colorbar(imk, cax=cax_k)
+    cbk.set_label(r"$|\Delta r_E|$", labelpad=2); cbk.ax.tick_params(labelsize=7.5, length=2)
+
+    # d-e: only the two reader-facing scalar summaries.
+    ax_gain = fig.add_subplot(gs[3, 0:4]); ax_remote = fig.add_subplot(gs[3, 5:9])
+    for st in avail:
+        ax_gain.plot(tk, a[f"{st}__fixed_gain"], color=cols[st], lw=2.0)
+        ax_remote.plot(tk, a[f"{st}__cumulative_sink_source_ratio"], color=cols[st], lw=2.0)
+    ax_gain.axhline(1.0, color="0.55", ls="--", lw=0.8)
+    ax_gain.set(xlabel="Time (ms)", ylabel="Response norm", title="Fixed-kick response")
+    ax_remote.set(xlabel="Time (ms)", ylabel="Energy ratio", title="Remote recruitment")
+    ax_remote.set_ylim(bottom=0)
+    for lab, ax in zip(("d", "e"), (ax_gain, ax_remote)):
+        _clean(ax); ax.text(-0.14, 1.08, lab, transform=ax.transAxes, fontsize=11, fontweight="bold")
+    handles = [Line2D([0], [0], color=cols[st], lw=2.0, label=short[st]) for st in avail]
+    ax_gain.legend(handles=handles, frameon=False, loc="upper right", handlelength=2.2)
+
+    _save_diagnostic_and_paper_figure(
+        fig,
+        diagnostic_stem="time_response",
+        paper_stem="figure5_supplementary_1_spatial_perturbation_response",
+    )
+    plt.close(fig)
+
+    # Supplement only: state-specific optimal-input upper bound, never labelled fixed-kick gain.
+    fig, ax = plt.subplots(figsize=(3.5, 2.7))
+    for st in avail:
+        ax.plot(a["T_sigma"], a[f"{st}__sigma1_T"], color=cols[st], lw=1.8, label=short[st])
+    ax.axhline(1.0, color="0.55", ls="--", lw=0.8)
+    ax.set_xlabel("Window (ms)"); ax.set_ylabel(r"$\sigma_1(T)$")
+    ax.set_title("Operator gain")
+    _clean(ax); ax.legend(frameon=False)
+    fig.tight_layout()
     for ext in ("png", "pdf"):
-        fig.savefig(os.path.join(OUT_DIR, "figures", f"time_response.{ext}"), dpi=150, bbox_inches="tight")
+        fig.savefig(os.path.join(OUT_DIR, "figures", f"operator_gain_envelope.{ext}"), dpi=300, bbox_inches="tight")
+    plt.close(fig)
+
+
+def cmd_run_eigenmode_timecourse(args):
+    """Instantaneous leading Jacobian mode on the actual MZ time-to-runoff trajectory.
+
+    Unlike the older alpha continuation, every point is a captured SNN slow state at a real
+    millisecond offset from the locked runoff time. Each point still uses a frozen-q rate-field
+    operating point; onset is left blank when that equilibrium is unresolved.
+    """
+    import src.topic4_state_conditioned_susceptibility as M
+    from src.spatial_perturbation_toolkit import normalized_field_overlap
+    cfg = _load_cfg()
+    label = args.candidate or "zA_q50_tz10000"
+    seeds = [int(s) for s in args.seeds.split(",")] if args.seeds else sorted(_load_locked_candidate(label)["onsets"])
+    time_labels = ["baseline_1000ms", "mid_fraction"] + \
+                  [f"pre_onset_{v}ms" for v in EIGEN_OFFSETS_MS] + ["onset"]
+    arrays, summary = {}, {}
+    for seed in seeds:
+        snap = _load_snapshot(label, seed)
+        labels = [str(x) for x in snap["snapshot_labels"]]
+        missing = [lab for lab in time_labels if lab not in labels]
+        if missing:
+            raise RuntimeError(f"seed {seed} snapshot artifact lacks dense eigenmode states {missing}; "
+                               "rerun capture-snapshots")
+        ctx = _seed_context(cfg, snap, cfg["grid_n"])
+        onset_t = float(snap["actual_time_ms"][labels.index("onset")])
+        prev_op = None
+        previous_field = None
+        records, fields = [], []
+        for lab in time_labels:
+            i = labels.index(lab)
+            t_rel = float(snap["actual_time_ms"][i]) - onset_t
+            zbar, _, _ = M.bin_neuron_state_to_grid(snap["z_E"][i], ctx["pos_norm"], ctx["grid"])
+            op, J, _ = M.state_operator(
+                zbar, ctx["grid"], ctx["scaffold"], w_ee_mult=cfg["w_ee_mult"], ratio=cfg["ratio"],
+                q_floor=cfg["q_floor"], op_dt=cfg["op_dt"], op_t_max=cfg["op_t_max"],
+                op_tol=cfg["op_tol"], init=prev_op)
+            rec = dict(label=lab, time_to_runoff_ms=t_rel, op_status=op.status, re=None, im=None,
+                       freq_hz=None, damping_time_ms=None, axis_score=None, globality=None,
+                       overlap_previous=None)
+            field = np.full((ctx["grid"].n, ctx["grid"].n), np.nan)
+            if J is not None:
+                mode = M.leading_mode_snapshot(J, ctx["grid"], theta=ctx["theta"])
+                if mode is not None:
+                    field = mode.pop("field")
+                    rec.update(**mode)
+                    rec["damping_time_ms"] = (-1.0 / rec["re"] if rec["re"] < 0 else None)
+                    if previous_field is not None:
+                        rec["overlap_previous"] = normalized_field_overlap(previous_field, field)
+                    previous_field = field
+                prev_op = {"rE": op.rE, "rI": op.rI}
+            records.append(rec); fields.append(field)
+        for key in ("time_to_runoff_ms", "re", "im", "freq_hz", "damping_time_ms",
+                    "axis_score", "globality", "overlap_previous"):
+            arrays[f"{seed}__{key}"] = np.array([
+                np.nan if r.get(key) is None else r[key] for r in records], float)
+        arrays[f"{seed}__fields"] = np.stack(fields)
+        arrays[f"{seed}__resolved"] = np.array([r["op_status"] == "resolved" for r in records], bool)
+        summary[str(seed)] = dict(records=records,
+                                  last_resolved_label=next((r["label"] for r in records[::-1]
+                                                            if r["op_status"] == "resolved"), None))
+        print(f"[eigenmode-timecourse] seed {seed}: last resolved={summary[str(seed)]['last_resolved_label']}",
+              flush=True)
+    out = dict(schema_version=SCHEMA_VERSION, candidate=label, seeds=seeds, labels=time_labels,
+               model_contract="actual MZ z-only SNN slow-state timestamps -> frozen-q M3B rate-field Jacobian",
+               mode_contract="instantaneous leading rate-branch eigenvalue and complex-pair E-loading; "
+                             "not finite-time V1/U1 and not a fixed-kick response",
+               per_seed=summary, git_sha=_git_sha(), argv=sys.argv)
+    _atomic_savez(os.path.join(OUT_DIR, "eigenmode_timecourse_arrays.npz"), **arrays)
+    _atomic_json(os.path.join(OUT_DIR, "eigenmode_timecourse_summary.json"), out)
+    _plot_eigenmode_timecourse(arrays, seeds, time_labels, representative_seed=seeds[0])
+    print("[eigenmode-timecourse] -> eigenmode_timecourse_summary.json + figures/eigenmode_timecourse.png",
+          flush=True)
+
+
+def _plot_eigenmode_timecourse(a, seeds, labels, representative_seed):
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+    from matplotlib.gridspec import GridSpec
+    plt.rcParams.update({
+        "font.size": 9.0, "axes.titlesize": 10.0, "axes.labelsize": 9.5,
+        "xtick.labelsize": 8.5, "ytick.labelsize": 8.5, "legend.fontsize": 7.8,
+        "pdf.fonttype": 42, "ps.fonttype": 42,
+    })
+    cfg = _load_cfg()
+    L = float(cfg["L_norm"]); half = L / 2
+    rep_t = a[f"{representative_seed}__time_to_runoff_ms"]
+    rep_fields = a[f"{representative_seed}__fields"]
+    map_labels = ["baseline_1000ms", "mid_fraction", "pre_onset_500ms", "pre_onset_20ms"]
+    idx = [labels.index(lab) for lab in map_labels]
+    vmax = max([float(np.nanmax(rep_fields[i])) for i in idx if np.isfinite(rep_fields[i]).any()] + [1e-12])
+
+    def _stack(key):
+        return np.stack([a[f"{s}__{key}"] for s in seeds])
+
+    t = np.nanmedian(_stack("time_to_runoff_ms"), axis=0)
+    metrics = {
+        "re": _stack("re"), "freq_hz": _stack("freq_hz"),
+        "damping_time_ms": _stack("damping_time_ms"), "axis_score": _stack("axis_score"),
+        "globality": _stack("globality"), "overlap_previous": _stack("overlap_previous"),
+    }
+    fig = plt.figure(figsize=(7.2, 4.8))
+    gs = GridSpec(2, 13, figure=fig, hspace=0.52, wspace=0.50,
+                  height_ratios=[1.0, 0.90], width_ratios=[1] * 12 + [0.16],
+                  top=0.96, bottom=0.13, left=0.08, right=0.955)
+    for c, i in enumerate(idx):
+        ax = fig.add_subplot(gs[0, 3 * c:3 * c + 3])
+        if np.isfinite(rep_fields[i]).any():
+            im = ax.imshow(rep_fields[i].T, origin="lower", extent=[-half, half, -half, half],
+                           cmap="magma", vmin=0, vmax=vmax, aspect="equal")
+        else:
+            ax.set_facecolor("0.92"); ax.text(0.5, 0.5, "Unresolved", transform=ax.transAxes,
+                                               ha="center", va="center", color="0.35")
+        display = {"baseline_1000ms": "Baseline", "mid_fraction": "Midpoint",
+                   "pre_onset_500ms": "Pre-onset", "pre_onset_20ms": "Pre-onset"}
+        ax.set_title(f"{display[map_labels[c]]}\n{rep_t[i]:.0f} ms", pad=3)
+        ax.set_xticks([]); ax.set_yticks([])
+        ax.text(-0.20, 1.08, "abcd"[c], transform=ax.transAxes, fontsize=11, fontweight="bold")
+    cax = fig.add_subplot(gs[0, 12])
+    cb = fig.colorbar(im, cax=cax)
+    cb.set_label("Mode amplitude", labelpad=2); cb.ax.tick_params(labelsize=7.5, length=2)
+
+    def _column_summary(x):
+        med = np.full(x.shape[1], np.nan); lo = med.copy(); hi = med.copy()
+        for j in range(x.shape[1]):
+            finite = x[:, j][np.isfinite(x[:, j])]
+            if finite.size:
+                med[j], lo[j], hi[j] = np.median(finite), finite.min(), finite.max()
+        return med, lo, hi
+
+    def _clean(ax):
+        ax.spines["top"].set_visible(False); ax.spines["right"].set_visible(False)
+        ax.tick_params(length=3, width=0.8)
+        ax.set_xticks([-4000, -2000, 0])
+
+    # e: stability; f: decay time. Frequency remains in the sidecar, not the main canvas.
+    scalar_panels = [
+        ("re", r"Re $\lambda$ (ms$^{-1}$)", "Stability", "#7B3294", 0.0),
+        ("damping_time_ms", r"$\tau$ (ms)", "Persistence", "#2A9D8F", None),
+    ]
+    scalar_spans = ((0, 3), (4, 7))
+    for c, (key, ylabel, title, col, zero) in enumerate(scalar_panels):
+        lo_col, hi_col = scalar_spans[c]
+        ax = fig.add_subplot(gs[1, lo_col:hi_col]); x = metrics[key]
+        med, lo, hi = _column_summary(x)
+        ax.fill_between(t, lo, hi, color=col, alpha=0.16, lw=0)
+        ax.plot(t, med, color=col, lw=2.0)
+        if zero is not None: ax.axhline(zero, color="0.55", ls="--", lw=0.8)
+        ax.set(ylabel=ylabel, title=title)
+        _clean(ax); ax.text(-0.19, 1.08, "ef"[c], transform=ax.transAxes,
+                            fontsize=11, fontweight="bold")
+
+    # g: spatial-mode metrics. Each quantity has a distinct non-template color.
+    ax = fig.add_subplot(gs[1, 8:12])
+    for key, col, lab in (("axis_score", "#C88719", "Axis"),
+                          ("globality", "#555555", "Globality"),
+                          ("overlap_previous", "#2A9D8F", "Overlap")):
+        x = metrics[key]; med, _, _ = _column_summary(x)
+        ax.plot(t, med, color=col, lw=1.8, label=lab)
+    ax.set(ylabel="Score", title="Spatial mode")
+    ax.set_ylim(-0.03, 1.03); _clean(ax)
+    ax.legend(frameon=False, loc="center left", bbox_to_anchor=(0.02, 0.48), handlelength=1.5)
+    ax.text(-0.19, 1.08, "g", transform=ax.transAxes, fontsize=11, fontweight="bold")
+    fig.supxlabel("Time to runoff (ms)", x=0.50, y=0.025, fontsize=9.5)
+    _save_diagnostic_and_paper_figure(
+        fig,
+        diagnostic_stem="eigenmode_timecourse",
+        paper_stem="figure5_supplementary_2_eigenmode_dynamics",
+    )
+    plt.close(fig)
+
+
+def cmd_plot_paper_ready(args):
+    """Rebuild the two Figure 5 supplementary candidates from accepted numeric sidecars only."""
+    time_path = os.path.join(OUT_DIR, "time_response_arrays.npz")
+    eigen_path = os.path.join(OUT_DIR, "eigenmode_timecourse_arrays.npz")
+    eigen_summary_path = os.path.join(OUT_DIR, "eigenmode_timecourse_summary.json")
+    missing = [p for p in (time_path, eigen_path, eigen_summary_path) if not os.path.exists(p)]
+    if missing:
+        raise FileNotFoundError("paper-ready export requires accepted sidecars: " + ", ".join(missing))
+
+    cfg = _load_cfg()
+    with np.load(time_path, allow_pickle=False) as time_arrays:
+        _plot_time_response(time_arrays, ["baseline_1000ms", "pre_onset_100ms"], cfg)
+
+    eigen_summary = json.load(open(eigen_summary_path))
+    seeds = [int(s) for s in eigen_summary["seeds"]]
+    if args.seeds:
+        requested = [int(s) for s in args.seeds.split(",")]
+        unknown = sorted(set(requested) - set(seeds))
+        if unknown:
+            raise ValueError(f"requested seeds are absent from the accepted eigenmode sidecar: {unknown}")
+        seeds = requested
+    with np.load(eigen_path, allow_pickle=False) as eigen_arrays:
+        _plot_eigenmode_timecourse(
+            eigen_arrays,
+            seeds,
+            eigen_summary["labels"],
+            representative_seed=seeds[0],
+        )
+    print(f"[plot-paper-ready] -> {PAPER_FIG_DIR}", flush=True)
 
 
 def _classify_continuation(traj):
@@ -961,7 +1276,9 @@ def main(argv=None):
     ap = argparse.ArgumentParser(description="Topic 4 state-conditioned spatial susceptibility runner.")
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("audit-inputs", "smoke", "capture-snapshots", "build-atlas", "run-controls",
-                 "run-nonlinear-spotchecks", "run-convergence", "run-time-response", "run-continuation", "run-post-onset", "all"):
+                 "run-nonlinear-spotchecks", "run-convergence", "run-time-response",
+                 "run-eigenmode-timecourse", "run-continuation", "run-post-onset",
+                 "plot-paper-ready", "all"):
         sp = sub.add_parser(name)
         sp.add_argument("--confirm-run", action="store_true", help="required to start any simulation")
         sp.add_argument("--candidate", default=None, help="MZ multiseed label (default zA_q50_tz10000)")
@@ -971,7 +1288,7 @@ def main(argv=None):
         sp.add_argument("--workers", default=None, help="max SNN workers, capped at 2")
         sp.add_argument("--resume", action="store_true", help="skip stages whose provenance matches")
     args = ap.parse_args(argv)
-    needs_confirm = args.cmd not in ("audit-inputs",)
+    needs_confirm = args.cmd not in ("audit-inputs", "plot-paper-ready")
     if needs_confirm and not args.confirm_run:
         print(f"REFUSING: '{args.cmd}' runs simulations. Pass --confirm-run (import-safe gate, design §4).",
               file=sys.stderr)
@@ -992,10 +1309,14 @@ def main(argv=None):
         cmd_run_convergence(args)
     elif args.cmd == "run-time-response":
         cmd_run_time_response(args)
+    elif args.cmd == "run-eigenmode-timecourse":
+        cmd_run_eigenmode_timecourse(args)
     elif args.cmd == "run-continuation":
         cmd_run_continuation(args)
     elif args.cmd == "run-post-onset":
         cmd_run_post_onset(args)
+    elif args.cmd == "plot-paper-ready":
+        cmd_plot_paper_ready(args)
     elif args.cmd == "all":
         cmd_capture_snapshots(args)
         cmd_build_atlas(args)

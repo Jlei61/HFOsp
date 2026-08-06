@@ -12,9 +12,21 @@
 
 ### time_response.png / .pdf
 
-用**同一个**源核 Gaussian kick，在每个状态下沿真实算子演化 `C_E e^{J_s t} b_fixed`（固定刺激→比较的是"网络状态变了多少"，不是每个状态各自换最优输入）。A：**最大有限时增益 σ1(T)** 随窗口 T——基线单调衰减、从不过 1（无净放大）；失控前 5 毫秒就过 1、**约 15 毫秒到峰**（−500ms 峰≈1.23、−100ms 峰≈1.51）随后自限衰减。B：同一 kick 的空间演化（行=状态、列=5/10/20/30/50/100 毫秒；共用发散色）——基线局部原地衰退；失控前沿横轴铺开、往汇端伸。C：**轴向 kymograph**（横=源→汇位置、纵=时间、色=|rE|）——基线只在源附近亮一下就灭；失控前沿轴向右扩、汇端被点亮、持续更久。
+只比较 baseline 与失控前 100 ms，用**同一个**源核 Gaussian kick 沿 `C_E e^{J_s t} b_fixed` 演化。Panel a 先给 5/15/30/50 ms 的两行空间响应，panel b–c 给时间×轴位置图；panel d 是固定 kick 的 E-rate 总响应范数，panel e 是累积汇/源响应能量比（100 ms 时 baseline≈0.12、pre-onset≈0.58）。灰色与赭金色只编码网络状态，避开论文中 template A/B 的红蓝语义色；主画布不再放 arrival 曲线或方法注释。10% arrival-threshold 拟合仍保存在 `time_response_summary.json`：baseline 不可拟合，pre-onset 斜率≈4.97 ms/归一化空间单位、R²≈0.89。
 
-**关注点**：A 看"何时过 1、峰在多早（≈15 毫秒，比固定 30 毫秒窗更早）、峰随失效长高、之后自限"；B/C 看"基线原地消退 vs 失控前沿轴传到汇"——这才是直观的传播动力学，替代了旧的压缩轴向分数行。
+**关注点**：固定 Gaussian kick **没有**总范数净放大，但 pre-onset 明显延长响应并增强远端招募；arrival-time 正斜率支持顺序招募，尚不足以单独证明连续 wavefront。该图是 MZ z-only 轨迹映射到 frozen-q M3B 率场代理，不是直接刺激完整 MZ SNN。
+
+### operator_gain_envelope.png / .pdf
+
+补充图：每个状态都允许重新选择自己的最优输入，画 E-rate→E-rate 算子块的最大奇异值 `σ1(T)`。baseline 从 1 单调下降；pre-onset 在约 5 ms 超过 1、约 15 ms 达峰≈1.51，之后衰减。它是算子上界，不是主图中固定 Gaussian kick 的实际增益。
+
+**关注点**：只用它回答“是否存在某个会被净放大的输入、最佳时间窗多长”，不要把它当成固定刺激响应。
+
+### eigenmode_timecourse.png / .pdf
+
+横轴是真实的距锁定 SNN runoff 时间，不再用 `alpha` 插值。Panel a–d 是 representative seed 1 的主 Jacobian 不变子空间 E-loading；panel e 为 `Re λ`，panel f 为 `τ=-1/Re λ`，panel g 为三种空间分数；约 22–24 Hz 的频率轨迹保存在 sidecar，但因信息较弱不进入主画布。`Axis` 用模态功率 `|φ_E|²` 的空间二阶矩张量计算：其各向异性乘以主轴相对骨架轴的 `cos(2Δθ)`；`Globality=(Σp)²/(NΣp²)`；`Overlap` 是相邻两个非负子空间 loading 场的归一化点积。seed 1 可解析到 -20 ms，seed 3/4 到 -100 ms；0 ms 边界均留空。
+
+**关注点**：领先模式在中段后发生从近静态全局模态到约 22–24 Hz 轴向模态的切换；Re 接近 0 表示阻尼变弱、持续时间变长，不表示传播速度变快。相邻 overlap 用来提示主模态身份切换，传播本身仍看 fixed-kick 图。
 
 ### state_conditioned_susceptibility_controls.png / .pdf
 
