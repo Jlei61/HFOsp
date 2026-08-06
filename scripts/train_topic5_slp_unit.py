@@ -49,6 +49,14 @@ torch.set_num_threads(2)
 # optimisation for a patient with 250 events as for one with 70,000.
 MIN_BATCHES_PER_EPOCH = 8
 
+# Activation memory grows as batch x rank steps x latent nodes and autograd keeps
+# every microstep, so a unit can hold several gigabytes.  That is a scheduling
+# constraint, not a modelling one: capping the batch here would change the
+# optimisation for some patients and not others, and a patient whose arms were
+# fitted at different batch sizes cannot be compared with itself.  Concurrency is
+# limited in the launcher instead, and a failed unit is retried rather than
+# silently dropped.
+
 DEFAULTS: Dict[str, Any] = {
     "hidden": 4,
     "microsteps": 3,

@@ -116,6 +116,14 @@ def main() -> int:
     lco = OUT / "leave_contact_out_metrics.csv"
     results.append(check("leave-contact-out results written", lco.exists()))
 
+    # 8b. nothing left behind on a transient error
+    stragglers = sorted(p.parent.relative_to(OUT / "per_subject").as_posix()
+                        for p in (OUT / "per_subject").rglob("FAILED.json")) \
+        if (OUT / "per_subject").exists() else []
+    results.append(check("no cohort unit left in a failed state", not stragglers,
+                         f"{len(stragglers)} failed, e.g. {stragglers[:2]}"
+                         if stragglers else ""))
+
     # 9. figures with their Chinese README
     figures = OUT / "figures"
     figure_files = list(figures.glob("*.png")) if figures.exists() else []
