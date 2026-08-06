@@ -746,6 +746,30 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 **历史关系**：HR/FHN 节点动力学路线（Phase 4 v1）已**整体归档**——见顶部 banner「历史 HR/FHN route」指针 + 结果 `results/topic4_sef_itp/phase4_hr_route_SUPERSEDED/` + spec `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md`，不再是主模型路线。详细 v2 plan 见 `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md`。
 
+### 6.6 MZ early-field bridge V1（2026-07-19，observation layer）
+
+在固定 E1146 SNN 底物上，slow-off returning events 建立 held-out 双向 contact timing templates；同一底物只开
+`z` 后进入 delayed operational runaway，并读取跨过 `t120` 前、相对 `t_recruit` 的 0–50 ms virtual-contact
+energy。seeds 1/3/4 的 mirror-invariant `rho_maxAB` 为 0.945 / 0.735 / 0.924，均为正；within-shaft null
+有 2/3 明确（seed3 p=0.086，与 null 重叠）。因此当前支持的是 **same scaffold, state-dependent readout**
+的观测层可行性，不是 clinical seizure、患者队列或 `z_i` 因果机制证明。
+
+跨 seed 模板迁移只作 exploratory diagnostic：对每个 target field，同 seed 模板并不优于另外两个 seed 的模板，
+削弱了纯同噪声 replay 解释；但统计单位只有 3 个 target fields，而且本次 9/9 `maxAB` 都由 B→A 分支取胜，
+不能写成双向模板整体已证明为 seed-invariant scaffold property。Figure 5 V1 保留连续 z-only 轨迹 + exact native
+returning event contact field + pre-t120 contact-energy field；灰色神经元只表示几何，不表示局部组织招募。
+
+下一版必须等待 MZ onset-dynamics / state-conditioned artifacts 验收后另做 **V2 integrated bridge**：把同一窗口注册到
+`D_z/q_eff/A_m`，并用 bit-identical checkpoint/resume 完成 native、uniform-mean、shuffle、reset-z state-matched
+counterfactual。没有这些对照，即使新增相图也只能叫动力学描述，不能升级为 causal bridge。完整数值、问题清单和
+V2 锁见 `docs/archive/topic4/sef_hfo/mz_early_field_bridge_2026-07-19.md` §10。
+
+Figure 5 同时登记两个**独立补充候选**，不塞入 V1 主画布：Supplementary 1 用同一个局部 kick 比较 baseline 与
+runoff 前 100 ms 的 frozen-q 率场响应；Supplementary 2 沿 MZ z-only 的真实慢状态时间戳展示领先 Jacobian mode
+由近全局转为沿轴并逐渐减弱阻尼。两者补的是 state-conditioned rate-field dynamics，不是 full-SNN eigenmode、
+ictal state 或完整 seizure cycle。输出位于 `results/paper-ready-figure/fig5_mz_spatial_dynamics_supplementary/figures/`，
+绘图合同见 `docs/figure5_supplementary_spatial_dynamics_spec.md`。
+
 ---
 
 ## 7. 模型支持 / 不支持的解释

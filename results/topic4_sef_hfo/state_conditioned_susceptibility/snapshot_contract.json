@@ -1,0 +1,158 @@
+{
+  "schema_version": "sccs-1.0",
+  "candidate": "zA_q50_tz10000",
+  "cfg": {
+    "I_th_EI": 1.6652801609959704,
+    "tau_z": 10000.0,
+    "use_m": false,
+    "use_z": true
+  },
+  "seeds": [
+    1,
+    3,
+    4
+  ],
+  "dt_ms": 0.1,
+  "subject": "epilepsiae_1146",
+  "montage": "narrow",
+  "snap_states": [
+    "baseline_1000ms",
+    "mid_fraction",
+    "pre_onset_500ms",
+    "pre_onset_100ms",
+    "pre_onset_1000ms",
+    "pre_onset_750ms",
+    "pre_onset_300ms",
+    "pre_onset_200ms",
+    "pre_onset_50ms",
+    "pre_onset_20ms",
+    "onset"
+  ],
+  "snapshot_update_convention": "captured inside MZSlowVars.step() AFTER the z/m Euler update and the streaming trace record; step counter is 0-based, one increment per simulate_kick iteration t; time_ms = step*dt; consistency: snapshot.z_E.mean() == mz.trace_z_mean[step].",
+  "capture_tail_ms": 400.0,
+  "early_stop_in_capture": false,
+  "per_seed": {
+    "1": {
+      "onset_ms": 4937.0,
+      "phenotype": "runaway",
+      "snapshot_times_ms": {
+        "baseline_1000ms": 1000.0,
+        "mid_fraction": 2468.5,
+        "onset": 4937.0,
+        "pre_onset_1000ms": 3937.0,
+        "pre_onset_750ms": 4187.0,
+        "pre_onset_500ms": 4437.0,
+        "pre_onset_300ms": 4637.0,
+        "pre_onset_200ms": 4737.0,
+        "pre_onset_100ms": 4837.0,
+        "pre_onset_50ms": 4887.0,
+        "pre_onset_20ms": 4917.0
+      },
+      "snapshot_steps": {
+        "baseline_1000ms": 10000,
+        "mid_fraction": 24685,
+        "pre_onset_500ms": 44370,
+        "pre_onset_100ms": 48370,
+        "pre_onset_1000ms": 39370,
+        "pre_onset_750ms": 41870,
+        "pre_onset_300ms": 46370,
+        "pre_onset_200ms": 47370,
+        "pre_onset_50ms": 48870,
+        "pre_onset_20ms": 49170,
+        "onset": 49370
+      },
+      "capture_T_ms": 5337.0
+    },
+    "3": {
+      "onset_ms": 4706.8,
+      "phenotype": "runaway",
+      "snapshot_times_ms": {
+        "baseline_1000ms": 1000.0,
+        "mid_fraction": 2353.4,
+        "onset": 4706.8,
+        "pre_onset_1000ms": 3706.8,
+        "pre_onset_750ms": 3956.8,
+        "pre_onset_500ms": 4206.8,
+        "pre_onset_300ms": 4406.8,
+        "pre_onset_200ms": 4506.8,
+        "pre_onset_100ms": 4606.8,
+        "pre_onset_50ms": 4656.8,
+        "pre_onset_20ms": 4686.8
+      },
+      "snapshot_steps": {
+        "baseline_1000ms": 10000,
+        "mid_fraction": 23534,
+        "pre_onset_500ms": 42068,
+        "pre_onset_100ms": 46068,
+        "pre_onset_1000ms": 37068,
+        "pre_onset_750ms": 39568,
+        "pre_onset_300ms": 44068,
+        "pre_onset_200ms": 45068,
+        "pre_onset_50ms": 46568,
+        "pre_onset_20ms": 46868,
+        "onset": 47068
+      },
+      "capture_T_ms": 5106.8
+    },
+    "4": {
+      "onset_ms": 4861.5,
+      "phenotype": "runaway",
+      "snapshot_times_ms": {
+        "baseline_1000ms": 1000.0,
+        "mid_fraction": 2430.75,
+        "onset": 4861.5,
+        "pre_onset_1000ms": 3861.5,
+        "pre_onset_750ms": 4111.5,
+        "pre_onset_500ms": 4361.5,
+        "pre_onset_300ms": 4561.5,
+        "pre_onset_200ms": 4661.5,
+        "pre_onset_100ms": 4761.5,
+        "pre_onset_50ms": 4811.5,
+        "pre_onset_20ms": 4841.5
+      },
+      "snapshot_steps": {
+        "baseline_1000ms": 10000,
+        "mid_fraction": 24308,
+        "pre_onset_500ms": 43615,
+        "pre_onset_100ms": 47615,
+        "pre_onset_1000ms": 38615,
+        "pre_onset_750ms": 41115,
+        "pre_onset_300ms": 45615,
+        "pre_onset_200ms": 46615,
+        "pre_onset_50ms": 48115,
+        "pre_onset_20ms": 48415,
+        "onset": 48615
+      },
+      "capture_T_ms": 5261.5
+    }
+  },
+  "source_artifact_paths": [
+    "results/topic4_sef_hfo/mz_slowvars/per_seed/multiseed_summary.json",
+    "results/topic4_sef_hfo/mz_slowvars/p3_candidates.json",
+    "results/topic4_sef_hfo/mz_slowvars/calibration.json"
+  ],
+  "engine_sha_parity": {
+    "ok": true,
+    "current": {
+      "kick_probe.py": "5faaedab37ab",
+      "params.py": "c2036d1e1548",
+      "model.py": "e77aad35cbfa",
+      "connectivity.py": "5ad75ec5066b",
+      "connectivity_rot.py": "2aa442624fef",
+      "lfp.py": "7f079081de4e"
+    },
+    "locked": {
+      "kick_probe.py": "5faaedab37ab",
+      "params.py": "c2036d1e1548",
+      "model.py": "e77aad35cbfa",
+      "connectivity.py": "5ad75ec5066b",
+      "connectivity_rot.py": "2aa442624fef",
+      "lfp.py": "7f079081de4e"
+    }
+  },
+  "git_sha": "6dc71c0",
+  "argv": [
+    "scripts/run_topic4_state_conditioned_susceptibility.py",
+    "audit-inputs"
+  ]
+}

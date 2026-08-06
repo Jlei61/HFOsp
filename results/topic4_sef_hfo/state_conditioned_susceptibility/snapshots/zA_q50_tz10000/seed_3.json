@@ -1,0 +1,110 @@
+{
+  "schema_version": "sccs-1.0",
+  "candidate": "zA_q50_tz10000",
+  "seed": 3,
+  "phenotype": "runaway",
+  "replay_phenotype": "runaway",
+  "locked_runaway_ms": 4706.8,
+  "replay_runaway_ms": 4706.8,
+  "onset_match": true,
+  "dt_ms": 0.1,
+  "L": 20.0,
+  "subject": "epilepsiae_1146",
+  "montage": "narrow",
+  "NE": 32000,
+  "N": 40000,
+  "core_r": 1.5,
+  "config": {
+    "I_th_EI": 1.6652801609959704,
+    "tau_z": 10000.0,
+    "use_m": false,
+    "use_z": true
+  },
+  "capture_T_ms": 5106.8,
+  "early_stop": false,
+  "n_steps_run": 51068,
+  "snapshot_labels": [
+    "baseline_1000ms",
+    "mid_fraction",
+    "pre_onset_500ms",
+    "pre_onset_100ms",
+    "pre_onset_1000ms",
+    "pre_onset_750ms",
+    "pre_onset_300ms",
+    "pre_onset_200ms",
+    "pre_onset_50ms",
+    "pre_onset_20ms",
+    "onset"
+  ],
+  "snapshot_steps": {
+    "baseline_1000ms": 10000,
+    "mid_fraction": 23534,
+    "pre_onset_500ms": 42068,
+    "pre_onset_100ms": 46068,
+    "pre_onset_1000ms": 37068,
+    "pre_onset_750ms": 39568,
+    "pre_onset_300ms": 44068,
+    "pre_onset_200ms": 45068,
+    "pre_onset_50ms": 46568,
+    "pre_onset_20ms": 46868,
+    "onset": 47068
+  },
+  "requested_time_ms": {
+    "baseline_1000ms": 1000.0,
+    "mid_fraction": 2353.4,
+    "pre_onset_500ms": 4206.8,
+    "pre_onset_100ms": 4606.8,
+    "pre_onset_1000ms": 3706.8,
+    "pre_onset_750ms": 3956.8,
+    "pre_onset_300ms": 4406.8,
+    "pre_onset_200ms": 4506.8,
+    "pre_onset_50ms": 4656.8,
+    "pre_onset_20ms": 4686.8,
+    "onset": 4706.8
+  },
+  "actual_time_ms": {
+    "pre_onset_200ms": 4506.8,
+    "pre_onset_1000ms": 3706.8,
+    "pre_onset_20ms": 4686.8,
+    "mid_fraction": 2353.4,
+    "pre_onset_50ms": 4656.8,
+    "pre_onset_300ms": 4406.8,
+    "pre_onset_500ms": 4206.8,
+    "pre_onset_750ms": 3956.8,
+    "baseline_1000ms": 1000.0,
+    "pre_onset_100ms": 4606.8,
+    "onset": 4706.8
+  },
+  "missing_snapshots": {},
+  "snapshot_update_convention": "captured inside MZSlowVars.step() AFTER the z/m Euler update and the streaming trace record; step counter is 0-based, one increment per simulate_kick iteration t; time_ms = step*dt; consistency: snapshot.z_E.mean() == mz.trace_z_mean[step].",
+  "gate": {
+    "onset_match": true,
+    "all_states_captured": true,
+    "i_cells_pinned": true,
+    "z_in_bounds": true,
+    "m_zero_for_zonly": true,
+    "pass_": true
+  },
+  "source_artifact_paths": [
+    "results/topic4_sef_hfo/mz_slowvars/per_seed/multiseed_summary.json",
+    "results/topic4_sef_hfo/mz_slowvars/p3_candidates.json",
+    "results/topic4_sef_hfo/mz_slowvars/calibration.json"
+  ],
+  "guarded_engine_sha256": {
+    "kick_probe.py": "5faaedab37ab",
+    "params.py": "c2036d1e1548",
+    "model.py": "e77aad35cbfa",
+    "connectivity.py": "5ad75ec5066b",
+    "connectivity_rot.py": "2aa442624fef",
+    "lfp.py": "7f079081de4e"
+  },
+  "git_sha": "6dc71c0",
+  "argv": [
+    "scripts/run_topic4_state_conditioned_susceptibility.py",
+    "capture-snapshots",
+    "--confirm-run",
+    "--workers",
+    "2"
+  ],
+  "wall_s": 582.4
+}

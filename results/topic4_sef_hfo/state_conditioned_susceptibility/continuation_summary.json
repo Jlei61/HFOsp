@@ -1,0 +1,89 @@
+{
+  "schema_version": "sccs-1.0",
+  "candidate": "zA_q50_tz10000",
+  "seeds": [
+    1,
+    3,
+    4
+  ],
+  "alphas": [
+    0.0,
+    0.025,
+    0.05,
+    0.07500000000000001,
+    0.1,
+    0.125,
+    0.15000000000000002,
+    0.17500000000000002,
+    0.2,
+    0.225,
+    0.25,
+    0.275,
+    0.30000000000000004,
+    0.325,
+    0.35000000000000003,
+    0.375,
+    0.4,
+    0.42500000000000004,
+    0.45,
+    0.47500000000000003,
+    0.5,
+    0.525,
+    0.55,
+    0.5750000000000001,
+    0.6000000000000001,
+    0.625,
+    0.65,
+    0.675,
+    0.7000000000000001,
+    0.7250000000000001,
+    0.75,
+    0.775,
+    0.8,
+    0.8250000000000001,
+    0.8500000000000001,
+    0.875,
+    0.9,
+    0.925,
+    0.9500000000000001,
+    0.9750000000000001,
+    1.0
+  ],
+  "note": "continuation z_alpha=(1-a)z_pre100 + a z_onset; warm-start branch tracking; leading rate-branch eigenvalue (Re/Im); classification per seed.",
+  "per_seed": {
+    "1": {
+      "classification": "fixed_point_loss_low_rate",
+      "leading_mode": "complex",
+      "freq_hz_near_crit": 23.883355111817362,
+      "re_at_last_resolved": -0.008087714234483108,
+      "alpha_last_resolved": 0.8250000000000001,
+      "note": "resting fixed point lost (steady solver stops converging) at LOW rate (rE_max << saturation, NOT a jump to a high-rate branch) while the leading mode is a weakly-damped complex_24Hz pair (Re~-0.008). Consistent with an oscillatory (Hopf-type) transition to a limit cycle, but NOT a confirmed supercritical Hopf: leading Re does not smoothly cross 0 before the fixed point vanishes (could be a fold / subcritical). Disambiguate fold-vs-Hopf with finer alpha near the loss + the post-onset limit-cycle analysis (time-dependent tangent operator / Floquet)."
+    },
+    "3": {
+      "classification": "fixed_point_loss_low_rate",
+      "leading_mode": "complex",
+      "freq_hz_near_crit": 23.805681466316095,
+      "re_at_last_resolved": -0.008358895767058411,
+      "alpha_last_resolved": 0.17500000000000002,
+      "note": "resting fixed point lost (steady solver stops converging) at LOW rate (rE_max << saturation, NOT a jump to a high-rate branch) while the leading mode is a weakly-damped complex_24Hz pair (Re~-0.008). Consistent with an oscillatory (Hopf-type) transition to a limit cycle, but NOT a confirmed supercritical Hopf: leading Re does not smoothly cross 0 before the fixed point vanishes (could be a fold / subcritical). Disambiguate fold-vs-Hopf with finer alpha near the loss + the post-onset limit-cycle analysis (time-dependent tangent operator / Floquet)."
+    },
+    "4": {
+      "classification": "fixed_point_loss_low_rate",
+      "leading_mode": "complex",
+      "freq_hz_near_crit": 23.82267296487034,
+      "re_at_last_resolved": -0.0073580165670799925,
+      "alpha_last_resolved": 0.45,
+      "note": "resting fixed point lost (steady solver stops converging) at LOW rate (rE_max << saturation, NOT a jump to a high-rate branch) while the leading mode is a weakly-damped complex_24Hz pair (Re~-0.007). Consistent with an oscillatory (Hopf-type) transition to a limit cycle, but NOT a confirmed supercritical Hopf: leading Re does not smoothly cross 0 before the fixed point vanishes (could be a fold / subcritical). Disambiguate fold-vs-Hopf with finer alpha near the loss + the post-onset limit-cycle analysis (time-dependent tangent operator / Floquet)."
+    }
+  },
+  "git_sha": "d70345a",
+  "argv": [
+    "scripts/run_topic4_state_conditioned_susceptibility.py",
+    "run-continuation",
+    "--candidate",
+    "zA_q50_tz10000",
+    "--seeds",
+    "1,3,4",
+    "--confirm-run"
+  ]
+}

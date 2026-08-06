@@ -1,0 +1,81 @@
+# M4-MZ per-neuron slow-vars run config (design 2026-07-18).
+# Documentation / provenance record of the PINNED parameters. The authoritative source is the
+# runner constants in scripts/run_topic4_mz_slowvars.py; this file mirrors them 1:1 for review and
+# is NOT auto-loaded (matches the M4 runner convention of module-level constants).
+#
+# Contract: docs/superpowers/specs/2026-07-18-topic4-mz-per-neuron-slowvars-design.md
+# Branch: codex/topic4-mz-slowvars
+
+substrate:                       # reuse scripts/run_m4_phaseplane.py::build_substrate (baked-in)
+  subject: epilepsiae_1146
+  montage: narrow
+  placement: template_source     # earliest-k electrodes per template core (k_early=3)
+  lesion: twoend_equal           # two low-V_th cores at source + sink centroids
+  L_mm: 20.0
+  density_per_mm2: 100.0         # -> N ~ 40000, NE ~ 32000
+  AR: 2.0
+  core_mean_mV: 17.5
+  core_std_mV: 1.0
+  core_radius_mm: 1.5
+  base_Vth_mV: 18.0
+  drive_nu_ext_ratio: 0.6
+  g_inhib: 3.6
+  dt_ms: 0.1
+
+protocol:
+  mode: spontaneous              # KICK_BOOST=0, t_kick=1e9 (no external kick)
+  V_th_per_neuron: substrate_vth # ride the heterogeneous double core (threshold passthrough)
+  same_seed_across_arms: true    # net seed == noise seed == build_substrate seed, reset per arm
+  early_stop_runaway: true       # discovery/arms (perf); FALSE for slow-off baseline (full trace)
+
+# ---- other slow variables are ALL OFF in this branch (design §1) ----
+disabled_mechanisms: [q_I, g_K, S_G_pool, a_shunt, STD]
+
+slow_vars:                       # only z_i and m_i, E cells ONLY
+  z_i:
+    equation: "tau_z dz/dt = z_inf - z ; z_inf = H(I_th_EI - I^{E,I})"
+    effect: "effective E inhibition = z_i * I^{E,I}"
+    init: 1.0
+    clip: [0.0, 1.0]
+  m_i:
+    equation: "dm/dt = -m/tau_adp + sum_k delta(t - t_i^k) ; +1 per E spike"
+    effect: "adaptation CURRENT = eta_m * m_i (subtracted from I_net; NOT a threshold shift)"
+    init: 0.0
+    clip_min: 0.0
+
+phases:
+  calibrate:   {T_ms: 8000,  seeds: [1, 3, 4]}   # slow-off baselines; 1,3 clean denominator, 4 stress
+  discovery:   {T_ms: 12000, seed: 1, workers: auto}
+  multiseed:   {T_ms: 15000, seeds: [1, 3, 4]}   # STOP here; no 40s acceptance this round
+
+baseline_anchor:
+  min_returning_events_per_seed: 3   # else insufficient (per seed; never borrow another seed's threshold)
+  event_detection: "cmrun active_fraction(BIN_MS=1.0) -> floor=P95(af[5,50]ms), bar=floor+0.5*(af.max-floor), detect_events"
+
+calibration_grids:               # design §6/§7 (values RESOLVED at run time from the slow-off baseline)
+  I_th_EI_quantiles: [0.50, 0.75, 0.90]   # q50 strong / q75 mid / q90 weak z-depletion
+  tau_z_ms: [2500, 5000, 10000]
+  tau_adp_ms: [500, 2000, 5000]
+  eta_m_fracs: [0.05, 0.10, 0.20]         # low/mid/high; eta_m = frac * I_EE_scale / peak_m(tau_adp)
+  I_EE_scale: "P90 of event-step E-cell I_E (excitatory reference)"
+  arm_c_selection:                        # PRE-REGISTERED before running arm C
+    z_targets: [0.8, 0.5, 0.2]            # realized z_min weak/mid/strong
+    m_targets: [0.05, 0.10, 0.20]         # realized adaptation-current fraction weak/mid/strong
+
+arms:
+  A_z_only: "I_th_EI{q50,q75,q90} x tau_z{2.5,5,10}s (m off) = 9 cells"
+  B_m_only: "tau_adp{0.5,2,5}s x eta_m{low,mid,high} (z off) = 9 cells"
+  C_z_plus_m: "3x3 of arm-C-selected z-configs x m-configs = 9 cells"
+
+phenotype:                       # branch-scoped; axis-preserving expanded recruitment ACCEPTED (design §8)
+  labels: [interictal_like, expanded_bounded, expanded_returned, fragment, suppress, runaway, insufficient]
+  axis_metrics: descriptive_only # NOT a gate this branch (override of the topic4 'must break axis' framing)
+  runaway_criterion: "120 Hz sustained >=80% of a 100 ms window on 20 ms-smoothed per-neuron Hz rate (reuse M4._first_sustained)"
+  expanded: "peak event duration AND participation AND peak-rate all above slow-off baseline P90, and not runaway"
+  returned: "post-event silence window mean rate back in baseline band (baseline + 1.5*sigma), no rebound runaway"
+
+output_dir: results/topic4_sef_hfo/mz_slowvars
+
+claim_boundary:
+  allowed: "z-only/m-only/z+m phenotype distributions; whether z+m yields bounded/recovered recruitment z-only lacks; (descriptive) axial preservation"
+  forbidden: "calling any result a seizure; relabeling runaway-truncated fragments as expanded; picking params from field concordance; claiming completed-seizure reproduction"

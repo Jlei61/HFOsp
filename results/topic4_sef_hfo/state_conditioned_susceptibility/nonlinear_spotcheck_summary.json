@@ -1,0 +1,27 @@
+{
+  "schema_version": "sccs-1.0",
+  "candidate": "zA_q50_tz10000",
+  "seed": 1,
+  "per_state": {
+    "baseline_1000ms": {
+      "op_status": "resolved",
+      "a1": 1.0,
+      "a2": 4.0,
+      "response_scale_ratio": 1.0,
+      "linear_within_10pct": true
+    },
+    "onset": {
+      "op_status": "unresolved",
+      "note": "not resolved; linear-regime check not run"
+    }
+  },
+  "note": "J is a LINEAR operator so exp(JT) scales exactly; this checks embedding/readout linearity.",
+  "git_sha": "66a4d93",
+  "argv": [
+    "scripts/run_topic4_state_conditioned_susceptibility.py",
+    "run-nonlinear-spotchecks",
+    "--candidate",
+    "zA_q50_tz10000",
+    "--confirm-run"
+  ]
+}

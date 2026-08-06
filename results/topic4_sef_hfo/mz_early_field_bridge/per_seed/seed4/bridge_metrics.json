@@ -1,0 +1,1185 @@
+{
+  "seed": 4,
+  "provenance_fingerprint": "1a4a72653040c34d",
+  "provenance": {
+    "git_sha": "3cda82e",
+    "engine_shas": {
+      "kick_probe.py": "5faaedab37ab",
+      "params.py": "c2036d1e1548",
+      "model.py": "e77aad35cbfa",
+      "connectivity.py": "5ad75ec5066b",
+      "connectivity_rot.py": "2aa442624fef",
+      "lfp.py": "7f079081de4e"
+    },
+    "subject": "epilepsiae_1146",
+    "montage": "narrow",
+    "dt": 0.1,
+    "seed": 4,
+    "candidate": {
+      "label": "zA_q75_tz5000",
+      "cfg": {
+        "use_z": true,
+        "use_m": false,
+        "I_th_EI": 95.19851312666987,
+        "tau_z": 5000.0
+      }
+    },
+    "T_ms": 15000.0,
+    "argv": [
+      "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-slowvars/scripts/run_topic4_mz_early_field_bridge.py",
+      "--confirm-run",
+      "--seeds",
+      "4",
+      "--resume"
+    ]
+  },
+  "onset": {
+    "status": "eligible",
+    "t120_ms": 9757.9,
+    "theta_recruit": 35.103128125000055,
+    "t_recruit_ms": 9559.3,
+    "onset_diff_ms": 198.6
+  },
+  "t120_ms": 9757.9,
+  "template_eligibility": {
+    "A_to_B": {
+      "contact": true,
+      "source": true
+    },
+    "B_to_A": {
+      "contact": true,
+      "source": true
+    }
+  },
+  "maxab_eligible": true,
+  "n_returning_events": 39,
+  "within_trajectory_audit": {
+    "n_pre_runaway_returning": 30,
+    "status": "eligible"
+  },
+  "by_window": {
+    "early_0_50_ms": {
+      "window_ms": [
+        0.0,
+        50.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 6408.1439711225175,
+        "dynamic_range": 5.151743292678748,
+        "recruited": 6,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 2597.8690106701583,
+        "dynamic_range": 4830069884954465.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.41500314248042974,
+            "rho_b": 0.5850967428606577,
+            "rho_maxab": 0.5850967428606577,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5850967428606577,
+            "p_one_sided": 0.017361111111111112,
+            "null_median": 0.012138613638480027,
+            "null_p95": 0.553247823490938,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 257,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.41500314248042974,
+            "earliness_energy_spearman": 0.41500314248042974,
+            "field_cosine": 0.289040433656669,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.6228737572631157
+          },
+          "assoc_B_to_A": {
+            "n": 345,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5850967428606577,
+            "earliness_energy_spearman": 0.5850967428606577,
+            "field_cosine": 0.47762548416962874,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 2.5017074200915523
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.4479682097988568,
+            "rho_b": 0.5081621809633659,
+            "rho_maxab": 0.5081621809633659,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5081621809633659,
+            "p_one_sided": 0.05555555555555555,
+            "null_median": 0.02768891999003075,
+            "null_p95": 0.512560085363453,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 225,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4479682097988568,
+            "earliness_energy_spearman": 0.4479682097988568,
+            "field_cosine": 0.32768206194655874,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.2754026866579784
+          },
+          "assoc_B_to_A": {
+            "n": 313,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5081621809633659,
+            "earliness_energy_spearman": 0.5081621809633659,
+            "field_cosine": 0.4210404714328303,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 11.440087844344408
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.8124038404635959,
+            "rho_b": 0.9240929684291712,
+            "rho_maxab": 0.9240929684291712,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9240929684291712,
+            "p_one_sided": 0.000999900009999,
+            "null_median": 0.5192522394030581,
+            "null_p95": 0.7612765882773649,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9240929684291712,
+            "p_one_sided": 0.00039996000399960006,
+            "null_median": 0.20462058586645934,
+            "null_p95": 0.5908391567007971,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.8124038404635959,
+            "earliness_energy_spearman": -0.8124038404635959,
+            "field_cosine": -0.8066402231786365,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -1.1905109689710696
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9240929684291712,
+            "earliness_energy_spearman": 0.9240929684291712,
+            "field_cosine": 0.886212057246077,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.0713063097081308
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.8124038404635959,
+            "rho_b": 0.9240929684291712,
+            "rho_maxab": 0.9240929684291712,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9240929684291712,
+            "p_one_sided": 0.000999900009999,
+            "null_median": 0.5192522394030581,
+            "null_p95": 0.7612765882773649,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9240929684291712,
+            "p_one_sided": 0.00039996000399960006,
+            "null_median": 0.20462058586645934,
+            "null_p95": 0.5908391567007971,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.8124038404635959,
+            "earliness_energy_spearman": -0.8124038404635959,
+            "field_cosine": -0.8066402231786365,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -1.1905109689710696
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9240929684291712,
+            "earliness_energy_spearman": 0.9240929684291712,
+            "field_cosine": 0.886212057246077,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.0713063097081308
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      }
+    },
+    "early_0_100_ms": {
+      "window_ms": [
+        0.0,
+        100.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 4548.665781149468,
+        "dynamic_range": 6.223727939393272,
+        "recruited": 5,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 2789.669991238581,
+        "dynamic_range": 6581568919043268.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.39688718772029385,
+            "rho_b": 0.6087542815103034,
+            "rho_maxab": 0.6087542815103034,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.6087542815103034,
+            "p_one_sided": 0.03298611111111111,
+            "null_median": 0.00489687221975838,
+            "null_p95": 0.5827963445224132,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 257,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.39688718772029385,
+            "earliness_energy_spearman": 0.39688718772029385,
+            "field_cosine": 0.3200067876816211,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.47801966509022414
+          },
+          "assoc_B_to_A": {
+            "n": 345,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.6087542815103034,
+            "earliness_energy_spearman": 0.6087542815103034,
+            "field_cosine": 0.519482065517432,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.6146483015254622
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.4428237840352653,
+            "rho_b": 0.5329450374370276,
+            "rho_maxab": 0.5329450374370276,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5329450374370276,
+            "p_one_sided": 0.0625,
+            "null_median": 0.015301395412610311,
+            "null_p95": 0.5543033915807869,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 225,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.4428237840352653,
+            "earliness_energy_spearman": 0.4428237840352653,
+            "field_cosine": 0.3555508827733828,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.749705324552014
+          },
+          "assoc_B_to_A": {
+            "n": 313,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5329450374370276,
+            "earliness_energy_spearman": 0.5329450374370276,
+            "field_cosine": 0.46926100303557794,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 2.540720048977054
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.8185584150125625,
+            "rho_b": 0.9108916403087545,
+            "rho_maxab": 0.9108916403087545,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9108916403087545,
+            "p_one_sided": 0.0014998500149985001,
+            "null_median": 0.5192522394030581,
+            "null_p95": 0.7590763669239621,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9108916403087545,
+            "p_one_sided": 0.00039996000399960006,
+            "null_median": 0.20462058586645934,
+            "null_p95": 0.5896593227119474,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.8185584150125625,
+            "earliness_energy_spearman": -0.8185584150125625,
+            "field_cosine": -0.739583755660541,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -1.0310491622664761
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9108916403087545,
+            "earliness_energy_spearman": 0.9108916403087545,
+            "field_cosine": 0.858980979374137,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.372323023134051
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.8185584150125625,
+            "rho_b": 0.9108916403087545,
+            "rho_maxab": 0.9108916403087545,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9108916403087545,
+            "p_one_sided": 0.0014998500149985001,
+            "null_median": 0.5192522394030581,
+            "null_p95": 0.7590763669239621,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9108916403087545,
+            "p_one_sided": 0.00039996000399960006,
+            "null_median": 0.20462058586645934,
+            "null_p95": 0.5896593227119474,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.8185584150125625,
+            "earliness_energy_spearman": -0.8185584150125625,
+            "field_cosine": -0.739583755660541,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -1.0310491622664761
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9108916403087545,
+            "earliness_energy_spearman": 0.9108916403087545,
+            "field_cosine": 0.858980979374137,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.372323023134051
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      }
+    },
+    "early_0_25_ms": {
+      "window_ms": [
+        0.0,
+        25.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 6031.033052871128,
+        "dynamic_range": 3.356420773115856,
+        "recruited": 8,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 2653.994333528708,
+        "dynamic_range": 5650405234887533.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.20658465711071852,
+            "rho_b": 0.6334440745648622,
+            "rho_maxab": 0.6334440745648622,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.6334440745648622,
+            "p_one_sided": 0.006944444444444444,
+            "null_median": 0.006472032181884816,
+            "null_p95": 0.52115236424802,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 257,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.20658465711071852,
+            "earliness_energy_spearman": 0.20658465711071852,
+            "field_cosine": 0.22393829532168952,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.40414864329118316
+          },
+          "assoc_B_to_A": {
+            "n": 345,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.6334440745648622,
+            "earliness_energy_spearman": 0.6334440745648622,
+            "field_cosine": 0.4634685590557456,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 89.59506238734464
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.3054405090708564,
+            "rho_b": 0.5734543219958123,
+            "rho_maxab": 0.5734543219958123,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5734543219958123,
+            "p_one_sided": 0.015625,
+            "null_median": 0.023872415861427045,
+            "null_p95": 0.47732647335652156,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 225,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.3054405090708564,
+            "earliness_energy_spearman": 0.3054405090708564,
+            "field_cosine": 0.3077498543307628,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.295056446690963
+          },
+          "assoc_B_to_A": {
+            "n": 313,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5734543219958123,
+            "earliness_energy_spearman": 0.5734543219958123,
+            "field_cosine": 0.4226978915074314,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1514.8487917521916
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.9047224586980955,
+            "rho_b": 0.9372942965495881,
+            "rho_maxab": 0.9372942965495881,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9372942965495881,
+            "p_one_sided": 0.00029997000299970003,
+            "null_median": 0.5038506899292386,
+            "null_p95": 0.7524757028637538,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9372942965495881,
+            "p_one_sided": 0.00029997000299970003,
+            "null_median": 0.20682080721986212,
+            "null_p95": 0.5846845821518305,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.9047224586980955,
+            "earliness_energy_spearman": -0.9047224586980955,
+            "field_cosine": -0.8582440709425299,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -1.5475933830031812
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9372942965495881,
+            "earliness_energy_spearman": 0.9372942965495881,
+            "field_cosine": 0.9208457006835431,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 1.2582554559743926
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.9047224586980955,
+            "rho_b": 0.9372942965495881,
+            "rho_maxab": 0.9372942965495881,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.9372942965495881,
+            "p_one_sided": 0.00029997000299970003,
+            "null_median": 0.5038506899292386,
+            "null_p95": 0.7524757028637538,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.9372942965495881,
+            "p_one_sided": 0.00029997000299970003,
+            "null_median": 0.20682080721986212,
+            "null_p95": 0.5846845821518305,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.9047224586980955,
+            "earliness_energy_spearman": -0.9047224586980955,
+            "field_cosine": -0.8582440709425299,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -1.5475933830031812
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.9372942965495881,
+            "earliness_energy_spearman": 0.9372942965495881,
+            "field_cosine": 0.9208457006835431,
+            "top_k_used": 3,
+            "top_k_overlap": 0.6666666666666666,
+            "quartile_contrast": 1.2582554559743926
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      }
+    },
+    "early_25_50_ms": {
+      "window_ms": [
+        25.0,
+        50.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 7402.855609204469,
+        "dynamic_range": 10.643775871840333,
+        "recruited": 5,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 2746.655192602675,
+        "dynamic_range": 5773168631901263.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.3775143164980912,
+            "rho_b": 0.5988994665051064,
+            "rho_maxab": 0.5988994665051064,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5988994665051064,
+            "p_one_sided": 0.019097222222222224,
+            "null_median": -0.01731681170880745,
+            "null_p95": 0.5608636988073087,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 257,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.3775143164980912,
+            "earliness_energy_spearman": 0.3775143164980912,
+            "field_cosine": 0.2967577844489254,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.6036122682306038
+          },
+          "assoc_B_to_A": {
+            "n": 345,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5988994665051064,
+            "earliness_energy_spearman": 0.5988994665051064,
+            "field_cosine": 0.4552350247715177,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 2.8289885491897864
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.3938056156893825,
+            "rho_b": 0.5347783913716692,
+            "rho_maxab": 0.5347783913716692,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5347783913716692,
+            "p_one_sided": 0.043402777777777776,
+            "null_median": -0.0014624394898997476,
+            "null_p95": 0.5267247750503552,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 225,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.3938056156893825,
+            "earliness_energy_spearman": 0.3938056156893825,
+            "field_cosine": 0.28651054200204396,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.559473834923668
+          },
+          "assoc_B_to_A": {
+            "n": 313,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5347783913716692,
+            "earliness_energy_spearman": 0.5347783913716692,
+            "field_cosine": 0.39400926269351416,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 237.36434910476163
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.7877855422677295,
+            "rho_b": 0.923761981551646,
+            "rho_maxab": 0.923761981551646,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.923761981551646,
+            "p_one_sided": 0.000999900009999,
+            "null_median": 0.521549826904757,
+            "null_p95": 0.7646450852078218,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.923761981551646,
+            "p_one_sided": 0.00039996000399960006,
+            "null_median": 0.20579451756036238,
+            "null_p95": 0.5908923580510855,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.7877855422677295,
+            "earliness_energy_spearman": -0.7877855422677295,
+            "field_cosine": -0.6787056977418874,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.9324927134463125
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.923761981551646,
+            "earliness_energy_spearman": 0.923761981551646,
+            "field_cosine": 0.782633358544557,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.537331855529573
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.7877855422677295,
+            "rho_b": 0.923761981551646,
+            "rho_maxab": 0.923761981551646,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.923761981551646,
+            "p_one_sided": 0.000999900009999,
+            "null_median": 0.521549826904757,
+            "null_p95": 0.7646450852078218,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.923761981551646,
+            "p_one_sided": 0.00039996000399960006,
+            "null_median": 0.20579451756036238,
+            "null_p95": 0.5908923580510855,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.7877855422677295,
+            "earliness_energy_spearman": -0.7877855422677295,
+            "field_cosine": -0.6787056977418874,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.9324927134463125
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.923761981551646,
+            "earliness_energy_spearman": 0.923761981551646,
+            "field_cosine": 0.782633358544557,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.537331855529573
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      }
+    },
+    "early_50_100_ms": {
+      "window_ms": [
+        50.0,
+        100.0
+      ],
+      "contact_energy_status": "eligible",
+      "source_energy_status": "eligible",
+      "contact_field_diag": {
+        "support": 15,
+        "std": 3104.5442646889214,
+        "dynamic_range": 22.778937920091753,
+        "recruited": 4,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source_field_diag": {
+        "support": 576,
+        "std": 3090.56410503849,
+        "dynamic_range": 8763435786739558.0,
+        "recruited": null,
+        "degenerate": false,
+        "status": "eligible"
+      },
+      "source": {
+        "all_support": {
+          "maxab": {
+            "rho_a": 0.3917260566323573,
+            "rho_b": 0.6478364344938713,
+            "rho_maxab": 0.6478364344938713,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.6478364344938713,
+            "p_one_sided": 0.013888888888888888,
+            "null_median": -0.01675987146983753,
+            "null_p95": 0.611345685718168,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 257,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.3917260566323573,
+            "earliness_energy_spearman": 0.3917260566323573,
+            "field_cosine": 0.3325591740883748,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.3980919674989486
+          },
+          "assoc_B_to_A": {
+            "n": 345,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.6478364344938713,
+            "earliness_energy_spearman": 0.6478364344938713,
+            "field_cosine": 0.5377642161684364,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 1.1860592720392458
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": 0.44295107553993474,
+            "rho_b": 0.5826764266925643,
+            "rho_maxab": 0.5826764266925643,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "toroidal_null": {
+            "status": "eligible",
+            "observed": 0.5826764266925643,
+            "p_one_sided": 0.052083333333333336,
+            "null_median": -0.0062676728877305715,
+            "null_p95": 0.5826850991376618,
+            "n_shifts": 575
+          },
+          "assoc_A_to_B": {
+            "n": 225,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.44295107553993474,
+            "earliness_energy_spearman": 0.44295107553993474,
+            "field_cosine": 0.3609498393544317,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 0.5322209371626315
+          },
+          "assoc_B_to_A": {
+            "n": 313,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.5826764266925643,
+            "earliness_energy_spearman": 0.5826764266925643,
+            "field_cosine": 0.4909960531225493,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": 2.861847984968199
+          },
+          "status": "eligible",
+          "n_kept": 544
+        }
+      },
+      "contact": {
+        "all_support": {
+          "maxab": {
+            "rho_a": -0.609302880347697,
+            "rho_b": 0.8382843356464625,
+            "rho_maxab": 0.8382843356464625,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.8382843356464625,
+            "p_one_sided": 0.010698930106989302,
+            "null_median": 0.5192522394030581,
+            "null_p95": 0.7590763669239621,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.8382843356464625,
+            "p_one_sided": 0.0021997800219978004,
+            "null_median": 0.20682080721986212,
+            "null_p95": 0.5846845821518305,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.609302880347697,
+            "earliness_energy_spearman": -0.609302880347697,
+            "field_cosine": -0.4658761536422535,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.48953273302181727
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.8382843356464625,
+            "earliness_energy_spearman": 0.8382843356464625,
+            "field_cosine": 0.6828026817465194,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.3563234858905504
+          }
+        },
+        "core_excluded": {
+          "maxab": {
+            "rho_a": -0.609302880347697,
+            "rho_b": 0.8382843356464625,
+            "rho_maxab": 0.8382843356464625,
+            "maxab_eligible": true,
+            "single_direction": null
+          },
+          "within_shaft_null": {
+            "status": "eligible",
+            "observed": 0.8382843356464625,
+            "p_one_sided": 0.010698930106989302,
+            "null_median": 0.5192522394030581,
+            "null_p95": 0.7590763669239621,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 958003200
+          },
+          "unrestricted_null": {
+            "status": "eligible",
+            "observed": 0.8382843356464625,
+            "p_one_sided": 0.0021997800219978004,
+            "null_median": 0.20682080721986212,
+            "null_p95": 0.5846845821518305,
+            "method": "monte_carlo",
+            "n_permutations": 10000,
+            "n_unique_possible": 1307674368000
+          },
+          "assoc_A_to_B": {
+            "n": 10,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": 0.609302880347697,
+            "earliness_energy_spearman": -0.609302880347697,
+            "field_cosine": -0.4658761536422535,
+            "top_k_used": 3,
+            "top_k_overlap": 0.0,
+            "quartile_contrast": -0.48953273302181727
+          },
+          "assoc_B_to_A": {
+            "n": 14,
+            "min_points": 3,
+            "top_k_requested": 3,
+            "status": "eligible",
+            "arrival_energy_spearman": -0.8382843356464625,
+            "earliness_energy_spearman": 0.8382843356464625,
+            "field_cosine": 0.6828026817465194,
+            "top_k_used": 3,
+            "top_k_overlap": 0.3333333333333333,
+            "quartile_contrast": 1.3563234858905504
+          },
+          "status": "eligible",
+          "n_kept": 15
+        }
+      },
+      "local_participation": {
+        "status": "not_recomputed_readout_patch",
+        "reason": "native raster not persisted; re-run to recompute"
+      }
+    }
+  },
+  "wall_s": 7384.6,
+  "status": "complete",
+  "readout_patched": "contact energy float-window fix (\u00a78.2/\u00a78.3); source preserved; local participation not recomputed (raster not persisted)"
+}

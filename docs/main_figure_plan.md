@@ -242,6 +242,20 @@ Fig4 已经承担“患者特异性 SNN 能否复现稳定正反间期 readout�
 
 **旧 Fig5-A 的新位置**：`fig5_core_model_s3_brakeoff` 保留为 Fig4/模型基线的通用双向传播素材和兼容输出，不再是当前 Figure 5 的首选主论点。它仍只说明模型可产生自发双向传播并被虚拟 SEEG 读出方向。
 
+### Figure 5 候选 Supplementary 1/2：MZ 空间易感性与本征模态
+
+- 输出目录：`results/paper-ready-figure/fig5_mz_spatial_dynamics_supplementary/figures/`。
+- Supplementary 1：`figure5_supplementary_1_spatial_perturbation_response.png/pdf`。比较 baseline 与
+  operational-runoff 前 100 ms 的 frozen-q 率场状态对同一个 source-core Gaussian kick 的空间响应。
+- Supplementary 2：`figure5_supplementary_2_eigenmode_dynamics.png/pdf`。沿 MZ z-only 轨迹的真实时间戳，展示
+  frozen-q 率场领先 Jacobian mode 的稳定性、衰减时间与空间重组。
+- 复现入口：`scripts/paper_figures/plot_figure5_supplementary_spatial_dynamics.py`（只读已验收 sidecar，不重跑 SNN）。
+- 完整视觉与 scientific claim 合同：`docs/figure5_supplementary_spatial_dynamics_spec.md`。
+
+当前安全口径是：同一固定骨架在 runoff 前出现更持久、更广的固定刺激响应，领先模式由近全局重组为沿轴且阻尼减弱。
+这两张图不把 pre-onset 写成 ictal state，不把 frozen-q 率场模式写成 full-SNN eigenmode，也不声称已经解释完整
+seizure cycle 或 recovery。
+
 ### M3A-v2 Step4 诊断图：低-q / gK closed-loop 负结果目视审阅
 
 **目的**：把 M3A-v2 Step4 的代表性动力学现象画成同一套 SNN 四列图，供目视检查：baseline 轴向事件、shallow low-q 无明显扩张、shallow low-q + gK suppress、deep low-q runaway、deep low-q + gK 仍不 rescue。

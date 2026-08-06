@@ -142,6 +142,7 @@
   - readout 事件 shading：forward 用暖色，reverse 用浅蓝；同一图只保留一个共享 legend。
   - 电极颜色固定：沿轴 / A shaft 为橙色，横轴 / B shaft 为青色。
 - **输出纪律**：正式 SNN 仿真图脚本放 `scripts/paper_figures/`，输出放 `results/paper-ready-figure/<figure_name>/figures/`，同时可写一份兼容旧 Topic 4 结果目录；`figures/README.md` 必须说明四列各自回答什么。
+- **Figure 5 空间动力学补充（2026-07-19 锁）**：`fig5_mz_spatial_dynamics_supplementary` 不套用四列 SNN raster 语法，而使用两张独立 Nature panel canvas：Supplementary 1 为 fixed-kick 空间响应，Supplementary 2 为 actual-time frozen-q Jacobian mode。baseline 固定灰、pre-onset/axis 固定赭黄，禁止复用模板 A/B 的红蓝语义色；无 super-title、无 grid、无画布内解释段落。完整 panel、metric、caption 和 claim boundary 以 [`docs/figure5_supplementary_spatial_dynamics_spec.md`](figure5_supplementary_spatial_dynamics_spec.md) 为唯一合同。
 - **科学边界**：这类图只能写成“模型底物 + 两种特异性组合 + 虚拟 SEEG readout”的机制/读出示意。不能因为图上有正反事件，就直接声称真实病人机制被证明；pipeline/KMeans 验证若需要，另作补图或下游结果图。
 - **建模图 KMeans 核验图（modeling-KMeans companion）**：用于回答“模型 readout 里的多事件是否自然分成两类，以及这两类是否对应 tempA/tempB 或真实模板”。它是 SNN 四列 readout 图的**配套核验图**，不是新的机制图，也不是 cohort 统计图。
   - **输入合同**：只消费同一模型 readout 的 clean directional events，不重跑仿真；必须在 metadata/README 写清楚 event filter、`k_dir`、seed/tag、n_events、每类 event 数。若 readout 没有两个方向或每方向事件数不足，模型×真实模板矩阵必须显示 N/A，不能用两个 KMeans 簇硬冒充 forward/reverse。

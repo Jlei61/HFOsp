@@ -1,0 +1,68 @@
+{
+  "schema_version": "sccs-1.0",
+  "candidate": "zA_q50_tz10000",
+  "seeds": [
+    1,
+    3,
+    4
+  ],
+  "states": [
+    "baseline_1000ms",
+    "pre_onset_100ms"
+  ],
+  "kick_sigma": 0.6,
+  "kick_center": "source_core",
+  "per_state": {
+    "baseline_1000ms": {
+      "fixed_kick_gain_peak": 0.9999999999999999,
+      "fixed_kick_gain_peak_ms": 0.0,
+      "instantaneous_sink_source_ratio_at_30ms": 2.553847192750867,
+      "cumulative_sink_source_ratio_at_30ms": 0.1020339088695197,
+      "cumulative_sink_source_ratio_at_100ms": 0.11876631126088831,
+      "arrival_threshold": 0.03351360182141082,
+      "arrival_fit": {
+        "eligible": false,
+        "n_points": 3,
+        "slope_ms_per_unit": null,
+        "velocity_unit_per_ms": null,
+        "intercept_ms": null,
+        "r2": null
+      },
+      "operator_envelope": {
+        "sigma1_cross1_ms": null,
+        "sigma1_peak": 1.0,
+        "T_peak_ms": 0.0
+      }
+    },
+    "pre_onset_100ms": {
+      "fixed_kick_gain_peak": 0.9999999999999999,
+      "fixed_kick_gain_peak_ms": 0.0,
+      "instantaneous_sink_source_ratio_at_30ms": 1.6157275065270107,
+      "cumulative_sink_source_ratio_at_30ms": 0.548224672774254,
+      "cumulative_sink_source_ratio_at_100ms": 0.5755532010440263,
+      "arrival_threshold": 0.03351360182141082,
+      "arrival_fit": {
+        "eligible": true,
+        "n_points": 7,
+        "slope_ms_per_unit": 4.971428571428569,
+        "velocity_unit_per_ms": 0.20114942528735644,
+        "intercept_ms": -3.2046331405639608,
+        "r2": 0.8908898305084746
+      },
+      "operator_envelope": {
+        "sigma1_cross1_ms": 5.0,
+        "sigma1_peak": 1.5050024285622832,
+        "T_peak_ms": 15.0
+      }
+    }
+  },
+  "arrival_threshold_fraction": 0.1,
+  "model_contract": "MZ z-only trajectory-derived frozen-q M3B rate-field susceptibility; not old qI/gK and not a direct perturbation of the full MZ SNN",
+  "note": "Main figure: FIXED source-core Gaussian kick evolved under exp(J_s t). Operator sigma1(T) envelope is saved separately and is not the fixed-kick gain. Arrival slope is threshold-defined evidence for sequential recruitment, not proof of a continuous wavefront.",
+  "git_sha": "6dc71c0",
+  "argv": [
+    "scripts/run_topic4_state_conditioned_susceptibility.py",
+    "run-time-response",
+    "--confirm-run"
+  ]
+}
