@@ -17,6 +17,15 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from scripts.analyse_topic5_spo_cohort import NOT_NESTED  # noqa: E402
 
 
+def sentence(text: str) -> str:
+    """Upper-case the first letter only.
+
+    str.capitalize() lower-cases everything after it, which silently rewrites the
+    rest of an already-punctuated sentence.
+    """
+    return text[:1].upper() + text[1:]
+
+
 def load(path: Path) -> dict:
     return json.loads(path.read_text()) if path.exists() else {}
 
@@ -188,11 +197,11 @@ def main() -> int:
             "each contact reads.\n")
         info = sweep.get("information_in_the_data", {})
         if info.get("reading"):
-            add(f"{info['reading'].capitalize()}.\n")
+            add(f"{sentence(info['reading'])}.\n")
         add(f"- verdict: **{sweep.get('verdict', 'not run')}** — "
             f"{sweep.get('reading', '')}")
         if sweep.get("ceiling"):
-            add(f"- but {sweep['ceiling']}.")
+            add(f"- {sweep['ceiling']}.")
         if sweep.get("non_monotone_note"):
             add(f"- {sweep['non_monotone_note']}.")
         add("")
@@ -209,7 +218,7 @@ def main() -> int:
             f"**{worst[0]}**, Spearman "
             f"{worst[1]['strongest_geometry_correlation']:.2f} with "
             f"{worst[1]['with'].replace('_', ' ')} across "
-            f"{_conf['n_patients']} patients. {_conf['reading'].capitalize()}.\n")
+            f"{_conf['n_patients']} patients. {sentence(_conf['reading'])}.\n")
     if rel.get("status") == "COMPLETE":
         add(f"- median within-minus-between {rel['median_delta']:+.4f}, 95% CI "
             f"[{rel['bootstrap_95ci'][0]:+.4f}, {rel['bootstrap_95ci'][1]:+.4f}], "
