@@ -1,6 +1,6 @@
 # Topic 4 — 轴约束的数据驱动病理场（data-driven core field）v0.1
 
-- **状态：** rev2.1（2026-08-06 第二轮技术审阅后）。Stage 0–1 授权执行；Stage 2 由 Stage 1 的预注册闸门
+- **状态：** rev3（2026-08-06 第三轮审阅后；**姿态改为探索性**，见 §0.4b）。Stage 0–1 授权执行；Stage 2 由 Stage 1 的预注册闸门
   裁定，Stage 3 由 Stage 2 结局 + §9 的场位置稳定性裁定 —— **均不由该阶段自身的结果裁定**。
   rev1 / rev2 从未执行，无结果作废。
 - **被试：** E1146（`epilepsiae_1146`）单被试 MVP。队列层不在本合同内。
@@ -124,6 +124,30 @@ rev2 从未执行。审阅给出 8 条 P0 + 2 条工程 + 2 条 P1，逐条核�
   均无条件定长、不依赖尖峰。→ §6.3a 记录核验结果并加**回归测试锁住**该性质
 - **P1-1 "未招募 = 排中间"是新建模假设** —— 成立。→ §5.2a 并列固定支撑成对分数 `S_pair` 作敏感性
 - **P1-2 必须评估等价最优场而非只看最优场** —— 成立。→ §8.2
+
+### 0.4b 第三轮审阅（2026-08-06）：姿态改为探索性 + 8 条正确性修正
+
+**用户裁定：现阶段是探索性的，不做严格自动闸门。** 由此 rev3 把 §7 从"fail-closed 九出口裁决器"
+改为**描述性报告 + 建议**：把全部数值摆出来，由人判断（§7.5）。**保留** fail-closed 的只有
+**数据完整性**检查（缺格 / NaN / 校验和不符）—— 那是正确性守卫，不是科学闸门。
+Holm 校正、TOST 等价界、coverage 作为裁决出口、多口径 `SOURCE_DISAGREEMENT` 统一出口 —— 全部降级为
+**并列报告的诊断量**。
+
+**但 8 条正确性缺陷照修**（与闸门松紧无关）：
+
+- **P0-1 `manual_projected` 实现的不是 spec 规定的对象。** rev2.2 的 plan 把它做成"平滑 Gaussian 双核
+  过 sigmoid"，于是 A 对比同时改变了抽样合同、硬 mask vs 平滑场、边缘病理化程度三件事。
+  → `manual_projected` 必须是**与 legacy 相同的两个圆盘 hard mask，只换 threshold draws**；
+  平滑参考单独新增 **`manual_smooth`** 臂，不复用名字（§7.2）
+- **P0-2 "任意两臂相关 < 0.95" 与等价臂设计自相矛盾** —— 见 §4.4 已重定义
+- **P0-3 Stage 1 在跨方向档位比较 `S_rank`** —— 见 §5.3 已补强制规则
+- **P0-4 `coverage` 用并集会被钻空子，且从未进入判断** —— 见 §5.5 已改逐方向；并要求一条
+  **对抗测试**：删掉最难匹配的触点后主分数不得升高
+- **P0-5 "无显著差异" 不等于等价** —— 见 §4.3.3 已改为预冻结等价界 + 区间报告
+- **P0-6 Stage 0 没有真正重跑任何仿真** —— 见 §6.1 已补 seed 5 逐字段 parity run
+- **P0-7 checksum 检查恒真、且先跑后提交** —— 见 §6.1 已补：从"去掉 checksum 字段的 canonical JSON"
+  现场重算；实现与测试**必须先提交**，在干净工作树中执行
+- **P0-8 并行缓存竞争 + resume 不可恢复** —— 见 §7.2 已改为**按网络种子并行**
 
 ### 0.5 缺失项（D 类）
 
@@ -348,9 +372,21 @@ b = b₀ / ρ        横向尺度（σ_⊥ = σ_⊥0 / ρ）        ⇒ a·b 恒
 
 `width_wide` 与 `width_narrow` 互相的相关只有 **0.373** —— 真正不同的场。
 
-**强制的非空性前置检查（pre-flight）**：Stage 1 开跑前，**在纯计算层**断言任意两个臂的 `h` 的空间相关
-`< 0.95`。任一对超过 0.95 ⇒ 该对比是空的，**不得开跑 84 次仿真**，直接报告参数化问题。
-这条检查耗时毫秒级，却能挡掉一整轮无意义的算力。
+**强制的非空性前置检查（pre-flight，rev3 重定义）**：Stage 1 开跑前在纯计算层检查，**只覆盖形状对比
+B1–B4，不覆盖等价对比 A** —— `manual_hard` 与 `manual_projected` 本来就应当空间上几乎相同，
+"全对全相关 < 0.95" 会把**正确实现**拒之门外（rev2.2 的原写法有此缺陷）。
+
+且**空间相关不是充分判据**：两个场可以相关很高而横向 rms / 轴向 rms / 重心已明显不同。
+每个形状对比冻结各自的非空性指标：
+
+| 对比 | 非空性指标 | 门槛 |
+|---|---|---|
+| B1 纵向形状 | 轴向质量分布（`h` 加权轴向 rms） | 相对差 ≥ 20% |
+| B2 / B3 横向宽度 | 横向 rms / 轴向 rms 之比 | 相对差 ≥ 50% |
+| B4 横向位置 | `h` 加权横向重心 `r̄` 的移动量 | ≥ 1.5 mm |
+| 所有臂 | 预算相对误差 `|Σh − N_core|/N_core` | < 1e-6 |
+
+空间相关作为**辅助诊断**一并落盘，不单独作为启动门。任一形状对比不满足其指标 ⇒ 不开跑，报告参数化问题。
 
 ### 4.2 二维轴约束场（Stage 3）
 
@@ -424,14 +460,17 @@ legacy 路径保留为 **`manual_hard`**，作为**外部参照臂**，不参与
 
 - **前置廉价 sanity（纯计算，非判据）**：`manual_projected` 的 `h` 与人工双核 mask 空间相关 ≥ 0.9；
   双峰 `α` 生成的 `h` 与人工双核 mask 空间相关 ≥ 0.9。不满足说明参数族根本表达不了旧工作点，直接停。
-- **正式判据 = 行为等价（Stage 1 第四臂）**：`manual_projected` 与 `manual_hard` 在**同一批网络种子上
-  配对比较**，须同时满足：
-  - `|mean(S_projected) − mean(S_hard)|` ≤ 配对差标准差 `sd(S_projected − S_hard)`（即无可检出的系统偏移）
-  - 双方向出现率之差 ≤ 2/8 seeds
-  - 可评分 seed 数之差 ≤ 1
+- **正式判据 = 行为等价（rev3 改为等价检验，不是"无显著差异"）**：`manual_projected` 与 `manual_hard`
+  在同一批 **12** 个网络种子上配对比较。**"p > 0.05" 不构成等价** —— 低功效或大方差同样给出不显著
+  （第三轮 P0-5）。改为：
 
-  **只有行为等价成立，新参数族才算表达了旧工作点**，`uniform_axial` 与 `learned` 的比较才有意义。
-  不成立 ⇒ Stage 1 判 `PARAMETERIZATION_MISMATCH`，停止报告。
+  - **运行前冻结等价界 `δ_eq = 0.05`**（`S_rank` 单位；明示的工程判断）；
+  - 判据 = 配对差的 95% 置信区间**完全落在** `[−δ_eq, +δ_eq]` 内（等价于双单侧检验 TOST）；
+  - 同时报告：双方向出现的 seed 数之差（12 seeds 下阈值 **≤ 3**，由 rev2 的 2/8 按比例换算并取整）、
+    可评分 seed 数之差 ≤ 1、逐方向 `coverage` 之差。
+
+  探索性姿态下这些是**报告项与建议**，不自动停机；但结论文字里不得在等价未成立时称"新参数族表达了
+  旧工作点"。
 
 **其余 TDD：**
 
@@ -458,8 +497,13 @@ legacy 路径保留为 **`manual_hard`**，作为**外部参照臂**，不参与
 CLAUDE.md §3 外科式改动）。⇒ 在本合同自己的评分模块中重新实现上述定义，并加上 §5.2a 的支撑集合同。
 实现后须有一个回归测试：在"仅共同触点"模式下，本模块与 `_sim_matrix` 对同一批已落盘事件给出相同矩阵。
 
-**更正 C4**：事件纳入门统一为 `n_part ≥ 2·k_dir + 1 = 5`（与 `subject_run` 一致），
-并**同时**用门 = 4 各算一份落盘。两个门给出不同闸门裁定 ⇒ `SOURCE_DISAGREEMENT`（§7.4(E) / §7.5）。
+**更正 C4（rev3 收紧）**：事件纳入门 = `n_part ≥ 2·k_dir + 1 = 5`。**`gate = 4` 整条删除。**
+已核验 `endpoint_centroid_axis` 在 `idx.size < 2*k_dir+1` 时返回 `None`；实测 signed 事件的 `n_part`
+最小值就是 5，**`n_part = 4` 的 signed 事件有 0 个** ⇒ 事后用 4 重筛救不回任何已无 `sign` 的事件，
+它不是独立口径，只会白白扩大敏感性组合数。
+
+**`common_only` 降级为敏感性，不与主 scorer 同等否决权**：它正是"候选自选支撑"这条被 §5.2a 堵死的
+路径，只用于回归对齐已发表数字，不参与承重判断。
 
 ### 5.2 交换不变得分（两套模板并列 —— 用户裁定）
 
@@ -541,6 +585,11 @@ CMA-ES 只用候选的**相对排序**、不用分数绝对值，因此字典序
 **但必须回到 held-out 充分性门**（§10.3）。每个候选仍记录 `n_dir` / `dir_forward` / `dir_reverse` /
 `n_directional` / `bidirectional`。
 
+**跨臂比较的强制规则（rev3 补，第三轮 P0-3）**：`S_rank` **只能在 `n_dir` 相同的种子内**作差。
+`n_dir` 不同的种子记为 **direction-tier win/loss**，单独计数，**不并入数值差**。
+每个臂对必须同时报告三样：(a) 同档位内的 `S_rank` 配对差，(b) `n_dir` 差的分布，(c) 双方向出现率。
+`n_dir = 0` 时 `S_rank = NaN`（不是任何有限值）。
+
 ### 5.4 axis-only 参照（rev2 新增，更正 P0-2）
 
 事件方向由 `sign(ax · u_C)` 定义（已核验 `read_event`），患者模板本身又主要沿 `u_C` 排列 ⇒
@@ -565,9 +614,12 @@ axis_only.reverse[n] = − proj(contact_n − center, u_C)
 
 每个候选除 `S` 外必须记录：
 
-- `coverage` = `SUPPORT` 中被该候选至少招募一次的触点比例；
-- `mean_n_part` = 逐事件参与触点数均值；
-- 两个方向各自的 `coverage`。
+- `coverage_forward` / `coverage_reverse` = **各方向单独**的支撑集招募比例；
+- `coverage_union` = 两方向并集比例（**只作参考** —— 并集会掩盖"每个方向各覆盖一小块"的情形，
+  第三轮审阅 P0-4）；
+- `mean_n_part` = 逐事件参与触点数均值。
+
+**承重的是逐方向覆盖率，不是并集。**
 
 **报告规则**：任何被提名为"优于对照"的候选，其 `coverage` 不得低于 `manual_projected` 的
 `coverage − 0.10`。低于则标注 `LOW_COVERAGE_WIN`，**不得计入主结论**，只能作为需要解释的观察。
@@ -672,7 +724,8 @@ Stage 1 用不到 1 小时把 (a) 和 (b) 分开。**在分开之前投入任何
 | 臂 | 场 | 抽样合同 | 问的是 |
 |---|---|---|---|
 | `manual_hard` | 已接受的两个半径 1.5 mm 圆盘核（legacy 路径原样） | `sample_core_field` × 2 + `np.minimum` | 外部参照，与已发表工作点同源 |
-| `manual_projected` | 同样的双核指示函数，走新参数族 | §4.3.1 latent-quantile | **新参数族有没有表达出旧工作点**（P0-4） |
+| `manual_projected` | **与 legacy 完全相同的两个圆盘 hard mask**，只换 threshold 抽样 | §4.3.1 latent-quantile | **抽样合同**是否改变了工作点（第三轮 P0-1） |
+| `manual_smooth` | 同样位置的平滑双核，走 §4.1 参数族 + 预算投影 | §4.3.1 | **hard mask vs 平滑场**的差异；形状对比 B1–B4 的基准臂 |
 | `uniform_axial` | `α = 0` + partition-of-unity（§4.1）+ 同预算投影 | §4.3.1 | **纵向形状**分不分得出 |
 | `width_wide` | 双核形状，定面积长宽比 `ρ = 0.5`（横向摊平），同预算 | §4.3.1 | **横向宽度**分不分得出（摊平） |
 | `width_narrow` | 双核形状，定面积长宽比 `ρ = 2.0`（轴向拉长），同预算 | §4.3.1 | **横向宽度**分不分得出（拉长） |
@@ -681,8 +734,15 @@ Stage 1 用不到 1 小时把 (a) 和 (b) 分开。**在分开之前投入任何
 
 外加 **`axis_only`（解析，零仿真成本）** 作为几何参照（§5.4）。
 
-共 **84 次仿真 = 672 生物秒 = 10.9 h 串行 ≈ 55 min–1.4 h（8–12 worker）**。
-内存：12 worker × ~9.4 GB ≈ 113 GB（218 GB 内）。
+共 **96 次仿真 = 768 生物秒 = 12.5 h 串行 ≈ 1–1.6 h**。
+
+**并行单位必须是网络种子，不是 (臂, 种子)（rev3 更正，第三轮 P0-8）**：一个 worker 载入/建一张网，
+然后**顺序**跑该种子的全部 8 个臂。按 (臂, 种子) 派发会让同一种子的 8 个 worker 同时 cache-miss、
+并发建同一张网并覆写同一个文件 —— 既毁掉"每种子建网一次"的工程承诺，又有文件损坏风险。
+缓存写入用**临时文件 + 原子 rename**。最多 8 个 seed worker（8 × ~9.4 GB ≈ 75 GB）。
+
+**逐次结果原子写入 `per_run/<seed>/<arm>.json`**，不用可能写出半行的 JSONL；
+验收要求恰好 **96 个唯一成功 key**，无重复、无失败、无缺失。
 
 **为什么加 `width_*` 两臂（P0-3）**：Stage 2 的学习参数含横向自由度（§4.1），但 rev2 的 Stage 1 只比了
 双核 / 走廊 / 横移，**从未检验读出能否分辨宽窄**。不检验就优化它是没有依据的。
@@ -705,77 +765,57 @@ Stage 1 用不到 1 小时把 (a) 和 (b) 分开。**在分开之前投入任何
 对每个**预注册对比**（§7.4），跨 12 个种子计算配对差 `Δ_k`，报告 `mean(Δ)`、`sd(Δ)`、
 符号一致数 `n_same`、双侧符号检验 `p`。
 
-### 7.4 预注册判据（rev2.1 重写，更正 P0-2）
+### 7.4 预注册对比与报告量（rev3：探索性，不自动裁决）
 
-**对比集合在运行前冻结，并按目的分组。** rev2 写的"6 个臂对（含 axis_only）"在算术上就不成立
-（4 仿真臂 = 6 对，含 axis_only 应为 10 对），且"任取一对达到 7/8"作为通用可辨识性门有两个缺陷：
-参数化等价对比的差异只反映抽样合同不同、与 axis_only 的差异不证明纵向形状可辨识；从多对中挑最显著的
-一对会产生多重选择偏差。**改为下列具名对比：**
+**对比集合在运行前冻结，并按目的分组。** 用户已裁定现阶段为探索性 ⇒ 下表**只产出数值与建议**，
+不产出自动停机裁定（§7.5）。
 
-| 组 | 对比 | 目的 | 进可辨识性门？ |
-|---|---|---|---|
-| **A** | `manual_projected` vs `manual_hard` | 参数化等价 | **否**（前置门，见下 (A)） |
-| **B1** | `manual_projected` vs `uniform_axial` | 纵向形状敏感性 | **是** |
-| **B2** | `manual_projected` vs `width_wide` | 横向宽度敏感性（增宽） | **是** |
-| **B3** | `manual_projected` vs `width_narrow` | 横向宽度敏感性（收窄） | **是** |
-| **B4** | `manual_projected` vs `mean(transverse_±)` | 横向位置敏感性 | **是** |
-| **C** | 各 projected 臂 vs `axis_only` | 几何参照（§5.4 承重规则） | **否**（只报告） |
-
-**(A) 参数族等价（前置，必须先过）** —— §4.3.3 的行为等价三条件。不过 ⇒ `PARAMETERIZATION_MISMATCH`。
-
-**(B) 可辨识性（核心）** —— 对 B1–B4 各做**双侧符号检验**（12 个配对差），**Holm 校正 across the 4**，
-至少一个在 `α = 0.05` 下存活即通过。（12/12 → p = 4.9e-4；11/12 → p = 6.3e-3；10/12 → p = 0.039。）
-- 通过 ⇒ 读出**能**分辨场的形状，反演有意义，并记录**是哪一个维度**（纵向 / 宽度 / 位置）可辨识；
-- 全不通过、但至少一个 B 对比的**未校正** p < 0.05 ⇒ `UNDERPOWERED_PROBE`：证据方向存在但种子数不够，
-  报告并建议加种子重跑，**不判 `READOUT_INSENSITIVE`**；
-- 全不通过且无一未校正 p < 0.05 ⇒ `READOUT_INSENSITIVE`。
-
-**哪个臂赢不构成闸门，只作为结论记录。** `uniform_axial` / `width_*` / `transverse_±` 任一胜过
-`manual_projected` 都是合法且有信息的结果（"手放的双核不是最优"），不是失败。
-
-**(C) 优化可行性 —— 跨 seed 排序一致性**
-
-`sd(Δ)` 小**不等于**候选排序可靠。在优化器实际会穿行的 **projected 臂族**
-（`manual_projected` / `uniform_axial` / `width_wide` / `width_narrow` / `mean(transverse_±)`，
-5 个 ⇒ **10 个臂对**；排除 `manual_hard`（抽样合同不同）与 `axis_only`（解析、无噪声））上定义：
-
-`concordance` = 12 个种子上、10 个臂对中"该种子内的符号与合并均值符号一致"的比例均值。
-
-| `concordance` | 裁定 | Stage 2 预算 |
+| 组 | 对比 | 目的 |
 |---|---|---|
-| ≥ 0.85 | `GO_SINGLE_SEED` | 每候选 1 seed；`M = 9` 个自由参数、popsize 10、~40 代 |
-| 0.65 – 0.85 | `GO_MULTI_SEED` | 每候选平均 4 seed；`M ≤ 9` 个自由参数、≤ 150 次评估 |
-| < 0.65 | `NO_GO_UNRESOLVABLE` | 停止报告 |
+| **A** | `manual_projected` vs `manual_hard` | **抽样合同等价**（两侧都是同一 hard mask） |
+| **A2** | `manual_smooth` vs `manual_projected` | **hard mask vs 平滑场**的独立影响 |
+| **B1** | `manual_smooth` vs `uniform_axial` | 纵向形状敏感性 |
+| **B2** | `manual_smooth` vs `width_wide` | 横向宽度敏感性（摊平） |
+| **B3** | `manual_smooth` vs `width_narrow` | 横向宽度敏感性（拉长） |
+| **B4** | `manual_smooth` vs `mean(transverse_±)` | 横向位置敏感性 |
+| **C** | 各臂 vs `axis_only` | 几何参照（§5.4 承重规则） |
 
-阈值 0.85 / 0.65 是**明示的工程判断**（不由任何"天花板"推导），Stage 1 运行前冻结，不得按结果调整。
+**B 组基准臂是 `manual_smooth` 而不是 `manual_projected`**（第三轮 P0-1）：两侧都经同一条
+平滑 + 预算投影管线，形状对比才只含形状；A / A2 分别隔离抽样合同与硬软差异。
 
-**(D) 可评分性** —— 某种子若在 ≥2 个臂上 `n_dir = 0`，记为**无信息种子**。
-无信息种子 ≥ 4/12 ⇒ `INSUFFICIENT_SCORABLE`（提示需加长单跑时长，而非改判据）。
+**每个对比必须报告的量**（§5.3 的跨档位规则：`S_rank` 只在 `n_dir` 相同的种子内作差）：
 
-**(E) 一致性** —— (B) 与 (C) 必须在**三个正交口径的全部组合**下给出相同裁定：
-`S_grad` / `S_geom` 两套模板源（§5.2）× 两种缺失规则（§5.2a）× 事件门 `n_part ≥ 5` / `≥ 4`（§5.1）。
-任一组合不一致 ⇒ `SOURCE_DISAGREEMENT`。
+- 同档位配对差的 `mean` / `sd` / **95% 置信区间** / 符号一致数 `n_same` / 双侧符号检验 `p`（未校正）；
+- **direction-tier win/loss 计数**（`n_dir` 不同的种子，单独计数，不并入数值差）；
+- 双方向出现率（各臂各自的 `n_dir = 2` 种子数 / 12）；
+- 逐方向 `coverage_forward` / `coverage_reverse`；
+- 三个正交口径**并列报告，不合并成一个出口**（第三轮末条）：
+  `TEMPLATE_SOURCE`（gradient vs geometry）、`SCORER_SENSITIVITY`（fixed-support vs common_only）、
+  `SCORE_DEFINITION`（Spearman vs balanced pair score）。
+- **跨 seed 排序一致性 `concordance`**：在 projected 臂族的两两对上，逐种子符号与合并符号一致的比例
+  （作为"CMA-ES 能不能靠单 seed 排序"的**诊断量**，不设门）。
 
-### 7.5 裁决器（纯函数，fail-closed）
+**多重比较不做 Holm 校正**（探索性姿态）；但报告时必须写明"未校正、6 个对比"，
+不得挑最显著的一个当结论。
 
-`stage1_verdict(runs) -> verdict` 必须是**无副作用的纯函数**，按下列顺序短路，**任何 NaN / 缺字段 /
-未覆盖分支一律返回 `FAIL_CLOSED` 而不是继续**：
+### 7.5 报告器（rev3：描述性，仅数据完整性 fail-closed）
+
+`stage1_report(runs, config) -> dict` 是**纯函数**，产出：
 
 ```
-1. 任何 (臂,种子) 缺失、S 为 NaN、或 config 校验和不匹配       -> FAIL_CLOSED
-2. 无信息种子 >= 4/12                                          -> INSUFFICIENT_SCORABLE     [停]
-3. (A) 参数族行为等价不成立                                     -> PARAMETERIZATION_MISMATCH [停]
-4. (E) 模板源 x 缺失规则 x 事件门 的任一组合裁定不一致            -> SOURCE_DISAGREEMENT       [停]
-5. (B) B1-B4 全不过 Holm，且无一未校正 p < 0.05                 -> READOUT_INSENSITIVE       [停]
-6. (B) B1-B4 全不过 Holm，但有未校正 p < 0.05                   -> UNDERPOWERED_PROBE        [停]
-7. (C) concordance < 0.65                                      -> NO_GO_UNRESOLVABLE        [停]
-8. (C) concordance in [0.65, 0.85)                             -> GO_MULTI_SEED
-9. (C) concordance >= 0.85                                     -> GO_SINGLE_SEED
+integrity:  ok | FAIL_CLOSED(reason)     <- 仅缺格 / NaN / checksum 不符；这是正确性守卫
+scorable:   每种子的可评分性，uninformative_seeds 计数
+equivalence: A / A2 的等价区间与 δ_eq=0.05 的关系（TOST 形式，报告不停机）
+shape:      B1-B4 的全部报告量（§7.4）
+geometry:   C 组各臂对 axis_only 的差
+concordance: 诊断量
+coverage:   逐臂逐方向覆盖率，以及是否低于 manual_smooth − 0.10（标 LOW_COVERAGE，不停机）
+recommendation: 一句话建议 + 理由（给人看，不是裁定）
 ```
 
-**所有 `[停]` 分支：停止，写报告，等用户决定**（用户 2026-08-06 已裁定此分支）。
-裁决器须有单元测试覆盖全部 9 条出口，包含 NaN、`n_dir = 0`、模板源冲突三类构造用例，
-外加一条 **`u_C⊥ → −u_C⊥` 符号翻转后裁定不变**的不变性测试（P0-4）。
+**只有 `integrity` 会 FAIL_CLOSED**（缺格 / NaN / 校验和不符）。科学结论一律交给人判断
+（用户 2026-08-06 裁定）。报告器须有单元测试覆盖：完整性失败、`n_dir = 0`、跨档位不作差、
+`u_C⊥` 符号翻转报告不变。
 
 ### 7.6 交付物
 
@@ -790,7 +830,8 @@ Holm 校正 p）、`concordance.csv`（10 个 projected 臂对 × 12 种子）�
 
 ## 8. Stage 2 — 低维场优化
 
-**仅在 Stage 1 裁决器返回 `GO_SINGLE_SEED` 或 `GO_MULTI_SEED` 时开启。预算按 §7.4(C) 的档位。**
+**仅在用户读过 Stage 1 报告（§7.5）并明确批准后开启。** 探索性姿态下没有自动放行；
+Stage 2 的结局分类（§8.1）与等价最优场协议（§8.2）须在开跑前冻结（那时才恢复严格预注册）。
 
 - 参数：`α ∈ R^M`（均值固定 0）+ `log ρ`（定面积长宽比，§4.1），共 **M 个自由参数**（**含横向形状，更正 B4**）
 - 优化器：CMA-ES ask–tell（非光滑、随机、低维、可并行）
@@ -806,7 +847,7 @@ Holm 校正 p）、`concordance.csv`（10 个 projected 臂对 × 12 种子）�
 ### 8.1 预注册结局分类（rev2 新增，更正 P0-5）
 
 Stage 2 的"什么算成功"**在运行前冻结**。裁决是 fail-closed 纯函数，**全部在 held-out 种子上评估**，
-且必须在 `S_grad` / `S_geom` 两套模板源下一致，否则 `SOURCE_DISAGREEMENT`。
+且必须在 `S_grad` / `S_geom` 两套模板源下一致 —— 不一致时并列报告两套结论，由人裁定。
 
 **按下列顺序短路裁定**（顺序本身是合同的一部分 —— 它决定了当多个条件同时成立时报告哪一个）：
 
@@ -1037,6 +1078,13 @@ stage3_2d_field/                    （仅 Stage 2 通过后）
 
 ## 14. 发布检查表
 
+- [ ] Stage 0 **真的重跑了** `gradient_shared` seed 5 并与冻结 artifact 逐字段 parity 比对（第三轮 P0-6）
+- [ ] `stage_config.json` 实际写入了 `N_core_manual` 与 `D0`（此前只在接口里承诺）
+- [ ] **实现与测试先提交**，Stage 0/1 在干净工作树中执行；每个 per-run artifact 记录
+      config checksum + 模块 SHA256 + 执行 commit + dirty-worktree 标志（第三轮 P0-7）
+- [ ] checksum 由"去掉 checksum 字段的 canonical JSON"现场重算，不是同一字符串传两遍
+- [ ] Stage 1 按**网络种子**并行；缓存原子写；产出恰好 96 个唯一成功 key（第三轮 P0-8）
+- [ ] CRN 测试比较**实际 OU 轨迹指纹**，不只是 RNG 调用次数
 - [ ] Stage 0 基线复现，版本对齐，`model_integrity_report.md` 已写
 - [ ] **三个参照均用同一冻结 scorer 重算**：`axis_only` / **自发双核 `manual_hard`** / `driven_pooled`
       （后者标注为 readout upper-reference，非基线）
@@ -1046,13 +1094,17 @@ stage3_2d_field/                    （仅 Stage 2 通过后）
       sanity）。**不含任何"逐位复现 legacy 抽样"的断言**（已核验不可能）
 - [ ] `uniform_axial` 用 partition-of-unity 基，`α = 0` 时 `q(s)` 相对波动 < 1e-6（P0-6）
 - [ ] 横向自由度是定面积长宽比 `ρ`，不是裸 `σ_⊥`；§4.4 非空性 pre-flight（任意两臂 `h` 相关 < 0.95）通过
-- [ ] Stage 1 **七个**仿真臂齐备：`manual_hard` / `manual_projected` / `uniform_axial` /
-      `width_wide` / `width_narrow` / `transverse_plus` / `transverse_minus`（P0-2/3/4）
-- [ ] Stage 1 预注册对比集合（A / B1–B4 / C）在跑前冻结；可辨识性只由 B1–B4 + Holm 裁定（P0-2）
-- [ ] Stage 1 裁决器为纯函数，**9 条**出口全部有单元测试，含 NaN / `n_dir=0` / 模板源冲突
-      三类构造用例 + `u_C⊥` 符号翻转不变性测试（P0-4）
-- [ ] Stage 1 判据在 模板源 × 缺失规则 × 事件门 全部组合下裁定一致
-- [ ] 打分实现 Spearman 与 `S_pair` 两套并列（P1-1），且"仅共同触点"模式与 `_sim_matrix` 回归一致
+- [ ] Stage 1 **八个**仿真臂齐备：`manual_hard` / `manual_projected`（同一 hard mask，换抽样）/
+      `manual_smooth` / `uniform_axial` / `width_wide` / `width_narrow` /
+      `transverse_plus` / `transverse_minus`（第三轮 P0-1）
+- [ ] Stage 1 预注册对比集合（A / A2 / B1–B4 / C）在跑前冻结；B 组基准臂是 `manual_smooth`
+- [ ] §4.4 的 pre-flight 用**逐对比的形状指标**（非全对全相关），且**不覆盖 A / A2**
+- [ ] `S_rank` 只在 `n_dir` 相同的种子内作差；跨档位记为 direction-tier win/loss（第三轮 P0-3）
+- [ ] `coverage_forward` / `coverage_reverse` 分开记录；对抗测试（删最难触点分数不得升高）通过
+- [ ] 等价用 TOST + 冻结的 `δ_eq = 0.05`，不用"p > 0.05"（第三轮 P0-5）
+- [ ] `gate = 4` 已整条删除（signed 事件 `n_part` 最小值就是 5）
+- [ ] Stage 1 报告器为纯函数；只有数据完整性会 FAIL_CLOSED；科学结论交人判断
+- [ ] 打分实现 Spearman 与 balanced pair score 两套并列，且 `common_only` 仅作回归/敏感性
 - [ ] 网络缓存键覆盖全部连接字段 + git commit + RNG 版本，逐字段扰动测试通过（Eng-1）
 - [ ] common random numbers 回归测试通过：换 `V_th_per_neuron` 后 OU 轨迹与 RNG 抽取次数逐位相同（Eng-2）
 - [ ] 字典序 `(n_dir, S_rank)` 已实现；全文无"严格分级 / 第二方向必然跃升"表述（P0-5）
