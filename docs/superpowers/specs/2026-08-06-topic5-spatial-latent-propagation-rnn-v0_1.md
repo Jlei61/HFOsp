@@ -33,10 +33,20 @@ than until a clock runs out. The truncated fits are retained under `per_subject_
 as evidence. The further-seed stage is cancelled; it would only have added units at the
 wrong budget. Every cohort number involving a latent arm is superseded by the refit.
 
+**Not re-verified, and disclosed rather than repaired.** The frozen configuration was chosen
+by the development sweep at the same short budget, so in principle the microstep count and
+connection-cost strength were compared between truncated runs. Two things make that unlikely
+to have changed the choice, and neither is a proof: the validation differences across every
+configuration tried spanned 0.0028, far too flat to have driven the selection, and the two
+criteria that did drive it — hop reachability and total connection cost — are structural
+properties of the graph rather than quantities that improve with more epochs. Re-running the
+sweep at the long budget was judged not worth several more hours against that. A reader who
+disagrees should treat the configuration as unverified.
+
 **Lesson for the next version.** A single epoch budget shared by arms with very different
 convergence rates is not a fair comparison, it is a comparison of convergence rates. Either
 give each arm its own budget large enough to converge, or make convergence a pre-condition
-for the unit to enter the analysis at all.
+for the unit to enter the analysis at all. The second is better: it fails loudly.
 
 **rev3 (2026-08-06, late execution)** — five amendments, each forced by something the
 run surfaced rather than by a change of mind:
