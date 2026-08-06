@@ -181,6 +181,21 @@ def main() -> int:
             "and it is what would have to change for this model family to be "
             "testable: contacts that read a smaller footprint, or events that run "
             "long enough for the displacement to accumulate past one.\n")
+    sweep = load(OUT / "synthetic" / "KERNEL_WIDTH_SWEEP.json")
+    if sweep.get("cells"):
+        add("That radius is half a modelling choice, so it was varied on its own "
+            "-- same grid, same generating parameters, only the width of the disc "
+            "each contact reads.\n")
+        info = sweep.get("information_in_the_data", {})
+        if info.get("reading"):
+            add(f"{info['reading'].capitalize()}.\n")
+        add(f"- verdict: **{sweep.get('verdict', 'not run')}** — "
+            f"{sweep.get('reading', '')}")
+        if sweep.get("ceiling"):
+            add(f"- but {sweep['ceiling']}.")
+        if sweep.get("non_monotone_note"):
+            add(f"- {sweep['non_monotone_note']}.")
+        add("")
 
     add("## 4. Is the fitted operator the patient's?\n")
     _rel = stats.get("parameter_reliability", {})
