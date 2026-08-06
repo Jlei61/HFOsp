@@ -266,10 +266,14 @@ class SPOModel(nn.Module):
         flat = a.flatten(1)
         total = flat.sum(1, keepdim=True).clamp_min(1e-6)
         mean_axis = (a * self.axis_coordinate).flatten(1).sum(1, keepdim=True) / total
-        spread = (
+        # sqrt has an infinite derivative at zero, and a rectified field is
+        # exactly zero whenever nothing has been driven yet -- so the very first
+        # backward pass returns NaN unless the variance is floored first.
+        variance = (
             (a * (self.axis_coordinate - mean_axis.view(-1, 1, 1)) ** 2)
             .flatten(1).sum(1, keepdim=True) / total
-        ).sqrt()
+        )
+        spread = variance.clamp_min(1e-12).sqrt()
         return torch.cat([
             flat.mean(1, keepdim=True),
             flat.max(1, keepdim=True).values,
