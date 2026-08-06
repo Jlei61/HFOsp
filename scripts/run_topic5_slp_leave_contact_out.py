@@ -174,6 +174,35 @@ def main() -> int:
                       f"pos={block['n_positive']}/{block['n']} "
                       f"p={block['wilcoxon_two_sided_p']:.3g}")
 
+    # Two holdout conditions were tested and the spec designated neither of them
+    # primary, so an uncorrected p from whichever one came out lower is not a
+    # result.  Holm across the pair, applied to the contrast that carries the
+    # hypothesis.
+    key = "degradation_from_retained_to_heldout"
+    tested = [(m, summary["comparisons"][m][key])
+              for m in MODES
+              if summary["comparisons"].get(m, {}).get(key, {}).get("status") == "COMPLETE"]
+    if tested:
+        ordered = sorted(tested, key=lambda kv: kv[1]["wilcoxon_two_sided_p"])
+        running = 0.0
+        for rank, (mode, block) in enumerate(ordered):
+            adjusted = min(1.0, block["wilcoxon_two_sided_p"] * (len(ordered) - rank))
+            running = max(running, adjusted)  # Holm is monotone
+            block["holm_adjusted_p"] = running
+            block["survives_holm"] = bool(running < 0.05)
+        summary["multiplicity"] = {
+            "family": [m for m, _ in tested],
+            "method": "Holm across the holdout conditions",
+            "reason": ("the spec reports both conditions and designates neither "
+                       "primary, so the smaller uncorrected p cannot be quoted "
+                       "on its own"),
+            "any_condition_survives": any(b["survives_holm"] for _, b in tested),
+        }
+        for mode, block in tested:
+            print(f"{mode:7s} {key}: raw p={block['wilcoxon_two_sided_p']:.3g} "
+                  f"Holm p={block['holm_adjusted_p']:.3g} "
+                  f"{'survives' if block['survives_holm'] else 'does not survive'}")
+
     (OUT / "leave_contact_out_summary.json").write_text(json.dumps(summary, indent=1))
     return 0
 

@@ -254,13 +254,36 @@ def main() -> int:
 
     add("## 5. Predicting at contacts the model never trained on\n")
     if lco:
-        for mode, entry in lco.get("comparisons", {}).items():
-            wording = ("the contact was still visible in the sequence but scored nowhere"
-                       if mode == "weak" else "the contact was removed from the input too")
-            add(f"- **{wording}** — {fmt(entry)}")
-        add("\nBoth models were trained without any per-contact parameter, because a contact "
-            "held out of training has no way to learn one; without that change the "
-            "comparison would be undefined at exactly the positions being tested.\n")
+        key = "degradation_from_retained_to_heldout"
+        add("Reported as how much each architecture LOSES at a contact it never "
+            "scored, not as its raw score there. Without a per-contact parameter the "
+            "tissue field sits lower everywhere, so raw scores at withheld contacts "
+            "would mostly re-measure that.\n")
+        for mode in ("weak", "strong"):
+            block = (lco.get("comparisons", {}).get(mode) or {}).get(key)
+            if not block or block.get("status") != "COMPLETE":
+                continue
+            wording = ("the contact stayed visible in the sequence but scored nowhere"
+                       if mode == "weak" else
+                       "the contact was removed from the input as well")
+            line = (f"- **{wording}** — {fmt(block)}")
+            if "holm_adjusted_p" in block:
+                line += (f"; adjusted for testing both conditions, "
+                         f"p={block['holm_adjusted_p']:.3g} "
+                         f"({'survives' if block['survives_holm'] else 'does not survive'})")
+            add(line)
+        multi = lco.get("multiplicity")
+        if multi:
+            add(f"\nBoth conditions were pre-registered and neither was named primary, so "
+                f"the smaller uncorrected p cannot be quoted on its own. "
+                f"{'At least one condition survives the correction.' if multi['any_condition_survives'] else 'Neither survives the correction.'} "
+                f"The direction is worth recording even so: the advantage appears in the "
+                f"harder condition, where the contact is invisible to the model and a "
+                f"field can still infer that location from its neighbours while a "
+                f"per-contact node cannot.\n")
+        add("Both models trained without any per-contact parameter, because a contact "
+            "held out of training has no way to learn one; with it the test is undefined "
+            "at exactly the positions being measured.\n")
     else:
         add("Not run.\n")
 
