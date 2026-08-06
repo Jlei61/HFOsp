@@ -35,13 +35,29 @@ from scripts.train_topic5_spo_unit import evaluate, load, partition  # noqa: E40
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results/topic5_spatial_propagation_operator_v0_2"
 
+# Only a nested pair isolates a component. Written out, the parameter sets are
+#   STATIC              {}
+#   FIELD_NULL          {gamma_a, beta, xi, gamma_r, eta}
+#   ISOTROPIC_DIFFUSION {gamma_a,                   eta, D}
+#   ANISOTROPIC_DRIFT   {gamma_a,                   eta, D_par, D_perp, v}
+#   ANISOTROPIC_RECOVERY{gamma_a, beta, xi, gamma_r, eta, D_par, D_perp, v}
+# FIELD_NULL and ISOTROPIC_DIFFUSION do not nest -- one has recovery and no
+# transport, the other transport and no recovery -- so that pair cannot be read
+# as what diffusion buys. It is kept, because it is a real question, but under a
+# name that says what it actually compares.
+#
+# The clean test of spatial transport is the full operator against FIELD_NULL:
+# both carry recovery, and the only difference is the three transport numbers.
 LADDER = [
     ("field_over_static", "FIELD_NULL", "STATIC"),
-    ("isotropic_over_field", "ISOTROPIC_DIFFUSION", "FIELD_NULL"),
+    ("transport_over_no_transport", "ANISOTROPIC_RECOVERY", "FIELD_NULL"),
     ("drift_over_isotropic", "ANISOTROPIC_DRIFT", "ISOTROPIC_DIFFUSION"),
     ("recovery_over_drift", "ANISOTROPIC_RECOVERY", "ANISOTROPIC_DRIFT"),
     ("full_over_static", "ANISOTROPIC_RECOVERY", "STATIC"),
+    ("transport_no_recovery_over_recovery_no_transport",
+     "ISOTROPIC_DIFFUSION", "FIELD_NULL"),
 ]
+NOT_NESTED = {"transport_no_recovery_over_recovery_no_transport"}
 FULL = "ANISOTROPIC_RECOVERY"
 METRIC = "test_next_bce"
 

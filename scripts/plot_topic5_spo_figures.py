@@ -23,12 +23,14 @@ OUT = ROOT / "results/topic5_spatial_propagation_operator_v0_2"
 FIGURES = OUT / "figures"
 FULL = "ANISOTROPIC_RECOVERY"
 
+# Only nested pairs are drawn: a non-nested difference is two components moving
+# at once and cannot be labelled with either of them.
 LADDER_LABEL = {
-    "field_over_static": "Field with no\ntransport",
-    "isotropic_over_field": "+ isotropic\ndiffusion",
+    "field_over_static": "A field with\nmemory",
+    "transport_over_no_transport": "+ spatial\ntransport",
     "drift_over_isotropic": "+ anisotropy\nand drift",
     "recovery_over_drift": "+ recovery\nfield",
-    "full_over_static": "Full operator\nover static",
+    "full_over_static": "Everything, over\na static rate",
 }
 
 

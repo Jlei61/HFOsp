@@ -33,8 +33,14 @@ from torch import Tensor, nn
 import torch.nn.functional as F
 
 # Nested family, from no spatial process to the full operator.  Each config
-# freezes a strict superset of the parameters of the one before it, so a gain
-# between neighbours is attributable to the component that was released.
+# releases parameters relative to STATIC, but they are NOT a single chain:
+# FIELD_NULL carries recovery and no transport while ISOTROPIC_DIFFUSION carries
+# transport and no recovery, so those two do not nest and a difference between
+# them is not attributable to one component. The nested pairs are STATIC subset
+# FIELD_NULL subset ANISOTROPIC_RECOVERY, and STATIC subset ISOTROPIC_DIFFUSION
+# subset ANISOTROPIC_DRIFT subset ANISOTROPIC_RECOVERY. See LADDER in
+# scripts/analyse_topic5_spo_cohort.py, which only reads the nested ones as
+# component effects.
 CONFIGS = (
     "STATIC",                 # contact bias only; no field at all
     "FIELD_NULL",             # field with decay and recovery, no spatial transport
