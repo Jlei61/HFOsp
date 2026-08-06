@@ -1,0 +1,120 @@
+[
+  {
+    "label": "ag0833_moff",
+    "analysis_start_ms": 5000.0,
+    "cfg": {
+      "use_z": true,
+      "use_m": false,
+      "use_phi": false,
+      "membrane_mode": "conductance",
+      "gaba_gain": 1.125,
+      "m_conductance_gain": 1.0,
+      "global_gaba_fraction": 0.08333333333333333,
+      "global_gaba_mode": "additive",
+      "z_scope": "local_only",
+      "v_match": 18.0,
+      "e_gaba": 0.0,
+      "e_k": 0.0,
+      "max_total_conductance": 99.0,
+      "fail_on_clip": true,
+      "I_th_EI": 95.19851312666987,
+      "tau_z": 2500.0
+    }
+  },
+  {
+    "label": "ag0833_mfast05",
+    "analysis_start_ms": 5000.0,
+    "cfg": {
+      "use_z": true,
+      "use_m": true,
+      "use_phi": false,
+      "membrane_mode": "conductance",
+      "gaba_gain": 1.125,
+      "m_conductance_gain": 1.0,
+      "global_gaba_fraction": 0.08333333333333333,
+      "global_gaba_mode": "additive",
+      "z_scope": "local_only",
+      "v_match": 18.0,
+      "e_gaba": 0.0,
+      "e_k": 0.0,
+      "max_total_conductance": 99.0,
+      "fail_on_clip": true,
+      "I_th_EI": 95.19851312666987,
+      "tau_z": 2500.0,
+      "tau_adp": 500.0,
+      "eta_m": 1.0335000469689224
+    }
+  },
+  {
+    "label": "ag0833_mfast10",
+    "analysis_start_ms": 5000.0,
+    "cfg": {
+      "use_z": true,
+      "use_m": true,
+      "use_phi": false,
+      "membrane_mode": "conductance",
+      "gaba_gain": 1.125,
+      "m_conductance_gain": 1.0,
+      "global_gaba_fraction": 0.08333333333333333,
+      "global_gaba_mode": "additive",
+      "z_scope": "local_only",
+      "v_match": 18.0,
+      "e_gaba": 0.0,
+      "e_k": 0.0,
+      "max_total_conductance": 99.0,
+      "fail_on_clip": true,
+      "I_th_EI": 95.19851312666987,
+      "tau_z": 2500.0,
+      "tau_adp": 500.0,
+      "eta_m": 2.067000093937845
+    }
+  },
+  {
+    "label": "ag0833_mslow05",
+    "analysis_start_ms": 5000.0,
+    "cfg": {
+      "use_z": true,
+      "use_m": true,
+      "use_phi": false,
+      "membrane_mode": "conductance",
+      "gaba_gain": 1.125,
+      "m_conductance_gain": 1.0,
+      "global_gaba_fraction": 0.08333333333333333,
+      "global_gaba_mode": "additive",
+      "z_scope": "local_only",
+      "v_match": 18.0,
+      "e_gaba": 0.0,
+      "e_k": 0.0,
+      "max_total_conductance": 99.0,
+      "fail_on_clip": true,
+      "I_th_EI": 95.19851312666987,
+      "tau_z": 2500.0,
+      "tau_adp": 2000.0,
+      "eta_m": 0.3725797177793549
+    }
+  },
+  {
+    "label": "ag0833_mslow10",
+    "analysis_start_ms": 5000.0,
+    "cfg": {
+      "use_z": true,
+      "use_m": true,
+      "use_phi": false,
+      "membrane_mode": "conductance",
+      "gaba_gain": 1.125,
+      "m_conductance_gain": 1.0,
+      "global_gaba_fraction": 0.08333333333333333,
+      "global_gaba_mode": "additive",
+      "z_scope": "local_only",
+      "v_match": 18.0,
+      "e_gaba": 0.0,
+      "e_k": 0.0,
+      "max_total_conductance": 99.0,
+      "fail_on_clip": true,
+      "I_th_EI": 95.19851312666987,
+      "tau_z": 2500.0,
+      "tau_adp": 2000.0,
+      "eta_m": 0.7451594355587098
+    }
+  }
+]

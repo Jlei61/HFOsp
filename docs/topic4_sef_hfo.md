@@ -50,6 +50,21 @@
 > **M4 M-gated reserve recovery R3（2026-07-20/21）**：冻结 fast sensor 的 scalar/path 层中，已有 M 只调节 q recovery rate，即可把 R2 的孤立 `80 s` 节点扩成预注册的 `80/90/100 s` corridor，且 `tau_fast=15/20/25 s` 无重拟合复现；gate-off 精确回到 R2，gate-only 又不能跨 fast exit fold，所以安全因果分工仍是 additive M 管 exit、M-gated recovery 管 reset。闭合 q→fast feedback 后，formal event-6-first canary 因第 5 事件在 `7620 ms` 提前跨 fold 而 clean no-go；这说明 feed-forward event map 缺失 `q↓→response/use↑→q further↓` 的闭环增益。按实际 event-5 entry 重新对齐，同一 trace 在下一次外驱前出现 4 次 core/annulus paired returns，并由 M 有限退出。入口：`docs/archive/topic4/sef_hfo/mz_m_gated_reserve_recovery_2026-07-20.md`、`docs/archive/topic4/sef_hfo/mz_m_gated_reserve_coupled_canary_2026-07-21.md`。
 >
 > **M4 actual-entry regional lifecycle R4（2026-07-21）**：从 R3 真实 `20 s` 末态继续而不人工 reset，现有 state machine 在约 `74.117 s` 完成一次真实 latch reset；M 随后按原 `12 s` 时间常数自然释放，系统到 `q=.899043`、`A<10^-9 mV`、`rE≈.823 Hz`，fast RHS `1.56e-10/ms`，向原 LLL root 收敛。相同六事件 challenge 在 protected state 仍有诱发 crossing，但没有 response-excluded 4-return lifecycle 且末段持续低；自然恢复后重新出现 event-5 entry、4 次 paired bursts 与有限退出。从共同 `20 s` checkpoint 开始的 recovery 与 recovered challenge 在 `.125/.0625 ms` 标签一致；原 R3 Segment A 仍只来自 hash-lock 的 `.125 ms` source trace。当前只接受为 **fixed-bath three-patch center-point hybrid relaxation lifecycle existence proof**：不是 electrical silence、零输入 spontaneous onset、连续空间 wavefront、robust corridor、Hopf/torus 或 full SNN。下一门仅为 fully coupled q-map local robustness + causal ablation，三条下游 workflow 继续冻结。入口：`docs/archive/topic4/sef_hfo/mz_actual_entry_lifecycle_closure_2026-07-21.md`。
+> **M4/MZ → FCXR-RC1 分阶段验收（更新至 2026-07-22）**：原 exact-conductance 路线能产生
+> “有序轴向间期事件 → 广招募/方向丢失的 terminal runaway”，但不能终止和恢复。FCXR-RC1 已把快系统收敛为
+> **external additive FF AMPA + recurrent E→E conductance + recurrent-only smooth saturation**；它跨 seed 保住
+> `L=20` 的间期工作点并挡住 runaway。冻结 `Z` 失效轴 Stage D 进一步发现：活动随失抑制连续加密为有界、空间结构稳定的
+> 亚稳密事件串，但没有稳健、独立的 finite-high 分支。因而当前结果是一个可用的 fast substrate，**仍不是完整发作生命周期**；
+> 终止、恢复和动态状态切换均未通过。详见
+> `docs/archive/topic4/sef_hfo/mz_fcxr_stage_d_branch_map_2026-07-22.md`。
+>
+> **最终模型与主图目标（2026-07-22 lock）**：在同一个患者特异空间 scaffold 上实现并分析
+> **间期 → 有界发作 → 间期**。这里“间期”不要求固定节律或周期轨道；它可以是稳定背景态、吸引域中的随机邻域或稳定概率分布，
+> 只要能按原有统计规律产生稀疏、不规则、自终止的 IED。所谓 recovery 也不是回到同一个相位点，而是回到这个间期状态空间邻域，
+> 且恢复窗内的事件率/IEI、时长、参与度、峰值和空间模板重新落回基线统计带。最终主图必须同时给出：① virtual-SEEG 的
+> 间期—发作—间期；② 慢变量相图中的进入、驻留、退出和返回轨迹；③ 间期与发作早期 energy field 的一致性；④ 三个阶段的
+> spatial eigenmode / stimulation readout。当前 `fig5_candidate_E1146_snn_state_readout_with_modes.png` 只作为布局和 readout 原型，
+> 其中 terminal runaway 不能冒充完整生命周期。
 >
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
@@ -976,6 +991,10 @@ Figure 5 下半部分另行设计；未明确解锁前，不再改变本 block �
 - **M3 阶段主文档（机制 screen，未 PASS）**：`docs/topic4_m3_stage.md` —— M3 stage 收口（一个主文档 + A/B 分文档）。M0→M1→M2 一致性（均质衬底空间自限难、不靠压死）→ 转 M3；**A 线（慢变量）源空间逐细胞 onset 梯度 = 沿轴相干招募波**（R²≈0.87、align≈1.0、40k SNN），**B 线（谱相图）§5 非正规瞬态 = 骨架特异自限轴向放大**，两线互相印证；停在"机制 screen 通过、发作机制未 validate"。方法学锁：正确仪器=源空间 onset 梯度（非接触空间/collision/elongation/主导本征模式）。
   - **A 线分文档** `docs/archive/topic4/sef_hfo/m3a_stage_conclusion_2026-06-27.md` —— A1/A1b/A1c/A2 收口；局部资源耗竭 + 恢复项产生 expanded axial recruitment 候选，不支持完整"间期短事件 → 离轴/全局发作样招募 → 恢复"。分阶段 recap：`m3a_a1b_state_topography_2026-06-25.md` / `m3a_a1c_pilot_recap_2026-06-25.md` / `m3a_a2_abbott_lg_pilot_recap_2026-06-26.md`（§6.2 = onset 梯度重开判读）；旧 `seizure_like` 仅历史 screen 名。
   - **B 线分文档** `docs/archive/topic4/sef_hfo/m3b_stage_conclusion_2026-06-28.md` —— Brunel 式有限-Jacobian 谱相图 = **SPM-PASS frozen map**（线性算子层面）；主导本征模式全局（k=0），§5 非正规瞬态读出骨架特异自限轴向；**SNN 口径已纠正**（B 线内置 tiny grid 是错仪器假阴，轴向 spiking 验证在 A 线 A2-P 为正）；判决闸 fail-closed（无 SNN/M3A overlay/几何零模型三道桥）。机器 = `src/topic4_m3b_spectral_phase.py`（TDD-0..15 绿）+ `m3b_jacobian_design_LOCKED_2026-06-27.md`。
+- **M4/MZ conductance 阶段包（机制与边界已锁，完整 lifecycle 未 PASS）**：
+  - `docs/archive/topic4/sef_hfo/mz_conductance_stage_handoff_2026-07-20.md` —— **其他 agent 的唯一入口**：分阶段 gate、当前安全/禁止 claim、复现锚、下一机制线和 no-touch 规则。
+  - `docs/archive/topic4/sef_hfo/mz_conductance_dynamics_reflection_and_next_model_2026-07-20.md` —— 当前结果的动力学反思：conductance/global/M 各自解决了什么、为什么仍只有 terminal runaway、为何下一步转向 E→E presynaptic resource。
+  - `results/paper-ready-figure/fig_mz_conductance_current_dynamics/figures/` —— 当前阶段机制图、PDF、metadata 和中文 README；只展示“间期轴向事件 → terminal runaway”，不是最终可恢复发作态图。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档

@@ -1,0 +1,173 @@
+{
+  "figure": "fig_mz_conductance_current_dynamics",
+  "status": "visual diagnostic; current positive route ends in runaway, not recovery",
+  "source_artifact": "results/topic4_sef_hfo/mz_conductance/figure_capture/20260719T161254.485218Z_2_6ce230e_e5944b9c4d_figure_capture/mz_conductance_current_dynamics.npz",
+  "source_metadata": "results/topic4_sef_hfo/mz_conductance/figure_capture/20260719T161254.485218Z_2_6ce230e_e5944b9c4d_figure_capture/mz_conductance_current_dynamics.json",
+  "outputs": {
+    "png": "results/paper-ready-figure/fig_mz_conductance_current_dynamics/figures/mz_conductance_current_dynamics.png",
+    "pdf": "results/paper-ready-figure/fig_mz_conductance_current_dynamics/figures/mz_conductance_current_dynamics.pdf"
+  },
+  "layout": [
+    "mechanism",
+    "returning event",
+    "early runaway",
+    "continuous electrode readout"
+  ],
+  "renderer_reuse": [
+    "plot_fig5_core_model_s3_brakeoff._axis_range_patch",
+    "plot_fig_m3a_v2_1_qigk_runaway_transition_gif._draw_contacts/_style_spatial/_shaft_color"
+  ],
+  "source_run": {
+    "run_id": "20260719T161254.485218Z_2_6ce230e_e5944b9c4d_figure_capture",
+    "label": "wp1125_zq75_tz2500_ag0.0833_figure",
+    "seed": 1,
+    "T": 8000.0,
+    "cfg": {
+      "use_z": true,
+      "use_m": false,
+      "use_phi": false,
+      "membrane_mode": "conductance",
+      "gaba_gain": 1.125,
+      "m_conductance_gain": 1.0,
+      "global_gaba_fraction": 0.08333333333333333,
+      "global_gaba_mode": "additive",
+      "z_scope": "local_only",
+      "v_match": 18.0,
+      "e_gaba": 0.0,
+      "e_k": 0.0,
+      "max_total_conductance": 99.0,
+      "fail_on_clip": true,
+      "I_th_EI": 95.19851312666987,
+      "tau_z": 2500.0
+    },
+    "artifact": "results/topic4_sef_hfo/mz_conductance/figure_capture/20260719T161254.485218Z_2_6ce230e_e5944b9c4d_figure_capture/mz_conductance_current_dynamics.npz",
+    "selection_rule": "median participation among returned events with t_on>=500 ms and t_off<=runaway-200 ms",
+    "representative_returning_event": {
+      "t_on": 5118.0,
+      "t_off": 5153.0,
+      "dur_ms": 36.0,
+      "peak_ext": 0.0374375,
+      "returned": true
+    },
+    "returning_window_ms": [
+      5113.0,
+      5163.0
+    ],
+    "runaway_window_ms": [
+      7150.1,
+      7280.1
+    ],
+    "n_returning_eligible": 19,
+    "n_events_total": 32,
+    "runaway_ms": 7180.1,
+    "run_metrics": {
+      "n_events": 32,
+      "peak_dur": 385.0,
+      "peak_participation": 0.1575,
+      "peak_rate": 175.00000000000003,
+      "peak_returned": false,
+      "max_dur": 385.0,
+      "peak_af": 0.1575
+    },
+    "spatial_counts": {
+      "returning": 7963,
+      "early_runaway": 15008,
+      "NE": 32000
+    },
+    "numerical": {
+      "safe": true,
+      "tau_eff_min_ms": 0.27988842871009595,
+      "max_clip_fraction": 0.0,
+      "peak_rss_gb": 6.796,
+      "wall_s": 652.64
+    },
+    "resource_preflight": {
+      "mem_available_gb": 235.12,
+      "swap_used_gb": 0.638,
+      "estimated_need_gb": 13.38,
+      "budget_gb": 164.58
+    },
+    "baseline_source": "results/topic4_sef_hfo/mz_conductance/runs/20260719T144115.889629Z_2_6ce230e_e12e45ca14_additive_global_seed1/baseline_current.json",
+    "substrate": {
+      "subject": "epilepsiae_1146",
+      "montage": "narrow",
+      "L": 20.0,
+      "density": 100.0,
+      "N": 40000,
+      "NE": 32000,
+      "NI": 8000,
+      "AR": 2.0,
+      "drive": 0.6,
+      "g": 3.6
+    },
+    "provenance": {
+      "git_sha": "6ce230e",
+      "git_status": [
+        " M results/topic4_sef_hfo/snn_heterogeneity/engine_versions.json",
+        " M src/snn_engine/kick_probe.py",
+        " M src/snn_engine/mz_slow_vars.py",
+        "?? config/topic4_mz_conductance.yaml",
+        "?? config/topic4_mz_conductance_additive_global_seed1.json",
+        "?? config/topic4_mz_conductance_figure_capture_seed1.json",
+        "?? config/topic4_mz_conductance_global_bracket_seed1.json",
+        "?? config/topic4_mz_conductance_m_boundary_seed1.json",
+        "?? config/topic4_mz_conductance_m_recovery_seed1.json",
+        "?? config/topic4_mz_conductance_protected_global_seed1.json",
+        "?? config/topic4_mz_conductance_z_confirm_seed3.json",
+        "?? config/topic4_mz_conductance_z_staircase_seed1.json",
+        "?? docs/archive/topic4/sef_hfo/mz_conductance_global_inhibition_pilot_2026-07-19.md",
+        "?? docs/superpowers/specs/2026-07-19-topic4-mz-conductance-global-inhibition-design.md",
+        "?? scripts/run_topic4_mz_conductance.py",
+        "?? src/topic4_mz_conductance.py",
+        "?? tests/test_mz_conductance.py",
+        "?? tests/test_topic4_mz_conductance.py"
+      ],
+      "argv": [
+        "scripts/run_topic4_mz_conductance.py",
+        "capture-figure",
+        "--confirm-run",
+        "--seed",
+        "1",
+        "--T",
+        "8000",
+        "--workers",
+        "1",
+        "--spec",
+        "config/topic4_mz_conductance_figure_capture_seed1.json",
+        "--baseline-json",
+        "results/topic4_sef_hfo/mz_conductance/runs/20260719T144115.889629Z_2_6ce230e_e12e45ca14_additive_global_seed1/baseline_current.json"
+      ],
+      "task_hash": "e5944b9c4d",
+      "note": "full T-by-NE spike raster was not serialized"
+    }
+  },
+  "spatial_readout": {
+    "returning": {
+      "n_recruited": 7963,
+      "recruited_fraction": 0.24884375,
+      "onset_axis_spearman": 0.9586027525696788,
+      "onset_perp_spearman": -0.006897753936880852,
+      "axis_p95_span_mm": 15.379548469185828,
+      "perp_p95_span_mm": 6.770906400680541
+    },
+    "early_runaway": {
+      "n_recruited": 15008,
+      "recruited_fraction": 0.469,
+      "onset_axis_spearman": -0.1177067548105341,
+      "onset_perp_spearman": 0.04307189938152291,
+      "axis_p95_span_mm": 19.053398778289555,
+      "perp_p95_span_mm": 9.85674849748611
+    }
+  },
+  "visual_contract": {
+    "onset_colormap": "viridis, 0=early and 1=late",
+    "montage": "registered E1146 narrow 15-contact plane",
+    "returning_selection": "median participation among returned events with t_on>=500 ms and t_off<=runaway-200 ms",
+    "terminal_label": "runaway"
+  },
+  "claim_boundary": [
+    "supports a spontaneous event-locked Z staircase followed by delayed runaway",
+    "does not support a bounded ictal attractor, limit cycle, bistability, or recovery",
+    "single-seed spatial visual diagnostic; quantitative verdict remains the multiseed pilot report"
+  ]
+}
