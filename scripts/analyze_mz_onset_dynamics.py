@@ -33,6 +33,11 @@ def per_cell(z):
         d_pre = float(np.mean(D[t >= t[-1] - 500.0]))
     a_max = float(a.max())
     a_onset = float(t[int(np.argmax(a > 0.1 * a_max))]) if a_max > 0 else None    # adaptation engages
+    # D and realized adaptation AT the first sustained crossing (runaway_ms) = the true onset state (P1-2):
+    # onset reference must be D_at_runaway, NOT the post-crossing D_max (which is ~100-140 ms later).
+    ic = min(int(np.searchsorted(t, onset)), len(t) - 1) if onset is not None else None
+    d_at_runaway = float(D[ic]) if ic is not None else None
+    a_at_runaway = float(a[ic]) if ic is not None else None
     rec_onset = float(on[0]) if on.size else None                                 # first interictal event
     durs = (off - on) if on.size else np.array([])
     t_peakD = float(t[int(np.argmax(D))])
@@ -43,6 +48,8 @@ def per_cell(z):
         target_frac=round(float(z["A_frac"]), 5), seed=int(z["seed"]), eta_m=round(float(z["eta_m"]), 5),
         onset_ms=None if onset is None else round(onset, 0),
         D_max=round(float(D.max()), 4), D_pre_onset=round(d_pre, 4), D_end=round(float(D[-1]), 4),
+        D_at_runaway=None if d_at_runaway is None else round(d_at_runaway, 4),
+        a_at_runaway=None if a_at_runaway is None else round(a_at_runaway, 5),
         a_max_realized=round(a_max, 5), a_onset_ms=None if a_onset is None else round(a_onset, 0),
         recruit_onset_ms=None if rec_onset is None else round(rec_onset, 0),
         n_events=int(on.size), event_dur_med_ms=round(float(np.median(durs)), 1) if durs.size else None,
@@ -52,6 +59,8 @@ def per_cell(z):
 def main():
     cells = {}
     for f in sorted(glob.glob(os.path.join(TRAJ, f"traj_{REGIME}_A*_seed*.npz"))):
+        if "_tau" in os.path.basename(f):
+            continue                          # tau-sweep cells are a separate sensitivity, NOT the tau=2000 gap grid
         z = np.load(f)
         fr = round(float(z["A_frac"]), 5)
         if fr not in GAP_FRACS:
@@ -60,13 +69,32 @@ def main():
     if not cells:
         print("no gap-grid trajectories found yet")
         return
-    # z-only onset D reference (mean D_max of a=0 cells)
-    zonly = [c["D_max"] for (fr, s), c in cells.items() if fr == 0.0]
-    D_onset_ref = float(np.mean(zonly)) if zonly else 0.096
+    # onset-D reference = D at FIRST-crossing (runaway_ms) of a=0 cells, NOT post-crossing D_max (P1-2 fix)
+    zonly = [c["D_at_runaway"] for (fr, s), c in cells.items() if fr == 0.0 and c["D_at_runaway"] is not None]
+    D_onset_ref = float(np.mean(zonly)) if zonly else 0.087
+    # run-off corridor + m-timing across ALL run-off cells (gap z-only + tau-sweep z+m runaways) — cross-grid
+    xc, mt = [], []
+    for f in sorted(glob.glob(os.path.join(TRAJ, f"traj_{REGIME}_A*_seed*.npz"))):
+        zz = np.load(f)
+        ra = float(zz["runaway_ms"])
+        if not np.isfinite(ra):
+            continue
+        tt = zz["t_ms"]
+        ii = min(int(np.searchsorted(tt, ra)), len(tt) - 1)
+        xc.append(float(zz["D_allE"][ii]))
+        if float(zz["a_allE"].max()) > 0:                       # m on (tau z+m runaways): a@crossing vs a_max
+            mt.append((float(zz["a_allE"][ii]), float(zz["a_allE"].max())))
     fracs = sorted({fr for fr, _ in cells})
     seeds = sorted({s for _, s in cells})
 
-    print(f"z-only onset-D reference (mean D_max at a=0) = {D_onset_ref:.4f}\n")
+    print(f"onset-D reference (D at first-crossing, a=0 cells) = {D_onset_ref:.4f}")
+    if xc:
+        print(f"run-off D corridor (all {len(xc)} runaways) = {np.mean(xc):.4f} ± {np.std(xc):.4f}"
+              f"  — m determines whether the trajectory REACHES the boundary, not where it is")
+    if mt:
+        print(f"adaptation at crossing = {np.mean([m[0] for m in mt]):.5f} (weak) vs a_max = "
+              f"{np.mean([m[1] for m in mt]):.5f} (post-onset) — feedback too late to contain")
+    print()
     hdr = "target_frac  seed  eta_m    onset_ms  D_max   D_pre  a_max     n_ev  rate_max  retrig  returned"
     print(hdr)
     rows = []
@@ -114,8 +142,13 @@ def main():
     else:
         conclusion = "Binary prevention: adaptation prevents onset with no bounded elevated approach."
     print("\nCONCLUSION:", conclusion)
-    json.dump(dict(D_onset_ref=D_onset_ref, cells=rows, verdict={str(k): v for k, v in verdict.items()},
-                   conclusion=conclusion),
+    runoff_corridor = (dict(n=len(xc), D_mean=round(float(np.mean(xc)), 4), D_sd=round(float(np.std(xc)), 4),
+                            D_min=round(float(np.min(xc)), 4), D_max=round(float(np.max(xc)), 4)) if xc else None)
+    m_timing = (dict(n=len(mt), a_at_crossing_mean=round(float(np.mean([m[0] for m in mt])), 5),
+                     a_post_onset_max_mean=round(float(np.mean([m[1] for m in mt])), 5)) if mt else None)
+    json.dump(dict(D_onset_ref=D_onset_ref, runoff_corridor=runoff_corridor,
+                   adaptation_timing_in_m_runaways=m_timing, cells=rows,
+                   verdict={str(k): v for k, v in verdict.items()}, conclusion=conclusion),
               open(os.path.join(OUT, "gap_dynamics_summary.json"), "w"), indent=1)
     print("wrote", os.path.join(OUT, "gap_dynamics_summary.json"))
 
