@@ -72,16 +72,24 @@ def _broad_lagpat_dir(dataset: str, subject: str) -> Path:
     return Path(f"results/lagpat_broad_epilepsiae/{subject}")
 
 
+def _narrow_lagpat_dir(dataset: str, subject: str) -> Path:
+    """Canonical (narrow) per-subject lagPat pool that produced interictal_propagation_masked
+    labels. Dataset-specific root (reuse, do NOT reinvent); C1 proof is the guardrail."""
+    from scripts.run_interictal_propagation import _subject_dir, YUQUAN_ROOT, EPILEPSIAE_ROOT
+    root = YUQUAN_ROOT if dataset == "yuquan" else EPILEPSIAE_ROOT
+    return _subject_dir(dataset, root, subject)
+
+
 def load_event_labels_ranks(
     dataset: str,
     subject: str,
     *,
     broad: bool = True,
-    labels_dir: str = "results/interictal_propagation_masked_broad/per_subject",
+    labels_dir: Optional[str] = None,
     lagpat_dir: Optional[str] = None,
     template_tol: float = 0.99,
 ) -> dict:
-    """Load broad A/B labels + per-event ranks, with the §C1 positional-alignment proof.
+    """Load broad OR narrow A/B labels + per-event ranks, with the §C1 positional-alignment proof.
 
     Returns dict with: masked (n_ch,n_valid, phantom-masked, NaN non-participating),
     bools (n_ch,n_valid), ranks_raw (n_ch,n_valid), labels (n_valid,), valid_ev,
@@ -92,9 +100,9 @@ def load_event_labels_ranks(
     drift can make n_valid coincide while events differ; we prove positional identity by
     reproducing the producer's per-cluster template exactly).
     """
-    if not broad:
-        raise NotImplementedError("narrow substrate path for the field metric is not built; "
-                                  "narrow is companion-only (M1d). See spec §4.")
+    if labels_dir is None:
+        labels_dir = ("results/interictal_propagation_masked_broad/per_subject" if broad
+                      else "results/interictal_propagation_masked/per_subject")
     js = json.load(open(Path(labels_dir) / f"{dataset}_{subject}.json"))
     ac = js["adaptive_cluster"]
     if not (ac.get("stable_k") == 2 and ac.get("chosen_k") == 2):
@@ -104,7 +112,8 @@ def load_event_labels_ranks(
     labels = np.asarray(ac["labels"], dtype=int)
     clusters = ac["clusters"]
 
-    lp = Path(lagpat_dir) if lagpat_dir else _broad_lagpat_dir(dataset, subject)
+    lp = Path(lagpat_dir) if lagpat_dir else (_broad_lagpat_dir(dataset, subject) if broad
+                                              else _narrow_lagpat_dir(dataset, subject))
     ev = load_subject_propagation_events(lp)
     ranks, bools, ch = ev["ranks"], ev["bools"], list(ev["channel_names"])
     valid_ev = _valid_event_indices(bools, min_participating=MIN_PARTICIPATING)
