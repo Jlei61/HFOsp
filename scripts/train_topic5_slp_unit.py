@@ -40,6 +40,11 @@ from src.topic5_virtual_seeg_operator import (
 ROOT = Path(__file__).resolve().parents[1]
 OUT_ROOT = ROOT / "results/topic5_spatial_latent_propagation_rnn_v0_1"
 
+# These tensors are far too small for intra-op parallelism to pay, and many of
+# these processes run at once.  Left at the default each one grabs every core and
+# they spend their time contending rather than computing.
+torch.set_num_threads(2)
+
 DEFAULTS: Dict[str, Any] = {
     "hidden": 4,
     "microsteps": 3,

@@ -41,6 +41,8 @@ def main() -> int:
     lco = load(OUT / "leave_contact_out_summary.json")
     frozen = load(OUT / "development" / "FROZEN_CONFIG.json")
     sweep = load(OUT / "development" / "SWEEP_SUMMARY.json")
+    baseline_check = load(OUT / "static_baseline_verification.json")
+    budget_probe = load(OUT / "convergence_bias_probe.json")
 
     matrix = OUT / "EXPERIMENT_MATRIX.csv"
     planned = completed = 0
@@ -138,6 +140,50 @@ def main() -> int:
             add(f"  - still improving when the epoch budget ran out, so these carry no "
                 f"negative verdict: {entry['patients_with_an_unconverged_arm']}")
     add("")
+
+    add("## 4b. Is the comparison fair?\n")
+    add("The static baseline reaches the epoch ceiling far more often than the recurrent "
+        "arm, and it does so in the direction that would flatter the recurrent arm. Two "
+        "checks, because a caveat would not settle it:\n")
+    if baseline_check:
+        add(f"- the same constant-per-contact model was refitted with a second-order "
+            f"optimiser and scored on the same held-out events. The cohort run sits "
+            f"{baseline_check['median_gap']:+.4f} from that optimum in the median and "
+            f"{baseline_check['max_abs_gap']:.4f} at worst, against a reported advantage "
+            f"around {abs(((primary.get('H1_recurrence') or {}).get('all') or {}).get('median_delta', float('nan'))):.3f}. "
+            f"Verdict: **{baseline_check['status'].lower().replace('_', ' ')}** — "
+            f"{baseline_check['means']}.")
+    else:
+        add("- baseline optimality check not available.")
+    if budget_probe:
+        add(f"- a sample of patients was refitted with a six-fold epoch budget. The "
+            f"advantage moved from {budget_probe['median_advantage_at_budget_95']:+.4f} to "
+            f"{budget_probe['median_advantage_at_long_budget']:+.4f}, a shrinkage of "
+            f"{budget_probe['median_shrinkage']:+.4f} "
+            f"({budget_probe['shrinkage_as_fraction_of_reported_advantage']:.1%} of the "
+            f"effect). {budget_probe['direction'].capitalize()}.")
+    else:
+        add("- longer-budget probe not available.")
+    add("")
+
+    if sweep:
+        add("## 4c. What the swept settings actually changed\n")
+        rows = sweep.get("stages", {}).get("wiring", {}).get("rows", [])
+        if rows:
+            losses = [r["validation_next_bce"] for r in rows]
+            costs = [r.get("wiring_cost", float("nan")) for r in rows]
+            add(f"Across every connection-cost and budget setting tried, prediction moved "
+                f"by {max(losses) - min(losses):.4f} while the total connection cost moved "
+                f"by a factor of {max(costs) / min(costs):.1f}. A much cheaper, shorter-range "
+                f"graph therefore costs essentially nothing in prediction — which is a "
+                f"statement about how little the connection pattern matters here, not "
+                f"evidence that the economical graph is the right one.\n")
+        micro = sweep.get("stages", {}).get("microsteps", {}).get("rows", [])
+        if micro:
+            add("The number of internal propagation steps does matter, but through reach "
+                "rather than accuracy: at one step only "
+                f"{min(r.get('hop_reachability', 1.0) for r in micro):.0%} of observed "
+                "transitions were within the graph's reach at all.\n")
 
     add("## 5. Predicting at contacts the model never trained on\n")
     if lco:
