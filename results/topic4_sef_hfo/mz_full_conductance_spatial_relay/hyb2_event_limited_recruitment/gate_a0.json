@@ -1,0 +1,64 @@
+{
+  "status": "A0_UNDECIDABLE_ALL_LEVELS",
+  "primary_level": null,
+  "per_level": {
+    "S25": {
+      "status": "A0_CEILING_CONFOUNDED",
+      "ceiling": {
+        "participants": false,
+        "voxels": true,
+        "runaway": false
+      },
+      "frac": 0.9,
+      "note": "the off arm is already near global recruitment, so there is no headroom for a >=10% improvement; this says nothing about the actuator",
+      "z_level": "S25",
+      "S_Z": 0.2315062193563353,
+      "I_th_EI": 37.486518318062565,
+      "t_gate_ms": 1518.5,
+      "off_participant_voxels": 923,
+      "off_window_participants": 18759
+    },
+    "S50": {
+      "status": "A0_CEILING_CONFOUNDED",
+      "ceiling": {
+        "participants": false,
+        "voxels": true,
+        "runaway": false
+      },
+      "frac": 0.9,
+      "note": "the off arm is already near global recruitment, so there is no headroom for a >=10% improvement; this says nothing about the actuator",
+      "z_level": "S50",
+      "S_Z": 0.2882185004778396,
+      "I_th_EI": 13.605692880018168,
+      "t_gate_ms": 1510.5,
+      "off_participant_voxels": 925,
+      "off_window_participants": 18969
+    },
+    "S75": {
+      "status": "A0_CEILING_CONFOUNDED",
+      "ceiling": {
+        "participants": false,
+        "voxels": true,
+        "runaway": false
+      },
+      "frac": 0.9,
+      "note": "the off arm is already near global recruitment, so there is no headroom for a >=10% improvement; this says nothing about the actuator",
+      "z_level": "S75",
+      "S_Z": 0.35969830488396864,
+      "I_th_EI": 3.65534894749967,
+      "t_gate_ms": 1517.5,
+      "off_participant_voxels": 924,
+      "off_window_participants": 19199
+    }
+  },
+  "missing": [],
+  "rule": "plan rev2: the primary verdict is the WEAKEST eligible level; eligibility is decidable from the off arm alone, so it cannot steer the efficacy call",
+  "ladder": [
+    "S25",
+    "S50",
+    "S75"
+  ],
+  "generated": "2026-08-01T09:30:03.900096+00:00",
+  "code_commit": "00b424f2",
+  "note": "no locked level left headroom or reached the actuator; A0 closes as undecidable -- do NOT lower further, widen the window or move the ceiling clause"
+}

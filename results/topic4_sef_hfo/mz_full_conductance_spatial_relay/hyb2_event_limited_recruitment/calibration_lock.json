@@ -1,0 +1,141 @@
+{
+  "status": "CALIBRATION_LOCK",
+  "generated": "2026-08-01T08:17:32.450721+00:00",
+  "code_commit": "cbf089ca",
+  "plan": "docs/superpowers/plans/2026-07-31-topic4-fcxr-hyb2.md",
+  "T_event_guard_ms": 22.0,
+  "gap_05_per_seed": {
+    "1": 225.4,
+    "3": 195.25
+  },
+  "gap_05_lock_ms": 195.25,
+  "gap_05_lock_rule": "min over seeds (plan 3.6)",
+  "tau_R_ms": 30.54105390302878,
+  "tau_interval": [
+    22.0,
+    42.397998795804966
+  ],
+  "headroom_ms": 20.397998795804966,
+  "residual": {
+    "gap_05": 0.0016731718693206684,
+    "gap_01": 0.0020531264434897343,
+    "gap_min": 0.0020531264434897343
+  },
+  "I_R_max": 4.134151260609386,
+  "dt_R_ms": 0.5,
+  "Q_BG": 0.99,
+  "eps_s_rule": "0.10 * median_v(b_v), per seed",
+  "eps_q_rule": "0.10 * Q_on, per seed",
+  "Q_scale_rule": "Q_scale := Q_on (plan 4.3)",
+  "seeds": {
+    "seed1": {
+      "Q_on": 112.50469568958786,
+      "Q_scale": 112.50469568958786,
+      "eps_q": 11.250469568958787,
+      "eps_s": 34.54907073974609,
+      "b_v_median": 51.28205108642578,
+      "b_v_zero_frac": 0.47265625,
+      "b_v_quantum_hz": 0.45454544060106855,
+      "b_v_mean": 175.97697684150074,
+      "b_v_max": 620.6896362304688,
+      "n_occupied": 1024,
+      "gap_05_ms": 225.4,
+      "gap_01_ms": 206.68,
+      "gap_min_ms": 199.0,
+      "n_events": 34,
+      "Q_on_source": "re-derived at the global tau_R from the recorded load",
+      "artifact": "calibration_seed1.npz"
+    },
+    "seed3": {
+      "Q_on": 173.42897929605712,
+      "Q_scale": 173.42897929605712,
+      "eps_q": 17.342897929605712,
+      "eps_s": 46.511627197265625,
+      "b_v_median": 0.0,
+      "b_v_zero_frac": 0.5283203125,
+      "b_v_quantum_hz": 33.8983039855957,
+      "b_v_mean": 187.82182051699533,
+      "b_v_max": 634.1463623046875,
+      "n_occupied": 1024,
+      "gap_05_ms": 195.25,
+      "gap_01_ms": 189.0,
+      "gap_min_ms": 189.0,
+      "n_events": 67,
+      "Q_on_source": "stored float64 value, cross-checked against an independent q_max_series derivation (173.428975, relative difference 2.53e-08, float32 round-trip)",
+      "artifact": "calibration_seed3.npz"
+    }
+  },
+  "b0_off_arm": {
+    "seed1": {
+      "label": "INTERICTAL_BASELINE",
+      "numerical": {
+        "finite": true,
+        "tau_eff_min_ms": 0.27372244628935677,
+        "clip_frac_max": 0.0,
+        "numerical_unsafe": false
+      },
+      "roll_hi_hz": 9.738229166666663,
+      "note": "this run IS the Gate B0 ELR-off arm for this seed"
+    },
+    "seed3": {
+      "label": "INTERICTAL_BASELINE",
+      "numerical": {
+        "finite": true,
+        "tau_eff_min_ms": 0.27736206915408185,
+        "clip_frac_max": 0.0,
+        "numerical_unsafe": false
+      },
+      "roll_hi_hz": 9.36927083333333,
+      "note": "this run IS the Gate B0 ELR-off arm for this seed"
+    }
+  },
+  "inputs_sha256": {
+    "lc1_baseline_seed1": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/baseline_contract_seed1.json",
+      "exists": true,
+      "sha256": "fd3e0d05ef730c30a484a071046e6a92d8f5e775b2035646dc89f4b4e8367c53"
+    },
+    "lc1_baseline_seed3": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/baseline_contract_seed3.json",
+      "exists": true,
+      "sha256": "9885b6e0ed83693738b885a2ceeb742c2702530b550e252d8c7389ad69ee6b5c"
+    },
+    "lc1_zonly_seed1_q75": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/z_only_summary_seed1_q75.json",
+      "exists": true,
+      "sha256": "a7b7ef5703f14681a52b115dcb0a6b9abae272bb93d14bcd1ce43883c83cb20b"
+    },
+    "lc1_zonly_seed1_q50": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/z_only_summary_seed1_q50.json",
+      "exists": true,
+      "sha256": "6224f5c05426804aa72d549866d365659dd2d89c20dddf7538c1981598ad866a"
+    },
+    "lc1_sensor_seed1": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/sensor_separation_seed1_ty120.json",
+      "exists": true,
+      "sha256": "a29e8f9766bd3b8f959beb6d2fc9f00e6cfc82b08c7be53a43c8cd973b1dca7d"
+    },
+    "lc1_xcontrol_seed1": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/xcontrol_seed1.json",
+      "exists": true,
+      "sha256": "fe5880d33767036a086667ce3064f98731d6ba7d583904a05cdebb8f7893f169"
+    },
+    "b2_1_matched_control": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-ion/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/ion_homeostasis/b2_1_matched_control.json",
+      "exists": true,
+      "sha256": "fe0eecb749b2a5281b1da17eb85cf1a07c97499d9a9b15dfee0920c50b093c8d"
+    },
+    "pi_snapshot_seed1": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-hyb2/results/topic4_sef_hfo/state_conditioned_susceptibility/snapshots/zA_q75_tz5000/seed_1.npz",
+      "exists": true,
+      "sha256": "3d73db6801eb6e0b8741b37d813fcbedad21d3e4d79545bf705ae7d614275ae9"
+    },
+    "pi_snapshot_seed3": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-hyb2/results/topic4_sef_hfo/state_conditioned_susceptibility/snapshots/zA_q75_tz5000/seed_3.npz",
+      "exists": true,
+      "sha256": "b3cf701fdf18f5adf1b3c939dc2e8de204c40b78a8efa8082785017dc8e5bd4a"
+    }
+  },
+  "note": "tau_R is GLOBAL (min cross-seed GAP_05); b_v / Q_on / Q_scale are PER SEED under the identical frozen rule, so the rule is out-of-sample on seed3",
+  "deadband_coverage_note": "About half of all occupied voxels have b_v = 0 (they fire in under 1% of 0.5 ms blocks), so in that half the deadband provides no protection and Q_on is the only gate -- the two-stage gate collapses to one stage there. b_v is also quantised to multiples of one spike per voxel-block, which is why its MEDIAN is uninformative and flips between 0 and one quantum across seeds on a ~50/50 split. Recorded BEFORE Gate B0 and Gate A0 run; Q_BG is NOT adjusted."
+}

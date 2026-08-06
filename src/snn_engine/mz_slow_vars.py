@@ -60,6 +60,35 @@ def cooperative_u_tilde(u, A_c, u_c, K_c, n):
     return u * (1.0 + A_c * H)
 
 
+def _stable_sigmoid(x):
+    """Overflow-safe logistic function for scalar/array inputs."""
+    x = np.asarray(x, dtype=float)
+    out = np.empty_like(x)
+    pos = x >= 0.0
+    out[pos] = 1.0 / (1.0 + np.exp(-x[pos]))
+    ex = np.exp(x[~pos])
+    out[~pos] = ex / (1.0 + ex)
+    return out
+
+
+def lc2_h_gate(h, theta, k):
+    """LC2 zero-baseline smooth gate ``S_tilde(h)``.
+
+    ``h`` is non-negative by construction.  Subtracting the value at zero makes the H contribution
+    exactly zero in the quiescent state without introducing a hard threshold.  The normalisation keeps
+    the gate in [0, 1] and separates its amplitude (``rho_h_lc2``) from its operating point.
+    """
+    h = np.asarray(h, dtype=float)
+    if not (np.isfinite(theta) and np.isfinite(k) and theta >= 0.0 and k > 0.0):
+        raise ValueError("lc2_h_gate requires finite theta>=0 and k>0")
+    s0 = _stable_sigmoid(np.asarray(-theta / k))
+    out = (_stable_sigmoid((h - theta) / k) - s0) / (1.0 - s0)
+    # The h==0 branch uses the same analytic value as s0; assigning literal zero prevents a harmless
+    # last-bit subtraction residue from violating the zero-baseline scientific contract.
+    out = np.where(h == 0.0, 0.0, out)
+    return np.clip(out, 0.0, 1.0)
+
+
 def gerec_baseline_quantiles(counts, edges, qs):
     """Quantiles of gErec_raw from the slow-off cumulative fixed-edge histogram (FCXR-HEO1 calibration).
 
@@ -88,6 +117,8 @@ class MZSlowVarsConfig:
     use_z: bool = False            # OFF by default -> byte parity with slow=None
     use_m: bool = False            # OFF by default -> byte parity with slow=None
     tau_z: float = 5000.0          # ms   inhibitory-efficacy recovery/depletion time constant (CALIBRATION)
+    tau_z_down: "float | None" = None  # FCXR-HYB1: asymmetric Z depletion tau (z_inf<z); None+None -> symmetric tau_z
+    tau_z_up: "float | None" = None    # FCXR-HYB1: asymmetric Z recovery tau (z_inf>=z)
     I_th_EI: float = 0.0           # E-cell GABA current depletion threshold (CALIBRATION)
     tau_adp: float = 2000.0        # ms   adaptation decay time constant (CALIBRATION)
     eta_m: float = 0.0             # adaptation current per unit m (CALIBRATION)
@@ -116,7 +147,15 @@ class MZSlowVarsConfig:
     coop_n: int = 4                # Hill exponent (fixed n=4)
     record_gerec_hist: bool = False  # slow-off OBSERVER: cumulative fixed-edge gErec_raw histogram (overall/core/surround)
     gerec_hist_edges: "np.ndarray | None" = None
+    # ---- FCXR-LC2-Core: local post-X recurrent state H (all OFF by default) ----
+    use_h_lc2: bool = False        # sensor/actuator master switch; rho=0 is sensor-only and membrane-identical
+    tau_h_lc2: float = 100.0       # ms; selected only by R1 temporal separability, not equilibrium fitting
+    theta_h_lc2: float = 0.0       # raw recurrent-conductance units
+    k_h_lc2: float = 1.0           # smooth gate width in raw recurrent-conductance units
+    rho_h_lc2: float = 0.0         # added pre-tanh recurrent conductance amplitude
+    h_lc2_init_E: "np.ndarray | None" = None  # frozen-fork/restart field; shape (NE,), finite and >=0
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
+    x_relay_frozen_E: "np.ndarray | None" = None  # LC2 dev fork: fixed source availability field, same E->E scatter path
     tau_y: float = 120.0           # ms  persistence sensor time constant
     tau_x: float = 1000.0          # ms  relay availability time constant (symmetric; used when tau_x_down/up are None)
     tau_x_down: "float | None" = None  # FCXR-LC1: asymmetric relay depletion tau (x_inf<x); None+None -> symmetric tau_x
@@ -212,6 +251,9 @@ class MZSlowVars:
         # runner AFTER construction; None -> never called -> byte parity. Pure side-effect: it only
         # reduces the already-computed E-cell components onto the electrode weights.
         self.seeg_observer = None
+        # LC2 R1 raw recurrent-conductance observer.  Assigned after construction by the dedicated
+        # runner; None is the byte-parity default.  It reads gErec_raw only and cannot write state.
+        self.h_lc2_observer = None
         if self.cfg.use_pump:
             if self.cfg.pump_u_init_E is not None:              # start equilibrated (no startup transient)
                 u0 = np.asarray(self.cfg.pump_u_init_E, float)
@@ -239,6 +281,26 @@ class MZSlowVars:
         self.y = np.zeros(self.NE)
         self.x_relay = np.ones(self.NE)
         self.ee_relay_send = np.ones(self.NE)
+        if self.cfg.x_relay_frozen_E is not None:
+            xf = np.asarray(self.cfg.x_relay_frozen_E, float)
+            if xf.shape != (self.NE,) or not np.all(np.isfinite(xf)) or np.any((xf < 0.0) | (xf > 1.0)):
+                raise ValueError(f"x_relay_frozen_E must be a finite field of shape ({self.NE},) in [0,1]")
+            self.x_relay[:] = xf
+            self.ee_relay_send[:] = xf
+        # LC2 H is E-target local and is allocated only when requested.  ``_h_source_lc2_E`` is the
+        # CURRENT step's post-X, pre-tanh gA_raw cached by membrane_terms; step() consumes it only after
+        # the membrane update, enforcing h(t-) -> membrane and gA(t) -> h(t+dt).
+        self.h_lc2_E = np.zeros(self.NE) if self.cfg.use_h_lc2 else None
+        self._h_source_lc2_E = np.zeros(self.NE) if self.cfg.use_h_lc2 else None
+        if self.cfg.h_lc2_init_E is not None:
+            h0 = np.asarray(self.cfg.h_lc2_init_E, float)
+            if h0.shape != (self.NE,):
+                raise ValueError(f"h_lc2_init_E must have length NE={self.NE}, got {h0.shape}")
+            self.h_lc2_E[:] = h0
+        self._gH_lc2_mean_last = 0.0
+        self._gH_lc2_max_last = 0.0
+        self._gA_raw_lc2_mean_last = 0.0
+        self._gA_raw_lc2_max_last = 0.0
         self._I_I_last = np.zeros(self.N)
         self._z_sensor_last_E = np.zeros(self.NE)
         self._gI_last_E = np.zeros(self.NE)
@@ -277,6 +339,9 @@ class MZSlowVars:
         self.trace_y_mean = []; self.trace_y_max = []
         self.trace_x_relay_mean = []; self.trace_x_relay_min = []
         self.trace_coop_engaged_frac = []; self.trace_coop_H_mean = []   # FCXR-HEO1 (appended when coop_A>0)
+        self.trace_h_lc2_mean = []; self.trace_h_lc2_max = []            # FCXR-LC2 (post-update H)
+        self.trace_gA_raw_lc2_mean = []; self.trace_gA_raw_lc2_max = []  # source used by this step's H update
+        self.trace_gH_lc2_mean = []; self.trace_gH_lc2_max = []          # membrane contribution from h(t-)
         # FCXR pump traces (appended only when cfg.use_pump); excess traces only when it reaches the membrane
         self.trace_u_mean = []; self.trace_u_max = []
         self.trace_phi_pump_mean = []; self.trace_phi_pump_max = []
@@ -407,6 +472,7 @@ class MZSlowVars:
         # (ampa_drive + gE*(E_E-V_match) == c_E*I_E), so arms differ ONLY in state-dependence off V_match.
         # Default ff_conductance=rec_conductance=True == the original full_conductance (arm D).
         ampa_drive = np.zeros(self.NE, dtype=float)
+        gH_lc2 = np.zeros(self.NE, dtype=float)
         if full:
             denomE = c.E_E - c.v_match
             I_ffE = np.maximum(I_E[:self.NE] - I_E_rec[:self.NE], 0.0)
@@ -417,10 +483,23 @@ class MZSlowVars:
                 gEff = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_ffE
             if c.rec_conductance:
                 gErec_raw = c.c_E * I_recE / denomE
-                # FCXR-HEO1: cooperative gate boosts the RAW recurrent conductance in a mid-activity band
-                # BEFORE saturation. gErec_raw is kept raw (clip/histogram audit reads it below); coop_A=0
-                # -> u_tilde IS gErec_raw -> the saturation line stays byte-identical to FCXR-RC1.
-                u_tilde = cooperative_u_tilde(gErec_raw, c.coop_A, c.coop_uc, c.coop_Kc, c.coop_n)
+                if self.h_lc2_observer is not None:
+                    self.h_lc2_observer.sample(gErec_raw, self._step_i)
+                if c.use_h_lc2:
+                    # LC2: I_E_rec has ALREADY passed through the presynaptic X relay and delay/filter
+                    # path.  Cache precisely this raw, pre-saturation conductance as the NEXT H source.
+                    np.copyto(self._h_source_lc2_E, gErec_raw)
+                    if c.rho_h_lc2 > 0.0:
+                        gH_lc2 = c.rho_h_lc2 * lc2_h_gate(
+                            self.h_lc2_E, theta=c.theta_h_lc2, k=c.k_h_lc2)
+                        u_tilde = gErec_raw + gH_lc2
+                    else:
+                        # Sensor-only H: keep the identical ndarray/value path into tanh.
+                        u_tilde = gErec_raw
+                else:
+                    # FCXR-HEO1: cooperative gate boosts the RAW recurrent conductance in a mid-activity
+                    # band BEFORE saturation. LC2 H and this historical gate are mutually exclusive.
+                    u_tilde = cooperative_u_tilde(gErec_raw, c.coop_A, c.coop_uc, c.coop_Kc, c.coop_n)
                 # FCXR-RC1 Stage C: smooth-saturate the recurrent conductance (slope 1 at small input ->
                 # interictal workpoint preserved; saturates toward g_sat at high input -> no hard clip).
                 gErec = (c.rec_sat_g * np.tanh(u_tilde / c.rec_sat_g)) if c.rec_sat_g > 0.0 else u_tilde
@@ -487,6 +566,11 @@ class MZSlowVars:
         self._gI_last_E = gI
         self._gM_last_E = gM
         self._gEff_mean_last = float(gEff.mean()); self._gErec_mean_last = float(gErec.mean())
+        if c.use_h_lc2:
+            self._gA_raw_lc2_mean_last = float(gErec_raw.mean())
+            self._gA_raw_lc2_max_last = float(gErec_raw.max())
+            self._gH_lc2_mean_last = float(gH_lc2.mean())
+            self._gH_lc2_max_last = float(gH_lc2.max())
         self._gbar_last = I_bar
         self._g_global_pre_z_last = float(global_part)
         self._gI_mean_last = float(gI.mean()); self._gI_max_last = float(gI.max())
@@ -519,23 +603,46 @@ class MZSlowVars:
             # y_j: exact decay + per-E-spike jump of 1000/tau_y -> a Hz-unit local persistence sensor.
             self.y *= np.exp(-dt / c.tau_y)
             self.y[spkE] += 1000.0 / c.tau_y
+            if c.x_relay_frozen_E is not None:
+                # Developmental frozen-X fork: retain the real activity sensor y for diagnostics, but
+                # keep the source-level relay availability fixed.  The scatter at the next frame reads
+                # precisely this field through ee_relay_send; no additive X current is introduced.
+                pass
             # x_j: relax toward x_inf(y) = 1 - (1-x_min)*Hill([y-y_gate]_+; K_y, n).  x stays in [0,1].
-            u = np.maximum(self.y - c.y_gate, 0.0)
-            un = u ** c.hill_n
-            hill = un / (c.K_y ** c.hill_n + un)
-            x_inf = 1.0 - (1.0 - c.x_min) * hill
-            if c.tau_x_down is None and c.tau_x_up is None:
-                self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))   # symmetric (byte-parity)
             else:
-                # FCXR-LC1 asymmetric: deplete (x_inf<x) on tau_x_down, recover (x_inf>=x) on tau_x_up.
-                # Equal taus reduce EXACTLY to the symmetric relaxation above (per-element factor identical).
-                tau_sel = np.where(x_inf < self.x_relay, c.tau_x_down, c.tau_x_up)
-                self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / tau_sel))
+                u = np.maximum(self.y - c.y_gate, 0.0)
+                un = u ** c.hill_n
+                hill = un / (c.K_y ** c.hill_n + un)
+                x_inf = 1.0 - (1.0 - c.x_min) * hill
+                if c.tau_x_down is None and c.tau_x_up is None:
+                    self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / c.tau_x))   # symmetric (byte-parity)
+                else:
+                    # FCXR-LC1 asymmetric: deplete (x_inf<x) on tau_x_down, recover (x_inf>=x) on tau_x_up.
+                    # Equal taus reduce EXACTLY to the symmetric relaxation above (per-element factor identical).
+                    tau_sel = np.where(x_inf < self.x_relay, c.tau_x_down, c.tau_x_up)
+                    self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / tau_sel))
+        if c.use_h_lc2:
+            # Exact first-order update under the piecewise-constant post-X gA_raw sampled by the membrane
+            # this frame.  Because this runs after membrane_terms, gA_raw,n cannot feed back until n+1.
+            decay_h = np.exp(-dt / c.tau_h_lc2)
+            self.h_lc2_E *= decay_h
+            self.h_lc2_E += (1.0 - decay_h) * self._h_source_lc2_E
+            if not (np.all(np.isfinite(self.h_lc2_E)) and np.all(self.h_lc2_E >= 0.0)):
+                raise FloatingPointError("non-finite or negative LC2 H state")
         if c.use_z:
             # z_inf = H(I_th_EI - I_I): 1 iff I_I < I_th_EI (strict); I_I >= I_th_EI -> 0 (deplete)
             z_inf_E = (self._z_sensor_last_E < c.I_th_EI).astype(float)
             zE = self.z[self.is_E]
-            zE = zE + (dt / c.tau_z) * (z_inf_E - zE)
+            if c.tau_z_down is None and c.tau_z_up is None:
+                zE = zE + (dt / c.tau_z) * (z_inf_E - zE)                      # symmetric (byte-parity)
+            else:
+                # FCXR-HYB1 asymmetric, mirroring the accepted asymmetric relay above: deplete
+                # (z_inf<z, i.e. the GABA sensor is still above threshold = HIGH LOAD) on
+                # tau_z_down; recover (z_inf>=z, the load has fallen back) on tau_z_up.  Still a
+                # first-order relaxation -- there is NO instantaneous reset.  Equal taus reduce
+                # exactly to the symmetric line above.
+                tau_sel = np.where(z_inf_E < zE, c.tau_z_down, c.tau_z_up)
+                zE = zE + (dt / tau_sel) * (z_inf_E - zE)
             self.z[self.is_E] = np.clip(zE, 0.0, 1.0)          # z in [0,1]
         if c.use_m and (c.m_enable_ms is None or self._step_i * dt >= c.m_enable_ms):
             # FCXR-HEO2: before m_enable_ms both decay AND accumulation are skipped -> m stays 0 (its init
@@ -683,6 +790,13 @@ class MZSlowVars:
         if self.cfg.coop_A > 0.0:                             # FCXR-HEO1 cooperative engagement (coop on only)
             self.trace_coop_engaged_frac.append(float(self._coop_engaged_frac_last))
             self.trace_coop_H_mean.append(float(self._coop_H_mean_last))
+        if self.cfg.use_h_lc2:
+            self.trace_h_lc2_mean.append(float(self.h_lc2_E.mean()))
+            self.trace_h_lc2_max.append(float(self.h_lc2_E.max()))
+            self.trace_gA_raw_lc2_mean.append(float(self._gA_raw_lc2_mean_last))
+            self.trace_gA_raw_lc2_max.append(float(self._gA_raw_lc2_max_last))
+            self.trace_gH_lc2_mean.append(float(self._gH_lc2_mean_last))
+            self.trace_gH_lc2_max.append(float(self._gH_lc2_max_last))
         if self.cfg.use_pump:
             # u is POST-update (same convention as z/m); phi/excess are the values the membrane
             # actually USED at this step, i.e. evaluated at u(t^-) -- documented +-1 step offset.
@@ -742,6 +856,8 @@ class MZSlowVars:
         if self.cfg.use_x:
             snap["x_E"] = self.x_relay.copy()        # relay availability (length NE)
             snap["y_E"] = self.y.copy()              # persistence sensor y_j (length NE)
+        if self.cfg.use_h_lc2:
+            snap["h_E"] = self.h_lc2_E.copy()         # LC2 local recurrent state (length NE)
         if self.cfg.use_pump:
             snap["u_E"] = self.u_pump_E.copy()       # activity-dependent load (length NE)
             if self.pump_phi_sum_E is not None:      # CUMULATIVE sums -> per-block means by differencing
@@ -778,6 +894,12 @@ class MZSlowVars:
             raise ValueError("max_total_conductance must be positive")
         if c.use_z and c.tau_z <= 0.0:
             raise ValueError("use_z requires tau_z>0")
+        # FCXR-HYB1 asymmetric Z kinetics: both-or-neither + positive (same rule as the relay)
+        if (c.tau_z_down is not None) or (c.tau_z_up is not None):
+            if c.tau_z_down is None or c.tau_z_up is None:
+                raise ValueError("asymmetric Z kinetics require BOTH tau_z_down and tau_z_up (or neither)")
+            if c.tau_z_down <= 0.0 or c.tau_z_up <= 0.0:
+                raise ValueError("tau_z_down and tau_z_up must be > 0 (asymmetric Z kinetics)")
         if c.z_frozen_E is not None:
             zf = np.asarray(c.z_frozen_E, float)
             if zf.ndim != 1 or not np.all(np.isfinite(zf)) or zf.min() < 0.0 or zf.max() > 1.0:
@@ -831,6 +953,25 @@ class MZSlowVars:
                 raise ValueError("coop_A>0 requires coop_uc>0 and coop_Kc>0")
             if int(c.coop_n) < 1:
                 raise ValueError("coop_A>0 requires coop_n>=1")
+        if c.use_h_lc2:
+            if not (c.membrane_mode == "full_conductance" and c.rec_conductance and c.rec_sat_g > 0.0):
+                raise ValueError("use_h_lc2 requires full_conductance + rec_conductance + rec_sat_g>0")
+            if c.coop_A > 0.0:
+                raise ValueError("LC2 H and HEO1 cooperative gate are mutually exclusive")
+            if not (np.isfinite(c.tau_h_lc2) and c.tau_h_lc2 > 0.0):
+                raise ValueError("tau_h_lc2 must be finite and >0")
+            if not (np.isfinite(c.theta_h_lc2) and c.theta_h_lc2 >= 0.0):
+                raise ValueError("theta_h_lc2 must be finite and >=0")
+            if not (np.isfinite(c.k_h_lc2) and c.k_h_lc2 > 0.0):
+                raise ValueError("k_h_lc2 must be finite and >0")
+            if not (np.isfinite(c.rho_h_lc2) and c.rho_h_lc2 >= 0.0):
+                raise ValueError("rho_h_lc2 must be finite and >=0")
+            if c.h_lc2_init_E is not None:
+                h0 = np.asarray(c.h_lc2_init_E, float)
+                if h0.ndim != 1 or not np.all(np.isfinite(h0)) or np.any(h0 < 0.0):
+                    raise ValueError("h_lc2_init_E must be a finite 1-D field with values >=0")
+        elif c.h_lc2_init_E is not None or c.rho_h_lc2 > 0.0:
+            raise ValueError("h_lc2_init_E/rho_h_lc2 require use_h_lc2=True")
         if c.use_x:
             if c.membrane_mode != "full_conductance":
                 raise ValueError("use_x (E->E relay) requires membrane_mode='full_conductance'")
@@ -851,6 +992,12 @@ class MZSlowVars:
                     raise ValueError("asymmetric relay kinetics require BOTH tau_x_down and tau_x_up (or neither)")
                 if c.tau_x_down <= 0.0 or c.tau_x_up <= 0.0:
                     raise ValueError("tau_x_down and tau_x_up must be > 0 (asymmetric relay kinetics)")
+            if c.x_relay_frozen_E is not None:
+                xf = np.asarray(c.x_relay_frozen_E, float)
+                if xf.ndim != 1 or not np.all(np.isfinite(xf)) or np.any((xf < 0.0) | (xf > 1.0)):
+                    raise ValueError("x_relay_frozen_E must be a finite 1-D field in [0,1]")
+        elif c.x_relay_frozen_E is not None:
+            raise ValueError("x_relay_frozen_E requires use_x=True")
         # ---- FCXR pump lifecycle (per-E activity-dependent load u_i + electrogenic pump) ----
         if not c.use_pump:
             if (c.pump_sensor_only or c.pump_Imax > 0.0 or c.pump_record_calibration

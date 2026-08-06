@@ -1,0 +1,469 @@
+{
+  "stage": "R1_REPLAYS",
+  "status": "PASS",
+  "rows": [
+    {
+      "state": "baseline",
+      "seed": 1,
+      "T_ms": 8000.0,
+      "dt_ms": 0.05,
+      "block_dt_ms": 1.0,
+      "config": {
+        "membrane_mode": "full_conductance",
+        "E_E": 58.0,
+        "c_E": 1.0,
+        "v_match": 18.0,
+        "e_gaba": 0.0,
+        "e_k": 0.0,
+        "ff_conductance": false,
+        "rec_conductance": true,
+        "rec_sat_g": 21.6,
+        "use_z": false,
+        "use_m": false,
+        "use_phi": false,
+        "I_th_EI": 95.19851312666987,
+        "tau_z": 2500.0,
+        "gaba_gain": 1.125,
+        "m_conductance_gain": 1.0,
+        "global_gaba_fraction": 0.0,
+        "global_gaba_mode": "additive",
+        "z_scope": "local_only",
+        "max_total_conductance": 99.0,
+        "fail_on_clip": false,
+        "use_x": false,
+        "tau_y": 120.0,
+        "tau_x": 1000.0,
+        "x_min": 0.0,
+        "y_gate": 0.0,
+        "K_y": 5.0,
+        "hill_n": 4
+      },
+      "sample_seed": 20260801,
+      "sample_n": 4096,
+      "n_blocks": 8000,
+      "validation": {
+        "reference_dt_ms": 6.0,
+        "replay_stride": 120,
+        "compared_n": 1334,
+        "exact_prefix": true,
+        "max_abs_diff": 1.4210854715202004e-14,
+        "mean_abs_diff": 2.8096798584216855e-16,
+        "reference_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/baseline_trace_seed1.npz"
+      },
+      "finite": true,
+      "clip_frac_max": 0.0,
+      "tau_eff_ratio_min": 0.01371761093969074,
+      "mean_rate_hz": 3.83808984375,
+      "max_rate_hz": 82.5,
+      "events": [
+        {
+          "t_on_ms": 2091.0,
+          "t_off_ms": 2098.0,
+          "dur_ms": 8.0,
+          "returned": true,
+          "peak_ext": 0.04621875
+        },
+        {
+          "t_on_ms": 2721.0,
+          "t_off_ms": 2728.0,
+          "dur_ms": 8.0,
+          "returned": true,
+          "peak_ext": 0.04828125
+        },
+        {
+          "t_on_ms": 3917.0,
+          "t_off_ms": 3929.0,
+          "dur_ms": 13.0,
+          "returned": true,
+          "peak_ext": 0.07109375
+        },
+        {
+          "t_on_ms": 4495.0,
+          "t_off_ms": 4502.0,
+          "dur_ms": 8.0,
+          "returned": true,
+          "peak_ext": 0.04534375
+        },
+        {
+          "t_on_ms": 4881.0,
+          "t_off_ms": 4892.0,
+          "dur_ms": 12.0,
+          "returned": true,
+          "peak_ext": 0.04684375
+        },
+        {
+          "t_on_ms": 5537.0,
+          "t_off_ms": 5555.0,
+          "dur_ms": 19.0,
+          "returned": true,
+          "peak_ext": 0.05465625
+        },
+        {
+          "t_on_ms": 6997.0,
+          "t_off_ms": 7006.0,
+          "dur_ms": 10.0,
+          "returned": true,
+          "peak_ext": 0.053375
+        },
+        {
+          "t_on_ms": 7230.0,
+          "t_off_ms": 7238.0,
+          "dur_ms": 9.0,
+          "returned": true,
+          "peak_ext": 0.0453125
+        },
+        {
+          "t_on_ms": 7838.0,
+          "t_off_ms": 7845.0,
+          "dur_ms": 8.0,
+          "returned": true,
+          "peak_ext": 0.0458125
+        }
+      ],
+      "gA_population_summary_names": [
+        "mean",
+        "q50",
+        "q90",
+        "q99"
+      ],
+      "output_npz": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/r1_sensor/baseline_gA_sensor.npz",
+      "output_sha256": "6cbfd6f1d51755b1506829d29fe1c6c7aae288521f694090d150a2f4009cdcf9",
+      "wall_s": 776.8,
+      "peak_rss_gb": 10.46,
+      "finished": "2026-08-01T14:01:06.526104+00:00"
+    },
+    {
+      "state": "q75",
+      "seed": 1,
+      "T_ms": 5000.0,
+      "dt_ms": 0.05,
+      "block_dt_ms": 1.0,
+      "config": {
+        "membrane_mode": "full_conductance",
+        "E_E": 58.0,
+        "c_E": 1.0,
+        "v_match": 18.0,
+        "e_gaba": 0.0,
+        "e_k": 0.0,
+        "ff_conductance": false,
+        "rec_conductance": true,
+        "rec_sat_g": 21.6,
+        "use_z": true,
+        "use_m": false,
+        "use_phi": false,
+        "I_th_EI": 95.19851312666987,
+        "tau_z": 5000.0,
+        "gaba_gain": 1.125,
+        "m_conductance_gain": 1.0,
+        "global_gaba_fraction": 0.0,
+        "global_gaba_mode": "additive",
+        "z_scope": "local_only",
+        "max_total_conductance": 99.0,
+        "fail_on_clip": false,
+        "use_x": false,
+        "tau_y": 120.0,
+        "tau_x": 1000.0,
+        "x_min": 0.0,
+        "y_gate": 0.0,
+        "K_y": 5.0,
+        "hill_n": 4
+      },
+      "sample_seed": 20260801,
+      "sample_n": 4096,
+      "n_blocks": 5000,
+      "validation": {
+        "reference_dt_ms": 6.0,
+        "replay_stride": 120,
+        "compared_n": 834,
+        "exact_prefix": true,
+        "max_abs_diff": 1.4210854715202004e-14,
+        "mean_abs_diff": 3.892436599525129e-16,
+        "reference_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/runs/20260722T171901.346631Z_2583352_f56b721_zonly_seed1_q75_T24000/zonly_traces.npz"
+      },
+      "finite": true,
+      "clip_frac_max": 0.0,
+      "tau_eff_ratio_min": 0.013823681607085034,
+      "mean_rate_hz": 5.34713125,
+      "max_rate_hz": 85.625,
+      "events": [
+        {
+          "t_on_ms": 1503.0,
+          "t_off_ms": 1511.0,
+          "dur_ms": 9.0,
+          "returned": true,
+          "peak_ext": 0.0458125
+        },
+        {
+          "t_on_ms": 1786.0,
+          "t_off_ms": 1797.0,
+          "dur_ms": 12.0,
+          "returned": true,
+          "peak_ext": 0.0468125
+        },
+        {
+          "t_on_ms": 2033.0,
+          "t_off_ms": 2043.0,
+          "dur_ms": 11.0,
+          "returned": true,
+          "peak_ext": 0.04928125
+        },
+        {
+          "t_on_ms": 2618.0,
+          "t_off_ms": 2630.0,
+          "dur_ms": 13.0,
+          "returned": true,
+          "peak_ext": 0.0715625
+        },
+        {
+          "t_on_ms": 2855.0,
+          "t_off_ms": 2867.0,
+          "dur_ms": 13.0,
+          "returned": true,
+          "peak_ext": 0.04846875
+        },
+        {
+          "t_on_ms": 3156.0,
+          "t_off_ms": 3163.0,
+          "dur_ms": 8.0,
+          "returned": true,
+          "peak_ext": 0.0461875
+        },
+        {
+          "t_on_ms": 3416.0,
+          "t_off_ms": 3431.0,
+          "dur_ms": 16.0,
+          "returned": true,
+          "peak_ext": 0.05153125
+        },
+        {
+          "t_on_ms": 3827.0,
+          "t_off_ms": 3839.0,
+          "dur_ms": 13.0,
+          "returned": true,
+          "peak_ext": 0.04984375
+        },
+        {
+          "t_on_ms": 4024.0,
+          "t_off_ms": 4039.0,
+          "dur_ms": 16.0,
+          "returned": true,
+          "peak_ext": 0.0554375
+        },
+        {
+          "t_on_ms": 4322.0,
+          "t_off_ms": 4337.0,
+          "dur_ms": 16.0,
+          "returned": true,
+          "peak_ext": 0.05240625
+        },
+        {
+          "t_on_ms": 4508.0,
+          "t_off_ms": 4533.0,
+          "dur_ms": 26.0,
+          "returned": true,
+          "peak_ext": 0.06240625
+        },
+        {
+          "t_on_ms": 4791.0,
+          "t_off_ms": 4824.0,
+          "dur_ms": 34.0,
+          "returned": true,
+          "peak_ext": 0.055375
+        }
+      ],
+      "gA_population_summary_names": [
+        "mean",
+        "q50",
+        "q90",
+        "q99"
+      ],
+      "output_npz": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/r1_sensor/q75_gA_sensor.npz",
+      "output_sha256": "3ebd2093b62cb08f435fea0505f6e2eceaaf086f02fdb80e51042c5b99e82c30",
+      "wall_s": 476.9,
+      "peak_rss_gb": 10.46,
+      "finished": "2026-08-01T14:10:34.018642+00:00"
+    },
+    {
+      "state": "heo1",
+      "seed": 1,
+      "T_ms": 4000.0,
+      "dt_ms": 0.05,
+      "block_dt_ms": 1.0,
+      "config": {
+        "membrane_mode": "full_conductance",
+        "E_E": 58.0,
+        "c_E": 1.0,
+        "v_match": 18.0,
+        "e_gaba": 0.0,
+        "e_k": 0.0,
+        "ff_conductance": false,
+        "rec_conductance": true,
+        "rec_sat_g": 21.6,
+        "use_z": false,
+        "use_m": false,
+        "use_phi": false,
+        "I_th_EI": 95.19851312666987,
+        "tau_z": 2500.0,
+        "gaba_gain": 1.125,
+        "m_conductance_gain": 1.0,
+        "global_gaba_fraction": 0.0,
+        "global_gaba_mode": "additive",
+        "z_scope": "local_only",
+        "max_total_conductance": 99.0,
+        "fail_on_clip": false,
+        "use_x": false,
+        "tau_y": 120.0,
+        "tau_x": 1000.0,
+        "x_min": 0.0,
+        "y_gate": 0.0,
+        "K_y": 5.0,
+        "hill_n": 4,
+        "coop_A": 8.0,
+        "coop_uc": 19.937214046527966,
+        "coop_Kc": 4.984303511631992,
+        "coop_n": 4
+      },
+      "sample_seed": 20260801,
+      "sample_n": 4096,
+      "n_blocks": 4000,
+      "validation": {
+        "reference_dt_ms": 0.05,
+        "replay_stride": 1,
+        "compared_n": 80000,
+        "exact_prefix": true,
+        "max_abs_diff": 5.684341886080802e-14,
+        "mean_abs_diff": 9.46276945690272e-15,
+        "reference_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-heo1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/high_energy_oscillatory_branch/screen_cells/gq0.999_A8_D0.15_nokick_trace.npz"
+      },
+      "finite": true,
+      "clip_frac_max": 0.0,
+      "tau_eff_ratio_min": 0.013104298430347787,
+      "mean_rate_hz": 130.59209375,
+      "max_rate_hz": 258.125,
+      "events": [
+        {
+          "t_on_ms": 203.0,
+          "t_off_ms": 3999.0,
+          "dur_ms": 3797.0,
+          "returned": false,
+          "peak_ext": 0.23096875
+        }
+      ],
+      "gA_population_summary_names": [
+        "mean",
+        "q50",
+        "q90",
+        "q99"
+      ],
+      "output_npz": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/r1_sensor/heo1_gA_sensor.npz",
+      "output_sha256": "815a36b39100edb5864c4c6442e0c1316f54142a757a4ffb4d111e8c0bd3266a",
+      "wall_s": 2207.2,
+      "peak_rss_gb": 10.46,
+      "finished": "2026-08-01T14:48:47.228034+00:00"
+    },
+    {
+      "state": "heo2",
+      "seed": 1,
+      "T_ms": 5000.0,
+      "dt_ms": 0.05,
+      "block_dt_ms": 1.0,
+      "config": {
+        "membrane_mode": "full_conductance",
+        "E_E": 58.0,
+        "c_E": 1.0,
+        "v_match": 18.0,
+        "e_gaba": 0.0,
+        "e_k": 0.0,
+        "ff_conductance": false,
+        "rec_conductance": true,
+        "rec_sat_g": 21.6,
+        "use_z": false,
+        "use_m": true,
+        "use_phi": false,
+        "I_th_EI": 95.19851312666987,
+        "tau_z": 2500.0,
+        "gaba_gain": 1.125,
+        "m_conductance_gain": 1.0,
+        "global_gaba_fraction": 0.0,
+        "global_gaba_mode": "additive",
+        "z_scope": "local_only",
+        "max_total_conductance": 99.0,
+        "fail_on_clip": false,
+        "use_x": false,
+        "tau_y": 120.0,
+        "tau_x": 1000.0,
+        "x_min": 0.0,
+        "y_gate": 0.0,
+        "K_y": 5.0,
+        "hill_n": 4,
+        "coop_A": 8.0,
+        "coop_uc": 19.937214046527966,
+        "coop_Kc": 4.984303511631992,
+        "coop_n": 4,
+        "eta_m": 0.3536345315014287,
+        "tau_adp": 250.0,
+        "m_enable_ms": 1000.0
+      },
+      "sample_seed": 20260801,
+      "sample_n": 4096,
+      "n_blocks": 5000,
+      "validation": {
+        "reference_dt_ms": 0.05,
+        "replay_stride": 1,
+        "compared_n": 100000,
+        "exact_prefix": true,
+        "max_abs_diff": 5.684341886080802e-14,
+        "mean_abs_diff": 4.574540746205003e-15,
+        "reference_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-heo1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/broadband_diagnostic/arms/dyn_tau250_frac0.1_trace.npz"
+      },
+      "finite": true,
+      "clip_frac_max": 0.0,
+      "tau_eff_ratio_min": 0.013104298430347787,
+      "mean_rate_hz": 62.1735875,
+      "max_rate_hz": 258.125,
+      "events": [
+        {
+          "t_on_ms": 203.0,
+          "t_off_ms": 2796.0,
+          "dur_ms": 2594.0,
+          "returned": true,
+          "peak_ext": 0.23096875
+        },
+        {
+          "t_on_ms": 3862.0,
+          "t_off_ms": 4029.0,
+          "dur_ms": 168.0,
+          "returned": true,
+          "peak_ext": 0.18378125
+        },
+        {
+          "t_on_ms": 4905.0,
+          "t_off_ms": 4999.0,
+          "dur_ms": 95.0,
+          "returned": false,
+          "peak_ext": 0.1686875
+        }
+      ],
+      "gA_population_summary_names": [
+        "mean",
+        "q50",
+        "q90",
+        "q99"
+      ],
+      "output_npz": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/r1_sensor/heo2_gA_sensor.npz",
+      "output_sha256": "fd915abb94e2fdf3c46ea13f794332bd535324a4183a0c7266e2e4788f7206ab",
+      "wall_s": 1601.8,
+      "peak_rss_gb": 10.46,
+      "finished": "2026-08-01T15:16:58.192001+00:00"
+    }
+  ],
+  "resource_before": {
+    "mem_available_gb": 223.5855941772461,
+    "swap_used_mb": 820.46484375
+  },
+  "resource_after": {
+    "mem_available_gb": 198.21277236938477,
+    "swap_used_mb": 816.21484375
+  },
+  "finished": "2026-08-01T15:16:58.459541+00:00"
+}

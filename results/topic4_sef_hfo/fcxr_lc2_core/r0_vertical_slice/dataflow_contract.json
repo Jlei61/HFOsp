@@ -1,0 +1,16 @@
+{
+  "status": "PASS",
+  "source": "post-X I_E_rec -> gErec_raw",
+  "actuator": "gA_raw + rho*S_tilde(h) before RC1 tanh",
+  "causal_order": [
+    "membrane uses h(t-)",
+    "gA_raw(t) cached",
+    "exact H update after membrane"
+  ],
+  "no_new_edges": true,
+  "no_global_sensor": true,
+  "no_additive_x_current": true,
+  "code": "src/snn_engine/mz_slow_vars.py",
+  "tests": "tests/test_mz_lc2_h.py",
+  "finished": "2026-08-01T13:34:39.756562+00:00"
+}

@@ -1,0 +1,110 @@
+{
+  "status": "LOCKED",
+  "design_commit": "8a4dad00",
+  "launcher_head": "8a4dad00902d0b437cc757f9a3a73d0d4c523644",
+  "locked_at": "2026-08-01T17:12:59.428198+00:00",
+  "traces": {
+    "baseline": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/r1_sensor/baseline_gA_sensor.npz",
+      "sha256": "6cbfd6f1d51755b1506829d29fe1c6c7aae288521f694090d150a2f4009cdcf9"
+    },
+    "q75": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/r1_sensor/q75_gA_sensor.npz",
+      "sha256": "3ebd2093b62cb08f435fea0505f6e2eceaaf086f02fdb80e51042c5b99e82c30"
+    },
+    "heo1": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/r1_sensor/heo1_gA_sensor.npz",
+      "sha256": "815a36b39100edb5864c4c6442e0c1316f54142a757a4ffb4d111e8c0bd3266a"
+    },
+    "heo2": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/r1_sensor/heo2_gA_sensor.npz",
+      "sha256": "fd915abb94e2fdf3c46ea13f794332bd535324a4183a0c7266e2e4788f7206ab"
+    }
+  },
+  "heo2_lfp": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-heo1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/broadband_diagnostic/arms/dyn_tau250_frac0.1_trace.npz",
+    "sha256": "2995f7490ebec4bc3f39ae37be79215cec600204fe02ceab650bdf357ea35582"
+  },
+  "p_field": {
+    "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/state_conditioned_susceptibility/snapshots/zA_q75_tz5000/seed_1.npz",
+    "sha256": "3d73db6801eb6e0b8741b37d813fcbedad21d3e4d79545bf705ae7d614275ae9"
+  },
+  "tau_grid_ms": [
+    20.0,
+    24.230553172571767,
+    29.355985352441397,
+    35.565588200778464,
+    43.08869380063767,
+    52.203144313650725,
+    63.2455532033676,
+    76.62373699114575,
+    92.83177667225557,
+    112.46826503806983,
+    136.25841381159216,
+    165.08083705360363,
+    200.00000000000003,
+    242.30553172571754,
+    293.5598535244138,
+    355.6558820077846,
+    430.8869380063765,
+    522.0314431365073,
+    632.4555320336759,
+    766.2373699114571,
+    928.3177667225556,
+    1124.6826503806983,
+    1362.5841381159219,
+    1650.8083705360364,
+    2000.0
+  ],
+  "false_latch_targets": [
+    0.0,
+    0.05,
+    0.1,
+    0.25
+  ],
+  "latch_ms": 50,
+  "bout_trim_ms": 50,
+  "bootstrap_n": 200,
+  "bootstrap_seed": 20260802,
+  "k_over_theta": [
+    0.05,
+    0.1,
+    0.2
+  ],
+  "rho_over_gsat": [
+    0.1,
+    0.2,
+    0.35,
+    0.5,
+    0.7
+  ],
+  "g_sat": 21.6,
+  "frozen_depletion": {
+    "healthy": 0.0,
+    "susceptible": 0.15
+  },
+  "x_depletion_levels": [
+    0.128,
+    0.214
+  ],
+  "development_noise": 401,
+  "replication_noise": 402,
+  "connection_seed": 1,
+  "locked_out": [
+    "M",
+    "K",
+    "A",
+    "ELR",
+    "new_EE_edges",
+    "global_seizure_label",
+    "kick"
+  ],
+  "engine_hashes": {
+    "src/snn_engine/kick_probe.py": "febba30005cb42ce0a80e9d133a2c661121ad639d58a035b7914425e1b7994d2",
+    "src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+    "src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+    "src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+    "src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+    "src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+  }
+}

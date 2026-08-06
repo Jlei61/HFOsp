@@ -1,0 +1,35 @@
+{
+  "canonical_status": "R1_IMPLEMENTATION_ACCEPTED",
+  "labels": [
+    "R1_IMPLEMENTATION_ACCEPTED",
+    "R1_SUSTAINED_CONTROL_SEPARABLE",
+    "R1_ACTIVE_BOUT_REANALYSIS_REQUIRED",
+    "R1_LONG_REST_GAP_NOT_BRIDGED",
+    "R1_CLOSED_LOOP_H_GEOMETRY_UNTESTED",
+    "R2_CLOSED_LOOP_EXPLORATION_AUTHORIZED"
+  ],
+  "raw_strict_full_window_status": "H_SENSOR_NOT_SEPARABLE",
+  "strict_full_window_is_hard_gate": false,
+  "heo1_only_bootstrap_intervals_ms": [
+    [
+      248.8660477784458,
+      915.4420687346009
+    ]
+  ],
+  "heo2_full_window_bootstrap_intervals_ms": [],
+  "heo1_best": {
+    "tau_ms": 419.01709060454283,
+    "margin": 0.30694603481888616
+  },
+  "heo2_full_window_best": {
+    "tau_ms": 2000.0,
+    "margin": -0.7051956471428276
+  },
+  "joint_best": {
+    "tau_ms": 2000.0,
+    "margin": -0.7051956471428276
+  },
+  "heo2_first_rest_like_gap_ms": 1066.0,
+  "interpretation": "The local post-X recurrent-drive persistence state separates returning IEDs from the HEO1 sustained control on a finite tau range, but cannot bridge the HEO2 full-window offset-like gap under the strict zero-overlap criterion. Closed-loop H geometry is untested.",
+  "adjudicated": "2026-08-01T16:35:47.456976+00:00"
+}

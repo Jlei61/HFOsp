@@ -1,0 +1,124 @@
+{
+  "status": "BASELINE_PRACTICALLY_INVISIBLE",
+  "checks": {
+    "active_occupancy": {
+      "ok": true,
+      "value": 0.00010774739583333334,
+      "threshold": 0.01,
+      "gating": true
+    },
+    "revt_no_sustained_rise": {
+      "ok": true,
+      "by_segment": [
+        0.0,
+        0.0,
+        0.0,
+        0.00043098958333333335
+      ],
+      "threshold": 0.01,
+      "gating": true,
+      "rule": "R_evt occupancy in EVERY equal segment, same 1% bound; a creeping floor fails it"
+    },
+    "event_stats_in_band": {
+      "ok": true,
+      "gating": true,
+      "detail": {
+        "clauses": {
+          "event_rate": true,
+          "iei_cv": true,
+          "duration": true,
+          "participation": true,
+          "not_silent": true
+        },
+        "event_rate_hz": 1.4166666666666667,
+        "off_event_rate_hz": 1.4166666666666667,
+        "iei_cv": 0.631760017934541,
+        "off_iei_cv": 0.631760017934541,
+        "duration_median_ms": 10.0,
+        "off_duration_median_ms": 10.0,
+        "participation_median": 0.0485,
+        "n_events": 34,
+        "off_n_events": 34,
+        "band": [
+          0.08625000000000001,
+          3.15
+        ],
+        "label": "INTERICTAL_BASELINE"
+      }
+    },
+    "numerically_safe": {
+      "ok": true,
+      "clip": 0.0,
+      "gating": true
+    }
+  },
+  "diagnostics": {
+    "q_pre_onset_residual": {
+      "value": 0.2668609625838638,
+      "reference": 0.01,
+      "gating": false,
+      "window_ms": 2.0,
+      "note": "broken instrument: samples the next event's build-up"
+    },
+    "q_floor_drift": {
+      "value": 0.008571690924640198,
+      "reference": 0.01,
+      "gating": false,
+      "note": "hidden-sensor level; the membrane-level reading is revt_no_sustained_rise"
+    }
+  },
+  "allowed_wording": "under the PRE-REGISTERED calibration-half Q_on, seed1 showed a very rare validation-half activation and seed3 showed none; on neither seed was any disturbance of the interictal event statistics observed, over 24 s and two connectivity seeds",
+  "forbidden_wording": "the actuator never fired at all / baseline invisibility has been proven bit-exactly / the event-scale actuator has been shown not to disturb the baseline",
+  "rescue_forbidden": "do not touch drive, connectivity, Q_on, tau_R or I_R_max",
+  "seed": 1,
+  "generated": "2026-08-01T08:17:34.299004+00:00",
+  "code_commit": "cbf089ca",
+  "Q_on": 112.50469568958786,
+  "T_ms": 24000.0,
+  "q_max_running": 154.40546934633304,
+  "t_gate_ms": 20339.5,
+  "q_diagnostic_source": "recomputed offline from the recorded calibration load (open-loop sensor arm) at the pre-registered Q_on",
+  "measured": {
+    "active_occupancy": 0.00010774739583333334,
+    "revt_occupancy_by_segment": [
+      0.0,
+      0.0,
+      0.0,
+      0.00043098958333333335
+    ],
+    "pre_onset_residual_frac": 0.2668609625838638,
+    "q_floor_drift": 0.008571690924640198,
+    "event_stats_in_band": true,
+    "event_stats_detail": {
+      "clauses": {
+        "event_rate": true,
+        "iei_cv": true,
+        "duration": true,
+        "participation": true,
+        "not_silent": true
+      },
+      "event_rate_hz": 1.4166666666666667,
+      "off_event_rate_hz": 1.4166666666666667,
+      "iei_cv": 0.631760017934541,
+      "off_iei_cv": 0.631760017934541,
+      "duration_median_ms": 10.0,
+      "off_duration_median_ms": 10.0,
+      "participation_median": 0.0485,
+      "n_events": 34,
+      "off_n_events": 34,
+      "band": [
+        0.08625000000000001,
+        3.15
+      ],
+      "label": "INTERICTAL_BASELINE"
+    },
+    "clip_frac_max": 0.0,
+    "numerical_unsafe": false
+  },
+  "provenance": {
+    "simulation": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-hyb2/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/hyb2_event_limited_recruitment/superseded/gate_b0_seed1.json",
+    "simulation_commit": "58cccf41",
+    "readjudicated_offline": true,
+    "reason": "the pre-registered calibration-half Q_on run"
+  }
+}

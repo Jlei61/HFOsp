@@ -1,0 +1,201 @@
+{
+  "status": "FINALIZED",
+  "head": "8072e70655c4d334a2b13532dbf10645777d06a2",
+  "candidate_verdict": {
+    "status": "COMPLETE",
+    "scientific_tier": "frozen_component_diagnostic",
+    "canonical_verdict": "GX1_MECHANISM_MAP_ACCEPTED",
+    "mechanism_map_labels": [
+      "FINITE_H_HIGH_STATE_POSITIVE",
+      "D_SELECTIVE_ONSET_CANDIDATE",
+      "SAME_D_BISTABILITY_NOT_FOUND",
+      "X_OFFSET_PATH_REACHABLE",
+      "X_FIXED_D_DYNAMIC_RANGE_INSUFFICIENT",
+      "COUPLED_D_X_OFFSET_UNTESTED",
+      "DYNAMIC_LIFECYCLE_UNTESTED",
+      "SPATIAL_INSTABILITY_UNTESTED"
+    ],
+    "selectivity_strip_verdict": "NO_NATURAL_SELECTIVITY_WINDOW_IN_LOCKED_STRIP",
+    "x_authority_verdict": "X_PATH_REACHABLE_RANGE_INSUFFICIENT",
+    "preregistered_next_hypothesis": "LOCAL_D_DEPENDENT_H_GAIN_ONLY_X_RANGE_SEPARATE",
+    "authorized_next_program": "LC3_DX_STATE_PLANE_AND_SPATIAL_INSTABILITY_AUDIT",
+    "strategy_adjudication": "The GX1 same-D dual-basin gate was a local frozen-geometry diagnostic, not a necessary condition for a seizure lifecycle. Test the current H equation in the coupled D-X plane and audit the spatial instability before adding an explicit D gate.",
+    "n_strip_rows": 36,
+    "n_strip_points": 12,
+    "n_strip_pass": 0,
+    "n_strip_window_points": 0,
+    "n_x_rows": 4,
+    "numerical_safe_rows": 40,
+    "numerical_total_rows": 40,
+    "entry_geometry": {
+      "component_label": "D_SELECTIVE_ONE_WAY_IGNITION_WITHOUT_DUAL_BASIN",
+      "selective_one_way_points": [
+        "H1_ts1.25_r025",
+        "H1_ts1.25_r050",
+        "H1_ts1.25_r075"
+      ],
+      "natural_dual_basin_window": false,
+      "explicit_d_gate_status": "DEFERRED_PENDING_LC3_CURRENT_EQUATION_AUDIT",
+      "lifecycle_interpretation": "D_SELECTIVE_MONOSTABLE_ONSET_CANDIDATE",
+      "same_D_bistability_required_for_lifecycle": false
+    },
+    "strip_resolution": {
+      "per_arm": {
+        "healthy_low": {
+          "n_points": 12,
+          "n_distinct_tail_rates": 12,
+          "min_gate_over_run": 0.0,
+          "gate_pinned_open_whole_run": false
+        },
+        "susceptible_low": {
+          "n_points": 12,
+          "n_distinct_tail_rates": 12,
+          "min_gate_over_run": 0.0,
+          "gate_pinned_open_whole_run": false
+        },
+        "susceptible_high": {
+          "n_points": 12,
+          "n_distinct_tail_rates": 3,
+          "min_gate_over_run": 0.9999999898060814,
+          "gate_pinned_open_whole_run": true
+        }
+      },
+      "gate_pinned_arms": [
+        "susceptible_high"
+      ],
+      "arms_that_resolve_tau_and_theta": [
+        "healthy_low",
+        "susceptible_low"
+      ]
+    },
+    "x_authority": {
+      "current_x_path_reachable": true,
+      "h_actuator_bypasses_x": false,
+      "largest_tested_returning_availability": 0.1,
+      "smallest_tested_nonreturning_availability_above_return": 0.5,
+      "experimental_return_bracket": [
+        0.1,
+        0.5
+      ],
+      "archived_relay_loads_at_this_anchor": [
+        {
+          "x_availability": 0.872,
+          "arm": "D1",
+          "required_low_workpoint_label": "FINITE_HIGH_ORBIT",
+          "returned_to_interictal": false,
+          "tail_rate_hz": 97.62428125
+        },
+        {
+          "x_availability": 0.786,
+          "arm": "D2",
+          "required_low_workpoint_label": "FINITE_HIGH_FIXED",
+          "returned_to_interictal": false,
+          "tail_rate_hz": 94.935
+        }
+      ],
+      "archived_relay_load_source": "LC2 E4 frozen_fork_map.json, same candidate_run_id",
+      "archived_range_status": "INSUFFICIENT_FOR_THIS_H_BRANCH",
+      "physiological_validity_of_returning_probe": "NOT_ESTABLISHED",
+      "fixed_D_dynamic_range_status": "INSUFFICIENT",
+      "coupled_D_X_offset_status": "UNTESTED"
+    },
+    "x_initial_condition": {
+      "h_initial": 2.2245484590530396,
+      "h_converged_at_full_availability": 6.8167105357515645,
+      "head_start_ratio": 3.064311999143119,
+      "extra_above_theta_decay_s_if_started_converged": 0.7082382981077257,
+      "run_duration_s": 5.059644256269407,
+      "required_low_window_s": 2.0,
+      "offset_tested_against": "analytic 2*theta head start, not the converged high branch",
+      "margin_ok": true
+    },
+    "dynamic_lifecycle_tested": false,
+    "spatial_instability_tested": false,
+    "morphology_tested": false,
+    "forbidden_claims": [
+      "spontaneous seizure lifecycle",
+      "bistability or hysteresis from the frozen strip alone",
+      "physiological validity of x=0 or x=0.1",
+      "patient-like ictal morphology",
+      "12 independent susceptible-high conditions: the H gate is pinned open in that arm, so it resolves rho only and is blind to tau_H and theta_H",
+      "removal of a converged high branch: the offset arms start from an analytic 2*theta head start",
+      "same-D bistability is necessary for a seizure lifecycle",
+      "the current dynamic X range is insufficient in the coupled D-X system: only fixed-D was tested",
+      "the D-selective transition is axial or local: spatial instability was not tested"
+    ],
+    "finalized_at": "2026-08-03T07:45:05.713242+00:00"
+  },
+  "artifacts": {
+    "execution_lock.json": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/execution_lock.json",
+      "sha256": "b9df84d4f4834d5a795365fb037c5a0d2d1ef4628cf45aa5e6a7e931b4102f15"
+    },
+    "selectivity_strip_manifest.json": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/selectivity_strip_manifest.json",
+      "sha256": "84280211e66161726415f82f3b4cb9305fed1654b546105fff89b5590996e801"
+    },
+    "selectivity_strip.json": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/selectivity_strip.json",
+      "sha256": "fd0043b767651a2c1dbc5a9fa4411757465b94f0f1dc2b751291d3b3d9945a9e"
+    },
+    "x_authority_manifest.json": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/x_authority_manifest.json",
+      "sha256": "777c8a6f8f53f1ed0f3877bd8081bad2750fae3ffde62638ebe075bf2e3745f9"
+    },
+    "x_authority_map.json": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/x_authority_map.json",
+      "sha256": "f799615014ba1771521b0381007a8d7cc72b106810b5961bd86b8161f557126a"
+    },
+    "candidate_verdict.json": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/candidate_verdict.json",
+      "sha256": "4405d848d7aafb48264a82bfac229c59a0caa07395e361dc6dc29def58a8d627"
+    },
+    "STATUS.md": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/STATUS.md",
+      "sha256": "d63485c59dcc419b5ff46cb523d795da15138fd5cfb64579ac28a89248304e50"
+    },
+    "figures/selectivity_strip.png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/figures/selectivity_strip.png",
+      "sha256": "c4e65e69544b62f7ae9cce39182d2b90c91d50f5afaf3f8d7ab1722a298e8acb"
+    },
+    "figures/x_authority.png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/figures/x_authority.png",
+      "sha256": "aa233f9925353045df22aa28e56d419d33ba9a5a12a1155f06a0dcc50e0d8976"
+    },
+    "figures/failure_logic.png": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/figures/failure_logic.png",
+      "sha256": "2327525b900ba74bdcef75205c91bc19af6a002268bb9c67f34b0700056940ac"
+    },
+    "figures/README.md": {
+      "path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-fcxr-lc2/results/topic4_sef_hfo/fcxr_lc2_core/gx1_entry_offset_diagnostics/figures/README.md",
+      "sha256": "29e7bc739ec280010e419ca9f9d1b54d9fba0e9b2d095c3a5349cf8e752bc828"
+    }
+  },
+  "finalized_at": "2026-08-03T07:45:06.948652+00:00",
+  "result_archive_commit": "8072e706",
+  "verification": {
+    "targeted_gx1_tests_passed": 20,
+    "figure_visual_qa": "PASS_ALL_THREE_REGENERATED_2026-08-03",
+    "blessed_engine_hashes": "6_OF_6_MATCH_EXECUTION_LOCK",
+    "numerical_safe_rows": "40_OF_40",
+    "max_single_cell_rss_gib": 11.236,
+    "swap_delta_mib": 0.0,
+    "residual_gx1_processes": 0,
+    "dynamic_lifecycle_unlocked": false,
+    "executable_contract_sha256_at_lock": "7732a819388201185e01936efbc136a2350d6700c4eadf1125a1663383464907",
+    "executable_contract_sha256_now": "fb41fd8c7c84b9cf4997411ff4f4ce20f2cbfa2cc125d173487e7ab67686f6bc",
+    "relevant_tests_passed_at_signoff": 154,
+    "relevant_tests_failed_at_signoff": 0,
+    "post_review_regression_2026_08_03": {
+      "scope": "12 LC2 / FCXR / MZ / SNN-engine test modules",
+      "passed": 349,
+      "failed": 0
+    },
+    "acceptance_regression_after_archive_lookup_fix": {
+      "scope": "12 directly coupled GX1 / LC2 / FCXR / MZ / SNN-engine modules",
+      "passed": 176,
+      "failed": 0
+    },
+    "post_review_note": "X1 verdict corrected from X_OFFSET_ALREADY_REACHABLE_IN_CURRENT_PATH to X_PATH_REACHABLE_RANGE_INSUFFICIENT; simulations were not re-run, cells are unchanged and were re-aggregated read-only."
+  }
+}
