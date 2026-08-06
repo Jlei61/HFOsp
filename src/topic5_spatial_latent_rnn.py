@@ -1,6 +1,11 @@
 """Model family for the Topic 5 spatial latent propagation RNN v0.1.
 
-Five arms share one task head so that every comparison is like for like:
+Five arms share the same prediction task and the same loss.  They do NOT
+share an output head: the recurrent arm reads out densely from a hidden
+vector, the contact-graph arm reads one scalar per contact node, and the
+latent arms emit per tissue unit and project through the fixed operator H.
+So this is a comparison of whole parameterisations, not a factorial
+decomposition of one factor at a time:
 
 ``STATIC_CONTACT``            per-contact frequency floor, no recurrence
 ``ORDINARY_GRU``              one unconstrained recurrent state, free readout
@@ -268,7 +273,14 @@ class GraphRecurrence(nn.Module):
 
 
 class SLPModel(nn.Module):
-    """One patient, one arm.  All arms expose the same next-set / STOP head."""
+    """One patient, one arm.  All arms expose the same next-set / STOP interface,
+    but the mapping onto that interface differs by arm; see the module docstring.
+
+    Every parameter here is fitted per patient -- the shared NodeCell is shared
+    across the nodes OF ONE PATIENT, not across patients -- so patients differ in
+    the cell, the bias, the emission, the scale and the STOP head as well as in
+    the graph.
+    """
 
     def __init__(self, config: ModelConfig):
         super().__init__()
