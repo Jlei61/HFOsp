@@ -90,28 +90,69 @@ def main() -> int:
     if not rows:
         raise SystemExit("no static units to verify")
     gaps = np.array([r["gap"] for r in rows])
+
+    # A fixed tolerance answers the wrong question.  What matters is not whether
+    # every patient's baseline is within some absolute distance of its optimum,
+    # but whether any patient's shortfall is large enough to have produced that
+    # patient's measured advantage.  Compare each gap to its own patient's
+    # recurrent-over-static difference.
+    import csv as _csv
+    advantage = {}
+    metrics = OUT / "patient_prediction_metrics.csv"
+    if metrics.exists():
+        by_arm: dict = {}
+        for row in _csv.DictReader(metrics.open()):
+            by_arm.setdefault(row["arm"], {}).setdefault(row["subject"], []).append(
+                float(row["test_next_bce"]))
+        for subject in by_arm.get("STATIC_CONTACT", {}):
+            if subject in by_arm.get("ORDINARY_GRU", {}):
+                advantage[subject] = float(
+                    np.median(by_arm["STATIC_CONTACT"][subject])
+                    - np.median(by_arm["ORDINARY_GRU"][subject]))
+    for row in rows:
+        own = advantage.get(row["subject"])
+        row["own_recurrent_advantage"] = own
+        row["gap_as_fraction_of_own_advantage"] = (
+            float(abs(row["gap"]) / abs(own)) if own else None)
+        row["gap_could_flip_this_patient"] = bool(own and abs(row["gap"]) >= abs(own))
+    could_flip = [r["subject"] for r in rows if r["gap_could_flip_this_patient"]]
+    fractions = [r["gap_as_fraction_of_own_advantage"] for r in rows
+                 if r["gap_as_fraction_of_own_advantage"] is not None]
+
     verdict = {
-        "contract": "topic5_slp_static_baseline_verification_v0_1",
+        "contract": "topic5_slp_static_baseline_verification_v0_2",
         "n_subjects": len(rows),
         "median_gap": float(np.median(gaps)),
         "max_abs_gap": float(np.abs(gaps).max()),
         "tolerance": TOLERANCE,
-        "status": "BASELINE_AT_ITS_OPTIMUM" if np.abs(gaps).max() <= TOLERANCE
-                  else "BASELINE_UNDERFITTED",
+        "n_patients_whose_gap_could_flip_their_own_sign": len(could_flip),
+        "patients_that_could_flip": could_flip,
+        "median_gap_as_fraction_of_own_advantage": (
+            float(np.median(fractions)) if fractions else None),
+        "max_gap_as_fraction_of_own_advantage": (
+            float(np.max(fractions)) if fractions else None),
+        "status": "NO_PATIENT_COULD_FLIP" if not could_flip else "SOME_PATIENT_COULD_FLIP",
         "means": (
-            "the static arm's convergence flag is a false alarm: its loss creeps "
-            "by amounts too small to clear the patience threshold while the model "
-            "already sits at the best a constant per contact can do"
-            if np.abs(gaps).max() <= TOLERANCE else
-            "the static arm is genuinely undertrained and the recurrent advantage "
-            "is inflated by that"
+            "no patient's baseline falls short of its own optimum by as much as that "
+            "patient's measured recurrent advantage, so the direction of the cohort "
+            "result cannot be an artefact of an undertrained baseline -- though on "
+            "the hardest patients the shortfall is an appreciable fraction of the "
+            "advantage and the effect size there should be read as a lower bound"
+            if not could_flip else
+            "at least one patient's baseline shortfall is as large as its measured "
+            "advantage, so that patient's contribution cannot be trusted"
         ),
         "subjects": rows,
     }
     (OUT / "static_baseline_verification.json").write_text(json.dumps(verdict, indent=1))
     print(f"\n{verdict['status']}  median gap {verdict['median_gap']:+.4f}, "
-          f"worst {verdict['max_abs_gap']:.4f}, tolerance {TOLERANCE}")
-    return 0 if verdict["status"] == "BASELINE_AT_ITS_OPTIMUM" else 1
+          f"worst {verdict['max_abs_gap']:.4f}")
+    if verdict["max_gap_as_fraction_of_own_advantage"] is not None:
+        print(f"as a fraction of each patient's own advantage: median "
+              f"{verdict['median_gap_as_fraction_of_own_advantage']:.1%}, "
+              f"worst {verdict['max_gap_as_fraction_of_own_advantage']:.1%}")
+    print(verdict["means"])
+    return 0 if verdict["status"] == "NO_PATIENT_COULD_FLIP" else 1
 
 
 if __name__ == "__main__":

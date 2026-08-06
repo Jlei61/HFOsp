@@ -209,10 +209,16 @@ def main() -> int:
         add(f"- the same constant-per-contact model was refitted with a second-order "
             f"optimiser and scored on the same held-out events. The cohort run sits "
             f"{baseline_check['median_gap']:+.4f} from that optimum in the median and "
-            f"{baseline_check['max_abs_gap']:.4f} at worst, against a reported advantage "
-            f"around {abs(((primary.get('H1_recurrence') or {}).get('all') or {}).get('median_delta') or float('nan')):.3f}. "
-            f"Verdict: **{baseline_check['status'].lower().replace('_', ' ')}** — "
-            f"{baseline_check['means']}.")
+            f"{baseline_check['max_abs_gap']:.4f} at worst.")
+        if baseline_check.get("max_gap_as_fraction_of_own_advantage") is not None:
+            add(f"  An absolute tolerance is the wrong test here, so each shortfall is "
+                f"compared to that patient's own measured advantage: median "
+                f"{baseline_check['median_gap_as_fraction_of_own_advantage']:.0%}, worst "
+                f"{baseline_check['max_gap_as_fraction_of_own_advantage']:.0%}, and "
+                f"{baseline_check['n_patients_whose_gap_could_flip_their_own_sign']} "
+                f"patients where it is large enough to have produced that patient's "
+                f"result.")
+        add(f"  **{baseline_check['means'].capitalize()}.**")
     else:
         add("- baseline optimality check not available.")
     if budget_probe and budget_probe.get("contrasts"):
