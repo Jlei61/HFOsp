@@ -330,17 +330,26 @@ class SPOModel(nn.Module):
         recruited = seed_set.clone()
         x_t = seed_set.clone()
         produced = [seed_set.clone()]
+        # Each sequence stops on its OWN stop probability. Averaging the batch
+        # ends every rollout on the same step, which makes the generated length
+        # distribution a single spike and says nothing about the model.
+        alive = torch.ones(batch, dtype=torch.bool, device=seed_set.device)
+        lengths = torch.ones(batch, dtype=torch.long, device=seed_set.device)
         for t in range(max_steps):
             t_norm = torch.full((batch, 1), t / max(max_steps - 1, 1),
                                 device=seed_set.device)
             state, logits, stop = self.step(state, x_t, recruited, t_norm)
             logits = logits.masked_fill(recruited > 0, NEG_INF)
             x_t = (torch.sigmoid(logits) > threshold).float()
-            if torch.sigmoid(stop).mean() > 0.5 or x_t.sum() == 0:
+            finished = (torch.sigmoid(stop) > 0.5) | (x_t.sum(-1) == 0)
+            alive = alive & ~finished
+            if not bool(alive.any()):
                 break
+            x_t = x_t * alive.unsqueeze(-1).float()
+            lengths = lengths + alive.long()
             produced.append(x_t.clone())
             recruited = ((recruited + x_t) > 0).float()
-        return produced
+        return produced, lengths
 
     def parameter_estimates(self) -> dict[str, float]:
         if self.operator is None:

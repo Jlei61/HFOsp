@@ -205,8 +205,9 @@ def test_rollout_does_not_consume_ground_truth():
     model = _setup("ANISOTROPIC_RECOVERY")
     seed = torch.zeros(1, model.config.n_contacts)
     seed[0, 0] = 1.0
-    produced = model.rollout(seed, max_steps=6)
+    produced, lengths = model.rollout(seed, max_steps=6)
     assert produced[0].equal(seed)
+    assert lengths.shape == (1,) and int(lengths[0]) >= 1
     assert all(p.shape == seed.shape for p in produced)
 
 
@@ -215,7 +216,7 @@ def test_a_contact_never_recruits_twice_in_a_rollout():
     model = _setup("ANISOTROPIC_RECOVERY")
     seed = torch.zeros(1, model.config.n_contacts)
     seed[0, 0] = 1.0
-    produced = model.rollout(seed, max_steps=10, threshold=0.0)
+    produced, _ = model.rollout(seed, max_steps=10, threshold=0.0)
     stacked = torch.cat(produced, dim=0)
     assert stacked.sum(dim=0).max() <= 1.0
 
@@ -274,3 +275,25 @@ def test_parameter_count_is_tiny_next_to_a_free_graph():
                   if n.startswith("operator.") or n.startswith("raw_w"))
     assert spatial <= 12, f"{spatial} spatial parameters is not a low-dimensional operator"
     assert spatial < n_cells ** 2 / 100
+
+
+# 16 ----------------------------------------------------------------------
+def test_rollout_stops_each_sequence_on_its_own():
+    """A batch must not share one stopping decision.
+
+    The first version averaged the batch's stop probability, so every rollout
+    ended on the same step and the generated length distribution collapsed to a
+    single spike -- which looks like a model that always produces one-rank
+    events rather than a batching bug.
+    """
+    model = _setup("ANISOTROPIC_RECOVERY")
+    c = model.config.n_contacts
+    seeds = torch.zeros(2, c)
+    seeds[0] = 1.0          # nothing left to recruit: must stop at once
+    seeds[1, 0] = 1.0       # room to continue
+    produced, lengths = model.rollout(seeds, max_steps=8, threshold=0.0)
+    assert lengths.shape == (2,)
+    assert int(lengths[0]) < int(lengths[1]), (
+        f"a saturated sequence ran as long as an open one ({lengths.tolist()}); "
+        "the batch is sharing a stopping decision"
+    )

@@ -60,12 +60,13 @@ def panel_a(ax, subject: str) -> None:
         return _empty(ax, "full operator not fitted")
     x = torch.zeros(1, model.config.n_contacts)
     x[0, model.config.n_contacts // 2] = 1.0
-    state = model.initial_state(1, x.device)
-    for t in range(3):
-        state, _, _ = model.step(state, x if t == 0 else torch.zeros_like(x),
-                                 x, torch.full((1, 1), t / 3))
-    a, r = state
-    field = (a[0] - r[0]).numpy().T
+    with torch.no_grad():
+        state = model.initial_state(1, x.device)
+        for t in range(3):
+            state, _, _ = model.step(state, x if t == 0 else torch.zeros_like(x),
+                                     x, torch.full((1, 1), t / 3))
+        a, r = state
+        field = (a[0] - r[0]).numpy().T
     mask = grid["mask"].T
     ax.imshow(np.where(mask > 0, field, np.nan), origin="lower", aspect="auto",
               cmap="RdBu_r", vmin=-np.abs(field).max(), vmax=np.abs(field).max())
@@ -88,8 +89,8 @@ def panel_b(ax, subject: str) -> None:
     rng = np.random.default_rng(0)
     for i in range(64):
         seeds[i, rng.integers(model.config.n_contacts)] = 1.0
-    produced = model.rollout(seeds, max_steps=int(observed.max()) + 4)
-    generated = np.full(64, len(produced))
+    _, lengths = model.rollout(seeds, max_steps=int(observed.max()) + 4)
+    generated = lengths.numpy()
     bins = np.arange(0, max(observed.max(), generated.max()) + 2) - 0.5
     ax.hist(observed, bins=bins, density=True, alpha=0.55, color="#3d5a80",
             label=f"observed (n={len(observed)})")
@@ -119,7 +120,8 @@ def panel_c(ax) -> None:
         ax.plot([i - 0.3, i + 0.3], [np.median(values)] * 2, color="0.15", lw=2)
     ax.axhline(0.0, color="0.55", lw=1, ls=":")
     ax.set_xticks(range(len(names)))
-    ax.set_xticklabels([LADDER_LABEL[n] for n in names], fontsize=6.5)
+    ax.set_xticklabels([LADDER_LABEL[n] for n in names], fontsize=6.0,
+                       rotation=20, ha="right")
     ax.set_ylabel("Improvement on the previous\nmodel, same patient")
     ax.set_title("C  What each component buys", loc="left", pad=14)
 
@@ -137,8 +139,13 @@ def panel_d(ax) -> None:
     ]
     for i, (name, value, floor, chance) in enumerate(layers):
         colour = "#2a9d8f" if value >= floor else "#d1495b"
-        ax.bar([i], [value - chance], color=colour, width=0.5)
+        height = value - chance
+        ax.bar([i], [height], color=colour, width=0.5)
         ax.plot([i - 0.3, i + 0.3], [floor - chance] * 2, color="0.25", ls="--", lw=1.2)
+        # A bar of exactly zero is the most informative outcome here and the
+        # easiest to mistake for a panel that failed to draw.
+        if abs(height) < 0.02:
+            ax.text(i, 0.02, "at chance", ha="center", fontsize=6, color="#d1495b")
     recovery = gate["recovery_strength_ordering"]
     if recovery.get("median_when_strong") is not None:
         gap = recovery["median_when_strong"] - recovery["median_when_absent"]
