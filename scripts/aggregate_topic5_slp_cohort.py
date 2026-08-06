@@ -149,6 +149,34 @@ def main() -> int:
             entry["patients_with_an_unconverged_arm"] = unconverged
             summary["comparisons"].setdefault(label, {})[name] = entry
 
+    # How each metric scales with montage size.  The paired comparisons above are
+    # within patient and so are safe either way, but the LEVELS are not
+    # comparable across patients on the multi-label loss: with more contacts most
+    # are absent at any step, so predicting absence well is enough to look good.
+    cache = json.loads((OUT / "cache" / "CACHE_SUMMARY.json").read_text())
+    n_contacts = {p["subject"]: p["n_contacts"] for p in cache["patients"]}
+    scaling = {}
+    for metric in (METRIC, SECONDARY):
+        table, _ = per_patient(rows, metric)
+        reference = table.get("STATIC_CONTACT", {})
+        common = [s for s in reference if s in n_contacts]
+        if len(common) >= 5:
+            rho = stats.spearmanr(
+                [n_contacts[s] for s in common], [reference[s] for s in common]
+            ).statistic
+            scaling[metric] = {
+                "spearman_level_vs_contact_count": float(rho),
+                "comparable_across_patients": bool(abs(rho) < 0.4),
+            }
+    summary["metric_scaling"] = scaling
+    summary["metric_scaling_note"] = (
+        "Levels of the multi-label loss fall as the montage grows, because most "
+        "contacts are absent at any step and predicting absence is easy. The "
+        "cardinality-conditioned rank loss rises instead, which is the honest "
+        "direction: more contacts to choose between is a harder question. Read "
+        "levels only on the rank loss; the paired differences are valid on both."
+    )
+
     (args.out / "cohort_statistics.json").write_text(json.dumps(summary, indent=1))
 
     print(f"units aggregated: {len(rows)}   arms: {summary['arms_present']}")

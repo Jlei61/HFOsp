@@ -45,6 +45,10 @@ OUT_ROOT = ROOT / "results/topic5_spatial_latent_propagation_rnn_v0_1"
 # they spend their time contending rather than computing.
 torch.set_num_threads(2)
 
+# Floor on gradient steps per epoch, so the epoch budget means the same amount of
+# optimisation for a patient with 250 events as for one with 70,000.
+MIN_BATCHES_PER_EPOCH = 8
+
 DEFAULTS: Dict[str, Any] = {
     "hidden": 4,
     "microsteps": 3,
@@ -228,7 +232,13 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
 
     train = partitions["train"]
     n_train = train.x.shape[0]
-    batch_size = int(cfg["batch_size"])
+    # A fixed batch counts gradient steps in units of epochs, which starves the
+    # patients with few events: at 1024 a patient with 249 training events gets
+    # one update per epoch, so the whole budget buys 95 updates and every arm
+    # sits far from its own optimum.  The gap to a second-order fit of the static
+    # baseline tracked training-set size almost exactly before this.  Every
+    # patient now gets at least eight updates per epoch.
+    batch_size = int(np.clip(n_train // MIN_BATCHES_PER_EPOCH, 32, int(cfg["batch_size"])))
     learnable = arm in ("CONTACT_GRAPH_RNN", "LATENT_LEARNED_SPATIAL_RNN")
 
     warmup, structure, freeze = (
