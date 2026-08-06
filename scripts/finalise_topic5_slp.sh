@@ -13,23 +13,32 @@ export OMP_NUM_THREADS=2 MKL_NUM_THREADS=2 PYTORCH_CUDA_ALLOC_CONF=expandable_se
 stamp() { echo "[$(date +%H:%M:%S)] $*"; }
 
 stamp "waiting for the 105-unit refit"
-while [ "$(find "$R/per_subject" -name DONE.json 2>/dev/null | wc -l)" -lt 105 ]; do
+while [ "$(find "$R/per_subject" -path "*/seed1/*" -name DONE.json 2>/dev/null | wc -l)" -lt 105 ]; do
   if [ "$(pgrep -fc train_topic5_slp_unit || echo 0)" -eq 0 ]; then
-    stamp "trainers gone at $(find "$R/per_subject" -name DONE.json | wc -l)/105; retrying stragglers"
+    stamp "trainers gone at $(find "$R/per_subject" -path "*/seed1/*" -name DONE.json | wc -l)/105; retrying stragglers"
     find "$R/per_subject" -name FAILED.json -delete 2>/dev/null
     "$PY" scripts/launch_topic5_slp_cohort.py --config "$CFG" \
       --arms STATIC_CONTACT ORDINARY_GRU CONTACT_GRAPH_RNN \
              LATENT_FIXED_LOCAL_RNN LATENT_LEARNED_SPATIAL_RNN \
       --seeds 1 --workers 5 >> "$R/refit_retry.log" 2>&1
-    [ "$(find "$R/per_subject" -name DONE.json | wc -l)" -lt 105 ] && break
+    [ "$(find "$R/per_subject" -path "*/seed1/*" -name DONE.json | wc -l)" -lt 105 ] && break
   fi
   sleep 120
 done
-stamp "cohort at $(find "$R/per_subject" -name DONE.json | wc -l)/105"
+stamp "cohort at $(find "$R/per_subject" -path "*/seed1/*" -name DONE.json | wc -l)/105"
 
 # Leave-contact-out trained its tissue-field arm under the old ceiling, and its
 # comparator did not, so any residual bias runs the same way as the cohort bias.
 # Redo it at the same budget as everything else.
+# The flow-ordering readout compares a patient against itself refitted from a
+# different start, so it needs a second seed. Cancelling seeds 2-3 removed every
+# within-patient pair and left the one structural question the recovery gate
+# licenses unanswerable.
+stamp "second seed for the learned arm, for the within-patient comparison"
+"$PY" scripts/launch_topic5_slp_cohort.py --config "$CFG" \
+  --arms LATENT_LEARNED_SPATIAL_RNN --seeds 2 --workers 5 \
+  >> "$R/seed2_latent.log" 2>&1 || true
+
 stamp "leave-contact-out at the corrected budget"
 if [ ! -d "$R/leave_contact_out_budget95" ] && [ -d "$R/leave_contact_out" ]; then
   mv "$R/leave_contact_out" "$R/leave_contact_out_budget95"
