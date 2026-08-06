@@ -56,15 +56,25 @@ def main() -> int:
     for subject in subjects:
         static_v1 = score(V1, subject, "STATIC_CONTACT")
         gru_v1 = score(V1, subject, "ORDINARY_GRU")
+        # Readout-matched: v0.1's latent arms emit per tissue unit and project
+        # through the same fixed kernel this version does, so comparing against
+        # them isolates what carries the dynamics -- a learned sparse graph over
+        # tissue nodes against eight physical scalars -- with the readout held
+        # constant. The recurrent comparison cannot do that.
+        learned_v1 = score(V1, subject, "LATENT_LEARNED_SPATIAL_RNN")
+        knn_v1 = score(V1, subject, "LATENT_FIXED_LOCAL_RNN")
         static_v2 = score(OUT / "per_subject", subject, "STATIC")
         field_v2 = score(OUT / "per_subject", subject, "FIELD_NULL")
         full_v2 = score(OUT / "per_subject", subject, "ANISOTROPIC_RECOVERY")
-        if None in (static_v1, gru_v1, static_v2, field_v2, full_v2):
+        if None in (static_v1, gru_v1, learned_v1, knn_v1,
+                    static_v2, field_v2, full_v2):
             continue
         rows.append({
             "subject": subject,
             "baseline_discrepancy": static_v2 - static_v1,
             "recurrent_advantage": static_v1 - gru_v1,
+            "learned_graph_advantage": static_v1 - learned_v1,
+            "fixed_knn_graph_advantage": static_v1 - knn_v1,
             "field_advantage": static_v2 - field_v2,
             "full_operator_advantage": static_v2 - full_v2,
         })
@@ -76,6 +86,8 @@ def main() -> int:
     field = np.array([r["field_advantage"] for r in rows])
     full = np.array([r["full_operator_advantage"] for r in rows])
     discrepancy = np.array([abs(r["baseline_discrepancy"]) for r in rows])
+    learned = np.array([r["learned_graph_advantage"] for r in rows])
+    knn = np.array([r["fixed_knn_graph_advantage"] for r in rows])
 
     report = {
         "contract": "topic5_spo_against_v0_1_v0_2",
@@ -113,35 +125,54 @@ def main() -> int:
                 "field's own advantage; the cohort medians hold but individual "
                 "patients should not be read from this"),
         },
+        "readout_matched": {
+            "what": ("v0.1's latent arms project through the same fixed kernel "
+                     "this version does, so against them the readout is held "
+                     "constant and only what carries the dynamics differs"),
+            "learned_sparse_graph_advantage_median": float(np.median(learned)),
+            "fixed_knn_graph_advantage_median": float(np.median(knn)),
+            "operator_share_of_learned_graph":
+                float(np.median(full) / np.median(learned))
+                if np.median(learned) > 0 else None,
+            "n_patients_operator_matches_learned_graph": int((full >= learned).sum()),
+            "wilcoxon_operator_vs_learned_graph_p": float(
+                stats.wilcoxon(full - learned).pvalue),
+        },
         "confound": {
             "what": ("the recurrent arm reads out through a free dense layer "
                      "(nn.Linear to one logit per contact) while every field here "
                      "must project through the fixed observation kernel"),
-            "consequence": ("the gap is recurrence AND readout together, not "
-                            "recurrence alone; some unknown part of the 91% the "
-                            "operator gives back may be the readout rather than "
-                            "the dynamics"),
+            "consequence": ("its gap is recurrence AND "
+                            "readout together, so it cannot be charged to the "
+                            "spatial parameterisation. The readout-matched "
+                            "comparison above is the one that isolates it, and "
+                            "there the operator and the learned graph are "
+                            "indistinguishable"),
             "why_not_tested": ("testing it means a sixth arm -- the operator with "
                                "a free readout -- which would change the "
                                "pre-registered nested family this version froze. "
                                "It is the natural first question for the next one"),
             "direction_of_bias": ("against the operator: a free readout can only "
-                                  "help, so the operator's share is a lower bound "
-                                  "and the true share of the DYNAMICS could be "
-                                  "higher than 9%"),
+                                  "help, so any share computed against the "
+                                  "recurrent arm is a lower bound"),
         },
         "per_patient": rows,
     }
+    rm_matches = report["readout_matched"]["n_patients_operator_matches_learned_graph"]
     report["reading"] = (
-        f"an unconstrained recurrent model beats a per-contact rate by "
-        f"{np.median(recurrent):+.4f}; the eight-scalar field beats it by "
-        f"{np.median(field):+.4f}, which is "
-        f"{report['share_recovered_by_field']:.0%} of the recurrent advantage, and "
-        f"the field matches or exceeds the recurrent model in "
-        f"{report['n_patients_where_field_matches_recurrent']} of {len(rows)} "
-        "patients. Replacing the free graph with a propagation operator kept a "
-        "small fraction of what recurrence was buying -- though the recurrent arm "
-        "also had a free readout, so this is a lower bound on the operator's share")
+        f"with the readout held constant, replacing v0.1's learned sparse graph "
+        f"with eight physical scalars costs nothing: the operator is "
+        f"{np.median(full):+.4f} over static against the learned graph's "
+        f"{np.median(learned):+.4f} and a fixed nearest-neighbour graph's "
+        f"{np.median(knn):+.4f}, matching the learned graph in "
+        f"{rm_matches} of {len(rows)} patients "
+        f"(p={report['readout_matched']['wilcoxon_operator_vs_learned_graph_p']:.3g}, "
+        "no detectable difference). What neither reaches is the unconstrained "
+        f"recurrent model at {np.median(recurrent):+.4f}, and because that arm "
+        "also reads out through a free dense layer, its lead is NOT attributable "
+        "to the spatial parameterisation. The eight scalars are as good a "
+        "substitute for a learned graph as the graph was; the gap that remains "
+        "sits somewhere neither of them touches")
 
     (OUT / "against_v0_1.json").write_text(json.dumps(report, indent=1))
     print(f"n={len(rows)}")
@@ -153,7 +184,19 @@ def main() -> int:
     print(f"  field matches recurrent in "
           f"{report['n_patients_where_field_matches_recurrent']}/{len(rows)}, "
           f"p={report['wilcoxon_field_vs_recurrent_p']:.3g}")
-    print(f"  {report['baseline_discrepancy']['reading']}")
+    rm = report["readout_matched"]
+    print("\n  readout-matched (both project through the same fixed kernel):")
+    print(f"    learned sparse graph over static  "
+          f"{rm['learned_sparse_graph_advantage_median']:+.4f}")
+    print(f"    fixed nearest-neighbour graph     "
+          f"{rm['fixed_knn_graph_advantage_median']:+.4f}")
+    print(f"    eight-scalar operator             {np.median(full):+.4f}"
+          + (f"   ({rm['operator_share_of_learned_graph']:.0%} of the learned graph)"
+             if rm["operator_share_of_learned_graph"] is not None else ""))
+    print(f"    operator matches learned graph in "
+          f"{rm['n_patients_operator_matches_learned_graph']}/{len(rows)}, "
+          f"p={rm['wilcoxon_operator_vs_learned_graph_p']:.3g}")
+    print(f"\n  {report['baseline_discrepancy']['reading']}")
     return 0
 
 

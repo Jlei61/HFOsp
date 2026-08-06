@@ -175,12 +175,17 @@ def main() -> int:
     add("")
     against = load(OUT / "against_v0_1.json")
     if against.get("n_patients"):
-        add("### What the eight scalars kept\n")
+        add("### What replacing the graph with eight scalars cost\n")
         add("v0.1 showed an unconstrained recurrent model beating a per-contact "
             "rate, and every structural prior it tried giving that gain back. This "
             "version replaced the structure with a propagation operator, so the "
-            "question it exists to answer is how much of that gain the operator "
-            "recovers.\n")
+            "question it exists to answer is what that substitution cost.\n")
+        add("Two comparisons, and only one of them is clean. v0.1's LATENT arms "
+            "project through the same fixed observation kernel this version does, "
+            "so against them the readout is held constant and the only thing that "
+            "differs is what carries the dynamics. Its recurrent arm reads out "
+            "through a free dense layer, so that comparison confounds two things "
+            "at once and is reported second.\n")
         add(f"The two versions share {against['shared']}. Each is scored against "
             "its own static baseline, so a shifted baseline cancels rather than "
             "propagating.\n")
