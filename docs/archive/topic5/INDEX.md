@@ -143,3 +143,8 @@
 ### `constructive_event_generation_sufficiency_v0_1_report_2026-07-30.md` — **局部 transition 可生成，但完整双向事件充分性 Gate 失败**
 - 34 人 × 3 seeds 的 102 个 source-conditioned free-running 单元全部完成；history 改善 first-order transition fingerprint，但不改善 suffix rank/precedence，只有 9/34 人至少两项达到人体 split-half 经验范围。
 - 独立 rank-progress STOP 在 34/34 人必要；22 位 train-only 双模态+物理轴合格患者中，history 未改善 template 或 signed-axis fidelity。Gate C 与 SNN bridge 按合同锁定。
+
+### `spatial_latent_propagation_rnn_v0_1_2026-08-06.md` — **状态从触点搬到组织平面；连接身份不可辨识，预测腿仍可读**
+- 触点改为观测口而非节点，第一次可以问「能不能预测没训练过的触点」。
+- 合成可辨识性检验：逐边身份与整体行进方向都认不出，只有各组织块往前推的相对排序认得出。
+- 因此患者间图差异与定向删连接两类说法在本版无依据；预测层面的比较不受影响。
