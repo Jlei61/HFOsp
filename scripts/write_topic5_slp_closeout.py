@@ -164,13 +164,16 @@ def main() -> int:
             f"{baseline_check['means']}.")
     else:
         add("- baseline optimality check not available.")
-    if budget_probe:
-        add(f"- a sample of patients was refitted with a six-fold epoch budget. The "
-            f"advantage moved from {budget_probe['median_advantage_at_budget_95']:+.4f} to "
-            f"{budget_probe['median_advantage_at_long_budget']:+.4f}, a shrinkage of "
-            f"{budget_probe['median_shrinkage']:+.4f} "
-            f"({budget_probe['shrinkage_as_fraction_of_reported_advantage']:.1%} of the "
-            f"effect). {budget_probe['direction'].capitalize()}.")
+    if budget_probe and budget_probe.get("contrasts"):
+        add(f"- a sample of {budget_probe['n_subjects']} patients was refitted with a "
+            f"budget several times larger. What matters is whether each gap keeps its "
+            f"sign once every arm has room to converge:")
+        for key, block in budget_probe["contrasts"].items():
+            better, worse = key.split("__over__")
+            add(f"  - {better} over {worse}: "
+                f"{block['median_at_budget_95']:+.4f} at the run budget, "
+                f"{block['median_at_long_budget']:+.4f} with room to converge — "
+                f"sign {'survives' if block['sign_survives_longer_budget'] else 'FLIPS'}")
     else:
         add("- longer-budget probe not available.")
     add("")

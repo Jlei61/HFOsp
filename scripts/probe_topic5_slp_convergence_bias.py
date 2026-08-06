@@ -22,9 +22,17 @@ ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "results/topic5_spatial_latent_propagation_rnn_v0_1"
 PYTHON = "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python"
 
-ARMS = ("STATIC_CONTACT", "ORDINARY_GRU")
-LONG_CONFIG = {"epochs_warmup": 0, "epochs_structure": 0,
-               "epochs_freeze": 600, "patience": 25}
+# The load-bearing negative is the tissue field against an unconstrained
+# recurrent model, so the budget probe has to cover that pair, not only the
+# static baseline it was first written for.
+ARMS = ("STATIC_CONTACT", "ORDINARY_GRU", "LATENT_LEARNED_SPATIAL_RNN")
+CONTRASTS = (
+    ("ORDINARY_GRU", "STATIC_CONTACT"),
+    ("LATENT_LEARNED_SPATIAL_RNN", "ORDINARY_GRU"),
+    ("LATENT_LEARNED_SPATIAL_RNN", "STATIC_CONTACT"),
+)
+LONG_CONFIG = {"epochs_warmup": 10, "epochs_structure": 25,
+               "epochs_freeze": 400, "patience": 25}
 
 
 def main() -> int:
@@ -80,41 +88,57 @@ def main() -> int:
                 "improvement": short["test_next_bce"] - long_run["test_next_bce"],
             }
         if ok:
-            entry["advantage_at_budget_95"] = (
-                entry["STATIC_CONTACT"]["budget_95_test"]
-                - entry["ORDINARY_GRU"]["budget_95_test"])
-            entry["advantage_at_long_budget"] = (
-                entry["STATIC_CONTACT"]["long_test"]
-                - entry["ORDINARY_GRU"]["long_test"])
-            entry["advantage_shrinkage"] = (
-                entry["advantage_at_budget_95"] - entry["advantage_at_long_budget"])
+            # Each contrast is written so a positive number means the first arm
+            # beats the second, on a loss.
+            for better, worse in CONTRASTS:
+                key = f"{better}__over__{worse}"
+                entry[key] = {
+                    "at_budget_95": entry[worse]["budget_95_test"]
+                                    - entry[better]["budget_95_test"],
+                    "at_long_budget": entry[worse]["long_test"]
+                                      - entry[better]["long_test"],
+                }
+                entry[key]["shrinkage"] = (
+                    entry[key]["at_budget_95"] - entry[key]["at_long_budget"])
             rows.append(entry)
 
     if not rows:
         raise SystemExit("no probe cell completed")
 
-    short_adv = np.array([r["advantage_at_budget_95"] for r in rows])
-    long_adv = np.array([r["advantage_at_long_budget"] for r in rows])
-    shrink = np.array([r["advantage_shrinkage"] for r in rows])
-    fraction = float(np.median(shrink) / np.median(short_adv)) if np.median(short_adv) else float("nan")
+    contrasts = {}
+    for better, worse in CONTRASTS:
+        key = f"{better}__over__{worse}"
+        short_adv = np.array([r[key]["at_budget_95"] for r in rows])
+        long_adv = np.array([r[key]["at_long_budget"] for r in rows])
+        shrink = np.array([r[key]["shrinkage"] for r in rows])
+        denominator = np.median(short_adv)
+        contrasts[key] = {
+            "median_at_budget_95": float(np.median(short_adv)),
+            "median_at_long_budget": float(np.median(long_adv)),
+            "median_shrinkage": float(np.median(shrink)),
+            "shrinkage_as_fraction": (float(np.median(shrink) / denominator)
+                                      if abs(denominator) > 1e-9 else float("nan")),
+            "sign_survives_longer_budget": bool(
+                np.sign(np.median(long_adv)) == np.sign(np.median(short_adv))),
+        }
 
     verdict = {
-        "contract": "topic5_slp_convergence_bias_probe_v0_1",
+        "contract": "topic5_slp_convergence_bias_probe_v0_2",
         "long_budget": LONG_CONFIG,
         "n_subjects": len(rows),
-        "median_advantage_at_budget_95": float(np.median(short_adv)),
-        "median_advantage_at_long_budget": float(np.median(long_adv)),
-        "median_shrinkage": float(np.median(shrink)),
-        "shrinkage_as_fraction_of_reported_advantage": fraction,
-        "direction": ("the reported advantage survives the longer budget"
-                      if np.median(long_adv) > 0 else
-                      "the reported advantage does not survive the longer budget"),
+        "means": ("a positive number means the first arm beats the second; the "
+                  "question is whether the epoch ceiling, not the model, produced "
+                  "the reported gap"),
+        "contrasts": contrasts,
         "subjects": rows,
     }
     (OUT / "convergence_bias_probe.json").write_text(json.dumps(verdict, indent=1))
-    print(f"n={len(rows)}  advantage at budget 95: {np.median(short_adv):+.4f}"
-          f"   at long budget: {np.median(long_adv):+.4f}"
-          f"   shrinkage {np.median(shrink):+.4f} ({fraction:.1%} of the effect)")
+    print(f"n={len(rows)} patients, long budget {LONG_CONFIG['epochs_freeze']} epochs\n")
+    for key, block in contrasts.items():
+        print(f"{key:52s} budget95={block['median_at_budget_95']:+.4f}  "
+              f"long={block['median_at_long_budget']:+.4f}  "
+              f"shrink={block['median_shrinkage']:+.4f}  "
+              f"sign survives={block['sign_survives_longer_budget']}")
     return 0
 
 
