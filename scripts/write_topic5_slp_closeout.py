@@ -134,6 +134,9 @@ def main() -> int:
         "H1b_contact_graph": "contact-node graph over an unconstrained recurrent model",
         "H1b_latent_learned": "tissue field over an unconstrained recurrent model",
         "H3": "learned graph over a fixed local graph",
+        "ceiling_dense_over_learned": "a fully connected tissue field over the sparse one",
+        "ceiling_dense_vs_recurrent": "a fully connected tissue field over an "
+                                      "unconstrained recurrent model",
     }
     for key, label in naming.items():
         entry = primary.get(key, {})

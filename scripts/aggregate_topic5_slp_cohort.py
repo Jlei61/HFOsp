@@ -33,6 +33,12 @@ COMPARISONS = [
     ("H1b_latent_learned", "LATENT_LEARNED_SPATIAL_RNN", "ORDINARY_GRU"),
     ("H1_latent", "LATENT_LEARNED_SPATIAL_RNN", "STATIC_CONTACT"),
     ("H3", "LATENT_LEARNED_SPATIAL_RNN", "LATENT_FIXED_LOCAL_RNN"),
+    # Ceiling control: how much of the tissue field's shortfall is the sparsity
+    # constraint, and how much is the parameterisation itself?  If the dense
+    # latent model also loses to an unconstrained recurrent model, sparsity is
+    # not what costs the accuracy.
+    ("ceiling_dense_over_learned", "LATENT_DENSE_RNN", "LATENT_LEARNED_SPATIAL_RNN"),
+    ("ceiling_dense_vs_recurrent", "LATENT_DENSE_RNN", "ORDINARY_GRU"),
 ]
 
 
