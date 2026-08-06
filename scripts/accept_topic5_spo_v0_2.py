@@ -94,6 +94,22 @@ def main() -> int:
 
     figures = OUT / "figures"
     pngs = list(figures.glob("*.png")) if figures.exists() else []
+    loco = stats.get("leave_contact_out", {})
+    results.append(check(
+        "leave-contact-out aggregated with a floor arm",
+        loco.get("status") == "COMPLETE" and bool(loco.get("over_floor")),
+        f"status={loco.get('status', 'not run')}, "
+        f"arms={sorted(loco.get('absolute', {}))}"))
+    # The failure this guards against did not raise: withholding a contact from
+    # every split left it out of the targets too, so the evaluation scored an
+    # empty question and returned a near-perfect number.
+    results.append(check(
+        "held-out evaluation is not scoring an empty target set",
+        all(e["median_heldout_next_bce"] > 1e-3
+            for e in loco.get("absolute", {}).values()) if loco.get("absolute")
+        else False,
+        "a held-out loss at zero means the withheld contacts carry no positives"))
+
     results.append(check("figure rendered with a Chinese README",
                          bool(pngs) and (figures / "README.md").exists(),
                          f"{len(pngs)} png"))

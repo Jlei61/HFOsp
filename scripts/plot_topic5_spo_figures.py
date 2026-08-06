@@ -206,6 +206,84 @@ def panel_f(ax) -> None:
     ax.set_title("F  Switching each component off", loc="left", pad=14)
 
 
+ARM_LABEL = {
+    "STATIC": "Knows nothing\nabout it (floor)",
+    "FIELD_NULL": "Field, no\ntransport",
+    "ANISOTROPIC_RECOVERY": "Full\noperator",
+}
+
+
+def panel_g(ax) -> None:
+    """Can it predict a contact it never trained on, from where that contact sits?
+
+    Absolute score, not degradation from each arm's own baseline -- an arm that is
+    worse everywhere has less room to fall and would win a relative comparison for
+    the wrong reason. Same patient joined across arms, so the pairing is visible.
+    """
+    path = OUT / "cohort_statistics.json"
+    if not path.exists():
+        return _empty(ax, "cohort not aggregated")
+    loco = json.loads(path.read_text()).get("leave_contact_out", {})
+    if loco.get("status") != "COMPLETE":
+        return _empty(ax, f"leave-contact-out: {loco.get('status', 'not run')}")
+    arms = [a for a in ARM_LABEL if a in loco["absolute"]]
+    if not arms:
+        return _empty(ax, "no arm completed")
+    per_arm = {a: loco["absolute"][a]["per_patient_heldout_next_bce"] for a in arms}
+    shared = sorted(set.intersection(*(set(v) for v in per_arm.values())))
+    for subject in shared:
+        ax.plot(range(len(arms)), [per_arm[a][subject] for a in arms],
+                color="0.75", lw=0.6, zorder=1)
+    for i, arm in enumerate(arms):
+        values = np.array([per_arm[arm][s] for s in shared])
+        jitter = (np.random.default_rng(i).random(len(values)) - 0.5) * 0.18
+        ax.scatter(np.full(len(values), i) + jitter, values, s=18,
+                   color="#8d99ae" if arm == "STATIC" else "#3d5a80", zorder=2)
+        ax.plot([i - 0.28, i + 0.28], [np.median(values)] * 2, color="0.15", lw=2,
+                zorder=3)
+    ax.set_xticks(range(len(arms)))
+    ax.set_xticklabels([ARM_LABEL[a] for a in arms], fontsize=6.5)
+    ax.set_ylabel("Loss on contacts never trained on\n(lower is better)")
+    ax.set_title("G  Predicting a contact it has never seen", loc="left", pad=14)
+    ax.text(0.0, 1.005, f"n={len(shared)}; absolute score, not degradation",
+            transform=ax.transAxes, fontsize=6, color="0.35", style="italic")
+
+
+def panel_scope(ax) -> None:
+    """What these panels are not evidence for.  Not a result -- the limits."""
+    lines = ["Scope"]
+    manifest = OUT / "INPUT_MANIFEST.json"
+    if manifest.exists():
+        m = json.loads(manifest.read_text())
+        if m.get("geometry_status", "").startswith("RETROSPECTIVE"):
+            lines.append("\u2022 The propagation plane was fitted using the whole "
+                         "recording, so it\n  could not have been known in advance. "
+                         "Nothing here shows the\n  geometry is predictable.")
+        if m.get("train_only_axis") == "NOT_ACHIEVED":
+            lines.append("\u2022 The axis was not re-derived from training contacts "
+                         "alone.")
+    stats_path = OUT / "cohort_statistics.json"
+    if stats_path.exists():
+        st = json.loads(stats_path.read_text())
+        bound = st.get("parameters_at_stability_bound", {})
+        if bound.get("n_units"):
+            lines.append(f"\u2022 {bound['n_units']} fits sit on the stability bound; "
+                         "their anisotropy is a\n  bound, not an estimate.")
+    gate = OUT / "synthetic" / "RECOVERY_GATE.json"
+    if gate.exists():
+        g = json.loads(gate.read_text())
+        unrec = [k.replace("_", " ") for k in
+                 ("drift_sign", "anisotropy_ordering", "recovery_strength_ordering")
+                 if g.get(k, {}).get("status") != "RECOVERABLE"]
+        if unrec:
+            lines.append("\u2022 On data with a known answer these did not come back: "
+                         + ", ".join(unrec)
+                         + ".\n  Per-patient values for them are not reportable.")
+    ax.text(0.0, 0.98, "\n\n".join(lines), transform=ax.transAxes, va="top",
+            fontsize=6.2, color="0.25", linespacing=1.5)
+    ax.set_axis_off()
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--subject", default="epilepsiae_1146")
@@ -213,14 +291,16 @@ def main() -> int:
     FIGURES.mkdir(parents=True, exist_ok=True)
     plt.rcParams.update({"font.size": 8, "axes.titlesize": 8.5,
                          "axes.spines.top": False, "axes.spines.right": False})
-    fig = plt.figure(figsize=(12.6, 7.2))
-    grid = fig.add_gridspec(2, 3, hspace=0.62, wspace=0.42)
+    fig = plt.figure(figsize=(16.4, 7.2))
+    grid = fig.add_gridspec(2, 4, hspace=0.62, wspace=0.45)
     panel_a(fig.add_subplot(grid[0, 0]), args.subject)
     panel_b(fig.add_subplot(grid[0, 1]), args.subject)
     panel_c(fig.add_subplot(grid[0, 2]))
+    panel_g(fig.add_subplot(grid[0, 3]))
     panel_d(fig.add_subplot(grid[1, 0]))
     panel_e(fig.add_subplot(grid[1, 1]))
     panel_f(fig.add_subplot(grid[1, 2]))
+    panel_scope(fig.add_subplot(grid[1, 3]))
     for extension in ("png", "pdf"):
         path = FIGURES / f"topic5_spo_rnn_v0_2_overview.{extension}"
         fig.savefig(path, dpi=190, bbox_inches="tight")

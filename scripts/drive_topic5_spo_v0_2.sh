@@ -53,9 +53,17 @@ $PY scripts/launch_topic5_spo_cohort.py --variants ANISOTROPIC_RECOVERY \
 # --- leave-contact-out, strong condition only ------------------------------
 # One condition, named in advance. v0.1 ran two with neither primary and spent
 # its multiplicity budget on a question it only needed to ask once.
+#
+# Three arms, because the absolute held-out score needs a floor to be readable.
+# With the withheld contact's bias neutralised, STATIC knows literally nothing
+# about it -- every withheld contact gets the same number. FIELD_NULL adds a
+# field that decays where contacts fired, so a withheld contact benefits only
+# from the read kernel's blur. The full operator additionally transports. An arm
+# that beats STATIC is using where the contact sits, and nothing else can
+# explain it.
 stamp "leave-contact-out, strong condition"
 $PY scripts/launch_topic5_spo_cohort.py \
-  --variants ANISOTROPIC_RECOVERY FIELD_NULL --seeds 1 --workers 4 \
+  --variants ANISOTROPIC_RECOVERY FIELD_NULL STATIC --seeds 1 --workers 4 \
   --holdout-fraction 0.25 --out-root "$R/leave_contact_out" \
   >> "$R/loco.log" 2>&1 || true
 

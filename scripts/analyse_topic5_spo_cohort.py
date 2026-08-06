@@ -194,6 +194,77 @@ def ablate(rows: list[dict], subjects: list[str]) -> list[dict]:
     return out
 
 
+# --- 4. leave-contact-out ------------------------------------------------
+HELDOUT_FLOOR = "STATIC"
+
+
+def leave_contact_out(subjects: list[str]) -> dict:
+    """Raw held-out performance, per arm. Never a relative degradation.
+
+    v0.1 reported how far each arm fell from its OWN retained score and read the
+    smaller fall as the better generaliser. That systematically favours whichever
+    arm was already worse everywhere -- a low baseline has less room to drop. The
+    absolute score on the withheld contacts is the comparison; the retained score
+    is context and nothing more.
+
+    STATIC is the floor. With the withheld contact's bias neutralised it assigns
+    every withheld contact the same number, so it knows nothing about them at
+    all. An arm that beats it is using where the contact sits.
+    """
+    rows = collect(OUT / "leave_contact_out")
+    if not rows:
+        return {"status": "NOT_RUN"}
+
+    def table(key):
+        out: dict[str, dict[str, dict[int, float]]] = {}
+        for r in rows:
+            if key in r:
+                out.setdefault(r["variant"], {}).setdefault(
+                    r["subject"], {})[r["seed"]] = r[key]
+        return out
+
+    heldout, retained = table("heldout_next_bce"), table("retained_next_bce")
+    heldout_top1 = table("heldout_top1")
+
+    report = {
+        "status": "COMPLETE",
+        "question": ("does the model predict a contact it never trained on, from "
+                     "where that contact sits"),
+        "condition": ("strong: the withheld contact is absent from the training "
+                      "ranks, absent from the training loss, absent from the test "
+                      "input, and carries the average retained contact's bias -- "
+                      "so the only thing left that is specific to it is position"),
+        "comparison_rule": ("absolute held-out score, patient-paired against the "
+                            "floor arm; relative degradation is not reported and "
+                            "must not be substituted"),
+        "floor_arm": HELDOUT_FLOOR,
+        "n_units": len(rows),
+        "absolute": {}, "over_floor": {},
+    }
+    for variant in sorted(heldout):
+        per_patient = {s: float(np.median(list(v.values())))
+                       for s, v in heldout[variant].items()}
+        report["absolute"][variant] = {
+            "n_patients": len(per_patient),
+            "median_heldout_next_bce": float(np.median(list(per_patient.values()))),
+            "median_heldout_top1": float(np.median([
+                np.median(list(v.values())) for v in heldout_top1[variant].values()]))
+            if variant in heldout_top1 else None,
+            "median_retained_next_bce": float(np.median([
+                np.median(list(v.values())) for v in retained[variant].values()]))
+            if variant in retained else None,
+            "per_patient_heldout_next_bce": per_patient,
+        }
+    if HELDOUT_FLOOR in heldout:
+        for variant in sorted(heldout):
+            if variant != HELDOUT_FLOOR:
+                report["over_floor"][variant] = paired(
+                    heldout[variant], heldout[HELDOUT_FLOOR], subjects)
+    else:
+        report["over_floor"] = {"status": "FLOOR_ARM_MISSING"}
+    return report
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--skip-ablations", action="store_true")
@@ -251,6 +322,7 @@ def main() -> int:
                  "censored; the anisotropy built from it is a bound, not an estimate"),
     }
 
+    summary["leave_contact_out"] = leave_contact_out(subjects)
     (OUT / "cohort_statistics.json").write_text(json.dumps(summary, indent=1))
 
     with (OUT / "parameter_estimates.csv").open("w", newline="") as fh:

@@ -156,7 +156,39 @@ def main() -> int:
                if entry.get("wilcoxon_two_sided_p") is not None else ""))
     add("")
 
-    add("## 5. Conditions on every number above\n")
+    add("## 5. Predicting a contact that was never trained on\n")
+    loco = stats.get("leave_contact_out", {})
+    if loco.get("status") != "COMPLETE":
+        add(f"Not available: {loco.get('status', 'not run')}.\n")
+    else:
+        add(f"{loco['condition']}\n")
+        add(f"The comparison is the {loco['comparison_rule'].split(';')[0]}. "
+            "A model that is worse everywhere falls less from its own baseline, so "
+            "a relative comparison would hand it the win for the wrong reason; it "
+            "is not reported here.\n")
+        add(f"Floor arm: **{loco['floor_arm']}** — with the withheld contact's bias "
+            "set to the average retained contact's, it assigns every withheld "
+            "contact the same number and therefore knows nothing about them.\n")
+        for arm, entry in loco["absolute"].items():
+            top1 = entry.get("median_heldout_top1")
+            add(f"- **{arm}** (n={entry['n_patients']}) — held-out loss "
+                f"{entry['median_heldout_next_bce']:.4f}"
+                + (f", held-out top-1 {top1:.3f}" if top1 is not None else "")
+                + (f"; on retained contacts {entry['median_retained_next_bce']:.4f}"
+                   if entry.get("median_retained_next_bce") is not None else ""))
+        add("")
+        for arm, entry in loco.get("over_floor", {}).items():
+            if isinstance(entry, dict) and entry.get("status") == "COMPLETE":
+                add(f"- **{arm} against the floor** — median "
+                    f"{entry['median_delta']:+.4f} "
+                    f"(positive means it beats knowing nothing), better in "
+                    f"{entry['n_positive']}/{entry['n']} patients, "
+                    f"p={entry['wilcoxon_two_sided_p']:.3g}, "
+                    f"95% CI [{entry['bootstrap_95ci'][0]:+.4f}, "
+                    f"{entry['bootstrap_95ci'][1]:+.4f}]")
+        add("")
+
+    add("## 6. Conditions on every number above\n")
     add(f"- geometry: {status['GEOMETRY_STATUS']}; train-only axis "
         f"{status['TRAIN_ONLY_AXIS']}")
     if manifest.get("train_only_axis_reason"):
@@ -175,7 +207,7 @@ def main() -> int:
     add("  speed or compared with one")
     add("")
 
-    add("## 6. Frozen status\n```text")
+    add("## 7. Frozen status\n```text")
     for key, value in status.items():
         add(f"{key}:\n{value}\n")
     add("```")

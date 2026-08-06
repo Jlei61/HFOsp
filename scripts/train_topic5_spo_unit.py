@@ -102,11 +102,35 @@ def partition(events, holdout: np.ndarray | None):
         else:
             trimmed = rows.copy()
             trimmed[:, holdout] = -1
-            out[name] = build_event_tensors(densify(trimmed))
+            tensors = build_event_tensors(densify(trimmed))
+            # Deleting the contact from the ranks is not enough to remove it from
+            # training. It stays a candidate at every step with the target always
+            # zero, so it is a permanent negative example and its bias is driven
+            # towards "never fires" -- the model would be taught the answer we
+            # withheld. Drop it from the loss entirely.
+            tensors.available[:, :, torch.as_tensor(holdout, dtype=torch.long)] = False
+            out[name] = tensors
     return out
 
 
 @torch.no_grad()
+@torch.no_grad()
+def neutralise_holdout_bias(model, holdout: np.ndarray) -> float:
+    """Strip the withheld contacts of the one parameter that is theirs alone.
+
+    Every contact carries a free bias. Left in the training loss the withheld
+    contact learns "never fires"; taken out of it the bias never moves off zero,
+    which reads as "fires more readily than any real contact". Both are answers
+    we handed the model rather than asked it for. Set it to what an average
+    retained contact carries, so the only thing still specific to this contact
+    is where it sits -- which is the whole question.
+    """
+    keep = np.setdiff1d(np.arange(model.config.n_contacts), holdout)
+    neutral = model.contact_bias[torch.as_tensor(keep, dtype=torch.long)].mean()
+    model.contact_bias[torch.as_tensor(holdout, dtype=torch.long)] = neutral
+    return float(neutral)
+
+
 def evaluate(model, tensors, contact_subset: np.ndarray | None = None) -> dict:
     logits, stop = model(tensors.x, tensors.recruited, tensors.valid)
     available, target = tensors.available, tensors.target
@@ -213,6 +237,11 @@ def main() -> int:
                    "hit_epoch_ceiling_while_improving":
                        len(history) >= int(cfg["epochs"]) and stale < int(cfg["patience"]),
                    "n_parameters": int(sum(p.numel() for p in model.parameters()))}
+        # Neutralise before ANY test score is taken, not just the split ones --
+        # the withheld contacts sit in the whole-test numbers too.
+        if holdout is not None:
+            metrics["holdout_bias_set_to_retained_mean"] = neutralise_holdout_bias(
+                model, holdout)
         for name in ("train", "validation", "test"):
             for key, value in evaluate(model, parts[name]).items():
                 metrics[f"{name}_{key}"] = value
