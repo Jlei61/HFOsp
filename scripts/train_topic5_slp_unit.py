@@ -96,11 +96,19 @@ def load_patient(subject: str, cache_root: Path):
     return plane, nodes, operator, events, provenance
 
 
-def make_model(arm: str, cfg: Dict[str, Any], plane, nodes, operator, seed: int) -> SLPModel:
+def make_model(arm: str, cfg: Dict[str, Any], plane, nodes, operator, seed: int,
+               shuffle_wiring_geometry: bool = False) -> SLPModel:
     xy = plane["xy_mm"]
     nodes_xy = nodes["nodes_xy"]
     H = operator["H"]
     geometry = xy if arm == "CONTACT_GRAPH_RNN" else nodes_xy
+    if shuffle_wiring_geometry:
+        # Permute the positions the WIRING COST sees, leaving the observation
+        # operator and every real coordinate untouched.  If a graph learned
+        # against a scrambled distance matrix predicts as well, then the spatial
+        # prior is not doing any work and "short connections are cheaper" is a
+        # decoration rather than a constraint.
+        geometry = geometry[np.random.default_rng(seed + 99991).permutation(len(geometry))]
     config = ModelConfig(
         arm=arm,
         n_contacts=len(xy),
@@ -226,7 +234,8 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
                 target=t.target, valid=t.valid, is_last=t.is_last,
             )
 
-    model = make_model(arm, cfg, plane, nodes, operator, seed).to(device)
+    model = make_model(arm, cfg, plane, nodes, operator, seed,
+                       bool(cfg.get("shuffle_wiring_geometry"))).to(device)
     optimiser = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
     rng = np.random.default_rng(seed)
 
@@ -445,6 +454,9 @@ def main() -> int:
     parser.add_argument("--holdout-contacts", default="",
                         help="index list, or auto:<fraction>, withheld from training")
     parser.add_argument("--holdout-mode", choices=("weak", "strong"), default="weak")
+    parser.add_argument("--shuffle-wiring-geometry", action="store_true",
+                        help="permute the positions the wiring cost sees; the "
+                             "observation operator keeps the real geometry")
     args = parser.parse_args()
 
     cfg = dict(DEFAULTS)
@@ -460,6 +472,8 @@ def main() -> int:
     torch.manual_seed(args.seed)
     np.random.seed(args.seed)
     effective = dict(cfg)
+    effective["shuffle_wiring_geometry"] = bool(args.shuffle_wiring_geometry)
+    cfg["shuffle_wiring_geometry"] = bool(args.shuffle_wiring_geometry)
     if args.holdout_contacts:
         effective["use_contact_bias"] = False  # forced by spec 7.1
     (out_dir / "config.json").write_text(json.dumps(
