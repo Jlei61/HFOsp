@@ -101,13 +101,58 @@ D=0.145 的精确标签（elevated vs metastable vs finite）**对 full-resoluti
 D2 只会确认而非改变结论；(b) 干净 GO 的前提（三起点全 finite）从未满足（实测 2/3 + 连续斜坡 + 亚稳），"独立分支"这个 D2
 预设的对象在数据里就不存在。D2 留作可选补充，不作为收口前置。
 
-## 6. 下一轮方向（用户指定，尚未开始）
+## 6. 最终模型与 Figure 5 合同（用户 2026-07-22 锁定）
+
+### 6.1 最终动力学对象
+
+最终目标是在**同一个空间 scaffold** 上得到一个可分析的完整过程：
+
+1. 系统位于间期背景邻域，稀疏、不规则 IED 自发出现并自终止；
+2. 慢变量把快系统带过 onset corridor，进入有界、可持续一段时间的发作样活动区；
+3. 延迟的负反馈使活动终止；
+4. 系统返回原来的间期状态空间邻域，并再次按基线统计规律产生稀疏、不规则 IED。
+
+**不要求间期是固定点上的静默，也不要求它是固定周期的极限环。** “间期没有固定节律”完全不妨碍它对应稳定背景态、稳定吸引域
+或稳定概率分布。恢复的承重定义不是波形逐点重合、周期相位复位或回到同一个微观状态，而是 post-ictal 窗重新进入 baseline
+neighborhood：事件率/IEI、事件时长、参与度、峰值、空间模板与回落占空比都重新落入预注册的间期统计带，并且没有继续漂移或
+再次 runaway。
+
+因此，下一版不必强求“间期极限环 ↔ 发作极限环”的双极限环结构；**excitable interictal invariant set / stationary distribution +
+slowly entered bounded ictal metastable set + delayed escape and return** 已经足以满足科学目标，但进入、发作驻留和返回都必须由动态
+慢变量真实产生，不能用拼接窗口、外部持续驱动或手工 reset 伪造。
+
+### 6.2 最终主图的四个承重 panel
+
+参考布局：
+`.worktrees/topic4-early-readout/results/paper-ready-figure/fig5_snn_state_readout/figures/fig5_candidate_E1146_snn_state_readout_with_modes.png`。
+该图是布局/readout 原型，不是当前生命周期验收图；上方目前仍是 terminal runaway，没有 recovery。
+
+1. **Virtual-SEEG lifecycle**：同一次连续仿真中清楚显示稀疏不规则间期事件 → 有界发作 → 终止 → 恢复后的稀疏不规则间期事件。
+2. **Slow-variable phase portrait**：画出慢变量如何离开间期邻域、穿过 onset corridor、在发作区驻留、再越过 termination corridor
+   返回间期邻域。轨迹不必闭合成严格周期轨道，但必须显示方向、时间和返回。
+3. **Data bridge / energy field**：用预先锁定的同一 readout 和窗口合同，展示间期 event energy field 与 early-ictal energy field
+   在空间 scaffold 上的一致，同时保留状态相关的幅值/招募范围差异。
+4. **Spatial eigenmode / stimulation**：在 baseline interictal、early ictal 和 recovered interictal 三个窗口分别计算同一有效算子下的
+   leading eigenmode、eigenvalue/gain/IPR 与局部刺激响应，检验“同一病理通路、不同状态易感性”，并验证恢复后 mode/readout 回到
+   基线带。仅凭 core→axis 的参与度轨迹不能替代 eigenmode 分析。
+
+### 6.3 Stage D 对这个目标已经提供什么、还缺什么
+
+- **已提供**：数值安全且保住间期统计工作点的 RC1 快系统；有界、自终止、核区→轴带结构稳定的事件族；一个可供慢反馈捕捉/释放的
+  亚稳密事件区；冻结失抑制轴上的分支/占空图。
+- **尚未提供**：动态慢变量驱动的 onset；独立且可控的发作驻留；自主 termination 和 post-ictal return；真实慢变量相图轨迹；三个
+  生命周期窗口的 eigenmode/stimulation 对比；基于真实 early-ictal 窗口的 energy-field bridge。
+
+所以当前模型**不能直接产出完整目标图**，但已经把最危险的 runaway 快系统改造成可用的有界 fast substrate。下一轮的成功标准不再是
+“冻结 D 轴上必须找到稳定高台阶”，而是动态慢反馈能否围绕现有亚稳密事件区构成一次进入—驻留—退出—统计返回的闭环。
+
+## 7. 下一轮方向（用户指定，尚未开始）
 
 **转向"利用亚稳密事件区构造非线性慢反馈闭环"，而不是继续沿冻结磨损轴扫描。** 直觉：这一族亚稳密事件串（有界、自终止、
 核区结构稳定、能撑数秒再熄灭）本身可能是一个"可被慢反馈捕捉/释放"的工作物质——与其在冻结轴上找一个不存在的稳定高台阶，
 不如让一个非线性慢反馈去围绕这个亚稳区构造进入/维持/退出的闭环。具体 spec 待起草。**本轮不进动态 Z/M/X。**
 
-## 7. Provenance / 资源
+## 8. Provenance / 资源
 
 - **代码**：`src/topic4_mz_fcxr_dynamics.py`（workpoint 分类器 + frozen_z_field + resolve/aggregate）；
   `scripts/run_topic4_mz_fcxr_stage_d.py`（baseline/smoke/pilot/grid/cells，seed-aware baseline）；

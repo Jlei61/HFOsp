@@ -24,13 +24,21 @@
 > frozen-Jacobian/起燃定位基础，但不覆盖 M4 的恢复、终止、acceptance 或 ablation 设计；这些问题以 M4
 > 最新 spec、runner 和结果文档为准。详见 `docs/topic4_m3_stage.md §6.1`。
 >
-> **M4/MZ conductance 分阶段验收（2026-07-20）**：`L=20` 上的 exact-conductance 工作点、跨 seed 的
-> `Z` event-locked staircase，以及“有序轴向间期事件 → 广招募/方向丢失的 terminal runaway”时空表型已经
-> 验收；但 **bounded ictal state、终止和恢复均未通过**。protected additive-global GABA 只移动
-> runaway/prevention 边界，当前线性 `M` 也不能把 onset 与 delayed termination 分开，因此不得把该结果写成
-> 可恢复发作或状态切换。下一条独立机制线冻结为 presynaptic E→E resource `x_j`，先检验空间 relay depletion
-> 能否把 runaway 变成 bounded high-recruitment bout。给其他 agent 的精确 gate、复现锚、no-go 边界和图路径见
-> `docs/archive/topic4/sef_hfo/mz_conductance_stage_handoff_2026-07-20.md`。
+> **M4/MZ → FCXR-RC1 分阶段验收（更新至 2026-07-22）**：原 exact-conductance 路线能产生
+> “有序轴向间期事件 → 广招募/方向丢失的 terminal runaway”，但不能终止和恢复。FCXR-RC1 已把快系统收敛为
+> **external additive FF AMPA + recurrent E→E conductance + recurrent-only smooth saturation**；它跨 seed 保住
+> `L=20` 的间期工作点并挡住 runaway。冻结 `Z` 失效轴 Stage D 进一步发现：活动随失抑制连续加密为有界、空间结构稳定的
+> 亚稳密事件串，但没有稳健、独立的 finite-high 分支。因而当前结果是一个可用的 fast substrate，**仍不是完整发作生命周期**；
+> 终止、恢复和动态状态切换均未通过。详见
+> `docs/archive/topic4/sef_hfo/mz_fcxr_stage_d_branch_map_2026-07-22.md`。
+>
+> **最终模型与主图目标（2026-07-22 lock）**：在同一个患者特异空间 scaffold 上实现并分析
+> **间期 → 有界发作 → 间期**。这里“间期”不要求固定节律或周期轨道；它可以是稳定背景态、吸引域中的随机邻域或稳定概率分布，
+> 只要能按原有统计规律产生稀疏、不规则、自终止的 IED。所谓 recovery 也不是回到同一个相位点，而是回到这个间期状态空间邻域，
+> 且恢复窗内的事件率/IEI、时长、参与度、峰值和空间模板重新落回基线统计带。最终主图必须同时给出：① virtual-SEEG 的
+> 间期—发作—间期；② 慢变量相图中的进入、驻留、退出和返回轨迹；③ 间期与发作早期 energy field 的一致性；④ 三个阶段的
+> spatial eigenmode / stimulation readout。当前 `fig5_candidate_E1146_snn_state_readout_with_modes.png` 只作为布局和 readout 原型，
+> 其中 terminal runaway 不能冒充完整生命周期。
 >
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
