@@ -189,3 +189,23 @@ def test_frozen_template_holds_zm_and_global_probe_lowers_all_E(tiny):
     v = templ2.threshold(t["vth"])
     assert np.allclose(t["vth"][:t["NE"]] - v[:t["NE"]], 1.5)      # ALL E lowered, not a focal disk
     assert np.array_equal(t["vth"][t["NE"]:], v[t["NE"]:])         # I cells untouched
+
+
+def test_faminit_ck_standardized_inits_and_paired_noise(tiny):
+    """Decisive-pilot fast-init standardization (review §7 P0a): native keeps the captured fast state; quiescent
+    resets to V_reset + zero currents/rings; elevated primes V near threshold; all three share the SAME rng_state
+    (paired noise) so a P_runaway comparison isolates fast-init, not noise."""
+    import run_topic4_mz_slow_fast_transition as RUN
+    t = tiny
+    r1 = run_loop(t["p"], t["net"], _fresh(t), t["vth"], n_steps=300, capture_final=True, store_spikes=False)
+    ck = r1["checkpoint"]
+    rs = MZSF.branch_rng_state(1, "faminit", "s", 0)
+    nat = RUN._faminit_ck(ck, "native", t["p"], t["vth"], 0.85, rs)
+    qui = RUN._faminit_ck(ck, "quiescent", t["p"], t["vth"], 0.85, rs)
+    ele = RUN._faminit_ck(ck, "elevated", t["p"], t["vth"], 0.85, rs)
+    assert np.array_equal(nat.V, ck.V)                                                   # native unchanged
+    assert np.allclose(qui.V, t["p"].V_reset) and np.allclose(qui.I_I, 0.0) and np.allclose(qui.s_E, 0.0)
+    assert np.allclose(qui.ring_sE, 0.0) and np.allclose(qui.ring_sI, 0.0) and qui.xi == 0.0
+    assert np.allclose(ele.V, t["p"].V_reset + 0.85 * (t["vth"] - t["p"].V_reset))       # primed near threshold
+    assert nat.rng_state == rs and qui.rng_state == rs and ele.rng_state == rs           # paired noise
+    assert nat.slow is None and qui.slow is None                                         # slow comes from the arg

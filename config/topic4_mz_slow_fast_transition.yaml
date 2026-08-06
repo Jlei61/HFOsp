@@ -73,6 +73,19 @@ matched_d_targets: [0.02, 0.04, 0.06, 0.08]
 runaway_hz: 120.0
 runaway_dur_ms: 100.0
 
+# --- decisive fast-init pilot (2026-07-21 review §7 P0a): slow-state-controlled vs fast-state-history-dependent.
+#     Dense checkpoints around the condition's OWN crossing; at each, freeze z/m and start the fast system from
+#     3 standardized inits (native / quiescent / elevated) under COMMON paired noise (rng keyed on replay index,
+#     NOT the init) so the comparison isolates fast-init from noise. ---
+faminit_pilot:
+  condition: mz_runaway
+  seeds: [1, 3]
+  offsets_ms: [-1500.0, -1000.0, -500.0, -250.0, -100.0, -50.0, 0.0]   # relative to OWN operational-runaway crossing
+  n_replay: 12
+  horizon_ms: 500.0
+  fast_inits: [native, quiescent, elevated]
+  elevated_vth_frac: 0.85      # elevated init: V = V_reset + frac*(V_th - V_reset) per neuron (primed near threshold)
+
 # --- upstream artifacts consumed (natural-trajectory cross-check + calibration provenance) ---
 upstream:
   onset_dynamics_per_seed: results/topic4_sef_hfo/mz_onset_dynamics/per_seed

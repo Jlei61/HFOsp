@@ -153,6 +153,28 @@ def _run_fork(S, ck, slow, n_steps, cfg, *, rng_state=None, early_stop=True):
     return res, ra
 
 
+def _faminit_ck(ck, mode, p, vth, frac, rng_state):
+    """Standardized fast initial condition on a frozen-slow checkpoint (review 2026-07-21 §7 P0a).
+      native    = keep the captured natural fast state (V/currents/rings/xi);
+      quiescent = V_reset everywhere + zero currents/rings/xi (standardized LOW-activity start);
+      elevated  = V primed to V_reset + frac*(V_th - V_reset) per neuron, else quiescent (standardized HIGH).
+    All three carry the SAME rng_state so P_runaway across inits is common-noise-paired (isolates fast-init,
+    not noise). slow=None (run_loop uses the passed frozen slow)."""
+    if mode == "native":
+        return dataclasses.replace(ck, rng_state=rng_state, slow=None)
+    N = ck.V.shape[0]
+    zeros = np.zeros(N)
+    if mode == "quiescent":
+        V = np.full(N, p.V_reset, float)
+    elif mode == "elevated":
+        V = p.V_reset + float(frac) * (np.asarray(vth, float) - p.V_reset)
+    else:
+        raise ValueError(f"unknown fast-init mode {mode!r}")
+    return dataclasses.replace(ck, V=V, ref=np.zeros(N, np.int32), s_E=zeros.copy(), I_E=zeros.copy(),
+                              s_I=zeros.copy(), I_I=zeros.copy(), ring_sE=np.zeros_like(ck.ring_sE),
+                              ring_sI=np.zeros_like(ck.ring_sI), xi=0.0, rng_state=rng_state, slow=None)
+
+
 def _p_runaway(S, ck, template, seed, cond, label, cfg):
     """Perturbation-free escape probability (design §3.1): N independent future-noise branches from the same
     frozen state, fraction meeting 120 Hz/100 ms runaway."""
