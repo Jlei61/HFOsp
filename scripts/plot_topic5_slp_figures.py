@@ -221,6 +221,32 @@ def panel_e(ax) -> None:
     ax.set_title("E  Short connections, and they reach far enough", loc="left")
 
 
+def panel_f(ax) -> None:
+    path = OUT / "flow_ordering.json"
+    if not path.exists():
+        ax.text(0.5, 0.5, "flow ordering not run", ha="center", va="center")
+        ax.set_axis_off()
+        return
+    ordering = json.loads(path.read_text())
+    within = np.array([w["spearman"] for w in ordering["within_patient"]["pairs"]])
+    between = np.array([b["spearman"] for b in ordering["between_patient"]["pairs"]])
+    if not len(within) or not len(between):
+        ax.text(0.5, 0.5, "too few pairs to compare", ha="center", va="center")
+        ax.set_axis_off()
+        return
+    for i, (values, colour) in enumerate(((within, "#3d5a80"), (between, "#a3a3a3"))):
+        jitter = (np.random.default_rng(i).random(len(values)) - 0.5) * 0.26
+        ax.scatter(np.full(len(values), i) + jitter, values, s=16, color=colour,
+                   alpha=0.7, linewidths=0)
+        ax.plot([i - 0.3, i + 0.3], [np.median(values)] * 2, color="0.15", lw=2)
+    ax.set_xticks([0, 1])
+    ax.set_xticklabels([f"Same patient,\nnew starting point\n(n={len(within)})",
+                        f"Different patients,\nsimilar montage\n(n={len(between)})"],
+                       fontsize=6.5)
+    ax.set_ylabel("Agreement in which patches\npush activity furthest")
+    ax.set_title("F  Is the recovered ordering the patient's?", loc="left")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--subject", default="epilepsiae_1146")
@@ -236,8 +262,7 @@ def main() -> int:
     panel_c(fig.add_subplot(grid[0, 2]))
     panel_d(fig.add_subplot(grid[1, 0]))
     panel_e(fig.add_subplot(grid[1, 1]))
-    note = fig.add_subplot(grid[1, 2])
-    note.set_axis_off()
+    panel_f(fig.add_subplot(grid[1, 2]))
 
     for extension in ("png", "pdf"):
         fig.savefig(FIGURES / f"topic5_slp_rnn_v0_1_overview.{extension}",
