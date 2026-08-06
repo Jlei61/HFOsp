@@ -147,6 +147,37 @@ def main():
                                sd=float(np.std(d, ddof=1)) if len(d) > 1 else float("nan"),
                                n_above=int(sum(x > 0 for x in d)))
     report["coverage_matched_axis_only"] = by_arm
+
+    # --- NOT PRE-REGISTERED -------------------------------------------------
+    # The frozen criterion tests the rank difference among seeds where both arms
+    # sit in the same direction tier. Stage 1 turned out to separate the fields
+    # mainly by WHETHER they produce two directions at all, which leaves few
+    # same-tier pairs and is a quantity the frozen test never looks at. Recorded
+    # here as an observation, explicitly outside the pre-registered analysis.
+    from scipy.stats import binomtest
+    tiers = {}
+    for arm in SIM_ARMS:
+        n2 = sum(1 for s in SEEDS if runs[(arm, s) + PRIMARY_KEY]["n_dir"] == 2)
+        tiers[arm] = dict(bidirectional_seeds=n2, n_seeds=len(SEEDS))
+    tier_tests = {}
+    for comp in COMPARISONS:
+        if comp["group"] != "shape":
+            continue
+        st = report["shape"][comp["name"]]
+        w, l = int(st["tier_wins"]), int(st["tier_losses"])
+        tier_tests[comp["name"]] = dict(
+            purpose=comp["purpose"], tier_wins=w, tier_losses=l,
+            p_uncorrected=(float(binomtest(w, w + l, 0.5, alternative="two-sided").pvalue)
+                           if w + l else float("nan")),
+            same_tier_n=int(st["n_same_tier"]))
+    report["direction_tier_addendum"] = dict(
+        status="NOT pre-registered -- reported as an observation, not as a result",
+        per_arm=tiers, per_comparison=tier_tests,
+        note=("the frozen shape test compares rank scores within a direction tier; "
+              "these counts compare the tiers themselves, which is where the arms "
+              "actually differ. Any claim from this must be pre-registered and "
+              "re-run, not read off this table."))
+
     json.dump(report, open(os.path.join(probe, "stage1_report.json"), "w"),
               indent=2, default=str)
 
