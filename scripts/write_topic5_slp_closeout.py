@@ -197,18 +197,6 @@ def main() -> int:
                 f"{min(r.get('hop_reachability', 1.0) for r in micro):.0%} of observed "
                 "transitions were within the graph's reach at all.\n")
 
-    add("## 5. Predicting at contacts the model never trained on\n")
-    if lco:
-        for mode, entry in lco.get("comparisons", {}).items():
-            wording = ("the contact was still visible in the sequence but scored nowhere"
-                       if mode == "weak" else "the contact was removed from the input too")
-            add(f"- **{wording}** — {fmt(entry)}")
-        add("\nBoth models were trained without any per-contact parameter, because a contact "
-            "held out of training has no way to learn one; without that change the "
-            "comparison would be undefined at exactly the positions being tested.\n")
-    else:
-        add("Not run.\n")
-
     add("## 4d. Does the spatial prior constrain anything?\n")
     if shuffle:
         add(f"The learned arm was trained twice per patient: once with the true node "
@@ -226,6 +214,18 @@ def main() -> int:
                 f"real geometry against {shuffle['mean_edge_length_shuffled']:.2f} with it "
                 f"permuted, in units of the typical spacing between tissue units")
         add(f"\n**{shuffle['reading'].capitalize()}.**\n")
+    else:
+        add("Not run.\n")
+
+    add("## 5. Predicting at contacts the model never trained on\n")
+    if lco:
+        for mode, entry in lco.get("comparisons", {}).items():
+            wording = ("the contact was still visible in the sequence but scored nowhere"
+                       if mode == "weak" else "the contact was removed from the input too")
+            add(f"- **{wording}** — {fmt(entry)}")
+        add("\nBoth models were trained without any per-contact parameter, because a contact "
+            "held out of training has no way to learn one; without that change the "
+            "comparison would be undefined at exactly the positions being tested.\n")
     else:
         add("Not run.\n")
 
