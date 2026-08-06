@@ -1,7 +1,8 @@
 # Topic 4 — 轴约束的数据驱动病理场（data-driven core field）v0.1
 
-- **状态：** rev2（2026-08-06 技术审阅 P0-1..P0-5 后）。Stage 0–1 授权执行；Stage 2 是否开启，由 Stage 1
-  的预注册闸门裁定，**不由 Stage 2 的结果裁定**。rev1 从未执行，无结果作废。
+- **状态：** rev2.1（2026-08-06 第二轮技术审阅后）。Stage 0–1 授权执行；Stage 2 由 Stage 1 的预注册闸门
+  裁定，Stage 3 由 Stage 2 结局 + §9 的场位置稳定性裁定 —— **均不由该阶段自身的结果裁定**。
+  rev1 / rev2 从未执行，无结果作废。
 - **被试：** E1146（`epilepsiae_1146`）单被试 MVP。队列层不在本合同内。
 - **产出根：** `results/topic4_sef_hfo/data_driven_core_field/`
 - **分支：** `codex/topic4-data-driven-core-field`
@@ -89,6 +90,40 @@ rev1 从未执行。以下五条全部经代码核验成立，已在 rev2 落实
   第四臂 `manual_projected`、等价性判据改为**行为等价**而非 h 空间相关
 - **P0-5 Stage 1 裁决不完备，Stage 2 没有冻结的成功标准。** → §7.5 补全决策表并 fail-closed、
   §7.4 增加跨 seed 排序一致性（`sd(Δ)` 小不等于候选排序可靠）、§8.1 新增预注册结局分类
+
+### 0.4a rev2 自身的缺陷（第二轮技术审阅，2026-08-06）
+
+rev2 从未执行。审阅给出 8 条 P0 + 2 条工程 + 2 条 P1，逐条核验后处置如下。
+
+- **P0-1 Stage 2 结局分类与 held-out 双方向门缺失** —— 部分已在 rev2 落实（`§8.4` 已重编号为 **§8.1**、
+  **§10.3** 存在）。但审阅指出的**真实缺口成立**：缺 `SIMULATOR_OVERFIT`（训练提高但 held-out 不提高）、
+  缺 **Stage 3 开启条件**、等价最优场处理太弱。→ §8.1 改为**有序短路裁定**并补两类结局、§8.2 新增
+  等价最优场族、§9 末补 Stage 3 开启条件
+- **P0-2 臂对数量在算术上不一致，且"任取一对 7/8"不能作通用可辨识性门** —— 成立。rev2 写"6 个臂对
+  （含 axis_only）"：4 仿真臂是 6 对，含 axis_only 应是 10 对。且参数化等价对比只反映抽样合同不同、
+  与 axis_only 的差异不证明纵向形状可辨识、从多对中挑最显著的一对有多重选择偏差。
+  → §7.4 改为**具名预注册对比**（A 前置 / B1–B4 进门 / C 只报告）+ **Holm 校正**
+- **P0-3 Stage 2 学 `σ_⊥` 但 Stage 1 从不检验宽度可辨识** —— 成立（这是我在 rev2 修 B4 时自己引入的
+  不一致）。→ §7.2 新增 `width_wide` / `width_narrow` 两臂 + §7.4 的 B2/B3
+- **P0-4 单侧横向平移违反 `u_C⊥` 的符号任意性** —— 成立。`u_C⊥` 的正负是**约定**
+  （`transverse_sign = 1 if w[dominant] >= 0 else -1`）。→ §7.2 改 ± 双侧两臂、B4 用逐种子平均、
+  §7.5 加符号翻转不变性测试、§9 的平移检验同样要求 ± 对称取值
+- **P0-5 分级得分的"严格有序"是数学错误** —— 成立。单方向可得 `(1+0)/2 = 0.5`，双方向若最优指派下
+  两格为 `+1`/`−1` 只得 `0`。→ §5.3 改为**字典序 `(n_dir, S_rank)`**（CMA-ES 只用排序，无需权重），
+  并删除"严格分级 / 第二方向必然跃升"的表述
+- **P0-6 `uniform_axial` 并不真正均匀** —— 成立且重要（它是主承重参照）。未归一化 Gaussian 基在轴两端
+  重叠数减少 ⇒ `π_m ≡ 1/M` 给出的是"中间高两端低的宽峰"。→ §4.1 改 **partition-of-unity 归一化**
+- **P0-7 Stage 3 空间质量用带符号 `h_i d_i`** —— 成立。约 31% 的 `d_i` 为负 ⇒ 重心可能落在场外、
+  `C_axis` 可能 <0 或 >1。→ §9 改为**纯 `h_i` 加权**
+- **P0-8 检查表保留 rev1 已否定的"h=1 逐位复现"** —— rev2 已改（检查表现写"**不含任何逐位复现断言**"）。
+  本轮只再确认一次
+- **Eng-1 缓存键须用完整配置哈希** —— 成立。→ §6.2 改 `SHA256(canonical config + git commit + RNG version)`
+  + 逐字段扰动测试
+- **Eng-2 "相同 seed" 不自动等于 common random numbers** —— **作为普遍原则成立，但已核验不适用于本引擎**：
+  主循环只有 `rng.standard_normal()`（每步 1 标量）与 `rng.poisson(..., size=N)`（每步 N 个），
+  均无条件定长、不依赖尖峰。→ §6.3a 记录核验结果并加**回归测试锁住**该性质
+- **P1-1 "未招募 = 排中间"是新建模假设** —— 成立。→ §5.2a 并列固定支撑成对分数 `S_pair` 作敏感性
+- **P1-2 必须评估等价最优场而非只看最优场** —— 成立。→ §8.2
 
 ### 0.5 缺失项（D 类）
 
@@ -258,13 +293,21 @@ s_i = u_C · (x_i − c_p)        c_p = 两个模板源质心的中点（= regis
 r_i = u_C⊥ · (x_i − c_p)
 ```
 
-沿轴放 `M` 个固定 Gaussian 基（中心 `κ_m` 等距覆盖患者触点的轴向支撑 + margin）：
+沿轴放 `M` 个固定 Gaussian 基（中心 `κ_m` 等距覆盖患者触点的轴向支撑 + margin），
+并做 **partition-of-unity 归一化**（rev2.1 更正 P0-6）：
 
 ```
-φ_m(s) = exp[ −(s − κ_m)² / (2 σ_s²) ]
+φ_m(s)  = exp[ −(s − κ_m)² / (2 σ_s²) ]
+φ̃_m(s) = φ_m(s) / Σ_n φ_n(s)                      ← 归一化：Σ_m φ̃_m(s) ≡ 1
 π  = softmax(α)                                    α ∈ R^M，均值固定为 0（消 softmax 平移冗余）
-q_i = exp[ −r_i² / (2 σ_⊥²) ] · ( ε + Σ_m π_m φ_m(s_i) )
+q_i = exp[ −r_i² / (2 σ_⊥²) ] · ( ε + Σ_m π_m φ̃_m(s_i) )
 ```
+
+**为什么必须归一化。** 未归一化时，即使 `π_m ≡ 1/M`，`Σ_m π_m φ_m(s)` 在轴两端因重叠基数量减少而下降
+⇒ 所谓 `uniform_axial` 实际是"中间高、两端渐低的宽峰"，而它是 Stage 1 与 Stage 2 的**主承重参照**，
+定义不准会污染全部对比。归一化后 `π_m ≡ 1/M ⇒ q(s) ≡ 1/M` 在有效支撑内**严格恒定**。
+
+**TDD**：`α = 0` 时，`q(s)` 在轴向支撑内的相对波动 < 1e-6（不含横向 envelope）。
 
 **与文稿的差别（B4）**：`σ_⊥` **参与学习**（对数参数化 `log σ_⊥`），不是固定超参。`σ_s` 固定
 （= 基间距的 1.2 倍），只控最小空间平滑尺度。⇒ Stage 2 参数量 = `M + 1`。
@@ -418,27 +461,48 @@ L_rank    = 1 − S
 4. **敏感性**：同时用"仅在共同触点上算"（= 现有 `_sim_matrix` 行为）各算一份落盘。两者若给出不同的
    闸门裁定，视为不稳定，按 §7.5 停止报告。
 
+**⚠️ "未招募 = 排中间"是一个新的建模假设（rev2.1 记录，P1-1）。** 它解决了缩小支撑的作弊问题，
+但"没被招募"未必等价于"生理上排中间"。因此**必须并列计算一个不做该假设的固定支撑成对分数**
+作为敏感性：
+
+```
+S_pair = ( 1 / C(C,2) ) · Σ_{i<j}  1(i,j 均有模型秩次) · sign[ (r_i − r_j)(T_i − T_j) ]
+```
+
+分母恒为冻结支撑 `SUPPORT` 全部 `C` 个触点的对数；任何涉及缺失触点的对贡献 0。性质：不缩小支撑、
+缺失不被解释成"中间"、低 coverage 自然压低分数，且与患者侧成对顺序的思想一致。
+
+**主口径仍是 Spearman**（与已发表 Figure 4 连续），`S_pair` 作为敏感性并列报告；
+两者若给出不同的闸门裁定，同样按 §7.5 停止报告。
+
 ### 5.3 可行性 —— 分级，不是硬门（更正 B1；rev2 修正 P0-3）
 
-文稿的 `|E₊| ≥ K 且 |E₋| ≥ K` 硬门取消。**分级规则改为不含任何发明常数：**
+文稿的 `|E₊| ≥ K 且 |E₋| ≥ K` 硬门取消。**改为字典序排序，不含任何发明常数与任何权重**
+（rev2.1 更正 P0-5）：
 
 ```
-两方向都有 ≥1 个可定向事件   →  S = max over assignment of  (M_11 + M_22) / 2
-只有一个方向有可定向事件     →  缺失方向的两格记为 0（不是 NaN、不是丢弃）
-                                 S = max over assignment of  (M_present + 0) / 2   ⇒  S ≤ 0.5
-一个可定向事件都没有         →  S = −1   （交换不变平均的理论下界）
+n_dir(候选) = 有可定向事件的方向数 ∈ {0, 1, 2}
+
+S_rank = 在有事件的方向上、按 §5.2 计算的交换不变匹配（缺方向的格从 max 的候选指派中剔除，
+         不填 0、不填 NaN；n_dir = 0 时 S_rank 未定义）
+
+候选排序 = 字典序 ( n_dir , S_rank )        —— 先比方向数，同方向数内再比匹配质量
 ```
 
-**rev1 的 `−0.25` 惩罚与 `S_FLOOR = 0.294` 两个发明常数已删除。** 新规则的性质：
+**为什么用字典序而不是一个标量分数。** rev2 曾用"缺失方向的格记 0，单方向上界 0.5"，并声称
+`无方向 < 单方向 < 双方向` **严格成立** —— **这个断言是错的**（P0-5）：单方向若与某模板相关 1.0
+得 `(1+0)/2 = 0.5`；双方向若最优指派下两格为 `+1` 与 `−1` 只得 `0`。**双方向候选不保证高于单方向候选。**
+标量化必然要么引入权重，要么破坏排序。
 
-- 单方向候选的**上界自动是 0.5**，**低于 axis-only 参照 0.696**（§2.4）⇒ 不可能出现"稳定单方向场
-  被当成成功"的情形（P0-3）；
-- 在"只有一个方向"这一档内，`S` 仍随该方向的匹配质量单调上升 ⇒ 优化器有梯度可爬；
-- 获得第二个方向时分数出现大幅跃升 ⇒ 搜索被正确地拉向双方向；
-- 三档严格有序：`无方向 (−1) < 单方向 (≤0.5) < 双方向`。不需要任何调参。
+CMA-ES 只用候选的**相对排序**、不用分数绝对值，因此字典序可以直接作为 fitness rank 使用，
+既保证"任何双方向候选优先于任何单方向候选"，又不需要发明 rate-loss 权重。
+**严格有序的是字典序的第一分量 `n_dir`，不是任何标量分数** —— 这正是 P0-5 的要点。
+
+**同时保留标量 `S_rank` 作为报告量**（用于与 axis-only 0.696、uniform 等参照做同尺度比较），
+但**不得**用它跨方向档位比较大小。
 
 **双方向不进入 per-candidate 损失**（读出太稀疏，逐 seed 强求会复活 B1 的平坦搜索面），
-**但必须回到 held-out 充分性门**（§10.3）。每个候选仍记录 `dir_forward` / `dir_reverse` /
+**但必须回到 held-out 充分性门**（§10.3）。每个候选仍记录 `n_dir` / `dir_forward` / `dir_reverse` /
 `n_directional` / `bidirectional`。
 
 ### 5.4 axis-only 参照（rev2 新增，更正 P0-2）
@@ -487,7 +551,7 @@ axis_only.reverse[n] = − proj(contact_n − center, u_C)
    - `S_axis_only`（解析，无仿真）
    - **`S_manual_hard_spontaneous`** —— 自发双核基线。rev1 缺这一项，是 P0-1 的根因。
      现有 63 次 `twoend_equal` 自发跑（多数为旧 `template_source` 几何）给出 `0.701 ± 0.173`（30/63 双方向），
-     **Stage 0 必须在冻结的 `gradient_shared` 几何上重取**，样本量与 Stage 1 的 8 个网络种子对齐；
+     **Stage 0 必须在冻结的 `gradient_shared` 几何上重取**，样本量与 Stage 1 的 12 个网络种子对齐；
    - `S_driven_pooled`（21 seed）—— 标注为 *readout upper-reference*，**不是基线**；
    - 三者各出 `S_grad` / `S_geom` 两套（§5.2），以及 §5.2a 的两种缺失规则各一份；
 4. 冻结 §5.2a 的 `SUPPORT`、§4.3.1 的 quantile seed、§5.3 的分级规则，写入 `config/` 并落盘校验和；
@@ -498,10 +562,22 @@ axis_only.reverse[n] = − proj(contact_n − center, u_C)
 
 ### 6.2 网络缓存层（D2 —— 最大工程杠杆）
 
-`(network_seed, theta_EE, L, density, AR)` → 连接结构落盘（`.npz`，含 `pos` / `labels` / 各连接索引与延迟）。
-命中则跳过 120 s 建网。
+连接结构落盘（`.npz`，含 `pos` / `labels` / 各连接索引与延迟），命中则跳过 120 s 建网。
 
-**验收：** 缓存命中与不命中的仿真结果在同 seed 下逐位相等（bit-parity 测试）。
+**缓存键必须是完整配置哈希（rev2.1 更正，Eng-1）：**
+
+```
+cache_key = SHA256( canonical_json(connectivity_config) + git_commit + numpy_rng_version )
+```
+
+`connectivity_config` 必须包含**所有影响连接图的字段**，不只是
+`(network_seed, theta_EE, L, density, AR)`：还有 `f_E`、全部 `l_EE / l_IE / l_EI / l_II`、
+`rho_*`、`C_EE / C_IE / C_EI / C_II`、`tau0`、`v_axon`、`delay_dt`、边界规则。
+**否则改了任一连接参数会错误命中旧缓存** —— 这类 bug 静默且致命。
+
+**验收：**
+1. 缓存命中与不命中的仿真结果在同 seed 下逐位相等（bit-parity）；
+2. 单元测试：逐个扰动 `connectivity_config` 的每个字段，缓存键必须改变。
 
 ### 6.3 流式包络（C2）
 
@@ -512,6 +588,22 @@ axis_only.reverse[n] = − proj(contact_n − center, u_C)
   8 worker ≈ 75 GB，在 218 GB 内装得下）；
 - **Stage 2 之前必须完成**（更长的跑会 OOM）。
 - **验收：** 流式与非流式在同 seed 下事件表逐位相等。
+
+### 6.3a Common random numbers 的前提已核验，但必须加锁（rev2.1 新增，Eng-2）
+
+"同 seed" 只有在噪声流与病理场无关时才构成真正的配对随机输入。**本引擎已核验满足**：
+`kick_probe.py` 主循环内只有两处 RNG 调用 ——
+`rng.standard_normal()`（每步 1 个标量，OU）与 `rng.poisson(nu_vec * dt, size=N)`（每步 N 个），
+**都是无条件、定长的**，`nu_vec` 只由 OU 状态与 kick mask 决定（Stage 1 中 `KICK_BOOST = 0`），
+**不依赖尖峰**。`rng.choice` 只在初始化时各调一次。⇒ 改变 `V_th_per_neuron` **不会**改变 RNG 调用序列。
+
+**但这是引擎的当前实现细节，不是被保证的合同。** 必须加回归测试锁住：
+
+1. 同一 `(network_seed, noise_seed)` 下，跑两个**不同**的 `V_th_per_neuron`，断言两次运行消耗的 RNG
+   抽取次数与 OU 轨迹 `xi(t)` **逐位相同**；
+2. 断言所有臂从**逐位相同的初始状态**启动（膜电位、突触门控、`m`、`z`），臂之间无状态继承；
+3. 引擎一旦引入任何依赖尖峰数量的条件式 RNG 调用，该测试必须失败 —— 因为那会使 Stage 1 的配对方差
+   探针失去意义。
 
 ### 6.4 场模块与 TDD
 
@@ -536,52 +628,79 @@ rev1 的理由（"头部空间 ≤0.10 小于噪声 0.141"）建在错误 regime
 
 Stage 1 用不到 1 小时把 (a) 和 (b) 分开。**在分开之前投入任何搜索算力都是赌博。**
 
-### 7.2 设计（rev2：4 个仿真臂，更正 P0-4）
+### 7.2 设计（rev2.1：7 个仿真臂 + 1 个解析臂，更正 P0-2/P0-3/P0-4）
 
-固定 8 个网络种子 `{1..8}`，每个种子**建网一次**（缓存），在**同一张网、同一噪声种子**上依次跑 4 个场，
-每个 8 s：
+固定 **12** 个网络种子 `{1..12}`，每个种子**建网一次**（缓存），在**同一张网、同一噪声种子**上
+依次跑 7 个场，每个 8 s：
 
 | 臂 | 场 | 抽样合同 | 问的是 |
 |---|---|---|---|
 | `manual_hard` | 已接受的两个半径 1.5 mm 圆盘核（legacy 路径原样） | `sample_core_field` × 2 + `np.minimum` | 外部参照，与已发表工作点同源 |
-| `manual_projected` | 同样的双核指示函数，走新参数族 | §4.3.1 latent-quantile | **新参数族有没有表达出旧工作点**（行为等价，P0-4） |
-| `uniform_axial` | `α = 0`（softmax 均匀）+ 同预算投影 | §4.3.1 | 摊成走廊后差多少 |
-| `transverse_shift` | 双核形状沿 `u_C⊥` 平移 3 mm，同预算 | §4.3.1 | 轴的横向位置重不重要 |
+| `manual_projected` | 同样的双核指示函数，走新参数族 | §4.3.1 latent-quantile | **新参数族有没有表达出旧工作点**（P0-4） |
+| `uniform_axial` | `α = 0` + partition-of-unity（§4.1）+ 同预算投影 | §4.3.1 | **纵向形状**分不分得出 |
+| `width_wide` | 双核形状，`σ_⊥ → 2 σ_⊥^manual`，同预算 | §4.3.1 | **横向宽度**分不分得出（增宽） |
+| `width_narrow` | 双核形状，`σ_⊥ → 0.5 σ_⊥^manual`，同预算 | §4.3.1 | **横向宽度**分不分得出（收窄） |
+| `transverse_plus` | 双核形状沿 `+u_C⊥` 平移 3 mm，同预算 | §4.3.1 | **横向位置**分不分得出 |
+| `transverse_minus` | 双核形状沿 `−u_C⊥` 平移 3 mm，同预算 | §4.3.1 | 同上，符号对称臂 |
 
-外加 **`axis_only`（解析，零仿真成本）** 作为第五个参照（§5.4）。
+外加 **`axis_only`（解析，零仿真成本）** 作为几何参照（§5.4）。
 
-共 **32 次仿真 = 256 生物秒 = 4.2 h 串行 ≈ 35–50 min（8 worker）**。内存：8 worker × ~9.4 GB ≈ 75 GB。
+共 **84 次仿真 = 672 生物秒 = 10.9 h 串行 ≈ 55 min–1.4 h（8–12 worker）**。
+内存：12 worker × ~9.4 GB ≈ 113 GB（218 GB 内）。
+
+**为什么加 `width_*` 两臂（P0-3）**：Stage 2 的学习参数含 `log σ_⊥`（§4.1），但 rev2 的 Stage 1 只比了
+双核 / 走廊 / 横移，**从未检验读出能否分辨宽窄**。不检验就优化 `σ_⊥` 是没有依据的。
+
+**为什么 `transverse` 必须 ± 双侧（P0-4）**：`u_C⊥` 的正负是**约定**（`sef_hfo_subject_placement.py`
+里由 `transverse_sign = 1 if w[dominant] >= 0 else -1` 决定），单侧 `+3 mm` 在翻转约定后会变成物理空间的
+另一侧。B4 对比用两臂**逐种子平均** `S`（对 `u_C⊥ → −u_C⊥` 构造性不变），两臂数值另行分别报告。
 
 **`manual_hard` 与 `manual_projected` 分开是 P0-4 的核心**：不分开就会把"硬 mask vs 软投影的阈值赋值
-差异"混进"空间形状差异"，让 `uniform_axial` 的对比失去意义。
+差异"混进"空间形状差异"，让所有形状对比失去意义。
 
 ### 7.3 测量量
 
-对每个 (臂, 种子)：`S_grad` / `S_geom` × 两种缺失规则（§5.2a）、`coverage`、`mean_n_part`、
-`dir_forward` / `dir_reverse`、`n_events`、`n_directional`、运行时、峰值内存。
+对每个 (臂, 种子)：`n_dir`、`S_rank`（`S_grad` / `S_geom` × 两种缺失规则 × 两个事件门）、`coverage`、
+`mean_n_part`、`dir_forward` / `dir_reverse`、`n_events`、`n_directional`、运行时、峰值内存。
 
-对每一对臂 `(a,b)`，跨 8 个种子计算**配对差** `Δ_ab,k = S_a,k − S_b,k`，报告
-`mean(Δ_ab)`、`sd(Δ_ab)`、**符号一致数** `n_same = #{k : sign(Δ_ab,k) = sign(mean Δ_ab)}`。
+对每个**预注册对比**（§7.4），跨 12 个种子计算配对差 `Δ_k`，报告 `mean(Δ)`、`sd(Δ)`、
+符号一致数 `n_same`、双侧符号检验 `p`。
 
-### 7.4 预注册判据（rev2 重写，更正 P0-5）
+### 7.4 预注册判据（rev2.1 重写，更正 P0-2）
 
-**判据一律用符号一致性（无分布假设、无发明的幅度常数）为主，幅度只报告不设门。**
+**对比集合在运行前冻结，并按目的分组。** rev2 写的"6 个臂对（含 axis_only）"在算术上就不成立
+（4 仿真臂 = 6 对，含 axis_only 应为 10 对），且"任取一对达到 7/8"作为通用可辨识性门有两个缺陷：
+参数化等价对比的差异只反映抽样合同不同、与 axis_only 的差异不证明纵向形状可辨识；从多对中挑最显著的
+一对会产生多重选择偏差。**改为下列具名对比：**
 
-**(A) 参数族等价（前置，必须先过）** —— §4.3.3 的行为等价三条件，比较 `manual_projected` vs `manual_hard`。
-不过 ⇒ `PARAMETERIZATION_MISMATCH`。
+| 组 | 对比 | 目的 | 进可辨识性门？ |
+|---|---|---|---|
+| **A** | `manual_projected` vs `manual_hard` | 参数化等价 | **否**（前置门，见下 (A)） |
+| **B1** | `manual_projected` vs `uniform_axial` | 纵向形状敏感性 | **是** |
+| **B2** | `manual_projected` vs `width_wide` | 横向宽度敏感性（增宽） | **是** |
+| **B3** | `manual_projected` vs `width_narrow` | 横向宽度敏感性（收窄） | **是** |
+| **B4** | `manual_projected` vs `mean(transverse_±)` | 横向位置敏感性 | **是** |
+| **C** | 各 projected 臂 vs `axis_only` | 几何参照（§5.4 承重规则） | **否**（只报告） |
 
-**(B) 可辨识性（核心）** —— 在 6 个臂对中（含 `axis_only`），是否**至少存在一对**满足
-`n_same ≥ 7/8`（两侧二项 p = 0.070；8/8 时 p = 0.0078）。
-- 存在 ⇒ 读出**能**分辨这些场，反演有意义；
-- 不存在 ⇒ `READOUT_INSENSITIVE`：这 15 个触点的秩次分不出场的形状，优化再多也没用。
+**(A) 参数族等价（前置，必须先过）** —— §4.3.3 的行为等价三条件。不过 ⇒ `PARAMETERIZATION_MISMATCH`。
 
-**哪个臂赢不构成闸门，只作为结论记录。** `transverse_shift` 或 `uniform_axial` 胜过 `manual_*`
-都是合法且有信息的结果（"手放的双核不是最优"），不是失败 —— 这补上了 rev1 未定义的两个分支。
+**(B) 可辨识性（核心）** —— 对 B1–B4 各做**双侧符号检验**（12 个配对差），**Holm 校正 across the 4**，
+至少一个在 `α = 0.05` 下存活即通过。（12/12 → p = 4.9e-4；11/12 → p = 6.3e-3；10/12 → p = 0.039。）
+- 通过 ⇒ 读出**能**分辨场的形状，反演有意义，并记录**是哪一个维度**（纵向 / 宽度 / 位置）可辨识；
+- 全不通过、但至少一个 B 对比的**未校正** p < 0.05 ⇒ `UNDERPOWERED_PROBE`：证据方向存在但种子数不够，
+  报告并建议加种子重跑，**不判 `READOUT_INSENSITIVE`**；
+- 全不通过且无一未校正 p < 0.05 ⇒ `READOUT_INSENSITIVE`。
 
-**(C) 优化可行性 —— 跨 seed 排序一致性（rev1 只看 `sd(Δ)`，不够）**
+**哪个臂赢不构成闸门，只作为结论记录。** `uniform_axial` / `width_*` / `transverse_±` 任一胜过
+`manual_projected` 都是合法且有信息的结果（"手放的双核不是最优"），不是失败。
 
-`sd(Δ)` 小**不等于**候选排序可靠。定义
-`concordance` = 8 个种子上、6 个臂对中"该种子内的符号与合并均值符号一致"的比例均值：
+**(C) 优化可行性 —— 跨 seed 排序一致性**
+
+`sd(Δ)` 小**不等于**候选排序可靠。在优化器实际会穿行的 **projected 臂族**
+（`manual_projected` / `uniform_axial` / `width_wide` / `width_narrow` / `mean(transverse_±)`，
+5 个 ⇒ **10 个臂对**；排除 `manual_hard`（抽样合同不同）与 `axis_only`（解析、无噪声））上定义：
+
+`concordance` = 12 个种子上、10 个臂对中"该种子内的符号与合并均值符号一致"的比例均值。
 
 | `concordance` | 裁定 | Stage 2 预算 |
 |---|---|---|
@@ -589,10 +708,10 @@ Stage 1 用不到 1 小时把 (a) 和 (b) 分开。**在分开之前投入任何
 | 0.65 – 0.85 | `GO_MULTI_SEED` | 每候选平均 4 seed；`M+1 ≤ 8` 维、≤ 150 次评估 |
 | < 0.65 | `NO_GO_UNRESOLVABLE` | 停止报告 |
 
-阈值 0.85 / 0.65 是**明示的工程判断**（不是从任何"天花板"推导的），Stage 1 运行前冻结，不得按结果调整。
+阈值 0.85 / 0.65 是**明示的工程判断**（不由任何"天花板"推导），Stage 1 运行前冻结，不得按结果调整。
 
-**(D) 可评分性** —— 某种子若在 ≥2 个臂上得到 `S = −1`（无可定向事件），记为**无信息种子**。
-无信息种子 ≥ 3/8 ⇒ `INSUFFICIENT_SCORABLE`（提示需加长单跑时长，而非改判据）。
+**(D) 可评分性** —— 某种子若在 ≥2 个臂上 `n_dir = 0`，记为**无信息种子**。
+无信息种子 ≥ 4/12 ⇒ `INSUFFICIENT_SCORABLE`（提示需加长单跑时长，而非改判据）。
 
 **(E) 一致性** —— (B) 与 (C) 必须在**三个正交口径的全部组合**下给出相同裁定：
 `S_grad` / `S_geom` 两套模板源（§5.2）× 两种缺失规则（§5.2a）× 事件门 `n_part ≥ 5` / `≥ 4`（§5.1）。
@@ -604,25 +723,29 @@ Stage 1 用不到 1 小时把 (a) 和 (b) 分开。**在分开之前投入任何
 未覆盖分支一律返回 `FAIL_CLOSED` 而不是继续**：
 
 ```
-1. 任何 (臂,种子) 缺失、S 为 NaN、或 config 校验和不匹配      -> FAIL_CLOSED
-2. 无信息种子 >= 3/8                                          -> INSUFFICIENT_SCORABLE   [停]
-3. (A) 参数族行为等价不成立                                    -> PARAMETERIZATION_MISMATCH [停]
-4. (E) 模板源 x 缺失规则 x 事件门 的任一组合裁定不一致           -> SOURCE_DISAGREEMENT      [停]
-5. (B) 不存在 n_same >= 7/8 的臂对                             -> READOUT_INSENSITIVE      [停]
-6. (C) concordance < 0.65                                     -> NO_GO_UNRESOLVABLE       [停]
-7. (C) concordance in [0.65, 0.85)                            -> GO_MULTI_SEED
-8. (C) concordance >= 0.85                                    -> GO_SINGLE_SEED
+1. 任何 (臂,种子) 缺失、S 为 NaN、或 config 校验和不匹配       -> FAIL_CLOSED
+2. 无信息种子 >= 4/12                                          -> INSUFFICIENT_SCORABLE     [停]
+3. (A) 参数族行为等价不成立                                     -> PARAMETERIZATION_MISMATCH [停]
+4. (E) 模板源 x 缺失规则 x 事件门 的任一组合裁定不一致            -> SOURCE_DISAGREEMENT       [停]
+5. (B) B1-B4 全不过 Holm，且无一未校正 p < 0.05                 -> READOUT_INSENSITIVE       [停]
+6. (B) B1-B4 全不过 Holm，但有未校正 p < 0.05                   -> UNDERPOWERED_PROBE        [停]
+7. (C) concordance < 0.65                                      -> NO_GO_UNRESOLVABLE        [停]
+8. (C) concordance in [0.65, 0.85)                             -> GO_MULTI_SEED
+9. (C) concordance >= 0.85                                     -> GO_SINGLE_SEED
 ```
 
 **所有 `[停]` 分支：停止，写报告，等用户决定**（用户 2026-08-06 已裁定此分支）。
-裁决器须有单元测试覆盖全部 8 条出口，包含 NaN、缺方向、模板源冲突三类构造用例。
+裁决器须有单元测试覆盖全部 9 条出口，包含 NaN、`n_dir = 0`、模板源冲突三类构造用例，
+外加一条 **`u_C⊥ → −u_C⊥` 符号翻转后裁定不变**的不变性测试（P0-4）。
 
 ### 7.6 交付物
 
 `results/topic4_sef_hfo/data_driven_core_field/stage1_variance_probe/`：
-`per_run.csv`（32 行 + `axis_only` 解析行）、`pairwise_deltas.csv`（6 臂对 × 8 种子）、
+`per_run.csv`（84 行 + `axis_only` 解析行）、
+`prespecified_comparisons.csv`（A / B1–B4 / C，各含 12 个配对差 + `mean` / `sd` / `n_same` / 符号检验 p /
+Holm 校正 p）、`concordance.csv`（10 个 projected 臂对 × 12 种子）、
 `gate_verdict.json`（(A)–(E) 全部数值 + 裁决器出口 + config 校验和）、
-`figures/`（配对差点线图 + 五臂分布图 + 覆盖率图 + `figures/README.md` 中文说明）。
+`figures/`（预注册对比的配对差点线图 + 八臂分布图 + 覆盖率图 + `figures/README.md` 中文说明）。
 
 ---
 
@@ -643,20 +766,51 @@ Stage 1 用不到 1 小时把 (a) 和 (b) 分开。**在分开之前投入任何
 
 ### 8.1 预注册结局分类（rev2 新增，更正 P0-5）
 
-Stage 2 的"什么算成功"**在运行前冻结**。裁决同样是 fail-closed 纯函数，在 held-out 种子上评估，
+Stage 2 的"什么算成功"**在运行前冻结**。裁决是 fail-closed 纯函数，**全部在 held-out 种子上评估**，
 且必须在 `S_grad` / `S_geom` 两套模板源下一致，否则 `SOURCE_DISAGREEMENT`。
 
-| 结局 | 条件 | 允许的表述 |
-|---|---|---|
-| `RECOVERED_NONTRIVIAL_FIELD` | held-out 上同时：超过 `axis_only` **且**超过 `uniform_axial`（符号一致 ≥7/8）；对 `manual_projected` 非劣；**通过 §10.3 双方向充分性门**；跨重启场稳定；`coverage` 不低于 `manual_projected − 0.10` | "从触点秩次反演出的非平凡病理场，优于纯几何与同预算均匀走廊" |
-| `UNIFORM_CORRIDOR_SUFFICIENT` | 优化结果不超过 `uniform_axial` | "在此读出分辨率下，一条同预算均匀轴向走廊已足够；数据不支持更结构化的场" |
-| `MANUAL_HEURISTIC_RETAINED` | 优化场稳定低于 `manual_projected` | "手放的两端核仍是更好的工作点；反演未找到更优解" |
-| `AXIS_ONLY_SUFFICIENT` | 没有任何臂稳定超过 `axis_only` | "得分可由沿轴传播的几何完全解释，病理场形状无可检出贡献" |
-| `ONE_DIRECTION_ONLY` | 其余条件满足，但 §10.3 双方向门不过 | **只能说"恢复了一个传播方向"**，禁止写成"复现了两模板 repertoire" |
-| `UNIDENTIFIABLE` | 跨 seed / 重启学到的场不稳定（场相关中位 < 0.5，或峰位置跨重启不一致） | "参数场在本读出下不可辨识；报告不稳定性，不展示最优一次" |
-| `READOUT_INSENSITIVE` | 预注册的形状扰动（横向平移、峰数改变）在 held-out 上无法被 montage 区分 | "该 montage 分辨不出这些场差异" |
+**按下列顺序短路裁定**（顺序本身是合同的一部分 —— 它决定了当多个条件同时成立时报告哪一个）：
 
-**`UNIDENTIFIABLE` 与 `READOUT_INSENSITIVE` 是合法结论，不是失败。** 按 §11 红线 14，不得只展示最优一次。
+```
+0. 任何 NaN / 缺 held-out 产物 / config 校验和不匹配        -> FAIL_CLOSED
+1. 训练集 S_rank 提高，held-out S_rank 不提高               -> SIMULATOR_OVERFIT
+2. §10.3 双方向充分性门不过                                  -> ONE_DIRECTION_ONLY
+3. 等价最优场族（§8.2）空间上互不相似                        -> FIELD_NONIDENTIFIABLE
+4. 跨 seed / 重启学到的场不稳定（场相关中位 < 0.5）          -> UNIDENTIFIABLE
+5. 无任何臂在 held-out 上稳定超过 axis_only                  -> AXIS_ONLY_SUFFICIENT
+6. 超过 axis_only 但 learned 不优于 uniform_axial            -> UNIFORM_CORRIDOR_SUFFICIENT
+7. learned 稳定低于 manual_projected                         -> MANUAL_HEURISTIC_RETAINED
+8. 以上皆不触发，且 coverage 达标                            -> RECOVERED_NONTRIVIAL_FIELD
+```
+
+| 结局 | 条件补充 | 允许的表述 |
+|---|---|---|
+| `RECOVERED_NONTRIVIAL_FIELD` | held-out 上同时超过 `axis_only` **与** `uniform_axial`（符号检验 ≥11/12）；对 `manual_projected` 非劣；过 §10.3；`coverage ≥ manual_projected − 0.10` | "从触点秩次反演出的非平凡病理场，优于纯几何与同预算均匀走廊" |
+| `SIMULATOR_OVERFIT` | 训练提高但 held-out 不提高（rev2.1 补，P0-1） | "优化拟合的是仿真器的随机实现，不是可迁移的场结构" |
+| `UNIFORM_CORRIDOR_SUFFICIENT` | 超过 `axis_only` 但不优于 `uniform_axial` | "在此读出分辨率下，一条同预算均匀轴向走廊已足够；数据不支持更结构化的场" |
+| `MANUAL_HEURISTIC_RETAINED` | 优化场稳定低于 `manual_projected` | "手放的两端核仍是更好的工作点；反演未找到更优解" |
+| `AXIS_ONLY_SUFFICIENT` | 无任何臂稳定超过 `axis_only` | "得分可由沿轴传播的几何完全解释，病理场形状无可检出贡献" |
+| `ONE_DIRECTION_ONLY` | §10.3 不过 | **只能说"恢复了一个传播方向"**，禁止写成"复现了两模板 repertoire" |
+| `FIELD_NONIDENTIFIABLE` | 多个空间形状**显著不同**的场取得等价 held-out 分数（rev2.1 补，P1-2） | "分数不能唯一确定场的形状；报告等价最优场族，不展示单一解" |
+| `UNIDENTIFIABLE` | 跨 seed / 重启场不稳定 | "参数场在本读出下不可辨识；报告不稳定性，不展示最优一次" |
+
+**`FIELD_NONIDENTIFIABLE` / `UNIDENTIFIABLE` / `READOUT_INSENSITIVE` / `AXIS_ONLY_SUFFICIENT` 都是
+合法结论，不是失败。** 按 §11 红线 14，不得只展示最优一次。
+
+### 8.2 等价最优场族（rev2.1 新增，P1-2）
+
+**只展示 CMA-ES 的单次最优解会过度解释** —— 空间形状完全不同的场可能取得同一分数。
+正式结果必须保存并报告：
+
+- 全部重启的最优场；
+- held-out 分数落在最优值 **1 个跨种子配对 sd** 之内的**全部**候选（= 等价最优场族）；
+- 该族的**逐体素均值场与标准差场**；
+- 族内两两**场相关**与 **Wasserstein 距离**；
+- 纵向重心、宽度 `σ_⊥`、峰位置、`r̄`（§9 的 `h`-加权定义）在族内的分布。
+
+**判定规则**：若族内两两场相关的中位数 < 0.5，判 `FIELD_NONIDENTIFIABLE`。
+**只有在族内稳定的特征**（重心 / 宽度 / 峰数）才允许被解释为"数据约束出的 core / corridor"；
+族内不稳定的特征只能作为该次运行的描述，不得进入结论。
 
 ---
 
@@ -666,10 +820,25 @@ Stage 2 的"什么算成功"**在运行前冻结**。裁决同样是 fail-closed
 
 - §4.2 的二维场，`β ∈ R^{7×3}`，同一预算投影
 - 从 Stage 2 最优场映射到 `η = 0` 中心行做 warm start，**外加至少一次随机重启**
-- 横向定位报告量：`r̄ = Σ_i (V_base − V_th,i) r_i / D0`；轴近质量
-  `C_axis(δ) = Σ_i (V_base − V_th,i) · 1(|r_i| < δ) / D0`
-- **横向平移检验**：冻结最优场形状与预算，沿 `u_C⊥` 平移若干 offset，**不重新优化**，用 held-out 种子
-  重算 S，画 `S(δ)`。最大值出现在 `δ ≈ 0` 才算支持"共享轴同时约束了病理场的横向位置"
+- **横向定位报告量必须用 `h_i`，不用 `h_i d_i`**（rev2.1 更正 P0-7）：
+
+  ```
+  r̄        = Σ_i h_i r_i / Σ_i h_i
+  C_axis(δ) = Σ_i h_i · 1(|r_i| < δ) / Σ_i h_i
+  ```
+
+  **原因**：新预算下 `d_i = V_base − V_core,i` 保留符号，约 31% 为负（§2.5）。用 `h_i d_i` 作空间"质量"
+  会引入负权重 ⇒ 重心可能落在场之外、`C_axis` 可能 <0 或 >1、分母 `D0` 不再对应非负质量。
+  `h_i ∈ [0,1]` 才是真正的非负空间质量。
+  如需"兴奋性效应加权"版本，另用 `w_i = h_i · max(d_i, 0)` 单独报告，**不得**用带符号的 `h_i d_i`。
+
+- **横向平移检验**：冻结最优场形状与预算，沿 `u_C⊥` 平移若干 offset（**必须 ± 双侧对称取值**，
+  见 §7.2 对 P0-4 的同一理由），**不重新优化**，用 held-out 种子重算 S，画 `S(δ)`。
+  最大值出现在 `δ ≈ 0` 才算支持"共享轴同时约束了病理场的横向位置"
+
+**Stage 3 开启条件（rev2.1 补，P0-1）**：Stage 2 结局 = `RECOVERED_NONTRIVIAL_FIELD`
+**且**等价最优场族（§8.2）的横向重心 `r̄` 跨重启标准差 < 1 mm。否则 Stage 3 不开启 —— 一个位置本身
+不稳定的场，做横向平移检验没有意义。
 
 ---
 
@@ -746,6 +915,24 @@ Stage 2 的"什么算成功"**在运行前冻结**。裁决同样是 fail-closed
 24. Stage 1 / Stage 2 的裁决器必须是**纯函数且 fail-closed**：NaN、缺方向、模板源不一致一律返回失败出口，
     不得继续（P0-5）。
 
+**rev2.1 新增（第二轮审阅）：**
+
+25. **不得用任何标量分数跨方向档位比较大小。** 方向数与匹配质量用**字典序** `(n_dir, S_rank)`
+    （P0-5）。禁止再写"无方向 < 单方向 < 双方向 严格成立"或"获得第二方向必然跃升"。
+26. `uniform_axial` 必须建在 **partition-of-unity 归一化基**上（P0-6）。未归一化的"均匀"实际是宽峰，
+    而它是全部对比的主承重参照。
+27. **横向相关的一切扰动必须 ± 对称**（Stage 1 的 `transverse_±`、Stage 3 的平移扫描），因为 `u_C⊥`
+    的正负是约定而非物理（P0-4）。须有符号翻转不变性测试。
+28. **空间"质量"一律用 `h_i` 加权，不得用带符号的 `h_i d_i`**（P0-7）。约 31% 的 `d_i` 为负，
+    带符号加权不是概率质量。
+29. **可辨识性只能由预注册的形状敏感性对比（B1–B4）裁定**，且必须 Holm 校正；参数化等价对比（A）与
+    几何参照对比（C）**不得**用来判"病理场是否可辨识"（P0-2）。
+30. **不得只展示单次最优场。** 必须报告等价最优场族及其族内稳定性；只有族内稳定的特征才可解释为
+    "数据约束出的 core / corridor"（P1-2、§8.2）。
+31. 网络缓存键必须覆盖**全部**影响连接图的字段 + git commit + RNG 版本（Eng-1）。
+32. 引擎若引入任何**依赖尖峰的条件式 RNG 调用**，Stage 1 的配对设计即告失效，§6.3a 的回归测试必须
+    因此失败（Eng-2）。
+
 ---
 
 ## 12. 明确推迟到后续 spec 的内容
@@ -758,6 +945,33 @@ Stage 2 的"什么算成功"**在运行前冻结**。裁决同样是 fail-closed
   不是现成可接的
 - **队列推广** —— 前提"两个模板相反"在队列水平是少数（broad 6/26、narrow 9/26），需独立论证（B5）
 - **患者侧时间块切分与模板重导** —— 见 §10.1
+
+---
+
+## 12a. 对论文正文的后果（rev2.1 新增）
+
+§2.3 / §2.4 的审计对 Figure 4 的表述有直接后果，必须在本合同产出新结果之前处理。
+
+**仓库内已经是对的。** `docs/paper-draft/figure4_subject_specific_snn.md` 已逐字写着：
+控制臂"支持'两个端点具有产生相反 readout 的能力'，**不支持**'双核同网长期自发且方向平衡'"（§Panel C），
+并在"不允许"清单里明列"双核同网可以长期自发且方向平衡"。Panel B 也已披露 seed 5 = 1 forward / 4 reverse。
+**本合同不修改该文件。**
+
+**需要核对的是仓库外的手稿正文。** 第二轮审阅引用了一句"同一二维 E–I 网络在随机背景输入下自然形成
+model forward 和 model reverse，并重现实验中的 TA/TB" —— 该句在本仓库 `docs/paper-draft/` 中检索不到。
+若它存在于仓库外的手稿版本，则受以下约束（依据 §2.3 的实测：自发双核 forward 事件数中位数 = 0；
+Panel C 的 103/119 来自 `driven_pooled` 两个单核臂）：
+
+**在本合同产出新结果之前，下列表述必须冻结或弱化：**
+
+- "自然形成两个方向相反的传播模板"
+- "在相同连接结构中自发产生两类事件"
+- "随机背景输入下两个 core 分别随机成核并形成双向重演"
+
+**可以说的**：同一连续自发轨迹中曾同时出现两个方向的事件（单窗口、已披露计数）；两端分别被点亮时
+各自能产生与患者对应模板一致的 readout。
+
+**这条不是本合同的失败，而是代码审计的产物**；但它是当前 Figure 4 最大的科学风险，需用户确认手稿版本。
 
 ---
 
@@ -791,10 +1005,21 @@ stage3_2d_field/                    （仅 Stage 2 通过后）
 - [ ] 网络缓存 bit-parity 测试通过
 - [ ] 场模块 TDD 全绿（二分收敛 <1e-6 / `h ∈ [0,1]` / 轴翻转与 TA-TB 交换不变 / 双峰表达力 ≥0.9 作前置
       sanity）。**不含任何"逐位复现 legacy 抽样"的断言**（已核验不可能）
-- [ ] Stage 1 四个仿真臂齐备，含 `manual_projected`（参数族行为等价，非 h 相关）
-- [ ] Stage 1 裁决器为纯函数，8 条出口全部有单元测试（含 NaN / 缺方向 / 模板源冲突构造用例）
-- [ ] Stage 1 判据在两套目标模板 × 两种缺失规则下裁定一致
-- [ ] Stage 2 结局分类（§8.1）在 Stage 2 开跑前冻结
+- [ ] `uniform_axial` 用 partition-of-unity 基，`α = 0` 时 `q(s)` 相对波动 < 1e-6（P0-6）
+- [ ] Stage 1 **七个**仿真臂齐备：`manual_hard` / `manual_projected` / `uniform_axial` /
+      `width_wide` / `width_narrow` / `transverse_plus` / `transverse_minus`（P0-2/3/4）
+- [ ] Stage 1 预注册对比集合（A / B1–B4 / C）在跑前冻结；可辨识性只由 B1–B4 + Holm 裁定（P0-2）
+- [ ] Stage 1 裁决器为纯函数，**9 条**出口全部有单元测试，含 NaN / `n_dir=0` / 模板源冲突
+      三类构造用例 + `u_C⊥` 符号翻转不变性测试（P0-4）
+- [ ] Stage 1 判据在 模板源 × 缺失规则 × 事件门 全部组合下裁定一致
+- [ ] 打分实现 Spearman 与 `S_pair` 两套并列（P1-1），且"仅共同触点"模式与 `_sim_matrix` 回归一致
+- [ ] 网络缓存键覆盖全部连接字段 + git commit + RNG 版本，逐字段扰动测试通过（Eng-1）
+- [ ] common random numbers 回归测试通过：换 `V_th_per_neuron` 后 OU 轨迹与 RNG 抽取次数逐位相同（Eng-2）
+- [ ] 字典序 `(n_dir, S_rank)` 已实现；全文无"严格分级 / 第二方向必然跃升"表述（P0-5）
+- [ ] Stage 3 的 `r̄` / `C_axis` 用 `h_i` 加权，非 `h_i d_i`（P0-7）
+- [ ] Stage 2 结局分类（§8.1，含 `SIMULATOR_OVERFIT` / `FIELD_NONIDENTIFIABLE`）与等价最优场族
+      协议（§8.2）在 Stage 2 开跑前冻结
+- [ ] Stage 3 开启条件（§9 末）在 Stage 3 开跑前冻结
 - [ ] 图目录有中文 README，图已目视检查
 - [ ] 本 spec 与 plan 已 commit，分支自包含
 - [ ] 主文档 / archive 未写入任何未过 Stage 1 闸门的数字
