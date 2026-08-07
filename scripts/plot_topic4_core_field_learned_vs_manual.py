@@ -122,6 +122,25 @@ def _field_extent(ax, posE, h, display, *, mass=0.90, cell=0.35):
     return float(level)
 
 
+def _rep_at_pad(fd, key, pad_ms):
+    """The representative event's onset field at the requested window padding.
+
+    The event detector closes an event when the population rate falls back
+    through its bar, but cells keep being recruited past that instant, so the
+    unpadded map understates how far the front travelled.
+    """
+    if pad_ms <= 0:
+        return fd[key].item()
+    pads = f"{key}_pads"
+    if pads not in fd.files:
+        raise SystemExit(f"{pads} absent -- rerun with --rep-pad-ms {pad_ms:g}")
+    for rep in fd[pads]:
+        if rep and abs(float(rep["pad_ms"]) - pad_ms) < 1e-6:
+            return rep
+    have = sorted({float(r["pad_ms"]) for r in fd[pads] if r})
+    raise SystemExit(f"pad {pad_ms:g} ms not stored; available: {have}")
+
+
 def _ignition_xy(rep, posE, display, frac=0.01):
     """Where the event actually started: centroid of the earliest-firing cells."""
     if not rep:
@@ -138,6 +157,9 @@ def _ignition_xy(rep, posE, display, frac=0.01):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--tag", default=LEARNED_TAG)
+    ap.add_argument("--pad-ms", type=float, default=0.0,
+                    help="extra ms of the representative events' onset window "
+                         "(must have been stored by the run)")
     ap.add_argument("--out", default=os.path.join(OUT, "figures"))
     a = ap.parse_args()
 
@@ -150,7 +172,8 @@ def main():
     names = [str(x) for x in fd["names"]]
     shafts = sorted({_shaft(n) for n in names})
     display = _registered_axis_display(fd)
-    rep_f, rep_r = fd["rep_fwd"].item(), fd["rep_rev"].item()
+    rep_f = _rep_at_pad(fd, "rep_fwd", a.pad_ms)
+    rep_r = _rep_at_pad(fd, "rep_rev", a.pad_ms)
 
     fig = plt.figure(figsize=(18.8, 4.55), facecolor="white")
     outer = gridspec.GridSpec(1, 3, width_ratios=[1.15, 2.0, 2.75],
@@ -222,6 +245,9 @@ def main():
                label="where the event started")],
         frameon=True, framealpha=0.9, edgecolor="0.85", fontsize=8.5,
         loc="lower left", borderpad=0.4, handlelength=1.4)
+    if a.pad_ms > 0:
+        axF.text(0.02, 0.985, f"onset window: event +{a.pad_ms:g} ms",
+                 transform=axF.transAxes, va="top", fontsize=8.5, color="0.35")
 
     # -- D: the readout of the same run ------------------------------------
     stats = _plot_interictal_sample_readout(
@@ -248,6 +274,7 @@ def main():
     json.dump(dict(
         figure="learned_core_field_readout", subject=cfg["subject"],
         learned_tag=a.tag, plotting_only=True,
+        onset_window_pad_ms=a.pad_ms,
         reference_hand_placed_figure=(
             "results/paper-ready-figure/fig4_subject_snn_e1146/figures/"
             "fig4_panel_b_bidirectional_readout"),

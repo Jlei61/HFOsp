@@ -93,7 +93,7 @@ def _learned_vth(core_field_dir, posE, NE, NI, reg):
 def subject_run(subject, montage_name, lesion, L, density, drive, T,
                 core_mean, core_std, core_r, seed, target_inter_core, k_dir=2,
                 placement="template_source", k_early=3, manual_source=None,
-                manual_sink=None, core_field=None):
+                manual_sink=None, core_field=None, rep_pad_ms=None):
     # Adapt the read-out estimator to sparse patient electrodes. The endpoint
     # estimator itself requires 2*k_dir+1 participants (5 for k_dir=2).
     cmrun.KDIR = int(k_dir)
@@ -221,13 +221,21 @@ def subject_run(subject, montage_name, lesion, L, density, drive, T,
     # representative forward + reverse events (for the core_model_s3-style A/B panels):
     # pick the directional event with the most participating contacts (ties -> readability),
     # save its per-neuron onset field (spatial propagation gradient) + window.
-    def pick(evs):
+    def pick(evs, pad_ms=0.0):
         if not evs:
             return None
         best = max(evs, key=lambda r: (r["n_part"], r["readability"] or 0))
-        on = per_neuron_onset(spk, best["t_on"], best["t_off"], DT)
-        return dict(meta=best, onset=on.astype(np.float32))
+        # The detector's t_off is where the POPULATION rate falls back through
+        # the bar; individual cells keep being recruited past it. Padding the
+        # onset window only -- event detection, readout and scoring all still
+        # use the unpadded event -- shows how far the front actually got.
+        on = per_neuron_onset(spk, best["t_on"],
+                              min(float(T), best["t_off"] + float(pad_ms)), DT)
+        return dict(meta=best, onset=on.astype(np.float32), pad_ms=float(pad_ms))
     rep_fwd, rep_rev = pick(dir_fwd), pick(dir_rev)
+    pads = [float(x) for x in (rep_pad_ms or []) if float(x) > 0]
+    rep_fwd_pads = [pick(dir_fwd, p) for p in pads]
+    rep_rev_pads = [pick(dir_rev, p) for p in pads]
 
     # figure/cluster sidecar: rep forward + reverse events + LFP + onset fields
     fig = dict(reg=dict(source_centroid=src_xy.tolist(), sink_centroid=snk_xy.tolist(),
@@ -243,6 +251,11 @@ def subject_run(subject, montage_name, lesion, L, density, drive, T,
                foci=np.array([src_xy, snk_xy], float),   # two core centroids (sheet coords)
                core_r=float(core_r), core_mean=float(core_mean), theta_deg=float(reg["theta_deg"]), L=float(L),
                rep_fwd=np.array(rep_fwd, dtype=object), rep_rev=np.array(rep_rev, dtype=object))
+    if pads:
+        # extra onset windows for the event maps only; nothing else consumes them
+        fig["rep_fwd_pads"] = np.array(rep_fwd_pads, dtype=object)
+        fig["rep_rev_pads"] = np.array(rep_rev_pads, dtype=object)
+        fig["active_fraction"] = af.astype(np.float32)
     return out, fig, spk
 
 
@@ -271,6 +284,9 @@ def main():
     ap.add_argument("--core-field", default=None,
                     help="data_driven_core_field output root; replaces the two hand-placed "
                          "cores with the best learned field from its Stage 2 checkpoint")
+    ap.add_argument("--rep-pad-ms", default=None,
+                    help="comma-separated extra ms appended to the representative "
+                         "events' onset window, e.g. 60,150,300; maps only")
     ap.add_argument("--tag", default=None)
     ap.add_argument("--out", default=OUT)
     a = ap.parse_args()
@@ -282,7 +298,8 @@ def main():
     msnk = a.sink_core.split(",") if a.sink_core else None
     out, fig, _ = subject_run(a.subject, a.montage, a.lesion, a.L, a.density, a.drive, a.T,
                               a.core_mean, a.core_std, a.core_r, a.seed, a.target_inter_core, a.k_dir,
-                              a.placement, a.k_early, msrc, msnk, a.core_field)
+                              a.placement, a.k_early, msrc, msnk, a.core_field,
+                              [float(x) for x in a.rep_pad_ms.split(",")] if a.rep_pad_ms else None)
     json.dump(out, open(os.path.join(a.out, f"readout_{tag}.json"), "w"), indent=2)
     np.savez_compressed(os.path.join(a.out, f"figdata_{tag}.npz"), **fig)
     print(f"[{tag}] events={out['n_events']} clean(n>=7)={out['n_clean']} fwd/rev={out['clean_forward']}/{out['clean_reverse']} "
