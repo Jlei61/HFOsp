@@ -1,10 +1,72 @@
 # Topic 5 Archive Index
 
+- `event_innovation_v3_0_execution_handoff_2026-08-03.md` — V3.0 已完成边界、实时进程、剩余 cumulative aggregate / acceptance / 归档步骤与禁止偏离项。**已闭环**，执行结果见下方 `event_innovation_v3_0_acceptance_2026-08-03.md`。
+
+## 当前后续合同（2026-08-03）
+
+- `docs/superpowers/specs/2026-08-03-topic5-stateful-event-sequence-rnn-v2_7-repair.md`
+  + matching plan：只修 early stopping，按原合同平行重跑 34 人，不增加模型容量。
+- `docs/superpowers/specs/2026-08-03-topic5-event-innovation-low-rank-state-space-v3_0.md`
+  + matching plan：以 rank/precedence 为主状态，依次检验 innovation 有效性、单事件多时距脉冲响应和重复 innovation 的累积/抵消；这是 association/local-projection 层，不把 observer correction 提前写成 state transition。
+- `docs/superpowers/specs/2026-08-03-topic5-event-innovation-recurrent-transition-v3_1.md`
+  + matching plan：observer-only 与 event-driven transition 共享 observation/filter/state dimension，唯一额外项位于 latent transition；synthetic 可并行，人体检验由冻结 v3.0 train/validation handoff 触发。34 人仍为 exploratory，独立复现后才允许 `supports activity-dependent shaping`。
+
+- `stable_repertoire_event_history_v2_4_acceptance_2026-08-02.md` — event-indexed
+  history v2.4 P0 repair, six-patient development freeze, locked 28-patient extension and
+  final bounded-negative recurrent-state verdict.
+
 > **主入口**：`docs/topic5_seizure_subtyping.md`（§5 历史文档索引含完整 backlink）
 > **范围**：以 ictal seizure 本身为研究对象（subtype / pre-ictal / propagation / outcome）。
 > **不属于**：interictal 事件内部传播（topic1）、IEI/PSD（topic2）、SOZ 空间归因（topic3）、模型层（topic4）。
 
 ## 主线（network-axis pivot）
+
+### `event_innovation_v3_0_followup_census_and_drift_2026-08-04.md` — **收口后续：一半人"看不清"是记录太短；实测效应只有可探测下限的一半；骨架自身按钟表在漂**
+- **不改** V3.0 冻结产物与 Level 1 判决，**不反开** V3.1；骨架漂移那一项的预注册档位是探索性描述，不是队列主张。
+- **覆盖诊断**：有效 17 人中位记录 96.7 h / 17,196 事件；"历史不够"9 人只有 21.4 h / 1,535 事件（差 4.5 倍时长、11 倍事件量）→ 这一半是**队列覆盖问题**不是生理结论。"残差仍可被过去预测"8 人不是长度问题（19.4 h 但 7,191 事件、触点 15.5），与前一组**不可合并**。有效组触点数（8）反而低于两未解组（16 / 15.5）——门槛对高维病人不利，是设计特性。
+- **跨记录可行性**：两侧各 ≥100 事件、中间静默 ≥24 h 的病人**只有 1 位**（`epilepsiae_1146`）；≥12 h 只有 4 位（2 位有有效偏差）；≥6 h 有 11 位（7 位有效）。→ **"跨天骨架"合同在这批数据上不可行，不要为它写 spec**；唯一还有体量的尺度是 ≥6 h。
+- **效力下界**：累加路线可探测下限 δ80 = +0.0069~0.0083，实测中位仅 +0.0041 → **实测约为下限的一半到六成**，`p=0.098` 的正确读法是"这么小的效应本来就抓不住"。单场路线 δ80 = 1.1 个病人间散布 SD。⚠️只约束**队列汇总**那一步，不约束病人内部估计环节。
+- **新测量（骨架漂移）**：同等事件间隔下，隔得秒数更多的两块次序更不像（控住块粗糙度+共享触点后中位 −0.0335、22/30 为负、`p=0.017`）；跨录制段也更不像（限定支持度达标后 −0.0137、18/30、`p=0.0086`）。⚠️**这两条不是互相独立的证据**（跨段本来就隔得更久）。
+- **昼夜复核已做**（口径取 `AGENTS.md` 锁定值，复用仓库已有 `_classify_day_night` / `epoch_to_local_hour`）：限定同相位后负号保住（−0.0335、24/30、`p=0.0066`）→ 时段解释不了它。**但真正原因是该混淆本来就几乎不存在**——块不跨录制段而 Epilepsiae 录制约 1 h 一段，同段配对最大间隔中位仅 **0.99 h**、跨相位配对占比中位 **0**、只有 7 位 Yuquan 病人有任何跨相位配对；真能检验的只有 6 人（5/6 同向但 `p=0.156`）。
+- **⚠️连带把"钟表漂移"收窄了**：该读数实际只覆盖**同一段约 1 小时记录内、典型相隔半小时**的两块（各人中位 1,646–2,099 s，全队列上限 1.98 h）。**不是"骨架在天尺度上漂移"**；超过约 2 小时的尺度本轮没有段内证据。
+- **两次同源执行事故已留痕**：`event_source_index` 是逐事件行指针不是段标签（`CLAUDE.md` §6.2 层级错配），误用版本产物整体移入 `_superseded_*` 目录并在新规则文件写明 supersedes；另修复秩基偏相关在控制变量吸干自变量时返回虚假 ±1（残差只剩浮点噪声会相关成 ±1），并单独记录残余变化占比使"没效力"与"效应为零"可区分。
+- 仍待签核才可做：真数据注入的效力下界（需定注入语义）、≥6 h 静默的跨段新合同。scoped `pytest` **157 passed**。
+
+### `event_innovation_v3_0_acceptance_2026-08-03.md` — **Level 1 leaky observer：能追踪当前次序状态，但一场事件的"新意"不带未来信息**
+- 朴素说法：一个时间步 = 一整场完整间期事件。用过去若干场估出"这个病人目前习惯的触点先后次序"，再问某一场里**没被过去猜到的那部分偏差**能否预告后面几场次序怎么变。两条路线（单场偏差→20 场后次序；连续 20 场偏差累加→次序挪动量），各自对照纯惯性外推、状态配对的替身偏差、往回看同样长的一段。
+- 判据在看结果前冻结并锁 SHA：一条路线三个中位数全为正 **且** 主指标病人层双尾 Wilcoxon `p≤0.05`。
+- **Goal 2 local**：主指标中位 −0.0007759、7/17、`p=0.329`（`true_minus_matched` +7.39e-6、10/17；`future_minus_past` +1.21e-4、12/17、`p=0.071` — 非主指标，禁单取包装阳性）→ 不成立。
+- **Goal 3 cumulative**：三中位数全正（主 +0.004148、11/17；`true_minus_matched` +1.83e-5、9/17；`alignment` +7.36e-4、10/17），但主指标 `p=0.098` 未过 0.05 → 不成立。**且支持度分层反转**：锚点 ≥100 的 9 人中位翻负 −0.000847、4/9、`p=0.910` → 必须读成"没看出预告作用"，**禁读成"差一点就阳性"**。
+- **有效 innovation 仅 17/34**（Epilepsiae 15/18、Yuquan 2/16）；另 17 人为"历史长度不够"或"残差仍可被过去预测"，是**未解**不是阴性证据。禁把 17 人结果讲成 34 人队列结论。
+- Epilepsiae 子集 cumulative `p=0.035` 是**事后子组**，预注册端点是全部 17 人，仅留档不作主张。dense moving-block 两路线（local −0.000695、`p=0.159`；cumulative +0.004689、`p=0.064`）**只作敏感性**，重叠锚点数不得当独立样本量。
+- 最终等级由已验收的 V2.7 state tracking 托底至 **Level 1 `leaky_observer`**。允许："最近发生的完整事件有助于追踪当前 repertoire 状态，但有效 innovation 不提供路线一致的未来传播信息"。禁止：`event-driven transition identified` / `activity-dependent shaping` / `causal plasticity` / `within-event next-rank mechanism`。
+- **V3.1 人体 transition 保持 `NOT_TRIGGERED`**，由 validation-only 结果在人体 test 释放前冻结（哈希被 release 记录并每次验收重校验）；本轮任何结果都不能反开，也不允许 model-capacity rescue。SNN 与本线独立，不互为 Gate 或 ground truth。
+- 工程：scoped `pytest` 104 passed；冻结主分析三件套 + 验收脚本 + release/handoff 六个 SHA256 逐位一致；`ACCEPTANCE_RULE_STATE.json` 未被验收运行改写。
+
+### `stateful_event_sequence_rnn_v2_7_acceptance_2026-08-03.md` — **repair-only 最终验收：短程 state tracking 保留，EWMA 与 chronology 阴性不变**
+- 34/34 validation 与 boundary audit、34×3 formal runs、dense/reset/memory/两类 chronology null 和 H40 全部闭环；102/102 trained checkpoints finite，epoch −1 不再参与 trained patience。
+- RNN 相对 static 中位 −0.0619、25/34、`p=0.00385`，但相对 EWMA formal `p=0.076`、dense `p=0.163`；block shuffle、time reversal 与 H40 均未提供额外支持。
+- v2.7 与 v2.6 患者级主效应 34/34 逐位相同：修复了训练充分性偏差，但未改变最佳 trained checkpoint。最终只保留 within-recording short-range state tracking，不支持 chronology-specific state 或 shaping。
+
+### `stateful_event_sequence_rnn_v2_6_acceptance_2026-08-02.md` — **验收为 state-tracking precursor：短程 leaky state 成立，state shaping 未检验**
+- 34/34 患者完成 validation-only profile 冻结（760 个 candidate fits）与 untouched test（3 seeds、102 个 checkpoint 全 finite）；旧 heldout20、A/B/轴、几何、SOZ、ictal、SNN 均未进入。
+- **阳性**：每场事件清零 hidden state 后 25/34 变差（`p=0.0051`），说明模型确实在用历史；RNN 超过静态 repertoire 中位 −0.0619、25/34、`p=0.00385`，且该阳性随支持度分层单调增强（≥50 windows：−0.0826、17/20、`p=0.00029`）。
+- **阴性**：没有稳定超过固定 EWMA（formal 中位 −0.0248、`p=0.076`；≥20 windows 分层后翻正为 +0.0378、`p=0.607`；dense +0.0294、`p=0.163`）。block shuffle 与 time reversal 两个 coherent null 均未被真实顺序超过；H=40 未释放额外优势。
+- **三条必带边界**：state 每个 source 开头清零 → 「长程」只到单段记录之内（每位患者 source 长度中位数，跨 34 人再取中位 = 294 个事件），跨 source / 跨天过程不在模型族里；block 长度 = horizon = anchor 间距 → 只测块间顺序、未测块内顺序；正式 test 支持度 1–1,096 极不均衡，任何队列陈述必须同时给分层。
+- **禁止写**：activity-dependent plasticity / network formation / causal shaping；也不得把 block-shuffle 的反向名义显著（`p=0.035`）读成「真实顺序有害」。
+- **阶段判决**：`ACCEPTED_AS_STATE_TRACKING_PRECURSOR_WITH_KNOWN_TRAINING_BIAS`。EWMA 本身是最小 leaky state model，因此“不超过 EWMA”收缩了动力学复杂度，但不终止 evolving-state 问题。
+- **后续合同**：v2.7 只修 epoch-minus-one early stopping 并平行重跑，且不作为 v3.0 的科学 Gate；v3.0 使用 rank/precedence primary state，先验证 innovation，再做单事件脉冲和重复事件累积；v3.1 单独承担 shared-filter transition identification，不重复 v2.2 block-delta 分支。
+- 派生验收层 `results/topic5_stateful_event_sequence_rnn/v2_6/acceptance/` 由 `scripts/accept_topic5_stateful_event_rnn_v2_6.py` 只读冻结产物推导，含 RNN vs static、支持度分层、双尾 null、seed 离散度与训练预算审计。
+
+### `stable_repertoire_event_rnn_v2_3_1_acceptance_2026-08-01.md` — **完整事件为时间步；长历史分布有信息，线性顺序状态呈患者异质性**
+- 恢复 split-half / odd-even 稳定模板作为 RNN 前提；六患者 train-only `K=2` repertoire read-back 6/6，旧 heldout20、A/B/轴/几何/SNN 均未进入。
+- 同信息集比较显示：无序 80 场历史在 H=20/H=40 分别 5/6、4/6 优于最近窗口；嵌套线性顺序增量跨两个 horizon 在 3 位患者同向，六患者总体 sign test 不显著。
+- 嵌套 GRU 仅 1/6 超过线性 correction；全队列只开放冻结的 static/recent/unordered/nested-linear/null 阶梯，不再扩 GRU。
+
+### `event_indexed_evolving_rank_field_v2_2_review_2026-08-01.md` — **event-indexed 动态可观测，但 event-history 增量 bounded negative**
+- 正式把长期时间轴从事件内 rank step 改为完整事件 chronology；pilot 6/6 与全 inventory 34/34 的 time/source/block/rank/tie 字段审计通过。
+- 六人 Phase 0 中 5 人 block reliable 且动态超过噪声，严格 full+middle low-rank Gate 后 2 人进入 Phase 1；matched fixed/persistence/drift/switching/time-IEI 比较中 0/2 通过 chronology null。
+- 结论只支持多数 pilot 存在 block-wise field variation，不支持 event-history shaping；停止 ELR/RNN，不扩全队列，SNN 独立。
 
 ### `stable_interaction_identifiability_v2_1_multiround_2026-07-31.md` — **RNNv2.1 五轮结构审计：single fixed graph 在 4 位可辨识患者中 bounded negative**
 - 修正 test endpoint-specific oracle Gate，不增加模型容量，完成 D1 baseline/envelope/diversity、D2 M2 operator、D4 unseen-start、D3 real-minus-null split stability 和 D0 patient-matched sensitivity+specificity。

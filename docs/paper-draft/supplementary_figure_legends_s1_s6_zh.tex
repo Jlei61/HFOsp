@@ -1,0 +1,70 @@
+% 需要在导言区加载：
+% \usepackage{graphicx}
+% \usepackage{float}
+% 下列路径假定补图文件命名为 FigS1.png、FigS2.pdf 至 FigS6.pdf。
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS1.png}
+\caption{
+\textbf{人工标注的间期 HFO、棘波与耦合事件具有可区分的形态和频谱特征。}
+\textbf{a}，历史人工标注验证集中高频振荡（high-frequency oscillation，HFO；$n=178$）、棘波（spike；$n=202$）和 HFO--棘波耦合事件（coupled；$n=296$）的波形与时频特征。每列上方显示单事件波形（黑色）及平均波形（黄色），中间和下方分别显示平均原始时频图及相对于事件前基线归一化的平均时频图。
+\textbf{b}，三类事件的平均归一化频谱能量曲线；阴影表示均值标准误。HFO 事件在约 $80~\mathrm{Hz}$ 处呈现主要高频峰，棘波以低频成分为主，而耦合事件在约 $120~\mathrm{Hz}$ 处呈现独立高频峰。箭头标示相应的局部频谱峰。图中 $n$ 表示该历史人工标注验证集中的事件数，不作为当前 Yuquan 和 Epilepsiae 双队列分析的患者分母。
+}
+\label{figS1}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS2.pdf}
+\caption{
+\textbf{原始及群体事件筛选后的间期 HFO 负荷对 SOZ 的定位能力。}
+\textbf{a}，Yuquan（$n=20$ 名患者）和 Epilepsiae（$n=15$ 名患者）队列中，以触点水平的群体事件筛选后 HFO 负荷区分临床标注发作起始区（seizure onset zone，SOZ）与非 SOZ 触点的患者水平受试者工作特征曲线。灰线表示单名患者，彩色实线表示队列均值，阴影表示均值标准误；插图中的点表示患者水平曲线下面积（area under the curve，AUC），黑线表示均值。Yuquan 和 Epilepsiae 队列的平均 AUC 分别为 $0.873$ 和 $0.955$。
+\textbf{b}，保留所有精修 HFO 检测（Raw）与进一步限制在通过筛选的群体事件时间窗内（Synchronized）所得患者水平 AUC 的配对比较。柱和黑色横线表示队列均值，连线点表示同一患者。Yuquan 队列的平均 AUC 由 $0.837$ 增至 $0.873$，Epilepsiae 队列由 $0.939$ 增至 $0.955$。统计检验采用双侧配对 Wilcoxon 符号秩检验；$\ast P<0.05$；n.s.，$P\geq0.05$。
+}
+\label{figS2}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS3.pdf}
+\caption{
+\textbf{聚类数扫描表明多数患者由两个主要时序模板描述，同时保留少数高阶解。}
+\textbf{a}，在屏蔽未参与触点后的事件--触点招募秩次特征上，对 $40$ 名患者扫描 $K=2$--$10$ 的无监督聚类解。对每名患者，在跨随机种子的中位调整互信息（adjusted mutual information，AMI）不低于 $0.70$ 且最小事件簇占比不低于 $0.10$ 的解中，选择中位轮廓系数最高的 $K$。左图显示最优 $K$ 的患者分布，其中 $34/40$ 名患者选择 $K=2$；中图显示各患者相对于 $K=2$ 的轮廓系数差值，并叠加队列中位数和四分位距；右图显示每个 $K$ 同时通过上述两个稳定性条件的患者比例。
+\textbf{b}，两个 $K=4$ 解（E11 和 E19）及一个 $K=6$ 解（Y10）的招募顺序图，每名患者展示 $2{,}500$ 次群体事件。颜色表示单次事件内由早至晚的相对招募顺序，浅灰色表示该触点未参与事件，阴影间隔分隔不同模板。右侧曲线表示各模板的触点平均秩次，阴影表示 $\pm1$ 个标准差。
+}
+\label{figS3}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS4.pdf}
+\caption{
+\textbf{间期招募轴的方向关系及留出事件空间回读。}
+\textbf{a}，$28$ 名患者中成对时序模板 TA 与 TB 所对应空间轴的有向夹角半玫瑰图。$0^{\circ}$ 表示方向相同，$180^{\circ}$ 表示方向相反；扇区数字表示每个 $30^{\circ}$ 区间内的患者数，径向黑线表示中位数，外侧黑弧表示四分位距。
+\textbf{b}，使用一半事件拟合患者特异性路径轴，并在互补的一半事件中计算触点招募秩次与路径轴坐标之间的患者水平 Spearman 相关。点表示患者（蓝色，Yuquan，$n=7$；紫色，Epilepsiae，$n=19$），小提琴图表示分布，黑色横线和竖线分别表示中位数和四分位距。合并两个队列后，留出事件相关的中位数为 $\rho=0.752$（四分位距，$0.500$--$0.842$；$n=26$ 名患者）。
+}
+\label{figS4}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS5.pdf}
+\caption{
+\textbf{发作早期频谱表型及一个 gamma 优势型发作示例。}
+\textbf{a}，$23$ 名患者共 $324$ 次发作的互斥性发作早期频谱分型。饼图显示宽频 $1$--$150~\mathrm{Hz}$ 型（$124/324$，$38.3\%$）、gamma 优势 $30$--$80~\mathrm{Hz}$ 型（$76/324$，$23.5\%$）、低频 $1$--$13~\mathrm{Hz}$ 型（$7/324$，$2.2\%$）及其他模式（$117/324$，$36.1\%$）的构成；$n$ 表示发作次数。
+\textbf{b}，代表性 gamma 优势型发作（E20，发作 7）。从上至下依次显示共同平均参考后的立体脑电信号、触点 HRB1 相对于基线归一化的时频图，以及 $1$--$30$、$30$--$80$、$80$--$150$ 和 $1$--$150~\mathrm{Hz}$ 频带的功率时间过程。时间以临床发作起始时刻 $0~\mathrm{s}$ 对齐；蓝色阴影表示 $-120$ 至 $-90~\mathrm{s}$ 的基线窗，红色阴影表示 $0$--$10~\mathrm{s}$ 的发作早期临床窗。该单次发作仅用于展示 gamma 优势型的信号形态，不参与队列水平统计推断。
+}
+\label{figS5}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=\textwidth]{figures/FigS6.pdf}
+\caption{
+\textbf{发作期与间期传播场一致性的多频带敏感性分析。}
+\textbf{a}，$17$ 名患者在七个频带上的患者水平传播场一致性差值 $\Delta$。对每名患者和每个频带，$D$ 定义为发作早期稠密空间网格与两个预定义间期模板场中较匹配者之间的中位空间一致性，并在比较前消解符号和横向镜像对称性；$\Delta$ 为 $D$ 减去该患者全触点置换零分布的中位数（$1{,}000$ 次置换）。点表示患者，小提琴图表示分布，黑色横线表示队列中位数；红色小提琴图和星号表示通过七频带 maxT 家族错误率校正的频带（$P_{\mathrm{FWER}}<0.05$）。
+\textbf{b}，相同患者--频带 $\Delta$ 值的热图，颜色表示相对于患者自身置换零分布的场一致性增益。患者按超过自身零分布的频带数排序，底行显示各频带的队列中位数；空心星号表示单侧患者自身经验检验 $P<0.05$，不代表队列水平显著性，亦未作跨频带多重比较校正。频带分别为 $\delta$（$1$--$4~\mathrm{Hz}$）、$\theta$（$4$--$8~\mathrm{Hz}$）、$\alpha$（$8$--$13~\mathrm{Hz}$）、$\beta$（$13$--$30~\mathrm{Hz}$）、$\gamma$（$30$--$80~\mathrm{Hz}$）、R（$80$--$150~\mathrm{Hz}$）和 FR（$150$--$250~\mathrm{Hz}$）。
+}
+\label{figS6}
+\end{figure}

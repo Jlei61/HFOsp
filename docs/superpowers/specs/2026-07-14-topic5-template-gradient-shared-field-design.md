@@ -69,6 +69,22 @@ producer 必须把两者分字段保存：`u` 只表示 early→late propagation
 
 所有场均在触点上用相同 Gaussian Nadaraya-Watson kernel 估计，带宽为归一化平面内 median nearest-neighbour spacing。主统计使用 contact-evaluated field，避免把插值网格像素当样本；2D grid 仅用于可视化。
 
+### 5.1 间期 TA/TB shared-field 反向性
+
+该问题只在上游已定义 shared axis 且 `geometry_2d_supported=true` 的患者中回答。TA、TB 必须投影到
+同一个冻结 shared plane，并在同一组 contact-evaluated 位置计算 signed Pearson
+`r_shared=corr(F_TA,F_TB)`；`r_shared<0` 表示两个传播场在共享平面上反向。主队列不再按
+signed axis cosine 的正负、`same/reversed` 标签或 strict-stability 分组；这些字段只用于上游定轴审计。
+不同轴患者没有合法 shared plane，不进入该 estimand，也不得用 own field 与 shared field 混合补齐分母。
+
+为与既有 field-concordance 主分析保持同一随机化层级，主 null 固定为全触点 channel shuffle：
+保持 shared axis、shared plane、contact set、bandwidth 和 TA field 不变，在全部触点间共同置换
+TB earliness 与 participation support，再重建 TB field。within-shaft shuffle 作为更严格的
+anatomy-controlled sensitivity，回答负相关是否超出杆内几何。统计单位为患者；主图展示每名患者的
+observed signed `r` 与其 channel-null median 的配对 Data–Null 分布，并沿用既有 reversal panel 的
+paired Wilcoxon `alternative='less'`。该检验条件于上游已定 shared axis，不重新检验 KMeans、建轴或
+共线门本身。
+
 每次发作同时计算：
 
 - `own_A`：A 模板与发作能量都投影到 A 自己的平面；

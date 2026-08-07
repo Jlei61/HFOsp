@@ -103,13 +103,14 @@
 - **布局**：左上 A/B 两个 contact-scale rank-vs-axis 拟合；左下为区域级 temporal-order overlay；右侧为 subject-native 透明脑表面、真实电极杆与红/蓝 early-to-late 箭头。SOZ 仍用黑环，并写明 overlay only。
 - **解剖边界**：区域名称不参与轴拟合或定向。主触点池不足以解析 region route 时必须写 `not resolved`；expanded-contact 版本只能叫 sensitivity。要写“复用了自然解剖梯度”，还需 cohort-level region transition，并用杆内触点 shuffle + 整杆 profile 重分配两级几何 null 分开检验杆内深度梯度与跨杆区域路线。
 
-### 3c. 患者特异 TA/TB 间期传播场（Fig2-E 候选）
+### 3c. 患者特异 TA/TB 间期传播场（公共 renderer / 旧 Fig2-E 候选）
 
 - **完整规范**：[`docs/topic5_interictal_field_figure_spec.md`](topic5_interictal_field_figure_spec.md)。后续所有间期 TA/TB 场图均以该文件为唯一视觉合同。
 - **示范图**：[`results/paper-ready-figure/fig2e_interictal_template_fields/figures/epilepsiae_1146_interictal_AB.png`](../results/paper-ready-figure/fig2e_interictal_template_fields/figures/epilepsiae_1146_interictal_AB.png)。
 - **复现入口**：`scripts/plot_topic5_interictal_template_ab_fields.py`；完整图复用 `plot_interictal_ab_subject()` / `plot_interictal_ab_atlas()`，拼版复用 `build_interictal_ab_panel_payloads()` / `draw_interictal_rank_field_panel()`，底层场只调用 `draw_topic5_field_panel()`。
 - **硬锁**：正式轴只读冻结 artifact 的 early→late `u`；共线才用 shared plane，否则用各自 own plane；transverse 只按电极几何定号；显示核固定 6 mm 且不得冒充评分 kernel；viridis 0=early/1=late；单患者只用一个共享 xlabel、一个 y 轴和一个与 field 等高的 colorbar。
 - **禁止**：不复制 renderer，不按颜色翻轴，不强行让 TA/TB 共面，不把单杆图解释为二维 field，不把这张间期图写成发作场一致性证据。
+- **主图状态**：该单患者图不再单独占用 Figure 2E；正式 Figure 2E 是 §3e 联合图左侧的4例 field morphology。该规范仍是全部间期 rank-field 的底层画图合同。
 
 ### 3d. 间期单事件包络传播 frame / GIF（Fig2-C 候选）
 
@@ -117,14 +118,14 @@
 - **示范图**：[`results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png`](../results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png)。
 - **动态 sidecar**：同目录 `fig2c_candidate_E1146_interictal_event_envelope_field.gif`。
 - **复现入口**：`scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py --subject epilepsiae_1146`；core renderer 为 `scripts/plot_topic5_interictal_event_envelope_field.py`。
-- **视觉硬锁**：每行按 `单事件 readout | 7 个 envelope frames | 冻结群体 template-rank field` 排列；readout 标题固定为 `Sample from TA/TB` 并在轴内靠右避开 colorbar，两行都写 `time (ms)`；x limits 取两次真实 STFT 窗的交集，不能在两端留无数据白条；静态时刻为 `−8, 0, +4, +15, +27, +38, +50 ms`。
-- **量纲硬锁**：中间 `magma` 表示单带 80–250 Hz Hilbert amplitude envelope 的 baseline robust-z，不得写成 energy/power；最右 `viridis` 表示冻结群体模板传播顺序，colorbar 顶部只写 `ranks` 并显示 artifact 实际 rank（E1146 为 0–14），端点分别写 early/late，不得再显示归一化 0–1。两幅模板场都写简短 `y (mm)`。
+- **视觉硬锁**：每行按 `单事件 readout | 5 个 envelope frames | 冻结群体 template-rank field` 排列；readout 标题固定为 `Sample from TA/TB` 并在轴内靠右避开 colorbar，两行都写 `time (ms)`；x limits 取两次真实 STFT 窗的交集，不能在两端留无数据白条。E1146 v6 时刻为 `0, +10, +26, +36, +44 ms`，由 2 ms 网格上的 contact-level joint-visible state-separation selector 得到：相邻≥8 ms、两行轴杆共同可见度≥0.38、TA/TB 相邻归一化触点状态 RMS distance≥0.10，整体轴向质心-时间方向相反且首末位移均≥12 mm；不读渲染像素。`t=0` 同时由 readout 黑色竖线标记。
+- **量纲硬锁**：中间低饱和蓝灰 `fig2c_muted_bluegray` 的源量是单带 80–250 Hz Hilbert amplitude envelope baseline robust-z；显示时 TA/TB 分别按本事件完整显示窗的 participant-only q99 归一化并 clip 到 0–1，colorbar 写 `Normalized HFO envelope`。该颜色只表达事件内传播形态，不比较 TA/TB 绝对幅度，也不得写成 energy/power；最右 `viridis` 表示冻结群体模板传播顺序并保持视觉主位，colorbar 顶部只写 `ranks` 并显示 artifact 实际 rank（E1146 为 0–14），端点分别写 early/late。两幅模板场都写简短 `y (mm)`。
 - **解释边界**：最右 template field 只提供群体顺序参照，不能把左/中单事件升级成 template-free、cohort replay、二维 traveling-wave 或机制证据。
-- **数据硬锁**：frozen fingerprint/contact order/shared plane 不重拟合；单带 `return_hil_enve`；participant-only support；6 mm 只作 display kernel；GIF 与静态图使用同一 exemplar/几何/色标，2 ms biological step 与 playback fps 分开记录。
+- **数据硬锁**：frozen fingerprint/contact order/shared plane 不重拟合；单带 `return_hil_enve`；participant-only support；6 mm 只作 display kernel；GIF 与静态图使用同一 exemplar/几何/cmap 和同一对 per-event q99 分母，原始分母写 metadata；2 ms biological step 与 playback fps 分开记录。
 - **适用范围硬锁**：这是单事件规范——TA/TB 每行各一个 exemplar。未来多事件 GIF 必须另立事件边界、事件间隔、逐事件 t0 和抽样合同，不得把 event train 塞进本 renderer。
 - **禁止**：不称 template-free，不把 Hilbert amplitude 写成 power，不把单被试两次事件写成 cohort 传播定律、跨未采样组织的 traveling wave 或机制证明。
 
-### 3e. Shared-axis TA–TB field 反向性队列行（Fig2-F 候选）
+### 3e. Shared-axis TA–TB field 形态与反向性（Fig2-E+F 联合候选）
 
 - **示范图**：`results/paper-ready-figure/fig2_shared_field_reversal/figures/fig2_shared_field_reversal_last_row.png`。
 - **复现入口**：`scripts/paper_figures/plot_fig2_shared_field_reversal_row.py`；左侧场图必须复用
@@ -134,6 +135,7 @@
   正负、same/reversed 标签或 strict-stability 分组，也不得用 own field 补齐不同轴患者。
 - **固定 estimand**：每名患者在冻结 shared plane 上的 exact contact-evaluated TA/TB template fields
   之间的 signed Pearson `r`。负值表示场组织反向；每个患者只贡献一个点。
+- **panel 分工**：Figure 2E 是左侧4组 TA/TB shared-axis field morphology；Figure 2F 是右侧完整12人分布和层级 full-contact spatial null。两者为一张联合图，不得把左侧例子单独当作 cohort 证据。
 - **布局**：7.15 × 3.05 inch 全宽行。左侧4列固定为匿名投稿代号 E15、E14、E13、Y9，每列含 TA/TB 两幅
   Viridis rank field；每对图严格共享冻结 shared plane、6 mm display bandwidth 和相同 x/y extent。
   每个 panel 均显示物理毫米刻度，底行 xlabel=`Shared TA axis (mm)`；最左列 ylabel 分别写
@@ -225,26 +227,28 @@ Topic 5 仍有多条探索线，只有已经进 paper-ready Fig3 的 field reado
 ### 5b. Fig3-B：间期 TA 时序场 vs 发作早期能量场
 
 - **唯一规范**：[`docs/fig3b_interictal_ictal_shared_field_spec.md`](fig3b_interictal_ictal_shared_field_spec.md)。
-- **示范图**：[`results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/epilepsiae_1146_seizure_15_interictal_ictal_shared_field.png`](../results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/epilepsiae_1146_seizure_15_interictal_ictal_shared_field.png)。
-- **复现入口**：`scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py`；默认扫描 E1146 的 complete / exact `1–150 Hz` checkpoints，并按最大 `shared_a_signed` 自动选择 seizure 15。
-- **视觉硬锁**：单行两个等大 field；左 `viridis` 表示冻结 TA timing 的 early→late，标题 `TA fields` 固定红色 `#B2182B`；右 `magma_r` 表示 clinical `[0,10] s`、`1–150 Hz` baseline-normalized broadband power。左右共用 shared TA plane / transverse sign / extent / TA support / 6 mm display sigma，两个 panel 分别写 `shared TA axis (mm)`；右图保留完整边框但不重复 y ticks。
-- **colorbar**：左色条显示真实 propagation rank（端点附 early/late），右色条显示真实 baseline-normalized log-band-power robust-z；不得只显示归一化 `0/1` 或 `low/high`。左右统一为深色代表“最早传播 / 最高 power”。
+- **正式示范图**：[`results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/epilepsiae_1146_seizure_02_interictal_ictal_shared_field.png`](../results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/epilepsiae_1146_seizure_02_interictal_ictal_shared_field.png)；从 seizure 2 / 10 / 23 / 1 morphology-aware positive-power 候选中目视锁定 seizure 2。
+- **正式复现入口**：`scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py`，默认即 seizure 2；候选审计由 `scripts/paper_figures/plot_fig3b_positive_ta_candidates.py` 复现。
+- **视觉硬锁**：单行两个等大 field；左 `viridis` 表示冻结 TA timing 的 early→late，标题 `TA fields` 固定红色 `#B2182B`；右 `Blues` 表示 clinical `[0,10] s`、`1–150 Hz` baseline-normalized broadband power，标题 `Early-ictal broadband power`。左右共用 shared TA plane / transverse sign / extent / TA support / 6 mm display sigma，两个 panel 分别写 `shared TA axis (mm)`；右图保留完整边框但不重复 y ticks。
+- **colorbar**：左色条标题 `ranks`，显示真实 propagation rank（端点附 early/late）；右色条显示真实 baseline-normalized log-band-power robust-z。不得只显示归一化 `0/1` 或 `low/high`。左右统一为深色代表“最早传播 / 最高 power”。
 - **数据硬锁**：右图为远端 EEG `[-120,-90] s` baseline robust-z 后的 clinical `[0,10] s` 均值，显示只做连续 min–max，不 rank、不 sign flip；15/15 exact-name join，并与 clinical shared-field checkpoint score 完全一致。
-- **禁止**：不从 ictal 值重拟合任何 field 几何；不把 best-TA seizure 的个体配对图称为独立 replay、cohort 或机制证据；不再引用已撤回的 Fig2-B / seizure 7 版本。
+- **禁止**：不从 ictal 值重拟合任何 field 几何；不把目视锁定的 energy-positive TA representative 称为独立 replay、cohort 或机制证据；不再引用已撤回的 Fig2-B / seizure 7 版本。
 
-### 5c. Fig3-C：peri-onset field similarity trajectory
+### 5c. Fig3-E：peri-onset field similarity trajectory
 
-- **示范图**：[`results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png`](../results/paper-ready-figure/fig3_peri_onset_field_similarity/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready.png)
-- **复现入口**：`scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py --subject epilepsiae_1146`
+- **Fig3-E visual template**：[`results/paper-ready-figure/fig3_peri_onset_field_similarity/design_variants/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready_journal_clean.png`](../results/paper-ready-figure/fig3_peri_onset_field_similarity/design_variants/figures/epilepsiae_1146_peri_onset_field_similarity_paper_ready_journal_clean.png)
+- **复现入口**：`scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py --subject epilepsiae_1146 --source-csv results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv --design-variant journal_clean --out-dir results/paper-ready-figure/fig3_peri_onset_field_similarity/design_variants/figures/`
 - **冻结间期输入**：`results/interictal_propagation_masked/template_gradient_fields/per_subject/<dataset>_<subject>.json`。必须同时通过 subject identity、fingerprint、`shared_a/shared_b` 完整性和二维几何门（`geometry_2d_supported=true`，两轴均 `n_shafts>=2`、`effective_rank>=2`）；任一失败即排除，**不回退** `own_a/own_b`。单杆 E139 只保留在 `sensitivity_1d/`，不计入二维分母。
 - **上游数据**：`results/topic5_ictal_recruitment/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv`
 - **上游生成命令**：`python scripts/plot_topic5_signed_broadband_similarity_timecourse.py --subject epilepsiae_1146 --start-sec -120 --stop-sec 20 --band-lo 1 --band-hi 150 --window-sec 10 --step-sec 2`
 - **全 subject 批处理**：`scripts/paper_figures/run_fig3_peri_onset_all_subjects.py`。默认 denominator flow 为 40 frozen → 14 shared-pair/fingerprint-valid → 12 二维 → 10 有 inventory → 7 有 eligible derived cache → 7 出图；其中 `complete_ok=3`、`partial_ok=3`、`severely_partial=1`，其余 5 为 `blocked_input`。E384 为 6/12，E583 为 3/22；后者不能承担 polarity 稳定叙述。显式 `--subjects` 和中断运行只写 `runs/<run_id>/` progress index，不覆盖 canonical index；主索引和 manifest 只在完整默认 run 收口后原子替换。
-- **回答**：展示同一 subject 多次 seizure 的 raw shared-plane similarity trajectory 及 signed A/B polarity sidecar。它不单独回答相似度是否超过 shaft geometry，也不证明 alignment 在 onset 时新出现。
+- **回答**：展示同一 subject 多次 seizure 的 raw shared-plane similarity trajectory 及 signed TA/TB polarity sidecar。它不单独回答相似度是否超过 shaft geometry，也不证明 alignment 在 onset 时新出现。
 - **布局（单行双面板）**：
-  - Panel a：shared plane 上的 `max(|r_A|, |r_B|)`，即 sign-free maxAB scaffold similarity。
-  - Panel b：shared plane 上的 signed `r_A` 与 signed `r_B`，分别对应 template A/B。
+  - 左图：shared plane 上的 `max(|r_A|, |r_B|)`，即 sign-free maxAB scaffold similarity。
+  - 右图：shared plane 上的 signed `r_A` 与 signed `r_B`；红/蓝图例只写 `TA` / `TB`。
   - 两个 panel 都使用同一时间范围、同一窗口定义、同一 seizure 集合。
+  - Fig3-E 画布固定为扁平横向 `7.4 × 2.55 in`；不写内部 panel 字母、panel 标题或病例数灰色小字；两个 panel 分别写 `Time (s)`，上/右边框隐藏。
+  - y label 固定简写为左 `Field similarity` + `max(|r_A|,|r_B|)`，右 `Signed field similarity, r`。
 - **时间轴合同**：
   - 数据窗口固定为 `[-120,+20]s`，10 s sliding window，2 s step。
   - x 轴画 **window center**，因此当前显示中心范围是 `[-115,+15]s`。
@@ -258,20 +262,20 @@ Topic 5 仍有多条探索线，只有已经进 paper-ready Fig3 的 field reado
   - 不画诊断下排。跨 seizure variance、`n_seizures`、drop 信息写入 summary JSON / README。
 - **配色**：
   - maxAB：Morandi rust `#A35E48`。
-  - template A：红 `#B2182B`。
-  - template B：蓝 `#2166AC`。
+  - TA：红 `#B2182B`。
+  - TB：蓝 `#2166AC`。
   - 单次 seizure：浅灰；不要让个体线压过 median/IQR。
 - **禁止事项**：
   - 不用 step 图作为 paper-ready 主版；step 只可用于检查窗口边界。
   - 不把 `maxAB |r|` 和 signed A/B 混成一个指标。
   - shared 不完整时不画图，不得静默改用 own A/B。
-  - 不用 1-45 Hz cache 顶替 1-150 Hz；Fig3-C trajectory 的 1-150 Hz 特征 = notch 滤波输入（50/100/150/200Hz）后对 `[1,150]` 全 bin 求和、**无额外 FFT-bin line mask**（区别于 field-concordance / v2 的额外 bin-mask 版本，谐波处理不同——别把两者当同一合同）；用别的频段要明确标注。
+  - 不用 1-45 Hz cache 顶替 1-150 Hz；Fig3-E trajectory 的 1-150 Hz 特征 = notch 滤波输入（50/100/150/200Hz）后对 `[1,150]` 全 bin 求和、**无额外 FFT-bin line mask**（区别于 field-concordance / v2 的额外 bin-mask 版本，谐波处理不同——别把两者当同一合同）；用别的频段要明确标注。
   - 不把 signed A/B sidecar 写成 formal gate；当前 formal-ish scaffold 读出仍是 sign-free / maxAB 语义。
   - 不写 replay、direction replay、timing-order replay、mechanism proof。
 
-**当前口径**：7 名具备二维几何资格的患者已生成 fingerprint-verified、shared-only 的个体级描述性 trajectory。Panel a 只展示 raw similarity；Panel b 只在 coverage 足够时作为 polarity sidecar。不得写“持续偏高受支持”、onset-emergent alignment、replay 或 cohort superiority。
+**当前口径**：Fig3-E 登记的是 E1146 clean 双轨迹画图类型；7 名具备二维几何资格的患者已有 fingerprint-verified、shared-only 个体级描述性 trajectory。左图只展示 raw similarity；右图只在 coverage 足够时作为 TA/TB polarity sidecar。不得写“持续偏高受支持”、onset-emergent alignment、replay 或 cohort superiority。既有 R3 artifact 中的 `fig3c_*` 名称仅为历史 provenance。
 
-### 5d. Fig3-C maxAB 空间置换 null（两档）+ 时间维校正
+### 5d. Fig3-E supporting maxAB 空间置换 null（两档）+ 时间维校正
 
 - **示范图**：`.../spatial_null/figures/epilepsiae_1146_maxab_spatial_null.png`。canonical `spatial_null/` 只包含与新版 trajectory 同 fingerprint、同 shared scorer、同成功 seizure 集的 7 名二维病例；旧 own-plane null 已移至 `legacy_own_plane_spatial_null/`，不得交叉引用。
 - **复现入口**：`python scripts/run_topic5_fig3b_maxab_spatial_null.py --all-ok`（`--skip-existing` 断点续；`--rebuild-from-stats` 从 `.npz` 只重算校正+重画不重跑；`--verify` 校验向量化读出与 exact `score()` 一致到机器精度）。
