@@ -115,7 +115,12 @@ def paired_test(a: Dict[str, float], b: Dict[str, float], label_a: str, label_b:
         "n": len(keys),
         "median_delta": float(np.median(delta)),
         "mean_delta": float(delta.mean()),
-        "n_better": int((delta < 0).sum()),  # lower loss is better
+        # `n_better` reads a loss: fewer is better.  Topology and tuning
+        # quantities have no such direction, so the raw sign count is reported
+        # alongside it -- reading `n_better` on modularity inverts the claim.
+        "n_better": int((delta < 0).sum()),
+        "n_positive": int((delta > 0).sum()),
+        "n_negative": int((delta < 0).sum()),
         "p": float(stat.pvalue) if stat is not None else float("nan"),
         "subjects": keys,
         "delta_by_subject": {k: float(v) for k, v in zip(keys, delta)},
@@ -332,13 +337,28 @@ def lesion_analysis(out_root: Path, table, fit_to_subject) -> Dict[str, Any]:
                 by_fit[r["fit_id"]].append(float(r[key]))
         return per_patient({f: float(np.mean(v)) for f, v in by_fit.items()}, fit_to_subject)
 
+    # A module lesion that damages one mode more than the other is only
+    # interesting if a matched patch does not do the same, so the control gets
+    # its own selectivity rather than being compared against zero.
+    for r in rows:
+        a, b = r.get("matched_patch_delta_mode0"), r.get("matched_patch_delta_mode1")
+        r["matched_patch_mode_selectivity"] = (
+            float(abs(a - b) / max(abs(a) + abs(b), 1e-9))
+            if a is not None and b is not None and np.isfinite(a) and np.isfinite(b)
+            else float("nan"))
+
     gates = {}
     module = patient("module_delta_next_bce")
     matched = patient("matched_patch_delta_next_bce")
     if module and matched:
         gates["module_vs_matched_contiguous_patch"] = paired_test(
             matched, module, "matched_patch", "module")  # module should hurt MORE
-    for key in ("mode_selectivity", "module_delta_mode0", "module_delta_mode1"):
+    sel, sel_control = patient("mode_selectivity"), patient("matched_patch_mode_selectivity")
+    if sel and sel_control:
+        gates["mode_selectivity_vs_matched_patch"] = paired_test(
+            sel, sel_control, "module_selectivity", "matched_patch_selectivity")
+    for key in ("mode_selectivity", "matched_patch_mode_selectivity",
+                "module_delta_mode0", "module_delta_mode1"):
         values = patient(key)
         if values:
             gates[key] = {"median": float(np.median(list(values.values()))),
@@ -432,7 +452,14 @@ def main() -> int:
     if not units:
         raise SystemExit("no finished units")
 
-    fresh = freshness(out_root, units)
+    # Only units the analysis actually consumes are held to the freshness bar.
+    # The eta sweep chose a hyper-parameter from validation loss and is not read
+    # again here, so its age is irrelevant and flagging it would only teach the
+    # next reader to pass --allow-stale reflexively.
+    consumed = [m for m in units
+                if m["_arm_dir"].endswith(f"_{args.cell}") and "__eta" not in m["_arm_dir"]
+                and "__dim2" not in m["_arm_dir"] and "__rho" not in m["_arm_dir"]]
+    fresh = freshness(out_root, consumed)
     if fresh["n_stale"] and not args.allow_stale:
         raise SystemExit(f"{fresh['n_stale']} units predate the current code or cache; "
                          "re-run them or pass --allow-stale")

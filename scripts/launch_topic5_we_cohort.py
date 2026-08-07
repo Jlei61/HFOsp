@@ -95,6 +95,15 @@ def build_jobs(out_root: Path, batch: str) -> List[Dict[str, Any]]:
             for arm, seeds in GRU_ARMS.items():
                 for seed in seeds:
                     jobs.append({"fit_id": fit_id, "arm": arm, "cell": "gru", "seed": seed})
+    elif batch == "gru_seeds":
+        # Pre-registered escalation: the one-seed gated-cell replication
+        # disagreed in direction with the primary cell, so the contrast it
+        # disagreed about is rerun at the primary cell's three seeds before the
+        # disagreement is called anything.
+        for fit_id in all_fits:
+            for arm in ("RANDOM_SET", "SPATIAL_SET"):
+                for seed in (1, 2):
+                    jobs.append({"fit_id": fit_id, "arm": arm, "cell": "gru", "seed": seed})
     elif batch == "density":
         for fit_id in all_fits:
             for arm in ("RANDOM_SET", "SPATIAL_SET"):
