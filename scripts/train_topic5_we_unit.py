@@ -26,6 +26,7 @@ sys.path.insert(0, str(ROOT))
 
 from src.topic5_wiring_economy_rnn import (  # noqa: E402
     WEConfig,
+    arm_uses_wiring_cost,
     WEModel,
     build_event_tensors,
     cardinality_conditioned_nll,
@@ -144,7 +145,7 @@ def rank_disagreement(a: list[list[list[int]]], b: list[list[list[int]]]) -> flo
 
 
 def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: Path,
-               device: torch.device, shuffled: bool = False) -> Dict[str, Any]:
+               device: torch.device, shuffled: bool = False, out_tag: str = "") -> Dict[str, Any]:
     cache = out_root / "cache" / fit_id
     plane = np.load(cache / "plane.npz")
     events = np.load(cache / "events.npz")
@@ -198,7 +199,7 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
             loss, _, _ = next_rank_stop_loss(
                 logits, stop, batch["target"], batch["available"], batch["valid"],
                 batch["is_last"], stop_weight=float(cfg["stop_weight"]))
-            if arm in ("RANDOM_SET", "SPATIAL_SET"):
+            if arm_uses_wiring_cost(arm):
                 loss = loss + float(cfg["eta"]) * model.wiring_cost()
             optimiser.zero_grad(set_to_none=True)
             loss.backward()
@@ -279,6 +280,7 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
         "thin": bool(n_train < 500),
         "converged": bool(not hit_ceiling), "hit_ceiling": bool(hit_ceiling),
         "n_epochs": n_epochs, "val_score": float(best),
+        "uses_wiring_cost": bool(arm_uses_wiring_cost(arm)),
         "test": test, "test_by_mode": by_mode, "rollout": roll,
         "generator_degenerate": degenerate,
         "label_coverage": provenance["label_coverage"],
@@ -297,7 +299,8 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
         metrics["c_wiring"] = 0.0
 
     suffix = "_shuffled" if shuffled else ""
-    out_dir = out_root / "per_subject" / fit_id / f"{arm}{suffix}_{cfg['cell']}" / f"seed{seed}"
+    out_dir = (out_root / "per_subject" / fit_id
+               / f"{arm}{suffix}_{cfg['cell']}{out_tag}" / f"seed{seed}")
     out_dir.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(metrics, indent=2)
     metrics["config_sha256"] = hashlib.sha256(payload.encode()).hexdigest()[:16]
@@ -320,6 +323,7 @@ def main() -> int:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--out-root", type=Path, default=OUT_ROOT)
     parser.add_argument("--shuffled", action="store_true")
+    parser.add_argument("--out-tag", default="")
     parser.add_argument("--eta", type=float, default=None)
     parser.add_argument("--density", type=float, default=None)
     parser.add_argument("--state-dim", type=int, default=None)
@@ -335,7 +339,8 @@ def main() -> int:
 
     torch.manual_seed(args.seed)
     metrics = train_unit(args.fit_id, args.arm, args.seed, cfg, args.out_root,
-                         torch.device(args.device), shuffled=args.shuffled)
+                         torch.device(args.device), shuffled=args.shuffled,
+                         out_tag=args.out_tag)
     print(f"{args.fit_id} {args.arm}{'_shuffled' if args.shuffled else ''} {args.cell} "
           f"seed{args.seed} epochs={metrics['n_epochs']} converged={metrics['converged']} "
           f"test_bce={metrics['test']['next_bce']:.4f} c_wiring={metrics['c_wiring']:.4f} "

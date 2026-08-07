@@ -184,3 +184,25 @@ def test_static_arm_has_no_recurrence_and_no_graph():
 def test_dense_arm_keeps_every_off_diagonal_edge():
     model = _model(arm="DENSE_TISSUE", n_nodes=16)
     assert int(model.node_mask.sum()) == 16 * 15
+
+
+def test_the_factorial_square_is_wired_the_way_the_contract_says():
+    from src.topic5_wiring_economy_rnn import arm_grows_spatially, arm_uses_wiring_cost
+    expected = {
+        "DENSE_TISSUE": (False, False),
+        "RANDOM_SET": (False, False),
+        "SPATIAL_SET": (True, True),
+        "RANDOM_SET_COST": (False, True),
+        "SPATIAL_SET_NOCOST": (True, False),
+    }
+    for arm, (growth, cost) in expected.items():
+        assert arm_grows_spatially(arm) is growth, arm
+        assert arm_uses_wiring_cost(arm) is cost, arm
+
+
+def test_off_diagonal_arms_grow_the_way_their_name_says():
+    short = _model(arm="SPATIAL_SET_NOCOST", n_nodes=40, seed=2)
+    long = _model(arm="RANDOM_SET_COST", n_nodes=40, seed=2)
+    d_short = short.D_mm.numpy()[short.node_mask.numpy() > 0].mean()
+    d_long = long.D_mm.numpy()[long.node_mask.numpy() > 0].mean()
+    assert d_short < 0.85 * d_long

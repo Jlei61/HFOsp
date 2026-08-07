@@ -28,10 +28,33 @@ import torch.nn.functional as F
 from torch import Tensor
 
 CELLS = ("rnn", "gru")
-ARMS = ("STATIC_CONTACT", "DENSE_TISSUE", "RANDOM_SET", "SPATIAL_SET")
-SPARSE_ARMS = ("RANDOM_SET", "SPATIAL_SET")
+
+# Wiring economy is two things at once: proposals biased towards short edges,
+# and a penalty that makes a long surviving edge expensive.  The pre-registered
+# primary contrast compares the bundle against neither, because "does spatial
+# wiring economy organise the network" is a question about the bundle.  The two
+# off-diagonal arms are secondary and exist only to say which half did the work
+# if the bundle turns out to matter.
+#                          (distance-biased growth, wiring-cost penalty)
+ARM_SPEC: dict[str, tuple[bool, bool]] = {
+    "DENSE_TISSUE": (False, False),
+    "RANDOM_SET": (False, False),
+    "SPATIAL_SET": (True, True),
+    "RANDOM_SET_COST": (False, True),
+    "SPATIAL_SET_NOCOST": (True, False),
+}
+ARMS = ("STATIC_CONTACT",) + tuple(ARM_SPEC)
+SPARSE_ARMS = ("RANDOM_SET", "SPATIAL_SET", "RANDOM_SET_COST", "SPATIAL_SET_NOCOST")
 NEG_INF = -1e9
 GROW_EPS_MM = 0.1
+
+
+def arm_uses_wiring_cost(arm: str) -> bool:
+    return arm in ARM_SPEC and ARM_SPEC[arm][1] and arm != "DENSE_TISSUE"
+
+
+def arm_grows_spatially(arm: str) -> bool:
+    return arm in ARM_SPEC and ARM_SPEC[arm][0]
 
 
 @dataclass
@@ -118,7 +141,7 @@ class WEModel(nn.Module):
         else:
             node_mask = initial_mask(
                 n, config.density, config.node_distance_mm,
-                spatial=(self.arm == "SPATIAL_SET"), seed=int(config.seed),
+                spatial=arm_grows_spatially(self.arm), seed=int(config.seed),
             )
         self.register_buffer("node_mask", torch.as_tensor(node_mask))
         self.register_buffer("initial_node_mask", torch.as_tensor(node_mask).clone())
@@ -187,7 +210,7 @@ class WEModel(nn.Module):
         inactive = torch.nonzero((flat == 0) & (off_diagonal > 0)).flatten()
         if inactive.numel() < n_drop:
             return 0
-        if self.arm == "SPATIAL_SET":
+        if arm_grows_spatially(self.arm):
             weights = 1.0 / (self.D_mm.reshape(-1)[inactive] + GROW_EPS_MM)
             probability = (weights / weights.sum()).double()
         else:

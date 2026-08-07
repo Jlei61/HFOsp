@@ -134,6 +134,14 @@ yuquan_{chengshuai,huanghanwen,litengsheng,liyouran,pengzihang,songzishuo,xuxiny
 
 触点集合：数据集触点 ∩ 平面 `contact_order`。**已逐个核对：21/21 两边集合完全相同。**
 
+### 2.4b 薄拟合（thin）分层
+
+按模式拆开之后，5 个拟合的训练事件少于 500：`epilepsiae_442__own_b` (280)、
+`yuquan_huanghanwen__shared` (254)、`yuquan_litengsheng__shared` (359)、
+`yuquan_songzishuo__own_a` (105)、`yuquan_songzishuo__own_b` (144)。
+它们标 `thin=true`，**不排除**，但主检验必须同时报告"含 thin"与"去 thin"两个版本。
+宋子硕两个拟合尤其极端：38 个触点、125 个组织单元，训练事件只有 105 / 144。
+
 ### 2.5 事件与切分
 
 来源 `results/topic5_interictal_rank_distribution/dataset_v0_4`（封条：`target_values_read=False`、
@@ -272,8 +280,35 @@ L = L_next_rank + λ_STOP · L_STOP + η · C_wiring
 `{0.003, 0.01, 0.03, 0.1, 0.3}` 按布线-性能拐点选定后冻结，全队列共用。
 **只用 validation 选，test 不参与选择。**
 
-`RANDOM_SET` 也带同样的 `η · C_wiring`（否则两臂差的就不止一件事）。
+**`RANDOM_SET` 不带 `η · C_wiring`。** 「空间布线经济」是两件事捆在一起：
+提议偏向短边 + 长边活下来要付代价。预注册的主对比问的是**这一整包**有没有用，
+所以基线必须是两样都没有。给基线也加成本会把操纵削弱、并且系统性偏向零结果。
+（2026-08-08 修正：初版实现给 `RANDOM_SET` 也加了成本，与本文件 §5 的模型表冲突，已回退。）
+
 `DENSE_TISSUE` 不带（无稀疏资源，wiring cost 会直接把它压成稀疏的）。
+
+### 4.5 二次分解：生长规则 × 布线成本 的 2×2
+
+主对比是整包 vs 都没有；捆绑的代价是赢了也说不清是哪一半在起作用。补两个副臂
+（各 1 个种子，**次要、不承载主张**）把方格补齐：
+
+| 臂 | 距离偏置生长 | 布线成本 | 层级 |
+|---|---|---|---|
+| `RANDOM_SET` | 否 | 否 | 主基线 |
+| `SPATIAL_SET` | 是 | 是 | 主模型 |
+| `RANDOM_SET_COST` | 否 | 是 | 次要分解 |
+| `SPATIAL_SET_NOCOST` | 是 | 否 | 次要分解 |
+
+### 4.6 生长规则本身有多强（实测，进 C1 对照的解读）
+
+在真实几何上量过：`1/(d+ε)` 提议让边**短 30–40%**（1146: 14.5 vs 20.7mm；
+张碧岑: 20.9 vs 33.3mm；253: 15.9 vs 30.6mm），聚类系数高约 13%（0.213 vs 0.188），
+但**模块度只高 0.02–0.04**（0.244 vs 0.225 / 0.207 vs 0.169 / 0.318 vs 0.281）。
+
+原因：二维平面上距离为 d 的节点对数量本身 ∝ d，`1/d` 的权重几乎正好抵消掉它，
+所以提议在长度上比"距离偏置"这个名字听起来要平得多。
+→ **解读纪律**：训练后如果出现大的模块度效应，它不可能只由生长规则解释；
+反过来，边长变短这件事**大部分**是生长规则给的，不能算发现。
 
 ---
 
@@ -285,6 +320,8 @@ L = L_next_rank + λ_STOP · L_STOP + η · C_wiring
 | `DENSE_TISSUE` | dense 标准循环 + 同一个 `H` | tissue representation 能力上界 |
 | `RANDOM_SET` | 固定稀疏、均匀随机 regrow + wiring cost | 稀疏 recurrence 基线 |
 | **`SPATIAL_SET`** | 固定稀疏、距离偏置 regrow + wiring cost | **主模型** |
+| `RANDOM_SET_COST` | 固定稀疏、均匀随机 regrow + wiring cost | 次要分解（§4.5） |
+| `SPATIAL_SET_NOCOST` | 固定稀疏、距离偏置 regrow，无 cost | 次要分解（§4.5） |
 
 **核心比较**：`SPATIAL_SET − RANDOM_SET` — 在完全相同的循环单元、边密度、局部 `H`、
 训练预算和任务下，空间布线经济是否改善性能并改变循环拓扑？
@@ -357,11 +394,12 @@ L = L_next_rank + λ_STOP · L_STOP + η · C_wiring
 | 批次 | 单元数 |
 |---|---|
 | η 扫描（8 开发患者 × 5 个 η，仅 `SPATIAL_SET`，1 种子） | 40 |
+| 2×2 分解副臂（31 × 2 臂 × 1 种子） | 62 |
 | RNN 主队列（31 拟合 × [1 static + 1 dense + 3 random + 3 spatial]） | 248 |
 | C2 打乱目标对照（31 × 1） | 31 |
 | GRU 复核（31 × 3 个循环模型 × 1 种子） | 93 |
 | 2 维容量探针（8 患者 × 1） | 8 |
-| **合计** | **420** |
+| **合计** | **482** |
 
 可选敏感性（时间允许再做）：密度 5% / 20% × `{SPATIAL, RANDOM}` × 31 = 124。
 
@@ -432,6 +470,9 @@ untrained 与 random-geometry 对照。
 | **G3** | 长出来的形状超出几何了吗 | 必须**同时**超过 C1 与 C2；只超过 `RANDOM_SET` 不算 |
 | **G4** | 模块是必需的吗 | 模块删除 vs 同大小同连续区域随机删除，患者内配对 |
 | **G5** | 功能分工存在吗 | §9.3 三项，每项对未训练对照 |
+
+**次要分解的措辞纪律**：`RANDOM_SET_COST` 与 `SPATIAL_SET_NOCOST` 各只有 1 个种子，
+只用来说"整包里哪一半更像是起作用的那个"，**不得**单独作为一条结论报告。
 
 **打平时的措辞（预注册）**：
 > 在同样的连接数下，让近处更容易连上既没有帮助也没有代价——这条约束是免费的，但不是必要的。
