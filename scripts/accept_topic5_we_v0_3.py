@@ -68,7 +68,10 @@ def main() -> int:
                 "RANDOM_SET_rnn": 93, "SPATIAL_SET_rnn": 93,
                 "RANDOM_SET_COST_rnn": 31, "SPATIAL_SET_NOCOST_rnn": 31,
                 "SPATIAL_SET_shuffled_rnn": 31,
-                "DENSE_TISSUE_gru": 31, "RANDOM_SET_gru": 31, "SPATIAL_SET_gru": 31}
+                # The gated cell started as a one-seed direction check; it
+                # disagreed with the primary cell, so the pre-registered
+                # escalation took the contrast it disagreed about to three seeds.
+                "DENSE_TISSUE_gru": 31, "RANDOM_SET_gru": 93, "SPATIAL_SET_gru": 93}
     missing = {a: n - len(by_arm.get(a, [])) for a, n in expected.items()
                if len(by_arm.get(a, [])) != n}
     gates.append(gate("every planned unit finished", not missing, missing or "complete"))
