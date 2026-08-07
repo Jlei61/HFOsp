@@ -53,6 +53,11 @@ def main() -> int:
     parser.add_argument("--out-root", type=Path, default=OUT / "per_subject")
     parser.add_argument("--log", type=Path, default=OUT / "cohort_run.log")
     args = parser.parse_args()
+    # The in-flight check compares the output root as a string, so the same
+    # directory written two ways -- relative here, absolute in the driver -- reads
+    # as two different units and the duplicate guard misses. Canonical form makes
+    # the identity unique regardless of how the launcher was invoked.
+    args.out_root = args.out_root.resolve()
 
     subjects = args.subjects or json.loads(
         (OUT / "INPUT_MANIFEST.json").read_text())["frozen_cohort"]["primary"]
