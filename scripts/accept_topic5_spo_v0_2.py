@@ -131,6 +131,32 @@ def main() -> int:
         f"{empty} sit at zero: the withheld contacts carry no positives"
         if empty else ""))
 
+    # Freshness, because completeness is not enough. The driver skipped three
+    # analysis stages on its final pass, so the closeout quoted a spatial-scale
+    # file computed on 17 patients and a cross-version file computed on 20,
+    # printed alongside ladder numbers computed on 21, with nothing to say they
+    # came from different states of the run. Every check above passed.
+    newest_unit = max((f.stat().st_mtime for f in OUT.rglob("DONE.json")),
+                      default=0.0)
+    derived = ("cohort_statistics.json", "against_v0_1.json",
+               "spatial_scale_check.json", "CLOSEOUT_REPORT.md")
+    stale = [name for name in derived
+             if not (OUT / name).exists()
+             or (OUT / name).stat().st_mtime < newest_unit]
+    results.append(check(
+        "every summary is newer than the last unit it summarises",
+        not stale,
+        f"stale: {stale}" if stale else ""))
+    report_time = (OUT / "CLOSEOUT_REPORT.md").stat().st_mtime \
+        if (OUT / "CLOSEOUT_REPORT.md").exists() else 0.0
+    quoted_later = [name for name in derived[:-1]
+                    if (OUT / name).exists()
+                    and (OUT / name).stat().st_mtime > report_time]
+    results.append(check(
+        "the closeout was written after everything it quotes",
+        not quoted_later,
+        f"written before {quoted_later}" if quoted_later else ""))
+
     results.append(check("figure rendered with a Chinese README",
                          bool(pngs) and (figures / "README.md").exists(),
                          f"{len(pngs)} png"))
