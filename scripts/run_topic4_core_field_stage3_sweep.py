@@ -125,9 +125,13 @@ def _evaluate(job):
             events.append(dict(t_on=round(ev["t_on"], 1), t_off=round(ev["t_off"], 1),
                                n_part=rd["n_part"], sign=rd["sign"],
                                readability=rd["readability"], ranks=rd["ranks"]))
-        return dict(cx=cx, cy=cy, sigma=sigma, seed=seed, events=events)
+        # every artefact carries the design hash it was produced under, so the
+        # summary can fail closed instead of silently mixing designs
+        return dict(cx=cx, cy=cy, sigma=sigma, seed=seed, events=events,
+                    config_checksum=cfg["checksum"], provenance=provenance())
     except Exception as exc:                                # noqa: BLE001
-        return dict(cx=cx, cy=cy, sigma=sigma, seed=seed, error=repr(exc))
+        return dict(cx=cx, cy=cy, sigma=sigma, seed=seed, error=repr(exc),
+                    config_checksum=cfg.get("checksum"), provenance=provenance())
 
 
 def _score(events, cfg, tgt, rule):
