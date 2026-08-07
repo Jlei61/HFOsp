@@ -1,0 +1,160 @@
+{
+ "figures": [
+  "stage3_sweep_match_map",
+  "stage3_sweep_direction_and_recruitment"
+ ],
+ "config_checksum": "8188bfc4ee2b2513483fc32a407f65af76fb59ca5e6e838ce48332001c7e5d41",
+ "summary_complete": false,
+ "artefact_audit": {
+  "primary": [],
+  "sensitivity": [
+   "no artefacts on disk"
+  ]
+ },
+ "undefined_fraction": {
+  "primary": 0.8979591836734694
+ },
+ "n_valid_histogram": {
+  "primary": {
+   "0": 44,
+   "1": 4,
+   "3": 1
+  }
+ },
+ "high_scoring_region": {
+  "mask": [
+   [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   [
+    false,
+    false,
+    false,
+    true,
+    false,
+    false,
+    false
+   ],
+   [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ],
+   [
+    false,
+    false,
+    false,
+    false,
+    false,
+    false,
+    false
+   ]
+  ],
+  "n_cells": 1,
+  "centers": [
+   [
+    10.0,
+    4.666666666666666
+   ]
+  ],
+  "rule": "top 10% of cells with at least 3 valid seeds, as a region -- never the single best cell",
+  "confirm_seeds": [
+   301,
+   302,
+   303,
+   304,
+   305,
+   306
+  ],
+  "confirmed": null
+ },
+ "region_confirmation": {
+  "stage": "stage3_legA_confirmation",
+  "cells": [
+   {
+    "center": [
+     10.0,
+     4.666666666666666
+    ],
+    "map_value": -0.021597662328178373,
+    "confirmed_mean": -0.04284292419051724,
+    "confirmed_n_valid": 3,
+    "n_confirm_seeds": 6
+   }
+  ],
+  "winners_curse": {
+   "mean_confirmed_minus_map": -0.021245261862338865,
+   "n_paired": 1,
+   "reading": "negative means the map was optimistic about this region by that much; report both numbers, never the map value alone"
+  },
+  "confirm_seeds": [
+   301,
+   302,
+   303,
+   304,
+   305,
+   306
+  ],
+  "sweep_seeds": [
+   201,
+   202,
+   203,
+   204
+  ],
+  "n_errors": 0,
+  "config_checksum": "8188bfc4ee2b2513483fc32a407f65af76fb59ca5e6e838ce48332001c7e5d41",
+  "provenance": {
+   "git_commit": "e9d97bd7cd19467d12104ded9798e04e463c7e7f",
+   "tracked_modules_dirty": false,
+   "module_sha256": {
+    "src/topic4_core_field.py": "4b66406ca93ff558fe204e12a9a9d1bcfe0ead4cd2b4ef3527603347e3699e46",
+    "src/topic4_core_field_scoring.py": "7d2a6b116fbb441f247529f79b763940a1f71a243d18e69ccd09adfc9fc0a850",
+    "src/topic4_core_field_report.py": "3c65249b0606b4f95a62f47e179331b597859e8d92b5b0722d09c353c8ee2390",
+    "src/topic4_core_field_runner.py": "ec839c5fedfacb73fb256a1b4e0551b2a3dbe9a03aed5d37cbb794fc6f1fdc37"
+   },
+   "numpy_version": "1.26.4"
+  }
+ },
+ "degradations": [
+  "sensitivity map (probe width 2.4 mm) was not run: the plan's pre-registered degradation order cuts that tier first when the window is short"
+ ],
+ "plotting_only": true,
+ "claim_boundary": "descriptive map from a fixed-shape probe; the highest cell is not a determined optimum -- see the confirmation pass on independent seeds"
+}

@@ -48,10 +48,17 @@ def _edges(cfg):
     return np.linspace(lo - step / 2, hi + step / 2, n + 1)
 
 
-def _draw_cells(ax, arr, n_valid, edges, *, cmap, vmin, vmax, show_counts=True):
-    """One rectangle per cell -- no interpolation, and the denominator on top."""
+def _draw_cells(ax, arr, denom, edges, *, cmap, vmin, vmax, show_counts=True,
+                n_total=4):
+    """One rectangle per cell -- no interpolation, and the denominator on top.
+
+    `denom` must be the denominator OF THIS LAYER. The match score is undefined
+    wherever a cell produced one direction, so it uses n_valid; direction and
+    recruitment are defined for every completed run, so they use n_runs. Passing
+    n_valid to those layers would grey out measured zeros as if unmeasured.
+    """
     A = np.asarray(arr, float)
-    V = np.asarray(n_valid, int)
+    V = np.asarray(denom, int)
     norm = plt.Normalize(vmin=vmin, vmax=vmax)
     cm = plt.get_cmap(cmap)
     for r in range(A.shape[0]):
@@ -60,14 +67,21 @@ def _draw_cells(ax, arr, n_valid, edges, *, cmap, vmin, vmax, show_counts=True):
             y0, y1 = edges[r], edges[r + 1]
             unreadable = (not np.isfinite(A[r, c])) or V[r, c] == 0
             face = C_GREY if unreadable else cm(norm(A[r, c]))
-            hatch = "///" if (not unreadable and V[r, c] <= 2) else None
+            hatch = ("///" if (not unreadable and 0 < V[r, c] <= n_total // 2)
+                     else None)
             ax.add_patch(Rectangle((x0, y0), x1 - x0, y1 - y0, facecolor=face,
                                    edgecolor="white", linewidth=0.5, hatch=hatch,
                                    zorder=1))
             if show_counts:
-                ax.text((x0 + x1) / 2, y0 + 0.12 * (y1 - y0), f"{V[r, c]}/4",
-                        ha="center", va="bottom", fontsize=6.2,
-                        color="0.25" if not unreadable else "0.45", zorder=3)
+                # dark fills need light text or the denominator disappears --
+                # and the denominator is the whole point of drawing it
+                lum = (0.45 if unreadable else
+                       0.299 * face[0] + 0.587 * face[1] + 0.114 * face[2])
+                ax.text((x0 + x1) / 2, y0 + 0.12 * (y1 - y0),
+                        f"{V[r, c]}/{n_total}",
+                        ha="center", va="bottom", fontsize=6.8,
+                        fontweight="bold" if not unreadable else "normal",
+                        color="white" if lum < 0.5 else "0.2", zorder=3)
     return plt.cm.ScalarMappable(norm=norm, cmap=cm)
 
 
@@ -98,13 +112,15 @@ def main():
 
     cfg = json.load(open(os.path.join(a.out, "config", "sweep_config.json")))
     summ = json.load(open(os.path.join(a.out, "sweep_summary.json")))
+    conf_path = os.path.join(a.out, "region_confirmation.json")
+    conf = json.load(open(conf_path)) if os.path.exists(conf_path) else None
     g, edges = _geometry(), _edges(cfg)
     figdir = os.path.join(a.out, "figures")
     os.makedirs(figdir, exist_ok=True)
 
     legend = [
-        Patch(facecolor=C_GREY, edgecolor="white", label="one direction only, score undefined"),
-        Patch(facecolor="white", edgecolor="0.4", hatch="///", label="1-2 of 4 networks valid"),
+        Patch(facecolor=C_GREY, edgecolor="white", label="one direction only, match score undefined"),
+        Patch(facecolor="white", edgecolor="0.4", hatch="///", label="1-2 of 4 networks contribute a score"),
         Line2D([], [], color=C_REF, lw=1.3, label="hand-placed cores (reference, not an input)"),
         Line2D([], [], color="0.35", lw=1.1, ls="--", label="frozen E->E anisotropy axis; no field-location constraint"),
         Line2D([], [], marker="v", ls="none", mfc="white", mec="black", ms=6, label="recording contacts"),
@@ -122,6 +138,20 @@ def main():
         sm = _draw_cells(ax, m["S_rank"], m["n_valid"], edges,
                          cmap="RdBu_r", vmin=-lim, vmax=lim)
         _overlay(ax, g, edges, label_axis=(key == have[0]))
+        if conf and key == "primary":
+            # both numbers, never the map value alone
+            for row in conf["cells"]:
+                cx, cy = row["center"]
+                mv, cv = row["map_value"], row["confirmed_mean"]
+                if mv is None:
+                    continue
+                ax.annotate(f"map {mv:+.2f}\nconfirmed {cv:+.2f}"
+                            if cv is not None else f"map {mv:+.2f}",
+                            xy=(cx, cy), xytext=(cx, cy - 4.2), ha="center",
+                            fontsize=8.2, color="0.15", zorder=8,
+                            bbox=dict(boxstyle="round,pad=0.3", fc="white",
+                                      ec="0.6", lw=0.6, alpha=0.92),
+                            arrowprops=dict(arrowstyle="-", color="0.4", lw=0.9))
         sigma = cfg["sigmas"][key]
         ax.set_title(f"probe width {sigma:g} mm"
                      + ("   (pre-registered primary)" if key == "primary"
@@ -141,7 +171,8 @@ def main():
     # ------------------------------------------- what the score cannot show
     m = summ["maps"]["primary"]
     fig, axes = plt.subplots(1, 2, figsize=(13.2, 6.9))
-    sm0 = _draw_cells(axes[0], m["bidirectional_fraction"], m["n_valid"], edges,
+    runs = m["n_runs"]
+    sm0 = _draw_cells(axes[0], m["bidirectional_fraction"], runs, edges,
                       cmap="viridis", vmin=0, vmax=1, show_counts=False)
     _overlay(axes[0], g, edges)
     axes[0].set_title("fraction of networks producing both directions",
@@ -149,7 +180,7 @@ def main():
     fig.colorbar(sm0, ax=axes[0], fraction=0.040, pad=0.02)
 
     rec = np.asarray(m["recruited_min"], float)
-    sm1 = _draw_cells(axes[1], rec, m["n_valid"], edges, cmap="viridis",
+    sm1 = _draw_cells(axes[1], rec, runs, edges, cmap="viridis",
                       vmin=0, vmax=float(np.nanmax(rec)) if np.isfinite(rec).any() else 1,
                       show_counts=False)
     _overlay(axes[1], g, edges, label_axis=False)
@@ -173,6 +204,10 @@ def main():
                    n_valid_histogram={k: summ["maps"][k]["n_valid_histogram"]
                                       for k in have},
                    high_scoring_region=summ["high_scoring_region"],
+                   region_confirmation=conf,
+                   degradations=["sensitivity map (probe width 2.4 mm) was not run: "
+                                 "the plan's pre-registered degradation order cuts "
+                                 "that tier first when the window is short"],
                    plotting_only=True,
                    claim_boundary=("descriptive map from a fixed-shape probe; the "
                                    "highest cell is not a determined optimum -- see "

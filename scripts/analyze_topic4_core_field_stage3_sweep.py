@@ -63,12 +63,14 @@ def _aggregate(cells, cfg, tgt, rule, n_cells, seeds):
     n = int(cfg["grid"]["n"])
     shape = (n, n)
     S = np.full(shape, np.nan)
-    n_valid = np.zeros(shape, int)
+    n_valid = np.zeros(shape, int)      # denominator for the MATCH layer only
+    n_runs = np.zeros(shape, int)       # denominator for every other layer
     bidir_frac = np.full(shape, np.nan)
     recruited = np.full(shape, np.nan)
     events = np.full(shape, np.nan)
     for i, rows in per.items():
         r, c = divmod(i, n)
+        n_runs[r, c] = len(rows)
         vals = [x["S_rank"] for x in rows if x["S_rank"] is not None]
         n_valid[r, c] = len(vals)
         if vals:
@@ -77,7 +79,8 @@ def _aggregate(cells, cfg, tgt, rule, n_cells, seeds):
             bidir_frac[r, c] = float(np.mean([x["n_dir"] == 2 for x in rows]))
             recruited[r, c] = float(np.mean([x["recruited_min"] for x in rows]))
             events[r, c] = float(np.mean([x["n_events"] for x in rows]))
-    return dict(S_rank=S, n_valid=n_valid, bidirectional_fraction=bidir_frac,
+    return dict(S_rank=S, n_valid=n_valid, n_runs=n_runs,
+                bidirectional_fraction=bidir_frac,
                 recruited_min=recruited, n_events=events, per_cell=per)
 
 
@@ -132,6 +135,7 @@ def main():
         complete=all(not v for v in audits.values()),
         maps={k: dict(S_rank=_layer(v["S_rank"]),
                       n_valid=v["n_valid"].tolist(),
+                      n_runs=v["n_runs"].tolist(),
                       bidirectional_fraction=_layer(v["bidirectional_fraction"]),
                       recruited_min=_layer(v["recruited_min"]),
                       n_events=_layer(v["n_events"]),
@@ -151,7 +155,9 @@ def main():
         reading_notes=[
             "S_rank is undefined wherever a cell produced only one direction; "
             "those cells are counted in undefined_fraction, not silently dropped",
-            "n_valid is the per-cell denominator and must be shown on any figure",
+            "n_valid is the denominator for the match layer ONLY; direction and "
+            "recruitment are defined for every completed run, so a cell where no "
+            "network was bidirectional is a measured zero, not an unmeasured cell",
             "the two probe sizes are separate maps and are never combined per cell",
         ])
     atomic_write_json(summary, os.path.join(a.out, "sweep_summary.json"))
