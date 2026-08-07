@@ -1,0 +1,60 @@
+{
+ "figure": "learned_core_field_readout",
+ "subject": "epilepsiae_1146",
+ "learned_tag": "epilepsiae_1146_learned_core_field_cr1p5_s5",
+ "plotting_only": true,
+ "reference_hand_placed_figure": "results/paper-ready-figure/fig4_subject_snn_e1146/figures/fig4_panel_b_bidirectional_readout",
+ "field": {
+  "theta": [
+   0.2254352770628113,
+   -3.4325650405686488,
+   1.2015940804282796,
+   0.03713421088118954,
+   2.357075362342678,
+   -2.0370560724364304,
+   0.9516872773554104,
+   -0.07235013848876515,
+   -0.9070201125778456,
+   1.0743975133488544
+  ],
+  "budget_cells": 1129,
+  "gap_between_lobes_hand_placed": 1.0,
+  "gap_between_lobes_learned": -0.13845996387584458
+ },
+ "run": {
+  "seed": 5,
+  "k_dir": 2,
+  "placement": "gradient_shared",
+  "theta_deg": -22.8,
+  "n_events": 5,
+  "n_clean": 5,
+  "dir_forward": 2,
+  "dir_reverse": 3,
+  "bidirectional": true
+ },
+ "readout_events": {
+  "forward_events": 1,
+  "reverse_events": 1,
+  "selected_pair": [
+   {
+    "t_on_ms": 1757.0,
+    "t_off_ms": 1809.0,
+    "type": "TA"
+   },
+   {
+    "t_on_ms": 2339.0,
+    "t_off_ms": 2389.0,
+    "type": "TB"
+   }
+  ],
+  "display_window_t0_ms": 1473.0,
+  "display_window_t1_ms": 2673.0,
+  "trace_band_hz": [
+   30.0,
+   80.0
+  ],
+  "trace_scaling": "per-contact signed component / window absolute p95"
+ },
+ "config_checksum": "8b4e14149eab7dceba9a489915bf71913434bc956d9e136417d6579c626c06cd",
+ "claim_boundary": "single-run rendering of the learned field on one network; not a cohort claim and not evidence that the learned field reproduces the hand-placed mechanism"
+}
