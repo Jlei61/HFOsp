@@ -106,6 +106,16 @@ def run_cell(subject: str, n_nodes: int, seed: int, work: Path,
         # A contact reading fewer than two nodes is a relabelling of one node,
         # not a sharper measurement -- such a cell must not be scored.
         "readout_is_degenerate": summary.get("readout_is_degenerate", False),
+        # Edge identity is only meaningful on the topology the arm commits to.
+        # Scored on a graph that was never sparsified it measures the wiring
+        # prior instead -- weights fall off with distance and true edges are
+        # local -- and comes out near 0.87 whatever else is varied. Recorded per
+        # cell so that can never again be read as recovery.
+        "n_edges": done.get("n_edges"),
+        "best_epoch": done.get("best_epoch"),
+        "topology_was_frozen": bool(
+            done.get("n_edges") is not None
+            and done["n_edges"] <= 1.5 * 6.0 * n_nodes),
         "observation_ratio": summary["observation_ratio"],
         "n_events_usable": summary["n_events_usable"],
         "edge_auc": edge_auc(fitted, truth["A_true"]),
@@ -210,12 +220,19 @@ def main() -> int:
         by_radius.setdefault(round(float(c["readout_radius_mm"]), 2), []).append(c)
     per_readout = {}
     for radius, group in sorted(by_radius.items()):
-        usable = [c for c in group if not c["readout_is_degenerate"]]
+        usable = [c for c in group
+                  if not c["readout_is_degenerate"] and c["topology_was_frozen"]]
         entry = {
             "readout_radius_mm": radius,
             "median_effective_nodes_per_contact": float(
                 np.median([c["effective_nodes_per_contact"] for c in group])),
-            "n_cells_total": len(group), "n_cells_degenerate": len(group) - len(usable),
+            "n_cells_total": len(group),
+            "n_cells_degenerate": sum(1 for c in group if c["readout_is_degenerate"]),
+            "n_cells_unfrozen_topology": sum(
+                1 for c in group if not c["topology_was_frozen"]),
+            "median_n_edges": float(np.median([c["n_edges"] for c in group
+                                               if c["n_edges"] is not None]))
+            if any(c["n_edges"] is not None for c in group) else None,
         }
         entry.update(score_layers(usable) if usable else
                      {"status": "ALL_CELLS_DEGENERATE"})
