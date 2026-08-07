@@ -110,3 +110,20 @@ def test_helpers_return_nan_rather_than_inventing_a_value_for_an_empty_window():
     af, _ = _trace(trough_af=0.18)
     assert np.isnan(trough_level(af, BIN, RUN_MS + 10, RUN_MS + 20))
     assert np.isnan(interictal_ceiling(af, BIN, 0.0))
+
+
+def test_a_probe_with_no_pre_onset_stretch_must_be_given_its_reference():
+    """The failure this guards: an empty pre-onset window silently sets every trough comparison
+    to the same answer, so a whole frozen-state map reads as one regime."""
+    import pytest
+    af, _ = _trace(trough_af=0.18)
+    with pytest.raises(ValueError, match="no interictal reference"):
+        _call(af, onset_ms=0.0)
+
+
+def test_an_externally_supplied_reference_is_used_and_decides_the_label():
+    af, _ = _trace(trough_af=0.18)
+    hot = _call(af, onset_ms=0.0, interictal_ceiling_af=0.05)   # troughs clear it
+    cold = _call(af, onset_ms=0.0, interictal_ceiling_af=0.30)  # troughs do not
+    assert hot["regime"] == "R3_carrier" and hot["carrier"] is True
+    assert cold["regime"] == "R4_burst_train" and cold["carrier"] is False

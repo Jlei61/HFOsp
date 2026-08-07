@@ -76,12 +76,17 @@ def interictal_ceiling(af, bin_ms, t_end_ms, q=INTERICTAL_Q):
 def classify_regime(*, af, af_bin_ms, rate_hz, dt_ms, baseline_roll_hi_hz,
                     onset_ms, offset_ms, run_ms, terminated, recovered,
                     refractory_ceiling_fraction=0.0, ceiling_max=0.5,
-                    numerical_unsafe=False):
+                    numerical_unsafe=False, interictal_ceiling_af=None):
     """One regime label for one trajectory, with the numbers the label rests on.
 
     ``terminated`` must already encode that a bout ending at the end of the record has not ended;
     this function does not re-derive it, because the same mistake made twice in two places is
     harder to find than the same mistake made once.
+
+    ``interictal_ceiling_af`` must be supplied whenever the record has no pre-onset stretch of its
+    own -- a frozen-state probe that starts already high has nothing before ``onset_ms`` to measure
+    the interictal spread from, and taking it from an empty window would silently drive every
+    trough comparison to the same answer.
     """
     if numerical_unsafe:
         return dict(regime="R1_runaway", reason="numerical failure", carrier=False)
@@ -101,7 +106,12 @@ def classify_regime(*, af, af_bin_ms, rate_hz, dt_ms, baseline_roll_hi_hz,
     wp_label = classify_run_workpoint(wp)
 
     trough = trough_level(af, af_bin_ms, onset_ms, epoch_end)
-    ceiling = interictal_ceiling(af, af_bin_ms, onset_ms)
+    ceiling = (float(interictal_ceiling_af) if interictal_ceiling_af is not None
+               else interictal_ceiling(af, af_bin_ms, onset_ms))
+    if not np.isfinite(ceiling):
+        raise ValueError(
+            "no interictal reference: the record has no pre-onset stretch, so "
+            "interictal_ceiling_af must be supplied from outside it")
     mod = epoch_modulation(af, af_bin_ms, onset_ms, epoch_end)
     stays_recruited = bool(np.isfinite(trough) and np.isfinite(ceiling) and trough > ceiling)
     oscillates = bool(np.isfinite(mod) and mod >= MOD_MIN)

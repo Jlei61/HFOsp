@@ -64,7 +64,9 @@ NOISE = 401
 REF_MS = 15000.0        # enough to hold an interictal moment and a settled ictal one
 T_INTERICTAL_MS = 4000.0
 T_ICTAL_MS = 12000.0
-PROBE_MS = 4000.0       # the plan's 3-8 s; long enough for several bursts, short enough to sweep
+# The plan's 3-8 s window, at its short end: 3 s still holds ~35 bursts at 11.7/s, and this
+# machine is oversubscribed by a neighbour, so a probe costs about half an hour of wall time.
+PROBE_MS = 3000.0
 ALPHA_D = (0.6, 0.8, 1.0, 1.2, 1.5)
 ALPHA_X = (0.0, 0.5, 1.0, 1.5, 2.0)
 GIB_PER_SIM_SECOND = 0.596
@@ -104,12 +106,20 @@ def stage_a():
     p = dataclasses.replace(S["p"], T=REF_MS, dt=E01.DT)
     t0 = time.time()
     legs = [("interictal", T_INTERICTAL_MS), ("ictal", T_ICTAL_MS - T_INTERICTAL_MS)]
-    state, out = None, {}
+    state, out, ceiling = None, {}, None
+    baseline = GEO._load_json(E01.ARTIFACTS["lc1_baseline"])
     for name, span_ms in legs:
         n_steps = int(round(span_ms / E01.DT))
         run = run_fcxr_loop(p, S["net"], slow=(slow if state is None else None),
                             start=state, n_steps=n_steps, capture_final=True,
-                            store_spikes=False)
+                            store_spikes=(name == "interictal"))
+        if name == "interictal":
+            # The probes start already high, so they carry no pre-onset stretch of their own; the
+            # level a trough must clear has to come from here or it cannot come from anywhere.
+            _e, af0, _b, _f, _ = OLD._events_from_res(
+                dict(rate_E=run["rate_E"], rate_I=run["rate_I"], E_spk_bool=run["E_spk_bool"]),
+                E01.DT, event_bar=float(baseline["frozen_event_bar"]))
+            ceiling = float(np.percentile(np.asarray(af0, float), 95))
         state = run["checkpoint"]
         out[name] = dict(path=paths[name], t_ms=(T_INTERICTAL_MS if name == "interictal"
                                                  else T_ICTAL_MS),
@@ -127,6 +137,7 @@ def stage_a():
                         d_star=d_star.astype(np.float32), x_star=x_star.astype(np.float32))
     rec = dict(status="COMPLETE", ref_ms=REF_MS, noise_seed=NOISE,
                point_id=GEO.H1_POINT_ID, states=out,
+               interictal_ceiling_af=ceiling,
                d_star_mean=float(d_star.mean()), x_star_mean=float(x_star.mean()),
                wall_s=time.time() - t0, finished=GEO._now())
     GEO._write_json(meta_path, rec)
@@ -172,10 +183,12 @@ def _probe(spec):
     spk = np.asarray(run["E_spk_bool"])
     per_cell_hz = spk.sum(axis=0) / (PROBE_MS * 1e-3)
     ceiling_frac = float(np.mean(per_cell_hz >= 0.8 * (1000.0 / S["p"].tau_ref_E)))
+    ref_meta = GEO._load_json(os.path.join(OUT, "reference.json"))
     reg = classify_regime(af=af, af_bin_ms=af_dt, rate_hz=rate, dt_ms=E01.DT,
                           baseline_roll_hi_hz=band_hi, onset_ms=0.0, offset_ms=PROBE_MS,
                           run_ms=PROBE_MS, terminated=False, recovered=False,
                           refractory_ceiling_fraction=ceiling_frac,
+                          interictal_ceiling_af=ref_meta["interictal_ceiling_af"],
                           numerical_unsafe=not np.all(np.isfinite(rate)))
     rec = dict(status="COMPLETE", tag=tag, alpha_d=spec["alpha_d"], alpha_x=spec["alpha_x"],
                ic=spec["ic"], probe_ms=PROBE_MS,
