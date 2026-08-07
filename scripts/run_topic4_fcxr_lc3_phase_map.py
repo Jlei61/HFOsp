@@ -83,6 +83,19 @@ def _context():
     return _CTX["S"]
 
 
+def _loop(S, **kw):
+    """Every run in this script goes through here.
+
+    ``run_fcxr_loop`` defaults ``v_th_per_neuron`` to None, which silently replaces the per-neuron
+    thresholds with one uniform value -- and the pathology in this substrate *is* two patches of
+    lowered threshold, so omitting it runs a homogeneous sheet that never ignites.  The first
+    version of this script omitted it at all three call sites and produced a reference trajectory
+    with no slow-variable development at all.  One helper, one place to get it right.
+    """
+    p = dataclasses.replace(S["p"], T=kw.pop("T_ms"), dt=E01.DT)
+    return run_fcxr_loop(p, S["net"], v_th_per_neuron=S["vth"], **kw)
+
+
 def _fresh_slow(S, cfg_updates=None):
     cfg = E01._dynamic_cfg(GEO._point(GEO.H1_POINT_ID))
     if cfg_updates:
@@ -103,16 +116,15 @@ def stage_a():
 
     slow = _fresh_slow(S)
     S["net"]["rng"] = np.random.default_rng(NOISE)
-    p = dataclasses.replace(S["p"], T=REF_MS, dt=E01.DT)
     t0 = time.time()
     legs = [("interictal", T_INTERICTAL_MS), ("ictal", T_ICTAL_MS - T_INTERICTAL_MS)]
     state, out, ceiling = None, {}, None
     baseline = GEO._load_json(E01.ARTIFACTS["lc1_baseline"])
     for name, span_ms in legs:
         n_steps = int(round(span_ms / E01.DT))
-        run = run_fcxr_loop(p, S["net"], slow=(slow if state is None else None),
-                            start=state, n_steps=n_steps, capture_final=True,
-                            store_spikes=(name == "interictal"))
+        run = _loop(S, T_ms=REF_MS, slow=(slow if state is None else None),
+                    start=state, n_steps=n_steps, capture_final=True,
+                    store_spikes=(name == "interictal"))
         if name == "interictal":
             # The probes start already high, so they carry no pre-onset stretch of their own; the
             # level a trough must clear has to come from here or it cannot come from anywhere.
@@ -159,7 +171,6 @@ def _probe(spec):
     z_field = 1.0 - d_field
     template = _fresh_slow(S, dict(use_z=False, z_frozen_E=z_field.copy(),
                                    x_relay_frozen_E=x_field.copy()))
-    p = dataclasses.replace(S["p"], T=PROBE_MS, dt=E01.DT)
     seed_state = load_into(os.path.join(OUT, f"ref_{spec['ic']}.npz"),
                            _seed_template(S, template))
     slow = seed_state.slow
@@ -171,9 +182,9 @@ def _probe(spec):
 
     S["net"]["rng"] = np.random.default_rng(NOISE + 1)
     t0 = time.time()
-    run = run_fcxr_loop(p, S["net"], start=seed_state,
-                        n_steps=int(round(PROBE_MS / E01.DT)),
-                        capture_final=True, store_spikes=True)
+    run = _loop(S, T_ms=PROBE_MS, start=seed_state,
+                n_steps=int(round(PROBE_MS / E01.DT)),
+                capture_final=True, store_spikes=True)
     baseline = GEO._load_json(E01.ARTIFACTS["lc1_baseline"])
     res = dict(rate_E=run["rate_E"], rate_I=run["rate_I"], E_spk_bool=run["E_spk_bool"])
     _events, af, af_dt, _floor, _ = OLD._events_from_res(
@@ -208,10 +219,9 @@ def _probe(spec):
 
 def _seed_template(S, slow):
     """A zero-length run just to obtain a structurally valid state to load onto."""
-    p = dataclasses.replace(S["p"], T=E01.DT, dt=E01.DT)
     S["net"]["rng"] = np.random.default_rng(NOISE)
-    return run_fcxr_loop(p, S["net"], slow=slow, n_steps=1, capture_final=True,
-                         store_spikes=False)["checkpoint"]
+    return _loop(S, T_ms=E01.DT, slow=slow, n_steps=1, capture_final=True,
+                 store_spikes=False)["checkpoint"]
 
 
 def main():
