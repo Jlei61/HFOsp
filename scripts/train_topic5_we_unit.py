@@ -34,6 +34,7 @@ from src.topic5_wiring_economy_rnn import (  # noqa: E402
     rollout,
     zeta_schedule,
 )
+from src.topic5_we_readouts import module_lesion, unit_tuning  # noqa: E402
 
 OUT_ROOT = ROOT / "results/topic5_wiring_economy_slp_rnn_v0_3"
 
@@ -269,6 +270,20 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
         roll["mode_disagreement"] = disagreement
         degenerate = bool(disagreement < float(cfg["generator_guard_fraction"]))
 
+    # Functional portrait and module lesion run here rather than in a later pass:
+    # both need the trained weights, and re-instantiating them from disk is one
+    # more place for a silent mismatch between what was scored and what was saved.
+    tuning = unit_tuning(model, tensors, test_idx[:2048], mode_kept, device)
+    lesion: Dict[str, Any] = {}
+    if arm != "STATIC_CONTACT":
+        nodes_xy = plane["nodes_xy_mm"]
+        lesion = module_lesion(
+            model, nodes_xy,
+            evaluate=lambda: evaluate(model, tensors, device, event_mask=(part == 2)),
+            evaluate_mode=lambda m: evaluate(model, tensors, device,
+                                             event_mask=(part == 2) & (mode_kept == m)),
+            seed=seed)
+
     snapshot = model.graph_snapshot()
     metrics: Dict[str, Any] = {
         "fit_id": fit_id, "arm": arm, "cell": cfg["cell"], "seed": seed,
@@ -309,6 +324,12 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
     if snapshot:
         np.savez_compressed(out_dir / "graph.npz.tmp.npz", **snapshot)
         (out_dir / "graph.npz.tmp.npz").rename(out_dir / "graph.npz")
+    if tuning.size:
+        np.savez_compressed(out_dir / "unit_tuning.npz.tmp.npz", tuning=tuning)
+        (out_dir / "unit_tuning.npz.tmp.npz").rename(out_dir / "unit_tuning.npz")
+    if lesion:
+        (out_dir / "lesion.json").write_text(json.dumps(lesion, indent=2))
+    torch.save(model.state_dict(), out_dir / "weights.pt")
     (out_dir / "history.json").write_text(json.dumps(history))
     (out_dir / "DONE.json").write_text(json.dumps({"ok": True, "converged": metrics["converged"]}))
     return metrics
