@@ -163,14 +163,17 @@ def main():
     os.makedirs(a.out, exist_ok=True)
     cfg_path = os.path.join(a.out, "config", "sweep_config.json")
     stage2_cfg = json.load(open(os.path.join(STAGE2, "config", "stage_config.json")))
+    # provenance records WHEN the run happened, so it must be outside the hash;
+    # otherwise the same frozen design fails verification on the next process
+    DROP = ("checksum", "provenance")
     if os.path.exists(cfg_path):
         cfg = json.load(open(cfg_path))
-        if canonical_checksum({k: v for k, v in cfg.items() if k != "checksum"}) != cfg["checksum"]:
+        if canonical_checksum(cfg, drop=DROP) != cfg["checksum"]:
             raise SystemExit("sweep config checksum mismatch")
     else:
         cfg = sweep_config(stage2_cfg)
-        cfg["checksum"] = canonical_checksum(cfg)
         cfg["provenance"] = provenance()
+        cfg["checksum"] = canonical_checksum(cfg, drop=DROP)
         os.makedirs(os.path.dirname(cfg_path), exist_ok=True)
         atomic_write_json(cfg, cfg_path)
         print(f"[config] frozen -> {cfg_path}  checksum={cfg['checksum']}")
