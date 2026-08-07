@@ -1,4 +1,10 @@
-# Topic 4 数据驱动病理场 — Stage 3 实施计划：全局二维场（rev2，2026-08-08 技术审阅后）
+# Topic 4 数据驱动病理场 — Stage 3 实施计划（rev2，2026-08-08 技术审阅后）
+
+> **执行状态 2026-08-08**：Task 1–3 全部完成（66 项测试绿）；Task 4 Leg A 主地图跑完
+> （196/196，审计通过）+ 高分区独立确认完成。**Task 4 的敏感性档、Task 5 Leg B、
+> Task 6 held-out、Task 7 主 A 面板的等值线部分本轮未跑**（按预注册降级顺序，
+> 合计还需约 19.5 小时）。结果见
+> `results/topic4_sef_hfo/data_driven_core_field_stage3/figures/README.md`。
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -127,7 +133,7 @@ def spatial_diagnostics(h, pos_xy, center, axis_unit, deltas=(1.0, 2.0, 3.0)) ->
     n_effective_lobes（h 的 2D 直方图上超过半高的连通分量数）。"""
 ```
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 关键断言（每条对应一个能被违反的合同）：
 
@@ -150,8 +156,8 @@ def spatial_diagnostics(h, pos_xy, center, axis_unit, deltas=(1.0, 2.0, 3.0)) ->
 9. **旋转不变性同样适用于诊断量**：`rms_transverse` 在把场整体旋转到轴上/轴外时按预期变化
 10. `probe_q` 的中心与尺寸可辨识：两个不同中心的探针，`h` 的相关 < 0.9
 
-- [ ] **Step 2: 实现，跑测试到绿**
-- [ ] **Step 3: 提交** `feat(topic4-stage3): free-centre mixture parameterisation with no axis prior`
+- [x] **Step 2: 实现，跑测试到绿**（27 项）
+- [x] **Step 3: 提交** `feat(topic4-stage3): free-centre mixture parameterisation with no axis prior`
 
 **验收：** 测试 6 的 (b) 任意角必须真的失败过一次——先写一个只在 90° 倍数下不变的实现
 （例如把 `phi` 量化到 π/2 网格）看它红，再改对。这一条是本 Task 的存在理由。
@@ -186,7 +192,7 @@ def candidate_key3(n_dir, n_recruited, s_rank) -> tuple:
     """(n_dir, coverage_tier(min(fwd, rev)), S_rank)。S_rank 永远不跨档相减。"""
 ```
 
-- [ ] **Step 1: 写失败测试**
+- [x] **Step 1: 写失败测试**
 
 1. `candidate_key3(2, 15, 0.1) > candidate_key3(2, 11, 0.9)` —— **招募档压倒秩次分**
 2. `candidate_key3(2, 5, x) > candidate_key3(1, 15, y)` 对任意 x,y —— **方向数仍是最高位**
@@ -201,8 +207,8 @@ def candidate_key3(n_dir, n_recruited, s_rank) -> tuple:
    （正向 11、反向 11 —— 但正向远端 3 个触点各只有 2–10 次观测），
    并集与 min 的差必须在测试里显式断言下来，防止将来有人改回并集
 
-- [ ] **Step 2: 实现，跑测试到绿**
-- [ ] **Step 3: 提交** `feat(topic4-stage3): rank recruitment above template match in the candidate key`
+- [x] **Step 2: 实现，跑测试到绿**（22 项）
+- [x] **Step 3: 提交** `feat(topic4-stage3): rank recruitment above template match in the candidate key`
 
 ---
 
@@ -249,15 +255,15 @@ def classify_stage3(results) -> dict:
 "训练/held-out 分数差"这个量本身没有稳定的对象可谈。
 Stage 2 把过拟合放在第一位，结果把所有科学问题都挡在门外（spec §8.3.4 的教训）。
 
-- [ ] **Step 1: 写失败测试** —— 每个结局至少一个 fixture，另加：
+- [x] **Step 1: 写失败测试** —— 每个结局至少一个 fixture，另加：
   - **测顺序**：同时满足"位置不稳"与"过拟合"时 `primary_outcome == "POSITION_UNIDENTIFIABLE"`
   - **测不遮挡**（本 Task 的存在理由）：同一个 fixture 下，
     `transfers_to_heldout is False` **且** `position_stable is False` **且**
     `len(all_triggered_conditions) == 2` —— 即主标签没有把另一条事实吃掉
   - `axis_relation` 在 `primary_outcome` 是失败标签时**仍然要被计算并返回**（可以是 "inconclusive"），
     不得返回 None 了事
-- [ ] **Step 2: 实现，跑测试到绿**
-- [ ] **Step 3: 提交** `feat(topic4-stage3): freeze the outcome taxonomy before any simulation`
+- [x] **Step 2: 实现，跑测试到绿**（17 项）
+- [x] **Step 3: 提交** `feat(topic4-stage3): freeze the outcome taxonomy before any simulation`
 
 **验收：** 提交时间戳必须早于任何 Stage 3 仿真产物的时间戳。
 
@@ -299,11 +305,11 @@ Stage 2 把过拟合放在第一位，结果把所有科学问题都挡在门外
 4. 报告里**禁止**出现"最优位置是 (x, y)"。允许的是"得分较高的区域覆盖 …，
    在独立种子上确认后的值为 …（比建图值低 …）"
 
-- [ ] **Step 1**: 写 config 冻结器（网格、两个尺寸、建图种子、确认种子、校验和），提交
-- [ ] **Step 2**: 跑主地图（`sigma=1.2`），每格原子写单独 JSON，支持中断续跑
-- [ ] **Step 3**: 跑敏感性地图（`sigma=2.4`），同样落盘
-- [ ] **Step 4**: 定"得分较高的区域"（按上面第 2 条的规则，纯函数，有测试），跑确认种子
-- [ ] **Step 5**: 汇总 `sweep_summary.json`：每格四层量 + `n_valid` + 确认结果 + NaN 占比
+- [x] **Step 1**: 写 config 冻结器（网格、两个尺寸、建图种子、确认种子、校验和），提交
+- [x] **Step 2**: 跑主地图（`sigma=1.2`）—— 196/196，审计通过，每格原子写单独 JSON，支持中断续跑
+- [ ] **Step 3**: ~~跑敏感性地图（`sigma=2.4`）~~ **按预注册降级顺序砍掉（窗口不足）**，同样落盘
+- [x] **Step 4**: 定"得分较高的区域"（1 格）（按上面第 2 条的规则，纯函数，有测试），跑确认种子
+- [x] **Step 5**: 汇总 `sweep_summary.json`：每格四层量 + `n_valid` + 确认结果 + NaN 占比
 
 **⚠️ 报告纪律：** 若某一层在大片格点上是 NaN，**必须在汇总里显式报告 NaN 的占比**，
 不得只画有值的部分（等于静默截断，AGENTS.md 结果规范）。
