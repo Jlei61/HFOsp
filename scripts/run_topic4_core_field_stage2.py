@@ -170,6 +170,8 @@ def main():
     ap.add_argument("--hours", type=float, default=8.0, help="hard wall-clock cap")
     ap.add_argument("--out", default=OUT)
     ap.add_argument("--force-tier", default=None)
+    ap.add_argument("--max-evals", type=int, default=None,
+                    help="override the tier's evaluation ceiling when resuming")
     a = ap.parse_args()
     t_start = time.time()
     deadline = t_start + a.hours * 3600.0
@@ -193,6 +195,9 @@ def main():
             for i, n in enumerate([str(x) for x in fd["names"]])}
 
     tier = _budget_tier(a.out, a.force_tier)
+    if a.max_evals is not None:
+        tier = dict(tier, max_evals=int(a.max_evals),
+                    tier=tier["tier"] + f"+resumed_to_{a.max_evals}")
     train_seeds = list(TRAIN_SEEDS_FULL[:tier["seeds_per_candidate"]])
     stage2 = os.path.join(a.out, "stage2_optimization")
     os.makedirs(stage2, exist_ok=True)
