@@ -211,3 +211,55 @@ def coverage_matched_axis_only(model, axial_projection, support=None):
     out["coverage_union"] = len(set(fwd) | set(rev)) / n_sup
     out["mean_n_part"] = float(np.mean([len(fwd), len(rev)]))
     return out
+
+
+# --------------------------------------------------------------------------
+# Stage 3: recruitment enters the candidate key (spec section 9.3)
+#
+# Stage 2 optimised the template match inside the two-direction tier and
+# converged on a filament that had plenty to say in one direction and almost
+# nothing in the other. A union count over both directions rewards exactly that
+# failure, so the load-bearing quantity is the SMALLER of the two directions;
+# the union stays a reported number and never enters the key (spec section 5.5).
+# --------------------------------------------------------------------------
+
+COVERAGE_TIER_STEP = 3
+
+
+def recruited_per_direction(events, support, part_min):
+    """(forward, reverse) counts of frozen-support contacts ever recruited."""
+    support = set(support)
+    seen = {1: set(), -1: set()}
+    for ev in events:
+        sign = ev.get("sign")
+        if sign is None or int(ev.get("n_part", 0)) < int(part_min):
+            continue
+        side = 1 if float(sign) > 0 else -1
+        for name, rank in (ev.get("ranks") or {}).items():
+            if rank is not None and name in support:
+                seen[side].add(name)
+    return len(seen[1]), len(seen[-1])
+
+
+def recruited_contacts(events, support, part_min):
+    """The load-bearing count: min over the two directions. One-sided runs give 0."""
+    return int(min(recruited_per_direction(events, support, part_min)))
+
+
+def coverage_tier(n_recruited, step=COVERAGE_TIER_STEP):
+    """Coarse tier, not a continuous weight.
+
+    The read-out is sparse enough that a continuous coverage weight would let
+    noise masquerade as signal; tiering absorbs it, as in the direction tier.
+    """
+    return int(int(n_recruited) // int(step))
+
+
+def candidate_key3(n_dir, n_recruited, s_rank):
+    """(n_dir, coverage_tier, S_rank), larger is better.
+
+    S_rank is never differenced across tiers -- same rule as candidate_key.
+    """
+    s = float(s_rank)
+    return (int(n_dir), coverage_tier(n_recruited),
+            s if np.isfinite(s) else -np.inf)
