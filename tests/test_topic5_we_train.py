@@ -155,3 +155,34 @@ def test_thin_fits_are_flagged(tmp_path):
     fit_id = _tiny_cache(tmp_path, n_events=180)
     m = train_unit(fit_id, "SPATIAL_SET", 0, _cfg(), tmp_path, torch.device("cpu"))
     assert m["thin"] is True and m["n_train"] < 500
+
+
+def test_unit_writes_a_functional_portrait_a_lesion_and_its_weights(tmp_path):
+    fit_id = _tiny_cache(tmp_path, n_events=400, n_contacts=8, n_nodes=24)
+    train_unit(fit_id, "SPATIAL_SET", 0, _cfg(), tmp_path, torch.device("cpu"))
+    d = tmp_path / "per_subject" / fit_id / "SPATIAL_SET_rnn" / "seed0"
+    tuning = np.load(d / "tuning.npz") if (d / "tuning.npz").exists() else np.load(d / "unit_tuning.npz")
+    assert tuning["tuning"].shape == (24, 8)   # six progress bins plus two modes
+    assert (d / "weights.pt").exists()
+    lesion = json.loads((d / "lesion.json").read_text())
+    if "skipped" not in lesion:
+        assert lesion["module_size"] >= 1
+        assert "matched_patch_delta_next_bce" in lesion
+        assert len(lesion["matched_patch"]) == lesion["module_size"]
+
+
+def test_the_lesion_control_patch_is_matched_not_scattered(tmp_path):
+    import numpy as _np
+    from src.topic5_we_readouts import matched_contiguous_patch
+    from src.topic5_wiring_economy_rnn import initial_mask
+    rng = _np.random.default_rng(0)
+    xy = rng.uniform(-30, 30, size=(60, 2))
+    d = _np.linalg.norm(xy[:, None] - xy[None], axis=-1)
+    mask = initial_mask(60, 0.1, d, spatial=True, seed=1) > 0
+    strength = _np.abs(rng.normal(size=(60, 60)))
+    members = _np.array(sorted(rng.choice(60, size=10, replace=False)))
+    patch = matched_contiguous_patch(mask, strength, d, xy, members, seed=2)
+    assert len(patch) == len(members)
+    spread = lambda idx: float(_np.linalg.norm(xy[idx] - xy[idx].mean(0), axis=1).mean())
+    scattered = rng.choice(60, size=10, replace=False)
+    assert spread(patch) < spread(scattered)
