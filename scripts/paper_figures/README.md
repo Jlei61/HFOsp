@@ -106,8 +106,8 @@ python scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py \
   --subject epilepsiae_1146
 ```
 
-For E1146 this command defaults to the accepted direction-qualified TB event 829; pass
-`--use-medoid-tb` only for the archived medoid sensitivity view.
+For E1146 this command defaults to the accepted direction-qualified TA event 6344 and TB event 829;
+pass `--use-medoid-ta` or `--use-medoid-tb` only for archived medoid sensitivity views.
 
 Default output:
 
@@ -117,21 +117,34 @@ results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/
 
 This producer emits the same E1146 single-event representative material as PNG + vector PDF and a
 synchronized TA/TB GIF (one exemplar per row, not an event train). Each row is laid out as a narrow
-`Sample from TA/TB` readout, seven event-envelope frames including explicit 0 ms, and the frozen
+`Sample from TA/TB` readout, five joint-visible event-envelope frames, and the frozen
 population TA/TB propagation-rank field. The event field uses participant-only support, a 6 mm
-display kernel, `magma`, and one shared A/B robust-z `vmax`; the static template field uses `viridis`
+display kernel and the muted low-salience `fig2c_muted_bluegray` map. TA and TB are each divided by
+their own participant-only robust-z q99 from the complete display window and clipped to 0–1; this
+improves within-event propagation visibility but removes absolute amplitude comparison between rows.
+The static template field uses `viridis`
 with the frozen artifact's actual rank range (E1146: 0–14), `ranks` above each colorbar, and separate
 early/late endpoint text. The readout x limits use the common intersection of the two real STFT
-windows so neither row has an event-specific white edge strip. The GIF uses the same exemplars and geometry at a 2 ms biological step;
+windows so neither row has an event-specific white edge strip. The black readout line marks `t=0`;
+the static montage does not add a near-duplicate zero frame. The GIF uses the same exemplars and geometry at a 2 ms biological step;
 default playback is 12 fps, which is display metadata rather than biological time.
+
+For the E1146 v6 static montage, a deterministic contact-level state-separation selector returns
+`0, +10, +26, +36, +44 ms`: adjacent frames are at least 8 ms apart, both rows pass a 0.38 axial visibility floor,
+and every adjacent pair differs by at least 0.10 RMS in both normalized axial-contact envelope states while the
+overall TA/TB centroid trends remain opposite. Rendered field
+pixels never enter frame selection; the complete `−8…+50 ms` interval remains in the GIF.
 
 Future multi-event GIFs require a separate producer/spec for event boundaries, inter-event gaps,
 per-event t0 and sampling. Do not extend this single-event renderer by concatenating events.
 
-If the default TB medoid is measurable but visually discontinuous, generate a locked-scale audit
-screen before changing the canonical exemplar:
+If a default medoid is measurable but visually discontinuous or weak along the shared axis, generate
+a locked-scale audit screen before changing the canonical exemplar:
 
 ```bash
+python scripts/paper_figures/screen_fig2c_ta_event_candidates.py \
+  --subject epilepsiae_1146 --top-k 500 --n-candidates 8
+
 python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
   --subject epilepsiae_1146 --top-k 500 --n-candidates 4
 
@@ -139,10 +152,12 @@ python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
   --subject epilepsiae_1146 --gif-event-pos 829 --mark-selected-for-fig2c
 ```
 
-The screen keeps TA, geometry, support, sigma, frame window and global field scale fixed. It ranks
-raw centroid/envelope metrics rather than image pixels, requires usable participation on both E1146
-shafts, and writes figures plus CSV/JSON under
-`results/paper-ready-figure/fig2c_interictal_event_envelope_field/tb_candidate_screen/`. A selected
+The screens keep the opposite exemplar, geometry, support, sigma, frame window and global field scale
+fixed. They rank raw centroid/envelope metrics rather than image pixels and require usable participation
+on both E1146 shafts. The TA screen additionally scores axial-shaft amplitude and the five-frame axial
+energy-centroid trajectory, which prevents a strong transverse shaft from masquerading as clear
+left-to-right propagation. Outputs are written under the corresponding `ta_candidate_screen/` and
+`tb_candidate_screen/` directories. A selected
 replacement is a direction-qualified illustrative exemplar, not an unconditional representative
 event. The explicit selection flag records the accepted representative TB event in screen metadata;
 it does not upgrade that single event to cohort evidence or overwrite the canonical Fig2-C output.
@@ -156,7 +171,7 @@ docs/fig2c_interictal_event_envelope_field_spec.md
 Do not copy the renderer or relabel this template-conditioned representative figure as template-free
 or cohort-level evidence.
 
-## Fig2-F Shared-field Reversal Last Row
+## Fig2-E+F Shared-field Reversal Joint Row
 
 Formal entry point:
 
@@ -170,7 +185,9 @@ Default output:
 results/paper-ready-figure/fig2_shared_field_reversal/figures/
 ```
 
-This is a full-width Figure 2 last-row candidate. It includes all 12 patients with a frozen shared
+This is a full-width Figure 2E+F joint-row candidate. Figure 2E is the left block of four paired
+TA/TB shared-axis rank-field examples; Figure 2F is the right block containing the complete cohort
+distribution and spatial null. It includes all 12 patients with a frozen shared
 axis and supported 2-D geometry, with no same/reversed/different or strict-stability strata. The left
 block reuses the canonical interictal Viridis renderer for the locked manuscript IDs E15/E14/E13/Y9 negative-field
 examples, selected for legible 2-D geometry; E958 is excluded because its contacts are dense/tall and
@@ -253,15 +270,26 @@ Default output:
 results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/
 ```
 
-The default scans E1146's 25 complete, exact 1–150 Hz clinical checkpoints and selects seizure 15,
-the maximum positive `shared_a_signed` example. The left panel is the frozen TA timing field with a
-red semantic `TA fields` title; the right is clinical 0–10 s distal-baseline robust-z power rendered
-with `magma_r`, continuous min-max interpolation, no rank and no sign flip. Both panels use the same
+The default is the visually locked E1146 seizure 2, selected from four morphology-aware positive-power
+TA candidates after auditing all 25 complete, exact 1–150 Hz clinical checkpoints. The left panel is the frozen TA timing field with a
+red semantic `TA fields` title; the right is `Early-ictal broadband power`, showing clinical 0–10 s
+distal-baseline robust-z power with `Blues`, continuous min-max interpolation, no rank and no sign flip. Both panels use the same
 frozen shared plane, contact order, TA support, extent and 6 mm display sigma; each panel has its own
 x label. Colorbars report raw propagation rank and robust-z values, with dark colors consistently
-meaning earliest propagation or highest broadband power.
+meaning earliest propagation or highest broadband power. The left colorbar is titled `ranks`; the
+right colorbar retains the positive robust-z values (`+1.03` to `+3.68`) rather than normalized labels.
 
 Full contract: `docs/fig3b_interictal_ictal_shared_field_spec.md`.
+
+Morphology-aware positive-power review candidates:
+
+```bash
+python scripts/paper_figures/plot_fig3b_positive_ta_candidates.py
+```
+
+This audit adds local source-topology checks to the global TA score and writes seizure 2, 10, 23,
+and 1 previews under `figures/candidates_positive_ta_morphology/`. Seizure 2 is the visually locked
+formal Fig3-B exemplar; the other previews remain selection provenance only.
 
 ## Fig3 Field Concordance Cohort Statistic (panel letter pending)
 
@@ -293,6 +321,24 @@ Current visual contract:
 - no background grid lines
 - Null is the matched channel-shuffle median
 - interpretation: shared coarse field axis, not pointwise directional replay
+
+## Fig3-E Peri-Onset Field Similarity
+
+Formal visual-template entry point:
+
+```bash
+python scripts/paper_figures/plot_fig3_peri_onset_field_similarity.py \
+  --subject epilepsiae_1146 \
+  --source-csv results/paper-ready-figure/fig3_peri_onset_field_similarity/runs/20260718T071020Z_d99c96ec/artifacts/field_dynamics_signed/epilepsiae_1146_signed_broadband_1_150Hz_similarity_timecourse_m120_p20_10s_step2s_per_seizure.csv \
+  --design-variant journal_clean \
+  --out-dir results/paper-ready-figure/fig3_peri_onset_field_similarity/design_variants/figures
+```
+
+The registered Fig3-E template is a flat, title-free E1146 two-panel trajectory. It omits internal
+panel letters and gray provenance text, hides top/right spines, gives each panel its own `Time (s)`
+x label, and uses compact y labels. The signed red/blue curves are labeled only `TA` and `TB`.
+The figure remains a subject-level descriptive readout; R3 quantitative artifacts may retain their
+historical `fig3c_*` contract names for provenance.
 
 ## Fig5-A Core Model Stage-3 Brake-Off
 

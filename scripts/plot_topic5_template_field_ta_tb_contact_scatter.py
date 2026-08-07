@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 from pathlib import Path
 
 import matplotlib
@@ -19,14 +20,17 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 
-from plot_topic5_interictal_template_ab_fields import (
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from scripts.plot_topic5_interictal_template_ab_fields import (
     DEFAULT_YUQUAN_CROSSWALK,
     _display_name,
     _load_yuquan_crosswalk,
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_INPUT = ROOT / "results/interictal_propagation_masked/template_gradient_fields"
 DEFAULT_OUTPUT = DEFAULT_INPUT / "figures"
 RELATION_ORDER = ("reversed", "same", "different")
@@ -91,10 +95,31 @@ def _load_rows(input_root: Path, yuquan_labels: dict[str, str]) -> list[dict]:
     return rows
 
 
-def _draw_subject(ax: plt.Axes, row: dict, limit: float) -> None:
+def draw_contact_field_scatter(
+    ax: plt.Axes,
+    row: dict,
+    limit: float,
+    *,
+    line_color: str | None = None,
+    title_color: str | None = None,
+    title: str | None = None,
+    annotation: str | None = None,
+    point_size: float = 29,
+    title_size: float = 9.3,
+    annotation_size: float = 7.2,
+) -> None:
+    """Draw one exact contact-field TA-vs-TB scatter.
+
+    This public painter is shared by the diagnostic atlas and the paper-ready
+    Figure 2 cohort row.  ``row['ta']``/``row['tb']`` are the exact contact-
+    evaluated fields used to calculate ``row['r']``; no field is rebuilt here.
+    """
     ta = row["ta"]
     tb = row["tb"]
-    relation_color = RELATION_COLORS[row["relation"]]
+    relation_color = str(
+        line_color or RELATION_COLORS.get(str(row.get("relation")), "#3E6F8E")
+    )
+    heading_color = str(title_color or relation_color)
     ax.plot([-limit, limit], [-limit, limit], color="0.82", linewidth=0.8, linestyle=":", zorder=0)
     ax.plot([-limit, limit], [limit, -limit], color="0.82", linewidth=0.8, linestyle="--", zorder=0)
     ax.axhline(0.0, color="0.9", linewidth=0.65, zorder=0)
@@ -109,7 +134,7 @@ def _draw_subject(ax: plt.Axes, row: dict, limit: float) -> None:
         ax.scatter(
             ta[keep],
             tb[keep],
-            s=29,
+            s=point_size,
             facecolors=shaft_color[shaft],
             edgecolors="white",
             linewidths=0.75,
@@ -132,18 +157,18 @@ def _draw_subject(ax: plt.Axes, row: dict, limit: float) -> None:
     ax.text(
         0.04,
         0.95,
-        f"r={row['r']:+.2f} · n={row['n_contacts']}",
+        annotation or f"r={row['r']:+.2f} · n={row['n_contacts']}",
         transform=ax.transAxes,
         ha="left",
         va="top",
-        fontsize=7.2,
+        fontsize=annotation_size,
         color="0.18",
     )
     ax.set_title(
-        row["display_id"],
-        fontsize=9.3,
+        str(title or row["display_id"]),
+        fontsize=title_size,
         fontweight="bold",
-        color=relation_color,
+        color=heading_color,
         pad=2.0,
     )
     for spine in ax.spines.values():
@@ -155,6 +180,11 @@ def _draw_subject(ax: plt.Axes, row: dict, limit: float) -> None:
     ax.set_xticks([-2, 0, 2])
     ax.set_yticks([-2, 0, 2])
     ax.tick_params(labelsize=6.5, length=2.5, pad=1.5)
+
+
+def _draw_subject(ax: plt.Axes, row: dict, limit: float) -> None:
+    """Backward-compatible atlas wrapper."""
+    draw_contact_field_scatter(ax, row, limit)
 
 
 def plot_atlas(rows: list[dict], out_png: Path, out_pdf: Path) -> None:

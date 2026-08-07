@@ -4,7 +4,7 @@
 This is an audit/screening producer, not the accepted Fig. 2c producer.  It keeps the
 canonical TA exemplar fixed, excludes the current TB medoid from the alternatives, and
 ranks raw-EEG-derived TB candidates without inspecting rendered pixels.  All comparison
-figures share one frame window, field geometry, display sigma, and global TA/TB vmax.
+figures share one frame window, field geometry, display sigma, and per-event q99 normalization rule.
 """
 from __future__ import annotations
 
@@ -24,6 +24,7 @@ if str(ROOT) not in sys.path:
 
 import src.topic5_interictal_event_field as ief  # noqa: E402
 from scripts.plot_topic5_interictal_event_envelope_field import (  # noqa: E402
+    CMAP_NAME,
     GIF_FPS,
     GIF_STEP_MS,
     OUT as EVENT_FIELD_OUT,
@@ -156,7 +157,7 @@ def _select_distinct_blocks(rows, n):
 
 
 def _write_readme(
-    figures_dir, selected, current, global_vmax, *, selected_for_fig2c_event_pos=None,
+    figures_dir, selected, current, raw_global_q99, *, selected_for_fig2c_event_pos=None,
 ):
     blocks = []
     all_rows = [("current_reference", current)] + [
@@ -180,8 +181,9 @@ def _write_readme(
         )
         blocks.append(
             f"### {filename}\n\n"
-            f"{status}；TA exemplar、shared plane、6 mm display kernel、−8…+50 ms frame "
-            f"window 和联合色标均固定。TB 沿 {row['axial_shaft']} 的质心-轴 Spearman="
+            f"{status}；TA exemplar、shared plane、6 mm display kernel 和 −8…+50 ms frame "
+            f"window 固定；每行按本事件完整窗 q99 归一化到 0–1。TB 沿 "
+            f"{row['axial_shaft']} 的质心-轴 Spearman="
             f"{row['centroid_vs_axis_rho']:+.3f}，中段可用 {row['n_middle_usable']}/"
             f"{row['n_middle_expected']}，中段最低 peak-z={row['middle_peak_z_min']:.1f}，"
             f"左端减右端质心时差={row['left_minus_right_centroid_ms']:.1f} ms；"
@@ -200,7 +202,7 @@ def _write_readme(
                 f"同一 TA 与 TB event {row['event_pos']} 的动态版本；生物学步长 "
                 f"{gif['biological_step_ms']:.0f} ms，播放 {gif['playback_fps']:.0f} fps，"
                 f"并复用静态候选的 −8…+50 ms 窗口、participant-only support、6 mm "
-                f"display kernel 和联合 vmax。\n\n"
+                f"display kernel 和同一事件的冻结 q99 归一化分母。\n\n"
                 f"**关注点**：观察 TB 两根杆参与时热区从 shared-axis 右端向中部/左端转移；"
                 f"播放速度不代表真实生物学时间倍率。"
             )
@@ -212,8 +214,9 @@ def _write_readme(
     text = (
         "# Fig2-C E1146 TB 单事件候选筛查\n\n"
         "所有图固定同一个 TA exemplar，并锁定 frozen geometry、participant-only support、"
-        f"6 mm display kernel、−8…+50 ms frame window 与全候选联合 vmax={global_vmax:.3f}。"
-        "每行依次显示单事件 readout、含 0 ms 的 robust-z HFO envelope frames、以及冻结的 "
+        f"6 mm display kernel 与 −8…+50 ms frame window。每行按本事件完整窗 q99 归一化"
+        f"到 0–1；全候选联合 raw robust-z q99={raw_global_q99:.3f} 仅作幅度审计，不作显示上限。"
+        "每行依次显示单事件 readout、5 个 joint-visible normalized HFO envelope frames、以及冻结的 "
         "viridis template propagation-rank field；readout 取两次真实 STFT 窗交集，rank colorbar "
         "显示 artifact 实际数值。候选按原始 readout 指标筛选，不读取渲染"
         f"像素；{selection_text}\n\n"
@@ -316,7 +319,6 @@ def run(ds_sid="epilepsiae_1146", *, output_dir=DEFAULT_OUT, n_candidates=4, top
         render(
             ds_sid, fz, ta, tb, ta_stats, event_stats(tb, fz), png,
             support_mode="participant", dpi=150, frame_window=FRAME_WINDOW_MS,
-            vmax_override=global_vmax,
         )
         row["figure_name"] = png.name
 
@@ -331,9 +333,11 @@ def run(ds_sid="epilepsiae_1146", *, output_dir=DEFAULT_OUT, n_candidates=4, top
             source=current_source,
         ),
         display_contract=dict(
-            frame_window_ms=list(FRAME_WINDOW_MS), global_vmax=float(global_vmax),
+            frame_window_ms=list(FRAME_WINDOW_MS),
+            raw_global_q99_robust_z_for_audit=float(global_vmax),
+            normalization="per-event participant-only complete-window q99 to 0..1",
             display_sigma_mm=float(fz["display_sigma_mm"]), support="participant-only",
-            cmap="magma", geometry="frozen shared plane",
+            cmap=CMAP_NAME, geometry="frozen shared plane",
         ),
         screening_contract=dict(
             expected_middle_contacts=expected_middle,
@@ -422,17 +426,18 @@ def render_candidate_gif(
     png_name = selected["figure_name"]
     gif_path = figures_dir / f"{Path(png_name).stem}.gif"
     display = payload["display_contract"]
+    raw_global_q99 = float(display.get(
+        "raw_global_q99_robust_z_for_audit", display.get("global_vmax", np.nan),
+    ))
     static_meta = render(
         ds_sid, fz, ta, tb, event_stats(ta, fz), event_stats(tb, fz),
         figures_dir / png_name, support_mode="participant", dpi=150,
         frame_window=display["frame_window_ms"],
-        vmax_override=float(display["global_vmax"]),
     )
     gif_meta = render_gif(
         ds_sid, fz, ta, tb, event_stats(ta, fz), event_stats(tb, fz), gif_path,
         support_mode="participant", step_ms=float(step_ms), fps=float(fps),
         frame_window=display["frame_window_ms"],
-        vmax_override=float(display["global_vmax"]),
     )
     selected["static"] = static_meta
     selected["gif"] = gif_meta
@@ -445,7 +450,7 @@ def render_candidate_gif(
     meta_path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding="utf-8")
     _write_readme(
         figures_dir, payload["selected"], payload["current_reference"],
-        float(display["global_vmax"]),
+        raw_global_q99,
         selected_for_fig2c_event_pos=payload.get("selected_for_fig2c_event_pos"),
     )
     print(f"[candidate-gif] {gif_path}", flush=True)

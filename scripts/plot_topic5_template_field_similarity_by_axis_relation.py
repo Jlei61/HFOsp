@@ -1,5 +1,10 @@
 #!/usr/bin/env python3
-"""Plot TA/TB interictal-field similarity by template-axis relation.
+"""Archived exploratory TA/TB field comparison by template-axis relation.
+
+This is not the canonical field-reversal analysis.  The current estimand uses
+only subjects with a frozen shared axis and supported 2D geometry, without
+same/reversed/different or strict-stability grouping; see
+``run_topic5_shared_template_field_similarity.py``.
 
 The primary figure follows the frozen field contract:
 

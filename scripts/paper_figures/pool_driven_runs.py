@@ -26,6 +26,17 @@ def _load(tag):
 def pool(source_tag, sink_tag, pooled_tag, half_ms=2500.0):
     sro, sfd = _load(source_tag)            # source core only -> forward template
     kro, kfd = _load(sink_tag)              # sink core only   -> reverse template
+    if sro.get("lesion") != "source" or kro.get("lesion") != "sink":
+        raise ValueError("paired pool requires source-only then sink-only input")
+    for key in ("subject", "montage", "placement", "seed", "k_dir"):
+        if sro.get(key) != kro.get(key):
+            raise ValueError(f"paired-arm {key} mismatch: {sro.get(key)} != {kro.get(key)}")
+    for key in ("contacts", "names", "posE", "foci"):
+        if not np.array_equal(np.asarray(sfd[key]), np.asarray(kfd[key])):
+            raise ValueError(f"paired-arm {key} mismatch")
+    for key in ("L", "core_r", "core_mean", "theta_deg"):
+        if not np.isclose(float(sfd[key]), float(kfd[key])):
+            raise ValueError(f"paired-arm {key} mismatch")
     kd = int(sro.get("k_dir", 2)); part_min = 2 * kd
 
     # directional events: source -> forward, sink -> reverse (the driven direction of each)
@@ -62,6 +73,10 @@ def pool(source_tag, sink_tag, pooled_tag, half_ms=2500.0):
     for e in pooled_events:
         union |= {n for n, v in (e.get("ranks") or {}).items() if v is not None}
     out = dict(sro)
+    source_duration_ms = float(st[-1] + np.median(np.diff(st)))
+    sink_duration_ms = float(kt[-1] + np.median(np.diff(kt)))
+    if not np.isclose(source_duration_ms, sink_duration_ms):
+        raise ValueError("paired-arm simulation duration mismatch")
     out.update(subject=sro["subject"], montage=sro["montage"], lesion="driven_pooled",
                placement=sro["placement"], k_dir=kd,
                n_events=len(pooled_events), n_clean=len(pooled_events),
@@ -71,6 +86,12 @@ def pool(source_tag, sink_tag, pooled_tag, half_ms=2500.0):
                per_event_cov=round(float(np.mean(npall) / valid), 3),
                union_cov=round(len(union) / valid, 3),
                source_tag=source_tag, sink_tag=sink_tag,
+               source_duration_ms=source_duration_ms,
+               sink_duration_ms=sink_duration_ms,
+               paired_simulation_duration_ms=source_duration_ms + sink_duration_ms,
+               paired_arm_contract=(
+                   "same seed and network realization; source-only and sink-only threshold arms"
+               ),
                events=pooled_events, readout_window_events=win_events)
     json.dump(out, open(os.path.join(RUN, f"readout_{pooled_tag}.json"), "w"), indent=2)
 

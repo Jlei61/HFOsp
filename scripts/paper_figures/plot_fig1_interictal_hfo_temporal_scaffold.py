@@ -375,6 +375,142 @@ def _place_panel_c_colorbar(fig: plt.Figure, image, ax_cbar: plt.Axes) -> None:
     cbar.ax.tick_params(labelsize=8.5, length=2)
 
 
+def _draw_fig1e_cluster_row(
+    fig: plt.Figure,
+    outer,
+    row: int,
+    arr: dict,
+    *,
+    display_label: str = "",
+    panel_label: str = "",
+    show_colorbar: bool = True,
+    show_heatmap_xlabel: bool = True,
+    show_mean_xlabel: bool = True,
+    display_label_fontweight: str = "bold",
+    display_label_fontsize: float = 10,
+    display_label_y: float = 1.17,
+    heatmap_ytick_fontsize: float = 9.5,
+    cluster_label_fontsize: float = 10,
+    mean_label_fontsize: float = 10.5,
+    mean_xtick_fontsize: float = 8.5,
+) -> dict:
+    """Draw one clustered-template row with the exact Figure-1E painter.
+
+    This is the single accepted drawing entry point for the clustered event
+    heatmap, TA/TB separator, masked phantom cells, colorbar, and cluster mean
+    rank profile.  Supplementary multi-patient examples call this function
+    directly so they cannot silently drift into a different visual contract.
+    """
+    ax_cluster, ax_cluster_dummy, ax_cbar, ax_mean = _panel_c_row_axes(
+        fig, outer, row
+    )
+    ax_cluster_dummy.axis("off")
+    ranks = arr["ranks"]
+    bools = arr["bools"]
+    channel_order = arr["channel_order"]
+    clustered_events = arr["clustered_events_all"]
+    im = propagation_plot._plot_rank_heatmap(
+        ax_cluster,
+        ranks[channel_order][:, clustered_events],
+        arr["ordered_names"],
+        title="",
+        display_bools=bools[channel_order][:, clustered_events],
+        ytick_fontsize=heatmap_ytick_fontsize,
+        title_fontsize=12,
+        xtick_fontsize=8,
+    )
+    cluster_boundary = int(np.sum(arr["clustered_labels_all"] == 0))
+    gap_half_width = max(24, int(round(0.006 * clustered_events.size)))
+    ax_cluster.axvspan(
+        cluster_boundary - gap_half_width,
+        cluster_boundary + gap_half_width,
+        facecolor="white",
+        edgecolor="0.62",
+        hatch="////",
+        linewidth=0.0,
+        zorder=12,
+    )
+    ax_cluster.plot(
+        [cluster_boundary - gap_half_width, cluster_boundary + gap_half_width],
+        [0.0, 0.0],
+        transform=ax_cluster.get_xaxis_transform(),
+        color="white",
+        lw=4,
+        solid_capstyle="butt",
+        clip_on=False,
+        zorder=13,
+    )
+    propagation_plot._plot_cluster_boundaries(
+        ax_cluster,
+        arr["clustered_labels_all"],
+        ranks.shape[0],
+        line_color="#d00000",
+        line_width=0.0,
+        line_style="-",
+        label_fontsize=cluster_label_fontsize,
+        label_box=False,
+        boundary_band=False,
+        label_names=["TA", "TB"],
+        label_y_offset=0.5,
+    )
+    if show_heatmap_xlabel:
+        ax_cluster.set_xlabel("Population events (clustered)", fontsize=10.5)
+    else:
+        ax_cluster.set_xlabel("")
+        ax_cluster.tick_params(axis="x", bottom=False, labelbottom=False)
+    propagation_plot._plot_cluster_rank_fig4(
+        ax_mean,
+        ranks,
+        bools,
+        arr["valid_events"],
+        arr["labels"],
+        channel_order,
+        arr["channel_names"],
+        title="",
+        label_fontsize=mean_label_fontsize,
+        title_fontsize=10,
+        xtick_fontsize=mean_xtick_fontsize,
+        legend_fontsize=7,
+        show_legend=False,
+        invert_yaxis=False,
+        show_ylabels=False,
+        marker_size=3.5,
+    )
+    if show_mean_xlabel:
+        ax_mean.set_xlabel("Rank", fontsize=10.5)
+    else:
+        ax_mean.set_xlabel("")
+        ax_mean.tick_params(axis="x", bottom=False, labelbottom=False)
+    if show_colorbar:
+        _place_panel_c_colorbar(fig, im, ax_cbar)
+    else:
+        ax_cbar.axis("off")
+    if display_label:
+        ax_cluster.text(
+            0.0,
+            display_label_y,
+            display_label,
+            transform=ax_cluster.transAxes,
+            ha="left",
+            va="bottom",
+            fontsize=display_label_fontsize,
+            fontweight=display_label_fontweight,
+            clip_on=False,
+        )
+    if panel_label:
+        _panel_label(ax_cluster, panel_label, x=-0.06, y=1.25)
+    return {
+        "axes": {
+            "heatmap": ax_cluster,
+            "colorbar": ax_cbar,
+            "mean_rank": ax_mean,
+        },
+        "cluster_boundary": cluster_boundary,
+        "gap_half_width": gap_half_width,
+        "image": im,
+    }
+
+
 def _render_exemplar_panel(
     output_dir: Path,
     c1_arr: dict,
@@ -446,78 +582,12 @@ def _render_exemplar_panel(
     )
     _panel_label(ax_raw, "c1", x=-0.06, y=1.22)
 
-    # c2: clustered opposing templates. No metric/header title is displayed.
-    ax_cluster, ax_cluster_dummy, ax_cbar2, ax_mean = _panel_c_row_axes(fig, outer, 1)
-    ax_cluster_dummy.axis("off")
-    ranks = c2_arr["ranks"]
-    bools = c2_arr["bools"]
-    channel_order = c2_arr["channel_order"]
-    clustered_events = c2_arr["clustered_events_all"]
-    im2 = propagation_plot._plot_rank_heatmap(
-        ax_cluster,
-        ranks[channel_order][:, clustered_events],
-        c2_arr["ordered_names"],
-        title="",
-        display_bools=bools[channel_order][:, clustered_events],
-        ytick_fontsize=9.5,
-        title_fontsize=12,
-        xtick_fontsize=8,
+    # c2: clustered opposing templates, using the shared Figure-1E painter.
+    c2_draw = _draw_fig1e_cluster_row(
+        fig, outer, 1, c2_arr, panel_label="c2"
     )
-    cluster_boundary = int(np.sum(c2_arr["clustered_labels_all"] == 0))
-    gap_half_width = max(24, int(round(0.006 * clustered_events.size)))
-    ax_cluster.axvspan(
-        cluster_boundary - gap_half_width,
-        cluster_boundary + gap_half_width,
-        facecolor="white",
-        edgecolor="0.62",
-        hatch="////",
-        linewidth=0.0,
-        zorder=12,
-    )
-    ax_cluster.plot(
-        [cluster_boundary - gap_half_width, cluster_boundary + gap_half_width],
-        [0.0, 0.0],
-        transform=ax_cluster.get_xaxis_transform(),
-        color="white",
-        lw=4,
-        solid_capstyle="butt",
-        clip_on=False,
-        zorder=13,
-    )
-    propagation_plot._plot_cluster_boundaries(
-        ax_cluster,
-        c2_arr["clustered_labels_all"],
-        ranks.shape[0],
-        line_color="#d00000",
-        line_width=0.0,
-        line_style="-",
-        label_fontsize=10,
-        label_box=False,
-        boundary_band=False,
-        label_names=["TA", "TB"],
-        label_y_offset=0.5,
-    )
-    ax_cluster.set_xlabel("Population events (clustered)", fontsize=10.5)
-    propagation_plot._plot_cluster_rank_fig4(
-        ax_mean,
-        ranks,
-        bools,
-        c2_arr["valid_events"],
-        c2_arr["labels"],
-        channel_order,
-        c2_arr["channel_names"],
-        title="",
-        label_fontsize=10.5,
-        title_fontsize=10,
-        xtick_fontsize=8.5,
-        legend_fontsize=7,
-        show_legend=False,
-        invert_yaxis=False,
-        show_ylabels=False,
-        marker_size=3.5,
-    )
-    _place_panel_c_colorbar(fig, im2, ax_cbar2)
-    _panel_label(ax_cluster, "c2", x=-0.06, y=1.16)
+    cluster_boundary = int(c2_draw["cluster_boundary"])
+    gap_half_width = int(c2_draw["gap_half_width"])
 
     for stale_stem in ("fig1-panelc1", "fig1-panelc2"):
         for suffix in (".png", ".pdf"):

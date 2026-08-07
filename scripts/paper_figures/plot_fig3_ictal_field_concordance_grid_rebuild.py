@@ -105,26 +105,120 @@ def fig_cohort(subj, cohort, method):
     (FIGDIR / "field_concordance_cohort_stat_metadata.json").write_text(json.dumps(meta, indent=2))
 
 
-def fig_multiband(mb_subj, mb_cohort):
+def fig_multiband(mb_subj, mb_cohort, *, panel_label="", significance_mode="fwer"):
+    """Render the main-figure seven-band gradient-R3 FWER panel.
+
+    The statistical contract is unchanged from the calculation artifact: each
+    dot is one subject-level observed-minus-own-null margin, the black bar is
+    the cohort median, and colour/star status comes only from the coherent
+    seven-band maxT pFWER.  This compact renderer deliberately omits a title
+    and exact p-value prose so the panel can be read at journal column scale.
+    """
     subject_deltas = {b: mb_subj[mb_subj.band == b].delta.dropna().tolist() for b in BAND_ORDER}
     cohort_medians = {r.band: float(r.delta_cohort_median) for r in mb_cohort.itertuples()}
-    pvalues = {r.band: float(r.seven_band_maxt_pfwer) for r in mb_cohort.itertuples()}
-    sizes = {r.band: int(r.n_subjects) for r in mb_cohort.itertuples()}
+    if significance_mode == "fwer":
+        pvalue_column = "seven_band_maxt_pfwer"
+        output_stem = "multiband_field_concordance_stat"
+    elif significance_mode == "raw-coherent":
+        pvalue_column = "coherent_cohort_spatial_null_p"
+        output_stem = "multiband_field_concordance_raw_p95_sensitivity"
+    else:
+        raise ValueError(f"unknown significance_mode: {significance_mode}")
+    pvalues = {r.band: float(getattr(r, pvalue_column)) for r in mb_cohort.itertuples()}
     n = int(mb_cohort.n_subjects.max())
-    npass = int((mb_cohort.seven_band_maxt_pfwer < 0.05).sum())
-    plot_null_per_band_figure(
-        BAND_ORDER, BAND_LABELS, subject_deltas, cohort_medians, pvalues, sizes,
-        f"Gradient R3 field concordance · seven bands · onset 0–10 s (n={n}) · {npass}/7 pass FWER",
-        FIGDIR / "multiband_field_concordance_stat.png",
-        ylabel="R3 grid-field concordance − all-contact null median\n(subject-level Δ)",
-        save_pdf=True, show_exact_annotations=False, figsize=(11.8, 6.6))
-    meta = {"figure": "multiband_field_concordance_stat",
-            "stars": "seven-band coherent maxT pFWER (< 0.05)",
+    npass = int((mb_cohort[pvalue_column] < 0.05).sum())
+
+    sig_color = "#B64F4F"
+    ns_color = "#D7D7D7"
+    point_color = "#333333"
+    rng = np.random.default_rng(17)
+    fig, ax = plt.subplots(figsize=(7.4, 4.8))
+
+    all_values = []
+    for xi, band in enumerate(BAND_ORDER):
+        values = np.asarray(subject_deltas[band], dtype=float)
+        values = values[np.isfinite(values)]
+        all_values.extend(values.tolist())
+        significant = bool(np.isfinite(pvalues[band]) and pvalues[band] < 0.05)
+        color = sig_color if significant else ns_color
+
+        if len(values) >= 2 and np.nanmax(values) > np.nanmin(values):
+            violin = ax.violinplot(
+                [values], positions=[xi], widths=0.76,
+                showmedians=False, showextrema=False,
+            )["bodies"][0]
+            violin.set_facecolor(color)
+            violin.set_edgecolor(sig_color if significant else "#9B9B9B")
+            violin.set_linewidth(1.0)
+            violin.set_alpha(0.52 if significant else 0.42)
+
+        jitter = rng.uniform(-0.075, 0.075, len(values))
+        ax.scatter(
+            xi + jitter, values, s=22, color=point_color, alpha=0.78,
+            edgecolors="white", linewidths=0.35, zorder=4,
+        )
+        ax.hlines(
+            cohort_medians[band], xi - 0.28, xi + 0.28,
+            color="black", linewidth=2.6, zorder=5,
+        )
+
+    data_min = float(np.nanmin(all_values))
+    data_max = float(np.nanmax(all_values))
+    y_lo = min(-0.62, data_min - 0.04)
+    y_hi = max(0.48, data_max + 0.13)
+    star_y = data_max + 0.075
+    for xi, band in enumerate(BAND_ORDER):
+        if pvalues[band] < 0.05:
+            ax.text(
+                xi, star_y, "*", ha="center", va="center",
+                color=sig_color, fontsize=22, fontweight="bold", zorder=7,
+            )
+
+    ax.axhline(0, color="#777777", linewidth=0.9, zorder=1)
+    ax.set_xlim(-0.62, len(BAND_ORDER) - 0.38)
+    ax.set_ylim(y_lo, y_hi)
+    ax.set_xticks(range(len(BAND_ORDER)))
+    ax.set_xticklabels([BAND_LABELS[b] for b in BAND_ORDER])
+    ax.set_ylabel("Field concordance − null (Δ)", fontsize=13.5, labelpad=7)
+    ax.tick_params(axis="x", labelsize=13, width=1.1, length=4, pad=5)
+    ax.tick_params(axis="y", labelsize=12.5, width=1.1, length=4)
+    ax.grid(axis="y", color="#E7E7E7", linewidth=0.65, zorder=0)
+    ax.spines[["top", "right"]].set_visible(False)
+    ax.spines[["bottom", "left"]].set_linewidth(1.1)
+
+    if panel_label:
+        ax.text(
+            0.985, 0.985, panel_label, transform=ax.transAxes,
+            ha="right", va="top", fontsize=15, fontweight="bold",
+            color="#111111",
+        )
+
+    fig.tight_layout(pad=0.45)
+    out_png = FIGDIR / f"{output_stem}.png"
+    fig.savefig(out_png, dpi=400, bbox_inches="tight", pad_inches=0.035)
+    fig.savefig(out_png.with_suffix(".pdf"), bbox_inches="tight", pad_inches=0.035)
+    plt.close(fig)
+
+    significant_bands = [b for b in BAND_ORDER if pvalues[b] < 0.05]
+    meta = {"figure": output_stem,
+            "axis": "gradient R3 dense grid",
+            "window": "clinical onset [0,10] s",
+            "n_subjects": n,
+            "significance_mode": significance_mode,
+            "pvalue_column_used_for_stars": pvalue_column,
+            "n_significant": npass,
+            "n_significant_fwer": (npass if significance_mode == "fwer" else None),
+            "significant_bands": significant_bands,
+            "panel_label": panel_label,
+            "stars": ("seven-band coherent maxT pFWER (< 0.05)" if significance_mode == "fwer"
+                      else "coherent cohort spatial-null P < 0.05, uncorrected across seven bands"),
             "per_band": [{"band": r.band, "delta_cohort_median": float(r.delta_cohort_median),
                           "n_positive": int(r.n_positive), "wilcoxon_one_sided_p": float(r.wilcoxon_one_sided_p),
+                          "coherent_cohort_spatial_null_p": float(r.coherent_cohort_spatial_null_p),
                           "seven_band_maxt_pfwer": float(r.seven_band_maxt_pfwer)} for r in mb_cohort.itertuples()],
             "claim_boundary": "band inheritance shown per band vs its own all-contact null; a star on one band and not another is NOT evidence that the two bands differ (see direct band omnibus)."}
-    (FIGDIR / "multiband_field_concordance_stat_metadata.json").write_text(json.dumps(meta, indent=2))
+    (FIGDIR / f"{output_stem}_metadata.json").write_text(json.dumps(meta, indent=2))
+    return npass
 
 
 def fig_r2_r3(subj, method):
@@ -228,22 +322,38 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--calc", default=str(CALC))
     ap.add_argument("--stage", default=str(STAGE))
+    ap.add_argument("--only", choices=("all", "multiband"), default="all",
+                    help="Render the full staging package or only the seven-band main panel.")
+    ap.add_argument("--panel-label", default="",
+                    help="Lower-case panel label placed inside the upper-right corner; use '' to omit.")
+    ap.add_argument("--significance-mode", choices=("fwer", "raw-coherent"), default="fwer",
+                    help="Formal seven-band maxT-FWER or explicitly uncorrected coherent-null sensitivity.")
     args = ap.parse_args()
     calc = Path(args.calc)
     CALC = calc
     FIGDIR = Path(args.stage) / "figures"
     FIGDIR.mkdir(parents=True, exist_ok=True)
+    mb_subj = pd.read_csv(calc / "multiband_subject.csv")
+    mb_cohort = pd.read_csv(calc / "multiband_cohort.csv")
+    if args.only == "multiband":
+        npass = fig_multiband(
+            mb_subj, mb_cohort, panel_label=args.panel_label,
+            significance_mode=args.significance_mode,
+        )
+        print(f"[figures] wrote multiband panel -> {FIGDIR} | {npass}/7 {args.significance_mode}")
+        return
+
     method = prim_method()
     subj = pd.read_csv(calc / "parent_anchor_subject.csv")
     cohort = pd.read_csv(calc / "parent_anchor_cohort.csv")
-    mb_subj = pd.read_csv(calc / "multiband_subject.csv")
-    mb_cohort = pd.read_csv(calc / "multiband_cohort.csv")
     ws_subj = pd.read_csv(calc / "within_shaft_multiband_subject.csv")
     ws_cohort = pd.read_csv(calc / "within_shaft_multiband_cohort.csv")
     ws_summary = json.loads((calc / "summary.json").read_text())["within_shaft"]
 
     fig_cohort(subj, cohort, method)
-    fig_multiband(mb_subj, mb_cohort)
+    if args.significance_mode != "fwer":
+        raise ValueError("--significance-mode raw-coherent is only supported with --only multiband")
+    fig_multiband(mb_subj, mb_cohort, panel_label=args.panel_label, significance_mode="fwer")
     diag = fig_r2_r3(subj, method)
     fig_within_shaft(ws_subj, ws_cohort, ws_summary)
     pooled = cohort[(cohort.group_id == "all_phenotype_matched") & (cohort.method == method)].iloc[0].to_dict()

@@ -32,6 +32,9 @@ if str(ROOT) not in sys.path:
 from src.ictal_onset_extraction import extract_seizure_window  # noqa: E402
 from src.plot_style import savefig_pub, style_panel  # noqa: E402
 from src.topic5_ictal_recruitment import bipolar_alias_label  # noqa: E402
+from scripts.paper_figures.patient_public_labels import (  # noqa: E402
+    public_patient_label,
+)
 
 
 OUT_DIR = ROOT / "results/paper-ready-figure/fig3a_raw_spectral_context/figures"
@@ -293,6 +296,7 @@ def _select_spectral_channel(
     eeg_rel: float | None,
     post_window: tuple[float, float],
     requested: str | None,
+    selection_profile: str = "broadband",
 ) -> tuple[int, dict]:
     lookup = _alias_index(sw.ch_names)
     if requested:
@@ -314,15 +318,30 @@ def _select_spectral_channel(
             name: float(np.nanpercentile(curves[name][win], 95))
             for name in SELECTION_BAND_NAMES
         }
-        min_p95 = min(band_p95.values())
-        mean_p95 = float(np.mean(list(band_p95.values())))
-        score = min_p95 + 0.25 * mean_p95
+        if selection_profile == "gamma":
+            gamma = band_p95["gamma"]
+            off_band = max(
+                band_p95["alpha"],
+                band_p95["beta"],
+                band_p95["high-gamma"],
+            )
+            score = gamma - 0.5 * max(off_band, 0.0)
+            min_p95 = gamma
+        else:
+            min_p95 = min(band_p95.values())
+            mean_p95 = float(np.mean(list(band_p95.values())))
+            score = min_p95 + 0.25 * mean_p95
         if best is None or score > best[0]:
             best = (score, min_p95, int(ci), band_p95)
     if best is None:
         raise RuntimeError("could not select spectral channel")
     return best[2], {
-        "method": "max_min_95pct_db_across_alpha_beta_gamma_high_gamma_broadband_in_onset_to_early_ictal_window",
+        "method": (
+            "max_gamma_95pct_db_minus_half_max_low_or_high_gamma"
+            if selection_profile == "gamma"
+            else "max_min_95pct_db_across_alpha_beta_gamma_high_gamma_broadband_in_onset_to_early_ictal_window"
+        ),
+        "selection_profile": selection_profile,
         "score_window_sec": [score_lo, score_hi],
         "score": best[0],
         "score_min_band_95pct_db": best[1],
@@ -374,6 +393,7 @@ def _make_figure(
     post_window: tuple[float, float],
     channel_source_label: str,
     spectral_selection: dict,
+    display_subject: str,
 ) -> tuple[plt.Figure, dict]:
     # Compact Fig3a layout: raw/TFR share the wide left column; the four
     # band-energy trajectories occupy a balanced 2x2 block on the right.
@@ -398,7 +418,7 @@ def _make_figure(
     _shade_windows(ax_raw, baseline, eeg_rel, post_window)
     _plot_continuous_stacked(ax_raw, sw, ch_idx, x_window, scale=trace_scale)
     _label_shaded_windows(ax_raw, baseline, eeg_rel, post_window)
-    ax_raw.set_title("E1146", fontsize=10.0, fontweight="bold", loc="left", pad=5)
+    ax_raw.set_title(display_subject, fontsize=10.0, fontweight="bold", loc="left", pad=5)
     style_panel(ax_raw)
     ax_raw.tick_params(axis="x", labelsize=9, width=0.9, length=4)
     ax_raw.tick_params(axis="y", labelsize=6, length=0)
@@ -487,8 +507,14 @@ def _make_figure(
     return fig, summary
 
 
-def _write_readme(out_png: Path, out_pdf: Path, ds_sid: str, seizure_idx: int) -> None:
-    readme = OUT_DIR / "README.md"
+def _write_readme(
+    out_dir: Path,
+    out_png: Path,
+    out_pdf: Path,
+    ds_sid: str,
+    seizure_idx: int,
+) -> None:
+    readme = out_dir / "README.md"
     readme.write_text(
         "# Fig3-A Raw Spectral Context\n\n"
         f"### {out_png.name} / {out_pdf.name}\n\n"
@@ -536,6 +562,11 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         eeg_rel,
         post_window,
         args.spectral_channel,
+        selection_profile=str(getattr(args, "spectral_profile", "broadband")),
+    )
+    display_dataset, display_raw_subject = ds_sid.split("_", 1)
+    display_subject = public_patient_label(
+        display_dataset, display_raw_subject
     )
 
     fig, summary = _make_figure(
@@ -547,11 +578,13 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         post_window=post_window,
         channel_source_label=channel_source_label,
         spectral_selection=spectral_selection,
+        display_subject=display_subject,
     )
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir = Path(getattr(args, "output_dir", None) or OUT_DIR).resolve()
+    out_dir.mkdir(parents=True, exist_ok=True)
     stem = f"{ds_sid}_seizure_{int(args.seizure_idx):02d}_raw_spectral_context"
-    out_png = OUT_DIR / f"{stem}.png"
-    out_pdf = OUT_DIR / f"{stem}.pdf"
+    out_png = out_dir / f"{stem}.png"
+    out_pdf = out_dir / f"{stem}.pdf"
     savefig_pub(fig, out_png, dpi=300)
     # Rebuild so PDF is saved from a live figure, not a closed one.
     fig_pdf, _ = _make_figure(
@@ -563,12 +596,14 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
         post_window=post_window,
         channel_source_label=channel_source_label,
         spectral_selection=spectral_selection,
+        display_subject=display_subject,
     )
     savefig_pub(fig_pdf, out_pdf, dpi=300)
 
     summary.update(
         {
             "subject": ds_sid,
+            "public_patient_label": display_subject,
             "loader_subject": loader_subject,
             "seizure_idx": int(args.seizure_idx),
             "seizure_id": sw.seizure_id,
@@ -588,9 +623,9 @@ def run(args: argparse.Namespace) -> tuple[Path, Path, Path]:
             "tier": "paper-ready Fig3-A single-seizure explanatory context; not a cohort statistic",
         }
     )
-    out_json = OUT_DIR / f"{stem}_summary.json"
+    out_json = out_dir / f"{stem}_summary.json"
     out_json.write_text(json.dumps(summary, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
-    _write_readme(out_png, out_pdf, ds_sid, int(args.seizure_idx))
+    _write_readme(out_dir, out_png, out_pdf, ds_sid, int(args.seizure_idx))
     print(out_png)
     print(out_pdf)
     print(out_json)
@@ -610,6 +645,13 @@ def main() -> None:
     ap.add_argument("--n-channels", type=int, default=15)
     ap.add_argument("--channel-source", default="lagpat", choices=("lagpat", "ictal"))
     ap.add_argument("--spectral-channel", default=None)
+    ap.add_argument(
+        "--spectral-profile",
+        default="broadband",
+        choices=("broadband", "gamma"),
+        help="channel-selection profile; gamma is for the supplemental gamma example",
+    )
+    ap.add_argument("--output-dir", type=Path, default=None)
     ap.add_argument("--channels", nargs="*", default=None)
     args = ap.parse_args()
     run(args)

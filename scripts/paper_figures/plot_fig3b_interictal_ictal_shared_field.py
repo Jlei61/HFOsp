@@ -2,10 +2,10 @@
 """Build Fig. 3B: frozen interictal timing vs early-ictal broadband field.
 
 The left panel is the frozen TA timing field on E1146's shared plane.  The
-right panel is the broadband (1--150 Hz) enhancement from the complete seizure
-with maximum positive shared-TA concordance over clinical onset [0, 10] s.  It
-uses the accepted distal-baseline robust-z contract and is projected without
-refitting, ranking, or sign flipping.
+right panel is broadband (1--150 Hz) power from seizure 2, visually locked from
+four morphology-aware positive-power TA candidates.  It uses the accepted
+distal-baseline robust-z contract and is projected without refitting, ranking,
+or sign flipping.
 """
 from __future__ import annotations
 
@@ -77,12 +77,16 @@ OUT_DIR = (
     / "figures"
 )
 
-SCHEMA_ID = "fig3b_interictal_ictal_shared_field_candidate_v2"
+SCHEMA_ID = "fig3b_interictal_ictal_shared_field_locked_v5"
 INTERICTAL_CMAP = "viridis"
-ICTAL_CMAP = "magma_r"
+ICTAL_CMAP = "Blues"
 TEMPLATE_COLORS = {"A": "#B2182B", "B": "#2166AC"}
 FIGSIZE = (7.25, 3.65)
 DISPLAY_DPI = 300
+LOCKED_SEIZURE_IDX = 2
+MORPHOLOGY_CANDIDATE_IDXS = (2, 10, 23, 1)
+DIRECT_EARLY_CORR_MIN = 0.35
+EARLIEST_PAIR_MIN_NORM = 0.30
 
 
 def _normalize_minmax(values: Sequence[float]) -> np.ndarray:
@@ -211,8 +215,8 @@ def _checkpoint_event(ds_sid: str, seizure_idx: int) -> tuple[dict | None, Path]
     return payload.get("event"), path
 
 
-def _best_template_a_seizure(ds_sid: str, n_target_contacts: int) -> tuple[int, list[dict]]:
-    """Select the available exact-band seizure with maximum signed TA concordance."""
+def _checkpoint_rows(ds_sid: str, n_target_contacts: int) -> list[dict]:
+    """Load complete exact-band clinical-onset checkpoint rows."""
     subject_dir = CHECKPOINT_ROOT / ds_sid
     rows = []
     for path in sorted(subject_dir.glob("seizure_*.json")):
@@ -237,7 +241,54 @@ def _best_template_a_seizure(ds_sid: str, n_target_contacts: int) -> tuple[int, 
     if not rows:
         raise ValueError(f"{ds_sid}: no complete exact 1-150 Hz clinical checkpoints")
     rows.sort(key=lambda row: (-row["shared_a_signed"], row["seizure_idx"]))
-    return int(rows[0]["seizure_idx"]), rows
+    return rows
+
+
+def _morphology_metrics(activation: np.ndarray, rank_a: np.ndarray) -> dict:
+    """Quantify the local TA source-to-late pattern used for candidate review."""
+    activation = np.asarray(activation, dtype=float)
+    rank_a = np.asarray(rank_a, dtype=float)
+    finite = np.isfinite(activation) & np.isfinite(rank_a)
+    if int(finite.sum()) != len(rank_a):
+        raise ValueError("morphology metrics require every frozen contact")
+    values = activation[finite]
+    ranks = rank_a[finite]
+    lo = float(values.min())
+    hi = float(values.max())
+    if not hi > lo:
+        raise ValueError("candidate activation is constant")
+    normalized = (values - lo) / (hi - lo)
+    early4 = ranks <= 3
+    late4 = ranks >= 11
+    earliest2 = ranks <= 1
+    return {
+        "power_min_robust_z": lo,
+        "power_median_robust_z": float(np.median(values)),
+        "power_mean_robust_z": float(np.mean(values)),
+        "power_max_robust_z": hi,
+        "power_fraction_positive": float(np.mean(values > 0.0)),
+        "direct_early_rank_correlation": float(np.corrcoef(-ranks, values)[0, 1]),
+        "early4_minus_late4_normalized": float(
+            np.mean(normalized[early4]) - np.mean(normalized[late4])
+        ),
+        "earliest2_min_normalized": float(np.min(normalized[earliest2])),
+        "rank0_power_robust_z": float(values[ranks == 0][0]),
+        "rank1_power_robust_z": float(values[ranks == 1][0]),
+    }
+
+
+def _passes_morphology_candidate(metrics: Mapping[str, object], score: Mapping[str, object]) -> bool:
+    """Apply the transparent morphology-aware positive-power review gate."""
+    return bool(
+        float(metrics["power_fraction_positive"]) == 1.0
+        and float(score["shared_a_signed"]) > 0.0
+        and str(score["shared_best_template"]) == "A"
+        and float(metrics["direct_early_rank_correlation"])
+        >= DIRECT_EARLY_CORR_MIN
+        and float(metrics["early4_minus_late4_normalized"]) > 0.0
+        and float(metrics["earliest2_min_normalized"])
+        >= EARLIEST_PAIR_MIN_NORM
+    )
 
 
 def _score_audit(
@@ -366,7 +417,7 @@ def render(
         support,
         cmap=ICTAL_CMAP,
         colorbar_values=activation,
-        title="Broadband power",
+        title="Early-ictal broadband power",
         title_color="black",
         show_y=False,
     )
@@ -381,7 +432,7 @@ def render(
     cbar_left.set_ticklabels(
         [f"{rank_lo:g} (early)", f"{rank_mid:g}", f"{rank_hi:g} (late)"]
     )
-    cbar_left.ax.set_title("propagation\nrank", fontsize=7.5, pad=5)
+    cbar_left.ax.set_title("ranks", fontsize=7.5, pad=5)
     cbar_left.ax.tick_params(labelsize=7.5, length=2)
 
     cbar_right = fig.colorbar(right_map, cax=fig.add_subplot(grid[0, 3]))
@@ -424,7 +475,7 @@ def _write_readme(out_dir: Path, stem: str, seizure_idx: int) -> Path:
 
 ### {stem}.png / .pdf
 
-E1146 的冻结 shared plane 配对图。左侧为红色语义标题的 TA early-to-late timing field；右侧为 E1146 全部可用发作中 `shared_a_signed` 最高的 seizure {seizure_idx}，显示 clinical onset `0–10 s` 内 broadband `1–150 Hz` baseline-normalized power，使用 `magma_r`，且不做 rank 或 sign flip。两幅图严格复用同一 contact order、shared TA axis、transverse sign、TA support 与同一个 6 mm display kernel。
+E1146 的冻结 shared plane 配对图。左侧为红色语义标题的 TA early-to-late timing field；右侧为从 positive-power TA morphology 候选中目视锁定的 seizure {seizure_idx}。右图显示 clinical onset `0–10 s` broadband `1–150 Hz` baseline-normalized power，使用 `Blues`，且不做 rank 或 sign flip。两幅图严格复用同一 contact order、shared TA axis、transverse sign、TA support 与同一个 6 mm display kernel。
 
 **关注点**：这是一个 representative-subject shared-field readout，用于连接间期传播轴与同次发作早期能量分布；不能单独解释为 replay、因果机制或 cohort 结论。
 
@@ -432,7 +483,19 @@ E1146 的冻结 shared plane 配对图。左侧为红色语义标题的 TA early
 
 记录 raw seizure、临床窗、远端 baseline、频谱参数、冻结 fingerprint、A/B 匹配分数、逐触点原始值与显示归一化。重画时必须先通过 checkpoint score parity，不能从 ictal 值重拟合轴、平面、support 或 kernel。
 
-**关注点**：两条 colorbar 分别恢复为真实 propagation rank 与 robust-z 数值；`magma_r` 令高 broadband power 为深色，与左图“早期为深色”的视觉方向一致。右图不是 contact rank，也不改变当前 maxAB 科学统计。
+**关注点**：两条 colorbar 分别恢复为真实 propagation rank 与 robust-z 数值；`Blues` 令高 broadband power 为深色，与左图“早期为深色”的视觉方向一致。锁定的 seizure 2 在 15/15 触点均为正，并通过局部源区形态 gate；空间相关仍只表达触点间相对模式。右图不是 contact rank，也不改变当前 maxAB 科学统计。
+
+### candidates_positive_ta_morphology/
+
+保留 seizure 2 / 10 / 23 / 1 四个 morphology-aware positive-power 预览、完整 25 次发作审计表和逐例 metadata。正式图经目视锁定候选 1（seizure 2）；其余候选只作选择 provenance。
+
+**关注点**：候选筛选与目视选择服务代表图构图，不能当作预注册统计、独立验证或 cohort 证据。
+
+### archive/
+
+保存已撤回的 seizure 15 负 power 版本和 seizure 9 中段先亮版本。
+
+**关注点**：archive 只记录选择合同为什么修订，不得作为正式 Fig3-B 引用。
 """
     path = out_dir / "README.md"
     path.write_text(text, encoding="utf-8")
@@ -444,7 +507,7 @@ def main() -> None:
     parser.add_argument("--subject", default="epilepsiae_1146")
     parser.add_argument(
         "--seizure-idx", type=int, default=None,
-        help="explicit inventory index; default selects maximum positive shared_a_signed",
+        help="explicit inventory index; default is visually locked Fig3-B seizure 2",
     )
     parser.add_argument("--output-dir", type=Path, default=OUT_DIR)
     args = parser.parse_args()
@@ -452,18 +515,22 @@ def main() -> None:
     ds_sid = str(args.subject).replace("/", "_")
     record, frozen_path = _load_record(ds_sid)
     fz = load_frozen(ds_sid)
-    best_seizure_idx, selection_rows = _best_template_a_seizure(ds_sid, len(fz["names"]))
-    seizure_idx = best_seizure_idx if args.seizure_idx is None else int(args.seizure_idx)
+    checkpoint_rows = _checkpoint_rows(ds_sid, len(fz["names"]))
+    seizure_idx = LOCKED_SEIZURE_IDX if args.seizure_idx is None else int(args.seizure_idx)
     activation, extraction = _extract_clinical_activation(
         ds_sid, seizure_idx, record
     )
     checkpoint, checkpoint_path = _checkpoint_event(ds_sid, seizure_idx)
     audit = _score_audit(record, activation, checkpoint)
     template = "A"
-    if args.seizure_idx is None and seizure_idx != best_seizure_idx:
-        raise AssertionError("automatic TA exemplar selection drifted")
-    if args.seizure_idx is None and audit["observed"]["shared_best_template"] != "A":
-        raise ValueError("the maximum-positive-TA exemplar is not maxAB winner A")
+    rank = np.asarray(fz["rank_a"], dtype=float)
+    morphology = _morphology_metrics(activation, rank)
+    if args.seizure_idx is None and seizure_idx != LOCKED_SEIZURE_IDX:
+        raise AssertionError("locked Fig3-B seizure drifted")
+    if args.seizure_idx is None and not _passes_morphology_candidate(
+        morphology, audit["observed"]
+    ):
+        raise ValueError("locked Fig3-B seizure no longer passes morphology gate")
 
     errors = []
     for key, comparison in (audit.get("checkpoint_comparison") or {}).items():
@@ -486,13 +553,12 @@ def main() -> None:
         out_pdf,
     )
 
-    rank = np.asarray(fz["rank_a" if template == "A" else "rank_b"], dtype=float)
     support = np.asarray(
         fz["support_a" if template == "A" else "support_b"], dtype=float
     )
     metadata = {
         "schema_id": SCHEMA_ID,
-        "status": "paper-ready Fig3-B candidate",
+        "status": "paper-ready Fig3-B locked",
         "paper_role": "Fig3-B interictal timing versus early-ictal shared field",
         "canonical_producer": "scripts/paper_figures/plot_fig3b_interictal_ictal_shared_field.py",
         "subject": ds_sid,
@@ -504,14 +570,27 @@ def main() -> None:
         "axis_direction_convention": record.get("axis_direction_convention"),
         "field_plane": "shared",
         "selected_template": template,
-        "template_selection": "TA fixed; seizure chosen by maximum positive shared_a_signed across complete exact-band E1146 checkpoints",
+        "template_selection": "TA fixed; seizure 2 visually locked from morphology-aware positive-power candidates 2, 10, 23, and 1",
         "seizure_selection": {
-            "criterion": "maximum shared_a_signed",
-            "n_candidates": len(selection_rows),
-            "automatic": args.seizure_idx is None,
+            "criterion": "manual visual lock after transparent positive-power and local TA source-topology gate",
+            "n_complete_exact_candidates": len(checkpoint_rows),
+            "n_morphology_candidates": len(MORPHOLOGY_CANDIDATE_IDXS),
+            "morphology_candidate_indices": list(MORPHOLOGY_CANDIDATE_IDXS),
+            "candidate_review_order": list(MORPHOLOGY_CANDIDATE_IDXS),
+            "locked_by_user_visual_review": bool(args.seizure_idx is None),
             "selected_seizure_idx": seizure_idx,
-            "best_available_seizure_idx": best_seizure_idx,
-            "rows_sorted_by_shared_a_signed": selection_rows,
+            "selected_candidate_order": 1 if seizure_idx == LOCKED_SEIZURE_IDX else None,
+            "morphology_gate": {
+                "all_contacts_positive_robust_z": True,
+                "shared_a_signed_positive": True,
+                "shared_best_template": "A",
+                "direct_early_rank_correlation_min": DIRECT_EARLY_CORR_MIN,
+                "early4_minus_late4_normalized_min_exclusive": 0.0,
+                "earliest2_min_normalized_min": EARLIEST_PAIR_MIN_NORM,
+                "earliest_contacts": ["SCL9", "ICL11"],
+            },
+            "selected_morphology_metrics": morphology,
+            "candidate_summary": "results/paper-ready-figure/fig3b_interictal_ictal_shared_field/figures/candidates_positive_ta_morphology/candidate_summary.json",
         },
         "contact_order": list(fz["names"]),
         "raw_interictal_rank": rank.tolist(),

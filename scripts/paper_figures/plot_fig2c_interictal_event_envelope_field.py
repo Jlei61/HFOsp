@@ -25,6 +25,7 @@ DEFAULT_OUT = (
     / "fig2c_interictal_event_envelope_field"
     / "figures"
 )
+LOCKED_TA_EVENT_POS = {"epilepsiae_1146": 6344}
 LOCKED_TB_EVENT_POS = {"epilepsiae_1146": 829}
 
 
@@ -36,14 +37,29 @@ def main():
     ap.add_argument("--gif-step-ms", type=float, default=GIF_STEP_MS)
     ap.add_argument("--gif-fps", type=float, default=GIF_FPS)
     ap.add_argument(
+        "--ta-event-pos", type=int,
+        help="explicit direction-qualified TA exemplar; E1146 defaults to accepted event 6344",
+    )
+    ap.add_argument(
         "--tb-event-pos", type=int,
         help="explicit direction-qualified TB exemplar; E1146 defaults to accepted event 829",
+    )
+    ap.add_argument(
+        "--use-medoid-ta", action="store_true",
+        help="ignore the accepted E1146 override and recompute the original TA medoid",
     )
     ap.add_argument(
         "--use-medoid-tb", action="store_true",
         help="ignore the accepted E1146 override and recompute the original TB medoid",
     )
     args = ap.parse_args()
+    ta_event_pos = None
+    if not args.use_medoid_ta:
+        ta_event_pos = (
+            args.ta_event_pos
+            if args.ta_event_pos is not None
+            else LOCKED_TA_EVENT_POS.get(args.subject)
+        )
     tb_event_pos = None
     if not args.use_medoid_tb:
         tb_event_pos = (
@@ -57,6 +73,7 @@ def main():
         make_gif=not args.no_gif,
         gif_step_ms=args.gif_step_ms,
         gif_fps=args.gif_fps,
+        ta_event_pos=ta_event_pos,
         tb_event_pos=tb_event_pos,
     )
     print("DONE", flush=True)

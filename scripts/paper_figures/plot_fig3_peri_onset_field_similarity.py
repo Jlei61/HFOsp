@@ -326,8 +326,20 @@ def _make_figure(
         ax1.plot(g["window_center_sec"], g["B_signed_corr"], color=COL_B, lw=0.4, alpha=0.075, zorder=1)
     ax1.axhline(0, color="0.35", lw=0.9, zorder=0)
     ax1.axvline(0, color="0.30", ls="--", lw=0.9, zorder=0)
-    _draw_band_line(ax1, agg, "A", color=COL_A, label="template A")
-    _draw_band_line(ax1, agg, "B", color=COL_B, label="template B")
+    _draw_band_line(
+        ax1,
+        agg,
+        "A",
+        color=COL_A,
+        label="TA" if journal_clean else "template A",
+    )
+    _draw_band_line(
+        ax1,
+        agg,
+        "B",
+        color=COL_B,
+        label="TB" if journal_clean else "template B",
+    )
     ax1.set_ylim(-1.0, 1.0)
     ax1.set_xlim(xlo, xhi)
     if journal_clean:
@@ -416,6 +428,7 @@ def _build_summary(
     return {
         "subject": ds_sid,
         "design_variant": design_variant,
+        "manuscript_panel": "Fig3E" if design_variant == DESIGN_JOURNAL_CLEAN else None,
         "source_csv": str(src.relative_to(ROOT)),
         "time_range_sec": [LO_SEC, HI_SEC],
         "band_hz": [1.0, 150.0],

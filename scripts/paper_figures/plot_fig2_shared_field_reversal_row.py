@@ -511,7 +511,11 @@ def build_figure(
     out_dir.mkdir(parents=True, exist_ok=True)
     np.savez_compressed(null_npz, channel_cohort_median_shift=null_delta)
     metadata = {
-        "figure_role": "Figure 2 last-row candidate: shared-axis TA/TB field reversal",
+        "figure_role": "Figure 2E+F candidate: shared-axis TA/TB field reversal",
+        "panel_assignments": {
+            "Figure 2E": "four paired TA/TB shared-axis rank-field examples",
+            "Figure 2F": "complete shared-axis cohort distribution and full-contact spatial null",
+        },
         "cohort": "shared_field_available and geometry_2d_supported",
         "estimand": (
             "signed Pearson r across exact contact-evaluated shared_a/shared_b template fields"
@@ -579,17 +583,17 @@ def _write_readme(out_dir: Path, metadata: Mapping[str, object]) -> None:
     example_text = "、".join(
         f"{row['display_id']} (r={row['r']:+.2f})" for row in metadata["examples"]
     )
-    text = f"""# Fig2 shared-field reversal 最后一行候选
+    text = f"""# Fig2-E+F shared-field reversal 联合候选
 
 ### fig2_shared_field_reversal_last_row.png / .pdf
 
-左侧复用冻结间期场的统一画图函数，在相同 shared plane 上成对展示 TA/TB Viridis rank field；
+左侧为 Figure 2E：复用冻结间期场的统一画图函数，在相同 shared plane 上成对展示 TA/TB Viridis rank field；
 横轴是冻结 shared TA propagation axis，显示带宽固定为 6 mm；四人统一裁到以各自触点范围为中心的
 50 × 60 mm display-only 窗口，轴、触点、rank、kernel 与统计均不改变。4个显示案例锁定为
 {example_text}；它们均为负相关且二维几何易读。E958 因触点过密、图形瘦长而排除，E1146 因已在
 Figure 2 前文出现而不重复。这些图用于直观说明场的反向形态，不是独立抽样验证。
 
-右上纳入全部 {distribution['n']} 名 shared-axis 且二维几何有效的患者，不按 axis cosine、
+右侧为 Figure 2F：右上纳入全部 {distribution['n']} 名 shared-axis 且二维几何有效的患者，不按 axis cosine、
 same/reversed 标签或 strict-stability 分组。当前 {distribution['n_negative']}/{distribution['n']}
 为负，中位 r={distribution['median']:+.3f}。右下是 TB earliness 与 support 在全部触点间联合打乱、
 重建 TB field 后的层级 cohort-median-shift null；观测 Δmedian={null['observed_median_delta']:+.3f}，
