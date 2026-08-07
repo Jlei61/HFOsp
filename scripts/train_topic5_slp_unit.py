@@ -341,11 +341,21 @@ def train_unit(subject: str, arm: str, seed: int, cfg: Dict[str, Any],
         log_rows.append(row)
 
         threshold = best["validation_next_bce"] * (1.0 - float(cfg["min_relative_improvement"]))
-        if validation["next_bce"] < threshold:
+        # Selection is restricted to epochs that HAVE the topology this arm is
+        # supposed to deliver. Freezing throws away all but the budgeted edges
+        # and validation loss gets worse when it happens, so the best epoch is
+        # almost always just before the freeze -- and the checkpoint restored at
+        # the end is then the dense pre-freeze graph. Anything that then scores
+        # "the fitted adjacency" is scoring a graph the arm never committed to:
+        # in the readout sweep, edge-identity AUC was 0.865 for every cell whose
+        # best epoch preceded the freeze and 0.502 for every cell whose best
+        # epoch followed it, with no dependence on the variable under test.
+        select_here = (not learnable) or phase == "freeze"
+        if select_here and validation["next_bce"] < threshold:
             best = {"validation_next_bce": validation["next_bce"], "epoch": epoch}
             best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
             stale = 0
-        else:
+        elif select_here:
             stale += 1
         # early stopping only inside the last phase, so structure formation always runs
         if phase == "freeze" and stale >= int(cfg["patience"]):

@@ -27,11 +27,19 @@ OUT_ROOT = ROOT / "results/topic5_spatial_latent_propagation_rnn_v0_1"
 
 
 def make_true_graph(nodes_xy: np.ndarray, radius_factor: float, axis_bias: float,
-                    seed: int) -> np.ndarray:
+                    seed: int, mean_degree: float = 0.0) -> np.ndarray:
     """Sparse directed graph: local edges, biased to point along +x.
 
     ``A[j, i]`` is the influence of node j on node i, matching the model's
     message convention.
+
+    Edges were originally the top 20% of all pairs, which fixes the DENSITY
+    rather than the degree: at 36 nodes that is about 6 edges per node, at 288 it
+    is 57. The model is fitted with a budget of a few edges per node, so raising
+    the node count silently turns the recovery question into "can a six-edge
+    model reproduce a fifty-seven-edge graph" -- structurally no, whatever the
+    readout does. ``mean_degree`` pins edges per node instead, so node count and
+    graph complexity stop moving together.
     """
     rng = np.random.default_rng(seed)
     d = np.linalg.norm(nodes_xy[:, None, :] - nodes_xy[None, :, :], axis=-1)
@@ -40,7 +48,9 @@ def make_true_graph(nodes_xy: np.ndarray, radius_factor: float, axis_bias: float
     forward = 0.5 * (1.0 + np.tanh(axis_bias * direction))
     weight = np.exp(-(d ** 2) / (2.0 * radius ** 2)) * forward
     np.fill_diagonal(weight, 0.0)
-    keep = weight > np.quantile(weight[weight > 0], 0.80)
+    quantile = 0.80 if not mean_degree else max(
+        0.0, 1.0 - mean_degree / max(len(nodes_xy) - 1, 1))
+    keep = weight > np.quantile(weight[weight > 0], quantile)
     A = weight * keep * (0.5 + rng.random(weight.shape))
     return A / max(A.sum(axis=0).max(), 1e-9)
 
@@ -83,6 +93,10 @@ def main() -> int:
     parser.add_argument("--n-events", type=int, default=6000)
     parser.add_argument("--seed", type=int, default=20260806)
     parser.add_argument("--radius-factor", type=float, default=0.35)
+    parser.add_argument("--true-mean-degree", type=float, default=0.0,
+                        help="edges per node in the true graph. 0 keeps the "
+                             "original top-20%%-of-pairs rule, whose degree grows "
+                             "with the node count.")
     parser.add_argument("--axis-bias", type=float, default=1.5)
     parser.add_argument("--leak", type=float, default=0.55)
     parser.add_argument("--gain", type=float, default=1.9)
@@ -90,22 +104,44 @@ def main() -> int:
     parser.add_argument("--noise", type=float, default=0.02)
     parser.add_argument("--n-nodes", type=int, default=0,
                         help="override the latent node count to vary the observation ratio")
+    parser.add_argument("--readout-radius-mm", type=float, default=0.0,
+                        help="override how far a contact reads (3 sigma). The node "
+                             "cloud is still sampled against the DEFAULT sigma, so "
+                             "the tissue and the true graph are identical across "
+                             "readout widths and only the blur changes.")
     parser.add_argument("--out", type=Path, default=OUT_ROOT / "synthetic")
     args = parser.parse_args()
 
     cache = OUT_ROOT / "cache" / args.subject
     nodes_xy = np.load(cache / "latent_nodes.npz")["nodes_xy"]
     H = np.load(cache / "seeg_operator.npz")["H"]
-    if args.n_nodes:
+    sigma_default = float(np.load(cache / "seeg_operator.npz")["sigma_mm"][0])
+    sigma_readout = sigma_default
+    if args.n_nodes or args.readout_radius_mm:
         from src.topic5_virtual_seeg_operator import (
-            build_observation_operator, kernel_sigma_mm, nearest_node, sample_latent_nodes,
+            SUPPORT_SIGMA, build_observation_operator, sample_latent_nodes,
         )
         xy = np.load(cache / "plane_coordinates.npz", allow_pickle=True)["xy_mm"]
-        sigma = float(np.load(cache / "seeg_operator.npz")["sigma_mm"][0])
-        nodes_xy = sample_latent_nodes(xy, args.n_nodes, sigma, seed=args.seed)
-        H = build_observation_operator(xy, nodes_xy, sigma)
+        n_nodes = args.n_nodes or len(nodes_xy)
+        # Two sigmas on purpose. The node cloud -- and therefore the tissue
+        # domain, the node spacing and the true graph drawn on it -- is sampled
+        # against the DEFAULT sigma in every condition. Only the width of the
+        # disc each contact averages over changes. Sampling the nodes against the
+        # narrowed sigma instead would shrink the domain at the same time and the
+        # comparison would confound blur with how much tissue is modelled.
+        nodes_xy = sample_latent_nodes(xy, n_nodes, sigma_default, seed=args.seed)
+        if args.readout_radius_mm:
+            sigma_readout = args.readout_radius_mm / SUPPORT_SIGMA
+        H = build_observation_operator(xy, nodes_xy, sigma_readout)
 
-    A_true = make_true_graph(nodes_xy, args.radius_factor, args.axis_bias, args.seed)
+    # A contact that averages over fewer than two nodes is not a blurred readout
+    # any more -- it is a relabelling of one node, which is a different model.
+    # Recorded so a degenerate cell is visible instead of being scored.
+    row = H / H.sum(axis=1, keepdims=True)
+    effective_nodes_per_contact = float(np.median(1.0 / np.sum(row ** 2, axis=1)))
+
+    A_true = make_true_graph(nodes_xy, args.radius_factor, args.axis_bias, args.seed,
+                             mean_degree=args.true_mean_degree)
     ranks = simulate_events(
         A_true, H, args.n_events, args.leak, args.gain, args.threshold,
         args.noise, args.seed,
@@ -135,8 +171,10 @@ def main() -> int:
     np.savez_compressed(subject_dir / "latent_nodes.npz", nodes_xy=nodes_xy,
                         seed=np.array([args.seed]),
                         contact_anchor_node=_nn(xy_plane, nodes_xy))
+    # The sigma actually used to build H, not the subject default -- writing the
+    # default here would make a narrowed readout invisible downstream.
     np.savez_compressed(subject_dir / "seeg_operator.npz", H=H,
-                        sigma_mm=np.load(cache / "seeg_operator.npz")["sigma_mm"])
+                        sigma_mm=np.array([sigma_readout]))
     np.savez_compressed(
         subject_dir / "events.npz", group_ids=ranks, split=split, n_ranks=lengths
     )
@@ -163,6 +201,11 @@ def main() -> int:
         "n_contacts": int(n_contacts),
         "n_nodes": int(len(nodes_xy)),
         "observation_ratio": float(n_contacts / len(nodes_xy)),
+        "readout_sigma_mm": sigma_readout,
+        "readout_radius_mm": sigma_readout * 3.0,
+        "subject_default_readout_radius_mm": sigma_default * 3.0,
+        "effective_nodes_per_contact": effective_nodes_per_contact,
+        "readout_is_degenerate": bool(effective_nodes_per_contact < 2.0),
         "true_edges": int((A_true > 0).sum()),
         "true_mean_degree": float((A_true > 0).sum() / len(nodes_xy)),
         "rank_length_median": float(np.median(lengths)),
