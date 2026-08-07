@@ -199,3 +199,35 @@ def test_probe_is_isotropic():
     q0 = probe_q(pos, CENTER, 1.5)
     q1 = probe_q(_rotate(pos, np.deg2rad(37.0), CENTER), CENTER, 1.5)
     assert np.allclose(np.sort(q0), np.sort(q1), atol=1e-9)
+
+
+# ------------------------------------------------------- Leg A region choice
+from src.topic4_core_field_stage3 import high_scoring_region  # noqa: E402
+
+
+def test_region_is_a_region_not_the_single_best_cell():
+    s = np.array([[0.1, 0.2, 0.9], [0.3, 0.85, 0.88], [0.4, 0.5, 0.6]])
+    v = np.full(s.shape, 4)
+    m = high_scoring_region(s, v, top_frac=0.34, min_valid=3)
+    assert m.sum() >= 3
+    assert m[0, 2] and m[1, 2]
+
+
+def test_undersampled_cells_cannot_win():
+    s = np.array([[0.99, 0.2], [0.3, 0.4]])
+    v = np.array([[1, 4], [4, 4]])            # the top cell has one valid seed
+    m = high_scoring_region(s, v, top_frac=0.5, min_valid=3)
+    assert not m[0, 0]
+
+
+def test_nan_cells_are_never_selected():
+    s = np.array([[np.nan, 0.2], [0.3, 0.4]])
+    v = np.full(s.shape, 4)
+    m = high_scoring_region(s, v, top_frac=0.5, min_valid=3)
+    assert not m[0, 0] and m.sum() >= 1
+
+
+def test_all_cells_invalid_returns_empty_rather_than_guessing():
+    s = np.full((3, 3), 0.5)
+    v = np.zeros((3, 3), int)
+    assert high_scoring_region(s, v).sum() == 0

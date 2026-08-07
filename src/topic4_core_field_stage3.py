@@ -110,3 +110,21 @@ def spatial_diagnostics(h, pos_xy, center, axis_unit, deltas=(1.0, 2.0, 3.0)):
         rms_axial=float(np.sqrt((h * s ** 2).sum() / m)),
         c_axis={float(d): float(h[np.abs(r) < float(d)].sum() / m) for d in deltas},
         mass=float(m))
+
+
+def high_scoring_region(scores, n_valid, top_frac=0.10, min_valid=3):
+    """Cells in the top `top_frac` of the map that are also well enough sampled.
+
+    Deliberately a REGION, not the argmax. Picking the single best of ninety-odd
+    cells at four seeds each is a winner's curse; the returned mask is what gets
+    re-run on independent seeds so the optimism can be measured rather than
+    inherited (plan, Leg A discipline).
+    """
+    s = np.asarray(scores, float)
+    v = np.asarray(n_valid, int)
+    eligible = np.isfinite(s) & (v >= int(min_valid))
+    if not eligible.any():
+        return np.zeros(s.shape, bool)
+    k = max(1, int(np.ceil(eligible.sum() * float(top_frac))))
+    cut = np.sort(s[eligible])[::-1][k - 1]
+    return eligible & (s >= cut)
