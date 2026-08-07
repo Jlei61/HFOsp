@@ -24,11 +24,13 @@ matplotlib.use("Agg")
 import matplotlib.gridspec as gridspec
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.lines import Line2D
+from matplotlib.patches import Patch
 
 sys.path.insert(0, os.getcwd())
 from scripts.paper_figures.plot_fig_subject_snn import (  # noqa: E402
-    _plot_event, _plot_interictal_sample_readout, _registered_axis_display,
-    _shaft)
+    _display_xy, _plot_event, _plot_interictal_sample_readout,
+    _registered_axis_display, _shaft)
 from src.topic4_core_field import axis_coords, manual_mask  # noqa: E402
 from src.topic4_core_field_scoring import candidate_key  # noqa: E402
 from src.topic4_core_field_stage2 import (params_to_h,  # noqa: E402
@@ -91,7 +93,46 @@ def _axial_profiles(cfg, fd):
     return dict(ctr=ctr, sep=sep, core_r=float(e["core_r"]),
                 hard=p_hard, flat=p_flat, learned=p_learn,
                 gap_hard=gap(p_hard), gap_learned=gap(p_learn),
-                theta=best["theta"])
+                theta=best["theta"], h_learned=h_learn, posE=posE)
+
+
+def _field_extent(ax, posE, h, display, *, mass=0.90, cell=0.35):
+    """Outline the region holding ``mass`` of the learned field's cells.
+
+    The learned field is a continuous extent, not a pair of discs, so the
+    mechanism overlay has to be its own iso-region -- drawing the hand-placed
+    core circles here would assert a mechanism input this run never had.
+    """
+    xy = _display_xy(np.asarray(posE, float), display)
+    xe = np.arange(xy[:, 0].min(), xy[:, 0].max() + cell, cell)
+    ye = np.arange(xy[:, 1].min(), xy[:, 1].max() + cell, cell)
+    tot = np.histogram2d(xy[:, 0], xy[:, 1], bins=[xe, ye], weights=h)[0]
+    cnt = np.histogram2d(xy[:, 0], xy[:, 1], bins=[xe, ye])[0]
+    dens = np.where(cnt > 0, tot / np.maximum(cnt, 1), 0.0)
+
+    order = np.argsort(dens.ravel())[::-1]
+    keep = np.cumsum(tot.ravel()[order]) <= mass * tot.sum()
+    level = dens.ravel()[order][keep].min() if keep.any() else dens.max()
+
+    xc, yc = 0.5 * (xe[:-1] + xe[1:]), 0.5 * (ye[:-1] + ye[1:])
+    ax.contourf(xc, yc, dens.T, levels=[level, dens.max() + 1e-9],
+                colors=[C_MANUAL], alpha=0.28, zorder=4)
+    ax.contour(xc, yc, dens.T, levels=[level], colors=[C_MANUAL],
+               linewidths=1.4, zorder=5)
+    return float(level)
+
+
+def _ignition_xy(rep, posE, display, frac=0.01):
+    """Where the event actually started: centroid of the earliest-firing cells."""
+    if not rep:
+        return None
+    onset = np.asarray(rep["onset"], float)
+    fin = np.isfinite(onset)
+    if fin.sum() < 20:
+        return None
+    cut = np.percentile(onset[fin], 100 * frac)
+    sel = fin & (onset <= cut)
+    return _display_xy(np.asarray(posE, float)[sel], display).mean(axis=0)
 
 
 def main():
@@ -144,12 +185,23 @@ def main():
         axA.spines[side].set_visible(False)
 
     # -- B/C: the two directions on the sheet ------------------------------
-    _plot_event(axF, fd, rep_f, "model forward", shafts, core_a, core_b,
+    # This run has no hand-placed cores. NaN foci suppress the two-disc overlay
+    # and its star; empty core lists stop contacts being ringed as core members.
+    fd_nc = {k: fd[k] for k in fd.files}
+    fd_nc["foci"] = np.full((2, 2), np.nan)
+    _plot_event(axF, fd_nc, rep_f, "model forward", shafts, [], [],
                 source_index=0, normalize_color=True, display=display,
                 formal=True, show_ylabel=True)
-    mappable = _plot_event(axR, fd, rep_r, "model reverse", shafts, core_a,
-                           core_b, source_index=1, normalize_color=True,
+    mappable = _plot_event(axR, fd_nc, rep_r, "model reverse", shafts, [], [],
+                           source_index=1, normalize_color=True,
                            display=display, formal=True, show_ylabel=False)
+    level = None
+    for ax_, rep in ((axF, rep_f), (axR, rep_r)):
+        level = _field_extent(ax_, pf["posE"], pf["h_learned"], display)
+        ig = _ignition_xy(rep, pf["posE"], display)
+        if ig is not None:
+            ax_.scatter([ig[0]], [ig[1]], marker="*", s=170, c="black",
+                        ec="white", lw=0.9, zorder=8)
     # the two maps are butted together, so the shared +10/-10 boundary label
     # would print twice and collide
     right_labels = axF.get_xticklabels()
@@ -163,10 +215,21 @@ def main():
         cb.ax.set_title("relative\nfiring onset", fontsize=10.0, pad=5.0)
         cb.ax.tick_params(labelsize=9.5, length=2.8)
 
+    axF.legend(handles=[
+        Patch(facecolor=C_MANUAL, alpha=0.28, edgecolor=C_MANUAL, lw=1.4,
+              label="learned pathology field"),
+        Line2D([], [], marker="*", ls="none", mfc="black", mec="white", ms=11,
+               label="where the event started")],
+        frameon=True, framealpha=0.9, edgecolor="0.85", fontsize=8.5,
+        loc="lower left", borderpad=0.4, handlelength=1.4)
+
     # -- D: the readout of the same run ------------------------------------
     stats = _plot_interictal_sample_readout(
         axRO, fd, ro.get("readout_window_events", ro["events"]), names, shafts,
         window_ms=1200.0)
+    # the readout's own legend sits above its right half, so the title goes left
+    axRO.set_title("model virtual-SEEG", fontsize=12, fontweight="bold",
+                   color="0.2", pad=7, loc="left")
 
     fig.canvas.draw()
     box_r, box_ro = axR.get_position(), axRO.get_position()
