@@ -91,6 +91,75 @@ def seed_removed_sequence_agreement(observed: np.ndarray, generated: list[list[i
     return float(value) if np.isfinite(value) else float("nan")
 
 
+def event_pair_reliability(ranks: np.ndarray, seed: int = 0,
+                           n_pairs: int = 2000) -> float:
+    """Median heldout event-pair rank correlation used only as a noise reference."""
+    values = np.asarray(ranks, float).copy()
+    values[values < 0] = np.nan
+    if len(values) < 20:
+        return float("nan")
+    rng = np.random.default_rng(seed)
+    correlations = []
+    for left, right in rng.choice(len(values), size=(n_pairs, 2)):
+        if left == right:
+            continue
+        use = np.isfinite(values[left]) & np.isfinite(values[right])
+        if (use.sum() < 3 or len(np.unique(values[left, use])) < 2
+                or len(np.unique(values[right, use])) < 2):
+            continue
+        value = spearmanr(values[left, use], values[right, use]).statistic
+        if np.isfinite(value):
+            correlations.append(float(value))
+    return float(np.median(correlations)) if correlations else float("nan")
+
+
+def noise_ceiling_reference(out_root: Path, patients: list[dict[str, Any]]) -> dict[str, Any]:
+    """Report sqrt(event-pair reliability) without using it as a pass threshold."""
+    manifest = json.loads((out_root / "INPUT_MANIFEST.json").read_text())
+    by_subject: dict[str, list[float]] = defaultdict(list)
+    fit_rows = []
+    for fit in manifest["fits"]:
+        with np.load(out_root / "cache" / fit["fit_id"] / "events.npz") as events:
+            keep = np.asarray(events["split"]) >= 0
+            split = np.asarray(events["split"])[keep]
+            ranks = np.asarray(events["ranks"])[keep]
+        rho = event_pair_reliability(ranks[split == 2], seed=17)
+        fit_rows.append({"subject": fit["subject"], "fit_id": fit["fit_id"],
+                         "event_pair_reliability": rho})
+        if np.isfinite(rho):
+            by_subject[fit["subject"]].append(rho)
+    ceiling = {subject: float(np.sqrt(max(float(np.median(values)), 0.0)))
+               for subject, values in by_subject.items() if values}
+    output_rows = []
+    model_summaries = {}
+    for model, cell in sorted({(row["model"], row["cell"]) for row in patients}):
+        selected = []
+        for row in patients:
+            if row["model"] != model or row["cell"] != cell or row["subject"] not in ceiling:
+                continue
+            reference = ceiling[row["subject"]]
+            value = float(row["rollout_spearman"])
+            output_rows.append({
+                "subject": row["subject"], "model": model, "cell": cell,
+                "event_pair_sqrt_reliability": reference,
+                "rollout_spearman": value,
+                "rollout_minus_reference": value - reference,
+                "rollout_over_reference": value / reference if reference > 1e-12 else float("nan"),
+            })
+            selected.append(value - reference)
+        if selected:
+            model_summaries[f"{model}|{cell}"] = paired_test(np.asarray(selected, float))
+    write_csv(out_root / "rollout_noise_ceiling_reference.csv", output_rows)
+    return {
+        "interpretation": (
+            "sqrt(event-pair reliability) is a descriptive noise reference only; "
+            "non-significant difference is not equivalence or ceiling attainment"
+        ),
+        "per_fit": fit_rows, "per_patient_reference": ceiling,
+        "model_minus_reference": model_summaries,
+    }
+
+
 def load_real_kept_events(out_root: Path, fit_id: str) -> tuple[np.ndarray, np.ndarray]:
     events = np.load(out_root / "cache" / fit_id / "events.npz")
     keep = events["split"] >= 0
@@ -487,6 +556,7 @@ def main() -> int:
     if audit["n_units"] != audit["expected_units"]:
         raise RuntimeError(f"formal convergence audit incomplete: {audit['n_units']}/1426")
     fits, patients = aggregate(rows)
+    ceiling_reference = noise_ceiling_reference(out_root, patients)
     write_csv(out_root / "interictal_per_event.csv", event_rows)
     write_csv(out_root / "interictal_per_fit_seed.csv", rows)
     write_csv(out_root / "interictal_fit_metrics.csv", fits)
@@ -532,6 +602,7 @@ def main() -> int:
                "primary_evaluation_target": "real_unshuffled_heldout_for_all_models",
                "rollout_seed_policy": "supplied rank 1 deleted from both observed and generated score",
                "statistics": statistics, "task_adequacy": adequacy,
+               "noise_ceiling_reference": ceiling_reference,
                "convergence_audit": {
                    "n_converged": audit["n_converged"],
                    "n_hit_ceiling": audit["n_hit_ceiling"],

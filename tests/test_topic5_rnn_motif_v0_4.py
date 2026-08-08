@@ -25,7 +25,10 @@ from build_topic5_rnn_motif_fields_v0_4 import (  # noqa: E402
     derive_common_contrast,
     split_half_stability,
 )
-from analyse_topic5_rnn_motif_interictal_v0_4 import seed_removed_sequence_agreement  # noqa: E402
+from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
+    event_pair_reliability,
+    seed_removed_sequence_agreement,
+)
 from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     compute_factorial_effects,
     permutation_indices,
@@ -163,6 +166,11 @@ def test_rollout_agreement_does_not_credit_the_supplied_seed():
     reversed_postseed = [[0], [3], [2], [1]]
     assert np.isclose(seed_removed_sequence_agreement(observed, correct), 1.0)
     assert np.isclose(seed_removed_sequence_agreement(observed, reversed_postseed), -1.0)
+
+
+def test_event_pair_reliability_is_only_the_repeated_event_reference():
+    ranks = np.tile(np.array([0, 1, 2, -1]), (24, 1))
+    assert np.isclose(event_pair_reliability(ranks, seed=3, n_pairs=100), 1.0)
 
 
 def test_early_ictal_permutations_are_synchronized_and_shaft_preserving():

@@ -76,6 +76,9 @@ def main() -> int:
     dense_wire = np.nanmedian([float(row["c_wiring"]) for row in by_model.get("M1_DENSE", [])])
     m6_wire = np.nanmedian([float(row["c_wiring"]) for row in by_model.get("M6_SPATIAL_MID", [])])
     level2 = bool(level1 and np.isfinite(dense_wire) and np.isfinite(m6_wire) and m6_wire < dense_wire)
+    m6_ceiling = inter["noise_ceiling_reference"]["model_minus_reference"].get(
+        "M6_SPATIAL_MID|rnn", {}
+    )
 
     early = load(out / "early_ictal_model_contrasts.json")
     m6_zero = contrast(early, "canonical_full|M6_SPATIAL_MID__rnn_margin_gt_zero")
@@ -135,6 +138,7 @@ def main() -> int:
 - 至少达到 partial adequacy 的 leaky-RNN 模型：{', '.join(adequate_models) if adequate_models else '无'}。
 - 因此“多种 recurrence 是否足以学习患者内传播”的 Level 1：**{'支持' if level1 else '不支持'}**。
 - Dense 的患者中位 wiring cost 为 {fmt(dense_wire)}，Spatial + cost 为 {fmt(m6_wire)}；Level 2 经济性：**{'支持' if level2 else '不支持'}**。
+- Spatial + cost 相对 `sqrt(event-pair reliability)` 的中位差为 {fmt(m6_ceiling.get('median'))}；该量只作噪声参照，差异不显著也不写成“达到天花板”。
 
 这里的“学会”同时要求留出 next-contact 与删除已提供起点后的自由推演不塌缩；不等于恢复了真实脑连接组。
 
