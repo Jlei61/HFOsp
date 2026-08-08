@@ -24,7 +24,9 @@
 - [x] 已有患者/手放双核/Stage 2/Stage 3 标定。
 - [x] 四臂共同配平到 n=18；优化合同固定 n=20，并生成同构患者地板。
 - [x] Leg A 留一网络位置敏感性。
-- [ ] 将 reference NPZ、summary、图和 README 纳入可复现产物检查。
+- [x] 将 reference NPZ、summary、图和 README 纳入可复现产物检查；reference SHA256
+  `987e6b4bdfdc9b3d31485852e2eb71cd8df3ee7d92ff6eb0456c8fa04925adc1`，producer 在
+  `18c64806` 上 `tracked_modules_dirty: false` 且逐值复现。
 
 **进入 Task 2 的门：** 四项 calibration gate 全过；患者留出必须最接近；Stage 3 正相关失败必须被距离自然惩罚。
 
