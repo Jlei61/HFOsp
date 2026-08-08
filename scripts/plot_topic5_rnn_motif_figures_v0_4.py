@@ -340,7 +340,9 @@ def panel_label(fig, subplot_spec, label: str):
 def render_stage(out_root: Path, stage: str):
     fig = plt.figure(figsize=(9.2, 3.2), layout="constrained", facecolor="white")
     root = fig.add_gridspec(1, 1)[0, 0]
-    if stage == "fields":
+    if stage == "interictal":
+        draw_interictal_sufficiency(root, out_root)
+    elif stage == "fields":
         record = empirical_record(out_root, REPRESENTATIVE)
         empirical_a, empirical_b, _ = build_interictal_ab_panel_payloads(record)
         _, model_a, model_b = model_field_payloads(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
@@ -390,13 +392,22 @@ def render_final(out_root: Path):
         fig.savefig(stem.with_suffix(suffix), **kwargs)
     plt.close(fig)
     readme = figure_dir / "README.md"
-    readme.write_text("""# Topic 5 RNN connectivity-motif figures
+    marker = "<!-- topic5-rnn-motif-v0.4-stage-and-final-figures -->"
+    existing = readme.read_text() if readme.exists() else "# Topic 5 RNN connectivity-motif figures\n"
+    base = existing.split(marker, 1)[0].rstrip()
+    section = """<!-- topic5-rnn-motif-v0.4-stage-and-final-figures -->
 
 ### topic5_figure6_rnn_connectivity_motifs.png / .pdf / .svg
 
 六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及有效连接 motif 的 matched-lesion 检验。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
 
 **关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些有效 motif 经干预承担该计算”，不把预测性能直接写成真实连接组恢复。
+
+### stage_interictal_scientific_readout.png / .pdf
+
+正式间期模型矩阵的阶段验收图：左侧为相对无循环基线的 next-contact 增益，右侧为删除已提供起点后的自由推演 rank 一致性；每个点是一位患者。
+
+**关注点**：只有同时改善局部预测并保持自由推演，才将某种连接约束称为足以表示患者内传播；这仍不是解剖连接恢复。
 
 ### stage_fields_scientific_readout.png / .pdf
 
@@ -415,7 +426,8 @@ def render_final(out_root: Path):
 代表患者的局部高影响骨架、少量长程 connector 及 connector matched-lesion 特异损害。
 
 **关注点**：只有结构富集、任务关系和 matched-lesion 同向时，才把该组织写成更容易支持传播的计算 motif。
-""")
+"""
+    readme.write_text(base + "\n\n" + section.lstrip())
     sources = {
         "A": [selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz"
               for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")],
@@ -436,7 +448,8 @@ def render_final(out_root: Path):
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, required=True)
-    parser.add_argument("--stage", choices=("fields", "early", "motif", "final"), required=True)
+    parser.add_argument("--stage", choices=("interictal", "fields", "early", "motif", "final"),
+                        required=True)
     args = parser.parse_args()
     out_root = args.out_root.resolve()
     if args.stage == "final": render_final(out_root)
