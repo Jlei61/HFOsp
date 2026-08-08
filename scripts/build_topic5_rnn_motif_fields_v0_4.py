@@ -183,7 +183,7 @@ def build_seed_fields(out_root: Path) -> tuple[list[dict], dict]:
         for template, selected in grouped.items():
             aggregate = aggregate_records(selected, len(contacts))
             split_stability = split_half_stability(selected, len(contacts))
-            aggregate["canonical_split_half_stability"] = np.asarray(
+            aggregate["canonical_full_split_half_stability"] = np.asarray(
                 [split_stability["canonical_full"]], dtype=np.float32
             )
             aggregate["seed_removed_split_half_stability"] = np.asarray(
@@ -214,9 +214,9 @@ def aggregate_patient_fields(out_root: Path, rows: list[dict], fields: dict) -> 
         by_fit[(row["subject"], row["fit_id"], row["scope"], row["model"], row["cell"], row["template"])].append(row)
     fit_fields: dict[tuple, dict] = {}
     fit_rows = []
-    for key, values in by_fit.items():
+    for key, seed_rows in by_fit.items():
         subject, fit_id, scope, model, cell, template = key
-        arrays = [fields[(fit_id, model, cell, int(row["seed"]), template)] for row in values]
+        arrays = [fields[(fit_id, model, cell, int(row["seed"]), template)] for row in seed_rows]
         contacts = arrays[0]["contacts"]
         aggregate = {"contacts": contacts}
         for name in ("canonical_full", "seed_removed", "participation"):
@@ -225,23 +225,29 @@ def aggregate_patient_fields(out_root: Path, rows: list[dict], fields: dict) -> 
             np.stack([item["seed_removed_denominator"] for item in arrays]), axis=0
         )
         for endpoint in ("canonical_full", "seed_removed"):
-            values = [safe_corr(left[endpoint], right[endpoint])
-                      for left, right in combinations(arrays, 2)]
+            pair_correlations = [safe_corr(left[endpoint], right[endpoint])
+                                 for left, right in combinations(arrays, 2)]
             aggregate[f"{endpoint}_seed_stability"] = (
-                float(np.nanmedian(values)) if values else float("nan")
+                float(np.nanmedian(pair_correlations)) if pair_correlations else float("nan")
             )
             split_values = [float(item[f"{endpoint}_split_half_stability"][0]) for item in arrays]
             aggregate[f"{endpoint}_split_half_stability"] = float(np.nanmedian(split_values))
         fit_fields[key] = aggregate
         fit_rows.append({"subject": subject, "fit_id": fit_id, "scope": scope, "model": model,
-                         "cell": cell, "template": template, "n_seeds": len(values),
+                         "cell": cell, "template": template, "n_seeds": len(seed_rows),
                          "canonical_seed_stability": aggregate["canonical_full_seed_stability"],
                          "seed_removed_seed_stability": aggregate["seed_removed_seed_stability"],
                          "canonical_split_half_stability": aggregate["canonical_full_split_half_stability"],
                          "seed_removed_split_half_stability": aggregate["seed_removed_split_half_stability"],
-                         "canonical_empirical_r": float(np.nanmedian([v["canonical_empirical_r"] for v in values])),
-                         "seed_removed_empirical_r": float(np.nanmedian([v["seed_removed_empirical_r"] for v in values])),
-                         "n_epoch_ceiling": int(sum(bool(v["hit_epoch_ceiling"]) for v in values))})
+                         "canonical_empirical_r": float(np.nanmedian([
+                             row["canonical_empirical_r"] for row in seed_rows
+                         ])),
+                         "seed_removed_empirical_r": float(np.nanmedian([
+                             row["seed_removed_empirical_r"] for row in seed_rows
+                         ])),
+                         "n_epoch_ceiling": int(sum(
+                             bool(row["hit_epoch_ceiling"]) for row in seed_rows
+                         ))})
     write_csv(out_root / "model_field_fit_metrics.csv", fit_rows)
 
     manifest = json.loads((out_root / "INPUT_MANIFEST.json").read_text())
