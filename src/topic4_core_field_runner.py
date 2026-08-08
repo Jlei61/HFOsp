@@ -20,11 +20,22 @@ CONNECTIVITY_FIELDS = (
     "rho_EE", "rho_IE", "rho_EI", "rho_II",
     "tau0", "v_axon", "delay_dt",
 )
+# Everything an artifact's numbers actually depend on. The placement helper was
+# missing for a long time, so artifacts were stamped "clean" while depending on
+# an uncommitted addition to it -- the stamp asserted reproducibility the tree
+# could not deliver. If a module can change a number, it belongs here.
 TRACKED_MODULES = (
     "src/topic4_core_field.py",
     "src/topic4_core_field_scoring.py",
     "src/topic4_core_field_report.py",
     "src/topic4_core_field_runner.py",
+    "src/topic4_core_field_stage2.py",
+    "src/topic4_core_field_stage3.py",
+    "src/topic4_core_field_profile.py",
+    "src/sef_hfo_subject_placement.py",
+    "src/sef_hfo_snn_adapter.py",
+    "src/sef_hfo_events.py",
+    "scripts/run_sef_hfo_snn_cm_spontaneous_readout.py",
 )
 
 
