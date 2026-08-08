@@ -126,12 +126,14 @@ def main():
     # the floor must use the same event count: a total-variation distance
     # between histograms is biased upward at small samples, so the all-events
     # figure of 0.03 is not what 80 model events should be compared against
-    fl = conf["floor_matched_to_n_events"]
+    # the producer renamed this when the floor's structure was corrected; accept
+    # either so a figure can still be drawn from an artifact of either vintage
+    fl = conf.get("floor_structure_matched") or conf["floor_matched_to_n_events"]
     axA.text(0.5, -0.30,
              f"learned field {conf['confirm_distance_train']:.2f} "
              f"(held-out recordings {conf['confirm_distance_heldout']:.2f})   ·   "
              f"best fixed blob {min(by_center.values()):.2f}   ·   "
-             f"patient vs itself at the same {fl['n']} events "
+             f"patient vs itself at the same {fl.get('model_n', fl.get('n'))} events "
              f"{fl['median']:.2f} [{fl['p05']:.2f}-{fl['p95']:.2f}]",
              transform=axA.transAxes, ha="center", va="top", fontsize=8.6,
              color="0.25")
@@ -200,7 +202,7 @@ def main():
                       confirmed_independent_networks=conf["confirm_distance_train"],
                       confirmed_held_out_recordings=conf["confirm_distance_heldout"],
                       best_fixed_blob=min(by_center.values()),
-                      floor_matched_to_n_events=conf["floor_matched_to_n_events"],
+                      floor_structure_matched=fl,
                       patient_train_vs_heldout_full=conf["patient_train_vs_heldout_full"],
                       winners_curse=conf["winners_curse"],
                       **conf["reference"]),

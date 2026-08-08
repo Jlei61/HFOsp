@@ -62,17 +62,19 @@
   "confirmed_independent_networks": 0.3997279443575493,
   "confirmed_held_out_recordings": 0.4254929958516203,
   "best_fixed_blob": 0.5905676977603247,
-  "floor_matched_to_n_events": {
-   "n": 80,
-   "median": 0.25,
-   "p05": 0.17500000000000002,
-   "p95": 0.325,
-   "note": "the 0.031 figure uses every patient event on both sides; a total-variation distance between histograms is biased upward at small samples, so the floor must be recomputed at the confirmation's own event count. 0.400 sits above the 95th percentile of this matched floor, so the mismatch is real, but it is not 13x anything"
+  "floor_structure_matched": {
+   "model_n": 80,
+   "n_bootstrap": 10000,
+   "median": 0.1827787530367067,
+   "p05": 0.13116788412259978,
+   "p95": 0.2409684598489134,
+   "structure": "model_n events vs the full patient training set",
+   "note": "scoring the same model_n against an independent model_n instead would add reference-side sampling noise the scorer never has and inflate this floor"
   },
   "patient_train_vs_heldout_full": 0.03841872399612187,
   "winners_curse": {
    "fit_minus_confirmed": -0.0584624280342107,
-   "retracted": "this difference is NOT a selection-bias estimate: the event count also changed from 32 to 80 and the distance is biased upward at small n, so selection and sample size move together"
+   "retracted": "not a selection-bias estimate: the event count also changed, from the fit's per-candidate count to this one, and a total-variation distance between histograms is biased upward at small samples, so selection and sample size move together"
   },
   "rigid_family_best": 0.591,
   "rigid_family_worst": 0.983,
