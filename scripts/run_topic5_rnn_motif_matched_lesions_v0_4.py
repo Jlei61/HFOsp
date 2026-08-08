@@ -126,6 +126,27 @@ def evaluate_lesion(model: WEModel, decoder: RolloutSizeHead, tensors: dict[str,
     }
 
 
+def generate_template_fields(
+    model: WEModel, decoder: RolloutSizeHead, ranks: np.ndarray, mode: np.ndarray,
+    selected: np.ndarray, provenance: dict[str, Any], device: torch.device,
+) -> dict[str, list[float]]:
+    """Generate target-free A/B fields from every held-out event for lesion readout."""
+    starts = [np.flatnonzero(ranks[index] == 0) for index in selected]
+    generated = rollout_with_size_head(model, decoder, starts, device)
+    grouped: dict[str, list[dict[str, Any]]] = {"A": [], "B": []}
+    for index, sequence in zip(selected, generated):
+        template = provenance["mode_to_template"].get(str(int(mode[index])))
+        if template in ("a", "b"):
+            grouped[template.upper()].append({"generated_rank_sets": sequence})
+    output: dict[str, list[float]] = {}
+    for template in ("A", "B"):
+        if grouped[template]:
+            output[template] = aggregate_records(
+                grouped[template], len(provenance["contacts"])
+            )["canonical_full"].tolist()
+    return output
+
+
 def edge_descriptor(edges: np.ndarray, strength: np.ndarray, distance: np.ndarray,
                     mask: np.ndarray, nodes_xy: np.ndarray) -> dict[str, float]:
     source, target = edges[:, 0], edges[:, 1]
@@ -258,6 +279,7 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
     mode = np.asarray(events["mode"])[keep]
     tensors = build_event_tensors(ranks)
     selected = evenly(np.flatnonzero(split == 2), max_events)
+    all_heldout = np.flatnonzero(split == 2)
     manifest = json.loads((out_root / "INPUT_MANIFEST.json").read_text())
     empirical = json.loads((Path(manifest["input_roots"]["field"]) / f"{metrics['subject']}.json").read_text())["interictal_field"]
     with np.load(influence_path, allow_pickle=False) as influence:
@@ -279,6 +301,9 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
     }
     original_mask = model.node_mask.detach().clone()
     baseline = evaluate_lesion(model, decoder, tensors, selected, ranks, mode, provenance, empirical, device)
+    baseline_fields = generate_template_fields(
+        model, decoder, ranks, mode, all_heldout, provenance, device
+    )
     outputs = {}
     for lesion_name, (kind, target) in lesions.items():
         n_target = int(target.sum())
@@ -297,6 +322,9 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
         if kind == "edge": apply_edge_lesion(model, target)
         else: apply_node_lesion(model, np.flatnonzero(target))
         targeted = evaluate_lesion(model, decoder, tensors, selected, ranks, mode, provenance, empirical, device)
+        targeted_fields = generate_template_fields(
+            model, decoder, ranks, mode, all_heldout, provenance, device
+        )
         random_metrics = []
         if len(matched) >= MINIMUM_VALID:
             for control in matched:
@@ -311,6 +339,9 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
             "status": "inference_available" if len(random_metrics) >= MINIMUM_VALID else "matched_inference_unavailable",
             "n_target": n_target, "n_valid_matched_draws": len(matched),
             "baseline": baseline, "targeted": targeted,
+            "field_contacts": [str(value) for value in provenance["contacts"]],
+            "baseline_fields": baseline_fields,
+            "targeted_fields": targeted_fields,
             "matched": {metric: [row[metric] for row in random_metrics] for metric in baseline},
         }
     return {
@@ -318,7 +349,9 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
         "subject": metrics["subject"], "fit_id": metrics["fit_id"], "scope": metrics["fit_scope"],
         "model": metrics["model_id"].rsplit("__", 1)[0], "cell": metrics["cell"],
         "seed": int(metrics["seed"]), "seed_selection": "closest_to_three_seed_validation_median",
-        "n_heldout_events": int(len(selected)), "target_draws": target_draws,
+        "n_heldout_events_for_matched_metrics": int(len(selected)),
+        "n_heldout_events_for_targeted_fields": int(len(all_heldout)),
+        "target_draws": target_draws,
         "minimum_valid_matched_draws": MINIMUM_VALID, "lesions": outputs,
         "matching_contract": {
             "draws": "without replacement within each draw; repeated draws allowed",
