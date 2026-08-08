@@ -194,9 +194,14 @@ def aggregate_patients(seizure_rows: list[dict[str, Any]], null_store: dict[str,
                     == (subject, model, cell, endpoint)]
         all_null = np.stack([null_store[row["null_key_all"]] for row in selected])
         shaft_null = np.stack([null_store[row["null_key_shaft"]] for row in selected])
+        common_all_null = np.stack([null_store[row["null_key_common_all"]] for row in selected])
+        common_shaft_null = np.stack([null_store[row["null_key_common_shaft"]] for row in selected])
         pnull_all = np.nanmedian(all_null, axis=0)
         pnull_shaft = np.nanmedian(shaft_null, axis=0)
+        pnull_common_all = np.nanmedian(common_all_null, axis=0)
+        pnull_common_shaft = np.nanmedian(common_shaft_null, axis=0)
         observed = float(np.nanmedian([row["observed"] for row in selected]))
+        common_observed = float(np.nanmedian([row["common_observed"] for row in selected]))
         row = {
             "subject": subject, "primary": subject != supportive, "supportive": subject == supportive,
             "model": model, "cell": cell, "endpoint": endpoint, "n_seizures": len(selected),
@@ -214,10 +219,24 @@ def aggregate_patients(seizure_rows: list[dict[str, Any]], null_store: dict[str,
             "within_shaft_null_median": float(np.nanmedian(pnull_shaft)),
             "within_shaft_margin": observed - float(np.nanmedian(pnull_shaft)),
             "within_shaft_p": float((1 + np.sum(pnull_shaft >= observed - 1e-15)) / (1 + np.isfinite(pnull_shaft).sum())),
+            "common_observed": common_observed,
+            "common_all_contact_null_median": float(np.nanmedian(pnull_common_all)),
+            "common_all_contact_margin": common_observed - float(np.nanmedian(pnull_common_all)),
+            "common_all_contact_p": float(
+                (1 + np.sum(pnull_common_all >= common_observed - 1e-15))
+                / (1 + np.isfinite(pnull_common_all).sum())
+            ),
+            "common_within_shaft_null_median": float(np.nanmedian(pnull_common_shaft)),
+            "common_within_shaft_margin": common_observed - float(np.nanmedian(pnull_common_shaft)),
+            "common_within_shaft_p": float(
+                (1 + np.sum(pnull_common_shaft >= common_observed - 1e-15))
+                / (1 + np.isfinite(pnull_common_shaft).sum())
+            ),
         }
         patients.append(row)
         key = f"{subject}|{model}|{cell}|{endpoint}"
-        patient_nulls[key] = pnull_all
+        patient_nulls[key + "|maxab"] = pnull_all
+        patient_nulls[key + "|common"] = pnull_common_all
     return patients, patient_nulls
 
 
@@ -393,13 +412,24 @@ def main() -> int:
                     scorer = build_scorer(record, a, b, finite)
                     all_score = score_one(scorer, target, perm_all)
                     shaft_score = score_one(scorer, target, perm_shaft)
+                    common = 0.5 * (a + b)
+                    common_scorer = build_scorer(record, common, common, finite)
+                    common_all_score = score_one(common_scorer, target, perm_all)
+                    common_shaft_score = score_one(common_scorer, target, perm_shaft)
                     key = f"{subject}|{seizure_id}|{model}|{cell}|{endpoint}"
                     key_all, key_shaft = key + "|all", key + "|shaft"
+                    key_common_all, key_common_shaft = key + "|common_all", key + "|common_shaft"
                     null_store[key_all] = all_score["null"]
                     null_store[key_shaft] = shaft_score["null"]
-                    null_labels.append(key)
-                    null_all.append(all_score["null"].astype(np.float32))
-                    null_shaft.append(shaft_score["null"].astype(np.float32))
+                    null_store[key_common_all] = common_all_score["null"]
+                    null_store[key_common_shaft] = common_shaft_score["null"]
+                    for label, score_all, score_shaft in (
+                        (key + "|maxab", all_score, shaft_score),
+                        (key + "|common", common_all_score, common_shaft_score),
+                    ):
+                        null_labels.append(label)
+                        null_all.append(score_all["null"].astype(np.float32))
+                        null_shaft.append(score_shaft["null"].astype(np.float32))
                     seizure_rows.append({
                         "subject": subject, "primary": subject in primary, "supportive": subject == supportive,
                         "seizure_id": seizure_id, "model": model, "cell": cell, "endpoint": endpoint,
@@ -410,12 +440,33 @@ def main() -> int:
                         "all_contact_margin": all_score["margin"], "all_contact_p": all_score["empirical_p"],
                         "within_shaft_null_median": shaft_score["null_median"],
                         "within_shaft_margin": shaft_score["margin"], "within_shaft_p": shaft_score["empirical_p"],
+                        "common_observed": common_all_score["observed"],
+                        "common_all_contact_null_median": common_all_score["null_median"],
+                        "common_all_contact_margin": common_all_score["margin"],
+                        "common_all_contact_p": common_all_score["empirical_p"],
+                        "common_within_shaft_null_median": common_shaft_score["null_median"],
+                        "common_within_shaft_margin": common_shaft_score["margin"],
+                        "common_within_shaft_p": common_shaft_score["empirical_p"],
                         **perm_support,
                         "null_key_all": key_all, "null_key_shaft": key_shaft,
+                        "null_key_common_all": key_common_all,
+                        "null_key_common_shaft": key_common_shaft,
                     })
 
     write_csv(out_root / "early_ictal_per_seizure.csv", seizure_rows)
     patient_rows, patient_nulls = aggregate_patients(seizure_rows, null_store, supportive)
+    fidelity_lookup = {
+        (row["subject"], row["model"], row["cell"]): row for row in fidelity_rows
+    }
+    for row in patient_rows:
+        if row["model"] == "EMPIRICAL_REFERENCE":
+            row["interictal_common_fidelity"] = 1.0
+            row["interictal_contrast_fidelity"] = 1.0
+            continue
+        fidelity = fidelity_lookup.get((row["subject"], row["model"], row["cell"]), {})
+        prefix = "canonical" if row["endpoint"] == "canonical_full" else "seed_removed"
+        row["interictal_common_fidelity"] = fidelity.get(f"{prefix}_common_fidelity", np.nan)
+        row["interictal_contrast_fidelity"] = fidelity.get(f"{prefix}_contrast_fidelity", np.nan)
     write_csv(out_root / "early_ictal_per_patient_model.csv", patient_rows)
     np.savez_compressed(
         out_root / "early_ictal_null_matrices.npz",
@@ -463,6 +514,12 @@ def main() -> int:
             if values:
                 contrasts[f"{endpoint}|{model}__{cell}_margin_gt_zero"] = paired_summary(
                     values, seed=stable_seed(endpoint, model, cell, "zero")
+                )
+            common_values = [float(lookup[(subject, model, cell, endpoint)]["common_all_contact_margin"])
+                             for subject in primary if (subject, model, cell, endpoint) in lookup]
+            if common_values:
+                contrasts[f"{endpoint}|{model}__{cell}_common_margin_gt_zero"] = paired_summary(
+                    common_values, seed=stable_seed(endpoint, model, cell, "common_zero")
                 )
     atomic_json(out_root / "early_ictal_model_contrasts.json", contrasts)
 
