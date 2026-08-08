@@ -6,10 +6,17 @@ identifier reaches a reader-facing label.  Cross-patient comparisons are drawn a
 within-patient paired differences, because the absolute level of the prediction
 score tracks contact count at rho = -0.96.
 
-The load-bearing panel is the control ladder (e).  Every topology number beats
-the untrained graph the same growth rule produces, and a reader who saw only that
-would conclude the task organised the network.  The panel therefore shows all
-three references side by side, including the one that removes the conclusion.
+The lead panel is the sufficiency ladder (c): given only the first contact of a
+held-out event, does the network regenerate the rest of that event's propagation
+order?  It is drawn against the intrinsic reproducibility of the patient's own
+events, because a generator scored on one noisy event can only reach the square
+root of the event-to-event reliability however good it is.
+
+The control ladder (e) asks the separate, harder question of whether the *shape*
+of the graph is the task's doing.  Every topology number beats the untrained
+graph the same growth rule produces, and a reader who saw only that would
+conclude the task organised the network, so all three references are shown side
+by side including the one that removes the conclusion.
 
 There is no separate "which proposals survive" panel: pruned-versus-kept edge
 length and the long-edge row of the ladder answer the same question, and the
@@ -61,8 +68,58 @@ def p_text(p: float) -> str:
 
 def load_analysis(out_root: Path, cell: str) -> Dict[str, Any]:
     analysis = out_root / "analysis"
-    return {name: json.loads((analysis / f"{name}_{cell}.json").read_text())
-            for name in ("pareto", "topology", "function", "lesion", "tendency")}
+    out = {name: json.loads((analysis / f"{name}_{cell}.json").read_text())
+           for name in ("pareto", "topology", "function", "lesion", "tendency")}
+    path = analysis / f"sufficiency_{cell}.json"
+    out["sufficiency"] = json.loads(path.read_text()) if path.exists() else None
+    return out
+
+
+SUFFICIENCY_ROWS = [
+    ("SPATIAL_SET", "sparse, wiring economy", "#2e7d5b"),
+    ("RANDOM_SET", "sparse, uniform rewiring", "#d98b3a"),
+    ("DENSE_TISSUE", "all-to-all tissue", "#4a6fa5"),
+    ("SPATIAL_SET_shuffled", "same training,\norder destroyed", "#5c6bc0"),
+    ("STATIC_CONTACT", "no recurrence", "#9e9e9e"),
+]
+
+
+def panel_sufficiency(ax, suff: Dict[str, Any]) -> None:
+    """Cohort same-start generation against its floors and its noise ceiling."""
+    ceiling = np.array([suff["noise_ceiling_sqrt_reliability"][k]
+                        for k in sorted(suff["noise_ceiling_sqrt_reliability"])])
+    rng = np.random.default_rng(2)
+    for i, (arm, label, colour) in enumerate(SUFFICIENCY_ROWS):
+        values = np.array(list(suff["arms"][arm]["without_start"].values()))
+        ax.scatter(values, np.full(len(values), i) + rng.normal(0, 0.07, len(values)),
+                   s=13, color=colour, alpha=0.65, linewidths=0, zorder=3)
+        ax.plot([np.median(values)] * 2, [i - 0.28, i + 0.28], color=colour, lw=2.6, zorder=4)
+    band = (np.percentile(ceiling, 25), np.percentile(ceiling, 75))
+    ax.axvspan(band[0], band[1], color="#b0413e", alpha=0.10, zorder=0)
+    ax.axvline(np.median(ceiling), color=LONG, lw=1.4, ls=(0, (4, 2)), zorder=1)
+    ax.text(np.median(ceiling), 1.75,
+            "  how well one event of this\n  patient predicts another\n"
+            "  (attenuation-corrected)",
+            color=LONG, fontsize=6.2, va="center", ha="left")
+    ax.set_yticks(range(len(SUFFICIENCY_ROWS)))
+    ax.set_yticklabels([lab for _, lab, _ in SUFFICIENCY_ROWS], fontsize=7)
+    ax.set_ylim(-0.6, len(SUFFICIENCY_ROWS) - 0.4)
+    ax.set_xlabel("agreement with the real propagation order\n"
+                  "(seeded contact removed, one point per patient)", fontsize=7.5)
+    ax.tick_params(labelsize=6.5)
+    ax.axvline(0, color="#1a1a1a", lw=0.7, zorder=1)
+    c = suff["contrasts"]
+    ax.text(0.015, 0.03,
+            f"vs no recurrence  {c['spatial_vs_no_recurrence']['median_delta']:+.2f}, "
+            f"{c['spatial_vs_no_recurrence']['n_higher']}/{c['spatial_vs_no_recurrence']['n']}, "
+            f"{p_text(c['spatial_vs_no_recurrence']['p'])}\n"
+            f"vs order destroyed  {c['spatial_vs_order_destroyed']['median_delta']:+.2f}, "
+            f"{c['spatial_vs_order_destroyed']['n_higher']}/{c['spatial_vs_order_destroyed']['n']}, "
+            f"{p_text(c['spatial_vs_order_destroyed']['p'])}\n"
+            f"vs the ceiling  {c['spatial_vs_noise_ceiling']['median_delta']:+.2f}, "
+            f"{c['spatial_vs_noise_ceiling']['n_higher']}/{c['spatial_vs_noise_ceiling']['n']}, "
+            f"{p_text(c['spatial_vs_noise_ceiling']['p'])}",
+            transform=ax.transAxes, ha="left", va="bottom", fontsize=6.2)
 
 
 # --------------------------------------------------------------- panel a ----
@@ -194,15 +251,10 @@ def panel_pareto(ax_scatter, ax_delta, pareto: Dict[str, Any]) -> None:
     ax_scatter.legend(fontsize=6, frameon=False, loc="upper left", handletextpad=0.4,
                       labelspacing=0.3, borderpad=0.2)
 
-    budget = pareto["sparse_vs_dense_budget"]
-    ax_scatter.text(0.97, 0.03,
-                    f"sparse arms use {budget['edge_count_ratio_median']:.0%} of the edges\n"
-                    f"and {budget['total_wiring_length_ratio_median']:.0%} of the total wiring",
-                    transform=ax_scatter.transAxes, ha="right", va="bottom", fontsize=6.2)
-
+    # The no-recurrence contrast lives in panel c; repeating it here would be the
+    # same question drawn twice.
     keys = [("SPATIAL_SET__vs__RANDOM_SET", "vs uniform\nsparse"),
-            ("SPATIAL_SET__vs__DENSE_TISSUE", "vs all-to-all"),
-            ("SPATIAL_SET__vs__STATIC_CONTACT", "vs no\nrecurrence")]
+            ("SPATIAL_SET__vs__DENSE_TISSUE", "vs all-\nto-all")]
     rng = np.random.default_rng(0)
     for i, (key, label) in enumerate(keys):
         block = pareto["contrasts"][key]
@@ -211,16 +263,23 @@ def panel_pareto(ax_scatter, ax_delta, pareto: Dict[str, Any]) -> None:
                          deltas, s=12, color="#37474f", alpha=0.7, linewidths=0, zorder=3)
         ax_delta.plot([i - 0.27, i + 0.27], [np.median(deltas)] * 2, color=LONG, lw=2.2, zorder=4)
     ax_delta.axhline(0, color="#1a1a1a", lw=0.8, zorder=1)
-    top = ax_delta.get_ylim()[1]
+    lo, hi = ax_delta.get_ylim()
+    ax_delta.set_ylim(lo, hi + 0.30 * (hi - lo))
     for i, (key, _) in enumerate(keys):
         block = pareto["contrasts"][key]
-        ax_delta.text(i, top, f"{p_text(block['p'])}\n{block['n_negative']}/{block['n']}",
-                      ha="center", va="bottom", fontsize=6)
+        ax_delta.text(i, hi + 0.02 * (hi - lo),
+                      f"{p_text(block['p'])}\n{block['n_negative']}/{block['n']}",
+                      ha="center", va="bottom", fontsize=5.8)
     ax_delta.set_xticks(range(len(keys)))
     ax_delta.set_xticklabels([lab for _, lab in keys], fontsize=6.4)
     ax_delta.set_xlim(-0.6, len(keys) - 0.4)
-    ax_delta.set_ylabel("wiring economy − reference\n(paired, negative = better)", fontsize=7)
+    ax_delta.set_ylabel("wiring economy − reference", fontsize=7)
     ax_delta.tick_params(labelsize=6.5)
+    budget = pareto["sparse_vs_dense_budget"]
+    ax_delta.set_xlabel(
+        f"the sparse arms spend {budget['edge_count_ratio_median']:.0%} of the edges\n"
+        f"and {budget['total_wiring_length_ratio_median']:.0%} of the total wiring",
+        fontsize=6.6)
 
 
 # --------------------------------------------------------------- panel d ----
@@ -336,7 +395,7 @@ def main() -> int:
 
     plt.rcParams.update({"font.family": "DejaVu Sans", "axes.linewidth": 0.7,
                          "xtick.major.width": 0.7, "ytick.major.width": 0.7})
-    fig = plt.figure(figsize=(11.2, 11.0))
+    fig = plt.figure(figsize=(11.8, 11.6))
     outer = gridspec.GridSpec(3, 1, figure=fig, hspace=0.40,
                               height_ratios=[1.00, 1.05, 0.92])
 
@@ -354,19 +413,19 @@ def main() -> int:
     axes_b[0].set_title("b  Held-out events regenerated from their own first contact",
                         loc="left", fontsize=9.5, fontweight="bold", pad=8)
 
-    middle = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=outer[1], wspace=0.42,
-                                              width_ratios=[1.0, 0.9, 1.5])
-    ax_c1 = fig.add_subplot(middle[0])
-    ax_c2 = fig.add_subplot(middle[1])
-    panel_pareto(ax_c1, ax_c2, a["pareto"])
-    ax_c1.set_title("c  What the wiring budget buys", loc="left", fontsize=9.5,
-                    fontweight="bold", pad=8)
+    middle = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=outer[1], wspace=0.34,
+                                              width_ratios=[1.35, 1.0])
+    ax_c = fig.add_subplot(middle[0])
+    if a["sufficiency"]:
+        panel_sufficiency(ax_c, a["sufficiency"])
+    ax_c.set_title("c  Can it regenerate this patient's propagation?", loc="left",
+                   fontsize=9.5, fontweight="bold", pad=8)
 
-    d = gridspec.GridSpecFromSubplotSpec(1, 3, subplot_spec=middle[2], wspace=0.08)
-    axes_d = [fig.add_subplot(d[i]) for i in range(3)]
-    panel_topology(axes_d, out_root, representative)
-    axes_d[0].text(0.0, 1.16, "d  One patient's graph before and after training",
-                   transform=axes_d[0].transAxes, fontsize=9.5, fontweight="bold")
+    d = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=middle[1], wspace=0.60)
+    ax_d1 = fig.add_subplot(d[0])
+    panel_pareto(ax_d1, fig.add_subplot(d[1]), a["pareto"])
+    ax_d1.set_title("d  What the wiring budget costs", loc="left", fontsize=9.5,
+                    fontweight="bold", pad=20)
 
     bottom = gridspec.GridSpecFromSubplotSpec(1, 2, subplot_spec=outer[2], wspace=0.30,
                                               width_ratios=[1.55, 1.0])
