@@ -537,6 +537,22 @@ def main() -> int:
         "all_contact_and_within_shaft_rebuild_inside_each_draw": True,
         "training_or_model_selection_after_unseal": False,
     })
+    atomic_json(out_root / "stage_f_scientific_drift_audit.json", {
+        "status": "ALIGNED",
+        "scientific_question": (
+            "whether target-free frozen model-generated interictal fields reproduce the existing "
+            "within-patient early-ictal broadband field correspondence"
+        ),
+        "target_role": "external frozen benchmark only",
+        "target_values_read_after_field_freeze": True,
+        "n_primary_subjects": len(primary),
+        "cohort_mismatch_known_before_unseal": metadata.get("join_status"),
+        "primary_endpoint": "canonical_full maxAB versus synchronized all-contact null",
+        "secondary_endpoints": ["seed_removed maxAB", "common-field concordance",
+                                "interictal A/B contrast fidelity", "within-shaft sensitivity"],
+        "not_claimed": ["seizure prediction", "causal interictal-to-ictal transition",
+                        "recovery of an anatomical connectome"],
+    })
     print(json.dumps({"status": "COMPLETE", "n_primary_subjects": len(primary),
                       "n_seizure_model_endpoint_rows": len(seizure_rows),
                       "target_values_read": True}))
