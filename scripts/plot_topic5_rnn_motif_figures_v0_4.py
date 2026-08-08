@@ -242,6 +242,57 @@ def draw_interictal_sufficiency(parent, out_root: Path):
     strip(ax2, rollout, "Free-rollout\nrank correlation", zero=True)
 
 
+def draw_stage_interictal(parent, out_root: Path):
+    """Diagnostic six-panel readout; the final figure uses the compact subset."""
+    frame = rows(out_root / "interictal_per_patient.csv")
+    rnn = [row for row in frame if row["cell"] == "rnn"]
+    lookup = {(row["subject"], row["model"]): row for row in rnn}
+    subjects = sorted({row["subject"] for row in rnn if row["model"] == "M0_NO_REC"})
+    models = [model for model in MODEL_ORDER
+              if all((subject, model) in lookup for subject in subjects)]
+    grid = parent.subgridspec(2, 3, hspace=0.58, wspace=0.42)
+    axes = [parent.figure.add_subplot(grid[row, col]) for row in range(2) for col in range(3)]
+
+    for axis, metric, label in (
+        (axes[0], "contact_nll", "Next-contact gain\n(M0 NLL − model NLL)"),
+        (axes[1], "stop_bce", "STOP gain\n(M0 BCE − model BCE)"),
+    ):
+        data = {model: [lookup[(subject, "M0_NO_REC")][metric]
+                        - lookup[(subject, model)][metric] for subject in subjects]
+                for model in models if model != "M0_NO_REC"}
+        strip(axis, data, label, zero=True)
+    strip(axes[2], {model: [lookup[(subject, model)]["rollout_spearman"]
+                            for subject in subjects] for model in models},
+          "Seed-removed rollout\nrank correlation", zero=True)
+    strip(axes[3], {model: [lookup[(subject, model)]["length_ratio"]
+                            for subject in subjects] for model in models},
+          "Generated / observed\npost-seed contacts", zero=False)
+    axes[3].axhline(1, color="#8d8d8d", lw=0.7)
+
+    retention_rows = rows(out_root / "dense_benefit_retention.csv")
+    retention = {
+        model: [row["dense_benefit_retention"] for row in retention_rows
+                if row["cell"] == "rnn" and row["model"] == model
+                and np.isfinite(float(row["dense_benefit_retention"]))]
+        for model in models if model not in {"M0_NO_REC", "M1_DENSE"}
+    }
+    strip(axes[4], retention, "Dense benefit retained", zero=True)
+    axes[4].axhline(1, color="#8d8d8d", lw=0.7)
+
+    gru = {(row["subject"], row["model"]): row for row in frame if row["cell"] == "gru"}
+    shared_models = [model for model in models
+                     if all((subject, model) in gru for subject in subjects)]
+    architecture = {
+        model: [gru[(subject, model)]["rollout_spearman"]
+                - lookup[(subject, model)]["rollout_spearman"] for subject in subjects]
+        for model in shared_models
+    }
+    strip(axes[5], architecture, "GRU − leaky RNN\nrollout correlation", zero=True)
+    for label, axis in zip("abcdef", axes):
+        axis.text(-0.18, 1.04, label, transform=axis.transAxes, fontsize=11,
+                  fontweight="bold", ha="right", va="bottom")
+
+
 def draw_pareto(ax, out_root: Path):
     inter = [row for row in rows(out_root / "interictal_per_patient.csv") if row["cell"] == "rnn"]
     fidelity = rows(out_root / "model_field_patient_metrics.csv")
@@ -338,10 +389,11 @@ def panel_label(fig, subplot_spec, label: str):
 
 
 def render_stage(out_root: Path, stage: str):
-    fig = plt.figure(figsize=(9.2, 3.2), layout="constrained", facecolor="white")
+    size = (11.4, 6.2) if stage == "interictal" else (9.2, 3.2)
+    fig = plt.figure(figsize=size, layout="constrained", facecolor="white")
     root = fig.add_gridspec(1, 1)[0, 0]
     if stage == "interictal":
-        draw_interictal_sufficiency(root, out_root)
+        draw_stage_interictal(root, out_root)
     elif stage == "fields":
         record = empirical_record(out_root, REPRESENTATIVE)
         empirical_a, empirical_b, _ = build_interictal_ab_panel_payloads(record)
@@ -405,7 +457,7 @@ def render_final(out_root: Path):
 
 ### stage_interictal_scientific_readout.png / .pdf
 
-正式间期模型矩阵的阶段验收图：左侧为相对无循环基线的 next-contact 增益，右侧为删除已提供起点后的自由推演 rank 一致性；每个点是一位患者。
+正式间期模型矩阵的六项阶段验收：next-contact、STOP、删除起点后的自由推演、生成长度、dense-benefit retention，以及 GRU 相对 leaky RNN 的复现；每个点是一位患者。
 
 **关注点**：只有同时改善局部预测并保持自由推演，才将某种连接约束称为足以表示患者内传播；这仍不是解剖连接恢复。
 
