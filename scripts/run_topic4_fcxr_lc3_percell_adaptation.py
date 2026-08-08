@@ -136,7 +136,11 @@ def _grid_fields(snapshots, posE, L, grid=GRID):
 
 
 def _run_arm(spec):
-    out_json = os.path.join(OUT, f"arm_{spec['arm']}.json")
+    # A delayed arm is a different experiment from the same eta_m applied from t=0, so it gets its
+    # own record rather than resuming into the undelayed one's file.
+    enable = spec.get("m_enable_ms")
+    name = spec["arm"] if enable is None else f"{spec['arm']}_on{int(enable / 1000)}s"
+    out_json = os.path.join(OUT, f"arm_{name}.json")
     if os.path.isfile(out_json):
         prior = GEO._load_json(out_json)
         if prior.get("status") == "COMPLETE":
@@ -146,6 +150,11 @@ def _run_arm(spec):
     cfg = E01._dynamic_cfg(GEO._point(GEO.H1_POINT_ID))
     cfg.update(use_m=True, tau_adp=TAU_ADP_MS, eta_m=float(spec["eta_m"]),
                m_mean_field=bool(spec["mean_field"]))
+    if enable is not None:
+        # HEO2's construction: let the high state establish first, then switch adaptation on.  It
+        # also passes that line's baseline gate by construction -- adaptation is off through the
+        # interictal train, so it cannot be what stops the train accumulating.
+        cfg["m_enable_ms"] = float(enable)
     snapshot_steps = {int(round(t / E01.DT)): f"t{int(t)}"
                       for t in np.arange(0.0, RUN_MS + SNAP_MS, SNAP_MS)}
     slow = MZSlowVars(S["N"], 18.0, MZSlowVarsConfig(**cfg), NE=S["NE"],
@@ -200,7 +209,8 @@ def _run_arm(spec):
     ne = int(slow_f.NE)
     npz_path = out_json.replace(".json", "_traces.npz")
     record = dict(
-        status="COMPLETE", arm=spec["arm"], use_m=True, eta_m=float(spec["eta_m"]),
+        status="COMPLETE", arm=name, eta_arm=spec["arm"], use_m=True,
+        eta_m=float(spec["eta_m"]), m_enable_ms=enable,
         m_mean_field=bool(spec["mean_field"]), tau_adp_ms=TAU_ADP_MS,
         use_gba=False, noise_seed=NOISE, point_id=GEO.H1_POINT_ID, run_ms=RUN_MS,
         no_kick=True, no_reset=True, no_parameter_step=True,
@@ -258,12 +268,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--confirm-run", action="store_true")
     ap.add_argument("--arms", default=",".join(a["arm"] for a in ARMS))
+    ap.add_argument("--m-enable-ms", type=float, default=None,
+                    help="switch adaptation on this late, so the discharge establishes first")
     ap.add_argument("--workers", type=int, default=0)
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("40k-neuron sweep requires --confirm-run")
 
-    want = [a for a in ARMS if a["arm"] in set(args.arms.split(","))]
+    want = [dict(a, m_enable_ms=args.m_enable_ms)
+            for a in ARMS if a["arm"] in set(args.arms.split(","))]
     per = BASE_RSS_GIB + GIB_PER_SIM_SECOND * RUN_MS / 1000.0
     avail = GEO._meminfo()["mem_available_gib"]
     # 40 GiB headroom, the same margin the sibling runners keep: this box has run out of memory
@@ -286,6 +299,7 @@ def main():
             r = fut.result()
             rows.append(r)
             print(f"[adapt] {r['arm']}: {r['stage']} — eta_m {r['eta_m']}, "
+                  f"on at {r.get('m_enable_ms')}, "
                   f"onset {r['onset_ms']}, offset {r['offset_ms']}, "
                   f"terminated={r['terminated']}, m_end mean {r['m_end_mean']:.1f} "
                   f"max {r['m_end_max']:.1f}, wear {r['wear_end']:.4f}", flush=True)
