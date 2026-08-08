@@ -105,27 +105,31 @@ def teacher_forced_size_examples(
     tensors: dict[str, torch.Tensor],
     event_indices: np.ndarray,
     device: torch.device,
+    batch_size: int = 512,
 ) -> tuple[torch.Tensor, torch.Tensor]:
     """Collect causal features and next-set sizes from selected events."""
     model.eval()
     feature_rows: list[torch.Tensor] = []
     target_rows: list[torch.Tensor] = []
-    for index in np.asarray(event_indices, int):
-        x = tensors["x"][index:index + 1].to(device)
-        recruited = tensors["recruited"][index:index + 1].to(device)
-        valid = tensors["valid"][index:index + 1].to(device)
-        is_last = tensors["is_last"][index:index + 1].to(device)
-        target = tensors["target"][index:index + 1].to(device)
-        h = (torch.zeros(1, model.n_nodes * model.state_dim, device=device)
+    indices = np.asarray(event_indices, int)
+    for begin in range(0, len(indices), int(batch_size)):
+        selected = torch.as_tensor(indices[begin:begin + int(batch_size)])
+        x = tensors["x"][selected].to(device)
+        recruited = tensors["recruited"][selected].to(device)
+        valid = tensors["valid"][selected].to(device)
+        is_last = tensors["is_last"][selected].to(device)
+        target = tensors["target"][selected].to(device)
+        h = (torch.zeros(len(selected), model.n_nodes * model.state_dim, device=device)
              if model.arm != "STATIC_CONTACT" else None)
+        feature_grid: list[torch.Tensor] = []
         for t in range(x.shape[1]):
-            if not bool(valid[0, t]):
-                break
             if h is not None:
                 h = model._step(h, x[:, t])
-            if not bool(is_last[0, t]):
-                feature_rows.append(state_features(model, h, t, recruited[:, t].mean(-1)).cpu())
-                target_rows.append((target[:, t].sum(-1).long() - 1).cpu())
+            feature_grid.append(state_features(model, h, t, recruited[:, t].mean(-1)))
+        features = torch.stack(feature_grid, dim=1)
+        continuing = valid & ~is_last
+        feature_rows.append(features[continuing].cpu())
+        target_rows.append((target.sum(-1).long()[continuing] - 1).cpu())
     if not feature_rows:
         return torch.empty(0, 4), torch.empty(0, dtype=torch.long)
     return torch.cat(feature_rows), torch.cat(target_rows)

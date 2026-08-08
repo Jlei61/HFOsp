@@ -11,8 +11,9 @@ from src.topic5_rnn_motif_v0_4 import (
     RolloutSizeHead,
     rollout_with_size_head,
     shuffle_rank_sets,
+    teacher_forced_size_examples,
 )
-from src.topic5_wiring_economy_rnn import WEConfig, WEModel
+from src.topic5_wiring_economy_rnn import WEConfig, WEModel, build_event_tensors
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
@@ -93,3 +94,21 @@ def test_launcher_order_control_preserves_seed_and_full_control_does_not(tmp_pat
     order = [job for job in build_jobs(tmp_path, "core") if job["spec_id"] == "C_ORDER_SHUFFLED"]
     full = [job for job in build_jobs(tmp_path, "dose") if job["spec_id"] == "C_FULL_RANK_SHUFFLED"]
     assert len(order) == 3 and len(full) == 1
+
+
+def test_chunked_size_features_are_identical_to_one_event_chunks():
+    model = _static_model(6)
+    tensors = build_event_tensors(np.array([
+        [0, 1, 2, -1, -1, -1],
+        [0, 0, 1, 2, 3, -1],
+        [1, 2, 0, 3, 4, 5],
+    ], dtype=np.int16))
+    index = np.arange(3)
+    one_x, one_y = teacher_forced_size_examples(
+        model, tensors, index, torch.device("cpu"), batch_size=1
+    )
+    all_x, all_y = teacher_forced_size_examples(
+        model, tensors, index, torch.device("cpu"), batch_size=16
+    )
+    assert torch.equal(one_y, all_y)
+    assert torch.allclose(one_x, all_x, atol=0, rtol=0)
