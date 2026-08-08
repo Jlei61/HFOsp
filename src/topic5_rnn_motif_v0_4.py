@@ -190,6 +190,7 @@ def fit_rollout_size_head(
 
 
 @torch.no_grad()
+@torch.no_grad()
 def rollout_with_size_head(
     model: WEModel,
     size_head: RolloutSizeHead,
