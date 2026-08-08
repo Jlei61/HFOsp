@@ -1,3 +1,18 @@
+"""Re-run the fit's best candidate on networks that had no say in choosing it.
+
+This was written into a scratch directory and run from there, so the number it
+produced had no committed producer. That is fixed here, along with a caution the
+first version got wrong: the change from the fit value to this one is NOT a
+clean winner's-curse estimate. It also changes the event count, and a
+total-variation distance between histograms is biased upward at small samples,
+so selection and sample size move the number together and cannot be separated
+by this comparison alone.
+
+The comparison floor must be matched on event count too. The patient's own two
+halves sit at 0.031 when both sides use every event, but at 80 events a side --
+what a six-network confirmation yields -- the same patient-versus-patient
+distance is about 0.25.
+"""
 import json, os, sys, numpy as np
 from multiprocessing import Pool
 sys.path.insert(0, os.getcwd()); sys.path.insert(0, os.path.join("src","snn_engine"))
