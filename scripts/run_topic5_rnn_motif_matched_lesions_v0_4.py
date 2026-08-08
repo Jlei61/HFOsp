@@ -320,6 +320,16 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
         "seed": int(metrics["seed"]), "seed_selection": "closest_to_three_seed_validation_median",
         "n_heldout_events": int(len(selected)), "target_draws": target_draws,
         "minimum_valid_matched_draws": MINIMUM_VALID, "lesions": outputs,
+        "matching_contract": {
+            "draws": "without replacement within each draw; repeated draws allowed",
+            "edge_total_weight_caliper": 0.10,
+            "edge_mean_length_caliper": 0.10,
+            "edge_mean_degree_absolute_caliper": 1.0,
+            "edge_spatial_extent_caliper": 0.10,
+            "node_incident_weight_caliper": 0.10,
+            "node_mean_degree_absolute_caliper": 1.0,
+            "node_radius_caliper": 0.10,
+        },
     }
 
 
@@ -373,6 +383,8 @@ def aggregate(out_root: Path) -> None:
     (out_root / "MATCHED_LESION_SUMMARY.json").write_text(json.dumps({
         "contract": "topic5_rnn_motif_matched_lesion_summary_v0_4", "target_values_read": False,
         "n_selected_fit_model_units": len(records), "statistics": statistics,
+        "cell_scope": "leaky_rnn_primary_only; GRU is limited to effective-reach architecture replication",
+        "target_draws": TARGET_DRAWS, "minimum_valid_matched_draws": MINIMUM_VALID,
         "interpretation_rule": "motif wording requires enrichment, task relation and positive matched-lesion specificity",
     }, indent=2))
 
