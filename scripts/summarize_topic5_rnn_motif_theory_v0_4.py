@@ -200,6 +200,11 @@ def main() -> int:
          if row["model"] == "M6_SPATIAL_MID" and row["cell"] == "rnn"],
         seed=stable_seed("M6 effective operator seed stability"),
     )
+    split_stability = paired_summary(
+        [row["effective_operator_split_half_stability"] for row in patient_rows
+         if row["model"] == "M6_SPATIAL_MID" and row["cell"] == "rnn"],
+        seed=stable_seed("M6 effective operator split half stability"),
+    )
     lesion_stats = lesion.get("statistics", {})
 
     def positive_significant(value: dict[str, Any] | None, estimate: str = "median") -> bool:
@@ -222,6 +227,7 @@ def main() -> int:
             m6_enrichment.get("long_top_enrichment")
         ),
         "effective_operator_seed_stability": positive_significant(stability),
+        "effective_operator_split_half_stability": positive_significant(split_stability),
         "task_relation": task_relation,
         "local_backbone_matched_lesion": positive_significant(
             local_lesion, "median_specificity_contact_nll"
@@ -239,6 +245,7 @@ def main() -> int:
         "enrichment": enrichment,
         "task_and_wiring_associations": associations,
         "effective_operator_seed_stability": {m6_key: stability},
+        "effective_operator_split_half_stability": {m6_key: split_stability},
         "M6_true_order_minus_order_shuffle_motif_score": proposal,
         "architecture_direction": architecture,
         "matched_lesion": lesion,
@@ -246,7 +253,8 @@ def main() -> int:
         "M6_motif_claim_pass": all(claim_components.values()),
         "claim_rule": (
             "the same local-backbone plus long-range-connector motif must show both enrichments, "
-            "cross-seed operator stability, task relation, local and long/connector matched-lesion "
+            "cross-seed and heldout split-half operator stability, task relation, local and "
+            "long/connector matched-lesion "
             "specificity, and true-order benefit over the identical order-shuffled proposal"
         ),
     }
