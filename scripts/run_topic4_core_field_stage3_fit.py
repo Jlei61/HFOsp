@@ -10,6 +10,16 @@ One scalar objective, no tiers and no direction labels. Three networks per
 candidate with common random numbers inside a generation: one run gives a
 distance with sd 0.058 and a +0.06 small-sample bias, three brings the noise to
 about 0.038, which is well under the differences worth resolving.
+
+WARNING -- this is NOT the objective frozen in spec 9.3. That contract specifies
+a two-dimensional energy distance over (slope, r2); what runs here is a
+one-dimensional binned total variation over sign(slope)*r2. The substitution had
+a reason -- the model recruits about seven contacts where the patient recruits
+twelve, so slope magnitude carries the participation mismatch -- but it was made
+without amending the contract, and it turned out to be wrong on the merits: the
+marginal is satisfiable by a single mid-array generator, and the field this
+script produced has its two directions correlated at +0.65 rather than opposite.
+A future round must restore a joint observable. See spec 9.3.
 """
 from __future__ import annotations
 
@@ -204,13 +214,19 @@ def main():
                          split_seed=SPLIT_SEED, frac=HELD_OUT_FRAC),
             reference=dict(rigid_family_best=0.591, rigid_family_worst=0.983,
                            hand_placed_two_cores=0.855, learned_filament=0.686,
-                           patient_split_half_floor=0.031),
+                           # the floor must match the scorer's structure: a
+                           # model-sized sample against the FULL patient
+                           # training set. 0.031 uses every event on both sides
+                           # and is not comparable to any model number.
+                           floor_note=("computed per artifact by "
+                                       "run_topic4_core_field_stage3_confirm_fit; "
+                                       "about 0.18 at 80 model events")),
             config_checksum=cfg["checksum"], provenance=provenance()), ck_path)
 
     overall = min(history, key=lambda r: r["distance"])
     print(f"\n[{tag}] {len(history)} candidates, best distance {overall['distance']:.3f}")
-    print(f"        rigid family best was 0.591, hand-placed pair 0.855, "
-          f"patient's own half-split floor 0.031")
+    print(f"        rigid family best 0.591, hand-placed pair 0.855; the floor "
+          f"is structure-matched per artifact by the confirmation script")
 
 
 if __name__ == "__main__":

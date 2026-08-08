@@ -1,0 +1,127 @@
+{
+  "subject": "epilepsiae_1146",
+  "support": [
+    "ICL1",
+    "ICL10",
+    "ICL11",
+    "ICL2",
+    "ICL3",
+    "ICL4",
+    "ICL5",
+    "ICL6",
+    "ICL7",
+    "ICL8",
+    "ICL9",
+    "SCL6",
+    "SCL7",
+    "SCL8",
+    "SCL9"
+  ],
+  "quantile_seed": 20260806,
+  "N_core_manual": 1129,
+  "D0": 607.4198018287647,
+  "part_min": 5,
+  "delta_eq": 0.05,
+  "sources": [
+    "gradient",
+    "geometry"
+  ],
+  "missing_rules": [
+    "mean_rank",
+    "common_only"
+  ],
+  "score_defs": [
+    "spearman",
+    "pair"
+  ],
+  "seeds": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12
+  ],
+  "duration_ms": 8000.0,
+  "field": {
+    "M": 9,
+    "EPS": 0.001,
+    "TAU_H": 0.25,
+    "A0": 1.5,
+    "B0": 1.5,
+    "SIGMA_S_FACTOR": 1.2,
+    "AXIAL_MARGIN": 2.0,
+    "SHIFT_MM": 3.0
+  },
+  "engine": {
+    "L": 20.0,
+    "density": 100.0,
+    "AR": 2.0,
+    "g": 3.6,
+    "dt": 0.1,
+    "k_dir": 2,
+    "core_mean": 17.5,
+    "core_std": 1.0,
+    "core_r": 1.5,
+    "v_base": 18.0
+  },
+  "provenance": {
+    "git_commit": "2441848480287726c507bb4811b315412429dbfa",
+    "tracked_modules_dirty": false,
+    "module_sha256": {
+      "src/topic4_core_field.py": "b9a8d27bc5a1ebb01e6506cbf56e98ec59a8e8e611f3904403fb0c44e49708d6",
+      "src/topic4_core_field_scoring.py": "9c4fb3df29ccf855c4597ffbbc31f40e2f2e130ee22f1396d26ee98ac974b3fa",
+      "src/topic4_core_field_report.py": "3c65249b0606b4f95a62f47e179331b597859e8d92b5b0722d09c353c8ee2390",
+      "src/topic4_core_field_runner.py": "4d48655a2fc277a4b5de95ac27d6971c36b96e3de4dca0fe2b482287db9784f6"
+    },
+    "numpy_version": "1.26.4"
+  },
+  "parity": {
+    "tag": "epilepsiae_1146_gradient_shared_corefrozen_cr1p5_s5_20260722",
+    "identical": false,
+    "differing_fields": {
+      "n_directional": {
+        "frozen": 5,
+        "fresh": 19
+      },
+      "dir_forward": {
+        "frozen": 1,
+        "fresh": 3
+      },
+      "dir_reverse": {
+        "frozen": 4,
+        "fresh": 16
+      },
+      "n_clean": {
+        "frozen": 5,
+        "fresh": 19
+      },
+      "clean_forward": {
+        "frozen": 1,
+        "fresh": 3
+      },
+      "clean_reverse": {
+        "frozen": 4,
+        "fresh": 16
+      }
+    },
+    "provenance": {
+      "git_commit": "2441848480287726c507bb4811b315412429dbfa",
+      "tracked_modules_dirty": false,
+      "module_sha256": {
+        "src/topic4_core_field.py": "b9a8d27bc5a1ebb01e6506cbf56e98ec59a8e8e611f3904403fb0c44e49708d6",
+        "src/topic4_core_field_scoring.py": "9c4fb3df29ccf855c4597ffbbc31f40e2f2e130ee22f1396d26ee98ac974b3fa",
+        "src/topic4_core_field_report.py": "3c65249b0606b4f95a62f47e179331b597859e8d92b5b0722d09c353c8ee2390",
+        "src/topic4_core_field_runner.py": "4d48655a2fc277a4b5de95ac27d6971c36b96e3de4dca0fe2b482287db9784f6"
+      },
+      "numpy_version": "1.26.4"
+    }
+  },
+  "checksum": "8b4e14149eab7dceba9a489915bf71913434bc956d9e136417d6579c626c06cd"
+}

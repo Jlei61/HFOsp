@@ -32,10 +32,20 @@ TRACKED_MODULES = (
     "src/topic4_core_field_stage2.py",
     "src/topic4_core_field_stage3.py",
     "src/topic4_core_field_profile.py",
+    "src/topic4_core_field_cmaes.py",
     "src/sef_hfo_subject_placement.py",
     "src/sef_hfo_snn_adapter.py",
     "src/sef_hfo_events.py",
+    "src/sef_hfo_heterogeneity.py",
     "scripts/run_sef_hfo_snn_cm_spontaneous_readout.py",
+    "scripts/run_topic4_core_field_stage3_fit.py",
+    "scripts/run_topic4_core_field_stage3_confirm_fit.py",
+    "scripts/run_topic4_core_field_stage3_profile_round1.py",
+    "src/snn_engine/kick_probe.py",
+    "src/snn_engine/params.py",
+    "src/snn_engine/connectivity.py",
+    "src/snn_engine/connectivity_rot.py",
+    "src/snn_engine/lfp.py",
 )
 
 
