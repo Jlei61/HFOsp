@@ -123,11 +123,16 @@ def main():
                label="recording contacts")],
         fontsize=8.0, loc="upper center", bbox_to_anchor=(0.5, -0.20), ncol=3,
         frameon=False, borderpad=0.2, handlelength=1.3, columnspacing=1.0)
+    # the floor must use the same event count: a total-variation distance
+    # between histograms is biased upward at small samples, so the all-events
+    # figure of 0.03 is not what 80 model events should be compared against
+    fl = conf["floor_matched_to_n_events"]
     axA.text(0.5, -0.30,
              f"learned field {conf['confirm_distance_train']:.2f} "
              f"(held-out recordings {conf['confirm_distance_heldout']:.2f})   ·   "
              f"best fixed blob {min(by_center.values()):.2f}   ·   "
-             f"patient vs itself {conf['reference']['patient_split_half_floor']:.2f}",
+             f"patient vs itself at the same {fl['n']} events "
+             f"{fl['median']:.2f} [{fl['p05']:.2f}-{fl['p95']:.2f}]",
              transform=axA.transAxes, ha="center", va="top", fontsize=8.6,
              color="0.25")
 
@@ -195,16 +200,35 @@ def main():
                       confirmed_independent_networks=conf["confirm_distance_train"],
                       confirmed_held_out_recordings=conf["confirm_distance_heldout"],
                       best_fixed_blob=min(by_center.values()),
+                      floor_matched_to_n_events=conf["floor_matched_to_n_events"],
+                      patient_train_vs_heldout_full=conf["patient_train_vs_heldout_full"],
+                      winners_curse=conf["winners_curse"],
                       **conf["reference"]),
         run=dict(seed=ro["seed"], n_events=ro["n_events"], n_clean=ro["n_clean"],
                  dir_forward=ro["dir_forward"], dir_reverse=ro["dir_reverse"],
                  bidirectional=ro["bidirectional"]),
         readout_events=stats,
-        claim_boundary=("one network for the event panels; the distances come "
-                        "from six independent networks and held-out patient "
-                        "recordings, and the search did not converge, so the "
-                        "field shown is the best of 100 candidates rather than "
-                        "an optimum")),
+        component_mass_fraction=[
+            float(c["weight"] * c["sigma_par"] * c["sigma_perp"]) /
+            sum(float(d["weight"] * d["sigma_par"] * d["sigma_perp"])
+                for d in unpack(theta, K_COMPONENTS, float(cfg["engine"]["L"])))
+            for c in unpack(theta, K_COMPONENTS, float(cfg["engine"]["L"]))],
+        caveats=[
+            "the objective run was a one-dimensional marginal, not the "
+            "two-dimensional joint distance frozen in spec 9.3; the marginal is "
+            "satisfiable by a single mid-array generator and the fitted field's "
+            "two directions correlate at +0.65 rather than being opposite",
+            "one restart at K=3 only, so the field's shape is not yet "
+            "identifiable; the search did not converge either, with sigma "
+            "growing after generation five",
+            "axial mass within 2 mm is 0.686, below the 0.70 threshold, so "
+            "AXIS_REDISCOVERED is NOT met",
+            "component weight is not component mass: the widest component "
+            "carries 0.04 of the weight but 15.5% of the mass, and the compact "
+            "one near the sink core carries 7.0%",
+            "one network for the event panels; distances come from six "
+            "independent networks and held-out patient recordings",
+        ]),
         open(stem + "_metadata.json", "w"), indent=1)
     print(f"wrote {stem}.png / .pdf / _metadata.json")
     print(f"  run: {ro['n_events']} events, fwd/rev {ro['dir_forward']}/{ro['dir_reverse']}")
