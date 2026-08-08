@@ -62,14 +62,14 @@ def plot_confirmation(payload, stem):
     ax.set_yticks(yy, labels)
     ax.set_xlabel("joint profile distance (lower is closer)")
     ax.set_title("A  Unseen-network distance", loc="left", weight="bold")
-    ax.text(0.99, 0.02, "circles: patient-train  |  diamonds: patient held-out",
-            transform=ax.transAxes, ha="right", va="bottom", fontsize=8, color="0.35")
+    ax.text(0.99, 0.98, "circles: patient-train  |  diamonds: patient held-out",
+            transform=ax.transAxes, ha="right", va="top", fontsize=8, color="0.35")
     ax.spines[["right", "top"]].set_visible(False)
 
     ax = axes[1]
-    ax.axvspan(payload["opposition_min_cluster_events"], 40, color="#3a9d78",
-               alpha=0.08)
-    ax.axhspan(-1.0, -0.2, color="#3a9d78", alpha=0.08)
+    ax.fill_betweenx(
+        [-1.0, -0.2], payload["opposition_min_cluster_events"], 40,
+        color="#3a9d78", alpha=0.13)
     ax.axvline(payload["opposition_min_cluster_events"], color="0.35", ls="--", lw=1)
     ax.axhline(-0.2, color="0.35", ls="--", lw=1)
     for index, (candidate, color) in enumerate(zip(candidates, colors[3:])):
@@ -79,7 +79,7 @@ def plot_confirmation(payload, stem):
         y = diagnostic["prototype_correlation"]
         ax.scatter(x, y, s=72, color=color, edgecolor="white", linewidth=0.8,
                    zorder=3)
-        offset = (6, 8) if index != 2 else (7, -16)
+        offset = (7, -28) if index == 0 else ((6, 8) if index == 1 else (7, -16))
         ax.annotate(f"{labels[3 + index]}\n{counts[0]} / {counts[1]}",
                     (x, y), xytext=offset, textcoords="offset points", fontsize=8,
                     color=color)
