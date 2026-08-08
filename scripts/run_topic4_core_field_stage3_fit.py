@@ -141,7 +141,12 @@ def main():
         x0 = np.zeros(dim)
         for k in range(K_COMPONENTS):                 # centres uniform in the sheet
             x0[5 * k:5 * k + 2] = rng.uniform(2.0, 18.0, size=2)
-            x0[5 * k + 2:5 * k + 4] = np.log(rng.uniform(0.8, 3.0, size=2))
+            # sigma 0.8-3.0 spread the fixed budget of 1129 cells so thin that
+            # no cell ended up strongly pathological -- max h 0.55-0.91 with at
+            # most 30 cells above 0.9, against 738 for the single blob that
+            # produces 22 events. Nothing ignited, so generation 1 came back
+            # flat at the penalty value with no gradient to follow.
+            x0[5 * k + 2:5 * k + 4] = np.log(rng.uniform(0.5, 1.5, size=2))
             x0[5 * k + 4] = rng.uniform(0, np.pi)
         es = CMAES(x0, SIGMA0, seed=2000 + a.restart, popsize=POPSIZE)
         history = []
@@ -171,7 +176,12 @@ def main():
                     v = signed_monotonicity(ev.get("ranks"), axial)
                     if v is not None:
                         vals_i.append(v)
-            dist = distance(vals_i, p_train) if len(vals_i) >= 10 else 1.0
+            # a flat penalty leaves the search no way out of an event-less
+            # region; grade it by how close the candidate came to having enough
+            if len(vals_i) >= 10:
+                dist = distance(vals_i, p_train)
+            else:
+                dist = 1.0 + 0.5 * (10 - len(vals_i)) / 10.0
             keys.append(-float(dist))                 # CMA-ES maximises
             rows.append(dict(theta=[float(t) for t in x], distance=float(dist),
                              n_events=len(vals_i), seeds=[int(s) for s in seeds],
