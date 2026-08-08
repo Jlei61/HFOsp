@@ -18,6 +18,13 @@ from src.topic5_wiring_economy_rnn import WEConfig, WEModel, build_event_tensors
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 from launch_topic5_rnn_motif_v0_4 import build_jobs  # noqa: E402
+from build_topic5_rnn_motif_fields_v0_4 import (  # noqa: E402
+    aggregate_records,
+    derive_common_contrast,
+    split_half_stability,
+)
+from analyse_topic5_rnn_motif_interictal_v0_4 import seed_removed_sequence_agreement  # noqa: E402
+from score_topic5_rnn_motif_early_ictal_v0_4 import permutation_indices  # noqa: E402
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -112,3 +119,50 @@ def test_chunked_size_features_are_identical_to_one_event_chunks():
     )
     assert torch.equal(one_y, all_y)
     assert torch.allclose(one_x, all_x, atol=0, rtol=0)
+
+
+def test_seed_removed_field_uses_missing_seed_and_nonseed_denominator():
+    records = [
+        {"generated_rank_sets": [[0], [1], [2]], "event_abs_time": 1.0, "kept_event_index": 0},
+        {"generated_rank_sets": [[1], [2], [0]], "event_abs_time": 2.0, "kept_event_index": 1},
+    ]
+    field = aggregate_records(records, 3)
+    assert field["canonical_full"].shape == (3,)
+    assert np.array_equal(field["seed_removed_denominator"], np.array([1, 1, 2]))
+    assert np.allclose(field["seed_removed"], np.array([0.0, 1.0, 0.5]))
+
+
+def test_common_and_contrast_are_exactly_derived_on_common_support():
+    common, contrast = derive_common_contrast(np.array([1.0, 0.0]), np.array([0.0, 0.5]))
+    assert np.allclose(common, np.array([0.5, 0.25]))
+    assert np.allclose(contrast, np.array([1.0, -0.5]))
+    with np.testing.assert_raises(ValueError):
+        derive_common_contrast(np.ones(2), np.ones(3))
+
+
+def test_split_half_stability_sorts_by_real_event_time():
+    records = [
+        {"generated_rank_sets": [[0], [1], [2]], "event_abs_time": time, "kept_event_index": index}
+        for index, time in enumerate([4.0, 1.0, 3.0, 2.0])
+    ]
+    stability = split_half_stability(records, 3)
+    assert np.isclose(stability["canonical_full"], 1.0)
+
+
+def test_rollout_agreement_does_not_credit_the_supplied_seed():
+    observed = np.array([0, 1, 2, 3])
+    correct = [[0], [1], [2], [3]]
+    reversed_postseed = [[0], [3], [2], [1]]
+    assert np.isclose(seed_removed_sequence_agreement(observed, correct), 1.0)
+    assert np.isclose(seed_removed_sequence_agreement(observed, reversed_postseed), -1.0)
+
+
+def test_early_ictal_permutations_are_synchronized_and_shaft_preserving():
+    eligible = np.arange(6)
+    shafts = ["A", "A", "A", "B", "B", "B"]
+    first = permutation_indices(6, eligible, shafts, 20, 7, True)
+    second = permutation_indices(6, eligible, shafts, 20, 7, True)
+    assert np.array_equal(first, second)
+    assert all(set(row[:3]) == {0, 1, 2} and set(row[3:]) == {3, 4, 5} for row in first)
+    all_contact = permutation_indices(6, eligible, shafts, 20, 7, False)
+    assert any(set(row[:3]) != {0, 1, 2} for row in all_contact)
