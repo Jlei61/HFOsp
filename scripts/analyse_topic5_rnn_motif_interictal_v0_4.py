@@ -358,6 +358,69 @@ def plot_stage(out_root: Path, patients: list[dict[str, Any]], stats: dict[str, 
     plt.close(fig)
 
 
+def convergence_audit(out_root: Path) -> dict[str, Any]:
+    """Audit convergence, final slopes, graph resources and producer identity."""
+    records = []
+    for path in sorted((out_root / "per_subject").glob("*/*__*/seed*/metrics.json")):
+        if path.parents[1].name.startswith("SMOKE_"):
+            continue
+        metrics = json.loads(path.read_text())
+        history = json.loads((path.parent / "history.json").read_text())
+        tail = np.asarray([row["val"] for row in history[-5:]], float)
+        slope = (float(np.polyfit(np.arange(len(tail)), tail, 1)[0])
+                 if len(tail) >= 2 else float("nan"))
+        expected_edges = (0 if metrics["arm"] == "STATIC_CONTACT" else
+                          metrics["n_nodes"] * (metrics["n_nodes"] - 1)
+                          if metrics["arm"] == "DENSE_TISSUE" else
+                          int(round(metrics["config"]["density"] * metrics["n_nodes"]
+                                    * (metrics["n_nodes"] - 1))))
+        snapshots = path.parent / "snapshots"
+        snapshot_applicable = metrics["arm"] != "STATIC_CONTACT"
+        records.append({
+            "fit_id": metrics["fit_id"], "model_id": metrics["model_id"],
+            "cell": metrics["cell"], "seed": int(metrics["seed"]),
+            "converged": bool(metrics["converged"]), "hit_ceiling": bool(metrics["hit_ceiling"]),
+            "n_epochs": int(metrics["n_epochs"]), "last5_validation_slope": slope,
+            "edge_count": int(metrics["edge_count"]), "expected_edge_count": int(expected_edges),
+            "edge_budget_valid": int(metrics["edge_count"]) == int(expected_edges),
+            "snapshot_applicable": snapshot_applicable,
+            "all_four_snapshots_present": (not snapshot_applicable) or all(
+                (snapshots / f"{name}.npz").exists()
+                for name in ("INIT", "REWIRE_MID", "MASK_FREEZE", "FINAL")
+            ),
+            "producer_hashes": metrics["producer_hashes"],
+        })
+    grouped = {}
+    for model_id in sorted({row["model_id"] for row in records}):
+        selected = [row for row in records if row["model_id"] == model_id]
+        grouped[model_id] = {
+            "n": len(selected), "n_converged": sum(row["converged"] for row in selected),
+            "n_hit_ceiling": sum(row["hit_ceiling"] for row in selected),
+            "median_epochs": float(np.median([row["n_epochs"] for row in selected])),
+            "median_last5_validation_slope": float(np.nanmedian([
+                row["last5_validation_slope"] for row in selected
+            ])),
+            "all_edge_budgets_valid": all(row["edge_budget_valid"] for row in selected),
+            "all_four_snapshots_present": all(row["all_four_snapshots_present"] for row in selected),
+        }
+    hashes = {}
+    for key in ("trainer", "model", "v0_4_contract", "input_manifest"):
+        values = sorted({row["producer_hashes"][key] for row in records})
+        hashes[key] = {"n_unique": len(values), "values": values}
+    payload = {
+        "contract": "topic5_rnn_motif_convergence_audit_v0_4",
+        "n_units": len(records), "expected_units": 1426,
+        "n_converged": sum(row["converged"] for row in records),
+        "n_hit_ceiling": sum(row["hit_ceiling"] for row in records),
+        "all_edge_budgets_valid": all(row["edge_budget_valid"] for row in records),
+        "all_four_snapshots_present": all(row["all_four_snapshots_present"] for row in records),
+        "producer_hashes": hashes, "by_model_cell": grouped,
+        "rows": records,
+    }
+    (out_root / "CONVERGENCE_AUDIT.json").write_text(json.dumps(payload, indent=2))
+    return payload
+
+
 def adequacy_and_retention(patients: list[dict[str, Any]], cell: str,
                            delta_ni: float) -> tuple[dict[str, Any], list[dict[str, Any]]]:
     table = {(row["subject"], row["model"]): row for row in patients if row["cell"] == cell}
@@ -420,6 +483,9 @@ def main() -> int:
     args = parser.parse_args()
     out_root = args.out_root.resolve()
     rows, event_rows = load_rows(out_root, torch.device(args.device))
+    audit = convergence_audit(out_root)
+    if audit["n_units"] != audit["expected_units"]:
+        raise RuntimeError(f"formal convergence audit incomplete: {audit['n_units']}/1426")
     fits, patients = aggregate(rows)
     write_csv(out_root / "interictal_per_event.csv", event_rows)
     write_csv(out_root / "interictal_per_fit_seed.csv", rows)
@@ -466,6 +532,12 @@ def main() -> int:
                "primary_evaluation_target": "real_unshuffled_heldout_for_all_models",
                "rollout_seed_policy": "supplied rank 1 deleted from both observed and generated score",
                "statistics": statistics, "task_adequacy": adequacy,
+               "convergence_audit": {
+                   "n_converged": audit["n_converged"],
+                   "n_hit_ceiling": audit["n_hit_ceiling"],
+                   "all_edge_budgets_valid": audit["all_edge_budgets_valid"],
+                   "all_four_snapshots_present": audit["all_four_snapshots_present"],
+               },
                "target_values_read": False}
     (out_root / "INTERICTAL_SUMMARY.json").write_text(json.dumps(summary, indent=2))
     (out_root / "stage_d_scientific_drift_audit.json").write_text(json.dumps({

@@ -44,6 +44,7 @@ def main() -> int:
         "INTERICTAL_SUMMARY.json", "MODEL_FIELD_MANIFEST.json", "TARGET_UNSEAL_AUTHORIZATION.json",
         "target_access_audit.json", "EFFECTIVE_INFLUENCE_SUMMARY.json", "EFFECTIVE_MOTIF_SUMMARY.json",
         "MATCHED_LESION_SUMMARY.json", "LESION_EARLY_ICTAL_SUMMARY.json",
+        "CONVERGENCE_AUDIT.json",
         "COMMON_OBSERVABLES.json", "figures/topic5_figure6_rnn_connectivity_motifs.png",
         "figures/topic5_figure6_rnn_connectivity_motifs.pdf", "figures/figure6_source_manifest.json",
         "stage_d_scientific_drift_audit.json", "stage_e_scientific_drift_audit.json",
@@ -90,6 +91,7 @@ def main() -> int:
     enrichment_pass = (motif_components["local_effective_enrichment"]
                        and motif_components["long_range_effective_enrichment"])
     stability_pass = motif_components["effective_operator_seed_stability"]
+    split_stability_pass = motif_components["effective_operator_split_half_stability"]
     task_relation_pass = motif_components["task_relation"]
     lesion_pass = (motif_components["local_backbone_matched_lesion"]
                    and motif_components["long_range_or_connector_matched_lesion"])
@@ -113,6 +115,7 @@ def main() -> int:
         },
         "level4_components": {"coherent_local_and_long_enrichment": enrichment_pass,
                               "effective_operator_seed_stability": stability_pass,
+                              "effective_operator_split_half_stability": split_stability_pass,
                               "task_relation": task_relation_pass,
                               "coherent_local_and_long_matched_lesion": lesion_pass,
                               "not_binary_proposal_only": proposal_pass},
@@ -148,6 +151,7 @@ canonical full、seed-removed、common-field 与 A/B contrast 已分开报告。
 
 - 同一 local-backbone + long-range-connector 结构的双重富集：**{'通过' if enrichment_pass else '未通过'}**。
 - 完整 effective operator 的跨 seed 稳定性：**{'通过' if stability_pass else '未通过'}**。
+- 同一冻结模型在前后半留出事件中的 effective operator 稳定性：**{'通过' if split_stability_pass else '未通过'}**。
 - motif score 与留出传播/间期场拟合的患者级关系：**{'通过' if task_relation_pass else '未通过'}**。
 - local 与 long/connector targeted lesion 相对 matched random lesion 的同结构特异损害：**{'通过' if lesion_pass else '未通过'}**。
 - 与相同生长规则的 order-shuffle 对照相比并非二值 proposal 自动造成：**{'通过' if proposal_pass else '未通过'}**。

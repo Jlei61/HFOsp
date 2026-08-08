@@ -11,6 +11,7 @@ from typing import Any
 
 import numpy as np
 import torch
+from scipy.stats import spearmanr
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -204,6 +205,13 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
     pulse_count = np.zeros((3, n_contacts, n_contacts), int)
     edge_sum = np.zeros((model.n_nodes, model.n_nodes), float)
     edge_count = 0
+    edge_half_sum = np.zeros((2, model.n_nodes, model.n_nodes), float)
+    edge_half_count = np.zeros(2, int)
+    event_time = (np.asarray(events["event_abs_time"])[keep]
+                  if "event_abs_time" in events else np.arange(len(ranks), dtype=float))
+    heldout_order = sorted(np.flatnonzero(split == 2), key=lambda index: (event_time[index], index))
+    half_by_event = {event: int(position >= len(heldout_order) / 2)
+                     for position, event in enumerate(heldout_order)}
     lag1_agreement = []
     for event, step in prefixes:
         x_grid = tensors["x"][event].to(device)
@@ -215,8 +223,12 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
         valid = np.outer(available.cpu().numpy(), available.cpu().numpy())
         tf_sum[valid] += jacobian[valid]
         tf_count[valid] += 1
-        edge_sum += edge_influence_rnn(model, h0, current, available)
+        edge_value = edge_influence_rnn(model, h0, current, available)
+        edge_sum += edge_value
         edge_count += 1
+        half = half_by_event[event]
+        edge_half_sum[half] += edge_value
+        edge_half_count[half] += 1
         base = open_loop(model, decoder, h0, current, recruited, step, None, 0.0)
         for contact in torch.nonzero(available, as_tuple=False).flatten().cpu().numpy():
             if contact_norm[contact] <= 1e-12:
@@ -236,6 +248,16 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
     teacher = np.divide(tf_sum, tf_count, out=np.zeros_like(tf_sum), where=tf_count > 0)
     pulse = np.divide(pulse_sum, pulse_count, out=np.zeros_like(pulse_sum), where=pulse_count > 0)
     edge_effect = edge_sum / max(edge_count, 1)
+    edge_half = np.divide(
+        edge_half_sum, edge_half_count[:, None, None],
+        out=np.zeros_like(edge_half_sum), where=edge_half_count[:, None, None] > 0,
+    )
+    off_node = ~np.eye(model.n_nodes, dtype=bool)
+    split_half_stability = float("nan")
+    if np.all(edge_half_count > 0):
+        left, right = edge_half[0][off_node], edge_half[1][off_node]
+        if np.std(left) > 0 and np.std(right) > 0:
+            split_half_stability = float(spearmanr(left, right).statistic)
 
     contact_xy = np.asarray(plane["contacts_xy_mm"], float)
     contact_distance = np.linalg.norm(contact_xy[:, None] - contact_xy[None, :], axis=-1)
@@ -279,6 +301,9 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
         "lag1_cross_shaft_abs": float(np.mean(np.abs(pulse[0][~same_shaft]))),
         "n_active_edges": int(mask.sum()), "n_local_backbone_edges": int(local_backbone.sum()),
         "n_long_high_edges": int(long_high.sum()), "n_connector_nodes": int(connector_nodes.sum()),
+        "effective_operator_split_half_stability": split_half_stability,
+        "n_prefixes_first_half": int(edge_half_count[0]),
+        "n_prefixes_second_half": int(edge_half_count[1]),
         "motif_estimable": motif_estimable,
         "effective_edge_definition": ("exact_leaky_one_step_deletion_sensitivity"
                                       if metrics["cell"] == "rnn" else "gru_gate_rms_activity_proxy"),
@@ -289,6 +314,7 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
         "open_loop_pulse_lag123": pulse.astype(np.float32),
         "contact_distance_mm": contact_distance.astype(np.float32),
         "edge_effective_influence": effective.astype(np.float32),
+        "edge_effective_influence_split_half": edge_half.astype(np.float32),
         "edge_strength": strength.astype(np.float32), "edge_distance_mm": distance.astype(np.float32),
         "edge_mask": mask.astype(np.uint8), "local_backbone_mask": local_backbone.astype(np.uint8),
         "long_high_mask": long_high.astype(np.uint8), "connector_nodes": connector_nodes.astype(np.uint8),
