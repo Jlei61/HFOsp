@@ -47,6 +47,7 @@ SPLIT_SEED, HELD_OUT_FRAC = 20260808, 0.3
 CLUSTER_SEED = 20260809
 DISTANCE_BOOTSTRAP_SEED = 20260810
 N_DISTANCE_BOOTSTRAP = 500
+OPPOSITION_MIN_CLUSTER_EVENTS = 10
 
 
 def _event_curves(events, axial, grid):
@@ -87,7 +88,12 @@ def _prototype_diagnostic(curves, reference):
     counts = np.bincount(labels, minlength=2)[order]
     corr = float(np.corrcoef(prototypes[0], prototypes[1])[0, 1])
     return dict(status="ok", n_events=int(len(z)), prototype_correlation=corr,
-                cluster_counts=counts.astype(int).tolist(), prototypes=prototypes)
+                cluster_counts=counts.astype(int).tolist(),
+                min_cluster_count=int(counts.min()),
+                minority_fraction=float(counts.min() / counts.sum()),
+                opposition_support_eligible=bool(
+                    counts.min() >= OPPOSITION_MIN_CLUSTER_EVENTS),
+                prototypes=prototypes)
 
 
 def _matched_distance(curves, reference, n_events, seed,

@@ -21,6 +21,7 @@ from scripts.calibrate_topic4_core_field_stage3_joint_observable import (  # noq
     DISTANCE_BOOTSTRAP_SEED,
     HELD_OUT_FRAC,
     N_DISTANCE_BOOTSTRAP,
+    OPPOSITION_MIN_CLUSTER_EVENTS,
     SPLIT_SEED,
     _matched_distance,
     _model_curves,
@@ -183,6 +184,85 @@ def _control_distributions(calibration, patient_heldout, axial, grid, reference)
     return out
 
 
+def reconcile_confirmation(payload):
+    """Apply held-out gates to an already completed measurement payload."""
+    controls = payload["optimization_controls_n20"]
+    rigid_best = min(
+        controls["hand_placed_two_cores"]["median"],
+        controls["stage2_filament"]["median"],
+    )
+    patient_floor_p95 = float(payload["patient_floor_train"]["p95"])
+    verdicts = []
+    for row in payload["candidates"]:
+        confirm = row["confirm"]
+        diagnostic = confirm["posthoc_prototypes"]
+        counts = [int(value) for value in diagnostic.get("cluster_counts", [])]
+        if len(counts) == 2 and sum(counts) > 0:
+            diagnostic["min_cluster_count"] = int(min(counts))
+            diagnostic["minority_fraction"] = float(min(counts) / sum(counts))
+            diagnostic["opposition_support_eligible"] = bool(
+                min(counts) >= OPPOSITION_MIN_CLUSTER_EVENTS)
+        else:
+            diagnostic["min_cluster_count"] = 0
+            diagnostic["minority_fraction"] = 0.0
+            diagnostic["opposition_support_eligible"] = False
+
+        train_bootstrap = confirm.get("bootstrap_distance_patient_train")
+        heldout_bootstrap = confirm.get("bootstrap_distance_patient_heldout")
+        train_median = (None if train_bootstrap is None else
+                        float(train_bootstrap["median"]))
+        heldout_median = (None if heldout_bootstrap is None else
+                          float(heldout_bootstrap["median"]))
+        corr = diagnostic.get("prototype_correlation")
+        gates = dict(
+            no_simulation_errors=bool(confirm.get("n_failed_networks", 0) == 0),
+            enough_usable_events=bool(confirm.get("n_usable", 0)
+                                      >= payload["objective_event_count"]),
+            two_cluster_support=bool(
+                diagnostic["opposition_support_eligible"]),
+            opposing_prototypes=bool(
+                diagnostic["opposition_support_eligible"]
+                and corr is not None and float(corr) <= -0.2),
+            better_than_rigid_control_median=bool(
+                train_median is not None and train_median < rigid_best),
+            within_patient_floor_p95=bool(
+                train_median is not None and train_median <= patient_floor_p95),
+        )
+        if not gates["no_simulation_errors"]:
+            verdict = "FAIL_CLOSED_SIMULATION_ERRORS"
+        elif not gates["enough_usable_events"]:
+            verdict = "TRANSFER_FEASIBILITY_FAIL"
+        elif not gates["two_cluster_support"]:
+            verdict = "TWO_CLUSTER_SUPPORT_FAIL"
+        elif not gates["opposing_prototypes"]:
+            verdict = "OPPOSITION_FAIL"
+        elif not gates["better_than_rigid_control_median"]:
+            verdict = "RIGID_CONTROL_NOT_BEATEN"
+        elif not gates["within_patient_floor_p95"]:
+            verdict = "PATIENT_DISTRIBUTION_MISMATCH"
+        else:
+            verdict = "CONFIRMATION_SCREEN_PASS"
+        confirm["gates"] = gates
+        confirm["heldout_minus_train_bootstrap_median"] = (
+            None if train_median is None or heldout_median is None else
+            float(heldout_median - train_median))
+        confirm["verdict"] = verdict
+        verdicts.append(verdict)
+
+    payload["status"] = (
+        "UNSEEN_NETWORK_CONFIRMATION_SCREEN_PASS"
+        if any(value == "CONFIRMATION_SCREEN_PASS" for value in verdicts)
+        else "UNSEEN_NETWORK_CONFIRMATION_NO_CANDIDATE_PASSES")
+    payload["scientific_verdict"] = (
+        "No preselected candidate jointly achieves adequate opposing-cluster "
+        "support, improvement over rigid controls, and the patient floor."
+        if payload["status"].endswith("NO_CANDIDATE_PASSES") else
+        "At least one preselected candidate passes this bounded confirmation screen; "
+        "K/restart identifiability and final sufficiency gates remain pending.")
+    payload["opposition_min_cluster_events"] = OPPOSITION_MIN_CLUSTER_EVENTS
+    return payload
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--checkpoint", default=CHECKPOINT)
@@ -191,7 +271,15 @@ def main():
     parser.add_argument("--n-confirm", type=int, default=6)
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--out", default=OUT)
+    parser.add_argument("--reconcile-existing", action="store_true")
     args = parser.parse_args()
+
+    if args.reconcile_existing:
+        payload = reconcile_confirmation(json.load(open(args.out)))
+        payload["reconciliation_provenance"] = provenance()
+        atomic_write_json(payload, args.out)
+        print(f"reconciled {args.out}: {payload['status']}")
+        return
 
     checkpoint = json.load(open(args.checkpoint))
     cfg = json.load(open(f"{STAGE2}/config/stage_config.json"))
@@ -288,7 +376,7 @@ def main():
             ),
         ))
 
-    output = dict(
+    output = reconcile_confirmation(dict(
         status="UNSEEN_NETWORK_CONFIRMATION_MEASUREMENT_COMPLETE",
         scientific_role=("candidate transfer screen; candidates were frozen before confirmation, "
                          "but this is not K/restart identifiability or lifecycle acceptance"),
@@ -317,7 +405,7 @@ def main():
             "post-hoc prototype opposition is a falsification diagnostic and was not optimized",
         ],
         provenance=provenance(),
-    )
+    ))
     atomic_write_json(output, args.out)
     print(f"wrote {args.out}")
     for row in result_rows:

@@ -6,6 +6,7 @@ from scripts.run_topic4_core_field_stage3_joint_confirm import (
     _distance_to_target,
     confirmation_seeds,
     evaluation_errors,
+    reconcile_confirmation,
     select_candidates,
 )
 from src.topic4_core_field_profile import fit_rank_curve_reference
@@ -66,3 +67,43 @@ def test_target_distance_uses_exactly_the_frozen_source_count():
     second = _distance_to_target(extended, reference, target, n_events=20)
     assert np.isfinite(first) and np.isfinite(second)
     assert _distance_to_target(train[:19], reference, target, n_events=20) is None
+
+
+def _confirmation_payload(counts, corr, train_median=0.5):
+    return {
+        "objective_event_count": 20,
+        "patient_floor_train": {"p95": 0.35},
+        "optimization_controls_n20": {
+            "hand_placed_two_cores": {"median": 0.67},
+            "stage2_filament": {"median": 0.63},
+        },
+        "candidates": [{
+            "confirm": {
+                "n_failed_networks": 0,
+                "n_usable": sum(counts),
+                "bootstrap_distance_patient_train": {"median": train_median},
+                "bootstrap_distance_patient_heldout": {"median": train_median + 0.02},
+                "posthoc_prototypes": {
+                    "cluster_counts": counts,
+                    "prototype_correlation": corr,
+                },
+            },
+        }],
+    }
+
+
+def test_reconciliation_rejects_a_singleton_opposing_cluster():
+    out = reconcile_confirmation(_confirmation_payload([1, 66], -0.9, 0.2))
+    confirm = out["candidates"][0]["confirm"]
+    assert confirm["verdict"] == "TWO_CLUSTER_SUPPORT_FAIL"
+    assert confirm["gates"]["opposing_prototypes"] is False
+    assert out["status"] == "UNSEEN_NETWORK_CONFIRMATION_NO_CANDIDATE_PASSES"
+
+
+def test_reconciliation_keeps_opposition_separate_from_distance_gates():
+    out = reconcile_confirmation(_confirmation_payload([20, 20], 0.4, 0.2))
+    confirm = out["candidates"][0]["confirm"]
+    assert confirm["gates"]["two_cluster_support"] is True
+    assert confirm["gates"]["opposing_prototypes"] is False
+    assert confirm["gates"]["within_patient_floor_p95"] is True
+    assert confirm["verdict"] == "OPPOSITION_FAIL"
