@@ -10,6 +10,7 @@ is written out with ``converged=false`` and is excluded downstream.
 from __future__ import annotations
 
 import argparse
+import gzip
 import hashlib
 import json
 import sys
@@ -58,7 +59,7 @@ DEFAULTS: Dict[str, Any] = {
     "max_batches_per_epoch": 120,
     "max_batch": 1024,
     "min_updates_per_epoch": 8,
-    "rollout_events": 256,
+    "rollout_events": None,
     "generator_guard_fraction": 0.15,
 }
 
@@ -294,11 +295,13 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
     max_steps = int(tensors["valid"].shape[1])
     roll: Dict[str, Any] = {}
     generated_by_mode: Dict[str, list] = {}
+    rollout_records: list[dict[str, Any]] = []
     for label, sel in [("all", test_idx)] + [
             (str(m), test_idx[mode_kept[test_idx] == m]) for m in (0, 1)]:
         if sel.size == 0:
             continue
-        pick = sel[:int(cfg["rollout_events"])]
+        limit = cfg.get("rollout_events")
+        pick = sel if limit is None else sel[:int(limit)]
         starts = [np.flatnonzero(kept_ranks[i] == 0) for i in pick]
         generated = rollout_with_size_head(model, decoder, starts, device)
         agreement = [sequence_agreement(kept_ranks[i], g) for i, g in zip(pick, generated)]
@@ -311,6 +314,22 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
                                                    / np.maximum(1, observed_lengths))),
         }
         generated_by_mode[label] = generated
+        if label == "all":
+            source_index = (events["event_source_index"][keep] if "event_source_index" in events
+                            else np.arange(len(kept_ranks), dtype=np.int64))
+            event_time = (events["event_abs_time"][keep] if "event_abs_time" in events
+                          else np.arange(len(kept_ranks), dtype=float))
+            rollout_records = [
+                {
+                    "kept_event_index": int(i),
+                    "event_source_index": int(source_index[i]),
+                    "event_abs_time": float(event_time[i]),
+                    "mode": int(mode_kept[i]),
+                    "seed_contacts": np.flatnonzero(kept_ranks[i] == 0).astype(int).tolist(),
+                    "generated_rank_sets": sequence,
+                }
+                for i, sequence in zip(pick, generated)
+            ]
 
     degenerate = None
     if "0" in generated_by_mode and "1" in generated_by_mode:
@@ -399,6 +418,8 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
     (out_dir / "rollout_decoder_history.json").write_text(
         json.dumps(decoder_metrics["curve"])
     )
+    with gzip.open(out_dir / "heldout_rollouts.json.gz", "wt", encoding="utf-8") as handle:
+        json.dump(rollout_records, handle, separators=(",", ":"))
     (out_dir / "history.json").write_text(json.dumps(history))
     (out_dir / "DONE.json").write_text(json.dumps({"ok": True, "converged": metrics["converged"]}))
     return metrics

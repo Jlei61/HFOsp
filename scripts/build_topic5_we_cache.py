@@ -239,6 +239,8 @@ def build_fit(subject: str, scope: str, plane: Dict[str, Any], record, mode: np.
         ranks=ranks.astype(np.int16),
         split=split,
         mode=mode.astype(np.int8),
+        event_abs_time=np.asarray(record.event_abs_time, dtype=np.float64),
+        event_source_index=np.asarray(record.event_source_index, dtype=np.int64),
     )
     provenance = {
         "fit_id": fit_id,
