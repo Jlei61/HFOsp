@@ -66,6 +66,8 @@ fraction 从 12.5% 提到 25%，sigma `0.650→0.627`；但 best 固定-n 距离
 `OPPOSITION_FAIL / TWO_CLUSTER_SUPPORT_FAIL / TWO_CLUSTER_SUPPORT_FAIL`。事件 bootstrap 的训练距离中位数
 为 0.675/0.706/0.789，均未优于 Stage 2 控制 0.627，也远高于患者地板 0.284。裁定：**死区修复有效，
 但当前三代优化没有恢复“接近患者且两个簇相反”的联合结构；不得进入连接性功能等效或 lifecycle 动态验证。**
+确认图见 `results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation/figures/`
+`stage3_joint_confirmation_screen.png`；左图是距离，右图是双簇支持与相反性联合门。
 
 **收敛门：** 至少两次重启的 held-out `D_curve` 落入彼此 bootstrap 区间；场的主要质量分量跨重启可匹配；
 独立网络确认不回退到 rigid-family best。
