@@ -152,7 +152,21 @@ def resolve_node_count(
     n_nodes = nominal
     while True:
         nodes = sample_latent_nodes(xy, n_nodes, sigma_mm, seed=seed)
-        H = build_observation_operator(xy, nodes, sigma_mm)
+        try:
+            H = build_observation_operator(xy, nodes, sigma_mm)
+        except ValueError:
+            # A contact that sees nothing at all is the same problem as a contact
+            # that sees too few nodes, only worse: at a narrow kernel the sampler
+            # can miss a whole disc.  Growing the node count is the same cure, so
+            # this path must grow rather than abort -- otherwise the operator is
+            # simply unusable below about 2 mm on the wide montages.
+            if n_nodes >= MAX_NODES:
+                raise ValueError(
+                    f"{len(xy)} contacts still leave a contact with no node at "
+                    f"sigma={sigma_mm} mm and the {MAX_NODES}-node ceiling"
+                ) from None
+            n_nodes = min(MAX_NODES, int(np.ceil(n_nodes * 1.25)))
+            continue
         if int((H > 0).sum(axis=1).min()) >= MIN_NODES_PER_CONTACT:
             return n_nodes, nodes, H, nominal
         if n_nodes >= MAX_NODES:
