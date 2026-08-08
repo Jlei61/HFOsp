@@ -303,6 +303,9 @@ def main() -> int:
     parser.add_argument("--device", default="cuda" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--max-prefixes", type=int, default=32)
     parser.add_argument("--limit", type=int, default=None)
+    parser.add_argument("--shard-index", type=int, default=0)
+    parser.add_argument("--n-shards", type=int, default=1)
+    parser.add_argument("--aggregate-only", action="store_true")
     args = parser.parse_args()
     out_root = args.out_root.resolve()
     paths = []
@@ -313,32 +316,49 @@ def main() -> int:
         model, _ = directory.rsplit("__", 1)
         if model in THEORY_MODELS:
             paths.append(path)
-    if args.limit is not None:
-        paths = paths[:args.limit]
-    rows = []
-    for index, path in enumerate(paths, 1):
-        output = out_root / "effective_influence" / path.parents[2].name / path.parents[1].name / path.parent.name / "influence.npz"
-        output.parent.mkdir(parents=True, exist_ok=True)
-        if output.exists():
+    all_paths = list(paths)
+    if args.limit is not None and args.n_shards == 1 and not args.aggregate_only:
+        all_paths = all_paths[:args.limit]
+    if not args.aggregate_only:
+        paths = all_paths[args.shard_index::args.n_shards]
+        if args.limit is not None:
+            paths = paths[:args.limit]
+        shard_rows = []
+        for index, path in enumerate(paths, 1):
+            output = out_root / "effective_influence" / path.parents[2].name / path.parents[1].name / path.parent.name / "influence.npz"
+            output.parent.mkdir(parents=True, exist_ok=True)
+            if output.exists():
+                with np.load(output, allow_pickle=False) as data:
+                    row = json.loads(str(data["summary_json"].item()))
+            else:
+                row, arrays = summarize_unit(out_root, path, torch.device(args.device), args.max_prefixes)
+                arrays["summary_json"] = np.asarray(json.dumps(row))
+                np.savez_compressed(output, **arrays)
+            shard_rows.append(row)
+            if index % 20 == 0:
+                print(json.dumps({"complete": index, "total": len(paths),
+                                  "shard": args.shard_index}), flush=True)
+        if args.n_shards > 1:
+            write_csv(out_root / f"effective_influence_shard_{args.shard_index:02d}.csv", shard_rows)
+    if args.n_shards == 1 or args.aggregate_only:
+        rows = []
+        for path in all_paths:
+            output = out_root / "effective_influence" / path.parents[2].name / path.parents[1].name / path.parent.name / "influence.npz"
+            if not output.exists():
+                raise RuntimeError(f"missing effective influence output: {output}")
             with np.load(output, allow_pickle=False) as data:
-                row = json.loads(str(data["summary_json"].item()))
-        else:
-            row, arrays = summarize_unit(out_root, path, torch.device(args.device), args.max_prefixes)
-            arrays["summary_json"] = np.asarray(json.dumps(row))
-            np.savez_compressed(output, **arrays)
-        rows.append(row)
-        if index % 20 == 0:
-            print(json.dumps({"complete": index, "total": len(paths)}), flush=True)
-    write_csv(out_root / "effective_influence_fit_seed.csv", rows)
-    summary = {
-        "contract": "topic5_rnn_motif_effective_influence_v0_4",
-        "target_values_read": False, "n_units": len(rows), "max_prefixes_per_unit": args.max_prefixes,
-        "primary_observables": ["lag1_2_3_open_loop_contact_reach", "local_backbone_long_range_connector"],
-        "teacher_forced_scope": "lag1_local_probability_jacobian_only",
-        "open_loop_scope": "lag1_to_lag3_deterministic_decoder_without_future_ranks",
-        "rank_step_not_real_time": True,
-    }
-    (out_root / "EFFECTIVE_INFLUENCE_SUMMARY.json").write_text(json.dumps(summary, indent=2))
+                rows.append(json.loads(str(data["summary_json"].item())))
+        write_csv(out_root / "effective_influence_fit_seed.csv", rows)
+        summary = {
+            "contract": "topic5_rnn_motif_effective_influence_v0_4",
+            "target_values_read": False, "n_units": len(rows),
+            "expected_units": len(all_paths), "max_prefixes_per_unit": args.max_prefixes,
+            "primary_observables": ["lag1_2_3_open_loop_contact_reach", "local_backbone_long_range_connector"],
+            "teacher_forced_scope": "lag1_local_probability_jacobian_only",
+            "open_loop_scope": "lag1_to_lag3_deterministic_decoder_without_future_ranks",
+            "rank_step_not_real_time": True,
+        }
+        (out_root / "EFFECTIVE_INFLUENCE_SUMMARY.json").write_text(json.dumps(summary, indent=2))
     return 0
 
 
