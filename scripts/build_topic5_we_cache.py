@@ -30,6 +30,11 @@ from scipy.stats import spearmanr
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
+# A linked git worktree intentionally has no ignored results/.  Resolve the
+# canonical data products from the main checkout while keeping all new outputs
+# inside the clean execution worktree.
+CANONICAL_ROOT = (ROOT.parents[1] if (ROOT.parents[1] / "results").exists() else ROOT)
+
 from src.interictal_propagation import (  # noqa: E402
     _valid_event_indices,
     load_subject_propagation_events,
@@ -43,9 +48,9 @@ from src.topic5_virtual_seeg_operator import (  # noqa: E402
     resolve_node_count,
 )
 
-DATASET_DIR = ROOT / "results/topic5_interictal_rank_distribution/dataset_v0_4"
-FIELD_DIR = ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
-PROP_DIR = ROOT / "results/interictal_propagation_masked/per_subject"
+DATASET_DIR = CANONICAL_ROOT / "results/topic5_interictal_rank_distribution/dataset_v0_4"
+FIELD_DIR = CANONICAL_ROOT / "results/interictal_propagation_masked/template_gradient_fields/per_subject"
+PROP_DIR = CANONICAL_ROOT / "results/interictal_propagation_masked/per_subject"
 EPILEPSIAE_LAGPAT = Path("/mnt/epilepsia_data/interilca_inter_results/all_data_lns")
 YUQUAN_LAGPAT = Path("/mnt/yuquan_data/yuquan_24h_edf")
 OUT_ROOT = ROOT / "results/topic5_wiring_economy_slp_rnn_v0_3"
@@ -266,6 +271,7 @@ def build_fit(subject: str, scope: str, plane: Dict[str, Any], record, mode: np.
 
 
 def main() -> int:
+    global DATASET_DIR, FIELD_DIR, PROP_DIR
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, default=OUT_ROOT)
     parser.add_argument("--subjects", nargs="*", default=None)
@@ -275,7 +281,17 @@ def main() -> int:
     parser.add_argument("--sigma-mm", type=float, default=None,
                         help="fix the read-out kernel width across the cohort instead of "
                              "deriving it per patient from contact spacing")
+    parser.add_argument("--dataset-dir", type=Path, default=DATASET_DIR)
+    parser.add_argument("--field-dir", type=Path, default=FIELD_DIR)
+    parser.add_argument("--prop-dir", type=Path, default=PROP_DIR)
     args = parser.parse_args()
+
+    DATASET_DIR = args.dataset_dir.resolve()
+    FIELD_DIR = args.field_dir.resolve()
+    PROP_DIR = args.prop_dir.resolve()
+    for label, path in (("dataset", DATASET_DIR), ("field", FIELD_DIR), ("propagation", PROP_DIR)):
+        if not path.exists():
+            raise FileNotFoundError(f"{label} input root does not exist: {path}")
 
     subjects = args.subjects or COHORT
     args.out_root.mkdir(parents=True, exist_ok=True)
@@ -297,7 +313,13 @@ def main() -> int:
                   f"train={row['n_train']:6d} cover={row['label_coverage']:.4f}")
 
     manifest = {
-        "contract": "topic5_wiring_economy_slp_rnn_v0_3_cache",
+        "contract": "topic5_rnn_motif_cross_state_v0_4_cache",
+        "geometry_status": "RETROSPECTIVE_TEST_INFORMED_PROPAGATION_PLANE",
+        "input_roots": {
+            "dataset": str(DATASET_DIR),
+            "field": str(FIELD_DIR),
+            "propagation": str(PROP_DIR),
+        },
         "cohort": subjects,
         "n_patients": len(subjects),
         "n_fits": len(rows),

@@ -16,6 +16,7 @@ from src.topic5_wiring_economy_rnn import (  # noqa: E402
     WEModel,
     active_edge_count,
     build_event_tensors,
+    fixed_local_mask,
     initial_mask,
     next_rank_stop_loss,
     zeta_schedule,
@@ -131,8 +132,34 @@ def test_state_dim_two_masks_by_block():
 def test_edge_strength_pools_gru_gates_into_one_number_per_pair():
     model = _model(cell="gru", n_nodes=8)
     strength = model.edge_strength()
-    expected = model.recurrent.detach().pow(2).sum(0).sqrt()
+    expected = model.recurrent.detach().pow(2).mean(0).sqrt()
     assert torch.allclose(strength, expected, atol=1e-6)
+
+
+def test_fixed_local_is_connected_degree_balanced_and_budget_matched():
+    _, distance = _geometry(n_nodes=30)
+    mask = fixed_local_mask(30, 0.1, distance)
+    assert int(mask.sum()) == active_edge_count(30, 0.1)
+    assert np.all(mask.sum(0) >= 1) and np.all(mask.sum(1) >= 1)
+    reached = {0}
+    frontier = [0]
+    while frontier:
+        source = frontier.pop()
+        for target in np.flatnonzero(mask[source]):
+            if int(target) not in reached:
+                reached.add(int(target))
+                frontier.append(int(target))
+    assert len(reached) == 30
+
+
+def test_padding_length_does_not_change_causal_time_feature():
+    model = _model(arm="SPATIAL_SET", n_nodes=12)
+    short = build_event_tensors(np.array([[0, 1, 2, -1, -1, -1]], np.int16))
+    long = build_event_tensors(np.array([[0, 1, 2, 3, 4, 5]], np.int16))
+    with torch.no_grad():
+        _, stop_short = model(short["x"], short["recruited"], short["valid"])
+        _, stop_long = model(long["x"], long["recruited"], long["valid"])
+    assert torch.allclose(stop_short[:, :3], stop_long[:, :3], atol=1e-7)
 
 
 def test_zeta_anneals_to_exactly_zero_before_the_freeze():

@@ -42,6 +42,7 @@ ARM_SPEC: dict[str, tuple[bool, bool]] = {
     "SPATIAL_SET": (True, True),
     "RANDOM_SET_COST": (False, True),
     "SPATIAL_SET_NOCOST": (True, False),
+    "FIXED_LOCAL": (False, False),
 }
 ARMS = ("STATIC_CONTACT",) + tuple(ARM_SPEC)
 SPARSE_ARMS = ("RANDOM_SET", "SPATIAL_SET", "RANDOM_SET_COST", "SPATIAL_SET_NOCOST")
@@ -112,6 +113,57 @@ def initial_mask(n_nodes: int, density: float, distance_mm: np.ndarray | None,
     return mask.reshape(n_nodes, n_nodes)
 
 
+def fixed_local_mask(n_nodes: int, density: float, distance_mm: np.ndarray) -> np.ndarray:
+    """Degree-balanced connected local graph with the same directed edge budget.
+
+    A bidirectional Euclidean minimum-spanning tree first guarantees that every
+    node can reach every other node.  The remaining budget is filled in balanced
+    out-degree rounds, always choosing the nearest still-unused target.  This is
+    deliberately deterministic: FIXED_LOCAL is a structural boundary condition,
+    not another random sparse-network family.
+    """
+    from scipy.sparse.csgraph import minimum_spanning_tree
+
+    distance = np.asarray(distance_mm, float)
+    if distance.shape != (n_nodes, n_nodes):
+        raise ValueError("distance_mm must be an n_nodes by n_nodes matrix")
+    budget = min(active_edge_count(n_nodes, density), n_nodes * (n_nodes - 1))
+    minimum = 2 * (n_nodes - 1)
+    if budget < minimum:
+        raise ValueError(
+            f"density gives {budget} directed edges, fewer than the {minimum} "
+            "needed for a bidirectional spanning tree"
+        )
+    tree = minimum_spanning_tree(distance).toarray()
+    undirected = (tree > 0) | (tree.T > 0)
+    mask = undirected.astype(np.float32)
+    mask = np.maximum(mask, mask.T)
+
+    order = []
+    for i in range(n_nodes):
+        row = distance[i].copy()
+        row[i] = np.inf
+        order.append(np.argsort(row, kind="stable"))
+    cursor = np.zeros(n_nodes, dtype=int)
+    while int(mask.sum()) < budget:
+        out_degree = mask.sum(1)
+        progress = False
+        for source in np.argsort(out_degree, kind="stable"):
+            while cursor[source] < n_nodes:
+                target = int(order[source][cursor[source]])
+                cursor[source] += 1
+                if source != target and mask[source, target] == 0:
+                    mask[source, target] = 1.0
+                    progress = True
+                    break
+            if int(mask.sum()) >= budget:
+                break
+        if not progress:
+            raise RuntimeError("could not fill the fixed-local edge budget")
+    np.fill_diagonal(mask, 0.0)
+    return mask
+
+
 class WEModel(nn.Module):
     def __init__(self, config: WEConfig):
         super().__init__()
@@ -138,6 +190,8 @@ class WEModel(nn.Module):
 
         if self.arm == "DENSE_TISSUE":
             node_mask = 1.0 - np.eye(n, dtype=np.float32)
+        elif self.arm == "FIXED_LOCAL":
+            node_mask = fixed_local_mask(n, config.density, config.node_distance_mm)
         else:
             node_mask = initial_mask(
                 n, config.density, config.node_distance_mm,
@@ -168,10 +222,15 @@ class WEModel(nn.Module):
                                                      device=self.node_mask.device))
 
     def edge_strength(self) -> Tensor:
-        """Per node-pair edge magnitude used for pruning and weighted topology."""
+        """Gate-RMS node-pair magnitude used for pruning and topology.
+
+        Averaging across GRU gates prevents the same numerical eta from becoming
+        three times stronger merely because the cell has three recurrent matrices.
+        State channels remain a within-edge vector and are pooled by an L2 norm.
+        """
         n, d = self.n_nodes, self.state_dim
         blocks = self.recurrent.detach().reshape(-1, n, d, n, d)
-        return blocks.pow(2).sum(dim=(0, 2, 4)).sqrt()
+        return blocks.pow(2).mean(dim=0).sum(dim=(1, 3)).sqrt()
 
     def masked_recurrent(self) -> Tensor:
         return self.recurrent * self._expanded_mask().unsqueeze(0)
@@ -180,7 +239,7 @@ class WEModel(nn.Module):
         """Mean edge length in units of ``d0``, weighted by edge strength."""
         n, d = self.n_nodes, self.state_dim
         blocks = self.recurrent.reshape(-1, n, d, n, d)
-        strength = blocks.pow(2).sum(dim=(0, 2, 4)).clamp_min(1e-12).sqrt()
+        strength = blocks.pow(2).mean(dim=0).sum(dim=(1, 3)).clamp_min(1e-12).sqrt()
         weighted = self.node_mask * strength * (self.D_mm / float(self.config.d0_mm))
         return weighted.sum() / self.node_mask.sum().clamp_min(1.0)
 
@@ -286,7 +345,10 @@ class WEModel(nn.Module):
         if self.arm != "STATIC_CONTACT":
             h = torch.zeros(b, self.n_nodes * self.state_dim, device=device)
         logits, stops = [], []
-        denom = max(1, steps - 1)
+        # The denominator must be observable at prediction time.  ``steps`` is
+        # the longest final event length in this padded batch and therefore a
+        # future leak; contact count is fixed before the event begins.
+        denom = max(1, self.n_contacts - 1)
         for t in range(steps):
             if h is not None:
                 h = self._step(h, x[:, t])
@@ -398,7 +460,7 @@ def rollout(model: WEModel, starts: Sequence[np.ndarray], n_contacts: int,
         x[0, list(start)] = 1.0
         recruited[0, list(start)] = 1.0
         sequence = [list(map(int, start))]
-        denom = max(1, max_steps - 1)
+        denom = max(1, n_contacts - 1)
         for t in range(max_steps):
             if h is not None:
                 h = model._step(h, x)

@@ -31,8 +31,12 @@ from src.topic5_wiring_economy_rnn import (  # noqa: E402
     build_event_tensors,
     cardinality_conditioned_nll,
     next_rank_stop_loss,
-    rollout,
     zeta_schedule,
+)
+from src.topic5_rnn_motif_v0_4 import (  # noqa: E402
+    fit_rollout_size_head,
+    rollout_with_size_head,
+    shuffle_rank_sets,
 )
 from src.topic5_we_readouts import module_lesion, unit_tuning  # noqa: E402
 
@@ -47,7 +51,7 @@ DEFAULTS: Dict[str, Any] = {
     "lr": 6e-3,
     "epochs_warmup": 10,
     "epochs_rewire": 40,
-    "epochs_freeze": 350,
+    "epochs_freeze": 3000,
     "zeta0": 0.20,
     "patience": 12,
     "min_relative_improvement": 1e-4,
@@ -57,6 +61,18 @@ DEFAULTS: Dict[str, Any] = {
     "rollout_events": 256,
     "generator_guard_fraction": 0.15,
 }
+
+
+def sha256_file(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for block in iter(lambda: handle.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
+
+
+def sha256_if_present(path: Path) -> str:
+    return sha256_file(path) if path.exists() else "NOT_PRESENT_TEST_CACHE"
 
 
 def resolve_batch(n_train: int) -> int:
@@ -71,19 +87,8 @@ def resolve_batch(n_train: int) -> int:
 
 
 def shuffle_targets(ranks: np.ndarray, seed: int) -> np.ndarray:
-    """Permute which contact holds which rank, per event.
-
-    Keeps the participating set and the event length; destroys the order.  This
-    is the control that asks how much topology the prune/regrow dynamics build
-    on their own, with the task signal removed but everything else identical.
-    """
-    rng = np.random.default_rng(seed)
-    out = ranks.copy()
-    for e, row in enumerate(out):
-        present = np.flatnonzero(row >= 0)
-        if present.size > 1:
-            out[e, present] = row[rng.permutation(present)]
-    return out
+    """Backward-compatible alias for the v0.4 first-rank-preserving control."""
+    return shuffle_rank_sets(ranks, seed=seed, keep_first=True)
 
 
 def evaluate(model: WEModel, tensors: Dict[str, torch.Tensor], device, batch_size=512,
@@ -146,7 +151,8 @@ def rank_disagreement(a: list[list[list[int]]], b: list[list[list[int]]]) -> flo
 
 
 def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: Path,
-               device: torch.device, shuffled: bool = False, out_tag: str = "") -> Dict[str, Any]:
+               device: torch.device, shuffled: bool = False, out_tag: str = "",
+               model_id: str | None = None, shuffle_mode: str = "none") -> Dict[str, Any]:
     cache = out_root / "cache" / fit_id
     plane = np.load(cache / "plane.npz")
     events = np.load(cache / "events.npz")
@@ -155,8 +161,14 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
     ranks = events["ranks"]
     split = events["split"]
     mode = events["mode"]
-    if shuffled:
-        ranks = shuffle_targets(ranks, seed=seed + 7717)
+    if shuffled and shuffle_mode == "none":
+        shuffle_mode = "keep_first"
+    if shuffle_mode == "keep_first":
+        ranks = shuffle_rank_sets(ranks, seed=seed + 7717, keep_first=True)
+    elif shuffle_mode == "full":
+        ranks = shuffle_rank_sets(ranks, seed=seed + 7717, keep_first=False)
+    elif shuffle_mode != "none":
+        raise ValueError(f"unknown shuffle_mode {shuffle_mode!r}")
 
     keep = split >= 0
     tensors = build_event_tensors(ranks[keep])
@@ -176,6 +188,25 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
     )
     model = WEModel(config).to(device)
     optimiser = torch.optim.Adam(model.parameters(), lr=float(cfg["lr"]))
+
+    snapshots: Dict[str, Dict[str, np.ndarray]] = {
+        "INIT": model.graph_snapshot(),
+    }
+    cost_trajectory: Dict[str, Dict[str, float]] = {}
+
+    def record_cost(label: str, task_value: float) -> None:
+        cost = (float(model.wiring_cost().detach())
+                if arm != "STATIC_CONTACT" else 0.0)
+        cost_trajectory[label] = {
+            "task_loss": float(task_value),
+            "c_wiring": cost,
+            "eta_c_wiring_over_task": (
+                float(cfg["eta"]) * cost / max(abs(float(task_value)), 1e-12)
+            ),
+        }
+
+    initial_val = evaluate(model, tensors, device, event_mask=(part == 1))
+    record_cost("INIT", initial_val["next_bce"] + float(cfg["stop_weight"]) * initial_val["stop_bce"])
 
     warmup, rewire_epochs = int(cfg["epochs_warmup"]), int(cfg["epochs_rewire"])
     ceiling = warmup + rewire_epochs + int(cfg["epochs_freeze"])
@@ -210,12 +241,19 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
         zeta = zeta_schedule(epoch, warmup, rewire_epochs, float(cfg["zeta0"]))
         if zeta > 0.0:
             model.rewire(zeta)
+        if epoch == warmup + max(0, rewire_epochs // 2) - 1:
+            snapshots["REWIRE_MID"] = model.graph_snapshot()
         if epoch == warmup + rewire_epochs - 1:
             model.freeze_mask()
+            snapshots["MASK_FREEZE"] = model.graph_snapshot()
 
         val = evaluate(model, tensors, device, event_mask=(part == 1))
         score = val["next_bce"] + float(cfg["stop_weight"]) * val["stop_bce"]
         history.append({"epoch": epoch, "val": score, "zeta": zeta})
+        if epoch == warmup + max(0, rewire_epochs // 2) - 1:
+            record_cost("REWIRE_MID", score)
+        if epoch == warmup + rewire_epochs - 1:
+            record_cost("MASK_FREEZE", score)
 
         # The early-stopping clock only runs once the graph has stopped moving.
         if epoch < warmup + rewire_epochs:
@@ -232,6 +270,17 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
     hit_ceiling = n_epochs >= ceiling
     if best_state is not None:
         model.load_state_dict(best_state)
+
+    snapshots["FINAL"] = model.graph_snapshot()
+    final_val = evaluate(model, tensors, device, event_mask=(part == 1))
+    record_cost("FINAL", final_val["next_bce"] + float(cfg["stop_weight"]) * final_val["stop_bce"])
+
+    # The recurrent model is frozen before the common cardinality decoder sees
+    # any state.  Test events are never used for this calibration.
+    decoder, decoder_metrics = fit_rollout_size_head(
+        model, tensors, np.flatnonzero(part == 0), np.flatnonzero(part == 1),
+        device, seed=seed,
+    )
 
     test = evaluate(model, tensors, device, event_mask=(part == 2))
     by_mode = {
@@ -251,7 +300,7 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
             continue
         pick = sel[:int(cfg["rollout_events"])]
         starts = [np.flatnonzero(kept_ranks[i] == 0) for i in pick]
-        generated = rollout(model, starts, config.n_contacts, max_steps, device)
+        generated = rollout_with_size_head(model, decoder, starts, device)
         agreement = [sequence_agreement(kept_ranks[i], g) for i, g in zip(pick, generated)]
         lengths = [len([c for s in g for c in s]) for g in generated]
         observed_lengths = [int((kept_ranks[i] >= 0).sum()) for i in pick]
@@ -287,7 +336,9 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
     snapshot = model.graph_snapshot()
     metrics: Dict[str, Any] = {
         "fit_id": fit_id, "arm": arm, "cell": cfg["cell"], "seed": seed,
-        "shuffled_targets": bool(shuffled),
+        "model_id": model_id or arm,
+        "shuffled_targets": bool(shuffle_mode != "none"),
+        "shuffle_mode": shuffle_mode,
         "fit_scope": provenance["scope"], "subject": provenance["subject"],
         "n_contacts": provenance["n_contacts"], "n_nodes": provenance["n_nodes"],
         "n_train": n_train, "n_validation": int((part == 1).sum()),
@@ -301,6 +352,14 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
         "label_coverage": provenance["label_coverage"],
         "device": str(device), "seconds": round(time.time() - started, 1),
         "config": {k: cfg[k] for k in sorted(cfg)},
+        "rollout_decoder": {k: v for k, v in decoder_metrics.items() if k != "curve"},
+        "cost_trajectory": cost_trajectory,
+        "producer_hashes": {
+            "trainer": sha256_file(Path(__file__).resolve()),
+            "model": sha256_file(ROOT / "src/topic5_wiring_economy_rnn.py"),
+            "v0_4_contract": sha256_file(ROOT / "src/topic5_rnn_motif_v0_4.py"),
+            "input_manifest": sha256_if_present(out_root / "INPUT_MANIFEST.json"),
+        },
     }
     if snapshot:
         mask = snapshot["mask"].astype(bool)
@@ -313,9 +372,10 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
         metrics["edge_count"] = 0
         metrics["c_wiring"] = 0.0
 
-    suffix = "_shuffled" if shuffled else ""
+    suffix = "_shuffled" if shuffle_mode != "none" else ""
+    directory_name = model_id or f"{arm}{suffix}_{cfg['cell']}{out_tag}"
     out_dir = (out_root / "per_subject" / fit_id
-               / f"{arm}{suffix}_{cfg['cell']}{out_tag}" / f"seed{seed}")
+               / directory_name / f"seed{seed}")
     out_dir.mkdir(parents=True, exist_ok=True)
     payload = json.dumps(metrics, indent=2)
     metrics["config_sha256"] = hashlib.sha256(payload.encode()).hexdigest()[:16]
@@ -324,12 +384,21 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
     if snapshot:
         np.savez_compressed(out_dir / "graph.npz.tmp.npz", **snapshot)
         (out_dir / "graph.npz.tmp.npz").rename(out_dir / "graph.npz")
+    snapshot_dir = out_dir / "snapshots"
+    snapshot_dir.mkdir(exist_ok=True)
+    for label, values in snapshots.items():
+        if values:
+            np.savez_compressed(snapshot_dir / f"{label}.npz", **values)
     if tuning.size:
         np.savez_compressed(out_dir / "unit_tuning.npz.tmp.npz", tuning=tuning)
         (out_dir / "unit_tuning.npz.tmp.npz").rename(out_dir / "unit_tuning.npz")
     if lesion:
         (out_dir / "lesion.json").write_text(json.dumps(lesion, indent=2))
     torch.save(model.state_dict(), out_dir / "weights.pt")
+    torch.save(decoder.state_dict(), out_dir / "rollout_size_head.pt")
+    (out_dir / "rollout_decoder_history.json").write_text(
+        json.dumps(decoder_metrics["curve"])
+    )
     (out_dir / "history.json").write_text(json.dumps(history))
     (out_dir / "DONE.json").write_text(json.dumps({"ok": True, "converged": metrics["converged"]}))
     return metrics
@@ -344,6 +413,8 @@ def main() -> int:
     parser.add_argument("--device", default="cpu")
     parser.add_argument("--out-root", type=Path, default=OUT_ROOT)
     parser.add_argument("--shuffled", action="store_true")
+    parser.add_argument("--shuffle-mode", choices=("none", "keep_first", "full"), default="none")
+    parser.add_argument("--model-id", default=None)
     parser.add_argument("--out-tag", default="")
     parser.add_argument("--eta", type=float, default=None)
     parser.add_argument("--density", type=float, default=None)
@@ -361,7 +432,8 @@ def main() -> int:
     torch.manual_seed(args.seed)
     metrics = train_unit(args.fit_id, args.arm, args.seed, cfg, args.out_root,
                          torch.device(args.device), shuffled=args.shuffled,
-                         out_tag=args.out_tag)
+                         out_tag=args.out_tag, model_id=args.model_id,
+                         shuffle_mode=args.shuffle_mode)
     print(f"{args.fit_id} {args.arm}{'_shuffled' if args.shuffled else ''} {args.cell} "
           f"seed{args.seed} epochs={metrics['n_epochs']} converged={metrics['converged']} "
           f"test_bce={metrics['test']['next_bce']:.4f} c_wiring={metrics['c_wiring']:.4f} "
