@@ -308,6 +308,14 @@ def aggregate_patient_fields(out_root: Path, rows: list[dict], fields: dict) -> 
             candidates["A"]["seed_removed"] - candidates["B"]["seed_removed"],
             empirical_scores["A"] - empirical_scores["B"],
         )
+        canonical_common_fidelity = safe_corr(
+            0.5 * (candidates["A"]["canonical_full"] + candidates["B"]["canonical_full"]),
+            0.5 * (empirical_scores["A"] + empirical_scores["B"]),
+        )
+        seed_removed_common_fidelity = safe_corr(
+            0.5 * (candidates["A"]["seed_removed"] + candidates["B"]["seed_removed"]),
+            0.5 * (empirical_scores["A"] + empirical_scores["B"]),
+        )
         shared_mode_corr = float("nan")
         if sources["A"] == sources["B"]:
             name_a = [str(x) for x in candidates["A"]["contacts"]]
@@ -325,8 +333,10 @@ def aggregate_patient_fields(out_root: Path, rows: list[dict], fields: dict) -> 
             "swapped_empirical_r": swapped_fidelity,
             "matched_minus_swapped_r": float(np.nanmean(fidelity)) - swapped_fidelity,
             "canonical_contrast_fidelity": canonical_contrast_fidelity,
+            "canonical_common_fidelity": canonical_common_fidelity,
             "seed_removed_matched_empirical_r": seed_removed_matched,
             "seed_removed_contrast_fidelity": seed_removed_contrast_fidelity,
+            "seed_removed_common_fidelity": seed_removed_common_fidelity,
             "canonical_seed_stability": float(np.nanmean([
                 candidates["A"]["canonical_full_seed_stability"],
                 candidates["B"]["canonical_full_seed_stability"],
