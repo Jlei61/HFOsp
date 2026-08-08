@@ -309,6 +309,10 @@ def main():
             fixed_count_distance=matched,
             prototype_correlation=diag.get("prototype_correlation"),
             cluster_counts=diag.get("cluster_counts"),
+            min_cluster_count=diag.get("min_cluster_count"),
+            minority_fraction=diag.get("minority_fraction"),
+            opposition_support_eligible=diag.get(
+                "opposition_support_eligible"),
         )
     optimization_floor = _matched_distance(
         curves["patient_heldout"], reference, OBJECTIVE_N_EVENTS,

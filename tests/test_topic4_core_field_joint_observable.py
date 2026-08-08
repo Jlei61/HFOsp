@@ -6,6 +6,10 @@ import os
 import numpy as np
 import pytest
 
+from scripts.calibrate_topic4_core_field_stage3_joint_observable import (
+    OPPOSITION_MIN_CLUSTER_EVENTS,
+    _prototype_diagnostic,
+)
 from src.topic4_core_field_profile import (
     fixed_count_indices,
     fit_rank_curve_reference,
@@ -57,6 +61,18 @@ def test_embedding_distance_is_symmetric_and_rejects_shape_drift():
         sliced_embedding_distance(b, a, directions))
     with pytest.raises(ValueError, match="matching 2-D shapes"):
         sliced_embedding_distance(a, b[:, :2], directions)
+
+
+def test_posthoc_opposition_requires_ten_events_in_each_cluster():
+    events = [_profile("forward", 0.05, seed) for seed in range(30)]
+    events += [_profile("reverse", 0.05, 100 + seed) for seed in range(9)]
+    curves = rank_curve_table(events, AX)
+    reference = fit_rank_curve_reference(
+        curves, n_components=4, n_reference=30, n_projections=8, seed=3)
+    diagnostic = _prototype_diagnostic(curves, reference)
+    assert diagnostic["min_cluster_count"] == 9
+    assert OPPOSITION_MIN_CLUSTER_EVENTS == 10
+    assert diagnostic["opposition_support_eligible"] is False
 
 
 def test_phantom_ranks_are_removed_by_the_same_participation_mask():
