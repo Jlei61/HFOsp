@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import csv
 import numpy as np
 import torch
 import json
@@ -20,6 +21,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from launch_topic5_rnn_motif_v0_4 import build_jobs  # noqa: E402
 from build_topic5_rnn_motif_fields_v0_4 import (  # noqa: E402
     aggregate_records,
+    aggregate_patient_fields,
     derive_common_contrast,
     split_half_stability,
 )
@@ -232,3 +234,37 @@ def test_effective_operator_seed_stability_keeps_inactive_edges(tmp_path):
     path = tmp_path / "seed2.npz"
     np.savez_compressed(path, edge_effective_influence=third)
     assert pairwise_seed_stability([paths[0], path]) < 1.0
+
+
+def test_patient_field_aggregation_keeps_seed_rows_distinct_from_pair_correlations(tmp_path):
+    field_root = tmp_path / "empirical"
+    field_root.mkdir()
+    (tmp_path / "INPUT_MANIFEST.json").write_text(json.dumps({
+        "input_roots": {"field": str(field_root)}
+    }))
+    (field_root / "p1.json").write_text(json.dumps({"interictal_field": {
+        "contact_order": ["A1", "A2", "A3"],
+        "rank_a": [0.0, 1.0, 2.0], "rank_b": [2.0, 1.0, 0.0],
+    }}))
+    rows, fields = [], {}
+    for seed in (0, 1, 2):
+        for template, value in (("A", [0.0, 0.5, 1.0]), ("B", [1.0, 0.5, 0.0])):
+            rows.append({
+                "subject": "p1", "fit_id": "p1__shared", "scope": "shared",
+                "model": "M6_SPATIAL_MID", "cell": "rnn", "seed": seed,
+                "template": template, "canonical_empirical_r": 1.0,
+                "seed_removed_empirical_r": 1.0, "hit_epoch_ceiling": False,
+            })
+            fields[("p1__shared", "M6_SPATIAL_MID", "rnn", seed, template)] = {
+                "contacts": np.array(["A1", "A2", "A3"]),
+                "canonical_full": np.asarray(value), "seed_removed": np.asarray(value),
+                "participation": np.asarray(value), "seed_removed_denominator": np.ones(3),
+                "canonical_full_split_half_stability": np.array([1.0]),
+                "seed_removed_split_half_stability": np.array([1.0]),
+            }
+    patient_rows, _ = aggregate_patient_fields(tmp_path, rows, fields)
+    assert len(patient_rows) == 1
+    with (tmp_path / "model_field_fit_metrics.csv").open(newline="") as handle:
+        fit_rows = list(csv.DictReader(handle))
+    assert len(fit_rows) == 2
+    assert all(row["n_seeds"] == "3" for row in fit_rows)
