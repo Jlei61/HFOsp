@@ -366,7 +366,7 @@ def train_unit(fit_id: str, arm: str, seed: int, cfg: Dict[str, Any], out_root: 
         "converged": bool(not hit_ceiling), "hit_ceiling": bool(hit_ceiling),
         "n_epochs": n_epochs, "val_score": float(best),
         "uses_wiring_cost": bool(arm_uses_wiring_cost(arm)),
-        "test": test, "test_by_mode": by_mode, "rollout": roll,
+        "validation": final_val, "test": test, "test_by_mode": by_mode, "rollout": roll,
         "generator_degenerate": degenerate,
         "label_coverage": provenance["label_coverage"],
         "device": str(device), "seconds": round(time.time() - started, 1),
