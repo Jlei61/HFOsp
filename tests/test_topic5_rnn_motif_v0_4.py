@@ -29,6 +29,7 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     permutation_indices,
     permutation_support,
 )
+from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -193,3 +194,22 @@ def test_factorial_effects_use_one_complete_patient_denominator():
     assert result["complete_patients"] == ["p1"]
     assert result["excluded_incomplete_patients"] == ["p2"]
     assert result["growth_at_zero"]["n"] == 1
+
+
+def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
+    def record(scope, fit_id, template, values):
+        payload = {
+            "status": "inference_available", "field_contacts": ["A1", "B1"],
+            "baseline_fields": {template: values},
+            "targeted_fields": {template: [value / 2 for value in values]},
+        }
+        return {
+            "subject": "p1", "model": "M6_SPATIAL_MID", "scope": scope,
+            "fit_id": fit_id, "lesions": {"connector_nodes": payload},
+        }
+    resolved = patient_fields([
+        record("own_a", "p1__own_a", "A", [1.0, 0.0]),
+        record("own_b", "p1__own_b", "B", [0.0, 1.0]),
+    ])[("p1", "M6_SPATIAL_MID", "connector_nodes")]
+    assert resolved["baseline"]["producers"] == {"A": "p1__own_a", "B": "p1__own_b"}
+    assert np.allclose(resolved["targeted"]["A"], [0.5, 0.0])
