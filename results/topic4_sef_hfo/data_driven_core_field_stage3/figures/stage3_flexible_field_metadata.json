@@ -1,0 +1,103 @@
+{
+ "figure": "stage3_flexible_field",
+ "plotting_only": true,
+ "learned_tag": "epilepsiae_1146_stage3_flexible_field_s5",
+ "field": {
+  "theta": [
+   9.150360794518686,
+   10.916827525390936,
+   1.5646545527626279,
+   0.18372298322404781,
+   0.3280398053025053,
+   7.075264611162219,
+   6.353313507771314,
+   1.4792326761563963,
+   -0.6350001546222489,
+   -0.023707512881091963,
+   15.737047945434215,
+   3.6674581157947763,
+   -2.499095122635797,
+   -0.378627563087879,
+   1.3047057631903842,
+   -2.248559651911874,
+   0.26593198965005094
+  ],
+  "K": 3,
+  "components": [
+   {
+    "center": [
+     9.150360794518686,
+     10.916827525390936
+    ],
+    "sigma_par": 4.78102305938593,
+    "sigma_perp": 1.2016828906644073,
+    "phi": 0.3280398053025053,
+    "weight": 0.04379356743778209
+   },
+   {
+    "center": [
+     7.075264611162219,
+     6.353313507771314
+    ],
+    "sigma_par": 4.389576161875611,
+    "sigma_perp": 0.5299354063777578,
+    "phi": -0.023707512881091963,
+    "weight": 0.5413026698091491
+   },
+   {
+    "center": [
+     15.371220717155394,
+     4.07125746826524
+    ],
+    "sigma_par": 0.4,
+    "sigma_perp": 0.6848006102027656,
+    "phi": 1.3047057631903842,
+    "weight": 0.4149037627530688
+   }
+  ],
+  "iso_level": 0.22837136684511086
+ },
+ "distance": {
+  "fit": 0.3412655163233386,
+  "confirmed_independent_networks": 0.3997279443575493,
+  "confirmed_held_out_recordings": 0.4254929958516203,
+  "best_fixed_blob": 0.5905676977603247,
+  "rigid_family_best": 0.591,
+  "rigid_family_worst": 0.983,
+  "hand_placed_two_cores": 0.855,
+  "learned_filament": 0.686,
+  "patient_split_half_floor": 0.031
+ },
+ "run": {
+  "seed": 5,
+  "n_events": 20,
+  "n_clean": 18,
+  "dir_forward": 14,
+  "dir_reverse": 4,
+  "bidirectional": true
+ },
+ "readout_events": {
+  "forward_events": 1,
+  "reverse_events": 1,
+  "selected_pair": [
+   {
+    "t_on_ms": 5953.0,
+    "t_off_ms": 5992.0,
+    "type": "TA"
+   },
+   {
+    "t_on_ms": 6332.0,
+    "t_off_ms": 6370.0,
+    "type": "TB"
+   }
+  ],
+  "display_window_t0_ms": 5561.5,
+  "display_window_t1_ms": 6761.5,
+  "trace_band_hz": [
+   30.0,
+   80.0
+  ],
+  "trace_scaling": "per-contact signed component / window absolute p95"
+ },
+ "claim_boundary": "one network for the event panels; the distances come from six independent networks and held-out patient recordings, and the search did not converge, so the field shown is the best of 100 candidates rather than an optimum"
+}

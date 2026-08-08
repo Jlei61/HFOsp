@@ -90,10 +90,41 @@ def _learned_vth(core_field_dir, posE, NE, NI, reg):
                      train_n_dir=best["n_dir"], budget_cells=float(cfg["N_core_manual"]))
 
 
+def _stage3_vth(path, posE, NE, NI, reg, L):
+    """Per-neuron thresholds from a Stage 3 free-centre mixture field.
+
+    ``path`` is a Stage 3 fit checkpoint or confirmation file; whichever it is,
+    the theta it carries is the one that was scored, so the field rendered here
+    is the field that was measured.
+    """
+    from src.topic4_core_field import (build_vth, core_thresholds,
+                                       sample_core_quantiles, signed_depth)
+    from src.topic4_core_field_stage3 import K_COMPONENTS, params_to_h
+
+    rec = json.load(open(path))
+    if "best_theta" in rec:
+        theta, fit = rec["best_theta"], rec.get("fit_value")
+    else:
+        best = min(rec["history"], key=lambda r: r["distance"])
+        theta, fit = best["theta"], best["distance"]
+    cfg = json.load(open(os.path.join(
+        "results/topic4_sef_hfo/data_driven_core_field", "config", "stage_config.json")))
+    e = cfg["engine"]
+    h = params_to_h(np.asarray(theta, float), posE, K_COMPONENTS, float(L),
+                    float(cfg["N_core_manual"]))
+    d = signed_depth(core_thresholds(
+        sample_core_quantiles(NE, cfg["quantile_seed"]), e["core_mean"],
+        e["core_std"]), e["v_base"])
+    vth = build_vth(h, d, n_total=NE + NI, n_E=NE, v_base=e["v_base"])
+    return vth, dict(source=path, theta=theta, fit_distance=fit,
+                     K=K_COMPONENTS, budget_cells=float(cfg["N_core_manual"]))
+
+
 def subject_run(subject, montage_name, lesion, L, density, drive, T,
                 core_mean, core_std, core_r, seed, target_inter_core, k_dir=2,
                 placement="template_source", k_early=3, manual_source=None,
-                manual_sink=None, core_field=None, rep_pad_ms=None):
+                manual_sink=None, core_field=None, rep_pad_ms=None,
+                stage3_field=None):
     # Adapt the read-out estimator to sparse patient electrodes. The endpoint
     # estimator itself requires 2*k_dir+1 participants (5 for k_dir=2).
     cmrun.KDIR = int(k_dir)
@@ -142,7 +173,9 @@ def subject_run(subject, montage_name, lesion, L, density, drive, T,
     def core(xy, s):
         return sample_core_field(net["pos"], is_E, xy, core_r, np.random.default_rng(s),
                                  core_mean=core_mean, core_std=core_std, base_mean=18.0)
-    if core_field is not None:
+    if stage3_field is not None:
+        vth, learned_meta = _stage3_vth(stage3_field, net["pos"][:NE], NE, NI, reg, L)
+    elif core_field is not None:
         # Same two-core budget and the same threshold draws, but the spatial
         # membership comes from the learned field instead of two hand-placed
         # disks. Reuses the Stage 2 constructors so the field rendered here is
@@ -284,6 +317,9 @@ def main():
     ap.add_argument("--core-field", default=None,
                     help="data_driven_core_field output root; replaces the two hand-placed "
                          "cores with the best learned field from its Stage 2 checkpoint")
+    ap.add_argument("--stage3-field", default=None,
+                    help="Stage 3 fit checkpoint or confirmation json; renders the "
+                         "free-centre mixture field it carries")
     ap.add_argument("--rep-pad-ms", default=None,
                     help="comma-separated extra ms appended to the representative "
                          "events' onset window, e.g. 60,150,300; maps only")
@@ -299,7 +335,8 @@ def main():
     out, fig, _ = subject_run(a.subject, a.montage, a.lesion, a.L, a.density, a.drive, a.T,
                               a.core_mean, a.core_std, a.core_r, a.seed, a.target_inter_core, a.k_dir,
                               a.placement, a.k_early, msrc, msnk, a.core_field,
-                              [float(x) for x in a.rep_pad_ms.split(",")] if a.rep_pad_ms else None)
+                              [float(x) for x in a.rep_pad_ms.split(",")] if a.rep_pad_ms else None,
+                              a.stage3_field)
     json.dump(out, open(os.path.join(a.out, f"readout_{tag}.json"), "w"), indent=2)
     np.savez_compressed(os.path.join(a.out, f"figdata_{tag}.npz"), **fig)
     print(f"[{tag}] events={out['n_events']} clean(n>=7)={out['n_clean']} fwd/rev={out['clean_forward']}/{out['clean_reverse']} "
