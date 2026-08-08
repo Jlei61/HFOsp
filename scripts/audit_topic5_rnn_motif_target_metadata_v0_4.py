@@ -81,7 +81,8 @@ def main() -> int:
     payload = {
         "contract": "topic5_rnn_motif_early_ictal_metadata_inventory_v0_4",
         "target_cache_root": str(target_root),
-        "target_arrays_deserialized": False,
+        "contact_name_arrays_deserialized": True,
+        "target_energy_arrays_deserialized": False,
         "target_values_read": False,
         "expected_primary_n": 15,
         "actual_primary_join_n": len(primary_join),

@@ -117,6 +117,18 @@ def permutation_indices(n: int, eligible: np.ndarray, shafts: list[str],
     return out
 
 
+def permutation_support(eligible: np.ndarray, shafts: list[str]) -> dict[str, int]:
+    """Describe how much support can actually move in the shaft-preserving null."""
+    sizes = [sum(shafts[index] == shaft for index in eligible)
+             for shaft in sorted({shafts[index] for index in eligible})]
+    return {
+        "n_eligible_contacts": int(len(eligible)),
+        "n_shafts": int(len(sizes)),
+        "n_within_shaft_permutable_contacts": int(sum(size for size in sizes if size > 1)),
+        "n_within_shaft_permutable_groups": int(sum(size > 1 for size in sizes)),
+    }
+
+
 def score_one(scorer: dict[str, Any], target: np.ndarray, permutations: np.ndarray) -> dict[str, Any]:
     detail = score_event_detail_single(scorer, target)
     null = score_event_maxab_batch(scorer, target[permutations])
@@ -137,6 +149,12 @@ def score_one(scorer: dict[str, Any], target: np.ndarray, permutations: np.ndarr
 def paired_summary(values: Iterable[float], draws: int = 10000, seed: int = 1) -> dict[str, Any]:
     values = np.asarray(list(values), float)
     values = values[np.isfinite(values)]
+    if values.size == 0:
+        return {
+            "n": 0, "median": np.nan, "bootstrap_95ci": [np.nan, np.nan],
+            "positive": 0, "negative": 0, "tied": 0,
+            "wilcoxon_p": np.nan, "sign_permutation_p": np.nan,
+        }
     tol = 1e-9
     nonzero = values[np.abs(values) > tol]
     p = float(wilcoxon(nonzero, method="auto").pvalue) if nonzero.size else 1.0
@@ -183,6 +201,12 @@ def aggregate_patients(seizure_rows: list[dict[str, Any]], null_store: dict[str,
             "subject": subject, "primary": subject != supportive, "supportive": subject == supportive,
             "model": model, "cell": cell, "endpoint": endpoint, "n_seizures": len(selected),
             "n_contacts_min": min(int(item["n_contacts"]) for item in selected),
+            "within_shaft_permutable_contacts_min": min(
+                int(item["n_within_shaft_permutable_contacts"]) for item in selected
+            ),
+            "within_shaft_permutable_groups_min": min(
+                int(item["n_within_shaft_permutable_groups"]) for item in selected
+            ),
             "observed": observed,
             "all_contact_null_median": float(np.nanmedian(pnull_all)),
             "all_contact_margin": observed - float(np.nanmedian(pnull_all)),
@@ -227,6 +251,41 @@ def conditional_effects(patient_rows: list[dict[str, Any]], fidelity_rows: list[
         contrasts[f"{model}_vs_{baseline}"] = paired_summary(values, seed=stable_seed(model, baseline, "conditional"))
     return {"endpoint": endpoint, "patient_intercept_removed": True,
             "within_patient_fidelity_slope": beta, "contrasts": contrasts}
+
+
+def compute_factorial_effects(
+    lookup: dict[tuple[str, str, str, str], dict[str, Any]],
+    primary: list[str], endpoint: str,
+) -> dict[str, Any]:
+    """Compute every 2x2 contrast on one identical complete-patient denominator."""
+    required = set(FACTORIAL)
+    complete = [subject for subject in primary if all(
+        (subject, model, "rnn", endpoint) in lookup for model in required
+    )]
+    definitions = {
+        "growth_at_zero": ("M4_SPATIAL_GROWTH", "M2_UNIFORM_SET"),
+        "growth_at_mid": ("M6_SPATIAL_MID", "M8_UNIFORM_COST_MID"),
+        "cost_uniform": ("M8_UNIFORM_COST_MID", "M2_UNIFORM_SET"),
+        "cost_spatial": ("M6_SPATIAL_MID", "M4_SPATIAL_GROWTH"),
+    }
+    effects: dict[str, Any] = {
+        "n_complete_patients": len(complete),
+        "complete_patients": complete,
+        "excluded_incomplete_patients": sorted(set(primary) - set(complete)),
+    }
+    raw: dict[str, np.ndarray] = {}
+    for name, (a_model, b_model) in definitions.items():
+        raw[name] = np.asarray([
+            lookup[(subject, a_model, "rnn", endpoint)]["all_contact_margin"]
+            - lookup[(subject, b_model, "rnn", endpoint)]["all_contact_margin"]
+            for subject in complete
+        ], float)
+        effects[name] = paired_summary(raw[name], seed=stable_seed(endpoint, name))
+    effects["interaction"] = paired_summary(
+        raw["cost_spatial"] - raw["cost_uniform"],
+        seed=stable_seed(endpoint, "interaction"),
+    )
+    return effects
 
 
 def main() -> int:
@@ -321,6 +380,7 @@ def main() -> int:
                     len(order), eligible, shafts, args.n_perm,
                     stable_seed(subject, seizure_id, endpoint, "within_shaft"), True,
                 )
+                perm_support = permutation_support(eligible, shafts)
                 # Frozen empirical reference uses the identical support and permutations.
                 candidates = {
                     ("EMPIRICAL_REFERENCE", "reference"): (
@@ -350,6 +410,7 @@ def main() -> int:
                         "all_contact_margin": all_score["margin"], "all_contact_p": all_score["empirical_p"],
                         "within_shaft_null_median": shaft_score["null_median"],
                         "within_shaft_margin": shaft_score["margin"], "within_shaft_p": shaft_score["empirical_p"],
+                        **perm_support,
                         "null_key_all": key_all, "null_key_shaft": key_shaft,
                     })
 
@@ -407,24 +468,7 @@ def main() -> int:
 
     factorial_effects = {}
     for endpoint in ENDPOINTS:
-        definitions = {
-            "growth_at_zero": ("M4_SPATIAL_GROWTH", "M2_UNIFORM_SET"),
-            "growth_at_mid": ("M6_SPATIAL_MID", "M8_UNIFORM_COST_MID"),
-            "cost_uniform": ("M8_UNIFORM_COST_MID", "M2_UNIFORM_SET"),
-            "cost_spatial": ("M6_SPATIAL_MID", "M4_SPATIAL_GROWTH"),
-        }
-        effects = {}
-        raw = {}
-        for name, (a_model, b_model) in definitions.items():
-            raw[name] = np.asarray([
-                lookup[(subject, a_model, "rnn", endpoint)]["all_contact_margin"]
-                - lookup[(subject, b_model, "rnn", endpoint)]["all_contact_margin"]
-                for subject in primary
-            ], float)
-            effects[name] = paired_summary(raw[name], seed=stable_seed(endpoint, name))
-        interaction = raw["cost_spatial"] - raw["cost_uniform"]
-        effects["interaction"] = paired_summary(interaction, seed=stable_seed(endpoint, "interaction"))
-        factorial_effects[endpoint] = effects
+        factorial_effects[endpoint] = compute_factorial_effects(lookup, primary, endpoint)
     atomic_json(out_root / "factorial_effects_early_ictal.json", factorial_effects)
     conditional = conditional_effects(patient_rows, fidelity_rows)
     atomic_json(out_root / "early_ictal_conditional_on_interictal_fidelity.json", conditional)

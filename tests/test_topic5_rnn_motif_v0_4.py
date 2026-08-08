@@ -24,7 +24,11 @@ from build_topic5_rnn_motif_fields_v0_4 import (  # noqa: E402
     split_half_stability,
 )
 from analyse_topic5_rnn_motif_interictal_v0_4 import seed_removed_sequence_agreement  # noqa: E402
-from score_topic5_rnn_motif_early_ictal_v0_4 import permutation_indices  # noqa: E402
+from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
+    compute_factorial_effects,
+    permutation_indices,
+    permutation_support,
+)
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -166,3 +170,26 @@ def test_early_ictal_permutations_are_synchronized_and_shaft_preserving():
     assert all(set(row[:3]) == {0, 1, 2} and set(row[3:]) == {3, 4, 5} for row in first)
     all_contact = permutation_indices(6, eligible, shafts, 20, 7, False)
     assert any(set(row[:3]) != {0, 1, 2} for row in all_contact)
+    assert permutation_support(eligible, shafts) == {
+        "n_eligible_contacts": 6,
+        "n_shafts": 2,
+        "n_within_shaft_permutable_contacts": 6,
+        "n_within_shaft_permutable_groups": 2,
+    }
+
+
+def test_factorial_effects_use_one_complete_patient_denominator():
+    lookup = {}
+    for subject in ("p1", "p2"):
+        for value, model in enumerate((
+            "M2_UNIFORM_SET", "M4_SPATIAL_GROWTH",
+            "M6_SPATIAL_MID", "M8_UNIFORM_COST_MID",
+        )):
+            lookup[(subject, model, "rnn", "canonical_full")] = {
+                "all_contact_margin": float(value)
+            }
+    del lookup[("p2", "M8_UNIFORM_COST_MID", "rnn", "canonical_full")]
+    result = compute_factorial_effects(lookup, ["p1", "p2"], "canonical_full")
+    assert result["complete_patients"] == ["p1"]
+    assert result["excluded_incomplete_patients"] == ["p2"]
+    assert result["growth_at_zero"]["n"] == 1
