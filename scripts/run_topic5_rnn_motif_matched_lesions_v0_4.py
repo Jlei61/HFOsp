@@ -420,6 +420,19 @@ def aggregate(out_root: Path) -> None:
         "target_draws": TARGET_DRAWS, "minimum_valid_matched_draws": MINIMUM_VALID,
         "interpretation_rule": "motif wording requires enrichment, task relation and positive matched-lesion specificity",
     }, indent=2))
+    (out_root / "stage_g_scientific_drift_audit.json").write_text(json.dumps({
+        "status": "ALIGNED",
+        "target_values_read": False,
+        "scientific_question": (
+            "which input-output effective organization supports heldout interictal propagation "
+            "under matched target-free perturbations"
+        ),
+        "primary_motif": "local high-influence backbone plus sparse long-range connector organization",
+        "primary_evidence_required": ["enrichment", "task association", "matched-lesion specificity"],
+        "cell_scope": "leaky RNN primary; GRU effective-reach replication only",
+        "not_claimed": ["edge-level connectome recovery", "hidden-unit neuron identity",
+                        "causal perturbation of the human brain"],
+    }, indent=2))
 
 
 def main() -> int:
