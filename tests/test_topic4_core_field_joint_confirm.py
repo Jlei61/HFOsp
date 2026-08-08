@@ -5,6 +5,7 @@ import pytest
 from scripts.run_topic4_core_field_stage3_joint_confirm import (
     _distance_to_target,
     confirmation_seeds,
+    evaluation_errors,
     select_candidates,
 )
 from src.topic4_core_field_profile import fit_rank_curve_reference
@@ -41,6 +42,17 @@ def test_confirmation_seed_pool_is_disjoint_from_every_fit_generation():
     assert set(seeds).isdisjoint(fit)
     with pytest.raises(ValueError):
         confirmation_seeds(_checkpoint(), 100)
+
+
+def test_worker_errors_keep_candidate_and_network_identity():
+    candidates = [dict(candidate_id="a", roles=["global"]),
+                  dict(candidate_id="b", roles=["final"])]
+    raw = [dict(seed=501, events=[]), dict(seed=502, error="boom"),
+           dict(seed=501, error="bad"), dict(seed=502, events=[])]
+    assert evaluation_errors(raw, candidates, [501, 502]) == [
+        dict(candidate_id="a", roles=["global"], seed=502, error="boom"),
+        dict(candidate_id="b", roles=["final"], seed=501, error="bad"),
+    ]
 
 
 def test_target_distance_uses_exactly_the_frozen_source_count():

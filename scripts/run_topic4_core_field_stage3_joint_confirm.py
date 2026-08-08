@@ -16,6 +16,7 @@ from multiprocessing import Pool
 import numpy as np
 
 sys.path.insert(0, os.getcwd())
+sys.path.insert(0, os.path.join("src", "snn_engine"))
 from scripts.calibrate_topic4_core_field_stage3_joint_observable import (  # noqa: E402
     DISTANCE_BOOTSTRAP_SEED,
     HELD_OUT_FRAC,
@@ -111,6 +112,22 @@ def confirmation_seeds(checkpoint, n_confirm):
     if len(selected) != int(n_confirm) or set(selected) & fit_seeds:
         raise ValueError("could not construct an independent confirmation seed pool")
     return selected, sorted(fit_seeds)
+
+
+def evaluation_errors(raw, candidates, seeds):
+    """Attach candidate and network identity to every caught worker error."""
+    rows = []
+    for index, row in enumerate(raw):
+        if "error" not in row:
+            continue
+        candidate_index, seed_index = divmod(index, len(seeds))
+        rows.append(dict(
+            candidate_id=candidates[candidate_index]["candidate_id"],
+            roles=candidates[candidate_index]["roles"],
+            seed=int(seeds[seed_index]),
+            error=str(row["error"]),
+        ))
+    return rows
 
 
 def _distance_to_target(curves, reference, target_z, n_events=MIN_PROFILE_EVENTS):
@@ -213,6 +230,18 @@ def main():
             for candidate in candidates for seed in seeds]
     with Pool(args.workers, maxtasksperchild=1) as pool:
         raw = pool.map(_evaluate, jobs)
+    simulation_errors = evaluation_errors(raw, candidates, seeds)
+    if simulation_errors:
+        atomic_write_json(dict(
+            status="FAIL_CLOSED_SIMULATION_ERRORS",
+            checkpoint=dict(path=args.checkpoint, sha256=_sha256(args.checkpoint)),
+            confirm_network_seeds=seeds,
+            errors=simulation_errors,
+            provenance=provenance(),
+        ), args.out)
+        raise RuntimeError(
+            f"confirmation failed closed with {len(simulation_errors)} simulation errors; "
+            f"see {args.out}")
 
     result_rows = []
     for candidate_index, candidate in enumerate(candidates):
@@ -253,7 +282,6 @@ def main():
                 n_detected=int(score["n_detected"]),
                 n_failed_networks=int(score["n_failed"]),
                 event_count_by_seed={str(seed): int(len(row.get("events", [])))
-                                     if "error" not in row else None
                                      for seed, row in zip(seeds, chunk)},
                 leave_one_network_out=loo,
                 posthoc_prototypes=_posthoc_diagnostic(curves, reference),
