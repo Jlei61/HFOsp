@@ -45,6 +45,40 @@ def n_free(K=K_COMPONENTS):
     return 5 * int(K) + int(K) - 1
 
 
+def latent_to_theta(latent, K=K_COMPONENTS, L=20.0, logit_limit=4.0):
+    """Decode O(1) optimizer coordinates into the legacy physical theta format.
+
+    The first Stage 3 fit asked one isotropic CMA-ES covariance to learn scales
+    spanning millimetres, log-millimetres, radians, and weight logits. It also
+    hard-clipped centres and sigmas, creating large latent plateaus. This smooth
+    decoder preconditions every coordinate and approaches, but never crosses, the
+    physical bounds. The returned theta remains compatible with `unpack` and all
+    existing renderers.
+    """
+    z = np.asarray(latent, float)
+    if z.size != n_free(K):
+        raise ValueError(f"expected {n_free(K)} latent values for K={K}, got {z.size}")
+    theta = np.zeros_like(z)
+    midpoint = np.full(2, float(L) / 2.0)
+    radius = float(L) / 2.0 - CENTER_MARGIN_MM
+    log_min, log_max = np.log(SIGMA_MIN_MM), np.log(SIGMA_MAX_MM)
+
+    for k in range(int(K)):
+        b = 5 * k
+        direction = z[b:b + 2]
+        norm = float(np.linalg.norm(direction))
+        radial = radius * np.tanh(norm / 1.5)
+        theta[b:b + 2] = (midpoint if norm < 1e-12 else
+                           midpoint + radial * direction / norm)
+        unit = 1.0 / (1.0 + np.exp(-np.clip(z[b + 2:b + 4], -40.0, 40.0)))
+        theta[b + 2:b + 4] = log_min + unit * (log_max - log_min)
+        theta[b + 4] = np.pi / (1.0 + np.exp(-float(np.clip(z[b + 4], -40.0, 40.0))))
+
+    if int(K) > 1:
+        theta[5 * K:] = float(logit_limit) * np.tanh(z[5 * K:] / 2.0)
+    return theta
+
+
 def unpack(theta, K=K_COMPONENTS, L=20.0):
     theta = np.asarray(theta, float)
     logits = np.append(theta[5 * K:5 * K + K - 1], 0.0)

@@ -64,7 +64,9 @@ def _load_cmrun():
 
 
 def _evaluate(job):
-    theta, seed, cfg, cache_dir = job
+    theta, seed, cfg, cache_dir, *optional = job
+    component_count = int(optional[0]) if optional else K_COMPONENTS
+    participant_target = int(optional[1]) if len(optional) > 1 else None
     try:
         from kick_probe import simulate_kick
         from lfp import LFPRecorder
@@ -84,7 +86,7 @@ def _evaluate(job):
         net, NE, NI, _ = get_network(p, reg["theta_deg"], e["AR"], cache_dir)
         posE = net["pos"][:NE]
 
-        h = params_to_h(np.asarray(theta, float), posE, K_COMPONENTS,
+        h = params_to_h(np.asarray(theta, float), posE, component_count,
                         float(e["L"]), float(cfg["N_core_manual"]))
         d = signed_depth(core_thresholds(
             sample_core_quantiles(NE, cfg["quantile_seed"]), e["core_mean"],
@@ -106,14 +108,24 @@ def _evaluate(job):
         env_f, fdt, _ = snn_event_envelope(spk, posE, msheet, e["dt"])
 
         events = []
-        for ev in detect_events(af, bin_w, event_on_frac=bar):
+        detected = detect_events(af, bin_w, event_on_frac=bar)
+        for ev in detected:
             rd = cmrun.read_event(env_f, fdt, msheet, valid,
                                   (ev["t_on"], ev["t_off"]), reg["axis_unit_vec"],
                                   k_dir=k_dir, part_min=2 * k_dir + 1)
             events.append(dict(ranks=rd["ranks"], n_part=rd["n_part"]))
         diag = spatial_diagnostics(h, posE, reg["center"], reg["axis_unit_vec"])
+        part_min = 2 * k_dir + 1
+        credit_target = part_min if participant_target is None else participant_target
         return dict(seed=seed, events=events, r_bar=diag["r_bar"],
-                    s_bar=diag["s_bar"], c_axis_2mm=diag["c_axis"][2.0])
+                    s_bar=diag["s_bar"], c_axis_2mm=diag["c_axis"][2.0],
+                    n_detected=int(len(detected)),
+                    max_n_part=int(max((ev["n_part"] for ev in events), default=0)),
+                    participant_credit=float(sum(
+                        min(float(ev["n_part"]) / credit_target, 1.0)
+                        for ev in events)),
+                    active_fraction_peak=float(af.max()),
+                    active_fraction_floor=float(floor))
     except Exception as exc:                                # noqa: BLE001
         return dict(seed=seed, error=repr(exc))
 

@@ -11,7 +11,7 @@ import pytest
 
 from src.topic4_core_field_stage3 import (CENTER_MARGIN_MM, K_COMPONENTS,
                                           SIGMA_MAX_MM, SIGMA_MIN_MM,
-                                          n_free, params_to_h, params_to_q,
+                                          latent_to_theta, n_free, params_to_h, params_to_q,
                                           probe_q, spatial_diagnostics, unpack)
 
 L = 20.0
@@ -73,6 +73,30 @@ def test_sigmas_out_of_range_are_clipped():
     for comp in unpack(theta, K_COMPONENTS, L):
         for s in (comp["sigma_par"], comp["sigma_perp"]):
             assert SIGMA_MIN_MM - 1e-9 <= s <= SIGMA_MAX_MM + 1e-9
+
+
+@pytest.mark.parametrize("K", [1, 2, 3])
+def test_standardized_latent_decoder_stays_strictly_inside_physical_bounds(K):
+    theta = latent_to_theta(np.linspace(-20.0, 20.0, n_free(K)), K, L)
+    for comp in unpack(theta, K, L):
+        assert np.linalg.norm(comp["center"] - CENTER) < L / 2 - CENTER_MARGIN_MM
+        assert SIGMA_MIN_MM < comp["sigma_par"] < SIGMA_MAX_MM
+        assert SIGMA_MIN_MM < comp["sigma_perp"] < SIGMA_MAX_MM
+        assert 0.0 < comp["phi"] < np.pi
+
+
+def test_latent_coordinates_are_preconditioned_at_order_one():
+    z = np.zeros(n_free(3))
+    base = latent_to_theta(z, 3, L)
+    moved = latent_to_theta(z + 0.5, 3, L)
+    assert not np.allclose(base, moved)
+    # A half-unit move changes every physical family without requiring a
+    # millimetre-scale step in one coordinate and a log-scale step in another.
+    for k in range(3):
+        b = 5 * k
+        assert np.linalg.norm(moved[b:b + 2] - base[b:b + 2]) > 1.0
+        assert abs(moved[b + 2] - base[b + 2]) > 0.1
+        assert abs(moved[b + 4] - base[b + 4]) > 0.1
 
 
 # -------------------------------------------------------------------- budget

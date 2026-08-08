@@ -1,5 +1,10 @@
 # Topic 4 数据驱动病理场 — Stage 3 实施计划（rev2，2026-08-08 技术审阅后）
 
+> **后续执行入口（2026-08-09）**：本文件保留第一轮 Stage 3 的历史执行合同。rev6 联合剖面、
+> 3D landscape、收敛修复与连接性等效 core 由
+> `docs/superpowers/plans/2026-08-09-topic4-stage3-joint-profile-convergence.md` 接续；不得再按本文旧 Task 5/6
+> 直接启动一维 TV 优化。
+
 > **执行状态 2026-08-08**：Task 1–3 全部完成（66 项测试绿）；Task 4 Leg A 主地图跑完
 > （196/196，审计通过）+ 高分区独立确认完成。**Task 4 的敏感性档、Task 5 Leg B、
 > Task 6 held-out、Task 7 主 A 面板的等值线部分本轮未跑**（按预注册降级顺序，

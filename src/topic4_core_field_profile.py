@@ -15,8 +15,20 @@ to be *injective*, which is measured and false (see NOT_A_POSITION).
 from __future__ import annotations
 
 import numpy as np
+from scipy.stats import wasserstein_distance
 
 MIN_PARTICIPANTS = 6
+
+# Stage 3 rev6 candidate observable. These are deliberately fixed rather than
+# inferred separately for every model candidate. The patient training split is
+# the only place where the embedding is fitted; held-out recordings and every
+# model arm are transformed without refitting.
+PROFILE_GRID_N = 31
+PROFILE_N_COMPONENTS = 8
+PROFILE_N_PROJECTIONS = 64
+PROFILE_REFERENCE_N = 4096
+PROFILE_REFERENCE_SEED = 20260809
+OBJECTIVE_N_EVENTS = 20
 
 OBJECTIVE_FEATURES = ("slope", "r2")
 REPORT_ONLY = ("curvature", "n_part", "argmin_axial")
@@ -105,6 +117,172 @@ def shape_table(events, axial, participating=None, part_min=MIN_PARTICIPANTS):
         if s is not None:
             rows.append(s)
     return rows
+
+
+def profile_grid(axial, n_grid=PROFILE_GRID_N):
+    """Frozen axial grid shared by patient and model event profiles."""
+    x = np.asarray(list(axial.values()), float)
+    if x.size < 2 or not np.isfinite(x).all() or np.ptp(x) < 1e-9:
+        raise ValueError("axial support must contain at least two distinct positions")
+    return np.linspace(float(x.min()), float(x.max()), int(n_grid))
+
+
+def normalized_rank_curve(ranks, axial, participating=None,
+                          part_min=MIN_PARTICIPANTS, grid=None):
+    """One event as a scale-free rank profile on a common axial grid.
+
+    Rank values are standardized within the event before interpolation, so a
+    model event with seven participating contacts is not penalized merely because
+    the patient often recruits twelve. Constant endpoint extension is explicit:
+    it records the observed ordering without inventing a new extremum outside the
+    participating span. The final unit norm removes residual amplitude scale.
+    """
+    pts = _pairs(ranks, axial, participating)
+    if len(pts) < int(part_min):
+        return None
+    pts.sort(key=lambda p: p[0])
+    x = np.asarray([p[0] for p in pts], float)
+    y = np.asarray([p[1] for p in pts], float)
+    if np.ptp(x) < 1e-9 or y.std() < 1e-9:
+        return None
+    y = (y - y.mean()) / y.std()
+    q = np.interp(profile_grid(axial) if grid is None else np.asarray(grid, float),
+                  x, y)
+    q = q - q.mean()
+    norm = float(np.linalg.norm(q))
+    return None if norm < 1e-12 else q / norm
+
+
+def rank_curve_table(events, axial, participating=None,
+                     part_min=MIN_PARTICIPANTS, grid=None):
+    """Normalized rank curves for raw rank dictionaries or event records."""
+    rows = []
+    for ev in events:
+        ranks = ev.get("ranks") if isinstance(ev, dict) and "ranks" in ev else ev
+        mask = participating(ev) if callable(participating) else participating
+        q = normalized_rank_curve(ranks, axial, mask, part_min, grid)
+        if q is not None:
+            rows.append(q)
+    n_grid = len(profile_grid(axial) if grid is None else np.asarray(grid))
+    return np.asarray(rows, float).reshape((-1, n_grid))
+
+
+def fit_rank_curve_reference(
+        patient_train_curves,
+        n_components=PROFILE_N_COMPONENTS,
+        n_reference=PROFILE_REFERENCE_N,
+        n_projections=PROFILE_N_PROJECTIONS,
+        seed=PROFILE_REFERENCE_SEED):
+    """Fit the unlabeled patient-training embedding used by the joint distance.
+
+    PCA is only a deterministic compression of the full normalized profile. The
+    distance is evaluated over many fixed projections of the retained joint
+    cloud; no direction labels, template assignments, or final acceptance-gate
+    quantities enter this fit.
+    """
+    x = np.asarray(patient_train_curves, float)
+    if x.ndim != 2 or len(x) < 2 or not np.isfinite(x).all():
+        raise ValueError("patient_train_curves must be a finite (n>=2, grid) matrix")
+    k = min(int(n_components), x.shape[1], len(x) - 1)
+    if k < 2:
+        raise ValueError("joint profile embedding needs at least two components")
+    center = x.mean(axis=0)
+    _, singular, vt = np.linalg.svd(x - center, full_matrices=False)
+    components = vt[:k]
+    scores = (x - center) @ components.T
+    score_center = scores.mean(axis=0)
+    score_scale = scores.std(axis=0)
+    score_scale[score_scale < 1e-12] = 1.0
+
+    rng = np.random.default_rng(int(seed))
+    take = min(int(n_reference), len(x))
+    reference_index = rng.choice(len(x), size=take, replace=False)
+    reference_z = (scores[reference_index] - score_center) / score_scale
+    n_proj = int(n_projections)
+    if n_proj < k:
+        raise ValueError("n_projections must include every retained PCA axis")
+    random_directions = rng.normal(size=(n_proj - k, k))
+    directions = np.vstack((np.eye(k), random_directions))
+    directions /= np.linalg.norm(directions, axis=1, keepdims=True)
+
+    variance = singular ** 2
+    explained = variance[:k] / variance.sum() if variance.sum() else np.zeros(k)
+    return dict(
+        center=center,
+        components=components,
+        score_center=score_center,
+        score_scale=score_scale,
+        reference_index=reference_index,
+        reference_z=reference_z,
+        directions=directions,
+        explained_variance_ratio=explained,
+        n_train=int(len(x)),
+        n_reference=int(take),
+        n_components=int(k),
+        n_projections=int(n_proj),
+        seed=int(seed),
+    )
+
+
+def transform_rank_curves(curves, reference):
+    """Apply a frozen patient-training embedding without refitting it."""
+    x = np.asarray(curves, float)
+    if x.ndim != 2 or x.shape[1] != len(reference["center"]):
+        raise ValueError("curves do not match the frozen profile grid")
+    scores = (x - reference["center"]) @ reference["components"].T
+    return (scores - reference["score_center"]) / reference["score_scale"]
+
+
+def sliced_rank_curve_distance(curves, reference):
+    """Sliced Wasserstein distance to the frozen patient training cloud."""
+    z = transform_rank_curves(curves, reference)
+    if len(z) < 2:
+        return float("nan")
+    ref = np.asarray(reference["reference_z"], float)
+    directions = np.asarray(reference["directions"], float)
+    return float(np.mean([
+        wasserstein_distance(z @ direction, ref @ direction)
+        for direction in directions
+    ]))
+
+
+def fixed_count_indices(n_available, n_events=OBJECTIVE_N_EVENTS):
+    """Deterministic, order-preserving coverage of exactly ``n_events`` rows."""
+    n_available, n_events = int(n_available), int(n_events)
+    if n_events < 2:
+        raise ValueError("fixed-count distance needs at least two events")
+    if n_available < n_events:
+        return None
+    # Midpoints of equal-width bins cover the complete ordered event stream and
+    # never duplicate an index when n_available >= n_events.
+    return np.floor(
+        (np.arange(n_events) + 0.5) * n_available / n_events).astype(int)
+
+
+def fixed_count_sliced_distance(curves, reference,
+                                n_events=OBJECTIVE_N_EVENTS):
+    """Sample-size-matched distance used by optimization candidates."""
+    x = np.asarray(curves, float)
+    index = fixed_count_indices(len(x), n_events)
+    return (float("nan") if index is None
+            else sliced_rank_curve_distance(x[index], reference))
+
+
+def rank_curve_reference_summary(reference):
+    """JSON-sized contract fields; excludes the large reference point cloud."""
+    return dict(
+        observable="within-event normalized rank curve on a fixed axial grid",
+        distance="sliced Wasserstein in a patient-training-only PCA embedding",
+        uses_direction_labels=False,
+        endpoint_extension="constant",
+        n_train=int(reference["n_train"]),
+        n_reference=int(reference["n_reference"]),
+        n_components=int(reference["n_components"]),
+        n_projections=int(reference["n_projections"]),
+        seed=int(reference["seed"]),
+        explained_variance_ratio=np.asarray(
+            reference["explained_variance_ratio"], float).tolist(),
+    )
 
 
 def objective_features(shapes, features=OBJECTIVE_FEATURES):

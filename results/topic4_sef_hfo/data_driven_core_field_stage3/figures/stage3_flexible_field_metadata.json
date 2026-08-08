@@ -82,6 +82,17 @@
   "learned_filament": 0.686,
   "patient_split_half_floor": 0.031
  },
+ "landscape": {
+  "rendering": "discrete measured 7x7 bars; no interpolation",
+  "z": "1 - first-round one-dimensional distance",
+  "n_valid": 18,
+  "n_missing": 31,
+  "learned_field_overlay": "90% field-mass contour projected to z floor",
+  "view": {
+   "elevation_deg": 31,
+   "azimuth_deg": -57
+  }
+ },
  "run": {
   "seed": 5,
   "n_events": 20,
