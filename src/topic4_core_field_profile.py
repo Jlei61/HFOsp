@@ -236,12 +236,23 @@ def transform_rank_curves(curves, reference):
 def sliced_rank_curve_distance(curves, reference):
     """Sliced Wasserstein distance to the frozen patient training cloud."""
     z = transform_rank_curves(curves, reference)
-    if len(z) < 2:
+    return sliced_embedding_distance(
+        z, reference["reference_z"], reference["directions"])
+
+
+def sliced_embedding_distance(z, target_z, directions):
+    """Sliced Wasserstein between two clouds in one frozen embedding."""
+    z = np.asarray(z, float)
+    target = np.asarray(target_z, float)
+    directions = np.asarray(directions, float)
+    if z.ndim != 2 or target.ndim != 2 or z.shape[1:] != target.shape[1:]:
+        raise ValueError("source and target embedding clouds must have matching 2-D shapes")
+    if directions.ndim != 2 or directions.shape[1] != z.shape[1]:
+        raise ValueError("directions do not match the embedding dimension")
+    if len(z) < 2 or len(target) < 2:
         return float("nan")
-    ref = np.asarray(reference["reference_z"], float)
-    directions = np.asarray(reference["directions"], float)
     return float(np.mean([
-        wasserstein_distance(z @ direction, ref @ direction)
+        wasserstein_distance(z @ direction, target @ direction)
         for direction in directions
     ]))
 

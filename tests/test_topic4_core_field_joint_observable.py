@@ -12,6 +12,7 @@ from src.topic4_core_field_profile import (
     normalized_rank_curve,
     rank_curve_reference_summary,
     rank_curve_table,
+    sliced_embedding_distance,
     sliced_rank_curve_distance,
     transform_rank_curves,
 )
@@ -45,6 +46,17 @@ def test_middle_source_is_not_collapsed_into_a_direction_sign():
     forward = normalized_rank_curve(_profile("forward"), AX)
     middle = normalized_rank_curve(_profile("middle"), AX)
     assert abs(float(np.corrcoef(forward, middle)[0, 1])) < 0.2
+
+
+def test_embedding_distance_is_symmetric_and_rejects_shape_drift():
+    rng = np.random.default_rng(4)
+    a = rng.normal(size=(20, 3))
+    b = rng.normal(size=(30, 3))
+    directions = np.eye(3)
+    assert sliced_embedding_distance(a, b, directions) == pytest.approx(
+        sliced_embedding_distance(b, a, directions))
+    with pytest.raises(ValueError, match="matching 2-D shapes"):
+        sliced_embedding_distance(a, b[:, :2], directions)
 
 
 def test_phantom_ranks_are_removed_by_the_same_participation_mask():

@@ -41,6 +41,7 @@ TRACKED_MODULES = (
     "scripts/run_sef_hfo_snn_cm_spontaneous_readout.py",
     "scripts/run_topic4_core_field_stage3_fit.py",
     "scripts/run_topic4_core_field_stage3_joint_fit.py",
+    "scripts/run_topic4_core_field_stage3_joint_confirm.py",
     "scripts/run_topic4_core_field_stage3_confirm_fit.py",
     "scripts/run_topic4_core_field_stage3_profile_round1.py",
     "scripts/calibrate_topic4_core_field_stage3_joint_observable.py",

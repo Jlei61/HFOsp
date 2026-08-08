@@ -45,11 +45,19 @@
   不把所有 0-event 候选压成同一个分数。
 - [ ] `K=1/2/3` 各自优化，至少 3 次独立重启；不得靠 K=3 权重饱和冒充正规嵌套比较。
 - [ ] cheap pilot 先证明 sigma 不持续发散、每代死区比例下降、best/median 有稳定改进，再开长跑。
+- [ ] 把训练 global best、最后一代 best 与 CMA mean 在预先冻结的 6 张未见网络上并列重评；确认池不再选参数。
 
 **Pilot-1（工程结果，不进入科学证据）**：K=3、1 代、16 候选、2 网络。空间覆盖初始化把
 zero-usable fraction 从旧 pilot 的 62.5% 降到 12.5%，median usable events 从 0 提到 11，feasible
 fraction 从 12.5% 提到 25%，sigma `0.650→0.627`；但 best 固定-n 距离为 0.820，尚差于已有 Stage 3
 校准值 0.740。裁定为**解除死区阻断，但未证明目标收敛**；下一步只能做小规模多代/多 restart，不得直接称恢复场。
+
+**Pilot-1--3（clean convergence pilot，仍不进入科学接受）**：commit `63eeab79`，K=3 restart 0，
+每代 16 候选、2 张同代共享网络。三代 `sigma=0.627/0.607/0.584`，feasible fraction
+`25%/25%/38%`，zero-usable `12%/31%/19%`，median usable `11/9/16`，best `D_curve`
+`0.820/0.634/0.702`。第一代与 dirty engineering pilot 逐值一致，证明重建可复现；尺度和死区工程问题
+明显改善，但目标随网络池波动，尚不满足稳定收敛门。全局训练 best 的有效结构是一主一次两个紧凑团块，
+第三分量权重很小且都偏在板的一侧，**不是两端 core 恢复证据**。下一步先做固定未见网络重评，不继续堆代数。
 
 **收敛门：** 至少两次重启的 held-out `D_curve` 落入彼此 bootstrap 区间；场的主要质量分量跨重启可匹配；
 独立网络确认不回退到 rigid-family best。
