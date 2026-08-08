@@ -43,6 +43,29 @@ def safe_spearman(x, y) -> dict[str, Any]:
     return {"n": int(use.sum()), "rho": float(result.statistic), "p": float(result.pvalue)}
 
 
+def pairwise_seed_stability(paths: list[Path]) -> float:
+    """Median rank correlation of the full effective operator across seeds.
+
+    Inactive and active edges are both retained, so this audits the stability of
+    the effective topology and its weights rather than cherry-picking shared
+    surviving edges.  Diagonal entries are excluded because self-edges are
+    forbidden by contract.
+    """
+    vectors = []
+    for path in sorted(paths):
+        with np.load(path, allow_pickle=False) as data:
+            value = np.asarray(data["edge_effective_influence"], float)
+        use = ~np.eye(value.shape[0], dtype=bool)
+        vectors.append(value[use])
+    correlations = []
+    for left in range(len(vectors)):
+        for right in range(left + 1, len(vectors)):
+            if np.std(vectors[left]) <= 0 or np.std(vectors[right]) <= 0:
+                continue
+            correlations.append(float(spearmanr(vectors[left], vectors[right]).statistic))
+    return float(np.nanmedian(correlations)) if correlations else float("nan")
+
+
 def unit_summary(path: Path, draws: int) -> dict[str, Any]:
     with np.load(path, allow_pickle=False) as data:
         summary = json.loads(str(data["summary_json"].item()))
@@ -91,19 +114,30 @@ def main() -> int:
     parser.add_argument("--draws", type=int, default=1000)
     args = parser.parse_args()
     out_root = args.out_root.resolve()
-    unit_rows = [unit_summary(path, args.draws) for path in sorted(
+    influence_paths = sorted(
         (out_root / "effective_influence").glob("*/*__*/seed*/influence.npz")
-    )]
+    )
+    unit_rows = [unit_summary(path, args.draws) for path in influence_paths]
     write_csv(out_root / "effective_motif_fit_seed.csv", unit_rows)
     numeric = [key for key, value in unit_rows[0].items() if isinstance(value, (int, float))
                and key not in {"seed"}]
     grouped: dict[tuple[str, str, str], list[dict[str, Any]]] = {}
     for row in unit_rows:
         grouped.setdefault((row["subject"], row["model"], row["cell"]), []).append(row)
+    fit_paths: dict[tuple[str, str, str], list[Path]] = {}
+    for path, row in zip(influence_paths, unit_rows):
+        fit_paths.setdefault((row["fit_id"], row["model"], row["cell"]), []).append(path)
+    fit_stability = {
+        key: pairwise_seed_stability(paths) for key, paths in fit_paths.items()
+    }
     patient_rows = []
     for (subject, model, cell), selected in sorted(grouped.items()):
         item = {"subject": subject, "model": model, "cell": cell, "n_fit_seed_units": len(selected)}
         item.update({key: float(np.nanmedian([row[key] for row in selected])) for key in numeric})
+        subject_fits = sorted({row["fit_id"] for row in selected})
+        item["effective_operator_seed_stability"] = float(np.nanmedian([
+            fit_stability.get((fit_id, model, cell), np.nan) for fit_id in subject_fits
+        ]))
         patient_rows.append(item)
     write_csv(out_root / "effective_motif_patient.csv", patient_rows)
 
@@ -158,18 +192,63 @@ def main() -> int:
             "same_direction_relative_to_zero": bool(rnn and gru and np.nanmedian(rnn) * np.nanmedian(gru) >= 0),
         }
     lesion = json.loads((out_root / "MATCHED_LESION_SUMMARY.json").read_text())
+    m6_key = "M6_SPATIAL_MID|rnn"
+    m6_enrichment = enrichment.get(m6_key, {})
+    m6_association = associations.get(m6_key, {})
+    stability = paired_summary(
+        [row["effective_operator_seed_stability"] for row in patient_rows
+         if row["model"] == "M6_SPATIAL_MID" and row["cell"] == "rnn"],
+        seed=stable_seed("M6 effective operator seed stability"),
+    )
+    lesion_stats = lesion.get("statistics", {})
+
+    def positive_significant(value: dict[str, Any] | None, estimate: str = "median") -> bool:
+        return bool(value and (value.get(estimate) or 0) > 0
+                    and (value.get("wilcoxon_p") or 1) < 0.05)
+
+    local_lesion = lesion_stats.get("M6_SPATIAL_MID|local_backbone_edges")
+    long_lesion = lesion_stats.get("M6_SPATIAL_MID|long_range_high_influence_edges")
+    connector_lesion = lesion_stats.get("M6_SPATIAL_MID|connector_nodes")
+    task_relation = any(
+        (value.get("rho") or 0) > 0 and (value.get("p") or 1) < 0.05
+        for key, value in m6_association.items() if key != "motif_vs_wiring_cost"
+    )
+    proposal = paired_summary(proposal_difference, seed=stable_seed("M6 proposal"))
+    claim_components = {
+        "local_effective_enrichment": positive_significant(
+            m6_enrichment.get("local_effective_ratio_minus_one")
+        ),
+        "long_range_effective_enrichment": positive_significant(
+            m6_enrichment.get("long_top_enrichment")
+        ),
+        "effective_operator_seed_stability": positive_significant(stability),
+        "task_relation": task_relation,
+        "local_backbone_matched_lesion": positive_significant(
+            local_lesion, "median_specificity_contact_nll"
+        ),
+        "long_range_or_connector_matched_lesion": (
+            positive_significant(long_lesion, "median_specificity_contact_nll")
+            or positive_significant(connector_lesion, "median_specificity_contact_nll")
+        ),
+        "not_binary_proposal_only": positive_significant(proposal),
+    }
     payload = {
         "contract": "topic5_rnn_motif_theory_summary_v0_4",
         "target_values_read": False,
         "effective_weight_permutation_null": "influence values permuted over the frozen active edge mask",
         "enrichment": enrichment,
         "task_and_wiring_associations": associations,
-        "M6_true_order_minus_order_shuffle_motif_score": paired_summary(
-            proposal_difference, seed=stable_seed("M6 proposal")
-        ),
+        "effective_operator_seed_stability": {m6_key: stability},
+        "M6_true_order_minus_order_shuffle_motif_score": proposal,
         "architecture_direction": architecture,
         "matched_lesion": lesion,
-        "claim_rule": "motif claim requires enrichment, task relation and matched-lesion specificity",
+        "M6_motif_claim_components": claim_components,
+        "M6_motif_claim_pass": all(claim_components.values()),
+        "claim_rule": (
+            "the same local-backbone plus long-range-connector motif must show both enrichments, "
+            "cross-seed operator stability, task relation, local and long/connector matched-lesion "
+            "specificity, and true-order benefit over the identical order-shuffled proposal"
+        ),
     }
     (out_root / "EFFECTIVE_MOTIF_SUMMARY.json").write_text(json.dumps(payload, indent=2))
     return 0

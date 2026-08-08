@@ -86,16 +86,15 @@ def main() -> int:
                             (m6_m0.get("holm_q_core_family") or 1) < 0.05)
 
     theory = load(out / "EFFECTIVE_MOTIF_SUMMARY.json")
-    m6_enrichment = theory["enrichment"].get("M6_SPATIAL_MID|rnn", {})
-    enrichment_pass = any((value.get("median") or 0) > 0 and (value.get("wilcoxon_p") or 1) < 0.05
-                          for value in m6_enrichment.values())
-    assoc = theory["task_and_wiring_associations"].get("M6_SPATIAL_MID|rnn", {})
-    task_relation_pass = any((value.get("rho") or 0) > 0 and (value.get("p") or 1) < 0.05
-                             for key, value in assoc.items() if key != "motif_vs_wiring_cost")
-    lesion = load(out / "MATCHED_LESION_SUMMARY.json")["statistics"]
-    lesion_pass = any(key.startswith("M6_SPATIAL_MID|") and value["median_specificity_contact_nll"] > 0
-                      and value["wilcoxon_p"] < 0.05 for key, value in lesion.items())
-    level4 = enrichment_pass and task_relation_pass and lesion_pass
+    motif_components = theory["M6_motif_claim_components"]
+    enrichment_pass = (motif_components["local_effective_enrichment"]
+                       and motif_components["long_range_effective_enrichment"])
+    stability_pass = motif_components["effective_operator_seed_stability"]
+    task_relation_pass = motif_components["task_relation"]
+    lesion_pass = (motif_components["local_backbone_matched_lesion"]
+                   and motif_components["long_range_or_connector_matched_lesion"])
+    proposal_pass = motif_components["not_binary_proposal_only"]
+    level4 = bool(theory["M6_motif_claim_pass"])
 
     acceptance = {
         "contract": "topic5_rnn_motif_cross_state_final_acceptance_v0_4",
@@ -112,9 +111,11 @@ def main() -> int:
             "level3_motif_selectivity": level3_selective,
             "level4_intervenable_computational_motif": level4,
         },
-        "level4_components": {"enrichment": enrichment_pass,
+        "level4_components": {"coherent_local_and_long_enrichment": enrichment_pass,
+                              "effective_operator_seed_stability": stability_pass,
                               "task_relation": task_relation_pass,
-                              "matched_lesion": lesion_pass},
+                              "coherent_local_and_long_matched_lesion": lesion_pass,
+                              "not_binary_proposal_only": proposal_pass},
         "adequate_rnn_models": adequate_models,
     }
     (out / "FINAL_ACCEPTANCE.json").write_text(json.dumps(acceptance, indent=2))
@@ -145,10 +146,12 @@ canonical full、seed-removed、common-field 与 A/B contrast 已分开报告。
 
 ## 3. 有效计算 motif
 
-- 固定图结构后置换 effective influence 的富集：**{'通过' if enrichment_pass else '未通过'}**。
+- 同一 local-backbone + long-range-connector 结构的双重富集：**{'通过' if enrichment_pass else '未通过'}**。
+- 完整 effective operator 的跨 seed 稳定性：**{'通过' if stability_pass else '未通过'}**。
 - motif score 与留出传播/间期场拟合的患者级关系：**{'通过' if task_relation_pass else '未通过'}**。
-- targeted lesion 相对 weight/degree/length/extent matched random lesion 的特异损害：**{'通过' if lesion_pass else '未通过'}**。
-- 三者同时成立的 Level 4：**{'支持 local-backbone + sparse connector motif' if level4 else '未达到机制性 motif 措辞，只保留描述性组织'}**。
+- local 与 long/connector targeted lesion 相对 matched random lesion 的同结构特异损害：**{'通过' if lesion_pass else '未通过'}**。
+- 与相同生长规则的 order-shuffle 对照相比并非二值 proposal 自动造成：**{'通过' if proposal_pass else '未通过'}**。
+- 全部同结构证据同时成立的 Level 4：**{'支持 local-backbone + sparse connector motif' if level4 else '未达到机制性 motif 措辞，只保留描述性组织'}**。
 
 GRU 只承担架构方向复现；matched lesion 的主分析限定在 leaky RNN。所有时间量是 rank-step，不是秒级生物时间常数。
 

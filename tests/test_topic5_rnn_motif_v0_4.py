@@ -30,6 +30,7 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     permutation_support,
 )
 from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
+from summarize_topic5_rnn_motif_theory_v0_4 import pairwise_seed_stability  # noqa: E402
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -213,3 +214,21 @@ def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
     ])[("p1", "M6_SPATIAL_MID", "connector_nodes")]
     assert resolved["baseline"]["producers"] == {"A": "p1__own_a", "B": "p1__own_b"}
     assert np.allclose(resolved["targeted"]["A"], [0.5, 0.0])
+
+
+def test_effective_operator_seed_stability_keeps_inactive_edges(tmp_path):
+    first = np.array([[0.0, 4.0, 0.0], [1.0, 0.0, 3.0], [0.0, 2.0, 0.0]])
+    second = 2.0 * first
+    paths = []
+    for index, value in enumerate((first, second)):
+        path = tmp_path / f"seed{index}.npz"
+        np.savez_compressed(path, edge_effective_influence=value)
+        paths.append(path)
+    assert np.isclose(pairwise_seed_stability(paths), 1.0)
+
+    # Changing which edges are inactive must lower stability; intersecting only
+    # the surviving active edges would incorrectly hide this instability.
+    third = np.array([[0.0, 0.0, 4.0], [3.0, 0.0, 0.0], [2.0, 1.0, 0.0]])
+    path = tmp_path / "seed2.npz"
+    np.savez_compressed(path, edge_effective_influence=third)
+    assert pairwise_seed_stability([paths[0], path]) < 1.0
