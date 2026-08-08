@@ -42,11 +42,17 @@ class PatientPlane:
             raise ValueError("xyz_mm must be aligned to contact_names")
 
 
-def kernel_sigma_mm(xy: np.ndarray) -> float:
-    """Half the median nearest-neighbour contact spacing, floored at 2 mm.
+def kernel_sigma_mm(xy: np.ndarray, floor_mm: float = MIN_SIGMA_MM) -> float:
+    """Half the median nearest-neighbour contact spacing, floored at ``floor_mm``.
 
     This is the ``0.5 * pitch`` rule already used for the virtual montage, read
     off the real geometry instead of a synthetic shaft pitch.
+
+    The floor is a parameter because it is the only part of the rule that is not
+    adaptive: on a dense montage it pushes the kernel far above half the pitch --
+    up to 7.5x on the densest patient here -- and the contact-similarity ladder
+    shows the evidence in a smoothed read-out collapses once the scale doubles.
+    The default is left where v0.1 and v0.2 set it so their numbers are unchanged.
     """
     points = np.asarray(xy, float)
     if points.shape[0] < 2:
@@ -54,7 +60,7 @@ def kernel_sigma_mm(xy: np.ndarray) -> float:
     d = np.linalg.norm(points[:, None, :] - points[None, :, :], axis=-1)
     np.fill_diagonal(d, np.inf)
     pitch = float(np.median(d.min(axis=1)))
-    return max(MIN_SIGMA_MM, 0.5 * pitch)
+    return max(float(floor_mm), 0.5 * pitch)
 
 
 def sample_latent_nodes(

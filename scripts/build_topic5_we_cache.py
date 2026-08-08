@@ -181,7 +181,8 @@ def plane_scopes(subject: str) -> Dict[str, Dict[str, Any]]:
 
 def build_fit(subject: str, scope: str, plane: Dict[str, Any], record, mode: np.ndarray,
               label_info: Dict[str, Any], out_root: Path,
-              sigma_override: float | None = None) -> Dict[str, Any]:
+              sigma_override: float | None = None,
+              sigma_floor_mm: float = 2.0) -> Dict[str, Any]:
     field = json.loads((FIELD_DIR / f"{subject}.json").read_text())["interictal_field"]
     order = [str(c) for c in field["contact_order"]]
     points = np.asarray(plane["points"], float)
@@ -211,7 +212,8 @@ def build_fit(subject: str, scope: str, plane: Dict[str, Any], record, mode: np.
     split[test] = 2
     split[~keep] = -1
 
-    sigma = float(sigma_override) if sigma_override else kernel_sigma_mm(contacts_xy)
+    sigma = (float(sigma_override) if sigma_override
+             else kernel_sigma_mm(contacts_xy, floor_mm=sigma_floor_mm))
     n_nodes, nodes_xy, H, nominal = resolve_node_count(contacts_xy, sigma, seed=NODE_SEED)
     node_distance = np.linalg.norm(nodes_xy[:, None, :] - nodes_xy[None, :, :], axis=-1)
 
@@ -243,6 +245,7 @@ def build_fit(subject: str, scope: str, plane: Dict[str, Any], record, mode: np.
         "nominal_n_nodes": int(nominal),
         "sigma_mm": float(sigma),
         "support_radius_mm": float(3.0 * sigma),
+        "sigma_floor_mm": float(sigma_floor_mm),
         "scale_mm": scale_mm,
         "node_seed": NODE_SEED,
         "min_ranks_per_event": MIN_RANKS_PER_EVENT,
@@ -266,6 +269,9 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, default=OUT_ROOT)
     parser.add_argument("--subjects", nargs="*", default=None)
+    parser.add_argument("--sigma-floor-mm", type=float, default=2.0,
+                        help="lower bound on the read-out kernel; 0 leaves every patient "
+                             "at half its own contact spacing")
     parser.add_argument("--sigma-mm", type=float, default=None,
                         help="fix the read-out kernel width across the cohort instead of "
                              "deriving it per patient from contact spacing")
@@ -283,7 +289,8 @@ def main() -> int:
             low_coverage.append(subject)
         for scope, plane in plane_scopes(subject).items():
             row = build_fit(subject, scope, plane, record, label_info["mode"],
-                            label_info, args.out_root, args.sigma_mm)
+                            label_info, args.out_root, args.sigma_mm,
+                            args.sigma_floor_mm)
             rows.append(row)
             print(f"{row['fit_id']:34s} C={row['n_contacts']:3d} M={row['n_nodes']:3d} "
                   f"sigma={row['sigma_mm']:4.1f}mm kept={row['n_events_kept']:6d} "
@@ -297,6 +304,7 @@ def main() -> int:
         "shared_fits": [r["fit_id"] for r in rows if r["scope"] == "shared"],
         "split_fits": [r["fit_id"] for r in rows if r["scope"] != "shared"],
         "sigma_override_mm": args.sigma_mm,
+        "sigma_floor_mm": args.sigma_floor_mm,
         "min_label_coverage": MIN_LABEL_COVERAGE,
         "low_coverage_subjects": low_coverage,
         "fits": rows,
