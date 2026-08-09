@@ -324,17 +324,33 @@ def draw_pareto(ax, out_root: Path):
 
 
 def early_activation(out_root: Path, subject: str):
-    metadata = json.loads((out_root / "EARLY_ICTAL_METADATA_INVENTORY.json").read_text())
-    target_root = Path(metadata["target_cache_root"])
     record = empirical_record(out_root, subject)
     order = [str(value) for value in record["interictal_field"]["contact_order"]]
     values = []
-    for path in sorted((target_root / f"outer_{subject}").glob(f"{subject}__*.npz")):
+    for path in locked_early_target_paths(out_root, subject):
         with np.load(path, allow_pickle=False) as data:
             lookup = dict(zip(np.asarray(data["contact_names"]).astype(str),
                               np.asarray(data["target_1_150"], float)))
         values.append([lookup.get(name, np.nan) for name in order])
+    if not values:
+        raise RuntimeError(f"no frozen early-ictal artifacts for {subject}")
     return np.nanmedian(np.asarray(values, float), axis=0)
+
+
+def locked_early_target_paths(out_root: Path, subject: str) -> list[Path]:
+    """Resolve the exact target bytes frozen before unseal for figure rendering."""
+    inventory = rows(out_root / "early_ictal_metadata_inventory.csv")
+    selected = []
+    for row in inventory:
+        if str(row["subject"]) != subject:
+            continue
+        path = Path(str(row["artifact_path"])).resolve()
+        if not path.is_file():
+            raise RuntimeError(f"frozen early-ictal artifact is missing: {path}")
+        if sha256(path) != str(row["artifact_sha256"]):
+            raise RuntimeError(f"frozen early-ictal artifact hash changed: {path}")
+        selected.append(path)
+    return sorted(selected)
 
 
 def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
@@ -637,11 +653,7 @@ early-ictal 解封前生成的完整模型场诊断图，展示代表患者两�
         / representative_metrics.parents[1].name / representative_metrics.parent.name
         / "influence.npz"
     )
-    target_inventory = rows(out_root / "early_ictal_metadata_inventory.csv")
-    representative_targets = sorted(
-        Path(row["artifact_path"]) for row in target_inventory
-        if row["subject"] == REPRESENTATIVE
-    )
+    representative_targets = locked_early_target_paths(out_root, REPRESENTATIVE)
     sources = {
         "A": [selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz"
               for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")]
