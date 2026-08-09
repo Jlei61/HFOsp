@@ -139,6 +139,9 @@ class MZSlowVarsConfig:
     # stationary activation was a*tau*r with the half-point cancelled and no threshold could be
     # placed.  Clearing linearly leaves m* = r*tau, and then m_hill_K is a real threshold.
     m_hill_K: "float | None" = None   # half-activation load; place it between the two states' loads
+    # FCXR-LC4b: optional exact low-load dead zone.  When set, m_hill_K is the half-activation
+    # scale of the POSITIVE EXCESS max(m-deadzone, 0).  None retains the literal LC4 equation.
+    m_hill_deadzone: "float | None" = None
     m_hill_n: float = 4.0             # cooperativity; sets how sharply the two states separate
     tau_a_on: float = 50.0            # ms  open; slower than one interictal event -> the transient is not followed
     tau_a_off: float = 5000.0         # ms  close; must outlast wear clearance or it lets go while D is still high
@@ -744,7 +747,13 @@ class MZSlowVars:
             # interictal event is followed at all, the slow one how long protection outlasts the
             # discharge.  Same first-order relaxation as z and the relay -- no instantaneous reset.
             mE = self.m[:self.NE]
-            x = (mE / c.m_hill_K) ** c.m_hill_n
+            if c.m_hill_deadzone is None:
+                # Keep the established LC4 path literal: an unset new field must not even add a
+                # max/subtract round trip to the old floating-point expression.
+                hill_load = mE
+            else:
+                hill_load = np.maximum(mE - c.m_hill_deadzone, 0.0)
+            x = (hill_load / c.m_hill_K) ** c.m_hill_n
             a_inf = x / (1.0 + x)
             aE = self.a[:self.NE]
             tau_sel = np.where(a_inf > aE, c.tau_a_on, c.tau_a_off)
@@ -1044,6 +1053,8 @@ class MZSlowVars:
         if c.m_enable_ms is not None and not c.use_m:
             raise ValueError("m_enable_ms (delayed adaptation onset) requires use_m=True")
         # FCXR-LC4 cooperative actuator
+        if c.m_hill_deadzone is not None and c.m_hill_K is None:
+            raise ValueError("m_hill_deadzone requires m_hill_K (cooperative actuator)")
         if c.m_hill_K is not None:
             if not (c.use_m or c.m_frozen_E is not None):
                 raise ValueError("m_hill_K (cooperative actuator) needs a load to act on: "
@@ -1056,6 +1067,9 @@ class MZSlowVars:
                     raise ValueError(f"{nm} must be finite and > {lo}")
             if not (np.isfinite(c.g_m_max) and c.g_m_max >= 0.0):
                 raise ValueError("g_m_max must be finite and non-negative")
+            if c.m_hill_deadzone is not None and not (
+                    np.isfinite(c.m_hill_deadzone) and c.m_hill_deadzone >= 0.0):
+                raise ValueError("m_hill_deadzone must be finite and >= 0")
         elif c.g_m_max != 0.0:
             # Same rule as eta_gba: a strength set with its mechanism off is a silently dead knob,
             # and that is how a mechanism gets reported ineffective when it was never switched on.

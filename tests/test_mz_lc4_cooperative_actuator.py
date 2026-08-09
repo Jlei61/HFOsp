@@ -82,6 +82,33 @@ def test_half_activation_is_exactly_at_K():
     assert np.allclose(x / (1.0 + x), 0.5)
 
 
+def test_deadzone_is_exactly_closed_below_and_at_threshold():
+    """LC4b differs from merely-small LC4 leakage: the executor is mathematically off."""
+    mz = _mk(use_m=True, tau_adp=1e9, **FC, **HILL, m_hill_deadzone=3.0)
+    mz.m[:NE] = 3.0
+    mz.step(np.zeros(N, bool), labels=None, dt=DT)
+    assert np.array_equal(mz.a, np.zeros(N))
+    assert mz.trace_adap_current[-1] == 0.0
+
+
+def test_deadzone_half_activation_is_at_deadzone_plus_K():
+    mz = _mk(use_m=True, tau_adp=1e9, **FC, **HILL, m_hill_deadzone=3.0)
+    mz.m[:NE] = 3.0 + HILL["m_hill_K"]
+    # One step's target can be recovered from the registered first-order Euler increment.
+    mz.step(np.zeros(N, bool), labels=None, dt=DT)
+    assert np.allclose(mz.a[:NE], (DT / HILL["tau_a_on"]) * 0.5)
+
+
+def test_zero_deadzone_is_numerically_identical_to_old_hill():
+    old = _mk(use_m=True, tau_adp=200.0, **FC, **HILL)
+    shifted = _mk(use_m=True, tau_adp=200.0, **FC, **HILL, m_hill_deadzone=0.0)
+    _drive(old, 1000, (0, 1, 3))
+    _drive(shifted, 1000, (0, 1, 3))
+    assert np.array_equal(old.m, shifted.m)
+    assert np.array_equal(old.a, shifted.a)
+    assert old.trace_adap_current == shifted.trace_adap_current
+
+
 # ---------------------------------------------------------------- the two time constants
 
 def test_opening_and_closing_use_their_own_time_constants():
@@ -157,6 +184,17 @@ def test_the_curve_replaces_the_linear_actuator_rather_than_adding_to_it():
 def test_a_strength_without_the_curve_raises():
     with pytest.raises(ValueError, match="g_m_max requires m_hill_K"):
         _mk(use_m=True, g_m_max=0.5, **FC)
+
+
+def test_deadzone_without_the_curve_raises():
+    with pytest.raises(ValueError, match="m_hill_deadzone requires m_hill_K"):
+        _mk(use_m=True, m_hill_deadzone=1.0, **FC)
+
+
+@pytest.mark.parametrize("bad", [-1.0, np.inf, np.nan])
+def test_invalid_deadzone_raises(bad):
+    with pytest.raises(ValueError, match="m_hill_deadzone must be finite and >= 0"):
+        _mk(use_m=True, **FC, **HILL, m_hill_deadzone=bad)
 
 
 def test_the_curve_requires_a_load_to_act_on():

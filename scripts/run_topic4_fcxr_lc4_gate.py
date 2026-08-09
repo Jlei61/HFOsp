@@ -109,6 +109,8 @@ def _cfg(d_field, candidate=None):
             tau_a_off=float(candidate["tau_a_off_ms"]),
             g_m_max=float(candidate["g_m_max"]),
         )
+        if candidate.get("deadzone") is not None:
+            cfg["m_hill_deadzone"] = float(candidate["deadzone"])
     return cfg
 
 
