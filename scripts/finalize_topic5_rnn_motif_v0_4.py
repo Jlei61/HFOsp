@@ -54,6 +54,10 @@ def audit_figure_sources(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
         errors.append("representative_role")
     if "seed median" not in representative.get("checkpoint_rule", ""):
         errors.append("representative_checkpoint_rule")
+    empirical_path = Path(representative.get("empirical_field_path", ""))
+    if (not empirical_path.is_file()
+            or representative.get("empirical_field_sha256_frozen") != sha256(empirical_path)):
+        errors.append("representative_empirical_field_freeze")
     for panel in "ABCDEF":
         records = manifest.get(panel)
         if not isinstance(records, list) or not records:

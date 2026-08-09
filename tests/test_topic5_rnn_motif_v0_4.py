@@ -883,12 +883,16 @@ def test_figure_source_manifest_verifies_every_panel_byte(tmp_path):
         path = tmp_path / f"panel_{panel}.csv"
         path.write_text(f"source,{panel}\n")
         records[panel] = [{"path": str(path), "sha256": sha256(path)}]
+    empirical = tmp_path / "empirical_field.json"
+    empirical.write_text('{"field": [1, 2, 3]}\n')
     manifest = {
         "_contract": "topic5_figure6_source_manifest_v0_4",
         "_representative_selection": {
             "patient": "epilepsiae_1146",
             "role": "supportive visualization; excluded from primary p-values",
             "checkpoint_rule": "choose validation contact NLL nearest the seed median",
+            "empirical_field_path": str(empirical),
+            "empirical_field_sha256_frozen": sha256(empirical),
         },
         **records,
     }
@@ -898,6 +902,31 @@ def test_figure_source_manifest_verifies_every_panel_byte(tmp_path):
     passed, errors = audit_figure_sources(manifest)
     assert not passed
     assert "panel_E_0_hash" in errors
+
+
+def test_figure_source_manifest_rejects_changed_empirical_field(tmp_path):
+    records = {}
+    for panel in "ABCDEF":
+        path = tmp_path / f"panel_{panel}.csv"
+        path.write_text(f"source,{panel}\n")
+        records[panel] = [{"path": str(path), "sha256": sha256(path)}]
+    empirical = tmp_path / "empirical_field.json"
+    empirical.write_text('{"field": [1, 2, 3]}\n')
+    manifest = {
+        "_contract": "topic5_figure6_source_manifest_v0_4",
+        "_representative_selection": {
+            "patient": "epilepsiae_1146",
+            "role": "supportive visualization; excluded from primary p-values",
+            "checkpoint_rule": "choose validation contact NLL nearest the seed median",
+            "empirical_field_path": str(empirical),
+            "empirical_field_sha256_frozen": sha256(empirical),
+        },
+        **records,
+    }
+    empirical.write_text('{"field": [3, 2, 1]}\n')
+    passed, errors = audit_figure_sources(manifest)
+    assert not passed
+    assert "representative_empirical_field_freeze" in errors
 
 
 def test_matched_lesion_unit_is_median_seed_not_motif_selected(tmp_path):
