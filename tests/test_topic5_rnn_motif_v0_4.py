@@ -49,7 +49,10 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     paired_summary,
     target_artifact_recheck_payload,
 )
-from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
+from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import (  # noqa: E402
+    bounded_secondary_summary,
+    patient_fields,
+)
 from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
     candidate_distance_classes,
     holm_fixed_association_family,
@@ -188,6 +191,16 @@ def test_figure_uses_only_frozen_early_target_inventory(tmp_path):
     frozen.write_bytes(b"changed")
     with np.testing.assert_raises_regex(RuntimeError, "hash changed"):
         locked_early_target_paths(tmp_path, "p1")
+
+
+def test_lesion_early_small_patient_cohort_is_descriptive_only():
+    small = bounded_secondary_summary([0.1, 0.2, 0.3, 0.4], seed=1)
+    assert small["cohort_inference_eligible"] is False
+    assert small["wilcoxon_p"] is None
+    assert small["bootstrap_95ci"] == [None, None]
+    enough = bounded_secondary_summary([0.1, 0.2, 0.3, 0.4, 0.5], seed=1)
+    assert enough["cohort_inference_eligible"] is True
+    assert enough["wilcoxon_p"] is not None
 
 
 def test_target_artifact_recheck_is_required_before_unseal():

@@ -83,6 +83,21 @@ def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
         writer.writeheader(); writer.writerows(rows)
 
 
+def bounded_secondary_summary(values: list[float], *, seed: int) -> dict[str, Any]:
+    """Keep very small cross-state lesion denominators descriptive only."""
+    result = paired_summary(values, seed=seed)
+    eligible = int(result.get("n", 0)) >= 5
+    result["cohort_inference_eligible"] = eligible
+    result["minimum_patients_for_inference"] = 5
+    if not eligible:
+        result["wilcoxon_p"] = None
+        result["bootstrap_95ci"] = [None, None]
+        result["inference_status"] = "descriptive_only_small_patient_denominator"
+    else:
+        result["inference_status"] = "eligible_secondary_inference"
+    return result
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, required=True)
@@ -192,7 +207,7 @@ def main() -> int:
         selected = [row for row in patient_rows if row["primary"] and row["model"] == model
                     and row["lesion"] == lesion and row["matched_inference_available"]]
         for metric in ("damage_maxab", "damage_margin", "damage_common"):
-            statistics[f"{model}|{lesion}|{metric}"] = paired_summary(
+            statistics[f"{model}|{lesion}|{metric}"] = bounded_secondary_summary(
                 [row[metric] for row in selected],
                 seed=stable_seed(model, lesion, metric, "lesion_early"),
             )
@@ -208,7 +223,8 @@ def main() -> int:
         }),
         "inference_rule": (
             "all targeted lesion fields are retained descriptively; cohort statistics use only "
-            "patient/model/lesion rows whose A and B producers each had at least 200 matched controls"
+            "patient/model/lesion rows whose A and B producers each had at least 200 matched controls; "
+            "inferential p-values additionally require at least 5 unique primary patients"
         ),
         "statistics": statistics,
     }, indent=2))
