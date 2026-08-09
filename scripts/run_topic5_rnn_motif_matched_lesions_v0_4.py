@@ -52,6 +52,18 @@ def number(value: Any) -> float:
     return float(value) if value is not None else float("nan")
 
 
+def perturbation_damage(metric: str, perturbed: Any, baseline: Any) -> float:
+    """Put heterogeneous heldout metrics on a common larger-is-worse scale."""
+    changed, intact = number(perturbed), number(baseline)
+    if metric in {"contact_nll", "stop_bce"}:
+        return changed - intact
+    if metric in {"rollout_spearman", "interictal_field_fidelity"}:
+        return intact - changed
+    if metric == "postseed_length_ratio":
+        return abs(changed - 1.0) - abs(intact - 1.0)
+    raise KeyError(f"unregistered lesion damage metric: {metric}")
+
+
 def safe_corr(a: np.ndarray, b: np.ndarray) -> float:
     use = np.isfinite(a) & np.isfinite(b)
     if use.sum() < 3 or np.std(a[use]) == 0 or np.std(b[use]) == 0:
@@ -396,12 +408,15 @@ def aggregate(out_root: Path) -> None:
             row = {key: record[key] for key in ("subject", "fit_id", "scope", "model", "cell", "seed")}
             row.update({"lesion": lesion, "status": values["status"],
                         "n_target": values["n_target"], "n_valid_matched_draws": values["n_valid_matched_draws"]})
-            for metric, direction in (("contact_nll", 1), ("stop_bce", 1),
-                                      ("rollout_spearman", -1), ("postseed_length_ratio", -1),
-                                      ("interictal_field_fidelity", -1)):
-                target_damage = direction * (number(values["targeted"][metric]) - number(values["baseline"][metric]))
-                matched_damage = [direction * (number(value) - number(values["baseline"][metric]))
-                                  for value in values["matched"].get(metric, [])]
+            for metric in ("contact_nll", "stop_bce", "rollout_spearman",
+                           "postseed_length_ratio", "interictal_field_fidelity"):
+                target_damage = perturbation_damage(
+                    metric, values["targeted"][metric], values["baseline"][metric]
+                )
+                matched_damage = [
+                    perturbation_damage(metric, value, values["baseline"][metric])
+                    for value in values["matched"].get(metric, [])
+                ]
                 row[f"target_damage_{metric}"] = target_damage
                 row[f"matched_median_damage_{metric}"] = float(np.nanmedian(matched_damage)) if matched_damage else np.nan
                 row[f"specificity_{metric}"] = target_damage - row[f"matched_median_damage_{metric}"]
