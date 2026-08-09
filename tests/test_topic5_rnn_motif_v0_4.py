@@ -88,6 +88,7 @@ from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     preflight_inventory_ok,
     target_artifact_recheck_ok,
     target_contract_trace_ok,
+    visual_qa_complete,
 )
 from run_topic5_rnn_motif_closeout_v0_4 import (  # noqa: E402
     PRIMARY_UNSEAL_SCRIPT,
@@ -160,6 +161,36 @@ def test_level4_wording_requires_target_free_motif_economy_and_cross_state():
     assert not integrated_level4(True, True, False)
     assert not integrated_level4(True, False, True)
     assert not integrated_level4(False, True, True)
+
+
+def test_visual_qa_requires_every_stage_and_final_panel():
+    stage_names = (
+        "stage_a_preflight_contract",
+        "stage_c_smoke_training_and_decoder",
+        "stage_d_interictal_model_matrix",
+        "stage_interictal_scientific_readout",
+        "stage_e_target_free_model_fields",
+        "stage_fields_scientific_readout",
+        "stage_motif_scientific_readout",
+        "stage_early_scientific_readout",
+    )
+    payload = {
+        "status": "ACCEPTED",
+        "scientific_contract_pass": True,
+        "visual_pass": True,
+        "png_pdf_svg_checked": True,
+        "stage_figures": {
+            name: {"scientific_pass": True, "visual_pass": True}
+            for name in stage_names
+        },
+        "final_panels": {
+            panel: {"scientific_pass": True, "visual_pass": True}
+            for panel in "ABCDEF"
+        },
+    }
+    assert visual_qa_complete(payload)
+    payload["final_panels"]["F"]["visual_pass"] = False
+    assert not visual_qa_complete(payload)
 
 
 def test_preflight_inventory_export_is_explicitly_post_run_and_target_free(tmp_path):
