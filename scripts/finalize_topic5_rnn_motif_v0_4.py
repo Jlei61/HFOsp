@@ -447,6 +447,11 @@ def main() -> int:
     )
 
     theory = load(out / "EFFECTIVE_MOTIF_SUMMARY.json")
+    theory_split_support_ok = bool(
+        theory.get("effective_operator_split_half_support")
+        == "frozen_active_recurrent_edges_only"
+    )
+    engineering_accepted = bool(engineering_accepted and theory_split_support_ok)
     motif_components = theory["M6_motif_claim_components"]
     enrichment_pass = (motif_components["local_effective_enrichment"]
                        and motif_components["long_range_effective_enrichment"])
@@ -573,6 +578,16 @@ def main() -> int:
                              "expected_units": influence_summary.get("expected_units"),
                              "edge_selector": motif_implementation.get("implementation_object", {}).get(
                                  "leaky_rnn_edge_selector")},
+            },
+            "effective_operator_split_half_support": {
+                "pass": theory_split_support_ok,
+                "evidence": ["EFFECTIVE_MOTIF_SUMMARY.json",
+                             "effective_motif_fit_seed.csv"],
+                "observed": theory.get("effective_operator_split_half_support"),
+                "note": (
+                    "Split-half stability is evaluated only on frozen active recurrent "
+                    "edges; shared structural zeros cannot create apparent stability."
+                ),
             },
             "matched_lesion_execution_complete": {
                 "pass": lesion_execution_ok,
