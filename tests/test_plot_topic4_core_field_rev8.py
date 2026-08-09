@@ -4,10 +4,12 @@ import numpy as np
 from scripts.paper_figures.plot_fig4_data_driven_core_field_rev8 import (
     _closest_mode_pair,
     _field_landscape_grid,
+    _verdict_label,
 )
 from scripts.paper_figures.plot_fig4_data_driven_core_field_rev8_kmeans import (
     _event_order,
     _normalized_rank_matrix,
+    _profile_stats,
 )
 
 
@@ -53,3 +55,15 @@ def test_field_landscape_grid_preserves_a_planar_field():
     xx, yy, zz = _field_landscape_grid(pos, h, L=2.0, resolution=9)
     assert xx.shape == yy.shape == zz.shape == (9, 9)
     assert np.allclose(zz, xx + 2.0 * yy)
+
+
+def test_profile_stats_keep_all_missing_contacts_missing_without_warning():
+    ranks = np.array([[np.nan, np.nan, 0.2], [0.0, 1.0, 0.5]])
+    mean, std = _profile_stats(ranks, np.array([True, True, False]))
+    assert np.isnan(mean[0]) and np.isnan(std[0])
+    assert mean[1] == 0.5 and std[1] == 0.5
+
+
+def test_internal_verdict_is_rendered_as_reader_facing_text():
+    assert _verdict_label("RIGID_TEMPLATE_MATCH_NOT_BEATEN") == \
+        "fails rigid-mode benchmark"

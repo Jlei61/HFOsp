@@ -392,6 +392,10 @@ def main():
             mode_sign_consistent_fraction=float(np.mean([
                 bool(row["mode"].get("matrix_sign_consistent"))
                 for row in rows])),
+            mode_sign_supported_fraction=float(np.mean([
+                bool(row["mode"].get("support_eligible"))
+                and bool(row["mode"].get("matrix_sign_consistent"))
+                for row in rows])),
             zero_usable_fraction=float(np.mean([
                 row["n_usable"] == 0 for row in rows])),
             median_usable=float(np.median([row["n_usable"] for row in rows])),
@@ -405,6 +409,7 @@ def main():
             f"[{tag}] gen {optimizer.generation:2d} sigma={optimizer.sigma:.3f} "
             f"D-feasible={summary['distance_feasible_fraction']:.0%} "
             f"mode-supported={summary['mode_supported_fraction']:.0%} "
+            f"sign+supported={summary['mode_sign_supported_fraction']:.0%} "
             f"median-events={summary['median_usable']:.1f} "
             f"best-joint={summary['best_joint_loss']}", flush=True)
 

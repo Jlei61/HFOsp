@@ -29,6 +29,9 @@ CONFIRM = f"{ROOT}/joint_confirmation_rev8/final_confirmation.json"
 OUT = "results/paper-ready-figure/fig4_data_driven_core_field_rev8/figures"
 MODE_COLORS = ("#c43c39", "#277da1")
 SHAFT_COLORS = ("#e67e22", "#159eae", "#6a51a3", "#2a9d55")
+VERDICT_LABELS = {
+    "RIGID_TEMPLATE_MATCH_NOT_BEATEN": "fails rigid-mode benchmark",
+}
 
 
 def _sha256(path):
@@ -38,6 +41,10 @@ def _sha256(path):
 
 def _shaft(name):
     return "".join(character for character in str(name) if not character.isdigit())
+
+
+def _verdict_label(verdict):
+    return VERDICT_LABELS.get(str(verdict), str(verdict).lower().replace("_", " "))
 
 
 def _plot_contacts(ax, contacts, names):
@@ -130,7 +137,7 @@ def _plot_mode_event(ax, data, mode, show_ylabel=False):
     if representative is None:
         ax.text(0.5, 0.5, "mode absent in representative network",
                 transform=ax.transAxes, ha="center", va="center", fontsize=10)
-        _style_sheet(ax, float(reg["L"]), f"patient mode {chr(65 + mode)}",
+        _style_sheet(ax, float(reg["L"]), f"model mode {chr(65 + mode)}",
                      show_ylabel=show_ylabel)
         return None
     onset = np.asarray(representative["onset"], float)
@@ -152,7 +159,7 @@ def _plot_mode_event(ax, data, mode, show_ylabel=False):
     source = pos[early].mean(axis=0)
     ax.scatter(source[0], source[1], marker="*", s=170, c=MODE_COLORS[mode],
                ec="white", lw=0.9, zorder=8)
-    _style_sheet(ax, float(reg["L"]), f"patient mode {chr(65 + mode)}",
+    _style_sheet(ax, float(reg["L"]), f"model mode {chr(65 + mode)}",
                  show_ylabel=show_ylabel)
     return image
 
@@ -220,8 +227,8 @@ def _plot_readout(ax, data, events):
                  fontweight="bold", pad=7, loc="left")
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(handles=[
-        Patch(facecolor=MODE_COLORS[0], alpha=0.22, label="patient mode A"),
-        Patch(facecolor=MODE_COLORS[1], alpha=0.22, label="patient mode B"),
+        Patch(facecolor=MODE_COLORS[0], alpha=0.22, label="model mode A"),
+        Patch(facecolor=MODE_COLORS[1], alpha=0.22, label="model mode B"),
     ], frameon=False, ncol=2, fontsize=9, loc="upper right")
     return dict(
         start_ms=float(start), stop_ms=float(stop),
@@ -235,7 +242,7 @@ def _plot_readout(ax, data, events):
 
 def _write_readme(out_dir):
     path = os.path.join(out_dir, "README.md")
-    existing = open(path).read() if os.path.exists(path) else "# Fig. 4 data-driven core-field rev8\n\n"
+    existing = open(path).read() if os.path.exists(path) else "# Fig. 4 data-driven core-field rev8.1\n\n"
     entry = """### fig4a_data_driven_core_field_waveforms
 
 这张图使用最终冻结候选的同一代表网络：左侧显示学得的病理场，中间显示由全体最终事件 KMeans 后选出的两个模式代表传播，右侧显示未经模板平均的 30–80 Hz virtual-SEEG 直接波形。阴影只表示无监督模式身份，不预先当作 forward/reverse 标签。
@@ -281,7 +288,7 @@ def main():
     readout_stats = _plot_readout(axes[3], data, capture["events"])
     verdict = confirmation["candidates"][0]["confirm"]["verdict"]
     fig.suptitle(
-        f"Data-driven core field: direct model readout  |  {verdict}",
+        f"Data-driven core field: direct model readout  |  {_verdict_label(verdict)}",
         fontsize=13.0, fontweight="bold", y=0.985)
 
     os.makedirs(args.out, exist_ok=True)

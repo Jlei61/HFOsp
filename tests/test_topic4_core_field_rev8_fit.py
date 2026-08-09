@@ -22,6 +22,7 @@ from scripts.run_topic4_core_field_stage3_rev8_confirm import (
     _representative_events,
     _selection_eligible_rows,
 )
+from scripts.audit_topic4_data_driven_core_mechanism import _candidate_payload
 from src.topic4_core_field_profile import (
     fit_profile_modes,
     fit_rank_curve_reference,
@@ -154,6 +155,17 @@ def test_rev81_selection_stops_before_heldout_if_sign_is_not_reproduced():
     eligible, required = _selection_eligible_rows(rows)
     assert required is True
     assert eligible == []
+
+
+def test_mechanism_audit_reads_the_frozen_rev81_candidate():
+    payload = _candidate_payload(dict(
+        objective_id="rev8.1", candidates=[dict(
+            candidate_id="c1", K=3, theta=list(range(17)),
+            confirm={"verdict": "FAILED_GATE"})]))
+    assert payload["candidate_id"] == "c1"
+    assert payload["K"] == 3
+    assert payload["theta"].tolist() == list(range(17))
+    assert payload["verdict"] == "FAILED_GATE"
 
 
 def test_fit_selection_and_final_network_pools_are_disjoint():

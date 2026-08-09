@@ -106,11 +106,11 @@ controls 为手放双核 `0.871`、Stage 2 filament `0.807`。training global be
 - [x] 生成并校验 patient-train target artifact。
 - [x] 运行 K=2/3 cheap pilot；K=3 六代 23/48 双簇支持但 0/48 矩阵符号一致，确认死区已解决、目标尺度仍错配。
 - [x] 冻结 rev8.1：`J=D_curve+2*D_mode`、符号一致高层级、训练 elite warm-start；held-out 仍封存。
-- [ ] 以独立目录运行 K=3 rev8.1，并在训练侧出现矩阵符号一致候选后才进入 selection。
-- [ ] 在 `761--766` 上选择并冻结唯一候选；selection JSON 必须写明 `patient_heldout_read=false`。
-- [ ] 冻结候选后在 patient held-out + `801--806` 上确认，保留 rev7 的每簇 10 条及 rigid/floor 门。
-- [ ] 用同一最终事件池生成两张正式图：Fig4A 直接 virtual-SEEG 波形；Fig4B KMeans 四块一致性核验。
-- [ ] PNG/PDF、metadata、中文 README、输入 hash 与视觉 QA 全部通过；失败结果也照实出图。
+- [x] 以独立目录运行 K=3 rev8.1；48 个训练候选中 6 个满足符号+训练支持，3 个还满足最终簇大小。
+- [x] 在 `761--766` 上选择并冻结唯一候选；selection JSON 记录 `patient_heldout_read=false`。
+- [x] 在 patient held-out + `801--806` 上确认：双模式与 LOO `6/6` 稳定，但未胜 rigid match、未到 patient floor。
+- [x] 用同一最终事件池生成两张正式图：Fig4A 直接 virtual-SEEG 波形；Fig4B KMeans 四块一致性核验。
+- [x] PNG/PDF、metadata、中文 README、输入 hash 与视觉 QA 全部通过；失败 verdict 已原样标记。
 
 ## Task 4：阈值 core 到连接性等效 core
 

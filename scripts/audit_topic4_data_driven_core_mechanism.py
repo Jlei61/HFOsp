@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
 import sys
@@ -27,6 +28,38 @@ CONFIRMATION = f"{ROOT}/fit/confirmation_K3_r0.json"
 OUT = f"{ROOT}/core_mechanism_audit.json"
 
 
+def _sha256(path):
+    with open(path, "rb") as handle:
+        return hashlib.sha256(handle.read()).hexdigest()
+
+
+def _candidate_payload(confirmation):
+    if confirmation.get("candidates"):
+        candidate = confirmation["candidates"][0]
+        return dict(
+            theta=np.asarray(candidate["theta"], float),
+            K=int(candidate["K"]),
+            candidate_id=candidate.get("candidate_id"),
+            objective=confirmation.get("objective_id"),
+            verdict=candidate.get("confirm", {}).get("verdict"),
+            warning=(
+                "field is the frozen final-confirmation candidate; its scientific "
+                "eligibility remains bounded by the recorded final verdict"
+            ),
+        )
+    return dict(
+        theta=np.asarray(confirmation["best_theta"], float),
+        K=K_COMPONENTS,
+        candidate_id=None,
+        objective=confirmation.get("objective_actually_used"),
+        verdict=None,
+        warning=(
+            "field is a historical first-round result and is used only to audit "
+            "parameter semantics"
+        ),
+    )
+
+
 def _quantiles(values):
     q = np.quantile(np.asarray(values, float), [0.0, 0.05, 0.25, 0.5, 0.75, 0.95, 1.0])
     return {name: float(value) for name, value in zip(
@@ -39,6 +72,7 @@ def _ratio(new, old):
 
 def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--confirmation", default=CONFIRMATION)
     ap.add_argument("--network-seed", type=int, default=622)
     ap.add_argument("--alpha", type=float, nargs="+",
                     default=(0.5, 1.0, 2.0, 5.0, 10.0))
@@ -46,8 +80,10 @@ def main():
     args = ap.parse_args()
 
     cfg = json.load(open(f"{STAGE2}/config/stage_config.json"))
-    confirmation = json.load(open(CONFIRMATION))
-    theta = np.asarray(confirmation["best_theta"], float)
+    confirmation = json.load(open(args.confirmation))
+    candidate = _candidate_payload(confirmation)
+    theta = candidate["theta"]
+    K = int(candidate["K"])
     e = cfg["engine"]
     cmrun = _load_cmrun()
     reg = _placement(cfg)
@@ -56,11 +92,11 @@ def main():
     cache = os.path.join(STAGE2, "network_cache")
     net, n_e, n_i, cache_hit = get_network(p, reg["theta_deg"], e["AR"], cache)
     pos_e = np.asarray(net["pos"][:n_e], float)
-    h = params_to_h(theta, pos_e, K_COMPONENTS, float(e["L"]),
+    h = params_to_h(theta, pos_e, K, float(e["L"]),
                     float(cfg["N_core_manual"]))
 
     component_rows = []
-    for component in unpack(theta, K_COMPONENTS, float(e["L"])):
+    for component in unpack(theta, K, float(e["L"])):
         row = {key: (value.tolist() if isinstance(value, np.ndarray) else float(value))
                for key, value in component.items()}
         row["fwhm_axes_mm"] = [2.35482 * row["sigma_par"],
@@ -105,14 +141,19 @@ def main():
 
     out = dict(
         status="ENGINEERING_PROTOTYPE_NOT_SCIENTIFIC_ACCEPTANCE",
-        source=dict(confirmation=CONFIRMATION,
-                    historical_objective=confirmation["objective_actually_used"],
-                    warning="field is the non-converged first-round K=3 result and is used only to audit parameter semantics"),
+        source=dict(
+            confirmation=args.confirmation,
+            confirmation_sha256=_sha256(args.confirmation),
+            candidate_id=candidate["candidate_id"],
+            objective=candidate["objective"],
+            final_verdict=candidate["verdict"],
+            warning=candidate["warning"],
+        ),
         current_core=dict(
             mechanism="static per-neuron signed threshold modulation via V_th_per_neuron",
             optimized_free_parameters="for each Gaussian: x, y, log sigma_parallel, log sigma_perpendicular, phi; plus K-1 mixture logits",
             radius_contract="no scalar radius is optimized; component sigmas and budget-projected h_i define derived scales",
-            theta=theta.tolist(), components=component_rows,
+            K=K, theta=theta.tolist(), components=component_rows,
             field=dict(h_sum=float(h.sum()), h_quantiles=_quantiles(h),
                        centroid_mm=centroid.tolist(), rms_radius_mm=float(rms_radius),
                        effective_neuron_count=n_effective,

@@ -1408,6 +1408,21 @@ rev8.1 只纠正训练目标尺度，不改变数据、embedding、事件数、K
    符号一致候选后，才允许消耗 `761--766` selection pool；若该符号结构不能在 selection pool
    复现，则写出负结果并停止，不得打开 patient-heldout。
 
+### 9.3g rev8.1 最终结果（2026-08-09）
+
+K=3、population 12、四代正式运行完成。48 个训练候选中，6 个同时满足矩阵符号与每簇至少 8 条，
+其中 3 个每簇至少 10 条；但第三代交集为 0，种群层面仍不能称为收敛。selection seeds `761--766`
+冻结了训练第四代候选，selection 侧为 `D_curve=0.578`、`D_mode=0.185`、簇 `12/20`，且
+`patient_heldout_read=false`。
+
+最终 unseen-network `801--806` 得到 50 个 usable events、簇 `17/33`。模型模式矩阵为
+`[[+0.155, -0.524], [-0.763, +0.977]]`，KMeans 初始化 AMI 为 1.0，留一网络 `6/6` 均保留
+双簇支持和符号结构；因此 rev8.1 **恢复了可重复的双模式符号结构**，不再是 rev7/rev8 的单模式塌缩。
+但 matched mean 仅 `0.566`，低于 Stage 2 filament `0.807` 和 hand cores `0.871`；held-out
+bootstrap distance median `0.557` 也高于 patient floor p95 `0.358`。最终 verdict 冻结为
+`RIGID_TEMPLATE_MATCH_NOT_BEATEN`：可写双模式符号结构恢复和相对距离改善，不可写优于 rigid family、达到病人
+分布或已经收敛。
+
 ### 9.4 空间诊断量与判据
 
 `r_bar` / `C_axis` 的定义与"必须用 `h` 不用 `h·d`"的理由（§9.4 rev4）**原样保留**。

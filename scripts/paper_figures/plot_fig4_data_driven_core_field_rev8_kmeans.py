@@ -18,11 +18,18 @@ PROFILES = f"{ROOT}/joint_confirmation_rev8/final_event_profiles.npz"
 CONFIRM = f"{ROOT}/joint_confirmation_rev8/final_confirmation.json"
 OUT = "results/paper-ready-figure/fig4_data_driven_core_field_rev8/figures"
 MODE_COLORS = ("#c43c39", "#277da1")
+VERDICT_LABELS = {
+    "RIGID_TEMPLATE_MATCH_NOT_BEATEN": "fails rigid-mode benchmark",
+}
 
 
 def _sha256(path):
     with open(path, "rb") as handle:
         return hashlib.sha256(handle.read()).hexdigest()
+
+
+def _verdict_label(verdict):
+    return VERDICT_LABELS.get(str(verdict), str(verdict).lower().replace("_", " "))
 
 
 def _normalized_rank_matrix(ranks):
@@ -90,12 +97,23 @@ def _plot_rank_distribution(ax, norm_ranks, names):
     ax.spines[["top", "right"]].set_visible(False)
 
 
+def _profile_stats(norm_ranks, selected):
+    values = np.asarray(norm_ranks, float)[:, np.asarray(selected, bool)]
+    mean = np.full(values.shape[0], np.nan)
+    std = np.full(values.shape[0], np.nan)
+    for row in range(values.shape[0]):
+        finite = values[row, np.isfinite(values[row])]
+        if len(finite):
+            mean[row] = finite.mean()
+            std[row] = finite.std()
+    return mean, std
+
+
 def _plot_profiles(ax, norm_ranks, labels, names):
     y = np.arange(len(names))
     for mode in (0, 1):
         selected = labels == mode
-        mean = np.nanmean(norm_ranks[:, selected], axis=1)
-        std = np.nanstd(norm_ranks[:, selected], axis=1)
+        mean, std = _profile_stats(norm_ranks, selected)
         finite = np.isfinite(mean)
         ax.fill_betweenx(y[finite], (mean - std)[finite], (mean + std)[finite],
                          color=MODE_COLORS[mode], alpha=0.15, lw=0)
@@ -134,7 +152,7 @@ def _plot_matrix(ax, matrix, valid):
 
 def _write_readme(out_dir):
     path = os.path.join(out_dir, "README.md")
-    existing = open(path).read() if os.path.exists(path) else "# Fig. 4 data-driven core-field rev8\n\n"
+    existing = open(path).read() if os.path.exists(path) else "# Fig. 4 data-driven core-field rev8.1\n\n"
     entry = """### fig4b_data_driven_core_field_kmeans
 
 这张图使用与 Fig4A 完全相同的最终 unseen-network 事件池。事件先在冻结的 patient-training embedding 中独立做 KMeans=2，再与两个病人训练模式做 Hungarian 匹配；最右矩阵是模型模式与病人模式的 Spearman 一致性，红框表示至少一项正式门未通过。
@@ -192,7 +210,7 @@ def main():
     fig.colorbar(matrix_image, cax=matrix_cbar).set_label("Spearman ρ", fontsize=9)
     verdict = candidate["confirm"]["verdict"]
     fig.suptitle(
-        f"KMeans modes against patient data  |  {verdict}",
+        f"KMeans modes against patient data  |  {_verdict_label(verdict)}",
         fontsize=13.0, fontweight="bold", y=0.985)
     fig.text(
         0.985, 0.035,
