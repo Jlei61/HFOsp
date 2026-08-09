@@ -27,8 +27,14 @@ Design of record: `docs/superpowers/specs/2026-08-09-topic4-fcxr-lc4-functional-
 
 - Reuse the same candidate without further tuning.
 - Run one 70 s no-kick dynamic-Z/H/X trajectory under `setsid nohup`, single worker.
-- Persist event ledger, regional slow-variable trajectories, numerical diagnostics and the actual
-  post-offset D field required for the 12 s frozen recovery confirmation.
+- Persist the exact final state, event ledger, regional slow-variable trajectories, numerical
+  diagnostics and the actual final D field after the pre-fixed eight-second return window.
+- A pure adjudicator must reject a bout ending at the record boundary, relapse inside 2 s, a
+  refractory-ceiling plateau, silence masquerading as recovery, and returning events outside the
+  frozen LC1 rate/duration/participation distribution.
+- Only an eligible nominal run launches one 12 s exact-state continuation with that actual spatial
+  D field frozen.  The first 2 s are burn-in; the remaining 10 s must still produce reference-like
+  returning IEDs without an ictal bout.
 - Do not call the result complete before the frozen actual-D check and >=8 s returning-event gate.
 
 ## Task 5 — closeout

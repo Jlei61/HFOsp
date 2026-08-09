@@ -99,14 +99,24 @@ actuator active from t=0.  No kick, reset, parameter step or saved-high-state fo
 
 Acceptance requires all of the following in the same trajectory:
 
-- at least 3 returning IEDs before spontaneous onset;
+- at least 8 s of interictal activity and at least 3 returning IEDs before spontaneous onset;
 - a bounded high state lasting 1–5 s, not runaway or a refractory-ceiling plateau;
 - autonomous offset;
-- postictal suppression;
-- the actual post-offset D field, when frozen at the first candidate recovery time, remains low for
-  12 s (the scalar `D=0.047` guide alone is not sufficient);
-- at least 8 s of post-offset observation containing returning IEDs whose event rate, duration and
-  participation return to the frozen LC1 reference distribution.
+- no ictal relapse for 2 s after offset, with the population rate in that guard below its own
+  pre-onset mean (the operational postictal-suppression clause);
+- refractory-ceiling fraction no greater than 1% during the high bout;
+- the **pre-fixed final 8 s** of the record consist of returning interictal windows and contain at
+  least 3 returning IEDs whose event rate, duration and participation return to the frozen LC1
+  reference distribution;
+- from the exact state at the end of that accepted return window, freeze the actual spatial D field
+  and continue for 12 s.  After a 2 s burn-in it must remain without an ictal bout and again contain
+  at least 3 returning IEDs inside the reference distribution.  The scalar `D=0.047` guide alone is
+  not sufficient.
+
+The final-eight-second rule replaces the earlier phrase "first candidate recovery time" before F2
+execution.  A first-candidate time would have to be selected after seeing the trace and is not an
+exact checkpoint in the current runner.  The final window is fixed before the data, directly proves
+an eight-second statistical return, and yields an exact checkpoint for the spatial-D confirmation.
 
 Failure is reported at the furthest completed leg.  A 70 s no-onset run is not rescued by extending
 time unless D is still increasing and the registered wall-time window, not an equilibrium, is the
@@ -124,5 +134,7 @@ only unresolved quantity; such an extension needs a new lock.
 ## 8. Claim boundary
 
 F0 proves functional baseline selectivity only.  F1 proves a frozen-D onset surface only.  The LC4
-fork proves termination authority only.  Only F2 plus the frozen actual-D recovery check may be
-called a candidate complete lifecycle, and confirmation seeds remain a later sprint.
+fork proves termination authority only.  A nominal F2 trajectory that passes before its frozen-D
+continuation is only `F2_NOMINAL_ELIGIBLE_FOR_FROZEN_D`.  Only the same trajectory plus the frozen
+actual-D recovery check may be called a **candidate complete lifecycle**, and confirmation seeds
+remain a later sprint.
