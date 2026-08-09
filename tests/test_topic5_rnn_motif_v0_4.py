@@ -1039,6 +1039,19 @@ def test_figure_source_manifest_verifies_every_panel_byte(tmp_path):
         path = tmp_path / f"panel_{panel}.csv"
         path.write_text(f"source,{panel}\n")
         records[panel] = [{"path": str(path), "sha256": sha256(path)}]
+    interictal = tmp_path / "interictal_per_patient.csv"
+    inventory = tmp_path / "early_ictal_metadata_inventory.csv"
+    interictal.write_text("subject,value\np1,1\n")
+    inventory.write_text("subject,path\np1,target\n")
+    records["D"].append({"path": str(interictal), "sha256": sha256(interictal)})
+    records["E"].append({"path": str(inventory), "sha256": sha256(inventory)})
+    candidate_metrics = {}
+    for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"):
+        candidate_metrics[model] = []
+        for seed in range(3):
+            path = tmp_path / f"{model}_seed{seed}_metrics.json"
+            path.write_text(json.dumps({"seed": seed}))
+            candidate_metrics[model].append({"path": str(path), "sha256": sha256(path)})
     empirical = tmp_path / "empirical_field.json"
     empirical.write_text('{"field": [1, 2, 3]}\n')
     manifest = {
@@ -1049,6 +1062,7 @@ def test_figure_source_manifest_verifies_every_panel_byte(tmp_path):
             "checkpoint_rule": "choose validation contact NLL nearest the seed median",
             "empirical_field_path": str(empirical),
             "empirical_field_sha256_frozen": sha256(empirical),
+            "selection_candidate_metrics": candidate_metrics,
         },
         **records,
     }
@@ -1066,6 +1080,19 @@ def test_figure_source_manifest_rejects_changed_empirical_field(tmp_path):
         path = tmp_path / f"panel_{panel}.csv"
         path.write_text(f"source,{panel}\n")
         records[panel] = [{"path": str(path), "sha256": sha256(path)}]
+    interictal = tmp_path / "interictal_per_patient.csv"
+    inventory = tmp_path / "early_ictal_metadata_inventory.csv"
+    interictal.write_text("subject,value\np1,1\n")
+    inventory.write_text("subject,path\np1,target\n")
+    records["D"].append({"path": str(interictal), "sha256": sha256(interictal)})
+    records["E"].append({"path": str(inventory), "sha256": sha256(inventory)})
+    candidate_metrics = {}
+    for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"):
+        candidate_metrics[model] = []
+        for seed in range(3):
+            path = tmp_path / f"{model}_seed{seed}_metrics.json"
+            path.write_text(json.dumps({"seed": seed}))
+            candidate_metrics[model].append({"path": str(path), "sha256": sha256(path)})
     empirical = tmp_path / "empirical_field.json"
     empirical.write_text('{"field": [1, 2, 3]}\n')
     manifest = {
@@ -1076,6 +1103,7 @@ def test_figure_source_manifest_rejects_changed_empirical_field(tmp_path):
             "checkpoint_rule": "choose validation contact NLL nearest the seed median",
             "empirical_field_path": str(empirical),
             "empirical_field_sha256_frozen": sha256(empirical),
+            "selection_candidate_metrics": candidate_metrics,
         },
         **records,
     }

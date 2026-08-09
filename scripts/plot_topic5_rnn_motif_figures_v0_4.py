@@ -90,13 +90,24 @@ def normalize_early(values: np.ndarray) -> np.ndarray:
 
 def selected_metrics(out_root: Path, subject: str, model: str, cell: str = "rnn") -> Path:
     candidates = []
-    for path in (out_root / "per_subject").glob(f"{subject}*" + f"/{model}__{cell}/seed*/metrics.json"):
+    for path in selection_candidate_metrics(out_root, subject, model, cell):
         data = json.loads(path.read_text())
         candidates.append((path, float(data["validation"]["contact_nll"])))
     if not candidates:
         raise FileNotFoundError(f"no checkpoint for {subject} {model} {cell}")
     median = float(np.median([value for _, value in candidates]))
     return min(candidates, key=lambda item: (abs(item[1] - median), str(item[0])))[0]
+
+
+def selection_candidate_metrics(
+    out_root: Path, subject: str, model: str, cell: str = "rnn"
+) -> list[Path]:
+    """Return every target-free checkpoint metric used by the median-seed rule."""
+    return sorted(
+        (out_root / "per_subject").glob(
+            f"{subject}*" + f"/{model}__{cell}/seed*/metrics.json"
+        )
+    )
 
 
 def empirical_record(out_root: Path, subject: str) -> dict[str, Any]:
@@ -690,25 +701,34 @@ early-ictal 解封前生成的完整模型场诊断图，展示代表患者两�
         / "influence.npz"
     )
     representative_targets = locked_early_target_paths(out_root, REPRESENTATIVE)
+    representative_models = (
+        "M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"
+    )
+    selection_candidates = {
+        model: selection_candidate_metrics(out_root, REPRESENTATIVE, model)
+        for model in representative_models
+    }
     sources = {
-        "A": [item for model in (
-                  "M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"
-              ) for item in (
-                  selected_metrics(out_root, REPRESENTATIVE, model),
+        "A": [item for model in representative_models for item in (
+                  *selection_candidates[model],
                   selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz",
               )] + [representative_plane],
-        "B": [selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL).parent
+        "B": selection_candidates[REPRESENTATIVE_MODEL] + [
+              selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL).parent
               / "heldout_rollouts.json.gz", representative_metrics,
               representative_events, representative_provenance, representative_empirical],
         "C": [out_root / "interictal_per_patient.csv", out_root / "interictal_per_event.csv"],
-        "D": [out_root / "accuracy_wiring_pareto.csv", out_root / "model_field_patient_metrics.csv"],
+        "D": [out_root / "interictal_per_patient.csv", out_root / "accuracy_wiring_pareto.csv",
+              out_root / "model_field_patient_metrics.csv"],
         "E": [out_root / "early_ictal_per_patient_model.csv",
               out_root / "early_ictal_null_matrices.npz",
+              out_root / "early_ictal_metadata_inventory.csv",
               out_root / "MODEL_FIELD_MANIFEST.json",
               out_root / "model_fields/per_patient" / REPRESENTATIVE
               / f"{REPRESENTATIVE_MODEL}__rnn.npz", representative_empirical]
              + representative_targets,
-        "F": [out_root / "effective_influence_fit_seed.csv",
+        "F": selection_candidates[REPRESENTATIVE_MODEL] + [
+              out_root / "effective_influence_fit_seed.csv",
               out_root / "matched_lesion_patient_metrics.csv",
               representative_metrics, representative_metrics.parent / "graph.npz",
               representative_plane,
@@ -729,7 +749,14 @@ early-ictal 解封前生成的完整模型场诊断图，展示代表患者两�
             ),
             "selected_metrics": {
                 model: str(selected_metrics(out_root, REPRESENTATIVE, model))
-                for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")
+                for model in representative_models
+            },
+            "selection_candidate_metrics": {
+                model: [
+                    {"path": str(path), "sha256": sha256(path)}
+                    for path in paths
+                ]
+                for model, paths in selection_candidates.items()
             },
             "empirical_field_path": str(representative_empirical),
             "empirical_field_sha256_frozen": representative_fit_contract["field_sha256"],

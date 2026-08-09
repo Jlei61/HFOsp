@@ -89,6 +89,18 @@ def audit_figure_sources(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
         errors.append("representative_role")
     if "seed median" not in representative.get("checkpoint_rule", ""):
         errors.append("representative_checkpoint_rule")
+    selection_candidates = representative.get("selection_candidate_metrics", {})
+    for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"):
+        records = selection_candidates.get(model)
+        if not isinstance(records, list) or len(records) < 3:
+            errors.append(f"representative_{model}_selection_candidates")
+            continue
+        for index, record in enumerate(records):
+            path = Path(record.get("path", ""))
+            if not path.is_file():
+                errors.append(f"representative_{model}_candidate_{index}_missing")
+            elif record.get("sha256") != sha256(path):
+                errors.append(f"representative_{model}_candidate_{index}_hash")
     empirical_path = Path(representative.get("empirical_field_path", ""))
     if (not empirical_path.is_file()
             or representative.get("empirical_field_sha256_frozen") != sha256(empirical_path)):
@@ -104,6 +116,12 @@ def audit_figure_sources(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
                 errors.append(f"panel_{panel}_{index}_missing")
             elif record.get("sha256") != sha256(path):
                 errors.append(f"panel_{panel}_{index}_hash")
+    panel_d_names = {Path(record.get("path", "")).name for record in manifest.get("D", [])}
+    if "interictal_per_patient.csv" not in panel_d_names:
+        errors.append("panel_D_actual_interictal_input")
+    panel_e_names = {Path(record.get("path", "")).name for record in manifest.get("E", [])}
+    if "early_ictal_metadata_inventory.csv" not in panel_e_names:
+        errors.append("panel_E_target_inventory_input")
     return not errors, errors
 
 
