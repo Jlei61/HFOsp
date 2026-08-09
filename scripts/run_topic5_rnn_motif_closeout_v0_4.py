@@ -39,6 +39,25 @@ def atomic_json(path: Path, payload: Any) -> None:
     temporary.replace(path)
 
 
+def git_state() -> tuple[str, str]:
+    commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
+    ).strip()
+    status = subprocess.check_output(
+        ["git", "status", "--porcelain"], cwd=ROOT, text=True
+    ).strip()
+    return commit, status
+
+
+def check_git_lock(expected_commit: str) -> None:
+    commit, status = git_state()
+    if commit != expected_commit or status:
+        raise RuntimeError(
+            f"closeout worktree changed: commit={commit}, expected={expected_commit}, "
+            f"dirty={bool(status)}"
+        )
+
+
 def closeout_commands(
     out_root: Path, target_cache_root: Path, snn_readout: Path,
 ) -> list[tuple[str, list[str]]]:
@@ -149,7 +168,11 @@ def wait_for_ready(out_root: Path, poll_seconds: int, max_wait_hours: float) -> 
     })
 
 
-def run_step(name: str, command: list[str], out_root: Path, code_hash: str) -> None:
+def run_step(
+    name: str, command: list[str], out_root: Path, code_hash: str,
+    expected_commit: str,
+) -> None:
+    check_git_lock(expected_commit)
     if any(PRIMARY_UNSEAL_SCRIPT in token for token in command):
         raise RuntimeError("closeout must never invoke the primary target-unseal scorer")
     marker = out_root / "closeout_status" / f"{name}.DONE.json"
@@ -197,22 +220,24 @@ def main() -> int:
         print(json.dumps({"stages": [name for name, _ in commands],
                           "primary_unseal_called": False}, indent=2))
         return 0
+    expected_commit, status = git_state()
+    if status:
+        raise RuntimeError("refusing to wait or close out from a dirty worktree")
     if args.wait_for_ready:
         wait_for_ready(out_root, args.poll_seconds, args.max_wait_hours)
+    check_git_lock(expected_commit)
     validate_ready(out_root)
     script_hash = sha256(Path(__file__))
     atomic_json(out_root / "CLOSEOUT_CONTRACT.json", {
         "contract": "topic5_rnn_motif_safe_post_unseal_closeout_v0_4",
         "created_utc": datetime.now(timezone.utc).isoformat(),
-        "closeout_git_commit": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True
-        ).strip(),
+        "closeout_git_commit": expected_commit,
         "closeout_code_hash": script_hash,
         "primary_target_unseal_repeated": False,
         "stages": [name for name, _ in commands],
     })
     for name, command in commands:
-        run_step(name, command, out_root, script_hash)
+        run_step(name, command, out_root, script_hash, expected_commit)
     atomic_json(out_root / "CLOSEOUT_READY_FOR_VISUAL_QA.json", {
         "status": "READY_FOR_MANUAL_VISUAL_QA",
         "finished_utc": datetime.now(timezone.utc).isoformat(),
