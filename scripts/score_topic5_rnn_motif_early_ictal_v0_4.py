@@ -104,6 +104,38 @@ def locked_target_artifacts(
     return {subject: sorted(paths) for subject, paths in by_subject.items()}
 
 
+def target_artifact_recheck_payload(
+    out_root: Path, metadata: dict[str, Any], artifacts: dict[str, list[Path]],
+) -> dict[str, Any]:
+    """Describe the completed byte audit without deserializing target values."""
+    primary = set(str(subject) for subject in metadata["actual_primary_join"])
+    supportive = str(metadata["supportive_subject"])
+    return {
+        "contract": "topic5_rnn_motif_pre_unseal_target_artifact_recheck_v0_4",
+        "created_utc": datetime.now(timezone.utc).isoformat(),
+        "inventory": "early_ictal_metadata_inventory.csv",
+        "n_artifacts": sum(len(paths) for paths in artifacts.values()),
+        "n_subjects": len(artifacts),
+        "n_primary_seizure_files": sum(
+            len(paths) for subject, paths in artifacts.items() if subject in primary
+        ),
+        "n_supportive_seizure_files": len(artifacts.get(supportive, [])),
+        "artifact_sha256_mismatches": 0,
+        "metadata_target_values_read": metadata.get("target_values_read"),
+        "metadata_target_energy_arrays_deserialized": metadata.get(
+            "target_energy_arrays_deserialized"
+        ),
+        "model_field_manifest_target_values_read": False,
+        "target_access_audit_existed_before_recheck": (
+            out_root / "target_access_audit.json"
+        ).exists(),
+        "early_ictal_output_directory_existed_before_recheck": (
+            out_root / "early_ictal"
+        ).exists(),
+        "status": "PASS",
+    }
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         raise RuntimeError(f"refusing to write empty table: {path}")
@@ -533,7 +565,16 @@ def main() -> int:
         raise RuntimeError("model field manifest changed after authorization")
     if manifest.get("target_values_read") is not False or metadata.get("target_values_read") is not False:
         raise RuntimeError("target seal is already broken")
+    if (out_root / "target_access_audit.json").exists():
+        raise RuntimeError("target access audit already exists; refusing a second unseal")
     target_files_by_subject = locked_target_artifacts(out_root, target_root, metadata)
+    target_recheck = target_artifact_recheck_payload(
+        out_root, metadata, target_files_by_subject
+    )
+    target_recheck["model_field_manifest_target_values_read"] = manifest.get(
+        "target_values_read"
+    )
+    atomic_json(out_root / "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json", target_recheck)
 
     unlock = {
         "contract": "topic5_rnn_motif_early_ictal_unlock_v0_4",
