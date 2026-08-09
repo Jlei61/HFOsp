@@ -40,3 +40,12 @@ def test_cfg_uses_candidate_without_tuning(monkeypatch):
     assert cfg["eta_m"] == 0.0
     assert cfg["m_hill_n"] == 6.0
     assert cfg["g_m_max"] == 49.0
+
+
+def test_cfg_optionally_overrides_h_entry_threshold(monkeypatch):
+    mod = _load()
+    monkeypatch.setattr(mod.GEO, "_point", lambda _x: {})
+    monkeypatch.setattr(mod.E01, "_dynamic_cfg", lambda _p: {"theta_h_lc2": 1.0})
+    c = dict(tau_adp_ms=1000.0, K=45.0, n=4, tau_a_on_ms=100.0,
+             tau_a_off_ms=10000.0, g_m_max=49.0, theta_h_lc2=1.7317)
+    assert mod._cfg(c)["theta_h_lc2"] == pytest.approx(1.7317)

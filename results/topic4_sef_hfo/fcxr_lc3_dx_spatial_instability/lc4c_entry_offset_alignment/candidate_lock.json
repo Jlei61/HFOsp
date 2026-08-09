@@ -1,0 +1,47 @@
+{
+  "status": "C0_PASS",
+  "verdict": "ENTRY_OFFSET_REPAIR_IDENTIFIABLE",
+  "candidate": {
+    "name": "lc4c_theta110_deadzone_dose_transfer",
+    "n": 4.0,
+    "tau_adp_ms": 1000.0,
+    "tau_a_on_ms": 100.0,
+    "tau_a_off_ms": 10000.0,
+    "deadzone": 46.83235549926758,
+    "K": 19.869522094726562,
+    "g_m_max": 151.3946389128093,
+    "matched_ictal_current": 44.8619393917937,
+    "calibration": {
+      "base": {
+        "interictal_peak_max": 35.99027633666992,
+        "ictal_settled_min": 57.674434661865234,
+        "ictal_settled_median": 66.70187759399414,
+        "extreme_gap": 21.684158325195312,
+        "deadzone_margin_each_side": 10.842079162597656,
+        "interictal_activation_max": 0.0,
+        "interictal_activation_mean": 0.0,
+        "ictal_activation_min": 0.08143489708023391,
+        "ictal_activation_mean": 0.5055224225319433,
+        "ictal_fraction_half_on": 0.5
+      },
+      "entry_anchor_onset_ms": 11000.0,
+      "entry_anchor_pre_events": 29,
+      "closed_high_a_mean_max": 0.2963244915008545,
+      "old_g_m_max": 88.74371816605014,
+      "dose_scale": 1.7059758374055478,
+      "interictal_activation_max": 0.0
+    },
+    "theta_h_lc2": 1.7317735254764568
+  },
+  "sources": {
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/stage1_entry_window/cell_tauz5000_theta110.json": "5586a33fbbd624f9ac9d266987da02c9c6254e0c748aa6cbd1d963d035eef3c2",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4b_deadzone_lifecycle/candidate_lock.json": "0381e0cef908450fb7485c5810af3aa9b7c2091da9da7d8e017d9d5d55ae05f0",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4b_deadzone_lifecycle/nominal_lifecycle.json": "27ce55c78e7abb6827209dc95af330fd09ea48a233deb11a29fc237e4fa3f479",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4b_deadzone_lifecycle/nominal_lifecycle_traces.npz": "93cc29d9b99a9c489959f756cc9ad409562d8901bebfa9280afc156ffb373ad9",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/percell_separation/per_cell.npz": "81d2c97a16eaf69753951dcd91f55153c7102d5d7ca4c0f75e12f9b24208a33d"
+  },
+  "rules": {
+    "entry": "existing theta_scale=1.1 row; no interpolation or scan",
+    "offset": "g_m_max = locked target / observed LC4b closed-high a_mean_max"
+  }
+}

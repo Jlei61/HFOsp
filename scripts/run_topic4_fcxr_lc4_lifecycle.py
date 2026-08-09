@@ -118,6 +118,8 @@ def _cfg(candidate):
     )
     if candidate.get("deadzone") is not None:
         cfg["m_hill_deadzone"] = float(candidate["deadzone"])
+    if candidate.get("theta_h_lc2") is not None:
+        cfg["theta_h_lc2"] = float(candidate["theta_h_lc2"])
     return cfg
 
 
