@@ -46,7 +46,9 @@ def main() -> int:
         "MATCHED_LESION_SUMMARY.json", "LESION_EARLY_ICTAL_SUMMARY.json",
         "CONVERGENCE_AUDIT.json",
         "COMMON_OBSERVABLES.json", "figures/topic5_figure6_rnn_connectivity_motifs.png",
-        "figures/topic5_figure6_rnn_connectivity_motifs.pdf", "figures/figure6_source_manifest.json",
+        "figures/topic5_figure6_rnn_connectivity_motifs.pdf",
+        "figures/topic5_figure6_rnn_connectivity_motifs.svg",
+        "figures/figure6_source_manifest.json", "VISUAL_QA.json",
         "stage_d_scientific_drift_audit.json", "stage_e_scientific_drift_audit.json",
         "stage_f_scientific_drift_audit.json", "stage_g_scientific_drift_audit.json",
         "stage_h_scientific_drift_audit.json",
@@ -61,9 +63,15 @@ def main() -> int:
                     if not path.parents[1].name.startswith("SMOKE_")]
     metrics_count = len(metric_paths)
     target = load(out / "target_access_audit.json")
+    visual = load(out / "VISUAL_QA.json") if (out / "VISUAL_QA.json").exists() else {}
+    visual_ok = bool(
+        visual.get("status") == "ACCEPTED"
+        and visual.get("scientific_contract_pass") is True
+        and visual.get("visual_pass") is True
+    )
     test_text = args.test_log.read_text().lower() if args.test_log.exists() else ""
     tests_ok = bool(" passed" in test_text and re.search(r"\b[1-9]\d* failed\b", test_text) is None)
-    engineering_accepted = not missing and stage_clean and metrics_count == 1426 and tests_ok
+    engineering_accepted = not missing and stage_clean and metrics_count == 1426 and tests_ok and visual_ok
 
     inter = load(out / "INTERICTAL_SUMMARY.json")
     adequate = inter["task_adequacy"]["rnn"]["models"]
@@ -88,6 +96,17 @@ def main() -> int:
                                  (m6_zero.get("wilcoxon_p") or 1) < 0.05)
     level3_selective = bool((m6_m0.get("median") or 0) > 0 and
                             (m6_m0.get("holm_q_core_family") or 1) < 0.05)
+    conditional = load(out / "early_ictal_conditional_on_interictal_fidelity.json")
+    conditional_m6_m0 = conditional.get("contrasts", {}).get(
+        "M6_SPATIAL_MID_vs_M0_NO_REC", {}
+    )
+    conditional_ci = conditional_m6_m0.get("patient_cluster_bootstrap_95ci", [None, None])
+    conditional_inductive_bias = bool(
+        (conditional_m6_m0.get("estimate") or 0) > 0
+        and conditional_ci[0] is not None
+        and float(conditional_ci[0]) > 0
+        and (conditional_m6_m0.get("patient_label_permutation_p") or 1) < 0.05
+    )
 
     theory = load(out / "EFFECTIVE_MOTIF_SUMMARY.json")
     motif_components = theory["M6_motif_claim_components"]
@@ -108,12 +127,14 @@ def main() -> int:
         "formal_training_units": metrics_count,
         "stage_clean": stage_clean,
         "focused_tests_passed": tests_ok,
+        "visual_qa_accepted": visual_ok,
         "target_access": target,
         "scientific_levels": {
             "level1_multiple_recurrences_sufficient": level1,
             "level2_economic_constraints": level2,
             "level3_cross_state_correspondence": level3_correspondence,
-            "level3_motif_selectivity": level3_selective,
+            "level3_raw_motif_selectivity": level3_selective,
+            "level3_conditional_inductive_bias": conditional_inductive_bias,
             "level4_intervenable_computational_motif": level4,
         },
         "level4_components": {"coherent_local_and_long_enrichment": enrichment_pass,
@@ -147,7 +168,8 @@ def main() -> int:
 - early-ictal primary cohort 是 target 解封前确定的实际交集 n={target['n_primary_subjects']}；主量为 clinical onset 0–10 s、1–150 Hz、canonical-full maxAB 相对 5000 次同步 all-contact null。
 - Spatial + cost 自身相对 null：median margin={fmt(m6_zero.get('median'))}，{m6_zero.get('positive', 0)}/{m6_zero.get('n', 0)} 患者为正，P={fmt(m6_zero.get('wilcoxon_p'))}。
 - 相对 no-recurrence：Δmargin={fmt(m6_m0.get('median'))}，Holm q={fmt(m6_m0.get('holm_q_core_family'))}；相对 dense：Δmargin={fmt(m6_dense.get('median'))}。
-- 因此“冻结 RNN 场是否存在跨状态对应”：**{'支持' if level3_correspondence else '未支持'}**；“该对应是否对 spatial+cost motif 有选择性”：**{'支持' if level3_selective else '未支持'}**。
+- 控制患者内 interictal field fidelity 后，Spatial + cost 相对 no-recurrence 的 model effect 为 {fmt(conditional_m6_m0.get('estimate'))}，patient-cluster bootstrap 95% CI={conditional_ci}，patient-label permutation P={fmt(conditional_m6_m0.get('patient_label_permutation_p'))}。
+- 因此“冻结 RNN 场是否存在跨状态对应”：**{'支持' if level3_correspondence else '未支持'}**；原始模型选择性：**{'支持' if level3_selective else '未支持'}**；控制间期拟合后仍支持特殊 inductive bias：**{'支持' if conditional_inductive_bias else '未支持'}**。
 
 canonical full、seed-removed、common-field 与 A/B contrast 已分开报告。单个 maxAB 阳性不会被写成“模型恢复了两种 A/B 模式”。
 
