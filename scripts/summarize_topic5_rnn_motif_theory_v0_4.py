@@ -108,6 +108,29 @@ def pairwise_seed_stability(paths: list[Path]) -> float:
     return pairwise_array_seed_stability(paths, "edge_effective_influence")
 
 
+def active_edge_split_half_stability(edge_half: np.ndarray, mask: np.ndarray) -> float:
+    """Compare heldout halves only where the frozen recurrent graph has an edge.
+
+    The two halves are evaluated with the same trained mask.  Including inactive
+    pairs would therefore add a large set of structural joint zeros that cannot
+    contain split-half evidence and can spuriously inflate the rank correlation.
+    Zeros on active edges remain in the comparison because they are genuine
+    zero effective influence under one heldout half.
+    """
+    edge_half = np.asarray(edge_half, float)
+    mask = np.asarray(mask, bool)
+    if edge_half.ndim != 3 or edge_half.shape[0] != 2:
+        raise ValueError("edge_half must have shape [2, node, node]")
+    if edge_half.shape[1:] != mask.shape:
+        raise ValueError("edge_half and mask shapes do not match")
+    use = mask & ~np.eye(mask.shape[0], dtype=bool)
+    left, right = edge_half[0][use], edge_half[1][use]
+    finite = np.isfinite(left) & np.isfinite(right)
+    if finite.sum() < 3 or np.std(left[finite]) <= 0 or np.std(right[finite]) <= 0:
+        return float("nan")
+    return float(spearmanr(left[finite], right[finite]).statistic)
+
+
 def candidate_distance_classes(mask: np.ndarray, distance: np.ndarray) -> tuple[np.ndarray, np.ndarray, float, float]:
     """Classify active edges using thresholds from every candidate node pair.
 
@@ -129,6 +152,7 @@ def unit_summary(path: Path, draws: int) -> dict[str, Any]:
         summary = json.loads(str(data["summary_json"].item()))
         mask = np.asarray(data["edge_mask"], bool)
         influence = np.asarray(data["edge_effective_influence"], float)
+        edge_half = np.asarray(data["edge_effective_influence_split_half"], float)
         distance = np.asarray(data["edge_distance_mm"], float)
         connector = np.asarray(data["connector_nodes"], bool)
     active = np.flatnonzero(mask.ravel())
@@ -159,6 +183,10 @@ def unit_summary(path: Path, draws: int) -> dict[str, Any]:
         "candidate_pair_distance_q50_mm": candidate_q50,
         "candidate_pair_distance_q75_mm": candidate_q75,
         "distance_threshold_reference": "all_off_diagonal_candidate_node_pairs",
+        "effective_operator_split_half_stability": active_edge_split_half_stability(
+            edge_half, mask
+        ),
+        "split_half_stability_support": "frozen_active_recurrent_edges_only",
         "motif_score": float(
             np.mean(values[local]) / max(mean_all, 1e-12)
             + observed_long_top - float(np.median(null))
