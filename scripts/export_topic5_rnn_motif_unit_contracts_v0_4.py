@@ -129,6 +129,62 @@ def export_preflight_inventory(out_root: Path) -> dict[str, Any]:
     return payload
 
 
+def audit_training_unit_artifacts(metrics_paths: list[Path]) -> dict[str, Any]:
+    """Audit every formal unit against the locked on-disk deliverable contract."""
+    formal = [
+        path for path in metrics_paths
+        if not path.parents[1].name.startswith("SMOKE_")
+    ]
+    base_required = (
+        "DONE.json",
+        "weights.pt",
+        "history.json",
+        "heldout_rollouts.json.gz",
+        "rollout_size_head.pt",
+        "rollout_decoder_history.json",
+        "config.json",
+        "input_hashes.json",
+    )
+    recurrent_required = (
+        "graph.npz",
+        "snapshots/INIT.npz",
+        "snapshots/REWIRE_MID.npz",
+        "snapshots/MASK_FREEZE.npz",
+        "snapshots/FINAL.npz",
+    )
+    missing: list[dict[str, str]] = []
+    n_no_recurrence = 0
+    n_recurrent = 0
+    for metrics_path in formal:
+        unit = metrics_path.parent
+        metrics = json.loads(metrics_path.read_text())
+        model_id = str(metrics["model_id"])
+        required = list(base_required)
+        if model_id.startswith("M0_NO_REC"):
+            n_no_recurrence += 1
+        else:
+            n_recurrent += 1
+            required.extend(recurrent_required)
+        for name in required:
+            if not (unit / name).is_file():
+                missing.append({"unit": str(unit), "artifact": name})
+    return {
+        "contract": "topic5_rnn_motif_training_unit_artifact_audit_v0_4",
+        "n_formal_training_units": len(formal),
+        "n_recurrent_units": n_recurrent,
+        "n_no_recurrence_units": n_no_recurrence,
+        "n_formal_units_complete": len(formal) - len({row["unit"] for row in missing}),
+        "n_missing_artifacts": len(missing),
+        "formal_units_complete": not missing,
+        "no_recurrence_graph_contract": (
+            "not applicable: M0 has no recurrent graph or graph snapshots"
+        ),
+        "required_for_all_formal_units": list(base_required),
+        "additional_required_for_recurrent_units": list(recurrent_required),
+        "missing": missing,
+    }
+
+
 def export(out_root: Path) -> dict[str, Any]:
     metrics_paths = sorted((out_root / "per_subject").glob("*/*__*/seed*/metrics.json"))
     if not metrics_paths:
@@ -164,6 +220,12 @@ def export(out_root: Path) -> dict[str, Any]:
         audit["preflight_inventory_export"] = "created_or_existing_identical"
     else:
         audit["preflight_inventory_export"] = "not_available_in_unit_only_fixture"
+    artifact_audit = audit_training_unit_artifacts(metrics_paths)
+    atomic_same_or_write(out_root / "TRAINING_UNIT_ARTIFACT_AUDIT.json", artifact_audit)
+    audit["formal_unit_artifact_audit"] = {
+        "n_formal_units_complete": artifact_audit["n_formal_units_complete"],
+        "formal_units_complete": artifact_audit["formal_units_complete"],
+    }
     atomic_same_or_write(out_root / "UNIT_CONTRACT_EXPORT_AUDIT.json", audit)
     return audit
 

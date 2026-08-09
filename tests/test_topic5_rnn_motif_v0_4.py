@@ -792,6 +792,15 @@ def test_unit_contract_export_is_lossless_and_idempotent(tmp_path):
     }
     metrics_path = unit / "metrics.json"
     metrics_path.write_text(json.dumps(metrics))
+    for name in (
+        "DONE.json", "weights.pt", "history.json", "heldout_rollouts.json.gz",
+        "rollout_size_head.pt", "rollout_decoder_history.json", "graph.npz",
+    ):
+        (unit / name).write_bytes(b"frozen artifact")
+    snapshots = unit / "snapshots"
+    snapshots.mkdir()
+    for name in ("INIT.npz", "REWIRE_MID.npz", "MASK_FREEZE.npz", "FINAL.npz"):
+        (snapshots / name).write_bytes(b"frozen snapshot")
 
     first = export_unit_contracts(out)
     config_before = (unit / "config.json").read_bytes()
@@ -801,6 +810,10 @@ def test_unit_contract_export_is_lossless_and_idempotent(tmp_path):
     assert first == second
     assert first["n_formal_training_units"] == 1
     assert first["n_smoke_training_units"] == 0
+    artifact_audit = json.loads((out / "TRAINING_UNIT_ARTIFACT_AUDIT.json").read_text())
+    assert artifact_audit["formal_units_complete"] is True
+    assert artifact_audit["n_formal_units_complete"] == 1
+    assert artifact_audit["n_missing_artifacts"] == 0
     assert config_before == (unit / "config.json").read_bytes()
     assert hashes_before == (unit / "input_hashes.json").read_bytes()
     config = json.loads(config_before)
@@ -808,6 +821,38 @@ def test_unit_contract_export_is_lossless_and_idempotent(tmp_path):
     assert config["training_config"] == metrics["config"]
     assert hashes["input_manifest"]["sha256"] == sha256(manifest)
     assert hashes["fit_cache"]["events.npz"]["sha256"] == sha256(cache / "events.npz")
+
+
+def test_unit_artifact_audit_treats_no_recurrence_graph_as_not_applicable(tmp_path):
+    out = tmp_path / "run"
+    unit = out / "per_subject" / "p1__shared" / "M0_NO_REC__rnn" / "seed0"
+    cache = out / "cache" / "p1__shared"
+    unit.mkdir(parents=True); cache.mkdir(parents=True)
+    manifest = out / "INPUT_MANIFEST.json"
+    manifest.write_text(json.dumps({"cohort": "frozen"}))
+    for name in ("plane.npz", "events.npz", "provenance.json"):
+        (cache / name).write_bytes(b"input")
+    metrics = {
+        "fit_id": "p1__shared", "subject": "p1", "fit_scope": "shared",
+        "model_id": "M0_NO_REC__rnn", "arm": "M0_NO_REC", "cell": "rnn",
+        "seed": 0, "shuffled_targets": False, "shuffle_mode": "none",
+        "config": {"lr": 0.01}, "rollout_decoder": {"n_epochs": 4},
+        "config_sha256": "recorded-config",
+        "producer_hashes": {"input_manifest": sha256(manifest), "trainer": "abc"},
+    }
+    (unit / "metrics.json").write_text(json.dumps(metrics))
+    for name in (
+        "DONE.json", "weights.pt", "history.json", "heldout_rollouts.json.gz",
+        "rollout_size_head.pt", "rollout_decoder_history.json",
+    ):
+        (unit / name).write_bytes(b"frozen artifact")
+
+    export_unit_contracts(out)
+    audit = json.loads((out / "TRAINING_UNIT_ARTIFACT_AUDIT.json").read_text())
+    assert audit["formal_units_complete"] is True
+    assert audit["n_no_recurrence_units"] == 1
+    assert audit["n_recurrent_units"] == 0
+    assert not (unit / "graph.npz").exists()
 
 
 def test_executed_yaml_contract_matches_the_frozen_model_and_split_contracts():
