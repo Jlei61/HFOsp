@@ -51,6 +51,7 @@ from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
     pairwise_seed_stability,
 )
 from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
+    choose_units,
     edge_descriptor_matches,
 )
 from build_topic5_rnn_motif_common_observables_v0_4 import (  # noqa: E402
@@ -586,3 +587,22 @@ def test_figure_representative_checkpoint_is_median_seed_not_best_seed(tmp_path)
         }))
     selected = selected_metrics(tmp_path, "p1", "M6_SPATIAL_MID")
     assert selected.parent.name == "seed1"
+
+
+def test_matched_lesion_unit_is_median_seed_not_motif_selected(tmp_path):
+    values = (0.5, 1.0, 8.0)
+    for seed, value in enumerate(values):
+        metrics_dir = (tmp_path / "per_subject" / "p1__shared"
+                       / "M6_SPATIAL_MID__rnn" / f"seed{seed}")
+        metrics_dir.mkdir(parents=True)
+        (metrics_dir / "metrics.json").write_text(json.dumps({
+            "fit_id": "p1__shared", "validation": {"contact_nll": value},
+        }))
+        influence_dir = (tmp_path / "effective_influence" / "p1__shared"
+                         / "M6_SPATIAL_MID__rnn" / f"seed{seed}")
+        influence_dir.mkdir(parents=True)
+        np.savez(influence_dir / "influence.npz", marker=np.asarray([seed]))
+    selected = choose_units(tmp_path)
+    assert len(selected) == 1
+    assert selected[0][0].parent.name == "seed1"
+    assert selected[0][1].parent.name == "seed1"
