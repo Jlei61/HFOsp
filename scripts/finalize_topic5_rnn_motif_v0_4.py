@@ -390,12 +390,17 @@ def main() -> int:
     adequate_models = [model for model, result in adequate.items()
                        if result["tier"] in {"ADEQUATE_PARTIAL", "ADEQUATE_STRONG"}]
     level1 = len(adequate_models) >= 2
+    m6_task_adequate = "M6_SPATIAL_MID" in adequate_models
     inter_rows = [row for row in csv_rows(out / "interictal_per_patient.csv") if row["cell"] == "rnn"]
     by_model = {model: [row for row in inter_rows if row["model"] == model]
                 for model in {row["model"] for row in inter_rows}}
     dense_wire = np.nanmedian([float(row["c_wiring"]) for row in by_model.get("M1_DENSE", [])])
     m6_wire = np.nanmedian([float(row["c_wiring"]) for row in by_model.get("M6_SPATIAL_MID", [])])
-    level2 = bool(level1 and np.isfinite(dense_wire) and np.isfinite(m6_wire) and m6_wire < dense_wire)
+    level2 = bool(
+        level1 and m6_task_adequate
+        and np.isfinite(dense_wire) and np.isfinite(m6_wire)
+        and m6_wire < dense_wire
+    )
     m6_ceiling = inter["noise_ceiling_reference"]["model_minus_reference"].get(
         "M6_SPATIAL_MID|rnn", {}
     )
@@ -404,10 +409,16 @@ def main() -> int:
     m6_zero = contrast(early, "canonical_full|M6_SPATIAL_MID__rnn_margin_gt_zero")
     m6_m0 = contrast(early, "canonical_full|M6_SPATIAL_MID__rnn_vs_M0_NO_REC__rnn")
     m6_dense = contrast(early, "canonical_full|M6_SPATIAL_MID__rnn_vs_M1_DENSE__rnn")
-    level3_correspondence = bool((m6_zero.get("median") or 0) > 0 and
-                                 (m6_zero.get("wilcoxon_p") or 1) < 0.05)
-    level3_selective = bool((m6_m0.get("median") or 0) > 0 and
-                            (m6_m0.get("holm_q_core_family") or 1) < 0.05)
+    level3_correspondence = bool(
+        m6_task_adequate
+        and (m6_zero.get("median") or 0) > 0
+        and (m6_zero.get("wilcoxon_p") or 1) < 0.05
+    )
+    level3_selective = bool(
+        m6_task_adequate
+        and (m6_m0.get("median") or 0) > 0
+        and (m6_m0.get("holm_q_core_family") or 1) < 0.05
+    )
     conditional = load(out / "early_ictal_conditional_on_interictal_fidelity.json")
     conditional_m6_m0 = conditional.get("contrasts", {}).get(
         "M6_SPATIAL_MID_vs_M0_NO_REC", {}
@@ -484,6 +495,7 @@ def main() -> int:
                               "coherent_local_and_long_matched_lesion": lesion_pass,
                               "not_binary_proposal_only": proposal_pass},
         "adequate_rnn_models": adequate_models,
+        "M6_task_adequate_for_level2_to_level4": m6_task_adequate,
     }
     (out / "FINAL_ACCEPTANCE.json").write_text(json.dumps(acceptance, indent=2))
 
