@@ -516,6 +516,9 @@ def main() -> int:
     }, indent=2))
     (out_root / "stage_e_scientific_drift_audit.json").write_text(json.dumps({
         "status": "ALIGNED", "target_values_read": False,
+        "geometry_status": json.loads((out_root / "PRE_FLIGHT_AUDIT.json").read_text())[
+            "geometry_status"
+        ],
         "checked": ["heldout same-start free rollout", "canonical and seed-removed endpoints",
                     "shared vs own_a/own_b aggregation", "common evaluation support independent of model participation"],
         "deviations": (["early-ictal primary intersection is smaller than the planning estimate; "

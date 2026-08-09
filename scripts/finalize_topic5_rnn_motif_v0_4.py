@@ -178,6 +178,8 @@ def main() -> int:
         and int(preflight.get("n_patients", -1)) == 21
         and int(preflight.get("n_fits", -1)) == 31
         and int(preflight.get("n_training_units", -1)) == 1426
+        and preflight.get("geometry_status") == "RETROSPECTIVE_TEST_INFORMED_PROPAGATION_PLANE"
+        and run_contract.get("geometry_status") == preflight.get("geometry_status")
         and run_contract.get("target_values_read_at_contract_freeze") is False
         and bool(postprocess_contract.get("git_commit"))
     )
@@ -373,6 +375,7 @@ def main() -> int:
                     "git_commit": postprocess_contract.get("git_commit"),
                     "patients": preflight.get("n_patients"),
                     "fits": preflight.get("n_fits"),
+                    "geometry_status": preflight.get("geometry_status"),
                     "target_values_read": preflight.get("target_values_read"),
                 },
             },
