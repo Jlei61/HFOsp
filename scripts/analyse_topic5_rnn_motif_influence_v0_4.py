@@ -208,6 +208,37 @@ def contact_orientation_summary(pulse: np.ndarray, contact_xy: np.ndarray) -> di
     return output
 
 
+def finite_mean(value: np.ndarray, mask: np.ndarray) -> float:
+    selected = np.asarray(value, float)[np.asarray(mask, bool)]
+    selected = selected[np.isfinite(selected)]
+    return float(selected.mean()) if selected.size else float("nan")
+
+
+def contact_pair_observation_count(
+    ranks: np.ndarray, split: np.ndarray, max_prefixes: int
+) -> np.ndarray:
+    """Count prefix contexts in which each output/input pair is estimable."""
+    tensors = build_event_tensors(np.asarray(ranks))
+    prefixes = prefix_inventory(tensors, np.asarray(split), max_prefixes)
+    n_contacts = int(ranks.shape[1])
+    count = np.zeros((n_contacts, n_contacts), np.int32)
+    for event, step in prefixes:
+        available = tensors["available"][event, step].numpy().astype(bool)
+        count += np.outer(available, available).astype(np.int32)
+    return count
+
+
+def contact_reach_summary(pulse: np.ndarray, contact_xy: np.ndarray) -> list[float]:
+    xy = np.asarray(contact_xy, float)
+    distance = np.linalg.norm(xy[:, None] - xy[None, :], axis=-1)
+    off = ~np.eye(len(xy), dtype=bool)
+    output = []
+    for matrix in np.asarray(pulse, float)[:3]:
+        weight = np.where(off & np.isfinite(matrix), np.abs(matrix), 0.0)
+        output.append(float((weight * distance).sum() / max(weight.sum(), 1e-12)))
+    return output
+
+
 def contact_response_summary(
     teacher: np.ndarray, pulse: np.ndarray, contact_xy: np.ndarray, shafts: list[str]
 ) -> dict[str, float]:
@@ -232,18 +263,12 @@ def contact_response_summary(
 
     def add(prefix: str, matrix: np.ndarray) -> None:
         absolute = np.abs(matrix)
-        output[f"{prefix}_signed_influence"] = float(np.mean(matrix[off]))
-        output[f"{prefix}_abs_influence"] = float(np.mean(absolute[off]))
-        output[f"{prefix}_same_shaft_abs"] = (
-            float(np.mean(absolute[same_shaft])) if same_shaft.any() else float("nan")
-        )
-        output[f"{prefix}_cross_shaft_abs"] = (
-            float(np.mean(absolute[cross_shaft])) if cross_shaft.any() else float("nan")
-        )
-        axis_value = float(np.mean(absolute[axis_mask])) if axis_mask.any() else float("nan")
-        transverse_value = (
-            float(np.mean(absolute[transverse_mask])) if transverse_mask.any() else float("nan")
-        )
+        output[f"{prefix}_signed_influence"] = finite_mean(matrix, off)
+        output[f"{prefix}_abs_influence"] = finite_mean(absolute, off)
+        output[f"{prefix}_same_shaft_abs"] = finite_mean(absolute, same_shaft)
+        output[f"{prefix}_cross_shaft_abs"] = finite_mean(absolute, cross_shaft)
+        axis_value = finite_mean(absolute, axis_mask)
+        transverse_value = finite_mean(absolute, transverse_mask)
         output[f"{prefix}_axis_aligned_abs"] = axis_value
         output[f"{prefix}_transverse_abs"] = transverse_value
         output[f"{prefix}_axis_to_transverse_ratio"] = (
@@ -252,12 +277,8 @@ def contact_response_summary(
         )
         for index in range(4):
             selected = off & (distance_bin == index)
-            output[f"{prefix}_distance_q{index + 1}_signed"] = (
-                float(np.mean(matrix[selected])) if selected.any() else float("nan")
-            )
-            output[f"{prefix}_distance_q{index + 1}_abs"] = (
-                float(np.mean(absolute[selected])) if selected.any() else float("nan")
-            )
+            output[f"{prefix}_distance_q{index + 1}_signed"] = finite_mean(matrix, selected)
+            output[f"{prefix}_distance_q{index + 1}_abs"] = finite_mean(absolute, selected)
 
     add("tf_lag1", teacher)
     for lag in range(min(3, pulse.shape[0])):
@@ -355,11 +376,12 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
     shafts = [parse_shaft(name) for name in context["provenance"]["contacts"]]
     same_shaft = np.equal.outer(shafts, shafts)
     off_contact = ~np.eye(n_contacts, dtype=bool)
-    reach = []
-    for lag in range(3):
-        weight = np.abs(pulse[lag]) * off_contact
-        reach.append(float((weight * contact_distance).sum() / max(weight.sum(), 1e-12)))
-    response = contact_response_summary(teacher, pulse, contact_xy, shafts)
+    observed_teacher = tf_count > 0
+    observed_pulse = pulse_count > 0
+    teacher_summary = np.where(observed_teacher, teacher, np.nan)
+    pulse_summary = np.where(observed_pulse, pulse, np.nan)
+    reach = contact_reach_summary(pulse_summary, contact_xy)
+    response = contact_response_summary(teacher_summary, pulse_summary, contact_xy, shafts)
 
     graph = dict(np.load(metrics_path.parent / "graph.npz"))
     mask = np.asarray(graph["mask"], bool)
@@ -399,12 +421,15 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
         "motif_estimable": motif_estimable,
         "effective_edge_definition": ("exact_leaky_one_step_deletion_sensitivity"
                                       if metrics["cell"] == "rnn" else "gru_gate_rms_activity_proxy"),
+        "contact_pair_observed_fraction": float(np.mean(observed_pulse[0][off_contact])),
         **response,
     }
     arrays = {
         "contacts": np.asarray(context["provenance"]["contacts"], dtype="U64"),
         "teacher_forced_lag1": teacher.astype(np.float32),
+        "teacher_forced_count": tf_count.astype(np.int32),
         "open_loop_pulse_lag123": pulse.astype(np.float32),
+        "open_loop_pulse_count": pulse_count.astype(np.int32),
         "contact_distance_mm": contact_distance.astype(np.float32),
         "edge_effective_influence": effective.astype(np.float32),
         "edge_effective_influence_split_half": edge_half.astype(np.float32),
@@ -471,12 +496,25 @@ def main() -> int:
                 cache = out_root / "cache" / metrics["fit_id"]
                 plane = dict(np.load(cache / "plane.npz"))
                 provenance = json.loads((cache / "provenance.json").read_text())
+                events = dict(np.load(cache / "events.npz"))
+                keep = events["split"] >= 0
+                pair_count = contact_pair_observation_count(
+                    np.asarray(events["ranks"])[keep], np.asarray(events["split"])[keep],
+                    args.max_prefixes,
+                )
+                teacher = np.asarray(data["teacher_forced_lag1"], float)
+                pulse = np.asarray(data["open_loop_pulse_lag123"], float)
+                teacher_summary = np.where(pair_count > 0, teacher, np.nan)
+                pulse_summary = np.where(pair_count[None, :, :] > 0, pulse, np.nan)
                 row.update(contact_response_summary(
-                    np.asarray(data["teacher_forced_lag1"], float),
-                    np.asarray(data["open_loop_pulse_lag123"], float),
+                    teacher_summary, pulse_summary,
                     np.asarray(plane["contacts_xy_mm"], float),
                     [parse_shaft(name) for name in provenance["contacts"]],
                 ))
+                reach = contact_reach_summary(pulse_summary, np.asarray(plane["contacts_xy_mm"], float))
+                row.update({f"lag{lag + 1}_reach_mm": value for lag, value in enumerate(reach)})
+                off = ~np.eye(pair_count.shape[0], dtype=bool)
+                row["contact_pair_observed_fraction"] = float(np.mean(pair_count[off] > 0))
                 rows.append(row)
         write_csv(out_root / "effective_influence_fit_seed.csv", rows)
         summary = {
@@ -489,6 +527,7 @@ def main() -> int:
             "teacher_forced_scope": "lag1_local_probability_jacobian_only",
             "open_loop_scope": "lag1_to_lag3_deterministic_decoder_without_future_ranks",
             "rank_step_not_real_time": True,
+            "missing_pair_contract": "pair count zero is excluded; observed zero response remains zero",
             "response_summaries": ["signed_and_absolute", "lag_decay",
                                    "same_vs_cross_shaft", "contact_distance_quartiles",
                                    "axis_aligned_vs_transverse"],
