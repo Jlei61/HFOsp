@@ -170,7 +170,7 @@ def main() -> int:
         "early_ictal_model_contrasts.json", "factorial_effects_early_ictal.json",
         "early_ictal_conditional_on_interictal_fidelity.json",
         "early_ictal_null_matrices.npz",
-        "CONVERGENCE_AUDIT.json",
+        "CONVERGENCE_AUDIT.json", "TRAINING_UNIT_ARTIFACT_AUDIT.json",
         "COMMON_OBSERVABLES.json", "COMMON_OBSERVABLES.csv",
         "figures/stage_a_preflight_contract.png", "figures/stage_a_preflight_contract.pdf",
         "figures/stage_c_smoke_training_and_decoder.png",
@@ -228,6 +228,8 @@ def main() -> int:
     tests_ok = bool(" passed" in test_text and re.search(r"\b[1-9]\d* failed\b", test_text) is None)
     unit_contracts = (load(out / "UNIT_CONTRACT_EXPORT_AUDIT.json")
                       if (out / "UNIT_CONTRACT_EXPORT_AUDIT.json").exists() else {})
+    unit_artifacts = (load(out / "TRAINING_UNIT_ARTIFACT_AUDIT.json")
+                      if (out / "TRAINING_UNIT_ARTIFACT_AUDIT.json").exists() else {})
     unit_contracts_ok = bool(
         unit_contracts.get("n_all_training_units") == 1435
         and unit_contracts.get("n_formal_training_units") == 1426
@@ -239,10 +241,18 @@ def main() -> int:
         and all((path.parent / "config.json").exists() for path in all_metric_paths)
         and all((path.parent / "input_hashes.json").exists() for path in all_metric_paths)
     )
+    unit_artifacts_ok = bool(
+        unit_artifacts.get("n_formal_training_units") == 1426
+        and unit_artifacts.get("n_recurrent_units") == 1240
+        and unit_artifacts.get("n_no_recurrence_units") == 186
+        and unit_artifacts.get("n_formal_units_complete") == 1426
+        and unit_artifacts.get("n_missing_artifacts") == 0
+        and unit_artifacts.get("formal_units_complete") is True
+    )
     engineering_accepted = bool(
         not missing and stage_clean and metrics_count == 1426 and tests_ok
         and drift_audits_ok
-        and visual_ok and unit_contracts_ok
+        and visual_ok and unit_contracts_ok and unit_artifacts_ok
     )
 
     preflight = load(out / "PRE_FLIGHT_AUDIT.json")
@@ -481,6 +491,7 @@ def main() -> int:
         "stage_clean": stage_clean,
         "focused_tests_passed": tests_ok,
         "unit_contracts_complete": unit_contracts_ok,
+        "training_unit_artifacts_complete": unit_artifacts_ok,
         "visual_qa_accepted": visual_ok,
         "target_access": target,
         "scientific_levels": {
@@ -622,6 +633,16 @@ def main() -> int:
                 "observed": {"config_contracts": unit_contracts.get("n_config_contracts"),
                              "input_hash_contracts": unit_contracts.get("n_input_hash_contracts")},
             },
+            "formal_training_unit_artifacts": {
+                "pass": unit_artifacts_ok,
+                "evidence": ["TRAINING_UNIT_ARTIFACT_AUDIT.json"],
+                "observed": {
+                    "formal_units_complete": unit_artifacts.get(
+                        "n_formal_units_complete"
+                    ),
+                    "missing_artifacts": unit_artifacts.get("n_missing_artifacts"),
+                },
+            },
         },
         "scientific_levels_are_independent": True,
         "level4_integration_rule": (
@@ -642,6 +663,7 @@ def main() -> int:
 
 - 正式训练：{metrics_count}/1426 单元；Core/Dose/GRU 均为 0 failed、0 OOM、0 nonfinite。
 - 独立复现合同：{unit_contracts.get('n_config_contracts', 0)}/1435 `config.json`，{unit_contracts.get('n_input_hash_contracts', 0)}/1435 `input_hashes.json`；不改 checkpoint 或 metrics。
+- 正式单元产物：{unit_artifacts.get('n_formal_units_complete', 0)}/1426 具备 checkpoint、held-out rollout、size decoder 与训练记录；1240 个 recurrent 单元另有 graph 和四个冻结快照，M0 无循环图因此明确记为不适用。
 - 至少达到 partial adequacy 的 leaky-RNN 模型：{', '.join(adequate_models) if adequate_models else '无'}。
 - 因此“多种 recurrence 是否足以学习患者内传播”的 Level 1：**{'支持' if level1 else '不支持'}**。
 - Dense 的患者中位 wiring cost 为 {fmt(dense_wire)}，Spatial + cost 为 {fmt(m6_wire)}；Level 2 经济性：**{'支持' if level2 else '不支持'}**。
