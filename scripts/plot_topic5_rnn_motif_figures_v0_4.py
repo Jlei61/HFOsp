@@ -572,7 +572,7 @@ def render_final(out_root: Path):
 
 ### topic5_figure6_rnn_connectivity_motifs.png / .pdf / .svg
 
-六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及 target-free 有效连接组织。若预先指定的 local/connector lesion 均有足够严格匹配对照，Panel F 展示 matched-lesion 特异损害；否则展示患者级 lag-1/2/3 open-loop effective reach。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
+六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及 target-free 有效连接组织。若预先指定的 local-backbone lesion 以及 long-range-edge 或 connector-node lesion 达到最低患者分母，Panel F 展示所有可估计成分的 matched-lesion 特异损害；否则展示患者级 lag-1/2/3 open-loop effective reach。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
 
 **关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些有效 motif 经干预承担该计算”，不把预测性能直接写成真实连接组恢复。
 
@@ -596,9 +596,27 @@ def render_final(out_root: Path):
 
 ### stage_motif_scientific_readout.png / .pdf
 
-代表患者的局部高影响骨架与少量长程 connector。右侧只有在两个预先指定 lesion 都达到最低可估计患者数时才展示 matched-lesion 特异损害，否则固定展示全队列患者级 open-loop effective reach。
+代表患者的局部高影响骨架与少量长程 connector。右侧只有在 local backbone 与至少一种预先指定的 long-range/connector lesion 均达到最低可估计患者数时，才展示所有达到分母的 matched-lesion 特异损害；否则固定展示全队列患者级 open-loop effective reach。
 
 **关注点**：只有结构富集、任务关系和 matched-lesion 同向时，才把该组织写成更容易支持传播的计算 motif。
+
+### stage_c_smoke_training_and_decoder.png / .pdf
+
+三位开发患者上的工程 smoke：检查模型前向、梯度、冻结 free-rollout decoder、显存与 checkpoint schema。该图不承担患者队列的科学统计，也没有读取 early-ictal target。
+
+**关注点**：这里只证明同一训练与解码合同可以稳定执行，不能把 smoke 性能写成科学筛选。
+
+### stage_d_interictal_model_matrix.png / .pdf
+
+正式间期分析的原始阶段诊断图，展示各模型 next-contact、STOP、自由推演和生成长度等患者级分布；与 `stage_interictal_scientific_readout` 使用同一冻结汇总，但保留较完整的工程读数。
+
+**关注点**：用于核对每个模型没有靠事件长度或 STOP 单项获得表面优势。
+
+### stage_e_target_free_model_fields.png / .pdf
+
+early-ictal 解封前生成的完整模型场诊断图，展示代表患者两种起点场与全队列 field-fidelity 分布。它与 `stage_fields_scientific_readout` 使用同一 field manifest，未使用发作数值挑选模型或场。
+
+**关注点**：确认共享和 non-collinear fit 的 A/B 聚合路径正确，并保留 canonical full 与 seed-removed 两个冻结端点。
 """
     readme.write_text(base + "\n\n" + section.lstrip())
     representative_metrics = selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
