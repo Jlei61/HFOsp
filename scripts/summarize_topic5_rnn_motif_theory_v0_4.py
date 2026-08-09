@@ -43,6 +43,30 @@ def safe_spearman(x, y) -> dict[str, Any]:
     return {"n": int(use.sum()), "rho": float(result.statistic), "p": float(result.pvalue)}
 
 
+def holm_fixed_association_family(
+    associations: dict[str, dict[str, Any]], keys: tuple[str, ...]
+) -> dict[str, float]:
+    """Holm-adjust one predeclared association family, retaining missing tests.
+
+    Missing or non-finite p-values remain in the family as p=1.  This prevents a
+    smaller, data-dependent multiplicity penalty when one association cannot be
+    estimated in a small patient cohort.
+    """
+    raw = {}
+    for key in keys:
+        value = associations.get(key, {})
+        p = value.get("p")
+        raw[key] = float(p) if p is not None and np.isfinite(p) else 1.0
+    ordered = sorted(raw, key=raw.get)
+    adjusted: dict[str, float] = {}
+    running = 0.0
+    n_tests = len(ordered)
+    for rank, key in enumerate(ordered):
+        running = max(running, (n_tests - rank) * raw[key])
+        adjusted[key] = min(1.0, running)
+    return adjusted
+
+
 def pairwise_array_seed_stability(
     paths: list[Path], key: str, array_index: int | None = None
 ) -> float:
@@ -242,6 +266,17 @@ def main() -> int:
     m6_key = "M6_SPATIAL_MID|rnn"
     m6_enrichment = enrichment.get(m6_key, {})
     m6_association = associations.get(m6_key, {})
+    m6_task_relation_keys = (
+        "motif_vs_rollout",
+        "motif_vs_empirical_field_fidelity",
+    )
+    m6_task_relation_holm = holm_fixed_association_family(
+        m6_association, m6_task_relation_keys
+    )
+    for key, q_value in m6_task_relation_holm.items():
+        m6_association.setdefault(key, {})[
+            "holm_q_m6_task_relation_family"
+        ] = q_value
     stability = paired_summary(
         [row["effective_operator_seed_stability"] for row in patient_rows
          if row["model"] == "M6_SPATIAL_MID" and row["cell"] == "rnn"],
@@ -275,8 +310,9 @@ def main() -> int:
     long_lesion = lesion_stats.get("M6_SPATIAL_MID|long_range_high_influence_edges")
     connector_lesion = lesion_stats.get("M6_SPATIAL_MID|connector_nodes")
     task_relation = any(
-        (value.get("rho") or 0) > 0 and (value.get("p") or 1) < 0.05
-        for key, value in m6_association.items() if key != "motif_vs_wiring_cost"
+        (m6_association.get(key, {}).get("rho") or 0) > 0
+        and m6_task_relation_holm[key] < 0.05
+        for key in m6_task_relation_keys
     )
     proposal = paired_summary(proposal_difference, seed=stable_seed("M6 proposal"))
     claim_components = {
@@ -308,6 +344,13 @@ def main() -> int:
         "effective_weight_permutation_null": "influence values permuted over the frozen active edge mask",
         "enrichment": enrichment,
         "task_and_wiring_associations": associations,
+        "M6_task_relation_holm_family": {
+            "members": list(m6_task_relation_keys),
+            "adjusted_p": m6_task_relation_holm,
+            "wiring_cost_excluded_reason": (
+                "wiring cost is an economy endpoint, not a task-performance endpoint"
+            ),
+        },
         "effective_operator_seed_stability": {m6_key: stability},
         "effective_operator_split_half_stability": {m6_key: split_stability},
         "open_loop_pulse_cross_seed_stability": {m6_key: pulse_seed_stability},
