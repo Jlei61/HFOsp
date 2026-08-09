@@ -39,6 +39,7 @@ from analyse_topic5_rnn_motif_influence_v0_4 import (  # noqa: E402
     contact_response_summary,
 )
 from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
+    aggregate_patients,
     conditional_effects,
     compute_dose_trend,
     compute_factorial_effects,
@@ -285,6 +286,36 @@ def test_early_ictal_permutations_are_synchronized_and_shaft_preserving():
         "n_within_shaft_permutable_contacts": 6,
         "n_within_shaft_permutable_groups": 2,
     }
+
+
+def test_early_ictal_null_is_folded_patient_first_draw_by_draw():
+    rows = []
+    nulls = {}
+    for seizure, observed, null in (
+        ("s1", 0.2, np.array([0.1, 0.6])),
+        ("s2", 0.8, np.array([0.3, 0.2])),
+    ):
+        keys = {name: f"{seizure}_{name}" for name in
+                ("all", "shaft", "common_all", "common_shaft")}
+        for key in keys.values():
+            nulls[key] = null
+        rows.append({
+            "subject": "p1", "model": "M6_SPATIAL_MID", "cell": "rnn",
+            "endpoint": "canonical_full", "seizure_id": seizure,
+            "observed": observed, "common_observed": observed,
+            "n_contacts": 8, "n_within_shaft_permutable_contacts": 8,
+            "n_within_shaft_permutable_groups": 2,
+            "null_key_all": keys["all"], "null_key_shaft": keys["shaft"],
+            "null_key_common_all": keys["common_all"],
+            "null_key_common_shaft": keys["common_shaft"],
+        })
+    patients, patient_nulls = aggregate_patients(rows, nulls, supportive="supportive")
+    assert len(patients) == 1
+    assert np.isclose(patients[0]["observed"], 0.5)
+    assert np.isclose(patients[0]["all_contact_null_median"], 0.3)
+    assert np.isclose(patients[0]["all_contact_margin"], 0.2)
+    key = "p1|M6_SPATIAL_MID|rnn|canonical_full|maxab"
+    assert np.allclose(patient_nulls[key], np.array([0.2, 0.4]))
 
 
 def test_early_ictal_scorer_reads_only_hash_locked_target_artifacts(tmp_path):
