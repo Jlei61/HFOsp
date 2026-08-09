@@ -52,6 +52,7 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
 from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
 from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
     candidate_distance_classes,
+    holm_fixed_association_family,
     pairwise_array_seed_stability,
     pairwise_seed_stability,
 )
@@ -108,6 +109,26 @@ def test_factorial_models_differ_only_in_growth_and_cost_components():
 def test_interictal_factorial_holm_is_monotone():
     adjusted = interictal_holm({"a": 0.01, "b": 0.03, "c": 0.04})
     assert adjusted == {"a": 0.03, "b": 0.06, "c": 0.06}
+
+
+def test_motif_task_relation_uses_fixed_holm_family():
+    adjusted = holm_fixed_association_family(
+        {
+            "motif_vs_rollout": {"p": 0.01},
+            "motif_vs_empirical_field_fidelity": {"p": 0.03},
+        },
+        ("motif_vs_rollout", "motif_vs_empirical_field_fidelity"),
+    )
+    assert adjusted == {
+        "motif_vs_rollout": 0.02,
+        "motif_vs_empirical_field_fidelity": 0.03,
+    }
+    missing = holm_fixed_association_family(
+        {"motif_vs_rollout": {"p": 0.01}},
+        ("motif_vs_rollout", "motif_vs_empirical_field_fidelity"),
+    )
+    assert missing["motif_vs_rollout"] == 0.02
+    assert missing["motif_vs_empirical_field_fidelity"] == 1.0
 
 
 def test_target_artifact_recheck_is_required_before_unseal():
