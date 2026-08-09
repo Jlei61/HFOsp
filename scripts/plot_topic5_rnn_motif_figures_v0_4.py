@@ -428,7 +428,7 @@ def lesion_display_values(out_root: Path) -> list[tuple[str, np.ndarray]]:
     lesion_order = (
         ("local_backbone_edges", "Local\nbackbone"),
         ("long_range_high_influence_edges", "Long-range\nedges"),
-        ("connector_nodes", "Connector\nnodes"),
+        ("connector_nodes", "Connector\nincident edges"),
     )
     available: dict[str, np.ndarray] = {}
     for lesion, _ in lesion_order:
@@ -596,7 +596,7 @@ def render_final(out_root: Path):
 
 ### stage_motif_scientific_readout.png / .pdf
 
-代表患者的局部高影响骨架与少量长程 connector。右侧只有在 local backbone 与至少一种预先指定的 long-range/connector lesion 均达到最低可估计患者数时，才展示所有达到分母的 matched-lesion 特异损害；否则固定展示全队列患者级 open-loop effective reach。
+代表患者的局部高影响骨架与少量长程 connector。右侧只有在 local backbone 与至少一种预先指定的 long-range/connector lesion 均达到最低可估计患者数时，才展示所有达到分母的 matched-lesion 特异损害；connector 操作切断所选 tissue node 的全部入/出 recurrent edges，但保留直接输入与 observation readout，因此不是完整 node ablation。否则固定展示全队列患者级 open-loop effective reach。
 
 **关注点**：只有结构富集、任务关系和 matched-lesion 同向时，才把该组织写成更容易支持传播的计算 motif。
 

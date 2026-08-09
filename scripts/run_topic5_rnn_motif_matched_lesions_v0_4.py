@@ -378,6 +378,10 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
             "node_incident_weight_caliper": 0.10,
             "node_mean_degree_absolute_caliper": 1.0,
             "node_radius_caliper": 0.10,
+            "connector_node_operation": (
+                "remove all incoming and outgoing recurrent edges incident to the selected "
+                "tissue nodes; retain direct input injection and observation-operator readout"
+            ),
         },
     }
 
@@ -434,6 +438,9 @@ def aggregate(out_root: Path) -> None:
         "n_selected_fit_model_units": len(records), "statistics": statistics,
         "cell_scope": "leaky_rnn_primary_only; GRU is limited to effective-reach architecture replication",
         "target_draws": TARGET_DRAWS, "minimum_valid_matched_draws": MINIMUM_VALID,
+        "connector_node_operation": (
+            "incident recurrent-edge removal; direct input and observation readout retained"
+        ),
         "interpretation_rule": "motif wording requires enrichment, task relation and positive matched-lesion specificity",
     }, indent=2))
     (out_root / "stage_g_scientific_drift_audit.json").write_text(json.dumps({
@@ -444,6 +451,9 @@ def aggregate(out_root: Path) -> None:
             "under matched target-free perturbations"
         ),
         "primary_motif": "local high-influence backbone plus sparse long-range connector organization",
+        "connector_perturbation_scope": (
+            "incoming/outgoing recurrent edges at connector nodes; not complete node ablation"
+        ),
         "primary_evidence_required": ["enrichment", "task association", "matched-lesion specificity"],
         "cell_scope": "leaky RNN primary; GRU effective-reach replication only",
         "not_claimed": ["edge-level connectome recovery", "hidden-unit neuron identity",
