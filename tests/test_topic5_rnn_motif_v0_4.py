@@ -70,7 +70,10 @@ from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
     patient_level_effective_reach,
     selected_metrics,
 )
-from finalize_topic5_rnn_motif_v0_4 import audit_figure_sources  # noqa: E402
+from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
+    audit_figure_sources,
+    target_artifact_recheck_ok,
+)
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -99,6 +102,20 @@ def test_factorial_models_differ_only_in_growth_and_cost_components():
 def test_interictal_factorial_holm_is_monotone():
     adjusted = interictal_holm({"a": 0.01, "b": 0.03, "c": 0.04})
     assert adjusted == {"a": 0.03, "b": 0.06, "c": 0.06}
+
+
+def test_target_artifact_recheck_is_required_before_unseal():
+    payload = {
+        "status": "PASS",
+        "n_artifacts": 26,
+        "artifact_sha256_mismatches": 0,
+        "metadata_target_values_read": False,
+        "model_field_manifest_target_values_read": False,
+        "target_access_audit_existed_before_recheck": False,
+    }
+    assert target_artifact_recheck_ok(payload)
+    assert not target_artifact_recheck_ok({**payload, "artifact_sha256_mismatches": 1})
+    assert not target_artifact_recheck_ok({**payload, "target_access_audit_existed_before_recheck": True})
 
 
 def test_primary_shuffle_keeps_first_rank_and_whole_tie_sets():

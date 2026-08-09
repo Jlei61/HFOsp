@@ -68,6 +68,18 @@ def audit_figure_sources(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
     return not errors, errors
 
 
+def target_artifact_recheck_ok(payload: dict[str, Any]) -> bool:
+    """Require a value-blind, byte-level target audit before unseal."""
+    return bool(
+        payload.get("status") == "PASS"
+        and int(payload.get("n_artifacts", -1)) == 26
+        and int(payload.get("artifact_sha256_mismatches", -1)) == 0
+        and payload.get("metadata_target_values_read") is False
+        and payload.get("model_field_manifest_target_values_read") is False
+        and payload.get("target_access_audit_existed_before_recheck") is False
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, required=True)
@@ -79,7 +91,8 @@ def main() -> int:
         "STAGE_CORE_STATUS.json", "STAGE_DOSE_STATUS.json", "STAGE_GRU_STATUS.json",
         "CHECKPOINT_REUSE_AUDIT.json",
         "INTERICTAL_SUMMARY.json", "MODEL_FIELD_MANIFEST.json", "TARGET_UNSEAL_AUTHORIZATION.json",
-        "target_access_audit.json", "EFFECTIVE_INFLUENCE_SUMMARY.json", "EFFECTIVE_MOTIF_SUMMARY.json",
+        "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json", "target_access_audit.json",
+        "EFFECTIVE_INFLUENCE_SUMMARY.json", "EFFECTIVE_MOTIF_SUMMARY.json",
         "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json",
         "MATCHED_LESION_SUMMARY.json", "LESION_EARLY_ICTAL_SUMMARY.json",
         "CONVERGENCE_AUDIT.json",
@@ -153,6 +166,7 @@ def main() -> int:
     lesion_unit_paths = sorted((out / "matched_lesions").glob("**/LESION_DONE.json"))
     lesion_units = [load(path) for path in lesion_unit_paths]
     unseal = load(out / "TARGET_UNSEAL_AUTHORIZATION.json")
+    target_recheck = load(out / "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json")
     lesion_early = load(out / "LESION_EARLY_ICTAL_SUMMARY.json")
     common_observables = load(out / "COMMON_OBSERVABLES.json")
     figure_source_manifest = load(out / "figures/figure6_source_manifest.json")
@@ -216,6 +230,7 @@ def main() -> int:
         and unseal.get("target_values_read_before_authorization") is False
         and unseal.get("all_engineering_valid_models_included") is True
         and unseal.get("cohort_mismatch_reported_before_unseal") is True
+        and target_artifact_recheck_ok(target_recheck)
         and target.get("target_values_read") is True
         and target.get("training_or_model_selection_after_unseal") is False
         and int(target.get("n_primary_subjects", -1)) == int(unseal.get("actual_primary_join_n", -2))
@@ -414,11 +429,15 @@ def main() -> int:
             },
             "early_ictal_unseal_order_and_scoring": {
                 "pass": bool(target_order_ok and lesion_early_ok),
-                "evidence": ["TARGET_UNSEAL_AUTHORIZATION.json", "target_access_audit.json",
+                "evidence": ["TARGET_UNSEAL_AUTHORIZATION.json",
+                             "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json", "target_access_audit.json",
                              "early_ictal_model_contrasts.json", "LESION_EARLY_ICTAL_SUMMARY.json",
                              "stage_f_scientific_drift_audit.json"],
                 "observed": {"primary_subjects": target.get("n_primary_subjects"),
                              "seizures": target.get("n_seizures"),
+                             "frozen_target_artifacts": target_recheck.get("n_artifacts"),
+                             "target_artifact_hash_mismatches": target_recheck.get(
+                                 "artifact_sha256_mismatches"),
                              "target_read_after_field_freeze": target.get("target_values_read"),
                              "lesion_readout_matched_primary_subjects": lesion_early.get(
                                  "n_primary_subjects_with_matched_inference")},
