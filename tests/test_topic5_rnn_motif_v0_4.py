@@ -29,6 +29,7 @@ from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
     event_pair_reliability,
     seed_removed_sequence_agreement,
 )
+from analyse_topic5_rnn_motif_influence_v0_4 import contact_orientation_summary  # noqa: E402
 from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     conditional_effects,
     compute_dose_trend,
@@ -313,6 +314,22 @@ def test_motif_distance_thresholds_do_not_create_long_edges_in_local_mask():
     assert q50 > 1.0 and q75 > q50
     assert local.all()
     assert not long.any()
+
+
+def test_contact_pulse_summary_separates_axis_and_transverse_pairs():
+    xy = np.array([[0.0, 0.0], [1.0, 0.0], [0.0, 2.0]])
+    pulse = np.zeros((3, 3, 3), float)
+    pulse[:, 0, 1] = 2.0
+    pulse[:, 1, 0] = 2.0
+    pulse[:, 0, 2] = 0.5
+    pulse[:, 2, 0] = 0.5
+    summary = contact_orientation_summary(pulse, xy)
+    assert summary["lag1_axis_aligned_abs"] > summary["lag1_transverse_abs"]
+    assert summary["lag1_axis_to_transverse_ratio"] > 1.0
+    assert set(summary) == {
+        f"lag{lag}_{name}" for lag in (1, 2, 3)
+        for name in ("axis_aligned_abs", "transverse_abs", "axis_to_transverse_ratio")
+    }
 
 
 def test_matched_edge_lesion_does_not_collapse_in_and_out_degree():
