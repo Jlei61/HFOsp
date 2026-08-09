@@ -1,0 +1,36 @@
+{
+  "status": "D0_PASS",
+  "verdict": "DEADZONE_IDENTIFIABLE",
+  "source": "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/percell_separation/per_cell.npz",
+  "source_sha256": "81d2c97a16eaf69753951dcd91f55153c7102d5d7ca4c0f75e12f9b24208a33d",
+  "selection_rule": {
+    "deadzone": "arithmetic midpoint of interictal maximum and ictal minimum",
+    "excess_scale": "ictal median minus deadzone",
+    "n": "locked n=4 termination-authority lineage",
+    "g_m_max": "force match to 44.8619393917937 using mean ictal activation"
+  },
+  "candidate": {
+    "name": "hill_n4_exact_deadzone_slow",
+    "n": 4.0,
+    "tau_adp_ms": 1000.0,
+    "tau_a_on_ms": 100.0,
+    "tau_a_off_ms": 10000.0,
+    "deadzone": 46.83235549926758,
+    "K": 19.869522094726562,
+    "g_m_max": 88.74371816605014,
+    "matched_ictal_current": 44.8619393917937,
+    "calibration": {
+      "interictal_peak_max": 35.99027633666992,
+      "ictal_settled_min": 57.674434661865234,
+      "ictal_settled_median": 66.70187759399414,
+      "extreme_gap": 21.684158325195312,
+      "deadzone_margin_each_side": 10.842079162597656,
+      "interictal_activation_max": 0.0,
+      "interictal_activation_mean": 0.0,
+      "ictal_activation_min": 0.08143489708023391,
+      "ictal_activation_mean": 0.5055224225319433,
+      "ictal_fraction_half_on": 0.5
+    }
+  },
+  "claim_boundary": "D0 proves only that an exact dead zone is identifiable on the frozen load artifact; D1 must test whether it remains exactly inert in a 12 s live baseline."
+}
