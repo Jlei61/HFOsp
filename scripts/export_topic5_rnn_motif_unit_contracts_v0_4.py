@@ -86,6 +86,49 @@ def build_contracts(out_root: Path, metrics_path: Path) -> tuple[dict[str, Any],
     return config, input_hashes
 
 
+def export_preflight_inventory(out_root: Path) -> dict[str, Any]:
+    """Index the immutable preflight evidence under the plan's named artifact."""
+    manifest_path = out_root / "INPUT_MANIFEST.json"
+    preflight_path = out_root / "PRE_FLIGHT_AUDIT.json"
+    metadata_path = out_root / "EARLY_ICTAL_METADATA_INVENTORY.json"
+    manifest = json.loads(manifest_path.read_text())
+    preflight = json.loads(preflight_path.read_text())
+    metadata = json.loads(metadata_path.read_text())
+    if preflight.get("target_values_read") is not False:
+        raise RuntimeError("preflight source does not preserve the target seal")
+    if metadata.get("target_values_read") is not False:
+        raise RuntimeError("metadata source does not preserve the target seal")
+    payload = {
+        "contract": "topic5_rnn_motif_preflight_inventory_compatibility_v0_4",
+        "artifact_role": (
+            "post-run index of immutable target-free preflight sources; not a re-run"
+        ),
+        "source_artifacts": {
+            "input_manifest": {
+                "path": str(manifest_path), "sha256": sha256(manifest_path),
+            },
+            "preflight_audit": {
+                "path": str(preflight_path), "sha256": sha256(preflight_path),
+            },
+            "early_ictal_metadata_inventory": {
+                "path": str(metadata_path), "sha256": sha256(metadata_path),
+            },
+        },
+        "n_patients": int(preflight["n_patients"]),
+        "n_fits": int(preflight["n_fits"]),
+        "n_training_units": int(preflight["n_training_units"]),
+        "geometry_status": preflight["geometry_status"],
+        "shared_and_noncollinear_fit_inventory": manifest.get("fits", []),
+        "expected_primary_n": metadata.get("expected_primary_n"),
+        "actual_primary_join_known_before_unseal": metadata.get("actual_primary_join", []),
+        "target_values_read_by_source_preflight": False,
+        "target_values_deserialized_by_this_exporter": False,
+        "created_after_target_unseal": (out_root / "target_access_audit.json").exists(),
+    }
+    atomic_same_or_write(out_root / "PREFLIGHT_INVENTORY.json", payload)
+    return payload
+
+
 def export(out_root: Path) -> dict[str, Any]:
     metrics_paths = sorted((out_root / "per_subject").glob("*/*__*/seed*/metrics.json"))
     if not metrics_paths:
@@ -107,6 +150,20 @@ def export(out_root: Path) -> dict[str, Any]:
         "checkpoint_or_metric_values_changed": False,
         "export_semantics": "lossless split of frozen metrics plus hashes of frozen fit-cache inputs",
     }
+    # The locked plan named a standalone PREFLIGHT_INVENTORY.json, while the
+    # immutable execution stored the same evidence across INPUT_MANIFEST and
+    # PRE_FLIGHT_AUDIT.  Materialize a transparent compatibility index without
+    # re-running preflight or touching any target array after unseal.
+    preflight_sources = (
+        out_root / "INPUT_MANIFEST.json",
+        out_root / "PRE_FLIGHT_AUDIT.json",
+        out_root / "EARLY_ICTAL_METADATA_INVENTORY.json",
+    )
+    if all(path.exists() for path in preflight_sources):
+        export_preflight_inventory(out_root)
+        audit["preflight_inventory_export"] = "created_or_existing_identical"
+    else:
+        audit["preflight_inventory_export"] = "not_available_in_unit_only_fixture"
     atomic_same_or_write(out_root / "UNIT_CONTRACT_EXPORT_AUDIT.json", audit)
     return audit
 

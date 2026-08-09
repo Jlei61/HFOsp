@@ -98,6 +98,19 @@ def target_contract_trace_ok(payload: dict[str, Any]) -> bool:
     )
 
 
+def integrated_level4(
+    target_free_intervenable_motif: bool,
+    economic_constraint: bool,
+    frozen_cross_state_correspondence: bool,
+) -> bool:
+    """Apply the locked integrated Level-4 scientific wording contract."""
+    return bool(
+        target_free_intervenable_motif
+        and economic_constraint
+        and frozen_cross_state_correspondence
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, required=True)
@@ -106,16 +119,50 @@ def main() -> int:
     out = args.out_root.resolve()
     required = [
         "PRE_FLIGHT_AUDIT.json", "RUN_CONTRACT.json", "POSTPROCESS_CONTRACT.json",
+        "PREFLIGHT_INVENTORY.json", "INPUT_MANIFEST.json",
         "STAGE_CORE_STATUS.json", "STAGE_DOSE_STATUS.json", "STAGE_GRU_STATUS.json",
         "CHECKPOINT_REUSE_AUDIT.json",
-        "INTERICTAL_SUMMARY.json", "MODEL_FIELD_MANIFEST.json", "TARGET_UNSEAL_AUTHORIZATION.json",
+        "INTERICTAL_SUMMARY.json", "interictal_per_event.csv",
+        "interictal_per_fit_seed.csv", "interictal_per_patient.csv",
+        "interictal_bootstrap.json", "task_adequacy_tiers.json",
+        "accuracy_wiring_pareto.csv", "factorial_effects_interictal.json",
+        "contracts/ROLLOUT_DECODER_CONTRACT.json",
+        "contracts/FIT_TO_PATIENT_AGGREGATION_CONTRACT.json",
+        "MODEL_FIELD_MANIFEST.json", "model_field_fit_seed_metrics.csv",
+        "model_field_fit_metrics.csv", "model_field_patient_metrics.csv",
+        "contracts/PRIMARY_THEORY_SET.json", "contracts/MOTIF_DEFINITION.json",
+        "TARGET_UNSEAL_AUTHORIZATION.json", "EARLY_ICTAL_METADATA_INVENTORY.json",
+        "early_ictal_metadata_inventory.csv",
         "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json", "EARLY_ICTAL_TARGET_CONTRACT_TRACE.json",
         "target_access_audit.json",
         "EFFECTIVE_INFLUENCE_SUMMARY.json", "EFFECTIVE_MOTIF_SUMMARY.json",
+        "effective_influence_fit_seed.csv", "effective_motif_patient.csv",
         "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json",
         "MATCHED_LESION_SUMMARY.json", "LESION_EARLY_ICTAL_SUMMARY.json",
+        "matched_lesion_fit_metrics.csv", "matched_lesion_patient_metrics.csv",
+        "lesion_early_ictal_per_seizure.csv", "lesion_early_ictal_per_patient.csv",
+        "early_ictal_per_seizure.csv", "early_ictal_per_patient_model.csv",
+        "early_ictal_model_contrasts.json", "factorial_effects_early_ictal.json",
+        "early_ictal_conditional_on_interictal_fidelity.json",
+        "early_ictal_null_matrices.npz",
         "CONVERGENCE_AUDIT.json",
-        "COMMON_OBSERVABLES.json", "figures/topic5_figure6_rnn_connectivity_motifs.png",
+        "COMMON_OBSERVABLES.json", "COMMON_OBSERVABLES.csv",
+        "figures/stage_a_preflight_contract.png", "figures/stage_a_preflight_contract.pdf",
+        "figures/stage_c_smoke_training_and_decoder.png",
+        "figures/stage_c_smoke_training_and_decoder.pdf",
+        "figures/stage_d_interictal_model_matrix.png",
+        "figures/stage_d_interictal_model_matrix.pdf",
+        "figures/stage_interictal_scientific_readout.png",
+        "figures/stage_interictal_scientific_readout.pdf",
+        "figures/stage_e_target_free_model_fields.png",
+        "figures/stage_e_target_free_model_fields.pdf",
+        "figures/stage_fields_scientific_readout.png",
+        "figures/stage_fields_scientific_readout.pdf",
+        "figures/stage_motif_scientific_readout.png",
+        "figures/stage_motif_scientific_readout.pdf",
+        "figures/stage_early_scientific_readout.png",
+        "figures/stage_early_scientific_readout.pdf",
+        "figures/topic5_figure6_rnn_connectivity_motifs.png",
         "figures/topic5_figure6_rnn_connectivity_motifs.pdf",
         "figures/topic5_figure6_rnn_connectivity_motifs.svg",
         "figures/figure6_source_manifest.json", "figures/README.md", "VISUAL_QA.json",
@@ -354,7 +401,14 @@ def main() -> int:
                       "未通过" if lesion_estimable else
                       "不可估计（严格 matched-control 分母不足）")
     proposal_pass = motif_components["not_binary_proposal_only"]
-    level4 = bool(theory["M6_motif_claim_pass"])
+    target_free_intervenable_motif = bool(theory["M6_motif_claim_pass"])
+    # The locked Level-4 wording is integrated: a perturbable target-free motif
+    # must also retain the economic benefit and point in the same direction on
+    # the frozen cross-state benchmark.  Keeping the target-free result separate
+    # prevents a clean lesion result from being over-written as an ictal bridge.
+    level4 = integrated_level4(
+        target_free_intervenable_motif, level2, level3_correspondence
+    )
 
     acceptance = {
         "contract": "topic5_rnn_motif_cross_state_final_acceptance_v0_4",
@@ -372,6 +426,7 @@ def main() -> int:
             "level3_cross_state_correspondence": level3_correspondence,
             "level3_raw_motif_selectivity": level3_selective,
             "level3_conditional_inductive_bias": conditional_inductive_bias,
+            "level4_target_free_intervenable_motif": target_free_intervenable_motif,
             "level4_intervenable_computational_motif": level4,
         },
         "level4_components": {"coherent_local_and_long_enrichment": enrichment_pass,
@@ -501,6 +556,10 @@ def main() -> int:
             },
         },
         "scientific_levels_are_independent": True,
+        "level4_integration_rule": (
+            "target-free intervenable motif AND lower wiring cost than dense "
+            "AND positive frozen early-ictal correspondence"
+        ),
         "archive_state": "RESULT_REPORT_GENERATED; tracked docs/archive closeout is a separate repository step",
     }
     (out / "COMPLETION_AUDIT.json").write_text(json.dumps(completion_audit, indent=2))
@@ -540,7 +599,8 @@ canonical full、seed-removed、common-field 与 A/B contrast 已分开报告。
 - motif score 与留出传播/间期场拟合的患者级关系：**{'通过' if task_relation_pass else '未通过'}**。
 - local 与 long/connector targeted lesion 相对 matched random lesion 的同结构特异损害：**{lesion_wording}**。其中 connector 操作只切断所选 tissue node 的全部入/出 recurrent edges，保留直接输入和 observation readout，不称为完整 node ablation。
 - 与相同生长规则的 order-shuffle 对照相比并非二值 proposal 自动造成：**{'通过' if proposal_pass else '未通过'}**。
-- 全部同结构证据同时成立的 Level 4：**{'支持 local-backbone + sparse connector motif' if level4 else '未达到机制性 motif 措辞，只保留描述性组织'}**。
+- target-free 的富集、稳定性、任务关系与 matched-lesion 全部成立：**{'支持可干预 motif' if target_free_intervenable_motif else '未同时成立'}**。
+- 同时满足较低布线成本和冻结 early-ictal 跨状态对应的 integrated Level 4：**{'支持 local-backbone + sparse connector motif 更容易承载该跨状态传播计算' if level4 else '未达到跨状态机制性 motif 措辞；按已通过的较低层结果分别报告'}**。
 
 GRU 只承担架构方向复现；matched lesion 的主分析限定在 leaky RNN。所有时间量是 rank-step，不是秒级生物时间常数。
 
