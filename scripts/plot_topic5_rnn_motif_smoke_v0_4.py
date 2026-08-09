@@ -14,6 +14,11 @@ COLORS = {
     "SMOKE_M3_FIXED_LOCAL": "#4c78a8",
     "SMOKE_M6_SPATIAL_MID": "#e45756",
 }
+LABELS = {
+    "SMOKE_M0_NO_REC": "No recurrence",
+    "SMOKE_M3_FIXED_LOCAL": "Local",
+    "SMOKE_M6_SPATIAL_MID": "Spatial + cost",
+}
 
 
 def main() -> int:
@@ -54,7 +59,7 @@ def main() -> int:
                          if metrics["fit_id"] == fit_id and metrics["model_id"].startswith(model_id))
             values.append(match["test"]["contact_nll"])
         axes[1].bar(np.arange(3) + (offset - 1) * width, values, width,
-                    color=COLORS[model_id], label=model_id.split("_", 2)[-1])
+                    color=COLORS[model_id], label=LABELS[model_id])
     axes[1].set_xticks(range(3), ["small", "medium", "large"])
     axes[1].set_ylabel("Held-out contact NLL")
     axes[1].set_title("Three montage scales", loc="left", fontweight="bold")
@@ -70,7 +75,7 @@ def main() -> int:
         strength = graph["strength"][mask]
         distance = graph["D_mm"][mask]
         axes[2].scatter(distance, strength, s=6, alpha=0.35, color=color,
-                        linewidths=0, label=model_id.split("_", 2)[-1])
+                        linewidths=0, label=LABELS[model_id])
     axes[2].set_xlabel("Edge length (mm)")
     axes[2].set_ylabel("Effective weight")
     axes[2].set_title("Same edge budget", loc="left", fontweight="bold")
