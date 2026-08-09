@@ -608,9 +608,25 @@ def render_final(out_root: Path):
               representative_metrics.parent / "graph.npz", representative_plane,
               representative_influence],
     }
-    manifest = {
+    panel_sources = {
         panel: [{"path": str(path), "sha256": sha256(path)} for path in paths]
         for panel, paths in sources.items()
+    }
+    manifest = {
+        "_contract": "topic5_figure6_source_manifest_v0_4",
+        "_representative_selection": {
+            "patient": REPRESENTATIVE,
+            "role": "target-free preassigned supportive visualization; excluded from primary p-values",
+            "checkpoint_rule": (
+                "within patient/model/cell, choose validation contact NLL nearest the seed median; "
+                "ties resolved by lexical path"
+            ),
+            "selected_metrics": {
+                model: str(selected_metrics(out_root, REPRESENTATIVE, model))
+                for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")
+            },
+        },
+        **panel_sources,
     }
     (figure_dir / "figure6_source_manifest.json").write_text(json.dumps(manifest, indent=2))
 
