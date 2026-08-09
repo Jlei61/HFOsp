@@ -412,6 +412,7 @@ GRU 只承担架构方向复现；matched lesion 的主分析限定在 leaky RNN
 
 - 主图：`figures/topic5_figure6_rnn_connectivity_motifs.png/.pdf/.svg`
 - 图源：`figures/figure6_source_manifest.json`
+- 代表患者：E1146 在 target 解封前固定，只作辅助可视化、不进入主 P 值；展示 checkpoint 按患者/模型内 validation NLL 最接近 seed 中位数选择，不取最好 seed。
 - 全量统计：`INTERICTAL_SUMMARY.json`、`early_ictal_model_contrasts.json`、`EFFECTIVE_MOTIF_SUMMARY.json`、`MATCHED_LESION_SUMMARY.json`
 - 跨系统表：`COMMON_OBSERVABLES.json/.csv`
 - 工程验收：`FINAL_ACCEPTANCE.json`

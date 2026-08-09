@@ -62,6 +62,7 @@ from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
 )
 from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
     patient_level_effective_reach,
+    selected_metrics,
 )
 
 
@@ -573,3 +574,15 @@ def test_effective_reach_plot_input_is_patient_first(tmp_path):
     assert set(reach) == {"p1", "p2"}
     np.testing.assert_allclose(reach["p1"], [1, 2, 3])
     np.testing.assert_allclose(reach["p2"], [10, 20, 30])
+
+
+def test_figure_representative_checkpoint_is_median_seed_not_best_seed(tmp_path):
+    values = (1.0, 2.0, 10.0)
+    for seed, value in enumerate(values):
+        directory = tmp_path / "per_subject" / "p1__shared" / "M6_SPATIAL_MID__rnn" / f"seed{seed}"
+        directory.mkdir(parents=True)
+        (directory / "metrics.json").write_text(json.dumps({
+            "validation": {"contact_nll": value},
+        }))
+    selected = selected_metrics(tmp_path, "p1", "M6_SPATIAL_MID")
+    assert selected.parent.name == "seed1"
