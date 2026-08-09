@@ -59,6 +59,7 @@ from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
     choose_units,
     complete_patient_fit_set,
     edge_descriptor_matches,
+    lesion_cohort_summary,
     perturbation_damage,
 )
 from build_topic5_rnn_motif_common_observables_v0_4 import (  # noqa: E402
@@ -457,6 +458,16 @@ def test_matched_lesion_requires_both_noncollinear_fits():
     unavailable = [both[0], {"fit_id": "p1__own_b",
                              "status": "matched_inference_unavailable"}]
     assert not complete_patient_fit_set(unavailable, expected)
+
+
+def test_small_lesion_cohorts_are_descriptive_only():
+    small = lesion_cohort_summary(np.ones(4))
+    assert small["n"] == 4
+    assert small["cohort_inference_eligible"] is False
+    assert small["wilcoxon_p"] is None
+    eligible = lesion_cohort_summary(np.ones(6))
+    assert eligible["cohort_inference_eligible"] is True
+    assert np.isclose(eligible["wilcoxon_p"], 0.03125)
 
 
 def test_lesion_figure_uses_estimable_frozen_components_without_effect_selection(
