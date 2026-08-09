@@ -30,6 +30,11 @@ THEORY_MODELS = {
 }
 TARGET_DRAWS = 500
 MINIMUM_VALID = 200
+M6_PRIMARY_LESION_FAMILY = (
+    "M6_SPATIAL_MID|local_backbone_edges",
+    "M6_SPATIAL_MID|long_range_high_influence_edges",
+    "M6_SPATIAL_MID|connector_nodes",
+)
 
 
 def clean_json(value: Any) -> Any:
@@ -432,6 +437,18 @@ def lesion_cohort_summary(values: np.ndarray, minimum_patients: int = 5) -> dict
     }
 
 
+def holm_fixed_family(pvalues: dict[str, float]) -> dict[str, float]:
+    """Holm-adjust a fixed family, including unavailable hypotheses as p=1."""
+    ordered = sorted(pvalues.items(), key=lambda item: item[1])
+    adjusted: dict[str, float] = {}
+    running = 0.0
+    n = len(ordered)
+    for rank, (name, value) in enumerate(ordered):
+        running = max(running, min(1.0, (n - rank) * float(value)))
+        adjusted[name] = running
+    return adjusted
+
+
 def aggregate(out_root: Path) -> None:
     records = [json.loads(path.read_text()) for path in sorted((out_root / "matched_lesions").glob("**/LESION_DONE.json"))]
     expected_fit_ids: dict[tuple[str, str, str], set[str]] = {}
@@ -485,11 +502,20 @@ def aggregate(out_root: Path) -> None:
         if len(values) == 0:
             continue
         statistics[f"{model}|{lesion}"] = lesion_cohort_summary(values)
+    raw_family = {}
+    for name in M6_PRIMARY_LESION_FAMILY:
+        value = statistics.get(name, {}).get("wilcoxon_p")
+        raw_family[name] = 1.0 if value is None else float(value)
+    adjusted_family = holm_fixed_family(raw_family)
+    for name in M6_PRIMARY_LESION_FAMILY:
+        if name in statistics:
+            statistics[name]["holm_q_m6_primary_lesion_family"] = adjusted_family[name]
     (out_root / "MATCHED_LESION_SUMMARY.json").write_text(json.dumps({
         "contract": "topic5_rnn_motif_matched_lesion_summary_v0_4", "target_values_read": False,
         "n_selected_fit_model_units": len(records), "statistics": statistics,
         "cell_scope": "leaky_rnn_primary_only; GRU is limited to effective-reach architecture replication",
         "target_draws": TARGET_DRAWS, "minimum_valid_matched_draws": MINIMUM_VALID,
+        "m6_primary_lesion_holm_family": list(M6_PRIMARY_LESION_FAMILY),
         "connector_node_operation": (
             "incident recurrent-edge removal; direct input and observation readout retained"
         ),
