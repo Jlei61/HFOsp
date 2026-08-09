@@ -487,7 +487,7 @@ canonical full、seed-removed、common-field 与 A/B contrast 已分开报告。
 - 完整 effective operator 的跨 seed 稳定性：**{'通过' if stability_pass else '未通过'}**。
 - 同一冻结模型在前后半留出事件中的 effective operator 稳定性：**{'通过' if split_stability_pass else '未通过'}**。
 - motif score 与留出传播/间期场拟合的患者级关系：**{'通过' if task_relation_pass else '未通过'}**。
-- local 与 long/connector targeted lesion 相对 matched random lesion 的同结构特异损害：**{lesion_wording}**。
+- local 与 long/connector targeted lesion 相对 matched random lesion 的同结构特异损害：**{lesion_wording}**。其中 connector 操作只切断所选 tissue node 的全部入/出 recurrent edges，保留直接输入和 observation readout，不称为完整 node ablation。
 - 与相同生长规则的 order-shuffle 对照相比并非二值 proposal 自动造成：**{'通过' if proposal_pass else '未通过'}**。
 - 全部同结构证据同时成立的 Level 4：**{'支持 local-backbone + sparse connector motif' if level4 else '未达到机制性 motif 措辞，只保留描述性组织'}**。
 

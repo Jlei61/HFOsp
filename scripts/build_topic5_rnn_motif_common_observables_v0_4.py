@@ -144,7 +144,7 @@ def main() -> int:
         for lesion, label in (
             ("local_backbone_edges", "local-backbone matched-lesion specificity"),
             ("long_range_high_influence_edges", "long-range-edge matched-lesion specificity"),
-            ("connector_nodes", "connector-node matched-lesion specificity"),
+            ("connector_nodes", "connector incident-edge matched-lesion specificity"),
         ):
             model_lesion = [
                 row for row in lesions
@@ -159,7 +159,10 @@ def main() -> int:
                 ))) if model_lesion else None),
                 "denominator": len(model_lesion),
                 "comparison_level": "heldout interictal ΔNLL beyond matched random lesion",
-                "boundary": "in-model perturbation only",
+                "boundary": (
+                    "in-model perturbation only; connector operation removes incident recurrent "
+                    "edges while retaining direct input and readout"
+                ),
                 "source": "matched_lesion_patient_metrics.csv",
             })
 
