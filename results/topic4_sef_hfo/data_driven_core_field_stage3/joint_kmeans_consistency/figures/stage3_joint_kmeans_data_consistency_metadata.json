@@ -1,0 +1,440 @@
+{
+  "figure": "stage3_joint_kmeans_data_consistency",
+  "confirmation": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_pilot_rev6.json",
+  "confirmation_sha256": "3fced8e317e3b5841aac57852eed6b91e78eab882d5c41ea415c2352ca15cd10",
+  "event_profiles": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation/joint_confirmation_event_profiles_rev6.npz",
+  "event_profiles_sha256": "0abb7b97046ff67bcc7979387ec0fe838a5cff0ac0ddc6d9615ca7b67488cab0",
+  "plotting_only": true,
+  "kmeans_contract": "patient train, patient held-out, controls, and candidates independently fit K=2 in the frozen embedding; candidate modes are Hungarian-matched afterward",
+  "display_sampling": "all model events; deterministic cluster-stratified cap of 240 patient held-out events",
+  "acceptance": {
+    "minimum_events_per_mode": 10,
+    "matrix_sign_pattern": "matched cells > 0 and crossed cells < 0",
+    "rigid_control_matched_mean_benchmark": 0.8710528480888351
+  },
+  "rows": [
+    {
+      "label": "patient held-out benchmark",
+      "n_events": 16633,
+      "metric": {
+        "status": "ok",
+        "n_events": 16633,
+        "cluster_counts": [
+          5652,
+          10981
+        ],
+        "min_cluster_count": 5652,
+        "minority_fraction": 0.33980640894607106,
+        "support_eligible": true,
+        "prototype_correlation": -0.7608870967741936,
+        "similarity_matrix": [
+          [
+            0.9887096774193549,
+            -0.7665322580645162
+          ],
+          [
+            -0.7875,
+            0.9987903225806452
+          ]
+        ],
+        "matched_correlations": [
+          0.9887096774193549,
+          0.9987903225806452
+        ],
+        "crossed_correlations": [
+          -0.7665322580645162,
+          -0.7875
+        ],
+        "matched_mean": 0.99375,
+        "crossed_mean": -0.7770161290322581,
+        "matrix_contrast": 1.7707661290322583,
+        "matrix_sign_consistent": true,
+        "candidate_raw_mode_for_data_mode": [
+          0,
+          1
+        ]
+      },
+      "verdict": null
+    },
+    {
+      "label": "training global best",
+      "n_events": 59,
+      "metric": {
+        "status": "ok",
+        "n_events": 59,
+        "cluster_counts": [
+          23,
+          36
+        ],
+        "min_cluster_count": 23,
+        "minority_fraction": 0.3898305084745763,
+        "support_eligible": true,
+        "prototype_correlation": 0.9022615778802117,
+        "similarity_matrix": [
+          [
+            -0.981188216046658,
+            0.775197371762167
+          ],
+          [
+            -0.9066510783746906,
+            0.917752104490142
+          ]
+        ],
+        "matched_correlations": [
+          -0.981188216046658,
+          0.917752104490142
+        ],
+        "crossed_correlations": [
+          0.775197371762167,
+          -0.9066510783746906
+        ],
+        "matched_mean": -0.03171805577825798,
+        "crossed_mean": -0.06572685330626182,
+        "matrix_contrast": 0.03400879752800384,
+        "matrix_sign_consistent": false,
+        "candidate_raw_mode_for_data_mode": [
+          0,
+          1
+        ],
+        "robustness": {
+          "kmeans_initialization_seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "pairwise_ami_median": 1.0,
+          "pairwise_ami_min": 1.0,
+          "pairwise_ami_max": 1.0,
+          "leave_one_network_out": [
+            {
+              "held_seed": 501,
+              "n_events": 47,
+              "cluster_counts": [
+                17,
+                30
+              ],
+              "support_eligible": true,
+              "matrix_sign_consistent": false,
+              "matched_mean": -0.02505744010898714
+            },
+            {
+              "held_seed": 502,
+              "n_events": 45,
+              "cluster_counts": [
+                21,
+                24
+              ],
+              "support_eligible": true,
+              "matrix_sign_consistent": false,
+              "matched_mean": -0.02041519282434362
+            },
+            {
+              "held_seed": 503,
+              "n_events": 45,
+              "cluster_counts": [
+                17,
+                28
+              ],
+              "support_eligible": true,
+              "matrix_sign_consistent": false,
+              "matched_mean": -0.03171805577825798
+            },
+            {
+              "held_seed": 504,
+              "n_events": 48,
+              "cluster_counts": [
+                20,
+                28
+              ],
+              "support_eligible": true,
+              "matrix_sign_consistent": false,
+              "matched_mean": -0.03952552882287269
+            },
+            {
+              "held_seed": 505,
+              "n_events": 52,
+              "cluster_counts": [
+                18,
+                34
+              ],
+              "support_eligible": true,
+              "matrix_sign_consistent": false,
+              "matched_mean": -0.023094159863313923
+            },
+            {
+              "held_seed": 506,
+              "n_events": 58,
+              "cluster_counts": [
+                22,
+                36
+              ],
+              "support_eligible": true,
+              "matrix_sign_consistent": false,
+              "matched_mean": -0.02632852277286929
+            }
+          ],
+          "loo_supported_data_pattern_count": 0,
+          "loo_total": 6,
+          "scientific_role": "stability diagnostic; not an additional post-hoc acceptance threshold"
+        }
+      },
+      "verdict": "KMEANS_DATA_PATTERN_FAIL"
+    },
+    {
+      "label": "final-generation best",
+      "n_events": 35,
+      "metric": {
+        "status": "ok",
+        "n_events": 35,
+        "cluster_counts": [
+          2,
+          33
+        ],
+        "min_cluster_count": 2,
+        "minority_fraction": 0.05714285714285714,
+        "support_eligible": false,
+        "prototype_correlation": 0.6529526655932799,
+        "similarity_matrix": [
+          [
+            -0.6369593741413493,
+            0.44460127254880505
+          ],
+          [
+            -0.9696927978682455,
+            0.8374340001044437
+          ]
+        ],
+        "matched_correlations": [
+          -0.6369593741413493,
+          0.8374340001044437
+        ],
+        "crossed_correlations": [
+          0.44460127254880505,
+          -0.9696927978682455
+        ],
+        "matched_mean": 0.1002373129815472,
+        "crossed_mean": -0.2625457626597202,
+        "matrix_contrast": 0.3627830756412674,
+        "matrix_sign_consistent": false,
+        "candidate_raw_mode_for_data_mode": [
+          0,
+          1
+        ],
+        "robustness": {
+          "kmeans_initialization_seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "pairwise_ami_median": 1.0000000000000002,
+          "pairwise_ami_min": 1.0000000000000002,
+          "pairwise_ami_max": 1.0000000000000002,
+          "leave_one_network_out": [
+            {
+              "held_seed": 501,
+              "n_events": 25,
+              "cluster_counts": [
+                1,
+                24
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": false,
+              "matched_mean": 0.1971335124724049
+            },
+            {
+              "held_seed": 502,
+              "n_events": 26,
+              "cluster_counts": [
+                2,
+                24
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": false,
+              "matched_mean": 0.1002373129815472
+            },
+            {
+              "held_seed": 503,
+              "n_events": 25,
+              "cluster_counts": [
+                1,
+                24
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": false,
+              "matched_mean": 0.04516339569015432
+            },
+            {
+              "held_seed": 504,
+              "n_events": 33,
+              "cluster_counts": [
+                2,
+                31
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": false,
+              "matched_mean": 0.10331309897605423
+            },
+            {
+              "held_seed": 505,
+              "n_events": 31,
+              "cluster_counts": [
+                2,
+                29
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": false,
+              "matched_mean": 0.1002373129815472
+            },
+            {
+              "held_seed": 506,
+              "n_events": 35,
+              "cluster_counts": [
+                2,
+                33
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": false,
+              "matched_mean": 0.1002373129815472
+            }
+          ],
+          "loo_supported_data_pattern_count": 0,
+          "loo_total": 6,
+          "scientific_role": "stability diagnostic; not an additional post-hoc acceptance threshold"
+        }
+      },
+      "verdict": "TWO_CLUSTER_SUPPORT_FAIL"
+    },
+    {
+      "label": "CMA mean",
+      "n_events": 67,
+      "metric": {
+        "status": "ok",
+        "n_events": 67,
+        "cluster_counts": [
+          1,
+          66
+        ],
+        "min_cluster_count": 1,
+        "minority_fraction": 0.014925373134328358,
+        "support_eligible": false,
+        "prototype_correlation": -0.10747952905582703,
+        "similarity_matrix": [
+          [
+            0.14643002401536603,
+            -0.27874145067387857
+          ],
+          [
+            -0.9481091297381911,
+            0.6474496831332077
+          ]
+        ],
+        "matched_correlations": [
+          0.14643002401536603,
+          0.6474496831332077
+        ],
+        "crossed_correlations": [
+          -0.27874145067387857,
+          -0.9481091297381911
+        ],
+        "matched_mean": 0.39693985357428685,
+        "crossed_mean": -0.6134252902060349,
+        "matrix_contrast": 1.0103651437803216,
+        "matrix_sign_consistent": true,
+        "candidate_raw_mode_for_data_mode": [
+          0,
+          1
+        ],
+        "robustness": {
+          "kmeans_initialization_seeds": [
+            0,
+            1,
+            2,
+            3,
+            4
+          ],
+          "pairwise_ami_median": 1.0,
+          "pairwise_ami_min": 1.0,
+          "pairwise_ami_max": 1.0,
+          "leave_one_network_out": [
+            {
+              "held_seed": 501,
+              "n_events": 66,
+              "cluster_counts": [
+                1,
+                65
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": true,
+              "matched_mean": 0.396871549761164
+            },
+            {
+              "held_seed": 502,
+              "n_events": 55,
+              "cluster_counts": [
+                1,
+                54
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": true,
+              "matched_mean": 0.39693985357428685
+            },
+            {
+              "held_seed": 503,
+              "n_events": 53,
+              "cluster_counts": [
+                25,
+                28
+              ],
+              "support_eligible": true,
+              "matrix_sign_consistent": false,
+              "matched_mean": -0.04925061441565376
+            },
+            {
+              "held_seed": 504,
+              "n_events": 55,
+              "cluster_counts": [
+                1,
+                54
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": true,
+              "matched_mean": 0.3882936024105792
+            },
+            {
+              "held_seed": 505,
+              "n_events": 53,
+              "cluster_counts": [
+                1,
+                52
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": true,
+              "matched_mean": 0.39693985357428685
+            },
+            {
+              "held_seed": 506,
+              "n_events": 53,
+              "cluster_counts": [
+                1,
+                52
+              ],
+              "support_eligible": false,
+              "matrix_sign_consistent": true,
+              "matched_mean": 0.39977244593799466
+            }
+          ],
+          "loo_supported_data_pattern_count": 0,
+          "loo_total": 6,
+          "scientific_role": "stability diagnostic; not an additional post-hoc acceptance threshold"
+        }
+      },
+      "verdict": "TWO_CLUSTER_SUPPORT_FAIL"
+    }
+  ],
+  "statistical_boundary": "The 31 curve positions are interpolated and autocorrelated; matrix entries are effect sizes, not 31 independent observations, so no channel-shuffle p-value is shown.",
+  "script_sha256": "7e7fa99bcb1dd344684e00375b04f4ef88673f0848b4aca73f6d165365ba147d"
+}
