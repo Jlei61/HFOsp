@@ -12,9 +12,11 @@ import json
 import os
 import sys
 import tempfile
+from itertools import combinations
 from multiprocessing import Pool
 
 import numpy as np
+from sklearn.metrics import adjusted_mutual_info_score
 
 sys.path.insert(0, os.getcwd())
 sys.path.insert(0, os.path.join("src", "snn_engine"))
@@ -93,6 +95,67 @@ def _kmeans_summary(row):
         else:
             out[key] = value
     return out
+
+
+def _kmeans_robustness(curves, network_ids, all_network_ids,
+                       patient_prototypes, reference):
+    """Initialization and leave-one-network-out diagnostics for pooled KMeans."""
+    curves = np.asarray(curves, float)
+    network_ids = np.asarray(network_ids, int)
+    labels = [
+        fit_profile_modes(curves, reference, seed=seed)["labels"]
+        for seed in range(5)
+    ]
+    ami = [
+        float(adjusted_mutual_info_score(labels[left], labels[right]))
+        for left, right in combinations(range(len(labels)), 2)
+    ]
+    leave_one_out = []
+    for held_seed in all_network_ids:
+        selected = network_ids != int(held_seed)
+        row = kmeans_data_consistency(
+            curves[selected], patient_prototypes, reference,
+            min_cluster_events=OPPOSITION_MIN_CLUSTER_EVENTS,
+        )
+        leave_one_out.append(dict(
+            held_seed=int(held_seed),
+            n_events=int(selected.sum()),
+            cluster_counts=([] if row.get("status") != "ok" else
+                            np.asarray(row["cluster_counts"], int).tolist()),
+            support_eligible=bool(row.get("support_eligible", False)),
+            matrix_sign_consistent=bool(
+                row.get("matrix_sign_consistent", False)),
+            matched_mean=(None if row.get("matched_mean") is None else
+                          float(row["matched_mean"])),
+        ))
+    joint = [
+        row["support_eligible"] and row["matrix_sign_consistent"]
+        for row in leave_one_out
+    ]
+    return dict(
+        kmeans_initialization_seeds=list(range(5)),
+        pairwise_ami_median=float(np.median(ami)),
+        pairwise_ami_min=float(np.min(ami)),
+        pairwise_ami_max=float(np.max(ami)),
+        leave_one_network_out=leave_one_out,
+        loo_supported_data_pattern_count=int(sum(joint)),
+        loo_total=int(len(leave_one_out)),
+        scientific_role="stability diagnostic; not an additional post-hoc acceptance threshold",
+    )
+
+
+def augment_kmeans_robustness(payload, profiles_path, reference):
+    """Add zero-simulation robustness diagnostics from the hashed curve artifact."""
+    arrays = np.load(profiles_path)
+    patient_prototypes = np.asarray(arrays["patient_train_prototypes"], float)
+    seeds = [int(seed) for seed in payload["confirm_network_seeds"]]
+    for index, candidate in enumerate(payload["candidates"]):
+        curves = np.asarray(arrays[f"candidate_{index}_curves"], float)
+        network_ids = np.asarray(arrays[f"candidate_{index}_seed_ids"], int)
+        candidate["confirm"]["kmeans_data_consistency"]["robustness"] = (
+            _kmeans_robustness(
+                curves, network_ids, seeds, patient_prototypes, reference))
+    return payload
 
 
 def select_candidates(checkpoint, sheet_length):
@@ -338,7 +401,13 @@ def main():
     args = parser.parse_args()
 
     if args.reconcile_existing:
-        payload = reconcile_confirmation(json.load(open(args.out)))
+        payload = json.load(open(args.out))
+        profiles_path = payload.get("event_profiles", {}).get("path", args.curves_out)
+        if _sha256(profiles_path) != payload.get("event_profiles", {}).get("sha256"):
+            raise RuntimeError("confirmation JSON and event-profile NPZ hashes differ")
+        payload = augment_kmeans_robustness(
+            payload, profiles_path, load_reference(args.reference))
+        payload = reconcile_confirmation(payload)
         payload["reconciliation_provenance"] = provenance()
         atomic_write_json(payload, args.out)
         print(f"reconciled {args.out}: {payload['status']}")
@@ -425,7 +494,6 @@ def main():
     )
     for candidate_index, candidate in enumerate(candidates):
         chunk = raw[candidate_index * len(seeds):(candidate_index + 1) * len(seeds)]
-        good = [row for row in chunk if "error" not in row]
         curve_chunks = [
             rank_curve_table(row.get("events", []), axial, grid=grid)
             for row in chunk
@@ -440,6 +508,8 @@ def main():
             curves, patient_prototypes, reference,
             min_cluster_events=OPPOSITION_MIN_CLUSTER_EVENTS,
         )
+        consistency_full["robustness"] = _kmeans_robustness(
+            curves, curve_seed_ids, seeds, patient_prototypes, reference)
         consistency = _kmeans_summary(consistency_full)
         profile_arrays[f"candidate_{candidate_index}_curves"] = np.asarray(
             curves, np.float32)

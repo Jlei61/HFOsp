@@ -76,6 +76,21 @@ fraction 从 12.5% 提到 25%，sigma `0.650→0.627`；但 best 固定-n 距离
 cells 全正、crossed cells 全负，以及 matched mean 不弱于最佳 rigid control；旧 `r<=-0.2` 只保留为
 辅助诊断。该 gate 不进入 rev6 optimizer，避免把确认池回灌训练。
 
+**rev7 实测（同一 501--506 未见网络池，commit `a02fee81`，dirty false）**：患者 held-out 对
+patient-train 的 KMeans 匹配为 `matched mean=0.994`、`contrast=1.771`，两簇 `5652/10981`；rigid
+controls 为手放双核 `0.871`、Stage 2 filament `0.807`。training global best 虽有 `23/36` 的簇支持，
+但匹配矩阵为 `[[-0.981,+0.775],[-0.907,+0.918]]`，两个模型簇都指向 data B，`matched mean=-0.032`，
+裁定 `KMEANS_DATA_PATTERN_FAIL`。final-generation best 为 `2/33`、matched mean `0.100`；CMA mean
+为 `1/66`、matched mean `0.397`，后两者均为 `TWO_CLUSTER_SUPPORT_FAIL`。因此 Fig. 4C 判据没有挽救
+当前候选，反而把失败定位为**模式塌缩到同一个病人方向**，不是单纯距离偏高。
+五个 KMeans 初始化的 pairwise AMI 对三个候选均为 `1.000`，说明该负结果不是初始化噪声；逐一移除
+501--506 网络后，三个候选满足“簇支持 + 病人矩阵结构”的次数均为 `0/6`。LOO 在本 revision 只作
+稳定性诊断，不在看到结果后新增阈值，但它确认 training global best 的同向塌缩跨网络保留。
+
+正式核验图：`results/topic4_sef_hfo/data_driven_core_field_stage3/joint_kmeans_consistency/figures/`
+`stage3_joint_kmeans_data_consistency.png`。曲线 artifact：`joint_confirmation/`
+`joint_confirmation_event_profiles_rev6.npz`；JSON 存其 SHA256，绘图入口先验 hash 不一致即停止。
+
 **收敛门：** 至少两次重启的 held-out `D_curve` 落入彼此 bootstrap 区间；场的主要质量分量跨重启可匹配；
 独立网络确认不回退到 rigid-family best。
 

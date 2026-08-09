@@ -60,12 +60,20 @@ def _prototype(curves, labels, mode):
 
 def _row_title(label, metric, verdict):
     counts = metric["cluster_counts"]
-    text = (
-        f"{label}  |  n={sum(counts)} ({counts[0]}/{counts[1]})  |  "
-        f"matched mean={metric['matched_mean']:.3f}  |  "
+    first = label if verdict is None else f"{label} | {verdict}"
+    second = (
+        f"n={sum(counts)} ({counts[0]}/{counts[1]}) | "
+        f"matched mean={metric['matched_mean']:.3f} | "
         f"contrast={metric['matrix_contrast']:.3f}"
     )
-    return text if verdict is None else f"{text}  |  {verdict}"
+    robustness = metric.get("robustness")
+    if robustness is not None:
+        second += (
+            f" | AMI={robustness['pairwise_ami_median']:.2f} | "
+            f"LOO pattern={robustness['loo_supported_data_pattern_count']}/"
+            f"{robustness['loo_total']}"
+        )
+    return f"{first}\n{second}"
 
 
 def render(confirmation_path=CONFIRMATION, profiles_path=PROFILES, out_dir=OUT):
@@ -89,7 +97,13 @@ def render(confirmation_path=CONFIRMATION, profiles_path=PROFILES, out_dir=OUT):
         verdict=None,
     )]
     for index, candidate in enumerate(payload["candidates"]):
-        role = ", ".join(candidate["roles"])
+        role_names = {
+            "training_global_best": "training global best",
+            "final_generation_best": "final-generation best",
+            "final_optimizer_mean": "CMA mean",
+        }
+        role = ", ".join(role_names.get(value, value.replace("_", " "))
+                         for value in candidate["roles"])
         rows.append(dict(
             label=role,
             curves=np.asarray(profiles[f"candidate_{index}_curves"], float),
@@ -129,17 +143,17 @@ def render(confirmation_path=CONFIRMATION, profiles_path=PROFILES, out_dir=OUT):
             + (f" (display {len(shown)}/{len(curves)})" if len(shown) < len(curves) else "")
         )
         heat.set_title(_row_title(row["label"], metric, row["verdict"]),
-                       loc="left", fontsize=10.5, weight="bold")
+                       loc="left", fontsize=9.6, weight="bold", pad=8)
         heat.text(
-            max(boundary / 2, 0), grid[-1] + 0.04 * np.ptp(grid), "mode A",
-            color=MODE_COLORS[0], ha="center", va="bottom", weight="bold",
-            clip_on=False,
+            max(boundary / 2, 0), grid[-1] - 0.04 * np.ptp(grid), "mode A",
+            color=MODE_COLORS[0], ha="center", va="top", weight="bold",
+            bbox=dict(fc="white", ec="none", alpha=0.78, pad=1.2),
         )
         heat.text(
             boundary + max((len(shown) - boundary) / 2, 0),
-            grid[-1] + 0.04 * np.ptp(grid), "mode B",
-            color=MODE_COLORS[1], ha="center", va="bottom", weight="bold",
-            clip_on=False,
+            grid[-1] - 0.04 * np.ptp(grid), "mode B",
+            color=MODE_COLORS[1], ha="center", va="top", weight="bold",
+            bbox=dict(fc="white", ec="none", alpha=0.78, pad=1.2),
         )
 
         profile = fig.add_subplot(outer[row_index, 1], sharey=heat)
@@ -155,9 +169,11 @@ def render(confirmation_path=CONFIRMATION, profiles_path=PROFILES, out_dir=OUT):
         profile.axvline(0.0, color="#777777", lw=0.8, ls=":")
         profile.set_xlabel("normalized rank profile")
         profile.tick_params(axis="y", labelleft=False)
-        if row_index == 0:
-            profile.set_title("solid: row mode   dashed: patient train",
-                              fontsize=9.5)
+        profile.text(
+            0.02, 0.97, "solid: row mode | dashed: patient train",
+            transform=profile.transAxes, ha="left", va="top", fontsize=8.2,
+            color="#444444",
+        )
 
         matrix_ax = fig.add_subplot(outer[row_index, 2])
         matrix = np.asarray(metric["similarity_matrix"], float)
@@ -187,9 +203,12 @@ def render(confirmation_path=CONFIRMATION, profiles_path=PROFILES, out_dir=OUT):
         fontsize=16, weight="bold",
     )
     rigid = float(payload["kmeans_rigid_benchmark_matched_mean"])
+    hand = float(payload["kmeans_controls"]["hand_placed_two_cores"]["matched_mean"])
+    filament = float(payload["kmeans_controls"]["stage2_filament"]["matched_mean"])
     fig.supxlabel(
         "Confirmation-only read-back. Green matrix border = supported Fig. 4C sign pattern; "
-        f"rigid-control matched-mean benchmark = {rigid:.3f}. "
+        f"rigid matched mean: hand cores={hand:.3f}, Stage 2 filament={filament:.3f}; "
+        f"benchmark={rigid:.3f}. "
         "No grid-point permutation p-values (interpolated positions are autocorrelated).",
         fontsize=9.5,
     )

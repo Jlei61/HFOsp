@@ -1,15 +1,20 @@
 """Selection contracts for the unseen-network joint confirmation producer."""
+import hashlib
+import json
+import os
+
 import numpy as np
 import pytest
 
 from scripts.run_topic4_core_field_stage3_joint_confirm import (
     _distance_to_target,
+    _kmeans_robustness,
     confirmation_seeds,
     evaluation_errors,
     reconcile_confirmation,
     select_candidates,
 )
-from src.topic4_core_field_profile import fit_rank_curve_reference
+from src.topic4_core_field_profile import fit_profile_modes, fit_rank_curve_reference
 from src.topic4_core_field_stage3 import n_free
 
 
@@ -67,6 +72,23 @@ def test_target_distance_uses_exactly_the_frozen_source_count():
     second = _distance_to_target(extended, reference, target, n_events=20)
     assert np.isfinite(first) and np.isfinite(second)
     assert _distance_to_target(train[:19], reference, target, n_events=20) is None
+
+
+def test_kmeans_robustness_reports_initialization_and_network_leave_out():
+    rng = np.random.default_rng(18)
+    base = np.linspace(-2.0, 2.0, 6)
+    left = base + rng.normal(0.0, 0.08, size=(60, 6))
+    right = -base + rng.normal(0.0, 0.08, size=(60, 6))
+    curves = np.vstack((left, right))
+    reference = fit_rank_curve_reference(
+        curves, n_components=4, n_reference=100, n_projections=8, seed=2)
+    patient_modes = fit_profile_modes(curves, reference)
+    network_ids = np.tile(np.arange(6), 20)
+    row = _kmeans_robustness(
+        curves, network_ids, range(6), patient_modes["prototypes"], reference)
+    assert row["pairwise_ami_min"] > 0.99
+    assert row["loo_supported_data_pattern_count"] == 6
+    assert row["loo_total"] == 6
 
 
 def _confirmation_payload(counts, corr, train_median=0.5,
@@ -128,3 +150,25 @@ def test_reconciliation_uses_kmeans_data_pattern_as_the_mode_gate():
     assert confirm["gates"]["opposing_prototypes"] is True
     assert confirm["gates"]["kmeans_matches_patient_modes"] is False
     assert confirm["verdict"] == "KMEANS_DATA_PATTERN_FAIL"
+
+
+_CONFIRMATION = ("results/topic4_sef_hfo/data_driven_core_field_stage3/"
+                 "joint_confirmation_pilot_rev6.json")
+
+
+@pytest.mark.integration
+@pytest.mark.skipif(not os.path.exists(_CONFIRMATION),
+                    reason="joint confirmation artifact not on disk")
+def test_real_confirmation_uses_hashed_kmeans_event_profiles():
+    payload = json.load(open(_CONFIRMATION))
+    artifact = payload["event_profiles"]
+    with open(artifact["path"], "rb") as handle:
+        assert hashlib.sha256(handle.read()).hexdigest() == artifact["sha256"]
+    assert payload["provenance"]["tracked_modules_dirty"] is False
+    assert payload["kmeans_controls"]["patient_heldout"][
+        "matrix_sign_consistent"] is True
+    assert [row["confirm"]["verdict"] for row in payload["candidates"]] == [
+        "KMEANS_DATA_PATTERN_FAIL",
+        "TWO_CLUSTER_SUPPORT_FAIL",
+        "TWO_CLUSTER_SUPPORT_FAIL",
+    ]

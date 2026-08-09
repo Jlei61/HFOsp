@@ -111,7 +111,8 @@ def main():
         status=payload["status"], input=args.input, input_sha256=_sha256(args.input),
         git_commit=_git_commit(), objective_event_count=payload["objective_event_count"],
         plot_contract=("distance intervals are event bootstraps; opposition support uses "
-                       "the frozen minimum of 10 events in each post-hoc cluster"),
+                       "the frozen minimum of 10 events in each post-hoc cluster; panel B is "
+                       "an auxiliary internal-opposition diagnostic after the rev7 KMeans-data gate"),
     )
     with open(args.out + "_metadata.json", "w") as fh:
         json.dump(metadata, fh, indent=2)
@@ -119,7 +120,7 @@ def main():
 
 ### stage3_joint_confirmation_screen
 
-这张图汇总三代 K=3 pilot 的未见网络确认。A 用固定 20 条事件比较患者地板、rigid controls 和三个预冻结候选；B 同时检查两个后验簇是否各有至少 10 条事件、且两原型相关不高于 -0.2。
+这张图汇总三代 K=3 pilot 的未见网络确认。A 用固定 20 条事件比较患者地板、rigid controls 和三个预冻结候选；B 检查两个后验簇的支持数及内部原型相关。B 现保留为辅助诊断，正式模式门已升级为 `joint_kmeans_consistency/figures/stage3_joint_kmeans_data_consistency.png` 的 KMeans--病人模板一致性矩阵。
 
 **关注点**：距离较低的两个候选都没有相反原型；唯一负相关的 CMA mean 实际是 1 对 66 的 singleton 分组。当前没有候选同时满足距离和双簇结构，不能解释为恢复了 core。
 """
