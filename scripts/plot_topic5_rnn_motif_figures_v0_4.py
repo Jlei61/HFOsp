@@ -438,12 +438,16 @@ def lesion_display_values(out_root: Path) -> list[tuple[str, np.ndarray]]:
     )
     available: dict[str, np.ndarray] = {}
     for lesion, _ in lesion_order:
+        by_subject: dict[str, list[float]] = {}
+        for row in lesion_rows:
+            value = float(row["specificity_contact_nll"])
+            if (row["model"] == REPRESENTATIVE_MODEL and row["cell"] == "rnn"
+                    and row["lesion"] == lesion
+                    and row["all_inference_available"] in (True, "True", "1", 1.0)
+                    and np.isfinite(value)):
+                by_subject.setdefault(str(row["subject"]), []).append(value)
         available[lesion] = np.asarray([
-            float(row["specificity_contact_nll"]) for row in lesion_rows
-            if row["model"] == REPRESENTATIVE_MODEL
-            and row["cell"] == "rnn" and row["lesion"] == lesion
-            and row["all_inference_available"] in (True, "True", "1", 1.0)
-            and np.isfinite(float(row["specificity_contact_nll"]))
+            np.median(by_subject[subject]) for subject in sorted(by_subject)
         ], float)
     if len(available["local_backbone_edges"]) < 5:
         return []

@@ -478,6 +478,24 @@ def test_lesion_figure_uses_estimable_frozen_components_without_effect_selection
     assert all("Connector" not in label for label, _ in selected)
 
 
+def test_lesion_figure_denominator_counts_unique_patients(tmp_path):
+    records = []
+    for lesion in ("local_backbone_edges", "long_range_high_influence_edges"):
+        for subject in ("p1", "p2", "p3", "p4"):
+            records.append({
+                "subject": subject, "model": "M6_SPATIAL_MID", "cell": "rnn",
+                "lesion": lesion, "all_inference_available": True,
+                "specificity_contact_nll": 1.0,
+            })
+        records.append({**records[-1], "specificity_contact_nll": 100.0})
+    with (tmp_path / "matched_lesion_patient_metrics.csv").open(
+            "w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=records[0].keys())
+        writer.writeheader()
+        writer.writerows(records)
+    assert lesion_display_values(tmp_path) == []
+
+
 def test_effective_operator_seed_stability_keeps_inactive_edges(tmp_path):
     first = np.array([[0.0, 4.0, 0.0], [1.0, 0.0, 3.0], [0.0, 2.0, 0.0]])
     second = 2.0 * first
