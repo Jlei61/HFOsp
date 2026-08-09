@@ -89,10 +89,18 @@ def _theta_sha256(theta):
     return hashlib.sha256(np.asarray(theta, dtype="<f8").tobytes()).hexdigest()
 
 
-def _candidate_rows(checkpoint_path, sheet_length, top_per_checkpoint=2):
+def _candidate_rows(
+        checkpoint_path, sheet_length, top_per_checkpoint=2,
+        expected_objective=OBJECTIVE_ID):
     checkpoint = json.load(open(checkpoint_path))
-    if checkpoint.get("objective") != OBJECTIVE_ID:
-        raise RuntimeError(f"not a rev8 checkpoint: {checkpoint_path}")
+    checkpoint_objective = checkpoint.get("objective")
+    contract_objective = checkpoint.get("run_contract", {}).get("objective_id")
+    if (checkpoint_objective != expected_objective
+            or contract_objective != expected_objective):
+        raise RuntimeError(
+            f"checkpoint objective mismatch: expected {expected_objective}, "
+            f"found {checkpoint_objective}/{contract_objective}: "
+            f"{checkpoint_path}")
     history = checkpoint.get("history", [])
     if not history:
         raise RuntimeError(f"empty checkpoint: {checkpoint_path}")
@@ -135,13 +143,14 @@ def _candidate_rows(checkpoint_path, sheet_length, top_per_checkpoint=2):
     return rows
 
 
-def build_shortlist(fit_dir, sheet_length):
+def build_shortlist(fit_dir, sheet_length, expected_objective=OBJECTIVE_ID):
     checkpoint_paths = sorted(glob.glob(os.path.join(fit_dir, "checkpoint_K*_r*.json")))
     if not checkpoint_paths:
         raise RuntimeError(f"no rev8 checkpoints in {fit_dir}")
     rows = [
         row for path in checkpoint_paths
-        for row in _candidate_rows(path, sheet_length)
+        for row in _candidate_rows(
+            path, sheet_length, expected_objective=expected_objective)
     ]
     unique = {}
     for row in rows:
@@ -184,8 +193,12 @@ def _evaluate_candidates(candidates, seeds, cfg, cache, workers,
                 failures.append(dict(
                     candidate_id=candidate["candidate_id"], seed=int(seed),
                     error=str(row["error"])))
+        contract = candidate["run_contract"]
         key, metrics = score_candidate(
-            chunk, axial, reference, patient_prototypes)
+            chunk, axial, reference, patient_prototypes,
+            mode_loss_weight=float(
+                contract.get("mode_loss_weight", MODE_LOSS_WEIGHT)),
+            mode_sign_tier=bool(contract.get("mode_sign_tier", False)))
         results.append(dict(
             **candidate,
             selection_fitness_key=[float(value) for value in key],
@@ -200,8 +213,25 @@ def _evaluate_candidates(candidates, seeds, cfg, cache, workers,
     return results, raw
 
 
+def _selection_eligible_rows(rows):
+    sign_tiers = {
+        bool(row["run_contract"].get("mode_sign_tier", False)) for row in rows
+    }
+    if len(sign_tiers) != 1:
+        raise RuntimeError("candidate shortlist mixes incompatible sign-tier contracts")
+    sign_required = sign_tiers.pop()
+    if not sign_required:
+        return rows, False
+    return [
+        row for row in rows
+        if bool(row["selection_metrics"]["mode"].get("matrix_sign_consistent"))
+    ], True
+
+
 def run_selection(args, cfg, axial, reference, patient_prototypes):
-    candidates = build_shortlist(args.fit_dir, float(cfg["engine"]["L"]))
+    candidates = build_shortlist(
+        args.fit_dir, float(cfg["engine"]["L"]),
+        expected_objective=args.objective_id)
     fit_seeds = sorted({seed for row in candidates for seed in row["fit_seeds"]})
     seeds = list(SELECTION_SEED_POOL)
     if set(seeds) & set(fit_seeds):
@@ -211,9 +241,47 @@ def run_selection(args, cfg, axial, reference, patient_prototypes):
     rows, _ = _evaluate_candidates(
         candidates, seeds, cfg, cache, args.workers,
         axial, reference, patient_prototypes)
-    selected = max(rows, key=lambda row: tuple(row["selection_fitness_key"]))
+    eligible_rows, sign_required = _selection_eligible_rows(rows)
+    ranked = sorted(
+        rows, key=lambda row: tuple(row["selection_fitness_key"]), reverse=True)
+    if not eligible_rows:
+        output = dict(
+            status="REV8_SELECTION_NO_SIGN_CONSISTENT_CANDIDATE",
+            objective_id=str(args.objective_id),
+            scientific_role=(
+                "selection-network diagnostic using patient-training target only; "
+                "no candidate was frozen and patient held-out recordings were not read"
+            ),
+            sign_consistency_required=sign_required,
+            selected_candidate_id=None,
+            selected_candidate=None,
+            ranked_candidates=ranked,
+            optimization_network_seeds=fit_seeds,
+            selection_network_seeds=seeds,
+            final_confirm_network_seeds=list(FINAL_CONFIRM_SEED_POOL),
+            patient_heldout_read=False,
+            patient_heldout_scores_computed=False,
+            reference=dict(path=args.reference, sha256=_sha256(args.reference)),
+            target=dict(path=args.target, sha256=_sha256(args.target)),
+            network_cache=dict(
+                hits=int(sum(row["cache_hit"] for row in cache_rows)),
+                builds=int(sum(not row["cache_hit"] for row in cache_rows)),
+            ),
+            provenance=provenance(),
+        )
+        atomic_write_json(output, args.selection_out)
+        print(json.dumps({
+            "status": output["status"],
+            "patient_heldout_read": False,
+            "n_ranked_candidates": len(ranked),
+        }, indent=2))
+        return
+    selected = max(
+        eligible_rows, key=lambda row: tuple(row["selection_fitness_key"]))
     output = dict(
         status="REV8_CANDIDATE_FROZEN_BEFORE_FINAL_CONFIRMATION",
+        objective_id=str(args.objective_id),
+        sign_consistency_required=sign_required,
         scientific_role=(
             "model-side candidate selection using patient-training target only; "
             "patient held-out recordings and final network seeds were not read"
@@ -221,8 +289,7 @@ def run_selection(args, cfg, axial, reference, patient_prototypes):
         selected_candidate_id=selected["candidate_id"],
         selected_theta_sha256=selected["theta_sha256"],
         selected_candidate=selected,
-        ranked_candidates=sorted(
-            rows, key=lambda row: tuple(row["selection_fitness_key"]), reverse=True),
+        ranked_candidates=ranked,
         optimization_network_seeds=fit_seeds,
         selection_network_seeds=seeds,
         final_confirm_network_seeds=list(FINAL_CONFIRM_SEED_POOL),
@@ -300,11 +367,19 @@ def run_confirmation(args, cfg, axial, reference, target):
     selection = json.load(open(args.selection_out))
     if selection.get("status") != "REV8_CANDIDATE_FROZEN_BEFORE_FINAL_CONFIRMATION":
         raise RuntimeError("final confirmation requires a frozen rev8 selection")
+    if selection.get("objective_id") != args.objective_id:
+        raise RuntimeError("selection/objective-id mismatch")
     if selection["reference"]["sha256"] != _sha256(args.reference):
         raise RuntimeError("selection/reference hash mismatch")
     if selection["target"]["sha256"] != _sha256(args.target):
         raise RuntimeError("selection/target hash mismatch")
     candidate = selection["selected_candidate"]
+    candidate_contract = candidate["run_contract"]
+    if candidate_contract.get("objective_id") != args.objective_id:
+        raise RuntimeError("selected candidate/objective-id mismatch")
+    mode_loss_weight = float(
+        candidate_contract.get("mode_loss_weight", MODE_LOSS_WEIGHT))
+    mode_sign_tier = bool(candidate_contract.get("mode_sign_tier", False))
     seeds = list(FINAL_CONFIRM_SEED_POOL)
     used = set(selection["optimization_network_seeds"]) | set(
         selection["selection_network_seeds"])
@@ -375,7 +450,9 @@ def run_confirmation(args, cfg, axial, reference, target):
     }
 
     _, train_metrics = score_candidate(
-        chunk, axial, reference, patient_prototypes)
+        chunk, axial, reference, patient_prototypes,
+        mode_loss_weight=mode_loss_weight,
+        mode_sign_tier=mode_sign_tier)
     train_bootstrap = _bootstrap_to_target(
         curves, reference, reference["reference_z"], DISTANCE_BOOTSTRAP_SEED + 300)
     heldout_bootstrap = _bootstrap_to_target(
@@ -428,6 +505,7 @@ def run_confirmation(args, cfg, axial, reference, target):
     )
     output = reconcile_confirmation(dict(
         status="REV8_FINAL_CONFIRMATION_MEASUREMENT_COMPLETE",
+        objective_id=str(args.objective_id),
         scientific_role=(
             "one frozen rev8 candidate evaluated on patient held-out recordings "
             "and a final unseen-network pool"
@@ -461,7 +539,8 @@ def run_confirmation(args, cfg, axial, reference, target):
         objective_event_count=OBJECTIVE_N_EVENTS,
         mode_objective_event_count=MODE_OBJECTIVE_N_EVENTS,
         mode_min_cluster_events_train=MODE_MIN_CLUSTER_EVENTS,
-        mode_loss_weight=MODE_LOSS_WEIGHT,
+        mode_loss_weight=mode_loss_weight,
+        mode_sign_tier=mode_sign_tier,
         patient_floor_train=calibration["optimization_patient_floor"],
         optimization_controls_n20=controls,
         kmeans_patient_train=dict(
@@ -496,6 +575,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--phase", choices=("select", "confirm"), required=True)
     parser.add_argument("--fit-dir", default=FIT_DIR)
+    parser.add_argument("--objective-id", default=OBJECTIVE_ID)
     parser.add_argument("--reference", default=REFERENCE_PATH)
     parser.add_argument("--target", default=TARGET_PATH)
     parser.add_argument("--calibration", default=CALIBRATION)

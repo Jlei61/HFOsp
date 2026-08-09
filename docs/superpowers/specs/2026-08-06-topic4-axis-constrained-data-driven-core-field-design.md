@@ -1389,6 +1389,25 @@ patient-train target，冻结唯一候选后才能打开 patient-heldout recordi
 
 若最终不通过，图仍必须生成并标明失败原因；禁止换 seed、删事件或改 KMeans 阈值来获得好看的双模式图。
 
+### 9.3f rev8.1 训练尺度纠正（2026-08-09，运行前冻结）
+
+rev8 cheap pilot 已完成：K=3 六代共 48 个候选，其中 23 个满足每簇至少 8 条，后四代
+`D_curve` 可计算率为 75%、88%、100%、100%；因此上一轮的主要失败已不是“不出事件”的死区。但
+48 个候选中 `0/48` 满足 Fig. 4C 的矩阵符号结构。旧目标把已经除以 2 的 `D_mode` 再乘 0.5，
+使其相对 `D_curve` 缩小四倍；优化器因而稳定留在“两个模型簇对应同一个病人模式”的错误盆地。
+
+rev8.1 只纠正训练目标尺度，不改变数据、embedding、事件数、KMeans、网络种子池或最终确认门：
+
+1. 双簇支持后使用 `J_rev8.1 = D_curve + 2.0 * D_mode`，等价于以原始 `2x2` Spearman 矩阵
+   RMSE 与 `D_curve` 同阶计分；所有候选继续落盘两个分量；
+2. 满足两个 matched cells `>0` 且两个 crossed cells `<0` 的候选进入更高的训练侧词典序层级；
+   这只是 patient-training 辅助目标，不替代 patient-heldout 和 unseen-network 盲检；
+3. K=3 从 rev8 checkpoint 中按新标量选出的、双簇支持的训练 elite warm-start；该选择不得读取
+   selection seeds、final seeds 或 patient-heldout；checkpoint 路径和 SHA256 写入 run contract；
+4. 使用独立结果目录与 objective ID，旧 rev8 checkpoint 不覆盖、不混入候选池。只有训练侧出现
+   符号一致候选后，才允许消耗 `761--766` selection pool；若该符号结构不能在 selection pool
+   复现，则写出负结果并停止，不得打开 patient-heldout。
+
 ### 9.4 空间诊断量与判据
 
 `r_bar` / `C_axis` 的定义与"必须用 `h` 不用 `h·d`"的理由（§9.4 rev4）**原样保留**。

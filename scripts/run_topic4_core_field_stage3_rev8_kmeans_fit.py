@@ -56,6 +56,9 @@ TARGET_PATH = (
 OUT = f"{ROOT}/joint_fit_kmeans_rev8"
 OBJECTIVE_ID = "rev8_curve_plus_patient_train_kmeans_v1"
 REV8_INIT_ID = f"{INIT_ID}_rev8"
+REV81_OBJECTIVE_ID = "rev8_1_curve_plus_patient_train_kmeans_weight2_v1"
+REV81_INIT_ID = "rev8_1_training_elite_mode_warm_start_v1"
+REV81_MODE_LOSS_WEIGHT = 2.0
 TRAIN_SEED_POOL = tuple(range(701, 761))
 SELECTION_SEED_POOL = tuple(range(761, 767))
 FINAL_CONFIRM_SEED_POOL = tuple(range(801, 807))
@@ -86,7 +89,9 @@ def load_training_target(path=TARGET_PATH):
     return {key: np.asarray(data[key]) for key in required}
 
 
-def rev8_candidate_fitness(distance, mode, n_usable, participant_credit):
+def rev8_candidate_fitness(
+        distance, mode, n_usable, participant_credit,
+        mode_loss_weight=MODE_LOSS_WEIGHT, mode_sign_tier=False):
     """Lexicographic feasibility followed by the frozen scalar objective."""
     n_usable = int(n_usable)
     participant_credit = float(participant_credit)
@@ -99,8 +104,10 @@ def rev8_candidate_fitness(distance, mode, n_usable, participant_credit):
     min_cluster = int(mode["min_cluster_count"])
     if not bool(mode["support_eligible"]):
         return (2.0, float(min_cluster), -mode_loss, -float(distance))
-    joint_loss = float(distance + MODE_LOSS_WEIGHT * mode_loss)
-    return (3.0, -joint_loss, -float(distance), -mode_loss)
+    joint_loss = float(distance + float(mode_loss_weight) * mode_loss)
+    tier = (4.0 if bool(mode_sign_tier)
+            and bool(mode.get("matrix_sign_consistent")) else 3.0)
+    return (tier, -joint_loss, -float(distance), -mode_loss)
 
 
 def _mode_summary(mode):
@@ -121,7 +128,9 @@ def _mode_summary(mode):
     return out
 
 
-def score_candidate(results, axial, reference, data_prototypes):
+def score_candidate(
+        results, axial, reference, data_prototypes,
+        mode_loss_weight=MODE_LOSS_WEIGHT, mode_sign_tier=False):
     good = [row for row in results if "error" not in row]
     events = [event for row in good for event in row.get("events", [])]
     curves = rank_curve_table(events, axial)
@@ -141,8 +150,11 @@ def score_candidate(results, axial, reference, data_prototypes):
         mode=_mode_summary(mode),
         joint_loss=(
             None if not np.isfinite(distance) or mode.get("status") != "ok"
-            else float(distance + MODE_LOSS_WEIGHT * mode["mode_matrix_loss"])
+            else float(distance + float(mode_loss_weight)
+                       * mode["mode_matrix_loss"])
         ),
+        mode_loss_weight=float(mode_loss_weight),
+        mode_sign_tier=bool(mode_sign_tier),
         n_usable=int(len(curves)),
         n_detected=int(sum(
             value.get("n_detected", len(value.get("events", []))) for value in good)),
@@ -152,14 +164,86 @@ def score_candidate(results, axial, reference, data_prototypes):
         n_failed=int(len(results) - len(good)),
     )
     return rev8_candidate_fitness(
-        distance, mode, len(curves), participant_credit), row
+        distance, mode, len(curves), participant_credit,
+        mode_loss_weight=mode_loss_weight,
+        mode_sign_tier=mode_sign_tier), row
+
+
+def training_elite_warm_start(checkpoint_path, K, mode_loss_weight):
+    """Choose a training-only, cluster-supported elite under the new scalar."""
+    if checkpoint_path is None:
+        return None, None
+    checkpoint = json.load(open(checkpoint_path))
+    if int(checkpoint.get("K", -1)) != int(K):
+        raise RuntimeError("warm-start checkpoint K does not match the requested K")
+    eligible = [
+        row for row in checkpoint.get("history", [])
+        if row.get("distance") is not None
+        and row.get("mode", {}).get("support_eligible")
+        and row.get("mode", {}).get("mode_matrix_loss") is not None
+    ]
+    if not eligible:
+        raise RuntimeError("warm-start checkpoint has no supported training elite")
+    weight = float(mode_loss_weight)
+    selected = min(eligible, key=lambda row: (
+        float(row["distance"]) + weight * float(row["mode"]["mode_matrix_loss"]),
+        float(row["mode"]["mode_matrix_loss"]),
+        float(row["distance"]),
+    ))
+    latent = np.asarray(selected["latent"], float)
+    if latent.size != n_free(K) or not np.isfinite(latent).all():
+        raise RuntimeError("warm-start elite has an invalid latent vector")
+    descriptor = dict(
+        path=str(checkpoint_path), sha256=_sha256(checkpoint_path),
+        source_objective=checkpoint.get("objective"),
+        source_git_commit=checkpoint.get("provenance", {}).get("git_commit"),
+        source_generation=int(selected["generation"]),
+        source_distance=float(selected["distance"]),
+        source_mode_loss=float(selected["mode"]["mode_matrix_loss"]),
+        source_joint_loss=float(
+            selected["distance"] + weight * selected["mode"]["mode_matrix_loss"]),
+        source_cluster_counts=[int(value) for value in
+                               selected["mode"]["cluster_counts"]],
+    )
+    return latent, descriptor
+
+
+def validate_objective_configuration(args):
+    """Bind revision IDs to their scientific scoring contracts."""
+    if args.objective_id == OBJECTIVE_ID:
+        expected = dict(
+            initializer_id=REV8_INIT_ID,
+            mode_loss_weight=MODE_LOSS_WEIGHT,
+            mode_sign_tier=False,
+            warm_start_checkpoint=None,
+        )
+    elif args.objective_id == REV81_OBJECTIVE_ID:
+        expected = dict(
+            initializer_id=REV81_INIT_ID,
+            mode_loss_weight=REV81_MODE_LOSS_WEIGHT,
+            mode_sign_tier=True,
+        )
+        if int(args.K) != 3 or not args.warm_start_checkpoint:
+            raise SystemExit("rev8.1 requires K=3 and a training checkpoint warm start")
+    else:
+        raise SystemExit(f"unknown objective-id: {args.objective_id}")
+    mismatches = []
+    for key, value in expected.items():
+        actual = getattr(args, key)
+        matches = (np.isclose(actual, value) if isinstance(value, float)
+                   else actual == value)
+        if not matches:
+            mismatches.append(f"{key}={actual!r}, expected {value!r}")
+    if mismatches:
+        raise SystemExit(
+            "objective-id/scoring contract mismatch:\n- " + "\n- ".join(mismatches))
 
 
 def _run_contract(args, reference_sha, target_sha, config_checksum,
-                  numeric_contract_sha):
+                  numeric_contract_sha, warm_start):
     return dict(
-        objective_id=OBJECTIVE_ID,
-        initializer_id=REV8_INIT_ID,
+        objective_id=str(args.objective_id),
+        initializer_id=str(args.initializer_id),
         K=int(args.K),
         restart=int(args.restart),
         popsize=int(args.popsize),
@@ -167,7 +251,10 @@ def _run_contract(args, reference_sha, target_sha, config_checksum,
         distance_event_count=OBJECTIVE_N_EVENTS,
         mode_event_count=MODE_OBJECTIVE_N_EVENTS,
         min_events_per_mode=MODE_MIN_CLUSTER_EVENTS,
-        mode_loss_weight=MODE_LOSS_WEIGHT,
+        mode_loss_weight=float(args.mode_loss_weight),
+        mode_sign_tier=bool(args.mode_sign_tier),
+        sigma0=float(args.sigma0),
+        warm_start=warm_start,
         train_seed_pool=list(TRAIN_SEED_POOL),
         selection_seed_pool=list(SELECTION_SEED_POOL),
         final_confirm_seed_pool=list(FINAL_CONFIRM_SEED_POOL),
@@ -189,7 +276,16 @@ def main():
     parser.add_argument("--hours", type=float, default=6.0)
     parser.add_argument("--pilot-stop-dead-fraction", type=float, default=0.50)
     parser.add_argument("--out", default=OUT)
+    parser.add_argument("--objective-id", default=OBJECTIVE_ID)
+    parser.add_argument("--initializer-id", default=REV8_INIT_ID)
+    parser.add_argument("--mode-loss-weight", type=float, default=MODE_LOSS_WEIGHT)
+    parser.add_argument("--mode-sign-tier", action="store_true")
+    parser.add_argument("--sigma0", type=float, default=SIGMA0)
+    parser.add_argument("--warm-start-checkpoint")
     args = parser.parse_args()
+    if args.mode_loss_weight <= 0.0 or args.sigma0 <= 0.0:
+        raise SystemExit("mode-loss-weight and sigma0 must be positive")
+    validate_objective_configuration(args)
 
     cfg = json.load(open(f"{STAGE2}/config/stage_config.json"))
     axial = axial_map()
@@ -200,8 +296,11 @@ def main():
     target_sha = _sha256(TARGET_PATH)
     prov = provenance()
     numeric_contract_sha = _numeric_contract_sha256(prov)
+    warm_latent, warm_start = training_elite_warm_start(
+        args.warm_start_checkpoint, args.K, args.mode_loss_weight)
     run_contract = _run_contract(
-        args, reference_sha, target_sha, cfg["checksum"], numeric_contract_sha)
+        args, reference_sha, target_sha, cfg["checksum"], numeric_contract_sha,
+        warm_start)
 
     tag = f"K{args.K}_r{args.restart}"
     checkpoint_path = os.path.join(args.out, f"checkpoint_{tag}.json")
@@ -218,14 +317,16 @@ def main():
         generation_summary = checkpoint["generation_summary"]
         print(f"[{tag}] resuming at generation {optimizer.generation}", flush=True)
     else:
+        initial_latent = (_initial_latent(args.K, args.restart)
+                          if warm_latent is None else warm_latent)
         optimizer = CMAES(
-            _initial_latent(args.K, args.restart), SIGMA0,
+            initial_latent, float(args.sigma0),
             seed=42000 + 100 * args.K + args.restart,
             popsize=args.popsize,
         )
         history, generation_summary = [], []
         print(
-            f"[{tag}] fresh {REV8_INIT_ID}, dim={n_free(args.K)}, "
+            f"[{tag}] fresh {args.initializer_id}, dim={n_free(args.K)}, "
             f"popsize={args.popsize}", flush=True)
 
     sys.path.insert(0, os.path.join("src", "snn_engine"))
@@ -262,7 +363,9 @@ def main():
             chunk = raw[
                 index * len(seeds):(index + 1) * len(seeds)]
             key, row = score_candidate(
-                chunk, axial, reference, data_prototypes)
+                chunk, axial, reference, data_prototypes,
+                mode_loss_weight=args.mode_loss_weight,
+                mode_sign_tier=args.mode_sign_tier)
             row.update(
                 latent=[float(value) for value in latent_value],
                 theta=[float(value) for value in theta],
@@ -286,6 +389,9 @@ def main():
             distance_feasible_fraction=float(np.mean([
                 row["distance"] is not None for row in rows])),
             mode_supported_fraction=float(len(eligible) / len(rows)),
+            mode_sign_consistent_fraction=float(np.mean([
+                bool(row["mode"].get("matrix_sign_consistent"))
+                for row in rows])),
             zero_usable_fraction=float(np.mean([
                 row["n_usable"] == 0 for row in rows])),
             median_usable=float(np.median([row["n_usable"] for row in rows])),
@@ -303,8 +409,8 @@ def main():
             f"best-joint={summary['best_joint_loss']}", flush=True)
 
         atomic_write_json(dict(
-            objective=OBJECTIVE_ID,
-            initializer=REV8_INIT_ID,
+            objective=str(args.objective_id),
+            initializer=str(args.initializer_id),
             run_contract=run_contract,
             K=int(args.K), restart=int(args.restart), popsize=int(args.popsize),
             seeds_per_candidate=int(args.seeds_per_candidate),
@@ -313,7 +419,7 @@ def main():
             config_checksum=cfg["checksum"],
             optimizer=optimizer.get_state(), history=history,
             generation_summary=generation_summary,
-            stop_reason=stop_reason, provenance=prov,
+            stop_reason=stop_reason, warm_start=warm_start, provenance=prov,
         ), checkpoint_path)
 
         if len(generation_summary) >= 3:

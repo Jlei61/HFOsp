@@ -3,6 +3,7 @@ import numpy as np
 
 from scripts.paper_figures.plot_fig4_data_driven_core_field_rev8 import (
     _closest_mode_pair,
+    _field_landscape_grid,
 )
 from scripts.paper_figures.plot_fig4_data_driven_core_field_rev8_kmeans import (
     _event_order,
@@ -43,3 +44,12 @@ def test_direct_readout_refuses_to_invent_a_missing_second_mode():
         {"mode": 0, "t_on": 100.0, "t_off": 120.0},
         {"mode": 0, "t_on": 200.0, "t_off": 220.0},
     ]) is None
+
+
+def test_field_landscape_grid_preserves_a_planar_field():
+    x, y = np.meshgrid(np.linspace(0.0, 2.0, 4), np.linspace(0.0, 2.0, 4))
+    pos = np.column_stack((x.ravel(), y.ravel()))
+    h = pos[:, 0] + 2.0 * pos[:, 1]
+    xx, yy, zz = _field_landscape_grid(pos, h, L=2.0, resolution=9)
+    assert xx.shape == yy.shape == zz.shape == (9, 9)
+    assert np.allclose(zz, xx + 2.0 * yy)

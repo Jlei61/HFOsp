@@ -16,6 +16,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.patches import Patch
+from scipy.interpolate import griddata
 from scipy.signal import butter, sosfiltfilt
 
 sys.path.insert(0, os.getcwd())
@@ -57,30 +58,70 @@ def _style_sheet(ax, L, title, show_ylabel=False):
     ax.spines[["top", "right"]].set_visible(False)
 
 
+def _field_landscape_grid(pos, h, L, resolution=72):
+    axis = np.linspace(0.0, float(L), int(resolution))
+    xx, yy = np.meshgrid(axis, axis)
+    zz = griddata(pos, h, (xx, yy), method="linear")
+    if np.isnan(zz).any():
+        nearest = griddata(pos, h, (xx, yy), method="nearest")
+        zz = np.where(np.isfinite(zz), zz, nearest)
+    return xx, yy, zz
+
+
 def _plot_field(ax, data):
     pos = np.asarray(data["posE"], float)
     h = np.asarray(data["h"], float)
     contacts = np.asarray(data["contacts"], float)
     names = [str(value) for value in data["names"]]
-    # A deterministic subsample keeps the 40k-cell field legible without
-    # changing its spatial density or range.
-    take = np.linspace(0, len(pos) - 1, min(9000, len(pos))).astype(int)
-    image = ax.scatter(
-        pos[take, 0], pos[take, 1], c=h[take], s=4.2, cmap="plasma",
-        vmin=0.0, vmax=max(float(np.quantile(h, 0.995)), 1e-6),
-        lw=0, alpha=0.72, rasterized=True,
-    )
-    _plot_contacts(ax, contacts, names)
     reg = data["reg"].item()
+    L = float(reg["L"])
+    xx, yy, zz = _field_landscape_grid(pos, h, L)
+    vmax = max(float(np.quantile(h, 0.995)), 1e-6)
+    surface = ax.plot_surface(
+        xx, yy, np.minimum(zz, vmax), cmap="plasma", vmin=0.0, vmax=vmax,
+        linewidth=0, antialiased=True, shade=False, alpha=0.96,
+        rasterized=True,
+    )
+    ax.contour(
+        xx, yy, zz, zdir="z", offset=0.0, levels=8,
+        cmap="plasma", vmin=0.0, vmax=vmax, linewidths=0.55, alpha=0.72,
+    )
+    contact_h = griddata(pos, h, contacts, method="linear")
+    if np.isnan(contact_h).any():
+        nearest = griddata(pos, h, contacts, method="nearest")
+        contact_h = np.where(np.isfinite(contact_h), contact_h, nearest)
+    shafts = sorted({_shaft(name) for name in names})
+    for index, shaft in enumerate(shafts):
+        selected = [i for i, name in enumerate(names) if _shaft(name) == shaft]
+        xyz = contacts[selected]
+        z = np.minimum(contact_h[selected], vmax) + 0.025 * vmax
+        color = SHAFT_COLORS[index % len(SHAFT_COLORS)]
+        ax.plot(xyz[:, 0], xyz[:, 1], z, color=color, lw=1.25, zorder=7)
+        ax.scatter(
+            xyz[:, 0], xyz[:, 1], z, s=23, c=color,
+            edgecolor="white", linewidth=0.5, depthshade=False, zorder=8,
+        )
     center = np.asarray(reg["center"], float)
     axis = np.asarray(reg["axis_unit"], float)
     endpoints = np.vstack((center - 9.5 * axis, center + 9.5 * axis))
-    ax.plot(endpoints[:, 0], endpoints[:, 1], color="white", lw=1.0,
-            ls=(0, (3, 3)), alpha=0.85, zorder=4)
-    cbar = plt.colorbar(image, ax=ax, fraction=0.047, pad=0.025)
+    ax.plot(
+        endpoints[:, 0], endpoints[:, 1], np.full(2, 1.06 * vmax),
+        color="#222222", lw=1.0, ls=(0, (3, 3)), alpha=0.9, zorder=9,
+    )
+    ax.set_xlim(0, L)
+    ax.set_ylim(0, L)
+    ax.set_zlim(0, 1.12 * vmax)
+    ax.set_xlabel("sheet x (mm)", labelpad=5)
+    ax.set_ylabel("sheet y (mm)", labelpad=5)
+    ax.set_zlabel("h", labelpad=3)
+    ax.set_title("data-driven field landscape", fontsize=11.5,
+                 fontweight="bold", pad=7)
+    ax.view_init(elev=31, azim=-58)
+    ax.set_box_aspect((1.0, 1.0, 0.58))
+    ax.tick_params(labelsize=7.5, pad=1)
+    cbar = plt.colorbar(surface, ax=ax, fraction=0.04, pad=0.01, shrink=0.74)
     cbar.set_label("pathology field h", fontsize=9)
     cbar.ax.tick_params(labelsize=8)
-    _style_sheet(ax, float(reg["L"]), "data-driven field", show_ylabel=True)
 
 
 def _plot_mode_event(ax, data, mode, show_ylabel=False):
@@ -226,7 +267,8 @@ def main():
     grid = fig.add_gridspec(
         1, 4, width_ratios=(1.12, 1.0, 1.0, 2.35),
         left=0.045, right=0.99, bottom=0.15, top=0.88, wspace=0.22)
-    axes = [fig.add_subplot(grid[0, index]) for index in range(4)]
+    axes = [fig.add_subplot(grid[0, 0], projection="3d")]
+    axes.extend(fig.add_subplot(grid[0, index]) for index in range(1, 4))
     _plot_field(axes[0], data)
     image_a = _plot_mode_event(axes[1], data, 0)
     image_b = _plot_mode_event(axes[2], data, 1)

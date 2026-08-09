@@ -103,8 +103,10 @@ controls 为手放双核 `0.871`、Stage 2 filament `0.807`。training global be
 - [x] 冻结 patient-train KMeans target 合同；target 不含 held-out 分数或 prototype。
 - [x] 冻结 `32` 条模式事件、每簇至少 `8` 条和 `J_rev8 = D_curve + 0.5*D_mode`。
 - [x] 实现优化/选择/最终确认三套 disjoint network seed 合同和 resume hash。
-- [ ] 生成并校验 patient-train target artifact。
-- [ ] 至少运行 K=2/3 cheap pilot；检查 sigma、dead-zone、双簇支持率和 joint loss，而非只看最优值。
+- [x] 生成并校验 patient-train target artifact。
+- [x] 运行 K=2/3 cheap pilot；K=3 六代 23/48 双簇支持但 0/48 矩阵符号一致，确认死区已解决、目标尺度仍错配。
+- [x] 冻结 rev8.1：`J=D_curve+2*D_mode`、符号一致高层级、训练 elite warm-start；held-out 仍封存。
+- [ ] 以独立目录运行 K=3 rev8.1，并在训练侧出现矩阵符号一致候选后才进入 selection。
 - [ ] 在 `761--766` 上选择并冻结唯一候选；selection JSON 必须写明 `patient_heldout_read=false`。
 - [ ] 冻结候选后在 patient held-out + `801--806` 上确认，保留 rev7 的每簇 10 条及 rigid/floor 门。
 - [ ] 用同一最终事件池生成两张正式图：Fig4A 直接 virtual-SEEG 波形；Fig4B KMeans 四块一致性核验。
