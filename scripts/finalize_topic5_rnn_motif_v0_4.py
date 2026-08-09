@@ -13,6 +13,18 @@ from typing import Any
 import numpy as np
 
 
+VISUAL_QA_STAGE_ITEMS = (
+    "stage_a_preflight_contract",
+    "stage_c_smoke_training_and_decoder",
+    "stage_d_interictal_model_matrix",
+    "stage_interictal_scientific_readout",
+    "stage_e_target_free_model_fields",
+    "stage_fields_scientific_readout",
+    "stage_motif_scientific_readout",
+    "stage_early_scientific_readout",
+)
+
+
 def load(path: Path) -> Any:
     return json.loads(path.read_text())
 
@@ -112,6 +124,28 @@ def integrated_level4(
         target_free_intervenable_motif
         and economic_constraint
         and frozen_cross_state_correspondence
+    )
+
+
+def visual_qa_complete(payload: dict[str, Any]) -> bool:
+    """Require explicit scientific and visual review of every deliverable panel."""
+    stages = payload.get("stage_figures", {})
+    panels = payload.get("final_panels", {})
+    return bool(
+        payload.get("status") == "ACCEPTED"
+        and payload.get("scientific_contract_pass") is True
+        and payload.get("visual_pass") is True
+        and payload.get("png_pdf_svg_checked") is True
+        and all(
+            stages.get(name, {}).get("scientific_pass") is True
+            and stages.get(name, {}).get("visual_pass") is True
+            for name in VISUAL_QA_STAGE_ITEMS
+        )
+        and all(
+            panels.get(panel, {}).get("scientific_pass") is True
+            and panels.get(panel, {}).get("visual_pass") is True
+            for panel in "ABCDEF"
+        )
     )
 
 
@@ -219,11 +253,7 @@ def main() -> int:
     metrics_count = len(metric_paths)
     target = load(out / "target_access_audit.json")
     visual = load(out / "VISUAL_QA.json") if (out / "VISUAL_QA.json").exists() else {}
-    visual_ok = bool(
-        visual.get("status") == "ACCEPTED"
-        and visual.get("scientific_contract_pass") is True
-        and visual.get("visual_pass") is True
-    )
+    visual_ok = visual_qa_complete(visual)
     test_text = args.test_log.read_text().lower() if args.test_log.exists() else ""
     tests_ok = bool(" passed" in test_text and re.search(r"\b[1-9]\d* failed\b", test_text) is None)
     unit_contracts = (load(out / "UNIT_CONTRACT_EXPORT_AUDIT.json")
