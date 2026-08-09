@@ -151,18 +151,36 @@ def edge_descriptor(edges: np.ndarray, strength: np.ndarray, distance: np.ndarra
                     mask: np.ndarray, nodes_xy: np.ndarray) -> dict[str, float]:
     source, target = edges[:, 0], edges[:, 1]
     endpoint = np.unique(edges)
-    degree = mask.sum(0) + mask.sum(1)
+    # Rows are presynaptic/source nodes and columns are postsynaptic/target
+    # nodes.  Keep the two degree directions separate: matching only their sum
+    # can silently pair an outgoing hub lesion with an incoming hub control.
+    # The frozen v0.4 contract explicitly requires endpoint in/out degree.
+    in_degree = mask.sum(0)
+    out_degree = mask.sum(1)
     points = nodes_xy[endpoint]
     extent = float(np.linalg.norm(points[:, None] - points[None, :], axis=-1).max()) if len(points) else 0.0
     return {
         "total_weight": float(strength[source, target].sum()),
         "mean_length": float(distance[source, target].mean()),
-        "mean_degree": float(np.mean(degree[endpoint])), "extent": extent,
+        "mean_in_degree": float(np.mean(in_degree[endpoint])),
+        "mean_out_degree": float(np.mean(out_degree[endpoint])),
+        "extent": extent,
     }
 
 
 def within(value: float, target: float, fraction: float) -> bool:
     return abs(value - target) <= fraction * max(abs(target), 1e-12)
+
+
+def edge_descriptor_matches(current: dict[str, float], target: dict[str, float]) -> bool:
+    """Return whether an edge draw satisfies the frozen directed calipers."""
+    return bool(
+        within(current["total_weight"], target["total_weight"], 0.10)
+        and within(current["mean_length"], target["mean_length"], 0.10)
+        and abs(current["mean_in_degree"] - target["mean_in_degree"]) <= 1.0
+        and abs(current["mean_out_degree"] - target["mean_out_degree"]) <= 1.0
+        and within(current["extent"], target["extent"], 0.10)
+    )
 
 
 def matched_edge_draws(target_mask: np.ndarray, mask: np.ndarray, strength: np.ndarray,
@@ -198,10 +216,7 @@ def matched_edge_draws(target_mask: np.ndarray, mask: np.ndarray, strength: np.n
         if len(np.unique(chosen[:, 0] * mask.shape[0] + chosen[:, 1])) != len(chosen):
             continue
         current = edge_descriptor(chosen, strength, distance, mask, nodes_xy)
-        if (within(current["total_weight"], descriptor["total_weight"], 0.10)
-                and within(current["mean_length"], descriptor["mean_length"], 0.10)
-                and abs(current["mean_degree"] - descriptor["mean_degree"]) <= 1.0
-                and within(current["extent"], descriptor["extent"], 0.10)):
+        if edge_descriptor_matches(current, descriptor):
             lesion = np.zeros_like(mask, bool); lesion[chosen[:, 0], chosen[:, 1]] = True
             valid.append(lesion)
     return valid
@@ -357,7 +372,8 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
             "draws": "without replacement within each draw; repeated draws allowed",
             "edge_total_weight_caliper": 0.10,
             "edge_mean_length_caliper": 0.10,
-            "edge_mean_degree_absolute_caliper": 1.0,
+            "edge_mean_in_degree_absolute_caliper": 1.0,
+            "edge_mean_out_degree_absolute_caliper": 1.0,
             "edge_spatial_extent_caliper": 0.10,
             "node_incident_weight_caliper": 0.10,
             "node_mean_degree_absolute_caliper": 1.0,
