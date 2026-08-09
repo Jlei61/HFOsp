@@ -15,6 +15,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.cm import ScalarMappable
+from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, Normalize
 from matplotlib.lines import Line2D
 import numpy as np
@@ -131,10 +132,18 @@ def draw_graph(ax, graph: dict[str, np.ndarray], plane: dict[str, np.ndarray], t
     contacts = np.asarray(plane["contacts_xy_mm"], float)
     mask = np.asarray(graph["mask"], bool)
     edges = np.argwhere(mask)
-    if len(edges) > 450:
-        edges = edges[np.linspace(0, len(edges) - 1, 450).astype(int)]
-    for i, j in edges:
-        ax.plot(xy[[i, j], 0], xy[[i, j], 1], color="#b9b9b9", lw=0.28, alpha=0.25, zorder=0)
+    # Preserve the actual ten-fold density contrast.  Subsampling the dense
+    # mask to approximately the sparse edge count makes distinct constraints
+    # look falsely alike; a faint LineCollection keeps every edge readable as
+    # a density cloud without producing a black hairball.
+    segments = np.asarray([[xy[i], xy[j]] for i, j in edges], float)
+    dense = len(edges) > 2 * xy.shape[0]
+    ax.add_collection(LineCollection(
+        segments, colors="#969696",
+        linewidths=0.14 if dense and len(edges) > 1000 else 0.28,
+        alpha=0.030 if dense and len(edges) > 1000 else 0.25,
+        zorder=0, rasterized=len(edges) > 1000,
+    ))
     if influence is not None:
         for key, color, width in (("local_backbone_mask", "#3b75af", 0.8),
                                   ("long_high_mask", "#d64c4c", 1.15)):
