@@ -74,7 +74,7 @@ def adjudicate_entry(*, regimes, win_ms, events, current_trace, current_dt_ms,
     onset_ms = None if bout is None else float(bout[0] * float(win_ms))
     pre_events = [] if onset_ms is None else [
         e for e in events
-        if bool(e.get("returned", False)) and float(e["t_on_ms"]) < onset_ms
+        if bool(e.get("returned", False)) and float(e["t_on"]) < onset_ms
     ]
     current = np.asarray(current_trace, dtype=float)
     prefix_n = min(current.size, int(round(ZERO_PREFIX_MS / float(current_dt_ms))))

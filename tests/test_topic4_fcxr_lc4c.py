@@ -39,7 +39,9 @@ def test_invalid_entry_anchor_is_rejected(onset):
 
 
 def _events(n=4):
-    return [dict(returned=True, t_on_ms=1000.0 + i * 1000.0) for i in range(n)]
+    # The canonical LC3/LC4 event contract stores onset in milliseconds as ``t_on``.
+    # Keeping the real producer schema here prevents a fixture-only alias from masking drift.
+    return [dict(returned=True, t_on=1000.0 + i * 1000.0) for i in range(n)]
 
 
 def test_entry_gate_accepts_aligned_safe_probe_with_zero_prefix():
@@ -73,3 +75,13 @@ def test_entry_gate_rejects_missing_bout():
         numerical_safe=True, refractory_fraction=0.0)
     assert out["verdict"] == "C1_NO_ENTRY"
     assert not out["passed"]
+
+
+def test_entry_gate_rejects_noncanonical_event_onset_key():
+    with pytest.raises(KeyError, match="t_on"):
+        adjudicate_entry(
+            regimes=["INTERICTAL"] * 10 + ["ICTAL"] * 5,
+            win_ms=1000.0,
+            events=[dict(returned=True, t_on_ms=1000.0)],
+            current_trace=np.zeros(1500), current_dt_ms=10.0,
+            numerical_safe=True, refractory_fraction=0.0)

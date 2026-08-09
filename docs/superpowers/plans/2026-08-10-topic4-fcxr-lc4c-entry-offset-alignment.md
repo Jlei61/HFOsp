@@ -41,3 +41,14 @@ Design of record:
 - Add Chinese `figures/README.md`, STATUS, manifest and archive.
 - Run focused regression, blessed/mechanism hash checks, `git diff --check`, process/swap audit,
   then commit the scientific gate.
+
+## Execution deviation ledger
+
+- **2026-08-10 C1 instrument failure (no scientific verdict):** the first locked 15 s run
+  completed its simulation but failed during post-run adjudication because the C1 unit-test
+  fixture invented `t_on_ms`, while the canonical LC3/LC4 event producer and all established
+  consumers use `t_on` in milliseconds.  C2 was not submitted.  The failed sentinels/logs are
+  retained under `lc4c_entry_offset_alignment/superseded/c1_event_schema_failure_2026-08-10/`.
+  The repair changes only the adjudicator field name and its fixture, adds a bad-schema
+  regression, and permits one exact-protocol C1 rerun; candidate values, seeds, duration and all
+  gates remain frozen.
