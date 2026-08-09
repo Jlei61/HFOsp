@@ -29,6 +29,7 @@ from build_topic5_rnn_motif_fields_v0_4 import (  # noqa: E402
 )
 from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
     event_pair_reliability,
+    paired_test,
     seed_removed_sequence_agreement,
 )
 from analyse_topic5_rnn_motif_influence_v0_4 import (  # noqa: E402
@@ -43,6 +44,7 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     locked_target_artifacts,
     permutation_indices,
     permutation_support,
+    paired_summary,
 )
 from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
 from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
@@ -312,6 +314,16 @@ def test_conditional_early_model_refits_patient_clusters_and_permutations():
     assert np.isclose(effect["estimate"], 0.30, atol=1e-8)
     assert len(effect["patient_cluster_bootstrap_95ci"]) == 2
     assert 0.0 < effect["patient_label_permutation_p"] <= 1.0
+
+
+def test_patient_wilcoxon_removes_ties_before_requesting_exact_distribution():
+    values = np.asarray([1.0, 2.0, 3.0, 4.0, 0.0, 5.0e-17])
+    interictal = paired_test(values)
+    early = paired_summary(values, draws=100, seed=9)
+    assert (interictal["positive"], interictal["negative"], interictal["tied"]) == (4, 0, 2)
+    assert (early["positive"], early["negative"], early["tied"]) == (4, 0, 2)
+    assert np.isclose(interictal["p_two_sided"], 0.125)
+    assert np.isclose(early["wilcoxon_p"], 0.125)
 
 
 def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
