@@ -81,6 +81,7 @@ def _resource(stage, **extra):
 
 
 def _preflight(stage):
+    E01.FCXR._assert_engine_blessed()
     m = _resource(f"{stage}_PREFLIGHT")
     if m["mem_available_gib"] < 128.0:
         raise SystemExit(f"{stage}: MemAvailable {m['mem_available_gib']:.1f} GiB < 128 GiB")
