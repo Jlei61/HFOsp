@@ -1,0 +1,33 @@
+{
+  "figure": "Fig4A data-driven core-field direct waveforms",
+  "plotting_only": true,
+  "input_capture": {
+    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/representative_readout.json",
+    "sha256": "16f0c8f894d8a073ad71d2b13d0c001a21616d0d79ed985d4be4bbe6189a07f6"
+  },
+  "input_figdata": {
+    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/representative_figdata.npz",
+    "sha256": "c405110fb01ff8f518e9c90e242d49ce70e08b1f2d0ad9cd9cf3a9d22559ff1e"
+  },
+  "input_confirmation": {
+    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
+    "sha256": "313061cd5d3cfb6cb77342e122ebff347e4a55b38b0559775bd2c9cd42b57705"
+  },
+  "candidate_id": "rev8_candidate_1",
+  "seed": 804,
+  "mode_counts": {
+    "0": 5,
+    "1": 7
+  },
+  "verdict": "RIGID_TEMPLATE_MATCH_NOT_BEATEN",
+  "direct_readout": {
+    "start_ms": 2574.0,
+    "stop_ms": 3774.0,
+    "displayed_mode_counts": {
+      "0": 2,
+      "1": 1
+    },
+    "contains_both_modes": true
+  },
+  "claim_boundary": "single-subject final-confirmation rendering; mode shading is an unsupervised readout identity, not a causal direction label"
+}

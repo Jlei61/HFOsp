@@ -1,0 +1,44 @@
+{
+  "figure": "Fig4B data-driven core-field KMeans consistency",
+  "plotting_only": true,
+  "input_profiles": {
+    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_event_profiles.npz",
+    "sha256": "46865b402c4ff2506acaaf7ed624662b794922b094784dce38d1e8fe5e5e0349"
+  },
+  "input_confirmation": {
+    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
+    "sha256": "313061cd5d3cfb6cb77342e122ebff347e4a55b38b0559775bd2c9cd42b57705"
+  },
+  "n_events": 50,
+  "cluster_counts": [
+    17,
+    33
+  ],
+  "similarity_matrix": [
+    [
+      0.1551185270358482,
+      -0.5242562441692711
+    ],
+    [
+      -0.7628661805219604,
+      0.9773970667375277
+    ]
+  ],
+  "matched_mean": 0.566257796886688,
+  "matrix_contrast": 1.2098190092323038,
+  "gates": {
+    "no_simulation_errors": true,
+    "enough_usable_events": true,
+    "two_cluster_support": true,
+    "kmeans_matrix_sign_consistent": true,
+    "kmeans_matches_patient_modes": true,
+    "beats_rigid_template_match": false,
+    "opposing_prototypes": true,
+    "better_than_rigid_control_median": true,
+    "within_patient_floor_p95": false
+  },
+  "verdict": "RIGID_TEMPLATE_MATCH_NOT_BEATEN",
+  "matrix_valid": false,
+  "permutation_p_values": null,
+  "permutation_note": "No p-values: the 31 interpolated profile positions are autocorrelated; acceptance uses support, sign structure, rigid benchmark, and held-out distances."
+}

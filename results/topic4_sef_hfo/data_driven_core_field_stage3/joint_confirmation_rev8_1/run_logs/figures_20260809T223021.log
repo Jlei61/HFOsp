@@ -1,0 +1,21 @@
+[2026-08-09T22:30:21+08:00] START rev8.1 representative capture and figures commit=3b3ec256
+{
+  "status": "REV8_REPRESENTATIVE_READOUT_CAPTURED",
+  "seed": 804,
+  "n_usable": 12,
+  "mode_counts": {
+    "0": 5,
+    "1": 7
+  },
+  "figdata_sha256": "c405110fb01ff8f518e9c90e242d49ce70e08b1f2d0ad9cd9cf3a9d22559ff1e"
+}
+real 219.40
+user 211.46
+sys 7.74
+wrote results/paper-ready-figure/fig4_data_driven_core_field_rev8_1/figures/fig4a_data_driven_core_field_waveforms.png / .pdf / _metadata.json
+/home/honglab/leijiaxin/HFOsp/scripts/paper_figures/plot_fig4_data_driven_core_field_rev8_kmeans.py:97: RuntimeWarning: Mean of empty slice
+  mean = np.nanmean(norm_ranks[:, selected], axis=1)
+/home/honglab/leijiaxin/anaconda3/lib/python3.11/site-packages/numpy/lib/nanfunctions.py:1879: RuntimeWarning: Degrees of freedom <= 0 for slice.
+  var = nanvar(a, axis=axis, dtype=dtype, out=out, ddof=ddof,
+wrote results/paper-ready-figure/fig4_data_driven_core_field_rev8_1/figures/fig4b_data_driven_core_field_kmeans.png / .pdf / _metadata.json
+[2026-08-09T22:34:06+08:00] DONE rev8.1 capture and figures rc=0

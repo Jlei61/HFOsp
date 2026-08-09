@@ -1423,6 +1423,10 @@ bootstrap distance median `0.557` 也高于 patient floor p95 `0.358`。最终 v
 `RIGID_TEMPLATE_MATCH_NOT_BEATEN`：可写双模式符号结构恢复和相对距离改善，不可写优于 rigid family、达到病人
 分布或已经收敛。
 
+正式产物位于 `joint_confirmation_rev8_1/` 和
+`results/paper-ready-figure/fig4_data_driven_core_field_rev8_1/figures/`。Fig4A 使用 seed 804 的直接
+virtual-SEEG（代表模式 `5/7`），Fig4B 使用全部 50 个最终 unseen-network 事件；两图输入 hash 已核对。
+
 ### 9.4 空间诊断量与判据
 
 `r_bar` / `C_axis` 的定义与"必须用 `h` 不用 `h·d`"的理由（§9.4 rev4）**原样保留**。

@@ -1,0 +1,23 @@
+[2026-08-09T22:21:35+08:00] START rev8.1 final confirmation commit=3b3ec256
+{
+  "status": "UNSEEN_NETWORK_CONFIRMATION_NO_CANDIDATE_PASSES",
+  "verdict": "RIGID_TEMPLATE_MATCH_NOT_BEATEN",
+  "n_usable": 50,
+  "cluster_counts": [
+    17,
+    33
+  ],
+  "matched_mean": 0.566257796886688,
+  "representative_run": {
+    "seed": 804,
+    "local_event_index_by_mode": {
+      "0": 6,
+      "1": 1
+    },
+    "has_both_modes": true
+  }
+}
+real 463.13
+user 1925.38
+sys 193.32
+[2026-08-09T22:29:18+08:00] DONE rev8.1 confirmation verdict=RIGID_TEMPLATE_MATCH_NOT_BEATEN
