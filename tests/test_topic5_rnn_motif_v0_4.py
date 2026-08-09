@@ -91,6 +91,7 @@ from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
 from run_topic5_rnn_motif_closeout_v0_4 import (  # noqa: E402
     PRIMARY_UNSEAL_SCRIPT,
     closeout_commands,
+    wait_for_ready,
 )
 
 
@@ -248,6 +249,16 @@ def test_post_unseal_closeout_never_repeats_primary_target_scorer(tmp_path):
     assert [name for name, _ in commands].count("lesion_early_ictal") == 1
     assert "final_figure" in [name for name, _ in commands]
     assert "focused_tests" in [name for name, _ in commands]
+
+
+def test_closeout_waiter_does_not_read_target_values(tmp_path):
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "POSTPROCESS_READY_FOR_VISUAL_QA.json").write_text("{}")
+    wait_for_ready(out, poll_seconds=10, max_wait_hours=1)
+    payload = json.loads((out / "CLOSEOUT_WAIT_STATUS.json").read_text())
+    assert payload["status"] == "IMMUTABLE_POSTPROCESS_READY"
+    assert payload["target_values_read_by_waiter"] is False
 
 
 def test_target_contract_trace_matches_paper_endpoint():

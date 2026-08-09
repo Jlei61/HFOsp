@@ -16,6 +16,7 @@ import os
 from pathlib import Path
 import subprocess
 import sys
+import time
 from typing import Any
 
 
@@ -120,6 +121,34 @@ def validate_ready(out_root: Path) -> None:
         raise RuntimeError("target access audit does not preserve the frozen-model contract")
 
 
+def wait_for_ready(out_root: Path, poll_seconds: int, max_wait_hours: float) -> None:
+    """Wait without touching scientific artifacts until the immutable run is ready."""
+    started = time.monotonic()
+    status_path = out_root / "CLOSEOUT_WAIT_STATUS.json"
+    while not (out_root / "POSTPROCESS_READY_FOR_VISUAL_QA.json").is_file():
+        failure = out_root / "PIPELINE_FAILED.json"
+        if failure.is_file():
+            raise RuntimeError(f"immutable postprocess failed; see {failure}")
+        elapsed_hours = (time.monotonic() - started) / 3600.0
+        if elapsed_hours > max_wait_hours:
+            raise TimeoutError(
+                f"immutable postprocess did not become ready within {max_wait_hours:g} hours"
+            )
+        atomic_json(status_path, {
+            "status": "WAITING_FOR_IMMUTABLE_POSTPROCESS",
+            "updated_utc": datetime.now(timezone.utc).isoformat(),
+            "elapsed_hours": elapsed_hours,
+            "target_values_read_by_waiter": False,
+        })
+        time.sleep(max(10, int(poll_seconds)))
+    atomic_json(status_path, {
+        "status": "IMMUTABLE_POSTPROCESS_READY",
+        "updated_utc": datetime.now(timezone.utc).isoformat(),
+        "elapsed_hours": (time.monotonic() - started) / 3600.0,
+        "target_values_read_by_waiter": False,
+    })
+
+
 def run_step(name: str, command: list[str], out_root: Path, code_hash: str) -> None:
     if any(PRIMARY_UNSEAL_SCRIPT in token for token in command):
         raise RuntimeError("closeout must never invoke the primary target-unseal scorer")
@@ -153,6 +182,9 @@ def main() -> int:
     parser.add_argument("--target-cache-root", type=Path, required=True)
     parser.add_argument("--snn-readout", type=Path, required=True)
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--wait-for-ready", action="store_true")
+    parser.add_argument("--poll-seconds", type=int, default=300)
+    parser.add_argument("--max-wait-hours", type=float, default=48.0)
     args = parser.parse_args()
     out_root = args.out_root.resolve()
     target_cache_root = args.target_cache_root.resolve()
@@ -165,6 +197,8 @@ def main() -> int:
         print(json.dumps({"stages": [name for name, _ in commands],
                           "primary_unseal_called": False}, indent=2))
         return 0
+    if args.wait_for_ready:
+        wait_for_ready(out_root, args.poll_seconds, args.max_wait_hours)
     validate_ready(out_root)
     script_hash = sha256(Path(__file__))
     atomic_json(out_root / "CLOSEOUT_CONTRACT.json", {
