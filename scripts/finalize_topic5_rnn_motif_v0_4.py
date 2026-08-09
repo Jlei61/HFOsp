@@ -40,7 +40,9 @@ def main() -> int:
     args = parser.parse_args()
     out = args.out_root.resolve()
     required = [
+        "PRE_FLIGHT_AUDIT.json", "RUN_CONTRACT.json", "POSTPROCESS_CONTRACT.json",
         "STAGE_CORE_STATUS.json", "STAGE_DOSE_STATUS.json", "STAGE_GRU_STATUS.json",
+        "CHECKPOINT_REUSE_AUDIT.json",
         "INTERICTAL_SUMMARY.json", "MODEL_FIELD_MANIFEST.json", "TARGET_UNSEAL_AUTHORIZATION.json",
         "target_access_audit.json", "EFFECTIVE_INFLUENCE_SUMMARY.json", "EFFECTIVE_MOTIF_SUMMARY.json",
         "MATCHED_LESION_SUMMARY.json", "LESION_EARLY_ICTAL_SUMMARY.json",
@@ -48,7 +50,7 @@ def main() -> int:
         "COMMON_OBSERVABLES.json", "figures/topic5_figure6_rnn_connectivity_motifs.png",
         "figures/topic5_figure6_rnn_connectivity_motifs.pdf",
         "figures/topic5_figure6_rnn_connectivity_motifs.svg",
-        "figures/figure6_source_manifest.json", "VISUAL_QA.json",
+        "figures/figure6_source_manifest.json", "figures/README.md", "VISUAL_QA.json",
         "POSTPROCESS_READY_FOR_VISUAL_QA.json", "UNIT_CONTRACT_EXPORT_AUDIT.json",
         "stage_d_scientific_drift_audit.json", "stage_e_scientific_drift_audit.json",
         "stage_f_scientific_drift_audit.json", "stage_g_scientific_drift_audit.json",
@@ -89,6 +91,83 @@ def main() -> int:
     engineering_accepted = bool(
         not missing and stage_clean and metrics_count == 1426 and tests_ok
         and visual_ok and unit_contracts_ok
+    )
+
+    preflight = load(out / "PRE_FLIGHT_AUDIT.json")
+    run_contract = load(out / "RUN_CONTRACT.json")
+    postprocess_contract = load(out / "POSTPROCESS_CONTRACT.json")
+    convergence = load(out / "CONVERGENCE_AUDIT.json")
+    reuse_audit = load(out / "CHECKPOINT_REUSE_AUDIT.json")
+    field_manifest = load(out / "MODEL_FIELD_MANIFEST.json")
+    influence_summary = load(out / "EFFECTIVE_INFLUENCE_SUMMARY.json")
+    lesion_raw = load(out / "MATCHED_LESION_SUMMARY.json")
+    unseal = load(out / "TARGET_UNSEAL_AUTHORIZATION.json")
+    common_observables = load(out / "COMMON_OBSERVABLES.json")
+
+    execution_contract_ok = bool(
+        preflight.get("status") == "PASS"
+        and preflight.get("target_values_read") is False
+        and int(preflight.get("n_patients", -1)) == 21
+        and int(preflight.get("n_fits", -1)) == 31
+        and int(preflight.get("n_training_units", -1)) == 1426
+        and run_contract.get("target_values_read_at_contract_freeze") is False
+        and bool(postprocess_contract.get("git_commit"))
+    )
+    convergence_ok = bool(
+        int(convergence.get("n_units", -1)) == 1426
+        and int(convergence.get("n_converged", -1)) == 1426
+        and int(convergence.get("n_hit_ceiling", -1)) == 0
+        and convergence.get("all_edge_budgets_valid") is True
+        and convergence.get("all_four_snapshots_present") is True
+        and int(reuse_audit.get("n_recurrent_units_missing_required_snapshot", -1)) == 0
+    )
+    field_freeze_ok = bool(
+        field_manifest.get("target_values_read") is False
+        and field_manifest.get("canonical_primary") is True
+        and field_manifest.get("seed_removed_mechanistic_secondary") is True
+        and int(field_manifest.get("formal_matrix_audit", {}).get("observed_formal_metrics", -1)) == 1426
+        and int(field_manifest.get("formal_matrix_audit", {}).get("nonconverged_units", -1)) == 0
+    )
+    influence_ok = bool(
+        influence_summary.get("target_values_read") is False
+        and int(influence_summary.get("n_units", -1)) == int(influence_summary.get("expected_units", -2)) == 1023
+    )
+    lesion_execution_ok = bool(
+        lesion_raw.get("target_values_read") is False
+        and int(lesion_raw.get("n_selected_fit_model_units", -1)) == 217
+        and int(lesion_raw.get("target_draws", -1)) == 500
+        and int(lesion_raw.get("minimum_valid_matched_draws", -1)) == 200
+    )
+    target_order_ok = bool(
+        unseal.get("authorized") is True
+        and unseal.get("target_values_read_before_authorization") is False
+        and unseal.get("all_engineering_valid_models_included") is True
+        and unseal.get("cohort_mismatch_reported_before_unseal") is True
+        and target.get("target_values_read") is True
+        and target.get("training_or_model_selection_after_unseal") is False
+        and int(target.get("n_primary_subjects", -1)) == int(unseal.get("actual_primary_join_n", -2))
+    )
+    common_observables_ok = bool(
+        common_observables.get("contract")
+        and common_observables.get("edge_to_edge_mapping_attempted") is not True
+    )
+    figure_ok = bool(
+        all((out / f"figures/topic5_figure6_rnn_connectivity_motifs.{suffix}").exists()
+            for suffix in ("png", "pdf", "svg"))
+        and (out / "figures/figure6_source_manifest.json").exists()
+        and (out / "figures/README.md").exists()
+        and visual_ok
+    )
+    engineering_accepted = bool(
+        engineering_accepted
+        and execution_contract_ok
+        and convergence_ok
+        and field_freeze_ok
+        and influence_ok
+        and lesion_execution_ok
+        and target_order_ok
+        and common_observables_ok
+        and figure_ok
     )
 
     inter = load(out / "INTERICTAL_SUMMARY.json")
@@ -179,6 +258,89 @@ def main() -> int:
         "adequate_rnn_models": adequate_models,
     }
     (out / "FINAL_ACCEPTANCE.json").write_text(json.dumps(acceptance, indent=2))
+
+    completion_audit = {
+        "contract": "topic5_rnn_motif_requirement_by_requirement_completion_audit_v0_4",
+        "status": "ACCEPTED" if engineering_accepted else "NOT_ACCEPTED",
+        "requirements": {
+            "immutable_preflight_and_run_contract": {
+                "pass": execution_contract_ok,
+                "evidence": ["PRE_FLIGHT_AUDIT.json", "RUN_CONTRACT.json", "POSTPROCESS_CONTRACT.json"],
+                "observed": {
+                    "git_commit": postprocess_contract.get("git_commit"),
+                    "patients": preflight.get("n_patients"),
+                    "fits": preflight.get("n_fits"),
+                    "target_values_read": preflight.get("target_values_read"),
+                },
+            },
+            "formal_training_and_convergence": {
+                "pass": bool(stage_clean and metrics_count == 1426 and convergence_ok),
+                "evidence": ["STAGE_CORE_STATUS.json", "STAGE_DOSE_STATUS.json",
+                             "STAGE_GRU_STATUS.json", "CONVERGENCE_AUDIT.json",
+                             "CHECKPOINT_REUSE_AUDIT.json"],
+                "observed": {"formal_units": metrics_count,
+                             "converged": convergence.get("n_converged"),
+                             "hit_ceiling": convergence.get("n_hit_ceiling")},
+            },
+            "target_free_model_field_freeze": {
+                "pass": field_freeze_ok,
+                "evidence": ["MODEL_FIELD_MANIFEST.json", "TARGET_UNSEAL_AUTHORIZATION.json"],
+                "observed": {"fit_seed_fields": field_manifest.get("n_fit_seed_fields"),
+                             "patient_fields": field_manifest.get("n_patient_fields"),
+                             "target_values_read": field_manifest.get("target_values_read")},
+            },
+            "effective_influence_complete": {
+                "pass": influence_ok,
+                "evidence": ["EFFECTIVE_INFLUENCE_SUMMARY.json"],
+                "observed": {"units": influence_summary.get("n_units"),
+                             "expected_units": influence_summary.get("expected_units")},
+            },
+            "matched_lesion_execution_complete": {
+                "pass": lesion_execution_ok,
+                "evidence": ["MATCHED_LESION_SUMMARY.json", "stage_g_scientific_drift_audit.json"],
+                "observed": {"selected_units": lesion_raw.get("n_selected_fit_model_units"),
+                             "target_draws": lesion_raw.get("target_draws"),
+                             "minimum_valid_draws": lesion_raw.get("minimum_valid_matched_draws"),
+                             "motif_inference_estimable": lesion_estimable},
+                "note": "Strict matching may be unestimable; this is distinct from a negative lesion effect.",
+            },
+            "early_ictal_unseal_order_and_scoring": {
+                "pass": target_order_ok,
+                "evidence": ["TARGET_UNSEAL_AUTHORIZATION.json", "target_access_audit.json",
+                             "early_ictal_model_contrasts.json", "stage_f_scientific_drift_audit.json"],
+                "observed": {"primary_subjects": target.get("n_primary_subjects"),
+                             "seizures": target.get("n_seizures"),
+                             "target_read_after_field_freeze": target.get("target_values_read")},
+            },
+            "human_rnn_snn_common_observables": {
+                "pass": common_observables_ok,
+                "evidence": ["COMMON_OBSERVABLES.json", "COMMON_OBSERVABLES.csv",
+                             "stage_h_scientific_drift_audit.json"],
+                "note": "Only shared mesoscopic observables are compared; no edge-to-synapse mapping.",
+            },
+            "figure6_and_visual_qa": {
+                "pass": figure_ok,
+                "evidence": ["figures/topic5_figure6_rnn_connectivity_motifs.png",
+                             "figures/topic5_figure6_rnn_connectivity_motifs.pdf",
+                             "figures/topic5_figure6_rnn_connectivity_motifs.svg",
+                             "figures/figure6_source_manifest.json", "figures/README.md",
+                             "VISUAL_QA.json"],
+            },
+            "focused_tests": {
+                "pass": tests_ok,
+                "evidence": [str(args.test_log)],
+            },
+            "per_unit_reproducibility_contracts": {
+                "pass": unit_contracts_ok,
+                "evidence": ["UNIT_CONTRACT_EXPORT_AUDIT.json"],
+                "observed": {"config_contracts": unit_contracts.get("n_config_contracts"),
+                             "input_hash_contracts": unit_contracts.get("n_input_hash_contracts")},
+            },
+        },
+        "scientific_levels_are_independent": True,
+        "archive_state": "RESULT_REPORT_GENERATED; tracked docs/archive closeout is a separate repository step",
+    }
+    (out / "COMPLETION_AUDIT.json").write_text(json.dumps(completion_audit, indent=2))
 
     report = f"""# Topic 5 RNN connectivity motif / cross-state v0.4 最终报告
 
