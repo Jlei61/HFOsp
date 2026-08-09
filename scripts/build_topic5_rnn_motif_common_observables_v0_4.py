@@ -87,6 +87,11 @@ def main() -> int:
     models = sorted({row["model"] for row in fields if row["cell"] == "rnn"})
     for model in models:
         model_fields = [row for row in fields if row["model"] == model and row["cell"] == "rnn"]
+        shared_model_fields = [
+            row for row in model_fields if row["aggregation"] == "shared_single_fit"
+        ]
+        contrast_fidelity = finite(model_fields, "canonical_contrast_fidelity")
+        shared_ab_association = finite(shared_model_fields, "generated_AB_r")
         model_early = [row for row in early if row["model"] == model and row["cell"] == "rnn"
                        and row["endpoint"] == "canonical_full" and row["primary"] == "True"]
         model_influence = [row for row in influence if row["model"] == model and row["cell"] == "rnn"]
@@ -108,6 +113,22 @@ def main() -> int:
              "status": "available", "value": float(np.nanmedian(finite(model_fields, "matched_empirical_r"))),
              "denominator": len(model_fields), "comparison_level": "contact-rank field",
              "boundary": "shared patients support one-model A/B; non-collinear patients use separate fits",
+             "source": "model_field_patient_metrics.csv"},
+            {"system": f"RNN:{model}", "observable": "empirical A/B contrast fidelity",
+             "status": "available" if contrast_fidelity.size else "missing",
+             "value": (float(np.nanmedian(contrast_fidelity))
+                       if contrast_fidelity.size else None),
+             "denominator": int(contrast_fidelity.size),
+             "comparison_level": "patient-level contact-rank contrast field",
+             "boundary": "contrast readout, not recovery of two anatomical networks",
+             "source": "model_field_patient_metrics.csv"},
+            {"system": f"RNN:{model}", "observable": "shared-fit source-conditioned A/B association",
+             "status": "available" if shared_ab_association.size else "missing",
+             "value": (float(np.nanmedian(shared_ab_association))
+                       if shared_ab_association.size else None),
+             "denominator": int(shared_ab_association.size),
+             "comparison_level": "same-network generated contact-rank fields",
+             "boundary": "different observed starts condition one network; global anticorrelation is not required",
              "source": "model_field_patient_metrics.csv"},
             {"system": f"RNN:{model}", "observable": "early-ictal canonical-field concordance",
              "status": "available", "value": float(np.nanmedian(finite(model_early, "all_contact_margin"))),
