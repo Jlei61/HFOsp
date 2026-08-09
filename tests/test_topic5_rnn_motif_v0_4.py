@@ -30,6 +30,7 @@ from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
     seed_removed_sequence_agreement,
 )
 from analyse_topic5_rnn_motif_influence_v0_4 import (  # noqa: E402
+    contact_pair_observation_count,
     contact_orientation_summary,
     contact_response_summary,
 )
@@ -342,6 +343,21 @@ def test_contact_pulse_summary_separates_axis_and_transverse_pairs():
         "lag1_distance_q1_abs", "lag1_distance_q4_signed",
     ):
         assert key in complete and np.isfinite(complete[key])
+
+
+def test_unobserved_contact_pairs_are_not_treated_as_zero_influence():
+    ranks = np.array([
+        [0, 1, 2, 3, 4],
+        [0, 1, 3, 2, 4],
+    ], dtype=np.int16)
+    count = contact_pair_observation_count(ranks, np.array([2, 2]), max_prefixes=32)
+    assert count[0, 1] == 0  # contact 0 is already recruited at every eligible prefix
+    matrix = np.zeros((5, 5), float)
+    matrix[count == 0] = np.nan
+    pulse = np.stack([matrix, matrix, matrix])
+    summary = contact_response_summary(matrix, pulse, np.c_[np.arange(5), np.zeros(5)], ["A"] * 5)
+    assert summary["lag1_abs_influence"] == 0.0
+    assert np.isnan(matrix[0, 1])
 
 
 def test_matched_edge_lesion_does_not_collapse_in_and_out_degree():
