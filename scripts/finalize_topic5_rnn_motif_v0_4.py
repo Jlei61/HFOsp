@@ -49,6 +49,7 @@ def main() -> int:
         "figures/topic5_figure6_rnn_connectivity_motifs.pdf",
         "figures/topic5_figure6_rnn_connectivity_motifs.svg",
         "figures/figure6_source_manifest.json", "VISUAL_QA.json",
+        "POSTPROCESS_READY_FOR_VISUAL_QA.json", "UNIT_CONTRACT_EXPORT_AUDIT.json",
         "stage_d_scientific_drift_audit.json", "stage_e_scientific_drift_audit.json",
         "stage_f_scientific_drift_audit.json", "stage_g_scientific_drift_audit.json",
         "stage_h_scientific_drift_audit.json",
@@ -59,7 +60,8 @@ def main() -> int:
     stage_clean = all(int(row["remaining"]) == 0 and int(row["failed"]) == 0
                       and int(row["oom"]) == 0 and int(row["nonfinite"]) == 0
                       for row in stages.values())
-    metric_paths = [path for path in (out / "per_subject").glob("*/*__*/seed*/metrics.json")
+    all_metric_paths = list((out / "per_subject").glob("*/*__*/seed*/metrics.json"))
+    metric_paths = [path for path in all_metric_paths
                     if not path.parents[1].name.startswith("SMOKE_")]
     metrics_count = len(metric_paths)
     target = load(out / "target_access_audit.json")
@@ -71,7 +73,23 @@ def main() -> int:
     )
     test_text = args.test_log.read_text().lower() if args.test_log.exists() else ""
     tests_ok = bool(" passed" in test_text and re.search(r"\b[1-9]\d* failed\b", test_text) is None)
-    engineering_accepted = not missing and stage_clean and metrics_count == 1426 and tests_ok and visual_ok
+    unit_contracts = (load(out / "UNIT_CONTRACT_EXPORT_AUDIT.json")
+                      if (out / "UNIT_CONTRACT_EXPORT_AUDIT.json").exists() else {})
+    unit_contracts_ok = bool(
+        unit_contracts.get("n_all_training_units") == 1435
+        and unit_contracts.get("n_formal_training_units") == 1426
+        and unit_contracts.get("n_smoke_training_units") == 9
+        and unit_contracts.get("n_config_contracts") == 1435
+        and unit_contracts.get("n_input_hash_contracts") == 1435
+        and unit_contracts.get("checkpoint_or_metric_values_changed") is False
+        and len(all_metric_paths) == 1435
+        and all((path.parent / "config.json").exists() for path in all_metric_paths)
+        and all((path.parent / "input_hashes.json").exists() for path in all_metric_paths)
+    )
+    engineering_accepted = bool(
+        not missing and stage_clean and metrics_count == 1426 and tests_ok
+        and visual_ok and unit_contracts_ok
+    )
 
     inter = load(out / "INTERICTAL_SUMMARY.json")
     adequate = inter["task_adequacy"]["rnn"]["models"]
@@ -117,6 +135,19 @@ def main() -> int:
     task_relation_pass = motif_components["task_relation"]
     lesion_pass = (motif_components["local_backbone_matched_lesion"]
                    and motif_components["long_range_or_connector_matched_lesion"])
+    lesion_summary = theory.get("matched_lesion", {})
+    lesion_statistics = lesion_summary.get("statistics", {})
+    local_lesion_estimable = "M6_SPATIAL_MID|local_backbone_edges" in lesion_statistics
+    long_lesion_estimable = any(
+        key in lesion_statistics for key in (
+            "M6_SPATIAL_MID|long_range_high_influence_edges",
+            "M6_SPATIAL_MID|connector_nodes",
+        )
+    )
+    lesion_estimable = bool(local_lesion_estimable and long_lesion_estimable)
+    lesion_wording = ("通过" if lesion_pass else
+                      "未通过" if lesion_estimable else
+                      "不可估计（严格 matched-control 分母不足）")
     proposal_pass = motif_components["not_binary_proposal_only"]
     level4 = bool(theory["M6_motif_claim_pass"])
 
@@ -127,6 +158,7 @@ def main() -> int:
         "formal_training_units": metrics_count,
         "stage_clean": stage_clean,
         "focused_tests_passed": tests_ok,
+        "unit_contracts_complete": unit_contracts_ok,
         "visual_qa_accepted": visual_ok,
         "target_access": target,
         "scientific_levels": {
@@ -141,6 +173,7 @@ def main() -> int:
                               "effective_operator_seed_stability": stability_pass,
                               "effective_operator_split_half_stability": split_stability_pass,
                               "task_relation": task_relation_pass,
+                              "matched_lesion_estimable": lesion_estimable,
                               "coherent_local_and_long_matched_lesion": lesion_pass,
                               "not_binary_proposal_only": proposal_pass},
         "adequate_rnn_models": adequate_models,
@@ -156,6 +189,7 @@ def main() -> int:
 ## 1. 间期传播充分性
 
 - 正式训练：{metrics_count}/1426 单元；Core/Dose/GRU 均为 0 failed、0 OOM、0 nonfinite。
+- 独立复现合同：{unit_contracts.get('n_config_contracts', 0)}/1435 `config.json`，{unit_contracts.get('n_input_hash_contracts', 0)}/1435 `input_hashes.json`；不改 checkpoint 或 metrics。
 - 至少达到 partial adequacy 的 leaky-RNN 模型：{', '.join(adequate_models) if adequate_models else '无'}。
 - 因此“多种 recurrence 是否足以学习患者内传播”的 Level 1：**{'支持' if level1 else '不支持'}**。
 - Dense 的患者中位 wiring cost 为 {fmt(dense_wire)}，Spatial + cost 为 {fmt(m6_wire)}；Level 2 经济性：**{'支持' if level2 else '不支持'}**。
@@ -179,7 +213,7 @@ canonical full、seed-removed、common-field 与 A/B contrast 已分开报告。
 - 完整 effective operator 的跨 seed 稳定性：**{'通过' if stability_pass else '未通过'}**。
 - 同一冻结模型在前后半留出事件中的 effective operator 稳定性：**{'通过' if split_stability_pass else '未通过'}**。
 - motif score 与留出传播/间期场拟合的患者级关系：**{'通过' if task_relation_pass else '未通过'}**。
-- local 与 long/connector targeted lesion 相对 matched random lesion 的同结构特异损害：**{'通过' if lesion_pass else '未通过'}**。
+- local 与 long/connector targeted lesion 相对 matched random lesion 的同结构特异损害：**{lesion_wording}**。
 - 与相同生长规则的 order-shuffle 对照相比并非二值 proposal 自动造成：**{'通过' if proposal_pass else '未通过'}**。
 - 全部同结构证据同时成立的 Level 4：**{'支持 local-backbone + sparse connector motif' if level4 else '未达到机制性 motif 措辞，只保留描述性组织'}**。
 
