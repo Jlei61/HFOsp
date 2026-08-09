@@ -57,6 +57,7 @@ from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
 )
 from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
     choose_units,
+    complete_patient_fit_set,
     edge_descriptor_matches,
     perturbation_damage,
 )
@@ -445,6 +446,17 @@ def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
                status="matched_inference_unavailable"),
     ])[('p1', 'M6_SPATIAL_MID', 'connector_nodes')]
     assert unresolved["matched_inference_available"] is False
+
+
+def test_matched_lesion_requires_both_noncollinear_fits():
+    expected = {"p1__own_a", "p1__own_b"}
+    one_side = [{"fit_id": "p1__own_a", "status": "inference_available"}]
+    assert not complete_patient_fit_set(one_side, expected)
+    both = one_side + [{"fit_id": "p1__own_b", "status": "inference_available"}]
+    assert complete_patient_fit_set(both, expected)
+    unavailable = [both[0], {"fit_id": "p1__own_b",
+                             "status": "matched_inference_unavailable"}]
+    assert not complete_patient_fit_set(unavailable, expected)
 
 
 def test_lesion_figure_uses_estimable_frozen_components_without_effect_selection(
