@@ -1,6 +1,6 @@
-# Topic 4 — 轴约束的数据驱动病理场（data-driven core field）v0.1 (rev7)
+# Topic 4 — 轴约束的数据驱动病理场（data-driven core field）v0.1 (rev8)
 
-- **状态：** rev3（2026-08-06 第三轮审阅后；**姿态改为探索性**，见 §0.4b）。Stage 0–1 授权执行；Stage 2 由 Stage 1 的预注册闸门
+- **状态：** rev8（2026-08-09；仍为**探索性**，rev3 姿态边界见 §0.4b）。Stage 0–1 已执行；Stage 2 由 Stage 1 的预注册闸门
   裁定，Stage 3 由 Stage 2 结局 + §9 的场位置稳定性裁定 —— **均不由该阶段自身的结果裁定**。
   rev1 / rev2 从未执行，无结果作废。
 - **被试：** E1146（`epilepsiae_1146`）单被试 MVP。队列层不在本合同内。
@@ -1356,6 +1356,38 @@ Fig. 4C 同构的**模型模式—病人模式一致性门**：
 该 KMeans consistency 是**确认/read-back gate**，不回灌 rev6 optimizer。若后续把 patient-train
 prototype match 改成训练目标，必须另起 revision，并保留 patient held-out blocks 与未见 network seeds 的
 双重隔离；不得在同一确认池上调阈值或选候选。
+
+### 9.3e rev8 训练目标：联合距离 + 病人训练模式矩阵（2026-08-09，运行前冻结）
+
+rev7 已证明 `D_curve` 改善仍可收敛到两个模型簇都对应同一个病人模式的解。rev8 按用户裁定，把
+**patient-training KMeans 一致性**加入优化，但保持 rev7 的 patient-heldout 与 unseen-network 最终确认不变。
+
+训练 target 只从患者训练 recording blocks 生成：在 rev6 冻结 embedding 内拟合 `K=2`，保存两条
+patient-train prototype 及其自身 `2x2` Spearman 矩阵 `M_patient`。矩阵非对角目标采用患者训练两原型的
+实测相关，而不是人为指定 `-1`，避免奖励比患者更极端的反向性。target producer 不计算 held-out prototype、
+held-out 距离或 held-out 阈值。
+
+每个候选按以下有序合同评分：
+
+1. 少于 20 条 usable events：只按 usable count 与 participant credit 排序；
+2. 20--31 条：可计算冻结的 `D_curve(n=20)`，但不能进入完整 rev8 目标；
+3. 固定覆盖抽取 32 条事件，独立拟合模型 `KMeans(K=2)`；任一簇少于 8 条时只按最小簇支持、模式误差、
+   `D_curve` 排序，不能与双簇支持候选竞争；
+4. 两簇均至少 8 条后，以 Hungarian matching 对齐模型模式和 patient-train 模式，令
+   `D_mode = RMSE(M_model - M_patient) / 2`，范围 `[0,1]`；
+5. 完整训练目标冻结为 `J_rev8 = D_curve + 0.5 * D_mode`。两个分量、矩阵、簇大小和 joint loss 全部落盘。
+
+模型网络严格分三池：优化 `701--760`；候选选择 `761--766`；最终确认 `801--806`。选择阶段只允许读取
+patient-train target，冻结唯一候选后才能打开 patient-heldout recording blocks；最终确认不得再改变参数、
+阈值或候选。训练侧每簇 8 条只是有限样本可优化门，最终 Fig. 4 核验仍使用 rev7 的每簇至少 10 条、矩阵
+符号结构、rigid-control 与 patient-floor 门。
+
+正式交付固定为同一冻结候选和同一最终事件池的两张图：
+
+- `Fig4A`：data-driven field、两个 KMeans 模式的代表传播事件和直接 30--80 Hz virtual-SEEG 波形；
+- `Fig4B`：clustered event heatmap、逐触点 rank 分布、两条 cluster profile 和 model-vs-patient `2x2` 矩阵。
+
+若最终不通过，图仍必须生成并标明失败原因；禁止换 seed、删事件或改 KMeans 阈值来获得好看的双模式图。
 
 ### 9.4 空间诊断量与判据
 

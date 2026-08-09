@@ -15,8 +15,13 @@ from src.topic4_core_field_profile import (NOT_A_POSITION, OBJECTIVE_FEATURES,
                                            REPORT_ONLY, argmin_axial_position,
                                            assert_not_interpreted_as_position,
                                            binned_distance, event_shape,
+                                           fixed_count_kmeans_mode_loss,
+                                           fit_profile_modes,
+                                           fit_rank_curve_reference,
                                            objective_features,
-                                           passes_sensitivity, recovery_score,
+                                           passes_sensitivity,
+                                           profile_mode_target_matrix,
+                                           rank_curve_table, recovery_score,
                                            shape_table, split_by_block)
 
 AX = {f"C{i}": float(s) for i, s in enumerate(np.linspace(-8, 8, 11))}
@@ -177,6 +182,53 @@ def test_distance_uses_frozen_edges_so_two_calls_are_comparable():
     d2 = binned_distance(a, b)
     assert d1 == pytest.approx(d2)
     assert binned_distance(a, wide) > d1
+
+
+# --------------------------------------- rev8 KMeans training companion
+def _noisy_mode_events(n_each=30):
+    return ([_monotone(+1, noise=0.10, seed=i) for i in range(n_each)]
+            + [_monotone(-1, noise=0.10, seed=100 + i) for i in range(n_each)])
+
+
+def test_patient_mode_target_uses_measured_cross_mode_similarity():
+    curves = rank_curve_table(_noisy_mode_events(), AX)
+    reference = fit_rank_curve_reference(
+        curves, n_components=4, n_reference=50, n_projections=12, seed=4)
+    modes = fit_profile_modes(curves, reference, seed=5)
+    target = profile_mode_target_matrix(modes["prototypes"])
+    assert np.diag(target) == pytest.approx([1.0, 1.0])
+    assert target[0, 1] == pytest.approx(target[1, 0])
+    assert target[0, 1] < 0.0
+
+
+def test_fixed_count_mode_loss_is_small_for_the_same_two_modes():
+    patient = rank_curve_table(_noisy_mode_events(40), AX)
+    reference = fit_rank_curve_reference(
+        patient, n_components=4, n_reference=60, n_projections=12, seed=4)
+    modes = fit_profile_modes(patient, reference, seed=5)
+    model = rank_curve_table(_noisy_mode_events(24), AX)
+    result = fixed_count_kmeans_mode_loss(
+        model, modes["prototypes"], reference,
+        n_events=32, min_cluster_events=8, seed=5)
+    assert result["support_eligible"] is True
+    assert result["mode_matrix_loss"] < 0.05
+    assert len(result["selected_event_indices"]) == 32
+
+
+def test_fixed_count_mode_loss_keeps_small_cluster_ineligible():
+    patient = rank_curve_table(_noisy_mode_events(40), AX)
+    reference = fit_rank_curve_reference(
+        patient, n_components=4, n_reference=60, n_projections=12, seed=4)
+    modes = fit_profile_modes(patient, reference, seed=5)
+    # Exactly two distinct profiles keep this test about support rather than
+    # allowing KMeans to split noise within the 29-event majority.
+    events = ([_monotone(+1) for _ in range(29)]
+              + [_monotone(-1) for _ in range(3)])
+    result = fixed_count_kmeans_mode_loss(
+        rank_curve_table(events, AX), modes["prototypes"], reference,
+        n_events=32, min_cluster_events=8, seed=5)
+    assert result["support_eligible"] is False
+    assert result["min_cluster_count"] < 8
 
 
 # --------------------------------------------------- held-out by block

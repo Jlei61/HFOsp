@@ -34,6 +34,13 @@ OBJECTIVE_N_EVENTS = 20
 PROFILE_MODE_SEED = 20260809
 PROFILE_MODE_N_INIT = 50
 
+# Stage 3 rev8 training-side mode objective.  The distance keeps its rev6
+# fixed-n=20 contract; the KMeans companion needs a larger, still fixed event
+# pool so a minority mode cannot be represented by one or two events.
+MODE_OBJECTIVE_N_EVENTS = 32
+MODE_MIN_CLUSTER_EVENTS = 8
+MODE_LOSS_WEIGHT = 0.5
+
 OBJECTIVE_FEATURES = ("slope", "r2")
 REPORT_ONLY = ("curvature", "n_part", "argmin_axial")
 
@@ -300,6 +307,20 @@ def profile_template_similarity(candidate_prototypes, data_prototypes):
     ], float)
 
 
+def profile_mode_target_matrix(data_prototypes):
+    """The Fig. 4-style matrix produced by perfect recovery of patient modes.
+
+    The off-diagonal target is the measured similarity between the two patient
+    training modes, not an artificial -1.  This keeps rev8 tied to the data's
+    actual separation instead of rewarding a more extreme opposition than the
+    patient exhibits.
+    """
+    target = profile_template_similarity(data_prototypes, data_prototypes)
+    if target.shape != (2, 2) or not np.isfinite(target).all():
+        raise ValueError("patient training modes must define a finite 2x2 target")
+    return target
+
+
 def kmeans_data_consistency(curves, data_prototypes, reference,
                             min_cluster_events=10,
                             seed=PROFILE_MODE_SEED,
@@ -350,6 +371,45 @@ def kmeans_data_consistency(curves, data_prototypes, reference,
         matrix_sign_consistent=sign_consistent,
         candidate_raw_mode_for_data_mode=candidate_for_data,
     )
+
+
+def fixed_count_kmeans_mode_loss(
+        curves, data_prototypes, reference,
+        n_events=MODE_OBJECTIVE_N_EVENTS,
+        min_cluster_events=MODE_MIN_CLUSTER_EVENTS,
+        seed=PROFILE_MODE_SEED,
+        n_init=PROFILE_MODE_N_INIT):
+    """Training-side KMeans auxiliary loss on one fixed-size event pool.
+
+    Model modes are fitted independently and only then matched to the frozen
+    patient-training modes.  The loss is the RMSE from the patient mode matrix,
+    divided by two because Spearman entries span [-1, 1].  It is therefore
+    bounded in [0, 1].  Cluster support remains a separate feasibility field;
+    callers must not treat a low loss from an undersupported mode as eligible.
+    """
+    x = np.asarray(curves, float)
+    index = fixed_count_indices(len(x), n_events)
+    if index is None:
+        return dict(
+            status="insufficient",
+            n_events=int(len(x)),
+            required_events=int(n_events),
+            support_eligible=False,
+        )
+    result = kmeans_data_consistency(
+        x[index], data_prototypes, reference,
+        min_cluster_events=min_cluster_events, seed=seed, n_init=n_init)
+    result["selected_event_indices"] = np.asarray(index, int)
+    result["required_events"] = int(n_events)
+    result["required_events_per_cluster"] = int(min_cluster_events)
+    if result.get("status") != "ok":
+        return result
+    target = profile_mode_target_matrix(data_prototypes)
+    matrix = np.asarray(result["similarity_matrix"], float)
+    loss = float(np.sqrt(np.mean((matrix - target) ** 2)) / 2.0)
+    result["target_similarity_matrix"] = target
+    result["mode_matrix_loss"] = loss
+    return result
 
 
 def sliced_rank_curve_distance(curves, reference):

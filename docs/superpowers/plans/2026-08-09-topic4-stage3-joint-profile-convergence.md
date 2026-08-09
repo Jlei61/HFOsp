@@ -1,16 +1,20 @@
-# Topic 4 Stage 3 联合剖面与收敛计划（rev2，2026-08-09）
+# Topic 4 Stage 3 联合剖面与收敛计划（rev3，2026-08-09）
 
-**Spec：** `docs/superpowers/specs/2026-08-06-topic4-axis-constrained-data-driven-core-field-design.md` rev6 §9.3c。
+**Spec：** `docs/superpowers/specs/2026-08-06-topic4-axis-constrained-data-driven-core-field-design.md` rev8 §9.3e。
 
 **核心问题：** 在不把双向验收门写入目标的前提下，完整逐事件剖面的联合分布能否从患者数据约束出一个
 跨网络稳定的病理场；随后同一空间场能否由局部连接性调制替代外加阈值场，并接入既有相图与有限发作生命周期合同。
 
 ## 冻结边界
 
-- 训练目标只用 rev6 `D_curve`；`k_dir`、TA/TB 标签、两模板相关与 §10.3 门不进入优化。
+- rev8 训练目标只用 patient-training recording blocks：`J_rev8 = D_curve + 0.5*D_mode`；
+  `D_mode` 是无监督模型 KMeans 模式矩阵到 patient-train 模式矩阵的误差。`k_dir`、人工 TA/TB 标签、
+  patient-heldout 与 §10.3 门不进入优化。
 - 每个候选的主目标固定使用 20 条 usable events；患者同构地板为 `0.287 [0.236, 0.358]`。
   少于 20 条只走 feasibility key，超过 20 条不得凭更多事件降低经验 Wasserstein 偏差。
 - 患者侧按 recording block 留出；模型侧确认 seed 不得进入拟合。
+- 模型网络三池锁定：优化 `701--760`、选择 `761--766`、最终确认 `801--806`；候选选择完成前不得读取
+  patient held-out。
 - 第一轮旧的一维 TV 结果只作历史对照，不作 warm start 的科学证据。
 - 当前 core 是 `V_th_per_neuron` 的静态**带符号阈值调制场**：冻结异质性中约 69.5% E 细胞的
   depth 降低阈值、30.5% 提高阈值。连接性等效版本是独立机制层，只有阈值场先稳定后才能启动。
@@ -93,6 +97,18 @@ controls 为手放双核 `0.871`、Stage 2 filament `0.807`。training global be
 
 **收敛门：** 至少两次重启的 held-out `D_curve` 落入彼此 bootstrap 区间；场的主要质量分量跨重启可匹配；
 独立网络确认不回退到 rigid-family best。
+
+### Task 3b：rev8 KMeans 辅助目标与 Fig. 4 双图交付
+
+- [x] 冻结 patient-train KMeans target 合同；target 不含 held-out 分数或 prototype。
+- [x] 冻结 `32` 条模式事件、每簇至少 `8` 条和 `J_rev8 = D_curve + 0.5*D_mode`。
+- [x] 实现优化/选择/最终确认三套 disjoint network seed 合同和 resume hash。
+- [ ] 生成并校验 patient-train target artifact。
+- [ ] 至少运行 K=2/3 cheap pilot；检查 sigma、dead-zone、双簇支持率和 joint loss，而非只看最优值。
+- [ ] 在 `761--766` 上选择并冻结唯一候选；selection JSON 必须写明 `patient_heldout_read=false`。
+- [ ] 冻结候选后在 patient held-out + `801--806` 上确认，保留 rev7 的每簇 10 条及 rigid/floor 门。
+- [ ] 用同一最终事件池生成两张正式图：Fig4A 直接 virtual-SEEG 波形；Fig4B KMeans 四块一致性核验。
+- [ ] PNG/PDF、metadata、中文 README、输入 hash 与视觉 QA 全部通过；失败结果也照实出图。
 
 ## Task 4：阈值 core 到连接性等效 core
 
