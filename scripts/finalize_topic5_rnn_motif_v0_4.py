@@ -53,11 +53,22 @@ def main() -> int:
         "figures/topic5_figure6_rnn_connectivity_motifs.svg",
         "figures/figure6_source_manifest.json", "figures/README.md", "VISUAL_QA.json",
         "POSTPROCESS_READY_FOR_VISUAL_QA.json", "UNIT_CONTRACT_EXPORT_AUDIT.json",
+        "stage_a_scientific_drift_audit.json", "stage_c_scientific_drift_audit.json",
         "stage_d_scientific_drift_audit.json", "stage_e_scientific_drift_audit.json",
         "stage_f_scientific_drift_audit.json", "stage_g_scientific_drift_audit.json",
         "stage_h_scientific_drift_audit.json",
     ]
     missing = [name for name in required if not (out / name).exists()]
+    drift_stages = ("a", "c", "d", "e", "f", "g", "h")
+    drift_audits = {
+        stage: (load(out / f"stage_{stage}_scientific_drift_audit.json")
+                if (out / f"stage_{stage}_scientific_drift_audit.json").exists() else {})
+        for stage in drift_stages
+    }
+    drift_audits_ok = all(
+        str(drift_audits[stage].get("status", "")).startswith("ALIGNED")
+        for stage in drift_stages
+    )
     stages = {stage: load(out / f"STAGE_{stage.upper()}_STATUS.json")
               for stage in ("core", "dose", "gru")}
     stage_clean = all(int(row["remaining"]) == 0 and int(row["failed"]) == 0
@@ -91,6 +102,7 @@ def main() -> int:
     )
     engineering_accepted = bool(
         not missing and stage_clean and metrics_count == 1426 and tests_ok
+        and drift_audits_ok
         and visual_ok and unit_contracts_ok
     )
 
@@ -300,6 +312,21 @@ def main() -> int:
                     "fits": preflight.get("n_fits"),
                     "target_values_read": preflight.get("target_values_read"),
                 },
+            },
+            "stagewise_scientific_alignment": {
+                "pass": drift_audits_ok,
+                "evidence": [
+                    f"stage_{stage}_scientific_drift_audit.json"
+                    for stage in drift_stages
+                ],
+                "observed": {
+                    stage: drift_audits[stage].get("status")
+                    for stage in drift_stages
+                },
+                "note": (
+                    "Every executed stage is checked against the original "
+                    "connectivity-to-interictal-to-cross-state-to-motif question."
+                ),
             },
             "formal_training_and_convergence": {
                 "pass": bool(stage_clean and metrics_count == 1426 and convergence_ok),
