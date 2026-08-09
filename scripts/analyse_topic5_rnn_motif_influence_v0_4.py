@@ -208,6 +208,69 @@ def contact_orientation_summary(pulse: np.ndarray, contact_xy: np.ndarray) -> di
     return output
 
 
+def contact_response_summary(
+    teacher: np.ndarray, pulse: np.ndarray, contact_xy: np.ndarray, shafts: list[str]
+) -> dict[str, float]:
+    """Complete frozen contact-space summary for TF and open-loop responses."""
+    teacher = np.asarray(teacher, float)
+    pulse = np.asarray(pulse, float)
+    xy = np.asarray(contact_xy, float)
+    off = ~np.eye(len(xy), dtype=bool)
+    same_shaft = np.equal.outer(shafts, shafts) & off
+    cross_shaft = ~np.equal.outer(shafts, shafts) & off
+    distance = np.linalg.norm(xy[:, None] - xy[None, :], axis=-1)
+    quartiles = np.quantile(distance[off], [0.25, 0.50, 0.75])
+    distance_bin = np.digitize(distance, quartiles)
+    delta = xy[:, None, :] - xy[None, :, :]
+    axis_mask = off & (np.abs(delta[..., 0]) >= np.abs(delta[..., 1]))
+    transverse_mask = off & ~axis_mask
+    output: dict[str, float] = {
+        "contact_distance_q25_mm": float(quartiles[0]),
+        "contact_distance_q50_mm": float(quartiles[1]),
+        "contact_distance_q75_mm": float(quartiles[2]),
+    }
+
+    def add(prefix: str, matrix: np.ndarray) -> None:
+        absolute = np.abs(matrix)
+        output[f"{prefix}_signed_influence"] = float(np.mean(matrix[off]))
+        output[f"{prefix}_abs_influence"] = float(np.mean(absolute[off]))
+        output[f"{prefix}_same_shaft_abs"] = (
+            float(np.mean(absolute[same_shaft])) if same_shaft.any() else float("nan")
+        )
+        output[f"{prefix}_cross_shaft_abs"] = (
+            float(np.mean(absolute[cross_shaft])) if cross_shaft.any() else float("nan")
+        )
+        axis_value = float(np.mean(absolute[axis_mask])) if axis_mask.any() else float("nan")
+        transverse_value = (
+            float(np.mean(absolute[transverse_mask])) if transverse_mask.any() else float("nan")
+        )
+        output[f"{prefix}_axis_aligned_abs"] = axis_value
+        output[f"{prefix}_transverse_abs"] = transverse_value
+        output[f"{prefix}_axis_to_transverse_ratio"] = (
+            axis_value / transverse_value if np.isfinite(transverse_value) and transverse_value > 0
+            else float("nan")
+        )
+        for index in range(4):
+            selected = off & (distance_bin == index)
+            output[f"{prefix}_distance_q{index + 1}_signed"] = (
+                float(np.mean(matrix[selected])) if selected.any() else float("nan")
+            )
+            output[f"{prefix}_distance_q{index + 1}_abs"] = (
+                float(np.mean(absolute[selected])) if selected.any() else float("nan")
+            )
+
+    add("tf_lag1", teacher)
+    for lag in range(min(3, pulse.shape[0])):
+        add(f"lag{lag + 1}", pulse[lag])
+    lag1 = output.get("lag1_abs_influence", float("nan"))
+    for lag in (2, 3):
+        value = output.get(f"lag{lag}_abs_influence", float("nan"))
+        output[f"lag{lag}_to_lag1_abs_ratio"] = (
+            value / lag1 if np.isfinite(lag1) and lag1 > 0 else float("nan")
+        )
+    return output
+
+
 def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
                    max_prefixes: int) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     model, decoder, metrics, plane, context = instantiate(out_root, metrics_path, device)
@@ -296,7 +359,7 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
     for lag in range(3):
         weight = np.abs(pulse[lag]) * off_contact
         reach.append(float((weight * contact_distance).sum() / max(weight.sum(), 1e-12)))
-    orientation = contact_orientation_summary(pulse, contact_xy)
+    response = contact_response_summary(teacher, pulse, contact_xy, shafts)
 
     graph = dict(np.load(metrics_path.parent / "graph.npz"))
     mask = np.asarray(graph["mask"], bool)
@@ -336,7 +399,7 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
         "motif_estimable": motif_estimable,
         "effective_edge_definition": ("exact_leaky_one_step_deletion_sensitivity"
                                       if metrics["cell"] == "rnn" else "gru_gate_rms_activity_proxy"),
-        **orientation,
+        **response,
     }
     arrays = {
         "contacts": np.asarray(context["provenance"]["contacts"], dtype="U64"),
@@ -404,13 +467,16 @@ def main() -> int:
                 raise RuntimeError(f"missing effective influence output: {output}")
             with np.load(output, allow_pickle=False) as data:
                 row = json.loads(str(data["summary_json"].item()))
-                if "lag1_axis_aligned_abs" not in row:
-                    metrics = json.loads(path.read_text())
-                    plane = dict(np.load(out_root / "cache" / metrics["fit_id"] / "plane.npz"))
-                    row.update(contact_orientation_summary(
-                        np.asarray(data["open_loop_pulse_lag123"], float),
-                        np.asarray(plane["contacts_xy_mm"], float),
-                    ))
+                metrics = json.loads(path.read_text())
+                cache = out_root / "cache" / metrics["fit_id"]
+                plane = dict(np.load(cache / "plane.npz"))
+                provenance = json.loads((cache / "provenance.json").read_text())
+                row.update(contact_response_summary(
+                    np.asarray(data["teacher_forced_lag1"], float),
+                    np.asarray(data["open_loop_pulse_lag123"], float),
+                    np.asarray(plane["contacts_xy_mm"], float),
+                    [parse_shaft(name) for name in provenance["contacts"]],
+                ))
                 rows.append(row)
         write_csv(out_root / "effective_influence_fit_seed.csv", rows)
         summary = {
@@ -423,6 +489,9 @@ def main() -> int:
             "teacher_forced_scope": "lag1_local_probability_jacobian_only",
             "open_loop_scope": "lag1_to_lag3_deterministic_decoder_without_future_ranks",
             "rank_step_not_real_time": True,
+            "response_summaries": ["signed_and_absolute", "lag_decay",
+                                   "same_vs_cross_shaft", "contact_distance_quartiles",
+                                   "axis_aligned_vs_transverse"],
         }
         (out_root / "EFFECTIVE_INFLUENCE_SUMMARY.json").write_text(json.dumps(summary, indent=2))
     return 0

@@ -29,7 +29,10 @@ from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
     event_pair_reliability,
     seed_removed_sequence_agreement,
 )
-from analyse_topic5_rnn_motif_influence_v0_4 import contact_orientation_summary  # noqa: E402
+from analyse_topic5_rnn_motif_influence_v0_4 import (  # noqa: E402
+    contact_orientation_summary,
+    contact_response_summary,
+)
 from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     conditional_effects,
     compute_dose_trend,
@@ -330,6 +333,15 @@ def test_contact_pulse_summary_separates_axis_and_transverse_pairs():
         f"lag{lag}_{name}" for lag in (1, 2, 3)
         for name in ("axis_aligned_abs", "transverse_abs", "axis_to_transverse_ratio")
     }
+    complete = contact_response_summary(np.ones((3, 3)), pulse, xy, ["A", "A", "B"])
+    for key in (
+        "tf_lag1_signed_influence", "tf_lag1_abs_influence",
+        "lag1_signed_influence", "lag1_abs_influence",
+        "lag2_to_lag1_abs_ratio", "lag3_to_lag1_abs_ratio",
+        "lag2_same_shaft_abs", "lag3_cross_shaft_abs",
+        "lag1_distance_q1_abs", "lag1_distance_q4_signed",
+    ):
+        assert key in complete and np.isfinite(complete[key])
 
 
 def test_matched_edge_lesion_does_not_collapse_in_and_out_degree():
