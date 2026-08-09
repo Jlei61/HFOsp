@@ -67,6 +67,12 @@ from src.topic4_fcxr_lc3_stage import (  # noqa: E402
     returned_to_reference,
 )
 from src.topic4_mz_fcxr_lifecycle import classify_lifecycle  # noqa: E402
+from src.topic4_mz_slowvars import eta_m_from_frac  # noqa: E402
+
+# Measured on this substrate, not borrowed: the discharge's per-cell rate, and the excitatory
+# current scale this project already calibrated for the force match.
+ICTAL_RATE_HZ = 70.5
+I_EE_SCALE = 272.75518960107513
 
 OUT = os.path.join(E01.OUT, "percell_adaptation")
 # Entry lands ~5 s in.  65 s of discharge was not enough to see what a slow variable does, and a
@@ -136,8 +142,6 @@ def _grid_fields(snapshots, posE, L, grid=GRID):
 
 
 def _run_arm(spec):
-    # A delayed arm is a different experiment from the same eta_m applied from t=0, so it gets its
-    # own record rather than resuming into the undelayed one's file.
     enable = spec.get("m_enable_ms")
     name = spec["arm"] if enable is None else f"{spec['arm']}_on{int(enable / 1000)}s"
     out_json = os.path.join(OUT, f"arm_{name}.json")
@@ -268,15 +272,35 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--confirm-run", action="store_true")
     ap.add_argument("--arms", default=",".join(a["arm"] for a in ARMS))
-    ap.add_argument("--m-enable-ms", type=float, default=None,
-                    help="switch adaptation on this late, so the discharge establishes first")
+    ap.add_argument("--tau-adp-ms", type=float, default=None,
+                    help="adaptation recovery time; the separation between interictal and ictal "
+                         "comes from where this sits between their two inter-event intervals "
+                         "(340 ms and 64 ms measured), not from any switch")
+    ap.add_argument("--frac", type=float, default=None,
+                    help="force-match: peak ictal adaptation current as a fraction of the "
+                         "excitatory current scale, so a tau sweep holds the dose fixed")
+    ap.add_argument("--run-ms", type=float, default=None,
+                    help="shorter records screen tau cheaply before a long run is committed")
     ap.add_argument("--workers", type=int, default=0)
     args = ap.parse_args()
     if not args.confirm_run:
         raise SystemExit("40k-neuron sweep requires --confirm-run")
 
-    want = [dict(a, m_enable_ms=args.m_enable_ms)
-            for a in ARMS if a["arm"] in set(args.arms.split(","))]
+    global RUN_MS, TAU_ADP_MS
+    if args.run_ms:
+        RUN_MS = float(args.run_ms)
+    if args.tau_adp_ms:
+        TAU_ADP_MS = float(args.tau_adp_ms)
+    if args.frac is not None:
+        # Force-match on the ictal side: m equilibrates near rate x tau, so holding
+        # eta_m * m_ictal = frac * I_EE keeps the delivered ictal current fixed while tau moves.
+        # The rate is the measured per-cell discharge rate; this is an estimate, and the arms
+        # record what was actually delivered rather than assuming it.
+        m_ictal = ICTAL_RATE_HZ * TAU_ADP_MS / 1000.0
+        eta = eta_m_from_frac(args.frac, I_EE_SCALE, m_ictal)
+        want = [dict(arm=f"tau{int(TAU_ADP_MS)}_f{args.frac:g}", eta_m=eta, mean_field=False)]
+    else:
+        want = [a for a in ARMS if a["arm"] in set(args.arms.split(","))]
     per = BASE_RSS_GIB + GIB_PER_SIM_SECOND * RUN_MS / 1000.0
     avail = GEO._meminfo()["mem_available_gib"]
     # 40 GiB headroom, the same margin the sibling runners keep: this box has run out of memory

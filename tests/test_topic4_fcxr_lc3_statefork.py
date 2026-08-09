@@ -129,3 +129,61 @@ def test_scaling_stays_inside_the_ranges_the_engine_validates():
     x_star = np.array([0.2, 0.05])
     d, x = scaled_fields(d_star, x_star, alpha_d=5.0, alpha_x=5.0)
     assert np.all((d >= 0) & (d <= 1)) and np.all((x >= 0) & (x <= 1))
+
+
+# ---- FCXR-LC4: the channel open fraction is state, and must fork with everything else ----
+
+class _Cfg:
+    def __init__(self, K):
+        self.m_hill_K = K
+
+
+def _state_with_a(seed=0, fill=0.5, a_fill=0.3, K=2.0):
+    s = _state(seed, fill)
+    s.slow.a = np.full(NE, a_fill, dtype=float)
+    s.slow.cfg = _Cfg(K)
+    return s
+
+
+def test_the_open_fraction_survives_a_fork(tmp_path):
+    """A reload that leaves the channel at the template's value is not a fork of this trajectory:
+    the whole point of the slow-off kinetics is that the state carries protection forward."""
+    s = _state_with_a(seed=3, a_fill=0.77)
+    p = str(tmp_path / "s.npz")
+    written = save_loop_state(p, s)
+    back = load_into(p, _state_with_a(seed=99, fill=0.9, a_fill=0.01))
+    assert np.allclose(np.asarray(back.slow.a), 0.77)
+    assert state_hash(back) == written
+
+
+def test_the_hash_covers_the_open_fraction_once_it_carries_something():
+    a, b = _state_with_a(seed=4, a_fill=0.2), _state_with_a(seed=4, a_fill=0.9)
+    assert state_hash(a) != state_hash(b)
+
+
+def test_an_all_zero_open_fraction_hashes_as_if_it_were_not_there():
+    """Backward compatibility with every reference state written before the variable existed."""
+    assert state_hash(_state_with_a(seed=4, a_fill=0.0)) == state_hash(_state(seed=4))
+
+
+def test_a_pre_existing_state_loads_onto_a_template_that_has_the_mechanism_configured(tmp_path):
+    """The fork this mechanism exists for: the saved discharge state predates the channel, and it
+    must load onto a template that has the channel switched on.  Keying the hash on the config
+    rather than on the array would reject it -- the child would hash differently from its own
+    file purely because the template's config changed."""
+    p = str(tmp_path / "discharge.npz")
+    written = save_loop_state(p, _state(seed=8))              # written before the channel existed
+    back = load_into(p, _state_with_a(seed=99, fill=0.9, a_fill=0.0, K=2.0))
+    assert state_hash(back) == written
+
+
+def test_a_file_written_before_the_channel_existed_still_loads(tmp_path):
+    """Backward compatibility is not optional here: the saved interictal and ictal reference states
+    predate this variable, and re-running them costs an hour of wall time each."""
+    p = str(tmp_path / "old.npz")
+    written = save_loop_state(p, _state(seed=6))          # no `a` on the slow object at all
+    back = load_into(p, _state_with_a(seed=99, fill=0.9, a_fill=0.5, K=None))
+    assert state_hash(back) == written
+    assert np.allclose(np.asarray(back.slow.a), 0.0), (
+        "a state that predates the channel had it shut; keeping the template's 0.5 would be the "
+        "half-restored fork this module exists to prevent")

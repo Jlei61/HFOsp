@@ -104,6 +104,15 @@ def state_hash(state: FCXRLoopState) -> str:
     ):
         if hasattr(slow, name):
             _hash_array(h, f"slow.{name}", getattr(slow, name))
+    # FCXR-LC4 channel open fraction, covered only once it carries something.  An all-zero array
+    # holds no state, and hashing it unconditionally would change every hash already on disk so the
+    # saved reference states would stop loading against their own recorded hash.  Keying that on
+    # the *config* instead looked equivalent and is not: loading one of those states onto a
+    # template that has the mechanism configured would then hash differently from the file it came
+    # from and be rejected -- which is exactly the fork this mechanism needs.  Keyed on the array,
+    # the hash stays a function of the state alone.
+    if hasattr(slow, "a") and np.any(np.asarray(slow.a)):
+        _hash_array(h, "slow.a", slow.a)
     h.update(np.asarray([int(getattr(slow, "_step_i", -1))], dtype=np.int64).tobytes())
     return h.hexdigest()
 

@@ -132,6 +132,17 @@ class MZSlowVarsConfig:
     tau_adp_E: "np.ndarray | None" = None  # FCXR-HEO3: per-E-cell adaptation RECOVERY time (patchy field; None = scalar tau_adp)
     eta_m_E: "np.ndarray | None" = None    # FCXR-HEO3: per-E-cell adaptation strength (None = scalar eta_m); pair with tau_adp_E as eta_i=eta0*tau0/tau_i to hold each cell's steady-state K load fixed
     m_mean_field: bool = False             # FCXR-HEO3 control: replace per-cell m by the POPULATION MEAN each step (pure temporal modulation, no inter-cell differences)
+    # ---- FCXR-LC4: cooperative load-activated outward current (OFF by default; m_hill_K=None -> the
+    # linear eta_m*m actuator above, byte-for-byte).  The load m_i keeps charging from the cell's own
+    # spikes and keeps clearing LINEARLY; only what the load *opens* changes.  That separation is the
+    # whole mechanism: the 2026-07-27 pump gated its own clearance with the same curve, so its
+    # stationary activation was a*tau*r with the half-point cancelled and no threshold could be
+    # placed.  Clearing linearly leaves m* = r*tau, and then m_hill_K is a real threshold.
+    m_hill_K: "float | None" = None   # half-activation load; place it between the two states' loads
+    m_hill_n: float = 4.0             # cooperativity; sets how sharply the two states separate
+    tau_a_on: float = 50.0            # ms  open; slower than one interictal event -> the transient is not followed
+    tau_a_off: float = 5000.0         # ms  close; must outlast wear clearance or it lets go while D is still high
+    g_m_max: float = 0.0              # adaptation current at FULL activation, at v_match (same units as eta_m*m)
     use_phi: bool = False          # optional Abbott-style spike-triggered threshold adaptation
     tau_phi: float = 100.0         # ms
     delta_phi: float = 0.0         # mV threshold increment per E spike
@@ -253,6 +264,9 @@ class MZSlowVars:
                        else np.asarray(self.cfg.tau_adp_E, float).copy())
         self._eta_full = np.full(self.N, float(self.cfg.eta_m))
         self._eta_full[:self.NE] = self._eta_E
+        # FCXR-LC4: channel open fraction, per cell like the load that drives it.  Starts closed, so
+        # a run that begins quiet begins with the mechanism off rather than with a preset bias.
+        self.a = np.zeros(self.N)
         self.phi = np.zeros(self.N)
         # ---- global-burst adaptation state (allocated ONLY when use_gba; off -> None -> byte parity) ----
         # Both are scalars: the trigger is a population property (how much of the array a single
@@ -347,7 +361,9 @@ class MZSlowVars:
         self.trace_m_mean = []; self.trace_m_max = []
         self.trace_m_core_mean = []; self.trace_m_surround_mean = []
         self.trace_phi_mean = []; self.trace_phi_max = []
-        self.trace_adap_current = []                            # eta_m * mean(m[E])
+        self.trace_adap_current = []                            # eta_m * mean(m[E]), or g_m_max * mean(a[E]) under FCXR-LC4
+        self.trace_a_mean = []                                  # FCXR-LC4 channel open fraction (empty while off)
+        self.trace_a_max = []
         self.trace_I_EI_E_mean = []                             # E-cell inhibitory current summary
         self.trace_rate_E = []; self.trace_rate_I = []
         self.trace_gaba_received_mean = []
@@ -406,6 +422,12 @@ class MZSlowVars:
         inh = self.z * I_I if (self.cfg.use_z or self.cfg.z_frozen_E is not None) else I_I  # frozen z is applied
         I_net = I_E - inh
         if self.cfg.use_m:
+            if self.cfg.m_hill_K is not None:
+                # The cooperative actuator is a conductance with a reversal; there is no faithful
+                # additive-current version of it, and silently applying the linear one here would
+                # run a different mechanism than the one configured.
+                raise RuntimeError("m_hill_K (cooperative actuator) has no additive-current form; "
+                                   "it requires membrane_mode='full_conductance'")
             I_net = I_net - self._eta_full * self.m            # m==0 on I cells -> E-only adaptation current
         if gba != 0.0:
             I_net = I_net.copy()
@@ -490,7 +512,8 @@ class MZSlowVars:
         gI = c.gaba_gain * I_inh_eff / (c.v_match - c.e_gaba)
         gba = self._gba_current()                                 # 0.0 unless the brake is on AND charged
         if c.use_m or c.m_frozen_E is not None:                   # FCXR-HEO2: frozen m also drives a static gM
-            I_adap = self._eta_E * self.m[:self.NE]
+            I_adap = (c.g_m_max * self.a[:self.NE] if c.m_hill_K is not None  # FCXR-LC4 cooperative
+                      else self._eta_E * self.m[:self.NE])
             if gba != 0.0:
                 I_adap = I_adap + gba
             gM = c.m_conductance_gain * I_adap / (c.v_match - c.e_k)
@@ -714,6 +737,18 @@ class MZSlowVars:
             self.m[spk & self.is_E] += 1.0                     # E spike -> +1 ; I spikes ignored (E-only)
             if c.m_mean_field:                                 # FCXR-HEO3 control: no inter-cell differences
                 self.m[self.is_E] = self.m[self.is_E].mean()
+        if c.m_hill_K is not None:
+            # FCXR-LC4.  The load opens a channel; the channel never feeds back into the load, which
+            # is what keeps m* = r*tau and leaves m_hill_K free to sit anywhere between the states.
+            # Opening and closing carry separate time constants: the fast one decides whether a brief
+            # interictal event is followed at all, the slow one how long protection outlasts the
+            # discharge.  Same first-order relaxation as z and the relay -- no instantaneous reset.
+            mE = self.m[:self.NE]
+            x = (mE / c.m_hill_K) ** c.m_hill_n
+            a_inf = x / (1.0 + x)
+            aE = self.a[:self.NE]
+            tau_sel = np.where(a_inf > aE, c.tau_a_on, c.tau_a_off)
+            self.a[:self.NE] = aE + (dt / tau_sel) * (a_inf - aE)
         if c.m_frozen_E is not None and c.m_frozen_enable_ms is not None and self._step_i * dt >= c.m_frozen_enable_ms:
             self.m[:self.NE] = self._m_frozen_cached          # FCXR-HEO2.1: delayed static-K inject (idempotent)
         if c.use_phi:
@@ -829,7 +864,15 @@ class MZSlowVars:
         self.trace_m_max.append(float(mE.max()))
         self.trace_phi_mean.append(float(self.phi[self.is_E].mean()))
         self.trace_phi_max.append(float(self.phi[self.is_E].max()))
-        self.trace_adap_current.append(float((self._eta_E * mE).mean()))
+        # The current actually delivered, not the one the linear actuator would have delivered:
+        # a diagnostic that keeps reporting a disabled path is how a mechanism gets read as
+        # ineffective, or effective, on a number the run never used.
+        self.trace_adap_current.append(
+            float(self.cfg.g_m_max * self.a[self.is_E].mean()) if self.cfg.m_hill_K is not None
+            else float((self._eta_E * mE).mean()))
+        if self.cfg.m_hill_K is not None:
+            self.trace_a_mean.append(float(self.a[self.is_E].mean()))
+            self.trace_a_max.append(float(self.a[self.is_E].max()))
         if self.cfg.use_gba:
             self.trace_gba_burst.append(float(self.gba_burst))
             self.trace_gba_a.append(float(self.gba_a))
@@ -927,6 +970,8 @@ class MZSlowVars:
         D_X and regional (core/axis/off) x/y recruitment can be computed post-hoc from a few snapshots."""
         snap = dict(z_E=self.z[:self.NE].copy(), m_E=self.m[:self.NE].copy(),
                     step=int(self._step_i), captured_after_update=True)
+        if self.cfg.m_hill_K is not None:
+            snap["a_E"] = self.a[:self.NE].copy()    # FCXR-LC4 channel open fraction (length NE)
         if self.cfg.use_x:
             snap["x_E"] = self.x_relay.copy()        # relay availability (length NE)
             snap["y_E"] = self.y.copy()              # persistence sensor y_j (length NE)
@@ -998,6 +1043,23 @@ class MZSlowVars:
             raise ValueError("use_m requires tau_adp>0")
         if c.m_enable_ms is not None and not c.use_m:
             raise ValueError("m_enable_ms (delayed adaptation onset) requires use_m=True")
+        # FCXR-LC4 cooperative actuator
+        if c.m_hill_K is not None:
+            if not (c.use_m or c.m_frozen_E is not None):
+                raise ValueError("m_hill_K (cooperative actuator) needs a load to act on: "
+                                 "use_m=True or a frozen m field")
+            if c.membrane_mode != "full_conductance":
+                raise ValueError("m_hill_K requires membrane_mode='full_conductance'")
+            for nm, val, lo in (("m_hill_K", c.m_hill_K, 0.0), ("m_hill_n", c.m_hill_n, 0.0),
+                                ("tau_a_on", c.tau_a_on, 0.0), ("tau_a_off", c.tau_a_off, 0.0)):
+                if not (np.isfinite(val) and val > lo):
+                    raise ValueError(f"{nm} must be finite and > {lo}")
+            if not (np.isfinite(c.g_m_max) and c.g_m_max >= 0.0):
+                raise ValueError("g_m_max must be finite and non-negative")
+        elif c.g_m_max != 0.0:
+            # Same rule as eta_gba: a strength set with its mechanism off is a silently dead knob,
+            # and that is how a mechanism gets reported ineffective when it was never switched on.
+            raise ValueError("g_m_max requires m_hill_K (the cooperative actuator) to be set")
         if c.m_frozen_E is not None:
             if c.membrane_mode != "full_conductance":
                 raise ValueError("m_frozen_E (static-K control) requires membrane_mode='full_conductance'")
