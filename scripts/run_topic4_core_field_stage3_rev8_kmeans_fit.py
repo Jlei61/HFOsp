@@ -11,7 +11,7 @@ import json
 import os
 import sys
 import time
-from multiprocessing import Pool
+from multiprocessing import get_context
 
 import numpy as np
 
@@ -61,6 +61,10 @@ SELECTION_SEED_POOL = tuple(range(761, 767))
 FINAL_CONFIRM_SEED_POOL = tuple(range(801, 807))
 DEFAULT_POPSIZE = 12
 SIGMA0 = 0.55
+# KMeans/BLAS executes in the parent between generations.  Forking after that
+# can inherit a locked native thread-pool state, so every worker generation must
+# start from a fresh interpreter.
+WORKER_CONTEXT = get_context("spawn")
 
 
 def _sha256(path):
@@ -240,7 +244,8 @@ def main():
         seeds = [int(value) for value in rng.choice(
             TRAIN_SEED_POOL, size=args.seeds_per_candidate, replace=False)]
         cache_jobs = _unique_seed_cache_jobs(seeds, cfg, cache)
-        with Pool(min(args.workers, len(cache_jobs)), maxtasksperchild=1) as pool:
+        with WORKER_CONTEXT.Pool(
+                min(args.workers, len(cache_jobs)), maxtasksperchild=1) as pool:
             cache_rows = pool.map(_precache_network, cache_jobs)
         errors = [row for row in cache_rows if "error" in row]
         if errors:
@@ -249,7 +254,7 @@ def main():
             (theta, seed, cfg, cache, args.K, MIN_PARTICIPANTS)
             for theta in physical for seed in seeds
         ]
-        with Pool(args.workers, maxtasksperchild=1) as pool:
+        with WORKER_CONTEXT.Pool(args.workers, maxtasksperchild=1) as pool:
             raw = pool.map(_evaluate, jobs)
 
         keys, rows = [], []

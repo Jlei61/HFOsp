@@ -6,6 +6,7 @@ from scripts.run_topic4_core_field_stage3_rev8_kmeans_fit import (
     MODE_LOSS_WEIGHT,
     SELECTION_SEED_POOL,
     TRAIN_SEED_POOL,
+    WORKER_CONTEXT,
     rev8_candidate_fitness,
     score_candidate,
 )
@@ -66,6 +67,10 @@ def test_fit_selection_and_final_network_pools_are_disjoint():
     assert not (set(TRAIN_SEED_POOL) & set(SELECTION_SEED_POOL))
     assert not (set(TRAIN_SEED_POOL) & set(FINAL_CONFIRM_SEED_POOL))
     assert not (set(SELECTION_SEED_POOL) & set(FINAL_CONFIRM_SEED_POOL))
+
+
+def test_optimizer_workers_spawn_after_parent_kmeans():
+    assert WORKER_CONTEXT.get_start_method() == "spawn"
 
 
 def test_representative_seed_maximizes_support_for_both_modes():
