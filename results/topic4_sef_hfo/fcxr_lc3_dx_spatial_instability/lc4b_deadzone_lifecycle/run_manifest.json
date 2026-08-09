@@ -1,0 +1,52 @@
+{
+  "experiment": "FCXR-LC4b exact-dead-zone cooperative terminator",
+  "status": "D3_NOMINAL_COMPLETE_STOPPED",
+  "verdict": "F2_NOMINAL_LIFECYCLE_INCOMPLETE",
+  "design": "docs/superpowers/specs/2026-08-09-topic4-fcxr-lc4b-exact-deadzone-design.md",
+  "plan": "docs/superpowers/plans/2026-08-09-topic4-fcxr-lc4b-exact-deadzone.md",
+  "execution_head": "66db6666d71add53d7be7f4373fa45ff8322ecfa",
+  "stages": {
+    "D0_analytic_candidate": "DEADZONE_IDENTIFIABLE",
+    "D1_paired_functional_baseline": "DEADZONE_BASELINE_INERT",
+    "D2_frozen_D_onset_surface": "ONSET_SURFACE_RETAINED",
+    "D3_nominal_continuous_lifecycle": "F2_NOMINAL_LIFECYCLE_INCOMPLETE",
+    "D3_exact_final_D_confirmation": "not_authorised"
+  },
+  "primary_verdicts": [
+    "candidate_lock.json",
+    "baseline_verdict.json",
+    "onset_surface_verdict.json",
+    "nominal_lifecycle.json",
+    "AUTOPILOT_STOP.json"
+  ],
+  "figure": "figures/lc4b_deadzone_lifecycle_diagnostic.png",
+  "artifact_sha256": {
+    "candidate_lock.json": "0381e0cef908450fb7485c5810af3aa9b7c2091da9da7d8e017d9d5d55ae05f0",
+    "baseline_verdict.json": "7d52c1958defcbb4a0d213fab266078920a40acf0589d5397be78f1b191bed3f",
+    "onset_surface_verdict.json": "2b304f3eb1ab018372116aa6771dc9eeea6c942b2d8633637bea68d443a04016",
+    "nominal_lifecycle.json": "27ce55c78e7abb6827209dc95af330fd09ea48a233deb11a29fc237e4fa3f479",
+    "nominal_lifecycle_traces.npz": "93cc29d9b99a9c489959f756cc9ad409562d8901bebfa9280afc156ffb373ad9",
+    "nominal_final_exact_state.npz": "d004443c854d41fbaae1e1d7da42d68b92e966bac986fb0f43b9a701d04bc7a3",
+    "AUTOPILOT_STOP.json": "0d460f07c1b174f3b9a14065a12dbcd3f0aa5460d22901f19dc8d42fb29c908f"
+  },
+  "source_sha256": {
+    "src/snn_engine/mz_slow_vars.py": "5b578bcf7de583a3829b655e53b17f71674d7a378788cd50ca0e23c0374c8071",
+    "src/topic4_fcxr_lc4b_deadzone.py": "84477303fa4a657ff798eaf76aecd445dff8ba367dc94ac1a2c828d87b9eed0e",
+    "src/topic4_fcxr_lc4_lifecycle.py": "a376a04b0df8103b776b027de0941fc54c91d619fe8cf375bdc246d328a74f1c",
+    "scripts/run_topic4_fcxr_lc4b_deadzone.py": "b0997143a391b7d957b1627a97940c8c5a0ab63b0e11bfa0085ab3ab5601104d",
+    "scripts/run_topic4_fcxr_lc4b_lifecycle.py": "55489f70925213908ba4b52825afa750072c61d5e02b5a63de1056f97c2e08b2",
+    "scripts/run_topic4_fcxr_lc4b_autopilot.sh": "00a95a9af11821c6674a942f811fe2cb2948700928d91f095534a3f741aee3d2",
+    "scripts/paper_figures/plot_fig_lc4b_deadzone_lifecycle.py": "0b8d9f7ee2701fd0bfead08f4f55c2f184869c78a8a1d4f112035e12f9185191"
+  },
+  "blessed_engine_hashes_match": true,
+  "tests": "355 passed in 31.17 s",
+  "resources": {
+    "worker_policy": "one 40k worker for every executed stage",
+    "long_run_mode": "setsid nohup with PID, stage flock, source lock and sentinels",
+    "peak_self_rss_gib": 50.886566162109375,
+    "minimum_logged_mem_available_gib": 186.5664176940918,
+    "swap_delta_mib": 0.0,
+    "residual_task_processes": 0
+  },
+  "completed": "2026-08-10T00:41:37+08:00"
+}

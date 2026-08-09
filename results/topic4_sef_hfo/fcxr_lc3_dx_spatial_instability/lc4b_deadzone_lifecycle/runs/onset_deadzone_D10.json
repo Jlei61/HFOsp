@@ -1,0 +1,87 @@
+{
+  "status": "COMPLETE",
+  "tag": "onset_deadzone_D10",
+  "role": "candidate",
+  "d_label": "D10",
+  "mean_D": 0.047358222634635794,
+  "run_ms": 12000.0,
+  "connection_seed": 1,
+  "noise_seed": 401,
+  "candidate": {
+    "name": "hill_n4_exact_deadzone_slow",
+    "n": 4.0,
+    "tau_adp_ms": 1000.0,
+    "tau_a_on_ms": 100.0,
+    "tau_a_off_ms": 10000.0,
+    "deadzone": 46.83235549926758,
+    "K": 19.869522094726562,
+    "g_m_max": 88.74371816605014,
+    "matched_ictal_current": 44.8619393917937,
+    "calibration": {
+      "interictal_peak_max": 35.99027633666992,
+      "ictal_settled_min": 57.674434661865234,
+      "ictal_settled_median": 66.70187759399414,
+      "extreme_gap": 21.684158325195312,
+      "deadzone_margin_each_side": 10.842079162597656,
+      "interictal_activation_max": 0.0,
+      "interictal_activation_mean": 0.0,
+      "ictal_activation_min": 0.08143489708023391,
+      "ictal_activation_mean": 0.5055224225319433,
+      "ictal_fraction_half_on": 0.5
+    }
+  },
+  "no_kick": true,
+  "no_reset": true,
+  "no_parameter_step": true,
+  "lifecycle": {
+    "label": "ICTAL_LIKE_BOUNDED",
+    "regimes": [
+      "INTERICTAL",
+      "DENSE",
+      "ICTAL",
+      "ICTAL",
+      "ICTAL",
+      "ICTAL",
+      "ICTAL",
+      "ICTAL",
+      "ICTAL",
+      "ICTAL",
+      "ICTAL",
+      "ICTAL"
+    ],
+    "bout": [
+      2,
+      11
+    ],
+    "reasons": [
+      "ictal bout runs to the end of the record; no autonomous termination observed"
+    ],
+    "pre_ms": 0.0,
+    "bout_ms": 10000.0
+  },
+  "departed": true,
+  "numerical": {
+    "finite": true,
+    "tau_eff_min_ms": 0.2646906538984052,
+    "clip_frac_max": 0.0,
+    "numerical_unsafe": false
+  },
+  "summary": {
+    "n_returning": 105,
+    "event_rate_hz": 8.75,
+    "iei_cv": 0.48426138859613954,
+    "median_duration_ms": 17.0,
+    "median_participation": 0.4430625,
+    "window_ms": [
+      0.0,
+      12000.0
+    ]
+  },
+  "adap_current_max": 1.4308493796449702,
+  "adap_current_fraction": 0.005245910744128075,
+  "max_rate_hz": 556.875,
+  "mean_rate_hz": 37.6266953125,
+  "wall_s": 2953.8232576847076,
+  "peak_rss_gib": 12.983039855957031,
+  "finished": "2026-08-09T10:49:56.156042+00:00"
+}

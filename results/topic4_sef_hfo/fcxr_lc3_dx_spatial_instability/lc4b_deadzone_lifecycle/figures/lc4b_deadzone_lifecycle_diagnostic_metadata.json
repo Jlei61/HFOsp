@@ -1,0 +1,28 @@
+{
+  "figure": "lc4b_deadzone_lifecycle_diagnostic",
+  "kind": "executed-stage diagnostic; not a complete-lifecycle or paper-claim figure",
+  "stage_verdicts": {
+    "D1": "DEADZONE_BASELINE_INERT",
+    "D2": "ONSET_SURFACE_RETAINED",
+    "D3": "F2_NOMINAL_LIFECYCLE_INCOMPLETE"
+  },
+  "panels": {
+    "A": "paired control/candidate population rates; traces and active fraction are byte-identical and current is exactly zero",
+    "B": "candidate at healthy D and the first departing frozen D10 field; dashed line is whole-record departure",
+    "C": "70 s no-kick trajectory with rate, mean D, relay depletion and executed dead-zone current normalized by its matched target",
+    "D": "mean D versus normalized executed current, coloured by time; the endpoint remains on the non-returned path"
+  },
+  "key_numbers": {
+    "nominal_onset_ms": 5000.0,
+    "nominal_offset_ms": null,
+    "nominal_bout_ms": 65000.0,
+    "max_executed_current": 26.29693603515625,
+    "matched_current_target": 44.8619393917937,
+    "max_current_fraction_of_target": 0.5861747483874177,
+    "final_return_window_event_rate_hz": 9.0,
+    "final_D_mean": 0.25489943947945753,
+    "final_X_mean": 0.8693237935264294
+  },
+  "claim_boundary": "The exact dead zone is baseline-inert and the D10 onset surface remains reachable. The single 70 s trajectory entered after 5 s but did not autonomously offset; its final 8 s were a 9 Hz dense self-terminating event train, not the frozen returning-IED distribution.  The gated exact-D continuation was therefore not run.",
+  "source": "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4b_deadzone_lifecycle"
+}

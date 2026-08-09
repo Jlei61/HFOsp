@@ -1,0 +1,214 @@
+{
+  "status": "COMPLETE",
+  "stage": "D1",
+  "control": {
+    "status": "COMPLETE",
+    "tag": "baseline_control",
+    "role": "baseline_control",
+    "d_label": "D_healthy",
+    "mean_D": 0.0,
+    "run_ms": 12000.0,
+    "connection_seed": 1,
+    "noise_seed": 401,
+    "candidate": null,
+    "no_kick": true,
+    "no_reset": true,
+    "no_parameter_step": true,
+    "lifecycle": {
+      "label": "INTERICTAL_BASELINE",
+      "regimes": [
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL"
+      ],
+      "bout": null,
+      "reasons": [
+        "interictal-dominant (isolated bursts tolerated)"
+      ]
+    },
+    "departed": false,
+    "numerical": {
+      "finite": true,
+      "tau_eff_min_ms": 0.2739009394326503,
+      "clip_frac_max": 0.0,
+      "numerical_unsafe": false
+    },
+    "summary": {
+      "n_returning": 8,
+      "event_rate_hz": 0.8,
+      "iei_cv": 0.6053001895076976,
+      "median_duration_ms": 9.0,
+      "median_participation": 0.045437500000000006,
+      "window_ms": [
+        2000.0,
+        12000.0
+      ]
+    },
+    "adap_current_max": 0.0,
+    "adap_current_fraction": 0.0,
+    "max_rate_hz": 66.87499999999999,
+    "mean_rate_hz": 3.9092786458333335,
+    "wall_s": 1438.5391063690186,
+    "peak_rss_gib": 12.967952728271484,
+    "finished": "2026-08-09T08:09:57.192504+00:00"
+  },
+  "candidate_row": {
+    "status": "COMPLETE",
+    "tag": "baseline_deadzone",
+    "role": "baseline_candidate",
+    "d_label": "D_healthy",
+    "mean_D": 0.0,
+    "run_ms": 12000.0,
+    "connection_seed": 1,
+    "noise_seed": 401,
+    "candidate": {
+      "name": "hill_n4_exact_deadzone_slow",
+      "n": 4.0,
+      "tau_adp_ms": 1000.0,
+      "tau_a_on_ms": 100.0,
+      "tau_a_off_ms": 10000.0,
+      "deadzone": 46.83235549926758,
+      "K": 19.869522094726562,
+      "g_m_max": 88.74371816605014,
+      "matched_ictal_current": 44.8619393917937,
+      "calibration": {
+        "interictal_peak_max": 35.99027633666992,
+        "ictal_settled_min": 57.674434661865234,
+        "ictal_settled_median": 66.70187759399414,
+        "extreme_gap": 21.684158325195312,
+        "deadzone_margin_each_side": 10.842079162597656,
+        "interictal_activation_max": 0.0,
+        "interictal_activation_mean": 0.0,
+        "ictal_activation_min": 0.08143489708023391,
+        "ictal_activation_mean": 0.5055224225319433,
+        "ictal_fraction_half_on": 0.5
+      }
+    },
+    "no_kick": true,
+    "no_reset": true,
+    "no_parameter_step": true,
+    "lifecycle": {
+      "label": "INTERICTAL_BASELINE",
+      "regimes": [
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL",
+        "INTERICTAL"
+      ],
+      "bout": null,
+      "reasons": [
+        "interictal-dominant (isolated bursts tolerated)"
+      ]
+    },
+    "departed": false,
+    "numerical": {
+      "finite": true,
+      "tau_eff_min_ms": 0.2739009394326503,
+      "clip_frac_max": 0.0,
+      "numerical_unsafe": false
+    },
+    "summary": {
+      "n_returning": 8,
+      "event_rate_hz": 0.8,
+      "iei_cv": 0.6053001895076976,
+      "median_duration_ms": 9.0,
+      "median_participation": 0.045437500000000006,
+      "window_ms": [
+        2000.0,
+        12000.0
+      ]
+    },
+    "adap_current_max": 0.0,
+    "adap_current_fraction": 0.0,
+    "max_rate_hz": 66.87499999999999,
+    "mean_rate_hz": 3.9092786458333335,
+    "wall_s": 1393.43048453331,
+    "peak_rss_gib": 12.980209350585938,
+    "finished": "2026-08-09T09:59:05.345669+00:00",
+    "gate": {
+      "passed": true,
+      "verdict": "DEADZONE_BASELINE_INERT",
+      "ratios": {
+        "event_rate": 1.0,
+        "iei_cv": 1.0,
+        "duration": 1.0,
+        "participation": 1.0
+      },
+      "ratio_bands": {
+        "event_rate": [
+          0.8,
+          1.25
+        ],
+        "iei_cv": [
+          0.6666666666666666,
+          1.5
+        ],
+        "duration": [
+          0.75,
+          1.3333333333333333
+        ],
+        "participation": [
+          0.8,
+          1.25
+        ]
+      },
+      "current_fraction": 0.0,
+      "clauses": {
+        "numerical_safe": true,
+        "no_sustained_bout": true,
+        "at_least_three_returning": true,
+        "current_leakage": true,
+        "event_rate_ratio": true,
+        "iei_cv_ratio": true,
+        "duration_ratio": true,
+        "participation_ratio": true,
+        "exact_zero_actuator": true,
+        "rate_trace_byte_identical": true,
+        "active_fraction_byte_identical": true
+      }
+    }
+  },
+  "selected_candidate": {
+    "name": "hill_n4_exact_deadzone_slow",
+    "n": 4.0,
+    "tau_adp_ms": 1000.0,
+    "tau_a_on_ms": 100.0,
+    "tau_a_off_ms": 10000.0,
+    "deadzone": 46.83235549926758,
+    "K": 19.869522094726562,
+    "g_m_max": 88.74371816605014,
+    "matched_ictal_current": 44.8619393917937,
+    "calibration": {
+      "interictal_peak_max": 35.99027633666992,
+      "ictal_settled_min": 57.674434661865234,
+      "ictal_settled_median": 66.70187759399414,
+      "extreme_gap": 21.684158325195312,
+      "deadzone_margin_each_side": 10.842079162597656,
+      "interictal_activation_max": 0.0,
+      "interictal_activation_mean": 0.0,
+      "ictal_activation_min": 0.08143489708023391,
+      "ictal_activation_mean": 0.5055224225319433,
+      "ictal_fraction_half_on": 0.5
+    }
+  },
+  "verdict": "DEADZONE_BASELINE_INERT",
+  "stopped": false,
+  "completed": "2026-08-09T09:59:06.617864+00:00"
+}
