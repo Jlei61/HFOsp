@@ -239,9 +239,14 @@ def main() -> int:
                    and motif_components["long_range_or_connector_matched_lesion"])
     lesion_summary = theory.get("matched_lesion", {})
     lesion_statistics = lesion_summary.get("statistics", {})
-    local_lesion_estimable = "M6_SPATIAL_MID|local_backbone_edges" in lesion_statistics
+    def cohort_lesion_estimable(key: str) -> bool:
+        return int(lesion_statistics.get(key, {}).get("n", 0)) >= 5
+
+    local_lesion_estimable = cohort_lesion_estimable(
+        "M6_SPATIAL_MID|local_backbone_edges"
+    )
     long_lesion_estimable = any(
-        key in lesion_statistics for key in (
+        cohort_lesion_estimable(key) for key in (
             "M6_SPATIAL_MID|long_range_high_influence_edges",
             "M6_SPATIAL_MID|connector_nodes",
         )
@@ -328,6 +333,7 @@ def main() -> int:
                              "unit_contracts_valid": lesion_unit_contracts_ok,
                              "target_draws": lesion_raw.get("target_draws"),
                              "minimum_valid_draws": lesion_raw.get("minimum_valid_matched_draws"),
+                             "minimum_patients_for_cohort_inference": 5,
                              "motif_inference_estimable": lesion_estimable},
                 "note": "Strict matching may be unestimable; this is distinct from a negative lesion effect.",
             },
