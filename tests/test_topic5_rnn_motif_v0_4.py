@@ -313,9 +313,9 @@ def test_conditional_early_model_refits_patient_clusters_and_permutations():
 
 
 def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
-    def record(scope, fit_id, template, values):
+    def record(scope, fit_id, template, values, status="inference_available"):
         payload = {
-            "status": "inference_available", "field_contacts": ["A1", "B1"],
+            "status": status, "field_contacts": ["A1", "B1"],
             "baseline_fields": {template: values},
             "targeted_fields": {template: [value / 2 for value in values]},
         }
@@ -329,6 +329,14 @@ def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
     ])[("p1", "M6_SPATIAL_MID", "connector_nodes")]
     assert resolved["baseline"]["producers"] == {"A": "p1__own_a", "B": "p1__own_b"}
     assert np.allclose(resolved["targeted"]["A"], [0.5, 0.0])
+    assert resolved["matched_inference_available"] is True
+
+    unresolved = patient_fields([
+        record("own_a", "p1__own_a", "A", [1.0, 0.0]),
+        record("own_b", "p1__own_b", "B", [0.0, 1.0],
+               status="matched_inference_unavailable"),
+    ])[('p1', 'M6_SPATIAL_MID', 'connector_nodes')]
+    assert unresolved["matched_inference_available"] is False
 
 
 def test_lesion_figure_uses_estimable_frozen_components_without_effect_selection(
