@@ -27,6 +27,30 @@ def finite(rows: list[dict[str, str]], key: str) -> np.ndarray:
     return np.asarray(values, float)
 
 
+def patient_level_vectors(
+    rows: list[dict[str, str]], keys: tuple[str, ...],
+) -> dict[str, np.ndarray]:
+    """Collapse fit and seed rows before any cohort-level observable.
+
+    Shared patients contribute three seed rows, whereas non-collinear patients
+    contribute two fits times three seeds.  Pooling the raw rows would therefore
+    count optimisation seeds as biological replicates and weight the latter
+    patients twice.  The common-observable table is descriptive, but it must
+    still obey the project-wide patient-first aggregation contract.
+    """
+    grouped: dict[str, list[dict[str, str]]] = {}
+    for row in rows:
+        grouped.setdefault(str(row["subject"]), []).append(row)
+    output: dict[str, np.ndarray] = {}
+    for subject, selected in sorted(grouped.items()):
+        values = []
+        for key in keys:
+            available = finite(selected, key)
+            values.append(float(np.median(available)) if available.size else np.nan)
+        output[subject] = np.asarray(values, float)
+    return output
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, required=True)
@@ -66,6 +90,13 @@ def main() -> int:
         model_early = [row for row in early if row["model"] == model and row["cell"] == "rnn"
                        and row["endpoint"] == "canonical_full" and row["primary"] == "True"]
         model_influence = [row for row in influence if row["model"] == model and row["cell"] == "rnn"]
+        patient_influence = patient_level_vectors(
+            model_influence, ("lag1_reach_mm", "lag2_reach_mm", "lag3_reach_mm")
+        )
+        influence_matrix = np.asarray(list(patient_influence.values()), float)
+        influence_available = bool(
+            influence_matrix.size and np.isfinite(influence_matrix).any(axis=1).any()
+        )
         model_interictal = [row for row in interictal if row["model"] == model and row["cell"] == "rnn"]
         model_lesion = [row for row in lesions if row["model"] == model and row["cell"] == "rnn"
                         and row["lesion"] == "connector_nodes" and row["all_inference_available"] == "True"]
@@ -85,10 +116,10 @@ def main() -> int:
              "denominator": len(model_early), "comparison_level": "patient-level null-relative R3 field margin",
              "boundary": "target-free frozen external benchmark", "source": "early_ictal_per_patient_model.csv"},
             {"system": f"RNN:{model}", "observable": "open-loop effective reach lag 1/2/3",
-             "status": "available" if model_influence else "missing", "value": (
-                 [float(np.nanmedian(finite(model_influence, key))) for key in
-                  ("lag1_reach_mm", "lag2_reach_mm", "lag3_reach_mm")] if model_influence else None),
-             "denominator": len(model_influence), "comparison_level": "contact-space finite-pulse response (mm)",
+             "status": "available" if influence_available else "missing", "value": (
+                 np.nanmedian(influence_matrix, axis=0).tolist() if influence_available else None),
+             "denominator": int(sum(np.isfinite(value).any() for value in patient_influence.values())),
+             "comparison_level": "patient-first contact-space finite-pulse response (mm)",
              "boundary": "rank-step, not real-time dynamics", "source": "effective_influence_fit_seed.csv"},
             {"system": f"RNN:{model}", "observable": "connector matched-lesion specificity",
              "status": "available" if model_lesion else "not estimable", "value": (

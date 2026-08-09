@@ -50,6 +50,13 @@ from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
 from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
     edge_descriptor_matches,
 )
+from build_topic5_rnn_motif_common_observables_v0_4 import (  # noqa: E402
+    patient_level_vectors,
+)
+from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
+    export as export_unit_contracts,
+    sha256,
+)
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -421,3 +428,64 @@ def test_patient_field_aggregation_keeps_seed_rows_distinct_from_pair_correlatio
         fit_rows = list(csv.DictReader(handle))
     assert len(fit_rows) == 2
     assert all(row["n_seeds"] == "3" for row in fit_rows)
+
+
+def test_common_observable_effective_reach_is_patient_first():
+    rows = []
+    for fit in ("own_a", "own_b"):
+        for seed in range(3):
+            rows.append({
+                "subject": "p_noncollinear", "fit_id": fit, "seed": str(seed),
+                "lag1_reach_mm": "1", "lag2_reach_mm": "2", "lag3_reach_mm": "3",
+            })
+    for seed in range(3):
+        rows.append({
+            "subject": "p_shared", "fit_id": "shared", "seed": str(seed),
+            "lag1_reach_mm": "10", "lag2_reach_mm": "20", "lag3_reach_mm": "30",
+        })
+    output = patient_level_vectors(
+        rows, ("lag1_reach_mm", "lag2_reach_mm", "lag3_reach_mm")
+    )
+    assert set(output) == {"p_noncollinear", "p_shared"}
+    np.testing.assert_allclose(output["p_noncollinear"], [1, 2, 3])
+    np.testing.assert_allclose(output["p_shared"], [10, 20, 30])
+    np.testing.assert_allclose(np.median(np.asarray(list(output.values())), axis=0),
+                               [5.5, 11.0, 16.5])
+
+
+def test_unit_contract_export_is_lossless_and_idempotent(tmp_path):
+    out = tmp_path / "run"
+    unit = out / "per_subject" / "p1__shared" / "M6_SPATIAL_MID__rnn" / "seed0"
+    cache = out / "cache" / "p1__shared"
+    unit.mkdir(parents=True); cache.mkdir(parents=True)
+    manifest = out / "INPUT_MANIFEST.json"
+    manifest.write_text(json.dumps({"cohort": "frozen"}))
+    for name, content in (("plane.npz", b"plane"), ("events.npz", b"events")):
+        (cache / name).write_bytes(content)
+    (cache / "provenance.json").write_text(json.dumps({"subject": "p1"}))
+    metrics = {
+        "fit_id": "p1__shared", "subject": "p1", "fit_scope": "shared",
+        "model_id": "M6_SPATIAL_MID__rnn", "arm": "SPATIAL_SET", "cell": "rnn",
+        "seed": 0, "shuffled_targets": False, "shuffle_mode": "none",
+        "config": {"lr": 0.01, "state_dim": 32},
+        "rollout_decoder": {"n_epochs": 4}, "config_sha256": "recorded-config",
+        "producer_hashes": {"input_manifest": sha256(manifest), "trainer": "abc"},
+    }
+    metrics_path = unit / "metrics.json"
+    metrics_path.write_text(json.dumps(metrics))
+
+    first = export_unit_contracts(out)
+    config_before = (unit / "config.json").read_bytes()
+    hashes_before = (unit / "input_hashes.json").read_bytes()
+    second = export_unit_contracts(out)
+
+    assert first == second
+    assert first["n_formal_training_units"] == 1
+    assert first["n_smoke_training_units"] == 0
+    assert config_before == (unit / "config.json").read_bytes()
+    assert hashes_before == (unit / "input_hashes.json").read_bytes()
+    config = json.loads(config_before)
+    hashes = json.loads(hashes_before)
+    assert config["training_config"] == metrics["config"]
+    assert hashes["input_manifest"]["sha256"] == sha256(manifest)
+    assert hashes["fit_cache"]["events.npz"]["sha256"] == sha256(cache / "events.npz")
