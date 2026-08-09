@@ -29,6 +29,7 @@ from build_topic5_rnn_motif_fields_v0_4 import (  # noqa: E402
 )
 from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
     event_pair_reliability,
+    holm as interictal_holm,
     paired_test,
     seed_removed_sequence_agreement,
 )
@@ -93,6 +94,11 @@ def test_factorial_models_differ_only_in_growth_and_cost_components():
     assert square["M2_UNIFORM_SET"].eta == square["M4_SPATIAL_GROWTH"].eta == 0.0
     assert square["M6_SPATIAL_MID"].eta == square["M8_UNIFORM_COST_MID"].eta == 0.03
     assert all(len(spec.seeds) == 3 for spec in square.values())
+
+
+def test_interictal_factorial_holm_is_monotone():
+    adjusted = interictal_holm({"a": 0.01, "b": 0.03, "c": 0.04})
+    assert adjusted == {"a": 0.03, "b": 0.06, "c": 0.06}
 
 
 def test_primary_shuffle_keeps_first_rank_and_whole_tie_sets():
