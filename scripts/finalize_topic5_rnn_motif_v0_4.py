@@ -54,6 +54,29 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def postprocess_snapshot_equivalence_ok(payload: dict[str, Any]) -> bool:
+    """Require source, frozen snapshot and recorded hash to be byte-identical.
+
+    The immutable postprocess was launched from the clean execution worktree's
+    source path rather than directly from ``postprocess_snapshot``.  This is a
+    documented path-level deviation from the locked plan.  It is computationally
+    acceptable only while every producer file remains byte-identical to its
+    pre-run snapshot and recorded digest.
+    """
+    scripts = payload.get("scripts", {})
+    if not isinstance(scripts, dict) or not scripts:
+        return False
+    for record in scripts.values():
+        source = Path(str(record.get("source", "")))
+        snapshot = Path(str(record.get("snapshot", "")))
+        expected = str(record.get("sha256", ""))
+        if (not source.is_file() or not snapshot.is_file() or not expected
+                or sha256(source) != expected
+                or sha256(snapshot) != expected):
+            return False
+    return True
+
+
 def audit_figure_sources(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
     """Verify that every Figure 6 panel still points to the frozen bytes."""
     errors: list[str] = []
@@ -338,6 +361,7 @@ def main() -> int:
         and run_contract.get("geometry_status") == preflight.get("geometry_status")
         and run_contract.get("target_values_read_at_contract_freeze") is False
         and bool(postprocess_contract.get("git_commit"))
+        and postprocess_snapshot_equivalence_ok(postprocess_contract)
         and preflight_inventory_ok(preflight_inventory, out)
         and named_contracts_ok
     )
@@ -566,6 +590,13 @@ def main() -> int:
                     "plan_named_preflight_inventory_verified": preflight_inventory_ok(
                         preflight_inventory, out
                     ),
+                    "postprocess_source_snapshot_byte_equivalence": (
+                        postprocess_snapshot_equivalence_ok(postprocess_contract)
+                    ),
+                    "postprocess_path_deviation": (
+                        "launched from clean committed source paths; all 21 producer files "
+                        "are required to remain byte-identical to postprocess_snapshot"
+                    ),
                     "named_contracts_verified": named_contracts_ok,
                 },
             },
@@ -709,6 +740,7 @@ def main() -> int:
 - 正式训练：{metrics_count}/1426 单元；Core/Dose/GRU 均为 0 failed、0 OOM、0 nonfinite。
 - 独立复现合同：{unit_contracts.get('n_config_contracts', 0)}/1435 `config.json`，{unit_contracts.get('n_input_hash_contracts', 0)}/1435 `input_hashes.json`；不改 checkpoint 或 metrics。
 - 正式单元产物：{unit_artifacts.get('n_formal_units_complete', 0)}/1426 具备 checkpoint、held-out rollout、size decoder 与训练记录；1240 个 recurrent 单元另有 graph 和四个冻结快照，M0 无循环图因此明确记为不适用。
+- Postprocess 的入口使用干净执行 worktree 下的 source path，而非直接使用 `postprocess_snapshot` path；这是相对冻结计划的形式偏差。最终验收逐文件要求 21/21 source、snapshot 与合同 SHA256 完全相同，因而不改变计算内容，但报告中不写成“字面完全按 snapshot path 执行”。
 - 至少达到 partial adequacy 的 leaky-RNN 模型：{', '.join(adequate_models) if adequate_models else '无'}。
 - 因此“多种 recurrence 是否足以学习患者内传播”的 Level 1：**{'支持' if level1 else '不支持'}**。
 - Dense 的患者中位 wiring cost 为 {fmt(dense_wire)}，Spatial + cost 为 {fmt(m6_wire)}；Level 2 经济性：**{'支持' if level2 else '不支持'}**。

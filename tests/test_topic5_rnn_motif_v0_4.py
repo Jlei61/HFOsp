@@ -85,6 +85,7 @@ from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
 from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     audit_figure_sources,
     integrated_level4,
+    postprocess_snapshot_equivalence_ok,
     preflight_inventory_ok,
     target_artifact_recheck_ok,
     target_contract_trace_ok,
@@ -191,6 +192,21 @@ def test_visual_qa_requires_every_stage_and_final_panel():
     assert visual_qa_complete(payload)
     payload["final_panels"]["F"]["visual_pass"] = False
     assert not visual_qa_complete(payload)
+
+
+def test_postprocess_snapshot_equivalence_requires_all_three_hashes(tmp_path):
+    source = tmp_path / "source.py"
+    snapshot = tmp_path / "snapshot.py"
+    source.write_text("print('fixed')\n")
+    snapshot.write_bytes(source.read_bytes())
+    import hashlib
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    payload = {"scripts": {"producer.py": {
+        "source": str(source), "snapshot": str(snapshot), "sha256": digest,
+    }}}
+    assert postprocess_snapshot_equivalence_ok(payload)
+    snapshot.write_text("print('changed')\n")
+    assert not postprocess_snapshot_equivalence_ok(payload)
 
 
 def test_preflight_inventory_export_is_explicitly_post_run_and_target_free(tmp_path):
