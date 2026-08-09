@@ -15,7 +15,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.cm import ScalarMappable
-from matplotlib.colors import Normalize
+from matplotlib.colors import ListedColormap, Normalize
 from matplotlib.lines import Line2D
 import numpy as np
 
@@ -202,11 +202,21 @@ def draw_rollout_example(parent, out_root: Path):
     matrices = rollout_matrices(out_root)
     grid = parent.subgridspec(2, 2, hspace=0.10, wspace=0.08)
     cmap = plt.get_cmap("viridis").copy(); cmap.set_bad("#d9d9d9")
+    seed_cmap = ListedColormap(["#c43d4d"])
     for row, template in enumerate(("A", "B")):
         for col, matrix in enumerate(matrices[template]):
             ax = parent.get_gridspec().figure.add_subplot(grid[row, col])
             ax.imshow(matrix, aspect="auto", interpolation="nearest", cmap=cmap, vmin=0, vmax=1)
-            if row == 0: ax.set_title(("Observed", "Generated")[col], fontsize=8.5, pad=2)
+            seed = np.where(np.isfinite(matrix) & np.isclose(matrix, 0.0), 1.0, np.nan)
+            ax.imshow(
+                seed, aspect="auto", interpolation="nearest", cmap=seed_cmap,
+                vmin=0, vmax=1,
+            )
+            if row == 0:
+                ax.set_title(
+                    ("Observed", "Given seed → free rollout")[col],
+                    fontsize=8.5, pad=2,
+                )
             if col == 0: ax.set_ylabel(f"T{template}\ncontacts", fontsize=8)
             else: ax.set_yticks([])
             ax.set_xticks([])
