@@ -45,6 +45,7 @@ def main() -> int:
         "CHECKPOINT_REUSE_AUDIT.json",
         "INTERICTAL_SUMMARY.json", "MODEL_FIELD_MANIFEST.json", "TARGET_UNSEAL_AUTHORIZATION.json",
         "target_access_audit.json", "EFFECTIVE_INFLUENCE_SUMMARY.json", "EFFECTIVE_MOTIF_SUMMARY.json",
+        "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json",
         "MATCHED_LESION_SUMMARY.json", "LESION_EARLY_ICTAL_SUMMARY.json",
         "CONVERGENCE_AUDIT.json",
         "COMMON_OBSERVABLES.json", "figures/topic5_figure6_rnn_connectivity_motifs.png",
@@ -100,6 +101,7 @@ def main() -> int:
     reuse_audit = load(out / "CHECKPOINT_REUSE_AUDIT.json")
     field_manifest = load(out / "MODEL_FIELD_MANIFEST.json")
     influence_summary = load(out / "EFFECTIVE_INFLUENCE_SUMMARY.json")
+    motif_implementation = load(out / "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json")
     lesion_raw = load(out / "MATCHED_LESION_SUMMARY.json")
     unseal = load(out / "TARGET_UNSEAL_AUTHORIZATION.json")
     common_observables = load(out / "COMMON_OBSERVABLES.json")
@@ -131,6 +133,8 @@ def main() -> int:
     influence_ok = bool(
         influence_summary.get("target_values_read") is False
         and int(influence_summary.get("n_units", -1)) == int(influence_summary.get("expected_units", -2)) == 1023
+        and motif_implementation.get("target_values_read") is False
+        and motif_implementation.get("thresholds_or_selected_edges_changed") is False
     )
     lesion_execution_ok = bool(
         lesion_raw.get("target_values_read") is False
@@ -291,9 +295,12 @@ def main() -> int:
             },
             "effective_influence_complete": {
                 "pass": influence_ok,
-                "evidence": ["EFFECTIVE_INFLUENCE_SUMMARY.json"],
+                "evidence": ["EFFECTIVE_INFLUENCE_SUMMARY.json",
+                             "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json"],
                 "observed": {"units": influence_summary.get("n_units"),
-                             "expected_units": influence_summary.get("expected_units")},
+                             "expected_units": influence_summary.get("expected_units"),
+                             "edge_selector": motif_implementation.get("implementation_object", {}).get(
+                                 "leaky_rnn_edge_selector")},
             },
             "matched_lesion_execution_complete": {
                 "pass": lesion_execution_ok,
@@ -371,7 +378,7 @@ canonical full、seed-removed、common-field 与 A/B contrast 已分开报告。
 
 ## 3. 有效计算 motif
 
-- 同一 local-backbone + long-range-connector 结构的双重富集：**{'通过' if enrichment_pass else '未通过'}**。
+- 同一 local-backbone + long-range-connector 结构的双重富集：**{'通过' if enrichment_pass else '未通过'}**。这里的 graph-level influence 是一阶 edge-deletion sensitivity；lag-1/2/3 contact pulse response 是另一个独立量，二者不混称。
 - 完整 effective operator 的跨 seed 稳定性：**{'通过' if stability_pass else '未通过'}**。
 - 同一冻结模型在前后半留出事件中的 effective operator 稳定性：**{'通过' if split_stability_pass else '未通过'}**。
 - motif score 与留出传播/间期场拟合的患者级关系：**{'通过' if task_relation_pass else '未通过'}**。
