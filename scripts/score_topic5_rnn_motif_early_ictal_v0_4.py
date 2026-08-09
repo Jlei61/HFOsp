@@ -240,8 +240,62 @@ def aggregate_patients(seizure_rows: list[dict[str, Any]], null_store: dict[str,
     return patients, patient_nulls
 
 
+def _fit_patient_fixed_effects(
+    rows: list[dict[str, Any]], models: tuple[str, ...], outcome_key: str = "outcome",
+) -> dict[str, Any]:
+    """Fit outcome ~ patient block + fidelity + model with no asymptotic SEs."""
+    blocks = sorted({str(row["block"]) for row in rows})
+    reference = "M0_NO_REC"
+    nonreference = [model for model in models if model != reference]
+    block_index = {value: index for index, value in enumerate(blocks)}
+    model_index = {value: index for index, value in enumerate(nonreference)}
+    x = np.zeros((len(rows), len(blocks) + 1 + len(nonreference)), float)
+    y = np.asarray([float(row[outcome_key]) for row in rows], float)
+    for index, row in enumerate(rows):
+        x[index, block_index[str(row["block"])]] = 1.0
+        x[index, len(blocks)] = float(row["fidelity"])
+        model = str(row["model"])
+        if model != reference:
+            x[index, len(blocks) + 1 + model_index[model]] = 1.0
+    coefficients = np.linalg.lstsq(x, y, rcond=None)[0]
+    gamma = {reference: 0.0}
+    for model, index in model_index.items():
+        gamma[model] = float(coefficients[len(blocks) + 1 + index])
+    return {
+        "beta": float(coefficients[len(blocks)]),
+        "gamma": gamma,
+        "fitted": x @ coefficients,
+        "residual": y - x @ coefficients,
+        "rank": int(np.linalg.matrix_rank(x)),
+        "n_parameters": int(x.shape[1]),
+    }
+
+
+def _fit_reduced_patient_fidelity(rows: list[dict[str, Any]]) -> tuple[np.ndarray, np.ndarray]:
+    """Reduced patient + fidelity fit used by the Freedman--Lane null."""
+    blocks = sorted({str(row["block"]) for row in rows})
+    block_index = {value: index for index, value in enumerate(blocks)}
+    x = np.zeros((len(rows), len(blocks) + 1), float)
+    y = np.asarray([float(row["outcome"]) for row in rows], float)
+    for index, row in enumerate(rows):
+        x[index, block_index[str(row["block"])]] = 1.0
+        x[index, len(blocks)] = float(row["fidelity"])
+    coefficients = np.linalg.lstsq(x, y, rcond=None)[0]
+    fitted = x @ coefficients
+    return fitted, y - fitted
+
+
 def conditional_effects(patient_rows: list[dict[str, Any]], fidelity_rows: list[dict[str, str]],
-                        endpoint: str = "canonical_full") -> dict[str, Any]:
+                        endpoint: str = "canonical_full", draws: int = 10000,
+                        seed: int = 20260809) -> dict[str, Any]:
+    """Patient-blocked model effects with cluster bootstrap and label null.
+
+    Every bootstrap resamples whole patients and refits both the fidelity slope
+    and model coefficients.  The permutation is a within-patient
+    Freedman--Lane residual-label permutation under the reduced
+    patient+fidelity model, so it preserves the two nuisance terms while
+    removing model identity.
+    """
     fidelity = {(row["subject"], row["model"], row["cell"]): float(row["matched_empirical_r"])
                 for row in fidelity_rows}
     selected = [row for row in patient_rows if row["primary"] and row["endpoint"] == endpoint
@@ -249,27 +303,113 @@ def conditional_effects(patient_rows: list[dict[str, Any]], fidelity_rows: list[
     by_patient: dict[str, list[dict[str, Any]]] = {}
     for row in selected:
         row = dict(row)
-        row["fidelity"] = fidelity[(row["subject"], row["model"], row["cell"])]
+        key = (row["subject"], row["model"], row["cell"])
+        if key not in fidelity or not np.isfinite(fidelity[key]):
+            continue
+        row["fidelity"] = fidelity[key]
+        row["outcome"] = float(row["all_contact_margin"])
+        row["block"] = str(row["subject"])
         by_patient.setdefault(row["subject"], []).append(row)
-    x, y = [], []
-    for rows in by_patient.values():
-        x.extend([row["fidelity"] - np.mean([item["fidelity"] for item in rows]) for row in rows])
-        y.extend([row["all_contact_margin"] - np.mean([item["all_contact_margin"] for item in rows]) for row in rows])
-    beta = float(np.dot(x, y) / max(np.dot(x, x), 1e-12))
+    models = tuple(model for model in CORE_MODELS if model in {
+        row["model"] for rows in by_patient.values() for row in rows
+    })
+    required = set(models)
+    complete = sorted(subject for subject, rows in by_patient.items()
+                      if {row["model"] for row in rows} == required)
+    analysis_rows = [row for subject in complete for row in by_patient[subject]]
+    if len(complete) < 2 or len(models) < 2:
+        raise RuntimeError("conditional early-ictal model needs at least two complete patients and models")
+    observed = _fit_patient_fixed_effects(analysis_rows, models)
+    pair_definitions = [
+        ("M6_SPATIAL_MID", "M2_UNIFORM_SET"),
+        ("M6_SPATIAL_MID", "M1_DENSE"),
+        ("M6_SPATIAL_MID", "M0_NO_REC"),
+    ]
+    pair_definitions = [pair for pair in pair_definitions if set(pair) <= set(models)]
+
+    rng = np.random.default_rng(seed)
+    bootstrap_beta = np.empty(draws, float)
+    bootstrap_gamma = {model: np.empty(draws, float) for model in models}
+    bootstrap_contrast = {f"{a}_vs_{b}": np.empty(draws, float)
+                          for a, b in pair_definitions}
+    for draw in range(draws):
+        sampled = rng.choice(complete, size=len(complete), replace=True)
+        rows = []
+        for replicate, subject in enumerate(sampled):
+            for source in by_patient[str(subject)]:
+                row = dict(source)
+                row["block"] = f"{subject}__bootstrap_{replicate}"
+                rows.append(row)
+        fitted = _fit_patient_fixed_effects(rows, models)
+        bootstrap_beta[draw] = fitted["beta"]
+        for model in models:
+            bootstrap_gamma[model][draw] = fitted["gamma"][model]
+        for a, b in pair_definitions:
+            bootstrap_contrast[f"{a}_vs_{b}"][draw] = fitted["gamma"][a] - fitted["gamma"][b]
+
+    reduced_fitted, reduced_residual = _fit_reduced_patient_fidelity(analysis_rows)
+    block_indices = {
+        subject: np.asarray([index for index, row in enumerate(analysis_rows)
+                             if row["block"] == subject], int)
+        for subject in complete
+    }
+    permutation_gamma = {model: np.empty(draws, float) for model in models}
+    permutation_contrast = {f"{a}_vs_{b}": np.empty(draws, float)
+                            for a, b in pair_definitions}
+    for draw in range(draws):
+        permuted = reduced_residual.copy()
+        for indices in block_indices.values():
+            permuted[indices] = rng.permutation(permuted[indices])
+        rows = [dict(row, permuted_outcome=float(value))
+                for row, value in zip(analysis_rows, reduced_fitted + permuted)]
+        fitted = _fit_patient_fixed_effects(rows, models, outcome_key="permuted_outcome")
+        for model in models:
+            permutation_gamma[model][draw] = fitted["gamma"][model]
+        for a, b in pair_definitions:
+            permutation_contrast[f"{a}_vs_{b}"][draw] = fitted["gamma"][a] - fitted["gamma"][b]
+
+    def inference(value: float, bootstrap: np.ndarray, permutation: np.ndarray) -> dict[str, Any]:
+        return {
+            "estimate": float(value),
+            "patient_cluster_bootstrap_95ci": np.quantile(bootstrap, [0.025, 0.975]).tolist(),
+            "patient_label_permutation_p": float(
+                (1 + np.sum(np.abs(permutation) >= abs(value) - 1e-15)) / (draws + 1)
+            ),
+        }
+
+    model_effects = {
+        model: inference(observed["gamma"][model], bootstrap_gamma[model], permutation_gamma[model])
+        for model in models if model != "M0_NO_REC"
+    }
     contrasts = {}
-    pairs = (("M6_SPATIAL_MID", "M2_UNIFORM_SET"),
-             ("M6_SPATIAL_MID", "M1_DENSE"),
-             ("M6_SPATIAL_MID", "M0_NO_REC"))
-    for model, baseline in pairs:
-        values = []
-        for rows in by_patient.values():
-            lookup = {row["model"]: row for row in rows}
-            if model in lookup and baseline in lookup:
-                values.append((lookup[model]["all_contact_margin"] - lookup[baseline]["all_contact_margin"])
-                              - beta * (lookup[model]["fidelity"] - lookup[baseline]["fidelity"]))
-        contrasts[f"{model}_vs_{baseline}"] = paired_summary(values, seed=stable_seed(model, baseline, "conditional"))
-    return {"endpoint": endpoint, "patient_intercept_removed": True,
-            "within_patient_fidelity_slope": beta, "contrasts": contrasts}
+    for a, b in pair_definitions:
+        name = f"{a}_vs_{b}"
+        value = observed["gamma"][a] - observed["gamma"][b]
+        contrasts[name] = inference(value, bootstrap_contrast[name], permutation_contrast[name])
+    return {
+        "endpoint": endpoint,
+        "model": "early_margin ~ patient_fixed_effect + interictal_fidelity + model",
+        "reference_model": "M0_NO_REC",
+        "complete_patients": complete,
+        "excluded_incomplete_patients": sorted(set(by_patient) - set(complete)),
+        "n_complete_patients": len(complete),
+        "n_rows": len(analysis_rows),
+        "bootstrap_draws": draws,
+        "permutation_draws": draws,
+        "permutation_contract": "within-patient Freedman-Lane residual-label permutation",
+        "within_patient_fidelity_slope": {
+            "estimate": observed["beta"],
+            "patient_cluster_bootstrap_95ci": np.quantile(
+                bootstrap_beta, [0.025, 0.975]
+            ).tolist(),
+            "permutation_p": None,
+            "reason_no_permutation_p": "fidelity is a nuisance covariate, not a tested model label",
+        },
+        "model_effects": model_effects,
+        "contrasts": contrasts,
+        "design_rank": observed["rank"],
+        "n_parameters": observed["n_parameters"],
+    }
 
 
 def compute_factorial_effects(

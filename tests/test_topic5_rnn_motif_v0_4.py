@@ -30,6 +30,7 @@ from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
     seed_removed_sequence_agreement,
 )
 from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
+    conditional_effects,
     compute_factorial_effects,
     permutation_indices,
     permutation_support,
@@ -208,6 +209,39 @@ def test_factorial_effects_use_one_complete_patient_denominator():
     assert result["complete_patients"] == ["p1"]
     assert result["excluded_incomplete_patients"] == ["p2"]
     assert result["growth_at_zero"]["n"] == 1
+
+
+def test_conditional_early_model_refits_patient_clusters_and_permutations():
+    models = (
+        "M0_NO_REC", "M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL",
+        "M4_SPATIAL_GROWTH", "M6_SPATIAL_MID", "M8_UNIFORM_COST_MID",
+    )
+    patient_rows, fidelity_rows = [], []
+    gamma = {model: 0.0 for model in models}
+    gamma["M6_SPATIAL_MID"] = 0.30
+    for patient_index in range(5):
+        subject = f"p{patient_index}"
+        for model_index, model in enumerate(models):
+            fidelity = (0.04 * model_index + 0.015 * patient_index * model_index
+                        + 0.01 * (patient_index % 2))
+            margin = 0.2 * patient_index + 0.5 * fidelity + gamma[model]
+            patient_rows.append({
+                "subject": subject, "primary": True, "endpoint": "canonical_full",
+                "cell": "rnn", "model": model, "all_contact_margin": margin,
+            })
+            fidelity_rows.append({
+                "subject": subject, "cell": "rnn", "model": model,
+                "matched_empirical_r": fidelity,
+            })
+    first = conditional_effects(patient_rows, fidelity_rows, draws=200, seed=12)
+    second = conditional_effects(patient_rows, fidelity_rows, draws=200, seed=12)
+    effect = first["contrasts"]["M6_SPATIAL_MID_vs_M0_NO_REC"]
+    assert first == second
+    assert first["n_complete_patients"] == 5
+    assert first["design_rank"] == first["n_parameters"]
+    assert np.isclose(effect["estimate"], 0.30, atol=1e-8)
+    assert len(effect["patient_cluster_bootstrap_95ci"]) == 2
+    assert 0.0 < effect["patient_label_permutation_p"] <= 1.0
 
 
 def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
