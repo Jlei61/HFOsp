@@ -80,6 +80,7 @@ from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
 from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     audit_figure_sources,
     integrated_level4,
+    preflight_inventory_ok,
     target_artifact_recheck_ok,
     target_contract_trace_ok,
 )
@@ -162,6 +163,10 @@ def test_preflight_inventory_export_is_explicitly_post_run_and_target_free(tmp_p
     assert result["n_patients"] == 1
     assert result["shared_and_noncollinear_fit_inventory"] == [fit]
     assert json.loads((out / "PREFLIGHT_INVENTORY.json").read_text()) == result
+    assert preflight_inventory_ok(result, out)
+    tampered = json.loads(json.dumps(result))
+    tampered["source_artifacts"]["input_manifest"]["sha256"] = "bad"
+    assert not preflight_inventory_ok(tampered, out)
 
 
 def test_target_artifact_recheck_is_required_before_unseal():
