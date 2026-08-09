@@ -31,6 +31,8 @@ CORE_MODELS = (
     "M4_SPATIAL_GROWTH", "M6_SPATIAL_MID", "M8_UNIFORM_COST_MID",
 )
 FACTORIAL = ("M2_UNIFORM_SET", "M4_SPATIAL_GROWTH", "M6_SPATIAL_MID", "M8_UNIFORM_COST_MID")
+DOSE_MODELS = ("M5_SPATIAL_LOW", "M6_SPATIAL_MID", "M7_SPATIAL_HIGH")
+DOSE_ETA = np.asarray((0.01, 0.03, 0.10), float)
 ENDPOINTS = ("canonical_full", "seed_removed")
 
 
@@ -444,7 +446,42 @@ def compute_factorial_effects(
         raw["cost_spatial"] - raw["cost_uniform"],
         seed=stable_seed(endpoint, "interaction"),
     )
+    family = tuple(definitions) + ("interaction",)
+    adjusted = holm({name: float(effects[name]["wilcoxon_p"]) for name in family})
+    for name in family:
+        effects[name]["holm_q_factorial_family"] = adjusted[name]
+    effects["holm_family"] = list(family)
     return effects
+
+
+def compute_dose_trend(
+    lookup: dict[tuple[str, str, str, str], dict[str, Any]],
+    primary: list[str], endpoint: str,
+) -> dict[str, Any]:
+    """Patient-level slope across the three preassigned positive eta values."""
+    complete = [subject for subject in primary if all(
+        (subject, model, "rnn", endpoint) in lookup for model in DOSE_MODELS
+    )]
+    x = np.log10(DOSE_ETA)
+    x = x - x.mean()
+    denominator = float(np.dot(x, x))
+    slopes = []
+    for subject in complete:
+        y = np.asarray([
+            lookup[(subject, model, "rnn", endpoint)]["all_contact_margin"]
+            for model in DOSE_MODELS
+        ], float)
+        slopes.append(float(np.dot(x, y - y.mean()) / denominator))
+    result = paired_summary(slopes, seed=stable_seed(endpoint, "spatial_eta_dose_trend"))
+    result.update({
+        "models": list(DOSE_MODELS),
+        "eta": DOSE_ETA.tolist(),
+        "x_scale": "log10_eta",
+        "complete_patients": complete,
+        "excluded_incomplete_patients": sorted(set(primary) - set(complete)),
+        "interpretation": "positive slope means larger wiring cost has larger early-ictal null-relative margin",
+    })
+    return result
 
 
 def main() -> int:
@@ -666,6 +703,9 @@ def main() -> int:
     factorial_effects = {}
     for endpoint in ENDPOINTS:
         factorial_effects[endpoint] = compute_factorial_effects(lookup, primary, endpoint)
+        factorial_effects[endpoint]["spatial_eta_dose_trend"] = compute_dose_trend(
+            lookup, primary, endpoint
+        )
     atomic_json(out_root / "factorial_effects_early_ictal.json", factorial_effects)
     conditional = conditional_effects(patient_rows, fidelity_rows)
     atomic_json(out_root / "early_ictal_conditional_on_interictal_fidelity.json", conditional)

@@ -31,6 +31,7 @@ from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
 )
 from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     conditional_effects,
+    compute_dose_trend,
     compute_factorial_effects,
     permutation_indices,
     permutation_support,
@@ -209,6 +210,25 @@ def test_factorial_effects_use_one_complete_patient_denominator():
     assert result["complete_patients"] == ["p1"]
     assert result["excluded_incomplete_patients"] == ["p2"]
     assert result["growth_at_zero"]["n"] == 1
+    assert set(result["holm_family"]) == {
+        "growth_at_zero", "growth_at_mid", "cost_uniform", "cost_spatial", "interaction"
+    }
+    assert all("holm_q_factorial_family" in result[name] for name in result["holm_family"])
+
+
+def test_early_ictal_dose_trend_uses_three_preassigned_positive_costs():
+    lookup = {}
+    models = ("M5_SPATIAL_LOW", "M6_SPATIAL_MID", "M7_SPATIAL_HIGH")
+    for subject, offset in (("p1", 0.0), ("p2", 0.2)):
+        for value, model in enumerate(models):
+            lookup[(subject, model, "rnn", "canonical_full")] = {
+                "all_contact_margin": offset + value,
+            }
+    result = compute_dose_trend(lookup, ["p1", "p2", "missing"], "canonical_full")
+    assert result["models"] == list(models)
+    assert result["complete_patients"] == ["p1", "p2"]
+    assert result["excluded_incomplete_patients"] == ["missing"]
+    assert result["median"] > 0
 
 
 def test_conditional_early_model_refits_patient_clusters_and_permutations():
