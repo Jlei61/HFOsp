@@ -415,36 +415,60 @@ def patient_level_effective_reach(out_root: Path) -> dict[str, np.ndarray]:
     return output
 
 
+def lesion_display_values(out_root: Path) -> list[tuple[str, np.ndarray]]:
+    """Return the preassigned lesion components that have cohort support.
+
+    Local-backbone damage is required because it is one half of the frozen
+    motif.  Long-range high-influence edges and connector nodes are then
+    admitted in a fixed order when each has at least five valid patient-level
+    estimates.  This rule depends only on estimability, never effect size.
+    """
+    lesion_path = out_root / "matched_lesion_patient_metrics.csv"
+    lesion_rows = rows(lesion_path) if lesion_path.exists() else []
+    lesion_order = (
+        ("local_backbone_edges", "Local\nbackbone"),
+        ("long_range_high_influence_edges", "Long-range\nedges"),
+        ("connector_nodes", "Connector\nnodes"),
+    )
+    available: dict[str, np.ndarray] = {}
+    for lesion, _ in lesion_order:
+        available[lesion] = np.asarray([
+            float(row["specificity_contact_nll"]) for row in lesion_rows
+            if row["model"] == REPRESENTATIVE_MODEL
+            and row["cell"] == "rnn" and row["lesion"] == lesion
+            and row["all_inference_available"] in (True, "True", "1", 1.0)
+            and np.isfinite(float(row["specificity_contact_nll"]))
+        ], float)
+    if len(available["local_backbone_edges"]) < 5:
+        return []
+    selected = [(lesion_order[0][1], available[lesion_order[0][0]])]
+    selected.extend(
+        (label, available[lesion]) for lesion, label in lesion_order[1:]
+        if len(available[lesion]) >= 5
+    )
+    return selected if len(selected) >= 2 else []
+
+
 def draw_reach_or_lesion(ax, out_root: Path):
-    """Use lesion specificity only when both frozen motif lesions are estimable.
+    """Use lesion specificity only when the frozen motif is estimable.
 
     The display rule uses only the number of valid matched controls, not effect
     size or significance.  Otherwise it falls back to patient-level open-loop
     reach, which is defined for every patient and does not overstate an
     underpowered lesion analysis.
     """
-    lesion_path = out_root / "matched_lesion_patient_metrics.csv"
-    lesion_rows = rows(lesion_path) if lesion_path.exists() else []
-    lesion_order = ("local_backbone_edges", "connector_nodes")
-    available: dict[str, list[float]] = {}
-    for lesion in lesion_order:
-        available[lesion] = [
-            float(row["specificity_contact_nll"]) for row in lesion_rows
-            if row["model"] == REPRESENTATIVE_MODEL
-            and row["cell"] == "rnn" and row["lesion"] == lesion
-            and row["all_inference_available"] in (True, "True", "1", 1.0)
-            and np.isfinite(float(row["specificity_contact_nll"]))
-        ]
-    if all(len(available[lesion]) >= 5 for lesion in lesion_order):
-        for x, lesion in enumerate(lesion_order):
-            values = np.asarray(available[lesion], float)
+    lesion_display = lesion_display_values(out_root)
+    if lesion_display:
+        for x, (_, values) in enumerate(lesion_display):
             jitter = np.linspace(-0.10, 0.10, len(values))
             ax.scatter(x + jitter, values, s=17, color=COLORS[REPRESENTATIVE_MODEL],
                        alpha=0.68, linewidths=0)
             ax.plot([x - 0.17, x + 0.17], [np.median(values)] * 2,
                     color="#111111", lw=1.4)
         ax.axhline(0, color="#8d8d8d", lw=0.7)
-        ax.set_xticks([0, 1], ["Local\nbackbone", "Connector\nnodes"])
+        ax.set_xticks(
+            range(len(lesion_display)), [label for label, _ in lesion_display]
+        )
         ax.set_ylabel("Damage beyond\nmatched lesion (Δ NLL)")
         ax.set_title("Matched perturbation", fontsize=8.5, pad=2.5)
         return

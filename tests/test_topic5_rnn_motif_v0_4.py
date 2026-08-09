@@ -62,6 +62,7 @@ from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
     sha256,
 )
 from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
+    lesion_display_values,
     patient_level_effective_reach,
     selected_metrics,
 )
@@ -328,6 +329,37 @@ def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
     ])[("p1", "M6_SPATIAL_MID", "connector_nodes")]
     assert resolved["baseline"]["producers"] == {"A": "p1__own_a", "B": "p1__own_b"}
     assert np.allclose(resolved["targeted"]["A"], [0.5, 0.0])
+
+
+def test_lesion_figure_uses_estimable_frozen_components_without_effect_selection(
+        tmp_path):
+    records = []
+    for lesion, n_rows, base in (
+        ("local_backbone_edges", 5, -10.0),
+        ("long_range_high_influence_edges", 6, -20.0),
+        ("connector_nodes", 4, 100.0),
+    ):
+        for index in range(n_rows):
+            records.append({
+                "subject": f"p{index}", "model": "M6_SPATIAL_MID",
+                "cell": "rnn", "lesion": lesion,
+                "all_inference_available": True,
+                "specificity_contact_nll": base + index,
+            })
+    with (tmp_path / "matched_lesion_patient_metrics.csv").open(
+            "w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=records[0].keys())
+        writer.writeheader()
+        writer.writerows(records)
+    selected = lesion_display_values(tmp_path)
+    assert [label for label, _ in selected] == [
+        "Local\nbackbone", "Long-range\nedges"
+    ]
+    assert np.allclose(selected[0][1], np.arange(5) - 10.0)
+
+    # Connector magnitude is deliberately huge, but it must not be selected
+    # until its patient denominator reaches the fixed threshold.
+    assert all("Connector" not in label for label, _ in selected)
 
 
 def test_effective_operator_seed_stability_keeps_inactive_edges(tmp_path):
