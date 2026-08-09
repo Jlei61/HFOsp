@@ -66,6 +66,7 @@ from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
     patient_level_effective_reach,
     selected_metrics,
 )
+from finalize_topic5_rnn_motif_v0_4 import audit_figure_sources  # noqa: E402
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -627,6 +628,29 @@ def test_figure_representative_checkpoint_is_median_seed_not_best_seed(tmp_path)
         }))
     selected = selected_metrics(tmp_path, "p1", "M6_SPATIAL_MID")
     assert selected.parent.name == "seed1"
+
+
+def test_figure_source_manifest_verifies_every_panel_byte(tmp_path):
+    records = {}
+    for panel in "ABCDEF":
+        path = tmp_path / f"panel_{panel}.csv"
+        path.write_text(f"source,{panel}\n")
+        records[panel] = [{"path": str(path), "sha256": sha256(path)}]
+    manifest = {
+        "_contract": "topic5_figure6_source_manifest_v0_4",
+        "_representative_selection": {
+            "patient": "epilepsiae_1146",
+            "role": "supportive visualization; excluded from primary p-values",
+            "checkpoint_rule": "choose validation contact NLL nearest the seed median",
+        },
+        **records,
+    }
+    passed, errors = audit_figure_sources(manifest)
+    assert passed and errors == []
+    (tmp_path / "panel_E.csv").write_text("target bytes changed\n")
+    passed, errors = audit_figure_sources(manifest)
+    assert not passed
+    assert "panel_E_0_hash" in errors
 
 
 def test_matched_lesion_unit_is_median_seed_not_motif_selected(tmp_path):

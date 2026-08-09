@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 from pathlib import Path
 import re
@@ -31,6 +32,40 @@ def fmt(value: Any, digits: int = 3) -> str:
 def contrast(summary: dict, name: str) -> dict[str, Any]:
     return summary.get(name, {"n": 0, "median": None, "positive": 0,
                               "wilcoxon_p": None, "holm_q_core_family": None})
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(1024 * 1024), b""):
+            digest.update(chunk)
+    return digest.hexdigest()
+
+
+def audit_figure_sources(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
+    """Verify that every Figure 6 panel still points to the frozen bytes."""
+    errors: list[str] = []
+    if manifest.get("_contract") != "topic5_figure6_source_manifest_v0_4":
+        errors.append("contract")
+    representative = manifest.get("_representative_selection", {})
+    if representative.get("patient") != "epilepsiae_1146":
+        errors.append("representative_patient")
+    if "excluded from primary p-values" not in representative.get("role", ""):
+        errors.append("representative_role")
+    if "seed median" not in representative.get("checkpoint_rule", ""):
+        errors.append("representative_checkpoint_rule")
+    for panel in "ABCDEF":
+        records = manifest.get(panel)
+        if not isinstance(records, list) or not records:
+            errors.append(f"panel_{panel}_sources")
+            continue
+        for index, record in enumerate(records):
+            path = Path(record.get("path", ""))
+            if not path.is_file():
+                errors.append(f"panel_{panel}_{index}_missing")
+            elif record.get("sha256") != sha256(path):
+                errors.append(f"panel_{panel}_{index}_hash")
+    return not errors, errors
 
 
 def main() -> int:
@@ -120,6 +155,8 @@ def main() -> int:
     unseal = load(out / "TARGET_UNSEAL_AUTHORIZATION.json")
     lesion_early = load(out / "LESION_EARLY_ICTAL_SUMMARY.json")
     common_observables = load(out / "COMMON_OBSERVABLES.json")
+    figure_source_manifest = load(out / "figures/figure6_source_manifest.json")
+    figure_sources_ok, figure_source_errors = audit_figure_sources(figure_source_manifest)
 
     execution_contract_ok = bool(
         preflight.get("status") == "PASS"
@@ -200,6 +237,7 @@ def main() -> int:
             for suffix in ("png", "pdf", "svg"))
         and (out / "figures/figure6_source_manifest.json").exists()
         and (out / "figures/README.md").exists()
+        and figure_sources_ok
         and visual_ok
     )
     engineering_accepted = bool(
@@ -398,6 +436,7 @@ def main() -> int:
                              "figures/topic5_figure6_rnn_connectivity_motifs.svg",
                              "figures/figure6_source_manifest.json", "figures/README.md",
                              "VISUAL_QA.json"],
+                "observed": {"source_manifest_hash_errors": figure_source_errors},
             },
             "focused_tests": {
                 "pass": tests_ok,
