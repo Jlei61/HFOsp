@@ -381,6 +381,7 @@ def main() -> int:
         },
         "effective_operator_seed_stability": {m6_key: stability},
         "effective_operator_split_half_stability": {m6_key: split_stability},
+        "effective_operator_split_half_support": "frozen_active_recurrent_edges_only",
         "open_loop_pulse_cross_seed_stability": {m6_key: pulse_seed_stability},
         "pulse_split_half_scope": "not estimated; split-half stability applies to the effective edge operator",
         "M6_true_order_minus_order_shuffle_motif_score": proposal,
