@@ -585,18 +585,17 @@ def render_final(out_root: Path):
         / representative_metrics.parents[1].name / representative_metrics.parent.name
         / "influence.npz"
     )
-    target_root = Path(json.loads(
-        (out_root / "EARLY_ICTAL_METADATA_INVENTORY.json").read_text()
-    )["target_cache_root"])
+    target_inventory = rows(out_root / "early_ictal_metadata_inventory.csv")
     representative_targets = sorted(
-        (target_root / f"outer_{REPRESENTATIVE}").glob(f"{REPRESENTATIVE}__*.npz")
+        Path(row["artifact_path"]) for row in target_inventory
+        if row["subject"] == REPRESENTATIVE
     )
     sources = {
         "A": [selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz"
               for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")]
              + [representative_plane],
         "B": [selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL).parent
-              / "heldout_rollouts.json.gz", out_root / "cache" / "epilepsiae_1146__shared" / "events.npz"],
+              / "heldout_rollouts.json.gz", out_root / "cache" / representative_fit / "events.npz"],
         "C": [out_root / "interictal_per_patient.csv", out_root / "interictal_per_event.csv"],
         "D": [out_root / "accuracy_wiring_pareto.csv", out_root / "model_field_patient_metrics.csv"],
         "E": [out_root / "early_ictal_per_patient_model.csv",
