@@ -103,6 +103,8 @@ def main() -> int:
     influence_summary = load(out / "EFFECTIVE_INFLUENCE_SUMMARY.json")
     motif_implementation = load(out / "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json")
     lesion_raw = load(out / "MATCHED_LESION_SUMMARY.json")
+    lesion_unit_paths = sorted((out / "matched_lesions").glob("**/LESION_DONE.json"))
+    lesion_units = [load(path) for path in lesion_unit_paths]
     unseal = load(out / "TARGET_UNSEAL_AUTHORIZATION.json")
     common_observables = load(out / "COMMON_OBSERVABLES.json")
 
@@ -136,8 +138,25 @@ def main() -> int:
         and motif_implementation.get("target_values_read") is False
         and motif_implementation.get("thresholds_or_selected_edges_changed") is False
     )
+    lesion_unit_contracts_ok = bool(
+        len(lesion_units) == 217
+        and all(record.get("target_values_read") is False for record in lesion_units)
+        and all(int(record.get("target_draws", -1)) == 500 for record in lesion_units)
+        and all(int(record.get("minimum_valid_matched_draws", -1)) == 200
+                for record in lesion_units)
+        and all(int(record.get("n_heldout_events_for_matched_metrics", 0)) > 0
+                and int(record.get("n_heldout_events_for_targeted_fields", 0))
+                >= int(record.get("n_heldout_events_for_matched_metrics", 0))
+                for record in lesion_units)
+        and all(
+            payload.get("status") != "inference_available"
+            or int(payload.get("n_valid_matched_draws", -1)) >= 200
+            for record in lesion_units for payload in record.get("lesions", {}).values()
+        )
+    )
     lesion_execution_ok = bool(
-        lesion_raw.get("target_values_read") is False
+        lesion_unit_contracts_ok
+        and lesion_raw.get("target_values_read") is False
         and int(lesion_raw.get("n_selected_fit_model_units", -1)) == 217
         and int(lesion_raw.get("target_draws", -1)) == 500
         and int(lesion_raw.get("minimum_valid_matched_draws", -1)) == 200
@@ -306,6 +325,7 @@ def main() -> int:
                 "pass": lesion_execution_ok,
                 "evidence": ["MATCHED_LESION_SUMMARY.json", "stage_g_scientific_drift_audit.json"],
                 "observed": {"selected_units": lesion_raw.get("n_selected_fit_model_units"),
+                             "unit_contracts_valid": lesion_unit_contracts_ok,
                              "target_draws": lesion_raw.get("target_draws"),
                              "minimum_valid_draws": lesion_raw.get("minimum_valid_matched_draws"),
                              "motif_inference_estimable": lesion_estimable},
