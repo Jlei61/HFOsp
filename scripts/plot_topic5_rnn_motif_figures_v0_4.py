@@ -617,7 +617,7 @@ def render_final(out_root: Path):
 
 ### topic5_figure6_rnn_connectivity_motifs.png / .pdf / .svg
 
-六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及 target-free 有效连接组织。若预先指定的 local-backbone lesion 以及 long-range-edge 或 connector-node lesion 达到最低患者分母，Panel F 展示所有可估计成分的 matched-lesion 特异损害；否则展示患者级 lag-1/2/3 open-loop effective reach。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
+六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及 target-free 有效连接组织。Panel B 的红格是观察到并提供给模型的第一 rank seed，其余 viridis 格才显示后续观察或自由推演。若预先指定的 local-backbone lesion 以及 long-range-edge 或 connector-node lesion 达到最低患者分母，Panel F 展示所有可估计成分的 matched-lesion 特异损害；否则展示患者级 lag-1/2/3 open-loop effective reach。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
 
 **关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些有效 motif 经干预承担该计算”，不把预测性能直接写成真实连接组恢复。
 
