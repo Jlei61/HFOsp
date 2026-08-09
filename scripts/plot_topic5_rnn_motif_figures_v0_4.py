@@ -676,6 +676,14 @@ early-ictal 解封前生成的完整模型场诊断图，展示代表患者两�
     representative_empirical = (
         Path(input_manifest["input_roots"]["field"]) / f"{REPRESENTATIVE}.json"
     )
+    representative_fit_contract = next(
+        row for row in input_manifest["fits"]
+        if row["fit_id"] == representative_fit
+    )
+    if sha256(representative_empirical) != representative_fit_contract["field_sha256"]:
+        raise RuntimeError(
+            "representative empirical field changed after INPUT_MANIFEST freeze"
+        )
     representative_influence = (
         out_root / "effective_influence" / representative_metrics.parents[2].name
         / representative_metrics.parents[1].name / representative_metrics.parent.name
@@ -723,6 +731,8 @@ early-ictal 解封前生成的完整模型场诊断图，展示代表患者两�
                 model: str(selected_metrics(out_root, REPRESENTATIVE, model))
                 for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")
             },
+            "empirical_field_path": str(representative_empirical),
+            "empirical_field_sha256_frozen": representative_fit_contract["field_sha256"],
         },
         **panel_sources,
     }
