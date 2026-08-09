@@ -59,6 +59,9 @@ from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
     export as export_unit_contracts,
     sha256,
 )
+from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
+    patient_level_effective_reach,
+)
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -521,3 +524,28 @@ def test_executed_yaml_contract_matches_the_frozen_model_and_split_contracts():
         assert exported[model]["seeds"] == list(spec.seeds)
     assert contract["rollout_decoder"]["observed_future_set_size_read"] is False
     assert contract["statistics"]["primary_unit"] == "patient"
+
+
+def test_effective_reach_plot_input_is_patient_first(tmp_path):
+    path = tmp_path / "effective_influence_fit_seed.csv"
+    rows = []
+    for fit_id in ("p1__own_a", "p1__own_b"):
+        for seed in (0, 1, 2):
+            rows.append({
+                "subject": "p1", "fit_id": fit_id, "model": "M6_SPATIAL_MID",
+                "cell": "rnn", "seed": seed,
+                "lag1_reach_mm": 1, "lag2_reach_mm": 2, "lag3_reach_mm": 3,
+            })
+    for seed in (0, 1, 2):
+        rows.append({
+            "subject": "p2", "fit_id": "p2__shared", "model": "M6_SPATIAL_MID",
+            "cell": "rnn", "seed": seed,
+            "lag1_reach_mm": 10, "lag2_reach_mm": 20, "lag3_reach_mm": 30,
+        })
+    with path.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader(); writer.writerows(rows)
+    reach = patient_level_effective_reach(tmp_path)
+    assert set(reach) == {"p1", "p2"}
+    np.testing.assert_allclose(reach["p1"], [1, 2, 3])
+    np.testing.assert_allclose(reach["p2"], [10, 20, 30])
