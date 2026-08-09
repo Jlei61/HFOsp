@@ -172,6 +172,45 @@ def visual_qa_complete(payload: dict[str, Any]) -> bool:
     )
 
 
+def stage_drift_audits_complete(audits: dict[str, dict[str, Any]]) -> bool:
+    """Verify stage-specific scientific content, not only an ALIGNED label."""
+    a, c, d, e, f, g, h = (audits.get(stage, {}) for stage in "acdefgh")
+    return bool(
+        a.get("status") == "ALIGNED"
+        and "recurrent motifs" in str(a.get("original_question", ""))
+        and len(a.get("checked", [])) >= 4
+        and isinstance(a.get("deviations"), list)
+        and c.get("status") == "ALIGNED_ENGINEERING_SMOKE"
+        and int(c.get("n_units", -1)) == 9
+        and c.get("scientific_inference_allowed") is False
+        and c.get("target_values_read") is False
+        and d.get("status") == "ALIGNED"
+        and d.get("target_values_read") is False
+        and "connectivity constraints" in str(d.get("scientific_question", ""))
+        and len(d.get("primary_corrections_applied", [])) >= 3
+        and len(d.get("not_claimed", [])) >= 3
+        and e.get("status") == "ALIGNED"
+        and e.get("target_values_read") is False
+        and len(e.get("checked", [])) >= 4
+        and isinstance(e.get("deviations"), list)
+        and f.get("status") == "ALIGNED"
+        and f.get("target_role") == "external frozen benchmark only"
+        and f.get("target_values_read_after_field_freeze") is True
+        and int(f.get("n_primary_subjects", 0)) > 0
+        and str(f.get("primary_endpoint", "")).startswith("canonical_full maxAB")
+        and g.get("status") == "ALIGNED"
+        and g.get("target_values_read") is False
+        and "local high-influence backbone" in str(g.get("primary_motif", ""))
+        and len(g.get("primary_evidence_required", [])) == 3
+        and "leaky RNN primary" in str(g.get("cell_scope", ""))
+        and h.get("status") == "ALIGNED"
+        and h.get("comparison_level") == "shared mesoscopic observables only"
+        and h.get("snn_rerun") is False
+        and len(h.get("explicitly_missing", [])) >= 2
+        and len(h.get("not_claimed", [])) >= 3
+    )
+
+
 def preflight_inventory_ok(payload: dict[str, Any], out_root: Path) -> bool:
     """Validate the transparent plan-named index against immutable sources."""
     expected = {
@@ -261,10 +300,7 @@ def main() -> int:
                 if (out / f"stage_{stage}_scientific_drift_audit.json").exists() else {})
         for stage in drift_stages
     }
-    drift_audits_ok = all(
-        str(drift_audits[stage].get("status", "")).startswith("ALIGNED")
-        for stage in drift_stages
-    )
+    drift_audits_ok = stage_drift_audits_complete(drift_audits)
     stages = {stage: load(out / f"STAGE_{stage.upper()}_STATUS.json")
               for stage in ("core", "dose", "gru")}
     stage_clean = all(int(row["remaining"]) == 0 and int(row["failed"]) == 0

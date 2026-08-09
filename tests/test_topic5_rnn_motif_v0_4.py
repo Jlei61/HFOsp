@@ -87,6 +87,7 @@ from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     integrated_level4,
     postprocess_snapshot_equivalence_ok,
     preflight_inventory_ok,
+    stage_drift_audits_complete,
     target_artifact_recheck_ok,
     target_contract_trace_ok,
     visual_qa_complete,
@@ -207,6 +208,33 @@ def test_postprocess_snapshot_equivalence_requires_all_three_hashes(tmp_path):
     assert postprocess_snapshot_equivalence_ok(payload)
     snapshot.write_text("print('changed')\n")
     assert not postprocess_snapshot_equivalence_ok(payload)
+
+
+def test_stage_drift_audit_requires_scientific_content_not_only_status():
+    audits = {
+        "a": {"status": "ALIGNED", "original_question": "which recurrent motifs",
+              "checked": [1, 2, 3, 4], "deviations": []},
+        "c": {"status": "ALIGNED_ENGINEERING_SMOKE", "n_units": 9,
+              "scientific_inference_allowed": False, "target_values_read": False},
+        "d": {"status": "ALIGNED", "target_values_read": False,
+              "scientific_question": "which connectivity constraints are sufficient",
+              "primary_corrections_applied": [1, 2, 3], "not_claimed": [1, 2, 3]},
+        "e": {"status": "ALIGNED", "target_values_read": False,
+              "checked": [1, 2, 3, 4], "deviations": []},
+        "f": {"status": "ALIGNED", "target_role": "external frozen benchmark only",
+              "target_values_read_after_field_freeze": True, "n_primary_subjects": 10,
+              "primary_endpoint": "canonical_full maxAB versus null"},
+        "g": {"status": "ALIGNED", "target_values_read": False,
+              "primary_motif": "local high-influence backbone plus connectors",
+              "primary_evidence_required": [1, 2, 3],
+              "cell_scope": "leaky RNN primary; GRU replication"},
+        "h": {"status": "ALIGNED", "comparison_level": "shared mesoscopic observables only",
+              "snn_rerun": False, "explicitly_missing": [1, 2],
+              "not_claimed": [1, 2, 3]},
+    }
+    assert stage_drift_audits_complete(audits)
+    audits["f"].pop("target_values_read_after_field_freeze")
+    assert not stage_drift_audits_complete(audits)
 
 
 def test_preflight_inventory_export_is_explicitly_post_run_and_target_free(tmp_path):
