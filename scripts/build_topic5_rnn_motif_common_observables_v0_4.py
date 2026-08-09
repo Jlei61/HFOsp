@@ -98,8 +98,6 @@ def main() -> int:
             influence_matrix.size and np.isfinite(influence_matrix).any(axis=1).any()
         )
         model_interictal = [row for row in interictal if row["model"] == model and row["cell"] == "rnn"]
-        model_lesion = [row for row in lesions if row["model"] == model and row["cell"] == "rnn"
-                        and row["lesion"] == "connector_nodes" and row["all_inference_available"] == "True"]
         output.extend([
             {"system": f"RNN:{model}", "observable": "heldout interictal propagation",
              "status": "available", "value": float(np.nanmedian(finite(model_interictal, "rollout_spearman"))),
@@ -121,12 +119,28 @@ def main() -> int:
              "denominator": int(sum(np.isfinite(value).any() for value in patient_influence.values())),
              "comparison_level": "patient-first contact-space finite-pulse response (mm)",
              "boundary": "rank-step, not real-time dynamics", "source": "effective_influence_fit_seed.csv"},
-            {"system": f"RNN:{model}", "observable": "connector matched-lesion specificity",
-             "status": "available" if model_lesion else "not estimable", "value": (
-                 float(np.nanmedian(finite(model_lesion, "specificity_contact_nll"))) if model_lesion else None),
-             "denominator": len(model_lesion), "comparison_level": "heldout interictal ΔNLL beyond matched random lesion",
-             "boundary": "in-model perturbation only", "source": "matched_lesion_patient_metrics.csv"},
         ])
+        for lesion, label in (
+            ("local_backbone_edges", "local-backbone matched-lesion specificity"),
+            ("long_range_high_influence_edges", "long-range-edge matched-lesion specificity"),
+            ("connector_nodes", "connector-node matched-lesion specificity"),
+        ):
+            model_lesion = [
+                row for row in lesions
+                if row["model"] == model and row["cell"] == "rnn"
+                and row["lesion"] == lesion and row["all_inference_available"] == "True"
+            ]
+            output.append({
+                "system": f"RNN:{model}", "observable": label,
+                "status": "available" if model_lesion else "not estimable",
+                "value": (float(np.nanmedian(finite(
+                    model_lesion, "specificity_contact_nll"
+                ))) if model_lesion else None),
+                "denominator": len(model_lesion),
+                "comparison_level": "heldout interictal ΔNLL beyond matched random lesion",
+                "boundary": "in-model perturbation only",
+                "source": "matched_lesion_patient_metrics.csv",
+            })
 
     output.extend([
         {"system": "SNN:E1146", "observable": "opposite-source bidirectionality",
@@ -161,6 +175,7 @@ def main() -> int:
     (out_root / "COMMON_OBSERVABLES.json").write_text(json.dumps({
         "contract": "topic5_human_rnn_snn_common_observables_v0_4",
         "edge_to_edge_comparison": False,
+        "edge_to_edge_mapping_attempted": False,
         "hidden_unit_to_neuron_comparison": False,
         "snn_rerun": False,
         "rows": output,
