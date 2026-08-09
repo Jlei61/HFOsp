@@ -66,6 +66,22 @@ def pairwise_seed_stability(paths: list[Path]) -> float:
     return float(np.nanmedian(correlations)) if correlations else float("nan")
 
 
+def candidate_distance_classes(mask: np.ndarray, distance: np.ndarray) -> tuple[np.ndarray, np.ndarray, float, float]:
+    """Classify active edges using thresholds from every candidate node pair.
+
+    Re-estimating Q50/Q75 on the surviving mask would force even a purely local
+    graph to contain an artificial "longest quartile".  The frozen motif
+    contract instead defines physical local/long classes on all off-diagonal
+    candidate pairs, independently of a model's learned topology.
+    """
+    mask = np.asarray(mask, bool)
+    distance = np.asarray(distance, float)
+    candidate = ~np.eye(mask.shape[0], dtype=bool)
+    q50, q75 = np.quantile(distance[candidate], [0.50, 0.75])
+    active_distance = distance.ravel()[np.flatnonzero(mask.ravel())]
+    return active_distance <= q50, active_distance >= q75, float(q50), float(q75)
+
+
 def unit_summary(path: Path, draws: int) -> dict[str, Any]:
     with np.load(path, allow_pickle=False) as data:
         summary = json.loads(str(data["summary_json"].item()))
@@ -78,8 +94,7 @@ def unit_summary(path: Path, draws: int) -> dict[str, Any]:
     lengths = distance.ravel()[active]
     if len(active) < 10:
         raise RuntimeError(f"too few active edges for motif null: {path}")
-    long = lengths >= np.quantile(lengths, 0.75)
-    local = lengths <= np.quantile(lengths, 0.50)
+    local, long, candidate_q50, candidate_q75 = candidate_distance_classes(mask, distance)
     n_top = max(1, int(np.ceil(0.10 * len(values))))
     order = np.argsort(values, kind="stable")[-n_top:]
     observed_long_top = float(long[order].mean())
@@ -99,6 +114,9 @@ def unit_summary(path: Path, draws: int) -> dict[str, Any]:
         "local_effective_ratio": float(np.mean(values[local]) / max(mean_all, 1e-12)),
         "long_effective_ratio": float(np.mean(values[long]) / max(mean_all, 1e-12)),
         "connector_node_fraction": float(connector.mean()),
+        "candidate_pair_distance_q50_mm": candidate_q50,
+        "candidate_pair_distance_q75_mm": candidate_q75,
+        "distance_threshold_reference": "all_off_diagonal_candidate_node_pairs",
         "motif_score": float(
             np.mean(values[local]) / max(mean_all, 1e-12)
             + observed_long_top - float(np.median(null))
@@ -241,6 +259,7 @@ def main() -> int:
     payload = {
         "contract": "topic5_rnn_motif_theory_summary_v0_4",
         "target_values_read": False,
+        "distance_threshold_reference": "all_off_diagonal_candidate_node_pairs",
         "effective_weight_permutation_null": "influence values permuted over the frozen active edge mask",
         "enrichment": enrichment,
         "task_and_wiring_associations": associations,

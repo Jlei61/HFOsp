@@ -37,7 +37,10 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     permutation_support,
 )
 from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
-from summarize_topic5_rnn_motif_theory_v0_4 import pairwise_seed_stability  # noqa: E402
+from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
+    candidate_distance_classes,
+    pairwise_seed_stability,
+)
 from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
     edge_descriptor_matches,
 )
@@ -299,6 +302,17 @@ def test_effective_operator_seed_stability_keeps_inactive_edges(tmp_path):
     path = tmp_path / "seed2.npz"
     np.savez_compressed(path, edge_effective_influence=third)
     assert pairwise_seed_stability([paths[0], path]) < 1.0
+
+
+def test_motif_distance_thresholds_do_not_create_long_edges_in_local_mask():
+    position = np.arange(8, dtype=float)
+    distance = np.abs(position[:, None] - position[None, :])
+    mask = (distance == 1.0)
+    np.fill_diagonal(mask, False)
+    local, long, q50, q75 = candidate_distance_classes(mask, distance)
+    assert q50 > 1.0 and q75 > q50
+    assert local.all()
+    assert not long.any()
 
 
 def test_matched_edge_lesion_does_not_collapse_in_and_out_degree():
