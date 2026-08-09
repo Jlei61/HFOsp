@@ -69,6 +69,7 @@ from build_topic5_rnn_motif_common_observables_v0_4 import (  # noqa: E402
 )
 from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
     export as export_unit_contracts,
+    export_preflight_inventory,
     sha256,
 )
 from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
@@ -78,6 +79,7 @@ from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
 )
 from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     audit_figure_sources,
+    integrated_level4,
     target_artifact_recheck_ok,
     target_contract_trace_ok,
 )
@@ -129,6 +131,37 @@ def test_motif_task_relation_uses_fixed_holm_family():
     )
     assert missing["motif_vs_rollout"] == 0.02
     assert missing["motif_vs_empirical_field_fidelity"] == 1.0
+
+
+def test_level4_wording_requires_target_free_motif_economy_and_cross_state():
+    assert integrated_level4(True, True, True)
+    assert not integrated_level4(True, True, False)
+    assert not integrated_level4(True, False, True)
+    assert not integrated_level4(False, True, True)
+
+
+def test_preflight_inventory_export_is_explicitly_post_run_and_target_free(tmp_path):
+    out = tmp_path
+    fit = {
+        "fit_id": "p1__shared", "subject": "p1", "scope": "shared",
+        "n_contacts": 4, "n_nodes": 4, "n_train": 8, "n_validation": 2, "n_test": 2,
+    }
+    (out / "INPUT_MANIFEST.json").write_text(json.dumps({"fits": [fit]}))
+    (out / "PRE_FLIGHT_AUDIT.json").write_text(json.dumps({
+        "target_values_read": False, "n_patients": 1, "n_fits": 1,
+        "n_training_units": 1,
+        "geometry_status": "RETROSPECTIVE_TEST_INFORMED_PROPAGATION_PLANE",
+    }))
+    (out / "EARLY_ICTAL_METADATA_INVENTORY.json").write_text(json.dumps({
+        "target_values_read": False, "expected_primary_n": 1,
+        "actual_primary_join": ["p1"],
+    }))
+    result = export_preflight_inventory(out)
+    assert result["target_values_deserialized_by_this_exporter"] is False
+    assert result["created_after_target_unseal"] is False
+    assert result["n_patients"] == 1
+    assert result["shared_and_noncollinear_fit_inventory"] == [fit]
+    assert json.loads((out / "PREFLIGHT_INVENTORY.json").read_text()) == result
 
 
 def test_target_artifact_recheck_is_required_before_unseal():
