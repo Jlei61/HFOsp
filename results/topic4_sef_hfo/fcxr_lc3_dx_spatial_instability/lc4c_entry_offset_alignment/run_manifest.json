@@ -1,0 +1,53 @@
+{
+  "experiment": "FCXR-LC4c entry-offset alignment",
+  "status": "C2_NOMINAL_COMPLETE_STOPPED",
+  "verdict": "F2_NOMINAL_LIFECYCLE_INCOMPLETE",
+  "design": "docs/superpowers/specs/2026-08-10-topic4-fcxr-lc4c-entry-offset-alignment-design.md",
+  "plan": "docs/superpowers/plans/2026-08-10-topic4-fcxr-lc4c-entry-offset-alignment.md",
+  "execution_head": "2c2d2e09d6941ebd5bb912e4772ea002cc03c32b",
+  "stages": {
+    "C0_candidate": "ENTRY_OFFSET_REPAIR_IDENTIFIABLE",
+    "C1_fresh_entry": "C1_ENTRY_ALIGNED",
+    "C2_nominal_lifecycle": "F2_NOMINAL_LIFECYCLE_INCOMPLETE",
+    "C2_exact_final_D_confirmation": "not_authorised"
+  },
+  "primary_verdicts": [
+    "candidate_lock.json",
+    "entry_gate.json",
+    "nominal_lifecycle.json",
+    "AUTOPILOT_STOP.json"
+  ],
+  "figure": "figures/lc4c_entry_offset_alignment_diagnostic.png",
+  "artifact_sha256": {
+    "candidate_lock.json": "9e560ff415bf9c4d951e5cd8001a681bc9ee872f6d4eaf7110639e48d3e6d6e2",
+    "entry_gate.json": "186eca44cb72d8a95046828bc6ec737ebeca37b3bb883e222b0e057bd55e2da6",
+    "entry_gate_traces.npz": "1a426a313828ea6e11a4f3c13a40d5fd705f8d703477dc47521cf05128a0ac9e",
+    "nominal_lifecycle.json": "e31b2d19430ce40e277b8ca7bc7a8972a8dc7b7f605587ed74d8fc407566908d",
+    "nominal_lifecycle_traces.npz": "22534ed100743b356873e5e0b3f727a95a94bc24d50c8016292933f8b587a3db",
+    "nominal_final_exact_state.npz": "04d3d58ea077f703fb078a82ee26f6a409de7c6e47653381fb90fa7c119c4c59",
+    "AUTOPILOT_STOP.json": "fe0f8c3bfc231e2b827c8f16c7fa5f7a95419b06225ff26a3a7889bc0c7320a9"
+  },
+  "source_sha256_at_execution": {
+    "src/snn_engine/mz_slow_vars.py": "5b578bcf7de583a3829b655e53b17f71674d7a378788cd50ca0e23c0374c8071",
+    "src/topic4_fcxr_lc4c.py": "be64f733e1fff441ac6c7f503aa6ddb84193cf263cbffef6e63f680e32f925a5",
+    "scripts/run_topic4_fcxr_lc4c.py": "1862ee20fd1c4708ef4cda1096ae756ac21e557d3ca26fcbc6c59a1c397c5467",
+    "scripts/run_topic4_fcxr_lc4c_autopilot.sh": "10f50b265c225a276185374c25a2e65c993a0049776f748ccdffa217810ad93d"
+  },
+  "postrun_reporting_repair": {
+    "reason": "generic nominal claim boundary incorrectly implied eligibility on a failed gate",
+    "simulation_values_changed": false,
+    "scripts/run_topic4_fcxr_lc4_lifecycle.py": "e5a385241d41a5e1d09160bed63200e97a283d9055700a2c79e28f1206a9c947"
+  },
+  "blessed_engine_hashes_match": true,
+  "tests": "606 passed in 149.02 s",
+  "resources": {
+    "worker_policy": "one 40k worker for every executed stage",
+    "long_run_mode": "setsid nohup with PID, independent session, stage flock, source lock and sentinels",
+    "peak_self_rss_gib": 50.88602066040039,
+    "minimum_logged_mem_available_gib": 189.04639053344727,
+    "swap_baseline_mib": 714.7890625,
+    "swap_delta_mib": 0.0,
+    "residual_task_processes": 0
+  },
+  "completed": "2026-08-10T07:14:45+08:00"
+}

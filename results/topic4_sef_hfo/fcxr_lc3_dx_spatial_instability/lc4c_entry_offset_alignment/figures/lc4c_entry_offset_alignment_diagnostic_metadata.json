@@ -1,0 +1,35 @@
+{
+  "figure": "lc4c_entry_offset_alignment_diagnostic",
+  "kind": "executed-stage diagnostic; not a complete-lifecycle or paper-claim figure",
+  "stage_verdicts": {
+    "C1": "C1_ENTRY_ALIGNED",
+    "C2_nominal": "F2_NOMINAL_LIFECYCLE_INCOMPLETE",
+    "C2_exact_final_D": "not_authorised"
+  },
+  "panels": {
+    "A": "fresh 15 s no-kick entry gate; the first 4 s have exactly zero executor current",
+    "B": "70 s nominal rate trajectory with 11 s onset and 66 s autonomous offset",
+    "C": "executed terminator current, mean D and relay depletion through the nominal path",
+    "D": "mean D versus normalized terminator current; only four post-offset seconds are observed"
+  },
+  "key_numbers": {
+    "onset_ms": 11000.0,
+    "offset_ms": 66000.0,
+    "bout_ms": 55000.0,
+    "pre_returning_events": 29,
+    "postictal_rate_hz": 2.41890625,
+    "post_offset_observation_ms": 4000.0,
+    "post_offset_returning_events": 0,
+    "final8": {
+      "n": 36,
+      "rate_hz": 4.5,
+      "duration_median_ms": 27.5,
+      "participation_median": 0.12196875
+    },
+    "final_D_mean": 0.14559792885379874,
+    "final_X_mean": 0.9221293744879198,
+    "max_current_fraction_of_target": 0.8825823643305972
+  },
+  "claim_boundary": "At one development seed, C1 proves aligned no-kick cumulative entry.  C2 shows an autonomous offset and four seconds of post-offset suppression, but the high bout lasts 55 seconds rather than 1\u20135 seconds and no returning event occurs after offset. Distributional recovery and the exact-D stability confirmation remain untested.",
+  "source": "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4c_entry_offset_alignment"
+}

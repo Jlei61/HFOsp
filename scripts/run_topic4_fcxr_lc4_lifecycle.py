@@ -246,8 +246,7 @@ def stage_nominal():
         final_a_mean=float(np.mean(slow_f.a[:ne])),
         max_rate_hz=float(np.max(rate)), mean_rate_hz=float(np.mean(rate)),
         wall_s=time.time() - t0, peak_rss_gib=GEO._meminfo()["self_peak_rss_gib"],
-        claim_boundary=("single-seed nominal eligibility only; complete lifecycle requires the "
-                        "exact-state frozen-D continuation"),
+        claim_boundary=_nominal_claim_boundary(gate),
         finished=GEO._now(),
     )
     GEO._write_json(out_json, rec)
@@ -259,6 +258,15 @@ def stage_nominal():
     del run, res, S
     gc.collect()
     return rec
+
+
+def _nominal_claim_boundary(gate):
+    """Keep the persisted claim scope consistent with the nominal gate."""
+    if bool((gate or {}).get("eligible_for_frozen_D", False)):
+        return ("single-seed nominal eligibility only; complete lifecycle requires the "
+                "exact-state frozen-D continuation")
+    return ("single-seed nominal lifecycle incomplete; exact-state frozen-D continuation "
+            "was not authorised")
 
 
 def _rekey_confirmation(state):

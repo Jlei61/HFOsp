@@ -6,6 +6,7 @@ from src.topic4_fcxr_lc4_lifecycle import (
     first_ictal_bout,
     refractory_ceiling_fraction,
 )
+from scripts.run_topic4_fcxr_lc4_lifecycle import _nominal_claim_boundary
 
 
 BAND = dict(
@@ -55,6 +56,14 @@ def test_nominal_good_path_is_only_eligible_not_complete():
     assert out["verdict"] == "F2_NOMINAL_ELIGIBLE_FOR_FROZEN_D"
     assert out["offset_ms"] == 13000.0
     assert out["n_returning_before_onset"] == 4
+
+
+def test_nominal_claim_boundary_follows_gate_eligibility():
+    assert "eligibility only" in _nominal_claim_boundary(
+        {"eligible_for_frozen_D": True})
+    failed = _nominal_claim_boundary({"eligible_for_frozen_D": False})
+    assert "incomplete" in failed
+    assert "not authorised" in failed
 
 
 def test_bout_at_record_end_is_not_an_offset():
