@@ -180,6 +180,34 @@ def weighted_participation(weight: np.ndarray, membership: np.ndarray) -> np.nda
     return out
 
 
+def contact_orientation_summary(pulse: np.ndarray, contact_xy: np.ndarray) -> dict[str, float]:
+    """Summarize pulse influence along versus across the frozen patient plane.
+
+    The plane contract fixes coordinate 0 along the interictal propagation axis
+    and coordinate 1 transverse to it.  We compare absolute contact-space
+    responses on off-diagonal pairs whose displacement is dominated by either
+    coordinate; this is a mesoscopic readout, not a recovered anatomical edge.
+    """
+    pulse = np.asarray(pulse, float)
+    xy = np.asarray(contact_xy, float)
+    delta = xy[:, None, :] - xy[None, :, :]
+    off = ~np.eye(len(xy), dtype=bool)
+    along = off & (np.abs(delta[..., 0]) >= np.abs(delta[..., 1]))
+    transverse = off & ~along
+    output: dict[str, float] = {}
+    for lag in range(min(3, pulse.shape[0])):
+        absolute = np.abs(pulse[lag])
+        axis_value = float(np.mean(absolute[along])) if along.any() else float("nan")
+        transverse_value = float(np.mean(absolute[transverse])) if transverse.any() else float("nan")
+        output[f"lag{lag + 1}_axis_aligned_abs"] = axis_value
+        output[f"lag{lag + 1}_transverse_abs"] = transverse_value
+        output[f"lag{lag + 1}_axis_to_transverse_ratio"] = (
+            axis_value / transverse_value if np.isfinite(transverse_value) and transverse_value > 0
+            else float("nan")
+        )
+    return output
+
+
 def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
                    max_prefixes: int) -> tuple[dict[str, Any], dict[str, np.ndarray]]:
     model, decoder, metrics, plane, context = instantiate(out_root, metrics_path, device)
@@ -268,6 +296,7 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
     for lag in range(3):
         weight = np.abs(pulse[lag]) * off_contact
         reach.append(float((weight * contact_distance).sum() / max(weight.sum(), 1e-12)))
+    orientation = contact_orientation_summary(pulse, contact_xy)
 
     graph = dict(np.load(metrics_path.parent / "graph.npz"))
     mask = np.asarray(graph["mask"], bool)
@@ -307,6 +336,7 @@ def summarize_unit(out_root: Path, metrics_path: Path, device: torch.device,
         "motif_estimable": motif_estimable,
         "effective_edge_definition": ("exact_leaky_one_step_deletion_sensitivity"
                                       if metrics["cell"] == "rnn" else "gru_gate_rms_activity_proxy"),
+        **orientation,
     }
     arrays = {
         "contacts": np.asarray(context["provenance"]["contacts"], dtype="U64"),
@@ -373,13 +403,23 @@ def main() -> int:
             if not output.exists():
                 raise RuntimeError(f"missing effective influence output: {output}")
             with np.load(output, allow_pickle=False) as data:
-                rows.append(json.loads(str(data["summary_json"].item())))
+                row = json.loads(str(data["summary_json"].item()))
+                if "lag1_axis_aligned_abs" not in row:
+                    metrics = json.loads(path.read_text())
+                    plane = dict(np.load(out_root / "cache" / metrics["fit_id"] / "plane.npz"))
+                    row.update(contact_orientation_summary(
+                        np.asarray(data["open_loop_pulse_lag123"], float),
+                        np.asarray(plane["contacts_xy_mm"], float),
+                    ))
+                rows.append(row)
         write_csv(out_root / "effective_influence_fit_seed.csv", rows)
         summary = {
             "contract": "topic5_rnn_motif_effective_influence_v0_4",
             "target_values_read": False, "n_units": len(rows),
             "expected_units": len(all_paths), "max_prefixes_per_unit": args.max_prefixes,
-            "primary_observables": ["lag1_2_3_open_loop_contact_reach", "local_backbone_long_range_connector"],
+            "primary_observables": ["lag1_2_3_open_loop_contact_reach",
+                                    "axis_aligned_vs_transverse_contact_influence",
+                                    "local_backbone_long_range_connector"],
             "teacher_forced_scope": "lag1_local_probability_jacobian_only",
             "open_loop_scope": "lag1_to_lag3_deterministic_decoder_without_future_ranks",
             "rank_step_not_real_time": True,
