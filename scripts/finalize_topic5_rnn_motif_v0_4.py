@@ -190,8 +190,10 @@ def main() -> int:
         and "at least 200 matched controls" in lesion_early.get("inference_rule", "")
     )
     common_observables_ok = bool(
-        common_observables.get("contract")
-        and common_observables.get("edge_to_edge_mapping_attempted") is not True
+        common_observables.get("contract") == "topic5_human_rnn_snn_common_observables_v0_4"
+        and common_observables.get("edge_to_edge_mapping_attempted") is False
+        and common_observables.get("hidden_unit_to_neuron_comparison") is False
+        and len(common_observables.get("rows", [])) > 0
     )
     figure_ok = bool(
         all((out / f"figures/topic5_figure6_rnn_connectivity_motifs.{suffix}").exists()
