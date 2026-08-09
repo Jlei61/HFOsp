@@ -41,8 +41,8 @@ MODEL_ORDER = [
 MODEL_LABEL = {
     "M0_NO_REC": "No rec.", "M1_DENSE": "Dense", "M2_UNIFORM_SET": "Sparse",
     "M3_FIXED_LOCAL": "Local", "M4_SPATIAL_GROWTH": "Spatial",
-    "M6_SPATIAL_MID": "Spatial + cost", "M8_UNIFORM_COST_MID": "Uniform + cost",
-    "C_ORDER_SHUFFLED": "Order shuffled",
+    "M6_SPATIAL_MID": "Spatial\n+ cost", "M8_UNIFORM_COST_MID": "Uniform\n+ cost",
+    "C_ORDER_SHUFFLED": "Order\nshuffled",
 }
 COLORS = {
     "M0_NO_REC": "#9b9b9b", "M1_DENSE": "#252525", "M2_UNIFORM_SET": "#7f7f7f",
@@ -251,7 +251,7 @@ def draw_stage_interictal(parent, out_root: Path):
     subjects = sorted({row["subject"] for row in rnn if row["model"] == "M0_NO_REC"})
     models = [model for model in MODEL_ORDER
               if all((subject, model) in lookup for subject in subjects)]
-    grid = parent.subgridspec(2, 3, hspace=0.58, wspace=0.42)
+    grid = parent.subgridspec(2, 3, hspace=0.34, wspace=0.42)
     figure = parent.get_gridspec().figure
     axes = [figure.add_subplot(grid[row, col]) for row in range(2) for col in range(3)]
 
@@ -326,7 +326,8 @@ def early_activation(out_root: Path, subject: str):
     return np.nanmedian(np.asarray(values, float), axis=0)
 
 
-def draw_cross_state(parent, out_root: Path, include_stats: bool = True):
+def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
+                     model_subset: tuple[str, ...] | None = None):
     _, pa, pb = model_field_payloads(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
     activation = early_activation(out_root, REPRESENTATIVE)
     fz = load_frozen(REPRESENTATIVE)
@@ -348,7 +349,7 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True):
         frame = [row for row in rows(out_root / "early_ictal_per_patient_model.csv")
                  if row["primary"] in (True, "True", "1", 1.0) and row["cell"] == "rnn"]
         data = {}
-        for model in MODEL_ORDER:
+        for model in (model_subset or tuple(MODEL_ORDER)):
             values = [row["all_contact_margin"] for row in frame
                       if row["model"] == model and row["endpoint"] == "canonical_full"]
             if values: data[model] = values
@@ -362,6 +363,68 @@ def influence_for_selected(out_root: Path):
     return metrics, dict(np.load(path, allow_pickle=False))
 
 
+def patient_level_effective_reach(out_root: Path) -> dict[str, np.ndarray]:
+    """Collapse fit and seed rows before exposing the patient denominator."""
+    frame = [row for row in rows(out_root / "effective_influence_fit_seed.csv")
+             if row["model"] == REPRESENTATIVE_MODEL and row["cell"] == "rnn"]
+    output: dict[str, np.ndarray] = {}
+    for subject in sorted({row["subject"] for row in frame}):
+        selected = [row for row in frame if row["subject"] == subject]
+        output[subject] = np.asarray([
+            np.nanmedian([row[f"lag{lag}_reach_mm"] for row in selected])
+            for lag in (1, 2, 3)
+        ], float)
+    return output
+
+
+def draw_reach_or_lesion(ax, out_root: Path):
+    """Use lesion specificity only when both frozen motif lesions are estimable.
+
+    The display rule uses only the number of valid matched controls, not effect
+    size or significance.  Otherwise it falls back to patient-level open-loop
+    reach, which is defined for every patient and does not overstate an
+    underpowered lesion analysis.
+    """
+    lesion_path = out_root / "matched_lesion_patient_metrics.csv"
+    lesion_rows = rows(lesion_path) if lesion_path.exists() else []
+    lesion_order = ("local_backbone_edges", "connector_nodes")
+    available: dict[str, list[float]] = {}
+    for lesion in lesion_order:
+        available[lesion] = [
+            float(row["specificity_contact_nll"]) for row in lesion_rows
+            if row["model"] == REPRESENTATIVE_MODEL
+            and row["cell"] == "rnn" and row["lesion"] == lesion
+            and row["all_inference_available"] in (True, "True", "1", 1.0)
+            and np.isfinite(float(row["specificity_contact_nll"]))
+        ]
+    if all(len(available[lesion]) >= 5 for lesion in lesion_order):
+        for x, lesion in enumerate(lesion_order):
+            values = np.asarray(available[lesion], float)
+            jitter = np.linspace(-0.10, 0.10, len(values))
+            ax.scatter(x + jitter, values, s=17, color=COLORS[REPRESENTATIVE_MODEL],
+                       alpha=0.68, linewidths=0)
+            ax.plot([x - 0.17, x + 0.17], [np.median(values)] * 2,
+                    color="#111111", lw=1.4)
+        ax.axhline(0, color="#8d8d8d", lw=0.7)
+        ax.set_xticks([0, 1], ["Local\nbackbone", "Connector\nnodes"])
+        ax.set_ylabel("Damage beyond\nmatched lesion (Δ NLL)")
+        ax.set_title("Matched perturbation", fontsize=8.5, pad=2.5)
+        return
+
+    reach = patient_level_effective_reach(out_root)
+    values = np.asarray(list(reach.values()), float)
+    for value in values:
+        ax.plot([1, 2, 3], value, color="#b8b8b8", lw=0.55, alpha=0.55)
+        ax.scatter([1, 2, 3], value, s=8, color="#b8b8b8", alpha=0.55, linewidths=0)
+    median = np.nanmedian(values, axis=0)
+    ax.plot([1, 2, 3], median, color=COLORS[REPRESENTATIVE_MODEL], lw=2.0,
+            marker="o", markersize=4.2, zorder=4)
+    ax.set_xticks([1, 2, 3], ["1", "2", "3"])
+    ax.set_xlabel("Rank steps after pulse")
+    ax.set_ylabel("Effective reach (mm)")
+    ax.set_title(f"Open-loop reach (n={len(values)} patients)", fontsize=8.5, pad=2.5)
+
+
 def draw_effective_motif(parent, out_root: Path):
     metrics, influence = influence_for_selected(out_root)
     graph = dict(np.load(metrics.parent / "graph.npz"))
@@ -371,17 +434,7 @@ def draw_effective_motif(parent, out_root: Path):
     ax = parent.get_gridspec().figure.add_subplot(grid[0, 0])
     draw_graph(ax, graph, plane, "Effective motif", influence)
     ax = parent.get_gridspec().figure.add_subplot(grid[0, 1])
-    lesion_path = out_root / "matched_lesion_patient_metrics.csv"
-    if lesion_path.exists():
-        frame = [row for row in rows(lesion_path)
-                 if row["model"] == REPRESENTATIVE_MODEL and row["lesion"] == "connector_nodes"]
-        values = np.asarray([row["specificity_contact_nll"] for row in frame], float)
-        jitter = np.linspace(-0.08, 0.08, len(values))
-        ax.scatter(jitter, values, s=17, color=COLORS[REPRESENTATIVE_MODEL], alpha=0.68)
-        if len(values): ax.plot([-0.16, 0.16], [np.nanmedian(values)] * 2, color="#111111", lw=1.4)
-    ax.axhline(0, color="#8d8d8d", lw=0.7)
-    ax.set_xlim(-0.35, 0.35); ax.set_xticks([0], ["Connector\nlesion"])
-    ax.set_ylabel("Damage beyond\nmatched lesion (Δ NLL)")
+    draw_reach_or_lesion(ax, out_root)
 
 
 def panel_label(fig, subplot_spec, label: str):
@@ -391,7 +444,7 @@ def panel_label(fig, subplot_spec, label: str):
 
 
 def render_stage(out_root: Path, stage: str):
-    size = (11.4, 6.2) if stage == "interictal" else (9.2, 3.2)
+    size = (11.4, 5.5) if stage == "interictal" else (9.2, 3.2)
     fig = plt.figure(figsize=size, layout="constrained", facecolor="white")
     root = fig.add_gridspec(1, 1)[0, 0]
     if stage == "interictal":
@@ -433,7 +486,11 @@ def render_final(out_root: Path):
     draw_rollout_example(outer[0, 1], out_root); panel_label(fig, outer[0, 1], "B")
     draw_interictal_sufficiency(outer[1, 0], out_root); panel_label(fig, outer[1, 0], "C")
     ax_d = fig.add_subplot(outer[1, 1]); draw_pareto(ax_d, out_root); panel_label(fig, outer[1, 1], "D")
-    draw_cross_state(outer[2, 0], out_root, include_stats=True); panel_label(fig, outer[2, 0], "E")
+    draw_cross_state(
+        outer[2, 0], out_root, include_stats=True,
+        model_subset=("M0_NO_REC", "M1_DENSE", "M3_FIXED_LOCAL",
+                      "M6_SPATIAL_MID", "C_ORDER_SHUFFLED"),
+    ); panel_label(fig, outer[2, 0], "E")
     draw_effective_motif(outer[2, 1], out_root); panel_label(fig, outer[2, 1], "F")
     handles, labels = ax_d.get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=min(8, len(labels)), frameon=False,
@@ -453,7 +510,7 @@ def render_final(out_root: Path):
 
 ### topic5_figure6_rnn_connectivity_motifs.png / .pdf / .svg
 
-六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及有效连接 motif 的 matched-lesion 检验。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
+六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及 target-free 有效连接组织。若预先指定的 local/connector lesion 均有足够严格匹配对照，Panel F 展示 matched-lesion 特异损害；否则展示患者级 lag-1/2/3 open-loop effective reach。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
 
 **关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些有效 motif 经干预承担该计算”，不把预测性能直接写成真实连接组恢复。
 
@@ -477,7 +534,7 @@ def render_final(out_root: Path):
 
 ### stage_motif_scientific_readout.png / .pdf
 
-代表患者的局部高影响骨架、少量长程 connector 及 connector matched-lesion 特异损害。
+代表患者的局部高影响骨架与少量长程 connector。右侧只有在两个预先指定 lesion 都达到最低可估计患者数时才展示 matched-lesion 特异损害，否则固定展示全队列患者级 open-loop effective reach。
 
 **关注点**：只有结构富集、任务关系和 matched-lesion 同向时，才把该组织写成更容易支持传播的计算 motif。
 """
