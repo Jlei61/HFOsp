@@ -74,6 +74,7 @@ from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
 from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     audit_figure_sources,
     target_artifact_recheck_ok,
+    target_contract_trace_ok,
 )
 
 
@@ -137,6 +138,24 @@ def test_target_artifact_recheck_payload_is_value_blind(tmp_path):
     assert payload["n_supportive_seizure_files"] == 1
     assert payload["metadata_target_energy_arrays_deserialized"] is False
     assert payload["target_access_audit_existed_before_recheck"] is False
+
+
+def test_target_contract_trace_matches_paper_endpoint():
+    payload = {
+        "status": "PASS",
+        "target_key": "target_1_150",
+        "anchor": "clinical_onset",
+        "post_onset_window_seconds": [0.0, 10.0],
+        "frequency_band_hz": [1.0, 150.0],
+        "primary_field_endpoint": "canonical_full_maxAB",
+        "primary_null": "5000 synchronized all-contact permutations with support rebuilt",
+        "sensitivity_null": "within-shaft permutations",
+        "target_values_read_during_trace": False,
+        "producer_chain": [{}, {}, {}, {}],
+    }
+    assert target_contract_trace_ok(payload)
+    assert not target_contract_trace_ok({**payload, "anchor": "eeg_onset"})
+    assert not target_contract_trace_ok({**payload, "frequency_band_hz": [1.0, 45.0]})
 
 
 def test_primary_shuffle_keeps_first_rank_and_whole_tie_sets():

@@ -80,6 +80,24 @@ def target_artifact_recheck_ok(payload: dict[str, Any]) -> bool:
     )
 
 
+def target_contract_trace_ok(payload: dict[str, Any]) -> bool:
+    """Verify that the external benchmark still matches the paper endpoint."""
+    return bool(
+        payload.get("status") == "PASS"
+        and payload.get("target_key") == "target_1_150"
+        and payload.get("anchor") == "clinical_onset"
+        and payload.get("post_onset_window_seconds") == [0.0, 10.0]
+        and payload.get("frequency_band_hz") == [1.0, 150.0]
+        and payload.get("primary_field_endpoint") == "canonical_full_maxAB"
+        and str(payload.get("primary_null", "")).startswith(
+            "5000 synchronized all-contact permutations"
+        )
+        and payload.get("sensitivity_null") == "within-shaft permutations"
+        and payload.get("target_values_read_during_trace") is False
+        and len(payload.get("producer_chain", [])) == 4
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, required=True)
@@ -91,7 +109,8 @@ def main() -> int:
         "STAGE_CORE_STATUS.json", "STAGE_DOSE_STATUS.json", "STAGE_GRU_STATUS.json",
         "CHECKPOINT_REUSE_AUDIT.json",
         "INTERICTAL_SUMMARY.json", "MODEL_FIELD_MANIFEST.json", "TARGET_UNSEAL_AUTHORIZATION.json",
-        "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json", "target_access_audit.json",
+        "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json", "EARLY_ICTAL_TARGET_CONTRACT_TRACE.json",
+        "target_access_audit.json",
         "EFFECTIVE_INFLUENCE_SUMMARY.json", "EFFECTIVE_MOTIF_SUMMARY.json",
         "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json",
         "MATCHED_LESION_SUMMARY.json", "LESION_EARLY_ICTAL_SUMMARY.json",
@@ -167,6 +186,7 @@ def main() -> int:
     lesion_units = [load(path) for path in lesion_unit_paths]
     unseal = load(out / "TARGET_UNSEAL_AUTHORIZATION.json")
     target_recheck = load(out / "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json")
+    target_contract_trace = load(out / "EARLY_ICTAL_TARGET_CONTRACT_TRACE.json")
     lesion_early = load(out / "LESION_EARLY_ICTAL_SUMMARY.json")
     common_observables = load(out / "COMMON_OBSERVABLES.json")
     figure_source_manifest = load(out / "figures/figure6_source_manifest.json")
@@ -233,6 +253,7 @@ def main() -> int:
         and unseal.get("all_engineering_valid_models_included") is True
         and unseal.get("cohort_mismatch_reported_before_unseal") is True
         and target_artifact_recheck_ok(target_recheck)
+        and target_contract_trace_ok(target_contract_trace)
         and target.get("target_values_read") is True
         and target.get("training_or_model_selection_after_unseal") is False
         and int(target.get("n_primary_subjects", -1)) == int(unseal.get("actual_primary_join_n", -2))
@@ -433,7 +454,8 @@ def main() -> int:
             "early_ictal_unseal_order_and_scoring": {
                 "pass": bool(target_order_ok and lesion_early_ok),
                 "evidence": ["TARGET_UNSEAL_AUTHORIZATION.json",
-                             "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json", "target_access_audit.json",
+                             "PRE_UNSEAL_TARGET_ARTIFACT_RECHECK.json",
+                             "EARLY_ICTAL_TARGET_CONTRACT_TRACE.json", "target_access_audit.json",
                              "early_ictal_model_contrasts.json", "LESION_EARLY_ICTAL_SUMMARY.json",
                              "stage_f_scientific_drift_audit.json"],
                 "observed": {"primary_subjects": target.get("n_primary_subjects"),
@@ -441,6 +463,13 @@ def main() -> int:
                              "frozen_target_artifacts": target_recheck.get("n_artifacts"),
                              "target_artifact_hash_mismatches": target_recheck.get(
                                  "artifact_sha256_mismatches"),
+                             "target_contract": {
+                                 "anchor": target_contract_trace.get("anchor"),
+                                 "window_seconds": target_contract_trace.get(
+                                     "post_onset_window_seconds"),
+                                 "band_hz": target_contract_trace.get("frequency_band_hz"),
+                                 "primary_null": target_contract_trace.get("primary_null"),
+                             },
                              "target_read_after_field_freeze": target.get("target_values_read"),
                              "lesion_readout_matched_primary_subjects": lesion_early.get(
                                  "n_primary_subjects_with_matched_inference")},
