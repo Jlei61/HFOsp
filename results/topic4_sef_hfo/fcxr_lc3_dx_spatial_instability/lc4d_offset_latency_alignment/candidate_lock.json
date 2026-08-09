@@ -1,0 +1,55 @@
+{
+  "status": "L0_PASS",
+  "verdict": "OFFSET_LATENCY_REPAIR_IDENTIFIABLE",
+  "candidate": {
+    "name": "lc4d_offset_latency_alignment",
+    "n": 4.0,
+    "tau_adp_ms": 1000.0,
+    "tau_a_on_ms": 100.0,
+    "tau_a_off_ms": 10000.0,
+    "deadzone": 46.83235549926758,
+    "K": 19.869522094726562,
+    "g_m_max": 734.1686843528613,
+    "matched_ictal_current": 44.8619393917937,
+    "calibration": {
+      "base": {
+        "base": {
+          "interictal_peak_max": 35.99027633666992,
+          "ictal_settled_min": 57.674434661865234,
+          "ictal_settled_median": 66.70187759399414,
+          "extreme_gap": 21.684158325195312,
+          "deadzone_margin_each_side": 10.842079162597656,
+          "interictal_activation_max": 0.0,
+          "interictal_activation_mean": 0.0,
+          "ictal_activation_min": 0.08143489708023391,
+          "ictal_activation_mean": 0.5055224225319433,
+          "ictal_fraction_half_on": 0.5
+        },
+        "entry_anchor_onset_ms": 11000.0,
+        "entry_anchor_pre_events": 29,
+        "closed_high_a_mean_max": 0.2963244915008545,
+        "old_g_m_max": 88.74371816605014,
+        "dose_scale": 1.7059758374055478,
+        "interictal_activation_max": 0.0
+      },
+      "source_onset_ms": 11000.0,
+      "source_offset_ms": 66000.0,
+      "align_after_onset_ms": 4000.0,
+      "align_time_ms": 15000.0,
+      "a_mean_at_align": 0.06110576540231705,
+      "prior_g_m_max": 151.3946389128093,
+      "dose_scale": 4.849370424376,
+      "interictal_activation_max": 0.0,
+      "prefix_current_max": 0.0
+    },
+    "theta_h_lc2": 1.7317735254764568
+  },
+  "sources": {
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4c_entry_offset_alignment/candidate_lock.json": "9e560ff415bf9c4d951e5cd8001a681bc9ee872f6d4eaf7110639e48d3e6d6e2",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4c_entry_offset_alignment/entry_gate.json": "186eca44cb72d8a95046828bc6ec737ebeca37b3bb883e222b0e057bd55e2da6",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4c_entry_offset_alignment/nominal_lifecycle.json": "e31b2d19430ce40e277b8ca7bc7a8972a8dc7b7f605587ed74d8fc407566908d",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4c_entry_offset_alignment/nominal_lifecycle_traces.npz": "22534ed100743b356873e5e0b3f727a95a94bc24d50c8016292933f8b587a3db",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/percell_separation/per_cell.npz": "81d2c97a16eaf69753951dcd91f55153c7102d5d7ca4c0f75e12f9b24208a33d"
+  },
+  "rule": "g_m_max = I_target / a_mean at exactly onset+4000 ms; no sweep or safety factor"
+}
