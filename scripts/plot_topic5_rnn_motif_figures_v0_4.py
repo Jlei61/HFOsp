@@ -256,7 +256,11 @@ def draw_stage_interictal(parent, out_root: Path):
     subjects = sorted({row["subject"] for row in rnn if row["model"] == "M0_NO_REC"})
     models = [model for model in MODEL_ORDER
               if all((subject, model) in lookup for subject in subjects)]
-    grid = parent.subgridspec(2, 3, hspace=0.34, wspace=0.42)
+    # Repeating the same long, rotated model labels on the upper row makes
+    # constrained_layout reserve a large empty band between rows.  The lower
+    # row carries the complete model labels, while the upper row shows only
+    # the measurements.
+    grid = parent.subgridspec(2, 3, hspace=0.16, wspace=0.42)
     figure = parent.get_gridspec().figure
     axes = [figure.add_subplot(grid[row, col]) for row in range(2) for col in range(3)]
 
@@ -295,6 +299,8 @@ def draw_stage_interictal(parent, out_root: Path):
         for model in shared_models
     }
     strip(axes[5], architecture, "GRU − leaky RNN\nrollout correlation", zero=True)
+    for axis in axes[:3]:
+        axis.tick_params(axis="x", bottom=False, labelbottom=False)
     for label, axis in zip("abcdef", axes):
         axis.text(-0.18, 1.04, label, transform=axis.transAxes, fontsize=11,
                   fontweight="bold", ha="right", va="bottom")
