@@ -46,6 +46,7 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     permutation_indices,
     permutation_support,
     paired_summary,
+    target_artifact_recheck_payload,
 )
 from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
 from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
@@ -116,6 +117,26 @@ def test_target_artifact_recheck_is_required_before_unseal():
     assert target_artifact_recheck_ok(payload)
     assert not target_artifact_recheck_ok({**payload, "artifact_sha256_mismatches": 1})
     assert not target_artifact_recheck_ok({**payload, "target_access_audit_existed_before_recheck": True})
+
+
+def test_target_artifact_recheck_payload_is_value_blind(tmp_path):
+    metadata = {
+        "actual_primary_join": ["p1", "p2"],
+        "supportive_subject": "s1",
+        "target_values_read": False,
+        "target_energy_arrays_deserialized": False,
+    }
+    artifacts = {
+        "p1": [tmp_path / "a.npz", tmp_path / "b.npz"],
+        "p2": [tmp_path / "c.npz"],
+        "s1": [tmp_path / "d.npz"],
+    }
+    payload = target_artifact_recheck_payload(tmp_path, metadata, artifacts)
+    assert payload["n_artifacts"] == 4
+    assert payload["n_primary_seizure_files"] == 3
+    assert payload["n_supportive_seizure_files"] == 1
+    assert payload["metadata_target_energy_arrays_deserialized"] is False
+    assert payload["target_access_audit_existed_before_recheck"] is False
 
 
 def test_primary_shuffle_keeps_first_rank_and_whole_tie_sets():
