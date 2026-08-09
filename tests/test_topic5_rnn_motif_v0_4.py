@@ -36,6 +36,9 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
 )
 from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
 from summarize_topic5_rnn_motif_theory_v0_4 import pairwise_seed_stability  # noqa: E402
+from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
+    edge_descriptor_matches,
+)
 
 
 def _static_model(n_contacts: int = 6) -> WEModel:
@@ -242,6 +245,25 @@ def test_effective_operator_seed_stability_keeps_inactive_edges(tmp_path):
     path = tmp_path / "seed2.npz"
     np.savez_compressed(path, edge_effective_influence=third)
     assert pairwise_seed_stability([paths[0], path]) < 1.0
+
+
+def test_matched_edge_lesion_does_not_collapse_in_and_out_degree():
+    target = {
+        "total_weight": 10.0, "mean_length": 5.0,
+        "mean_in_degree": 1.0, "mean_out_degree": 4.0, "extent": 20.0,
+    }
+    valid = {
+        "total_weight": 10.5, "mean_length": 4.8,
+        "mean_in_degree": 1.5, "mean_out_degree": 3.5, "extent": 19.0,
+    }
+    # The total degree is identical to the target, but its direction is
+    # reversed.  The pre-fix matcher accepted this invalid control.
+    direction_swapped = {
+        "total_weight": 10.0, "mean_length": 5.0,
+        "mean_in_degree": 4.0, "mean_out_degree": 1.0, "extent": 20.0,
+    }
+    assert edge_descriptor_matches(valid, target)
+    assert not edge_descriptor_matches(direction_swapped, target)
 
 
 def test_patient_field_aggregation_keeps_seed_rows_distinct_from_pair_correlations(tmp_path):
