@@ -42,10 +42,12 @@ def patient_fields(records: list[dict[str, Any]]) -> dict[tuple[str, str, str], 
     output: dict[tuple[str, str, str], dict[str, Any]] = {}
     for key, values in grouped.items():
         resolved: dict[str, Any] = {}
+        resolved_status: dict[str, dict[str, bool]] = {}
         for condition in ("baseline", "targeted"):
             candidates = {}
             contacts = {}
             producers = {}
+            matched_available = {}
             for record, payload in values:
                 for template, field in payload[f"{condition}_fields"].items():
                     template = str(template).upper()
@@ -54,6 +56,7 @@ def patient_fields(records: list[dict[str, Any]]) -> dict[tuple[str, str, str], 
                         candidates[template] = np.asarray(field, float)
                         contacts[template] = [str(value) for value in payload["field_contacts"]]
                         producers[template] = record["fit_id"]
+                        matched_available[template] = payload.get("status") == "inference_available"
             if set(candidates) != {"A", "B"}:
                 continue
             if contacts["A"] != contacts["B"]:
@@ -62,7 +65,12 @@ def patient_fields(records: list[dict[str, Any]]) -> dict[tuple[str, str, str], 
                 "A": candidates["A"], "B": candidates["B"],
                 "contacts": contacts["A"], "producers": producers,
             }
+            resolved_status[condition] = matched_available
         if set(resolved) == {"baseline", "targeted"}:
+            resolved["matched_inference_available"] = all(
+                resolved_status[condition].get(template, False)
+                for condition in ("baseline", "targeted") for template in ("A", "B")
+            )
             output[key] = resolved
     return output
 
@@ -104,8 +112,11 @@ def main() -> int:
         shafts = [str(value) for value in field_record["shafts"]]
         aligned = {}
         for key, conditions in subject_fields.items():
-            aligned[key] = {}
-            for condition, value in conditions.items():
+            aligned[key] = {
+                "matched_inference_available": conditions["matched_inference_available"]
+            }
+            for condition in ("baseline", "targeted"):
+                value = conditions[condition]
                 lookup_a = dict(zip(value["contacts"], value["A"]))
                 lookup_b = dict(zip(value["contacts"], value["B"]))
                 aligned[key][condition] = (
@@ -114,7 +125,8 @@ def main() -> int:
                 )
         common_finite = np.ones(len(order), bool)
         for conditions in aligned.values():
-            for a, b in conditions.values():
+            for condition in ("baseline", "targeted"):
+                a, b = conditions[condition]
                 common_finite &= np.isfinite(a) & np.isfinite(b)
         for target_path in target_files_by_subject[subject]:
             with np.load(target_path, allow_pickle=False) as data:
@@ -133,7 +145,8 @@ def main() -> int:
             )
             for (_, model, lesion), conditions in aligned.items():
                 scored = {}
-                for condition, (a, b) in conditions.items():
+                for condition in ("baseline", "targeted"):
+                    a, b = conditions[condition]
                     maxab = score_one(build_scorer(record, a, b, finite), target, permutations)
                     common = 0.5 * (a + b)
                     common_score = score_one(
@@ -146,6 +159,7 @@ def main() -> int:
                     "subject": subject, "primary": subject in primary,
                     "supportive": subject == supportive, "seizure_id": seizure,
                     "model": model, "cell": "rnn", "lesion": lesion,
+                    "matched_inference_available": conditions["matched_inference_available"],
                     "n_contacts": int(len(eligible)),
                     "intact_maxab": intact["observed"], "lesioned_maxab": lesioned["observed"],
                     "intact_margin": intact["margin"], "lesioned_margin": lesioned["margin"],
@@ -164,6 +178,9 @@ def main() -> int:
         patient_rows.append({
             "subject": subject, "primary": subject in primary, "supportive": subject == supportive,
             "model": model, "cell": "rnn", "lesion": lesion, "n_seizures": len(selected),
+            "matched_inference_available": all(
+                row["matched_inference_available"] for row in selected
+            ),
             **{metric: float(np.nanmedian([row[metric] for row in selected]))
                for metric in ("intact_maxab", "lesioned_maxab", "intact_margin", "lesioned_margin",
                               "damage_maxab", "damage_margin", "intact_common", "lesioned_common",
@@ -173,7 +190,7 @@ def main() -> int:
     statistics = {}
     for model, lesion in sorted({(row["model"], row["lesion"]) for row in patient_rows}):
         selected = [row for row in patient_rows if row["primary"] and row["model"] == model
-                    and row["lesion"] == lesion]
+                    and row["lesion"] == lesion and row["matched_inference_available"]]
         for metric in ("damage_maxab", "damage_margin", "damage_common"):
             statistics[f"{model}|{lesion}|{metric}"] = paired_summary(
                 [row[metric] for row in selected],
@@ -185,6 +202,14 @@ def main() -> int:
         "target_selection_used_for_lesions": False,
         "fields_generated_from_all_heldout_interictal_events": True,
         "n_primary_subjects": len({row["subject"] for row in patient_rows if row["primary"]}),
+        "n_primary_subjects_with_matched_inference": len({
+            row["subject"] for row in patient_rows
+            if row["primary"] and row["matched_inference_available"]
+        }),
+        "inference_rule": (
+            "all targeted lesion fields are retained descriptively; cohort statistics use only "
+            "patient/model/lesion rows whose A and B producers each had at least 200 matched controls"
+        ),
         "statistics": statistics,
     }, indent=2))
     print(json.dumps({"status": "COMPLETE", "n_rows": len(rows),
