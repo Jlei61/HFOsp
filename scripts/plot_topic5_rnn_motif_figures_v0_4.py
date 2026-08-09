@@ -42,8 +42,8 @@ MODEL_ORDER = [
 MODEL_LABEL = {
     "M0_NO_REC": "No rec.", "M1_DENSE": "Dense", "M2_UNIFORM_SET": "Sparse",
     "M3_FIXED_LOCAL": "Local", "M4_SPATIAL_GROWTH": "Spatial",
-    "M6_SPATIAL_MID": "Spatial\n+ cost", "M8_UNIFORM_COST_MID": "Uniform\n+ cost",
-    "C_ORDER_SHUFFLED": "Order\nshuffled",
+    "M6_SPATIAL_MID": "Sp.+cost", "M8_UNIFORM_COST_MID": "Unif.+cost",
+    "C_ORDER_SHUFFLED": "Shuffle",
 }
 COLORS = {
     "M0_NO_REC": "#9b9b9b", "M1_DENSE": "#252525", "M2_UNIFORM_SET": "#7f7f7f",
@@ -222,7 +222,11 @@ def strip(ax, data: dict[str, np.ndarray], ylabel: str, zero: bool = False):
         ax.scatter(x + jitter, values, s=12, alpha=0.6, color=COLORS[model], linewidths=0)
         if len(values): ax.plot([x - 0.22, x + 0.22], [np.median(values)] * 2, color="#111111", lw=1.25)
     if zero: ax.axhline(0, color="#8d8d8d", lw=0.7)
-    ax.set_xticks(range(len(models)), [MODEL_LABEL[model] for model in models], rotation=35, ha="right")
+    ax.set_xticks(
+        range(len(models)), [MODEL_LABEL[model] for model in models],
+        rotation=45, ha="right", rotation_mode="anchor",
+    )
+    ax.tick_params(axis="x", labelsize=7.2, pad=2)
     ax.set_ylabel(ylabel)
     return models
 
@@ -372,7 +376,11 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
                     [np.nanmedian(values)] * 2, color="#111111", lw=1.15,
                 )
         stat_ax.axhline(0, color="#8d8d8d", lw=0.7)
-        stat_ax.set_xticks(range(len(models)), [MODEL_LABEL[model] for model in models])
+        stat_ax.set_xticks(
+            range(len(models)), [MODEL_LABEL[model] for model in models],
+            rotation=45, ha="right", rotation_mode="anchor",
+        )
+        stat_ax.tick_params(axis="x", labelsize=7.2, pad=2)
         stat_ax.set_ylabel("Early-ictal\nnull-relative margin")
         stat_ax.legend(
             handles=[
