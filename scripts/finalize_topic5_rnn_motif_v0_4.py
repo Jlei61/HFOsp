@@ -111,6 +111,27 @@ def integrated_level4(
     )
 
 
+def preflight_inventory_ok(payload: dict[str, Any], out_root: Path) -> bool:
+    """Validate the transparent plan-named index against immutable sources."""
+    expected = {
+        "input_manifest": out_root / "INPUT_MANIFEST.json",
+        "preflight_audit": out_root / "PRE_FLIGHT_AUDIT.json",
+        "early_ictal_metadata_inventory": out_root / "EARLY_ICTAL_METADATA_INVENTORY.json",
+    }
+    sources = payload.get("source_artifacts", {})
+    return bool(
+        payload.get("contract")
+        == "topic5_rnn_motif_preflight_inventory_compatibility_v0_4"
+        and payload.get("target_values_read_by_source_preflight") is False
+        and payload.get("target_values_deserialized_by_this_exporter") is False
+        and all(
+            path.is_file()
+            and sources.get(key, {}).get("sha256") == sha256(path)
+            for key, path in expected.items()
+        )
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, required=True)
@@ -221,11 +242,20 @@ def main() -> int:
     )
 
     preflight = load(out / "PRE_FLIGHT_AUDIT.json")
+    preflight_inventory = load(out / "PREFLIGHT_INVENTORY.json")
     run_contract = load(out / "RUN_CONTRACT.json")
     postprocess_contract = load(out / "POSTPROCESS_CONTRACT.json")
     convergence = load(out / "CONVERGENCE_AUDIT.json")
     reuse_audit = load(out / "CHECKPOINT_REUSE_AUDIT.json")
     field_manifest = load(out / "MODEL_FIELD_MANIFEST.json")
+    rollout_contract_path = out / "contracts/ROLLOUT_DECODER_CONTRACT.json"
+    fit_aggregation_path = out / "contracts/FIT_TO_PATIENT_AGGREGATION_CONTRACT.json"
+    primary_theory_path = out / "contracts/PRIMARY_THEORY_SET.json"
+    motif_definition_path = out / "contracts/MOTIF_DEFINITION.json"
+    rollout_contract = load(rollout_contract_path)
+    fit_aggregation = load(fit_aggregation_path)
+    primary_theory = load(primary_theory_path)
+    motif_definition = load(motif_definition_path)
     influence_summary = load(out / "EFFECTIVE_INFLUENCE_SUMMARY.json")
     motif_implementation = load(out / "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json")
     lesion_raw = load(out / "MATCHED_LESION_SUMMARY.json")
@@ -239,6 +269,21 @@ def main() -> int:
     figure_source_manifest = load(out / "figures/figure6_source_manifest.json")
     figure_sources_ok, figure_source_errors = audit_figure_sources(figure_source_manifest)
 
+    named_contracts_ok = bool(
+        rollout_contract.get("cardinality")
+        == "argmax(size_head)+1; never observed future set size"
+        and fit_aggregation.get("Q2_field")
+        == "own_a->F_A and own_b->F_B retained separately; maxAB before patient median"
+        and primary_theory.get("target_blind_models") == [
+            "M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL",
+            "M4_SPATIAL_GROWTH", "M6_SPATIAL_MID",
+            "M8_UNIFORM_COST_MID", "C_ORDER_SHUFFLED",
+        ]
+        and motif_definition.get("target_values_read_before_freeze") is False
+        and field_manifest.get("fit_to_patient_contract_sha256")
+        == sha256(fit_aggregation_path)
+        and unseal.get("motif_definition_sha256") == sha256(motif_definition_path)
+    )
     execution_contract_ok = bool(
         preflight.get("status") == "PASS"
         and preflight.get("target_values_read") is False
@@ -249,6 +294,8 @@ def main() -> int:
         and run_contract.get("geometry_status") == preflight.get("geometry_status")
         and run_contract.get("target_values_read_at_contract_freeze") is False
         and bool(postprocess_contract.get("git_commit"))
+        and preflight_inventory_ok(preflight_inventory, out)
+        and named_contracts_ok
     )
     convergence_ok = bool(
         int(convergence.get("n_units", -1)) == 1426
@@ -453,6 +500,10 @@ def main() -> int:
                     "fits": preflight.get("n_fits"),
                     "geometry_status": preflight.get("geometry_status"),
                     "target_values_read": preflight.get("target_values_read"),
+                    "plan_named_preflight_inventory_verified": preflight_inventory_ok(
+                        preflight_inventory, out
+                    ),
+                    "named_contracts_verified": named_contracts_ok,
                 },
             },
             "stagewise_scientific_alignment": {
