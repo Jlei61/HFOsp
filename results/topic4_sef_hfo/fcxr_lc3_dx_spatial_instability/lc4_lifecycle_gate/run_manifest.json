@@ -1,0 +1,39 @@
+{
+  "experiment": "FCXR-LC4 functional selectivity and lifecycle",
+  "status": "F0_COMPLETE_STOPPED",
+  "verdict": "NO_BASELINE_PRESERVING_HILL_CANDIDATE",
+  "design": "docs/superpowers/specs/2026-08-09-topic4-fcxr-lc4-functional-selectivity-design.md",
+  "plan": "docs/superpowers/plans/2026-08-09-topic4-fcxr-lc4-functional-selectivity.md",
+  "execution_head": "ede74507bbc01c7d6824ab0e29c7e2f79ca30d58",
+  "stages": {
+    "F0_paired_functional_baseline": "complete_no_candidate",
+    "F1_frozen_D_onset_surface": "not_authorised",
+    "F2_continuous_lifecycle": "not_authorised"
+  },
+  "runs": [
+    "runs/baseline_control.json",
+    "runs/baseline_n6.json",
+    "runs/baseline_n8.json"
+  ],
+  "primary_verdict": "baseline_verdict.json",
+  "figure": "figures/lc4_functional_baseline_gate.png",
+  "source_sha256": {
+    "src/snn_engine/mz_slow_vars.py": "0ba3f70d2a11eae3daa11bd290393b40a1df150acbd4f89e0c708534ac2e41bf",
+    "src/topic4_fcxr_lc4_gate.py": "40258d6dcbb311a74a1eaa7edc3da9c46210d97155ddf4110474fa95304fd6fb",
+    "src/topic4_fcxr_lc4_lifecycle.py": "a376a04b0df8103b776b027de0941fc54c91d619fe8cf375bdc246d328a74f1c",
+    "scripts/run_topic4_fcxr_lc4_gate.py": "37c57e4b687177b12fbf027027492b80de0a1c0f600f9461e5e08b1eefd62b7a",
+    "scripts/run_topic4_fcxr_lc4_gate_autopilot.sh": "efe0c3576cefb49865e1285c7a25e0b1841c0dc8427d742cf6378e91ef58515f",
+    "scripts/run_topic4_fcxr_lc4_lifecycle.py": "8e21102e5a9d7eed11c9d1eb407a696da88228eaed712150be89dcc5053220e1",
+    "scripts/run_topic4_fcxr_lc4_lifecycle_autopilot.sh": "417faef807122a587da0611d74202c9b602912e57f038e38b430e8c05e032828"
+  },
+  "blessed_engine_hashes_match": true,
+  "tests": "363 passed in 33.51 s",
+  "resources": {
+    "worker_policy": "one 40k worker",
+    "peak_self_rss_gib": 12.983505249023438,
+    "minimum_logged_mem_available_gib": 191.35490036010742,
+    "swap_delta_mib": 0.0,
+    "residual_task_processes": 0
+  },
+  "completed": "2026-08-09T17:17:49+08:00"
+}

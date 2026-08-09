@@ -1,0 +1,13 @@
+{
+  "figure": "lc4_functional_baseline_gate",
+  "kind": "F0 diagnostic; not a lifecycle or paper-claim figure",
+  "verdict": "NO_BASELINE_PRESERVING_HILL_CANDIDATE",
+  "panels": {
+    "A": "100 ms-smoothed paired E-population rates; grey region is excluded burn-in",
+    "B": "candidate/control functional ratios and metric-specific locked bands",
+    "C": "executed maximum outward-current fraction and the locked leakage ceiling",
+    "D": "all eight F0 clauses; F1/F2 explicitly not run"
+  },
+  "claim_boundary": "Both candidates were numerically safe and below the leakage ceiling.  n=6 failed event rate and IEI-CV; n=8 failed event rate.  F1/F2 were gate-blocked, so this artifact contains no onset-surface or lifecycle evidence.",
+  "source": "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4_lifecycle_gate"
+}

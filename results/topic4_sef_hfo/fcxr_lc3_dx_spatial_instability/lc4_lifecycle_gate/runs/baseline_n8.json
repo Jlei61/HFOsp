@@ -1,0 +1,71 @@
+{
+  "status": "COMPLETE",
+  "tag": "baseline_n8",
+  "role": "baseline_candidate",
+  "d_label": "D_healthy",
+  "mean_D": 0.0,
+  "run_ms": 12000.0,
+  "connection_seed": 1,
+  "noise_seed": 401,
+  "candidate": {
+    "name": "hill_n8_slow",
+    "n": 8.0,
+    "K": 45.56005751798107,
+    "tau_adp_ms": 1000.0,
+    "tau_a_on_ms": 100.0,
+    "tau_a_off_ms": 10000.0,
+    "g_m_max": 46.97609717148232,
+    "ictal_activation": 0.9549950313673128,
+    "predicted_interictal_activation": 0.0001475747046729844,
+    "matched_ictal_current": 44.8619393917937
+  },
+  "no_kick": true,
+  "no_reset": true,
+  "no_parameter_step": true,
+  "lifecycle": {
+    "label": "INTERICTAL_BASELINE",
+    "regimes": [
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL"
+    ],
+    "bout": null,
+    "reasons": [
+      "interictal-dominant (isolated bursts tolerated)"
+    ]
+  },
+  "departed": false,
+  "numerical": {
+    "finite": true,
+    "tau_eff_min_ms": 0.27376517210463563,
+    "clip_frac_max": 0.0,
+    "numerical_unsafe": false
+  },
+  "summary": {
+    "n_returning": 11,
+    "event_rate_hz": 1.1,
+    "iei_cv": 0.5559526377770474,
+    "median_duration_ms": 11.0,
+    "median_participation": 0.04684375,
+    "window_ms": [
+      2000.0,
+      12000.0
+    ]
+  },
+  "adap_current_max": 0.0024258589980900615,
+  "adap_current_fraction": 8.893905929482265e-06,
+  "max_rate_hz": 96.24999999999999,
+  "mean_rate_hz": 3.3427213541666667,
+  "wall_s": 1763.1017289161682,
+  "peak_rss_gib": 12.983505249023438,
+  "finished": "2026-08-09T09:12:29.592401+00:00"
+}

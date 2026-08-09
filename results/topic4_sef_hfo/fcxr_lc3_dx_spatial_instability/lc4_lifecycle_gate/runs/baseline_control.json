@@ -1,0 +1,60 @@
+{
+  "status": "COMPLETE",
+  "tag": "baseline_control",
+  "role": "baseline_control",
+  "d_label": "D_healthy",
+  "mean_D": 0.0,
+  "run_ms": 12000.0,
+  "connection_seed": 1,
+  "noise_seed": 401,
+  "candidate": null,
+  "no_kick": true,
+  "no_reset": true,
+  "no_parameter_step": true,
+  "lifecycle": {
+    "label": "INTERICTAL_BASELINE",
+    "regimes": [
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL",
+      "INTERICTAL"
+    ],
+    "bout": null,
+    "reasons": [
+      "interictal-dominant (isolated bursts tolerated)"
+    ]
+  },
+  "departed": false,
+  "numerical": {
+    "finite": true,
+    "tau_eff_min_ms": 0.2739009394326503,
+    "clip_frac_max": 0.0,
+    "numerical_unsafe": false
+  },
+  "summary": {
+    "n_returning": 8,
+    "event_rate_hz": 0.8,
+    "iei_cv": 0.6053001895076976,
+    "median_duration_ms": 9.0,
+    "median_participation": 0.045437500000000006,
+    "window_ms": [
+      2000.0,
+      12000.0
+    ]
+  },
+  "adap_current_max": 0.0,
+  "adap_current_fraction": 0.0,
+  "max_rate_hz": 66.87499999999999,
+  "mean_rate_hz": 3.9092786458333335,
+  "wall_s": 1438.5391063690186,
+  "peak_rss_gib": 12.967952728271484,
+  "finished": "2026-08-09T08:09:57.192504+00:00"
+}
