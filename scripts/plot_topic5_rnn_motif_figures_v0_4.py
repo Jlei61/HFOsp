@@ -154,7 +154,7 @@ def draw_graph(ax, graph: dict[str, np.ndarray], plane: dict[str, np.ndarray], t
 def draw_motif_ladder(parent, out_root: Path):
     grid = parent.subgridspec(1, 4, wspace=0.04)
     for index, model in enumerate(("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")):
-        ax = parent.figure.add_subplot(grid[0, index])
+        ax = parent.get_gridspec().figure.add_subplot(grid[0, index])
         _, graph, plane = graph_data(out_root, REPRESENTATIVE, model)
         draw_graph(ax, graph, plane, MODEL_LABEL[model])
 
@@ -203,7 +203,7 @@ def draw_rollout_example(parent, out_root: Path):
     cmap = plt.get_cmap("viridis").copy(); cmap.set_bad("#d9d9d9")
     for row, template in enumerate(("A", "B")):
         for col, matrix in enumerate(matrices[template]):
-            ax = parent.figure.add_subplot(grid[row, col])
+            ax = parent.get_gridspec().figure.add_subplot(grid[row, col])
             ax.imshow(matrix, aspect="auto", interpolation="nearest", cmap=cmap, vmin=0, vmax=1)
             if row == 0: ax.set_title(("Observed", "Generated")[col], fontsize=8.5, pad=2)
             if col == 0: ax.set_ylabel(f"T{template}\ncontacts", fontsize=8)
@@ -237,7 +237,8 @@ def draw_interictal_sufficiency(parent, out_root: Path):
     rollout = {model: [lookup[(subject, model)]["rollout_spearman"] for subject in subjects]
                for model in models}
     grid = parent.subgridspec(1, 2, wspace=0.48)
-    ax1 = parent.figure.add_subplot(grid[0, 0]); ax2 = parent.figure.add_subplot(grid[0, 1])
+    figure = parent.get_gridspec().figure
+    ax1 = figure.add_subplot(grid[0, 0]); ax2 = figure.add_subplot(grid[0, 1])
     strip(ax1, gain, "Recurrence gain\n(Δ NLL)", zero=True)
     strip(ax2, rollout, "Free-rollout\nrank correlation", zero=True)
 
@@ -251,7 +252,8 @@ def draw_stage_interictal(parent, out_root: Path):
     models = [model for model in MODEL_ORDER
               if all((subject, model) in lookup for subject in subjects)]
     grid = parent.subgridspec(2, 3, hspace=0.58, wspace=0.42)
-    axes = [parent.figure.add_subplot(grid[row, col]) for row in range(2) for col in range(3)]
+    figure = parent.get_gridspec().figure
+    axes = [figure.add_subplot(grid[row, col]) for row in range(2) for col in range(3)]
 
     for axis, metric, label in (
         (axes[0], "contact_nll", "Next-contact gain\n(M0 NLL − model NLL)"),
@@ -333,16 +335,16 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True):
                               height_ratios=[1.0, 0.72] if include_stats else [1.0],
                               hspace=0.42, wspace=0.13)
     for col, (payload, title) in enumerate(((pa, "Model TA"), (pb, "Model TB"))):
-        ax = parent.figure.add_subplot(grid[0, col])
+        ax = parent.get_gridspec().figure.add_subplot(grid[0, col])
         draw_topic5_field_panel(ax, payload, payload["vals"], title, "", compact=True,
                                 labels=False, cbar=False, contact_size=20, contact_outline_lw=0.55)
-    ax = parent.figure.add_subplot(grid[0, 2])
+    ax = parent.get_gridspec().figure.add_subplot(grid[0, 2])
     _draw_field(ax, fz, _normalize_minmax(activation), np.asarray(fz["support_a"], float),
                 cmap="magma_r", colorbar_values=activation, title="Early ictal",
                 title_color="#111111", show_y=False)
     ax.set_xlabel(""); ax.set_ylabel(""); ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
     if include_stats:
-        stat_ax = parent.figure.add_subplot(grid[1, :])
+        stat_ax = parent.get_gridspec().figure.add_subplot(grid[1, :])
         frame = [row for row in rows(out_root / "early_ictal_per_patient_model.csv")
                  if row["primary"] in (True, "True", "1", 1.0) and row["cell"] == "rnn"]
         data = {}
@@ -366,9 +368,9 @@ def draw_effective_motif(parent, out_root: Path):
     fit_id = json.loads(metrics.read_text())["fit_id"]
     plane = dict(np.load(out_root / "cache" / fit_id / "plane.npz"))
     grid = parent.subgridspec(1, 2, wspace=0.30)
-    ax = parent.figure.add_subplot(grid[0, 0])
+    ax = parent.get_gridspec().figure.add_subplot(grid[0, 0])
     draw_graph(ax, graph, plane, "Effective motif", influence)
-    ax = parent.figure.add_subplot(grid[0, 1])
+    ax = parent.get_gridspec().figure.add_subplot(grid[0, 1])
     lesion_path = out_root / "matched_lesion_patient_metrics.csv"
     if lesion_path.exists():
         frame = [row for row in rows(lesion_path)
