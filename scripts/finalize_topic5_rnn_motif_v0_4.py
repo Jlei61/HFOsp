@@ -357,6 +357,7 @@ def main() -> int:
         and lesion_early.get("target_selection_used_for_lesions") is False
         and lesion_early.get("fields_generated_from_all_heldout_interictal_events") is True
         and "at least 200 matched controls" in lesion_early.get("inference_rule", "")
+        and "at least 5 unique primary patients" in lesion_early.get("inference_rule", "")
     )
     common_observables_ok = bool(
         common_observables.get("contract") == "topic5_human_rnn_snn_common_observables_v0_4"
