@@ -670,6 +670,12 @@ early-ictal 解封前生成的完整模型场诊断图，展示代表患者两�
     representative_metrics = selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
     representative_fit = json.loads(representative_metrics.read_text())["fit_id"]
     representative_plane = out_root / "cache" / representative_fit / "plane.npz"
+    representative_events = out_root / "cache" / representative_fit / "events.npz"
+    representative_provenance = out_root / "cache" / representative_fit / "provenance.json"
+    input_manifest = json.loads((out_root / "INPUT_MANIFEST.json").read_text())
+    representative_empirical = (
+        Path(input_manifest["input_roots"]["field"]) / f"{REPRESENTATIVE}.json"
+    )
     representative_influence = (
         out_root / "effective_influence" / representative_metrics.parents[2].name
         / representative_metrics.parents[1].name / representative_metrics.parent.name
@@ -677,21 +683,27 @@ early-ictal 解封前生成的完整模型场诊断图，展示代表患者两�
     )
     representative_targets = locked_early_target_paths(out_root, REPRESENTATIVE)
     sources = {
-        "A": [selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz"
-              for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")]
-             + [representative_plane],
+        "A": [item for model in (
+                  "M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"
+              ) for item in (
+                  selected_metrics(out_root, REPRESENTATIVE, model),
+                  selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz",
+              )] + [representative_plane],
         "B": [selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL).parent
-              / "heldout_rollouts.json.gz", out_root / "cache" / representative_fit / "events.npz"],
+              / "heldout_rollouts.json.gz", representative_metrics,
+              representative_events, representative_provenance, representative_empirical],
         "C": [out_root / "interictal_per_patient.csv", out_root / "interictal_per_event.csv"],
         "D": [out_root / "accuracy_wiring_pareto.csv", out_root / "model_field_patient_metrics.csv"],
         "E": [out_root / "early_ictal_per_patient_model.csv",
               out_root / "early_ictal_null_matrices.npz",
               out_root / "MODEL_FIELD_MANIFEST.json",
               out_root / "model_fields/per_patient" / REPRESENTATIVE
-              / f"{REPRESENTATIVE_MODEL}__rnn.npz"] + representative_targets,
+              / f"{REPRESENTATIVE_MODEL}__rnn.npz", representative_empirical]
+             + representative_targets,
         "F": [out_root / "effective_influence_fit_seed.csv",
               out_root / "matched_lesion_patient_metrics.csv",
-              representative_metrics.parent / "graph.npz", representative_plane,
+              representative_metrics, representative_metrics.parent / "graph.npz",
+              representative_plane,
               representative_influence],
     }
     panel_sources = {
