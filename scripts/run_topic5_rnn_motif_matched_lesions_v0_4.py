@@ -409,6 +409,29 @@ def complete_patient_fit_set(
     )
 
 
+def lesion_cohort_summary(values: np.ndarray, minimum_patients: int = 5) -> dict[str, Any]:
+    """Keep small matched-lesion denominators descriptive only."""
+    values = np.asarray(values, float)
+    values = values[np.isfinite(values)]
+    eligible = len(values) >= int(minimum_patients)
+    nonzero = values[np.abs(values) > 1e-9]
+    return {
+        "n": int(len(values)),
+        "minimum_patients_for_cohort_inference": int(minimum_patients),
+        "cohort_inference_eligible": bool(eligible),
+        "median_specificity_contact_nll": (
+            float(np.median(values)) if len(values) else None
+        ),
+        "positive": int((values > 1e-9).sum()),
+        "negative": int((values < -1e-9).sum()),
+        "tied": int((np.abs(values) <= 1e-9).sum()),
+        "wilcoxon_p": (
+            float(wilcoxon(nonzero, method="auto").pvalue)
+            if eligible and len(nonzero) else (1.0 if eligible else None)
+        ),
+    }
+
+
 def aggregate(out_root: Path) -> None:
     records = [json.loads(path.read_text()) for path in sorted((out_root / "matched_lesions").glob("**/LESION_DONE.json"))]
     expected_fit_ids: dict[tuple[str, str, str], set[str]] = {}
@@ -461,12 +484,7 @@ def aggregate(out_root: Path) -> None:
         values = values[np.isfinite(values)]
         if len(values) == 0:
             continue
-        nonzero = values[np.abs(values) > 1e-9]
-        statistics[f"{model}|{lesion}"] = {
-            "n": len(values), "median_specificity_contact_nll": float(np.median(values)),
-            "positive": int((values > 1e-9).sum()),
-            "wilcoxon_p": float(wilcoxon(nonzero, method="auto").pvalue) if len(nonzero) else 1.0,
-        }
+        statistics[f"{model}|{lesion}"] = lesion_cohort_summary(values)
     (out_root / "MATCHED_LESION_SUMMARY.json").write_text(json.dumps({
         "contract": "topic5_rnn_motif_matched_lesion_summary_v0_4", "target_values_read": False,
         "n_selected_fit_model_units": len(records), "statistics": statistics,

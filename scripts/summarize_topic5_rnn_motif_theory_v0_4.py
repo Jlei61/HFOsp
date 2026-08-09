@@ -262,8 +262,12 @@ def main() -> int:
         for lag in (1, 2, 3)
     }
 
-    def positive_significant(value: dict[str, Any] | None, estimate: str = "median") -> bool:
-        return bool(value and (value.get(estimate) or 0) > 0
+    def positive_significant(value: dict[str, Any] | None, estimate: str = "median",
+                             require_lesion_eligibility: bool = False) -> bool:
+        return bool(value
+                    and (not require_lesion_eligibility
+                         or value.get("cohort_inference_eligible") is True)
+                    and (value.get(estimate) or 0) > 0
                     and (value.get("wilcoxon_p") or 1) < 0.05)
 
     local_lesion = lesion_stats.get("M6_SPATIAL_MID|local_backbone_edges")
@@ -285,11 +289,11 @@ def main() -> int:
         "effective_operator_split_half_stability": positive_significant(split_stability),
         "task_relation": task_relation,
         "local_backbone_matched_lesion": positive_significant(
-            local_lesion, "median_specificity_contact_nll"
+            local_lesion, "median_specificity_contact_nll", True
         ),
         "long_range_or_connector_matched_lesion": (
-            positive_significant(long_lesion, "median_specificity_contact_nll")
-            or positive_significant(connector_lesion, "median_specificity_contact_nll")
+            positive_significant(long_lesion, "median_specificity_contact_nll", True)
+            or positive_significant(connector_lesion, "median_specificity_contact_nll", True)
         ),
         "not_binary_proposal_only": positive_significant(proposal),
     }
