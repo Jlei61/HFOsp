@@ -118,6 +118,7 @@ def main() -> int:
     lesion_unit_paths = sorted((out / "matched_lesions").glob("**/LESION_DONE.json"))
     lesion_units = [load(path) for path in lesion_unit_paths]
     unseal = load(out / "TARGET_UNSEAL_AUTHORIZATION.json")
+    lesion_early = load(out / "LESION_EARLY_ICTAL_SUMMARY.json")
     common_observables = load(out / "COMMON_OBSERVABLES.json")
 
     execution_contract_ok = bool(
@@ -182,6 +183,12 @@ def main() -> int:
         and target.get("training_or_model_selection_after_unseal") is False
         and int(target.get("n_primary_subjects", -1)) == int(unseal.get("actual_primary_join_n", -2))
     )
+    lesion_early_ok = bool(
+        lesion_early.get("status") == "SECONDARY_TARGET_READOUT_COMPLETE"
+        and lesion_early.get("target_selection_used_for_lesions") is False
+        and lesion_early.get("fields_generated_from_all_heldout_interictal_events") is True
+        and "at least 200 matched controls" in lesion_early.get("inference_rule", "")
+    )
     common_observables_ok = bool(
         common_observables.get("contract")
         and common_observables.get("edge_to_edge_mapping_attempted") is not True
@@ -201,6 +208,7 @@ def main() -> int:
         and influence_ok
         and lesion_execution_ok
         and target_order_ok
+        and lesion_early_ok
         and common_observables_ok
         and figure_ok
     )
@@ -365,12 +373,15 @@ def main() -> int:
                 "note": "Strict matching may be unestimable; this is distinct from a negative lesion effect.",
             },
             "early_ictal_unseal_order_and_scoring": {
-                "pass": target_order_ok,
+                "pass": bool(target_order_ok and lesion_early_ok),
                 "evidence": ["TARGET_UNSEAL_AUTHORIZATION.json", "target_access_audit.json",
-                             "early_ictal_model_contrasts.json", "stage_f_scientific_drift_audit.json"],
+                             "early_ictal_model_contrasts.json", "LESION_EARLY_ICTAL_SUMMARY.json",
+                             "stage_f_scientific_drift_audit.json"],
                 "observed": {"primary_subjects": target.get("n_primary_subjects"),
                              "seizures": target.get("n_seizures"),
-                             "target_read_after_field_freeze": target.get("target_values_read")},
+                             "target_read_after_field_freeze": target.get("target_values_read"),
+                             "lesion_readout_matched_primary_subjects": lesion_early.get(
+                                 "n_primary_subjects_with_matched_inference")},
             },
             "human_rnn_snn_common_observables": {
                 "pass": common_observables_ok,
