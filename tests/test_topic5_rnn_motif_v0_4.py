@@ -7,6 +7,8 @@ import json
 import sys
 from pathlib import Path
 
+import yaml
+
 from src.topic5_rnn_motif_v0_4 import (
     MODEL_SPECS,
     RolloutSizeHead,
@@ -489,3 +491,33 @@ def test_unit_contract_export_is_lossless_and_idempotent(tmp_path):
     assert config["training_config"] == metrics["config"]
     assert hashes["input_manifest"]["sha256"] == sha256(manifest)
     assert hashes["fit_cache"]["events.npz"]["sha256"] == sha256(cache / "events.npz")
+
+
+def test_executed_yaml_contract_matches_the_frozen_model_and_split_contracts():
+    path = ROOT / "config/topic5_rnn_motif_cross_state_v0_4.yaml"
+    contract = yaml.safe_load(path.read_text())
+
+    assert contract["contract_role"] == "EXECUTED_CONTRACT_EXPORT"
+    assert contract["geometry_status"] == "RETROSPECTIVE_TEST_INFORMED_PROPAGATION_PLANE"
+    assert contract["cohort"]["n_patients"] == 21
+    assert contract["cohort"]["n_fits"] == 31
+    assert len(contract["cohort"]["shared_fits"]) == 11
+    assert len(contract["cohort"]["split_fits"]) == 20
+    assert contract["training"]["formal_training_units"] == 1426
+
+    split = contract["split"]
+    assert split["source_pool"] == "canonical_train80_only"
+    assert sum(split[key] for key in (
+        "train_fraction_within_train80",
+        "validation_fraction_within_train80",
+        "test_fraction_within_train80",
+    )) == 1.0
+    assert split["old_outer_heldout20_status"].startswith("BURNED")
+
+    exported = contract["model_matrix"]
+    for model, spec in MODEL_SPECS.items():
+        assert exported[model]["arm"] == spec.arm
+        assert exported[model]["eta"] == spec.eta
+        assert exported[model]["seeds"] == list(spec.seeds)
+    assert contract["rollout_decoder"]["observed_future_set_size_read"] is False
+    assert contract["statistics"]["primary_unit"] == "patient"

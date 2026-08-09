@@ -1,0 +1,210 @@
+# Topic 5 RNN motif / cross-state benchmark v0.4
+#
+# This file is the durable, human-readable export of the contract that was
+# actually executed.  It does not retroactively claim to have driven the
+# already-running immutable snapshot.  The authoritative machine records are
+# RUN_CONTRACT.json and the hashed files under results/.../contracts/.
+
+contract: topic5_rnn_motif_cross_state_v0_4
+contract_role: EXECUTED_CONTRACT_EXPORT
+scientific_spec: docs/superpowers/specs/2026-08-08-topic5-rnn-motif-cross-state-theory-v0-4-design.md
+execution_plan: docs/superpowers/plans/2026-08-08-topic5-rnn-motif-cross-state-theory-v0-4.md
+geometry_status: RETROSPECTIVE_TEST_INFORMED_PROPAGATION_PLANE
+biological_unit: patient
+target_values_read_at_contract_freeze: false
+
+inputs:
+  masked_phantom_rank_fix: true
+  rank_dataset: /home/honglab/leijiaxin/HFOsp/results/topic5_interictal_rank_distribution/dataset_v0_4
+  propagation_fields: /home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/template_gradient_fields/per_subject
+  propagation_results: /home/honglab/leijiaxin/HFOsp/results/interictal_propagation_masked/per_subject
+  minimum_ranks_per_event: 2
+  minimum_label_coverage: 0.98
+
+cohort:
+  n_patients: 21
+  n_fits: 31
+  n_shared_single_fit_patients: 11
+  n_non_collinear_two_fit_patients: 10
+  patients:
+    - epilepsiae_1084
+    - epilepsiae_1146
+    - epilepsiae_1150
+    - epilepsiae_253
+    - epilepsiae_384
+    - epilepsiae_442
+    - epilepsiae_548
+    - epilepsiae_590
+    - epilepsiae_620
+    - epilepsiae_922
+    - epilepsiae_958
+    - yuquan_chengshuai
+    - yuquan_huanghanwen
+    - yuquan_litengsheng
+    - yuquan_liyouran
+    - yuquan_pengzihang
+    - yuquan_songzishuo
+    - yuquan_xuxinyi
+    - yuquan_zhangbichen
+    - yuquan_zhangkexuan
+    - yuquan_zhaochenxi
+  shared_fits:
+    - epilepsiae_1084__shared
+    - epilepsiae_1146__shared
+    - epilepsiae_384__shared
+    - epilepsiae_548__shared
+    - epilepsiae_590__shared
+    - epilepsiae_958__shared
+    - yuquan_chengshuai__shared
+    - yuquan_huanghanwen__shared
+    - yuquan_litengsheng__shared
+    - yuquan_pengzihang__shared
+    - yuquan_zhaochenxi__shared
+  split_fits:
+    - epilepsiae_1150__own_a
+    - epilepsiae_1150__own_b
+    - epilepsiae_253__own_a
+    - epilepsiae_253__own_b
+    - epilepsiae_442__own_a
+    - epilepsiae_442__own_b
+    - epilepsiae_620__own_a
+    - epilepsiae_620__own_b
+    - epilepsiae_922__own_a
+    - epilepsiae_922__own_b
+    - yuquan_liyouran__own_a
+    - yuquan_liyouran__own_b
+    - yuquan_songzishuo__own_a
+    - yuquan_songzishuo__own_b
+    - yuquan_xuxinyi__own_a
+    - yuquan_xuxinyi__own_b
+    - yuquan_zhangbichen__own_a
+    - yuquan_zhangbichen__own_b
+    - yuquan_zhangkexuan__own_a
+    - yuquan_zhangkexuan__own_b
+
+split:
+  order: chronological
+  source_pool: canonical_train80_only
+  train_fraction_within_train80: 0.70
+  validation_fraction_within_train80: 0.15
+  test_fraction_within_train80: 0.15
+  approximate_fraction_of_all_events:
+    train: 0.56
+    validation: 0.12
+    test: 0.12
+  old_outer_heldout20_status: BURNED_BY_EARLIER_RNN_DEVELOPMENT_NOT_USED
+
+node_plane:
+  n_nodes_per_contact: 4
+  contact_readout: local_gaussian_H
+  sigma_floor_mm: 0.0
+  node_seed: 20260808
+  density: 0.10
+  distance_normalization_mm: 10.0
+
+training:
+  primary_cell: leaky_rnn
+  replication_cell: gru
+  formal_training_units: 1426
+  seeds: [0, 1, 2]
+  optimizer: Adam
+  learning_rate: 0.006
+  gradient_norm_clip: 5.0
+  state_dim: 1
+  stop_weight: 1.0
+  warmup_epochs: 10
+  rewire_epochs: 40
+  freeze_epoch_ceiling: 3000
+  zeta_initial: 0.2
+  patience: 12
+  minimum_relative_improvement: 0.0001
+  maximum_batches_per_epoch: 120
+  maximum_batch_size: 1024
+  minimum_updates_per_epoch: 8
+  batch_rule: min(1024, ceil(n_train/8))
+
+model_matrix:
+  M0_NO_REC: {arm: STATIC_CONTACT, eta: 0.0, seeds: [0, 1, 2]}
+  M1_DENSE: {arm: DENSE_TISSUE, eta: 0.0, seeds: [0, 1, 2]}
+  M2_UNIFORM_SET: {arm: RANDOM_SET, eta: 0.0, seeds: [0, 1, 2]}
+  M3_FIXED_LOCAL: {arm: FIXED_LOCAL, eta: 0.0, seeds: [0, 1, 2]}
+  M4_SPATIAL_GROWTH: {arm: SPATIAL_SET_NOCOST, eta: 0.0, seeds: [0, 1, 2]}
+  M5_SPATIAL_LOW: {arm: SPATIAL_SET, eta: 0.01, seeds: [0, 1, 2]}
+  M6_SPATIAL_MID: {arm: SPATIAL_SET, eta: 0.03, seeds: [0, 1, 2]}
+  M7_SPATIAL_HIGH: {arm: SPATIAL_SET, eta: 0.10, seeds: [0, 1, 2]}
+  M8_UNIFORM_COST_MID: {arm: RANDOM_SET_COST, eta: 0.03, seeds: [0, 1, 2]}
+  C_ORDER_SHUFFLED: {arm: SPATIAL_SET, eta: 0.03, seeds: [0, 1, 2]}
+  C_FULL_RANK_SHUFFLED: {arm: SPATIAL_SET, eta: 0.03, seeds: [0]}
+  factorial:
+    growth_by_cost: [M2_UNIFORM_SET, M4_SPATIAL_GROWTH, M8_UNIFORM_COST_MID, M6_SPATIAL_MID]
+  gru_replication: [M0_NO_REC, M1_DENSE, M2_UNIFORM_SET, M3_FIXED_LOCAL, M6_SPATIAL_MID]
+
+rollout_decoder:
+  contract_path: contracts/ROLLOUT_DECODER_CONTRACT.json
+  calibration: interictal_validation_only
+  observed_future_set_size_read: false
+  stop_precedence: probability_at_least_0.5
+  repeated_contact_mask: true
+  maximum_ranks: n_contacts
+
+field_contracts:
+  canonical_full:
+    role: cross_modal_primary
+    includes_supplied_seed: true
+  seed_removed:
+    role: recurrence_specific_key_secondary
+    includes_supplied_seed: false
+  fit_to_patient:
+    q1_non_collinear: average_own_a_and_own_b_within_patient
+    q2_non_collinear: preserve_own_a_and_own_b_through_per_seizure_maxAB
+    shared: one_fit_posthoc_A_B_source_labels
+
+theory:
+  target_blind_primary_models:
+    - M1_DENSE
+    - M2_UNIFORM_SET
+    - M3_FIXED_LOCAL
+    - M4_SPATIAL_GROWTH
+    - M6_SPATIAL_MID
+    - M8_UNIFORM_COST_MID
+    - C_ORDER_SHUFFLED
+  primary_observables:
+    - effective_reach
+    - local_backbone_long_range_connectors
+    - targeted_vs_matched_lesion
+  matched_lesion:
+    target_draws: 500
+    minimum_valid_matched_draws: 200
+    insufficient_matches_status: MATCHED_INFERENCE_UNAVAILABLE
+
+early_ictal_external_benchmark:
+  training_target_free: true
+  field_freeze_before_target_read: true
+  endpoint: strict clinical onset [0,10] s, 1-150 Hz baseline-normalized broadband energy
+  expected_primary_patients: 15
+  actual_locked_intersection_patients: 10
+  actual_locked_intersection_seizures: 24
+  supportive_patient: epilepsiae_1146
+  supportive_seizures: 2
+  primary_null: patient-wise coherent all-contact label shuffle
+  primary_permutations: 5000
+  sensitivity_null: within-shaft label shuffle
+  aggregation: per-seizure maxAB then patient median
+
+statistics:
+  aggregation_order: event_to_fit_to_patient_to_cohort
+  primary_unit: patient
+  paired_tests: exact_wilcoxon_with_tie_tolerance
+  uncertainty: patient_bootstrap
+  cross_model_nulls_synchronized: true
+
+immutable_execution:
+  locked_training_commit: cfeb9e0bc94e06bd7647fbfcb8a87c7595e172e7
+  current_postprocess_commit: 75356467c8b45fdc87870060217c11ae5844137c
+  snapshot_manifest_sha256: b39fc1a53d8a6b5592050af958d68fe548f5568d2b7d11f119488c3d458b6e9d
+  input_manifest_sha256: 168eda1afe577f602a4fe66ee17776de297420e91237adfc2e8d78d25a73a908
+  model_matrix_sha256: 71e9a78d2838a57a2a8642052aa035c040812e250b9aecad240f98d14a77657c
+  rollout_decoder_sha256: b0d0d42ac50f0aaf899d72a05ceb0470d5735aba0622dc80457710dd3c2c3242
+  checkpoint_reuse:
+    new_v0_4: 1426
+    reused_v0_3: 0
