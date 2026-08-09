@@ -569,15 +569,37 @@ def render_final(out_root: Path):
 **关注点**：只有结构富集、任务关系和 matched-lesion 同向时，才把该组织写成更容易支持传播的计算 motif。
 """
     readme.write_text(base + "\n\n" + section.lstrip())
+    representative_metrics = selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
+    representative_fit = json.loads(representative_metrics.read_text())["fit_id"]
+    representative_plane = out_root / "cache" / representative_fit / "plane.npz"
+    representative_influence = (
+        out_root / "effective_influence" / representative_metrics.parents[2].name
+        / representative_metrics.parents[1].name / representative_metrics.parent.name
+        / "influence.npz"
+    )
+    target_root = Path(json.loads(
+        (out_root / "EARLY_ICTAL_METADATA_INVENTORY.json").read_text()
+    )["target_cache_root"])
+    representative_targets = sorted(
+        (target_root / f"outer_{REPRESENTATIVE}").glob(f"{REPRESENTATIVE}__*.npz")
+    )
     sources = {
         "A": [selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz"
-              for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")],
+              for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")]
+             + [representative_plane],
         "B": [selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL).parent
               / "heldout_rollouts.json.gz", out_root / "cache" / "epilepsiae_1146__shared" / "events.npz"],
         "C": [out_root / "interictal_per_patient.csv", out_root / "interictal_per_event.csv"],
         "D": [out_root / "accuracy_wiring_pareto.csv", out_root / "model_field_patient_metrics.csv"],
-        "E": [out_root / "early_ictal_per_patient_model.csv", out_root / "early_ictal_null_matrices.npz"],
-        "F": [out_root / "effective_influence_fit_seed.csv", out_root / "matched_lesion_patient_metrics.csv"],
+        "E": [out_root / "early_ictal_per_patient_model.csv",
+              out_root / "early_ictal_null_matrices.npz",
+              out_root / "MODEL_FIELD_MANIFEST.json",
+              out_root / "model_fields/per_patient" / REPRESENTATIVE
+              / f"{REPRESENTATIVE_MODEL}__rnn.npz"] + representative_targets,
+        "F": [out_root / "effective_influence_fit_seed.csv",
+              out_root / "matched_lesion_patient_metrics.csv",
+              representative_metrics.parent / "graph.npz", representative_plane,
+              representative_influence],
     }
     manifest = {
         panel: [{"path": str(path), "sha256": sha256(path)} for path in paths]
