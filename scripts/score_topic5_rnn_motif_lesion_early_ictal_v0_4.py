@@ -17,6 +17,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 
 from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     build_scorer,
+    locked_target_artifacts,
     paired_summary,
     permutation_indices,
     score_one,
@@ -90,6 +91,7 @@ def main() -> int:
     primary = list(metadata["actual_primary_join"])
     supportive = str(metadata["supportive_subject"])
     subjects = primary + ([supportive] if metadata["supportive_available"] else [])
+    target_files_by_subject = locked_target_artifacts(out_root, target_root, metadata)
     fields = patient_fields(read_records(out_root))
     rows: list[dict[str, Any]] = []
     for subject in subjects:
@@ -114,7 +116,7 @@ def main() -> int:
         for conditions in aligned.values():
             for a, b in conditions.values():
                 common_finite &= np.isfinite(a) & np.isfinite(b)
-        for target_path in sorted((target_root / f"outer_{subject}").glob(f"{subject}__*.npz")):
+        for target_path in target_files_by_subject[subject]:
             with np.load(target_path, allow_pickle=False) as data:
                 names = np.asarray(data["contact_names"]).astype(str).tolist()
                 values = np.asarray(data["target_1_150"], float)

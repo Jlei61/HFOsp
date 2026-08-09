@@ -74,6 +74,36 @@ def read_csv(path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def locked_target_artifacts(
+    out_root: Path, target_root: Path, metadata: dict[str, Any],
+) -> dict[str, list[Path]]:
+    """Resolve only the target artifacts frozen by the metadata audit."""
+    inventory_path = out_root / "early_ictal_metadata_inventory.csv"
+    if sha256(inventory_path) != metadata.get("inventory_csv_sha256"):
+        raise RuntimeError("early-ictal metadata inventory changed after freeze")
+    if Path(metadata["target_cache_root"]).resolve() != target_root.resolve():
+        raise RuntimeError("target cache root differs from the frozen metadata inventory")
+    rows = read_csv(inventory_path)
+    by_subject: dict[str, list[Path]] = {}
+    for row in rows:
+        path = Path(row["artifact_path"]).resolve()
+        if not path.is_relative_to(target_root.resolve()):
+            raise RuntimeError(f"target artifact escaped frozen cache root: {path}")
+        if not path.is_file():
+            raise RuntimeError(f"frozen target artifact is missing: {path}")
+        if sha256(path) != row["artifact_sha256"]:
+            raise RuntimeError(f"frozen target artifact hash changed: {path}")
+        by_subject.setdefault(row["subject"], []).append(path)
+    observed_counts = {subject: len(paths) for subject, paths in by_subject.items()}
+    expected_counts = {str(subject): int(count) for subject, count in
+                       metadata["seizure_file_counts_filename_only"].items()}
+    if observed_counts != expected_counts:
+        raise RuntimeError(
+            f"frozen target artifact count mismatch: {observed_counts} != {expected_counts}"
+        )
+    return {subject: sorted(paths) for subject, paths in by_subject.items()}
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         raise RuntimeError(f"refusing to write empty table: {path}")
@@ -503,6 +533,7 @@ def main() -> int:
         raise RuntimeError("model field manifest changed after authorization")
     if manifest.get("target_values_read") is not False or metadata.get("target_values_read") is not False:
         raise RuntimeError("target seal is already broken")
+    target_files_by_subject = locked_target_artifacts(out_root, target_root, metadata)
 
     unlock = {
         "contract": "topic5_rnn_motif_early_ictal_unlock_v0_4",
@@ -549,7 +580,7 @@ def main() -> int:
         if not loaded:
             raise RuntimeError(f"no model fields for {subject}")
 
-        target_files = sorted((target_root / f"outer_{subject}").glob(f"{subject}__*.npz"))
+        target_files = target_files_by_subject[subject]
         for target_path in target_files:
             # This is the only target-value access point in the v0.4 pipeline.
             with np.load(target_path, allow_pickle=False) as data:

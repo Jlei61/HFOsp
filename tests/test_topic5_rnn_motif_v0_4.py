@@ -40,6 +40,7 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
     conditional_effects,
     compute_dose_trend,
     compute_factorial_effects,
+    locked_target_artifacts,
     permutation_indices,
     permutation_support,
 )
@@ -214,6 +215,29 @@ def test_early_ictal_permutations_are_synchronized_and_shaft_preserving():
         "n_within_shaft_permutable_contacts": 6,
         "n_within_shaft_permutable_groups": 2,
     }
+
+
+def test_early_ictal_scorer_reads_only_hash_locked_target_artifacts(tmp_path):
+    target_root = tmp_path / "targets"
+    target_root.mkdir()
+    artifact = target_root / "epilepsiae_p1__s1.npz"
+    artifact.write_bytes(b"frozen target bytes")
+    inventory = tmp_path / "early_ictal_metadata_inventory.csv"
+    with inventory.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=("subject", "artifact_path", "artifact_sha256"))
+        writer.writeheader()
+        writer.writerow({"subject": "epilepsiae_p1", "artifact_path": str(artifact),
+                         "artifact_sha256": sha256(artifact)})
+    metadata = {
+        "target_cache_root": str(target_root),
+        "inventory_csv_sha256": sha256(inventory),
+        "seizure_file_counts_filename_only": {"epilepsiae_p1": 1},
+    }
+    resolved = locked_target_artifacts(tmp_path, target_root, metadata)
+    assert resolved == {"epilepsiae_p1": [artifact.resolve()]}
+    artifact.write_bytes(b"mutated after target freeze")
+    with np.testing.assert_raises_regex(RuntimeError, "hash changed"):
+        locked_target_artifacts(tmp_path, target_root, metadata)
 
 
 def test_factorial_effects_use_one_complete_patient_denominator():
