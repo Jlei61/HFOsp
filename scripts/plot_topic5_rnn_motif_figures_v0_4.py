@@ -32,7 +32,6 @@ from paper_figures.plot_fig3b_interictal_ictal_shared_field import (  # noqa: E4
     _draw_field,
     _normalize_minmax,
 )
-from plot_topic5_interictal_event_envelope_field import load_frozen  # noqa: E402
 
 
 MODEL_ORDER = [
@@ -376,7 +375,11 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
                      model_subset: tuple[str, ...] | None = None):
     _, pa, pb = model_field_payloads(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
     activation = early_activation(out_root, REPRESENTATIVE)
-    fz = load_frozen(REPRESENTATIVE)
+    # Use the exact empirical record frozen in INPUT_MANIFEST.  A worktree-local
+    # ``results/interictal_propagation_masked`` tree is gitignored and may not
+    # exist in a clean execution worktree; resolving it implicitly would make
+    # rendering depend on an unmanifested ambient file.
+    fz = empirical_record(out_root, REPRESENTATIVE)
     columns = 3
     grid = parent.subgridspec(2 if include_stats else 1, columns,
                               height_ratios=[1.0, 0.72] if include_stats else [1.0],
