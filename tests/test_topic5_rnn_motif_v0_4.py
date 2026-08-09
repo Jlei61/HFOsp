@@ -54,6 +54,7 @@ from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import (  # noqa: E402
     patient_fields,
 )
 from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
+    active_edge_split_half_stability,
     candidate_distance_classes,
     holm_fixed_association_family,
     pairwise_array_seed_stability,
@@ -141,6 +142,17 @@ def test_motif_task_relation_uses_fixed_holm_family():
     )
     assert missing["motif_vs_rollout"] == 0.02
     assert missing["motif_vs_empirical_field_fidelity"] == 1.0
+
+
+def test_motif_split_half_stability_excludes_structural_joint_zeros():
+    mask = np.zeros((5, 5), dtype=bool)
+    mask[0, 1] = mask[1, 2] = mask[2, 3] = True
+    halves = np.zeros((2, 5, 5), dtype=float)
+    halves[0][mask] = [1.0, 2.0, 3.0]
+    halves[1][mask] = [3.0, 2.0, 1.0]
+    # The inactive pairs are joint zeros fixed by the shared graph and must not
+    # turn an anticorrelated active-edge operator into apparent stability.
+    assert np.isclose(active_edge_split_half_stability(halves, mask), -1.0)
 
 
 def test_level4_wording_requires_target_free_motif_economy_and_cross_state():
