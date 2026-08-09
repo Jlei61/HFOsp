@@ -74,6 +74,7 @@ from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
 )
 from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
     lesion_display_values,
+    locked_early_target_paths,
     patient_level_effective_reach,
     selected_metrics,
 )
@@ -167,6 +168,26 @@ def test_preflight_inventory_export_is_explicitly_post_run_and_target_free(tmp_p
     tampered = json.loads(json.dumps(result))
     tampered["source_artifacts"]["input_manifest"]["sha256"] = "bad"
     assert not preflight_inventory_ok(tampered, out)
+
+
+def test_figure_uses_only_frozen_early_target_inventory(tmp_path):
+    frozen = tmp_path / "frozen.npz"
+    extra = tmp_path / "extra.npz"
+    np.savez(frozen, contact_names=np.asarray(["A1"]), target_1_150=np.asarray([1.0]))
+    np.savez(extra, contact_names=np.asarray(["A1"]), target_1_150=np.asarray([99.0]))
+    with (tmp_path / "early_ictal_metadata_inventory.csv").open("w", newline="") as handle:
+        writer = csv.DictWriter(
+            handle, fieldnames=["subject", "artifact_path", "artifact_sha256"]
+        )
+        writer.writeheader()
+        writer.writerow({
+            "subject": "p1", "artifact_path": str(frozen),
+            "artifact_sha256": sha256(frozen),
+        })
+    assert locked_early_target_paths(tmp_path, "p1") == [frozen.resolve()]
+    frozen.write_bytes(b"changed")
+    with np.testing.assert_raises_regex(RuntimeError, "hash changed"):
+        locked_early_target_paths(tmp_path, "p1")
 
 
 def test_target_artifact_recheck_is_required_before_unseal():
