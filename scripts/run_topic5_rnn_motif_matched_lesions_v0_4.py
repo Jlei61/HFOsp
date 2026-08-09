@@ -398,8 +398,24 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
     }
 
 
+def complete_patient_fit_set(
+    rows: list[dict[str, Any]], expected_fit_ids: set[str],
+) -> bool:
+    """Require every preassigned patient fit before cohort lesion inference."""
+    observed = {str(row["fit_id"]) for row in rows}
+    return bool(
+        observed == set(expected_fit_ids)
+        and all(row["status"] == "inference_available" for row in rows)
+    )
+
+
 def aggregate(out_root: Path) -> None:
     records = [json.loads(path.read_text()) for path in sorted((out_root / "matched_lesions").glob("**/LESION_DONE.json"))]
+    expected_fit_ids: dict[tuple[str, str, str], set[str]] = {}
+    for record in records:
+        expected_fit_ids.setdefault(
+            (record["subject"], record["model"], record["cell"]), set()
+        ).add(record["fit_id"])
     fit_rows = []
     for record in records:
         for lesion, values in record["lesions"].items():
@@ -429,8 +445,11 @@ def aggregate(out_root: Path) -> None:
     numeric = [key for key in fit_rows[0] if key.startswith(("target_damage_", "matched_median_", "specificity_"))]
     for key, rows in grouped.items():
         subject, model, cell, lesion = key
+        expected = expected_fit_ids[(subject, model, cell)]
+        observed = {row["fit_id"] for row in rows}
         item = {"subject": subject, "model": model, "cell": cell, "lesion": lesion,
-                "n_fits": len(rows), "all_inference_available": all(row["status"] == "inference_available" for row in rows)}
+                "n_fits": len(observed), "n_expected_fits": len(expected),
+                "all_inference_available": complete_patient_fit_set(rows, expected)}
         item.update({name: float(np.nanmean([row[name] for row in rows])) for name in numeric})
         patient_rows.append(item)
     write_csv(out_root / "matched_lesion_patient_metrics.csv", patient_rows)
