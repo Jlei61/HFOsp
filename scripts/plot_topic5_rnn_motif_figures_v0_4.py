@@ -16,6 +16,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.cm import ScalarMappable
 from matplotlib.colors import Normalize
+from matplotlib.lines import Line2D
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -348,12 +349,41 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
         stat_ax = parent.get_gridspec().figure.add_subplot(grid[1, :])
         frame = [row for row in rows(out_root / "early_ictal_per_patient_model.csv")
                  if row["primary"] in (True, "True", "1", 1.0) and row["cell"] == "rnn"]
-        data = {}
+        models = []
         for model in (model_subset or tuple(MODEL_ORDER)):
-            values = [row["all_contact_margin"] for row in frame
-                      if row["model"] == model and row["endpoint"] == "canonical_full"]
-            if values: data[model] = values
-        strip(stat_ax, data, "Early-ictal margin", zero=True)
+            canonical = [row["all_contact_margin"] for row in frame
+                         if row["model"] == model and row["endpoint"] == "canonical_full"]
+            seed_removed = [row["all_contact_margin"] for row in frame
+                            if row["model"] == model and row["endpoint"] == "seed_removed"]
+            if not canonical or not seed_removed:
+                continue
+            models.append(model)
+            for offset, values, marker, filled in (
+                    (-0.12, canonical, "o", True), (0.12, seed_removed, "D", False)):
+                values = np.asarray(values, float)
+                jitter = np.linspace(-0.055, 0.055, len(values))
+                stat_ax.scatter(
+                    len(models) - 1 + offset + jitter, values, s=12, marker=marker,
+                    facecolor=COLORS[model] if filled else "white",
+                    edgecolor=COLORS[model], linewidth=0.65, alpha=0.72,
+                )
+                stat_ax.plot(
+                    [len(models) - 1 + offset - 0.08, len(models) - 1 + offset + 0.08],
+                    [np.nanmedian(values)] * 2, color="#111111", lw=1.15,
+                )
+        stat_ax.axhline(0, color="#8d8d8d", lw=0.7)
+        stat_ax.set_xticks(range(len(models)), [MODEL_LABEL[model] for model in models])
+        stat_ax.set_ylabel("Early-ictal\nnull-relative margin")
+        stat_ax.legend(
+            handles=[
+                Line2D([], [], marker="o", color="#555555", markerfacecolor="#555555",
+                       lw=0, markersize=4.5, label="Canonical full"),
+                Line2D([], [], marker="D", color="#555555", markerfacecolor="white",
+                       lw=0, markersize=4.5, label="Seed removed"),
+            ],
+            loc="upper left", frameon=False, ncol=2, fontsize=7.0,
+            handletextpad=0.35, columnspacing=0.8, borderaxespad=0.1,
+        )
 
 
 def influence_for_selected(out_root: Path):
