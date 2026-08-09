@@ -44,6 +44,7 @@ from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
 from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
 from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
     candidate_distance_classes,
+    pairwise_array_seed_stability,
     pairwise_seed_stability,
 )
 from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
@@ -307,6 +308,15 @@ def test_effective_operator_seed_stability_keeps_inactive_edges(tmp_path):
     path = tmp_path / "seed2.npz"
     np.savez_compressed(path, edge_effective_influence=third)
     assert pairwise_seed_stability([paths[0], path]) < 1.0
+
+    pulse_a = np.stack([first, first * 2, first * 3])
+    pulse_b = np.stack([second, second * 2, second * 3])
+    pa = tmp_path / "pulse0.npz"; pb = tmp_path / "pulse1.npz"
+    np.savez_compressed(pa, open_loop_pulse_lag123=pulse_a)
+    np.savez_compressed(pb, open_loop_pulse_lag123=pulse_b)
+    assert np.isclose(pairwise_array_seed_stability(
+        [pa, pb], "open_loop_pulse_lag123", array_index=2
+    ), 1.0)
 
 
 def test_motif_distance_thresholds_do_not_create_long_edges_in_local_mask():

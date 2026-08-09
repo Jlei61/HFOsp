@@ -43,8 +43,10 @@ def safe_spearman(x, y) -> dict[str, Any]:
     return {"n": int(use.sum()), "rho": float(result.statistic), "p": float(result.pvalue)}
 
 
-def pairwise_seed_stability(paths: list[Path]) -> float:
-    """Median rank correlation of the full effective operator across seeds.
+def pairwise_array_seed_stability(
+    paths: list[Path], key: str, array_index: int | None = None
+) -> float:
+    """Median rank correlation of one full contact/node operator across seeds.
 
     Inactive and active edges are both retained, so this audits the stability of
     the effective topology and its weights rather than cherry-picking shared
@@ -54,16 +56,32 @@ def pairwise_seed_stability(paths: list[Path]) -> float:
     vectors = []
     for path in sorted(paths):
         with np.load(path, allow_pickle=False) as data:
-            value = np.asarray(data["edge_effective_influence"], float)
+            value = np.asarray(data[key], float)
+        if array_index is not None:
+            value = value[array_index]
         use = ~np.eye(value.shape[0], dtype=bool)
         vectors.append(value[use])
     correlations = []
     for left in range(len(vectors)):
         for right in range(left + 1, len(vectors)):
-            if np.std(vectors[left]) <= 0 or np.std(vectors[right]) <= 0:
+            finite = np.isfinite(vectors[left]) & np.isfinite(vectors[right])
+            # Legacy pulse artifacts predate the explicit pair-count array and
+            # encode never-observed pairs as joint zeros.  Excluding joint-zero
+            # entries prevents that shared missingness from inflating seed
+            # stability.  Edge-operator zeros remain meaningful inactive edges
+            # and are deliberately retained.
+            if key == "open_loop_pulse_lag123":
+                finite &= (np.abs(vectors[left]) > 0) | (np.abs(vectors[right]) > 0)
+            if finite.sum() < 3 or np.std(vectors[left][finite]) <= 0 or np.std(vectors[right][finite]) <= 0:
                 continue
-            correlations.append(float(spearmanr(vectors[left], vectors[right]).statistic))
+            correlations.append(float(spearmanr(
+                vectors[left][finite], vectors[right][finite]
+            ).statistic))
     return float(np.nanmedian(correlations)) if correlations else float("nan")
+
+
+def pairwise_seed_stability(paths: list[Path]) -> float:
+    return pairwise_array_seed_stability(paths, "edge_effective_influence")
 
 
 def candidate_distance_classes(mask: np.ndarray, distance: np.ndarray) -> tuple[np.ndarray, np.ndarray, float, float]:
@@ -148,6 +166,12 @@ def main() -> int:
     fit_stability = {
         key: pairwise_seed_stability(paths) for key, paths in fit_paths.items()
     }
+    fit_pulse_stability = {
+        (key, lag): pairwise_array_seed_stability(
+            paths, "open_loop_pulse_lag123", array_index=lag
+        )
+        for key, paths in fit_paths.items() for lag in range(3)
+    }
     patient_rows = []
     for (subject, model, cell), selected in sorted(grouped.items()):
         item = {"subject": subject, "model": model, "cell": cell, "n_fit_seed_units": len(selected)}
@@ -156,6 +180,11 @@ def main() -> int:
         item["effective_operator_seed_stability"] = float(np.nanmedian([
             fit_stability.get((fit_id, model, cell), np.nan) for fit_id in subject_fits
         ]))
+        for lag in range(3):
+            item[f"pulse_lag{lag + 1}_seed_stability"] = float(np.nanmedian([
+                fit_pulse_stability.get(((fit_id, model, cell), lag), np.nan)
+                for fit_id in subject_fits
+            ]))
         patient_rows.append(item)
     write_csv(out_root / "effective_motif_patient.csv", patient_rows)
 
@@ -224,6 +253,14 @@ def main() -> int:
         seed=stable_seed("M6 effective operator split half stability"),
     )
     lesion_stats = lesion.get("statistics", {})
+    pulse_seed_stability = {
+        f"lag{lag}": paired_summary(
+            [row[f"pulse_lag{lag}_seed_stability"] for row in patient_rows
+             if row["model"] == "M6_SPATIAL_MID" and row["cell"] == "rnn"],
+            seed=stable_seed(f"M6 pulse lag{lag} seed stability"),
+        )
+        for lag in (1, 2, 3)
+    }
 
     def positive_significant(value: dict[str, Any] | None, estimate: str = "median") -> bool:
         return bool(value and (value.get(estimate) or 0) > 0
@@ -265,6 +302,8 @@ def main() -> int:
         "task_and_wiring_associations": associations,
         "effective_operator_seed_stability": {m6_key: stability},
         "effective_operator_split_half_stability": {m6_key: split_stability},
+        "open_loop_pulse_cross_seed_stability": {m6_key: pulse_seed_stability},
+        "pulse_split_half_scope": "not estimated; split-half stability applies to the effective edge operator",
         "M6_true_order_minus_order_shuffle_motif_score": proposal,
         "architecture_direction": architecture,
         "matched_lesion": lesion,
