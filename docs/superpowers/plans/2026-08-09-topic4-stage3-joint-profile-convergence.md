@@ -1,4 +1,4 @@
-# Topic 4 Stage 3 联合剖面与收敛计划（rev1，2026-08-09）
+# Topic 4 Stage 3 联合剖面与收敛计划（rev2，2026-08-09）
 
 **Spec：** `docs/superpowers/specs/2026-08-06-topic4-axis-constrained-data-driven-core-field-design.md` rev6 §9.3c。
 
@@ -68,6 +68,13 @@ fraction 从 12.5% 提到 25%，sigma `0.650→0.627`；但 best 固定-n 距离
 但当前三代优化没有恢复“接近患者且两个簇相反”的联合结构；不得进入连接性功能等效或 lifecycle 动态验证。**
 确认图见 `results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation/figures/`
 `stage3_joint_confirmation_screen.png`；左图是距离，右图是双簇支持与相反性联合门。
+
+**rev7 KMeans-data consistency 补充（用户指定 Fig. 4C 判据）**：旧确认只做了模型内部 KMeans 两原型
+相关，没有画、也没有 gate 模型 KMeans 簇与病人 KMeans 簇的一致性。现按 spec §9.3d 增加真正的
+无监督比较：patient-train、patient-heldout、每个模型候选和两个 rigid controls 分别独立拟合 K=2，
+再做 Hungarian permutation match 的 `2×2` Spearman matrix。接受必须同时满足每簇 `>=10`、matched
+cells 全正、crossed cells 全负，以及 matched mean 不弱于最佳 rigid control；旧 `r<=-0.2` 只保留为
+辅助诊断。该 gate 不进入 rev6 optimizer，避免把确认池回灌训练。
 
 **收敛门：** 至少两次重启的 held-out `D_curve` 落入彼此 bootstrap 区间；场的主要质量分量跨重启可匹配；
 独立网络确认不回退到 rigid-family best。

@@ -20,13 +20,13 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
-from sklearn.cluster import KMeans
 
 sys.path.insert(0, os.getcwd())
 from scripts.run_topic4_core_field_stage3_profile_round1 import PATIENT, axial_map
 from src.interictal_propagation import load_subject_propagation_events
 from src.topic4_core_field_profile import (
     OBJECTIVE_N_EVENTS,
+    fit_profile_modes,
     fit_rank_curve_reference,
     normalized_rank_curve,
     profile_grid,
@@ -76,18 +76,17 @@ def _model_curves(paths, axial, grid):
 
 
 def _prototype_diagnostic(curves, reference):
-    z = transform_rank_curves(curves, reference)
-    if len(z) < 8:
-        return dict(status="insufficient", n_events=int(len(z)))
-    labels = KMeans(n_clusters=2, n_init=50, random_state=CLUSTER_SEED).fit_predict(z)
-    prototypes = np.asarray([curves[labels == k].mean(axis=0) for k in (0, 1)])
-    # Deterministic display order only; clustering and the distance are unlabeled.
-    x = np.arange(prototypes.shape[1], dtype=float)
-    order = np.argsort([np.corrcoef(x, p)[0, 1] for p in prototypes])
-    prototypes = prototypes[order]
-    counts = np.bincount(labels, minlength=2)[order]
+    if len(curves) < 8:
+        return dict(status="insufficient", n_events=int(len(curves)))
+    modes = fit_profile_modes(curves, reference, seed=CLUSTER_SEED)
+    if modes["status"] != "ok":
+        return modes
+    prototypes = modes["prototypes"]
+    counts = modes["cluster_counts"]
+    # Preserve the rev6 diagnostic contract: this field was Pearson before the
+    # Fig. 4C-style Spearman matrix was added as a separate rev7 read-back.
     corr = float(np.corrcoef(prototypes[0], prototypes[1])[0, 1])
-    return dict(status="ok", n_events=int(len(z)), prototype_correlation=corr,
+    return dict(status="ok", n_events=int(len(curves)), prototype_correlation=corr,
                 cluster_counts=counts.astype(int).tolist(),
                 min_cluster_count=int(counts.min()),
                 minority_fraction=float(counts.min() / counts.sum()),

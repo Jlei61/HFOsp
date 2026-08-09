@@ -15,7 +15,9 @@ to be *injective*, which is measured and false (see NOT_A_POSITION).
 from __future__ import annotations
 
 import numpy as np
-from scipy.stats import wasserstein_distance
+from scipy.optimize import linear_sum_assignment
+from scipy.stats import spearmanr, wasserstein_distance
+from sklearn.cluster import KMeans
 
 MIN_PARTICIPANTS = 6
 
@@ -29,6 +31,8 @@ PROFILE_N_PROJECTIONS = 64
 PROFILE_REFERENCE_N = 4096
 PROFILE_REFERENCE_SEED = 20260809
 OBJECTIVE_N_EVENTS = 20
+PROFILE_MODE_SEED = 20260809
+PROFILE_MODE_N_INIT = 50
 
 OBJECTIVE_FEATURES = ("slope", "r2")
 REPORT_ONLY = ("curvature", "n_part", "argmin_axial")
@@ -231,6 +235,121 @@ def transform_rank_curves(curves, reference):
         raise ValueError("curves do not match the frozen profile grid")
     scores = (x - reference["center"]) @ reference["components"].T
     return (scores - reference["score_center"]) / reference["score_scale"]
+
+
+def _safe_spearman(left, right):
+    left = np.asarray(left, float)
+    right = np.asarray(right, float)
+    valid = np.isfinite(left) & np.isfinite(right)
+    if valid.sum() < 3 or left[valid].std() < 1e-12 or right[valid].std() < 1e-12:
+        return float("nan")
+    return float(spearmanr(left[valid], right[valid]).statistic)
+
+
+def fit_profile_modes(curves, reference, seed=PROFILE_MODE_SEED,
+                      n_init=PROFILE_MODE_N_INIT):
+    """Fit two unlabeled propagation modes in the frozen patient embedding.
+
+    The raw KMeans ids are arbitrary.  We order the two modes only for stable
+    serialization and plotting, by their correlation with the axial grid
+    index.  No patient template is used to fit or order a model candidate.
+    """
+    x = np.asarray(curves, float)
+    if x.ndim != 2 or len(x) < 2 or not np.isfinite(x).all():
+        return dict(status="insufficient", n_events=int(len(x)))
+    z = transform_rank_curves(x, reference)
+    if np.unique(z, axis=0).shape[0] < 2:
+        return dict(status="insufficient", n_events=int(len(x)),
+                    reason="fewer than two distinct embedded profiles")
+    raw_labels = KMeans(
+        n_clusters=2, n_init=int(n_init), random_state=int(seed),
+    ).fit_predict(z)
+    raw_prototypes = np.asarray([
+        x[raw_labels == cluster].mean(axis=0) for cluster in (0, 1)
+    ])
+    axial_index = np.arange(x.shape[1], dtype=float)
+    order = np.argsort([
+        _safe_spearman(axial_index, prototype)
+        for prototype in raw_prototypes
+    ])
+    inverse = np.empty(2, dtype=int)
+    inverse[order] = np.arange(2)
+    labels = inverse[raw_labels]
+    prototypes = raw_prototypes[order]
+    counts = np.bincount(labels, minlength=2)
+    return dict(
+        status="ok",
+        n_events=int(len(x)),
+        labels=labels,
+        prototypes=prototypes,
+        cluster_counts=counts.astype(int),
+        raw_cluster_order=np.asarray(order, int),
+        prototype_correlation=_safe_spearman(prototypes[0], prototypes[1]),
+    )
+
+
+def profile_template_similarity(candidate_prototypes, data_prototypes):
+    """Spearman matrix, candidate modes by patient-data modes."""
+    candidate = np.asarray(candidate_prototypes, float)
+    data = np.asarray(data_prototypes, float)
+    if candidate.ndim != 2 or data.ndim != 2 or candidate.shape != data.shape:
+        raise ValueError("candidate and data prototypes must have matching 2-D shapes")
+    return np.asarray([
+        [_safe_spearman(left, right) for right in data]
+        for left in candidate
+    ], float)
+
+
+def kmeans_data_consistency(curves, data_prototypes, reference,
+                            min_cluster_events=10,
+                            seed=PROFILE_MODE_SEED,
+                            n_init=PROFILE_MODE_N_INIT):
+    """Match independently fitted model modes to frozen patient modes.
+
+    This is a confirmation/read-back statistic, not part of the rev6 optimizer.
+    The Hungarian assignment is label-invariant.  A valid two-mode match needs
+    support in both model clusters and the Fig. 4C sign pattern after matching:
+    positive matched cells and negative crossed cells.
+    """
+    modes = fit_profile_modes(curves, reference, seed=seed, n_init=n_init)
+    if modes["status"] != "ok":
+        return modes
+    matrix = profile_template_similarity(modes["prototypes"], data_prototypes)
+    if not np.isfinite(matrix).all():
+        return dict(status="invalid_similarity", n_events=modes["n_events"])
+    rows, columns = linear_sum_assignment(-matrix)
+    candidate_for_data = np.empty(2, dtype=int)
+    candidate_for_data[columns] = rows
+    aligned_matrix = matrix[candidate_for_data]
+    aligned_prototypes = modes["prototypes"][candidate_for_data]
+    aligned_counts = modes["cluster_counts"][candidate_for_data]
+    raw_to_data = np.empty(2, dtype=int)
+    raw_to_data[candidate_for_data] = np.arange(2)
+    aligned_labels = raw_to_data[modes["labels"]]
+    matched = np.diag(aligned_matrix)
+    crossed = aligned_matrix[np.arange(2), np.arange(2)[::-1]]
+    support = bool(aligned_counts.min() >= int(min_cluster_events))
+    sign_consistent = bool(np.all(matched > 0.0) and np.all(crossed < 0.0))
+    return dict(
+        status="ok",
+        n_events=modes["n_events"],
+        labels=aligned_labels,
+        prototypes=aligned_prototypes,
+        cluster_counts=aligned_counts,
+        min_cluster_count=int(aligned_counts.min()),
+        minority_fraction=float(aligned_counts.min() / aligned_counts.sum()),
+        support_eligible=support,
+        prototype_correlation=_safe_spearman(
+            aligned_prototypes[0], aligned_prototypes[1]),
+        similarity_matrix=aligned_matrix,
+        matched_correlations=matched,
+        crossed_correlations=crossed,
+        matched_mean=float(matched.mean()),
+        crossed_mean=float(crossed.mean()),
+        matrix_contrast=float(matched.mean() - crossed.mean()),
+        matrix_sign_consistent=sign_consistent,
+        candidate_raw_mode_for_data_mode=candidate_for_data,
+    )
 
 
 def sliced_rank_curve_distance(curves, reference):

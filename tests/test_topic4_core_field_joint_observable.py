@@ -12,7 +12,9 @@ from scripts.calibrate_topic4_core_field_stage3_joint_observable import (
 )
 from src.topic4_core_field_profile import (
     fixed_count_indices,
+    fit_profile_modes,
     fit_rank_curve_reference,
+    kmeans_data_consistency,
     normalized_rank_curve,
     rank_curve_reference_summary,
     rank_curve_table,
@@ -73,6 +75,42 @@ def test_posthoc_opposition_requires_ten_events_in_each_cluster():
     assert diagnostic["min_cluster_count"] == 9
     assert OPPOSITION_MIN_CLUSTER_EVENTS == 10
     assert diagnostic["opposition_support_eligible"] is False
+
+
+def test_kmeans_data_consistency_is_label_invariant_and_requires_support():
+    data_events = []
+    for seed in range(80):
+        data_events.extend((
+            _profile("forward", 0.15, seed),
+            _profile("reverse", 0.15, 1000 + seed),
+        ))
+    data_curves = rank_curve_table(data_events, AX)
+    reference = fit_rank_curve_reference(
+        data_curves, n_components=4, n_reference=120,
+        n_projections=16, seed=3,
+    )
+    data_modes = fit_profile_modes(data_curves, reference)
+
+    candidate_events = [
+        _profile("reverse", 0.15, 2000 + seed) for seed in range(20)
+    ] + [
+        _profile("forward", 0.15, 3000 + seed) for seed in range(20)
+    ]
+    candidate = kmeans_data_consistency(
+        rank_curve_table(candidate_events, AX),
+        data_modes["prototypes"], reference, min_cluster_events=10,
+    )
+    assert candidate["support_eligible"] is True
+    assert candidate["matrix_sign_consistent"] is True
+    assert np.min(candidate["matched_correlations"]) > 0.95
+    assert np.max(candidate["crossed_correlations"]) < -0.95
+
+    under_supported = kmeans_data_consistency(
+        rank_curve_table(candidate_events[:29], AX),
+        data_modes["prototypes"], reference, min_cluster_events=10,
+    )
+    assert under_supported["min_cluster_count"] == 9
+    assert under_supported["support_eligible"] is False
 
 
 def test_phantom_ranks_are_removed_by_the_same_participation_mask():

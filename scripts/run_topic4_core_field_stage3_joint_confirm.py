@@ -11,6 +11,7 @@ import hashlib
 import json
 import os
 import sys
+import tempfile
 from multiprocessing import Pool
 
 import numpy as np
@@ -40,7 +41,9 @@ from scripts.run_topic4_core_field_stage3_joint_fit import (  # noqa: E402
 from scripts.run_topic4_core_field_stage3_profile_round1 import axial_map  # noqa: E402
 from src.topic4_core_field_profile import (  # noqa: E402
     PROFILE_REFERENCE_N,
+    fit_profile_modes,
     fixed_count_indices,
+    kmeans_data_consistency,
     rank_curve_table,
     sliced_embedding_distance,
     split_by_block,
@@ -54,6 +57,7 @@ ROOT = "results/topic4_sef_hfo/data_driven_core_field_stage3"
 CHECKPOINT = f"{ROOT}/joint_fit_clean_pilot_rev6/checkpoint_K3_r0.json"
 CALIBRATION = f"{ROOT}/joint_observable/calibration_summary.json"
 OUT = f"{ROOT}/joint_confirmation_pilot_rev6.json"
+CURVES_OUT = f"{ROOT}/joint_confirmation/joint_confirmation_event_profiles_rev6.npz"
 CONFIRM_SEED_POOL = tuple(range(501, 560))
 HELDOUT_REFERENCE_SEED = 20260815
 
@@ -61,6 +65,34 @@ HELDOUT_REFERENCE_SEED = 20260815
 def _sha256(path):
     with open(path, "rb") as fh:
         return hashlib.sha256(fh.read()).hexdigest()
+
+
+def _atomic_npz(path, **arrays):
+    directory = os.path.dirname(path) or "."
+    os.makedirs(directory, exist_ok=True)
+    fd, temporary = tempfile.mkstemp(prefix=".tmp_", suffix=".npz", dir=directory)
+    os.close(fd)
+    try:
+        np.savez_compressed(temporary, **arrays)
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def _kmeans_summary(row):
+    """Remove event-sized arrays while retaining every acceptance quantity."""
+    out = {}
+    for key, value in row.items():
+        if key in {"labels", "prototypes"}:
+            continue
+        if isinstance(value, np.ndarray):
+            out[key] = value.tolist()
+        elif isinstance(value, np.generic):
+            out[key] = value.item()
+        else:
+            out[key] = value
+    return out
 
 
 def select_candidates(checkpoint, sheet_length):
@@ -169,11 +201,15 @@ def _posthoc_diagnostic(curves, reference):
     return row
 
 
-def _control_distributions(calibration, patient_heldout, axial, grid, reference):
+def _control_curve_sets(calibration, patient_heldout, axial, grid):
     curves = dict(patient_heldout=patient_heldout)
     for key in ("hand_placed_two_cores", "stage2_filament"):
         curves[key] = _model_curves(
             calibration["inputs"]["model_paths"][key], axial, grid)
+    return curves
+
+
+def _control_distributions(curves, reference):
     out = {}
     for index, (key, values) in enumerate(curves.items()):
         row = _matched_distance(
@@ -192,6 +228,13 @@ def reconcile_confirmation(payload):
         controls["stage2_filament"]["median"],
     )
     patient_floor_p95 = float(payload["patient_floor_train"]["p95"])
+    if "kmeans_controls" not in payload:
+        raise ValueError(
+            "confirmation payload predates the KMeans-to-data contract; rerun measurement")
+    rigid_template_match = max(
+        float(payload["kmeans_controls"][key]["matched_mean"])
+        for key in ("hand_placed_two_cores", "stage2_filament")
+    )
     verdicts = []
     for row in payload["candidates"]:
         confirm = row["confirm"]
@@ -214,12 +257,27 @@ def reconcile_confirmation(payload):
         heldout_median = (None if heldout_bootstrap is None else
                           float(heldout_bootstrap["median"]))
         corr = diagnostic.get("prototype_correlation")
+        consistency = confirm.get("kmeans_data_consistency")
+        if consistency is None:
+            raise ValueError(
+                "candidate predates the KMeans-to-data contract; rerun measurement")
+        matched_mean = consistency.get("matched_mean")
         gates = dict(
             no_simulation_errors=bool(confirm.get("n_failed_networks", 0) == 0),
             enough_usable_events=bool(confirm.get("n_usable", 0)
                                       >= payload["objective_event_count"]),
             two_cluster_support=bool(
-                diagnostic["opposition_support_eligible"]),
+                consistency.get("support_eligible", False)),
+            kmeans_matrix_sign_consistent=bool(
+                consistency.get("support_eligible", False)
+                and consistency.get("matrix_sign_consistent", False)),
+            kmeans_matches_patient_modes=bool(
+                consistency.get("support_eligible", False)
+                and consistency.get("matrix_sign_consistent", False)),
+            beats_rigid_template_match=bool(
+                consistency.get("support_eligible", False)
+                and matched_mean is not None
+                and float(matched_mean) >= rigid_template_match),
             opposing_prototypes=bool(
                 diagnostic["opposition_support_eligible"]
                 and corr is not None and float(corr) <= -0.2),
@@ -234,8 +292,10 @@ def reconcile_confirmation(payload):
             verdict = "TRANSFER_FEASIBILITY_FAIL"
         elif not gates["two_cluster_support"]:
             verdict = "TWO_CLUSTER_SUPPORT_FAIL"
-        elif not gates["opposing_prototypes"]:
-            verdict = "OPPOSITION_FAIL"
+        elif not gates["kmeans_matches_patient_modes"]:
+            verdict = "KMEANS_DATA_PATTERN_FAIL"
+        elif not gates["beats_rigid_template_match"]:
+            verdict = "RIGID_TEMPLATE_MATCH_NOT_BEATEN"
         elif not gates["better_than_rigid_control_median"]:
             verdict = "RIGID_CONTROL_NOT_BEATEN"
         elif not gates["within_patient_floor_p95"]:
@@ -254,12 +314,14 @@ def reconcile_confirmation(payload):
         if any(value == "CONFIRMATION_SCREEN_PASS" for value in verdicts)
         else "UNSEEN_NETWORK_CONFIRMATION_NO_CANDIDATE_PASSES")
     payload["scientific_verdict"] = (
-        "No preselected candidate jointly achieves adequate opposing-cluster "
-        "support, improvement over rigid controls, and the patient floor."
+        "No preselected candidate jointly achieves two supported KMeans modes, "
+        "the patient mode-similarity pattern, improvement over rigid controls, "
+        "and the patient floor."
         if payload["status"].endswith("NO_CANDIDATE_PASSES") else
         "At least one preselected candidate passes this bounded confirmation screen; "
         "K/restart identifiability and final sufficiency gates remain pending.")
     payload["opposition_min_cluster_events"] = OPPOSITION_MIN_CLUSTER_EVENTS
+    payload["kmeans_rigid_benchmark_matched_mean"] = rigid_template_match
     return payload
 
 
@@ -271,6 +333,7 @@ def main():
     parser.add_argument("--n-confirm", type=int, default=6)
     parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--out", default=OUT)
+    parser.add_argument("--curves-out", default=CURVES_OUT)
     parser.add_argument("--reconcile-existing", action="store_true")
     args = parser.parse_args()
 
@@ -297,14 +360,33 @@ def main():
     seeds, fit_seeds = confirmation_seeds(checkpoint, args.n_confirm)
     patient, blocks = _patient_curves(axial, grid)
     train_index, heldout_index = split_by_block(blocks, HELD_OUT_FRAC, SPLIT_SEED)
+    patient_train = patient[train_index]
     patient_heldout = patient[heldout_index]
+    patient_modes = fit_profile_modes(patient_train, reference)
+    if patient_modes["status"] != "ok":
+        raise RuntimeError("patient training data did not define two KMeans modes")
+    patient_prototypes = patient_modes["prototypes"]
     heldout_z_all = transform_rank_curves(patient_heldout, reference)
     rng = np.random.default_rng(HELDOUT_REFERENCE_SEED)
     heldout_take = min(PROFILE_REFERENCE_N, len(heldout_z_all))
     heldout_z = heldout_z_all[
         rng.choice(len(heldout_z_all), size=heldout_take, replace=False)]
-    controls = _control_distributions(
-        calibration, patient_heldout, axial, grid, reference)
+    control_curves = _control_curve_sets(
+        calibration, patient_heldout, axial, grid)
+    controls = _control_distributions(control_curves, reference)
+    kmeans_controls_full = {
+        key: kmeans_data_consistency(
+            values, patient_prototypes, reference,
+            min_cluster_events=OPPOSITION_MIN_CLUSTER_EVENTS,
+        )
+        for key, values in control_curves.items()
+    }
+    if any(row.get("status") != "ok" for row in kmeans_controls_full.values()):
+        raise RuntimeError("a frozen KMeans control did not define two modes")
+    kmeans_controls = {
+        key: _kmeans_summary(value)
+        for key, value in kmeans_controls_full.items()
+    }
 
     cache = os.path.join(STAGE2, "network_cache")
     cache_jobs = _unique_seed_cache_jobs(seeds, cfg, cache)
@@ -332,12 +414,38 @@ def main():
             f"see {args.out}")
 
     result_rows = []
+    profile_arrays = dict(
+        grid=np.asarray(grid, np.float32),
+        patient_train_prototypes=np.asarray(patient_prototypes, np.float32),
+        patient_train_cluster_counts=np.asarray(
+            patient_modes["cluster_counts"], np.int64),
+        patient_heldout_curves=np.asarray(patient_heldout, np.float32),
+        patient_heldout_labels=np.asarray(
+            kmeans_controls_full["patient_heldout"]["labels"], np.int8),
+    )
     for candidate_index, candidate in enumerate(candidates):
         chunk = raw[candidate_index * len(seeds):(candidate_index + 1) * len(seeds)]
         good = [row for row in chunk if "error" not in row]
-        events = [event for row in good for event in row.get("events", [])]
-        curves = rank_curve_table(events, axial, grid=grid)
+        curve_chunks = [
+            rank_curve_table(row.get("events", []), axial, grid=grid)
+            for row in chunk
+        ]
+        curves = np.vstack(curve_chunks)
+        curve_seed_ids = np.concatenate([
+            np.full(len(values), int(seed), dtype=np.int64)
+            for seed, values in zip(seeds, curve_chunks)
+        ])
         _, score = score_candidate(chunk, axial, reference, MIN_PROFILE_EVENTS)
+        consistency_full = kmeans_data_consistency(
+            curves, patient_prototypes, reference,
+            min_cluster_events=OPPOSITION_MIN_CLUSTER_EVENTS,
+        )
+        consistency = _kmeans_summary(consistency_full)
+        profile_arrays[f"candidate_{candidate_index}_curves"] = np.asarray(
+            curves, np.float32)
+        profile_arrays[f"candidate_{candidate_index}_labels"] = np.asarray(
+            consistency_full.get("labels", []), np.int8)
+        profile_arrays[f"candidate_{candidate_index}_seed_ids"] = curve_seed_ids
         train_bootstrap = (None if len(curves) < MIN_PROFILE_EVENTS else
                            _matched_distance(
                                curves, reference, MIN_PROFILE_EVENTS,
@@ -373,9 +481,11 @@ def main():
                                      for seed, row in zip(seeds, chunk)},
                 leave_one_network_out=loo,
                 posthoc_prototypes=_posthoc_diagnostic(curves, reference),
+                kmeans_data_consistency=consistency,
             ),
         ))
 
+    _atomic_npz(args.curves_out, **profile_arrays)
     output = reconcile_confirmation(dict(
         status="UNSEEN_NETWORK_CONFIRMATION_MEASUREMENT_COMPLETE",
         scientific_role=("candidate transfer screen; candidates were frozen before confirmation, "
@@ -383,6 +493,8 @@ def main():
         checkpoint=dict(path=args.checkpoint, sha256=_sha256(args.checkpoint),
                         run_contract=checkpoint["run_contract"]),
         reference=dict(path=args.reference, sha256=_sha256(args.reference)),
+        event_profiles=dict(path=args.curves_out, sha256=_sha256(args.curves_out),
+                            dtype="float32 curves; int8 aligned KMeans labels"),
         patient_split=dict(unit="recording block", frac=HELD_OUT_FRAC,
                            seed=SPLIT_SEED, n_train=int(len(train_index)),
                            n_heldout=int(len(heldout_index)),
@@ -397,12 +509,21 @@ def main():
         objective_event_count=MIN_PROFILE_EVENTS,
         patient_floor_train=calibration["optimization_patient_floor"],
         optimization_controls_n20=controls,
+        kmeans_patient_train=dict(
+            n_events=int(patient_modes["n_events"]),
+            cluster_counts=np.asarray(
+                patient_modes["cluster_counts"], int).tolist(),
+            prototype_correlation=float(
+                patient_modes["prototype_correlation"]),
+        ),
+        kmeans_controls=kmeans_controls,
         candidates=result_rows,
         limitations=[
             "single K=3 restart and three optimization generations",
             "six confirmation networks do not establish K or field identifiability",
             "event bootstrap does not model network-seed clustering; leave-one-network-out is reported separately",
             "post-hoc prototype opposition is a falsification diagnostic and was not optimized",
+            "KMeans-to-data consistency is confirmation-only and was not optimized",
         ],
         provenance=provenance(),
     ))

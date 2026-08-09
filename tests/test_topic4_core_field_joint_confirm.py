@@ -69,13 +69,18 @@ def test_target_distance_uses_exactly_the_frozen_source_count():
     assert _distance_to_target(train[:19], reference, target, n_events=20) is None
 
 
-def _confirmation_payload(counts, corr, train_median=0.5):
+def _confirmation_payload(counts, corr, train_median=0.5,
+                          matrix_sign_consistent=True, matched_mean=0.9):
     return {
         "objective_event_count": 20,
         "patient_floor_train": {"p95": 0.35},
         "optimization_controls_n20": {
             "hand_placed_two_cores": {"median": 0.67},
             "stage2_filament": {"median": 0.63},
+        },
+        "kmeans_controls": {
+            "hand_placed_two_cores": {"matched_mean": 0.87},
+            "stage2_filament": {"matched_mean": 0.81},
         },
         "candidates": [{
             "confirm": {
@@ -86,6 +91,12 @@ def _confirmation_payload(counts, corr, train_median=0.5):
                 "posthoc_prototypes": {
                     "cluster_counts": counts,
                     "prototype_correlation": corr,
+                },
+                "kmeans_data_consistency": {
+                    "cluster_counts": counts,
+                    "support_eligible": min(counts) >= 10,
+                    "matrix_sign_consistent": matrix_sign_consistent,
+                    "matched_mean": matched_mean,
                 },
             },
         }],
@@ -105,5 +116,15 @@ def test_reconciliation_keeps_opposition_separate_from_distance_gates():
     confirm = out["candidates"][0]["confirm"]
     assert confirm["gates"]["two_cluster_support"] is True
     assert confirm["gates"]["opposing_prototypes"] is False
+    assert confirm["gates"]["kmeans_matches_patient_modes"] is True
     assert confirm["gates"]["within_patient_floor_p95"] is True
-    assert confirm["verdict"] == "OPPOSITION_FAIL"
+    assert confirm["verdict"] == "CONFIRMATION_SCREEN_PASS"
+
+
+def test_reconciliation_uses_kmeans_data_pattern_as_the_mode_gate():
+    out = reconcile_confirmation(_confirmation_payload(
+        [20, 20], -0.9, 0.2, matrix_sign_consistent=False))
+    confirm = out["candidates"][0]["confirm"]
+    assert confirm["gates"]["opposing_prototypes"] is True
+    assert confirm["gates"]["kmeans_matches_patient_modes"] is False
+    assert confirm["verdict"] == "KMEANS_DATA_PATTERN_FAIL"

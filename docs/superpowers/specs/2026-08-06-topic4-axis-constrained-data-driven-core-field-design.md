@@ -1,4 +1,4 @@
-# Topic 4 — 轴约束的数据驱动病理场（data-driven core field）v0.1 (rev6)
+# Topic 4 — 轴约束的数据驱动病理场（data-driven core field）v0.1 (rev7)
 
 - **状态：** rev3（2026-08-06 第三轮审阅后；**姿态改为探索性**，见 §0.4b）。Stage 0–1 授权执行；Stage 2 由 Stage 1 的预注册闸门
   裁定，Stage 3 由 Stage 2 结局 + §9 的场位置稳定性裁定 —— **均不由该阶段自身的结果裁定**。
@@ -1335,6 +1335,27 @@ Stage 3 单中段生成器、已知位置敏感，而且没有把最终验收门
 双核或充分性结论。Stage 3 当前只有 18 个校准事件，最终判断必须用独立网络池重新估计距离及结构同构地板。
 冻结参考：`results/topic4_sef_hfo/data_driven_core_field_stage3/joint_observable/`
 `{rank_curve_reference.npz,calibration_summary.json}`。
+
+### 9.3d rev7 确认门：无监督 KMeans 模式与病人模式一致性（2026-08-09）
+
+`D_curve` 判断整团事件分布是否接近，但不能单独证明模型恢复了病人的两个传播模式；只看模型两个
+KMeans 原型彼此负相关也不够，因为一个极小簇或两个与病人无关的相反形状都能通过。最终确认新增
+Fig. 4C 同构的**模型模式—病人模式一致性门**：
+
+1. 只在患者训练 recording blocks 上、在 §9.3c 冻结的 8 维 embedding 内独立拟合 `KMeans(K=2)`；
+   这两个 patient-train prototypes 随 reference 一起冻结；
+2. 病人 held-out blocks、每个未见网络候选和 rigid controls **各自独立**拟合 `KMeans(K=2)`，不得用
+   患者标签分配模型事件；
+3. 候选两个 prototype 与 patient-train 两个 prototype 构造 `2×2` Spearman matrix，用 Hungarian
+   一一匹配消除 KMeans 标签置换；报告 matched cells、crossed cells、matched mean 和 matrix contrast；
+4. 有效模式要求每簇至少 10 条事件；Fig. 4C 方向结构要求两个 matched cells 均 `>0`、两个 crossed
+   cells 均 `<0`；31 个插值 grid points 高度相关，因此本轮不把 channel-shuffle p 值伪装成独立检验；
+5. data-driven candidate 若要声称优于 rigid family，其 matched mean 还必须不低于 hand cores 与
+   Stage 2 filament 中较高者；同时仍须通过 §9.3c 的 rigid-distance 与 patient-floor 门。
+
+该 KMeans consistency 是**确认/read-back gate**，不回灌 rev6 optimizer。若后续把 patient-train
+prototype match 改成训练目标，必须另起 revision，并保留 patient held-out blocks 与未见 network seeds 的
+双重隔离；不得在同一确认池上调阈值或选候选。
 
 ### 9.4 空间诊断量与判据
 
