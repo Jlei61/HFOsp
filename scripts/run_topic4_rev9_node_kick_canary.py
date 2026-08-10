@@ -79,6 +79,9 @@ def _event_summary(result, cmrun, detect_events, *, interval_ms):
         detector_threshold=float(threshold), n_events=int(len(events)),
         n_events_in_response_interval=int(len(overlapping)),
         response_interval_event=bool(overlapping),
+        events_in_response_interval=[dict(
+            t_on=float(event["t_on"]), t_off=float(event["t_off"]))
+            for event in overlapping],
         runaway_early_stop_ms=result["runaway_early_stop_ms"],
         simulated_until_ms=float(len(spikes) * cmrun.DT),
         wall_seconds=float(result["wall_s"]),
@@ -263,9 +266,16 @@ def main():
     if len(amplitude_matches) != 1:
         raise RuntimeError("window-selection amplitude is absent or ambiguous")
     selection_amplitude_index = int(amplitude_matches[0])
-    window_medians = np.nanmedian(
-        scalars["downstream_positive_per_cell"][:, :, selection_amplitude_index, :],
-        axis=(0, 1))
+    site_seed_linear_eligible = (
+        ~response_event.any(axis=2) & ~np.isfinite(runaway_ms).any(axis=2))
+    selection_values = scalars["downstream_positive_per_cell"][
+        :, :, selection_amplitude_index, :]
+    if site_seed_linear_eligible.any():
+        window_medians = np.nanmedian(np.where(
+            site_seed_linear_eligible[:, :, None], selection_values, np.nan),
+            axis=(0, 1))
+    else:
+        window_medians = np.full(n_window, np.nan)
     if not np.isfinite(window_medians).any():
         selected_window_index = None
     else:
@@ -278,14 +288,17 @@ def main():
     for seed_index, seed in enumerate(seeds):
         for site_index, site in enumerate(sites):
             for window_index in range(n_window):
+                eligible = bool(site_seed_linear_eligible[seed_index, site_index])
                 source = fit_response_slope(
-                    actual_amplitudes,
-                    scalars["source_signed_per_cell"][
-                        seed_index, site_index, :, window_index])
+                    actual_amplitudes if eligible else [],
+                    (scalars["source_signed_per_cell"][
+                        seed_index, site_index, :, window_index]
+                     if eligible else []))
                 downstream = fit_response_slope(
-                    actual_amplitudes,
-                    scalars["downstream_signed_per_cell"][
-                        seed_index, site_index, :, window_index])
+                    actual_amplitudes if eligible else [],
+                    (scalars["downstream_signed_per_cell"][
+                        seed_index, site_index, :, window_index]
+                     if eligible else []))
                 if source["slope"] is not None:
                     source_slopes[seed_index, site_index, window_index] = source["slope"]
                 if downstream["slope"] is not None:
@@ -293,16 +306,19 @@ def main():
                 slope_records.append(dict(
                     seed=seed, site_id=site["id"], window_index=window_index,
                     source=source, downstream=downstream,
-                    all_amplitudes_linear_eligible=bool(
-                        not response_event[seed_index, site_index].any()
-                        and not np.isfinite(runaway_ms[seed_index, site_index]).any()),
+                    all_amplitudes_linear_eligible=eligible,
                 ))
 
     paired = scalars["downstream_signed_per_cell"]
-    paired_median = np.nanmedian(paired, axis=0)
-    paired_mad = np.nanmedian(
-        np.abs(paired - paired_median[None, ...]), axis=0)
-    downstream_snr = np.abs(paired_median) / (1.4826 * paired_mad + 1e-6)
+    if site_seed_linear_eligible.any():
+        eligible_paired = np.where(
+            site_seed_linear_eligible[:, :, None, None], paired, np.nan)
+        paired_median = np.nanmedian(eligible_paired, axis=0)
+        paired_mad = np.nanmedian(
+            np.abs(eligible_paired - paired_median[None, ...]), axis=0)
+        downstream_snr = np.abs(paired_median) / (1.4826 * paired_mad + 1e-6)
+    else:
+        downstream_snr = np.full((n_site, n_amp, n_window), np.nan)
     _atomic_npz(
         output_npz,
         seeds=np.asarray(seeds, np.int64),
@@ -316,6 +332,7 @@ def main():
             -1 if selected_window_index is None else selected_window_index, np.int64),
         window_downstream_positive_median=np.asarray(window_medians, np.float64),
         response_interval_event=response_event,
+        site_seed_linear_eligible=site_seed_linear_eligible,
         runaway_early_stop_ms=runaway_ms,
         simulation_wall_seconds=simulation_wall,
         source_slopes=source_slopes,
@@ -328,7 +345,8 @@ def main():
 
     package_lock = "requirements.txt"
     payload = dict(
-        status="REV9_NODE_KICK_CANARY_COMPLETE",
+        status=("REV9_NODE_KICK_CANARY_COMPLETE" if selected_window_index is not None
+                else "REV9_NODE_KICK_CANARY_NO_ELIGIBLE_WINDOW"),
         scientific_role=(
             "Node-only instrument canary used to freeze the response window; "
             "not edge calibration, equivalence evidence, or patient validation"),
@@ -350,6 +368,8 @@ def main():
             n_kick_pairs=int(response_event.size),
             n_response_interval_event=int(response_event.sum()),
             n_runaway=int(np.isfinite(runaway_ms).sum()),
+            n_eligible_site_seed=int(site_seed_linear_eligible.sum()),
+            n_total_site_seed=int(site_seed_linear_eligible.size),
             sham=sham_records),
         slopes=slope_records,
         runs=records,

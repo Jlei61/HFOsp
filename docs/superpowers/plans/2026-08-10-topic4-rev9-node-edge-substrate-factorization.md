@@ -32,10 +32,13 @@
 
 ## Task 3：冻结 small-kick instrument
 
-- [ ] 写 `config/topic4_rev9_exploratory.json`，冻结 E-only top-hat、onset 100 ms、duration 18 ms、radius 1 mm。
-- [ ] 幅度固定 `{0.25,0.5,1.0}*nu_theta`，5 ms bins，pulse-end 后三个候选窗口。
-- [ ] 明确 signed/positive response、source/downstream、OLS slope、窗口 tie-break 和 paired event exclusion。
-- [ ] canary seeds `901--903` 生成所有 alpha 的 response surface；只据 Node 冻结全局窗口。
+- [x] 写 `config/topic4_rev9_exploratory.json`，冻结 E-only top-hat、初始 onset 100 ms、duration 18 ms、radius 1 mm。
+- [x] 幅度固定 `{0.25,0.5,1.0}*nu_theta`，5 ms bins，pulse-end 后三个候选窗口。
+- [x] 明确 signed/positive response、source/downstream、OLS slope、窗口 tie-break 和 paired event exclusion。
+- [x] Node canary seeds `901--903` 完成 57 次仿真；54/54 kick pairs 被 sham 启动事件污染，0 runaway。
+- [x] eligibility reconciliation 作废原始 20--40 ms 自动选择：`0/18` site-seed eligible，正式状态无可用窗口。
+- [ ] 用同三条 Node sham 扫 `[100,160,220,280,340] ms`，只在 3/3 seeds 安静时冻结新 onset。
+- [ ] 新 onset 下重跑 Node canary，再据无事件 paired units 冻结全局窗口。
 - [ ] 保存 SNR、event/runaway、exclusion imbalance；这些是诊断，不是放行门。
 
 ## Task 4：Alpha exploratory calibration

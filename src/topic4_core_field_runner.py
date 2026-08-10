@@ -56,6 +56,8 @@ TRACKED_MODULES = (
     "scripts/build_topic4_rev9_frozen_readouts.py",
     "scripts/run_topic4_rev9_structure_audit.py",
     "scripts/run_topic4_rev9_node_kick_canary.py",
+    "scripts/reconcile_topic4_rev9_node_kick_canary.py",
+    "scripts/run_topic4_rev9_sham_onset_scan.py",
     "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8.py",
     "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8_kmeans.py",
     "scripts/audit_topic4_data_driven_core_mechanism.py",

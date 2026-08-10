@@ -59,6 +59,7 @@
     "event_exclusion": "if_any_arm_has_detector_event_exclude_site_seed_from_all_linear_slopes_and_report_imbalance",
     "runaway_handling": "terminate_run_record_nonlinear_outcome",
     "canary_seeds": [901, 902, 903],
+    "onset_scan_candidates_ms": [100.0, 160.0, 220.0, 280.0, 340.0],
     "origins": [
       {"id": "component_1", "role": "field_component", "xy_mm": [3.6202140551125526, 7.054341437477716]},
       {"id": "component_2", "role": "field_component", "xy_mm": [11.847833907651358, 3.577066400859459]},

@@ -151,7 +151,8 @@ r_(e,c) = q_c(x_e) / sum_j q_j(x_e)
 instrument 直接采用 `src/snn_engine/kick_probe.py` 的实际语义：
 
 - E-only top-hat disk；`r_kick=1.0 mm`；
-- pulse onset `100 ms`，duration `18 ms`；
+- 初始 pulse onset `100 ms`，duration `18 ms`。若 Node sham 在该响应区间出现自发事件，先仅用 sham trajectories
+  在预冻结候选 onset 上选择跨 seeds 的全局安静时段，再冻结新 onset；不得用 edge response 或 patient score 选择 timing；
 - 在 pulse 内给 disk 内 E neurons 增加外部 Poisson rate `KICK_BOOST`，单位 `1/ms`；
 - amplitude 为 `{0.25,0.5,1.0} * nu_theta`，其中 `nu_theta=compute_nu_theta(params)[0]`；
 - kick/sham 使用相同 network、OU、Poisson seed；sham 的额外 rate 为 0；
@@ -164,6 +165,11 @@ instrument 直接采用 `src/snn_engine/kick_probe.py` 的实际语义：
 
 如果任一 arm 在窗口中触发 detector event，该 site-seed 在所有 arm 的线性 slope 比较中成组剔除，同时保存触发 arm、
 事件数和 exclusion imbalance。runaway 立即终止该 run 并作为 nonlinear/destabilizing outcome，不静默丢弃。
+
+**首轮 instrument 结果：** `t_kick=100 ms` 的 Node canary 在 seeds 901--903 的 sham 中均有响应区间事件，导致
+`0/18` site-seed 可用于线性窗口选择；54 个 kick runs 无 runaway。原始响应保留为启动过渡诊断，但 20--40 ms 的原始
+自动窗口已作废。下一步只做 sham-only onset scan，找到全局安静 onset 后再重跑 Node canary；此时不得启动 edge alpha
+动力学扫描。
 
 ## 9. Alpha 探索和四臂运行
 
