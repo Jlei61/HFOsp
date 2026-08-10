@@ -118,21 +118,22 @@ def _payload(ds_sid, rd_dir, geo_dir, activation, field="template_a"):
 
 def draw_topic5_field_panel(
     ax, dat, vals, title, cbar_label, *, compact, labels=False, cbar=False,
-    contact_outline_lw=None, contact_size=None,
+    contact_outline_lw=None, contact_size=None, cmap="viridis",
+    title_color="black",
 ):
-    """viridis field + contacts + swap-source rings (red=source in A, blue=source in B) + SOZ rings."""
+    """Physical-mm field + contacts + frozen A/B source and SOZ rings."""
     xlim, ylim, sigma = dat["frame"]["xlim"], dat["frame"]["ylim"], dat["frame"]["sigma_mm"]
     xs, ys, names, soz = dat["xs"], dat["ys"], dat["names"], dat["soz"]
     _, _, T, _, _ = _smooth_rank_field_mm(xs, ys, vals, dat["sup"], xlim, ylim, sigma)
     im = ax.imshow(T, origin="lower", extent=[xlim[0], xlim[1], ylim[0], ylim[1]],
-                   aspect="equal", cmap="viridis", vmin=0, vmax=1)
+                   aspect="equal", cmap=cmap, vmin=0, vmax=1)
     ok = np.isfinite(vals)
     xx, yy, vv = xs[ok], ys[ok], np.asarray(vals)[ok]
     nn = [n for n, o in zip(names, ok) if o]
     soz_ok = np.asarray(soz)[ok]
     base_lw = float(contact_outline_lw) if contact_outline_lw is not None else (1.0 if compact else 1.7)
     marker_size = float(contact_size) if contact_size is not None else (40 if compact else 80)
-    ax.scatter(xx, yy, c=vv, cmap="viridis", vmin=0, vmax=1, s=marker_size, zorder=3,
+    ax.scatter(xx, yy, c=vv, cmap=cmap, vmin=0, vmax=1, s=marker_size, zorder=3,
                edgecolors=["k" if z else "white" for z in soz_ok],
                linewidths=[base_lw + 0.4 if z else base_lw for z in soz_ok])
     for grp, col in ((dat["src_a"], SRC_A_COL), (dat["src_b"], SRC_B_COL)):
@@ -143,7 +144,8 @@ def draw_topic5_field_panel(
         for x, y, n in zip(xx, yy, nn):
             ax.text(x, y + (ylim[1] - ylim[0]) * 0.026, n, ha="center", va="bottom",
                     fontsize=5.5, color="0.92", path_effects=LABEL_HALO, zorder=6)
-    ax.set_title(title, fontsize=FS_TITLE_COMPACT if compact else FS_TITLE_PANEL)
+    ax.set_title(title, fontsize=FS_TITLE_COMPACT if compact else FS_TITLE_PANEL,
+                 color=title_color, fontweight="bold")
     ax.set_xlim(*xlim); ax.set_ylim(*ylim); ax.set_aspect("equal", adjustable="box")
     if compact:
         ax.set_xticks([]); ax.set_yticks([])
