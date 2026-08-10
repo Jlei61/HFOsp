@@ -247,6 +247,13 @@ paired coverage 为 `28/34`；source/downstream slope 的配对 Spearman 分别�
 仍有明显 identity 偏离。安全口径是“选择了一个便于四臂比较的 Edge reference”，不能写 Node/Edge 等效或收敛到同一机制。
 正式诊断图为 `node_edge_calibration/figures/rev9_edge_alpha_calibration.{png,pdf}`。
 
+**Out-of-selection 描述性复测：** 冻结 instrument、权重、尺度和 `alpha_star=0.75` 后，在 seeds `911--922` 得到
+`J_eval=0.510`、paired coverage `48/53=0.906`、response loss `0.307`；selection seeds 对应值为
+`0.434`、`28/34=0.824`、`0.166`。source/downstream slope 的 Spearman 为 `0.82/0.74`，但 seed bootstrap 95% 区间
+分别为 `[0.64,0.91]` 和 `[0.49,0.88]`，`J_eval` 区间为 `[0.211,1.533]`。因此可写“局部响应的跨位置排序关系在未参与选择的
+network seeds 上仍可见”，不能写绝对响应等效；response loss 的升高必须在四臂结果中保留。正式诊断图为
+`node_edge_calibration/figures/rev9_alpha_star_out_of_selection.{png,pdf}`。这一步没有读取 patient held-out，也不构成患者盲检。
+
 ### 9.2 四臂 endpoint
 
 至少包括：baseline/event rate、runaway、earliest density、frozen/de novo mode proportion、OOD、recruitment、

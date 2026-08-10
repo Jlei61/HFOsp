@@ -60,7 +60,11 @@
 - [x] 不改目标函数完成 midpoint：`J(0.75)=0.434 < J(1.5)=0.472`，冻结 `alpha_star=0.75`。
 - [x] midpoint 只做这一轮两个点；beta 默认关闭。
 - [x] 生成校准诊断图 PNG/PDF/metadata/README，包含 objective 分解、coverage、edge ratio 和 Node-Edge slope 散点。
-- [ ] seeds `911--922` 不重选 instrument/alpha，做 out-of-selection 描述性复测。
+- [x] seeds `911--922` 不重选 instrument/alpha，完成 out-of-selection 描述性复测：`J_eval=0.510`、coverage `48/53`、
+  source/downstream Spearman `0.82/0.74`；response loss 从 selection 的 `0.166` 增至 `0.307`，只支持排序关系外推。
+- [x] 重建 selection 和 out-of-selection 摘要，匹配函数纳入 module hashes；正式 producer commit `b0ff089e`，
+  `tracked_modules_dirty=false`，三步均由 nohup 状态链完成并通知。
+- [x] 生成 out-of-selection PNG/PDF/metadata/README；保留宽 bootstrap 区间和 identity 偏离，不作等效判定。
 - [ ] primary family 若仅有径向宽度缺口，再开 beta 小网格；轴向/非径向失配直接保留阴性结果。
 
 ## Task 5：四臂因果分解
@@ -98,11 +102,11 @@
 
 ## 当前最短执行顺序
 
-1. 提交 Node/Edge mapper、测试和本版 spec/plan。
-2. 运行 alpha grid 的零仿真结构审计，确认真实 40k-neuron network 上的守恒和畸变曲线。
-3. 完成 responsibility/null 与 frozen classifier sidecar。
-4. 冻结 instrument，先用 `901--903` nohup canary 画 response surface。
-5. 根据 response surface 选 `alpha_star`，再启动 `911--922` 四臂探索。
+1. 实现 Null / Node / Edge / Node+Edge 共用的长仿真 producer，锁定同 seed、同初态、同 readout 和同事件预算。
+2. 用 seeds `911--922` 分 worker 挂 nohup 四臂长跑；Node+Edge 沿用 `alpha_star=0.75`，不在四臂结果上重调。
+3. 聚合二因素效应与 paired bootstrap，同时输出 frozen classifier 和 de novo KMeans 的 support、AMI、OOD 与 mode endpoint。
+4. 生成一张机制分解图和一张 Fig4-style direct waveform/KMeans 图，先做科学合同检查，再做 PNG/PDF 视觉检查。
+5. 根据 mode/onset/profile 的具体缺口决定是否做 beta 径向小网格；beta 不是四臂探索的前置 blocker。
 
 ## 探索轮完成定义
 
