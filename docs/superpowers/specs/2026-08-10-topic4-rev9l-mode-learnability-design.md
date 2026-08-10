@@ -1,6 +1,6 @@
 # Topic 4 rev9-L: mode realizability and learnability audit
 
-**状态：** `L1_COMPLETE_L2_ACTIVE`
+**状态：** `L2_COMPLETE_L3A_ACTIVE`
 **日期：** 2026-08-10
 **上游：** rev8.1 patient-training KMeans fit；rev9 frozen-field node-edge factorial
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
@@ -162,7 +162,29 @@ rank curve 只在 `1/3` selection networks 改变。因此冻结为
 
 ## 6. L3：network 与 optimizer audit
 
-使用 12 个与 rev8/rev9 不重叠的新 network seeds：6 fit、3 selection、3 confirmation。分别报告：
+### 6.1 L3a：现有单事件 route-shape surrogate
+
+每个 L2 candidate/network/source 目前只有一次 forced event，因此不能直接把四个分布 descriptor 当成 per-network capacity。先用冻结
+classifier PCA 空间中 intended source 到 intended patient centroid 的距离做零新增仿真的探索性 surrogate：
+
+```text
+d_A,r(theta) = ||z(y_component2,r) - mu_A||
+d_B,r(theta) = ||z(y_component1,r) - mu_B||
+S_r(theta) = max(d_A,r(theta), d_B,r(theta))
+
+C_per_net^(1) = median_r min_theta S_r(theta)
+C_shared^(1)  = min_theta median_r S_r(theta)
+Delta_network^(1) = C_shared^(1) - C_per_net^(1)
+```
+
+只纳入 L2 结构可容许候选。上标 `(1)` 明确表示每 source/network 只有一个 event；它只能回答当前 64 点库是否能移动单次 route
+shape，不能建立 recruitment、precedence 或 event-distribution capacity，也不使用 patient floor 设置 PASS/FAIL。若 L3a 选出的
+shared-surrogate candidate 未在 selection seeds 上评估，先冻结该 candidate，再只补三张 selection 网络作 out-of-fit sanity。
+
+### 6.2 L3b：重复事件正式 oracle 与 optimizer 条件
+
+正式分布级审计使用 12 个与 rev8/rev9 不重叠的新 network seeds：已有 6 fit、3 selection，另留 3 confirmation 不参与任何选择。
+每个 network/source 必须有足够的独立事件或 noise realizations，才能分别报告：
 
 ```text
 C_per_net = median_r min_theta max(D_A,r, D_B,r)
