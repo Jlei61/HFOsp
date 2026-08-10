@@ -168,6 +168,24 @@ def stage_audit():
     return payload
 
 
+def _assert_audit_current():
+    path = OUT / "u0_lineage_audit.json"
+    if not path.is_file():
+        raise SystemExit("LC5 U1 requires U0 audit")
+    audit = json.loads(path.read_text())
+    if audit.get("status") != "U0_PASS":
+        raise SystemExit("LC5 U0 audit is not PASS")
+    if audit.get("git_head") != _git_head():
+        raise SystemExit("LC5 code commit drifted after U0 audit")
+    for rel, expected in audit.get("mechanism_module_hashes", {}).items():
+        if _sha(ROOT / rel) != expected:
+            raise SystemExit(f"LC5 mechanism source drift after U0 audit: {rel}")
+    for name, expected in audit.get("artifacts", {}).items():
+        if _sha(name) != expected:
+            raise SystemExit(f"LC5 source artifact drift after U0 audit: {name}")
+    return audit
+
+
 def _config(S, candidate):
     cfg = E01._dynamic_cfg(GEO._point(GEO.H1_POINT_ID))
     cfg.update(
@@ -210,8 +228,7 @@ def _copy_state(seconds_dir, target_dir, t_ms, label):
 def stage_capture():
     if U1_FINAL.is_dir():
         return json.loads((U1_FINAL / "u1_capture_summary.json").read_text())
-    if not (OUT / "u0_lineage_audit.json").is_file():
-        raise SystemExit("LC5 U1 requires U0 audit")
+    _assert_audit_current()
     preflight = _append_resource("U1_PREFLIGHT")
     if preflight["mem_available_gib"] < 128.0:
         raise SystemExit(f"LC5 U1 MemAvailable {preflight['mem_available_gib']:.1f} GiB < 128")
