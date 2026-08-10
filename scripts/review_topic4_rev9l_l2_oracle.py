@@ -109,24 +109,125 @@ def _prototype_weak(row):
     return float(max(losses))
 
 
-def _plot(fit_rows, selection_rows, baseline_id, selected_id, field_kl, floor,
-          output_dir):
+def arrays_equal_nan(left, right):
+    left, right = np.asarray(left), np.asarray(right)
+    return left.shape == right.shape and np.array_equal(
+        left, right, equal_nan=True)
+
+
+def _source_curve(path, source):
+    with np.load(path, allow_pickle=False) as loaded:
+        identifiers = np.asarray(loaded["source_ids"]).astype(str)
+        index = np.flatnonzero(identifiers == source)
+        if len(index) != 1:
+            raise RuntimeError(f"source {source} missing or duplicated in {path}")
+        return np.asarray(loaded["rank_curves"][index[0]], float)
+
+
+def _curve_signature(curves):
+    digest = hashlib.sha256()
+    for curve in curves:
+        values = np.asarray(curve, np.float64)
+        digest.update(np.asarray(values.shape, np.int64).tobytes())
+        digest.update(np.isnan(values).tobytes())
+        digest.update(np.nan_to_num(values, nan=0.0).tobytes())
+    return digest.hexdigest()
+
+
+def _curve_audit(root, candidate_ids, seeds, source_for, gamma_by_id):
+    baseline_id = "sobol_000"
+    baseline = {
+        mode: {
+            seed: _source_curve(
+                root / f"{baseline_id}_seed{seed}.npz", source)
+            for seed in seeds
+        }
+        for mode, source in source_for.items()
+    }
+    audit, signatures = {}, {mode: {} for mode in source_for}
+    combined_signatures = {}
+    for candidate_id in candidate_ids:
+        audit[candidate_id] = {}
+        combined_curves = []
+        for mode, source in source_for.items():
+            curves = [
+                _source_curve(root / f"{candidate_id}_seed{seed}.npz", source)
+                for seed in seeds
+            ]
+            combined_curves.extend(curves)
+            changed = [
+                not arrays_equal_nan(curve, baseline[mode][seed])
+                for curve, seed in zip(curves, seeds)
+            ]
+            maximum = []
+            for curve, seed in zip(curves, seeds):
+                delta = np.abs(curve - baseline[mode][seed])
+                finite = delta[np.isfinite(delta)]
+                maximum.append(float(finite.max(initial=0.0)))
+            audit[candidate_id][mode] = {
+                "source": source,
+                "changed_network_seeds": [
+                    int(seed) for seed, value in zip(seeds, changed) if value],
+                "n_changed_networks": int(sum(changed)),
+                "n_networks": int(len(seeds)),
+                "max_abs_curve_change_by_seed": dict(
+                    zip(map(str, seeds), maximum)),
+            }
+            signatures[mode][candidate_id] = _curve_signature(curves)
+        combined_signatures[candidate_id] = _curve_signature(combined_curves)
+
+    def groups(signature_by_id):
+        grouped = {}
+        for candidate_id, signature in signature_by_id.items():
+            grouped.setdefault(signature, []).append(candidate_id)
+        output = []
+        for identifiers in grouped.values():
+            if len(identifiers) < 2:
+                continue
+            distances = [
+                float(np.linalg.norm(
+                    gamma_by_id[left] - gamma_by_id[right]))
+                for index, left in enumerate(identifiers)
+                for right in identifiers[index + 1:]
+            ]
+            output.append({
+                "candidate_ids": identifiers,
+                "min_pairwise_gamma_l2": min(distances),
+                "max_pairwise_gamma_l2": max(distances),
+            })
+        return output
+
+    return audit, {
+        "mode_A": groups(signatures["A"]),
+        "mode_B": groups(signatures["B"]),
+        "combined_A_B": groups(combined_signatures),
+    }
+
+
+def _plot(fit_rows, selection_rows, baseline_id, selected_id, curve_audit,
+          floor, output_dir):
     output_dir.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(1, 4, figsize=(16.0, 4.2), constrained_layout=True)
     common = [key for key in selection_rows if key in fit_rows]
-    x = [fit_rows[key]["score"]["objective"] for key in common]
-    y = [selection_rows[key]["corrected_score"]["objective"] for key in common]
+    fit_baseline = fit_rows[baseline_id]["score"]["objective"]
+    selection_baseline = selection_rows[baseline_id]["corrected_score"]["objective"]
+    x = [fit_baseline - fit_rows[key]["score"]["objective"] for key in common]
+    y = [selection_baseline - selection_rows[key]["corrected_score"]["objective"]
+         for key in common]
     axes[0].scatter(x, y, color="#277da1", s=38)
-    lo, hi = min(x + y), max(x + y)
+    lo, hi = min(x + y + [0.0]), max(x + y + [0.0])
     axes[0].plot([lo, hi], [lo, hi], ls="--", color="0.6", lw=1)
+    axes[0].axhline(0.0, color="0.75", lw=0.8)
+    axes[0].axvline(0.0, color="0.75", lw=0.8)
     for key in common:
         axes[0].annotate(key.replace("sobol_", ""),
-                         (fit_rows[key]["score"]["objective"],
-                          selection_rows[key]["corrected_score"]["objective"]),
+                         (fit_baseline - fit_rows[key]["score"]["objective"],
+                          selection_baseline
+                          - selection_rows[key]["corrected_score"]["objective"]),
                          xytext=(2, 2), textcoords="offset points", fontsize=7)
-    axes[0].set_xlabel("fit objective (n=6 floor)")
-    axes[0].set_ylabel("selection objective (n=3 floor)")
-    axes[0].set_title("A  Out-of-fit stability", loc="left", weight="bold")
+    axes[0].set_xlabel("fit improvement vs scalar (n=6 floor)")
+    axes[0].set_ylabel("selection improvement vs scalar (n=3 floor)")
+    axes[0].set_title("A  Fit-to-selection retention", loc="left", weight="bold")
 
     base, best = selection_rows[baseline_id], selection_rows[selected_id]
     positions = np.arange(len(DESCRIPTOR_NAMES))
@@ -149,37 +250,54 @@ def _plot(fit_rows, selection_rows, baseline_id, selected_id, field_kl, floor,
     axes[1].set_title("B  Baseline bars, selected dots", loc="left", weight="bold")
     axes[1].legend(frameon=False, fontsize=7)
 
-    all_fit = list(fit_rows.values())
-    axes[2].scatter(
-        [row["mode_descriptors"]["modes"]["A"]["curve_prototype_spearman"]
-         for row in all_fit],
-        [row["score"]["mode_scores"]["A"] for row in all_fit],
-        color="0.55", s=24)
-    axes[2].scatter(
-        fit_rows[selected_id]["mode_descriptors"]["modes"]["A"][
-            "curve_prototype_spearman"],
-        fit_rows[selected_id]["score"]["mode_scores"]["A"],
-        marker="*", s=150, color="#d1495b", label="selected")
-    axes[2].set_xlabel("mode A prototype Spearman")
-    axes[2].set_ylabel("full mode A score")
-    axes[2].set_title("C  Prototype is not the objective", loc="left", weight="bold")
+    ordered = sorted(
+        common,
+        key=lambda key: selection_baseline
+        - selection_rows[key]["corrected_score"]["objective"])
+    positions = np.arange(len(ordered))
+    axes[2].barh(
+        positions - 0.17,
+        [curve_audit[key]["A"]["n_changed_networks"] for key in ordered],
+        0.32, color="#d1495b", label="mode A source")
+    axes[2].barh(
+        positions + 0.17,
+        [curve_audit[key]["B"]["n_changed_networks"] for key in ordered],
+        0.32, color="#277da1", label="mode B source")
+    axes[2].axvline(len(next(iter(curve_audit.values()))["A"][
+        "max_abs_curve_change_by_seed"]), color="0.5", ls="--", lw=0.8)
+    axes[2].set_xlim(0, 3.15)
+    axes[2].set_xticks([0, 1, 2, 3])
+    axes[2].set_yticks(positions, [key.replace("sobol_", "") for key in ordered],
+                       fontsize=7)
+    axes[2].set_xlabel("selection networks with changed rank curve")
+    axes[2].set_title("C  Shared route change", loc="left", weight="bold")
     axes[2].legend(frameon=False, fontsize=7)
 
-    axes[3].scatter(
-        [field_kl[row["candidate_id"]] for row in all_fit],
-        [row["score"]["objective"] for row in all_fit],
-        c=[row["score"]["mode_scores"]["A"] for row in all_fit],
-        cmap="magma", s=28)
-    axes[3].set_xlabel("field-target residual KL (median max C1/C2)")
-    axes[3].set_ylabel("fit weakest-mode objective")
-    axes[3].set_title("D  Fit-distortion landscape", loc="left", weight="bold")
+    shown = [baseline_id, selected_id]
+    for candidate_id in ordered[::-1]:
+        if candidate_id not in shown:
+            shown.append(candidate_id)
+        if len(shown) == 5:
+            break
+    gamma = np.asarray([selection_rows[key]["gamma"] for key in shown], float)
+    scale = max(float(np.max(np.abs(gamma))), 1e-12)
+    image = axes[3].imshow(
+        gamma, cmap="RdBu_r", vmin=-scale, vmax=scale, aspect="auto")
+    axes[3].set_yticks(range(len(shown)), [key.replace("sobol_", "") for key in shown],
+                       fontsize=7)
+    axes[3].set_xticks(
+        range(6), ("C1<-C1", "C1<-C2", "C2<-C1", "C2<-C2",
+                   "BG<-C1", "BG<-C2"), rotation=30, ha="right", fontsize=7)
+    axes[3].set_title("D  Distinct parameters, coarse ties", loc="left",
+                      weight="bold")
+    fig.colorbar(image, ax=axes[3], shrink=0.80, label="gamma")
     for suffix in ("png", "pdf"):
         fig.savefig(output_dir / f"rev9l_l2_scientific_review.{suffix}", dpi=300)
     plt.close(fig)
     (output_dir / "README.md").write_text(
         "### rev9l_l2_scientific_review.png\n"
-        "A 图用各自匹配事件数的 patient-training floor 比较 fit 与 selection；B 图把 scalar baseline（浅柱）和 selection 候选（实点）的四项绝对距离除以 patient floor；C 图显示只提高 prototype correlation 不等于完整模式改善；D 图改用 C1/C2 field-target KL，避免 background target 把 distortion 中位数压到零。\n\n"
-        "**关注点**：selection 改善是否稳定、mode A 四项是否接近患者抽样地板，以及连接扰动是否换来实质的 weakest-mode 收益。\n")
+        "A 图用各自匹配事件数的 patient-training floor 显示相对 scalar edge 的 fit 与 selection 改善；B 图把 scalar baseline（浅柱）和 selection 候选（实点）的四项绝对距离除以 patient floor；C 图直接计数每个候选在三张 selection 网络上是否改变 A/B rank curve；D 图展示若干不同 residual 参数。该图是 development/oracle 审阅，不读取 patient held-out。\n\n"
+        "**关注点**：selection 改善是否来自三张网络共享的 mode-A 路径改变，以及 mode-A 四层误差是否真正接近患者训练抽样地板。\n")
 
 
 def main():
@@ -217,6 +335,18 @@ def main():
     selected_id, baseline_id = corrected_rank[0], "sobol_000"
     baseline = selection_rows[baseline_id]
     selected = selection_rows[selected_id]
+    seeds = list(map(int, config["network_seeds"]["selection"]))
+    source_for = {
+        "A": config["primary_mapping"]["mode_A_source"],
+        "B": config["primary_mapping"]["mode_B_source"],
+    }
+    gamma_by_id = {
+        candidate_id: np.asarray(row["gamma"], float)
+        for candidate_id, row in selection_rows.items()
+    }
+    curve_audit, equivalent_groups = _curve_audit(
+        root / "selection_confirmation/workers", list(selection_rows), seeds,
+        source_for, gamma_by_id)
     common = list(selection_rows)
     rank_result = spearmanr(
         [fit_rows[key]["score"]["objective"] for key in common],
@@ -239,11 +369,16 @@ def main():
     objective_gain = float(
         baseline["corrected_score"]["objective"]
         - selected["corrected_score"]["objective"])
+    selected_a_curve_change = curve_audit[selected_id]["A"]
+    shared_mode_a_route_change = (
+        selected_a_curve_change["n_changed_networks"] == len(seeds))
     payload = {
-        "status": "REV9L_L2_SCIENTIFIC_REVIEW_COMPLETE",
+        "status": "L2_COMPONENT_PAIR_SEARCH_NO_SHARED_MODE_A_RESTORATION",
         "safe_claim": (
-            "the six-parameter conserved edge residual yields only a small "
-            "selection-network improvement and does not recover patient mode A"),
+            "within the frozen 64-point bounded component-pair search, the "
+            "six-parameter conserved edge residual yields only a small "
+            "selection improvement and no candidate restores mode A across all "
+            "three selection networks"),
         "fit_n_per_mode": 6,
         "selection_n_per_mode": 3,
         "selection_floor_mismatch_fixed": True,
@@ -265,6 +400,15 @@ def main():
         },
         "selection_raw_descriptor_delta_selected_minus_baseline": raw_delta,
         "mode_a_selected_above_patient_floor_q95": mode_a_above_q95,
+        "selection_curve_audit": curve_audit,
+        "selected_mode_a_curve_change": selected_a_curve_change,
+        "shared_mode_a_route_change": bool(shared_mode_a_route_change),
+        "equivalent_output_groups": {
+            **equivalent_groups,
+            "interpretation": (
+                "distinct gamma vectors can produce identical forced rank curves; "
+                "the edge mechanism is not identifiable under this coarse readout"),
+        },
         "prototype_only_ablation": {
             "best_candidate_id": prototype_best["candidate_id"],
             "mode_a_prototype_spearman": prototype_best[
@@ -274,12 +418,25 @@ def main():
                 prototype_best["candidate_id"]) + 1,
         },
         "diagnosis": {
-            "objective": "OLD_OBJECTIVE_INSUFFICIENT_NEW_WEAKEST_MODE_OBJECTIVE_NEEDED",
+            "objective": "WORST_MODE_OBJECTIVE_USED_NO_SHARED_MODE_A_RESTORATION",
             "optimizer": "NOT_ATTRIBUTABLE_NO_FULL_KNOWN_GOOD_SOLUTION",
-            "edge_family": "SMALL_EFFECT_DIRECTION_FOUND_MODE_A_RECOVERY_FAIL",
+            "edge_family": (
+                "NO_SHARED_MODE_A_ROUTE_RESTORATION_OBSERVED_WITHIN_64_POINT_"
+                "BOUNDED_SEARCH"),
+            "network": "SELECTION_BEST_CHANGES_MODE_A_ON_ONE_OF_THREE_NETWORKS",
+            "identifiability": "PARAMETER_TO_COARSE_OUTPUT_MANY_TO_ONE_OBSERVED",
             "beta": "KEEP_CLOSED_ROUTE_SHAPE_NOT_RADIAL_SCALE",
             "patient_interictal_reproduction": "NO_PARTIAL_PROPAGATION_PHENOTYPE_ONLY",
         },
+        "local_refinement_recommended": False,
+        "local_refinement_reason": (
+            "the corrected selection gain does not represent a shared mode-A "
+            "route change across the selection networks"),
+        "next_recommendation": (
+            "L3_PER_NETWORK_ORACLE_DIAGNOSTIC_WITHOUT_OPTIMIZER_CLAIM"),
+        "family_claim_boundary": (
+            "no shared restoration was observed within this finite bounded search; "
+            "this is not proof that no parameter exists in the family"),
         "field_target_residual_kl": field_kl,
         "patient_heldout_scores_computed": False,
         "inputs": {
@@ -292,13 +449,56 @@ def main():
     output_dir = root / "scientific_review"
     output_path = output_dir / "l2_scientific_review.json"
     atomic_write_json(payload, output_path)
-    _plot(fit_rows, selection_rows, baseline_id, selected_id, field_kl,
+    _plot(fit_rows, selection_rows, baseline_id, selected_id, curve_audit,
           floor3, output_dir / "figures")
+
+    decision_path = root.parent / "decision.json"
+    decision = json.loads(decision_path.read_text())
+    decision["status"] = payload["status"]
+    decision["propagation_family"]["status"] = payload["status"]
+    decision["propagation_family"]["component_pair_review"] = {
+        "review_path": str(output_path),
+        "selection_best_candidate_id": selected_id,
+        "corrected_improvement_vs_scalar": objective_gain,
+        "relative_improvement_vs_scalar": payload[
+            "corrected_objective"]["relative_improvement"],
+        "mode_A_networks_changed": selected_a_curve_change[
+            "n_changed_networks"],
+        "mode_A_networks_total": len(seeds),
+        "shared_mode_A_route_change": bool(shared_mode_a_route_change),
+        "local_refinement_recommended": False,
+        "claim_boundary": payload["family_claim_boundary"],
+    }
+    decision["propagation_family"]["next_recommendation"] = payload[
+        "next_recommendation"]
+    decision["network_realization"] = {
+        "status": "SHARED_MODE_A_IMPROVEMENT_NOT_OBSERVED",
+        "selection_best_A_changed_networks": selected_a_curve_change[
+            "changed_network_seeds"],
+        "selection_networks": seeds,
+        "per_network_oracle_status": "NOT_YET_QUANTIFIED",
+    }
+    decision["optimizer"] = {
+        "status": payload["diagnosis"]["optimizer"],
+        "reason": "optimizer attribution requires a known-good shared solution",
+    }
+    decision["identifiability"] = {
+        "status": payload["diagnosis"]["identifiability"],
+        "equivalent_output_groups": equivalent_groups,
+        "claim_boundary": (
+            "coarse forced-output ties do not identify a unique edge mechanism"),
+    }
+    decision["patient_heldout_scores_computed"] = False
+    decision["l2_scientific_review_provenance"] = payload["provenance"]
+    atomic_write_json(decision, decision_path)
     print(json.dumps({
         "status": payload["status"],
         "corrected_selected_candidate_id": selected_id,
         "relative_improvement": payload["corrected_objective"]["relative_improvement"],
         "mode_a_above_floor_q95": mode_a_above_q95,
+        "mode_a_networks_changed": selected_a_curve_change[
+            "n_changed_networks"],
+        "mode_a_networks_total": len(seeds),
         "diagnosis": payload["diagnosis"],
         "patient_heldout_scores_computed": False,
     }, indent=2), flush=True)
