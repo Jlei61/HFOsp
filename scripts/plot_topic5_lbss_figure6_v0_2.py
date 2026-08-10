@@ -20,7 +20,9 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
 from scripts.plot_contact_plane_static import _smooth_rank_field_mm  # noqa: E402
-from src.topic5_template_axis_field import scorers_from_interictal_record  # noqa: E402
+from scripts.score_topic5_rnn_motif_early_ictal_v0_4 import build_scorer  # noqa: E402
+from scripts.summarize_topic5_lbss_claims_v0_2 import attenuation_damage_auc  # noqa: E402
+from src.topic5_gradient_grid_field import score_event_detail_single  # noqa: E402
 
 
 RED = "#B2182B"
@@ -188,41 +190,69 @@ def smooth_field(points_mm: np.ndarray, values: np.ndarray, support: np.ndarray,
 
 
 def draw_cross_state_maps(fig, spec, out: Path, subject: str) -> dict:
-    sub = spec.subgridspec(1, 2, wspace=0.10)
-    axes = [fig.add_subplot(sub[0, i]) for i in range(2)]
+    sub = spec.subgridspec(1, 3, wspace=0.12)
+    axes = [fig.add_subplot(sub[0, i]) for i in range(3)]
     old_manifest = json.loads((OLD_ROOT / "MODEL_FIELD_MANIFEST.json").read_text())
     record = json.loads(Path(old_manifest["patient_geometry"][subject]["empirical_record"]).read_text())
-    scorers_from_interictal_record(record)
     field = record["interictal_field"]; order = [str(value) for value in field["contact_order"]]
-    plane = field["planes"]["own_a"]
-    points = np.asarray(plane["points"], float) * float(plane["scale_mm"])
-    support = np.asarray(field["support_a"], float)
     with np.load(out / "model_fields" / "intact" / "per_patient" / subject / f"{L3}.npz", allow_pickle=False) as data:
         names = data["contacts"].astype(str).tolist()
-        lookup = dict(zip(names, np.asarray(data["A_canonical_full"], float)))
-        earliness = np.asarray([lookup[name] for name in order], float)
-    rank_display = 1.0 - earliness
+        lookup_a = dict(zip(names, np.asarray(data["A_canonical_full"], float)))
+        lookup_b = dict(zip(names, np.asarray(data["B_canonical_full"], float)))
+        model_a = np.asarray([lookup_a[name] for name in order], float)
+        model_b = np.asarray([lookup_b[name] for name in order], float)
     target_root = Path(json.loads((out / "EARLY_ICTAL_METADATA_INVENTORY.json").read_text())["target_cache_root"])
     target_path = sorted((target_root / f"outer_{subject}").glob(f"{subject}__*.npz"))[0]
     with np.load(target_path, allow_pickle=False) as data:
         target_lookup = dict(zip(data["contact_names"].astype(str).tolist(), np.asarray(data["target_1_150"], float)))
     energy = np.asarray([target_lookup.get(name, np.nan) for name in order], float)
-    energy_norm = (energy - np.nanmin(energy)) / max(np.nanmax(energy) - np.nanmin(energy), 1e-12)
-    for ax, values, cmap, title in (
-        (axes[0], rank_display, "viridis", "RNN interictal field"),
-        (axes[1], energy_norm, "magma_r", "Early-ictal energy"),
-    ):
+    finite = np.isfinite(energy) & np.isfinite(field["earliness_a"]) & np.isfinite(field["earliness_b"])
+    detail = score_event_detail_single(build_scorer(record, model_a, model_b, finite), energy)
+    template = str(detail["best_template"])
+    if template not in {"A", "B"}:
+        raise RuntimeError(f"no maxAB template available for Figure 6 representative: {subject}")
+    model_earliness = model_a if template == "A" else model_b
+    empirical_earliness = np.asarray(field[f"earliness_{template.lower()}"], float)
+    plane = field["planes"][f"own_{template.lower()}"]
+    points = np.asarray(plane["points"], float) * float(plane["scale_mm"])
+    support = np.asarray(field[f"support_{template.lower()}"], float)
+    if detail[f"mirror_{template.lower()}"] == "mirror":
+        points = points.copy(); points[:, 1] *= -1.0
+    timing_payloads = (
+        (axes[0], 1.0 - empirical_earliness, f"Data T{template}"),
+        (axes[1], 1.0 - model_earliness, f"RNN T{template}"),
+    )
+    timing_image = None
+    for ax, values, title in timing_payloads:
         X, Y, T, _, _ = smooth_field(points, values, support)
-        ax.imshow(T, origin="lower", extent=[X.min(), X.max(), Y.min(), Y.max()],
-                  aspect="equal", cmap=cmap, vmin=0, vmax=1, interpolation="bilinear")
-        ax.scatter(points[:, 0], points[:, 1], c=values, cmap=cmap, vmin=0, vmax=1,
+        timing_image = ax.imshow(T, origin="lower", extent=[X.min(), X.max(), Y.min(), Y.max()],
+                  aspect="equal", cmap="viridis", vmin=0, vmax=1, interpolation="bilinear")
+        ax.scatter(points[:, 0], points[:, 1], c=values, cmap="viridis", vmin=0, vmax=1,
                    s=22, edgecolor="white", lw=0.7)
-        ax.set_title(title, fontsize=9)
-        ax.set_xlabel("Propagation axis (mm)")
+        ax.set_title(title, fontsize=9, color=RED if template == "A" else BLUE)
         ax.set_xticks([]); ax.set_yticks([])
-    axes[0].set_ylabel("Transverse axis")
+    e_min, e_max = float(np.nanmin(energy)), float(np.nanmax(energy))
+    X, Y, T, _, _ = smooth_field(points, energy, support)
+    energy_image = axes[2].imshow(T, origin="lower", extent=[X.min(), X.max(), Y.min(), Y.max()],
+        aspect="equal", cmap="Blues", vmin=e_min, vmax=e_max, interpolation="bilinear")
+    axes[2].scatter(points[:, 0], points[:, 1], c=energy, cmap="Blues", vmin=e_min, vmax=e_max,
+                    s=22, edgecolor="white", lw=0.7)
+    axes[2].set_title("Early ictal", fontsize=9)
+    axes[2].set_xticks([]); axes[2].set_yticks([])
+    for ax in axes:
+        ax.set_xlabel("Propagation axis", fontsize=7)
+    timing_bar = fig.colorbar(timing_image, ax=axes[:2], fraction=0.025, pad=0.015)
+    timing_bar.set_ticks([0, 1], ["early", "late"]); timing_bar.ax.tick_params(labelsize=6)
+    energy_bar = fig.colorbar(energy_image, ax=axes[2], fraction=0.045, pad=0.025)
+    energy_bar.set_ticks([e_min, e_max]); energy_bar.ax.tick_params(labelsize=6)
+    energy_bar.ax.set_title("power\n(z)", fontsize=6, pad=2)
     panel_letter(axes[0], "E")
-    return {"subject": subject, "target_path": str(target_path), "target_key": "target_1_150"}
+    return {
+        "subject": subject, "target_path": str(target_path), "target_key": "target_1_150",
+        "maxab_template": template, "maxab_abs_r": detail["maxab"],
+        "maxab_signed_r": detail[f"signed_{template.lower()}"],
+        "maxab_mirror": detail[f"mirror_{template.lower()}"],
+    }
 
 
 def draw_early_statistics(fig, spec, out: Path) -> None:
@@ -239,13 +269,11 @@ def draw_early_statistics(fig, spec, out: Path) -> None:
     axes[0].set_xticks(range(4), ["Local", "Extra", "Random", "Selected"], rotation=28, ha="right")
     axes[0].set_ylabel("Early-ictal margin")
 
-    summary = json.loads((out / "early_ictal" / "EARLY_ICTAL_SUMMARY.json").read_text())
     names = ("L1_ADDED", "L2_ADDED", "L3_ADDED", "L3_MATCHED_LOCAL")
-    values = [summary["attenuation"]["seed_removed"][f"{name}_damage_auc_gt_zero"]["median"] for name in names]
-    axes[1].bar(range(4), values, color=["#8395a7", "#a970b5", RED, BLUE], width=0.68)
-    axes[1].axhline(0, color="#777777", lw=0.7, ls="--")
-    axes[1].set_xticks(range(4), ["Extra", "Random", "Selected", "Local"], rotation=28, ha="right")
-    axes[1].set_ylabel("Concordance damage AUC")
+    auc = attenuation_damage_auc(patient, "seed_removed")
+    values = [auc[auc.target == name].damage_auc.to_numpy(float) for name in names]
+    dot_summary(axes[1], values, ["Extra", "Random", "Selected", "Local"],
+                ["#8395a7", "#a970b5", RED, BLUE], "Concordance damage AUC")
     for ax in axes: ax.spines[["top", "right"]].set_visible(False)
     panel_letter(axes[0], "F")
 
