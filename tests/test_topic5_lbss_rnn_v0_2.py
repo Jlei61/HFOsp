@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import numpy as np
+import pandas as pd
 import torch
 
+from scripts.analyse_topic5_lbss_interictal_v0_2 import aggregate_patient, paired_test
 from scripts.run_topic5_lbss_detectability_v0_2 import (
     build_ground_truth_model,
     simulate_events,
@@ -172,3 +174,22 @@ def test_detectability_generator_uses_real_geometry_schema():
     assert int(planted.sum()) == model.lbss_config.k_added
     assert np.all((ranks >= 0).sum(axis=1) >= 5)
     assert np.all((ranks == 0).sum(axis=1) == 1)
+
+
+def test_patient_aggregation_is_seed_then_fit_then_patient():
+    table = pd.DataFrame({
+        "subject": ["p"] * 6,
+        "fit_id": ["a"] * 3 + ["b"] * 3,
+        "arm": ["L3"] * 6,
+        "value": [1.0, 2.0, 100.0, 5.0, 6.0, 7.0],
+    })
+    result = aggregate_patient(table, ["value"])
+    # median fit a=2, median fit b=6, then patient mean=4.
+    assert np.isclose(result.loc[0, "value"], 4.0)
+
+
+def test_paired_test_separates_numerical_ties():
+    result = paired_test(np.array([1.0, -1.0, 1e-12, 0.0]))
+    assert result["n_positive"] == 1
+    assert result["n_negative"] == 1
+    assert result["n_tied"] == 2
