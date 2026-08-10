@@ -100,17 +100,21 @@ def _summary(values):
     }
 
 
-def _load_workers(config, config_path, expected_commit):
-    root = Path(config["output_root"]) / "phase1"
+def _load_workers(config, config_path, expected_commit, *, candidates=None,
+                  stage="phase1", seeds=None):
+    root = Path(config["output_root"]) / stage
     config_sha = _sha256(config_path)
     expected = subprocess.check_output(
         ["git", "rev-parse", expected_commit], cwd=ROOT, text=True).strip()
     output, inputs = {}, []
     contact_names = None
-    for candidate in config["component_pair_family"]["phase1_candidates"]:
+    candidates = (config["component_pair_family"]["phase1_candidates"]
+                  if candidates is None else candidates)
+    seeds = config["network_seeds"]["fit"] if seeds is None else seeds
+    for candidate in candidates:
         candidate_id = candidate["candidate_id"]
         rows, arrays, diagnostics = [], [], []
-        for seed in config["network_seeds"]["fit"]:
+        for seed in seeds:
             stem = root / "workers" / f"{candidate_id}_seed{seed}"
             json_path, npz_path = stem.with_suffix(".json"), stem.with_suffix(".npz")
             payload = json.loads(json_path.read_text())
@@ -216,6 +220,13 @@ def _candidate_summary(data, config, reference, patient, patient_labels,
             row["edge_ratio"]["p99"] for row in data["edge_diagnostics"]]),
         "edge_ratio_max": _summary([
             row["edge_ratio"]["max"] for row in data["edge_diagnostics"]]),
+        "edge_ratio_global_min": float(min(
+            row["edge_ratio"]["min"] for row in data["edge_diagnostics"])),
+        "edge_ratio_global_max": float(max(
+            row["edge_ratio"]["max"] for row in data["edge_diagnostics"])),
+        "residual_kl_all_targets": _summary([
+            row["residual_target_groups"]["all_nonzero_incoming"]["kl_median"]
+            for row in data["edge_diagnostics"]]),
         "max_abs_incoming_E_error": max(
             row["max_abs_incoming_E_error"] for row in data["edge_diagnostics"]),
         "all_topology_unchanged": all(
@@ -225,6 +236,9 @@ def _candidate_summary(data, config, reference, patient, patient_labels,
         "all_gaba_unchanged": all(
             row["gaba_unchanged"] for row in data["edge_diagnostics"]),
     }
+    structural["ratio_within_0p25_4"] = bool(
+        structural["edge_ratio_global_min"] >= 0.25
+        and structural["edge_ratio_global_max"] <= 4.0)
     return {
         "gamma": data["gamma"],
         "source_mode_correlation": correlations,

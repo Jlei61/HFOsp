@@ -213,6 +213,11 @@ def component_pair_normalized_ee(net, h_e, membership, gamma, *, alpha=0.75):
             or not np.array_equal(original_cols, final_cols)):
         raise RuntimeError("component-pair mapper changed edge identity")
     edge_ratio = final_data / original_data
+    incoming_error = np.abs(
+        incoming_ee_weight(final_net["ampa_by_delay"], int(net["NE"]))
+        - incoming_ee_weight(net["ampa_by_delay"], int(net["NE"])))
+    if incoming_error.max(initial=0.0) > 1e-9:
+        raise RuntimeError("combined scalar/residual mapper violated incoming-E conservation")
     return final_net, {
         "mechanism": "component_pair_residual_target_normalized_EE_exp_v2",
         "alpha": alpha,
@@ -225,8 +230,8 @@ def component_pair_normalized_ee(net, h_e, membership, gamma, *, alpha=0.75):
         "residual_exact_noop": bool(residual_diagnostics["exact_noop"]),
         "n_E": int(net["NE"]),
         "n_ee_edges": int(len(final_data)),
-        "max_abs_incoming_E_error": residual_diagnostics[
-            "max_abs_incoming_E_error"],
+        "max_abs_incoming_E_error": float(incoming_error.max(initial=0.0)),
+        "mean_abs_incoming_E_error": float(incoming_error.mean()),
         "topology_unchanged": bool(
             scalar_diagnostics["topology_unchanged"]
             and residual_diagnostics["topology_unchanged"]),

@@ -130,16 +130,27 @@ prototype rho 约 `0.97`，component 2 对 A 仅约 `0.23`；component 3 和三�
 
 ## 5. L2：最小 relaxed component-pair edge oracle
 
-仅当 L1 显示 scalar `exp(alpha*h_t*h_s)` 的 forced propagation 不足时进入。定义 Gaussian soft responsibility `r_c(i)`：
+仅当 L1 显示 scalar `exp(alpha*h_t*h_s)` 的 forced propagation 不足时进入。冻结 `alpha=0.75`，并用
+`h_i` 加权 Gaussian responsibility，把远场质量留给 background；不能把几乎为零的 Gaussian 尾部强制归一化成 component。
+对 target groups `a in {C1,C2,BG}` 和 source groups `b in {C1,C2}` 定义六参数 residual：
 
 ```text
-log M_ts = eta11*r1(t)r1(s) + eta22*r2(t)r2(s)
-         + eta1_from_2*r1(t)r2(s) + eta2_from_1*r2(t)r1(s)
+log M_ts = 0.75*h_t*h_s
+         + sum_a r_a(t) * [gamma_a1*r_C1(s) + gamma_a2*r_C2(s)]
 ```
 
 参数方向固定为 source `s` 到 target `t`。仍执行 per-target normalization，保持 topology、delay、incoming-E、E->I 和 GABA。
-component 3 固定为零，作为负对照。先做正负 finite-difference response Jacobian，再由受约束 ridge 生成候选，最多 16 个完整
-SNN candidates；不直接开放 edge matrix，也不先增加 radial `beta`。
+background/C3 source 是 residual 零参照，component 3 target 固定为零负对照；`gamma=0` 必须逐数组退化为冻结 scalar edge。
+六个 `gamma` 的边界为 `[-log(4),+log(4)]`。先用 13 个中心有限差分候选做方向和实现审计，再在 fit seeds
+`1004--1009` 上运行 64-point scrambled Sobol；所有候选保留完整结果，只有最终 edge ratio 全在 `[0.25,4]` 且无 runaway
+的候选进入排序。
+
+正式搜索目标只读取 patient training。每个模式从六个不同 recording blocks 各取一个事件，重复 512 次，得到与六个 model
+network events 同计数的 recruitment、precedence、mean-rank profile 和 event-cloud floors。每项用
+`z=(D-floor_median)/floor_IQR` 标准化并取 `softplus(z)`；每模式另加 `2*(1-readable_fraction)`，最后用 `tau=0.25` 的
+smooth worst-mode 汇总并加 `0.10*OOD_fraction`。prototype Spearman、response mass、edge KL/ratio/delay 只作解释和 Pareto
+distortion 轴，不混入 shape objective。fit 前 8 个候选在 selection seeds `1011--1013` 复核；不读 patient held-out，
+不直接开放全 edge matrix，也不先增加 radial `beta`。
 
 ## 6. L3：network 与 optimizer audit
 

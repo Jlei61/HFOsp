@@ -1,0 +1,38 @@
+import numpy as np
+
+from src.topic4_component_pair_search import score_candidate, sobol_candidates
+
+
+def test_sobol_candidates_are_deterministic_bounded_and_reserve_zero():
+    search = {
+        "n_candidates": 64, "dimension": 6, "scramble": True,
+        "seed": 17, "candidate_zero_reserved_for_gamma0": True,
+    }
+    first = sobol_candidates(search, [-1.0, 1.0])
+    second = sobol_candidates(search, [-1.0, 1.0])
+    assert first == second
+    np.testing.assert_array_equal(first[0]["gamma"], np.zeros(6))
+    values = np.asarray([row["gamma"] for row in first])
+    assert values.shape == (64, 6)
+    assert np.all((values >= -1.0) & (values <= 1.0))
+
+
+def test_weakest_mode_objective_protects_the_worse_mode():
+    floor = {"modes": {mode: {name: {"median": 0.0, "scale_iqr": 1.0}
+                                      for name in (
+                                          "recruitment_mean_absolute_error",
+                                          "precedence_mean_absolute_error",
+                                          "mean_rank_profile_absolute_error",
+                                          "event_distribution_sliced_wasserstein")}
+                        for mode in ("A", "B")}}
+    descriptors = {"modes": {
+        "A": {name: 2.0 for name in floor["modes"]["A"]},
+        "B": {name: 0.0 for name in floor["modes"]["B"]},
+    }}
+    score = score_candidate(
+        descriptors, floor, {"A": 1.0, "B": 1.0}, {"A": 0.0, "B": 0.0},
+        readable_weight=2.0, tau=0.25, ood_weight=0.1)
+    assert score["weak_mode"] == "A"
+    assert score["mode_scores"]["A"] > score["mode_scores"]["B"]
+    assert score["mode_scores"]["B"] < score["weakest_mode_shape"] \
+        < score["mode_scores"]["A"]

@@ -61,11 +61,12 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
 ## Task L2：relaxed edge oracle（条件性）
 
 - [x] L1 已确认 scalar Edge 只改变 gain/localization、不改善 mode A，满足进入条件。
-- [x] 实现四参数 component-pair mapper。
-- [x] 单测 target/source 方向、per-target conservation、exact no-op、topology/delay 不变。
-- [ ] 在 6 个 fit networks 上运行 9 个中心有限差分候选，只使用 component 1/2 forced sources。
-- [ ] 正负 finite difference 建 Jacobian，受约束 ridge 生成候选，最多 16 个 full-SNN evaluations。
-- [ ] component 3 固定为零负对照；不开放全 edge matrix，不先扫 beta。
+- [x] 实现保留 `alpha=0.75` scalar baseline 的六参数 C1/C2/BG-target x C1/C2-source residual mapper。
+- [x] 单测 target/source 方向、background tail membership、per-target conservation、`gamma=0` 精确退化、topology/delay 不变。
+- [x] 冻结训练集 matched-count bootstrap floor 与四 descriptor smooth weakest-mode objective；held-out 禁止读取。
+- [ ] 在 6 个 fit networks 上运行 13 个中心有限差分候选，只使用 component 1/2 forced sources。
+- [ ] 在同一 fit networks 上运行 64-point Sobol，保留完整探索结果，仅结构可容许候选进入 weakest-mode 排序。
+- [ ] fit 前 8 个候选在 selection seeds 1011--1013 复核；component 3 固定为零负对照，不开放全 edge matrix，不先扫 beta。
 
 ## Task L3：network/optimizer audit
 
