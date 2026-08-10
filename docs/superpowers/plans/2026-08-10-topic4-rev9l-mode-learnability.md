@@ -61,8 +61,9 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
 ## Task L2：relaxed edge oracle（条件性）
 
 - [x] L1 已确认 scalar Edge 只改变 gain/localization、不改善 mode A，满足进入条件。
-- [ ] 实现四参数 component-pair mapper。
-- [ ] 单测 target/source 方向、per-target conservation、exact no-op、topology/delay 不变。
+- [x] 实现四参数 component-pair mapper。
+- [x] 单测 target/source 方向、per-target conservation、exact no-op、topology/delay 不变。
+- [ ] 在 6 个 fit networks 上运行 9 个中心有限差分候选，只使用 component 1/2 forced sources。
 - [ ] 正负 finite difference 建 Jacobian，受约束 ridge 生成候选，最多 16 个 full-SNN evaluations。
 - [ ] component 3 固定为零负对照；不开放全 edge matrix，不先扫 beta。
 

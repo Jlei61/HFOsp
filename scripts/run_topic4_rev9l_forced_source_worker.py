@@ -22,6 +22,10 @@ from scripts.run_topic4_rev9_node_kick_canary import (  # noqa: E402
     _load_network,
 )
 from scripts.run_topic4_rev9_factorial_worker import _event_histogram  # noqa: E402
+from src.topic4_component_pair_edge import (  # noqa: E402
+    component_pair_normalized_ee,
+    normalized_component_responsibilities,
+)
 from src.topic4_core_connectivity import field_normalized_ee_pair  # noqa: E402
 from src.topic4_core_field_profile import normalized_rank_curve  # noqa: E402
 from src.topic4_core_field_rev9 import (  # noqa: E402
@@ -189,12 +193,27 @@ def main():
     parser.add_argument("--out-npz")
     parser.add_argument("--cache-dir")
     parser.add_argument("--expected-commit")
+    parser.add_argument("--component-pair-eta", nargs=4, type=float)
+    parser.add_argument("--candidate-id")
     args = parser.parse_args()
 
     config_path = Path(args.config)
     config = json.loads(config_path.read_text())
-    if config["scientific_role"] != "forced_initiation_propagation_capacity_development_audit":
+    allowed_roles = {
+        "forced_initiation_propagation_capacity_development_audit",
+        "component_pair_edge_forced_oracle_development",
+    }
+    if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("L1 scientific role changed")
+    is_component_pair = (
+        config["scientific_role"] == "component_pair_edge_forced_oracle_development")
+    if is_component_pair and (args.component_pair_eta is None or not args.candidate_id):
+        parser.error("component-pair oracle requires eta and candidate-id")
+    if not is_component_pair and (args.component_pair_eta is not None
+                                  or args.candidate_id is not None):
+        parser.error("component-pair arguments are not valid for the L1 role")
+    if is_component_pair and args.arm != "Edge":
+        parser.error("component-pair L2 isolates the Edge-only arm")
     allowed_seeds = set(sum(config["network_seeds"].values(), []))
     if args.seed not in allowed_seeds:
         parser.error("--seed is outside the rev9-L frozen seed sets")
@@ -263,16 +282,24 @@ def main():
         quantile_seed=stage["quantile_seed"],
         core_mean=engine["core_mean"], core_std=engine["core_std"],
         v_base=engine["v_base"], K=candidate["K"], L=engine["L"])
-    switches = arm_contract(args.arm)
-    edge_diagnostics = None
-    if switches["edge"]:
-        net, edge_diagnostics = field_normalized_ee_pair(
-            net, node["h"], config["alpha_star"], beta=0.0,
-            active_vth_shift=node["delta_vtheta"])
-    vtheta = (node["vtheta"] if switches["node"] else
-              np.full(n_e + n_i, float(engine["v_base"])))
     contributions = component_contributions(
         candidate["theta"], positions, K=candidate["K"], L=engine["L"])
+    responsibilities = normalized_component_responsibilities(contributions)
+    switches = arm_contract(args.arm)
+    edge_diagnostics = None
+    edge_family = "none"
+    if switches["edge"]:
+        if is_component_pair:
+            net, edge_diagnostics = component_pair_normalized_ee(
+                net, responsibilities, args.component_pair_eta)
+            edge_family = "component_pair_target_normalized"
+        else:
+            net, edge_diagnostics = field_normalized_ee_pair(
+                net, node["h"], config["alpha_star"], beta=0.0,
+                active_vth_shift=node["delta_vtheta"])
+            edge_family = "scalar_field_assortative"
+    vtheta = (node["vtheta"] if switches["node"] else
+              np.full(n_e + n_i, float(engine["v_base"])))
 
     with np.load(inputs["frozen_readouts_npz"]["path"], allow_pickle=False) as frozen:
         classifier = {
@@ -549,6 +576,9 @@ def main():
         "status": "REV9L_FORCED_SOURCE_WORKER_COMPLETE",
         "scientific_role": config["scientific_role"],
         "arm": args.arm,
+        "edge_family": edge_family,
+        "candidate_id": args.candidate_id,
+        "component_pair_eta": args.component_pair_eta,
         "switches": switches,
         "seed": int(args.seed),
         "sources": [source["id"] for source in sources],
