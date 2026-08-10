@@ -5,6 +5,7 @@ import pandas as pd
 import torch
 
 from scripts.analyse_topic5_lbss_interictal_v0_2 import aggregate_patient, paired_test
+from scripts.launch_topic5_lbss_v0_2 import acquire_stage_lock
 from scripts.run_topic5_lbss_detectability_v0_2 import (
     build_ground_truth_model,
     simulate_events,
@@ -193,3 +194,13 @@ def test_paired_test_separates_numerical_ties():
     assert result["n_positive"] == 1
     assert result["n_negative"] == 1
     assert result["n_tied"] == 2
+
+
+def test_launcher_lock_blocks_duplicate_and_recovers_stale(tmp_path):
+    lock = acquire_stage_lock(tmp_path, "formal")
+    with np.testing.assert_raises(RuntimeError):
+        acquire_stage_lock(tmp_path, "formal")
+    lock.write_text('{"pid": 999999999, "stage": "formal"}\n')
+    recovered = acquire_stage_lock(tmp_path, "formal")
+    assert recovered.exists()
+    assert (tmp_path / "FORMAL_STALE_LOCK_RECOVERY.json").exists()

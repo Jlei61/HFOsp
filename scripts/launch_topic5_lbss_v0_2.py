@@ -29,6 +29,45 @@ def write_json(path: Path, value: object) -> None:
     temporary.replace(path)
 
 
+def process_alive(pid: int) -> bool:
+    try:
+        os.kill(int(pid), 0)
+    except (OSError, ValueError):
+        return False
+    return True
+
+
+def acquire_stage_lock(out: Path, stage: str) -> Path:
+    lock = out / f"{stage.upper()}_LAUNCHER.lock"
+    payload = {
+        "pid": os.getpid(),
+        "stage": stage,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    try:
+        descriptor = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    except FileExistsError:
+        try:
+            prior = json.loads(lock.read_text())
+            prior_pid = int(prior["pid"])
+        except (OSError, ValueError, KeyError, json.JSONDecodeError):
+            prior, prior_pid = {"unreadable": True}, -1
+        if process_alive(prior_pid):
+            raise RuntimeError(f"active {stage} launcher already holds {lock}: pid={prior_pid}")
+        recovery = out / f"{stage.upper()}_STALE_LOCK_RECOVERY.json"
+        write_json(recovery, {
+            "recovered_at": datetime.now(timezone.utc).isoformat(),
+            "stale_lock": prior,
+            "replacement_pid": os.getpid(),
+        })
+        lock.unlink()
+        descriptor = os.open(lock, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o644)
+    with os.fdopen(descriptor, "w") as stream:
+        json.dump(payload, stream, indent=2)
+        stream.write("\n")
+    return lock
+
+
 def job_directory(out: Path, fit: str, arm: str, seed: int, stage: str) -> Path:
     root = "diagnostic_smoke_units" if stage == "smoke" else "per_fit"
     return out / root / fit / arm / f"seed{seed}"
@@ -131,6 +170,8 @@ def main() -> None:
         print(status_path.read_text())
         return
 
+    lock_path = acquire_stage_lock(out, stage)
+
     log_root = out / "run_logs" / stage
     results: list[dict] = []
     started = time.time()
@@ -192,9 +233,11 @@ def main() -> None:
     if unresolved:
         failed_marker.write_text(json.dumps(final, indent=2) + "\n")
         marker.unlink(missing_ok=True)
+        lock_path.unlink(missing_ok=True)
         raise SystemExit(2)
     marker.write_text(json.dumps(final, indent=2) + "\n")
     failed_marker.unlink(missing_ok=True)
+    lock_path.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
