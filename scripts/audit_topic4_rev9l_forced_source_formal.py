@@ -12,6 +12,7 @@ from pathlib import Path
 import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.lines import Line2D
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -151,16 +152,20 @@ def _plot(audit, output_dir):
             "intended_minus_cross"]["median"] for arm in arms]
         clean_values = [audit["arms"][arm]["sham_clear"][source][
             "intended_minus_cross"]["median"] for arm in arms]
-        axes[2].scatter(x + offset[source], all_values, color=color,
+        axes[2].scatter(x + offset[source] - 0.025, all_values, color=color,
                         marker=marker, s=32)
-        axes[2].scatter(x + offset[source], clean_values, facecolor="white",
+        axes[2].scatter(x + offset[source] + 0.025, clean_values, facecolor="white",
                         edgecolor=color, marker=marker, s=40)
     axes[2].axhline(0.0, color="0.45", ls=":", lw=1)
     axes[2].set_xticks(x, arms, rotation=20)
     axes[2].set_ylabel("intended minus cross Spearman")
     axes[2].set_title("c  sham-clear sensitivity", loc="left", weight="bold")
-    axes[2].text(0.02, 0.04, "filled: all; open: sham-clear",
-                 transform=axes[2].transAxes, fontsize=7)
+    axes[2].legend(handles=[
+        Line2D([], [], marker="o", color="0.25", lw=0,
+               markerfacecolor="0.25", label="all seeds"),
+        Line2D([], [], marker="o", color="0.25", lw=0,
+               markerfacecolor="white", label="sham-clear"),
+    ], frameon=False, fontsize=7, loc="lower right")
     for suffix in ("png", "pdf"):
         figure.savefig(output_dir / f"rev9l_l1_review_audit.{suffix}", dpi=300)
     plt.close(figure)
