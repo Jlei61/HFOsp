@@ -1,6 +1,6 @@
 # Topic 4 rev9-L: mode realizability and learnability audit
 
-**状态：** `L3A_FIT_COMPLETE_SELECTION_SANITY_ACTIVE`
+**状态：** `L3A_COMPLETE_L3B_FROZEN`
 **日期：** 2026-08-10
 **上游：** rev8.1 patient-training KMeans fit；rev9 frozen-field node-edge factorial
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
@@ -187,16 +187,26 @@ shared-surrogate minimum 有并列，二级规则固定为既有 L2 full fit obj
 surrogate 高度离散，不能识别唯一参数。按预定二级规则冻结 `sobol_058`，只在 seeds 1011--1013 补做 selection sanity；同时计算
 route surrogate 与 matched `n=3` 完整 weakest-mode objective，confirmation seeds 仍不读取。
 
+selection sanity 的 3/3 workers 成功。`sobol_058` 的单事件 weak centroid distance 在 seeds 1011/1013 改善、1012 不变，但
+matched `n=3` 完整 objective 从 scalar 的 2.717 上升到 2.864，恶化 5.42%；mode A precedence、profile 和 event-cloud 均变差。
+因此单事件 surrogate 只能作 route-shape 诊断，不能提供已知好解，`sobol_058` 不进入 optimizer 或 spontaneous confirmation。
+
 ### 6.2 L3b：重复事件正式 oracle 与 optimizer 条件
 
-正式分布级审计使用 12 个与 rev8/rev9 不重叠的新 network seeds：已有 6 fit、3 selection，另留 3 confirmation 不参与任何选择。
-每个 network/source 必须有足够的独立事件或 noise realizations，才能分别报告：
+正式分布级审计先只用 6 个 fit network seeds。worker 增加独立 `dynamics_seed`：`network_seed` 继续决定 Params、位置、topology、delay
+和 cache key，`dynamics_seed` 只重置 paired sham/forced 的外源噪声 RNG；默认未提供时等于 network seed，必须逐数组复现旧 worker。
+冻结 dynamics seeds `31001/31002/31003`，所有候选使用 common random numbers。57 个 L2 结构可容许候选 x 6 networks x 3
+dynamics repeats 共 1026 workers，每个 repeat 同时产生 intended A/B source response。每个 candidate/network 用 3 events/mode 与
+`n=3` patient-training floor 计算完整 recruitment、precedence、profile 和 event-cloud weakest-mode objective `J(theta,r)`：
 
 ```text
-C_per_net = median_r min_theta max(D_A,r, D_B,r)
-C_shared  = min_theta median_r max(D_A,r, D_B,r)
+C_per_net = median_r min_theta J(theta,r)
+C_shared  = min_theta median_r J(theta,r)
 Delta_network = C_shared - C_per_net
 ```
+
+除 L2 已冻结的结构可容许集合外不增加新 gate。fit 只选择候选；3 个 selection networks 仅在 shared candidate 冻结后复核，3 个
+confirmation networks 继续不读。L3b 的 3 repeats 是最小分布级探索，不能冒充高精度 capacity ceiling。
 
 confirmation seeds 只在参数和 objective 完全冻结后读取。只有 oracle 或 deterministic search 已知存在好解时，才以相同 evaluation
 budget、common random numbers 比较 Sobol/local refinement 与 CMA-ES 三次 restart。若多组相距很远的参数产生同等输出，结论是
