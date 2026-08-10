@@ -171,6 +171,10 @@ instrument 直接采用 `src/snn_engine/kick_probe.py` 的实际语义：
 自动窗口已作废。下一步只做 sham-only onset scan，找到全局安静 onset 后再重跑 Node canary；此时不得启动 edge alpha
 动力学扫描。
 
+sham-only onset scan 对 `[100,160,220,280,340] ms` 的无事件 seed 数为 `[0,1,3,2,2]`，因此按预定规则冻结
+`t_kick=220 ms`。第二轮 Node canary 必须复用首轮 e785 commit 的同三张 network cache，只改变 timing；新结果写独立
+`t220` artifact，不覆盖首轮失败证据。
+
 ## 9. Alpha 探索和四臂运行
 
 ### 9.1 结构与局部响应

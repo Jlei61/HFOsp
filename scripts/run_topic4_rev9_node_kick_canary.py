@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import platform
+import pickle
 import subprocess
 import sys
 import tempfile
@@ -19,8 +20,10 @@ sys.path.insert(0, os.path.join("src", "snn_engine"))
 from scripts.run_topic4_core_field_stage3_fit import _load_cmrun  # noqa: E402
 from src.topic4_core_field_rev9 import reconstruct_frozen_node  # noqa: E402
 from src.topic4_core_field_runner import (  # noqa: E402
+    CONNECTIVITY_FIELDS,
     _placement,
     atomic_write_json,
+    canonical_checksum,
     get_network,
     provenance,
 )
@@ -95,6 +98,36 @@ def _candidate(config):
     if len(rows) != 1 or rows[0]["theta_sha256"] != config["inputs"]["theta_sha256"]:
         raise RuntimeError("configured frozen candidate or theta hash does not reproduce")
     return rows[0]
+
+
+def _load_network(params, stage, reg, seed, config, cache_dir):
+    source_path = config["small_kick_instrument"].get(
+        "network_cache_source_artifact")
+    if source_path:
+        source = json.loads(Path(source_path).read_text())
+        source_commit = source["provenance"]["git_commit"]
+        source_numpy = source["provenance"]["numpy_version"]
+        cache_config = {
+            field: getattr(params, field) for field in CONNECTIVITY_FIELDS
+        }
+        cache_config.update(
+            theta_EE_deg=float(reg["theta_deg"]),
+            AR=float(stage["engine"]["AR"]),
+            numpy_version=str(source_numpy), rng_bit_generator="PCG64",
+            git_commit=str(source_commit))
+        key = canonical_checksum(cache_config, drop=())
+        path = Path(cache_dir) / f"{key}.pkl"
+        if not path.exists():
+            raise RuntimeError(f"frozen canary network cache is missing: {path}")
+        with open(path, "rb") as handle:
+            cached = pickle.load(handle)
+        return (
+            cached["net"], int(cached["NE"]), int(cached["NI"]), True,
+            dict(source_artifact=source_path, source_commit=source_commit,
+                 cache_key=key, cache_path=str(path), cache_sha256=_sha256(path)))
+    net, n_e, n_i, hit = get_network(
+        params, reg["theta_deg"], stage["engine"]["AR"], cache_dir)
+    return net, n_e, n_i, hit, dict(source_artifact=None)
 
 
 def _without_maps(row):
@@ -172,8 +205,8 @@ def main():
         elif not np.array_equal(actual_amplitudes, amplitudes):
             raise RuntimeError("nu_theta changed across paired network seeds")
         network_started = time.time()
-        net, n_e, n_i, cache_hit = get_network(
-            params, reg["theta_deg"], engine["AR"], cache_dir)
+        net, n_e, n_i, cache_hit, cache_source = _load_network(
+            params, stage, reg, seed, config, cache_dir)
         node = reconstruct_frozen_node(
             candidate["theta"], net["pos"][:n_e], n_total=n_e + n_i,
             target_count=stage["N_core_manual"],
@@ -183,7 +216,7 @@ def main():
         network_records.append(dict(
             seed=seed, cache_hit=bool(cache_hit), n_E=int(n_e), n_I=int(n_i),
             setup_seconds=float(time.time() - network_started),
-            node_hashes=node["hashes"]))
+            node_hashes=node["hashes"], cache_source=cache_source))
 
         net["rng"] = np.random.default_rng(seed)
         sham = simulate_kick(

@@ -37,7 +37,8 @@
 - [x] 明确 signed/positive response、source/downstream、OLS slope、窗口 tie-break 和 paired event exclusion。
 - [x] Node canary seeds `901--903` 完成 57 次仿真；54/54 kick pairs 被 sham 启动事件污染，0 runaway。
 - [x] eligibility reconciliation 作废原始 20--40 ms 自动选择：`0/18` site-seed eligible，正式状态无可用窗口。
-- [ ] 用同三条 Node sham 扫 `[100,160,220,280,340] ms`，只在 3/3 seeds 安静时冻结新 onset。
+- [x] 同三条 Node sham onset scan 完成：无事件 seed 数 `[0,1,3,2,2]`，冻结唯一 3/3 安静的 `220 ms`。
+- [x] 第二轮 producer 固定复用 e785 的原 network cache，避免 timing 比较混入 connectivity 改变。
 - [ ] 新 onset 下重跑 Node canary，再据无事件 paired units 冻结全局窗口。
 - [ ] 保存 SNR、event/runaway、exclusion imbalance；这些是诊断，不是放行门。
 

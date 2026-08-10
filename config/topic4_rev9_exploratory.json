@@ -39,7 +39,10 @@
     "kick_population": "E",
     "spatial_kernel": "top_hat_disk",
     "radius_mm": 1.0,
-    "kick_onset_ms": 100.0,
+    "kick_onset_ms": 220.0,
+    "initial_kick_onset_ms": 100.0,
+    "timing_selection_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/sham_onset_scan.json",
+    "network_cache_source_artifact": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_calibration/node_kick_canary.json",
     "kick_duration_ms": 18.0,
     "simulation_duration_ms": 400.0,
     "amplitude_source": "src/snn_engine/params.py::compute_nu_theta(params)[0]",
@@ -60,6 +63,11 @@
     "runaway_handling": "terminate_run_record_nonlinear_outcome",
     "canary_seeds": [901, 902, 903],
     "onset_scan_candidates_ms": [100.0, 160.0, 220.0, 280.0, 340.0],
+    "onset_selection_result": {
+      "event_free_seed_counts": [0, 1, 3, 2, 2],
+      "selected_onset_ms": 220.0,
+      "rule": "require all three Node sham seeds event-free, then lowest median interval peak and earliest tie break"
+    },
     "origins": [
       {"id": "component_1", "role": "field_component", "xy_mm": [3.6202140551125526, 7.054341437477716]},
       {"id": "component_2", "role": "field_component", "xy_mm": [11.847833907651358, 3.577066400859459]},
