@@ -1,4 +1,4 @@
-"""Run the frozen Node arm's paired small-kick canary on seeds 901--903."""
+"""Run paired rev9 Node or Edge small-kick response measurements."""
 from __future__ import annotations
 
 import argparse
@@ -18,6 +18,7 @@ import numpy as np
 sys.path.insert(0, os.getcwd())
 sys.path.insert(0, os.path.join("src", "snn_engine"))
 from scripts.run_topic4_core_field_stage3_fit import _load_cmrun  # noqa: E402
+from src.topic4_core_connectivity import field_normalized_ee_pair  # noqa: E402
 from src.topic4_core_field_rev9 import reconstruct_frozen_node  # noqa: E402
 from src.topic4_core_field_runner import (  # noqa: E402
     CONNECTIVITY_FIELDS,
@@ -143,7 +144,14 @@ def main():
     parser.add_argument("--out-json")
     parser.add_argument("--out-npz")
     parser.add_argument("--cache-dir")
+    parser.add_argument("--arm", choices=("Node", "Edge"), default="Node")
+    parser.add_argument("--alpha", type=float, default=0.0)
+    parser.add_argument("--seeds", type=int, nargs="+")
     args = parser.parse_args()
+    if args.arm == "Node" and args.alpha != 0.0:
+        parser.error("--alpha is only defined for the Edge arm")
+    if args.alpha < 0.0 or not np.isfinite(args.alpha):
+        parser.error("--alpha must be finite and non-negative")
 
     config = json.loads(Path(args.config).read_text())
     instrument = config["small_kick_instrument"]
@@ -164,7 +172,8 @@ def main():
     detect_events = __import__(
         "src.sef_hfo_events", fromlist=["detect_events"]).detect_events
 
-    seeds = [int(value) for value in instrument["canary_seeds"]]
+    seeds = [int(value) for value in (
+        args.seeds if args.seeds is not None else instrument["canary_seeds"])]
     sites = list(instrument["origins"])
     multipliers = np.asarray(instrument["amplitude_multipliers"], float)
     windows = np.asarray(instrument["candidate_windows_after_pulse_end_ms"], float)
@@ -206,6 +215,17 @@ def main():
         package_lock=dict(path=package_lock, sha256=_sha256(package_lock)),
         systemd_unit=os.environ.get("REV9_SYSTEMD_UNIT"),
     )
+    execution_inputs = dict(
+        config=dict(path=args.config, sha256=_sha256(args.config)),
+        stage_config=dict(
+            path=config["inputs"]["stage_config"],
+            sha256=_sha256(config["inputs"]["stage_config"])),
+        confirmation=dict(
+            path=config["inputs"]["confirmation"],
+            sha256=_sha256(config["inputs"]["confirmation"])),
+        candidate_id=candidate["candidate_id"],
+        theta_sha256=candidate["theta_sha256"],
+    )
 
     for seed_index, seed in enumerate(seeds):
         params = params_cls(
@@ -227,23 +247,34 @@ def main():
             quantile_seed=stage["quantile_seed"],
             core_mean=engine["core_mean"], core_std=engine["core_std"],
             v_base=engine["v_base"], K=candidate["K"], L=engine["L"])
+        edge_diagnostics = None
+        if args.arm == "Edge":
+            net, edge_diagnostics = field_normalized_ee_pair(
+                net, node["h"], args.alpha, beta=0.0,
+                active_vth_shift=node["delta_vtheta"])
+            vtheta = np.full(n_e + n_i, float(engine["v_base"]))
+        else:
+            vtheta = node["vtheta"]
         network_records.append(dict(
             seed=seed, cache_hit=bool(cache_hit), n_E=int(n_e), n_I=int(n_i),
             setup_seconds=float(time.time() - network_started),
-            node_hashes=node["hashes"], cache_source=cache_source))
+            node_hashes=node["hashes"], cache_source=cache_source,
+            edge_diagnostics=edge_diagnostics))
 
         net["rng"] = np.random.default_rng(seed)
         sham = simulate_kick(
             params, net, KICK_BOOST=0.0,
             kick_center=sites[0]["xy_mm"],
             r_kick=instrument["radius_mm"], t_kick=pulse_onset,
-            V_th_per_neuron=node["vtheta"], early_stop_runaway=True)
+            V_th_per_neuron=vtheta, early_stop_runaway=True)
         sham_summary = _event_summary(
             sham, cmrun, detect_events, interval_ms=response_interval)
-        sham_summary.update(seed=seed, arm="Node", rng_seed=seed)
+        sham_summary.update(seed=seed, arm=args.arm, alpha=float(args.alpha),
+                            rng_seed=seed)
         sham_records.append(sham_summary)
         print(json.dumps(dict(
-            progress="sham_complete", seed=seed,
+            progress="sham_complete", arm=args.arm, alpha=float(args.alpha),
+            seed=seed,
             wall_seconds=sham_summary["wall_seconds"],
             response_event=sham_summary["response_interval_event"])), flush=True)
 
@@ -255,7 +286,7 @@ def main():
                     params, net, KICK_BOOST=float(amplitude),
                     kick_center=site["xy_mm"],
                     r_kick=instrument["radius_mm"], t_kick=pulse_onset,
-                    V_th_per_neuron=node["vtheta"], early_stop_runaway=True)
+                    V_th_per_neuron=vtheta, early_stop_runaway=True)
                 event = _event_summary(
                     kick, cmrun, detect_events, interval_ms=response_interval)
                 measured = paired_spike_response(
@@ -296,6 +327,7 @@ def main():
                                   window_index] = row["positive_map_per_cell"]
                 records.append(dict(
                     seed=seed, site_id=site["id"], site_role=site["role"],
+                    arm=args.arm, alpha=float(args.alpha),
                     site_xy_mm=site["xy_mm"], amplitude_multiplier=float(multiplier),
                     kick_boost_1_per_ms=float(amplitude), response=serialized_windows,
                     event=event, paired_sham_response_event=bool(
@@ -306,7 +338,8 @@ def main():
                         and event["runaway_early_stop_ms"] is None),
                 ))
                 print(json.dumps(dict(
-                    progress="kick_complete", seed=seed, site=site["id"],
+                    progress="kick_complete", arm=args.arm,
+                    alpha=float(args.alpha), seed=seed, site=site["id"],
                     amplitude_multiplier=float(multiplier),
                     wall_seconds=event["wall_seconds"],
                     response_event=bool(response_event[
@@ -408,15 +441,15 @@ def main():
     )
 
     if n_eligible_seeds < 2:
-        status = "REV9_NODE_KICK_CANARY_SPARSE_CROSS_NETWORK_SUPPORT"
+        status = f"REV9_{args.arm.upper()}_KICK_CANARY_SPARSE_CROSS_NETWORK_SUPPORT"
     else:
-        status = "REV9_NODE_KICK_CANARY_COMPLETE"
+        status = f"REV9_{args.arm.upper()}_KICK_CANARY_COMPLETE"
     payload = dict(
         status=status,
         scientific_role=(
-            "Node-only instrument canary used to freeze the response window; "
-            "not edge calibration, equivalence evidence, or patient validation"),
-        arm="Node", seeds=seeds, sites=sites,
+            f"{args.arm} small-kick response measurement; exploratory response "
+            "matching only, not equivalence evidence or patient validation"),
+        arm=args.arm, alpha=float(args.alpha), seeds=seeds, sites=sites,
         amplitude_multipliers=multipliers.tolist(),
         kick_boost_1_per_ms=actual_amplitudes.tolist(),
         pulse=dict(onset_ms=pulse_onset, duration_ms=instrument["kick_duration_ms"],
@@ -460,16 +493,7 @@ def main():
             role="diagnostic only; no acceptance threshold"),
         arrays=dict(path=str(output_npz), sha256=_sha256(output_npz)),
         wall_seconds=float(time.time() - started),
-        inputs=dict(
-            config=dict(path=args.config, sha256=_sha256(args.config)),
-            stage_config=dict(
-                path=config["inputs"]["stage_config"],
-                sha256=_sha256(config["inputs"]["stage_config"])),
-            confirmation=dict(
-                path=config["inputs"]["confirmation"],
-                sha256=_sha256(config["inputs"]["confirmation"])),
-            candidate_id=candidate["candidate_id"],
-            theta_sha256=candidate["theta_sha256"]),
+        inputs=execution_inputs,
         provenance=dict(
             **execution_provenance,
             network_seed=seeds, ou_seed=seeds, poisson_seed=seeds,
