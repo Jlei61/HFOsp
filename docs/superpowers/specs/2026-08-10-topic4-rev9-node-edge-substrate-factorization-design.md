@@ -155,7 +155,8 @@ instrument 直接采用 `src/snn_engine/kick_probe.py` 的实际语义：
   在预冻结候选 onset 上选择跨 seeds 的全局安静时段，再冻结新 onset；不得用 edge response 或 patient score 选择 timing；
 - 在 pulse 内给 disk 内 E neurons 增加外部 Poisson rate `KICK_BOOST`，单位 `1/ms`；
 - amplitude 首轮为 `{0.25,0.5,1.0} * nu_theta`；安静 onset canary 若多数 run 仍直接触发 detector event，
-  只按预先声明的一档降幅规则改为 `{0.05,0.10,0.20} * nu_theta`，其中 `nu_theta=compute_nu_theta(params)[0]`；
+  用 `{0.05,0.10,0.20} * nu_theta` 做一次 threshold mapping。最终局部线性 instrument 的最大幅度取所有 canary
+  site-seed 共同保持非事件的最大已测值，另两档固定为其 `1/2` 和 `1/4`；`nu_theta=compute_nu_theta(params)[0]`；
 - kick/sham 使用相同 network、OU、Poisson seed；sham 的额外 rate 为 0；
 - response 使用 `5 ms` 空间-时间 bins；窗口从 pulse end 后 `[0,10]`、`[10,20]`、`[20,40] ms` 中选；
 - source 是 top-hat disk 内 E cells；downstream 是 disk 外 E cells；
@@ -181,6 +182,12 @@ sham-only onset scan 对 `[100,160,220,280,340] ms` 的无事件 seed 数为 `[0
 非事件响应，而且全部来自 seed 903。自动选择的 20--40 ms 因此只是单网络 canary candidate，不能称跨网络冻结窗口。
 下一步复用完全相同的三张 network 和 onset，仅将剂量降为 `{0.05,0.10,0.20} * nu_theta`。有效 seed 覆盖作为连续诊断；
 覆盖不足不令脚本失败，也不启动当前高剂量下的 edge response matching。
+
+**Threshold mapping 结果：** 54 个 kick 中 16 个触发 detector event，0 runaway；`6/18` site-seed 对三个剂量均为
+非事件，覆盖 3/3 networks，但 field component 的全剂量有效响应仍主要来自 seed 903，不能据此冻结跨网络 field response。
+另一方面，最低档 `0.05 * nu_theta` 在 `18/18` site-seed 均保持非事件。因此最终线性 canary 固定为
+`{0.0125,0.025,0.05} * nu_theta`，只复用 Node canary 的非事件上限，不读取 edge 或 patient score。threshold mapping 中
+component 比 control 更早进入 detector event 是一个探索性 ignition-threshold endpoint，不替代局部响应斜率。
 
 ## 9. Alpha 探索和四臂运行
 

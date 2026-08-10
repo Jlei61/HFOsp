@@ -41,7 +41,9 @@
 - [x] 第二轮 producer 固定复用 e785 的原 network cache，避免 timing 比较混入 connectivity 改变。
 - [x] 新 onset 下 Node canary 完成：3/3 sham 安静；42/54 kick 触发事件，0 runaway，仅 3/18 site-seed eligible 且全属 seed 903。
 - [x] 作废高剂量下的跨网络冻结解释；20--40 ms 仅保留为单网络 canary candidate。
-- [ ] 同三张 network、同 220 ms onset 降幅至 `{0.05,0.10,0.20}*nu_theta` 重跑；有效 seed 覆盖只作诊断。
+- [x] 同三张 network、同 220 ms onset 跑 `{0.05,0.10,0.20}*nu_theta` threshold mapping：16/54 event、0 runaway。
+- [x] 确认 `0.05*nu_theta` 在 18/18 site-seed 均为非事件；更高剂量显示 component 较早进入 ignition 的探索性差异。
+- [ ] 最终线性 canary 使用 `{0.0125,0.025,0.05}*nu_theta`；最大值来自共同非事件上限，另两档按几何下分。
 - [x] 保存 SNR、event/runaway 和排除数；这些是诊断，不是放行门。
 
 ## Task 4：Alpha exploratory calibration
