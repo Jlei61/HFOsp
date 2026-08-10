@@ -116,9 +116,9 @@ def _load_workers(config, config_path, expected_commit):
             payload = json.loads(json_path.read_text())
             if (payload["status"] != "REV9L_FORCED_SOURCE_WORKER_COMPLETE"
                     or payload["scientific_role"] != config["scientific_role"]
-                    or payload["edge_family"] != "component_pair_target_normalized"
+                    or payload["edge_family"] != "component_pair_residual_target_normalized"
                     or payload["candidate_id"] != candidate_id
-                    or not np.allclose(payload["component_pair_eta"], candidate["eta"])
+                    or not np.allclose(payload["component_pair_gamma"], candidate["gamma"])
                     or int(payload["seed"]) != int(seed)):
                 raise RuntimeError(f"L2 worker identity mismatch: {json_path}")
             provenance = payload["provenance"]
@@ -151,7 +151,7 @@ def _load_workers(config, config_path, expected_commit):
                 "npz": {"path": str(npz_path), "sha256": _sha256(npz_path)},
             })
         output[candidate_id] = {
-            "eta": candidate["eta"], "rows": rows, "arrays": arrays,
+            "gamma": candidate["gamma"], "rows": rows, "arrays": arrays,
             "edge_diagnostics": diagnostics,
         }
     return output, contact_names, inputs
@@ -226,7 +226,7 @@ def _candidate_summary(data, config, reference, patient, patient_labels,
             row["gaba_unchanged"] for row in data["edge_diagnostics"]),
     }
     return {
-        "eta": data["eta"],
+        "gamma": data["gamma"],
         "source_mode_correlation": correlations,
         "mode_descriptors": descriptors,
         "geometry": geometry,
@@ -264,10 +264,12 @@ def _metric_vector(candidate):
 def _finite_differences(candidates, config):
     epsilon = float(config["component_pair_family"]["epsilon"])
     pair_ids = {
-        "eta11": ("eta11_p", "eta11_m"),
-        "eta22": ("eta22_p", "eta22_m"),
-        "eta1_from_2": ("eta1_from_2_p", "eta1_from_2_m"),
-        "eta2_from_1": ("eta2_from_1_p", "eta2_from_1_m"),
+        "gamma_c1_from_c1": ("g_c1_c1_p", "g_c1_c1_m"),
+        "gamma_c1_from_c2": ("g_c1_c2_p", "g_c1_c2_m"),
+        "gamma_c2_from_c1": ("g_c2_c1_p", "g_c2_c1_m"),
+        "gamma_c2_from_c2": ("g_c2_c2_p", "g_c2_c2_m"),
+        "gamma_bg_from_c1": ("g_bg_c1_p", "g_bg_c1_m"),
+        "gamma_bg_from_c2": ("g_bg_c2_p", "g_bg_c2_m"),
     }
     metrics = {candidate_id: _metric_vector(row)
                for candidate_id, row in candidates.items()}
@@ -284,7 +286,7 @@ def _finite_differences(candidates, config):
 
 def _plot(candidates, finite, config, output_dir):
     output_dir.mkdir(parents=True, exist_ok=True)
-    parameters = config["component_pair_family"]["eta_order"]
+    parameters = config["component_pair_family"]["gamma_order"]
     metrics = list(next(iter(finite["central_derivatives"].values())))
     matrix = np.asarray([
         [finite["central_derivatives"][parameter][metric] for parameter in parameters]
@@ -367,7 +369,7 @@ def main():
         "candidates": candidates,
         "finite_difference": finite,
         "all_structural_contracts_preserved": bool(all_structural),
-        "next_task": "generate at most seven response-informed candidates without collapsing descriptors",
+        "next_task": "run the frozen 64-point six-dimensional Sobol exploration",
         "patient_heldout_scores_computed": False,
         "worker_inputs": worker_inputs,
         "config": {"path": str(config_path), "sha256": _sha256(config_path)},
@@ -380,7 +382,7 @@ def main():
     _plot(candidates, finite, config, figures)
     (figures / "README.md").write_text(
         "### rev9l_l2_component_pair_phase1.png\n"
-        "左图是四个 component-pair 参数对 A/B 五类 mode descriptor 的中心有限差分；中图直接显示九个候选的患者训练集 A/B prototype correlation；右图报告对应 edge ratio 扰动。所有结果来自相同六个 fit networks 和 paired forced sources。\n\n"
+        "左图是六个 component-pair residual 参数对 A/B 五类 mode descriptor 的中心有限差分；中图直接显示 13 个候选的患者训练集 A/B prototype correlation；右图报告对应 edge ratio 扰动。所有结果来自相同六个 fit networks 和 paired forced sources。\n\n"
         "**关注点**：是否存在能连续改善 mode A 且不损害 mode B 的参数方向，以及这种方向是否只靠过大的 edge 权重畸变产生。\n"
     )
     decision_path = Path(config["output_root"]).parent / "decision.json"

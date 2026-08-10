@@ -1,5 +1,5 @@
 {
-  "schema_version": "topic4_rev9l_component_pair_edge_v1",
+  "schema_version": "topic4_rev9l_component_pair_edge_v2",
   "scientific_role": "component_pair_edge_forced_oracle_development",
   "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle",
   "inputs": {
@@ -84,25 +84,71 @@
     "de_novo_kmeans": false
   },
   "component_pair_family": {
-    "eta_order": ["eta11", "eta22", "eta1_from_2", "eta2_from_1"],
-    "eta_matrix": "rows target component, columns source component",
+    "gamma_order": [
+      "gamma_c1_from_c1",
+      "gamma_c1_from_c2",
+      "gamma_c2_from_c1",
+      "gamma_c2_from_c2",
+      "gamma_bg_from_c1",
+      "gamma_bg_from_c2"
+    ],
+    "gamma_matrix": "rows target C1/C2/background, columns source C1/C2",
+    "scalar_alpha_baseline": 0.75,
+    "zero_gamma_contract": "exactly reproduces the frozen scalar alpha edge",
     "component_3_parameterized": false,
+    "background_source_is_zero_residual_reference": true,
     "per_target_incoming_E_normalization": true,
+    "gamma_bounds": [-1.3862943611198906, 1.3862943611198906],
     "epsilon": 0.75,
     "phase1_candidates": [
-      {"candidate_id": "eta0", "eta": [0.0, 0.0, 0.0, 0.0]},
-      {"candidate_id": "eta11_p", "eta": [0.75, 0.0, 0.0, 0.0]},
-      {"candidate_id": "eta11_m", "eta": [-0.75, 0.0, 0.0, 0.0]},
-      {"candidate_id": "eta22_p", "eta": [0.0, 0.75, 0.0, 0.0]},
-      {"candidate_id": "eta22_m", "eta": [0.0, -0.75, 0.0, 0.0]},
-      {"candidate_id": "eta1_from_2_p", "eta": [0.0, 0.0, 0.75, 0.0]},
-      {"candidate_id": "eta1_from_2_m", "eta": [0.0, 0.0, -0.75, 0.0]},
-      {"candidate_id": "eta2_from_1_p", "eta": [0.0, 0.0, 0.0, 0.75]},
-      {"candidate_id": "eta2_from_1_m", "eta": [0.0, 0.0, 0.0, -0.75]}
+      {"candidate_id": "gamma0", "gamma": [0.0, 0.0, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c1_c1_p", "gamma": [0.75, 0.0, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c1_c1_m", "gamma": [-0.75, 0.0, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c1_c2_p", "gamma": [0.0, 0.75, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c1_c2_m", "gamma": [0.0, -0.75, 0.0, 0.0, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c2_c1_p", "gamma": [0.0, 0.0, 0.75, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c2_c1_m", "gamma": [0.0, 0.0, -0.75, 0.0, 0.0, 0.0]},
+      {"candidate_id": "g_c2_c2_p", "gamma": [0.0, 0.0, 0.0, 0.75, 0.0, 0.0]},
+      {"candidate_id": "g_c2_c2_m", "gamma": [0.0, 0.0, 0.0, -0.75, 0.0, 0.0]},
+      {"candidate_id": "g_bg_c1_p", "gamma": [0.0, 0.0, 0.0, 0.0, 0.75, 0.0]},
+      {"candidate_id": "g_bg_c1_m", "gamma": [0.0, 0.0, 0.0, 0.0, -0.75, 0.0]},
+      {"candidate_id": "g_bg_c2_p", "gamma": [0.0, 0.0, 0.0, 0.0, 0.0, 0.75]},
+      {"candidate_id": "g_bg_c2_m", "gamma": [0.0, 0.0, 0.0, 0.0, 0.0, -0.75]}
     ]
   },
+  "objective": {
+    "patient_training_only": true,
+    "patient_heldout_permitted": false,
+    "sampling_unit": "six distinct recording blocks per mode, one event per block",
+    "n_model_events_per_mode": 6,
+    "bootstrap_repeats": 512,
+    "bootstrap_seed": 940217,
+    "descriptors": [
+      "recruitment_mean_absolute_error",
+      "precedence_mean_absolute_error",
+      "mean_rank_profile_absolute_error",
+      "event_distribution_sliced_wasserstein"
+    ],
+    "floor_center": "median",
+    "floor_scale": "interquartile_range",
+    "floor_scale_minimum": 1e-6,
+    "descriptor_penalty": "softplus((distance-floor_median)/floor_IQR)",
+    "readable_fraction_penalty_weight": 2.0,
+    "weakest_mode_lse_tau": 0.25,
+    "ood_weight": 0.1,
+    "floor_output": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor.json"
+  },
+  "sobol_search": {
+    "n_candidates": 64,
+    "dimension": 6,
+    "scramble": true,
+    "seed": 940218,
+    "candidate_zero_reserved_for_gamma0": true,
+    "top_k_for_selection_seeds": 8,
+    "selection_rule": "lowest training weakest-mode objective among structurally admissible candidates"
+  },
   "interpretation": {
-    "phase1_role": "finite-difference response audit before candidate generation",
+    "phase1_role": "six-axis finite-difference response audit before Sobol search",
     "descriptors_remain_separate": true,
     "no_formal_acceptance_gate": true,
     "patient_heldout_scores_computed": false,

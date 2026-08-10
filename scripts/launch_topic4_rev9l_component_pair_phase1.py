@@ -77,7 +77,7 @@ def main():
             stem = worker_dir / f"{candidate['candidate_id']}_seed{seed}"
             jobs.append({
                 "candidate_id": candidate["candidate_id"],
-                "eta": candidate["eta"], "seed": int(seed),
+                "gamma": candidate["gamma"], "seed": int(seed),
                 "json": stem.with_suffix(".json"),
                 "npz": stem.with_suffix(".npz"),
                 "status": run_dir / f"{candidate['candidate_id']}_seed{seed}.status",
@@ -122,7 +122,7 @@ def main():
                 "--seed", str(job["seed"]), "--sources",
                 *config["packet"]["formal_sources"], "--packet-fractions",
                 str(config["packet"]["frozen_fraction_of_E"]),
-                "--component-pair-eta", *[str(value) for value in job["eta"]],
+                "--component-pair-gamma", *[str(value) for value in job["gamma"]],
                 "--candidate-id", job["candidate_id"],
                 "--expected-commit", commit,
                 "--out-json", str(job["json"]), "--out-npz", str(job["npz"]),
