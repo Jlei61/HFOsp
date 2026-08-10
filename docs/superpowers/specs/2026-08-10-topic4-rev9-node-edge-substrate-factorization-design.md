@@ -242,6 +242,11 @@ overlapping event。各权重在读取 alpha grid 聚合值前冻结；所有分
 shift 更小而成为 coarse minimum；这不是稳定等效证据。按预定 midpoint 规则只补 `0.75` 和 `1.5`，公式、权重、instrument
 和 seeds 均不改变，之后冻结一个 response-matched reference。
 
+**Midpoint 后冻结：** `alpha={0.75,1.5}` 的 `J_cal={0.434,0.472}`，因此冻结 `alpha_star=0.75`。该点的 primary
+paired coverage 为 `28/34`；source/downstream slope 的配对 Spearman 分别为 `0.61/0.85`，但 field-component source
+仍有明显 identity 偏离。安全口径是“选择了一个便于四臂比较的 Edge reference”，不能写 Node/Edge 等效或收敛到同一机制。
+正式诊断图为 `node_edge_calibration/figures/rev9_edge_alpha_calibration.{png,pdf}`。
+
 ### 9.2 四臂 endpoint
 
 至少包括：baseline/event rate、runaway、earliest density、frozen/de novo mode proportion、OOD、recruitment、

@@ -57,9 +57,9 @@
 - [x] 并行生成 seeds 904--906 的 Node reference；缺失 network 均在冻结 engine hashes 一致后构建。
 - [x] 36 个 Edge workers 分两批完成 `{0,0.25,0.5,1,2,4} × seeds 901--906`；36/36 success，0 OOM/run failure。
 - [x] coarse `J_cal` 完成：alpha 1.0 最低（0.485），alpha 0.25 次低（0.584）；前者主要由 baseline shift 驱动。
-- [ ] 不改目标函数，补 midpoint `{0.75,1.5} × seeds 901--906` 后冻结 response-matched `alpha_star`。
+- [x] 不改目标函数完成 midpoint：`J(0.75)=0.434 < J(1.5)=0.472`，冻结 `alpha_star=0.75`。
 - [x] midpoint 只做这一轮两个点；beta 默认关闭。
-- [ ] 原始单位和标准化分数同时画，附 ratio/KL/ESS、baseline shift 和 paired count。
+- [x] 生成校准诊断图 PNG/PDF/metadata/README，包含 objective 分解、coverage、edge ratio 和 Node-Edge slope 散点。
 - [ ] seeds `911--922` 不重选 instrument/alpha，做 out-of-selection 描述性复测。
 - [ ] primary family 若仅有径向宽度缺口，再开 beta 小网格；轴向/非径向失配直接保留阴性结果。
 
