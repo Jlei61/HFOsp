@@ -11,4 +11,4 @@
 - Recovery note: simulation and NPZ completed; JSON was reconstructed without rerun after a post-simulation numpy-bool serialization failure. The failure did not change the negative gate.
 - Scientific boundary: this one-seed result rejects transfer of the K_y=3 late-bout depth to the current natural-entry loop. It does not reject lower sensor placement or a recruited-area/non-local X coordinate.
 
-Primary evidence: `candidate_lock.json`, `x_depth_screen.json`, `x_depth_screen_traces.npz`, `X1_DONE.json`, `AUTOPILOT_STOP.json`.
+Primary evidence: `candidate_lock.json`, `x_depth_screen.json`, `x_depth_screen_traces.npz`, `X1_DONE.json`, `AUTOPILOT_STOP.json`; diagnostic: `figures/lc4f_x_depth_screen.png`.

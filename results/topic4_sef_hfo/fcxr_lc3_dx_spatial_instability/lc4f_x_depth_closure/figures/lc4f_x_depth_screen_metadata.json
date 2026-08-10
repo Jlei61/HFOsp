@@ -1,0 +1,24 @@
+{
+  "figure": "lc4f_x_depth_screen",
+  "kind": "executed X1 diagnostic; explicitly not a lifecycle figure",
+  "verdict": "X_DEPTH_OFFSET_NEGATIVE",
+  "panels": {
+    "A": "fresh no-kick rate trace with cumulative entry and no offset",
+    "B": "population mean X against the independently archived 0.380 termination boundary",
+    "C": "population-mean D-H slow trajectory, onset marker and record-end marker",
+    "D": "regional X at the final stored snapshot, showing incomplete spatial coverage"
+  },
+  "key_numbers": {
+    "mean_rate_hz": 29.79176139831543,
+    "high_segment_mean_rate_hz": 54.688636779785156,
+    "max_rate_hz": 337.5,
+    "min_X_mean": 0.48805558681488037,
+    "final_X_mean": 0.5005332231521606,
+    "final_D_mean": 0.5403498411178589,
+    "final_H_mean": 2.1240451335906982,
+    "final_y_mean": 67.75996398925781,
+    "max_M_current": 0.0
+  },
+  "claim_boundary": "one development seed natural-entry screen; the empirical K_y=3 X depth did not reach the archived termination boundary and did not autonomously offset",
+  "source": "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4f_x_depth_closure"
+}
