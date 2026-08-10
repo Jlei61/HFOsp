@@ -117,7 +117,12 @@ U1_RUNNING.json
 resource_log.jsonl
 ```
 
-唯一合法 substrate：`Z dynamic, H dynamic, X=1 from t=0, M=0 from t=0, U actuator off, no kick/reset/parameter step`。LC4f dynamic-X post-onset state 仅作 provenance，不可加载为 source。保存 baseline→late 的完整 per-cell sparse spike stream、fresh `r_hi_ref`、rate fields、`gErec_raw/gErec_eff/I_EE_force/H`、vSEEG/event ledger，以及 onset、onset+1s、+4s、late 的原始 exact SNN states。若 22 s 没有 onset，写 `U1_ENTRY_NOT_REPRODUCED.json` + FAILED/STOP。
+唯一合法 substrate：`Z dynamic, H dynamic, X=1 from t=0, M=0 from t=0, U actuator off, no kick/reset/parameter step`。LC4f dynamic-X post-onset state 仅作 provenance，不可加载为 source。保存 baseline→late 的完整 per-cell sparse spike stream、fresh `r_hi_ref`、rate fields、`gErec_raw/gErec_eff/I_EE_force/H`、vSEEG/event ledger，以及 onset 前 1s、onset、onset+1s、+4s、late 的原始 exact SNN states。若 22 s 没有 onset，写 `U1_ENTRY_NOT_REPRODUCED.json` + FAILED/STOP。
+
+分析窗预锁为：baseline=`[onset-4s,onset)`，high reference=`[onset+1s,onset+4s)`；后者中至少
+发过 1 个 spike 的 E cells 构成唯一 `E_hi`。`r_hi_ref` 取 `E_hi` 逐细胞 rate 中位数；T2/T4
+的 `q_i*` 与 `Gamma_U` 共用该支持集和时间窗。onset<4s 或 onset+4s 超出 capture 都是
+`U1_REFERENCE_WINDOW_UNAVAILABLE`，不得缩窗。
 
 U1a 期间不生成 formal U state；临时 observer 即使存在也只能标 `provisional_not_for_candidate_lock`。
 
@@ -142,10 +147,11 @@ u1_capture_traces.npz
 u1_capture_summary.json
 u1_event_ledger.json
 u1_sparse_spikes.npz
-states/onset.pkl
-states/onset_plus_1s.pkl
-states/onset_plus_4s.pkl
-states/late.pkl
+states/onset.npz
+states/pre_onset.npz
+states/onset_plus_1s.npz
+states/onset_plus_4s.npz
+states/late.npz
 u1_noise_provenance.json
 U1_DONE.json
 ```

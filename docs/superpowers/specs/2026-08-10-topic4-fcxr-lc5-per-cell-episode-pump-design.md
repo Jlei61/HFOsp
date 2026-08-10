@@ -206,7 +206,7 @@ U0 通过只表示 instrument 可用，不表示 pump 有效。
 U1a 保存：
 
 - 至少 8 s pre-onset baseline；
-- onset、onset+1 s、+4 s、late high-state 的原始 exact SNN states；
+- onset 前 1 s、onset、onset+1 s、+4 s、late high-state 的原始 exact SNN states；
 - membrane、synapse、delay ring、refractory、Z/H、RNG/counter-based input state；
 - 从 baseline 到 late 的完整 per-cell sparse spike stream；
 - fresh `r_hi,ref`、逐细胞 baseline/high rate fields；
@@ -214,6 +214,13 @@ U1a 保存：
 - 完整 canonical config/code/input hash。
 
 U1a 不生成 formal `u_i/p0_i`；任何为了在线监控而计算的 provisional observer state 都不得进入 candidate lock。若 22 s 内没有自然进入，记 `U1_ENTRY_NOT_REPRODUCED`，停止；不允许 kick 代替。
+
+时间支持在新数据落盘前固定如下，禁止 U1b 看结果后改窗：baseline rate field 使用
+`[onset-4 s, onset)`（若 onset 不足 4 s 则 U1a 不合格）；high-reference window 使用
+`[onset+1 s, onset+4 s)`。`r_hi,ref` 是该 high window 中至少发过 1 个 spike 的 E cells 的
+逐细胞 rate 中位数；同一个 cell support、同一 high window 也必须用于 `q_i*` admissibility
+和 `Gamma_U` 的 numerator/denominator。未在 high window 发放的 E cells 仍保留在完整逐细胞
+状态与 baseline leakage 分析里，但不准以零 force 样本稀释高态剂量标尺。
 
 ### 7.2 U1b：锁尺度后的 deterministic offline replay
 

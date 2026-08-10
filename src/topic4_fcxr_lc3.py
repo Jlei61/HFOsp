@@ -113,6 +113,11 @@ def state_hash(state: FCXRLoopState) -> str:
     # the hash stays a function of the state alone.
     if hasattr(slow, "a") and np.any(np.asarray(slow.a)):
         _hash_array(h, "slow.a", slow.a)
+    # LC5 per-cell episode load follows the same backward-compatible state rule: old source states
+    # predate U and therefore mean an all-zero load, while any formal nonzero U field must affect the
+    # exact-state hash and survive a fork.
+    if getattr(slow, "u_pump_E", None) is not None and np.any(np.asarray(slow.u_pump_E)):
+        _hash_array(h, "slow.u_pump_E", slow.u_pump_E)
     h.update(np.asarray([int(getattr(slow, "_step_i", -1))], dtype=np.int64).tobytes())
     return h.hexdigest()
 
@@ -233,8 +238,13 @@ def _assert_registered_path(slow):
 
 
 def run_fcxr_loop(p, net, *, slow=None, start=None, n_steps, capture_final=False,
-                  store_spikes=True, v_th_per_neuron=None):
-    """Run or resume the registered no-kick FCXR path with exact engine arithmetic."""
+                  store_spikes=True, spike_sink=None, input_sink=None, v_th_per_neuron=None):
+    """Run or resume the registered no-kick FCXR path with exact engine arithmetic.
+
+    ``spike_sink(step, E_cell_indices)`` is an optional pure observer for sparse streaming.  It is
+    called only on steps with E spikes, after the membrane/slow update and before synaptic scatter;
+    the indices are copied so a sink cannot alias engine scratch state.
+    """
 
     if (slow is None) == (start is None):
         raise ValueError("provide exactly one of fresh slow or start state")
@@ -291,6 +301,8 @@ def run_fcxr_loop(p, net, *, slow=None, start=None, n_steps, capture_final=False
         s_I += ring_sI[slot]; ring_sI[slot] = 0.0
         nu_vec = np.full(n, max(nu_now, 0.0))
         ext = rng.poisson(nu_vec * dt, size=n).astype(np.float64)
+        if input_sink is not None:
+            input_sink(int(t), float(xi), ext.copy())
         s_E += ext * c["ext_incr"]
 
         I_E = s_E + (I_E - s_E) * c["decay_i_e"]
@@ -321,6 +333,8 @@ def run_fcxr_loop(p, net, *, slow=None, start=None, n_steps, capture_final=False
             sp_e = np.where(spk[:ne])[0]
             sp_i = np.where(spk[ne:])[0]
             if sp_e.size:
+                if spike_sink is not None:
+                    spike_sink(int(t), sp_e.copy())
                 st = a_indptr[sp_e]
                 cnt = a_indptr[sp_e + 1] - st
                 total = int(cnt.sum())

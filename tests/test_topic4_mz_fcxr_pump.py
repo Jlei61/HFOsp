@@ -285,6 +285,23 @@ def test_legacy_abs_component_matches_the_blessed_lfp_recorder_exactly():
     assert np.allclose(tr["legacy_abs"], res["lfp_trace"], rtol=0, atol=0)
 
 
+def test_virtual_seeg_observer_decimation_selects_exact_full_trace_samples():
+    cfg = _seeg_cfg()
+    p, net, NE, _ = _seeg_net()
+    rec = LFPRecorder(p, net["pos"], net["labels"], sites=_SITES)
+    full = PUMP.VirtualSeegComponentObserver(rec, cfg)
+    dec = PUMP.VirtualSeegComponentObserver(rec, cfg, sample_every=2)
+    n = len(net["labels"])
+    for k in range(5):
+        args = (
+            np.linspace(1.0 + k, 2.0 + k, n), np.linspace(0.2, 0.8, n),
+            np.linspace(0.1, 0.3, NE), np.full(NE, 0.1), np.zeros(NE), None,
+        )
+        full.sample(*args)
+        dec.sample(*args)
+    assert np.array_equal(dec.stack()["legacy_abs"], full.stack()["legacy_abs"][::2])
+
+
 def test_a_pure_slow_pump_sinusoid_cannot_make_no_direct_pump_broadband():
     """READOUT_CONTAMINATION regression: power injected only through the direct pump term must show
     up in all_components and NOT in no_direct_pump (spec §I3 / plan §7 Gate I-a readout)."""

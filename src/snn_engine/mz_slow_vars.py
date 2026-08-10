@@ -205,6 +205,7 @@ class MZSlowVarsConfig:
     pump_tau_ms: float = 0.0       # ms  pump-mediated load release time (clearance scaled by dt/tau_N)
     pump_Imax: float = 0.0         # max electrogenic membrane effect; >0 requires pump_p0_E
     pump_h: int = 3                # Hill exponent of phi(u)=u^h/(1+u^h); primary tier fixes 3
+    pump_excess_mode: str = "signed_centered"  # historical signed_centered | LC5 rectified_excess
     pump_p0_E: "np.ndarray | None" = None    # per-E baseline pump activation E_baseline[phi(u_i)] (shrunken)
     pump_u_init_E: "np.ndarray | None" = None  # start the load at an equilibrated field (None -> zeros)
     pump_record_calibration: bool = False    # OBSERVER: cumulative per-cell sum phi(u) + spike counts
@@ -296,6 +297,7 @@ class MZSlowVars:
         # LC2 R1 raw recurrent-conductance observer.  Assigned after construction by the dedicated
         # runner; None is the byte-parity default.  It reads gErec_raw only and cannot write state.
         self.h_lc2_observer = None
+        self.recurrent_drive_observer = None   # LC5 pure read; absent by default
         if self.cfg.use_pump:
             if self.cfg.pump_u_init_E is not None:              # start equilibrated (no startup transient)
                 u0 = np.asarray(self.cfg.pump_u_init_E, float)
@@ -570,6 +572,8 @@ class MZSlowVars:
                 # FCXR-RC1 Stage C: smooth-saturate the recurrent conductance (slope 1 at small input ->
                 # interictal workpoint preserved; saturates toward g_sat at high input -> no hard clip).
                 gErec = (c.rec_sat_g * np.tanh(u_tilde / c.rec_sat_g)) if c.rec_sat_g > 0.0 else u_tilde
+                if self.recurrent_drive_observer is not None:
+                    self.recurrent_drive_observer.sample(gErec_raw, gErec, self._step_i)
             else:
                 gErec_raw = np.zeros(self.NE, dtype=float)
                 gErec = np.zeros(self.NE, dtype=float); ampa_drive = ampa_drive + c.c_E * I_recE
@@ -805,9 +809,8 @@ class MZSlowVars:
         """Baseline-centered electrogenic pump current on E cells at the CURRENT load u(t^-), or None
         when the pump must not reach the membrane (off / sensor-only / after a scheduled knockout).
 
-        Formula pinned to src/topic4_mz_fcxr_pump.excess_pump_current by
-        tests/test_mz_slow_vars.py::test_membrane_uses_pre_step_load_and_step_applies_the_jump_after.
-        NO positive part: phi<p0 gives a negative excess (activation below the baseline reference).
+        Formula pinned to src/topic4_mz_fcxr_pump.excess_pump_current by the pump/LC5 tests.
+        The historical default is signed-centered; LC5 explicitly opts into rectified excess.
         """
         c = self.cfg
         if not c.use_pump or c.pump_sensor_only or c.pump_Imax <= 0.0:
@@ -817,7 +820,10 @@ class MZSlowVars:
             self._pump_excess_last = None                       # scheduled current knockout (u keeps evolving)
             return None
         uh = self.u_pump_E ** c.pump_h
-        ex = c.pump_Imax * (uh / (1.0 + uh) - self._pump_p0_E)
+        excess = uh / (1.0 + uh) - self._pump_p0_E
+        if c.pump_excess_mode == "rectified_excess":
+            excess = np.maximum(excess, 0.0)
+        ex = c.pump_Imax * excess
         self._pump_excess_last = ex
         return ex
 
@@ -1182,6 +1188,8 @@ class MZSlowVars:
         elif c.x_relay_frozen_E is not None:
             raise ValueError("x_relay_frozen_E requires use_x=True")
         # ---- FCXR pump lifecycle (per-E activity-dependent load u_i + electrogenic pump) ----
+        if c.pump_excess_mode not in ("signed_centered", "rectified_excess"):
+            raise ValueError("pump_excess_mode must be 'signed_centered' or 'rectified_excess'")
         if not c.use_pump:
             if (c.pump_sensor_only or c.pump_Imax > 0.0 or c.pump_record_calibration
                     or c.pump_interventions or c.pump_u_init_E is not None):

@@ -113,6 +113,55 @@ def test_split_continuation_matches_uninterrupted_and_is_idempotent():
     np.testing.assert_array_equal(tails[0]["E_spk_bool"], tails[1]["E_spk_bool"])
 
 
+def test_sparse_spike_sink_is_a_pure_read_and_matches_dense_raster():
+    p, net_ref, slow_ref, vth = _case()
+    n_steps = 240
+    ref = run_fcxr_loop(
+        p, net_ref, slow=slow_ref, n_steps=n_steps,
+        capture_final=True, store_spikes=True, v_th_per_neuron=vth,
+    )
+
+    p, net_got, slow_got, vth = _case()
+    steps, cells = [], []
+
+    def sink(step, spiking_cells):
+        steps.extend([int(step)] * len(spiking_cells))
+        cells.extend(np.asarray(spiking_cells, dtype=int).tolist())
+
+    got = run_fcxr_loop(
+        p, net_got, slow=slow_got, n_steps=n_steps,
+        capture_final=True, store_spikes=False, spike_sink=sink,
+        v_th_per_neuron=vth,
+    )
+    expected_steps, expected_cells = np.nonzero(ref["E_spk_bool"])
+    np.testing.assert_array_equal(np.asarray(steps), expected_steps)
+    np.testing.assert_array_equal(np.asarray(cells), expected_cells)
+    np.testing.assert_array_equal(got["rate_E"], ref["rate_E"])
+    np.testing.assert_array_equal(got["rate_I"], ref["rate_I"])
+    assert got["E_spk_bool"] is None
+    assert state_hash(got["checkpoint"]) == state_hash(ref["checkpoint"])
+
+
+def test_input_sink_is_a_pure_read_and_sees_every_exact_draw():
+    p, net_ref, slow_ref, vth = _case()
+    ref = run_fcxr_loop(
+        p, net_ref, slow=slow_ref, n_steps=13, capture_final=True,
+        store_spikes=False, v_th_per_neuron=vth,
+    )
+    p, net_got, slow_got, vth = _case()
+    rows = []
+    got = run_fcxr_loop(
+        p, net_got, slow=slow_got, n_steps=13, capture_final=True,
+        store_spikes=False,
+        input_sink=lambda step, xi, ext: rows.append((step, xi, ext.copy())),
+        v_th_per_neuron=vth,
+    )
+    assert [r[0] for r in rows] == list(range(13))
+    assert all(r[2].shape == (len(vth),) for r in rows)
+    np.testing.assert_array_equal(got["rate_E"], ref["rate_E"])
+    assert state_hash(got["checkpoint"]) == state_hash(ref["checkpoint"])
+
+
 def test_zero_current_perturbation_is_exact_continuation_byte_for_byte():
     p, net, slow, vth = _case()
     pre = run_fcxr_loop(

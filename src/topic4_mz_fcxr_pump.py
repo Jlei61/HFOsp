@@ -6,18 +6,19 @@ ionic-homeostasis model, and must never be reported as one.
 
     phi(u) = u^h / (1 + u^h)                      h = 3 fixed for the primary tier
     du/dt  = a_load * S_i(t) - phi(u_i)/tau_N     S_i = spike train
-    I_pump_excess = Imax * [phi(u_i) - p0_i]      distributionally baseline-centered, NO positive part
+    I_pump_excess = Imax * f[phi(u_i) - p0_i]     explicit signed or rectified mode
 
 Three clauses that are science contract, not implementation detail (spec §2.2/§2.3):
 
   1. the spike jump is PER SPIKE (never scaled by dt); the clearance IS scaled by dt/tau_N;
   2. the SAME phi drives the clearance and the membrane current;
-  3. the membrane effect is Imax*(phi-p0) with NO positive part -- ``+Imax*p0`` compensates the
-     steady state already implicit in the FCXR baseline, so a negative excess only means "pump
-     activation below the baseline reference", never "pump running backwards".
+  3. the archived pump line keeps signed ``f(x)=x`` semantics.  LC5 explicitly selects
+     ``f(x)=[x]+`` so below-reference load cannot inject a relative depolarizing compensation.
+     The two equations share code but their scientific meanings must not be mixed.
 
 Contract enumerated 1:1 in tests/test_topic4_mz_fcxr_pump.py.
-Design: docs/superpowers/specs/2026-07-26-topic4-mz-fcxr-pump-lifecycle-design.md
+Designs: docs/superpowers/specs/2026-07-26-topic4-mz-fcxr-pump-lifecycle-design.md
+         docs/superpowers/specs/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump-design.md
 """
 from __future__ import annotations
 
@@ -56,13 +57,23 @@ def step_spike_load(u, spikes, *, a_load, tau_N, dt, h=PRIMARY_H):
     return np.maximum(u + jump - clearance, 0.0)
 
 
-def excess_pump_current(u, p0, *, Imax, h=PRIMARY_H):
-    """Baseline-centered electrogenic pump current Imax*[phi(u)-p0] subtracted from the E drive.
+def excess_pump_current(u, p0, *, Imax, h=PRIMARY_H, mode="signed_centered"):
+    """Return the explicitly selected excess-pump current.
 
-    NO positive part: phi<p0 gives a negative excess (pump activation below the baseline reference),
-    which cancels the mean bias that a rectifier would inject from baseline fluctuations alone.
+    ``signed_centered`` is the historical FCXR-pump equation and remains the default: activation
+    below ``p0`` gives negative compensation.  LC5 explicitly selects ``rectified_excess`` so only
+    activation above the per-cell baseline reference produces outward current.  Keeping the mode
+    explicit prevents a new lifecycle experiment from silently changing archived pump semantics.
     """
-    return Imax * (pump_activation(u, h) - np.asarray(p0, float))
+    excess = pump_activation(u, h) - np.asarray(p0, float)
+    if mode == "signed_centered":
+        return Imax * excess
+    if mode == "rectified_excess":
+        return Imax * np.maximum(excess, 0.0)
+    raise ValueError(
+        "pump excess mode must be 'signed_centered' or 'rectified_excess' "
+        f"(got {mode!r})"
+    )
 
 
 # =====================================================================================
@@ -310,7 +321,7 @@ class VirtualSeegComponentObserver:
     COMPONENTS = ("legacy_abs", "excitatory", "inhibitory", "adaptation", "pump",
                   "no_direct_pump", "all_components")
 
-    def __init__(self, lfp_recorder, cfg, z_threshold=None):
+    def __init__(self, lfp_recorder, cfg, z_threshold=None, sample_every=1):
         # Reuse the blessed recorder's per-site neuron indices and normalized shape weights, and its
         # exact per-site np.dot reduction, so `legacy_abs` is BITWISE identical to LFPRecorder.sample.
         self._idx = list(lfp_recorder._idx)
@@ -320,6 +331,10 @@ class VirtualSeegComponentObserver:
         # sensor IS max(I_I[:NE],0), so the fraction of E cells BELOW I_th_EI (z_inf=1, recovering)
         # can be accumulated here without touching the engine. None -> not accumulated.
         self.z_threshold = z_threshold
+        self.sample_every = int(sample_every)
+        if self.sample_every < 1:
+            raise ValueError("sample_every must be >= 1")
+        self._seen_steps = 0
         self.z_inf_high_sum = 0.0
         self.z_inf_n = 0
         self.NE = int(lfp_recorder.NE)
@@ -335,6 +350,10 @@ class VirtualSeegComponentObserver:
         return out
 
     def sample(self, I_E, I_I, gE, gI, gM, ex_pump):
+        take = self._seen_steps % self.sample_every == 0
+        self._seen_steps += 1
+        if not take:
+            return
         NE = self.NE
         if self.z_threshold is not None:
             self.z_inf_high_sum += float(np.mean(np.maximum(I_I[:NE], 0.0) < self.z_threshold))

@@ -23,8 +23,7 @@ FAST_ARRAYS = ("V", "ref", "s_E", "I_E", "s_I", "I_I", "s_E_rec", "I_E_rec",
                "ring_sE", "ring_sI")
 SLOW_ARRAYS = ("z", "m", "phi", "x_relay", "y", "ee_relay_send", "h_lc2_E",
                "_h_source_lc2_E", "_z_sensor_last_E",
-               "a")   # FCXR-LC4 channel open fraction; absent from files written before it existed,
-                      # which load_into already tolerates by skipping missing keys
+               "a", "u_pump_E")  # LC4/LC5 slow actuator states; old files legitimately lack them
 
 
 def save_loop_state(path, state: FCXRLoopState):
@@ -66,11 +65,10 @@ def load_into(path, template: FCXRLoopState) -> FCXRLoopState:
         if cur is None:
             continue
         if key not in z.files:
-            if k == "a":
-                # A file written before this variable existed is a state whose channel was shut,
-                # not a state whose channel happened to hold whatever the template was carrying.
-                # Leaving the template's value here is the exact failure this module exists to
-                # prevent: a fork that restores most of the state and silently keeps the rest.
+            if k in ("a", "u_pump_E"):
+                # A file written before either variable existed is a state whose actuator was shut,
+                # not a state that held whatever the new template happened to carry.  Leaving the
+                # template value here creates a half-restored fork.
                 np.asarray(cur)[...] = 0.0
             continue
         np.asarray(cur)[...] = z[key]

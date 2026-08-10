@@ -187,3 +187,34 @@ def test_a_file_written_before_the_channel_existed_still_loads(tmp_path):
     assert np.allclose(np.asarray(back.slow.a), 0.0), (
         "a state that predates the channel had it shut; keeping the template's 0.5 would be the "
         "half-restored fork this module exists to prevent")
+
+
+# ---- FCXR-LC5: formal per-cell episode load must be part of an exact fork ----
+
+def _state_with_u(seed=0, fill=0.5, u_fill=0.3):
+    s = _state(seed, fill)
+    s.slow.u_pump_E = np.full(NE, u_fill, dtype=float)
+    return s
+
+
+def test_the_formal_episode_load_survives_a_fork(tmp_path):
+    s = _state_with_u(seed=12, u_fill=0.77)
+    p = str(tmp_path / "u_state.npz")
+    written = save_loop_state(p, s)
+    back = load_into(p, _state_with_u(seed=99, fill=0.9, u_fill=0.01))
+    assert np.allclose(np.asarray(back.slow.u_pump_E), 0.77)
+    assert state_hash(back) == written
+
+
+def test_the_hash_covers_nonzero_episode_load():
+    a = _state_with_u(seed=13, u_fill=0.2)
+    b = _state_with_u(seed=13, u_fill=0.9)
+    assert state_hash(a) != state_hash(b)
+
+
+def test_loading_a_pre_u_state_sets_the_new_load_to_zero(tmp_path):
+    p = str(tmp_path / "pre_u.npz")
+    written = save_loop_state(p, _state(seed=14))
+    back = load_into(p, _state_with_u(seed=99, fill=0.9, u_fill=0.5))
+    assert np.allclose(np.asarray(back.slow.u_pump_E), 0.0)
+    assert state_hash(back) == written
