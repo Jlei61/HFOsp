@@ -91,6 +91,7 @@ def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba
 def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   verbose=False, kick_center=None, lfp_recorder=None, r_kick=None, t_kick=None,
                   V_th_per_neuron=None, perturb=None,
+                  forced_spike_mask=None, forced_spike_ms=None,
                   early_stop_runaway=False, es_thresh_hz=120.0, es_dur_ms=100.0,
                   ee_std_u=0.0, ee_std_tau_ms=0.0,
                   dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
@@ -101,6 +102,11 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
     radius R_KICK about the sheet center, during [T_KICK, T_KICK+DUR_KICK).
+
+    `forced_spike_mask` and `forced_spike_ms` are an off-by-default causal
+    assay hook. Together they inject one exact E-neuron presynaptic spike packet
+    on the simulation time grid; the packet then follows the ordinary reset,
+    refractory, delay-ring and synaptic-weight path.
 
     Returns the standard recorders plus per-step inside/outside-disk E-spike
     counts. Use slow=None (epilepsy layer off). KICK_BOOST=0 -> pure control
@@ -120,6 +126,25 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
     dt = p.dt
     nsteps = int(round(p.T / dt))
+    forced_on = forced_spike_mask is not None or forced_spike_ms is not None
+    if forced_on:
+        if forced_spike_mask is None or forced_spike_ms is None:
+            raise ValueError("forced spike mask and time must be provided together")
+        forced_spike_mask = np.asarray(forced_spike_mask, bool)
+        if forced_spike_mask.shape != (N,):
+            raise ValueError("forced spike mask must align to all neurons")
+        if np.any(forced_spike_mask[NE:]):
+            raise ValueError("forced spike packet must contain excitatory neurons only")
+        if not np.any(forced_spike_mask[:NE]):
+            raise ValueError("forced spike packet must contain at least one E neuron")
+        forced_spike_step = int(round(float(forced_spike_ms) / dt))
+        if abs(forced_spike_step * dt - float(forced_spike_ms)) > 1e-9:
+            raise ValueError("forced spike time must lie on the simulation time grid")
+        if forced_spike_step < 0 or forced_spike_step >= nsteps:
+            raise ValueError("forced spike time lies outside the simulation")
+    else:
+        forced_spike_step = None
+    forced_spike_collision_count = 0
 
     # ---- precomputed decays ---- (identical to model.simulate)
     decay_sE = np.exp(-dt / p.tau_r_AMPA)
@@ -337,6 +362,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                                  shunt_gaba=shunt_gaba, e_gaba=e_gaba, g_gaba_scale=g_gaba_scale)
         V = np.where(free, Vtmp, p.V_reset)
         spk = free & (V >= (V_th_eff if np.isscalar(V_th_eff) else V_th_eff))
+        if forced_spike_step is not None and t == forced_spike_step:
+            forced_spike_collision_count = int(np.count_nonzero(
+                spk & forced_spike_mask))
+            spk[forced_spike_mask] = True
         V[spk] = p.V_reset
         ref[spk] = ref_steps[spk]
 
@@ -439,6 +468,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         E_spk_bool=E_spk_bool,
         n_inside=int(kick_mask.sum()), n_outside=int(outside_mask.sum()),
         NE=NE, nu_theta=nu_theta, wall_s=time.time() - t0,
+        forced_spike_step=forced_spike_step,
+        forced_spike_requested_count=(
+            0 if forced_spike_step is None else int(forced_spike_mask.sum())),
+        forced_spike_collision_count=int(forced_spike_collision_count),
         lfp_trace=lfp_trace,                                    # (nsteps, n_sites) or None
         lfp_sites=(None if lfp_recorder is None else lfp_recorder.sites),
     )

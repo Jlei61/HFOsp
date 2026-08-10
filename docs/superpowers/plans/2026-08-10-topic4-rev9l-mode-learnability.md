@@ -37,7 +37,11 @@ L0 解释规则：
 
 ## Task L1：forced-initiation capacity
 
-- [ ] 实现 deterministic E-neuron forced-spike adapter 和 sham；单测锁定 spike 时刻、cell identity 和无注入 no-op。
+- [x] 冻结独立 L1 config；component 按 raw Gaussian contribution 选源，control 按冻结中心最近邻选同数 E cells。
+- [x] 冻结 primary paired-excess rank window `[100,250] ms`；returned triggered event 只作 secondary，后发自发事件不计。
+- [x] 实现 deterministic E-neuron forced-spike adapter 和 sham；单测锁定 spike 时刻、cell identity 和无注入 no-op。
+- [x] 实现 one-arm/one-network worker：一次建网和 sham 后复用全部 source/packet pairs，并保存 paired-excess rank/geometry。
+- [x] 实现三网络 bounded canary launcher、120 s wait、status/log/notify 和 packet-selection aggregator。
 - [ ] 冻结 primary mapping A<-component2、B<-component1，并预生成 component1/2/3 与三个 off-field source sets。
 - [ ] Node canary 比较 0.5%/1%/2% `N_E`，冻结最小可读 packet size。
 - [ ] Null/Node/Edge/Node+Edge 在新 fit seeds 上运行 400 ms paired assays。

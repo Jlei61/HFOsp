@@ -85,8 +85,9 @@ Primary source mapping 使用当前 onset association：
 - patient mode A <- Gaussian component 2；
 - patient mode B <- Gaussian component 1。
 
-Secondary scan 包括 components 1/2/3 和三个预冻结 matched off-field sites。source site 是 frozen Gaussian responsibility
-最高的一组 E neurons，不按输出结果移动位置。
+Secondary scan 包括 components 1/2/3 和三个预冻结 matched off-field sites。component source 按该分量的 raw Gaussian
+contribution 取前 N 个 E neurons；不能直接取 responsibility，因为远离全部 Gaussian 的尾部也可能得到虚高相对责任。
+off-field control 按到冻结 control center 的距离取最近 N 个 E neurons。两者 packet 数相同，位置不按输出结果移动。
 
 ### 4.2 Forced packet
 
@@ -94,8 +95,11 @@ Secondary scan 包括 components 1/2/3 和三个预冻结 matched off-field site
 `0.5%/1%/2% * N_E`，冻结最小的“产生可读 downstream recruitment 且没有大面积非有限/runaway”的 packet size。
 所有 arm/seed 共用 source neuron identity、时刻和随机数流；sham 只是不注入 packet。
 
-正式四臂为 Null、Node、Edge、Node+Edge。运行窗 400 ms；本层不等待自发事件，不用 KMeans 发现 mode，也不优化 mode
-proportion。source identity 决定比较的 patient target。
+正式四臂为 Null、Node、Edge、Node+Edge，运行窗 400 ms。primary rank readout 固定在 `[100,250] ms`，先计算
+`clip(contact_envelope_forced-contact_envelope_sham,0,infinity)`，再走同一个 `read_event`；这样 propagation capacity 不以
+detector 是否形成完整 returned event 为前提。raw forced trajectory 上与 trigger 重叠、onset latency 不超过 40 ms 的 returned
+event 作为 secondary duration/return endpoint；后发自发事件不能冒充 triggered event。本层不用 KMeans 发现 mode，也不优化
+mode proportion；source identity 决定比较的 patient target。
 
 ### 4.3 Readout
 
