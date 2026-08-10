@@ -66,11 +66,12 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
 - [x] 冻结训练集 matched-count bootstrap floor 与四 descriptor smooth weakest-mode objective；held-out 禁止读取。
 - [x] 在 6 个 fit networks 上运行 13 个中心有限差分候选，只使用 component 1/2 forced sources。
 - [x] 在同一 fit networks 上运行 64-point Sobol，保留完整探索结果，仅结构可容许候选进入 weakest-mode 排序。
-- [ ] fit 前 8 个候选加 `gamma=0` 基线在 selection seeds 1011--1013 做 out-of-fit sanity；改善保留后才做 bounded local refinement。component 3 固定为零负对照，不开放全 edge matrix，不先扫 beta。
+- [x] fit 前 8 个加 `gamma=0` 基线在 selection seeds 1011--1013 完成 `27/27`；使用独立 3-event floor，held-out 未读。
+- [x] selection 改善仅 2.27%，mode A 只改变 1/3 networks；停止 local refinement，component 3 保持负对照，beta 保持 0。
 
 ## Task L3：network/optimizer audit
 
-- [ ] 使用 6 fit / 3 selection / 3 confirmation 新 network seeds。
+- [x] 使用 6 fit / 3 selection 新 network seeds；因 shared forced capacity 未成立，不读取 3 confirmation seeds。
 - [ ] 分别求 per-network oracle 与 shared-parameter oracle，报告 `Delta_network`。
 - [ ] 已知好解存在后，以相同预算和 CRN 比较 Sobol/local refinement 与 CMA-ES 3 restarts。
 - [ ] 参数等价类和多解直接进入 identifiability 结论。

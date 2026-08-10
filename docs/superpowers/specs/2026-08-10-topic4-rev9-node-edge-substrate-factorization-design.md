@@ -448,15 +448,32 @@ floor median `m_qk` 和 IQR `s_qk`，然后定义：
 ```text
 Z_qk = (D_qk - m_qk) / (s_qk + eps)
 D_k  = mean_q softplus(Z_qk) + 2 * (1 - readable_fraction_k)
-J_shape = tau * log[exp(D_A/tau) + exp(D_B/tau)]
+J_shape = tau * log{mean[exp(D_A/tau), exp(D_B/tau)]}
 J_L2 = J_shape + 0.10 * OOD_fraction
 ```
 
 `J_shape` 保护最弱模式；intended-minus-cross Spearman、response mass、r50/r90 和 return 只作辅助曲线，不替代四层主目标。
 ratio、KL、ESS 和 weighted-delay change 单独形成 distortion axis，与 `J_L2` 画 Pareto，不再用任意权重混入患者形状目标。
-首轮是探索性 capacity scan：在 fit seeds `1004--1009` 上用 common random numbers 做 64 个 Sobol points；将 weakest-mode
-前 8 个与 `gamma=0` 基线在未参与筛选的 `1011--1013` 上做 out-of-fit sanity。只有改善在 selection networks
+fit 使用每 mode 6 events 的 patient floor；selection 只有 3 张网络，因此必须另用每 mode 3 events 的 floor，不能直接沿用 fit
+floor 比绝对 `J`。首轮是探索性 capacity scan：在 fit seeds `1004--1009` 上用 common random numbers 做 64 个 Sobol points；
+将 weakest-mode 前 8 个与 `gamma=0` 基线在未参与筛选的 `1011--1013` 上做 out-of-fit sanity。只有改善在 selection networks
 保留后才做小范围 bounded local refinement。不得读取 patient held-out，也不得根据结果修改 source mapping。
+
+### 13.2a L2 执行结果与停止决定（2026-08-11）
+
+- 13 个有限差分候选共 `78/78` workers 完成；64-point Sobol 共 `384/384` 完成，57 个满足最终 edge ratio `[0.25,4]`。
+- fit 最优为 `sobol_015`；前 8 个加 scalar baseline 在 selection seeds 共 `27/27` 完成。使用正确的 3-event floor 后，selection
+  最优改为 `sobol_004`，相对 scalar objective 只改善 `2.27%`，fit 与 selection 的候选排序不稳定。
+- `sobol_004` 的 mode A recruitment、precedence、profile 和 event-cloud 距离全部高于 patient-training matched floor 的 95%
+  分位；其 mode A rank curve 仅在 `1/3` selection networks 改变，不能算 shared route restoration。
+- prototype-only 排序会选到把 mode A Spearman 提高、同时恶化 recruitment 的候选，证明单独 KMeans/prototype 目标不足；新的
+  四层 weakest-mode objective 有必要，但没有找到完整 known-good 解。
+- 多个相距较远的 `gamma` 产生完全相同的 forced rank curves，当前 coarse readout 下 parameter-to-output 映射为 many-to-one。
+
+因此本轮状态冻结为 `L2_COMPONENT_PAIR_SEARCH_NO_SHARED_MODE_A_RESTORATION`。不做 top-k local refinement，不启动 CMA-ES
+head-to-head，也不开 `beta`。这不是六参数 family 的数学不可能性证明；它只说明在冻结 source/scaffold、给定边界和 64-point
+预算内没有观察到跨网络共享的 mode A 恢复。若继续，下一步只做 per-network oracle 诊断 `Delta_network`，区分 shared-family
+限制与 network realization 限制。
 
 ### 13.3 optimizer 与 beta 的裁定实验
 
@@ -479,3 +496,6 @@ weighted-delay radial scale 时，才做小型 beta 网格。现在 Edge 已轻�
 - `edge_structure_detail/edge_structure_detail_summary.json` 与结构图；
 - `forced_source_capacity/formal_fit/forced_source_capacity_summary.json`；
 - `forced_source_capacity/formal_fit/review_audit/rev9l_l1_review_audit.json` 与审阅图。
+- `relaxed_edge_oracle/sobol_fit/sobol_fit_summary.json`；
+- `relaxed_edge_oracle/selection_confirmation/selection_confirmation_summary.json`；
+- `relaxed_edge_oracle/scientific_review/l2_scientific_review.json` 与审阅图。

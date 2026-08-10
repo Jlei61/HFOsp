@@ -135,11 +135,12 @@
 - [x] 冻结六参数 directional component-pair residual 公式；保持 topology、delay labels、每 target incoming-E 和非 E->E 通路不变。
 - [x] 冻结四层 floor-normalized descriptor 与 smooth worst-mode objective；Spearman margin 和 response mass 只作辅助量。
 - [x] 在 fit seeds `1004--1009` 上运行 64-point Sobol capacity scan，common random numbers，18 workers，120 s coarse wait。
-- [ ] fit 前 8 个加 `gamma=0` 基线先在 selection seeds `1011--1013` 做 out-of-fit sanity；改善保留后才做 bounded local refinement；不读取 patient held-out。
+- [x] fit 前 8 个加 `gamma=0` 基线在 selection seeds `1011--1013` 完成 `27/27`；用独立 3-event floor 纠正计数，held-out 未读。
+- [x] selection 最优只改善 2.27%、A 路径仅改变 1/3 networks；停止 bounded local refinement，不把弱改善升级为 known-good 解。
 - [ ] 若得到双优 known-good oracle，做 synthetic-teacher recovery，再按相同 simulation-call budget 比较 multi-restart CMA-ES 与
   Sobol+local；报告 regret 和 restart variance。
-- [ ] 同候选集做旧 global、mode mean、worst-mode objective ablation，分离 objective 与 optimizer。
-- [ ] beta 保持 0；只有 A/B route 已恢复且剩余误差明确为 r50/r90 或 weighted-delay radial scale 时才开小网格。
+- [x] L0 旧 objective replay 加 L2 prototype-only ablation 均证明旧目标不保护完整 mode A；optimizer 因无 full known-good 解仍不可归因。
+- [x] beta 保持 0；当前缺口是跨网络 route shape，不是 r50/r90 或 weighted-delay radial scale。
 
 ## Task 8：Substrate bundle 和 lifecycle 计划
 
@@ -151,12 +152,13 @@
 
 ## 当前最短执行顺序
 
-1. 运行 L2 component-pair relaxed edge oracle，直接测试 mode-A route 是否在守恒连接 family 中可实现；当前不开 beta。
+1. L2 component-pair relaxed edge oracle 已完成：有限预算内没有 shared mode-A restoration，当前不开 beta，也不做 local refinement。
 2. 对三个 Gaussian component 做 direct lesion 与 matched relocation，并做多 permutation `d_i` 配准审计，定位 Node 几何的因果来源。
-3. 得到已知可实现的 forced/oracle 解后，先做 synthetic-teacher recovery，再同预算比较 weakest-mode objective、multi-restart
+3. 若继续优化归因，先用现有 64 点做 per-network oracle，量化 shared 与 per-network capacity gap；得到 shared known-good 解后，
+   再做 synthetic-teacher recovery，并同预算比较 weakest-mode objective、multi-restart
    CMA-ES 和 Sobol/local refinement，
    再区分 objective、optimizer 与 family limitation。
-4. 若 L2 仍不能改善 A，停止调 scalar alpha/beta，转向 directional scaffold 或 observation contract；不把失败继续归给优化器。
+4. 停止调 scalar alpha/beta；per-network oracle 仍失败时转向更一般的 directional scaffold 或 observation contract，不把失败归给优化器。
 5. 只有位置特异性稳定时才称 mode-specific core；随后把确认的静态 substrate 接回既有 Z/M/adaptation 方程，单独检查
    entry、bounded carrier、exit、postictal protection 和 return/recovery。
 

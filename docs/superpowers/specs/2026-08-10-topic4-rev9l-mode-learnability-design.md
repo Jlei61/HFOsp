@@ -153,6 +153,13 @@ distortion 轴，不混入 shape objective。fit 前 8 个候选与 `gamma=0` sc
 `1011--1013` 做 out-of-fit sanity；只有改善在 selection networks 保留后才进入 bounded local refinement。不读
 patient held-out，不直接开放全 edge matrix，也不先增加 radial `beta`。
 
+selection 只有 3 个 model events/mode，必须另建 3-event matched patient floor；fit 的 6-event floor 不得用于 selection 的绝对
+评分。执行结果为：64-point fit `384/384` workers 成功、57 个结构可容许；top-8 加 baseline 的 selection `27/27` 成功。
+count-corrected selection 最优 `sobol_004` 相对 scalar 只改善 `2.27%`，mode A 四项仍全部高于 patient floor 95% 分位，且 A
+rank curve 只在 `1/3` selection networks 改变。因此冻结为
+`L2_COMPONENT_PAIR_SEARCH_NO_SHARED_MODE_A_RESTORATION`，不做 local refinement、不启 CMA-ES 对比、不开 beta。该结论只覆盖
+当前边界和 64-point 有限搜索，不是 family 全空间不可能性证明。
+
 ## 6. L3：network 与 optimizer audit
 
 使用 12 个与 rev8/rev9 不重叠的新 network seeds：6 fit、3 selection、3 confirmation。分别报告：
