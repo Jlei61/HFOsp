@@ -41,7 +41,7 @@ OLD_ROOT = Path(
 
 
 def panel_letter(ax, label: str) -> None:
-    ax.text(-0.13, 1.08, label, transform=ax.transAxes, fontsize=12,
+    ax.text(-0.13, 1.08, label, transform=ax.transAxes, fontsize=15,
             fontweight="bold", va="top", ha="left")
 
 
@@ -89,7 +89,7 @@ def draw_graph(ax, out: Path, fit_id: str) -> None:
     ax.scatter(contacts[:, 0], contacts[:, 1], s=26, facecolor="white", edgecolor=DARK,
                linewidth=0.8, zorder=4)
     ax.set_aspect("equal"); ax.set_xticks([]); ax.set_yticks([])
-    ax.set_title("Local backbone + selected shortcuts", fontsize=10, pad=5)
+    ax.set_title("Local backbone + selected shortcuts", fontsize=11.5, pad=5)
     for spine in ax.spines.values(): spine.set_visible(False)
 
 
@@ -124,9 +124,9 @@ def draw_event_reproduction(fig, spec, out: Path, fit_id: str) -> None:
             axes[row_index, column].set_xticks([]); axes[row_index, column].set_yticks([])
             for spine in axes[row_index, column].spines.values(): spine.set_visible(False)
         axes[row_index, 0].set_ylabel(f"T{template}", color=color, rotation=0, labelpad=12,
-                                     fontsize=10, fontweight="bold", va="center")
-    axes[0, 0].set_title("Observed", fontsize=9, pad=4)
-    axes[0, 1].set_title("Generated", fontsize=9, pad=4)
+                                     fontsize=11.5, fontweight="bold", va="center")
+    axes[0, 0].set_title("Observed", fontsize=11, pad=4)
+    axes[0, 1].set_title("Generated", fontsize=11, pad=4)
     panel_letter(axes[0, 0], "B")
 
 
@@ -169,7 +169,7 @@ def draw_pathways(fig, spec, out: Path, subject: str) -> None:
         source, target = pattern[:n], pattern[n:]
         ax.scatter(xy[:, 0], xy[:, 1], s=18 + 480 * source, color=BLUE, alpha=0.72)
         ax.scatter(xy[:, 0], xy[:, 1], s=10 + 320 * target, facecolor="none", edgecolor=RED, lw=1.0)
-        ax.set_aspect("equal"); ax.set_title(title, fontsize=9)
+        ax.set_aspect("equal"); ax.set_title(title, fontsize=11)
         ax.set_xticks([]); ax.set_yticks([])
         for spine in ax.spines.values(): spine.set_visible(False)
     comparison = pd.read_csv(out / "pathway_analysis" / "true_vs_shuffle_patient_patterns.csv")
@@ -229,7 +229,7 @@ def draw_cross_state_maps(fig, spec, out: Path, subject: str) -> dict:
                   aspect="equal", cmap="viridis", vmin=0, vmax=1, interpolation="bilinear")
         ax.scatter(points[:, 0], points[:, 1], c=values, cmap="viridis", vmin=0, vmax=1,
                    s=22, edgecolor="white", lw=0.7)
-        ax.set_title(title, fontsize=9, color=RED if template == "A" else BLUE)
+        ax.set_title(title, fontsize=11, color=RED if template == "A" else BLUE)
         ax.set_xticks([]); ax.set_yticks([])
     e_min, e_max = float(np.nanmin(energy)), float(np.nanmax(energy))
     X, Y, T, _, _ = smooth_field(points, energy, support)
@@ -237,15 +237,15 @@ def draw_cross_state_maps(fig, spec, out: Path, subject: str) -> dict:
         aspect="equal", cmap="Blues", vmin=e_min, vmax=e_max, interpolation="bilinear")
     axes[2].scatter(points[:, 0], points[:, 1], c=energy, cmap="Blues", vmin=e_min, vmax=e_max,
                     s=22, edgecolor="white", lw=0.7)
-    axes[2].set_title("Early ictal", fontsize=9)
+    axes[2].set_title("Early ictal", fontsize=11)
     axes[2].set_xticks([]); axes[2].set_yticks([])
     for ax in axes:
-        ax.set_xlabel("Propagation axis", fontsize=7)
+        ax.set_xlabel("Propagation axis", fontsize=9)
     timing_bar = fig.colorbar(timing_image, ax=axes[:2], fraction=0.025, pad=0.015)
-    timing_bar.set_ticks([0, 1], ["early", "late"]); timing_bar.ax.tick_params(labelsize=6)
+    timing_bar.set_ticks([0, 1], ["early", "late"]); timing_bar.ax.tick_params(labelsize=8)
     energy_bar = fig.colorbar(energy_image, ax=axes[2], fraction=0.045, pad=0.025)
-    energy_bar.set_ticks([e_min, e_max]); energy_bar.ax.tick_params(labelsize=6)
-    energy_bar.ax.set_title("power\n(z)", fontsize=6, pad=2)
+    energy_bar.set_ticks([e_min, e_max]); energy_bar.ax.tick_params(labelsize=8)
+    energy_bar.ax.set_title("power\n(z)", fontsize=8, pad=2)
     panel_letter(axes[0], "E")
     return {
         "subject": subject, "target_path": str(target_path), "target_key": "target_1_150",
@@ -287,8 +287,8 @@ def main() -> None:
     if not (out / "EARLY_ICTAL_SCORING_COMPLETE.json").exists():
         raise RuntimeError("complete early-ictal scoring before final figure")
     mpl.rcParams.update({
-        "font.family": "DejaVu Sans", "font.size": 8.2, "axes.labelsize": 8.5,
-        "xtick.labelsize": 7.2, "ytick.labelsize": 7.2, "axes.linewidth": 0.8,
+        "font.family": "DejaVu Sans", "font.size": 10.5, "axes.labelsize": 11.0,
+        "xtick.labelsize": 9.3, "ytick.labelsize": 9.3, "axes.linewidth": 0.8,
         "pdf.fonttype": 42, "ps.fonttype": 42,
     })
     fig = plt.figure(figsize=(12.0, 7.7))
