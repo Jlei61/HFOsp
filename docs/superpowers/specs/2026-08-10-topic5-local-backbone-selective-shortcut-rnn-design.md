@@ -243,6 +243,8 @@ d_{e,t}=\operatorname{median}_{c\in N_{e,t+1}}
 - intermediate：50–80%；
 - distal：80–100%。
 
+所有 arm（包括 order-shuffle）必须使用未打乱的真实 train events 计算完全相同的 q50/q80；shuffle 只改变模型拟合输入，不能改变距离分箱定义。每个 unit 保存 observed-train distance reference 的 hash，aggregate 前逐 fit/seed 核对一致。
+
 每个患者、每个 bin 至少 20 个 heldout transitions 才进入患者级分箱推断；不足则标记 `DESCRIPTIVE_ONLY`，但不排除总体 propagation/field 分析。必须报告三个 bin 的事件数和实际毫米范围。
 
 Primary contrast：

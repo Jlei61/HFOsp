@@ -235,7 +235,8 @@ def train_unit(
     plane = np.load(cache / "plane.npz", allow_pickle=False)
     events = np.load(cache / "events.npz", allow_pickle=False)
     provenance = json.loads((cache / "provenance.json").read_text())
-    ranks = events["ranks"][events["split"] >= 0].copy()
+    observed_ranks = events["ranks"][events["split"] >= 0].copy()
+    ranks = observed_ranks.copy()
     split = events["split"][events["split"] >= 0]
     mode = events["mode"][events["split"] >= 0]
     shuffle_audit = None
@@ -357,7 +358,7 @@ def train_unit(
     distance_rows = decision_rows(model, tensors, ranks, test_idx, plane["contacts_xy_mm"], device)
     finite_train_distances = []
     for event_index in train_idx:
-        row = ranks[event_index]
+        row = observed_ranks[event_index]
         max_rank = int(row[row >= 0].max()) if np.any(row >= 0) else -1
         recruited: set[int] = set()
         for rank_index in range(max_rank):
@@ -431,6 +432,10 @@ def train_unit(
         "validation": validation,
         "test": test,
         "distance_thresholds_mm": {"q50": float(q50), "q80": float(q80)},
+        "distance_bin_reference": "observed_true_order_train_events",
+        "distance_bin_reference_sha256": hashlib.sha256(
+            np.ascontiguousarray(observed_ranks[train_idx]).view(np.uint8)
+        ).hexdigest(),
         "distance_bins": bin_metrics,
         "rollout": {
             "n": len(generated),

@@ -120,6 +120,8 @@ C_L3_ORDER_SHUFFLED
 
 `C_L3_ORDER_SHUFFLED` 只在 train/validation events 上执行 derangement；所有 arm 共享未改动的真实 held-out test events、candidate masks 和评分决策。Aggregate 前逐 fit 核验 test-rank hash 完全相同。
 
+Local/intermediate/distal 的 q50/q80 一律由未打乱的真实 train events 冻结；aggregate 同时核验各 arm 的 `distance_bin_reference_sha256` 和阈值逐位一致。
+
 资源策略：
 
 - 使用 GPU 多 worker，但以实测吞吐为准；
