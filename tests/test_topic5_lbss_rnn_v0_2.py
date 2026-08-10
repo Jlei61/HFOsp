@@ -6,6 +6,7 @@ import torch
 
 from scripts.analyse_topic5_lbss_interictal_v0_2 import aggregate_patient, paired_test
 from scripts.launch_topic5_lbss_v0_2 import acquire_stage_lock
+from scripts.score_topic5_lbss_early_ictal_v0_2 import align
 from scripts.run_topic5_lbss_detectability_v0_2 import (
     build_ground_truth_model,
     simulate_events,
@@ -258,3 +259,14 @@ def test_local_control_matching_is_deterministic_and_uses_active_local_edges():
     assert first["selected_masks"].shape == (5, n, n)
     assert np.all(first["selected_masks"].astype(bool) <= local)
     assert np.all(first["selected_masks"].sum(axis=(1, 2)) == int(target.sum()))
+
+
+def test_seed_removed_scoring_keeps_fixed_contact_support():
+    names = np.asarray(["A1", "A2", "A3"])
+    values = np.asarray([0.8, np.nan, 0.2])
+    assert np.array_equal(
+        align(values, names, ["A3", "A2", "A1"], "seed_removed"),
+        np.asarray([0.2, 0.0, 0.8]),
+    )
+    canonical = align(values, names, ["A3", "A2", "A1"], "canonical_full")
+    assert np.isnan(canonical[1])
