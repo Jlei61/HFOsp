@@ -53,6 +53,17 @@ def clean_json(value: Any) -> Any:
     return value
 
 
+def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Write a non-empty result table with the schema fixed by its first row."""
+    if not rows:
+        raise RuntimeError(f"refusing to write empty matched-lesion table: {path}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def number(value: Any) -> float:
     return float(value) if value is not None else float("nan")
 
