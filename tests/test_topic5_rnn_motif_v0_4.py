@@ -127,9 +127,9 @@ def _static_model(n_contacts: int = 6) -> WEModel:
 
 
 def test_finalizer_requires_complete_frozen_focused_suite():
-    assert focused_test_log_ok("138 passed, 1 warning in 9.2s")
-    assert not focused_test_log_ok("137 passed, 1 warning in 9.2s")
-    assert not focused_test_log_ok("138 passed, 1 failed in 9.2s")
+    assert focused_test_log_ok("139 passed, 1 warning in 9.2s")
+    assert not focused_test_log_ok("138 passed, 1 warning in 9.2s")
+    assert not focused_test_log_ok("139 passed, 1 failed in 9.2s")
 
 
 def test_factorial_models_differ_only_in_growth_and_cost_components():
@@ -198,6 +198,7 @@ def test_visual_qa_requires_every_stage_and_final_panel():
         "stage_fields_scientific_readout",
         "stage_motif_scientific_readout",
         "stage_early_scientific_readout",
+        "stage_early_start_ablation_sensitivity",
     )
     payload = {
         "status": "ACCEPTED",
