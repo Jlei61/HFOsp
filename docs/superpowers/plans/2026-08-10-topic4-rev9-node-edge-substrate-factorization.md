@@ -54,8 +54,9 @@
 
 - [x] Edge `alpha=0.5, seed=901` smoke 通过：结构守恒、逐窗 readout、启动 provenance 和 nohup 状态链均正常。
 - [x] worker 按一个 `arm-alpha-seed` 分片；基于 80 logical CPUs/246 GiB available memory，最多 18 个并发、分两批运行。
-- [ ] 并行生成 seeds 904--906 的 Node reference；缺失 network 仅在冻结 engine hashes 一致时构建。
-- [ ] seeds `901--906` 扫 `{0,0.25,0.5,1,2,4}`，按 `J_cal` 排出 response-matched `alpha_star`。
+- [x] 并行生成 seeds 904--906 的 Node reference；缺失 network 均在冻结 engine hashes 一致后构建。
+- [x] 36 个 Edge workers 分两批完成 `{0,0.25,0.5,1,2,4} × seeds 901--906`；36/36 success，0 OOM/run failure。
+- [ ] 按冻结的 robust paired `J_cal` 聚合并排出 response-matched `alpha_star`。
 - [ ] 最优相邻区间至多两轮 midpoint；beta 默认关闭。
 - [ ] 原始单位和标准化分数同时画，附 ratio/KL/ESS、baseline shift 和 paired count。
 - [ ] seeds `911--922` 不重选 instrument/alpha，做 out-of-selection 描述性复测。

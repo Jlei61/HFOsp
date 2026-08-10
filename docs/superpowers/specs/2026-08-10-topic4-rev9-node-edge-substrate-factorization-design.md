@@ -219,10 +219,20 @@ wrapper、systemd unit 和产物中的 seed/amplitude/window/site 语义。produ
 排序分数只用于选择一个便于四臂比较的参考 `alpha_star`，不称 equivalence test：
 
 ```text
-J_cal = median site-seed standardized squared difference of
-        [source slope, downstream slope, r90, axis ratio, response map]
-        + off-field response penalty + baseline-shift penalty
+L_pair = mean(
+    pseudoHuber((Edge-Node)/robust_Node_scale)
+        for [source slope, downstream slope, r90, log(axis ratio)],
+    normalized_sqrt_JS(positive response maps)^2)
+
+J_cal = median(L_pair)
+        + (1 - paired_coverage among Node-eligible site-seeds)
+        + 0.5 * median(L_pair for matched off-field controls)
+        + 0.25 * median(sham baseline shift)
 ```
+
+`robust_Node_scale=max(1.4826*MAD, SD fallback, feature floor)`；sham baseline shift 联合比较 active-fraction floor、peak
+的 log ratio 和 event-count relative difference。配对单位是同 seed、同 site，且 Node/Edge 的 primary 0--10 ms 窗均无
+overlapping event。各权重在读取 alpha grid 聚合值前冻结；所有分项、原始标量、pair rows 和缺失比例同时保存。
 
 每项同时画原始单位。ratio/KL/ESS reference bands、response-map rho、gain ratio、baseline 变化和有效 paired 数都作为
 诊断侧栏呈现。`alpha_star` 是 response-matched reference point，不表示 edge 和 node 机制相同。
