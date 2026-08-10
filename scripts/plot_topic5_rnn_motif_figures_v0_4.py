@@ -553,7 +553,10 @@ def draw_effective_motif(parent, out_root: Path):
     plane = dict(np.load(out_root / "cache" / fit_id / "plane.npz"))
     grid = parent.subgridspec(1, 2, wspace=0.30)
     ax = parent.get_gridspec().figure.add_subplot(grid[0, 0])
-    draw_graph(ax, graph, plane, "Effective motif", influence)
+    # The frozen candidate motif did not pass the joint enrichment/task/lesion
+    # contract.  Keep the target-free influence map visible, but do not label
+    # the organization as an established motif.
+    draw_graph(ax, graph, plane, "Effective influence test", influence)
     ax = parent.get_gridspec().figure.add_subplot(grid[0, 1])
     draw_reach_or_lesion(ax, out_root)
 
@@ -631,9 +634,9 @@ def render_final(out_root: Path):
 
 ### topic5_figure6_rnn_connectivity_motifs.png / .pdf / .svg
 
-六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及 target-free 有效连接组织。Panel B 的红格是观察到并提供给模型的第一 rank seed，其余 viridis 格才显示后续观察或自由推演。若预先指定的 local-backbone lesion 以及 long-range-edge 或 connector-node lesion 达到最低患者分母，Panel F 展示所有可估计成分的 matched-lesion 特异损害；否则展示患者级 lag-1/2/3 open-loop effective reach。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
+六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及 target-free 有效影响结构检验。Panel B 的红格是观察到并提供给模型的第一 rank seed，其余 viridis 格才显示后续观察或自由推演。若预先指定的 local-backbone lesion 以及 long-range-edge 或 connector-node lesion 达到最低患者分母，Panel F 展示所有可估计成分的 matched-lesion 特异损害；否则展示患者级 lag-1/2/3 open-loop effective reach。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
 
-**关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些有效 motif 经干预承担该计算”，不把预测性能直接写成真实连接组恢复。
+**关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 候选有效组织能否通过干预检验”，不把预测性能直接写成真实连接组恢复；只有结构富集、任务关系和 matched lesion 同向时才命名为计算 motif。
 
 ### stage_interictal_scientific_readout.png / .pdf
 
