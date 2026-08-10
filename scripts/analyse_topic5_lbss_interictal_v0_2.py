@@ -215,9 +215,18 @@ def main() -> None:
                     "seed": seed,
                     "test_contact_nll": metrics["test"]["contact_nll"],
                     "test_top1": metrics["test"]["top1"],
+                    "local_contact_nll": metrics["distance_bins"]["local"]["contact_nll"],
+                    "local_top1": metrics["distance_bins"]["local"]["top1"],
+                    "local_n": metrics["distance_bins"]["local"]["n"],
+                    "local_distance_median_mm": metrics["distance_bins"]["local"]["distance_median_mm"],
+                    "intermediate_contact_nll": metrics["distance_bins"]["intermediate"]["contact_nll"],
+                    "intermediate_top1": metrics["distance_bins"]["intermediate"]["top1"],
+                    "intermediate_n": metrics["distance_bins"]["intermediate"]["n"],
+                    "intermediate_distance_median_mm": metrics["distance_bins"]["intermediate"]["distance_median_mm"],
                     "distal_contact_nll": metrics["distance_bins"]["distal"]["contact_nll"],
                     "distal_top1": metrics["distance_bins"]["distal"]["top1"],
                     "distal_n": metrics["distance_bins"]["distal"]["n"],
+                    "distal_distance_median_mm": metrics["distance_bins"]["distal"]["distance_median_mm"],
                     "rollout_spearman": metrics["rollout"]["seed_removed_spearman_median"],
                     "rollout_length_ratio": metrics["rollout"]["length_ratio_median"],
                     "no_rec_contact_nll": old["test"]["contact_nll"],
@@ -256,7 +265,10 @@ def main() -> None:
     pd.DataFrame(slopes).to_csv(out / "interictal_distance_gain_slopes.csv", index=False)
     table.to_csv(out / "interictal_per_fit_seed.csv", index=False)
     value_columns = [
-        "test_contact_nll", "test_top1", "distal_contact_nll", "distal_top1", "distal_n",
+        "test_contact_nll", "test_top1",
+        "local_contact_nll", "local_top1", "local_n", "local_distance_median_mm",
+        "intermediate_contact_nll", "intermediate_top1", "intermediate_n", "intermediate_distance_median_mm",
+        "distal_contact_nll", "distal_top1", "distal_n", "distal_distance_median_mm",
         "rollout_spearman", "rollout_length_ratio", "no_rec_contact_nll", "n_epochs", "seconds",
     ]
     patient = aggregate_patient(table, value_columns)
