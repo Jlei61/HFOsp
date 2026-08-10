@@ -366,6 +366,18 @@ def early_activation(out_root: Path, subject: str):
     return np.nanmedian(np.asarray(values, float), axis=0)
 
 
+def ictal_payload_from_template(template_payload: dict[str, Any]) -> dict[str, Any]:
+    """Reuse the frozen physical-mm field frame without template-source rings."""
+    required = {"xs", "ys", "names", "sup", "soz", "frame"}
+    missing = required.difference(template_payload)
+    if missing:
+        raise KeyError(f"incomplete physical-mm field payload: {sorted(missing)}")
+    payload = dict(template_payload)
+    payload["src_a"] = []
+    payload["src_b"] = []
+    return payload
+
+
 def locked_early_target_paths(out_root: Path, subject: str) -> list[Path]:
     """Resolve the exact target bytes frozen before unseal for figure rendering."""
     inventory = rows(out_root / "early_ictal_metadata_inventory.csv")
@@ -386,23 +398,38 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
                      model_subset: tuple[str, ...] | None = None):
     _, pa, pb = model_field_payloads(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
     activation = early_activation(out_root, REPRESENTATIVE)
-    # Use the exact empirical record frozen in INPUT_MANIFEST.  A worktree-local
-    # ``results/interictal_propagation_masked`` tree is gitignored and may not
-    # exist in a clean execution worktree; resolving it implicitly would make
-    # rendering depend on an unmanifested ambient file.
-    fz = empirical_record(out_root, REPRESENTATIVE)
     columns = 3
-    grid = parent.subgridspec(2 if include_stats else 1, columns,
-                              height_ratios=[1.0, 0.72] if include_stats else [1.0],
-                              hspace=0.42, wspace=0.13)
-    for col, (payload, title) in enumerate(((pa, "Model TA"), (pb, "Model TB"))):
+    grid = parent.subgridspec(
+        2 if include_stats else 1, columns,
+        height_ratios=[0.90, 0.96] if include_stats else [1.0],
+        hspace=0.18, wspace=0.13,
+    )
+    for col, (payload, title) in enumerate(
+        ((pa, "Frozen RNN · TA"), (pb, "Frozen RNN · TB"))
+    ):
         ax = parent.get_gridspec().figure.add_subplot(grid[0, col])
         draw_topic5_field_panel(ax, payload, payload["vals"], title, "", compact=True,
                                 labels=False, cbar=False, contact_size=20, contact_outline_lw=0.55)
+        ax.set_anchor("S")
     ax = parent.get_gridspec().figure.add_subplot(grid[0, 2])
-    _draw_field(ax, fz, _normalize_minmax(activation), np.asarray(fz["support_a"], float),
-                cmap="magma_r", colorbar_values=activation, title="Early ictal",
-                title_color="#111111", show_y=False)
+    # Reuse the exact physical-mm plane, frame and smoother already used for
+    # the two frozen model fields.  The empirical JSON is not the legacy
+    # ``points_mm`` drawing payload expected by ``_draw_field``; passing it
+    # directly silently crossed two incompatible geometry contracts.
+    ictal_payload = ictal_payload_from_template(pa)
+    draw_topic5_field_panel(
+        ax, ictal_payload, _normalize_minmax(activation), "Early ictal energy", "",
+        compact=True, labels=False, cbar=False, contact_size=20,
+        contact_outline_lw=0.55,
+    )
+    ax.set_anchor("S")
+    cax = ax.inset_axes([1.055, 0.08, 0.035, 0.84])
+    cb = ax.figure.colorbar(
+        ScalarMappable(norm=Normalize(0, 1), cmap="viridis"), cax=cax,
+    )
+    cb.set_ticks([0, 1], labels=["low", "high"])
+    cb.ax.tick_params(labelsize=6.7, length=2.0, pad=1.5)
+    cb.set_label("Within-field rank", fontsize=7.2, labelpad=2.5)
     ax.set_xlabel(""); ax.set_ylabel(""); ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
     if include_stats:
         stat_ax = parent.get_gridspec().figure.add_subplot(grid[1, :])
@@ -431,12 +458,16 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
                     [np.nanmedian(values)] * 2, color="#111111", lw=1.15,
                 )
         stat_ax.axhline(0, color="#8d8d8d", lw=0.7)
+        stat_ax.axvline(0.5, color="#d1d1d1", lw=0.65)
+        if len(models) > 2:
+            stat_ax.axvline(len(models) - 1.5, color="#d1d1d1", lw=0.65)
         stat_ax.set_xticks(
             range(len(models)), [MODEL_LABEL[model] for model in models],
             rotation=45, ha="right", rotation_mode="anchor",
         )
-        stat_ax.tick_params(axis="x", labelsize=7.2, pad=2)
-        stat_ax.set_ylabel("Early-ictal\nnull-relative margin")
+        stat_ax.tick_params(axis="x", labelsize=7.6, pad=2)
+        stat_ax.set_xlabel("Frozen interictal model")
+        stat_ax.set_ylabel("Model–ictal |ρ|\nminus channel-shuffle null")
         stat_ax.legend(
             handles=[
                 Line2D([], [], marker="o", color="#555555", markerfacecolor="#555555",
