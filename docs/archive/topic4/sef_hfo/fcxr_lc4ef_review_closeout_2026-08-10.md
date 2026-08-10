@@ -69,4 +69,3 @@ X 暂停作为 lifecycle 主退出变量。若为了论文机制归因继续分�
 
 - `docs/superpowers/specs/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump-design.md`
 - `docs/superpowers/plans/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump.md`
-

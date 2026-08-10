@@ -43,6 +43,17 @@
 > `docs/archive/topic4/sef_hfo/mz_fcxr_heo_line_acceptance_2026-07-26.md` 与
 > `docs/superpowers/specs/2026-07-26-topic4-mz-fcxr-pump-lifecycle-design.md`。
 >
+> **FCXR-LC3/LC4 生命周期进展与收口（2026-08-10）**：repeated returning IED → `D/Z` 累积 →
+> 无 kick 自然进入已经稳定复现；LC4f 的一条 40k 轨迹在 29 个 returning IED 后于 11 s 进入。
+> 但当前 cell-local `y→X` 与 closed-loop shared-execution 都未在预注册 1–5 s 窗内自主 offset。
+> shared execution 消除了“核心塌陷、轴外残留”，同时把实际峰值剂量从约 51.4 压到 20.3，故不能把
+> 阴性唯一归因于空间覆盖；旧 `X=0.380` 也只保留为 state-conditioned late-bout reference。
+> **完整 lifecycle 仍未 PASS。** 当前 X 实现停止作为主退出路线，下一步锁为不含空间 sensor/mask 的
+> 逐细胞 episode-load recovery：`Z_i` 负责 entry，`H_i` 负责 carrier，新增 `U_i` 负责 offset 与
+> postictal memory，`M_i` 只在闭环成立后塑造形态。详见
+> `docs/archive/topic4/sef_hfo/fcxr_lc4ef_review_closeout_2026-08-10.md` 与
+> `docs/superpowers/specs/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump-design.md`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
@@ -920,7 +931,11 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
   - `results/paper-ready-figure/fig_mz_conductance_current_dynamics/figures/` —— 当前阶段机制图、PDF、metadata 和中文 README；只展示“间期轴向事件 → terminal runaway”，不是最终可恢复发作态图。
 - **FCXR-HEO 后续机制线（2026-07-26 最终收口）**：
   - `docs/archive/topic4/sef_hfo/mz_fcxr_heo_line_acceptance_2026-07-26.md` —— RC1→Stage D→LC1→HEO1/2/3 的统一验收、三张关键图的最终读法、允许/禁止 claim；最终标签为 **bounded coherent common-mode oscillatory branch**。
-  - `docs/superpowers/specs/2026-07-26-topic4-mz-fcxr-pump-lifecycle-design.md` —— 下一阶段唯一入口：先诊断当前周期样分支与真实读出，再以逐细胞 Na-like load / pump-equivalent recovery 单独解决 termination、postictal memory 与统计恢复。
+  - `docs/superpowers/specs/2026-07-26-topic4-mz-fcxr-pump-lifecycle-design.md` —— 历史 pump 入口；其 signed-centered actuator 后因基线扰动停机，现仅作方程与失败模式 provenance，不再是当前执行入口。
+- **FCXR-LC3/LC4 → LC5（2026-08-10 当前入口）**：
+  - `docs/archive/topic4/sef_hfo/fcxr_lc4ef_review_closeout_2026-08-10.md` —— LC4e/f 的最终安全结论：自然 entry 成立，当前 X 实现无 offset；空间失配、剂量自限、移动 D/H 与作用通道仍耦合。
+  - `docs/superpowers/specs/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump-design.md` —— **当前唯一机制入口**：不加空间场，逐细胞 `U_i` episode memory 的 3×3 high-state authority screen。
+  - `docs/superpowers/plans/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump.md` —— U0–U2 锁定实施图；先 exact high-state fork，再最多两个自然闭环，U2/U2b 未过不跑 70 s。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档
