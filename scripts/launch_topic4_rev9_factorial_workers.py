@@ -35,6 +35,8 @@ def main():
     parser.add_argument("--max-concurrent", type=int)
     parser.add_argument("--wait-seconds", type=float, default=60.0)
     parser.add_argument("--unit-prefix", default="topic4-rev9-factorial")
+    parser.add_argument("--capture-representatives", action="store_true")
+    parser.add_argument("--summary")
     args = parser.parse_args()
 
     config_path = Path(args.config).resolve()
@@ -52,20 +54,29 @@ def main():
         raise RuntimeError(f"launcher commit {commit} is not current HEAD {head}")
 
     output_root = (ROOT / config["output_root"]).resolve()
-    worker_dir = output_root / "workers"
-    run_dir = output_root / "run_logs"
+    worker_dir = output_root / (
+        "representative" if args.capture_representatives else "workers")
+    run_dir = output_root / (
+        "representative/run_logs" if args.capture_representatives else "run_logs")
     worker_dir.mkdir(parents=True, exist_ok=True)
     run_dir.mkdir(parents=True, exist_ok=True)
     jobs = []
+    summary = None
+    if args.capture_representatives:
+        summary_path = Path(args.summary or output_root / "factorial_summary.json")
+        summary = json.loads(summary_path.read_text())
     for arm in arms:
-        for seed in seeds:
+        arm_seeds = ([int(summary["arm_summaries"][arm]["representative"]["seed"])]
+                     if summary is not None else seeds)
+        for seed in arm_seeds:
             tag = f"{_slug(arm)}_seed{int(seed)}"
+            filename_tag = f"{tag}_capture" if args.capture_representatives else tag
             jobs.append(dict(
-                arm=arm, seed=int(seed), tag=tag,
-                status=run_dir / f"{tag}.status",
-                log=run_dir / f"{tag}.log",
-                json=worker_dir / f"{tag}.json",
-                npz=worker_dir / f"{tag}.npz"))
+                arm=arm, seed=int(seed), tag=filename_tag,
+                status=run_dir / f"{filename_tag}.status",
+                log=run_dir / f"{filename_tag}.log",
+                json=worker_dir / f"{filename_tag}.json",
+                npz=worker_dir / f"{filename_tag}.npz"))
 
     pending, active, completed, failed = [], [], [], []
     for job in jobs:
@@ -108,6 +119,8 @@ def main():
                 "--out-json", str(job["json"]),
                 "--out-npz", str(job["npz"]),
             ]
+            if args.capture_representatives:
+                command.append("--capture-lfp")
             subprocess.run(command, cwd=ROOT, check=True)
             job["unit"] = unit
             active.append(job)
@@ -121,6 +134,7 @@ def main():
     summary = dict(
         status=("REV9_FACTORIAL_WORKERS_COMPLETE" if not failed
                 else "REV9_FACTORIAL_WORKERS_FAILED"),
+        capture_representatives=bool(args.capture_representatives),
         commit=commit, max_concurrent=max_concurrent,
         n_jobs=len(jobs), n_success=len(completed), n_failed=len(failed),
         failed=[dict(arm=row["arm"], seed=row["seed"],

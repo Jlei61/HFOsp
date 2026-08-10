@@ -303,8 +303,12 @@ def main():
         normalized_ranks = normalized_event_ranks(ranks)
         recruitment = (np.mean(np.isfinite(ranks), axis=0) if len(ranks)
                        else np.full(len(contact_names), np.nan))
-        mean_rank = (np.nanmean(normalized_ranks, axis=0) if len(ranks)
-                     else np.full(len(contact_names), np.nan))
+        mean_rank = np.full(len(contact_names), np.nan)
+        for contact_index in range(len(contact_names)):
+            finite = normalized_ranks[:, contact_index][
+                np.isfinite(normalized_ranks[:, contact_index])]
+            if len(finite):
+                mean_rank[contact_index] = float(finite.mean())
         precedence, precedence_support = pairwise_precedence(ranks)
 
         seed_scalars = {key: [] for key in (
