@@ -55,13 +55,14 @@ def _provenance(expected_commit):
             ["git", "show", f"{expected}:{path}"], cwd=ROOT)).hexdigest()
         for path in paths
     }
-    if (dirty or current != expected
-            or any(hashes[path] != expected_hashes[path] for path in paths)):
+    match = all(hashes[path] == expected_hashes[path] for path in paths)
+    if dirty or not match:
         raise RuntimeError("L3a surrogate producer differs from expected commit")
     return {
-        "git_commit": current,
+        "git_commit_at_review": current,
         "expected_git_commit": expected,
         "runtime_modules_dirty": False,
+        "runtime_modules_match_expected_commit": True,
         "runtime_module_sha256": hashes,
         "python_executable": sys.executable,
         "python_version": platform.python_version(),
