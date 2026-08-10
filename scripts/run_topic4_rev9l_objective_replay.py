@@ -229,23 +229,25 @@ def _plot_objective(rows, selected_index, front, associations, out_dir):
     generation = np.asarray([row["generation"] for row in rows], float)
 
     ax = axes[0]
-    ax.scatter(da[~eligible], db[~eligible], marker="x", color="0.7", label="support不足")
+    ax.scatter(da[~eligible], db[~eligible], marker="x", color="0.7",
+               label="insufficient support")
     points = ax.scatter(da[eligible], db[eligible], c=generation[eligible], cmap="viridis",
-                        s=34, label="support合格")
+                        s=34, label="support eligible")
     if front:
         order = sorted(front, key=lambda index: da[index])
         ax.plot(da[order], db[order], color="#d1495b", lw=1.2, label="Pareto front")
     ax.scatter(da[selected_index], db[selected_index], marker="*", s=170,
-               color="#c23b33", edgecolor="white", linewidth=0.8, label="冻结候选")
+               color="#c23b33", edgecolor="white", linewidth=0.8,
+               label="frozen candidate")
     ax.set_xlabel("mode A loss")
     ax.set_ylabel("mode B loss")
-    ax.set_title("A  历史候选的双模式前沿", loc="left", weight="bold")
+    ax.set_title("A  Historical two-mode candidate front", loc="left", weight="bold")
     ax.legend(frameon=False, fontsize=8)
     fig.colorbar(points, ax=ax, label="generation")
 
     for ax, key, title in zip(
             axes[1:], ("mode_a_loss", "weak_mode_loss"),
-            ("B  旧目标几乎不推动 mode A", "C  旧目标主要跟随综合损失")):
+            ("B  Old objective vs mode A", "C  Old objective vs weakest mode")):
         values = np.asarray([row[key] for row in rows], float)
         ax.scatter(old[eligible], values[eligible], c=generation[eligible], cmap="viridis", s=34)
         result = associations[key]
@@ -270,7 +272,7 @@ def _plot_reliability(reliability, out_dir):
                      color="black", lw=1.5)
     axes[0].set_xticks([0, 1], ["mode A", "mode B"])
     axes[0].set_ylabel("block vs complement Spearman")
-    axes[0].set_title("A  患者训练模式的分块稳定性", loc="left", weight="bold")
+    axes[0].set_title("A  Patient-training mode stability", loc="left", weight="bold")
 
     props = reliability["mode_proportion_by_block"]
     axes[1].scatter(np.arange(len(props)), [row["mode_a_fraction"] for row in props],
@@ -279,7 +281,7 @@ def _plot_reliability(reliability, out_dir):
                     color="0.25", ls="--", lw=1)
     axes[1].set_xlabel("training recording block")
     axes[1].set_ylabel("mode A fraction")
-    axes[1].set_title("B  模式占比随记录块变化", loc="left", weight="bold")
+    axes[1].set_title("B  Mode occupancy across recording blocks", loc="left", weight="bold")
 
     for x, mode in enumerate(("A", "B")):
         rows = reliability["modes"][mode]["block_rows"]
@@ -293,7 +295,7 @@ def _plot_reliability(reliability, out_dir):
             color=colors[mode], marker="^", s=20, alpha=0.65)
     axes[2].set_xticks([0, 1], ["mode A", "mode B"])
     axes[2].set_ylabel("distance in frozen embedding")
-    axes[2].set_title("C  块内与块间离散", loc="left", weight="bold")
+    axes[2].set_title("C  Within- and between-block dispersion", loc="left", weight="bold")
     axes[2].scatter([], [], color="0.4", marker="o", label="within block")
     axes[2].scatter([], [], color="0.4", marker="^", label="between block")
     axes[2].legend(frameon=False, fontsize=8)
