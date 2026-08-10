@@ -1,7 +1,7 @@
 # Topic 4 rev9-L mode learnability 执行计划
 
 **Spec：** `docs/superpowers/specs/2026-08-10-topic4-rev9l-mode-learnability-design.md`
-**状态：** L0/L1/L2 完成；L3a 单事件 route-shape surrogate 进行中
+**状态：** L0/L1/L2 与 L3a fit 重放完成；`sobol_058` selection sanity 待运行
 **分支：** `codex/topic4-rev9l-mode-learnability`
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
 
@@ -72,10 +72,11 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
 ## Task L3：network/optimizer audit
 
 - [x] 使用 6 fit / 3 selection 新 network seeds；因 shared forced capacity 未成立，不读取 3 confirmation seeds。
-- [ ] L3a 用现有 64 x 6 fit events 计算 intended-source 到 intended patient centroid 的单事件 route-shape surrogate，报告
+- [x] L3a 用现有 64 x 6 fit events 计算 intended-source 到 intended patient centroid 的单事件 route-shape surrogate，报告
   `C_per_net^(1)`、`C_shared^(1)` 和 `Delta_network^(1)`；并列时按既有 L2 full fit objective、candidate id 二级排序；不设新 gate，
   不冒充分布级 capacity。
-- [ ] 若 L3a shared-surrogate candidate 不在已有 selection 集，冻结后只补 3 张 selection 网络作 out-of-fit sanity。
+- [ ] 已得到 `0.775/1.057/0.282`，shared minimum 有 20 个并列；按二级规则冻结未进入旧 selection 的 `sobol_058`，只补 3 张
+  selection 网络，同时报告 route surrogate 和 matched `n=3` 完整 objective。
 - [ ] L3b 只有在每 network/source 获得重复事件后，才求正式 per-network 与 shared-parameter oracle；3 个 confirmation seeds 保持未读。
 - [ ] 已知好解存在后，以相同预算和 CRN 比较 Sobol/local refinement 与 CMA-ES 3 restarts。
 - [x] 当前候选库已观察到参数到粗 rank-curve 输出多对一；是否存在多个完整模式解仍未测试。

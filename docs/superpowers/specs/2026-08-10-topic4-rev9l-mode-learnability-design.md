@@ -1,6 +1,6 @@
 # Topic 4 rev9-L: mode realizability and learnability audit
 
-**状态：** `L2_COMPLETE_L3A_ACTIVE`
+**状态：** `L3A_FIT_COMPLETE_SELECTION_SANITY_ACTIVE`
 **日期：** 2026-08-10
 **上游：** rev8.1 patient-training KMeans fit；rev9 frozen-field node-edge factorial
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
@@ -181,6 +181,11 @@ Delta_network^(1) = C_shared^(1) - C_per_net^(1)
 shape，不能建立 recruitment、precedence 或 event-distribution capacity，也不使用 patient floor 设置 PASS/FAIL。若 L3a 选出的
 shared-surrogate minimum 有并列，二级规则固定为既有 L2 full fit objective 最低、再按 candidate id；不得另看 selection 数据解并列。
 若该 candidate 未在 selection seeds 上评估，先冻结该 candidate，再只补三张 selection 网络作 out-of-fit sanity。
+
+现有 57 个结构可容许候选 x 6 张 fit 网络的重放得到 `C_per_net^(1)=0.775`、`C_shared^(1)=1.057`、
+`Delta_network^(1)=0.282`。每张网络都有候选优于 scalar 的单事件 weak distance，但 shared minimum 有 20 个候选并列，说明该
+surrogate 高度离散，不能识别唯一参数。按预定二级规则冻结 `sobol_058`，只在 seeds 1011--1013 补做 selection sanity；同时计算
+route surrogate 与 matched `n=3` 完整 weakest-mode objective，confirmation seeds 仍不读取。
 
 ### 6.2 L3b：重复事件正式 oracle 与 optimizer 条件
 
