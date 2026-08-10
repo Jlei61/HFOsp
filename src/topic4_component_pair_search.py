@@ -6,7 +6,11 @@ import math
 import numpy as np
 from scipy.stats import qmc
 
-from src.topic4_mode_learnability import mode_conditioned_descriptor_replay
+from src.topic4_core_field_profile import (
+    sliced_embedding_distance,
+    transform_rank_curves,
+)
+from src.topic4_rev9_factorial import normalized_event_ranks, pairwise_precedence
 
 
 DESCRIPTOR_NAMES = (
@@ -62,6 +66,32 @@ def patient_descriptor_floor(
             raise ValueError(f"mode {mode} has fewer than {n_per_mode} blocks")
         eligible[mode] = mode_blocks
 
+    patient_z = transform_rank_curves(curves, reference)
+
+    def mean_rank(values):
+        normalized = normalized_event_ranks(values)
+        count = np.isfinite(normalized).sum(axis=0)
+        return np.divide(
+            np.nansum(normalized, axis=0), count,
+            out=np.full(normalized.shape[1], np.nan), where=count > 0)
+
+    def mean_absolute(left, right, *, off_diagonal=False):
+        valid = np.isfinite(left) & np.isfinite(right)
+        if off_diagonal:
+            valid &= ~np.eye(left.shape[0], dtype=bool)
+        return float(np.mean(np.abs(left[valid] - right[valid])))
+
+    patient_reference = {}
+    for mode in (0, 1):
+        use = labels == mode
+        precedence, _ = pairwise_precedence(ranks[use])
+        patient_reference[mode] = {
+            "recruitment": np.isfinite(ranks[use]).mean(axis=0),
+            "precedence": precedence,
+            "profile": mean_rank(ranks[use]),
+            "z": patient_z[use],
+        }
+
     samples = {
         mode: {name: np.empty(repeats, float) for name in DESCRIPTOR_NAMES}
         for mode in ("A", "B")
@@ -76,15 +106,31 @@ def patient_descriptor_floor(
                 options = np.flatnonzero((labels == mode) & (blocks == block))
                 selected_indices.append(int(rng.choice(options)))
                 selected_labels.append(mode)
-        result = mode_conditioned_descriptor_replay(
-            curves[selected_indices], ranks[selected_indices], selected_labels,
-            curves, ranks, labels, reference)
-        for mode in ("A", "B"):
-            for name in DESCRIPTOR_NAMES:
-                value = result["modes"][mode][name]
-                if value is None or not np.isfinite(value):
-                    raise RuntimeError(f"non-finite patient floor: {mode}/{name}")
-                samples[mode][name][repeat] = float(value)
+        selected_indices = np.asarray(selected_indices, int)
+        selected_labels = np.asarray(selected_labels, int)
+        selected_z = transform_rank_curves(curves[selected_indices], reference)
+        for mode, name in enumerate(("A", "B")):
+            use = selected_labels == mode
+            selected_ranks = ranks[selected_indices][use]
+            recruitment = np.isfinite(selected_ranks).mean(axis=0)
+            precedence, _ = pairwise_precedence(selected_ranks)
+            profile = mean_rank(selected_ranks)
+            values = {
+                "recruitment_mean_absolute_error": mean_absolute(
+                    recruitment, patient_reference[mode]["recruitment"]),
+                "precedence_mean_absolute_error": mean_absolute(
+                    precedence, patient_reference[mode]["precedence"],
+                    off_diagonal=True),
+                "mean_rank_profile_absolute_error": mean_absolute(
+                    profile, patient_reference[mode]["profile"]),
+                "event_distribution_sliced_wasserstein": sliced_embedding_distance(
+                    selected_z[use], patient_reference[mode]["z"],
+                    reference["directions"]),
+            }
+            for metric, value in values.items():
+                if not np.isfinite(value):
+                    raise RuntimeError(f"non-finite patient floor: {name}/{metric}")
+                samples[name][metric][repeat] = float(value)
 
     summary = {"modes": {}}
     for mode in ("A", "B"):

@@ -1,6 +1,10 @@
 import numpy as np
 
-from src.topic4_component_pair_search import score_candidate, sobol_candidates
+from src.topic4_component_pair_search import (
+    patient_descriptor_floor,
+    score_candidate,
+    sobol_candidates,
+)
 
 
 def test_sobol_candidates_are_deterministic_bounded_and_reserve_zero():
@@ -36,3 +40,29 @@ def test_weakest_mode_objective_protects_the_worse_mode():
     assert score["mode_scores"]["A"] > score["mode_scores"]["B"]
     assert score["mode_scores"]["B"] < score["weakest_mode_shape"] \
         < score["mode_scores"]["A"]
+
+
+def test_patient_floor_uses_distinct_block_draws_and_returns_finite_scales():
+    rng = np.random.default_rng(4)
+    curves = rng.normal(size=(24, 3))
+    ranks = np.asarray([rng.permutation(4) for _ in range(24)], float)
+    labels = np.repeat([0, 1], 12)
+    blocks = np.asarray([f"A{i}" for i in range(12)]
+                        + [f"B{i}" for i in range(12)])
+    reference = {
+        "center": np.zeros(3),
+        "components": np.eye(2, 3),
+        "score_center": np.zeros(2),
+        "score_scale": np.ones(2),
+        "directions": np.eye(2),
+    }
+    floor, samples, sampled = patient_descriptor_floor(
+        curves, ranks, labels, blocks, reference,
+        n_per_mode=6, repeats=10, seed=7)
+    assert sampled.shape == (10, 2, 6)
+    assert all(len(set(sampled[draw, mode])) == 6
+               for draw in range(10) for mode in range(2))
+    for mode in ("A", "B"):
+        for metric, summary in floor["modes"][mode].items():
+            assert np.isfinite(samples[mode][metric]).all()
+            assert summary["scale_iqr"] >= 1e-6
