@@ -49,6 +49,8 @@ TRACKED_MODULES = (
     "scripts/run_topic4_core_field_stage3_rev8_kmeans_fit.py",
     "scripts/run_topic4_core_field_stage3_rev8_confirm.py",
     "scripts/capture_topic4_core_field_stage3_rev8_readout.py",
+    "scripts/capture_topic4_core_field_stage3_rev8_all_onsets.py",
+    "scripts/build_topic4_core_field_stage3_rev8_figure_diagnostics.py",
     "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8.py",
     "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8_kmeans.py",
     "scripts/audit_topic4_data_driven_core_mechanism.py",
