@@ -1,7 +1,7 @@
 # Topic 4 rev9 node-edge factorization 执行计划
 
 **Spec：** `docs/superpowers/specs/2026-08-10-topic4-rev9-node-edge-substrate-factorization-design.md`
-**状态：** Task 5 审阅纠错完成；rev9-L L1 capacity audit 进行中；Task 6 因果定位待执行
+**状态：** Task 5 审阅纠错与 rev9-L L1 capacity audit 完成；L2 component-pair oracle 待执行；Task 6 因果定位待执行
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9/`
 
 ## 执行纪律
@@ -96,6 +96,22 @@
 - [x] L0 objective replay 确认旧目标不保护 mode A，但没有证据证明 selection 漏掉一个已知双优解。
 - [x] 输出独立 review sidecar、纠错图和 optimizer/objective 诊断图；原始执行产物不覆盖。
 
+### Task 5.2：Edge 结构与 forced-initiation 容量审计
+
+- [x] 12 张网络完成 component-flow、source outgoing influence 和 weighted-delay sidecar；确认方向为 row=target、column=source。
+- [x] C1/C2 self-flow `+13.9%/+11.6%`；BG-source->component-target `-8.7%/-6.8%`；C1/C2 source outgoing
+  `+7.6%/+7.0%`，但 neuron-level `rho(h, log outgoing-ratio)=-0.656`，不称单调 high-h boost 或局部 radial core。
+- [x] packet canary `1001--1003` 冻结 `0.005*N_E`；formal fit 改为不重叠的 `1004--1009`。
+- [x] 主 readout 排除 deterministic injection frame，包含该帧的结果只作 sensitivity；24/24 四臂 workers 完成，0 pre-trigger
+  mismatch，0 runaway，未读取 patient held-out；含/不含该帧的 prototype correlation 最大差值为 `0.018`。
+- [x] forced C2->A 的绝对 Spearman 四臂均约 `0.23`；C1->B 约 `0.97`；C3 和三个 controls 不可读。四层 readout 确认 A
+  仍是限制项，不能把正 intended-minus-cross margin 写成 mode A 已恢复。
+- [x] Edge-Null downstream mass 在 C2/C1 分别增加 `4583 [4114,4916]`、`5400 [4850,5839]`，route shape 基本不变；
+  当前 Edge 定位为 conditional relay/amplifier。
+- [x] sham-trigger-window collision 单独审计；Node/Node+Edge 的 mass 和 interaction 不解释为真实抑制或拮抗。
+- [x] 结论分层：objective limitation 已证实；optimizer limitation 未裁定；scalar edge/frozen scaffold 的 mode-A route limitation
+  已有直接证据；完整患者间期活动仍未复现。
+
 ## Task 6：Component lesion、relocation 和 d interaction
 
 - [ ] 三个 component 全做 direct lesion 和 matched relocation。
@@ -114,6 +130,17 @@
 - [ ] 保存 frozen/de novo assignment margin、support 和 estimator hashes。
 - [ ] 无新 blind unit 时只写 `DEVELOPMENT_ONLY_NO_BLIND_UNIT`，不执行 formal patient optimization。
 
+### Task 7.1：L2 component-pair edge oracle 与 optimizer 归因
+
+- [x] 冻结六参数 directional component-pair residual 公式；保持 topology、delay labels、每 target incoming-E 和非 E->E 通路不变。
+- [x] 冻结四层 floor-normalized descriptor 与 smooth worst-mode objective；Spearman margin 和 response mass 只作辅助量。
+- [ ] 在 fit seeds `1004--1009` 上运行 64-point Sobol capacity scan，common random numbers，18 workers，120 s coarse wait。
+- [ ] 对 Pareto 前 8 个做 bounded local refinement，并在 selection seeds `1011--1013` 上复核；不读取 patient held-out。
+- [ ] 若得到双优 known-good oracle，做 synthetic-teacher recovery，再按相同 simulation-call budget 比较 multi-restart CMA-ES 与
+  Sobol+local；报告 regret 和 restart variance。
+- [ ] 同候选集做旧 global、mode mean、worst-mode objective ablation，分离 objective 与 optimizer。
+- [ ] beta 保持 0；只有 A/B route 已恢复且剩余误差明确为 r50/r90 或 weighted-delay radial scale 时才开小网格。
+
 ## Task 8：Substrate bundle 和 lifecycle 计划
 
 - [ ] bundle 包含 h/d/Vtheta、alpha/beta、neuron order、全部 hash、结构诊断、response 和四臂 endpoint。
@@ -124,11 +151,12 @@
 
 ## 当前最短执行顺序
 
-1. 完成 rev9-L L1 forced-initiation assay，先区分点不着和传不对；不运行 de novo KMeans，不读取 patient held-out。
+1. 运行 L2 component-pair relaxed edge oracle，直接测试 mode-A route 是否在守恒连接 family 中可实现；当前不开 beta。
 2. 对三个 Gaussian component 做 direct lesion 与 matched relocation，并做多 permutation `d_i` 配准审计，定位 Node 几何的因果来源。
-3. scalar edge forced propagation 不足时，先开 component-pair relaxed edge oracle；当前不开只改变径向集中度的 beta。
-4. 得到已知可实现的 forced/oracle 解后，同预算比较 weakest-mode objective、multi-restart CMA-ES 和 Sobol/local refinement，
+3. 得到已知可实现的 forced/oracle 解后，先做 synthetic-teacher recovery，再同预算比较 weakest-mode objective、multi-restart
+   CMA-ES 和 Sobol/local refinement，
    再区分 objective、optimizer 与 family limitation。
+4. 若 L2 仍不能改善 A，停止调 scalar alpha/beta，转向 directional scaffold 或 observation contract；不把失败继续归给优化器。
 5. 只有位置特异性稳定时才称 mode-specific core；随后把确认的静态 substrate 接回既有 Z/M/adaptation 方程，单独检查
    entry、bounded carrier、exit、postictal protection 和 return/recovery。
 

@@ -377,3 +377,104 @@ rev9-L 的 L0 replay 进一步显示：旧 `joint_loss` 与 mode-A loss 无关�
 lesion / matched relocation 和 `d_i` interaction audit。只有得到可实现的 forced/oracle 解后，才用同预算比较 weakest-mode
 objective、multi-restart CMA-ES 与 Sobol/local refinement。当前不开 beta：它只改变径向集中，不能直接修复 source gain、
 response-map 或 mode-A 几何；若后续缺口被明确定位为径向连接尺度，再开小型 beta 网格。
+
+## 13. rev9-L forced-source 结果与下一轮连接 oracle
+
+### 13.1 已完成的 forced-source 分解
+
+packet-size canary 只在 Node seeds `1001--1003` 上选择最小可读剂量 `0.005 * N_E=160` cells；正式 fit 改用互不重叠的
+seeds `1004--1009`。四臂、六个 source、同一 packet 和同一 sham 均冻结。主 readout 在生成 contact envelope 前，将
+`100 ms` 注入帧的 source cells 恢复为 sham 值；包含注入帧的版本只作敏感性。正式结果不运行 KMeans，不读取 patient
+held-out，source identity 在仿真前固定为 `component_2 -> A`、`component_1 -> B`。
+
+24/24 arm-network workers 完成，pre-trigger mismatch 和 runaway 均为 0。四臂的 source-conditioned route shape 几乎不变：
+含/不含 deterministic packet frame 的 prototype correlation 最大差值仅 `0.018`，因此下表不是注入帧直接读出的假象。
+
+| arm | component 2 vs patient A | component 1 vs patient B |
+|---|---:|---:|
+| Null | 0.230 | 0.967 |
+| Node | 0.230 | 0.972 |
+| Edge | 0.230 | 0.967 |
+| Node+Edge | 0.230 | 0.967 |
+
+component 3 和三个 off-field controls 均不能形成可用的全 contact rank curve。四层 readout 同样显示 A 是限制项：A 的
+prototype Spearman 约 `0.09--0.24`、precedence MAE 约 `0.46`、event-cloud distance 约 `1.07--1.21`；B 的 prototype
+Spearman 约 `0.966--0.970`、precedence MAE 约 `0.20--0.21`、event-cloud distance 约 `0.66--0.69`。因此 forced
+initiation 证明 C1/C2 是可访问 source，但没有恢复患者 mode A 的具体传播几何。
+
+Edge 相对 Null 的 paired downstream positive-spike mass 增量在 C2 和 C1 分别为 `4583 [4114,4916]` 和
+`5400 [4850,5839]`，同时 source re-spike mass 增加；rank shape 基本不变。这支持 `conditional relay/amplifier`，不支持
+`Edge 恢复了第二个患者模式`。Node/Node+Edge 在部分 seeds 的 sham trigger window 内已有事件，故其 forced-minus-sham mass
+和 factorial interaction 只作描述，不解释为真实抑制或拮抗；sham-clear sensitivity 单独保存。
+
+结构 sidecar 在 12 张网络上进一步显示：C1/C2 self-flow 增加约 `13.9%/11.6%`，BG-source 到 C1/C2-target 减少约
+`8.7%/6.8%`，C1/C2 source-group outgoing influence 增加约 `7.6%/7.0%`，对应 target 的 weighted incoming delay
+提前约 `0.22/0.18 ms`。但逐细胞 `h` 与 outgoing log-ratio 的 Spearman 为 `-0.656`，所以该 mapper 是群组层面的
+field-assortative redistribution，不是单调 high-h boost，也不是严格局部径向 core。
+
+当前诊断必须分层：
+
+- **objective limitation：已证实。** 旧 objective 不保护 mode A；
+- **optimizer limitation：未裁定。** 搜索只有有限 restart 且未收敛，但 archive 中不存在 known-good 双优解；
+- **scalar edge / frozen scaffold limitation：已有证据。** 绕过 ignition 后，四臂 route shape 仍几乎相同且 A 仍弱；
+- **完整患者间期活动：未复现。** 当前只支持自发 event-like activity、双 repertoire 和部分传播表型，不能扩展到临床波形、
+  频谱、持续时间、事件率或完整事件分布。
+
+### 13.2 L2 component-pair residual edge oracle
+
+下一轮先保持 `h`、`d`、`Vtheta`、topology、delay labels、E->I/GABA 和 `alpha=0.75` 全部冻结。用 soft membership
+`r_a(i)`（`a in {C1,C2,BG}`，C3 保留为未调制负对照）增加六个可辨识 residual：
+
+```text
+log M_t,s = alpha * h_t * h_s
+            + sum_{a in {C1,C2,BG}} r_a(t)
+              * [gamma_a1 * r_C1(s) + gamma_a2 * r_C2(s)]
+
+W'_t,s,delta = W_t,s,delta * M_t,s
+               * sum_s,delta W_t,s,delta
+               / sum_s,delta [W_t,s,delta * M_t,s]
+```
+
+BG-source 是每个 target-group 的参考水平，因此没有不可辨识的整行常数。该 family 可以分别改变 C1/C2 self relay、交叉 relay
+和 component-to-background influence，同时仍保持每个 target incoming-E 总量。它是用于判断 family capacity 的 relaxed oracle，
+不是最终患者机制。参数范围首先由旧 ratio `[0.25,4]`、KL 和 ESS 诊断截断；越界点只标为 exploratory inadmissible，不据此
+反复增加 blocker。六个 `gamma` 的 Sobol box 固定为 `[-log(4), +log(4)]`；每个候选仍在真实稀疏矩阵上重算 edge ratio，
+box 本身不替代结构审计。
+
+训练只用 forced sources C2->A 和 C1->B。对 mode `k` 和 descriptor
+`q in {recruitment, precedence, profile, event-cloud}`，先用患者训练集做与模型每 mode 数量匹配的 hash-locked bootstrap，保存
+floor median `m_qk` 和 IQR `s_qk`，然后定义：
+
+```text
+Z_qk = (D_qk - m_qk) / (s_qk + eps)
+D_k  = mean_q softplus(Z_qk) + 2 * (1 - readable_fraction_k)
+J_shape = tau * log[exp(D_A/tau) + exp(D_B/tau)]
+J_L2 = J_shape + 0.10 * OOD_fraction
+```
+
+`J_shape` 保护最弱模式；intended-minus-cross Spearman、response mass、r50/r90 和 return 只作辅助曲线，不替代四层主目标。
+ratio、KL、ESS 和 weighted-delay change 单独形成 distortion axis，与 `J_L2` 画 Pareto，不再用任意权重混入患者形状目标。
+首轮是探索性 capacity scan：在 fit seeds `1004--1009` 上用 common random numbers 做 64 个 Sobol points；保留 Pareto 前 8 个做
+小范围 local refinement，再在未参与筛选的 `1011--1013` 上复核。不得读取 patient held-out，也不得根据结果修改 source mapping。
+
+### 13.3 optimizer 与 beta 的裁定实验
+
+只有 L2 或其他明确 oracle 找到同时改善 A/B 的已知解，才进入 optimizer 归因：
+
+1. **synthetic-teacher recovery：** 用已知 oracle 参数产生 hash-locked synthetic target，检查优化器能否在同预算恢复 route
+   descriptors；失败才是直接的 optimizer 证据。
+2. **同预算 head-to-head：** weakest-mode objective、common random numbers 和相同 simulation calls 下比较 multi-restart
+   CMA-ES 与 Sobol + top-k local refinement；报告 best-of-budget、restart variance 和 known-solution regret。
+3. **objective ablation：** 同一候选集分别按旧 global objective、均值 mode objective 和 worst-mode objective 排序，确认改善
+   来自目标定义而不是额外预算。
+4. **family decision：** 若 L2 仍不能提高 A，则停止调 scalar alpha/beta，转而检查 source-target directional scaffold 或 montage
+   observation contract；不得把失败继续归因于 CMA-ES。
+
+当前 `beta` 保持 0。只有候选已经同时恢复 A/B 的 recruitment、precedence 和 profile，而剩余误差主要表现为 r50/r90 或
+weighted-delay radial scale 时，才做小型 beta 网格。现在 Edge 已轻微缩短 r90，而 A route shape 未改善，直接开 beta 的方向不对。
+
+正式产物：
+
+- `edge_structure_detail/edge_structure_detail_summary.json` 与结构图；
+- `forced_source_capacity/formal_fit/forced_source_capacity_summary.json`；
+- `forced_source_capacity/formal_fit/review_audit/rev9l_l1_review_audit.json` 与审阅图。
