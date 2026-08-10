@@ -33,6 +33,10 @@ def _git(*args, default="unknown"):
         return default
 
 
+def _git_file(commit, path):
+    return subprocess.check_output(["git", "show", f"{commit}:{path}"])
+
+
 def _atomic_npz(path, arrays):
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -53,8 +57,19 @@ def main():
     parser.add_argument("--input-npz", required=True)
     parser.add_argument("--out-json", required=True)
     parser.add_argument("--out-npz", required=True)
+    parser.add_argument("--source-execution-commit")
+    parser.add_argument("--source-wrapper")
     args = parser.parse_args()
 
+    package_lock = "requirements.txt"
+    execution_provenance = dict(
+        **provenance(), git_status_porcelain=_git("status", "--porcelain"),
+        producer_sha256=_sha256(__file__), config_sha256=_sha256(args.config),
+        python_executable=sys.executable,
+        python_version=platform.python_version(),
+        package_lock=dict(path=package_lock, sha256=_sha256(package_lock)),
+        systemd_unit=os.environ.get("REV9_SYSTEMD_UNIT"),
+    )
     config = json.loads(Path(args.config).read_text())
     instrument = config["small_kick_instrument"]
     source = json.loads(Path(args.input_json).read_text())
@@ -140,7 +155,62 @@ def main():
 
     selected_eligible = eligible[:, :, selected]
     eligible_seed_mask = selected_eligible.any(axis=1)
-    package_lock = "requirements.txt"
+    source_execution = None
+    if args.source_execution_commit:
+        commit = _git("rev-parse", args.source_execution_commit)
+        producer_path = "scripts/run_topic4_rev9_node_kick_canary.py"
+        config_path = "config/topic4_rev9_exploratory.json"
+        producer_blob = _git_file(commit, producer_path)
+        config_blob = _git_file(commit, config_path)
+        frozen_config = json.loads(config_blob)
+        frozen_instrument = frozen_config["small_kick_instrument"]
+        semantic_config_match = bool(
+            source["seeds"] == frozen_instrument["canary_seeds"]
+            and np.allclose(
+                source["amplitude_multipliers"],
+                frozen_instrument["amplitude_multipliers"])
+            and np.allclose(
+                source["windows_after_pulse_end_ms"],
+                frozen_instrument["candidate_windows_after_pulse_end_ms"])
+            and np.isclose(
+                source["pulse"]["onset_ms"],
+                frozen_instrument["kick_onset_ms"])
+            and np.isclose(
+                source["pulse"]["duration_ms"],
+                frozen_instrument["kick_duration_ms"])
+            and np.isclose(
+                source["pulse"]["radius_mm"],
+                frozen_instrument["radius_mm"])
+            and source["sites"] == frozen_instrument["origins"])
+        wrapper = None
+        wrapper_commit_match = None
+        if args.source_wrapper:
+            wrapper_text = Path(args.source_wrapper).read_text()
+            wrapper = dict(path=args.source_wrapper, sha256=_sha256(args.source_wrapper))
+            wrapper_commit_match = bool(
+                f"commit={commit[:8]}" in wrapper_text
+                and commit[:8] in source["provenance"].get("systemd_unit", ""))
+        if not semantic_config_match or wrapper_commit_match is False:
+            raise RuntimeError("source execution evidence does not match frozen commit")
+        expected_producer_sha = hashlib.sha256(producer_blob).hexdigest()
+        expected_config_sha = hashlib.sha256(config_blob).hexdigest()
+        payload_provenance_consistent = bool(
+            source["provenance"].get("git_commit") == commit
+            and source["provenance"].get("producer_sha256")
+            == expected_producer_sha
+            and source["provenance"].get("config_sha256")
+            == expected_config_sha)
+        source_execution = dict(
+            commit=commit,
+            producer=dict(path=producer_path, sha256=expected_producer_sha),
+            config=dict(path=config_path, sha256=expected_config_sha),
+            wrapper=wrapper,
+            wrapper_commit_match=wrapper_commit_match,
+            semantic_config_match=semantic_config_match,
+            payload_end_of_run_provenance_consistent=payload_provenance_consistent,
+            note=(
+                "Raw payload captured file hashes at process end; use this "
+                "start-commit reconstruction when consistency is false"))
     payload = dict(
         status="REV9_NODE_KICK_WINDOW_RECONCILED",
         scientific_role=(
@@ -149,7 +219,8 @@ def main():
         source=dict(
             json=dict(path=args.input_json, sha256=_sha256(args.input_json)),
             npz=dict(path=args.input_npz, sha256=_sha256(args.input_npz)),
-            status=source["status"], provenance=source["provenance"]),
+            status=source["status"], provenance=source["provenance"],
+            execution=source_execution),
         pulse=source["pulse"], seeds=seeds.tolist(), sites=source["sites"],
         amplitude_multipliers=amplitudes.tolist(),
         kick_boost_1_per_ms=arrays["kick_boost_1_per_ms"].tolist(),
@@ -168,12 +239,7 @@ def main():
         slopes=slope_records,
         arrays=dict(path=args.out_npz, sha256=_sha256(args.out_npz)),
         provenance=dict(
-            **provenance(), git_status_porcelain=_git("status", "--porcelain"),
-            producer_sha256=_sha256(__file__), config_sha256=_sha256(args.config),
-            python_executable=sys.executable,
-            python_version=platform.python_version(),
-            package_lock=dict(path=package_lock, sha256=_sha256(package_lock)),
-            systemd_unit=os.environ.get("REV9_SYSTEMD_UNIT"),
+            **execution_provenance,
             network_seed=seeds.tolist(), readout_seed=None),
     )
     atomic_write_json(payload, args.out_json)

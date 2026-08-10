@@ -196,6 +196,15 @@ downstream positive mass 最大值选择 20--40 ms。逐窗口重算得到可用
 说明旧逻辑过度排除早期响应且偏向晚期放大。rev9 从此固定 0--10 ms 为 primary first-generation window；旧 raw artifact
 保留，正式解释使用带 source hash 的 window-reconciled sidecar。这是指标语义修复，不增加新的停止条件。
 
+**最终 Node instrument：** `{0.0125,0.025,0.05} * nu_theta` raw canary 无 runaway。逐窗口 sidecar 的可用 site-seed
+为 `17/18`、`16/18`、`15/18`，primary 0--10 ms 覆盖 3/3 networks。近临界网络的 event crossing 对 amplitude 并非严格
+单调，因此不再继续降幅追求 18/18；event overlap 和 ignition threshold 作为结果报告。
+
+该长跑启动于 commit `944293a2`，但旧 producer 在进程结束时才读取 HEAD/文件 hash，期间的 window-eligibility 修复导致
+raw JSON 错标为后来的 commit。raw arrays 保留；正式 sidecar 必须用 `git show 944293a2` 重建 producer/config blob，核对
+wrapper、systemd unit 和产物中的 seed/amplitude/window/site 语义。producer 从此在任何仿真前快照 provenance，不能在结束时
+重新读取可变工作区状态。
+
 ## 9. Alpha 探索和四臂运行
 
 ### 9.1 结构与局部响应

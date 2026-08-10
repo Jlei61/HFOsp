@@ -45,7 +45,9 @@
 - [x] 确认 `0.05*nu_theta` 在 18/18 site-seed 均为非事件；更高剂量显示 component 较早进入 ignition 的探索性差异。
 - [x] 发现 broad response interval 误用于排除全部窗口；threshold mapping 逐窗可用数为 16/18、11/18、7/18。
 - [x] primary window 改为预定义 0--10 ms first-generation response；后两窗只作传播诊断，不再最大化 downstream mass。
-- [ ] 最终 canary 使用 `{0.0125,0.025,0.05}*nu_theta`；原始仿真完成后运行 window-specific reconcile sidecar。
+- [x] 最终 canary 使用 `{0.0125,0.025,0.05}*nu_theta`；逐窗可用数 17/18、16/18、15/18，0 runaway，覆盖 3/3 networks。
+- [x] 修复长跑结束时才读 provenance 的错误；producer 改为启动前快照。
+- [ ] 用 944 commit blob、wrapper/systemd unit 和运行参数重建 raw 来源，重跑正式 window-specific sidecar。
 - [x] 保存 SNR、event/runaway 和排除数；这些是诊断，不是放行门。
 
 ## Task 4：Alpha exploratory calibration

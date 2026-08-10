@@ -195,6 +195,17 @@ def main():
     records, sham_records, network_records = [], [], []
     actual_amplitudes = None
     started = time.time()
+    package_lock = "requirements.txt"
+    execution_provenance = dict(
+        **provenance(),
+        git_status_porcelain=_git("status", "--porcelain"),
+        producer_sha256=_sha256(__file__),
+        config_sha256=_sha256(args.config),
+        python_executable=sys.executable,
+        python_version=platform.python_version(),
+        package_lock=dict(path=package_lock, sha256=_sha256(package_lock)),
+        systemd_unit=os.environ.get("REV9_SYSTEMD_UNIT"),
+    )
 
     for seed_index, seed in enumerate(seeds):
         params = params_cls(
@@ -396,7 +407,6 @@ def main():
         **{key: np.asarray(value, np.float64) for key, value in scalars.items()},
     )
 
-    package_lock = "requirements.txt"
     if n_eligible_seeds < 2:
         status = "REV9_NODE_KICK_CANARY_SPARSE_CROSS_NETWORK_SUPPORT"
     else:
@@ -461,14 +471,7 @@ def main():
             candidate_id=candidate["candidate_id"],
             theta_sha256=candidate["theta_sha256"]),
         provenance=dict(
-            **provenance(),
-            git_status_porcelain=_git("status", "--porcelain"),
-            producer_sha256=_sha256(__file__),
-            config_sha256=_sha256(args.config),
-            python_executable=sys.executable,
-            python_version=platform.python_version(),
-            package_lock=dict(path=package_lock, sha256=_sha256(package_lock)),
-            systemd_unit=os.environ.get("REV9_SYSTEMD_UNIT"),
+            **execution_provenance,
             network_seed=seeds, ou_seed=seeds, poisson_seed=seeds,
             readout_seed=None),
     )
