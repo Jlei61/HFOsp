@@ -42,6 +42,8 @@ edge ratio、KL、ESS、baseline rate、SNR、response correlation、mode suppor
 - connectivity axis 继承患者 rank-derived 模板；rev9 不声称独立恢复轴。
 - patient train 只用于开发 mode readout 和距离。旧 held-out 仅作历史 read-back，不参与 rev9 选择。
 - 长仿真统一使用 `systemd-run --user -> /usr/bin/nohup`，写 `.log/.status`，结束时尝试 `notify-send`。
+- response worker 按一个 `arm-alpha-seed` 一进程分片；本机 80 logical CPUs、约 246 GiB available memory 下最多同时 18 个，
+  分批运行。缺失 network 只在 `params/connectivity/connectivity_rot` 与冻结来源逐文件 hash 一致时生成一次并供同 seed 复用。
 
 ## 4. Node 实现与重建合同
 

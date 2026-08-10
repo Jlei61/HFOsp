@@ -120,13 +120,32 @@ def _load_network(params, stage, reg, seed, config, cache_dir):
         key = canonical_checksum(cache_config, drop=())
         path = Path(cache_dir) / f"{key}.pkl"
         if not path.exists():
-            raise RuntimeError(f"frozen canary network cache is missing: {path}")
+            critical = (
+                "src/snn_engine/params.py",
+                "src/snn_engine/connectivity.py",
+                "src/snn_engine/connectivity_rot.py",
+            )
+            source_hashes = source["provenance"]["module_sha256"]
+            mismatches = [module for module in critical
+                          if source_hashes.get(module) != _sha256(module)]
+            if mismatches or str(np.__version__) != str(source_numpy):
+                raise RuntimeError(
+                    "cannot build a missing frozen network with changed engine: "
+                    f"{mismatches}")
+            net, n_e, n_i, hit = get_network(
+                params, reg["theta_deg"], stage["engine"]["AR"], cache_dir)
+            return net, n_e, n_i, hit, dict(
+                source_artifact=source_path, source_commit=source_commit,
+                frozen_cache_key=key, frozen_cache_path=str(path),
+                frozen_cache_present=False,
+                built_with_verified_engine_hashes=list(critical))
         with open(path, "rb") as handle:
             cached = pickle.load(handle)
         return (
             cached["net"], int(cached["NE"]), int(cached["NI"]), True,
             dict(source_artifact=source_path, source_commit=source_commit,
-                 cache_key=key, cache_path=str(path), cache_sha256=_sha256(path)))
+                 frozen_cache_key=key, frozen_cache_path=str(path),
+                 frozen_cache_present=True, cache_sha256=_sha256(path)))
     net, n_e, n_i, hit = get_network(
         params, reg["theta_deg"], stage["engine"]["AR"], cache_dir)
     return net, n_e, n_i, hit, dict(source_artifact=None)
