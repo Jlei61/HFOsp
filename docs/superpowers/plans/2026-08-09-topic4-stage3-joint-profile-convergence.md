@@ -112,7 +112,13 @@ controls 为手放双核 `0.871`、Stage 2 filament `0.807`。training global be
 - [x] 用同一最终事件池生成两张正式图：Fig4A 直接 virtual-SEEG 波形；Fig4B KMeans 四块一致性核验。
 - [x] PNG/PDF、metadata、中文 README、输入 hash 与视觉 QA 全部通过；失败 verdict 已原样标记。
 
-## Task 4：阈值 core 到连接性等效 core
+## Task 4：阈值 core 到连接性等效 core（由 rev9 接管）
+
+**活动合同已迁移到：**
+`docs/superpowers/specs/2026-08-10-topic4-rev9-node-edge-substrate-factorization-design.md` 与
+`docs/superpowers/plans/2026-08-10-topic4-rev9-node-edge-substrate-factorization.md`。下列已完成项只保留为 rev8.1
+工程审计记录；不得直接从旧 additive prototype 开长跑。node/edge 不再称“同预算”，正式比较使用
+matched-local-response，patient optimization 还受新 blind unit 硬门约束。
 
 - [x] 记录阈值场自由参数与派生量：中心、长短轴、角度、质量、`h_i`、`V_th` 深度分布；core radius 不是单独自由参数，
   而是混合分量 sigma 与预算投影后的派生尺度。
@@ -124,8 +130,8 @@ controls 为手放双核 `0.871`、Stage 2 filament `0.807`。training global be
   `|ΔV_th|≥0.1 mV`，因此不得把当前场简写成全局或全-core 降阈。
 - [x] E→E 等效映射守恒预检：`alpha=0.5–10` 的逐 target incoming-E 最大误差约 `1.1e-11`；这只证明
   工程守恒，不是动力学等效。
-- [ ] 与阈值场做 matched-local-gain 校准：局部线性响应相等、全局均值连接增益不变、噪声和 RNG 配对。
-- [ ] 局部起核通过后只生成 hash-locked `h_i + alpha_EE` 交接产物，不在本分支直接改正在并行执行的
+- [ ] 按 rev9 plan 完成 matched-local-response calibration、四臂分解和因果 controls。
+- [ ] 通过 rev9 handoff gate 后只生成 hash-locked `h_i + alpha_EE` 交接产物，不在本分支直接改正在并行执行的
   FCXR-LC3/LC4。历史 E→E STD 单独终止器已经是 3-seed clean no-go，只能作受限负对照，不能再作为默认恢复解。
 
 ## Task 5：相图与有限生命周期接口

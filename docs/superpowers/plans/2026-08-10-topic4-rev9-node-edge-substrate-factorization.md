@@ -21,8 +21,13 @@ matched-local-response 分解；通过后只生成 lifecycle handoff，不在本
 - [x] Fig4B model profile 实线、patient prototype 虚线、patient recording-block variability band。
 - [x] 2x2 matrix 增加 conditional hierarchical bootstrap 95% CI；metadata 明确它条件于冻结 KMeans 标签。
 - [x] 增加 `D_curve` vs worst-mode correlation benchmark；control y 只画描述性点估计。
-- [ ] 正式 nohup producer 完成后检查 JSON/NPZ hash、PNG/PDF、README 和视觉遮挡。
-- [ ] 根据 `P(component|mode)` 判断是否值得启动 component lesion；关联弱不等于路线自动停止，但必须降级表述。
+- [x] 正式 nohup producer 完成后检查 JSON/NPZ hash、PNG/PDF、README 和视觉遮挡。
+- [x] 根据 `P(component|mode)` 判断是否值得启动 component lesion；关联弱不等于路线自动停止，但必须降级表述。
+
+**Task 1 实测：** 50/50 final events 逐曲线 hash 复现。Mode A 的 17/17 source centroids 最近 component 2；
+Mode B 为 component 1 `23/33`、component 2 `10/33`，component 3 为 `0/50`。这足以启动 lesion/relocation，
+但仍只是关联。conditional hierarchical bootstrap 的 mode-A matched cell 为 `+0.155 [0.011,0.318]`，mode-B 为
+`+0.977 [0.969,0.987]`；CI 条件于冻结 KMeans 标签，不是重新聚类的不确定性，也不改变 rigid benchmark fail。
 
 **产物：**
 
@@ -62,8 +67,10 @@ matched-local-response 分解；通过后只生成 lifecycle handoff，不在本
 - [ ] 从 frozen theta 解出每个 raw `q_c` 和原 projection lambda。
 - [ ] 三个 component 全做 direct lesion；保持原 lambda，不补预算。
 - [ ] control location 在运行前从绕 sheet center 的 `+90/-90` 度旋转中选与原场重叠最小的一侧；orientation 同步旋转，matched relocation 调回原 h budget。
+- [ ] relocation 保留 Gaussian weight/covariance，只对替换后的 raw q 重新求 `project_to_budget` 的 lambda；不得用整体 q 缩放冒充 matched control。
 - [ ] d arms：original、global shuffle、1 mm neighborhood shuffle、positive-only、negative-only。
 - [ ] positive/negative 同时输出 raw 与 `sum h|d|` matched。
+- [ ] metadata 明确 d 是位置独立的冻结随机抽样；shuffle 只检验 realization dependence，不表述为患者空间配准。
 - [ ] 所有 arm 跑 paired seeds，统一读 event rate、mode proportion、Dglobal、D_A/B、onset、duration、size、return。
 - [ ] 若 lesion 只改 event rate、不改 onset/mode，不能称 mode-specific core。
 
@@ -113,7 +120,10 @@ matched-local-response 分解；通过后只生成 lifecycle handoff，不在本
 ## Task 7：rev9 patient objective 开发与 formal 开启门
 
 - [ ] patient train 按 recording block 建四项 mode distance 和各自 floor。
+- [ ] 模型每个候选固定 KMeans `K=2,n_init=100,random_state=0`，Hungarian 对齐 patient-train prototypes；10 个 random-state consensus AMI 中位数 `<0.8` 直接 mode-unstable。
 - [ ] precedence 只纳入达到冻结共同参与 support 的 contact pairs，权重与缺失规则写入 artifact。
+- [ ] event-cloud PCA 只在 patient train 拟合，95% variance、最多 8 维；64 个 sliced-Wasserstein directions 与变换参数 hash-lock。
+- [ ] mode JS 使用自然对数和每 mode 0.5 Jeffreys pseudocount；其 floor 也只来自 patient-train recording-block split-half。
 - [ ] 实现 `J_rev9`、fixed n=20 global、fixed n=32 mode、每簇至少 10。
 - [ ] 用 patient train split-half 和已有 controls 做 zero-simulation scale sanity；不得用旧 held-out 调 lambda/tau。
 - [ ] 没有新 blind unit 时只输出 `DEVELOPMENT_ONLY_NO_BLIND_UNIT`，停止 formal optimization。

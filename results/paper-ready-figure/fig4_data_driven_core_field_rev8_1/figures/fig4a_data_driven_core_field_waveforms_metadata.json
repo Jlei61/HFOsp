@@ -2,16 +2,24 @@
   "figure": "Fig4A data-driven core-field direct waveforms",
   "plotting_only": true,
   "input_capture": {
-    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/representative_readout.json",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/representative_readout.json",
     "sha256": "16f0c8f894d8a073ad71d2b13d0c001a21616d0d79ed985d4be4bbe6189a07f6"
   },
   "input_figdata": {
-    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/representative_figdata.npz",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/representative_figdata.npz",
     "sha256": "c405110fb01ff8f518e9c90e242d49ce70e08b1f2d0ad9cd9cf3a9d22559ff1e"
   },
   "input_confirmation": {
-    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
     "sha256": "313061cd5d3cfb6cb77342e122ebff347e4a55b38b0559775bd2c9cd42b57705"
+  },
+  "input_onset_summary": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/all_event_onset_diagnostics.json",
+    "sha256": "7340c4a5c79001cd6339d211553b8da7f03a5c32aeaae299ba34e92927e9d599"
+  },
+  "input_onset_diagnostics": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/all_event_onset_diagnostics.npz",
+    "sha256": "779191878019d2f1e6fc1bbacd29270eea241002a3a1703e1b969144106b0ed9"
   },
   "candidate_id": "rev8_candidate_1",
   "seed": 804,
@@ -27,7 +35,38 @@
       "0": 2,
       "1": 1
     },
-    "contains_both_modes": true
+    "contains_both_modes": true,
+    "common_amplitude_scale_mV": 100.0,
+    "amplitude_contract": "one common scale for every contact; LFP is the model current proxy, not calibrated clinical SEEG voltage"
+  },
+  "signed_delta_vth": {
+    "vmin": -1.1729852771759053,
+    "vmax": 1.1729852771759053
+  },
+  "all_event_onset": {
+    "n_events": 50,
+    "mode_counts": [
+      17,
+      33
+    ],
+    "probability_component_given_mode": [
+      [
+        0.0,
+        1.0,
+        0.0
+      ],
+      [
+        0.696969696969697,
+        0.30303030303030304,
+        0.0
+      ]
+    ],
+    "contract": {
+      "definition": "neurons at or below each event's 1st percentile relative onset",
+      "quantile": 0.01,
+      "density": "each event histogram normalized to unit mass before mode averaging",
+      "component_assignment": "nearest Gaussian center to the event source centroid"
+    }
   },
   "claim_boundary": "single-subject final-confirmation rendering; mode shading is an unsupervised readout identity, not a causal direction label"
 }

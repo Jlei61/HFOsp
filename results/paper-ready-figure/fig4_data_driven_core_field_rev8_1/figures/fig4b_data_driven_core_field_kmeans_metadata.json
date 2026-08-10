@@ -2,12 +2,20 @@
   "figure": "Fig4B data-driven core-field KMeans consistency",
   "plotting_only": true,
   "input_profiles": {
-    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_event_profiles.npz",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_event_profiles.npz",
     "sha256": "46865b402c4ff2506acaaf7ed624662b794922b094784dce38d1e8fe5e5e0349"
   },
   "input_confirmation": {
-    "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
     "sha256": "313061cd5d3cfb6cb77342e122ebff347e4a55b38b0559775bd2c9cd42b57705"
+  },
+  "input_diagnostic_summary": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/figure_diagnostics.json",
+    "sha256": "796e5efde0fc5b3e0fde136badd5411c4b3995c7b7610baa86ae35fb9437cdff"
+  },
+  "input_diagnostics": {
+    "path": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/figure_diagnostics.npz",
+    "sha256": "45dede976f4a218c5a88909b30758985791c00a2017f396dd28c68ef4d296055"
   },
   "n_events": 50,
   "cluster_counts": [
@@ -39,6 +47,68 @@
   },
   "verdict": "RIGID_TEMPLATE_MATCH_NOT_BEATEN",
   "matrix_valid": false,
+  "matrix_ci": {
+    "low": [
+      [
+        0.010883326642215252,
+        -0.6224747896194458
+      ],
+      [
+        -0.8239625692367554,
+        0.9693244099617004
+      ]
+    ],
+    "high": [
+      [
+        0.3184509575366974,
+        -0.40630367398262024
+      ],
+      [
+        -0.755792498588562,
+        0.9868192076683044
+      ]
+    ],
+    "contract": {
+      "seed": 20260810,
+      "requested": 1000,
+      "valid": 1000,
+      "ci": "2.5--97.5 percentiles",
+      "model_hierarchy": "final unseen-network seed then event",
+      "patient_hierarchy": "training recording block then event",
+      "cluster_contract": "conditional on the original frozen KMeans labels; this CI measures prototype sampling uncertainty, not clustering uncertainty",
+      "matrix_ci_low": [
+        [
+          0.010883326806099426,
+          -0.6224747885365091
+        ],
+        [
+          -0.8239625402849795,
+          0.9693244087425862
+        ]
+      ],
+      "matrix_ci_high": [
+        [
+          0.31845094423501424,
+          -0.4063036731398204
+        ],
+        [
+          -0.755792513953893,
+          0.9868192315103291
+        ]
+      ]
+    }
+  },
+  "benchmark": {
+    "names": [
+      "data-driven",
+      "filament",
+      "hand dual-core",
+      "patient held-out"
+    ],
+    "x": "matched-n global curve distance; lower is better",
+    "y": "minimum matched diagonal Spearman correlation; higher is better",
+    "control_y_uncertainty": "not available from the frozen confirmation summary; control y values are descriptive point estimates"
+  },
   "permutation_p_values": null,
   "permutation_note": "No p-values: the 31 interpolated profile positions are autocorrelated; acceptance uses support, sign structure, rigid benchmark, and held-out distances."
 }

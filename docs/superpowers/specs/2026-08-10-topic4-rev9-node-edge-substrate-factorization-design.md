@@ -44,6 +44,10 @@ node 参数单位是 mV，edge 参数是无量纲权重重分配；二者没有�
 **matched-local-response**：先用 paired small-kick/sham 测出 node-only 的局部响应曲线，再在守恒约束内选择 edge 参数。
 若 edge 在预注册的权重畸变范围内无法匹配 node，就判定当前 edge family 不足，不扩大参数直到碰到结果。
 
+edge primary 只共享学得的非负空间 envelope `h`，不把 `d` 偷渡进连接权重。`d` 是冻结的、位置独立的 node
+阈值抽样，而不是患者学得的空间变量；因此本轮问的是“同一 h 几何能否由 edge redistribution 实现”，不是要求 edge
+逐神经元复制 signed `Delta Vtheta=-hd`。若二者不等效，这是机制分解结果，不是必须通过的工程 gate。
+
 per-target incoming-E 权重和守恒只排除了静态总增益变化，不能守恒实际递归电流，因为 source firing rate、相关性和
 时序会改变。实际响应必须由 SNN paired perturbation 测量，不能由权重和替代。
 
@@ -54,6 +58,9 @@ rev8.1 的平均匹配被 mode B 掩盖，因此 rev9 的连续目标必须保�
 
 静态 edge core 只决定 substrate / entry susceptibility。它不提供 slow exit、postictal protection 或 recovery。
 任何相图与有限发作表述仍须满足 entry、bounded carrier、exit、postictal protection、return/recovery 五项合同。
+
+`d` 的 spatial shuffle 只检验结果是否依赖这一次冻结随机实现及其与 `h` 相乘后的局部组成。因为 `d` 原本就独立于
+位置抽样，shuffle 结果不得表述为发现或破坏了患者来源的生物学空间配准。
 
 ## 4. 与真实 SNN 方程的对应
 
@@ -181,8 +188,9 @@ J_cal(alpha) = median_(r,q) [
 ] + P_control + P_baseline
 ```
 
-每个 `z2(delta)=delta^2/s^2`，`s=max(Node-only seed IQR, 0.1*|Node median|, numerical floor)`，只由 Node-only
-calibration seeds 定义。`P_control` 惩罚 edge 相对 node 在 off-field control 出现额外 response。`P_baseline` 来自独立
+每个 `z2(delta)=delta^2/s^2`，`s=max(Node-only seed IQR, 0.1*|Node median|, numerical floor)`，并在公式中对应的
+同一变换坐标上计算，只由 Node-only calibration seeds 定义。`P_control` 惩罚 edge 相对 node 在 off-field control
+出现额外 response。`P_baseline` 来自独立
 `T=2000 ms` no-kick paired runs：baseline E-rate 或 active-fraction p95 改变 >25%，以及任何 runaway/tonic，均设
 fail-closed 大罚；短 calibration run 的 event count 只报告，不用不稳定的小计数作 25% gate。
 
@@ -204,7 +212,8 @@ Spearman `>=0.80`，且至少 `5/6` calibration network seeds 同方向满足。
 - direct lesion：`q_minus=max(q-q_c,eps)`，保持原 projection lambda，不补回预算；测总贡献；
 - matched relocation：删去 `q_c`，把同 covariance/weight 分量移动到保持 sheet-center radius 和边界距离的冻结
   control location；primary control 是绕 sheet center 旋转 `+90/-90` 度后与原场重叠最小的一侧，component orientation
-  同步旋转。随后标量调整使 `sum h` 回到原预算；测位置特异性；
+  同步旋转。对替换后的 raw `q` 重新调用 `project_to_budget(q,target_count)`，只重新求 projection `lambda`，不改变任何
+  Gaussian 的 weight/covariance；测位置特异性；
 - 每个 component、control location 和 seed 配对；禁止只做最显眼的两个主分量。
 
 报告 event rate、mode proportion、`D_global`、每个 `D_k`、earliest component、duration、size、return。
@@ -212,7 +221,8 @@ Spearman `>=0.80`，且至少 `5/6` calibration network seeds 同方向满足。
 ### 8.3 `d_i` interaction audit
 
 固定 h，至少比较：原始 d、全局 spatial shuffle、1 mm spatial-bin neighborhood shuffle、positive-only、negative-only。
-shuffle 保持 d marginal；positive/negative-only 同时报 raw 与 `sum h|d|` matched 版本。这样分开 h 几何、d 异质性和二者配准。
+shuffle 保持 d marginal；positive/negative-only 同时报 raw 与 `sum h|d|` matched 版本。这样分开 h 几何、d 异质性和
+特定随机实现的局部组成；不得把后者写成患者来源的空间配准。
 
 ## 9. 新的 patient-training 连续目标
 
@@ -224,6 +234,16 @@ shuffle 保持 d marginal；positive/negative-only 同时报 raw 与 `sum h|d|` 
 - `D_prec,k`：共同参与 contact pairs 的 precedence probability weighted RMSE；
 - `D_prof,k`：31-point mean normalized-rank profile RMSE；
 - `D_dist,k`：frozen embedding 中 mode-conditioned event-cloud sliced Wasserstein。
+
+患者 mode 标签和 prototype 只在 patient train 上冻结。每个模型候选用固定 `K=2, n_init=100, random_state=0` 对其
+31-point normalized-rank curves 聚类；两模型簇用 2x2 Hungarian assignment 最小化 patient-train prototype 的
+`D_prof` 后命名 A/B。该 assignment、两个簇的支持数和 KMeans inertia 全部入 artifact。若重复 `random_state=0--9`
+的 consensus AMI 中位数 `<0.8`，候选按 mode-unstable fail，不允许靠某一次标签排列进入连续目标。
+
+`D_dist` 的 embedding 只在 patient train 的 31-point event curves 上拟合：标准化参数和 PCA basis 冻结，保留达到
+95% variance 的最小维数并封顶 8 维；sliced Wasserstein 使用 64 个 hash-locked unit directions。模型只能 transform，
+不得 refit。`D_JS` 使用自然对数和每个 mode `0.5` 的固定 Jeffreys pseudocount；它自己的 floor 同样来自 patient-train
+recording-block split-half。
 
 每一项都用 recording-block split-half patient floor 转成 excess-noise 单位：
 
