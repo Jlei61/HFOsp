@@ -506,7 +506,7 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
             rotation=45, ha="right", rotation_mode="anchor",
         )
         stat_ax.tick_params(axis="x", labelsize=7.6, pad=2)
-        stat_ax.set_xlabel("Frozen interictal model")
+        stat_ax.set_xlabel("Frozen interictal model" if show_geometry_axes else "")
         stat_ax.set_ylabel("Null-relative maxAB |ρ|")
 
 
@@ -760,7 +760,7 @@ def render_final(out_root: Path):
                          "ytick.labelsize": 7.5, "axes.linewidth": 0.7})
     fig = plt.figure(figsize=(11.2, 8.4), facecolor="white")
     outer = fig.add_gridspec(3, 2, hspace=0.34, wspace=0.22,
-                             left=0.055, right=0.985, top=0.975, bottom=0.07)
+                             left=0.055, right=0.985, top=0.975, bottom=0.105)
     draw_motif_ladder(outer[0, 0], out_root); panel_label(fig, outer[0, 0], "A")
     draw_rollout_example(outer[0, 1], out_root); panel_label(fig, outer[0, 1], "B")
     draw_interictal_sufficiency(outer[1, 0], out_root); panel_label(fig, outer[1, 0], "C")
@@ -773,7 +773,8 @@ def render_final(out_root: Path):
     draw_effective_motif(outer[2, 1], out_root); panel_label(fig, outer[2, 1], "F")
     handles, labels = ax_d.get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=min(8, len(labels)), frameon=False,
-               bbox_to_anchor=(0.5, 0.005), fontsize=7.5, handletextpad=0.4, columnspacing=1.0)
+               bbox_to_anchor=(0.5, 0.018), fontsize=7.5,
+               handletextpad=0.4, columnspacing=1.0)
     figure_dir = out_root / "figures"; figure_dir.mkdir(parents=True, exist_ok=True)
     stem = figure_dir / "topic5_figure6_rnn_connectivity_motifs"
     for suffix, dpi in ((".png", 600), (".pdf", None), (".svg", None)):
