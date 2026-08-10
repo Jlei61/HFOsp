@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from pathlib import Path
 
 import numpy as np
@@ -17,6 +18,7 @@ from scripts.freeze_topic5_lbss_postprocess_snapshot_v0_2 import dependency_clos
 from scripts.summarize_topic5_lbss_claims_v0_2 import (
     attenuation_damage_auc,
     holm,
+    main as claim_summary_main,
 )
 from src.topic5_lbss_rnn_v0_2 import (
     LBSSConfig,
@@ -313,3 +315,79 @@ def test_postprocess_snapshot_dependency_closure_is_self_contained():
         Path("src/topic5_lbss_analysis_v0_2.py"),
         Path("src/topic5_lbss_rnn_v0_2.py"),
     }.issubset(closure)
+
+
+def test_claim_adjudicator_runs_on_patient_first_tables(tmp_path, monkeypatch):
+    for marker in (
+        "INTERICTAL_ANALYSIS_COMPLETE.json", "PATHWAY_ANALYSIS_COMPLETE.json",
+        "ATTENUATION_COMPLETE.json", "EARLY_ICTAL_SCORING_COMPLETE.json",
+    ):
+        (tmp_path / marker).write_text("{}\n")
+    arms = (
+        "L0_LOCAL_ONLY", "L1_LOCAL_PLUS_LEARNED_EXTRA_LOCAL",
+        "L2_LOCAL_PLUS_RANDOM_LR", "L3_LOCAL_PLUS_LEARNED_LR",
+        "C_L3_ORDER_SHUFFLED",
+    )
+    interictal = []
+    for subject in ("p1", "p2"):
+        for index, arm in enumerate(arms):
+            interictal.append({
+                "subject": subject, "arm": arm,
+                "no_rec_contact_nll": 2.0,
+                "test_contact_nll": 1.8 - 0.02 * index,
+                "distal_contact_nll": 1.9 - 0.03 * index,
+                "distal_n": 25,
+            })
+    pd.DataFrame(interictal).to_csv(tmp_path / "interictal_per_patient.csv", index=False)
+    pathway = tmp_path / "pathway_analysis"; pathway.mkdir()
+    pd.DataFrame({
+        "subject": ["p1", "p2"],
+        "endpoint_dissimilarity_beyond_proposal": [0.2, 0.1],
+        "effective_dissimilarity_beyond_proposal": [0.3, 0.2],
+    }).to_csv(pathway / "true_vs_shuffle_patient_patterns.csv", index=False)
+    attenuation = tmp_path / "attenuation"; attenuation.mkdir()
+    auc_rows = []
+    for subject in ("p1", "p2"):
+        for target, value in (
+            ("L1_ADDED", 0.05), ("L2_ADDED", 0.04),
+            ("L3_ADDED", 0.20), ("L3_MATCHED_LOCAL", 0.01),
+        ):
+            auc_rows.append({
+                "subject": subject, "target": target, "auc_distal_selectivity": value,
+                "inferential_eligible": True, "n_valid_matched_draws_min": 500,
+            })
+    pd.DataFrame(auc_rows).to_csv(attenuation / "attenuation_patient_auc.csv", index=False)
+    early = tmp_path / "early_ictal"; early.mkdir()
+    early_rows = []
+    target_arm = {
+        "L1_ADDED": arms[1], "L2_ADDED": arms[2],
+        "L3_ADDED": arms[3], "L3_MATCHED_LOCAL": arms[3],
+    }
+    for subject in ("p1", "p2"):
+        for endpoint in ("canonical_full", "seed_removed"):
+            for index, arm in enumerate(arms[:4]):
+                early_rows.append({
+                    "subject": subject, "primary": True, "endpoint": endpoint,
+                    "condition": f"INTACT|{arm}", "all_contact_margin": 0.1 + 0.02 * index,
+                })
+            for target, arm in target_arm.items():
+                base = next(row["all_contact_margin"] for row in early_rows
+                            if row["subject"] == subject and row["endpoint"] == endpoint
+                            and row["condition"] == f"INTACT|{arm}")
+                for alpha in (0.25, 0.50, 0.75, 1.00):
+                    early_rows.append({
+                        "subject": subject, "primary": True, "endpoint": endpoint,
+                        "condition": f"ATTEN|{target}|{alpha:.2f}",
+                        "all_contact_margin": base - alpha * (0.2 if target == "L3_ADDED" else 0.05),
+                    })
+    pd.DataFrame(early_rows).to_csv(early / "early_ictal_per_patient_condition.csv", index=False)
+    monkeypatch.setattr("sys.argv", ["claim-summary", "--out-root", str(tmp_path)])
+    claim_summary_main()
+    result = json.loads((tmp_path / "LBSS_CLAIM_SUMMARY.json").read_text())
+    assert result["n_interictal_patients"] == 2
+    assert set(result["claim_B_holm_family"]) == {
+        "L3_vs_L0_LOCAL_ONLY_distal",
+        "L3_vs_L1_LOCAL_PLUS_LEARNED_EXTRA_LOCAL_distal",
+        "L3_vs_L2_LOCAL_PLUS_RANDOM_LR_distal",
+    }
+    assert result["claim_C_holm_family"]["selected_nonlocal_vs_matched_local_attenuation_dd"]["median"] > 0
