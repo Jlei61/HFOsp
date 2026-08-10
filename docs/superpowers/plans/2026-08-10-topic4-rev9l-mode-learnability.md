@@ -73,7 +73,8 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
 
 - [x] 使用 6 fit / 3 selection 新 network seeds；因 shared forced capacity 未成立，不读取 3 confirmation seeds。
 - [ ] L3a 用现有 64 x 6 fit events 计算 intended-source 到 intended patient centroid 的单事件 route-shape surrogate，报告
-  `C_per_net^(1)`、`C_shared^(1)` 和 `Delta_network^(1)`；不设新 gate，不冒充分布级 capacity。
+  `C_per_net^(1)`、`C_shared^(1)` 和 `Delta_network^(1)`；并列时按既有 L2 full fit objective、candidate id 二级排序；不设新 gate，
+  不冒充分布级 capacity。
 - [ ] 若 L3a shared-surrogate candidate 不在已有 selection 集，冻结后只补 3 张 selection 网络作 out-of-fit sanity。
 - [ ] L3b 只有在每 network/source 获得重复事件后，才求正式 per-network 与 shared-parameter oracle；3 个 confirmation seeds 保持未读。
 - [ ] 已知好解存在后，以相同预算和 CRN 比较 Sobol/local refinement 与 CMA-ES 3 restarts。

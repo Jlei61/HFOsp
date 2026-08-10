@@ -179,7 +179,8 @@ Delta_network^(1) = C_shared^(1) - C_per_net^(1)
 
 只纳入 L2 结构可容许候选。上标 `(1)` 明确表示每 source/network 只有一个 event；它只能回答当前 64 点库是否能移动单次 route
 shape，不能建立 recruitment、precedence 或 event-distribution capacity，也不使用 patient floor 设置 PASS/FAIL。若 L3a 选出的
-shared-surrogate candidate 未在 selection seeds 上评估，先冻结该 candidate，再只补三张 selection 网络作 out-of-fit sanity。
+shared-surrogate minimum 有并列，二级规则固定为既有 L2 full fit objective 最低、再按 candidate id；不得另看 selection 数据解并列。
+若该 candidate 未在 selection seeds 上评估，先冻结该 candidate，再只补三张 selection 网络作 out-of-fit sanity。
 
 ### 6.2 L3b：重复事件正式 oracle 与 optimizer 条件
 
