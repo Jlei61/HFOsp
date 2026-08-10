@@ -188,13 +188,14 @@ def _plot_benchmark(ax, diagnostics):
                 max(0.0, y[0] - data_ci[0])], [max(0.0, data_ci[1] - y[0])]]),
             fmt="none", ecolor=colors[0], capsize=2.5, lw=1.0, zorder=3)
     ax.set_xlabel(r"global curve distance $D_{curve}$")
-    ax.set_ylabel("worst-mode Spearman rho")
+    ax.set_ylabel("worst-mode rho", labelpad=10)
+    ax.yaxis.set_label_position("right")
     ax.set_title("global vs weakest mode", fontsize=11.5,
                  fontweight="bold", pad=7)
     ax.set_xlim(max(0.0, float(x_low.min()) - 0.04), min(1.0, float(x_high.max()) + 0.04))
     ax.set_ylim(-0.05, 1.05)
     ax.grid(color="0.90", lw=0.7, zorder=0)
-    ax.legend(frameon=False, fontsize=7.4, loc="lower right")
+    ax.legend(frameon=False, fontsize=7.4, loc="lower left")
     ax.spines[["top", "right"]].set_visible(False)
 
 

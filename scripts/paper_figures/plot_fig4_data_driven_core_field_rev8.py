@@ -284,7 +284,7 @@ def _plot_readout(ax, data, events):
     ax.set_xlim(0, float(t[-1])); ax.set_ylim(-0.7, offsets[-1] + 1.0)
     ax.set_yticks(offsets); ax.set_yticklabels(names, fontsize=8.5)
     ax.set_xlabel("simulation time (ms)")
-    ax.set_ylabel("virtual-SEEG (30–80 Hz)")
+    ax.set_ylabel("model-current proxy (30–80 Hz)")
     ax.set_title("direct electrode readout", fontsize=11.5,
                  fontweight="bold", pad=7, loc="left")
     ax.spines[["top", "right"]].set_visible(False)
