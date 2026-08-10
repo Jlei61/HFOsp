@@ -219,12 +219,14 @@ def _plot(fit_rows, selection_rows, baseline_id, selected_id, curve_audit,
     axes[0].plot([lo, hi], [lo, hi], ls="--", color="0.6", lw=1)
     axes[0].axhline(0.0, color="0.75", lw=0.8)
     axes[0].axvline(0.0, color="0.75", lw=0.8)
-    for key in common:
-        axes[0].annotate(key.replace("sobol_", ""),
-                         (fit_baseline - fit_rows[key]["score"]["objective"],
-                          selection_baseline
-                          - selection_rows[key]["corrected_score"]["objective"]),
-                         xytext=(2, 2), textcoords="offset points", fontsize=7)
+    fit_best = min(common, key=lambda key: fit_rows[key]["score"]["objective"])
+    for key in dict.fromkeys((baseline_id, selected_id, fit_best)):
+        axes[0].annotate(
+            key.replace("sobol_", ""),
+            (fit_baseline - fit_rows[key]["score"]["objective"],
+             selection_baseline
+             - selection_rows[key]["corrected_score"]["objective"]),
+            xytext=(3, 3), textcoords="offset points", fontsize=7)
     axes[0].set_xlabel("fit improvement vs scalar (n=6 floor)")
     axes[0].set_ylabel("selection improvement vs scalar (n=3 floor)")
     axes[0].set_title("A  Fit-to-selection retention", loc="left", weight="bold")
