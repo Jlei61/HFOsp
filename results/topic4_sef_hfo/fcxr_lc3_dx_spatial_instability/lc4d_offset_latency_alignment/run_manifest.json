@@ -1,0 +1,56 @@
+{
+  "experiment": "FCXR-LC4d offset-latency alignment",
+  "status": "L1_COMPLETE_STOPPED",
+  "verdict": "OFFSET_LATENCY_REPAIR_INSUFFICIENT",
+  "design": "docs/superpowers/specs/2026-08-10-topic4-fcxr-lc4d-offset-latency-alignment-design.md",
+  "plan": "docs/superpowers/plans/2026-08-10-topic4-fcxr-lc4d-offset-latency-alignment.md",
+  "execution_head": "cf96230fb7a7bddb21de8eab9e72f20d20e04eb3",
+  "stages": {
+    "L0_analytic_candidate": "OFFSET_LATENCY_REPAIR_IDENTIFIABLE",
+    "L1_fresh_latency_screen": "OFFSET_LATENCY_REPAIR_INSUFFICIENT",
+    "L2_nominal_lifecycle": "not_authorised",
+    "L2_exact_final_D_confirmation": "not_authorised"
+  },
+  "primary_verdicts": [
+    "candidate_lock.json",
+    "latency_screen.json",
+    "L1_DONE.json",
+    "AUTOPILOT_STOP.json"
+  ],
+  "figure": "figures/lc4d_offset_latency_screen.png",
+  "artifact_sha256": {
+    "candidate_lock.json": "6e8587bd4ad834a9e72e9244a2c9cdd31adbb6a85369c7b9337fb074ae94aa5e",
+    "latency_screen.json": "d9c296cc687832400c293ed9df9a730cca08eb542a8abf2465f39c441de2630b",
+    "latency_screen_traces.npz": "faa994dfbf8bf954345ce8774862f733c64e98b63e94e9b32307fe2d14f4d189",
+    "L1_DONE.json": "5ac8fbebf9eb301b85f24de444f179b828c926bda8369c10267a92f440ef6fdc",
+    "AUTOPILOT_STOP.json": "88a68ad9bc9f52ece2a050d9b0cc8382b66b682817acb644e9aa36137b618b9f"
+  },
+  "source_sha256_at_execution": {
+    "src/snn_engine/mz_slow_vars.py": "5b578bcf7de583a3829b655e53b17f71674d7a378788cd50ca0e23c0374c8071",
+    "src/topic4_fcxr_lc4d.py": "236d5a44967f02cbc1c6c0194291d42f35f33a648ad34618148c9eab4a8fbde9",
+    "scripts/run_topic4_fcxr_lc4d.py": "bb6f437d166d78fb48543c12806abc716cd0bef6544ec4f901ad3b704ad25092",
+    "scripts/run_topic4_fcxr_lc4d_autopilot.sh": "cce4daf0174eb2729fa4b02b42d8fc5f0df66b57ca54be1b6c3f142002316683"
+  },
+  "postrun_reporting_repair": {
+    "reason": "terminal L1 marker was durable but the stale RUNNING marker was not cleared",
+    "simulation_values_changed": false,
+    "scripts/run_topic4_fcxr_lc4d.py": "4d2dc1b273b45327a3c4b6b896df83ff02b187265ec84bf8e46a990cfd50c9c3",
+    "scripts/paper_figures/plot_fig_lc4d_offset_latency_screen.py": "e4c22ebc8b3ed2158f356edc24742d33d2be373249b814cb3cfb89c50463d1ea"
+  },
+  "blessed_engine_hashes_match": true,
+  "tests": {
+    "broad_regression": "956 passed, 1 warning in 234.27 s",
+    "postrepair_targeted_and_blessed": "12 passed in 0.61 s"
+  },
+  "resources": {
+    "worker_policy": "one 40k worker and one pinned math thread",
+    "long_run_mode": "setsid nohup with independent PID/SID, stage flock, source lock and sentinels",
+    "wall_s": 3343.141741514206,
+    "peak_self_rss_gib": 16.686534881591797,
+    "minimum_logged_mem_available_gib": 221.00675582885742,
+    "swap_baseline_mib": 714.7890625,
+    "swap_delta_mib": 0.0,
+    "residual_task_processes": 0
+  },
+  "completed": "2026-08-10T13:09:48+08:00"
+}

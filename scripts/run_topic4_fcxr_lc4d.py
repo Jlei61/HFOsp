@@ -64,6 +64,14 @@ def _peak_rss_gib() -> float:
     return resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0 / 1024.0
 
 
+def _clear_running_sentinel(path: Path) -> None:
+    """Remove a stage-running marker after a terminal marker is durable."""
+    try:
+        path.unlink()
+    except FileNotFoundError:
+        pass
+
+
 def stage_screen() -> dict:
     LC4._preflight("L1_SCREEN")
     candidate = _candidate()
@@ -141,6 +149,7 @@ def stage_screen() -> dict:
     GEO._write_json(OUT / "L1_DONE.json", dict(
         status="DONE", verdict=gate["verdict"], passed=gate["passed"],
         finished=GEO._now()))
+    _clear_running_sentinel(OUT / "L1_RUNNING.json")
     LC4._resource("L1_SCREEN_DONE", wall_s=rec["wall_s"], peak_rss_gib=rec["peak_rss_gib"])
     del run, S
     gc.collect()
@@ -167,6 +176,7 @@ def main() -> None:
             except BaseException as exc:
                 GEO._write_json(OUT / "L1_FAILED.json", dict(
                     status="FAILED", error=repr(exc), finished=GEO._now()))
+                _clear_running_sentinel(OUT / "L1_RUNNING.json")
                 raise
         gate = result["gate"]
     else:

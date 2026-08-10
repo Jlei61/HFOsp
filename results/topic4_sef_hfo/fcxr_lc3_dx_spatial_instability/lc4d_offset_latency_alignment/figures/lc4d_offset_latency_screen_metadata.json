@@ -1,0 +1,33 @@
+{
+  "figure": "lc4d_offset_latency_screen",
+  "kind": "executed L1 diagnostic; not a lifecycle or paper-claim figure",
+  "stage_verdicts": {
+    "L0": "OFFSET_LATENCY_REPAIR_IDENTIFIABLE",
+    "L1": "OFFSET_LATENCY_REPAIR_INSUFFICIENT",
+    "L2_nominal": "not_authorised",
+    "L2_exact_D": "not_authorised"
+  },
+  "panels": {
+    "A": "fresh no-intervention rate trace; onset at 11 s and no offset by record end",
+    "B": "executed current relative to the locked target; actual current at 15 s is only 0.411 of target",
+    "C": "regional relay/load coordinate y after onset",
+    "D": "regional H carrier showing late off-axis persistence after core suppression"
+  },
+  "key_numbers": {
+    "onset_ms": 11000.0,
+    "offset_ms": null,
+    "bout_ms_lower_bound": 7000.0,
+    "pre_returning_events": 29,
+    "target_current": 44.8619393917937,
+    "actual_current_at_15s": 18.441844940185547,
+    "actual_fraction_at_15s": 0.41107997536903174,
+    "first_target_reach_ms": 15840.0,
+    "max_current": 51.41675745788373,
+    "core_y_17p75s": 1.0433504940010607e-05,
+    "off_axis_y_17p75s": 13.300216674804688,
+    "core_H_17p75s": 0.08492203801870346,
+    "off_axis_H_17p75s": 1.1179249286651611
+  },
+  "claim_boundary": "At one development seed, the exact-dead-zone mechanism preserves cumulative no-kick entry and remains numerically safe, but a 4.85x cell-local gain increase does not produce an offset within the 18 s screen.  The regional trace is consistent with core suppression accompanied by persistent off-axis load/carrier.  It does not by itself prove a causal migration mechanism or rule out a spatially coordinated termination pathway.",
+  "source": "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4d_offset_latency_alignment"
+}

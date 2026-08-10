@@ -45,3 +45,12 @@ def test_runner_delegates_candidate_to_unchanged_lifecycle_module():
     mod = _load()
     assert mod.LC4._candidate is mod._candidate
     assert mod.LC4.OUT.endswith("lc4d_offset_latency_alignment")
+
+
+def test_terminal_stage_clears_stale_running_sentinel(tmp_path):
+    mod = _load()
+    marker = tmp_path / "L1_RUNNING.json"
+    marker.write_text("running")
+    mod._clear_running_sentinel(marker)
+    assert not marker.exists()
+    mod._clear_running_sentinel(marker)
