@@ -1,0 +1,57 @@
+{
+  "experiment": "FCXR-LC4e spatially shared terminator",
+  "status": "E1_COMPLETE_STOPPED",
+  "verdict": "SHARED_EXECUTOR_OFFSET_NEGATIVE",
+  "design": "docs/superpowers/specs/2026-08-10-topic4-fcxr-lc4e-spatially-shared-terminator-design.md",
+  "plan": "docs/superpowers/plans/2026-08-10-topic4-fcxr-lc4e-spatially-shared-terminator.md",
+  "execution_head": "68b98060016604235b4fe5d3e183a4852cad43cd",
+  "stages": {
+    "E0_candidate_lock": "SHARED_EXECUTOR_IDENTIFIABLE",
+    "E1_architecture_screen": "SHARED_EXECUTOR_OFFSET_NEGATIVE",
+    "E2_nominal_lifecycle": "not_authorised",
+    "E2_exact_final_D_confirmation": "not_authorised"
+  },
+  "primary_verdicts": [
+    "candidate_lock.json",
+    "latency_screen.json",
+    "architecture_verdict.json",
+    "E1_DONE.json",
+    "AUTOPILOT_STOP.json"
+  ],
+  "figure": "figures/lc4e_shared_executor_screen.png",
+  "artifact_sha256": {
+    "candidate_lock.json": "ab30e030624fb220db183706ac79669de10da74794137e6930971e4f398aaf50",
+    "latency_screen.json": "b7daf7b9ed9cf2ccc7644ec9741aa1cf7e226028516812d4120246f9c58dafab",
+    "latency_screen_traces.npz": "cfcb1a57289f4b8754a1fa0265fdd333bfe47bda99a2eb7f08ba272453e35fde",
+    "architecture_verdict.json": "4c121634b157c1e8c8ba6f82b0f326551cb0e72648b56c1e3e8b130b92148d12",
+    "E1_DONE.json": "afd1ba22558d79ba16128cccf186cea0104530f4f76a474e7a291a3072e42087",
+    "AUTOPILOT_STOP.json": "5de8d383b711136e4dc8dd46759fa634d9d191f4a571344d3601a0f9366a1895"
+  },
+  "source_sha256_at_execution": {
+    "src/snn_engine/mz_slow_vars.py": "c374b852b1e9c2473e76db6217235015f899d927a5a05bf499c121320f25e44f",
+    "src/topic4_fcxr_lc4e.py": "0bd243e8a1a28b235bfc24d96336464bb205ba34ba9aa9d694d2a78a079159d4",
+    "scripts/run_topic4_fcxr_lc4e.py": "f33d23ff76139facd1ecff1194827e85dd6063f41cdf7e706c58fe9b44abdda5",
+    "scripts/run_topic4_fcxr_lc4e_autopilot.sh": "dc7d49ce13ff3e11904ccfa2cd6c77967916596a23f718c8cd54da41114de799"
+  },
+  "postrun_reporting": {
+    "scripts/paper_figures/plot_fig_lc4e_shared_executor_screen.py": "bdfa87cfdd5a3bb1a2b13db583ab5234f2f9f2a0c22bfae192c366d770b3294f",
+    "simulation_values_changed": false,
+    "figure_visually_inspected": true
+  },
+  "blessed_engine_hashes_match": true,
+  "tests": {
+    "preexecution_broad_regression": "966 passed, 1 warning in 233.71 s",
+    "postrun_targeted_and_blessed": "11 passed in 1.48 s"
+  },
+  "resources": {
+    "worker_policy": "one 40k worker and one pinned math thread",
+    "long_run_mode": "setsid nohup with independent PID/SID, stage flock, source lock and sentinels",
+    "wall_s": 5797.2232546806335,
+    "peak_self_rss_gib": 16.686859130859375,
+    "minimum_logged_mem_available_gib": 230.0788917541504,
+    "swap_baseline_mib": 713.2890625,
+    "swap_delta_mib": 1.09765625,
+    "residual_task_processes": 0
+  },
+  "completed": "2026-08-10T15:02:15+08:00"
+}

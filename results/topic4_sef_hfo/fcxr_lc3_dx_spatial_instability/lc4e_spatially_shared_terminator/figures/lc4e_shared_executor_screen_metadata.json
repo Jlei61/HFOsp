@@ -1,0 +1,39 @@
+{
+  "figure": "lc4e_shared_executor_screen",
+  "kind": "executed E1 causal architecture diagnostic; not a lifecycle figure",
+  "verdict": "SHARED_EXECUTOR_OFFSET_NEGATIVE",
+  "panels": {
+    "A": "archived local and fresh shared rate traces; causal prefix matches and neither offsets",
+    "B": "executed local versus shared current after their identical first-current boundary",
+    "C": "regional load in the shared arm after onset",
+    "D": "local versus shared regional H at the final stored snapshot"
+  },
+  "key_numbers": {
+    "onset_ms": 11000.0,
+    "offset_ms": null,
+    "pre_returning_events": 29,
+    "local_peak_current": 51.4129638671875,
+    "shared_peak_current": 20.33938980102539,
+    "shared_to_local_peak_current": 0.39560819433727074,
+    "local_final_core_y": 1.0433504940010607e-05,
+    "shared_final_core_y": 76.91688919067383,
+    "shared_final_H_core_A": 3.129443645477295,
+    "local_final_H_core_A": 0.09253723919391632,
+    "shared_final_H_core_B": 3.116163492202759,
+    "local_final_H_core_B": 0.0773068368434906,
+    "shared_final_H_axial": 3.337916851043701,
+    "local_final_H_axial": 0.08198252320289612,
+    "shared_final_H_off_axis": 2.500898599624634,
+    "local_final_H_off_axis": 1.1179249286651611,
+    "shared_final_y_core_A": 71.979248046875,
+    "local_final_y_core_A": 1.1024462764908094e-05,
+    "shared_final_y_core_B": 81.85453033447266,
+    "local_final_y_core_B": 9.84254711511312e-06,
+    "shared_final_y_axial": 72.40498352050781,
+    "local_final_y_axial": 8.999279998533893e-06,
+    "shared_final_y_off_axis": 52.556861877441406,
+    "local_final_y_off_axis": 13.300216674804688
+  },
+  "claim_boundary": "At one development seed, changing only the spatial allocation of the matched cell-load actuator preserves the exact causal prefix and removes the archived core-suppression/off-axis-escape pattern, but it still does not produce autonomous offset within the 18 s screen. This rejects spatial allocation as the sole blocker; it does not reject X-mediated or recruited-area termination.",
+  "source": "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4e_spatially_shared_terminator"
+}

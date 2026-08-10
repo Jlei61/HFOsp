@@ -1,0 +1,48 @@
+{
+  "schema": "fcxr-lc4e-spatial-executor-screen-1.0",
+  "verdict": "SHARED_EXECUTOR_OFFSET_NEGATIVE",
+  "passed": false,
+  "prefix": {
+    "local_first_current_ms": 11830.0,
+    "shared_first_current_ms": 11830.0,
+    "first_current_time_equal": true,
+    "current_zero_before_boundary": true,
+    "rate_grid_equal": true,
+    "af_grid_equal": true,
+    "rate_prefix_equal": true,
+    "af_prefix_equal": true
+  },
+  "local_control": {
+    "verdict": "OFFSET_LATENCY_REPAIR_INSUFFICIENT",
+    "onset_ms": 11000.0,
+    "offset_ms": null,
+    "bout_ms": 7000.0
+  },
+  "shared": {
+    "verdict": "OFFSET_LATENCY_REPAIR_INSUFFICIENT",
+    "onset_ms": 11000.0,
+    "offset_ms": null,
+    "bout_ms": 7000.0,
+    "n_returning_before_onset": 29,
+    "max_current": 20.33938980102539
+  },
+  "spatial": {
+    "shared_final_H_core_A": 3.129443645477295,
+    "local_final_H_core_A": 0.09253723919391632,
+    "shared_final_H_core_B": 3.116163492202759,
+    "local_final_H_core_B": 0.0773068368434906,
+    "shared_final_H_axial": 3.337916851043701,
+    "local_final_H_axial": 0.08198252320289612,
+    "shared_final_H_off_axis": 2.500898599624634,
+    "local_final_H_off_axis": 1.1179249286651611,
+    "shared_final_y_core_A": 71.979248046875,
+    "local_final_y_core_A": 1.1024462764908094e-05,
+    "shared_final_y_core_B": 81.85453033447266,
+    "local_final_y_core_B": 9.84254711511312e-06,
+    "shared_final_y_axial": 72.40498352050781,
+    "local_final_y_axial": 8.999279998533893e-06,
+    "shared_final_y_off_axis": 52.556861877441406,
+    "local_final_y_off_axis": 13.300216674804688
+  },
+  "claim_boundary": "one development seed causal architecture screen; a positive result only authorises the locked nominal lifecycle gate"
+}
