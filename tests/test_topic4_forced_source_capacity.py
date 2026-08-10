@@ -3,6 +3,8 @@ import json
 import numpy as np
 import pytest
 
+from scripts.run_topic4_rev9l_forced_source_worker import resolve_dynamics_seed
+
 from src.topic4_forced_source_capacity import (
     exclude_injected_packet_frame,
     paired_excess_geometry,
@@ -11,6 +13,13 @@ from src.topic4_forced_source_capacity import (
     select_triggered_event,
     source_mode_correlation_summary,
 )
+
+
+def test_dynamics_seed_defaults_to_network_seed_and_can_be_separated():
+    assert resolve_dynamics_seed(1004) == 1004
+    assert resolve_dynamics_seed(1004, 31001) == 31001
+    with pytest.raises(ValueError):
+        resolve_dynamics_seed(1004, -1)
 
 
 def test_component_source_uses_raw_contribution_not_relative_responsibility():

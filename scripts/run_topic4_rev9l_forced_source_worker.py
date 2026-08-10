@@ -181,12 +181,21 @@ def _pad_envelopes(rows, n_contacts):
     return output
 
 
+def resolve_dynamics_seed(network_seed, dynamics_seed=None):
+    """Keep legacy parity while allowing independent noise repeats."""
+    value = int(network_seed if dynamics_seed is None else dynamics_seed)
+    if value < 0 or value >= 2 ** 63:
+        raise ValueError("dynamics seed must lie in [0, 2**63)")
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=DEFAULT_CONFIG)
     parser.add_argument("--arm", required=True,
                         choices=("Null", "Node", "Edge", "Node+Edge"))
     parser.add_argument("--seed", required=True, type=int)
+    parser.add_argument("--dynamics-seed", type=int)
     parser.add_argument("--sources", nargs="+")
     parser.add_argument("--packet-fractions", nargs="+", type=float)
     parser.add_argument("--out-json")
@@ -217,6 +226,7 @@ def main():
     allowed_seeds = set(sum(config["network_seeds"].values(), []))
     if args.seed not in allowed_seeds:
         parser.error("--seed is outside the rev9-L frozen seed sets")
+    dynamics_seed = resolve_dynamics_seed(args.seed, args.dynamics_seed)
     sources = _source_records(
         config, args.sources or config["packet"]["formal_sources"])
     fractions = np.asarray(
@@ -322,7 +332,7 @@ def main():
     valid_contacts = cmrun.valid_mask(
         montage, positions, engine["L"], params.Rr)
 
-    net["rng"] = np.random.default_rng(int(args.seed))
+    net["rng"] = np.random.default_rng(dynamics_seed)
     sham = simulate_kick(
         params, net, KICK_BOOST=0.0, t_kick=1e9,
         V_th_per_neuron=vtheta,
@@ -354,7 +364,7 @@ def main():
             packet_all[:n_e] = packet_e
             source_center = positions[indices].mean(axis=0)
 
-            net["rng"] = np.random.default_rng(int(args.seed))
+            net["rng"] = np.random.default_rng(dynamics_seed)
             forced = simulate_kick(
                 params, net, KICK_BOOST=0.0, t_kick=1e9,
                 V_th_per_neuron=vtheta, forced_spike_mask=packet_all,
@@ -582,6 +592,8 @@ def main():
         "component_pair_gamma": args.component_pair_gamma,
         "switches": switches,
         "seed": int(args.seed),
+        "network_seed": int(args.seed),
+        "dynamics_seed": dynamics_seed,
         "sources": [source["id"] for source in sources],
         "packet_fractions_of_E": fractions.tolist(),
         "simulation": simulation,
@@ -611,7 +623,8 @@ def main():
     }
     atomic_write_json(payload, output_json)
     print(json.dumps({
-        "status": payload["status"], "arm": args.arm, "seed": args.seed,
+        "status": payload["status"], "arm": args.arm,
+        "network_seed": args.seed, "dynamics_seed": dynamics_seed,
         "n_pairs": len(run_rows),
         "n_curve_usable": sum(
             row["paired_excess_readout"]["curve_usable"] for row in run_rows),
