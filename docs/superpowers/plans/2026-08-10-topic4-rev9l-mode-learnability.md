@@ -77,7 +77,7 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
   不冒充分布级 capacity。
 - [x] 已得到 `0.775/1.057/0.282`，shared minimum 有 20 个并列；`sobol_058` 在 selection 上改善 2/3 route distances，但完整
   `n=3` objective 恶化 5.42%，不作为已知好解。
-- [ ] worker 分离 `network_seed` 与 `dynamics_seed`，默认路径保持旧输出；冻结 3 个 dynamics seeds 和 common random numbers。
+- [x] worker 分离 `network_seed` 与 `dynamics_seed`；默认 canary 的 23 个数组及 NPZ SHA 与旧输出完全一致；冻结 3 个 dynamics seeds 和 CRN。
 - [ ] L3b 运行 57 candidates x 6 fit networks x 3 repeats，以完整 `n=3` weakest-mode objective 求 `C_per_net/C_shared/Delta_network`；
   除既有结构可容许集合外不加 gate，3 个 confirmation seeds 保持未读。
 - [ ] 已知好解存在后，以相同预算和 CRN 比较 Sobol/local refinement 与 CMA-ES 3 restarts。

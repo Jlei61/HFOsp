@@ -199,6 +199,9 @@ matched `n=3` 完整 objective 从 scalar 的 2.717 上升到 2.864，恶化 5.4
 dynamics repeats 共 1026 workers，每个 repeat 同时产生 intended A/B source response。每个 candidate/network 用 3 events/mode 与
 `n=3` patient-training floor 计算完整 recruitment、precedence、profile 和 event-cloud weakest-mode objective `J(theta,r)`：
 
+默认 seed 路径的 parity canary 已通过：`sobol_000/network_seed=1004` 的新旧 23 个 NPZ 数组逐项完全一致，文件 SHA256 均为
+`76dbd65036f10ffe9585a45c771af2c90de71b3e65427bfe4ecb8f86a01aeff7`。
+
 ```text
 C_per_net = median_r min_theta J(theta,r)
 C_shared  = min_theta median_r J(theta,r)
@@ -206,7 +209,8 @@ Delta_network = C_shared - C_per_net
 ```
 
 除 L2 已冻结的结构可容许集合外不增加新 gate。fit 只选择候选；3 个 selection networks 仅在 shared candidate 冻结后复核，3 个
-confirmation networks 继续不读。L3b 的 3 repeats 是最小分布级探索，不能冒充高精度 capacity ceiling。
+confirmation networks 继续不读。若某 candidate/network 的某一模式 3 次均不可读，不中止整批任务，也不删除该候选；该矩阵格固定记
+`J=100` 并保留 failure reason。L3b 的 3 repeats 是最小分布级探索，不能冒充高精度 capacity ceiling。
 
 confirmation seeds 只在参数和 objective 完全冻结后读取。只有 oracle 或 deterministic search 已知存在好解时，才以相同 evaluation
 budget、common random numbers 比较 Sobol/local refinement 与 CMA-ES 三次 restart。若多组相距很远的参数产生同等输出，结论是
