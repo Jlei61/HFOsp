@@ -11,6 +11,10 @@ from scripts.run_topic5_lbss_detectability_v0_2 import (
     build_ground_truth_model,
     simulate_events,
 )
+from scripts.summarize_topic5_lbss_claims_v0_2 import (
+    attenuation_damage_auc,
+    holm,
+)
 from src.topic5_lbss_rnn_v0_2 import (
     LBSSConfig,
     LBSSModel,
@@ -270,3 +274,29 @@ def test_seed_removed_scoring_keeps_fixed_contact_support():
     )
     canonical = align(values, names, ["A3", "A2", "A1"], "canonical_full")
     assert np.isnan(canonical[1])
+
+
+def test_claim_family_holm_is_monotone_in_sorted_pvalues():
+    adjusted = holm({"a": 0.01, "b": 0.03, "c": 0.20})
+    assert np.isclose(adjusted["a"], 0.03)
+    assert np.isclose(adjusted["b"], 0.06)
+    assert np.isclose(adjusted["c"], 0.20)
+
+
+def test_early_ictal_attenuation_auc_uses_each_arms_own_intact_field():
+    rows = []
+    for target, arm, base in (
+        ("L1_ADDED", "L1_LOCAL_PLUS_LEARNED_EXTRA_LOCAL", 0.20),
+        ("L2_ADDED", "L2_LOCAL_PLUS_RANDOM_LR", 0.30),
+        ("L3_ADDED", "L3_LOCAL_PLUS_LEARNED_LR", 0.40),
+        ("L3_MATCHED_LOCAL", "L3_LOCAL_PLUS_LEARNED_LR", 0.40),
+    ):
+        rows.append({"subject": "p", "primary": True, "endpoint": "seed_removed",
+                     "condition": f"INTACT|{arm}", "all_contact_margin": base})
+        for alpha in (0.25, 0.50, 0.75, 1.00):
+            rows.append({"subject": "p", "primary": True, "endpoint": "seed_removed",
+                         "condition": f"ATTEN|{target}|{alpha:.2f}",
+                         "all_contact_margin": base - alpha})
+    result = attenuation_damage_auc(pd.DataFrame(rows), "seed_removed")
+    assert set(result.target) == {"L1_ADDED", "L2_ADDED", "L3_ADDED", "L3_MATCHED_LOCAL"}
+    assert np.allclose(result.damage_auc, 0.5)

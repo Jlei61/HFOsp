@@ -142,12 +142,22 @@ def aggregate(rows: pd.DataFrame, out: Path) -> pd.DataFrame:
                 np.r_[item["effective_endpoint_source_contact"], item["effective_endpoint_target_contact"]]
                 for item in arrays
             ]), axis=0)
-            fit_patterns.append((endpoint, effective))
+            exposure = np.nanmedian(np.stack([
+                np.r_[item["exposure_endpoint_source_contact"], item["exposure_endpoint_target_contact"]]
+                for item in arrays
+            ]), axis=0)
+            fit_patterns.append((endpoint, effective, exposure))
         endpoint = np.mean(np.stack([item[0] for item in fit_patterns]), axis=0)
         effective = np.mean(np.stack([item[1] for item in fit_patterns]), axis=0)
+        exposure = np.mean(np.stack([item[2] for item in fit_patterns]), axis=0)
         destination = out / "pathway_analysis" / "per_patient" / subject / f"{arm}.npz"
         destination.parent.mkdir(parents=True, exist_ok=True)
-        np.savez_compressed(destination, endpoint_pattern=endpoint, effective_pattern=effective)
+        np.savez_compressed(
+            destination,
+            endpoint_pattern=endpoint,
+            effective_pattern=effective,
+            proposal_exposure_pattern=exposure,
+        )
         pattern_rows.append({"subject": subject, "arm": arm, "path": str(destination)})
     pattern = pd.DataFrame(pattern_rows)
     comparisons = []
@@ -155,10 +165,20 @@ def aggregate(rows: pd.DataFrame, out: Path) -> pd.DataFrame:
         paths = {row.arm: row.path for row in pattern[pattern.subject == subject].itertuples()}
         true = np.load(paths["L3_LOCAL_PLUS_LEARNED_LR"], allow_pickle=False)
         shuffle = np.load(paths["C_L3_ORDER_SHUFFLED"], allow_pickle=False)
+        endpoint_dissimilarity = 1.0 - safe_corr(true["endpoint_pattern"], shuffle["endpoint_pattern"])
+        effective_dissimilarity = 1.0 - safe_corr(true["effective_pattern"], shuffle["effective_pattern"])
+        proposal_dissimilarity = 1.0 - safe_corr(
+            true["proposal_exposure_pattern"], shuffle["proposal_exposure_pattern"]
+        )
         comparisons.append({
             "subject": subject,
             "endpoint_true_shuffle_r": safe_corr(true["endpoint_pattern"], shuffle["endpoint_pattern"]),
             "effective_true_shuffle_r": safe_corr(true["effective_pattern"], shuffle["effective_pattern"]),
+            "proposal_exposure_true_shuffle_r": safe_corr(
+                true["proposal_exposure_pattern"], shuffle["proposal_exposure_pattern"]
+            ),
+            "endpoint_dissimilarity_beyond_proposal": endpoint_dissimilarity - proposal_dissimilarity,
+            "effective_dissimilarity_beyond_proposal": effective_dissimilarity - proposal_dissimilarity,
         })
     comparison = pd.DataFrame(comparisons)
     comparison.to_csv(out / "pathway_analysis" / "true_vs_shuffle_patient_patterns.csv", index=False)
@@ -188,15 +208,16 @@ def plot_pathways(patient: pd.DataFrame, out: Path, representative: str) -> None
         ax.set_xlabel("Propagation axis (mm)")
         ax.set_ylabel("Transverse axis (mm)")
     ax = axes[2]
-    ax.scatter(np.zeros(len(patient)), 1 - patient["endpoint_true_shuffle_r"], s=18,
+    ax.scatter(np.zeros(len(patient)), patient["endpoint_dissimilarity_beyond_proposal"], s=18,
                color="#66727c", alpha=0.75)
-    ax.scatter(np.ones(len(patient)), 1 - patient["effective_true_shuffle_r"], s=18,
+    ax.scatter(np.ones(len(patient)), patient["effective_dissimilarity_beyond_proposal"], s=18,
                color="#c83e32", alpha=0.75)
-    ax.scatter([0, 1], [np.nanmedian(1 - patient["endpoint_true_shuffle_r"]),
-                        np.nanmedian(1 - patient["effective_true_shuffle_r"])],
+    ax.scatter([0, 1], [np.nanmedian(patient["endpoint_dissimilarity_beyond_proposal"]),
+                        np.nanmedian(patient["effective_dissimilarity_beyond_proposal"])],
                s=48, color="#202020", zorder=3)
     ax.set_xticks([0, 1], ["Endpoints", "Influence"])
-    ax.set_ylabel("True vs shuffle dissimilarity")
+    ax.axhline(0, color="#777777", lw=0.7, ls="--")
+    ax.set_ylabel("Dissimilarity beyond proposal")
     for label, ax in zip("ABC", axes):
         ax.text(-0.16, 1.05, label, transform=ax.transAxes, fontsize=11, fontweight="bold", va="top")
         ax.spines[["top", "right"]].set_visible(False)
@@ -208,7 +229,7 @@ def plot_pathways(patient: pd.DataFrame, out: Path, representative: str) -> None
     (figures / "README.md").write_text(
         "### stage_e_target_free_pathway_formation.png\n\n"
         "A、B 在预先指定代表患者中显示真实顺序和打乱顺序训练后，新增边的 contact-space source（蓝）与 target（红圈）有效影响分布。"
-        "C 在患者层比较两种训练的 endpoint 和 effective-influence pattern 差异。\n\n"
+        "C 在患者层显示真实顺序与打乱顺序的空间差异超过 candidate-proposal exposure 差异的部分。\n\n"
         "**关注点**：承重对象是粗空间有效影响，不是跨 seed 完全相同的二元边。\n"
     )
 

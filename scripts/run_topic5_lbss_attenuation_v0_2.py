@@ -362,6 +362,7 @@ def aggregate_metrics(out: Path, draw_frame: pd.DataFrame, field_frame: pd.DataF
         "contact_nll", "top1", "local_nll", "intermediate_nll", "distal_nll",
         "rollout_spearman", "rollout_reach_mm", "intact_contact_nll", "intact_local_nll",
         "intact_intermediate_nll", "intact_distal_nll", "intact_rollout_spearman",
+        "inferential_eligible", "n_valid_matched_draws",
     ]
     unit = draw_frame.groupby(
         ["subject", "fit_id", "scope", "arm", "seed", "target", "alpha"], sort=False
@@ -378,7 +379,11 @@ def aggregate_metrics(out: Path, draw_frame: pd.DataFrame, field_frame: pd.DataF
         subject, arm, target = key
         group = group.sort_values("alpha")
         x = np.r_[0.0, group.alpha.to_numpy(float)]
-        row = {"subject": subject, "arm": arm, "target": target}
+        row = {
+            "subject": subject, "arm": arm, "target": target,
+            "inferential_eligible": bool(group.inferential_eligible.min() >= 1.0),
+            "n_valid_matched_draws_min": int(group.n_valid_matched_draws.min()),
+        }
         for endpoint in ("delta_contact_nll", "delta_local_nll", "delta_distal_nll", "distal_selectivity"):
             y = np.r_[0.0, group[endpoint].to_numpy(float)]
             row[f"auc_{endpoint}"] = float(np.trapz(y, x))

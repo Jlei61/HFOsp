@@ -64,6 +64,8 @@ def main() -> None:
              ["scripts/prepare_topic5_lbss_early_ictal_unseal_v0_2.py"]),
             ("G_early_ictal", "EARLY_ICTAL_SCORING_COMPLETE.json",
              ["scripts/score_topic5_lbss_early_ictal_v0_2.py", "--n-perm", "5000"]),
+            ("G_claims", "LBSS_CLAIM_ADJUDICATION_COMPLETE.json",
+             ["scripts/summarize_topic5_lbss_claims_v0_2.py"]),
             ("H_figure", "figures/topic5_figure6_lbss_rnn.png",
              ["scripts/plot_topic5_lbss_figure6_v0_2.py"]),
         )
