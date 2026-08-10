@@ -1,7 +1,18 @@
 import numpy as np
 
-from src.topic4_rev9_local_response import (fit_response_slope,
+from src.topic4_rev9_local_response import (event_window_overlap,
+                                            fit_response_slope,
                                             paired_spike_response)
+
+
+def test_event_window_overlap_is_window_specific_and_half_open():
+    windows = [[0.0, 10.0], [10.0, 20.0], [20.0, 40.0]]
+    assert event_window_overlap(
+        [{"t_on": 247.0, "t_off": 253.0}], 238.0, windows).tolist() == [
+            True, True, False]
+    assert event_window_overlap(
+        [{"t_on": 248.0, "t_off": 258.0}], 238.0, windows).tolist() == [
+            False, True, False]
 
 
 def test_fit_response_slope_recovers_linear_response():

@@ -4,6 +4,23 @@ from __future__ import annotations
 import numpy as np
 
 
+def event_window_overlap(events, pulse_end_ms, windows_after_ms):
+    """Return which post-pulse windows overlap any detector event."""
+    windows = np.asarray(windows_after_ms, float)
+    if windows.ndim != 2 or windows.shape[1] != 2:
+        raise ValueError("windows_after_ms must have shape (n, 2)")
+    overlap = np.zeros(len(windows), bool)
+    for event in events:
+        event_start = float(event["t_on"])
+        event_stop = float(event["t_off"])
+        if event_stop <= event_start:
+            raise ValueError("event stop must be after event start")
+        starts = float(pulse_end_ms) + windows[:, 0]
+        stops = float(pulse_end_ms) + windows[:, 1]
+        overlap |= (event_start < stops) & (event_stop > starts)
+    return overlap
+
+
 def fit_response_slope(amplitudes, responses):
     """OLS response-amplitude slope with intercept and a descriptive R squared."""
     amplitudes = np.asarray(amplitudes, float)

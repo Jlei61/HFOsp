@@ -43,7 +43,9 @@
 - [x] 作废高剂量下的跨网络冻结解释；20--40 ms 仅保留为单网络 canary candidate。
 - [x] 同三张 network、同 220 ms onset 跑 `{0.05,0.10,0.20}*nu_theta` threshold mapping：16/54 event、0 runaway。
 - [x] 确认 `0.05*nu_theta` 在 18/18 site-seed 均为非事件；更高剂量显示 component 较早进入 ignition 的探索性差异。
-- [ ] 最终线性 canary 使用 `{0.0125,0.025,0.05}*nu_theta`；最大值来自共同非事件上限，另两档按几何下分。
+- [x] 发现 broad response interval 误用于排除全部窗口；threshold mapping 逐窗可用数为 16/18、11/18、7/18。
+- [x] primary window 改为预定义 0--10 ms first-generation response；后两窗只作传播诊断，不再最大化 downstream mass。
+- [ ] 最终 canary 使用 `{0.0125,0.025,0.05}*nu_theta`；原始仿真完成后运行 window-specific reconcile sidecar。
 - [x] 保存 SNR、event/runaway 和排除数；这些是诊断，不是放行门。
 
 ## Task 4：Alpha exploratory calibration

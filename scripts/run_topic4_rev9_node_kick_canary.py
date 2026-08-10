@@ -28,6 +28,7 @@ from src.topic4_core_field_runner import (  # noqa: E402
     provenance,
 )
 from src.topic4_rev9_local_response import (  # noqa: E402
+    event_window_overlap,
     fit_response_slope,
     paired_spike_response,
 )
@@ -187,6 +188,8 @@ def main():
         dtype=np.float32)
     positive_maps = np.full_like(signed_maps, np.nan)
     response_event = np.zeros((n_seed, n_site, n_amp), bool)
+    window_event_overlap = np.zeros(
+        (n_seed, n_site, n_amp, n_window), bool)
     runaway_ms = np.full((n_seed, n_site, n_amp), np.nan)
     simulation_wall = np.full((n_seed, n_site, n_amp), np.nan)
     records, sham_records, network_records = [], [], []
@@ -253,6 +256,14 @@ def main():
                 response_event[seed_index, site_index, amplitude_index] = bool(
                     event["response_interval_event"]
                     or sham_summary["response_interval_event"])
+                window_event_overlap[
+                    seed_index, site_index, amplitude_index] = event_window_overlap(
+                        event["events_in_response_interval"], pulse_end, windows)
+                if sham_summary["response_interval_event"]:
+                    window_event_overlap[
+                        seed_index, site_index, amplitude_index] |= event_window_overlap(
+                            sham_summary["events_in_response_interval"],
+                            pulse_end, windows)
                 if event["runaway_early_stop_ms"] is not None:
                     runaway_ms[seed_index, site_index, amplitude_index] = float(
                         event["runaway_early_stop_ms"])
@@ -293,29 +304,33 @@ def main():
                 del kick
         del sham, net, node
 
-    selection_multiplier = float(
-        instrument["window_selection_amplitude_multiplier"])
+    selection_multiplier = float(instrument["window_selection_amplitude_multiplier"])
     amplitude_matches = np.flatnonzero(np.isclose(multipliers, selection_multiplier))
     if len(amplitude_matches) != 1:
         raise RuntimeError("window-selection amplitude is absent or ambiguous")
     selection_amplitude_index = int(amplitude_matches[0])
-    site_seed_linear_eligible = (
-        ~response_event.any(axis=2) & ~np.isfinite(runaway_ms).any(axis=2))
+    site_seed_window_eligible = (
+        ~window_event_overlap.any(axis=2)
+        & ~np.isfinite(runaway_ms).any(axis=2)[:, :, None])
+    primary_window = np.asarray(
+        instrument["primary_window_after_pulse_end_ms"], float)
+    primary_matches = np.flatnonzero(np.all(np.isclose(windows, primary_window), axis=1))
+    if len(primary_matches) != 1:
+        raise RuntimeError("primary response window is absent or ambiguous")
+    selected_window_index = int(primary_matches[0])
+    site_seed_linear_eligible = site_seed_window_eligible[
+        :, :, selected_window_index]
     eligible_seed_mask = site_seed_linear_eligible.any(axis=1)
     n_eligible_seeds = int(eligible_seed_mask.sum())
     selection_values = scalars["downstream_positive_per_cell"][
         :, :, selection_amplitude_index, :]
-    if site_seed_linear_eligible.any():
-        window_medians = np.nanmedian(np.where(
-            site_seed_linear_eligible[:, :, None], selection_values, np.nan),
-            axis=(0, 1))
-    else:
-        window_medians = np.full(n_window, np.nan)
-    if not np.isfinite(window_medians).any():
-        selected_window_index = None
-    else:
-        best = np.nanmax(window_medians)
-        selected_window_index = int(np.flatnonzero(window_medians == best)[0])
+    window_medians = np.asarray([
+        np.nanmedian(np.where(
+            site_seed_window_eligible[:, :, window_index],
+            selection_values[:, :, window_index], np.nan))
+        if site_seed_window_eligible[:, :, window_index].any() else np.nan
+        for window_index in range(n_window)
+    ])
 
     source_slopes = np.full((n_seed, n_site, n_window), np.nan)
     downstream_slopes = np.full_like(source_slopes, np.nan)
@@ -323,7 +338,8 @@ def main():
     for seed_index, seed in enumerate(seeds):
         for site_index, site in enumerate(sites):
             for window_index in range(n_window):
-                eligible = bool(site_seed_linear_eligible[seed_index, site_index])
+                eligible = bool(site_seed_window_eligible[
+                    seed_index, site_index, window_index])
                 source = fit_response_slope(
                     actual_amplitudes if eligible else [],
                     (scalars["source_signed_per_cell"][
@@ -345,9 +361,9 @@ def main():
                 ))
 
     paired = scalars["downstream_signed_per_cell"]
-    if site_seed_linear_eligible.any():
+    if site_seed_window_eligible.any():
         eligible_paired = np.where(
-            site_seed_linear_eligible[:, :, None, None], paired, np.nan)
+            site_seed_window_eligible[:, :, None, :], paired, np.nan)
         paired_median = np.nanmedian(eligible_paired, axis=0)
         paired_mad = np.nanmedian(
             np.abs(eligible_paired - paired_median[None, ...]), axis=0)
@@ -367,7 +383,9 @@ def main():
             -1 if selected_window_index is None else selected_window_index, np.int64),
         window_downstream_positive_median=np.asarray(window_medians, np.float64),
         response_interval_event=response_event,
+        event_window_overlap=window_event_overlap,
         site_seed_linear_eligible=site_seed_linear_eligible,
+        site_seed_window_linear_eligible=site_seed_window_eligible,
         runaway_early_stop_ms=runaway_ms,
         simulation_wall_seconds=simulation_wall,
         source_slopes=source_slopes,
@@ -379,9 +397,7 @@ def main():
     )
 
     package_lock = "requirements.txt"
-    if selected_window_index is None:
-        status = "REV9_NODE_KICK_CANARY_NO_ELIGIBLE_WINDOW"
-    elif n_eligible_seeds < 2:
+    if n_eligible_seeds < 2:
         status = "REV9_NODE_KICK_CANARY_SPARSE_CROSS_NETWORK_SUPPORT"
     else:
         status = "REV9_NODE_KICK_CANARY_COMPLETE"
@@ -403,6 +419,9 @@ def main():
             selected_index=selected_window_index,
             selected_window=(None if selected_window_index is None
                              else windows[selected_window_index].tolist()),
+            selection_rule="predefined_first_generation_window",
+            eligible_site_seed_by_window=(
+                site_seed_window_eligible.sum(axis=(0, 1)).astype(int).tolist()),
             n_eligible_seeds=n_eligible_seeds,
             eligible_seeds=np.asarray(seeds)[eligible_seed_mask].tolist(),
             cross_network_support=bool(n_eligible_seeds >= 2),
@@ -414,6 +433,8 @@ def main():
         event_diagnostics=dict(
             n_kick_pairs=int(response_event.size),
             n_response_interval_event=int(response_event.sum()),
+            n_event_overlap_by_window=(
+                window_event_overlap.sum(axis=(0, 1, 2)).astype(int).tolist()),
             n_runaway=int(np.isfinite(runaway_ms).sum()),
             n_eligible_site_seed=int(site_seed_linear_eligible.sum()),
             n_total_site_seed=int(site_seed_linear_eligible.size),

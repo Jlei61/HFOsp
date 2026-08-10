@@ -158,15 +158,17 @@ instrument 直接采用 `src/snn_engine/kick_probe.py` 的实际语义：
   用 `{0.05,0.10,0.20} * nu_theta` 做一次 threshold mapping。最终局部线性 instrument 的最大幅度取所有 canary
   site-seed 共同保持非事件的最大已测值，另两档固定为其 `1/2` 和 `1/4`；`nu_theta=compute_nu_theta(params)[0]`；
 - kick/sham 使用相同 network、OU、Poisson seed；sham 的额外 rate 为 0；
-- response 使用 `5 ms` 空间-时间 bins；窗口从 pulse end 后 `[0,10]`、`[10,20]`、`[20,40] ms` 中选；
+- response 使用 `5 ms` 空间-时间 bins；pulse end 后 `[0,10] ms` 预定义为 first-generation primary window，
+  `[10,20]`、`[20,40] ms` 保留为后续传播诊断，不再按最大 downstream mass 选择主窗；
 - source 是 top-hat disk 内 E cells；downstream 是 disk 外 E cells；
 - signed response 是每个 bin/cell 的 `spike_mass_kick-spike_mass_sham`；空间形状另用 positive clip；
 - 每个 origin 对三个 amplitude 做带截距 OLS，得到 source/downstream response-amplitude slope；
-- 全局窗口只看 Node canary 的跨 site/seed median downstream positive mass，最大者为主窗，平局取最早窗；
+- 每个窗口分别报告跨 site/seed median downstream positive mass，但不据此改变 primary window；
 - SNR、排除数和 kick/sham detector event 全部报告，但不设通过阈值。
 
-如果任一 arm 在窗口中触发 detector event，该 site-seed 在所有 arm 的线性 slope 比较中成组剔除，同时保存触发 arm、
-事件数和 exclusion imbalance。runaway 立即终止该 run 并作为 nonlinear/destabilizing outcome，不静默丢弃。
+如果任一 arm 的 detector event 与某个窗口重叠，该 site-seed 只在该窗口的跨 arm 线性 slope 比较中成组剔除，同时保存
+触发 arm、事件数和 exclusion imbalance。不能用从 kick onset 到最晚窗口结束的 broad interval event 排除全部窗口。
+runaway 立即终止该 run 并作为 nonlinear/destabilizing outcome，不静默丢弃。
 
 **首轮 instrument 结果：** `t_kick=100 ms` 的 Node canary 在 seeds 901--903 的 sham 中均有响应区间事件，导致
 `0/18` site-seed 可用于线性窗口选择；54 个 kick runs 无 runaway。原始响应保留为启动过渡诊断，但 20--40 ms 的原始
@@ -188,6 +190,11 @@ sham-only onset scan 对 `[100,160,220,280,340] ms` 的无事件 seed 数为 `[0
 另一方面，最低档 `0.05 * nu_theta` 在 `18/18` site-seed 均保持非事件。因此最终线性 canary 固定为
 `{0.0125,0.025,0.05} * nu_theta`，只复用 Node canary 的非事件上限，不读取 edge 或 patient score。threshold mapping 中
 component 比 control 更早进入 detector event 是一个探索性 ignition-threshold endpoint，不替代局部响应斜率。
+
+**Eligibility 实现纠错：** threshold-mapping artifact 的旧 producer 曾用整个响应区间的 event flag 排除三个窗口，并按
+downstream positive mass 最大值选择 20--40 ms。逐窗口重算得到可用 site-seed 数依次为 `16/18`、`11/18`、`7/18`，
+说明旧逻辑过度排除早期响应且偏向晚期放大。rev9 从此固定 0--10 ms 为 primary first-generation window；旧 raw artifact
+保留，正式解释使用带 source hash 的 window-reconciled sidecar。这是指标语义修复，不增加新的停止条件。
 
 ## 9. Alpha 探索和四臂运行
 
