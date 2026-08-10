@@ -1,0 +1,40 @@
+{
+  "status": "X0_PASS",
+  "verdict": "X_DEPTH_CANDIDATE_IDENTIFIABLE",
+  "candidate": {
+    "name": "lc4f_x_depth_k3",
+    "theta_h_lc2": 1.7317735254764568,
+    "use_m": false,
+    "y_gate": 76.63856219587187,
+    "K_y": 3.0,
+    "tau_y": 120.0,
+    "tau_x_down": 500.0,
+    "tau_x_up": 5000.0,
+    "x_min": 0.1,
+    "hill_n": 4,
+    "evidence": {
+      "k3_x_min": 0.3776160663387708,
+      "k4_x_min": 0.3837051357770863,
+      "k5_x_min": 0.39017443728955603,
+      "termination_boundary": 0.38
+    }
+  },
+  "artifacts": {
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4c_entry_offset_alignment/candidate_lock.json": "9e560ff415bf9c4d951e5cd8001a681bc9ee872f6d4eaf7110639e48d3e6d6e2",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/hill_placement_sweep/arm_gate76p64_Ky3p00.json": "a262c695fc09a2f415329b3a3b1b1175b6664100939dd22ae5eb234a36608ff3",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/hill_placement_sweep/arm_gate76p64_Ky4p00.json": "f5b7abc61f779c896acc9c6ee3f8c68924ad07590e3ab88b56431c014b422baf",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/hill_placement_sweep/arm_gate76p64_Ky5p00.json": "ce8f7cf6d6eb213abb7af089923d3cc346a2d0b23105cb35c8383da2eb24c639",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/dx_arbitration_probe/dx_arbitration.json": "1c0f6404d2ab87d6b4e5483e52935bc9333d1091e3ad0ea633b146467df5335b",
+    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/sensor_separation_seed1_ty120.json": "a29e8f9766bd3b8f959beb6d2fc9f00e6cfc82b08c7be53a43c8cd973b1dca7d"
+  },
+  "sources": {
+    "src/topic4_fcxr_lc4f.py": "a5158ee027a00b5e57b415a6e67c2918e21dd952173faa722181a02a8692b39a",
+    "scripts/run_topic4_fcxr_lc4f.py": "a2715bf4878635069210b9d1d3965ac701c293fbac682239886bc3875efbc13f",
+    "scripts/run_topic4_fcxr_lc4f_autopilot.sh": "863a942685e2ea68a8999f5af176fb89c733d0d549aaf0246881b23802ae6092",
+    "docs/superpowers/specs/2026-08-10-topic4-fcxr-lc4f-x-depth-closure-design.md": "88d609dcfbbc4e59dfbce074de09e8805f088b54899e54d99568223b6c1a5098",
+    "docs/superpowers/plans/2026-08-10-topic4-fcxr-lc4f-x-depth-closure.md": "975773b7acf90d0dc912dd0d96be0ef33910ae8eab621206cc4bd047b766717f",
+    "src/snn_engine/mz_slow_vars.py": "c374b852b1e9c2473e76db6217235015f899d927a5a05bf499c121320f25e44f",
+    "scripts/run_topic4_fcxr_lc4_lifecycle.py": "c34b8bdeea3044dd7318b0f270e50e5aecf1e56490e98f47a30463b35ccd2a15"
+  },
+  "created": "2026-08-10T09:15:12.312123+00:00"
+}

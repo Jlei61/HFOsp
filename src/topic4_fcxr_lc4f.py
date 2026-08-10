@@ -45,7 +45,8 @@ def adjudicate_screen(*, regimes, win_ms, events, numerical_safe, refractory_fra
         bounded_duration=1000.0 <= duration <= 5000.0, autonomous_offset=ended,
         guard_observed=len(guard) == guard_n,
         no_rapid_relapse=len(guard) == guard_n and "ICTAL" not in guard,
-        post_rate_suppressed=(np.isfinite(post_rate_hz) and post_rate_hz < pre_rate_hz),
+        post_rate_suppressed=bool(np.isfinite(post_rate_hz)
+                                  and post_rate_hz < pre_rate_hz),
         not_refractory=float(refractory_fraction) <= 0.01,
     )
     if not ended:
@@ -65,4 +66,3 @@ def adjudicate_screen(*, regimes, win_ms, events, numerical_safe, refractory_fra
                 bout_ms=duration, n_returning_before_onset=len(pre_events),
                 pre_rate_hz=float(pre_rate_hz), post_rate_hz=float(post_rate_hz),
                 refractory_ceiling_fraction=float(refractory_fraction))
-

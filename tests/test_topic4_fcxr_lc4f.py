@@ -1,3 +1,5 @@
+import json
+
 from src.topic4_fcxr_lc4f import adjudicate_screen, derive_candidate
 
 
@@ -24,4 +26,4 @@ def test_persistent_high_is_not_candidate():
                           refractory_fraction=0, pre_rate_hz=4, post_rate_hz=float("nan"),
                           m_current_max=0)
     assert g["verdict"] == "X_DEPTH_OFFSET_NEGATIVE"
-
+    json.dumps(g)

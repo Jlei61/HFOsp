@@ -1,0 +1,67 @@
+{
+  "status": "COMPLETE_RECOVERED_FROM_DURABLE_TRACES",
+  "stage": "X1_SCREEN",
+  "candidate": {
+    "name": "lc4f_x_depth_k3",
+    "theta_h_lc2": 1.7317735254764568,
+    "use_m": false,
+    "y_gate": 76.63856219587187,
+    "K_y": 3.0,
+    "tau_y": 120.0,
+    "tau_x_down": 500.0,
+    "tau_x_up": 5000.0,
+    "x_min": 0.1,
+    "hill_n": 4
+  },
+  "run_ms": 22000.0,
+  "connection_seed": 1,
+  "noise_seed": 401,
+  "no_kick": true,
+  "no_reset": true,
+  "no_parameter_step": true,
+  "gate": {
+    "verdict": "X_DEPTH_OFFSET_NEGATIVE",
+    "passed": false,
+    "clauses": {
+      "numerical_safe": true,
+      "m_current_exactly_zero": true,
+      "pre_ms": true,
+      "pre_returning_events": true,
+      "bounded_duration": false,
+      "autonomous_offset": false,
+      "guard_observed": false,
+      "no_rapid_relapse": false,
+      "post_rate_suppressed": false,
+      "not_refractory": true
+    },
+    "bout": [11, 21],
+    "onset_ms": 11000.0,
+    "offset_ms": null,
+    "bout_ms": 11000.0,
+    "n_returning_before_onset": 29,
+    "pre_rate_hz": 4.894886493682861,
+    "post_rate_hz": null,
+    "refractory_ceiling_fraction": 0.0
+  },
+  "trace_summary": {
+    "mean_rate_hz": 29.79176139831543,
+    "high_segment_mean_rate_hz": 54.688636779785156,
+    "max_rate_hz": 337.5,
+    "min_X_mean": 0.48805558681488037,
+    "final_X_mean": 0.5005332231521606,
+    "final_D_mean": 0.5403498411178589,
+    "final_H_mean": 2.1240451335906982,
+    "final_y_mean": 67.75996398925781,
+    "max_M_current": 0.0
+  },
+  "recovery_provenance": {
+    "reason": "simulation completed and durable NPZ was written, but initial JSON serialization stopped on numpy.bool_ in the false post-rate clause",
+    "gate_prefix_source": "x_depth_screen.json.4113250.tmp",
+    "trace_source": "x_depth_screen_traces.npz",
+    "returning_event_count_source": "offline replay of stored 1 ms activity-fraction trace with the frozen event bar",
+    "simulation_rerun": false,
+    "scientific_verdict_changed": false,
+    "full_event_ledger_available": false
+  },
+  "claim_boundary": "one development seed natural-entry screen; the empirical K_y=3 X depth did not reach the archived termination boundary and did not autonomously offset"
+}
