@@ -86,6 +86,10 @@ def _candidate():
     lock = _load(LOCK)
     if lock.get("status") != "X0_PASS":
         raise SystemExit("LC4f requires X0_PASS lock")
+    for name, expected in lock["artifacts"].items():
+        path = Path(name) if Path(name).is_absolute() else ROOT / name
+        if sha256_file(path) != expected:
+            raise SystemExit(f"LC4f artifact drift: {name}")
     for rel, expected in lock["sources"].items():
         if sha256_file(ROOT / rel) != expected:
             raise SystemExit(f"LC4f source drift: {rel}")

@@ -8,7 +8,7 @@ mkdir -p "$OUT"
 
 run_stage() {
   local stage="$1" hours="$2"
-  "$PY" "$ROOT/scripts/run_topic4_fcxr_lc4f.py" --confirm-run --stage "$stage" &
+  setsid "$PY" "$ROOT/scripts/run_topic4_fcxr_lc4f.py" --confirm-run --stage "$stage" &
   local pid=$!
   echo "$pid" > "$OUT/${stage}.pid"
   local deadline=$(( $(date +%s) + hours * 3600 ))
