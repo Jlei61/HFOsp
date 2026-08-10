@@ -127,6 +127,10 @@
 
 ## PR 系列
 
+### `rnn_connectivity_motif_cross_state_v0_4_result_2026-08-10.md` — **多类 recurrent wiring 足以生成间期传播，但跨状态与可干预 motif 未建立**
+- 1426/1426 正式单元完成、140 项冻结测试通过；dense、sparse、local 与 spatial/economic leaky RNN 均达到患者内传播充分性，Spatial + cost 以更低 wiring cost 保留任务能力。
+- frozen RNN field 对 clinical-onset 0–10 s、1–150 Hz early-ictal field 只有数值趋势（primary n=10），结构特异优势、多重校正后跨状态对应和 matched-lesion motif 均未成立；Figure 6 与可/不可写边界已冻结。
+
 ### `pr1_seizure_clustering/` — Per-subject seizure subtyping (z-ER tensor + 1−Spearman + UPGMA)
 - `pr1_zer_cohort_2026-05-10.md` — **主结果文档**：cohort z-ER subtyping，含 sentinel 视觉裁定、audit fix 历史、over_split 规则演化
 - 见 `results/data_driven_soz/layer_a_ictal_er_rank/seizure_clusters/figures/README.md` 的 cohort 视觉骨架
