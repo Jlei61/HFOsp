@@ -24,6 +24,16 @@ VISUAL_QA_STAGE_ITEMS = (
     "stage_early_scientific_readout",
 )
 
+FOCUSED_TEST_FILES = (
+    "tests/test_topic5_rnn_motif_v0_4.py",
+    "tests/test_topic5_spatial_latent_rnn.py",
+    "tests/test_topic5_we_cache.py",
+    "tests/test_topic5_we_graph_analysis.py",
+    "tests/test_topic5_we_train.py",
+    "tests/test_topic5_wiring_economy_rnn.py",
+)
+EXPECTED_FOCUSED_TESTS = 138
+
 
 def load(path: Path) -> Any:
     return json.loads(path.read_text())
@@ -152,6 +162,21 @@ def target_contract_trace_ok(payload: dict[str, Any]) -> bool:
         and payload.get("sensitivity_null") == "within-shaft permutations"
         and payload.get("target_values_read_during_trace") is False
         and len(payload.get("producer_chain", [])) == 4
+    )
+
+
+def focused_test_pass_count(text: str) -> int:
+    """Return the final pytest pass count, or zero for an incomplete log."""
+    matches = re.findall(r"(?m)\b(\d+)\s+passed\b", text.lower())
+    return int(matches[-1]) if matches else 0
+
+
+def focused_test_log_ok(text: str, expected: int = EXPECTED_FOCUSED_TESTS) -> bool:
+    """Require the complete frozen focused suite, not merely one green test."""
+    lowered = text.lower()
+    return bool(
+        focused_test_pass_count(lowered) == int(expected)
+        and re.search(r"\b\d+\s+(?:failed|error|errors)\b", lowered) is None
     )
 
 
@@ -306,6 +331,7 @@ def main() -> int:
         "figures/topic5_figure6_rnn_connectivity_motifs.svg",
         "figures/figure6_source_manifest.json", "figures/README.md", "VISUAL_QA.json",
         "POSTPROCESS_READY_FOR_VISUAL_QA.json", "UNIT_CONTRACT_EXPORT_AUDIT.json",
+        "closeout_status/focused_tests.DONE.json",
         "stage_a_scientific_drift_audit.json", "stage_c_scientific_drift_audit.json",
         "stage_d_scientific_drift_audit.json", "stage_e_scientific_drift_audit.json",
         "stage_f_scientific_drift_audit.json", "stage_g_scientific_drift_audit.json",
@@ -331,8 +357,17 @@ def main() -> int:
     target = load(out / "target_access_audit.json")
     visual = load(out / "VISUAL_QA.json") if (out / "VISUAL_QA.json").exists() else {}
     visual_ok = visual_qa_complete(visual)
-    test_text = args.test_log.read_text().lower() if args.test_log.exists() else ""
-    tests_ok = bool(" passed" in test_text and re.search(r"\b[1-9]\d* failed\b", test_text) is None)
+    test_text = args.test_log.read_text() if args.test_log.exists() else ""
+    test_marker_path = out / "closeout_status" / "focused_tests.DONE.json"
+    test_marker = load(test_marker_path) if test_marker_path.exists() else {}
+    test_command = test_marker.get("command", [])
+    listed_test_files = [token for token in test_command if str(token).startswith("tests/")]
+    test_command_ok = bool(
+        test_marker.get("stage") == "focused_tests"
+        and tuple(listed_test_files) == FOCUSED_TEST_FILES
+        and test_command[-1:] == ["-q"]
+    )
+    tests_ok = bool(focused_test_log_ok(test_text) and test_command_ok)
     unit_contracts = (load(out / "UNIT_CONTRACT_EXPORT_AUDIT.json")
                       if (out / "UNIT_CONTRACT_EXPORT_AUDIT.json").exists() else {})
     unit_artifacts = (load(out / "TRAINING_UNIT_ARTIFACT_AUDIT.json")
@@ -756,6 +791,12 @@ def main() -> int:
             "focused_tests": {
                 "pass": tests_ok,
                 "evidence": [str(args.test_log)],
+                "observed": {
+                    "passed": focused_test_pass_count(test_text),
+                    "expected": EXPECTED_FOCUSED_TESTS,
+                    "frozen_test_files": list(FOCUSED_TEST_FILES),
+                    "command_matches_frozen_suite": test_command_ok,
+                },
             },
             "per_unit_reproducibility_contracts": {
                 "pass": unit_contracts_ok,

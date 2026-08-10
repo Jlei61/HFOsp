@@ -84,6 +84,7 @@ from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
 )
 from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     audit_figure_sources,
+    focused_test_log_ok,
     integrated_level4,
     postprocess_snapshot_equivalence_ok,
     preflight_inventory_ok,
@@ -107,6 +108,12 @@ def _static_model(n_contacts: int = 6) -> WEModel:
             parameter.zero_()
         model.stop_head[-1].bias.fill_(-10.0)
     return model
+
+
+def test_finalizer_requires_complete_frozen_focused_suite():
+    assert focused_test_log_ok("138 passed, 1 warning in 9.2s")
+    assert not focused_test_log_ok("137 passed, 1 warning in 9.2s")
+    assert not focused_test_log_ok("138 passed, 1 failed in 9.2s")
 
 
 def test_factorial_models_differ_only_in_growth_and_cost_components():
