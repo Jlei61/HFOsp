@@ -283,8 +283,9 @@ mean 仅 `0.228`，且一个 crossed correlation 为正，不支持 edge-only �
 在 12 个配对 network seeds 上，usable-event-rate 的 `Delta_Node=+1.125 Hz [0.823,1.438]`，
 `Delta_Node+Edge=+1.625 Hz [1.208,2.031]`，interaction 为 `+0.448 Hz [-0.156,1.011]`。participants 的
 Node+Edge interaction 为 `+2.917 [1.083,5.000]`，但因为 Null 仅 6 个 seeds 有 usable events，该 endpoint 只有 `n=6`
-配对单位。故安全口径是：Node excitability 是稳定患者对齐双模式的主要生成底物；冻结 Edge redistribution 在 Node 背景上提高
-事件产出和参与范围，是调制项而不是等效 core 机制。interaction 的 event-rate 区间跨零，不能写成稳定协同效应。
+配对单位。故安全口径是：Node excitability 是稳定双模式几何及患者训练 prototype 定向的主要生成底物；其中 mode A
+相关仅 `0.264`，不能说两个模式都已匹配。冻结 Edge redistribution 在 Node 背景上提高事件产出和参与范围，是调制项而不是
+等效 core 机制。interaction 的 event-rate 区间跨零，不能写成稳定协同效应。
 
 正式聚合为 `node_edge_factorial/factorial_summary.{json,npz}`；图为
 `node_edge_factorial/figures/rev9_factorial_direct_waveforms.{png,pdf}` 和

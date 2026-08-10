@@ -79,7 +79,8 @@
 **Task 5 判读：** Node 与 Node+Edge 的 usable events 为 `121/169`、pooled OOD 为 `0.033/0.053`，de novo/frozen AMI
 均为 `1.0`；matched mean 为 `0.620/0.601`。Edge-only 仅 `18` 个 usable events、OOD `0.833`、matched mean `0.228`。
 因此 Node 是双模式主要生成底物；Edge 在 Node 背景上增加事件产出和参与范围，但当前不支持 edge-only core equivalence，
-也不支持 Node+Edge 改善患者模式匹配。正式产物为 `node_edge_factorial/factorial_summary.{json,npz}`、
+也不支持 Node+Edge 改善患者模式匹配。Node 的 mode A 相关仅 `0.264`，两个模式都已匹配的结论仍不成立。正式产物为
+`node_edge_factorial/factorial_summary.{json,npz}`、
 `node_edge_factorial/figures/rev9_factorial_direct_waveforms.{png,pdf}` 和
 `node_edge_factorial/figures/rev9_factorial_kmeans_modes.{png,pdf}`。
 
