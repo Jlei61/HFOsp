@@ -810,6 +810,12 @@ def main():
     parser.add_argument("--out-dir", default=str(DEFAULT_OUT))
     args = parser.parse_args()
 
+    # Snapshot code identity before any long analysis. Concurrent Topic 4 work
+    # may advance HEAD while this producer is running.
+    runtime_provenance = _runtime_provenance()
+    worktree_status_at_start = _git("status", "--porcelain")
+    producer_sha256_at_start = _sha256(__file__)
+
     config = _json_input(args.config)
     factorial_config = _json_input(args.factorial_config)
     selection = _json_input(args.selection)
@@ -893,8 +899,9 @@ def main():
                 "finish forced-initiation capacity, then component lesion, matched relocation, "
                 "and multi-permutation d audit before any radial beta expansion")),
         provenance=dict(
-            **_runtime_provenance(), producer_sha256=_sha256(__file__),
-            git_status_porcelain=_git("status", "--porcelain"),
+            **runtime_provenance,
+            producer_sha256=producer_sha256_at_start,
+            worktree_status_porcelain_at_start=worktree_status_at_start,
             patient_readout="training blocks only; held-out values not computed"),
     )
     out_json = out_dir / "rev9_review_audit.json"

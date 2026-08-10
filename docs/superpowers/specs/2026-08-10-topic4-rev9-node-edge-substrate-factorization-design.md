@@ -1,6 +1,6 @@
 # Topic 4 rev9: data-driven node-edge substrate factorization
 
-**状态：** `EXPLORATORY_EXECUTION_ACTIVE`
+**状态：** `REV9_REVIEW_CORRECTED / REV9L_CAPACITY_AUDIT_ACTIVE`
 **日期：** 2026-08-10
 **上游：** rev8.1 frozen field；旧 patient held-out 已消费，不能再称 blind
 
@@ -235,12 +235,12 @@ J_cal = median(L_pair)
 overlapping event。各权重在读取 alpha grid 聚合值前冻结；所有分项、原始标量、pair rows 和缺失比例同时保存。
 
 每项同时画原始单位。ratio/KL/ESS reference bands、response-map rho、gain ratio、baseline 变化和有效 paired 数都作为
-诊断侧栏呈现。`alpha_star` 是 response-matched reference point，不表示 edge 和 node 机制相同。
+诊断侧栏呈现。`alpha_star` 是 response-objective selected candidate，不表示 edge 和 node 响应等效或机制相同。
 
 **Coarse alpha 结果：** 冻结 `J_cal` 在 `{0,0.25,0.5,1,2,4}` 上分别为
 `{0.604,0.584,0.624,0.485,0.633,0.990}`。`alpha=0.25` 的纯 response loss 最低，`alpha=1.0` 因 sham baseline
 shift 更小而成为 coarse minimum；这不是稳定等效证据。按预定 midpoint 规则只补 `0.75` 和 `1.5`，公式、权重、instrument
-和 seeds 均不改变，之后冻结一个 response-matched reference。
+和 seeds 均不改变，之后冻结一个 response-objective selected candidate。
 
 **Midpoint 后冻结：** `alpha={0.75,1.5}` 的 `J_cal={0.434,0.472}`，因此冻结 `alpha_star=0.75`。该点的 primary
 paired coverage 为 `28/34`；source/downstream slope 的配对 Spearman 分别为 `0.61/0.85`，但 field-component source
@@ -292,6 +292,34 @@ Node+Edge interaction 为 `+2.917 [1.083,5.000]`，但因为 Null 仅 6 个 seed
 `node_edge_factorial/figures/rev9_factorial_kmeans_modes.{png,pdf}`。这些 seeds 已用于 local-response out-of-selection 描述，
 所以本轮仍是探索性 network-seed factorial，不是新的 network blind，也没有读取 patient held-out。
 
+### 9.3 审阅后零仿真纠错
+
+原始 worker、selection 和 factorial artifacts 保持只读；纠错写入独立 `review_audit_20260810/` sidecar。该审计只读取
+patient training blocks，不计算旧 patient held-out 分数。
+
+- **Node 重建：** rev9 `Vtheta0-hd` 与 rev8.1 冻结向量在原 dtype 下逐值一致，最大绝对误差为 0；double multiplication
+  排除。
+- **Alpha 身份：** `alpha_star=0.75` 通过结构参考带，但逐 site 正响应诊断不足以建立 local-response equivalence。三个 field
+  components 的有效 paired seeds 分别为 `8/12、9/12、5/12`；source gain ratio 中位数为 `0.25、0.679、0.50`，response-map
+  rho 为 `0.568、0.601、0.736`。因此正式状态为 `LOCAL_RESPONSE_EQUIVALENCE_UNRESOLVED`。`alpha=4` 的最小 edge ratio
+  为 `0.085<0.25`，仅标为 `STRUCTURALLY_INADMISSIBLE_EXPLORATORY_ONLY`，不参与 reference 解释。
+- **统一 detector 敏感性：** 用 12 个 Node arm-specific thresholds 的中位数 `0.01957` 作事后公共绝对阈值，在
+  `0.8/1.0/1.2` 倍下，Null/Node/Edge/Node+Edge 的总事件数分别为 `3/116/4/222`、`3/137/3/221`、
+  `2/135/2/324`。高阈值会切分宽事件，故事件数不作为唯一结论。threshold-free mean active fraction 分别为
+  `0.000144/0.001917/0.000157/0.003891`，更直接支持 Edge 在 Node 背景上的条件性放大，而不是 Edge-only 点火。
+- **网络是统计单位：** Node 和 Node+Edge 均有 `12/12` 网络同时产生 in-support A/B 两种模式；cluster label 与 network
+  identity 的 AMI 仅 `0.015/0.007`，leave-one-network-out KMeans 中位 AMI 为 `1.0/1.0`。这排除了“不同网络各自产生一个
+  mode”的替代解释。equal-network B fraction 为 `0.493/0.538`，仍低于 patient-training 的 `0.691`。
+- **模式矩阵可评价性：** Null 和 Edge-only 的 in-support counts 为 `0/1` 和 `0/3`，状态为 `NOT_EVALUABLE`；其 KMeans
+  相关矩阵只保留作描述，不能进入患者模式排名。Node/Node+Edge 可评价。
+- **分层模式 readout：** hierarchical profile rho 的 Node A/B 为 `0.238 [0.141,0.341] / 0.977 [0.977,0.986]`，
+  Node+Edge 为 `0.227 [0.161,0.279] / 0.986`。mode-conditioned event-cloud distance 中，Node A/B 为
+  `1.086/0.486`，对应 patient matched floor p95 为 `0.239/0.185`；Node+Edge 为 `1.138/0.421`，对应 floor
+  `0.214/0.153`。因此即使 mode B rank geometry 很强，完整 mode distribution 仍未恢复，mode A 是主要缺口。
+
+审阅后的安全口径是：冻结的 patient-data-constrained Node field 在新网络上稳定产生低 OOD 的双簇传播 repertoire，Edge
+在 Node 已点火后增加活动负荷；当前结果没有复现患者完整间期活动，也没有证明 response-equivalent edge 或 causal core。
+
 ## 10. Frozen-field causal exploration
 
 三个 Gaussian component 全做：
@@ -340,9 +368,12 @@ systemd unit、network/OU/Poisson/readout seeds 和 paired-unit id。`.status` �
 
 允许表述“在冻结 field 下，node/edge 对局部响应和模式 endpoint 呈现某种效应或交互”。没有新 blind validation 时禁止写
 “恢复了真实病人 core”。静态 h/alpha 不替换 Z/M/adaptation；后续 lifecycle 仍须单独检查 entry、bounded carrier、exit、
-postictal protection 和 return/recovery。只有 `alpha_star` 可标记为当前 `response-matched reference`，其他相图 alpha 点均是
-新的探索性 substrate。
+postictal protection 和 return/recovery。只有 `alpha_star` 可标记为当前 `response-objective selected candidate`，其他相图
+alpha 点均是新的探索性 substrate。
 
-四臂结果把下一步收窄为冻结 Node 场的 component lesion / matched relocation 和 `d_i` interaction audit。Edge-only 不再作为
-core-equivalent 路线继续调参；只有 lesion/relocation 指向稳定位置特异性后，才进入连接性局部化和既有 Z/M/adaptation 方程的
-lifecycle 相图。若后续缺口可明确归因于径向连接尺度，再开小型 beta 网格，beta 不作为当前探索的放行门。
+rev9-L 的 L0 replay 进一步显示：旧 `joint_loss` 与 mode-A loss 无关联（Spearman `rho=-0.082,p=0.704`），但 fit library
+和三个 selection-evaluated candidates 都没有双优 dominator。因此可判定旧 objective 不保护 mode A，不能判定 optimizer
+漏掉了一个已知好解。下一步先用 frozen forced source 分离 ignition 与 propagation capacity；随后做冻结 Node 场的 component
+lesion / matched relocation 和 `d_i` interaction audit。只有得到可实现的 forced/oracle 解后，才用同预算比较 weakest-mode
+objective、multi-restart CMA-ES 与 Sobol/local refinement。当前不开 beta：它只改变径向集中，不能直接修复 source gain、
+response-map 或 mode-A 几何；若后续缺口被明确定位为径向连接尺度，再开小型 beta 网格。

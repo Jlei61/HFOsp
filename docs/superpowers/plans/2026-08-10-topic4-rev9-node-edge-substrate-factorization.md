@@ -1,7 +1,7 @@
 # Topic 4 rev9 node-edge factorization 执行计划
 
 **Spec：** `docs/superpowers/specs/2026-08-10-topic4-rev9-node-edge-substrate-factorization-design.md`
-**状态：** Task 5 四臂探索完成；Task 6 因果定位待执行
+**状态：** Task 5 审阅纠错完成；rev9-L L1 capacity audit 进行中；Task 6 因果定位待执行
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9/`
 
 ## 执行纪律
@@ -84,6 +84,18 @@
 `node_edge_factorial/figures/rev9_factorial_direct_waveforms.{png,pdf}` 和
 `node_edge_factorial/figures/rev9_factorial_kmeans_modes.{png,pdf}`。
 
+### Task 5.1：审阅后零仿真纠错
+
+- [x] Node reconstruction hash audit：rev9 与 rev8.1 `Vtheta` 在冻结 dtype 下逐值一致，最大误差 0。
+- [x] 将 `alpha=0.75` 改标为 response-objective selected candidate；逐 site response equivalence 状态为 unresolved。
+- [x] 将 `alpha=4` 标为 structurally inadmissible/exploratory-only，并在校准图中置灰。
+- [x] 用统一绝对 detector 做 `0.8/1.0/1.2` 敏感性，并补 threshold-free activity burden。
+- [x] 以 network seed 为独立单位补 A/B rate、mode proportion、factorial interaction 和 hierarchical bootstrap。
+- [x] 确认 Node/Node+Edge 均为 `12/12` 单网络内有 A/B；Null/Edge-only 患者模式矩阵标为 `NOT_EVALUABLE`。
+- [x] 补 recruitment、precedence、mean profile 和 event cloud 四层 mode-conditioned readout。
+- [x] L0 objective replay 确认旧目标不保护 mode A，但没有证据证明 selection 漏掉一个已知双优解。
+- [x] 输出独立 review sidecar、纠错图和 optimizer/objective 诊断图；原始执行产物不覆盖。
+
 ## Task 6：Component lesion、relocation 和 d interaction
 
 - [ ] 三个 component 全做 direct lesion 和 matched relocation。
@@ -94,6 +106,8 @@
 
 ## Task 7：Patient objective development
 
+- [x] L0 availability-aware replay：旧 objective 与 mode-A loss `rho=-0.082,p=0.704`；mode-A target 虽更异质但可用于
+  forced-capacity assay。
 - [ ] assignment/proportion pool 改为 50 events；JS 使用全 pool。
 - [ ] shape metrics 用每 mode 10 events 的多组 hash-locked balanced subsets。
 - [ ] patient floor 与模型 estimator 在 event/mode count、block、missingness、PCA 和重复抽样上同构。
@@ -103,19 +117,20 @@
 ## Task 8：Substrate bundle 和 lifecycle 计划
 
 - [ ] bundle 包含 h/d/Vtheta、alpha/beta、neuron order、全部 hash、结构诊断、response 和四臂 endpoint。
-- [ ] `alpha_star` 标记为 response-matched reference；其他 alpha 是新 exploratory substrate。
+- [ ] `alpha_star` 标记为 response-objective selected candidate；其他 alpha 是新 exploratory substrate。
 - [ ] lesion 阳性才称 mode-specific core；阴性使用 data-driven spatial parameterization。
 - [ ] 后续连接性相图沿用既有 Z/M/adaptation 方程，不把静态 h/alpha 改名为 slow state。
 - [ ] 每个相图点重新检查 entry、bounded carrier、exit、postictal protection 和 return/recovery。
 
 ## 当前最短执行顺序
 
-1. 冻结当前 Node 场、`alpha_star`、事件判定和 frozen/de novo readout，不用四臂结果重新拟合。
-2. 对三个 Gaussian component 做 direct lesion 与 matched-budget relocation，报告 mode、earliest density 和 projection collateral change。
-3. 做 original/global shuffle/neighborhood shuffle/positive-only/negative-only 的 `d_i` 配准审计，区分 h 几何与 h-d 配准。
-4. 只有位置特异性稳定时，才把对应区域称为 mode-specific core 并设计局部连接性；阴性时保留 spatial parameterization 命名。
-5. 将确认后的静态 substrate 接回既有 Z/M/adaptation 方程，另跑 entry、bounded carrier、exit、postictal protection 和 return；
-   仅在缺口明确为径向连接尺度时补 beta 小网格。
+1. 完成 rev9-L L1 forced-initiation assay，先区分点不着和传不对；不运行 de novo KMeans，不读取 patient held-out。
+2. 对三个 Gaussian component 做 direct lesion 与 matched relocation，并做多 permutation `d_i` 配准审计，定位 Node 几何的因果来源。
+3. scalar edge forced propagation 不足时，先开 component-pair relaxed edge oracle；当前不开只改变径向集中度的 beta。
+4. 得到已知可实现的 forced/oracle 解后，同预算比较 weakest-mode objective、multi-restart CMA-ES 和 Sobol/local refinement，
+   再区分 objective、optimizer 与 family limitation。
+5. 只有位置特异性稳定时才称 mode-specific core；随后把确认的静态 substrate 接回既有 Z/M/adaptation 方程，单独检查
+   entry、bounded carrier、exit、postictal protection 和 return/recovery。
 
 ## 探索轮完成定义
 
