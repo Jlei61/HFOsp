@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import csv
 import numpy as np
+import pytest
 import torch
 import json
 import sys
@@ -49,6 +50,15 @@ from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
 )
 from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
     edge_descriptor_matches,
+)
+from closeout_topic5_rnn_motif_review_v0_4 import (  # noqa: E402
+    field_decomposition,
+    graph_wiring_metrics,
+    median_by_fit_then_patient,
+    sequence_metrics,
+    target_leave_one_seizure_out,
+    wiring_decomposition,
+    write_figure_readme,
 )
 
 
@@ -185,6 +195,113 @@ def test_rollout_agreement_does_not_credit_the_supplied_seed():
 def test_event_pair_reliability_is_only_the_repeated_event_reference():
     ranks = np.tile(np.array([0, 1, 2, -1]), (24, 1))
     assert np.isclose(event_pair_reliability(ranks, seed=3, n_pairs=100), 1.0)
+
+
+def test_review_wiring_metrics_distinguish_total_from_mean_cost():
+    graph = {
+        "mask": np.array([[0, 1], [1, 0]], dtype=np.uint8),
+        "strength": np.array([[0.0, 2.0], [1.0, 0.0]]),
+        "D_mm": np.array([[0.0, 10.0], [20.0, 0.0]]),
+    }
+    result = graph_wiring_metrics(graph, d0_mm=10.0)
+    assert result["edge_count"] == 2
+    assert np.isclose(result["total_geometric_length_mm"], 30.0)
+    assert np.isclose(result["total_strength_weighted_length_mm"], 40.0)
+    assert np.isclose(result["mean_edge_strength_weighted_length_over_d0"], 2.0)
+    assert np.isclose(result["strength_normalized_mean_length_mm"], 40.0 / 3.0)
+
+
+def test_review_sequence_diagnostics_remove_supplied_seed():
+    observed = np.array([0, 1, 2, 3, -1])
+    correct = sequence_metrics(observed, [[0], [1], [2], [3]])
+    reverse = sequence_metrics(observed, [[0], [3], [2], [1]])
+    assert np.isclose(correct["kendall_tau_b"], 1.0)
+    assert np.isclose(correct["normalized_rank_mae"], 0.0)
+    assert np.isclose(correct["participation_jaccard"], 1.0)
+    assert np.isclose(reverse["kendall_tau_b"], -1.0)
+
+
+def test_review_loo_target_reliability_uses_other_seizures_only(tmp_path):
+    names = np.array(["A1", "A2", "A3", "A4"])
+    for index, values in enumerate(([1.0, 2.0, 3.0, 4.0], [2.0, 4.0, 6.0, 8.0])):
+        np.savez(tmp_path / f"p__s{index}.npz", contact_names=names,
+                 target_1_150=np.asarray(values))
+    rows = target_leave_one_seizure_out(sorted(tmp_path.glob("*.npz")))
+    assert len(rows) == 2
+    assert all(np.isclose(row["loo_spearman"], 1.0) for row in rows)
+
+
+def test_review_field_decomposition_keeps_registered_full_field_primary():
+    rows = []
+    values = {
+        ("M6_SPATIAL_MID", "rnn", "canonical_full"): 0.30,
+        ("M6_SPATIAL_MID", "rnn", "seed_removed"): 0.20,
+        ("M0_NO_REC", "rnn", "canonical_full"): 0.10,
+        ("C_ORDER_SHUFFLED", "rnn", "canonical_full"): 0.15,
+        ("M4_SPATIAL_GROWTH", "rnn", "canonical_full"): 0.25,
+        ("EMPIRICAL_REFERENCE", "reference", "canonical_full"): 0.40,
+    }
+    for (model, cell, endpoint), value in values.items():
+        rows.append({"subject": "p1", "primary": "True", "model": model,
+                     "cell": cell, "endpoint": endpoint, "all_contact_margin": str(value)})
+    patients, summary = field_decomposition(rows)
+    assert summary["primary_endpoint_unchanged"] == "FIELD_CANONICAL_FULL"
+    assert np.isclose(patients[0]["source_contribution"], 0.10)
+    assert np.isclose(patients[0]["recurrence_increment"], 0.20)
+    assert np.isclose(patients[0]["order_specific_increment"], 0.15)
+    assert np.isclose(patients[0]["wiring_cost_increment"], 0.05)
+
+
+def test_review_patient_aggregation_weights_fits_not_seeds():
+    rows = [{"subject": "p1", "fit_id": "own_a", "model": "M", "cell": "rnn", "value": v}
+            for v in (1.0, 1.0, 1.0)]
+    rows += [{"subject": "p1", "fit_id": "own_b", "model": "M", "cell": "rnn", "value": 9.0}]
+    patients = median_by_fit_then_patient(rows, ["value"])
+    # Flat median over the four runs would be 1.0; the frozen rule gives each fit
+    # equal weight, so the patient value sits between the two fit medians.
+    assert np.isclose(patients[0]["value"], 5.0)
+
+
+def _write_wiring_unit(out_root, subject, scope, model, seed, strength, c_wiring):
+    unit = out_root / "per_subject" / f"{subject}__{scope}" / f"{model}__rnn" / f"seed{seed}"
+    unit.mkdir(parents=True)
+    np.savez(unit / "graph.npz", mask=np.array([[0, 1], [0, 0]], dtype=np.uint8),
+             strength=np.array([[0.0, strength], [0.0, 0.0]]),
+             D_mm=np.array([[0.0, 10.0], [10.0, 0.0]]))
+    (unit / "metrics.json").write_text(json.dumps({
+        "subject": subject, "fit_id": f"{subject}__{scope}", "fit_scope": scope,
+        "cell": "rnn", "seed": seed, "c_wiring": c_wiring, "config": {"d0_mm": 10.0},
+    }))
+
+
+def test_review_wiring_drops_smoke_units_and_must_match_the_frozen_table(tmp_path):
+    _write_wiring_unit(tmp_path, "p1", "own_a", "M6_SPATIAL_MID", 0, 2.0, 2.0)
+    _write_wiring_unit(tmp_path, "p1", "own_a", "SMOKE_M6_SPATIAL_MID", 0, 90.0, 90.0)
+    (tmp_path / "interictal_per_patient.csv").write_text(
+        "subject,model,cell,c_wiring\np1,M6_SPATIAL_MID,rnn,2.0\n"
+    )
+    rows, summary = wiring_decomposition(tmp_path)
+    assert [row["model"] for row in rows] == ["M6_SPATIAL_MID"]
+    assert summary["n_smoke_graph_runs_excluded"] == 1
+    assert summary["registered_c_wiring_parity"]["maximum_absolute_difference"] < 1e-9
+
+    (tmp_path / "interictal_per_patient.csv").write_text(
+        "subject,model,cell,c_wiring\np1,M6_SPATIAL_MID,rnn,0.5\n"
+    )
+    with pytest.raises(RuntimeError, match="frozen interictal table"):
+        wiring_decomposition(tmp_path)
+
+
+def test_review_closeout_readme_section_survives_a_later_figure_rewrite(tmp_path):
+    marker = "<!-- topic5-rnn-motif-v0.4-stage-and-final-figures -->"
+    figures = tmp_path / "figures"
+    figures.mkdir()
+    (figures / "README.md").write_text(f"# head\n\n{marker}\n\n### main figure\n")
+    write_figure_readme(tmp_path)
+    text = (figures / "README.md").read_text()
+    assert text.index("topic5_rnn_motif_review_closeout.png") < text.index(marker)
+    # The figure script keeps everything before its own marker verbatim.
+    assert "topic5_rnn_motif_review_closeout.png" in text.split(marker)[0]
 
 
 def test_early_ictal_permutations_are_synchronized_and_shaft_preserving():

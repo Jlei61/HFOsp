@@ -41,14 +41,16 @@ MODEL_ORDER = [
 MODEL_LABEL = {
     "M0_NO_REC": "No rec.", "M1_DENSE": "Dense", "M2_UNIFORM_SET": "Sparse",
     "M3_FIXED_LOCAL": "Local", "M4_SPATIAL_GROWTH": "Spatial",
-    "M6_SPATIAL_MID": "Spatial + cost", "M8_UNIFORM_COST_MID": "Uniform + cost",
-    "C_ORDER_SHUFFLED": "Order shuffled",
+    "M6_SPATIAL_MID": "Sp. + cost", "M8_UNIFORM_COST_MID": "Unif. + cost",
+    "C_ORDER_SHUFFLED": "Order shuffle",
+    "EMPIRICAL_REFERENCE": "Empirical field",
 }
 COLORS = {
     "M0_NO_REC": "#9b9b9b", "M1_DENSE": "#252525", "M2_UNIFORM_SET": "#7f7f7f",
     "M3_FIXED_LOCAL": "#3b75af", "M4_SPATIAL_GROWTH": "#55a7a1",
     "M6_SPATIAL_MID": "#d64c4c", "M8_UNIFORM_COST_MID": "#e58a2d",
     "C_ORDER_SHUFFLED": "#6c65b8",
+    "EMPIRICAL_REFERENCE": "#b83b3b",
 }
 REPRESENTATIVE = "epilepsiae_1146"
 REPRESENTATIVE_MODEL = "M6_SPATIAL_MID"
@@ -213,8 +215,9 @@ def draw_rollout_example(parent, out_root: Path):
             for spine in ax.spines.values(): spine.set_linewidth(0.6)
 
 
-def strip(ax, data: dict[str, np.ndarray], ylabel: str, zero: bool = False):
-    models = [model for model in MODEL_ORDER if model in data]
+def strip(ax, data: dict[str, np.ndarray], ylabel: str, zero: bool = False,
+          model_order: list[str] | None = None):
+    models = [model for model in (model_order or MODEL_ORDER) if model in data]
     for x, model in enumerate(models):
         values = np.asarray(data[model], float); values = values[np.isfinite(values)]
         jitter = np.linspace(-0.13, 0.13, len(values)) if len(values) else np.asarray([])
@@ -307,7 +310,7 @@ def draw_pareto(ax, out_root: Path):
         ax.scatter(values[:, 0], values[:, 1], s=8, color=COLORS[model], alpha=0.18, linewidths=0)
         ax.scatter(np.nanmedian(values[:, 0]), np.nanmedian(values[:, 1]), s=45,
                    color=COLORS[model], edgecolor="white", linewidth=0.7, label=MODEL_LABEL[model], zorder=4)
-    ax.set_xlabel("Normalized wiring cost")
+    ax.set_xlabel("Mean edge strength × distance / 10 mm")
     ax.set_ylabel("Interictal field fidelity")
     ax.axhline(0, color="#aaaaaa", lw=0.6)
 
@@ -346,13 +349,17 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True):
     if include_stats:
         stat_ax = parent.get_gridspec().figure.add_subplot(grid[1, :])
         frame = [row for row in rows(out_root / "early_ictal_per_patient_model.csv")
-                 if row["primary"] in (True, "True", "1", 1.0) and row["cell"] == "rnn"]
+                 if row["primary"] in (True, "True", "1", 1.0)
+                 and row["endpoint"] == "canonical_full"]
+        display = ["EMPIRICAL_REFERENCE", "M0_NO_REC", "M1_DENSE", "M3_FIXED_LOCAL",
+                   "M6_SPATIAL_MID", "M8_UNIFORM_COST_MID", "C_ORDER_SHUFFLED"]
         data = {}
-        for model in MODEL_ORDER:
+        for model in display:
+            expected_cell = "reference" if model == "EMPIRICAL_REFERENCE" else "rnn"
             values = [row["all_contact_margin"] for row in frame
-                      if row["model"] == model and row["endpoint"] == "canonical_full"]
+                      if row["cell"] == expected_cell and row["model"] == model]
             if values: data[model] = values
-        strip(stat_ax, data, "Early-ictal margin", zero=True)
+        strip(stat_ax, data, "Early-ictal margin", zero=True, model_order=display)
 
 
 def influence_for_selected(out_root: Path):
@@ -367,21 +374,58 @@ def draw_effective_motif(parent, out_root: Path):
     graph = dict(np.load(metrics.parent / "graph.npz"))
     fit_id = json.loads(metrics.read_text())["fit_id"]
     plane = dict(np.load(out_root / "cache" / fit_id / "plane.npz"))
-    grid = parent.subgridspec(1, 2, wspace=0.30)
+    grid = parent.subgridspec(1, 2, width_ratios=[1.05, 0.95], wspace=0.32)
     ax = parent.get_gridspec().figure.add_subplot(grid[0, 0])
     draw_graph(ax, graph, plane, "Effective motif", influence)
-    ax = parent.get_gridspec().figure.add_subplot(grid[0, 1])
-    lesion_path = out_root / "matched_lesion_patient_metrics.csv"
-    if lesion_path.exists():
-        frame = [row for row in rows(lesion_path)
-                 if row["model"] == REPRESENTATIVE_MODEL and row["lesion"] == "connector_nodes"]
-        values = np.asarray([row["specificity_contact_nll"] for row in frame], float)
-        jitter = np.linspace(-0.08, 0.08, len(values))
-        ax.scatter(jitter, values, s=17, color=COLORS[REPRESENTATIVE_MODEL], alpha=0.68)
-        if len(values): ax.plot([-0.16, 0.16], [np.nanmedian(values)] * 2, color="#111111", lw=1.4)
+    summary = [row for row in rows(out_root / "effective_motif_patient.csv")
+               if row["model"] == REPRESENTATIVE_MODEL and row["cell"] == "rnn"]
+    right = grid[0, 1].subgridspec(2, 1, hspace=0.52)
+    ax = parent.get_gridspec().figure.add_subplot(right[0, 0])
+    local = np.asarray([row["local_effective_ratio"] - 1.0 for row in summary], float)
+    ax.scatter(np.linspace(-0.09, 0.09, len(local)), local, s=15,
+               color=COLORS[REPRESENTATIVE_MODEL], alpha=0.65)
+    if len(local): ax.plot([-0.18, 0.18], [np.nanmedian(local)] * 2, color="#111111", lw=1.3)
+    ax.axhline(0, color="#8d8d8d", lw=0.7); ax.set_xlim(-0.30, 0.30); ax.set_xticks([])
+    ax.set_ylabel("Local influence\nenrichment")
+
+    ax = parent.get_gridspec().figure.add_subplot(right[1, 0])
+    for index, key in enumerate(("effective_operator_seed_stability",
+                                 "effective_operator_split_half_stability")):
+        values = np.asarray([row[key] for row in summary], float)
+        values = values[np.isfinite(values)]
+        ax.scatter(index + np.linspace(-0.08, 0.08, len(values)), values, s=15,
+                   color=("#3b75af", "#55a7a1")[index], alpha=0.65)
+        if len(values): ax.plot([index - 0.18, index + 0.18], [np.median(values)] * 2,
+                                color="#111111", lw=1.3)
     ax.axhline(0, color="#8d8d8d", lw=0.7)
-    ax.set_xlim(-0.35, 0.35); ax.set_xticks([0], ["Connector\nlesion"])
-    ax.set_ylabel("Damage beyond\nmatched lesion (Δ NLL)")
+    ax.set_xticks([0, 1], ["Seeds", "Train halves"])
+    ax.set_ylabel("Operator stability (ρ)")
+
+
+def render_lesion_supplement(out_root: Path):
+    frame = [row for row in rows(out_root / "matched_lesion_patient_metrics.csv")
+             if row["model"] == REPRESENTATIVE_MODEL and row["cell"] == "rnn"]
+    lesions = [("local_backbone_edges", "Local backbone"),
+               ("connector_nodes", "Connector nodes")]
+    fig, ax = plt.subplots(figsize=(3.9, 3.1), layout="constrained", facecolor="white")
+    labels = []
+    for index, (lesion, label) in enumerate(lesions):
+        values = np.asarray([row["specificity_contact_nll"] for row in frame
+                             if row["lesion"] == lesion
+                             and row["all_inference_available"] in (True, "True", "1", 1.0)], float)
+        values = values[np.isfinite(values)]
+        ax.scatter(index + np.linspace(-0.09, 0.09, len(values)), values, s=20,
+                   color=COLORS[REPRESENTATIVE_MODEL], alpha=0.65)
+        if len(values): ax.plot([index - 0.2, index + 0.2], [np.median(values)] * 2,
+                                color="#111111", lw=1.4)
+        labels.append(f"{label}\n(n={len(values)})")
+    ax.axhline(0, color="#8d8d8d", lw=0.7)
+    ax.set_xticks(range(len(labels)), labels)
+    ax.set_ylabel("Damage beyond matched\nperturbation (Δ NLL)")
+    stem = out_root / "figures" / "topic5_matched_lesion_exploratory"
+    fig.savefig(stem.with_suffix(".png"), dpi=600, bbox_inches="tight", facecolor="white")
+    fig.savefig(stem.with_suffix(".pdf"), bbox_inches="tight", facecolor="white")
+    plt.close(fig)
 
 
 def panel_label(fig, subplot_spec, label: str):
@@ -426,9 +470,9 @@ def render_stage(out_root: Path, stage: str):
 def render_final(out_root: Path):
     plt.rcParams.update({"font.size": 8.5, "axes.labelsize": 8.5, "xtick.labelsize": 7.5,
                          "ytick.labelsize": 7.5, "axes.linewidth": 0.7})
-    fig = plt.figure(figsize=(11.2, 8.4), facecolor="white")
-    outer = fig.add_gridspec(3, 2, hspace=0.34, wspace=0.22,
-                             left=0.055, right=0.985, top=0.975, bottom=0.07)
+    fig = plt.figure(figsize=(11.2, 9.1), facecolor="white")
+    outer = fig.add_gridspec(3, 2, hspace=0.52, wspace=0.22,
+                             left=0.055, right=0.985, top=0.975, bottom=0.115)
     draw_motif_ladder(outer[0, 0], out_root); panel_label(fig, outer[0, 0], "A")
     draw_rollout_example(outer[0, 1], out_root); panel_label(fig, outer[0, 1], "B")
     draw_interictal_sufficiency(outer[1, 0], out_root); panel_label(fig, outer[1, 0], "C")
@@ -437,7 +481,7 @@ def render_final(out_root: Path):
     draw_effective_motif(outer[2, 1], out_root); panel_label(fig, outer[2, 1], "F")
     handles, labels = ax_d.get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=min(8, len(labels)), frameon=False,
-               bbox_to_anchor=(0.5, 0.005), fontsize=7.5, handletextpad=0.4, columnspacing=1.0)
+               bbox_to_anchor=(0.5, 0.025), fontsize=7.5, handletextpad=0.4, columnspacing=1.0)
     figure_dir = out_root / "figures"; figure_dir.mkdir(parents=True, exist_ok=True)
     stem = figure_dir / "topic5_figure6_rnn_connectivity_motifs"
     for suffix, dpi in ((".png", 600), (".pdf", None), (".svg", None)):
@@ -445,6 +489,7 @@ def render_final(out_root: Path):
         if dpi: kwargs["dpi"] = dpi
         fig.savefig(stem.with_suffix(suffix), **kwargs)
     plt.close(fig)
+    render_lesion_supplement(out_root)
     readme = figure_dir / "README.md"
     marker = "<!-- topic5-rnn-motif-v0.4-stage-and-final-figures -->"
     existing = readme.read_text() if readme.exists() else "# Topic 5 RNN connectivity-motif figures\n"
@@ -453,9 +498,15 @@ def render_final(out_root: Path):
 
 ### topic5_figure6_rnn_connectivity_motifs.png / .pdf / .svg
 
-六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与布线成本、冻结模型场与临床发作早期能量场，以及有效连接 motif 的 matched-lesion 检验。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
+六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与平均 active-edge 布线代价、冻结模型场与临床发作早期能量场，以及局部有效影响和跨 seed / train-half 的算子稳定性。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
 
-**关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些有效 motif 经干预承担该计算”，不把预测性能直接写成真实连接组恢复。
+**关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些局部有效组织可重复”，不把预测性能直接写成真实连接组恢复。
+
+### topic5_matched_lesion_exploratory.png / .pdf
+
+Spatial + cost 模型中 local-backbone 与 connector 的 targeted perturbation 相对匹配随机扰动。横轴直接标出实际可匹配患者数；由于只有 n=5 和 n=7，该图只作探索性旁证，不承担 cohort 阴性或阳性结论。
+
+**关注点**：当前 matched-lesion 状态是 `INCONCLUSIVE_DUE_TO_MATCHING_ELIGIBILITY`，不是“lesion 失败”。
 
 ### stage_interictal_scientific_readout.png / .pdf
 
@@ -477,9 +528,9 @@ def render_final(out_root: Path):
 
 ### stage_motif_scientific_readout.png / .pdf
 
-代表患者的局部高影响骨架、少量长程 connector 及 connector matched-lesion 特异损害。
+代表患者的局部高影响组织，以及其患者级局部富集、跨 seed 和 train-half 稳定性。
 
-**关注点**：只有结构富集、任务关系和 matched-lesion 同向时，才把该组织写成更容易支持传播的计算 motif。
+**关注点**：当前只支持稳定的局部有效组织；长程 connector 与特异扰动仍未建立。
 """
     readme.write_text(base + "\n\n" + section.lstrip())
     sources = {
@@ -490,7 +541,7 @@ def render_final(out_root: Path):
         "C": [out_root / "interictal_per_patient.csv", out_root / "interictal_per_event.csv"],
         "D": [out_root / "accuracy_wiring_pareto.csv", out_root / "model_field_patient_metrics.csv"],
         "E": [out_root / "early_ictal_per_patient_model.csv", out_root / "early_ictal_null_matrices.npz"],
-        "F": [out_root / "effective_influence_fit_seed.csv", out_root / "matched_lesion_patient_metrics.csv"],
+        "F": [out_root / "effective_influence_fit_seed.csv", out_root / "effective_motif_patient.csv"],
     }
     manifest = {
         panel: [{"path": str(path), "sha256": sha256(path)} for path in paths]

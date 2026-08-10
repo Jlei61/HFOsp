@@ -215,6 +215,9 @@ GRU 只承担架构方向复现；matched lesion 的主分析限定在 leaky RNN
 """
     (out / "TOPIC5_RNN_MOTIF_FINAL_REPORT_ZH.md").write_text(report)
     if engineering_accepted:
+        # A failure marker left behind by an earlier attempt would otherwise sit
+        # next to the success marker and contradict it.
+        (out / "PIPELINE_FAILED.json").unlink(missing_ok=True)
         (out / "PIPELINE_COMPLETE.json").write_text(json.dumps({
             "status": "COMPLETE", "acceptance": "ACCEPTED",
             "final_acceptance": str(out / "FINAL_ACCEPTANCE.json"),
@@ -222,6 +225,7 @@ GRU 只承担架构方向复现；matched lesion 的主分析限定在 leaky RNN
             "figure": str(out / "figures/topic5_figure6_rnn_connectivity_motifs.png"),
         }, indent=2))
     else:
+        (out / "PIPELINE_COMPLETE.json").unlink(missing_ok=True)
         (out / "PIPELINE_FAILED.json").write_text(json.dumps({
             "status": "INCOMPLETE", "missing": missing, "stage_clean": stage_clean,
             "metrics_count": metrics_count, "tests_ok": tests_ok,
