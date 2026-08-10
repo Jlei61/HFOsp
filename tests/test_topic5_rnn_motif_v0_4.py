@@ -78,11 +78,26 @@ from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
     sha256,
 )
 from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
+    ictal_payload_from_template,
     lesion_display_values,
     locked_early_target_paths,
     patient_level_effective_reach,
     selected_metrics,
 )
+
+
+def test_ictal_field_reuses_physical_frame_without_template_source_rings():
+    template = {
+        "xs": np.array([0.0, 1.0]), "ys": np.array([0.0, 0.0]),
+        "names": ["A1", "A2"], "sup": np.ones(2), "soz": np.zeros(2),
+        "frame": {"xlim": [-1.0, 2.0], "ylim": [-1.0, 1.0], "sigma_mm": 1.0},
+        "src_a": ["A1"], "src_b": ["A2"],
+    }
+    payload = ictal_payload_from_template(template)
+    assert payload["frame"] is template["frame"]
+    assert payload["xs"] is template["xs"]
+    assert payload["src_a"] == [] and payload["src_b"] == []
+    assert template["src_a"] == ["A1"] and template["src_b"] == ["A2"]
 from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     audit_figure_sources,
     focused_test_log_ok,
