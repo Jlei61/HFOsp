@@ -1,7 +1,7 @@
 # Topic 4 rev9-L mode learnability 执行计划
 
 **Spec：** `docs/superpowers/specs/2026-08-10-topic4-rev9l-mode-learnability-design.md`
-**状态：** L0 objective replay 完成；L1 forced-initiation 实现中
+**状态：** L0 完成；L1 packet 已冻结，formal fit 待启动
 **分支：** `codex/topic4-rev9l-mode-learnability`
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
 
@@ -42,11 +42,15 @@ L0 解释规则：
 - [x] 实现 deterministic E-neuron forced-spike adapter 和 sham；单测锁定 spike 时刻、cell identity 和无注入 no-op。
 - [x] 实现 one-arm/one-network worker：一次建网和 sham 后复用全部 source/packet pairs，并保存 paired-excess rank/geometry。
 - [x] 实现三网络 bounded canary launcher、120 s wait、status/log/notify 和 packet-selection aggregator。
-- [ ] 冻结 primary mapping A<-component2、B<-component1，并预生成 component1/2/3 与三个 off-field source sets。
-- [ ] Node canary 比较 0.5%/1%/2% `N_E`，冻结最小可读 packet size。
+- [x] 冻结 primary mapping A<-component2、B<-component1，以及 component1/2/3 与三个 off-field source 的确定性选取规则。
+- [x] Node canary 比较 0.5%/1%/2% `N_E`，冻结最小可读 packet size。
 - [ ] Null/Node/Edge/Node+Edge 在新 fit seeds 上运行 400 ms paired assays。
 - [ ] 输出 recruitment、precedence、profile、event cloud、r50/r90、duration、size、OOD、return 和 sham difference。
 - [ ] 直接判断 ignition 与 propagation，不运行 de novo KMeans。
+
+**L1 canary 结果：** `0.5% * N_E` 已冻结；component 1/2 在 seeds 1001-1003 均为 3/3 可读，18/18 trigger 前 spike
+bit-identical，runaway 0。canary 只选 instrument，不进入患者 capacity 结论。正式 config 额外锁定 canary、patient-training
+prototype 与 profile reference hash；24 个 one-arm/one-seed jobs 最多并发 18，120 秒检查一次。
 
 ## Task L2：relaxed edge oracle（条件性）
 

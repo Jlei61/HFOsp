@@ -6,6 +6,7 @@ from src.topic4_forced_source_capacity import (
     select_packet_fraction,
     select_source_indices,
     select_triggered_event,
+    source_mode_correlation_summary,
 )
 
 
@@ -84,3 +85,34 @@ def test_packet_selection_uses_smallest_fraction_with_both_sources_readable():
         rows, source_ids=["c1", "c2"], min_networks_per_source=2)
     assert selected["status"] == "PACKET_FRACTION_FROZEN"
     assert selected["selected"]["packet_fraction_of_E"] == pytest.approx(0.01)
+
+
+def test_source_mode_summary_keeps_source_identity_fixed():
+    patient = np.asarray([
+        [0.0, 1.0, 2.0, 3.0],
+        [3.0, 2.0, 1.0, 0.0],
+    ])
+    curves = np.asarray([
+        [3.0, 2.1, 1.0, 0.0],
+        [0.0, 0.9, 2.0, 3.0],
+        [0.0, 1.1, 2.0, 3.0],
+    ])
+    result = source_mode_correlation_summary(
+        curves, ["component_1", "component_2", "component_2"], patient,
+        source_order=["component_1", "component_2"])
+    matrix = np.asarray(result["median_correlation_matrix"])
+    assert matrix[0, 1] == pytest.approx(1.0)
+    assert matrix[0, 0] == pytest.approx(-1.0)
+    assert matrix[1, 0] == pytest.approx(1.0)
+    assert matrix[1, 1] == pytest.approx(-1.0)
+    assert result["sources"]["component_2"]["n_total"] == 2
+
+
+def test_source_mode_summary_reports_unusable_curve_without_relabeling():
+    result = source_mode_correlation_summary(
+        np.asarray([[np.nan, np.nan, np.nan]]), ["control_1"],
+        np.asarray([[0.0, 1.0, 2.0], [2.0, 1.0, 0.0]]),
+        source_order=["control_1"])
+    assert result["sources"]["control_1"]["n_total"] == 1
+    assert result["sources"]["control_1"]["n_usable"] == 0
+    assert result["median_correlation_matrix"] == [[None, None]]

@@ -59,7 +59,7 @@ def _atomic_npz(path, **arrays):
             os.unlink(temporary)
 
 
-def _runtime_provenance():
+def _runtime_provenance(expected_commit=None):
     paths = set()
     for module in tuple(sys.modules.values()):
         filename = getattr(module, "__file__", None)
@@ -77,9 +77,25 @@ def _runtime_provenance():
     dirty = subprocess.check_output(
         ["git", "status", "--porcelain", "--", *paths],
         cwd=ROOT, text=True).strip()
+    current_commit = subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    expected_hashes = None
+    modules_match_expected = None
+    if expected_commit is not None:
+        expected_commit = subprocess.check_output(
+            ["git", "rev-parse", str(expected_commit)], cwd=ROOT,
+            text=True).strip()
+        expected_hashes = {}
+        for path in paths:
+            content = subprocess.check_output(
+                ["git", "show", f"{expected_commit}:{path}"], cwd=ROOT)
+            expected_hashes[path] = hashlib.sha256(content).hexdigest()
+        modules_match_expected = all(
+            expected_hashes[path] == _sha256(ROOT / path) for path in paths)
     return {
-        "git_commit": subprocess.check_output(
-            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "git_commit": current_commit,
+        "expected_git_commit": expected_commit,
+        "runtime_modules_match_expected_commit": modules_match_expected,
         "runtime_modules_dirty": bool(dirty),
         "runtime_module_sha256": {path: _sha256(ROOT / path) for path in paths},
         "python_executable": sys.executable,
@@ -171,6 +187,7 @@ def main():
     parser.add_argument("--out-json")
     parser.add_argument("--out-npz")
     parser.add_argument("--cache-dir")
+    parser.add_argument("--expected-commit")
     args = parser.parse_args()
 
     config_path = Path(args.config)
@@ -225,7 +242,12 @@ def main():
     snn_event_envelope = __import__(
         "src.sef_hfo_snn_adapter", fromlist=["snn_event_envelope"]
     ).snn_event_envelope
-    execution_provenance = _runtime_provenance()
+    execution_provenance = _runtime_provenance(args.expected_commit)
+    if execution_provenance["runtime_modules_dirty"]:
+        raise RuntimeError("runtime modules are dirty")
+    if (args.expected_commit is not None
+            and not execution_provenance["runtime_modules_match_expected_commit"]):
+        raise RuntimeError("runtime modules differ from the launcher commit")
 
     params = params_cls(
         g=engine["g"], L=engine["L"], density=engine["density"],

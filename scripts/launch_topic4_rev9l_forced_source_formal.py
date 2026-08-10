@@ -1,4 +1,4 @@
-"""Launch bounded rev9-L forced-packet canary workers and aggregate once."""
+"""Launch bounded rev9-L L1 formal fit workers and aggregate once."""
 from __future__ import annotations
 
 import argparse
@@ -12,8 +12,8 @@ ROOT = Path(__file__).resolve().parents[1]
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 MANAGER = ROOT / "scripts/run_topic4_rev9l_managed_command.sh"
 WORKER = ROOT / "scripts/run_topic4_rev9l_forced_source_worker.py"
-AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev9l_packet_canary.py"
-DEFAULT_CONFIG = ROOT / "config/topic4_rev9l_forced_source.json"
+AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev9l_forced_source_formal.py"
+DEFAULT_CONFIG = ROOT / "config/topic4_rev9l_forced_source_formal.json"
 
 
 def _state(path):
@@ -22,13 +22,17 @@ def _state(path):
     return path.read_text().strip().split(maxsplit=1)[0]
 
 
+def _slug(arm):
+    return arm.lower().replace("+", "_")
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--commit", required=True)
     parser.add_argument("--max-concurrent", type=int)
     parser.add_argument("--wait-seconds", type=float)
-    parser.add_argument("--unit-prefix", default="topic4-rev9l-forced-canary")
+    parser.add_argument("--unit-prefix", default="topic4-rev9l-forced-fit")
     args = parser.parse_args()
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
@@ -38,24 +42,32 @@ def main():
         ["git", "rev-parse", args.commit], cwd=ROOT, text=True).strip()
     if head != commit:
         raise RuntimeError(f"launcher commit {commit} is not current HEAD {head}")
-    max_concurrent = int(args.max_concurrent or min(
-        len(config["network_seeds"]["canary"]),
-        config["execution"]["max_workers"]))
+    max_concurrent = int(args.max_concurrent or config["execution"]["max_workers"])
     wait_seconds = float(args.wait_seconds or config["execution"]["wait_seconds"])
-    output_root = ROOT / config["output_root"] / "canary"
-    worker_dir, run_dir = output_root / "workers", output_root / "run_logs"
+    if max_concurrent < 1 or max_concurrent > config["execution"]["max_workers"]:
+        raise ValueError("max-concurrent exceeds the frozen memory budget")
+
+    canary_record = config["inputs"]["packet_canary_summary"]
+    import hashlib
+    if hashlib.sha256((ROOT / canary_record["path"]).read_bytes()).hexdigest() != \
+            canary_record["sha256"]:
+        raise RuntimeError("packet canary changed after formal lock")
+
+    formal_dir = ROOT / config["output_root"] / "formal_fit"
+    worker_dir, run_dir = formal_dir / "workers", formal_dir / "run_logs"
     worker_dir.mkdir(parents=True, exist_ok=True)
     run_dir.mkdir(parents=True, exist_ok=True)
     jobs = []
-    for seed in config["network_seeds"]["canary"]:
-        stem = worker_dir / f"node_seed{int(seed)}"
-        jobs.append({
-            "seed": int(seed),
-            "json": stem.with_suffix(".json"),
-            "npz": stem.with_suffix(".npz"),
-            "status": run_dir / f"node_seed{int(seed)}.status",
-            "log": run_dir / f"node_seed{int(seed)}.log",
-        })
+    for arm in config["arms"]:
+        for seed in config["network_seeds"]["fit"]:
+            stem = worker_dir / f"{_slug(arm)}_seed{int(seed)}"
+            jobs.append({
+                "arm": arm, "seed": int(seed),
+                "json": stem.with_suffix(".json"),
+                "npz": stem.with_suffix(".npz"),
+                "status": run_dir / f"{_slug(arm)}_seed{int(seed)}.status",
+                "log": run_dir / f"{_slug(arm)}_seed{int(seed)}.log",
+            })
     pending, active, completed, failed = [], [], [], []
     for job in jobs:
         state = _state(job["status"])
@@ -83,18 +95,20 @@ def main():
         refresh()
         while pending and len(active) < max_concurrent:
             job = pending.pop(0)
-            unit = f"{args.unit_prefix}-s{job['seed']}-{commit[:8]}"
+            unit = (f"{args.unit_prefix}-{_slug(job['arm'])}-s{job['seed']}-"
+                    f"{commit[:8]}")
             command = [
                 "systemd-run", "--user", "--collect", f"--unit={unit}",
                 "--property=Type=exec", f"--working-directory={ROOT}",
                 f"--setenv=REV9L_SYSTEMD_UNIT={unit}",
                 "/usr/bin/nohup", str(MANAGER), str(job["status"]),
-                str(job["log"]), f"forced canary Node seed={job['seed']}",
+                str(job["log"]),
+                f"forced formal {job['arm']} seed={job['seed']}",
                 commit[:8], str(PYTHON), str(WORKER),
-                "--config", str(config_path), "--arm", "Node",
+                "--config", str(config_path), "--arm", job["arm"],
                 "--seed", str(job["seed"]), "--sources",
-                *config["packet"]["canary_sources"], "--packet-fractions",
-                *[str(value) for value in config["packet"]["canary_fractions_of_E"]],
+                *config["packet"]["formal_sources"], "--packet-fractions",
+                str(config["packet"]["frozen_fraction_of_E"]),
                 "--expected-commit", commit,
                 "--out-json", str(job["json"]), "--out-npz", str(job["npz"]),
             ]
@@ -102,7 +116,8 @@ def main():
             job["unit"] = unit
             active.append(job)
             print(json.dumps({
-                "progress": "launched", "seed": job["seed"], "unit": unit,
+                "progress": "launched", "arm": job["arm"],
+                "seed": job["seed"], "unit": unit,
                 "active": len(active), "pending": len(pending),
             }), flush=True)
         if active:
@@ -110,18 +125,19 @@ def main():
 
     refresh()
     if failed:
-        raise RuntimeError(f"{len(failed)} forced canary worker(s) failed")
+        raise RuntimeError(f"{len(failed)} formal forced-source worker(s) failed")
     subprocess.run([
         str(PYTHON), str(AGGREGATOR), "--config", str(config_path),
+        "--expected-commit", commit,
     ], cwd=ROOT, check=True)
     print(json.dumps({
-        "status": "REV9L_FORCED_CANARY_COMPLETE",
+        "status": "REV9L_FORCED_FORMAL_FIT_COMPLETE",
         "commit": commit, "n_success": len(completed), "n_failed": 0,
-        "wait_seconds": wait_seconds,
+        "max_concurrent": max_concurrent, "wait_seconds": wait_seconds,
     }, indent=2), flush=True)
     subprocess.run([
         "notify-send", "Topic 4 rev9-L",
-        f"forced packet canary completed: {len(completed)}/{len(jobs)}",
+        f"forced formal fit completed: {len(completed)}/{len(jobs)}",
     ], check=False)
 
 

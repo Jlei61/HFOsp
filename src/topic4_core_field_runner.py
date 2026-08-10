@@ -36,6 +36,7 @@ TRACKED_MODULES = (
     "src/topic4_rev9_response_matching.py",
     "src/topic4_rev9_factorial.py",
     "src/topic4_mode_learnability.py",
+    "src/topic4_forced_source_capacity.py",
     "src/topic4_rev9_review_audit.py",
     "src/topic4_core_field_profile.py",
     "src/topic4_core_connectivity.py",
@@ -67,6 +68,9 @@ TRACKED_MODULES = (
     "scripts/run_topic4_rev9_factorial_worker.py",
     "scripts/aggregate_topic4_rev9_factorial.py",
     "scripts/run_topic4_rev9l_objective_replay.py",
+    "scripts/run_topic4_rev9l_forced_source_worker.py",
+    "scripts/aggregate_topic4_rev9l_packet_canary.py",
+    "scripts/aggregate_topic4_rev9l_forced_source_formal.py",
     "scripts/audit_topic4_rev9_review_fixes.py",
     "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8.py",
     "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8_kmeans.py",
@@ -109,7 +113,7 @@ def provenance():
     )
 
 
-def connectivity_config(p, theta_deg, ar):
+def connectivity_config(p, theta_deg, ar, *, git_commit=None):
     """Every field that can change the connectivity graph. Keying on
     (seed, theta, L, density, AR) alone would silently hit a stale cache."""
     cfg = {f: getattr(p, f) for f in CONNECTIVITY_FIELDS}
@@ -117,7 +121,9 @@ def connectivity_config(p, theta_deg, ar):
     cfg["AR"] = float(ar)
     cfg["numpy_version"] = np.__version__
     cfg["rng_bit_generator"] = "PCG64"
-    cfg["git_commit"] = _git("rev-parse", "HEAD")
+    cfg["git_commit"] = (
+        _git("rev-parse", "HEAD") if git_commit is None else str(git_commit)
+    )
     return cfg
 
 
@@ -125,7 +131,7 @@ def cache_key(config):
     return canonical_checksum(config, drop=())
 
 
-def get_network(p, theta_deg, ar, cache_dir):
+def get_network(p, theta_deg, ar, cache_dir, *, git_commit=None):
     """Build or load the connectivity graph.
 
     Field-independent, so ONE build per (seed, theta) serves every arm. Written
@@ -141,7 +147,7 @@ def get_network(p, theta_deg, ar, cache_dir):
     from connectivity import place_neurons
     from connectivity_rot import build_connectivity_rot
 
-    cfg = connectivity_config(p, theta_deg, ar)
+    cfg = connectivity_config(p, theta_deg, ar, git_commit=git_commit)
     key = cache_key(cfg)
     os.makedirs(cache_dir, exist_ok=True)
     path = os.path.join(cache_dir, f"{key}.pkl")

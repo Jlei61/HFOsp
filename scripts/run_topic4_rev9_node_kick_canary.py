@@ -133,7 +133,8 @@ def _load_network(params, stage, reg, seed, config, cache_dir):
                     "cannot build a missing frozen network with changed engine: "
                     f"{mismatches}")
             net, n_e, n_i, hit = get_network(
-                params, reg["theta_deg"], stage["engine"]["AR"], cache_dir)
+                params, reg["theta_deg"], stage["engine"]["AR"], cache_dir,
+                git_commit=source_commit)
             return net, n_e, n_i, hit, dict(
                 source_artifact=source_path, source_commit=source_commit,
                 frozen_cache_key=key, frozen_cache_path=str(path),

@@ -1,6 +1,6 @@
 # Topic 4 rev9-L: mode realizability and learnability audit
 
-**状态：** `L0_OBJECTIVE_REPLAY_ACTIVE`
+**状态：** `L1_FORCED_FIT_READY`
 **日期：** 2026-08-10
 **上游：** rev8.1 patient-training KMeans fit；rev9 frozen-field node-edge factorial
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
@@ -101,6 +101,11 @@ detector 是否形成完整 returned event 为前提。raw forced trajectory 上
 event 作为 secondary duration/return endpoint；后发自发事件不能冒充 triggered event。本层不用 KMeans 发现 mode，也不优化
 mode proportion；source identity 决定比较的 patient target。
 
+Instrument canary 已在 seeds 1001-1003 完成：三个候选 packet size 均对 component 1/2 产生可读 rank curve；按“最小可读”
+规则冻结 `0.5% * N_E`（本网络为 160 个 E neurons）。18/18 paired runs 的 trigger 前 spike bit-identical，runaway 为 0。
+该结果只冻结刺激强度，不是患者模式 capacity 证据。正式 fit 使用独立 config 锁定 canary JSON hash，并在 6 个 fit networks 上
+运行四臂和全部六个 source。
+
 ### 4.3 Readout
 
 每个 source/arm/network 报告：
@@ -110,8 +115,12 @@ mode proportion；source identity 决定比较的 patient target。
 - `r50/r90`、duration、size、OOD 和 return；
 - sham-subtracted response 和 runaway/non-finite 状态。
 
-连续 capacity summary 使用四层距离的预冻结等权平均，再以 `D_weak(tau=0.25)` 保护 mode A/B。任何单一 sign matrix 不作为
-主要目标。
+四层距离保留各自量纲和 patient-training reference，分别报告，不在观察 formal fit 后临时拼成等权综合分数。source-to-mode
+prototype Spearman 和 intended-minus-cross margin 只作直观方向性摘要，不作为新的正式 acceptance gate；L2 是否值得进入依据
+scalar Edge 的整套 forced readout 与 source-oracle 结构共同判断。
+
+网络 cache 的 provenance 使用冻结 connectivity producer commit 作为 cache key。缺失 cache 时仍以该 commit 写入目标 key，避免
+四个 arm 因当前 HEAD 不同而重复建图；launcher commit 与实际运行模块 hash 分别记录，分支在长跑期间前移不能静默改写 producer。
 
 ## 5. L2：最小 relaxed component-pair edge oracle
 

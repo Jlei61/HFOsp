@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import numpy as np
+from scipy.stats import spearmanr
 
 
 def select_source_indices(positions, source, *, n_cells,
@@ -134,3 +135,73 @@ def select_packet_fraction(rows, *, source_ids, min_networks_per_source):
                              row["packet_fraction_of_E"]))
         status = "PACKET_FRACTION_SPARSE_FALLBACK"
     return {"status": status, "selected": selected, "fractions": summaries}
+
+
+def _finite_summary(values):
+    values = np.asarray(values, float)
+    values = values[np.isfinite(values)]
+    if not len(values):
+        return {"median": None, "q05": None, "q95": None, "n": 0}
+    return {
+        "median": float(np.median(values)),
+        "q05": float(np.quantile(values, 0.05)),
+        "q95": float(np.quantile(values, 0.95)),
+        "n": int(len(values)),
+    }
+
+
+def source_mode_correlation_summary(
+        curves, source_ids, patient_prototypes, *, source_order):
+    """Per-network source-to-patient-mode Spearman matrix.
+
+    Source identity is kept fixed. This is an oracle/capacity readout and does
+    not run KMeans or relabel a source after seeing its response.
+    """
+    curves = np.asarray(curves, float)
+    source_ids = np.asarray(source_ids).astype(str)
+    prototypes = np.asarray(patient_prototypes, float)
+    source_order = [str(value) for value in source_order]
+    if curves.ndim != 2 or prototypes.ndim != 2:
+        raise ValueError("curves and patient_prototypes must be two-dimensional")
+    if len(curves) != len(source_ids):
+        raise ValueError("curves and source_ids must align")
+    if curves.shape[1] != prototypes.shape[1] or prototypes.shape[0] != 2:
+        raise ValueError("two patient prototypes must share the curve grid")
+    unknown = sorted(set(source_ids) - set(source_order))
+    if unknown:
+        raise ValueError(f"source_order is missing source ids: {unknown}")
+
+    per_source = {}
+    matrix = np.full((len(source_order), 2), np.nan)
+    for source_index, source in enumerate(source_order):
+        selected = np.flatnonzero(source_ids == source)
+        correlations = np.full((len(selected), 2), np.nan)
+        for row_index, curve_index in enumerate(selected):
+            curve = curves[curve_index]
+            if not np.isfinite(curve).all() or np.std(curve) < 1e-12:
+                continue
+            for mode in range(2):
+                prototype = prototypes[mode]
+                if not np.isfinite(prototype).all() or np.std(prototype) < 1e-12:
+                    continue
+                correlations[row_index, mode] = float(
+                    spearmanr(curve, prototype).statistic)
+        summaries = [_finite_summary(correlations[:, mode]) for mode in range(2)]
+        matrix[source_index] = [summary["median"] if summary["median"] is not None
+                                else np.nan for summary in summaries]
+        per_source[source] = {
+            "n_total": int(len(selected)),
+            "n_usable": int(np.isfinite(correlations).all(axis=1).sum()),
+            "patient_A": summaries[0],
+            "patient_B": summaries[1],
+            "per_network_correlation_to_A_B": correlations.tolist(),
+        }
+    return {
+        "source_order": source_order,
+        "patient_mode_order": ["A", "B"],
+        "median_correlation_matrix": [
+            [None if not np.isfinite(value) else float(value) for value in row]
+            for row in matrix
+        ],
+        "sources": per_source,
+    }
