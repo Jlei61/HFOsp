@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import numpy as np
 
 from src.topic4_component_pair_search import (
@@ -5,6 +8,17 @@ from src.topic4_component_pair_search import (
     score_candidate,
     sobol_candidates,
 )
+from src.topic4_component_pair_edge import gamma_matrix
+
+
+def test_frozen_phase1_candidates_are_all_six_dimensional():
+    config = json.loads(Path(
+        "config/topic4_rev9l_component_pair_edge.json").read_text())
+    candidates = config["component_pair_family"]["phase1_candidates"]
+    assert len(candidates) == 13
+    assert len({row["candidate_id"] for row in candidates}) == 13
+    for row in candidates:
+        assert gamma_matrix(row["gamma"]).shape == (3, 2)
 
 
 def test_sobol_candidates_are_deterministic_bounded_and_reserve_zero():
