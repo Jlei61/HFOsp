@@ -237,6 +237,11 @@ overlapping event。各权重在读取 alpha grid 聚合值前冻结；所有分
 每项同时画原始单位。ratio/KL/ESS reference bands、response-map rho、gain ratio、baseline 变化和有效 paired 数都作为
 诊断侧栏呈现。`alpha_star` 是 response-matched reference point，不表示 edge 和 node 机制相同。
 
+**Coarse alpha 结果：** 冻结 `J_cal` 在 `{0,0.25,0.5,1,2,4}` 上分别为
+`{0.604,0.584,0.624,0.485,0.633,0.990}`。`alpha=0.25` 的纯 response loss 最低，`alpha=1.0` 因 sham baseline
+shift 更小而成为 coarse minimum；这不是稳定等效证据。按预定 midpoint 规则只补 `0.75` 和 `1.5`，公式、权重、instrument
+和 seeds 均不改变，之后冻结一个 response-matched reference。
+
 ### 9.2 四臂 endpoint
 
 至少包括：baseline/event rate、runaway、earliest density、frozen/de novo mode proportion、OOD、recruitment、

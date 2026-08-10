@@ -56,8 +56,9 @@
 - [x] worker 按一个 `arm-alpha-seed` 分片；基于 80 logical CPUs/246 GiB available memory，最多 18 个并发、分两批运行。
 - [x] 并行生成 seeds 904--906 的 Node reference；缺失 network 均在冻结 engine hashes 一致后构建。
 - [x] 36 个 Edge workers 分两批完成 `{0,0.25,0.5,1,2,4} × seeds 901--906`；36/36 success，0 OOM/run failure。
-- [ ] 按冻结的 robust paired `J_cal` 聚合并排出 response-matched `alpha_star`。
-- [ ] 最优相邻区间至多两轮 midpoint；beta 默认关闭。
+- [x] coarse `J_cal` 完成：alpha 1.0 最低（0.485），alpha 0.25 次低（0.584）；前者主要由 baseline shift 驱动。
+- [ ] 不改目标函数，补 midpoint `{0.75,1.5} × seeds 901--906` 后冻结 response-matched `alpha_star`。
+- [x] midpoint 只做这一轮两个点；beta 默认关闭。
 - [ ] 原始单位和标准化分数同时画，附 ratio/KL/ESS、baseline shift 和 paired count。
 - [ ] seeds `911--922` 不重选 instrument/alpha，做 out-of-selection 描述性复测。
 - [ ] primary family 若仅有径向宽度缺口，再开 beta 小网格；轴向/非径向失配直接保留阴性结果。

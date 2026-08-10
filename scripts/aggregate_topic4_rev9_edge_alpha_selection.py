@@ -138,7 +138,9 @@ def main():
     instrument = config["small_kick_instrument"]
     primary_window = instrument["primary_window_after_pulse_end_ms"]
     selection_amplitude = instrument["window_selection_amplitude_multiplier"]
-    expected_alphas = np.asarray(config["edge"]["alpha_grid"], float)
+    expected_alphas = np.asarray(
+        config["edge"]["alpha_grid"]
+        + config["edge"].get("alpha_midpoint_grid", []), float)
     expected_seeds = [int(value) for value in config["edge"]["calibration_seeds"]]
     execution_provenance = dict(
         **provenance(), git_status_porcelain=_git("status", "--porcelain"),
