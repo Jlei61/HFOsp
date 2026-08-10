@@ -301,6 +301,8 @@ def main():
     selection_amplitude_index = int(amplitude_matches[0])
     site_seed_linear_eligible = (
         ~response_event.any(axis=2) & ~np.isfinite(runaway_ms).any(axis=2))
+    eligible_seed_mask = site_seed_linear_eligible.any(axis=1)
+    n_eligible_seeds = int(eligible_seed_mask.sum())
     selection_values = scalars["downstream_positive_per_cell"][
         :, :, selection_amplitude_index, :]
     if site_seed_linear_eligible.any():
@@ -377,9 +379,14 @@ def main():
     )
 
     package_lock = "requirements.txt"
+    if selected_window_index is None:
+        status = "REV9_NODE_KICK_CANARY_NO_ELIGIBLE_WINDOW"
+    elif n_eligible_seeds < 2:
+        status = "REV9_NODE_KICK_CANARY_SPARSE_CROSS_NETWORK_SUPPORT"
+    else:
+        status = "REV9_NODE_KICK_CANARY_COMPLETE"
     payload = dict(
-        status=("REV9_NODE_KICK_CANARY_COMPLETE" if selected_window_index is not None
-                else "REV9_NODE_KICK_CANARY_NO_ELIGIBLE_WINDOW"),
+        status=status,
         scientific_role=(
             "Node-only instrument canary used to freeze the response window; "
             "not edge calibration, equivalence evidence, or patient validation"),
@@ -396,6 +403,13 @@ def main():
             selected_index=selected_window_index,
             selected_window=(None if selected_window_index is None
                              else windows[selected_window_index].tolist()),
+            n_eligible_seeds=n_eligible_seeds,
+            eligible_seeds=np.asarray(seeds)[eligible_seed_mask].tolist(),
+            cross_network_support=bool(n_eligible_seeds >= 2),
+            support_role=(
+                "diagnostic only; sparse support does not fail execution, but the "
+                "selected window remains a canary candidate rather than a frozen "
+                "cross-network instrument"),
             tie_break="earliest"),
         event_diagnostics=dict(
             n_kick_pairs=int(response_event.size),
@@ -403,6 +417,7 @@ def main():
             n_runaway=int(np.isfinite(runaway_ms).sum()),
             n_eligible_site_seed=int(site_seed_linear_eligible.sum()),
             n_total_site_seed=int(site_seed_linear_eligible.size),
+            n_eligible_seeds=n_eligible_seeds,
             sham=sham_records),
         slopes=slope_records,
         runs=records,

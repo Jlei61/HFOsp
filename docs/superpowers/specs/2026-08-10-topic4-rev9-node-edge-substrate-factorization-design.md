@@ -154,7 +154,8 @@ instrument 直接采用 `src/snn_engine/kick_probe.py` 的实际语义：
 - 初始 pulse onset `100 ms`，duration `18 ms`。若 Node sham 在该响应区间出现自发事件，先仅用 sham trajectories
   在预冻结候选 onset 上选择跨 seeds 的全局安静时段，再冻结新 onset；不得用 edge response 或 patient score 选择 timing；
 - 在 pulse 内给 disk 内 E neurons 增加外部 Poisson rate `KICK_BOOST`，单位 `1/ms`；
-- amplitude 为 `{0.25,0.5,1.0} * nu_theta`，其中 `nu_theta=compute_nu_theta(params)[0]`；
+- amplitude 首轮为 `{0.25,0.5,1.0} * nu_theta`；安静 onset canary 若多数 run 仍直接触发 detector event，
+  只按预先声明的一档降幅规则改为 `{0.05,0.10,0.20} * nu_theta`，其中 `nu_theta=compute_nu_theta(params)[0]`；
 - kick/sham 使用相同 network、OU、Poisson seed；sham 的额外 rate 为 0；
 - response 使用 `5 ms` 空间-时间 bins；窗口从 pulse end 后 `[0,10]`、`[10,20]`、`[20,40] ms` 中选；
 - source 是 top-hat disk 内 E cells；downstream 是 disk 外 E cells；
@@ -174,6 +175,12 @@ instrument 直接采用 `src/snn_engine/kick_probe.py` 的实际语义：
 sham-only onset scan 对 `[100,160,220,280,340] ms` 的无事件 seed 数为 `[0,1,3,2,2]`，因此按预定规则冻结
 `t_kick=220 ms`。第二轮 Node canary 必须复用首轮 e785 commit 的同三张 network cache，只改变 timing；新结果写独立
 `t220` artifact，不覆盖首轮失败证据。
+
+**第二轮 instrument 结果：** `t_kick=220 ms` 后 3/3 sham 的响应区间均无事件，说明 timing 修复成立；但
+`{0.25,0.5,1.0} * nu_theta` 的 54 个 kick 中 42 个触发 detector event。只有 `3/18` site-seed 对三个剂量均保持
+非事件响应，而且全部来自 seed 903。自动选择的 20--40 ms 因此只是单网络 canary candidate，不能称跨网络冻结窗口。
+下一步复用完全相同的三张 network 和 onset，仅将剂量降为 `{0.05,0.10,0.20} * nu_theta`。有效 seed 覆盖作为连续诊断；
+覆盖不足不令脚本失败，也不启动当前高剂量下的 edge response matching。
 
 ## 9. Alpha 探索和四臂运行
 

@@ -18,8 +18,8 @@
 - [x] Fig4B：model/patient prototype、patient block variability、hierarchical bootstrap CI 和 benchmark Pareto 图。
 - [x] direct readout 统一幅度标尺、图例和 mode shading。
 - [x] 50/50 final event profile hash 复现；nearest-component onset sidecar 完成。
-- [ ] 增加 soft Gaussian responsibility、mode-label permutation 和 pooled-location null。
-- [ ] 冻结 rev8.1 mode classifier、distance/OOD p99，并保存 de novo KMeans 对照配置。
+- [x] 增加 soft Gaussian responsibility、mode-label permutation 和 pooled-location null。
+- [x] 冻结 rev8.1 mode classifier、distance/OOD p99，并保存 de novo KMeans 对照配置。
 
 ## Task 2：Node 重建和 Edge mapper v2
 
@@ -27,20 +27,22 @@
 - [x] 实现 `field_normalized_ee_pair`：source-target pair、跨 delay target log-sum-exp normalization。
 - [x] 精确 no-op、零 incoming target、全 AMPA cache invalidation、结构和 incoming-E 守恒诊断。
 - [x] 单测锁定 target/source 方向、可分离 target factor 抵消、pair factor 生效和 beta 数值路径。
-- [ ] 用冻结 rev8.1 artifact 做 node hash/reconstruction formal preflight。
-- [ ] alpha grid 结构审计写入正式 JSON。
+- [x] 用冻结 rev8.1 artifact 做 node hash/reconstruction formal preflight；float/dtype 均逐值一致，最大误差 0。
+- [x] alpha grid 结构审计写入正式 JSON；所有 alpha 保持 topology、delay、E->I/GABA 和 incoming-E。
 
 ## Task 3：冻结 small-kick instrument
 
 - [x] 写 `config/topic4_rev9_exploratory.json`，冻结 E-only top-hat、初始 onset 100 ms、duration 18 ms、radius 1 mm。
-- [x] 幅度固定 `{0.25,0.5,1.0}*nu_theta`，5 ms bins，pulse-end 后三个候选窗口。
+- [x] 首轮幅度 `{0.25,0.5,1.0}*nu_theta`，5 ms bins，pulse-end 后三个候选窗口。
 - [x] 明确 signed/positive response、source/downstream、OLS slope、窗口 tie-break 和 paired event exclusion。
 - [x] Node canary seeds `901--903` 完成 57 次仿真；54/54 kick pairs 被 sham 启动事件污染，0 runaway。
 - [x] eligibility reconciliation 作废原始 20--40 ms 自动选择：`0/18` site-seed eligible，正式状态无可用窗口。
 - [x] 同三条 Node sham onset scan 完成：无事件 seed 数 `[0,1,3,2,2]`，冻结唯一 3/3 安静的 `220 ms`。
 - [x] 第二轮 producer 固定复用 e785 的原 network cache，避免 timing 比较混入 connectivity 改变。
-- [ ] 新 onset 下重跑 Node canary，再据无事件 paired units 冻结全局窗口。
-- [ ] 保存 SNR、event/runaway、exclusion imbalance；这些是诊断，不是放行门。
+- [x] 新 onset 下 Node canary 完成：3/3 sham 安静；42/54 kick 触发事件，0 runaway，仅 3/18 site-seed eligible 且全属 seed 903。
+- [x] 作废高剂量下的跨网络冻结解释；20--40 ms 仅保留为单网络 canary candidate。
+- [ ] 同三张 network、同 220 ms onset 降幅至 `{0.05,0.10,0.20}*nu_theta` 重跑；有效 seed 覆盖只作诊断。
+- [x] 保存 SNR、event/runaway 和排除数；这些是诊断，不是放行门。
 
 ## Task 4：Alpha exploratory calibration
 
