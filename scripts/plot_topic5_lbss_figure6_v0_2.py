@@ -19,7 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 
-from scripts.plot_topic5_interictal_template_ab_fields import _smooth_rank_field_mm  # noqa: E402
+from scripts.plot_contact_plane_static import _smooth_rank_field_mm  # noqa: E402
 from src.topic5_template_axis_field import scorers_from_interictal_record  # noqa: E402
 
 
@@ -171,8 +171,10 @@ def draw_pathways(fig, spec, out: Path, subject: str) -> None:
         ax.set_xticks([]); ax.set_yticks([])
         for spine in ax.spines.values(): spine.set_visible(False)
     comparison = pd.read_csv(out / "pathway_analysis" / "true_vs_shuffle_patient_patterns.csv")
-    values = [1 - comparison.endpoint_true_shuffle_r, 1 - comparison.effective_true_shuffle_r]
-    dot_summary(axes[2], values, ["Endpoints", "Influence"], [GRAY, RED], "True–shuffle dissimilarity")
+    values = [comparison.endpoint_dissimilarity_beyond_proposal,
+              comparison.effective_dissimilarity_beyond_proposal]
+    dot_summary(axes[2], values, ["Endpoints", "Influence"], [GRAY, RED],
+                "Dissimilarity beyond proposal")
     panel_letter(axes[0], "D")
 
 
