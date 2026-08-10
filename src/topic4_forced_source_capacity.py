@@ -83,6 +83,24 @@ def paired_excess_geometry(
     }
 
 
+def exclude_injected_packet_frame(forced_spikes, sham_spikes, packet_mask,
+                                  *, trigger_step):
+    """Return a readout copy with only the direct injected source frame removed."""
+    forced = np.asarray(forced_spikes, bool)
+    sham = np.asarray(sham_spikes, bool)
+    packet_mask = np.asarray(packet_mask, bool)
+    if forced.shape != sham.shape or forced.ndim != 2:
+        raise ValueError("forced and sham spikes must share (time, E neuron) shape")
+    if packet_mask.shape != (forced.shape[1],):
+        raise ValueError("packet_mask must align to E neurons")
+    trigger_step = int(trigger_step)
+    if trigger_step < 0 or trigger_step >= len(forced):
+        raise ValueError("trigger_step lies outside the spike array")
+    response = forced.copy()
+    response[trigger_step, packet_mask] = sham[trigger_step, packet_mask]
+    return response
+
+
 def select_triggered_event(events, *, trigger_ms, max_latency_ms):
     """Earliest returned event whose onset is time-locked to the forced packet."""
     lower = float(trigger_ms)

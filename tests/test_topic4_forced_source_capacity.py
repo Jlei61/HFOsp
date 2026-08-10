@@ -1,7 +1,10 @@
+import json
+
 import numpy as np
 import pytest
 
 from src.topic4_forced_source_capacity import (
+    exclude_injected_packet_frame,
     paired_excess_geometry,
     select_packet_fraction,
     select_source_indices,
@@ -50,6 +53,27 @@ def test_paired_excess_geometry_excludes_forced_source_from_downstream():
     assert result["downstream_positive_neurons"] == 1
     assert result["r50_mm"] == pytest.approx(1.0)
     assert result["r90_mm"] == pytest.approx(1.0)
+
+
+def test_packet_frame_exclusion_changes_only_source_cells_at_trigger():
+    forced = np.zeros((5, 4), bool)
+    sham = np.zeros_like(forced)
+    forced[2, [0, 1, 3]] = True
+    sham[2, 1] = True
+    packet = np.asarray([True, True, False, False])
+    response = exclude_injected_packet_frame(
+        forced, sham, packet, trigger_step=2)
+    np.testing.assert_array_equal(response[2], [False, True, False, True])
+    np.testing.assert_array_equal(response[:2], forced[:2])
+    np.testing.assert_array_equal(response[3:], forced[3:])
+    assert forced[2, 0]
+
+
+def test_packet_frame_exclusion_rejects_misaligned_packet():
+    with pytest.raises(ValueError, match="packet_mask"):
+        exclude_injected_packet_frame(
+            np.zeros((3, 4), bool), np.zeros((3, 4), bool),
+            np.zeros(3, bool), trigger_step=1)
 
 
 def test_triggered_event_selection_rejects_late_and_nonreturning_events():
@@ -116,3 +140,12 @@ def test_source_mode_summary_reports_unusable_curve_without_relabeling():
     assert result["sources"]["control_1"]["n_total"] == 1
     assert result["sources"]["control_1"]["n_usable"] == 0
     assert result["median_correlation_matrix"] == [[None, None]]
+
+
+def test_formal_forced_config_separates_canary_seeds_and_direct_packet_frame():
+    canary = json.load(open("config/topic4_rev9l_forced_source.json"))
+    formal = json.load(open("config/topic4_rev9l_forced_source_formal.json"))
+    assert not (set(canary["network_seeds"]["canary"])
+                & set(formal["network_seeds"]["fit"]))
+    assert formal["readout"]["exclude_injected_frame_from_primary"] is True
+    assert formal["readout"]["inclusive_packet_frame_sensitivity"]

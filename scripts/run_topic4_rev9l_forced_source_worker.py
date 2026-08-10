@@ -31,6 +31,7 @@ from src.topic4_core_field_rev9 import (  # noqa: E402
 )
 from src.topic4_core_field_runner import _placement, atomic_write_json  # noqa: E402
 from src.topic4_forced_source_capacity import (  # noqa: E402
+    exclude_injected_packet_frame,
     paired_excess_geometry,
     select_source_indices,
     select_triggered_event,
@@ -349,12 +350,11 @@ def main():
             exclude_packet_frame = bool(config["readout"].get(
                 "exclude_injected_frame_from_primary", False))
             if exclude_packet_frame:
-                injected_frame = forced_spikes[trigger_step, packet_e].copy()
-                forced_spikes[trigger_step, packet_e] = sham_spikes[
-                    trigger_step, packet_e]
+                response_spikes = exclude_injected_packet_frame(
+                    forced_spikes, sham_spikes, packet_e,
+                    trigger_step=trigger_step)
                 response_envelope, response_dt, _ = snn_event_envelope(
-                    forced_spikes, positions, montage, engine["dt"])
-                forced_spikes[trigger_step, packet_e] = injected_frame
+                    response_spikes, positions, montage, engine["dt"])
                 if response_dt != envelope_dt:
                     raise RuntimeError("packet-excluded envelope frame dt changed")
             else:
