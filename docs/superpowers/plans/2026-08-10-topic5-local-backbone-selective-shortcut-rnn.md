@@ -206,6 +206,8 @@ Local/intermediate/distal 的 q50/q80 一律由未打乱的真实 train events �
 
 每位患者记录有效 matched draws；少于 200 标记 `DESCRIPTIVE_ONLY`。
 
+Local-subset matcher 固定为每 unit 最多 20,000 次无放回候选抽样；按 spec 的 weight、degree、spatial extent 与 H-support calipers 保留最多 500 个合法集合，并在 target-free 阶段预冻结 composite mismatch 最小的 16 个做精确四档 attenuation。所有 500 个 descriptors 和 16 个 target hashes 写入 manifest，不能按任何 attenuation endpoint 重新排序。
+
 正式统计使用 attenuation slope/AUC 和 distal-selectivity `S`；双重解离使用 spec §10 的 `DD`。不为每个 alpha 分别追逐 P 值。200-draw 要求只用于 L3 local-subset controls。
 
 本阶段同时生成所有 attenuated canonical-full、seed-removed、A/B/common/contrast fields，并冻结：

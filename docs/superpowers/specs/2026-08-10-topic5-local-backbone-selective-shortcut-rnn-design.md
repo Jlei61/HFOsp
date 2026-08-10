@@ -315,6 +315,8 @@ Target sets：
 3. `A_L3`：L3 的 K 条 task-selected nonlocal edges，在 L3 内 attenuate；
 4. L3 内 K 条 local-backbone edges，匹配总绝对权重、endpoint in/out degree、空间覆盖和 tissue support；不匹配 edge length，因为 local/nonlocal 正是被检验因素。
 
+L3 local-subset control 在任何模型输出或 target 评分前按固定算法产生。每个 unit 用固定 seed 从 active local mask 中无放回抽取最多 20,000 个 K-edge candidate subsets；合法集合必须同时满足：总绝对权重为 L3-LR target 的 0.75–1.25 倍，unique source/target node 数分别相差不超过 `max(2, 20%)`，source/target weighted RMS spatial extent 分别为 target 的 0.70–1.30 倍，且 H-supported source/target node 数分别相差不超过 `max(2, 20%)`。保留 composite standardized mismatch 最小的 500 个合法集合；少于 200 个时该 unit 的 local-control inference 标记 `DESCRIPTIVE_ONLY`。为控制推演成本，在合法集合中预冻结 mismatch 最小的 16 个用于精确四档 attenuation，unit-level endpoint 取这 16 个结果的中位数；500 个合法集合的 descriptors 全部保留以审计匹配质量。不得按间期或 early-ictal attenuation 效果选择 local subset。
+
 评价：
 
 - all-transition NLL；

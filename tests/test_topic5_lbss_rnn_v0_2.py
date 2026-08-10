@@ -23,6 +23,11 @@ from src.topic5_lbss_rnn_v0_2 import (
     strong_component_audit,
     transition_frontier_distance,
 )
+from src.topic5_lbss_analysis_v0_2 import (
+    attenuate_mask,
+    endpoint_density,
+    match_local_control_subsets,
+)
 
 
 def line_distance(n: int) -> np.ndarray:
@@ -204,3 +209,52 @@ def test_launcher_lock_blocks_duplicate_and_recovers_stale(tmp_path):
     recovered = acquire_stage_lock(tmp_path, "formal")
     assert recovered.exists()
     assert (tmp_path / "FORMAL_STALE_LOCK_RECOVERY.json").exists()
+
+
+def test_attenuation_only_changes_requested_active_edges():
+    model = _make_model("L3_LOCAL_PLUS_LEARNED_LR")
+    before = model.recurrent.detach().clone()
+    target = model.added_mask.detach().cpu().numpy().astype(bool)
+    attenuate_mask(model, target, 0.5)
+    assert torch.allclose(model.recurrent[:, model.added_mask.bool()],
+                          0.5 * before[:, model.added_mask.bool()])
+    assert torch.equal(model.recurrent[:, model.local_mask.bool()],
+                       before[:, model.local_mask.bool()])
+
+
+def test_endpoint_density_uses_weighted_source_and_target_semantics():
+    strength = np.zeros((3, 3), float)
+    strength[2, 0] = 2.0  # source column 0 -> target row 2
+    result = endpoint_density(strength, strength > 0, np.eye(3))
+    assert np.argmax(result["source_node"]) == 0
+    assert np.argmax(result["target_node"]) == 2
+    assert np.isclose(result["source_contact"].sum(), 1.0)
+
+
+def test_local_control_matching_is_deterministic_and_uses_active_local_edges():
+    n = 12
+    xy = np.c_[np.arange(n, dtype=float), np.zeros(n)]
+    local = np.zeros((n, n), bool)
+    for source in range(n):
+        local[(source - 1) % n, source] = True
+        local[(source + 1) % n, source] = True
+    target = np.zeros_like(local)
+    for source in range(0, n, 3):
+        target[(source + 5) % n, source] = True
+    kwargs = dict(
+        local_mask=local,
+        target_mask=target,
+        strength=np.ones((n, n)),
+        nodes_xy_mm=xy,
+        observation_operator=np.eye(n),
+        seed=9,
+        max_candidate_draws=2_000,
+        keep_valid=50,
+        evaluate_best=5,
+    )
+    first = match_local_control_subsets(**kwargs)
+    second = match_local_control_subsets(**kwargs)
+    assert first["selected_hashes"] == second["selected_hashes"]
+    assert first["selected_masks"].shape == (5, n, n)
+    assert np.all(first["selected_masks"].astype(bool) <= local)
+    assert np.all(first["selected_masks"].sum(axis=(1, 2)) == int(target.sum()))
