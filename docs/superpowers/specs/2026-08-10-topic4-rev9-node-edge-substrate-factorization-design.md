@@ -260,6 +260,37 @@ network seeds 上仍可见”，不能写绝对响应等效；response loss 的�
 pairwise precedence、mean rank profile、event-cloud distance、duration、size 和 return status。每个 endpoint 用 paired-network
 bootstrap 给 Delta 和 `I_Y` 的区间；CI 宽时写 `unidentifiable`。
 
+**探索性四臂结果：** 冻结 `alpha_star=0.75`，在同一组 seeds `911--922` 上完成 Null / Node / Edge / Node+Edge
+共 `48/48` 个 worker；无运行失败、OOM 或 runaway。四臂的 detected/usable event 数分别为 `83/13`、`138/121`、
+`82/18` 和 `176/169`。Null 与 Edge 的 pooled OOD 分别为 `0.923/0.833`，而 Node 与 Node+Edge 为
+`0.033/0.053`。这说明单独重分配 E->E incoming weight 不能替代 `Vtheta=Vtheta0-hd` 产生患者训练分布附近的事件族。
+
+de novo KMeans 的 frozen-assignment AMI 在 Node 和 Node+Edge 均为 `1.000`，10 个 random states 的 consensus AMI 也均为
+`1.000`；对应患者训练 prototype 的 Spearman 矩阵分别为
+
+```text
+Node       [[+0.264, -0.594],
+            [-0.763, +0.977]]
+
+Node+Edge  [[+0.235, -0.576],
+            [-0.799, +0.967]]
+```
+
+matched mean 为 `0.620/0.601`，因此 Node+Edge 保留了 Node 产生的两模式几何，但没有提高模式匹配。Edge-only 的 matched
+mean 仅 `0.228`，且一个 crossed correlation 为正，不支持 edge-only 双模式恢复。event-cloud distance 为 Null `0.571`、Node
+`0.595`、Edge `0.436`、Node+Edge `0.557`；该 pooled 描述量受各臂事件数和 OOD 组成影响，不能单独用来宣布 Edge 更接近患者。
+
+在 12 个配对 network seeds 上，usable-event-rate 的 `Delta_Node=+1.125 Hz [0.823,1.438]`，
+`Delta_Node+Edge=+1.625 Hz [1.208,2.031]`，interaction 为 `+0.448 Hz [-0.156,1.011]`。participants 的
+Node+Edge interaction 为 `+2.917 [1.083,5.000]`，但因为 Null 仅 6 个 seeds 有 usable events，该 endpoint 只有 `n=6`
+配对单位。故安全口径是：Node excitability 是稳定患者对齐双模式的主要生成底物；冻结 Edge redistribution 在 Node 背景上提高
+事件产出和参与范围，是调制项而不是等效 core 机制。interaction 的 event-rate 区间跨零，不能写成稳定协同效应。
+
+正式聚合为 `node_edge_factorial/factorial_summary.{json,npz}`；图为
+`node_edge_factorial/figures/rev9_factorial_direct_waveforms.{png,pdf}` 和
+`node_edge_factorial/figures/rev9_factorial_kmeans_modes.{png,pdf}`。这些 seeds 已用于 local-response out-of-selection 描述，
+所以本轮仍是探索性 network-seed factorial，不是新的 network blind，也没有读取 patient held-out。
+
 ## 10. Frozen-field causal exploration
 
 三个 Gaussian component 全做：
@@ -310,3 +341,7 @@ systemd unit、network/OU/Poisson/readout seeds 和 paired-unit id。`.status` �
 “恢复了真实病人 core”。静态 h/alpha 不替换 Z/M/adaptation；后续 lifecycle 仍须单独检查 entry、bounded carrier、exit、
 postictal protection 和 return/recovery。只有 `alpha_star` 可标记为当前 `response-matched reference`，其他相图 alpha 点均是
 新的探索性 substrate。
+
+四臂结果把下一步收窄为冻结 Node 场的 component lesion / matched relocation 和 `d_i` interaction audit。Edge-only 不再作为
+core-equivalent 路线继续调参；只有 lesion/relocation 指向稳定位置特异性后，才进入连接性局部化和既有 Z/M/adaptation 方程的
+lifecycle 相图。若后续缺口可明确归因于径向连接尺度，再开小型 beta 网格，beta 不作为当前探索的放行门。

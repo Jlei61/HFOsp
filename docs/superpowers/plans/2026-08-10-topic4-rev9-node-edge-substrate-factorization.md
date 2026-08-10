@@ -1,7 +1,7 @@
 # Topic 4 rev9 node-edge factorization 执行计划
 
 **Spec：** `docs/superpowers/specs/2026-08-10-topic4-rev9-node-edge-substrate-factorization-design.md`
-**状态：** 探索性执行已开始
+**状态：** Task 5 四臂探索完成；Task 6 因果定位待执行
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9/`
 
 ## 执行纪律
@@ -65,16 +65,23 @@
 - [x] 重建 selection 和 out-of-selection 摘要，匹配函数纳入 module hashes；正式 producer commit `b0ff089e`，
   `tracked_modules_dirty=false`，三步均由 nohup 状态链完成并通知。
 - [x] 生成 out-of-selection PNG/PDF/metadata/README；保留宽 bootstrap 区间和 identity 偏离，不作等效判定。
-- [ ] primary family 若仅有径向宽度缺口，再开 beta 小网格；轴向/非径向失配直接保留阴性结果。
+- [x] 四臂结果显示主要缺口是 Edge-only 模式丢失和高 OOD，不是孤立径向宽度；beta 小网格延后且不作为 blocker。
 
 ## Task 5：四臂因果分解
 
-- [ ] seeds `911--922` 跑 Null / Node / Edge / Node+Edge；Node+Edge 不重调 alpha。
-- [ ] 每个 endpoint 计算 `Delta_N`、`Delta_E`、`Delta_NE` 和 `I_Y=Y_NE-Y_N-Y_E+Y_0`。
-- [ ] 同时报 frozen classifier 与 de novo KMeans、OOD、AMI、support 和 consensus。
-- [ ] 输出 onset、rate、mode proportion、recruitment、precedence、profile、event cloud、duration、size、return。
-- [ ] endpoint-level paired bootstrap 和机制表允许 `unidentifiable`。
-- [ ] 生成一张机制分解图和一张 Fig4-style direct waveform/KMeans 图，图目录写中文 README。
+- [x] seeds `911--922` 跑 Null / Node / Edge / Node+Edge；Node+Edge 不重调 alpha。`48/48` success，0 OOM/runaway。
+- [x] 每个 endpoint 计算 `Delta_N`、`Delta_E`、`Delta_NE` 和 `I_Y=Y_NE-Y_N-Y_E+Y_0`。
+- [x] 同时报 frozen classifier 与 de novo KMeans、OOD、AMI、support 和 consensus。
+- [x] 输出 onset、rate、mode proportion、recruitment、precedence、profile、event cloud、duration、size、return。
+- [x] endpoint-level paired bootstrap 保留实际 `n_paired`；Null 低支持使部分 mode endpoint 仅 `n=6`，未填补缺失值。
+- [x] 生成 Fig4-style direct waveform 和 KMeans mode 两张图，包含 PNG/PDF/metadata 和中文 README。
+
+**Task 5 判读：** Node 与 Node+Edge 的 usable events 为 `121/169`、pooled OOD 为 `0.033/0.053`，de novo/frozen AMI
+均为 `1.0`；matched mean 为 `0.620/0.601`。Edge-only 仅 `18` 个 usable events、OOD `0.833`、matched mean `0.228`。
+因此 Node 是双模式主要生成底物；Edge 在 Node 背景上增加事件产出和参与范围，但当前不支持 edge-only core equivalence，
+也不支持 Node+Edge 改善患者模式匹配。正式产物为 `node_edge_factorial/factorial_summary.{json,npz}`、
+`node_edge_factorial/figures/rev9_factorial_direct_waveforms.{png,pdf}` 和
+`node_edge_factorial/figures/rev9_factorial_kmeans_modes.{png,pdf}`。
 
 ## Task 6：Component lesion、relocation 和 d interaction
 
@@ -102,11 +109,12 @@
 
 ## 当前最短执行顺序
 
-1. 实现 Null / Node / Edge / Node+Edge 共用的长仿真 producer，锁定同 seed、同初态、同 readout 和同事件预算。
-2. 用 seeds `911--922` 分 worker 挂 nohup 四臂长跑；Node+Edge 沿用 `alpha_star=0.75`，不在四臂结果上重调。
-3. 聚合二因素效应与 paired bootstrap，同时输出 frozen classifier 和 de novo KMeans 的 support、AMI、OOD 与 mode endpoint。
-4. 生成一张机制分解图和一张 Fig4-style direct waveform/KMeans 图，先做科学合同检查，再做 PNG/PDF 视觉检查。
-5. 根据 mode/onset/profile 的具体缺口决定是否做 beta 径向小网格；beta 不是四臂探索的前置 blocker。
+1. 冻结当前 Node 场、`alpha_star`、事件判定和 frozen/de novo readout，不用四臂结果重新拟合。
+2. 对三个 Gaussian component 做 direct lesion 与 matched-budget relocation，报告 mode、earliest density 和 projection collateral change。
+3. 做 original/global shuffle/neighborhood shuffle/positive-only/negative-only 的 `d_i` 配准审计，区分 h 几何与 h-d 配准。
+4. 只有位置特异性稳定时，才把对应区域称为 mode-specific core 并设计局部连接性；阴性时保留 spatial parameterization 命名。
+5. 将确认后的静态 substrate 接回既有 Z/M/adaptation 方程，另跑 entry、bounded carrier、exit、postictal protection 和 return；
+   仅在缺口明确为径向连接尺度时补 beta 小网格。
 
 ## 探索轮完成定义
 
