@@ -1,0 +1,75 @@
+{
+  "status": "E0_PASS",
+  "verdict": "SHARED_EXECUTOR_IDENTIFIABLE",
+  "candidate": {
+    "name": "lc4d_offset_latency_alignment",
+    "n": 4.0,
+    "tau_adp_ms": 1000.0,
+    "tau_a_on_ms": 100.0,
+    "tau_a_off_ms": 10000.0,
+    "deadzone": 46.83235549926758,
+    "K": 19.869522094726562,
+    "g_m_max": 734.1686843528613,
+    "matched_ictal_current": 44.8619393917937,
+    "calibration": {
+      "base": {
+        "base": {
+          "interictal_peak_max": 35.99027633666992,
+          "ictal_settled_min": 57.674434661865234,
+          "ictal_settled_median": 66.70187759399414,
+          "extreme_gap": 21.684158325195312,
+          "deadzone_margin_each_side": 10.842079162597656,
+          "interictal_activation_max": 0.0,
+          "interictal_activation_mean": 0.0,
+          "ictal_activation_min": 0.08143489708023391,
+          "ictal_activation_mean": 0.5055224225319433,
+          "ictal_fraction_half_on": 0.5
+        },
+        "entry_anchor_onset_ms": 11000.0,
+        "entry_anchor_pre_events": 29,
+        "closed_high_a_mean_max": 0.2963244915008545,
+        "old_g_m_max": 88.74371816605014,
+        "dose_scale": 1.7059758374055478,
+        "interictal_activation_max": 0.0
+      },
+      "source_onset_ms": 11000.0,
+      "source_offset_ms": 66000.0,
+      "align_after_onset_ms": 4000.0,
+      "align_time_ms": 15000.0,
+      "a_mean_at_align": 0.06110576540231705,
+      "prior_g_m_max": 151.3946389128093,
+      "dose_scale": 4.849370424376,
+      "interictal_activation_max": 0.0,
+      "prefix_current_max": 0.0
+    },
+    "theta_h_lc2": 1.7317735254764568,
+    "m_hill_spatial_mode": "shared"
+  },
+  "derivation": {
+    "changed_fields": {
+      "m_hill_spatial_mode": "shared"
+    },
+    "local_onset_ms": 11000.0,
+    "local_first_current_ms": 11830.0,
+    "local_first_current_index": 1183,
+    "local_trace_dt_ms": 10.0
+  },
+  "source_artifacts": {
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4d_offset_latency_alignment/candidate_lock.json": "6e8587bd4ad834a9e72e9244a2c9cdd31adbb6a85369c7b9337fb074ae94aa5e",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4d_offset_latency_alignment/latency_screen.json": "d9c296cc687832400c293ed9df9a730cca08eb542a8abf2465f39c441de2630b",
+    "results/topic4_sef_hfo/fcxr_lc3_dx_spatial_instability/lc4d_offset_latency_alignment/latency_screen_traces.npz": "faa994dfbf8bf954345ce8774862f733c64e98b63e94e9b32307fe2d14f4d189"
+  },
+  "sources": {
+    "src/snn_engine/mz_slow_vars.py": "c374b852b1e9c2473e76db6217235015f899d927a5a05bf499c121320f25e44f",
+    "src/topic4_fcxr_lc4e.py": "0bd243e8a1a28b235bfc24d96336464bb205ba34ba9aa9d694d2a78a079159d4",
+    "src/topic4_fcxr_lc4d.py": "236d5a44967f02cbc1c6c0194291d42f35f33a648ad34618148c9eab4a8fbde9",
+    "scripts/run_topic4_fcxr_lc4_lifecycle.py": "c34b8bdeea3044dd7318b0f270e50e5aecf1e56490e98f47a30463b35ccd2a15",
+    "scripts/run_topic4_fcxr_lc4d.py": "4d2dc1b273b45327a3c4b6b896df83ff02b187265ec84bf8e46a990cfd50c9c3",
+    "scripts/run_topic4_fcxr_lc4e.py": "f33d23ff76139facd1ecff1194827e85dd6063f41cdf7e706c58fe9b44abdda5",
+    "scripts/run_topic4_fcxr_lc4e_autopilot.sh": "dc7d49ce13ff3e11904ccfa2cd6c77967916596a23f718c8cd54da41114de799",
+    "docs/superpowers/specs/2026-08-10-topic4-fcxr-lc4e-spatially-shared-terminator-design.md": "da98b08186fea382f305bbba0392754951d27925d6dc69c156db21facc43ab54",
+    "docs/superpowers/plans/2026-08-10-topic4-fcxr-lc4e-spatially-shared-terminator.md": "bafd16ac78d20d532e2b552776a6c3f6fd60d78997f7b054b45dd5638c203660"
+  },
+  "no_candidate_list": true,
+  "created": "2026-08-10T05:23:01.587060+00:00"
+}
