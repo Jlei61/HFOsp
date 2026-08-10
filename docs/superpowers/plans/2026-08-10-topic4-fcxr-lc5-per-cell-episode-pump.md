@@ -2,7 +2,7 @@
 
 日期：2026-08-10
 
-状态：**IMPLEMENTATION PLAN LOCKED FOR U0–U2。U3/U4 条件性，U2 未过不得执行。**
+状态：**IMPLEMENTATION PLAN rev2 LOCKED FOR U0–U2。U3/U4 条件性，U2 未过不得执行。**
 
 对应 spec：`docs/superpowers/specs/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump-design.md`
 
@@ -12,8 +12,8 @@
 
 1. LC4e/f 口径和图修订落档；
 2. 新 `rectified_excess` U current 与历史 pump 行为被测试隔离；
-3. 一条 no-kick natural-entry exact capture 同时产生三个 tau 的 sensor-only load state；
-4. 完成严格匹配的 pump-off + 3×3 high-state fork，并对最多两个候选完成 onset+4 s / late visited-state 复核；
+3. 一条 canonical no-U-actuator、no-kick natural-entry capture 产生 exact states 与完整 sparse spike stream；锁 fresh `r_hi_ref` 后离线重放三个 formal tau load state；
+4. 完成严格匹配的 pump-off + 3×3 counterfactual authority fork，并对最多两个候选完成 onset+4 s hard replay、late stress test 与 interictal baseline-compatibility replay；
 5. 按 spec §8 输出标签、判决、图、README、资源日志和 archive；
 6. 只在 U2 与移动状态复核都通过时写出 `U3_AUTHORISED.json`；否则 STOP。
 
@@ -76,7 +76,7 @@ pump_excess_mode: Literal["signed_centered", "rectified_excess"] = "signed_cente
 9. invalid mode fail loudly；
 10. JSON sanitizer 覆盖 `numpy.bool_`、`numpy.float*`、小 ndarray、Path；
 11. atomic bundle 任一文件校验失败时不发布半套正式产物；
-12. H source 仍是有效 recurrent `gErec_raw`，U 不直接 reset H。
+12. H source 仍是 pre-saturation recurrent `gErec_raw`，同时记录 `gErec_eff/I_EE_force`，U 不直接 reset H。
 
 ### T1.3 多 tau observer
 
@@ -84,9 +84,9 @@ pump_excess_mode: Literal["signed_centered", "rectified_excess"] = "signed_cente
 
 T1 产物：`u1_engine_contract.json`。
 
-## 4. T2 — 解析 calibration，先锁数再跑
+## 4. T2 — 解析 calibration preflight，不生成 formal state
 
-从已归档 pump-off high-state / per-cell separation 读取候选 rate 只做 preflight；最终 `r_hi_ref` 必须来自 T3 fresh capture。
+从已归档 pump-off high-state / per-cell separation 读取候选 rate 只做零仿真 preflight；最终 `r_hi_ref` 必须来自 T3/U1a fresh capture。preflight 数值不得用于生成 formal `u_i/p0_i` 或 source snapshot。
 
 锁定函数：
 
@@ -103,9 +103,9 @@ Imax(tau, Gamma) = Gamma * median(I_EE_force) / median([Phi(u)-p0]+)
 - interictal activation/current leakage prediction；
 - 9 个解析 Imax。
 
-任何 `q99≥0.90`、divergent fraction >0、分母≤0、Imax 非有限，记 `U_SCALE_NOT_IDENTIFIABLE` 并停止，不得换 median 为 mean。
+定义 `q_i*=a_load*r_i*tau_U`。任何 `q0.99(q_i*)≥0.90`、任一 eligible E cell `q_i*≥1`、分母≤0、Imax 非有限，记 `U_SCALE_NOT_IDENTIFIABLE` 并停止，不得换 median 为 mean。三个 tau 共用同一个 rate-distribution gate。
 
-## 5. T3 — U1 no-kick exact capture
+## 5. T3 — U1a canonical no-U-actuator exact capture
 
 ### T3.1 启动
 
@@ -117,7 +117,9 @@ U1_RUNNING.json
 resource_log.jsonl
 ```
 
-模拟采用 accepted LC4f nominal entry，pump actuator off；多 tau observer 只读。保存至少 onset、onset+1s、+4s、late 三个 exact states。若 22 s 没有 onset，写 `U1_ENTRY_NOT_REPRODUCED.json` + FAILED/STOP。
+唯一合法 substrate：`Z dynamic, H dynamic, X=1 from t=0, M=0 from t=0, U actuator off, no kick/reset/parameter step`。LC4f dynamic-X post-onset state 仅作 provenance，不可加载为 source。保存 baseline→late 的完整 per-cell sparse spike stream、fresh `r_hi_ref`、rate fields、`gErec_raw/gErec_eff/I_EE_force/H`、vSEEG/event ledger，以及 onset、onset+1s、+4s、late 的原始 exact SNN states。若 22 s 没有 onset，写 `U1_ENTRY_NOT_REPRODUCED.json` + FAILED/STOP。
+
+U1a 期间不生成 formal U state；临时 observer 即使存在也只能标 `provisional_not_for_candidate_lock`。
 
 ### T3.2 Prefix validation
 
@@ -129,7 +131,7 @@ resource_log.jsonl
 - rate/activity prefix；
 - Z/H traces。
 
-只读 observer 必须逐位不改变主轨迹；否则 `OBSERVER_CONTAMINATES_TRAJECTORY`。
+capture 必须与同配置 no-U-actuator causal prefix 一致；否则 `CAPTURE_CONTAMINATES_TRAJECTORY`。
 
 ### T3.3 Artifact transaction
 
@@ -139,6 +141,7 @@ resource_log.jsonl
 u1_capture_traces.npz
 u1_capture_summary.json
 u1_event_ledger.json
+u1_sparse_spikes.npz
 states/onset.pkl
 states/onset_plus_1s.pkl
 states/onset_plus_4s.pkl
@@ -149,17 +152,19 @@ U1_DONE.json
 
 正式文件用 atomic rename；禁止 NPZ 成功、JSON 失败后靠手工重建冒充一次完整事务。
 
-## 6. T4 — 回填 candidate lock
+## 6. T4 — 锁 calibration、U1b 离线重放并回填 candidate lock
 
-T3 完成后才运行。用 fresh `r_hi_ref` 和 `I_EE_force` 回填：
+T3 完成后才运行。先用 fresh `r_hi_ref` 锁三套 `a_load`，再对同一条 sparse spike stream 离线重放三套 formal U fields，计算 `p0_i`，并把 formal U state 附到 onset/+1s/+4s/late 原始 state。禁止复用任何锁前 provisional load。若 sparse stream 无法无损重放，只能在锁数后 deterministic replay 一次 canonical trajectory，并验证 main-state/input hash 一致。
+
+随后用锁定 high-reference sample domain `E_hi` 回填：
 
 ```text
 candidate_lock.json
 ```
 
-内容包括 equation hash、3 个 tau、3 个 Gamma、每格 a_load/Imax、p0 derivation hash、source state hash、noise hash、所有 gate。lock 后修改代码或数值必须 fail loudly。
+内容包括 equation hash、canonical config hash、3 个 tau、3 个 Gamma、每格 a_load/Imax、`E_hi` support/hash、`V_match` 来源、zero-force 排除率、p0 derivation hash、raw/formal source-state hash、spike/input hash、所有 gate。lock 后修改代码或数值必须 fail loudly。
 
-## 7. T5 — U2 3×3 high-state fork
+## 7. T5 — U2 3×3 counterfactual actuator-on authority fork
 
 ### T5.1 运行顺序
 
@@ -173,14 +178,14 @@ tau 3s: Gamma 0.10, 0.25, 0.40
 tau 15s: Gamma 0.10, 0.25, 0.40
 ```
 
-每条从同一 onset+1s exact state fork；D/Z frozen、H dynamic、X=1、M=0、外源输入相同。严格单 worker、每格独立 DONE sentinel。早停只允许：numerical failure；或已连续低态 ≥2 s 后完成 post-offset observation。
+每条从同一 onset+1s exact state fork；D/Z frozen、H dynamic、X=1、M=0、外源输入相同。严格单 worker、每格独立 DONE sentinel。早停只允许 numerical failure；所有正常臂必须跑满 8 s，以保证 offset≤6 s 后至少 2 s post-offset observation。
 
 ### T5.2 每格最小输出
 
 - rate / activity fraction；
 - `u/Phi/I_U` q10/q50/q90/q99；
 - H、`I_EE_force`、I/E balance；
-- offset candidate 与 1 s guard；
+- offset candidate 与 2 s post-offset guard；6–8 s 才下降标 `LATE_DECLINE_UNRESOLVED`；
 - refractory fraction、clip、tau_eff；
 - exact source/noise/code hashes；
 - label 与 label reason。
@@ -220,7 +225,11 @@ figures/README.md
 
 ## 9. T7 — U2 gate、移动状态复核与 stop
 
-先按 spec §8.2 原样判定。若通过，最多两个候选各自在 onset+4 s 与 late exact snapshots 上复核；D/Z 冻结各自状态，H 动态，其他合同与 T5 相同。只有 primary 在三个 visited states 都 `BOUNDED_OFFSET` 才写：
+先按 spec §8.2 的 authority/dose-ordering 条件产生最多两个候选。候选必须在 onset+4 s snapshot 上仍为 `BOUNDED_OFFSET`；late snapshot 只作 stress test，报告 `late-established-carrier rescue: pass/fail`，不得单独封锁 U3。
+
+随后执行 U2c baseline compatibility：每个候选从同一个 pre-onset interictal state 做 `Imax=0` vs candidate 的 6–8 s paired replay，D/Z frozen、H dynamic、输入相同。比较 event count、duration、participation、peak、core A/B share、vSEEG energy、mean I_U；全部必须位于 canonical block-to-block variability。
+
+只有 onset+1/+4 authority、coherent dose ordering、U2c baseline compatibility、数值安全均通过才写：
 
 ```text
 U3_AUTHORISED.json
@@ -233,16 +242,17 @@ U_AUTHORITY_NO_GO_IN_CURRENT_H.json
 NO_ROBUST_U_WINDOW.json
 H_BYPASS_OR_CARRIER_MISALIGNMENT.json
 FAST_ADAPTATION_LIKE_NOT_EPISODE_OFFSET.json
-U_AUTHORITY_NOT_ROBUST_TO_VISITED_SLOW_STATE.json
+U_AUTHORITY_NOT_ROBUST_TO_ONSET_PLUS_4S.json
+U_BASELINE_INCOMPATIBLE.json
 ```
 
 任一 STOP 后不得自动加大 `Gamma`、延长 grid、打开 M、改 H 或跑 70 s。
 
 ## 10. T8 — 条件性 U3 自然 lifecycle
 
-仅在 `U3_AUTHORISED.json` 存在且 hashes 与 HEAD 一致时执行。最多 primary + 一个 sensitivity，每条 70 s，no kick，机制 t=0 始终在线。
+仅在 `U3_AUTHORISED.json` 存在且 hashes 与 HEAD 一致时执行。最多 primary + 一个 sensitivity，每条 70 s，no kick，机制 t=0 始终在线。初值按 `u_i(0)=Phi^{-1}(p0_i)` 构造并记录 hash，使 `I_U(0)=0`；不得把 onset/late load 带回 t=0。
 
-先 development noise/connection；通过完整 lifecycle gate 后才运行独立 connection seed。任何参数选择发生后，confirmation seed 只确认，不回调参数。
+先 development noise/connection；通过完整 lifecycle gate 后才运行独立 connection seed。跨 seed 冻结 `tau_U,h_U,Gamma_U,Phi(u_hi*)=0.5`；每 seed 只按 outcome-blind nominal reference 和同一公式重算 nuisance `p0_i,a_U,Imax`。confirmation seed 不参与参数选择、不根据 lifecycle 结果回调。
 
 输出：
 
@@ -255,7 +265,7 @@ figures/u3_lifecycle.png/.pdf
 figures/README.md
 ```
 
-最终判决必须分开：entry / bounded carrier / offset / postictal / D recovery / returning IED distribution。缺一项即不得称完整 lifecycle。
+最终判决必须分开：entry / bounded carrier / offset / postictal / D recovery / returning IED distribution。D 读数固定为 all-E mean `mean_i(1-z_i)`，执行时读取 canonical quiet-stable reference band（历史中心约 0.047），只作 supportive coordinate；低态稳定、returning IED 分布和 no-rebound 才承重。缺一项即不得称完整 lifecycle。
 
 ## 11. T9 — 条件性 U4 M morphology
 
@@ -281,9 +291,16 @@ pytest -q tests/test_topic4_fcxr_lc5*.py
 - 启动前记录 MemAvailable、swap、sibling PID/命令；
 - swap delta ≥256 MiB 停止新提交，≥512 MiB 终止最新 worker并写 RESOURCE_STOP；
 - 每 stage 使用独立 flock，不使用 `pgrep -f` 判断自身；只按登记 PID；
-- wall-kill：capture 2 h、每个 8 s fork 90 min、70 s lifecycle 4 h；超时先 checkpoint 再终止；
+- U1a 后实测 `c_wall=T_wall/T_sim`；每 stage wall-kill = `1.5*c_wall*T_target + I/O margin`，受 12 h hard safety cap 约束；超时先写 rolling checkpoint 再终止；
 - 网络断开后 `setsid nohup` 必须继续；结束后 DONE/FAILED sentinel 能由新会话读取；
 - 不轮询占用前台会话；检查时读 sentinel/resource log。
+
+### 13.1 checkpoint 与输入流
+
+- 每 1–2 s 仿真时间原子覆盖一个 rolling exact checkpoint，不永久保存全部中间状态；
+- event ledger 与 summary 流式追加并带 checksum；
+- 只长期保留 pre-onset/onset/early/pre-offset/post-offset/recovered landmark states；
+- 外源输入使用 counter-based deterministic stream 或分块 replay，禁止生成完整 `N×T` 巨型数组。
 
 ## 14. 提交边界
 
