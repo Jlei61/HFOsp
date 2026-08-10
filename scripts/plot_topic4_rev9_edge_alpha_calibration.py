@@ -36,6 +36,11 @@ def _panel_label(axis, label):
               fontsize=10, fontweight="bold", va="top")
 
 
+def _set_alpha_ticks(axis, alpha):
+    axis.set_xticks(alpha)
+    axis.set_xticklabels([f"{value:g}" for value in alpha])
+
+
 def _scatter_match(axis, rows, feature_index, title, label):
     colors = {"field_component": "#D55E00", "matched_off_field": "#0072B2"}
     labels = {"field_component": "field component", "matched_off_field": "off-field control"}
@@ -98,6 +103,7 @@ def main():
     axis.scatter(alpha[chosen], j_cal[chosen], s=72, facecolor="#009E73",
                  edgecolor="black", linewidth=0.7, zorder=4)
     axis.set(xlabel="edge strength alpha", ylabel="J_cal")
+    _set_alpha_ticks(axis, alpha)
     axis.set_title("response-matched reference", loc="left", fontweight="bold")
     _panel_label(axis, "a")
 
@@ -116,6 +122,7 @@ def main():
                  edgecolor="white", linewidth=0.35, label=name)
         bottom += values
     axis.set(xlabel="edge strength alpha", ylabel="objective contribution")
+    _set_alpha_ticks(axis, alpha)
     axis.set_title("objective decomposition", loc="left", fontweight="bold")
     axis.legend(frameon=False, ncol=2, loc="upper left")
     _panel_label(axis, "b")
@@ -127,6 +134,7 @@ def main():
     axis.axhline(denominator, color="#555555", linewidth=0.8, linestyle="--")
     axis.set_ylim(0, denominator + 3)
     axis.set(xlabel="edge strength alpha", ylabel=f"paired units (of {denominator})")
+    _set_alpha_ticks(axis, alpha)
     axis.set_title("primary-window coverage", loc="left", fontweight="bold")
     _panel_label(axis, "c")
 
@@ -144,6 +152,7 @@ def main():
     axis.axhline(4.0, color="#999999", linewidth=0.6, linestyle=":")
     axis.set_yscale("log")
     axis.set(xlabel="edge strength alpha", ylabel="new / original edge weight")
+    _set_alpha_ticks(axis, alpha)
     axis.set_title("structural redistribution", loc="left", fontweight="bold")
     axis.legend(frameon=False, loc="upper left")
     _panel_label(axis, "d")
