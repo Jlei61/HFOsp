@@ -6,6 +6,8 @@ import csv
 import hashlib
 import json
 import os
+import platform
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -32,7 +34,7 @@ from src.topic4_core_field_profile import (  # noqa: E402
     split_by_block,
     transform_rank_curves,
 )
-from src.topic4_core_field_runner import atomic_write_json, provenance  # noqa: E402
+from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_mode_learnability import (  # noqa: E402
     block_mode_reliability,
     candidate_replay_rows,
@@ -46,10 +48,44 @@ from src.topic4_mode_learnability import (  # noqa: E402
 
 
 DEFAULT_CONFIG = "config/topic4_rev9l_mode_learnability.json"
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _runtime_provenance():
+    """Hash the repository modules actually imported by this producer."""
+    paths = set()
+    for module in tuple(sys.modules.values()):
+        filename = getattr(module, "__file__", None)
+        if not filename:
+            continue
+        path = Path(filename).resolve()
+        if path.suffix != ".py":
+            continue
+        try:
+            relative = path.relative_to(ROOT)
+        except ValueError:
+            continue
+        paths.add(str(relative))
+    paths.add(str(Path(__file__).resolve().relative_to(ROOT)))
+    paths = sorted(paths)
+    dirty = subprocess.check_output(
+        ["git", "status", "--porcelain", "--", *paths],
+        cwd=ROOT, text=True).strip()
+    return {
+        "git_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "runtime_modules_dirty": bool(dirty),
+        "runtime_module_sha256": {
+            path: _sha256(ROOT / path) for path in paths
+        },
+        "python_executable": sys.executable,
+        "python_version": platform.python_version(),
+        "numpy_version": np.__version__,
+    }
 
 
 def _load_reference(path):
@@ -412,7 +448,7 @@ def main():
         "optimizer": {"status": "not_yet_tested", "next_task": "L3 after oracle"},
         "identifiability": {"status": "not_yet_tested"},
         "patient_heldout_scores_computed": False,
-        "provenance": provenance(),
+        "provenance": _runtime_provenance(),
     }
 
     _atomic_csv(replay_dir / "candidate_metric_table.csv", rows)

@@ -1,7 +1,7 @@
 # Topic 4 rev9-L mode learnability 执行计划
 
 **Spec：** `docs/superpowers/specs/2026-08-10-topic4-rev9l-mode-learnability-design.md`
-**状态：** L0 objective replay 实现中
+**状态：** L0 objective replay 完成；L1 forced-initiation 实现中
 **分支：** `codex/topic4-rev9l-mode-learnability`
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
 
@@ -15,13 +15,19 @@
 
 ## Task L0：objective replay
 
-- [ ] 锁定 rev8.1 checkpoint、selection、final arrays、patient reference/target 和 rev9 factorial hashes。
-- [ ] 对 48 个 fit candidates 重放保留的 global/mode/support 指标，计算 `D_A/D_B/D_weak` 和 Pareto front。
-- [ ] 单独重放 3 个 selection candidates，不把 fit-only candidate 冒充 selection miss。
-- [ ] 计算旧 objective 与 `D_A/D_B/D_weak` 的 Spearman 相关。
-- [ ] 仅对有逐事件数组的 final/rev9 arms 计算完整 descriptor；历史缺失标为 `not_retained`。
-- [ ] 仅用 patient training blocks 计算 mode A/B block-to-complement reliability、mode proportion 和 dispersion。
-- [ ] 输出 CSV/JSON、Pareto/objective 图、patient reliability 图和唯一根 `decision.json`。
+- [x] 锁定 rev8.1 checkpoint、selection、final arrays、patient reference/target 和 rev9 factorial hashes。
+- [x] 对 48 个 fit candidates 重放保留的 global/mode/support 指标，计算 `D_A/D_B/D_weak` 和 Pareto front。
+- [x] 单独重放 3 个 selection candidates，不把 fit-only candidate 冒充 selection miss。
+- [x] 计算旧 objective 与 `D_A/D_B/D_weak` 的 Spearman 相关。
+- [x] 仅对有逐事件数组的 final/rev9 arms 计算完整 descriptor；历史缺失标为 `not_retained`。
+- [x] 仅用 patient training blocks 计算 mode A/B block-to-complement reliability、mode proportion 和 dispersion。
+- [x] 输出 CSV/JSON、Pareto/objective 图、patient reliability 图和唯一根 `decision.json`。
+
+**L0 结果：** 48 个 fit candidates 中 24 个 support eligible。旧 `joint_loss` 与 mode A loss 的 Spearman
+`rho=-0.082, p=0.704`，与 mode B 和 smooth weakest-mode loss 分别为 `rho=0.775/0.840`；fit 库和三个 selection-evaluated
+candidates 均没有同时改善 A 且不损 B 的 dominator。因此判定为 `OBJECTIVE_DOES_NOT_PROTECT_MODE_A`，不是已经存在双优候选却
+漏选。patient-training block-to-complement reliability 的中位数为 A `0.964`、B `0.984`；A 的 5% 分位更低（`0.772` vs
+`0.896`），说明 A 更异质，但 target 仍有足够稳定性进入 forced-capacity assay。旧 patient held-out 未计算分数或 prototype。
 
 L0 解释规则：
 
