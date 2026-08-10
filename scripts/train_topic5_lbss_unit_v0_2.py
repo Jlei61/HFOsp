@@ -23,7 +23,7 @@ from src.topic5_lbss_rnn_v0_2 import (  # noqa: E402
     build_pool_contract,
     checkpoint_is_eligible,
     clear_recurrent_optimizer_state,
-    derange_rank_sets,
+    derange_training_validation_only,
     semantic_snapshot_epochs,
     transition_frontier_distance,
 )
@@ -235,14 +235,15 @@ def train_unit(
     plane = np.load(cache / "plane.npz", allow_pickle=False)
     events = np.load(cache / "events.npz", allow_pickle=False)
     provenance = json.loads((cache / "provenance.json").read_text())
-    ranks = events["ranks"].copy()
+    ranks = events["ranks"][events["split"] >= 0].copy()
+    split = events["split"][events["split"] >= 0]
+    mode = events["mode"][events["split"] >= 0]
     shuffle_audit = None
     if arm == "C_L3_ORDER_SHUFFLED":
-        ranks, shuffle_audit = derange_rank_sets(ranks, stable_seed(fit_id, 7717))
+        ranks, shuffle_audit = derange_training_validation_only(
+            ranks, split, stable_seed(fit_id, 7717)
+        )
     keep = events["split"] >= 0
-    ranks = ranks[keep]
-    split = events["split"][keep]
-    mode = events["mode"][keep]
     tensors = build_event_tensors(ranks)
     train_idx = np.flatnonzero(split == 0)
     val_idx = np.flatnonzero(split == 1)

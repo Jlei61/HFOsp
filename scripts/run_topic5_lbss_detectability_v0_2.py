@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import concurrent.futures
+import hashlib
 import json
 import subprocess
 import sys
@@ -43,6 +44,14 @@ GEOMETRIES = (
 def write_json(path: Path, value: object) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(value, indent=2, allow_nan=True) + "\n")
+
+
+def sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as stream:
+        for block in iter(lambda: stream.read(1 << 20), b""):
+            digest.update(block)
+    return digest.hexdigest()
 
 
 def build_ground_truth_model(plane: dict[str, np.ndarray], seed: int) -> tuple[LBSSModel, np.ndarray]:
@@ -177,7 +186,11 @@ def run_job(trainer: Path, synthetic_root: Path, fit_id: str, arm: str, device: 
     metrics_path = synthetic_root / "per_fit" / fit_id / arm / "seed0" / "metrics.json"
     if metrics_path.exists():
         existing = json.loads(metrics_path.read_text())
-        if existing.get("converged") and existing.get("target_values_read") is False:
+        if (
+            existing.get("converged")
+            and existing.get("target_values_read") is False
+            and existing.get("producer_hashes", {}).get("trainer") == sha256(trainer)
+        ):
             return {"fit_id": fit_id, "arm": arm, "returncode": 0, "log": str(log), "reused": True}
     command = [
         sys.executable, str(trainer), "--fit-id", fit_id, "--arm", arm, "--seed", "0",

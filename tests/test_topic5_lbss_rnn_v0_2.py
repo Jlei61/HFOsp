@@ -14,6 +14,7 @@ from src.topic5_lbss_rnn_v0_2 import (
     checkpoint_is_eligible,
     clear_recurrent_optimizer_state,
     derange_rank_sets,
+    derange_training_validation_only,
     semantic_snapshot_epochs,
     source_balanced_sample,
     strong_component_audit,
@@ -126,6 +127,20 @@ def test_derangement_keeps_first_and_has_no_later_fixed_rank():
     assert audit["n_effectively_shuffled"] == 1
     assert audit["n_unchanged_due_to_length_2"] == 1
     assert audit["mean_kendall_distance_from_true_order"] > 0
+
+
+def test_order_shuffle_never_changes_heldout_test_targets():
+    ranks = np.array([
+        [0, 1, 2, 3],
+        [0, 2, 1, 3],
+        [0, 3, 1, 2],
+    ], dtype=np.int16)
+    split = np.array([0, 1, 2], dtype=np.int8)
+    shuffled, audit = derange_training_validation_only(ranks, split, seed=9)
+    assert not np.array_equal(shuffled[:2], ranks[:2])
+    assert np.array_equal(shuffled[2], ranks[2])
+    assert audit["heldout_test_unchanged"]
+    assert audit["heldout_test_sha256_before"] == audit["heldout_test_sha256_after"]
 
 
 def test_frontier_distance_uses_novel_contacts_not_centroid_shift():

@@ -118,6 +118,8 @@ C_L3_ORDER_SHUFFLED
 
 31 fits × 5 arms × 3 seeds = 465 units；synthetic detectability 单元另列，不混入真实患者统计。
 
+`C_L3_ORDER_SHUFFLED` 只在 train/validation events 上执行 derangement；所有 arm 共享未改动的真实 held-out test events、candidate masks 和评分决策。Aggregate 前逐 fit 核验 test-rank hash 完全相同。
+
 资源策略：
 
 - 使用 GPU 多 worker，但以实测吞吐为准；

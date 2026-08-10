@@ -8,6 +8,7 @@ distance estimands used by every later trainer and scorer.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import hashlib
 import math
 from typing import Iterable
 
@@ -401,6 +402,34 @@ def derange_rank_sets(ranks: np.ndarray, seed: int) -> tuple[np.ndarray, dict]:
             float(np.mean(kendall_distances)) if kendall_distances else 0.0
         ),
     }
+
+
+def derange_training_validation_only(
+    ranks: np.ndarray,
+    split: np.ndarray,
+    seed: int,
+) -> tuple[np.ndarray, dict]:
+    """Destroy train/validation order while preserving the real held-out test."""
+    source = np.asarray(ranks)
+    split = np.asarray(split)
+    if source.ndim != 2 or split.shape != (source.shape[0],):
+        raise ValueError("ranks and split must align by event")
+    train_validation = (split == 0) | (split == 1)
+    test = split == 2
+    shuffled, audit = derange_rank_sets(source[train_validation], seed)
+    output = source.copy()
+    output[train_validation] = shuffled
+    before = hashlib.sha256(np.ascontiguousarray(source[test]).view(np.uint8)).hexdigest()
+    after = hashlib.sha256(np.ascontiguousarray(output[test]).view(np.uint8)).hexdigest()
+    audit.update({
+        "scope": "train_and_validation_only",
+        "n_train_validation_events": int(train_validation.sum()),
+        "n_test_events": int(test.sum()),
+        "heldout_test_unchanged": bool(np.array_equal(output[test], source[test])),
+        "heldout_test_sha256_before": before,
+        "heldout_test_sha256_after": after,
+    })
+    return output, audit
 
 
 def transition_frontier_distance(

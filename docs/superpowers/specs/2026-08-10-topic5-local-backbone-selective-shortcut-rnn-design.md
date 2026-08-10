@@ -184,7 +184,7 @@ S_{ij}=|W_{ij}|.
 
 L1 使用完全相同的算法，但 candidate pool 换成 `E_extra-local`。
 
-Order-shuffle 固定 rank 1，仅置换 rank 2…T 的完整 tie sets；保持事件长度、参与集合、split 和 patient-specific shuffle mapping。当 `T−1≥2` 时使用 derangement，保证后续 rank 均不留在原位；`T=2` 保持原样并单独计数。必须输出有效打乱事件比例、因长度 2 未改变比例和相对真实顺序的平均 Kendall distance。
+Order-shuffle 固定 rank 1，仅置换 **train/validation events** 中 rank 2…T 的完整 tie sets；保持事件长度、参与集合、split 和 patient-specific shuffle mapping。Held-out test events 始终保持真实顺序，使 true-order 与 shuffle 模型在完全相同的真实测试决策上评分。当 `T−1≥2` 时使用 derangement，保证后续 rank 均不留在原位；`T=2` 保持原样并单独计数。必须输出有效打乱事件比例、因长度 2 未改变比例、相对真实顺序的平均 Kendall distance，以及 held-out test ranks 前后逐位一致的 hash。
 
 ### 7.1 Checkpoint、snapshot 与 resume 合同
 
