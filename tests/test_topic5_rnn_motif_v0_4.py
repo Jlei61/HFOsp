@@ -67,6 +67,7 @@ from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
     holm_fixed_family,
     lesion_cohort_summary,
     perturbation_damage,
+    write_csv as write_matched_lesion_csv,
 )
 from build_topic5_rnn_motif_common_observables_v0_4 import (  # noqa: E402
     patient_level_vectors,
@@ -1139,7 +1140,7 @@ def test_matched_lesion_unit_is_median_seed_not_motif_selected(tmp_path):
     assert selected[0][1].parent.name == "seed1"
 
 
-def test_matched_lesion_damage_uses_each_metric_optimum():
+def test_matched_lesion_damage_uses_each_metric_optimum(tmp_path):
     assert np.isclose(perturbation_damage("contact_nll", 1.4, 1.0), 0.4)
     assert np.isclose(perturbation_damage("stop_bce", 0.8, 0.5), 0.3)
     assert np.isclose(perturbation_damage("rollout_spearman", 0.2, 0.7), 0.5)
@@ -1147,3 +1148,8 @@ def test_matched_lesion_damage_uses_each_metric_optimum():
     # Both shorter and longer rollouts are harmful relative to the ideal ratio 1.
     assert np.isclose(perturbation_damage("postseed_length_ratio", 0.6, 0.9), 0.3)
     assert np.isclose(perturbation_damage("postseed_length_ratio", 1.4, 1.1), 0.3)
+    table = tmp_path / "matched.csv"
+    write_matched_lesion_csv(table, [{"subject": "p1", "damage": 0.3}])
+    assert list(csv.DictReader(table.open(encoding="utf-8"))) == [
+        {"subject": "p1", "damage": "0.3"}
+    ]
