@@ -6,6 +6,11 @@
 
 ## 主线（network-axis pivot）
 
+### `rnn_motif_cross_state_v0_4_review_closeout_2026-08-10.md` — **间期生成充分性闭合；跨状态对应趋势未确认；局部有效组织阳性**
+- 冻结模型无需重训；补齐 16→15→10 队列排除链、early-ictal target 患者内可靠性、canonical/full 场分解、布线资源定义和自由推演 Kendall 诊断。缺失 5 人均因冻结物理坐标模型少于 8 个 exact geometry/event contacts，不是评分 join 静默丢失。
+- Q1 为强阳性：真实顺序 recurrent models 能自由生成 heldout 间期传播；多种 topology 均充分。Q2 仍是正向但未确认：source 有稳定贡献，recurrence 正向，true-order 与 wiring cost 无额外跨状态增量。Q3 仅支持 local effective influence enrichment；matched lesion 因 n=5/7 记为不确定。
+- 下一阶段 `Local-Backbone Selective-Shortcut RNN` v0.2 已按 2026-08-11 审阅完成七项 P0 修订并锁定执行；v0.4 收口与新合同分开提交，结果目录不互相覆盖。
+
 ### `stable_interaction_identifiability_v2_1_multiround_2026-07-31.md` — **RNNv2.1 五轮结构审计：single fixed graph 在 4 位可辨识患者中 bounded negative**
 - 修正 test endpoint-specific oracle Gate，不增加模型容量，完成 D1 baseline/envelope/diversity、D2 M2 operator、D4 unseen-start、D3 real-minus-null split stability 和 D0 patient-matched sensitivity+specificity。
 - D0 为 4/6 PASS；这 4 位 human real-minus-null stability 全为负。另 2 位分别因 sensitivity 与 fixed-vs-mixture specificity 不足保持未裁决。
