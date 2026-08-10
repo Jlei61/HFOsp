@@ -1,7 +1,7 @@
 # Topic 4 rev9-L mode learnability 执行计划
 
 **Spec：** `docs/superpowers/specs/2026-08-10-topic4-rev9l-mode-learnability-design.md`
-**状态：** L0 完成；L1 packet 已冻结，formal fit 待启动
+**状态：** L0/L1 完成；L2 component-pair oracle 实现中
 **分支：** `codex/topic4-rev9l-mode-learnability`
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
 
@@ -44,17 +44,24 @@ L0 解释规则：
 - [x] 实现三网络 bounded canary launcher、120 s wait、status/log/notify 和 packet-selection aggregator。
 - [x] 冻结 primary mapping A<-component2、B<-component1，以及 component1/2/3 与三个 off-field source 的确定性选取规则。
 - [x] Node canary 比较 0.5%/1%/2% `N_E`，冻结最小可读 packet size。
-- [ ] Null/Node/Edge/Node+Edge 在新 fit seeds 上运行 400 ms paired assays。
-- [ ] 输出 recruitment、precedence、profile、event cloud、r50/r90、duration、size、OOD、return 和 sham difference。
-- [ ] 直接判断 ignition 与 propagation，不运行 de novo KMeans。
+- [x] Null/Node/Edge/Node+Edge 在新 fit seeds 1004-1009 上运行 400 ms paired assays。
+- [x] 输出 recruitment、precedence、profile、event cloud、r50/r90、duration、size、OOD、return 和 sham difference。
+- [x] 直接判断 ignition 与 propagation，不运行 de novo KMeans。
 
 **L1 canary 结果：** `0.5% * N_E` 已冻结；component 1/2 在 seeds 1001-1003 均为 3/3 可读，18/18 trigger 前 spike
 bit-identical，runaway 0。canary 只选 instrument，不进入患者 capacity 结论。正式 config 额外锁定 canary、patient-training
 prototype 与 profile reference hash；24 个 one-arm/one-seed jobs 最多并发 18，120 秒检查一次。
 
+**L1 formal 结果：** 24/24 worker 成功，0 pre-trigger mismatch、0 runaway。component 1/2 在所有臂均产生方向性 B/A
+response，但 Null 已有同样矩阵；component 3 与三个 off-field controls 均无可读 curve。scalar Edge 相对 Null 增加
+component 1/2 downstream mass 约 5400/4583 spikes，并把 `r90` 缩短约 0.115/0.069 mm，却没有改善 mode A 的任一绝对
+descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方向翻转和 B curve 不可读。因此 L1 判为
+`L1_SOURCE_LOCATION_SPECIFIC_BASELINE_SCAFFOLD_DOMINATED`，进入 L2；不把它写成 data-driven node/edge 已复现双模式。
+
 ## Task L2：relaxed edge oracle（条件性）
 
-- [ ] 仅在 scalar forced propagation 不足时实现四参数 component-pair mapper。
+- [x] L1 已确认 scalar Edge 只改变 gain/localization、不改善 mode A，满足进入条件。
+- [ ] 实现四参数 component-pair mapper。
 - [ ] 单测 target/source 方向、per-target conservation、exact no-op、topology/delay 不变。
 - [ ] 正负 finite difference 建 Jacobian，受约束 ridge 生成候选，最多 16 个 full-SNN evaluations。
 - [ ] component 3 固定为零负对照；不开放全 edge matrix，不先扫 beta。

@@ -1,6 +1,6 @@
 # Topic 4 rev9-L: mode realizability and learnability audit
 
-**状态：** `L1_FORCED_FIT_READY`
+**状态：** `L1_COMPLETE_L2_ACTIVE`
 **日期：** 2026-08-10
 **上游：** rev8.1 patient-training KMeans fit；rev9 frozen-field node-edge factorial
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
@@ -121,6 +121,12 @@ scalar Edge 的整套 forced readout 与 source-oracle 结构共同判断。
 
 网络 cache 的 provenance 使用冻结 connectivity producer commit 作为 cache key。缺失 cache 时仍以该 commit 写入目标 key，避免
 四个 arm 因当前 HEAD 不同而重复建图；launcher commit 与实际运行模块 hash 分别记录，分支在长跑期间前移不能静默改写 producer。
+
+L1 formal 在 fit seeds 1004-1009 上 24/24 完成。Null、Node、Edge 的 source-mode matrix 近乎相同：component 1 对 B 的
+prototype rho 约 `0.97`，component 2 对 A 仅约 `0.23`；component 3 和三个 control source 均无可读 curve。Edge 相对 Null
+增加下游 spike mass、轻微缩短 `r90`，但没有改善 mode A 的 recruitment、precedence、profile、event distribution 或 prototype。
+因此当前证据是 source-location specificity 与 baseline-scaffold directionality，不是 scalar node/edge 恢复患者双模式。Node+Edge
+在 seed 1006 的 A 方向翻转，提示共享网络稳定性仍需 L3。注入 frame inclusive sensitivity 不改变上述中位结论。
 
 ## 5. L2：最小 relaxed component-pair edge oracle
 

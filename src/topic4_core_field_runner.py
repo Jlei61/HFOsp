@@ -71,6 +71,7 @@ TRACKED_MODULES = (
     "scripts/run_topic4_rev9l_forced_source_worker.py",
     "scripts/aggregate_topic4_rev9l_packet_canary.py",
     "scripts/aggregate_topic4_rev9l_forced_source_formal.py",
+    "scripts/review_topic4_rev9l_forced_source_formal.py",
     "scripts/audit_topic4_rev9_review_fixes.py",
     "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8.py",
     "scripts/paper_figures/plot_fig4_data_driven_core_field_rev8_kmeans.py",
