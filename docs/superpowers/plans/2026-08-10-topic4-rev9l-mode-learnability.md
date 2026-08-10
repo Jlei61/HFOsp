@@ -64,9 +64,9 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
 - [x] 实现保留 `alpha=0.75` scalar baseline 的六参数 C1/C2/BG-target x C1/C2-source residual mapper。
 - [x] 单测 target/source 方向、background tail membership、per-target conservation、`gamma=0` 精确退化、topology/delay 不变。
 - [x] 冻结训练集 matched-count bootstrap floor 与四 descriptor smooth weakest-mode objective；held-out 禁止读取。
-- [ ] 在 6 个 fit networks 上运行 13 个中心有限差分候选，只使用 component 1/2 forced sources。
-- [ ] 在同一 fit networks 上运行 64-point Sobol，保留完整探索结果，仅结构可容许候选进入 weakest-mode 排序。
-- [ ] fit 前 8 个候选在 selection seeds 1011--1013 复核；component 3 固定为零负对照，不开放全 edge matrix，不先扫 beta。
+- [x] 在 6 个 fit networks 上运行 13 个中心有限差分候选，只使用 component 1/2 forced sources。
+- [x] 在同一 fit networks 上运行 64-point Sobol，保留完整探索结果，仅结构可容许候选进入 weakest-mode 排序。
+- [ ] fit 前 8 个候选加 `gamma=0` 基线在 selection seeds 1011--1013 做 out-of-fit sanity；改善保留后才做 bounded local refinement。component 3 固定为零负对照，不开放全 edge matrix，不先扫 beta。
 
 ## Task L3：network/optimizer audit
 

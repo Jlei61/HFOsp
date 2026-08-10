@@ -11,7 +11,10 @@ import time
 from pathlib import Path
 
 sys.path.insert(0, os.getcwd())
-from src.topic4_component_pair_search import sobol_candidates
+from src.topic4_component_pair_search import (
+    selection_candidates_with_baseline,
+    sobol_candidates,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -60,7 +63,9 @@ def _candidates(config, stage):
     fit = json.loads(fit_path.read_text())
     if fit["status"] != "REV9L_L2_SOBOL_FIT_COMPLETE":
         raise RuntimeError("Sobol fit is not complete")
-    return fit["top_for_selection"]
+    return selection_candidates_with_baseline(
+        fit["top_for_selection"],
+        dimension=int(config["sobol_search"]["dimension"]))
 
 
 def main():

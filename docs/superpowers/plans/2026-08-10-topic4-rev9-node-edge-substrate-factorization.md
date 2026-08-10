@@ -134,8 +134,8 @@
 
 - [x] 冻结六参数 directional component-pair residual 公式；保持 topology、delay labels、每 target incoming-E 和非 E->E 通路不变。
 - [x] 冻结四层 floor-normalized descriptor 与 smooth worst-mode objective；Spearman margin 和 response mass 只作辅助量。
-- [ ] 在 fit seeds `1004--1009` 上运行 64-point Sobol capacity scan，common random numbers，18 workers，120 s coarse wait。
-- [ ] 对 Pareto 前 8 个做 bounded local refinement，并在 selection seeds `1011--1013` 上复核；不读取 patient held-out。
+- [x] 在 fit seeds `1004--1009` 上运行 64-point Sobol capacity scan，common random numbers，18 workers，120 s coarse wait。
+- [ ] fit 前 8 个加 `gamma=0` 基线先在 selection seeds `1011--1013` 做 out-of-fit sanity；改善保留后才做 bounded local refinement；不读取 patient held-out。
 - [ ] 若得到双优 known-good oracle，做 synthetic-teacher recovery，再按相同 simulation-call budget 比较 multi-restart CMA-ES 与
   Sobol+local；报告 regret 和 restart variance。
 - [ ] 同候选集做旧 global、mode mean、worst-mode objective ablation，分离 objective 与 optimizer。

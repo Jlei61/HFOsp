@@ -45,6 +45,28 @@ def sobol_candidates(search, bounds):
     ]
 
 
+def selection_candidates_with_baseline(top_candidates, *, dimension=6):
+    """Return the frozen fit selections plus the zero-residual comparator."""
+    candidates = [
+        {
+            "candidate_id": str(row["candidate_id"]),
+            "gamma": np.asarray(row["gamma"], float).tolist(),
+        }
+        for row in top_candidates
+    ]
+    if any(len(row["gamma"]) != dimension for row in candidates):
+        raise ValueError("selection candidates do not match the gamma dimension")
+    identifiers = [row["candidate_id"] for row in candidates]
+    if len(identifiers) != len(set(identifiers)):
+        raise ValueError("selection candidate identifiers must be unique")
+    if "sobol_000" not in identifiers:
+        candidates.append({
+            "candidate_id": "sobol_000",
+            "gamma": np.zeros(dimension, float).tolist(),
+        })
+    return candidates
+
+
 def patient_descriptor_floor(
         patient_curves, patient_ranks, patient_labels, patient_blocks,
         reference, *, n_per_mode, repeats, seed, scale_minimum=1e-6):
@@ -196,5 +218,6 @@ __all__ = [
     "DESCRIPTOR_NAMES",
     "patient_descriptor_floor",
     "score_candidate",
+    "selection_candidates_with_baseline",
     "sobol_candidates",
 ]

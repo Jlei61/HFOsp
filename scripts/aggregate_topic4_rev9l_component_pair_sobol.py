@@ -21,7 +21,11 @@ from scripts.aggregate_topic4_rev9l_component_pair_phase1 import (  # noqa: E402
     _provenance,
     _sha256,
 )
-from src.topic4_component_pair_search import score_candidate, sobol_candidates  # noqa: E402
+from src.topic4_component_pair_search import (  # noqa: E402
+    score_candidate,
+    selection_candidates_with_baseline,
+    sobol_candidates,
+)
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 
 
@@ -50,7 +54,9 @@ def _selection_candidates(config):
     summary = json.loads(path.read_text())
     if summary["status"] != "REV9L_L2_SOBOL_FIT_COMPLETE":
         raise RuntimeError("Sobol fit is not complete")
-    return summary["top_for_selection"], {
+    return selection_candidates_with_baseline(
+        summary["top_for_selection"],
+        dimension=int(config["sobol_search"]["dimension"])), {
         "path": str(path), "sha256": _sha256(path),
     }
 

@@ -6,6 +6,7 @@ import numpy as np
 from src.topic4_component_pair_search import (
     patient_descriptor_floor,
     score_candidate,
+    selection_candidates_with_baseline,
     sobol_candidates,
 )
 from src.topic4_component_pair_edge import gamma_matrix
@@ -33,6 +34,15 @@ def test_sobol_candidates_are_deterministic_bounded_and_reserve_zero():
     values = np.asarray([row["gamma"] for row in first])
     assert values.shape == (64, 6)
     assert np.all((values >= -1.0) & (values <= 1.0))
+
+
+def test_selection_candidates_append_zero_residual_baseline_once():
+    top = [{"candidate_id": "sobol_015", "gamma": [0.5] * 6}]
+    selected = selection_candidates_with_baseline(top)
+    assert [row["candidate_id"] for row in selected] == [
+        "sobol_015", "sobol_000"]
+    np.testing.assert_array_equal(selected[-1]["gamma"], np.zeros(6))
+    assert selection_candidates_with_baseline(selected) == selected
 
 
 def test_weakest_mode_objective_protects_the_worse_mode():

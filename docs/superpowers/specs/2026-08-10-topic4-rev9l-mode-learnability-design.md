@@ -149,8 +149,9 @@ background/C3 source 是 residual 零参照，component 3 target 固定为零负
 network events 同计数的 recruitment、precedence、mean-rank profile 和 event-cloud floors。每项用
 `z=(D-floor_median)/floor_IQR` 标准化并取 `softplus(z)`；每模式另加 `2*(1-readable_fraction)`，最后用 `tau=0.25` 的
 smooth worst-mode 汇总并加 `0.10*OOD_fraction`。prototype Spearman、response mass、edge KL/ratio/delay 只作解释和 Pareto
-distortion 轴，不混入 shape objective。fit 前 8 个候选在 selection seeds `1011--1013` 复核；不读 patient held-out，
-不直接开放全 edge matrix，也不先增加 radial `beta`。
+distortion 轴，不混入 shape objective。fit 前 8 个候选与 `gamma=0` scalar-edge 基线一起在 selection seeds
+`1011--1013` 做 out-of-fit sanity；只有改善在 selection networks 保留后才进入 bounded local refinement。不读
+patient held-out，不直接开放全 edge matrix，也不先增加 radial `beta`。
 
 ## 6. L3：network 与 optimizer audit
 

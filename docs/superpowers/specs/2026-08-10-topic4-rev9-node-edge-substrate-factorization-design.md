@@ -454,8 +454,9 @@ J_L2 = J_shape + 0.10 * OOD_fraction
 
 `J_shape` 保护最弱模式；intended-minus-cross Spearman、response mass、r50/r90 和 return 只作辅助曲线，不替代四层主目标。
 ratio、KL、ESS 和 weighted-delay change 单独形成 distortion axis，与 `J_L2` 画 Pareto，不再用任意权重混入患者形状目标。
-首轮是探索性 capacity scan：在 fit seeds `1004--1009` 上用 common random numbers 做 64 个 Sobol points；保留 Pareto 前 8 个做
-小范围 local refinement，再在未参与筛选的 `1011--1013` 上复核。不得读取 patient held-out，也不得根据结果修改 source mapping。
+首轮是探索性 capacity scan：在 fit seeds `1004--1009` 上用 common random numbers 做 64 个 Sobol points；将 weakest-mode
+前 8 个与 `gamma=0` 基线在未参与筛选的 `1011--1013` 上做 out-of-fit sanity。只有改善在 selection networks
+保留后才做小范围 bounded local refinement。不得读取 patient held-out，也不得根据结果修改 source mapping。
 
 ### 13.3 optimizer 与 beta 的裁定实验
 
