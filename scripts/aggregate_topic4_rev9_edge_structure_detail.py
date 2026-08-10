@@ -5,14 +5,16 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
 
-from src.topic4_core_field_runner import atomic_write_json
-
-
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
+
+
 DEFAULT_CONFIG = ROOT / "config/topic4_rev9_factorial.json"
 DEFAULT_DIR = ROOT / (
     "results/topic4_sef_hfo/data_driven_core_field_rev9/edge_structure_detail")
