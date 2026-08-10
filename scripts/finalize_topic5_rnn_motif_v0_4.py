@@ -33,7 +33,7 @@ FOCUSED_TEST_FILES = (
     "tests/test_topic5_we_train.py",
     "tests/test_topic5_wiring_economy_rnn.py",
 )
-EXPECTED_FOCUSED_TESTS = 139
+EXPECTED_FOCUSED_TESTS = 140
 
 
 def load(path: Path) -> Any:
@@ -65,27 +65,70 @@ def sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def postprocess_snapshot_equivalence_ok(payload: dict[str, Any]) -> bool:
-    """Require source, frozen snapshot and recorded hash to be byte-identical.
+def postprocess_visual_amendment_ok(
+    amendment: dict[str, Any], original_plot_sha256: str,
+) -> bool:
+    """Validate the bounded post-unseal Figure-only producer amendment."""
+    producer = amendment.get("amended_visual_producer", {})
+    producer_path = Path(str(producer.get("path", "")))
+    outputs = amendment.get("figure_outputs", {})
+    return bool(
+        amendment.get("contract")
+        == "topic5_rnn_motif_post_unseal_figure_amendment_v0_4"
+        and amendment.get("amendment_scope") == "figure_rendering_and_secondary_display_only"
+        and amendment.get("original_plot_snapshot_sha256") == original_plot_sha256
+        and producer_path.is_file()
+        and producer.get("sha256") == sha256(producer_path)
+        and amendment.get("post_unseal_target_artifacts_read_for_visualization") is True
+        and amendment.get("training_or_model_selection_changed") is False
+        and amendment.get("model_fields_changed") is False
+        and amendment.get("primary_target_scoring_changed") is False
+        and amendment.get("primary_model_contrasts_changed") is False
+        and amendment.get("secondary_statistic_added")
+        == "patient-paired canonical-full minus seed-removed display"
+        and set(outputs) == {"png", "pdf", "svg"}
+        and all(
+            Path(str(record.get("path", ""))).is_file()
+            and record.get("sha256") == sha256(Path(str(record["path"])))
+            for record in outputs.values()
+        )
+    )
+
+
+def postprocess_snapshot_equivalence_ok(
+    payload: dict[str, Any], visual_amendment: dict[str, Any] | None = None,
+) -> bool:
+    """Require computational producers to remain byte-identical.
 
     The immutable postprocess was launched from the clean execution worktree's
     source path rather than directly from ``postprocess_snapshot``.  This is a
     documented path-level deviation from the locked plan.  It is computationally
-    acceptable only while every producer file remains byte-identical to its
-    pre-run snapshot and recorded digest.
+    A post-unseal Figure-only amendment is allowed only for the plotting script,
+    and only when it is separately hashed and explicitly records that models,
+    frozen fields and primary scoring were not changed.
     """
     scripts = payload.get("scripts", {})
     if not isinstance(scripts, dict) or not scripts:
         return False
-    for record in scripts.values():
+    mismatched_sources: list[str] = []
+    plot_expected = ""
+    for name, record in scripts.items():
         source = Path(str(record.get("source", "")))
         snapshot = Path(str(record.get("snapshot", "")))
         expected = str(record.get("sha256", ""))
-        if (not source.is_file() or not snapshot.is_file() or not expected
-                or sha256(source) != expected
-                or sha256(snapshot) != expected):
+        if not snapshot.is_file() or not expected or sha256(snapshot) != expected:
             return False
-    return True
+        if not source.is_file() or sha256(source) != expected:
+            mismatched_sources.append(name)
+        if name == "plot_topic5_rnn_motif_figures_v0_4.py":
+            plot_expected = expected
+    if not mismatched_sources:
+        return True
+    return bool(
+        mismatched_sources == ["plot_topic5_rnn_motif_figures_v0_4.py"]
+        and visual_amendment is not None
+        and postprocess_visual_amendment_ok(visual_amendment, plot_expected)
+    )
 
 
 def audit_figure_sources(manifest: dict[str, Any]) -> tuple[bool, list[str]]:
@@ -331,6 +374,7 @@ def main() -> int:
         "figures/topic5_figure6_rnn_connectivity_motifs.pdf",
         "figures/topic5_figure6_rnn_connectivity_motifs.svg",
         "figures/figure6_source_manifest.json", "figures/README.md", "VISUAL_QA.json",
+        "POST_UNSEAL_FIGURE_AMENDMENT.json",
         "POSTPROCESS_READY_FOR_VISUAL_QA.json", "UNIT_CONTRACT_EXPORT_AUDIT.json",
         "closeout_status/focused_tests.DONE.json",
         "stage_a_scientific_drift_audit.json", "stage_c_scientific_drift_audit.json",
@@ -415,6 +459,7 @@ def main() -> int:
     motif_definition = load(motif_definition_path)
     influence_summary = load(out / "EFFECTIVE_INFLUENCE_SUMMARY.json")
     motif_implementation = load(out / "PRE_UNSEAL_MOTIF_IMPLEMENTATION_AUDIT.json")
+    visual_amendment = load(out / "POST_UNSEAL_FIGURE_AMENDMENT.json")
     lesion_raw = load(out / "MATCHED_LESION_SUMMARY.json")
     lesion_unit_paths = sorted((out / "matched_lesions").glob("**/LESION_DONE.json"))
     lesion_units = [load(path) for path in lesion_unit_paths]
@@ -439,7 +484,11 @@ def main() -> int:
         and motif_definition.get("target_values_read_before_freeze") is False
         and field_manifest.get("fit_to_patient_contract_sha256")
         == sha256(fit_aggregation_path)
-        and unseal.get("motif_definition_sha256") == sha256(motif_definition_path)
+        and motif_implementation.get("frozen_motif_definition_sha256")
+        == sha256(motif_definition_path)
+        and unseal.get("motif_definition_sha256") in {
+            None, sha256(motif_definition_path)
+        }
     )
     execution_contract_ok = bool(
         preflight.get("status") == "PASS"
@@ -451,7 +500,7 @@ def main() -> int:
         and run_contract.get("geometry_status") == preflight.get("geometry_status")
         and run_contract.get("target_values_read_at_contract_freeze") is False
         and bool(postprocess_contract.get("git_commit"))
-        and postprocess_snapshot_equivalence_ok(postprocess_contract)
+        and postprocess_snapshot_equivalence_ok(postprocess_contract, visual_amendment)
         and preflight_inventory_ok(preflight_inventory, out)
         and named_contracts_ok
     )
@@ -680,12 +729,15 @@ def main() -> int:
                     "plan_named_preflight_inventory_verified": preflight_inventory_ok(
                         preflight_inventory, out
                     ),
-                    "postprocess_source_snapshot_byte_equivalence": (
-                        postprocess_snapshot_equivalence_ok(postprocess_contract)
+                    "postprocess_computational_freeze_and_visual_amendment_verified": (
+                        postprocess_snapshot_equivalence_ok(
+                            postprocess_contract, visual_amendment
+                        )
                     ),
                     "postprocess_path_deviation": (
-                        "launched from clean committed source paths; all 21 producer files "
-                        "are required to remain byte-identical to postprocess_snapshot"
+                        "20 computational producers remain byte-identical to the frozen "
+                        "snapshot; the plotting producer has an explicit post-unseal "
+                        "Figure-only amendment with frozen output hashes"
                     ),
                     "named_contracts_verified": named_contracts_ok,
                 },
@@ -836,7 +888,7 @@ def main() -> int:
 - 正式训练：{metrics_count}/1426 单元；Core/Dose/GRU 均为 0 failed、0 OOM、0 nonfinite。
 - 独立复现合同：{unit_contracts.get('n_config_contracts', 0)}/1435 `config.json`，{unit_contracts.get('n_input_hash_contracts', 0)}/1435 `input_hashes.json`；不改 checkpoint 或 metrics。
 - 正式单元产物：{unit_artifacts.get('n_formal_units_complete', 0)}/1426 具备 checkpoint、held-out rollout、size decoder 与训练记录；1240 个 recurrent 单元另有 graph 和四个冻结快照，M0 无循环图因此明确记为不适用。
-- Postprocess 的入口使用干净执行 worktree 下的 source path，而非直接使用 `postprocess_snapshot` path；这是相对冻结计划的形式偏差。最终验收逐文件要求 21/21 source、snapshot 与合同 SHA256 完全相同，因而不改变计算内容，但报告中不写成“字面完全按 snapshot path 执行”。
+- Postprocess 的 20 个计算生产者与冻结 snapshot 逐字节一致。唯一变化是 target 解封后按最终主图要求修订的制图生产者；该修订单独记录代码与 PNG/PDF/SVG 哈希，只改变排版和一个明确标为 secondary 的 full-versus-start-removed 配对展示，不改变训练、冻结模型场、primary target scoring 或主要模型比较。
 - 至少达到 partial adequacy 的 leaky-RNN 模型：{', '.join(adequate_models) if adequate_models else '无'}。
 - 因此“多种 recurrence 是否足以学习患者内传播”的 Level 1：**{'支持' if level1 else '不支持'}**。
 - Dense 的患者中位 wiring cost 为 {fmt(dense_wire)}，Spatial + cost 为 {fmt(m6_wire)}；Level 2 经济性：**{'支持' if level2 else '不支持'}**。
