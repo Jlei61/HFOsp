@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 import json
+import multiprocessing as mp
 import sys
 from pathlib import Path
 
@@ -119,6 +121,13 @@ def summarize_unit(out: Path, metrics_path: Path, device: torch.device, max_pref
         "path": str(destination),
         "target_values_read": False,
     }
+
+
+def summarize_unit_worker(payload: tuple[str, str, str, int]) -> dict:
+    """Spawn-safe wrapper; every worker writes a unique unit artifact."""
+    out, metrics_path, device, max_prefixes = payload
+    torch.set_num_threads(2)
+    return summarize_unit(Path(out), Path(metrics_path), torch.device(device), max_prefixes)
 
 
 def aggregate(rows: pd.DataFrame, out: Path) -> pd.DataFrame:
@@ -239,16 +248,24 @@ def main() -> None:
     parser.add_argument("--out-root", type=Path, default=Path("results/topic5_lbss_rnn_v0_2"))
     parser.add_argument("--device", default="cuda:0" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--max-prefixes", type=int, default=64)
+    parser.add_argument("--workers", type=int, default=6)
     parser.add_argument("--representative", default="epilepsiae_1084")
     args = parser.parse_args()
     out = args.out_root.resolve()
     if not (out / "MODEL_FIELDS_FROZEN.json").exists():
         raise RuntimeError("intact fields must be frozen before pathway analysis")
-    rows = []
+    jobs = []
     for metrics_path in sorted((out / "per_fit").glob("*/*/seed*/metrics.json")):
         metrics = json.loads(metrics_path.read_text())
         if metrics["arm"] in ARMS:
-            rows.append(summarize_unit(out, metrics_path, torch.device(args.device), args.max_prefixes))
+            jobs.append((str(out), str(metrics_path), args.device, args.max_prefixes))
+    if args.workers <= 1:
+        rows = [summarize_unit_worker(job) for job in jobs]
+    else:
+        with ProcessPoolExecutor(
+            max_workers=args.workers, mp_context=mp.get_context("spawn")
+        ) as executor:
+            rows = list(executor.map(summarize_unit_worker, jobs, chunksize=1))
     frame = pd.DataFrame(rows)
     if len(frame) != 31 * len(ARMS) * 3:
         raise RuntimeError(f"expected {31 * len(ARMS) * 3} pathway units, observed {len(frame)}")

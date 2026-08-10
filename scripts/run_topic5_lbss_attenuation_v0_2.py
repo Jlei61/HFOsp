@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import argparse
+from concurrent.futures import ProcessPoolExecutor
 import gzip
 import hashlib
 import json
+import multiprocessing as mp
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -275,6 +277,13 @@ def unit_target(
     return metric_rows, field_rows
 
 
+def unit_target_worker(payload: tuple[str, str, str, str]) -> tuple[list[dict], list[dict]]:
+    """Spawn-safe wrapper; every target/unit pair writes to a unique path."""
+    out, metrics_path, target_name, device = payload
+    torch.set_num_threads(2)
+    return unit_target(Path(out), Path(metrics_path), target_name, torch.device(device))
+
+
 def aggregate_patient_fields(out: Path, field_frame: pd.DataFrame, field_root: Path) -> pd.DataFrame:
     fit_fields = {}
     for key, group in field_frame.groupby(
@@ -452,19 +461,27 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, default=Path("results/topic5_lbss_rnn_v0_2"))
     parser.add_argument("--device", default="cuda:0" if torch.cuda.is_available() else "cpu")
+    parser.add_argument("--workers", type=int, default=6)
     args = parser.parse_args()
     out = args.out_root.resolve()
     if not (out / "PATHWAY_ANALYSIS_COMPLETE.json").exists():
         raise RuntimeError("pathway analysis and intact fields must be frozen before attenuation")
-    device = torch.device(args.device)
-    draw_rows, field_rows = [], []
+    jobs = []
     for target, arm in TARGETS.items():
         paths = sorted((out / "per_fit").glob(f"*/{arm}/seed*/metrics.json"))
         if len(paths) != 31 * 3:
             raise RuntimeError(f"expected 93 units for {target}, observed {len(paths)}")
         for metrics_path in paths:
-            rows, fields = unit_target(out, metrics_path, target, device)
-            draw_rows.extend(rows); field_rows.extend(fields)
+            jobs.append((str(out), str(metrics_path), target, args.device))
+    if args.workers <= 1:
+        results = [unit_target_worker(job) for job in jobs]
+    else:
+        with ProcessPoolExecutor(
+            max_workers=args.workers, mp_context=mp.get_context("spawn")
+        ) as executor:
+            results = list(executor.map(unit_target_worker, jobs, chunksize=1))
+    draw_rows = [row for rows, _ in results for row in rows]
+    field_rows = [row for _, fields in results for row in fields]
     attenuation = out / "attenuation"
     attenuation.mkdir(exist_ok=True)
     draw_frame, field_frame = pd.DataFrame(draw_rows), pd.DataFrame(field_rows)
