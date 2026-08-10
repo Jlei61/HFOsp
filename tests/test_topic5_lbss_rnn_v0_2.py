@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import numpy as np
 import pandas as pd
 import torch
@@ -11,6 +13,7 @@ from scripts.run_topic5_lbss_detectability_v0_2 import (
     build_ground_truth_model,
     simulate_events,
 )
+from scripts.freeze_topic5_lbss_postprocess_snapshot_v0_2 import dependency_closure
 from scripts.summarize_topic5_lbss_claims_v0_2 import (
     attenuation_damage_auc,
     holm,
@@ -300,3 +303,13 @@ def test_early_ictal_attenuation_auc_uses_each_arms_own_intact_field():
     result = attenuation_damage_auc(pd.DataFrame(rows), "seed_removed")
     assert set(result.target) == {"L1_ADDED", "L2_ADDED", "L3_ADDED", "L3_MATCHED_LOCAL"}
     assert np.allclose(result.damage_auc, 0.5)
+
+
+def test_postprocess_snapshot_dependency_closure_is_self_contained():
+    closure = set(dependency_closure(("scripts/run_topic5_lbss_attenuation_v0_2.py",)))
+    assert {
+        Path("scripts/train_topic5_lbss_unit_v0_2.py"),
+        Path("scripts/build_topic5_rnn_motif_fields_v0_4.py"),
+        Path("src/topic5_lbss_analysis_v0_2.py"),
+        Path("src/topic5_lbss_rnn_v0_2.py"),
+    }.issubset(closure)
