@@ -115,6 +115,7 @@ def _cfg(candidate):
         tau_a_on=float(candidate["tau_a_on_ms"]),
         tau_a_off=float(candidate["tau_a_off_ms"]),
         g_m_max=float(candidate["g_m_max"]),
+        m_hill_spatial_mode=str(candidate.get("m_hill_spatial_mode", "local")),
     )
     if candidate.get("deadzone") is not None:
         cfg["m_hill_deadzone"] = float(candidate["deadzone"])

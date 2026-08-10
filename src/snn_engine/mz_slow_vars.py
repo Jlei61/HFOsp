@@ -146,6 +146,9 @@ class MZSlowVarsConfig:
     tau_a_on: float = 50.0            # ms  open; slower than one interictal event -> the transient is not followed
     tau_a_off: float = 5000.0         # ms  close; must outlast wear clearance or it lets go while D is still high
     g_m_max: float = 0.0              # adaptation current at FULL activation, at v_match (same units as eta_m*m)
+    # FCXR-LC4e: keep the local load/gate unchanged but optionally share its population-mean
+    # outward current across E cells.  "local" is the historical path and remains the default.
+    m_hill_spatial_mode: str = "local"  # local | shared
     use_phi: bool = False          # optional Abbott-style spike-triggered threshold adaptation
     tau_phi: float = 100.0         # ms
     delta_phi: float = 0.0         # mV threshold increment per E spike
@@ -515,7 +518,7 @@ class MZSlowVars:
         gI = c.gaba_gain * I_inh_eff / (c.v_match - c.e_gaba)
         gba = self._gba_current()                                 # 0.0 unless the brake is on AND charged
         if c.use_m or c.m_frozen_E is not None:                   # FCXR-HEO2: frozen m also drives a static gM
-            I_adap = (c.g_m_max * self.a[:self.NE] if c.m_hill_K is not None  # FCXR-LC4 cooperative
+            I_adap = (self._cooperative_current_E() if c.m_hill_K is not None  # FCXR-LC4 cooperative
                       else self._eta_E * self.m[:self.NE])
             if gba != 0.0:
                 I_adap = I_adap + gba
@@ -783,6 +786,20 @@ class MZSlowVars:
         if not self.cfg.use_gba or self.cfg.eta_gba == 0.0 or self.gba_a == 0.0:
             return 0.0
         return float(self.cfg.eta_gba) * float(self.gba_a)
+
+    def _cooperative_current_E(self):
+        """Current delivered by the LC4 gate, with its spatial allocation explicit.
+
+        ``local`` is the executed LC4--LC4d equation.  ``shared`` changes only where the
+        same population-mean dose is delivered; it does not alter m, a, or their kinetics.
+        """
+        c = self.cfg
+        local = c.g_m_max * self.a[:self.NE]
+        if c.m_hill_spatial_mode == "local":
+            return local
+        if c.m_hill_spatial_mode == "shared":
+            return np.full(self.NE, float(local.mean()), dtype=float)
+        raise RuntimeError(f"invalid m_hill_spatial_mode {c.m_hill_spatial_mode!r}")
 
     def _pump_excess_E(self):
         """Baseline-centered electrogenic pump current on E cells at the CURRENT load u(t^-), or None
@@ -1055,6 +1072,8 @@ class MZSlowVars:
         # FCXR-LC4 cooperative actuator
         if c.m_hill_deadzone is not None and c.m_hill_K is None:
             raise ValueError("m_hill_deadzone requires m_hill_K (cooperative actuator)")
+        if c.m_hill_spatial_mode not in ("local", "shared"):
+            raise ValueError("m_hill_spatial_mode must be 'local' or 'shared'")
         if c.m_hill_K is not None:
             if not (c.use_m or c.m_frozen_E is not None):
                 raise ValueError("m_hill_K (cooperative actuator) needs a load to act on: "
