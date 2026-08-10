@@ -124,4 +124,3 @@ def adjudicate_shared_screen(*, local_record: dict, shared_record: dict,
         claim_boundary=("one development seed causal architecture screen; a positive result only "
                         "authorises the locked nominal lifecycle gate"),
     )
-

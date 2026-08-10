@@ -121,4 +121,3 @@ run_stage E2_CONFIRM confirm 10800 "$OUT/nohup_e2_confirm.log" "$OUT/e2_confirm.
 [[ -f "$OUT/F2_CONFIRM_DONE.json" && -f "$OUT/lifecycle_verdict.json" ]] || {
   write_stop "$OUT/AUTOPILOT_FAILED.json" FAILED "confirmation missing terminal verdict" E2_CONFIRM; exit 1; }
 write_stop "$OUT/AUTOPILOT_DONE.json" DONE "conditional chain finished" E2_CONFIRM
-
