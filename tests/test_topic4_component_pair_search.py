@@ -10,6 +10,7 @@ from src.topic4_component_pair_search import (
     sobol_candidates,
 )
 from src.topic4_component_pair_edge import gamma_matrix
+from scripts.launch_topic4_rev9l_component_pair_sobol import _state_commit
 
 
 def test_frozen_phase1_candidates_are_all_six_dimensional():
@@ -20,6 +21,13 @@ def test_frozen_phase1_candidates_are_all_six_dimensional():
     assert len({row["candidate_id"] for row in candidates}) == 13
     for row in candidates:
         assert gamma_matrix(row["gamma"]).shape == (3, 2)
+
+
+def test_launcher_status_records_are_commit_aware(tmp_path):
+    path = tmp_path / "worker.status"
+    assert _state_commit(path) == ("MISSING", None)
+    path.write_text("SUCCESS exit_code=0 commit=abc12345\n")
+    assert _state_commit(path) == ("SUCCESS", "abc12345")
 
 
 def test_sobol_candidates_are_deterministic_bounded_and_reserve_zero():

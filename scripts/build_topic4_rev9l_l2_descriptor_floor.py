@@ -93,6 +93,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=DEFAULT_CONFIG)
     parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--n-per-mode", type=int)
+    parser.add_argument("--output")
     args = parser.parse_args()
     config_path = Path(args.config)
     config = json.loads(config_path.read_text())
@@ -120,16 +122,21 @@ def main():
                     modes["cluster_counts"], loaded["patient_train_mode_counts"])):
             raise RuntimeError("patient training target changed")
 
+    n_per_mode = int(args.n_per_mode or objective["n_model_events_per_mode"])
+    if n_per_mode < 2:
+        parser.error("--n-per-mode must be at least two")
     floor, samples, sampled_blocks = patient_descriptor_floor(
         patient["curves"], patient["ranks"], modes["labels"],
         patient["block_ids"], reference,
-        n_per_mode=int(objective["n_model_events_per_mode"]),
+        n_per_mode=n_per_mode,
         repeats=int(objective["bootstrap_repeats"]),
         seed=int(objective["bootstrap_seed"]),
         scale_minimum=float(objective["floor_scale_minimum"]))
-    output_path = Path(objective["floor_output"])
-    sample_path = output_path.with_name(
-        "patient_training_descriptor_floor_samples.npz")
+    output_path = Path(args.output or objective["floor_output"])
+    if args.output is None and n_per_mode != int(objective["n_model_events_per_mode"]):
+        output_path = output_path.with_name(
+            f"patient_training_descriptor_floor_n{n_per_mode}.json")
+    sample_path = output_path.with_name(f"{output_path.stem}_samples.npz")
     arrays = {"sampled_blocks": sampled_blocks}
     for mode in ("A", "B"):
         for metric, values in samples[mode].items():
@@ -139,8 +146,9 @@ def main():
         "status": "REV9L_L2_PATIENT_TRAINING_FLOOR_COMPLETE",
         "scientific_role": (
             "training-only matched-count floor; patient held-out was not read"),
-        "sampling_unit": objective["sampling_unit"],
-        "n_events_per_mode_per_draw": int(objective["n_model_events_per_mode"]),
+        "sampling_unit": (
+            f"{n_per_mode} distinct recording blocks per mode, one event per block"),
+        "n_events_per_mode_per_draw": n_per_mode,
         "bootstrap_repeats": int(objective["bootstrap_repeats"]),
         "bootstrap_seed": int(objective["bootstrap_seed"]),
         "n_patient_training_events": int(len(patient["curves"])),

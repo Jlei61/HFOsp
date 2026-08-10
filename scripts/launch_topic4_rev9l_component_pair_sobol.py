@@ -35,6 +35,15 @@ def _state(path):
     return path.read_text().strip().split(maxsplit=1)[0]
 
 
+def _state_commit(path):
+    if not path.exists():
+        return "MISSING", None
+    fields = path.read_text().strip().split()
+    commit = next((value.split("=", 1)[1] for value in fields
+                   if value.startswith("commit=")), None)
+    return (fields[0] if fields else "MISSING"), commit
+
+
 def _complete(job, *, config_sha, commit):
     if (_state(job["status"]) != "SUCCESS" or not job["json"].exists()
             or not job["npz"].exists()):
@@ -115,20 +124,32 @@ def main():
         if _complete(job, config_sha=config_sha, commit=commit):
             completed.append(job)
         elif _state(job["status"]) == "RUNNING":
+            _, status_commit = _state_commit(job["status"])
+            if status_commit != commit[:8]:
+                raise RuntimeError(
+                    f"active worker belongs to another commit: {job['status']}")
             active.append(job)
         else:
             pending.append(job)
 
     def refresh():
-        nonlocal active
+        nonlocal active, pending
         remaining = []
         for job in active:
             if _complete(job, config_sha=config_sha, commit=commit):
                 completed.append(job)
-            elif _state(job["status"]) == "FAILED":
-                failed.append(job)
             else:
-                remaining.append(job)
+                state, status_commit = _state_commit(job["status"])
+                if state == "RUNNING":
+                    if status_commit != commit[:8]:
+                        raise RuntimeError(
+                            f"active worker changed commit: {job['status']}")
+                    remaining.append(job)
+                elif state == "FAILED" and status_commit == commit[:8]:
+                    failed.append(job)
+                else:
+                    # A stale SUCCESS/FAILED sidecar is not an active job.
+                    pending.append(job)
         active = remaining
 
     while pending or active:
