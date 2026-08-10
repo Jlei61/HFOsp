@@ -38,7 +38,8 @@ def _panel_label(axis, label):
 
 def _set_alpha_ticks(axis, alpha):
     axis.set_xticks(alpha)
-    axis.set_xticklabels([f"{value:g}" for value in alpha])
+    axis.set_xticklabels([f"{value:g}" for value in alpha], rotation=45,
+                         ha="right", fontsize=6.5)
 
 
 def _scatter_match(axis, rows, feature_index, title, label):
