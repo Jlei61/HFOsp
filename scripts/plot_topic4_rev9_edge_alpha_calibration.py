@@ -42,6 +42,11 @@ def _set_alpha_ticks(axis, alpha):
                          ha="right", fontsize=6.5)
 
 
+def _structurally_admissible(row):
+    ratio = row["structure"]["edge_ratio"]
+    return bool(ratio["min"] >= 0.25 and ratio["max"] <= 4.0)
+
+
 def _scatter_match(axis, rows, feature_index, title, label):
     colors = {"field_component": "#D55E00", "matched_off_field": "#0072B2"}
     labels = {"field_component": "field component", "matched_off_field": "off-field control"}
@@ -85,6 +90,8 @@ def main():
     rows = sorted(summary["summaries"], key=lambda row: row["alpha"])
     alpha = np.asarray([row["alpha"] for row in rows], float)
     selected_alpha = float(summary["selection"]["alpha_star"])
+    structurally_admissible = np.asarray([
+        _structurally_admissible(row) for row in rows], bool)
     selected_pairs = [row for row in summary["pair_rows"]
                       if row["alpha"] == selected_alpha
                       and row["paired_eligible"] and row["pair_loss"] is not None]
@@ -100,12 +107,19 @@ def main():
     axis = axes[0, 0]
     j_cal = np.asarray([row["J_cal"] for row in rows])
     axis.plot(alpha, j_cal, color="#222222", marker="o", linewidth=1.4)
+    if np.any(~structurally_admissible):
+        axis.scatter(
+            alpha[~structurally_admissible], j_cal[~structurally_admissible],
+            marker="x", s=62, color="#999999", linewidth=1.5, zorder=5,
+            label="structurally inadmissible")
     chosen = int(np.flatnonzero(np.isclose(alpha, selected_alpha))[0])
     axis.scatter(alpha[chosen], j_cal[chosen], s=72, facecolor="#009E73",
                  edgecolor="black", linewidth=0.7, zorder=4)
     axis.set(xlabel="edge strength alpha", ylabel="J_cal")
     _set_alpha_ticks(axis, alpha)
-    axis.set_title("response-matched reference", loc="left", fontweight="bold")
+    axis.set_title("response-objective selection", loc="left", fontweight="bold")
+    if np.any(~structurally_admissible):
+        axis.legend(frameon=False, loc="upper left")
     _panel_label(axis, "a")
 
     axis = axes[0, 1]
@@ -122,6 +136,8 @@ def main():
         axis.bar(alpha, values, width=0.13, bottom=bottom, color=color,
                  edgecolor="white", linewidth=0.35, label=name)
         bottom += values
+    for value in alpha[~structurally_admissible]:
+        axis.axvspan(value - 0.07, value + 0.07, color="#999999", alpha=0.22)
     axis.set(xlabel="edge strength alpha", ylabel="objective contribution")
     _set_alpha_ticks(axis, alpha)
     axis.set_title("objective decomposition", loc="left", fontweight="bold")
@@ -132,6 +148,8 @@ def main():
     paired = np.asarray([row["n_paired"] for row in rows])
     denominator = int(rows[0]["n_node_eligible"])
     axis.bar(alpha, paired, width=0.13, color="#56B4E9", edgecolor="white")
+    for value in alpha[~structurally_admissible]:
+        axis.axvspan(value - 0.07, value + 0.07, color="#999999", alpha=0.22)
     axis.axhline(denominator, color="#555555", linewidth=0.8, linestyle="--")
     axis.set_ylim(0, denominator + 3)
     axis.set(xlabel="edge strength alpha", ylabel=f"paired units (of {denominator})")
@@ -148,6 +166,11 @@ def main():
                       label="min-max")
     axis.fill_between(alpha, ratio_p01, ratio_p99, color="#CC79A7", alpha=0.5,
                       label="1st-99th percentile")
+    if np.any(~structurally_admissible):
+        axis.scatter(
+            alpha[~structurally_admissible], ratio_min[~structurally_admissible],
+            marker="x", s=50, color="#777777", linewidth=1.4, zorder=5,
+            label="outside reference band")
     axis.axhline(1.0, color="#333333", linewidth=0.8)
     axis.axhline(0.25, color="#999999", linewidth=0.6, linestyle=":")
     axis.axhline(4.0, color="#999999", linewidth=0.6, linestyle=":")
@@ -174,10 +197,12 @@ def main():
     metadata = dict(
         status="REV9_EDGE_ALPHA_CALIBRATION_DIAGNOSTIC",
         scientific_role=(
-            "Exploratory local-response calibration diagnostic; alpha_star is "
-            "not Node-Edge equivalence or patient validation"),
+            "Exploratory local-response objective diagnostic; alpha_star is an "
+            "objective-selected candidate, not response equivalence or patient validation"),
         alpha_star=selected_alpha,
-        selection=summary["selection"],
+        selection_original=summary["selection"],
+        corrected_alpha_role="RESPONSE_OBJECTIVE_SELECTED_CANDIDATE",
+        structurally_inadmissible_alpha=alpha[~structurally_admissible].tolist(),
         n_node_eligible=denominator,
         n_paired_at_alpha_star=len(selected_pairs),
         source=dict(path=args.summary, sha256=_sha256(args.summary)),
@@ -188,7 +213,7 @@ def main():
     (out_dir / "README.md").write_text(
         "### rev9_edge_alpha_calibration.png\n\n"
         "这是一张 rev9 Node-Edge 局部响应校准诊断图。上排依次显示总目标函数、目标函数分解和逐窗配对覆盖；下排显示 E->E 权重重分配范围，以及冻结 alpha 下 source/downstream slope 的 Node-Edge 配对。\n\n"
-        "绿色点只表示用于后续四臂比较的 response-matched reference，不表示两种机制等效；精确数值和全部 pair rows 见同级 selection summary JSON。\n\n"
+        "绿色点只表示目标函数选中的候选，不表示两种机制等效；灰色叉号表示超出结构参考带、仅保留作探索诊断的候选。精确数值和全部 pair rows 见同级 selection summary JSON。\n\n"
         "**关注点**：alpha 的优势来自哪一项、paired coverage 是否下降，以及散点是否真正贴近 identity line。\n")
     print(json.dumps(metadata, indent=2))
 

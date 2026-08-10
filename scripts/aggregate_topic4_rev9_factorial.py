@@ -446,7 +446,7 @@ def main():
             patient_block_diagnostics=dict(
                 path=diagnostic_path, sha256=_sha256(diagnostic_path))),
         limitations=[
-            "alpha was response-matched on different network seeds and is not an equivalence estimate",
+            "alpha was selected by a response objective on different network seeds; site-resolved equivalence was not established",
             "the same seeds were used for the out-of-selection local-response audit and this exploratory factorial",
             "de novo KMeans is descriptive and does not replace the frozen classifier",
             "no new patient blind unit was read",

@@ -23,6 +23,9 @@ ROOT = Path(
 SUMMARY = ROOT / "factorial_summary.json"
 ARRAYS = ROOT / "factorial_summary.npz"
 OUT = ROOT / "figures"
+REVIEW_AUDIT = Path(
+    "results/topic4_sef_hfo/data_driven_core_field_rev9/"
+    "review_audit_20260810/rev9_review_audit.json")
 ARMS = ("Null", "Node", "Edge", "Node+Edge")
 MODE_COLORS = ("#C43C39", "#277DA1")
 SHAFT_COLORS = ("#E67E22", "#159EAE", "#6A51A3", "#2A9D55")
@@ -237,7 +240,7 @@ def _plot_waveforms(summary, arrays, out_dir):
             "model-current proxy, not calibrated clinical voltage"))
 
 
-def _plot_kmeans(summary, arrays, out_dir):
+def _plot_kmeans(summary, arrays, out_dir, review_audit=None):
     plt.rcParams.update({
         "font.size": 8, "axes.titlesize": 9, "axes.labelsize": 8,
         "xtick.labelsize": 7, "ytick.labelsize": 7,
@@ -333,9 +336,24 @@ def _plot_kmeans(summary, arrays, out_dir):
         axis.set_yticks((0, 1), ("model A", "model B") if column == 0 else ("", ""))
         matched = arm_summary["de_novo"].get("matched_mean")
         counts = arm_summary["de_novo"].get("cluster_counts")
-        axis.set_title(
-            f"KMeans vs patient | mean={matched:.2f} | n={counts[0]}/{counts[1]}",
-            fontsize=8.2)
+        evaluation = (None if review_audit is None else
+                      review_audit["factorial_mode_audit"]["arms"][arm][
+                          "patient_mode_matrix_status"])
+        if evaluation is not None and evaluation["status"] == "NOT_EVALUABLE":
+            id_counts = evaluation["in_distribution_counts"]
+            axis.add_patch(plt.Rectangle(
+                (-0.5, -0.5), 2.0, 2.0, facecolor="#F2F2F2", alpha=0.82,
+                hatch="////", edgecolor="#777777", linewidth=0.8, zorder=3))
+            axis.text(
+                0.5, 0.5,
+                f"NOT EVALUABLE\nin-support n={id_counts[0]}/{id_counts[1]}\n"
+                f"OOD={evaluation['ood_fraction']:.0%}",
+                ha="center", va="center", fontsize=8.5, fontweight="bold",
+                color="#333333", zorder=4)
+            title = f"descriptive KMeans only | raw n={counts[0]}/{counts[1]}"
+        else:
+            title = f"KMeans vs patient | mean={matched:.2f} | n={counts[0]}/{counts[1]}"
+        axis.set_title(title, fontsize=8.2)
     heat_cbar = fig.colorbar(
         heatmap_image, ax=heat_axes, fraction=0.012, pad=0.008)
     heat_cbar.set_label("within-event rank")
@@ -367,7 +385,7 @@ def _write_readme(out_dir):
 
 这张图对四臂分别展示逐事件 rank heatmap、de novo KMeans prototype 与冻结 patient-training prototype，以及 2×2 Spearman 一致性矩阵。K/F/O 三行标注分别是 de novo 标签、frozen 标签和 frozen OOD；患者虚线周围的浅色带来自 recording-block variability。
 
-**关注点**：两簇支持数、frozen/de novo AMI、OOD 比例和矩阵的正对角/负交叉应一起判断；稳定 KMeans 本身不等于匹配患者模式。
+**关注点**：两簇支持数、frozen/de novo AMI、OOD 比例和矩阵的正对角/负交叉应一起判断；灰色斜线矩阵因 in-support 事件不足或 OOD 过高而不可评价，稳定 KMeans 本身不等于匹配患者模式。
 """
     (out_dir / "README.md").write_text(text)
 
@@ -377,16 +395,19 @@ def main():
     parser.add_argument("--summary", default=str(SUMMARY))
     parser.add_argument("--arrays", default=str(ARRAYS))
     parser.add_argument("--out-dir", default=str(OUT))
+    parser.add_argument("--review-audit", default=str(REVIEW_AUDIT))
     args = parser.parse_args()
     summary = json.loads(Path(args.summary).read_text())
     if summary["arrays"]["sha256"] != _sha256(args.arrays):
         raise RuntimeError("factorial summary/array hash mismatch")
     with np.load(args.arrays, allow_pickle=False) as loaded:
         arrays = {key: loaded[key] for key in loaded.files}
+    review_audit = (json.loads(Path(args.review_audit).read_text())
+                    if Path(args.review_audit).exists() else None)
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
     waveform = _plot_waveforms(summary, arrays, out_dir)
-    kmeans = _plot_kmeans(summary, arrays, out_dir)
+    kmeans = _plot_kmeans(summary, arrays, out_dir, review_audit=review_audit)
     _write_readme(out_dir)
     metadata = dict(
         status="REV9_FACTORIAL_FIG4_STYLE_COMPLETE",

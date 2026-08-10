@@ -307,7 +307,9 @@ def main():
         selection=dict(
             alpha_star=selected["alpha"], J_cal=selected["J_cal"],
             tie_break="lower alpha",
-            interpretation="response-matched reference only"),
+            interpretation=(
+                "response-objective selected candidate; local-response equivalence "
+                "requires a separately frozen, site-resolved adjudication")),
         pair_rows=pair_rows,
         inputs=[dict(path=str(path), sha256=_sha256(path))
                 for path in source_paths],
