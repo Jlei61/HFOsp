@@ -112,7 +112,7 @@ def main() -> None:
         for spine in ("top", "right"):
             ax.spines[spine].set_visible(False)
     fig.suptitle(
-        "FCXR-LC4e: matched spatial sharing removes local escape but still does not terminate",
+        "FCXR-LC4e: closed-loop sharing removes regional escape but self-limits dose",
         fontsize=12, fontweight="bold", y=1.03)
     fig.tight_layout()
     for ext in ("png", "pdf"):
@@ -142,11 +142,11 @@ def main() -> None:
             **verdict["spatial"],
         },
         "claim_boundary": (
-            "At one development seed, changing only the spatial allocation of the matched cell-load "
+            "At one development seed, changing only the spatial allocation of the closed-loop cell-load "
             "actuator preserves the exact causal prefix and removes the archived core-suppression/off-axis-"
-            "escape pattern, but it still does not produce autonomous offset within the 18 s screen. "
-            "This rejects spatial allocation as the sole blocker; it does not reject X-mediated or "
-            "recruited-area termination."
+            "escape pattern, but it also reduces its own delivered peak dose and does not produce autonomous "
+            "offset within the 18 s screen. The arms are not cumulative-dose matched. This closes the locked "
+            "closed-loop implementation, not activity-dependent relay depression as a mechanism family."
         ),
         "source": str(RESULT.relative_to(ROOT)),
     }

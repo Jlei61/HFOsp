@@ -67,12 +67,12 @@ def main():
     axes[0].set(xlim=(0, 22), xlabel="time (s)", ylabel="E-cell rate (Hz)",
                 title="entry is preserved; offset is absent")
 
-    # B — the registered K=3 candidate does not reach the frozen X boundary.
+    # B — the registered K=3 candidate does not reach the archived late-bout reference in this window.
     tx = np.arange(data["x_mean"].size) * dt / 1000.0
     axes[1].plot(tx, data["x_mean"], color=BLUE, lw=1.3,
                  label="population-mean X")
     axes[1].axhline(boundary, color=RED, ls="--", lw=1.0,
-                    label="archived offset boundary")
+                    label="archived late-bout reference")
     i_min = int(np.argmin(data["x_mean"]))
     axes[1].scatter([tx[i_min]], [data["x_mean"][i_min]], s=38, color=BLUE,
                     edgecolor="white", zorder=3)
@@ -80,7 +80,7 @@ def main():
                  f"minimum = {data['x_mean'][i_min]:.3f}", fontsize=8, ha="right")
     axes[1].axvline(onset, color=GREY, ls=":", lw=0.8)
     axes[1].set(xlim=(9.5, 22), ylim=(0.30, 1.03), xlabel="time (s)",
-                ylabel="relay availability X", title="the natural loop never reaches offset depth")
+                ylabel="relay availability X", title="archived X reference not reached\nwithin target window")
     axes[1].legend(frameon=False, fontsize=7.2, loc="upper right")
 
     # C — the slow trajectory goes into the high-state region and does not turn back.
@@ -97,7 +97,7 @@ def main():
     cb.set_label("time (s)", fontsize=8)
     cb.ax.tick_params(labelsize=7)
 
-    # D — only the cores approach strong X suppression; broad tissue remains above the boundary.
+    # D — regional means show a spatial mismatch, not a universal population threshold.
     regions = ("core A", "core B", "axial", "off-axis", "all")
     keys = ("core_A", "core_B", "axial", "off_axis", "all")
     vals = [float(data[f"snapshot_X_{k}"][-1]) for k in keys]
@@ -106,7 +106,7 @@ def main():
     axes[3].axhline(boundary, color=RED, ls="--", lw=1.0)
     axes[3].set_xticks(np.arange(len(vals)), regions, rotation=22)
     axes[3].set(ylim=(0.30, 0.56), ylabel="regional X at 21.75 s",
-                title="cell-local X lacks population-wide coverage")
+                title="X field and carrier support\nare spatially mismatched")
     for i, v in enumerate(vals):
         axes[3].text(i, v + 0.008, f"{v:.2f}", ha="center", fontsize=7.5)
 
@@ -117,7 +117,7 @@ def main():
         for spine in ("top", "right"):
             ax.spines[spine].set_visible(False)
     fig.suptitle(
-        "FCXR-LC4f: archived X depth does not transfer to the natural-entry closed loop",
+        "FCXR-LC4f: natural entry persists beyond the preregistered offset window",
         fontsize=12, fontweight="bold", y=1.03)
     fig.tight_layout()
     for ext in ("png", "pdf"):
@@ -130,12 +130,17 @@ def main():
         "verdict": record["gate"]["verdict"],
         "panels": {
             "A": "fresh no-kick rate trace with cumulative entry and no offset",
-            "B": "population mean X against the independently archived 0.380 termination boundary",
+            "B": "population mean X against the archived 0.380 late-bout reference; not a universal boundary",
             "C": "population-mean D-H slow trajectory, onset marker and record-end marker",
-            "D": "regional X at the final stored snapshot, showing incomplete spatial coverage",
+            "D": "regional X at the final stored snapshot, showing mismatch with the surviving carrier support",
         },
         "key_numbers": record["trace_summary"],
-        "claim_boundary": record["claim_boundary"],
+        "claim_boundary": (
+            "One development-seed natural-entry screen: the empirical K_y=3 loop did not reach the archived "
+            "late-bout X reference and did not autonomously offset within the preregistered 1--5 s target "
+            "window. This does not establish an asymptotic X floor, a universal X threshold, or population-wide "
+            "coverage as the unique failure mechanism."
+        ),
         "source": str(RESULT.relative_to(ROOT)),
     }
     (OUT / "lc4f_x_depth_screen_metadata.json").write_text(

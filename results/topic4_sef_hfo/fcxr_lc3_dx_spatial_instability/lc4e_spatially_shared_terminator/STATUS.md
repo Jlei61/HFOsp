@@ -10,6 +10,6 @@
 - Dose result: shared peak current is 20.339 versus 51.417 in the local arm, consistent with closed-loop suppression of its own driving load
 - E2 nominal / exact-D: **not authorised**
 - Numerical/resource status: finite, zero clip, refractory fraction 0; peak RSS 16.687 GiB; swap delta about 1.1 MiB; no residual task process
-- Scientific boundary: this single-seed E1 rejects spatial allocation as the sole blocker and closes the LC4 cell-load actuator family under the locked routing rule. It does not reject X-mediated or recruited-area termination, establish recovery, or establish a seizure lifecycle.
+- Scientific boundary: this single-seed E1 closes the locked closed-loop spatial-sharing implementation. Because sharing also reduced delivered dose, it does not isolate spatial allocation at matched cumulative dose, reject activity-dependent relay depression as a family, establish recovery, or establish a seizure lifecycle.
 
 Primary evidence: `candidate_lock.json`, `latency_screen.json`, `architecture_verdict.json`, `E1_DONE.json`, `AUTOPILOT_STOP.json`; diagnostic: `figures/lc4e_shared_executor_screen.png`.

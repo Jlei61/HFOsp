@@ -2,7 +2,7 @@
 
 ## 一句话结论
 
-在完全相同的逐细胞负荷、dead zone、Hill 曲线、时间常数、增益和无 kick 入场轨迹上，只把终止电流从逐细胞局部分配改为全 E 细胞共享，确实消除了“核心被压住、轴外逃逸”的空间失败形态，但高态仍持续到 18 s 记录末端，没有自主终止。按预注册规则，这关闭 LC4 cell-load actuator 家族，下一步回到已经实测存在的 X relay offset surface。
+在完全相同的逐细胞负荷、dead zone、Hill 曲线、时间常数、增益和无 kick 入场轨迹上，只把终止电流从逐细胞局部分配改为全 E 细胞共享，确实消除了“核心被压住、轴外逃逸”的空间失败形态，但高态仍持续到 18 s 记录末端，没有自主终止。共享执行同时把峰值剂量从 51.4 压到 20.3，因此这轮关闭的是当前闭环实现，不是“活动依赖 relay depression”整个机制家族，也不是累计剂量匹配的空间因果检验。
 
 ## 测了什么
 
@@ -29,9 +29,9 @@ LC4d 的局部终止器可能只压住最活跃的核心，使高态转移到轴
 
 禁止：不能称为完整 lifecycle、不能声称 shared inhibition 普遍无效、不能否定 X relay 或 recruited-area termination，也不能把单 seed 架构比较写成患者机制。
 
-## 路由
+## 路由（2026-08-10 审阅后订正）
 
-按 design §7 的 `both negative` 分支，停止 LC4 cell-load actuator 家族。下一步优先复用已归档的 X 冻结边界（高磨损下 X=0.395 维持、X=0.380 返回低态）和动态 hill-placement 结果，直接检验在当前无-kick D/Z entry 上，X 的已知可达深度能否在 1–5 s 内自主终止并提供足够的 postictal protection。不得再扫 `g_m_max`。
+按原 design §7 的 `both negative` 分支，LC4 具体实现停止，不再扫 `g_m_max`。但其科学解释收窄为：closed-loop sharing 消除了区域逃逸，同时因 sensor–actuator 自限减少累计剂量。后续若再研究 X，只允许做等剂量 yoked replay、trajectory-conditioned offset surface 或作用通道归因；这些是诊断，不再是 lifecycle 主路线。生命周期主路线转向独立的逐细胞 episode-load recovery coordinate，见 LC5 spec/plan。
 
 ## 产物
 
