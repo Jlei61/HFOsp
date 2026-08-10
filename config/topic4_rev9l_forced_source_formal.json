@@ -74,13 +74,15 @@
   "arms": ["Null", "Node", "Edge", "Node+Edge"],
   "alpha_star": 0.75,
   "network_seeds": {
-    "fit": [1001, 1002, 1003, 1004, 1005, 1006],
+    "fit": [1004, 1005, 1006, 1007, 1008, 1009],
     "selection": [1011, 1012, 1013],
     "confirmation": [1021, 1022, 1023]
   },
   "readout": {
     "primary_window_ms": [100.0, 250.0],
-    "rank_curve": "read_event_on_clip(forced_contact_envelope_minus_sham_contact_envelope,0,infinity)",
+    "exclude_injected_frame_from_primary": true,
+    "rank_curve": "read_event_on_clip(forced_contact_envelope_after_replacing_injected_source_frame_with_sham_minus_sham_contact_envelope,0,infinity)",
+    "inclusive_packet_frame_sensitivity": "same readout without replacing the injected source frame",
     "secondary_triggered_event": "returned event overlapping trigger and starting no later than trigger_plus_40ms",
     "paired_excess": "clip(forced_minus_sham_spike_count,0,infinity) from trigger to 250ms",
     "source_identity_defines_target": true,

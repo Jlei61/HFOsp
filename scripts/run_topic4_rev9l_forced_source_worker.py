@@ -308,7 +308,9 @@ def main():
 
     run_rows = []
     rank_curves, rank_rows, packet_masks = [], [], []
+    inclusive_rank_curves, inclusive_rank_rows = [], []
     positive_counts, signed_counts, excess_envelopes = [], [], []
+    inclusive_excess_envelopes = []
     active_forced = []
     assigned_distances, assigned_labels, assigned_ood = [], [], []
     for source in sources:
@@ -337,9 +339,29 @@ def main():
                 forced_spikes, positions, montage, engine["dt"])
             if forced_envelope_dt != envelope_dt:
                 raise RuntimeError("forced/sham envelope frame dt changed")
-            n_frame = min(forced_envelope.shape[1], sham_envelope.shape[1])
+            inclusive_n_frame = min(
+                forced_envelope.shape[1], sham_envelope.shape[1])
+            inclusive_excess_envelope = np.clip(
+                forced_envelope[:, :inclusive_n_frame]
+                - sham_envelope[:, :inclusive_n_frame],
+                0.0, None)
+
+            exclude_packet_frame = bool(config["readout"].get(
+                "exclude_injected_frame_from_primary", False))
+            if exclude_packet_frame:
+                injected_frame = forced_spikes[trigger_step, packet_e].copy()
+                forced_spikes[trigger_step, packet_e] = sham_spikes[
+                    trigger_step, packet_e]
+                response_envelope, response_dt, _ = snn_event_envelope(
+                    forced_spikes, positions, montage, engine["dt"])
+                forced_spikes[trigger_step, packet_e] = injected_frame
+                if response_dt != envelope_dt:
+                    raise RuntimeError("packet-excluded envelope frame dt changed")
+            else:
+                response_envelope = forced_envelope
+            n_frame = min(response_envelope.shape[1], sham_envelope.shape[1])
             excess_envelope = np.clip(
-                forced_envelope[:, :n_frame] - sham_envelope[:, :n_frame],
+                response_envelope[:, :n_frame] - sham_envelope[:, :n_frame],
                 0.0, None)
 
             primary_window = config["readout"]["primary_window_ms"]
@@ -364,6 +386,25 @@ def main():
             else:
                 assigned = assign_frozen_modes(
                     np.asarray(curve)[None, :], classifier, reference)
+
+            inclusive_response_available = (
+                inclusive_n_frame * envelope_dt >= float(primary_window[1]))
+            inclusive_readout = (cmrun.read_event(
+                inclusive_excess_envelope, envelope_dt, montage, valid_contacts,
+                tuple(primary_window), reg["axis_unit_vec"],
+                k_dir=int(engine["k_dir"]),
+                part_min=2 * int(engine["k_dir"]) + 1)
+                if inclusive_response_available else {"n_part": 0, "ranks": None})
+            inclusive_rank_dict = inclusive_readout.get("ranks") or {}
+            inclusive_rank_row = np.asarray([
+                np.nan if inclusive_rank_dict.get(name) is None
+                else float(inclusive_rank_dict[name])
+                for name in contact_names], float)
+            inclusive_curve = normalized_rank_curve(
+                inclusive_rank_dict, axial, grid=grid)
+            inclusive_curve_row = (
+                np.full(len(grid), np.nan) if inclusive_curve is None
+                else np.asarray(inclusive_curve, float))
 
             geometry_end = min(
                 float(simulation["paired_response_end_ms"]),
@@ -413,6 +454,7 @@ def main():
                     forced["forced_spike_collision_count"]),
                 "paired_excess_readout": {
                     "window_ms": primary_window,
+                    "injected_source_frame_excluded": exclude_packet_frame,
                     "response_available": bool(response_available),
                     "n_part": int(readout.get("n_part", 0)),
                     "curve_usable": bool(curve is not None),
@@ -422,6 +464,11 @@ def main():
                         [None, None] if curve is None else
                         assigned["distance_matrix"][0].astype(float).tolist()),
                     "ood": bool(assigned["ood"][0]),
+                },
+                "inclusive_packet_frame_sensitivity": {
+                    "response_available": bool(inclusive_response_available),
+                    "n_part": int(inclusive_readout.get("n_part", 0)),
+                    "curve_usable": bool(inclusive_curve is not None),
                 },
                 "paired_geometry": {
                     key: value for key, value in geometry.items()
@@ -441,10 +488,14 @@ def main():
             run_rows.append(row)
             rank_curves.append(curve_row)
             rank_rows.append(rank_row)
+            inclusive_rank_curves.append(inclusive_curve_row)
+            inclusive_rank_rows.append(inclusive_rank_row)
             packet_masks.append(packet_e)
             positive_counts.append(geometry["positive_spike_count_per_E"])
             signed_counts.append(geometry["signed_spike_count_per_E"])
             excess_envelopes.append(excess_envelope.astype(np.float32))
+            inclusive_excess_envelopes.append(
+                inclusive_excess_envelope.astype(np.float32))
             active_forced.append(forced_events["active_fraction"])
             assigned_distances.append(assigned["distance_matrix"][0])
             assigned_labels.append(int(assigned["labels"][0]))
@@ -470,11 +521,17 @@ def main():
         packet_masks_E=np.asarray(packet_masks, bool),
         rank_curves=np.asarray(rank_curves, np.float32),
         contact_ranks=np.asarray(rank_rows, np.float32),
+        inclusive_packet_frame_rank_curves=np.asarray(
+            inclusive_rank_curves, np.float32),
+        inclusive_packet_frame_contact_ranks=np.asarray(
+            inclusive_rank_rows, np.float32),
         contact_names=np.asarray(contact_names, dtype="U32"),
         paired_positive_spike_count_E=np.asarray(positive_counts, np.float32),
         paired_signed_spike_count_E=np.asarray(signed_counts, np.float32),
         excess_contact_envelope=_pad_envelopes(
             excess_envelopes, len(contact_names)),
+        inclusive_packet_frame_excess_contact_envelope=_pad_envelopes(
+            inclusive_excess_envelopes, len(contact_names)),
         envelope_dt_ms=np.asarray(envelope_dt, float),
         forced_active_fraction=_pad_rows(active_forced, dtype=np.float32),
         sham_active_fraction=np.asarray(sham_events["active_fraction"], np.float32),

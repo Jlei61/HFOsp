@@ -29,6 +29,7 @@ from src.topic4_forced_source_capacity import (  # noqa: E402
 from src.topic4_mode_learnability import (  # noqa: E402
     mode_conditioned_descriptor_replay,
 )
+from src.topic4_rev9_factorial import factorial_effects  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -159,6 +160,9 @@ def _load_workers(config, expected_commit):
                     "source_ids", "rank_curves", "contact_ranks",
                     "assigned_mode", "assigned_ood", "assigned_distance_to_A_B",
                     "excess_contact_envelope",
+                    "inclusive_packet_frame_rank_curves",
+                    "inclusive_packet_frame_contact_ranks",
+                    "inclusive_packet_frame_excess_contact_envelope",
                 )}
             if len(record["source_ids"]) != len(payload["runs"]):
                 raise RuntimeError("formal JSON/NPZ row count differs")
@@ -270,6 +274,64 @@ def _arm_summary(arm_data, config, reference, patient, patient_labels,
         "n_runaway": int(sum(row["runaway_early_stop_ms"] is not None
                              for row in rows)),
     }
+
+
+def _paired_factorial_summary(arm_data, config, prototypes):
+    seeds = [int(seed) for seed in config["network_seeds"]["fit"]]
+    arms = config["arms"]
+    output = {}
+    for source_index, source in enumerate(config["packet"]["formal_sources"]):
+        intended = None
+        if source == config["primary_mapping"]["mode_A_source"]:
+            intended = 0
+        elif source == config["primary_mapping"]["mode_B_source"]:
+            intended = 1
+        metrics = {
+            "downstream_positive_spike_mass": {},
+            "source_respike_signed_mass": {},
+            "r90_mm": {},
+            "curve_usable": {},
+            "ood": {},
+        }
+        if intended is not None:
+            metrics["intended_minus_cross_spearman"] = {}
+        for arm in arms:
+            rows = [row for row in arm_data[arm]["rows"]
+                    if row["source_id"] == source]
+            arrays = [record for row, record in zip(
+                arm_data[arm]["rows"], arm_data[arm]["arrays"])
+                      if row["source_id"] == source]
+            if [int(row["seed"]) for row in rows] != seeds:
+                raise RuntimeError(f"formal seed order changed for {arm}/{source}")
+            metrics["downstream_positive_spike_mass"][arm] = [
+                row["paired_geometry"]["downstream_positive_spike_mass"]
+                for row in rows]
+            metrics["source_respike_signed_mass"][arm] = [
+                row["source_respike_signed_mass_after_injected_frame"]
+                for row in rows]
+            metrics["r90_mm"][arm] = [
+                row["paired_geometry"]["r90_mm"] for row in rows]
+            metrics["curve_usable"][arm] = [
+                float(row["paired_excess_readout"]["curve_usable"])
+                for row in rows]
+            metrics["ood"][arm] = [
+                float(row["paired_excess_readout"]["ood"])
+                for row in rows]
+            if intended is not None:
+                values = []
+                for record in arrays:
+                    result = source_mode_correlation_summary(
+                        np.asarray(record["rank_curves"])[None, :], [source],
+                        prototypes, source_order=[source])
+                    pair = np.asarray(result["sources"][source][
+                        "per_network_correlation_to_A_B"][0], float)
+                    values.append(float(pair[intended] - pair[1 - intended]))
+                metrics["intended_minus_cross_spearman"][arm] = values
+        output[source] = {
+            metric: factorial_effects(values, seed=9700 + source_index * 20 + index)
+            for index, (metric, values) in enumerate(metrics.items())
+        }
+    return output
 
 
 def _plot_capacity(arm_data, summaries, config, prototypes, output_dir):
@@ -404,6 +466,8 @@ def main():
                           patient_labels, prototypes)
         for arm in config["arms"]
     }
+    paired_factorial = _paired_factorial_summary(
+        arm_data, config, prototypes)
     descriptive_status = {
         arm: ("FORCED_PRIMARY_DIRECTIONAL_ALIGNMENT_OBSERVED"
               if summaries[arm]["primary_directional_alignment_observed"]
@@ -412,10 +476,12 @@ def main():
     }
     node_positive = summaries["Node"]["primary_directional_alignment_observed"]
     edge_positive = summaries["Edge"]["primary_directional_alignment_observed"]
-    recommendation = (
-        "RUN_L2_COMPONENT_PAIR_EDGE_ORACLE" if not edge_positive
-        else "SCALAR_EDGE_FORCED_CAPACITY_OBSERVED_REVIEW_BEFORE_L2"
-    )
+    if not node_positive:
+        recommendation = "REVIEW_NODE_OR_SOURCE_MAPPING_BEFORE_EDGE_FAMILY_EXPANSION"
+    elif not edge_positive:
+        recommendation = "RUN_L2_COMPONENT_PAIR_EDGE_ORACLE"
+    else:
+        recommendation = "COMPARE_EDGE_TO_NULL_FACTORIAL_EFFECTS_BEFORE_L2"
     provenance = _runtime_provenance(args.expected_commit)
     output_root = Path(config["output_root"])
     formal_dir = output_root / "formal_fit"
@@ -429,7 +495,9 @@ def main():
         "packet_fraction_of_E": config["packet"]["frozen_fraction_of_E"],
         "descriptive_arm_status": descriptive_status,
         "arms": summaries,
+        "paired_factorial_by_source": paired_factorial,
         "next_recommendation": recommendation,
+        "beta_status": "DO_NOT_OPEN_UNTIL_A_RADIAL_SCALE_DEFECT_IS_ISOLATED",
         "patient_heldout_scores_computed": False,
         "worker_inputs": worker_inputs,
         "config": {"path": str(config_path), "sha256": _sha256(config_path)},
@@ -465,6 +533,8 @@ def main():
         "next_recommendation": recommendation,
         "summary_path": str(formal_dir / "forced_source_capacity_summary.json"),
     }
+    decision["beta_status"] = (
+        "DO_NOT_OPEN_UNTIL_A_RADIAL_SCALE_DEFECT_IS_ISOLATED")
     decision["patient_heldout_scores_computed"] = False
     decision["l1_provenance"] = provenance
     atomic_write_json(decision, decision_path)
