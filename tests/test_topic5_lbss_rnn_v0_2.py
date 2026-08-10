@@ -3,6 +3,10 @@ from __future__ import annotations
 import numpy as np
 import torch
 
+from scripts.run_topic5_lbss_detectability_v0_2 import (
+    build_ground_truth_model,
+    simulate_events,
+)
 from src.topic5_lbss_rnn_v0_2 import (
     LBSSConfig,
     LBSSModel,
@@ -139,3 +143,17 @@ def test_snapshot_and_checkpoint_contract():
     assert epochs["SNAPSHOT_MASK_FREEZE"] == 49
     assert not checkpoint_is_eligible(48, epochs["SNAPSHOT_MASK_FREEZE"])
     assert checkpoint_is_eligible(49, epochs["SNAPSHOT_MASK_FREEZE"])
+
+
+def test_detectability_generator_uses_real_geometry_schema():
+    distance = line_distance(8).astype(np.float32)
+    plane = {
+        "D_mm": distance,
+        "H": np.eye(8, dtype=np.float32),
+    }
+    model, planted = build_ground_truth_model(plane, seed=3)
+    ranks = simulate_events(model, n_events=12, seed=4)
+    assert ranks.shape == (12, 8)
+    assert int(planted.sum()) == model.lbss_config.k_added
+    assert np.all((ranks >= 0).sum(axis=1) >= 5)
+    assert np.all((ranks == 0).sum(axis=1) == 1)
