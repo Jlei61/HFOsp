@@ -728,11 +728,14 @@ def render_stage(out_root: Path, stage: str):
         empirical_a, empirical_b, _ = build_interictal_ab_panel_payloads(record)
         _, model_a, model_b = model_field_payloads(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
         grid = root.subgridspec(1, 5, width_ratios=[1, 1, 1, 1, 1.15], wspace=0.15)
-        for col, (payload, title) in enumerate(((empirical_a, "Data TA"), (model_a, "RNN TA"),
-                                                (empirical_b, "Data TB"), (model_b, "RNN TB"))):
+        for col, (payload, title, title_color) in enumerate(
+            ((empirical_a, "Data TA", TA_RED), (model_a, "RNN TA", TA_RED),
+             (empirical_b, "Data TB", TB_BLUE), (model_b, "RNN TB", TB_BLUE))
+        ):
             ax = fig.add_subplot(grid[0, col])
             draw_topic5_field_panel(ax, payload, payload["vals"], title, "", compact=True,
-                                    contact_size=23, contact_outline_lw=0.6)
+                                    contact_size=23, contact_outline_lw=0.6,
+                                    title_color=title_color)
         ax = fig.add_subplot(grid[0, 4])
         frame = rows(out_root / "model_field_patient_metrics.csv")
         data = {model: [row["matched_empirical_r"] for row in frame

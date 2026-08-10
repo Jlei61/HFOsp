@@ -22,6 +22,7 @@ VISUAL_QA_STAGE_ITEMS = (
     "stage_fields_scientific_readout",
     "stage_motif_scientific_readout",
     "stage_early_scientific_readout",
+    "stage_early_start_ablation_sensitivity",
 )
 
 FOCUSED_TEST_FILES = (
@@ -32,7 +33,7 @@ FOCUSED_TEST_FILES = (
     "tests/test_topic5_we_train.py",
     "tests/test_topic5_wiring_economy_rnn.py",
 )
-EXPECTED_FOCUSED_TESTS = 138
+EXPECTED_FOCUSED_TESTS = 139
 
 
 def load(path: Path) -> Any:
