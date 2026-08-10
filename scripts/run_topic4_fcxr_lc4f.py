@@ -54,6 +54,14 @@ def _load(path):
     return json.loads(Path(path).read_text())
 
 
+def _artifact_key(path: Path) -> str:
+    """Keep repo artifacts relative and cross-worktree evidence explicit."""
+    try:
+        return str(path.relative_to(ROOT))
+    except ValueError:
+        return str(path)
+
+
 def stage_lock():
     lc4c = _load(BASE / "lc4c_entry_offset_alignment/candidate_lock.json")
     rows = [_load(BASE / f"hill_placement_sweep/arm_gate76p64_Ky{k}p00.json")
@@ -67,7 +75,7 @@ def stage_lock():
                  Path(E01.ARTIFACTS["lc1_sensor"])]
     payload = dict(status="X0_PASS", verdict="X_DEPTH_CANDIDATE_IDENTIFIABLE",
                    candidate=candidate,
-                   artifacts={str(p.relative_to(ROOT)): sha256_file(p) for p in artifacts},
+                   artifacts={_artifact_key(p): sha256_file(p) for p in artifacts},
                    sources={p: sha256_file(ROOT / p) for p in SOURCES},
                    created=GEO._now())
     GEO._write_json(LOCK, payload)
