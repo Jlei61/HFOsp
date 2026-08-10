@@ -37,6 +37,9 @@ def main():
         raise ValueError("Node workers require the default alpha=0")
 
     output_dir = Path(args.output_dir)
+    if not output_dir.is_absolute():
+        output_dir = ROOT / output_dir
+    output_dir = output_dir.resolve()
     output_dir.mkdir(parents=True, exist_ok=True)
     launched, skipped = [], []
     for alpha in args.alphas:
@@ -53,7 +56,8 @@ def main():
             title = f"{args.arm} alpha={alpha:g} seed={seed}"
             command = [
                 "systemd-run", "--user", f"--unit={unit}",
-                "--property=Type=exec", f"--setenv=REV9_SYSTEMD_UNIT={unit}",
+                "--property=Type=exec", f"--working-directory={ROOT}",
+                f"--setenv=REV9_SYSTEMD_UNIT={unit}",
                 "/usr/bin/nohup", str(MANAGER), str(status), str(log), title,
                 commit[:8], str(PYTHON), str(PRODUCER), "--arm", args.arm,
                 "--alpha", str(alpha), "--seeds", str(seed),
