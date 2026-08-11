@@ -96,3 +96,20 @@
   initialization.
 - [ ] In a separate next phase, test packet-amplitude and SCL mass/total-budget
   curves before opening directional route support.
+
+## SA6F representation correction
+
+- [x] Reclassify SA6 as a constrained fixed-K3 component-3 relocation canary,
+  not a continuous-field capacity test.
+- [x] Remove `K`, component identity, and peak count from the primary field.
+- [x] Implement a continuous tensor-product cubic B-spline surface followed by
+  the existing exact field-mass projection.
+- [x] Use `4x4` controls as the matched-DoF primary (15 effective versus 17 for
+  K=3) and `6x6` only as a resolution sensitivity; controls are not cores.
+- [x] Build patient-training recruitment initializations with shaft-balanced
+  fitting weights and no shaft-assigned basis functions.
+- [ ] Launch up to 37 coefficient-unique fields on the same three paired SA6
+  networks using the common
+  detector and forced-source/readout contract.
+- [ ] Adjudicate representation capacity before packet-amplitude, budget,
+  connectivity, Edge, or `beta` experiments.

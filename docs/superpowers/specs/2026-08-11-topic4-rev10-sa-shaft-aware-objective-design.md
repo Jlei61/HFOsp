@@ -3,7 +3,7 @@
 ## 1. Scientific objective
 
 The only objective of rev10-SA is to determine whether patient-training data can
-drive the existing fixed-budget `K=3` node field to cover both ICL and SCL and to
+first test whether the existing fixed-budget `K=3` node field can cover both ICL and SCL and then, after the representation audit below, replace component allocation with a continuous non-component field to
 reproduce within- and cross-shaft propagation structure. Edge calibration,
 `beta`, topology expansion, optimizer comparison, slow variables, and patient
 generalization are outside the first phase.
@@ -342,3 +342,43 @@ amplitude curve on the strongest field, then SCL mass/total-budget curve, each
 with matched off-shaft controls. Only persistent ICL-to-SCL failure after that
 ladder justifies opening a directional route-support family. `beta` remains
 closed because no result has isolated a width/delay residual.
+
+### 8.3 Representation correction: SA6F continuous field
+
+The preceding SA6 did not test a free field. Its producer fixed the first two
+Gaussian components and assigned component 3 to the SCL relocation/weight scan.
+Its negative result is therefore renamed:
+
+```text
+FIXED_K3_COMPONENT3_RELOCATION_CANARY_NEGATIVE
+```
+
+It cannot adjudicate continuous-field capacity. SA6F removes `K`, component
+identity, and peak-count constraints from the primary representation. The
+latent field is a tensor-product cubic B-spline surface
+
+```text
+s(x,y) = sum_uv c_uv B_u(x) B_v(y)
+q(x,y) = exp(s(x,y))
+h       = project_to_fixed_mass(q)
+```
+
+The `4x4` primary surface has 16 coefficients and one mass-projection-redundant
+constant direction, hence 15 effective degrees of freedom, approximately
+matched to the old K=3 Gaussian's 17 parameters. A `6x6` surface is only a
+resolution sensitivity. Spline coefficients are numerical field controls, not
+cores; the field may produce any number of extrema or connected regions.
+
+Patient-training contact recruitment initializes the surface with equal total
+ICL/SCL fitting weight. No spline basis is assigned to a shaft. Mode-A and
+mode-B forced sources come from their patient earliest-ICL centroids rather
+than frozen Gaussian centers. K=3 remains one historical benchmark only.
+
+SA6F reuses network seeds `1031-1033` from the constrained SA6 so field
+representation is the paired experimental factor and the existing 500-MB
+network caches are reused. These are development networks, not independent
+confirmation seeds.
+
+SA6F precedes packet-amplitude, total-budget, Edge, `beta`, topology, and formal
+field optimization. Its result is exploratory and cannot support patient
+generalization.

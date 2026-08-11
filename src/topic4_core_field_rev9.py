@@ -28,6 +28,23 @@ def reconstruct_frozen_node(theta, pos_e, *, n_total, target_count,
     n_e = len(pos_e)
     h = params_to_h(np.asarray(theta, float), pos_e, int(K), float(L),
                     float(target_count))
+    return reconstruct_node_from_h(
+        h, n_total=n_total, quantile_seed=quantile_seed,
+        core_mean=core_mean, core_std=core_std, v_base=v_base,
+    )
+
+
+def reconstruct_node_from_h(h, *, n_total, quantile_seed, core_mean,
+                            core_std, v_base):
+    """Apply the frozen signed threshold depths to any valid continuous field."""
+    h = np.asarray(h, float)
+    if h.ndim != 1 or not len(h):
+        raise ValueError("h must be a non-empty one-dimensional E-neuron field")
+    if not np.isfinite(h).all() or np.any((h < 0.0) | (h > 1.0)):
+        raise ValueError("h must be finite and lie in [0, 1]")
+    n_e = len(h)
+    if int(n_total) < n_e:
+        raise ValueError("n_total cannot be smaller than the E-neuron field")
     quantiles = sample_core_quantiles(n_e, int(quantile_seed))
     d = signed_depth(core_thresholds(
         quantiles, float(core_mean), float(core_std)), float(v_base))

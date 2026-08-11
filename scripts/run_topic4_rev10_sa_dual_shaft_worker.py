@@ -13,7 +13,9 @@ import numpy as np
 
 sys.path.insert(0, os.getcwd())
 sys.path.insert(0, os.path.join("src", "snn_engine"))
-from scripts.freeze_topic4_rev10_sa_dual_shaft_candidates import build_manifest  # noqa: E402
+from scripts.freeze_topic4_rev10_sa_dual_shaft_candidates import (  # noqa: E402
+    build_manifest as build_k3_manifest,
+)
 from scripts.run_topic4_core_field_stage3_fit import _load_cmrun  # noqa: E402
 from scripts.run_topic4_rev9_node_kick_canary import _load_network  # noqa: E402
 from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
@@ -24,7 +26,11 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
     _sha256,
 )
 from src.sef_hfo_observation import VirtualMontage, extract_lagpat  # noqa: E402
-from src.topic4_core_field_rev9 import reconstruct_frozen_node  # noqa: E402
+from src.topic4_continuous_field import continuous_field_h  # noqa: E402
+from src.topic4_core_field_rev9 import (  # noqa: E402
+    reconstruct_frozen_node,
+    reconstruct_node_from_h,
+)
 from src.topic4_core_field_runner import _placement, atomic_write_json  # noqa: E402
 from src.topic4_forced_source_capacity import (  # noqa: E402
     exclude_injected_packet_frame,
@@ -66,6 +72,28 @@ def _event_rows(active, bin_width, threshold):
     return detect_events(active, bin_width, event_on_frac=float(threshold))
 
 
+def _candidate_node(candidate, positions, *, n_total, stage):
+    engine = stage["engine"]
+    if candidate.get("field_type") == "continuous_bspline":
+        h, _ = continuous_field_h(
+            candidate["coefficients"], positions,
+            n_basis=int(candidate["n_basis"]), degree=int(candidate["degree"]),
+            target_count=stage["N_core_manual"], L=engine["L"],
+        )
+        return reconstruct_node_from_h(
+            h, n_total=n_total, quantile_seed=stage["quantile_seed"],
+            core_mean=engine["core_mean"], core_std=engine["core_std"],
+            v_base=engine["v_base"],
+        )
+    return reconstruct_frozen_node(
+        candidate["theta"], positions, n_total=n_total,
+        target_count=stage["N_core_manual"],
+        quantile_seed=stage["quantile_seed"],
+        core_mean=engine["core_mean"], core_std=engine["core_std"],
+        v_base=engine["v_base"], K=3, L=engine["L"],
+    )
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
@@ -79,9 +107,24 @@ def main():
 
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
-    assay = config["sa6_dual_shaft_field"]
-    if assay["status"] != "DESIGN_FROZEN_SA5_READOUT_CLEARED":
-        raise RuntimeError("SA6 design is not cleared by SA5")
+    continuous = "sa6f_continuous_field" in config
+    if continuous:
+        assay = config["sa6f_continuous_field"]
+        if assay["status"] != "DESIGN_FROZEN_AFTER_K3_REPRESENTATION_AUDIT":
+            raise RuntimeError("SA6F continuous-field design is not frozen")
+        from scripts.freeze_topic4_rev10_sa_continuous_field_candidates import (  # noqa: E402
+            build_manifest as build_continuous_manifest,
+        )
+        manifest_builder = build_continuous_manifest
+        output_subdir = "continuous_field_capacity"
+        worker_status = "SA6F_CONTINUOUS_FIELD_WORKER_COMPLETE"
+    else:
+        assay = config["sa6_dual_shaft_field"]
+        if assay["status"] != "DESIGN_FROZEN_SA5_READOUT_CLEARED":
+            raise RuntimeError("SA6 design is not cleared by SA5")
+        manifest_builder = build_k3_manifest
+        output_subdir = "dual_shaft_capacity"
+        worker_status = "SA6_DUAL_SHAFT_WORKER_COMPLETE"
     if assay["arm"] != "Node_only" or assay["edge"] != "off" or assay["beta"] != "closed":
         raise RuntimeError("SA6 must remain Node-only with edge and beta closed")
     if args.seed not in {int(value) for value in assay["network_seeds"]}:
@@ -93,7 +136,7 @@ def main():
     sa5 = _load_json_input(inputs["sa5_summary"])
     if sa5["status"] != "SCL_READOUT_NOT_PRIMARY_LIMIT":
         raise RuntimeError("SA5 status changed")
-    manifest = build_manifest(config_path, args.expected_commit)
+    manifest = manifest_builder(config_path, args.expected_commit)
     matches = [row for row in manifest["candidate_set"]["candidates"]
                if row["candidate_id"] == args.candidate_id]
     if len(matches) != 1:
@@ -112,7 +155,7 @@ def main():
             and not provenance["runtime_modules_match_expected_commit"]):
         raise RuntimeError("SA6 runtime modules differ from launcher commit")
 
-    output_root = ROOT / config["output_root"] / "dual_shaft_capacity"
+    output_root = ROOT / config["output_root"] / output_subdir
     stem = f"{args.candidate_id}_seed_{args.seed}"
     output_json = Path(args.out_json or output_root / "workers" / f"{stem}.json")
     output_npz = Path(args.out_npz or output_root / "workers" / f"{stem}.npz")
@@ -143,12 +186,8 @@ def main():
         params, stage, reg, int(args.seed), base, cache_dir,
     )
     positions = np.asarray(net["pos"][:n_e], float)
-    node = reconstruct_frozen_node(
-        candidate["theta"], positions, n_total=n_e + n_i,
-        target_count=stage["N_core_manual"],
-        quantile_seed=stage["quantile_seed"],
-        core_mean=engine["core_mean"], core_std=engine["core_std"],
-        v_base=engine["v_base"], K=int(assay["K"]), L=engine["L"],
+    node = _candidate_node(
+        candidate, positions, n_total=n_e + n_i, stage=stage,
     )
     if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
         raise RuntimeError("SA6 field budget projection failed")
@@ -307,8 +346,11 @@ def main():
         delta_vtheta=np.asarray(node["delta_vtheta"], np.float32),
     )
     payload = {
-        "status": "SA6_DUAL_SHAFT_WORKER_COMPLETE",
-        "scientific_role": "exploratory fixed-budget Node-only field capacity",
+        "status": worker_status,
+        "scientific_role": (
+            "exploratory non-component continuous Node-field capacity"
+            if continuous else "exploratory fixed-K3 component-relocation canary"
+        ),
         "candidate": candidate,
         "seed": int(args.seed),
         "runs": run_rows,

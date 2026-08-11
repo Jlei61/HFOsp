@@ -8,7 +8,7 @@
 
 rev10-SA 第一阶段已经回答了“旧目标是否看不见 SCL”这个问题：答案是**是**。新的目标能稳定识别 SCL 删除、跨杆 timing 改变和 0/4 到 4/4 的连续恢复；但现有历史产物还不能证明“旧 objective 选错了某个已有 field”，因为真正的 48 个 field-fit 候选没有保存逐事件固定 contact 数据。
 
-SA5 contact detectability 已经完成并排除 SCL observation 主限制。当前可继续进入 SA6 fixed-budget dual-shaft field canary；仍不能直接进入 field optimizer、Edge、`beta` 或 topology 扩展。
+SA5 contact detectability 已经完成并排除 SCL observation 主限制。SA6 随后只完成了 fixed-K3 component-3 relocation canary；它不是连续自由场容量测试。当前进入 SA6F continuous-field correction，仍不直接开放 Edge、`beta` 或 topology。
 
 ## 2. 完成程度
 
@@ -123,7 +123,7 @@ L3: rho=0.129, n=57, p=0.338
 
 六张网络均使用每 contact `160` 个、半径 `1 mm` 的等量 E-cell packet。SCL/ICL current gain 为 `0.961 [0.934, 0.986]`，local neural response 为 `0.953 [0.942, 0.985]`，两杆 detector margin 均为 100% 正值。结论是 `SCL_READOUT_NOT_PRIMARY_LIMIT`：SCL 在同等局部活动下可被当前 virtual-contact readout 正常读出。
 
-### SA6 fixed-budget dual-shaft field canary
+### SA6 fixed-K3 component-3 relocation canary
 
 ![rev10-SA dual-shaft capacity](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary/dual_shaft_capacity/figures/rev10_sa_dual_shaft_capacity.png)
 
@@ -141,14 +141,14 @@ threshold-lowered neurons      69.7%
 
 但该候选的 ICL-A -> SCL 和 ICL-B -> SCL 招募仍均为 `0`。反向的 SCL packet 在 `2/3` 网络能触及至少一个 ICL contact，不过平均只招募 `0.061` 的 ICL contacts。短 spontaneous 总共检测到 `14` 个事件，全部返回、`0` 个 multishaft event。
 
-因此最窄的结论是：**tested field-allocation grid 没找到 dual-shaft capacity，且残差更像 cross-shaft access/route 或强度预算问题，而不是 observation failure。** 这不能外推成所有 K=3 固定预算 fields 都失败。
+因此最窄的结论是：**固定两个 ICL Gaussian、只移动并调节第三个 component 的 2+1 分配没有产生 ICL→SCL 传播。** 它既不能外推成所有 K=3 fields 失败，也不能裁定连续自由场容量。
 
 ## 7. 最小修改路线
 
-1. 暂不进入 SA7 optimizer，因为没有 known-good dual-shaft initialization。
-2. 先在 strongest SCL field 上做 packet amplitude curve，判断 ICL->SCL 是阈值不足还是完全缺 route。
-3. 再做 SCL mass fraction 与 total field budget curve，分别检验分配与总强度。
-4. 若 ICL->SCL 仍为零而 SCL->ICL 保留，再设计 directional route-support family；`beta` 继续关闭。
+1. 先运行无 K、无 component/峰数约束的 continuous B-spline field canary。
+2. 以 4×4 控制面作为 matched-DoF primary，6×6 只作分辨率敏感性；控制系数不是 core。
+3. 只有 continuous field 仍不能产生 ICL→SCL 时，才运行 packet-amplitude 与总 field-budget curve。
+4. 若上述实验仍显示方向性不可达，再设计 directional route-support；`beta` 继续关闭。
 
 ## 8. 当前状态
 
@@ -163,9 +163,9 @@ OLD_OBJECTIVE_FIELD_SELECTION_MISS_NOT_TESTABLE
 /
 SCL_READOUT_NOT_PRIMARY_LIMIT
 /
-DUAL_SHAFT_FIELD_CAPACITY_NOT_FOUND_IN_TESTED_GRID_CANARY
+FIXED_K3_COMPONENT3_RELOCATION_CANARY_NEGATIVE
 /
-SA7_FIELD_REFIT_NOT_JUSTIFIED
+CONTINUOUS_NONCOMPONENT_FIELD_CAPACITY_RUNNING_NEXT
 ```
 
-这条线已排除 observation 层解释，也证明简单 relocation 与 `w_SCL<=0.35` 的 width grid 不足。下一轮应先用强度/packet ladder 区分“阈值不够”和“route 不通”，而不是把同一个不具备已知可行区的目标直接交给 CMA-ES。
+这条线已排除 observation 层解释，也证明简单 component-3 relocation 与 `w_SCL<=0.35` 的 width grid 不足。它没有测试自由场；下一轮先让患者训练目标驱动连续二维场，再决定是否需要强度或 connectivity 机制诊断。
