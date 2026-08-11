@@ -628,3 +628,35 @@ capacity signal; it does not establish patient recovery. Only then may V5
 optimize continuous spline/KL coefficients on separated fit and selection
 network pools. `K`, Edge, `beta`, topology, and observation-conditioned support
 priors remain closed.
+
+V4.1 completed `21/21` workers with zero failure and zero runaway. The stable
+spline bridge preserved the V3 shaft partition on the paired seed. In
+particular, uniform 09 changed from `3 joint + 3 ICL-only` to
+`2 joint + 4 ICL-only`, while uniform 12 changed from
+`2 joint + 9 SCL-only` to `4 joint + 9 SCL-only`. The selected exploratory
+bridge field is uniform 12 with joint fraction `4/13=0.308`; uniform 09 has
+`2/6=0.333`. Both remain far below patient train joint fractions near 0.95, and
+both have high OOD. The safe result is stable-coordinate capacity preservation,
+not patient repertoire recovery.
+
+V5 is an adaptive continuous interpolation round on fit seed 1031. Its four
+anchors are selected by a frozen non-spatial rule: the Stage 3 reference, the
+two highest-joint V4.1 candidates, and one additional lowest-route candidate.
+The resulting source IDs are uniform 09, uniform 12, uniform 06, and the Stage
+3 reference. This use of patient-training score is optimizer feedback; it does
+not change the uniform `18 x 18` basis or add parameters near contacts.
+
+For every unordered anchor pair, V5 freezes three interior fractions under two
+continuous paths:
+
+```text
+s_t = (1-t) s_left + t s_right
+q_t = (1-t) exp(s_left) + t exp(s_right),  s_t = log(q_t)
+```
+
+Together with the four anchors this gives 40 coefficient-unique fields. The
+first path interpolates the latent log field; the second preserves a union of
+positive density support. Neither path defines components or cores. Values on
+unobserved sheet regions remain smooth-prior extensions and are not identified
+by patient data. V5 is fit-only; a diverse subset must be evaluated on network
+seeds 1032/1033 before any fresh-seed confirmation.

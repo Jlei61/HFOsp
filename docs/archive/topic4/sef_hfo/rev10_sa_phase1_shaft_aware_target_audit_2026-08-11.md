@@ -263,3 +263,16 @@ REV10SA_V4_NO_JOINT_SHAFT_CANDIDATE
 `0.00316`、最小相关 `0.99975`、最小 top-5% Jaccard `0.971`、条件数 `27.53`；field
 builder 仍不读取 contact、shaft、patient event 或 V3 score。V4.1 先验证表示桥接，再开放
 V5 连续系数优化；不增加 K/core，Edge 与 `beta` 继续关闭。
+
+V4.1 随后完成 `21/21` workers，零失败、零 runaway。uniform 09 在同 seed 上从 V3 的
+`3 joint + 3 ICL-only` 变为 spline 的 `2 joint + 4 ICL-only`；uniform 12 从
+`2 joint + 9 SCL-only` 变为 `4 joint + 9 SCL-only`。因此稳定 spline 保留了旧场的
+shaft capacity，但最佳 joint fraction 仍只有 `0.333`，远低于患者约 `0.95`，且事件云
+高 OOD。这是表示桥接通过，不是患者模式恢复。
+
+V5 使用冻结规则从训练 seed 选四个锚点：Stage 3 参考、两个最高 joint 场 uniform 09/12、
+一个额外最低 route 场 uniform 06。患者训练目标只作为 optimizer feedback；18×18 均匀
+basis、每处空间分辨率和正则化不变。对 6 对锚点分别构建 latent-linear 与 density-mixture
+两条连续路径，每条取 `t=0.25/0.5/0.75`，加四个锚点共 40 个场。未观测区域仍是平滑先验
+延拓，不能声称由患者数据识别。V5 先在 1031 拟合，再把多样 Pareto subset 带到
+1032/1033；不增加 K/core，Edge、`beta` 和 topology 继续关闭。

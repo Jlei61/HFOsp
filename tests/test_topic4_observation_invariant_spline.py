@@ -34,6 +34,9 @@ def test_uniform_spline_coordinates_are_stable_and_observation_free():
     from scripts.freeze_topic4_rev10_sa_spline_bridge_v41_candidates import (
         build_candidates as build_bridge_candidates,
     )
+    from scripts.freeze_topic4_rev10_sa_spline_interpolation_v5_candidates import (
+        build_candidates as build_interpolation_candidates,
+    )
 
     grid = uniform_sheet_grid(32, L=20.0)
     basis = tensor_basis(grid, 10, degree=3, L=20.0)
@@ -44,7 +47,7 @@ def test_uniform_spline_coordinates_are_stable_and_observation_free():
     for function in (
         uniform_allocation_centers, fit_uniform_surface,
         allocation_direction, sample_smooth_residual_pairs, build_candidates,
-        build_bridge_candidates,
+        build_bridge_candidates, build_interpolation_candidates,
     ):
         assert forbidden.isdisjoint(inspect.signature(function).parameters)
 
@@ -94,3 +97,25 @@ def test_joint_shaft_selection_is_fail_closed_but_keeps_diagnostic():
     rows[1]["n_joint"] = 1
     verdict = _selection_verdict(rows, config)
     assert verdict["selected"]["candidate_id"] == "other"
+
+
+def test_v5_anchor_selection_uses_scores_not_spatial_metadata():
+    from scripts.freeze_topic4_rev10_sa_spline_interpolation_v5_candidates import (
+        select_anchor_ids,
+    )
+
+    rows = [
+        {"candidate_id": "reference", "n_joint": 0, "joint_fraction": 0.0,
+         "selection_score": 8.0, "route_score": 8.0, "n_runaway_networks": 0},
+        {"candidate_id": "joint_high", "n_joint": 2, "joint_fraction": 0.4,
+         "selection_score": 5.0, "route_score": 5.0, "n_runaway_networks": 0},
+        {"candidate_id": "joint_low", "n_joint": 1, "joint_fraction": 0.2,
+         "selection_score": 4.0, "route_score": 4.0, "n_runaway_networks": 0},
+        {"candidate_id": "route", "n_joint": 0, "joint_fraction": 0.0,
+         "selection_score": 3.0, "route_score": 2.0, "n_runaway_networks": 0},
+    ]
+    selected = select_anchor_ids(
+        {"candidate_rows": rows}, reference_id="reference",
+        joint_count=2, route_count=1,
+    )
+    assert selected == ["reference", "joint_high", "joint_low", "route"]

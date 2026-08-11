@@ -188,10 +188,13 @@
   library has no joint event.
 - [x] Freeze V4.1 as a complete 21-field V3-to-`18 x 18` spline bridge with no
   score-based source selection; preflight maximum `h` RMSE is `0.00316`.
-- [ ] Run all 21 V4.1 bridge candidates on paired seed 1031 and verify that the
-  stable field representation preserves at least one joint-event capacity case.
-- [ ] If V4.1 passes, construct V5 in a uniform low-frequency spline/KL
-  coefficient subspace around the bridged feasible fields; fit on 1031 and
-  select on 1032/1033 without contact-conditioned basis functions.
+- [x] Run all 21 V4.1 bridge candidates on paired seed 1031; all workers were
+  clean and stable, and uniform 09/12 retained joint-event capacity.
+- [x] Freeze V5 with four score-selected but spatially unconditioned anchors and
+  all pairwise latent-linear/density-mixture interpolation paths, for 40 unique
+  continuous fields.
+- [ ] Run the 40-candidate V5 fit screen on seed 1031 with bounded workers.
+- [ ] Carry a diverse V5 subset, not only the scalar minimum, to seeds
+  1032/1033 without contact-conditioned basis functions.
 - [ ] Confirm the frozen V4/V5 winner on fresh development network seeds and
   state the patient-generalization boundary.

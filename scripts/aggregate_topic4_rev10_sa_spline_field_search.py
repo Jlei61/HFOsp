@@ -276,6 +276,9 @@ def _plot_search(summary, manifest, config, output_root):
         "observation_free_smooth_random_residual": ("^", "#E15759", "random field"),
         "uniform_negative_control": ("s", "#7F7F7F", "uniform control"),
         "v3_spectral_to_spline_bridge": ("D", "#4E79A7", "V3 spline bridge"),
+        "adaptive_training_anchor": ("D", "#111111", "training anchor"),
+        "adaptive_latent_linear_interpolation": ("o", "#4E79A7", "latent interpolation"),
+        "adaptive_density_mixture_interpolation": ("^", "#E15759", "density interpolation"),
     }
     for role in sorted({row["role"] for row in rows}):
         marker, color, label = role_styles.get(role, ("o", "#7F7F7F", role))
