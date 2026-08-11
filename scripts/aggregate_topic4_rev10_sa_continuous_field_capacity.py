@@ -75,6 +75,7 @@ def _plot(summary, manifest, output_root, *, support_control=False):
     candidates = {row["candidate_id"]: row
                   for row in manifest["candidate_set"]["candidates"]}
     rows = summary["candidate_rows"]
+    row_by_id = {row["candidate_id"]: row for row in rows}
     if support_control:
         disconnected = [row for row in rows
                         if row["representation_role"] == "continuous_disconnected_support"]
@@ -134,6 +135,19 @@ def _plot(summary, manifest, output_root, *, support_control=False):
         ax.set_xlim(0, 20)
         ax.set_ylim(0, 20)
         ax.set_title(f"{chr(65 + column)}  {title}", loc="left", weight="bold")
+        if support_control:
+            path = row_by_id[candidate_id]["field_near_path"]
+            bridge_text = (
+                f" | bridge h={path['bridge_mean_h']:.2f}"
+                if "bridge_mean_h" in path else ""
+            )
+            ax.text(
+                0.02, 0.02, f"actual path h={path['mean_h']:.2f}{bridge_text}",
+                transform=ax.transAxes, fontsize=7.5, color="white",
+                ha="left", va="bottom",
+                bbox={"facecolor": "black", "alpha": 0.55, "pad": 2,
+                      "edgecolor": "none"},
+            )
         ax.set_xlabel("sheet x (mm)")
         if column == 0:
             ax.set_ylabel("sheet y (mm)")
@@ -463,9 +477,9 @@ def main():
                      if row["forced_both_mode_SCL_network_fraction"] >= 2 / 3]
     if support_control:
         status = (
-            "CONTINUOUS_CONNECTED_SUPPORT_CROSS_SHAFT_OBSERVED_EXPLORATORY"
+            "NO_K_CONTINUOUS_CONNECTED_FIELD_CROSS_SHAFT_OBSERVED_EXPLORATORY"
             if cross_support else
-            "CONTINUOUS_CONNECTED_SUPPORT_NO_CROSS_SHAFT_SUPPORT"
+            "NO_K_CONTINUOUS_CONNECTED_FIELD_FAILS_CROSS_SHAFT_AT_FIXED_PACKET_AND_BUDGET"
         )
     else:
         status = (

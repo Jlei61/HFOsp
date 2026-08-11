@@ -126,9 +126,14 @@
 - [x] Freeze widths 0.10/0.20/0.35/0.50 mm at the same exact field-mass budget.
 - [x] Verify dense-sheet projected path strength before simulation: mean
   `h=0.535-1.000` within 0.25 mm of the path.
-- [ ] Launch eight fields x three paired networks through systemd-run -> nohup,
+- [x] Launch eight fields x three paired networks through systemd-run -> nohup,
   using at most 12 workers and 120-second waits.
-- [ ] Aggregate actual projected path/bridge `h`, directional forced response,
+- [x] Aggregate actual projected path/bridge `h`, directional forced response,
   spontaneous events, return, and safety.
-- [ ] Adjudicate continuous support capacity before packet-amplitude, budget,
-  connectivity, Edge, or `beta` experiments.
+- [x] Freeze the result as no cross-shaft support at fixed packet and budget:
+  bridge mean `h=0.528-0.907`, all 24 workers clean, zero ICL-to-SCL contacts,
+  zero runaway.
+- [ ] Next phase: run a small paired packet-amplitude curve on connected fields;
+  only then run a total-budget curve if needed.
+- [ ] Open directional route support only after packet/budget ambiguity is
+  removed; keep Edge and `beta` closed.

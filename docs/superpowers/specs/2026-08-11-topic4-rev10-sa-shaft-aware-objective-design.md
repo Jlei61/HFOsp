@@ -430,3 +430,29 @@ not the patient-fit field. The formal patient fit remains a free continuous
 spline/RKHS field optimized directly with the shaft-aware SNN objective and a
 smoothness penalty; basis resolution is numerical discretization, never a core
 count. `beta`, Edge, and topology remain closed until SA6G is adjudicated.
+
+#### SA6G result
+
+All `8 x 3 = 24` workers completed from clean commit `425e8b36`, with no
+runaway. In the four connected fields, actual bridge mean `h` was
+`0.528-0.907`; `74.4-98.0%` of bridge-near neurons had `h>=0.5`. Despite this,
+both patient-derived ICL forced sources recruited zero SCL contacts in every
+candidate and every network. SCL forcing reached only approximately one of 11
+ICL contacts on average (`0.061`). No connected field generated a spontaneous
+event in the 400-ms canary; the disconnected narrow controls generated five
+events, all returned and none were multishaft.
+
+The frozen status is:
+
+```text
+NO_K_CONTINUOUS_CONNECTED_FIELD_FAILS_CROSS_SHAFT_AT_FIXED_PACKET_AND_BUDGET
+```
+
+This result removes fixed core count and weak bridge field as explanations for
+the current failure. It still does not prove a connectivity-family failure,
+because packet amplitude and total excitability budget remain frozen. The next
+small experiment is a paired packet-amplitude curve on the connected fields,
+followed only if needed by a total-budget curve. If ICL-to-SCL access remains
+zero while local ICL propagation and SCL-to-ICL response persist, a directional
+route-support family is justified. `beta` remains closed because the residual
+is reachability, not demonstrated width or delay mismatch.

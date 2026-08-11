@@ -167,7 +167,7 @@ FIXED_K3_COMPONENT3_RELOCATION_CANARY_NEGATIVE
 /
 LOW_RESOLUTION_CONTINUOUS_INITIALIZATION_NO_CROSS_SHAFT_SUPPORT
 /
-NO_K_CONTINUOUS_SUPPORT_CAPACITY_RUNNING_NEXT
+NO_K_CONTINUOUS_CONNECTED_FIELD_FAILS_CROSS_SHAFT_AT_FIXED_PACKET_AND_BUDGET
 ```
 
 SA6F 已完成 `37 x 3 = 111` 个无 K B-spline workers，零 runaway，但没有
@@ -176,7 +176,13 @@ ICL-to-SCL recruitment。该结果仍不能裁定连续场或 connectivity：最
 候选把 mode-A ICL precedence excess 从约 `2.99` 降到 `0.393`，说明连续场能
 改变杆内限制项，但没有解决 SCL。
 
-下一步 SA6G 不增加 core 或 `K`，而使用到双杆路径的连续距离场，并比较有/无最短
-跨杆桥。8 个固定质量候选的 dense-sheet 预检显示路径 0.25 mm 内平均
-`h=0.535-1.000`。它是场强充分的 capacity positive control，不是患者拟合；若仍
-不能跨杆，才进入 packet/budget 或 connectivity 机制诊断。
+SA6G 已完成 `8 x 3 = 24` 个 workers，全部 clean、零 runaway。四个已连接场的
+真实 bridge mean `h=0.528-0.907`，bridge-near `h>=0.5` 比例为
+`74.4-98.0%`；但两个 ICL source 在所有场和所有网络中均为 0 个 SCL contacts。
+SCL 反向只平均触及约 1/11 个 ICL contacts。5 个短 spontaneous events 全部来自
+disconnected narrow controls，全部返回、无 multishaft event。
+
+因此已排除“固定 K/core 数”和“桥上场太弱”作为当前阴性的主要解释，但还不能直接写
+connectivity family fail：packet amplitude 与总 field budget 尚未扫。下一步先做小型
+packet-amplitude curve，再视结果做 budget curve；只有持续 ICL→SCL=0 才开放
+directional route-support，`beta` 继续关闭。
