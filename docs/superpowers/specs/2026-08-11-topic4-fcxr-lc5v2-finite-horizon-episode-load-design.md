@@ -106,6 +106,27 @@ Z/H 动态，X=1，M=0，未来外源输入由 checkpoint RNG 连续产生。每
 
 两边不得同时扩展。
 
+### 5.1 2026-08-12 结果驱动的低剂量 bracket 修订
+
+首轮与第一次向下 bracket 已实际证明 `Gamma=0.025,0.050,0.075,0.10,0.25`
+全部为 `IMMEDIATE_SUPPRESSION`；其中 `Gamma=0.025` 在分叉首时刻的群体平均
+`I_U=0.5254`，而同一时刻 `I_EE_force=0.0907`。这说明原注册强度轴没有夹住
+动力学边界，不能把“全在过抑制侧”误写成 U 机制阴性。
+
+因此授权一次、仅一次更低的机制定位 bracket：
+
+```text
+tau_U = 8 s
+Gamma_U = 0.001, 0.003, 0.005, 0.010
+```
+
+四点均继续使用同一 exact onset、同一 `u_i/p0_i`、同一未来外源输入和同一解析
+`Imax(Gamma)`；不改 gate、不改方程、不改 Z/H。该 bracket 的唯一任务是区分
+`ESCALATING_SATURATION -> CONTAINED/FINITE -> IMMEDIATE_SUPPRESSION` 是否存在中间区。
+在四点落地前不得继续向更低剂量追加点；若出现 contained/finite，立即停止强度扩展并按
+§7 转入时间尺度比较。若四点仍只给 saturation 与 immediate suppression、没有中间类，
+则报告 fast substrate 在该执行通路上呈陡峭 switching，不以无限细化网格抢救。
+
 ## 6. U2 标签与核心 gate
 
 - `ESCALATING_SATURATION`：继续进入既有 refractory/saturation class；
@@ -133,7 +154,9 @@ U3 只在出现 finite excursion 后启动；从 t=0 `u=0`、U 始终在线，�
 
 ## 8. 资源与授权
 
-40k 严格单 worker；线程数全 1；每次提交前检查 sibling、MemAvailable 和 swap。swap 相对该 stage
+每个 40k arm 内部严格单 worker、线程数全 1。经用户明确授权，独立 U2 arms 可在资源
+preflight 后并行，最多 4 臂；并行前按本线实测单臂峰值 RSS 的 1.5 倍逐臂预算，且
+`MemAvailable` 必须至少为总预算的 3 倍。每次提交前检查 sibling、MemAvailable 和 swap。swap 相对该 stage
 基线 +256 MiB 停止新提交，+512 MiB 保存 rolling checkpoint 后终止当前 worker。每个 U2 7 s arm
 使用实测 cost 生成 wall guard，初始上限 5 h，可由首臂实测更新；不得把整个 U3 塞进 12 h 单任务。
 

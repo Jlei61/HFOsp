@@ -67,6 +67,22 @@ control 必须复现原 pump-off onset prefix；不一致则 `U2_CONTROL_MISMATC
 若 0.25 与 control 有核心分离，补 0.10、0.40；否则先判断 dose 是否实际送达，再决定是否按 spec
 追加 0.60。不得默认跑满。
 
+### T3.1 — 2026-08-12 低剂量边界定位
+
+已有结果显示 `Gamma=0.025--0.25` 全为 `IMMEDIATE_SUPPRESSION`，且 exact-load 审计排除了
+粗时间步重放污染。按同步修订后的 spec，只运行：
+
+```text
+tau8_gamma0001
+tau8_gamma0003
+tau8_gamma0005
+tau8_gamma0010
+```
+
+四臂使用同一输入/状态/判决器并可资源安全地并行；每臂内部仍为单 worker、单线程。
+完成后生成统一 branch table。出现 `CONTAINED_HIGH_NO_OFFSET` 或
+`FINITE_EXCURSION_OFFSET` 即停止强度轴并进入 tau 比较；四点均无中间类则停止继续细化。
+
 输出 `u2a_branch_map.json` 与诊断图；只有核心动力学结果出现后再跑广泛回归和确认 seed。
 
 ## T4 — 工程合同
@@ -74,7 +90,9 @@ control 必须复现原 pump-off onset prefix；不一致则 `U2_CONTROL_MISMATC
 - `mz_slow_vars.py` 如不需修改则保持 hash；若修改必须单独 mechanism hash；
 - 六个 blessed engine 文件不改；
 - pump-off/control exact prefix parity；
-- `setsid nohup` + flock + PID + sentinel；
+- `setsid nohup` + arm-scoped flock + PID + sentinel；
+- 用户已授权 OOM-safe 并行；最多 4 个独立 U2 arm，按实测 6.8 GiB/arm 的 1.5 倍预算，
+  启动时 `MemAvailable` 至少为总预算 3 倍，swap 增量门不变；
 - 资源守卫在每个 simulation chunk 后执行；
 - 用户文件 `scripts/nohup_subject_capture.sh` 不碰；
 - 不 push/merge。
