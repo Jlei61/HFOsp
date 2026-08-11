@@ -2,6 +2,8 @@ import inspect
 
 import numpy as np
 
+from scripts.launch_topic4_rev10_sa_spectral_field_search import NUMERIC_ENV
+
 from src.topic4_continuous_field import continuous_surface, tensor_basis
 from src.topic4_observation_invariant_spline import (
     allocation_direction,
@@ -10,6 +12,19 @@ from src.topic4_observation_invariant_spline import (
     uniform_allocation_centers,
 )
 from src.topic4_spectral_field import uniform_sheet_grid
+
+
+def test_spline_search_limits_each_numeric_runtime_to_one_thread():
+    assert NUMERIC_ENV
+    assert set(NUMERIC_ENV.values()) == {"1"}
+    assert {
+        "BLIS_NUM_THREADS",
+        "OPENBLAS_NUM_THREADS",
+        "OMP_NUM_THREADS",
+        "MKL_NUM_THREADS",
+        "NUMEXPR_NUM_THREADS",
+        "VECLIB_MAXIMUM_THREADS",
+    } <= set(NUMERIC_ENV)
 
 
 def test_uniform_spline_coordinates_are_stable_and_observation_free():

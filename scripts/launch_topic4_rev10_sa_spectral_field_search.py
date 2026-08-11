@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import os
 import subprocess
 import time
 from pathlib import Path
@@ -19,6 +20,14 @@ WORKER = ROOT / "scripts/run_topic4_rev10_sa_spectral_field_worker.py"
 AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_sa_spectral_field_search.py"
 V4_AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_sa_spline_field_search.py"
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_sa_observation_invariant_field.json"
+NUMERIC_ENV = {
+    "BLIS_NUM_THREADS": "1",
+    "OPENBLAS_NUM_THREADS": "1",
+    "OMP_NUM_THREADS": "1",
+    "MKL_NUM_THREADS": "1",
+    "NUMEXPR_NUM_THREADS": "1",
+    "VECLIB_MAXIMUM_THREADS": "1",
+}
 
 
 def _sha256(path):
@@ -83,7 +92,7 @@ def main():
     subprocess.run([
         str(PYTHON), str(freezer), "--config", str(config_path),
         "--expected-commit", commit, "--out", str(manifest_path),
-    ], cwd=ROOT, check=True)
+    ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
     manifest = json.loads(manifest_path.read_text())
     candidates = [
         row["candidate_id"] for row in manifest["candidate_set"]["candidates"]
@@ -138,6 +147,7 @@ def main():
                 "systemd-run", "--user", "--collect", f"--unit={unit}",
                 "--property=Type=exec", f"--working-directory={ROOT}",
                 f"--setenv=REV10SA_SYSTEMD_UNIT={unit}",
+                *[f"--setenv={key}={value}" for key, value in NUMERIC_ENV.items()],
                 "/usr/bin/nohup", str(MANAGER), str(job["status"]),
                 str(job["log"]),
                 f"spectral {job['candidate']} seed={job['seed']}", commit[:8],
@@ -161,7 +171,7 @@ def main():
     subprocess.run([
         str(PYTHON), str(aggregator), "--config", str(config_path),
         "--expected-commit", commit,
-    ], cwd=ROOT, check=True)
+    ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
     subprocess.run([
         "notify-send", "Topic 4 rev10-SA",
         f"Observation-invariant spectral search completed: {len(completed)}/{len(jobs)}",
