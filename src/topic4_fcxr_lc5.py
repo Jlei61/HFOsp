@@ -424,6 +424,110 @@ def json_sanitize(value, *, max_array_elements=10000):
     raise TypeError(f"unsupported JSON value {type(value).__name__}")
 
 
+def resource_stop_reason(
+    *,
+    swap_used_mib: float,
+    swap_baseline_mib: float,
+    self_rss_gib: float,
+    self_rss_baseline_gib: float,
+    hold_delta_mib: float = 256.0,
+    kill_delta_mib: float = 512.0,
+):
+    """Design §12 swap guard: hold new submissions at +256 MiB, kill this worker at +512 MiB.
+
+    The verdict depends only on total swap growth because that is what the contract bounds.  The
+    record also carries this worker's own resident growth, so a stop driven by sibling pressure
+    stays distinguishable from a stop this worker caused.
+    """
+
+    if not all(np.isfinite(v) for v in (swap_used_mib, swap_baseline_mib)):
+        raise ValueError("swap readings must be finite")
+    if not all(np.isfinite(v) for v in (self_rss_gib, self_rss_baseline_gib)):
+        raise ValueError("rss readings must be finite")
+    if not (np.isfinite(hold_delta_mib) and hold_delta_mib > 0.0):
+        raise ValueError("hold_delta_mib must be finite and positive")
+    if not (np.isfinite(kill_delta_mib) and kill_delta_mib >= hold_delta_mib):
+        raise ValueError("kill_delta_mib must be finite and at or above hold_delta_mib")
+    delta = float(swap_used_mib) - float(swap_baseline_mib)
+    if delta >= float(kill_delta_mib):
+        action = "TERMINATE_NEWEST_WORKER"
+    elif delta >= float(hold_delta_mib):
+        action = "HOLD_NEW_SUBMISSIONS"
+    else:
+        action = None
+    return {
+        "action": action,
+        "swap_delta_mib": delta,
+        "self_rss_delta_mib": (float(self_rss_gib) - float(self_rss_baseline_gib)) * 1024.0,
+        "hold_delta_mib": float(hold_delta_mib),
+        "kill_delta_mib": float(kill_delta_mib),
+    }
+
+
+def refractory_ceiling_report(
+    per_cell_rate_hz, *, tau_ref_ms, near_ceiling_fraction=0.9, sat_ceiling_hz=None
+):
+    """Where a per-cell rate field sits against the hard ``1/tau_ref`` single-cell ceiling.
+
+    A population whose cells pile up at the refractory wall is a saturated source, not a bounded
+    carrier, so this has to be adjudicated explicitly rather than left to a lifecycle-shape label.
+
+    ``sat_ceiling_hz`` is the substrate's already-registered saturation line
+    (``run_m4_phaseplane.SAT_CEILING_FRAC * 1000/tau_ref_E``), whose own contract is "peak rate
+    below this means the response is finite-energy rather than pinned at a runaway ceiling".  It is
+    reported alongside the hard wall because it is the stricter of the two.
+    """
+
+    rates = np.asarray(per_cell_rate_hz, float)
+    if rates.ndim != 1 or rates.size == 0:
+        raise ValueError("per_cell_rate_hz must be a non-empty 1-D field")
+    if not np.all(np.isfinite(rates)) or np.any(rates < 0.0):
+        raise ValueError("per_cell_rate_hz must be finite and non-negative")
+    if not (np.isfinite(tau_ref_ms) and tau_ref_ms > 0.0):
+        raise ValueError("tau_ref_ms must be finite and positive")
+    if not (0.0 < float(near_ceiling_fraction) <= 1.0):
+        raise ValueError("near_ceiling_fraction must lie in (0,1]")
+    ceiling = 1000.0 / float(tau_ref_ms)
+    threshold = float(near_ceiling_fraction) * ceiling
+    report = {
+        "ceiling_hz": ceiling,
+        "mean_hz": float(rates.mean()),
+        "median_hz": float(np.median(rates)),
+        "p99_hz": float(np.quantile(rates, 0.99)),
+        "max_hz": float(rates.max()),
+        "mean_ceiling_ratio": float(rates.mean() / ceiling),
+        "near_ceiling_threshold_hz": threshold,
+        "near_ceiling_fraction": float(np.mean(rates >= threshold)),
+    }
+    if sat_ceiling_hz is not None:
+        if not (np.isfinite(sat_ceiling_hz) and sat_ceiling_hz > 0.0):
+            raise ValueError("sat_ceiling_hz must be finite and positive")
+        report["registered_sat_ceiling_hz"] = float(sat_ceiling_hz)
+        report["mean_sat_ceiling_ratio"] = float(rates.mean() / float(sat_ceiling_hz))
+        report["above_sat_ceiling_fraction"] = float(np.mean(rates >= float(sat_ceiling_hz)))
+    return report
+
+
+def admissible_target_activation(per_cell_rate_hz, *, r_hi_ref_hz):
+    """Strict supremum of ``target_activation`` that keeps every cell's load equilibrium finite.
+
+    ``Phi(u*) = q_i* = target * r_i / r_hi_ref`` is solvable only while ``q_i* < 1``, so the fastest
+    cell binds the whole field.  The returned value is excluded, not attainable.
+    """
+
+    rates = np.asarray(per_cell_rate_hz, float)
+    if rates.ndim != 1 or rates.size == 0:
+        raise ValueError("per_cell_rate_hz must be a non-empty 1-D field")
+    if not np.all(np.isfinite(rates)) or np.any(rates < 0.0):
+        raise ValueError("per_cell_rate_hz must be finite and non-negative")
+    if not (np.isfinite(r_hi_ref_hz) and r_hi_ref_hz > 0.0):
+        raise ValueError("r_hi_ref_hz must be finite and positive")
+    r_max = float(rates.max())
+    if r_max <= 0.0:
+        raise ValueError("per_cell_rate_hz must contain at least one active cell")
+    return float(r_hi_ref_hz) / r_max
+
+
 class AtomicStageBundle:
     """Publish a stage directory only after every required artifact exists.
 
