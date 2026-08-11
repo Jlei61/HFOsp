@@ -272,17 +272,23 @@ Q2_EARLY_ICTAL_CROSS_STATE_TRANSFER:         POSITIVE_TREND_NOT_CONFIRMED
 Q3_LOCAL_EFFECTIVE_ORGANIZATION:             SUPPORTED
 Q3_LONG_RANGE_CONNECTOR_MOTIF:               NOT_ESTABLISHED
 MATCHED_LESION:                              INCONCLUSIVE_LOW_ELIGIBILITY
-V0_4_ENGINEERING_CLOSEOUT:                   COMPLETE
+V0_4_ENGINEERING_CLOSEOUT:                   COMPLETE except visual QA re-confirmation
 BRANCH_RECONCILIATION:                       MERGED (pipeline branch + review branch)
 FIGURES_REGENERATED_FROM_MERGED_TREE:        YES
 FOCUSED_TESTS:                               140 passed / 5 skipped of 145 collected
+VISUAL_QA:                                   STALE — recorded against commit 71c22692, figures have since changed
 COMMITTED:                                   YES
 ```
+
+`VISUAL_QA.json` 是 2026-08-10 11:45 UTC 对**旧图**做的目视验收，本轮所有图已重画，因此这份记录已过期。
+`finalize_topic5_rnn_motif_v0_4.py` 的 `visual_qa_complete` 只查 JSON 里的布尔字段、不查图是否变过，
+所以在用户重新目视之前**不要重跑 finalize**，否则会把 ACCEPTED 盖在没人看过的图上。
 
 下一阶段不应继续围绕 generic wiring economy 加模型，而应单独检验“固定局部 recurrent backbone + 少量任务选择的长程 pathway”。对应 LBSS-RNN spec/plan 与本报告同时提供，但在用户审阅前不启动。
 
 ## 10. 遗留（本轮明确不做，但要记着）
 
+- **图需要用户重新目视验收**（见 §9）。`visual_qa_complete` 不校验图是否在验收后变过，这个缺口本轮没有补——补它意味着给 `VISUAL_QA.json` 加图哈希并让 finalize 比对，属于验收框架改动，留给下一轮。
 - `draw_reach_or_lesion` 与 `patient_level_effective_reach` / `lesion_display_values` 保留在画图脚本里、仍有测试覆盖，但因为 Panel F 改版已不被任何图调用。若以后要恢复"分母够就画 matched perturbation、否则画 open-loop reach"的条件面板，从这里接。
 - early-ictal target 数组的 worktree 依赖只做了登记，没有搬进结果树；真要彻底可再现需要把那 44 MB 复制进来或改由 manifest 指向一个稳定位置。
 - 审阅建议的 weight-only regularization 与 distance-permuted cost 两个新训练对照仍未做（理由见 §4 末）。
