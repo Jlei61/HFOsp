@@ -10,6 +10,10 @@
       "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/sobol_fit/sobol_fit_summary.json",
       "sha256": "8a3c1c0e0be6ef02a4d319f6a6c6670f98c0eccd527fd17ed1b90a5009beaf30"
     },
+    "patient_floor_n2": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor_n2.json",
+      "sha256": "30ffc751886721d3119d6142403dbc5946b9c69128d9a7ae2a65e0de5131b1ef"
+    },
     "patient_floor_n3": {
       "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/objective_floor/patient_training_descriptor_floor_n3.json",
       "sha256": "c02cc5b147b66bae5a925e4edbdfe6df4c35cb8349ad082e7df558d8dde9e29a"
@@ -36,11 +40,14 @@
   "dynamics_seeds": [31001, 31002, 31003],
   "common_random_numbers": true,
   "events_per_mode_per_network": 3,
-  "patient_floor_event_count": 3,
+  "patient_floor_event_counts": [2, 3],
+  "minimum_usable_events_per_mode": 2,
+  "floor_policy": "match each mode to its actual readable event count and retain the readable-fraction penalty",
   "readout_failure_objective": 100.0,
   "output_stage": "network_oracle_repeated/fit",
   "shared_tie_break_rule": "lowest median network objective, then lowest mean, then candidate id",
   "patient_heldout_permitted": false,
+  "worker_expected_commit": "217f9982c07b780f870d11f32e1e39ffbdb9d29e",
   "execution": {
     "max_workers": 18,
     "wait_seconds": 120,

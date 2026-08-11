@@ -202,6 +202,8 @@ def _candidate_summary(data, config, reference, patient, patient_labels,
     geometry = {}
     for source in source_order:
         selected = [row for row in data["rows"] if row["source_id"] == source]
+        n_curves_usable = int(sum(
+            row["paired_excess_readout"]["curve_usable"] for row in selected))
         geometry[source] = {
             "downstream_positive_spike_mass": _summary([
                 row["paired_geometry"]["downstream_positive_spike_mass"]
@@ -210,6 +212,8 @@ def _candidate_summary(data, config, reference, patient, patient_labels,
                 row["paired_geometry"]["r90_mm"] for row in selected]),
             "curve_usable_fraction": float(np.mean([
                 row["paired_excess_readout"]["curve_usable"] for row in selected])),
+            "n_curves_total": int(len(selected)),
+            "n_curves_usable": n_curves_usable,
             "ood_fraction": float(np.mean([
                 row["paired_excess_readout"]["ood"] for row in selected])),
         }

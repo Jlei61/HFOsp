@@ -106,7 +106,7 @@ def _load_group(base, base_path, config, candidate, network_seed, expected_commi
     }, contact_names, inputs
 
 
-def _score(row, floor, base, *, failure_objective):
+def _score(row, floors, base, *, failure_objective, minimum_usable=2):
     if row["mode_descriptors"] is None:
         return {
             "objective": float(failure_objective),
@@ -130,9 +130,33 @@ def _score(row, floor, base, *, failure_objective):
         mode: row["geometry"][source]["ood_fraction"]
         for mode, source in source_for.items()
     }
+    counts = {
+        mode: int(row["geometry"][source]["n_curves_usable"])
+        for mode, source in source_for.items()
+    }
+    if any(count < int(minimum_usable) or count not in floors
+           for count in counts.values()):
+        return {
+            "objective": float(failure_objective),
+            "mode_scores": {
+                "A": float(failure_objective),
+                "B": float(failure_objective),
+            },
+            "weak_mode": None,
+            "readout_failure": True,
+            "failure_reason": (
+                "one or both modes lack a supported count-matched patient floor"),
+            "matched_floor_event_count_by_mode": counts,
+        }
+    matched_floor = {
+        "modes": {
+            mode: floors[counts[mode]]["floor"]["modes"][mode]
+            for mode in ("A", "B")
+        }
+    }
     objective = base["objective"]
     result = score_candidate(
-        row["mode_descriptors"], floor["floor"], readable, ood,
+        row["mode_descriptors"], matched_floor, readable, ood,
         readable_weight=objective["readable_fraction_penalty_weight"],
         tau=objective["weakest_mode_lse_tau"],
         ood_weight=objective["ood_weight"])
@@ -148,6 +172,9 @@ def _score(row, floor, base, *, failure_objective):
             "failure_reason": "non-finite repeated-event descriptor",
         }
     result["readout_failure"] = False
+    result["matched_floor_event_count_by_mode"] = counts
+    result["floor_policy"] = (
+        "mode-specific actual-readable-count patient-training floor")
     return result
 
 
@@ -170,7 +197,7 @@ def _plot(payload, output_dir):
     axes[0].plot(x, [values[shared_id][str(seed)] for seed in seeds],
                  "s-", color="#277da1", label=f"shared {shared_id[-3:]}")
     axes[0].set_xticks(x, seeds, rotation=30)
-    axes[0].set_ylabel("matched n=3 weakest-mode objective")
+    axes[0].set_ylabel("count-matched weakest-mode objective")
     axes[0].set_title("A  Repeated-event capacity", loc="left", weight="bold")
     axes[0].legend(frameon=False, fontsize=7)
 
@@ -222,7 +249,7 @@ def _plot(payload, output_dir):
     plt.close(fig)
     (output_dir / "README.md").write_text(
         "### rev9l_l3b_repeated_network_oracle.png\n"
-        "A 用每张固定网络上的三个独立 dynamics repeats 比较 scalar、逐网络 oracle 和 shared candidate；B 展示完整 A/B mode score；C 显示候选跨网络 objective；D 给出对应 edge residual。全部指标只使用 patient training 的 matched n=3 floor。\n\n"
+        "A 用每张固定网络上的三个独立 dynamics repeats 比较 scalar、逐网络 oracle 和 shared candidate；B 展示完整 A/B mode score；C 显示候选跨网络 objective；D 给出对应 edge residual。全部指标只使用 patient training，并按每个 mode 实际可读的 2 或 3 个事件匹配 floor。\n\n"
         "**关注点**：逐网络最优是否显著优于同一 shared 参数，以及 shared 改善是否同时保护 mode A 和 mode B。\n")
 
 
@@ -239,16 +266,20 @@ def main():
     base_path = Path(config["inputs"]["component_pair_config"]["path"])
     base = json.loads(base_path.read_text())
     fit = json.loads(Path(config["inputs"]["l2_fit_summary"]["path"]).read_text())
-    floor = json.loads(Path(config["inputs"]["patient_floor_n3"]["path"]).read_text())
-    if (floor["n_events_per_mode_per_draw"] != 3
-            or floor.get("patient_heldout_scores_computed") is not False):
-        raise RuntimeError("L3b patient floor is invalid")
+    floors = {}
+    for count in config["patient_floor_event_counts"]:
+        floor = json.loads(Path(
+            config["inputs"][f"patient_floor_n{count}"]["path"]).read_text())
+        if (floor["n_events_per_mode_per_draw"] != int(count)
+                or floor.get("patient_heldout_scores_computed") is not False):
+            raise RuntimeError(f"L3b patient floor n={count} is invalid")
+        floors[int(count)] = floor
     candidates = [
         {"candidate_id": row["candidate_id"], "gamma": row["gamma"]}
         for row in fit["candidates"] if row["score"].get("eligible")
     ]
-    expected = subprocess.check_output(
-        ["git", "rev-parse", args.expected_commit],
+    worker_expected = subprocess.check_output(
+        ["git", "rev-parse", config["worker_expected_commit"]],
         cwd=Path(__file__).resolve().parents[1], text=True).strip()
     patient_state = None
     rows, objective, worker_inputs = [], {}, []
@@ -257,7 +288,8 @@ def main():
         objective[candidate_id] = {}
         for network_seed in config["network_seeds"]:
             data, contact_names, inputs = _load_group(
-                base, base_path, config, candidate, network_seed, expected)
+                base, base_path, config, candidate, network_seed,
+                worker_expected)
             worker_inputs.extend(inputs)
             if patient_state is None:
                 patient_state = _patient(base, contact_names)
@@ -265,8 +297,9 @@ def main():
             row = _candidate_summary(
                 data, base, reference, patient, patient_labels, prototypes)
             score = _score(
-                row, floor, base,
-                failure_objective=float(config["readout_failure_objective"]))
+                row, floors, base,
+                failure_objective=float(config["readout_failure_objective"]),
+                minimum_usable=int(config["minimum_usable_events_per_mode"]))
             objective[candidate_id][int(network_seed)] = score["objective"]
             rows.append({
                 "candidate_id": candidate_id,
@@ -308,6 +341,9 @@ def main():
         "network_seeds": list(map(int, config["network_seeds"])),
         "dynamics_seeds": list(map(int, config["dynamics_seeds"])),
         "events_per_mode_per_network": len(config["dynamics_seeds"]),
+        "floor_policy": config["floor_policy"],
+        "patient_floor_event_counts": list(map(
+            int, config["patient_floor_event_counts"])),
         "n_candidates": len(candidates),
         "n_workers": len(worker_inputs),
         "oracle": oracle,
@@ -319,13 +355,15 @@ def main():
         },
         "runaway_is_reported_not_hidden": True,
         "formal_scope": (
-            "three dynamics repeats per source/network are a minimum repeated-"
-            "event exploratory oracle, not a high-precision capacity ceiling"),
+            "three attempted dynamics repeats per source/network with mode-wise "
+            "count-matched training floors are a minimum repeated-event "
+            "exploratory oracle, not a high-precision capacity ceiling"),
         "optimizer_status": "NOT_TESTED_PENDING_SHARED_SELECTION_SANITY",
         "patient_heldout_scores_computed": False,
         "inputs": {
             "config": {"path": str(config_path), "sha256": _sha256(config_path)},
             "worker_inputs": worker_inputs,
+            "worker_expected_commit": worker_expected,
         },
         "provenance": _provenance(args.expected_commit),
     }
