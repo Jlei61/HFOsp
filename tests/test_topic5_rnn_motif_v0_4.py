@@ -79,11 +79,26 @@ from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
     sha256,
 )
 from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
+    ictal_payload_from_template,
     lesion_display_values,
     locked_early_target_paths,
     patient_level_effective_reach,
     selected_metrics,
 )
+
+
+def test_ictal_field_reuses_physical_frame_without_template_source_rings():
+    template = {
+        "xs": np.array([0.0, 1.0]), "ys": np.array([0.0, 0.0]),
+        "names": ["A1", "A2"], "sup": np.ones(2), "soz": np.zeros(2),
+        "frame": {"xlim": [-1.0, 2.0], "ylim": [-1.0, 1.0], "sigma_mm": 1.0},
+        "src_a": ["A1"], "src_b": ["A2"],
+    }
+    payload = ictal_payload_from_template(template)
+    assert payload["frame"] is template["frame"]
+    assert payload["xs"] is template["xs"]
+    assert payload["src_a"] == [] and payload["src_b"] == []
+    assert template["src_a"] == ["A1"] and template["src_b"] == ["A2"]
 from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
     audit_figure_sources,
     focused_test_log_ok,
@@ -122,12 +137,12 @@ def _static_model(n_contacts: int = 6) -> WEModel:
 
 
 def test_finalizer_requires_complete_frozen_focused_suite():
-    assert focused_test_log_ok("145 passed, 1 warning in 9.2s")
-    assert not focused_test_log_ok("144 passed, 1 warning in 9.2s")
-    assert not focused_test_log_ok("145 passed, 1 failed in 9.2s")
+    assert focused_test_log_ok("147 passed, 1 warning in 9.2s")
+    assert not focused_test_log_ok("146 passed, 1 warning in 9.2s")
+    assert not focused_test_log_ok("147 passed, 1 failed in 9.2s")
     # Optional-cache skips must not be read as a missing test.
-    assert focused_test_log_ok("140 passed, 5 skipped, 1 warning in 9.2s")
-    assert not focused_test_log_ok("139 passed, 5 skipped, 1 warning in 9.2s")
+    assert focused_test_log_ok("142 passed, 5 skipped, 1 warning in 9.2s")
+    assert not focused_test_log_ok("141 passed, 5 skipped, 1 warning in 9.2s")
 
 
 def test_factorial_models_differ_only_in_growth_and_cost_components():
@@ -196,6 +211,7 @@ def test_visual_qa_requires_every_stage_and_final_panel():
         "stage_fields_scientific_readout",
         "stage_motif_scientific_readout",
         "stage_early_scientific_readout",
+        "stage_early_start_ablation_sensitivity",
     )
     payload = {
         "status": "ACCEPTED",
@@ -229,6 +245,53 @@ def test_postprocess_snapshot_equivalence_requires_all_three_hashes(tmp_path):
     assert postprocess_snapshot_equivalence_ok(payload)
     snapshot.write_text("print('changed')\n")
     assert not postprocess_snapshot_equivalence_ok(payload)
+
+
+def test_postprocess_snapshot_equivalence_allows_only_audited_figure_amendment(tmp_path):
+    import hashlib
+
+    source = tmp_path / "source.py"
+    snapshot = tmp_path / "snapshot.py"
+    amended = tmp_path / "amended_plot.py"
+    figure_paths = {
+        suffix: tmp_path / f"figure.{suffix}" for suffix in ("png", "pdf", "svg")
+    }
+    snapshot.write_text("print('frozen')\n")
+    source.write_text("print('later closeout copy')\n")
+    amended.write_text("print('visual amendment')\n")
+    for suffix, path in figure_paths.items():
+        path.write_text(suffix)
+    frozen_hash = hashlib.sha256(snapshot.read_bytes()).hexdigest()
+    payload = {"scripts": {"plot_topic5_rnn_motif_figures_v0_4.py": {
+        "source": str(source), "snapshot": str(snapshot), "sha256": frozen_hash,
+    }}}
+    amendment = {
+        "contract": "topic5_rnn_motif_post_unseal_figure_amendment_v0_4",
+        "amendment_scope": "figure_rendering_and_secondary_display_only",
+        "original_plot_snapshot_sha256": frozen_hash,
+        "amended_visual_producer": {
+            "path": str(amended),
+            "sha256": hashlib.sha256(amended.read_bytes()).hexdigest(),
+        },
+        "post_unseal_target_artifacts_read_for_visualization": True,
+        "training_or_model_selection_changed": False,
+        "model_fields_changed": False,
+        "primary_target_scoring_changed": False,
+        "primary_model_contrasts_changed": False,
+        "secondary_statistic_added": (
+            "patient-paired canonical-full minus seed-removed display"
+        ),
+        "figure_outputs": {
+            suffix: {
+                "path": str(path),
+                "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            }
+            for suffix, path in figure_paths.items()
+        },
+    }
+    assert postprocess_snapshot_equivalence_ok(payload, amendment)
+    amendment["primary_target_scoring_changed"] = True
+    assert not postprocess_snapshot_equivalence_ok(payload, amendment)
 
 
 def test_stage_drift_audit_requires_scientific_content_not_only_status():

@@ -19,6 +19,7 @@ from matplotlib.collections import LineCollection
 from matplotlib.colors import ListedColormap, Normalize
 from matplotlib.lines import Line2D
 import numpy as np
+from scipy.stats import wilcoxon
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -28,7 +29,6 @@ from plot_topic5_interictal_template_ab_fields import (  # noqa: E402
     build_interictal_ab_panel_payloads,
 )
 from plot_topic5_field_vs_ictal_swap import draw_topic5_field_panel  # noqa: E402
-from plot_topic5_interictal_event_envelope_field import load_frozen  # noqa: E402
 from paper_figures.plot_fig3b_interictal_ictal_shared_field import (  # noqa: E402
     _draw_field,
     _normalize_minmax,
@@ -60,6 +60,8 @@ COLORS = {
 }
 REPRESENTATIVE = "epilepsiae_1146"
 REPRESENTATIVE_MODEL = "M6_SPATIAL_MID"
+TA_RED = "#B2182B"
+TB_BLUE = "#2166AC"
 
 
 def rows(path: Path) -> list[dict[str, Any]]:
@@ -374,6 +376,18 @@ def early_activation(out_root: Path, subject: str):
     return np.nanmedian(np.asarray(values, float), axis=0)
 
 
+def ictal_payload_from_template(template_payload: dict[str, Any]) -> dict[str, Any]:
+    """Reuse the frozen physical-mm field frame without template-source rings."""
+    required = {"xs", "ys", "names", "sup", "soz", "frame"}
+    missing = required.difference(template_payload)
+    if missing:
+        raise KeyError(f"incomplete physical-mm field payload: {sorted(missing)}")
+    payload = dict(template_payload)
+    payload["src_a"] = []
+    payload["src_b"] = []
+    return payload
+
+
 def locked_early_target_paths(out_root: Path, subject: str) -> list[Path]:
     """Resolve the exact target bytes frozen before unseal for figure rendering."""
     inventory = rows(out_root / "early_ictal_metadata_inventory.csv")
@@ -394,26 +408,81 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
                      model_subset: tuple[str, ...] | None = None):
     _, pa, pb = model_field_payloads(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
     activation = early_activation(out_root, REPRESENTATIVE)
-    # Use the exact empirical record frozen in INPUT_MANIFEST.  A worktree-local
-    # ``results/interictal_propagation_masked`` tree is gitignored and may not
-    # exist in a clean execution worktree; resolving it implicitly would make
-    # rendering depend on an unmanifested ambient file.  The record still has to
-    # go through load_frozen for the fingerprint gate and the shared-plane
-    # display geometry that _draw_field consumes.
-    fz = load_frozen(REPRESENTATIVE, record=empirical_record(out_root, REPRESENTATIVE))
     columns = 3
-    grid = parent.subgridspec(2 if include_stats else 1, columns,
-                              height_ratios=[1.0, 0.72] if include_stats else [1.0],
-                              hspace=0.42, wspace=0.13)
-    for col, (payload, title) in enumerate(((pa, "Model TA"), (pb, "Model TB"))):
+    show_geometry_axes = model_subset is None
+    grid = parent.subgridspec(
+        2 if include_stats else 1, columns,
+        height_ratios=[1.28, 0.82] if include_stats else [1.0],
+        hspace=0.30, wspace=0.22,
+    )
+    field_axes = []
+    for col, (payload, title, title_color) in enumerate(
+        ((pa, "Frozen RNN · TA" if show_geometry_axes else "RNN TA", TA_RED),
+         (pb, "Frozen RNN · TB" if show_geometry_axes else "RNN TB", TB_BLUE))
+    ):
         ax = parent.get_gridspec().figure.add_subplot(grid[0, col])
-        draw_topic5_field_panel(ax, payload, payload["vals"], title, "", compact=True,
-                                labels=False, cbar=False, contact_size=20, contact_outline_lw=0.55)
+        draw_topic5_field_panel(ax, payload, payload["vals"], title, "",
+                                compact=not show_geometry_axes,
+                                labels=False, cbar=False, contact_size=20,
+                                contact_outline_lw=0.55, cmap="viridis",
+                                title_color=title_color)
+        ax.set_title(title, fontsize=10.5 if show_geometry_axes else 7.6,
+                     pad=5 if show_geometry_axes else 2.5,
+                     color=title_color, fontweight="bold")
+        if show_geometry_axes:
+            ax.set_xlabel("shared TA axis (mm)", fontsize=8.5)
+            if col == 0:
+                ax.set_ylabel("transverse (mm)", fontsize=8.5)
+            else:
+                ax.set_ylabel("")
+                ax.tick_params(axis="y", left=False, labelleft=False)
+            ax.tick_params(axis="both", labelsize=7.5, length=2.2)
+        ax.set_anchor("S")
+        field_axes.append(ax)
+    model_cax = field_axes[-1].inset_axes([1.035, 0.10, 0.035, 0.80])
+    model_cb = field_axes[-1].figure.colorbar(
+        ScalarMappable(norm=Normalize(0, 1), cmap="viridis"), cax=model_cax,
+    )
+    model_cb.set_ticks([0, 1], labels=["early", "late"])
+    model_cb.ax.tick_params(labelsize=6.5, length=2.0, pad=1.2)
+    model_cb.set_label("order", fontsize=7.0, labelpad=2.0)
     ax = parent.get_gridspec().figure.add_subplot(grid[0, 2])
-    _draw_field(ax, fz, _normalize_minmax(activation), np.asarray(fz["support_a"], float),
-                cmap="magma_r", colorbar_values=activation, title="Early ictal",
-                title_color="#111111", show_y=False)
-    ax.set_xlabel(""); ax.set_ylabel(""); ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
+    # Reuse the exact physical-mm plane, frame and smoother already used for
+    # the two frozen model fields.  The empirical JSON is not the legacy
+    # ``points_mm`` drawing payload expected by ``_draw_field``; passing it
+    # directly silently crossed two incompatible geometry contracts.
+    ictal_payload = ictal_payload_from_template(pa)
+    draw_topic5_field_panel(
+        ax, ictal_payload, _normalize_minmax(activation),
+        "Early-ictal broadband power", "",
+        compact=not show_geometry_axes, labels=False, cbar=False, contact_size=20,
+        contact_outline_lw=0.55, cmap="Blues", title_color="#174A7E",
+    )
+    ax.set_title("Early-ictal broadband power" if show_geometry_axes else "Early-ictal power",
+                 fontsize=10.5 if show_geometry_axes else 7.6,
+                 pad=5 if show_geometry_axes else 2.5,
+                 color="#111111", fontweight="bold")
+    if show_geometry_axes:
+        ax.set_xlabel("shared TA axis (mm)", fontsize=8.5)
+        ax.set_ylabel("")
+        ax.tick_params(axis="y", left=False, labelleft=False)
+        ax.tick_params(axis="x", labelsize=7.5, length=2.2)
+    ax.set_anchor("S")
+    cax = ax.inset_axes([1.055, 0.08, 0.035, 0.84])
+    cb = ax.figure.colorbar(
+        ScalarMappable(
+            norm=Normalize(float(np.nanmin(activation)), float(np.nanmax(activation))),
+            cmap="Blues",
+        ), cax=cax,
+    )
+    cb.ax.tick_params(labelsize=6.7, length=2.0, pad=1.5)
+    cb.set_label("power (robust z)", fontsize=7.2, labelpad=2.5)
+    if not show_geometry_axes:
+        ax.set_xlabel(""); ax.set_ylabel("")
+        ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
+    if show_geometry_axes:
+        field_axes[0].text(-0.18, 1.20, "E1146", transform=field_axes[0].transAxes,
+                           fontsize=12, fontweight="bold", ha="left", va="bottom")
     if include_stats:
         stat_ax = parent.get_gridspec().figure.add_subplot(grid[1, :])
         frame = [row for row in rows(out_root / "early_ictal_per_patient_model.csv")
@@ -426,42 +495,119 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
             canonical = [row["all_contact_margin"] for row in frame
                          if row["cell"] == cell and row["model"] == model
                          and row["endpoint"] == "canonical_full"]
-            seed_removed = [row["all_contact_margin"] for row in frame
-                            if row["cell"] == cell and row["model"] == model
-                            and row["endpoint"] == "seed_removed"]
-            if not canonical or not seed_removed:
+            if not canonical:
                 continue
             models.append(model)
-            for offset, values, marker, filled in (
-                    (-0.12, canonical, "o", True), (0.12, seed_removed, "D", False)):
-                values = np.asarray(values, float)
-                jitter = np.linspace(-0.055, 0.055, len(values))
-                stat_ax.scatter(
-                    len(models) - 1 + offset + jitter, values, s=12, marker=marker,
-                    facecolor=COLORS[model] if filled else "white",
-                    edgecolor=COLORS[model], linewidth=0.65, alpha=0.72,
-                )
-                stat_ax.plot(
-                    [len(models) - 1 + offset - 0.08, len(models) - 1 + offset + 0.08],
-                    [np.nanmedian(values)] * 2, color="#111111", lw=1.15,
-                )
+            values = np.asarray(canonical, float)
+            jitter = np.linspace(-0.075, 0.075, len(values))
+            stat_ax.scatter(
+                len(models) - 1 + jitter, values, s=14, marker="o",
+                facecolor=COLORS[model], edgecolor="white", linewidth=0.45, alpha=0.78,
+            )
+            stat_ax.plot(
+                [len(models) - 1 - 0.13, len(models) - 1 + 0.13],
+                [np.nanmedian(values)] * 2, color="#111111", lw=1.25,
+            )
         stat_ax.axhline(0, color="#8d8d8d", lw=0.7)
+        stat_ax.axvline(0.5, color="#d1d1d1", lw=0.65)
+        if len(models) > 2:
+            stat_ax.axvline(len(models) - 1.5, color="#d1d1d1", lw=0.65)
         stat_ax.set_xticks(
             range(len(models)), [MODEL_LABEL[model] for model in models],
             rotation=45, ha="right", rotation_mode="anchor",
         )
-        stat_ax.tick_params(axis="x", labelsize=7.2, pad=2)
-        stat_ax.set_ylabel("Early-ictal\nnull-relative margin")
-        stat_ax.legend(
-            handles=[
-                Line2D([], [], marker="o", color="#555555", markerfacecolor="#555555",
-                       lw=0, markersize=4.5, label="Canonical full"),
-                Line2D([], [], marker="D", color="#555555", markerfacecolor="white",
-                       lw=0, markersize=4.5, label="Seed removed"),
-            ],
-            loc="upper left", frameon=False, ncol=2, fontsize=7.0,
-            handletextpad=0.35, columnspacing=0.8, borderaxespad=0.1,
-        )
+        stat_ax.tick_params(axis="x", labelsize=7.6, pad=2)
+        stat_ax.set_xlabel("Frozen interictal model" if show_geometry_axes else "")
+        stat_ax.set_ylabel("Null-relative maxAB |ρ|")
+
+
+def _holm(p_values: list[float]) -> list[float]:
+    """Holm correction in the original model order."""
+    order = np.argsort(np.asarray(p_values, float))
+    adjusted = np.ones(len(p_values), float)
+    running = 0.0
+    for rank, index in enumerate(order):
+        running = max(running, min(1.0, (len(p_values) - rank) * p_values[index]))
+        adjusted[index] = running
+    return adjusted.tolist()
+
+
+def endpoint_paired_tests(out_root: Path) -> list[dict[str, Any]]:
+    """Patient-first full-field versus start-removed endpoint sensitivity."""
+    frame = [row for row in rows(out_root / "early_ictal_per_patient_model.csv")
+             if row["primary"] in (True, "True", "1", 1.0) and row["cell"] == "rnn"]
+    output = []
+    for model in MODEL_ORDER:
+        by_subject: dict[str, dict[str, float]] = {}
+        for row in frame:
+            if row["model"] == model and row["endpoint"] in ("canonical_full", "seed_removed"):
+                by_subject.setdefault(str(row["subject"]), {})[str(row["endpoint"])] = float(
+                    row["all_contact_margin"]
+                )
+        paired = [
+            (subject, values["canonical_full"], values["seed_removed"])
+            for subject, values in sorted(by_subject.items())
+            if {"canonical_full", "seed_removed"}.issubset(values)
+        ]
+        delta = np.asarray([full - removed for _, full, removed in paired], float)
+        nonzero = delta[np.abs(delta) > 1e-12]
+        p_value = float(wilcoxon(nonzero, method="auto").pvalue) if nonzero.size else 1.0
+        output.append({
+            "model": model,
+            "label": MODEL_LABEL[model],
+            "n_patients": int(delta.size),
+            "median_full_minus_start_removed": float(np.nanmedian(delta)),
+            "n_full_higher": int(np.sum(delta > 1e-12)),
+            "n_start_removed_higher": int(np.sum(delta < -1e-12)),
+            "n_tied": int(np.sum(np.abs(delta) <= 1e-12)),
+            "wilcoxon_p": p_value,
+            "patients": [subject for subject, _, _ in paired],
+            "full": [float(full) for _, full, _ in paired],
+            "start_removed": [float(removed) for _, _, removed in paired],
+        })
+    for row, q_value in zip(output, _holm([row["wilcoxon_p"] for row in output])):
+        row["holm_q"] = float(q_value)
+    return output
+
+
+def render_endpoint_sensitivity(out_root: Path) -> None:
+    """Separate the supplied-start ablation from the cross-state main panel."""
+    tests = endpoint_paired_tests(out_root)
+    figure_dir = out_root / "figures"
+    figure_dir.mkdir(parents=True, exist_ok=True)
+    (out_root / "early_field_endpoint_paired_tests.json").write_text(
+        json.dumps({
+            "comparison": "full field including supplied start minus propagation-only field",
+            "unit": "patient",
+            "primary_null": "all-contact label permutation",
+            "multiple_testing": "Holm across the eight displayed models",
+            "rows": tests,
+        }, indent=2, ensure_ascii=False)
+    )
+    fig, ax = plt.subplots(figsize=(7.8, 2.7), facecolor="white", layout="constrained")
+    for index, row in enumerate(tests):
+        delta = np.asarray(row["full"], float) - np.asarray(row["start_removed"], float)
+        jitter = np.linspace(-0.09, 0.09, len(delta))
+        ax.scatter(index + jitter, delta, s=16, color=COLORS[row["model"]],
+                   edgecolor="white", linewidth=0.4, alpha=0.72, zorder=2)
+        median = float(np.nanmedian(delta))
+        ax.plot([index - 0.15, index + 0.15], [median, median], color="#111111",
+                lw=1.2, zorder=3)
+        if row["holm_q"] < 0.05:
+            top = float(np.nanmax(delta)) + 0.012
+            ax.text(index, top, "*", ha="center", va="bottom", fontsize=10,
+                    fontweight="bold")
+    ax.axhline(0, color="#888888", lw=0.75)
+    ax.set_xticks(range(len(tests)), [row["label"] for row in tests],
+                  rotation=32, ha="right", rotation_mode="anchor")
+    ax.set_ylabel("Δ null-relative maxAB |ρ|\n(full − start removed)")
+    ax.tick_params(labelsize=8)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    stem = figure_dir / "stage_early_start_ablation_sensitivity"
+    fig.savefig(stem.with_suffix(".png"), dpi=400, bbox_inches="tight")
+    fig.savefig(stem.with_suffix(".pdf"), bbox_inches="tight")
+    plt.close(fig)
 
 
 def influence_for_selected(out_root: Path):
@@ -650,7 +796,7 @@ def panel_label(fig, subplot_spec, label: str):
 
 
 def render_stage(out_root: Path, stage: str):
-    size = (11.4, 5.5) if stage == "interictal" else (9.2, 3.2)
+    size = (11.4, 5.5) if stage == "interictal" else ((11.2, 5.7) if stage == "early" else (9.2, 3.2))
     fig = plt.figure(figsize=size, layout="constrained", facecolor="white")
     root = fig.add_gridspec(1, 1)[0, 0]
     if stage == "interictal":
@@ -660,11 +806,14 @@ def render_stage(out_root: Path, stage: str):
         empirical_a, empirical_b, _ = build_interictal_ab_panel_payloads(record)
         _, model_a, model_b = model_field_payloads(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
         grid = root.subgridspec(1, 5, width_ratios=[1, 1, 1, 1, 1.15], wspace=0.15)
-        for col, (payload, title) in enumerate(((empirical_a, "Data TA"), (model_a, "RNN TA"),
-                                                (empirical_b, "Data TB"), (model_b, "RNN TB"))):
+        for col, (payload, title, title_color) in enumerate(
+            ((empirical_a, "Data TA", TA_RED), (model_a, "RNN TA", TA_RED),
+             (empirical_b, "Data TB", TB_BLUE), (model_b, "RNN TB", TB_BLUE))
+        ):
             ax = fig.add_subplot(grid[0, col])
             draw_topic5_field_panel(ax, payload, payload["vals"], title, "", compact=True,
-                                    contact_size=23, contact_outline_lw=0.6)
+                                    contact_size=23, contact_outline_lw=0.6,
+                                    title_color=title_color)
         ax = fig.add_subplot(grid[0, 4])
         frame = rows(out_root / "model_field_patient_metrics.csv")
         data = {model: [row["matched_empirical_r"] for row in frame
@@ -680,14 +829,16 @@ def render_stage(out_root: Path, stage: str):
     fig.savefig(stem.with_suffix(".png"), dpi=400, bbox_inches="tight")
     fig.savefig(stem.with_suffix(".pdf"), bbox_inches="tight")
     plt.close(fig)
+    if stage == "early":
+        render_endpoint_sensitivity(out_root)
 
 
 def render_final(out_root: Path):
     plt.rcParams.update({"font.size": 8.5, "axes.labelsize": 8.5, "xtick.labelsize": 7.5,
                          "ytick.labelsize": 7.5, "axes.linewidth": 0.7})
-    fig = plt.figure(figsize=(11.2, 9.1), facecolor="white")
-    outer = fig.add_gridspec(3, 2, hspace=0.52, wspace=0.22,
-                             left=0.055, right=0.985, top=0.975, bottom=0.115)
+    fig = plt.figure(figsize=(11.2, 8.4), facecolor="white")
+    outer = fig.add_gridspec(3, 2, hspace=0.34, wspace=0.22,
+                             left=0.055, right=0.985, top=0.975, bottom=0.105)
     draw_motif_ladder(outer[0, 0], out_root); panel_label(fig, outer[0, 0], "A")
     draw_rollout_example(outer[0, 1], out_root); panel_label(fig, outer[0, 1], "B")
     draw_interictal_sufficiency(outer[1, 0], out_root); panel_label(fig, outer[1, 0], "C")
@@ -700,7 +851,8 @@ def render_final(out_root: Path):
     draw_effective_motif(outer[2, 1], out_root); panel_label(fig, outer[2, 1], "F")
     handles, labels = ax_d.get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=min(8, len(labels)), frameon=False,
-               bbox_to_anchor=(0.5, 0.025), fontsize=7.5, handletextpad=0.4, columnspacing=1.0)
+               bbox_to_anchor=(0.5, 0.018), fontsize=7.5,
+               handletextpad=0.4, columnspacing=1.0)
     figure_dir = out_root / "figures"; figure_dir.mkdir(parents=True, exist_ok=True)
     stem = figure_dir / "topic5_figure6_rnn_connectivity_motifs"
     for suffix, dpi in ((".png", 600), (".pdf", None), (".svg", None)):
@@ -741,9 +893,15 @@ Spatial + cost 模型中预先指定的 targeted perturbation 相对匹配随机
 
 ### stage_early_scientific_readout.png / .pdf
 
-冻结模型 TA/TB 场、患者平均 clinical-onset 0–10 s broadband 1–150 Hz 能量场和主队列 null-relative margin。
+冻结模型 TA/TB 场、同患者 clinical-onset 0–10 s、1–150 Hz 基线 robust-z 宽带功率场，以及主队列 full-field 的全触点打乱校正 margin。TA/TB 标题分别沿用数据图的红/蓝语义色；RNN 场用 viridis 表示生成先后，真实发作功率严格使用 Fig. 3C 的 Blues 色图。代表患者的功率图是该患者冻结可用发作的触点级中位，不是 RNN 输出。
 
-**关注点**：个体场只作直观例子，队列患者点才承担跨状态统计；canonical full 是主量，seed-removed 为机制性次量。
+**关注点**：个体场只作直观例子，队列患者点才承担跨状态统计；纵轴是 observed maxAB |rho| 减去全触点标签打乱 null 的中位数，杆内打乱仅作为另一个敏感性端点，不在本图中。
+
+### stage_early_start_ablation_sensitivity.png / .pdf
+
+患者级配对比较完整生成场与移除模型已知第一 rank 起点后的传播场。每条线是一位主分析患者，星号只在八模型 Holm 校正后 q<0.05 时显示；精确数值保存在 `early_field_endpoint_paired_tests.json`。
+
+**关注点**：这不是两个不同模型，而是同一冻结模型场的起点消融；单独成图可避免把机制性次端点与主跨状态量混在同一个 legend 中。
 
 ### stage_motif_scientific_readout.png / .pdf
 

@@ -150,11 +150,8 @@ def _shared_display_geometry(shared_plane):
     return pts, int(sign), xlim, ylim
 
 
-def load_frozen(ds_sid, record=None):
-    # ``record`` lets a caller supply the same JSON resolved through its own
-    # frozen input manifest instead of the ambient FROZEN root, without
-    # duplicating the fingerprint gate or the display-geometry derivation.
-    rec = record if record is not None else json.load(open(FROZEN / f"{ds_sid}.json"))
+def load_frozen(ds_sid):
+    rec = json.load(open(FROZEN / f"{ds_sid}.json"))
     scorers_from_interictal_record(rec)                          # <- fingerprint gate (raises)
     template_a, template_b, template_mode = build_interictal_ab_panel_payloads(
         rec, display_sigma_mm=DEFAULT_DISPLAY_SIGMA_MM,
