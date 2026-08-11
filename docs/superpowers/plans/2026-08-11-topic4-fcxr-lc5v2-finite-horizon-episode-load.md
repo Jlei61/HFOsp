@@ -83,6 +83,27 @@ tau8_gamma0010
 完成后生成统一 branch table。出现 `CONTAINED_HIGH_NO_OFFSET` 或
 `FINITE_EXCURSION_OFFSET` 即停止强度轴并进入 tau 比较；四点均无中间类则停止继续细化。
 
+### T3.2 — 去掉 onset step 的连续在线前缀
+
+T3.1 四点均为 immediate suppression 后，不再细化 onset fork。新增独立 runner：
+
+```text
+Gamma 0 control
+Gamma 0.001
+Gamma 0.003
+```
+
+三臂 fresh t=0、`u=0`、U 始终在线，运行 18 s，按 1 s exact rolling checkpoint 写出。
+control 与 U1 前 18 s 做 spike/rate exact parity；失败则另外两臂没有解释权。通过后报告：
+
+1. returning IED 数与自然 onset；
+2. onset 前 baseline 是否被抑制；
+3. onset 后 saturation、contained high 或 finite offset；
+4. U rise、rate、D/H 的时间顺序；
+5. 外源输入 hash、数值安全和资源。
+
+只有自然进入后的 contained/finite 结果才解锁 tau；no-onset 不能包装成成功终止。
+
 输出 `u2a_branch_map.json` 与诊断图；只有核心动力学结果出现后再跑广泛回归和确认 seed。
 
 ## T4 — 工程合同

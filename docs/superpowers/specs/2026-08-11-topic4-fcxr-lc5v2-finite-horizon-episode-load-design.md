@@ -127,6 +127,28 @@ Gamma_U = 0.001, 0.003, 0.005, 0.010
 §7 转入时间尺度比较。若四点仍只给 saturation 与 immediate suppression、没有中间类，
 则报告 fast substrate 在该执行通路上呈陡峭 switching，不以无限细化网格抢救。
 
+### 5.2 2026-08-12 连续在线前缀判决
+
+低剂量 bracket 实测 `Gamma=0.001,0.003,0.005,0.010` 仍全部为
+`IMMEDIATE_SUPPRESSION`。这关闭的是“在 onset exact state 上突然接通预积累 U 电流”的
+反事实分叉协议；它不能替代真实机制从间期开始连续在线的检验。
+
+因此新增一次最小、不同问题的连续前缀实验：
+
+- fresh `t=0`，`u_i(0)=0`，U load 与 current 从第一步起始终在线；
+- dynamic Z/H，X=1，M=0，无 kick、reset 或参数 step；
+- `tau_U=8 s`，只比较 `Gamma={0,0.001,0.003}`；
+- 同一 connection/noise seed、同一外源输入生成合同，运行 18 s；
+- `Gamma=0` 必须逐位复现既有 U1 前 18 s 的 spike stream/rate，否则整批判
+  `NATURAL_PREFIX_CONTROL_MISMATCH`；
+- 0.001/0.003 只回答：returning IED 是否保留、是否仍自然 onset、是否把升级改成有限
+  excursion。该阶段不验收 8 s postictal statistical return。
+
+若两个非零臂都在自然 onset 前消灭 IED 或阻断 onset，则判当前 `p0/Imax` 组合缺少
+baseline--ictal selectivity，停止本方程的强度细化；若出现自然 onset 后的 contained/finite
+轨迹，才解锁 §7 的 tau 比较。该实验不是绕过 U2 gate，而是去掉 onset parameter step 后对
+runtime 方程本身做判决。
+
 ## 6. U2 标签与核心 gate
 
 - `ESCALATING_SATURATION`：继续进入既有 refractory/saturation class；
