@@ -1,0 +1,1417 @@
+{
+  "datasets": {
+    "hand_dual_core": {
+      "label": "hand dual-core",
+      "n_events_with_rank_curve": 220,
+      "n_files": 21,
+      "path_pattern": "results/topic4_sef_hfo/field_swap_subject_snn",
+      "score": {
+        "fixed_events_per_mode": 6,
+        "frozen_ood_fraction": 0.05454545454545454,
+        "mean_mode_score": 5.3208821834067095,
+        "mode_counts": [
+          115,
+          105
+        ],
+        "modes": {
+          "0": {
+            "floor_excess": {
+              "event_cloud": 5.578214502448829,
+              "precedence.ICL-ICL": 4.9192380623793674,
+              "precedence.ICL-SCL": 4.945687230565559,
+              "precedence.SCL-SCL": 3.245464688289686,
+              "profile.ICL": 3.0804089082630393,
+              "profile.SCL": 2.4925576911195133,
+              "profile.cross": 4.340104184043014,
+              "recruitment.ICL": 3.057019689548595,
+              "recruitment.SCL": 4.610510380622837
+            },
+            "n_available": 115,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 5.578214502448829,
+              "mode_score": 4.728687469053874,
+              "precedence": 4.831592392026357,
+              "profile": 4.067219573465054,
+              "recruitment": 4.437723408275256
+            },
+            "raw": {
+              "event_cloud": 1.5884476780035797,
+              "multishaft_fraction": 0.3333333333333333,
+              "precedence.ICL-ICL": 0.33544687607996815,
+              "precedence.ICL-SCL": 0.34109546814119046,
+              "precedence.SCL-SCL": 0.3679647605015215,
+              "profile.ICL": 0.2711262899479023,
+              "profile.SCL": 0.31942253950003274,
+              "profile.cross": 0.6730954529606054,
+              "recruitment.ICL": 0.3435481499632443,
+              "recruitment.SCL": 0.6352650494159928
+            },
+            "selected_event_indices": [
+              32,
+              72,
+              109,
+              144,
+              178,
+              208
+            ],
+            "status": "OK"
+          },
+          "1": {
+            "floor_excess": {
+              "event_cloud": 8.061623543963833,
+              "precedence.ICL-ICL": 5.715319211492914,
+              "precedence.ICL-SCL": 7.608145377516226,
+              "precedence.SCL-SCL": 3.4941741861622733,
+              "profile.ICL": 2.5300667547895412,
+              "profile.SCL": 2.905779894989677,
+              "profile.cross": 4.245400894507719,
+              "recruitment.ICL": 4.3883203553669965,
+              "recruitment.SCL": 4.105267394128943
+            },
+            "n_available": 105,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 8.061623543963833,
+              "mode_score": 5.913076897759544,
+              "precedence": 7.333621045049803,
+              "profile": 3.972182585122056,
+              "recruitment": 4.284880416902484
+            },
+            "raw": {
+              "event_cloud": 1.9279322835971338,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.4015448164944379,
+              "precedence.ICL-SCL": 0.49091113497754363,
+              "precedence.SCL-SCL": 0.5346304810718471,
+              "profile.ICL": 0.23873465764848792,
+              "profile.SCL": 0.2777711282037603,
+              "profile.cross": 0.5100842610586552,
+              "recruitment.ICL": 0.4331915477096954,
+              "recruitment.SCL": 0.8368152498315201
+            },
+            "selected_event_indices": [
+              8,
+              43,
+              69,
+              106,
+              149,
+              185
+            ],
+            "status": "OK"
+          }
+        },
+        "n_events": 220,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.07727272727272727,
+        "pooled_scl_recruitment_fraction": 0.019318181818181818,
+        "status": "OK",
+        "weak_mode": "B",
+        "weak_mode_score": 5.741970569674646
+      },
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    "rev8_1_final": {
+      "label": "rev8.1 final",
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_event_profiles.npz",
+      "score": {
+        "fixed_events_per_mode": 6,
+        "mean_mode_score": 5.8366930988324075,
+        "mode_counts": [
+          17,
+          33
+        ],
+        "modes": {
+          "0": {
+            "floor_excess": {
+              "event_cloud": 7.174720789037576,
+              "precedence.ICL-ICL": 7.8422301418251905,
+              "precedence.ICL-SCL": 5.565769399170436,
+              "precedence.SCL-SCL": 3.245464688289686,
+              "profile.ICL": 3.8013556260406998,
+              "profile.SCL": 3.184477768570074,
+              "profile.cross": 3.925949794065288,
+              "recruitment.ICL": 1.209620885540469,
+              "recruitment.SCL": 5.412846020761246
+            },
+            "n_available": 17,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 7.174720789037576,
+              "mode_score": 5.939934990260312,
+              "precedence": 7.567604824515643,
+              "profile": 3.7778551093874735,
+              "recruitment": 5.239559238100555
+            },
+            "raw": {
+              "event_cloud": 1.8626519173072018,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.48909326328345704,
+              "precedence.ICL-SCL": 0.37360890276443953,
+              "precedence.SCL-SCL": 0.3679647605015215,
+              "profile.ICL": 0.3110386395711071,
+              "profile.SCL": 0.376213191944324,
+              "profile.cross": 0.6167877456018385,
+              "recruitment.ICL": 0.21246099812137545,
+              "recruitment.SCL": 0.7185983827493262
+            },
+            "selected_event_indices": [
+              5,
+              10,
+              31,
+              35,
+              38,
+              46
+            ],
+            "status": "OK"
+          },
+          "1": {
+            "floor_excess": {
+              "event_cloud": 7.695713404403783,
+              "precedence.ICL-ICL": 1.989773242657782,
+              "precedence.ICL-SCL": 7.608145377516226,
+              "precedence.SCL-SCL": 3.4941741861622733,
+              "profile.ICL": 2.775933079627671,
+              "profile.SCL": 2.905779894989677,
+              "profile.cross": 4.245400894507719,
+              "recruitment.ICL": 0.823938965928244,
+              "recruitment.SCL": 4.105267394128943
+            },
+            "n_available": 33,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 7.695713404403783,
+              "mode_score": 5.733451207404503,
+              "precedence": 7.333492323226274,
+              "profile": 3.97261800447249,
+              "recruitment": 3.9319810975154663
+            },
+            "raw": {
+              "event_cloud": 1.8649182096694437,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.1868963254604805,
+              "precedence.ICL-SCL": 0.49091113497754363,
+              "precedence.SCL-SCL": 0.5346304810718471,
+              "profile.ICL": 0.2522302706191877,
+              "profile.SCL": 0.2777711282037603,
+              "profile.cross": 0.5100842610586552,
+              "recruitment.ICL": 0.18563559927765186,
+              "recruitment.SCL": 0.8368152498315201
+            },
+            "selected_event_indices": [
+              3,
+              13,
+              20,
+              26,
+              33,
+              44
+            ],
+            "status": "OK"
+          }
+        },
+        "n_events": 50,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.0,
+        "pooled_scl_recruitment_fraction": 0.0,
+        "status": "OK",
+        "weak_mode": "A",
+        "weak_mode_score": 5.85743114939242
+      },
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    "rev9_edge": {
+      "label": "Edge",
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+      "score": {
+        "fixed_events_per_mode": 6,
+        "frozen_ood_fraction": 0.8333333333333334,
+        "mean_mode_score": 2.7004362870831926,
+        "mode_counts": [
+          7,
+          11
+        ],
+        "modes": {
+          "0": {
+            "floor_excess": {
+              "event_cloud": 1.4545802312972929,
+              "precedence.ICL-ICL": 2.585323325646306,
+              "precedence.ICL-SCL": 2.029084725735945,
+              "precedence.SCL-SCL": 0.8839820644212092,
+              "profile.ICL": 1.7747455980037454,
+              "profile.SCL": 0.24679298586907633,
+              "profile.cross": 0.09479525375988425,
+              "recruitment.ICL": 2.062447121389146,
+              "recruitment.SCL": 0.0
+            },
+            "n_available": 7,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 1.4545802312972929,
+              "mode_score": 1.7953320776900106,
+              "precedence": 2.3365755409686586,
+              "profile": 1.5009468923232832,
+              "recruitment": 1.8892256461708081
+            },
+            "raw": {
+              "event_cloud": 0.8802024252376438,
+              "multishaft_fraction": 1.0,
+              "precedence.ICL-ICL": 0.21276520004614044,
+              "precedence.ICL-SCL": 0.18816611512312617,
+              "precedence.SCL-SCL": 0.15986214207620864,
+              "profile.ICL": 0.19884343014115125,
+              "profile.SCL": 0.13509714267463593,
+              "profile.cross": 0.0959106670965742,
+              "recruitment.ICL": 0.2729755778812383,
+              "recruitment.SCL": 0.13526504941599282
+            },
+            "selected_event_indices": [
+              2,
+              6,
+              7,
+              10,
+              14,
+              15
+            ],
+            "status": "OK"
+          },
+          "1": {
+            "floor_excess": {
+              "event_cloud": 3.9229630826346766,
+              "precedence.ICL-ICL": 4.392362688648911,
+              "precedence.ICL-SCL": 4.6270475685615455,
+              "precedence.SCL-SCL": 3.026935061561965,
+              "profile.ICL": 3.17171427602684,
+              "profile.SCL": 1.233700637921301,
+              "profile.cross": 0.8854811622128563,
+              "recruitment.ICL": 3.3399247050422405,
+              "recruitment.SCL": 1.4777334452506068
+            },
+            "n_available": 11,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 3.9229630826346766,
+              "mode_score": 3.605540496476374,
+              "precedence": 4.435220173332633,
+              "profile": 2.8971953223549534,
+              "recruitment": 3.1667834075832344
+            },
+            "raw": {
+              "event_cloud": 1.2152057748828158,
+              "multishaft_fraction": 0.8333333333333334,
+              "precedence.ICL-ICL": 0.3253222644960295,
+              "precedence.ICL-SCL": 0.32717064635896154,
+              "precedence.SCL-SCL": 0.4729881833846659,
+              "profile.ICL": 0.27395471723138737,
+              "profile.SCL": 0.16666001709264922,
+              "profile.cross": 0.1483084413578269,
+              "recruitment.ICL": 0.3603776282124217,
+              "recruitment.SCL": 0.37848191649818685
+            },
+            "selected_event_indices": [
+              0,
+              3,
+              5,
+              11,
+              13,
+              17
+            ],
+            "status": "OK"
+          }
+        },
+        "n_events": 18,
+        "patient_mode_status": "NOT_EVALUABLE",
+        "pooled_multishaft_fraction": 0.8888888888888888,
+        "pooled_scl_recruitment_fraction": 0.5416666666666666,
+        "status": "OK",
+        "weak_mode": "B",
+        "weak_mode_score": 3.432432815658262
+      },
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    "rev9_node": {
+      "label": "Node",
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+      "score": {
+        "fixed_events_per_mode": 6,
+        "frozen_ood_fraction": 0.03305785123966942,
+        "mean_mode_score": 5.781903412730218,
+        "mode_counts": [
+          57,
+          64
+        ],
+        "modes": {
+          "0": {
+            "floor_excess": {
+              "event_cloud": 7.204411365171956,
+              "precedence.ICL-ICL": 7.398309404307072,
+              "precedence.ICL-SCL": 5.565769399170436,
+              "precedence.SCL-SCL": 3.245464688289686,
+              "profile.ICL": 3.6280214164553044,
+              "profile.SCL": 3.184477768570074,
+              "profile.cross": 3.925949794065288,
+              "recruitment.ICL": 1.4209166201430807,
+              "recruitment.SCL": 5.412846020761246
+            },
+            "n_available": 57,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 7.204411365171956,
+              "mode_score": 5.823769388402128,
+              "precedence": 7.123820160886627,
+              "profile": 3.727286772871829,
+              "recruitment": 5.239559254678097
+            },
+            "raw": {
+              "event_cloud": 1.8677513534395889,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.46575867472812343,
+              "precedence.ICL-SCL": 0.37360890276443953,
+              "precedence.SCL-SCL": 0.3679647605015215,
+              "profile.ICL": 0.30144267997514745,
+              "profile.SCL": 0.376213191944324,
+              "profile.cross": 0.6167877456018385,
+              "recruitment.ICL": 0.22745405537858365,
+              "recruitment.SCL": 0.7185983827493262
+            },
+            "selected_event_indices": [
+              6,
+              22,
+              52,
+              68,
+              82,
+              106
+            ],
+            "status": "OK"
+          },
+          "1": {
+            "floor_excess": {
+              "event_cloud": 7.722599382291347,
+              "precedence.ICL-ICL": 1.9898037834863507,
+              "precedence.ICL-SCL": 7.608145377516226,
+              "precedence.SCL-SCL": 3.4941741861622733,
+              "profile.ICL": 2.3920497801578535,
+              "profile.SCL": 2.905779894989677,
+              "profile.cross": 4.245400894507719,
+              "recruitment.ICL": 1.4170994113971567,
+              "recruitment.SCL": 4.105267394128943
+            },
+            "n_available": 64,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 7.722599382291347,
+              "mode_score": 5.740037437058308,
+              "precedence": 7.333492323226279,
+              "profile": 3.9720720967377923,
+              "recruitment": 3.9319859459778135
+            },
+            "raw": {
+              "event_cloud": 1.869548294531979,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.1868980850798281,
+              "precedence.ICL-SCL": 0.49091113497754363,
+              "precedence.SCL-SCL": 0.5346304810718471,
+              "profile.ICL": 0.2311589000727303,
+              "profile.SCL": 0.2777711282037603,
+              "profile.cross": 0.5100842610586552,
+              "recruitment.ICL": 0.22683219992356413,
+              "recruitment.SCL": 0.8368152498315201
+            },
+            "selected_event_indices": [
+              12,
+              33,
+              48,
+              75,
+              96,
+              113
+            ],
+            "status": "OK"
+          }
+        },
+        "n_events": 121,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.0,
+        "pooled_scl_recruitment_fraction": 0.0,
+        "status": "OK",
+        "weak_mode": "A",
+        "weak_mode_score": 5.785392669175385
+      },
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    "rev9_node_edge": {
+      "label": "Node+Edge",
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+      "score": {
+        "fixed_events_per_mode": 6,
+        "frozen_ood_fraction": 0.05325443786982249,
+        "mean_mode_score": 6.1605938549087735,
+        "mode_counts": [
+          74,
+          95
+        ],
+        "modes": {
+          "0": {
+            "floor_excess": {
+              "event_cloud": 7.573713644874924,
+              "precedence.ICL-ICL": 9.935280031942346,
+              "precedence.ICL-SCL": 5.565769399170436,
+              "precedence.SCL-SCL": 3.245464688289686,
+              "profile.ICL": 3.8417482363927307,
+              "profile.SCL": 3.184477768570074,
+              "profile.cross": 3.925949794065288,
+              "recruitment.ICL": 1.2923158385468523,
+              "recruitment.SCL": 5.412846020761246
+            },
+            "n_available": 74,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 7.573713644874924,
+              "mode_score": 6.566828455769443,
+              "precedence": 9.660626966192776,
+              "profile": 3.7934139690169664,
+              "recruitment": 5.239559242993104
+            },
+            "raw": {
+              "event_cloud": 1.931180011083911,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.5991139356330486,
+              "precedence.ICL-SCL": 0.37360890276443953,
+              "precedence.SCL-SCL": 0.3679647605015215,
+              "profile.ICL": 0.31327481590260314,
+              "profile.SCL": 0.376213191944324,
+              "profile.cross": 0.6167877456018385,
+              "recruitment.ICL": 0.2183288409703504,
+              "recruitment.SCL": 0.7185983827493262
+            },
+            "selected_event_indices": [
+              13,
+              40,
+              66,
+              93,
+              114,
+              159
+            ],
+            "status": "OK"
+          },
+          "1": {
+            "floor_excess": {
+              "event_cloud": 7.779944930154486,
+              "precedence.ICL-ICL": 1.8214563008806433,
+              "precedence.ICL-SCL": 7.608145377516226,
+              "precedence.SCL-SCL": 3.4941741861622733,
+              "profile.ICL": 2.2830153130859325,
+              "profile.SCL": 2.905779894989677,
+              "profile.cross": 4.245400894507719,
+              "recruitment.ICL": 0.3876272637056248,
+              "recruitment.SCL": 4.105267394128943
+            },
+            "n_available": 95,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 7.779944930154486,
+              "mode_score": 5.754359254048105,
+              "precedence": 7.333492323204993,
+              "profile": 3.9720190768002444,
+              "recruitment": 3.9319806860326993
+            },
+            "raw": {
+              "event_cloud": 1.8794238792775029,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.17719869245040928,
+              "precedence.ICL-SCL": 0.49091113497754363,
+              "precedence.SCL-SCL": 0.5346304810718471,
+              "profile.ICL": 0.22517399356291065,
+              "profile.SCL": 0.2777711282037603,
+              "profile.cross": 0.5100842610586552,
+              "recruitment.ICL": 0.15533256897462153,
+              "recruitment.SCL": 0.8368152498315201
+            },
+            "selected_event_indices": [
+              14,
+              42,
+              72,
+              105,
+              133,
+              151
+            ],
+            "status": "OK"
+          }
+        },
+        "n_events": 169,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.0,
+        "pooled_scl_recruitment_fraction": 0.0,
+        "status": "OK",
+        "weak_mode": "A",
+        "weak_mode_score": 6.403053153223452
+      },
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    "rev9_null": {
+      "label": "Null",
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+      "score": {
+        "fixed_events_per_mode": 6,
+        "frozen_ood_fraction": 0.9230769230769231,
+        "mean_mode_score": 2.0171796721231248,
+        "mode_counts": [
+          6,
+          7
+        ],
+        "modes": {
+          "0": {
+            "floor_excess": {
+              "event_cloud": 1.4304270398539414,
+              "precedence.ICL-ICL": 3.0356604010155994,
+              "precedence.ICL-SCL": 2.5122906327904793,
+              "precedence.SCL-SCL": 0.7210179126677888,
+              "profile.ICL": 2.3064615716386476,
+              "profile.SCL": 0.6861894371237054,
+              "profile.cross": 0.0,
+              "recruitment.ICL": 2.201614991913529,
+              "recruitment.SCL": 0.4723183391003462
+            },
+            "n_available": 6,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 1.4304270398539414,
+              "mode_score": 2.0703263434224533,
+              "precedence": 2.790086788084584,
+              "profile": 2.032215818310249,
+              "recruitment": 2.028575727441039
+            },
+            "raw": {
+              "event_cloud": 0.8760540497867522,
+              "multishaft_fraction": 1.0,
+              "precedence.ICL-ICL": 0.23643706188279504,
+              "precedence.ICL-SCL": 0.21350256965129433,
+              "precedence.SCL-SCL": 0.1455011358394608,
+              "profile.ICL": 0.22827977171348898,
+              "profile.SCL": 0.1711614396385286,
+              "profile.cross": 0.02507733376324084,
+              "recruitment.ICL": 0.28285060851098587,
+              "recruitment.SCL": 0.20545822102425879
+            },
+            "selected_event_indices": [
+              2,
+              3,
+              4,
+              5,
+              6,
+              9
+            ],
+            "status": "OK"
+          },
+          "1": {
+            "floor_excess": {
+              "event_cloud": 2.214209117202386,
+              "precedence.ICL-ICL": 2.699276957343816,
+              "precedence.ICL-SCL": 2.245417019479416,
+              "precedence.SCL-SCL": 2.0307102644994477,
+              "profile.ICL": 1.7704972596704547,
+              "profile.SCL": 0.7634283468708204,
+              "profile.cross": 0.5991228169681084,
+              "recruitment.ICL": 1.8247423221721069,
+              "recruitment.SCL": 1.0545941657372169
+            },
+            "n_available": 7,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 2.214209117202386,
+              "mode_score": 1.9640330008237958,
+              "precedence": 2.476727525220036,
+              "profile": 1.5025127386367074,
+              "recruitment": 1.6626826222360538
+            },
+            "raw": {
+              "event_cloud": 0.9209380379148078,
+              "multishaft_fraction": 0.8333333333333334,
+              "precedence.ICL-ICL": 0.22777460290338702,
+              "precedence.ICL-SCL": 0.1963566393028186,
+              "precedence.SCL-SCL": 0.3415574399587788,
+              "profile.ICL": 0.19704185593102685,
+              "profile.SCL": 0.13541001709264924,
+              "profile.cross": 0.11747510802449358,
+              "recruitment.ICL": 0.2551441049563703,
+              "recruitment.SCL": 0.30467170501588525
+            },
+            "selected_event_indices": [
+              0,
+              1,
+              7,
+              10,
+              11,
+              12
+            ],
+            "status": "OK"
+          }
+        },
+        "n_events": 13,
+        "patient_mode_status": "NOT_EVALUABLE",
+        "pooled_multishaft_fraction": 0.9230769230769231,
+        "pooled_scl_recruitment_fraction": 0.5769230769230769,
+        "status": "OK",
+        "weak_mode": "A",
+        "weak_mode_score": 2.0227867649880045
+      },
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    "stage2_filament": {
+      "label": "Stage 2 filament",
+      "n_events_with_rank_curve": 507,
+      "n_files": 120,
+      "path_pattern": "results/topic4_sef_hfo/field_swap_subject_snn",
+      "score": {
+        "fixed_events_per_mode": 6,
+        "frozen_ood_fraction": 0.08875739644970414,
+        "mean_mode_score": 5.600669807426728,
+        "mode_counts": [
+          148,
+          359
+        ],
+        "modes": {
+          "0": {
+            "floor_excess": {
+              "event_cloud": 6.864961567924056,
+              "precedence.ICL-ICL": 4.520206216576854,
+              "precedence.ICL-SCL": 5.565769399170436,
+              "precedence.SCL-SCL": 3.245464688289686,
+              "profile.ICL": 3.2726404564874434,
+              "profile.SCL": 3.184477768570074,
+              "profile.cross": 3.925949794065288,
+              "recruitment.ICL": 0.0,
+              "recruitment.SCL": 5.412846020761246
+            },
+            "n_available": 148,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 6.864961567924056,
+              "mode_score": 5.270036963142789,
+              "precedence": 5.294926454905295,
+              "profile": 3.6807006040217196,
+              "recruitment": 5.239559225720084
+            },
+            "raw": {
+              "event_cloud": 1.809449939772744,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.3144718614989092,
+              "precedence.ICL-SCL": 0.37360890276443953,
+              "precedence.SCL-SCL": 0.3679647605015215,
+              "profile.ICL": 0.28176842559003795,
+              "profile.SCL": 0.376213191944324,
+              "profile.cross": 0.6167877456018385,
+              "recruitment.ICL": 0.09580658335375315,
+              "recruitment.SCL": 0.7185983827493262
+            },
+            "selected_event_indices": [
+              49,
+              143,
+              210,
+              266,
+              373,
+              441
+            ],
+            "status": "OK"
+          },
+          "1": {
+            "floor_excess": {
+              "event_cloud": 8.205522381590841,
+              "precedence.ICL-ICL": 5.375659237839634,
+              "precedence.ICL-SCL": 7.608145377516226,
+              "precedence.SCL-SCL": 3.4941741861622733,
+              "profile.ICL": 3.0783139953049394,
+              "profile.SCL": 2.905779894989677,
+              "profile.cross": 4.245400894507719,
+              "recruitment.ICL": 4.286435881145279,
+              "recruitment.SCL": 4.105267394128943
+            },
+            "n_available": 359,
+            "n_scored": 6,
+            "objective": {
+              "event_cloud": 8.205522381590841,
+              "mode_score": 5.931302651710668,
+              "precedence": 7.3335254123313085,
+              "profile": 3.9742471686197334,
+              "recruitment": 4.211915644300789
+            },
+            "raw": {
+              "event_cloud": 1.952713373301943,
+              "multishaft_fraction": 0.0,
+              "precedence.ICL-ICL": 0.38197520135099455,
+              "precedence.ICL-SCL": 0.49091113497754363,
+              "precedence.SCL-SCL": 0.5346304810718471,
+              "profile.ICL": 0.26882797187165847,
+              "profile.SCL": 0.2777711282037603,
+              "profile.cross": 0.5100842610586552,
+              "recruitment.ICL": 0.4261153948262834,
+              "recruitment.SCL": 0.8368152498315201
+            },
+            "selected_event_indices": [
+              40,
+              123,
+              212,
+              306,
+              382,
+              468
+            ],
+            "status": "OK"
+          }
+        },
+        "n_events": 507,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.021696252465483234,
+        "pooled_scl_recruitment_fraction": 0.011341222879684419,
+        "status": "OK",
+        "weak_mode": "B",
+        "weak_mode_score": 5.775164264051889
+      },
+      "semantics": "ORDINAL_COMPATIBLE"
+    }
+  },
+  "development_boundary": "patient training target only; no patient held-out score read",
+  "field_selection_miss": {
+    "reason": "all 48 rev8.1 fit-history candidates lack per-event fixed-contact values; retained controls do not establish a shaft-aware field-candidate ranking",
+    "status": "NOT_TESTABLE"
+  },
+  "fixed_events_per_mode": 6,
+  "historical_multishaft_support": {
+    "any_l2_candidate_positive": false,
+    "any_l3_candidate_positive": false,
+    "any_ordinal_dataset_positive": true,
+    "interpretation": "rev8.1 final, Node, and Node+Edge have zero SCL support; hand dual-core and Stage 2 filament have sparse support; Null and Edge have high SCL recruitment but OOD>0.5 and cannot define patient modes",
+    "ordinal_datasets": {
+      "hand_dual_core": {
+        "frozen_ood_fraction": 0.05454545454545454,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.07727272727272727,
+        "pooled_scl_recruitment_fraction": 0.019318181818181818
+      },
+      "rev8_1_final": {
+        "frozen_ood_fraction": null,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.0,
+        "pooled_scl_recruitment_fraction": 0.0
+      },
+      "rev9_edge": {
+        "frozen_ood_fraction": 0.8333333333333334,
+        "patient_mode_status": "NOT_EVALUABLE",
+        "pooled_multishaft_fraction": 0.8888888888888888,
+        "pooled_scl_recruitment_fraction": 0.5416666666666666
+      },
+      "rev9_node": {
+        "frozen_ood_fraction": 0.03305785123966942,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.0,
+        "pooled_scl_recruitment_fraction": 0.0
+      },
+      "rev9_node_edge": {
+        "frozen_ood_fraction": 0.05325443786982249,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.0,
+        "pooled_scl_recruitment_fraction": 0.0
+      },
+      "rev9_null": {
+        "frozen_ood_fraction": 0.9230769230769231,
+        "patient_mode_status": "NOT_EVALUABLE",
+        "pooled_multishaft_fraction": 0.9230769230769231,
+        "pooled_scl_recruitment_fraction": 0.5769230769230769
+      },
+      "stage2_filament": {
+        "frozen_ood_fraction": 0.08875739644970414,
+        "patient_mode_status": "DEVELOPMENT_ONLY",
+        "pooled_multishaft_fraction": 0.021696252465483234,
+        "pooled_scl_recruitment_fraction": 0.011341222879684419
+      }
+    }
+  },
+  "inputs": {
+    "factorization": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/direction_extent_factorization_audit.json",
+      "sha256": "f9aca1a98ba6076ceb70a69b1509c9efa6dfea5df00c4f9d13657677738e0c47"
+    },
+    "floors": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_floors.json",
+      "sha256": "2f28c5ecd991d0a1b051337370fa7b975ecc2ce95b2f00f26a3ea88469299b94"
+    },
+    "target": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    }
+  },
+  "inventory": [
+    {
+      "family": "rev8_1_field_fit_history",
+      "n_candidates": 48,
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_fit_kmeans_rev8_1/checkpoint_K3_r0.json",
+      "reason": "per-event fixed-contact values were not retained",
+      "semantics": "NOT_RESCORABLE"
+    },
+    {
+      "family": "rev8_1_final",
+      "n_events": 50,
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_event_profiles.npz",
+      "score_status": "OK",
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    {
+      "family": "rev9_null",
+      "n_events": 13,
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+      "score_status": "OK",
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    {
+      "family": "rev9_node",
+      "n_events": 121,
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+      "score_status": "OK",
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    {
+      "family": "rev9_edge",
+      "n_events": 18,
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+      "score_status": "OK",
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    {
+      "family": "rev9_node_edge",
+      "n_events": 169,
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/node_edge_factorial/factorial_summary.npz",
+      "score_status": "OK",
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    {
+      "family": "hand_dual_core",
+      "n_events": 220,
+      "path": "results/topic4_sef_hfo/field_swap_subject_snn",
+      "score_status": "OK",
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    {
+      "family": "stage2_filament",
+      "n_events": 507,
+      "path": "results/topic4_sef_hfo/field_swap_subject_snn",
+      "score_status": "OK",
+      "semantics": "ORDINAL_COMPATIBLE"
+    },
+    {
+      "family": "L2_sobol_component_pair_edge",
+      "n_candidates": 64,
+      "n_worker_artifacts": 384,
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/sobol_fit/workers",
+      "rank_parity_rows": 768,
+      "semantics": "FULL_TIMING"
+    },
+    {
+      "family": "L3_repeated_component_pair_edge",
+      "n_candidates": 57,
+      "n_worker_artifacts": 1026,
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/relaxed_edge_oracle/network_oracle_repeated/fit/workers",
+      "rank_parity_rows": 2052,
+      "semantics": "FULL_TIMING"
+    }
+  ],
+  "l2": {
+    "best_new_score_candidate": {
+      "candidate_id": "sobol_056",
+      "median_mean_mode_score": 5.193511584950915,
+      "median_mode_0_precedence.ICL-ICL_excess": 3.1531724925008033,
+      "median_mode_0_precedence.ICL-SCL_excess": 5.565769399170436,
+      "median_mode_0_precedence.SCL-SCL_excess": 3.245464688289686,
+      "median_mode_0_recruitment.ICL_excess": 2.125135973570765,
+      "median_mode_0_recruitment.SCL_excess": 5.412846020761246,
+      "median_mode_1_precedence.ICL-ICL_excess": 4.0602017403914505,
+      "median_mode_1_precedence.ICL-SCL_excess": 7.608145377516226,
+      "median_mode_1_precedence.SCL-SCL_excess": 3.4941741861622733,
+      "median_mode_1_recruitment.ICL_excess": 0.9063958708539198,
+      "median_mode_1_recruitment.SCL_excess": 4.105267394128943,
+      "median_pooled_multishaft_fraction": 0.0,
+      "median_pooled_scl_recruitment_fraction": 0.0,
+      "median_weak_mode_score": 5.351135816675288,
+      "n_eligible_replicates": 1,
+      "n_replicates": 1,
+      "old_objective": 5.0949769776098845,
+      "replicate_scores": [
+        {
+          "assigned_ood_fraction": 0.25,
+          "fixed_events_per_mode": 6,
+          "mean_mode_score": 5.193511584950915,
+          "mode_counts": [
+            6,
+            6
+          ],
+          "modes": {
+            "0": {
+              "floor_excess": {
+                "event_cloud": 5.745014968735405,
+                "precedence.ICL-ICL": 3.1531724925008033,
+                "precedence.ICL-SCL": 5.565769399170436,
+                "precedence.SCL-SCL": 3.245464688289686,
+                "profile.ICL": 0.15279901289201267,
+                "profile.SCL": 3.1860380346556263,
+                "profile.cross": 3.456076721607122,
+                "recruitment.ICL": 2.125135973570765,
+                "recruitment.SCL": 5.412846020761246
+              },
+              "n_available": 6,
+              "n_scored": 6,
+              "objective": {
+                "event_cloud": 5.745014968735405,
+                "mode_score": 4.882559126931104,
+                "precedence": 5.291155713427819,
+                "profile": 3.2545061139779907,
+                "recruitment": 5.239559711583203
+              },
+              "raw": {
+                "event_cloud": 1.7173163065879842,
+                "multishaft_fraction": 0.0,
+                "precedence.ICL-ICL": 0.24261405717347354,
+                "precedence.ICL-SCL": 0.37360890276443953,
+                "precedence.SCL-SCL": 0.3679647605015215,
+                "profile.ICL": 0.11188739887338284,
+                "profile.SCL": 0.4129651503532692,
+                "profile.cross": 0.6375238756114405,
+                "recruitment.ICL": 0.27742383402760756,
+                "recruitment.SCL": 0.7185983827493262
+              },
+              "selected_event_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "status": "OK"
+            },
+            "1": {
+              "floor_excess": {
+                "event_cloud": 7.623398259802882,
+                "precedence.ICL-ICL": 4.0602017403914505,
+                "precedence.ICL-SCL": 7.608145377516226,
+                "precedence.SCL-SCL": 3.4941741861622733,
+                "profile.ICL": 0.6973979155829622,
+                "profile.SCL": 2.266967915136679,
+                "profile.cross": 3.4009674241529746,
+                "recruitment.ICL": 0.9063958708539198,
+                "recruitment.SCL": 4.105267394128943
+              },
+              "n_available": 6,
+              "n_scored": 6,
+              "objective": {
+                "event_cloud": 7.623398259802882,
+                "mode_score": 5.504464042970725,
+                "precedence": 7.333492494788044,
+                "profile": 3.128984124988326,
+                "recruitment": 3.9319812923036483
+              },
+              "raw": {
+                "event_cloud": 1.7401094548261802,
+                "multishaft_fraction": 0.0,
+                "precedence.ICL-ICL": 0.30618470803577064,
+                "precedence.ICL-SCL": 0.49091113497754363,
+                "precedence.SCL-SCL": 0.5346304810718471,
+                "profile.ICL": 0.1379179330313701,
+                "profile.SCL": 0.25467975459226766,
+                "profile.cross": 0.49494159746074523,
+                "recruitment.ICL": 0.1913624548167727,
+                "recruitment.SCL": 0.8368152498315201
+              },
+              "selected_event_indices": [
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ],
+              "status": "OK"
+            }
+          },
+          "n_events": 12,
+          "pooled_multishaft_fraction": 0.0,
+          "pooled_scl_recruitment_fraction": 0.0,
+          "replicate_id": 0,
+          "status": "OK",
+          "weak_mode": "B",
+          "weak_mode_score": 5.351135816675288
+        }
+      ]
+    },
+    "n_candidates": 64,
+    "n_workers": 384,
+    "old_vs_new_rank_association": {
+      "n": 62,
+      "pvalue": 0.0036617471627962894,
+      "rho": 0.3637233696294053
+    },
+    "rank_parity_rows": 768
+  },
+  "l3": {
+    "best_new_score_candidate": {
+      "candidate_id": "sobol_048",
+      "median_mean_mode_score": 5.408375188628007,
+      "median_mode_0_precedence.ICL-ICL_excess": 5.867012443035698,
+      "median_mode_0_precedence.ICL-SCL_excess": 5.565769399170436,
+      "median_mode_0_precedence.SCL-SCL_excess": 3.245464688289686,
+      "median_mode_0_recruitment.ICL_excess": 2.62996195617766,
+      "median_mode_0_recruitment.SCL_excess": 5.412846020761246,
+      "median_mode_1_precedence.ICL-ICL_excess": 4.0602017403914505,
+      "median_mode_1_precedence.ICL-SCL_excess": 7.608145377516226,
+      "median_mode_1_precedence.SCL-SCL_excess": 3.4941741861622733,
+      "median_mode_1_recruitment.ICL_excess": 0.9063958708539198,
+      "median_mode_1_recruitment.SCL_excess": 4.105267394128943,
+      "median_pooled_multishaft_fraction": 0.0,
+      "median_pooled_scl_recruitment_fraction": 0.0,
+      "median_weak_mode_score": 5.42411325128926,
+      "n_eligible_replicates": 3,
+      "n_replicates": 3,
+      "old_objective": 3.0651557859093277,
+      "replicate_scores": [
+        {
+          "assigned_ood_fraction": 0.0,
+          "fixed_events_per_mode": 6,
+          "mean_mode_score": 5.408375188628007,
+          "mode_counts": [
+            6,
+            6
+          ],
+          "modes": {
+            "0": {
+              "floor_excess": {
+                "event_cloud": 7.084275146559036,
+                "precedence.ICL-ICL": 5.912484042096841,
+                "precedence.ICL-SCL": 5.565769399170436,
+                "precedence.SCL-SCL": 3.245464688289686,
+                "profile.ICL": 2.4248684187380865,
+                "profile.SCL": 3.1860380346556263,
+                "profile.cross": 3.456076721607122,
+                "recruitment.ICL": 2.62996195617766,
+                "recruitment.SCL": 5.412846020761246
+              },
+              "n_available": 6,
+              "n_scored": 6,
+              "objective": {
+                "event_cloud": 7.084275146559036,
+                "mode_score": 5.318734041002387,
+                "precedence": 5.693593309325109,
+                "profile": 3.257504821737405,
+                "recruitment": 5.239562886387999
+              },
+              "raw": {
+                "event_cloud": 1.970044651675128,
+                "multishaft_fraction": 0.0,
+                "precedence.ICL-ICL": 0.3876566160450908,
+                "precedence.ICL-SCL": 0.37360890276443953,
+                "precedence.SCL-SCL": 0.3679647605015215,
+                "profile.ICL": 0.24837884564119858,
+                "profile.SCL": 0.4129651503532692,
+                "profile.cross": 0.6375238756114405,
+                "recruitment.ICL": 0.313245119660214,
+                "recruitment.SCL": 0.7185983827493262
+              },
+              "selected_event_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "status": "OK"
+            },
+            "1": {
+              "floor_excess": {
+                "event_cloud": 7.597607298036141,
+                "precedence.ICL-ICL": 4.0602017403914505,
+                "precedence.ICL-SCL": 7.608145377516226,
+                "precedence.SCL-SCL": 3.4941741861622733,
+                "profile.ICL": 0.7040875498925561,
+                "profile.SCL": 2.266967915136679,
+                "profile.cross": 3.4009674241529746,
+                "recruitment.ICL": 0.9063958708539198,
+                "recruitment.SCL": 4.105267394128943
+              },
+              "n_available": 6,
+              "n_scored": 6,
+              "objective": {
+                "event_cloud": 7.597607298036141,
+                "mode_score": 5.498016336253626,
+                "precedence": 7.333492494788044,
+                "profile": 3.128984259886668,
+                "recruitment": 3.9319812923036483
+              },
+              "raw": {
+                "event_cloud": 1.7360921677736094,
+                "multishaft_fraction": 0.0,
+                "precedence.ICL-ICL": 0.30618470803577064,
+                "precedence.ICL-SCL": 0.49091113497754363,
+                "precedence.SCL-SCL": 0.5346304810718471,
+                "profile.ICL": 0.13827246355831438,
+                "profile.SCL": 0.25467975459226766,
+                "profile.cross": 0.49494159746074523,
+                "recruitment.ICL": 0.1913624548167727,
+                "recruitment.SCL": 0.8368152498315201
+              },
+              "selected_event_indices": [
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ],
+              "status": "OK"
+            }
+          },
+          "n_events": 12,
+          "pooled_multishaft_fraction": 0.0,
+          "pooled_scl_recruitment_fraction": 0.0,
+          "replicate_id": 31001,
+          "status": "OK",
+          "weak_mode": "B",
+          "weak_mode_score": 5.42411325128926
+        },
+        {
+          "assigned_ood_fraction": 0.0,
+          "fixed_events_per_mode": 6,
+          "mean_mode_score": 5.365238682248868,
+          "mode_counts": [
+            6,
+            6
+          ],
+          "modes": {
+            "0": {
+              "floor_excess": {
+                "event_cloud": 7.103511022914763,
+                "precedence.ICL-ICL": 5.180473977320139,
+                "precedence.ICL-SCL": 5.565769399170436,
+                "precedence.SCL-SCL": 3.245464688289686,
+                "profile.ICL": 2.3418608582742224,
+                "profile.SCL": 3.1860380346556263,
+                "profile.cross": 3.456076721607122,
+                "recruitment.ICL": 2.62996195617766,
+                "recruitment.SCL": 5.412846020761246
+              },
+              "n_available": 6,
+              "n_scored": 6,
+              "objective": {
+                "event_cloud": 7.103511022914763,
+                "mode_score": 5.2348442648511515,
+                "precedence": 5.339642022605734,
+                "profile": 3.2566611274961117,
+                "recruitment": 5.239562886387999
+              },
+              "raw": {
+                "event_cloud": 1.9736746044491915,
+                "multishaft_fraction": 0.0,
+                "precedence.ICL-ICL": 0.3491786801517935,
+                "precedence.ICL-SCL": 0.37360890276443953,
+                "precedence.SCL-SCL": 0.3679647605015215,
+                "profile.ICL": 0.2433922805339761,
+                "profile.SCL": 0.4129651503532692,
+                "profile.cross": 0.6375238756114405,
+                "recruitment.ICL": 0.313245119660214,
+                "recruitment.SCL": 0.7185983827493262
+              },
+              "selected_event_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "status": "OK"
+            },
+            "1": {
+              "floor_excess": {
+                "event_cloud": 7.58807365126863,
+                "precedence.ICL-ICL": 3.9838575695568954,
+                "precedence.ICL-SCL": 7.608145377516226,
+                "precedence.SCL-SCL": 3.4941741861622733,
+                "profile.ICL": 0.738138811264023,
+                "profile.SCL": 2.266967915136679,
+                "profile.cross": 3.4009674241529746,
+                "recruitment.ICL": 0.9063958708539198,
+                "recruitment.SCL": 4.105267394128943
+              },
+              "n_available": 6,
+              "n_scored": 6,
+              "objective": {
+                "event_cloud": 7.58807365126863,
+                "mode_score": 5.495633099646584,
+                "precedence": 7.33349244962942,
+                "profile": 3.1289850053846378,
+                "recruitment": 3.9319812923036483
+              },
+              "raw": {
+                "event_cloud": 1.7346071748497591,
+                "multishaft_fraction": 0.0,
+                "precedence.ICL-ICL": 0.3017861148615198,
+                "precedence.ICL-SCL": 0.49091113497754363,
+                "precedence.SCL-SCL": 0.5346304810718471,
+                "profile.ICL": 0.14007707814237774,
+                "profile.SCL": 0.25467975459226766,
+                "profile.cross": 0.49494159746074523,
+                "recruitment.ICL": 0.1913624548167727,
+                "recruitment.SCL": 0.8368152498315201
+              },
+              "selected_event_indices": [
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ],
+              "status": "OK"
+            }
+          },
+          "n_events": 12,
+          "pooled_multishaft_fraction": 0.0,
+          "pooled_scl_recruitment_fraction": 0.0,
+          "replicate_id": 31002,
+          "status": "OK",
+          "weak_mode": "B",
+          "weak_mode_score": 5.397805627164425
+        },
+        {
+          "assigned_ood_fraction": 0.0,
+          "fixed_events_per_mode": 6,
+          "mean_mode_score": 5.428544900018528,
+          "mode_counts": [
+            6,
+            6
+          ],
+          "modes": {
+            "0": {
+              "floor_excess": {
+                "event_cloud": 7.2768846670105045,
+                "precedence.ICL-ICL": 5.867012443035698,
+                "precedence.ICL-SCL": 5.565769399170436,
+                "precedence.SCL-SCL": 3.245464688289686,
+                "profile.ICL": 2.2644624232126813,
+                "profile.SCL": 3.1860380346556263,
+                "profile.cross": 3.456076721607122,
+                "recruitment.ICL": 3.2705485562340626,
+                "recruitment.SCL": 5.412846020761246
+              },
+              "n_available": 6,
+              "n_scored": 6,
+              "objective": {
+                "event_cloud": 7.2768846670105045,
+                "mode_score": 5.357619648602429,
+                "precedence": 5.657898173399534,
+                "profile": 3.2560890662824415,
+                "recruitment": 5.239606687717236
+              },
+              "raw": {
+                "event_cloud": 2.0063914991046037,
+                "multishaft_fraction": 0.0,
+                "precedence.ICL-ICL": 0.3852664121970411,
+                "precedence.ICL-SCL": 0.37360890276443953,
+                "precedence.SCL-SCL": 0.3679647605015215,
+                "profile.ICL": 0.23874267592597748,
+                "profile.SCL": 0.4129651503532692,
+                "profile.cross": 0.6375238756114405,
+                "recruitment.ICL": 0.3586996651147594,
+                "recruitment.SCL": 0.7185983827493262
+              },
+              "selected_event_indices": [
+                0,
+                1,
+                2,
+                3,
+                4,
+                5
+              ],
+              "status": "OK"
+            },
+            "1": {
+              "floor_excess": {
+                "event_cloud": 7.603421761193519,
+                "precedence.ICL-ICL": 4.0602017403914505,
+                "precedence.ICL-SCL": 7.608145377516226,
+                "precedence.SCL-SCL": 3.4941741861622733,
+                "profile.ICL": 0.7403524095708843,
+                "profile.SCL": 2.266967915136679,
+                "profile.cross": 3.4009674241529746,
+                "recruitment.ICL": 0.9063958708539198,
+                "recruitment.SCL": 4.105267394128943
+              },
+              "n_available": 6,
+              "n_scored": 6,
+              "objective": {
+                "event_cloud": 7.603421761193519,
+                "mode_score": 5.499470151434627,
+                "precedence": 7.333492494788044,
+                "profile": 3.128985057453298,
+                "recruitment": 3.9319812923036483
+              },
+              "raw": {
+                "event_cloud": 1.7369978481344677,
+                "multishaft_fraction": 0.0,
+                "precedence.ICL-ICL": 0.30618470803577064,
+                "precedence.ICL-SCL": 0.49091113497754363,
+                "precedence.SCL-SCL": 0.5346304810718471,
+                "profile.ICL": 0.14019439220438096,
+                "profile.SCL": 0.25467975459226766,
+                "profile.cross": 0.49494159746074523,
+                "recruitment.ICL": 0.1913624548167727,
+                "recruitment.SCL": 0.8368152498315201
+              },
+              "selected_event_indices": [
+                6,
+                7,
+                8,
+                9,
+                10,
+                11
+              ],
+              "status": "OK"
+            }
+          },
+          "n_events": 12,
+          "pooled_multishaft_fraction": 0.0,
+          "pooled_scl_recruitment_fraction": 0.0,
+          "replicate_id": 31003,
+          "status": "OK",
+          "weak_mode": "B",
+          "weak_mode_score": 5.438473551119031
+        }
+      ]
+    },
+    "n_candidates": 57,
+    "n_workers": 1026,
+    "old_vs_new_rank_association": {
+      "n": 57,
+      "pvalue": 0.33765108867986837,
+      "rho": 0.1293292074111116
+    },
+    "rank_parity_rows": 2052
+  },
+  "mode_factorization": "old A/B direction labels primary; shaft extent remains continuous within mode",
+  "provenance": {
+    "git_commit": "c6bde4b49c8d8f20f2ea203f0b1355157f676040",
+    "numpy_version": "1.26.4",
+    "python_executable": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "python_version": "3.11.5",
+    "runtime_file_sha256": {
+      "config/topic4_rev10_sa_shaft_aware.json": "88ea711352088e32dd1d4f361dced9e8d1bd4153fc08df584c4ef02ca6a0fb57",
+      "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b",
+      "scripts/rescore_topic4_rev10_sa_historical_artifacts.py": "7facb79abecf5a9f517fe4043829e970f94294a79db8fac9036b43cb78db7a6f",
+      "src/sef_hfo_observation.py": "550bb2c11d15963acf5fc4561f3226a5621ef9dc50acba4d68f03b3cee85bded",
+      "src/topic4_shaft_aware.py": "9c5c3ddb7b7a462051f7b8c705299012c9b1792ce04bdd55711653610d17e7bf"
+    },
+    "runtime_files_dirty": false
+  },
+  "scientific_verdict": "FROZEN_LEARNED_NODE_FIELDS_HAVE_ZERO_SCL_SUPPORT; RIGID_CONTROLS_HAVE_SPARSE_SCL_SUPPORT; EDGE_NULL_MULTISHAFT_EVENTS_ARE_PATIENT_MODE_NOT_EVALUABLE; OLD_OBJECTIVE_FIELD_SELECTION_MISS_NOT_TESTABLE",
+  "scoring_semantics": {
+    "FULL_TIMING": "retained excess envelopes, original threshold re-extraction, rank parity required",
+    "NOT_RESCORABLE": "no per-event fixed-contact identity; no reconstruction from aggregate curves",
+    "ORDINAL_COMPATIBLE": "retained ranks, separate ordinal patient embedding/floors",
+    "cross_semantics_absolute_score_comparison": "FORBIDDEN"
+  },
+  "status": "SA4_HISTORICAL_RESCORING_COMPLETE"
+}

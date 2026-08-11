@@ -103,7 +103,7 @@ L3: rho=0.129, n=57, p=0.338
 - 当前定向单元测试 `9/9` 通过；
 - SA4 使用 `systemd-run --user -> nohup`，独立日志、退出码、完成标记和桌面通知，修正版退出码为 0。
 
-当前 artifact provenance 仍显示 runtime dirty，因为 producer 与配置尚未提交。正式 SA5 启动前必须先提交并用 clean commit 重建必要 sidecar。
+最终 clean freeze 由 commit `c6bde4b4` 重建。target、direction/extent 和 SA4 三份 sidecar 均记录该 commit 且 `runtime_dirty=false`；数值与提交前审计一致。
 
 ## 6. 图
 

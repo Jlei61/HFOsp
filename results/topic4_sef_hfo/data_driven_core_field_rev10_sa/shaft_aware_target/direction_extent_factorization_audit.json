@@ -1,0 +1,204 @@
+{
+  "extent_factor": {
+    "all_four_crossed_cells_supported": true,
+    "ami_old_vs_shaft_aware": 0.011184792338129329,
+    "contingency_old_by_shaft_aware": [
+      [
+        5082,
+        4193
+      ],
+      [
+        8668,
+        12106
+      ]
+    ],
+    "extent_auc_for_old_mode_b": 0.6180779649660562,
+    "extent_auc_for_shaft_aware_cluster_b": 0.9518886624388556,
+    "extent_quartiles": [
+      {
+        "lower": 0.2727272727272727,
+        "n_events": 7111,
+        "old_mode_b_fraction": 0.5826184784137252,
+        "quartile": 1,
+        "shaft_aware_cluster_b_fraction": 0.045141330333286454,
+        "upper": 0.6590909090909092
+      },
+      {
+        "lower": 0.6590909090909092,
+        "n_events": 7599,
+        "old_mode_b_fraction": 0.6553493880773786,
+        "quartile": 2,
+        "shaft_aware_cluster_b_fraction": 0.23332017370706673,
+        "upper": 0.8295454545454546
+      },
+      {
+        "lower": 0.8295454545454546,
+        "n_events": 5792,
+        "old_mode_b_fraction": 0.6926795580110497,
+        "quartile": 3,
+        "shaft_aware_cluster_b_fraction": 0.804385359116022,
+        "upper": 0.9545454545454546
+      },
+      {
+        "lower": 0.9545454545454546,
+        "n_events": 9547,
+        "old_mode_b_fraction": 0.8001466429244789,
+        "quartile": 4,
+        "shaft_aware_cluster_b_fraction": 0.9998952550539436,
+        "upper": 1.0
+      }
+    ]
+  },
+  "inputs": {
+    "heldout_scores_read": false,
+    "target_npz": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+    "target_sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b",
+    "target_summary": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_target_summary.json",
+    "target_summary_sha256": "d9a7629de3b3c1cd45c1431d8e3782f8301bd4e58509ba2e0c0cd66180820c15"
+  },
+  "matched_design": {
+    "events_per_old_mode": {
+      "median": 7590.0,
+      "q05": 7590.0,
+      "q95": 7590.0
+    },
+    "max_events_per_label_per_stratum": 40,
+    "n_eligible_strata": 1118,
+    "n_strata_used": 1118,
+    "null": "permute old A/B within each exactly matched stratum",
+    "repeats": 128,
+    "seed": 20260826,
+    "strata": "recording_block x recruited_ICL_count x recruited_SCL_count"
+  },
+  "matched_direction_contrast": {
+    "precedence.ICL-ICL": {
+      "null": {
+        "median": 8.908051796059462e-05,
+        "q05": 6.35082680497576e-05,
+        "q95": 0.00014348037537949051
+      },
+      "observed": {
+        "median": 0.1420428093465011,
+        "q05": 0.14081475535105767,
+        "q95": 0.14315556622343667
+      },
+      "observed_median_above_null_q95": true
+    },
+    "precedence.ICL-SCL": {
+      "null": {
+        "median": 7.948386390811194e-05,
+        "q05": 5.7569720043742e-05,
+        "q95": 0.0001283910793887596
+      },
+      "observed": {
+        "median": 0.08213250486364872,
+        "q05": 0.08109398091012007,
+        "q95": 0.08312095762640045
+      },
+      "observed_median_above_null_q95": true
+    },
+    "precedence.SCL-SCL": {
+      "null": {
+        "median": 8.396083039973148e-05,
+        "q05": 3.926982479467465e-05,
+        "q95": 0.00013832733324031644
+      },
+      "observed": {
+        "median": 0.00410029060363903,
+        "q05": 0.003823428128321597,
+        "q95": 0.004429241539902968
+      },
+      "observed_median_above_null_q95": true
+    },
+    "profile.ICL": {
+      "null": {
+        "median": 0.004098330460639399,
+        "q05": 0.0025987930380571597,
+        "q95": 0.006924720796388843
+      },
+      "observed": {
+        "median": 0.2849633172039827,
+        "q05": 0.28358231590690647,
+        "q95": 0.28666194687666324
+      },
+      "observed_median_above_null_q95": true
+    },
+    "profile.SCL": {
+      "null": {
+        "median": 0.0038369441176586278,
+        "q05": 0.0015748430291927114,
+        "q95": 0.006142869646684532
+      },
+      "observed": {
+        "median": 0.18877380444731093,
+        "q05": 0.18691783351585167,
+        "q95": 0.1909505360152151
+      },
+      "observed_median_above_null_q95": true
+    },
+    "profile.cross": {
+      "null": {
+        "median": 0.0021888861752139624,
+        "q05": 0.0001617170194351037,
+        "q95": 0.006643395755103049
+      },
+      "observed": {
+        "median": 0.15098420547276645,
+        "q05": 0.1491241585130869,
+        "q95": 0.15335302365917974
+      },
+      "observed_median_above_null_q95": true
+    },
+    "recruitment.ICL": {
+      "null": {
+        "median": 0.004503533357288302,
+        "q05": 0.0026793627979398715,
+        "q95": 0.006403162055335979
+      },
+      "observed": {
+        "median": 0.020481494789795184,
+        "q05": 0.019340040723439922,
+        "q95": 0.021646903820816864
+      },
+      "observed_median_above_null_q95": true
+    },
+    "recruitment.SCL": {
+      "null": {
+        "median": 0.003689064558629801,
+        "q05": 0.0019334650856389815,
+        "q95": 0.007048748353096185
+      },
+      "observed": {
+        "median": 0.02266139657444005,
+        "q05": 0.01987483530961794,
+        "q95": 0.02448287220026349
+      },
+      "observed_median_above_null_q95": true
+    }
+  },
+  "precedence_direction_survives_extent_matching": {
+    "ICL-ICL": true,
+    "ICL-SCL": true,
+    "SCL-SCL": true
+  },
+  "provenance": {
+    "git_commit": "c6bde4b49c8d8f20f2ea203f0b1355157f676040",
+    "numpy_version": "1.26.4",
+    "python_executable": "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+    "python_version": "3.11.5",
+    "runtime_file_sha256": {
+      "config/topic4_rev10_sa_shaft_aware.json": "88ea711352088e32dd1d4f361dced9e8d1bd4153fc08df584c4ef02ca6a0fb57",
+      "scripts/audit_topic4_rev10_sa_mode_factorization.py": "05562f1386f315c326f788ad8056fd4ec64018ca78445c6289f1856eb5ac6b80",
+      "src/topic4_shaft_aware.py": "9c5c3ddb7b7a462051f7b8c705299012c9b1792ce04bdd55711653610d17e7bf"
+    },
+    "runtime_files_dirty": false
+  },
+  "recommended_target_factorization": {
+    "flat_shaft_aware_k2_as_patient_mode": "REJECT",
+    "model_optimization_resume": "requires explicit spec amendment after review",
+    "primary_mode_identity": "frozen old direction A/B labels",
+    "within_mode_distribution": "shaft-balanced recruitment extent and fixed-contact event cloud; do not replace A/B with the extent KMeans labels"
+  },
+  "scientific_role": "patient-training-only exploratory resolution of the pre-registered PATIENT_MODE_DEFINITION_UNRESOLVED stop; no model artifact scored",
+  "status": "DIRECTION_AND_EXTENT_FACTORS_BOTH_SUPPORTED_EXPLORATORY"
+}

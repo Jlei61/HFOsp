@@ -67,6 +67,8 @@
 - [x] Recompute all supported shaft-aware recruitment/precedence/coverage endpoints.
 - [x] Determine whether any retained historical candidate supports an old-objective
   selection miss; unavailable metrics remain explicit.
+- [x] Rebuild target, factorization, and SA4 from commit `c6bde4b4`; all three
+  runtime provenance records are clean and reproduce the exploratory values.
 
 ## Conditional next phase
 
