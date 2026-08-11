@@ -300,3 +300,65 @@ def calibrate_episode_dose(
         "unit_excess_integral_sha256": array_sha256(num),
         "recurrent_force_integral_sha256": array_sha256(den),
     }
+
+
+def classify_u2_excursion(
+    rate_hz,
+    *,
+    dt_ms: float,
+    interictal_upper_hz: float,
+    saturated: bool,
+    quiet_tail_ms: float = 2000.0,
+    minimum_high_ms: float = 500.0,
+    target_high_max_ms: float = 5000.0,
+) -> dict:
+    """Classify one onset-state fork without pretending a brief trough is offset.
+
+    The interictal band is defined on one-second population means in the upstream lifecycle
+    contract.  We therefore use a causal one-second rolling mean here and require a *terminal*
+    two-second low tail.  This is intentionally a coarse U2 funnel label; causal ordering and
+    returning-IED statistics are separate gates once a finite excursion exists.
+    """
+
+    rate = np.asarray(rate_hz, float)
+    if rate.ndim != 1 or rate.size == 0 or not np.all(np.isfinite(rate)):
+        raise ValueError("rate_hz must be a finite non-empty 1-D trace")
+    if np.any(rate < 0.0) or not (np.isfinite(dt_ms) and dt_ms > 0.0):
+        raise ValueError("rate_hz must be non-negative and dt_ms positive")
+    if not (np.isfinite(interictal_upper_hz) and interictal_upper_hz > 0.0):
+        raise ValueError("interictal_upper_hz must be finite and positive")
+    win = max(1, int(round(1000.0 / float(dt_ms))))
+    if rate.size < win:
+        raise ValueError("U2 trace must be at least one second")
+    # Cumulative sums keep the 0.05-ms, 7-s production trace linear-time.  ``np.convolve`` with
+    # a 20,000-sample box would turn this small adjudication into billions of multiply-adds.
+    cumulative = np.r_[0.0, np.cumsum(rate, dtype=np.float64)]
+    rolling = (cumulative[win:] - cumulative[:-win]) / win
+    above = rolling > float(interictal_upper_hz)
+    last_above = int(np.flatnonzero(above)[-1]) if np.any(above) else -1
+    offset_ms = float((last_above + win) * dt_ms) if last_above >= 0 else 0.0
+    terminal_low_ms = float((above.size - last_above - 1) * dt_ms)
+    has_terminal_offset = terminal_low_ms >= float(quiet_tail_ms)
+
+    if has_terminal_offset:
+        if offset_ms < float(minimum_high_ms):
+            label = "IMMEDIATE_SUPPRESSION"
+        elif offset_ms <= float(target_high_max_ms):
+            label = "FINITE_EXCURSION_OFFSET"
+        else:
+            label = "LATE_OFFSET_OUTSIDE_TARGET"
+    elif bool(saturated):
+        label = "ESCALATING_SATURATION"
+    else:
+        label = "CONTAINED_HIGH_NO_OFFSET"
+    return {
+        "label": label,
+        "offset_ms": offset_ms if has_terminal_offset else None,
+        "terminal_low_ms": terminal_low_ms,
+        "terminal_offset": bool(has_terminal_offset),
+        "saturated": bool(saturated),
+        "rolling_window_ms": 1000.0,
+        "interictal_upper_hz": float(interictal_upper_hz),
+        "rolling_peak_hz": float(np.max(rolling)),
+        "rolling_end_hz": float(rolling[-1]),
+    }

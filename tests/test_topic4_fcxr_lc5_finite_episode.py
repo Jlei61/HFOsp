@@ -4,6 +4,7 @@ import pytest
 from src.topic4_fcxr_lc5 import SparseSpikeStream, replay_sparse_loads
 from src.topic4_fcxr_lc5_finite_episode import (
     calibrate_episode_dose,
+    classify_u2_excursion,
     coarsen_sparse_stream,
     estimate_shrunken_p0,
     replay_finite_load,
@@ -91,3 +92,30 @@ def test_large_load_is_kept_not_dropped():
     out = replay_finite_load(s, dt_ms=1.0, tau_ms=3000.0, a_load=1.0)
     assert out.u_final[0] > 90.0
     assert out.u_final[1] == 0.0
+
+
+def test_u2_classifier_requires_terminal_two_second_low_tail():
+    # A one-second rolling band needs roughly one extra raw second before it can establish a full
+    # two-second terminal low tail.
+    rate = np.r_[np.full(3000, 60.0), np.zeros(3000)]
+    out = classify_u2_excursion(
+        rate, dt_ms=1.0, interictal_upper_hz=10.0, saturated=False,
+    )
+    assert out["label"] == "FINITE_EXCURSION_OFFSET"
+    assert out["terminal_low_ms"] >= 2000.0
+
+
+def test_u2_classifier_does_not_call_a_brief_trough_offset():
+    rate = np.r_[np.full(2000, 60.0), np.zeros(1000), np.full(2000, 60.0)]
+    out = classify_u2_excursion(
+        rate, dt_ms=1.0, interictal_upper_hz=10.0, saturated=False,
+    )
+    assert out["label"] == "CONTAINED_HIGH_NO_OFFSET"
+    assert out["terminal_offset"] is False
+
+
+def test_u2_classifier_preserves_saturation_as_distinct_failure():
+    out = classify_u2_excursion(
+        np.full(7000, 300.0), dt_ms=1.0, interictal_upper_hz=10.0, saturated=True,
+    )
+    assert out["label"] == "ESCALATING_SATURATION"
