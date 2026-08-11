@@ -137,3 +137,29 @@
   only then run a total-budget curve if needed.
 - [ ] Open directional route support only after packet/budget ambiguity is
   removed; keep Edge and `beta` closed.
+
+## SA6H observation-invariant field correction
+
+- [x] Reclassify SA6F as observation-conditioned because patient contact
+  targets directly set its coefficients.
+- [x] Reclassify SA6G as an observation-conditioned reachability control because
+  observed shaft paths directly define its support.
+- [x] Freeze a whole-sheet real Fourier representation with free sine/cosine
+  phase, isotropic frequency support, no component count, and no peak-count
+  constraint.
+- [x] Add a regression test that the field builder accepts no contact, shaft,
+  onset, or patient-label arguments.
+- [x] Project the selected Stage 3 field over a uniform sheet as a warm start;
+  keep the exact K3 field only as a historical benchmark.
+- [x] Freeze V0/V1/V2 candidates: exact/projected/uniform controls, three
+  antithetic low-frequency pairs, and six antithetic multiscale pairs.
+- [x] Implement one-candidate/one-network 8-s spontaneous workers using the
+  common detector and no patient-derived kick source.
+- [x] Implement shaft-aware aggregation, OOD accounting, KMeans stability/AMI,
+  field landscapes, direct readout, and patient/model prototype figures.
+- [ ] Commit and launch `21 x 3` workers through `systemd-run -> nohup`, at most
+  10 concurrent workers, with 180-s waits.
+- [ ] Build a smaller V3 refinement around the best observation-invariant field;
+  do not tune Edge or `beta`.
+- [ ] Confirm frozen V3 candidates on fresh development network seeds and state
+  the patient-generalization boundary.

@@ -456,3 +456,62 @@ followed only if needed by a total-budget curve. If ICL-to-SCL access remains
 zero while local ICL propagation and SCL-to-ICL response persist, a directional
 route-support family is justified. `beta` remains closed because the residual
 is reachability, not demonstrated width or delay mismatch.
+
+### 8.5 Observation-boundary correction and SA6H
+
+The SA6F/SA6G results remain valid capacity diagnostics, but neither is a free
+learned field. SA6F fitted B-spline coefficients at observed contacts using
+patient recruitment targets. SA6G defined support from observed shaft paths.
+Both therefore place more latent information where the observation is denser.
+Their corrected roles are:
+
+```text
+SA6F = OBSERVATION_CONDITIONED_BSPLINE_CAPACITY_DIAGNOSTIC
+SA6G = OBSERVATION_CONDITIONED_PATH_REACHABILITY_CONTROL
+```
+
+They cannot adjudicate recovery of the unobserved two-dimensional substrate.
+Their geometries are forbidden as a formal fit initialization or prior.
+
+SA6H returns to the clearly learned Stage 3 field, but uses it only as a warm
+start. The formal latent field is defined over the complete `20 x 20 mm` sheet
+with real Fourier features:
+
+```text
+s(x) = sum_k [a_k cos(k dot x) + b_k sin(k dot x)]
+q(x) = exp(s(x))
+h(x) = project_to_fixed_mass(q)
+```
+
+The constant mode is absent because fixed-mass projection makes it
+unidentifiable. Frequencies are selected by isotropic radius; every frequency
+has both sine and cosine phase. The stationary residual prior gives equal phase
+variance and depends only on frequency magnitude. Basis bandwidth is numerical
+resolution, not a core count; there is no component identity or peak-count
+constraint.
+
+The observation boundary is strict:
+
+- field construction may use uniform sheet coordinates, the old Stage 3 field
+  as a whole-sheet warm start, a stationary prior, and fixed total mass;
+- it may not use contact coordinates, shaft paths, patient onset density,
+  patient labels, or patient-derived forced sources;
+- patient information enters only after spontaneous SNN simulation through the
+  virtual-electrode readout, frozen mode classifier, and shaft-aware objective.
+
+The initial library has `21` candidates. `V0` contains the exact Stage 3
+benchmark, a uniform negative control, and its uniform-sheet spectral
+projection. `V1` has three antithetic low-frequency residual pairs. `V2` has
+six antithetic stationary multiscale residual pairs. Each candidate runs for
+8 s without a kick on the same three development networks, using the same mass,
+`d_i`, connectivity, and common absolute detector.
+
+Selection protects spontaneous two-mode support and safety, then minimizes the
+shaft-aware weakest-mode score plus a continuous OOD penalty. Roughness is a
+reported tie-break only. De novo KMeans stability, KMeans/frozen-label AMI,
+mode counts, direct model-current traces, and patient/model prototypes are
+mandatory outputs; KMeans alone is not the objective.
+
+The old patient held-out block has already been read. SA6H therefore remains
+development-only on fresh network seeds. Edge, `beta`, and topology stay closed
+until an observation-invariant Node field is frozen and confirmed.

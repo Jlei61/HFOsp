@@ -186,3 +186,21 @@ disconnected narrow controls，全部返回、无 multishaft event。
 connectivity family fail：packet amplitude 与总 field budget 尚未扫。下一步先做小型
 packet-amplitude curve，再视结果做 budget curve；只有持续 ICL→SCL=0 才开放
 directional route-support，`beta` 继续关闭。
+
+## 9. Observation-boundary correction: SA6H
+
+后续审计撤回了 SA6F/SA6G 的“自由场”称谓。SA6F 的 B-spline 系数由患者接触点上的
+recruitment target 拟合，SA6G 的支撑直接来自观测到的两条杆路径；二者都会让信息量随
+电极覆盖变化，只能保留为 observation-conditioned capacity diagnostics，不能说明患者数据
+从无偏二维场中恢复出 substrate。
+
+SA6H 回到 Stage 3 已学出的明确场，但只把它作为全 sheet warm start。新的 latent field
+使用整张 `20 x 20 mm` sheet 上的 real Fourier `cos/sin` 基底和 stationary isotropic
+residual；field builder 不接收 contact、shaft、patient onset、mode label 或 forced source。
+患者信息只在 8-s spontaneous SNN 仿真完成后，经虚拟电极 readout、冻结 mode classifier
+和 shaft-aware training objective 进入评分。
+
+初始开发库为 `V0/V1/V2` 共 21 个候选，在配对网络 `1031-1033` 上运行；结果用于构造
+小型 `V3` refinement，再以新网络确认。由于患者 held-out 已经使用，整个 SA6H 仍只能写
+development-only recovery，不能写 patient blind generalization。Edge、`beta` 和 topology
+在 observation-invariant Node field 冻结前继续关闭。
