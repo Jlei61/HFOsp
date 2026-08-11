@@ -2,7 +2,10 @@ import numpy as np
 import pytest
 
 from scripts.aggregate_topic4_rev9l_l3b_repeated_oracle import _score
-from src.topic4_repeated_network_oracle import summarize_network_oracles
+from src.topic4_repeated_network_oracle import (
+    review_repeated_capacity,
+    summarize_network_oracles,
+)
 
 
 def test_repeated_oracle_separates_per_network_and_shared_capacity():
@@ -117,3 +120,48 @@ def test_repeated_score_fails_closed_below_supported_event_count():
         base, failure_objective=100.0)
     assert result["objective"] == 100.0
     assert result["matched_floor_event_count_by_mode"] == {"A": 1, "B": 3}
+
+
+def test_repeated_capacity_review_rejects_objective_gain_without_mode_a_capacity():
+    metrics = (
+        "recruitment_mean_absolute_error",
+        "precedence_mean_absolute_error",
+        "mean_rank_profile_absolute_error",
+        "event_distribution_sliced_wasserstein",
+    )
+    rows = []
+    for seed in (1, 2):
+        rows.append({
+            "candidate_id": "candidate", "network_seed": seed,
+            "score": {
+                "matched_floor_event_count_by_mode": {"A": 3, "B": 3},
+                "mode_scores": {"A": 2.0, "B": 1.0},
+                "standardized_descriptors": {
+                    "A": {name: {"raw": 2.0} for name in metrics}},
+            },
+        })
+    payload = {
+        "network_seeds": [1, 2],
+        "objective_by_candidate_network": {
+            "sobol_000": {"1": 3.0, "2": 3.0},
+            "candidate": {"1": 2.0, "2": 2.0},
+        },
+        "oracle": {
+            "shared": {"selected_candidate_id": "candidate"},
+            "per_network": [
+                {"network_seed": seed, "minimum_objective": 2.0,
+                 "representative_candidate_id": "candidate"}
+                for seed in (1, 2)
+            ],
+        },
+        "candidate_network_rows": rows,
+    }
+    floor = _floor(3, a_median=0.0, b_median=0.0)
+    for value in floor["floor"]["modes"]["A"].values():
+        value["q95"] = 1.0
+    review = review_repeated_capacity(payload, {3: floor})
+    assert review["per_network_oracle_improved_all_networks"] is True
+    assert review["shared_n_networks_improved"] == 2
+    assert review["n_networks_with_mode_A_all_descriptors_within_patient_q95"] == 0
+    assert review["shared_forced_capacity_supported"] is False
+    assert review["status"] == "FINITE_LIBRARY_MODE_A_CAPACITY_NOT_OBSERVED"
