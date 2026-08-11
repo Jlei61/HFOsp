@@ -185,6 +185,46 @@ def _pareto_flags(rows):
     return flags
 
 
+def _selection_verdict(rows, config):
+    """Keep a descriptive scalar minimum separate from a valid selection."""
+    objective = config["search"]["objective"]
+    minimum_joint = int(objective.get("minimum_joint_events_for_selection", 1))
+    diagnostic = min(
+        rows,
+        key=lambda row: (
+            row["n_runaway_networks"] > 0,
+            row["selection_score"],
+            row["candidate_id"],
+        ),
+    )
+    eligible = [
+        row for row in rows
+        if row["n_runaway_networks"] == 0 and row["n_joint"] >= minimum_joint
+    ]
+    labels = config.get("aggregation", {})
+    if not eligible:
+        return {
+            "status": labels.get(
+                "no_joint_status", "REV10SA_V4_NO_JOINT_SHAFT_CANDIDATE",
+            ),
+            "selected": None,
+            "diagnostic": diagnostic,
+            "minimum_joint_events_for_selection": minimum_joint,
+        }
+    selected = min(
+        eligible,
+        key=lambda row: (row["selection_score"], row["candidate_id"]),
+    )
+    return {
+        "status": labels.get(
+            "success_status", "REV10SA_V4_JOINT_SHAFT_CANDIDATE_FOUND",
+        ),
+        "selected": selected,
+        "diagnostic": diagnostic,
+        "minimum_joint_events_for_selection": minimum_joint,
+    }
+
+
 def _relative_field(candidate, positions):
     surface = continuous_surface(
         candidate["coefficients"], positions,
@@ -193,15 +233,28 @@ def _relative_field(candidate, positions):
     return np.exp(np.clip(surface - surface.max(), -30.0, 0.0))
 
 
-def _plot_search(summary, manifest, output_root):
+def _plot_search(summary, manifest, config, output_root):
     rows = summary["candidate_rows"]
     candidates = {row["candidate_id"]: row for row in manifest["candidate_set"]["candidates"]}
     selected = summary["selected_candidate_id"]
-    joint_best = max(rows, key=lambda row: (row["joint_fraction"], -row["selection_score"]))[
-        "candidate_id"
-    ]
-    map_ids = ["v4_stage3_spline_warm", selected, joint_best]
-    titles = ["Stage 3 spline warm", "balanced objective", "highest joint fraction"]
+    display = summary["display_candidate_id"]
+    joint_best = max(
+        rows,
+        key=lambda row: (
+            row["joint_fraction"], row["scl_participation_fraction"],
+            -row["selection_score"],
+        ),
+    )
+    reference = config.get("aggregation", {}).get(
+        "plot_reference_candidate_id",
+        manifest["candidate_set"]["candidates"][0]["candidate_id"],
+    )
+    map_ids = [reference, display, joint_best["candidate_id"]]
+    joint_title = (
+        "highest joint fraction" if joint_best["n_joint"] > 0
+        else "highest SCL participation (no joint)"
+    )
+    titles = ["reference field", "scalar diagnostic", joint_title]
     grid = uniform_sheet_grid(120, L=20.0)
     axis = (np.arange(120) + 0.5) * 20.0 / 120
     fig = plt.figure(figsize=(15.8, 7.4), constrained_layout=True)
@@ -217,21 +270,29 @@ def _plot_search(summary, manifest, output_root):
         fig.colorbar(image, ax=ax, fraction=0.046, pad=0.03)
 
     ax = fig.add_subplot(gs[1, 0])
-    for role, marker, color in (
-        ("stage3_uniform_spline_warm", "*", "#111111"),
-        ("uniform_sheet_allocation_refinement", "o", "#4E79A7"),
-        ("observation_free_smooth_random_residual", "^", "#E15759"),
-        ("uniform_negative_control", "s", "#7F7F7F"),
-    ):
+    role_styles = {
+        "stage3_uniform_spline_warm": ("*", "#111111", "Stage 3 warm"),
+        "uniform_sheet_allocation_refinement": ("o", "#4E79A7", "uniform probe"),
+        "observation_free_smooth_random_residual": ("^", "#E15759", "random field"),
+        "uniform_negative_control": ("s", "#7F7F7F", "uniform control"),
+        "v3_spectral_to_spline_bridge": ("D", "#4E79A7", "V3 spline bridge"),
+    }
+    for role in sorted({row["role"] for row in rows}):
+        marker, color, label = role_styles.get(role, ("o", "#7F7F7F", role))
         selected_rows = [row for row in rows if row["role"] == role]
         ax.scatter(
             [row["route_score"] for row in selected_rows],
             [row["joint_fraction"] for row in selected_rows],
-            marker=marker, c=color, s=48, alpha=0.75, label=role.split("_")[0],
+            marker=marker, c=color, s=48, alpha=0.75, label=label,
         )
-    chosen = next(row for row in rows if row["candidate_id"] == selected)
-    ax.scatter(chosen["route_score"], chosen["joint_fraction"], marker="*",
-               s=170, c="#59A14F", edgecolor="black", zorder=5)
+    shown_candidate = next(row for row in rows if row["candidate_id"] == display)
+    ax.scatter(
+        shown_candidate["route_score"], shown_candidate["joint_fraction"],
+        marker="*" if selected is not None else "X", s=170,
+        c="#59A14F" if selected is not None else "#D62728",
+        edgecolor="black", zorder=5,
+        label="eligible selection" if selected is not None else "diagnostic only",
+    )
     ax.axhline(summary["joint_fraction_target"], color="black", linestyle="--", linewidth=0.8)
     ax.set_xlabel("direction weak-mode score (lower better)")
     ax.set_ylabel("all-event joint-shaft fraction")
@@ -265,12 +326,15 @@ def _plot_search(summary, manifest, output_root):
     ax.set_title("F  Direction support", loc="left", weight="bold")
     ax.legend(frameon=False, fontsize=7)
     fig.suptitle(
-        "Stable continuous random-field screen | direction and shaft participation factorized",
+        "Stable continuous-field screen | " + summary["status"],
         fontsize=14, weight="bold",
     )
     figure_dir = Path(output_root) / "figures"
     figure_dir.mkdir(parents=True, exist_ok=True)
-    stem = figure_dir / "rev10_sa_v4_spline_field_search"
+    prefix = config.get("aggregation", {}).get(
+        "figure_prefix", "rev10_sa_v4_spline_field",
+    )
+    stem = figure_dir / f"{prefix}_search"
     fig.savefig(stem.with_suffix(".png"), dpi=300, facecolor="white")
     fig.savefig(stem.with_suffix(".pdf"), facecolor="white")
     plt.close(fig)
@@ -279,7 +343,7 @@ def _plot_search(summary, manifest, output_root):
 
 def _plot_fig4(summary, config, event_records, output_root, contact_names,
                patient_onsets, patient_labels, patient_z):
-    selected_id = summary["selected_candidate_id"]
+    selected_id = summary["display_candidate_id"]
     selected = event_records[selected_id]
     labels, ood, z = selected["labels"], selected["ood"], selected["embedding"]
     kmeans = selected["kmeans"]
@@ -368,9 +432,13 @@ def _plot_fig4(summary, config, event_records, output_root, contact_names,
     ax.set_ylabel("recruitment probability")
     ax.set_title("D  Fixed-contact recruitment prototypes", loc="left", weight="bold")
     ax.legend(frameon=False, ncol=3, fontsize=8)
-    fig.suptitle(f"Fig.4-style shaft-aware readout | {selected_id}",
+    qualifier = "eligible" if summary["selected_candidate_id"] else "diagnostic only"
+    fig.suptitle(f"Fig.4-style shaft-aware readout | {selected_id} | {qualifier}",
                  fontsize=14, weight="bold")
-    stem = Path(output_root) / "figures" / "rev10_sa_v4_fig4_modes"
+    prefix = config.get("aggregation", {}).get(
+        "figure_prefix", "rev10_sa_v4_spline_field",
+    )
+    stem = Path(output_root) / "figures" / f"{prefix}_fig4_modes"
     fig.savefig(stem.with_suffix(".png"), dpi=300, facecolor="white")
     fig.savefig(stem.with_suffix(".pdf"), facecolor="white")
     plt.close(fig)
@@ -504,16 +572,31 @@ def main():
     rows.sort(key=lambda row: (
         row["n_runaway_networks"] > 0, row["selection_score"], row["candidate_id"],
     ))
-    selected = rows[0]
+    verdict = _selection_verdict(rows, config)
+    selected = verdict["selected"]
+    diagnostic = verdict["diagnostic"]
     summary = {
-        "status": "REV10SA_V4_STABLE_SPLINE_SCREEN_COMPLETE",
+        "status": verdict["status"],
         "scientific_role": config["scientific_role"],
         "safe_claim": (
             "candidate fields were frozen without observation geometry; old A/B direction "
-            "and all-event joint-shaft participation were scored as separate factors"
+            "and all-event joint-shaft participation were scored as separate factors; "
+            "a scalar minimum is not selected when no joint-shaft event exists"
         ),
-        "selected_candidate_id": selected["candidate_id"],
-        "selected_selection_score": selected["selection_score"],
+        "selected_candidate_id": (
+            selected["candidate_id"] if selected is not None else None
+        ),
+        "selected_selection_score": (
+            selected["selection_score"] if selected is not None else None
+        ),
+        "display_candidate_id": (
+            selected["candidate_id"] if selected is not None
+            else diagnostic["candidate_id"]
+        ),
+        "diagnostic_candidate_id": diagnostic["candidate_id"],
+        "minimum_joint_events_for_selection": verdict[
+            "minimum_joint_events_for_selection"
+        ],
         "joint_fraction_target": config["search"]["objective"][
             "minimum_target_joint_fraction"
         ],
@@ -528,23 +611,26 @@ def main():
         "config": {"path": str(config_path.relative_to(ROOT)), "sha256": config_sha},
         "provenance": _runtime_provenance(args.expected_commit),
     }
-    _atomic_csv(output_root / "v4_spline_field_candidate_summary.csv", rows)
-    _atomic_json(output_root / "v4_spline_field_search_summary.json", summary)
-    search_stem = _plot_search(summary, manifest, output_root)
+    prefix = config.get("aggregation", {}).get(
+        "artifact_prefix", "v4_spline_field",
+    )
+    _atomic_csv(output_root / f"{prefix}_candidate_summary.csv", rows)
+    _atomic_json(output_root / f"{prefix}_search_summary.json", summary)
+    search_stem = _plot_search(summary, manifest, config, output_root)
     fig4_stem = _plot_fig4(
         summary, config, event_records, output_root, contact_names,
         patient_onsets, patient_labels, patient_z,
     )
     (output_root / "figures" / "README.md").write_text(
-        """### rev10_sa_v4_spline_field_search
+        f"""### {search_stem.name}
 
 这张图在数值稳定的均匀连续 spline 场中比较 Stage 3 warm、全 sheet 等距 allocation directions 和 observation-free 平滑随机残差。方向 A/B 与同一事件双杆参与被拆成两个目标；触点和杆信息不参与候选场生成。
 
-**关注点**：候选必须同时保留 A/B 方向支持并提高 joint-shaft fraction，SCL-only 事件不能冒充患者多杆恢复。
+**关注点**：状态为 {summary['status']}；候选必须实际产生 joint-shaft event 才能成为 selection，SCL-only 事件不能冒充患者多杆恢复。
 
-### rev10_sa_v4_fig4_modes
+### {fig4_stem.name}
 
-这张图展示最低探索目标候选的直接 model-current、patient/model shaft-aware event cloud、de novo KMeans 与监督式 A/B 方向标签的一致性，以及 15 个固定 contact 的招募 prototype。
+这张图展示 {summary['display_candidate_id']} 的直接 model-current、patient/model shaft-aware event cloud、de novo KMeans 与监督式 A/B 方向标签的一致性，以及 15 个固定 contact 的招募 prototype。若没有 eligible selection，它只作为 scalar diagnostic 展示。
 
 **关注点**：KMeans 稳定、A/B 可分和双杆招募是三个不同证据，必须同时查看。
 """,

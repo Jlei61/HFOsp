@@ -593,3 +593,38 @@ and top-5% support Jaccard `0.966`. Candidate fields comprise the spline warm,
 a uniform negative control, `16 x 2` identical whole-sheet allocation probes,
 and eight antithetic pairs of observation-free smooth random residuals. No
 contact, shaft, onset, or mode coordinate enters field construction.
+
+#### V4 result and V4.1 representation bridge
+
+All 50 V4 candidates completed on common network seed 1031 with zero worker
+failure and zero runaway. The field builder remained observation-free, but the
+screen did not enter the known V3 capacity region: V4 used the full Stage 3 warm
+field plus log-amplitude 1/2 probes of width 3 mm, whereas V3 used `0.5 x warm`
+plus amplitude 4 at width 2.5 mm. Six V4 candidates produced at least one
+SCL-only event, but no candidate produced a joint ICL+SCL event. Therefore the
+scalar minimum is diagnostic only and the frozen verdict is:
+
+```text
+REV10SA_V4_NO_JOINT_SHAFT_CANDIDATE
+```
+
+When all joint fractions are zero, the joint penalty is constant and the
+remaining scalar rank reduces to route/support/OOD differences. The aggregator
+must set `selected_candidate_id=null`; it may display the scalar minimum but
+must not call it a balanced or eligible winner.
+
+V4.1 tests representation continuity before any new optimizer. Every one of the
+21 frozen V3 spectral fields is projected on a uniform sheet into an `18 x 18`
+cubic B-spline field. No V3 score, winner identity, contact, shaft, onset, or
+label is used to choose a source field. Preflight over the complete library must
+retain all 21 candidates and satisfy maximum field-`h` RMSE below 0.005. The
+observed preflight is RMSE `0.00316`, minimum correlation `0.99975`, minimum
+top-5% Jaccard `0.971`, and design condition number `27.53`.
+
+V4.1 uses the same network seed 1031 as a paired dynamics bridge. At least one
+joint event is required before any candidate can be called eligible. Passing
+the bridge establishes that the stable continuous coordinates preserve the old
+capacity signal; it does not establish patient recovery. Only then may V5
+optimize continuous spline/KL coefficients on separated fit and selection
+network pools. `K`, Edge, `beta`, topology, and observation-conditioned support
+priors remain closed.

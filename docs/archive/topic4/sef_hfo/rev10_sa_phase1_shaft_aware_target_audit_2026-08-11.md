@@ -243,3 +243,23 @@ V3 Fourier 坐标的条件数约 `1e8`，不适合继续优化。V4 改为不读
 cubic B-spline continuous field，条件数 `27.6`；Stage 3 warm 的 `h` RMSE `0.0098`，top-5%
 Jaccard `0.966`。V4 冻结 50 个候选：warm、uniform negative、16 个全 sheet 位置各两个温和
 幅度，以及 8 对 observation-free 平滑随机场。Edge、`beta`、topology 继续关闭。
+
+### SA6H V4 result and V4.1 bridge
+
+V4 从 clean commit `48d49318` 完成 `50/50` workers，零失败、零 runaway。
+数值线程已限制为每 worker 1 个，16 并发时内存余量超过 170 GiB。50 个候选均没有
+joint ICL+SCL event；只有 6 个候选出现少量 SCL-only activity。因此原自动输出的
+`v4_alloc_02_a1p0` 只是 joint penalty 全部相同时的 route scalar minimum，不是科学
+winner。修正状态为：
+
+```text
+REV10SA_V4_NO_JOINT_SHAFT_CANDIDATE
+```
+
+这一阴性不能归因于 spline family 或 optimizer。V4 实际测试的是 `1.0 x Stage3 warm`
+加幅度 1/2、宽 3 mm 的温和扰动，没有覆盖 V3 已知产生 SCL/joint events 的
+`0.5 x warm + amplitude 4, width 2.5 mm` 区域。下一步 V4.1 不根据结果挑位置，而把 V3
+全部 21 个场逐一投影到稳定 `18 x 18` uniform B-spline 坐标。全库预检最大 `h` RMSE
+`0.00316`、最小相关 `0.99975`、最小 top-5% Jaccard `0.971`、条件数 `27.53`；field
+builder 仍不读取 contact、shaft、patient event 或 V3 score。V4.1 先验证表示桥接，再开放
+V5 连续系数优化；不增加 K/core，Edge 与 `beta` 继续关闭。

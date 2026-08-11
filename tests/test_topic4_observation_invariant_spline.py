@@ -31,6 +31,9 @@ def test_uniform_spline_coordinates_are_stable_and_observation_free():
     from scripts.freeze_topic4_rev10_sa_spline_field_v4_candidates import (
         build_candidates,
     )
+    from scripts.freeze_topic4_rev10_sa_spline_bridge_v41_candidates import (
+        build_candidates as build_bridge_candidates,
+    )
 
     grid = uniform_sheet_grid(32, L=20.0)
     basis = tensor_basis(grid, 10, degree=3, L=20.0)
@@ -41,6 +44,7 @@ def test_uniform_spline_coordinates_are_stable_and_observation_free():
     for function in (
         uniform_allocation_centers, fit_uniform_surface,
         allocation_direction, sample_smooth_residual_pairs, build_candidates,
+        build_bridge_candidates,
     ):
         assert forbidden.isdisjoint(inspect.signature(function).parameters)
 
@@ -62,3 +66,31 @@ def test_smooth_random_pairs_are_antithetic_at_frozen_rms():
         assert np.isclose(
             np.sqrt(np.mean((positive - positive.mean()) ** 2)), expected,
         )
+
+
+def test_joint_shaft_selection_is_fail_closed_but_keeps_diagnostic():
+    from scripts.aggregate_topic4_rev10_sa_spline_field_search import (
+        _selection_verdict,
+    )
+
+    config = {"search": {"objective": {
+        "minimum_joint_events_for_selection": 1,
+    }}}
+    rows = [
+        {
+            "candidate_id": "route_only", "selection_score": 1.0,
+            "n_runaway_networks": 0, "n_joint": 0,
+        },
+        {
+            "candidate_id": "other", "selection_score": 2.0,
+            "n_runaway_networks": 0, "n_joint": 0,
+        },
+    ]
+    verdict = _selection_verdict(rows, config)
+    assert verdict["selected"] is None
+    assert verdict["diagnostic"]["candidate_id"] == "route_only"
+    assert verdict["status"] == "REV10SA_V4_NO_JOINT_SHAFT_CANDIDATE"
+
+    rows[1]["n_joint"] = 1
+    verdict = _selection_verdict(rows, config)
+    assert verdict["selected"]["candidate_id"] == "other"

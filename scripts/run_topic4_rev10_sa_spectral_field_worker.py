@@ -110,6 +110,7 @@ def main():
         "development_only_observation_invariant_continuous_node_field_search",
         "development_only_observation_invariant_uniform_allocation_refinement",
         "development_only_stable_spline_random_field_screen",
+        "development_only_v3_to_stable_spline_bridge",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("spectral search role changed")
