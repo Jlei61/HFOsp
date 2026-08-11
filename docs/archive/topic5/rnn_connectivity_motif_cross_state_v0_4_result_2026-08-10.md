@@ -1,5 +1,10 @@
 # RNN connectivity motif / cross-state v0.4 正式结果
 
+> **后续修订见 `rnn_motif_cross_state_v0_4_review_closeout_2026-08-10.md`。** 本文两处已被后续审阅取代：
+> (a) 冻结测试套件现为 147 项（142 passed + 5 环境相关 skipped），不再是 140/140；
+> (b) 文中"视觉核对完成"针对的是当时那批图，审阅收口后所有图已重画，需重新目视验收。
+> 科学结论本身未变。
+
 ## 结论
 
 本轮工程验收通过。1426/1426 个正式训练单元完成，0 failed、0 OOM、0 nonfinite；完整冻结测试 140/140 通过，PNG/PDF/SVG 与 Figure 6 A–F 均完成科学和视觉核对。

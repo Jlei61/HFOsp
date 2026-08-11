@@ -22,12 +22,17 @@
 
 ### 1.2 第二轮：整体审阅发现的问题
 
-**分支漂移（最严重的一条）**。v0.4 流水线是在 `codex/topic5-rnn-motif-v0-4-closeout` 上跑完的
-（`POSTPROCESS_CONTRACT.json::git_commit = 527e3555`，`POST_UNSEAL_RECOVERY_15a67b50.sh` 锁 `15a67b50`），
-而 §1.1 那一轮收口写在 `codex/topic5-rnn-motif-cross-state-v0-4` 上，此分支停在流水线分支 **64 个 commit 之前**。
-那 64 个 commit 绝大多数是收紧主张的修正，所以用旧脚本重画图等于回滚了其中数条 —— 最实质的一条是
-主图 Panel F 标题被改回 `Effective motif`，而冻结判决本身是 `M6_motif_claim_pass = false`。
-现已把流水线分支合并进来并逐处裁决冲突（见 §7），全部图重画。
+**分支漂移（最严重的一条）**。这套工作实际散在**三个分支**上，而 §1.1 那一轮收口写在其中最旧的一个上：
+
+| 分支 | 角色 | 证据 |
+|---|---|---|
+| `codex/topic5-rnn-motif-cross-state-v0-4` | §1.1 审阅收口写在这里；比下面两个各少 64 / 70 个 commit | — |
+| `codex/topic5-rnn-motif-v0-4-closeout` | 正式流水线在这里跑完 | `POSTPROCESS_CONTRACT.json::git_commit = 527e3555`；`POST_UNSEAL_RECOVERY_15a67b50.sh` 锁 `15a67b50` |
+| `codex/topic5-rnn-motif-v0-4-visuals` | **用户目视验收的那批图出自这里**，比流水线分支再多 6 个图修 | `VISUAL_QA.json::review_commit = 71c22692` |
+
+那些 commit 绝大多数是收紧主张或修图的修正，所以用最旧的分支重跑画图脚本等于回滚了其中数条 ——
+最实质的一条是主图 Panel F 标题被改回 `Effective motif`，而冻结判决本身是 `M6_motif_claim_pass = false`。
+现已把后两个分支依次合并进来并逐处裁决冲突（见 §7），全部图用合并树重画。
 
 **两处聚合口径**（改后重算）：
 
@@ -37,10 +42,12 @@
 - 6 个 pre-flight smoke 训练单元混进了冻结布线统计（`n_graph_runs` 1,246 → 1,240）。现按 `SMOKE_` 前缀排除，
   并断言剩余患者-模型行是冻结队列的子集。
 
-**上游画图 bug**。流水线分支的 `draw_cross_state` 把 `load_frozen` 换成 `empirical_record`，却没有一起搬
-shared-plane 显示几何，`--stage early/final` 会直接 `KeyError: 'points_mm'`（即
-`PIPELINE_FAILED_old_figure_geometry_2026-08-10.json` 记的那次失败）。现给 `load_frozen` 加可选
-`record=` 参数：既走 INPUT_MANIFEST 解析路径（不依赖 ambient 常量），又复用原有的 fingerprint gate 与几何推导。
+**Panel E 的几何合同**。流水线分支的 `draw_cross_state` 把 `load_frozen` 换成 `empirical_record`，却没有
+一起搬 shared-plane 显示几何，`--stage early/final` 会直接 `KeyError: 'points_mm'`（即
+`PIPELINE_FAILED_old_figure_geometry_2026-08-10.json` 记的那次失败）。本轮先自己补了一版（给 `load_frozen`
+加可选 `record=`），合并 visuals 分支后**已撤回**，改用上游的 `ictal_payload_from_template`：
+后者不是把发作场退回旧的 `points_mm` 绘图路径，而是让它复用两张模型场**同一块 physical-mm 平面**。
+这才是对的——旧路径会让 Panel E 三张图分别画在两套互不相容的几何合同上。
 
 **其余**：留存几何清单的 SHA256 原先取自输入文件却标注在留存副本旁，改为对留存副本取哈希；
 新增 `REVIEW_EARLY_ICTAL_TARGET_DEPENDENCY.json` 登记仍在另一 worktree 的 26 个 early-ictal target 文件
@@ -49,9 +56,9 @@ shared-plane 显示几何，`--stage early/final` 会直接 `KeyError: 'points_m
 Panel E 从"同一个量画两遍"改成实际承重的"相对 dense 的资源占比"。
 
 新增 7 个回归测试，覆盖 field 分解、fit-first aggregation、布线口径与 frozen-table parity、smoke 排除、
-rollout seed removal、target LOO reliability 和 README 持久化。合并后六个冻结测试文件共 145 项：
-140 passed、5 skipped（跳过的 5 项在 `test_topic5_spatial_latent_rnn.py`，依赖一个可选上游 cache）。
-验收门原先硬比对 "passed == 138"，会被这种环境相关的 skip 打翻，已改为比对 passed + skipped == 145。
+rollout seed removal、target LOO reliability 和 README 持久化。合并后六个冻结测试文件共 147 项：
+142 passed、5 skipped（跳过的 5 项在 `test_topic5_spatial_latent_rnn.py`，依赖一个可选上游 cache）。
+验收门原先硬比对 "passed == 138"，会被这种环境相关的 skip 打翻，已改为比对 passed + skipped == 147。
 
 最终状态写入也已修正为互斥：工程验收成功时删除旧 `PIPELINE_FAILED.json`，失败时删除旧
 `PIPELINE_COMPLETE.json`，避免历史失败标记与当前成功标记同时存在；目录里那份过期标记已按既有
@@ -240,7 +247,7 @@ MATCHED_LESION: INCONCLUSIVE_DUE_TO_MATCHING_ELIGIBILITY
 
 1. Panel B 恢复流水线分支的 `Given seed → free rollout` 标题与红色 seed 格，明确区分白送的第一 rank 和自由推演；
 2. Panel D 轴名不再把 mean-edge cost 混写成 total wiring；
-3. Panel E 同时保留两个冻结端点（实心圆 canonical full、空心菱形 seed removed），并把经验间期场放在同一尺度作参照；
+3. Panel E 三张场图统一画在同一块 physical-mm 平面上（上游 `ictal_payload_from_template`），下方分布图采用上游的单端点样式并加入经验间期场作同尺度参照；seed-removed 端点由上游的独立 `render_endpoint_sensitivity` 图承担；
 4. Panel F 标题保持流水线分支已锁的 `Effective influence test`（**不是** `Effective motif`——冻结判决是 `M6_motif_claim_pass = false`），右侧改为全队列可估计的局部有效影响富集与两种口径分别标注的算子稳定性；
 5. matched perturbation 从主图移出，探索图直接标出 n=5/7，并按上游命名写作 connector incident edges。
 
@@ -273,9 +280,9 @@ Q3_LOCAL_EFFECTIVE_ORGANIZATION:             SUPPORTED
 Q3_LONG_RANGE_CONNECTOR_MOTIF:               NOT_ESTABLISHED
 MATCHED_LESION:                              INCONCLUSIVE_LOW_ELIGIBILITY
 V0_4_ENGINEERING_CLOSEOUT:                   COMPLETE except visual QA re-confirmation
-BRANCH_RECONCILIATION:                       MERGED (pipeline branch + review branch)
+BRANCH_RECONCILIATION:                       MERGED (review + pipeline + visuals branches)
 FIGURES_REGENERATED_FROM_MERGED_TREE:        YES
-FOCUSED_TESTS:                               140 passed / 5 skipped of 145 collected
+FOCUSED_TESTS:                               142 passed / 5 skipped of 147 collected
 VISUAL_QA:                                   STALE — recorded against commit 71c22692, figures have since changed
 COMMITTED:                                   YES
 ```
