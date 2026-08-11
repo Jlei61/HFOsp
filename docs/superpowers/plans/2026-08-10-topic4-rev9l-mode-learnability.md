@@ -1,7 +1,7 @@
 # Topic 4 rev9-L mode learnability 执行计划
 
 **Spec：** `docs/superpowers/specs/2026-08-10-topic4-rev9l-mode-learnability-design.md`
-**状态：** L0/L1/L2/L3a 完成；L3b 重复事件 oracle 已冻结、待实现运行
+**状态：** rev9-L development/oracle audit 完成；optimizer 与 spontaneous 条件未满足，未运行
 **分支：** `codex/topic4-rev9l-mode-learnability`
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
 
@@ -78,21 +78,23 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
 - [x] 已得到 `0.775/1.057/0.282`，shared minimum 有 20 个并列；`sobol_058` 在 selection 上改善 2/3 route distances，但完整
   `n=3` objective 恶化 5.42%，不作为已知好解。
 - [x] worker 分离 `network_seed` 与 `dynamics_seed`；默认 canary 的 23 个数组及 NPZ SHA 与旧输出完全一致；冻结 3 个 dynamics seeds 和 CRN。
-- [ ] L3b 运行 57 candidates x 6 fit networks x 3 repeats，以完整 `n=3` weakest-mode objective 求 `C_per_net/C_shared/Delta_network`；
-  除既有结构可容许集合外不加 gate，3 个 confirmation seeds 保持未读。
-- [ ] 已知好解存在后，以相同预算和 CRN 比较 Sobol/local refinement 与 CMA-ES 3 restarts。
+- [x] L3b 完成 57 candidates x 6 fit networks x 3 repeats，1026/1026 workers 成功；唯一 `2/3` 可读 mode 使用 patient-training
+  `n=2` floor，其余使用 `n=3` floor，readable penalty 保留。得到 `C_per_net/C_shared/Delta=2.6560/2.6755/0.0195`。
+- [x] 逐网络 oracle 在 6/6 networks 小幅改善，但 mode A 四项在 6/6 networks 均全部高于 patient-training q95；shared
+  `sobol_002` 只改善 2/6，mean objective 比 scalar 更差。因此不进入 selection sanity。
+- [x] optimizer 条件审计完成：没有已知好的 full shared solution，故不比较 Sobol/local refinement 与 CMA-ES；状态为
+  `NOT_TESTED_NO_KNOWN_GOOD_SHARED_SOLUTION`，不得写 optimizer failure。
 - [x] 当前候选库已观察到参数到粗 rank-curve 输出多对一；是否存在多个完整模式解仍未测试。
 
 ## Task L4：spontaneous confirmation（条件性）
 
-- [ ] 仅在 forced shared capacity 成立后执行。
-- [ ] 冻结 candidate、objective、detector 和 classifier；confirmation seeds 不参与前序选择。
-- [ ] primary 用 frozen classifier，secondary 用 de novo KMeans。
-- [ ] 报每网络 A/B event rate、OOD、四层 mode distance 和 network bootstrap。
+- [x] 条件审计完成：forced shared capacity 未成立，因此不执行 spontaneous confirmation，不读取 confirmation 或 patient held-out。
+- [x] candidate、objective、detector 和 classifier 没有因 L3b 结果继续调整。
+- [x] frozen classifier、de novo KMeans、spontaneous A/B event rate 与 network bootstrap 均未运行，不能写间期双模式复现。
 
 ## 完成定义
 
-- `decision.json` 对 target/objective、ignition、propagation family、network、optimizer、identifiability 分项作答；
-- 现存数据没有保存的指标不补造；
-- forced event、spontaneous interictal phenotype、patient blind 和 lifecycle claim 四层分开；
-- 每个正式产物能从 clean commit、冻结 config 和记录的 input hashes 重建。
+- [x] `decision.json` 对 target/objective、ignition、propagation family、network、optimizer、identifiability 分项作答；
+- [x] 现存数据没有保存的指标不补造；
+- [x] forced event、spontaneous interictal phenotype、patient blind 和 lifecycle claim 四层分开；
+- [x] 正式 worker、count-matched aggregation 与 scientific review 分别记录 clean commit、冻结 config 和 input hashes。

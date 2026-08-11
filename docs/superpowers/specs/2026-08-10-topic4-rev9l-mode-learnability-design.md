@@ -1,6 +1,6 @@
 # Topic 4 rev9-L: mode realizability and learnability audit
 
-**状态：** `L3A_COMPLETE_L3B_FROZEN`
+**状态：** `REV9L_DEVELOPMENT_AUDIT_COMPLETE`
 **日期：** 2026-08-10
 **上游：** rev8.1 patient-training KMeans fit；rev9 frozen-field node-edge factorial
 **结果目录：** `results/topic4_sef_hfo/data_driven_core_field_rev9_learnability/`
@@ -196,8 +196,14 @@ matched `n=3` 完整 objective 从 scalar 的 2.717 上升到 2.864，恶化 5.4
 正式分布级审计先只用 6 个 fit network seeds。worker 增加独立 `dynamics_seed`：`network_seed` 继续决定 Params、位置、topology、delay
 和 cache key，`dynamics_seed` 只重置 paired sham/forced 的外源噪声 RNG；默认未提供时等于 network seed，必须逐数组复现旧 worker。
 冻结 dynamics seeds `31001/31002/31003`，所有候选使用 common random numbers。57 个 L2 结构可容许候选 x 6 networks x 3
-dynamics repeats 共 1026 workers，每个 repeat 同时产生 intended A/B source response。每个 candidate/network 用 3 events/mode 与
-`n=3` patient-training floor 计算完整 recruitment、precedence、profile 和 event-cloud weakest-mode objective `J(theta,r)`：
+dynamics repeats 共 1026 workers，每个 repeat 同时产生 intended A/B source response。每个 candidate/network 尝试产生 3
+events/mode，并计算完整 recruitment、precedence、profile 和 event-cloud weakest-mode objective `J(theta,r)`。
+
+正式运行中 `2051/2052` 个 source responses 可读；唯一短缺为 `sobol_017/network1004/component_2` 的 `2/3`。初版聚合错误地把这两个
+事件仍按 `n=3` floor 标准化。该问题发现于任何 out-of-fit selection 或后续 optimizer 运行前，随后使用同一 patient-training producer
+补建 `n=2` floor；最终按每个 mode
+实际可读的 2 或 3 个事件选择 count-matched floor，并保留原来的 readable-fraction penalty。worker commit `217f9982` 与校正聚合
+commit `3d654fff` 分开记录；SNN 数组没有重跑或改写。
 
 默认 seed 路径的 parity canary 已通过：`sobol_000/network_seed=1004` 的新旧 23 个 NPZ 数组逐项完全一致，文件 SHA256 均为
 `76dbd65036f10ffe9585a45c771af2c90de71b3e65427bfe4ecb8f86a01aeff7`。
@@ -209,18 +215,38 @@ Delta_network = C_shared - C_per_net
 ```
 
 除 L2 已冻结的结构可容许集合外不增加新 gate。fit 只选择候选；3 个 selection networks 仅在 shared candidate 冻结后复核，3 个
-confirmation networks 继续不读。若某 candidate/network 的某一模式 3 次均不可读，不中止整批任务，也不删除该候选；该矩阵格固定记
-`J=100` 并保留 failure reason。L3b 的 3 repeats 是最小分布级探索，不能冒充高精度 capacity ceiling。
+confirmation networks 继续不读。每个 mode 有 2 或 3 次可读时使用相应 count-matched floor；只有 0 或 1 次可读、无法构成受支持的
+分布描述量时，该矩阵格固定记 `J=100` 并保留 failure reason，不中止整批任务，也不删除该候选。L3b 的 3 repeats 是最小分布级探索，
+不能冒充高精度 capacity ceiling。
+
+1026/1026 workers 成功，无 runaway、无 pre-trigger mismatch。count-matched 聚合得到
+`C_per_net=2.6560`、`C_shared=2.6755`、`Delta_network=0.0195`；有限库 shared minimum 为 `sobol_002`。逐网络 oracle 在 6/6
+networks 都比 scalar 小，paired gain 中位数 `0.0599`（scalar 中位数的约 2.20%），但六张网络使用六个不同的最优 residual。更关键的
+是，每张网络 oracle 的 mode A recruitment、precedence、rank profile 和 event-cloud 四项误差仍全部高于对应 patient-training
+`q95`；mode A recruitment MAE 在所有候选/网络固定为 `0.35173`。因此这些是有限库中的小幅 route-shape 改善，不是 mode A
+realizability。
+
+shared `sobol_002` 只在 2/6 networks 改善，paired gain 中位数约 `-6.6e-5`，mean gain `-0.0117`；其 mean objective
+`2.7616` 反而差于 scalar 的 `2.7499`。据此冻结
+`FINITE_LIBRARY_MODE_A_CAPACITY_NOT_OBSERVED` 和 `STOP_NO_SHARED_FORCED_CAPACITY`。不运行 selection sanity、optimizer benchmark
+或 confirmation；该阴性结论只覆盖冻结 scaffold 上测试的有限 bounded static-edge library，不推广为患者模式一般不可学习。
 
 confirmation seeds 只在参数和 objective 完全冻结后读取。只有 oracle 或 deterministic search 已知存在好解时，才以相同 evaluation
 budget、common random numbers 比较 Sobol/local refinement 与 CMA-ES 三次 restart。若多组相距很远的参数产生同等输出，结论是
 `OUTPUT_REALIZABLE_MECHANISM_NONIDENTIFIABLE`，不是恢复了唯一 core。
+
+本轮没有已知好的 full shared solution，因此 optimizer 状态冻结为
+`NOT_TESTED_NO_KNOWN_GOOD_SHARED_SOLUTION`；当前结果不能归因于 CMA-ES 或其他 optimizer failure。既有候选库中参数到粗输出的多对一仍然
+成立，所以也不能从小幅 objective 改善识别唯一 edge/core 机制。
 
 ## 7. L4：条件性 spontaneous confirmation
 
 仅在 forced shared capacity 成立后恢复无外部 trigger。候选、detector、objective 和 source mapping 全部冻结；primary 使用 frozen
 mode classifier，de novo KMeans 只作 secondary。forced pass / spontaneous fail 归为 ignition 或 mode occupancy 问题，不能归为
 传播 family failure。
+
+L3b 未建立 forced shared capacity，因此 L4 未运行，patient blind 未打开。当前 ignition 结论仍只限于已知 component source 可以触发
+返回基线的传播；spontaneous mode occupancy、完整间期活动和发作生命周期均未测试。
 
 ## 8. 唯一决策产物和允许表述
 
