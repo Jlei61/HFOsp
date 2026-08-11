@@ -167,7 +167,17 @@
 - [x] Build V3 as 16 identical allocation directions on a 4x4 uniform sheet grid,
   plus warm attenuation and initial-reference controls; these are Fourier
   optimizer probes, not cores.
-- [ ] Launch the `21 x 3` V3 refinement on the paired development networks;
+- [x] Launch the `21 x 3` V3 refinement on the paired development networks;
   do not tune Edge or `beta`.
-- [ ] Confirm frozen V3 candidates on fresh development network seeds and state
-  the patient-generalization boundary.
+- [x] Complete `21 x 3` V3 workers from `c933986b` with zero failure/runaway.
+- [x] Re-audit V3 without simulation: retain all detected events, separate old
+  A/B direction from shaft participation, and show that SCL-rich fields mostly
+  switch shafts rather than produce patient-like joint events.
+- [x] Identify and close the old shared-axis entry-filter bug and the ill-
+  conditioned half-period Fourier optimization coordinates.
+- [x] Implement V4 stable `14 x 14` uniform B-spline fields, block-validated
+  supervised A/B assignment, all-event joint-shaft scoring, and Pareto outputs.
+- [ ] Launch the 50-candidate V4 screen on common seed 1031 with 16 bounded
+  workers, then carry a diverse Pareto subset to seeds 1032/1033.
+- [ ] Confirm the frozen V4/V5 winner on fresh development network seeds and
+  state the patient-generalization boundary.

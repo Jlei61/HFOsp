@@ -14,8 +14,10 @@ PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 MANAGER = ROOT / "scripts/run_topic4_rev10_sa_managed_command.sh"
 FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_spectral_field_candidates.py"
 V3_FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_spectral_field_v3_candidates.py"
+V4_FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_spline_field_v4_candidates.py"
 WORKER = ROOT / "scripts/run_topic4_rev10_sa_spectral_field_worker.py"
 AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_sa_spectral_field_search.py"
+V4_AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_sa_spline_field_search.py"
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_sa_observation_invariant_field.json"
 
 
@@ -58,12 +60,13 @@ def main():
     args = parser.parse_args()
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
-    freezer = (
-        V3_FREEZER
-        if config["scientific_role"]
-        == "development_only_observation_invariant_uniform_allocation_refinement"
-        else FREEZER
-    )
+    role = config["scientific_role"]
+    if role == "development_only_observation_invariant_uniform_allocation_refinement":
+        freezer, aggregator = V3_FREEZER, AGGREGATOR
+    elif role == "development_only_stable_spline_random_field_screen":
+        freezer, aggregator = V4_FREEZER, V4_AGGREGATOR
+    else:
+        freezer, aggregator = FREEZER, AGGREGATOR
     config_sha = _sha256(config_path)
     head = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
@@ -156,7 +159,7 @@ def main():
     if failed:
         raise RuntimeError(f"{len(failed)} spectral worker(s) failed")
     subprocess.run([
-        str(PYTHON), str(AGGREGATOR), "--config", str(config_path),
+        str(PYTHON), str(aggregator), "--config", str(config_path),
         "--expected-commit", commit,
     ], cwd=ROOT, check=True)
     subprocess.run([

@@ -30,6 +30,7 @@ from src.topic4_core_field_rev9 import (  # noqa: E402
     reconstruct_node_from_h,
 )
 from src.topic4_core_field_runner import _placement, atomic_write_json  # noqa: E402
+from src.topic4_continuous_field import continuous_field_h  # noqa: E402
 from src.topic4_spectral_field import spectral_field_h  # noqa: E402
 
 
@@ -70,12 +71,21 @@ def _candidate_node(candidate, positions, *, n_total, stage, config):
             v_base=engine["v_base"], K=3, L=engine["L"],
         )
     if candidate["field_type"] != "spectral_continuous":
-        raise ValueError(f"unknown spectral worker field type: {candidate['field_type']}")
-    h, _ = spectral_field_h(
-        candidate["coefficients"], positions,
-        max_harmonic=config["field"]["max_harmonic"],
-        target_count=stage["N_core_manual"], L=engine["L"],
-    )
+        if candidate["field_type"] != "spline_continuous":
+            raise ValueError(
+                f"unknown continuous worker field type: {candidate['field_type']}"
+            )
+        h, _ = continuous_field_h(
+            candidate["coefficients"], positions,
+            n_basis=candidate["n_basis"], degree=candidate["degree"],
+            target_count=stage["N_core_manual"], L=engine["L"],
+        )
+    else:
+        h, _ = spectral_field_h(
+            candidate["coefficients"], positions,
+            max_harmonic=config["field"]["max_harmonic"],
+            target_count=stage["N_core_manual"], L=engine["L"],
+        )
     return reconstruct_node_from_h(
         h, n_total=n_total, quantile_seed=stage["quantile_seed"],
         core_mean=engine["core_mean"], core_std=engine["core_std"],
@@ -99,6 +109,7 @@ def main():
     allowed_roles = {
         "development_only_observation_invariant_continuous_node_field_search",
         "development_only_observation_invariant_uniform_allocation_refinement",
+        "development_only_stable_spline_random_field_screen",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("spectral search role changed")
@@ -106,6 +117,7 @@ def main():
         int(value) for value in (
             config["search"]["network_seeds"]
             + config["search"]["selection_network_seeds"]
+            + config["search"].get("final_network_seeds", [])
         )
     }
     if args.seed not in allowed_seeds:

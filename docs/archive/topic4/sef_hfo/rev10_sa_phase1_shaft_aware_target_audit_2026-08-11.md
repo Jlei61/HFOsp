@@ -223,3 +223,23 @@ development-only recovery，不能写 patient blind generalization。Edge、`bet
 SCL recruitment 上产生变化。V3 改为 4x4 全 sheet 等距 allocation scan；16 个位置在不读取
 contact/shaft 的情况下冻结，同一平滑方向投影回 Fourier 场，由仿真后的 patient objective
 选择。这些是 optimizer probes，不是新增 core 或 K。
+
+### SA6H V3 correction and V4 handoff
+
+V3 `63/63` workers 在 `c933986b` 完成，零失败、零 runaway。原聚合仍选择旧场，但原因
+不是所有新场都没有 SCL：位置 07/10 分别产生 `39/21` 个 SCL-only 事件，位置 12 产生
+`13/43` 个双杆事件，位置 09 产生 `4/12` 个双杆事件。原 aggregator 在 shaft-aware loss
+之前调用旧 shared-axis rank curve；SCL-rich events 被变成不可用或 OOD，因此目标入口仍然
+shaft-blind。这个结果只能解释为 continuous Node field 具有 SCL activation capacity，不能
+解释为患者双杆 repertoire 已恢复。
+
+patient full shaft-aware KMeans 与旧 A/B 的 AMI 只有 `0.011`，因为前者主要区分招募范围，
+后者是传播方向。使用 patient train、按 recording block 隔离的监督式 A/B 分类器，6 折
+balanced accuracy 为 `0.939-0.957`，pooled `0.945`，AUC `0.990`。因此 V4 把方向身份和
+双杆参与因子化：每个事件都分配 A/B，同时 OOD 只作惩罚不作删除；所有事件另算 ICL-only、
+joint、SCL-only。
+
+V3 Fourier 坐标的条件数约 `1e8`，不适合继续优化。V4 改为不读取观测的 `14 x 14` uniform
+cubic B-spline continuous field，条件数 `27.6`；Stage 3 warm 的 `h` RMSE `0.0098`，top-5%
+Jaccard `0.966`。V4 冻结 50 个候选：warm、uniform negative、16 个全 sheet 位置各两个温和
+幅度，以及 8 对 observation-free 平滑随机场。Edge、`beta`、topology 继续关闭。

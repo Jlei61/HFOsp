@@ -550,3 +550,46 @@ location of a `4 x 4` uniform sheet grid. The 16 locations are fixed before and
 without reading contacts or shaft paths. The patient objective may select among
 them only after spontaneous simulation. These directions are optimizer probes
 in the same Fourier field, not biological cores or a new `K`.
+
+#### V3 result: capacity signal and objective-entry correction
+
+All `21 x 3` V3 workers completed from clean commit `c933986b` with zero
+failure and zero runaway. The original aggregation again selected the initial
+field (`5.407`). That selection is invalid for the new scientific question:
+the aggregator first converted events to the old shared-axis rank curve and
+discarded events for which that curve was unavailable. SCL-rich candidates
+therefore reached the shaft-aware objective as `usable=0` or OOD=1.
+
+The raw events nevertheless establish a bounded capacity result. Uniform
+locations 07, 09, 10, 11, 12, 14, and 15 produced SCL events. Most were
+shaft-switching rather than cross-shaft: location 07 produced 39 SCL-only and
+zero joint events, while location 10 produced 21 SCL-only and zero joint
+events. The strongest joint candidates were location 12 (`13/43`) and location
+09 (`4/12`), far below the patient A/B joint-shaft fractions (`0.957/0.983`).
+Thus continuous Node allocation can make SCL active, but the tested fields do
+not yet reproduce patient multishaft events.
+
+Old A/B direction and full shaft-aware KMeans must not be conflated. Patient
+shaft-aware KMeans is stable but has AMI `0.011` to old A/B because it is
+dominated by recruitment extent. A patient-training-only logistic direction
+classifier in the same shaft-aware embedding preserves old A/B with
+recording-block-held-out balanced accuracy `0.945` and AUC `0.990`. V4 freezes
+this supervised direction classifier, assigns every model event, and reports
+class-conditional OOD without deleting events. The objective is factorized
+into:
+
+1. all-event joint-shaft participation;
+2. old A/B direction support and mode-conditioned shaft-aware distance;
+3. OOD and event-support penalties;
+4. de novo KMeans as a diagnostic only.
+
+The half-period Fourier coordinates are also retired for optimization. Their
+uniform-grid condition number is approximately `1e8`, with coefficients up to
+`7.7e4`; maps are deterministic in float64, so V3 remains a valid capacity
+diagnostic, but coefficient distance and roughness are not trustworthy. V4
+uses a `14 x 14` uniform cubic B-spline log field (`195` effective DoF), whose
+condition number is `27.6`. It projects the Stage 3 field with `h` RMSE `0.0098`
+and top-5% support Jaccard `0.966`. Candidate fields comprise the spline warm,
+a uniform negative control, `16 x 2` identical whole-sheet allocation probes,
+and eight antithetic pairs of observation-free smooth random residuals. No
+contact, shaft, onset, or mode coordinate enters field construction.
