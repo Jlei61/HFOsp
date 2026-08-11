@@ -166,11 +166,21 @@ def _plot_landscape(summary, manifest, config, output_root):
     candidates = {
         row["candidate_id"]: row for row in manifest["candidate_set"]["candidates"]
     }
-    map_ids = [
-        "v0_exact_stage3_k3", "v0_stage3_spectral_projection",
-        summary["selected_candidate_id"],
-    ]
-    titles = ["old Stage 3 field", "uniform spectral projection", "best search field"]
+    is_v3 = config["scientific_role"] == (
+        "development_only_observation_invariant_uniform_allocation_refinement"
+    )
+    if is_v3:
+        map_ids = [
+            "v3_warm_scale_1p00", "v3_initial_selected",
+            summary["selected_candidate_id"],
+        ]
+        titles = ["spectral warm field", "initial-search reference", "best V3 field"]
+    else:
+        map_ids = [
+            "v0_exact_stage3_k3", "v0_stage3_spectral_projection",
+            summary["selected_candidate_id"],
+        ]
+        titles = ["old Stage 3 field", "uniform spectral projection", "best search field"]
     axis = np.linspace(0.0, 20.0, 140)
     xx, yy = np.meshgrid(axis, axis)
     grid = np.column_stack([xx.ravel(), yy.ravel()])
@@ -191,9 +201,10 @@ def _plot_landscape(summary, manifest, config, output_root):
             ax.set_ylabel("sheet y (mm)")
         fig.colorbar(image, ax=ax, fraction=0.046, pad=0.03, label="relative field")
 
-    palette = {"V0": "#7F7F7F", "V1": "#4E79A7", "V2": "#E15759"}
+    palette = {"V0": "#7F7F7F", "V1": "#4E79A7", "V2": "#E15759",
+               "V3": "#59A14F"}
     ax = fig.add_subplot(gs[1, 0])
-    for version in ("V0", "V1", "V2"):
+    for version in sorted({row["version"] for row in rows}):
         selected = [row for row in rows if row["version"] == version]
         ax.scatter(
             [row["weak_mode_score"] for row in selected],
@@ -238,7 +249,9 @@ def _plot_landscape(summary, manifest, config, output_root):
     ax.set_title("F  Spontaneous repertoire support", loc="left", weight="bold")
     ax.legend(frameon=False, fontsize=8)
     fig.suptitle(
-        "Observation-invariant continuous field search | contacts enter after simulation",
+        ("Observation-invariant V3 uniform allocation | contacts enter after simulation"
+         if is_v3 else
+         "Observation-invariant continuous field search | contacts enter after simulation"),
         fontsize=14, weight="bold",
     )
     figure_dir = Path(output_root) / "figures"
@@ -459,6 +472,10 @@ def main():
                 return float("nan")
             return float(score["modes"][str(mode)]["floor_excess"][key])
 
+        scl_values = [
+            excess(0, "recruitment.SCL"), excess(1, "recruitment.SCL")
+        ]
+        finite_scl = [value for value in scl_values if np.isfinite(value)]
         row = {
             "candidate_id": candidate["candidate_id"],
             "version": candidate["version"], "role": candidate["role"],
@@ -489,9 +506,9 @@ def main():
             "mode_B_ICL_precedence_excess": excess(1, "precedence.ICL-ICL"),
             "mode_A_SCL_recruitment_excess": excess(0, "recruitment.SCL"),
             "mode_B_SCL_recruitment_excess": excess(1, "recruitment.SCL"),
-            "worst_mode_SCL_recruitment_excess": float(np.nanmax([
-                excess(0, "recruitment.SCL"), excess(1, "recruitment.SCL")
-            ])),
+            "worst_mode_SCL_recruitment_excess": (
+                float(max(finite_scl)) if finite_scl else float("nan")
+            ),
         }
         candidate_rows.append(row)
         details[candidate["candidate_id"]] = {
@@ -512,7 +529,12 @@ def main():
     ))
     selected = candidate_rows[0]
     summary = {
-        "status": "REV10SA_SPECTRAL_INITIAL_SEARCH_COMPLETE",
+        "status": (
+            "REV10SA_SPECTRAL_V3_SEARCH_COMPLETE"
+            if config["scientific_role"]
+            == "development_only_observation_invariant_uniform_allocation_refinement"
+            else "REV10SA_SPECTRAL_INITIAL_SEARCH_COMPLETE"
+        ),
         "scientific_role": config["scientific_role"],
         "safe_claim": (
             "whole-sheet stationary spectral fields were compared using only "
@@ -536,12 +558,29 @@ def main():
     field_stem = _plot_landscape(summary, manifest, config, output_root)
     fig4_stem = _plot_fig4(summary, config, reference, output_root, event_records)
     readme = output_root / "figures" / "README.md"
+    phase_text = (
+        "V3 在整张 sheet 的 4x4 等距位置施加完全相同的平滑 allocation direction；"
+        "位置集合不读取 contact 或 shaft geometry，由仿真后的 shaft-aware loss 选择。"
+        if config["scientific_role"]
+        == "development_only_observation_invariant_uniform_allocation_refinement"
+        else
+        "V0-V2 比较旧 Stage 3 场、其均匀谱投影和平稳随机残差。"
+    )
+    attention = (
+        "比较 warm/reference 与 V3 是否改善最弱模式、SCL recruitment 和 OOD；"
+        "均匀位置只是搜索方向，不是候选 core。"
+        if config["scientific_role"]
+        == "development_only_observation_invariant_uniform_allocation_refinement"
+        else
+        "先看 V0 投影是否复现旧场，再看 V1/V2 是否在不增加观测先验的情况下"
+        "改善最弱模式、SCL recruitment 和 OOD。"
+    )
     readme.write_text(
-        """### rev10_sa_spectral_field_search
+        f"""### rev10_sa_spectral_field_search
 
-这张图比较旧 Stage 3 场、它在均匀二维谱基底上的投影，以及 V1/V2 平稳残差搜索得到的候选。场生成不读取接触点、杆轨迹、患者 onset 或患者 mode；患者信息只在自发 SNN 仿真后的虚拟电极 readout 和 shaft-aware loss 中使用。
+{phase_text} 场生成不读取接触点、杆轨迹、患者 onset 或患者 mode；患者信息只在自发 SNN 仿真后的虚拟电极 readout 和 shaft-aware loss 中使用。
 
-**关注点**：先看 V0 投影是否复现旧场，再看 V1/V2 是否在不增加观测先验的情况下改善最弱模式、SCL recruitment 和 OOD。
+**关注点**：{attention}
 
 ### rev10_sa_spectral_field_fig4_modes
 

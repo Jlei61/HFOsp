@@ -74,3 +74,46 @@ def test_builder_api_has_no_observation_geometry_argument():
         assert forbidden.isdisjoint(inspect.signature(
             getattr(topic4_spectral_field, name)
         ).parameters)
+
+
+def test_v3_allocation_grid_is_uniform_and_observation_free():
+    import inspect
+    from scripts.freeze_topic4_rev10_sa_spectral_field_v3_candidates import (
+        build_candidates,
+        uniform_allocation_centers,
+    )
+
+    centers = uniform_allocation_centers(4, margin_mm=2.5, L=20.0)
+    assert centers.shape == (16, 2)
+    assert np.array_equal(np.unique(centers[:, 0]), np.linspace(2.5, 17.5, 4))
+    assert np.array_equal(np.unique(centers[:, 1]), np.linspace(2.5, 17.5, 4))
+    forbidden = {"contact_xy", "contacts", "shaft_ids", "onsets", "labels"}
+    assert forbidden.isdisjoint(inspect.signature(build_candidates).parameters)
+
+
+def test_uniform_allocation_direction_moves_continuous_field_mass():
+    from src.topic4_spectral_field import (
+        fourier_basis_2d,
+        fourier_wavevectors,
+        spectral_field_h,
+        uniform_sheet_grid,
+    )
+
+    grid = uniform_sheet_grid(64, L=20.0)
+    center = np.array([12.5, 12.5])
+    width = 2.5
+    surface = 4.0 * np.exp(
+        -0.5 * np.sum((grid - center) ** 2, axis=1) / width ** 2
+    )
+    surface -= surface.mean()
+    fitted, *_ = np.linalg.lstsq(
+        fourier_basis_2d(grid, 9, L=20.0), surface, rcond=None,
+    )
+    coefficients = fitted.reshape(len(fourier_wavevectors(9, L=20.0)), 2)
+    h, _ = spectral_field_h(
+        coefficients, grid, max_harmonic=9, target_count=145.0, L=20.0,
+    )
+    radius = np.linalg.norm(grid - center, axis=1)
+
+    assert np.linalg.norm(grid[np.argmax(h)] - center) < 0.5
+    assert h[radius <= width].sum() / h.sum() > 0.5

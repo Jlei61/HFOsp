@@ -204,3 +204,22 @@ residual；field builder 不接收 contact、shaft、patient onset、mode label 
 小型 `V3` refinement，再以新网络确认。由于患者 held-out 已经使用，整个 SA6H 仍只能写
 development-only recovery，不能写 patient blind generalization。Edge、`beta` 和 topology
 在 observation-invariant Node field 冻结前继续关闭。
+
+### SA6H initial result
+
+初轮 `21 x 3 = 63` 个 8-s spontaneous workers 全部从 clean commit `dd9ae9ac`
+完成，无 worker failure、无 runaway。旧 K3 与它的均匀 Fourier 投影分别产生 `34/33`
+个事件；投影 `h` RMSE 为 `0.0103`，top-5% support Jaccard 为 `0.952`，说明表示替换
+没有破坏旧场。uniform field 为 0 事件，是有效负对照。
+
+但初轮没有恢复 shaft-aware patient repertoire。谱 warm start 的 weak-mode score 为
+`5.397`；表面 winner `v1_pair01_plus` 为 `5.407`，只因 OOD 从 `0.037` 降到 0 才在总分
+上领先 `0.009`，不能视为场改善。9 个 support-eligible candidates 的 SCL recruitment
+均为 0，mode A/B SCL recruitment excess 固定为 `5.413/4.105`。KMeans 与 frozen labels
+的 AMI 为 1，但 model-A prototype 与 patient A 明显不符，证明双簇稳定不等于患者模式复现。
+
+本轮主要限制是搜索半径：旧 warm field 在场外比峰值低约 `6-7` 个 log units，V1/V2
+扰动至多约 1 RMS，足以改变 A/B occupancy，甚至造成单模式 collapse，却不足以让候选在
+SCL recruitment 上产生变化。V3 改为 4x4 全 sheet 等距 allocation scan；16 个位置在不读取
+contact/shaft 的情况下冻结，同一平滑方向投影回 Fourier 场，由仿真后的 patient objective
+选择。这些是 optimizer probes，不是新增 core 或 K。

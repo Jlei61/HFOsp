@@ -96,8 +96,11 @@ def main():
 
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
-    if config["scientific_role"] != (
-            "development_only_observation_invariant_continuous_node_field_search"):
+    allowed_roles = {
+        "development_only_observation_invariant_continuous_node_field_search",
+        "development_only_observation_invariant_uniform_allocation_refinement",
+    }
+    if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("spectral search role changed")
     allowed_seeds = {
         int(value) for value in (

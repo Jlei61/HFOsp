@@ -515,3 +515,38 @@ mandatory outputs; KMeans alone is not the objective.
 The old patient held-out block has already been read. SA6H therefore remains
 development-only on fresh network seeds. Edge, `beta`, and topology stay closed
 until an observation-invariant Node field is frozen and confirmed.
+
+#### SA6H initial result and V3 correction
+
+All `21 x 3 = 63` initial workers completed from clean commit `dd9ae9ac`
+without runaway or worker failure. The uniform field produced no spontaneous
+events. The old K3 field produced `34` events and its uniform spectral
+projection produced `33`, while the projection preflight gave field-`h` RMSE
+`0.0103` and top-5% support Jaccard `0.952`. The spectral representation
+therefore preserves the old learned field without using it as a component
+model.
+
+The initial search did not recover the shaft-aware patient repertoire. The
+spectral warm start had weakest-mode score `5.397`; the selected V1 candidate
+had `5.407` before OOD penalty and won only because its OOD was `0` versus
+`0.037`. This `0.009` total-score margin is not evidence of an improved field.
+Every one of the nine support-eligible candidates had zero SCL recruitment in
+the six fixed events per mode, with identical SCL recruitment excess
+`5.413/4.105` for modes A/B. KMeans was stable and agreed with the frozen labels
+(`AMI=1`) for the eligible candidates, but the model-A prototype remained far
+from patient A. Thus stable two-cluster geometry and patient recovery are
+empirically separated.
+
+The negative is not yet a failure of the Fourier family or shaft-aware loss.
+The old warm field is approximately `6-7` log units below its peaks away from
+support, whereas V1/V2 perturbations were at most one whole-sheet RMS. They
+changed mode occupancy and often caused single-mode collapse, but did not give
+the objective a candidate with variable SCL recruitment. The limitation is the
+tested search radius around the warm start.
+
+V3 therefore performs an observation-invariant allocation scan. It attenuates
+the warm field and projects one identical smooth log-field direction at every
+location of a `4 x 4` uniform sheet grid. The 16 locations are fixed before and
+without reading contacts or shaft paths. The patient objective may select among
+them only after spontaneous simulation. These directions are optimizer probes
+in the same Fourier field, not biological cores or a new `K`.

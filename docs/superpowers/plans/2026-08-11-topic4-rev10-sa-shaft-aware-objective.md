@@ -157,9 +157,17 @@
   common detector and no patient-derived kick source.
 - [x] Implement shaft-aware aggregation, OOD accounting, KMeans stability/AMI,
   field landscapes, direct readout, and patient/model prototype figures.
-- [ ] Commit and launch `21 x 3` workers through `systemd-run -> nohup`, at most
+- [x] Commit and launch `21 x 3` workers through `systemd-run -> nohup`, at most
   10 concurrent workers, with 180-s waits.
-- [ ] Build a smaller V3 refinement around the best observation-invariant field;
+- [x] Complete all 63 workers with zero failures/runaway and generate the field
+  landscape plus direct-readout/KMeans figure.
+- [x] Adjudicate the initial library: the spectral projection preserves old
+  dynamics, KMeans is stable, but no eligible candidate changes SCL recruitment
+  and the apparent V1 winner does not improve the raw weakest-mode score.
+- [x] Build V3 as 16 identical allocation directions on a 4x4 uniform sheet grid,
+  plus warm attenuation and initial-reference controls; these are Fourier
+  optimizer probes, not cores.
+- [ ] Launch the `21 x 3` V3 refinement on the paired development networks;
   do not tune Edge or `beta`.
 - [ ] Confirm frozen V3 candidates on fresh development network seeds and state
   the patient-generalization boundary.

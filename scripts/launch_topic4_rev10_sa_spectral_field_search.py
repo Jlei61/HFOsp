@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[1]
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 MANAGER = ROOT / "scripts/run_topic4_rev10_sa_managed_command.sh"
 FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_spectral_field_candidates.py"
+V3_FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_spectral_field_v3_candidates.py"
 WORKER = ROOT / "scripts/run_topic4_rev10_sa_spectral_field_worker.py"
 AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_sa_spectral_field_search.py"
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_sa_observation_invariant_field.json"
@@ -57,6 +58,12 @@ def main():
     args = parser.parse_args()
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
+    freezer = (
+        V3_FREEZER
+        if config["scientific_role"]
+        == "development_only_observation_invariant_uniform_allocation_refinement"
+        else FREEZER
+    )
     config_sha = _sha256(config_path)
     head = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
@@ -71,7 +78,7 @@ def main():
     output_root.mkdir(parents=True, exist_ok=True)
     manifest_path = output_root / "candidate_manifest.json"
     subprocess.run([
-        str(PYTHON), str(FREEZER), "--config", str(config_path),
+        str(PYTHON), str(freezer), "--config", str(config_path),
         "--expected-commit", commit, "--out", str(manifest_path),
     ], cwd=ROOT, check=True)
     manifest = json.loads(manifest_path.read_text())
