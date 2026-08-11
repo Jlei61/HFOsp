@@ -221,10 +221,32 @@ confirmation networks 继续不读。每个 mode 有 2 或 3 次可读时使用�
 
 1026/1026 workers 成功，无 runaway、无 pre-trigger mismatch。count-matched 聚合得到
 `C_per_net=2.6560`、`C_shared=2.6755`、`Delta_network=0.0195`；有限库 shared minimum 为 `sobol_002`。逐网络 oracle 在 6/6
-networks 都比 scalar 小，paired gain 中位数 `0.0599`（scalar 中位数的约 2.20%），但六张网络使用六个不同的最优 residual。更关键的
-是，每张网络 oracle 的 mode A recruitment、precedence、rank profile 和 event-cloud 四项误差仍全部高于对应 patient-training
-`q95`；mode A recruitment MAE 在所有候选/网络固定为 `0.35173`。因此这些是有限库中的小幅 route-shape 改善，不是 mode A
-realizability。
+networks 都比 scalar 小，paired gain 中位数 `0.0599`，六张网络的 argmin 是六个不同的 residual。更关键的是，每张网络 oracle 的
+mode A recruitment、precedence、rank profile 和 event-cloud 四项误差仍全部高于对应 patient-training `q95`。因此这些是有限库
+中的小幅 route-shape 改善，不是 mode A realizability。
+
+以下五点是 2026-08-11 复审补入的口径校正，全部由 `src/topic4_rev9l_capacity_audit.py` 从冻结 payload 重算，不再手写：
+
+- **objective 的绝对尺度。** 同样只有 3 个事件的 patient-training 子样本，落在自己 floor 中位时得 `0.6931`、落在自己 floor
+  `q95` 时得 `1.6891`。全库 342 个 candidate x network 的 objective 中位数为 `2.8231`、最小 `2.6113`，即中位数高出 patient
+  `q95` 参考 `1.1339`。逐网络 paired gain `0.0599` 相当于该差距的 `5.3%`；旧稿的「scalar 中位数的 2.20%」是以零点任意的
+  objective 作分母，不再使用。
+- **recruitment 不是「固定值」。** mode A recruitment MAE 取 21 个不同值、范围 `0.3517–0.5436`；`0.35173` 是全库最小值，
+  由 scalar baseline 在 6/6 networks 达到，252/342 行与之并列，另有 90 行更差。正确表述是「该 family 从未把 recruitment 压到
+  scalar 以下，只会变差」，不是「该描述量不动」——后者会被读成仪器失灵而非 capacity 失败。四个描述量里只有 recruitment
+  （A 与 B 皆然）具有这一性质，precedence / rank profile / event cloud 都被库中某些候选改善过。
+- **失败集中在 mode A 的形状量，recruitment 是两个 mode 共同的读出上限。** 6/6 networks 的逐网络 oracle 中，mode B 的三个形状
+  量（precedence `0.59–0.63`、rank profile `0.60–0.77`、event cloud `0.78–0.84` 倍 `q95`）全部落在 patient `q95` 以内，只有
+  recruitment 超标（`1.35–1.52`）；mode A 四项全部超标（`1.14–1.35`）。触点 `0/2/4/7` 在 57 个候选 x 6 张网络 x 两个 mode 的
+  全部组合里从未被招募，而患者在这四个触点上的招募概率为 A `0.598–0.799`、B `0.740–0.913`；它们独占最优 recruitment 误差的
+  A `54.5%`、B `61.4%`。把这四个触点补上后 mode A recruitment MAE 会降到 `0.1602`。因此 recruitment 那一项是 forced 读出的
+  几何上限，不能计入 component-pair edge family 的 capacity 证据。
+- **`Delta_network >= 0` 是恒等式。** 逐网络最小值的中位数不可能超过任何单一候选的中位数，所以 `Delta_network` 恒非负；
+  同理，库中含 scalar baseline 时逐网络 oracle 必然 `<=` scalar，「6/6 networks 改善」不是独立发现，只有幅度是。本轮没有跑
+  repeat-level noise null，因此 `Delta=0.0195` 只能作为描述量，不能读成「六张网络需要不同 residual」。
+- **描述量 support 不对称，方向对结论有利。** 模型 mode A 的 precedence 只在 `42–110/210` 对触点上有支持、rank profile 只在
+  `7–11/15` 个触点上有支持，而 patient floor 建立在 `210/210` 与 `15/15` 上。模型形状误差是在更小、更容易的 support 上取平均后
+  与全 support 的 floor 比较，即被系统性低估；本节的阴性结论因此是保守的。
 
 shared `sobol_002` 只在 2/6 networks 改善，paired gain 中位数约 `-6.6e-5`，mean gain `-0.0117`；其 mean objective
 `2.7616` 反而差于 scalar 的 `2.7499`。据此冻结

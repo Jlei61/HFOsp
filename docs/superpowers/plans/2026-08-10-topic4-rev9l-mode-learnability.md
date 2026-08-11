@@ -82,6 +82,13 @@ descriptor（prototype rho 仍约 0.23）。Node+Edge 在 seed 1006 出现 A 方
   `n=2` floor，其余使用 `n=3` floor，readable penalty 保留。得到 `C_per_net/C_shared/Delta=2.6560/2.6755/0.0195`。
 - [x] 逐网络 oracle 在 6/6 networks 小幅改善，但 mode A 四项在 6/6 networks 均全部高于 patient-training q95；shared
   `sobol_002` 只改善 2/6，mean objective 比 scalar 更差。因此不进入 selection sanity。
+- [x] 2026-08-11 复审：补建 `src/topic4_rev9l_capacity_audit.py`，把 L3b 阴性结论依赖的五个派生事实改为从冻结 payload 重算
+  并写进 `l3b_scientific_review.json::capacity_audit` 与 `decision.json`——patient-equivalent objective 尺度
+  (`0.6931 / 1.6891`，全库中位数高出 `q95` 参考 `1.1339`)、recruitment 取 21 个值而非固定值（`0.35173` 是全库最小、
+  scalar 在 6/6 达到）、mode B 三个形状量全部在 `q95` 以内而触点 `0/2/4/7` 两个 mode 都从未招募（占 mode A recruitment 误差
+  `54.5%`）、`Delta_network >= 0` 为恒等式且未跑 noise null、模型形状量 support 小于 floor support 故阴性偏保守。
+- [x] 2026-08-11 复审：`_score` 增加 descriptor 事件数与 count-matched floor 计数必须相等的硬校验，aggregator 增加跨
+  candidate/network 组的 `contact_names` 一致性校验；两者在冻结产物上均为 0 违例，但此前无守卫。
 - [x] optimizer 条件审计完成：没有已知好的 full shared solution，故不比较 Sobol/local refinement 与 CMA-ES；状态为
   `NOT_TESTED_NO_KNOWN_GOOD_SHARED_SOLUTION`，不得写 optimizer failure。
 - [x] 当前候选库已观察到参数到粗 rank-curve 输出多对一；是否存在多个完整模式解仍未测试。

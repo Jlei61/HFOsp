@@ -148,6 +148,20 @@ def _score(row, floors, base, *, failure_objective, minimum_usable=2):
                 "one or both modes lack a supported count-matched patient floor"),
             "matched_floor_event_count_by_mode": counts,
         }
+    # The descriptor events and the count-matched floor are selected by two
+    # independent readability criteria (all-finite rank curve in the descriptor
+    # replay, curve_usable in the paired-excess readout). If they ever diverge,
+    # an n-event descriptor would be standardized against an n'-event floor --
+    # exactly the defect the count-matched floor was introduced to remove --
+    # and nothing downstream would notice. Fail loudly instead.
+    used = {
+        mode: int(row["mode_descriptors"]["modes"][mode]["n_model_events"])
+        for mode in ("A", "B")
+    }
+    if used != counts:
+        raise RuntimeError(
+            "repeated-oracle descriptor event counts disagree with the "
+            f"readable counts driving floor selection: {used} vs {counts}")
     matched_floor = {
         "modes": {
             mode: floors[counts[mode]]["floor"]["modes"][mode]
@@ -282,6 +296,7 @@ def main():
         ["git", "rev-parse", config["worker_expected_commit"]],
         cwd=Path(__file__).resolve().parents[1], text=True).strip()
     patient_state = None
+    patient_reference_contacts = None
     rows, objective, worker_inputs = [], {}, []
     for candidate in candidates:
         candidate_id = candidate["candidate_id"]
@@ -292,7 +307,15 @@ def main():
                 worker_expected)
             worker_inputs.extend(inputs)
             if patient_state is None:
+                patient_reference_contacts = contact_names
                 patient_state = _patient(base, contact_names)
+            elif not np.array_equal(contact_names, patient_reference_contacts):
+                # The patient arrays are built once from the first group. Any
+                # later group with a different contact order would silently
+                # index the patient reference by the wrong contacts.
+                raise RuntimeError(
+                    "L3b contact order changed between candidate/network "
+                    f"groups: {candidate['candidate_id']}/{network_seed}")
             reference, patient, patient_labels, prototypes = patient_state
             row = _candidate_summary(
                 data, base, reference, patient, patient_labels, prototypes)

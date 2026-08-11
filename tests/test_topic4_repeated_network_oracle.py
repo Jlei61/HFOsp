@@ -61,7 +61,8 @@ def test_repeated_score_uses_mode_specific_readable_count_floor():
     )
     row = {
         "mode_descriptors": {"modes": {
-            mode: {name: 5.0 for name in metrics} for mode in ("A", "B")
+            "A": {**{name: 5.0 for name in metrics}, "n_model_events": 2},
+            "B": {**{name: 5.0 for name in metrics}, "n_model_events": 3},
         }},
         "geometry": {
             "source_a": {
@@ -95,6 +96,49 @@ def test_repeated_score_uses_mode_specific_readable_count_floor():
     assert np.isclose(
         result["standardized_descriptors"]["B"]
         ["recruitment_mean_absolute_error"]["z"], 1.0)
+
+
+def test_repeated_score_rejects_descriptor_count_floor_count_divergence():
+    metrics = (
+        "recruitment_mean_absolute_error",
+        "precedence_mean_absolute_error",
+        "mean_rank_profile_absolute_error",
+        "event_distribution_sliced_wasserstein",
+    )
+    # The descriptor replay kept three events while the paired-excess readout
+    # reported two usable curves. Scoring three events against an n=2 floor is
+    # silent mis-standardization, so the aggregator must refuse.
+    row = {
+        "mode_descriptors": {"modes": {
+            "A": {**{name: 5.0 for name in metrics}, "n_model_events": 3},
+            "B": {**{name: 5.0 for name in metrics}, "n_model_events": 3},
+        }},
+        "geometry": {
+            "source_a": {
+                "n_curves_usable": 2, "curve_usable_fraction": 2.0 / 3.0,
+                "ood_fraction": 0.0,
+            },
+            "source_b": {
+                "n_curves_usable": 3, "curve_usable_fraction": 1.0,
+                "ood_fraction": 0.0,
+            },
+        },
+    }
+    base = {
+        "primary_mapping": {
+            "mode_A_source": "source_a", "mode_B_source": "source_b"},
+        "objective": {
+            "readable_fraction_penalty_weight": 2.0,
+            "weakest_mode_lse_tau": 0.25,
+            "ood_weight": 0.1,
+        },
+    }
+    with pytest.raises(RuntimeError, match="descriptor event counts disagree"):
+        _score(
+            row,
+            {2: _floor(2, a_median=1.0, b_median=1.0),
+             3: _floor(3, a_median=1.0, b_median=1.0)},
+            base, failure_objective=100.0)
 
 
 def test_repeated_score_fails_closed_below_supported_event_count():
