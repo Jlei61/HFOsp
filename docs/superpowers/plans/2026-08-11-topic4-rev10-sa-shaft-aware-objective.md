@@ -108,8 +108,27 @@
   K=3) and `6x6` only as a resolution sensitivity; controls are not cores.
 - [x] Build patient-training recruitment initializations with shaft-balanced
   fitting weights and no shaft-assigned basis functions.
-- [ ] Launch up to 37 coefficient-unique fields on the same three paired SA6
+- [x] Launch 37 coefficient-unique fields on the same three paired SA6
   networks using the common
   detector and forced-source/readout contract.
-- [ ] Adjudicate representation capacity before packet-amplitude, budget,
+- [x] Adjudicate the run as a low-resolution initialization negative, not a
+  continuous-family negative: all 111 workers completed, but maximum mean SCL
+  `h` was only 0.128 and no candidate produced ICL-to-SCL recruitment.
+- [x] Note the mode-A ICL precedence lead (excess approximately 0.393 versus
+  approximately 2.99 for the frozen K3 benchmark) without calling it a patient
+  solution.
+
+## SA6G no-K continuous support capacity control
+
+- [x] Define a smooth distance-to-path field with no component or peak count.
+- [x] Use observed dual-shaft polylines with and without the shortest direct
+  cross-shaft bridge; path segments are geometry controls, not cores.
+- [x] Freeze widths 0.10/0.20/0.35/0.50 mm at the same exact field-mass budget.
+- [x] Verify dense-sheet projected path strength before simulation: mean
+  `h=0.535-1.000` within 0.25 mm of the path.
+- [ ] Launch eight fields x three paired networks through systemd-run -> nohup,
+  using at most 12 workers and 120-second waits.
+- [ ] Aggregate actual projected path/bridge `h`, directional forced response,
+  spontaneous events, return, and safety.
+- [ ] Adjudicate continuous support capacity before packet-amplitude, budget,
   connectivity, Edge, or `beta` experiments.

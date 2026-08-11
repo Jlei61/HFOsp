@@ -12,7 +12,6 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 MANAGER = ROOT / "scripts/run_topic4_rev10_sa_managed_command.sh"
-FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_continuous_field_candidates.py"
 WORKER = ROOT / "scripts/run_topic4_rev10_sa_dual_shaft_worker.py"
 AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_sa_continuous_field_capacity.py"
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_sa_continuous_field_canary.json"
@@ -28,7 +27,7 @@ def _state(path):
     return path.read_text().strip().split(maxsplit=1)[0]
 
 
-def _complete(job, *, config_sha, commit):
+def _complete(job, *, config_sha, commit, worker_status):
     if (_state(job["status"]) != "SUCCESS" or not job["json"].exists()
             or not job["npz"].exists()):
         return False
@@ -38,7 +37,7 @@ def _complete(job, *, config_sha, commit):
         return False
     provenance = payload.get("provenance", {})
     return bool(
-        payload.get("status") == "SA6F_CONTINUOUS_FIELD_WORKER_COMPLETE"
+        payload.get("status") == worker_status
         and payload.get("config", {}).get("sha256") == config_sha
         and provenance.get("expected_git_commit") == commit
         and provenance.get("runtime_modules_match_expected_commit") is True
@@ -57,6 +56,19 @@ def main():
     args = parser.parse_args()
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
+    support_control = "sa6g_continuous_support" in config
+    if support_control:
+        assay = config["sa6g_continuous_support"]
+        freezer = ROOT / "scripts/freeze_topic4_rev10_sa_continuous_support_candidates.py"
+        output_subdir = "continuous_support_capacity"
+        worker_status = "SA6G_CONTINUOUS_SUPPORT_WORKER_COMPLETE"
+        phase = "SA6G"
+    else:
+        assay = config["sa6f_continuous_field"]
+        freezer = ROOT / "scripts/freeze_topic4_rev10_sa_continuous_field_candidates.py"
+        output_subdir = "continuous_field_capacity"
+        worker_status = "SA6F_CONTINUOUS_FIELD_WORKER_COMPLETE"
+        phase = "SA6F"
     config_sha = _sha256(config_path)
     head = subprocess.check_output(
         ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
@@ -67,17 +79,16 @@ def main():
     if head != commit:
         raise RuntimeError(f"launcher commit {commit} is not current HEAD {head}")
 
-    output_root = ROOT / config["output_root"] / "continuous_field_capacity"
+    output_root = ROOT / config["output_root"] / output_subdir
     output_root.mkdir(parents=True, exist_ok=True)
     manifest_path = output_root / "candidate_manifest.json"
     subprocess.run([
-        str(PYTHON), str(FREEZER), "--config", str(config_path),
+        str(PYTHON), str(freezer), "--config", str(config_path),
         "--expected-commit", commit, "--out", str(manifest_path),
     ], cwd=ROOT, check=True)
     manifest = json.loads(manifest_path.read_text())
     candidates = [row["candidate_id"]
                   for row in manifest["candidate_set"]["candidates"]]
-    assay = config["sa6f_continuous_field"]
     seeds = [int(value) for value in assay["network_seeds"]]
     maximum = int(args.max_concurrent or min(
         len(candidates) * len(seeds), config["execution"]["max_workers"],
@@ -100,7 +111,9 @@ def main():
             })
     pending, active, completed, failed = [], [], [], []
     for job in jobs:
-        if _complete(job, config_sha=config_sha, commit=commit):
+        if _complete(
+                job, config_sha=config_sha, commit=commit,
+                worker_status=worker_status):
             completed.append(job)
         elif _state(job["status"]) == "RUNNING":
             active.append(job)
@@ -111,7 +124,9 @@ def main():
         nonlocal active
         remaining = []
         for job in active:
-            if _complete(job, config_sha=config_sha, commit=commit):
+            if _complete(
+                    job, config_sha=config_sha, commit=commit,
+                    worker_status=worker_status):
                 completed.append(job)
             elif _state(job["status"]) == "FAILED":
                 failed.append(job)
@@ -131,7 +146,7 @@ def main():
                 f"--setenv=REV10SA_SYSTEMD_UNIT={unit}",
                 "/usr/bin/nohup", str(MANAGER), str(job["status"]),
                 str(job["log"]),
-                f"SA6F {job['candidate']} seed={job['seed']}", commit[:8],
+                f"{phase} {job['candidate']} seed={job['seed']}", commit[:8],
                 str(PYTHON), str(WORKER), "--config", str(config_path),
                 "--candidate-id", job["candidate"], "--seed", str(job["seed"]),
                 "--expected-commit", commit,
@@ -148,17 +163,17 @@ def main():
             time.sleep(wait_seconds)
     refresh()
     if failed:
-        raise RuntimeError(f"{len(failed)} SA6F worker(s) failed")
+        raise RuntimeError(f"{len(failed)} {phase} worker(s) failed")
     subprocess.run([
         str(PYTHON), str(AGGREGATOR), "--config", str(config_path),
         "--expected-commit", commit,
     ], cwd=ROOT, check=True)
     subprocess.run([
         "notify-send", "Topic 4 rev10-SA",
-        f"continuous-field canary completed: {len(completed)}/{len(jobs)}",
+        f"{phase} continuous-field canary completed: {len(completed)}/{len(jobs)}",
     ], check=False)
     print(json.dumps({
-        "status": "SA6F_CONTINUOUS_FIELD_LAUNCH_COMPLETE",
+        "status": f"{phase}_CONTINUOUS_FIELD_LAUNCH_COMPLETE",
         "commit": commit, "n_success": len(completed), "n_failed": 0,
         "n_candidates": len(candidates), "n_seeds": len(seeds),
         "max_concurrent": maximum, "wait_seconds": wait_seconds,

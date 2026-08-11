@@ -6,8 +6,11 @@ import json
 from src.topic4_continuous_field import (
     background_anchors,
     build_continuous_field_candidates,
+    build_continuous_support_candidates,
+    continuous_corridor_field_h,
     continuous_field_h,
     continuous_surface,
+    distance_to_segments,
     fit_contact_target,
     patient_contact_targets,
     shaft_balanced_contact_weights,
@@ -20,6 +23,9 @@ from src.topic4_core_field_rev9 import (
 )
 from scripts.run_topic4_rev10_sa_dual_shaft_worker import _candidate_node
 from scripts.freeze_topic4_rev10_sa_continuous_field_candidates import build_manifest
+from scripts.freeze_topic4_rev10_sa_continuous_support_candidates import (
+    build_manifest as build_support_manifest,
+)
 from scripts.aggregate_topic4_rev10_sa_continuous_field_capacity import _relative_field
 
 
@@ -62,6 +68,20 @@ def test_continuous_field_projection_has_exact_mass_without_k():
     assert h.sum() == pytest.approx(123.0, abs=1e-9)
     assert np.all((h > 0.0) & (h < 1.0))
     assert diagnostics["surface_max"] > diagnostics["surface_min"]
+
+
+def test_continuous_corridor_is_smooth_exact_mass_and_not_components():
+    positions = np.asarray([
+        [0.0, 0.0], [1.0, 0.0], [2.0, 0.0], [1.0, 1.0], [1.0, 2.0],
+    ])
+    segments = np.asarray([[[0.0, 0.0], [2.0, 0.0]]])
+    distance = distance_to_segments(positions, segments)
+    assert np.allclose(distance, [0.0, 0.0, 0.0, 1.0, 2.0])
+    h, _ = continuous_corridor_field_h(
+        segments, positions, width_mm=0.5, target_count=2.0,
+    )
+    assert h.sum() == pytest.approx(2.0, abs=1e-9)
+    assert h[1] > h[3] > h[4]
 
 
 def test_direct_h_node_reconstruction_matches_legacy_theta_path():
@@ -193,6 +213,49 @@ def test_real_continuous_manifest_keeps_k3_as_benchmark_only():
         manifest["forced_sources"][0]["xy_mm"],
         manifest["forced_sources"][1]["xy_mm"],
     )
+
+
+def test_continuous_support_manifest_has_no_k_component_or_peak_contract():
+    config_path = ROOT / "config/topic4_rev10_sa_continuous_support_canary.json"
+    manifest = build_support_manifest(config_path)
+    candidates = manifest["candidate_set"]["candidates"]
+    assert len(candidates) == 8
+    assert {row["support_id"] for row in candidates} == {
+        "dual_shaft_disconnected", "dual_shaft_connected",
+    }
+    assert all(row["field_type"] == "continuous_corridor" for row in candidates)
+    assert all(row["component_count"] is None for row in candidates)
+    assert all(row["peak_count_constraint"] is None for row in candidates)
+    assert max(row["mean_h_within_path_radius"]
+               for row in manifest["candidate_preflight"]) > 0.5
+
+
+def test_worker_accepts_continuous_support_candidate_without_k():
+    contacts = [
+        {"shaft_id": "ICL", "within_shaft_order_by_shared_axis": 0,
+         "sheet_xy_mm": [1.0, 1.0]},
+        {"shaft_id": "ICL", "within_shaft_order_by_shared_axis": 1,
+         "sheet_xy_mm": [8.0, 1.0]},
+        {"shaft_id": "SCL", "within_shaft_order_by_shared_axis": 0,
+         "sheet_xy_mm": [2.0, 8.0]},
+        {"shaft_id": "SCL", "within_shaft_order_by_shared_axis": 1,
+         "sheet_xy_mm": [7.0, 8.0]},
+    ]
+    candidate = build_continuous_support_candidates(
+        contacts, widths_mm=[0.5],
+    )["candidates"][1]
+    rng = np.random.default_rng(22)
+    positions = rng.uniform(0.0, 20.0, size=(100, 2))
+    stage = {
+        "N_core_manual": 20.0,
+        "quantile_seed": 3,
+        "engine": {
+            "L": 20.0, "core_mean": 17.5, "core_std": 1.0, "v_base": 18.0,
+        },
+    }
+    node = _candidate_node(candidate, positions, n_total=125, stage=stage)
+    assert node["h"].sum() == pytest.approx(20.0, abs=1e-9)
+    assert node["vtheta"].shape == (125,)
 
 
 def test_continuous_plot_field_is_finite_and_normalized():

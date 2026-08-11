@@ -382,3 +382,51 @@ confirmation seeds.
 SA6F precedes packet-amplitude, total-budget, Edge, `beta`, topology, and formal
 field optimization. Its result is exploratory and cannot support patient
 generalization.
+
+#### SA6F result and interpretation correction
+
+All `37 x 3 = 111` workers completed without runaway. Neither the `4x4`
+matched-DoF fields nor the `6x6` resolution fields produced forced
+ICL-to-SCL recruitment. This is not yet a continuous-family or connectivity
+failure. The strongest tested continuous initialization reached only mean
+`h=0.128` within 1 mm of SCL contacts, whereas the preceding constrained K3
+SCL allocation reached `0.424`. Exact fixed-mass projection diluted the broad
+low-resolution spline surfaces, and some field mass remained between or away
+from the observed contact paths.
+
+SA6F is therefore frozen as:
+
+```text
+LOW_RESOLUTION_CONTINUOUS_INITIALIZATION_NO_CROSS_SHAFT_SUPPORT
+```
+
+One `4x4` field reduced mode-A ICL precedence excess from approximately `2.99`
+to `0.393`, showing that a continuous field can materially change the limiting
+within-ICL pattern. SCL recruitment excess nevertheless remained unchanged.
+This is a useful initialization lead, not a fitted patient solution.
+
+### 8.4 No-K continuous support capacity control: SA6G
+
+SA6G does not add Gaussian cores or increase biological `K`. It constructs a
+continuous positive-control field from distance to the observed shaft paths:
+
+```text
+d(x, Gamma) = minimum distance from x to the continuous path Gamma
+q(x)        = exp[-d(x, Gamma)^2 / (2 sigma^2)]
+h           = project_to_fixed_mass(q)
+```
+
+`Gamma` is either the union of the observed ICL and SCL polylines or that union
+plus the shortest cross-shaft bridge. The line segments encode the capacity
+control geometry only; they are not components, peaks, or inferred cores.
+Widths are `0.10, 0.20, 0.35, 0.50 mm`, giving eight fields at the unchanged
+mass budget. Preflight on a dense sheet gives mean projected `h=0.535-1.000`
+within 0.25 mm of the path, so this control closes the field-strength ambiguity
+left by SA6F.
+
+SA6G remains Node-only with frozen topology, `d_i`, detector, network seeds,
+packet sources, and total field mass. It is an exploratory capacity control,
+not the patient-fit field. The formal patient fit remains a free continuous
+spline/RKHS field optimized directly with the shaft-aware SNN objective and a
+smoothness penalty; basis resolution is numerical discretization, never a core
+count. `beta`, Edge, and topology remain closed until SA6G is adjudicated.

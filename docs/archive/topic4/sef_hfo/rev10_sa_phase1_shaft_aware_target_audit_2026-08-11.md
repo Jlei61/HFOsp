@@ -165,7 +165,18 @@ SCL_READOUT_NOT_PRIMARY_LIMIT
 /
 FIXED_K3_COMPONENT3_RELOCATION_CANARY_NEGATIVE
 /
-CONTINUOUS_NONCOMPONENT_FIELD_CAPACITY_RUNNING_NEXT
+LOW_RESOLUTION_CONTINUOUS_INITIALIZATION_NO_CROSS_SHAFT_SUPPORT
+/
+NO_K_CONTINUOUS_SUPPORT_CAPACITY_RUNNING_NEXT
 ```
 
-这条线已排除 observation 层解释，也证明简单 component-3 relocation 与 `w_SCL<=0.35` 的 width grid 不足。它没有测试自由场；下一轮先让患者训练目标驱动连续二维场，再决定是否需要强度或 connectivity 机制诊断。
+SA6F 已完成 `37 x 3 = 111` 个无 K B-spline workers，零 runaway，但没有
+ICL-to-SCL recruitment。该结果仍不能裁定连续场或 connectivity：最强 SCL 邻域
+平均 `h` 只有 `0.128`，明显低于 constrained K3 canary 的 `0.424`。一个 4x4
+候选把 mode-A ICL precedence excess 从约 `2.99` 降到 `0.393`，说明连续场能
+改变杆内限制项，但没有解决 SCL。
+
+下一步 SA6G 不增加 core 或 `K`，而使用到双杆路径的连续距离场，并比较有/无最短
+跨杆桥。8 个固定质量候选的 dense-sheet 预检显示路径 0.25 mm 内平均
+`h=0.535-1.000`。它是场强充分的 capacity positive control，不是患者拟合；若仍
+不能跨杆，才进入 packet/budget 或 connectivity 机制诊断。

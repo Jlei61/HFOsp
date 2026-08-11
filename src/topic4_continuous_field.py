@@ -83,6 +83,122 @@ def continuous_field_h(coefficients, positions, *, n_basis, target_count,
     }
 
 
+def distance_to_segments(positions, segments):
+    """Euclidean distance to a union of line segments."""
+    positions = np.asarray(positions, float)
+    segments = np.asarray(segments, float)
+    if positions.ndim != 2 or positions.shape[1] != 2:
+        raise ValueError("positions must have shape (n, 2)")
+    if segments.ndim != 3 or segments.shape[1:] != (2, 2) or not len(segments):
+        raise ValueError("segments must have shape (n_segments, 2, 2)")
+    start = segments[:, 0]
+    delta = segments[:, 1] - start
+    denominator = np.sum(delta ** 2, axis=1)
+    if np.any(denominator <= 0.0):
+        raise ValueError("support segments must have positive length")
+    offset = positions[:, None, :] - start[None, :, :]
+    fraction = np.clip(
+        np.sum(offset * delta[None, :, :], axis=2) / denominator[None, :],
+        0.0, 1.0,
+    )
+    projection = start[None, :, :] + fraction[:, :, None] * delta[None, :, :]
+    return np.min(
+        np.linalg.norm(positions[:, None, :] - projection, axis=2), axis=1,
+    )
+
+
+def continuous_corridor_field_h(segments, positions, *, width_mm, target_count):
+    """Project a smooth distance-to-path field to an exact mass budget.
+
+    The path is a capacity positive control, not a collection of components.
+    Neither its segment count nor its extrema are interpreted as biological
+    cores.
+    """
+    width_mm = float(width_mm)
+    if not np.isfinite(width_mm) or width_mm <= 0.0:
+        raise ValueError("width_mm must be positive")
+    distance = distance_to_segments(positions, segments)
+    q = np.exp(-0.5 * (distance / width_mm) ** 2)
+    h, threshold = project_to_budget(q, float(target_count))
+    return h, {
+        "distance_min_mm": float(np.min(distance)),
+        "distance_median_mm": float(np.median(distance)),
+        "projection_threshold": float(threshold),
+    }
+
+
+def shaft_polyline_segments(contacts):
+    """Build the two observed shaft polylines from the frozen contact contract."""
+    segments = []
+    for shaft in ("ICL", "SCL"):
+        rows = sorted(
+            (row for row in contacts if row["shaft_id"] == shaft),
+            key=lambda row: int(row["within_shaft_order_by_shared_axis"]),
+        )
+        points = np.asarray([row["sheet_xy_mm"] for row in rows], float)
+        if len(points) < 2:
+            raise ValueError(f"shaft {shaft} needs at least two contacts")
+        segments.extend(np.stack([points[:-1], points[1:]], axis=1))
+    return np.asarray(segments, float)
+
+
+def closest_cross_shaft_segment(contacts):
+    """Return the shortest observed ICL-to-SCL contact bridge."""
+    icl = np.asarray([
+        row["sheet_xy_mm"] for row in contacts if row["shaft_id"] == "ICL"
+    ], float)
+    scl = np.asarray([
+        row["sheet_xy_mm"] for row in contacts if row["shaft_id"] == "SCL"
+    ], float)
+    if not len(icl) or not len(scl):
+        raise ValueError("both shafts are required")
+    distance = np.linalg.norm(icl[:, None, :] - scl[None, :, :], axis=2)
+    i, j = np.unravel_index(np.argmin(distance), distance.shape)
+    return np.asarray([icl[i], scl[j]], float)
+
+
+def build_continuous_support_candidates(contacts, *, widths_mm):
+    """Construct no-K shaft-support controls for the field-capacity assay."""
+    shaft_segments = shaft_polyline_segments(contacts)
+    bridge = closest_cross_shaft_segment(contacts)
+    candidates = []
+    for support_id, segments in (
+        ("dual_shaft_disconnected", shaft_segments),
+        ("dual_shaft_connected", np.concatenate([
+            shaft_segments, bridge[None, :, :],
+        ], axis=0)),
+    ):
+        for width_mm in widths_mm:
+            metadata = {
+                "candidate_id": (
+                    f"corridor_{support_id}_w{str(width_mm).replace('.', 'p')}"
+                ),
+                "field_type": "continuous_corridor",
+                "support_id": support_id,
+                "width_mm": float(width_mm),
+                "segments": np.asarray(segments, float).tolist(),
+                "bridge_segment": (
+                    bridge.tolist() if support_id == "dual_shaft_connected" else None
+                ),
+                "component_count": None,
+                "peak_count_constraint": None,
+                "no_component_or_peak_assignment": True,
+            }
+            metadata["field_sha256"] = continuous_candidate_hash({
+                key: metadata[key] for key in (
+                    "field_type", "support_id", "width_mm", "segments",
+                )
+            })
+            candidates.append(metadata)
+    if len({row["field_sha256"] for row in candidates}) != len(candidates):
+        raise RuntimeError("continuous support candidates are not unique")
+    return {
+        "shaft_segments": shaft_segments,
+        "bridge_segment": bridge,
+        "candidates": candidates,
+    }
+
+
 def second_difference_operator(n_basis):
     """Second differences along both control-surface axes."""
     n_basis = int(n_basis)

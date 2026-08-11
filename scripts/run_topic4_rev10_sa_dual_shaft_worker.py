@@ -26,7 +26,10 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
     _sha256,
 )
 from src.sef_hfo_observation import VirtualMontage, extract_lagpat  # noqa: E402
-from src.topic4_continuous_field import continuous_field_h  # noqa: E402
+from src.topic4_continuous_field import (  # noqa: E402
+    continuous_corridor_field_h,
+    continuous_field_h,
+)
 from src.topic4_core_field_rev9 import (  # noqa: E402
     reconstruct_frozen_node,
     reconstruct_node_from_h,
@@ -85,6 +88,16 @@ def _candidate_node(candidate, positions, *, n_total, stage):
             core_mean=engine["core_mean"], core_std=engine["core_std"],
             v_base=engine["v_base"],
         )
+    if candidate.get("field_type") == "continuous_corridor":
+        h, _ = continuous_corridor_field_h(
+            candidate["segments"], positions, width_mm=candidate["width_mm"],
+            target_count=stage["N_core_manual"],
+        )
+        return reconstruct_node_from_h(
+            h, n_total=n_total, quantile_seed=stage["quantile_seed"],
+            core_mean=engine["core_mean"], core_std=engine["core_std"],
+            v_base=engine["v_base"],
+        )
     return reconstruct_frozen_node(
         candidate["theta"], positions, n_total=n_total,
         target_count=stage["N_core_manual"],
@@ -108,6 +121,7 @@ def main():
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
     continuous = "sa6f_continuous_field" in config
+    continuous_support = "sa6g_continuous_support" in config
     if continuous:
         assay = config["sa6f_continuous_field"]
         if assay["status"] != "DESIGN_FROZEN_AFTER_K3_REPRESENTATION_AUDIT":
@@ -118,6 +132,20 @@ def main():
         manifest_builder = build_continuous_manifest
         output_subdir = "continuous_field_capacity"
         worker_status = "SA6F_CONTINUOUS_FIELD_WORKER_COMPLETE"
+        scientific_role = "exploratory non-component continuous Node-field capacity"
+    elif continuous_support:
+        assay = config["sa6g_continuous_support"]
+        if assay["status"] != "DESIGN_FROZEN_AFTER_LOW_RESOLUTION_FIELD_AUDIT":
+            raise RuntimeError("SA6G continuous-support design is not frozen")
+        from scripts.freeze_topic4_rev10_sa_continuous_support_candidates import (  # noqa: E402
+            build_manifest as build_continuous_support_manifest,
+        )
+        manifest_builder = build_continuous_support_manifest
+        output_subdir = "continuous_support_capacity"
+        worker_status = "SA6G_CONTINUOUS_SUPPORT_WORKER_COMPLETE"
+        scientific_role = (
+            "exploratory no-K continuous support capacity positive control"
+        )
     else:
         assay = config["sa6_dual_shaft_field"]
         if assay["status"] != "DESIGN_FROZEN_SA5_READOUT_CLEARED":
@@ -125,6 +153,7 @@ def main():
         manifest_builder = build_k3_manifest
         output_subdir = "dual_shaft_capacity"
         worker_status = "SA6_DUAL_SHAFT_WORKER_COMPLETE"
+        scientific_role = "exploratory fixed-K3 component-relocation canary"
     if assay["arm"] != "Node_only" or assay["edge"] != "off" or assay["beta"] != "closed":
         raise RuntimeError("SA6 must remain Node-only with edge and beta closed")
     if args.seed not in {int(value) for value in assay["network_seeds"]}:
@@ -347,10 +376,7 @@ def main():
     )
     payload = {
         "status": worker_status,
-        "scientific_role": (
-            "exploratory non-component continuous Node-field capacity"
-            if continuous else "exploratory fixed-K3 component-relocation canary"
-        ),
+        "scientific_role": scientific_role,
         "candidate": candidate,
         "seed": int(args.seed),
         "runs": run_rows,

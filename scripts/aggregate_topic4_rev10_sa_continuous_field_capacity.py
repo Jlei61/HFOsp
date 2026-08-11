@@ -28,7 +28,10 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
     _runtime_provenance,
     _sha256,
 )
-from src.topic4_continuous_field import continuous_surface  # noqa: E402
+from src.topic4_continuous_field import (  # noqa: E402
+    continuous_surface,
+    distance_to_segments,
+)
 from src.topic4_core_field_stage3 import params_to_q  # noqa: E402
 from src.topic4_shaft_aware import contract_groups, contract_pairs  # noqa: E402
 
@@ -37,10 +40,10 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_sa_continuous_field_canary.json"
 
 
-def _worker_complete(payload, npz_path, config_sha, commit):
+def _worker_complete(payload, npz_path, config_sha, commit, worker_status):
     provenance = payload.get("provenance", {})
     return bool(
-        payload.get("status") == "SA6F_CONTINUOUS_FIELD_WORKER_COMPLETE"
+        payload.get("status") == worker_status
         and payload.get("config", {}).get("sha256") == config_sha
         and provenance.get("expected_git_commit") == commit
         and provenance.get("runtime_modules_match_expected_commit") is True
@@ -53,34 +56,70 @@ def _relative_field(candidate, positions, L=20.0):
     if candidate["field_type"] == "gaussian_k3_benchmark":
         q = params_to_q(candidate["theta"], positions, K=3, L=L)
         latent = np.log(np.maximum(q, 1e-12))
-    else:
+    elif candidate["field_type"] == "continuous_bspline":
         latent = continuous_surface(
             candidate["coefficients"], positions,
             n_basis=int(candidate["n_basis"]), degree=int(candidate["degree"]), L=L,
         )
+    elif candidate["field_type"] == "continuous_corridor":
+        distance = distance_to_segments(positions, candidate["segments"])
+        latent = -0.5 * (distance / float(candidate["width_mm"])) ** 2
+    else:
+        raise ValueError(f"unknown continuous field type: {candidate['field_type']}")
     return np.exp(np.clip(latent - np.max(latent), -30.0, 0.0))
 
 
-def _plot(summary, manifest, output_root):
+def _plot(summary, manifest, output_root, *, support_control=False):
     contacts = np.asarray(summary["contact_xy_mm"], float)
     shafts = np.asarray(summary["shaft_ids"]).astype(str)
     candidates = {row["candidate_id"]: row
                   for row in manifest["candidate_set"]["candidates"]}
     rows = summary["candidate_rows"]
-    primary = [row for row in rows if row["representation_role"] == "matched_dof"]
-    sensitivity = [row for row in rows if row["representation_role"] == "resolution"]
-    primary_best = min(primary, key=lambda row: row["descriptive_loss"])
-    sensitivity_best = min(sensitivity, key=lambda row: row["descriptive_loss"])
-    map_ids = ["frozen_K3_benchmark", primary_best["candidate_id"],
-               sensitivity_best["candidate_id"]]
+    if support_control:
+        disconnected = [row for row in rows
+                        if row["representation_role"] == "continuous_disconnected_support"]
+        connected = [row for row in rows
+                     if row["representation_role"] == "continuous_connected_support"]
+        narrow_connected = min(connected, key=lambda row: row["width_mm"])
+        broad_connected = max(connected, key=lambda row: row["width_mm"])
+        matched_disconnected = min(
+            disconnected,
+            key=lambda row: abs(row["width_mm"] - narrow_connected["width_mm"]),
+        )
+        map_ids = [matched_disconnected["candidate_id"],
+                   narrow_connected["candidate_id"], broad_connected["candidate_id"]]
+        map_titles = [
+            f"disconnected support, width {matched_disconnected['width_mm']:.2f} mm",
+            f"connected support, width {narrow_connected['width_mm']:.2f} mm",
+            f"connected support, width {broad_connected['width_mm']:.2f} mm",
+        ]
+        palette = {
+            "continuous_disconnected_support": "#4E79A7",
+            "continuous_connected_support": "#E15759",
+        }
+        labels = {
+            "continuous_disconnected_support": "two shaft paths",
+            "continuous_connected_support": "shaft paths + bridge",
+        }
+    else:
+        primary = [row for row in rows if row["representation_role"] == "matched_dof"]
+        sensitivity = [row for row in rows if row["representation_role"] == "resolution"]
+        primary_best = min(primary, key=lambda row: row["descriptive_loss"])
+        sensitivity_best = min(sensitivity, key=lambda row: row["descriptive_loss"])
+        map_ids = ["frozen_K3_benchmark", primary_best["candidate_id"],
+                   sensitivity_best["candidate_id"]]
+        map_titles = ["historical K=3 benchmark", "4x4 continuous matched-DoF",
+                      "6x6 continuous sensitivity"]
+        palette = {"K3_benchmark": "#7F7F7F", "matched_dof": "#4E79A7",
+                   "resolution": "#59A14F"}
+        labels = {"K3_benchmark": "historical K=3", "matched_dof": "4x4 continuous",
+                  "resolution": "6x6 sensitivity"}
     axis = np.linspace(0.0, 20.0, 120)
     xx, yy = np.meshgrid(axis, axis)
     grid = np.column_stack([xx.ravel(), yy.ravel()])
 
     fig = plt.figure(figsize=(16.2, 8.4), constrained_layout=True)
     gs = fig.add_gridspec(2, 3, height_ratios=[1.0, 0.95])
-    map_titles = ["historical K=3 benchmark", "4x4 continuous matched-DoF",
-                  "6x6 continuous sensitivity"]
     for column, (candidate_id, title) in enumerate(zip(map_ids, map_titles)):
         ax = fig.add_subplot(gs[0, column])
         relative = _relative_field(candidates[candidate_id], grid).reshape(xx.shape)
@@ -102,10 +141,6 @@ def _plot(summary, manifest, output_root):
         fig.colorbar(image, ax=ax, fraction=0.046, pad=0.03, label="relative field")
 
     ax = fig.add_subplot(gs[1, 0])
-    palette = {"K3_benchmark": "#7F7F7F", "matched_dof": "#4E79A7",
-               "resolution": "#59A14F"}
-    labels = {"K3_benchmark": "historical K=3", "matched_dof": "4x4 continuous",
-              "resolution": "6x6 sensitivity"}
     seen = set()
     for row in rows:
         role = row["representation_role"]
@@ -162,25 +197,32 @@ def _plot(summary, manifest, output_root):
                     f"n={row['spontaneous_event_count']}", rotation=90,
                     ha="center", va="top", fontsize=6, color="#2F6F6A")
 
-    fig.suptitle(
-        f"SA6F continuous non-component field canary | {summary['status']}",
-        fontsize=14, weight="bold",
-    )
+    phase = "SA6G continuous support control" if support_control else "SA6F continuous field canary"
+    fig.suptitle(f"{phase} | {summary['status']}", fontsize=14, weight="bold")
     figure_dir = Path(output_root) / "figures"
     figure_dir.mkdir(parents=True, exist_ok=True)
-    stem = figure_dir / "rev10_sa_continuous_field_capacity"
+    stem = figure_dir / (
+        "rev10_sa_continuous_support_capacity" if support_control
+        else "rev10_sa_continuous_field_capacity"
+    )
     fig.savefig(stem.with_suffix(".png"), dpi=240, facecolor="white")
     fig.savefig(stem.with_suffix(".pdf"), facecolor="white")
     plt.close(fig)
-    (figure_dir / "README.md").write_text(
+    readme = (
+        """### rev10_sa_continuous_support_capacity
+
+这张图比较两条不相连的连续杆支撑与加入最短跨杆桥后的连续场。线段只定义几何容量正控，既不是 Gaussian component，也不代表生物学 core；A-C 展示连续场，D-F 展示 shaft-aware 误差、定向 forced response 和短 spontaneous 返回。
+
+**关注点**：该图只判断固定质量预算下的连续场是否具备跨杆可达容量，不是患者场拟合或 blind generalization。
+""" if support_control else
         """### rev10_sa_continuous_field_capacity
 
 这张图比较历史 K=3 Gaussian 基准、4x4 matched-DoF 连续 B-spline 场和 6x6 分辨率敏感性。控制系数只是连续场的数值自由度，不代表 core；A-C 展示场本身，D-F 展示 shaft-aware 误差、双向 forced response 和短 spontaneous 返回。
 
 **关注点**：这是 patient-training-only exploratory canary，不是 blind generalization；连续场没有预设 component、峰数或每杆 core 数量。
-""",
-        encoding="utf-8",
+"""
     )
+    (figure_dir / "README.md").write_text(readme, encoding="utf-8")
     return stem
 
 
@@ -192,7 +234,19 @@ def main():
     args = parser.parse_args()
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
-    assay = config["sa6f_continuous_field"]
+    support_control = "sa6g_continuous_support" in config
+    if support_control:
+        assay = config["sa6g_continuous_support"]
+        output_subdir = "continuous_support_capacity"
+        worker_status = "SA6G_CONTINUOUS_SUPPORT_WORKER_COMPLETE"
+        summary_name = "continuous_support_capacity_summary.json"
+        csv_name = "continuous_support_candidate_summary.csv"
+    else:
+        assay = config["sa6f_continuous_field"]
+        output_subdir = "continuous_field_capacity"
+        worker_status = "SA6F_CONTINUOUS_FIELD_WORKER_COMPLETE"
+        summary_name = "continuous_field_capacity_summary.json"
+        csv_name = "continuous_field_candidate_summary.csv"
     config_sha = _sha256(config_path)
     commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
@@ -201,7 +255,7 @@ def main():
         ["git", "rev-parse", args.worker_commit or args.expected_commit],
         cwd=ROOT, text=True,
     ).strip()
-    output_root = ROOT / config["output_root"] / "continuous_field_capacity"
+    output_root = ROOT / config["output_root"] / output_subdir
     manifest = json.loads((output_root / "candidate_manifest.json").read_text())
     if manifest["config"]["sha256"] != config_sha:
         raise RuntimeError("continuous-field manifest uses another config")
@@ -226,13 +280,14 @@ def main():
     worker_dir = output_root / "workers"
     candidate_rows, worker_inputs = [], []
     for candidate in manifest["candidate_set"]["candidates"]:
-        forced, spontaneous, metadata, field_neighborhood = [], [], [], []
+        forced, spontaneous, metadata, field_neighborhood, field_path = [], [], [], [], []
         for seed in seeds:
             stem = worker_dir / f"{candidate['candidate_id']}_seed_{seed}"
             json_path, npz_path = stem.with_suffix(".json"), stem.with_suffix(".npz")
             payload = json.loads(json_path.read_text())
-            if not _worker_complete(payload, npz_path, config_sha, worker_commit):
-                raise RuntimeError(f"incomplete or stale SA6F worker: {stem}")
+            if not _worker_complete(
+                    payload, npz_path, config_sha, worker_commit, worker_status):
+                raise RuntimeError(f"incomplete or stale continuous-field worker: {stem}")
             if payload["candidate"]["field_sha256"] != candidate["field_sha256"]:
                 raise RuntimeError(f"candidate field hash changed in {stem}")
             with np.load(npz_path, allow_pickle=False) as loaded:
@@ -262,6 +317,23 @@ def main():
                         "mean_delta_vtheta_mV": float(np.mean(delta_vtheta[near])),
                     }
                 field_neighborhood.append(shaft_row)
+                if support_control:
+                    path_radius = float(assay["field_strength_audit"]["path_radius_mm"])
+                    segments = np.asarray(candidate["segments"], float)
+                    path_near = distance_to_segments(positions, segments) <= path_radius
+                    path_row = {
+                        "path_radius_mm": path_radius,
+                        "mean_h": float(np.mean(h[path_near])),
+                        "fraction_h_ge_0p5": float(np.mean(h[path_near] >= 0.5)),
+                    }
+                    if candidate.get("bridge_segment") is not None:
+                        bridge = np.asarray(candidate["bridge_segment"], float)[None, :, :]
+                        bridge_near = distance_to_segments(positions, bridge) <= path_radius
+                        path_row["bridge_mean_h"] = float(np.mean(h[bridge_near]))
+                        path_row["bridge_fraction_h_ge_0p5"] = float(
+                            np.mean(h[bridge_near] >= 0.5)
+                        )
+                    field_path.append(path_row)
             metadata.append(payload)
             worker_inputs.append({
                 "candidate_id": candidate["candidate_id"], "seed": seed,
@@ -318,8 +390,10 @@ def main():
             } for shaft in ("ICL", "SCL")
         }
         representation_role = (
-            "K3_benchmark" if candidate["field_type"] == "gaussian_k3_benchmark"
-            else ("matched_dof" if int(candidate["n_basis"]) == 4 else "resolution")
+            candidate["role"] if support_control else (
+                "K3_benchmark" if candidate["field_type"] == "gaussian_k3_benchmark"
+                else ("matched_dof" if int(candidate["n_basis"]) == 4 else "resolution")
+            )
         )
         row = {
             "candidate_id": candidate["candidate_id"],
@@ -329,6 +403,8 @@ def main():
             "n_basis": candidate.get("n_basis"),
             "roughness": candidate.get("roughness"),
             "contrast": candidate.get("contrast"),
+            "support_id": candidate.get("support_id"),
+            "width_mm": candidate.get("width_mm"),
             "mode_A_SCL_recruitment_excess": mode_a_scl,
             "mode_B_SCL_recruitment_excess": mode_b_scl,
             "worst_mode_SCL_recruitment_excess": max(mode_a_scl, mode_b_scl),
@@ -358,6 +434,11 @@ def main():
             ])),
             "field_near_ICL": field_summary["ICL"],
             "field_near_SCL": field_summary["SCL"],
+            "field_near_path": ({
+                key: float(np.mean([value[key] for value in field_path if key in value]))
+                for key in sorted({key for value in field_path for key in value})
+                if key != "path_radius_mm"
+            } if field_path else None),
             "spontaneous_event_count": int(n_spontaneous),
             "spontaneous_multishaft_fraction": (
                 float(spontaneous_multishaft.mean()) if len(spontaneous_multishaft)
@@ -380,14 +461,24 @@ def main():
     least_loss = min(eligible, key=lambda row: row["descriptive_loss"])
     cross_support = [row for row in eligible
                      if row["forced_both_mode_SCL_network_fraction"] >= 2 / 3]
-    status = (
-        "CONTINUOUS_FIELD_CROSS_SHAFT_SUPPORT_OBSERVED_EXPLORATORY"
-        if cross_support else
-        "CONTINUOUS_FIELD_INITIALIZATION_CANARY_NO_CROSS_SHAFT_SUPPORT"
-    )
+    if support_control:
+        status = (
+            "CONTINUOUS_CONNECTED_SUPPORT_CROSS_SHAFT_OBSERVED_EXPLORATORY"
+            if cross_support else
+            "CONTINUOUS_CONNECTED_SUPPORT_NO_CROSS_SHAFT_SUPPORT"
+        )
+    else:
+        status = (
+            "CONTINUOUS_FIELD_CROSS_SHAFT_SUPPORT_OBSERVED_EXPLORATORY"
+            if cross_support else
+            "CONTINUOUS_FIELD_INITIALIZATION_CANARY_NO_CROSS_SHAFT_SUPPORT"
+        )
     summary = {
         "status": status,
         "scientific_role": (
+            "development-only no-K continuous support capacity positive control; "
+            "not a patient-fit field or blind generalization"
+            if support_control else
             "development-only non-component continuous-field initialization "
             "canary; no formal optimizer or patient blind generalization"
         ),
@@ -400,6 +491,7 @@ def main():
         "contact_xy_mm": [row["sheet_xy_mm"] for row in contract["contacts"]],
         "interpretation_boundary": {
             "spline_coefficients_are_cores": False,
+            "support_segments_are_cores": False,
             "component_or_peak_count_is_fixed": False,
             "formal_shaft_aware_SNN_optimization": "not run",
             "K3_role": "historical benchmark only",
@@ -412,14 +504,14 @@ def main():
         "config": {"path": str(config_path.relative_to(ROOT)), "sha256": config_sha},
         "provenance": _runtime_provenance(args.expected_commit),
     }
-    output_json = output_root / "continuous_field_capacity_summary.json"
+    output_json = output_root / summary_name
     _atomic_json(output_json, summary)
     _atomic_csv(
-        output_root / "continuous_field_candidate_summary.csv",
+        output_root / csv_name,
         [{key: value for key, value in row.items() if key != "score"}
          for row in candidate_rows],
     )
-    stem = _plot(summary, manifest, output_root)
+    stem = _plot(summary, manifest, output_root, support_control=support_control)
     print(json.dumps({
         "status": status,
         "least_loss_descriptive_candidate": least_loss["candidate_id"],
