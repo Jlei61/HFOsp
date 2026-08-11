@@ -106,7 +106,14 @@ def _npz_atomic(path, **arrays):
 
 
 def _arm_tag(gamma):
-    return f"u2a_tau8_gamma{int(round(float(gamma) * 100)):03d}"
+    value = float(gamma)
+    # Preserve the two already-published historical names; use explicit milli-Gamma units for the
+    # denser sub-0.10 bracket so 0.025 can never collide with the old 0.25 ``gamma025`` bundle.
+    if np.isclose(value, 0.10, rtol=0.0, atol=1e-12):
+        return "u2a_tau8_gamma010"
+    if np.isclose(value, 0.25, rtol=0.0, atol=1e-12):
+        return "u2a_tau8_gamma025"
+    return f"u2a_tau8_gamma_milli{int(round(value * 1000)):03d}"
 
 
 def _arm_paths(gamma):
@@ -130,11 +137,17 @@ def _load_contract(gamma=0.25, *, prefer_exact=True):
     with np.load(fields_path, allow_pickle=False) as z:
         p0 = np.asarray(z[p0_key], float)
         u_onset = np.asarray(z[u_key], float)
-    key = str(float(gamma))
     if exact_used:
-        imax = float(audit["dose_exact"]["Imax_by_gamma"][key])
+        dose = audit["dose_exact"]
+        imax = (
+            float(gamma)
+            * float(dose["recurrent_force_integral_median_ms"])
+            / float(dose["unit_excess_integral_median_ms"])
+        )
     else:
-        imax = float(prelock["Imax_by_gamma"][key])
+        # The calibration equation is exactly linear in Gamma.  This path exists only before the
+        # exact audit; use the locked 0.10 anchor rather than inventing another scale.
+        imax = float(prelock["Imax_by_gamma"]["0.1"]) * float(gamma) / 0.1
     prelock = dict(prelock, runtime_fields=str(fields_path), exact_fields_used=exact_used)
     return prelock, p0, u_onset, imax
 
@@ -557,9 +570,10 @@ def stage_gamma(gamma):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--stage", choices=("control", "exact-load-audit", "gamma010", "gamma025"),
+        "--stage", choices=("control", "exact-load-audit", "gamma", "gamma010", "gamma025"),
         required=True,
     )
+    parser.add_argument("--gamma", type=float)
     parser.add_argument("--confirm-run", action="store_true")
     args = parser.parse_args()
     if args.stage.startswith("gamma") and not args.confirm_run:
@@ -568,6 +582,10 @@ def main():
         result = stage_control()
     elif args.stage == "exact-load-audit":
         result = stage_exact_load_audit()
+    elif args.stage == "gamma":
+        if args.gamma is None or not (0.0 < args.gamma < 1.0):
+            raise SystemExit("--stage gamma requires --gamma in (0,1)")
+        result = stage_gamma(float(args.gamma))
     else:
         result = stage_gamma(0.10 if args.stage == "gamma010" else 0.25)
     print(json.dumps(json_sanitize(result), indent=2, sort_keys=True), flush=True)
