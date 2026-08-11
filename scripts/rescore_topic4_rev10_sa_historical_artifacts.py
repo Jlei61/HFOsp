@@ -103,7 +103,8 @@ def _target_descriptor(loaded, prefix, mode):
     }
 
 
-def load_scoring_contract(target_path, floors_path, semantics):
+def load_scoring_contract(target_path, floors_path, semantics,
+                          fixed_events_per_mode=FIXED_EVENTS_PER_MODE):
     if semantics not in {"FULL_TIMING", "ORDINAL_COMPATIBLE"}:
         raise ValueError("unknown scoring semantics")
     prefix = "" if semantics == "FULL_TIMING" else "ordinal_"
@@ -127,7 +128,7 @@ def load_scoring_contract(target_path, floors_path, semantics):
         "full_timing_floors" if semantics == "FULL_TIMING"
         else "ordinal_compatible_floors"
     )
-    floors = floor_payload[floor_key][str(FIXED_EVENTS_PER_MODE)]
+    floors = floor_payload[floor_key][str(int(fixed_events_per_mode))]
     return contact_names, embedding, targets, floors
 
 

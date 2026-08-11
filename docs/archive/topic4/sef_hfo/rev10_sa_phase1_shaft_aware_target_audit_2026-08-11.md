@@ -8,7 +8,7 @@
 
 rev10-SA 第一阶段已经回答了“旧目标是否看不见 SCL”这个问题：答案是**是**。新的目标能稳定识别 SCL 删除、跨杆 timing 改变和 0/4 到 4/4 的连续恢复；但现有历史产物还不能证明“旧 objective 选错了某个已有 field”，因为真正的 48 个 field-fit 候选没有保存逐事件固定 contact 数据。
 
-当前可继续进入 SA5 contact detectability。不能直接进入 field optimizer、Edge、`beta` 或 topology 扩展。
+SA5 contact detectability 已经完成并排除 SCL observation 主限制。当前可继续进入 SA6 fixed-budget dual-shaft field canary；仍不能直接进入 field optimizer、Edge、`beta` 或 topology 扩展。
 
 ## 2. 完成程度
 
@@ -25,7 +25,6 @@ rev10-SA 第一阶段已经回答了“旧目标是否看不见 SCL”这个问�
 
 未完成：
 
-- SA5 虚拟电极可检测性；
 - SA6 fixed-budget SCL relocation 与 dual-shaft capacity；
 - 新 field 拟合、独立 selection network、重新 Edge factorization；
 - 新 patient blind unit。
@@ -100,7 +99,7 @@ L3: rho=0.129, n=57, p=0.338
 - FULL_TIMING 和 ORDINAL_COMPATIBLE 使用不同 patient embedding/floors，禁止比较绝对分数；
 - L2 `768` 行、L3 `2052` 行 retained envelope 的重新提取 rank 与保存 rank 完全一致；
 - missing SCL 保留为四状态 precedence 的“未共同招募”，不删除 pair；
-- 当前定向单元测试 `9/9` 通过；
+- 当前 SA0-SA6 定向单元测试 `19/19` 通过；
 - SA4 使用 `systemd-run --user -> nohup`，独立日志、退出码、完成标记和桌面通知，修正版退出码为 0。
 
 最终 clean freeze 由 commit `c6bde4b4` 重建。target、direction/extent 和 SA4 三份 sidecar 均记录该 commit 且 `runtime_dirty=false`；数值与提交前审计一致。
@@ -119,13 +118,18 @@ L3: rho=0.129, n=57, p=0.338
 
 ![rev10-SA historical artifact rescore](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/figures/rev10_sa_historical_artifact_rescore.png)
 
+### SA5 contact detectability
+
+![rev10-SA contact detectability](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary/contact_detectability/figures/rev10_sa_contact_detectability.png)
+
+六张网络均使用每 contact `160` 个、半径 `1 mm` 的等量 E-cell packet。SCL/ICL current gain 为 `0.961 [0.934, 0.986]`，local neural response 为 `0.953 [0.942, 0.985]`，两杆 detector margin 均为 100% 正值。结论是 `SCL_READOUT_NOT_PRIMARY_LIMIT`：SCL 在同等局部活动下可被当前 virtual-contact readout 正常读出。
+
 ## 7. 最小修改路线
 
-1. 提交并冻结 SA0-SA5 的代码、配置和文档，重建 clean provenance。
-2. 运行六张网络的 SA5，同一网络内给 15 个 contact 注入同半径、同数量 exact spike packet。
-3. 若 SCL 神经响应正常但 current readout 低，先修 observation；若两者都正常，进入 SA6。
-4. SA6 先跑 component-3 SCL relocation、matched off-shaft 和小型 mass/width grid，不开 optimizer。
-5. 只有 SA6 找到 dual-shaft feasible region，才做低维 field allocation fit；`beta` 和 Edge 继续关闭。
+1. 从 clean commit 启动 21-candidate SA6 canary，三张新网络、12 workers、120 秒状态等待。
+2. 同时比较 frozen、component-3 SCL relocation、matched off-shaft 和 `2x3x3` mass/width grid。
+3. 每张网络运行 ICL-A、ICL-B、SCL 三种 forced source 和一条短 spontaneous 轨迹。
+4. 只有 SA6 找到 dual-shaft feasible region，才做低维 field allocation fit；`beta` 和 Edge 继续关闭。
 
 ## 8. 当前状态
 
@@ -138,9 +142,9 @@ FROZEN_LEARNED_NODE_FIELDS_HAVE_ZERO_SCL_SUPPORT
 /
 OLD_OBJECTIVE_FIELD_SELECTION_MISS_NOT_TESTABLE
 /
-VIRTUAL_CONTACT_OBSERVATION_PENDING
+SCL_READOUT_NOT_PRIMARY_LIMIT
 /
-DUAL_SHAFT_FIELD_CAPACITY_PENDING
+DUAL_SHAFT_FIELD_CAPACITY_RUNNING_NEXT
 ```
 
-这条线现在最核心的问题已经从“换优化器是否能救 mode A”转为两个可分辨的机制问题：SCL 是否在 observation 层可读，以及固定预算 K=3 field 是否存在一个能同时支持 ICL/SCL 的区域。
+这条线现在已排除 observation 层解释。剩余的最近问题是固定预算 K=3 field 是否存在一个能同时支持 ICL/SCL 的区域；在这个问题回答前，不比较优化器，也不开放连接参数。

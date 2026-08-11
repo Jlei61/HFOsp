@@ -73,10 +73,14 @@
 ## Conditional next phase
 
 - [x] Design and implement SA5 contact detectability after freezing SA0-SA4.
-- [ ] Run six paired SA5 network workers from a clean commit and adjudicate
+- [x] Run six paired SA5 network workers from clean commit `226338e9` and adjudicate
   observation versus local-network limitations.
 - [x] Freeze the conditional SA6 matched SCL relocation and fixed-budget field
-  canary design; launch only if
-  patient target and positive controls are stable.
+  canary design; SA5 cleared launch with current ratio `0.961` and neural ratio
+  `0.953`.
+- [x] Implement the deterministic 21-candidate SA6 manifest, paired worker,
+  bounded launcher, three-event shaft-aware aggregation, and diagnostic figure.
+- [ ] Launch SA6 from a clean commit with 12 workers and 120-second waits; then
+  adjudicate fixed-budget dual-shaft capacity before any optimizer run.
 - [ ] Do not launch formal field optimization, Edge recalibration, `beta`, or
   optimizer comparison in this phase.

@@ -22,6 +22,22 @@
     "sa4_summary": {
       "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/historical_artifact_rescore_summary.json",
       "sha256": "52d4ed821aa3c3a6e2cf89492aaa3d8f75a4362a3217e4b4e4b3864c99392918"
+    },
+    "shaft_aware_target_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "shaft_aware_floors": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_floors.json",
+      "sha256": "2f28c5ecd991d0a1b051337370fa7b975ecc2ce95b2f00f26a3ea88469299b94"
+    },
+    "sa5_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary/contact_detectability/contact_detectability_summary.json",
+      "sha256": "2d6544c513c8dc61f8eaea8bc8530a46b642899871493e4c619317e4abd2a669"
+    },
+    "rev9_common_detector_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json",
+      "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"
     }
   },
   "sa5_contact_detectability": {
@@ -50,7 +66,7 @@
     }
   },
   "sa6_dual_shaft_field": {
-    "status": "DESIGN_FROZEN_PENDING_SA5",
+    "status": "DESIGN_FROZEN_SA5_READOUT_CLEARED",
     "arm": "Node_only",
     "K": 3,
     "total_field_mass": "same N_core_manual budget projection as rev8.1",
@@ -58,7 +74,43 @@
     "beta": "closed",
     "network_topology": "frozen",
     "d_i": "same quantile_seed realization",
-    "detector": "common frozen detector after SA5",
+    "network_seeds": [1031, 1032, 1033],
+    "simulation": {
+      "duration_ms": 400.0,
+      "forced_spike_ms": 100.0,
+      "response_window_ms": [100.0, 250.0],
+      "early_stop_runaway": true
+    },
+    "detector": {
+      "population_active_fraction_threshold": 0.0195703125,
+      "origin": "posthoc median of 12 rev9 Node thresholds; frozen before SA6 and applied unchanged to every candidate",
+      "role": "common canary event detector, not a patient-derived acceptance threshold"
+    },
+    "contact_readout": {
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5,
+      "tie_tolerance_ms": "one envelope frame",
+      "forced_primary": "clip(packet-frame-excluded forced envelope minus paired sham envelope, 0, infinity)"
+    },
+    "forced_packet": {
+      "radius_mm": 1.0,
+      "fraction_of_E": 0.005,
+      "minimum_common_count": 20,
+      "sources": [
+        {"id": "ICL_mode_A", "patient_mode": 0, "center_from": "frozen_component_2"},
+        {"id": "ICL_mode_B", "patient_mode": 1, "center_from": "frozen_component_1"},
+        {"id": "SCL", "patient_mode": null, "center_from": "patient_earliest_scl_centroid"}
+      ]
+    },
+    "candidate_grid": {
+      "scl_component_1based": 3,
+      "scl_mass_fractions": [0.15, 0.25, 0.35],
+      "scl_sigma_parallel_mm": [1.5, 3.0, 4.5],
+      "scl_sigma_perp": "preserve frozen component 3",
+      "scl_orientation": "principal axis of the four SCL contacts",
+      "patient_earliest_centroid_weighting": "mean within each old A/B mode, then equal mean across modes",
+      "expected_candidate_count": 21
+    },
     "field_arms": [
       "frozen_field",
       "component_3_matched_relocation_to_SCL",
@@ -68,7 +120,14 @@
       "SCL_sigma_parallel_grid_1.5_3.0_4.5_mm"
     ],
     "forced_sources": ["ICL_mode_A", "ICL_mode_B", "SCL"],
-    "launch_rule": "only after SA5 excludes a primary virtual-contact observation failure"
+    "launch_rule": "SA5 status must equal SCL_READOUT_NOT_PRIMARY_LIMIT",
+    "exploratory_capacity_readout": {
+      "event_count_per_patient_mode": 3,
+      "scl_recruitment_excess_reference": 1.0,
+      "majority_networks": 2,
+      "hard_safety": "no runaway early stop",
+      "mode_b_icl_structure": "report beside frozen baseline; do not turn into an extra blocker"
+    }
   },
   "execution": {
     "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",

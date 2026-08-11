@@ -295,7 +295,24 @@ neural weak                  -> SCL_LOCAL_NETWORK_RESPONSE_LIMIT
 both retained                -> SCL_READOUT_NOT_PRIMARY_LIMIT
 ```
 
-SA6 may launch only when SA5 does not support a primary observation failure.
-The SA6 field design remains Node-only, fixed `K=3`, fixed total field mass,
-fixed topology and `d_i`, with forced-source capacity preceding spontaneous
-confirmation.
+SA5 completed on six networks from a clean commit. Every network used exactly
+`160` E neurons per contact packet. The equal-network SCL/ICL ratios were
+`0.961 [0.934, 0.986]` for current gain and `0.953 [0.942, 0.985]` for local
+neural response; all ICL and SCL contacts had positive detector margin. The
+frozen branch status is therefore `SCL_READOUT_NOT_PRIMARY_LIMIT`.
+
+SA6 is consequently cleared to launch. It remains Node-only, fixed `K=3`,
+fixed total field mass, fixed topology and `d_i`. The exploratory candidate set
+contains exactly 21 fields: frozen, component-3 matched SCL relocation,
+matched off-shaft relocation, and `2 centers x 3 masses x 3 longitudinal
+widths`. Three new network seeds (`1031-1033`) each receive equal `0.5%` E-cell
+packets from ICL mode-A, ICL mode-B, and SCL source locations, plus one paired
+short spontaneous run. The common population detector is frozen at
+`0.0195703125` before candidate execution. No Edge, `alpha`, `beta`, topology,
+or optimizer parameter is opened.
+
+SA6 uses patient floors at three events per old direction mode. The
+`excess<=1` SCL recruitment line, support in at least two of three paired
+networks, and absence of runaway define an exploratory capacity reference, not
+a patient blind acceptance gate. Mode-B ICL structure is reported beside the
+frozen baseline instead of becoming another blocker.
