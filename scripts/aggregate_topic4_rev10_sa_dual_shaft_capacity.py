@@ -73,7 +73,7 @@ def _plot(summary, manifest, config, output_root):
     candidates = {row["candidate_id"]: row
                   for row in manifest["candidate_set"]["candidates"]}
     rows = summary["candidate_rows"]
-    best_id = summary["selected_exploratory_candidate"]
+    best_id = summary["least_loss_descriptive_candidate"]
     map_ids = ["frozen", "component3_scl_relocation", best_id]
     map_ids = list(dict.fromkeys(map_ids))
     axis = np.linspace(0.0, 20.0, 100)
@@ -108,16 +108,20 @@ def _plot(summary, manifest, config, output_root):
         "matched_offshaft_control": "#B07AA1",
         "scl_mass_width_grid": "#4E79A7",
     }
+    seen_roles = set()
     for row in rows:
+        label = None if row["role"] in seen_roles else row["role"].replace("_", " ")
+        seen_roles.add(row["role"])
         ax.scatter(row["mode_A_ICL_precedence_excess"],
                    row["worst_mode_SCL_recruitment_excess"],
                    s=35 + 90 * row["forced_both_mode_SCL_network_fraction"],
                    color=role_colors[row["role"]], alpha=0.8,
-                   edgecolor="white", linewidth=0.5)
+                   edgecolor="white", linewidth=0.5, label=label)
     ax.axhline(1.0, color="black", linestyle="--", linewidth=0.9)
     ax.set_xlabel("mode A ICL-ICL precedence excess")
     ax.set_ylabel("worst-mode SCL recruitment excess")
     ax.set_title("D  Capacity plane", loc="left", weight="bold")
+    ax.legend(frameon=False, fontsize=7, loc="upper right")
 
     ax = fig.add_subplot(gs[1, 1])
     ordered = sorted(rows, key=lambda row: row["worst_mode_SCL_recruitment_excess"])
@@ -131,6 +135,9 @@ def _plot(summary, manifest, config, output_root):
     ax.set_xlim(0, 1.02)
     ax.set_xlabel("networks recruiting SCL from both ICL sources")
     ax.set_title("E  Paired-network support", loc="left", weight="bold")
+    if not any(row["forced_both_mode_SCL_network_fraction"] > 0.0 for row in shown):
+        ax.text(0.5, 0.5, "all tested candidates: 0/3 networks",
+                transform=ax.transAxes, ha="center", va="center", fontsize=10)
 
     ax = fig.add_subplot(gs[1, 2])
     x = np.arange(len(shown))
@@ -144,6 +151,11 @@ def _plot(summary, manifest, config, output_root):
     ax.set_ylabel("spontaneous event fraction")
     ax.set_title("F  Short spontaneous confirmation", loc="left", weight="bold")
     ax.legend(frameon=False, fontsize=8)
+    for index, row in enumerate(shown):
+        if row["spontaneous_event_count"]:
+            ax.text(index + 0.18, min(0.96, row["spontaneous_returned_fraction"]),
+                    f"n={row['spontaneous_event_count']}", rotation=90,
+                    ha="center", va="top", fontsize=6, color="#2F6F6A")
 
     fig.suptitle(
         f"SA6 fixed-budget dual-shaft field canary | {summary['status']}",
@@ -171,12 +183,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--worker-commit")
     args = parser.parse_args()
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
     config_sha = _sha256(config_path)
     commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
+    ).strip()
+    worker_commit = subprocess.check_output(
+        ["git", "rev-parse", args.worker_commit or args.expected_commit],
+        cwd=ROOT, text=True,
     ).strip()
     output_root = ROOT / config["output_root"] / "dual_shaft_capacity"
     manifest_path = output_root / "candidate_manifest.json"
@@ -205,11 +222,12 @@ def main():
         forced = []
         spontaneous = []
         metadata = []
+        field_neighborhood = []
         for seed in seeds:
             stem = worker_dir / f"{candidate['candidate_id']}_seed_{seed}"
             json_path, npz_path = stem.with_suffix(".json"), stem.with_suffix(".npz")
             payload = json.loads(json_path.read_text())
-            if not _worker_complete(payload, npz_path, config_sha, commit):
+            if not _worker_complete(payload, npz_path, config_sha, worker_commit):
                 raise RuntimeError(f"incomplete or stale SA6 worker: {stem}")
             if payload["candidate"]["theta_sha256"] != candidate["theta_sha256"]:
                 raise RuntimeError(f"candidate hash changed in {stem}")
@@ -218,6 +236,31 @@ def main():
                     raise RuntimeError(f"contact order changed in {stem}")
                 forced.append(np.asarray(loaded["forced_onsets"], float))
                 spontaneous.append(np.asarray(loaded["spontaneous_onsets"], float))
+                positions = np.asarray(loaded["positions_E"], float)
+                h = np.asarray(loaded["h"], float)
+                delta_vtheta = np.asarray(loaded["delta_vtheta"], float)
+                shaft_row = {}
+                contact_xy = np.asarray([
+                    row["sheet_xy_mm"] for row in contract["contacts"]
+                ], float)
+                shaft_ids = np.asarray([
+                    row["shaft_id"] for row in contract["contacts"]
+                ])
+                for shaft in ("ICL", "SCL"):
+                    near = np.any([
+                        np.linalg.norm(positions - contact, axis=1) <= 1.0
+                        for contact in contact_xy[shaft_ids == shaft]
+                    ], axis=0)
+                    shaft_row[shaft] = {
+                        "mean_h": float(np.mean(h[near])),
+                        "median_h": float(np.median(h[near])),
+                        "fraction_h_ge_0p5": float(np.mean(h[near] >= 0.5)),
+                        "mean_delta_vtheta_mV": float(np.mean(delta_vtheta[near])),
+                        "fraction_threshold_lowered": float(np.mean(
+                            delta_vtheta[near] < 0.0
+                        )),
+                    }
+                field_neighborhood.append(shaft_row)
             metadata.append(payload)
             worker_inputs.append({
                 "candidate_id": candidate["candidate_id"], "seed": seed,
@@ -266,6 +309,17 @@ def main():
         )
         mode_a_scl = _metric(score, 0, "floor_excess", "recruitment.SCL")
         mode_b_scl = _metric(score, 1, "floor_excess", "recruitment.SCL")
+        source_rows = {
+            source: [run for payload in metadata for run in payload["runs"]
+                     if run["source_id"] == source]
+            for source in ("ICL_mode_A", "ICL_mode_B", "SCL")
+        }
+        field_summary = {
+            shaft: {
+                key: float(np.mean([row[shaft][key] for row in field_neighborhood]))
+                for key in field_neighborhood[0][shaft]
+            } for shaft in ("ICL", "SCL")
+        }
         row = {
             "candidate_id": candidate["candidate_id"],
             "role": candidate["role"],
@@ -290,6 +344,20 @@ def main():
             ),
             "forced_both_mode_SCL_network_fraction": float(both_mode_by_seed.mean()),
             "forced_SCL_source_cross_network_fraction": float(scl_source_cross.mean()),
+            "forced_ICL_A_to_SCL_mean_recruited_fraction": float(np.mean([
+                run["SCL_recruited_contact_fraction"]
+                for run in source_rows["ICL_mode_A"]
+            ])),
+            "forced_ICL_B_to_SCL_mean_recruited_fraction": float(np.mean([
+                run["SCL_recruited_contact_fraction"]
+                for run in source_rows["ICL_mode_B"]
+            ])),
+            "forced_SCL_to_ICL_mean_recruited_fraction": float(np.mean([
+                run["ICL_recruited_contact_fraction"]
+                for run in source_rows["SCL"]
+            ])),
+            "field_near_ICL": field_summary["ICL"],
+            "field_near_SCL": field_summary["SCL"],
             "spontaneous_event_count": int(n_spontaneous),
             "spontaneous_multishaft_fraction": (
                 float(spontaneous_multishaft.mean()) if len(spontaneous_multishaft)
@@ -319,7 +387,7 @@ def main():
     ))
     positive = [row for row in candidate_rows if row["capacity_reference_met"]]
     status = ("DUAL_SHAFT_CAPACITY_POSITIVE_EXPLORATORY" if positive
-              else "DUAL_SHAFT_FIELD_CAPACITY_NOT_FOUND_CANARY")
+              else "DUAL_SHAFT_FIELD_CAPACITY_NOT_FOUND_IN_TESTED_GRID_CANARY")
     lookup = {row["candidate_id"]: row for row in candidate_rows}
     relocation_specificity = bool(
         lookup["component3_scl_relocation"]["capacity_reference_met"]
@@ -331,10 +399,18 @@ def main():
             "development-only fixed-budget K=3 Node field capacity; no patient blind "
             "generalization and no edge result"
         ),
-        "selected_exploratory_candidate": selected["candidate_id"],
+        "least_loss_descriptive_candidate": selected["candidate_id"],
+        "selection_warning": (
+            "least-loss is descriptive only; no candidate met the exploratory "
+            "capacity reference" if not positive else
+            "one or more candidates met the exploratory capacity reference"
+        ),
         "n_capacity_reference_candidates": len(positive),
         "capacity_reference_candidate_ids": [row["candidate_id"] for row in positive],
         "matched_relocation_position_specificity": relocation_specificity,
+        "strongest_SCL_field_candidate": max(
+            candidate_rows, key=lambda row: row["field_near_SCL"]["mean_h"]
+        )["candidate_id"],
         "candidate_rows": candidate_rows,
         "contact_names": contact_names.tolist(),
         "shaft_ids": [row["shaft_id"] for row in contract["contacts"]],
@@ -346,6 +422,7 @@ def main():
             "patient_blind": "not available; development only",
         },
         "inputs": worker_inputs,
+        "worker_commit": worker_commit,
         "config": {"path": str(config_path.relative_to(ROOT)), "sha256": config_sha},
         "provenance": _runtime_provenance(args.expected_commit),
     }

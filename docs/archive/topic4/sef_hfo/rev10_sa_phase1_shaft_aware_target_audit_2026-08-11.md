@@ -12,7 +12,7 @@ SA5 contact detectability 已经完成并排除 SCL observation 主限制。当�
 
 ## 2. 完成程度
 
-> **rev10-SA 第一阶段完成度：85/100；完整 dual-shaft recovery 完成度：约 40/100**
+> **rev10-SA SA0-SA6 完成度：90/100；完整 dual-shaft recovery 完成度：约 55/100**
 
 已完成：
 
@@ -25,7 +25,6 @@ SA5 contact detectability 已经完成并排除 SCL observation 主限制。当�
 
 未完成：
 
-- SA6 fixed-budget SCL relocation 与 dual-shaft capacity；
 - 新 field 拟合、独立 selection network、重新 Edge factorization；
 - 新 patient blind unit。
 
@@ -124,12 +123,32 @@ L3: rho=0.129, n=57, p=0.338
 
 六张网络均使用每 contact `160` 个、半径 `1 mm` 的等量 E-cell packet。SCL/ICL current gain 为 `0.961 [0.934, 0.986]`，local neural response 为 `0.953 [0.942, 0.985]`，两杆 detector margin 均为 100% 正值。结论是 `SCL_READOUT_NOT_PRIMARY_LIMIT`：SCL 在同等局部活动下可被当前 virtual-contact readout 正常读出。
 
+### SA6 fixed-budget dual-shaft field canary
+
+![rev10-SA dual-shaft capacity](/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary/dual_shaft_capacity/figures/rev10_sa_dual_shaft_capacity.png)
+
+`21` 个固定 K=3 fields 在 `3` 张新网络上全部完成，共 `63/63` workers 成功、零 runaway。没有任何候选让 ICL mode-A 或 mode-B source 招募 SCL；因此 mode A/B 的 SCL recruitment floor excess 分别固定在 `2.81/3.88`，全部高于 1。
+
+这不是因为 SCL field 没有真正加上去。最强候选 `grid_mid_w35_s4p5` 在 SCL contact 1 mm 邻域达到：
+
+```text
+mean h                         0.424
+median h                       0.447
+h >= 0.5                      42.2%
+mean delta Vtheta             -0.216 mV
+threshold-lowered neurons      69.7%
+```
+
+但该候选的 ICL-A -> SCL 和 ICL-B -> SCL 招募仍均为 `0`。反向的 SCL packet 在 `2/3` 网络能触及至少一个 ICL contact，不过平均只招募 `0.061` 的 ICL contacts。短 spontaneous 总共检测到 `14` 个事件，全部返回、`0` 个 multishaft event。
+
+因此最窄的结论是：**tested field-allocation grid 没找到 dual-shaft capacity，且残差更像 cross-shaft access/route 或强度预算问题，而不是 observation failure。** 这不能外推成所有 K=3 固定预算 fields 都失败。
+
 ## 7. 最小修改路线
 
-1. 从 clean commit 启动 21-candidate SA6 canary，三张新网络、12 workers、120 秒状态等待。
-2. 同时比较 frozen、component-3 SCL relocation、matched off-shaft 和 `2x3x3` mass/width grid。
-3. 每张网络运行 ICL-A、ICL-B、SCL 三种 forced source 和一条短 spontaneous 轨迹。
-4. 只有 SA6 找到 dual-shaft feasible region，才做低维 field allocation fit；`beta` 和 Edge 继续关闭。
+1. 暂不进入 SA7 optimizer，因为没有 known-good dual-shaft initialization。
+2. 先在 strongest SCL field 上做 packet amplitude curve，判断 ICL->SCL 是阈值不足还是完全缺 route。
+3. 再做 SCL mass fraction 与 total field budget curve，分别检验分配与总强度。
+4. 若 ICL->SCL 仍为零而 SCL->ICL 保留，再设计 directional route-support family；`beta` 继续关闭。
 
 ## 8. 当前状态
 
@@ -144,7 +163,9 @@ OLD_OBJECTIVE_FIELD_SELECTION_MISS_NOT_TESTABLE
 /
 SCL_READOUT_NOT_PRIMARY_LIMIT
 /
-DUAL_SHAFT_FIELD_CAPACITY_RUNNING_NEXT
+DUAL_SHAFT_FIELD_CAPACITY_NOT_FOUND_IN_TESTED_GRID_CANARY
+/
+SA7_FIELD_REFIT_NOT_JUSTIFIED
 ```
 
-这条线现在已排除 observation 层解释。剩余的最近问题是固定预算 K=3 field 是否存在一个能同时支持 ICL/SCL 的区域；在这个问题回答前，不比较优化器，也不开放连接参数。
+这条线已排除 observation 层解释，也证明简单 relocation 与 `w_SCL<=0.35` 的 width grid 不足。下一轮应先用强度/packet ladder 区分“阈值不够”和“route 不通”，而不是把同一个不具备已知可行区的目标直接交给 CMA-ES。

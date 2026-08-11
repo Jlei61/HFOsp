@@ -80,7 +80,19 @@
   `0.953`.
 - [x] Implement the deterministic 21-candidate SA6 manifest, paired worker,
   bounded launcher, three-event shaft-aware aggregation, and diagnostic figure.
-- [ ] Launch SA6 from a clean commit with 12 workers and 120-second waits; then
+- [x] Launch SA6 from clean commit `b066026f` with 12 workers and 120-second waits; then
   adjudicate fixed-budget dual-shaft capacity before any optimizer run.
-- [ ] Do not launch formal field optimization, Edge recalibration, `beta`, or
+- [x] Aggregate all 63 workers: no candidate met the exploratory capacity
+  reference; strongest SCL field still had zero ICL-to-SCL recruitment.
+- [x] Do not launch formal field optimization, Edge recalibration, `beta`, or
   optimizer comparison in this phase.
+
+## SA6 decision
+
+- [x] Freeze status as
+  `DUAL_SHAFT_FIELD_CAPACITY_NOT_FOUND_IN_TESTED_GRID_CANARY`, not a general
+  K=3 family failure.
+- [x] Keep SA7 field refit closed because there is no known-good dual-shaft
+  initialization.
+- [ ] In a separate next phase, test packet-amplitude and SCL mass/total-budget
+  curves before opening directional route support.

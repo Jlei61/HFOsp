@@ -316,3 +316,29 @@ SA6 uses patient floors at three events per old direction mode. The
 networks, and absence of runaway define an exploratory capacity reference, not
 a patient blind acceptance gate. Mode-B ICL structure is reported beside the
 frozen baseline instead of becoming another blocker.
+
+### 8.2 SA6 result and boundary
+
+All `21 candidates x 3 networks` completed from commit `b066026f`; all 63
+workers exited successfully and no forced or spontaneous run entered runaway.
+No candidate recruited any SCL contact after either ICL direction source, so
+the floor-excess SCL recruitment errors remained `2.81` for mode A and `3.88`
+for mode B. The tested-grid status is:
+
+```text
+DUAL_SHAFT_FIELD_CAPACITY_NOT_FOUND_IN_TESTED_GRID_CANARY
+```
+
+This is not a general fixed-budget family failure. The strongest tested SCL
+allocation (`w_SCL=0.35`, `sigma_parallel=4.5 mm`) produced mean `h=0.424`
+and mean `delta Vtheta=-0.216 mV` within 1 mm of SCL contacts, yet ICL-to-SCL
+recruitment remained zero. Conversely, an SCL packet reached at least one ICL
+contact in `2/3` networks for that field. The current canary therefore points
+to directional cross-shaft access, packet threshold, or field-amplitude budget
+as the next discriminants; it does not justify a high-dimensional SA7 fit.
+
+The next minimal experiment is a non-optimized mechanism ladder: packet
+amplitude curve on the strongest field, then SCL mass/total-budget curve, each
+with matched off-shaft controls. Only persistent ICL-to-SCL failure after that
+ladder justifies opening a directional route-support family. `beta` remains
+closed because no result has isolated a width/delay residual.
