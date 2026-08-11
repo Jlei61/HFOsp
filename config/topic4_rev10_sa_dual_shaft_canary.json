@@ -1,0 +1,87 @@
+{
+  "schema_version": "topic4_rev10_sa_dual_shaft_canary_v1",
+  "scientific_role": "development_only_contact_detectability_then_fixed_budget_dual_shaft_capacity",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/dual_shaft_canary",
+  "inputs": {
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "frozen_confirmation": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_stage3/joint_confirmation_rev8_1/final_confirmation.json",
+      "sha256": "313061cd5d3cfb6cb77342e122ebff347e4a55b38b0559775bd2c9cd42b57705"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "sa4_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/historical_artifact_rescore_summary.json",
+      "sha256": "7e5933eae57482f5fa49e27339f2cdf106b89419989357ece6dc5f7a69d84225"
+    }
+  },
+  "sa5_contact_detectability": {
+    "substrate": "uniform_vthreshold_null",
+    "network_seeds": [1004, 1005, 1006, 1007, 1008, 1009],
+    "duration_ms": 250.0,
+    "forced_spike_ms": 100.0,
+    "response_stop_ms": 180.0,
+    "baseline_window_ms": [20.0, 90.0],
+    "packet_radius_mm": 1.0,
+    "requested_packet_fraction_of_E": 0.005,
+    "minimum_common_packet_count": 20,
+    "local_neural_radius_mm": 1.0,
+    "detector_threshold": "sham_baseline_mean_plus_5sd_in_current_proxy_units",
+    "paired_randomness": "same network, OU, Poisson, initial state, and raster-selection RNG within seed",
+    "primary_readouts": [
+      "peak_lfp_excess_per_packet_cell",
+      "lfp_peak_snr",
+      "absolute_detector_margin",
+      "local_positive_spike_excess_per_cell",
+      "packet_positive_respike_excess_per_cell"
+    ],
+    "exploratory_ratio_reference": {
+      "scl_over_icl_lower": 0.5,
+      "role": "mechanism interpretation aid, not a preregistered acceptance gate"
+    }
+  },
+  "sa6_dual_shaft_field": {
+    "status": "DESIGN_FROZEN_PENDING_SA5",
+    "arm": "Node_only",
+    "K": 3,
+    "total_field_mass": "same N_core_manual budget projection as rev8.1",
+    "edge": "off",
+    "beta": "closed",
+    "network_topology": "frozen",
+    "d_i": "same quantile_seed realization",
+    "detector": "common frozen detector after SA5",
+    "field_arms": [
+      "frozen_field",
+      "component_3_matched_relocation_to_SCL",
+      "matched_off_shaft_relocation",
+      "SCL_mass_fraction_grid_0.15_0.25_0.35",
+      "SCL_center_midpoint_or_patient_earliest_centroid",
+      "SCL_sigma_parallel_grid_1.5_3.0_4.5_mm"
+    ],
+    "forced_sources": ["ICL_mode_A", "ICL_mode_B", "SCL"],
+    "launch_rule": "only after SA5 excludes a primary virtual-contact observation failure"
+  },
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "max_workers_sa5": 6,
+    "max_workers_sa6": 12,
+    "wait_seconds": 120,
+    "notify_on_completion": true
+  },
+  "forbidden": [
+    "patient_heldout_score",
+    "beta",
+    "edge_recalibration_before_dual_shaft_field_freeze",
+    "topology_expansion",
+    "optimizer_comparison"
+  ]
+}
