@@ -15,7 +15,9 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.cm import ScalarMappable
-from matplotlib.colors import Normalize
+from matplotlib.collections import LineCollection
+from matplotlib.colors import ListedColormap, Normalize
+from matplotlib.lines import Line2D
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -26,11 +28,11 @@ from plot_topic5_interictal_template_ab_fields import (  # noqa: E402
     build_interictal_ab_panel_payloads,
 )
 from plot_topic5_field_vs_ictal_swap import draw_topic5_field_panel  # noqa: E402
+from plot_topic5_interictal_event_envelope_field import load_frozen  # noqa: E402
 from paper_figures.plot_fig3b_interictal_ictal_shared_field import (  # noqa: E402
     _draw_field,
     _normalize_minmax,
 )
-from plot_topic5_interictal_event_envelope_field import load_frozen  # noqa: E402
 
 
 MODEL_ORDER = [
@@ -41,10 +43,14 @@ MODEL_ORDER = [
 MODEL_LABEL = {
     "M0_NO_REC": "No rec.", "M1_DENSE": "Dense", "M2_UNIFORM_SET": "Sparse",
     "M3_FIXED_LOCAL": "Local", "M4_SPATIAL_GROWTH": "Spatial",
-    "M6_SPATIAL_MID": "Sp. + cost", "M8_UNIFORM_COST_MID": "Unif. + cost",
-    "C_ORDER_SHUFFLED": "Order shuffle",
-    "EMPIRICAL_REFERENCE": "Empirical field",
+    "M6_SPATIAL_MID": "Sp.+cost", "M8_UNIFORM_COST_MID": "Unif.+cost",
+    "C_ORDER_SHUFFLED": "Shuffle",
+    "EMPIRICAL_REFERENCE": "Empirical",
 }
+# The empirical interictal field is not a trained model; it is scored on the
+# same frozen endpoints so the cross-state panel can show what the data-side
+# field already achieves before any network is fitted.
+EMPIRICAL_REFERENCE = "EMPIRICAL_REFERENCE"
 COLORS = {
     "M0_NO_REC": "#9b9b9b", "M1_DENSE": "#252525", "M2_UNIFORM_SET": "#7f7f7f",
     "M3_FIXED_LOCAL": "#3b75af", "M4_SPATIAL_GROWTH": "#55a7a1",
@@ -91,13 +97,24 @@ def normalize_early(values: np.ndarray) -> np.ndarray:
 
 def selected_metrics(out_root: Path, subject: str, model: str, cell: str = "rnn") -> Path:
     candidates = []
-    for path in (out_root / "per_subject").glob(f"{subject}*" + f"/{model}__{cell}/seed*/metrics.json"):
+    for path in selection_candidate_metrics(out_root, subject, model, cell):
         data = json.loads(path.read_text())
         candidates.append((path, float(data["validation"]["contact_nll"])))
     if not candidates:
         raise FileNotFoundError(f"no checkpoint for {subject} {model} {cell}")
     median = float(np.median([value for _, value in candidates]))
     return min(candidates, key=lambda item: (abs(item[1] - median), str(item[0])))[0]
+
+
+def selection_candidate_metrics(
+    out_root: Path, subject: str, model: str, cell: str = "rnn"
+) -> list[Path]:
+    """Return every target-free checkpoint metric used by the median-seed rule."""
+    return sorted(
+        (out_root / "per_subject").glob(
+            f"{subject}*" + f"/{model}__{cell}/seed*/metrics.json"
+        )
+    )
 
 
 def empirical_record(out_root: Path, subject: str) -> dict[str, Any]:
@@ -132,10 +149,18 @@ def draw_graph(ax, graph: dict[str, np.ndarray], plane: dict[str, np.ndarray], t
     contacts = np.asarray(plane["contacts_xy_mm"], float)
     mask = np.asarray(graph["mask"], bool)
     edges = np.argwhere(mask)
-    if len(edges) > 450:
-        edges = edges[np.linspace(0, len(edges) - 1, 450).astype(int)]
-    for i, j in edges:
-        ax.plot(xy[[i, j], 0], xy[[i, j], 1], color="#b9b9b9", lw=0.28, alpha=0.25, zorder=0)
+    # Preserve the actual ten-fold density contrast.  Subsampling the dense
+    # mask to approximately the sparse edge count makes distinct constraints
+    # look falsely alike; a faint LineCollection keeps every edge readable as
+    # a density cloud without producing a black hairball.
+    segments = np.asarray([[xy[i], xy[j]] for i, j in edges], float)
+    dense = len(edges) > 2 * xy.shape[0]
+    ax.add_collection(LineCollection(
+        segments, colors="#969696",
+        linewidths=0.14 if dense and len(edges) > 1000 else 0.28,
+        alpha=0.030 if dense and len(edges) > 1000 else 0.25,
+        zorder=0, rasterized=len(edges) > 1000,
+    ))
     if influence is not None:
         for key, color, width in (("local_backbone_mask", "#3b75af", 0.8),
                                   ("long_high_mask", "#d64c4c", 1.15)):
@@ -203,11 +228,21 @@ def draw_rollout_example(parent, out_root: Path):
     matrices = rollout_matrices(out_root)
     grid = parent.subgridspec(2, 2, hspace=0.10, wspace=0.08)
     cmap = plt.get_cmap("viridis").copy(); cmap.set_bad("#d9d9d9")
+    seed_cmap = ListedColormap(["#c43d4d"])
     for row, template in enumerate(("A", "B")):
         for col, matrix in enumerate(matrices[template]):
             ax = parent.get_gridspec().figure.add_subplot(grid[row, col])
             ax.imshow(matrix, aspect="auto", interpolation="nearest", cmap=cmap, vmin=0, vmax=1)
-            if row == 0: ax.set_title(("Observed", "Generated")[col], fontsize=8.5, pad=2)
+            seed = np.where(np.isfinite(matrix) & np.isclose(matrix, 0.0), 1.0, np.nan)
+            ax.imshow(
+                seed, aspect="auto", interpolation="nearest", cmap=seed_cmap,
+                vmin=0, vmax=1,
+            )
+            if row == 0:
+                ax.set_title(
+                    ("Observed", "Given seed → free rollout")[col],
+                    fontsize=8.5, pad=2,
+                )
             if col == 0: ax.set_ylabel(f"T{template}\ncontacts", fontsize=8)
             else: ax.set_yticks([])
             ax.set_xticks([])
@@ -224,7 +259,11 @@ def strip(ax, data: dict[str, np.ndarray], ylabel: str, zero: bool = False,
         ax.scatter(x + jitter, values, s=12, alpha=0.6, color=COLORS[model], linewidths=0)
         if len(values): ax.plot([x - 0.22, x + 0.22], [np.median(values)] * 2, color="#111111", lw=1.25)
     if zero: ax.axhline(0, color="#8d8d8d", lw=0.7)
-    ax.set_xticks(range(len(models)), [MODEL_LABEL[model] for model in models], rotation=35, ha="right")
+    ax.set_xticks(
+        range(len(models)), [MODEL_LABEL[model] for model in models],
+        rotation=45, ha="right", rotation_mode="anchor",
+    )
+    ax.tick_params(axis="x", labelsize=7.2, pad=2)
     ax.set_ylabel(ylabel)
     return models
 
@@ -254,7 +293,11 @@ def draw_stage_interictal(parent, out_root: Path):
     subjects = sorted({row["subject"] for row in rnn if row["model"] == "M0_NO_REC"})
     models = [model for model in MODEL_ORDER
               if all((subject, model) in lookup for subject in subjects)]
-    grid = parent.subgridspec(2, 3, hspace=0.58, wspace=0.42)
+    # Repeating the same long, rotated model labels on the upper row makes
+    # constrained_layout reserve a large empty band between rows.  The lower
+    # row carries the complete model labels, while the upper row shows only
+    # the measurements.
+    grid = parent.subgridspec(2, 3, hspace=0.16, wspace=0.42)
     figure = parent.get_gridspec().figure
     axes = [figure.add_subplot(grid[row, col]) for row in range(2) for col in range(3)]
 
@@ -293,6 +336,8 @@ def draw_stage_interictal(parent, out_root: Path):
         for model in shared_models
     }
     strip(axes[5], architecture, "GRU − leaky RNN\nrollout correlation", zero=True)
+    for axis in axes[:3]:
+        axis.tick_params(axis="x", bottom=False, labelbottom=False)
     for label, axis in zip("abcdef", axes):
         axis.text(-0.18, 1.04, label, transform=axis.transAxes, fontsize=11,
                   fontweight="bold", ha="right", va="bottom")
@@ -316,23 +361,46 @@ def draw_pareto(ax, out_root: Path):
 
 
 def early_activation(out_root: Path, subject: str):
-    metadata = json.loads((out_root / "EARLY_ICTAL_METADATA_INVENTORY.json").read_text())
-    target_root = Path(metadata["target_cache_root"])
     record = empirical_record(out_root, subject)
     order = [str(value) for value in record["interictal_field"]["contact_order"]]
     values = []
-    for path in sorted((target_root / f"outer_{subject}").glob(f"{subject}__*.npz")):
+    for path in locked_early_target_paths(out_root, subject):
         with np.load(path, allow_pickle=False) as data:
             lookup = dict(zip(np.asarray(data["contact_names"]).astype(str),
                               np.asarray(data["target_1_150"], float)))
         values.append([lookup.get(name, np.nan) for name in order])
+    if not values:
+        raise RuntimeError(f"no frozen early-ictal artifacts for {subject}")
     return np.nanmedian(np.asarray(values, float), axis=0)
 
 
-def draw_cross_state(parent, out_root: Path, include_stats: bool = True):
+def locked_early_target_paths(out_root: Path, subject: str) -> list[Path]:
+    """Resolve the exact target bytes frozen before unseal for figure rendering."""
+    inventory = rows(out_root / "early_ictal_metadata_inventory.csv")
+    selected = []
+    for row in inventory:
+        if str(row["subject"]) != subject:
+            continue
+        path = Path(str(row["artifact_path"])).resolve()
+        if not path.is_file():
+            raise RuntimeError(f"frozen early-ictal artifact is missing: {path}")
+        if sha256(path) != str(row["artifact_sha256"]):
+            raise RuntimeError(f"frozen early-ictal artifact hash changed: {path}")
+        selected.append(path)
+    return sorted(selected)
+
+
+def draw_cross_state(parent, out_root: Path, include_stats: bool = True,
+                     model_subset: tuple[str, ...] | None = None):
     _, pa, pb = model_field_payloads(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
     activation = early_activation(out_root, REPRESENTATIVE)
-    fz = load_frozen(REPRESENTATIVE)
+    # Use the exact empirical record frozen in INPUT_MANIFEST.  A worktree-local
+    # ``results/interictal_propagation_masked`` tree is gitignored and may not
+    # exist in a clean execution worktree; resolving it implicitly would make
+    # rendering depend on an unmanifested ambient file.  The record still has to
+    # go through load_frozen for the fingerprint gate and the shared-plane
+    # display geometry that _draw_field consumes.
+    fz = load_frozen(REPRESENTATIVE, record=empirical_record(out_root, REPRESENTATIVE))
     columns = 3
     grid = parent.subgridspec(2 if include_stats else 1, columns,
                               height_ratios=[1.0, 0.72] if include_stats else [1.0],
@@ -349,17 +417,51 @@ def draw_cross_state(parent, out_root: Path, include_stats: bool = True):
     if include_stats:
         stat_ax = parent.get_gridspec().figure.add_subplot(grid[1, :])
         frame = [row for row in rows(out_root / "early_ictal_per_patient_model.csv")
-                 if row["primary"] in (True, "True", "1", 1.0)
-                 and row["endpoint"] == "canonical_full"]
-        display = ["EMPIRICAL_REFERENCE", "M0_NO_REC", "M1_DENSE", "M3_FIXED_LOCAL",
-                   "M6_SPATIAL_MID", "M8_UNIFORM_COST_MID", "C_ORDER_SHUFFLED"]
-        data = {}
-        for model in display:
-            expected_cell = "reference" if model == "EMPIRICAL_REFERENCE" else "rnn"
-            values = [row["all_contact_margin"] for row in frame
-                      if row["cell"] == expected_cell and row["model"] == model]
-            if values: data[model] = values
-        strip(stat_ax, data, "Early-ictal margin", zero=True, model_order=display)
+                 if row["primary"] in (True, "True", "1", 1.0)]
+        models = []
+        for model in (model_subset or (EMPIRICAL_REFERENCE, *MODEL_ORDER)):
+            # The empirical field is stored under its own cell label; every other
+            # entry in this panel is a leaky-RNN model.
+            cell = "reference" if model == EMPIRICAL_REFERENCE else "rnn"
+            canonical = [row["all_contact_margin"] for row in frame
+                         if row["cell"] == cell and row["model"] == model
+                         and row["endpoint"] == "canonical_full"]
+            seed_removed = [row["all_contact_margin"] for row in frame
+                            if row["cell"] == cell and row["model"] == model
+                            and row["endpoint"] == "seed_removed"]
+            if not canonical or not seed_removed:
+                continue
+            models.append(model)
+            for offset, values, marker, filled in (
+                    (-0.12, canonical, "o", True), (0.12, seed_removed, "D", False)):
+                values = np.asarray(values, float)
+                jitter = np.linspace(-0.055, 0.055, len(values))
+                stat_ax.scatter(
+                    len(models) - 1 + offset + jitter, values, s=12, marker=marker,
+                    facecolor=COLORS[model] if filled else "white",
+                    edgecolor=COLORS[model], linewidth=0.65, alpha=0.72,
+                )
+                stat_ax.plot(
+                    [len(models) - 1 + offset - 0.08, len(models) - 1 + offset + 0.08],
+                    [np.nanmedian(values)] * 2, color="#111111", lw=1.15,
+                )
+        stat_ax.axhline(0, color="#8d8d8d", lw=0.7)
+        stat_ax.set_xticks(
+            range(len(models)), [MODEL_LABEL[model] for model in models],
+            rotation=45, ha="right", rotation_mode="anchor",
+        )
+        stat_ax.tick_params(axis="x", labelsize=7.2, pad=2)
+        stat_ax.set_ylabel("Early-ictal\nnull-relative margin")
+        stat_ax.legend(
+            handles=[
+                Line2D([], [], marker="o", color="#555555", markerfacecolor="#555555",
+                       lw=0, markersize=4.5, label="Canonical full"),
+                Line2D([], [], marker="D", color="#555555", markerfacecolor="white",
+                       lw=0, markersize=4.5, label="Seed removed"),
+            ],
+            loc="upper left", frameon=False, ncol=2, fontsize=7.0,
+            handletextpad=0.35, columnspacing=0.8, borderaxespad=0.1,
+        )
 
 
 def influence_for_selected(out_root: Path):
@@ -369,6 +471,106 @@ def influence_for_selected(out_root: Path):
     return metrics, dict(np.load(path, allow_pickle=False))
 
 
+def patient_level_effective_reach(out_root: Path) -> dict[str, np.ndarray]:
+    """Collapse fit and seed rows before exposing the patient denominator."""
+    frame = [row for row in rows(out_root / "effective_influence_fit_seed.csv")
+             if row["model"] == REPRESENTATIVE_MODEL and row["cell"] == "rnn"]
+    output: dict[str, np.ndarray] = {}
+    for subject in sorted({row["subject"] for row in frame}):
+        selected = [row for row in frame if row["subject"] == subject]
+        output[subject] = np.asarray([
+            np.nanmedian([row[f"lag{lag}_reach_mm"] for row in selected])
+            for lag in (1, 2, 3)
+        ], float)
+    return output
+
+
+def lesion_patient_values(out_root: Path, lesion: str) -> np.ndarray:
+    """Patient-level matched-perturbation damage for one preassigned lesion.
+
+    Collapses to one value per patient so any denominator printed downstream
+    counts unique patients rather than fit rows.
+    """
+    lesion_path = out_root / "matched_lesion_patient_metrics.csv"
+    lesion_rows = rows(lesion_path) if lesion_path.exists() else []
+    by_subject: dict[str, list[float]] = {}
+    for row in lesion_rows:
+        value = float(row["specificity_contact_nll"])
+        if (row["model"] == REPRESENTATIVE_MODEL and row["cell"] == "rnn"
+                and row["lesion"] == lesion
+                and row["all_inference_available"] in (True, "True", "1", 1.0)
+                and np.isfinite(value)):
+            by_subject.setdefault(str(row["subject"]), []).append(value)
+    return np.asarray([np.median(by_subject[subject]) for subject in sorted(by_subject)], float)
+
+
+def lesion_display_values(out_root: Path) -> list[tuple[str, np.ndarray]]:
+    """Return the preassigned lesion components that have cohort support.
+
+    Local-backbone damage is required because it is one half of the frozen
+    motif.  Long-range high-influence edges and connector nodes are then
+    admitted in a fixed order when each has at least five valid patient-level
+    estimates.  This rule depends only on estimability, never effect size.
+    """
+    lesion_order = (
+        ("local_backbone_edges", "Local\nbackbone"),
+        ("long_range_high_influence_edges", "Long-range\nedges"),
+        ("connector_nodes", "Connector\nincident edges"),
+    )
+    available = {lesion: lesion_patient_values(out_root, lesion)
+                 for lesion, _ in lesion_order}
+    if len(available["local_backbone_edges"]) < 5:
+        return []
+    selected = [(lesion_order[0][1], available[lesion_order[0][0]])]
+    selected.extend(
+        (label, available[lesion]) for lesion, label in lesion_order[1:]
+        if len(available[lesion]) >= 5
+    )
+    return selected if len(selected) >= 2 else []
+
+
+def draw_reach_or_lesion(ax, out_root: Path):
+    """Use lesion specificity only when the frozen motif is estimable.
+
+    The display rule uses only the number of valid matched controls, not effect
+    size or significance.  Otherwise it falls back to patient-level open-loop
+    reach, which is defined for every patient and does not overstate an
+    underpowered lesion analysis.
+
+    Retained but no longer wired into a figure: matched perturbation moved to
+    the exploratory supplement because only five and seven patients are
+    estimable, and Panel F now shows cohort-wide effective-influence readouts.
+    """
+    lesion_display = lesion_display_values(out_root)
+    if lesion_display:
+        for x, (_, values) in enumerate(lesion_display):
+            jitter = np.linspace(-0.10, 0.10, len(values))
+            ax.scatter(x + jitter, values, s=17, color=COLORS[REPRESENTATIVE_MODEL],
+                       alpha=0.68, linewidths=0)
+            ax.plot([x - 0.17, x + 0.17], [np.median(values)] * 2,
+                    color="#111111", lw=1.4)
+        ax.axhline(0, color="#8d8d8d", lw=0.7)
+        ax.set_xticks(
+            range(len(lesion_display)), [label for label, _ in lesion_display]
+        )
+        ax.set_ylabel("Damage beyond\nmatched lesion (Δ NLL)")
+        ax.set_title("Matched perturbation", fontsize=8.5, pad=2.5)
+        return
+
+    reach = patient_level_effective_reach(out_root)
+    values = np.asarray(list(reach.values()), float)
+    for value in values:
+        ax.plot([1, 2, 3], value, color="#b8b8b8", lw=0.55, alpha=0.55)
+        ax.scatter([1, 2, 3], value, s=8, color="#b8b8b8", alpha=0.55, linewidths=0)
+    median = np.nanmedian(values, axis=0)
+    ax.plot([1, 2, 3], median, color=COLORS[REPRESENTATIVE_MODEL], lw=2.0,
+            marker="o", markersize=4.2, zorder=4)
+    ax.set_xticks([1, 2, 3], ["1", "2", "3"])
+    ax.set_xlabel("Rank steps after pulse")
+    ax.set_ylabel("Effective reach (mm)")
+    ax.set_title(f"Open-loop reach (n={len(values)} patients)", fontsize=8.5, pad=2.5)
+
+
 def draw_effective_motif(parent, out_root: Path):
     metrics, influence = influence_for_selected(out_root)
     graph = dict(np.load(metrics.parent / "graph.npz"))
@@ -376,21 +578,33 @@ def draw_effective_motif(parent, out_root: Path):
     plane = dict(np.load(out_root / "cache" / fit_id / "plane.npz"))
     grid = parent.subgridspec(1, 2, width_ratios=[1.05, 0.95], wspace=0.32)
     ax = parent.get_gridspec().figure.add_subplot(grid[0, 0])
-    draw_graph(ax, graph, plane, "Effective motif", influence)
+    # The frozen candidate motif did not pass the joint enrichment/task/lesion
+    # contract.  Keep the target-free influence map visible, but do not label
+    # the organization as an established motif.
+    draw_graph(ax, graph, plane, "Effective influence test", influence)
+    # Matched perturbation is estimable in only five and seven patients, which
+    # is too thin for a main-figure panel; it moves to the exploratory figure
+    # with its denominators printed.  This panel keeps the two readouts that are
+    # defined for the whole interictal cohort.
     summary = [row for row in rows(out_root / "effective_motif_patient.csv")
                if row["model"] == REPRESENTATIVE_MODEL and row["cell"] == "rnn"]
-    right = grid[0, 1].subgridspec(2, 1, hspace=0.52)
+    right = grid[0, 1].subgridspec(2, 1, hspace=0.62)
     ax = parent.get_gridspec().figure.add_subplot(right[0, 0])
     local = np.asarray([row["local_effective_ratio"] - 1.0 for row in summary], float)
     ax.scatter(np.linspace(-0.09, 0.09, len(local)), local, s=15,
                color=COLORS[REPRESENTATIVE_MODEL], alpha=0.65)
     if len(local): ax.plot([-0.18, 0.18], [np.nanmedian(local)] * 2, color="#111111", lw=1.3)
-    ax.axhline(0, color="#8d8d8d", lw=0.7); ax.set_xlim(-0.30, 0.30); ax.set_xticks([])
+    ax.axhline(0, color="#8d8d8d", lw=0.7); ax.set_xlim(-0.30, 0.30)
+    ax.set_xticks([0], [f"n={len(local)} patients"])
     ax.set_ylabel("Local influence\nenrichment")
 
+    # The two stabilities are not the same estimand: the seed comparison spans
+    # the full operator across independent graph draws, the split-half one is
+    # restricted to the frozen active edges of a single model.  Label both.
     ax = parent.get_gridspec().figure.add_subplot(right[1, 0])
-    for index, key in enumerate(("effective_operator_seed_stability",
-                                 "effective_operator_split_half_stability")):
+    stabilities = (("effective_operator_seed_stability", "Across seeds\n(full operator)"),
+                   ("effective_operator_split_half_stability", "Across train halves\n(active edges)"))
+    for index, (key, label) in enumerate(stabilities):
         values = np.asarray([row[key] for row in summary], float)
         values = values[np.isfinite(values)]
         ax.scatter(index + np.linspace(-0.08, 0.08, len(values)), values, s=15,
@@ -398,29 +612,30 @@ def draw_effective_motif(parent, out_root: Path):
         if len(values): ax.plot([index - 0.18, index + 0.18], [np.median(values)] * 2,
                                 color="#111111", lw=1.3)
     ax.axhline(0, color="#8d8d8d", lw=0.7)
-    ax.set_xticks([0, 1], ["Seeds", "Train halves"])
+    ax.set_xticks(range(len(stabilities)), [label for _, label in stabilities])
+    ax.tick_params(axis="x", labelsize=6.6)
     ax.set_ylabel("Operator stability (ρ)")
 
 
 def render_lesion_supplement(out_root: Path):
-    frame = [row for row in rows(out_root / "matched_lesion_patient_metrics.csv")
-             if row["model"] == REPRESENTATIVE_MODEL and row["cell"] == "rnn"]
+    """Exploratory matched-perturbation figure with its denominators printed."""
     lesions = [("local_backbone_edges", "Local backbone"),
-               ("connector_nodes", "Connector nodes")]
-    fig, ax = plt.subplots(figsize=(3.9, 3.1), layout="constrained", facecolor="white")
+               ("long_range_high_influence_edges", "Long-range edges"),
+               ("connector_nodes", "Connector incident edges")]
+    available = [(label, lesion_patient_values(out_root, lesion))
+                 for lesion, label in lesions]
+    available = [(label, values) for label, values in available if len(values)]
+    fig, ax = plt.subplots(figsize=(4.2, 3.1), layout="constrained", facecolor="white")
     labels = []
-    for index, (lesion, label) in enumerate(lesions):
-        values = np.asarray([row["specificity_contact_nll"] for row in frame
-                             if row["lesion"] == lesion
-                             and row["all_inference_available"] in (True, "True", "1", 1.0)], float)
-        values = values[np.isfinite(values)]
+    for index, (label, values) in enumerate(available):
         ax.scatter(index + np.linspace(-0.09, 0.09, len(values)), values, s=20,
                    color=COLORS[REPRESENTATIVE_MODEL], alpha=0.65)
-        if len(values): ax.plot([index - 0.2, index + 0.2], [np.median(values)] * 2,
-                                color="#111111", lw=1.4)
+        ax.plot([index - 0.2, index + 0.2], [np.median(values)] * 2,
+                color="#111111", lw=1.4)
         labels.append(f"{label}\n(n={len(values)})")
     ax.axhline(0, color="#8d8d8d", lw=0.7)
     ax.set_xticks(range(len(labels)), labels)
+    ax.tick_params(axis="x", labelsize=7.2)
     ax.set_ylabel("Damage beyond matched\nperturbation (Δ NLL)")
     stem = out_root / "figures" / "topic5_matched_lesion_exploratory"
     fig.savefig(stem.with_suffix(".png"), dpi=600, bbox_inches="tight", facecolor="white")
@@ -435,7 +650,7 @@ def panel_label(fig, subplot_spec, label: str):
 
 
 def render_stage(out_root: Path, stage: str):
-    size = (11.4, 6.2) if stage == "interictal" else (9.2, 3.2)
+    size = (11.4, 5.5) if stage == "interictal" else (9.2, 3.2)
     fig = plt.figure(figsize=size, layout="constrained", facecolor="white")
     root = fig.add_gridspec(1, 1)[0, 0]
     if stage == "interictal":
@@ -477,7 +692,11 @@ def render_final(out_root: Path):
     draw_rollout_example(outer[0, 1], out_root); panel_label(fig, outer[0, 1], "B")
     draw_interictal_sufficiency(outer[1, 0], out_root); panel_label(fig, outer[1, 0], "C")
     ax_d = fig.add_subplot(outer[1, 1]); draw_pareto(ax_d, out_root); panel_label(fig, outer[1, 1], "D")
-    draw_cross_state(outer[2, 0], out_root, include_stats=True); panel_label(fig, outer[2, 0], "E")
+    draw_cross_state(
+        outer[2, 0], out_root, include_stats=True,
+        model_subset=(EMPIRICAL_REFERENCE, "M0_NO_REC", "M1_DENSE", "M3_FIXED_LOCAL",
+                      "M6_SPATIAL_MID", "C_ORDER_SHUFFLED"),
+    ); panel_label(fig, outer[2, 0], "E")
     draw_effective_motif(outer[2, 1], out_root); panel_label(fig, outer[2, 1], "F")
     handles, labels = ax_d.get_legend_handles_labels()
     fig.legend(handles, labels, loc="lower center", ncol=min(8, len(labels)), frameon=False,
@@ -498,15 +717,15 @@ def render_final(out_root: Path):
 
 ### topic5_figure6_rnn_connectivity_motifs.png / .pdf / .svg
 
-六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与平均 active-edge 布线代价、冻结模型场与临床发作早期能量场，以及局部有效影响和跨 seed / train-half 的算子稳定性。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
+六联图依次展示真实患者几何上的连接约束、同患者留出间期事件的真实与自由生成 A/B 时序、全队列间期预测充分性、传播场拟合与平均 active-edge 布线代价、冻结模型场与临床发作早期能量场，以及 target-free 有效影响结构检验。Panel B 的红格是观察到并提供给模型的第一 rank seed，其余 viridis 格才显示后续观察或自由推演。Panel E 的实心圆是 canonical full、空心菱形是 seed-removed 两个冻结端点，并同尺度并列经验间期场作参照。Panel F 左侧是代表患者的有效影响图，右侧是全队列可估计的两项读数：局部有效影响富集，以及跨随机种子（全算子）与跨 train-half（仅冻结 active edges）两种口径的算子稳定性——这两根轴不是同一个被估量，标签已分别写出。matched-lesion 只有 n=5/7 可估计，已移到 `topic5_matched_lesion_exploratory`。所有统计先在患者内合并，所有场使用冻结触点顺序和几何；发作数值只在模型与场完全冻结后进入 Panel E。
 
-**关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些局部有效组织可重复”，不把预测性能直接写成真实连接组恢复。
+**关注点**：图的承重顺序是“能生成间期传播 → 哪些结构更经济 → 哪些冻结场跨状态对应 → 哪些有效组织在全队列上可重复”，不把预测性能直接写成真实连接组恢复；只有结构富集、任务关系和 matched lesion 同向时才命名为计算 motif，当前三项未同向，因此该面板标题是 “Effective influence test” 而不是 motif。
 
 ### topic5_matched_lesion_exploratory.png / .pdf
 
-Spatial + cost 模型中 local-backbone 与 connector 的 targeted perturbation 相对匹配随机扰动。横轴直接标出实际可匹配患者数；由于只有 n=5 和 n=7，该图只作探索性旁证，不承担 cohort 阴性或阳性结论。
+Spatial + cost 模型中预先指定的 targeted perturbation 相对匹配随机扰动的特异损害；connector 操作切断所选 tissue node 的全部入/出 recurrent edges，但保留直接输入与 observation readout，因此不是完整 node ablation。横轴直接标出实际可匹配患者数（每位患者先合并为一个值）；long-range-edge 一档 0 位患者可估计因此不出现。
 
-**关注点**：当前 matched-lesion 状态是 `INCONCLUSIVE_DUE_TO_MATCHING_ELIGIBILITY`，不是“lesion 失败”。
+**关注点**：当前 matched-lesion 状态是 `INCONCLUSIVE_DUE_TO_MATCHING_ELIGIBILITY`——n=5 与 n=7 太小，既不承担 cohort 阳性也不承担 cohort 阴性结论。
 
 ### stage_interictal_scientific_readout.png / .pdf
 
@@ -528,24 +747,116 @@ Spatial + cost 模型中 local-backbone 与 connector 的 targeted perturbation 
 
 ### stage_motif_scientific_readout.png / .pdf
 
-代表患者的局部高影响组织，以及其患者级局部富集、跨 seed 和 train-half 稳定性。
+代表患者的局部高影响骨架与少量长程 connector，右侧是全队列患者级的局部有效影响富集，以及跨随机种子（全算子）与跨 train-half（仅冻结 active edges）两种口径的算子稳定性。两种稳定性口径不同，不可当作同一个量并读。
 
-**关注点**：当前只支持稳定的局部有效组织；长程 connector 与特异扰动仍未建立。
+**关注点**：只有结构富集、任务关系和 matched-lesion 同向时，才把该组织写成更容易支持传播的计算 motif；当前只支持"局部有效影响的统计组织跨患者稳定"，长程 connector 与特异扰动仍未建立。
+
+### stage_c_smoke_training_and_decoder.png / .pdf
+
+三位开发患者上的工程 smoke：检查模型前向、梯度、冻结 free-rollout decoder、显存与 checkpoint schema。该图不承担患者队列的科学统计，也没有读取 early-ictal target。
+
+**关注点**：这里只证明同一训练与解码合同可以稳定执行，不能把 smoke 性能写成科学筛选。
+
+### stage_d_interictal_model_matrix.png / .pdf
+
+正式间期分析的原始阶段诊断图，展示各模型 next-contact、STOP、自由推演和生成长度等患者级分布；与 `stage_interictal_scientific_readout` 使用同一冻结汇总，但保留较完整的工程读数。
+
+**关注点**：用于核对每个模型没有靠事件长度或 STOP 单项获得表面优势。
+
+### stage_e_target_free_model_fields.png / .pdf
+
+early-ictal 解封前生成的完整模型场诊断图，展示代表患者两种起点场与全队列 field-fidelity 分布。它与 `stage_fields_scientific_readout` 使用同一 field manifest，未使用发作数值挑选模型或场。
+
+**关注点**：确认共享和 non-collinear fit 的 A/B 聚合路径正确，并保留 canonical full 与 seed-removed 两个冻结端点。
 """
     readme.write_text(base + "\n\n" + section.lstrip())
-    sources = {
-        "A": [selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz"
-              for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID")],
-        "B": [selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL).parent
-              / "heldout_rollouts.json.gz", out_root / "cache" / "epilepsiae_1146__shared" / "events.npz"],
-        "C": [out_root / "interictal_per_patient.csv", out_root / "interictal_per_event.csv"],
-        "D": [out_root / "accuracy_wiring_pareto.csv", out_root / "model_field_patient_metrics.csv"],
-        "E": [out_root / "early_ictal_per_patient_model.csv", out_root / "early_ictal_null_matrices.npz"],
-        "F": [out_root / "effective_influence_fit_seed.csv", out_root / "effective_motif_patient.csv"],
+    representative_metrics = selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL)
+    representative_fit = json.loads(representative_metrics.read_text())["fit_id"]
+    representative_plane = out_root / "cache" / representative_fit / "plane.npz"
+    representative_events = out_root / "cache" / representative_fit / "events.npz"
+    representative_provenance = out_root / "cache" / representative_fit / "provenance.json"
+    input_manifest = json.loads((out_root / "INPUT_MANIFEST.json").read_text())
+    representative_empirical = (
+        Path(input_manifest["input_roots"]["field"]) / f"{REPRESENTATIVE}.json"
+    )
+    representative_fit_contract = next(
+        row for row in input_manifest["fits"]
+        if row["fit_id"] == representative_fit
+    )
+    if sha256(representative_empirical) != representative_fit_contract["field_sha256"]:
+        raise RuntimeError(
+            "representative empirical field changed after INPUT_MANIFEST freeze"
+        )
+    representative_influence = (
+        out_root / "effective_influence" / representative_metrics.parents[2].name
+        / representative_metrics.parents[1].name / representative_metrics.parent.name
+        / "influence.npz"
+    )
+    representative_targets = locked_early_target_paths(out_root, REPRESENTATIVE)
+    representative_models = (
+        "M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"
+    )
+    selection_candidates = {
+        model: selection_candidate_metrics(out_root, REPRESENTATIVE, model)
+        for model in representative_models
     }
-    manifest = {
+    sources = {
+        "A": [item for model in representative_models for item in (
+                  *selection_candidates[model],
+                  selected_metrics(out_root, REPRESENTATIVE, model).parent / "graph.npz",
+              )] + [representative_plane],
+        "B": selection_candidates[REPRESENTATIVE_MODEL] + [
+              selected_metrics(out_root, REPRESENTATIVE, REPRESENTATIVE_MODEL).parent
+              / "heldout_rollouts.json.gz", representative_metrics,
+              representative_events, representative_provenance, representative_empirical],
+        "C": [out_root / "interictal_per_patient.csv", out_root / "interictal_per_event.csv"],
+        "D": [out_root / "interictal_per_patient.csv", out_root / "accuracy_wiring_pareto.csv",
+              out_root / "model_field_patient_metrics.csv"],
+        "E": [out_root / "early_ictal_per_patient_model.csv",
+              out_root / "early_ictal_null_matrices.npz",
+              out_root / "early_ictal_metadata_inventory.csv",
+              out_root / "MODEL_FIELD_MANIFEST.json",
+              out_root / "model_fields/per_patient" / REPRESENTATIVE
+              / f"{REPRESENTATIVE_MODEL}__rnn.npz", representative_empirical]
+             + representative_targets,
+        # matched_lesion_patient_metrics.csv still belongs here: render_final also
+        # emits the exploratory perturbation figure from this same call.
+        "F": selection_candidates[REPRESENTATIVE_MODEL] + [
+              out_root / "effective_influence_fit_seed.csv",
+              out_root / "effective_motif_patient.csv",
+              out_root / "matched_lesion_patient_metrics.csv",
+              representative_metrics, representative_metrics.parent / "graph.npz",
+              representative_plane,
+              representative_influence],
+    }
+    panel_sources = {
         panel: [{"path": str(path), "sha256": sha256(path)} for path in paths]
         for panel, paths in sources.items()
+    }
+    manifest = {
+        "_contract": "topic5_figure6_source_manifest_v0_4",
+        "_representative_selection": {
+            "patient": REPRESENTATIVE,
+            "role": "target-free preassigned supportive visualization; excluded from primary p-values",
+            "checkpoint_rule": (
+                "within patient/model/cell, choose validation contact NLL nearest the seed median; "
+                "ties resolved by lexical path"
+            ),
+            "selected_metrics": {
+                model: str(selected_metrics(out_root, REPRESENTATIVE, model))
+                for model in representative_models
+            },
+            "selection_candidate_metrics": {
+                model: [
+                    {"path": str(path), "sha256": sha256(path)}
+                    for path in paths
+                ]
+                for model, paths in selection_candidates.items()
+            },
+            "empirical_field_path": str(representative_empirical),
+            "empirical_field_sha256_frozen": representative_fit_contract["field_sha256"],
+        },
+        **panel_sources,
     }
     (figure_dir / "figure6_source_manifest.json").write_text(json.dumps(manifest, indent=2))
 

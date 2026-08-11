@@ -1,16 +1,18 @@
 # Topic 5 RNN connectivity motif / cross-state v0.4 审阅后收口报告
 
-> 状态：代码与统计已按审阅意见修复并重算；冻结模型未重训；等待用户终审后再 commit。
+> 状态：两轮审阅后的定稿。第一轮修 endpoint / 定义层，第二轮整体审阅又发现并修复了分支漂移、两处聚合口径和一个上游画图 bug；冻结模型未重训。
 
 ## 一句话结论
 
-这轮已经可靠证明：患者内间期 contact-rank 序列含有可被 recurrent network 学会并自由生成的有序传播信息，多种 dense、sparse、local 和 spatial recurrent topology 都足以完成该计算；Spatial + cost 只用约 10% 的边、约 4.9% 的总几何布线长度，仍保持相近的传播表现。
+这轮已经可靠证明：患者内间期 contact-rank 序列含有可被 recurrent network 学会并自由生成的有序传播信息，多种 dense、sparse、local 和 spatial recurrent topology 都足以完成该计算；在**预先设定的 10% 稀疏预算下**，Spatial + cost 实际只花掉 dense 约 4.9% 的总几何布线长度，仍保持相近的传播表现。
 
 但冻结模型场到发作早期场的证据仍未闭合。当前 10 人交集中，第一 rank/source 对跨状态一致性有稳定贡献；recurrence 是正向但未确认；真实顺序和 wiring cost 没有显示额外跨状态增量。内部网络只支持“局部有效影响富集”，不支持“关键长程 connector 已被辨识并经特异干预验证”。
 
 ## 1. 本次审阅后到底修了什么
 
-本次没有改训练目标、网络权重、模型选择或 early-ictal endpoint，因此不需要重跑 1,426 个训练单元。修复集中在五类会影响解释的地方：
+本次没有改训练目标、网络权重、模型选择或 early-ictal endpoint，因此不需要重跑 1,426 个训练单元。
+
+### 1.1 第一轮：endpoint 与定义层
 
 1. 重建 strict target 16 人 → primary 15 人 → exact model–target intersection 10 人的逐患者排除链；
 2. 明确 `FIELD_CANONICAL_FULL` 才是冻结 spec 的跨 Human–RNN–SNN primary，`FIELD_SEED_REMOVED` 是 recurrence-specific key secondary；
@@ -18,14 +20,48 @@
 4. 将训练中的平均 active-edge cost 与总几何长度、总强度加权布线量分开；
 5. 用 Kendall τb、归一化 rank 误差和参与集合 Jaccard 补查 free-rollout Spearman 的 0.5 平台是否掩盖模型差异。
 
-新增 7 个回归测试，覆盖 field 分解、fit-first aggregation、布线口径与 frozen-table parity、smoke 排除、rollout seed removal、target LOO reliability 和 README 持久化；`tests/test_topic5_rnn_motif_v0_4.py` 当前 30/30，通过两份相关测试共 50/50。
+### 1.2 第二轮：整体审阅发现的问题
+
+**分支漂移（最严重的一条）**。v0.4 流水线是在 `codex/topic5-rnn-motif-v0-4-closeout` 上跑完的
+（`POSTPROCESS_CONTRACT.json::git_commit = 527e3555`，`POST_UNSEAL_RECOVERY_15a67b50.sh` 锁 `15a67b50`），
+而 §1.1 那一轮收口写在 `codex/topic5-rnn-motif-cross-state-v0-4` 上，此分支停在流水线分支 **64 个 commit 之前**。
+那 64 个 commit 绝大多数是收紧主张的修正，所以用旧脚本重画图等于回滚了其中数条 —— 最实质的一条是
+主图 Panel F 标题被改回 `Effective motif`，而冻结判决本身是 `M6_motif_claim_pass = false`。
+现已把流水线分支合并进来并逐处裁决冲突（见 §7），全部图重画。
+
+**两处聚合口径**（改后重算）：
+
+- 布线资源表原先一次性对全部 fit×seed 取中位数，冻结的间期表却是"先在 fit 内对 seed 取中位、再在患者内对 fit 取中位"。
+  294 行里 118 行不一致，`c_wiring` 最大差 0.352。改为两段式后与 `interictal_per_patient.csv::c_wiring`
+  最大差 3.11×10⁻⁷（float32 存储精度），并加了断言：不一致直接报错。同一修正套用到 free-rollout 诊断表。
+- 6 个 pre-flight smoke 训练单元混进了冻结布线统计（`n_graph_runs` 1,246 → 1,240）。现按 `SMOKE_` 前缀排除，
+  并断言剩余患者-模型行是冻结队列的子集。
+
+**上游画图 bug**。流水线分支的 `draw_cross_state` 把 `load_frozen` 换成 `empirical_record`，却没有一起搬
+shared-plane 显示几何，`--stage early/final` 会直接 `KeyError: 'points_mm'`（即
+`PIPELINE_FAILED_old_figure_geometry_2026-08-10.json` 记的那次失败）。现给 `load_frozen` 加可选
+`record=` 参数：既走 INPUT_MANIFEST 解析路径（不依赖 ambient 常量），又复用原有的 fingerprint gate 与几何推导。
+
+**其余**：留存几何清单的 SHA256 原先取自输入文件却标注在留存副本旁，改为对留存副本取哈希；
+新增 `REVIEW_EARLY_ICTAL_TARGET_DEPENDENCY.json` 登记仍在另一 worktree 的 26 个 early-ictal target 文件
+（路径 + 逐文件哈希 + 丢失后果）；`figures/README.md` 补上收口图条目且能扛住后续重画；lesion 补充图 y 轴
+标签截断修好，并改为复用上游 `lesion_patient_values` 做逐患者合并；收口图各面板补上自己的分母，
+Panel E 从"同一个量画两遍"改成实际承重的"相对 dense 的资源占比"。
+
+新增 7 个回归测试，覆盖 field 分解、fit-first aggregation、布线口径与 frozen-table parity、smoke 排除、
+rollout seed removal、target LOO reliability 和 README 持久化。合并后六个冻结测试文件共 145 项：
+140 passed、5 skipped（跳过的 5 项在 `test_topic5_spatial_latent_rnn.py`，依赖一个可选上游 cache）。
+验收门原先硬比对 "passed == 138"，会被这种环境相关的 skip 打翻，已改为比对 passed + skipped == 145。
+
+最终状态写入也已修正为互斥：工程验收成功时删除旧 `PIPELINE_FAILED.json`，失败时删除旧
+`PIPELINE_COMPLETE.json`，避免历史失败标记与当前成功标记同时存在；目录里那份过期标记已按既有
+约定改名归档为 `PIPELINE_FAILED_pre_visual_qa_2026-08-10.json`。
 
 队列排除审计所用的上游几何清单已复制为
 `results/topic5_rnn_motif_cross_state_benchmark_v0_4/REVIEW_SOURCE_GEOMETRY_MANIFEST.json`，
-其 SHA256 同时写入 `REVIEW_ATTRITION_AUDIT.json` 和
-`REVIEW_CLOSEOUT_AUDIT_COMPLETE.json`。后续重跑不依赖产生该清单的旧 worktree。
-
-最终状态写入也已修正为互斥：工程验收成功时删除旧 `PIPELINE_FAILED.json`，失败时删除旧 `PIPELINE_COMPLETE.json`，避免历史失败标记与当前成功标记同时存在。
+其 SHA256 同时写入 `REVIEW_ATTRITION_AUDIT.json` 和 `REVIEW_CLOSEOUT_AUDIT_COMPLETE.json`。
+**但 early-ictal target 数组本身没有复制进来**，所以"后续重跑不依赖旧 worktree"只对几何清单成立；
+target 那一侧若 worktree 被删，归档数值仍然有效但不可再核验（见上述 dependency JSON）。
 
 ## 2. 队列为什么是 10 人，不是 15 人
 
@@ -61,17 +97,26 @@ Spatial + cost 相对 no-recurrence：
 
 ### 3.2 0.500 rollout 平台是不是指标假象
 
-审阅后从 2,349,312 条冻结 rollout 记录中，对每个 fit/seed 均匀抽取最多 128 条，共重评 164,726 条，registered Spearman 主指标不变，只增加诊断：
+审阅后从 2,349,312 条冻结 rollout 记录中，对每个 fit/seed 均匀抽取最多 128 条，共重评 164,726 条，registered Spearman 主指标不变，只增加诊断（患者级用与冻结间期表相同的两段式聚合）：
 
 | 模型 | 患者中位 Kendall τb |
 |---|---:|
 | No recurrence | 0.087 |
-| Dense | 0.333 |
-| Local | 0.351 |
-| Spatial + cost | 0.341 |
-| Order shuffle | 0.128 |
+| Dense | 0.337 |
+| Local | 0.333 |
+| Spatial + cost | 0.353 |
+| Order shuffle | 0.094 |
 
-Spatial + cost 相对 no-recurrence 的 τb 增量中位为 +0.284，18/21 为正；相对 order-shuffle 为 +0.200，18/21 为正、0 负。说明原来的 0.500 平台确实较离散，但“真实 recurrent computation 能生成传播、shuffle 不能”的结论不依赖 Spearman 量化。
+Spatial + cost 相对 no-recurrence 的 τb 增量中位为 +0.260（18 正 / 1 负 / 2 并列，n=21）；相对 order-shuffle 为 +0.260（19 正 / 0 负 / 2 并列）。说明原来的 0.500 平台确实较离散，但“真实 recurrent computation 能生成传播、shuffle 不能”的结论不依赖 Spearman 量化。
+
+同批算出来的另外两项诊断必须一并报告，因为它们把 Q1 的说法收窄了：
+
+| 诊断 | vs no-recurrence | vs order-shuffle |
+|---|---:|---:|
+| 归一化 rank 误差下降 | +0.063（19 正 / 1 负） | +0.083（21 正 / 0 负） |
+| 参与集合 Jaccard 提升 | **−0.013（7 正 / 13 负，p=0.48）** | **0.000（7 正 / 8 负，p=0.93）** |
+
+也就是说：recurrent model 赢在**把参与的触点排对顺序**，不赢在**挑出哪些触点会参与**——后者它并不比无循环的静态模型更准。因此 Q1 的正确写法是"学会了有序传播"，不能顺势写成"学会了预测哪些触点会被招募"。
 
 ## 4. Wiring economy 应该写到什么程度
 
@@ -85,18 +130,18 @@ C_{\mathrm{mean-edge}}
 |w_{ij}|\frac{d_{ij}}{10\,\mathrm{mm}}.
 \]
 
-它是 active-edge 平均代价，不是总布线量。重算 1,246 份 `graph.npz` 后，与训练日志最大绝对误差为 6.04×10⁻⁷。
+它是 active-edge 平均代价，不是总布线量。重算 1,240 份正式 `graph.npz`（已排除 6 份 smoke）后，与训练日志最大绝对误差为 6.04×10⁻⁷；患者级聚合与冻结的 `interictal_per_patient.csv::c_wiring` 最大差 3.11×10⁻⁷。
 
 相对 dense，Spatial + cost 的患者内中位比例为：
 
-| 资源量 | Spatial + cost / Dense |
-|---|---:|
-| active edge count | 10.0% |
-| total geometric length | 4.89% |
-| total strength-weighted length | 3.38% |
-| mean-edge normalized cost | 33.7% |
+| 资源量 | Spatial + cost / Dense | 性质 |
+|---|---:|---|
+| active edge count | 10.0% | **设计参数**（所有稀疏臂 `density=0.1`），不是结果 |
+| total geometric length | 4.93% | 结果 |
+| total strength-weighted length | 3.38% | 结果 |
+| mean-edge normalized cost | 33.7% | 结果 |
 
-因此“约 5% total wiring”只允许指纯几何总长度；Panel D 现在明确标为 mean active-edge strength × distance / 10 mm。wiring economy 的安全结论是：它能用显著更少的连接资源保持任务表现，但它不是癫痫网络形成的病理哲学，也没有显示独立的 early-ictal 优势。
+这里必须把设计和结果分开：**10% 的边数是我们预先设死的稀疏预算**，不是模型学出来的；真正的发现是——在同样只许用 10% 边的前提下，空间生长 + 布线惩罚会去挑短边，于是总几何长度只花到 dense 的约 4.9%，而任务表现基本不掉。所以“约 5% total wiring”只允许指纯几何总长度；Panel D 现在明确标为 mean active-edge strength × distance / 10 mm。wiring economy 的安全结论是：它能用显著更少的连接资源保持任务表现，但它不是癫痫网络形成的病理哲学，也没有显示独立的 early-ictal 优势。
 
 审阅建议的 weight-only regularization 和 distance-permuted cost 两个新训练对照本次没有追加。原因不是忽略替代解释，而是当前收口已经主动撤回“患者真实几何带来特异优势”的主张，只保留资源—性能 trade-off；这两个对照只会继续拆解 generic wiring regularization，不会闭合 Q2 或 Q3。若以后仍要主张 geometry-specific wiring benefit，它们必须补做；下一阶段 LBSS 则直接取消长边距离惩罚，改测少量任务选择长程 pathway。
 
@@ -162,17 +207,18 @@ GRU 也进入了冻结 early-ictal scorer。其 Spatial + cost canonical-full ma
 Spatial + cost 的患者级结果：
 
 - local effective influence enrichment 中位 +0.0461，18/21 为正，P=1.34×10⁻⁵；
-- 同一冻结模型在 train split-halves 上的 effective operator 稳定性中位 ρ=0.980；
-- 不同随机 seed 间完整 operator 稳定性只有中位 ρ=0.142；
+- 同一冻结模型在 train split-halves 上的 effective operator 稳定性中位 ρ=0.980，**但只在冻结的 active edges 上计算**（`effective_operator_split_half_support = frozen_active_recurrent_edges_only`）；
+- 不同随机 seed 间**完整** operator 稳定性只有中位 ρ=0.142；
 - long-range high-influence enrichment 不成立；
 - motif score 与任务表现不稳定相关。
 
-所以“局部影响的统计组织”跨患者稳定，但精确 edge-weight operator 并没有跨 seed 收敛到唯一答案。这再次说明网络级充分性强、逐边可辨识性弱。
+这两个 ρ 不是同一个被估量：0.980 问的是"同一张图、同一组边，换一半训练数据后权重还稳不稳"，0.142 问的是"换一颗随机种子重新长一张图，整个算子还认不认得出来"。所以只能说"局部影响的统计组织跨患者稳定，但精确 edge-weight operator 并没有跨 seed 收敛到唯一答案"，不能把 0.980 读成"算子可复现"。主图 Panel F 已把两根轴分别标注为 `Across seeds (full operator)` 与 `Across train halves (active edges)`，防止并排读成同一个量。
 
 Matched lesion 的真正状态是：
 
 - local backbone：5 位患者满足完整匹配合同，4 正/1 负，Holm q=0.9375；
-- connector nodes：7 位，4 正/3 负，Holm q=0.9375。
+- connector incident edges：7 位，4 正/3 负，Holm q=0.9375；
+- long-range high-influence edges：**0 位患者可估计**——它虽然写在预先声明的 Holm family 里（3 项），却没有任何统计量，因此上面两项的 q 实际是按 m=3 校正的，偏保守。
 
 因此状态已改为：
 
@@ -186,14 +232,17 @@ MATCHED_LESION: INCONCLUSIVE_DUE_TO_MATCHING_ELIGIBILITY
 
 - 主六联图：`results/topic5_rnn_motif_cross_state_benchmark_v0_4/figures/topic5_figure6_rnn_connectivity_motifs.png/.pdf/.svg`
 - 审阅收口诊断：`.../figures/topic5_rnn_motif_review_closeout.png/.pdf`
-- 探索性 matched lesion：`.../figures/topic5_matched_lesion_exploratory.png/.pdf`
+- 探索性 matched perturbation：`.../figures/topic5_matched_lesion_exploratory.png/.pdf`
 
-主图的变化：
+全部图已用合并后的代码树重画（§1.2），`figures/README.md` 逐图说明同步更新。
 
-1. Panel D 轴名不再把 mean-edge cost 混写成 total wiring；
-2. Panel E 加入 empirical field、static、order-shuffle 和 true-order RNN 的同尺度比较；
-3. Panel F 改为局部有效影响及跨 seed/train-half 稳定性；
-4. matched lesion 从主图移出，并显式标出 n=5/7。
+主图相对第一轮的变化：
+
+1. Panel B 恢复流水线分支的 `Given seed → free rollout` 标题与红色 seed 格，明确区分白送的第一 rank 和自由推演；
+2. Panel D 轴名不再把 mean-edge cost 混写成 total wiring；
+3. Panel E 同时保留两个冻结端点（实心圆 canonical full、空心菱形 seed removed），并把经验间期场放在同一尺度作参照；
+4. Panel F 标题保持流水线分支已锁的 `Effective influence test`（**不是** `Effective motif`——冻结判决是 `M6_motif_claim_pass = false`），右侧改为全队列可估计的局部有效影响富集与两种口径分别标注的算子稳定性；
+5. matched perturbation 从主图移出，探索图直接标出 n=5/7，并按上游命名写作 connector incident edges。
 
 ## 8. 当前最终允许写 / 不允许写
 
@@ -211,19 +260,29 @@ MATCHED_LESION: INCONCLUSIVE_DUE_TO_MATCHING_ELIGIBILITY
 - Spatial + cost 是癫痫特异的最佳 topology；
 - 精确 interictal rank order 已被证明在发作早期复用；
 - local backbone + long-range connector 已经建立；
-- 非显著等于达到数据天花板或证明等价。
+- 非显著等于达到数据天花板或证明等价；
+- **10% 的边是模型自己省下来的**（那是预设的稀疏预算，省出来的是长度）；
+- **recurrent model 更会挑哪些触点参与**（参与集合 Jaccard 相对无循环为 −0.013，p=0.48）。
 
 ## 9. 收口判决
 
 ```text
-Q1_INTERICTAL_GENERATIVE_SUFFICIENCY:       CLOSED_POSITIVE
-Q2_EARLY_ICTAL_CROSS_STATE_TRANSFER:        POSITIVE_TREND_NOT_CONFIRMED
-Q3_LOCAL_EFFECTIVE_ORGANIZATION:            SUPPORTED
-Q3_LONG_RANGE_CONNECTOR_MOTIF:              NOT_ESTABLISHED
+Q1_INTERICTAL_GENERATIVE_SUFFICIENCY:        CLOSED_POSITIVE (ordering only; participation-set NOT improved)
+Q2_EARLY_ICTAL_CROSS_STATE_TRANSFER:         POSITIVE_TREND_NOT_CONFIRMED
+Q3_LOCAL_EFFECTIVE_ORGANIZATION:             SUPPORTED
+Q3_LONG_RANGE_CONNECTOR_MOTIF:               NOT_ESTABLISHED
 MATCHED_LESION:                              INCONCLUSIVE_LOW_ELIGIBILITY
 V0_4_ENGINEERING_CLOSEOUT:                   COMPLETE
-READY_FOR_USER_FINAL_REVIEW:                 YES
-COMMITTED:                                   NO
+BRANCH_RECONCILIATION:                       MERGED (pipeline branch + review branch)
+FIGURES_REGENERATED_FROM_MERGED_TREE:        YES
+FOCUSED_TESTS:                               140 passed / 5 skipped of 145 collected
+COMMITTED:                                   YES
 ```
 
 下一阶段不应继续围绕 generic wiring economy 加模型，而应单独检验“固定局部 recurrent backbone + 少量任务选择的长程 pathway”。对应 LBSS-RNN spec/plan 与本报告同时提供，但在用户审阅前不启动。
+
+## 10. 遗留（本轮明确不做，但要记着）
+
+- `draw_reach_or_lesion` 与 `patient_level_effective_reach` / `lesion_display_values` 保留在画图脚本里、仍有测试覆盖，但因为 Panel F 改版已不被任何图调用。若以后要恢复"分母够就画 matched perturbation、否则画 open-loop reach"的条件面板，从这里接。
+- early-ictal target 数组的 worktree 依赖只做了登记，没有搬进结果树；真要彻底可再现需要把那 44 MB 复制进来或改由 manifest 指向一个稳定位置。
+- 审阅建议的 weight-only regularization 与 distance-permuted cost 两个新训练对照仍未做（理由见 §4 末）。

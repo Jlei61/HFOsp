@@ -178,6 +178,7 @@ def main() -> int:
             "which biologically constrained recurrent motifs can learn patient interictal propagation, "
             "produce frozen fields aligned to early ictal energy, and expose effective motifs"
         ),
+        "geometry_status": manifest["geometry_status"],
         "checked": ["same task and geometry across arms", "factorial changes only growth/cost",
                     "early-ictal target not accessed", "patient-level aggregation paths separated"],
         "deviations": [],

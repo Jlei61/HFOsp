@@ -30,6 +30,11 @@ THEORY_MODELS = {
 }
 TARGET_DRAWS = 500
 MINIMUM_VALID = 200
+M6_PRIMARY_LESION_FAMILY = (
+    "M6_SPATIAL_MID|local_backbone_edges",
+    "M6_SPATIAL_MID|long_range_high_influence_edges",
+    "M6_SPATIAL_MID|connector_nodes",
+)
 
 
 def clean_json(value: Any) -> Any:
@@ -48,8 +53,31 @@ def clean_json(value: Any) -> Any:
     return value
 
 
+def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
+    """Write a non-empty result table with the schema fixed by its first row."""
+    if not rows:
+        raise RuntimeError(f"refusing to write empty matched-lesion table: {path}")
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader()
+        writer.writerows(rows)
+
+
 def number(value: Any) -> float:
     return float(value) if value is not None else float("nan")
+
+
+def perturbation_damage(metric: str, perturbed: Any, baseline: Any) -> float:
+    """Put heterogeneous heldout metrics on a common larger-is-worse scale."""
+    changed, intact = number(perturbed), number(baseline)
+    if metric in {"contact_nll", "stop_bce"}:
+        return changed - intact
+    if metric in {"rollout_spearman", "interictal_field_fidelity"}:
+        return intact - changed
+    if metric == "postseed_length_ratio":
+        return abs(changed - 1.0) - abs(intact - 1.0)
+    raise KeyError(f"unregistered lesion damage metric: {metric}")
 
 
 def safe_corr(a: np.ndarray, b: np.ndarray) -> float:
@@ -378,12 +406,67 @@ def run_unit(out_root: Path, metrics_path: Path, influence_path: Path, device: t
             "node_incident_weight_caliper": 0.10,
             "node_mean_degree_absolute_caliper": 1.0,
             "node_radius_caliper": 0.10,
+            "connector_node_operation": (
+                "remove all incoming and outgoing recurrent edges incident to the selected "
+                "tissue nodes; retain direct input injection and observation-operator readout"
+            ),
         },
     }
 
 
+def complete_patient_fit_set(
+    rows: list[dict[str, Any]], expected_fit_ids: set[str],
+) -> bool:
+    """Require every preassigned patient fit before cohort lesion inference."""
+    observed = {str(row["fit_id"]) for row in rows}
+    return bool(
+        observed == set(expected_fit_ids)
+        and all(row["status"] == "inference_available" for row in rows)
+    )
+
+
+def lesion_cohort_summary(values: np.ndarray, minimum_patients: int = 5) -> dict[str, Any]:
+    """Keep small matched-lesion denominators descriptive only."""
+    values = np.asarray(values, float)
+    values = values[np.isfinite(values)]
+    eligible = len(values) >= int(minimum_patients)
+    nonzero = values[np.abs(values) > 1e-9]
+    return {
+        "n": int(len(values)),
+        "minimum_patients_for_cohort_inference": int(minimum_patients),
+        "cohort_inference_eligible": bool(eligible),
+        "median_specificity_contact_nll": (
+            float(np.median(values)) if len(values) else None
+        ),
+        "positive": int((values > 1e-9).sum()),
+        "negative": int((values < -1e-9).sum()),
+        "tied": int((np.abs(values) <= 1e-9).sum()),
+        "wilcoxon_p": (
+            float(wilcoxon(nonzero, method="auto").pvalue)
+            if eligible and len(nonzero) else (1.0 if eligible else None)
+        ),
+    }
+
+
+def holm_fixed_family(pvalues: dict[str, float]) -> dict[str, float]:
+    """Holm-adjust a fixed family, including unavailable hypotheses as p=1."""
+    ordered = sorted(pvalues.items(), key=lambda item: item[1])
+    adjusted: dict[str, float] = {}
+    running = 0.0
+    n = len(ordered)
+    for rank, (name, value) in enumerate(ordered):
+        running = max(running, min(1.0, (n - rank) * float(value)))
+        adjusted[name] = running
+    return adjusted
+
+
 def aggregate(out_root: Path) -> None:
     records = [json.loads(path.read_text()) for path in sorted((out_root / "matched_lesions").glob("**/LESION_DONE.json"))]
+    expected_fit_ids: dict[tuple[str, str, str], set[str]] = {}
+    for record in records:
+        expected_fit_ids.setdefault(
+            (record["subject"], record["model"], record["cell"]), set()
+        ).add(record["fit_id"])
     fit_rows = []
     for record in records:
         for lesion, values in record["lesions"].items():
@@ -392,12 +475,15 @@ def aggregate(out_root: Path) -> None:
             row = {key: record[key] for key in ("subject", "fit_id", "scope", "model", "cell", "seed")}
             row.update({"lesion": lesion, "status": values["status"],
                         "n_target": values["n_target"], "n_valid_matched_draws": values["n_valid_matched_draws"]})
-            for metric, direction in (("contact_nll", 1), ("stop_bce", 1),
-                                      ("rollout_spearman", -1), ("postseed_length_ratio", -1),
-                                      ("interictal_field_fidelity", -1)):
-                target_damage = direction * (number(values["targeted"][metric]) - number(values["baseline"][metric]))
-                matched_damage = [direction * (number(value) - number(values["baseline"][metric]))
-                                  for value in values["matched"].get(metric, [])]
+            for metric in ("contact_nll", "stop_bce", "rollout_spearman",
+                           "postseed_length_ratio", "interictal_field_fidelity"):
+                target_damage = perturbation_damage(
+                    metric, values["targeted"][metric], values["baseline"][metric]
+                )
+                matched_damage = [
+                    perturbation_damage(metric, value, values["baseline"][metric])
+                    for value in values["matched"].get(metric, [])
+                ]
                 row[f"target_damage_{metric}"] = target_damage
                 row[f"matched_median_damage_{metric}"] = float(np.nanmedian(matched_damage)) if matched_damage else np.nan
                 row[f"specificity_{metric}"] = target_damage - row[f"matched_median_damage_{metric}"]
@@ -410,8 +496,11 @@ def aggregate(out_root: Path) -> None:
     numeric = [key for key in fit_rows[0] if key.startswith(("target_damage_", "matched_median_", "specificity_"))]
     for key, rows in grouped.items():
         subject, model, cell, lesion = key
+        expected = expected_fit_ids[(subject, model, cell)]
+        observed = {row["fit_id"] for row in rows}
         item = {"subject": subject, "model": model, "cell": cell, "lesion": lesion,
-                "n_fits": len(rows), "all_inference_available": all(row["status"] == "inference_available" for row in rows)}
+                "n_fits": len(observed), "n_expected_fits": len(expected),
+                "all_inference_available": complete_patient_fit_set(rows, expected)}
         item.update({name: float(np.nanmean([row[name] for row in rows])) for name in numeric})
         patient_rows.append(item)
     write_csv(out_root / "matched_lesion_patient_metrics.csv", patient_rows)
@@ -423,17 +512,24 @@ def aggregate(out_root: Path) -> None:
         values = values[np.isfinite(values)]
         if len(values) == 0:
             continue
-        nonzero = values[np.abs(values) > 1e-9]
-        statistics[f"{model}|{lesion}"] = {
-            "n": len(values), "median_specificity_contact_nll": float(np.median(values)),
-            "positive": int((values > 1e-9).sum()),
-            "wilcoxon_p": float(wilcoxon(nonzero, method="auto").pvalue) if len(nonzero) else 1.0,
-        }
+        statistics[f"{model}|{lesion}"] = lesion_cohort_summary(values)
+    raw_family = {}
+    for name in M6_PRIMARY_LESION_FAMILY:
+        value = statistics.get(name, {}).get("wilcoxon_p")
+        raw_family[name] = 1.0 if value is None else float(value)
+    adjusted_family = holm_fixed_family(raw_family)
+    for name in M6_PRIMARY_LESION_FAMILY:
+        if name in statistics:
+            statistics[name]["holm_q_m6_primary_lesion_family"] = adjusted_family[name]
     (out_root / "MATCHED_LESION_SUMMARY.json").write_text(json.dumps({
         "contract": "topic5_rnn_motif_matched_lesion_summary_v0_4", "target_values_read": False,
         "n_selected_fit_model_units": len(records), "statistics": statistics,
         "cell_scope": "leaky_rnn_primary_only; GRU is limited to effective-reach architecture replication",
         "target_draws": TARGET_DRAWS, "minimum_valid_matched_draws": MINIMUM_VALID,
+        "m6_primary_lesion_holm_family": list(M6_PRIMARY_LESION_FAMILY),
+        "connector_node_operation": (
+            "incident recurrent-edge removal; direct input and observation readout retained"
+        ),
         "interpretation_rule": "motif wording requires enrichment, task relation and positive matched-lesion specificity",
     }, indent=2))
     (out_root / "stage_g_scientific_drift_audit.json").write_text(json.dumps({
@@ -444,6 +540,9 @@ def aggregate(out_root: Path) -> None:
             "under matched target-free perturbations"
         ),
         "primary_motif": "local high-influence backbone plus sparse long-range connector organization",
+        "connector_perturbation_scope": (
+            "incoming/outgoing recurrent edges at connector nodes; not complete node ablation"
+        ),
         "primary_evidence_required": ["enrichment", "task association", "matched-lesion specificity"],
         "cell_scope": "leaky RNN primary; GRU effective-reach replication only",
         "not_claimed": ["edge-level connectome recovery", "hidden-unit neuron identity",

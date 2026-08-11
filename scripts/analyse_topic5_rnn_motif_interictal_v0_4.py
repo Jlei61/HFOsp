@@ -68,6 +68,18 @@ def bootstrap_ci(values: np.ndarray, seed: int = 20260809, draws: int = 10000) -
     return np.quantile(samples, [0.025, 0.975]).astype(float).tolist()
 
 
+def holm(pvalues: dict[str, float]) -> dict[str, float]:
+    """Holm-adjust one preassigned contrast family."""
+    items = sorted(pvalues.items(), key=lambda item: item[1])
+    adjusted: dict[str, float] = {}
+    running = 0.0
+    n = len(items)
+    for rank, (name, value) in enumerate(items):
+        running = max(running, min(1.0, (n - rank) * float(value)))
+        adjusted[name] = running
+    return adjusted
+
+
 def write_csv(path: Path, rows: list[dict[str, Any]]) -> None:
     if not rows:
         return
@@ -326,9 +338,14 @@ def stats_for(patients: list[dict[str, Any]], cell: str) -> dict[str, Any]:
         for name, function in definitions.items():
             values = np.array([function(subject) for subject in subjects])
             factorial[name] = {**paired_test(values), "bootstrap_95ci": bootstrap_ci(values, seed=31)}
+        adjusted = holm({name: float(factorial[name]["p_two_sided"])
+                         for name in definitions})
+        for name in definitions:
+            factorial[name]["holm_q_factorial_family"] = adjusted[name]
 
     return {"cell": cell, "n_patients": len(subjects), "available_models": available_models,
-            "comparisons": comparisons, "factorial": factorial}
+            "comparisons": comparisons, "factorial": factorial,
+            "factorial_holm_family": list(factorial)}
 
 
 def patient_bootstrap(event_rows: list[dict[str, Any]], draws: int = 2000,

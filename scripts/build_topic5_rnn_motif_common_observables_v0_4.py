@@ -27,6 +27,30 @@ def finite(rows: list[dict[str, str]], key: str) -> np.ndarray:
     return np.asarray(values, float)
 
 
+def patient_level_vectors(
+    rows: list[dict[str, str]], keys: tuple[str, ...],
+) -> dict[str, np.ndarray]:
+    """Collapse fit and seed rows before any cohort-level observable.
+
+    Shared patients contribute three seed rows, whereas non-collinear patients
+    contribute two fits times three seeds.  Pooling the raw rows would therefore
+    count optimisation seeds as biological replicates and weight the latter
+    patients twice.  The common-observable table is descriptive, but it must
+    still obey the project-wide patient-first aggregation contract.
+    """
+    grouped: dict[str, list[dict[str, str]]] = {}
+    for row in rows:
+        grouped.setdefault(str(row["subject"]), []).append(row)
+    output: dict[str, np.ndarray] = {}
+    for subject, selected in sorted(grouped.items()):
+        values = []
+        for key in keys:
+            available = finite(selected, key)
+            values.append(float(np.median(available)) if available.size else np.nan)
+        output[subject] = np.asarray(values, float)
+    return output
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, required=True)
@@ -63,12 +87,22 @@ def main() -> int:
     models = sorted({row["model"] for row in fields if row["cell"] == "rnn"})
     for model in models:
         model_fields = [row for row in fields if row["model"] == model and row["cell"] == "rnn"]
+        shared_model_fields = [
+            row for row in model_fields if row["aggregation"] == "shared_single_fit"
+        ]
+        contrast_fidelity = finite(model_fields, "canonical_contrast_fidelity")
+        shared_ab_association = finite(shared_model_fields, "generated_AB_r")
         model_early = [row for row in early if row["model"] == model and row["cell"] == "rnn"
                        and row["endpoint"] == "canonical_full" and row["primary"] == "True"]
         model_influence = [row for row in influence if row["model"] == model and row["cell"] == "rnn"]
+        patient_influence = patient_level_vectors(
+            model_influence, ("lag1_reach_mm", "lag2_reach_mm", "lag3_reach_mm")
+        )
+        influence_matrix = np.asarray(list(patient_influence.values()), float)
+        influence_available = bool(
+            influence_matrix.size and np.isfinite(influence_matrix).any(axis=1).any()
+        )
         model_interictal = [row for row in interictal if row["model"] == model and row["cell"] == "rnn"]
-        model_lesion = [row for row in lesions if row["model"] == model and row["cell"] == "rnn"
-                        and row["lesion"] == "connector_nodes" and row["all_inference_available"] == "True"]
         output.extend([
             {"system": f"RNN:{model}", "observable": "heldout interictal propagation",
              "status": "available", "value": float(np.nanmedian(finite(model_interictal, "rollout_spearman"))),
@@ -80,22 +114,57 @@ def main() -> int:
              "denominator": len(model_fields), "comparison_level": "contact-rank field",
              "boundary": "shared patients support one-model A/B; non-collinear patients use separate fits",
              "source": "model_field_patient_metrics.csv"},
+            {"system": f"RNN:{model}", "observable": "empirical A/B contrast fidelity",
+             "status": "available" if contrast_fidelity.size else "missing",
+             "value": (float(np.nanmedian(contrast_fidelity))
+                       if contrast_fidelity.size else None),
+             "denominator": int(contrast_fidelity.size),
+             "comparison_level": "patient-level contact-rank contrast field",
+             "boundary": "contrast readout, not recovery of two anatomical networks",
+             "source": "model_field_patient_metrics.csv"},
+            {"system": f"RNN:{model}", "observable": "shared-fit source-conditioned A/B association",
+             "status": "available" if shared_ab_association.size else "missing",
+             "value": (float(np.nanmedian(shared_ab_association))
+                       if shared_ab_association.size else None),
+             "denominator": int(shared_ab_association.size),
+             "comparison_level": "same-network generated contact-rank fields",
+             "boundary": "different observed starts condition one network; global anticorrelation is not required",
+             "source": "model_field_patient_metrics.csv"},
             {"system": f"RNN:{model}", "observable": "early-ictal canonical-field concordance",
              "status": "available", "value": float(np.nanmedian(finite(model_early, "all_contact_margin"))),
              "denominator": len(model_early), "comparison_level": "patient-level null-relative R3 field margin",
              "boundary": "target-free frozen external benchmark", "source": "early_ictal_per_patient_model.csv"},
             {"system": f"RNN:{model}", "observable": "open-loop effective reach lag 1/2/3",
-             "status": "available" if model_influence else "missing", "value": (
-                 [float(np.nanmedian(finite(model_influence, key))) for key in
-                  ("lag1_reach_mm", "lag2_reach_mm", "lag3_reach_mm")] if model_influence else None),
-             "denominator": len(model_influence), "comparison_level": "contact-space finite-pulse response (mm)",
+             "status": "available" if influence_available else "missing", "value": (
+                 np.nanmedian(influence_matrix, axis=0).tolist() if influence_available else None),
+             "denominator": int(sum(np.isfinite(value).any() for value in patient_influence.values())),
+             "comparison_level": "patient-first contact-space finite-pulse response (mm)",
              "boundary": "rank-step, not real-time dynamics", "source": "effective_influence_fit_seed.csv"},
-            {"system": f"RNN:{model}", "observable": "connector matched-lesion specificity",
-             "status": "available" if model_lesion else "not estimable", "value": (
-                 float(np.nanmedian(finite(model_lesion, "specificity_contact_nll"))) if model_lesion else None),
-             "denominator": len(model_lesion), "comparison_level": "heldout interictal ΔNLL beyond matched random lesion",
-             "boundary": "in-model perturbation only", "source": "matched_lesion_patient_metrics.csv"},
         ])
+        for lesion, label in (
+            ("local_backbone_edges", "local-backbone matched-lesion specificity"),
+            ("long_range_high_influence_edges", "long-range-edge matched-lesion specificity"),
+            ("connector_nodes", "connector incident-edge matched-lesion specificity"),
+        ):
+            model_lesion = [
+                row for row in lesions
+                if row["model"] == model and row["cell"] == "rnn"
+                and row["lesion"] == lesion and row["all_inference_available"] == "True"
+            ]
+            output.append({
+                "system": f"RNN:{model}", "observable": label,
+                "status": "available" if model_lesion else "not estimable",
+                "value": (float(np.nanmedian(finite(
+                    model_lesion, "specificity_contact_nll"
+                ))) if model_lesion else None),
+                "denominator": len(model_lesion),
+                "comparison_level": "heldout interictal ΔNLL beyond matched random lesion",
+                "boundary": (
+                    "in-model perturbation only; connector operation removes incident recurrent "
+                    "edges while retaining direct input and readout"
+                ),
+                "source": "matched_lesion_patient_metrics.csv",
+            })
 
     output.extend([
         {"system": "SNN:E1146", "observable": "opposite-source bidirectionality",
@@ -130,6 +199,7 @@ def main() -> int:
     (out_root / "COMMON_OBSERVABLES.json").write_text(json.dumps({
         "contract": "topic5_human_rnn_snn_common_observables_v0_4",
         "edge_to_edge_comparison": False,
+        "edge_to_edge_mapping_attempted": False,
         "hidden_unit_to_neuron_comparison": False,
         "snn_rerun": False,
         "rows": output,

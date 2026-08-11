@@ -43,6 +43,30 @@ def safe_spearman(x, y) -> dict[str, Any]:
     return {"n": int(use.sum()), "rho": float(result.statistic), "p": float(result.pvalue)}
 
 
+def holm_fixed_association_family(
+    associations: dict[str, dict[str, Any]], keys: tuple[str, ...]
+) -> dict[str, float]:
+    """Holm-adjust one predeclared association family, retaining missing tests.
+
+    Missing or non-finite p-values remain in the family as p=1.  This prevents a
+    smaller, data-dependent multiplicity penalty when one association cannot be
+    estimated in a small patient cohort.
+    """
+    raw = {}
+    for key in keys:
+        value = associations.get(key, {})
+        p = value.get("p")
+        raw[key] = float(p) if p is not None and np.isfinite(p) else 1.0
+    ordered = sorted(raw, key=raw.get)
+    adjusted: dict[str, float] = {}
+    running = 0.0
+    n_tests = len(ordered)
+    for rank, key in enumerate(ordered):
+        running = max(running, (n_tests - rank) * raw[key])
+        adjusted[key] = min(1.0, running)
+    return adjusted
+
+
 def pairwise_array_seed_stability(
     paths: list[Path], key: str, array_index: int | None = None
 ) -> float:
@@ -84,6 +108,29 @@ def pairwise_seed_stability(paths: list[Path]) -> float:
     return pairwise_array_seed_stability(paths, "edge_effective_influence")
 
 
+def active_edge_split_half_stability(edge_half: np.ndarray, mask: np.ndarray) -> float:
+    """Compare heldout halves only where the frozen recurrent graph has an edge.
+
+    The two halves are evaluated with the same trained mask.  Including inactive
+    pairs would therefore add a large set of structural joint zeros that cannot
+    contain split-half evidence and can spuriously inflate the rank correlation.
+    Zeros on active edges remain in the comparison because they are genuine
+    zero effective influence under one heldout half.
+    """
+    edge_half = np.asarray(edge_half, float)
+    mask = np.asarray(mask, bool)
+    if edge_half.ndim != 3 or edge_half.shape[0] != 2:
+        raise ValueError("edge_half must have shape [2, node, node]")
+    if edge_half.shape[1:] != mask.shape:
+        raise ValueError("edge_half and mask shapes do not match")
+    use = mask & ~np.eye(mask.shape[0], dtype=bool)
+    left, right = edge_half[0][use], edge_half[1][use]
+    finite = np.isfinite(left) & np.isfinite(right)
+    if finite.sum() < 3 or np.std(left[finite]) <= 0 or np.std(right[finite]) <= 0:
+        return float("nan")
+    return float(spearmanr(left[finite], right[finite]).statistic)
+
+
 def candidate_distance_classes(mask: np.ndarray, distance: np.ndarray) -> tuple[np.ndarray, np.ndarray, float, float]:
     """Classify active edges using thresholds from every candidate node pair.
 
@@ -105,6 +152,7 @@ def unit_summary(path: Path, draws: int) -> dict[str, Any]:
         summary = json.loads(str(data["summary_json"].item()))
         mask = np.asarray(data["edge_mask"], bool)
         influence = np.asarray(data["edge_effective_influence"], float)
+        edge_half = np.asarray(data["edge_effective_influence_split_half"], float)
         distance = np.asarray(data["edge_distance_mm"], float)
         connector = np.asarray(data["connector_nodes"], bool)
     active = np.flatnonzero(mask.ravel())
@@ -135,6 +183,10 @@ def unit_summary(path: Path, draws: int) -> dict[str, Any]:
         "candidate_pair_distance_q50_mm": candidate_q50,
         "candidate_pair_distance_q75_mm": candidate_q75,
         "distance_threshold_reference": "all_off_diagonal_candidate_node_pairs",
+        "effective_operator_split_half_stability": active_edge_split_half_stability(
+            edge_half, mask
+        ),
+        "split_half_stability_support": "frozen_active_recurrent_edges_only",
         "motif_score": float(
             np.mean(values[local]) / max(mean_all, 1e-12)
             + observed_long_top - float(np.median(null))
@@ -242,6 +294,17 @@ def main() -> int:
     m6_key = "M6_SPATIAL_MID|rnn"
     m6_enrichment = enrichment.get(m6_key, {})
     m6_association = associations.get(m6_key, {})
+    m6_task_relation_keys = (
+        "motif_vs_rollout",
+        "motif_vs_empirical_field_fidelity",
+    )
+    m6_task_relation_holm = holm_fixed_association_family(
+        m6_association, m6_task_relation_keys
+    )
+    for key, q_value in m6_task_relation_holm.items():
+        m6_association.setdefault(key, {})[
+            "holm_q_m6_task_relation_family"
+        ] = q_value
     stability = paired_summary(
         [row["effective_operator_seed_stability"] for row in patient_rows
          if row["model"] == "M6_SPATIAL_MID" and row["cell"] == "rnn"],
@@ -262,16 +325,22 @@ def main() -> int:
         for lag in (1, 2, 3)
     }
 
-    def positive_significant(value: dict[str, Any] | None, estimate: str = "median") -> bool:
-        return bool(value and (value.get(estimate) or 0) > 0
-                    and (value.get("wilcoxon_p") or 1) < 0.05)
+    def positive_significant(value: dict[str, Any] | None, estimate: str = "median",
+                             require_lesion_eligibility: bool = False,
+                             p_key: str = "wilcoxon_p") -> bool:
+        return bool(value
+                    and (not require_lesion_eligibility
+                         or value.get("cohort_inference_eligible") is True)
+                    and (value.get(estimate) or 0) > 0
+                    and (value.get(p_key) or 1) < 0.05)
 
     local_lesion = lesion_stats.get("M6_SPATIAL_MID|local_backbone_edges")
     long_lesion = lesion_stats.get("M6_SPATIAL_MID|long_range_high_influence_edges")
     connector_lesion = lesion_stats.get("M6_SPATIAL_MID|connector_nodes")
     task_relation = any(
-        (value.get("rho") or 0) > 0 and (value.get("p") or 1) < 0.05
-        for key, value in m6_association.items() if key != "motif_vs_wiring_cost"
+        (m6_association.get(key, {}).get("rho") or 0) > 0
+        and m6_task_relation_holm[key] < 0.05
+        for key in m6_task_relation_keys
     )
     proposal = paired_summary(proposal_difference, seed=stable_seed("M6 proposal"))
     claim_components = {
@@ -285,11 +354,14 @@ def main() -> int:
         "effective_operator_split_half_stability": positive_significant(split_stability),
         "task_relation": task_relation,
         "local_backbone_matched_lesion": positive_significant(
-            local_lesion, "median_specificity_contact_nll"
+            local_lesion, "median_specificity_contact_nll", True,
+            "holm_q_m6_primary_lesion_family"
         ),
         "long_range_or_connector_matched_lesion": (
-            positive_significant(long_lesion, "median_specificity_contact_nll")
-            or positive_significant(connector_lesion, "median_specificity_contact_nll")
+            positive_significant(long_lesion, "median_specificity_contact_nll", True,
+                                 "holm_q_m6_primary_lesion_family")
+            or positive_significant(connector_lesion, "median_specificity_contact_nll", True,
+                                    "holm_q_m6_primary_lesion_family")
         ),
         "not_binary_proposal_only": positive_significant(proposal),
     }
@@ -300,8 +372,16 @@ def main() -> int:
         "effective_weight_permutation_null": "influence values permuted over the frozen active edge mask",
         "enrichment": enrichment,
         "task_and_wiring_associations": associations,
+        "M6_task_relation_holm_family": {
+            "members": list(m6_task_relation_keys),
+            "adjusted_p": m6_task_relation_holm,
+            "wiring_cost_excluded_reason": (
+                "wiring cost is an economy endpoint, not a task-performance endpoint"
+            ),
+        },
         "effective_operator_seed_stability": {m6_key: stability},
         "effective_operator_split_half_stability": {m6_key: split_stability},
+        "effective_operator_split_half_support": "frozen_active_recurrent_edges_only",
         "open_loop_pulse_cross_seed_stability": {m6_key: pulse_seed_stability},
         "pulse_split_half_scope": "not estimated; split-half stability applies to the effective edge operator",
         "M6_true_order_minus_order_shuffle_motif_score": proposal,

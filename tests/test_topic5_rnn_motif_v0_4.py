@@ -8,6 +8,8 @@ import json
 import sys
 from pathlib import Path
 
+import yaml
+
 from src.topic5_rnn_motif_v0_4 import (
     MODEL_SPECS,
     RolloutSizeHead,
@@ -28,6 +30,8 @@ from build_topic5_rnn_motif_fields_v0_4 import (  # noqa: E402
 )
 from analyse_topic5_rnn_motif_interictal_v0_4 import (  # noqa: E402
     event_pair_reliability,
+    holm as interictal_holm,
+    paired_test,
     seed_removed_sequence_agreement,
 )
 from analyse_topic5_rnn_motif_influence_v0_4 import (  # noqa: E402
@@ -36,20 +40,65 @@ from analyse_topic5_rnn_motif_influence_v0_4 import (  # noqa: E402
     contact_response_summary,
 )
 from score_topic5_rnn_motif_early_ictal_v0_4 import (  # noqa: E402
+    aggregate_patients,
     conditional_effects,
     compute_dose_trend,
     compute_factorial_effects,
+    locked_target_artifacts,
     permutation_indices,
     permutation_support,
+    paired_summary,
+    target_artifact_recheck_payload,
 )
-from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import patient_fields  # noqa: E402
+from score_topic5_rnn_motif_lesion_early_ictal_v0_4 import (  # noqa: E402
+    bounded_secondary_summary,
+    patient_fields,
+)
 from summarize_topic5_rnn_motif_theory_v0_4 import (  # noqa: E402
+    active_edge_split_half_stability,
     candidate_distance_classes,
+    holm_fixed_association_family,
     pairwise_array_seed_stability,
     pairwise_seed_stability,
 )
 from run_topic5_rnn_motif_matched_lesions_v0_4 import (  # noqa: E402
+    choose_units,
+    complete_patient_fit_set,
     edge_descriptor_matches,
+    holm_fixed_family,
+    lesion_cohort_summary,
+    perturbation_damage,
+    write_csv as write_matched_lesion_csv,
+)
+from build_topic5_rnn_motif_common_observables_v0_4 import (  # noqa: E402
+    patient_level_vectors,
+)
+from export_topic5_rnn_motif_unit_contracts_v0_4 import (  # noqa: E402
+    export as export_unit_contracts,
+    export_preflight_inventory,
+    sha256,
+)
+from plot_topic5_rnn_motif_figures_v0_4 import (  # noqa: E402
+    lesion_display_values,
+    locked_early_target_paths,
+    patient_level_effective_reach,
+    selected_metrics,
+)
+from finalize_topic5_rnn_motif_v0_4 import (  # noqa: E402
+    audit_figure_sources,
+    focused_test_log_ok,
+    integrated_level4,
+    postprocess_snapshot_equivalence_ok,
+    preflight_inventory_ok,
+    stage_drift_audits_complete,
+    target_artifact_recheck_ok,
+    target_contract_trace_ok,
+    visual_qa_complete,
+)
+from run_topic5_rnn_motif_closeout_v0_4 import (  # noqa: E402
+    PRIMARY_UNSEAL_SCRIPT,
+    closeout_commands,
+    wait_for_ready,
 )
 from closeout_topic5_rnn_motif_review_v0_4 import (  # noqa: E402
     field_decomposition,
@@ -72,6 +121,15 @@ def _static_model(n_contacts: int = 6) -> WEModel:
     return model
 
 
+def test_finalizer_requires_complete_frozen_focused_suite():
+    assert focused_test_log_ok("145 passed, 1 warning in 9.2s")
+    assert not focused_test_log_ok("144 passed, 1 warning in 9.2s")
+    assert not focused_test_log_ok("145 passed, 1 failed in 9.2s")
+    # Optional-cache skips must not be read as a missing test.
+    assert focused_test_log_ok("140 passed, 5 skipped, 1 warning in 9.2s")
+    assert not focused_test_log_ok("139 passed, 5 skipped, 1 warning in 9.2s")
+
+
 def test_factorial_models_differ_only_in_growth_and_cost_components():
     square = {key: MODEL_SPECS[key] for key in (
         "M2_UNIFORM_SET", "M4_SPATIAL_GROWTH", "M6_SPATIAL_MID", "M8_UNIFORM_COST_MID"
@@ -83,6 +141,250 @@ def test_factorial_models_differ_only_in_growth_and_cost_components():
     assert square["M2_UNIFORM_SET"].eta == square["M4_SPATIAL_GROWTH"].eta == 0.0
     assert square["M6_SPATIAL_MID"].eta == square["M8_UNIFORM_COST_MID"].eta == 0.03
     assert all(len(spec.seeds) == 3 for spec in square.values())
+
+
+def test_interictal_factorial_holm_is_monotone():
+    adjusted = interictal_holm({"a": 0.01, "b": 0.03, "c": 0.04})
+    assert adjusted == {"a": 0.03, "b": 0.06, "c": 0.06}
+
+
+def test_motif_task_relation_uses_fixed_holm_family():
+    adjusted = holm_fixed_association_family(
+        {
+            "motif_vs_rollout": {"p": 0.01},
+            "motif_vs_empirical_field_fidelity": {"p": 0.03},
+        },
+        ("motif_vs_rollout", "motif_vs_empirical_field_fidelity"),
+    )
+    assert adjusted == {
+        "motif_vs_rollout": 0.02,
+        "motif_vs_empirical_field_fidelity": 0.03,
+    }
+    missing = holm_fixed_association_family(
+        {"motif_vs_rollout": {"p": 0.01}},
+        ("motif_vs_rollout", "motif_vs_empirical_field_fidelity"),
+    )
+    assert missing["motif_vs_rollout"] == 0.02
+    assert missing["motif_vs_empirical_field_fidelity"] == 1.0
+
+
+def test_motif_split_half_stability_excludes_structural_joint_zeros():
+    mask = np.zeros((5, 5), dtype=bool)
+    mask[0, 1] = mask[1, 2] = mask[2, 3] = True
+    halves = np.zeros((2, 5, 5), dtype=float)
+    halves[0][mask] = [1.0, 2.0, 3.0]
+    halves[1][mask] = [3.0, 2.0, 1.0]
+    # The inactive pairs are joint zeros fixed by the shared graph and must not
+    # turn an anticorrelated active-edge operator into apparent stability.
+    assert np.isclose(active_edge_split_half_stability(halves, mask), -1.0)
+
+
+def test_level4_wording_requires_target_free_motif_economy_and_cross_state():
+    assert integrated_level4(True, True, True)
+    assert not integrated_level4(True, True, False)
+    assert not integrated_level4(True, False, True)
+    assert not integrated_level4(False, True, True)
+
+
+def test_visual_qa_requires_every_stage_and_final_panel():
+    stage_names = (
+        "stage_a_preflight_contract",
+        "stage_c_smoke_training_and_decoder",
+        "stage_d_interictal_model_matrix",
+        "stage_interictal_scientific_readout",
+        "stage_e_target_free_model_fields",
+        "stage_fields_scientific_readout",
+        "stage_motif_scientific_readout",
+        "stage_early_scientific_readout",
+    )
+    payload = {
+        "status": "ACCEPTED",
+        "scientific_contract_pass": True,
+        "visual_pass": True,
+        "png_pdf_svg_checked": True,
+        "stage_figures": {
+            name: {"scientific_pass": True, "visual_pass": True}
+            for name in stage_names
+        },
+        "final_panels": {
+            panel: {"scientific_pass": True, "visual_pass": True}
+            for panel in "ABCDEF"
+        },
+    }
+    assert visual_qa_complete(payload)
+    payload["final_panels"]["F"]["visual_pass"] = False
+    assert not visual_qa_complete(payload)
+
+
+def test_postprocess_snapshot_equivalence_requires_all_three_hashes(tmp_path):
+    source = tmp_path / "source.py"
+    snapshot = tmp_path / "snapshot.py"
+    source.write_text("print('fixed')\n")
+    snapshot.write_bytes(source.read_bytes())
+    import hashlib
+    digest = hashlib.sha256(source.read_bytes()).hexdigest()
+    payload = {"scripts": {"producer.py": {
+        "source": str(source), "snapshot": str(snapshot), "sha256": digest,
+    }}}
+    assert postprocess_snapshot_equivalence_ok(payload)
+    snapshot.write_text("print('changed')\n")
+    assert not postprocess_snapshot_equivalence_ok(payload)
+
+
+def test_stage_drift_audit_requires_scientific_content_not_only_status():
+    audits = {
+        "a": {"status": "ALIGNED", "original_question": "which recurrent motifs",
+              "checked": [1, 2, 3, 4], "deviations": []},
+        "c": {"status": "ALIGNED_ENGINEERING_SMOKE", "n_units": 9,
+              "scientific_inference_allowed": False, "target_values_read": False},
+        "d": {"status": "ALIGNED", "target_values_read": False,
+              "scientific_question": "which connectivity constraints are sufficient",
+              "primary_corrections_applied": [1, 2, 3], "not_claimed": [1, 2, 3]},
+        "e": {"status": "ALIGNED", "target_values_read": False,
+              "checked": [1, 2, 3, 4], "deviations": []},
+        "f": {"status": "ALIGNED", "target_role": "external frozen benchmark only",
+              "target_values_read_after_field_freeze": True, "n_primary_subjects": 10,
+              "primary_endpoint": "canonical_full maxAB versus null"},
+        "g": {"status": "ALIGNED", "target_values_read": False,
+              "primary_motif": "local high-influence backbone plus connectors",
+              "primary_evidence_required": [1, 2, 3],
+              "cell_scope": "leaky RNN primary; GRU replication"},
+        "h": {"status": "ALIGNED", "comparison_level": "shared mesoscopic observables only",
+              "snn_rerun": False, "explicitly_missing": [1, 2],
+              "not_claimed": [1, 2, 3]},
+    }
+    assert stage_drift_audits_complete(audits)
+    audits["f"].pop("target_values_read_after_field_freeze")
+    assert not stage_drift_audits_complete(audits)
+
+
+def test_preflight_inventory_export_is_explicitly_post_run_and_target_free(tmp_path):
+    out = tmp_path
+    fit = {
+        "fit_id": "p1__shared", "subject": "p1", "scope": "shared",
+        "n_contacts": 4, "n_nodes": 4, "n_train": 8, "n_validation": 2, "n_test": 2,
+    }
+    (out / "INPUT_MANIFEST.json").write_text(json.dumps({"fits": [fit]}))
+    (out / "PRE_FLIGHT_AUDIT.json").write_text(json.dumps({
+        "target_values_read": False, "n_patients": 1, "n_fits": 1,
+        "n_training_units": 1,
+        "geometry_status": "RETROSPECTIVE_TEST_INFORMED_PROPAGATION_PLANE",
+    }))
+    (out / "EARLY_ICTAL_METADATA_INVENTORY.json").write_text(json.dumps({
+        "target_values_read": False, "expected_primary_n": 1,
+        "actual_primary_join": ["p1"],
+    }))
+    result = export_preflight_inventory(out)
+    assert result["target_values_deserialized_by_this_exporter"] is False
+    assert result["created_after_target_unseal"] is False
+    assert result["n_patients"] == 1
+    assert result["shared_and_noncollinear_fit_inventory"] == [fit]
+    assert json.loads((out / "PREFLIGHT_INVENTORY.json").read_text()) == result
+    assert preflight_inventory_ok(result, out)
+    tampered = json.loads(json.dumps(result))
+    tampered["source_artifacts"]["input_manifest"]["sha256"] = "bad"
+    assert not preflight_inventory_ok(tampered, out)
+
+
+def test_figure_uses_only_frozen_early_target_inventory(tmp_path):
+    frozen = tmp_path / "frozen.npz"
+    extra = tmp_path / "extra.npz"
+    np.savez(frozen, contact_names=np.asarray(["A1"]), target_1_150=np.asarray([1.0]))
+    np.savez(extra, contact_names=np.asarray(["A1"]), target_1_150=np.asarray([99.0]))
+    with (tmp_path / "early_ictal_metadata_inventory.csv").open("w", newline="") as handle:
+        writer = csv.DictWriter(
+            handle, fieldnames=["subject", "artifact_path", "artifact_sha256"]
+        )
+        writer.writeheader()
+        writer.writerow({
+            "subject": "p1", "artifact_path": str(frozen),
+            "artifact_sha256": sha256(frozen),
+        })
+    assert locked_early_target_paths(tmp_path, "p1") == [frozen.resolve()]
+    frozen.write_bytes(b"changed")
+    with np.testing.assert_raises_regex(RuntimeError, "hash changed"):
+        locked_early_target_paths(tmp_path, "p1")
+
+
+def test_lesion_early_small_patient_cohort_is_descriptive_only():
+    small = bounded_secondary_summary([0.1, 0.2, 0.3, 0.4], seed=1)
+    assert small["cohort_inference_eligible"] is False
+    assert small["wilcoxon_p"] is None
+    assert small["bootstrap_95ci"] == [None, None]
+    enough = bounded_secondary_summary([0.1, 0.2, 0.3, 0.4, 0.5], seed=1)
+    assert enough["cohort_inference_eligible"] is True
+    assert enough["wilcoxon_p"] is not None
+
+
+def test_target_artifact_recheck_is_required_before_unseal():
+    payload = {
+        "status": "PASS",
+        "n_artifacts": 26,
+        "artifact_sha256_mismatches": 0,
+        "metadata_target_values_read": False,
+        "model_field_manifest_target_values_read": False,
+        "target_access_audit_existed_before_recheck": False,
+    }
+    assert target_artifact_recheck_ok(payload)
+    assert not target_artifact_recheck_ok({**payload, "artifact_sha256_mismatches": 1})
+    assert not target_artifact_recheck_ok({**payload, "target_access_audit_existed_before_recheck": True})
+
+
+def test_target_artifact_recheck_payload_is_value_blind(tmp_path):
+    metadata = {
+        "actual_primary_join": ["p1", "p2"],
+        "supportive_subject": "s1",
+        "target_values_read": False,
+        "target_energy_arrays_deserialized": False,
+    }
+    artifacts = {
+        "p1": [tmp_path / "a.npz", tmp_path / "b.npz"],
+        "p2": [tmp_path / "c.npz"],
+        "s1": [tmp_path / "d.npz"],
+    }
+    payload = target_artifact_recheck_payload(tmp_path, metadata, artifacts)
+    assert payload["n_artifacts"] == 4
+    assert payload["n_primary_seizure_files"] == 3
+    assert payload["n_supportive_seizure_files"] == 1
+    assert payload["metadata_target_energy_arrays_deserialized"] is False
+    assert payload["target_access_audit_existed_before_recheck"] is False
+
+
+def test_post_unseal_closeout_never_repeats_primary_target_scorer(tmp_path):
+    commands = closeout_commands(tmp_path / "out", tmp_path / "targets", tmp_path / "snn.json")
+    flattened = [token for _, command in commands for token in command]
+    assert not any(PRIMARY_UNSEAL_SCRIPT in token for token in flattened)
+    assert [name for name, _ in commands].count("lesion_early_ictal") == 1
+    assert "final_figure" in [name for name, _ in commands]
+    assert "focused_tests" in [name for name, _ in commands]
+
+
+def test_closeout_waiter_does_not_read_target_values(tmp_path):
+    out = tmp_path / "out"
+    out.mkdir()
+    (out / "POSTPROCESS_READY_FOR_VISUAL_QA.json").write_text("{}")
+    wait_for_ready(out, poll_seconds=10, max_wait_hours=1)
+    payload = json.loads((out / "CLOSEOUT_WAIT_STATUS.json").read_text())
+    assert payload["status"] == "IMMUTABLE_POSTPROCESS_READY"
+    assert payload["target_values_read_by_waiter"] is False
+
+
+def test_target_contract_trace_matches_paper_endpoint():
+    payload = {
+        "status": "PASS",
+        "target_key": "target_1_150",
+        "anchor": "clinical_onset",
+        "post_onset_window_seconds": [0.0, 10.0],
+        "frequency_band_hz": [1.0, 150.0],
+        "primary_field_endpoint": "canonical_full_maxAB",
+        "primary_null": "5000 synchronized all-contact permutations with support rebuilt",
+        "sensitivity_null": "within-shaft permutations",
+        "target_values_read_during_trace": False,
+        "producer_chain": [{}, {}, {}, {}],
+    }
+    assert target_contract_trace_ok(payload)
+    assert not target_contract_trace_ok({**payload, "anchor": "eeg_onset"})
+    assert not target_contract_trace_ok({**payload, "frequency_band_hz": [1.0, 45.0]})
 
 
 def test_primary_shuffle_keeps_first_rank_and_whole_tie_sets():
@@ -321,6 +623,59 @@ def test_early_ictal_permutations_are_synchronized_and_shaft_preserving():
     }
 
 
+def test_early_ictal_null_is_folded_patient_first_draw_by_draw():
+    rows = []
+    nulls = {}
+    for seizure, observed, null in (
+        ("s1", 0.2, np.array([0.1, 0.6])),
+        ("s2", 0.8, np.array([0.3, 0.2])),
+    ):
+        keys = {name: f"{seizure}_{name}" for name in
+                ("all", "shaft", "common_all", "common_shaft")}
+        for key in keys.values():
+            nulls[key] = null
+        rows.append({
+            "subject": "p1", "model": "M6_SPATIAL_MID", "cell": "rnn",
+            "endpoint": "canonical_full", "seizure_id": seizure,
+            "observed": observed, "common_observed": observed,
+            "n_contacts": 8, "n_within_shaft_permutable_contacts": 8,
+            "n_within_shaft_permutable_groups": 2,
+            "null_key_all": keys["all"], "null_key_shaft": keys["shaft"],
+            "null_key_common_all": keys["common_all"],
+            "null_key_common_shaft": keys["common_shaft"],
+        })
+    patients, patient_nulls = aggregate_patients(rows, nulls, supportive="supportive")
+    assert len(patients) == 1
+    assert np.isclose(patients[0]["observed"], 0.5)
+    assert np.isclose(patients[0]["all_contact_null_median"], 0.3)
+    assert np.isclose(patients[0]["all_contact_margin"], 0.2)
+    key = "p1|M6_SPATIAL_MID|rnn|canonical_full|maxab"
+    assert np.allclose(patient_nulls[key], np.array([0.2, 0.4]))
+
+
+def test_early_ictal_scorer_reads_only_hash_locked_target_artifacts(tmp_path):
+    target_root = tmp_path / "targets"
+    target_root.mkdir()
+    artifact = target_root / "epilepsiae_p1__s1.npz"
+    artifact.write_bytes(b"frozen target bytes")
+    inventory = tmp_path / "early_ictal_metadata_inventory.csv"
+    with inventory.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=("subject", "artifact_path", "artifact_sha256"))
+        writer.writeheader()
+        writer.writerow({"subject": "epilepsiae_p1", "artifact_path": str(artifact),
+                         "artifact_sha256": sha256(artifact)})
+    metadata = {
+        "target_cache_root": str(target_root),
+        "inventory_csv_sha256": sha256(inventory),
+        "seizure_file_counts_filename_only": {"epilepsiae_p1": 1},
+    }
+    resolved = locked_target_artifacts(tmp_path, target_root, metadata)
+    assert resolved == {"epilepsiae_p1": [artifact.resolve()]}
+    artifact.write_bytes(b"mutated after target freeze")
+    with np.testing.assert_raises_regex(RuntimeError, "hash changed"):
+        locked_target_artifacts(tmp_path, target_root, metadata)
+
+
 def test_factorial_effects_use_one_complete_patient_denominator():
     lookup = {}
     for subject in ("p1", "p2"):
@@ -390,10 +745,20 @@ def test_conditional_early_model_refits_patient_clusters_and_permutations():
     assert 0.0 < effect["patient_label_permutation_p"] <= 1.0
 
 
+def test_patient_wilcoxon_removes_ties_before_requesting_exact_distribution():
+    values = np.asarray([1.0, 2.0, 3.0, 4.0, 0.0, 5.0e-17])
+    interictal = paired_test(values)
+    early = paired_summary(values, draws=100, seed=9)
+    assert (interictal["positive"], interictal["negative"], interictal["tied"]) == (4, 0, 2)
+    assert (early["positive"], early["negative"], early["tied"]) == (4, 0, 2)
+    assert np.isclose(interictal["p_two_sided"], 0.125)
+    assert np.isclose(early["wilcoxon_p"], 0.125)
+
+
 def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
-    def record(scope, fit_id, template, values):
+    def record(scope, fit_id, template, values, status="inference_available"):
         payload = {
-            "status": "inference_available", "field_contacts": ["A1", "B1"],
+            "status": status, "field_contacts": ["A1", "B1"],
             "baseline_fields": {template: values},
             "targeted_fields": {template: [value / 2 for value in values]},
         }
@@ -407,6 +772,89 @@ def test_lesion_fields_keep_noncollinear_a_and_b_producers_separate():
     ])[("p1", "M6_SPATIAL_MID", "connector_nodes")]
     assert resolved["baseline"]["producers"] == {"A": "p1__own_a", "B": "p1__own_b"}
     assert np.allclose(resolved["targeted"]["A"], [0.5, 0.0])
+    assert resolved["matched_inference_available"] is True
+
+    unresolved = patient_fields([
+        record("own_a", "p1__own_a", "A", [1.0, 0.0]),
+        record("own_b", "p1__own_b", "B", [0.0, 1.0],
+               status="matched_inference_unavailable"),
+    ])[('p1', 'M6_SPATIAL_MID', 'connector_nodes')]
+    assert unresolved["matched_inference_available"] is False
+
+
+def test_matched_lesion_requires_both_noncollinear_fits():
+    expected = {"p1__own_a", "p1__own_b"}
+    one_side = [{"fit_id": "p1__own_a", "status": "inference_available"}]
+    assert not complete_patient_fit_set(one_side, expected)
+    both = one_side + [{"fit_id": "p1__own_b", "status": "inference_available"}]
+    assert complete_patient_fit_set(both, expected)
+    unavailable = [both[0], {"fit_id": "p1__own_b",
+                             "status": "matched_inference_unavailable"}]
+    assert not complete_patient_fit_set(unavailable, expected)
+
+
+def test_small_lesion_cohorts_are_descriptive_only():
+    small = lesion_cohort_summary(np.ones(4))
+    assert small["n"] == 4
+    assert small["cohort_inference_eligible"] is False
+    assert small["wilcoxon_p"] is None
+    eligible = lesion_cohort_summary(np.ones(6))
+    assert eligible["cohort_inference_eligible"] is True
+    assert np.isclose(eligible["wilcoxon_p"], 0.03125)
+
+
+def test_primary_lesion_holm_keeps_unavailable_hypotheses():
+    adjusted = holm_fixed_family({"local": 0.01, "long": 0.03, "connector": 1.0})
+    assert adjusted == {"local": 0.03, "long": 0.06, "connector": 1.0}
+
+
+def test_lesion_figure_uses_estimable_frozen_components_without_effect_selection(
+        tmp_path):
+    records = []
+    for lesion, n_rows, base in (
+        ("local_backbone_edges", 5, -10.0),
+        ("long_range_high_influence_edges", 6, -20.0),
+        ("connector_nodes", 4, 100.0),
+    ):
+        for index in range(n_rows):
+            records.append({
+                "subject": f"p{index}", "model": "M6_SPATIAL_MID",
+                "cell": "rnn", "lesion": lesion,
+                "all_inference_available": True,
+                "specificity_contact_nll": base + index,
+            })
+    with (tmp_path / "matched_lesion_patient_metrics.csv").open(
+            "w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=records[0].keys())
+        writer.writeheader()
+        writer.writerows(records)
+    selected = lesion_display_values(tmp_path)
+    assert [label for label, _ in selected] == [
+        "Local\nbackbone", "Long-range\nedges"
+    ]
+    assert np.allclose(selected[0][1], np.arange(5) - 10.0)
+
+    # Connector magnitude is deliberately huge, but it must not be selected
+    # until its patient denominator reaches the fixed threshold.
+    assert all("Connector" not in label for label, _ in selected)
+
+
+def test_lesion_figure_denominator_counts_unique_patients(tmp_path):
+    records = []
+    for lesion in ("local_backbone_edges", "long_range_high_influence_edges"):
+        for subject in ("p1", "p2", "p3", "p4"):
+            records.append({
+                "subject": subject, "model": "M6_SPATIAL_MID", "cell": "rnn",
+                "lesion": lesion, "all_inference_available": True,
+                "specificity_contact_nll": 1.0,
+            })
+        records.append({**records[-1], "specificity_contact_nll": 100.0})
+    with (tmp_path / "matched_lesion_patient_metrics.csv").open(
+            "w", encoding="utf-8", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=records[0].keys())
+        writer.writeheader()
+        writer.writerows(records)
+    assert lesion_display_values(tmp_path) == []
 
 
 def test_effective_operator_seed_stability_keeps_inactive_edges(tmp_path):
@@ -538,3 +986,290 @@ def test_patient_field_aggregation_keeps_seed_rows_distinct_from_pair_correlatio
         fit_rows = list(csv.DictReader(handle))
     assert len(fit_rows) == 2
     assert all(row["n_seeds"] == "3" for row in fit_rows)
+
+
+def test_common_observable_effective_reach_is_patient_first():
+    rows = []
+    for fit in ("own_a", "own_b"):
+        for seed in range(3):
+            rows.append({
+                "subject": "p_noncollinear", "fit_id": fit, "seed": str(seed),
+                "lag1_reach_mm": "1", "lag2_reach_mm": "2", "lag3_reach_mm": "3",
+            })
+    for seed in range(3):
+        rows.append({
+            "subject": "p_shared", "fit_id": "shared", "seed": str(seed),
+            "lag1_reach_mm": "10", "lag2_reach_mm": "20", "lag3_reach_mm": "30",
+        })
+    output = patient_level_vectors(
+        rows, ("lag1_reach_mm", "lag2_reach_mm", "lag3_reach_mm")
+    )
+    assert set(output) == {"p_noncollinear", "p_shared"}
+    np.testing.assert_allclose(output["p_noncollinear"], [1, 2, 3])
+    np.testing.assert_allclose(output["p_shared"], [10, 20, 30])
+    np.testing.assert_allclose(np.median(np.asarray(list(output.values())), axis=0),
+                               [5.5, 11.0, 16.5])
+
+
+def test_unit_contract_export_is_lossless_and_idempotent(tmp_path):
+    out = tmp_path / "run"
+    unit = out / "per_subject" / "p1__shared" / "M6_SPATIAL_MID__rnn" / "seed0"
+    cache = out / "cache" / "p1__shared"
+    unit.mkdir(parents=True); cache.mkdir(parents=True)
+    manifest = out / "INPUT_MANIFEST.json"
+    manifest.write_text(json.dumps({"cohort": "frozen"}))
+    for name, content in (("plane.npz", b"plane"), ("events.npz", b"events")):
+        (cache / name).write_bytes(content)
+    (cache / "provenance.json").write_text(json.dumps({"subject": "p1"}))
+    metrics = {
+        "fit_id": "p1__shared", "subject": "p1", "fit_scope": "shared",
+        "model_id": "M6_SPATIAL_MID__rnn", "arm": "SPATIAL_SET", "cell": "rnn",
+        "seed": 0, "shuffled_targets": False, "shuffle_mode": "none",
+        "config": {"lr": 0.01, "state_dim": 32},
+        "rollout_decoder": {"n_epochs": 4}, "config_sha256": "recorded-config",
+        "producer_hashes": {"input_manifest": sha256(manifest), "trainer": "abc"},
+    }
+    metrics_path = unit / "metrics.json"
+    metrics_path.write_text(json.dumps(metrics))
+    for name in (
+        "DONE.json", "weights.pt", "history.json", "heldout_rollouts.json.gz",
+        "rollout_size_head.pt", "rollout_decoder_history.json", "graph.npz",
+    ):
+        (unit / name).write_bytes(b"frozen artifact")
+    snapshots = unit / "snapshots"
+    snapshots.mkdir()
+    for name in ("INIT.npz", "REWIRE_MID.npz", "MASK_FREEZE.npz", "FINAL.npz"):
+        (snapshots / name).write_bytes(b"frozen snapshot")
+
+    first = export_unit_contracts(out)
+    config_before = (unit / "config.json").read_bytes()
+    hashes_before = (unit / "input_hashes.json").read_bytes()
+    second = export_unit_contracts(out)
+
+    assert first == second
+    assert first["n_formal_training_units"] == 1
+    assert first["n_smoke_training_units"] == 0
+    artifact_audit = json.loads((out / "TRAINING_UNIT_ARTIFACT_AUDIT.json").read_text())
+    assert artifact_audit["formal_units_complete"] is True
+    assert artifact_audit["n_formal_units_complete"] == 1
+    assert artifact_audit["n_missing_artifacts"] == 0
+    assert config_before == (unit / "config.json").read_bytes()
+    assert hashes_before == (unit / "input_hashes.json").read_bytes()
+    config = json.loads(config_before)
+    hashes = json.loads(hashes_before)
+    assert config["training_config"] == metrics["config"]
+    assert hashes["input_manifest"]["sha256"] == sha256(manifest)
+    assert hashes["fit_cache"]["events.npz"]["sha256"] == sha256(cache / "events.npz")
+
+
+def test_unit_artifact_audit_treats_no_recurrence_graph_as_not_applicable(tmp_path):
+    out = tmp_path / "run"
+    unit = out / "per_subject" / "p1__shared" / "M0_NO_REC__rnn" / "seed0"
+    cache = out / "cache" / "p1__shared"
+    unit.mkdir(parents=True); cache.mkdir(parents=True)
+    manifest = out / "INPUT_MANIFEST.json"
+    manifest.write_text(json.dumps({"cohort": "frozen"}))
+    for name in ("plane.npz", "events.npz", "provenance.json"):
+        (cache / name).write_bytes(b"input")
+    metrics = {
+        "fit_id": "p1__shared", "subject": "p1", "fit_scope": "shared",
+        "model_id": "M0_NO_REC__rnn", "arm": "M0_NO_REC", "cell": "rnn",
+        "seed": 0, "shuffled_targets": False, "shuffle_mode": "none",
+        "config": {"lr": 0.01}, "rollout_decoder": {"n_epochs": 4},
+        "config_sha256": "recorded-config",
+        "producer_hashes": {"input_manifest": sha256(manifest), "trainer": "abc"},
+    }
+    (unit / "metrics.json").write_text(json.dumps(metrics))
+    for name in (
+        "DONE.json", "weights.pt", "history.json", "heldout_rollouts.json.gz",
+        "rollout_size_head.pt", "rollout_decoder_history.json",
+    ):
+        (unit / name).write_bytes(b"frozen artifact")
+
+    export_unit_contracts(out)
+    audit = json.loads((out / "TRAINING_UNIT_ARTIFACT_AUDIT.json").read_text())
+    assert audit["formal_units_complete"] is True
+    assert audit["n_no_recurrence_units"] == 1
+    assert audit["n_recurrent_units"] == 0
+    assert not (unit / "graph.npz").exists()
+
+
+def test_executed_yaml_contract_matches_the_frozen_model_and_split_contracts():
+    path = ROOT / "config/topic5_rnn_motif_cross_state_v0_4.yaml"
+    contract = yaml.safe_load(path.read_text())
+
+    assert contract["contract_role"] == "EXECUTED_CONTRACT_EXPORT"
+    assert contract["geometry_status"] == "RETROSPECTIVE_TEST_INFORMED_PROPAGATION_PLANE"
+    assert contract["cohort"]["n_patients"] == 21
+    assert contract["cohort"]["n_fits"] == 31
+    assert len(contract["cohort"]["shared_fits"]) == 11
+    assert len(contract["cohort"]["split_fits"]) == 20
+    assert contract["training"]["formal_training_units"] == 1426
+
+    split = contract["split"]
+    assert split["source_pool"] == "canonical_train80_only"
+    assert sum(split[key] for key in (
+        "train_fraction_within_train80",
+        "validation_fraction_within_train80",
+        "test_fraction_within_train80",
+    )) == 1.0
+    assert split["old_outer_heldout20_status"].startswith("BURNED")
+
+    exported = contract["model_matrix"]
+    for model, spec in MODEL_SPECS.items():
+        assert exported[model]["arm"] == spec.arm
+        assert exported[model]["eta"] == spec.eta
+        assert exported[model]["seeds"] == list(spec.seeds)
+    assert contract["rollout_decoder"]["observed_future_set_size_read"] is False
+    assert contract["statistics"]["primary_unit"] == "patient"
+
+
+def test_effective_reach_plot_input_is_patient_first(tmp_path):
+    path = tmp_path / "effective_influence_fit_seed.csv"
+    rows = []
+    for fit_id in ("p1__own_a", "p1__own_b"):
+        for seed in (0, 1, 2):
+            rows.append({
+                "subject": "p1", "fit_id": fit_id, "model": "M6_SPATIAL_MID",
+                "cell": "rnn", "seed": seed,
+                "lag1_reach_mm": 1, "lag2_reach_mm": 2, "lag3_reach_mm": 3,
+            })
+    for seed in (0, 1, 2):
+        rows.append({
+            "subject": "p2", "fit_id": "p2__shared", "model": "M6_SPATIAL_MID",
+            "cell": "rnn", "seed": seed,
+            "lag1_reach_mm": 10, "lag2_reach_mm": 20, "lag3_reach_mm": 30,
+        })
+    with path.open("w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=list(rows[0]))
+        writer.writeheader(); writer.writerows(rows)
+    reach = patient_level_effective_reach(tmp_path)
+    assert set(reach) == {"p1", "p2"}
+    np.testing.assert_allclose(reach["p1"], [1, 2, 3])
+    np.testing.assert_allclose(reach["p2"], [10, 20, 30])
+
+
+def test_figure_representative_checkpoint_is_median_seed_not_best_seed(tmp_path):
+    values = (1.0, 2.0, 10.0)
+    for seed, value in enumerate(values):
+        directory = tmp_path / "per_subject" / "p1__shared" / "M6_SPATIAL_MID__rnn" / f"seed{seed}"
+        directory.mkdir(parents=True)
+        (directory / "metrics.json").write_text(json.dumps({
+            "validation": {"contact_nll": value},
+        }))
+    selected = selected_metrics(tmp_path, "p1", "M6_SPATIAL_MID")
+    assert selected.parent.name == "seed1"
+
+
+def test_figure_source_manifest_verifies_every_panel_byte(tmp_path):
+    records = {}
+    for panel in "ABCDEF":
+        path = tmp_path / f"panel_{panel}.csv"
+        path.write_text(f"source,{panel}\n")
+        records[panel] = [{"path": str(path), "sha256": sha256(path)}]
+    interictal = tmp_path / "interictal_per_patient.csv"
+    inventory = tmp_path / "early_ictal_metadata_inventory.csv"
+    interictal.write_text("subject,value\np1,1\n")
+    inventory.write_text("subject,path\np1,target\n")
+    records["D"].append({"path": str(interictal), "sha256": sha256(interictal)})
+    records["E"].append({"path": str(inventory), "sha256": sha256(inventory)})
+    candidate_metrics = {}
+    for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"):
+        candidate_metrics[model] = []
+        for seed in range(3):
+            path = tmp_path / f"{model}_seed{seed}_metrics.json"
+            path.write_text(json.dumps({"seed": seed}))
+            candidate_metrics[model].append({"path": str(path), "sha256": sha256(path)})
+    empirical = tmp_path / "empirical_field.json"
+    empirical.write_text('{"field": [1, 2, 3]}\n')
+    manifest = {
+        "_contract": "topic5_figure6_source_manifest_v0_4",
+        "_representative_selection": {
+            "patient": "epilepsiae_1146",
+            "role": "supportive visualization; excluded from primary p-values",
+            "checkpoint_rule": "choose validation contact NLL nearest the seed median",
+            "empirical_field_path": str(empirical),
+            "empirical_field_sha256_frozen": sha256(empirical),
+            "selection_candidate_metrics": candidate_metrics,
+        },
+        **records,
+    }
+    passed, errors = audit_figure_sources(manifest)
+    assert passed and errors == []
+    (tmp_path / "panel_E.csv").write_text("target bytes changed\n")
+    passed, errors = audit_figure_sources(manifest)
+    assert not passed
+    assert "panel_E_0_hash" in errors
+
+
+def test_figure_source_manifest_rejects_changed_empirical_field(tmp_path):
+    records = {}
+    for panel in "ABCDEF":
+        path = tmp_path / f"panel_{panel}.csv"
+        path.write_text(f"source,{panel}\n")
+        records[panel] = [{"path": str(path), "sha256": sha256(path)}]
+    interictal = tmp_path / "interictal_per_patient.csv"
+    inventory = tmp_path / "early_ictal_metadata_inventory.csv"
+    interictal.write_text("subject,value\np1,1\n")
+    inventory.write_text("subject,path\np1,target\n")
+    records["D"].append({"path": str(interictal), "sha256": sha256(interictal)})
+    records["E"].append({"path": str(inventory), "sha256": sha256(inventory)})
+    candidate_metrics = {}
+    for model in ("M1_DENSE", "M2_UNIFORM_SET", "M3_FIXED_LOCAL", "M6_SPATIAL_MID"):
+        candidate_metrics[model] = []
+        for seed in range(3):
+            path = tmp_path / f"{model}_seed{seed}_metrics.json"
+            path.write_text(json.dumps({"seed": seed}))
+            candidate_metrics[model].append({"path": str(path), "sha256": sha256(path)})
+    empirical = tmp_path / "empirical_field.json"
+    empirical.write_text('{"field": [1, 2, 3]}\n')
+    manifest = {
+        "_contract": "topic5_figure6_source_manifest_v0_4",
+        "_representative_selection": {
+            "patient": "epilepsiae_1146",
+            "role": "supportive visualization; excluded from primary p-values",
+            "checkpoint_rule": "choose validation contact NLL nearest the seed median",
+            "empirical_field_path": str(empirical),
+            "empirical_field_sha256_frozen": sha256(empirical),
+            "selection_candidate_metrics": candidate_metrics,
+        },
+        **records,
+    }
+    empirical.write_text('{"field": [3, 2, 1]}\n')
+    passed, errors = audit_figure_sources(manifest)
+    assert not passed
+    assert "representative_empirical_field_freeze" in errors
+
+
+def test_matched_lesion_unit_is_median_seed_not_motif_selected(tmp_path):
+    values = (0.5, 1.0, 8.0)
+    for seed, value in enumerate(values):
+        metrics_dir = (tmp_path / "per_subject" / "p1__shared"
+                       / "M6_SPATIAL_MID__rnn" / f"seed{seed}")
+        metrics_dir.mkdir(parents=True)
+        (metrics_dir / "metrics.json").write_text(json.dumps({
+            "fit_id": "p1__shared", "validation": {"contact_nll": value},
+        }))
+        influence_dir = (tmp_path / "effective_influence" / "p1__shared"
+                         / "M6_SPATIAL_MID__rnn" / f"seed{seed}")
+        influence_dir.mkdir(parents=True)
+        np.savez(influence_dir / "influence.npz", marker=np.asarray([seed]))
+    selected = choose_units(tmp_path)
+    assert len(selected) == 1
+    assert selected[0][0].parent.name == "seed1"
+    assert selected[0][1].parent.name == "seed1"
+
+
+def test_matched_lesion_damage_uses_each_metric_optimum(tmp_path):
+    assert np.isclose(perturbation_damage("contact_nll", 1.4, 1.0), 0.4)
+    assert np.isclose(perturbation_damage("stop_bce", 0.8, 0.5), 0.3)
+    assert np.isclose(perturbation_damage("rollout_spearman", 0.2, 0.7), 0.5)
+    assert np.isclose(perturbation_damage("interictal_field_fidelity", 0.1, 0.6), 0.5)
+    # Both shorter and longer rollouts are harmful relative to the ideal ratio 1.
+    assert np.isclose(perturbation_damage("postseed_length_ratio", 0.6, 0.9), 0.3)
+    assert np.isclose(perturbation_damage("postseed_length_ratio", 1.4, 1.1), 0.3)
+    table = tmp_path / "matched.csv"
+    write_matched_lesion_csv(table, [{"subject": "p1", "damage": 0.3}])
+    assert list(csv.DictReader(table.open(encoding="utf-8"))) == [
+        {"subject": "p1", "damage": "0.3"}
+    ]
