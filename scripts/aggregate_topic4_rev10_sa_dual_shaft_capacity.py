@@ -42,7 +42,9 @@ def _atomic_csv(path, rows):
     try:
         fieldnames = list(rows[0]) if rows else []
         with open(temporary, "w", newline="") as stream:
-            writer = csv.DictWriter(stream, fieldnames=fieldnames)
+            writer = csv.DictWriter(
+                stream, fieldnames=fieldnames, lineterminator="\n",
+            )
             writer.writeheader()
             writer.writerows(rows)
         os.replace(temporary, path)
