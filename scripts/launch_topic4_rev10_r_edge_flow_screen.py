@@ -25,6 +25,9 @@ DYNAMIC_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d_adaptation_canary.py"
 RESOURCE_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d2_resource_canary.py"
 DYNAMIC_EDGE_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d3_ee_std_canary.py"
 SPATIAL_OU_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d5_spatial_ou_canary.py"
+SPATIAL_OU_BRACKET_AUDITOR = (
+    ROOT / "scripts/audit_topic4_rev10_d5_1_low_amplitude_bracket.py"
+)
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -279,9 +282,13 @@ def main():
     spatial_ou = config["scientific_role"] == (
         "development_only_translation_invariant_spatial_ou_accessibility_canary"
     )
-    if dynamic or resource or dynamic_edge or spatial_ou:
+    spatial_ou_bracket = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_low_amplitude_bracket"
+    )
+    if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket:
         auditor = (
-            SPATIAL_OU_AUDITOR if spatial_ou
+            SPATIAL_OU_BRACKET_AUDITOR if spatial_ou_bracket
+            else SPATIAL_OU_AUDITOR if spatial_ou
             else DYNAMIC_EDGE_AUDITOR if dynamic_edge
             else RESOURCE_AUDITOR if resource else DYNAMIC_AUDITOR
         )
@@ -294,12 +301,12 @@ def main():
     else:
         completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou else "Topic 4 rev10-R",
+        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket else "Topic 4 rev10-R",
         f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
         "status": (
-            completion if dynamic or resource or dynamic_edge or spatial_ou
+            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket
             else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
         ),
         "completed": len(completed), "total": len(jobs),

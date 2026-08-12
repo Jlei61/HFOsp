@@ -104,6 +104,7 @@ def main():
         "development_only_inhibitory_resource_accessibility_canary",
         "development_only_dynamic_ee_std_accessibility_canary",
         "development_only_translation_invariant_spatial_ou_accessibility_canary",
+        "development_only_translation_invariant_spatial_ou_low_amplitude_bracket",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -127,6 +128,7 @@ def main():
         "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
         "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN",
         "REV10D5_SPATIAL_OU_LIBRARY_FROZEN",
+        "REV10D5_1_SPATIAL_OU_LOW_AMPLITUDE_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -298,6 +300,7 @@ def main():
         "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
         "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN",
         "REV10D5_SPATIAL_OU_LIBRARY_FROZEN",
+        "REV10D5_1_SPATIAL_OU_LOW_AMPLITUDE_LIBRARY_FROZEN",
     }:
         if not np.all(coefficients == 0.0):
             raise RuntimeError("rev10-D requires exact no-op edge coefficients")

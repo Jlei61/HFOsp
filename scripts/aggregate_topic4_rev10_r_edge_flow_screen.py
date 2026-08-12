@@ -339,6 +339,22 @@ def main():
             "mean_network_returned_events_scored": float(np.mean([
                 value["n_returned_events_scored"] for value in values
             ])),
+            "mean_network_returned_fraction": float(np.mean([
+                payload["run"]["n_returned_events"]
+                / max(payload["run"]["n_common_detector_events"], 1)
+                for payload in metadata
+            ])),
+            "mean_network_fraction_time_above_detector": float(np.mean([
+                payload["run"]["fraction_time_above_common_detector"]
+                for payload in metadata
+            ])),
+            "max_network_fraction_time_above_detector": float(max(
+                payload["run"]["fraction_time_above_common_detector"]
+                for payload in metadata
+            )),
+            "mean_network_peak_active_fraction": float(np.mean([
+                payload["run"]["peak_active_fraction"] for payload in metadata
+            ])),
             "mean_network_shape_A": float(np.mean([
                 value["shape_by_mode"]["A"] for value in values
             ])),
@@ -472,6 +488,9 @@ def main():
     is_spatial_ou_canary = config["scientific_role"] == (
         "development_only_translation_invariant_spatial_ou_accessibility_canary"
     )
+    is_spatial_ou_bracket = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_low_amplitude_bracket"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -503,9 +522,12 @@ def main():
         summary["status"] = "REV10D3_RETURNED_ONLY_CANARY_COMPLETE"
     if is_spatial_ou_canary:
         summary["status"] = "REV10D5_RETURNED_ONLY_CANARY_COMPLETE"
+    if is_spatial_ou_bracket:
+        summary["status"] = "REV10D5_1_RETURNED_ONLY_BRACKET_COMPLETE"
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
         or is_dynamic_edge_canary or is_spatial_ou_canary
+        or is_spatial_ou_bracket
         else basename_by_phase[phase]
     )
     _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)

@@ -7,3 +7,7 @@
 5. Compare every local arm only with its exact marginal-matched permuted arm and off. Do not fit centers, phases, contacts, or D4 source locations.
 6. If a local survivor exists, freeze it before new networks and run off/local/permuted confirmation on six seeds. Produce exactly the accepted Fig.4 pair: direct same-network waveforms and de novo KMeans versus patient consistency.
 7. If no survivor exists, close this fluctuation family; do not tune an optimizer or open beta on the basis of the negative result.
+
+## Canary outcome
+
+Completed `27/27` workers with peak RSS 7.52 GiB, nine-worker maximum, no OOM or failed worker. Both local and permuted families restored A+B in every development network, so the result is `NONLOCAL_MARGINAL_ACCESS_OBSERVED`, not spatial-locality evidence. Because the minimum tested amplitude raised detector occupancy to roughly 0.38, run D5.1 at amplitudes 0.1, 0.2, and 0.35 before any fresh confirmation. Keep the same fit networks and paired local/permuted controls; do not consume confirmation seeds during this bracket.

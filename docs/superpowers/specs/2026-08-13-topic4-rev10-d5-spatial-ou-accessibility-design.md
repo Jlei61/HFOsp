@@ -29,3 +29,9 @@ The canary scans `sigma={0.5,1.0}/ms`, `ell={0.38,0.76} mm`, `tau=20 ms`, plus e
 - Otherwise: no access in the tested continuous fluctuation family.
 
 This is a development canary, not patient generalization. Only a surviving candidate may enter fresh-network confirmation and the required Fig.4 pair. KMeans stability is never substituted for supervised patient-mode support.
+
+## Canary outcome and lower-amplitude fork
+
+All four local and all four matched-permuted arms produced clean A and B in `3/3` development networks; exact off produced A in `0/3`. The best local score was `1.83`, versus `4.25` for its matched permutation and `11.35` off, but spatial locality was not necessary for route access. The bounded verdict is `REV10D5_NONLOCAL_MARGINAL_ACCESS_OBSERVED`: neuron-level afferent heterogeneity opens A access, while local coherence may improve event geometry but is not yet a capacity requirement.
+
+At `sigma=0.5/ms`, local activity occupied `36.9-39.2%` of the trace above the common detector and generated `78-91` events per 8 seconds, versus `4.4-7.8%` and `8-14` events off. This is not runaway, but it is too large an activity-burden shift to send directly to confirmation. D5.1 therefore freezes `ell=0.38 mm`, `tau=20 ms` and scans only `sigma={0.1,0.2,0.35}/ms` for local and exact-marginal permuted arms. The selection is the lowest amplitude with same-network A+B support in at least `2/3`, reported together with time-above-detector as a Pareto diagnostic rather than a new hard blocker.
