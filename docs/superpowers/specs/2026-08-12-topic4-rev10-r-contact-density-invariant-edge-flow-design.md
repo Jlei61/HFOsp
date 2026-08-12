@@ -238,3 +238,31 @@ failure remains unresolved rather than assumed.
 `beta` remains closed until the residual is specifically a radial response
 width or effective-delay-scale error. Static substrate results remain separate
 from onset/carrier/termination/recovery claims about the ictal lifecycle.
+
+## 9. R2.1 closeout and next mechanism
+
+R2.1 moved edge structure at an adequate dose: applied logit RMS was about
+`0.13-0.14`, edge ratios remained inside the frozen `[0.518,1.932]` guarantee,
+incoming-E error stayed below `2e-11`, and topology, delays, E-to-I, and GABA
+were unchanged. Nevertheless, no one of the 32 nonzero directions produced
+mode A across the four fit networks. The three fit-Pareto directions produced
+mode A in `0/3` selection networks, and the frozen `edge_spatial_02_pos`
+produced mode A in `0/3` confirmation networks. Exact no-op was better in the
+confirmation objective.
+
+The formal verdict is
+`REV10R2_STATIC_CONTINUOUS_EDGE_ROUTE_NOT_OBSERVED`. It closes only this finite
+library and dose, not the mathematical continuum of all 12 coefficients. A
+generic optimizer comparison is not the next experiment: the objective already
+fail-closed on absent mode A, and no shared known-good basin exists. `beta`
+also stays closed because the residual is categorical mode support rather than
+a demonstrated radial-width or delay-scale mismatch.
+
+The next family should add one low-dimensional **dynamic accessibility state**
+on top of the same frozen Node and connectivity substrate, for example a slow
+inhibitory/adaptation variable that changes which route is reachable from one
+network without changing topology or adding spatial cores. The preregistered
+test must compare static-state, state-shuffled, and state-conditioned arms with
+the same returned-only shaft-aware objective. It should first prove that both
+modes occur within individual networks; only then should it be connected to a
+longer onset/carrier/termination/recovery experiment.

@@ -5,6 +5,7 @@ import numpy as np
 
 from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
     _same_network_pair,
+    _write_readme,
     formal_clean_mask,
     normalize_event_ranks,
 )
@@ -61,6 +62,16 @@ def test_same_network_pair_never_crosses_networks():
     assert pair[2]["seed"] == 1
 
 
+def test_confirmation_readme_preserves_pre_network_freeze_semantics(tmp_path):
+    _write_readme(tmp_path, {
+        "candidate_id": "edge_spatial_02_pos",
+        "phase": "confirmation",
+    })
+    text = (tmp_path / "README.md").read_text()
+    assert "selection 阶段在读取确认网络前冻结的非零候选" in text
+    assert "fit screen 冻结的 diagnostic best" not in text
+
+
 def test_figure_consumer_has_no_simulation_or_candidate_selection():
     path = ROOT / "scripts/paper_figures/plot_fig4_spatial_edge_flow_validation.py"
     tree = ast.parse(path.read_text())
@@ -74,3 +85,5 @@ def test_figure_consumer_has_no_simulation_or_candidate_selection():
     assert "fit_network_seeds" in source
     assert "same-network" in source
     assert "a.u." in source
+    assert 'manifest["selection_freeze"]["selected_nonzero_candidate_id"]' in source
+    assert "candidate_is_phase_diagnostic_best" in source

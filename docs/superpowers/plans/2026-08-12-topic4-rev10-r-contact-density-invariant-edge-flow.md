@@ -2,13 +2,13 @@
 
 ## Scope
 
-- [ ] Freeze rev10-SA V6.2 artifacts and hashes; development Node anchor is `t=0.05`,
+- [x] Freeze rev10-SA V6.2 artifacts and hashes; development Node anchor is `t=0.05`,
   with `t=0.025/0.075` as sensitivities.
-- [ ] Mark seeds 1041-1043 as consumed development history; use 1051-1054 for
+- [x] Mark seeds 1041-1043 as consumed development history; use 1051-1054 for
   fit, 1061-1063 for selection, and 1071-1073 for confirmation.
-- [ ] Keep patient held-out, `beta`, topology growth, slow variables, contact-
+- [x] Keep patient held-out, `beta`, topology growth, slow variables, contact-
   conditioned bases, Gaussian components, and peak-count constraints closed.
-- [ ] Treat this as exploratory route-capacity work with network seed as the
+- [x] Treat this as exploratory route-capacity work with network seed as the
   independent unit.
 
 ## R0 graph-basis audit
@@ -70,12 +70,12 @@ at `0.95 log(2)/2`, and starts in a new artifact directory.
 - [x] Freeze 32 nonzero symmetric scrambled-Sobol spatial vector fields, plus
   `c=0`, with antithetic pairs; reject the original exact-maximum amplitude as
   underpowered after its sentinel.
-- [ ] Freeze R2.1 with raw full-edge RMS `0.15`, edge-wise logit clipping, and
+- [x] Freeze R2.1 with raw full-edge RMS `0.15`, edge-wise logit clipping, and
   an explicit applied-dose sidecar before launching the replacement screen.
-- [ ] Launch one candidate-network per `systemd-run --user -> nohup` worker with
+- [x] Launch one candidate-network per `systemd-run --user -> nohup` worker with
   all numeric thread counts at 1, bounded by measured RSS and available memory.
-- [ ] Use common network/noise seeds and the common absolute detector.
-- [ ] Score Node and Node+Edge per network with A/B joint+ID support,
+- [x] Use common network/noise seeds and the common absolute detector.
+- [x] Score Node and Node+Edge per network with A/B joint+ID support,
   recruitment, three precedence classes, profile, event cloud, and OOD.
 - [x] Preserve `event_returned` for every detected event and restrict formal
   interictal scoring/Fig.4 to returned events; retain excluded counts as
@@ -83,12 +83,12 @@ at `0.95 log(2)/2`, and starts in a new artifact directory.
 
 ## R3 selection and confirmation
 
-- [ ] Freeze at most six diverse fit Pareto fields before reading selection
+- [x] Freeze at most six diverse fit Pareto fields before reading selection
   networks 1061-1063.
-- [ ] Keep equal network weight; do not rank by pooled event count or KMeans AMI.
-- [ ] Freeze at most three selection fields before fresh development networks
+- [x] Keep equal network weight; do not rank by pooled event count or KMeans AMI.
+- [x] Freeze at most three selection fields before fresh development networks
   1071-1073.
-- [ ] Produce a Fig.4-style direct readout/KMeans figure and a network-level
+- [x] Produce a Fig.4-style direct readout/KMeans figure and a network-level
   A/B joint+ID support figure with a Chinese figure README.
 
 ## Decision
@@ -101,3 +101,20 @@ at `0.95 log(2)/2`, and starts in a new artifact directory.
   static edge refinement and specify a dynamic-state experiment.
 - [ ] Compare CMA-ES/local/Sobol only after a known-good shared solution exists.
 - [ ] Open `beta` only for a demonstrated radial-width or delay-scale residual.
+
+## Final R2.1 outcome
+
+- Fit 1051-1054: only one of 32 nonzero directions produced any returned formal
+  mode A, and only on seed 1053; no shared direction existed.
+- Selection 1061-1063: all three frozen Pareto directions produced mode A in
+  `0/3` networks. `edge_spatial_02_pos` was retained only as the least-bad
+  returned-only contrast.
+- Confirmation 1071-1073: the frozen nonzero contrast produced mode A in `0/3`
+  networks and scored `11.18`; exact no-op produced an incidental A in `1/3`
+  and scored `10.13`.
+- Verdict: `REV10R2_STATIC_CONTINUOUS_EDGE_ROUTE_NOT_OBSERVED`. This is a
+  bounded negative over the tested 32-direction library, not a proof over all
+  coefficients in R12.
+- `beta` remains closed; no radial-width or delay-scale residual was isolated.
+- Optimizer comparison remains unjustified because no shared known-good mode-A
+  basin exists and the current objective already penalizes absent A support.

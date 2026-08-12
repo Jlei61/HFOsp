@@ -910,13 +910,13 @@ def _write_readme(output_dir):
     entries = """
 ### fig4a_continuous_field_v62_direct_readout
 
-这张图按冻结 Fig.4 直接读出合同展示同一个 V6.2 连续场：三维 h landscape、神经元实际承受的 signed Delta Vtheta、唯一 formal mode A 与同网络最近 formal mode B 的逐触点传播，以及同一网络的连续 30-80 Hz model-current envelope。圆环表示该模式全部 formal clean events 的 earliest-contact density，星号只表示当前代表事件的最早触点。
+这张图按冻结 Fig.4 直接读出合同展示同一个 V6.2 连续场：三维 h landscape、神经元实际承受的 signed Delta Vtheta、唯一 returned formal mode A 与同网络最近 returned formal mode B 的逐触点传播，以及同一网络的连续 30-80 Hz model-current envelope。圆环只汇总 returned、双杆、patient-support 内的 formal clean events；星号表示当前代表事件的最早触点。
 
 **关注点**：A 只有 1 个 joint+in-distribution event，图中出现一例 A 不等于 fresh-network 双模式 repertoire 已经通过；worker 未保存 raw band-passed current，因此这里是直接模型电流包络，不是临床 SEEG 波形。
 
 ### fig4b_continuous_field_v62_kmeans_consistency
 
-这张图只使用与 Fig4A 同一批 worker artifact 中的 formal clean events，按冻结布局展示 KMeans heatmap、逐触点 rank 分布、cluster profile 与患者 prototype。KMeans 可自然切成两组，但 supervised patient mode A 只有 1 个 clean event，低于冻结的每模式 6 个评分预算，因此 model-vs-patient 矩阵显示 N/A，不能把两个 pooled clusters 改名为患者 A/B。
+这张图只使用与 Fig4A 同一批 worker artifact 中 returned、双杆、patient-support 内的 formal clean events，按冻结布局展示 KMeans heatmap、逐触点 rank 分布、cluster profile 与患者 prototype。KMeans 可自然切成两组，但 supervised patient mode A 只有 1 个 clean event，低于冻结的每模式 6 个评分预算，因此 model-vs-patient 矩阵显示 N/A，不能把两个 pooled clusters 改名为患者 A/B。
 
 **关注点**：区分“聚类数值稳定”和“两个患者传播模式均有足够支持”；本轮只能验收前者，不能验收患者模式一致性。
 

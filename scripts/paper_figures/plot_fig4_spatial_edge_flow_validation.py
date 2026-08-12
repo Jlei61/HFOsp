@@ -126,9 +126,13 @@ def _load_bundle(config_path, output_root, candidate_id=None):
     manifest, summary = _json(manifest_path), _json(summary_path)
     if manifest["config"]["sha256"] != _sha256(config_path):
         raise RuntimeError("manifest and rev10-R2 config do not match")
-    frozen_id = summary["diagnostic_best_candidate_id"]
+    frozen_id = (
+        manifest["selection_freeze"]["selected_nonzero_candidate_id"]
+        if phase == "confirmation"
+        else summary["diagnostic_best_candidate_id"]
+    )
     if candidate_id is not None and candidate_id != frozen_id:
-        raise RuntimeError("figure candidate must equal frozen diagnostic best")
+        raise RuntimeError("figure candidate must equal the pre-network frozen candidate")
     candidate_id = frozen_id
     candidates = {
         row["candidate_id"]: row for row in manifest["candidate_set"]["candidates"]
@@ -390,7 +394,16 @@ def _metadata(bundle, figure):
         "figure": figure, "plotting_only": True,
         "candidate_id": bundle["candidate_id"],
         "candidate_role": (
-            f"frozen diagnostic best from equal-network {bundle['phase']} screen"
+            "pre-network frozen nonzero confirmation candidate"
+            if bundle["phase"] == "confirmation"
+            else f"frozen diagnostic best from equal-network {bundle['phase']} screen"
+        ),
+        "phase_diagnostic_best_candidate_id": bundle["summary"][
+            "diagnostic_best_candidate_id"
+        ],
+        "candidate_is_phase_diagnostic_best": bool(
+            bundle["candidate_id"]
+            == bundle["summary"]["diagnostic_best_candidate_id"]
         ),
         "source_status": bundle["summary"]["status"],
         "formal_clean_mode_counts": {
@@ -613,9 +626,14 @@ def _render_kmeans(bundle, output_dir):
 
 def _write_readme(output_dir, bundle):
     path = Path(output_dir) / "README.md"
+    candidate_context = (
+        "selection 阶段在读取确认网络前冻结的非零候选"
+        if bundle["phase"] == "confirmation"
+        else "等网络 fit screen 冻结的 diagnostic best"
+    )
     path.write_text(f"""### fig4a_spatial_edge_flow_direct_readout
 
-这张图展示 returned-only 等网络 fit screen 冻结的 diagnostic best `{bundle['candidate_id']}`：均匀连续 E-to-E vector field、冻结 Node 的 signed Delta Vtheta、同一网络 A/B 逐触点传播和连续 30-80 Hz model-current envelope。若没有单张网络同时产生两种 formal clean 模式，模式图与波形区会明确显示 unavailable，不跨网络拼接代表事件。
+这张图展示 returned-only {candidate_context} `{bundle['candidate_id']}`：均匀连续 E-to-E vector field、冻结 Node 的 signed Delta Vtheta、同一网络 A/B 逐触点传播和连续 30-80 Hz model-current envelope。若没有单张网络同时产生两种 formal clean 模式，模式图与波形区会明确显示 unavailable，不跨网络拼接代表事件。
 
 **关注点**：连续连接场是否在不增加 core、contact-conditioned 参数或 topology 的前提下补回同网络 mode A，同时保留 mode B。
 
