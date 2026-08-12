@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -93,3 +95,13 @@ def test_adjudication_requires_improvement_and_positive_matrix_margin():
     ], anchor_purity=0.67, patient_q05=0.88)
     assert verdict["selected_candidate_id"] == "a"
     assert verdict["status"].endswith("DID_NOT_IMPROVE_FROZEN_ANCHOR")
+
+
+def test_d5_3_auditor_is_directly_executable():
+    completed = subprocess.run([
+        sys.executable,
+        str(ROOT / "scripts/audit_topic4_rev10_d5_3_spatial_ou_kmeans_grid.py"),
+        "--help",
+    ], cwd=ROOT, text=True, capture_output=True, check=False)
+    assert completed.returncode == 0, completed.stderr
+    assert "--config" in completed.stdout

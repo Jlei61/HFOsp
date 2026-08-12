@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import sys
 import tempfile
 from pathlib import Path
 
@@ -14,6 +15,9 @@ os.environ["MKL_NUM_THREADS"] = "1"
 import numpy as np
 from scipy.stats import spearmanr
 from sklearn.cluster import KMeans
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
     _canonical_rank_kmeans,
@@ -26,7 +30,6 @@ from scripts.run_topic4_rev9l_forced_source_worker import _sha256
 from src.lagpat_rank_audit import build_masked_kmeans_features
 
 
-ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_d5_3_spatial_ou_kmeans_grid.json"
 
 
