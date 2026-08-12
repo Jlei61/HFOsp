@@ -39,7 +39,9 @@ def _atomic_json(path, payload):
     fd, temporary = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
     os.close(fd)
     try:
-        Path(temporary).write_text(json.dumps(payload, indent=2, sort_keys=True))
+        Path(temporary).write_text(json.dumps(
+            payload, indent=2, sort_keys=True, allow_nan=False,
+        ))
         os.replace(temporary, path)
     finally:
         if os.path.exists(temporary):
@@ -165,6 +167,13 @@ def continuous_selection_score(*, purity, signed_margin, ood, occupancy):
     )
 
 
+def _finite_matrix_list(matrix):
+    return [
+        [None if not np.isfinite(value) else float(value) for value in row]
+        for row in np.asarray(matrix, float)
+    ]
+
+
 def audit_candidate(config_path, root, candidate, aggregate_row, selection):
     bundle = _load_bundle(
         config_path, root, candidate["candidate_id"],
@@ -220,7 +229,7 @@ def audit_candidate(config_path, root, candidate, aggregate_row, selection):
         "selection_score": score,
         "balanced_kmeans": bootstrap,
         "pooled_canonical_kmeans": pooled,
-        "supervised_direction_vs_patient_spearman": matrix.tolist(),
+        "supervised_direction_vs_patient_spearman": _finite_matrix_list(matrix),
         "signed_patient_margin": margin,
         "activity": {
             "mean_network_ood_fraction": float(

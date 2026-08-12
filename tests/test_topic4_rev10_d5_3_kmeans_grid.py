@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from scripts.audit_topic4_rev10_d5_3_spatial_ou_kmeans_grid import (
+    _finite_matrix_list,
     adjudicate,
     continuous_selection_score,
     direction_purity,
@@ -120,3 +121,9 @@ def test_d5_3_loader_uses_canary_summary_contract():
     assert _returned_summary_filename(confirmation) == (
         "confirmation_summary_returned_only.json"
     )
+
+
+def test_non_evaluable_matrix_is_strict_json_compatible():
+    matrix = _finite_matrix_list([[np.nan, np.inf], [-np.inf, 0.5]])
+    assert matrix == [[None, None], [None, 0.5]]
+    assert json.loads(json.dumps(matrix, allow_nan=False)) == matrix
