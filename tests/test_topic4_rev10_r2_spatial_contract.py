@@ -3,6 +3,12 @@ import json
 from pathlib import Path
 
 from scripts.launch_topic4_rev10_r2_spatial_edge_audit import NUMERIC_ENV
+from scripts.freeze_topic4_rev10_r2_spatial_edge_candidates import (
+    build_candidates,
+    whitened_directions,
+)
+
+import numpy as np
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -39,3 +45,32 @@ def test_r2_audit_launcher_is_bounded_nohup_and_sparse_polling():
     assert '"/usr/bin/nohup"' in source
     assert '"--property=MemoryMax=24G"' in source
     assert "time.sleep(wait_seconds)" in source
+
+
+def test_whitened_sobol_library_is_antithetic_and_bounded():
+    config = json.loads(CONFIG.read_text())
+    covariance = np.stack([
+        np.diag(np.linspace(0.5 + seed * 0.01, 2.0 + seed * 0.01, 12))
+        for seed in range(4)
+    ])
+    maxima = np.stack([
+        np.linspace(1.0 + seed * 0.01, 2.0 + seed * 0.01, 12)
+        for seed in range(4)
+    ])
+    directions, _, mean_covariance, eigenvalues = whitened_directions(
+        config, covariance,
+    )
+    metric_norm = np.einsum(
+        "ni,ij,nj->n", directions, mean_covariance, directions,
+    )
+    np.testing.assert_allclose(metric_norm, np.ones(len(directions)))
+    assert np.all(eigenvalues > 0.0)
+    candidates, *_ = build_candidates(config, maxima, covariance)
+    assert len(candidates) == 33
+    by_id = {row["candidate_id"]: row for row in candidates}
+    bound = config["candidate_library"]["raw_logit_abs_bound"]
+    for row in candidates[1:]:
+        coefficients = np.asarray(row["coefficients"])
+        opposite = np.asarray(by_id[row["antithetic_pair"]]["coefficients"])
+        np.testing.assert_allclose(coefficients, -opposite, atol=1e-15, rtol=0.0)
+        assert np.max(maxima @ np.abs(coefficients)) <= bound + 1e-14

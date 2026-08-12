@@ -45,6 +45,7 @@ def test_edge_worker_keeps_node_anchor_and_basis_separate():
     source = (ROOT / "scripts/run_topic4_rev10_r_edge_flow_worker.py").read_text()
     assert "_candidate_node" in source
     assert "graph_spectral_ee_flow" in source
+    assert "spatial_vector_ee_flow" in source
     assert "config[\"node_anchor\"]" in source
     assert "patient_train_onsets" not in source
     assert set(inspect.signature(_load_basis).parameters) == {

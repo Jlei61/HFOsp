@@ -66,6 +66,13 @@ at relative covariance eigenvalue `1e-6`, with condition number at most `1e6`.
 Candidate directions are whitened using the equal-network mean full-edge
 feature covariance, then amplitude-bounded by exact per-graph feature maxima.
 
+R2 graph-only capacity passed on all four fit networks before patient scoring:
+effective rank was `12/12` in every network, covariance condition number was
+`30.9-31.6`, and the weakest relative covariance eigenvalue remained
+`0.0316-0.0323`. The 12-dimensional spatial-vector library is therefore
+eligible for the exploratory SNN screen. This is a representation-capacity
+result only; it does not show that any coefficient field restores mode A.
+
 Let `W_ts` be the frozen E-to-E weight from source `s` to target `t`, summed over
 the fixed delay labels for basis construction. Because rows are targets and
 columns are sources, a row-normalized matrix is an incoming-source distribution,

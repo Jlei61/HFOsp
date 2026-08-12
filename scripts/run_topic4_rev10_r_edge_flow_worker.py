@@ -31,6 +31,7 @@ from src.topic4_graph_edge_flow import (  # noqa: E402
     array_sha256,
     graph_spectral_ee_flow,
 )
+from src.topic4_spatial_edge_flow import spatial_vector_ee_flow  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -72,8 +73,11 @@ def main():
 
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
-    if config["scientific_role"] != (
-            "development_only_contact_density_invariant_route_capacity"):
+    allowed_roles = {
+        "development_only_contact_density_invariant_route_capacity",
+        "development_only_observation_invariant_spatial_route_capacity",
+    }
+    if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
     if args.seed not in set(map(int, config["search"]["fit_network_seeds"])):
         parser.error("worker seed is outside the frozen fit-network set")
@@ -86,7 +90,11 @@ def main():
     output_root = ROOT / config["output_root"]
     manifest_path = output_root / "candidate_manifest.json"
     manifest = json.loads(manifest_path.read_text())
-    if (manifest.get("status") != "REV10R_GRAPH_SPECTRAL_LIBRARY_FROZEN"
+    allowed_manifests = {
+        "REV10R_GRAPH_SPECTRAL_LIBRARY_FROZEN",
+        "REV10R2_SPATIAL_EDGE_LIBRARY_FROZEN",
+    }
+    if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
         raise RuntimeError("rev10-R candidate manifest is stale")
     matches = [
@@ -96,11 +104,14 @@ def main():
     if len(matches) != 1:
         parser.error("candidate is outside the frozen rev10-R library")
     candidate = matches[0]
-    basis_records = {
-        int(row["seed"]): row for row in manifest["graph_bases"]
-    }
-    basis_record = basis_records[args.seed]
-    basis_npz = ROOT / basis_record["npz"]
+    basis_record = None
+    basis_npz = None
+    if manifest["status"] == "REV10R_GRAPH_SPECTRAL_LIBRARY_FROZEN":
+        basis_records = {
+            int(row["seed"]): row for row in manifest["graph_bases"]
+        }
+        basis_record = basis_records[args.seed]
+        basis_npz = ROOT / basis_record["npz"]
 
     provenance = _runtime_provenance(args.expected_commit)
     provenance["systemd_unit"] = os.environ.get("REV10R_SYSTEMD_UNIT")
@@ -168,14 +179,37 @@ def main():
     )
     if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
         raise RuntimeError("Node anchor field budget changed")
-    basis = _load_basis(basis_npz, basis_record, args.seed)
     coefficients = np.asarray(candidate["coefficients"], float)
     if array_sha256(coefficients) != candidate["coefficients_sha256"]:
         raise RuntimeError("edge coefficient hash changed")
     net["rng"] = np.random.default_rng(int(args.seed))
-    mapped_net, edge_audit = graph_spectral_ee_flow(
-        net, basis, coefficients,
-    )
+    if manifest["status"] == "REV10R_GRAPH_SPECTRAL_LIBRARY_FROZEN":
+        basis = _load_basis(basis_npz, basis_record, args.seed)
+        mapped_net, edge_audit = graph_spectral_ee_flow(
+            net, basis, coefficients,
+        )
+        edge_basis = {
+            "family": "graph_spectral_chebyshev",
+            "seed": int(args.seed), "npz": str(basis_npz),
+            "npz_sha256": basis_record["npz_sha256"],
+            "graph_weight_sha256": basis["graph_weight_sha256"],
+            "rank": basis["rank"],
+        }
+    else:
+        spatial = config["spatial_edge_basis"]
+        mapped_net, edge_audit = spatial_vector_ee_flow(
+            net, positions, coefficients,
+            L=float(spatial["sheet_L_mm"]),
+            length_scale=float(spatial["displacement_length_scale_mm"]),
+        )
+        edge_basis = {
+            "family": "continuous_quadratic_midpoint_vector_flow",
+            "feature_names": edge_audit["feature_names"],
+            "sheet_L_mm": edge_audit["sheet_L_mm"],
+            "displacement_length_scale_mm": edge_audit[
+                "displacement_length_scale_mm"
+            ],
+        }
 
     contacts = contract["contacts"]
     contact_names = [row["contact_name"] for row in contacts]
@@ -245,7 +279,7 @@ def main():
         h=np.asarray(node["h"], np.float32),
         delta_vtheta=np.asarray(node["delta_vtheta"], np.float32),
         edge_coefficients=coefficients.astype(np.float64),
-        spectral_response=np.asarray(edge_audit["spectral_response"], np.float64),
+        edge_response=np.asarray(edge_audit.get("spectral_response", []), np.float64),
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -267,12 +301,7 @@ def main():
             "node_hashes": node["hashes"],
         },
         "edge_audit": edge_audit,
-        "graph_basis": {
-            "seed": int(args.seed), "npz": str(basis_npz),
-            "npz_sha256": basis_record["npz_sha256"],
-            "graph_weight_sha256": basis["graph_weight_sha256"],
-            "rank": basis["rank"],
-        },
+        "edge_basis": edge_basis,
         "network": {
             "n_E": int(n_e), "n_I": int(n_i),
             "cache_hit": bool(cache_hit), "cache_source": cache_source,

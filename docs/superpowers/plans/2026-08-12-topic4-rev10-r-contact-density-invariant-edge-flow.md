@@ -35,15 +35,20 @@ parameterization-negative result, not optimizer failure.
 
 ## R0b spatial-vector replacement
 
-- [ ] Build a 12-coefficient degree-two continuous vector field on uniform
+- [x] Build a 12-coefficient degree-two continuous vector field on uniform
   physical sheet coordinates; do not use contacts, shafts, patient events,
   Node `h`, components, or peaks.
-- [ ] Audit full-edge covariance on networks 1051-1054; require effective rank
+- [x] Audit full-edge covariance on networks 1051-1054; require effective rank
   at least 10 and condition number at most `1e6` before SNN.
-- [ ] Whiten candidate directions by the equal-network mean covariance and
+- [x] Whiten candidate directions by the equal-network mean covariance and
   freeze amplitude from exact feature maxima over every fit graph.
-- [ ] Preserve the same target-normalization, structural contract, fit seeds,
+- [x] Preserve the same target-normalization, structural contract, fit seeds,
   equal-network objective, and Fig.4 validation outputs.
+
+Observed R2 preflight: all four networks passed at effective rank `12/12`,
+condition number `30.9-31.6`, and weakest relative eigenvalue
+`0.0316-0.0323`. Proceed to the frozen Sobol screen without further family
+changes.
 
 ## R1 edge mapper
 
