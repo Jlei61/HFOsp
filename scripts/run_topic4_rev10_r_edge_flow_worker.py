@@ -107,6 +107,7 @@ def main():
         "development_only_translation_invariant_spatial_ou_low_amplitude_bracket",
         "development_only_translation_invariant_spatial_ou_confirmation",
         "development_only_translation_invariant_spatial_ou_kmeans_grid",
+        "development_only_translation_invariant_spatial_ou_kmeans_selection",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -133,6 +134,7 @@ def main():
         "REV10D5_1_SPATIAL_OU_LOW_AMPLITUDE_LIBRARY_FROZEN",
         "REV10D5_2_SPATIAL_OU_CONFIRMATION_LIBRARY_FROZEN",
         "REV10D5_3_SPATIAL_OU_KMEANS_GRID_FROZEN",
+        "REV10D5_4_SPATIAL_OU_KMEANS_SELECTION_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):

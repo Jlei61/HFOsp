@@ -34,6 +34,9 @@ SPATIAL_OU_CONFIRMATION_AUDITOR = (
 SPATIAL_OU_KMEANS_GRID_AUDITOR = (
     ROOT / "scripts/audit_topic4_rev10_d5_3_spatial_ou_kmeans_grid.py"
 )
+SPATIAL_OU_KMEANS_SELECTION_AUDITOR = (
+    ROOT / "scripts/audit_topic4_rev10_d5_4_spatial_ou_kmeans_selection.py"
+)
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -297,10 +300,15 @@ def main():
     spatial_ou_kmeans_grid = config["scientific_role"] == (
         "development_only_translation_invariant_spatial_ou_kmeans_grid"
     )
+    spatial_ou_kmeans_selection = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_kmeans_selection"
+    )
     if (dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket
-            or spatial_ou_confirmation or spatial_ou_kmeans_grid):
+            or spatial_ou_confirmation or spatial_ou_kmeans_grid
+            or spatial_ou_kmeans_selection):
         auditor = (
             SPATIAL_OU_CONFIRMATION_AUDITOR if spatial_ou_confirmation
+            else SPATIAL_OU_KMEANS_SELECTION_AUDITOR if spatial_ou_kmeans_selection
             else SPATIAL_OU_KMEANS_GRID_AUDITOR if spatial_ou_kmeans_grid
             else SPATIAL_OU_BRACKET_AUDITOR if spatial_ou_bracket
             else SPATIAL_OU_AUDITOR if spatial_ou
@@ -313,6 +321,7 @@ def main():
         ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
         verdict_path = output_root / (
             "confirmation_verdict.json" if spatial_ou_confirmation
+            else "selection_verdict.json" if spatial_ou_kmeans_selection
             else "canary_verdict.json"
         )
         verdict = json.loads(verdict_path.read_text())
@@ -320,12 +329,12 @@ def main():
     else:
         completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid else "Topic 4 rev10-R",
+        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection else "Topic 4 rev10-R",
         f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
         "status": (
-            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid
+            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection
             else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
         ),
         "completed": len(completed), "total": len(jobs),
