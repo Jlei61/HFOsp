@@ -6,16 +6,18 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from itertools import product
 from pathlib import Path
 
 import numpy as np
 
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 from src.topic4_graph_edge_flow import array_sha256
 
 
-ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_d_local_adaptation_canary.json"
 
 

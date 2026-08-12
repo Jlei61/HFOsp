@@ -1,4 +1,5 @@
 import json
+import subprocess
 from pathlib import Path
 
 import numpy as np
@@ -54,3 +55,15 @@ def test_dynamic_mechanism_contract_forbids_observation_conditioning():
     assert "contact" in forbidden
     assert "gaussian" in forbidden
     assert "larger k" in forbidden
+
+
+def test_freezer_is_a_runnable_cli_entrypoint():
+    completed = subprocess.run(
+        [
+            "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+            "scripts/freeze_topic4_rev10_d_adaptation_candidates.py",
+            "--help",
+        ],
+        cwd=ROOT, capture_output=True, text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
