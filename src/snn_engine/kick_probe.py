@@ -115,7 +115,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
-                  fb_override_trace=None, ee_std_mode="local"):
+                  fb_override_trace=None, ee_std_mode="local",
+                  external_e_rate_drive=None):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
@@ -163,6 +164,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     else:
         forced_spike_step = None
     forced_spike_collision_count = 0
+    external_rate_clip_count = 0
+    external_rate_sample_count = 0
 
     # ---- precomputed decays ---- (identical to model.simulate)
     decay_sE = np.exp(-dt / p.tau_r_AMPA)
@@ -320,6 +323,14 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             x_dep += (1.0 - x_dep) * x_rec_f                 # M1: recover availability toward 1 each step
         # ===================== KICK: the only change vs model.simulate =====================
         nu_vec = np.full(N, max(nu_now, 0.0))
+        if external_e_rate_drive is not None:
+            delta_rate = np.asarray(external_e_rate_drive.step(tm), float)
+            if delta_rate.shape != (NE,) or not np.isfinite(delta_rate).all():
+                raise ValueError("external E rate drive must return finite shape (NE,)")
+            raw_e_rate = nu_vec[:NE] + delta_rate
+            external_rate_clip_count += int(np.count_nonzero(raw_e_rate < 0.0))
+            external_rate_sample_count += int(NE)
+            nu_vec[:NE] = np.maximum(raw_e_rate, 0.0)
         if tk <= tm < tk + DUR_KICK:
             nu_vec[kick_mask] += KICK_BOOST          # extra external rate, units 1/ms
         if t_kick2 is not None and t_kick2 <= tm < t_kick2 + DUR_KICK:
@@ -497,6 +508,15 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         forced_spike_collision_count=int(forced_spike_collision_count),
         lfp_trace=lfp_trace,                                    # (nsteps, n_sites) or None
         lfp_sites=(None if lfp_recorder is None else lfp_recorder.sites),
+        external_e_rate_drive=(
+            None if external_e_rate_drive is None else {
+                "negative_rate_clip_count": int(external_rate_clip_count),
+                "rate_sample_count": int(external_rate_sample_count),
+                "negative_rate_clip_fraction": float(
+                    external_rate_clip_count / max(external_rate_sample_count, 1)
+                ),
+            }
+        ),
     )
     if dump_i_spikes:
         res["I_spk_bool"] = I_spk_bool

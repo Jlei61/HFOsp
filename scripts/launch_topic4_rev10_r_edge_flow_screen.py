@@ -24,6 +24,7 @@ AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_r_edge_flow_screen.py"
 DYNAMIC_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d_adaptation_canary.py"
 RESOURCE_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d2_resource_canary.py"
 DYNAMIC_EDGE_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d3_ee_std_canary.py"
+SPATIAL_OU_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d5_spatial_ou_canary.py"
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -275,9 +276,13 @@ def main():
     dynamic_edge = config["scientific_role"] == (
         "development_only_dynamic_ee_std_accessibility_canary"
     )
-    if dynamic or resource or dynamic_edge:
+    spatial_ou = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_accessibility_canary"
+    )
+    if dynamic or resource or dynamic_edge or spatial_ou:
         auditor = (
-            DYNAMIC_EDGE_AUDITOR if dynamic_edge
+            SPATIAL_OU_AUDITOR if spatial_ou
+            else DYNAMIC_EDGE_AUDITOR if dynamic_edge
             else RESOURCE_AUDITOR if resource else DYNAMIC_AUDITOR
         )
         subprocess.run([
@@ -289,12 +294,12 @@ def main():
     else:
         completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge else "Topic 4 rev10-R",
+        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou else "Topic 4 rev10-R",
         f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
         "status": (
-            completion if dynamic or resource or dynamic_edge
+            completion if dynamic or resource or dynamic_edge or spatial_ou
             else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
         ),
         "completed": len(completed), "total": len(jobs),

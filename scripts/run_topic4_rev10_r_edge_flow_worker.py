@@ -38,6 +38,10 @@ from src.topic4_graph_edge_flow import (  # noqa: E402
     graph_spectral_ee_flow,
 )
 from src.topic4_spatial_edge_flow import spatial_vector_ee_flow  # noqa: E402
+from src.topic4_spatial_ou_drive import (  # noqa: E402
+    SpatialOUConfig,
+    SpatialOUDrive,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -99,6 +103,7 @@ def main():
         "development_only_dynamic_accessibility_canary",
         "development_only_inhibitory_resource_accessibility_canary",
         "development_only_dynamic_ee_std_accessibility_canary",
+        "development_only_translation_invariant_spatial_ou_accessibility_canary",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -121,6 +126,7 @@ def main():
         "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN",
         "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
         "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN",
+        "REV10D5_SPATIAL_OU_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -243,8 +249,10 @@ def main():
     adaptation = candidate.get("adaptation", {"mode": "off"})
     resource = candidate.get("inhibitory_resource", {"mode": "off"})
     ee_std = candidate.get("ee_std", {"mode": "off"})
+    spatial_ou = candidate.get("spatial_ou", {"mode": "off"})
     active_dynamic_mechanisms = sum(
-        row["mode"] != "off" for row in (adaptation, resource, ee_std)
+        row["mode"] != "off"
+        for row in (adaptation, resource, ee_std, spatial_ou)
     )
     if active_dynamic_mechanisms > 1:
         raise RuntimeError("rev10-D dynamic mechanisms cannot be combined")
@@ -289,6 +297,7 @@ def main():
         "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN",
         "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
         "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN",
+        "REV10D5_SPATIAL_OU_LIBRARY_FROZEN",
     }:
         if not np.all(coefficients == 0.0):
             raise RuntimeError("rev10-D requires exact no-op edge coefficients")
@@ -309,6 +318,21 @@ def main():
     valid = cmrun.valid_mask(montage, positions, engine["L"], params.Rr)
     if not np.all(valid):
         raise RuntimeError("all frozen contacts must be locally readable")
+    if spatial_ou["mode"] == "off":
+        external_drive = None
+    else:
+        external_drive = SpatialOUDrive(
+            positions, float(engine["L"]), float(engine["dt"]),
+            SpatialOUConfig(
+                mode=spatial_ou["mode"],
+                sigma_rate_per_ms=float(spatial_ou["sigma_rate_per_ms"]),
+                tau_ms=float(spatial_ou["tau_ms"]),
+                ell_mm=float(spatial_ou["ell_mm"]),
+                update_interval_ms=float(spatial_ou["update_interval_ms"]),
+                grid_spacing_mm=float(spatial_ou["grid_spacing_mm"]),
+                seed=int(args.seed) + int(spatial_ou["seed_offset"]),
+            ),
+        )
     result = simulate_kick(
         params, mapped_net, KICK_BOOST=0.0, t_kick=1e9,
         V_th_per_neuron=node["vtheta"], slow=slow,
@@ -321,6 +345,7 @@ def main():
         dump_ee_std_trace=(
             manifest["status"] == "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN"
         ),
+        external_e_rate_drive=external_drive,
     )
     spikes = np.asarray(result["E_spk_bool"], bool)
     active, active_dt = cmrun.active_fraction(spikes, engine["dt"], cmrun.BIN_MS)
@@ -372,6 +397,16 @@ def main():
         "mean": np.asarray(result.get("xdep_mean", []), np.float32),
         "min": np.asarray(result.get("xdep_min", []), np.float32),
     }
+    spatial_ou_trace = (
+        external_drive.trace_arrays() if external_drive is not None else {
+            key: np.empty(0, dtype=np.float32)
+            for key in (
+                "time_ms", "spatial_mean_rate_per_ms",
+                "spatial_sd_rate_per_ms", "maximum_rate_per_ms",
+                "minimum_rate_per_ms", "argmax_x_mm", "argmax_y_mm",
+            )
+        }
+    )
     _atomic_npz(
         output_npz,
         contact_names=np.asarray(contact_names, dtype="U16"),
@@ -402,6 +437,21 @@ def main():
         resource_mean_drive=resource_trace["mean_drive"],
         ee_std_mean=ee_std_trace["mean"],
         ee_std_min=ee_std_trace["min"],
+        spatial_ou_time_ms=spatial_ou_trace["time_ms"],
+        spatial_ou_mean_rate_per_ms=spatial_ou_trace[
+            "spatial_mean_rate_per_ms"
+        ],
+        spatial_ou_sd_rate_per_ms=spatial_ou_trace[
+            "spatial_sd_rate_per_ms"
+        ],
+        spatial_ou_maximum_rate_per_ms=spatial_ou_trace[
+            "maximum_rate_per_ms"
+        ],
+        spatial_ou_minimum_rate_per_ms=spatial_ou_trace[
+            "minimum_rate_per_ms"
+        ],
+        spatial_ou_argmax_x_mm=spatial_ou_trace["argmax_x_mm"],
+        spatial_ou_argmax_y_mm=spatial_ou_trace["argmax_y_mm"],
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -462,6 +512,24 @@ def main():
             "minimum_source_availability": float(np.min(
                 ee_std_trace["min"], initial=1.0,
             )),
+        },
+        "spatial_ou_accessibility": {
+            **spatial_ou,
+            "trace_samples": int(len(spatial_ou_trace["time_ms"])),
+            "mean_spatial_sd_rate_per_ms": float(np.mean(
+                spatial_ou_trace["spatial_sd_rate_per_ms"],
+            )) if len(spatial_ou_trace["time_ms"]) else 0.0,
+            "peak_rate_per_ms": float(np.max(
+                spatial_ou_trace["maximum_rate_per_ms"], initial=0.0,
+            )),
+            "minimum_rate_per_ms": float(np.min(
+                spatial_ou_trace["minimum_rate_per_ms"], initial=0.0,
+            )),
+            "negative_rate_clip_fraction": float(
+                (result.get("external_e_rate_drive") or {}).get(
+                    "negative_rate_clip_fraction", 0.0,
+                )
+            ),
         },
         "network": {
             "n_E": int(n_e), "n_I": int(n_i),
