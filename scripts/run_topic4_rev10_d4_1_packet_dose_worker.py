@@ -17,7 +17,6 @@ from scripts.run_topic4_core_field_stage3_fit import _load_cmrun  # noqa: E402
 from scripts.run_topic4_rev10_d4_uniform_source_worker import (  # noqa: E402
     _classifier,
     _embedding,
-    _event_diagnostics,
     _load_record,
 )
 from scripts.run_topic4_rev10_sa_spectral_field_worker import (  # noqa: E402
@@ -36,12 +35,33 @@ from src.topic4_forced_source_capacity import (  # noqa: E402
     exclude_injected_packet_frame,
     paired_excess_geometry,
     select_source_indices,
+    select_triggered_event,
 )
 from src.topic4_shaft_aware import contract_groups  # noqa: E402
 from src.topic4_shaft_aware_direction import assign_direction_modes  # noqa: E402
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_d4_1_packet_dose_confirmation.json"
+
+
+def _full_event_diagnostics(spikes, *, cmrun, detect_events, detector,
+                            trigger_ms, latency_ms):
+    active, bin_ms = cmrun.active_fraction(spikes, cmrun.DT, cmrun.BIN_MS)
+    events = detect_events(active, bin_ms, event_on_frac=float(detector))
+    triggered = select_triggered_event(
+        events, trigger_ms=trigger_ms, max_latency_ms=latency_ms,
+    )
+    rows = [{
+        "t_on_ms": float(event["t_on"]),
+        "t_off_ms": float(event["t_off"]),
+        "returned": bool(event.get("returned", False)),
+    } for event in events]
+    selected = None if triggered is None else {
+        "t_on_ms": float(triggered["t_on"]),
+        "t_off_ms": float(triggered["t_off"]),
+        "returned": bool(triggered.get("returned", False)),
+    }
+    return active, selected, rows
 
 
 def main():
@@ -52,6 +72,8 @@ def main():
     parser.add_argument("--out-json")
     parser.add_argument("--out-npz")
     parser.add_argument("--cache-dir")
+    parser.add_argument("--only-packet-fraction", type=float)
+    parser.add_argument("--dump-active", action="store_true")
     args = parser.parse_args()
 
     config_path = Path(args.config).resolve()
@@ -173,15 +195,25 @@ def main():
     sham_envelope, envelope_dt, _ = snn_event_envelope(
         sham_spikes, positions, montage, engine["dt"],
     )
-    sham_active, sham_triggered = _event_diagnostics(
+    sham_active, sham_triggered, sham_events = _full_event_diagnostics(
         sham_spikes, cmrun=cmrun, detect_events=detect_events,
         detector=detector, trigger_ms=simulation["forced_spike_ms"],
         latency_ms=simulation["trigger_max_latency_ms"],
     )
 
     trigger_step = int(round(simulation["forced_spike_ms"] / engine["dt"]))
-    rows, onsets_rows, ranks_rows = [], [], []
-    for fraction in manifest["packet_fractions_of_E"]:
+    fractions = list(map(float, manifest["packet_fractions_of_E"]))
+    diagnostic_subset = args.only_packet_fraction is not None
+    if diagnostic_subset:
+        matches = [
+            value for value in fractions
+            if np.isclose(value, float(args.only_packet_fraction))
+        ]
+        if len(matches) != 1:
+            parser.error("only-packet-fraction is outside the frozen dose ladder")
+        fractions = matches
+    rows, onsets_rows, ranks_rows, active_rows = [], [], [], []
+    for fraction in fractions:
         packet_n = max(1, int(round(float(fraction) * n_e)))
         for source in manifest["sources"]:
             indices = select_source_indices(
@@ -235,7 +267,7 @@ def main():
                 np.isfinite(onset[shaft_ids == "ICL"]).any()
                 and np.isfinite(onset[shaft_ids == "SCL"]).any()
             )
-            active, triggered = _event_diagnostics(
+            active, triggered, detected_events = _full_event_diagnostics(
                 forced_spikes, cmrun=cmrun, detect_events=detect_events,
                 detector=detector, trigger_ms=simulation["forced_spike_ms"],
                 latency_ms=simulation["trigger_max_latency_ms"],
@@ -263,6 +295,7 @@ def main():
                 "pretrigger_spikes_bit_identical": pretrigger_identical,
                 "forced_spike_collision_count": int(forced["forced_spike_collision_count"]),
                 "triggered_event": triggered,
+                "detected_events": detected_events,
                 "runaway_early_stop_ms": forced["runaway_early_stop_ms"],
                 "joint_shaft": joint,
                 "assigned_mode": label,
@@ -284,9 +317,10 @@ def main():
             })
             onsets_rows.append(onset)
             ranks_rows.append(rank)
+            if args.dump_active:
+                active_rows.append(active)
 
-    _atomic_npz(
-        output_npz,
+    arrays = dict(
         contact_names=contact_names,
         shaft_ids=shaft_ids,
         source_ids=np.asarray([row["source_id"] for row in rows]),
@@ -301,13 +335,21 @@ def main():
         clean=np.asarray([row["clean_expected_response"] for row in rows], bool),
         sham_active_fraction=np.asarray(sham_active, np.float32),
     )
+    if args.dump_active:
+        arrays["forced_active_fraction"] = np.asarray(active_rows, np.float32)
+    _atomic_npz(output_npz, **arrays)
     payload = {
-        "status": "REV10D4_1_PACKET_DOSE_WORKER_COMPLETE",
+        "status": (
+            "REV10D4_1_PACKET_DOSE_TIMING_AUDIT_COMPLETE"
+            if diagnostic_subset else
+            "REV10D4_1_PACKET_DOSE_WORKER_COMPLETE"
+        ),
         "scientific_role": config["scientific_role"],
         "seed": int(args.seed),
         "response_rows": rows,
         "sham": {
             "triggered_event": sham_triggered,
+            "detected_events": sham_events,
             "runaway_early_stop_ms": sham["runaway_early_stop_ms"],
             "peak_active_fraction": float(np.max(sham_active, initial=0.0)),
         },
@@ -327,6 +369,14 @@ def main():
             "sha256": _sha256(config_path),
         },
         "wall_seconds": float(time.time() - started),
+        "diagnostic_subset": {
+            "enabled": diagnostic_subset,
+            "only_packet_fraction": (
+                None if not diagnostic_subset else float(fractions[0])
+            ),
+            "active_fraction_dumped": bool(args.dump_active),
+            "formal_verdict_unchanged": bool(diagnostic_subset),
+        },
         "provenance": provenance,
     }
     atomic_write_json(payload, output_json)

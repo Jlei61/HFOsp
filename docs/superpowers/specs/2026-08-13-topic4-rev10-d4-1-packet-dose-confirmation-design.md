@@ -24,3 +24,7 @@ The smallest packet dose is accepted only when both sources pass in at least `5/
 ## Claim boundary
 
 The A source was selected using the D4 patient-labeled outcome map, so this is development-only confirmation. A forced packet is an intervention and cannot replace the accepted Fig.4 direct-waveform and KMeans pair. Those figures can be replaced only after an observation-invariant continuous mechanism generates both modes spontaneously within the same network pool.
+
+## Frozen secondary timing audit
+
+The primary run returned `5/6` clean A and `4/6` clean B responses at 160 E neurons, while both sources had `6/6` correct directions and `6/6` joint-shaft recruitment. The preregistered verdict remains `NOT_CONFIRMED`. A secondary audit therefore reruns only sham+A+B at the already frozen maximum dose, saves every detector interval and active-fraction trace, and asks whether the missing formal responses occurred after the 40 ms latency window or overlapped sham events. This audit may attribute the failure but cannot alter the primary verdict or select a new dose/source.
