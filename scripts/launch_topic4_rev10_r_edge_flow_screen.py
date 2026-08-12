@@ -31,6 +31,9 @@ SPATIAL_OU_BRACKET_AUDITOR = (
 SPATIAL_OU_CONFIRMATION_AUDITOR = (
     ROOT / "scripts/audit_topic4_rev10_d5_2_spatial_ou_confirmation.py"
 )
+SPATIAL_OU_KMEANS_GRID_AUDITOR = (
+    ROOT / "scripts/audit_topic4_rev10_d5_3_spatial_ou_kmeans_grid.py"
+)
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -291,10 +294,14 @@ def main():
     spatial_ou_confirmation = config["scientific_role"] == (
         "development_only_translation_invariant_spatial_ou_confirmation"
     )
+    spatial_ou_kmeans_grid = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_kmeans_grid"
+    )
     if (dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket
-            or spatial_ou_confirmation):
+            or spatial_ou_confirmation or spatial_ou_kmeans_grid):
         auditor = (
             SPATIAL_OU_CONFIRMATION_AUDITOR if spatial_ou_confirmation
+            else SPATIAL_OU_KMEANS_GRID_AUDITOR if spatial_ou_kmeans_grid
             else SPATIAL_OU_BRACKET_AUDITOR if spatial_ou_bracket
             else SPATIAL_OU_AUDITOR if spatial_ou
             else DYNAMIC_EDGE_AUDITOR if dynamic_edge
@@ -313,12 +320,12 @@ def main():
     else:
         completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation else "Topic 4 rev10-R",
+        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid else "Topic 4 rev10-R",
         f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
         "status": (
-            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation
+            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid
             else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
         ),
         "completed": len(completed), "total": len(jobs),

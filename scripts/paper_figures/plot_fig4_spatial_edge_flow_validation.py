@@ -113,7 +113,9 @@ def _classifier_from_manifest(manifest):
     return classifier
 
 
-def _load_bundle(config_path, output_root, candidate_id=None):
+def _load_bundle(
+        config_path, output_root, candidate_id=None,
+        *, allow_exploratory_candidate=False):
     sys.path.insert(0, str(ROOT))
     from scripts.rescore_topic4_rev10_sa_historical_artifacts import (  # noqa: E402
         load_scoring_contract,
@@ -138,9 +140,10 @@ def _load_bundle(config_path, output_root, candidate_id=None):
         if phase == "confirmation"
         else summary["diagnostic_best_candidate_id"]
     )
-    if candidate_id is not None and candidate_id != frozen_id:
+    if (candidate_id is not None and candidate_id != frozen_id
+            and not allow_exploratory_candidate):
         raise RuntimeError("figure candidate must equal the pre-network frozen candidate")
-    candidate_id = frozen_id
+    candidate_id = frozen_id if candidate_id is None else candidate_id
     candidates = {
         row["candidate_id"]: row for row in manifest["candidate_set"]["candidates"]
     }
