@@ -74,3 +74,24 @@ def test_whitened_sobol_library_is_antithetic_and_bounded():
         opposite = np.asarray(by_id[row["antithetic_pair"]]["coefficients"])
         np.testing.assert_allclose(coefficients, -opposite, atol=1e-15, rtol=0.0)
         assert np.max(maxima @ np.abs(coefficients)) <= bound + 1e-14
+
+
+def test_r21_library_uses_rms_dose_with_clipping():
+    config = json.loads(
+        (ROOT / "config/topic4_rev10_r2_1_spatial_edge_flow.json").read_text()
+    )
+    covariance = np.stack([np.diag(np.linspace(0.5, 2.0, 12))] * 4)
+    maxima = np.stack([np.linspace(1.0, 2.0, 12)] * 4)
+    second_moment = covariance + 0.05 * np.ones_like(covariance)
+    candidates, *_ = build_candidates(
+        config, maxima, covariance, second_moment,
+    )
+    target = config["candidate_library"]["target_unclipped_logit_rms"]
+    clip = config["candidate_library"]["raw_logit_abs_bound"]
+    for row in candidates[1:]:
+        coefficients = np.asarray(row["coefficients"])
+        rms = float(np.sqrt(
+            coefficients @ second_moment.mean(axis=0) @ coefficients
+        ))
+        assert np.isclose(rms, target)
+        assert row["raw_logit_clip"] == clip

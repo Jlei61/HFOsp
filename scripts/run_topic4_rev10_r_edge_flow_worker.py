@@ -201,6 +201,7 @@ def main():
             net, positions, coefficients,
             L=float(spatial["sheet_L_mm"]),
             length_scale=float(spatial["displacement_length_scale_mm"]),
+            raw_logit_clip=candidate.get("raw_logit_clip"),
         )
         edge_basis = {
             "family": "continuous_quadratic_midpoint_vector_flow",

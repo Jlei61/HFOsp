@@ -148,7 +148,8 @@ def _target_distribution_summary(kl, ess_ratio, positive_targets):
 
 
 def spatial_vector_ee_flow(net, positions_e, coefficients, *, L=20.0,
-                           length_scale=1.0, ratio_sample_limit=1_000_000):
+                           length_scale=1.0, raw_logit_clip=None,
+                           ratio_sample_limit=1_000_000):
     """Redistribute fixed E-to-E edges with one continuous directed flow field."""
     n_e = int(net["NE"])
     positions = np.asarray(positions_e, float)
@@ -157,6 +158,10 @@ def spatial_vector_ee_flow(net, positions_e, coefficients, *, L=20.0,
         raise ValueError(f"positions_e must have shape ({n_e}, 2)")
     if coefficients.shape != (len(FEATURE_NAMES),):
         raise ValueError(f"coefficients must have shape ({len(FEATURE_NAMES)},)")
+    if raw_logit_clip is not None:
+        raw_logit_clip = float(raw_logit_clip)
+        if not np.isfinite(raw_logit_clip) or raw_logit_clip <= 0.0:
+            raise ValueError("raw_logit_clip must be finite and positive")
     old_bins = net["ampa_by_delay"]
     old_topology = _hash_sparse_bins(old_bins, include_data=False)
     old_ei = _hash_sparse_bins(old_bins, rows=slice(n_e, None))
@@ -171,6 +176,7 @@ def spatial_vector_ee_flow(net, positions_e, coefficients, *, L=20.0,
         "feature_names": FEATURE_NAMES,
         "sheet_L_mm": float(L),
         "displacement_length_scale_mm": float(length_scale),
+        "raw_logit_clip_abs": raw_logit_clip,
     }
     if np.all(coefficients == 0.0):
         new_net = copy.copy(net)
@@ -183,6 +189,11 @@ def spatial_vector_ee_flow(net, positions_e, coefficients, *, L=20.0,
             "e_to_i_unchanged": True, "gaba_unchanged": True,
             "ampa_data_unchanged": True,
             "invalidated_ampa_cache_keys": removed,
+            "logit_dose": {
+                "raw_rms": 0.0, "applied_rms": 0.0,
+                "raw_abs_max": 0.0, "applied_abs_max": 0.0,
+                "clipped_edge_fraction": 0.0,
+            },
             "edge_ratio": {"min": 1.0, "p01": 1.0, "median": 1.0,
                            "p99": 1.0, "max": 1.0,
                            "quantile_sample_size": 0, "sample_stride": 1},
@@ -191,14 +202,24 @@ def spatial_vector_ee_flow(net, positions_e, coefficients, *, L=20.0,
             ),
         }
 
-    def edge_logits(rows, columns):
+    def raw_edge_logits(rows, columns):
         return spatial_vector_edge_logits(
             positions[rows], positions[columns], coefficients,
             L=L, length_scale=length_scale,
         )
 
+    def edge_logits(rows, columns):
+        raw = raw_edge_logits(rows, columns)
+        if raw_logit_clip is None:
+            return raw
+        return np.clip(raw, -raw_logit_clip, raw_logit_clip)
+
     target_max = np.full(n_e, -np.inf, float)
     total_edges = 0
+    raw_logit_sum_sq = 0.0
+    applied_logit_sum_sq = 0.0
+    raw_logit_abs_max = 0.0
+    clipped_edges = 0
     for matrix in old_bins:
         coo = matrix.tocoo(copy=False)
         ee = coo.row < n_e
@@ -209,7 +230,18 @@ def spatial_vector_ee_flow(net, positions_e, coefficients, *, L=20.0,
             continue
         if np.any(~np.isfinite(data)) or np.any(data <= 0.0):
             raise ValueError("stored E-to-E weights must be finite and positive")
-        np.maximum.at(target_max, rows, np.log(data) + edge_logits(rows, columns))
+        raw_logits = raw_edge_logits(rows, columns)
+        logits = (
+            raw_logits if raw_logit_clip is None
+            else np.clip(raw_logits, -raw_logit_clip, raw_logit_clip)
+        )
+        np.maximum.at(target_max, rows, np.log(data) + logits)
+        raw_logit_sum_sq += float(raw_logits @ raw_logits)
+        applied_logit_sum_sq += float(logits @ logits)
+        raw_logit_abs_max = max(
+            raw_logit_abs_max, float(np.max(np.abs(raw_logits), initial=0.0)),
+        )
+        clipped_edges += int(np.sum(raw_logits != logits))
         total_edges += len(data)
     target_sum = np.zeros(n_e, float)
     for matrix in old_bins:
@@ -291,6 +323,10 @@ def spatial_vector_ee_flow(net, positions_e, coefficients, *, L=20.0,
     if (float(np.max(incoming_error, initial=0.0)) > 1e-9
             or not topology_unchanged or not e_to_i_unchanged or not gaba_unchanged):
         raise RuntimeError("spatial edge flow violated structural conservation")
+    if raw_logit_clip is not None:
+        ratio_limit = float(np.exp(2.0 * raw_logit_clip))
+        if ratio_min < 1.0 / ratio_limit - 1e-10 or ratio_max > ratio_limit + 1e-10:
+            raise RuntimeError("clipped spatial edge flow exceeded ratio guarantee")
     ess_old = np.divide(
         1.0, old_concentration, out=np.full(n_e, np.nan),
         where=old_concentration > 0.0,
@@ -330,6 +366,16 @@ def spatial_vector_ee_flow(net, positions_e, coefficients, *, L=20.0,
         "gaba_unchanged": bool(gaba_unchanged),
         "ampa_data_unchanged": _hash_sparse_bins(new_bins) == old_data_hash,
         "invalidated_ampa_cache_keys": removed,
+        "logit_dose": {
+            "raw_rms": float(np.sqrt(raw_logit_sum_sq / total_edges)),
+            "applied_rms": float(np.sqrt(applied_logit_sum_sq / total_edges)),
+            "raw_abs_max": raw_logit_abs_max,
+            "applied_abs_max": float(
+                min(raw_logit_abs_max, raw_logit_clip)
+                if raw_logit_clip is not None else raw_logit_abs_max
+            ),
+            "clipped_edge_fraction": float(clipped_edges / total_edges),
+        },
         "edge_ratio": {
             "min": ratio_min, "p01": float(np.percentile(sampled, 1)),
             "median": float(np.median(sampled)),

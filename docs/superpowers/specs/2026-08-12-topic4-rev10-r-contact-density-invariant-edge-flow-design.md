@@ -158,6 +158,20 @@ continuous diagnostics. Exploratory bounds start at edge ratio `[0.5,2]`; a
 secondary `[0.25,4]` range is opened only if the narrow range changes the
 mode-A route without destabilization.
 
+### R2.1 dose correction
+
+The first R2 sentinel exposed a dose-parameterization failure before the full
+screen: scaling every direction by the single most extreme edge produced only
+`0.009-0.013` full-edge logit RMS, and the sentinel's sampled 1st-99th edge
+ratio was only `0.972-1.027`. This run is `R2_DOSE_PARAMETERIZATION_FAIL`, not
+an edge-mechanism result. R2.1 retains the same 12-dimensional continuous
+sheet field and Sobol directions. Each direction is scaled by the equal-network
+full-edge second moment to raw logit RMS `0.15`, then clipped edge-wise at
+`0.95 log(2)/2` before target normalization. The observation-free feature
+sample predicts clipped RMS `0.123-0.142` with only `3.5%-4.9%` clipped edges;
+the ratio guarantee remains `[0.518,1.932]`. No patient event, contact, shaft,
+Node field, component, or peak informed this correction.
+
 ## 6. Objective and independent unit
 
 The independent unit is the network seed, not pooled events. For mode

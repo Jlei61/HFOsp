@@ -30,7 +30,7 @@ DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r2_spatial_edge_flow.json"
 
 
 def _audit_records(config, config_sha):
-    records, maxima, covariance = [], [], []
+    records, maxima, covariance, second_moment = [], [], [], []
     root = ROOT / config["output_root"] / "feature_audit"
     for seed in map(int, config["search"]["fit_network_seeds"]):
         json_path, npz_path = root / f"seed_{seed}.json", root / f"seed_{seed}.npz"
@@ -50,6 +50,10 @@ def _audit_records(config, config_sha):
         with np.load(npz_path, allow_pickle=False) as loaded:
             maxima.append(np.asarray(loaded["feature_abs_max"], float))
             covariance.append(np.asarray(loaded["covariance"], float))
+            count = int(loaded["n_ee_delay_entries"])
+            second_moment.append(
+                np.asarray(loaded["feature_gram"], float) / count
+            )
             names = np.asarray(loaded["feature_names"]).astype(str)
         if not np.array_equal(names, np.asarray(FEATURE_NAMES)):
             raise RuntimeError(f"spatial feature order changed: seed {seed}")
@@ -65,7 +69,10 @@ def _audit_records(config, config_sha):
             ],
             "producer_commit": source_commit,
         })
-    return records, np.asarray(maxima), np.asarray(covariance)
+    return (
+        records, np.asarray(maxima), np.asarray(covariance),
+        np.asarray(second_moment),
+    )
 
 
 def whitened_directions(config, covariance):
@@ -95,12 +102,22 @@ def whitened_directions(config, covariance):
     return physical, latent, mean_covariance, eigenvalues
 
 
-def build_candidates(config, feature_abs_max, covariance):
+def build_candidates(config, feature_abs_max, covariance, second_moment=None):
     directions, latent, mean_covariance, eigenvalues = whitened_directions(
         config, covariance,
     )
     dimension = directions.shape[1]
-    bound = float(config["candidate_library"]["raw_logit_abs_bound"])
+    library = config["candidate_library"]
+    bound = float(library["raw_logit_abs_bound"])
+    target_rms = library.get("target_unclipped_logit_rms")
+    if target_rms is not None:
+        target_rms = float(target_rms)
+        if not np.isfinite(target_rms) or target_rms <= 0.0:
+            raise ValueError("target_unclipped_logit_rms must be positive")
+    mean_second_moment = np.mean(
+        np.asarray(second_moment if second_moment is not None else covariance),
+        axis=0,
+    )
     candidates = [{
         "candidate_id": "edge_noop", "version": "rev10-R2",
         "role": "reused_Node_baseline_exact_noop",
@@ -108,12 +125,20 @@ def build_candidates(config, feature_abs_max, covariance):
         "coefficients": np.zeros(dimension).tolist(),
         "coefficients_sha256": array_sha256(np.zeros(dimension)),
         "raw_logit_abs_bound": 0.0,
+        "raw_logit_clip": bound if target_rms is not None else None,
+        "target_unclipped_logit_rms": 0.0,
         "edge_ratio_guarantee": [1.0, 1.0],
         "antithetic_pair": None,
     }]
     for index, direction in enumerate(directions):
-        worst = float(np.max(feature_abs_max @ np.abs(direction)))
-        scale = bound / worst
+        if target_rms is None:
+            worst = float(np.max(feature_abs_max @ np.abs(direction)))
+            scale = bound / worst
+        else:
+            direction_rms = float(np.sqrt(
+                direction @ mean_second_moment @ direction
+            ))
+            scale = target_rms / direction_rms
         for suffix, sign in (("pos", 1.0), ("neg", -1.0)):
             coefficients = sign * scale * direction
             candidates.append({
@@ -127,6 +152,10 @@ def build_candidates(config, feature_abs_max, covariance):
                 "latent_whitened_direction": (sign * latent[index]).tolist(),
                 "coefficient_l2": float(np.linalg.norm(coefficients)),
                 "raw_logit_abs_bound": bound,
+                "raw_logit_clip": bound if target_rms is not None else None,
+                "target_unclipped_logit_rms": (
+                    target_rms if target_rms is not None else None
+                ),
                 "edge_ratio_guarantee": [
                     float(np.exp(-2.0 * bound)),
                     float(np.exp(2.0 * bound)),
@@ -151,9 +180,9 @@ def build_manifest(config_path, expected_commit):
         ["git", "rev-parse", expected_commit], cwd=ROOT, text=True,
     ).strip()
     config_sha = _sha256(config_path)
-    audits, maxima, covariance = _audit_records(config, config_sha)
+    audits, maxima, covariance, second_moment = _audit_records(config, config_sha)
     candidates, directions, latent, mean_covariance, eigenvalues = build_candidates(
-        config, maxima, covariance,
+        config, maxima, covariance, second_moment,
     )
     contract = _load_json_input(config["inputs"]["contact_contract"])
     classifier = _patient_classifier(config, contract)
@@ -178,6 +207,9 @@ def build_manifest(config_path, expected_commit):
             "feature_names": FEATURE_NAMES,
             "feature_abs_max_by_fit_graph": maxima.tolist(),
             "equal_network_mean_covariance": mean_covariance.tolist(),
+            "equal_network_mean_second_moment": np.mean(
+                second_moment, axis=0,
+            ).tolist(),
             "equal_network_mean_covariance_eigenvalues": eigenvalues.tolist(),
             "physical_directions_sha256": array_sha256(directions),
             "latent_sobol_directions_sha256": array_sha256(latent),
@@ -186,6 +218,10 @@ def build_manifest(config_path, expected_commit):
             "guaranteed_edge_ratio_interval": config["candidate_library"][
                 "guaranteed_pre_simulation_edge_ratio_interval"
             ],
+            "dose_parameterization": config["candidate_library"].get(
+                "amplitude_parameterization",
+                "exact_full_edge_maximum_without_clipping",
+            ),
         },
         "feature_audits": audits,
         "direction_classifier": _json_classifier(classifier),

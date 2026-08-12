@@ -31,7 +31,20 @@ finish() {
     exit "$code"
 }
 
+terminate() {
+    trap - TERM INT
+    if [ -n "${child_pid:-}" ]; then
+        kill -TERM "$child_pid" >/dev/null 2>&1 || true
+        wait "$child_pid" || true
+    fi
+    exit 143
+}
+
 mkdir -p "$(dirname "$STATUS")" "$(dirname "$LOG")"
 trap finish EXIT
+trap terminate TERM INT
 write_status "RUNNING pid=$$ started_at=$(date --iso-8601=seconds) commit=$COMMIT"
-"$@" >> "$LOG" 2>&1
+"$@" >> "$LOG" 2>&1 &
+child_pid=$!
+wait "$child_pid"
+exit $?

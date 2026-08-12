@@ -47,8 +47,14 @@ parameterization-negative result, not optimizer failure.
 
 Observed R2 preflight: all four networks passed at effective rank `12/12`,
 condition number `30.9-31.6`, and weakest relative eigenvalue
-`0.0316-0.0323`. Proceed to the frozen Sobol screen without further family
-changes.
+`0.0316-0.0323`.
+
+Observed R2 dose sentinel: **stopped before the full screen**. Exact-maximum
+scaling yielded only `0.009-0.013` logit RMS across the library and a sentinel
+1st-99th edge ratio of `0.972-1.027`. This is a parameterization-negative dose
+audit, not a mechanism result. R2.1 keeps the basis and directions fixed, uses
+equal-network full-edge second-moment scaling to raw RMS `0.15`, clips logits
+at `0.95 log(2)/2`, and starts in a new artifact directory.
 
 ## R1 edge mapper
 
@@ -61,8 +67,11 @@ changes.
 
 ## R2 paired exploratory screen
 
-- [ ] Freeze 32 nonzero symmetric scrambled-Sobol filters in rank-4 coefficient
-  space, plus `c=0`, with antithetic pairs.
+- [x] Freeze 32 nonzero symmetric scrambled-Sobol spatial vector fields, plus
+  `c=0`, with antithetic pairs; reject the original exact-maximum amplitude as
+  underpowered after its sentinel.
+- [ ] Freeze R2.1 with raw full-edge RMS `0.15`, edge-wise logit clipping, and
+  an explicit applied-dose sidecar before launching the replacement screen.
 - [ ] Launch one candidate-network per `systemd-run --user -> nohup` worker with
   all numeric thread counts at 1, bounded by measured RSS and available memory.
 - [ ] Use common network/noise seeds and the common absolute detector.

@@ -97,3 +97,17 @@ def test_spatial_feature_audit_handles_empty_delay_bins():
         / sample["n_ee_delay_entries"] ** 2
     )
     assert np.all(np.linalg.eigvalsh(covariance) >= -1e-12)
+
+
+def test_clipped_spatial_flow_has_audited_dose_and_ratio_bound():
+    net, positions = _network(), _positions()
+    clip = 0.2
+    _, audit = spatial_vector_ee_flow(
+        net, positions, np.linspace(-4.0, 4.0, 12),
+        L=20.0, length_scale=2.0, raw_logit_clip=clip,
+    )
+    assert audit["logit_dose"]["raw_rms"] > audit["logit_dose"]["applied_rms"]
+    assert audit["logit_dose"]["clipped_edge_fraction"] > 0.0
+    assert audit["logit_dose"]["applied_abs_max"] <= clip
+    assert audit["edge_ratio"]["min"] >= np.exp(-2.0 * clip) - 1e-10
+    assert audit["edge_ratio"]["max"] <= np.exp(2.0 * clip) + 1e-10
