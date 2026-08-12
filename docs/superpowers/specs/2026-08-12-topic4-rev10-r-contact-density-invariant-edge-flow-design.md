@@ -22,7 +22,10 @@ Vtheta_i = Vtheta_0 - h_i d_i
 
 - Neuron positions, E/I labels, topology, delay-bin assignment, E-to-I edges,
   GABA edges, external drive, detector, readout, and shaft-aware patient target.
-- Primary Node reference `t=0.050`; `t=0.025/0.075` are field sensitivities.
+- Development Node anchor `t=0.050`; `t=0.025/0.075` are field sensitivities.
+  The anchor was chosen after reading V6.2 and is not an independently selected
+  winner. Seeds 1041-1043 are consequently development history and may not be
+  reused as rev10-R selection or confirmation networks.
 - No contact, shaft, onset, patient label, Gaussian component, or field peak may
   enter the edge basis construction.
 
@@ -128,11 +131,13 @@ coexistence is reported explicitly but is not multiplied into many blockers.
 
 1. Implement basis/no-op/normalization tests and a zero-SNN structure sidecar.
 2. Run a small symmetric Sobol library in the 16-dimensional `R=4` coefficient
-   matrix on common fit networks. Include `+Gamma/-Gamma` pairs and `Gamma=0`;
-   do not start with CMA-ES.
-3. Freeze a diverse Pareto subset before two selection networks. Retain fields
-   with different A/B tradeoffs, not only the scalar minimum.
-4. Confirm only a frozen subset on three fresh development networks, with the
+   matrix on common fit networks 1051-1054. Include `+Gamma/-Gamma` pairs and
+   `Gamma=0`; do not start with CMA-ES. The initial budget is 32 nonzero fields
+   plus one no-op, with one Node baseline reused per network.
+3. Freeze at most six diverse Pareto fields before selection networks
+   1061-1063. Retain fields with different A/B tradeoffs, not only the scalar
+   minimum.
+4. Freeze at most three fields before confirmation networks 1071-1073, with the
    common detector and mode-conditioned joint+ID readout.
 5. Compare Node with Node+Edge per network. Edge-only is descriptive because
    rev9 showed it is not an ignition substrate.

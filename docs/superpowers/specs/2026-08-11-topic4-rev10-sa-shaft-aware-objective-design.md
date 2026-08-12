@@ -2,11 +2,13 @@
 
 ## 1. Scientific objective
 
-The only objective of rev10-SA is to determine whether patient-training data can
-first test whether the existing fixed-budget `K=3` node field can cover both ICL and SCL and then, after the representation audit below, replace component allocation with a continuous non-component field to
-reproduce within- and cross-shaft propagation structure. Edge calibration,
-`beta`, topology expansion, optimizer comparison, slow variables, and patient
-generalization are outside the first phase.
+The objective of rev10-SA is to determine whether patient-training data can
+shape a Node excitability field that reproduces within- and cross-shaft
+propagation structure. The first historical canary tests the fixed-budget
+`K=3` field; the formal capacity line then replaces component allocation with a
+uniform-basis continuous non-component field. Edge calibration, `beta`,
+topology expansion, optimizer comparison, slow variables, and patient
+generalization are outside this phase.
 
 The accepted rev9-L state is:
 

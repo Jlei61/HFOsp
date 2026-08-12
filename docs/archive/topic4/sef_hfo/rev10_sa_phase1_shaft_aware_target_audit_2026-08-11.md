@@ -6,13 +6,13 @@
 
 ## 1. 一句话判断
 
-rev10-SA 第一阶段已经回答了“旧目标是否看不见 SCL”这个问题：答案是**是**。新的目标能稳定识别 SCL 删除、跨杆 timing 改变和 0/4 到 4/4 的连续恢复；但现有历史产物还不能证明“旧 objective 选错了某个已有 field”，因为真正的 48 个 field-fit 候选没有保存逐事件固定 contact 数据。
+rev10-SA 已回答三个不同问题。第一，旧目标确实看不见 SCL；新的目标能稳定识别 SCL 删除、跨杆 timing 改变和 0/4 到 4/4 的连续恢复。第二，SCL 虚拟触点本身可读，旧 fixed-K3 relocation 阴性不能外推成自由场失败。第三，回到 Stage 3 学习场并改用均匀二维连续基底后，mode B 跨新网络稳定，mode A 仍未形成同一网络内的共享 repertoire。
 
-SA5 contact detectability 已经完成并排除 SCL observation 主限制。SA6 随后只完成了 fixed-K3 component-3 relocation canary；它不是连续自由场容量测试。当前进入 SA6F continuous-field correction，仍不直接开放 Edge、`beta` 或 topology。
+因此当前不再增加 K/core，也不继续做 Node 场系数细化。下一步是单独的 contact-density-invariant edge-flow 探索；Edge、`beta` 和 topology 在 rev10-SA 内保持关闭。
 
 ## 2. 完成程度
 
-> **rev10-SA SA0-SA6 完成度：90/100；完整 dual-shaft recovery 完成度：约 55/100**
+> **rev10-SA 工程执行完成度：100/100；患者双模式科学恢复完成度：约 60/100**
 
 已完成：
 
@@ -22,11 +22,15 @@ SA5 contact detectability 已经完成并排除 SCL observation 主限制。SA6 
 - 四个零仿真正控；
 - patient direction 与 event extent 的 factorization 审计；
 - rev8.1 final、rev9 factorial、hand dual-core、filament、L2/L3 retained artifact 的统一重评分。
+- Stage 3 warm start 到均匀 `18 x 18` continuous spline 的表示桥接；
+- V4-V6.2 的 fit、selection 和 fresh-network confirmation；
+- 最终 `9/9` V6.2 workers 与 Fig.4-style 波形/KMeans、网络级 A/B support 图。
 
-未完成：
+未完成的科学闭环：
 
-- 新 field 拟合、独立 selection network、重新 Edge factorization；
-- 新 patient blind unit。
+- mode A 的跨网络共享传播容量；
+- 冻结新场后的 edge-flow/factorial 机制分解；
+- 新 patient blind unit，以及患者波形、频谱、持续时间、幅度和事件率层面的完整比较。
 
 ## 3. P0 / P1 关键问题
 

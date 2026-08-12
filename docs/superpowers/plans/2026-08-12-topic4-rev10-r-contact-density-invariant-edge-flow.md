@@ -2,8 +2,10 @@
 
 ## Scope
 
-- [ ] Freeze rev10-SA V6.2 artifacts and hashes; primary Node field is `t=0.05`,
+- [ ] Freeze rev10-SA V6.2 artifacts and hashes; development Node anchor is `t=0.05`,
   with `t=0.025/0.075` as sensitivities.
+- [ ] Mark seeds 1041-1043 as consumed development history; use 1051-1054 for
+  fit, 1061-1063 for selection, and 1071-1073 for confirmation.
 - [ ] Keep patient held-out, `beta`, topology growth, slow variables, contact-
   conditioned bases, Gaussian components, and peak-count constraints closed.
 - [ ] Treat this as exploratory route-capacity work with network seed as the
@@ -32,8 +34,8 @@
 
 ## R2 paired exploratory screen
 
-- [ ] Freeze a symmetric scrambled-Sobol library in rank-4 coefficient space,
-  including `gamma=0` and antithetic pairs.
+- [ ] Freeze 32 nonzero symmetric scrambled-Sobol fields in rank-4 coefficient
+  space, plus `Gamma=0`, with antithetic pairs.
 - [ ] Launch one candidate-network per `systemd-run --user -> nohup` worker with
   all numeric thread counts at 1, bounded by measured RSS and available memory.
 - [ ] Use common network/noise seeds and the common absolute detector.
@@ -42,9 +44,11 @@
 
 ## R3 selection and confirmation
 
-- [ ] Freeze a diverse fit Pareto subset before reading two selection networks.
+- [ ] Freeze at most six diverse fit Pareto fields before reading selection
+  networks 1061-1063.
 - [ ] Keep equal network weight; do not rank by pooled event count or KMeans AMI.
-- [ ] Freeze the selection subset before three fresh development networks.
+- [ ] Freeze at most three selection fields before fresh development networks
+  1071-1073.
 - [ ] Produce a Fig.4-style direct readout/KMeans figure and a network-level
   A/B joint+ID support figure with a Chinese figure README.
 

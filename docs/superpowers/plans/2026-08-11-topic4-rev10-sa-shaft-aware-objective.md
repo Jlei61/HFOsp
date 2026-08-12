@@ -9,7 +9,7 @@
 - Missing per-event data are reported as unavailable, never reconstructed from
   aggregate curves.
 - New figure directories receive a Chinese `README.md` after rendering.
-- Long jobs use managed nohup execution, bounded workers, 120-second waits, and
+- Long jobs use managed nohup execution, bounded workers, 180-second waits, and
   completion notification.
 
 ## Previous-round acceptance
