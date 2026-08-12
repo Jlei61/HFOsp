@@ -108,6 +108,7 @@ def main():
         "development_only_translation_invariant_spatial_ou_confirmation",
         "development_only_translation_invariant_spatial_ou_kmeans_grid",
         "development_only_translation_invariant_spatial_ou_kmeans_selection",
+        "development_only_observation_invariant_continuous_field_kmeans_screen",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -135,6 +136,7 @@ def main():
         "REV10D5_2_SPATIAL_OU_CONFIRMATION_LIBRARY_FROZEN",
         "REV10D5_3_SPATIAL_OU_KMEANS_GRID_FROZEN",
         "REV10D5_4_SPATIAL_OU_KMEANS_SELECTION_FROZEN",
+        "REV10D6_CONTINUOUS_FIELD_SENSITIVITY_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -215,8 +217,9 @@ def main():
         params, stage, _placement(stage), int(args.seed), base, cache_dir,
     )
     positions = np.asarray(net["pos"][:n_e], float)
+    node_candidate = candidate.get("node_field", anchor)
     node = _candidate_node(
-        anchor, positions, n_total=n_e + n_i,
+        node_candidate, positions, n_total=n_e + n_i,
         stage=stage, config=anchor_config,
     )
     if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
@@ -308,6 +311,7 @@ def main():
         "REV10D5_SPATIAL_OU_LIBRARY_FROZEN",
         "REV10D5_1_SPATIAL_OU_LOW_AMPLITUDE_LIBRARY_FROZEN",
         "REV10D5_2_SPATIAL_OU_CONFIRMATION_LIBRARY_FROZEN",
+        "REV10D6_CONTINUOUS_FIELD_SENSITIVITY_LIBRARY_FROZEN",
     }:
         if not np.all(coefficients == 0.0):
             raise RuntimeError("rev10-D requires exact no-op edge coefficients")
@@ -479,6 +483,10 @@ def main():
         "node_anchor": {
             "candidate_id": anchor["candidate_id"],
             "field_sha256": anchor["field_sha256"],
+        },
+        "node_field": {
+            "candidate_id": node_candidate["candidate_id"],
+            "field_sha256": node_candidate["field_sha256"],
             "sum_h": float(node["h"].sum()),
             "node_hashes": node["hashes"],
         },

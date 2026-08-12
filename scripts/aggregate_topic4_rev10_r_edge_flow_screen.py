@@ -494,6 +494,9 @@ def main():
     is_spatial_ou_kmeans_grid = config["scientific_role"] == (
         "development_only_translation_invariant_spatial_ou_kmeans_grid"
     )
+    is_continuous_field_kmeans_screen = config["scientific_role"] == (
+        "development_only_observation_invariant_continuous_field_kmeans_screen"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -529,10 +532,15 @@ def main():
         summary["status"] = "REV10D5_1_RETURNED_ONLY_BRACKET_COMPLETE"
     if is_spatial_ou_kmeans_grid:
         summary["status"] = "REV10D5_3_RETURNED_ONLY_KMEANS_GRID_COMPLETE"
+    if is_continuous_field_kmeans_screen:
+        summary["status"] = (
+            "REV10D6_RETURNED_ONLY_CONTINUOUS_FIELD_SCREEN_COMPLETE"
+        )
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
         or is_dynamic_edge_canary or is_spatial_ou_canary
         or is_spatial_ou_bracket or is_spatial_ou_kmeans_grid
+        or is_continuous_field_kmeans_screen
         else basename_by_phase[phase]
     )
     _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)
