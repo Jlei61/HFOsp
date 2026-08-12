@@ -121,6 +121,14 @@ def _mode_shape_scores(score6, score3):
     return output, source
 
 
+def returned_only_onsets(onsets, event_returned):
+    onsets = np.asarray(onsets, float)
+    event_returned = np.asarray(event_returned, bool)
+    if onsets.ndim != 2 or event_returned.shape != (len(onsets),):
+        raise ValueError("onsets and event_returned must align by event")
+    return onsets[event_returned]
+
+
 def _score_seed(onsets, *, classifier, groups, pairs, embedding, targets,
                 floors6, floors3, scoring_config, objective):
     onsets = np.asarray(onsets, float)
@@ -203,12 +211,17 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
     parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--worker-commit")
     args = parser.parse_args()
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
     config_sha = _sha256(config_path)
     commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
+    ).strip()
+    worker_commit = subprocess.check_output(
+        ["git", "rev-parse", args.worker_commit or args.expected_commit],
+        cwd=ROOT, text=True,
     ).strip()
     output_root = ROOT / config["output_root"]
     manifest_path = output_root / "candidate_manifest.json"
@@ -244,18 +257,27 @@ def main():
             json_path, npz_path = stem.with_suffix(".json"), stem.with_suffix(".npz")
             payload = json.loads(json_path.read_text())
             if not _worker_complete(
-                    payload, npz_path, config_sha, manifest_sha, commit):
+                    payload, npz_path, config_sha, manifest_sha, worker_commit):
                 raise RuntimeError(f"stale rev10-R worker: {stem}")
             with np.load(npz_path, allow_pickle=False) as loaded:
                 worker_names = np.asarray(loaded["contact_names"]).astype(str)
                 onsets = np.asarray(loaded["onsets"], float)
+                event_returned = np.asarray(loaded["event_returned"], bool)
             if not np.array_equal(worker_names, names.astype(str)):
                 raise RuntimeError(f"contact order changed: {stem}")
+            scored_onsets = returned_only_onsets(onsets, event_returned)
             by_seed[str(seed)] = _score_seed(
-                onsets, classifier=classifier, groups=groups, pairs=pairs,
+                scored_onsets, classifier=classifier, groups=groups, pairs=pairs,
                 embedding=embedding, targets=targets, floors6=floors6,
                 floors3=floors3, scoring_config=scoring_config,
                 objective=objective,
+            )
+            by_seed[str(seed)]["n_detected_events"] = int(len(onsets))
+            by_seed[str(seed)]["n_returned_events_scored"] = int(
+                len(scored_onsets)
+            )
+            by_seed[str(seed)]["n_nonreturned_events_excluded"] = int(
+                len(onsets) - len(scored_onsets)
             )
             metadata.append(payload)
             worker_inputs.append({
@@ -274,8 +296,27 @@ def main():
             "candidate_id": candidate["candidate_id"],
             "selection_score_equal_network": mean_score,
             "n_runaway_networks": runaway,
-            "total_events_descriptive": int(sum(value["n_events"] for value in values)),
-            "mean_network_events": float(np.mean([value["n_events"] for value in values])),
+            "total_events_descriptive": int(sum(
+                value["n_detected_events"] for value in values
+            )),
+            "mean_network_events": float(np.mean([
+                value["n_detected_events"] for value in values
+            ])),
+            "total_detected_events_descriptive": int(sum(
+                value["n_detected_events"] for value in values
+            )),
+            "total_returned_events_scored": int(sum(
+                value["n_returned_events_scored"] for value in values
+            )),
+            "total_nonreturned_events_excluded": int(sum(
+                value["n_nonreturned_events_excluded"] for value in values
+            )),
+            "mean_network_detected_events_descriptive": float(np.mean([
+                value["n_detected_events"] for value in values
+            ])),
+            "mean_network_returned_events_scored": float(np.mean([
+                value["n_returned_events_scored"] for value in values
+            ])),
             "mean_network_shape_A": float(np.mean([
                 value["shape_by_mode"]["A"] for value in values
             ])),
@@ -336,12 +377,13 @@ def main():
     ))
     baseline = next(row for row in rows if row["candidate_id"] == "edge_noop")
     summary = {
-        "status": "REV10R_FIT_SCREEN_COMPLETE",
+        "status": "REV10R_RETURNED_ONLY_FIT_SCREEN_COMPLETE",
         "scientific_role": config["scientific_role"],
         "safe_claim": (
             "all candidate scores use equal network weights; event-pooled counts "
-            "are descriptive only; mode shape is scored only on joint and "
-            "patient-supported events, while absent support remains a penalty"
+            "are descriptive only; non-returned detector events are excluded; "
+            "mode shape is scored only on returned, joint, patient-supported "
+            "events, while absent support remains a penalty"
         ),
         "baseline_candidate_id": "edge_noop",
         "baseline": baseline,
@@ -352,10 +394,11 @@ def main():
         "worker_inputs": worker_inputs,
         "manifest": {"path": str(manifest_path), "sha256": manifest_sha},
         "config": {"path": str(config_path.relative_to(ROOT)), "sha256": config_sha},
+        "source_worker_commit": worker_commit,
         "provenance": _runtime_provenance(args.expected_commit),
     }
-    _atomic_csv(output_root / "fit_screen_candidate_summary.csv", rows)
-    _atomic_json(output_root / "fit_screen_summary.json", summary)
+    _atomic_csv(output_root / "fit_screen_candidate_summary_returned_only.csv", rows)
+    _atomic_json(output_root / "fit_screen_summary_returned_only.json", summary)
     print(json.dumps({
         "status": summary["status"],
         "diagnostic_best_candidate_id": summary["diagnostic_best_candidate_id"],

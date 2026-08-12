@@ -197,6 +197,11 @@ J_route = LSE_tau(D_A, D_B)
 zero-event networks remain valid observations. Pooled KMeans, mean correlation,
 or total joint fraction cannot compensate for missing mode A. Same-network A/B
 coexistence is reported explicitly but is not multiplied into many blockers.
+Only detector events with `event_returned=True` enter the interictal mode score,
+KMeans panel, or direct representative-event readout. All detector events and
+the excluded non-returned count remain descriptive outputs. This is a
+zero-simulation censoring rule on saved event sidecars, not a rerun or candidate
+adaptation.
 
 ## 7. Exploration sequence
 

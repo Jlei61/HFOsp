@@ -58,11 +58,17 @@ def normalize_event_ranks(ranks):
     return output
 
 
-def formal_clean_mask(onsets, labels, ood, groups):
+def formal_clean_mask(onsets, labels, ood, groups, event_returned=None):
     onsets = np.asarray(onsets, float)
     icl = np.isfinite(onsets[:, np.asarray(groups["ICL"], int)]).any(axis=1)
     scl = np.isfinite(onsets[:, np.asarray(groups["SCL"], int)]).any(axis=1)
-    return icl & scl & ~np.asarray(ood, bool)
+    returned = (
+        np.ones(len(onsets), bool) if event_returned is None
+        else np.asarray(event_returned, bool)
+    )
+    if returned.shape != (len(onsets),):
+        raise ValueError("event_returned must align with onsets")
+    return returned & icl & scl & ~np.asarray(ood, bool)
 
 
 def _column_stats(values):
@@ -111,7 +117,7 @@ def _load_bundle(config_path, output_root, candidate_id=None):
     config_path, output_root = Path(config_path).resolve(), Path(output_root).resolve()
     config = _json(config_path)
     manifest_path = output_root / "candidate_manifest.json"
-    summary_path = output_root / "fit_screen_summary.json"
+    summary_path = output_root / "fit_screen_summary_returned_only.json"
     manifest, summary = _json(manifest_path), _json(summary_path)
     if manifest["config"]["sha256"] != _sha256(config_path):
         raise RuntimeError("manifest and rev10-R2 config do not match")
@@ -150,6 +156,7 @@ def _load_bundle(config_path, output_root, candidate_id=None):
                 "seed": int(seed), "onsets": onsets, "ranks": ranks,
                 "event_t_on_ms": np.asarray(loaded["event_t_on_ms"], float),
                 "event_t_off_ms": np.asarray(loaded["event_t_off_ms"], float),
+                "event_returned": np.asarray(loaded["event_returned"], bool),
                 "contact_envelope": np.asarray(loaded["contact_envelope"], float),
                 "contact_envelope_dt_ms": float(loaded["contact_envelope_dt_ms"]),
             }
@@ -174,11 +181,16 @@ def _load_bundle(config_path, output_root, candidate_id=None):
         })
     onsets = np.concatenate([block["onsets"] for block in blocks], axis=0)
     ranks = np.concatenate([block["ranks"] for block in blocks], axis=0)
+    event_returned = np.concatenate([
+        block["event_returned"] for block in blocks
+    ], axis=0)
     assigned = assign_direction_modes(
         onsets, groups=groups, embedding=embedding, classifier=classifier,
     )
     labels, ood = np.asarray(assigned["labels"], int), np.asarray(assigned["ood"], bool)
-    clean = formal_clean_mask(onsets, labels, ood, groups)
+    clean = formal_clean_mask(
+        onsets, labels, ood, groups, event_returned=event_returned,
+    )
     clean_counts = np.bincount(labels[clean], minlength=2)
     with np.load(target_path, allow_pickle=False) as target:
         patient = {key: np.asarray(target[key]) for key in (
@@ -194,6 +206,7 @@ def _load_bundle(config_path, output_root, candidate_id=None):
         "static": static, "onsets": onsets, "ranks": ranks,
         "labels": labels, "ood": ood,
         "embedding": np.asarray(assigned["embedding"], float),
+        "event_returned": event_returned,
         "clean": clean, "clean_counts": clean_counts,
         "required_per_mode": 6, "patient": patient,
         "worker_inputs": worker_inputs, "target_path": target_path,
@@ -365,6 +378,9 @@ def _metadata(bundle, figure):
             "A": int(bundle["clean_counts"][0]),
             "B": int(bundle["clean_counts"][1]),
         },
+        "detected_event_count": int(len(bundle["event_returned"])),
+        "returned_event_count": int(np.sum(bundle["event_returned"])),
+        "nonreturned_event_count_excluded": int(np.sum(~bundle["event_returned"])),
         "required_events_per_mode": bundle["required_per_mode"],
         "inputs": {
             "config": {"path": str(bundle["config_path"]),
@@ -376,7 +392,8 @@ def _metadata(bundle, figure):
             "workers": bundle["worker_inputs"],
         },
         "claim_boundary": (
-            "development-only fit-network visualization; no patient-blind "
+            "returned detector events only; development-only fit-network "
+            "visualization; no patient-blind "
             "generalization, causal core, or ictal lifecycle claim"
         ),
     }
@@ -579,13 +596,13 @@ def _write_readme(output_dir, bundle):
     path = Path(output_dir) / "README.md"
     path.write_text(f"""### fig4a_spatial_edge_flow_direct_readout
 
-这张图展示等网络 fit screen 冻结的 diagnostic best `{bundle['candidate_id']}`：均匀连续 E-to-E vector field、冻结 Node 的 signed Delta Vtheta、同一网络 A/B 逐触点传播和连续 30-80 Hz model-current envelope。若没有单张网络同时产生两种 formal clean 模式，模式图与波形区会明确显示 unavailable，不跨网络拼接代表事件。
+这张图展示 returned-only 等网络 fit screen 冻结的 diagnostic best `{bundle['candidate_id']}`：均匀连续 E-to-E vector field、冻结 Node 的 signed Delta Vtheta、同一网络 A/B 逐触点传播和连续 30-80 Hz model-current envelope。若没有单张网络同时产生两种 formal clean 模式，模式图与波形区会明确显示 unavailable，不跨网络拼接代表事件。
 
 **关注点**：连续连接场是否在不增加 core、contact-conditioned 参数或 topology 的前提下补回同网络 mode A，同时保留 mode B。
 
 ### fig4b_spatial_edge_flow_kmeans_consistency
 
-这张图使用同一候选的 formal clean events 展示固定 contact heatmap、KMeans、rank distribution、患者 prototype 和 model-patient 相关矩阵。KMeans 数值稳定与患者 A/B 一致性分开判定；任一 supervised mode 少于冻结的 6 个事件时，矩阵显示 N/A。
+这张图只使用同一候选中 returned、双杆、patient-support 内的 formal clean events，展示固定 contact heatmap、KMeans、rank distribution、患者 prototype 和 model-patient 相关矩阵。KMeans 数值稳定与患者 A/B 一致性分开判定；任一 supervised mode 少于冻结的 6 个事件时，矩阵显示 N/A。
 
 **关注点**：先看 formal A/B 支持和同网络共存，再看 KMeans AMI 与患者 prototype；不能用 pooled 两簇代替缺失的患者模式。
 """)

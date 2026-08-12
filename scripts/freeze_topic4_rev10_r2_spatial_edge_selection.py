@@ -91,7 +91,7 @@ def build_manifest(config_path, expected_commit):
     source_manifest_path = ROOT / config["inputs"]["fit_candidate_manifest"]["path"]
     fit_summary = json.loads(fit_summary_path.read_text())
     source_manifest = json.loads(source_manifest_path.read_text())
-    if fit_summary.get("status") != "REV10R_FIT_SCREEN_COMPLETE":
+    if fit_summary.get("status") != "REV10R_RETURNED_ONLY_FIT_SCREEN_COMPLETE":
         raise RuntimeError("fit screen is incomplete")
     if source_manifest.get("status") != "REV10R2_SPATIAL_EDGE_LIBRARY_FROZEN":
         raise RuntimeError("source candidate library is not rev10-R2")

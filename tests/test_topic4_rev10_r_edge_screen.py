@@ -3,7 +3,10 @@ from pathlib import Path
 
 import numpy as np
 
-from scripts.aggregate_topic4_rev10_r_edge_flow_screen import _mode_shape_scores
+from scripts.aggregate_topic4_rev10_r_edge_flow_screen import (
+    _mode_shape_scores,
+    returned_only_onsets,
+)
 from scripts.launch_topic4_rev10_r_edge_flow_screen import (
     NUMERIC_ENV,
     _memory_bounded_workers,
@@ -41,6 +44,12 @@ def test_only_unsupported_mode_receives_penalty():
     assert sources["B"] == "n6"
 
 
+def test_returned_only_scoring_excludes_nonself_terminated_events():
+    onsets = np.arange(12, dtype=float).reshape(3, 4)
+    selected = returned_only_onsets(onsets, np.asarray([True, False, True]))
+    np.testing.assert_array_equal(selected, onsets[[0, 2]])
+
+
 def test_edge_worker_keeps_node_anchor_and_basis_separate():
     source = (ROOT / "scripts/run_topic4_rev10_r_edge_flow_worker.py").read_text()
     assert "_candidate_node" in source
@@ -60,6 +69,8 @@ def test_aggregator_declares_equal_network_primary_unit():
     assert "selection_score_equal_network" in source
     assert "mean_network_shape_A" in source
     assert "mean_network_shape_B" in source
+    assert 'loaded["event_returned"]' in source
+    assert "fit_screen_summary_returned_only.json" in source
     assert "pooled" not in source.split("def main():", 1)[1].split(
         "safe_claim", 1
     )[0]

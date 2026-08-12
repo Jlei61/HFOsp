@@ -31,6 +31,16 @@ def test_formal_clean_mask_keeps_filter_terms_coupled():
     )
 
 
+def test_formal_clean_mask_requires_return_when_supplied():
+    onsets = np.asarray([[1.0, 2.0], [1.0, 2.0]])
+    clean = formal_clean_mask(
+        onsets, np.asarray([0, 1]), np.asarray([False, False]),
+        {"ICL": np.asarray([0]), "SCL": np.asarray([1])},
+        event_returned=np.asarray([False, True]),
+    )
+    np.testing.assert_array_equal(clean, [False, True])
+
+
 def test_matrix_acceptance_fails_when_one_direction_is_under_supported():
     labels = np.asarray([0] + [1] * 8)
     clean = np.ones(len(labels), bool)

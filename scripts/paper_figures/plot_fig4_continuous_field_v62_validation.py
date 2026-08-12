@@ -74,7 +74,7 @@ def normalize_event_ranks(ranks):
     return output
 
 
-def formal_clean_mask(onsets, labels, ood, groups):
+def formal_clean_mask(onsets, labels, ood, groups, event_returned=None):
     """Couple direction identity, dual-shaft recruitment, and patient support."""
     onsets = np.asarray(onsets, dtype=float)
     labels = np.asarray(labels, dtype=int)
@@ -83,7 +83,13 @@ def formal_clean_mask(onsets, labels, ood, groups):
         raise ValueError("event labels, OOD mask, and onsets must align")
     icl = np.isfinite(onsets[:, np.asarray(groups["ICL"], int)]).any(axis=1)
     scl = np.isfinite(onsets[:, np.asarray(groups["SCL"], int)]).any(axis=1)
-    return icl & scl & ~ood
+    returned = (
+        np.ones(len(onsets), bool) if event_returned is None
+        else np.asarray(event_returned, bool)
+    )
+    if returned.shape != (len(onsets),):
+        raise ValueError("event_returned must align with onsets")
+    return returned & icl & scl & ~ood
 
 
 def matrix_acceptance_status(labels, clean, required_per_mode):
@@ -225,6 +231,7 @@ def _load_bundle(config_path, output_root, candidate_id):
                 "onsets": onsets, "ranks": ranks,
                 "event_t_on_ms": np.asarray(loaded["event_t_on_ms"], float),
                 "event_t_off_ms": np.asarray(loaded["event_t_off_ms"], float),
+                "event_returned": np.asarray(loaded["event_returned"], bool),
                 "contact_envelope": np.asarray(loaded["contact_envelope"], float),
                 "contact_envelope_dt_ms": float(loaded["contact_envelope_dt_ms"]),
             }
@@ -249,10 +256,19 @@ def _load_bundle(config_path, output_root, candidate_id):
         })
     onsets = np.concatenate([block["onsets"] for block in blocks], axis=0)
     ranks = np.concatenate([block["ranks"] for block in blocks], axis=0)
+    event_returned = np.concatenate([
+        block["event_returned"] for block in blocks
+    ], axis=0)
     assigned = assign_direction_modes(
         onsets, groups=groups, embedding=embedding, classifier=classifier,
     )
-    clean = formal_clean_mask(onsets, assigned["labels"], assigned["ood"], groups)
+    all_event_clean = formal_clean_mask(
+        onsets, assigned["labels"], assigned["ood"], groups,
+    )
+    clean = formal_clean_mask(
+        onsets, assigned["labels"], assigned["ood"], groups,
+        event_returned=event_returned,
+    )
     required = int(config["search"]["objective"]["fixed_events_per_mode"])
     matrix_valid, clean_counts = matrix_acceptance_status(
         assigned["labels"], clean, required,
@@ -260,11 +276,14 @@ def _load_bundle(config_path, output_root, candidate_id):
     expected = summary["candidate_details"][candidate_id][
         "mode_conditioned_joint_support"
     ]
-    if clean_counts.tolist() != [
+    all_event_clean_counts = np.bincount(
+        np.asarray(assigned["labels"], int)[all_event_clean], minlength=2,
+    )
+    if all_event_clean_counts.tolist() != [
         expected["A"]["n_joint_in_distribution"],
         expected["B"]["n_joint_in_distribution"],
     ]:
-        raise RuntimeError("reconstructed Fig.4 event pool disagrees with summary")
+        raise RuntimeError("reconstructed all-event pool disagrees with summary")
     with np.load(target_path, allow_pickle=False) as target:
         patient = {key: np.asarray(target[key]) for key in (
             "patient_train_ranks", "patient_train_old_labels",
@@ -280,6 +299,8 @@ def _load_bundle(config_path, output_root, candidate_id):
         "ood": np.asarray(assigned["ood"], bool),
         "embedding": np.asarray(assigned["embedding"], float),
         "probability_B": np.asarray(assigned["probability_B"], float),
+        "event_returned": event_returned,
+        "all_event_clean_counts": all_event_clean_counts,
         "clean": clean, "clean_counts": clean_counts,
         "required_per_mode": required, "matrix_valid": matrix_valid,
         "patient": patient, "worker_inputs": worker_inputs,
@@ -839,7 +860,9 @@ def _base_metadata(bundle, figure):
     return {
         "figure": figure, "plotting_only": True,
         "candidate_id": bundle["candidate_id"],
-        "candidate_role": "frozen display candidate; not a selected success",
+        "candidate_role": (
+            "frozen display candidate; returned events only; not a selected success"
+        ),
         "source_status": bundle["summary"]["status"],
         "selected_candidate_id": bundle["summary"]["selected_candidate_id"],
         "event_filter": (
@@ -852,6 +875,13 @@ def _base_metadata(bundle, figure):
             "A": int(bundle["clean_counts"][0]),
             "B": int(bundle["clean_counts"][1]),
         },
+        "historical_all_event_clean_mode_counts": {
+            "A": int(bundle["all_event_clean_counts"][0]),
+            "B": int(bundle["all_event_clean_counts"][1]),
+        },
+        "detected_event_count": int(len(bundle["event_returned"])),
+        "returned_event_count": int(np.sum(bundle["event_returned"])),
+        "nonreturned_event_count_excluded": int(np.sum(~bundle["event_returned"])),
         "required_events_per_mode": int(bundle["required_per_mode"]),
         "inputs": {
             "config": {"path": str(bundle["config_path"]),

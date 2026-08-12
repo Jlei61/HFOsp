@@ -27,6 +27,16 @@ def test_formal_clean_mask_requires_both_shafts_and_patient_support():
     assert clean.tolist() == [True, True, True, False]
 
 
+def test_formal_clean_mask_excludes_nonreturned_event():
+    clean = formal_clean_mask(
+        np.asarray([[0.0, 1.0], [0.0, 1.0]]),
+        np.asarray([0, 1]), np.asarray([False, False]),
+        {"ICL": np.asarray([0]), "SCL": np.asarray([1])},
+        event_returned=np.asarray([True, False]),
+    )
+    assert clean.tolist() == [True, False]
+
+
 def test_rank_normalization_preserves_missing_contacts():
     values = normalize_event_ranks(np.asarray([[4.0, np.nan, 2.0, 3.0]]))
     np.testing.assert_allclose(values[0, [0, 2, 3]], [1.0, 0.0, 0.5])

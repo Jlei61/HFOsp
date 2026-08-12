@@ -77,6 +77,9 @@ at `0.95 log(2)/2`, and starts in a new artifact directory.
 - [ ] Use common network/noise seeds and the common absolute detector.
 - [ ] Score Node and Node+Edge per network with A/B joint+ID support,
   recruitment, three precedence classes, profile, event cloud, and OOD.
+- [x] Preserve `event_returned` for every detected event and restrict formal
+  interictal scoring/Fig.4 to returned events; retain excluded counts as
+  descriptive safety evidence.
 
 ## R3 selection and confirmation
 
