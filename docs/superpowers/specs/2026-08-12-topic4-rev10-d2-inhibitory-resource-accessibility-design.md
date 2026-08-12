@@ -88,3 +88,16 @@ mode in {local, global}
 
 The same gate and controls apply. No interpolation or optimizer follows if
 D2.2 fails.
+
+## D2.2 outcome
+
+D2.2 completed all 21 workers. Local `k_q=0.0055` and `0.007/ms` produced mode
+A in `0/3` networks. Local `0.0085/ms` also produced A in `0/3` and entered
+runaway in one network. The matched global `0.0085/ms` produced one A event in
+only `1/3` networks and had the best continuous score (`10.159` versus off
+`11.539`), but this is neither shared capacity nor a local-specific effect.
+
+The q-resource family is therefore closed as
+`REV10D2_LOCAL_INHIBITORY_RESOURCE_ACCESS_NOT_OBSERVED`. No D2 candidate is
+eligible for confirmation or a replacement Fig.4. The next mechanism may use
+dynamic edge state, but no further q-dose interpolation is allowed.
