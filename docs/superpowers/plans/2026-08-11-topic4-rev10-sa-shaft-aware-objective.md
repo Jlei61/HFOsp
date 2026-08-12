@@ -199,7 +199,11 @@
 - [x] Freeze a diverse eight-field V5.1 subset, not only the scalar minimum,
   for seeds 1032/1033 without contact-conditioned basis functions. Require at
   least one joint-shaft event in both networks before selection.
-- [ ] Run the 16 paired V5.1 workers and freeze a fail-closed cross-network
-  verdict without adapting candidates to the selection outcomes.
-- [ ] Confirm the frozen V4/V5 winner on fresh development network seeds and
-  state the patient-generalization boundary.
+- [x] Run the 16 paired V5.1 workers and freeze a fail-closed cross-network
+  verdict without adapting candidates to the selection outcomes. Two fields
+  had joint events in both networks, but joint fraction and A/B occupancy
+  remained far from the patient target and varied by network.
+- [x] Freeze V5.2 with the V5.1 score winner, the highest-joint eligible anchor,
+  and the Stage 3 reference before reading fresh seeds 1041-1043.
+- [ ] Run nine V5.2 workers and state the development-only capacity and patient-
+  generalization boundary from the per-network results.

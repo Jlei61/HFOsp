@@ -294,3 +294,15 @@ Pareto candidates，以及 winner anchor pair 上全部 density points。每个�
 各跑一次。唯一新增的跨网络资格条件是：pooled 至少 2 个 joint events，且两个网络各至少
 1 个 joint event。若没有候选通过，裁定为训练网络信号不能跨网络实现；不得归因于优化器，
 也不得据此开放 Edge、`beta` 或 observation-conditioned basis。
+
+V5.1 完成 `16/16` workers，零失败、零 runaway。训练 winner `t=0.25` 没有跨网络
+复现：1032 为 `0/2 joint`，1033 为 `2/3 joint`。同一 uniform09/uniform12 density
+path 的 `t=0.75` 在两个网络均有 joint event：1032 为 `4/6`，1033 为 `2/8`；合计
+`6/14`、OOD `0.571`。uniform12 anchor 的事件支持更大，为 `15/34 joint`，也覆盖
+两个网络，但 route score 更差。两者的 joint fraction 均约 `0.43-0.44`，仍远低于患者
+约 `0.95`，A/B occupancy 也随网络明显变化。
+
+因此 V5.1 的安全结论是 `CROSS_NETWORK_JOINT_SHAFT_CAPACITY_FOUND`，不是患者模式恢复。
+V5.2 在读取 1041-1043 前冻结三场：`t=0.75` score winner、uniform12 joint-support
+anchor、Stage 3 reference。每场跑三个全新 development networks；正式报告以逐网络结果
+为主，不再让一个混合 scalar 掩盖 event yield、joint support 和方向误差之间的权衡。

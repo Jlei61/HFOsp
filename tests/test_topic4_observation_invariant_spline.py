@@ -179,3 +179,28 @@ def test_v51_diversity_rule_keeps_pareto_anchors_and_winner_path():
     assert selected == [
         "winner", "anchor_joint", "pareto", "neighbor_a", "neighbor_b",
     ]
+
+
+def test_v52_uses_distinct_score_support_and_stage3_fields():
+    from scripts.freeze_topic4_rev10_sa_v52_final_candidates import (
+        select_final_sources,
+    )
+
+    summary = {
+        "selected_candidate_id": "score_winner",
+        "minimum_seeds_with_joint_for_selection": 2,
+        "candidate_rows": [
+            {"candidate_id": "score_winner", "n_runaway_networks": 0,
+             "n_joint": 4, "joint_fraction": 0.5, "n_seeds_with_joint": 2,
+             "selection_score": 1.0},
+            {"candidate_id": "support", "n_runaway_networks": 0,
+             "n_joint": 12, "joint_fraction": 0.4, "n_seeds_with_joint": 2,
+             "selection_score": 3.0},
+            {"candidate_id": "one_network", "n_runaway_networks": 0,
+             "n_joint": 20, "joint_fraction": 0.8, "n_seeds_with_joint": 1,
+             "selection_score": 0.5},
+        ],
+    }
+    assert select_final_sources(summary, "stage3") == (
+        "score_winner", "support", "stage3",
+    )

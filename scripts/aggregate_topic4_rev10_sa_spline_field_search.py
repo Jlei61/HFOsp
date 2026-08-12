@@ -293,6 +293,9 @@ def _plot_search(summary, manifest, config, output_root):
         "selection_confirmation_adaptive_training_anchor": ("D", "#111111", "anchor confirmation"),
         "selection_confirmation_adaptive_latent_linear_interpolation": ("o", "#4E79A7", "latent confirmation"),
         "selection_confirmation_adaptive_density_mixture_interpolation": ("^", "#E15759", "density confirmation"),
+        "final_confirmation_score_winner": ("^", "#E15759", "score winner"),
+        "final_confirmation_joint_support": ("D", "#59A14F", "joint-support anchor"),
+        "final_confirmation_stage3_reference": ("s", "#111111", "Stage 3 reference"),
     }
     for role in sorted({row["role"] for row in rows}):
         marker, color, label = role_styles.get(role, ("o", "#7F7F7F", role))
@@ -430,7 +433,7 @@ def _plot_fig4(summary, config, event_records, output_root, contact_names,
     ax.set_xticks([0, 1], ["direction A", "direction B"])
     ax.set_yticks([0, 1], ["KMeans 1", "KMeans 2"])
     ami = float(kmeans.get("ami_with_direction_labels", np.nan))
-    ax.set_title(f"C  KMeans/direction consistency | AMI={ami:.2f}",
+    ax.set_title(f"C  KMeans vs direction | AMI={ami:.2f}",
                  loc="left", weight="bold")
     fig.colorbar(image, ax=ax, fraction=0.046, pad=0.03)
 

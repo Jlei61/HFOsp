@@ -19,6 +19,7 @@ V4_FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_spline_field_v4_candidates.p
 V41_FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_spline_bridge_v41_candidates.py"
 V5_FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_spline_interpolation_v5_candidates.py"
 V51_FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_v5_selection_candidates.py"
+V52_FREEZER = ROOT / "scripts/freeze_topic4_rev10_sa_v52_final_candidates.py"
 WORKER = ROOT / "scripts/run_topic4_rev10_sa_spectral_field_worker.py"
 AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_sa_spectral_field_search.py"
 V4_AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_sa_spline_field_search.py"
@@ -83,6 +84,8 @@ def main():
         freezer, aggregator = V5_FREEZER, V4_AGGREGATOR
     elif role == "development_only_stable_spline_selection_confirmation":
         freezer, aggregator = V51_FREEZER, V4_AGGREGATOR
+    elif role == "development_only_stable_spline_final_confirmation":
+        freezer, aggregator = V52_FREEZER, V4_AGGREGATOR
     else:
         freezer, aggregator = FREEZER, AGGREGATOR
     config_sha = _sha256(config_path)

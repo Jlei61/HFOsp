@@ -682,3 +682,12 @@ network. This is one minimal cross-network realizability requirement, not a
 claim that the patient event distribution has been recovered. No V5.1 result
 may alter the frozen library, open Edge or beta, or move basis functions toward
 contacts.
+
+V5.2 is a fresh-development-network confirmation, not another search. It
+freezes three complementary fields before seeds 1041-1043 are read: the V5.1
+score winner, the eligible V5.1 field with the largest pooled joint-event
+support, and the original Stage 3 field. Each field is evaluated once per
+network. Confirmation requires at least three pooled joint events spanning at
+least two of three networks. The primary report is the full per-network table;
+the scalar minimum remains secondary because direction distance, joint support,
+and event yield trade off strongly.

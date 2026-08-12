@@ -113,6 +113,7 @@ def main():
         "development_only_v3_to_stable_spline_bridge",
         "development_only_stable_spline_adaptive_interpolation",
         "development_only_stable_spline_selection_confirmation",
+        "development_only_stable_spline_final_confirmation",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("spectral search role changed")
