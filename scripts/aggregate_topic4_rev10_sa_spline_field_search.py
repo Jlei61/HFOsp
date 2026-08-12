@@ -513,7 +513,7 @@ def _plot_fig4(summary, config, event_records, output_root, contact_names,
     if examples:
         scale_value = common_scale * 0.34
         scale_x = min(row[1].min() for row in examples) + 12.0
-        scale_y = -0.15
+        scale_y = -0.70
         ax.plot([scale_x, scale_x], [scale_y, scale_y + 0.34],
                 color="black", linewidth=1.4, clip_on=False)
         ax.text(scale_x + 5.0, scale_y + 0.17,
