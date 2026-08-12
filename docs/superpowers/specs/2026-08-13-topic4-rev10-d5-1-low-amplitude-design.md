@@ -28,4 +28,10 @@ The selection rule is fixed before execution: choose the smallest local amplitud
 
 Only a later frozen run on unseen networks `1291-1296` may produce the accepted Fig.4 pair: direct model waveforms and KMeans/patient-mode consistency. Both modes must occur spontaneously within the same networks. A pooled split across different networks is insufficient.
 
-The confirmation contrast is exact off, the frozen `sigma=0.1/ms` local arm, and its exact-marginal permutation. Fig.4 is evaluable when at least `4/6` unseen networks contain both formal modes and the pooled returned clean support is at least six events per mode. Scientific patient-mode consistency additionally requires KMeans AMI with the frozen supervised direction of at least `0.8` and a positive-diagonal/negative-crossed patient prototype matrix after cluster labels are mapped only by supervised-direction contingency.
+The confirmation contrast is exact off, the frozen `sigma=0.1/ms` local arm, and its exact-marginal permutation. Fig.4 is evaluable when at least `4/6` unseen networks contain both formal modes and the pooled returned clean support is at least six events per mode.
+
+## Post-execution contract correction
+
+The initial D5.2 confirmation config incorrectly demanded `AMI >= 0.8` between KMeans on the full shaft-aware PCA embedding and frozen direction A/B. This gate is invalid: patient training data under that same representation has AMI `0.011`, because flat shaft-aware KMeans primarily identifies recruitment extent while A/B identifies propagation direction. The invalid verdict is archived and cannot be used.
+
+The corrected Fig.4C audit reuses the repository's canonical contract: KMeans on masked, within-event normalized contact ranks; cluster-direction association is summarized by label-swap-invariant purity and a seed-stratified permutation; the model-vs-patient matrix is built directly from frozen supervised A/B events, never from KMeans cluster labels. Patient-level clustering strength is a matched hierarchical block-bootstrap benchmark. Because this correction followed inspection of confirmation results, the corrected adjudication is exploratory, not a preregistered success gate.

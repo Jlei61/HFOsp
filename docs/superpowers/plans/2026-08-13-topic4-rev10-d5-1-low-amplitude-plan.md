@@ -10,4 +10,6 @@
 
 Bracket result: `sigma=0.1/ms` was the smallest accessible local amplitude (`2/3` same-network A/B), but its matched permutation also reached `2/3`. Its mean detector occupancy was `0.275` versus `0.060` off and OOD was `0.570`; these remain explicit mismatches. Freeze this local/permuted pair with off before running confirmation seeds `1291-1296`.
 
+Confirmation execution completed `18/18` frozen workers with no worker failure or OOM. Before any new simulation, invalidate the full-shaft-PCA KMeans AMI gate, rerun the canonical masked-rank Fig.4C audit, regenerate both figures, and compare direction purity against a patient block-bootstrap matched to the model event and A/B counts. Only after this correction may a KMeans-aware next parameter bracket be specified.
+
 No patient held-out data, source-coordinate placement, core-count growth, static edge fitting, beta opening, or optimizer comparison is allowed in D5.1.

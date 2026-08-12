@@ -454,7 +454,7 @@ def _plot_readout(ax, bundle, pair):
 
 def _save(fig, stem):
     stem.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(stem.with_suffix(".png"), dpi=300, facecolor="white",
+    fig.savefig(stem.with_suffix(".png"), dpi=600, facecolor="white",
                 bbox_inches="tight", pad_inches=0.03)
     fig.savefig(stem.with_suffix(".pdf"), facecolor="white",
                 bbox_inches="tight", pad_inches=0.03)
@@ -579,6 +579,60 @@ def _kmeans(clean_z, direction):
     }
 
 
+def _direction_purity(labels, direction):
+    labels = np.asarray(labels, int)
+    direction = np.asarray(direction, int)
+    contingency = np.zeros((2, 2), int)
+    for cluster, mode in zip(labels, direction):
+        contingency[int(cluster), int(mode)] += 1
+    identity = int(contingency[0, 0] + contingency[1, 1])
+    swapped = int(contingency[0, 1] + contingency[1, 0])
+    return float(max(identity, swapped) / max(1, contingency.sum())), contingency
+
+
+def _canonical_rank_kmeans(bundle, min_shared_contacts=3):
+    """Apply the canonical Fig.4C masked-rank KMeans contract."""
+    sys.path.insert(0, str(ROOT))
+    from src.interictal_propagation import (  # noqa: E402
+        compute_adaptive_cluster_stereotypy,
+    )
+
+    clean_index = np.flatnonzero(bundle["clean"])
+    rank_matrix = np.asarray(bundle["ranks"][clean_index], float).T
+    participation = np.isfinite(rank_matrix)
+    valid = participation.sum(axis=0) >= int(min_shared_contacts)
+    result = compute_adaptive_cluster_stereotypy(
+        rank_matrix, participation, bundle["static"]["contact_names"].tolist(),
+        k_range=(2, 2), use_masked_features=True,
+        min_shared_channels=int(min_shared_contacts),
+        min_participation=int(min_shared_contacts), n_sample=100,
+        n_tau_seeds=5,
+    )
+    labels = np.asarray(result.get("labels", []), int)
+    if labels.shape != (int(np.sum(valid)),):
+        raise RuntimeError("canonical rank KMeans event subset changed")
+    selected_index = clean_index[valid]
+    direction = np.asarray(bundle["labels"][selected_index], int)
+    purity, contingency = _direction_purity(labels, direction)
+    scan = result.get("scan", [{}])[0]
+    return {
+        "clean_global_index": selected_index,
+        "labels": labels,
+        "direction": direction,
+        "direction_purity": purity,
+        "direction_contingency": contingency,
+        "cluster_counts": np.bincount(labels, minlength=2),
+        "within_cluster_tau_mean": result.get("within_cluster_tau_mean"),
+        "inter_cluster_corr_matrix": result.get("inter_cluster_corr_matrix"),
+        "candidate_forward_reverse_pairs": result.get(
+            "candidate_forward_reverse_pairs", []
+        ),
+        "stability_ami_median": scan.get("median_ami"),
+        "silhouette_median": scan.get("median_silhouette"),
+        "result": result,
+    }
+
+
 def _patient_profiles(bundle):
     ranks = normalize_event_ranks(bundle["patient"]["patient_train_ranks"])
     labels = bundle["patient"]["patient_train_old_labels"].astype(int)
@@ -608,10 +662,34 @@ def _similarity(model, patient):
 
 
 def _render_kmeans(bundle, output_dir):
-    clean_index = np.flatnonzero(bundle["clean"])
+    canonical = _canonical_rank_kmeans(bundle)
+    clean_index = canonical["clean_global_index"]
     ranks = normalize_event_ranks(bundle["ranks"][clean_index])
-    direction = bundle["labels"][clean_index]
-    labels, audit = _kmeans(bundle["embedding"][clean_index], direction)
+    direction = canonical["direction"]
+    labels = canonical["labels"]
+    audit = {
+        "status": "OK", "feature_contract": "masked normalized event ranks",
+        "min_shared_contacts": 3,
+        "n_events": int(len(labels)),
+        "cluster_counts": canonical["cluster_counts"].tolist(),
+        "direction_contingency": canonical[
+            "direction_contingency"
+        ].tolist(),
+        "direction_purity": canonical["direction_purity"],
+        "within_cluster_tau_mean": canonical[
+            "within_cluster_tau_mean"
+        ],
+        "inter_cluster_corr_matrix": canonical[
+            "inter_cluster_corr_matrix"
+        ],
+        "candidate_forward_reverse_pairs": canonical[
+            "candidate_forward_reverse_pairs"
+        ],
+        "kmeans_stability_ami_median": canonical[
+            "stability_ami_median"
+        ],
+        "silhouette_median": canonical["silhouette_median"],
+    }
     names = bundle["static"]["contact_names"]
     fig = plt.figure(figsize=(18.8, 5.2), facecolor="white")
     grid = fig.add_gridspec(1, 4, width_ratios=(3.0, 1.0, 1.55, 1.25),
@@ -659,13 +737,18 @@ def _render_kmeans(bundle, output_dir):
         axes[1].set_title("rank distribution", weight="bold")
 
         patient, patient_low, patient_high = _patient_profiles(bundle)
-        model = np.asarray([_column_stats(ranks[labels == group])[0] for group in (0, 1)])
+        cluster_profiles = np.asarray([
+            _column_stats(ranks[labels == group])[0] for group in (0, 1)
+        ])
+        majority_mode = np.argmax(
+            canonical["direction_contingency"], axis=1,
+        )
         y = np.arange(len(names))
         for group in (0, 1):
-            finite = np.isfinite(model[group])
-            axes[2].plot(model[group, finite], y[finite], "-o",
+            finite = np.isfinite(cluster_profiles[group])
+            axes[2].plot(cluster_profiles[group, finite], y[finite], "-o",
                          color=GROUP_COLORS[group], lw=1.8, ms=3.5,
-                         label=f"group {group + 1}")
+                         label=f"group {group + 1} ({'AB'[majority_mode[group]]}-majority)")
         for mode in (0, 1):
             finite = np.isfinite(patient[mode])
             axes[2].fill_betweenx(y[finite], patient_low[mode, finite],
@@ -679,10 +762,13 @@ def _render_kmeans(bundle, output_dir):
         axes[2].set_yticks(axes[0].get_yticks(), [])
         axes[2].set_title("cluster rank profile", weight="bold")
         axes[2].legend(frameon=False, fontsize=7, ncol=2)
-        matrix = _similarity(model, patient)
+        supervised_model = np.asarray([
+            _column_stats(ranks[direction == mode])[0] for mode in (0, 1)
+        ])
+        matrix = _similarity(supervised_model, patient)
         matrix_valid = bool(np.all(bundle["clean_counts"] >= bundle["required_per_mode"]))
         axes[3].set_xticks((0, 1), ("patient A", "patient B"), fontsize=8)
-        axes[3].set_yticks((0, 1), ("group 1", "group 2"), fontsize=8)
+        axes[3].set_yticks((0, 1), ("model A", "model B"), fontsize=8)
         axes[3].set_aspect("equal")
         axes[3].set_title("model vs patient", weight="bold")
         if matrix_valid:
@@ -701,9 +787,29 @@ def _render_kmeans(bundle, output_dir):
                          f"formal A/B={bundle['clean_counts'][0]}/{bundle['clean_counts'][1]} < 6",
                          transform=axes[3].transAxes, ha="center", va="center",
                          fontsize=8, color="#9B2F2A")
-    qualifier = "patient matrix evaluable" if matrix_valid else "patient matrix not evaluable"
+    corrected_path = bundle["output_root"] / "confirmation_verdict.json"
+    corrected = _json(corrected_path) if corrected_path.exists() else {}
+    benchmark = corrected.get("patient_matched_kmeans_direction_purity", {})
+    q05 = benchmark.get("q05")
+    if q05 is not None:
+        qualifier = (
+            f"direction purity={audit['direction_purity']:.2f} < "
+            f"patient q05={q05:.2f}"
+        )
+    else:
+        qualifier = (
+            f"direction purity={audit['direction_purity']:.2f}; "
+            + ("patient matrix evaluable" if matrix_valid else "patient matrix N/A")
+        )
     fig.suptitle(f"KMeans modes against patient data  |  {qualifier}",
                  fontsize=13, weight="bold", y=0.985)
+    fig.text(
+        0.985, 0.045,
+        f"clusters={audit['cluster_counts'][0]}/{audit['cluster_counts'][1]}"
+        f"   stable AMI={audit['kmeans_stability_ami_median']:.2f}"
+        f"   direction purity={audit['direction_purity']:.2f}",
+        ha="right", va="bottom", fontsize=8.5, color="0.32",
+    )
     stem = Path(output_dir) / (
         "fig4b_spatial_ou_kmeans_consistency" if _is_spatial_ou(bundle)
         else "fig4b_spatial_edge_flow_kmeans_consistency"
@@ -716,7 +822,12 @@ def _render_kmeans(bundle, output_dir):
         "files": _save(fig, stem), "kmeans": audit,
         "matrix_valid": matrix_valid,
         "matrix_status": "EVALUABLE" if matrix_valid else "NOT_EVALUABLE_SUPPORT",
-        "descriptive_cluster_vs_patient_spearman": matrix.tolist(),
+        "supervised_direction_vs_patient_spearman": matrix.tolist(),
+        "matrix_rows": "frozen supervised model A/B, not KMeans cluster labels",
+        "corrected_confirmation_verdict": (
+            {"path": str(corrected_path), "sha256": _sha256(corrected_path)}
+            if corrected_path.exists() else None
+        ),
     })
     Path(str(stem) + "_metadata.json").write_text(json.dumps(metadata, indent=2))
     return stem
@@ -738,9 +849,9 @@ def _write_readme(output_dir, bundle):
 
 ### fig4b_spatial_ou_kmeans_consistency
 
-这张图只使用 returned、双杆、patient-support 内的 formal clean events，展示固定 contact heatmap、KMeans、rank distribution、患者 prototype 和 model-patient 相关矩阵。KMeans 数值稳定、与 frozen patient-direction 的 AMI、以及患者 prototype 的正对角/负交叉分开记录，不用 pooled 两簇替代缺失模式。
+这张图只使用 returned、双杆、patient-support 内的 formal clean events。KMeans 严格复用 Fig.4C 的 masked normalized rank 特征；方向 purity 判断两个自然簇与 frozen A/B 的关联强度。最右矩阵直接由 frozen model A/B 事件构建，而不是把 KMeans 簇强行改名为 A/B。
 
-**关注点**：先看同网络 A/B 支持和每模式样本数，再看 KMeans 是否恢复同一模式划分及患者 rank 几何；这是 development confirmation，不是 patient blind generalization。
+**关注点**：患者 rank 几何可恢复并不等于 KMeans 离散性达到患者水平；当前应同时看正对角/负交叉矩阵、direction purity 及 patient-matched purity 区间。这是 development confirmation，不是 patient blind generalization。
 """)
         return
     path.write_text(f"""### fig4a_spatial_edge_flow_direct_readout
