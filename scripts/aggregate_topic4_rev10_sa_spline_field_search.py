@@ -511,7 +511,7 @@ def _plot_fig4(summary, config, event_records, output_root, contact_names,
                 f"model direction {'AB'[mode]}",
                 color=colors[mode], fontsize=9, weight="bold")
     if examples:
-        scale_value = common_scale * 0.34
+        scale_value = common_scale
         scale_x = min(row[1].min() for row in examples) + 12.0
         scale_y = -0.70
         ax.plot([scale_x, scale_x], [scale_y, scale_y + 0.34],
