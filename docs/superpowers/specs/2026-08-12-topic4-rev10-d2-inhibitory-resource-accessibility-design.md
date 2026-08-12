@@ -42,7 +42,20 @@ k_q in {0.01, 0.03, 0.10} ms^-1
 mode in {local, global}
 ```
 
-Together with exact off this is 7 candidates x 3 fresh networks (`1111-1113`).
+The initial D2 preflight at `k_q=0.01/ms` reached `q_min=0.5` and entered
+runaway at `2.20 s`; this is `D2_DOSE_PARAMETERIZATION_FAIL`, not a mechanism
+result. D2.1 therefore freezes a lower bracket before new networks:
+
+```text
+k_q in {0.0005, 0.0015, 0.004} ms^-1
+mode in {local, global}
+```
+
+The slow field updates every `1 ms` while the SNN remains at `0.1 ms`. A
+deterministic reference test requires the resulting q field to stay within
+`2e-4` of the 0.1-ms slow-field update under the same spike history.
+
+Together with exact off this is 7 candidates x 3 fresh networks (`1141-1143`).
 The common detector, returned-only shaft-aware objective and frozen direction
 classifier remain unchanged.
 

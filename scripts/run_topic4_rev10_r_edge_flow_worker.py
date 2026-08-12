@@ -276,6 +276,7 @@ def main():
                 a0=float(resource["a0"]),
                 a50=float(resource["a50"]),
                 trace_dt_ms=float(resource["trace_dt_ms"]),
+                update_interval_ms=float(resource["update_interval_ms"]),
             ),
         )
     if manifest["status"] in {

@@ -132,7 +132,7 @@ def _resource(mode, k_q=0.1):
         InhibitoryResourceConfig(
             mode=mode, tau_q_ms=100.0, k_q_per_ms=k_q,
             n_grid=8, sigma_rate_mm=0.4, sigma_q_mm=0.8,
-            tau_rate_ms=10.0, trace_dt_ms=1.0,
+            tau_rate_ms=10.0, trace_dt_ms=1.0, update_interval_ms=1.0,
         ),
     )
 
@@ -212,3 +212,30 @@ def test_zero_depletion_resource_is_engine_bit_parity():
     )
     assert np.array_equal(baseline["E_spk_bool"], dynamic["E_spk_bool"])
     assert np.array_equal(baseline["rate_E"], dynamic["rate_E"])
+
+
+def test_one_ms_resource_update_tracks_point_one_ms_reference():
+    positions_e = np.asarray([[1.0, 1.0], [1.2, 1.0], [3.0, 3.0]])
+    positions_i = np.asarray([[1.0, 1.2], [3.0, 3.2]])
+    common = dict(
+        mode="local", tau_q_ms=750.0, k_q_per_ms=0.001,
+        n_grid=8, sigma_rate_mm=0.4, sigma_q_mm=0.8,
+        tau_rate_ms=100.0, trace_dt_ms=10.0,
+    )
+    fine = ActivityDependentInhibitoryResource(
+        positions_e, positions_i, 4.0, 0.1,
+        InhibitoryResourceConfig(**common, update_interval_ms=0.1),
+    )
+    coarse = ActivityDependentInhibitoryResource(
+        positions_e, positions_i, 4.0, 0.1,
+        InhibitoryResourceConfig(**common, update_interval_ms=1.0),
+    )
+    labels = np.asarray([0, 0, 0, 1, 1])
+    for step in range(2000):
+        spikes = np.asarray([
+            step % 10 == 0, step % 13 == 0, step % 37 == 0,
+            step % 11 == 0, step % 29 == 0,
+        ])
+        fine.step(spikes, labels, 0.1)
+        coarse.step(spikes, labels, 0.1)
+    assert np.max(np.abs(fine.q_field - coarse.q_field)) < 2e-4

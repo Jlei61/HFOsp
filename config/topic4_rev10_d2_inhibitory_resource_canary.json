@@ -1,7 +1,7 @@
 {
-  "schema_version": "topic4_rev10_d2_inhibitory_resource_canary_v1",
+  "schema_version": "topic4_rev10_d2_1_inhibitory_resource_canary_v1",
   "scientific_role": "development_only_inhibitory_resource_accessibility_canary",
-  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/inhibitory_resource_d2",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/inhibitory_resource_d2_1",
   "inputs": {
     "rev9_base_config": {"path": "config/topic4_rev9_exploratory.json", "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"},
     "stage_config": {"path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json", "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"},
@@ -19,7 +19,7 @@
   "spatial_edge_basis": {"representation": "degree_two_continuous_midpoint_vector_field", "sheet_L_mm": 20.0, "displacement_length_scale_mm": 0.38, "coefficient_count": 12, "forbidden_inputs": ["contact coordinates", "shaft identity", "patient events or labels", "node field values", "Gaussian components or peaks"]},
   "inhibitory_resource_library": {
     "modes": ["local", "global"],
-    "k_q_per_ms": [0.01, 0.03, 0.1],
+    "k_q_per_ms": [0.0005, 0.0015, 0.004],
     "tau_q_ms": 750.0,
     "q_min": 0.5,
     "n_grid": 32,
@@ -31,11 +31,13 @@
     "a0": 0.0,
     "a50": 1.0,
     "trace_dt_ms": 10.0,
-    "include_exact_off": true
+    "update_interval_ms": 1.0,
+    "include_exact_off": true,
+    "parameter_freeze_reason": "D2 k_q=0.01/ms reached q_min and runaway on the preflight seed; D2.1 lowers the bracket before fresh networks 1141-1143"
   },
   "search": {
     "phase": "fit", "arm": "Node_plus_dynamic_inhibitory_resource", "beta": "closed", "network_topology": "frozen",
-    "fit_network_seeds": [1111, 1112, 1113], "selection_network_seeds": [1121, 1122, 1123], "confirmation_network_seeds": [1131, 1132, 1133],
+    "fit_network_seeds": [1141, 1142, 1143], "selection_network_seeds": [1151, 1152, 1153], "confirmation_network_seeds": [1161, 1162, 1163],
     "simulation": {"duration_ms": 8000.0, "early_stop_runaway": true},
     "detector": {"population_active_fraction_threshold": 0.0195703125, "role": "frozen common absolute detector"},
     "contact_readout": {"participation_margin_fraction": 0.1, "timing_fraction": 0.5},

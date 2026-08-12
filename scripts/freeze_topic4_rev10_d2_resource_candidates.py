@@ -44,6 +44,7 @@ def candidate_library(config):
     shared = {key: library[key] for key in (
         "tau_q_ms", "q_min", "n_grid", "sigma_rate_mm", "tau_rate_ms",
         "sigma_q_mm", "eta_e", "eta_i", "a0", "a50", "trace_dt_ms",
+        "update_interval_ms",
     )}
     for mode in library["modes"]:
         for k_q in library["k_q_per_ms"]:

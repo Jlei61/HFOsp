@@ -127,6 +127,7 @@ class InhibitoryResourceConfig:
     a0: float = 0.0
     a50: float = 1.0
     trace_dt_ms: float = 10.0
+    update_interval_ms: float = 0.1
 
     def validate(self, dt_ms: float) -> None:
         if self.mode not in {"local", "global"}:
@@ -143,6 +144,9 @@ class InhibitoryResourceConfig:
             raise ValueError("inhibitory drive weight must not be smaller than E")
         if self.trace_dt_ms < dt_ms:
             raise ValueError("trace interval must be at least one engine step")
+        ratio = self.update_interval_ms / dt_ms
+        if self.update_interval_ms < dt_ms or not np.isclose(ratio, round(ratio)):
+            raise ValueError("resource update interval must be an integer number of engine steps")
 
 
 class ActivityDependentInhibitoryResource:
@@ -164,15 +168,24 @@ class ActivityDependentInhibitoryResource:
         shape = (cfg.n_grid, cfg.n_grid)
         self.rate_e = np.zeros(shape)
         self.rate_i = np.zeros(shape)
+        self.count_e = np.zeros(shape)
+        self.count_i = np.zeros(shape)
         self.q_field = np.ones(shape)
         self.q_global = 1.0
         self.kernel_q = isotropic_gaussian(
             cfg.n_grid, self.sheet_l_mm, cfg.sigma_q_mm,
         )
+        self.kernel_rate = isotropic_gaussian(
+            cfg.n_grid, self.sheet_l_mm, cfg.sigma_rate_mm,
+        )
         self.index_e_x, self.index_e_y = _grid_index(
             self.positions_e, self.sheet_l_mm, cfg.n_grid,
         )
-        self.alpha_rate = float(1.0 - np.exp(-dt_ms / cfg.tau_rate_ms))
+        self.update_every = int(round(cfg.update_interval_ms / dt_ms))
+        self.update_dt_ms = self.update_every * self.dt_ms
+        self.alpha_rate = float(
+            1.0 - np.exp(-self.update_dt_ms / cfg.tau_rate_ms)
+        )
         self.trace_every = max(1, int(round(cfg.trace_dt_ms / dt_ms)))
         self.step_index = 0
         self.last_mean_drive = 0.0
@@ -206,42 +219,57 @@ class ActivityDependentInhibitoryResource:
         if spikes.shape != (self.n_total,):
             raise ValueError("spike vector must align to all neurons")
         cfg = self.cfg
-        instantaneous_e = firing_rate_field(
-            spikes[:self.n_e], self.positions_e, self.sheet_l_mm,
-            cfg.n_grid, cfg.sigma_rate_mm,
-        )
-        instantaneous_i = firing_rate_field(
-            spikes[self.n_e:], self.positions_i, self.sheet_l_mm,
-            cfg.n_grid, cfg.sigma_rate_mm,
-        )
-        self.rate_e += self.alpha_rate * (instantaneous_e - self.rate_e)
-        self.rate_i += self.alpha_rate * (instantaneous_i - self.rate_i)
-        drive = saturation(
-            convolve_periodic(
-                aq_drive(self.rate_e, self.rate_i, cfg.eta_e, cfg.eta_i),
-                self.kernel_q,
-            ),
-            cfg.a0, cfg.a50,
-        )
-        self.last_mean_drive = float(np.mean(drive))
-        if cfg.mode == "local":
-            self.q_field += self.dt_ms * (
-                (1.0 - self.q_field) / cfg.tau_q_ms
-                - cfg.k_q_per_ms * drive * self.q_field
+        self.step_index += 1
+        e_indices = np.flatnonzero(spikes[:self.n_e])
+        if len(e_indices):
+            np.add.at(
+                self.count_e,
+                (self.index_e_y[e_indices], self.index_e_x[e_indices]), 1.0,
             )
-            np.clip(self.q_field, cfg.q_min, 1.0, out=self.q_field)
+        i_indices = np.flatnonzero(spikes[self.n_e:])
+        if len(i_indices):
+            index_i_x, index_i_y = _grid_index(
+                self.positions_i[i_indices], self.sheet_l_mm, cfg.n_grid,
+            )
+            np.add.at(self.count_i, (index_i_y, index_i_x), 1.0)
+        if self.step_index % self.update_every == 0:
+            instantaneous_e = convolve_periodic(
+                self.count_e / self.update_every, self.kernel_rate,
+            )
+            instantaneous_i = convolve_periodic(
+                self.count_i / self.update_every, self.kernel_rate,
+            )
+            self.count_e.fill(0.0)
+            self.count_i.fill(0.0)
+            self.rate_e += self.alpha_rate * (instantaneous_e - self.rate_e)
+            self.rate_i += self.alpha_rate * (instantaneous_i - self.rate_i)
+            drive = saturation(
+                convolve_periodic(
+                    aq_drive(self.rate_e, self.rate_i, cfg.eta_e, cfg.eta_i),
+                    self.kernel_q,
+                ),
+                cfg.a0, cfg.a50,
+            )
+            self.last_mean_drive = float(np.mean(drive))
+            if cfg.mode == "local":
+                self.q_field += self.update_dt_ms * (
+                    (1.0 - self.q_field) / cfg.tau_q_ms
+                    - cfg.k_q_per_ms * drive * self.q_field
+                )
+                np.clip(self.q_field, cfg.q_min, 1.0, out=self.q_field)
+            else:
+                self.q_global += self.update_dt_ms * (
+                    (1.0 - self.q_global) / cfg.tau_q_ms
+                    - cfg.k_q_per_ms * self.last_mean_drive * self.q_global
+                )
+                self.q_global = float(np.clip(self.q_global, cfg.q_min, 1.0))
+        if cfg.mode == "local":
             q_mean = float(np.mean(self.q_field))
             q_sd = float(np.std(self.q_field))
             q_minimum = float(np.min(self.q_field))
         else:
-            self.q_global += self.dt_ms * (
-                (1.0 - self.q_global) / cfg.tau_q_ms
-                - cfg.k_q_per_ms * self.last_mean_drive * self.q_global
-            )
-            self.q_global = float(np.clip(self.q_global, cfg.q_min, 1.0))
             q_mean = q_minimum = self.q_global
             q_sd = 0.0
-        self.step_index += 1
         if self.step_index % self.trace_every == 0:
             self.trace_time_ms.append(self.step_index * self.dt_ms)
             self.trace_q_mean.append(q_mean)
