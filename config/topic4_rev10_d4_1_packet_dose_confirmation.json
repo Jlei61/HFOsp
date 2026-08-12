@@ -1,0 +1,30 @@
+{
+  "schema_version": "topic4_rev10_d4_1_packet_dose_confirmation_v1",
+  "scientific_role": "development_only_fresh_network_forced_route_dose_confirmation",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/uniform_forced_source_d4_1_confirmation",
+  "inputs": {
+    "rev9_base_config": {"path": "config/topic4_rev9_exploratory.json", "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"},
+    "stage_config": {"path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json", "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"},
+    "contact_contract": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json", "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"},
+    "shaft_aware_target_npz": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz", "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"},
+    "common_detector_audit": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json", "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"},
+    "node_anchor_config": {"path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json", "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"},
+    "node_anchor_manifest": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json", "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"},
+    "d4_source_manifest": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/uniform_forced_source_d4/source_grid_manifest.json", "sha256": "c2060c09044b6dff51a951222b8415c7fc0eb5d25486892470fc8846f76762c6"},
+    "d4_verdict": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/uniform_forced_source_d4/uniform_source_verdict.json", "sha256": "0cc7f0f0608e3794ff7e4f19c0ad8247f0590b43fefa13a82560e74aaf834da1"}
+  },
+  "node_anchor": {"candidate_id": "v62_density_t050", "field_sha256": "5fc404a876713430b8d258a63e94e58fd9bd6e7a60234f7f34598dd49b97e060"},
+  "sources": [
+    {"source_id": "route_A_x18_y06", "xy_mm": [18.0, 6.0], "expected_mode": "A", "selection_role": "D4 outcome-selected then frozen before fresh networks"},
+    {"source_id": "route_B_x02_y14", "xy_mm": [2.0, 14.0], "expected_mode": "B", "selection_role": "geometric mirror of A around sheet center and D4 positive control"}
+  ],
+  "packet_fractions_of_E": [0.000625, 0.00125, 0.0025, 0.005],
+  "network_seeds": [1231, 1232, 1233, 1234, 1235, 1236],
+  "simulation": {"duration_ms": 400.0, "forced_spike_ms": 100.0, "trigger_max_latency_ms": 40.0, "paired_response_end_ms": 250.0, "early_stop_runaway": true},
+  "detector": {"population_active_fraction_threshold": 0.0195703125, "role": "frozen common absolute detector"},
+  "contact_readout": {"participation_margin_fraction": 0.1, "timing_fraction": 0.5},
+  "decision": {"minimum_networks_per_source_at_same_dose": 5, "require_expected_mode": true, "require_returned_triggered_event": true, "require_joint_shaft_participation": true, "require_patient_support": true, "require_pretrigger_identity": true},
+  "execution": {"launcher": "systemd-run --user -> /usr/bin/nohup -> managed command", "max_workers": 6, "wait_seconds": 180, "numeric_threads_per_worker": 1, "notify_on_completion": true, "minimum_available_memory_gib_per_worker": 8.0},
+  "claim_boundary": {"source_A_is_patient_outcome_selected": true, "source_coordinates_frozen_before_fresh_networks": true, "forced_packet_is_not_spontaneous_activity": true, "fresh_network_seed_is_independent_unit": true, "patient_target_is_development_only_readout": true, "Fig4_replacement_forbidden": true},
+  "forbidden": ["field or edge refitting", "source reselection after fresh-network results", "patient held-out scoring", "spontaneous interictal reproduction claim", "core claim", "Fig4 replacement"]
+}
