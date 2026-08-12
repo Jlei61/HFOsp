@@ -227,3 +227,25 @@ def test_v52_uses_distinct_score_support_and_stage3_fields():
     assert select_final_sources(summary, "stage3") == (
         "score_winner", "support", "stage3",
     )
+
+
+def test_v6_boundary_reproduces_known_v5_endpoint():
+    import json
+    from pathlib import Path
+
+    from scripts.freeze_topic4_rev10_sa_v6_mode_boundary_candidates import (
+        build_candidates,
+    )
+
+    root = Path(__file__).resolve().parents[1]
+    config = json.loads((root / "config/topic4_rev10_sa_observation_invariant_field_v6.json").read_text())
+    manifest = json.loads((root / config["inputs"]["v5_candidate_manifest"]["path"]).read_text())
+    audit = json.loads((root / config["inputs"]["v5_mode_conditioned_audit"]["path"]).read_text())
+    candidates, _ = build_candidates(config, manifest, audit)
+
+    assert len(candidates) == 11
+    known = next(
+        row for row in manifest["candidate_set"]["candidates"]
+        if row["candidate_id"] == "v5_density_p05_t025"
+    )
+    assert candidates[-1]["field_sha256"] == known["field_sha256"]

@@ -208,7 +208,9 @@
 - [x] Run nine V5.2 workers; all completed cleanly, but eventwise audit showed
   that pooled joint support was entirely mode B while pseudo-mode A was OOD and
   SCL-only. Downgrade the automatic pooled PASS.
-- [ ] Run the zero-simulation mode-conditioned joint-support audit over V4.1,
-  V5, V5.1, and V5.2 artifacts.
-- [ ] Refine only the continuous uniform12-to-uniform06 density path around the
-  observed A/B support boundary using the corrected per-mode objective.
+- [x] Run the zero-simulation mode-conditioned joint-support audit over V4.1,
+  V5, V5.1, and V5.2 artifacts; all four returned no eligible field.
+- [x] Freeze V6 as 11 complete-field density mixtures along the continuous
+  uniform12-to-uniform06 path over `t=[0,0.25]`.
+- [ ] Run the V6 fit workers and require joint in-distribution A and B support
+  separately before any candidate enters network-seed selection.

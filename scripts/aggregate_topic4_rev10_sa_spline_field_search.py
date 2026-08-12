@@ -331,6 +331,7 @@ def _plot_search(summary, manifest, config, output_root):
         "final_confirmation_score_winner": ("^", "#E15759", "score winner"),
         "final_confirmation_joint_support": ("D", "#59A14F", "joint-support anchor"),
         "final_confirmation_stage3_reference": ("s", "#111111", "Stage 3 reference"),
+        "mode_conditioned_density_boundary": ("o", "#B07AA1", "mode boundary"),
     }
     for role in sorted({row["role"] for row in rows}):
         marker, color, label = role_styles.get(role, ("o", "#7F7F7F", role))

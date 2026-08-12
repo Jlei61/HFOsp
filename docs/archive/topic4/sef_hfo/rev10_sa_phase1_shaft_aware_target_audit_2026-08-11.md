@@ -327,3 +327,9 @@ POOLED_JOINT_OBJECTIVE_SHAFT_PARTITION_BLINDNESS_CONFIRMED
 这首先是目标函数问题，不是 optimizer non-convergence。下一步把资格单位改为每个模式各自
 `joint-shaft AND in-distribution`，先零仿真重扫已有场，再只细化 uniform12 到 uniform06
 之间已观察到 A/B support 交界的连续 density path；仍不增加 K/core，不开放 Edge 或 `beta`。
+
+正式审计脚本随后对 V4.1、V5、V5.1、V5.2 全部重算，四轮均为
+`MODE_CONDITIONED_JOINT_SUPPORT_NOT_FOUND`。V6 不增加场自由度，只在 uniform12 到
+uniform06 的正密度混合路径上把 `t=0-0.25` 细分为 11 个点。左端提供 joint+ID B，旧
+`t=0.25` 提供 1 个 joint+ID A 但没有 B；目标是检查中间是否存在两者共存窗口。候选资格
+直接要求 A、B 各至少 1 个 joint+ID event，pooled joint 和 KMeans AMI 不再能代偿缺失模式。

@@ -702,3 +702,13 @@ selection unit is now a mode-specific event satisfying both joint-shaft
 participation and the frozen class-conditional patient support. Every future
 candidate must provide such events for A and B separately; pooled joint count
 cannot compensate for a missing mode.
+
+V6 is a one-dimensional continuous-field boundary refinement, not a new field
+family. The frozen V5 library contains no field with patient-supported joint
+events in both directions. Uniform 12 supplies joint in-distribution B events,
+while the density path from uniform 12 toward uniform 06 first supplies one
+joint in-distribution A event at `t=0.25` after B support has disappeared. V6
+samples this same complete-field path at increments of 0.025 over `t=[0,0.25]`.
+No contact coordinate is used to place a parameter. Fit eligibility requires
+at least one joint in-distribution event in each direction; if none exists, the
+tested path has no observed coexistence window and no selection round follows.
