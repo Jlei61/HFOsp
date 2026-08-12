@@ -109,3 +109,19 @@ The confirmation output must use the accepted Fig.4 pair:
 
 Without a new patient-blind unit, all patient comparisons remain development
 only.
+
+## 9. D1 outcome
+
+All `19 x 3 = 57` workers completed on seeds 1081-1083 without runaway. Every
+arm, including exact off, had formal mode-A support in `0/3` networks. Exact
+off yielded 22 returned events; increasing adaptation generally reduced event
+yield, reaching 2-5 returned events in the strongest slow arms. The diagnostic
+best was the weakest global brake (`tau=250 ms`, `q=0.10 mV`) at `11.327`, only
+`0.021` below exact off (`11.348`). No local arm exceeded both its matched
+global control and off in same-network A/B support.
+
+The frozen verdict is `REV10D_LOCAL_ADAPTATION_ROUTE_ACCESS_NOT_OBSERVED`.
+This rules out the tested negative-feedback grid as a mode-A access mechanism;
+it does not justify optimizer comparison or a weaker interpolation sweep. A
+next canary must be able to increase route accessibility, not only suppress
+recently active neurons.

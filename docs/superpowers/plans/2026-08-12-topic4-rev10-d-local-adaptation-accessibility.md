@@ -22,19 +22,26 @@
 
 ## Execution
 
-- [ ] Commit all runtime modules and config before launching.
-- [ ] Run one measured-RSS sentinel, then choose worker count from half of
+- [x] Commit all runtime modules and config before launching.
+- [x] Run one measured-RSS sentinel, then choose worker count from half of
   available RAM with one numeric thread per worker and 24 GiB cgroup limits.
-- [ ] Launch every worker through `systemd-run --user -> nohup -> managed
+- [x] Launch every worker through `systemd-run --user -> nohup -> managed
   command`; controller waits 180 s between checks and sends a desktop
   notification on completion.
-- [ ] Complete 19 candidates x 3 networks with common random numbers.
+- [x] Complete 19 candidates x 3 networks with common random numbers.
 
 ## Decision
 
-- [ ] Compare each local arm with its same-parameter global control and off.
-- [ ] Require same-network returned A/B support; KMeans stability is secondary.
-- [ ] If local-specific accessibility is observed, freeze one candidate before
+- [x] Compare each local arm with its same-parameter global control and off.
+- [x] Require same-network returned A/B support; KMeans stability is secondary.
+- [x] If local-specific accessibility is observed, freeze one candidate before
   fresh confirmation 1091-1093 and produce the accepted Fig.4 pair.
-- [ ] Otherwise close this adaptation family without opening beta, adding
+- [x] Otherwise close this adaptation family without opening beta, adding
   spatial cores or comparing optimizers.
+
+## Outcome
+
+`REV10D_LOCAL_ADAPTATION_ROUTE_ACCESS_NOT_OBSERVED`: all 18 dynamic candidates
+and exact off produced mode A in `0/3` networks. Stronger/slower adaptation
+reduced returned event yield rather than opening an alternate route. No
+confirmation or Fig.4 upgrade was eligible.
