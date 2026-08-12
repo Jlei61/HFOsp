@@ -21,6 +21,7 @@ TIME = Path("/usr/bin/time")
 MANAGER = ROOT / "scripts/run_topic4_rev10_sa_managed_command.sh"
 WORKER = ROOT / "scripts/run_topic4_rev10_r_edge_flow_worker.py"
 AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_r_edge_flow_screen.py"
+DYNAMIC_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d_adaptation_canary.py"
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -263,12 +264,25 @@ def main():
         str(PYTHON), str(AGGREGATOR), "--config", str(config_path),
         "--expected-commit", commit,
     ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
+    dynamic = (
+        config["scientific_role"] == "development_only_dynamic_accessibility_canary"
+    )
+    if dynamic:
+        subprocess.run([
+            str(PYTHON), str(DYNAMIC_AUDITOR), "--config", str(config_path),
+        ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
+        verdict = json.loads((output_root / "canary_verdict.json").read_text())
+        completion = verdict["status"]
+    else:
+        completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev10-R",
-        f"Fit screen completed: {len(completed)}/{len(jobs)}; workers={maximum}",
+        "notify-send", "Topic 4 rev10-D" if dynamic else "Topic 4 rev10-R",
+        f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
-        "status": "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE",
+        "status": (
+            completion if dynamic else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
+        ),
         "completed": len(completed), "total": len(jobs),
         "max_workers": maximum,
         "memory_audit": str(memory_audit_path),

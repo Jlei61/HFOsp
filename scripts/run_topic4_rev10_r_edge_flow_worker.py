@@ -27,6 +27,10 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
 )
 from src.sef_hfo_observation import VirtualMontage  # noqa: E402
 from src.topic4_core_field_runner import _placement, atomic_write_json  # noqa: E402
+from src.topic4_dynamic_accessibility import (  # noqa: E402
+    AdaptationConfig,
+    SpikeTriggeredAdaptation,
+)
 from src.topic4_graph_edge_flow import (  # noqa: E402
     array_sha256,
     graph_spectral_ee_flow,
@@ -90,6 +94,7 @@ def main():
         "development_only_observation_invariant_spatial_route_capacity",
         "development_only_observation_invariant_spatial_route_selection",
         "development_only_observation_invariant_spatial_route_confirmation",
+        "development_only_dynamic_accessibility_canary",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -109,6 +114,7 @@ def main():
         "REV10R2_SPATIAL_EDGE_LIBRARY_FROZEN",
         "REV10R2_SPATIAL_EDGE_SELECTION_LIBRARY_FROZEN",
         "REV10R2_SPATIAL_EDGE_CONFIRMATION_LIBRARY_FROZEN",
+        "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -228,6 +234,30 @@ def main():
             ],
         }
 
+    adaptation = candidate.get("adaptation", {"mode": "off"})
+    if adaptation["mode"] == "off":
+        slow = None
+    else:
+        slow = SpikeTriggeredAdaptation(
+            n_total=n_e + n_i,
+            n_e=n_e,
+            dt_ms=float(engine["dt"]),
+            cfg=AdaptationConfig(
+                mode=adaptation["mode"],
+                tau_ms=float(adaptation["tau_ms"]),
+                increment_mV=float(adaptation["increment_mV"]),
+                trace_dt_ms=float(adaptation["trace_dt_ms"]),
+            ),
+        )
+    if manifest["status"] == "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN":
+        if not np.all(coefficients == 0.0):
+            raise RuntimeError("rev10-D requires exact no-op edge coefficients")
+        if not (
+            edge_audit["edge_ratio"]["min"] == 1.0
+            and edge_audit["edge_ratio"]["max"] == 1.0
+        ):
+            raise RuntimeError("rev10-D edge mapper is not an exact no-op")
+
     contacts = contract["contacts"]
     contact_names = [row["contact_name"] for row in contacts]
     contact_xy = np.asarray([row["sheet_xy_mm"] for row in contacts], float)
@@ -241,7 +271,7 @@ def main():
         raise RuntimeError("all frozen contacts must be locally readable")
     result = simulate_kick(
         params, mapped_net, KICK_BOOST=0.0, t_kick=1e9,
-        V_th_per_neuron=node["vtheta"],
+        V_th_per_neuron=node["vtheta"], slow=slow,
         early_stop_runaway=bool(simulation["early_stop_runaway"]),
     )
     spikes = np.asarray(result["E_spk_bool"], bool)
@@ -278,6 +308,12 @@ def main():
         })
     onsets = np.asarray(onset_rows, float).reshape((-1, len(contact_names)))
     ranks = np.asarray(rank_rows, float).reshape((-1, len(contact_names)))
+    adaptation_trace = (
+        slow.trace_arrays() if slow is not None else {
+            key: np.empty(0, dtype=np.float32)
+            for key in ("time_ms", "mean_mV", "sd_mV", "max_mV")
+        }
+    )
     _atomic_npz(
         output_npz,
         contact_names=np.asarray(contact_names, dtype="U16"),
@@ -297,6 +333,10 @@ def main():
         delta_vtheta=np.asarray(node["delta_vtheta"], np.float32),
         edge_coefficients=coefficients.astype(np.float64),
         edge_response=np.asarray(edge_audit.get("spectral_response", []), np.float64),
+        adaptation_time_ms=adaptation_trace["time_ms"],
+        adaptation_mean_mV=adaptation_trace["mean_mV"],
+        adaptation_sd_mV=adaptation_trace["sd_mV"],
+        adaptation_max_mV=adaptation_trace["max_mV"],
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -319,6 +359,19 @@ def main():
         },
         "edge_audit": edge_audit,
         "edge_basis": edge_basis,
+        "dynamic_accessibility": {
+            **adaptation,
+            "trace_samples": int(len(adaptation_trace["time_ms"])),
+            "peak_mean_mV": float(np.max(
+                adaptation_trace["mean_mV"], initial=0.0,
+            )),
+            "peak_spatial_sd_mV": float(np.max(
+                adaptation_trace["sd_mV"], initial=0.0,
+            )),
+            "peak_neuron_mV": float(np.max(
+                adaptation_trace["max_mV"], initial=0.0,
+            )),
+        },
         "network": {
             "n_E": int(n_e), "n_I": int(n_i),
             "cache_hit": bool(cache_hit), "cache_source": cache_source,

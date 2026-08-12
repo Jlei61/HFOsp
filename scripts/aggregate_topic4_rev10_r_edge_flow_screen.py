@@ -296,6 +296,11 @@ def main():
             mean_score = 1000.0 + runaway
         row = {
             "candidate_id": candidate["candidate_id"],
+            "adaptation_mode": candidate.get("adaptation", {}).get("mode", "off"),
+            "adaptation_tau_ms": candidate.get("adaptation", {}).get("tau_ms", 0.0),
+            "adaptation_increment_mV": candidate.get("adaptation", {}).get(
+                "increment_mV", 0.0,
+            ),
             "selection_score_equal_network": mean_score,
             "n_runaway_networks": runaway,
             "total_events_descriptive": int(sum(
@@ -362,12 +367,25 @@ def main():
                 value["edge_audit"]["max_abs_incoming_E_error"]
                 for value in metadata
             )),
+            "mean_network_peak_adaptation_mean_mV": float(np.mean([
+                payload.get("dynamic_accessibility", {}).get("peak_mean_mV", 0.0)
+                for payload in metadata
+            ])),
+            "mean_network_peak_adaptation_spatial_sd_mV": float(np.mean([
+                payload.get("dynamic_accessibility", {}).get(
+                    "peak_spatial_sd_mV", 0.0,
+                ) for payload in metadata
+            ])),
         }
         rows.append(row)
         details[candidate["candidate_id"]] = {
             "by_seed": by_seed,
             "edge_audit_by_seed": {
                 str(payload["seed"]): payload["edge_audit"]
+                for payload in metadata
+            },
+            "dynamic_accessibility_by_seed": {
+                str(payload["seed"]): payload.get("dynamic_accessibility", {})
                 for payload in metadata
             },
         }
@@ -388,8 +406,14 @@ def main():
         "selection": "selection",
         "confirmation": "confirmation",
     }
+    is_dynamic_canary = (
+        config["scientific_role"] == "development_only_dynamic_accessibility_canary"
+    )
     summary = {
-        "status": status_by_phase[phase],
+        "status": (
+            "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
+            if is_dynamic_canary else status_by_phase[phase]
+        ),
         "phase": phase,
         "scientific_role": config["scientific_role"],
         "safe_claim": (
@@ -410,7 +434,7 @@ def main():
         "source_worker_commit": worker_commit,
         "provenance": _runtime_provenance(args.expected_commit),
     }
-    basename = basename_by_phase[phase]
+    basename = "canary" if is_dynamic_canary else basename_by_phase[phase]
     _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)
     _atomic_json(output_root / f"{basename}_summary_returned_only.json", summary)
     print(json.dumps({
