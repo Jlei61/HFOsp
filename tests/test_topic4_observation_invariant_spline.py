@@ -163,6 +163,28 @@ def test_selection_can_require_patient_supported_joint_events_in_both_modes():
     assert _selection_verdict([row], config)["selected"] is row
 
 
+def test_selection_can_require_both_modes_in_the_same_network():
+    from scripts.aggregate_topic4_rev10_sa_spline_field_search import _selection_verdict
+
+    config = {"search": {"objective": {
+        "minimum_joint_events_for_selection": 2,
+        "minimum_seeds_with_joint_for_selection": 1,
+        "minimum_joint_in_distribution_events_per_mode_for_selection": 1,
+        "minimum_seeds_with_joint_in_distribution_per_mode_for_selection": 1,
+        "minimum_same_networks_with_both_joint_in_distribution_modes_for_selection": 1,
+    }}}
+    row = {
+        "candidate_id": "different_networks", "selection_score": 1.0,
+        "n_runaway_networks": 0, "n_joint": 4, "n_seeds_with_joint": 2,
+        "weak_mode_joint_in_distribution_count": 1,
+        "weak_mode_joint_in_distribution_seed_count": 1,
+        "same_network_both_modes_joint_in_distribution_count": 0,
+    }
+    assert _selection_verdict([row], config)["selected"] is None
+    row["same_network_both_modes_joint_in_distribution_count"] = 1
+    assert _selection_verdict([row], config)["selected"] is row
+
+
 def test_v51_diversity_rule_keeps_pareto_anchors_and_winner_path():
     from scripts.freeze_topic4_rev10_sa_v5_selection_candidates import (
         select_confirmation_ids,

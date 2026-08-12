@@ -212,5 +212,10 @@
   V5, V5.1, and V5.2 artifacts; all four returned no eligible field.
 - [x] Freeze V6 as 11 complete-field density mixtures along the continuous
   uniform12-to-uniform06 path over `t=[0,0.25]`.
-- [ ] Run the V6 fit workers and require joint in-distribution A and B support
+- [x] Run the V6 fit workers and require joint in-distribution A and B support
   separately before any candidate enters network-seed selection.
+- [x] Run V6 fit: all 11 workers completed, but A support appeared only after B
+  support disappeared; no candidate was selected.
+- [x] Freeze all 11 V6 fields unchanged for V6.1 on seeds 1032/1033.
+- [ ] Run V6.1 and require at least one same network to express patient-supported
+  joint A and B before any further Node-field optimization.

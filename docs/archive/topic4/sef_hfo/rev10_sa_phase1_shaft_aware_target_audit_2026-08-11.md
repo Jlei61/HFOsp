@@ -333,3 +333,9 @@ POOLED_JOINT_OBJECTIVE_SHAFT_PARTITION_BLINDNESS_CONFIRMED
 uniform06 的正密度混合路径上把 `t=0-0.25` 细分为 11 个点。左端提供 joint+ID B，旧
 `t=0.25` 提供 1 个 joint+ID A 但没有 B；目标是检查中间是否存在两者共存窗口。候选资格
 直接要求 A、B 各至少 1 个 joint+ID event，pooled joint 和 KMeans AMI 不再能代偿缺失模式。
+
+V6 完成 `11/11` workers，零失败、零 runaway，但没有候选通过。`t=0-0.15` 只有
+joint+ID B；`t=0.175-0.20` 两者都没有；`t=0.225-0.25` 首次出现 1 个 joint+ID A，
+但 B 已为零。由于 fit seed 事件数较少，V6.1 不按 score 筛点，而把 11 点完整路径原样带到
+1032/1033。资格进一步要求至少一张同一网络同时产生 joint+ID A 与 B；不同网络分别承担
+两种模式不算同一 substrate 的 repertoire。

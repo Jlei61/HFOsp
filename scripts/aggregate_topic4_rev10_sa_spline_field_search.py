@@ -217,6 +217,10 @@ def _selection_verdict(rows, config):
     minimum_mode_joint_seeds = int(objective.get(
         "minimum_seeds_with_joint_in_distribution_per_mode_for_selection", 0,
     ))
+    minimum_same_networks = int(objective.get(
+        "minimum_same_networks_with_both_joint_in_distribution_modes_for_selection",
+        0,
+    ))
     diagnostic = min(
         rows,
         key=lambda row: (
@@ -239,6 +243,9 @@ def _selection_verdict(rows, config):
             and int(row.get(
                 "weak_mode_joint_in_distribution_seed_count", 0,
             )) >= minimum_mode_joint_seeds
+            and int(row.get(
+                "same_network_both_modes_joint_in_distribution_count", 0,
+            )) >= minimum_same_networks
         )
     ]
     labels = config.get("aggregation", {})
@@ -253,6 +260,7 @@ def _selection_verdict(rows, config):
             "minimum_seeds_with_joint_for_selection": minimum_joint_seeds,
             "minimum_joint_in_distribution_events_per_mode_for_selection": minimum_mode_joint,
             "minimum_seeds_with_joint_in_distribution_per_mode_for_selection": minimum_mode_joint_seeds,
+            "minimum_same_networks_with_both_joint_in_distribution_modes_for_selection": minimum_same_networks,
         }
     selected = min(
         eligible,
@@ -268,6 +276,7 @@ def _selection_verdict(rows, config):
         "minimum_seeds_with_joint_for_selection": minimum_joint_seeds,
         "minimum_joint_in_distribution_events_per_mode_for_selection": minimum_mode_joint,
         "minimum_seeds_with_joint_in_distribution_per_mode_for_selection": minimum_mode_joint_seeds,
+        "minimum_same_networks_with_both_joint_in_distribution_modes_for_selection": minimum_same_networks,
     }
 
 
@@ -332,6 +341,7 @@ def _plot_search(summary, manifest, config, output_root):
         "final_confirmation_joint_support": ("D", "#59A14F", "joint-support anchor"),
         "final_confirmation_stage3_reference": ("s", "#111111", "Stage 3 reference"),
         "mode_conditioned_density_boundary": ("o", "#B07AA1", "mode boundary"),
+        "selection_mode_conditioned_density_boundary": ("o", "#B07AA1", "boundary selection"),
     }
     for role in sorted({row["role"] for row in rows}):
         marker, color, label = role_styles.get(role, ("o", "#7F7F7F", role))
@@ -663,6 +673,15 @@ def main():
                 )
                 for name in ("A", "B")
             ),
+            "same_network_both_modes_joint_in_distribution_count": int(sum(
+                all(
+                    value["mode_conditioned_joint_support"][name][
+                        "n_joint_in_distribution"
+                    ] > 0
+                    for name in ("A", "B")
+                )
+                for value in seed_readouts.values()
+            )),
             "score6_status": score6["status"], "score3_status": score3["status"],
         }
         rows.append(row)
@@ -718,6 +737,9 @@ def main():
         ],
         "minimum_seeds_with_joint_in_distribution_per_mode_for_selection": verdict[
             "minimum_seeds_with_joint_in_distribution_per_mode_for_selection"
+        ],
+        "minimum_same_networks_with_both_joint_in_distribution_modes_for_selection": verdict[
+            "minimum_same_networks_with_both_joint_in_distribution_modes_for_selection"
         ],
         "joint_fraction_target": config["search"]["objective"][
             "minimum_target_joint_fraction"

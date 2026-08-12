@@ -712,3 +712,12 @@ samples this same complete-field path at increments of 0.025 over `t=[0,0.25]`.
 No contact coordinate is used to place a parameter. Fit eligibility requires
 at least one joint in-distribution event in each direction; if none exists, the
 tested path has no observed coexistence window and no selection round follows.
+
+Because the V6 fit seed is event-sparse, V6.1 retains all 11 boundary fields
+rather than selecting a scalar minimum. It runs the complete frozen path on
+selection seeds 1032 and 1033. Eligibility requires joint in-distribution A and
+B events within at least one same network realization; A and B supplied by
+different networks do not establish a repertoire in one substrate. If V6.1 is
+negative, the current evidence closes further optimizer-only refinement of
+this Node-field path and motivates a separately specified route/connectivity
+mechanism experiment.
