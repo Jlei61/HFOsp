@@ -37,7 +37,9 @@ spike history.
 
 For an identical spike history, local and global have exactly the same latent
 mean resource. Their only application-level difference is source identity.
-This avoids interpreting a generic reduction of recurrent gain as route memory.
+Because the arms are closed-loop, their realized spike histories and therefore
+their realized mean availability may diverge. This is an equation-matched
+control, not a post hoc trajectory-dose match.
 
 ## Frozen canary
 
@@ -75,3 +77,30 @@ beta, changing K, fitting contacts or comparing optimizers.
 This is a three-network development canary using a patient-training target. It
 cannot establish patient generalization, a recovered clinical waveform, a
 patient core, or an ictal lifecycle mechanism.
+
+## Outcome
+
+All `9 x 3 = 27` workers completed under the managed launcher with no worker
+failure or OOM. The measured sentinel used `7.51 GiB` peak RSS and zero swap;
+the controller selected nine workers and reported completion automatically.
+
+Exact off produced 28 detected events, 27 returned events and patient-supported
+mode B in `3/3` networks, but mode A in `0/3`. Every local STD candidate also
+produced mode A in `0/3`; unlike off, all four local arms produced mode B in
+`0/3` and had mean OOD fraction `1.0`. Their total detected event counts fell
+monotonically across the tested strength/time-scale combinations to
+`11, 5, 4, 2`. The best score was exact off (`11.341`); all local scores were
+`12.5`.
+
+The formal status is:
+
+```text
+REV10D3_SOURCE_SPECIFIC_DYNAMIC_EDGE_ACCESS_NOT_OBSERVED
+```
+
+Within the frozen grid, presynaptic E->E depression did not expose an alternate
+route; it removed the existing mode-B repertoire and pushed residual events out
+of patient support. No D3 candidate is eligible for confirmation or a new
+Fig.4. No interpolation of `U` or `tau_D` follows. The next diagnostic must
+separate absent spontaneous nucleation from absent forced route capacity before
+another mechanism family is introduced.

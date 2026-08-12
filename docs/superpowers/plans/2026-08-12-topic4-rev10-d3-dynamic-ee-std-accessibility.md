@@ -5,14 +5,17 @@
 - [x] Define source-specific E->E STD and an exact latent-mean global control.
 - [x] Keep Node, static edges, topology, delays, detector and patient target
   fixed; prohibit observation-conditioned inputs.
-- [ ] Add engine default-parity, local/global application and contract tests.
-- [ ] Freeze 9 candidates before fresh network seeds 1201-1203.
-- [ ] Run one non-no-op measured-RSS sentinel through `systemd-run -> nohup`.
-- [ ] Launch remaining workers with memory-bounded parallelism, 180 s waits and
+- [x] Add engine default-parity, local/global application and contract tests.
+- [x] Freeze 9 candidates before fresh network seeds 1201-1203.
+- [x] Run one non-no-op measured-RSS sentinel through `systemd-run -> nohup`.
+- [x] Launch remaining workers with memory-bounded parallelism, 180 s waits and
   completion notification.
-- [ ] Aggregate returned events with equal network weights and adjudicate local
+- [x] Aggregate returned events with equal network weights and adjudicate local
   against matched global and exact off.
-- [ ] Only after a positive canary, freeze confirmation seeds and produce the
+- [x] Do not run confirmation or replace Fig.4: all local arms had mode A and B
+  support in 0/3 networks, while exact off retained B in 3/3.
+- [x] Only after a positive canary, freeze confirmation seeds and produce the
   direct-waveform and KMeans Fig.4 pair.
-- [ ] If negative, close D3 and use the accumulated mechanism evidence to decide
-  whether a history-dependent directional route family is justified.
+- [x] Close D3 as `SOURCE_SPECIFIC_DYNAMIC_EDGE_ACCESS_NOT_OBSERVED`.
+- [ ] Map forced route capacity on a uniform spatial source grid before deciding
+  whether a new history-dependent directional route family is justified.
