@@ -113,6 +113,25 @@ def _classifier_from_manifest(manifest):
     return classifier
 
 
+def _returned_summary_filename(config):
+    role = config.get("scientific_role", "")
+    if role in {
+        "development_only_dynamic_accessibility_canary",
+        "development_only_inhibitory_resource_accessibility_canary",
+        "development_only_dynamic_ee_std_accessibility_canary",
+        "development_only_translation_invariant_spatial_ou_accessibility_canary",
+        "development_only_translation_invariant_spatial_ou_low_amplitude_bracket",
+        "development_only_translation_invariant_spatial_ou_kmeans_grid",
+    }:
+        return "canary_summary_returned_only.json"
+    phase = config.get("search", {}).get("phase", "fit")
+    return {
+        "fit": "fit_screen_summary_returned_only.json",
+        "selection": "selection_summary_returned_only.json",
+        "confirmation": "confirmation_summary_returned_only.json",
+    }[phase]
+
+
 def _load_bundle(
         config_path, output_root, candidate_id=None,
         *, allow_exploratory_candidate=False):
@@ -127,11 +146,7 @@ def _load_bundle(
     config = _json(config_path)
     manifest_path = output_root / "candidate_manifest.json"
     phase = config.get("search", {}).get("phase", "fit")
-    summary_path = output_root / {
-        "fit": "fit_screen_summary_returned_only.json",
-        "selection": "selection_summary_returned_only.json",
-        "confirmation": "confirmation_summary_returned_only.json",
-    }[phase]
+    summary_path = output_root / _returned_summary_filename(config)
     manifest, summary = _json(manifest_path), _json(summary_path)
     if manifest["config"]["sha256"] != _sha256(config_path):
         raise RuntimeError("manifest and rev10-R2 config do not match")

@@ -13,6 +13,9 @@ from scripts.audit_topic4_rev10_d5_3_spatial_ou_kmeans_grid import (
 from scripts.freeze_topic4_rev10_d5_3_spatial_ou_kmeans_grid import (
     candidate_library,
 )
+from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
+    _returned_summary_filename,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -105,3 +108,15 @@ def test_d5_3_auditor_is_directly_executable():
     ], cwd=ROOT, text=True, capture_output=True, check=False)
     assert completed.returncode == 0, completed.stderr
     assert "--config" in completed.stdout
+
+
+def test_d5_3_loader_uses_canary_summary_contract():
+    config = _config()
+    assert _returned_summary_filename(config) == "canary_summary_returned_only.json"
+    confirmation = {
+        "scientific_role": "development_only_translation_invariant_spatial_ou_confirmation",
+        "search": {"phase": "confirmation"},
+    }
+    assert _returned_summary_filename(confirmation) == (
+        "confirmation_summary_returned_only.json"
+    )
