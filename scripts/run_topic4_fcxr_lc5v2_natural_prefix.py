@@ -474,7 +474,7 @@ def recover_completed_control():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gamma", type=float, choices=(0.0, 0.001, 0.003))
+    parser.add_argument("--gamma", type=float, choices=(0.0, 0.001, 0.003, 0.005))
     parser.add_argument("--recover-completed-control", action="store_true")
     parser.add_argument("--p0-policy", choices=("mean", "q099"), default="mean")
     parser.add_argument("--confirm-run", action="store_true")

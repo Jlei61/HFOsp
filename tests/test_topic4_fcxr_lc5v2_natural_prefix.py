@@ -16,6 +16,7 @@ def test_prefix_tags_are_unambiguous():
     assert PREFIX._tag(0.0).endswith("milli000")
     assert PREFIX._tag(0.001).endswith("milli001")
     assert PREFIX._tag(0.003).endswith("milli003")
+    assert PREFIX._tag(0.005, "q099").endswith("milli005")
     with pytest.raises(ValueError):
         PREFIX._tag(0.0015)
     assert PREFIX._tag(0.001, "q099").startswith("u3_prefix_q099_")
