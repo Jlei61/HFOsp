@@ -7,13 +7,15 @@ import math
 import os
 import re
 import subprocess
+import sys
 import time
 from pathlib import Path
 
-from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds
-
-
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds  # noqa: E402
+
+
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 TIME = Path("/usr/bin/time")
 MANAGER = ROOT / "scripts/run_topic4_rev10_sa_managed_command.sh"

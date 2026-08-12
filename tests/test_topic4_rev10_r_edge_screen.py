@@ -1,4 +1,6 @@
 import inspect
+import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
@@ -109,3 +111,13 @@ def test_screen_launcher_uses_measured_rss_and_memory_headroom(tmp_path):
     assert '"/usr/bin/nohup"' in source
     assert '"--property=MemoryMax=24G"' in source
     assert "time.sleep(wait_seconds)" in source
+
+
+def test_screen_launcher_is_directly_importable_as_cli():
+    completed = subprocess.run(
+        [sys.executable, str(
+            ROOT / "scripts/launch_topic4_rev10_r_edge_flow_screen.py"
+        ), "--help"],
+        cwd="/tmp", capture_output=True, text=True, check=False,
+    )
+    assert completed.returncode == 0, completed.stderr
