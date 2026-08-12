@@ -66,3 +66,25 @@ joint, in-distribution A and B in at least `2/3` networks, preserve B in at
 least `2/3`, exceed both its matched global control and off in same-network A/B
 support, and avoid runaway. This is not patient-blind validation or an ictal
 lifecycle test.
+
+## D2.1 outcome and D2.2 boundary extension
+
+D2.1 completed `7 x 3 = 21` workers without runaway. Exact off and both lower
+local doses produced mode A in `0/3` networks. The upper local boundary
+`k_q=0.004/ms` produced one returned, joint, in-distribution A event on seed
+1141 and mode B on all three networks; matched global and exact off produced A
+in `0/3`. Its equal-network score was `10.245` versus `11.417` for off, but
+same-network A/B support was only `1/3`, so the formal verdict remained
+`REV10D2_LOCAL_INHIBITORY_RESOURCE_ACCESS_NOT_OBSERVED`.
+
+Because the only local-specific A appeared at the upper tested boundary while
+`q_min` remained `0.861-0.909` with no runaway, one final fixed dose extension
+is eligible. D2.2 freezes, before fresh networks 1171-1173:
+
+```text
+k_q in {0.0055, 0.0070, 0.0085} ms^-1
+mode in {local, global}
+```
+
+The same gate and controls apply. No interpolation or optimizer follows if
+D2.2 fails.

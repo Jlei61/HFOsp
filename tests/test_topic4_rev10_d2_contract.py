@@ -16,12 +16,12 @@ def _config():
 def test_resource_library_is_three_paired_doses_plus_off():
     rows=candidate_library(_config()); assert len(rows)==7
     keys={(r["inhibitory_resource"]["mode"],r["inhibitory_resource"]["k_q_per_ms"]) for r in rows[1:]}
-    for k in (0.0005,0.0015,0.004):
+    for k in (0.0055,0.007,0.0085):
         assert ("local",k) in keys and ("global",k) in keys
     assert {row["candidate_id"] for row in rows[1:]} == {
         f"qresource_{mode}_k{dose}"
         for mode in ("local", "global")
-        for dose in ("000500", "001500", "004000")
+        for dose in ("005500", "007000", "008500")
     }
 
 
@@ -33,6 +33,6 @@ def test_resource_library_keeps_static_edges_off_and_hashes_canonical():
 
 
 def test_resource_canary_uses_fresh_networks_and_long_wait():
-    config=_config(); assert config["search"]["fit_network_seeds"]==[1141,1142,1143]
+    config=_config(); assert config["search"]["fit_network_seeds"]==[1171,1172,1173]
     assert config["execution"]["wait_seconds"]>=180
     assert config["inhibitory_resource_library"]["update_interval_ms"] == 1.0

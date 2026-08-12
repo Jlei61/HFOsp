@@ -15,3 +15,13 @@
   against matched global and off.
 - [ ] Only after a positive canary, freeze a fresh confirmation and produce the
   accepted direct-waveform and KMeans Fig.4 pair.
+
+## D2.1 outcome
+
+- [x] Complete 21/21 workers on 1141-1143 without runaway.
+- [x] Record upper-bound local-specific A support in only 1/3 networks; gate
+  remains failed despite score `10.245` versus off `11.417`.
+- [x] Freeze one final boundary extension at
+  `k_q={0.0055,0.0070,0.0085}/ms` before fresh networks 1171-1173.
+- [ ] Run D2.2 with the same local/global/off comparison and stop if A/B does
+  not occur in at least 2/3 networks.
