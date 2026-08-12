@@ -5,11 +5,15 @@ import argparse
 import hashlib
 import json
 import os
+import sys
 import tempfile
 from pathlib import Path
 
 import numpy as np
 from sklearn.metrics import adjusted_mutual_info_score
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
     _column_stats,
@@ -21,7 +25,6 @@ from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_d5_2_spatial_ou_confirmation.json"
 
 

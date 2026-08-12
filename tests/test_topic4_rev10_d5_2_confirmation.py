@@ -1,4 +1,6 @@
 import numpy as np
+import subprocess
+from pathlib import Path
 
 from scripts.audit_topic4_rev10_d5_2_spatial_ou_confirmation import (
     adjudicate,
@@ -11,6 +13,8 @@ ACCEPTANCE = {
     "minimum_pooled_clean_events_per_mode": 6,
     "minimum_kmeans_ami_with_supervised_direction": 0.8,
 }
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _row(both, occupancy=0.1, runaway=0):
@@ -32,6 +36,21 @@ def test_cluster_mapping_uses_supervised_contingency_not_patient_correlation():
     )
     assert mapping == (1, 0)
     assert table.tolist() == [[0, 2], [2, 0]]
+
+
+def test_confirmation_auditor_imports_when_executed_as_a_script():
+    completed = subprocess.run(
+        [
+            "/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python",
+            str(ROOT / "scripts/audit_topic4_rev10_d5_2_spatial_ou_confirmation.py"),
+            "--help",
+        ],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0, completed.stderr
 
 
 def test_d5_2_positive_status_requires_support_kmeans_and_patient_geometry():
