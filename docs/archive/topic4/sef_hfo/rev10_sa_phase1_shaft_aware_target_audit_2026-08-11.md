@@ -276,3 +276,21 @@ basis、每处空间分辨率和正则化不变。对 6 对锚点分别构建 la
 两条连续路径，每条取 `t=0.25/0.5/0.75`，加四个锚点共 40 个场。未观测区域仍是平滑先验
 延拓，不能声称由患者数据识别。V5 先在 1031 拟合，再把多样 Pareto subset 带到
 1032/1033；不增加 K/core，Edge、`beta` 和 topology 继续关闭。
+
+### SA6I V5 fit result and V5.1 selection contract
+
+V5 在 fit seed 1031 完成 `40/40` workers，零失败、零 runaway。18 个 latent-linear
+内插场全部为 `0 joint`；density-mixture 路径产生了新的 joint support。fit minimum
+`v5_density_p03_t025` 共 6 个事件，其中 3 个 joint、2 个 ICL-only、1 个 SCL-only，
+A/B 为 `3/3`，OOD fraction 为 `0.50`。相比 uniform 09 的 `2/6 joint` 和 uniform 12
+的 `4/13 joint`，joint fraction 提高到 `0.50`，但分母只有 6，不能称为患者恢复。
+
+这个结果支持的只是一个优化方向：在同一个 observation-invariant `18 x 18` spline
+basis 中，正密度混合保留两个场的 support union，优于对 log field 做直线平移。它不支持
+把 spline 极值解释成多个 core，也没有识别未放置电极的二维区域。
+
+V5.1 在读取 1032/1033 前冻结 8 个多样场：fit winner、joint-positive anchors、全部
+Pareto candidates，以及 winner anchor pair 上全部 density points。每个场在两个新网络上
+各跑一次。唯一新增的跨网络资格条件是：pooled 至少 2 个 joint events，且两个网络各至少
+1 个 joint event。若没有候选通过，裁定为训练网络信号不能跨网络实现；不得归因于优化器，
+也不得据此开放 Edge、`beta` 或 observation-conditioned basis。

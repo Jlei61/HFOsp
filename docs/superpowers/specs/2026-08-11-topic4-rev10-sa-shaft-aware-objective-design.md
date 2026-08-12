@@ -660,3 +660,25 @@ positive density support. Neither path defines components or cores. Values on
 unobserved sheet regions remain smooth-prior extensions and are not identified
 by patient data. V5 is fit-only; a diverse subset must be evaluated on network
 seeds 1032/1033 before any fresh-seed confirmation.
+
+V5 completed `40/40` workers on fit seed 1031 with zero failure and zero
+runaway. Latent-linear interpolation did not produce a joint-shaft event in
+any of its 18 interior fields. Density-mixture interpolation did: the fit
+minimum `density(uniform09, uniform12; t=0.25)` produced 6 events, including
+3 joint-shaft events, with direction counts `3/3` and OOD fraction `0.50`.
+This is a sparse fit-network signal, not recovery. It suggests that retaining
+the union of positive field support is more useful than translating the log
+field between endpoints, but the event denominator is too small to interpret
+the spatial extrema or mode proportions biologically.
+
+V5.1 freezes eight fields before reading any selection-network outcome: the
+V5 fit minimum, joint-positive training anchors, all V5 Pareto fields, and all
+density-mixture points on the fit winner's anchor pair. The field basis and
+coefficient locations remain uniform over the sheet; patient observations are
+used only to rank complete simulated fields. Every candidate is run on both
+network seeds 1032 and 1033. A field is selection-eligible only when it has at
+least two pooled joint-shaft events and at least one joint-shaft event in each
+network. This is one minimal cross-network realizability requirement, not a
+claim that the patient event distribution has been recovered. No V5.1 result
+may alter the frozen library, open Edge or beta, or move basis functions toward
+contacts.

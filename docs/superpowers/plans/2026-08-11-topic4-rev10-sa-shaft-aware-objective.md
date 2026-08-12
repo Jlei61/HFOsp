@@ -193,8 +193,13 @@
 - [x] Freeze V5 with four score-selected but spatially unconditioned anchors and
   all pairwise latent-linear/density-mixture interpolation paths, for 40 unique
   continuous fields.
-- [ ] Run the 40-candidate V5 fit screen on seed 1031 with bounded workers.
-- [ ] Carry a diverse V5 subset, not only the scalar minimum, to seeds
-  1032/1033 without contact-conditioned basis functions.
+- [x] Run the 40-candidate V5 fit screen on seed 1031 with bounded workers;
+  all workers completed cleanly, and only density-mixture interpolation
+  increased joint-shaft support (`3/6` for the sparse fit winner).
+- [x] Freeze a diverse eight-field V5.1 subset, not only the scalar minimum,
+  for seeds 1032/1033 without contact-conditioned basis functions. Require at
+  least one joint-shaft event in both networks before selection.
+- [ ] Run the 16 paired V5.1 workers and freeze a fail-closed cross-network
+  verdict without adapting candidates to the selection outcomes.
 - [ ] Confirm the frozen V4/V5 winner on fresh development network seeds and
   state the patient-generalization boundary.

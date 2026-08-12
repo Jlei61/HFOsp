@@ -189,6 +189,9 @@ def _selection_verdict(rows, config):
     """Keep a descriptive scalar minimum separate from a valid selection."""
     objective = config["search"]["objective"]
     minimum_joint = int(objective.get("minimum_joint_events_for_selection", 1))
+    minimum_joint_seeds = int(
+        objective.get("minimum_seeds_with_joint_for_selection", 1)
+    )
     diagnostic = min(
         rows,
         key=lambda row: (
@@ -199,7 +202,13 @@ def _selection_verdict(rows, config):
     )
     eligible = [
         row for row in rows
-        if row["n_runaway_networks"] == 0 and row["n_joint"] >= minimum_joint
+        if (
+            row["n_runaway_networks"] == 0
+            and row["n_joint"] >= minimum_joint
+            and int(row.get(
+                "n_seeds_with_joint", 1 if row["n_joint"] > 0 else 0,
+            )) >= minimum_joint_seeds
+        )
     ]
     labels = config.get("aggregation", {})
     if not eligible:
@@ -210,6 +219,7 @@ def _selection_verdict(rows, config):
             "selected": None,
             "diagnostic": diagnostic,
             "minimum_joint_events_for_selection": minimum_joint,
+            "minimum_seeds_with_joint_for_selection": minimum_joint_seeds,
         }
     selected = min(
         eligible,
@@ -222,6 +232,7 @@ def _selection_verdict(rows, config):
         "selected": selected,
         "diagnostic": diagnostic,
         "minimum_joint_events_for_selection": minimum_joint,
+        "minimum_seeds_with_joint_for_selection": minimum_joint_seeds,
     }
 
 
@@ -279,6 +290,9 @@ def _plot_search(summary, manifest, config, output_root):
         "adaptive_training_anchor": ("D", "#111111", "training anchor"),
         "adaptive_latent_linear_interpolation": ("o", "#4E79A7", "latent interpolation"),
         "adaptive_density_mixture_interpolation": ("^", "#E15759", "density interpolation"),
+        "selection_confirmation_adaptive_training_anchor": ("D", "#111111", "anchor confirmation"),
+        "selection_confirmation_adaptive_latent_linear_interpolation": ("o", "#4E79A7", "latent confirmation"),
+        "selection_confirmation_adaptive_density_mixture_interpolation": ("^", "#E15759", "density confirmation"),
     }
     for role in sorted({row["role"] for row in rows}):
         marker, color, label = role_styles.get(role, ("o", "#7F7F7F", role))
@@ -530,6 +544,23 @@ def main():
             z = np.empty((0, len(classifier["coef"])), float)
         counts = np.bincount(labels, minlength=2)
         participation = all_event_shaft_participation(onsets, groups)
+        seed_readouts = {}
+        cursor = 0
+        for seed, block in zip(seeds, onset_blocks):
+            stop = cursor + len(block)
+            block_labels = labels[cursor:stop]
+            block_ood = ood[cursor:stop]
+            block_participation = all_event_shaft_participation(block, groups)
+            block_counts = np.bincount(block_labels, minlength=2)
+            seed_readouts[str(seed)] = {
+                **block_participation,
+                "mode_A_count": int(block_counts[0]),
+                "mode_B_count": int(block_counts[1]),
+                "ood_fraction": (
+                    float(np.mean(block_ood)) if len(block_ood) else 1.0
+                ),
+            }
+            cursor = stop
         score6 = score_mode_conditioned_events(
             onsets, labels, groups=groups, pairs=pairs, embedding=embedding,
             targets=targets, floors=floors6, config=scoring_config,
@@ -555,6 +586,9 @@ def main():
             "mode_A_count": int(counts[0]), "mode_B_count": int(counts[1]),
             "ood_fraction": ood_fraction,
             "n_runaway_networks": runaway,
+            "n_seeds_with_joint": int(sum(
+                value["n_joint"] > 0 for value in seed_readouts.values()
+            )),
             "score6_status": score6["status"], "score3_status": score3["status"],
         }
         rows.append(row)
@@ -565,6 +599,7 @@ def main():
                 str(seed): int(metadata[index]["run"]["n_common_detector_events"])
                 for index, seed in enumerate(seeds)
             },
+            "shaft_and_direction_by_seed": seed_readouts,
         }
         event_records[candidate["candidate_id"]] = {
             "onsets": onsets, "labels": labels, "ood": ood,
@@ -599,6 +634,9 @@ def main():
         "diagnostic_candidate_id": diagnostic["candidate_id"],
         "minimum_joint_events_for_selection": verdict[
             "minimum_joint_events_for_selection"
+        ],
+        "minimum_seeds_with_joint_for_selection": verdict[
+            "minimum_seeds_with_joint_for_selection"
         ],
         "joint_fraction_target": config["search"]["objective"][
             "minimum_target_joint_fraction"

@@ -119,3 +119,63 @@ def test_v5_anchor_selection_uses_scores_not_spatial_metadata():
         joint_count=2, route_count=1,
     )
     assert selected == ["reference", "joint_high", "joint_low", "route"]
+
+
+def test_selection_confirmation_requires_joint_events_in_both_networks():
+    from scripts.aggregate_topic4_rev10_sa_spline_field_search import (
+        _selection_verdict,
+    )
+
+    config = {"search": {"objective": {
+        "minimum_joint_events_for_selection": 2,
+        "minimum_seeds_with_joint_for_selection": 2,
+    }}}
+    rows = [{
+        "candidate_id": "one_seed", "selection_score": 1.0,
+        "n_runaway_networks": 0, "n_joint": 3,
+        "n_seeds_with_joint": 1,
+    }]
+    assert _selection_verdict(rows, config)["selected"] is None
+    rows[0]["n_seeds_with_joint"] = 2
+    assert _selection_verdict(rows, config)["selected"] is rows[0]
+
+
+def test_v51_diversity_rule_keeps_pareto_anchors_and_winner_path():
+    from scripts.freeze_topic4_rev10_sa_v5_selection_candidates import (
+        select_confirmation_ids,
+    )
+
+    candidates = [
+        {"candidate_id": "winner", "role": "adaptive_density_mixture_interpolation",
+         "anchor_pair_index": 3},
+        {"candidate_id": "neighbor_a", "role": "adaptive_density_mixture_interpolation",
+         "anchor_pair_index": 3},
+        {"candidate_id": "neighbor_b", "role": "adaptive_density_mixture_interpolation",
+         "anchor_pair_index": 3},
+        {"candidate_id": "anchor_joint", "role": "adaptive_training_anchor"},
+        {"candidate_id": "pareto", "role": "adaptive_training_anchor"},
+    ]
+    rows = [
+        {"candidate_id": "winner", "role": candidates[0]["role"],
+         "joint_fraction": 0.5, "selection_score": 1.0, "n_joint": 2,
+         "pareto_nondominated": True},
+        {"candidate_id": "neighbor_a", "role": candidates[1]["role"],
+         "joint_fraction": 0.2, "selection_score": 3.0, "n_joint": 1,
+         "pareto_nondominated": False},
+        {"candidate_id": "neighbor_b", "role": candidates[2]["role"],
+         "joint_fraction": 0.0, "selection_score": 4.0, "n_joint": 0,
+         "pareto_nondominated": False},
+        {"candidate_id": "anchor_joint", "role": "adaptive_training_anchor",
+         "joint_fraction": 0.3, "selection_score": 2.0, "n_joint": 1,
+         "pareto_nondominated": False},
+        {"candidate_id": "pareto", "role": "adaptive_training_anchor",
+         "joint_fraction": 0.0, "selection_score": 2.5, "n_joint": 0,
+         "pareto_nondominated": True},
+    ]
+    selected = select_confirmation_ids(
+        {"candidate_set": {"candidates": candidates}},
+        {"selected_candidate_id": "winner", "candidate_rows": rows},
+    )
+    assert selected == [
+        "winner", "anchor_joint", "pareto", "neighbor_a", "neighbor_b",
+    ]
