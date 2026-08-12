@@ -10,3 +10,5 @@
 ## Outcome-triggered secondary audit
 
 The formal maximum-dose result was A `5/6`, B `4/6`, so the primary decision is frozen as `NOT_CONFIRMED`. Because direction and joint-shaft recruitment were both `6/6`, rerun only the maximum-dose sham+A+B trajectories with full detector timing. Reuse the measured 6.83 GiB sentinel upper bound, launch at most six workers under the same cgroup caps, and keep the 180 second wait. Report broad-window timing and sham overlap as attribution only; do not retrofit the primary gate.
+
+**Completed:** both missing B detector onsets were 141 ms, one 1-ms bin beyond the formal window. Broad returned response, expected direction, and joint-shaft recruitment were all 6/6 for both sources, with no sham overlap. Preserve the formal `NOT_CONFIRMED` verdict but proceed to an exploratory, translation-invariant continuous accessibility mechanism under the bounded `BROAD_ROUTE_TIMING_SUPPORTED` status.
