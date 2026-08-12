@@ -8,7 +8,7 @@
 
 rev10-SA 已回答三个不同问题。第一，旧目标确实看不见 SCL；新的目标能稳定识别 SCL 删除、跨杆 timing 改变和 0/4 到 4/4 的连续恢复。第二，SCL 虚拟触点本身可读，旧 fixed-K3 relocation 阴性不能外推成自由场失败。第三，回到 Stage 3 学习场并改用均匀二维连续基底后，mode B 跨新网络稳定，mode A 仍未形成同一网络内的共享 repertoire。
 
-因此当前不再增加 K/core，也不继续做 Node 场系数细化。下一步是单独的 contact-density-invariant edge-flow 探索；Edge、`beta` 和 topology 在 rev10-SA 内保持关闭。
+因此当前不再增加 K/core，也不继续做 Node 场系数细化。下一步是单独的 contact-density-invariant edge-flow 探索；Edge、`beta` 和 topology 在 rev10-SA 内保持关闭。rev10-R 首轮跨网络共享参数使用 singular value 上的四系数 Chebyshev 响应 `f_c(sigma)`，不直接共享 full `Gamma`：后者在不同网络的近退化 SVD 子空间旋转下没有固定数值含义，而谱函数在退化块内给出相同响应。
 
 ## 2. 完成程度
 

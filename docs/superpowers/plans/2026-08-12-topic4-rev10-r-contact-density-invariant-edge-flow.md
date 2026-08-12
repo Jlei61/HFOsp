@@ -20,22 +20,27 @@
   field peak enters the builder signature or artifact provenance.
 - [ ] Freeze rank `R=4`; use `R=2/6` only as numerical sensitivities.
 - [ ] Drop the leading degree mode, standardize retained coordinates to unit
-  RMS, and test deterministic sign, subspace-projector stability, and family
-  invariance under basis rotation.
+  RMS, and test deterministic sign, singular-gap stability, joint SVD sign
+  invariance, and degenerate-subspace rotation invariance of `f_c(sigma)`.
+- [ ] Keep the primary shared family a four-coefficient Chebyshev response on
+  paired singular modes. Do not
+  open full cross-mode `Gamma` until a graph-only coordinate-transport audit is
+  frozen; the statement that the full family is rotation invariant does not
+  make one numerical `Gamma` comparable across independently sampled graphs.
 
 ## R1 edge mapper
 
-- [ ] Implement target-normalized `U Gamma V^T` edge flow over existing E-to-E
-  edges, with a primary `4 x 4` coefficient matrix.
-- [ ] Test `Gamma=0` exact no-op, topology/delay preservation, finite positive
+- [ ] Implement target-normalized `sum_r f_c(sigma_r) u_r v_r^T` edge flow over
+  existing E-to-E edges, with four primary Chebyshev coefficients.
+- [ ] Test `c=0` exact no-op, topology/delay preservation, finite positive
   weights, incoming-E error `<=1e-9`, and unchanged E-to-I/GABA hashes.
 - [ ] Report edge ratio, KL, ESS, outgoing-source influence, component-free
   graph-mode flow, and effective weighted-delay changes.
 
 ## R2 paired exploratory screen
 
-- [ ] Freeze 32 nonzero symmetric scrambled-Sobol fields in rank-4 coefficient
-  space, plus `Gamma=0`, with antithetic pairs.
+- [ ] Freeze 32 nonzero symmetric scrambled-Sobol filters in rank-4 coefficient
+  space, plus `c=0`, with antithetic pairs.
 - [ ] Launch one candidate-network per `systemd-run --user -> nohup` worker with
   all numeric thread counts at 1, bounded by measured RSS and available memory.
 - [ ] Use common network/noise seeds and the common absolute detector.

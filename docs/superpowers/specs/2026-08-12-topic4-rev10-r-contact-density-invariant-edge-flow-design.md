@@ -51,27 +51,42 @@ largest-magnitude-entry convention. The rank-`R` subspaces and singular values
 are hashed; near-degenerate subspaces are compared by projector rather than by
 individual vector identity.
 
-For every existing E-to-E edge and fixed delay `delta`, define:
+For every existing E-to-E edge and fixed delay `delta`, the primary shared
+cross-network family is a continuous spectral filter.  Four Chebyshev
+coefficients `c_0..c_3` define `f_c` on normalized singular value, and:
 
 ```text
-ell_ts(Gamma) = u(t)^T Gamma v(s)
+xi_r = 2 sigma_r / sigma_1 - 1
+f_c(sigma_r) = sum_q c_q T_q(xi_r)
+ell_ts(c) = sum_r f_c(sigma_r) u_r(t) v_r(s)
 S_t = sum_(s,delta) W_ts^(delta)
 W'_ts^(delta) = S_t * softmax_(s,delta)
-                [log W_ts^(delta) + ell_ts(Gamma)]
+                [log W_ts^(delta) + ell_ts(c)]
 ```
 
 This interaction is nonseparable after target normalization and can alter
-directional source allocation. `Gamma` is an `R x R` coefficient matrix; the
-family `U Gamma V^T` is invariant to orthogonal rotations within the retained
-left/right subspaces. It remains one low-rank graph-flow field, not a collection
-of cores. Primary rank is `R=4`; `R=2/6` are numerical resolution sensitivities,
-not biological mode counts.
+directional source allocation. The product `u_r(t)v_r(s)` is invariant to the
+joint sign flip of an SVD pair. If a singular block is exactly degenerate,
+`f_c` assigns the same response to every vector in that block, so the summed
+field is invariant to arbitrary rotations within it. Near-degenerate modes
+receive nearby responses. The same numerical `c` therefore has a graph-spectral
+meaning across independently sampled networks without aligning neuron-specific
+singular vectors.
+
+A full `R x R Gamma` is not primary. Although the *set* `U Gamma V^T` is
+subspace-rotation invariant, a fixed numerical `Gamma` is not invariant when a
+near-degenerate SVD block rotates between network seeds. Cross-mode terms may
+be opened only after a graph-only alignment audit freezes a common coordinate
+transport; they cannot be used to rescue the first screen post hoc. The primary
+rank is `R=4`; `R=2/6` are numerical resolution sensitivities, not biological
+mode counts. This remains one low-rank graph-flow field, not a collection of
+cores.
 
 `contact-density-invariant` has a narrow meaning: no extra basis element is
 placed where contacts are dense and no shaft path determines its support. It
 does not mean patient-observation-free. The frozen E-to-E scaffold already
 inherits the rank-derived patient propagation axis, and the patient-training
-objective selects `Gamma`; both facts must remain explicit in every artifact.
+objective selects `c`; both facts must remain explicit in every artifact.
 
 ## 4. SNN connection
 
@@ -94,7 +109,7 @@ Only implementation-invalid outcomes stop a run:
 - exact topology and delay labels;
 - incoming E budget error at most `1e-9` for every nonzero E target;
 - E-to-I and GABA hashes unchanged;
-- `Gamma=0` exact no-op.
+- `c=0` exact no-op.
 
 Edge ratio, KL, ESS, source outgoing influence, and weighted-delay change are
 continuous diagnostics. Exploratory bounds start at edge ratio `[0.5,2]`; a
@@ -130,10 +145,11 @@ coexistence is reported explicitly but is not multiplied into many blockers.
 ## 7. Exploration sequence
 
 1. Implement basis/no-op/normalization tests and a zero-SNN structure sidecar.
-2. Run a small symmetric Sobol library in the 16-dimensional `R=4` coefficient
-   matrix on common fit networks 1051-1054. Include `+Gamma/-Gamma` pairs and
-   `Gamma=0`; do not start with CMA-ES. The initial budget is 32 nonzero fields
-   plus one no-op, with one Node baseline reused per network.
+2. Run a small symmetric Sobol library in the four-dimensional Chebyshev
+   coefficient space on common fit networks 1051-1054. Include `+c/-c` pairs
+   and `c=0`; do not start with CMA-ES. The initial
+   budget is 32 nonzero fields plus one no-op, with one Node baseline reused per
+   network.
 3. Freeze at most six diverse Pareto fields before selection networks
    1061-1063. Retain fields with different A/B tradeoffs, not only the scalar
    minimum.
@@ -152,7 +168,7 @@ failure remains unresolved rather than assumed.
   candidate relay mechanism; proceed to a frozen four-arm confirmation.
 - Event yield rises but mode shapes do not: edge is a conditional amplifier,
   not the missing route mechanism.
-- Different `Gamma` is needed per network: finite shared route capacity remains
+- Different `c` is needed per network: finite shared route capacity remains
   unobserved; do not increase rank without a residual-specific reason.
 - Ranks 2/4/6 all fail with adequate structural movement: static redistribution
   is insufficient; the next candidate is a dynamic state or slow-variable
