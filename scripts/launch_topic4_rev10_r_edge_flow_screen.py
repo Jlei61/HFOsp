@@ -10,6 +10,8 @@ import subprocess
 import time
 from pathlib import Path
 
+from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds
+
 
 ROOT = Path(__file__).resolve().parents[1]
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
@@ -149,7 +151,7 @@ def main():
     candidates = [
         row["candidate_id"] for row in manifest["candidate_set"]["candidates"]
     ]
-    seeds = list(map(int, config["search"]["fit_network_seeds"]))
+    seeds = active_network_seeds(config)
     worker_dir, run_dir = output_root / "workers", output_root / "run_logs"
     worker_dir.mkdir(parents=True, exist_ok=True)
     run_dir.mkdir(parents=True, exist_ok=True)

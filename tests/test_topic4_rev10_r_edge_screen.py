@@ -12,7 +12,10 @@ from scripts.launch_topic4_rev10_r_edge_flow_screen import (
     _memory_bounded_workers,
     _peak_rss_kib,
 )
-from scripts.run_topic4_rev10_r_edge_flow_worker import _load_basis
+from scripts.run_topic4_rev10_r_edge_flow_worker import (
+    _load_basis,
+    active_network_seeds,
+)
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,6 +65,15 @@ def test_edge_worker_keeps_node_anchor_and_basis_separate():
     }
 
 
+def test_active_network_seeds_are_phase_explicit():
+    search = {
+        "fit_network_seeds": [1], "selection_network_seeds": [2],
+        "confirmation_network_seeds": [3],
+    }
+    for phase, expected in (("fit", [1]), ("selection", [2]), ("confirmation", [3])):
+        assert active_network_seeds({"search": {**search, "phase": phase}}) == expected
+
+
 def test_aggregator_declares_equal_network_primary_unit():
     source = (
         ROOT / "scripts/aggregate_topic4_rev10_r_edge_flow_screen.py"
@@ -70,7 +82,9 @@ def test_aggregator_declares_equal_network_primary_unit():
     assert "mean_network_shape_A" in source
     assert "mean_network_shape_B" in source
     assert 'loaded["event_returned"]' in source
-    assert "fit_screen_summary_returned_only.json" in source
+    assert '"fit": "fit_screen"' in source
+    assert '"selection": "selection"' in source
+    assert '"confirmation": "confirmation"' in source
     assert "pooled" not in source.split("def main():", 1)[1].split(
         "safe_claim", 1
     )[0]

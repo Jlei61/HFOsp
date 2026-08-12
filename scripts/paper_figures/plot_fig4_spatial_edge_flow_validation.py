@@ -117,7 +117,12 @@ def _load_bundle(config_path, output_root, candidate_id=None):
     config_path, output_root = Path(config_path).resolve(), Path(output_root).resolve()
     config = _json(config_path)
     manifest_path = output_root / "candidate_manifest.json"
-    summary_path = output_root / "fit_screen_summary_returned_only.json"
+    phase = config.get("search", {}).get("phase", "fit")
+    summary_path = output_root / {
+        "fit": "fit_screen_summary_returned_only.json",
+        "selection": "selection_summary_returned_only.json",
+        "confirmation": "confirmation_summary_returned_only.json",
+    }[phase]
     manifest, summary = _json(manifest_path), _json(summary_path)
     if manifest["config"]["sha256"] != _sha256(config_path):
         raise RuntimeError("manifest and rev10-R2 config do not match")
@@ -141,7 +146,12 @@ def _load_bundle(config_path, output_root, candidate_id=None):
     classifier = _classifier_from_manifest(manifest)
     blocks, records, worker_inputs = [], [], []
     cursor, static = 0, None
-    for seed in config["search"]["fit_network_seeds"]:
+    seed_key = {
+        "fit": "fit_network_seeds",
+        "selection": "selection_network_seeds",
+        "confirmation": "confirmation_network_seeds",
+    }[phase]
+    for seed in config["search"][seed_key]:
         stem = output_root / "workers" / f"{candidate_id}_seed_{seed}"
         json_path, npz_path = stem.with_suffix(".json"), stem.with_suffix(".npz")
         payload = _json(json_path)
@@ -199,6 +209,7 @@ def _load_bundle(config_path, output_root, candidate_id=None):
         )}
     return {
         "config": config, "config_path": config_path, "output_root": output_root,
+        "phase": phase, "network_seed_key": seed_key,
         "manifest": manifest, "manifest_path": manifest_path,
         "summary": summary, "summary_path": summary_path,
         "candidate_id": candidate_id, "candidate": candidate,
@@ -215,7 +226,8 @@ def _load_bundle(config_path, output_root, candidate_id=None):
 
 
 def _same_network_pair(bundle):
-    for seed in bundle["config"]["search"]["fit_network_seeds"]:
+    seed_key = bundle.get("network_seed_key", "fit_network_seeds")
+    for seed in bundle["config"]["search"][seed_key]:
         by_mode = []
         for mode in (0, 1):
             by_mode.append([
@@ -340,6 +352,11 @@ def _plot_readout(ax, bundle, pair):
         shaft = bundle["static"]["shaft_ids"][contact]
         ax.plot(t, trace[contact] * 0.68 / scale + offsets[row],
                 color=SHAFT_COLORS[shaft], lw=0.82)
+    bar_x = 0.045 * max(stop - start, 1.0)
+    bar_y = -0.40
+    ax.plot([bar_x, bar_x], [bar_y, bar_y + 0.68], color="#222222", lw=1.5)
+    ax.text(bar_x + 0.015 * max(stop - start, 1.0), bar_y + 0.34,
+            f"{scale:.2g} a.u.", ha="left", va="center", fontsize=7.2)
     ax.set_yticks(offsets, bundle["static"]["contact_names"][contacts], fontsize=7.5)
     ax.set_xlim(0, stop - start)
     ax.set_ylim(-0.6, offsets[-1] + 1.0)
@@ -351,7 +368,7 @@ def _plot_readout(ax, bundle, pair):
     ax.legend(handles=[
         Patch(facecolor=MODE_COLORS[0], alpha=0.2, label="model mode A"),
         Patch(facecolor=MODE_COLORS[1], alpha=0.2, label="model mode B"),
-    ], frameon=False, fontsize=7.5, ncol=2, loc="upper right")
+    ], frameon=False, fontsize=7.5, ncol=2, loc="lower right")
     return {"same_network_pair": True, "seed": block["seed"],
             "mode_A_global_index": a_index, "mode_B_global_index": b_index}
 
@@ -372,7 +389,9 @@ def _metadata(bundle, figure):
     return {
         "figure": figure, "plotting_only": True,
         "candidate_id": bundle["candidate_id"],
-        "candidate_role": "frozen diagnostic best from equal-network fit screen",
+        "candidate_role": (
+            f"frozen diagnostic best from equal-network {bundle['phase']} screen"
+        ),
         "source_status": bundle["summary"]["status"],
         "formal_clean_mode_counts": {
             "A": int(bundle["clean_counts"][0]),

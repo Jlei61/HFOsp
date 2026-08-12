@@ -38,6 +38,18 @@ ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 
 
+def active_network_seeds(config):
+    phase = config.get("search", {}).get("phase", "fit")
+    key = {
+        "fit": "fit_network_seeds",
+        "selection": "selection_network_seeds",
+        "confirmation": "confirmation_network_seeds",
+    }.get(phase)
+    if key is None:
+        raise ValueError(f"unknown rev10-R search phase: {phase}")
+    return list(map(int, config["search"][key]))
+
+
 def _load_basis(npz_path, record, seed):
     if _sha256(npz_path) != record["npz_sha256"]:
         raise RuntimeError(f"graph basis NPZ changed: seed {seed}")
@@ -76,11 +88,13 @@ def main():
     allowed_roles = {
         "development_only_contact_density_invariant_route_capacity",
         "development_only_observation_invariant_spatial_route_capacity",
+        "development_only_observation_invariant_spatial_route_selection",
+        "development_only_observation_invariant_spatial_route_confirmation",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
-    if args.seed not in set(map(int, config["search"]["fit_network_seeds"])):
-        parser.error("worker seed is outside the frozen fit-network set")
+    if args.seed not in set(active_network_seeds(config)):
+        parser.error("worker seed is outside the active frozen network set")
     if config["search"]["beta"] != "closed":
         raise RuntimeError("beta must remain closed")
     for record in config["inputs"].values():
@@ -93,6 +107,8 @@ def main():
     allowed_manifests = {
         "REV10R_GRAPH_SPECTRAL_LIBRARY_FROZEN",
         "REV10R2_SPATIAL_EDGE_LIBRARY_FROZEN",
+        "REV10R2_SPATIAL_EDGE_SELECTION_LIBRARY_FROZEN",
+        "REV10R2_SPATIAL_EDGE_CONFIRMATION_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):

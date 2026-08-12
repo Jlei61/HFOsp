@@ -22,6 +22,7 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
     _runtime_provenance,
     _sha256,
 )
+from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds  # noqa: E402
 from src.topic4_shaft_aware import (  # noqa: E402
     centered_smooth_max,
     contract_groups,
@@ -248,7 +249,8 @@ def main():
         raise RuntimeError("scoring and contact contracts differ")
     classifier = _classifier_from_manifest(manifest)
     objective = config["search"]["objective"]
-    seeds = list(map(int, config["search"]["fit_network_seeds"]))
+    phase = config.get("search", {}).get("phase", "fit")
+    seeds = active_network_seeds(config)
     rows, details, worker_inputs = [], {}, []
     for candidate in manifest["candidate_set"]["candidates"]:
         by_seed, metadata = {}, []
@@ -376,8 +378,19 @@ def main():
         row["selection_score_equal_network"], row["candidate_id"],
     ))
     baseline = next(row for row in rows if row["candidate_id"] == "edge_noop")
+    status_by_phase = {
+        "fit": "REV10R_RETURNED_ONLY_FIT_SCREEN_COMPLETE",
+        "selection": "REV10R_RETURNED_ONLY_SELECTION_COMPLETE",
+        "confirmation": "REV10R_RETURNED_ONLY_CONFIRMATION_COMPLETE",
+    }
+    basename_by_phase = {
+        "fit": "fit_screen",
+        "selection": "selection",
+        "confirmation": "confirmation",
+    }
     summary = {
-        "status": "REV10R_RETURNED_ONLY_FIT_SCREEN_COMPLETE",
+        "status": status_by_phase[phase],
+        "phase": phase,
         "scientific_role": config["scientific_role"],
         "safe_claim": (
             "all candidate scores use equal network weights; event-pooled counts "
@@ -397,8 +410,9 @@ def main():
         "source_worker_commit": worker_commit,
         "provenance": _runtime_provenance(args.expected_commit),
     }
-    _atomic_csv(output_root / "fit_screen_candidate_summary_returned_only.csv", rows)
-    _atomic_json(output_root / "fit_screen_summary_returned_only.json", summary)
+    basename = basename_by_phase[phase]
+    _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)
+    _atomic_json(output_root / f"{basename}_summary_returned_only.json", summary)
     print(json.dumps({
         "status": summary["status"],
         "diagnostic_best_candidate_id": summary["diagnostic_best_candidate_id"],

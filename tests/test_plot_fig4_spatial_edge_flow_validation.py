@@ -73,3 +73,4 @@ def test_figure_consumer_has_no_simulation_or_candidate_selection():
     assert 'summary["diagnostic_best_candidate_id"]' in source
     assert "fit_network_seeds" in source
     assert "same-network" in source
+    assert "a.u." in source
