@@ -49,7 +49,9 @@ def candidate_library(config):
     for mode in library["modes"]:
         for k_q in library["k_q_per_ms"]:
             rows.append({
-                "candidate_id": f"qresource_{mode}_k{int(round(1000*k_q)):04d}",
+                "candidate_id": (
+                    f"qresource_{mode}_k{int(round(1_000_000*k_q)):06d}"
+                ),
                 **base,
                 "inhibitory_resource": {
                     "mode": mode, "k_q_per_ms": float(k_q), **shared,

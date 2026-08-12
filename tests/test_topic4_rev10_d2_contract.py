@@ -18,6 +18,11 @@ def test_resource_library_is_three_paired_doses_plus_off():
     keys={(r["inhibitory_resource"]["mode"],r["inhibitory_resource"]["k_q_per_ms"]) for r in rows[1:]}
     for k in (0.0005,0.0015,0.004):
         assert ("local",k) in keys and ("global",k) in keys
+    assert {row["candidate_id"] for row in rows[1:]} == {
+        f"qresource_{mode}_k{dose}"
+        for mode in ("local", "global")
+        for dose in ("000500", "001500", "004000")
+    }
 
 
 def test_resource_library_keeps_static_edges_off_and_hashes_canonical():
