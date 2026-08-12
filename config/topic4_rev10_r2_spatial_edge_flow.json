@@ -1,0 +1,150 @@
+{
+  "schema_version": "topic4_rev10_r2_spatial_edge_flow_v1",
+  "scientific_role": "development_only_observation_invariant_spatial_route_capacity",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev10_r/spatial_edge_flow",
+  "inputs": {
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "shaft_aware_target_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "shaft_aware_floors": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_floors.json",
+      "sha256": "2f28c5ecd991d0a1b051337370fa7b975ecc2ce95b2f00f26a3ea88469299b94"
+    },
+    "shaft_aware_scoring_config": {
+      "path": "config/topic4_rev10_sa_shaft_aware.json",
+      "sha256": "88ea711352088e32dd1d4f361dced9e8d1bd4153fc08df584c4ef02ca6a0fb57"
+    },
+    "common_detector_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json",
+      "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"
+    },
+    "node_anchor_config": {
+      "path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json",
+      "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"
+    },
+    "node_anchor_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json",
+      "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"
+    },
+    "node_anchor_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/v62_mode_boundary_final_search_summary.json",
+      "sha256": "23a3be8fe60ac03eb511717062718a4e6fea1d24a2540ff330fa5f01da429fbf"
+    }
+  },
+  "node_anchor": {
+    "candidate_id": "v62_density_t050",
+    "field_sha256": "5fc404a876713430b8d258a63e94e58fd9bd6e7a60234f7f34598dd49b97e060",
+    "selection_role": "development anchor chosen after V6.2; not blind"
+  },
+  "spatial_edge_basis": {
+    "representation": "degree_two_continuous_midpoint_vector_field",
+    "sheet_L_mm": 20.0,
+    "displacement_length_scale_mm": 0.38,
+    "scalar_basis": [
+      "constant", "mid_x", "mid_y", "mid_x_mid_y", "P2_mid_x", "P2_mid_y"
+    ],
+    "vector_components": ["x", "y"],
+    "coefficient_count": 12,
+    "sample_limit": 250000,
+    "minimum_effective_rank_relative_eigenvalue": 1e-06,
+    "minimum_effective_rank": 10,
+    "maximum_covariance_condition_number": 1000000.0,
+    "forbidden_inputs": [
+      "contact coordinates",
+      "shaft identity",
+      "patient events or labels",
+      "node field values",
+      "Gaussian components or peaks"
+    ]
+  },
+  "candidate_library": {
+    "parameterization": "pooled_graph_whitened_spatial_vector_coefficients",
+    "sobol_seed": 20260812,
+    "base_direction_count": 16,
+    "antithetic": true,
+    "include_exact_noop": true,
+    "raw_logit_abs_bound": 0.32924425414002567,
+    "bound_derivation": "0.95 * log(2) / 2; exact feature maxima over every fit graph",
+    "whitening": "inverse square root of equal-network mean full-edge feature covariance",
+    "guaranteed_pre_simulation_edge_ratio_interval": [
+      0.5176331417029475,
+      1.9318701208159248
+    ]
+  },
+  "direction_classifier": {
+    "label_semantics": "old_A_B_propagation_direction",
+    "feature_semantics": "FULL_TIMING_shaft_aware",
+    "recording_block_cv_folds": 6,
+    "regularization_c": 1.0,
+    "ood_quantile": 0.99,
+    "minimum_cv_balanced_accuracy": 0.9
+  },
+  "search": {
+    "arm": "Node_plus_Edge",
+    "beta": "closed",
+    "network_topology": "frozen",
+    "fit_network_seeds": [1051, 1052, 1053, 1054],
+    "selection_network_seeds": [1061, 1062, 1063],
+    "confirmation_network_seeds": [1071, 1072, 1073],
+    "simulation": {
+      "duration_ms": 8000.0,
+      "early_stop_runaway": true
+    },
+    "detector": {
+      "population_active_fraction_threshold": 0.0195703125,
+      "role": "frozen common absolute detector"
+    },
+    "contact_readout": {
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    },
+    "objective": {
+      "semantics": "EQUAL_NETWORK_MODE_CONDITIONED_JOINT_IN_DISTRIBUTION",
+      "fixed_events_per_mode": 6,
+      "fallback_events_per_mode": 3,
+      "lse_temperature": 0.25,
+      "minimum_joint_in_distribution_events_per_mode_per_network": 1,
+      "support_weight": 4.0,
+      "ood_weight": 0.5,
+      "maximum_fit_pareto_candidates": 6,
+      "maximum_selection_candidates": 3
+    }
+  },
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "audit_max_workers": 4,
+    "screen_max_workers": 12,
+    "wait_seconds": 180,
+    "numeric_threads_per_worker": 1,
+    "notify_on_completion": true,
+    "minimum_available_memory_gib_per_screen_worker": 8.0
+  },
+  "claim_boundary": {
+    "patient_target": "development only",
+    "network_seed_is_independent_unit": true,
+    "pooled_events_do_not_define_selection": true,
+    "edge_basis_is_uniform_over_sheet_and_does_not_use_contact_density": true,
+    "frozen_connectivity_still_inherits_patient_rank_axis": true,
+    "mode_A_route_capacity_not_yet_established": true
+  },
+  "forbidden": [
+    "patient held-out scoring",
+    "contact-conditioned edge bases",
+    "candidate adaptation after reading selection or confirmation seeds",
+    "beta, topology growth, slow variables, or discrete edge cores",
+    "CMA-ES before a known-good shared route exists"
+  ]
+}

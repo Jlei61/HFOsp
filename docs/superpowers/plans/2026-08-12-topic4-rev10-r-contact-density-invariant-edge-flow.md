@@ -28,6 +28,23 @@
   frozen; the statement that the full family is rotation invariant does not
   make one numerical `Gamma` comparable across independently sampled graphs.
 
+**Observed R1 outcome:** graph-only preflight found condition number
+`3.3e6-4.2e6` and effective feature spectrum about
+`1:0.12:9e-4:1.5e-7`; no SNN screen was launched. R1 is closed as a
+parameterization-negative result, not optimizer failure.
+
+## R0b spatial-vector replacement
+
+- [ ] Build a 12-coefficient degree-two continuous vector field on uniform
+  physical sheet coordinates; do not use contacts, shafts, patient events,
+  Node `h`, components, or peaks.
+- [ ] Audit full-edge covariance on networks 1051-1054; require effective rank
+  at least 10 and condition number at most `1e6` before SNN.
+- [ ] Whiten candidate directions by the equal-network mean covariance and
+  freeze amplitude from exact feature maxima over every fit graph.
+- [ ] Preserve the same target-normalization, structural contract, fit seeds,
+  equal-network objective, and Fig.4 validation outputs.
+
 ## R1 edge mapper
 
 - [ ] Implement target-normalized `sum_r f_c(sigma_r) u_r v_r^T` edge flow over

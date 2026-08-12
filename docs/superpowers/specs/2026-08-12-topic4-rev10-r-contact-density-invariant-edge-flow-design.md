@@ -31,6 +31,41 @@ Vtheta_i = Vtheta_0 - h_i d_i
 
 ## 3. Contact-density-invariant edge coordinates
 
+### R1 graph-spectral preflight outcome
+
+The graph-spectral construction below was implemented and audited on fit
+networks 1051-1054 before any SNN candidate screen. Retained singular values
+were tightly compressed (`0.953-0.992`); the four-column Chebyshev response
+design had condition number `3.3e6-4.2e6`, sampled feature singular-value ratios
+approximately `1:0.12:9e-4:1.5e-7`, and maximum column correlation about
+`0.9995`. Thus the nominal four-parameter family had only about two usable
+directions. R1 is retained as a parameterization-negative graph-only audit and
+must not be described as optimizer or mechanism failure. No R1 SNN candidates
+were launched.
+
+### R2 primary spatial-vector family
+
+The next admissible family uses fixed physical sheet coordinates shared across
+network realizations. Let `m_ts=(x_t+x_s)/2`, `d_ts=x_s-x_t`, and let `B(m)` be
+the complete degree-two polynomial basis on the uniformly normalized 20 mm
+sheet. A continuous vector field `v_c(m)` has six scalar coefficients per
+component (12 total), and
+
+```text
+ell_ts(c) = v_c(m_ts) dot d_ts / l_EE
+W'_ts^(delta) = S_t * softmax_(s,delta)
+                [log W_ts^(delta) + ell_ts(c)]
+```
+
+This is one continuous route field, not multiple cores. Swapping source and
+target changes the sign of `ell` while leaving the midpoint unchanged. The
+basis is uniform over the sheet and does not use contacts, shafts, patient
+events, Node `h`, or observed field peaks. Before SNN screening, all existing
+E-to-E edges on every fit graph must show effective feature rank at least 10
+at relative covariance eigenvalue `1e-6`, with condition number at most `1e6`.
+Candidate directions are whitened using the equal-network mean full-edge
+feature covariance, then amplitude-bounded by exact per-graph feature maxima.
+
 Let `W_ts` be the frozen E-to-E weight from source `s` to target `t`, summed over
 the fixed delay labels for basis construction. Because rows are targets and
 columns are sources, a row-normalized matrix is an incoming-source distribution,
