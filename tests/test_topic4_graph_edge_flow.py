@@ -139,6 +139,20 @@ def test_edge_feature_sample_reconstructs_logits():
     assert np.all(sample["feature_abs_max"] > 0.0)
 
 
+def test_edge_feature_sample_accepts_empty_delay_bins():
+    net = _network()
+    empty = sparse.csc_matrix(net["ampa_by_delay"][0].shape, dtype=float)
+    bins = [empty, *net["ampa_by_delay"], empty]
+    sample = sample_spectral_edge_features(
+        bins, _manual_basis(net), sample_limit=100,
+    )
+    assert sample["n_ee_delay_entries"] == sum(
+        matrix[:net["NE"], :].nnz for matrix in net["ampa_by_delay"]
+    )
+    assert len(sample["features"]) > 0
+    assert np.all(np.isfinite(sample["feature_abs_max"]))
+
+
 def test_real_basis_is_deterministic_and_drops_leading_mode():
     rng = np.random.default_rng(8)
     dense = rng.uniform(0.2, 1.5, size=(8, 8))

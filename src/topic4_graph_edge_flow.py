@@ -188,6 +188,8 @@ def sample_spectral_edge_features(ampa_by_delay, basis, *,
         ee = coo.row < n_e
         rows = np.asarray(coo.row[ee], np.int64)
         columns = np.asarray(coo.col[ee], np.int64)
+        if not len(rows):
+            continue
         local = np.flatnonzero(
             (offset + np.arange(len(rows), dtype=np.int64)) % stride == 0
         )
