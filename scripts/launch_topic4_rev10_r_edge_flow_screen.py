@@ -28,6 +28,9 @@ SPATIAL_OU_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d5_spatial_ou_canary.py"
 SPATIAL_OU_BRACKET_AUDITOR = (
     ROOT / "scripts/audit_topic4_rev10_d5_1_low_amplitude_bracket.py"
 )
+SPATIAL_OU_CONFIRMATION_AUDITOR = (
+    ROOT / "scripts/audit_topic4_rev10_d5_2_spatial_ou_confirmation.py"
+)
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -285,9 +288,14 @@ def main():
     spatial_ou_bracket = config["scientific_role"] == (
         "development_only_translation_invariant_spatial_ou_low_amplitude_bracket"
     )
-    if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket:
+    spatial_ou_confirmation = config["scientific_role"] == (
+        "development_only_translation_invariant_spatial_ou_confirmation"
+    )
+    if (dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket
+            or spatial_ou_confirmation):
         auditor = (
-            SPATIAL_OU_BRACKET_AUDITOR if spatial_ou_bracket
+            SPATIAL_OU_CONFIRMATION_AUDITOR if spatial_ou_confirmation
+            else SPATIAL_OU_BRACKET_AUDITOR if spatial_ou_bracket
             else SPATIAL_OU_AUDITOR if spatial_ou
             else DYNAMIC_EDGE_AUDITOR if dynamic_edge
             else RESOURCE_AUDITOR if resource else DYNAMIC_AUDITOR
@@ -296,17 +304,21 @@ def main():
             str(PYTHON), str(auditor),
             "--config", str(config_path),
         ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
-        verdict = json.loads((output_root / "canary_verdict.json").read_text())
+        verdict_path = output_root / (
+            "confirmation_verdict.json" if spatial_ou_confirmation
+            else "canary_verdict.json"
+        )
+        verdict = json.loads(verdict_path.read_text())
         completion = verdict["status"]
     else:
         completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket else "Topic 4 rev10-R",
+        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation else "Topic 4 rev10-R",
         f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
         "status": (
-            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket
+            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation
             else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
         ),
         "completed": len(completed), "total": len(jobs),

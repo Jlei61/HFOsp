@@ -19,6 +19,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 from matplotlib.patches import Patch
+from scipy.interpolate import griddata
 from scipy.stats import kendalltau, spearmanr
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_mutual_info_score
@@ -41,6 +42,12 @@ def _sha256(path):
 
 def _json(path):
     return json.loads(Path(path).read_text())
+
+
+def _is_spatial_ou(bundle):
+    return bundle.get("candidate", {}).get(
+        "spatial_ou", {},
+    ).get("mode") == "local"
 
 
 def normalize_event_ranks(ranks):
@@ -255,6 +262,50 @@ def _plot_contacts(ax, bundle):
                    color=SHAFT_COLORS[shaft], edgecolor="white", linewidth=0.6, zorder=6)
 
 
+def _field_grid(positions, values, *, size=84, limit=20.0):
+    axis = np.linspace(0.0, float(limit), int(size))
+    xx, yy = np.meshgrid(axis, axis)
+    zz = griddata(positions, values, (xx, yy), method="linear")
+    if np.isnan(zz).any():
+        nearest = griddata(positions, values, (xx, yy), method="nearest")
+        zz = np.where(np.isfinite(zz), zz, nearest)
+    return xx, yy, zz
+
+
+def _plot_landscape(ax, bundle):
+    static = bundle["static"]
+    positions, h = static["positions_E"], static["h"]
+    xx, yy, hh = _field_grid(positions, h)
+    vmax = max(float(np.quantile(h, 0.995)), 1e-6)
+    surface = ax.plot_surface(
+        xx, yy, np.minimum(hh, vmax), cmap="plasma", vmin=0.0, vmax=vmax,
+        linewidth=0, antialiased=True, shade=False, alpha=0.97,
+        rasterized=True,
+    )
+    ax.contour(xx, yy, hh, zdir="z", offset=0.0, levels=7, cmap="plasma",
+               linewidths=0.55, alpha=0.75)
+    contact_h = griddata(
+        positions, h, static["contact_xy_mm"], method="linear",
+    )
+    contact_h = np.nan_to_num(contact_h, nan=0.0) + 0.025 * vmax
+    for shaft in ("ICL", "SCL"):
+        selected = static["shaft_ids"] == shaft
+        xy = static["contact_xy_mm"][selected]
+        z = contact_h[selected]
+        ax.plot(xy[:, 0], xy[:, 1], z, color=SHAFT_COLORS[shaft], lw=1.15)
+        ax.scatter(xy[:, 0], xy[:, 1], z, s=27,
+                   color=SHAFT_COLORS[shaft], edgecolor="white",
+                   linewidth=0.55, depthshade=False)
+    ax.set(xlim=(0, 20), ylim=(0, 20), zlim=(0, 1.12 * vmax),
+           xlabel="sheet x (mm)", ylabel="sheet y (mm)", zlabel="h")
+    ax.set_title("continuous field landscape", weight="bold", pad=7)
+    ax.view_init(elev=31, azim=-58)
+    ax.set_box_aspect((1.0, 1.0, 0.58))
+    ax.tick_params(labelsize=7.2, pad=1)
+    colorbar = plt.colorbar(surface, ax=ax, fraction=0.04, pad=0.01, shrink=0.72)
+    colorbar.set_label("pathology field h", fontsize=8)
+
+
 def _plot_flow(ax, bundle):
     sys.path.insert(0, str(ROOT))
     from src.topic4_spatial_edge_flow import spatial_vector_field  # noqa: E402
@@ -290,6 +341,13 @@ def _plot_delta(ax, bundle):
 
 def _plot_mode(ax, bundle, global_index, mode):
     xy = bundle["static"]["contact_xy_mm"]
+    if _is_spatial_ou(bundle):
+        xx, yy, hh = _field_grid(
+            bundle["static"]["positions_E"], bundle["static"]["h"],
+        )
+        levels = np.unique(np.quantile(bundle["static"]["h"], (0.75, 0.90, 0.98)))
+        ax.contour(xx, yy, hh, levels=levels, colors="#303030",
+                   linestyles="--", linewidths=0.65, alpha=0.55)
     if global_index is None:
         _plot_contacts(ax, bundle)
         ax.text(0.5, 0.5, "same-network\nmode pair unavailable",
@@ -308,6 +366,23 @@ def _plot_mode(ax, bundle, global_index, mode):
         earliest = finite & np.isclose(onset, np.nanmin(onset))
         ax.scatter(xy[earliest, 0], xy[earliest, 1], marker="*", s=120,
                    color="#111111", edgecolor="white", linewidth=0.5, zorder=8)
+        selected = bundle["onsets"][
+            bundle["clean"] & (bundle["labels"] == mode)
+        ]
+        density = np.zeros(len(xy), float)
+        for event_onset in selected:
+            event_finite = np.isfinite(event_onset)
+            if np.any(event_finite):
+                event_earliest = event_finite & np.isclose(
+                    event_onset, np.nanmin(event_onset),
+                )
+                density[event_earliest] += 1.0 / int(np.sum(event_earliest))
+        density /= max(1, len(selected))
+        present = density > 0
+        ax.scatter(xy[present, 0], xy[present, 1],
+                   s=52 + 150 * density[present], facecolor="none",
+                   edgecolor=MODE_COLORS[mode], linewidth=1.1,
+                   alpha=0.78, zorder=9)
         plt.colorbar(image, ax=ax, fraction=0.047, pad=0.025,
                      ticks=(0, 1), label="early to late")
     _plot_contacts(ax, bundle)
@@ -424,7 +499,7 @@ def _metadata(bundle, figure):
             "workers": bundle["worker_inputs"],
         },
         "claim_boundary": (
-            "returned detector events only; development-only fit-network "
+            f"returned detector events only; development-only {bundle['phase']}-network "
             "visualization; no patient-blind "
             "generalization, causal core, or ictal lifecycle claim"
         ),
@@ -438,19 +513,36 @@ def _render_direct(bundle, output_dir):
         1, 5, width_ratios=(1.1, 1.0, 1.0, 1.0, 2.35),
         left=0.036, right=0.992, bottom=0.17, top=0.86, wspace=0.31,
     )
-    axes = [fig.add_subplot(grid[0, index]) for index in range(5)]
-    _plot_flow(axes[0], bundle)
+    axes = [
+        fig.add_subplot(grid[0, 0], projection="3d")
+        if _is_spatial_ou(bundle) else fig.add_subplot(grid[0, 0]),
+        *[fig.add_subplot(grid[0, index]) for index in range(1, 5)],
+    ]
+    if _is_spatial_ou(bundle):
+        _plot_landscape(axes[0], bundle)
+    else:
+        _plot_flow(axes[0], bundle)
     _plot_delta(axes[1], bundle)
     _plot_mode(axes[2], bundle, None if pair is None else pair[0], 0)
     _plot_mode(axes[3], bundle, None if pair is None else pair[1], 1)
     readout = _plot_readout(axes[4], bundle, pair)
     qualifier = "same-network A/B available" if pair else "same-network A/B unavailable"
+    mechanism = (
+        "Continuous field with spatial OU accessibility"
+        if _is_spatial_ou(bundle) else "Continuous spatial edge field"
+    )
     fig.suptitle(
-        f"Continuous spatial edge field: direct model readout  |  {qualifier}",
+        f"{mechanism}: direct model readout  |  {qualifier}",
         fontsize=13, weight="bold", y=0.985,
     )
-    stem = Path(output_dir) / "fig4a_spatial_edge_flow_direct_readout"
-    metadata = _metadata(bundle, "Fig4A spatial edge-flow direct readout")
+    stem = Path(output_dir) / (
+        "fig4a_spatial_ou_direct_readout" if _is_spatial_ou(bundle)
+        else "fig4a_spatial_edge_flow_direct_readout"
+    )
+    metadata = _metadata(bundle, (
+        "Fig4A spatial-OU direct readout" if _is_spatial_ou(bundle)
+        else "Fig4A spatial edge-flow direct readout"
+    ))
     metadata.update({"files": _save(fig, stem), "direct_readout": readout})
     Path(str(stem) + "_metadata.json").write_text(json.dumps(metadata, indent=2))
     return stem
@@ -612,8 +704,14 @@ def _render_kmeans(bundle, output_dir):
     qualifier = "patient matrix evaluable" if matrix_valid else "patient matrix not evaluable"
     fig.suptitle(f"KMeans modes against patient data  |  {qualifier}",
                  fontsize=13, weight="bold", y=0.985)
-    stem = Path(output_dir) / "fig4b_spatial_edge_flow_kmeans_consistency"
-    metadata = _metadata(bundle, "Fig4B spatial edge-flow KMeans consistency")
+    stem = Path(output_dir) / (
+        "fig4b_spatial_ou_kmeans_consistency" if _is_spatial_ou(bundle)
+        else "fig4b_spatial_edge_flow_kmeans_consistency"
+    )
+    metadata = _metadata(bundle, (
+        "Fig4B spatial-OU KMeans consistency" if _is_spatial_ou(bundle)
+        else "Fig4B spatial edge-flow KMeans consistency"
+    ))
     metadata.update({
         "files": _save(fig, stem), "kmeans": audit,
         "matrix_valid": matrix_valid,
@@ -631,6 +729,20 @@ def _write_readme(output_dir, bundle):
         if bundle["phase"] == "confirmation"
         else "等网络 fit screen 冻结的 diagnostic best"
     )
+    if _is_spatial_ou(bundle):
+        path.write_text(f"""### fig4a_spatial_ou_direct_readout
+
+这张图展示 fresh-network confirmation 中预先冻结的连续场候选 `{bundle['candidate_id']}`：三维 `h` landscape、神经元实际承受的 signed `Delta Vtheta`、同一网络内自发 A/B 的逐触点传播，以及连续 30-80 Hz model-current envelope。局部 OU 只提供全片、零均值、平移不变的连续随机可达性，不使用 contact、shaft、患者事件或 D4 source 坐标；圆环汇总所有 formal clean events 的 earliest-contact density。
+
+**关注点**：同一冻结连续场能否在未见网络中自发访问 A/B 两条传播路径；直接模型电流包络不是临床 SEEG 电压。
+
+### fig4b_spatial_ou_kmeans_consistency
+
+这张图只使用 returned、双杆、patient-support 内的 formal clean events，展示固定 contact heatmap、KMeans、rank distribution、患者 prototype 和 model-patient 相关矩阵。KMeans 数值稳定、与 frozen patient-direction 的 AMI、以及患者 prototype 的正对角/负交叉分开记录，不用 pooled 两簇替代缺失模式。
+
+**关注点**：先看同网络 A/B 支持和每模式样本数，再看 KMeans 是否恢复同一模式划分及患者 rank 几何；这是 development confirmation，不是 patient blind generalization。
+""")
+        return
     path.write_text(f"""### fig4a_spatial_edge_flow_direct_readout
 
 这张图展示 returned-only {candidate_context} `{bundle['candidate_id']}`：均匀连续 E-to-E vector field、冻结 Node 的 signed Delta Vtheta、同一网络 A/B 逐触点传播和连续 30-80 Hz model-current envelope。若没有单张网络同时产生两种 formal clean 模式，模式图与波形区会明确显示 unavailable，不跨网络拼接代表事件。
@@ -659,7 +771,10 @@ def main():
     kmeans = _render_kmeans(bundle, figure_dir)
     _write_readme(figure_dir, bundle)
     print(json.dumps({
-        "status": "REV10R2_FIG4_VALIDATION_COMPLETE",
+        "status": (
+            "REV10D5_2_FIG4_VALIDATION_COMPLETE" if _is_spatial_ou(bundle)
+            else "REV10R2_FIG4_VALIDATION_COMPLETE"
+        ),
         "candidate_id": bundle["candidate_id"],
         "figures": [str(direct), str(kmeans)],
     }, indent=2))

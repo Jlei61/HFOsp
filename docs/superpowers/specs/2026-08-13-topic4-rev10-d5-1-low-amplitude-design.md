@@ -27,3 +27,5 @@ The selection rule is fixed before execution: choose the smallest local amplitud
 ## Fig.4 boundary
 
 Only a later frozen run on unseen networks `1291-1296` may produce the accepted Fig.4 pair: direct model waveforms and KMeans/patient-mode consistency. Both modes must occur spontaneously within the same networks. A pooled split across different networks is insufficient.
+
+The confirmation contrast is exact off, the frozen `sigma=0.1/ms` local arm, and its exact-marginal permutation. Fig.4 is evaluable when at least `4/6` unseen networks contain both formal modes and the pooled returned clean support is at least six events per mode. Scientific patient-mode consistency additionally requires KMeans AMI with the frozen supervised direction of at least `0.8` and a positive-diagonal/negative-crossed patient prototype matrix after cluster labels are mapped only by supervised-direction contingency.
