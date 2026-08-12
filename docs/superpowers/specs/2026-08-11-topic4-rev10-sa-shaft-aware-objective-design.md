@@ -730,3 +730,54 @@ scalar minimum, and evaluates each on seeds 1041-1043. Confirmation requires at
 least two A and two B joint in-distribution events spanning at least two same
 network realizations. This is still development-only capacity evidence; it is
 not a patient held-out or distributional-recovery claim.
+
+#### V6.2 final adjudication
+
+V6.2 completed all `9/9` frozen field-network workers with no failure and no
+runaway. The three adjacent fields produced the following pooled
+mode-conditioned support:
+
+```text
+field t    total    A joint+ID    B joint+ID    networks with both
+0.025       44          0             26                0
+0.050       52          1             26                1
+0.075       39          0             26                0
+```
+
+The single A event at `t=0.050` occurred only in seed 1041. Neither seed 1042
+nor seed 1043 produced a patient-supported joint A event. Therefore the frozen
+confirmation status is:
+
+```text
+REV10SA_V62_FRESH_NETWORK_MODE_COEXISTENCE_NOT_CONFIRMED
+```
+
+This closes further coefficient-only refinement of the tested Node-field path.
+It does not erase the positive result: all three fields generated
+patient-supported joint B events across all three fresh networks. The bounded
+capacity statement is therefore `MODE_B_SHARED_NODE_CAPACITY_OBSERVED /
+MODE_A_SHARED_NODE_CAPACITY_NOT_OBSERVED_IN_TESTED_CONTINUOUS_PATH`.
+
+No further Gaussian components, core count, or peak-count parameter may be
+introduced to repair this result. The fitted object remains the nonnegative
+continuous surface
+
+```text
+h(x,y) = exp(s(x,y) - max(s))
+```
+
+on a uniform tensor-product basis. The `18 x 18` coefficients are numerical
+coordinates of one field, not 324 biological cores. Values away from the
+contacts are smooth-prior extensions and remain biologically unidentified.
+
+The optimizer status remains `NOT_TESTED_NO_KNOWN_GOOD_SHARED_SOLUTION`.
+V3-V6.2 establish that the old pooled objective was wrong and that a fine
+observation-invariant continuous path was evaluated on separated networks;
+they do not provide a known-good shared mode-A target against which CMA-ES,
+Sobol, or local search regret can be measured. The remaining residual is most
+consistent with route/connectivity or network-state capacity, not merely a
+missed scalar field coefficient.
+
+`beta` remains closed. It changes radial concentration or weighted delay scale,
+whereas the observed failure is loss of the mode-A route while mode B remains
+well supported. No result here identifies a radial-width residual.

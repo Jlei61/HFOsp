@@ -185,6 +185,40 @@ def test_selection_can_require_both_modes_in_the_same_network():
     assert _selection_verdict([row], config)["selected"] is row
 
 
+def test_mode_conditioned_search_rows_expose_weak_mode_fraction():
+    from src.topic4_shaft_aware_direction import mode_conditioned_joint_support
+
+    groups = {"ICL": np.arange(2), "SCL": np.arange(2, 4)}
+    values = np.asarray([
+        [0.0, 1.0, 2.0, 3.0],
+        [0.0, 1.0, 2.0, 3.0],
+        [0.0, 1.0, 2.0, 3.0],
+    ])
+    support = mode_conditioned_joint_support(
+        values, np.asarray([0, 1, 1]), np.asarray([False, False, True]), groups,
+    )
+    weak = min(
+        support[name]["joint_in_distribution_fraction"] for name in ("A", "B")
+    )
+    assert weak == 0.5
+
+
+def test_mode_conditioned_network_support_preserves_mode_identity():
+    from src.topic4_shaft_aware_direction import mode_conditioned_joint_support
+
+    groups = {"ICL": np.arange(2), "SCL": np.arange(2, 4)}
+    values = np.asarray([
+        [0.0, 1.0, 2.0, 3.0],
+        [0.0, 1.0, 2.0, 3.0],
+        [0.0, 1.0, np.nan, np.nan],
+    ])
+    support = mode_conditioned_joint_support(
+        values, np.asarray([0, 1, 0]), np.asarray([False, False, False]), groups,
+    )
+    assert support["A"]["n_joint_in_distribution"] == 1
+    assert support["B"]["n_joint_in_distribution"] == 1
+
+
 def test_v51_diversity_rule_keeps_pareto_anchors_and_winner_path():
     from scripts.freeze_topic4_rev10_sa_v5_selection_candidates import (
         select_confirmation_ids,

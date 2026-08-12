@@ -345,3 +345,45 @@ V6.1 完成 `22/22` workers，零失败、零 runaway。`t=0.025/0.05/0.075` 在
 joint+ID A 全为 0。因此这是一个相邻但单事件、单网络的 coexistence signal，不是稳定恢复。
 V6.2 将三点全部冻结到 1041-1043，要求 A/B 各至少 2 个 joint+ID events，并且至少两张
 同一网络分别同时表达 A/B；这将作为 Node-only continuous-field 路线的最终容量裁定。
+
+### SA6J V6.2 新网络最终裁定
+
+V6.2 完成 `9/9` workers，零失败、零 runaway。三个场在 1041-1043 上的结果为：
+
+| field | 总事件 | A joint+ID | B joint+ID | 同时有 A/B 的网络数 |
+|---|---:|---:|---:|---:|
+| `t=0.025` | 44 | 0 | 26 | 0 |
+| `t=0.050` | 52 | 1 | 26 | 1 |
+| `t=0.075` | 39 | 0 | 26 | 0 |
+
+`t=0.050` 的唯一有效 A 事件只出现在 seed 1041；1042/1043 均为 0。三场的 B 则都在三张
+新网络中稳定出现。因此正式状态是：
+
+```text
+REV10SA_V62_FRESH_NETWORK_MODE_COEXISTENCE_NOT_CONFIRMED
+/
+MODE_B_SHARED_NODE_CAPACITY_OBSERVED
+/
+MODE_A_SHARED_NODE_CAPACITY_NOT_OBSERVED_IN_TESTED_CONTINUOUS_PATH
+```
+
+当前 data-driven Node 场不能说复现了患者完整间期活动，也不能说恢复了患者两种传播模式。能说的是：
+**从 Stage 3 学习场出发、在不读取 contact/shaft 位置的均匀二维连续基底上，模型跨新网络稳定产生患者
+支持域内的双杆 mode B；mode A 只出现过单事件、单网络信号，没有形成共享 repertoire。**
+
+这不是“K 不够大”。本轮正式场为 `18 x 18` tensor-product spline 表示的一张连续曲面，系数是数值基底，
+不是 324 个 core；继续增加 Gaussian 数或峰数会重新引入 core 分解偏见，并不能针对目前的 mode-A route
+残差。也不能把失败归因于 CMA-ES：修正 objective 后已经完成细路径、selection networks 和 fresh networks，
+但没有已知 good shared solution，因此不存在可解释的 optimizer regret benchmark。
+
+下一步不再修 field allocation，而冻结连续 `h(x,y)`，单独测试 contact-density-invariant directional
+edge-flow。这里的“contact-density-invariant”只表示不会在电极密集处放更多连接参数；冻结 connectivity
+本身仍继承患者 rank-derived axis，患者训练目标也会选择 edge 参数，不能称为 observation-free。
+`beta` 继续关闭，因为它主要改变径向集中或有效 delay scale，当前缺口是 mode A 的传播路线。
+旧 rev9L Gaussian component-pair residual 已经只在 `1/3` selection networks 改变 mode A，并在 6 张网络
+的 shared 候选中只改善 `2/6`；新实验不得复用 component responsibility 作为连接坐标。
+
+最终图：
+
+- `results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/figures/rev10_sa_v62_mode_boundary_final_search.png`
+- `results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/figures/rev10_sa_v62_mode_boundary_final_fig4_modes.png`

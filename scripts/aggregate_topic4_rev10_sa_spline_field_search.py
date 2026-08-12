@@ -293,10 +293,18 @@ def _plot_search(summary, manifest, config, output_root):
     candidates = {row["candidate_id"]: row for row in manifest["candidate_set"]["candidates"]}
     selected = summary["selected_candidate_id"]
     display = summary["display_candidate_id"]
+    mode_conditioned = int(summary.get(
+        "minimum_joint_in_distribution_events_per_mode_for_selection", 0,
+    )) > 0
+    support_fraction_key = (
+        "weak_mode_joint_in_distribution_fraction"
+        if mode_conditioned else "joint_fraction"
+    )
     joint_best = max(
         rows,
         key=lambda row: (
-            row["joint_fraction"], row["scl_participation_fraction"],
+            row[support_fraction_key], row["joint_fraction"],
+            row["scl_participation_fraction"],
             -row["selection_score"],
         ),
     )
@@ -306,7 +314,8 @@ def _plot_search(summary, manifest, config, output_root):
     )
     map_ids = [reference, display, joint_best["candidate_id"]]
     joint_title = (
-        "highest joint fraction" if joint_best["n_joint"] > 0
+        "highest weak-mode joint+ID" if mode_conditioned
+        else "highest joint fraction" if joint_best["n_joint"] > 0
         else "highest SCL participation (no joint)"
     )
     titles = ["reference field", "scalar diagnostic", joint_title]
@@ -349,48 +358,95 @@ def _plot_search(summary, manifest, config, output_root):
         selected_rows = [row for row in rows if row["role"] == role]
         ax.scatter(
             [row["route_score"] for row in selected_rows],
-            [row["joint_fraction"] for row in selected_rows],
+            [row[support_fraction_key] for row in selected_rows],
             marker=marker, c=color, s=48, alpha=0.75, label=label,
         )
     shown_candidate = next(row for row in rows if row["candidate_id"] == display)
     ax.scatter(
-        shown_candidate["route_score"], shown_candidate["joint_fraction"],
+        shown_candidate["route_score"], shown_candidate[support_fraction_key],
         marker="*" if selected is not None else "X", s=170,
         c="#59A14F" if selected is not None else "#D62728",
         edgecolor="black", zorder=5,
         label="eligible selection" if selected is not None else "diagnostic only",
     )
-    ax.axhline(summary["joint_fraction_target"], color="black", linestyle="--", linewidth=0.8)
+    if not mode_conditioned:
+        ax.axhline(summary["joint_fraction_target"], color="black", linestyle="--", linewidth=0.8)
     ax.set_xlabel("direction weak-mode score (lower better)")
-    ax.set_ylabel("all-event joint-shaft fraction")
+    ax.set_ylabel(
+        "weak-mode joint+ID fraction" if mode_conditioned
+        else "all-event joint-shaft fraction"
+    )
     ax.set_title("D  Factorized objective plane", loc="left", weight="bold")
     ax.legend(frameon=False, fontsize=7)
 
     shown = sorted(rows, key=lambda row: row["selection_score"])[:10]
     x = np.arange(len(shown))
     ax = fig.add_subplot(gs[1, 1])
-    ax.bar(x, [row["n_icl_only"] for row in shown], color="#4E79A7", label="ICL only")
-    ax.bar(x, [row["n_joint"] for row in shown],
-           bottom=[row["n_icl_only"] for row in shown], color="#59A14F", label="joint")
-    bottom = [row["n_icl_only"] + row["n_joint"] for row in shown]
-    ax.bar(x, [row["n_scl_only"] for row in shown], bottom=bottom,
-           color="#E15759", label="SCL only")
+    if mode_conditioned:
+        ax.bar(x - 0.2, [row["mode_A_joint_in_distribution_count"] for row in shown],
+               width=0.4, color="#F28E2B", label="A joint+ID")
+        ax.bar(x + 0.2, [row["mode_B_joint_in_distribution_count"] for row in shown],
+               width=0.4, color="#4E79A7", label="B joint+ID")
+        panel_e_title = "E  Patient-supported joint events"
+    else:
+        ax.bar(x, [row["n_icl_only"] for row in shown], color="#4E79A7", label="ICL only")
+        ax.bar(x, [row["n_joint"] for row in shown],
+               bottom=[row["n_icl_only"] for row in shown], color="#59A14F", label="joint")
+        bottom = [row["n_icl_only"] + row["n_joint"] for row in shown]
+        ax.bar(x, [row["n_scl_only"] for row in shown], bottom=bottom,
+               color="#E15759", label="SCL only")
+        panel_e_title = "E  All-event shaft participation"
     ax.set_xticks(x, [str(i + 1) for i in range(len(shown))])
     ax.set_xlabel("candidate rank")
     ax.set_ylabel("detected events")
-    ax.set_title("E  All-event shaft participation", loc="left", weight="bold")
+    ax.set_title(panel_e_title, loc="left", weight="bold")
     ax.legend(frameon=False, fontsize=7)
 
     ax = fig.add_subplot(gs[1, 2])
-    ax.bar(x - 0.2, [row["mode_A_count"] for row in shown], width=0.4,
-           color="#F28E2B", label="direction A")
-    ax.bar(x + 0.2, [row["mode_B_count"] for row in shown], width=0.4,
-           color="#76B7B2", label="direction B")
-    ax.axhline(6, color="black", linestyle="--", linewidth=0.8)
-    ax.set_xticks(x, [str(i + 1) for i in range(len(shown))])
-    ax.set_xlabel("candidate rank")
-    ax.set_ylabel("assigned events")
-    ax.set_title("F  Direction support", loc="left", weight="bold")
+    if mode_conditioned:
+        network_rows = []
+        for rank, row in enumerate(shown, start=1):
+            by_seed = summary["candidate_details"][row["candidate_id"]][
+                "shaft_and_direction_by_seed"
+            ]
+            for seed in summary["network_seeds"]:
+                support = by_seed[str(seed)]["mode_conditioned_joint_support"]
+                network_rows.append((
+                    rank, int(seed),
+                    support["A"]["n_joint_in_distribution"],
+                    support["B"]["n_joint_in_distribution"],
+                ))
+        network_x = np.arange(len(network_rows))
+        ax.bar(network_x - 0.2, [row[2] for row in network_rows], width=0.4,
+               color="#F28E2B", label="A joint+ID")
+        ax.bar(network_x + 0.2, [row[3] for row in network_rows], width=0.4,
+               color="#4E79A7", label="B joint+ID")
+        coexist = [index for index, row in enumerate(network_rows)
+                   if row[2] > 0 and row[3] > 0]
+        if coexist:
+            top = max(max(row[2], row[3]) for row in network_rows)
+            ax.scatter(coexist, [top * 1.08] * len(coexist), marker="*", s=80,
+                       c="#59A14F", edgecolor="black", linewidth=0.4,
+                       label="same-network coexistence", zorder=5)
+        ax.set_xticks(
+            network_x,
+            [f"{rank}|{seed}" for rank, seed, _, _ in network_rows],
+            rotation=60, ha="right", fontsize=7,
+        )
+        ax.set_xlabel("candidate rank | network seed")
+        ax.set_ylabel("patient-supported joint events")
+        panel_f_title = "F  Network-level mode support"
+    else:
+        ax.bar(x - 0.2, [row["mode_A_count"] for row in shown], width=0.4,
+               color="#F28E2B", label="direction A")
+        ax.bar(x + 0.2, [row["mode_B_count"] for row in shown], width=0.4,
+               color="#76B7B2", label="direction B")
+        ax.axhline(6, color="black", linestyle="--", linewidth=0.8)
+        ax.set_xticks(x, [str(i + 1) for i in range(len(shown))])
+        ax.set_xlabel("candidate rank")
+        ax.set_ylabel("assigned events")
+        panel_f_title = "F  Direction support"
+    ax.set_title(panel_f_title, loc="left", weight="bold")
     ax.legend(frameon=False, fontsize=7)
     fig.suptitle(
         "Stable continuous-field screen | " + summary["status"],
@@ -661,6 +717,10 @@ def main():
             "mode_B_joint_in_distribution_fraction": mode_support["B"][
                 "joint_in_distribution_fraction"
             ],
+            "weak_mode_joint_in_distribution_fraction": min(
+                mode_support[name]["joint_in_distribution_fraction"]
+                for name in ("A", "B")
+            ),
             "weak_mode_joint_in_distribution_count": min(
                 mode_support[name]["n_joint_in_distribution"]
                 for name in ("A", "B")
@@ -712,9 +772,10 @@ def main():
         "status": verdict["status"],
         "scientific_role": config["scientific_role"],
         "safe_claim": (
-            "candidate fields were frozen without observation geometry; old A/B direction "
-            "and all-event joint-shaft participation were scored as separate factors; "
-            "a scalar minimum is not selected when no joint-shaft event exists"
+            "candidate fields were frozen without observation geometry; direction, "
+            "joint-shaft participation, and patient-support membership are coupled "
+            "per event when the mode-conditioned contract is active; a scalar "
+            "minimum is not selected when required mode support is absent"
         ),
         "selected_candidate_id": (
             selected["candidate_id"] if selected is not None else None
@@ -769,9 +830,9 @@ def main():
     (output_root / "figures" / "README.md").write_text(
         f"""### {search_stem.name}
 
-这张图在数值稳定的均匀连续 spline 场中比较 Stage 3 warm、全 sheet 等距 allocation directions 和 observation-free 平滑随机残差。方向 A/B 与同一事件双杆参与被拆成两个目标；触点和杆信息不参与候选场生成。
+这张图比较数值稳定、均匀二维 spline 基底中的连续场。场的参数位置不由触点或杆轨迹决定；mode-conditioned 轮次按方向分别统计同一事件双杆参与且落在患者支持域内的事件。
 
-**关注点**：状态为 {summary['status']}；候选必须实际产生 joint-shaft event 才能成为 selection，SCL-only 事件不能冒充患者多杆恢复。
+**关注点**：状态为 {summary['status']}；A、B 必须各自产生 joint+in-distribution event，pooled joint、SCL-only 或 KMeans 分簇不能代偿缺失模式。
 
 ### {fig4_stem.name}
 

@@ -220,5 +220,18 @@
 - [x] Run V6.1: three adjacent fields produced one supported joint A event in
   seed 1033 while retaining supported joint B; seed 1032 had no supported A.
 - [x] Freeze all three adjacent fields for V6.2 on seeds 1041-1043.
-- [ ] Run V6.2 and require coexistence in at least two fresh networks before
-  closing the Node-field capacity verdict.
+- [x] Run V6.2: all nine workers completed without failure/runaway; all three
+  fields retained shared patient-supported joint B events, but only `t=0.05`
+  produced one joint+ID A event and only in one of three fresh networks.
+- [x] Close the coefficient-only Node-field path as
+  `REV10SA_V62_FRESH_NETWORK_MODE_COEXISTENCE_NOT_CONFIRMED`.
+- [x] Freeze the interpretation: the `18 x 18` spline coefficients form one
+  continuous field and are not cores; do not add K, components, or peak-count
+  constraints.
+- [x] Keep optimizer comparison and `beta` closed because no known-good shared
+  mode-A solution exists and the residual is directional route support rather
+  than radial width.
+- [x] Hand the next exploratory mechanism to a separate contact-density-
+  invariant graph edge-flow spec; do not reuse the failed Gaussian
+  component-pair residual or claim that the inherited rank scaffold is
+  observation-free.
