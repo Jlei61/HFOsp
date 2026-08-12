@@ -49,3 +49,39 @@ This diagnostic can identify the next mechanism class but cannot establish
 spontaneous patient-mode recovery, patient generalization, a clinical waveform,
 a core, or an ictal lifecycle. The accepted Fig.4 pair is replaced only after a
 positive mechanism is frozen and confirmed on new networks.
+
+## Outcome
+
+All three network workers completed through the managed launcher. The sentinel
+used `2.33 GiB` peak RSS with zero swap, and the two remaining workers ran in
+parallel. All 75 forced responses had bit-identical pre-trigger spike rasters
+relative to their network-matched sham, and none entered runaway.
+
+One source, fixed a priori at `(18,6) mm`, produced clean mode A in `3/3`
+networks. Per-network patient direction probabilities were strongly A-like
+(`P(B)=0.00059, 0.00155, 0.000096`), and class-conditional OOD distances were
+`41.25, 35.85, 25.13`, all below the frozen A threshold `47.22`. Responses were
+returned, recruited both shafts and included `6, 5, 9` contacts. Their onset was
+`138-140 ms`, about 38-40 ms after the packet; downstream positive spike mass
+was about 72k and `r90` about 19 mm.
+
+Mode B provided a spatially separate positive control: `(2,14)`, `(6,14)` and
+`(2,18) mm` each produced clean B in `3/3` networks. The selected A source had
+mean Node field `h=2.6e-6`, while the strongest B source `(2,18)` had mean
+`h=0.844`. Thus mode A route capacity exists outside the current high-h Node
+support; the observed spontaneous asymmetry is primarily consistent with a
+nucleation/accessibility gap rather than total absence of an A propagation
+route.
+
+The formal status is:
+
+```text
+REV10D4_UNIFORM_FORCED_MODE_A_ROUTE_CAPACITY_OBSERVED
+```
+
+This does not yet prove that physiological spontaneous fluctuations can access
+the route, because the fixed packet recruits `0.5%` of E neurons. The next step
+is a pre-frozen packet-dose confirmation at the selected A source and a matched
+B source on fresh network seeds. Only after a stable minimum packet is found may
+a smooth, observation-invariant accessibility mechanism be designed. No source
+point is added as a Gaussian core, contact anchor or direct fitted field peak.
