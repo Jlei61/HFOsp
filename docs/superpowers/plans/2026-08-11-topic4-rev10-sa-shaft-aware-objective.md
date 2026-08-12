@@ -205,5 +205,10 @@
   remained far from the patient target and varied by network.
 - [x] Freeze V5.2 with the V5.1 score winner, the highest-joint eligible anchor,
   and the Stage 3 reference before reading fresh seeds 1041-1043.
-- [ ] Run nine V5.2 workers and state the development-only capacity and patient-
-  generalization boundary from the per-network results.
+- [x] Run nine V5.2 workers; all completed cleanly, but eventwise audit showed
+  that pooled joint support was entirely mode B while pseudo-mode A was OOD and
+  SCL-only. Downgrade the automatic pooled PASS.
+- [ ] Run the zero-simulation mode-conditioned joint-support audit over V4.1,
+  V5, V5.1, and V5.2 artifacts.
+- [ ] Refine only the continuous uniform12-to-uniform06 density path around the
+  observed A/B support boundary using the corrected per-mode objective.

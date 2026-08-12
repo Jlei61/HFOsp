@@ -306,3 +306,24 @@ path 的 `t=0.75` 在两个网络均有 joint event：1032 为 `4/6`，1033 为 
 V5.2 在读取 1041-1043 前冻结三场：`t=0.75` score winner、uniform12 joint-support
 anchor、Stage 3 reference。每场跑三个全新 development networks；正式报告以逐网络结果
 为主，不再让一个混合 scalar 掩盖 event yield、joint support 和方向误差之间的权衡。
+
+V5.2 完成 `9/9` workers，零失败、零 runaway。pooled readout 表面改善：score winner
+在三个新网络均有 joint events，合计 `18/26=0.692`，A/B 数量 `8/18`，总体 OOD
+`0.308`。但 eventwise 交叉审计推翻了自动 PASS：A 为 `0/8 joint` 且 `8/8 OOD`，B 为
+`18/18 joint` 且 `0/18 OOD`。uniform12 anchor 也是 A `0/27 joint, 27/27 OOD`，B
+`31/31 joint, 0/31 OOD`。KMeans 与监督方向 AMI=1 是因为两者都在分“joint B”与
+“SCL-only pseudo-A”，不是患者的两个 joint-shaft 方向。
+
+因此正式状态降级为：
+
+```text
+CONTINUOUS_FIELD_CROSS_NETWORK_MODE_B_CAPACITY_CONFIRMED
+/
+MODE_A_JOINT_PATIENT_SUPPORT_NOT_OBSERVED
+/
+POOLED_JOINT_OBJECTIVE_SHAFT_PARTITION_BLINDNESS_CONFIRMED
+```
+
+这首先是目标函数问题，不是 optimizer non-convergence。下一步把资格单位改为每个模式各自
+`joint-shaft AND in-distribution`，先零仿真重扫已有场，再只细化 uniform12 到 uniform06
+之间已观察到 A/B support 交界的连续 density path；仍不增加 K/core，不开放 Edge 或 `beta`。

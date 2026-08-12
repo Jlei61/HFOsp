@@ -158,3 +158,37 @@ def all_event_shaft_participation(values, groups):
         "icl_participation_fraction": float(np.sum(icl) / count),
         "scl_participation_fraction": float(np.sum(scl) / count),
     }
+
+
+def mode_conditioned_joint_support(values, labels, ood, groups):
+    """Keep direction, joint-shaft participation, and patient support coupled."""
+    values = np.asarray(values, dtype=float)
+    labels = np.asarray(labels, dtype=int)
+    ood = np.asarray(ood, dtype=bool)
+    if values.ndim != 2 or labels.shape != (len(values),):
+        raise ValueError("event values and direction labels must align")
+    if ood.shape != (len(values),):
+        raise ValueError("OOD mask and event values must align")
+    icl = np.isfinite(values[:, groups["ICL"]]).any(axis=1)
+    scl = np.isfinite(values[:, groups["SCL"]]).any(axis=1)
+    joint = icl & scl
+    output = {}
+    for mode, name in ((0, "A"), (1, "B")):
+        selected = labels == mode
+        n_mode = int(np.sum(selected))
+        denominator = max(1, n_mode)
+        n_joint = int(np.sum(selected & joint))
+        n_in_distribution = int(np.sum(selected & ~ood))
+        n_joint_in_distribution = int(np.sum(selected & joint & ~ood))
+        output[name] = {
+            "n_events": n_mode,
+            "n_joint": n_joint,
+            "n_in_distribution": n_in_distribution,
+            "n_joint_in_distribution": n_joint_in_distribution,
+            "joint_fraction": float(n_joint / denominator),
+            "in_distribution_fraction": float(n_in_distribution / denominator),
+            "joint_in_distribution_fraction": float(
+                n_joint_in_distribution / denominator
+            ),
+        }
+    return output

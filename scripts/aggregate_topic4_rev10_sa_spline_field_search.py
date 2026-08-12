@@ -37,6 +37,7 @@ from src.topic4_shaft_aware import (  # noqa: E402
 from src.topic4_shaft_aware_direction import (  # noqa: E402
     all_event_shaft_participation,
     assign_direction_modes,
+    mode_conditioned_joint_support,
 )
 from src.topic4_spectral_field import uniform_sheet_grid  # noqa: E402
 
@@ -133,7 +134,8 @@ def _kmeans_audit(z, direction_labels):
     }
 
 
-def _objective(score6, score3, counts, participation, ood_fraction, config):
+def _objective(score6, score3, counts, participation, ood_fraction, config,
+               mode_support=None):
     objective = config["search"]["objective"]
     required = int(objective["fixed_events_per_mode"])
     support_penalty = float(sum(
@@ -154,11 +156,27 @@ def _objective(score6, score3, counts, participation, ood_fraction, config):
         0.0, (target - participation["joint_fraction"])
         / max(target - floor_q05, 1e-12),
     )
+    mode_required = int(objective.get(
+        "minimum_joint_in_distribution_events_per_mode_for_objective", 0,
+    ))
+    mode_support_penalty = 0.0
+    if mode_required > 0:
+        if mode_support is None:
+            raise ValueError("mode-conditioned joint support is required")
+        mode_support_penalty = float(sum(
+            max(0, mode_required - int(
+                mode_support[name]["n_joint_in_distribution"]
+            )) / mode_required
+            for name in ("A", "B")
+        ))
     score = (
         route_score
         + float(objective["joint_weight"]) * joint_excess
         + float(objective["direction_support_weight"]) * support_penalty
         + float(objective["ood_weight"]) * float(ood_fraction)
+        + float(objective.get(
+            "mode_conditioned_joint_support_weight", 0.0,
+        )) * mode_support_penalty
     )
     return {
         "selection_score": float(score),
@@ -166,6 +184,7 @@ def _objective(score6, score3, counts, participation, ood_fraction, config):
         "route_score_source": route_source,
         "joint_excess": float(joint_excess),
         "direction_support_penalty": support_penalty,
+        "mode_conditioned_joint_support_penalty": mode_support_penalty,
     }
 
 
@@ -192,6 +211,12 @@ def _selection_verdict(rows, config):
     minimum_joint_seeds = int(
         objective.get("minimum_seeds_with_joint_for_selection", 1)
     )
+    minimum_mode_joint = int(objective.get(
+        "minimum_joint_in_distribution_events_per_mode_for_selection", 0,
+    ))
+    minimum_mode_joint_seeds = int(objective.get(
+        "minimum_seeds_with_joint_in_distribution_per_mode_for_selection", 0,
+    ))
     diagnostic = min(
         rows,
         key=lambda row: (
@@ -208,6 +233,12 @@ def _selection_verdict(rows, config):
             and int(row.get(
                 "n_seeds_with_joint", 1 if row["n_joint"] > 0 else 0,
             )) >= minimum_joint_seeds
+            and int(row.get(
+                "weak_mode_joint_in_distribution_count", 0,
+            )) >= minimum_mode_joint
+            and int(row.get(
+                "weak_mode_joint_in_distribution_seed_count", 0,
+            )) >= minimum_mode_joint_seeds
         )
     ]
     labels = config.get("aggregation", {})
@@ -220,6 +251,8 @@ def _selection_verdict(rows, config):
             "diagnostic": diagnostic,
             "minimum_joint_events_for_selection": minimum_joint,
             "minimum_seeds_with_joint_for_selection": minimum_joint_seeds,
+            "minimum_joint_in_distribution_events_per_mode_for_selection": minimum_mode_joint,
+            "minimum_seeds_with_joint_in_distribution_per_mode_for_selection": minimum_mode_joint_seeds,
         }
     selected = min(
         eligible,
@@ -233,6 +266,8 @@ def _selection_verdict(rows, config):
         "diagnostic": diagnostic,
         "minimum_joint_events_for_selection": minimum_joint,
         "minimum_seeds_with_joint_for_selection": minimum_joint_seeds,
+        "minimum_joint_in_distribution_events_per_mode_for_selection": minimum_mode_joint,
+        "minimum_seeds_with_joint_in_distribution_per_mode_for_selection": minimum_mode_joint_seeds,
     }
 
 
@@ -547,6 +582,9 @@ def main():
             z = np.empty((0, len(classifier["coef"])), float)
         counts = np.bincount(labels, minlength=2)
         participation = all_event_shaft_participation(onsets, groups)
+        mode_support = mode_conditioned_joint_support(
+            onsets, labels, ood, groups,
+        )
         seed_readouts = {}
         cursor = 0
         for seed, block in zip(seeds, onset_blocks):
@@ -554,6 +592,9 @@ def main():
             block_labels = labels[cursor:stop]
             block_ood = ood[cursor:stop]
             block_participation = all_event_shaft_participation(block, groups)
+            block_mode_support = mode_conditioned_joint_support(
+                block, block_labels, block_ood, groups,
+            )
             block_counts = np.bincount(block_labels, minlength=2)
             seed_readouts[str(seed)] = {
                 **block_participation,
@@ -562,6 +603,7 @@ def main():
                 "ood_fraction": (
                     float(np.mean(block_ood)) if len(block_ood) else 1.0
                 ),
+                "mode_conditioned_joint_support": block_mode_support,
             }
             cursor = stop
         score6 = score_mode_conditioned_events(
@@ -577,6 +619,7 @@ def main():
         ood_fraction = float(np.mean(ood)) if len(ood) else 1.0
         objective = _objective(
             score6, score3, counts, participation, ood_fraction, config,
+            mode_support=mode_support,
         )
         runaway = int(sum(row["run"]["runaway_early_stop_ms"] is not None for row in metadata))
         if runaway:
@@ -592,12 +635,40 @@ def main():
             "n_seeds_with_joint": int(sum(
                 value["n_joint"] > 0 for value in seed_readouts.values()
             )),
+            "mode_A_joint_count": mode_support["A"]["n_joint"],
+            "mode_B_joint_count": mode_support["B"]["n_joint"],
+            "mode_A_joint_in_distribution_count": mode_support["A"][
+                "n_joint_in_distribution"
+            ],
+            "mode_B_joint_in_distribution_count": mode_support["B"][
+                "n_joint_in_distribution"
+            ],
+            "mode_A_joint_in_distribution_fraction": mode_support["A"][
+                "joint_in_distribution_fraction"
+            ],
+            "mode_B_joint_in_distribution_fraction": mode_support["B"][
+                "joint_in_distribution_fraction"
+            ],
+            "weak_mode_joint_in_distribution_count": min(
+                mode_support[name]["n_joint_in_distribution"]
+                for name in ("A", "B")
+            ),
+            "weak_mode_joint_in_distribution_seed_count": min(
+                sum(
+                    value["mode_conditioned_joint_support"][name][
+                        "n_joint_in_distribution"
+                    ] > 0
+                    for value in seed_readouts.values()
+                )
+                for name in ("A", "B")
+            ),
             "score6_status": score6["status"], "score3_status": score3["status"],
         }
         rows.append(row)
         kmeans = _kmeans_audit(z, labels)
         details[candidate["candidate_id"]] = {
             "score_n6": score6, "score_n3": score3, "kmeans": kmeans,
+            "mode_conditioned_joint_support": mode_support,
             "event_count_by_seed": {
                 str(seed): int(metadata[index]["run"]["n_common_detector_events"])
                 for index, seed in enumerate(seeds)
@@ -640,6 +711,12 @@ def main():
         ],
         "minimum_seeds_with_joint_for_selection": verdict[
             "minimum_seeds_with_joint_for_selection"
+        ],
+        "minimum_joint_in_distribution_events_per_mode_for_selection": verdict[
+            "minimum_joint_in_distribution_events_per_mode_for_selection"
+        ],
+        "minimum_seeds_with_joint_in_distribution_per_mode_for_selection": verdict[
+            "minimum_seeds_with_joint_in_distribution_per_mode_for_selection"
         ],
         "joint_fraction_target": config["search"]["objective"][
             "minimum_target_joint_fraction"

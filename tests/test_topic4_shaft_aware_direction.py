@@ -5,6 +5,7 @@ from src.topic4_shaft_aware_direction import (
     all_event_shaft_participation,
     assign_direction_modes,
     fit_direction_classifier,
+    mode_conditioned_joint_support,
 )
 
 
@@ -66,6 +67,24 @@ def test_all_event_shaft_participation_does_not_drop_single_shaft_events():
     assert result["n_scl_only"] == 1
     assert result["n_unreadable"] == 1
     assert result["joint_fraction"] == 0.25
+
+
+def test_mode_conditioned_joint_support_rejects_ood_pseudo_mode():
+    groups = {"ICL": np.arange(2), "SCL": np.arange(2, 4)}
+    values = np.asarray([
+        [np.nan, np.nan, 0.0, 1.0],
+        [0.0, 1.0, 2.0, 3.0],
+        [0.0, 1.0, 2.0, 3.0],
+    ])
+    result = mode_conditioned_joint_support(
+        values, labels=np.asarray([0, 1, 1]),
+        ood=np.asarray([True, False, True]), groups=groups,
+    )
+
+    assert result["A"]["n_joint_in_distribution"] == 0
+    assert result["A"]["n_in_distribution"] == 0
+    assert result["B"]["n_joint"] == 2
+    assert result["B"]["n_joint_in_distribution"] == 1
 
 
 def test_factorized_objective_rewards_joint_events_without_hard_deletion():

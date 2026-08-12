@@ -691,3 +691,14 @@ network. Confirmation requires at least three pooled joint events spanning at
 least two of three networks. The primary report is the full per-network table;
 the scalar minimum remains secondary because direction distance, joint support,
 and event yield trade off strongly.
+
+The V5.2 pooled verdict is not sufficient. Post-run eventwise cross-tabulation
+showed a shaft-partition solution: for the score winner, direction A had
+`0/8` joint events and all 8 were OOD, whereas direction B had `18/18` joint
+events and all 18 were in-distribution. The joint-support anchor showed the
+same split (`0/27` versus `31/31`). Therefore KMeans/direction AMI of 1 reflects
+shaft participation, not recovery of two patient directions. The corrected
+selection unit is now a mode-specific event satisfying both joint-shaft
+participation and the frozen class-conditional patient support. Every future
+candidate must provide such events for A and B separately; pooled joint count
+cannot compensate for a missing mode.
