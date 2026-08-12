@@ -18,6 +18,7 @@ def test_prefix_tags_are_unambiguous():
     assert PREFIX._tag(0.003).endswith("milli003")
     with pytest.raises(ValueError):
         PREFIX._tag(0.0015)
+    assert PREFIX._tag(0.001, "q099").startswith("u3_prefix_q099_")
 
 
 def test_prefix_is_fresh_u0_always_online_contract():
@@ -33,3 +34,9 @@ def test_outcome_never_calls_no_onset_an_offset():
     )
     assert outcome == "NO_NATURAL_ONSET"
     assert onset is None and offset is None
+
+
+def test_disabled_optional_current_has_zero_peak():
+    assert PREFIX._safe_peak([]) == 0.0
+    assert PREFIX._safe_peak([0.0, 0.0]) == 0.0
+    assert PREFIX._safe_peak([0.0, 2.5, 1.0]) == pytest.approx(2.5)

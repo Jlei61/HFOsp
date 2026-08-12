@@ -149,6 +149,22 @@ baseline--ictal selectivity，停止本方程的强度细化；若出现自然 o
 轨迹，才解锁 §7 的 tau 比较。该实验不是绕过 U2 gate，而是去掉 onset parameter step 后对
 runtime 方程本身做判决。
 
+### 5.3 p0 baseline-leakage 修订
+
+连续前缀证明 mean-`p0_i` 保留 returning IED、但 18 s 内阻断自然 onset。只读重放进一步显示：
+
+- mean-`p0` 在间期有 37.56% cell-time 样本产生正超额；
+- per-cell temporal q99 把该比例降到 0.788%，population excess mean 降低约 3,160 倍；
+- 同一 q99 下 early-ictal active cell-time 仍为 84.89%，每个时刻激活细胞中位占比 84.11%。
+
+因此本轮只修 baseline reference，不改 runtime 方程：`p0_i` 从 baseline temporal mean 改为
+同一锁定 `W_B=[7,11]s` 上的 per-cell temporal q99。q99 在运行前由 pump-off reference 决定，
+不是 seizure sensor；不用 temporal max，以免单个离群样本支配。`Imax` 必须按 q99 后的 early-window
+excess integral 重新解析配平，保持 nominal Gamma 的定义不变。
+
+只授权 `tau=8s, Gamma={0.001,0.003,0.005}` 的 fresh-t0 连续前缀。若三臂仍无自然 onset，
+关闭当前 rectified per-cell U 的 lifecycle 主线；若出现自然 onset 后 contained/finite，才转 §7。
+
 ## 6. U2 标签与核心 gate
 
 - `ESCALATING_SATURATION`：继续进入既有 refractory/saturation class；
@@ -186,5 +202,5 @@ preflight 后并行，最多 4 臂；并行前按本线实测单臂峰值 RSS �
 
 ## 9. 当前授权边界
 
-本锁授权：finite calibration、候选锁、U2a control 与首个 `Gamma=0.25`，以及在核心分离出现后的
-0.10/0.40 顺序补点。未出现核心分离前不做多 seed、形态、eigenmode 或论文图。
+本锁授权：finite calibration、候选锁、已执行的 U2a/连续前缀诊断，以及 §5.3 锁定的 q99-`p0`
+三点连续前缀。未出现自然 onset 后的 contained/finite 前不做多 seed、形态、eigenmode 或论文图。

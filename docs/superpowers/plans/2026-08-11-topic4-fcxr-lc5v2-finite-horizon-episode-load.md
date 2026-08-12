@@ -104,6 +104,19 @@ control 与 U1 前 18 s 做 spike/rate exact parity；失败则另外两臂没�
 
 只有自然进入后的 contained/finite 结果才解锁 tau；no-onset 不能包装成成功终止。
 
+### T3.3 — q99-p0 baseline/ictal 分离修复
+
+先用 pump-off U1 spike stream 离线重放并原子落盘：
+
+- mean/q90/q95/q99/max 的 baseline leakage；
+- early-ictal active cell-time、active-cell coverage 与 per-cell excess integral；
+- 固定选择规则：baseline active-sample <=1% 且 early median active-cell >=75% 时选 q99；
+- 按选中 q99 excess integral 重新解析 `Imax(Gamma)`。
+
+规则通过后，fresh t0 并行运行 `Gamma={0.001,0.003,0.005}`。不再运行 control，因 T3.2 control
+已对 U1 前18秒实现 spike/rate bitwise parity。三臂仍无 onset 即停止本 U 方程；至少一个自然 onset
+后 contained/finite 才解锁 tau。
+
 输出 `u2a_branch_map.json` 与诊断图；只有核心动力学结果出现后再跑广泛回归和确认 seed。
 
 ## T4 — 工程合同
