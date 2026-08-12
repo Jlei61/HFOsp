@@ -28,7 +28,9 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
 from src.sef_hfo_observation import VirtualMontage  # noqa: E402
 from src.topic4_core_field_runner import _placement, atomic_write_json  # noqa: E402
 from src.topic4_dynamic_accessibility import (  # noqa: E402
+    ActivityDependentInhibitoryResource,
     AdaptationConfig,
+    InhibitoryResourceConfig,
     SpikeTriggeredAdaptation,
 )
 from src.topic4_graph_edge_flow import (  # noqa: E402
@@ -95,6 +97,7 @@ def main():
         "development_only_observation_invariant_spatial_route_selection",
         "development_only_observation_invariant_spatial_route_confirmation",
         "development_only_dynamic_accessibility_canary",
+        "development_only_inhibitory_resource_accessibility_canary",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -115,6 +118,7 @@ def main():
         "REV10R2_SPATIAL_EDGE_SELECTION_LIBRARY_FROZEN",
         "REV10R2_SPATIAL_EDGE_CONFIRMATION_LIBRARY_FROZEN",
         "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN",
+        "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -235,6 +239,9 @@ def main():
         }
 
     adaptation = candidate.get("adaptation", {"mode": "off"})
+    resource = candidate.get("inhibitory_resource", {"mode": "off"})
+    if adaptation["mode"] != "off" and resource["mode"] != "off":
+        raise RuntimeError("adaptation and inhibitory resource cannot be combined")
     if adaptation["mode"] == "off":
         slow = None
     else:
@@ -249,7 +256,32 @@ def main():
                 trace_dt_ms=float(adaptation["trace_dt_ms"]),
             ),
         )
-    if manifest["status"] == "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN":
+    if resource["mode"] != "off":
+        slow = ActivityDependentInhibitoryResource(
+            positions_e=positions,
+            positions_i=np.asarray(net["pos"][n_e:], float),
+            sheet_l_mm=float(engine["L"]),
+            dt_ms=float(engine["dt"]),
+            cfg=InhibitoryResourceConfig(
+                mode=resource["mode"],
+                tau_q_ms=float(resource["tau_q_ms"]),
+                k_q_per_ms=float(resource["k_q_per_ms"]),
+                q_min=float(resource["q_min"]),
+                n_grid=int(resource["n_grid"]),
+                sigma_rate_mm=float(resource["sigma_rate_mm"]),
+                tau_rate_ms=float(resource["tau_rate_ms"]),
+                sigma_q_mm=float(resource["sigma_q_mm"]),
+                eta_e=float(resource["eta_e"]),
+                eta_i=float(resource["eta_i"]),
+                a0=float(resource["a0"]),
+                a50=float(resource["a50"]),
+                trace_dt_ms=float(resource["trace_dt_ms"]),
+            ),
+        )
+    if manifest["status"] in {
+        "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN",
+        "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
+    }:
         if not np.all(coefficients == 0.0):
             raise RuntimeError("rev10-D requires exact no-op edge coefficients")
         if not (
@@ -309,9 +341,15 @@ def main():
     onsets = np.asarray(onset_rows, float).reshape((-1, len(contact_names)))
     ranks = np.asarray(rank_rows, float).reshape((-1, len(contact_names)))
     adaptation_trace = (
-        slow.trace_arrays() if slow is not None else {
+        slow.trace_arrays() if adaptation["mode"] != "off" else {
             key: np.empty(0, dtype=np.float32)
             for key in ("time_ms", "mean_mV", "sd_mV", "max_mV")
+        }
+    )
+    resource_trace = (
+        slow.trace_arrays() if resource["mode"] != "off" else {
+            key: np.empty(0, dtype=np.float32)
+            for key in ("time_ms", "q_mean", "q_sd", "q_min", "mean_drive")
         }
     )
     _atomic_npz(
@@ -337,6 +375,11 @@ def main():
         adaptation_mean_mV=adaptation_trace["mean_mV"],
         adaptation_sd_mV=adaptation_trace["sd_mV"],
         adaptation_max_mV=adaptation_trace["max_mV"],
+        resource_time_ms=resource_trace["time_ms"],
+        resource_q_mean=resource_trace["q_mean"],
+        resource_q_sd=resource_trace["q_sd"],
+        resource_q_min=resource_trace["q_min"],
+        resource_mean_drive=resource_trace["mean_drive"],
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -370,6 +413,22 @@ def main():
             )),
             "peak_neuron_mV": float(np.max(
                 adaptation_trace["max_mV"], initial=0.0,
+            )),
+        },
+        "dynamic_inhibitory_resource": {
+            **resource,
+            "trace_samples": int(len(resource_trace["time_ms"])),
+            "minimum_mean_q": float(np.min(
+                resource_trace["q_mean"], initial=1.0,
+            )),
+            "peak_spatial_q_sd": float(np.max(
+                resource_trace["q_sd"], initial=0.0,
+            )),
+            "minimum_local_q": float(np.min(
+                resource_trace["q_min"], initial=1.0,
+            )),
+            "peak_mean_depletion_drive": float(np.max(
+                resource_trace["mean_drive"], initial=0.0,
             )),
         },
         "network": {

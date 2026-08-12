@@ -301,6 +301,12 @@ def main():
             "adaptation_increment_mV": candidate.get("adaptation", {}).get(
                 "increment_mV", 0.0,
             ),
+            "resource_mode": candidate.get("inhibitory_resource", {}).get(
+                "mode", "off",
+            ),
+            "resource_k_q_per_ms": candidate.get(
+                "inhibitory_resource", {},
+            ).get("k_q_per_ms", 0.0),
             "selection_score_equal_network": mean_score,
             "n_runaway_networks": runaway,
             "total_events_descriptive": int(sum(
@@ -376,6 +382,16 @@ def main():
                     "peak_spatial_sd_mV", 0.0,
                 ) for payload in metadata
             ])),
+            "mean_network_minimum_resource_q": float(np.mean([
+                payload.get("dynamic_inhibitory_resource", {}).get(
+                    "minimum_local_q", 1.0,
+                ) for payload in metadata
+            ])),
+            "mean_network_peak_resource_spatial_sd": float(np.mean([
+                payload.get("dynamic_inhibitory_resource", {}).get(
+                    "peak_spatial_q_sd", 0.0,
+                ) for payload in metadata
+            ])),
         }
         rows.append(row)
         details[candidate["candidate_id"]] = {
@@ -387,6 +403,11 @@ def main():
             "dynamic_accessibility_by_seed": {
                 str(payload["seed"]): payload.get("dynamic_accessibility", {})
                 for payload in metadata
+            },
+            "dynamic_inhibitory_resource_by_seed": {
+                str(payload["seed"]): payload.get(
+                    "dynamic_inhibitory_resource", {},
+                ) for payload in metadata
             },
         }
     for row, flag in zip(rows, _pareto(rows)):
@@ -408,6 +429,9 @@ def main():
     }
     is_dynamic_canary = (
         config["scientific_role"] == "development_only_dynamic_accessibility_canary"
+    )
+    is_resource_canary = config["scientific_role"] == (
+        "development_only_inhibitory_resource_accessibility_canary"
     )
     summary = {
         "status": (
@@ -434,7 +458,12 @@ def main():
         "source_worker_commit": worker_commit,
         "provenance": _runtime_provenance(args.expected_commit),
     }
-    basename = "canary" if is_dynamic_canary else basename_by_phase[phase]
+    if is_resource_canary:
+        summary["status"] = "REV10D2_RETURNED_ONLY_CANARY_COMPLETE"
+    basename = (
+        "canary" if is_dynamic_canary or is_resource_canary
+        else basename_by_phase[phase]
+    )
     _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)
     _atomic_json(output_root / f"{basename}_summary_returned_only.json", summary)
     print(json.dumps({
