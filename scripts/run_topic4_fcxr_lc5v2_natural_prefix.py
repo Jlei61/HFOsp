@@ -49,24 +49,31 @@ from src.topic4_mz_fcxr_lifecycle import classify_regime_sequence  # noqa: E402
 
 RUN_MS = 18000.0
 N_CHUNKS = int(round(RUN_MS / U2.CHUNK_MS))
-P0_AUDIT = U2.OUT / "p0_separation_audit"
 MECHANISM_FILES = U2.MECHANISM_FILES + (Path(__file__),)
+ALLOWED_TAU_MS = (3000.0, 8000.0, 15000.0)
 
 
 def _sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def _tag(gamma, p0_policy="mean"):
+def _tau_label(tau_ms):
+    tau = float(tau_ms)
+    if tau not in ALLOWED_TAU_MS:
+        raise ValueError(f"tau_ms must be one of {ALLOWED_TAU_MS}")
+    return f"tau{int(tau / 1000.0)}"
+
+
+def _tag(gamma, p0_policy="mean", tau_ms=8000.0):
     milli = int(round(float(gamma) * 1000.0))
     if not np.isclose(milli / 1000.0, float(gamma), rtol=0.0, atol=1e-12):
         raise ValueError("natural-prefix Gamma must resolve exactly in milli-Gamma units")
     prefix = "u3_prefix" if p0_policy == "mean" else f"u3_prefix_{p0_policy}"
-    return f"{prefix}_tau8_gamma_milli{milli:03d}"
+    return f"{prefix}_{_tau_label(tau_ms)}_gamma_milli{milli:03d}"
 
 
-def _paths(gamma, p0_policy="mean"):
-    tag = _tag(gamma, p0_policy)
+def _paths(gamma, p0_policy="mean", tau_ms=8000.0):
+    tag = _tag(gamma, p0_policy, tau_ms)
     return U2.OUT / tag, U2.OUT / f".{tag}.work"
 
 
@@ -92,18 +99,18 @@ def _safe_peak(values):
     return 0.0 if values.size == 0 else float(np.max(values))
 
 
-def _stage_lock(gamma, p0_policy="mean"):
+def _stage_lock(gamma, p0_policy="mean", tau_ms=8000.0):
     U2.OUT.mkdir(parents=True, exist_ok=True)
-    f = (U2.OUT / f".{_tag(gamma, p0_policy)}.lock").open("w")
+    f = (U2.OUT / f".{_tag(gamma, p0_policy, tau_ms)}.lock").open("w")
     try:
         fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError as exc:
         f.close()
-        raise SystemExit(f"{_tag(gamma, p0_policy)} is already running") from exc
+        raise SystemExit(f"{_tag(gamma, p0_policy, tau_ms)} is already running") from exc
     return f
 
 
-def _fresh_system(p0, imax, a_load):
+def _fresh_system(p0, imax, a_load, tau_ms):
     candidate = LC5._load_candidate()
     S = U2.PP.build_substrate(U2.CONNECTION_SEED)
     U2.install_registered_noise_rng(S["net"])
@@ -112,7 +119,7 @@ def _fresh_system(p0, imax, a_load):
         use_pump=True,
         pump_sensor_only=False,
         pump_a_load=float(a_load),
-        pump_tau_ms=U2.TAU_MS,
+        pump_tau_ms=float(tau_ms),
         pump_Imax=float(imax),
         pump_h=3,
         pump_excess_mode="rectified_excess",
@@ -155,31 +162,43 @@ def _outcome(lifecycle, regimes, saturated):
     return "OFFSET_OUTSIDE_TARGET", onset, offset
 
 
-def _p0_contract(gamma, p0_policy):
-    prelock, p0, unused_u, imax = U2._load_contract(gamma)
+def _p0_contract(gamma, p0_policy, tau_ms):
+    tau_ms = float(tau_ms)
+    tau_key = f"tau{int(tau_ms)}"
+    calibration = json.loads((U2.CAL / "finite_episode_calibration.json").read_text())
+    tau_record = calibration["tau"][tau_key]
+    contract = {"a_load": float(tau_record["a_load"]), "tau_ms": tau_ms}
     if p0_policy == "mean":
-        return prelock, p0, imax
+        with np.load(U2.CAL / "u_fields_tau3_8_15.npz", allow_pickle=False) as z:
+            p0 = np.asarray(z[f"p0_{tau_key}"], float)
+        dose = tau_record["dose"]["Imax_by_gamma"]
+        imax = float(dose.get(str(float(gamma)), dose["0.1"] * float(gamma) / 0.1))
+        return contract, p0, imax
     if p0_policy != "q099":
         raise ValueError("unsupported p0 policy")
-    summary = json.loads((P0_AUDIT / "summary.json").read_text())
+    audit = U2.OUT / f"p0_separation_audit_{tau_key}"
+    summary = json.loads((audit / "summary.json").read_text())
     if summary.get("status") != "P0_SEPARATION_PASS" or summary.get("selected_policy") != "q099":
         raise SystemExit("q99 p0 separation audit is absent or failed")
-    with np.load(P0_AUDIT / "p0_fields.npz", allow_pickle=False) as z:
+    if not np.isclose(float(summary["tau_ms"]), tau_ms, rtol=0.0, atol=1e-12):
+        raise SystemExit("q99 p0 separation audit tau mismatch")
+    with np.load(audit / "p0_fields.npz", allow_pickle=False) as z:
         p0 = np.asarray(z["q099"], float)
     imax = float(summary["Imax_by_gamma"][str(float(gamma))])
-    return prelock, p0, imax
+    return contract, p0, imax
 
 
-def stage_prefix(gamma, p0_policy="mean"):
-    arm, work = _paths(gamma, p0_policy)
-    tag = _tag(gamma, p0_policy)
+def stage_prefix(gamma, p0_policy="mean", tau_ms=8000.0):
+    tau_ms = float(tau_ms)
+    arm, work = _paths(gamma, p0_policy, tau_ms)
+    tag = _tag(gamma, p0_policy, tau_ms)
     sentinel = tag.upper()
     if arm.is_dir():
         return json.loads((arm / "summary.json").read_text())
-    lock = _stage_lock(gamma, p0_policy)
+    lock = _stage_lock(gamma, p0_policy, tau_ms)
     running = U2.OUT / f"RUNNING_{sentinel}.json"
     try:
-        prelock, p0, imax = _p0_contract(gamma, p0_policy)
+        prelock, p0, imax = _p0_contract(gamma, p0_policy, tau_ms)
         if work.exists():
             raise SystemExit(f"stale work directory requires inspection: {work}")
         resources = U2.GEO._meminfo()
@@ -190,13 +209,13 @@ def stage_prefix(gamma, p0_policy="mean"):
         started = time.time()
         _write_json(running, {
             "status": "RUNNING", "pid": os.getpid(), "started": U2.GEO._now(),
-            "gamma": float(gamma), "Imax": float(imax), "T_ms": RUN_MS,
+            "gamma": float(gamma), "Imax": float(imax), "tau_ms": tau_ms, "T_ms": RUN_MS,
             "semantics": "fresh_t0_u0_always_online_no_step", "p0_policy": p0_policy,
         })
         (U2.OUT / f"{tag}.pid").write_text(f"{os.getpid()}\n")
         U2._resource_row(f"{sentinel}_PREFLIGHT", baseline_swap)
 
-        S, slow, cfg_dict = _fresh_system(p0, imax, prelock["a_load"])
+        S, slow, cfg_dict = _fresh_system(p0, imax, prelock["a_load"], tau_ms)
         stride = int(round(U2.TRACE_DT_MS / U2.DT_MS))
         force_scale = float(slow.cfg.E_E - slow.cfg.v_match)
         slow.recurrent_drive_observer = RecurrentDriveBlockObserver(
@@ -297,7 +316,7 @@ def stage_prefix(gamma, p0_policy="mean"):
             "status": "COMPLETE", "arm": tag, "outcome": outcome,
             "runtime_semantics": "fresh_t0_u0_always_online_no_step",
             "gamma_nominal_dose": float(gamma), "Imax": float(imax), "p0_policy": p0_policy,
-            "tau_ms": U2.TAU_MS, "a_load": float(prelock["a_load"]), "h": 3,
+            "tau_ms": tau_ms, "a_load": float(prelock["a_load"]), "h": 3,
             "T_ms": RUN_MS, "onset_ms": onset_ms, "offset_ms": offset_ms,
             "lifecycle": lifecycle, "n_events": len(events),
             "n_returning": len(returned), "control_parity": control,
@@ -474,7 +493,10 @@ def recover_completed_control():
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--gamma", type=float, choices=(0.0, 0.001, 0.003, 0.005))
+    parser.add_argument(
+        "--gamma", type=float, choices=(0.0, 0.001, 0.003, 0.005, 0.010, 0.020)
+    )
+    parser.add_argument("--tau-ms", type=float, choices=ALLOWED_TAU_MS, default=8000.0)
     parser.add_argument("--recover-completed-control", action="store_true")
     parser.add_argument("--p0-policy", choices=("mean", "q099"), default="mean")
     parser.add_argument("--confirm-run", action="store_true")
@@ -486,7 +508,10 @@ def main():
         raise SystemExit("--gamma is required unless recovering the completed control")
     if not args.confirm_run:
         raise SystemExit("a 40k natural-prefix arm requires --confirm-run")
-    print(json.dumps(json_sanitize(stage_prefix(args.gamma, args.p0_policy)), indent=2, sort_keys=True), flush=True)
+    print(json.dumps(
+        json_sanitize(stage_prefix(args.gamma, args.p0_policy, args.tau_ms)),
+        indent=2, sort_keys=True,
+    ), flush=True)
 
 
 if __name__ == "__main__":

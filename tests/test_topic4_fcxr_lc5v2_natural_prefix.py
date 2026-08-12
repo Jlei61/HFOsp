@@ -20,6 +20,11 @@ def test_prefix_tags_are_unambiguous():
     with pytest.raises(ValueError):
         PREFIX._tag(0.0015)
     assert PREFIX._tag(0.001, "q099").startswith("u3_prefix_q099_")
+    assert "tau3" in PREFIX._tag(0.010, "q099", 3000.0)
+    assert "tau15" in PREFIX._tag(0.010, "q099", 15000.0)
+    assert PREFIX._tag(0.010, "q099", 3000.0) != PREFIX._tag(0.010, "q099", 15000.0)
+    with pytest.raises(ValueError):
+        PREFIX._tag(0.010, "q099", 6000.0)
 
 
 def test_prefix_is_fresh_u0_always_online_contract():
@@ -27,6 +32,7 @@ def test_prefix_is_fresh_u0_always_online_contract():
     assert "pump_u_init_E=np.zeros" in source
     assert 'use_pump=True' in source
     assert 'runtime_semantics\": \"fresh_t0_u0_always_online_no_step' in source
+    assert "pump_tau_ms=float(tau_ms)" in source
 
 
 def test_outcome_never_calls_no_onset_an_offset():

@@ -1,6 +1,8 @@
 import importlib.util
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -18,3 +20,10 @@ def test_q99_selection_requires_both_sides_of_separation():
     bad_early = [{**good[0], "early_median_active_cells_per_sample": 0.70}]
     assert AUDIT.select_policy(bad_baseline) is None
     assert AUDIT.select_policy(bad_early) is None
+
+
+def test_multitau_audits_have_distinct_transaction_roots():
+    assert AUDIT._output_dir(3000.0) != AUDIT._output_dir(8000.0)
+    assert AUDIT._output_dir(8000.0) != AUDIT._output_dir(15000.0)
+    with pytest.raises(ValueError):
+        AUDIT._output_dir(6000.0)

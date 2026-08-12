@@ -165,6 +165,41 @@ excess integral 重新解析配平，保持 nominal Gamma 的定义不变。
 只授权 `tau=8s, Gamma={0.001,0.003,0.005}` 的 fresh-t0 连续前缀。若三臂仍无自然 onset，
 关闭当前 rectified per-cell U 的 lifecycle 主线；若出现自然 onset 后 contained/finite，才转 §7。
 
+### 5.4 2026-08-13 多时间尺度漏斗修订
+
+§5.3 三条 q99 连续前缀现已完成。三臂与 pump-off 在 `0--11 s` 的 spike stream 逐位一致，
+均在 `11 s` 自然进入；因此 baseline selectivity 与 entry preservation 已通过。但
+`Gamma={0.001,0.003,0.005}` 全部为 `ESCALATING_SATURATION`，最大档 18 s 末端率仅从
+`366.8` 降到 `355.2 Hz`，没有弯折 `D--H` 路径。
+
+这暴露了旧 §7 的循环门：`tau_U` 可能决定 episode memory 能否形成 contained/finite excursion，
+却要求先在固定 `tau_U=8 s` 成功才允许测试 `tau_U`。该门撤销，改为一次预注册的多时间尺度
+自适应漏斗：
+
+```text
+first pass: tau_U = {3, 8, 15} s, Gamma_U = 0.010
+```
+
+每个 `tau_U` 必须从同一 U1 pump-off spike stream 独立锁定：
+
+- 已有 finite-window bisection 给出的 `a_U(tau)`；
+- 同一 `W_B=[7,11]s` 上的 per-cell temporal q99 `p0_i(tau)`；
+- 同一 `W_E=[12,14]s` excess integral 解析得到的 `Imax(tau,Gamma)`。
+
+禁止把 `tau=8 s` 的 `a_U/p0/Imax` 套给其它时间尺度。三臂均 fresh `t=0`、`u=0`、U 始终在线、
+dynamic Z/H、X=1、M=0、无 kick/reset/parameter step，并复用同一 external-input 合同。
+
+首轮之后，每个 tau 只允许沿一个方向补一个点：
+
+- `Gamma=0.010` 仍 saturation：该 tau 只补 `Gamma=0.020`；
+- `Gamma=0.010` 在 onset 前阻断 entry 或 `<0.5 s` suppression：该 tau 只补 `Gamma=0.005`；
+- 出现 contained/finite：该 tau 立即停止强度扩展；
+- 不同时向上下两侧补点，不追加第三个强度点。
+
+如果三个时间尺度均从 saturation 直接跳到 no-onset/immediate suppression、没有中间类，才报告
+当前 `H+U` 组合在该执行通路上缺少可控窗；若所有允许强度仍 saturation，则报告 U authority
+不足。二者都不等于否定所有 per-cell episode-memory 机制。
+
 ## 6. U2 标签与核心 gate
 
 - `ESCALATING_SATURATION`：继续进入既有 refractory/saturation class；
@@ -183,8 +218,8 @@ excess integral 重新解析配平，保持 nominal Gamma 的定义不变。
 
 ## 7. 后续只由结果解锁
 
-若 U2a 出现 contained/finite 点，才在 1--2 个 Gamma 上比较 `tau_U={3,8,15}s`。只对 primary
-补一对 dynamic-D / frozen-D 短诊断。late snapshot 是 stress test，不阻断候选。
+多时间尺度比较按 §5.4 已解锁。只对其中出现的 primary contained/finite 候选补一对
+dynamic-D / frozen-D 短诊断。late snapshot 是 stress test，不阻断候选。
 
 U3 只在出现 finite excursion 后启动；从 t=0 `u=0`、U 始终在线，按 5--10 s simulation chunk
 顺序续跑。每个 chunk 使用 rolling exact checkpoint、连续 RNG、atomic ledger。满足完整 lifecycle
@@ -202,5 +237,6 @@ preflight 后并行，最多 4 臂；并行前按本线实测单臂峰值 RSS �
 
 ## 9. 当前授权边界
 
-本锁授权：finite calibration、候选锁、已执行的 U2a/连续前缀诊断，以及 §5.3 锁定的 q99-`p0`
-三点连续前缀。未出现自然 onset 后的 contained/finite 前不做多 seed、形态、eigenmode 或论文图。
+本锁授权：finite calibration、候选锁、已执行的 U2a/连续前缀诊断、§5.3 q99 三点前缀，以及
+§5.4 的多时间尺度自适应漏斗。未出现自然 onset 后的 contained/finite 前不做多 seed、形态、
+eigenmode、长程 recovery 或论文图。

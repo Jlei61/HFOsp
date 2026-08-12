@@ -21,12 +21,12 @@ from src.topic4_fcxr_lc5_finite_episode import coarsen_sparse_stream  # noqa: E4
 from src.topic4_mz_fcxr_pump import pump_activation  # noqa: E402
 
 
-OUT = ROOT / "results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/p0_separation_audit"
+OUT_ROOT = ROOT / "results/topic4_sef_hfo/fcxr_lc5v2_finite_episode"
 SOURCE = ROOT / "results/topic4_sef_hfo/fcxr_lc5_episode_pump/u1_capture/u1_sparse_spikes.npz"
-EXACT = ROOT / "results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/exact_load_audit"
-A_LOAD = 0.014675
-TAU_MS = 8000.0
+EXACT = OUT_ROOT / "exact_load_audit"
+CAL = OUT_ROOT / "finite_calibration"
 SAMPLE_MS = 5
+ALLOWED_TAU_MS = (3000.0, 8000.0, 15000.0)
 
 
 def _write_json(path, value):
@@ -52,9 +52,25 @@ def select_policy(rows):
     return None
 
 
-def run_audit():
-    if OUT.is_dir():
-        return json.loads((OUT / "summary.json").read_text())
+def _tau_key(tau_ms):
+    tau = float(tau_ms)
+    if tau not in ALLOWED_TAU_MS:
+        raise ValueError(f"tau_ms must be one of {ALLOWED_TAU_MS}")
+    return f"tau{int(tau)}"
+
+
+def _output_dir(tau_ms):
+    return OUT_ROOT / f"p0_separation_audit_{_tau_key(tau_ms)}"
+
+
+def run_audit(tau_ms=8000.0):
+    tau_ms = float(tau_ms)
+    tau_key = _tau_key(tau_ms)
+    out = _output_dir(tau_ms)
+    if out.is_dir():
+        return json.loads((out / "summary.json").read_text())
+    calibration = json.loads((CAL / "finite_episode_calibration.json").read_text())
+    a_load = float(calibration["tau"][tau_key]["a_load"])
     full = load_sparse_spike_stream(SOURCE)
     stream = coarsen_sparse_stream(full, source_dt_ms=0.05, target_dt_ms=1.0, stop_ms=14000)
     del full
@@ -76,11 +92,11 @@ def run_audit():
         if cells.size:
             spike[cells] = 1.0
         previous, pos = cells, end
-        np.maximum(u + A_LOAD * spike - phi / TAU_MS, 0.0, out=u)
+        np.maximum(u + a_load * spike - phi / tau_ms, 0.0, out=u)
     baseline = np.stack(baseline)
     early = np.stack(early)
-    with np.load(EXACT / "fields.npz", allow_pickle=False) as z:
-        old = np.asarray(z["p0_exact"], float)
+    with np.load(CAL / "u_fields_tau3_8_15.npz", allow_pickle=False) as z:
+        old = np.asarray(z[f"p0_{tau_key}"], float)
     fields = {"old_mean": old.astype(np.float32)}
     policies = [("old_mean", old)] + [
         (f"q{int(q * 100):03d}", np.quantile(baseline, q, axis=0))
@@ -112,19 +128,19 @@ def run_audit():
         "early_percell_excess_integral_median_ms"
     ]
     force = float(exact["dose_exact"]["recurrent_force_integral_median_ms"])
-    gammas = (0.001, 0.003, 0.005)
+    gammas = (0.005, 0.010, 0.020)
     imax = {str(gamma): float(gamma * force / denom) for gamma in gammas}
     summary = {
         "status": "P0_SEPARATION_PASS", "selected_policy": selected,
         "selection_rule": {"baseline_active_sample_fraction_max": 0.01,
                            "early_median_active_cells_per_sample_min": 0.75},
         "baseline_window_ms": [7000, 11000], "early_window_ms": [12000, 14000],
-        "sample_ms": SAMPLE_MS, "a_load": A_LOAD, "tau_ms": TAU_MS, "h": 3,
+        "sample_ms": SAMPLE_MS, "a_load": a_load, "tau_ms": tau_ms, "h": 3,
         "rows": rows, "recurrent_force_integral_median_ms": force,
         "selected_excess_integral_median_ms": denom, "Imax_by_gamma": imax,
         "source_spike_sha256": stream.sha256,
     }
-    with AtomicStageBundle(OUT) as bundle:
+    with AtomicStageBundle(out) as bundle:
         _write_json(bundle.path("summary.json"), summary)
         _npz_atomic(bundle.path("p0_fields.npz"), **fields)
         bundle.commit(required=["summary.json", "p0_fields.npz"])
@@ -133,11 +149,12 @@ def run_audit():
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--tau-ms", type=float, choices=ALLOWED_TAU_MS, default=8000.0)
     parser.add_argument("--confirm-audit", action="store_true")
     args = parser.parse_args()
     if not args.confirm_audit:
         raise SystemExit("pass --confirm-audit")
-    print(json.dumps(json_sanitize(run_audit()), indent=2, sort_keys=True))
+    print(json.dumps(json_sanitize(run_audit(args.tau_ms)), indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":

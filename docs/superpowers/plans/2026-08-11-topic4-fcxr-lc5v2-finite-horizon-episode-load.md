@@ -119,6 +119,30 @@ control 与 U1 前 18 s 做 spike/rate exact parity；失败则另外两臂没�
 
 输出 `u2a_branch_map.json` 与诊断图；只有核心动力学结果出现后再跑广泛回归和确认 seed。
 
+### T3.4 — 多时间尺度自适应漏斗
+
+T3.3 已证明 q99 deadband 保住逐位 baseline 与 11 s natural onset，但
+`tau8, Gamma={0.001,0.003,0.005}` 均为 saturation。先补齐逐 tau 执行合同：
+
+1. 从既有 finite calibration 读取 `a_load_tau{3000,8000,15000}`；
+2. 对每个 tau 离线计算自己的 baseline temporal q99 `p0`；
+3. 在同一 early window 计算 q99 excess integral，并解析
+   `Imax(tau,Gamma={0.005,0.010,0.020})`；
+4. 产物分别落在 `p0_separation_audit_tau{3000,8000,15000}/`，tau8 旧产物保留为审计证据；
+5. runner 的 tag、flock、PID、sentinel、bundle 都必须包含 tau，禁止不同 tau 相互覆盖。
+
+随后资源安全地并行运行：
+
+```text
+q99_tau3_gamma010
+q99_tau8_gamma010
+q99_tau15_gamma010
+```
+
+均为 fresh t0、18 s、no kick、U always-online；先核对同一 external input hash，并分别报告
+baseline exactness、onset、saturation/contained/finite、D/H/U/IU 时序。完成后按 spec §5.4 每个 tau
+最多补一个单边强度点。任何 contained/finite 立即停止该 tau 的强度轴；只有 finite 才续跑 recovery。
+
 ## T4 — 工程合同
 
 - `mz_slow_vars.py` 如不需修改则保持 hash；若修改必须单独 mechanism hash；
@@ -138,3 +162,11 @@ control 与 U1 前 18 s 做 spike/rate exact parity；失败则另外两臂没�
 3. 回答 U 是否把 escalating saturation 改成 contained/finite excursion；
 4. 有核心分离才扩点；
 5. 结果、资源、进程和措辞边界写入 STATUS。
+
+## Definition of done（T3.4）
+
+1. 三个 tau 的 `a_U/q99-p0/Imax` 均独立可追溯；
+2. 三条 `Gamma=0.010` 连续前缀都有独立 DONE/FAILED 与资源日志；
+3. 回答时间尺度是否改变 saturation/containment/offset 类别；
+4. 只按单边规则补点，不铺完整网格；
+5. 没有 finite 前不进入长程 lifecycle 或 morphology。
