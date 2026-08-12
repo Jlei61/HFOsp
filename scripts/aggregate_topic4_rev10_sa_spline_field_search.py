@@ -478,6 +478,7 @@ def _plot_fig4(summary, config, event_records, output_root, contact_names,
     ax = fig.add_subplot(gs[:, 0])
     shown = 0
     names = np.asarray(contact_names).astype(str)
+    examples = []
     for mode in (0, 1):
         eligible = np.flatnonzero((labels == mode) & ~ood)
         if not len(eligible):
@@ -494,15 +495,30 @@ def _plot_fig4(summary, config, event_records, output_root, contact_names,
         stop = min(envelope.shape[1], int((t_off + 150.0) / dt))
         time_axis = np.arange(stop - start) * dt + start * dt - t_on + shown * 420.0
         segment = envelope[:, start:stop]
-        scale = max(float(np.percentile(np.abs(segment), 99)), 1e-9)
-        for contact, trace in enumerate(segment):
-            ax.plot(time_axis, trace / scale * 0.34 + contact,
-                    color=colors[mode], linewidth=0.75, alpha=0.85)
-        ax.axvspan(shown * 420.0, shown * 420.0 + t_off - t_on,
-                   color=colors[mode], alpha=0.10)
-        ax.text(shown * 420.0 + 4, len(names) - 0.3, f"model direction {'AB'[mode]}",
-                color=colors[mode], fontsize=9, weight="bold")
+        examples.append((mode, time_axis, segment, t_off - t_on, shown))
         shown += 1
+    common_scale = max(
+        [float(np.percentile(np.abs(row[2]), 99)) for row in examples] + [1e-9]
+    )
+    trace_gain = 0.34 / common_scale
+    for mode, time_axis, segment, duration, example_index in examples:
+        for contact, trace in enumerate(segment):
+            ax.plot(time_axis, trace * trace_gain + contact,
+                    color=colors[mode], linewidth=0.75, alpha=0.85)
+        ax.axvspan(example_index * 420.0, example_index * 420.0 + duration,
+                   color=colors[mode], alpha=0.10)
+        ax.text(example_index * 420.0 + 4, len(names) - 0.3,
+                f"model direction {'AB'[mode]}",
+                color=colors[mode], fontsize=9, weight="bold")
+    if examples:
+        scale_value = common_scale * 0.34
+        scale_x = min(row[1].min() for row in examples) + 12.0
+        scale_y = -0.15
+        ax.plot([scale_x, scale_x], [scale_y, scale_y + 0.34],
+                color="black", linewidth=1.4, clip_on=False)
+        ax.text(scale_x + 5.0, scale_y + 0.17,
+                f"{scale_value:.2g} a.u. model-current proxy",
+                va="center", fontsize=7)
     ax.set_yticks(np.arange(len(names)), names)
     ax.invert_yaxis()
     ax.set_xlabel("time aligned to event onset (ms; examples separated)")
