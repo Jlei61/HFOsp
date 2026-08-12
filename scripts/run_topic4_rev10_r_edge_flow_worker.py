@@ -98,6 +98,7 @@ def main():
         "development_only_observation_invariant_spatial_route_confirmation",
         "development_only_dynamic_accessibility_canary",
         "development_only_inhibitory_resource_accessibility_canary",
+        "development_only_dynamic_ee_std_accessibility_canary",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -119,6 +120,7 @@ def main():
         "REV10R2_SPATIAL_EDGE_CONFIRMATION_LIBRARY_FROZEN",
         "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN",
         "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
+        "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -240,8 +242,12 @@ def main():
 
     adaptation = candidate.get("adaptation", {"mode": "off"})
     resource = candidate.get("inhibitory_resource", {"mode": "off"})
-    if adaptation["mode"] != "off" and resource["mode"] != "off":
-        raise RuntimeError("adaptation and inhibitory resource cannot be combined")
+    ee_std = candidate.get("ee_std", {"mode": "off"})
+    active_dynamic_mechanisms = sum(
+        row["mode"] != "off" for row in (adaptation, resource, ee_std)
+    )
+    if active_dynamic_mechanisms > 1:
+        raise RuntimeError("rev10-D dynamic mechanisms cannot be combined")
     if adaptation["mode"] == "off":
         slow = None
     else:
@@ -282,6 +288,7 @@ def main():
     if manifest["status"] in {
         "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN",
         "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
+        "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN",
     }:
         if not np.all(coefficients == 0.0):
             raise RuntimeError("rev10-D requires exact no-op edge coefficients")
@@ -306,6 +313,14 @@ def main():
         params, mapped_net, KICK_BOOST=0.0, t_kick=1e9,
         V_th_per_neuron=node["vtheta"], slow=slow,
         early_stop_runaway=bool(simulation["early_stop_runaway"]),
+        ee_std_u=float(ee_std.get("u", 0.0)),
+        ee_std_tau_ms=float(ee_std.get("tau_ms", 0.0)),
+        ee_std_mode=(
+            "local" if ee_std["mode"] == "off" else ee_std["mode"]
+        ),
+        dump_ee_std_trace=(
+            manifest["status"] == "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN"
+        ),
     )
     spikes = np.asarray(result["E_spk_bool"], bool)
     active, active_dt = cmrun.active_fraction(spikes, engine["dt"], cmrun.BIN_MS)
@@ -353,6 +368,10 @@ def main():
             for key in ("time_ms", "q_mean", "q_sd", "q_min", "mean_drive")
         }
     )
+    ee_std_trace = {
+        "mean": np.asarray(result.get("xdep_mean", []), np.float32),
+        "min": np.asarray(result.get("xdep_min", []), np.float32),
+    }
     _atomic_npz(
         output_npz,
         contact_names=np.asarray(contact_names, dtype="U16"),
@@ -381,6 +400,8 @@ def main():
         resource_q_sd=resource_trace["q_sd"],
         resource_q_min=resource_trace["q_min"],
         resource_mean_drive=resource_trace["mean_drive"],
+        ee_std_mean=ee_std_trace["mean"],
+        ee_std_min=ee_std_trace["min"],
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -430,6 +451,16 @@ def main():
             )),
             "peak_mean_depletion_drive": float(np.max(
                 resource_trace["mean_drive"], initial=0.0,
+            )),
+        },
+        "dynamic_ee_std": {
+            **ee_std,
+            "trace_samples": int(len(ee_std_trace["mean"])),
+            "minimum_mean_availability": float(np.min(
+                ee_std_trace["mean"], initial=1.0,
+            )),
+            "minimum_source_availability": float(np.min(
+                ee_std_trace["min"], initial=1.0,
             )),
         },
         "network": {

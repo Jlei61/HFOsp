@@ -23,6 +23,7 @@ WORKER = ROOT / "scripts/run_topic4_rev10_r_edge_flow_worker.py"
 AGGREGATOR = ROOT / "scripts/aggregate_topic4_rev10_r_edge_flow_screen.py"
 DYNAMIC_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d_adaptation_canary.py"
 RESOURCE_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d2_resource_canary.py"
+DYNAMIC_EDGE_AUDITOR = ROOT / "scripts/audit_topic4_rev10_d3_ee_std_canary.py"
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -271,9 +272,16 @@ def main():
     resource = config["scientific_role"] == (
         "development_only_inhibitory_resource_accessibility_canary"
     )
-    if dynamic or resource:
+    dynamic_edge = config["scientific_role"] == (
+        "development_only_dynamic_ee_std_accessibility_canary"
+    )
+    if dynamic or resource or dynamic_edge:
+        auditor = (
+            DYNAMIC_EDGE_AUDITOR if dynamic_edge
+            else RESOURCE_AUDITOR if resource else DYNAMIC_AUDITOR
+        )
         subprocess.run([
-            str(PYTHON), str(RESOURCE_AUDITOR if resource else DYNAMIC_AUDITOR),
+            str(PYTHON), str(auditor),
             "--config", str(config_path),
         ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
         verdict = json.loads((output_root / "canary_verdict.json").read_text())
@@ -281,12 +289,13 @@ def main():
     else:
         completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev10-D" if dynamic or resource else "Topic 4 rev10-R",
+        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge else "Topic 4 rev10-R",
         f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
         "status": (
-            completion if dynamic or resource else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
+            completion if dynamic or resource or dynamic_edge
+            else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
         ),
         "completed": len(completed), "total": len(jobs),
         "max_workers": maximum,

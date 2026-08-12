@@ -307,6 +307,9 @@ def main():
             "resource_k_q_per_ms": candidate.get(
                 "inhibitory_resource", {},
             ).get("k_q_per_ms", 0.0),
+            "ee_std_mode": candidate.get("ee_std", {}).get("mode", "off"),
+            "ee_std_u": candidate.get("ee_std", {}).get("u", 0.0),
+            "ee_std_tau_ms": candidate.get("ee_std", {}).get("tau_ms", 0.0),
             "selection_score_equal_network": mean_score,
             "n_runaway_networks": runaway,
             "total_events_descriptive": int(sum(
@@ -392,6 +395,11 @@ def main():
                     "peak_spatial_q_sd", 0.0,
                 ) for payload in metadata
             ])),
+            "mean_network_minimum_std_availability": float(np.mean([
+                payload.get("dynamic_ee_std", {}).get(
+                    "minimum_mean_availability", 1.0,
+                ) for payload in metadata
+            ])),
         }
         rows.append(row)
         details[candidate["candidate_id"]] = {
@@ -408,6 +416,10 @@ def main():
                 str(payload["seed"]): payload.get(
                     "dynamic_inhibitory_resource", {},
                 ) for payload in metadata
+            },
+            "dynamic_ee_std_by_seed": {
+                str(payload["seed"]): payload.get("dynamic_ee_std", {})
+                for payload in metadata
             },
         }
     for row, flag in zip(rows, _pareto(rows)):
@@ -432,6 +444,9 @@ def main():
     )
     is_resource_canary = config["scientific_role"] == (
         "development_only_inhibitory_resource_accessibility_canary"
+    )
+    is_dynamic_edge_canary = config["scientific_role"] == (
+        "development_only_dynamic_ee_std_accessibility_canary"
     )
     summary = {
         "status": (
@@ -460,8 +475,11 @@ def main():
     }
     if is_resource_canary:
         summary["status"] = "REV10D2_RETURNED_ONLY_CANARY_COMPLETE"
+    if is_dynamic_edge_canary:
+        summary["status"] = "REV10D3_RETURNED_ONLY_CANARY_COMPLETE"
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
+        or is_dynamic_edge_canary
         else basename_by_phase[phase]
     )
     _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)

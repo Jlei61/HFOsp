@@ -70,6 +70,23 @@ def ee_std_apply(a_w, a_dst, x_per_edge, NE):
     return a_w * np.where(a_dst < NE, x_per_edge, 1.0)
 
 
+def ee_std_source_availability(x_dep, spiking_sources, mode):
+    """Availability applied to firing E sources for local or mean-matched STD.
+
+    The global control retains the same latent per-source resource dynamics as
+    the local arm, but applies their instantaneous mean to every outgoing E->E
+    source.  Thus an identical spike history has an identical mean resource
+    dose while only the local arm retains source identity in edge application.
+    """
+    x_dep = np.asarray(x_dep, dtype=float)
+    spiking_sources = np.asarray(spiking_sources, dtype=np.int64)
+    if mode == "local":
+        return x_dep[spiking_sources]
+    if mode == "global":
+        return np.full(spiking_sources.shape, x_dep.mean(), dtype=float)
+    raise ValueError("ee_std_mode must be local or global")
+
+
 def membrane_step(V, I_E, I_I, decay_V, *, shunt_gaba=False, e_gaba=11.0, g_gaba_scale=0.0):
     """One LIF membrane update. Default (shunt_gaba=False) = current-based LIF, BIT-IDENTICAL
     to the pre-2026-06-19 engine: V_inf = I_E - I_I; V -> V_inf + (V - V_inf)*decay_V.
@@ -97,7 +114,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
-                  feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False, fb_override_trace=None):
+                  feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
+                  fb_override_trace=None, ee_std_mode="local"):
     """Verbatim copy of model.simulate's integration loop, with ONE addition:
     a localized transient kick on the external Poisson rate. The kick adds
     `KICK_BOOST` (extra external rate, 1/ms) to the E neurons in a disk of
@@ -210,6 +228,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     ee_std_on = ee_std_u > 0.0
     if ee_std_on:
         assert ee_std_tau_ms > 0.0, "ee_std_u>0 requires ee_std_tau_ms>0"
+        if ee_std_mode not in {"local", "global"}:
+            raise ValueError("ee_std_mode must be local or global")
         x_dep = np.ones(NE)                                  # availability per E neuron, recovers to 1
         x_rec_f = ee_std_recover_factor(dt, ee_std_tau_ms)
 
@@ -424,7 +444,10 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                     if ee_std_on:
                         # M1: E->E edges scaled by the presynaptic availability at spike time (x_j(t-));
                         # E->I edges untouched. Then deplete the firers (vesicle use): x_j(t+)=x_j*(1-U).
-                        x_per_edge = np.repeat(x_dep[spE], cnt)
+                        x_source = ee_std_source_availability(
+                            x_dep, spE, ee_std_mode,
+                        )
+                        x_per_edge = np.repeat(x_source, cnt)
                         w_eff = ee_std_apply(a_w[idx], a_dst[idx], x_per_edge, NE)
                         np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), w_eff)
                         x_dep[spE] *= (1.0 - ee_std_u)
