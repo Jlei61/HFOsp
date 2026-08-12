@@ -217,5 +217,8 @@
 - [x] Run V6 fit: all 11 workers completed, but A support appeared only after B
   support disappeared; no candidate was selected.
 - [x] Freeze all 11 V6 fields unchanged for V6.1 on seeds 1032/1033.
-- [ ] Run V6.1 and require at least one same network to express patient-supported
-  joint A and B before any further Node-field optimization.
+- [x] Run V6.1: three adjacent fields produced one supported joint A event in
+  seed 1033 while retaining supported joint B; seed 1032 had no supported A.
+- [x] Freeze all three adjacent fields for V6.2 on seeds 1041-1043.
+- [ ] Run V6.2 and require coexistence in at least two fresh networks before
+  closing the Node-field capacity verdict.

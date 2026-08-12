@@ -339,3 +339,9 @@ joint+ID B；`t=0.175-0.20` 两者都没有；`t=0.225-0.25` 首次出现 1 个 
 但 B 已为零。由于 fit seed 事件数较少，V6.1 不按 score 筛点，而把 11 点完整路径原样带到
 1032/1033。资格进一步要求至少一张同一网络同时产生 joint+ID A 与 B；不同网络分别承担
 两种模式不算同一 substrate 的 repertoire。
+
+V6.1 完成 `22/22` workers，零失败、零 runaway。`t=0.025/0.05/0.075` 在 seed 1033
+都出现 exactly 1 个 joint+ID A，同时分别保留 `9/4/6` 个 joint+ID B；seed 1032 的
+joint+ID A 全为 0。因此这是一个相邻但单事件、单网络的 coexistence signal，不是稳定恢复。
+V6.2 将三点全部冻结到 1041-1043，要求 A/B 各至少 2 个 joint+ID events，并且至少两张
+同一网络分别同时表达 A/B；这将作为 Node-only continuous-field 路线的最终容量裁定。

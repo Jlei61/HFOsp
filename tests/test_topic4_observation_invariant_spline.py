@@ -271,3 +271,19 @@ def test_v6_boundary_reproduces_known_v5_endpoint():
         if row["candidate_id"] == "v5_density_p05_t025"
     )
     assert candidates[-1]["field_sha256"] == known["field_sha256"]
+
+
+def test_v62_keeps_all_adjacent_selection_positive_fields():
+    from scripts.freeze_topic4_rev10_sa_v62_final_candidates import select_sources
+
+    summary = {"candidate_rows": [
+        {"candidate_id": "v61_t075",
+         "same_network_both_modes_joint_in_distribution_count": 1},
+        {"candidate_id": "v61_t000",
+         "same_network_both_modes_joint_in_distribution_count": 0},
+        {"candidate_id": "v61_t025",
+         "same_network_both_modes_joint_in_distribution_count": 1},
+        {"candidate_id": "v61_t050",
+         "same_network_both_modes_joint_in_distribution_count": 1},
+    ]}
+    assert select_sources(summary) == ["v61_t025", "v61_t050", "v61_t075"]

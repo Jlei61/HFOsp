@@ -116,6 +116,7 @@ def main():
         "development_only_stable_spline_final_confirmation",
         "development_only_mode_conditioned_boundary_refinement",
         "development_only_mode_conditioned_boundary_selection",
+        "development_only_mode_conditioned_boundary_final_confirmation",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("spectral search role changed")

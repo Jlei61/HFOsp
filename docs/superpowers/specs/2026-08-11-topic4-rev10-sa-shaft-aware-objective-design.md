@@ -721,3 +721,12 @@ different networks do not establish a repertoire in one substrate. If V6.1 is
 negative, the current evidence closes further optimizer-only refinement of
 this Node-field path and motivates a separately specified route/connectivity
 mechanism experiment.
+
+V6.1 found a narrow adjacent interval (`t=0.025, 0.05, 0.075`) in which seed
+1033 contained one joint in-distribution A event while retaining 9, 4, and 6
+joint in-distribution B events, respectively. Seed 1032 contained no supported
+joint A event. V6.2 therefore freezes all three adjacent fields, not only the
+scalar minimum, and evaluates each on seeds 1041-1043. Confirmation requires at
+least two A and two B joint in-distribution events spanning at least two same
+network realizations. This is still development-only capacity evidence; it is
+not a patient held-out or distributional-recovery claim.
