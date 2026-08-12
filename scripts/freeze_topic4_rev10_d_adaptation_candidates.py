@@ -12,6 +12,8 @@ from pathlib import Path
 
 import numpy as np
 
+from src.topic4_graph_edge_flow import array_sha256
+
 
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_d_local_adaptation_canary.json"
@@ -19,11 +21,6 @@ DEFAULT_CONFIG = ROOT / "config/topic4_rev10_d_local_adaptation_canary.json"
 
 def _sha256(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
-
-
-def _array_sha256(values):
-    values = np.ascontiguousarray(np.asarray(values, dtype=np.float64))
-    return hashlib.sha256(values.view(np.uint8)).hexdigest()
 
 
 def _atomic_json(path, payload):
@@ -42,7 +39,7 @@ def _atomic_json(path, payload):
 def candidate_library(config):
     count = int(config["spatial_edge_basis"]["coefficient_count"])
     zero = np.zeros(count, dtype=np.float64)
-    zero_hash = _array_sha256(zero)
+    zero_hash = array_sha256(zero)
     candidates = [{
         "candidate_id": "edge_noop",
         "coefficients": zero.tolist(),

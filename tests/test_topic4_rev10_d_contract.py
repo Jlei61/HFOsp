@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 
 from scripts.freeze_topic4_rev10_d_adaptation_candidates import candidate_library
+from src.topic4_graph_edge_flow import array_sha256
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -33,6 +34,9 @@ def test_frozen_grid_has_off_plus_paired_local_global_candidates():
 def test_every_dynamic_candidate_keeps_static_edges_exactly_off():
     for candidate in candidate_library(_config()):
         assert np.array_equal(candidate["coefficients"], np.zeros(12))
+        assert candidate["coefficients_sha256"] == array_sha256(
+            np.asarray(candidate["coefficients"], dtype=np.float64)
+        )
 
 
 def test_canary_uses_fresh_networks_and_long_controller_wait():
