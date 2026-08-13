@@ -6,6 +6,12 @@
 
 ## 主线（network-axis pivot）
 
+### `multiscale_effective_scaffold_v0_5_feasibility_2026-08-13.md` — **v0.5 只完成 target-free recovery feasibility；正式合同待终审，尚无训练结果**
+- 已知缺失的 5 位患者/9 fits 在 `min_joint_contacts=6` 下均可构造 full-tissue H、zero-H nodes、强连通 local backbone 和足量 nonlocal pool；未读取 early-ictal energy values。
+- 这只是定向 feasibility，不是正式 cohort census。正式 builder 必须自动扫描整个 parent cohort；预计 26 人/40 fits 与 17 人/167 seizures 仍待 builder、cache 和训练 smoke 冻结。
+- 修订后的唯一 target-free primary 是 `(L3-L2m) x J_lat`；L2m 必须匹配 L3 的 directed degree、reciprocity 和完整距离分箱后从头训练。Early-ictal 只作已知 target 上的 locked internal mechanistic follow-up。
+- Spec：`docs/superpowers/specs/2026-08-13-topic5-patient-specific-multiscale-effective-scaffold-v0-5-design.md`；plan：`docs/superpowers/plans/2026-08-13-topic5-patient-specific-multiscale-effective-scaffold-v0-5.md`。
+
 ### `lbss_full_tissue_spatial_search_closeout_2026-08-12.md` — **完整组织平面与 early-ictal 收口：局部 recurrence 足够；跨状态对应正向但不具 nonlocal 特异性**
 - 21 人/31 fits 的 latent mesh 修正为完整组织域：nodes 中位 104，zero-H nodes 中位 53（57.8%）；钳零这些未观测 nodes 后 21/21 患者留出预测变差，排除了模型仅在 contacts 附近计算的解释。
 - 465/465 正式单元显示 L0 local-only 相对 no-recurrence 为 20/21 改善；L3 相对 order-shuffle 为 21/21 改善，但 L3 不优于 local-only、等容量 extra-local 或 random-nonlocal。

@@ -62,6 +62,16 @@ task-selected nonlocal topology 特异性。**模型矩阵始终称为 patient-s
 propagation scaffold，不称 anatomical/white-matter connectivity；0–10 s broadband energy
 称 early-ictal field receipt/correspondence，不等同于 tissue recruitment into ictal core。
 
+**2026-08-13 v0.5 状态（仅合同与 target-free feasibility，尚无正式训练结果）**：已知因旧
+`joint contacts >=8` 被挡掉的 5 位患者/9 fits，在不读取 early-ictal energy values 的审计中均可按
+6-contact 下限构造 full-tissue geometry；但正式 builder 仍须自动扫描整个 parent cohort，预计
+26 人/40 fits 与 17 人/167 seizures 不能提前当成完成分母。v0.5 的唯一 target-free primary 改为
+患者 nonlocality `J_lat` 与 heldout distal `L3-L2m` 增益的 interaction；`L2m` 是匹配 directed
+degree、reciprocity 和完整 distance bins 后从头训练的 random-nonlocal control。Early-ictal 目标
+固定为 0–10 s、1–150 Hz broadband energy field，使用 signed best-mode Spearman oracle repertoire
+correspondence；它是 locked internal mechanistic follow-up，不是独立确认。正式训练预算至少 321
+units，等待用户终审锁定 spec/plan 后才启动。
+
 ---
 
 ## 1. 这个 topic 只回答什么问题
