@@ -5,10 +5,12 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 FREEZER = ROOT / "scripts/freeze_topic4_rev10_zm1_1_tau_library.py"
 LAUNCHER = ROOT / "scripts/launch_topic4_rev10_r_edge_flow_screen.py"
@@ -48,14 +50,25 @@ def main():
         "--expected-commit", args.commit,
     ], cwd=ROOT, check=True, env=env)
     root = ROOT / config["output_root"]
+    decision_name = {
+        "fit": "tau_adp_fit_decision.json",
+        "selection": "tau_adp_selection_decision.json",
+        "confirmation": "tau_adp_confirmation_decision.json",
+    }[phase]
+    decision = json.loads((root / decision_name).read_text())
     if phase == "confirmation":
         subprocess.run([
             str(PYTHON), str(PLOTTER), "--config", str(config_path),
             "--expected-commit", args.commit,
         ], cwd=ROOT, check=True, env=env)
     done = {
-        "status": f"REV10ZM1_1_TAU_{phase.upper()}_CONTROLLER_COMPLETE",
+        "status": (
+            f"REV10ZM1_1_TAU_{phase.upper()}_NO_ADVANCEMENT_COMPLETE"
+            if decision["status"].endswith("NO_SAFE_EVALUABLE_CANDIDATE")
+            else f"REV10ZM1_1_TAU_{phase.upper()}_CONTROLLER_COMPLETE"
+        ),
         "phase": phase,
+        "decision_status": decision["status"],
         "config": str(config_path.relative_to(ROOT)),
         "commit": args.commit,
         "upstream_decision": args.upstream_decision,

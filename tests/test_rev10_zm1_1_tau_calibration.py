@@ -6,6 +6,8 @@ import json
 from pathlib import Path
 
 import scripts.freeze_topic4_rev10_zm1_1_tau_library as freezer
+import scripts.run_topic4_rev10_zm1_1_tau_phase_controller as controller
+import scripts.finalize_topic4_rev10_zm1_1_tau_phase as finalizer
 from scripts.audit_topic4_rev10_zm1_1_tau_phase import (
     _dominates,
     _eligible,
@@ -90,3 +92,11 @@ def test_pareto_selection_has_no_composite_score_and_excludes_runaway():
     assert [row["candidate_id"] for row in _pareto([
         best, dominated, unsafe,
     ])] == ["best"]
+
+
+def test_phase_controller_can_import_repo_atomic_writer():
+    from src.topic4_core_field_runner import atomic_write_json
+
+    assert controller.ROOT == ROOT
+    assert callable(atomic_write_json)
+    assert finalizer.DECISION_BY_PHASE["fit"] == "tau_adp_fit_decision.json"
