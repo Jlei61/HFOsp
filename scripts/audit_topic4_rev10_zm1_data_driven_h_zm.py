@@ -19,12 +19,17 @@ from scripts.audit_topic4_rev10_d5_2_spatial_ou_confirmation import (  # noqa: E
     _patient_matched_benchmark,
 )
 from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (  # noqa: E402
+    SEMANTIC_MODE_ORDER,
     _canonical_rank_kmeans,
     _column_stats,
     _load_bundle,
+    _map_kmeans_clusters_to_modes,
     _patient_profiles,
     _similarity,
     normalize_event_ranks,
+)
+from scripts.run_topic4_rev10_r_edge_flow_worker import (  # noqa: E402
+    active_network_seeds,
 )
 from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
     _runtime_provenance,
@@ -41,9 +46,19 @@ def _patient_geometry(bundle):
     labels = np.asarray(bundle["labels"][clean_index], int)
     ranks = normalize_event_ranks(bundle["ranks"][clean_index])
     model = np.asarray([
-        _column_stats(ranks[labels == mode])[0] for mode in (0, 1)
+        _column_stats(ranks[labels == mode])[0]
+        for mode in SEMANTIC_MODE_ORDER
     ])
     return _similarity(model, _patient_profiles(bundle)[0])
+
+
+def _signed_geometry_margin(matrix):
+    matrix = np.asarray(matrix, float)
+    if matrix.shape != (2, 2) or not np.all(np.isfinite(matrix)):
+        return None
+    return float(min(
+        matrix[0, 0], matrix[1, 1], -matrix[0, 1], -matrix[1, 0],
+    ))
 
 
 def _slow_state(root, candidate_id, seeds):
@@ -88,15 +103,24 @@ def _arm_audit(config_path, root, candidate_id, row):
         "activity": row,
         "supervised_direction_vs_patient_spearman": matrix.tolist(),
         "slow_state": _slow_state(
-            root, candidate_id, bundle["config"]["search"][
-                "confirmation_network_seeds"
-            ],
+            root, candidate_id, active_network_seeds(bundle["config"]),
         ),
     }
     try:
         canonical = _canonical_rank_kmeans(bundle)
         selected = canonical["clean_global_index"]
         direction = np.asarray(canonical["direction"], int)
+        mapped_labels, cluster_to_mode = _map_kmeans_clusters_to_modes(
+            canonical["labels"], canonical["direction_contingency"],
+        )
+        event_ranks = normalize_event_ranks(bundle["ranks"][selected])
+        cluster_profiles = np.asarray([
+            _column_stats(event_ranks[mapped_labels == mode])[0]
+            for mode in SEMANTIC_MODE_ORDER
+        ])
+        cluster_matrix = _similarity(
+            cluster_profiles, _patient_profiles(bundle)[0],
+        )
         output["canonical_fig4c_kmeans"] = {
             "status": "EVALUABLE",
             "n_events": int(len(selected)),
@@ -112,6 +136,13 @@ def _arm_audit(config_path, root, candidate_id, row):
                 canonical["stability_ami_median"]
             ),
             "silhouette_median": float(canonical["silhouette_median"]),
+            "cluster_to_frozen_numeric_mode": cluster_to_mode.tolist(),
+            "cluster_vs_patient_spearman_MTA_MTB_by_TA_TB": (
+                cluster_matrix.tolist()
+            ),
+            "cluster_vs_patient_signed_geometry_margin": (
+                _signed_geometry_margin(cluster_matrix)
+            ),
             "patient_matched_direction_purity": _patient_matched_benchmark(
                 bundle, direction, draws=256, seed=20260813,
             ),

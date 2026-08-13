@@ -1,0 +1,143 @@
+{
+  "schema_version": "topic4_rev10_zm1_1_tau_adp_fit_v1",
+  "scientific_role": "development_only_data_driven_h_zm_tau_adp_calibration",
+  "claim_boundary": "Development-only one-dimensional M recovery-time calibration on frozen learned h plus spatial OU plus Z/M; no patient-blind, seizure-lifecycle, or mechanism-identifiability claim.",
+  "output_root": "results/topic4_sef_hfo/data_driven_core_field_rev10_zm/h_plus_zm_tau_adp/fit",
+  "inputs": {
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91"
+    },
+    "shaft_aware_target_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b"
+    },
+    "shaft_aware_floors": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_floors.json",
+      "sha256": "2f28c5ecd991d0a1b051337370fa7b975ecc2ce95b2f00f26a3ea88469299b94"
+    },
+    "shaft_aware_scoring_config": {
+      "path": "config/topic4_rev10_sa_shaft_aware.json",
+      "sha256": "88ea711352088e32dd1d4f361dced9e8d1bd4153fc08df584c4ef02ca6a0fb57"
+    },
+    "common_detector_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json",
+      "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"
+    },
+    "node_anchor_config": {
+      "path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json",
+      "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"
+    },
+    "node_anchor_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json",
+      "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"
+    },
+    "node_anchor_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/v62_mode_boundary_final_search_summary.json",
+      "sha256": "23a3be8fe60ac03eb511717062718a4e6fea1d24a2540ff330fa5f01da429fbf"
+    },
+    "frozen_direction_classifier_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_r/spatial_edge_flow_r2_1/candidate_manifest.json",
+      "sha256": "482b5fe1478a68a3bc061dd91545aed9ad1dc98ba3c178a63458bbbc0ddb887d"
+    },
+    "source_d5_2_config": {
+      "path": "config/topic4_rev10_d5_2_spatial_ou_confirmation.json",
+      "sha256": "9bda008c1f42a6abba48b6046b8f357612e669387cb4bb0e25cf26baa1419c61"
+    },
+    "source_d5_2_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/candidate_manifest.json",
+      "sha256": "f3dab0988c7c227bc1f9a4aca2ca49fdd9c5c0fbe008e789b303dedc999410f7"
+    },
+    "source_d5_2_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/confirmation_summary_returned_only.json",
+      "sha256": "72f9a557d5770efa4d4664d9c3a708e20c768c931da5d2316ac6264b9fd42884"
+    },
+    "source_d5_2_verdict": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/confirmation_verdict.json",
+      "sha256": "0e65e88c59dfca0b70b7cb1e315803598372e4161fcaf4c10e4883df354d5320"
+    }
+  },
+  "node_anchor": {
+    "candidate_id": "v62_density_t050",
+    "field_sha256": "5fc404a876713430b8d258a63e94e58fd9bd6e7a60234f7f34598dd49b97e060",
+    "selection_role": "Frozen D5.2 development anchor; not patient blind."
+  },
+  "mz_calibration": {
+    "source_label": "zA_q75_tz5000__mA0p001",
+    "source_commit": "795105221806fd3c2dd9224d1bfa6797634adab7",
+    "source_path": "config/topic4_mz_early_field_bridge_v2_zm.yaml",
+    "varied_parameter_only": "tau_adp",
+    "candidate_tau_adp_ms": [500.0, 1000.0, 1500.0, 2000.0],
+    "I_th_EI": 95.19851312666987,
+    "tau_z": 5000.0,
+    "eta_m": 0.007451594355587098,
+    "trace_stride_steps": 10
+  },
+  "slow_state_observation": {
+    "core_trace_mask": "h_i >= 0.5",
+    "role": "Audit summaries only; never changes Z/M equations or the node field."
+  },
+  "search": {
+    "phase": "fit",
+    "arm": "tau_adp_only_bracket_on_frozen_h_spatial_ou_zm",
+    "beta": "closed",
+    "network_topology": "frozen",
+    "fit_network_seeds": [1361, 1362, 1363],
+    "selection_network_seeds": [1371, 1372, 1373, 1374],
+    "confirmation_network_seeds": [1381, 1382, 1383, 1384, 1385, 1386],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true
+    },
+    "detector": {
+      "population_active_fraction_threshold": 0.0195703125,
+      "role": "Frozen common absolute detector."
+    },
+    "contact_readout": {
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    },
+    "objective": {
+      "semantics": "EXPLORATORY_EQUAL_NETWORK_RETURNED_ONLY_NO_SINGLE_SCORE_SELECTION",
+      "fixed_events_per_mode": 6,
+      "fallback_events_per_mode": 3,
+      "lse_temperature": 0.25,
+      "minimum_joint_in_distribution_events_per_mode_per_network": 1,
+      "support_weight": 4.0,
+      "ood_weight": 0.5,
+      "maximum_fit_pareto_candidates": 2,
+      "maximum_selection_candidates": 2
+    },
+    "acceptance": {
+      "role": "Exploratory multi-metric reporting; only runaway excludes a candidate from advancement.",
+      "figure_contract": "The final confirmation is judged with the two frozen data-driven SNN figures.",
+      "natural_kmeans_benchmark": "Report model direction purity against the patient-matched q05 and signed TA/TB geometry."
+    }
+  },
+  "spatial_edge_basis": {
+    "representation": "degree_two_continuous_midpoint_vector_field",
+    "sheet_L_mm": 20.0,
+    "displacement_length_scale_mm": 0.38,
+    "coefficient_count": 12,
+    "role": "Exact no-op edge adapter only."
+  },
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "screen_max_workers": 6,
+    "wait_seconds": 300,
+    "numeric_threads_per_worker": 1,
+    "notify_on_completion": true,
+    "minimum_available_memory_gib_per_screen_worker": 16.0,
+    "available_memory_fraction_budgeted": 0.5,
+    "cgroup_memory_high_gib": 20,
+    "cgroup_memory_max_gib": 24
+  }
+}

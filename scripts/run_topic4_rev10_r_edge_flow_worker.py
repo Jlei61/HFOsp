@@ -113,6 +113,7 @@ def main():
         "development_only_continuous_field_natural_kmeans_fresh_closeout",
         "development_only_continuous_field_joint_direction_surface",
         "development_only_data_driven_h_zm_consistency",
+        "development_only_data_driven_h_zm_tau_adp_calibration",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -144,6 +145,9 @@ def main():
         "REV10D6_1_NATURAL_KMEANS_CLOSEOUT_LIBRARY_FROZEN",
         "REV10D6_2_JOINT_CONTINUOUS_FIELD_SURFACE_FROZEN",
         "REV10ZM1_H_PLUS_ZM_LIBRARY_FROZEN",
+        "REV10ZM1_1_H_ZM_TAU_FIT_LIBRARY_FROZEN",
+        "REV10ZM1_1_H_ZM_TAU_SELECTION_LIBRARY_FROZEN",
+        "REV10ZM1_1_H_ZM_TAU_CONFIRMATION_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -340,6 +344,9 @@ def main():
         "REV10D6_1_NATURAL_KMEANS_CLOSEOUT_LIBRARY_FROZEN",
         "REV10D6_2_JOINT_CONTINUOUS_FIELD_SURFACE_FROZEN",
         "REV10ZM1_H_PLUS_ZM_LIBRARY_FROZEN",
+        "REV10ZM1_1_H_ZM_TAU_FIT_LIBRARY_FROZEN",
+        "REV10ZM1_1_H_ZM_TAU_SELECTION_LIBRARY_FROZEN",
+        "REV10ZM1_1_H_ZM_TAU_CONFIRMATION_LIBRARY_FROZEN",
     }:
         if not np.all(coefficients == 0.0):
             raise RuntimeError("rev10-D requires exact no-op edge coefficients")
