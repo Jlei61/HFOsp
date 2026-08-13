@@ -162,10 +162,16 @@ def _load_bundle(
     manifest, summary = _json(manifest_path), _json(summary_path)
     if manifest["config"]["sha256"] != _sha256(config_path):
         raise RuntimeError("manifest and rev10-R2 config do not match")
-    if config.get("scientific_role") == JOINT_CONTINUOUS_SURFACE_ROLE:
+    if (config.get("scientific_role") == JOINT_CONTINUOUS_SURFACE_ROLE
+            and (candidate_id is None or not allow_exploratory_candidate)):
         verdict = _json(output_root / "confirmation_verdict.json")
         frozen_id = verdict["diagnostic_display_candidate_id"]
         figure_candidate_selection = "post-run preregistered diagnostic display rule"
+    elif config.get("scientific_role") == JOINT_CONTINUOUS_SURFACE_ROLE:
+        # The auditor explicitly traverses every frozen candidate before the
+        # verdict exists. This path never selects the final display candidate.
+        frozen_id = candidate_id
+        figure_candidate_selection = "explicit frozen-library audit candidate"
     else:
         frozen_id = (
             manifest["selection_freeze"]["selected_nonzero_candidate_id"]

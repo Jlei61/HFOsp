@@ -101,6 +101,14 @@ def test_figure_consumer_has_no_simulation_or_candidate_selection():
     assert "candidate_is_phase_diagnostic_best" in source
 
 
+def test_d62_explicit_audit_candidate_does_not_require_verdict():
+    source = (
+        ROOT / "scripts/paper_figures/plot_fig4_spatial_edge_flow_validation.py"
+    ).read_text()
+    assert "candidate_id is None or not allow_exploratory_candidate" in source
+    assert "explicit frozen-library audit candidate" in source
+
+
 def test_kmeans_display_mapping_uses_best_two_mode_permutation():
     labels = np.array([0, 0, 0, 1, 1])
     contingency = np.array([[1, 2], [2, 0]])
