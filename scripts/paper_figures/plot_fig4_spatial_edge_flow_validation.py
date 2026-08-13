@@ -1152,16 +1152,22 @@ def _render_kmeans(bundle, output_dir):
     matrix = cluster_matrix
     displayed_matrix_contract = "pooled KMeans cluster vs patient profile"
     d61_row = None
-    if bundle["config"].get("scientific_role") in {
+    role = bundle["config"].get("scientific_role")
+    if role in {
             "development_only_continuous_field_natural_kmeans_fresh_closeout",
             JOINT_CONTINUOUS_SURFACE_ROLE,
             "development_only_continuous_field_joint_direction_replication"}:
         verdict_path = bundle["output_root"] / "confirmation_verdict.json"
         verdict = _json(verdict_path)
-        d61_row = next(
-            row for row in verdict["candidate_rows"]
-            if row["candidate_id"] == bundle["candidate_id"]
-        )
+        if role == "development_only_continuous_field_joint_direction_replication":
+            d61_row = verdict["candidate_metrics"]
+            if d61_row["candidate_id"] != bundle["candidate_id"]:
+                raise RuntimeError("D6.3 figure candidate differs from verdict")
+        else:
+            d61_row = next(
+                row for row in verdict["candidate_rows"]
+                if row["candidate_id"] == bundle["candidate_id"]
+            )
         numeric_matrices = np.asarray([
             seed_row["crossfit_patient_readout"]["matrix"]
             for seed_row in d61_row["natural_kmeans_by_network"].values()

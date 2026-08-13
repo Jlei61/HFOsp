@@ -109,6 +109,14 @@ def test_d62_explicit_audit_candidate_does_not_require_verdict():
     assert "explicit frozen-library audit candidate" in source
 
 
+def test_d63_figure_reads_two_arm_replication_schema():
+    source = (
+        ROOT / "scripts/paper_figures/plot_fig4_spatial_edge_flow_validation.py"
+    ).read_text()
+    assert 'd61_row = verdict["candidate_metrics"]' in source
+    assert "D6.3 figure candidate differs from verdict" in source
+
+
 def test_kmeans_display_mapping_uses_best_two_mode_permutation():
     labels = np.array([0, 0, 0, 1, 1])
     contingency = np.array([[1, 2], [2, 0]])
