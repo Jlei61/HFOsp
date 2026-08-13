@@ -28,6 +28,9 @@ from sklearn.metrics import adjusted_mutual_info_score
 from threadpoolctl import threadpool_limits
 
 ROOT = Path(__file__).resolve().parents[2]
+JOINT_CONTINUOUS_SURFACE_ROLE = (
+    "development_only_continuous_field_joint_direction_surface"
+)
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r2_spatial_edge_flow.json"
 TA_MODE = 1
 TB_MODE = 0
@@ -159,14 +162,23 @@ def _load_bundle(
     manifest, summary = _json(manifest_path), _json(summary_path)
     if manifest["config"]["sha256"] != _sha256(config_path):
         raise RuntimeError("manifest and rev10-R2 config do not match")
-    frozen_id = (
-        manifest["selection_freeze"]["selected_nonzero_candidate_id"]
-        if phase == "confirmation"
-        else summary["diagnostic_best_candidate_id"]
-    )
+    if config.get("scientific_role") == JOINT_CONTINUOUS_SURFACE_ROLE:
+        verdict = _json(output_root / "confirmation_verdict.json")
+        frozen_id = verdict["diagnostic_display_candidate_id"]
+        figure_candidate_selection = "post-run preregistered diagnostic display rule"
+    else:
+        frozen_id = (
+            manifest["selection_freeze"]["selected_nonzero_candidate_id"]
+            if phase == "confirmation"
+            else summary["diagnostic_best_candidate_id"]
+        )
+        figure_candidate_selection = (
+            "pre-network frozen candidate" if phase == "confirmation"
+            else "phase diagnostic best"
+        )
     if (candidate_id is not None and candidate_id != frozen_id
             and not allow_exploratory_candidate):
-        raise RuntimeError("figure candidate must equal the pre-network frozen candidate")
+        raise RuntimeError("figure candidate violates the frozen display contract")
     candidate_id = frozen_id if candidate_id is None else candidate_id
     candidates = {
         row["candidate_id"]: row for row in manifest["candidate_set"]["candidates"]
@@ -251,6 +263,7 @@ def _load_bundle(
         "manifest": manifest, "manifest_path": manifest_path,
         "summary": summary, "summary_path": summary_path,
         "candidate_id": candidate_id, "candidate": candidate,
+        "figure_candidate_selection": figure_candidate_selection,
         "groups": groups, "blocks": blocks, "records": records,
         "static": static, "onsets": onsets, "ranks": ranks,
         "labels": labels, "ood": ood,
@@ -717,11 +730,7 @@ def _metadata(bundle, figure):
     return {
         "figure": figure, "plotting_only": True,
         "candidate_id": bundle["candidate_id"],
-        "candidate_role": (
-            "pre-network frozen nonzero confirmation candidate"
-            if bundle["phase"] == "confirmation"
-            else f"frozen diagnostic best from equal-network {bundle['phase']} screen"
-        ),
+        "candidate_role": bundle["figure_candidate_selection"],
         "phase_diagnostic_best_candidate_id": bundle["summary"][
             "diagnostic_best_candidate_id"
         ],
@@ -1137,8 +1146,9 @@ def _render_kmeans(bundle, output_dir):
     matrix = cluster_matrix
     displayed_matrix_contract = "pooled KMeans cluster vs patient profile"
     d61_row = None
-    if bundle["config"].get("scientific_role") == (
-            "development_only_continuous_field_natural_kmeans_fresh_closeout"):
+    if bundle["config"].get("scientific_role") in {
+            "development_only_continuous_field_natural_kmeans_fresh_closeout",
+            JOINT_CONTINUOUS_SURFACE_ROLE}:
         verdict_path = bundle["output_root"] / "confirmation_verdict.json"
         verdict = _json(verdict_path)
         d61_row = next(
@@ -1256,20 +1266,27 @@ def _write_readme(output_dir, bundle):
     primary = bundle.get("manifest", {}).get("selection_freeze", {}).get(
         "primary_candidate_id",
     )
-    spatial_candidate_context = (
-        "fresh networks 运行前冻结的 primary"
-        if primary is None or bundle["candidate_id"] == primary
-        else "预冻结候选库中按 fresh 结果事后选择的描述性候选；不替代 primary"
-    )
+    role = bundle.get("config", {}).get("scientific_role")
+    if role == JOINT_CONTINUOUS_SURFACE_ROLE:
+        spatial_candidate_context = (
+            "按运行前写定的 display rule 事后选择、仅用于诊断的候选"
+        )
+    else:
+        spatial_candidate_context = (
+            "fresh networks 运行前冻结的 primary"
+            if primary is None or bundle["candidate_id"] == primary
+            else "预冻结候选库中按 fresh 结果事后选择的描述性候选；不替代 primary"
+        )
     candidate_context = (
         "selection 阶段在读取确认网络前冻结的非零候选"
         if bundle["phase"] == "confirmation"
         else "等网络 fit screen 冻结的 diagnostic best"
     )
     if _is_spatial_ou(bundle):
-        d61 = bundle["config"].get("scientific_role") == (
-            "development_only_continuous_field_natural_kmeans_fresh_closeout"
-        )
+        d61 = bundle["config"].get("scientific_role") in {
+            "development_only_continuous_field_natural_kmeans_fresh_closeout",
+            JOINT_CONTINUOUS_SURFACE_ROLE,
+        }
         matrix_text = (
             "最右矩阵是 6 张网络等权的 contact-split cross-fit patient readout："
             "在一组交替触点上分配模式，在互斥触点上评价，再交换两组。"
@@ -1347,6 +1364,9 @@ def main():
         }, indent=2))
     print(json.dumps({
         "status": (
+            "REV10D6_2_FIG4_DIAGNOSTIC_COMPLETE"
+            if config.get("scientific_role") == JOINT_CONTINUOUS_SURFACE_ROLE
+            else
             "REV10D6_1_FIG4_DIAGNOSTIC_COMPLETE"
             if config.get("scientific_role") == (
                 "development_only_continuous_field_natural_kmeans_fresh_closeout"

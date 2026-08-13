@@ -96,6 +96,8 @@ def test_figure_consumer_has_no_simulation_or_candidate_selection():
     assert "same-network" in source
     assert "a.u." in source
     assert 'manifest["selection_freeze"]["selected_nonzero_candidate_id"]' in source
+    assert 'verdict["diagnostic_display_candidate_id"]' in source
+    assert "post-run preregistered diagnostic display rule" in source
     assert "candidate_is_phase_diagnostic_best" in source
 
 
