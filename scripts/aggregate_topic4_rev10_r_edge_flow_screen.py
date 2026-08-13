@@ -538,6 +538,9 @@ def main():
     is_natural_kmeans_closeout = config["scientific_role"] == (
         "development_only_continuous_field_natural_kmeans_fresh_closeout"
     )
+    is_joint_continuous_surface = config["scientific_role"] == (
+        "development_only_continuous_field_joint_direction_surface"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -580,6 +583,10 @@ def main():
     if is_natural_kmeans_closeout:
         summary["status"] = (
             "REV10D6_1_RETURNED_ONLY_FRESH_CLOSEOUT_COMPLETE"
+        )
+    if is_joint_continuous_surface:
+        summary["status"] = (
+            "REV10D6_2_RETURNED_ONLY_JOINT_SURFACE_COMPLETE"
         )
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
