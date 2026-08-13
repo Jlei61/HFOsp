@@ -41,6 +41,8 @@ TARGET_BASE = {
     "L3_ADDED": "L3_LOCAL_PLUS_LEARNED_LR",
     "L3_MATCHED_LOCAL": "L3_LOCAL_PLUS_LEARNED_LR",
 }
+REQUIRED_ATTENUATION_TARGETS = ("L1_ADDED", "L2_ADDED", "L3_ADDED")
+OPTIONAL_ATTENUATION_TARGETS = ("L3_MATCHED_LOCAL",)
 OLD_ROOT = Path(
     "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-rnn-motif-cross-state-v0-4/"
     "results/topic5_rnn_motif_cross_state_benchmark_v0_4"
@@ -95,9 +97,41 @@ def load_candidates(out: Path, subject: str, endpoint: str, order: list[str]) ->
                     "a": align(data[f"A_{endpoint}"], names, order, endpoint),
                     "b": align(data[f"B_{endpoint}"], names, order, endpoint),
                 }
-    expected = len(ARMS) + len(TARGET_BASE) * 4
-    if len(candidates) != expected:
-        raise RuntimeError(f"{subject} {endpoint}: expected {expected} frozen candidates, got {len(candidates)}")
+    intact = {f"INTACT|{arm}" for arm in ARMS}
+    required_attenuation = {
+        f"ATTEN|{target}|{alpha:.2f}"
+        for target in REQUIRED_ATTENUATION_TARGETS
+        for alpha in (0.25, 0.50, 0.75, 1.00)
+    }
+    missing_required = sorted((intact | required_attenuation) - set(candidates))
+    if missing_required:
+        raise RuntimeError(
+            f"{subject} {endpoint}: missing required frozen candidates {missing_required}"
+        )
+    # Matched-local fields exist only when the target-free caliper search found
+    # a legal active local subset.  A failed search is explicitly descriptive-
+    # only and must not be repaired by inventing a counterfactual field.  The
+    # optional control is therefore either complete at all four doses or absent.
+    for target in OPTIONAL_ATTENUATION_TARGETS:
+        optional = {
+            f"ATTEN|{target}|{alpha:.2f}"
+            for alpha in (0.25, 0.50, 0.75, 1.00)
+        }
+        present = optional & set(candidates)
+        if present and present != optional:
+            raise RuntimeError(
+                f"{subject} {endpoint}: optional {target} fields are only partially frozen"
+            )
+    expected = len(intact) + len(required_attenuation)
+    optional_count = sum(
+        int(f"ATTEN|{target}|0.25" in candidates) * 4
+        for target in OPTIONAL_ATTENUATION_TARGETS
+    )
+    if len(candidates) != expected + optional_count:
+        raise RuntimeError(
+            f"{subject} {endpoint}: unexpected frozen candidate inventory "
+            f"({len(candidates)} rows)"
+        )
     return candidates
 
 

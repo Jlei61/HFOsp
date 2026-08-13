@@ -1,6 +1,14 @@
 # Topic 5.1 Local-Backbone Selective-Shortcut RNN（LBSS-RNN）科学设计 v0.2
 
-> 状态：已按 2026-08-11 审阅修订并锁定执行。除工程 bug、OOM 并发和已定义暂停条件外，不在真实结果出来后修改科学合同。
+> **2026-08-12 状态修正**：本版本复用的 latent nodes 全部位于任一 contact 的 `3 sigma` 观测带内，
+> 因此只作为 `CONTACT_DILATED_DOMAIN_SENSITIVITY` 保留；不得再用其 local-only/LR 结果关闭完整组织
+> 平面上的 selective-shortcut 假设。修复版合同见
+> `2026-08-12-topic5-lbss-full-tissue-rnn-v0-3-design.md`。
+
+> 状态：LBSS 物理连接子分析已按 2026-08-11 审阅锁定。**分母更正**见
+> `2026-08-11-topic5-rnn-full-cohort-field-transfer-correction-design.md`：本文件中的
+> 21 人是物理几何机制子集，10 人/24 seizures 是旧 cache 的历史敏感性结果，均不得再冒充
+> “全部间期患者”或 Figure 3D 的 primary early-ictal cohort。
 
 ## 1. 一句话目标
 
@@ -31,7 +39,9 @@ v0.4 已经证明：
 
 LBSS 只改变 recurrent mask 的组成，以下全部继承 v0.4：
 
-- 21 位物理坐标模型患者、31 fits；
+- 21 位物理坐标模型患者、31 fits；该分母只用于 LBSS 局部/非局部连接结构比较；
+- 患者内间期传播可学习性的 cohort primary 固定为 `dataset_v0_4` 的全部 34 位 K=2 患者，
+  由不依赖物理坐标的 contact-space recurrent model 承担；
 - shared 患者单 fit，non-collinear 患者 own_a/own_b 两 fit；
 - retrospective/test-informed propagation plane；
 - `geometry_status=RETROSPECTIVE_TEST_INFORMED`；
@@ -364,9 +374,33 @@ TARGET_KNOWN_TO_PROJECT_BUT_WITHHELD_FROM_LBSS_TRAINING_AND_SELECTION
 
 所有 LBSS 模型、fields、pathway definitions 和 attenuation sets 先冻结，之后才运行 scorer。不得根据 early-ictal 结果调整 K、r_local、rewiring、checkpoint 或 representative patient。
 
-### 11.2 Cohort
+### 11.2 Cohort（2026-08-11 分母更正）
 
-沿用 v0.4 physical-coordinate model cohort 与 target 的 exact primary intersection：10 人、24 seizures；E1146 为 supportive。缺失的 5 位 strict-target 患者不事后降低 8-contact model threshold。
+跨状态 primary 不再使用旧的 `topic5-history-rnn-early-ictal/cache/outer_*` 交集。
+正式外部测试必须逐位复用 Figure 3D 的冻结母清单：
+
+```text
+all_phenotype_matched: 17 patients / 167 seizures
+strict_broadband:      16 patients / 106 seizures
+gamma_nonbroadband:    11 patients / 61 seizures
+```
+
+其中 Epilepsiae 以 clinical onset 对齐；Yuquan Xuxinyi 因无 clinical-onset 标注，保留真实
+EEG-onset 对齐，不能伪造 clinical onset。每位患者所有合格 seizures 先患者内折叠，再做患者级统计。
+发作数据只用于冻结模型和 model fields 之后的测试，不参与训练、模型选择、checkpoint 选择或参数调整。
+
+旧的 10 人/24 seizures 结果只保留为 `LBSS_PHYSICAL_EXACT_JOIN_ARCHIVE_SENSITIVITY`，不得作为
+primary cohort，也不得据此写“只有 10 人有发作数据”。
+
+### 11.2.1 强制防回归断言
+
+新的 scorer 必须 fail closed：
+
+1. 输入母清单必须来自 `clinical_onset_gradient_field_cohort_stat_{subject,event}.csv`；
+2. primary subjects 必须恰为 17，primary seizures 必须恰为 167；
+3. 禁止读取任何 `cache/outer_<subject>/<subject>__*.npz` 作为 Figure 3D target；
+4. 模型覆盖在 target 读取前冻结并写 hash；
+5. 若 17 人中任一人没有冻结模型场，scorer 必须停止并列出缺失者，不得静默缩小分母。
 
 ### 11.3 Endpoints
 

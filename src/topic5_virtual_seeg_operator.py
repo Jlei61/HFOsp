@@ -16,6 +16,7 @@ from dataclasses import dataclass
 from typing import Sequence
 
 import numpy as np
+from scipy.spatial import ConvexHull, QhullError
 
 # Support cut-off in units of sigma.  Beyond this the Gaussian weight is below
 # 1.2e-2 of the peak and the operator would stop being local.
@@ -140,6 +141,244 @@ def node_count(n_contacts: int) -> int:
 # which the contact still averages a neighbourhood.
 MIN_NODES_PER_CONTACT = 3
 MAX_NODES = 192
+
+
+# Full-tissue v0.3 uses a larger but still bounded latent mesh.  The historical
+# 192-node ceiling remains untouched above so the old contact-dilated results
+# stay reproducible.
+FULL_TISSUE_MAX_NODES = 384
+FULL_TISSUE_MIN_BACKGROUND_NODES = 64
+FULL_TISSUE_MIN_ZERO_H_NODES = 16
+FULL_TISSUE_MIN_ZERO_H_FRACTION = 0.10
+
+
+@dataclass(frozen=True)
+class FullTissueLayout:
+    """Versioned latent interpolation domain for LBSS v0.3.
+
+    ``nodes_xy`` contains both quasi-uniform background tissue nodes and any
+    extra local nodes needed for a non-degenerate SEEG readout.  ``H`` is still
+    exactly local, so columns whose sum is zero are genuine latent tissue state:
+    they can only be driven and observed through recurrent propagation.
+    """
+
+    nodes_xy: np.ndarray
+    H: np.ndarray
+    domain_area_mm2: float
+    domain_margin_mm: float
+    background_spacing_mm: float
+    candidate_step_mm: float
+    n_background_nodes: int
+    n_support_nodes_added: int
+    n_zero_h_nodes: int
+    zero_h_fraction: float
+    contact_pitch_mm: float
+    envelope_kind: str
+
+
+def _median_contact_pitch(xy: np.ndarray) -> float:
+    points = np.asarray(xy, float)
+    d = np.linalg.norm(points[:, None, :] - points[None, :, :], axis=-1)
+    np.fill_diagonal(d, np.inf)
+    value = float(np.median(d.min(axis=1)))
+    if not np.isfinite(value) or value <= 0:
+        raise ValueError("contact geometry has no positive nearest-neighbour pitch")
+    return value
+
+
+def _full_tissue_candidates(
+    xy: np.ndarray,
+    sigma_mm: float,
+) -> tuple[np.ndarray, float, float, float, str]:
+    """Grid the offset contact-cloud envelope, independent of readout support.
+
+    A non-degenerate cloud uses an outward-shifted convex hull.  A nearly
+    collinear cloud uses a PCA-aligned rectangle.  Neither path clips candidates
+    by distance to a contact; this is the key v0.3 change.
+    """
+    points = np.asarray(xy, float)
+    pitch = _median_contact_pitch(points)
+    margin = max(SUPPORT_SIGMA * float(sigma_mm), pitch)
+    background_spacing = max(2.0, pitch)
+    step = max(0.25, min(1.0, 0.5 * min(background_spacing, float(sigma_mm))))
+    lo = points.min(axis=0) - margin
+    hi = points.max(axis=0) + margin
+    gx = np.arange(lo[0], hi[0] + step, step)
+    gy = np.arange(lo[1], hi[1] + step, step)
+    grid = np.stack(np.meshgrid(gx, gy, indexing="ij"), axis=-1).reshape(-1, 2)
+
+    centred = points - points.mean(axis=0, keepdims=True)
+    singular = np.linalg.svd(centred, compute_uv=False)
+    near_collinear = bool(len(singular) < 2 or singular[1] <= 1e-6 * max(singular[0], 1e-12))
+    if not near_collinear:
+        try:
+            hull = ConvexHull(points)
+            normals = hull.equations[:, :2]
+            offsets = hull.equations[:, 2]
+            norm = np.linalg.norm(normals, axis=1)
+            inside = np.all(
+                grid @ normals.T + offsets <= margin * norm + 1e-9,
+                axis=1,
+            )
+            kind = "OFFSET_CONVEX_HULL"
+        except QhullError:
+            near_collinear = True
+    if near_collinear:
+        centre = points.mean(axis=0)
+        _, _, vh = np.linalg.svd(points - centre, full_matrices=False)
+        basis = vh if vh.shape == (2, 2) else np.eye(2)
+        contact_uv = (points - centre) @ basis.T
+        grid_uv = (grid - centre) @ basis.T
+        lower = contact_uv.min(axis=0) - margin
+        upper = contact_uv.max(axis=0) + margin
+        inside = np.all((grid_uv >= lower) & (grid_uv <= upper), axis=1)
+        kind = "PCA_RECTANGLE_FALLBACK"
+
+    candidates = grid[inside]
+    if len(candidates) < FULL_TISSUE_MIN_BACKGROUND_NODES:
+        raise ValueError("full-tissue envelope contains too few grid candidates")
+    area = float(len(candidates) * step * step)
+    return candidates, area, margin, background_spacing, kind
+
+
+def _farthest_points(
+    candidates: np.ndarray,
+    n_points: int,
+    seed: int,
+) -> np.ndarray:
+    if n_points > len(candidates):
+        raise ValueError("requested more background nodes than domain candidates")
+    rng = np.random.default_rng(seed)
+    chosen = [int(rng.integers(len(candidates)))]
+    distance = np.linalg.norm(candidates - candidates[chosen[0]], axis=1)
+    for _ in range(int(n_points) - 1):
+        nxt = int(np.argmax(distance))
+        chosen.append(nxt)
+        distance = np.minimum(
+            distance,
+            np.linalg.norm(candidates - candidates[nxt], axis=1),
+        )
+    return candidates[np.asarray(chosen, dtype=int)]
+
+
+def _farthest_points_from_existing(
+    candidates: np.ndarray,
+    existing: np.ndarray,
+    n_points: int,
+) -> np.ndarray:
+    """Deterministically fill holes while staying far from the existing mesh."""
+    pool = np.asarray(candidates, float)
+    fixed = np.asarray(existing, float)
+    if int(n_points) <= 0:
+        return np.empty((0, 2), dtype=float)
+    distance = np.linalg.norm(pool[:, None, :] - fixed[None, :, :], axis=-1).min(axis=1)
+    chosen: list[int] = []
+    for _ in range(int(n_points)):
+        nxt = int(np.argmax(distance))
+        if not np.isfinite(distance[nxt]) or distance[nxt] <= 1e-7:
+            raise ValueError("not enough distinct candidates to fill the latent mesh")
+        chosen.append(nxt)
+        distance = np.minimum(distance, np.linalg.norm(pool - pool[nxt], axis=1))
+        distance[nxt] = -np.inf
+    return pool[np.asarray(chosen, dtype=int)]
+
+
+def _add_contact_support_nodes(
+    contacts_xy: np.ndarray,
+    nodes_xy: np.ndarray,
+    sigma_mm: float,
+) -> tuple[np.ndarray, int]:
+    """Add only the local latent nodes needed to keep every H row a neighbourhood."""
+    contacts = np.asarray(contacts_xy, float)
+    nodes = [row.copy() for row in np.asarray(nodes_xy, float)]
+    radius = 0.5 * float(sigma_mm)
+    base_angles = np.array([0.0, 2.0 * np.pi / 3.0, 4.0 * np.pi / 3.0])
+    added = 0
+    for contact_index, contact in enumerate(contacts):
+        array = np.asarray(nodes, float)
+        count = int(np.sum(np.linalg.norm(array - contact, axis=1) <= SUPPORT_SIGMA * sigma_mm))
+        angle_offset = (contact_index % 7) * (np.pi / 31.0)
+        for angle in base_angles + angle_offset:
+            if count >= MIN_NODES_PER_CONTACT:
+                break
+            candidate = contact + radius * np.array([np.cos(angle), np.sin(angle)])
+            array = np.asarray(nodes, float)
+            if np.min(np.linalg.norm(array - candidate, axis=1)) <= 1e-7:
+                continue
+            nodes.append(candidate)
+            count += 1
+            added += 1
+    return np.asarray(nodes, float), int(added)
+
+
+def resolve_full_tissue_layout(
+    xy: np.ndarray,
+    sigma_mm: float,
+    seed: int,
+    *,
+    max_nodes: int = FULL_TISSUE_MAX_NODES,
+) -> FullTissueLayout:
+    """Build the v0.3 full-tissue mesh and local virtual-SEEG operator.
+
+    The background node budget is area based rather than contact-count based.
+    Up to three support nodes per contact are reserved before applying the hard
+    ceiling, so narrow readout kernels cannot make a contact disappear.
+    """
+    points = np.asarray(xy, float)
+    if points.ndim != 2 or points.shape[1] != 2 or len(points) < 2:
+        raise ValueError("xy must be an (n_contacts, 2) array with at least two contacts")
+    candidates, area, margin, spacing, envelope_kind = _full_tissue_candidates(
+        points, sigma_mm
+    )
+    pitch = _median_contact_pitch(points)
+    reserve = MIN_NODES_PER_CONTACT * len(points)
+    if reserve + FULL_TISSUE_MIN_BACKGROUND_NODES > int(max_nodes):
+        raise ValueError("max_nodes cannot hold the minimum background and contact support nodes")
+    target_background = int(np.ceil(area / (spacing * spacing)))
+    target_background = max(FULL_TISSUE_MIN_BACKGROUND_NODES, target_background)
+    target_background = min(int(max_nodes) - reserve, target_background)
+    background = _farthest_points(candidates, target_background, seed)
+    nodes, n_support_added = _add_contact_support_nodes(points, background, sigma_mm)
+    if len(nodes) > int(max_nodes):
+        raise RuntimeError("full-tissue node ceiling exceeded after support-node placement")
+    H = build_observation_operator(points, nodes, sigma_mm)
+    zero = np.asarray(H.sum(axis=0) <= 1e-12)
+    minimum_zero = max(
+        FULL_TISSUE_MIN_ZERO_H_NODES,
+        int(np.ceil(FULL_TISSUE_MIN_ZERO_H_FRACTION * len(nodes))),
+    )
+    if int(zero.sum()) < minimum_zero:
+        needed = minimum_zero - int(zero.sum())
+        if len(nodes) + needed > int(max_nodes):
+            raise ValueError(
+                "node ceiling leaves too little room for explicit zero-H tissue nodes"
+            )
+        distance_to_contact = np.linalg.norm(
+            candidates[:, None, :] - points[None, :, :], axis=-1
+        ).min(axis=1)
+        zero_candidates = candidates[
+            distance_to_contact > SUPPORT_SIGMA * float(sigma_mm) + 1e-9
+        ]
+        fill = _farthest_points_from_existing(zero_candidates, nodes, needed)
+        nodes = np.concatenate([nodes, fill], axis=0)
+        H = build_observation_operator(points, nodes, sigma_mm)
+        zero = np.asarray(H.sum(axis=0) <= 1e-12)
+        if int(zero.sum()) < minimum_zero:
+            raise RuntimeError("zero-H fill did not satisfy the frozen coverage contract")
+    return FullTissueLayout(
+        nodes_xy=nodes,
+        H=H,
+        domain_area_mm2=area,
+        domain_margin_mm=margin,
+        background_spacing_mm=spacing,
+        candidate_step_mm=max(0.25, min(1.0, 0.5 * min(spacing, float(sigma_mm)))),
+        n_background_nodes=int(len(background)),
+        n_support_nodes_added=n_support_added,
+        n_zero_h_nodes=int(zero.sum()),
+        zero_h_fraction=float(zero.mean()),
+        contact_pitch_mm=pitch,
+        envelope_kind=envelope_kind,
+    )
 
 
 def resolve_node_count(

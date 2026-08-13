@@ -74,6 +74,8 @@ def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, default=Path("results/topic5_lbss_rnn_v0_2"))
     parser.add_argument("--snapshot-name", default="postprocess_snapshot_v2")
+    parser.add_argument("--allow-dirty", action="store_true",
+                        help="freeze the exact reviewed worktree and record its diff hash")
     args = parser.parse_args()
     out = args.out_root.resolve()
     if (out / "TARGET_UNSEAL_AUTHORIZATION.json").exists() or (out / "TARGET_ACCESS_AUDIT.json").exists():
@@ -82,8 +84,9 @@ def main() -> None:
     if snapshot.exists():
         raise FileExistsError(snapshot)
     status = subprocess.check_output(["git", "status", "--porcelain"], cwd=ROOT, text=True).strip()
-    if status:
+    if status and not args.allow_dirty:
         raise RuntimeError(f"postprocess snapshot requires a clean worktree:\n{status}")
+    diff = subprocess.check_output(["git", "diff", "--binary"], cwd=ROOT)
     files = dependency_closure(ENTRY_FILES)
     records = {}
     for relative in files:
@@ -96,6 +99,9 @@ def main() -> None:
         "contract": "topic5_lbss_self_contained_postprocess_snapshot_v0_2",
         "created_at": datetime.now(timezone.utc).isoformat(),
         "git_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
+        "dirty_worktree_explicitly_allowed": bool(args.allow_dirty and status),
+        "git_status_porcelain": status.splitlines(),
+        "git_diff_sha256": hashlib.sha256(diff).hexdigest(),
         "files": records,
         "entry_files": list(ENTRY_FILES),
         "self_contained_local_import_closure": True,

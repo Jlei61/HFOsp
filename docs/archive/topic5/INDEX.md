@@ -6,6 +6,27 @@
 
 ## 主线（network-axis pivot）
 
+### `lbss_full_tissue_spatial_search_closeout_2026-08-12.md` — **完整组织平面与 early-ictal 收口：局部 recurrence 足够；跨状态对应正向但不具 nonlocal 特异性**
+- 21 人/31 fits 的 latent mesh 修正为完整组织域：nodes 中位 104，zero-H nodes 中位 53（57.8%）；钳零这些未观测 nodes 后 21/21 患者留出预测变差，排除了模型仅在 contacts 附近计算的解释。
+- 465/465 正式单元显示 L0 local-only 相对 no-recurrence 为 20/21 改善；L3 相对 order-shuffle 为 21/21 改善，但 L3 不优于 local-only、等容量 extra-local 或 random-nonlocal。
+- 13 档 target-free 空间/训练 screen、组合检查及两档 matched confirmation 共 216 单元，较低 rewiring fraction 与较低 learning rate 均未确认 selective-nonlocal 优势；停止继续追逐超参数。
+- 全部 intact/attenuation fields 冻结后，12 人/141 seizures 中 L3 canonical-full field 相对 synchronized all-contact null 的 margin 中位 `+0.1420`（9/12，双侧 `P=0.0122`，bootstrap CI 为正）；但 Claim-D family `q=0.0854`，L3 不优于 L0/L1/L2，attenuation 双重解离不成立。允许写“model-generated interictal field 有正向 early-ictal correspondence”，不允许写“selective nonlocal topology 被发作早期特异复用”。
+
+### `rnn_full_cohort_field_transfer_v0_1_2026-08-11.md` — **34 人间期生成阳性；冻结 RNN field 在 Figure 3 的 17 人/167 次发作上出现正向跨状态对应**
+- 修复旧 history-RNN `outer_*` cache 将发作分母静默缩为 10 人/24 seizures 的问题；今后间期 primary 固定为 34 位 K=2 患者，RNN external benchmark 固定为 Figure 3D 的 17 人/167 次 phenotype-matched seizures。
+- 复用 34×3 个已收敛 patient-within linear-state RNN，不重训。Native rollout transition correlation 相对 static-only 为 33/34 改善（中位 +0.3188，单侧 paired Wilcoxon P=1.16×10⁻¹⁰）。
+- 17/17 个 RNN fields 在 target access 前冻结。RNN-field early-ictal maxAB |r| 相对 synchronized all-contact shuffle 的患者中位 margin 为 +0.0297，11/17 为正，预定义单侧 paired Wilcoxon P=0.0443；双侧 patient sign-flip P=0.116。E1146 的 RNN TA/TB 对经验 TA/TB 分别为 ρ=0.957/0.904。
+
+### `lbss_latent_domain_audit_2026-08-12.md` — **P0 几何纠偏：旧 spatial RNN 没有真正未观测 tissue nodes**
+- 31/31 fits 的 v0.2 latent nodes 全部位于任一 SEEG contact 的 `3 sigma` readout support 内；zero-H nodes 为 0%，中位 65.6% nodes 只由一个 contact 读出。
+- 因而旧 local kNN 是 contact-dilated-domain 上的局部图，不足以关闭完整传播平面中的 selective-nonlocal-shortcut 假设。旧 LBSS 数值保留为 sensitivity；v0.3 使用 offset contact-cloud envelope、显式 zero-H latent state 和相同 L0–L3/order-shuffle matched experiment 重跑。
+- v0.3 target-value-free metadata audit 已冻结 Figure 3D 17 人/167 seizures 到 full-tissue spatial cohort 的逐患者交集：12 人/141 seizures，8–16 个 exact-joined contacts；缺失 5 人均因没有 full-tissue spatial model，不再沿用旧 10 人/24 seizures cache。
+
+### `local_backbone_selective_shortcut_rnn_v0_2_closeout_2026-08-11.md` — **历史 contact-dilated-domain sensitivity：真实顺序可学；shortcut 结论待 full-tissue 重跑**
+- 21 人、31 fits、5 arms、3 seeds 的 465/465 正式训练单元全部完成；强连通 local backbone 相对 no-recurrence 的 heldout NLL 改善为 20/21，且能从第一 rank 自由生成留出传播。真实顺序相对 deranged order-shuffle 为 21/21 改善。
+- 在 contact-dilated domain 中，task-selected nonlocal shortcuts 在 distal transitions 上不优于 local-only、extra-local 或 random-nonlocal；但 2026-08-12 审计确认该 domain 没有真正未观测 tissue nodes，local kNN 可跨越未表示组织。因此该阴性只作历史 sensitivity，不能否定 full-tissue selective shortcut。
+- 所有模型场和 attenuation 场在 target unseal 前冻结。该报告的 10 人/24 seizures 仅保留为 LBSS 物理 exact-join 历史敏感性；正式 RNN cross-state 分母和结果已由上一条 34/17 全 cohort 修复接管。四个 LBSS recurrent arms 相近、selected-shortcut-specific 跨状态增量不成立的结构比较仍保留。
+
 ### `rnn_motif_cross_state_v0_4_review_closeout_2026-08-10.md` — **间期生成充分性闭合；跨状态对应趋势未确认；局部有效组织阳性**
 - 冻结模型无需重训；补齐 16→15→10 队列排除链、early-ictal target 患者内可靠性、canonical/full 场分解、布线资源定义和自由推演 Kendall 诊断。缺失 5 人均因冻结物理坐标模型少于 8 个 exact geometry/event contacts，不是评分 join 静默丢失。
 - Q1 为强阳性：真实顺序 recurrent models 能自由生成 heldout 间期传播；多种 topology 均充分。Q2 仍是正向但未确认：source 有稳定贡献，recurrence 正向，true-order 与 wiring cost 无额外跨状态增量。Q3 仅支持 local effective influence enrichment；matched lesion 因 n=5/7 记为不确定。

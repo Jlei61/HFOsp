@@ -1,8 +1,13 @@
 # Topic 5.1 LBSS-RNN 执行计划 v0.2
 
+> **2026-08-12 状态修正**：本计划已完成的空间模型使用 contact-dilated latent domain，仅作为历史
+> sensitivity。后续执行由 `2026-08-12-topic5-lbss-full-tissue-rnn-v0-3.md` 接管。
+
 > 对应 spec：`docs/superpowers/specs/2026-08-10-topic5-local-backbone-selective-shortcut-rnn-design.md`
 >
-> 状态：已按 2026-08-11 审阅修订并获准执行。
+> 状态：LBSS 物理几何子分析已完成。全 cohort/early-ictal 分母修复由
+> `2026-08-11-topic5-rnn-full-cohort-field-transfer-correction.md` 接管；本计划中旧 10 人 target
+> 交集不得再作为正式外部测试分母。
 
 ## Milestone A｜干净工作区与输入冻结
 
@@ -27,7 +32,9 @@
 - 每个 fit 的 candidate pool ≥K；
 - snapshot 与 source hash 一致。
 
-暂停阈值固定为：geometry-ineligible 患者多于 2 位，或任一当前 10 人 early-ictal primary 患者 ineligible。低于该阈值时不改 cohort，按预定义状态继续并逐患者报告。
+该阈值只适用于历史 LBSS 物理机制子集，不再决定 RNN external benchmark 分母。正式
+early-ictal primary 必须逐位匹配 Figure 3D 的 17 人/167 seizures；任何缺失都报错停止，不能
+因 geometry-ineligible 自动缩小 cohort。
 
 ## Milestone B｜LBSS mask 与训练实现
 
@@ -235,7 +242,8 @@ target_access_count = 0
 - canonical-full primary；
 - seed-removed key secondary；
 - patient-first；
-- actual frozen intersection n=10，E1146 supportive。
+- 历史 LBSS physical exact join n=10，E1146 supportive；仅归档敏感性。
+- 正式 RNN external benchmark 必须转到 Figure 3D 的 n=17/167 全母清单。
 
 统计：
 
@@ -248,13 +256,15 @@ target_access_count = 0
 7. LR-vs-local double-dissociation；
 8. learned-nonlocal attenuation 对 early-ictal margin 的 dose response。
 
-Claim B、C、D 各自作为独立 Holm family。Early-ictal 图和表明确标出 `n=10 patients / 24 seizures`。
+Claim B、C 仍在 21 人 LBSS 机制子集中裁决。正式 cross-state 图和表明确标出
+`n=17 patients / 167 seizures`；旧 `n=10 / 24 seizures` 只能标为 archived physical-subset sensitivity。
 
 不允许：
 
 - 看到 target 后改 K、threshold、checkpoint 或模型；
 - 挑 early-ictal 最好的 seed；
-- 把 n=10 改写成完整 strict 15/16；
+- 把 21 人 LBSS 机制子集改写成 34 人间期 cohort；
+- 把旧 n=10/24 cache 结果改写成 Figure 3D 的正式 n=17/167 外部测试；
 - 将趋势写成确认迁移。
 - target unseal 后重新运行模型、选择 edge target 或生成 field；
 - scorer 写出任何新的模型 field。

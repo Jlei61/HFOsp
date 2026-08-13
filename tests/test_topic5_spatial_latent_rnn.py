@@ -29,6 +29,7 @@ from src.topic5_virtual_seeg_operator import (
     nearest_node,
     node_count,
     normalised_distance,
+    resolve_full_tissue_layout,
     resolve_node_count,
     sample_latent_nodes,
 )
@@ -162,6 +163,47 @@ def test_resolve_node_count_guarantees_a_neighbourhood_when_contacts_are_dense()
     assert n_nodes >= nominal
     assert int((H > 0).sum(axis=1).min()) >= MIN_NODES_PER_CONTACT
     assert len(nodes) == n_nodes
+
+
+# --------------------------------------------------------------------------
+# Full-tissue LBSS v0.3: contacts are readouts, not the latent domain
+# --------------------------------------------------------------------------
+
+def test_full_tissue_layout_contains_explicit_unobserved_state():
+    xy = _toy_plane(n_shafts=3, per_shaft=5, pitch=4.0)
+    sigma = kernel_sigma_mm(xy, floor_mm=0.0)
+    layout = resolve_full_tissue_layout(xy, sigma, seed=17)
+    zero_h = layout.H.sum(axis=0) <= 1e-12
+    assert int(zero_h.sum()) >= 16
+    assert float(zero_h.mean()) >= 0.10
+    assert layout.n_zero_h_nodes == int(zero_h.sum())
+    # Historical placement used the observation support union as its domain;
+    # the full-tissue mesh must no longer obey that identity.
+    distance = np.linalg.norm(
+        layout.nodes_xy[:, None, :] - xy[None, :, :], axis=-1
+    )
+    assert np.any(distance.min(axis=1) > SUPPORT_SIGMA * sigma)
+
+
+def test_full_tissue_layout_preserves_local_readout_contract():
+    xy = _toy_plane(n_shafts=4, per_shaft=4, pitch=3.0)
+    sigma = kernel_sigma_mm(xy, floor_mm=0.0)
+    layout = resolve_full_tissue_layout(xy, sigma, seed=19)
+    np.testing.assert_allclose(layout.H.sum(axis=1), 1.0, atol=1e-12)
+    assert int((layout.H > 0).sum(axis=1).min()) >= MIN_NODES_PER_CONTACT
+    assert len(layout.nodes_xy) <= 384
+
+
+def test_full_tissue_layout_is_seed_deterministic_without_changing_domain():
+    xy = _toy_plane(n_shafts=3, per_shaft=5, pitch=4.0)
+    sigma = kernel_sigma_mm(xy, floor_mm=0.0)
+    a = resolve_full_tissue_layout(xy, sigma, seed=23)
+    b = resolve_full_tissue_layout(xy, sigma, seed=23)
+    c = resolve_full_tissue_layout(xy, sigma, seed=29)
+    np.testing.assert_array_equal(a.nodes_xy, b.nodes_xy)
+    np.testing.assert_array_equal(a.H, b.H)
+    assert not np.array_equal(a.nodes_xy, c.nodes_xy)
+    assert a.domain_area_mm2 == pytest.approx(c.domain_area_mm2)
 
 
 # --------------------------------------------------------------------------

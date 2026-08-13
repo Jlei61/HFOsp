@@ -50,6 +50,22 @@ def safe_corr(a: np.ndarray, b: np.ndarray) -> float:
     return float(value) if np.isfinite(value) else float("nan")
 
 
+def add_scale_bar(ax: plt.Axes, xy: np.ndarray, length_mm: float = 5.0) -> None:
+    """Add a compact physical scale without misnaming the tissue-plane axes."""
+    xy = np.asarray(xy, float)
+    x0, x1 = float(xy[:, 0].min()), float(xy[:, 0].max())
+    y0, y1 = float(xy[:, 1].min()), float(xy[:, 1].max())
+    pad_x = max(0.8, 0.08 * max(x1 - x0, length_mm))
+    pad_y = max(0.8, 0.08 * max(y1 - y0, length_mm))
+    start = x0 + pad_x
+    y = y0 + pad_y
+    shown = min(float(length_mm), max(length_mm * 0.5, x1 - x0 - 2 * pad_x))
+    ax.plot([start, start + shown], [y, y], color="#263238", lw=1.5,
+            solid_capstyle="butt", clip_on=False)
+    ax.text(start + shown / 2, y - 0.65 * pad_y, f"{shown:g} mm",
+            ha="center", va="top", fontsize=8.5, color="#263238")
+
+
 def summarize_unit(out: Path, metrics_path: Path, device: torch.device, max_prefixes: int) -> dict:
     model, _, metrics, plane, events, _ = instantiate_lbss(out, metrics_path, device)
     keep = events["split"] >= 0
@@ -214,8 +230,9 @@ def plot_pathways(patient: pd.DataFrame, out: Path, representative: str) -> None
         ax.scatter(xy[:, 0], xy[:, 1], s=12 + 300 * target, facecolor="none", edgecolor="#c83e32", lw=1.0)
         ax.set_aspect("equal")
         ax.set_title(title)
-        ax.set_xlabel("Propagation axis (mm)")
-        ax.set_ylabel("Transverse axis (mm)")
+        ax.set_xticks([])
+        ax.set_yticks([])
+        add_scale_bar(ax, xy)
     ax = axes[2]
     ax.scatter(np.zeros(len(patient)), patient["endpoint_dissimilarity_beyond_proposal"], s=18,
                color="#66727c", alpha=0.75)
@@ -235,12 +252,17 @@ def plot_pathways(patient: pd.DataFrame, out: Path, representative: str) -> None
         fig.savefig(figures / f"stage_e_target_free_pathway_formation.{suffix}", dpi=600,
                     bbox_inches="tight")
     plt.close(fig)
-    (figures / "README.md").write_text(
+    entry = (
         "### stage_e_target_free_pathway_formation.png\n\n"
-        "A、B 在预先指定代表患者中显示真实顺序和打乱顺序训练后，新增边的 contact-space source（蓝）与 target（红圈）有效影响分布。"
+        "A、B 在预先指定代表患者的真实 tissue-plane 几何中显示真实顺序和打乱顺序训练后，新增边的 contact-space source（蓝）与 target（红圈）有效影响分布。"
         "C 在患者层显示真实顺序与打乱顺序的空间差异超过 candidate-proposal exposure 差异的部分。\n\n"
-        "**关注点**：承重对象是粗空间有效影响，不是跨 seed 完全相同的二元边。\n"
+        "**关注点**：承重对象是粗空间有效影响，不是跨 seed 完全相同的二元边；二维坐标只表示患者组织平面，不被命名为独立恢复的病理轴。\n"
     )
+    readme = figures / "README.md"
+    previous = readme.read_text() if readme.exists() else ""
+    if "### stage_e_target_free_pathway_formation.png" not in previous:
+        with readme.open("a") as stream:
+            stream.write(("\n" if previous else "") + entry)
 
 
 def main() -> None:

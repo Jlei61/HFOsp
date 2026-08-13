@@ -6,11 +6,17 @@ import argparse
 import hashlib
 import json
 from pathlib import Path
+import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from scipy.stats import wilcoxon
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from src.topic5_lbss_analysis_v0_2 import upsert_figure_readme  # noqa: E402
 
 
 ARMS = (
@@ -73,6 +79,25 @@ def paired_test(values: np.ndarray, tolerance: float = 1e-9) -> dict:
 def load_distance(path: Path) -> pd.DataFrame:
     frame = pd.DataFrame(json.loads(path.read_text()))
     return frame[["event_index", "rank_index", "frontier_distance_mm", "contact_nll", "top1"]]
+
+
+def require_no_rec_equivalence(out: Path) -> dict:
+    """Refuse to import the v0.4 comparator without its equivalence audit.
+
+    Spec section 4 allows the v0.4 no-recurrence arm into a matched contrast
+    only after a checkpoint/config/hash equivalence audit.  Claim A is built on
+    that arm, so the audit is a hard precondition rather than a report.
+    """
+    path = out / "NO_REC_EQUIVALENCE_AUDIT.json"
+    if not path.exists():
+        raise RuntimeError(
+            "Claim A imports the v0.4 no-recurrence arm; run "
+            "scripts/complete_topic5_lbss_closeout_audits_v0_2.py --only-comparator-audit first"
+        )
+    audit = json.loads(path.read_text())
+    if audit.get("verdict") != "EQUIVALENT_ENOUGH_FOR_MATCHED_CONTRAST":
+        raise RuntimeError(f"no-recurrence comparator failed equivalence: {audit.get('verdict')}")
+    return audit
 
 
 def old_no_rec_metrics(fit_id: str, seed: int) -> dict:
@@ -138,7 +163,8 @@ def plot_summary(patient: pd.DataFrame, summary: dict, out: Path) -> None:
         fig.savefig(figures / f"stage_d_interictal_lbss_summary.{suffix}", dpi=600,
                     bbox_inches="tight")
     plt.close(fig)
-    (figures / "README.md").write_text(
+    upsert_figure_readme(
+        figures / "README.md", "stage_d_interictal_lbss_summary.png",
         "### stage_d_interictal_lbss_summary.png\n\n"
         "A 比较 L3 在全部 held-out next-rank decisions 上相对三种 matched arm 及顺序打乱的 NLL 增益。"
         "B 只看由真实训练事件冻结的 distal transitions；C 展示只给第一 rank 后自由生成的患者级传播排序一致性。\n\n"
@@ -153,6 +179,7 @@ def main() -> None:
     out = args.out_root.resolve()
     if not (out / "FORMAL_TRAINING_COMPLETE.json").exists():
         raise RuntimeError("formal training is not complete")
+    equivalence = require_no_rec_equivalence(out)
     input_manifest = json.loads((out / "INPUT_CACHE_MANIFEST.json").read_text())
     fit_ids = sorted({row["fit_id"] for row in input_manifest["files"]})
     snapshot = out / "run_snapshot"
@@ -301,6 +328,7 @@ def main() -> None:
         "all_test_targets_shared": True,
         "all_distance_bins_shared": True,
         "all_L2_L3_initial_masks_shared": True,
+        "no_recurrence_comparator_equivalence": equivalence["verdict"],
         "target_values_read": False,
     }, indent=2) + "\n")
     plot_summary(patient, summary, out)

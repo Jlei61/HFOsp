@@ -35,9 +35,9 @@ ARMS = (
     "L3_LOCAL_PLUS_LEARNED_LR",
     "C_L3_ORDER_SHUFFLED",
 )
-OLD_ROOT = Path(
-    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-rnn-motif-cross-state-v0-4/"
-    "results/topic5_rnn_motif_cross_state_benchmark_v0_4"
+DEFAULT_FIELD_ROOT = Path(
+    "/home/honglab/leijiaxin/HFOsp/results/"
+    "interictal_propagation_masked/template_gradient_fields/per_subject"
 )
 
 
@@ -207,12 +207,14 @@ def aggregate_patient_fields(out: Path, field_root: Path, fit_fields: dict) -> p
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--out-root", type=Path, default=Path("results/topic5_lbss_rnn_v0_2"))
+    parser.add_argument("--field-root", type=Path, default=DEFAULT_FIELD_ROOT)
     args = parser.parse_args()
     out = args.out_root.resolve()
     if not (out / "INTERICTAL_ANALYSIS_COMPLETE.json").exists():
         raise RuntimeError("interictal analysis must pass before field freeze")
-    old_manifest = json.loads((OLD_ROOT / "INPUT_MANIFEST.json").read_text())
-    field_root = Path(old_manifest["input_roots"]["field"])
+    field_root = args.field_root.resolve()
+    if len(list(field_root.glob("*.json"))) < 21:
+        raise RuntimeError(f"canonical empirical field root is incomplete: {field_root}")
     frame, fields = build_seed_fields(out, field_root)
     # 11 shared fits contribute A and B; 20 own-mode fits contribute one each.
     expected_fit_seed_templates = (11 * 2 + 20) * len(ARMS) * 3

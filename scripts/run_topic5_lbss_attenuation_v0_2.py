@@ -8,6 +8,7 @@ import gzip
 import hashlib
 import json
 import multiprocessing as mp
+import os
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -50,9 +51,9 @@ TARGETS = {
     "L3_ADDED": "L3_LOCAL_PLUS_LEARNED_LR",
     "L3_MATCHED_LOCAL": "L3_LOCAL_PLUS_LEARNED_LR",
 }
-OLD_ROOT = Path(
-    "/home/honglab/leijiaxin/HFOsp/.worktrees/topic5-rnn-motif-cross-state-v0-4/"
-    "results/topic5_rnn_motif_cross_state_benchmark_v0_4"
+DEFAULT_FIELD_ROOT = Path(
+    "/home/honglab/leijiaxin/HFOsp/results/"
+    "interictal_propagation_masked/template_gradient_fields/per_subject"
 )
 
 
@@ -62,6 +63,81 @@ def sha256_file(path: Path) -> str:
         for block in iter(lambda: stream.read(1 << 20), b""):
             digest.update(block)
     return digest.hexdigest()
+
+
+def attenuation_unit_cache_path(
+    out: Path, metrics_path: Path, target_name: str
+) -> Path:
+    """Return the unique, restart-safe cache path for one attenuation job."""
+    metrics = json.loads(metrics_path.read_text())
+    return (
+        out / "attenuation" / "unit_cache" / str(metrics["fit_id"])
+        / target_name / f"seed{int(metrics['seed'])}.json.gz"
+    )
+
+
+def write_attenuation_unit_cache(
+    destination: Path,
+    metrics_path: Path,
+    target_name: str,
+    draw_rows: list[dict],
+    field_rows: list[dict],
+) -> None:
+    """Atomically persist a completed job before returning it to the parent.
+
+    ProcessPoolExecutor otherwise keeps every completed result only in parent
+    memory until all 372 jobs finish.  A network/session interruption near the
+    end would therefore force the entire target-free attenuation experiment to
+    be recomputed.  This sidecar changes scheduling durability only; scientific
+    inputs, masks, doses, rollouts and aggregation remain identical.
+    """
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = destination.with_name(destination.name + f".tmp.{os.getpid()}")
+    payload = {
+        "contract": "topic5_lbss_attenuation_unit_cache_v0_3",
+        "metrics_path": str(metrics_path),
+        "metrics_sha256": sha256_file(metrics_path),
+        "target": target_name,
+        "draw_rows": draw_rows,
+        "field_rows": field_rows,
+        "target_values_read": False,
+    }
+    with gzip.open(temporary, "wt", encoding="utf-8") as stream:
+        json.dump(payload, stream, separators=(",", ":"), allow_nan=True)
+    os.replace(temporary, destination)
+
+
+def load_attenuation_unit_cache(
+    destination: Path, metrics_path: Path, target_name: str
+) -> tuple[list[dict], list[dict]] | None:
+    """Load a complete unit only when its producer inputs still match."""
+    if not destination.exists():
+        return None
+    try:
+        with gzip.open(destination, "rt", encoding="utf-8") as stream:
+            payload = json.load(stream)
+        if payload.get("contract") != "topic5_lbss_attenuation_unit_cache_v0_3":
+            return None
+        if payload.get("target_values_read") is not False:
+            return None
+        if payload.get("target") != target_name:
+            return None
+        if payload.get("metrics_sha256") != sha256_file(metrics_path):
+            return None
+        draw_rows = payload["draw_rows"]
+        field_rows = payload["field_rows"]
+        if not isinstance(draw_rows, list) or not isinstance(field_rows, list):
+            return None
+        for row in field_rows:
+            field_path = Path(row["path"])
+            rollout_path = Path(row["rollout_path"])
+            if not field_path.exists() or sha256_file(field_path) != row["field_sha256"]:
+                return None
+            if not rollout_path.exists() or sha256_file(rollout_path) != row["rollout_sha256"]:
+                return None
+        return draw_rows, field_rows
+    except (OSError, EOFError, KeyError, TypeError, ValueError, json.JSONDecodeError):
+        return None
 
 
 def rollout_reach(sequence: list[list[int]], seed: np.ndarray, xy: np.ndarray) -> float:
@@ -222,7 +298,26 @@ def unit_target(
         inferential = True
         target_hashes = [mask_sha256(target_masks[0])]
     if not target_masks:
-        raise RuntimeError(f"no valid attenuation target masks: {metrics['fit_id']} {target_name}")
+        # A failed matched-control search is a prespecified descriptive-only
+        # outcome, not a pipeline failure.  Preserve one explicit row per dose
+        # so eligibility propagates through the patient-first aggregation, but
+        # do not invent a counterfactual field when no active local subset met
+        # the frozen calipers.
+        empty = {
+            "contact_nll": np.nan, "top1": np.nan,
+            "local_nll": np.nan, "intermediate_nll": np.nan, "distal_nll": np.nan,
+            "local_n": 0, "intermediate_n": 0, "distal_n": 0,
+            "rollout_spearman": np.nan, "rollout_reach_mm": np.nan,
+        }
+        rows = [{
+            "subject": metrics["subject"], "fit_id": metrics["fit_id"],
+            "scope": metrics["scope"], "arm": metrics["arm"], "seed": metrics["seed"],
+            "target": target_name, "alpha": alpha, "draw": -1,
+            **empty, **intact, "target_mask_sha256": "NO_VALID_MATCH",
+            "n_valid_matched_draws": match_count, "inferential_eligible": False,
+            "target_values_read": False,
+        } for alpha in ALPHAS]
+        return rows, []
 
     metric_rows, field_rows = [], []
     for alpha in ALPHAS:
@@ -280,8 +375,20 @@ def unit_target(
 def unit_target_worker(payload: tuple[str, str, str, str]) -> tuple[list[dict], list[dict]]:
     """Spawn-safe wrapper; every target/unit pair writes to a unique path."""
     out, metrics_path, target_name, device = payload
+    out_path = Path(out)
+    metrics = Path(metrics_path)
+    cache_path = attenuation_unit_cache_path(out_path, metrics, target_name)
+    cached = load_attenuation_unit_cache(cache_path, metrics, target_name)
+    if cached is not None:
+        return cached
     torch.set_num_threads(2)
-    return unit_target(Path(out), Path(metrics_path), target_name, torch.device(device))
+    draw_rows, field_rows = unit_target(
+        out_path, metrics, target_name, torch.device(device)
+    )
+    write_attenuation_unit_cache(
+        cache_path, metrics, target_name, draw_rows, field_rows
+    )
+    return draw_rows, field_rows
 
 
 def aggregate_patient_fields(out: Path, field_frame: pd.DataFrame, field_root: Path) -> pd.DataFrame:
@@ -367,17 +474,41 @@ def aggregate_patient_fields(out: Path, field_frame: pd.DataFrame, field_root: P
 
 
 def aggregate_metrics(out: Path, draw_frame: pd.DataFrame, field_frame: pd.DataFrame) -> pd.DataFrame:
-    value_columns = [
+    metric_columns = [
         "contact_nll", "top1", "local_nll", "intermediate_nll", "distal_nll",
         "rollout_spearman", "rollout_reach_mm", "intact_contact_nll", "intact_local_nll",
         "intact_intermediate_nll", "intact_distal_nll", "intact_rollout_spearman",
-        "inferential_eligible", "n_valid_matched_draws",
     ]
-    unit = draw_frame.groupby(
-        ["subject", "fit_id", "scope", "arm", "seed", "target", "alpha"], sort=False
-    )[value_columns].median().reset_index()
-    fit = unit.groupby(["subject", "fit_id", "arm", "target", "alpha"], sort=False)[value_columns].median().reset_index()
-    patient = fit.groupby(["subject", "arm", "target", "alpha"], sort=False)[value_columns].mean().reset_index()
+    unit_keys = ["subject", "fit_id", "scope", "arm", "seed", "target", "alpha"]
+    unit_group = draw_frame.groupby(unit_keys, sort=False)
+    unit = unit_group[metric_columns].median().reset_index()
+    unit = unit.merge(
+        unit_group.agg(
+            inferential_eligible=("inferential_eligible", "min"),
+            n_valid_matched_draws=("n_valid_matched_draws", "min"),
+        ).reset_index(),
+        on=unit_keys, how="left", validate="one_to_one",
+    )
+    fit_keys = ["subject", "fit_id", "arm", "target", "alpha"]
+    fit_group = unit.groupby(fit_keys, sort=False)
+    fit = fit_group[metric_columns].median().reset_index()
+    fit = fit.merge(
+        fit_group.agg(
+            inferential_eligible=("inferential_eligible", "min"),
+            n_valid_matched_draws=("n_valid_matched_draws", "min"),
+        ).reset_index(),
+        on=fit_keys, how="left", validate="one_to_one",
+    )
+    patient_keys = ["subject", "arm", "target", "alpha"]
+    patient_group = fit.groupby(patient_keys, sort=False)
+    patient = patient_group[metric_columns].mean().reset_index()
+    patient = patient.merge(
+        patient_group.agg(
+            inferential_eligible=("inferential_eligible", "min"),
+            n_valid_matched_draws=("n_valid_matched_draws", "min"),
+        ).reset_index(),
+        on=patient_keys, how="left", validate="one_to_one",
+    )
     for endpoint in ("contact_nll", "local_nll", "intermediate_nll", "distal_nll"):
         patient[f"delta_{endpoint}"] = patient[endpoint] - patient[f"intact_{endpoint}"]
     patient["distal_selectivity"] = patient["delta_distal_nll"] - patient["delta_local_nll"]
@@ -462,6 +593,7 @@ def main() -> None:
     parser.add_argument("--out-root", type=Path, default=Path("results/topic5_lbss_rnn_v0_2"))
     parser.add_argument("--device", default="cuda:0" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--workers", type=int, default=6)
+    parser.add_argument("--field-root", type=Path, default=DEFAULT_FIELD_ROOT)
     args = parser.parse_args()
     out = args.out_root.resolve()
     if not (out / "PATHWAY_ANALYSIS_COMPLETE.json").exists():
@@ -487,16 +619,35 @@ def main() -> None:
     draw_frame, field_frame = pd.DataFrame(draw_rows), pd.DataFrame(field_rows)
     draw_frame.to_csv(attenuation / "attenuation_per_fit_seed_draw.csv", index=False)
     field_frame.to_csv(attenuation / "attenuated_field_per_fit_seed.csv", index=False)
-    if len(field_frame) != (42 * 3 * 4 + 42 * 3 * 4 + 42 * 3 * 8):
-        raise RuntimeError(f"unexpected fit-seed-template field count: {len(field_frame)}")
-    field_root = Path(json.loads((OLD_ROOT / "INPUT_MANIFEST.json").read_text())["input_roots"]["field"])
-    aggregate_patient_fields(out, field_frame, field_root)
+    field_counts = field_frame.groupby("target").size().to_dict()
+    expected_simple = 42 * 3 * 4
+    for target in ("L1_ADDED", "L2_ADDED", "L3_ADDED"):
+        if int(field_counts.get(target, 0)) != expected_simple:
+            raise RuntimeError(
+                f"unexpected {target} fit-seed-template field count: "
+                f"{field_counts.get(target, 0)} != {expected_simple}"
+            )
+    if int(field_counts.get("L3_MATCHED_LOCAL", 0)) < 1:
+        raise RuntimeError("no matched-local fields were evaluable in the cohort")
+    field_root = args.field_root.resolve()
+    if len(list(field_root.glob("*.json"))) < 21:
+        raise RuntimeError(f"canonical empirical field root is incomplete: {field_root}")
+    patient_fields = aggregate_patient_fields(out, field_frame, field_root)
     patient = aggregate_metrics(out, draw_frame, field_frame)
     plot_stage(patient, out)
     manifest = out / "ATTENUATED_FIELD_MANIFEST.csv"
+    skipped_units = draw_frame.loc[draw_frame.draw < 0, ["fit_id", "seed", "target"]].drop_duplicates()
+    ineligible_units = draw_frame.loc[
+        ~draw_frame.inferential_eligible.astype(bool), ["fit_id", "seed", "target"]
+    ].drop_duplicates()
     (out / "ATTENUATED_FIELD_MANIFEST.json").write_text(json.dumps({
-        "status": "FROZEN", "n_fit_seed_target_alpha": 31 * 3 * 4 * 4,
-        "n_patient_target_alpha": 21 * 4 * 4,
+        "status": "FROZEN_WITH_DESCRIPTIVE_ONLY_CONTROLS",
+        "n_scheduled_fit_seed_target_alpha": 31 * 3 * 4 * 4,
+        "n_field_rows": len(field_frame),
+        "field_rows_by_target": {str(key): int(value) for key, value in field_counts.items()},
+        "n_patient_target_alpha": len(patient_fields),
+        "n_skipped_no_valid_control_units": len(skipped_units),
+        "n_inferentially_ineligible_units": len(ineligible_units),
         "manifest": str(manifest), "manifest_sha256": sha256_file(manifest),
         "local_control_candidate_draws": 20_000,
         "local_control_valid_target": 500,
@@ -504,8 +655,13 @@ def main() -> None:
         "target_access_count": 0, "target_values_read": False,
     }, indent=2) + "\n")
     (out / "ATTENUATION_COMPLETE.json").write_text(json.dumps({
-        "status": "PASS", "target_values_read": False,
+        "status": "PASS_WITH_DESCRIPTIVE_ONLY_CONTROLS", "target_values_read": False,
         "n_metric_draw_rows": len(draw_frame), "n_field_rows": len(field_frame),
+        "n_restart_safe_unit_caches": len(list(
+            (out / "attenuation" / "unit_cache").glob("*/*/seed*.json.gz")
+        )),
+        "n_skipped_no_valid_control_units": len(skipped_units),
+        "n_inferentially_ineligible_units": len(ineligible_units),
     }, indent=2) + "\n")
 
 

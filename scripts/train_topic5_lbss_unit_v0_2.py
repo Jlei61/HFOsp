@@ -43,6 +43,7 @@ DEFAULTS: dict[str, Any] = {
     "lr": 6e-3,
     "density": 0.10,
     "added_fraction": 0.10,
+    "r_local_multiplier": 2.0,
     "state_dim": 1,
     "stop_weight": 1.0,
     "epochs_warmup": 10,
@@ -120,34 +121,41 @@ def decision_rows(
     event_indices: np.ndarray,
     contact_xy_mm: np.ndarray,
     device: torch.device,
+    batch_size: int = 512,
 ) -> list[dict[str, Any]]:
     model.eval()
     rows: list[dict[str, Any]] = []
-    for event_index in np.asarray(event_indices, dtype=int):
-        batch = {key: value[event_index:event_index + 1].to(device) for key, value in tensors.items()}
+    indices = np.asarray(event_indices, dtype=int)
+    for begin in range(0, len(indices), int(batch_size)):
+        chosen_np = indices[begin:begin + int(batch_size)]
+        chosen = torch.as_tensor(chosen_np)
+        batch = {key: value[chosen].to(device) for key, value in tensors.items()}
         logits, _ = model(batch["x"], batch["recruited"], batch["valid"])
-        row = ranks[event_index]
-        max_rank = int(row[row >= 0].max()) if np.any(row >= 0) else -1
-        recruited: set[int] = set()
-        for rank_index in range(max_rank):
-            current = np.flatnonzero(row == rank_index)
-            recruited.update(current.tolist())
-            nxt = np.flatnonzero(row == rank_index + 1)
-            distance = transition_frontier_distance(current, recruited, nxt, contact_xy_mm)
-            available = batch["available"][0, rank_index]
-            target = batch["target"][0, rank_index]
-            log_prob = torch.log_softmax(logits[0, rank_index].masked_fill(~available, -1e9), -1)
-            nll = float(-(log_prob * target).sum() / target.sum().clamp_min(1.0))
-            prediction = int(logits[0, rank_index].masked_fill(~available, -1e9).argmax())
-            rows.append({
-                "event_index": int(event_index),
-                "rank_index": int(rank_index),
-                "frontier_distance_mm": distance,
-                "contact_nll": nll,
-                "top1": int(prediction in set(nxt.tolist())),
-                "n_current": int(current.size),
-                "n_next": int(nxt.size),
-            })
+        masked = logits.masked_fill(~batch["available"], -1e9)
+        log_prob = torch.log_softmax(masked, -1).detach().cpu().numpy()
+        prediction = masked.argmax(-1).detach().cpu().numpy()
+        target = batch["target"].detach().cpu().numpy()
+        for local_index, event_index in enumerate(chosen_np):
+            row = ranks[event_index]
+            max_rank = int(row[row >= 0].max()) if np.any(row >= 0) else -1
+            recruited: set[int] = set()
+            for rank_index in range(max_rank):
+                current = np.flatnonzero(row == rank_index)
+                recruited.update(current.tolist())
+                nxt = np.flatnonzero(row == rank_index + 1)
+                distance = transition_frontier_distance(current, recruited, nxt, contact_xy_mm)
+                next_target = target[local_index, rank_index]
+                denominator = max(1.0, float(next_target.sum()))
+                nll = float(-(log_prob[local_index, rank_index] * next_target).sum() / denominator)
+                rows.append({
+                    "event_index": int(event_index),
+                    "rank_index": int(rank_index),
+                    "frontier_distance_mm": distance,
+                    "contact_nll": nll,
+                    "top1": int(int(prediction[local_index, rank_index]) in set(nxt.tolist())),
+                    "n_current": int(current.size),
+                    "n_next": int(nxt.size),
+                })
     return rows
 
 
@@ -251,7 +259,10 @@ def train_unit(
     test_idx = np.flatnonzero(split == 2)
     batch_size = resolve_batch(len(train_idx), cfg)
 
-    pools = build_pool_contract(plane["D_mm"], cfg["density"], cfg["added_fraction"])
+    pools = build_pool_contract(
+        plane["D_mm"], cfg["density"], cfg["added_fraction"],
+        cfg["r_local_multiplier"],
+    )
     model = LBSSModel(LBSSConfig(
         arm=arm,
         n_contacts=int(provenance["n_contacts"]),
@@ -491,10 +502,27 @@ def main() -> None:
     parser.add_argument("--out-root", type=Path, default=Path("results/topic5_lbss_rnn_v0_2"))
     parser.add_argument("--device", default="cuda:0" if torch.cuda.is_available() else "cpu")
     parser.add_argument("--epochs-freeze", type=int)
+    parser.add_argument(
+        "--config-json", type=Path,
+        help=("Optional target-free development override. Only spatial-search keys "
+              "lr/density/added_fraction/r_local_multiplier/zeta0/state_dim are accepted."),
+    )
     parser.add_argument("--no-resume", action="store_true")
     parser.add_argument("--unit-root-name", default="per_fit")
     args = parser.parse_args()
     cfg = dict(DEFAULTS)
+    if args.config_json is not None:
+        overrides = json.loads(args.config_json.read_text())
+        if not isinstance(overrides, dict):
+            raise ValueError("config-json must contain a JSON object")
+        allowed = {"lr", "density", "added_fraction", "r_local_multiplier", "zeta0", "state_dim"}
+        unknown = sorted(set(overrides) - allowed)
+        if unknown:
+            raise ValueError(f"unsupported target-free search keys: {unknown}")
+        cfg.update(overrides)
+        if int(cfg["state_dim"]) not in (1, 2, 4):
+            raise ValueError("target-free state_dim must be one of 1, 2, or 4")
+        cfg["state_dim"] = int(cfg["state_dim"])
     if args.epochs_freeze is not None:
         cfg["epochs_freeze"] = int(args.epochs_freeze)
     torch.manual_seed(args.seed)

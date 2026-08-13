@@ -12,6 +12,24 @@ from src.topic5_lbss_rnn_v0_2 import LBSSConfig, LBSSModel, build_pool_contract
 from src.topic5_rnn_motif_v0_4 import RolloutSizeHead
 
 
+def upsert_figure_readme(readme: Path, heading: str, entry: str) -> None:
+    """Replace one figure's README section in place, keeping every other section.
+
+    The stage scripts previously either clobbered the whole file with
+    ``write_text`` or appended blindly, so re-running a plot deleted the other
+    figures' notes or produced duplicate sections.
+    """
+    sections: list[str] = []
+    if readme.exists():
+        current = readme.read_text()
+        sections = [block for block in current.split("\n### ") if block.strip()]
+        sections = [block if block.startswith("### ") else "### " + block.lstrip("# ")
+                    for block in sections]
+        sections = [block for block in sections if not block.startswith(f"### {heading}")]
+    sections.append(entry.strip() + "\n")
+    readme.write_text("\n".join(block.rstrip() + "\n" for block in sections))
+
+
 def mask_sha256(mask: np.ndarray) -> str:
     return hashlib.sha256(np.ascontiguousarray(np.asarray(mask, np.uint8)).view(np.uint8)).hexdigest()
 
@@ -29,7 +47,10 @@ def instantiate_lbss(
     events = {key: events_file[key] for key in events_file.files}
     provenance = json.loads((cache / "provenance.json").read_text())
     cfg = metrics["config"]
-    pools = build_pool_contract(plane["D_mm"], cfg["density"], cfg["added_fraction"])
+    pools = build_pool_contract(
+        plane["D_mm"], cfg["density"], cfg["added_fraction"],
+        cfg.get("r_local_multiplier", 2.0),
+    )
     model = LBSSModel(LBSSConfig(
         arm=metrics["arm"],
         n_contacts=int(provenance["n_contacts"]),

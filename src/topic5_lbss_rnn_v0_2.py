@@ -95,16 +95,23 @@ def symmetrized_knn_mask(distance_mm: np.ndarray, density: float = 0.10) -> tupl
         row = distance[source].copy()
         row[source] = np.inf
         stable_order.append(np.argsort(row, kind="stable"))
+    # Grow one mask incrementally.  The historical implementation rebuilt all
+    # k-neighbour masks from scratch, which is harmless at 60 nodes but becomes
+    # the dominant cost for the full-tissue v0.3 meshes.  Connectivity and edge
+    # count are monotone in k, so once a connected mask passes the target edge
+    # budget no later k can improve the absolute budget mismatch.
+    mask = np.zeros((n, n), dtype=bool)
     for k in range(1, n):
-        mask = np.zeros((n, n), dtype=bool)
         for source in range(n):
-            for target_node in stable_order[source][:k]:
-                mask[source, target_node] = True
-                mask[target_node, source] = True
+            target_node = stable_order[source][k - 1]
+            mask[source, target_node] = True
+            mask[target_node, source] = True
         np.fill_diagonal(mask, False)
         audit = strong_component_audit(mask)
         if audit["all_nodes_one_strong_component"]:
-            candidates.append((abs(int(mask.sum()) - target), k, mask))
+            candidates.append((abs(int(mask.sum()) - target), k, mask.copy()))
+            if int(mask.sum()) >= target:
+                break
     if not candidates:
         raise RuntimeError("no strongly connected symmetrized-kNN mask exists")
     _, k, selected = min(candidates, key=lambda item: (item[0], item[1]))
@@ -115,6 +122,7 @@ def build_pool_contract(
     distance_mm: np.ndarray,
     density: float = 0.10,
     added_fraction: float = 0.10,
+    r_local_multiplier: float = 2.0,
 ) -> PoolContract:
     distance = _validate_distance(distance_mm)
     local, k_neighbors = symmetrized_knn_mask(distance, density=density)
@@ -122,7 +130,9 @@ def build_pool_contract(
     local_lengths = distance[local_bool]
     if local_lengths.size == 0:
         raise RuntimeError("local backbone contains no edges")
-    r_local = 2.0 * float(np.median(local_lengths))
+    if not np.isfinite(r_local_multiplier) or float(r_local_multiplier) <= 1.0:
+        raise ValueError("r_local_multiplier must be finite and greater than one")
+    r_local = float(r_local_multiplier) * float(np.median(local_lengths))
     off = ~np.eye(distance.shape[0], dtype=bool)
     available = off & ~local_bool
     extra = available & (distance <= r_local)
@@ -301,7 +311,20 @@ class LBSSModel(WEModel):
             self.edge_age[target, source] = -1
         for target, source in grown:
             self.edge_age[target, source] = 0
-        self.recurrent[:, touched] = 0.0
+        # ``touched`` is a node-pair mask.  When every tissue node carries
+        # multiple state channels, each changed node edge owns a full d x d
+        # recurrent block and the node mask must be lifted before indexing the
+        # recurrent tensor.  State-dimension one is intentionally unchanged.
+        touched_recurrent = touched
+        if self.state_dim > 1:
+            touched_recurrent = torch.kron(
+                touched.float(),
+                torch.ones(
+                    self.state_dim, self.state_dim,
+                    device=touched.device, dtype=touched.dtype,
+                ),
+            ).bool()
+        self.recurrent[:, touched_recurrent] = 0.0
         self.rewire_counter += 1
         return {"n_drop": n_drop, "touched": touched}
 

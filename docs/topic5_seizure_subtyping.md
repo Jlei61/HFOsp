@@ -18,6 +18,50 @@
 > 范围：以 ictal seizure 本身为研究对象——subject 内的 seizure subtype carve-out + 下游 pre-ictal / outcome / propagation 关联。
 > **不属于**：interictal 事件内部传播（topic1）、IEI/PSD（topic2）、spatial SOZ 归因（topic3）、模型层（topic4）。
 
+### RNN full-cohort 分母锁与跨状态结果（2026-08-11）
+
+RNN 间期患者内自监督学习的正式分母固定为 masked-rank `dataset_v0_4` 全部 34 位 K=2 患者，
+每人 3 seeds；Figure 3 external benchmark 固定为 17 位患者、167 次 phenotype-matched
+seizures。旧 history-RNN `outer_*` cache 得到的 10 人/24 seizures 只允许作为历史物理 exact-join
+敏感性，**不得再写成“只有 10 人有发作数据”或 primary early-ictal cohort**。
+
+空间机制层另有独立分母：full-tissue LBSS 只覆盖具备可用二维传播平面的 21 人/31 fits；其与 Figure 3D 的逐患者交集在 target-value-free metadata audit 中冻结为 **12 人/141 seizures**（每次 8–16 个 exact contacts）。因此 Figure 6 的总体跨状态结果仍使用 contact-space RNN 的 17 人/167 seizures；local/nonlocal spatial mechanism 只能在 21 人间期及 12 人/141 seizures 的空间交集中解释，不能把 12 静默写成 17，也不能退回旧 10/24。
+
+复用已收敛 patient-within linear-state RNN 后，native rollout transition correlation 相对
+static-only 为 33/34 改善（中位差 +0.3188，单侧 paired Wilcoxon P=1.16×10⁻¹⁰）。在 17/17
+model fields 先于 target access 冻结后，RNN-field early-ictal maxAB |r| 相对 synchronized
+all-contact channel shuffle 的患者中位 margin 为 +0.0297，11/17 为正，预定义单侧 paired
+Wilcoxon P=0.0443（双侧 patient sign-flip P=0.116）。正式方法、边界与图见
+`docs/archive/topic5/rnn_full_cohort_field_transfer_v0_1_2026-08-11.md`。
+
+**2026-08-12 spatial-RNN 几何纠偏**：此前 wiring-economy/LBSS 的 latent nodes 实际全部落在
+contact 的 `3 sigma` 直接读出带内，31/31 fits 均无 zero-H latent node；因此旧结果只能说明
+contact-dilated domain 上多种 recurrence 可学习传播，不能据此认定完整组织平面上的 local-only 已足够。
+当前 v0.3 保留 SEEG 为局部 `H^T/H` 读出端口，在 contact 间和直接观测范围外加入 full-tissue latent
+state，并重新比较 local backbone、extra-local、random nonlocal、task-selected nonlocal 与 order-shuffle。
+审计见 `docs/archive/topic5/lbss_latent_domain_audit_2026-08-12.md`。
+
+**2026-08-12 full-tissue 间期与空间搜索结果**：21 人/31 fits 的 v0.3 latent nodes 中位 104，
+其中 zero-H nodes 中位 53（57.8%）；把 zero-H states 逐 rank 钳零后，21/21 患者的 held-out
+预测变差，中位 `+0.2684 nats/decision`，说明 contact 之间和直接读出区外的组织状态确实参与计算。
+465/465 正式单元中，local-only 相对 no-recurrence 为 20/21 改善，真实 L3 相对 order-shuffle
+为 21/21 改善；但 task-selected nonlocal 相对 local-only、extra-local 和 random-nonlocal 均无
+选择性增量。预先限定的 13 档 target-free 空间/训练 screen 及两档 matched confirmation 也未找到
+同时超过上述 controls 的配置，因此不继续扩大搜索追阳性。详见
+`docs/archive/topic5/lbss_full_tissue_spatial_search_closeout_2026-08-12.md`。
+
+**2026-08-13 full-tissue early-ictal 收口**：所有 intact 与 attenuation fields 在 target
+unseal 前冻结。12 位 spatial exact-join 患者/141 次 seizures 中，L3 canonical-full field
+相对 synchronized all-contact channel-shuffle null 的患者级 margin 中位为 `+0.1420`
+（bootstrap 95% CI `[+0.0077,+0.2433]`，9/12 为正，双侧 Wilcoxon `P=0.0122`）；
+seed-removed margin 中位为 `+0.1343`（9/12，`P=0.0161`，CI 跨零）。但 L3 在
+seed-removed endpoint 上不优于 L0/L1/L2，nonlocal attenuation 也未形成 distal 或
+cross-state double-dissociation；Claim-D family 校正后 canonical 对应为 `q=0.0854`。
+因此正式口径是：**间期训练并冻结的 model-generated fields 呈正向跨状态空间对应，但该对应不具
+task-selected nonlocal topology 特异性。**模型矩阵始终称为 patient-specific effective
+propagation scaffold，不称 anatomical/white-matter connectivity；0–10 s broadband energy
+称 early-ictal field receipt/correspondence，不等同于 tissue recruitment into ictal core。
+
 ---
 
 ## 1. 这个 topic 只回答什么问题
