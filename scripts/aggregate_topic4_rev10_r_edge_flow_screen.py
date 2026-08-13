@@ -316,6 +316,9 @@ def main():
             ).get("sigma_rate_per_ms", 0.0),
             "spatial_ou_tau_ms": candidate.get("spatial_ou", {}).get("tau_ms", 0.0),
             "spatial_ou_ell_mm": candidate.get("spatial_ou", {}).get("ell_mm", 0.0),
+            "mz_mode": candidate.get("mz", {}).get("mode", "off"),
+            "mz_use_z": candidate.get("mz", {}).get("use_z", False),
+            "mz_use_m": candidate.get("mz", {}).get("use_m", False),
             "selection_score_equal_network": mean_score,
             "n_runaway_networks": runaway,
             "total_events_descriptive": int(sum(
@@ -432,6 +435,34 @@ def main():
                     "negative_rate_clip_fraction", 0.0,
                 ) for payload in metadata
             ], default=0.0)),
+            "mean_network_final_z": float(np.mean([
+                payload.get("mz_slow_state", {}).get("final_z_mean")
+                for payload in metadata
+                if payload.get("mz_slow_state", {}).get("final_z_mean") is not None
+            ])) if any(
+                payload.get("mz_slow_state", {}).get("final_z_mean") is not None
+                for payload in metadata
+            ) else None,
+            "mean_network_peak_m": float(np.mean([
+                payload.get("mz_slow_state", {}).get("maximum_m")
+                for payload in metadata
+                if payload.get("mz_slow_state", {}).get("maximum_m") is not None
+            ])) if any(
+                payload.get("mz_slow_state", {}).get("maximum_m") is not None
+                for payload in metadata
+            ) else None,
+            "mean_network_peak_mean_adaptation_current": float(np.mean([
+                payload.get("mz_slow_state", {}).get(
+                    "peak_mean_adaptation_current"
+                ) for payload in metadata
+                if payload.get("mz_slow_state", {}).get(
+                    "peak_mean_adaptation_current"
+                ) is not None
+            ])) if any(
+                payload.get("mz_slow_state", {}).get(
+                    "peak_mean_adaptation_current"
+                ) is not None for payload in metadata
+            ) else None,
         }
         rows.append(row)
         details[candidate["candidate_id"]] = {
@@ -458,6 +489,10 @@ def main():
                     "spatial_ou_accessibility", {},
                 ) for payload in metadata
             },
+            "mz_slow_state_by_seed": {
+                str(payload["seed"]): payload.get("mz_slow_state", {})
+                for payload in metadata
+            },
         }
     for row, flag in zip(rows, _pareto(rows)):
         row["pareto_nondominated"] = bool(flag)
@@ -465,7 +500,10 @@ def main():
         row["n_runaway_networks"] > 0,
         row["selection_score_equal_network"], row["candidate_id"],
     ))
-    baseline = next(row for row in rows if row["candidate_id"] == "edge_noop")
+    baseline_id = manifest.get("selection_freeze", {}).get(
+        "paired_control_candidate_id", "edge_noop",
+    )
+    baseline = next(row for row in rows if row["candidate_id"] == baseline_id)
     status_by_phase = {
         "fit": "REV10R_RETURNED_ONLY_FIT_SCREEN_COMPLETE",
         "selection": "REV10R_RETURNED_ONLY_SELECTION_COMPLETE",
@@ -513,7 +551,7 @@ def main():
             "mode shape is scored only on returned, joint, patient-supported "
             "events, while absent support remains a penalty"
         ),
-        "baseline_candidate_id": "edge_noop",
+        "baseline_candidate_id": baseline_id,
         "baseline": baseline,
         "diagnostic_best_candidate_id": rows[0]["candidate_id"],
         "candidate_rows": rows,

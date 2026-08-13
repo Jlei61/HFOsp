@@ -42,6 +42,7 @@ from src.topic4_spatial_ou_drive import (  # noqa: E402
     SpatialOUConfig,
     SpatialOUDrive,
 )
+from src.snn_engine.mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -110,6 +111,7 @@ def main():
         "development_only_translation_invariant_spatial_ou_kmeans_selection",
         "development_only_observation_invariant_continuous_field_kmeans_screen",
         "development_only_continuous_field_natural_kmeans_fresh_closeout",
+        "development_only_data_driven_h_zm_consistency",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -139,6 +141,7 @@ def main():
         "REV10D5_4_SPATIAL_OU_KMEANS_SELECTION_FROZEN",
         "REV10D6_CONTINUOUS_FIELD_SENSITIVITY_LIBRARY_FROZEN",
         "REV10D6_1_NATURAL_KMEANS_CLOSEOUT_LIBRARY_FROZEN",
+        "REV10ZM1_H_PLUS_ZM_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -263,6 +266,7 @@ def main():
     resource = candidate.get("inhibitory_resource", {"mode": "off"})
     ee_std = candidate.get("ee_std", {"mode": "off"})
     spatial_ou = candidate.get("spatial_ou", {"mode": "off"})
+    mz = candidate.get("mz", {"mode": "off"})
     active_dynamic_mechanisms = sum(
         row["mode"] != "off"
         for row in (adaptation, resource, ee_std, spatial_ou)
@@ -306,6 +310,23 @@ def main():
                 update_interval_ms=float(resource["update_interval_ms"]),
             ),
         )
+    if mz["mode"] != "off":
+        if adaptation["mode"] != "off" or resource["mode"] != "off":
+            raise RuntimeError("ZM1 cannot combine Z/M with another slow protocol")
+        if not (mz.get("use_z") and mz.get("use_m")):
+            raise RuntimeError("ZM1 active arm must use Z and M together")
+        slow = MZSlowVars(
+            n_e + n_i, params.V_th,
+            MZSlowVarsConfig(
+                use_z=True, use_m=True,
+                I_th_EI=float(mz["I_th_EI"]),
+                tau_z=float(mz["tau_z"]),
+                tau_adp=float(mz["tau_adp"]),
+                eta_m=float(mz["eta_m"]),
+                trace_stride_steps=int(mz["trace_stride_steps"]),
+            ),
+            NE=n_e, core_mask_E=np.asarray(node["h"] >= 0.5, bool),
+        )
     if manifest["status"] in {
         "REV10D_LOCAL_ADAPTATION_LIBRARY_FROZEN",
         "REV10D2_INHIBITORY_RESOURCE_LIBRARY_FROZEN",
@@ -315,6 +336,7 @@ def main():
         "REV10D5_2_SPATIAL_OU_CONFIRMATION_LIBRARY_FROZEN",
         "REV10D6_CONTINUOUS_FIELD_SENSITIVITY_LIBRARY_FROZEN",
         "REV10D6_1_NATURAL_KMEANS_CLOSEOUT_LIBRARY_FROZEN",
+        "REV10ZM1_H_PLUS_ZM_LIBRARY_FROZEN",
     }:
         if not np.all(coefficients == 0.0):
             raise RuntimeError("rev10-D requires exact no-op edge coefficients")
@@ -424,6 +446,12 @@ def main():
             )
         }
     )
+    mz_trace = (
+        slow.trace_arrays() if mz["mode"] != "off" else {
+            key: np.empty(0, dtype=np.float32)
+            for key in MZSlowVars.TRACE_NAMES
+        }
+    )
     _atomic_npz(
         output_npz,
         contact_names=np.asarray(contact_names, dtype="U16"),
@@ -469,6 +497,22 @@ def main():
         ],
         spatial_ou_argmax_x_mm=spatial_ou_trace["argmax_x_mm"],
         spatial_ou_argmax_y_mm=spatial_ou_trace["argmax_y_mm"],
+        mz_time_ms=mz_trace["time_ms"],
+        mz_z_mean=mz_trace["z_mean"],
+        mz_z_min=mz_trace["z_min"],
+        mz_z_core_mean=mz_trace["z_core_mean"],
+        mz_z_surround_mean=mz_trace["z_surround_mean"],
+        mz_m_mean=mz_trace["m_mean"],
+        mz_m_max=mz_trace["m_max"],
+        mz_m_core_mean=mz_trace["m_core_mean"],
+        mz_m_surround_mean=mz_trace["m_surround_mean"],
+        mz_adaptation_current_mean=mz_trace["adaptation_current_mean"],
+        mz_inhibitory_current_mean=mz_trace["inhibitory_current_mean"],
+        mz_fraction_inhibitory_current_above_threshold=mz_trace[
+            "fraction_inhibitory_current_above_threshold"
+        ],
+        mz_spike_count_E=mz_trace["spike_count_E"],
+        mz_spike_count_I=mz_trace["spike_count_I"],
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -551,6 +595,21 @@ def main():
                     "negative_rate_clip_fraction", 0.0,
                 )
             ),
+        },
+        "mz_slow_state": {
+            **mz,
+            **(slow.summary() if mz["mode"] != "off" else {
+                "trace_samples": 0,
+                "final_z_mean": None,
+                "minimum_z": None,
+                "final_m_mean": None,
+                "maximum_m": None,
+                "peak_mean_adaptation_current": None,
+                "mean_fraction_above_z_threshold": None,
+            }),
+            "core_trace_mask": "h_i >= 0.5",
+            "core_trace_neuron_count": int(np.sum(node["h"] >= 0.5)),
+            "changes_node_threshold_field": False,
         },
         "network": {
             "n_E": int(n_e), "n_I": int(n_i),
