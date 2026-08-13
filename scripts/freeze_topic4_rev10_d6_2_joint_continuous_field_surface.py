@@ -88,6 +88,9 @@ def candidate_library(config, source):
                 ),
                 "spatial_ou": deepcopy(baseline["spatial_ou"]),
             }
+            for key in ("mz", "data_driven_snn_baseline"):
+                if key in baseline:
+                    row[key] = deepcopy(baseline[key])
         row["d6_2_latent_coordinates"] = {
             "natural_kmeans_direction_a": a,
             "patient_crossfit_direction_b": b,

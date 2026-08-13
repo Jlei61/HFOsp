@@ -1,0 +1,107 @@
+{
+  "schema_version": "topic4_data_driven_snn_baseline_zm_v1",
+  "baseline_id": "data_driven_snn_h_spatial_ou_zm_reference_v1",
+  "scientific_role": "shared_development_baseline_for_data_driven_node_field_search",
+  "model_family": "current_based_spatial_lif_with_per_neuron_z_m_slow_state",
+  "claim_boundary": "This is a shared development mechanism baseline, not a stable interictal model. The frozen Z/M reference is unsafe on the current warm h field and may only be used in a field search that treats late runaway as an invalid candidate.",
+  "inputs": {
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "node_anchor_config": {
+      "path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json",
+      "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"
+    },
+    "node_anchor_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json",
+      "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"
+    },
+    "spatial_ou_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/candidate_manifest.json",
+      "sha256": "f3dab0988c7c227bc1f9a4aca2ca49fdd9c5c0fbe008e789b303dedc999410f7"
+    },
+    "spatial_ou_verdict": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/spatial_ou_accessibility_d5_2_confirmation/confirmation_verdict.json",
+      "sha256": "0e65e88c59dfca0b70b7cb1e315803598372e4161fcaf4c10e4883df354d5320"
+    },
+    "zm_direct_transfer_config": {
+      "path": "config/topic4_rev10_zm1_data_driven_h_zm.json",
+      "sha256": "8514fea62b3c1279de97059c90eeb631838c95dc8300139fc9bbacee2140153c"
+    },
+    "zm_tau_calibration_config": {
+      "path": "config/topic4_rev10_zm1_1_tau_fit.json",
+      "sha256": "05c437bfae880ab7163a28fd5c88010f8f2d3512b3c2f0cdccd12a05e114fa69"
+    },
+    "zm_tau_calibration_decision": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_zm/h_plus_zm_tau_adp/fit/tau_adp_fit_decision.json",
+      "sha256": "45578d588f4f3992521d26776adcb7fefb761812f7aa61e8890c61e5b11992c1"
+    },
+    "zm_tau_calibration_done": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_zm/h_plus_zm_tau_adp/fit/DONE.json",
+      "sha256": "8492d32466ec03449fa6515c06bb97ca6ab5a22a0f7b45824fe838c7a3d26744"
+    },
+    "mz_engine": {
+      "path": "src/snn_engine/mz_slow_vars.py",
+      "sha256": "cc80980ff7539ea5c9c72f3724d810b838d7e230550e905d08a437d642dd11d3"
+    }
+  },
+  "node_substrate": {
+    "threshold_equation": "V_th_i = V_th_0 - h_i d_i",
+    "warm_anchor_candidate_id": "v62_density_t050",
+    "warm_anchor_field_sha256": "5fc404a876713430b8d258a63e94e58fd9bd6e7a60234f7f34598dd49b97e060",
+    "free_field_policy": "h may vary continuously; d_i, topology, delays, and the contact observation model remain frozen"
+  },
+  "spatial_ou": {
+    "mode": "local",
+    "sigma_rate_per_ms": 0.1,
+    "tau_ms": 20.0,
+    "ell_mm": 0.38,
+    "update_interval_ms": 1.0,
+    "grid_spacing_mm": 0.4,
+    "seed_offset": 500000
+  },
+  "active_slow_state": {
+    "mode": "z_plus_m",
+    "use_z": true,
+    "use_m": true,
+    "I_th_EI": 95.19851312666987,
+    "tau_z": 5000.0,
+    "tau_adp": 500.0,
+    "eta_m": 0.007451594355587098,
+    "trace_stride_steps": 10,
+    "reference_status": "UNSAFE_ON_CURRENT_WARM_H_FIELD",
+    "usage": "Fixed mechanism reference for development-only free-h search; not an accepted control or confirmation model."
+  },
+  "paired_slow_off": {
+    "mode": "off",
+    "use_z": false,
+    "use_m": false,
+    "trace_stride_steps": 10
+  },
+  "negative_evidence": {
+    "status": "TAU_ADP_ONLY_CALIBRATION_NO_ADVANCEMENT",
+    "tested_tau_adp_ms": [500.0, 1000.0, 1500.0, 2000.0],
+    "fresh_fit_network_seeds": [1361, 1362, 1363],
+    "runaway_networks_per_candidate": 3,
+    "networks_per_candidate": 3,
+    "implication": "Do not select a stable Z/M default from this bracket. A future free-field search tests whether h can stabilize this fixed mechanism reference; it does not inherit a positive Z/M result."
+  },
+  "consumer_contract": {
+    "allowed_runtime_modes": ["active_z_plus_m", "paired_slow_off"],
+    "default_runtime_mode": null,
+    "runtime_mode_must_be_explicit": true,
+    "minimum_simulation_duration_ms": 20000.0,
+    "late_runaway_is_invalid": true,
+    "common_random_numbers_across_field_candidates": true,
+    "natural_kmeans_and_patient_geometry_required_for_final_acceptance": true,
+    "canonical_acceptance_figures": [
+      "fig4a_spatial_ou_direct_readout",
+      "fig4b_spatial_ou_kmeans_consistency"
+    ]
+  }
+}
