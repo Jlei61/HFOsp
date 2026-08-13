@@ -4,6 +4,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -174,16 +175,46 @@ def main():
         ),
     )
     descriptive_best = ranked[0]["candidate_id"] if ranked else None
+    primary = manifest["selection_freeze"]["primary_candidate_id"]
+    density_support = {
+        candidate_id: int(sum(
+            seed_row["natural_kmeans"].get(
+                "heldout_gmm_k2_minus_k1_loglik_per_event", -np.inf,
+            ) is not None
+            and seed_row["natural_kmeans"].get(
+                "heldout_gmm_k2_minus_k1_loglik_per_event", -np.inf,
+            ) > 0
+            for seed_row in row["natural_kmeans_by_network"].values()
+        ))
+        for candidate_id, row in by_id.items()
+    }
+    patient_aligned = [
+        candidate_id for candidate_id, contrast in contrasts.items()
+        if contrast["natural_alignment_delta"] is not None
+        and contrast["natural_alignment_delta"]["network_bootstrap_q05"] > 0
+        and contrast["crossfit_margin_delta"] is not None
+        and contrast["crossfit_margin_delta"]["network_bootstrap_q05"] > 0
+        and density_support[candidate_id] >= 4
+    ]
     status = (
-        "REV10D6_1_NATURAL_KMEANS_SIGNAL_RETAINED"
-        if replicated else "REV10D6_1_NATURAL_KMEANS_SIGNAL_NOT_REPLICATED"
+        "REV10D6_1_PATIENT_ALIGNED_NATURAL_REPERTOIRE_CONFIRMED"
+        if patient_aligned
+        else "REV10D6_1_ORTHOGONAL_PARTIAL_SENSITIVITY_REPERTOIRE_UNRESOLVED"
     )
     payload = {
         "status": status,
-        "replicated_candidate_ids": replicated,
-        "prefrozen_primary_candidate_id": manifest["selection_freeze"][
-            "primary_candidate_id"
-        ],
+        "exploratory_four_of_six_signal_candidate_ids": replicated,
+        "patient_aligned_natural_repertoire_candidate_ids": patient_aligned,
+        "prefrozen_primary_candidate_id": primary,
+        "prefrozen_primary_replication_status": (
+            "EXPLORATORY_SIGNAL_RULE_PASS"
+            if primary in replicated else "NOT_REPLICATED"
+        ),
+        "k2_over_k1_positive_network_counts": density_support,
+        "minimum_density_support_networks": 4,
+        "patient_aligned_natural_repertoire_status": (
+            "CONFIRMED" if patient_aligned else "UNRESOLVED"
+        ),
         "descriptive_fresh_best_candidate_id": descriptive_best,
         "candidate_rows": rows,
         "paired_candidate_minus_warm_baseline": contrasts,
@@ -204,13 +235,24 @@ def main():
             "config": {"path": str(config_path.relative_to(ROOT)), "sha256": _sha256(config_path)},
             "manifest": {"path": str(manifest_path.relative_to(ROOT)), "sha256": _sha256(manifest_path)},
             "summary": {"path": str(summary_path.relative_to(ROOT)), "sha256": _sha256(summary_path)},
+            "analysis_code": {
+                "path": str(Path(__file__).resolve().relative_to(ROOT)),
+                "sha256": _sha256(Path(__file__).resolve()),
+            },
         },
+        "analysis_git_commit": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
+        ).strip(),
     }
     output = root / "confirmation_verdict.json"
     _atomic_json(output, payload)
     print(json.dumps({
         "status": status,
-        "replicated_candidate_ids": replicated,
+        "exploratory_four_of_six_signal_candidate_ids": replicated,
+        "patient_aligned_natural_repertoire_candidate_ids": patient_aligned,
+        "prefrozen_primary_replication_status": payload[
+            "prefrozen_primary_replication_status"
+        ],
         "prefrozen_primary_candidate_id": payload["prefrozen_primary_candidate_id"],
         "descriptive_fresh_best_candidate_id": descriptive_best,
     }, indent=2))

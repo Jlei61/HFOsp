@@ -60,6 +60,14 @@ def test_paired_contrast_excludes_missing_network_metric_instead_of_zero_filling
     assert result["networks_with_positive_recruitment_improvement"] == 2
 
 
+def test_d61_auditor_requires_joint_direction_geometry_and_density_support():
+    source = (ROOT / "scripts/audit_topic4_rev10_d6_1_natural_kmeans_closeout.py").read_text()
+    assert 'natural_alignment_delta"]["network_bootstrap_q05"] > 0' in source
+    assert 'crossfit_margin_delta"]["network_bootstrap_q05"] > 0' in source
+    assert "density_support[candidate_id] >= 4" in source
+    assert "ORTHOGONAL_PARTIAL_SENSITIVITY_REPERTOIRE_UNRESOLVED" in source
+
+
 def test_d61_entrypoints_are_directly_executable():
     for script in (
         "freeze_topic4_rev10_d6_1_natural_kmeans_closeout.py",
