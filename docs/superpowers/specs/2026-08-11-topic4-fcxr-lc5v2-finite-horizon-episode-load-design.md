@@ -1,5 +1,11 @@
 # FCXR-LC5v2 — finite-horizon per-cell episode-load interception
 
+> **已收口的历史合同（2026-08-13）**：本文件保留 LC5v2 的完整决策轨迹，不再作为运行参数源。
+> 唯一 active 合同见
+> `docs/superpowers/specs/2026-08-13-topic4-fcxr-lc5v2p1-timescale-dose-map-design.md`；
+> 历史结果与撤回口径见
+> `docs/archive/topic4/sef_hfo/fcxr_lc5v2_decision_log_2026-08-13.md`。
+
 状态：**DESIGN LOCK — CORE EXPLORATION**
 日期：2026-08-11
 

@@ -1,5 +1,10 @@
 # FCXR-LC5v2 finite-horizon episode-load — implementation plan
 
+> **已收口的历史 plan（2026-08-13）**：不得再从本文件选择 stage 或参数。
+> 当前唯一 plan 为
+> `docs/superpowers/plans/2026-08-13-topic4-fcxr-lc5v2p1-timescale-dose-map.md`，
+> 机器执行只读取 `config/topic4_fcxr_lc5v2p1_timescale_dose_map.json`。
+
 对应 spec：`docs/superpowers/specs/2026-08-11-topic4-fcxr-lc5v2-finite-horizon-episode-load-design.md`
 
 状态：**LOCKED FOR CORE EXPLORATION**

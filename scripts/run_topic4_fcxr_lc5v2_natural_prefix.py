@@ -64,16 +64,25 @@ def _tau_label(tau_ms):
     return f"tau{int(tau / 1000.0)}"
 
 
-def _tag(gamma, p0_policy="mean", tau_ms=8000.0):
+def _protocol_prefix(protocol_id, p0_policy):
+    if protocol_id is None:
+        return "u3_prefix" if p0_policy == "mean" else f"u3_prefix_{p0_policy}"
+    protocol_id = str(protocol_id)
+    if not protocol_id or any(c not in "abcdefghijklmnopqrstuvwxyz0123456789_" for c in protocol_id):
+        raise ValueError("protocol_id must contain only lowercase letters, digits and underscores")
+    return f"{protocol_id}_{p0_policy}"
+
+
+def _tag(gamma, p0_policy="mean", tau_ms=8000.0, protocol_id=None):
     milli = int(round(float(gamma) * 1000.0))
     if not np.isclose(milli / 1000.0, float(gamma), rtol=0.0, atol=1e-12):
         raise ValueError("natural-prefix Gamma must resolve exactly in milli-Gamma units")
-    prefix = "u3_prefix" if p0_policy == "mean" else f"u3_prefix_{p0_policy}"
+    prefix = _protocol_prefix(protocol_id, p0_policy)
     return f"{prefix}_{_tau_label(tau_ms)}_gamma_milli{milli:03d}"
 
 
-def _paths(gamma, p0_policy="mean", tau_ms=8000.0):
-    tag = _tag(gamma, p0_policy, tau_ms)
+def _paths(gamma, p0_policy="mean", tau_ms=8000.0, protocol_id=None):
+    tag = _tag(gamma, p0_policy, tau_ms, protocol_id)
     return U2.OUT / tag, U2.OUT / f".{tag}.work"
 
 
@@ -99,14 +108,15 @@ def _safe_peak(values):
     return 0.0 if values.size == 0 else float(np.max(values))
 
 
-def _stage_lock(gamma, p0_policy="mean", tau_ms=8000.0):
+def _stage_lock(gamma, p0_policy="mean", tau_ms=8000.0, protocol_id=None):
     U2.OUT.mkdir(parents=True, exist_ok=True)
-    f = (U2.OUT / f".{_tag(gamma, p0_policy, tau_ms)}.lock").open("w")
+    tag = _tag(gamma, p0_policy, tau_ms, protocol_id)
+    f = (U2.OUT / f".{tag}.lock").open("w")
     try:
         fcntl.flock(f.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
     except BlockingIOError as exc:
         f.close()
-        raise SystemExit(f"{_tag(gamma, p0_policy, tau_ms)} is already running") from exc
+        raise SystemExit(f"{tag} is already running") from exc
     return f
 
 
@@ -135,17 +145,19 @@ def _fresh_system(p0, imax, a_load, tau_ms):
     return S, slow, cfg_dict
 
 
-def _reference_prefix():
+def _reference_prefix(run_ms=RUN_MS):
     stream = load_sparse_spike_stream(U2.SOURCE / "u1_sparse_spikes.npz")
-    n_steps = int(round(RUN_MS / U2.DT_MS))
+    n_steps = int(round(float(run_ms) / U2.DT_MS))
+    if n_steps > stream.n_steps:
+        raise ValueError("reference prefix exceeds the locked U1 stream")
     keep = stream.steps < n_steps
     short = SparseSpikeStream(stream.steps[keep], stream.cells[keep], n_steps, stream.n_cells)
     with np.load(U2.SOURCE / "u1_capture_traces.npz", allow_pickle=False) as z:
-        rate = np.asarray(z["rate_E"], np.float32)[: int(round(RUN_MS / 10.0))]
+        rate = np.asarray(z["rate_E"], np.float32)[: int(round(float(run_ms) / 10.0))]
     return short, rate
 
 
-def _outcome(lifecycle, regimes, saturated):
+def _outcome(lifecycle, regimes, saturated, run_ms=RUN_MS):
     bout = LC5.LC4.first_ictal_bout(regimes, float(U2._baseline()["band"]["win_ms"]))
     if bout is None:
         return "NO_NATURAL_ONSET", None, None
@@ -154,12 +166,114 @@ def _outcome(lifecycle, regimes, saturated):
     offset = (bout[1] + 1) * win
     terminated = bout[1] + 1 < len(regimes) and regimes[bout[1] + 1] != "ICTAL"
     if not terminated:
-        return ("ESCALATING_SATURATION" if saturated else "SUSTAINED_HIGH_NO_OFFSET"), onset, None
+        return ("ESCALATING_SATURATION" if saturated else "CONTAINED_HIGH_NO_OFFSET"), onset, None
     duration = offset - onset
-    tail = RUN_MS - offset
+    tail = float(run_ms) - offset
     if 1000.0 <= duration <= 5000.0 and tail >= 2000.0 and lifecycle["label"] != "RAPID_RELAPSE":
         return "FINITE_EXCURSION_CANDIDATE", onset, offset
     return "OFFSET_OUTSIDE_TARGET", onset, offset
+
+
+def _combine_streams(streams, chunk_steps):
+    if not streams:
+        raise ValueError("at least one completed stream chunk is required")
+    return SparseSpikeStream(
+        np.concatenate([s.steps + k * chunk_steps for k, s in enumerate(streams)]),
+        np.concatenate([s.cells for s in streams]),
+        len(streams) * chunk_steps,
+        streams[0].n_cells,
+    )
+
+
+def _adjudicate(stream, rate):
+    n_seconds = int(round(stream.n_steps * U2.DT_MS / 1000.0))
+    reports = U2._window_reports(stream, n_seconds=n_seconds)
+    saturated = bool(any(item["mean_sat_ceiling_ratio"] >= 1.0 for item in reports))
+    baseline = U2._baseline()
+    af, af_dt = stream.active_fraction(
+        dt_ms=U2.DT_MS, bin_ms=float(baseline["af_bin_ms"])
+    )
+    events = LC5.CM.detect_events(
+        af, af_dt, event_on_frac=float(baseline["frozen_event_bar"])
+    )
+    returned = [event for event in events if event["returned"]]
+    windows = LC5.build_windows(
+        rate, U2.DT_MS, af, af_dt, float(baseline["band"]["roll_hi"]), returned,
+        float(baseline["band"]["win_ms"]),
+        event_lookback_ms=float(baseline["band"]["event_lookback_ms"]),
+        finite=bool(np.all(np.isfinite(rate))),
+    )
+    lifecycle = LC5.classify_lifecycle(windows, baseline["band"], runaway=saturated)
+    regimes = LC5._smooth_isolated(lifecycle["regimes"])
+    run_ms = stream.n_steps * U2.DT_MS
+    outcome, onset_ms, offset_ms = _outcome(lifecycle, regimes, saturated, run_ms)
+    return {
+        "reports": reports,
+        "saturated": saturated,
+        "af": af,
+        "af_dt": af_dt,
+        "events": events,
+        "returned": returned,
+        "lifecycle": lifecycle,
+        "regimes": regimes,
+        "outcome": outcome,
+        "onset_ms": onset_ms,
+        "offset_ms": offset_ms,
+    }
+
+
+def _event_metrics(events, end_ms):
+    selected = [event for event in events if float(event["t_on"]) < float(end_ms)]
+    onsets = np.asarray([event["t_on"] for event in selected], float)
+    durations = np.asarray([event["dur_ms"] for event in selected], float)
+    peaks = np.asarray([event["peak_ext"] for event in selected], float)
+    iei = np.diff(onsets)
+    return {
+        "window_ms": [0.0, float(end_ms)],
+        "n_events": int(len(selected)),
+        "event_rate_hz": float(len(selected) / (float(end_ms) / 1000.0)),
+        "iei_median_ms": float(np.median(iei)) if iei.size else None,
+        "iei_cv": float(np.std(iei) / np.mean(iei)) if iei.size and np.mean(iei) > 0 else None,
+        "duration_median_ms": float(np.median(durations)) if durations.size else None,
+        "duration_q90_ms": float(np.quantile(durations, 0.9)) if durations.size else None,
+        "participation_peak_median": float(np.median(peaks)) if peaks.size else None,
+        "participation_peak_q90": float(np.quantile(peaks, 0.9)) if peaks.size else None,
+    }
+
+
+def _target_end_ms(onset_ms, min_run_ms, max_run_ms, post_onset_ms):
+    if onset_ms is None:
+        return float(max_run_ms)
+    return min(
+        float(max_run_ms),
+        max(float(min_run_ms), float(onset_ms) + float(post_onset_ms)),
+    )
+
+
+def _u_tail_diagnostics(u_final, p0, tau_ms, u_mean_trace, trace_dt_ms):
+    u_final = np.asarray(u_final, float)
+    p0 = np.clip(np.asarray(p0, float), 0.0, 1.0 - 1e-12)
+    baseline_u = np.power(np.divide(p0, 1.0 - p0), 1.0 / 3.0)
+    release_s = float(tau_ms) * np.maximum(u_final - baseline_u, 0.0) / 1000.0
+    trace = np.asarray(u_mean_trace, float)
+    n_tail = min(trace.size, max(2, int(round(1000.0 / float(trace_dt_ms)))))
+    if n_tail >= 2:
+        t = np.arange(n_tail, dtype=float) * float(trace_dt_ms) / 1000.0
+        slope = float(np.polyfit(t, trace[-n_tail:], 1)[0])
+    else:
+        slope = None
+    return {
+        "u_q50_q90_q99_max": [
+            float(np.quantile(u_final, 0.5)), float(np.quantile(u_final, 0.9)),
+            float(np.quantile(u_final, 0.99)), float(np.max(u_final)),
+        ],
+        "u_mean_slope_last_1s_per_s": slope,
+        "release_time_s_q50_q90_q99_max": [
+            float(np.quantile(release_s, 0.5)), float(np.quantile(release_s, 0.9)),
+            float(np.quantile(release_s, 0.99)), float(np.max(release_s)),
+        ],
+        "release_time_note": "clearance-only approximation tau*(u-u_baseline) where Phi is near one",
+    }
 
 
 def _p0_contract(gamma, p0_policy, tau_ms):
@@ -188,14 +302,35 @@ def _p0_contract(gamma, p0_policy, tau_ms):
     return contract, p0, imax
 
 
-def stage_prefix(gamma, p0_policy="mean", tau_ms=8000.0):
+def stage_prefix(
+    gamma,
+    p0_policy="mean",
+    tau_ms=8000.0,
+    *,
+    protocol_id=None,
+    min_run_ms=RUN_MS,
+    max_run_ms=RUN_MS,
+    post_onset_ms=7000.0,
+    expected_input_prefix_18s=None,
+    baseline_eval_end_ms=11000.0,
+    protocol_manifest_sha256=None,
+    extra_mechanism_files=(),
+):
     tau_ms = float(tau_ms)
-    arm, work = _paths(gamma, p0_policy, tau_ms)
-    tag = _tag(gamma, p0_policy, tau_ms)
+    min_run_ms, max_run_ms = float(min_run_ms), float(max_run_ms)
+    if not (0 < min_run_ms <= max_run_ms):
+        raise ValueError("run limits must satisfy 0 < min_run_ms <= max_run_ms")
+    for value in (min_run_ms, max_run_ms):
+        if not np.isclose(value / U2.CHUNK_MS, round(value / U2.CHUNK_MS)):
+            raise ValueError("run limits must be exact CHUNK_MS multiples")
+    min_chunks = int(round(min_run_ms / U2.CHUNK_MS))
+    max_chunks = int(round(max_run_ms / U2.CHUNK_MS))
+    arm, work = _paths(gamma, p0_policy, tau_ms, protocol_id)
+    tag = _tag(gamma, p0_policy, tau_ms, protocol_id)
     sentinel = tag.upper()
     if arm.is_dir():
         return json.loads((arm / "summary.json").read_text())
-    lock = _stage_lock(gamma, p0_policy, tau_ms)
+    lock = _stage_lock(gamma, p0_policy, tau_ms, protocol_id)
     running = U2.OUT / f"RUNNING_{sentinel}.json"
     try:
         prelock, p0, imax = _p0_contract(gamma, p0_policy, tau_ms)
@@ -209,7 +344,10 @@ def stage_prefix(gamma, p0_policy="mean", tau_ms=8000.0):
         started = time.time()
         _write_json(running, {
             "status": "RUNNING", "pid": os.getpid(), "started": U2.GEO._now(),
-            "gamma": float(gamma), "Imax": float(imax), "tau_ms": tau_ms, "T_ms": RUN_MS,
+            "gamma": float(gamma), "Imax": float(imax), "tau_ms": tau_ms,
+            "min_run_ms": min_run_ms, "max_run_ms": max_run_ms,
+            "post_onset_ms": float(post_onset_ms), "protocol_id": protocol_id,
+            "protocol_manifest_sha256": protocol_manifest_sha256,
             "semantics": "fresh_t0_u0_always_online_no_step", "p0_policy": p0_policy,
         })
         (U2.OUT / f"{tag}.pid").write_text(f"{os.getpid()}\n")
@@ -223,12 +361,13 @@ def stage_prefix(gamma, p0_policy="mean", tau_ms=8000.0):
             steps_per_block=int(round(1000.0 / U2.DT_MS)), force_scale=force_scale,
         )
         input_hasher = ExactInputHasher()
-        p = dataclasses.replace(S["p"], T=RUN_MS, dt=U2.DT_MS)
+        p = dataclasses.replace(S["p"], T=max_run_ms, dt=U2.DT_MS)
         chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
         state = None
         rate_parts, trace_parts, streams = [], {}, []
+        input_prefix_18s_sha256 = None
 
-        for chunk in range(N_CHUNKS):
+        for chunk in range(max_chunks):
             active_slow = slow if state is None else state.slow
             attrs = (
                 "trace_z_mean", "trace_h_lc2_mean", "trace_gA_raw_lc2_mean",
@@ -275,63 +414,125 @@ def stage_prefix(gamma, p0_policy="mean", tau_ms=8000.0):
             if row["action"] == "TERMINATE_AFTER_CHECKPOINT":
                 raise RuntimeError("RESOURCE_STOP_AFTER_CHECKPOINT")
 
-        steps = np.concatenate([s.steps + k * chunk_steps for k, s in enumerate(streams)])
-        cells = np.concatenate([s.cells for s in streams])
-        stream = SparseSpikeStream(steps, cells, N_CHUNKS * chunk_steps, S["NE"])
+            completed_chunks = chunk + 1
+            completed_ms = completed_chunks * U2.CHUNK_MS
+            if np.isclose(completed_ms, RUN_MS):
+                input_prefix_18s_sha256 = input_hasher.sha256
+                if (expected_input_prefix_18s is not None and
+                        input_prefix_18s_sha256 != str(expected_input_prefix_18s)):
+                    raise RuntimeError("CONTROL_OR_INPUT_PREFIX_MISMATCH")
+            if completed_chunks >= min_chunks:
+                partial_stream = _combine_streams(streams, chunk_steps)
+                partial_rate = np.concatenate(rate_parts)
+                partial = _adjudicate(partial_stream, partial_rate)
+                onset = partial["onset_ms"]
+                target_ms = _target_end_ms(onset, min_run_ms, max_run_ms, post_onset_ms)
+                if completed_ms >= target_ms:
+                    break
+
+        stream = _combine_streams(streams, chunk_steps)
         rate = np.concatenate(rate_parts)
         traces = {key: np.concatenate(parts) for key, parts in trace_parts.items()}
-        reports = U2._window_reports(stream, n_seconds=N_CHUNKS)
-        saturated = bool(any(x["mean_sat_ceiling_ratio"] >= 1.0 for x in reports))
-        baseline = U2._baseline()
-        af, af_dt = stream.active_fraction(
-            dt_ms=U2.DT_MS, bin_ms=float(baseline["af_bin_ms"])
+        adjudication = _adjudicate(stream, rate)
+        reports = adjudication["reports"]
+        saturated = adjudication["saturated"]
+        af, af_dt = adjudication["af"], adjudication["af_dt"]
+        events, returned = adjudication["events"], adjudication["returned"]
+        lifecycle = adjudication["lifecycle"]
+        outcome, onset_ms, offset_ms = (
+            adjudication["outcome"], adjudication["onset_ms"], adjudication["offset_ms"]
         )
-        events = LC5.CM.detect_events(
-            af, af_dt, event_on_frac=float(baseline["frozen_event_bar"])
-        )
-        returned = [e for e in events if e["returned"]]
-        windows = LC5.build_windows(
-            rate, U2.DT_MS, af, af_dt, float(baseline["band"]["roll_hi"]), returned,
-            float(baseline["band"]["win_ms"]),
-            event_lookback_ms=float(baseline["band"]["event_lookback_ms"]),
-            finite=bool(np.all(np.isfinite(rate))),
-        )
-        lifecycle = LC5.classify_lifecycle(windows, baseline["band"], runaway=saturated)
-        regimes = LC5._smooth_isolated(lifecycle["regimes"])
-        outcome, onset_ms, offset_ms = _outcome(lifecycle, regimes, saturated)
+        actual_run_ms = stream.n_steps * U2.DT_MS
 
-        ref_stream, ref_rate = _reference_prefix()
+        ref_ms = min(actual_run_ms, RUN_MS)
+        ref_stream, ref_rate = _reference_prefix(ref_ms)
         rate10 = rate[::stride].astype(np.float32)
+        observed_prefix_steps = int(round(ref_ms / U2.DT_MS))
+        keep_prefix = stream.steps < observed_prefix_steps
+        observed_prefix = SparseSpikeStream(
+            stream.steps[keep_prefix], stream.cells[keep_prefix], observed_prefix_steps, stream.n_cells
+        )
         control = {
             "required": bool(float(gamma) == 0.0),
             "spike_sha256_expected": ref_stream.sha256,
-            "spike_sha256_observed": stream.sha256,
-            "spike_exact": bool(stream.sha256 == ref_stream.sha256),
-            "rate_max_abs_diff_hz": float(np.max(np.abs(rate10 - ref_rate))),
+            "spike_sha256_observed": observed_prefix.sha256,
+            "spike_exact": bool(observed_prefix.sha256 == ref_stream.sha256),
+            "rate_max_abs_diff_hz": float(np.max(np.abs(rate10[:ref_rate.size] - ref_rate))),
         }
         if float(gamma) == 0.0 and not (control["spike_exact"] and control["rate_max_abs_diff_hz"] == 0.0):
             outcome = "NATURAL_PREFIX_CONTROL_MISMATCH"
 
+        baseline_ms = min(float(baseline_eval_end_ms), actual_run_ms)
+        observed_baseline = _event_metrics(events, baseline_ms)
+        ref11, _ = _reference_prefix(baseline_ms)
+        baseline = U2._baseline()
+        ref_af, ref_af_dt = ref11.active_fraction(
+            dt_ms=U2.DT_MS, bin_ms=float(baseline["af_bin_ms"])
+        )
+        ref_events = LC5.CM.detect_events(
+            ref_af, ref_af_dt, event_on_frac=float(baseline["frozen_event_bar"])
+        )
+        reference_baseline = _event_metrics(ref_events, baseline_ms)
+        entry_status = "ONSET_AT_REFERENCE_TIME"
+        if onset_ms is None:
+            if actual_run_ms < max_run_ms:
+                entry_status = "NO_ONSET_OBSERVATION_INCOMPLETE"
+            elif observed_baseline["n_events"] < 0.25 * max(1, reference_baseline["n_events"]):
+                entry_status = "BASELINE_SUPPRESSED"
+                outcome = "BASELINE_SUPPRESSED"
+            else:
+                entry_status = "ENTRY_BLOCKED_WITH_IED"
+                outcome = "ENTRY_BLOCKED_WITH_IED"
+        elif onset_ms > float(baseline_eval_end_ms):
+            entry_status = "DELAYED_ONSET"
+
+        drive = state.slow.recurrent_drive_observer.arrays()
+        recurrent_force_mean = traces["gErec_mean"] * force_scale
+        achieved_ratio = np.divide(
+            traces["pump_current_mean"], recurrent_force_mean,
+            out=np.full_like(recurrent_force_mean, np.nan), where=recurrent_force_mean > 0,
+        )
+        u_diagnostic = _u_tail_diagnostics(
+            state.slow.u_pump_E, p0, tau_ms, traces["u_mean"], U2.TRACE_DT_MS
+        )
+
         summary = {
             "status": "COMPLETE", "arm": tag, "outcome": outcome,
+            "protocol_id": protocol_id,
+            "protocol_manifest_sha256": protocol_manifest_sha256,
             "runtime_semantics": "fresh_t0_u0_always_online_no_step",
             "gamma_nominal_dose": float(gamma), "Imax": float(imax), "p0_policy": p0_policy,
             "tau_ms": tau_ms, "a_load": float(prelock["a_load"]), "h": 3,
-            "T_ms": RUN_MS, "onset_ms": onset_ms, "offset_ms": offset_ms,
+            "T_ms": actual_run_ms, "onset_ms": onset_ms, "offset_ms": offset_ms,
+            "entry_status": entry_status,
+            "observation_policy": {
+                "min_run_ms": min_run_ms, "post_onset_ms": float(post_onset_ms),
+                "max_run_ms": max_run_ms,
+            },
             "lifecycle": lifecycle, "n_events": len(events),
             "n_returning": len(returned), "control_parity": control,
             "external_input_sha256": input_hasher.sha256,
+            "external_input_prefix_18s_sha256": input_prefix_18s_sha256,
             "spike_sha256": stream.sha256, "window_reports": reports,
+            "baseline_event_metrics": {
+                "observed": observed_baseline, "pump_off_reference": reference_baseline,
+                "interpretation": "statistical comparison; bitwise parity is not required for active arms",
+            },
             "per_second_mean_rate_hz": [float(x["mean_hz"]) for x in reports],
             "mean_rate_hz": float(np.mean(rate)),
             "end_rate_hz": float(np.mean(rate[-int(round(1000.0 / U2.DT_MS)):])),
             "pump_current_peak_mean": _safe_peak(traces["pump_current_mean"]),
+            "achieved_population_mean_ratio_median": float(np.nanmedian(achieved_ratio)),
+            "achieved_population_mean_ratio_peak": float(np.nanmax(achieved_ratio)),
             "D_start_end": [float(traces["D_mean"][0]), float(traces["D_mean"][-1])],
             "H_start_end": [float(traces["H_mean"][0]), float(traces["H_mean"][-1])],
             "u_start_end": [float(traces["u_mean"][0]), float(traces["u_mean"][-1])],
+            "u_tail_diagnostics": u_diagnostic,
             "clip_frac_max": float(np.max(traces["clip_frac"])),
             "final_state_hash": state_hash(state),
-            "mechanism_hashes": {str(path): _sha(path) for path in MECHANISM_FILES},
+            "mechanism_hashes": {
+                str(path): _sha(path) for path in MECHANISM_FILES + tuple(map(Path, extra_mechanism_files))
+            },
             "config_scalar": {
                 k: v for k, v in cfg_dict.items()
                 if np.isscalar(v) and not isinstance(v, (bytes, bytearray))
@@ -350,8 +551,12 @@ def stage_prefix(gamma, p0_policy="mean", tau_ms=8000.0):
                 n_steps=np.asarray([stream.n_steps], np.int64),
                 n_cells=np.asarray([stream.n_cells], np.int64), sha256=np.asarray([stream.sha256]),
             )
+            _npz_atomic(bundle.path("recurrent_drive_blocks.npz"), **drive)
             U2.save_loop_state(str(bundle.path("final_state.npz")), state)
-            bundle.commit(required=["summary.json", "traces.npz", "spikes.npz", "final_state.npz"])
+            bundle.commit(required=[
+                "summary.json", "traces.npz", "spikes.npz", "recurrent_drive_blocks.npz",
+                "final_state.npz",
+            ])
         _write_json(U2.OUT / f"DONE_{sentinel}.json", {
             "status": "DONE", "bundle": str(arm), "outcome": outcome,
             "finished": U2.GEO._now(),

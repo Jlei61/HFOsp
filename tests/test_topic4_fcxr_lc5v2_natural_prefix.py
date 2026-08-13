@@ -25,6 +25,11 @@ def test_prefix_tags_are_unambiguous():
     assert PREFIX._tag(0.010, "q099", 3000.0) != PREFIX._tag(0.010, "q099", 15000.0)
     with pytest.raises(ValueError):
         PREFIX._tag(0.010, "q099", 6000.0)
+    assert PREFIX._tag(0.010, "q099", 3000.0, "lc5v2p1_map").startswith(
+        "lc5v2p1_map_q099_"
+    )
+    with pytest.raises(ValueError):
+        PREFIX._tag(0.010, "q099", 3000.0, "LC5 bad")
 
 
 def test_prefix_is_fresh_u0_always_online_contract():
@@ -47,3 +52,21 @@ def test_disabled_optional_current_has_zero_peak():
     assert PREFIX._safe_peak([]) == 0.0
     assert PREFIX._safe_peak([0.0, 0.0]) == 0.0
     assert PREFIX._safe_peak([0.0, 2.5, 1.0]) == pytest.approx(2.5)
+
+
+def test_u_tail_diagnostic_reports_quantiles_slope_and_release_time():
+    out = PREFIX._u_tail_diagnostics(
+        [1.0, 2.0, 3.0, 4.0], [0.0, 0.0, 0.0, 0.0], 3000.0,
+        [0.0, 0.1, 0.2, 0.3], 500.0,
+    )
+    assert out["u_q50_q90_q99_max"][0] == pytest.approx(2.5)
+    assert out["u_q50_q90_q99_max"][-1] == pytest.approx(4.0)
+    assert out["release_time_s_q50_q90_q99_max"][0] == pytest.approx(7.5)
+    assert out["u_mean_slope_last_1s_per_s"] > 0
+
+
+def test_active_protocol_allows_event_aligned_limits_but_legacy_defaults_remain_fixed():
+    assert PREFIX._target_end_ms(11000.0, 18000.0, 25000.0, 7000.0) == 18000.0
+    assert PREFIX._target_end_ms(15000.0, 18000.0, 25000.0, 7000.0) == 22000.0
+    assert PREFIX._target_end_ms(20000.0, 18000.0, 25000.0, 7000.0) == 25000.0
+    assert PREFIX._target_end_ms(None, 18000.0, 25000.0, 7000.0) == 25000.0
