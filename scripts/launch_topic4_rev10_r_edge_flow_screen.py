@@ -40,6 +40,9 @@ SPATIAL_OU_KMEANS_SELECTION_AUDITOR = (
 CONTINUOUS_FIELD_KMEANS_AUDITOR = (
     ROOT / "scripts/audit_topic4_rev10_d6_continuous_field_kmeans_screen.py"
 )
+NATURAL_KMEANS_CLOSEOUT_AUDITOR = (
+    ROOT / "scripts/audit_topic4_rev10_d6_1_natural_kmeans_closeout.py"
+)
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -309,14 +312,19 @@ def main():
     continuous_field_kmeans = config["scientific_role"] == (
         "development_only_observation_invariant_continuous_field_kmeans_screen"
     )
+    natural_kmeans_closeout = config["scientific_role"] == (
+        "development_only_continuous_field_natural_kmeans_fresh_closeout"
+    )
     if (dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket
             or spatial_ou_confirmation or spatial_ou_kmeans_grid
-            or spatial_ou_kmeans_selection or continuous_field_kmeans):
+            or spatial_ou_kmeans_selection or continuous_field_kmeans
+            or natural_kmeans_closeout):
         auditor = (
             SPATIAL_OU_CONFIRMATION_AUDITOR if spatial_ou_confirmation
             else SPATIAL_OU_KMEANS_SELECTION_AUDITOR if spatial_ou_kmeans_selection
             else SPATIAL_OU_KMEANS_GRID_AUDITOR if spatial_ou_kmeans_grid
             else CONTINUOUS_FIELD_KMEANS_AUDITOR if continuous_field_kmeans
+            else NATURAL_KMEANS_CLOSEOUT_AUDITOR if natural_kmeans_closeout
             else SPATIAL_OU_BRACKET_AUDITOR if spatial_ou_bracket
             else SPATIAL_OU_AUDITOR if spatial_ou
             else DYNAMIC_EDGE_AUDITOR if dynamic_edge
@@ -327,7 +335,7 @@ def main():
             "--config", str(config_path),
         ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
         verdict_path = output_root / (
-            "confirmation_verdict.json" if spatial_ou_confirmation
+            "confirmation_verdict.json" if spatial_ou_confirmation or natural_kmeans_closeout
             else "selection_verdict.json" if spatial_ou_kmeans_selection
             else "canary_verdict.json"
         )
@@ -336,12 +344,12 @@ def main():
     else:
         completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection or continuous_field_kmeans else "Topic 4 rev10-R",
+        "notify-send", "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection or continuous_field_kmeans or natural_kmeans_closeout else "Topic 4 rev10-R",
         f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
         "status": (
-            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection or continuous_field_kmeans
+            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection or continuous_field_kmeans or natural_kmeans_closeout
             else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
         ),
         "completed": len(completed), "total": len(jobs),

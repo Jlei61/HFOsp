@@ -497,6 +497,9 @@ def main():
     is_continuous_field_kmeans_screen = config["scientific_role"] == (
         "development_only_observation_invariant_continuous_field_kmeans_screen"
     )
+    is_natural_kmeans_closeout = config["scientific_role"] == (
+        "development_only_continuous_field_natural_kmeans_fresh_closeout"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -535,6 +538,10 @@ def main():
     if is_continuous_field_kmeans_screen:
         summary["status"] = (
             "REV10D6_RETURNED_ONLY_CONTINUOUS_FIELD_SCREEN_COMPLETE"
+        )
+    if is_natural_kmeans_closeout:
+        summary["status"] = (
+            "REV10D6_1_RETURNED_ONLY_FRESH_CLOSEOUT_COMPLETE"
         )
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
