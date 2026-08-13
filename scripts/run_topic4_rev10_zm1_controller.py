@@ -5,12 +5,14 @@ import argparse
 import json
 import os
 import subprocess
+import sys
 from pathlib import Path
 
-from src.topic4_core_field_runner import atomic_write_json
-
-
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
+
+
 PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 GENERIC_LAUNCHER = ROOT / "scripts/launch_topic4_rev10_r_edge_flow_screen.py"
 AUDITOR = ROOT / "scripts/audit_topic4_rev10_zm1_data_driven_h_zm.py"
