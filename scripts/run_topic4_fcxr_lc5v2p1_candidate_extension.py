@@ -1,0 +1,294 @@
+#!/usr/bin/env python3
+"""Exact-state continuation of the single preselected LC5v2.1 contained/finite candidate."""
+
+from __future__ import annotations
+
+import argparse
+import dataclasses
+import fcntl
+import hashlib
+import json
+import os
+from pathlib import Path
+import shutil
+import sys
+import time
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+
+
+ROOT = Path(__file__).resolve().parents[1]
+for path in (ROOT, ROOT / "scripts", ROOT / "src/snn_engine"):
+    if str(path) not in sys.path:
+        sys.path.insert(0, str(path))
+
+import aggregate_topic4_fcxr_lc5v2p1_phase_map as AGG  # noqa: E402
+import run_topic4_fcxr_lc5v2_natural_prefix as PREFIX  # noqa: E402
+from src.topic4_fcxr_lc3 import run_fcxr_loop, state_hash  # noqa: E402
+from src.topic4_fcxr_lc5 import (  # noqa: E402
+    AtomicStageBundle,
+    ExactInputHasher,
+    RecurrentDriveBlockObserver,
+    SparseSpikeBinaryWriter,
+    SparseSpikeStream,
+    load_sparse_spike_stream,
+)
+
+
+U2 = PREFIX.U2
+CONTINUE_MS = 18000.0
+TOTAL_TARGET_MS = 43000.0
+
+
+def _sha(path):
+    return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+
+
+def _write_json(path, payload):
+    PREFIX._write_json(path, payload)
+
+
+def _combine_full(original, continuation):
+    chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
+    steps = [original.steps]
+    cells = [original.cells]
+    for index, stream in enumerate(continuation):
+        steps.append(stream.steps + original.n_steps + index * chunk_steps)
+        cells.append(stream.cells)
+    return SparseSpikeStream(
+        np.concatenate(steps), np.concatenate(cells),
+        original.n_steps + len(continuation) * chunk_steps, original.n_cells,
+    )
+
+
+def _rate_from_stream(stream):
+    counts = np.bincount(stream.steps, minlength=stream.n_steps).astype(float)
+    return counts / stream.n_cells / U2.DT_MS * 1000.0
+
+
+def _plot_extension(arm, result, rate10, traces):
+    figures = Path(arm) / "figures"
+    figures.mkdir(parents=True, exist_ok=True)
+    t = np.arange(rate10.size) * U2.TRACE_DT_MS / 1000.0
+    fig, axes = plt.subplots(3, 1, figsize=(10.5, 7.4), sharex=True, constrained_layout=True)
+    axes[0].plot(t, np.maximum(rate10, 1e-3), color="#333333", linewidth=.8)
+    axes[0].set_yscale("log"); axes[0].set_ylabel("E rate (Hz)")
+    axes[0].set_title("a  Natural entry and candidate continuation")
+    axes[1].plot(t, traces["D_mean"], color="#B2182B", label="D = 1-z")
+    axh = axes[1].twinx()
+    axh.plot(t, traces["H_mean"], color="#2166AC", label="H")
+    axes[1].set_ylabel("D"); axh.set_ylabel("H")
+    axes[1].set_title("b  Entry coordinate and cooperative drive")
+    axes[2].plot(t, traces["u_mean"], color="#E69F00", label="mean U load")
+    axp = axes[2].twinx()
+    axp.plot(t, traces["pump_current_mean"], color="#2CA25F", label="mean pump current")
+    axes[2].set_ylabel("Mean U"); axp.set_ylabel("Pump current")
+    axes[2].set_xlabel("Simulation time (s)")
+    axes[2].set_title("c  Episode memory and delivered recovery current")
+    for ax in axes:
+        if result.get("onset_ms") is not None:
+            ax.axvline(result["onset_ms"] / 1000.0, color="#B2182B", linestyle="--", linewidth=1)
+        if result.get("offset_ms") is not None:
+            ax.axvline(result["offset_ms"] / 1000.0, color="#2CA25F", linestyle="--", linewidth=1)
+        ax.grid(alpha=.16)
+    fig.suptitle(
+        f"LC5v2.1 exact continuation: {result['outcome'].replace('_', ' ').lower()}", fontsize=13
+    )
+    png = figures / "lc5v2p1_candidate_extension.png"
+    pdf = figures / "lc5v2p1_candidate_extension.pdf"
+    fig.savefig(png, dpi=220, bbox_inches="tight")
+    fig.savefig(pdf, bbox_inches="tight")
+    plt.close(fig)
+    (figures / "README.md").write_text(
+        "### lc5v2p1_candidate_extension.png\n\n"
+        "这张诊断图从自然轨迹 25 秒的完整状态继续推进，不重置膜电位、突触、慢变量或随机数。a 看候选高态最后是终止、维持还是再次升级；b 看 D 与 H 的移动边界；c 看逐细胞 U 负荷及其恢复电流是否在活动下降后继续保留。\n\n"
+        "**关注点**：只有绿色 offset 线之后同时出现低活动保护、D 恢复并最终恢复 returning IED，才构成完整 lifecycle；单独 containment 或 rate 下降不算。\n\n"
+        "### lc5v2p1_candidate_extension.pdf\n\n与 PNG 相同的矢量版本。\n\n"
+        "**关注点**：这是单 seed 机制诊断，不是鲁棒性或患者队列主张。\n"
+    )
+    _write_json(figures / "lc5v2p1_candidate_extension_metadata.json", {
+        "summary": str(Path(arm) / "summary.json"), "outcome": result["outcome"],
+        "onset_ms": result.get("onset_ms"), "offset_ms": result.get("offset_ms"),
+        "png": str(png), "pdf": str(pdf),
+    })
+
+
+def run(source_summary):
+    source_summary = Path(source_summary).resolve()
+    source = source_summary.parent
+    summary = json.loads(source_summary.read_text())
+    if summary["outcome"] not in {"CONTAINED_HIGH_NO_OFFSET", "FINITE_EXCURSION_CANDIDATE"}:
+        raise RuntimeError("source is not an extension-eligible candidate")
+    if not np.isclose(float(summary["T_ms"]), 25000.0):
+        raise RuntimeError("extension requires the canonical 25-s source")
+    tau_ms = float(summary["tau_ms"])
+    gamma = float(summary["gamma_nominal_dose"])
+    tag = f"lc5v2p1_candidate_extension_tau{int(tau_ms)}_gamma{int(round(gamma*1000)):04d}"
+    arm = U2.OUT / tag
+    work = U2.OUT / f".{tag}.work"
+    sentinel = tag.upper()
+    if arm.is_dir():
+        return json.loads((arm / "summary.json").read_text())
+    lock = (U2.OUT / f".{tag}.lock").open("w")
+    try:
+        fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError as exc:
+        raise SystemExit(f"{tag} is already running") from exc
+    running = U2.OUT / f"RUNNING_{sentinel}.json"
+    failed = U2.OUT / f"FAILED_{sentinel}.json"
+    done = U2.OUT / f"DONE_{sentinel}.json"
+    try:
+        if work.exists():
+            raise RuntimeError(f"stale work directory requires inspection: {work}")
+        resources = U2.GEO._meminfo()
+        if resources["mem_available_gib"] < 96.0:
+            raise RuntimeError("candidate continuation requires at least 96 GiB MemAvailable")
+        baseline_swap = float(resources["swap_used_mib"])
+        prelock, p0, imax = PREFIX._p0_contract(gamma, "q099", tau_ms)
+        if not np.isclose(float(imax), float(summary["Imax"]), rtol=0.0, atol=1e-10):
+            raise RuntimeError("candidate Imax drift")
+        S, slow, _ = PREFIX._fresh_system(p0, imax, prelock["a_load"], tau_ms)
+        template = U2.PM._seed_template(S, slow)
+        state = U2.load_into(source / "final_state.npz", template)
+        expected_step = int(round(float(summary["T_ms"]) / U2.DT_MS))
+        if int(state.t) != expected_step or state_hash(state) != summary["final_state_hash"]:
+            raise RuntimeError("source exact-state mismatch")
+
+        work.mkdir(parents=True)
+        _write_json(running, {
+            "status": "RUNNING", "pid": os.getpid(), "source_summary": str(source_summary),
+            "source_summary_sha256": _sha(source_summary), "source_state_hash": state_hash(state),
+            "tau_ms": tau_ms, "gamma": gamma, "continuation_ms": CONTINUE_MS,
+            "target_total_ms": TOTAL_TARGET_MS,
+        })
+        started = time.time()
+        stride = int(round(U2.TRACE_DT_MS / U2.DT_MS))
+        force_scale = float(state.slow.cfg.E_E - state.slow.cfg.v_match)
+        state.slow.recurrent_drive_observer = RecurrentDriveBlockObserver(
+            S["NE"], sample_every=stride,
+            steps_per_block=int(round(1000.0 / U2.DT_MS)), force_scale=force_scale,
+        )
+        attrs = (
+            "trace_z_mean", "trace_h_lc2_mean", "trace_gA_raw_lc2_mean",
+            "trace_gErec_mean", "trace_u_mean", "trace_u_max", "trace_phi_pump_mean",
+            "trace_pump_excess_mean", "trace_pump_excess_max", "trace_conductance_clip_frac",
+        )
+        trace_parts, streams = {}, []
+        input_hasher = ExactInputHasher()
+        chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
+        p = dataclasses.replace(S["p"], T=CONTINUE_MS, dt=U2.DT_MS)
+        for chunk in range(int(round(CONTINUE_MS / U2.CHUNK_MS))):
+            starts = {name: len(getattr(state.slow, name)) for name in attrs}
+            binary = work / f"chunk_{chunk:02d}.bin"
+            writer = SparseSpikeBinaryWriter(
+                binary, step_origin=state.t, n_steps=chunk_steps, n_cells=S["NE"]
+            )
+            run_out = run_fcxr_loop(
+                p, S["net"], start=state, n_steps=chunk_steps, capture_final=True,
+                store_spikes=False, spike_sink=writer, input_sink=input_hasher,
+                v_th_per_neuron=S["vth"],
+            )
+            state = run_out["checkpoint"]
+            stream = writer.finalize(work / f"chunk_{chunk:02d}_spikes.npz")
+            binary.unlink(missing_ok=True)
+            streams.append(stream)
+            sliced = U2._trace_slice(state.slow, starts, stride)
+            for key, value in sliced.items():
+                trace_parts.setdefault(key, []).append(value)
+            U2.save_loop_state(str(work / "rolling_checkpoint.npz"), state)
+            row = U2._resource_row(
+                f"{sentinel}_CHUNK", baseline_swap, chunk=chunk + 1,
+                completed_total_ms=state.t * U2.DT_MS, wall_s=time.time() - started,
+            )
+            _write_json(work / "progress.json", {
+                "status": "RUNNING", "completed_chunks": chunk + 1,
+                "completed_total_ms": state.t * U2.DT_MS, "state_hash": state_hash(state),
+                "resource_action": row["action"],
+            })
+            if row["action"] == "TERMINATE_AFTER_CHECKPOINT":
+                raise RuntimeError("RESOURCE_STOP_AFTER_CHECKPOINT")
+
+        original = load_sparse_spike_stream(source / "spikes.npz")
+        full = _combine_full(original, streams)
+        rate = _rate_from_stream(full)
+        adjudication = PREFIX._adjudicate(full, rate)
+        with np.load(source / "traces.npz", allow_pickle=False) as z:
+            old_traces = {name: np.asarray(z[name]) for name in z.files}
+        new_traces = {name: np.concatenate(parts) for name, parts in trace_parts.items()}
+        combined_traces = {}
+        for name, old in old_traces.items():
+            if name in {"rate_dt_ms", "af", "af_dt_ms", "rate_E"}:
+                continue
+            if name in new_traces:
+                combined_traces[name] = np.concatenate([old, new_traces[name]])
+        rate10 = rate[::stride].astype(np.float32)
+        af, af_dt = adjudication["af"], adjudication["af_dt"]
+        u_diag = PREFIX._u_tail_diagnostics(
+            state.slow.u_pump_E, p0, tau_ms, combined_traces["u_mean"], U2.TRACE_DT_MS
+        )
+        result = {
+            "status": "COMPLETE", "arm": tag, "outcome": adjudication["outcome"],
+            "source_summary": str(source_summary), "source_summary_sha256": _sha(source_summary),
+            "source_outcome": summary["outcome"], "source_state_hash": summary["final_state_hash"],
+            "runtime_semantics": "exact_state_continuation_no_parameter_change",
+            "tau_ms": tau_ms, "gamma_nominal_dose": gamma, "Imax": imax,
+            "a_load": float(prelock["a_load"]), "p0_policy": "q099", "h": 3,
+            "T_ms": full.n_steps * U2.DT_MS,
+            "onset_ms": adjudication["onset_ms"], "offset_ms": adjudication["offset_ms"],
+            "lifecycle": adjudication["lifecycle"], "n_events": len(adjudication["events"]),
+            "n_returning": len(adjudication["returned"]),
+            "per_second_mean_rate_hz": [float(x["mean_hz"]) for x in adjudication["reports"]],
+            "mean_rate_hz": float(np.mean(rate)),
+            "end_rate_hz": float(np.mean(rate[-int(round(1000.0/U2.DT_MS)):])),
+            "u_tail_diagnostics": u_diag,
+            "D_start_end": [summary["D_start_end"][0], float(combined_traces["D_mean"][-1])],
+            "H_start_end": [summary["H_start_end"][0], float(combined_traces["H_mean"][-1])],
+            "u_start_end": [summary["u_start_end"][0], float(combined_traces["u_mean"][-1])],
+            "continuation_external_input_sha256": input_hasher.sha256,
+            "spike_sha256": full.sha256, "final_state_hash": state_hash(state),
+            "clip_frac_max": float(np.max(combined_traces["clip_frac"])),
+            "wall_s": time.time() - started,
+            "claim_boundary": "extension tests containment/offset; recovery requires post-offset Z and returning-IED gates",
+        }
+        with AtomicStageBundle(arm) as bundle:
+            _write_json(bundle.path("summary.json"), result)
+            PREFIX._npz_atomic(
+                bundle.path("traces.npz"), rate_dt_ms=np.asarray([U2.TRACE_DT_MS], np.float32),
+                rate_E=rate10, af=af.astype(np.float32), af_dt_ms=np.asarray([af_dt], np.float32),
+                **{key: np.asarray(value, np.float32) for key, value in combined_traces.items()},
+            )
+            PREFIX._npz_atomic(
+                bundle.path("spikes.npz"), steps=full.steps, cells=full.cells.astype(np.int32),
+                n_steps=np.asarray([full.n_steps], np.int64), n_cells=np.asarray([full.n_cells], np.int64),
+                sha256=np.asarray([full.sha256]),
+            )
+            U2.save_loop_state(str(bundle.path("final_state.npz")), state)
+            bundle.commit(required=["summary.json", "traces.npz", "spikes.npz", "final_state.npz"])
+        _plot_extension(arm, result, rate10, combined_traces)
+        _write_json(done, {"status": "DONE", "arm": str(arm), "outcome": result["outcome"]})
+        running.unlink(missing_ok=True)
+        shutil.rmtree(work, ignore_errors=True)
+        return result
+    except BaseException as exc:
+        _write_json(failed, {"status": "FAILED", "error": f"{type(exc).__name__}: {exc}"})
+        running.unlink(missing_ok=True)
+        raise
+    finally:
+        lock.close()
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--source-summary", type=Path, required=True)
+    parser.add_argument("--confirm-run", action="store_true")
+    args = parser.parse_args()
+    if not args.confirm_run:
+        raise SystemExit("candidate continuation requires --confirm-run")
+    print(json.dumps(PREFIX.json_sanitize(run(args.source_summary)), indent=2, sort_keys=True))
+
+
+if __name__ == "__main__":
+    main()
