@@ -70,3 +70,16 @@ def test_active_protocol_allows_event_aligned_limits_but_legacy_defaults_remain_
     assert PREFIX._target_end_ms(15000.0, 18000.0, 25000.0, 7000.0) == 22000.0
     assert PREFIX._target_end_ms(20000.0, 18000.0, 25000.0, 7000.0) == 25000.0
     assert PREFIX._target_end_ms(None, 18000.0, 25000.0, 7000.0) == 25000.0
+
+
+def test_q99_boundary_dose_is_analytic_scaling_not_refit():
+    summary = {
+        "Imax_by_gamma": {"0.005": 2.5},
+        "recurrent_force_integral_median_ms": 100.0,
+        "selected_excess_integral_median_ms": 2.0,
+    }
+    assert PREFIX._q99_imax(summary, 0.005) == pytest.approx(2.5)
+    assert PREFIX._q99_imax(summary, 0.007) == pytest.approx(0.007 * 100.0 / 2.0)
+    bad = dict(summary, selected_excess_integral_median_ms=0.0)
+    with pytest.raises(ValueError, match="finite and positive"):
+        PREFIX._q99_imax(bad, 0.007)

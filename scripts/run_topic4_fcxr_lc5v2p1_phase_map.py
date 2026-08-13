@@ -26,7 +26,13 @@ import run_topic4_fcxr_lc5v2_natural_prefix as PREFIX  # noqa: E402
 
 
 DEFAULT_MANIFEST = ROOT / "config/topic4_fcxr_lc5v2p1_timescale_dose_map.json"
-RECEIPTS = PREFIX.U2.OUT / "lc5v2p1_phase_map_reuse_receipts"
+BASE_EXPERIMENT = "lc5v2p1_timescale_dose_map"
+BOUNDARY_EXPERIMENT = "lc5v2p1_boundary_patch"
+BOUNDARY_CELLS = {
+    (3000.0, 0.030), (3000.0, 0.040), (3000.0, 0.060),
+    (8000.0, 0.006), (8000.0, 0.007), (8000.0, 0.008), (8000.0, 0.009),
+    (15000.0, 0.001), (15000.0, 0.002), (15000.0, 0.003), (15000.0, 0.004),
+}
 
 
 def _sha(path):
@@ -42,7 +48,8 @@ def load_manifest(path=DEFAULT_MANIFEST):
     payload = json.loads(path.read_text())
     if payload.get("schema_version") != 1:
         raise ValueError("unsupported LC5v2.1 manifest schema")
-    if payload.get("experiment_id") != "lc5v2p1_timescale_dose_map":
+    experiment_id = payload.get("experiment_id")
+    if experiment_id not in {BASE_EXPERIMENT, BOUNDARY_EXPERIMENT}:
         raise ValueError("unexpected experiment_id")
     model = payload["model"]
     frozen = {
@@ -53,13 +60,31 @@ def load_manifest(path=DEFAULT_MANIFEST):
     }
     if model != frozen:
         raise ValueError("manifest model contract drift")
-    cells = {
-        _cell_key(tau, gamma): (float(tau), float(gamma))
-        for tau in payload["matrix"]["tau_ms"] for gamma in payload["matrix"]["gamma"]
-    }
-    if len(cells) != 9 or set(cells) != set(payload["reuse"]["eligible_cells"]):
-        raise ValueError("manifest must define one reuse entry for every 3x3 cell")
+    matrix = payload["matrix"]
+    if "cells" in matrix:
+        pairs = {(float(row["tau_ms"]), float(row["gamma"])) for row in matrix["cells"]}
+    else:
+        pairs = {
+            (float(tau), float(gamma))
+            for tau in matrix["tau_ms"] for gamma in matrix["gamma"]
+        }
+    cells = {_cell_key(tau, gamma): (tau, gamma) for tau, gamma in pairs}
+    if len(cells) != len(pairs):
+        raise ValueError("manifest cell labels collide after canonical formatting")
+    if experiment_id == BASE_EXPERIMENT and pairs != {
+        (tau, gamma) for tau in (3000.0, 8000.0, 15000.0)
+        for gamma in (0.005, 0.010, 0.020)
+    }:
+        raise ValueError("base manifest drifted from the locked 3x3")
+    if experiment_id == BOUNDARY_EXPERIMENT and pairs != BOUNDARY_CELLS:
+        raise ValueError("boundary manifest drifted from the locked 11-cell patch")
+    if set(cells) != set(payload["reuse"]["eligible_cells"]):
+        raise ValueError("manifest must define one reuse entry for every cell")
     return path, payload, cells
+
+
+def receipts_dir(experiment_id):
+    return PREFIX.U2.OUT / f"{experiment_id}_reuse_receipts"
 
 
 def _write_json(path, payload):
@@ -127,16 +152,17 @@ def validate_control(root, summary_path, observation):
 
 def run_cell(cell, manifest_path=DEFAULT_MANIFEST):
     manifest_path, manifest, cells = load_manifest(manifest_path)
+    receipts = receipts_dir(manifest["experiment_id"])
     if cell == "control":
         receipt = validate_control(
             ROOT, Path(manifest["reuse"]["control"]), manifest["observation"]
         )
-        RECEIPTS.mkdir(parents=True, exist_ok=True)
+        receipts.mkdir(parents=True, exist_ok=True)
         receipt["manifest_sha256"] = _sha(manifest_path)
-        _write_json(RECEIPTS / "control.json", receipt)
+        _write_json(receipts / "control.json", receipt)
         return receipt
     if cell not in cells:
-        raise ValueError(f"cell {cell!r} is not in the locked 3x3 manifest")
+        raise ValueError(f"cell {cell!r} is not in the locked manifest")
     tau_ms, gamma = cells[cell]
     expected_input = manifest["source"]["expected_external_input_prefix_18s_sha256"]
     reuse = manifest["reuse"]["eligible_cells"][cell]
@@ -145,9 +171,9 @@ def run_cell(cell, manifest_path=DEFAULT_MANIFEST):
             ROOT, Path(reuse), tau_ms=tau_ms, gamma=gamma,
             observation=manifest["observation"], expected_input=expected_input,
         )
-        RECEIPTS.mkdir(parents=True, exist_ok=True)
+        receipts.mkdir(parents=True, exist_ok=True)
         receipt["manifest_sha256"] = _sha(manifest_path)
-        _write_json(RECEIPTS / f"{cell}.json", receipt)
+        _write_json(receipts / f"{cell}.json", receipt)
         return receipt
     observation = manifest["observation"]
     return PREFIX.stage_prefix(

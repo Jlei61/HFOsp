@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "experiment_id": "lc5v2p1_boundary_patch",
+  "scientific_semantics": "dose-boundary refinement at the three locked episode-memory timescales",
+  "selection_freeze": {
+    "selected_before_tau15_gamma0020_completed": true,
+    "basis": "tau3 remained saturated through Gamma 0.020; tau8 crossed from saturation at 0.005 to entry-blocked at 0.010; tau15 was entry-blocked at 0.005",
+    "no_outcome_adaptive_edits_inside_block": true
+  },
+  "source": {
+    "u1_root": "results/topic4_sef_hfo/fcxr_lc5_episode_pump/u1_capture",
+    "onset_ms": 11000.0,
+    "baseline_window_ms": [7000.0, 11000.0],
+    "early_episode_window_ms": [12000.0, 14000.0],
+    "expected_external_input_prefix_18s_sha256": "e1f0a524bcf4787b41d790e2bd4e290b835b6adc060b5b0f4a09020de639bfeb"
+  },
+  "model": {
+    "online_from_t0": true,
+    "u0": 0.0,
+    "p0_mode": "temporal_q099",
+    "dynamic_z": true,
+    "dynamic_h": true,
+    "x_frozen": 1.0,
+    "m_enabled": false,
+    "kick": false,
+    "parameter_step": false,
+    "connection_seed": 1,
+    "noise_seed": 401,
+    "dt_ms": 0.05,
+    "hill_h": 3
+  },
+  "matrix": {
+    "cells": [
+      {"tau_ms": 3000.0, "gamma": 0.030},
+      {"tau_ms": 3000.0, "gamma": 0.040},
+      {"tau_ms": 3000.0, "gamma": 0.060},
+      {"tau_ms": 8000.0, "gamma": 0.006},
+      {"tau_ms": 8000.0, "gamma": 0.007},
+      {"tau_ms": 8000.0, "gamma": 0.008},
+      {"tau_ms": 8000.0, "gamma": 0.009},
+      {"tau_ms": 15000.0, "gamma": 0.001},
+      {"tau_ms": 15000.0, "gamma": 0.002},
+      {"tau_ms": 15000.0, "gamma": 0.003},
+      {"tau_ms": 15000.0, "gamma": 0.004}
+    ]
+  },
+  "observation": {
+    "min_end_ms": 18000.0,
+    "post_onset_ms": 7000.0,
+    "max_end_ms": 25000.0,
+    "chunk_ms": 1000.0
+  },
+  "reuse": {
+    "control": "results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/u3_prefix_tau8_gamma_milli000",
+    "eligible_cells": {
+      "tau3000_gamma0030": null,
+      "tau3000_gamma0040": null,
+      "tau3000_gamma0060": null,
+      "tau8000_gamma0006": null,
+      "tau8000_gamma0007": null,
+      "tau8000_gamma0008": null,
+      "tau8000_gamma0009": null,
+      "tau15000_gamma0001": null,
+      "tau15000_gamma0002": null,
+      "tau15000_gamma0003": null,
+      "tau15000_gamma0004": null
+    }
+  },
+  "hard_stops": [
+    "CONTROL_OR_INPUT_PREFIX_MISMATCH",
+    "CALIBRATION_MANIFEST_OR_MECHANISM_HASH_MISMATCH",
+    "NUMERICAL_OR_RESOURCE_FAILURE"
+  ],
+  "resource": {
+    "max_parallel_arms": 4,
+    "threads_per_arm": 1,
+    "rss_budget_multiplier": 1.5,
+    "memavailable_to_total_budget_ratio": 3.0,
+    "stop_new_submit_swap_delta_mib": 256.0,
+    "terminate_after_checkpoint_swap_delta_mib": 512.0
+  }
+}

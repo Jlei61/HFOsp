@@ -30,3 +30,8 @@ def test_four_worker_memory_gate_matches_locked_multipliers():
     _, manifest, _ = BLOCK.MAP.load_manifest()
     assert BLOCK.required_memavailable_gib(4, manifest) == pytest.approx(122.4)
     assert BLOCK.required_memavailable_gib(3, manifest) == pytest.approx(91.8)
+
+
+def test_boundary_block_has_independent_lock_and_sentinels():
+    assert BLOCK._block_stem(BLOCK.MAP.BASE_EXPERIMENT) == "lc5v2p1_phase_map"
+    assert BLOCK._block_stem(BLOCK.MAP.BOUNDARY_EXPERIMENT) == "lc5v2p1_boundary_patch"

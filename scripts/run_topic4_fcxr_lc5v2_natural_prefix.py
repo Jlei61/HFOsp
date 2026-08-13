@@ -298,8 +298,22 @@ def _p0_contract(gamma, p0_policy, tau_ms):
         raise SystemExit("q99 p0 separation audit tau mismatch")
     with np.load(audit / "p0_fields.npz", allow_pickle=False) as z:
         p0 = np.asarray(z["q099"], float)
-    imax = float(summary["Imax_by_gamma"][str(float(gamma))])
+    imax = _q99_imax(summary, gamma)
     return contract, p0, imax
+
+
+def _q99_imax(summary, gamma):
+    dose = summary["Imax_by_gamma"]
+    key = str(float(gamma))
+    if key in dose:
+        return float(dose[key])
+    # Imax is a nuisance normalization that is analytically linear in nominal Gamma once tau,
+    # a_load and p0 are frozen.  Boundary refinement therefore does not refit load or deadband.
+    force = float(summary["recurrent_force_integral_median_ms"])
+    excess = float(summary["selected_excess_integral_median_ms"])
+    if not (np.isfinite(force) and np.isfinite(excess) and force > 0.0 and excess > 0.0):
+        raise ValueError("q99 dose reference must be finite and positive")
+    return float(gamma) * force / excess
 
 
 def stage_prefix(

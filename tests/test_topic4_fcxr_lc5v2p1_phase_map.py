@@ -31,8 +31,27 @@ def test_manifest_has_only_three_hard_stop_families():
 
 
 def test_unknown_cell_is_rejected_before_any_simulation():
-    with pytest.raises(ValueError, match="not in the locked 3x3"):
+    with pytest.raises(ValueError, match="not in the locked manifest"):
         MAP.run_cell("tau6000_gamma0010")
+
+
+def test_boundary_manifest_is_the_locked_irregular_11_cell_patch():
+    path = ROOT / "config/topic4_fcxr_lc5v2p1_boundary_patch.json"
+    _, manifest, cells = MAP.load_manifest(path)
+    assert manifest["experiment_id"] == MAP.BOUNDARY_EXPERIMENT
+    assert len(cells) == 11
+    assert set(cells.values()) == MAP.BOUNDARY_CELLS
+    assert all(source is None for source in manifest["reuse"]["eligible_cells"].values())
+
+
+def test_boundary_manifest_rejects_outcome_adaptive_cell_edit(tmp_path):
+    source = ROOT / "config/topic4_fcxr_lc5v2p1_boundary_patch.json"
+    payload = json.loads(source.read_text())
+    payload["matrix"]["cells"].pop()
+    path = tmp_path / "drifted.json"
+    path.write_text(json.dumps(payload))
+    with pytest.raises(ValueError, match="boundary manifest drifted"):
+        MAP.load_manifest(path)
 
 
 def test_reuse_requires_onset_and_full_post_onset_window(tmp_path):

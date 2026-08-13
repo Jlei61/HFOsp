@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import fcntl
+import argparse
 import json
 import os
 from pathlib import Path
@@ -63,7 +64,13 @@ def required_memavailable_gib(n_workers, manifest):
     return total_budget * float(resource["memavailable_to_total_budget_ratio"])
 
 
-def _run_batch(batch, manifest_path, batch_index, swap_baseline):
+def _block_stem(experiment_id):
+    if experiment_id == MAP.BASE_EXPERIMENT:
+        return "lc5v2p1_phase_map"
+    return str(experiment_id)
+
+
+def _run_batch(batch, manifest_path, batch_index, swap_baseline, block_stem):
     manifest_path = Path(manifest_path).resolve()
     logs = OUT / "lc5v2p1_phase_map_logs"
     logs.mkdir(parents=True, exist_ok=True)
@@ -95,7 +102,7 @@ def _run_batch(batch, manifest_path, batch_index, swap_baseline):
             env=env, start_new_session=True,
         )
         children.append((cell, process, log, str(log_path)))
-    _write_json(OUT / f"lc5v2p1_batch_{batch_index}_RUNNING.json", {
+    _write_json(OUT / f"{block_stem}_batch_{batch_index}_RUNNING.json", {
         "status": "RUNNING", "batch_index": batch_index, "cells": list(batch),
         "children": [{"cell": c, "pid": p.pid, "log": log} for c, p, _, log in children],
         "resource_preflight": resource, "required_memavailable_gib": required,
@@ -107,18 +114,22 @@ def _run_batch(batch, manifest_path, batch_index, swap_baseline):
         if code != 0:
             failures.append({"cell": cell, "exit_code": code, "log": log_path})
     status = "DONE" if not failures else "FAILED"
-    _write_json(OUT / f"lc5v2p1_batch_{batch_index}_{status}.json", {
+    _write_json(OUT / f"{block_stem}_batch_{batch_index}_{status}.json", {
         "status": status, "batch_index": batch_index, "cells": list(batch),
         "failures": failures, "finished_epoch_s": time.time(),
     })
-    (OUT / f"lc5v2p1_batch_{batch_index}_RUNNING.json").unlink(missing_ok=True)
+    (OUT / f"{block_stem}_batch_{batch_index}_RUNNING.json").unlink(missing_ok=True)
     if failures:
         raise RuntimeError(f"batch {batch_index} failed: {failures}")
 
 
 def main():
-    manifest_path, manifest, cells = MAP.load_manifest()
-    lock_path = OUT / ".lc5v2p1_phase_map_block.lock"
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--manifest", type=Path, default=MAP.DEFAULT_MANIFEST)
+    args = parser.parse_args()
+    manifest_path, manifest, cells = MAP.load_manifest(args.manifest)
+    block_stem = _block_stem(manifest["experiment_id"])
+    lock_path = OUT / f".{block_stem}_block.lock"
     OUT.mkdir(parents=True, exist_ok=True)
     lock = lock_path.open("w")
     try:
@@ -134,24 +145,25 @@ def main():
         pending = pending_cells(manifest, cells)
         max_parallel = int(manifest["resource"]["max_parallel_arms"])
         swap_baseline = _meminfo()["swap_used_mib"]
-        _write_json(OUT / "lc5v2p1_phase_map_block_RUNNING.json", {
+        _write_json(OUT / f"{block_stem}_block_RUNNING.json", {
             "status": "RUNNING", "pid": os.getpid(), "pending_cells": pending,
             "manifest_sha256": MAP._sha(manifest_path), "swap_baseline_mib": swap_baseline,
         })
         for batch_index, start in enumerate(range(0, len(pending), max_parallel), 1):
             _run_batch(
-                pending[start:start + max_parallel], manifest_path, batch_index, swap_baseline
+                pending[start:start + max_parallel], manifest_path, batch_index, swap_baseline,
+                block_stem,
             )
-        _write_json(OUT / "lc5v2p1_phase_map_block_DONE.json", {
+        _write_json(OUT / f"{block_stem}_block_DONE.json", {
             "status": "DONE", "cells": list(cells), "finished_epoch_s": time.time(),
         })
-        (OUT / "lc5v2p1_phase_map_block_RUNNING.json").unlink(missing_ok=True)
+        (OUT / f"{block_stem}_block_RUNNING.json").unlink(missing_ok=True)
     except BaseException as exc:
-        _write_json(OUT / "lc5v2p1_phase_map_block_FAILED.json", {
+        _write_json(OUT / f"{block_stem}_block_FAILED.json", {
             "status": "FAILED", "error": f"{type(exc).__name__}: {exc}",
             "finished_epoch_s": time.time(),
         })
-        (OUT / "lc5v2p1_phase_map_block_RUNNING.json").unlink(missing_ok=True)
+        (OUT / f"{block_stem}_block_RUNNING.json").unlink(missing_ok=True)
         raise
     finally:
         lock.close()
