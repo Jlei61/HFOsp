@@ -938,6 +938,7 @@ def _plot_cluster_boundaries(
     label_box: bool = False,
     boundary_band: bool = False,
     label_names: List[str] | None = None,
+    label_colors: List[str] | None = None,
     label_y_offset: float = 0.15,
 ) -> None:
     if labels_sorted.size == 0:
@@ -978,11 +979,16 @@ def _plot_cluster_boundaries(
             if label_names is not None and label_idx < len(label_names)
             else f"C{int(cluster_id)}"
         )
+        label_color = (
+            label_colors[label_idx]
+            if label_colors is not None and label_idx < len(label_colors)
+            else line_color
+        )
         ax.text(
             cursor + count / 2.0,
             n_ch + label_y_offset,
             f"{label_text} (n={count})",
-            color=line_color,
+            color=label_color,
             ha="center",
             va="bottom",
             fontsize=label_fontsize,
@@ -1008,12 +1014,20 @@ def _plot_rank_histogram(
     label_fontsize: float = 16,
     title_fontsize: float = 18,
     xtick_fontsize: float = 14,
+    ridge_spacing: float | None = None,
+    smooth_sigma_bins: float = 0.0,
+    smooth_ridge_height: float = 0.13,
 ) -> None:
     n_ch = len(channel_order)
     ordered_names = [channel_names[idx] for idx in channel_order]
     if ytick_fontsize is None:
         ytick_fontsize = 14 if n_ch > 24 else 16
     overlap = 0.85
+    spacing = 1.0 - overlap if ridge_spacing is None else float(ridge_spacing)
+    if spacing <= 0.0:
+        raise ValueError("ridge_spacing must be positive")
+    if smooth_sigma_bins < 0.0:
+        raise ValueError("smooth_sigma_bins must be non-negative")
     for ci_idx, ci in enumerate(channel_order):
         vals = np.asarray(ranks[ci, event_indices], dtype=float)
         mask = np.asarray(bools[ci, event_indices], dtype=bool)
@@ -1023,14 +1037,31 @@ def _plot_rank_histogram(
             continue
         hist, _ = np.histogram(vals, bins=np.arange(0, n_ch + 1) - 0.5)
         hist_norm = hist / max(1, vals.size)
-        y_base = ci_idx * (1.0 - overlap)
-        ax.bar(
-            np.arange(n_ch), hist_norm, bottom=y_base, width=1.0,
-            color=plt.cm.viridis(ci_idx / max(1, n_ch - 1)),
-            alpha=0.75, linewidth=0, rasterized=True,
-        )
+        y_base = ci_idx * spacing
+        color = plt.cm.viridis(ci_idx / max(1, n_ch - 1))
+        if smooth_sigma_bins > 0.0:
+            from scipy.ndimage import gaussian_filter1d
+
+            smoothed = gaussian_filter1d(
+                hist_norm.astype(float), smooth_sigma_bins, mode="nearest",
+            )
+            peak = float(np.max(smoothed, initial=0.0))
+            if peak > 0.0:
+                smoothed = smoothed * (float(smooth_ridge_height) / peak)
+            x_dense = np.linspace(0.0, n_ch - 1.0, max(120, 12 * n_ch))
+            y_dense = np.interp(x_dense, np.arange(n_ch), smoothed)
+            ax.fill_between(
+                x_dense, y_base, y_base + y_dense,
+                color=color, alpha=0.72, linewidth=0, rasterized=True,
+            )
+            ax.plot(x_dense, y_base + y_dense, color=color, lw=0.75)
+        else:
+            ax.bar(
+                np.arange(n_ch), hist_norm, bottom=y_base, width=1.0,
+                color=color, alpha=0.75, linewidth=0, rasterized=True,
+            )
         ax.axhline(y_base, color="0.8", lw=0.3)
-    ax.set_yticks(np.arange(n_ch) * (1.0 - overlap))
+    ax.set_yticks(np.arange(n_ch) * spacing)
     ax.set_yticklabels(ordered_names if show_ylabels else [], fontsize=ytick_fontsize)
     if not show_ylabels:
         ax.tick_params(axis="y", left=False, labelleft=False)
@@ -1061,6 +1092,8 @@ def _plot_cluster_rank_fig4(
     invert_yaxis: bool = True,
     show_ylabels: bool = True,
     marker_size: float = 6.0,
+    line_colors: List[str] | None = None,
+    label_names: List[str] | None = None,
 ) -> None:
     """Per-cluster mean rank line + shaded mean +/- std band on fixed channel order."""
     n_ch = len(channel_order)
@@ -1070,7 +1103,10 @@ def _plot_cluster_rank_fig4(
     unique_k = np.unique(labels)
     n_k = len(unique_k)
     _base_colors = ["#1f77b4", "#d62728", "#2ca02c", "#ff7f0e", "#9467bd", "#8c564b", "#e377c2", "#17becf"]
-    line_colors = [_base_colors[i % len(_base_colors)] for i in range(n_k)]
+    if line_colors is None:
+        line_colors = [_base_colors[i % len(_base_colors)] for i in range(n_k)]
+    elif len(line_colors) < n_k:
+        raise ValueError("line_colors must cover every displayed cluster")
     y_pos = np.arange(n_ch, dtype=float)
 
     for ki, cid in enumerate(unique_k):
@@ -1095,7 +1131,11 @@ def _plot_cluster_rank_fig4(
         ax.plot(
             means[valid], y_pos[valid],
             "-o", color=line_colors[ki], lw=2.5, ms=marker_size, zorder=10,
-            label=f"C{int(cid)} (n={int(mask_cluster.sum())})",
+            label=(
+                f"{label_names[ki]} (n={int(mask_cluster.sum())})"
+                if label_names is not None and ki < len(label_names)
+                else f"C{int(cid)} (n={int(mask_cluster.sum())})"
+            ),
         )
 
     ax.set_yticks(y_pos)

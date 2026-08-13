@@ -1,20 +1,20 @@
 #!/usr/bin/env python3
-"""Build paper Figure 1 as individual temporal-scaffold panels.
+"""Build paper Figure 1 as independent panel-level outputs.
 
 Figure scope is intentionally temporal: group-event observation, refined-HFO
 SOZ anchor, a masked representative temporal-template example, and cohort-level
 MI/uplift. Spatial-axis evidence belongs to the next main figure.
 
-Each scientific message is rendered as its own file under the strict
-``fig1-panel<id>`` naming so the panels can be assembled externally:
+The manuscript's Figure 1A is a hand-drawn schematic and is intentionally not
+produced or retained here.  Code-generated panels follow the manuscript panel
+letters exactly so they can be assembled externally without aliases:
 
-    fig1-panela1  legacy manually annotated HFO morphology set (n=178)
-    fig1-panela2  group-event phenomenon (reused Y3 demo, copied verbatim)
-    fig1-panelb1  Yuquan refined-HFO count -> clinical SOZ ROC
-    fig1-panelb2  Epilepsiae refined-HFO count -> clinical SOZ ROC
-    fig1-panelc   aligned c1 temporal-order row + c2 TA/TB clustered row
-    fig1-paneld1  MI data vs permutation null (40 subjects)   [masked shared-participant]
-    fig1-paneld2  within-template matching-index uplift (40 subjects)
+    fig1-panelb1  legacy manually annotated HFO morphology set (n=178)
+    fig1-panelb2  group-event phenomenon (reused Y3 demo, copied verbatim)
+    fig1-panelc   time-ordered masked rank heatmap + rank distributions
+    fig1-paneld   MI data vs permutation null (40 subjects)
+    fig1-panele   TA/TB clustered heatmap + mean-rank profiles
+    fig1-panelf   within-template matching-index uplift (40 subjects)
 
 No composite is emitted. The across-time reproducibility (split-half/odd-even)
 panel is intentionally not part of Figure 1.
@@ -26,6 +26,7 @@ import argparse
 import json
 import os
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 
@@ -51,15 +52,15 @@ from src.interictal_propagation import _valid_event_indices  # noqa: E402
 from src.plot_style import COL_EPI, COL_YQ  # noqa: E402
 
 
-DEFAULT_OUTPUT = ROOT / "results/paper-ready-figure/fig1_interictal_hfo_temporal_scaffold/figures"
+DEFAULT_OUTPUT = ROOT / "results/paper-ready-figure/fig1/figures"
 DEFAULT_GROUP_EVENT = (
     ROOT
-    / "results/paper-ready-figure/fig1_hfo_group_event_demo/figures"
+    / "results/paper-ready-figure/archive/2026-08-09_fig1_source_material/fig1_hfo_group_event_demo/figures"
     / "yuquan_y3_hfo_group_event_demo.png"
 )
 DEFAULT_SINGLE_HFO = (
     ROOT
-    / "results/paper-ready-figure/fig1_hfo_group_event_demo/figures"
+    / "results/paper-ready-figure/archive/2026-08-09_fig1_source_material/fig1_hfo_group_event_demo/figures"
     / "legacy_hfo_n178_schematic.png"
 )
 MASKED_ROOT = ROOT / "results/interictal_propagation_masked"
@@ -108,33 +109,40 @@ def _apply_rcparams() -> None:
 def _save_panel(fig: plt.Figure, output_dir: Path, stem: str) -> list[str]:
     png = output_dir / f"{stem}.png"
     pdf = output_dir / f"{stem}.pdf"
-    fig.savefig(png, dpi=300, facecolor="white", bbox_inches="tight")
-    fig.savefig(pdf, dpi=300, facecolor="white", bbox_inches="tight")
+    fig.savefig(png, dpi=600, facecolor="white", bbox_inches="tight")
+    fig.savefig(pdf, facecolor="white", bbox_inches="tight")
     plt.close(fig)
     return [str(png.relative_to(ROOT)), str(pdf.relative_to(ROOT))]
 
 
 # ---------------------------------------------------------------------------
-# Panel a: legacy HFO morphology set (a1) + Y3 group-event demo (a2)
+# Panel B: legacy HFO morphology set (B1) + Y3 group-event demo (B2)
 # ---------------------------------------------------------------------------
-def _render_panel_a(output_dir: Path, single_hfo_png: Path, group_event_png: Path) -> dict:
+def _render_panel_b_sources(output_dir: Path, single_hfo_png: Path, group_event_png: Path) -> dict:
     def _copy(src_png: Path, stem: str) -> list[str]:
-        files: list[str] = []
-        for suffix in (".png", ".pdf"):
-            src = src_png.with_suffix(suffix)
-            if not src.exists():
-                continue
-            dst = output_dir / f"{stem}{suffix}"
-            shutil.copyfile(src, dst)
-            files.append(str(dst.relative_to(ROOT)))
-        if not files:
+        src_pdf = src_png.with_suffix(".pdf")
+        if src_pdf.exists():
+            dst_pdf = output_dir / f"{stem}.pdf"
+            shutil.copyfile(src_pdf, dst_pdf)
+            subprocess.run(
+                ["pdftoppm", "-png", "-singlefile", "-r", "600", str(dst_pdf),
+                 str(output_dir / stem)],
+                check=True,
+            )
+            return [
+                str((output_dir / f"{stem}.png").relative_to(ROOT)),
+                str(dst_pdf.relative_to(ROOT)),
+            ]
+        if not src_png.exists():
             raise FileNotFoundError(f"Panel {stem} source not found: {src_png}")
-        return files
+        dst_png = output_dir / f"{stem}.png"
+        shutil.copyfile(src_png, dst_png)
+        return [str(dst_png.relative_to(ROOT))]
 
     return {
-        "a1": {
-            "panel_id": "a1",
-            "files": _copy(single_hfo_png, "fig1-panela1"),
+        "b1": {
+            "panel_id": "b1",
+            "files": _copy(single_hfo_png, "fig1-panelb1"),
             "producer": "scripts/paper_figures/plot_fig1_single_hfo_schematic.py",
             "reused_from": str(single_hfo_png.relative_to(ROOT)),
             "source_set": "legacy manually annotated HFO morphology artifact",
@@ -145,9 +153,9 @@ def _render_panel_a(output_dir: Path, single_hfo_png: Path, group_event_png: Pat
             ],
             "content": "178 overlaid HFO snippets + yellow mean, raw and baseline-normalized mean spectrograms",
         },
-        "a2": {
-            "panel_id": "a2",
-            "files": _copy(group_event_png, "fig1-panela2"),
+        "b2": {
+            "panel_id": "b2",
+            "files": _copy(group_event_png, "fig1-panelb2"),
             "producer": "scripts/paper_figures/plot_fig1_hfo_group_event_legacy_style.py",
             "reused_from": str(group_event_png.relative_to(ROOT)),
             "public_patient_label": "Yuquan Y3",
@@ -393,6 +401,11 @@ def _draw_fig1e_cluster_row(
     cluster_label_fontsize: float = 10,
     mean_label_fontsize: float = 10.5,
     mean_xtick_fontsize: float = 8.5,
+    column_indices: tuple[int, int, int] = (0, 1, 2),
+    gap_half_width_events: int | None = None,
+    cluster_label_names: list[str] | None = None,
+    cluster_colors: list[str] | None = None,
+    mean_profile_label_names: list[str] | None = None,
 ) -> dict:
     """Draw one clustered-template row with the exact Figure-1E painter.
 
@@ -401,9 +414,27 @@ def _draw_fig1e_cluster_row(
     rank profile.  Supplementary multi-patient examples call this function
     directly so they cannot silently drift into a different visual contract.
     """
-    ax_cluster, ax_cluster_dummy, ax_cbar, ax_mean = _panel_c_row_axes(
-        fig, outer, row
+    heatmap_col, colorbar_col, mean_col = column_indices
+    left = gridspec.GridSpecFromSubplotSpec(
+        2, 1, subplot_spec=outer[row, heatmap_col],
+        height_ratios=[20, 1], hspace=0.06,
     )
+    colorbar_column = gridspec.GridSpecFromSubplotSpec(
+        2, 1, subplot_spec=outer[row, colorbar_col],
+        height_ratios=[20, 1], hspace=0.06,
+    )
+    right = gridspec.GridSpecFromSubplotSpec(
+        2, 1, subplot_spec=outer[row, mean_col],
+        height_ratios=[20, 1], hspace=0.06,
+    )
+    ax_cluster = fig.add_subplot(left[0])
+    ax_cluster_dummy = fig.add_subplot(left[1], sharex=ax_cluster)
+    ax_cbar = fig.add_subplot(colorbar_column[0])
+    ax_cbar_dummy = fig.add_subplot(colorbar_column[1])
+    ax_cbar_dummy.axis("off")
+    ax_mean = fig.add_subplot(right[0])
+    ax_mean_dummy = fig.add_subplot(right[1], sharex=ax_mean)
+    ax_mean_dummy.axis("off")
     ax_cluster_dummy.axis("off")
     ranks = arr["ranks"]
     bools = arr["bools"]
@@ -420,7 +451,12 @@ def _draw_fig1e_cluster_row(
         xtick_fontsize=8,
     )
     cluster_boundary = int(np.sum(arr["clustered_labels_all"] == 0))
-    gap_half_width = max(24, int(round(0.006 * clustered_events.size)))
+    gap_half_width = (
+        max(24, int(round(0.006 * clustered_events.size)))
+        if gap_half_width_events is None else int(gap_half_width_events)
+    )
+    if gap_half_width < 0:
+        raise ValueError("gap_half_width_events must be non-negative")
     ax_cluster.axvspan(
         cluster_boundary - gap_half_width,
         cluster_boundary + gap_half_width,
@@ -450,7 +486,8 @@ def _draw_fig1e_cluster_row(
         label_fontsize=cluster_label_fontsize,
         label_box=False,
         boundary_band=False,
-        label_names=["TA", "TB"],
+        label_names=cluster_label_names or ["TA", "TB"],
+        label_colors=cluster_colors,
         label_y_offset=0.5,
     )
     if show_heatmap_xlabel:
@@ -475,6 +512,8 @@ def _draw_fig1e_cluster_row(
         invert_yaxis=False,
         show_ylabels=False,
         marker_size=3.5,
+        line_colors=cluster_colors,
+        label_names=mean_profile_label_names,
     )
     if show_mean_xlabel:
         ax_mean.set_xlabel("Rank", fontsize=10.5)
@@ -511,38 +550,32 @@ def _draw_fig1e_cluster_row(
     }
 
 
-def _render_exemplar_panel(
+def _render_temporal_order_panel(
     output_dir: Path,
-    c1_arr: dict,
-    c1_display_label: str,
-    c2_arr: dict,
-    c2_display_label: str,
+    arr: dict,
+    display_label: str,
 ) -> dict:
-    fig = plt.figure(figsize=(11.6, 6.8), facecolor="white")
+    fig = plt.figure(figsize=(11.6, 3.35), facecolor="white")
     outer = gridspec.GridSpec(
-        2,
+        1,
         3,
         figure=fig,
         width_ratios=[8.4, 0.16, 1.35],
-        height_ratios=[1, 1],
-        hspace=0.22,
         wspace=0.13,
         left=0.065,
         right=0.985,
-        bottom=0.07,
-        top=0.94,
+        bottom=0.14,
+        top=0.88,
     )
-
-    # c1: time-ordered masked events + original overlapping rank ridgelines.
-    ax_raw, ax_strip, ax_cbar1, ax_dist = _panel_c_row_axes(fig, outer, 0)
-    ranks = c1_arr["ranks"]
-    bools = c1_arr["bools"]
-    channel_order = c1_arr["channel_order"]
-    display_events = c1_arr["display_events"]
-    im1 = propagation_plot._plot_rank_heatmap(
+    ax_raw, ax_strip, ax_cbar, ax_dist = _panel_c_row_axes(fig, outer, 0)
+    ranks = arr["ranks"]
+    bools = arr["bools"]
+    channel_order = arr["channel_order"]
+    display_events = arr["display_events"]
+    image = propagation_plot._plot_rank_heatmap(
         ax_raw,
         ranks[channel_order][:, display_events],
-        c1_arr["ordered_names"],
+        arr["ordered_names"],
         title="",
         display_bools=bools[channel_order][:, display_events],
         ytick_fontsize=9.5,
@@ -551,7 +584,7 @@ def _render_exemplar_panel(
     )
     ax_raw.tick_params(axis="x", labelbottom=False)
     ax_raw.set_xlabel("")
-    propagation_plot._plot_daynight_strip(ax_strip, c1_arr["day_mask"])
+    propagation_plot._plot_daynight_strip(ax_strip, arr["day_mask"])
     ax_strip.set_xlabel(
         "Population events (time-ordered)  ·  strip: day (white) / night (black)",
         fontsize=10.5,
@@ -560,94 +593,88 @@ def _render_exemplar_panel(
         ax_dist,
         ranks,
         bools,
-        c1_arr["valid_events"],
+        arr["valid_events"],
         channel_order,
-        c1_arr["channel_names"],
+        arr["channel_names"],
         title="Rank dist.",
         show_ylabels=False,
         label_fontsize=10.5,
         title_fontsize=10,
         xtick_fontsize=8.5,
     )
-    _place_panel_c_colorbar(fig, im1, ax_cbar1)
+    _place_panel_c_colorbar(fig, image, ax_cbar)
     ax_raw.text(
         0.006,
         1.07,
-        f"{c1_display_label}  |  n={c1_arr['valid_events'].size:,}",
+        f"{display_label}  |  n={arr['valid_events'].size:,}",
         transform=ax_raw.transAxes,
         ha="left",
         va="bottom",
         fontsize=9.5,
         fontweight="bold",
     )
-    _panel_label(ax_raw, "c1", x=-0.06, y=1.22)
-
-    # c2: clustered opposing templates, using the shared Figure-1E painter.
-    c2_draw = _draw_fig1e_cluster_row(
-        fig, outer, 1, c2_arr, panel_label="c2"
-    )
-    cluster_boundary = int(c2_draw["cluster_boundary"])
-    gap_half_width = int(c2_draw["gap_half_width"])
-
-    for stale_stem in ("fig1-panelc1", "fig1-panelc2"):
-        for suffix in (".png", ".pdf"):
-            (output_dir / f"{stale_stem}{suffix}").unlink(missing_ok=True)
     files = _save_panel(fig, output_dir, "fig1-panelc")
     return {
         "panel_id": "c",
         "files": files,
         "producer_source": "scripts/plot_interictal_propagation.py --masked-features --pr3 --paper-style",
-        "layout": "c1 above c2; identical heatmap/colorbar/right-summary column geometry",
-        "figure_size_inches": [11.6, 6.8],
+        "layout": "time-ordered heatmap, day/night strip, colorbar, and rank distributions",
+        "figure_size_inches": [11.6, 3.35],
         "axis_label_fontsize_points": 10.5,
         "channel_label_fontsize_points": 9.5,
         "colorbar_label_fontsize_points": 10.5,
-        "same_subject_in_c1_c2": True,
         "panel_column_order": ["event_heatmap", "colorbar", "rank_summary"],
-        "separate_c1_c2_files_emitted": False,
-        "subpanels": {
-            "c1": {
-                "record": f"results/interictal_propagation_masked/per_subject/{c1_arr['dataset']}_{c1_arr['subject']}.json",
-                "public_patient_label": c1_display_label,
-                "n_valid_events": int(c1_arr["valid_events"].size),
-                "displayed_events": int(c1_arr["display_events"].size),
-                "masked_features": True,
-                "daynight_strip": True,
-                "header_fields": ["public_patient_label", "n_valid_events"],
-                "masked_mi_mean": c1_arr["mi_mean"],
-                "rank_distribution_helper": "scripts/plot_interictal_propagation.py::_plot_rank_histogram",
-                "rank_distribution_scaling": "original overlapping probability-normalized ridgeline",
-                "rank_distribution_channel_order": c1_arr["ordered_names"],
-            },
-            "c2": {
-                "record": f"results/interictal_propagation_masked/per_subject/{c2_arr['dataset']}_{c2_arr['subject']}.json",
-                "public_patient_label": c2_display_label,
-                "n_valid_events": int(c2_arr["valid_events"].size),
-                "displayed_events": int(c2_arr["clustered_events_all"].size),
-                "cluster_counts": {
-                    str(cluster_id): int(np.sum(c2_arr["labels"] == cluster_id))
-                    for cluster_id in np.unique(c2_arr["labels"])
-                },
-                "all_valid_events_displayed": True,
-                "cluster_separator": {
-                    "style": "white gap with gray diagonal hatch and interrupted x-axis spine",
-                    "boundary_event_index": cluster_boundary,
-                    "gap_half_width_events": gap_half_width,
-                },
-                "mean_rank_marker_size_points": 3.5,
-                "masked_features": True,
-                "chosen_k": c2_arr["chosen_k"],
-                "within_cluster_tau": c2_arr["within_cluster_tau"],
-                "overall_tau": c2_arr["overall_tau"],
-                "inter_template_spearman_r": c2_arr["inter_corr"],
-                "displayed_header": "",
-            },
+        "record": f"results/interictal_propagation_masked/per_subject/{arr['dataset']}_{arr['subject']}.json",
+        "public_patient_label": display_label,
+        "n_valid_events": int(arr["valid_events"].size),
+        "displayed_events": int(arr["display_events"].size),
+        "masked_features": True,
+        "daynight_strip": True,
+        "masked_mi_mean": arr["mi_mean"],
+        "rank_distribution_helper": "scripts/plot_interictal_propagation.py::_plot_rank_histogram",
+    }
+
+
+def _render_clustered_template_panel(
+    output_dir: Path,
+    arr: dict,
+) -> dict:
+    fig = plt.figure(figsize=(11.6, 3.35), facecolor="white")
+    outer = gridspec.GridSpec(
+        1, 3, figure=fig, width_ratios=[8.4, 0.16, 1.35], wspace=0.13,
+        left=0.065, right=0.985, bottom=0.14, top=0.88,
+    )
+    drawn = _draw_fig1e_cluster_row(fig, outer, 0, arr)
+    cluster_boundary = int(drawn["cluster_boundary"])
+    gap_half_width = int(drawn["gap_half_width"])
+    files = _save_panel(fig, output_dir, "fig1-panele")
+    return {
+        "panel_id": "e",
+        "files": files,
+        "producer_source": "scripts/plot_interictal_propagation.py --masked-features --pr3 --paper-style",
+        "record": f"results/interictal_propagation_masked/per_subject/{arr['dataset']}_{arr['subject']}.json",
+        "n_valid_events": int(arr["valid_events"].size),
+        "displayed_events": int(arr["clustered_events_all"].size),
+        "cluster_counts": {
+            str(cluster_id): int(np.sum(arr["labels"] == cluster_id))
+            for cluster_id in np.unique(arr["labels"])
         },
+        "all_valid_events_displayed": True,
+        "cluster_separator": {
+            "style": "white gap with gray diagonal hatch and interrupted x-axis spine",
+            "boundary_event_index": cluster_boundary,
+            "gap_half_width_events": gap_half_width,
+        },
+        "masked_features": True,
+        "chosen_k": arr["chosen_k"],
+        "within_cluster_tau": arr["within_cluster_tau"],
+        "overall_tau": arr["overall_tau"],
+        "inter_template_spearman_r": arr["inter_corr"],
     }
 
 
 # ---------------------------------------------------------------------------
-# Panel d: cohort MI (d1) and within-template uplift (d2)
+# Panels D and F: cohort MI and within-template uplift
 # ---------------------------------------------------------------------------
 def _plot_mi(ax: plt.Axes, records: list[dict]) -> dict:
     import scipy.stats as st
@@ -698,10 +725,9 @@ def _plot_mi(ax: plt.Axes, records: list[dict]) -> dict:
 def _render_mi_panel(output_dir: Path, records: list[dict]) -> dict:
     fig, ax = plt.subplots(figsize=(5.2, 3.9), facecolor="white")
     summary = _plot_mi(ax, records)
-    _panel_label(ax, "d1", x=-0.16, y=1.14)
-    files = _save_panel(fig, output_dir, "fig1-paneld1")
+    files = _save_panel(fig, output_dir, "fig1-paneld")
     return {
-        "panel_id": "d1",
+        "panel_id": "d",
         "files": files,
         "producer_source": "scripts/plot_interictal_propagation.py --masked-features",
         "records": "results/interictal_propagation_masked/per_subject/*.json",
@@ -775,10 +801,9 @@ def _plot_uplift(ax: plt.Axes, records: list[dict]) -> dict:
 def _render_uplift_panel(output_dir: Path, records: list[dict]) -> dict:
     fig, ax = plt.subplots(figsize=(3.9, 3.9), facecolor="white")
     summary = _plot_uplift(ax, records)
-    _panel_label(ax, "d2", x=-0.2, y=1.12)
-    files = _save_panel(fig, output_dir, "fig1-paneld2")
+    files = _save_panel(fig, output_dir, "fig1-panelf")
     return {
-        "panel_id": "d2",
+        "panel_id": "f",
         "files": files,
         "producer_source": "scripts/plot_interictal_propagation.py --masked-features",
         "records": "results/interictal_propagation_masked/per_subject/*.json",
@@ -788,47 +813,51 @@ def _render_uplift_panel(output_dir: Path, records: list[dict]) -> dict:
 
 def _write_readme(output_dir: Path) -> None:
     (output_dir / "README.md").write_text(
-        """### fig1-panela1.png
+        """# Figure 1 panel 与完整排版输出
+
+Figure 1A 是作者手绘示意图，不由代码生成，也不保存在本目录。独立 panel 文件不写左上角 panel 字母；字母只出现在 `fig1-complete-layout` 完整排版中。
+
+### fig1-panelb1.png / .pdf
 
 严格复用 legacy 人工标注的 178 段 HFO，展示黑色叠加波形、黄色均值及 raw/normalized 平均谱。三行 x 轴均铺满完整 0–0.6 s，首末频谱 cell 仅延展绘图边界、不修改谱值。
 
 **关注点**：标题应为红色 `HFO n = 178`，两张谱在 x 轴左右均不应出现白带。
 
-### fig1-panela2.png
+### fig1-panelb2.png / .pdf
 
-展示 Yuquan Y3 的三个真实群体 HFO 事件及 normalized spectrogram。A1/A2 的谱量统一为 Gaussian-smoothed magnitude；A2 保留原 50 ms Hamming 窗以维持群体事件的时间分辨率，红点取主峰 ≥70% 连通增强区的同图加权质心。
+展示 Yuquan Y3 的三个真实群体 HFO 事件及 normalized spectrogram。B1/B2 的谱量统一为 Gaussian-smoothed magnitude；B2 保留原 50 ms Hamming 窗以维持群体事件的时间分辨率，红点取主峰 ≥70% 连通增强区的同图加权质心。
 
 **关注点**：每个红点应落在对应通道的高频能量增强团内，左右外边界无白带，只有事件之间保留白色分隔线。
 
-### fig1-panelb1.png
+### fig1-panelc.png / .pdf
 
-Yuquan refined-HFO count 对 clinical SOZ 的 subject-level ROC 汇总，现场重算 20 例。灰线为单被试，蓝线和阴影为 cohort mean 与 SEM。
+展示 Epilepsiae E7 的 masked 时间顺序热图、原始 overlapping rank ridgeline 与 day/night strip。
 
-**关注点**：本 panel 是 clinical anchor，不等于传播被限制在 clinical SOZ 内。
+**关注点**：非参与触点必须保持空白；day/night strip 与事件时间顺序严格对齐。
 
-### fig1-panelb2.png
-
-Epilepsiae refined-HFO count 对 clinical SOZ 的 subject-level ROC 汇总，纳入具备可用 SOZ 标签的 15 例。紫线和阴影为 cohort mean 与 SEM。
-
-**关注点**：核对 n=15；无临床 SOZ 标签的病例不应被强行纳入。
-
-### fig1-panelc.png
-
-同一文件上下组合同一位 Epilepsiae E7 的 c1/c2。c1 展示 masked 时间顺序热图、原始 overlapping rank ridgeline 与 day/night strip；c2 将全量 6,556 个有效事件按 KMeans k=2 的 TA/TB 标签重排，并展示 mean-rank 轮廓。
-
-**关注点**：上下两排来自同一患者，TA/TB 两个 n 之和必须等于 c1 的全量 n=6,556；TA/TB 之间使用白底灰色斜线断带并截断 x 轴线；右下 mean-rank 质心 marker 缩小。
-
-### fig1-paneld1.png
+### fig1-paneld.png / .pdf
 
 患者内 masked shared-participant MI data vs permutation null；严格复用原 cohort producer 的 violin + box/IQR + whiskers + subject points，并恢复 data-vs-null 显著性括号。phantom ranks 已排除。
 
 **关注点**：producer 对 40 个输入执行 `legacy_mi.masked=true` 硬检查；y 轴从 0 开始，括号显示 cohort-level data > null 检验。
 
-### fig1-paneld2.png
+### fig1-panele.png / .pdf
+
+将同一位 Epilepsiae E7 的全量 6,556 个有效事件按 masked KMeans k=2 的 TA/TB 标签重排，并展示两类 mean-rank 轮廓。
+
+**关注点**：TA/TB 两个 n 之和必须等于 6,556；两类之间使用白底灰色斜线断带并截断 x 轴线。
+
+### fig1-panelf.png / .pdf
 
 Overall 与 within-template MI 配对散点，量化分模板后的 matching uplift。底层数值仍来自 masked `overall_tau` / `within_cluster_tau_mean` rank-concordance fields，但图面统一使用 MI 简写。画布只显示 median ΔMI，cohort 计数留给 caption/正文。
 
 **关注点**：两轴从 0 开始；对角线下方恢复灰区；右上角图例解释蓝色 Yuquan、棕色 Epilepsiae；统计文字移入无数据的右下灰区。
+
+### fig1-complete-layout.png / .pdf
+
+将代码生成的 B–F panel 排为完整 Figure 1，并在完整画布上添加 B–F 字母。A 为作者手绘内容，因此本版保留 A 的外部拼入边界。
+
+**关注点**：独立 panel 内不应重复出现字母；完整排版中的字母位置和字号应统一。
 """,
         encoding="utf-8",
     )
@@ -856,48 +885,39 @@ def build(
     output_dir.mkdir(parents=True, exist_ok=True)
     _apply_rcparams()
 
-    panel_a = _render_panel_a(output_dir, single_hfo_png, group_event_png)
-    panel_b1 = _render_roc_panel(output_dir, "yuquan", "b1")
-    panel_b2 = _render_roc_panel(output_dir, "epilepsiae", "b2")
+    panel_b = _render_panel_b_sources(output_dir, single_hfo_png, group_event_png)
     c1_arr = _load_exemplar_arrays(c1_exemplar, max_events=max_events)
-    panel_c = _render_exemplar_panel(
-        output_dir,
-        c1_arr,
-        c1_display_label=c1_exemplar_label,
-        c2_arr=c1_arr,
-        c2_display_label=c1_exemplar_label,
-    )
-    panel_d1 = _render_mi_panel(output_dir, records)
-    panel_d2 = _render_uplift_panel(output_dir, records)
+    panel_c = _render_temporal_order_panel(output_dir, c1_arr, c1_exemplar_label)
+    panel_d = _render_mi_panel(output_dir, records)
+    panel_e = _render_clustered_template_panel(output_dir, c1_arr)
+    panel_f = _render_uplift_panel(output_dir, records)
 
     panels = {
-        **panel_a,
-        "b1": panel_b1,
-        "b2": panel_b2,
+        **panel_b,
         "c": panel_c,
-        "d1": panel_d1,
-        "d2": panel_d2,
+        "d": panel_d,
+        "e": panel_e,
+        "f": panel_f,
     }
     outputs = [f for panel in panels.values() for f in panel["files"]]
 
     metadata = {
-        "schema_version": "paper_figure1_temporal_scaffold_panels_v3",
+        "schema_version": "paper_figure1_independent_panels_v4",
         "claim_scope": "Interictal HFO population events exhibit recurrent patient-specific temporal organization.",
         "forbidden_upgrade": "This figure alone does not establish a shared 3D propagation axis.",
         "producer": "scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py",
         "panel_id_stamped": {
-            "a1": False,
-            "a2": False,
-            "b1_b2_c1_c2_d1_d2": True,
-            "note": "c1/c2 are stamped as aligned rows inside the single fig1-panelc file",
+            "individual_panels": False,
+            "note": "panel letters are added only by fig1-complete-layout; Figure 1A is hand-drawn and absent",
         },
+        "figure1a": "hand-drawn; intentionally not generated or retained in paper-ready-figure",
         "composite_emitted": False,
         "split_half_included": False,
-        "paneld1_statistic": "masked shared-participant MI (phantom ranks excluded); 40/40 significant, cohort median 0.228.",
+        "paneld_statistic": "masked shared-participant MI (phantom ranks excluded); 40/40 significant, cohort median 0.228.",
         "outputs": outputs,
         "panels": panels,
     }
-    metadata_path = output_dir / "figure1_interictal_hfo_temporal_scaffold_metadata.json"
+    metadata_path = output_dir.parent / "figure1_panel_metadata.json"
     metadata_path.write_text(json.dumps(metadata, indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
     _write_readme(output_dir)
     return metadata

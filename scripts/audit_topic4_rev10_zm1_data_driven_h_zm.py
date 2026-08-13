@@ -26,7 +26,10 @@ from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (  # no
     _similarity,
     normalize_event_ranks,
 )
-from scripts.run_topic4_rev9l_forced_source_worker import _sha256  # noqa: E402
+from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
+    _runtime_provenance,
+    _sha256,
+)
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 
 
@@ -131,6 +134,7 @@ def _delta(active, control, key):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default=str(DEFAULT_CONFIG))
+    parser.add_argument("--expected-commit", required=True)
     args = parser.parse_args()
     config_path = Path(args.config).resolve()
     config = json.loads(config_path.read_text())
@@ -150,6 +154,10 @@ def main():
     active = _arm_audit(
         config_path, root, "h_spou_zm_transfer", rows["h_spou_zm_transfer"],
     )
+    provenance = _runtime_provenance(args.expected_commit)
+    if (provenance["runtime_modules_dirty"]
+            or not provenance["runtime_modules_match_expected_commit"]):
+        raise RuntimeError("ZM1 audit modules are not frozen")
     payload = {
         "status": "REV10ZM1_EXPLORATORY_H_PLUS_ZM_TRANSFER_COMPLETE",
         "scientific_role": config["scientific_role"],
@@ -179,6 +187,7 @@ def main():
             "no_new_blocker_or_gate": True,
             "claim_boundary": config["claim_boundary"],
         },
+        "provenance": provenance,
         "inputs": {
             "config": {"path": str(config_path.relative_to(ROOT)),
                        "sha256": _sha256(config_path)},

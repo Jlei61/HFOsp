@@ -36,9 +36,11 @@ def main():
     ], cwd=ROOT, check=True, env=env)
     subprocess.run([
         str(PYTHON), str(AUDITOR), "--config", str(config_path),
+        "--expected-commit", args.commit,
     ], cwd=ROOT, check=True, env=env)
     subprocess.run([
         str(PYTHON), str(PLOTTER), "--config", str(config_path),
+        "--expected-commit", args.commit,
     ], cwd=ROOT, check=True, env=env)
     output_root = ROOT / config["output_root"]
     audit = json.loads((output_root / "zm_transfer_audit.json").read_text())
