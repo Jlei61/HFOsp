@@ -26,6 +26,7 @@ from src.topic4_data_driven_snn_baseline import (
 ROOT = Path(__file__).resolve().parents[1]
 D6_CONFIG = ROOT / "config/topic4_rev10_d6_continuous_field_kmeans_screen.json"
 D62_CONFIG = ROOT / "config/topic4_rev10_d6_2_joint_continuous_field_surface.json"
+D7_CONFIG = ROOT / "config/topic4_rev10_d7_active_zm_continuous_field_canary.json"
 
 
 def test_shared_baseline_is_hash_locked_and_has_no_implicit_runtime():
@@ -117,3 +118,23 @@ def test_joint_free_field_interpolation_preserves_inherited_zm_runtime():
         row["data_driven_snn_baseline"]["baseline_id"] == EXPECTED_ID
         for row in rows
     )
+
+
+def test_d7_canary_uses_active_zm_for_twenty_seconds_on_fresh_networks():
+    config = json.loads(D7_CONFIG.read_text())
+    anchor_manifest = json.loads(
+        (ROOT / config["inputs"]["node_anchor_manifest"]["path"]).read_text()
+    )
+    anchor = next(
+        row for row in anchor_manifest["candidate_set"]["candidates"]
+        if row["candidate_id"] == config["node_anchor"]["candidate_id"]
+    )
+    assert config["data_driven_snn_baseline"]["runtime_mode"] == (
+        "active_z_plus_m"
+    )
+    assert config["search"]["simulation"]["duration_ms"] >= 20000.0
+    assert config["search"]["fit_network_seeds"] == [1421, 1422]
+    rows, _ = candidate_library(config, anchor)
+    assert len(rows) == 49
+    assert all(row["mz"]["mode"] == "z_plus_m" for row in rows)
+    assert all(row["spatial_ou"]["mode"] == "local" for row in rows)
