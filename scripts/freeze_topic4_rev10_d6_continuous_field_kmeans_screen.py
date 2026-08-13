@@ -68,6 +68,21 @@ def shared_runtime_baseline(config):
     return baseline, str(record["runtime_mode"]), deepcopy(record)
 
 
+def fixed_runtime_contract(config, runtime):
+    return {
+        "network_seeds": config["search"]["fit_network_seeds"],
+        "duration_ms": config["search"]["simulation"]["duration_ms"],
+        "late_runaway_is_invalid": (
+            None if runtime is None else runtime[0]["consumer_contract"]
+            ["late_runaway_is_invalid"]
+        ),
+        "spatial_ou": config["fixed_spatial_ou"],
+        "data_driven_snn_baseline": None if runtime is None else runtime[2],
+        "edge": "exact no-op",
+        "beta": "closed",
+    }
+
+
 def projected_uniform_residuals(config):
     """Return unit-RMS whole-sheet Fourier directions in spline coordinates."""
     field = config["field_search"]
@@ -248,14 +263,7 @@ def build_manifest(config_path, expected_commit):
             "sha256": config["inputs"]["frozen_direction_classifier_manifest"]["sha256"],
             "copied_without_refit": True,
         },
-        "fixed_contract": {
-            "network_seeds": config["search"]["fit_network_seeds"],
-            "spatial_ou": config["fixed_spatial_ou"],
-            "data_driven_snn_baseline": (
-                None if runtime is None else runtime[2]
-            ),
-            "edge": "exact no-op", "beta": "closed",
-        },
+        "fixed_contract": fixed_runtime_contract(config, runtime),
         "forbidden_builder_inputs": config["field_search"][
             "forbidden_builder_inputs"
         ],

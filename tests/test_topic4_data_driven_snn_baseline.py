@@ -10,6 +10,8 @@ import pytest
 
 from scripts.freeze_topic4_rev10_d6_continuous_field_kmeans_screen import (
     candidate_library,
+    fixed_runtime_contract,
+    shared_runtime_baseline,
 )
 from scripts.freeze_topic4_rev10_d6_2_joint_continuous_field_surface import (
     candidate_library as joint_candidate_library,
@@ -138,3 +140,12 @@ def test_d7_canary_uses_active_zm_for_twenty_seconds_on_fresh_networks():
     assert len(rows) == 49
     assert all(row["mz"]["mode"] == "z_plus_m" for row in rows)
     assert all(row["spatial_ou"]["mode"] == "local" for row in rows)
+
+
+def test_d7_manifest_exposes_duration_and_late_runaway_contract():
+    config = json.loads(D7_CONFIG.read_text())
+    contract = fixed_runtime_contract(
+        config, shared_runtime_baseline(config),
+    )
+    assert contract["duration_ms"] == 20000.0
+    assert contract["late_runaway_is_invalid"] is True
