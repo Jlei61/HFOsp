@@ -112,6 +112,7 @@ def main():
         "development_only_observation_invariant_continuous_field_kmeans_screen",
         "development_only_continuous_field_natural_kmeans_fresh_closeout",
         "development_only_continuous_field_joint_direction_surface",
+        "development_only_continuous_field_joint_direction_replication",
         "development_only_data_driven_h_zm_consistency",
         "development_only_data_driven_h_zm_tau_adp_calibration",
     }
@@ -144,6 +145,7 @@ def main():
         "REV10D6_CONTINUOUS_FIELD_SENSITIVITY_LIBRARY_FROZEN",
         "REV10D6_1_NATURAL_KMEANS_CLOSEOUT_LIBRARY_FROZEN",
         "REV10D6_2_JOINT_CONTINUOUS_FIELD_SURFACE_FROZEN",
+        "REV10D6_3_JOINT_FIELD_REPLICATION_PAIR_FROZEN",
         "REV10ZM1_H_PLUS_ZM_LIBRARY_FROZEN",
         "REV10ZM1_1_H_ZM_TAU_FIT_LIBRARY_FROZEN",
         "REV10ZM1_1_H_ZM_TAU_SELECTION_LIBRARY_FROZEN",
@@ -343,6 +345,7 @@ def main():
         "REV10D6_CONTINUOUS_FIELD_SENSITIVITY_LIBRARY_FROZEN",
         "REV10D6_1_NATURAL_KMEANS_CLOSEOUT_LIBRARY_FROZEN",
         "REV10D6_2_JOINT_CONTINUOUS_FIELD_SURFACE_FROZEN",
+        "REV10D6_3_JOINT_FIELD_REPLICATION_PAIR_FROZEN",
         "REV10ZM1_H_PLUS_ZM_LIBRARY_FROZEN",
         "REV10ZM1_1_H_ZM_TAU_FIT_LIBRARY_FROZEN",
         "REV10ZM1_1_H_ZM_TAU_SELECTION_LIBRARY_FROZEN",

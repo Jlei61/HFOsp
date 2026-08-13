@@ -541,6 +541,9 @@ def main():
     is_joint_continuous_surface = config["scientific_role"] == (
         "development_only_continuous_field_joint_direction_surface"
     )
+    is_joint_field_replication = config["scientific_role"] == (
+        "development_only_continuous_field_joint_direction_replication"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -587,6 +590,10 @@ def main():
     if is_joint_continuous_surface:
         summary["status"] = (
             "REV10D6_2_RETURNED_ONLY_JOINT_SURFACE_COMPLETE"
+        )
+    if is_joint_field_replication:
+        summary["status"] = (
+            "REV10D6_3_RETURNED_ONLY_REPLICATION_COMPLETE"
         )
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary

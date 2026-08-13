@@ -1154,7 +1154,8 @@ def _render_kmeans(bundle, output_dir):
     d61_row = None
     if bundle["config"].get("scientific_role") in {
             "development_only_continuous_field_natural_kmeans_fresh_closeout",
-            JOINT_CONTINUOUS_SURFACE_ROLE}:
+            JOINT_CONTINUOUS_SURFACE_ROLE,
+            "development_only_continuous_field_joint_direction_replication"}:
         verdict_path = bundle["output_root"] / "confirmation_verdict.json"
         verdict = _json(verdict_path)
         d61_row = next(
@@ -1292,6 +1293,7 @@ def _write_readme(output_dir, bundle):
         d61 = bundle["config"].get("scientific_role") in {
             "development_only_continuous_field_natural_kmeans_fresh_closeout",
             JOINT_CONTINUOUS_SURFACE_ROLE,
+            "development_only_continuous_field_joint_direction_replication",
         }
         matrix_text = (
             "最右矩阵是 6 张网络等权的 contact-split cross-fit patient readout："
