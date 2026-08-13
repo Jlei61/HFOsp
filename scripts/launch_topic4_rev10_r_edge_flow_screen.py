@@ -175,6 +175,9 @@ def main():
     candidates = [
         row["candidate_id"] for row in manifest["candidate_set"]["candidates"]
     ]
+    control_candidate = manifest.get("selection_freeze", {}).get(
+        "paired_control_candidate_id", "edge_noop",
+    )
     seeds = active_network_seeds(config)
     worker_dir, run_dir = output_root / "workers", output_root / "run_logs"
     worker_dir.mkdir(parents=True, exist_ok=True)
@@ -203,7 +206,7 @@ def main():
     memory_audit_path = output_root / "screen_memory_audit.json"
     if pending:
         sentinel = next(
-            (job for job in pending if job["candidate"] != "edge_noop"),
+            (job for job in pending if job["candidate"] != control_candidate),
             pending[0],
         )
         _launch(

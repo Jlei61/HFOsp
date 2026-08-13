@@ -6,6 +6,9 @@ import json
 from pathlib import Path
 
 import scripts.freeze_topic4_rev10_zm1_data_driven_h_zm as freezer
+from scripts.launch_topic4_rev10_r_edge_flow_screen import (
+    _memory_bounded_workers,
+)
 from scripts.audit_topic4_rev10_zm1_data_driven_h_zm import _delta
 
 
@@ -65,3 +68,12 @@ def test_paired_delta_uses_equal_network_candidate_rows():
     assert _delta(
         active, control, "mean_network_returned_events_scored"
     ) == 2.5
+
+
+def test_zm1_memory_budget_caps_parallel_workers():
+    config = json.loads(CONFIG.read_text())
+    available_kib = 210 * 1024 ** 2
+    peak_rss_kib = 10 * 1024 ** 2
+    assert _memory_bounded_workers(
+        config, peak_rss_kib=peak_rss_kib, available_kib=available_kib,
+    ) == 6
