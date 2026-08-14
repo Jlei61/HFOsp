@@ -43,6 +43,7 @@ AUTHORIZATION = OUT / "lc5_to_lc6a_authorization.json"
 GRAPH_IDS = NAT.GRAPH_IDS
 MECHANISM_FILES = (
     Path(__file__).resolve(), PRELOCK,
+    ROOT / "src/topic4_fcxr_lc3.py",
     ROOT / "src/topic4_fcxr_lc3_perturb.py",
     ROOT / "src/topic4_fcxr_lc6_functional.py",
 )

@@ -162,6 +162,28 @@ def test_input_sink_is_a_pure_read_and_sees_every_exact_draw():
     assert state_hash(got["checkpoint"]) == state_hash(ref["checkpoint"])
 
 
+def test_main_loop_membrane_term_sink_is_a_pure_read():
+    p, net_ref, slow_ref, vth = _case()
+    ref = run_fcxr_loop(
+        p, net_ref, slow=slow_ref, n_steps=31, capture_final=True,
+        store_spikes=False, v_th_per_neuron=vth,
+    )
+    p, net_got, slow_got, vth = _case()
+    rows = []
+    got = run_fcxr_loop(
+        p, net_got, slow=slow_got, n_steps=31, capture_final=True,
+        store_spikes=False,
+        membrane_term_sink=lambda step, v, drive, g_rel, g_rev, mz: rows.append(
+            (step, v.shape, drive.shape, g_rel.shape, g_rev.shape, mz.NE)
+        ),
+        v_th_per_neuron=vth,
+    )
+    assert len(rows) == 31
+    assert all(row[1:] == ((net_got["NE"],),) * 4 + (net_got["NE"],) for row in rows)
+    np.testing.assert_array_equal(got["rate_E"], ref["rate_E"])
+    assert state_hash(got["checkpoint"]) == state_hash(ref["checkpoint"])
+
+
 def test_zero_current_perturbation_is_exact_continuation_byte_for_byte():
     p, net, slow, vth = _case()
     pre = run_fcxr_loop(

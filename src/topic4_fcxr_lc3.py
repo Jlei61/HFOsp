@@ -238,12 +238,16 @@ def _assert_registered_path(slow):
 
 
 def run_fcxr_loop(p, net, *, slow=None, start=None, n_steps, capture_final=False,
-                  store_spikes=True, spike_sink=None, input_sink=None, v_th_per_neuron=None):
+                  store_spikes=True, spike_sink=None, input_sink=None,
+                  membrane_term_sink=None, v_th_per_neuron=None):
     """Run or resume the registered no-kick FCXR path with exact engine arithmetic.
 
     ``spike_sink(step, E_cell_indices)`` is an optional pure observer for sparse streaming.  It is
     called only on steps with E spikes, after the membrane/slow update and before synaptic scatter;
     the indices are copied so a sink cannot alias engine scratch state.
+
+    ``membrane_term_sink(step, V_E, drive_E, g_rel_E, g_rev_E, slow)`` observes the pre-update
+    membrane terms.  It receives read-only views by contract; registered sinks must not mutate them.
     """
 
     if (slow is None) == (start is None):
@@ -310,6 +314,10 @@ def run_fcxr_loop(p, net, *, slow=None, start=None, n_steps, capture_final=False
         I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * c["decay_i_e"]
 
         drive, g_rel, g_rev = slow.membrane_terms(I_E, I_I, labels, I_E_rec=I_E_rec)
+        if membrane_term_sink is not None:
+            membrane_term_sink(
+                int(t), V[:ne], drive[:ne], g_rel[:ne], g_rev[:ne], slow,
+            )
         vth = slow.threshold(base_vth)
         ref -= 1
         np.maximum(ref, 0, out=ref)

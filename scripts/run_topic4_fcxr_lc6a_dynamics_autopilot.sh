@@ -103,6 +103,12 @@ run_pool functional C0 C1 Q1 Q2 Q3
 
 # C0 alone establishes the frozen IED-exposure reference required by all four comparisons.
 run_pool natural C0
+
+# Freeze the C0-derived local companion classifier before any Q-arm result exists.
+"$PY" scripts/lock_topic4_fcxr_lc6a_local_classifier.py \
+  --execution-manifest "$MANIFEST" --confirm-run \
+  > "$OUT/logs/local_classifier_lock.log" 2>&1
+
 run_pool natural C1 Q1 Q2 Q3
 
 echo "LC6A fixed T4/T5 experiment block complete"

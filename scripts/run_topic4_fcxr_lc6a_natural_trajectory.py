@@ -32,9 +32,9 @@ from src.topic4_fcxr_lc6_surround import (  # noqa: E402
     EToIGraph, extract_e_to_i, graph_sha256, replace_e_to_i_in_net,
 )
 from src.topic4_fcxr_lc6_trajectory import (  # noqa: E402
-    cell_spatial_bins, coarse_field_mean, linear_slope, local_saturation_readout,
-    observation_decision, per_second_cell_rates, spatial_map_persistence,
-    spatial_rate_maps,
+    NaturalCurrentObserver, cell_spatial_bins, coarse_field_mean, linear_slope,
+    local_saturation_readout, observation_decision, per_second_cell_rates,
+    spatial_map_persistence, spatial_rate_maps,
 )
 
 
@@ -294,6 +294,9 @@ def run(condition, manifest_path):
     chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
     p = dataclasses.replace(S["p"], T=float(observation["hard_cap_ms"]), dt=U2.DT_MS)
     input_hasher = ExactInputHasher()
+    current_observer = NaturalCurrentObserver(
+        dt_ms=U2.DT_MS, sample_dt_ms=U2.TRACE_DT_MS,
+    )
     streams, trace_parts = [], {}
     input_hashes_by_chunk = []
     pinned_checkpoints = {}
@@ -317,6 +320,7 @@ def run(condition, manifest_path):
         out = run_fcxr_loop(
             p, S["net"], start=state, n_steps=chunk_steps, capture_final=True,
             store_spikes=False, spike_sink=writer, input_sink=input_hasher,
+            membrane_term_sink=current_observer.sample,
             v_th_per_neuron=S["vth"],
         )
         state = out["checkpoint"]
@@ -389,6 +393,7 @@ def run(condition, manifest_path):
     control_parity = _c0_control_parity(condition, full, rate)
     adjudication = PREFIX._adjudicate(full, rate)
     traces = {key: np.concatenate(parts) for key, parts in trace_parts.items()}
+    current_traces = current_observer.arrays()
     rate_maps = spatial_rate_maps(
         full.steps, full.cells, spatial_bins, spatial_occupancy,
         n_steps=full.n_steps, dt_ms=U2.DT_MS, window_ms=1000.0,
@@ -434,6 +439,16 @@ def run(condition, manifest_path):
         "local_rate_q95_peak_hz": float(np.nanmax(np.nanquantile(rate_maps, .95, axis=1))),
         "local_rate_q99_peak_hz": float(np.nanmax(np.nanquantile(rate_maps, .99, axis=1))),
         "spatial_map_persistence": spatial_map_persistence(rate_maps),
+        "current_decomposition": {
+            "sample_dt_ms": float(U2.TRACE_DT_MS),
+            "F_E_mean_peak": float(np.max(current_traces["F_E_mean"])),
+            "F_E_mean_late": float(np.mean(current_traces["F_E_mean"][-100:])),
+            "F_I_mean_peak": float(np.max(current_traces["F_I_mean"])),
+            "F_I_mean_late": float(np.mean(current_traces["F_I_mean"][-100:])),
+            "I_syn_signed_mean_late": float(
+                np.mean(current_traces["I_syn_signed_mean"][-100:])
+            ),
+        },
         "D_start_end": [float(traces["D_mean"][0]), float(traces["D_mean"][-1])],
         "H_start_end": [float(traces["H_mean"][0]), float(traces["H_mean"][-1])],
         "clip_frac_max": float(np.max(traces["clip_frac"])),
@@ -459,7 +474,7 @@ def run(condition, manifest_path):
         )
         _npz_atomic(
             bundle.path("traces.npz"), rate_dt_ms=np.asarray([U2.TRACE_DT_MS], np.float32),
-            rate_E=rate[::stride].astype(np.float32), **traces,
+            rate_E=rate[::stride].astype(np.float32), **traces, **current_traces,
         )
         _npz_atomic(
             bundle.path("spatial_readouts.npz"),

@@ -1,6 +1,9 @@
 import numpy as np
 
 from src.topic4_fcxr_lc6_trajectory import (
+    NaturalCurrentObserver,
+    apply_local_classifier,
+    calibrate_local_classifier,
     cell_spatial_bins,
     coarse_field_mean,
     linear_slope,
@@ -66,3 +69,62 @@ def test_local_saturation_field_mean_slope_and_persistence():
     assert np.isclose(linear_slope([1., 2., 3.], dt_s=.5), 2.0)
     persistence = spatial_map_persistence(np.array([[0., 1., 2.], [0., 2., 4.]]))
     assert np.isclose(persistence["median_consecutive_correlation"], 1.0)
+
+
+def test_natural_current_observer_samples_actual_signed_terms():
+    class Config:
+        E_E = 58.0
+        e_gaba = 0.0
+
+    class Slow:
+        cfg = Config()
+        _gI_last_E = np.array([.5, 1.0])
+
+    observer = NaturalCurrentObserver(dt_ms=.05, sample_dt_ms=.1)
+    for step in range(4):
+        observer.sample(
+            step, np.array([10., 20.]), np.array([1., 2.]),
+            np.array([1.5, 3.0]), np.zeros(2), Slow(),
+        )
+    arrays = observer.arrays()
+    np.testing.assert_allclose(arrays["current_time_ms"], [0.0, 0.1])
+    assert arrays["F_E_mean"].shape == (2,)
+    assert np.all(arrays["F_E_mean"] > 0)
+    assert np.all(arrays["F_I_mean"] > 0)
+
+
+def test_local_classifier_is_locked_on_returning_ied_tail_then_detects_sustained_area():
+    occupancy = np.ones(4, dtype=int)
+    c0_maps = np.zeros((10, 4), float)
+    c0_maps[0] = [20., 2., 0., 0.]
+    c0_maps[2] = [18., 3., 0., 0.]
+    events = [
+        {"t_on": 0., "t_off": 90., "returned": True},
+        {"t_on": 200., "t_off": 290., "returned": True},
+    ]
+    lock = calibrate_local_classifier(
+        c0_maps, occupancy, events, onset_ms=1000., sheet_size_mm=2.0,
+        rate_quantile=.995, area_quantile=.99,
+    )
+    assert lock["n_pre_onset_returning_events"] == 2
+    assert lock["persistence_windows"] == 5
+    assert np.isclose(lock["component_area_threshold_mm2"], .99)
+    arm_maps = np.zeros((10, 4), float)
+    arm_maps[1:7] = 30.0
+    result = apply_local_classifier(arm_maps, occupancy, lock)
+    assert result["local_onset_ms"] == 100.0
+    assert result["max_component_area_mm2"] == 4.0
+
+
+def test_local_classifier_rejects_non_returning_or_post_onset_calibration_events():
+    maps = np.zeros((2, 4), float)
+    occupancy = np.ones(4, dtype=int)
+    events = [{"t_on": 0., "t_off": 90., "returned": False}]
+    try:
+        calibrate_local_classifier(
+            maps, occupancy, events, onset_ms=1000., sheet_size_mm=2.0,
+        )
+    except RuntimeError as exc:
+        assert "no pre-onset returning IED" in str(exc)
+    else:
+        raise AssertionError("classifier lock must fail without eligible C0 IEDs")

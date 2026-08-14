@@ -19,4 +19,7 @@ def test_autopilot_preserves_c0_reference_order_and_fixed_five_arm_block():
     assert "run_pool functional C0 C1 Q1 Q2 Q3" in source
     assert "run_pool natural C0" in source
     assert "run_pool natural C1 Q1 Q2 Q3" in source
-    assert source.index("run_pool natural C0") < source.index("run_pool natural C1 Q1 Q2 Q3")
+    lock = "lock_topic4_fcxr_lc6a_local_classifier.py"
+    assert lock in source
+    assert source.index("run_pool natural C0") < source.index(lock)
+    assert source.index(lock) < source.index("run_pool natural C1 Q1 Q2 Q3")

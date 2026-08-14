@@ -36,6 +36,8 @@ def test_manifest_and_runner_lock_no_kick_event_aligned_contract():
     assert "run_fcxr_loop" in text
     assert "simulate_kick" not in text
     assert "spatial_readouts.npz" in text
+    assert "membrane_term_sink=current_observer.sample" in text
+    assert '"current_decomposition"' in text
 
 
 def test_trace_chunk_converts_z_to_D():
@@ -67,6 +69,7 @@ def test_non_c0_arm_requires_completed_c0_reference(tmp_path, monkeypatch):
 def test_mechanism_source_hashes_include_unblessed_slow_module():
     hashes = RUNNER._source_hashes()
     assert "src/snn_engine/mz_slow_vars.py" in hashes
+    assert "src/topic4_fcxr_lc3.py" in hashes
     assert "src/topic4_fcxr_lc6_trajectory.py" in hashes
     assert all(len(value) == 64 for value in hashes.values())
 
