@@ -172,6 +172,39 @@ def _manifest_contract(path):
     return path, payload, contract, source_summary
 
 
+def _locked_config_from_summary(summary, p0, ne):
+    """Rebuild the source arm's config without consulting deleted historical worktrees."""
+    if "config_scalar" not in summary:
+        raise RuntimeError("source summary lacks locked config_scalar")
+    cfg = dict(summary["config_scalar"])
+    scalar_checks = {
+        "pump_Imax": float(summary["Imax"]),
+        "pump_a_load": float(summary["a_load"]),
+        "pump_tau_ms": float(summary["tau_ms"]),
+    }
+    for key, expected in scalar_checks.items():
+        if not np.isclose(float(cfg[key]), expected, rtol=0.0, atol=1e-10):
+            raise RuntimeError(f"source summary config mismatch: {key}")
+    cfg.update(
+        pump_p0_E=np.asarray(p0, float).copy(),
+        pump_u_init_E=np.zeros(int(ne), dtype=float),
+        x_relay_frozen_E=np.ones(int(ne), dtype=float),
+    )
+    return cfg
+
+
+def _fresh_system_from_locked_summary(summary, p0):
+    S = U2.PP.build_substrate(U2.CONNECTION_SEED)
+    U2.install_registered_noise_rng(S["net"])
+    cfg = _locked_config_from_summary(summary, p0, S["NE"])
+    slow = PREFIX.MZSlowVars(
+        S["N"], 18.0, PREFIX.MZSlowVarsConfig(**cfg), NE=S["NE"],
+        core_mask_E=U2.OLD_SLOW.build_core_masks(S),
+    )
+    S["net"]["rng"] = np.random.default_rng(U2.NOISE_SEED)
+    return S, slow, cfg
+
+
 def run(source_summary, *, target_total_ms=None, output_tag=None, execution_manifest=None):
     source_summary = Path(source_summary).resolve()
     source = source_summary.parent
@@ -209,7 +242,7 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
         prelock, p0, imax = PREFIX._p0_contract(gamma, "q099", tau_ms)
         if not np.isclose(float(imax), float(summary["Imax"]), rtol=0.0, atol=1e-10):
             raise RuntimeError("candidate Imax drift")
-        S, slow, _ = PREFIX._fresh_system(p0, imax, prelock["a_load"], tau_ms)
+        S, slow, _ = _fresh_system_from_locked_summary(summary, p0)
         template = U2.PM._seed_template(S, slow)
         state = U2.load_into(source / "final_state.npz", template)
         expected_step = int(round(float(summary["T_ms"]) / U2.DT_MS))

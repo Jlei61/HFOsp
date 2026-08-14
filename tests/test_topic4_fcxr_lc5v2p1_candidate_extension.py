@@ -71,3 +71,22 @@ def test_lc6a_manifest_locks_source_and_horizon():
     assert payload["graph_family"][2]["id"] == "Q1"
     assert contract["target_total_ms"] == 40000.0
     assert source.name == "summary.json"
+
+
+def test_locked_config_uses_summary_not_historical_sensor_path():
+    summary = {
+        "Imax": 3.0,
+        "a_load": 0.01,
+        "tau_ms": 15000.0,
+        "config_scalar": {
+            "pump_Imax": 3.0,
+            "pump_a_load": 0.01,
+            "pump_tau_ms": 15000.0,
+            "y_gate": 76.5,
+        },
+    }
+    cfg = EXT._locked_config_from_summary(summary, np.asarray([0.1, 0.2]), 2)
+    assert cfg["y_gate"] == 76.5
+    assert cfg["pump_p0_E"].tolist() == [0.1, 0.2]
+    assert cfg["pump_u_init_E"].tolist() == [0.0, 0.0]
+    assert cfg["x_relay_frozen_E"].tolist() == [1.0, 1.0]
