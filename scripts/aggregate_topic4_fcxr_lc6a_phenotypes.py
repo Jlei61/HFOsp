@@ -240,9 +240,26 @@ def _plot(rows):
     ax.set_xticks(x, names); ax.set_yscale("log"); ax.set_ylabel("Rate (Hz)")
     ax.set_title("b  Global and local activity"); ax.legend(frameon=False, fontsize=8)
     ax = axes[1, 0]
-    ax.plot(x, [row["spatial_slow_flow"]["max_D_halo_lead_mm"] for row in rows], "o-", label="D halo lead")
-    ax.plot(x, [row["spatial_slow_flow"]["max_active_area_mm2"] for row in rows], "s-", label="active area")
-    ax.set_xticks(x, names); ax.set_title("c  Spatial slow-flow readouts"); ax.legend(frameon=False, fontsize=8)
+    d_halo = [row["spatial_slow_flow"]["max_D_halo_lead_mm"] for row in rows]
+    active_area = [row["spatial_slow_flow"]["max_active_area_mm2"] for row in rows]
+    line_d = ax.plot(x, d_halo, "o-", color="#2166AC", label="D halo lead")
+    ax.set_xticks(x, names)
+    ax.set_ylabel("D-halo lead (mm)", color="#2166AC")
+    ax.tick_params(axis="y", labelcolor="#2166AC")
+    ax_area = ax.twinx()
+    line_area = ax_area.plot(
+        x, active_area, "s--", color="#D6604D", label="active area",
+    )
+    ax_area.set_ylabel("Maximum active area (mm²)", color="#D6604D")
+    ax_area.tick_params(axis="y", labelcolor="#D6604D")
+    ax.set_title("c  Spatial slow-flow readouts")
+    ax.legend(
+        line_d + line_area,
+        [line.get_label() for line in line_d + line_area],
+        frameon=False,
+        fontsize=8,
+        loc="best",
+    )
     ax = axes[1, 1]
     margins = [row["boundedness"].get("boundedness_margin", np.nan) for row in rows]
     colors = ["#2CA25F" if row["boundedness"].get("bounded_candidate") else "#B2182B" for row in rows]
