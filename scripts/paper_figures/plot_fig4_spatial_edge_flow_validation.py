@@ -175,11 +175,15 @@ def _load_bundle(
         frozen_id = candidate_id
         figure_candidate_selection = "explicit frozen-library audit candidate"
     else:
-        frozen_id = (
-            manifest["selection_freeze"]["selected_nonzero_candidate_id"]
-            if phase == "confirmation"
-            else summary["diagnostic_best_candidate_id"]
-        )
+        if phase == "confirmation":
+            selection_freeze = manifest["selection_freeze"]
+            frozen_id = (
+                manifest["selection_freeze"]["selected_nonzero_candidate_id"]
+                if "selected_nonzero_candidate_id" in selection_freeze
+                else selection_freeze["selected_joint_candidate_id"]
+            )
+        else:
+            frozen_id = summary["diagnostic_best_candidate_id"]
         figure_candidate_selection = (
             "pre-network frozen candidate" if phase == "confirmation"
             else "phase diagnostic best"
