@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "experiment_id": "fcxr_lc6a_graph_realization_confirmation",
+  "trigger": {
+    "requires_bounded_candidate": true,
+    "requires_nonzero_exact_null_response": true,
+    "requires_probe_without_global_or_local_saturation": true,
+    "selection": "largest boundedness margin among gain-forked eligible candidates"
+  },
+  "graph": {
+    "output_suffix": "B",
+    "seed_by_parent_condition": {
+      "C0": 771000,
+      "C1": 771001,
+      "Q1": 771002,
+      "Q2": 771003,
+      "Q3": 771004
+    },
+    "same_q_target": true,
+    "same_weight_and_delay_rule": true,
+    "initial_proposal_width_source": "canonical candidate graph metadata",
+    "maximum_graph_only_q_corrections": 2,
+    "minimum_l_parallel_mm": 0.05,
+    "maximum_l_parallel_mm": 2.0,
+    "trajectory_outcome_may_adjust_q_or_width": false
+  },
+  "runtime": {
+    "noise_seed": 401,
+    "same_natural_trajectory_contract": true,
+    "no_parameter_reselection": true
+  },
+  "decision": {
+    "replicated_bounded_carrier": "CLEAN_CARRIER_POSITIVE",
+    "not_replicated": "GRAPH_REALIZATION_SENSITIVE",
+    "not_triggered": "NO_BOUNDED_RESPONSIVE_CANONICAL_CANDIDATE"
+  }
+}

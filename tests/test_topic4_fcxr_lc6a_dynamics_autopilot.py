@@ -29,3 +29,8 @@ def test_autopilot_preserves_c0_reference_order_and_fixed_five_arm_block():
     assert source.index("aggregate_topic4_fcxr_lc6a_phenotypes.py") < source.index(
         "run_topic4_fcxr_lc6a_gain_forks.py lock"
     )
+    assert source.index("run_topic4_fcxr_lc6a_gain_forks.py finalize") < source.index(
+        "run_topic4_fcxr_lc6a_confirmation.py build"
+    )
+    assert "--confirmation-lock" in source
+    assert "run_topic4_fcxr_lc6a_confirmation.py finalize" in source

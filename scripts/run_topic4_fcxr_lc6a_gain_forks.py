@@ -54,6 +54,7 @@ DONE = OUT / "DONE_LC6A_GAIN_FORKS.json"
 FIGURES = OUT / "figures"
 MECHANISM_FILES = (
     Path(__file__).resolve(), PRELOCK, FUNCTIONAL_PRELOCK,
+    Path(NAT.__file__).resolve(),
     ROOT / "src/topic4_fcxr_lc3.py",
     ROOT / "src/topic4_fcxr_lc3_perturb.py",
     ROOT / "src/topic4_fcxr_lc3_statefork.py",

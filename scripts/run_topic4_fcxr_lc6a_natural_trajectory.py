@@ -53,6 +53,7 @@ MECHANISM_FILES = (
     Path(PREFIX.__file__).resolve(),
     Path(U2.__file__).resolve(),
     ROOT / "src/topic4_fcxr_lc3.py",
+    ROOT / "src/topic4_fcxr_lc3_statefork.py",
     ROOT / "src/topic4_fcxr_lc6_surround.py",
     ROOT / "src/topic4_fcxr_lc6_trajectory.py",
     ROOT / "src/snn_engine/mz_slow_vars.py",
@@ -178,10 +179,10 @@ def _fresh_config(summary, ne):
     return cfg
 
 
-def _fresh_system(summary, graph, graph_expected_hash, condition):
+def _fresh_system(summary, graph, graph_expected_hash, condition, *, force_replacement=False):
     S = U2.PP.build_substrate(U2.CONNECTION_SEED)
     base = extract_e_to_i(S["net"], S["NE"], S["NI"])
-    if condition == "C0":
+    if condition == "C0" and not force_replacement:
         if graph_sha256(base) != graph_expected_hash:
             raise RuntimeError("C0 graph artifact is not exact substrate parity")
     else:
@@ -264,30 +265,67 @@ def _event_count_before(events, onset_ms):
     ])
 
 
-def run(condition, manifest_path):
+def _validate_confirmation(lock_path, *, parent_condition, output_condition, graph_path):
+    if lock_path is None:
+        raise RuntimeError("noncanonical graph run requires a confirmation lock")
+    lock_path = Path(lock_path).resolve()
+    payload = json.loads(lock_path.read_text())
+    if payload.get("status") != "LOCKED" or payload.get("authorized") is not True:
+        raise RuntimeError("LC6A graph-realization confirmation is not authorized")
+    if payload.get("parent_condition") != parent_condition:
+        raise RuntimeError("confirmation parent condition mismatch")
+    if payload.get("output_condition") != output_condition:
+        raise RuntimeError("confirmation output condition mismatch")
+    if Path(payload["graph_artifact"]).resolve() != Path(graph_path).resolve():
+        raise RuntimeError("confirmation graph path mismatch")
+    if _sha(graph_path) != payload["graph_artifact_sha256"]:
+        raise RuntimeError("confirmation graph artifact drift")
+    return lock_path, payload
+
+
+def run(
+    condition, manifest_path, *, graph_path_override=None,
+    output_condition=None, confirmation_lock=None,
+):
     manifest_path, manifest, source_summary = _validate_manifest(manifest_path, condition)
     manifest_hash = _sha(manifest_path)
     source_hashes = _source_hashes()
-    graph_path = OUT / f"graphs/{condition}.npz"
+    output_condition = condition if output_condition is None else str(output_condition)
+    graph_path = (
+        OUT / f"graphs/{condition}.npz"
+        if graph_path_override is None else Path(graph_path_override).resolve()
+    )
+    confirmation = None
+    if graph_path_override is not None:
+        _lock_path, confirmation = _validate_confirmation(
+            confirmation_lock, parent_condition=condition,
+            output_condition=output_condition, graph_path=graph_path,
+        )
     graph, graph_metadata = _load_graph(graph_path)
-    if graph_metadata.get("graph_legality", "PASS") != "PASS" and condition != "C0":
+    if (
+        graph_metadata.get("graph_legality", "PASS") != "PASS"
+        and (condition != "C0" or graph_path_override is not None)
+    ):
         raise RuntimeError(f"GRAPH_LEGALITY_FAILED_{condition}")
     summary_cfg = json.loads(source_summary.read_text())
-    c0_ied_to_onset = _load_c0_ied_reference(condition)
+    c0_ied_to_onset = _load_c0_ied_reference(output_condition)
     observation = manifest["observation"]
     resources = U2.GEO._meminfo()
     if resources["mem_available_gib"] < 96.0:
         raise RuntimeError("LC6A natural trajectory requires at least 96 GiB MemAvailable")
     baseline_swap = float(resources["swap_used_mib"])
-    arm = OUT / f"trajectories/{condition}"
-    work = OUT / f"trajectories/.{condition}.work"
+    arm = OUT / f"trajectories/{output_condition}"
+    work = OUT / f"trajectories/.{output_condition}.work"
     if arm.is_dir():
         return json.loads((arm / "summary.json").read_text())
     if work.exists():
         raise RuntimeError(f"stale work directory requires inspection: {work}")
     work.mkdir(parents=True)
     started = time.time()
-    S, slow, cfg = _fresh_system(summary_cfg, graph, graph_sha256(graph), condition)
+    S, slow, cfg = _fresh_system(
+        summary_cfg, graph, graph_sha256(graph), condition,
+        force_replacement=graph_path_override is not None,
+    )
     state = U2.PM._seed_template(S, slow)
     initial_state_hash = state_hash(state)
     stride = int(round(U2.TRACE_DT_MS / U2.DT_MS))
@@ -350,7 +388,7 @@ def run(condition, manifest_path):
             ied_multiplier=observation["entry_blocked_ied_multiplier"],
         )
         row = U2._resource_row(
-            f"LC6A_{condition}_CHUNK", baseline_swap, chunk=chunk + 1,
+            f"LC6A_{output_condition}_CHUNK", baseline_swap, chunk=chunk + 1,
             completed_total_ms=full.n_steps * U2.DT_MS,
             wall_s=time.time() - started,
         )
@@ -390,7 +428,7 @@ def run(condition, manifest_path):
 
     full = _combine_streams(streams)
     rate = _rate_from_stream(full)
-    control_parity = _c0_control_parity(condition, full, rate)
+    control_parity = _c0_control_parity(output_condition, full, rate)
     adjudication = PREFIX._adjudicate(full, rate)
     traces = {key: np.concatenate(parts) for key, parts in trace_parts.items()}
     current_traces = current_observer.arrays()
@@ -419,7 +457,8 @@ def run(condition, manifest_path):
         outcome = "HIGH_STATE_OBSERVED_FOR_PHENOTYPE_MAP"
     tail = min(2, len(per_second_rate))
     summary = {
-        "status": "COMPLETE", "condition": condition, "outcome": outcome,
+        "status": "COMPLETE", "condition": output_condition,
+        "parent_condition": condition, "outcome": outcome,
         "graph_sha256": graph_sha256(graph), "graph_artifact": str(graph_path),
         "graph_construction_q": graph_metadata["construction_q"],
         "manifest": str(manifest_path), "manifest_sha256": manifest_hash,
@@ -458,6 +497,7 @@ def run(condition, manifest_path):
         "initial_state_hash": initial_state_hash,
         "final_state_hash": state_hash(state),
         "source_sha256": source_hashes,
+        "graph_realization_confirmation": confirmation,
         "pinned_checkpoints": pinned_checkpoints,
         "config_scalar": {
             key: value for key, value in cfg.items()
@@ -504,6 +544,9 @@ def run(condition, manifest_path):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--condition", choices=GRAPH_IDS, required=True)
+    parser.add_argument("--graph-artifact", type=Path)
+    parser.add_argument("--output-condition")
+    parser.add_argument("--confirmation-lock", type=Path)
     parser.add_argument(
         "--execution-manifest", type=Path,
         default=ROOT / "config/topic4_fcxr_lc6a_patient_axis_surround.json",
@@ -512,23 +555,37 @@ def main():
     args = parser.parse_args()
     if not args.confirm_run:
         raise SystemExit("LC6A natural trajectory requires --confirm-run")
+    if args.graph_artifact is None and any(
+        value is not None for value in (args.output_condition, args.confirmation_lock)
+    ):
+        parser.error("confirmation options require --graph-artifact")
+    if args.graph_artifact is not None and not (args.output_condition and args.confirmation_lock):
+        parser.error("confirmation graph requires --output-condition and --confirmation-lock")
+    output_condition = args.condition if args.output_condition is None else args.output_condition
+    if not output_condition.replace("_", "").isalnum():
+        parser.error("output condition must be alphanumeric/underscore")
     trajectory_root = OUT / "trajectories"
     trajectory_root.mkdir(parents=True, exist_ok=True)
-    lock_path = trajectory_root / f".{args.condition}.lock"
+    lock_path = trajectory_root / f".{output_condition}.lock"
     with lock_path.open("w") as lock:
         try:
             fcntl.flock(lock.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
-            raise SystemExit(f"LC6A {args.condition} is already running") from exc
-        running = trajectory_root / f"RUNNING_{args.condition}.json"
-        failed = trajectory_root / f"FAILED_{args.condition}.json"
-        done = trajectory_root / f"DONE_{args.condition}.json"
-        _write_json(running, {"status": "RUNNING", "condition": args.condition, "pid": os.getpid()})
+            raise SystemExit(f"LC6A {output_condition} is already running") from exc
+        running = trajectory_root / f"RUNNING_{output_condition}.json"
+        failed = trajectory_root / f"FAILED_{output_condition}.json"
+        done = trajectory_root / f"DONE_{output_condition}.json"
+        _write_json(running, {"status": "RUNNING", "condition": output_condition, "pid": os.getpid()})
         try:
-            result = run(args.condition, args.execution_manifest)
+            result = run(
+                args.condition, args.execution_manifest,
+                graph_path_override=args.graph_artifact,
+                output_condition=output_condition,
+                confirmation_lock=args.confirmation_lock,
+            )
             _write_json(done, {
-                "status": "DONE", "condition": args.condition,
-                "outcome": result["outcome"], "summary": str(OUT / f"trajectories/{args.condition}/summary.json"),
+                "status": "DONE", "condition": output_condition,
+                "outcome": result["outcome"], "summary": str(OUT / f"trajectories/{output_condition}/summary.json"),
             })
             failed.unlink(missing_ok=True)
             print(json.dumps(_jsonable(result), indent=2, sort_keys=True))

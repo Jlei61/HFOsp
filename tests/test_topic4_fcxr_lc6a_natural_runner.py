@@ -70,6 +70,7 @@ def test_mechanism_source_hashes_include_unblessed_slow_module():
     hashes = RUNNER._source_hashes()
     assert "src/snn_engine/mz_slow_vars.py" in hashes
     assert "src/topic4_fcxr_lc3.py" in hashes
+    assert "src/topic4_fcxr_lc3_statefork.py" in hashes
     assert "src/topic4_fcxr_lc6_trajectory.py" in hashes
     assert all(len(value) == 64 for value in hashes.values())
 

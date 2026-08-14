@@ -135,4 +135,41 @@ run_pool gain "${gain_conditions[@]}"
 "$PY" scripts/run_topic4_fcxr_lc6a_gain_forks.py finalize --confirm-run \
   > "$OUT/logs/gain_finalize.log" 2>&1
 
-echo "LC6A fixed T4/T5 and conditional T7 experiment blocks complete"
+"$PY" scripts/run_topic4_fcxr_lc6a_confirmation.py build \
+  --execution-manifest "$MANIFEST" --confirm-run \
+  > "$OUT/logs/confirmation_build.log" 2>&1
+
+confirmation_authorized=$(
+  "$PY" - <<'PY'
+import json
+from pathlib import Path
+path = Path("results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/confirmation_lock.json")
+print("1" if json.loads(path.read_text()).get("authorized") else "0")
+PY
+)
+if [[ "$confirmation_authorized" == "1" ]]; then
+  mapfile -t confirmation_args < <(
+    "$PY" - <<'PY'
+import json
+from pathlib import Path
+path = Path("results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/confirmation_lock.json")
+row = json.loads(path.read_text())
+print(row["parent_condition"])
+print(row["output_condition"])
+print(row["graph_artifact"])
+PY
+  )
+  check_headroom
+  "$PY" scripts/run_topic4_fcxr_lc6a_natural_trajectory.py \
+    --condition "${confirmation_args[0]}" \
+    --output-condition "${confirmation_args[1]}" \
+    --graph-artifact "${confirmation_args[2]}" \
+    --confirmation-lock "$OUT/confirmation_lock.json" \
+    --execution-manifest "$MANIFEST" --confirm-run \
+    > "$OUT/logs/confirmation_natural.log" 2>&1
+fi
+
+"$PY" scripts/run_topic4_fcxr_lc6a_confirmation.py finalize --confirm-run \
+  > "$OUT/logs/confirmation_finalize.log" 2>&1
+
+echo "LC6A fixed T4/T5, conditional T7, and conditional confirmation blocks complete"

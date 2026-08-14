@@ -48,6 +48,8 @@ def build_condition(
     *,
     proposal_l_parallel_override=None,
     calibration_provenance=None,
+    graph_seed_override=None,
+    output_condition=None,
 ):
     if condition not in ALLOWED:
         raise ValueError(f"condition must be one of {ALLOWED}")
@@ -82,12 +84,15 @@ def build_condition(
             q_target, c0_width, i2e_width, ee_width, S["p"].l_IE,
         )
     if proposal_l_parallel_override is not None:
-        if condition == "C1":
+        if condition == "C1" and output_condition is None:
             raise ValueError("C1 cannot use a calibrated width override")
         l_parallel = float(proposal_l_parallel_override)
         if not np.isfinite(l_parallel) or l_parallel <= 0.0:
             raise ValueError("calibrated proposal width must be finite and positive")
-    seed = int(generation["condition_graph_seeds"][condition])
+    seed = int(
+        generation["condition_graph_seeds"][condition]
+        if graph_seed_override is None else graph_seed_override
+    )
     sources, chain = rewire_e_to_i_targetwise(
         c0.sources, S["posE"], S["posI"], S["axis_unit"],
         l_parallel=l_parallel,
@@ -123,8 +128,9 @@ def build_condition(
     audit = {
         **legality,
         "status": "COMPLETE",
-        "condition": condition,
-        "role": row["role"],
+        "condition": condition if output_condition is None else str(output_condition),
+        "parent_condition": condition,
+        "role": row["role"] if output_condition is None else f"graph_realization_confirmation_of_{condition}",
         "manifest": str(manifest_path),
         "manifest_sha256": FAMILY._sha(manifest_path),
         "trajectory_outcome_read": False,
@@ -156,8 +162,9 @@ def build_condition(
     }
     if calibration_provenance is not None:
         audit["graph_only_calibration"] = calibration_provenance
-    FAMILY._save_graph(FAMILY.OUT / f"graphs/{condition}.npz", candidate, audit)
-    FAMILY._write_json(FAMILY.OUT / f"graph_condition_{condition}.json", audit)
+    output_id = condition if output_condition is None else str(output_condition)
+    FAMILY._save_graph(FAMILY.OUT / f"graphs/{output_id}.npz", candidate, audit)
+    FAMILY._write_json(FAMILY.OUT / f"graph_condition_{output_id}.json", audit)
     return audit
 
 
