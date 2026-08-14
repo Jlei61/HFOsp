@@ -77,6 +77,10 @@ def test_finalize_validates_and_writes_required_artifacts(tmp_path):
     assert (tmp_path / "figures/lc6a_functional_response.png").is_file()
     assert (tmp_path / "figures/lc6a_functional_response.pdf").is_file()
     assert "### lc6a_functional_response.png" in (tmp_path / "figures/README.md").read_text()
+    MOD.finalize(tmp_path)
+    readme = (tmp_path / "figures/README.md").read_text()
+    assert readme.count("### lc6a_functional_response.png") == 1
+    assert readme.count("### lc6a_functional_response.pdf") == 1
 
 
 def test_finalize_marks_matched_background_event_as_confounded(tmp_path):

@@ -8,6 +8,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import sys
 
 import matplotlib
@@ -200,7 +201,7 @@ def _plot(
 ) -> tuple[Path, Path]:
     figure_dir = output_root / "figures"
     figure_dir.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(2, 2, figsize=(12.2, 7.8), constrained_layout=True)
+    fig, axes = plt.subplots(2, 2, figsize=(12.2, 7.8))
     profile_axes = (axes[0, 0], axes[0, 1], axes[1, 0])
     for window, ax in enumerate(profile_axes):
         for condition in CONDITIONS:
@@ -214,7 +215,10 @@ def _plot(
                 summaries[condition]["locations"]["neutral_axis"]["max_active_fraction_1ms_probe"],
             ) >= float(event_bar)
             label = condition + ("†" if background_event else "")
-            ax.plot(centers, curve, color=COLORS[condition], lw=1.65, label=label)
+            ax.plot(
+                centers, curve, color=COLORS[condition], lw=1.65, label=label,
+                ls="--" if background_event else "-", alpha=.72 if background_event else 1.0,
+            )
         ax.axhline(0.0, color="#777777", lw=0.8, ls="--")
         ax.axvline(0.0, color="#AAAAAA", lw=0.7, ls=":")
         ax.set_xlim(-6.0, 6.0)
@@ -252,12 +256,13 @@ def _plot(
     ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2))
     ax.legend(frameon=False, fontsize=8, loc="best")
     ax.spines[["top", "right"]].set_visible(False)
-    fig.suptitle("LC6A baseline functional response", fontsize=14, fontweight="bold")
+    fig.suptitle("LC6A paired functional response (descriptive)", fontsize=14, fontweight="bold")
     fig.text(
-        0.5, 0.002,
+        0.5, 0.012,
         "† matched sham/probe window contains a background population event; descriptive only",
         ha="center", va="bottom", fontsize=8, color="#555555",
     )
+    fig.tight_layout(rect=(0.0, 0.055, 1.0, 0.94))
     png = figure_dir / "lc6a_functional_response.png"
     pdf = figure_dir / "lc6a_functional_response.pdf"
     tmp_png = figure_dir / f".{png.name}.tmp.{os.getpid()}.png"
@@ -273,14 +278,15 @@ def _plot(
 def _update_readme(output_root: Path) -> None:
     path = output_root / "figures/README.md"
     existing = path.read_text() if path.is_file() else "# 图说明\n\n"
-    marker = "### lc6a_functional_response.png"
-    if marker in existing:
-        before, after = existing.split(marker, 1)
-        next_section = after.find("\n### ")
-        existing = (
-            before.rstrip() + "\n\n"
-            + (after[next_section + 1:] if next_section >= 0 else "")
-        )
+    sections = re.split(r"(?=^### )", existing, flags=re.MULTILINE)
+    drop = (
+        "### lc6a_functional_response.png",
+        "### lc6a_functional_response.pdf",
+    )
+    existing = "".join(
+        section for section in sections
+        if not section.startswith(drop)
+    ).rstrip() + "\n\n"
     block = (
         "### lc6a_functional_response.png\n\n"
         "前三格显示同一亚阈值 E patch 在三个预注册时间窗内，沿患者轴产生的配对带符号突触膜贡献；"
