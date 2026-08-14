@@ -30,6 +30,7 @@ TWO_HOP = OUT / "two_hop_kernel_audit.json"
 FUNCTIONAL = OUT / "impulse_response_audit.json"
 GAINS = OUT / "gain_forks.json"
 CONFIRMATION = OUT / "confirmation_summary.json"
+LC5_AUTHORIZATION = OUT / "lc5_to_lc6a_authorization.json"
 RUN_MANIFEST = OUT / "run_manifest.json"
 STATUS = OUT / "STATUS.md"
 RESOURCE_LOG = OUT / "resource_log.jsonl"
@@ -213,6 +214,17 @@ def _write_readme() -> None:
 
 def run() -> dict:
     manifest, graph, two_hop, functional, phenotype, gains, confirmation = _verify_complete()
+    lc5 = _json(LC5_AUTHORIZATION)
+    if not (
+        lc5.get("status") == "COMPLETE"
+        and lc5.get("authorize_lc6a_40k_dynamics") is True
+        and lc5.get("lc5_outcome") == "ESCALATING_SATURATION"
+        and lc5.get("checks", {}).get("classifier_replay_complete") is True
+    ):
+        raise RuntimeError("LC5 right-censor closeout does not authorize LC6A")
+    lc5_summary = Path(lc5["lc5_summary"])
+    if _sha(lc5_summary) != lc5["lc5_summary_sha256"]:
+        raise RuntimeError("LC5 right-censor summary drift")
     engine = _verify_engine_hashes(manifest)
     graph_rows = _graph_rows(graph, two_hop)
     trajectory = _trajectory_rows(phenotype)
@@ -228,7 +240,8 @@ def run() -> dict:
     _write_readme()
 
     key_artifacts = [
-        GRAPH, TWO_HOP, FUNCTIONAL, PHENOTYPE, GAINS, CONFIRMATION,
+        LC5_AUTHORIZATION, lc5_summary, GRAPH, TWO_HOP, FUNCTIONAL,
+        PHENOTYPE, GAINS, CONFIRMATION,
         FIGURES / "lc6a_graph_and_twohop.png",
         FIGURES / "lc6a_functional_response.png",
         FIGURES / "lc6a_trajectory_phenotypes.png",
@@ -263,6 +276,18 @@ def run() -> dict:
         "completed_at": now,
         "graph_rows": graph_rows,
         "trajectory_rows": trajectory,
+        "lc5_right_censor_closeout": {
+            "decision": lc5["decision"],
+            "onset_ms": lc5["lc5_onset_ms"],
+            "terminal_ms": lc5["lc5_terminal_ms"],
+            "end_rate_hz": lc5["lc5_end_rate_hz"],
+            "D_end": lc5["lc5_D_end"],
+            "H_end": lc5["lc5_H_end"],
+            "summary": str(lc5_summary),
+            "summary_sha256": lc5["lc5_summary_sha256"],
+            "first_continuation_chunk_input_hash_unavailable": True,
+            "classifier_snapshot_replay_complete": True,
+        },
         "gain_forks": gains,
         "confirmation": confirmation,
         "engineering": {
@@ -324,6 +349,8 @@ def run() -> dict:
 
 五个固定图和五条自然轨迹均完成。实际 two-hop 抑制宽度从 C0 的 {graph_rows[0]['two_hop_q']:.3f} 增至 Q3 的 {graph_rows[-1]['two_hop_q']:.3f}；五臂都保留自然进入，但随后均进入注册 saturation，没有打开 bounded high-state carrier。
 
+LC5v2.1 唯一右删失格已续跑裁决：23 s onset 后在 27 s 达到 405.9 Hz，D=0.573、H=25.763，结局 `ESCALATING_SATURATION`。25--26 s 的 reducer 故障使该段输入 hash/诊断 trace 不可用，但 exact checkpoint 已恢复，28 个 classifier bundles 重放完成，注册 saturation 出现在后续完整 26--27 s 段。
+
 Q2/Q3 改变了基线事件统计；Q3 将 onset 从 C0 的 11 s 提前到 6 s，说明更宽 E→I reach 也可能通过更早/更广的抑制使用推动 D 耗竭，而不只是稳定网络。
 
 gain fork 只回答高态是否还对弱输入有非零响应；它不覆盖 boundedness。没有 carrier，因此 graph-realization confirmation 按合同未触发。
@@ -345,11 +372,15 @@ lifecycle：**NOT_TESTED**
 
 正式标签：`CANONICAL_SEED_AXIAL_REACH_FAMILY_NO_CARRIER`。
 
-## 2. 这轮真正改了什么
+## 2. LC5v2.1 右删失格收口
+
+唯一右删失格在 23 s onset；从 25 s exact state 继续后，于 27 s 达到 405.9 Hz，D=0.573、H=25.763，判 `ESCALATING_SATURATION`，没有 offset。25--26 s 曾在 reducer 路径失败，因此该段输入 hash 和诊断 trace 不可用；但 exact checkpoint 被恢复，28 个 classifier snapshot bundles 全部重放，注册 saturation 位于完整记录的 26--27 s 段。这个缺口限制第一续跑秒的细粒度诊断，不改变终局 saturation 裁决。
+
+## 3. 这轮真正改了什么
 
 只改变代码 `IE`，即生物学 E→I 的患者轴 reach；EE、I→E、I→I、权重、Z/H、两个 core、噪声与所有慢机制保持冻结。graph-only two-hop 审计显示 q 从 {graph_rows[0]['two_hop_q']:.3f} 增至 {graph_rows[-1]['two_hop_q']:.3f}，所以这不是“图没改到位”的假阴性。
 
-## 3. 五条自然轨迹
+## 4. 五条自然轨迹
 
 {table}
 
@@ -357,21 +388,21 @@ lifecycle：**NOT_TESTED**
 
 Q1/Q2 把 onset 推迟到 13/12 s，Q3 却提前到 6 s；更宽 E→I reach 不是单向稳定旋钮。它可能先招募更远的 I 使用，继而在 wavefront 前方加速 D=1-Z 的耗竭。
 
-## 4. gain fork 的意义
+## 5. gain fork 的意义
 
 按预注册规则选择 C0 与 Q2。fork 只测 exact high-state snapshot 对弱局部输入是否仍有有限非零响应，不参与 boundedness 标签。即使存在很小的非零响应，也不能把已经升级到 saturation 的状态改称 carrier。
 
-## 5. 可以说与不能说
+## 6. 可以说与不能说
 
 可以说：在 canonical graph/noise 与锁定 legacy substrate 下，单独把患者轴 E→I reach 扫到 q≈1.5，没有打开 bounded carrier；Q2/Q3 还带来 baseline tradeoff。
 
 不能说：Mexican-hat 普遍无效；U 被否定；LC6A 测过 termination 或完整 lifecycle。LC6A 从设计上只测 carrier capability。
 
-## 6. 下一机制分支
+## 7. 下一机制分支
 
 固定宽核把 800 条 E→I 输入从近处重新分配到远处，也削弱了局部 center。若继续，优先做 spec 已预留但未授权的 center-preserving two-component E→I kernel（70–75% legacy local + 25–30% wide axial），而不是继续扩单一 q 网格。若仍是全局 saturation，应转向 H source/transfer；不能再把问题包装成“刹车剂量不足”。
 
-## 7. 工程与边界
+## 8. 工程与边界
 
 五图 graph legality、two-hop、functional、自然轨迹、两个 gain phenotype 和未触发 confirmation 均完成；六个 blessed engine hash 一致。无 carrier，所以 confirmation 不运行是合同结果，不是缺失实验。
 
