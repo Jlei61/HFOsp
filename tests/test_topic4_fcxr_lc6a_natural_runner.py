@@ -99,3 +99,24 @@ def test_recovery_checkpoint_keeps_current_and_previous(tmp_path, monkeypatch):
     RUNNER._rotate_recovery_checkpoint(tmp_path, object())
     assert (tmp_path / "rolling_checkpoint.current.npz").read_bytes() == b"third"
     assert (tmp_path / "rolling_checkpoint.previous.npz").read_bytes() == b"second"
+
+
+def test_non_c0_does_not_claim_control_parity():
+    assert RUNNER._c0_control_parity("Q2", object(), object()) == {"required": False}
+
+
+def test_c0_control_parity_is_exact(monkeypatch):
+    stream = RUNNER.SparseSpikeStream(
+        np.array([0, 2], np.int64), np.array([0, 1], np.int32), 4, 2,
+    )
+    rate = np.array([1., 2., 3., 4.])
+    monkeypatch.setattr(RUNNER.PREFIX, "RUN_MS", .2)
+    monkeypatch.setattr(RUNNER.U2, "DT_MS", .05)
+    monkeypatch.setattr(RUNNER.U2, "TRACE_DT_MS", .05)
+    monkeypatch.setattr(
+        RUNNER.PREFIX, "_reference_prefix",
+        lambda end_ms: (stream, rate.astype(np.float32)),
+    )
+    result = RUNNER._c0_control_parity("C0", stream, rate)
+    assert result["spike_exact"] is True
+    assert result["rate_max_abs_diff_hz"] == 0.0

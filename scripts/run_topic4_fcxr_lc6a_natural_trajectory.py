@@ -216,6 +216,36 @@ def _rate_from_stream(stream):
     return counts / stream.n_cells / U2.DT_MS * 1000.0
 
 
+def _prefix_stream(stream, end_ms):
+    n_steps = int(round(float(end_ms) / U2.DT_MS))
+    keep = stream.steps < n_steps
+    return SparseSpikeStream(
+        stream.steps[keep], stream.cells[keep], n_steps, stream.n_cells,
+    )
+
+
+def _c0_control_parity(condition, stream, rate):
+    if condition != "C0":
+        return {"required": False}
+    reference_ms = min(float(stream.n_steps * U2.DT_MS), float(PREFIX.RUN_MS))
+    reference_stream, reference_rate = PREFIX._reference_prefix(reference_ms)
+    observed_stream = _prefix_stream(stream, reference_ms)
+    stride = int(round(U2.TRACE_DT_MS / U2.DT_MS))
+    observed_rate = np.asarray(rate[:observed_stream.n_steps:stride], np.float32)
+    max_abs = float(np.max(np.abs(observed_rate - reference_rate)))
+    record = {
+        "required": True,
+        "reference_ms": reference_ms,
+        "spike_sha256_expected": reference_stream.sha256,
+        "spike_sha256_observed": observed_stream.sha256,
+        "spike_exact": bool(observed_stream.sha256 == reference_stream.sha256),
+        "rate_max_abs_diff_hz": max_abs,
+    }
+    if not (record["spike_exact"] and max_abs == 0.0):
+        raise RuntimeError("C0 natural trajectory does not reproduce the locked pump-off prefix")
+    return record
+
+
 def _trace_chunk(slow, starts, stride):
     result = {}
     for output, attribute in TRACE_ATTRS.items():
@@ -325,8 +355,12 @@ def run(condition, manifest_path):
         if onset_ms is not None:
             for name, target_ms in (
                 ("onset_detected", float(onset_ms)),
+                ("onset_plus_1s", float(onset_ms) + 1000.0),
                 ("onset_plus_2s", float(onset_ms) + 2000.0),
+                ("onset_plus_4s", float(onset_ms) + 4000.0),
                 ("onset_plus_6s", float(onset_ms) + 6000.0),
+                ("onset_plus_8s", float(onset_ms) + 8000.0),
+                ("onset_plus_12s", float(onset_ms) + 12000.0),
             ):
                 if name not in pinned_checkpoints and completed_ms >= target_ms:
                     record = _pin_checkpoint(
@@ -352,6 +386,7 @@ def run(condition, manifest_path):
 
     full = _combine_streams(streams)
     rate = _rate_from_stream(full)
+    control_parity = _c0_control_parity(condition, full, rate)
     adjudication = PREFIX._adjudicate(full, rate)
     traces = {key: np.concatenate(parts) for key, parts in trace_parts.items()}
     rate_maps = spatial_rate_maps(
@@ -390,6 +425,7 @@ def run(condition, manifest_path):
         "n_events": len(adjudication["events"]),
         "n_returning": len(adjudication["returned"]),
         "n_returning_pre_onset": n_pre,
+        "control_parity": control_parity,
         "per_second_mean_rate_hz": per_second_rate.tolist(),
         "late_rate_slope_hz_per_s": linear_slope(per_second_rate[-tail:], dt_s=1.0),
         "late_D_slope_per_s": linear_slope(traces["D_mean"][-tail * int(1000/U2.TRACE_DT_MS):], dt_s=U2.TRACE_DT_MS/1000),
