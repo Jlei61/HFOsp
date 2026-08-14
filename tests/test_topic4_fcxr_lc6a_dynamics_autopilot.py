@@ -12,6 +12,20 @@ def test_autopilot_waits_for_graph_hard_gates_and_uses_dynamic_slot_refill():
     assert "wait -n -p finished" in source
     assert "MAX_SLOTS=4" in source
     assert "check_headroom" in source
+    assert "STAGE_SWAP_BASELINE_MIB" in source
+    assert "delta >= 256.0" in source
+    assert "3.0*rss" in source
+    assert "SUBMISSION_SLOT_CAP" in source
+
+
+def test_autopilot_remeasures_natural_arm_rss_before_parallel_fill():
+    source = SCRIPT.read_text()
+    assert "remeasure_rss_budget" in source
+    assert "LC6A_C0_CHUNK" in source
+    c0 = source.index("run_pool natural C0")
+    measured = source.index("RSS_BUDGET_GIB=$(remeasure_rss_budget)")
+    parallel = source.index("run_pool natural C1 Q1 Q2 Q3")
+    assert c0 < measured < parallel
 
 
 def test_autopilot_preserves_c0_reference_order_and_fixed_five_arm_block():

@@ -7,6 +7,9 @@ OUT="$ROOT/results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround"
 PY=/home/honglab/leijiaxin/anaconda3/bin/python
 MANIFEST="$ROOT/config/topic4_fcxr_lc6a_patient_axis_surround.json"
 MAX_SLOTS=4
+RSS_BUDGET_GIB=8.0
+STAGE_SWAP_BASELINE_MIB=0
+SUBMISSION_SLOT_CAP=1
 
 export OMP_NUM_THREADS=1
 export OPENBLAS_NUM_THREADS=1
@@ -33,13 +36,57 @@ wait_for_graph_stage() {
   done
 }
 
+swap_used_mib() {
+  awk '
+    /^SwapTotal:/ {total=$2}
+    /^SwapFree:/  {free=$2}
+    END {printf "%.3f", (total-free)/1024.0}
+  ' /proc/meminfo
+}
+
 check_headroom() {
-  local available_kib
+  local available_kib swap_now_mib swap_delta_mib required_kib slots_by_memory
   available_kib=$(awk '/^MemAvailable:/ {print $2}' /proc/meminfo)
-  if (( available_kib < 100663296 )); then
-    echo "MemAvailable below 96 GiB; refusing a new LC6A arm" >&2
+  swap_now_mib=$(swap_used_mib)
+  swap_delta_mib=$(awk -v now="$swap_now_mib" -v base="$STAGE_SWAP_BASELINE_MIB" \
+    'BEGIN {printf "%.3f", now-base}')
+  if awk -v delta="$swap_delta_mib" 'BEGIN {exit !(delta >= 256.0)}'; then
+    echo "stage swap delta is +${swap_delta_mib} MiB; pausing new LC6A submissions" >&2
     return 1
   fi
+  required_kib=$(awk -v rss="$RSS_BUDGET_GIB" \
+    'BEGIN {printf "%.0f", 3.0*rss*1024.0*1024.0}')
+  if (( available_kib < 100663296 )); then
+    echo "MemAvailable below 96 GiB; pausing new LC6A submissions" >&2
+    return 1
+  fi
+  if (( available_kib < required_kib )); then
+    echo "MemAvailable below 3x measured per-arm RSS budget; pausing submission" >&2
+    return 1
+  fi
+  slots_by_memory=$(awk -v kib="$available_kib" -v rss="$RSS_BUDGET_GIB" \
+    'BEGIN {n=int(kib/(3.0*rss*1024.0*1024.0)); if (n<1) n=1; print n}')
+  SUBMISSION_SLOT_CAP=$slots_by_memory
+  (( SUBMISSION_SLOT_CAP > MAX_SLOTS )) && SUBMISSION_SLOT_CAP=$MAX_SLOTS
+  return 0
+}
+
+remeasure_rss_budget() {
+  "$PY" - <<'PY'
+import json
+from pathlib import Path
+
+path = Path("results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/resource_log.jsonl")
+rows = []
+if path.is_file():
+    for line in path.read_text().splitlines():
+        row = json.loads(line)
+        if str(row.get("stage", "")).startswith("LC6A_C0_CHUNK"):
+            rows.append(float(row["self_peak_rss_gib"]))
+if not rows:
+    raise SystemExit("C0 natural arm did not publish a measured RSS budget")
+print(f"{max(rows):.6f}")
+PY
 }
 
 run_pool() {
@@ -49,9 +96,15 @@ run_pool() {
   local -a pids=()
   local -A name_by_pid=()
   local condition pid finished status
+  STAGE_SWAP_BASELINE_MIB=$(swap_used_mib)
   while (( ${#queue[@]} > 0 || ${#pids[@]} > 0 )); do
-    while (( ${#queue[@]} > 0 && ${#pids[@]} < MAX_SLOTS )); do
-      check_headroom
+    while (( ${#queue[@]} > 0 )); do
+      if ! check_headroom; then
+        break
+      fi
+      if (( ${#pids[@]} >= SUBMISSION_SLOT_CAP )); then
+        break
+      fi
       condition=${queue[0]}
       queue=("${queue[@]:1}")
       if [[ "$stage" == "functional" ]]; then
@@ -76,6 +129,13 @@ run_pool() {
       name_by_pid[$pid]=$condition
       echo "started $stage $condition pid=$pid"
     done
+    if (( ${#pids[@]} == 0 )); then
+      # A temporary machine-level resource condition is not a scientific
+      # failure.  Keep the detached dispatcher alive and retry without
+      # consuming or dropping a registered arm.
+      sleep 30
+      continue
+    fi
     finished=
     if wait -n -p finished "${pids[@]}"; then
       status=0
@@ -107,6 +167,12 @@ run_pool functional C0 C1 Q1 Q2 Q3
 
 # C0 alone establishes the frozen IED-exposure reference required by all four comparisons.
 run_pool natural C0
+
+# C0 is the first full natural arm under the current engine path.  Replace the
+# conservative inherited 8 GiB estimate with its measured peak before filling
+# the four-arm natural pool.
+RSS_BUDGET_GIB=$(remeasure_rss_budget)
+echo "measured LC6A natural-arm RSS budget: ${RSS_BUDGET_GIB} GiB"
 
 # Freeze the C0-derived local companion classifier before any Q-arm result exists.
 "$PY" scripts/lock_topic4_fcxr_lc6a_local_classifier.py \
