@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import ast
+import json
 from pathlib import Path
 
 import numpy as np
@@ -10,6 +11,8 @@ from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
     _figure2a_context_geometry,
     _map_kmeans_clusters_to_modes,
     _same_network_pair,
+    _science_status,
+    _status_banner,
     _write_readme,
     formal_clean_mask,
     normalize_event_ranks,
@@ -197,3 +200,84 @@ def test_contact_activity_bandpass_is_signed_and_input_preserving():
     assert np.min(filtered[0]) < -0.5
     assert np.max(filtered[0]) > 0.5
     assert np.std(filtered[0]) > 8.0 * np.std(filtered[1])
+
+
+def _verdict_bundle(tmp_path, *, seeds, replication_pass=False):
+    (tmp_path / "confirmation_verdict.json").write_text(json.dumps({
+        "status": "REV10D6_3_JOINT_CONTINUOUS_FIELD_NOT_REPLICATED",
+        "fig4_acceptance": "DIAGNOSTIC_ONLY",
+        "replication_pass": replication_pass,
+        "replication_rule": "both paired lower bounds above zero",
+        "network_seed_is_the_independent_unit": True,
+    }))
+    return {
+        "output_root": tmp_path,
+        "candidate_id": "d62_a0p5_b0p5",
+        "phase": "confirmation",
+        "candidate": {"spatial_ou": {"mode": "local"}},
+        "network_seed_key": "confirmation_network_seeds",
+        "config": {
+            "scientific_role": (
+                "development_only_continuous_field_joint_direction_replication"
+            ),
+            "search": {"confirmation_network_seeds": list(seeds)},
+        },
+    }
+
+
+def test_science_status_travels_with_the_figure(tmp_path):
+    status = _science_status(_verdict_bundle(tmp_path, seeds=range(1401, 1413)))
+    assert status["fig4_acceptance"] == "DIAGNOSTIC_ONLY"
+    assert status["verdict_status"].endswith("NOT_REPLICATED")
+    assert status["replication_pass"] is False
+    assert _science_status({"output_root": tmp_path / "missing"}) is None
+
+
+def test_status_banner_states_the_accepted_verdict():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    text = _status_banner(fig, {
+        "fig4_acceptance": "DIAGNOSTIC_ONLY",
+        "verdict_status": "REV10D6_3_JOINT_CONTINUOUS_FIELD_NOT_REPLICATED",
+        "replication_pass": False,
+    })
+    plt.close(fig)
+    assert "DIAGNOSTIC_ONLY" in text
+    assert "NOT_REPLICATED" in text
+    assert "replication rule NOT met" in text
+    assert _status_banner(fig, None) is None
+
+
+def test_readme_reports_the_real_network_count_and_verdict(tmp_path):
+    _write_readme(tmp_path, _verdict_bundle(tmp_path, seeds=range(1401, 1413)))
+    text = (tmp_path / "README.md").read_text()
+    assert "12 张网络等权" in text
+    assert "6 张网络" not in text
+    assert "DIAGNOSTIC_ONLY" in text
+    assert "不得替换主文 Fig.4" in text
+
+
+def test_figure_b_keeps_the_required_qualifiers_on_canvas():
+    source = (
+        ROOT / "scripts/paper_figures/plot_fig4_spatial_edge_flow_validation.py"
+    ).read_text()
+    # The spec requires purity, stability, within-cluster consistency and the
+    # supervised matrix to be reported on the figure, not only in metadata.
+    assert "visible_qualifier_removed" not in source
+    assert "_kmeans_qualifier_caption" in source
+    for fragment in ("natural KMeans: purity", "seed AMI", "within-cluster tau",
+                     "supervised MTA-TA", "pooled descriptive MTA-TA"):
+        assert fragment in source
+    # A replication-failed diagnostic run must not print a validation status.
+    assert "REV10D6_3_FIG4_DIAGNOSTIC_COMPLETE" in source
+
+
+def test_landscape_colorbar_stays_inside_its_own_cell():
+    source = (
+        ROOT / "scripts/paper_figures/plot_fig4_spatial_edge_flow_validation.py"
+    ).read_text()
+    assert "plt.colorbar(surface, ax=ax" not in source
+    assert "figure.colorbar(surface, cax=colorbar_ax)" in source

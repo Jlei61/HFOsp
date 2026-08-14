@@ -484,9 +484,18 @@ def _plot_landscape(ax, bundle):
     ax.view_init(elev=32.0, azim=-95.0)
     ax.set_box_aspect((1.0, 1.0, 0.46), zoom=1.03)
     ax.set_axis_off()
-    colorbar = plt.colorbar(surface, ax=ax, fraction=0.042, pad=0.035, shrink=0.78)
-    colorbar.set_label("field h", fontsize=10.5)
-    colorbar.ax.tick_params(labelsize=9)
+    # Keep the field colorbar inside the landscape cell. Stealing space from the
+    # 3-D axes pushes the bar into the inter-panel gap, where its label collides
+    # with the neighbouring onset-density y-label.
+    figure = ax.get_figure()
+    box = ax.get_position()
+    colorbar_ax = figure.add_axes([
+        box.x0 + 0.885 * box.width, box.y0 + 0.24 * box.height,
+        0.030 * box.width, 0.44 * box.height,
+    ])
+    colorbar = figure.colorbar(surface, cax=colorbar_ax)
+    colorbar.set_label("field h", fontsize=10.5, labelpad=2.0)
+    colorbar.ax.tick_params(labelsize=9, pad=1.5)
     return context
 
 
@@ -605,8 +614,13 @@ def _plot_mode_density(ax, bundle, mode, display_name, *, show_ylabel):
     ax.yaxis.label.set_size(11)
     ax.set_title(display_name, fontsize=14,
                  color=MODE_COLORS[mode], weight="bold", pad=8)
-    ax.text(0.035, 0.955, f"clean events  n={int(bundle['clean_counts'][mode])}",
-            transform=ax.transAxes, ha="left", va="top", fontsize=9.5,
+    n_networks = len(bundle["config"]["search"][
+        bundle.get("network_seed_key", "fit_network_seeds")
+    ])
+    ax.text(0.035, 0.965,
+            f"clean events  n={int(bundle['clean_counts'][mode])}\n"
+            f"pooled over {n_networks} networks",
+            transform=ax.transAxes, ha="left", va="top", fontsize=9.0,
             color="white", weight="bold",
             bbox={"facecolor": MODE_COLORS[mode], "edgecolor": "none",
                   "alpha": 0.86, "pad": 2.2})
@@ -729,6 +743,55 @@ def _save(fig, stem):
             for suffix in ("png", "pdf")}
 
 
+def _science_status(bundle):
+    """Read the accepted scientific verdict of the run these figures display.
+
+    Producer-side "COMPLETE" states only say the plotting inputs exist. The
+    accepted verdict lives in ``confirmation_verdict.json`` and must travel with
+    the figure, otherwise a replication-failed diagnostic panel is indexed as a
+    passed Fig.4 validation.
+    """
+    root = bundle.get("output_root")
+    path = None if root is None else Path(root) / "confirmation_verdict.json"
+    if path is None or not path.exists():
+        return None
+    verdict = _json(path)
+    return {
+        "verdict_path": str(path),
+        "verdict_sha256": _sha256(path),
+        "verdict_status": verdict.get("status"),
+        "fig4_acceptance": verdict.get("fig4_acceptance"),
+        "replication_pass": verdict.get("replication_pass"),
+        "replication_rule": verdict.get("replication_rule"),
+        "network_seed_is_the_independent_unit": verdict.get(
+            "network_seed_is_the_independent_unit"
+        ),
+    }
+
+
+def _status_banner(fig, status):
+    """Print the accepted verdict on the canvas, not only in the metadata."""
+    if status is None:
+        return None
+    acceptance = status.get("fig4_acceptance")
+    verdict = status.get("verdict_status")
+    if acceptance is None and verdict is None:
+        return None
+    text = " | ".join(
+        part for part in (
+            None if acceptance is None else f"Fig.4 status: {acceptance}",
+            verdict,
+            None if status.get("replication_pass") is not False
+            else "network-level replication rule NOT met",
+        ) if part
+    )
+    # Anchored just outside the axes band; `bbox_inches="tight"` grows the
+    # canvas around it, so the banner can never occlude a panel.
+    fig.text(0.008, 1.006, text, ha="left", va="bottom", fontsize=10.5,
+             color="#7A2E2B", weight="bold")
+    return text
+
+
 def _metadata(bundle, figure):
     primary = bundle.get("manifest", {}).get("selection_freeze", {}).get(
         "primary_candidate_id",
@@ -837,6 +900,8 @@ def _render_direct(bundle, output_dir):
         axes[2], bundle, TB_MODE, "Model TB", show_ylabel=False,
     )
     readout = _plot_readout(axes[3], bundle, pair)
+    science_status = _science_status(bundle)
+    banner = _status_banner(fig, science_status)
     stem = Path(output_dir) / (
         "fig4a_spatial_ou_direct_readout" if _is_spatial_ou(bundle)
         else "fig4a_spatial_edge_flow_direct_readout"
@@ -866,6 +931,8 @@ def _render_direct(bundle, output_dir):
         "semantic_mode_audit": semantic_audit,
         "mode_mean_direction_xy_mm": direction_meta,
         "removed_redundant_panel": "frozen signed delta-Vtheta node map",
+        "science_status": science_status,
+        "rendered_status_banner": banner,
     })
     if context is not None:
         metadata["figure2a_geometry_context"] = {
@@ -1004,6 +1071,58 @@ def _map_kmeans_clusters_to_modes(labels, contingency):
     return cluster_to_mode[np.asarray(labels, int)], cluster_to_mode
 
 
+def _kmeans_qualifier_caption(
+        fig, audit, supervised_matrix, patient_q05, network_row,
+        matrix_contract, pooled_matrix):
+    """Render the Figure-B numbers the spec requires on the canvas itself.
+
+    The displayed matrix is the most favourable of several readouts. Direction
+    purity, cluster stability, within-cluster consistency, the supervised
+    matrix and the pooled descriptive matrix must be visible next to it, or the
+    panel reads as a pass on its own.
+    """
+    def _format(value, digits=2, signed=True):
+        if value is None or not np.isfinite(value):
+            return "n/a"
+        return f"{value:+.{digits}f}" if signed else f"{value:.{digits}f}"
+
+    parts = [
+        "natural KMeans: purity {}{}".format(
+            _format(audit["direction_purity"], 3, signed=False),
+            "" if patient_q05 is None
+            else f" (patient-matched q05 {patient_q05:.3f})",
+        ),
+        f"seed AMI {_format(audit['kmeans_stability_ami_median'], signed=False)}",
+        "within-cluster tau {}".format(
+            _format(audit["within_cluster_tau_mean"], signed=False)
+        ),
+        "supervised MTA-TA {} / MTB-TB {}".format(
+            _format(supervised_matrix[0, 0]), _format(supervised_matrix[1, 1]),
+        ),
+        "pooled descriptive MTA-TA {} / MTB-TB {}".format(
+            _format(pooled_matrix[0, 0]), _format(pooled_matrix[1, 1]),
+        ),
+    ]
+    if network_row is not None:
+        alignment = network_row["natural_balanced_alignment_equal_network"]
+        margin = network_row["crossfit_margin_equal_network"]
+        parts.append(
+            "per-network (n={}): alignment {:.3f} [{:.3f}, {:.3f}], "
+            "cross-fit margin {:.3f} [{:.3f}, {:.3f}]".format(
+                alignment["n_networks"], alignment["equal_network_mean"],
+                alignment["network_bootstrap_q05"],
+                alignment["network_bootstrap_q95"],
+                margin["equal_network_mean"],
+                margin["network_bootstrap_q05"],
+                margin["network_bootstrap_q95"],
+            )
+        )
+    text = f"matrix = {matrix_contract}\n" + "  |  ".join(parts)
+    fig.text(0.008, -0.012, text, ha="left", va="top", fontsize=10,
+             color="#333333", linespacing=1.5)
+    return text
+
+
 def _render_kmeans(bundle, output_dir):
     sys.path.insert(0, str(ROOT))
     from scripts import plot_interictal_propagation as propagation_plot  # noqa: E402
@@ -1101,7 +1220,9 @@ def _render_kmeans(bundle, output_dir):
     heatmap_ax.set_ylabel("electrode contact", fontsize=13)
     heatmap_ax.tick_params(axis="x", labelsize=11)
     profile_ax.set_title("cluster rank profile", fontsize=14, weight="bold", pad=8)
-    profile_ax.set_xlabel("normalized rank", fontsize=13)
+    profile_ax.set_xlabel(
+        f"mean rank position (0 = first, {n_contacts - 1} = last)", fontsize=13,
+    )
     profile_ax.tick_params(axis="x", labelsize=11)
 
     rank_grid = outer[0, 2].subgridspec(2, 1, height_ratios=(20, 1), hspace=0.06)
@@ -1220,6 +1341,12 @@ def _render_kmeans(bundle, output_dir):
     corrected = _json(corrected_path) if corrected_path.exists() else {}
     benchmark = corrected.get("patient_matched_kmeans_direction_purity", {})
     q05 = benchmark.get("q05")
+    science_status = _science_status(bundle)
+    banner = _status_banner(fig, science_status)
+    qualifier = _kmeans_qualifier_caption(
+        fig, audit, supervised_matrix, q05, d61_row, displayed_matrix_contract,
+        cluster_matrix,
+    )
     stem = Path(output_dir) / (
         "fig4b_spatial_ou_kmeans_consistency" if _is_spatial_ou(bundle)
         else "fig4b_spatial_edge_flow_kmeans_consistency"
@@ -1256,10 +1383,14 @@ def _render_kmeans(bundle, output_dir):
         "patient_columns": ["TA", "TB"],
         "semantic_mode_audit": semantic_audit,
         "display_contact_order": names[channel_order].tolist(),
-        "visible_qualifier_removed": {
-            "direction_purity": audit["direction_purity"],
-            "patient_q05": q05,
-        },
+        "visible_qualifier_caption": qualifier,
+        "science_status": science_status,
+        "rendered_status_banner": banner,
+        "kmeans_event_subset_contract": (
+            "formal clean events with at least three participating contacts; "
+            "clean events below that support are outside the KMeans input, so "
+            "Fig4B event totals are smaller than the Fig4A mode counts"
+        ),
         "contact_order_contract": "Figure 1E fixed order from patient-training ranks",
         "figure1e_shared_painter": (
             "scripts/paper_figures/plot_fig1_interictal_hfo_temporal_scaffold.py"
@@ -1301,23 +1432,43 @@ def _write_readme(output_dir, bundle):
             JOINT_CONTINUOUS_SURFACE_ROLE,
             "development_only_continuous_field_joint_direction_replication",
         }
+        n_networks = len(bundle["config"].get("search", {}).get(
+            bundle.get("network_seed_key", "fit_network_seeds"), [],
+        ))
         matrix_text = (
-            "最右矩阵是 6 张网络等权的 contact-split cross-fit patient readout："
-            "在一组交替触点上分配模式，在互斥触点上评价，再交换两组。"
+            f"最右矩阵是 {n_networks} 张网络等权的 contact-split cross-fit patient "
+            "readout：在一组交替触点上分配模式，在互斥触点上评价，再交换两组。"
+            "它是本图上最有利的一种口径；同一批事件的 pooled 描述性矩阵在图下方"
+            "同时给出，两者第二模式不同号时以 per-network 结果为准。"
             if d61 else
-            "最右矩阵沿用相同语义色。"
+            "最右矩阵是同一批 pooled 事件的 KMeans cluster 对患者 prototype 的"
+            "描述性相关，没有 contact-split cross-fit 分离。"
         )
-        path.write_text(f"""### fig4a_spatial_ou_direct_readout
+        status = _science_status(bundle)
+        status_text = "" if status is None else (
+            "> **科学状态**："
+            + "".join(
+                f"`{status[key]}` / " for key in
+                ("fig4_acceptance", "verdict_status")
+                if status.get(key) is not None
+            ).rstrip(" /")
+            + "。"
+            + ("网络级复制规则未通过，本目录两图只能作为诊断图，"
+               "不得替换主文 Fig.4。"
+               if status.get("replication_pass") is False else "")
+            + "\n\n"
+        )
+        path.write_text(f"""{status_text}### fig4a_spatial_ou_direct_readout
 
 这张图展示 {spatial_candidate_context} `{bundle['candidate_id']}`。左侧直接复用 Figure 2A 的 E1146 ICL/SCL 三维几何、正交相机和触点投影语法：20 个局部植入触点全部显示，其中未进入 SNN readout 的 SCL1-SCL5 为灰色；透明投影平面覆盖连续 `h` landscape。中间按 Figure 2 冻结模板核正为 Model TA（数值标签 1）和 Model TB（数值标签 0），分别汇总所有 formal clean 事件的 earliest-contact density 与平均传播方向；右侧显示同一网络中触点支持最高且时间上分离的 MTA/MTB 事件对，并按 Figure 1E 的固定顺序展示全部 15 个 readout 电极。
 
-**关注点**：两种模式的起始可达区域是否在同一连续场上形成可辨认的空间差异。右侧信号是 contact firing-density envelope 的带通结果，不是 current-LFP 或临床 SEEG 电压。
+**关注点**：两种模式的起始可达区域是否在同一连续场上形成可辨认的空间差异。中间两幅的事件数是 {n_networks} 张网络汇总值，不是单张网络的可复制程度。右侧信号是 contact firing-density envelope 的带通结果，不是 current-LFP 或临床 SEEG 电压。
 
 ### fig4b_spatial_ou_kmeans_consistency
 
-这张图只使用 returned、双杆、patient-support 内的 formal clean events。热图、masked cells、白色斜线分隔、色条、电极顺序和 rank summary 直接复用 Figure 1E painter；rank distribution 使用同一共享函数的平滑紧凑 ridgeline 显示。KMeans 两簇先按 frozen 数值方向标签排列，再经过 Figure 2 模板审计统一命名为 MTA/MTB；实线表示模型 MTA/MTB，虚线表示患者 TA/TB。{matrix_text}
+这张图只使用 returned、双杆、patient-support 内、且至少有 3 个参与触点的 formal clean events，因此事件总数少于 fig4a 的模式计数。热图、masked cells、白色斜线分隔、色条、电极顺序和 rank summary 直接复用 Figure 1E painter；rank distribution 使用同一共享函数的平滑紧凑 ridgeline 显示。KMeans 两簇先按 frozen 数值方向标签排列，再经过 Figure 2 模板审计统一命名为 MTA/MTB；实线表示模型 MTA/MTB，虚线表示患者 TA/TB。{matrix_text}图下方一行同时给出 direction purity、seed AMI、within-cluster tau、supervised 与 pooled 描述性矩阵对角{"，以及 per-network equal-network 区间" if d61 else ""}。
 
-**关注点**：同时看 cluster-vs-patient 正对角/负交叉、direction purity 与 patient-matched purity 区间；患者 rank 几何接近不等于 KMeans 离散性达标。这是 development confirmation，不是 patient blind generalization。
+**关注点**：先读图下方那一行，再读矩阵——矩阵是本图上最有利的口径，purity{"与 per-network 区间" if d61 else ""}才是承重量；两簇的方向列联表可能同时偏向同一方向标签，此时第二簇的方向可分性接近抛硬币。患者 rank 几何接近不等于 KMeans 离散性达标。这是 development confirmation，不是 patient blind generalization。
 """)
         return
     path.write_text(f"""### fig4a_spatial_edge_flow_direct_readout
@@ -1376,6 +1527,7 @@ def main():
             "provenance": provenance,
             "figures": [str(direct), str(kmeans)],
         }, indent=2))
+    science_status = _science_status(bundle)
     print(json.dumps({
         "status": (
             "REV10D6_2_FIG4_DIAGNOSTIC_COMPLETE"
@@ -1385,12 +1537,17 @@ def main():
             if config.get("scientific_role") == (
                 "development_only_continuous_field_natural_kmeans_fresh_closeout"
             ) else
+            "REV10D6_3_FIG4_DIAGNOSTIC_COMPLETE"
+            if config.get("scientific_role") == (
+                "development_only_continuous_field_joint_direction_replication"
+            ) else
             "REV10D5_2_FIG4_VALIDATION_COMPLETE" if _is_spatial_ou(bundle)
             else "REV10R2_FIG4_VALIDATION_COMPLETE"
         ),
         "candidate_id": bundle["candidate_id"],
         "figures": [str(direct), str(kmeans)],
         "producer_frozen": provenance is not None,
+        "science_status": science_status,
     }, indent=2))
 
 

@@ -56,6 +56,17 @@ D7 将同一 49-field observation-invariant library 接到 active Z+M reference�
 
 两图满足“只看同网络自发波形 + KMeans/患者一致性”的展示合同，PNG 为 600 dpi、PDF 单页、producer provenance clean。图中 pooled cross-fit matrix 为 `[[+0.80,-0.72],[-0.48,+0.35]]`，第二模式匹配弱；更重要的是 D6.3 network-level replication fail。因此两图只能标记 `DIAGNOSTIC_ONLY`，不得替换主文 Fig.4。
 
+## 6. 2026-08-14 图形与合同修正（本节撤回 §5 的“视觉验收通过”）
+
+对本线的独立复核发现四处必须修正的问题，已修并重绘 D6.3 与 D5.2 两套图：
+
+1. **P0 文字互相覆盖**：Fig4A 左侧连续场 colorbar 的 `field h` 标签与相邻 onset-density 面板的 `sheet y (mm)` 完全重叠，两处都不可读。违反图规范 §6「无文字遮挡」。colorbar 已改为在 landscape cell 内部显式定位。
+2. **P0 图上撤掉了合同要求的限定符**：producer 曾把 `direction purity` 从画布移除、只留 metadata（字段名即 `visible_qualifier_removed`），使矩阵单独看起来像通过。规范 §3 要求 purity / stability / within-cluster consistency / supervised 矩阵与 KMeans-患者矩阵**同时**出现在图和 metadata。现已在图下方常驻一行，并同时给出 pooled 描述性矩阵对角（D6.3 为 `+0.76 / −0.60`，与所显示 cross-fit 矩阵第二模式不同号）。
+3. **P0 裁定不随图走**：两图的 metadata 只记 `source_status = ..._REPLICATION_COMPLETE`，producer stdout 对 D6.3 role 落到 `REV10D5_2_FIG4_VALIDATION_COMPLETE`。现新增 `science_status`（verdict 路径 + SHA256 + `fig4_acceptance` + `replication_pass`）、画布顶部裁定横幅，stdout 增加 D6.3 诊断档位。
+4. **P1 README 事实错误**：生成的 `figures/README.md` 硬编码“6 张网络”，而 D6.3 是 12 张；且「关注点」要求读者看图上已被删掉的 purity。网络数与科学状态现由 verdict / config 生成；Fig4A 面板内也标注 pooled 网络数（D6.3 = 12），并说明 Fig4B 事件数（365）少于 Fig4A 模式计数（295+81）的原因是 ≥3 参与触点的 KMeans 输入门槛。
+
+**科学裁定不变**：D6.3 仍是 `REV10D6_3_JOINT_CONTINUOUS_FIELD_NOT_REPLICATED` / `DIAGNOSTIC_ONLY`，D5.2 仍低于 patient-matched q05。修正只影响“图是否诚实自述”，不改任何数值。规范增补见 `docs/topic4_data_driven_snn_figure_spec.md` §6.1 与 §7。
+
 ## 当前能否说明复现患者间期活动
 
 不能。当前只支持：

@@ -1,7 +1,10 @@
 # Topic 4 data-driven SNN 双图规范
 
-> 状态：v1，2026-08-13。本文是 data-driven SNN 结果展示与验收的规范入口。
+> 状态：v1.1，2026-08-14。本文是 data-driven SNN 结果展示与验收的规范入口。
 > 它锁定图型、语义和证据边界，不把当前候选升级为患者模式复现成功。
+>
+> v1.1 增补（见 §6.1）：图必须把该次运行的**已接受科学裁定**画在画布上，
+> 不能只写进 metadata；`direction purity` 等不利限定符不得从图上撤下。
 
 ## 1. 规范对象
 
@@ -130,4 +133,35 @@ slow = None
 > 连续 data-driven node field 加局部 spatial OU drive 可以在同一网络产生可监督区分的 MTA/MTB 事件，但无监督事件结构尚未复现患者 TA/TB 双模式。
 
 不能写成“data-driven SNN 已复现患者间期活动”“已恢复真实 core”“已证明传播机制”或“Z/M 模型复现”。
+
+## 6.1 裁定必须上画布（v1.1，2026-08-14）
+
+producer 打印的 `*_COMPLETE` 只说明绘图输入齐全，不是科学结论。因此：
+
+- 两张图都必须在画布顶部打印该次运行 `confirmation_verdict.json` 的
+  `fig4_acceptance` / `status`；若 `replication_pass=false`，必须同时写明
+  “network-level replication rule NOT met”。metadata 增设 `science_status` 字段
+  记录 verdict 路径、SHA256 与上述三项。
+- Figure B 图下方必须常驻一行：`direction purity`（有 patient-matched q05 时并列）、
+  `seed AMI`、`within-cluster tau`、supervised 矩阵对角、pooled 描述性矩阵对角，
+  以及有 per-network 复制臂时的 equal-network 区间。**禁止**把不利限定符
+  从图上移除只留 metadata（历史违规字段名 `visible_qualifier_removed`）。
+- Figure B 最右矩阵是多种口径中最有利的一种；图注和 `figures/README.md`
+  必须写明口径，并在 pooled 描述性矩阵第二模式与之不同号时点出。
+- Figure A 的模式事件计数是跨网络 pooled 值，面板内必须标注 pooled 网络数。
+- `figures/README.md` 的网络数、口径与科学状态一律由 verdict / config 生成，
+  不得硬编码。
+
+## 7. 本线当前状态（2026-08-14）
+
+- §1 的 D5.2 目录仍是规范双图源，但科学状态是
+  `REV10D5_2_DIRECTION_PROTOTYPES_RECOVERED_KMEANS_BELOW_PATIENT_BENCHMARK`
+  （direction purity `0.674` < patient-matched q05 `0.884`）。
+- D6.3 复制目录
+  `results/topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_kmeans_d6_3_fresh_replication/figures/`
+  是同规格的第二套图，状态 `DIAGNOSTIC_ONLY` /
+  `REV10D6_3_JOINT_CONTINUOUS_FIELD_NOT_REPLICATED`，12 张新网络未复制，
+  **不得替换主文 Fig.4**。
+- 整条 D4.1→D7 线的裁定见
+  `docs/archive/topic4/sef_hfo/rev10_d4_1_to_d7_fig4_goal_closeout_2026-08-14.md`。
 
