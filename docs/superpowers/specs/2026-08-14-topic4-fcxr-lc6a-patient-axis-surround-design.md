@@ -51,8 +51,10 @@ CANONICAL_SEED_AXIAL_REACH_FAMILY_NO_CARRIER
 
 ## 2. LC5v2.1 右删失裁决：与 graph engineering 并行
 
-上一轮 `tau_U=15 s, Gamma_U=0.003` 在约 23 s 才 onset，25 s 只观察高态约 2 s，当前为
-`RIGHT_CENSORED_CONTAINMENT_CANDIDATE`。
+执行前，上一轮 `tau_U=15 s, Gamma_U=0.003` 在约 23 s 才 onset，25 s 只观察高态约 2 s，属于
+`RIGHT_CENSORED_CONTAINMENT_CANDIDATE`。执行后已按本节原合同从 exact state 续跑并在 27 s 达到
+405.86 Hz，触发注册饱和线，终局改判 `ESCALATING_SATURATION`；无 offset。该结果授权 LC6A 五臂
+自然轨迹，但不改变下列预注册权限映射。
 
 本 spec 获得执行授权后，只允许从 25 s exact state 原参数继续到总时长 40 s：
 

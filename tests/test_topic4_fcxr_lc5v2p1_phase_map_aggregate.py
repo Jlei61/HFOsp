@@ -58,6 +58,41 @@ def test_extension_reclassifies_source_without_erasing_screen_outcome():
     assert adjudication["early_stop_reason"] == "REGISTERED_SATURATION_REACHED"
 
 
+def test_two_extensions_close_both_short_window_labels():
+    first = _row("CONTAINED_HIGH_NO_OFFSET", 7000, 240, tau=3, gamma=.06)
+    second = _row("CONTAINED_HIGH_NO_OFFSET", 2000, 146, tau=15, gamma=.003)
+    second["source_summary"] = "/tmp/second/summary.json"
+    extensions = [
+        (Path("/tmp/first_extension/summary.json"), {
+            "status": "COMPLETE", "source_summary": first["source_summary"],
+            "source_outcome": "CONTAINED_HIGH_NO_OFFSET",
+            "outcome": "ESCALATING_SATURATION", "tau_ms": 3000.0,
+            "gamma_nominal_dose": .06, "T_ms": 19000.0, "onset_ms": 11000.0,
+            "offset_ms": None, "n_returning": 84, "mean_rate_hz": 41.5,
+            "end_rate_hz": 308.7, "per_second_mean_rate_hz": [240.0, 308.7],
+            "early_stop_reason": "REGISTERED_SATURATION_REACHED",
+        }),
+        (Path("/tmp/second_extension/summary.json"), {
+            "status": "COMPLETE", "source_summary": second["source_summary"],
+            "source_outcome": "CONTAINED_HIGH_NO_OFFSET",
+            "outcome": "ESCALATING_SATURATION", "tau_ms": 15000.0,
+            "gamma_nominal_dose": .003, "T_ms": 27000.0, "onset_ms": 23000.0,
+            "offset_ms": None, "n_returning": 58, "mean_rate_hz": 39.4,
+            "end_rate_hz": 405.9, "per_second_mean_rate_hz": [146.0, 308.5, 405.9],
+            "early_stop_reason": "REGISTERED_SATURATION_REACHED",
+        }),
+    ]
+    merged, adjudications = AGG.merge_extensions([first, second], extensions)
+    assert [row["adjudicated_outcome"] for row in merged] == [
+        "ESCALATING_SATURATION", "ESCALATING_SATURATION",
+    ]
+    assert [Path(row["extension_summary"]) for row in merged] == [
+        extensions[0][0], extensions[1][0],
+    ]
+    assert len(adjudications) == 2
+    assert adjudications[1]["end_rate_hz"] == 405.9
+
+
 def test_short_post_onset_containment_is_right_censored():
     row = _row("CONTAINED_HIGH_NO_OFFSET", 2000, 146, tau=15, gamma=.003)
     row["adjudicated_outcome"] = row["outcome"]

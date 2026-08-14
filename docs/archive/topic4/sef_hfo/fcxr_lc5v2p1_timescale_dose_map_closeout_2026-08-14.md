@@ -5,7 +5,7 @@
 
 ## 1. 最终判决
 
-本轮完成基础 3×3、边界补点 11 格，以及按预注册排序选出的唯一一次 exact-state 候选续跑。
+本轮完成基础 3×3、边界补点 11 格，以及两个受短观察窗限制条件的 exact-state 续跑。
 逐细胞 episode-load `U_i` 在当前 ZM/RC1/H 底座上形成了一条很窄的“继续饱和—阻断自然进入”边界，
 但没有观察到自主 offset，更没有 postictal protection、Z 恢复或 returning IED recovery。
 
@@ -41,15 +41,15 @@ mask、recruited-area、Gaussian sharing 或人工 core 权重。比较的是：
 1. `tau=3 s, Gamma=0.060` 在 18 s 时看似 contained，但 exact-state 续跑下一秒即达到 308.68 Hz，
    触发注册饱和线，最终改判 `ESCALATING_SATURATION`；当时 `D=0.511`、`H=19.822`，U 仍以
    `+5.04/s` 上升，估算释放时间中位数约 38 s。
-2. `tau=15 s, Gamma=0.003` 到 23 s 才 onset，记录在 25 s 结束，只观察到 onset 后 2 s；末端
-   145.97 Hz。它只能标为 `RIGHT_CENSORED_CONTAINMENT_CANDIDATE`，不能证明持续 containment，且按
-   合同不再开启第二次候选续跑。
+2. `tau=15 s, Gamma=0.003` 到 23 s 才 onset，初始记录在 25 s 结束，只观察到 onset 后 2 s；
+   exact-state 续跑到 27 s 后，末端 E 率达到 405.86 Hz，同样触发注册饱和线；当时 `D=0.573`、
+   `H=25.763`，U 仍以 `+5.60/s` 上升，未见 offset。
 
 合并续跑后的最终证据分层：
 
-- 11 格升级至饱和；
+- 12 格升级至饱和；
 - 8 格保持 IED 但阻断自然进入；
-- 1 格晚进入、右删失；
+- 0 格仍属右删失；
 - 0 格自主 offset；
 - 0 格完整 lifecycle。
 
@@ -59,9 +59,10 @@ mask、recruited-area、Gaussian sharing 或人工 core 权重。比较的是：
 这个移动没有打开一个可重复的中间动力学区。较弱 U 追不上不断上升的 D/H 正反馈，较强 U 则在 onset
 前就降低易感性；目前没有条件同时做到“保留自然进入—形成有限高态—自主退出”。
 
-这说明当前失败不只是时间窗太短。唯一最有希望的 `tau=3 s, Gamma=0.060` 已用完整状态和相同未来
-输入继续，明确回到饱和类。另一方面，`tau=15 s, Gamma=0.003` 的短观察保留了一个边界线索，但证据
-等级不足以改变 0-offset 的主结论。
+这说明当前失败不只是时间窗太短。两个一度最有希望的短窗条件都从完整状态继续，并明确回到饱和类。
+其中第二条续跑因早先 reducer-only 失败，25--26 s 的逐块输入 digest 无法回溯，但恢复使用的是已落盘
+exact state，26--27 s 输入 digest 已记录；这不影响其 405.86 Hz 注册饱和判决，但该 provenance 限制
+保留在原 summary 中。
 
 允许声称：
 
@@ -72,7 +73,7 @@ mask、recruited-area、Gaussian sharing 或人工 core 权重。比较的是：
 禁止声称：
 
 - 逐细胞 pump/adaptation 在一般意义上不能终止发作；
-- 右删失格已经形成 bounded ictal carrier；
+- 两个短窗 contained 标签已经形成 bounded ictal carrier；
 - 获得 postictal protection、Z recovery、returning IED recovery 或完整 lifecycle；
 - 当前结果已经回答是否需要修改连接结构。
 
@@ -85,9 +86,11 @@ mask、recruited-area、Gaussian sharing 或人工 core 权重。比较的是：
 - `results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/lc5v2p1_joint_phase_map/phase_map.csv`
 - `results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/lc5v2p1_joint_phase_map/figures/lc5v2p1_joint_phase_map.png`
 - `results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/lc5v2p1_candidate_extension_tau3000_gamma0060/summary.json`
+- `results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/lc5v2p1_right_censor_extension_tau15000_gamma0003/summary.json`
 - `results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/DONE_LC5V2P1_CANDIDATE_EXTENSION_TAU3000_GAMMA0060.json`
+- `results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/DONE_LC5V2P1_RIGHT_CENSOR_EXTENSION_TAU15000_GAMMA0003.json`
 
-所有长运行已结束，无残留 LC5v2.1 仿真进程。本轮不再补格、不再续跑第二个候选、不解锁 recovery、M、
+所有长运行已结束，无残留 LC5v2.1 仿真进程。本轮不再补格、不再续跑候选、不解锁 recovery、M、
 multi-seed、eigenmode 或论文主张。
 
 代码收口后 LC3--LC5 全链回归为 `420 passed`，`git diff --check` 干净；聚合器的续跑合并与右删失

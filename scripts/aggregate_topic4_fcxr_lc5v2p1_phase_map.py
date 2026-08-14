@@ -33,6 +33,12 @@ EXTENSION_SUMMARY = (
     / "lc5v2p1_candidate_extension_tau3000_gamma0060"
     / "summary.json"
 )
+RIGHT_CENSOR_EXTENSION_SUMMARY = (
+    MAP.PREFIX.U2.OUT
+    / "lc5v2p1_right_censor_extension_tau15000_gamma0003"
+    / "summary.json"
+)
+EXTENSION_SUMMARIES = (EXTENSION_SUMMARY, RIGHT_CENSOR_EXTENSION_SUMMARY)
 
 OUTCOME_ORDER = [
     "ESCALATING_SATURATION",
@@ -114,16 +120,19 @@ def collect_rows():
     return sorted(rows, key=lambda r: (r["tau_ms"], r["gamma"]))
 
 
-def merge_extension(rows, extension):
-    """Merge the one pre-registered exact-state continuation without erasing screen evidence."""
+def _initialize_extension_fields(rows):
     merged = [dict(row) for row in rows]
     for row in merged:
         row.setdefault("screen_outcome", row["outcome"])
         row["adjudicated_outcome"] = row["screen_outcome"]
         row["extension_outcome"] = None
         row["extension_summary"] = None
+    return merged
+
+
+def _merge_one_extension(merged, extension, extension_summary_path):
     if extension is None:
-        return merged, None
+        return None
     if extension.get("status") != "COMPLETE":
         raise RuntimeError("candidate extension is not complete")
     source = Path(extension["source_summary"]).resolve()
@@ -152,11 +161,11 @@ def merge_extension(rows, extension):
     )
     row["extension_outcome"] = extension["outcome"]
     row["adjudicated_outcome"] = extension["outcome"]
-    row["extension_summary"] = str(EXTENSION_SUMMARY)
+    row["extension_summary"] = str(extension_summary_path)
     row["extension_early_stop_reason"] = extension.get("early_stop_reason")
-    return merged, {
+    return {
         "source_summary": str(source),
-        "extension_summary": str(EXTENSION_SUMMARY),
+        "extension_summary": str(extension_summary_path),
         "screen_outcome": extension["source_outcome"],
         "adjudicated_outcome": extension["outcome"],
         "T_ms": extension["T_ms"],
@@ -165,6 +174,24 @@ def merge_extension(rows, extension):
         "end_rate_hz": extension["end_rate_hz"],
         "early_stop_reason": extension.get("early_stop_reason"),
     }
+
+
+def merge_extension(rows, extension, extension_summary_path=EXTENSION_SUMMARY):
+    """Compatibility wrapper for merging one exact-state continuation."""
+    merged = _initialize_extension_fields(rows)
+    result = _merge_one_extension(merged, extension, extension_summary_path)
+    return merged, result
+
+
+def merge_extensions(rows, extensions):
+    """Merge every registered continuation while preserving each screen outcome."""
+    merged = _initialize_extension_fields(rows)
+    results = []
+    for extension_summary_path, extension in extensions:
+        result = _merge_one_extension(merged, extension, extension_summary_path)
+        if result is not None:
+            results.append(result)
+    return merged, results
 
 
 def evidence_class(row):
@@ -181,6 +208,14 @@ def load_extension():
     if not EXTENSION_SUMMARY.is_file():
         return None
     return json.loads(EXTENSION_SUMMARY.read_text())
+
+
+def load_extensions():
+    return [
+        (path, json.loads(path.read_text()))
+        for path in EXTENSION_SUMMARIES
+        if path.is_file()
+    ]
 
 
 def choose_extension_candidate(rows):
@@ -206,7 +241,7 @@ def _csv(rows, path):
             writer.writerow({key: row.get(key) for key in fields})
 
 
-def _plot(rows, extension_result):
+def _plot(rows, extension_results):
     FIGURES.mkdir(parents=True, exist_ok=True)
     fig, axes = plt.subplots(2, 2, figsize=(12.0, 8.2), constrained_layout=True)
     ax = axes[0, 0]
@@ -219,7 +254,7 @@ def _plot(rows, extension_result):
             s=90, color=OUTCOME_COLORS[outcome], edgecolor="white", linewidth=0.8,
             label=outcome.replace("_", " ").lower(), zorder=3,
         )
-    if extension_result is not None:
+    if extension_results:
         selected = [r for r in rows if r.get("extension_summary")]
         ax.scatter([r["gamma"] for r in selected], [r["tau_s"] for r in selected], s=175,
                    marker="*", facecolors="white", edgecolors="black", linewidths=1.2,
@@ -292,7 +327,7 @@ def _plot(rows, extension_result):
 def run():
     screen_rows = collect_rows()
     selected_candidate = choose_extension_candidate(screen_rows)
-    rows, extension_result = merge_extension(screen_rows, load_extension())
+    rows, extension_results = merge_extensions(screen_rows, load_extensions())
     for row in rows:
         row["final_evidence_class"] = evidence_class(row)
     OUT.mkdir(parents=True, exist_ok=True)
@@ -317,23 +352,24 @@ def run():
             "finite before contained; then longest observed post-onset duration; then lowest end rate"
         ),
         "primary_extension_candidate": selected_candidate,
-        "extension_result": extension_result,
+        "extension_result": extension_results[0] if extension_results else None,
+        "extension_results": extension_results,
         "open_extension_candidate": None,
         "rows": rows,
         "claim_boundary": (
-            "The pre-registered extension reclassified tau=3 s, Gamma=0.060 as escalating "
-            "saturation. The remaining late-onset tau=15 s, Gamma=0.003 cell has only 2 s of "
-            "post-onset follow-up and is right-censored. No offset, postictal protection, Z "
-            "recovery, or returning-IED recovery was observed."
+            "Two exact-state continuations reclassified both short-window contained labels "
+            "as escalating saturation: tau=3 s, Gamma=0.060 reached 308.68 Hz at 19 s, and "
+            "tau=15 s, Gamma=0.003 reached 405.86 Hz at 27 s. No offset, postictal "
+            "protection, Z recovery, or returning-IED recovery was observed."
         ),
     }
     _write_json(OUT / "phase_map.json", payload)
-    png, pdf = _plot(rows, extension_result)
+    png, pdf = _plot(rows, extension_results)
     readme = """### lc5v2p1_joint_phase_map.png
 
-这张收口图联合基础 3×3、沿边界补的 11 格和唯一一次预注册续跑。a 的白色星号标出被续跑的 `tau=3 s, Gamma=0.060`：它在原 18 秒窗内短暂看似 contained，继续 1 秒便超过注册饱和线，最终按饱和计；黄色点是 `tau=15 s, Gamma=0.003`，但 onset 后只观察到 2 秒，因此仅作右删失线索。b 区分自然进入与 25 秒内未进入；c 显示末端活动；d 对照代表性轨迹。
+这张收口图联合基础 3×3、沿边界补的 11 格和两次 exact-state 续跑。a 的白色星号标出两个原本受短窗限制的 contained 标签：`tau=3 s, Gamma=0.060` 在 19 秒达到 308.68 Hz，`tau=15 s, Gamma=0.003` 在 27 秒达到 405.86 Hz；两者最终都按注册饱和计。b 区分自然进入与 25 秒内未进入；c 显示续跑后的末端活动；d 对照代表性轨迹。
 
-**关注点**：20 个条件中没有观察到 offset。最终证据是 11 格升级饱和、8 格保持 IED 但阻断进入、1 格因晚进入而右删失；没有 postictal、Z 恢复或 returning IED recovery。
+**关注点**：20 个条件中没有观察到 offset。最终证据是 12 格升级饱和、8 格保持 IED 但阻断进入、0 格仍属右删失；没有 postictal、Z 恢复或 returning IED recovery。
 
 ### lc5v2p1_joint_phase_map.pdf
 
@@ -345,7 +381,8 @@ def run():
     _write_json(FIGURES / "lc5v2p1_joint_phase_map_metadata.json", {
         "source": str(OUT / "phase_map.json"), "png": str(png), "pdf": str(pdf),
         "n_cells": len(rows), "candidate": selected_candidate,
-        "extension_result": extension_result,
+        "extension_result": extension_results[0] if extension_results else None,
+        "extension_results": extension_results,
     })
     return payload
 
