@@ -404,7 +404,7 @@ Q1/Q2 把 onset 推迟到 13/12 s，Q3 却提前到 6 s；更宽 E→I reach 不
 
 ## 8. 工程与边界
 
-五图 graph legality、two-hop、functional、自然轨迹、两个 gain phenotype 和未触发 confirmation 均完成；六个 blessed engine hash 一致。无 carrier，所以 confirmation 不运行是合同结果，不是缺失实验。
+graph legality、two-hop、functional、自然轨迹、两个 gain phenotype、四组主图和未触发 confirmation 均完成；六个 blessed engine hash 一致。无 carrier，所以 confirmation 不运行是合同结果，不是缺失实验。
 
 结果根：`{OUT.relative_to(ROOT)}`。spec 的旧嵌套路径示例未被 runner 使用；这一纯路径偏差已在 `run_manifest.json` 留痕。
 
