@@ -1,0 +1,27 @@
+{
+  "af_bin_ms": 1.0,
+  "band": {
+    "event_lookback_ms": 8000.0,
+    "event_rate_hi": 3.15,
+    "event_rate_lo": 0.086,
+    "recruit_p90": 0.0717,
+    "roll_hi": 9.7382291667,
+    "win_ms": 1000.0
+  },
+  "floor_af": 3.125e-05,
+  "frozen_event_bar": 0.03978125,
+  "original_full_contract": {
+    "available": false,
+    "historical_absolute_path": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-mz-fcxr-lc1/results/topic4_sef_hfo/mz_full_conductance_spatial_relay/lifecycle_closure/baseline_contract_seed1.json",
+    "sha256": "fd3e0d05ef730c30a484a071046e6a92d8f5e775b2035646dc89f4b4e8367c53"
+  },
+  "provenance": {
+    "accepted_summary": "docs/archive/topic4/fcxr_lc3_e4_first_nokick_trajectory_2026-08-04.md",
+    "event_constants": "docs/superpowers/specs/2026-08-04-topic4-fcxr-lc3-event-driven-pivot-design.md",
+    "event_rate_contract": "docs/superpowers/specs/2026-08-04-topic4-fcxr-lc3-event-driven-pivot-design.md",
+    "roll_hi_contract": "docs/superpowers/specs/2026-08-02-topic4-fcxr-lc2-closed-loop-exploration-design.md"
+  },
+  "reconstruction_scope": "classifier fields only; no baseline trace, base windows, or raw returning-event ledger are reconstructed",
+  "schema": "fcxr_lc1_seed1_classifier_snapshot_v1",
+  "seed": 1
+}

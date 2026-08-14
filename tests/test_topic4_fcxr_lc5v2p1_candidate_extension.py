@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 
 import numpy as np
@@ -97,3 +98,33 @@ def test_continuation_locks_manifest_hash_at_start_and_checks_each_chunk():
     assert "execution_manifest_sha256_start" in source
     assert "execution manifest drifted during LC5 continuation" in source
     assert '"execution_manifest_sha256": execution_manifest_sha256_start' in source
+
+
+def test_recovery_inventory_requires_one_exact_checkpoint_and_all_spike_chunks(tmp_path):
+    (tmp_path / "rolling_checkpoint.npz").touch()
+    (tmp_path / "chunk_00_spikes.npz").touch()
+    (tmp_path / "progress.json").write_text(json.dumps({
+        "completed_chunks": 1,
+        "completed_total_ms": 26000.0,
+        "state_hash": "abc",
+    }))
+    inventory = EXT.recovery_inventory(tmp_path, total_chunks=15)
+    assert inventory["completed_chunks"] == 1
+    assert inventory["spike_paths"] == [tmp_path / "chunk_00_spikes.npz"]
+    # The reviewed reducer-path failure predates per-chunk trace/input transactions.  Their
+    # absence is recorded later as a diagnostic gap, not confused with a missing dynamical state.
+    assert inventory["trace_paths"] == [tmp_path / "chunk_00_traces.npz"]
+    assert inventory["input_paths"] == [tmp_path / "chunk_00_input.json"]
+
+
+def test_recovery_inventory_rejects_missing_scientific_spike_chunk(tmp_path):
+    (tmp_path / "rolling_checkpoint.npz").touch()
+    (tmp_path / "progress.json").write_text(json.dumps({"completed_chunks": 1}))
+    with np.testing.assert_raises_regex(RuntimeError, "lacks spike chunks"):
+        EXT.recovery_inventory(tmp_path, total_chunks=15)
+
+
+def test_candidate_requires_full_classifier_replay_audit():
+    audit = EXT._classifier_audit_contract()
+    assert audit["status"] == "LC1_CLASSIFIER_SNAPSHOT_REPLAY_PASS"
+    assert audit["n_pass"] == audit["n_bundles"]

@@ -59,6 +59,7 @@ from src.topic4_fcxr_lc5_finite_episode import (  # noqa: E402
     estimate_shrunken_p0,
     replay_finite_load,
 )
+from src.topic4_fcxr_lc_baseline import load_classifier_snapshot  # noqa: E402
 
 
 DT_MS = 0.05
@@ -153,7 +154,8 @@ def _load_contract(gamma=0.25, *, prefer_exact=True):
 
 
 def _baseline():
-    return json.loads(Path(E01.ARTIFACTS["lc1_baseline"]).read_text())
+    """Load the tracked classifier subset, never a deleted sibling-worktree path."""
+    return load_classifier_snapshot()
 
 
 def _window_reports(stream, *, n_seconds=7):

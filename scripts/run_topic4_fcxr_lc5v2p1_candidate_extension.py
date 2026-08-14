@@ -40,6 +40,11 @@ from src.topic4_fcxr_lc5 import (  # noqa: E402
 
 U2 = PREFIX.U2
 TARGET_POST_ONSET_MS = 20000.0
+CLASSIFIER_AUDIT = U2.OUT / "lc1_classifier_snapshot_replay_audit.json"
+TRACE_KEYS = (
+    "D_mean", "H_mean", "H_source_mean", "gErec_mean", "u_mean", "u_max",
+    "pump_phi_mean", "pump_current_mean", "pump_current_max", "clip_frac",
+)
 
 
 def _sha(path):
@@ -73,6 +78,69 @@ def chunk_mean_rate_hz(stream):
     if duration_s <= 0.0:
         raise ValueError("chunk duration must be positive")
     return float(stream.steps.size / stream.n_cells / duration_s)
+
+
+def _classifier_audit_contract():
+    if not CLASSIFIER_AUDIT.is_file():
+        raise RuntimeError("LC1 classifier snapshot replay audit is absent")
+    audit = json.loads(CLASSIFIER_AUDIT.read_text())
+    if audit.get("status") != "LC1_CLASSIFIER_SNAPSHOT_REPLAY_PASS":
+        raise RuntimeError("LC1 classifier snapshot replay audit did not pass")
+    if int(audit.get("n_pass", -1)) != int(audit.get("n_bundles", -2)):
+        raise RuntimeError("LC1 classifier snapshot replay audit is incomplete")
+    snapshot = ROOT / "config/topic4_fcxr_lc1_seed1_classifier_snapshot.json"
+    if audit.get("snapshot_sha256") != _sha(snapshot):
+        raise RuntimeError("LC1 classifier snapshot changed after its replay audit")
+    return audit
+
+
+def recovery_inventory(work, *, total_chunks):
+    """Read the progress ledger without touching a live SNN state."""
+    work = Path(work)
+    progress_path = work / "progress.json"
+    checkpoint = work / "rolling_checkpoint.npz"
+    if not progress_path.is_file() or not checkpoint.is_file():
+        raise RuntimeError("partial continuation lacks progress or rolling checkpoint")
+    progress = json.loads(progress_path.read_text())
+    completed = int(progress.get("completed_chunks", -1))
+    if not 0 < completed < int(total_chunks):
+        raise RuntimeError("partial continuation completed_chunks is outside the resumable range")
+    spike_paths = [work / f"chunk_{index:02d}_spikes.npz" for index in range(completed)]
+    missing_spikes = [str(path) for path in spike_paths if not path.is_file()]
+    if missing_spikes:
+        raise RuntimeError(f"partial continuation lacks spike chunks: {missing_spikes}")
+    trace_paths = [work / f"chunk_{index:02d}_traces.npz" for index in range(completed)]
+    input_paths = [work / f"chunk_{index:02d}_input.json" for index in range(completed)]
+    return {
+        "progress": progress,
+        "completed_chunks": completed,
+        "checkpoint": checkpoint,
+        "spike_paths": spike_paths,
+        "trace_paths": trace_paths,
+        "input_paths": input_paths,
+    }
+
+
+def _archive_prior_failure(failed, tag):
+    if not failed.is_file():
+        return None
+    payload = json.loads(failed.read_text())
+    expected = "FileNotFoundError: [Errno 2] No such file or directory:"
+    if not str(payload.get("error", "")).startswith(expected):
+        raise RuntimeError("partial continuation has an unreviewed failure reason")
+    superseded = U2.OUT / "superseded" / f"{tag}_baseline_path_failure_after_chunk1"
+    superseded.mkdir(parents=True, exist_ok=True)
+    target = superseded / failed.name
+    if not target.exists():
+        os.replace(failed, target)
+    else:
+        failed.unlink()
+    _write_json(superseded / "recovery_note.json", {
+        "status": "SUPERSEDED_INSTRUMENT_PATH_FAILURE",
+        "scientific_chunks_retained": 1,
+        "reason": "the simulation completed 25-26 s; only the read-only reducer used a deleted sibling path",
+    })
+    return target
 
 
 def continuation_schedule(
@@ -236,8 +304,7 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
     failed = U2.OUT / f"FAILED_{sentinel}.json"
     done = U2.OUT / f"DONE_{sentinel}.json"
     try:
-        if work.exists():
-            raise RuntimeError(f"stale work directory requires inspection: {work}")
+        classifier_audit = _classifier_audit_contract()
         resources = U2.GEO._meminfo()
         if resources["mem_available_gib"] < 96.0:
             raise RuntimeError("candidate continuation requires at least 96 GiB MemAvailable")
@@ -251,13 +318,63 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
         expected_step = int(round(float(summary["T_ms"]) / U2.DT_MS))
         if int(state.t) != expected_step or state_hash(state) != summary["final_state_hash"]:
             raise RuntimeError("source exact-state mismatch")
-
-        work.mkdir(parents=True)
+        source_state_hash = state_hash(state)
+        original = load_sparse_spike_stream(source / "spikes.npz")
+        total_chunks = int(round(continuation_ms / U2.CHUNK_MS))
+        chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
+        chunk_trace_n = int(round(U2.CHUNK_MS / U2.TRACE_DT_MS))
+        trace_parts = {key: [] for key in TRACE_KEYS}
+        streams, input_segments, missing_trace_intervals = [], [], []
+        start_chunk = 0
+        recovered_from_partial = False
+        if work.exists():
+            inventory = recovery_inventory(work, total_chunks=total_chunks)
+            start_chunk = int(inventory["completed_chunks"])
+            _archive_prior_failure(failed, tag)
+            resumed = U2.load_into(inventory["checkpoint"], state)
+            expected_resumed_step = expected_step + start_chunk * chunk_steps
+            if int(resumed.t) != expected_resumed_step:
+                raise RuntimeError("partial continuation checkpoint is at the wrong simulation step")
+            if state_hash(resumed) != inventory["progress"].get("state_hash"):
+                raise RuntimeError("partial continuation checkpoint disagrees with progress ledger")
+            state = resumed
+            streams = [load_sparse_spike_stream(path) for path in inventory["spike_paths"]]
+            for index, (trace_path, input_path) in enumerate(
+                zip(inventory["trace_paths"], inventory["input_paths"])
+            ):
+                if trace_path.is_file():
+                    with np.load(trace_path, allow_pickle=False) as z:
+                        for key in TRACE_KEYS:
+                            trace_parts[key].append(np.asarray(z[key], np.float32))
+                else:
+                    for key in TRACE_KEYS:
+                        trace_parts[key].append(np.full(chunk_trace_n, np.nan, np.float32))
+                    missing_trace_intervals.append([
+                        float(summary["T_ms"]) + index * U2.CHUNK_MS,
+                        float(summary["T_ms"]) + (index + 1) * U2.CHUNK_MS,
+                    ])
+                if input_path.is_file():
+                    input_segments.append(json.loads(input_path.read_text()))
+                else:
+                    input_segments.append({
+                        "chunk": index,
+                        "window_ms": [
+                            float(summary["T_ms"]) + index * U2.CHUNK_MS,
+                            float(summary["T_ms"]) + (index + 1) * U2.CHUNK_MS,
+                        ],
+                        "sha256": None,
+                        "status": "UNAVAILABLE_AFTER_REDUCER_PATH_FAILURE",
+                    })
+            recovered_from_partial = True
+        else:
+            work.mkdir(parents=True)
         _write_json(running, {
             "status": "RUNNING", "pid": os.getpid(), "source_summary": str(source_summary),
-            "source_summary_sha256": _sha(source_summary), "source_state_hash": state_hash(state),
+            "source_summary_sha256": _sha(source_summary), "source_state_hash": source_state_hash,
             "tau_ms": tau_ms, "gamma": gamma, "continuation_ms": continuation_ms,
             "target_total_ms": target_total_ms,
+            "resumed_from_partial": recovered_from_partial,
+            "resumed_completed_chunks": start_chunk,
             "execution_manifest": str(execution_manifest) if execution_manifest else None,
             "execution_manifest_sha256_start": execution_manifest_sha256_start,
         })
@@ -273,13 +390,9 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
             "trace_gErec_mean", "trace_u_mean", "trace_u_max", "trace_phi_pump_mean",
             "trace_pump_excess_mean", "trace_pump_excess_max", "trace_conductance_clip_frac",
         )
-        trace_parts, streams = {}, []
         early_stop_reason = None
-        input_hasher = ExactInputHasher()
-        chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
         p = dataclasses.replace(S["p"], T=continuation_ms, dt=U2.DT_MS)
-        original = load_sparse_spike_stream(source / "spikes.npz")
-        for chunk in range(int(round(continuation_ms / U2.CHUNK_MS))):
+        for chunk in range(start_chunk, total_chunks):
             if (execution_manifest is not None and
                     _sha(execution_manifest) != execution_manifest_sha256_start):
                 raise RuntimeError("execution manifest drifted during LC5 continuation")
@@ -288,9 +401,10 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
             writer = SparseSpikeBinaryWriter(
                 binary, step_origin=state.t, n_steps=chunk_steps, n_cells=S["NE"]
             )
+            chunk_input_hasher = ExactInputHasher()
             run_out = run_fcxr_loop(
                 p, S["net"], start=state, n_steps=chunk_steps, capture_final=True,
-                store_spikes=False, spike_sink=writer, input_sink=input_hasher,
+                store_spikes=False, spike_sink=writer, input_sink=chunk_input_hasher,
                 v_th_per_neuron=S["vth"],
             )
             state = run_out["checkpoint"]
@@ -299,18 +413,33 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
             streams.append(stream)
             sliced = U2._trace_slice(state.slow, starts, stride)
             for key, value in sliced.items():
-                trace_parts.setdefault(key, []).append(value)
+                trace_parts[key].append(value)
+            PREFIX._npz_atomic(
+                work / f"chunk_{chunk:02d}_traces.npz",
+                **{key: np.asarray(value, np.float32) for key, value in sliced.items()},
+            )
+            input_row = {
+                "chunk": chunk,
+                "window_ms": [
+                    float(summary["T_ms"]) + chunk * U2.CHUNK_MS,
+                    float(summary["T_ms"]) + (chunk + 1) * U2.CHUNK_MS,
+                ],
+                "sha256": chunk_input_hasher.sha256,
+                "status": "RECORDED",
+            }
+            _write_json(work / f"chunk_{chunk:02d}_input.json", input_row)
+            input_segments.append(input_row)
             row = U2._resource_row(
                 f"{sentinel}_CHUNK", baseline_swap, chunk=chunk + 1,
                 completed_total_ms=state.t * U2.DT_MS, wall_s=time.time() - started,
             )
+            U2.save_loop_state(str(work / "rolling_checkpoint.npz"), state)
             _write_json(work / "progress.json", {
                 "status": "RUNNING", "completed_chunks": chunk + 1,
                 "completed_total_ms": state.t * U2.DT_MS, "state_hash": state_hash(state),
-                "resource_action": row["action"],
+                "resource_action": row["action"], "last_input_sha256": chunk_input_hasher.sha256,
             })
             if row["action"] == "TERMINATE_AFTER_CHECKPOINT":
-                U2.save_loop_state(str(work / "rolling_checkpoint.npz"), state)
                 raise RuntimeError("RESOURCE_STOP_AFTER_CHECKPOINT")
             terminal = False
             if chunk_mean_rate_hz(stream) >= float(U2.SAT_CEILING_HZ):
@@ -326,8 +455,6 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
                         partial_total_ms - float(partial_offset) >= 2000.0):
                     early_stop_reason = "OFFSET_PLUS_2S_LOW_OBSERVED"
                     terminal = True
-            if (chunk + 1) % 5 == 0 or terminal:
-                U2.save_loop_state(str(work / "rolling_checkpoint.npz"), state)
             if terminal:
                 break
 
@@ -360,6 +487,9 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
             "target_total_ms": target_total_ms,
             "requested_continuation_ms": continuation_ms,
             "actual_continuation_ms": len(streams) * U2.CHUNK_MS,
+            "recovered_from_partial_exact_checkpoint": recovered_from_partial,
+            "recovered_completed_chunks": start_chunk,
+            "missing_diagnostic_trace_intervals_ms": missing_trace_intervals,
             "early_stop_reason": early_stop_reason,
             "T_ms": full.n_steps * U2.DT_MS,
             "onset_ms": adjudication["onset_ms"], "offset_ms": adjudication["offset_ms"],
@@ -372,13 +502,23 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
             "D_start_end": [summary["D_start_end"][0], float(combined_traces["D_mean"][-1])],
             "H_start_end": [summary["H_start_end"][0], float(combined_traces["H_mean"][-1])],
             "u_start_end": [summary["u_start_end"][0], float(combined_traces["u_mean"][-1])],
-            "continuation_external_input_sha256": input_hasher.sha256,
+            "continuation_external_input_sha256": None,
+            "continuation_external_input_hash_scope": "per_chunk_only",
+            "continuation_external_input_segment_manifest_sha256": hashlib.sha256(
+                json.dumps(input_segments, sort_keys=True).encode()
+            ).hexdigest(),
+            "continuation_external_input_segments": input_segments,
             "spike_sha256": full.sha256, "final_state_hash": state_hash(state),
-            "clip_frac_max": float(np.max(combined_traces["clip_frac"])),
+            "clip_frac_max": float(np.nanmax(combined_traces["clip_frac"])),
+            "clip_frac_max_observed": float(np.nanmax(combined_traces["clip_frac"])),
+            "clip_trace_complete": not bool(missing_trace_intervals),
             "wall_s": time.time() - started,
             "claim_boundary": "extension tests containment/offset; recovery requires post-offset Z and returning-IED gates",
             "execution_manifest": str(execution_manifest) if execution_manifest else None,
             "execution_manifest_sha256": execution_manifest_sha256_start,
+            "classifier_snapshot_replay_audit": str(CLASSIFIER_AUDIT),
+            "classifier_snapshot_replay_audit_sha256": _sha(CLASSIFIER_AUDIT),
+            "classifier_snapshot_replay_n_bundles": classifier_audit["n_bundles"],
         }
         with AtomicStageBundle(arm) as bundle:
             _write_json(bundle.path("summary.json"), result)
@@ -400,7 +540,10 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
         shutil.rmtree(work, ignore_errors=True)
         return result
     except BaseException as exc:
-        _write_json(failed, {"status": "FAILED", "error": f"{type(exc).__name__}: {exc}"})
+        _write_json(failed, {
+            "status": "FAILED", "error": f"{type(exc).__name__}: {exc}",
+            "partial_work_preserved": bool(work.exists()),
+        })
         running.unlink(missing_ok=True)
         raise
     finally:
