@@ -148,13 +148,23 @@ def _graph_rows(graph: dict, two_hop: dict) -> list[dict]:
     return rows
 
 
-def _trajectory_rows(phenotype: dict) -> list[dict]:
+def _trajectory_rows(
+    phenotype: dict, natural_summaries: dict[str, dict] | None = None,
+) -> list[dict]:
+    if natural_summaries is None:
+        natural_summaries = {
+            condition: _json(OUT / f"trajectories/{condition}/summary.json")
+            for condition in ("C0", "C1", "Q1", "Q2", "Q3")
+        }
     rows = []
     for row in phenotype["rows"]:
+        natural = natural_summaries[row["condition"]]
         rows.append({
             "condition": row["condition"],
             "onset_s": float(row["effective_onset_ms"]) / 1000.0,
-            "n_returning_pre_onset": int(row["baseline_metrics"]["n_events"]),
+            # baseline_metrics is deliberately capped at the C0 baseline horizon for
+            # across-arm equivalence.  The entry ledger belongs to the arm's own onset.
+            "n_returning_pre_onset": int(natural["n_returning_pre_onset"]),
             "peak_global_rate_hz": float(row["global_rate_100ms_peak_hz"]),
             "peak_local_q99_hz": float(row["local_rate_q99_peak_hz"]),
             "D_halo_lead_mm": float(row["spatial_slow_flow"]["max_D_halo_lead_mm"]),

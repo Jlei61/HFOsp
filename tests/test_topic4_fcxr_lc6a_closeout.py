@@ -50,10 +50,12 @@ def test_trajectory_rows_keeps_baseline_tradeoff_separate_from_headline():
         }]
     }
 
-    row = closeout._trajectory_rows(phenotype)[0]
+    row = closeout._trajectory_rows(
+        phenotype, natural_summaries={"Q2": {"n_returning_pre_onset": 37}},
+    )[0]
 
     assert row["onset_s"] == 12.0
-    assert row["n_returning_pre_onset"] == 33
+    assert row["n_returning_pre_onset"] == 37
     assert row["baseline_tradeoff"] is True
     assert row["headline"] == "SATURATED_HIGH_STATE"
 
