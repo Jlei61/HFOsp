@@ -10,6 +10,9 @@ from scripts.audit_topic4_rev11_nlc_local_connectivity_canary import adjudicate
 from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
     _returned_summary_filename,
 )
+from scripts.rescore_topic4_rev11_nlc_crossfit import (
+    select_joint_search_parents,
+)
 from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds
 from scripts.run_topic4_rev9l_forced_source_worker import _sha256
 
@@ -78,3 +81,19 @@ def test_adjudication_is_exploratory_and_reports_best_arm():
     assert result["status"] == "REV11NLC_LOCAL_CONNECTIVITY_CAPACITY_CANDIDATE_FOUND"
     assert result["selected_candidate_id"] == "joint"
     assert np.isclose(result["selected_minus_baseline_score"], -0.3)
+
+
+def test_nlc2_parent_rule_keeps_two_nonrunaway_joint_solutions():
+    verdict = {"selected_candidate_id": "joint_03"}
+    summary = {
+        "diagnostic_best_candidate_id": "joint_04",
+        "candidate_rows": [
+            {"candidate_id": "joint_03", "n_runaway_networks": 0,
+             "selection_score_equal_network": 2.0},
+            {"candidate_id": "joint_04", "n_runaway_networks": 0,
+             "selection_score_equal_network": 1.0},
+        ],
+    }
+    assert select_joint_search_parents(verdict, summary) == [
+        "joint_03", "joint_04",
+    ]
