@@ -6,6 +6,7 @@ from pathlib import Path
 import numpy as np
 
 from scripts.aggregate_topic4_rev10_r_edge_flow_screen import (
+    _incoming_e_error_by_pathway,
     _mode_shape_scores,
     returned_only_onsets,
 )
@@ -53,6 +54,18 @@ def test_returned_only_scoring_excludes_nonself_terminated_events():
     onsets = np.arange(12, dtype=float).reshape(3, 4)
     selected = returned_only_onsets(onsets, np.asarray([True, False, True]))
     np.testing.assert_array_equal(selected, onsets[[0, 2]])
+
+
+def test_incoming_e_audit_accepts_legacy_and_pathway_specific_schema():
+    assert _incoming_e_error_by_pathway({
+        "max_abs_incoming_E_error": 1e-12,
+    }) == {"E_to_E": 1e-12}
+    assert _incoming_e_error_by_pathway({
+        "pathway_audit": {
+            "E_to_E": {"max_abs_incoming_error": 2e-12},
+            "E_to_I": {"max_abs_incoming_error": 3e-12},
+        },
+    }) == {"E_to_E": 2e-12, "E_to_I": 3e-12}
 
 
 def test_edge_worker_keeps_node_anchor_and_basis_separate():

@@ -130,6 +130,19 @@ def returned_only_onsets(onsets, event_returned):
     return onsets[event_returned]
 
 
+def _incoming_e_error_by_pathway(edge_audit):
+    """Normalize legacy E->E and rev11 pathway-specific conservation audits."""
+    pathway_audit = edge_audit.get("pathway_audit", {})
+    if pathway_audit:
+        return {
+            str(pathway): float(values["max_abs_incoming_error"])
+            for pathway, values in pathway_audit.items()
+        }
+    return {
+        "E_to_E": float(edge_audit["max_abs_incoming_E_error"]),
+    }
+
+
 def _score_seed(onsets, *, classifier, groups, pairs, embedding, targets,
                 floors6, floors3, scoring_config, objective):
     onsets = np.asarray(onsets, float)
@@ -294,6 +307,10 @@ def main():
         mean_score = float(np.mean([value["selection_score"] for value in values]))
         if runaway:
             mean_score = 1000.0 + runaway
+        incoming_e_errors = [
+            _incoming_e_error_by_pathway(payload["edge_audit"])
+            for payload in metadata
+        ]
         row = {
             "candidate_id": candidate["candidate_id"],
             "adaptation_mode": candidate.get("adaptation", {}).get("mode", "off"),
@@ -398,9 +415,22 @@ def main():
                 for value in metadata
             )),
             "max_incoming_E_error": float(max(
-                value["edge_audit"]["max_abs_incoming_E_error"]
-                for value in metadata
+                error
+                for by_pathway in incoming_e_errors
+                for error in by_pathway.values()
             )),
+            "max_incoming_E_to_E_error": float(max(
+                by_pathway["E_to_E"] for by_pathway in incoming_e_errors
+                if "E_to_E" in by_pathway
+            )),
+            "max_incoming_E_to_I_error": (
+                float(max(
+                    by_pathway["E_to_I"] for by_pathway in incoming_e_errors
+                    if "E_to_I" in by_pathway
+                ))
+                if any("E_to_I" in values for values in incoming_e_errors)
+                else None
+            ),
             "mean_network_peak_adaptation_mean_mV": float(np.mean([
                 payload.get("dynamic_accessibility", {}).get("peak_mean_mV", 0.0)
                 for payload in metadata
