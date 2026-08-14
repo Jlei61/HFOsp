@@ -1,7 +1,10 @@
 # FCXR-LC5v2.1 — dose-boundary patch
 
-状态：**DESIGN LOCK — ACTIVE**  
+状态：**EXECUTED — CLOSED（2026-08-14）**
 日期：2026-08-13
+
+> 11 格补点与唯一候选续跑均已完成；最终归档见
+> `docs/archive/topic4/sef_hfo/fcxr_lc5v2p1_timescale_dose_map_closeout_2026-08-14.md`。
 
 ## 科学问题
 

@@ -3,7 +3,10 @@
 对应 spec：
 `docs/superpowers/specs/2026-08-13-topic4-fcxr-lc5v2p1-boundary-patch-design.md`
 
-状态：**LOCKED FOR EXECUTION**
+状态：**EXECUTED — CLOSED（2026-08-14）**
+
+> 最终联合判决见
+> `docs/archive/topic4/sef_hfo/fcxr_lc5v2p1_timescale_dose_map_closeout_2026-08-14.md`。
 
 1. 锁定 11 格 manifest，并验证与主实验的 model/source/observation 合同一致。
 2. 对 manifest-only runner 增加 irregular-cell 支持；基础 3x3 与边界块都必须由硬编码 profile 防漂移。

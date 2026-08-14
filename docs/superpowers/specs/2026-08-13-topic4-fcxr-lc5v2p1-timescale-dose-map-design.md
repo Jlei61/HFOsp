@@ -1,7 +1,11 @@
 # FCXR-LC5v2.1 — matched-dose episode-memory timescale–dose map
 
-状态：**DESIGN LOCK — ACTIVE**
+状态：**EXECUTED — CLOSED（2026-08-14）**
 日期：2026-08-13
+
+> 最终判决与续跑裁决见
+> `docs/archive/topic4/sef_hfo/fcxr_lc5v2p1_timescale_dose_map_closeout_2026-08-14.md`。
+> 本文件保留执行时锁定合同，不再追加参数或实验格。
 
 ## 1. 唯一科学问题
 

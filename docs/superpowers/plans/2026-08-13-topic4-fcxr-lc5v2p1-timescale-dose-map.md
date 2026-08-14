@@ -3,7 +3,10 @@
 对应 active spec：
 `docs/superpowers/specs/2026-08-13-topic4-fcxr-lc5v2p1-timescale-dose-map-design.md`
 
-状态：**LOCKED FOR EXECUTION**
+状态：**EXECUTED — CLOSED（2026-08-14）**
+
+> 20 格联合相图和唯一一次预注册候选续跑均已完成；最终归档见
+> `docs/archive/topic4/sef_hfo/fcxr_lc5v2p1_timescale_dose_map_closeout_2026-08-14.md`。
 
 ## T0 — 收口与唯一合同
 
