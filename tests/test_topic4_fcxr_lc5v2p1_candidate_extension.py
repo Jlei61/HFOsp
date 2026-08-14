@@ -52,3 +52,22 @@ def test_continuation_schedule_preserves_legacy_25s_case(monkeypatch):
     target, continuation = EXT.continuation_schedule(25000.0, 23000.0)
     assert target == 43000.0
     assert continuation == 18000.0
+
+
+def test_continuation_schedule_accepts_locked_total_horizon(monkeypatch):
+    monkeypatch.setattr(EXT.U2, "CHUNK_MS", 1000.0)
+    target, continuation = EXT.continuation_schedule(
+        25000.0, 23000.0, target_total_ms=40000.0,
+    )
+    assert target == 40000.0
+    assert continuation == 15000.0
+
+
+def test_lc6a_manifest_locks_source_and_horizon():
+    manifest, payload, contract, source = EXT._manifest_contract(
+        ROOT / "config/topic4_fcxr_lc6a_patient_axis_surround.json"
+    )
+    assert manifest.name == "topic4_fcxr_lc6a_patient_axis_surround.json"
+    assert payload["graph_family"][2]["id"] == "Q1"
+    assert contract["target_total_ms"] == 40000.0
+    assert source.name == "summary.json"

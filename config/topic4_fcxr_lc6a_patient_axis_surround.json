@@ -1,0 +1,80 @@
+{
+  "schema_version": 1,
+  "experiment_id": "fcxr_lc6a_patient_axis_surround",
+  "scientific_semantics": "patient-axis E-to-I reach capability probe for a bounded high-state carrier",
+  "protocol": {
+    "spec": "docs/superpowers/specs/2026-08-14-topic4-fcxr-lc6a-patient-axis-surround-design.md",
+    "plan": "docs/superpowers/plans/2026-08-14-topic4-fcxr-lc6a-patient-axis-surround.md",
+    "protocol_commit": "b9207d3c9ae8960b7e2b7f75109ebc97e3daa7bd"
+  },
+  "lc5_continuation": {
+    "source_summary": "results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/lc5v2p1_boundary_patch_q099_tau15_gamma_milli003/summary.json",
+    "source_summary_sha256": "89b9fac954e6827a1aea9f9f89bde78af9a457c92a9eb8c7db7f305defc745e5",
+    "source_final_state_sha256": "82a0731ee517b5fdaed56fa9b925320d023cd19f1fb354272519d0cf056c2385",
+    "source_final_state_hash": "5a9cb82a203ed92dc050a4fee4bd12289fa6153462608cc04a5fae6d1b6a6bc5",
+    "source_t_ms": 25000.0,
+    "source_onset_ms": 23000.0,
+    "target_total_ms": 40000.0,
+    "saturation_contiguous_ms": 1000.0,
+    "post_offset_low_observation_ms": 2000.0,
+    "output_tag": "lc5v2p1_right_censor_extension_tau15000_gamma0003"
+  },
+  "model": {
+    "dynamic_z": true,
+    "dynamic_h": true,
+    "u_enabled": false,
+    "m_enabled": false,
+    "x_frozen": 1.0,
+    "kick": false,
+    "reset": false,
+    "parameter_step": false,
+    "connection_seed": 1,
+    "noise_seed": 401,
+    "dt_ms": 0.05
+  },
+  "graph_family": [
+    {"id": "C0", "q_marginal": "legacy", "role": "canonical"},
+    {"id": "C1", "q_marginal": "legacy", "tolerance": 0.05, "role": "inhibitory_microstate"},
+    {"id": "Q1", "q_marginal": 1.0, "tolerance": 0.05, "role": "width_matching"},
+    {"id": "Q2", "q_marginal": 1.25, "tolerance": 0.05, "role": "mild_surround"},
+    {"id": "Q3", "q_marginal": 1.5, "tolerance": 0.05, "role": "strong_surround"}
+  ],
+  "graph_contract": {
+    "changed_population_direction": "E_to_I_code_IE_only",
+    "target_in_degree": 800,
+    "per_target_weight_multiset_exact": true,
+    "weight_depends_on_new_distance": false,
+    "delay_rule": "tau0_plus_distance_over_v_then_frozen_quantization",
+    "source_out_degree_relative_tolerance": 0.1,
+    "graph_rng_separate_from_runtime_rng": true
+  },
+  "observation": {
+    "base_end_ms": 50000.0,
+    "post_onset_ms": 12000.0,
+    "hard_cap_ms": 65000.0,
+    "entry_blocked_ied_multiplier": 1.5,
+    "summary_every_ms": 1000.0,
+    "checkpoint_every_ms": 5000.0
+  },
+  "hard_gates": [
+    "ARTIFACT_STATE_INTEGRITY",
+    "GRAPH_LEGALITY",
+    "NUMERICAL_RESOURCE_INTEGRITY"
+  ],
+  "blessed_engine_sha256": {
+    "src/snn_engine/kick_probe.py": "febba30005cb42ce0a80e9d133a2c661121ad639d58a035b7914425e1b7994d2",
+    "src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884",
+    "src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+    "src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+    "src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+    "src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47"
+  },
+  "resource": {
+    "max_parallel_arms": 4,
+    "threads_per_arm": 1,
+    "rss_budget_multiplier": 1.5,
+    "memavailable_to_total_budget_ratio": 3.0,
+    "stop_new_submit_swap_delta_mib": 256.0,
+    "terminate_after_checkpoint_swap_delta_mib": 512.0
+  }
+}

@@ -75,13 +75,19 @@ def chunk_mean_rate_hz(stream):
     return float(stream.steps.size / stream.n_cells / duration_s)
 
 
-def continuation_schedule(source_T_ms, onset_ms, target_post_onset_ms=TARGET_POST_ONSET_MS):
+def continuation_schedule(
+    source_T_ms, onset_ms, target_post_onset_ms=TARGET_POST_ONSET_MS,
+    *, target_total_ms=None,
+):
     """Return an exact-state continuation horizon ending target time after onset."""
     source_T_ms = float(source_T_ms)
     if onset_ms is None:
         raise ValueError("candidate continuation requires an observed natural onset")
     onset_ms = float(onset_ms)
-    target_total_ms = onset_ms + float(target_post_onset_ms)
+    if target_total_ms is None:
+        target_total_ms = onset_ms + float(target_post_onset_ms)
+    else:
+        target_total_ms = float(target_total_ms)
     continuation_ms = target_total_ms - source_T_ms
     if continuation_ms <= 0:
         raise ValueError("source already reaches the locked post-onset target")
@@ -139,18 +145,47 @@ def _plot_extension(arm, result, rate10, traces):
     })
 
 
-def run(source_summary):
+def _manifest_contract(path):
+    path = Path(path).resolve()
+    payload = json.loads(path.read_text())
+    if payload.get("experiment_id") != "fcxr_lc6a_patient_axis_surround":
+        raise RuntimeError("wrong LC6A execution manifest")
+    contract = payload["lc5_continuation"]
+    source_summary = ROOT / contract["source_summary"]
+    if _sha(source_summary) != contract["source_summary_sha256"]:
+        raise RuntimeError("LC5 source summary hash mismatch")
+    source_state = source_summary.parent / "final_state.npz"
+    if _sha(source_state) != contract["source_final_state_sha256"]:
+        raise RuntimeError("LC5 source final-state artifact hash mismatch")
+    source_payload = json.loads(source_summary.read_text())
+    locked_fields = {
+        "T_ms": "source_t_ms",
+        "onset_ms": "source_onset_ms",
+        "final_state_hash": "source_final_state_hash",
+    }
+    for source_key, contract_key in locked_fields.items():
+        if source_payload.get(source_key) != contract.get(contract_key):
+            raise RuntimeError(f"LC5 source {source_key} disagrees with execution manifest")
+    for relative, expected in payload["blessed_engine_sha256"].items():
+        if _sha(ROOT / relative) != expected:
+            raise RuntimeError(f"blessed engine hash mismatch: {relative}")
+    return path, payload, contract, source_summary
+
+
+def run(source_summary, *, target_total_ms=None, output_tag=None, execution_manifest=None):
     source_summary = Path(source_summary).resolve()
     source = source_summary.parent
     summary = json.loads(source_summary.read_text())
     if summary["outcome"] not in {"CONTAINED_HIGH_NO_OFFSET", "FINITE_EXCURSION_CANDIDATE"}:
         raise RuntimeError("source is not an extension-eligible candidate")
     target_total_ms, continuation_ms = continuation_schedule(
-        summary["T_ms"], summary.get("onset_ms")
+        summary["T_ms"], summary.get("onset_ms"), target_total_ms=target_total_ms,
     )
     tau_ms = float(summary["tau_ms"])
     gamma = float(summary["gamma_nominal_dose"])
-    tag = f"lc5v2p1_candidate_extension_tau{int(tau_ms)}_gamma{int(round(gamma*1000)):04d}"
+    tag = output_tag or (
+        f"lc5v2p1_candidate_extension_tau{int(tau_ms)}_gamma{int(round(gamma*1000)):04d}"
+    )
     arm = U2.OUT / tag
     work = U2.OUT / f".{tag}.work"
     sentinel = tag.upper()
@@ -187,6 +222,7 @@ def run(source_summary):
             "source_summary_sha256": _sha(source_summary), "source_state_hash": state_hash(state),
             "tau_ms": tau_ms, "gamma": gamma, "continuation_ms": continuation_ms,
             "target_total_ms": target_total_ms,
+            "execution_manifest": str(execution_manifest) if execution_manifest else None,
         })
         started = time.time()
         stride = int(round(U2.TRACE_DT_MS / U2.DT_MS))
@@ -205,6 +241,7 @@ def run(source_summary):
         input_hasher = ExactInputHasher()
         chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
         p = dataclasses.replace(S["p"], T=continuation_ms, dt=U2.DT_MS)
+        original = load_sparse_spike_stream(source / "spikes.npz")
         for chunk in range(int(round(continuation_ms / U2.CHUNK_MS))):
             starts = {name: len(getattr(state.slow, name)) for name in attrs}
             binary = work / f"chunk_{chunk:02d}.bin"
@@ -223,7 +260,6 @@ def run(source_summary):
             sliced = U2._trace_slice(state.slow, starts, stride)
             for key, value in sliced.items():
                 trace_parts.setdefault(key, []).append(value)
-            U2.save_loop_state(str(work / "rolling_checkpoint.npz"), state)
             row = U2._resource_row(
                 f"{sentinel}_CHUNK", baseline_swap, chunk=chunk + 1,
                 completed_total_ms=state.t * U2.DT_MS, wall_s=time.time() - started,
@@ -234,12 +270,27 @@ def run(source_summary):
                 "resource_action": row["action"],
             })
             if row["action"] == "TERMINATE_AFTER_CHECKPOINT":
+                U2.save_loop_state(str(work / "rolling_checkpoint.npz"), state)
                 raise RuntimeError("RESOURCE_STOP_AFTER_CHECKPOINT")
+            terminal = False
             if chunk_mean_rate_hz(stream) >= float(U2.SAT_CEILING_HZ):
                 early_stop_reason = "REGISTERED_SATURATION_REACHED"
+                terminal = True
+            else:
+                partial_full = _combine_full(original, streams)
+                partial_rate = _rate_from_stream(partial_full)
+                partial = PREFIX._adjudicate(partial_full, partial_rate)
+                partial_offset = partial.get("offset_ms")
+                partial_total_ms = partial_full.n_steps * U2.DT_MS
+                if (partial_offset is not None and
+                        partial_total_ms - float(partial_offset) >= 2000.0):
+                    early_stop_reason = "OFFSET_PLUS_2S_LOW_OBSERVED"
+                    terminal = True
+            if (chunk + 1) % 5 == 0 or terminal:
+                U2.save_loop_state(str(work / "rolling_checkpoint.npz"), state)
+            if terminal:
                 break
 
-        original = load_sparse_spike_stream(source / "spikes.npz")
         full = _combine_full(original, streams)
         rate = _rate_from_stream(full)
         adjudication = PREFIX._adjudicate(full, rate)
@@ -265,7 +316,8 @@ def run(source_summary):
             "tau_ms": tau_ms, "gamma_nominal_dose": gamma, "Imax": imax,
             "a_load": float(prelock["a_load"]), "p0_policy": "q099", "h": 3,
             "source_T_ms": float(summary["T_ms"]),
-            "target_post_onset_ms": TARGET_POST_ONSET_MS,
+            "target_post_onset_ms": target_total_ms - float(summary["onset_ms"]),
+            "target_total_ms": target_total_ms,
             "requested_continuation_ms": continuation_ms,
             "actual_continuation_ms": len(streams) * U2.CHUNK_MS,
             "early_stop_reason": early_stop_reason,
@@ -285,6 +337,8 @@ def run(source_summary):
             "clip_frac_max": float(np.max(combined_traces["clip_frac"])),
             "wall_s": time.time() - started,
             "claim_boundary": "extension tests containment/offset; recovery requires post-offset Z and returning-IED gates",
+            "execution_manifest": str(execution_manifest) if execution_manifest else None,
+            "execution_manifest_sha256": _sha(execution_manifest) if execution_manifest else None,
         }
         with AtomicStageBundle(arm) as bundle:
             _write_json(bundle.path("summary.json"), result)
@@ -315,12 +369,29 @@ def run(source_summary):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--source-summary", type=Path, required=True)
+    parser.add_argument("--source-summary", type=Path)
+    parser.add_argument("--execution-manifest", type=Path)
+    parser.add_argument("--target-total-ms", type=float)
+    parser.add_argument("--output-tag")
     parser.add_argument("--confirm-run", action="store_true")
     args = parser.parse_args()
     if not args.confirm_run:
         raise SystemExit("candidate continuation requires --confirm-run")
-    print(json.dumps(PREFIX.json_sanitize(run(args.source_summary)), indent=2, sort_keys=True))
+    manifest_path = None
+    if args.execution_manifest is not None:
+        manifest_path, _, contract, source_summary = _manifest_contract(args.execution_manifest)
+        target_total_ms = float(contract["target_total_ms"])
+        output_tag = str(contract["output_tag"])
+    else:
+        if args.source_summary is None:
+            parser.error("one of --source-summary or --execution-manifest is required")
+        source_summary = args.source_summary
+        target_total_ms = args.target_total_ms
+        output_tag = args.output_tag
+    print(json.dumps(PREFIX.json_sanitize(run(
+        source_summary, target_total_ms=target_total_ms, output_tag=output_tag,
+        execution_manifest=manifest_path,
+    )), indent=2, sort_keys=True))
 
 
 if __name__ == "__main__":
