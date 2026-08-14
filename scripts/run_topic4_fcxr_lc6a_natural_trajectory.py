@@ -222,6 +222,26 @@ def _fresh_system(summary, graph, graph_expected_hash, condition, *, force_repla
     return S, slow, cfg
 
 
+def _fresh_initial_state(S, slow, p):
+    """Materialize the exact t=0 state without advancing the trajectory.
+
+    A fresh ``run_fcxr_loop`` consumes two registered recorder-selection RNG
+    draws before its first membrane step.  A zero-length capture preserves
+    those semantics while keeping ``t == 0``.  Reusing the historical
+    ``_seed_template`` helper here would advance one full engine step and make
+    C0 a shifted 1..N continuation instead of the locked 0..N fresh run.
+    """
+
+    out = run_fcxr_loop(
+        p, S["net"], slow=slow, n_steps=0, capture_final=True,
+        store_spikes=False, v_th_per_neuron=S["vth"],
+    )
+    state = out["checkpoint"]
+    if state is None or int(state.t) != 0:
+        raise RuntimeError("fresh LC6A state materialization advanced simulation time")
+    return state
+
+
 def _combine_streams(streams):
     chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
     return SparseSpikeStream(
@@ -346,11 +366,11 @@ def run(
         summary_cfg, graph, graph_sha256(graph), condition,
         force_replacement=graph_path_override is not None,
     )
-    state = U2.PM._seed_template(S, slow)
-    initial_state_hash = state_hash(state)
     stride = int(round(U2.TRACE_DT_MS / U2.DT_MS))
     chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
     p = dataclasses.replace(S["p"], T=float(observation["hard_cap_ms"]), dt=U2.DT_MS)
+    state = _fresh_initial_state(S, slow, p)
+    initial_state_hash = state_hash(state)
     input_hasher = ExactInputHasher()
     current_observer = NaturalCurrentObserver(
         dt_ms=U2.DT_MS, sample_dt_ms=U2.TRACE_DT_MS,

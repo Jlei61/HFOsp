@@ -1,6 +1,8 @@
 import importlib.util
+import inspect
 import json
 from pathlib import Path
+from types import SimpleNamespace
 
 import numpy as np
 
@@ -38,6 +40,32 @@ def test_fresh_config_has_only_ZH_dynamic_and_freezes_X_at_one():
         core_mask_E=np.zeros(3, dtype=bool),
     )
     assert slow.u_pump_E is None
+
+
+def test_fresh_initial_state_is_a_zero_length_capture_not_a_one_step_template(monkeypatch):
+    calls = []
+    sentinel = SimpleNamespace(t=0)
+
+    def fake_loop(p, net, **kwargs):
+        calls.append((p, net, kwargs))
+        return {"checkpoint": sentinel}
+
+    monkeypatch.setattr(RUNNER, "run_fcxr_loop", fake_loop)
+    system = {"net": object(), "vth": np.array([-40.0, -41.0])}
+    slow = object()
+    params = object()
+    assert RUNNER._fresh_initial_state(system, slow, params) is sentinel
+    assert len(calls) == 1
+    assert calls[0][2] == {
+        "slow": slow,
+        "n_steps": 0,
+        "capture_final": True,
+        "store_spikes": False,
+        "v_th_per_neuron": system["vth"],
+    }
+    # Lock the original failure mode: the natural runner must not use the
+    # historical helper that advances one engine step merely to make a state.
+    assert "_seed_template" not in inspect.getsource(RUNNER.run)
 
 
 def test_manifest_and_runner_lock_no_kick_event_aligned_contract():
