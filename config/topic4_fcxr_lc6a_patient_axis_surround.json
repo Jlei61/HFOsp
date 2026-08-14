@@ -48,6 +48,25 @@
     "source_out_degree_relative_tolerance": 0.1,
     "graph_rng_separate_from_runtime_rng": true
   },
+  "graph_generation": {
+    "builder": "perpendicular_stratified_independence_metropolis_hastings",
+    "base_graph_seed": 661000,
+    "condition_graph_seeds": {
+      "C1": 661001,
+      "Q1": 661002,
+      "Q2": 661003,
+      "Q3": 661004
+    },
+    "initial_sweeps": 2,
+    "maximum_sweeps": 6,
+    "proposal_block_size": 1,
+    "proposal_perpendicular_bin_mm": 0.25,
+    "audit_every_sweeps": 1,
+    "edge_margin_mm": 1.0,
+    "perpendicular_sampler_width_mm": 0.25,
+    "proposal_parallel_width_rule": "graph_only_scale_from_C0_empirical_covariance",
+    "trajectory_outcome_used_for_graph_selection": false
+  },
   "observation": {
     "base_end_ms": 50000.0,
     "post_onset_ms": 12000.0,
