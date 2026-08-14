@@ -64,16 +64,17 @@
     "detector": {"population_active_fraction_threshold": 0.0195703125, "role": "frozen common absolute detector"},
     "contact_readout": {"participation_margin_fraction": 0.1, "timing_fraction": 0.5},
     "objective": {"semantics": "EXPLORATORY_EQUAL_NETWORK_RETURNED_ONLY", "fixed_events_per_mode": 6, "fallback_events_per_mode": 3, "lse_temperature": 0.25, "minimum_joint_in_distribution_events_per_mode_per_network": 1, "support_weight": 4.0, "ood_weight": 0.5},
+    "kmeans_selection": {"minimum_networks_with_three_clean_events_per_mode": 2, "balanced_events_per_mode_per_network": 6, "bootstrap_draws": 128, "bootstrap_seed": 20260814},
     "hard_invalid_only": ["nonfinite", "late_runaway", "statistic_not_evaluable"],
     "selection_display": ["natural within-network KMeans", "cross-fitted patient geometry", "weakest-mode error", "event yield"]
   },
   "execution": {
     "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
-    "max_workers": 9,
+    "screen_max_workers": 9,
     "wait_seconds": 180,
     "numeric_threads_per_worker": 1,
     "notify_on_completion": true,
-    "minimum_available_memory_gib_per_worker": 8.0
+    "minimum_available_memory_gib_per_screen_worker": 8.0
   },
   "claim_boundary": "connectivity-capacity canary on patient-development targets; Node is frozen, Z/M is off, topology is fixed, and no patient-blind or ictal claim is allowed"
 }

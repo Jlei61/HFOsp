@@ -6,6 +6,7 @@ import numpy as np
 from scripts.freeze_topic4_rev11_nlc_local_connectivity_canary import (
     build_candidates,
 )
+from scripts.audit_topic4_rev11_nlc_local_connectivity_canary import adjudicate
 from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds
 from scripts.run_topic4_rev9l_forced_source_worker import _sha256
 
@@ -55,3 +56,16 @@ def test_primary_canary_keeps_zm_and_gaba_feedback_frozen():
         assert candidate["mz"]["mode"] == "off"
         assert candidate["adaptation"]["mode"] == "off"
         assert candidate["inhibitory_resource"]["mode"] == "off"
+
+
+def test_adjudication_is_exploratory_and_reports_best_arm():
+    rows = [
+        {"candidate_id": "node_baseline", "arm": "Node", "selection_score": 0.8},
+        {"candidate_id": "ee", "arm": "Node+EE", "selection_score": 0.6},
+        {"candidate_id": "ei", "arm": "Node+EtoI", "selection_score": 0.7},
+        {"candidate_id": "joint", "arm": "Node+EE+EtoI", "selection_score": 0.5},
+    ]
+    result = adjudicate(rows)
+    assert result["status"] == "REV11NLC_LOCAL_CONNECTIVITY_CAPACITY_CANDIDATE_FOUND"
+    assert result["selected_candidate_id"] == "joint"
+    assert np.isclose(result["selected_minus_baseline_score"], -0.3)
