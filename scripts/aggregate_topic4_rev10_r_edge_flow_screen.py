@@ -544,6 +544,9 @@ def main():
     is_joint_field_replication = config["scientific_role"] == (
         "development_only_continuous_field_joint_direction_replication"
     )
+    is_local_connectivity_canary = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_canary"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -595,11 +598,14 @@ def main():
         summary["status"] = (
             "REV10D6_3_RETURNED_ONLY_REPLICATION_COMPLETE"
         )
+    if is_local_connectivity_canary:
+        summary["status"] = "REV11NLC_RETURNED_ONLY_CANARY_COMPLETE"
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
         or is_dynamic_edge_canary or is_spatial_ou_canary
         or is_spatial_ou_bracket or is_spatial_ou_kmeans_grid
         or is_continuous_field_kmeans_screen
+        or is_local_connectivity_canary
         else basename_by_phase[phase]
     )
     _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)

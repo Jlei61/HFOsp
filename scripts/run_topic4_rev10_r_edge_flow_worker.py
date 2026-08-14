@@ -37,6 +37,9 @@ from src.topic4_graph_edge_flow import (  # noqa: E402
     array_sha256,
     graph_spectral_ee_flow,
 )
+from src.topic4_local_connectivity import (  # noqa: E402
+    continuous_local_e_source_flow,
+)
 from src.topic4_spatial_edge_flow import spatial_vector_ee_flow  # noqa: E402
 from src.topic4_spatial_ou_drive import (  # noqa: E402
     SpatialOUConfig,
@@ -115,6 +118,7 @@ def main():
         "development_only_continuous_field_joint_direction_replication",
         "development_only_data_driven_h_zm_consistency",
         "development_only_data_driven_h_zm_tau_adp_calibration",
+        "development_only_data_driven_node_local_connectivity_canary",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -150,6 +154,7 @@ def main():
         "REV10ZM1_1_H_ZM_TAU_FIT_LIBRARY_FROZEN",
         "REV10ZM1_1_H_ZM_TAU_SELECTION_LIBRARY_FROZEN",
         "REV10ZM1_1_H_ZM_TAU_CONFIRMATION_LIBRARY_FROZEN",
+        "REV11NLC_LOCAL_CONNECTIVITY_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -241,6 +246,7 @@ def main():
     if array_sha256(coefficients) != candidate["coefficients_sha256"]:
         raise RuntimeError("edge coefficient hash changed")
     net["rng"] = np.random.default_rng(int(args.seed))
+    h_i_for_edge = np.empty(0, float)
     if manifest["status"] == "REV10R_GRAPH_SPECTRAL_LIBRARY_FROZEN":
         basis = _load_basis(basis_npz, basis_record, args.seed)
         mapped_net, edge_audit = graph_spectral_ee_flow(
@@ -252,6 +258,38 @@ def main():
             "npz_sha256": basis_record["npz_sha256"],
             "graph_weight_sha256": basis["graph_weight_sha256"],
             "rank": basis["rank"],
+        }
+    elif manifest["status"] == "REV11NLC_LOCAL_CONNECTIVITY_LIBRARY_FROZEN":
+        if node_candidate["field_type"] != "spline_continuous":
+            raise RuntimeError("rev11-NLC requires the frozen continuous spline Node field")
+        from src.topic4_continuous_field import continuous_field_h_with_queries
+        h_e, h_i, field_query_audit = continuous_field_h_with_queries(
+            node_candidate["coefficients"], positions,
+            np.asarray(net["pos"][n_e:], float),
+            n_basis=node_candidate["n_basis"], degree=node_candidate["degree"],
+            target_count=stage["N_core_manual"], L=engine["L"],
+        )
+        if not np.array_equal(h_e, node["h"]):
+            raise RuntimeError("rev11-NLC E/I field query changed the frozen E-node field")
+        h_i_for_edge = h_i
+        local = config["local_connectivity_basis"]
+        mapped_net, edge_audit = continuous_local_e_source_flow(
+            net, np.asarray(net["pos"], float), np.concatenate([h_e, h_i]),
+            coefficients,
+            l_ee=float(local["E_to_E_length_scale_mm"]),
+            l_e_to_i=float(local["E_to_I_length_scale_mm"]),
+            raw_logit_clip=candidate.get("raw_logit_clip"),
+        )
+        edge_basis = {
+            "family": "continuous_field_coupled_local_E_source_flow",
+            "feature_names": edge_audit["feature_names"],
+            "pathways": edge_audit["pathways"],
+            "field_query_audit": field_query_audit,
+            "I_field_summary": {
+                "min": float(np.min(h_i)),
+                "mean": float(np.mean(h_i)),
+                "max": float(np.max(h_i)),
+            },
         }
     else:
         spatial = config["spatial_edge_basis"]
@@ -481,6 +519,7 @@ def main():
         contact_envelope_dt_ms=np.asarray(envelope_dt, float),
         positions_E=np.asarray(positions, np.float32),
         h=np.asarray(node["h"], np.float32),
+        h_I_for_edge=np.asarray(h_i_for_edge, np.float32),
         delta_vtheta=np.asarray(node["delta_vtheta"], np.float32),
         edge_coefficients=coefficients.astype(np.float64),
         edge_response=np.asarray(edge_audit.get("spectral_response", []), np.float64),

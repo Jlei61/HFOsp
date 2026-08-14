@@ -4,7 +4,12 @@ import numpy as np
 
 from scripts.launch_topic4_rev10_sa_spectral_field_search import NUMERIC_ENV
 
-from src.topic4_continuous_field import continuous_surface, tensor_basis
+from src.topic4_continuous_field import (
+    continuous_field_h,
+    continuous_field_h_with_queries,
+    continuous_surface,
+    tensor_basis,
+)
 from src.topic4_observation_invariant_spline import (
     allocation_direction,
     fit_uniform_surface,
@@ -50,6 +55,26 @@ def test_uniform_spline_coordinates_are_stable_and_observation_free():
         build_bridge_candidates, build_interpolation_candidates,
     ):
         assert forbidden.isdisjoint(inspect.signature(function).parameters)
+
+
+def test_query_population_uses_reference_level_set_without_renormalizing():
+    reference = np.array([
+        [0.0, 0.0], [5.0, 5.0], [10.0, 10.0], [15.0, 15.0], [20.0, 20.0],
+    ])
+    query = np.array([[2.0, 18.0], [18.0, 2.0]])
+    coefficients = np.arange(25, dtype=float).reshape(5, 5)
+    expected, expected_audit = continuous_field_h(
+        coefficients, reference, n_basis=5, target_count=2.0,
+    )
+    actual, query_h, audit = continuous_field_h_with_queries(
+        coefficients, reference, query, n_basis=5, target_count=2.0,
+    )
+    np.testing.assert_array_equal(actual, expected)
+    assert audit["projection_threshold"] == expected_audit["projection_threshold"]
+    assert query_h.shape == (2,)
+    assert np.isfinite(query_h).all()
+    assert np.all((query_h >= 0.0) & (query_h <= 1.0))
+    assert not np.isclose(query_h.sum(), 2.0)
 
 
 def test_smooth_random_pairs_are_antithetic_at_frozen_rms():

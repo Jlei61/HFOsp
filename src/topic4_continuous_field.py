@@ -12,9 +12,9 @@ import json
 
 import numpy as np
 from scipy.interpolate import BSpline
-from scipy.special import logit
+from scipy.special import expit, logit
 
-from src.topic4_core_field import project_to_budget
+from src.topic4_core_field import EPS, TAU_H, project_to_budget
 
 
 def open_uniform_knots(n_basis, degree=3, L=20.0):
@@ -79,6 +79,34 @@ def continuous_field_h(coefficients, positions, *, n_basis, target_count,
     return h, {
         "surface_min": float(np.min(surface)),
         "surface_max": float(np.max(surface)),
+        "projection_threshold": float(threshold),
+    }
+
+
+def continuous_field_h_with_queries(
+        coefficients, reference_positions, query_positions, *, n_basis,
+        target_count, degree=3, L=20.0):
+    """Evaluate one budget-projected field at reference and query positions.
+
+    The level-set threshold is fitted only on ``reference_positions``. Query
+    values use that same threshold, so a second neuron population does not get
+    a separately normalized field.
+    """
+    reference_surface = continuous_surface(
+        coefficients, reference_positions, n_basis=n_basis, degree=degree, L=L,
+    )
+    reference_q = np.exp(np.clip(reference_surface, -30.0, 30.0))
+    reference_h, threshold = project_to_budget(reference_q, float(target_count))
+    query_surface = continuous_surface(
+        coefficients, query_positions, n_basis=n_basis, degree=degree, L=L,
+    )
+    query_q = np.exp(np.clip(query_surface, -30.0, 30.0))
+    query_h = expit((np.log(query_q + EPS) - threshold) / TAU_H)
+    return reference_h, query_h, {
+        "reference_surface_min": float(np.min(reference_surface)),
+        "reference_surface_max": float(np.max(reference_surface)),
+        "query_surface_min": float(np.min(query_surface)),
+        "query_surface_max": float(np.max(query_surface)),
         "projection_threshold": float(threshold),
     }
 
