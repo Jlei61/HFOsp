@@ -89,13 +89,40 @@ print(f"{max(rows):.6f}")
 PY
 }
 
+stage_done_path() {
+  local stage=$1 condition=$2
+  if [[ "$stage" == "functional" ]]; then
+    echo "$OUT/functional_probes/DONE_LC6A_FUNCTIONAL_${condition}.json"
+  elif [[ "$stage" == "natural" ]]; then
+    echo "$OUT/trajectories/DONE_${condition}.json"
+  elif [[ "$stage" == "gain" ]]; then
+    echo "$OUT/DONE_LC6A_GAIN_${condition}.json"
+  else
+    return 1
+  fi
+}
+
+wait_for_finished_pid() {
+  local -n active_pids=$1
+  local candidate
+  while true; do
+    for candidate in "${active_pids[@]}"; do
+      if ! kill -0 "$candidate" 2>/dev/null; then
+        echo "$candidate"
+        return 0
+      fi
+    done
+    sleep 2
+  done
+}
+
 run_pool() {
   local stage=$1
   shift
   local -a queue=("$@")
   local -a pids=()
   local -A name_by_pid=()
-  local condition pid finished status
+  local condition pid finished status done_path
   STAGE_SWAP_BASELINE_MIB=$(swap_used_mib)
   while (( ${#queue[@]} > 0 || ${#pids[@]} > 0 )); do
     while (( ${#queue[@]} > 0 )); do
@@ -107,6 +134,11 @@ run_pool() {
       fi
       condition=${queue[0]}
       queue=("${queue[@]:1}")
+      done_path=$(stage_done_path "$stage" "$condition")
+      if [[ -f "$done_path" ]]; then
+        echo "skipped completed $stage $condition"
+        continue
+      fi
       if [[ "$stage" == "functional" ]]; then
         "$PY" scripts/run_topic4_fcxr_lc6a_functional_probe.py run \
           --condition "$condition" --execution-manifest "$MANIFEST" --confirm-run \
@@ -136,8 +168,8 @@ run_pool() {
       sleep 30
       continue
     fi
-    finished=
-    if wait -n -p finished "${pids[@]}"; then
+    finished=$(wait_for_finished_pid pids)
+    if wait "$finished"; then
       status=0
     else
       status=$?
