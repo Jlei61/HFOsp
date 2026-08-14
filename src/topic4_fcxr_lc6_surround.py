@@ -242,15 +242,42 @@ def _uniform_nonmember_block(rng, selected, n_source: int, size: int) -> np.ndar
     return np.asarray(chosen, dtype=np.int32)
 
 
-def _weighted_nonmember_from_cdf(rng, pool, cdf, selected) -> int:
+def _weighted_nonmember_from_cdf(
+    rng, pool, cdf, selected, *, rejection_cap: int = 64,
+) -> tuple[int, bool]:
+    """Draw exactly from ``weight | source not selected`` without starvation.
+
+    Rejection is cheap for broad kernels, but can take tens of thousands of
+    draws when the current target already contains most of a narrow kernel's
+    probability mass (the LC6A C1 control).  After a fixed number of misses we
+    explicitly form the same conditional distribution.  Both branches have
+    the identical proposal law; the fallback changes runtime and RNG
+    consumption, not the Metropolis-Hastings target.
+    """
     if cdf.size == 0 or not np.isfinite(cdf[-1]) or cdf[-1] <= 0.0:
         raise RuntimeError("proposal bin has no positive-weight source")
-    while True:
+    if rejection_cap < 0:
+        raise ValueError("rejection_cap must be non-negative")
+    for _ in range(int(rejection_cap)):
         index = int(np.searchsorted(cdf, rng.random() * cdf[-1], side="right"))
         index = min(index, len(pool) - 1)
         candidate = int(pool[index])
         if not selected[candidate]:
-            return candidate
+            return candidate, False
+
+    weights = np.diff(np.concatenate(([0.0], np.asarray(cdf, dtype=float))))
+    available = ~selected[pool]
+    available_weights = weights[available]
+    total = float(available_weights.sum())
+    if not np.isfinite(total) or total <= 0.0:
+        raise RuntimeError("proposal bin has no positive-weight nonmember")
+    available_pool = pool[available]
+    available_cdf = np.cumsum(available_weights)
+    index = int(np.searchsorted(
+        available_cdf, rng.random() * total, side="right",
+    ))
+    index = min(index, len(available_pool) - 1)
+    return int(available_pool[index]), True
 
 
 def rewire_e_to_i_targetwise(
@@ -298,6 +325,7 @@ def rewire_e_to_i_targetwise(
     accepted_blocks_by_sweep = np.zeros(int(n_sweeps), dtype=np.int64)
     proposed_blocks_by_sweep = np.zeros(int(n_sweeps), dtype=np.int64)
     changed_by_sweep = np.zeros(int(n_sweeps), dtype=np.int64)
+    conditional_fallback_draws = 0
     for target in range(result.shape[0]):
         current = result[target]
         selected.fill(False)
@@ -353,9 +381,10 @@ def rewire_e_to_i_targetwise(
                         # This coarse perpendicular stratum is fully occupied;
                         # leaving the edge unchanged is the only legal move.
                         continue
-                    candidate = _weighted_nonmember_from_cdf(
+                    candidate, used_fallback = _weighted_nonmember_from_cdf(
                         rng, pools[bin_id], pool_cdfs[bin_id], selected,
                     )
+                    conditional_fallback_draws += int(used_fallback)
                     new = np.asarray([candidate], dtype=np.int32)
                     z_forward = pool_totals[bin_id] - selected_weight_by_bin[bin_id]
                     z_reverse = z_forward - target_weight[candidate] + target_weight[int(old[0])]
@@ -412,6 +441,9 @@ def rewire_e_to_i_targetwise(
         "n_accepted_edges": int(accepted_edges),
         "acceptance_by_sweep": acceptance_by_sweep,
         "hamming_by_sweep": hamming_by_sweep,
+        "conditional_fallback_draws": int(conditional_fallback_draws),
+        "nonmember_sampling": "rejection_then_exact_conditional",
+        "nonmember_rejection_cap": 64,
     }
 
 

@@ -490,3 +490,10 @@ figures/README.md
 本 spec 不授权 LC6B/U、M、global tail、center-preserving follow-up、H 修改、heterogeneity、全五臂
 multi-seed 或正式 operator/eigenmode identification。termination 与 lifecycle 在最终报告中固定为
 `NOT_TESTED`。
+
+## 16. 2026-08-14 等价采样实现澄清
+
+E→I 重连的非成员 proposal 定义始终是同一 perpendicular bin 内按核权重条件于“当前未选”抽样。
+实现允许先做至多 64 次等价拒绝；若未命中，必须从显式条件分布直接抽样，防止 legacy 窄核 C1 因
+已选边占据高概率质量而饥饿。该切换只改变计算路径和 RNG 消耗，不改变 proposal 分布或科学合同；
+`conditional_fallback_draws`、抽样模式和 cap 必须写入 graph chain audit。

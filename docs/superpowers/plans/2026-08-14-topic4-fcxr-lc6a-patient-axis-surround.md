@@ -351,3 +351,12 @@ C1 baseline 偏移、无 zero crossing、entry blocked、static pattern、low ga
 本 plan 不授权：LC6B/U、M、global tail、center-preserving follow-up、H 修改、heterogeneity、全五臂
 multi-seed、正式 operator/eigenmode audit 或 paper-ready 主图。当前只把 spec/plan 修到 implementation
 ready；未得到用户明确授权前不运行仿真。
+
+## 15. 2026-08-14 C1 非成员抽样执行订正
+
+C1 的窄核与 C0 相同，原拒绝抽样在部分 target/bin 中已选边占据绝大多数权重质量；graph-only 抽样审计
+显示中位约 87 次、q99 约 4.2 万次尝试才能得到一个非成员。该实现不会改变图的理论目标，但会造成
+无科学价值的运行饥饿。执行器订正为：最多 64 次拒绝，仍未命中时显式构造同一 bin 中
+`weight | source not selected` 的条件分布并抽样。两条路径的 proposal law 完全相同，Hastings 校正、
+graph seed、sweeps、q、degree、weight/delay 和所有科学参数不变；产物必须记录 fallback 次数。未完成的
+旧 C1 尝试归档，不触碰已经完成的 Q1--Q3 图。

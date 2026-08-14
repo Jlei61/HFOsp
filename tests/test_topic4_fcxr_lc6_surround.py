@@ -4,6 +4,7 @@ import numpy as np
 from scipy import sparse
 
 from src.topic4_fcxr_lc6_surround import (
+    _weighted_nonmember_from_cdf,
     EToIGraph,
     assign_frozen_target_weights,
     audit_basic_legality,
@@ -138,6 +139,40 @@ def test_stratified_pool_builder_does_not_rescan_full_source_array_per_bin():
     source = Path(__import__("src.topic4_fcxr_lc6_surround", fromlist=["x"]).__file__).read_text()
     assert 'np.argsort(source_bins, kind="stable")' in source
     assert "np.flatnonzero(source_bins == bin_id)" not in source
+
+
+def test_weighted_nonmember_fallback_is_exactly_conditioned_and_cannot_starve():
+    # Source 0 owns almost all proposal mass but is already selected.  Pure
+    # rejection would need about one million draws; cap=0 forces the exact
+    # conditional branch and must return 1/2 in their 1:3 weight ratio.
+    weights = np.array([0.999996, 0.000001, 0.000003], dtype=float)
+    cdf = np.cumsum(weights)
+    pool = np.arange(3, dtype=np.int32)
+    selected = np.array([True, False, False])
+    rng = np.random.default_rng(771)
+    draws = np.array([
+        _weighted_nonmember_from_cdf(
+            rng, pool, cdf, selected, rejection_cap=0,
+        )[0]
+        for _ in range(12000)
+    ])
+    assert not np.any(draws == 0)
+    assert abs(np.mean(draws == 2) - 0.75) < 0.02
+
+
+def test_stratified_narrow_kernel_records_exact_conditional_fallback():
+    pos_e = np.column_stack((np.linspace(-2.0, 2.0, 120), np.zeros(120)))
+    pos_i = np.array([[0.0, 0.0]])
+    base = np.arange(40, 80, dtype=np.int32)[None, :]
+    candidate, diag = rewire_e_to_i_targetwise(
+        base, pos_e, pos_i, [1.0, 0.0],
+        l_parallel=0.12, l_perpendicular=0.25,
+        graph_seed=772, n_sweeps=1, proposal_block_size=1,
+        proposal_perpendicular_bin_mm=0.25,
+    )
+    assert candidate.shape == base.shape
+    assert diag["conditional_fallback_draws"] > 0
+    assert diag["nonmember_sampling"] == "rejection_then_exact_conditional"
 
 
 def test_graph_hash_and_off_path_are_exact():
