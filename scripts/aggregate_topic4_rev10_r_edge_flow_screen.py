@@ -591,6 +591,9 @@ def main():
     is_local_connectivity_joint_selection = config["scientific_role"] == (
         "development_only_data_driven_node_local_connectivity_joint_selection"
     )
+    is_local_connectivity_frozen_confirmation = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_frozen_confirmation"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -648,6 +651,10 @@ def main():
         summary["status"] = "REV11NLC_JOINT_FIT_RETURNED_ONLY_COMPLETE"
     if is_local_connectivity_joint_selection:
         summary["status"] = "REV11NLC_JOINT_SELECTION_RETURNED_ONLY_COMPLETE"
+    if is_local_connectivity_frozen_confirmation:
+        summary["status"] = (
+            "REV11NLC_FROZEN_CONFIRMATION_RETURNED_ONLY_COMPLETE"
+        )
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
         or is_dynamic_edge_canary or is_spatial_ou_canary

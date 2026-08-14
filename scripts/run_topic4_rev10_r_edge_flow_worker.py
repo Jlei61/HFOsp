@@ -121,6 +121,7 @@ def main():
         "development_only_data_driven_node_local_connectivity_canary",
         "development_only_data_driven_node_local_connectivity_joint_fit",
         "development_only_data_driven_node_local_connectivity_joint_selection",
+        "development_only_data_driven_node_local_connectivity_frozen_confirmation",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -159,6 +160,7 @@ def main():
         "REV11NLC_LOCAL_CONNECTIVITY_LIBRARY_FROZEN",
         "REV11NLC_JOINT_NODE_CONNECTIVITY_FIT_LIBRARY_FROZEN",
         "REV11NLC_JOINT_NODE_CONNECTIVITY_SELECTION_LIBRARY_FROZEN",
+        "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -266,7 +268,8 @@ def main():
     elif manifest["status"] in {
             "REV11NLC_LOCAL_CONNECTIVITY_LIBRARY_FROZEN",
             "REV11NLC_JOINT_NODE_CONNECTIVITY_FIT_LIBRARY_FROZEN",
-            "REV11NLC_JOINT_NODE_CONNECTIVITY_SELECTION_LIBRARY_FROZEN"}:
+            "REV11NLC_JOINT_NODE_CONNECTIVITY_SELECTION_LIBRARY_FROZEN",
+            "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN"}:
         if node_candidate["field_type"] != "spline_continuous":
             raise RuntimeError("rev11-NLC requires the frozen continuous spline Node field")
         from src.topic4_continuous_field import continuous_field_h_with_queries
