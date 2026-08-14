@@ -7,6 +7,9 @@ from scripts.freeze_topic4_rev11_nlc_local_connectivity_canary import (
     build_candidates,
 )
 from scripts.audit_topic4_rev11_nlc_local_connectivity_canary import adjudicate
+from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
+    _returned_summary_filename,
+)
 from scripts.run_topic4_rev10_r_edge_flow_worker import active_network_seeds
 from scripts.run_topic4_rev9l_forced_source_worker import _sha256
 
@@ -56,6 +59,12 @@ def test_primary_canary_keeps_zm_and_gaba_feedback_frozen():
         assert candidate["mz"]["mode"] == "off"
         assert candidate["adaptation"]["mode"] == "off"
         assert candidate["inhibitory_resource"]["mode"] == "off"
+
+
+def test_nlc_loader_uses_canary_summary_contract():
+    assert _returned_summary_filename(_config()) == (
+        "canary_summary_returned_only.json"
+    )
 
 
 def test_adjudication_is_exploratory_and_reports_best_arm():
