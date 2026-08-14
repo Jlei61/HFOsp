@@ -197,6 +197,9 @@ wait_for_graph_stage
 
 run_pool functional C0 C1 Q1 Q2 Q3
 
+"$PY" scripts/finalize_topic4_fcxr_lc6a_functional_probes.py --confirm-run \
+  > "$OUT/logs/functional_finalize.log" 2>&1
+
 # C0 alone establishes the frozen IED-exposure reference required by all four comparisons.
 run_pool natural C0
 
