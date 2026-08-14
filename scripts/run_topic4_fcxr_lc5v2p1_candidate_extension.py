@@ -209,6 +209,9 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
     source_summary = Path(source_summary).resolve()
     source = source_summary.parent
     summary = json.loads(source_summary.read_text())
+    execution_manifest_sha256_start = (
+        _sha(execution_manifest) if execution_manifest is not None else None
+    )
     if summary["outcome"] not in {"CONTAINED_HIGH_NO_OFFSET", "FINITE_EXCURSION_CANDIDATE"}:
         raise RuntimeError("source is not an extension-eligible candidate")
     target_total_ms, continuation_ms = continuation_schedule(
@@ -256,6 +259,7 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
             "tau_ms": tau_ms, "gamma": gamma, "continuation_ms": continuation_ms,
             "target_total_ms": target_total_ms,
             "execution_manifest": str(execution_manifest) if execution_manifest else None,
+            "execution_manifest_sha256_start": execution_manifest_sha256_start,
         })
         started = time.time()
         stride = int(round(U2.TRACE_DT_MS / U2.DT_MS))
@@ -276,6 +280,9 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
         p = dataclasses.replace(S["p"], T=continuation_ms, dt=U2.DT_MS)
         original = load_sparse_spike_stream(source / "spikes.npz")
         for chunk in range(int(round(continuation_ms / U2.CHUNK_MS))):
+            if (execution_manifest is not None and
+                    _sha(execution_manifest) != execution_manifest_sha256_start):
+                raise RuntimeError("execution manifest drifted during LC5 continuation")
             starts = {name: len(getattr(state.slow, name)) for name in attrs}
             binary = work / f"chunk_{chunk:02d}.bin"
             writer = SparseSpikeBinaryWriter(
@@ -371,7 +378,7 @@ def run(source_summary, *, target_total_ms=None, output_tag=None, execution_mani
             "wall_s": time.time() - started,
             "claim_boundary": "extension tests containment/offset; recovery requires post-offset Z and returning-IED gates",
             "execution_manifest": str(execution_manifest) if execution_manifest else None,
-            "execution_manifest_sha256": _sha(execution_manifest) if execution_manifest else None,
+            "execution_manifest_sha256": execution_manifest_sha256_start,
         }
         with AtomicStageBundle(arm) as bundle:
             _write_json(bundle.path("summary.json"), result)

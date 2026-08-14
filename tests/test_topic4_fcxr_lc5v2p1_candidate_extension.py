@@ -90,3 +90,10 @@ def test_locked_config_uses_summary_not_historical_sensor_path():
     assert cfg["pump_p0_E"].tolist() == [0.1, 0.2]
     assert cfg["pump_u_init_E"].tolist() == [0.0, 0.0]
     assert cfg["x_relay_frozen_E"].tolist() == [1.0, 1.0]
+
+
+def test_continuation_locks_manifest_hash_at_start_and_checks_each_chunk():
+    source = EXT.__file__ and Path(EXT.__file__).read_text()
+    assert "execution_manifest_sha256_start" in source
+    assert "execution manifest drifted during LC5 continuation" in source
+    assert '"execution_manifest_sha256": execution_manifest_sha256_start' in source
