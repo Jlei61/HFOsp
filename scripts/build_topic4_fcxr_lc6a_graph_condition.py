@@ -15,6 +15,8 @@ from pathlib import Path
 import sys
 import time
 
+import numpy as np
+
 
 ROOT = Path(__file__).resolve().parents[1]
 for path in (ROOT, ROOT / "scripts", ROOT / "src/snn_engine"):
@@ -40,7 +42,13 @@ from src.topic4_fcxr_lc6_surround import (  # noqa: E402
 ALLOWED = ("C1", "Q1", "Q2", "Q3")
 
 
-def build_condition(manifest_path, condition):
+def build_condition(
+    manifest_path,
+    condition,
+    *,
+    proposal_l_parallel_override=None,
+    calibration_provenance=None,
+):
     if condition not in ALLOWED:
         raise ValueError(f"condition must be one of {ALLOWED}")
     manifest_path, manifest = FAMILY._validate_manifest(manifest_path)
@@ -73,6 +81,12 @@ def build_condition(manifest_path, condition):
         l_parallel, desired_sigma = FAMILY._target_parallel_width(
             q_target, c0_width, i2e_width, ee_width, S["p"].l_IE,
         )
+    if proposal_l_parallel_override is not None:
+        if condition == "C1":
+            raise ValueError("C1 cannot use a calibrated width override")
+        l_parallel = float(proposal_l_parallel_override)
+        if not np.isfinite(l_parallel) or l_parallel <= 0.0:
+            raise ValueError("calibrated proposal width must be finite and positive")
     seed = int(generation["condition_graph_seeds"][condition])
     sources, chain = rewire_e_to_i_targetwise(
         c0.sources, S["posE"], S["posI"], S["axis_unit"],
@@ -118,6 +132,11 @@ def build_condition(manifest_path, condition):
         "q_tolerance": tolerance,
         "construction_q": q_observed,
         "proposal_l_parallel_mm": l_parallel,
+        "proposal_l_parallel_source": (
+            "graph_only_secant_recalibration"
+            if proposal_l_parallel_override is not None
+            else "manifest_initial_graph_only_scale"
+        ),
         "proposal_l_perpendicular_mm": float(generation["perpendicular_sampler_width_mm"]),
         "desired_e_to_i_sigma_parallel_mm": desired_sigma,
         "marginal_e_to_i": width,
@@ -135,6 +154,8 @@ def build_condition(manifest_path, condition):
         "resource_end": FAMILY._meminfo(),
         "wall_s": time.time() - started,
     }
+    if calibration_provenance is not None:
+        audit["graph_only_calibration"] = calibration_provenance
     FAMILY._save_graph(FAMILY.OUT / f"graphs/{condition}.npz", candidate, audit)
     FAMILY._write_json(FAMILY.OUT / f"graph_condition_{condition}.json", audit)
     return audit

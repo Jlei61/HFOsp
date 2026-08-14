@@ -1,0 +1,32 @@
+{
+  "schema_version": 1,
+  "experiment_id": "fcxr_lc6a_patient_axis_surround_graph_recalibration",
+  "scope": "graph_only_before_any_lc6a_snn_dynamics",
+  "trigger": "a Q condition is graph-legal except that construction_q misses its frozen target",
+  "evidence_trigger": {
+    "condition": "Q3",
+    "initial_graph_sha256": "fd3da6ba270ef3e51cce7a2b4f0047ffdf04fe9f25cf15ea06f2b3f18fa11d2d",
+    "q_target": 1.5,
+    "q_observed": 1.165264491215527,
+    "proposal_l_parallel_mm": 0.5109877198873922,
+    "trajectory_outcome_read": false
+  },
+  "rule": {
+    "anchor_low": "C1 same-sampler legacy-width result",
+    "anchor_high": "the latest failed Q attempt",
+    "update": "secant on empirical E-to-I sigma_parallel versus proposal_l_parallel_mm",
+    "formula": "l_new=l_hi+(sigma_target-sigma_hi)*(l_hi-l_lo)/(sigma_hi-sigma_lo)",
+    "same_condition_graph_seed": true,
+    "same_sweeps_per_attempt": 2,
+    "max_correction_rounds": 2,
+    "minimum_l_parallel_mm": 0.05,
+    "maximum_l_parallel_mm": 2.0,
+    "q_tolerance_unchanged": true,
+    "outdegree_contract_unchanged": true,
+    "trajectory_outcome_may_be_read": false
+  },
+  "decision": {
+    "final_q_inside_frozen_tolerance": "freeze corrected graph",
+    "still_outside_after_two_corrections": "GRAPH_TARGET_UNREACHABLE_ENGINEERING_STOP"
+  }
+}
