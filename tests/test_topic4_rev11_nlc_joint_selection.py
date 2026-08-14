@@ -5,6 +5,7 @@ import numpy as np
 
 from scripts.audit_topic4_rev11_nlc_joint_node_connectivity_selection import (
     _score_network_sample,
+    paired_network_bootstrap,
 )
 from scripts.freeze_topic4_rev11_nlc_joint_node_connectivity_selection import (
     selection_library,
@@ -80,3 +81,31 @@ def test_nlc3_selection_keeps_dynamic_ictal_variables_out():
         assert candidate["adaptation"]["mode"] == "off"
         assert candidate["inhibitory_resource"]["mode"] == "off"
         np.testing.assert_equal(np.asarray(candidate["coefficients"]).shape, (2, 6))
+
+
+def test_paired_bootstrap_uses_the_same_network_draws():
+    config, fit_manifest, _ = _inputs()
+    candidates = {
+        row["candidate_id"]: row
+        for row in fit_manifest["candidate_set"]["candidates"]
+    }
+    good = {
+        str(seed): {
+            "natural": 0.9, "crossfit": 0.6,
+            "recruitment_A": 0.1, "recruitment_B": 0.1,
+            "shape_A": 0.7, "shape_B": 0.8,
+            "ood": 0.1, "occupancy": 0.2,
+        }
+        for seed in range(6)
+    }
+    bad = {
+        seed: {**row, "natural": 0.4, "crossfit": -0.2, "shape_A": 4.0}
+        for seed, row in good.items()
+    }
+    result = paired_network_bootstrap(
+        candidates["joint_04_control"], candidates["node_baseline"],
+        {"joint_04_control": good, "node_baseline": bad}, config,
+    )
+    assert result["status"] == "OK"
+    assert result["n_paired_networks"] == 6
+    assert result["bootstrap_probability_selected_lower"] == 1.0

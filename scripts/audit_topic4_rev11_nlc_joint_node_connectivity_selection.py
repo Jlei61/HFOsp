@@ -216,9 +216,9 @@ def main():
     comparisons = {}
     if selected is not None:
         selected_candidate = manifest_candidates[selected["candidate_id"]]
-        for comparator_id in (
-            "node_baseline", "joint_03_control", "joint_04_control",
-        ):
+        for comparator_id in manifest_candidates:
+            if comparator_id == selected["candidate_id"]:
+                continue
             comparator_row = next(
                 row for row in rows if row["candidate_id"] == comparator_id
             )
