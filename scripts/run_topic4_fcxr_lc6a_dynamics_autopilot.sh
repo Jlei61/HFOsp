@@ -111,4 +111,7 @@ run_pool natural C0
 
 run_pool natural C1 Q1 Q2 Q3
 
+"$PY" scripts/aggregate_topic4_fcxr_lc6a_phenotypes.py --confirm-run \
+  > "$OUT/logs/phenotype_map.log" 2>&1
+
 echo "LC6A fixed T4/T5 experiment block complete"

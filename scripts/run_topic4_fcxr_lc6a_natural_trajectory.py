@@ -482,6 +482,11 @@ def run(condition, manifest_path):
             D_maps_1s=np.asarray(d_maps, np.float32), H_maps_1s=np.asarray(h_maps, np.float32),
             cell_bins=spatial_bins, occupancy=spatial_occupancy,
             n_bins_axis=np.asarray([32], np.int32),
+            positions_E=np.asarray(S["posE"], np.float32),
+            patient_axis_unit=np.asarray(S["axis_unit"], np.float32),
+            source_xy=np.asarray(S["src_xy"], np.float32),
+            sink_xy=np.asarray(S["snk_xy"], np.float32),
+            sheet_size_mm=np.asarray([S["L"]], np.float32),
         )
         U2.save_loop_state(str(bundle.path("final_state.npz")), state)
         pinned_required = []

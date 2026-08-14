@@ -119,6 +119,7 @@ def run(manifest_path):
         "C0_spatial_readouts_sha256": _sha(spatial_path),
         "C0_graph_sha256": summary["graph_sha256"],
         "C0_global_onset_ms": float(onset_ms),
+        "C0_n_returning_pre_onset": int(summary["n_returning_pre_onset"]),
         "thresholds": thresholds,
         "selection_used_Q_trajectory_outcomes": False,
         "source_sha256": {
