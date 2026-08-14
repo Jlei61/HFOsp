@@ -39,8 +39,7 @@ from src.topic4_fcxr_lc5 import (  # noqa: E402
 
 
 U2 = PREFIX.U2
-CONTINUE_MS = 18000.0
-TOTAL_TARGET_MS = 43000.0
+TARGET_POST_ONSET_MS = 20000.0
 
 
 def _sha(path):
@@ -67,6 +66,22 @@ def _combine_full(original, continuation):
 def _rate_from_stream(stream):
     counts = np.bincount(stream.steps, minlength=stream.n_steps).astype(float)
     return counts / stream.n_cells / U2.DT_MS * 1000.0
+
+
+def continuation_schedule(source_T_ms, onset_ms, target_post_onset_ms=TARGET_POST_ONSET_MS):
+    """Return an exact-state continuation horizon ending target time after onset."""
+    source_T_ms = float(source_T_ms)
+    if onset_ms is None:
+        raise ValueError("candidate continuation requires an observed natural onset")
+    onset_ms = float(onset_ms)
+    target_total_ms = onset_ms + float(target_post_onset_ms)
+    continuation_ms = target_total_ms - source_T_ms
+    if continuation_ms <= 0:
+        raise ValueError("source already reaches the locked post-onset target")
+    n_chunks = continuation_ms / U2.CHUNK_MS
+    if not np.isclose(n_chunks, round(n_chunks), rtol=0.0, atol=1e-9):
+        raise ValueError("continuation horizon must be an integer number of chunks")
+    return target_total_ms, continuation_ms
 
 
 def _plot_extension(arm, result, rate10, traces):
@@ -104,7 +119,8 @@ def _plot_extension(arm, result, rate10, traces):
     plt.close(fig)
     (figures / "README.md").write_text(
         "### lc5v2p1_candidate_extension.png\n\n"
-        "这张诊断图从自然轨迹 25 秒的完整状态继续推进，不重置膜电位、突触、慢变量或随机数。a 看候选高态最后是终止、维持还是再次升级；b 看 D 与 H 的移动边界；c 看逐细胞 U 负荷及其恢复电流是否在活动下降后继续保留。\n\n"
+        f"这张诊断图从自然轨迹 {result['source_T_ms']/1000:.1f} 秒的完整状态继续推进到 onset 后 "
+        f"{result['target_post_onset_ms']/1000:.1f} 秒，不重置膜电位、突触、慢变量或随机数。a 看候选高态最后是终止、维持还是再次升级；b 看 D 与 H 的移动边界；c 看逐细胞 U 负荷及其恢复电流是否在活动下降后继续保留。\n\n"
         "**关注点**：只有绿色 offset 线之后同时出现低活动保护、D 恢复并最终恢复 returning IED，才构成完整 lifecycle；单独 containment 或 rate 下降不算。\n\n"
         "### lc5v2p1_candidate_extension.pdf\n\n与 PNG 相同的矢量版本。\n\n"
         "**关注点**：这是单 seed 机制诊断，不是鲁棒性或患者队列主张。\n"
@@ -122,8 +138,9 @@ def run(source_summary):
     summary = json.loads(source_summary.read_text())
     if summary["outcome"] not in {"CONTAINED_HIGH_NO_OFFSET", "FINITE_EXCURSION_CANDIDATE"}:
         raise RuntimeError("source is not an extension-eligible candidate")
-    if not np.isclose(float(summary["T_ms"]), 25000.0):
-        raise RuntimeError("extension requires the canonical 25-s source")
+    target_total_ms, continuation_ms = continuation_schedule(
+        summary["T_ms"], summary.get("onset_ms")
+    )
     tau_ms = float(summary["tau_ms"])
     gamma = float(summary["gamma_nominal_dose"])
     tag = f"lc5v2p1_candidate_extension_tau{int(tau_ms)}_gamma{int(round(gamma*1000)):04d}"
@@ -161,8 +178,8 @@ def run(source_summary):
         _write_json(running, {
             "status": "RUNNING", "pid": os.getpid(), "source_summary": str(source_summary),
             "source_summary_sha256": _sha(source_summary), "source_state_hash": state_hash(state),
-            "tau_ms": tau_ms, "gamma": gamma, "continuation_ms": CONTINUE_MS,
-            "target_total_ms": TOTAL_TARGET_MS,
+            "tau_ms": tau_ms, "gamma": gamma, "continuation_ms": continuation_ms,
+            "target_total_ms": target_total_ms,
         })
         started = time.time()
         stride = int(round(U2.TRACE_DT_MS / U2.DT_MS))
@@ -179,8 +196,8 @@ def run(source_summary):
         trace_parts, streams = {}, []
         input_hasher = ExactInputHasher()
         chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
-        p = dataclasses.replace(S["p"], T=CONTINUE_MS, dt=U2.DT_MS)
-        for chunk in range(int(round(CONTINUE_MS / U2.CHUNK_MS))):
+        p = dataclasses.replace(S["p"], T=continuation_ms, dt=U2.DT_MS)
+        for chunk in range(int(round(continuation_ms / U2.CHUNK_MS))):
             starts = {name: len(getattr(state.slow, name)) for name in attrs}
             binary = work / f"chunk_{chunk:02d}.bin"
             writer = SparseSpikeBinaryWriter(
@@ -236,6 +253,9 @@ def run(source_summary):
             "runtime_semantics": "exact_state_continuation_no_parameter_change",
             "tau_ms": tau_ms, "gamma_nominal_dose": gamma, "Imax": imax,
             "a_load": float(prelock["a_load"]), "p0_policy": "q099", "h": 3,
+            "source_T_ms": float(summary["T_ms"]),
+            "target_post_onset_ms": TARGET_POST_ONSET_MS,
+            "continuation_ms": continuation_ms,
             "T_ms": full.n_steps * U2.DT_MS,
             "onset_ms": adjudication["onset_ms"], "offset_ms": adjudication["offset_ms"],
             "lifecycle": adjudication["lifecycle"], "n_events": len(adjudication["events"]),
