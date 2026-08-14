@@ -34,6 +34,12 @@ def test_rate_reconstruction_uses_per_cell_hz(monkeypatch):
     assert np.allclose(EXT._rate_from_stream(stream), [1000.0, 500.0])
 
 
+def test_chunk_mean_rate_matches_population_spike_rate(monkeypatch):
+    monkeypatch.setattr(EXT.U2, "DT_MS", 0.5)
+    stream = SparseSpikeStream([0, 0, 1], [0, 1, 1], 2, 4)
+    assert EXT.chunk_mean_rate_hz(stream) == 750.0
+
+
 def test_continuation_schedule_accepts_event_aligned_18s_source(monkeypatch):
     monkeypatch.setattr(EXT.U2, "CHUNK_MS", 1000.0)
     target, continuation = EXT.continuation_schedule(18000.0, 11000.0)

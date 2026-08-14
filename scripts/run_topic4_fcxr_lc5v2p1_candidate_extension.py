@@ -68,6 +68,13 @@ def _rate_from_stream(stream):
     return counts / stream.n_cells / U2.DT_MS * 1000.0
 
 
+def chunk_mean_rate_hz(stream):
+    duration_s = stream.n_steps * U2.DT_MS / 1000.0
+    if duration_s <= 0.0:
+        raise ValueError("chunk duration must be positive")
+    return float(stream.steps.size / stream.n_cells / duration_s)
+
+
 def continuation_schedule(source_T_ms, onset_ms, target_post_onset_ms=TARGET_POST_ONSET_MS):
     """Return an exact-state continuation horizon ending target time after onset."""
     source_T_ms = float(source_T_ms)
@@ -194,6 +201,7 @@ def run(source_summary):
             "trace_pump_excess_mean", "trace_pump_excess_max", "trace_conductance_clip_frac",
         )
         trace_parts, streams = {}, []
+        early_stop_reason = None
         input_hasher = ExactInputHasher()
         chunk_steps = int(round(U2.CHUNK_MS / U2.DT_MS))
         p = dataclasses.replace(S["p"], T=continuation_ms, dt=U2.DT_MS)
@@ -227,6 +235,9 @@ def run(source_summary):
             })
             if row["action"] == "TERMINATE_AFTER_CHECKPOINT":
                 raise RuntimeError("RESOURCE_STOP_AFTER_CHECKPOINT")
+            if chunk_mean_rate_hz(stream) >= float(U2.SAT_CEILING_HZ):
+                early_stop_reason = "REGISTERED_SATURATION_REACHED"
+                break
 
         original = load_sparse_spike_stream(source / "spikes.npz")
         full = _combine_full(original, streams)
@@ -255,7 +266,9 @@ def run(source_summary):
             "a_load": float(prelock["a_load"]), "p0_policy": "q099", "h": 3,
             "source_T_ms": float(summary["T_ms"]),
             "target_post_onset_ms": TARGET_POST_ONSET_MS,
-            "continuation_ms": continuation_ms,
+            "requested_continuation_ms": continuation_ms,
+            "actual_continuation_ms": len(streams) * U2.CHUNK_MS,
+            "early_stop_reason": early_stop_reason,
             "T_ms": full.n_steps * U2.DT_MS,
             "onset_ms": adjudication["onset_ms"], "offset_ms": adjudication["offset_ms"],
             "lifecycle": adjudication["lifecycle"], "n_events": len(adjudication["events"]),
