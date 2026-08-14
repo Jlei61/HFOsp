@@ -9,6 +9,7 @@ import numpy as np
 from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
     _bandpass_contact_activity,
     _figure2a_context_geometry,
+    _equal_network_row,
     _map_kmeans_clusters_to_modes,
     _same_network_pair,
     _science_status,
@@ -233,6 +234,39 @@ def test_science_status_travels_with_the_figure(tmp_path):
     assert _science_status({"output_root": tmp_path / "missing"}) is None
 
 
+def test_nlc_science_status_and_equal_network_metrics_follow_nested_verdict(tmp_path):
+    (tmp_path / "confirmation_verdict.json").write_text(json.dumps({
+        "status": "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_PASS",
+        "figure_eligible": True,
+        "candidate_rows": [{
+            "candidate_id": "joint_04_control",
+            "crossfit_and_natural_metrics": {
+                "candidate_id": "joint_04_control",
+                "natural_kmeans_by_network": {},
+                "natural_balanced_alignment_equal_network": {
+                    "n_networks": 12,
+                },
+                "crossfit_margin_equal_network": {"n_networks": 12},
+            },
+        }],
+    }))
+    bundle = {
+        "output_root": tmp_path,
+        "candidate_id": "joint_04_control",
+        "config": {"scientific_role": (
+            "development_only_data_driven_node_local_connectivity_"
+            "frozen_confirmation"
+        )},
+    }
+
+    status = _science_status(bundle)
+    row = _equal_network_row(bundle)
+
+    assert status["figure_eligible"] is True
+    assert row["candidate_id"] == "joint_04_control"
+    assert row["natural_balanced_alignment_equal_network"]["n_networks"] == 12
+
+
 def test_status_banner_states_the_accepted_verdict():
     import matplotlib
     matplotlib.use("Agg")
@@ -249,6 +283,23 @@ def test_status_banner_states_the_accepted_verdict():
     assert "NOT_REPLICATED" in text
     assert "replication rule NOT met" in text
     assert _status_banner(fig, None) is None
+
+
+def test_status_banner_maps_nlc_eligibility_without_inventing_replication():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    text = _status_banner(fig, {
+        "figure_eligible": True,
+        "verdict_status": "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_PASS",
+        "replication_pass": None,
+    })
+    plt.close(fig)
+    assert "FIGURE_ELIGIBLE" in text
+    assert "CONFIRMATION_PASS" in text
+    assert "replication rule" not in text
 
 
 def test_readme_reports_the_real_network_count_and_verdict(tmp_path):

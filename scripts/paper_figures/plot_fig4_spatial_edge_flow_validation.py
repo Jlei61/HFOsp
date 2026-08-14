@@ -31,6 +31,9 @@ ROOT = Path(__file__).resolve().parents[2]
 JOINT_CONTINUOUS_SURFACE_ROLE = (
     "development_only_continuous_field_joint_direction_surface"
 )
+NLC_FROZEN_CONFIRMATION_ROLE = (
+    "development_only_data_driven_node_local_connectivity_frozen_confirmation"
+)
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r2_spatial_edge_flow.json"
 TA_MODE = 1
 TB_MODE = 0
@@ -59,6 +62,12 @@ def _is_spatial_ou(bundle):
     return bundle.get("candidate", {}).get(
         "spatial_ou", {},
     ).get("mode") == "local"
+
+
+def _is_nlc_confirmation(bundle):
+    return bundle.get("config", {}).get("scientific_role") == (
+        NLC_FROZEN_CONFIRMATION_ROLE
+    )
 
 
 def normalize_event_ranks(ranks):
@@ -767,6 +776,7 @@ def _science_status(bundle):
         "verdict_sha256": _sha256(path),
         "verdict_status": verdict.get("status"),
         "fig4_acceptance": verdict.get("fig4_acceptance"),
+        "figure_eligible": verdict.get("figure_eligible"),
         "replication_pass": verdict.get("replication_pass"),
         "replication_rule": verdict.get("replication_rule"),
         "network_seed_is_the_independent_unit": verdict.get(
@@ -780,6 +790,11 @@ def _status_banner(fig, status):
     if status is None:
         return None
     acceptance = status.get("fig4_acceptance")
+    if acceptance is None and status.get("figure_eligible") is not None:
+        acceptance = (
+            "FIGURE_ELIGIBLE" if status["figure_eligible"]
+            else "DIAGNOSTIC_ONLY"
+        )
     verdict = status.get("verdict_status")
     if acceptance is None and verdict is None:
         return None
@@ -897,6 +912,17 @@ def _render_direct(bundle, output_dir):
     context = None
     if _is_spatial_ou(bundle):
         context = _plot_landscape(axes[0], bundle)
+        if _is_nlc_confirmation(bundle):
+            axes[0].text2D(
+                0.01, 0.97, "Node field + local E-to-E/E-to-I",
+                transform=axes[0].transAxes, ha="left", va="top",
+                fontsize=11.5, weight="bold", color="#243238",
+            )
+            axes[0].text2D(
+                0.01, 0.90, "fixed topology/delays; incoming-E budgets conserved",
+                transform=axes[0].transAxes, ha="left", va="top",
+                fontsize=8.8, color="#405158",
+            )
     else:
         _plot_flow(axes[0], bundle)
     _plot_mode_density(
@@ -909,7 +935,8 @@ def _render_direct(bundle, output_dir):
     science_status = _science_status(bundle)
     banner = _status_banner(fig, science_status)
     stem = Path(output_dir) / (
-        "fig4a_spatial_ou_direct_readout" if _is_spatial_ou(bundle)
+        "fig4a_nlc_direct_readout" if _is_nlc_confirmation(bundle)
+        else "fig4a_spatial_ou_direct_readout" if _is_spatial_ou(bundle)
         else "fig4a_spatial_edge_flow_direct_readout"
     )
     metadata = _metadata(bundle, (
@@ -940,6 +967,28 @@ def _render_direct(bundle, output_dir):
         "science_status": science_status,
         "rendered_status_banner": banner,
     })
+    if _is_nlc_confirmation(bundle):
+        verdict = _json(bundle["output_root"] / "confirmation_verdict.json")
+        structure = verdict["structure_and_provenance_audit"]
+        metadata["local_connectivity_contract"] = {
+            "mechanism": bundle["config"]["local_connectivity_basis"][
+                "representation"
+            ],
+            "feature_names": bundle["config"]["local_connectivity_basis"][
+                "feature_names"
+            ],
+            "coefficients_E_to_E_E_to_I": bundle["candidate"]["coefficients"],
+            "topology": bundle["config"]["local_connectivity_basis"]["topology"],
+            "delays": bundle["config"]["local_connectivity_basis"]["delays"],
+            "incoming_weight_budget": bundle["config"][
+                "local_connectivity_basis"
+            ]["incoming_weight_budget"],
+            "observed_edge_ratio_range": [
+                structure["minimum_edge_ratio"],
+                structure["maximum_edge_ratio"],
+            ],
+            "Z_M_role": verdict.get("Z_M_role"),
+        }
     if context is not None:
         metadata["figure2a_geometry_context"] = {
             key: context[key] for key in (
@@ -1129,6 +1178,32 @@ def _kmeans_qualifier_caption(
     return text
 
 
+def _equal_network_row(bundle):
+    """Return the accepted equal-network natural/cross-fit metrics, if present."""
+    role = bundle["config"].get("scientific_role")
+    accepted_roles = {
+        "development_only_continuous_field_natural_kmeans_fresh_closeout",
+        JOINT_CONTINUOUS_SURFACE_ROLE,
+        "development_only_continuous_field_joint_direction_replication",
+        NLC_FROZEN_CONFIRMATION_ROLE,
+    }
+    if role not in accepted_roles:
+        return None
+    verdict = _json(bundle["output_root"] / "confirmation_verdict.json")
+    if role == "development_only_continuous_field_joint_direction_replication":
+        d61_row = verdict["candidate_metrics"]
+        if d61_row["candidate_id"] != bundle["candidate_id"]:
+            raise RuntimeError("D6.3 figure candidate differs from verdict")
+        return d61_row
+    row = next(
+        row for row in verdict["candidate_rows"]
+        if row["candidate_id"] == bundle["candidate_id"]
+    )
+    if role == NLC_FROZEN_CONFIRMATION_ROLE:
+        row = row["crossfit_and_natural_metrics"]
+    return row
+
+
 def _render_kmeans(bundle, output_dir):
     sys.path.insert(0, str(ROOT))
     from scripts import plot_interictal_propagation as propagation_plot  # noqa: E402
@@ -1278,23 +1353,8 @@ def _render_kmeans(bundle, output_dir):
     cluster_matrix = _similarity(cluster_profiles, patient)
     matrix = cluster_matrix
     displayed_matrix_contract = "pooled KMeans cluster vs patient profile"
-    d61_row = None
-    role = bundle["config"].get("scientific_role")
-    if role in {
-            "development_only_continuous_field_natural_kmeans_fresh_closeout",
-            JOINT_CONTINUOUS_SURFACE_ROLE,
-            "development_only_continuous_field_joint_direction_replication"}:
-        verdict_path = bundle["output_root"] / "confirmation_verdict.json"
-        verdict = _json(verdict_path)
-        if role == "development_only_continuous_field_joint_direction_replication":
-            d61_row = verdict["candidate_metrics"]
-            if d61_row["candidate_id"] != bundle["candidate_id"]:
-                raise RuntimeError("D6.3 figure candidate differs from verdict")
-        else:
-            d61_row = next(
-                row for row in verdict["candidate_rows"]
-                if row["candidate_id"] == bundle["candidate_id"]
-            )
+    d61_row = _equal_network_row(bundle)
+    if d61_row is not None:
         numeric_matrices = np.asarray([
             seed_row["crossfit_patient_readout"]["matrix"]
             for seed_row in d61_row["natural_kmeans_by_network"].values()
@@ -1354,7 +1414,8 @@ def _render_kmeans(bundle, output_dir):
         cluster_matrix,
     )
     stem = Path(output_dir) / (
-        "fig4b_spatial_ou_kmeans_consistency" if _is_spatial_ou(bundle)
+        "fig4b_nlc_kmeans_consistency" if _is_nlc_confirmation(bundle)
+        else "fig4b_spatial_ou_kmeans_consistency" if _is_spatial_ou(bundle)
         else "fig4b_spatial_edge_flow_kmeans_consistency"
     )
     metadata = _metadata(bundle, (
@@ -1376,6 +1437,16 @@ def _render_kmeans(bundle, output_dir):
             ]
         ),
         "d6_1_equal_network_crossfit_margin": (
+            None if d61_row is None else d61_row[
+                "crossfit_margin_equal_network"
+            ]
+        ),
+        "equal_network_natural_kmeans": (
+            None if d61_row is None else d61_row[
+                "natural_balanced_alignment_equal_network"
+            ]
+        ),
+        "equal_network_crossfit_margin": (
             None if d61_row is None else d61_row[
                 "crossfit_margin_equal_network"
             ]
@@ -1437,6 +1508,7 @@ def _write_readme(output_dir, bundle):
             "development_only_continuous_field_natural_kmeans_fresh_closeout",
             JOINT_CONTINUOUS_SURFACE_ROLE,
             "development_only_continuous_field_joint_direction_replication",
+            NLC_FROZEN_CONFIRMATION_ROLE,
         }
         n_networks = len(bundle["config"].get("search", {}).get(
             bundle.get("network_seed_key", "fit_network_seeds"), [],
@@ -1464,6 +1536,20 @@ def _write_readme(output_dir, bundle):
                if status.get("replication_pass") is False else "")
             + "\n\n"
         )
+        if _is_nlc_confirmation(bundle):
+            path.write_text(f"""{status_text}### fig4a_nlc_direct_readout
+
+这张图展示 final fresh-network 确认中的冻结候选 `{bundle['candidate_id']}`。左侧是连续 Node field，并明确标注同一底物上的局部 E-to-E/E-to-I 权重重分配；连接 topology 与 delays 不变，每个 postsynaptic target 的 incoming-E 总量按 pathway 守恒。中间汇总 {n_networks} 张网络的 formal clean Model TA/Model TB onset density，右侧从同一张网络选择一对时间分离的 MTA/MTB 事件，展示全部 15 个虚拟触点的 30--80 Hz firing-density envelope。
+
+**关注点**：这是静态 Node-connectivity substrate 的 development confirmation。波形不是 clinical SEEG，也不是 current-LFP；Z/M 在本轮关闭，不能由此声称发作生命周期已经统一。
+
+### fig4b_nlc_kmeans_consistency
+
+这张图只使用同一冻结候选中 returned、双杆、patient-support 内、且至少有 3 个参与触点的 formal clean events。heatmap、missing-contact mask、固定触点顺序和 rank profile 复用 Figure 1E painter；KMeans 不读取患者标签。{matrix_text}图下方同时给出 pooled 描述统计和 {n_networks} 张网络等权的 natural alignment / contact-split cross-fit 区间。
+
+**关注点**：本轮通过的是同网络双簇、正 patient geometry 和相对 Node-only 的 composite-score 增益；它仍是 patient-development 结果，不是 patient-blind generalization 或完整患者间期波形复现。
+""")
+            return
         path.write_text(f"""{status_text}### fig4a_spatial_ou_direct_readout
 
 这张图展示 {spatial_candidate_context} `{bundle['candidate_id']}`。左侧直接复用 Figure 2A 的 E1146 ICL/SCL 三维几何、正交相机和触点投影语法：20 个局部植入触点全部显示，其中未进入 SNN readout 的 SCL1-SCL5 为灰色；透明投影平面覆盖连续 `h` landscape。中间按 Figure 2 冻结模板核正为 Model TA（数值标签 1）和 Model TB（数值标签 0），分别汇总所有 formal clean 事件的 earliest-contact density 与平均传播方向；右侧显示同一网络中触点支持最高且时间上分离的 MTA/MTB 事件对，并按 Figure 1E 的固定顺序展示全部 15 个 readout 电极。
@@ -1536,6 +1622,9 @@ def main():
     science_status = _science_status(bundle)
     print(json.dumps({
         "status": (
+            "REV11NLC_FIG4_CONFIRMATION_COMPLETE"
+            if config.get("scientific_role") == NLC_FROZEN_CONFIRMATION_ROLE
+            else
             "REV10D6_2_FIG4_DIAGNOSTIC_COMPLETE"
             if config.get("scientific_role") == JOINT_CONTINUOUS_SURFACE_ROLE
             else
