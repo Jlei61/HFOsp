@@ -106,6 +106,17 @@ def _pump_off_overrides(ne):
     }
 
 
+def _baseline_event_bar(baseline):
+    """Read the accepted LC baseline schema without alias guessing."""
+
+    if baseline.get("schema") != "fcxr_lc1_seed1_classifier_snapshot_v1":
+        raise RuntimeError("unexpected LC6A baseline classifier schema")
+    value = float(baseline["frozen_event_bar"])
+    if not np.isfinite(value) or not 0.0 < value < 1.0:
+        raise RuntimeError("frozen baseline event bar is invalid")
+    return value
+
+
 def _probe_system(condition, manifest_path):
     manifest_path, manifest, source_summary = NAT._validate_manifest(manifest_path, condition)
     summary = json.loads(source_summary.read_text())
@@ -249,8 +260,9 @@ def lock_amplitude(manifest_path):
         return json.loads(LOCK.read_text())
     S, state, graph, _meta, _manifest = _probe_system("C0", manifest_path)
     baseline = NAT.U2._baseline()
+    event_bar = _baseline_event_bar(baseline)
     S, state, quiet_rows = _find_c0_quiet_state(
-        S, state, prelock["timing"], baseline["event_bar"],
+        S, state, prelock["timing"], event_bar,
     )
     centers = locked_patch_centers(
         S, patch_radius_mm=prelock["geometry"]["patch_radius_mm"],
@@ -268,7 +280,7 @@ def lock_amplitude(manifest_path):
     for fraction in prelock["amplitude_lock"]["candidate_fractions"]:
         amplitude = float(fraction) * i_ref
         sham, probe, paired = _pair(S, state, centers["neutral_axis"], amplitude, prelock)
-        subthreshold = paired["max_active_fraction_1ms_probe"] < float(baseline["event_bar"])
+        subthreshold = paired["max_active_fraction_1ms_probe"] < event_bar
         candidates.append({
             "fraction": float(fraction), "amplitude": amplitude,
             "subthreshold": bool(subthreshold),
@@ -297,7 +309,7 @@ def lock_amplitude(manifest_path):
         "quiet_search": quiet_rows,
         "patch_centers": centers,
         "amplitude_reference": {"definition": prelock["amplitude_lock"]["reference"], "value": i_ref},
-        "event_bar": baseline["event_bar"],
+        "event_bar": event_bar,
         "candidates": candidates,
         "selected": selected,
         "source_sha256": _source_hashes(),

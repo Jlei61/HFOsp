@@ -59,3 +59,9 @@ def test_functional_probe_clears_all_inherited_pump_options_fail_closed():
         3, 18.0, cfg, NE=2, core_mask_E=np.zeros(2, dtype=bool),
     )
     assert slow.u_pump_E is None
+
+
+def test_functional_probe_reads_the_accepted_frozen_baseline_schema():
+    baseline = MOD.NAT.U2._baseline()
+    assert MOD._baseline_event_bar(baseline) == baseline["frozen_event_bar"]
+    assert "event_bar" not in baseline
