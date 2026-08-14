@@ -81,6 +81,31 @@ def _validate_prelock():
     return payload
 
 
+def _pump_off_overrides(ne):
+    """Return a complete fail-closed pump-off configuration.
+
+    ``_fresh_config`` is intentionally inherited from the LC5 substrate and
+    can therefore carry fitted pump arrays and intervention metadata.  Merely
+    setting ``use_pump=False``/``pump_Imax=0`` leaves those options live and is
+    rejected by the engine.  LC6A functional probes test Z=1/H=0 baseline E/I
+    geometry, so every pump state, observer and intervention must be absent.
+    """
+
+    return {
+        "use_pump": False,
+        "pump_sensor_only": False,
+        "pump_a_load": 0.0,
+        "pump_tau_ms": 0.0,
+        "pump_Imax": 0.0,
+        "pump_h": 3,
+        "pump_excess_mode": "rectified_excess",
+        "pump_p0_E": None,
+        "pump_u_init_E": None,
+        "pump_record_calibration": False,
+        "pump_interventions": None,
+    }
+
+
 def _probe_system(condition, manifest_path):
     manifest_path, manifest, source_summary = NAT._validate_manifest(manifest_path, condition)
     summary = json.loads(source_summary.read_text())
@@ -96,14 +121,13 @@ def _probe_system(condition, manifest_path):
         S["net"] = replace_e_to_i_in_net(S["net"], graph, ne=S["NE"], ni=S["NI"])
     NAT.U2.install_registered_noise_rng(S["net"])
     cfg = NAT._fresh_config(summary, S["NE"])
+    cfg.update(_pump_off_overrides(S["NE"]))
     cfg.update(
         use_z=False,
         z_frozen_E=np.ones(S["NE"], dtype=float),
         use_h_lc2=True,
         h_lc2_init_E=np.zeros(S["NE"], dtype=float),
         rho_h_lc2=0.0,
-        use_pump=False,
-        pump_Imax=0.0,
         use_m=False,
         use_x=True,
         x_relay_frozen_E=np.ones(S["NE"], dtype=float),

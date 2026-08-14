@@ -37,3 +37,25 @@ def test_runner_requires_explicit_lc5_authorization_and_never_reads_q_trajectory
     assert "lc5_to_lc6a_authorization.json" in source
     assert 'q_trajectory_outcome_read": False' in source
     assert "paired functional arms did not share exact external input" in source
+
+
+def test_functional_probe_clears_all_inherited_pump_options_fail_closed():
+    hostile = {
+        "use_pump": True,
+        "pump_sensor_only": True,
+        "pump_a_load": 2.0,
+        "pump_tau_ms": 8000.0,
+        "pump_Imax": 4.0,
+        "pump_p0_E": np.ones(2),
+        "pump_u_init_E": np.ones(2),
+        "pump_record_calibration": True,
+        "pump_interventions": [{"kind": "pump_current_knockout", "step": 1}],
+    }
+    hostile.update(MOD._pump_off_overrides(2))
+    cfg = MOD.MZSlowVarsConfig(**hostile)
+    # Engine validation, rather than a shallow dict assertion, locks the exact
+    # failure that stopped the first real amplitude-lock run.
+    slow = MOD.MZSlowVars(
+        3, 18.0, cfg, NE=2, core_mask_E=np.zeros(2, dtype=bool),
+    )
+    assert slow.u_pump_E is None
