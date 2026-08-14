@@ -22,6 +22,7 @@ for path in (ROOT, ROOT / "scripts", ROOT / "src/snn_engine"):
 
 import build_topic4_fcxr_lc6a_graph_condition as CONDITION  # noqa: E402
 import build_topic4_fcxr_lc6a_graph_family as FAMILY  # noqa: E402
+from src.topic4_fcxr_lc6_surround import EToIGraph, graph_sha256  # noqa: E402
 
 
 Q_IDS = ("Q1", "Q2", "Q3")
@@ -67,9 +68,21 @@ def _archive_attempt(condition: str, round_index: int) -> Path:
 
 def _read_condition(condition: str) -> dict:
     path = FAMILY.OUT / f"graph_condition_{condition}.json"
-    if not path.is_file():
+    if path.is_file():
+        return json.loads(path.read_text())
+    graph_path = FAMILY.OUT / f"graphs/{condition}.npz"
+    if not graph_path.is_file():
         raise RuntimeError(f"missing condition audit: {condition}")
-    return json.loads(path.read_text())
+    with np.load(graph_path, allow_pickle=False) as z:
+        graph = EToIGraph(
+            np.asarray(z["sources"], np.int32), np.asarray(z["weights"]),
+            np.asarray(z["delay_steps"], np.int32),
+        )
+        expected = str(z["graph_sha256"][0])
+        metadata = json.loads(str(z["metadata_json"][0]))
+    if graph_sha256(graph) != expected or metadata.get("graph_sha256") != expected:
+        raise RuntimeError(f"graph artifact hash mismatch: {condition}")
+    return metadata
 
 
 def recalibrate(manifest_path: Path, addendum_path: Path) -> dict:
