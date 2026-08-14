@@ -51,7 +51,7 @@ def test_functional_probe_clears_all_inherited_pump_options_fail_closed():
         "pump_record_calibration": True,
         "pump_interventions": [{"kind": "pump_current_knockout", "step": 1}],
     }
-    hostile.update(MOD._pump_off_overrides(2))
+    hostile.update(MOD.NAT._pump_off_overrides())
     cfg = MOD.MZSlowVarsConfig(**hostile)
     # Engine validation, rather than a shallow dict assertion, locks the exact
     # failure that stopped the first real amplitude-lock run.

@@ -15,13 +15,29 @@ SPEC.loader.exec_module(RUNNER)
 def test_fresh_config_has_only_ZH_dynamic_and_freezes_X_at_one():
     summary = {"config_scalar": {
         "use_z": True, "use_h_lc2": True, "use_pump": True,
-        "pump_Imax": 4.0, "use_m": True, "use_x": True,
+        "pump_sensor_only": True, "pump_a_load": 2.0,
+        "pump_tau_ms": 8000.0, "pump_Imax": 4.0,
+        "pump_p0_E": np.ones(3), "pump_u_init_E": np.ones(3),
+        "pump_record_calibration": True,
+        "pump_interventions": [{"kind": "pump_current_knockout", "step": 1}],
+        "use_m": True, "use_x": True,
     }}
     cfg = RUNNER._fresh_config(summary, 3)
     assert cfg["use_z"] is True and cfg["use_h_lc2"] is True
     assert cfg["use_pump"] is False and cfg["pump_Imax"] == 0.0
     assert cfg["use_m"] is False and cfg["use_x"] is True
     assert cfg["x_relay_frozen_E"].tolist() == [1.0, 1.0, 1.0]
+    assert cfg["pump_p0_E"] is None and cfg["pump_u_init_E"] is None
+    assert cfg["pump_interventions"] is None
+    engine_cfg = dict(cfg)
+    engine_cfg.update(
+        use_z=False, use_h_lc2=False, use_x=False, x_relay_frozen_E=None,
+    )
+    slow = RUNNER.MZSlowVars(
+        4, 18.0, RUNNER.MZSlowVarsConfig(**engine_cfg), NE=3,
+        core_mask_E=np.zeros(3, dtype=bool),
+    )
+    assert slow.u_pump_E is None
 
 
 def test_manifest_and_runner_lock_no_kick_event_aligned_contract():

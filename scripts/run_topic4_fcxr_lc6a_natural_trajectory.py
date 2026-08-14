@@ -164,14 +164,34 @@ def _load_c0_ied_reference(condition):
     return int(json.loads(summary.read_text())["n_returning_pre_onset"])
 
 
+def _pump_off_overrides():
+    """Return the complete engine-valid pump-off state for LC6A.
+
+    The frozen LC5 source contains fitted pump arrays and intervention
+    metadata.  ``use_pump=False`` alone is deliberately rejected by the
+    engine when any of those options remain live, so the natural and
+    functional LC6A paths share this single fail-closed reset.
+    """
+
+    return {
+        "use_pump": False,
+        "pump_sensor_only": False,
+        "pump_a_load": 0.0,
+        "pump_tau_ms": 0.0,
+        "pump_Imax": 0.0,
+        "pump_h": 3,
+        "pump_excess_mode": "rectified_excess",
+        "pump_p0_E": None,
+        "pump_u_init_E": None,
+        "pump_record_calibration": False,
+        "pump_interventions": None,
+    }
+
+
 def _fresh_config(summary, ne):
     cfg = dict(summary["config_scalar"])
+    cfg.update(_pump_off_overrides())
     cfg.update(
-        use_pump=False,
-        pump_sensor_only=False,
-        pump_Imax=0.0,
-        pump_p0_E=np.zeros(int(ne), dtype=float),
-        pump_u_init_E=np.zeros(int(ne), dtype=float),
         use_m=False,
         use_x=True,
         x_relay_frozen_E=np.ones(int(ne), dtype=float),
