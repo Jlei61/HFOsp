@@ -55,6 +55,9 @@ LOCAL_CONNECTIVITY_AUDITOR = (
 JOINT_LOCAL_CONNECTIVITY_AUDITOR = (
     ROOT / "scripts/audit_topic4_rev11_nlc_joint_node_connectivity_fit.py"
 )
+JOINT_LOCAL_CONNECTIVITY_SELECTION_AUDITOR = (
+    ROOT / "scripts/audit_topic4_rev11_nlc_joint_node_connectivity_selection.py"
+)
 DEFAULT_CONFIG = ROOT / "config/topic4_rev10_r_graph_edge_flow.json"
 NUMERIC_ENV = {
     "BLIS_NUM_THREADS": "1",
@@ -342,12 +345,16 @@ def main():
     local_connectivity_joint_fit = config["scientific_role"] == (
         "development_only_data_driven_node_local_connectivity_joint_fit"
     )
+    local_connectivity_joint_selection = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_joint_selection"
+    )
     if (dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket
             or spatial_ou_confirmation or spatial_ou_kmeans_grid
             or spatial_ou_kmeans_selection or continuous_field_kmeans
             or natural_kmeans_closeout or joint_continuous_surface
             or joint_field_replication or local_connectivity
-            or local_connectivity_joint_fit):
+            or local_connectivity_joint_fit
+            or local_connectivity_joint_selection):
         auditor = (
             SPATIAL_OU_CONFIRMATION_AUDITOR if spatial_ou_confirmation
             else SPATIAL_OU_KMEANS_SELECTION_AUDITOR if spatial_ou_kmeans_selection
@@ -356,6 +363,8 @@ def main():
             else NATURAL_KMEANS_CLOSEOUT_AUDITOR if natural_kmeans_closeout
             else JOINT_CONTINUOUS_SURFACE_AUDITOR if joint_continuous_surface
             else JOINT_FIELD_REPLICATION_AUDITOR if joint_field_replication
+            else JOINT_LOCAL_CONNECTIVITY_SELECTION_AUDITOR
+            if local_connectivity_joint_selection
             else JOINT_LOCAL_CONNECTIVITY_AUDITOR if local_connectivity_joint_fit
             else LOCAL_CONNECTIVITY_AUDITOR if local_connectivity
             else SPATIAL_OU_BRACKET_AUDITOR if spatial_ou_bracket
@@ -369,7 +378,7 @@ def main():
         ], cwd=ROOT, check=True, env={**os.environ, **NUMERIC_ENV})
         verdict_path = output_root / (
             "confirmation_verdict.json" if spatial_ou_confirmation or natural_kmeans_closeout or joint_continuous_surface or joint_field_replication
-            else "selection_verdict.json" if spatial_ou_kmeans_selection
+            else "selection_verdict.json" if spatial_ou_kmeans_selection or local_connectivity_joint_selection
             else "canary_verdict.json"
         )
         verdict = json.loads(verdict_path.read_text())
@@ -377,12 +386,12 @@ def main():
     else:
         completion = f"Fit screen completed: {len(completed)}/{len(jobs)}"
     subprocess.run([
-        "notify-send", "Topic 4 rev11-NLC" if local_connectivity or local_connectivity_joint_fit else "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection or continuous_field_kmeans or natural_kmeans_closeout or joint_continuous_surface or joint_field_replication else "Topic 4 rev10-R",
+        "notify-send", "Topic 4 rev11-NLC" if local_connectivity or local_connectivity_joint_fit or local_connectivity_joint_selection else "Topic 4 rev10-D" if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection or continuous_field_kmeans or natural_kmeans_closeout or joint_continuous_surface or joint_field_replication else "Topic 4 rev10-R",
         f"{completion}; workers={maximum}",
     ], check=False)
     print(json.dumps({
         "status": (
-            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection or continuous_field_kmeans or natural_kmeans_closeout or joint_continuous_surface or joint_field_replication or local_connectivity or local_connectivity_joint_fit
+            completion if dynamic or resource or dynamic_edge or spatial_ou or spatial_ou_bracket or spatial_ou_confirmation or spatial_ou_kmeans_grid or spatial_ou_kmeans_selection or continuous_field_kmeans or natural_kmeans_closeout or joint_continuous_surface or joint_field_replication or local_connectivity or local_connectivity_joint_fit or local_connectivity_joint_selection
             else "REV10R_EDGE_FLOW_FIT_SCREEN_COMPLETE"
         ),
         "completed": len(completed), "total": len(jobs),

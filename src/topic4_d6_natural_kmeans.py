@@ -128,7 +128,11 @@ def crossfit_patient_readout(ranks, patient_ranks, patient_labels, folds):
         })
         assignments.append(labels)
     stack = np.asarray([row["matrix"] for row in fold_rows], float)
-    matrix = np.nanmean(stack, axis=0)
+    count = np.sum(np.isfinite(stack), axis=0)
+    matrix = np.divide(
+        np.nansum(stack, axis=0), count,
+        out=np.full(stack.shape[1:], np.nan), where=count > 0,
+    )
     consensus = np.where(
         (assignments[0] >= 0) & (assignments[0] == assignments[1]),
         assignments[0], -1,

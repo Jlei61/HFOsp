@@ -294,6 +294,9 @@ def main():
             by_seed[str(seed)]["n_nonreturned_events_excluded"] = int(
                 len(onsets) - len(scored_onsets)
             )
+            by_seed[str(seed)]["fraction_time_above_common_detector"] = float(
+                payload["run"]["fraction_time_above_common_detector"]
+            )
             metadata.append(payload)
             worker_inputs.append({
                 "candidate_id": candidate["candidate_id"], "seed": seed,
@@ -585,6 +588,9 @@ def main():
     is_local_connectivity_joint_fit = config["scientific_role"] == (
         "development_only_data_driven_node_local_connectivity_joint_fit"
     )
+    is_local_connectivity_joint_selection = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_joint_selection"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -640,6 +646,8 @@ def main():
         summary["status"] = "REV11NLC_RETURNED_ONLY_CANARY_COMPLETE"
     if is_local_connectivity_joint_fit:
         summary["status"] = "REV11NLC_JOINT_FIT_RETURNED_ONLY_COMPLETE"
+    if is_local_connectivity_joint_selection:
+        summary["status"] = "REV11NLC_JOINT_SELECTION_RETURNED_ONLY_COMPLETE"
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
         or is_dynamic_edge_canary or is_spatial_ou_canary
