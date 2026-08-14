@@ -135,6 +135,7 @@ def _returned_summary_filename(config):
         "development_only_translation_invariant_spatial_ou_kmeans_grid",
         "development_only_observation_invariant_continuous_field_kmeans_screen",
         "development_only_data_driven_node_local_connectivity_canary",
+        "development_only_data_driven_node_local_connectivity_joint_fit",
     }:
         return "canary_summary_returned_only.json"
     phase = config.get("search", {}).get("phase", "fit")

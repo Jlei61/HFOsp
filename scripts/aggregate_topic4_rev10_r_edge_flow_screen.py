@@ -313,6 +313,11 @@ def main():
         ]
         row = {
             "candidate_id": candidate["candidate_id"],
+            "arm": candidate.get("arm"),
+            "node_field_sha256": candidate.get("node_field", {}).get(
+                "field_sha256"
+            ),
+            "search_coordinates": candidate.get("search_coordinates"),
             "adaptation_mode": candidate.get("adaptation", {}).get("mode", "off"),
             "adaptation_tau_ms": candidate.get("adaptation", {}).get("tau_ms", 0.0),
             "adaptation_increment_mV": candidate.get("adaptation", {}).get(
@@ -577,6 +582,9 @@ def main():
     is_local_connectivity_canary = config["scientific_role"] == (
         "development_only_data_driven_node_local_connectivity_canary"
     )
+    is_local_connectivity_joint_fit = config["scientific_role"] == (
+        "development_only_data_driven_node_local_connectivity_joint_fit"
+    )
     summary = {
         "status": (
             "REV10D_RETURNED_ONLY_CANARY_COMPLETE"
@@ -630,12 +638,14 @@ def main():
         )
     if is_local_connectivity_canary:
         summary["status"] = "REV11NLC_RETURNED_ONLY_CANARY_COMPLETE"
+    if is_local_connectivity_joint_fit:
+        summary["status"] = "REV11NLC_JOINT_FIT_RETURNED_ONLY_COMPLETE"
     basename = (
         "canary" if is_dynamic_canary or is_resource_canary
         or is_dynamic_edge_canary or is_spatial_ou_canary
         or is_spatial_ou_bracket or is_spatial_ou_kmeans_grid
         or is_continuous_field_kmeans_screen
-        or is_local_connectivity_canary
+        or is_local_connectivity_canary or is_local_connectivity_joint_fit
         else basename_by_phase[phase]
     )
     _atomic_csv(output_root / f"{basename}_candidate_summary_returned_only.csv", rows)

@@ -7,32 +7,33 @@
 - [x] Confirm target/source naming for all four pathways.
 - [x] Quantify one frozen 40k-neuron network: edge counts, fixed in-degree,
   source out-degree and distance geometry.
-- [ ] Freeze a machine-readable baseline audit with cache/config hashes.
+- [x] Freeze a machine-readable baseline audit with cache/config hashes.
 
 ## NLC1: continuous local mapper
 
-- [ ] Implement separate target-normalized E->E and E->I transforms.
-- [ ] Preserve pathway-specific incoming budgets, topology, delay bins and all
+- [x] Implement separate target-normalized E->E and E->I transforms.
+- [x] Preserve pathway-specific incoming budgets, topology, delay bins and all
   GABA matrices.
-- [ ] Test exact no-op, pathway isolation, finite values and off-field source
+- [x] Test exact no-op, pathway isolation, finite values and off-field source
   participation.
-- [ ] Add structural summaries for field/background source-target flow and
+- [ ] Add NLC2 structural summaries for field/background source-target flow and
   weighted distance.
 
 ## NLC2: capacity canary
 
-- [ ] Freeze candidate coefficient bounds before simulations.
-- [ ] Run paired `Node`, `Node+EE`, `Node+EtoI`, `Node+EE+EtoI` arms.
-- [ ] Use slow-off dynamics, common detector and common random numbers.
-- [ ] Keep only non-finite, late runaway and statistic-not-evaluable as hard
+- [x] Freeze candidate coefficient bounds before simulations.
+- [x] Run paired `Node`, `Node+EE`, `Node+EtoI`, `Node+EE+EtoI` arms.
+- [x] Use slow-off dynamics, common detector and common random numbers.
+- [x] Keep only non-finite, late runaway and statistic-not-evaluable as hard
   invalid states.
-- [ ] Select a small Pareto set using natural KMeans, cross-fitted patient
+- [x] Rescore a small Pareto set using natural KMeans, cross-fitted patient
   geometry, weakest-mode error and event yield.
 
 ## NLC3: joint search and confirmation
 
-- [ ] Release smooth observation-invariant Node perturbation coordinates.
-- [ ] Jointly fit Node and retained local-connectivity coefficients.
+- [ ] Release all 12 low-frequency whole-sheet Node perturbation coordinates.
+- [ ] Jointly fit Node and retained E->E/E->I coefficients around the two
+  complementary NLC1 centres.
 - [ ] Separate fit, selection and confirmation network pools.
 - [ ] Produce canonical direct-readout and KMeans figures.
 - [ ] Report network-level paired effects and all negative arms.
