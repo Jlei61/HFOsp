@@ -1,0 +1,49 @@
+{
+  "schema_version": 1,
+  "experiment_id": "fcxr_lc6a_functional_probe",
+  "scientific_role": "descriptive paired baseline functional geometry assay",
+  "runtime_authorization": "only after LC5 continuation is terminal-negative and all five graphs are legal",
+  "state": {
+    "z_frozen": 1.0,
+    "h_membrane_gain": 0.0,
+    "u_enabled": false,
+    "m_enabled": false,
+    "x_frozen": 1.0
+  },
+  "geometry": {
+    "patch_radius_mm": 0.25,
+    "core_adjacent_rule": "source_centroid_plus_core_radius_plus_patch_radius_toward_sink",
+    "neutral_axis_rule": "midpoint_between_source_and_sink",
+    "axis_bin_width_mm": 0.25,
+    "axis_range_mm": [-6.0, 6.0],
+    "transverse_half_width_mm": 0.75
+  },
+  "timing": {
+    "pulse_ms": 50.0,
+    "response_ms": 300.0,
+    "registered_windows_ms": [[0.0, 50.0], [50.0, 150.0], [150.0, 300.0]],
+    "minimum_c0_burnin_ms": 1000.0,
+    "quiet_search_window_ms": 300.0,
+    "maximum_c0_burnin_ms": 5000.0
+  },
+  "amplitude_lock": {
+    "location": "neutral_axis",
+    "reference": "Q95 absolute additive E drive at selected C0 exact state",
+    "candidate_fractions": [0.005, 0.01, 0.025, 0.05],
+    "selection": "largest candidate whose 300 ms probe arm remains below the frozen LC1 population-event bar",
+    "q_outcome_may_be_read": false,
+    "selected_amplitude_is_reused_for_all_graphs_and_locations": true
+  },
+  "probe_matrix": {
+    "C0": ["core_adjacent", "neutral_axis"],
+    "C1": ["neutral_axis"],
+    "Q1": ["neutral_axis"],
+    "Q2": ["core_adjacent", "neutral_axis"],
+    "Q3": ["core_adjacent", "neutral_axis"]
+  },
+  "interpretation": {
+    "zero_crossing_is_a_gate": false,
+    "weak_response_is_a_gate": false,
+    "natural_trajectory_authority": false
+  }
+}
