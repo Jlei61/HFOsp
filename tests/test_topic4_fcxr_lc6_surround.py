@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 from scipy import sparse
 
@@ -130,6 +132,12 @@ def test_stratified_asymmetric_proposal_uses_hastings_and_preserves_perp_bins():
         assert np.array_equal(np.sort(base_bin), np.sort(candidate_bin))
     assert diag["proposal"].endswith("asymmetric")
     assert "forward_reverse" in diag["hastings_correction"]
+
+
+def test_stratified_pool_builder_does_not_rescan_full_source_array_per_bin():
+    source = Path(__import__("src.topic4_fcxr_lc6_surround", fromlist=["x"]).__file__).read_text()
+    assert 'np.argsort(source_bins, kind="stable")' in source
+    assert "np.flatnonzero(source_bins == bin_id)" not in source
 
 
 def test_graph_hash_and_off_path_are_exact():

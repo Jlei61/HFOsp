@@ -312,20 +312,31 @@ def rewire_e_to_i_targetwise(
         target_weight = np.exp(logw - float(np.max(logw)))
         pools = pool_cdfs = pool_totals = source_bins = None
         selected_weight_by_bin = None
+        selected_count_by_bin = None
         if proposal_perpendicular_bin_mm is not None:
             _, d_perpendicular = projected_offsets(pos_e, pos_i[target], axis)
             source_bins = np.floor(
                 d_perpendicular / float(proposal_perpendicular_bin_mm)
             ).astype(np.int32)
             pools, pool_cdfs, pool_totals = {}, {}, {}
-            for bin_id in np.unique(source_bins):
-                pool = np.flatnonzero(source_bins == bin_id).astype(np.int32)
+            # Sort once and slice contiguous bin segments.  Re-scanning all E
+            # sources once per bin would multiply the 40k build cost by ~80.
+            bin_order = np.argsort(source_bins, kind="stable")
+            sorted_bins = source_bins[bin_order]
+            unique_bins, starts = np.unique(sorted_bins, return_index=True)
+            stops = np.concatenate((starts[1:], [len(bin_order)]))
+            for bin_id, start, stop in zip(unique_bins, starts, stops):
+                pool = bin_order[start:stop].astype(np.int32, copy=False)
                 pools[int(bin_id)] = pool
                 cdf = np.cumsum(target_weight[pool])
                 pool_cdfs[int(bin_id)] = cdf
                 pool_totals[int(bin_id)] = float(cdf[-1])
             selected_weight_by_bin = {
                 int(bin_id): float(target_weight[current[source_bins[current] == bin_id]].sum())
+                for bin_id in np.unique(source_bins[current])
+            }
+            selected_count_by_bin = {
+                int(bin_id): int(np.count_nonzero(source_bins[current] == bin_id))
                 for bin_id in np.unique(source_bins[current])
             }
         for sweep in range(int(n_sweeps)):
@@ -338,6 +349,10 @@ def rewire_e_to_i_targetwise(
                     log_q_forward = log_q_reverse = 0.0
                 else:
                     bin_id = int(source_bins[int(old[0])])
+                    if selected_count_by_bin[bin_id] >= len(pools[bin_id]):
+                        # This coarse perpendicular stratum is fully occupied;
+                        # leaving the edge unchanged is the only legal move.
+                        continue
                     candidate = _weighted_nonmember_from_cdf(
                         rng, pools[bin_id], pool_cdfs[bin_id], selected,
                     )
