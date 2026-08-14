@@ -5,10 +5,14 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
 from scipy.stats import qmc
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from scripts.run_topic4_rev9l_forced_source_worker import (
     _runtime_provenance,
@@ -17,7 +21,6 @@ from scripts.run_topic4_rev9l_forced_source_worker import (
 from src.topic4_graph_edge_flow import array_sha256
 
 
-ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_CONFIG = ROOT / "config/topic4_rev11_nlc_local_connectivity_canary.json"
 
 
