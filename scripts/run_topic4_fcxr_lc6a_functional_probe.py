@@ -52,6 +52,10 @@ def _sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def _source_hashes():
+    return {str(path.relative_to(ROOT)): _sha(path) for path in MECHANISM_FILES}
+
+
 def _write_json(path, payload):
     NAT._write_json(path, payload)
 
@@ -270,7 +274,7 @@ def lock_amplitude(manifest_path):
         "event_bar": baseline["event_bar"],
         "candidates": candidates,
         "selected": selected,
-        "source_sha256": {str(path.relative_to(ROOT)): _sha(path) for path in MECHANISM_FILES},
+        "source_sha256": _source_hashes(),
     }
     _write_json(LOCK, payload)
     return payload
@@ -284,6 +288,7 @@ def run_condition(condition, manifest_path):
     lock = json.loads(LOCK.read_text())
     if lock["prelock_sha256"] != _sha(PRELOCK):
         raise RuntimeError("functional prelock drifted after amplitude selection")
+    source_hashes = _source_hashes()
     arm = OUT / f"functional_probes/{condition}"
     if arm.is_dir():
         return json.loads((arm / "summary.json").read_text())
@@ -292,6 +297,8 @@ def run_condition(condition, manifest_path):
     locations = prelock["probe_matrix"][condition]
     summaries, arrays = {}, {}
     for location in locations:
+        if _source_hashes() != source_hashes:
+            raise RuntimeError("functional-probe source drifted during execution")
         center = lock["patch_centers"][location]
         sham, probe, paired = _pair(S, state, center, lock["selected"]["amplitude"], prelock)
         summaries[location] = {
@@ -324,6 +331,7 @@ def run_condition(condition, manifest_path):
         "locations": summaries,
         "arrays_sha256": {key: array_sha256(value) for key, value in arrays.items()},
         "zero_crossing_is_a_gate": False,
+        "source_sha256": source_hashes,
     }
     with AtomicStageBundle(arm) as bundle:
         _write_json(bundle.path("summary.json"), summary)
@@ -353,11 +361,32 @@ def main():
             fcntl.flock(lock_file.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError as exc:
             raise SystemExit("requested functional-probe stage is already running") from exc
-        if args.stage == "lock":
-            result = lock_amplitude(args.execution_manifest)
-        else:
-            result = run_condition(args.condition, args.execution_manifest)
-        print(json.dumps(NAT._jsonable(result), indent=2, sort_keys=True))
+        label = "LOCK" if args.stage == "lock" else str(args.condition)
+        sentinel_root = OUT if args.stage == "lock" else OUT / "functional_probes"
+        sentinel_root.mkdir(parents=True, exist_ok=True)
+        running = sentinel_root / f"RUNNING_LC6A_FUNCTIONAL_{label}.json"
+        failed = sentinel_root / f"FAILED_LC6A_FUNCTIONAL_{label}.json"
+        done = sentinel_root / f"DONE_LC6A_FUNCTIONAL_{label}.json"
+        _write_json(running, {"status": "RUNNING", "pid": os.getpid(), "stage": args.stage, "condition": args.condition})
+        try:
+            if args.stage == "lock":
+                result = lock_amplitude(args.execution_manifest)
+            else:
+                result = run_condition(args.condition, args.execution_manifest)
+            _write_json(done, {
+                "status": "DONE", "stage": args.stage, "condition": args.condition,
+                "result": str(LOCK if args.stage == "lock" else OUT / f"functional_probes/{args.condition}/summary.json"),
+            })
+            failed.unlink(missing_ok=True)
+            print(json.dumps(NAT._jsonable(result), indent=2, sort_keys=True))
+        except BaseException as exc:
+            _write_json(failed, {
+                "status": "FAILED", "stage": args.stage, "condition": args.condition,
+                "error": f"{type(exc).__name__}: {exc}",
+            })
+            raise
+        finally:
+            running.unlink(missing_ok=True)
 
 
 if __name__ == "__main__":
