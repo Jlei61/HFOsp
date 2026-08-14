@@ -35,7 +35,6 @@ from __future__ import annotations
 
 import argparse
 import csv
-import itertools
 import json
 import sys
 from pathlib import Path
@@ -47,7 +46,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation, PillowWriter
 from matplotlib.cm import ScalarMappable
-from matplotlib.colors import LinearSegmentedColormap, Normalize
+from matplotlib.colors import LinearSegmentedColormap, Normalize, PowerNorm
 
 _ROOT = Path(__file__).resolve().parents[1]
 if str(_ROOT) not in sys.path:
@@ -87,12 +86,17 @@ ONSET_FRAC, ONSET_MIN_Z, ONSET_SUSTAIN_MS = 0.25, 5.0, 5.0
 TOP_K, SNR_MIN_Z, SNR_MIN_CH = 40, 5.0, 5
 AXIAL_MIN_CH = 6       # 沿轴杆上至少 6 个触点的峰可测 —— 4 个点量不出梯度。
                        # 这是**可测性**门（看有几个点，不看斜率），不是挑漂亮的。
-FRAME_AVG_MS, N_FRAMES = 3.0, 5
+FRAME_AVG_MS, N_FRAMES = 3.0, 4
 CMAP_NAME = "fig2c_muted_bluegray"
 CMAP = LinearSegmentedColormap.from_list(
     CMAP_NAME,
     ["#f7f8fa", "#dfe7eb", "#b5c8d0", "#7f9eaa", "#456b78"],
 )
+FIELD_DISPLAY_GAMMA = 0.50
+FIELD_DISPLAY_NORM_ID = "fixed_power_norm_gamma_0p50"
+FIELD_DISPLAY_NORM = PowerNorm(gamma=FIELD_DISPLAY_GAMMA, vmin=0.0, vmax=1.0)
+STATIC_FIELD_NORMALIZATION_ID = "per_frame_participant_top3_mean_robust_z"
+STATIC_FIELD_CBAR_LABEL = "Relative HFO envelope"
 FRAME_PRE_MS, FRAME_MARGIN_MS, FRAME_MIN_POST_MS, FRAME_MAX_POST_MS = 8.0, 4.0, 35.0, 50.0
 GIF_STEP_MS, GIF_FPS = 2.0, 12
 NOTCH_HZ = (50.0, 100.0, 150.0, 200.0, 250.0)
@@ -130,14 +134,18 @@ TEMPLATE_GAP_COL = FIELD_CBAR_COL + 1
 TEMPLATE_FIELD_COL = TEMPLATE_GAP_COL + 1
 TEMPLATE_CBAR_COL = TEMPLATE_FIELD_COL + 1
 N_LAYOUT_COLS = TEMPLATE_CBAR_COL + 1
-PAPER_SCHEMA_ID = "fig2c_interictal_event_envelope_field_candidate_v6"
+PAPER_SCHEMA_ID = "fig2c_interictal_event_envelope_field_candidate_v10"
 FIELD_NORMALIZATION_ID = "per_event_participant_q99_over_complete_display_window"
 STATIC_FRAME_GRID_STEP_MS = 2.0
 STATIC_FRAME_MIN_GAP_MS = 8.0
-STATIC_FRAME_MIN_JOINT_VISIBILITY = 0.38
+STATIC_FRAME_MIN_JOINT_VISIBILITY = 0.24
 STATIC_FRAME_MIN_AXIS_SPAN_MM = 12.0
-STATIC_FRAME_MIN_STATE_DISTANCE = 0.10
+STATIC_FRAME_MIN_STATE_DISTANCE = 0.09
 STATIC_FRAME_MIN_CENTROID_RHO = 0.70
+STATIC_FRAME_MIN_ENDPOINT_HANDOFF = 0.10
+STATIC_FRAME_MIN_FULL_VISIBILITY = 0.30
+STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM = 2.0
+STATIC_FRAME_MIN_HOTSPOT_STEP_MM = 4.0
 
 
 def _inventory(subject):
@@ -501,9 +509,9 @@ def _panel(ax, grid, T, pts, cvals, part, vmax, title, *, show_y=False, show_x=F
     X, Y = grid
     ax.imshow(T, origin="lower",
               extent=[X.min(), X.max(), Y.min(), Y.max()], aspect="equal", cmap=CMAP,
-              vmin=0, vmax=vmax, interpolation="bilinear")
+              norm=FIELD_DISPLAY_NORM, interpolation="bilinear")
     ax.scatter(pts[part, 0], pts[part, 1], c=np.clip(cvals[part], 0, vmax), cmap=CMAP,
-               vmin=0, vmax=vmax, s=34, edgecolors="#34434a", linewidths=0.9, zorder=3)
+               norm=FIELD_DISPLAY_NORM, s=34, edgecolors="#34434a", linewidths=0.9, zorder=3)
     ax.scatter(pts[~part, 0], pts[~part, 1], facecolors="none", edgecolors="0.62", s=22,
                linewidths=0.7, zorder=3)
     ax.set_title(title, fontsize=FRAME_TITLE_SIZE)
@@ -571,6 +579,27 @@ def _event_normalization_scales(ea, eb, t_lo, t_hi, override=None):
     return scales
 
 
+def _static_frame_relative_values(raw_values, participant):
+    """Normalize one static frame by its three strongest participating contacts.
+
+    Static small multiples are intended to show where the envelope is concentrated.  A single
+    complete-window q99 makes low-amplitude but direction-qualified late frames nearly white after
+    the fixed 6-mm smoother.  The top-three mean is a robust frame-local reference: it does not let
+    one contact set the scale, and the full-field visibility gate prevents quiet noise frames from
+    being amplified into the paper panel.
+    """
+    raw = np.clip(np.asarray(raw_values, float), 0.0, None)
+    part = np.asarray(participant, bool)
+    if raw.ndim != 1 or part.shape != raw.shape:
+        raise ValueError("static frame values and participant mask must be aligned vectors")
+    if int(part.sum()) < 3:
+        raise ValueError("static frame normalization requires at least three participants")
+    scale = float(np.mean(np.sort(raw[part])[-3:]))
+    if not np.isfinite(scale) or scale <= 0:
+        raise ValueError("static frame top-three participant scale must be positive and finite")
+    return np.clip(raw / scale, 0.0, 1.0), scale
+
+
 def _normalized_axial_frame_metrics(event, fz, frame_times, scale):
     """Contact-level visibility and axis centroid; rendered field pixels are never inspected."""
     visibility, centroids, _ = _normalized_axial_frame_states(
@@ -608,13 +637,78 @@ def _normalized_axial_frame_states(event, fz, frame_times, scale):
     )
 
 
-def _select_joint_visible_frame_times(ea, eb, fz, t_lo, t_hi, scales, n_frames=N_FRAMES):
-    """Pick sparse, visible and contact-state-distinct frames with opposite overall motion.
+def _normalized_full_frame_states(event, fz, frame_times, scale):
+    """Return full-participant visibility, centroid and top-3 hotspot along the shared axis.
 
-    Selection uses normalized contact envelopes only.  The strict path requires five temporally
-    separated frames, visible axial activity in both rows, a minimum adjacent contact-state change,
-    and opposite overall centroid trends.  A generic uniform fallback keeps other subjects
-    renderable.
+    These quantities are computed from the exact contact values and frozen coordinates consumed
+    by the final 2-D field.  They deliberately include every participating shaft, closing the old
+    mismatch where an ICL-only selector could approve frames whose rendered all-shaft hotspot did
+    not move.
+    """
+    part = np.asarray(event["part"], bool)
+    if int(part.sum()) < 3:
+        raise ValueError("full-field frame selection requires >=3 participants")
+    x = np.asarray(fz["ax_mm"], float)[part]
+    visibility, centroids, hotspots, states = [], [], [], []
+    for frame_ms in np.asarray(frame_times, float):
+        raw = np.clip(
+            ief.values_at(
+                event["env_z"], event["t"], event["t0"], frame_ms,
+                avg_ms=FRAME_AVG_MS,
+            ),
+            0.0, None,
+        )
+        values = np.clip(raw / float(scale), 0.0, 1.0)[part]
+        states.append(values)
+        top_k = min(3, len(values))
+        top = np.argsort(values)[-top_k:]
+        top_values = values[top]
+        visibility.append(float(np.mean(top_values)))
+        weight = float(np.sum(values))
+        top_weight = float(np.sum(top_values))
+        centroids.append(float(np.sum(x * values) / weight) if weight > 0 else float("nan"))
+        hotspots.append(
+            float(np.sum(x[top] * top_values) / top_weight)
+            if top_weight > 0 else float("nan")
+        )
+    return (
+        np.asarray(visibility, float),
+        np.asarray(centroids, float),
+        np.asarray(hotspots, float),
+        np.asarray(states, float),
+    )
+
+
+def _axial_endpoint_contrast(event, fz, states):
+    """Return right-minus-left energy on the fixed outer thirds of the axial shaft.
+
+    This contact-level readability metric does not inspect rendered field pixels.  Unlike a
+    centroid, it only changes when energy is actually handed from one shaft end to the other, so
+    a diffuse energy plateau cannot pass as a distinct propagation frame.
+    """
+    part = np.asarray(event["part"], bool)
+    shaft = np.asarray(fz["shafts"] == fz["axial_shaft"], bool)
+    axial = part & shaft
+    x_all = np.asarray(fz["ax_mm"], float)[shaft]
+    x = np.asarray(fz["ax_mm"], float)[axial]
+    states = np.asarray(states, float)
+    if states.ndim != 2 or states.shape[1] != len(x):
+        raise ValueError("axial endpoint contrast received a misaligned contact-state matrix")
+    q1, q2 = np.quantile(x_all, [1.0 / 3.0, 2.0 / 3.0])
+    left, right = x <= q1, x >= q2
+    if not left.any() or not right.any():
+        raise ValueError("axial endpoint contrast requires participants at both shaft ends")
+    return np.mean(states[:, right], axis=1) - np.mean(states[:, left], axis=1)
+
+
+def _select_joint_visible_frame_times(ea, eb, fz, t_lo, t_hi, scales, n_frames=N_FRAMES):
+    """Pick equally spaced frames with opposite motion in the final all-shaft field inputs.
+
+    Selection uses normalized contact envelopes only.  The strict path searches arithmetic time
+    sequences on the biological 2-ms grid.  It retains the axial direction gates, then additionally
+    requires the full-participant centroid and top-3 hotspot to move at every step in the direction
+    that the final 2-D renderer is expected to show.  A generic uniform fallback keeps other
+    subjects renderable.
     """
     n_frames = int(n_frames)
     grid = np.arange(
@@ -631,75 +725,136 @@ def _select_joint_visible_frame_times(ea, eb, fz, t_lo, t_hi, scales, n_frames=N
         vis_b, cen_b, state_b = _normalized_axial_frame_states(
             eb, fz, grid, scales["TB"],
         )
+        endpoint_a = _axial_endpoint_contrast(ea, fz, state_a)
+        endpoint_b = _axial_endpoint_contrast(eb, fz, state_b)
+        full_vis_a, full_cen_a, hot_a, _ = _normalized_full_frame_states(
+            ea, fz, grid, scales["TA"],
+        )
+        full_vis_b, full_cen_b, hot_b, _ = _normalized_full_frame_states(
+            eb, fz, grid, scales["TB"],
+        )
     except ValueError:
         fallback = _static_frame_times(t_lo, t_hi, n_frames)
         return fallback, {"selection_mode": "uniform_fallback_axial_geometry"}
     joint = np.minimum(vis_a, vis_b)
+    full_joint = np.minimum(full_vis_a, full_vis_b)
     feasible = []
     late_floor = float(t_hi) - STATIC_FRAME_MIN_GAP_MS
-    for indices in itertools.combinations(range(len(grid)), n_frames):
-        idx = np.asarray(indices, int)
-        times = grid[idx]
-        if times[0] > 0.0 or times[-1] < late_floor:
-            continue
-        if float(np.min(np.diff(times))) < STATIC_FRAME_MIN_GAP_MS:
-            continue
-        if not np.all(np.isfinite(cen_a[idx])) or not np.all(np.isfinite(cen_b[idx])):
-            continue
-        if float(np.min(joint[idx])) < STATIC_FRAME_MIN_JOINT_VISIBILITY:
-            continue
-        rho_a = float(spearmanr(times, cen_a[idx]).correlation)
-        rho_b = float(spearmanr(times, cen_b[idx]).correlation)
-        if (
-            not np.isfinite(rho_a)
-            or not np.isfinite(rho_b)
-            or rho_a < STATIC_FRAME_MIN_CENTROID_RHO
-            or rho_b > -STATIC_FRAME_MIN_CENTROID_RHO
-        ):
-            continue
-        span_a = float(cen_a[idx][-1] - cen_a[idx][0])
-        span_b = float(cen_b[idx][0] - cen_b[idx][-1])
-        if span_a < STATIC_FRAME_MIN_AXIS_SPAN_MM or span_b < STATIC_FRAME_MIN_AXIS_SPAN_MM:
-            continue
-        state_step_a = np.sqrt(np.mean(np.diff(state_a[idx], axis=0) ** 2, axis=1))
-        state_step_b = np.sqrt(np.mean(np.diff(state_b[idx], axis=0) ** 2, axis=1))
-        joint_state_step = np.minimum(state_step_a, state_step_b)
-        if float(np.min(joint_state_step)) < STATIC_FRAME_MIN_STATE_DISTANCE:
-            continue
-        score = float(
-            2.0 * np.min(joint[idx])
-            + np.mean(joint[idx])
-            + 2.0 * np.min(joint_state_step)
-            + np.mean(joint_state_step)
-            + 0.1 * (rho_a - rho_b)
-        )
-        feasible.append(
-            (
-                score, tuple(float(x) for x in times), idx, span_a, span_b,
-                rho_a, rho_b, state_step_a, state_step_b, joint_state_step,
+    min_step_idx = int(np.ceil(STATIC_FRAME_MIN_GAP_MS / STATIC_FRAME_GRID_STEP_MS))
+    for step_idx in range(min_step_idx, len(grid)):
+        for start_idx in range(len(grid)):
+            idx = start_idx + np.arange(n_frames, dtype=int) * step_idx
+            if idx[-1] >= len(grid):
+                break
+            times = grid[idx]
+            if times[0] > STATIC_FRAME_GRID_STEP_MS or times[-1] < late_floor:
+                continue
+            if (
+                not np.all(np.isfinite(cen_a[idx]))
+                or not np.all(np.isfinite(cen_b[idx]))
+                or not np.all(np.isfinite(full_cen_a[idx]))
+                or not np.all(np.isfinite(full_cen_b[idx]))
+                or not np.all(np.isfinite(hot_a[idx]))
+                or not np.all(np.isfinite(hot_b[idx]))
+            ):
+                continue
+            if float(np.min(joint[idx])) < STATIC_FRAME_MIN_JOINT_VISIBILITY:
+                continue
+            rho_a = float(spearmanr(times, cen_a[idx]).correlation)
+            rho_b = float(spearmanr(times, cen_b[idx]).correlation)
+            if (
+                not np.isfinite(rho_a)
+                or not np.isfinite(rho_b)
+                or rho_a < STATIC_FRAME_MIN_CENTROID_RHO
+                or rho_b > -STATIC_FRAME_MIN_CENTROID_RHO
+            ):
+                continue
+            span_a = float(cen_a[idx][-1] - cen_a[idx][0])
+            span_b = float(cen_b[idx][0] - cen_b[idx][-1])
+            if span_a < STATIC_FRAME_MIN_AXIS_SPAN_MM or span_b < STATIC_FRAME_MIN_AXIS_SPAN_MM:
+                continue
+            state_step_a = np.sqrt(np.mean(np.diff(state_a[idx], axis=0) ** 2, axis=1))
+            state_step_b = np.sqrt(np.mean(np.diff(state_b[idx], axis=0) ** 2, axis=1))
+            joint_state_step = np.minimum(state_step_a, state_step_b)
+            if float(np.min(joint_state_step)) < STATIC_FRAME_MIN_STATE_DISTANCE:
+                continue
+            handoff_a = np.diff(endpoint_a[idx])
+            handoff_b = -np.diff(endpoint_b[idx])
+            joint_handoff = np.minimum(handoff_a, handoff_b)
+            if float(np.min(joint_handoff)) < STATIC_FRAME_MIN_ENDPOINT_HANDOFF:
+                continue
+            full_centroid_step_a = np.diff(full_cen_a[idx])
+            full_centroid_step_b = -np.diff(full_cen_b[idx])
+            joint_full_centroid_step = np.minimum(
+                full_centroid_step_a, full_centroid_step_b,
             )
-        )
+            hotspot_step_a = np.diff(hot_a[idx])
+            hotspot_step_b = -np.diff(hot_b[idx])
+            joint_hotspot_step = np.minimum(hotspot_step_a, hotspot_step_b)
+            if float(np.min(full_joint[idx])) < STATIC_FRAME_MIN_FULL_VISIBILITY:
+                continue
+            if (
+                float(np.min(joint_full_centroid_step))
+                < STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM
+            ):
+                continue
+            if float(np.min(joint_hotspot_step)) < STATIC_FRAME_MIN_HOTSPOT_STEP_MM:
+                continue
+            score = float(
+                2.0 * np.min(joint_hotspot_step)
+                + np.mean(joint_hotspot_step)
+                + np.min(joint_full_centroid_step)
+                + 0.5 * np.mean(joint_full_centroid_step)
+                + 2.0 * np.min(joint_handoff)
+                + np.mean(joint_handoff)
+                + 2.0 * np.min(joint[idx])
+                + np.mean(joint[idx])
+                + 2.0 * np.min(joint_state_step)
+                + np.mean(joint_state_step)
+                + 0.1 * (rho_a - rho_b)
+            )
+            feasible.append(
+                (
+                    score, tuple(float(x) for x in times), idx, span_a, span_b,
+                    rho_a, rho_b, state_step_a, state_step_b, joint_state_step,
+                    handoff_a, handoff_b, joint_handoff,
+                    full_centroid_step_a, full_centroid_step_b,
+                    joint_full_centroid_step, hotspot_step_a, hotspot_step_b,
+                    joint_hotspot_step,
+                    float(times[1] - times[0]),
+                )
+            )
     if not feasible:
         fallback = _static_frame_times(t_lo, t_hi, n_frames)
         return fallback, {
-            "selection_mode": "uniform_fallback_no_strict_joint_visible_solution",
+            "selection_mode": "uniform_fallback_no_strict_equal_interval_solution",
             "grid_step_ms": STATIC_FRAME_GRID_STEP_MS,
+            "times_are_equally_spaced": True,
         }
     (
         score, selected, idx, span_a, span_b, rho_a, rho_b,
         state_step_a, state_step_b, joint_state_step,
+        handoff_a, handoff_b, joint_handoff,
+        full_centroid_step_a, full_centroid_step_b, joint_full_centroid_step,
+        hotspot_step_a, hotspot_step_b, joint_hotspot_step, equal_interval_ms,
     ) = max(
         feasible, key=lambda row: (row[0], tuple(-x for x in row[1]))
     )
     return np.asarray(selected, float), {
-        "selection_mode": "joint_visible_contact_state_separation_v3",
+        "selection_mode": "equal_interval_full_field_hotspot_v6",
         "rendered_pixels_used": False,
+        "times_are_equally_spaced": True,
+        "equal_interval_ms": equal_interval_ms,
         "grid_step_ms": STATIC_FRAME_GRID_STEP_MS,
         "minimum_gap_ms": STATIC_FRAME_MIN_GAP_MS,
         "minimum_joint_visibility": STATIC_FRAME_MIN_JOINT_VISIBILITY,
         "minimum_axis_span_mm": STATIC_FRAME_MIN_AXIS_SPAN_MM,
         "minimum_contact_state_distance": STATIC_FRAME_MIN_STATE_DISTANCE,
         "minimum_abs_centroid_time_rho": STATIC_FRAME_MIN_CENTROID_RHO,
+        "minimum_endpoint_handoff_per_step": STATIC_FRAME_MIN_ENDPOINT_HANDOFF,
+        "minimum_full_participant_visibility": STATIC_FRAME_MIN_FULL_VISIBILITY,
+        "minimum_full_centroid_step_mm": STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM,
+        "minimum_top3_hotspot_step_mm": STATIC_FRAME_MIN_HOTSPOT_STEP_MM,
         "objective_score": float(score),
         "joint_visibility": [float(x) for x in joint[idx]],
         "ta_axis_centroids_mm": [float(x) for x in cen_a[idx]],
@@ -709,6 +864,22 @@ def _select_joint_visible_frame_times(ea, eb, fz, t_lo, t_hi, scales, n_frames=N
         "ta_contact_state_step_rms": [float(x) for x in state_step_a],
         "tb_contact_state_step_rms": [float(x) for x in state_step_b],
         "joint_contact_state_step_rms": [float(x) for x in joint_state_step],
+        "ta_right_minus_left_endpoint_energy": [float(x) for x in endpoint_a[idx]],
+        "tb_right_minus_left_endpoint_energy": [float(x) for x in endpoint_b[idx]],
+        "ta_endpoint_handoff_step": [float(x) for x in handoff_a],
+        "tb_endpoint_handoff_step": [float(x) for x in handoff_b],
+        "joint_endpoint_handoff_step": [float(x) for x in joint_handoff],
+        "joint_full_participant_visibility": [float(x) for x in full_joint[idx]],
+        "ta_full_centroids_mm": [float(x) for x in full_cen_a[idx]],
+        "tb_full_centroids_mm": [float(x) for x in full_cen_b[idx]],
+        "ta_full_centroid_step_mm": [float(x) for x in full_centroid_step_a],
+        "tb_full_centroid_step_mm": [float(x) for x in full_centroid_step_b],
+        "joint_full_centroid_step_mm": [float(x) for x in joint_full_centroid_step],
+        "ta_top3_hotspots_mm": [float(x) for x in hot_a[idx]],
+        "tb_top3_hotspots_mm": [float(x) for x in hot_b[idx]],
+        "ta_top3_hotspot_step_mm": [float(x) for x in hotspot_step_a],
+        "tb_top3_hotspot_step_mm": [float(x) for x in hotspot_step_b],
+        "joint_top3_hotspot_step_mm": [float(x) for x in joint_hotspot_step],
         "ta_axis_span_mm": span_a,
         "tb_axis_span_mm": span_b,
     }
@@ -855,8 +1026,9 @@ def render(
     pts = fz["points_mm"]
     sup = {"TA": _support(support_mode, fz, ea, "a"), "TB": _support(support_mode, fz, eb, "b")}
     t_lo, t_hi = _frame_window(ea, eb) if frame_window is None else map(float, frame_window)
-    # 每次事件各自在**完整显示窗**内用 participant-only q99 作分母，再 clip 到 0..1。
-    # 这让中间场只承担“事件内移动”而不承担 TA/TB 绝对幅度比较；原始 robust-z 分母写入 metadata。
+    # Complete-window q99 is used by the deterministic frame selector and retained for audit.
+    # The four static small multiples are then normalized frame-wise by the participant top-three
+    # mean so low-amplitude late frames remain spatially legible after the fixed 6-mm smoother.
     scales = _event_normalization_scales(
         ea, eb, t_lo, t_hi, override=normalization_scales_override,
     )
@@ -880,13 +1052,15 @@ def render(
     layout_engine = fig.get_layout_engine()
     if layout_engine is not None:
         layout_engine.set(w_pad=0.02, h_pad=0.02, wspace=0.015, hspace=0.015)
+    frame_scales = {"TA": [], "TB": []}
     for r, (lab, e, st) in enumerate((("TA", ea, sa), ("TB", eb, sb))):
         for c, x in enumerate(fts):
             raw = np.clip(
                 ief.values_at(e["env_z"], e["t"], e["t0"], float(x), avg_ms=FRAME_AVG_MS),
                 0.0, None,
             )
-            v = np.clip(raw / scales[lab], 0.0, 1.0)
+            v, frame_scale = _static_frame_relative_values(raw, e["part"])
+            frame_scales[lab].append(float(frame_scale))
             X, Y, T, _, _ = _event_field(fz, v, sup[lab])
             field_ax = axes[r, FRAME_COL_START + c]
             _panel(field_ax, (X, Y), T, pts, v, e["part"], vmax, _time_label(x),
@@ -894,10 +1068,10 @@ def render(
         field_cax = axes[r, FIELD_CBAR_COL]
         field_cax.set_box_aspect(1.0 / FIELD_CBAR_WIDTH_RATIO)
         field_cb = fig.colorbar(
-            ScalarMappable(Normalize(0, vmax), cmap=CMAP), cax=field_cax,
+            ScalarMappable(FIELD_DISPLAY_NORM, cmap=CMAP), cax=field_cax,
         )
         field_cb.set_ticks([0.0, 0.5, 1.0])
-        _label_colorbar(field_cb, "Normalized HFO envelope")
+        _label_colorbar(field_cb, STATIC_FIELD_CBAR_LABEL)
         axes[r, GROUP_GAP_COL].set_axis_off()
         axes[r, TEMPLATE_GAP_COL].set_axis_off()
         spec_im, _, _, _ = _readout(
@@ -926,17 +1100,26 @@ def render(
         path.parent.mkdir(parents=True, exist_ok=True)
         fig.savefig(path, dpi=dpi, bbox_inches="tight")
     plt.close(fig)
-    print(f"  [figure] {Path(out_png).name}  normalized 0..1 "
-          f"(raw q99 TA={scales['TA']:.1f}, TB={scales['TB']:.1f})  "
+    print(f"  [figure] {Path(out_png).name}  frame-relative 0..1 "
+          f"(selector q99 TA={scales['TA']:.1f}, TB={scales['TB']:.1f})  "
           f"window {t_lo:+.0f}..{t_hi:+.0f} ms ({support_mode})", flush=True)
     return dict(t_lo_ms=float(t_lo), t_hi_ms=float(t_hi), vmax=float(vmax),
                 frame_times_ms=[float(x) for x in fts], support_mode=support_mode,
-                cmap=CMAP_NAME, normalization_mode=FIELD_NORMALIZATION_ID,
-                normalization_scales_robust_z={lab: float(value)
-                                               for lab, value in scales.items()},
+                cmap=CMAP_NAME, normalization_mode=STATIC_FIELD_NORMALIZATION_ID,
+                display_norm=FIELD_DISPLAY_NORM_ID,
+                display_gamma=float(FIELD_DISPLAY_GAMMA),
+                frame_normalization_scales_robust_z=frame_scales,
+                frame_normalization_reference=(
+                    "within each displayed static frame, mean of the three strongest "
+                    "participating-contact envelopes equals 1; values are clipped to 0..1"
+                ),
+                selection_normalization_mode=FIELD_NORMALIZATION_ID,
+                complete_window_q99_robust_z_for_selection_and_audit={
+                    lab: float(value) for lab, value in scales.items()
+                },
                 static_frame_selection=frame_selection,
-                field_colorbars=("one labeled normalized HFO envelope bar per TA/TB row; "
-                                 "each displays 0..1 after its own complete-window q99 scaling"),
+                field_colorbars=("one labeled relative HFO envelope bar per TA/TB row; each "
+                                 "static frame uses its own participant top-three mean reference"),
                 readout_colorbars="one labeled normalized-magnitude 0..1 bar per TA/TB row",
                 template_colorbars=("one viridis bar per TA/TB row titled ranks; actual frozen "
                                     "rank numbers with separate early/late endpoint text"),
@@ -1030,7 +1213,7 @@ def render_gif(
         field_cax = axes[r, 4]
         field_cax.set_box_aspect(1.0 / FIELD_CBAR_WIDTH_RATIO)
         field_cb = fig.colorbar(
-            ScalarMappable(Normalize(0, vmax), cmap=CMAP),
+            ScalarMappable(FIELD_DISPLAY_NORM, cmap=CMAP),
             cax=field_cax,
         )
         field_cb.set_ticks([0.0, 0.5, 1.0])
@@ -1093,6 +1276,7 @@ def render_gif(
         playback_duration_sec=float(len(frame_times) / fps),
         frame_average_ms=float(FRAME_AVG_MS), t_lo_ms=float(t_lo), t_hi_ms=float(t_hi),
         vmax=float(vmax), cmap=CMAP_NAME, normalization_mode=FIELD_NORMALIZATION_ID,
+        display_norm=FIELD_DISPLAY_NORM_ID, display_gamma=float(FIELD_DISPLAY_GAMMA),
         normalization_scales_robust_z={lab: float(value) for lab, value in scales.items()},
         display_sigma_mm=float(fz["display_sigma_mm"]),
         readout_cursor="black dashed line at the displayed field time",
@@ -1130,13 +1314,13 @@ def _write_paper_ready_readme(figures_dir, ds_sid, js, static_meta, gif_meta):
 
 同一对 TA/TB exemplar 的动态版本。生物学时间从 {gif_meta['t_lo_ms']:+.0f} 到 {gif_meta['t_hi_ms']:+.0f} ms，帧间隔 {gif_meta['biological_step_ms']:.0f} ms；播放速度 {gif_meta['playback_fps']:.0f} fps 只用于观看，不代表真实时间倍率。左侧黑色虚线与中间当前 envelope field 帧严格同步，最右冻结 template rank field 保持不动。
 
-**关注点**：比较 TA/TB 热区沿冻结 shared axis 的相反移动；GIF 与静态 candidate 必须使用同一 exemplar、support、几何、6 mm display kernel，以及各事件在完整显示窗内冻结的 q99 归一化分母。中间场不能再用于比较 TA/TB 绝对 robust-z 幅度。
+**关注点**：比较 TA/TB 热区沿冻结 shared axis 的相反移动；GIF 与静态 candidate 使用同一 exemplar、support、几何、6 mm display kernel 和 colormap，但量纲承担不同任务：GIF 固定每事件完整窗 q99 以保留连续幅度演化，静态小图逐帧以最强三个参与触点的均值归一化以突出空间位置。两者都不能用于比较 TA/TB 绝对 robust-z 幅度。
 """
     text = f"""# Fig2-C candidate：E1146 间期单事件包络传播场
 
 ### {stem}.png / .pdf
 
-Fig2-C representative-subject 单事件候选：每行只放一个 exemplar（TA 一次、TB 一次），不是多事件 train。三组内容依次为：左侧 `Sample from TA/TB` normalized-magnitude spectrogram 与质心轨迹；中间 participant-only 单带 HFO Hilbert amplitude envelope 场；最右冻结群体 TA/TB propagation-rank field。静态帧为 `{frame_text} ms`，由 contact-level joint-visible state-separation selector 在 2 ms 网格上确定：两行轴杆共同可见度至少 {STATIC_FRAME_MIN_JOINT_VISIBILITY:.2f}、相邻帧至少 {STATIC_FRAME_MIN_GAP_MS:.0f} ms，且 TA/TB 相邻归一化触点状态的 RMS distance 至少 {STATIC_FRAME_MIN_STATE_DISTANCE:.2f}；整体轴向质心-时间方向保持相反。选择过程不读取渲染像素。中间先在每次事件的完整显示窗内，以 participant-only robust-z envelope q99 为分母归一化并 clip 到 0–1，再用低饱和蓝灰顺序色图 `{CMAP_NAME}` 显示；这增强事件内移动，但取消 TA/TB 绝对幅度比较。最右使用 `viridis`，colorbar 顶部写 `ranks` 并显示 artifact 实际 rank，最低/最高端分别附 early/late。左侧两行取真实 STFT 窗的共同交集，避免无数据白边；三个 colorbar 均写明物理量。
+Fig2-C representative-subject 单事件候选：每行只放一个 exemplar（TA 一次、TB 一次），不是多事件 train。三组内容依次为：左侧 `Sample from TA/TB` normalized-magnitude spectrogram 与质心轨迹；中间 participant-only 单带 HFO Hilbert amplitude envelope 场；最右冻结群体 TA/TB propagation-rank field。静态帧为 `{frame_text} ms`，由 contact-level equal-interval full-field selector 在 2 ms 网格上确定：全部时间间隔完全相等；除轴杆共同可见度、状态分离、质心方向和端点交接门外，最终二维场实际使用的全部参与触点还必须共同可见度至少 {STATIC_FRAME_MIN_FULL_VISIBILITY:.2f}，每一步全参与触点质心至少移动 {STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM:.1f} mm，top-3 热点至少移动 {STATIC_FRAME_MIN_HOTSPOT_STEP_MM:.1f} mm（TA 向右、TB 向左）。选择过程只读取接触点包络与冻结坐标，不读取渲染像素。为避免完整窗 q99 把有效但幅度较低的后帧压成近白色，四幅静态小图分别以该帧最强三个参与触点的 robust-z envelope 均值为 1 并 clip 到 0–1；colorbar 因此写 `{STATIC_FIELD_CBAR_LABEL}`。低饱和蓝灰 `{CMAP_NAME}` 继续固定使用 `PowerNorm(gamma={FIELD_DISPLAY_GAMMA:.2f})`。这种 frame-relative 显示只比较空间集中位置，不比较帧间、TA/TB 间绝对幅度；连续幅度演化保留在 GIF 的 complete-window q99 尺度中。最右使用 `viridis`，colorbar 顶部写 `ranks` 并显示 artifact 实际 rank，最低/最高端分别附 early/late。左侧两行取真实 STFT 窗的共同交集，避免无数据白边；三个 colorbar 均写明物理量。
 
 当前 E1146 的沿轴杆 {js['axial_shaft']} 质心-轴 Spearman 为 TA {ta['fig1a_centroid_vs_axis_rho']:+.3f}、TB {tb['fig1a_centroid_vs_axis_rho']:+.3f}。显示核固定为 6 mm，只控制画布连续性，不替换冻结分析 kernel。
 
@@ -1164,7 +1348,7 @@ def package_paper_ready(
     pdf = figures_dir / f"{stem}.pdf"
     static_meta = render(
         ds_sid, fz, ea, eb, sa, sb, png, support_mode="participant",
-        extra_outputs=(pdf,), dpi=150,
+        extra_outputs=(pdf,), dpi=600,
     )
     gif_meta = None
     if make_gif:
@@ -1176,7 +1360,8 @@ def package_paper_ready(
         schema_id=PAPER_SCHEMA_ID,
         status="paper-ready Fig2-C candidate; representative subject, not final locked panel",
         ds_sid=ds_sid,
-        canonical_producer="scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py",
+        canonical_producer="scripts/paper_figures/build_main_figures_1_2.py",
+        source_producer="scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py",
         core_renderer="scripts/plot_topic5_interictal_event_envelope_field.py",
         source_metadata=str(OUT / f"{ds_sid}_event_envelope_field.json"),
         frozen_fingerprint=js["frozen_fingerprint"],
@@ -1248,7 +1433,7 @@ def _write_readme(ds_sid, fz, js):
 
 ### {main}
 
-左侧复用 Fig1a 的 Gaussian-smoothed magnitude、逐触点逐事件归一化、主增强区质心和真实 STFT cell 边界，并明确标题为单次 `Sample from TA/TB`；上下两行都写 `time (ms)`，x limits 取两次真实 STFT 窗的共同交集，标题在轴内靠右避开 colorbar，黑色竖线标记 `t=0`。中间两行在完全相同的 shared-plane 物理毫米坐标上显示 participant-only HFO envelope；TA/TB 分别用其完整显示窗的 robust-z q99 归一化到 0–1。5 个静态帧由两行共同可见度、相反轴向质心移动和相邻状态分离门共同确定，不从渲染像素手挑。低饱和蓝灰顺序色图让最右模板场保持视觉主位，同时避免弱一行整行发白；因此中间两行只比较传播形态，不比较绝对幅度。最右两幅调用冻结群体 TA/TB template-rank field 公共 renderer；`viridis` colorbar 顶部写 `ranks`，显示 artifact 实际 rank 数值并在最低/最高端分别附 early/late，两行 y-label 均简写为 `y (mm)`。沿轴杆 {fz['axial_shaft']} 的 Fig1a 质心-轴 Spearman 为 TA {ar:+.3f}、TB {br:+.3f}。
+左侧复用 Fig1a 的 Gaussian-smoothed magnitude、逐触点逐事件归一化、主增强区质心和真实 STFT cell 边界，并明确标题为单次 `Sample from TA/TB`；上下两行都写 `time (ms)`，x limits 取两次真实 STFT 窗的共同交集，标题在轴内靠右避开 colorbar，黑色竖线标记 `t=0`。中间两行在完全相同的 shared-plane 物理毫米坐标上显示 participant-only HFO envelope。4 个静态帧由严格等间距、轴向方向门和最终二维场全部参与触点的逐步质心/top-3 热点移动门共同确定，不从渲染像素手挑；每帧再以本帧最强三个参与触点的 robust-z envelope 均值归一化到 1，使幅度较低但已通过可见度门的后帧不会被完整窗 q99 压成近白色。低饱和蓝灰顺序色图固定使用 `PowerNorm(gamma={FIELD_DISPLAY_GAMMA:.2f})`；静态中间场只比较空间集中位置，不比较帧间或 TA/TB 绝对幅度。最右两幅调用冻结群体 TA/TB template-rank field 公共 renderer；`viridis` colorbar 顶部写 `ranks`，显示 artifact 实际 rank 数值并在最低/最高端分别附 early/late，两行 y-label 均简写为 `y (mm)`。沿轴杆 {fz['axial_shaft']} 的 Fig1a 质心-轴 Spearman 为 TA {ar:+.3f}、TB {br:+.3f}。
 
 **关注点**：比较两行质心轨迹与左侧热区移动是否同号相反；不要把单被试两次示例升级成跨二维组织的 traveling wave 证据。
 

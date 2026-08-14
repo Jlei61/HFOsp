@@ -99,29 +99,38 @@ Current accepted visual contract:
 
 ## Fig2-C Interictal Event Envelope Field Candidate
 
-Formal entry point:
+Canonical Figure 2 entry point:
 
 ```bash
-python scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py \
-  --subject epilepsiae_1146
+python scripts/paper_figures/build_main_figures_1_2.py \
+  --figure 2 --recompute-fig2c --fig2-gif
 ```
 
-For E1146 this command defaults to the accepted direction-qualified TA event 6344 and TB event 829;
+For E1146 this command defaults to the accepted direction-qualified TA event 6344 and TB event 937;
 pass `--use-medoid-ta` or `--use-medoid-tb` only for archived medoid sensitivity views.
 
-Default output:
+Canonical output:
 
 ```text
-results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/
+results/paper-ready-figure/fig2/figures/fig2-panelc.{png,pdf,gif}
+results/paper-ready-figure/fig2/fig2_panelc_metadata.json
 ```
+
+The lower-level producer remains `plot_fig2c_interictal_event_envelope_field.py`; when run directly,
+its default output is analysis staging under
+`results/interictal_propagation_masked/event_envelope_fields/paper_source/figures/` rather than the
+retired paper-ready top-level directory.
 
 This producer emits the same E1146 single-event representative material as PNG + vector PDF and a
 synchronized TA/TB GIF (one exemplar per row, not an event train). Each row is laid out as a narrow
-`Sample from TA/TB` readout, five joint-visible event-envelope frames, and the frozen
+`Sample from TA/TB` readout, four equally spaced joint-visible event-envelope frames, and the frozen
 population TA/TB propagation-rank field. The event field uses participant-only support, a 6 mm
-display kernel and the muted low-salience `fig2c_muted_bluegray` map. TA and TB are each divided by
-their own participant-only robust-z q99 from the complete display window and clipped to 0–1; this
-improves within-event propagation visibility but removes absolute amplitude comparison between rows.
+display kernel and the muted low-salience `fig2c_muted_bluegray` map under a fixed
+`PowerNorm(gamma=0.5)`. Each static frame is divided by the mean of its three strongest
+participating-contact robust-z envelopes and clipped to 0–1. This makes the spatial concentration
+readable after the fixed 6 mm smoother, but removes amplitude comparison across frames and rows.
+The GIF instead freezes one complete-window participant-only q99 per event so continuous amplitude
+evolution is retained without frame-wise flicker.
 The static template field uses `viridis`
 with the frozen artifact's actual rank range (E1146: 0–14), `ranks` above each colorbar, and separate
 early/late endpoint text. The readout x limits use the common intersection of the two real STFT
@@ -129,11 +138,11 @@ windows so neither row has an event-specific white edge strip. The black readout
 the static montage does not add a near-duplicate zero frame. The GIF uses the same exemplars and geometry at a 2 ms biological step;
 default playback is 12 fps, which is display metadata rather than biological time.
 
-For the E1146 v6 static montage, a deterministic contact-level state-separation selector returns
-`0, +10, +26, +36, +44 ms`: adjacent frames are at least 8 ms apart, both rows pass a 0.38 axial visibility floor,
-and every adjacent pair differs by at least 0.10 RMS in both normalized axial-contact envelope states while the
-overall TA/TB centroid trends remain opposite. Rendered field
-pixels never enter frame selection; the complete `−8…+50 ms` interval remains in the GIF.
+For the E1146 v10 static montage, a deterministic contact-level equal-interval selector returns
+`0, +16, +32, +48 ms`. It evaluates the same all-participant support used by the rendered field:
+joint visibility is at least 0.30, each adjacent TA/TB step moves the full-support weighted centroid
+by at least 2 mm in opposite directions, and each top-3 hotspot centroid moves by at least 4 mm.
+Rendered pixels never enter frame selection; the complete `−8…+50 ms` interval remains in the GIF.
 
 Future multi-event GIFs require a separate producer/spec for event boundaries, inter-event gaps,
 per-event t0 and sampling. Do not extend this single-event renderer by concatenating events.
@@ -149,12 +158,12 @@ python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
   --subject epilepsiae_1146 --top-k 500 --n-candidates 4
 
 python scripts/paper_figures/screen_fig2c_tb_event_candidates.py \
-  --subject epilepsiae_1146 --gif-event-pos 829 --mark-selected-for-fig2c
+  --subject epilepsiae_1146 --gif-event-pos 937 --mark-selected-for-fig2c
 ```
 
 The screens keep the opposite exemplar, geometry, support, sigma, frame window and global field scale
 fixed. They rank raw centroid/envelope metrics rather than image pixels and require usable participation
-on both E1146 shafts. The TA screen additionally scores axial-shaft amplitude and the five-frame axial
+on both E1146 shafts. The TA screen additionally scores axial-shaft amplitude and the four-frame axial
 energy-centroid trajectory, which prevents a strong transverse shaft from masquerading as clear
 left-to-right propagation. Outputs are written under the corresponding `ta_candidate_screen/` and
 `tb_candidate_screen/` directories. A selected

@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import json
 import sys
 from pathlib import Path
 
@@ -20,6 +21,9 @@ if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
 
 import scripts.plot_topic5_interictal_event_envelope_field as P
+import scripts.paper_figures.build_main_figures_1_2 as F12
+import scripts.paper_figures.plot_fig2c_interictal_event_envelope_field as PF
+import scripts.paper_figures.screen_fig2c_ta_event_candidates as TAS
 import scripts.paper_figures.screen_fig2c_tb_event_candidates as S
 import src.topic5_interictal_event_field as ief
 
@@ -139,6 +143,40 @@ def test_tb_screen_strict_gate_requires_both_shafts(fz, tb):
     assert S._gate_tier(row, n_middle_expected=1) == "strict"
     row["shaft_counts"]["SCL"]["n_usable"] = 1
     assert S._gate_tier(row, n_middle_expected=1) == "outside"
+
+
+def test_ta_screen_flips_direction_metrics_to_left_to_right(fz, ta):
+    row = TAS._ta_metrics(ta, fz)
+    assert row["centroid_vs_axis_rho"] > 0
+    assert row["right_minus_left_centroid_ms"] > 0
+    assert row["left_to_right_monotonic_fraction"] == pytest.approx(1.0)
+    assert row["envelope_q99"] > 0
+    assert TAS._gate_tier(row, n_middle_expected=1) == "strict"
+    row["shaft_counts"]["SCL"]["n_usable"] = 1
+    assert TAS._gate_tier(row, n_middle_expected=1) == "outside"
+
+
+def test_ta_screen_amplitude_strength_changes_ranking_when_other_metrics_tie():
+    def row(pos, amplitude):
+        return dict(
+            event_pos=pos,
+            centroid_vs_axis_rho=0.9,
+            envelope_q99=amplitude,
+            contact_peak_median=amplitude,
+            middle_peak_z_min=10.0,
+            left_to_right_monotonic_fraction=0.9,
+            right_minus_left_centroid_ms=20.0,
+            rho_vs_template=0.9,
+            axial_envelope_q99=amplitude,
+            axial_contact_peak_median=amplitude,
+            static_frame_axis_rho=0.9,
+            static_frame_axis_span_mm=20.0,
+            n_active_axial_static_frames=3,
+            axial_completion_by_50_fraction=1.0,
+        )
+
+    rows = TAS._score_rows([row(1, 10.0), row(2, 40.0)])
+    assert rows[1]["screen_score"] > rows[0]["screen_score"]
 
 
 def test_tb_screen_prioritizes_strict_middle_complete_event_over_block_diversity():
@@ -376,15 +414,38 @@ def test_no_module_level_200ms_constant():
 
 # ------------------------------------------------------------------ vmax 覆盖整个显示窗
 def test_vmax_is_computed_over_the_full_window_not_just_the_frames(fz):
-    """承重回归：readout 画的是连续时间，只用 7 帧算 vmax 会让帧间的峰意外饱和。"""
+    """承重回归：readout 画的是连续时间，只用离散帧算 vmax 会让帧间的峰意外饱和。"""
     n, fs = 1000, 1000.0
     z_full = np.ones((1, n))
     z_full[0, 470:490] = 60.0                                # 窄爆发，藏在两帧之间
-    frame_idx = [0, 150, 300, 450, 600, 750, 900]            # 7 帧全部错过它
+    frame_idx = [0, 225, 450, 675, 900]                      # 5 帧全部错过它
     frames = z_full[:, frame_idx]
     v_frames, v_full = ief.pooled_vmax([frames]), ief.pooled_vmax([z_full])
     assert v_frames == pytest.approx(1.0)                    # 只看帧 -> 以为最大值就是基线
     assert v_full > 20 * v_frames                            # 完整窗才看得到真峰
+
+
+def test_event_field_normalization_uses_one_complete_window_q99_per_event(ta, tb):
+    louder_tb = dict(tb, env_z=np.asarray(tb["env_z"], float) * 2.0)
+    scales = P._event_normalization_scales(ta, louder_tb, -8.0, 50.0)
+    assert scales["TA"] > 0
+    assert scales["TB"] == pytest.approx(2.0 * scales["TA"])
+    assert P.FIELD_NORMALIZATION_ID == (
+        "per_event_participant_q99_over_complete_display_window"
+    )
+
+
+def test_static_frame_normalization_uses_robust_participant_top3_reference():
+    raw = np.array([1.0, 3.0, 5.0, 7.0, 100.0])
+    participant = np.array([True, True, True, True, False])
+    shown, scale = P._static_frame_relative_values(raw, participant)
+    assert scale == pytest.approx((3.0 + 5.0 + 7.0) / 3.0)
+    assert shown[:4] == pytest.approx([0.2, 0.6, 1.0, 1.0])
+    assert shown[4] == pytest.approx(1.0)  # nonparticipant is clipped but excluded by support
+    assert P.STATIC_FIELD_NORMALIZATION_ID == (
+        "per_frame_participant_top3_mean_robust_z"
+    )
+    assert P.STATIC_FIELD_CBAR_LABEL == "Relative HFO envelope"
 
 
 def test_readout_title_never_prints_nan_rho(fz):
@@ -402,7 +463,7 @@ def test_compact_layout_contract():
     assert P.READOUT_WIDTH_RATIO < 0.8
     assert P.READOUT_BOX_ASPECT > 1.0
     assert P.SPEC_CBAR_WIDTH_RATIO < P.FIELD_CBAR_WIDTH_RATIO
-    assert P.FIGURE_WIDTH_IN >= 16.0
+    assert 12.5 <= P.FIGURE_WIDTH_IN <= 13.2
     assert 4.5 < P.FIGURE_HEIGHT_IN < 5.0
     assert P.FIELD_TICK_LABELSIZE >= 8
     assert P.CONTACT_TICK_LABELSIZE >= 8
@@ -424,20 +485,63 @@ def test_frame_times_are_never_duplicated():
     fts = P._static_frame_times(-15.0, 40.0, P.N_FRAMES)
     assert len(np.unique(np.round(fts, 1))) == len(fts) == P.N_FRAMES
     assert np.all(np.diff(fts) > 0)
-    assert 0.0 in fts
+    assert np.min(np.diff(fts)) >= 10.0
 
 
-def test_static_frame_times_insert_zero_into_locked_E1146_grid():
+def test_static_frame_times_avoid_redundant_zero_and_plus_four_ms():
     got = P._static_frame_times(-8.0, 50.0)
-    assert got == pytest.approx([-8.0, 0.0, 3.6, 15.2, 26.8, 38.4, 50.0])
-    assert P._time_label(0.0) == "0 ms"
-    assert P._time_label(3.6) == "+4 ms"
+    assert got == pytest.approx([-8.0, 11.333333, 30.666667, 50.0])
+    assert 0.0 not in got
+    assert P._time_label(11.333333) == "+11 ms"
+
+
+def test_joint_visible_selector_requires_both_rows_and_distinct_contact_states(
+    fz, ta, tb, monkeypatch,
+):
+    # The compact synthetic pulse fixture peaks at joint visibility 1/3; lower only this
+    # data-dependent floor while retaining the production state-distance and direction gates.
+    monkeypatch.setattr(P, "STATIC_FRAME_MIN_JOINT_VISIBILITY", 0.30)
+    # Rectangular 20-ms synthetic pulses overlap at the first handoff; the production exemplar
+    # regression below locks the non-zero endpoint gate on the raw E1146 event pair.
+    monkeypatch.setattr(P, "STATIC_FRAME_MIN_ENDPOINT_HANDOFF", -1.0)
+    monkeypatch.setattr(P, "STATIC_FRAME_MIN_FULL_VISIBILITY", 0.0)
+    monkeypatch.setattr(P, "STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM", -100.0)
+    monkeypatch.setattr(P, "STATIC_FRAME_MIN_HOTSPOT_STEP_MM", -100.0)
+    scales = P._event_normalization_scales(ta, tb, -8.0, 50.0)
+    times, audit = P._select_joint_visible_frame_times(
+        ta, tb, fz, -8.0, 50.0, scales,
+    )
+    assert len(times) == P.N_FRAMES
+    assert np.min(np.diff(times)) >= P.STATIC_FRAME_MIN_GAP_MS
+    assert np.ptp(np.diff(times)) < 1e-9
+    assert audit["selection_mode"] == "equal_interval_full_field_hotspot_v6"
+    assert audit["times_are_equally_spaced"] is True
+    assert audit["equal_interval_ms"] == pytest.approx(np.diff(times)[0])
+    assert min(audit["joint_visibility"]) >= P.STATIC_FRAME_MIN_JOINT_VISIBILITY
+    assert min(audit["joint_contact_state_step_rms"]) >= P.STATIC_FRAME_MIN_STATE_DISTANCE
+    assert min(audit["joint_endpoint_handoff_step"]) >= -1.0
+    assert len(audit["joint_full_centroid_step_mm"]) == P.N_FRAMES - 1
+    assert len(audit["joint_top3_hotspot_step_mm"]) == P.N_FRAMES - 1
+    assert audit["ta_centroid_vs_time_rho"] >= P.STATIC_FRAME_MIN_CENTROID_RHO
+    assert audit["tb_centroid_vs_time_rho"] <= -P.STATIC_FRAME_MIN_CENTROID_RHO
+
+
+def test_endpoint_contrast_tracks_actual_left_to_right_handoff(fz, ta):
+    # Four participating ICL contacts are ordered at -16, -8, 0, +8 mm.  The fixed outer
+    # thirds therefore compare the first two contacts with the last contact.
+    states = np.asarray([
+        [1.0, 0.8, 0.1, 0.0],
+        [0.3, 0.2, 0.7, 1.0],
+    ])
+    contrast = P._axial_endpoint_contrast(ta, fz, states)
+    assert contrast == pytest.approx([-0.9, 0.75])
+    assert np.diff(contrast)[0] > P.STATIC_FRAME_MIN_ENDPOINT_HANDOFF
 
 
 def test_frame_window_is_tighter_than_the_old_plus_96ms_tail(fz, ta, tb):
     lo, hi = P._frame_window(ta, tb)
     assert (lo, hi) == pytest.approx((-8.0, 39.0))
-    assert P.N_FRAMES == 7
+    assert P.N_FRAMES == 4
     assert P.FRAME_MAX_POST_MS == 50.0
 
 
@@ -453,8 +557,45 @@ def test_paper_candidate_naming_contract():
     assert P._paper_stem("epilepsiae_1146") == (
         "fig2c_candidate_E1146_interictal_event_envelope_field"
     )
-    assert P.PAPER_SCHEMA_ID == "fig2c_interictal_event_envelope_field_candidate_v1"
+    assert P.PAPER_SCHEMA_ID == "fig2c_interictal_event_envelope_field_candidate_v10"
+    assert F12.FIG2C_ACCEPTED_SCHEMA == P.PAPER_SCHEMA_ID
+    assert P.STATIC_FRAME_MIN_JOINT_VISIBILITY == pytest.approx(0.24)
+    assert P.STATIC_FRAME_MIN_ENDPOINT_HANDOFF == pytest.approx(0.10)
+    assert P.STATIC_FRAME_MIN_FULL_VISIBILITY == pytest.approx(0.30)
+    assert P.STATIC_FRAME_MIN_FULL_CENTROID_STEP_MM == pytest.approx(2.0)
+    assert P.STATIC_FRAME_MIN_HOTSPOT_STEP_MM == pytest.approx(4.0)
+    assert "paper-ready-figure" not in str(PF.DEFAULT_OUT)
     assert P.GIF_FPS == 12
+    assert PF.LOCKED_TA_EVENT_POS["epilepsiae_1146"] == 6344
+    assert PF.LOCKED_TB_EVENT_POS["epilepsiae_1146"] == 937
+
+
+def test_fig2_builder_rewrites_staging_paths_to_canonical_panel_names(tmp_path):
+    figures = tmp_path / "figures"
+    figures.mkdir()
+    metadata_path = tmp_path / "fig2_panelc_metadata.json"
+    metadata_path.write_text(json.dumps({
+        "static": {"figure": "/old/staging.png", "extra_outputs": ["/old/staging.pdf"]},
+        "gif": {"figure": "/old/staging.gif"},
+    }))
+    F12._canonicalize_fig2c_metadata(metadata_path, figures)
+    metadata = json.loads(metadata_path.read_text())
+    assert Path(metadata["static"]["figure"]).name == "fig2-panelc.png"
+    assert Path(metadata["static"]["extra_outputs"][0]).name == "fig2-panelc.pdf"
+    assert Path(metadata["gif"]["figure"]).name == "fig2-panelc.gif"
+
+
+def test_event_field_uses_muted_bluegray_not_salient_magma():
+    assert P.CMAP_NAME == "fig2c_muted_bluegray"
+    assert P.CMAP.name == P.CMAP_NAME
+    lo = np.asarray(P.CMAP(0.0)[:3])
+    hi = np.asarray(P.CMAP(1.0)[:3])
+    assert lo.mean() > 0.9
+    assert hi.mean() < 0.45
+    assert hi.max() - hi.min() < 0.22
+    assert P.FIELD_DISPLAY_GAMMA == pytest.approx(0.5)
+    assert P.FIELD_DISPLAY_NORM(0.25) == pytest.approx(0.5)
+    assert P.FIELD_DISPLAY_NORM_ID == "fixed_power_norm_gamma_0p50"
 
 
 def test_small_gif_uses_same_frozen_geometry_and_writes_real_animation(tmp_path, fz, ta, tb):
@@ -467,7 +608,11 @@ def test_small_gif_uses_same_frozen_geometry_and_writes_real_animation(tmp_path,
     )
     assert out.exists() and out.stat().st_size > 0
     assert meta["display_sigma_mm"] == pytest.approx(6.0)
-    assert meta["vmax"] > 0
+    assert meta["vmax"] == pytest.approx(1.0)
+    assert meta["normalization_mode"] == P.FIELD_NORMALIZATION_ID
+    assert meta["display_norm"] == P.FIELD_DISPLAY_NORM_ID
+    assert meta["display_gamma"] == pytest.approx(0.5)
+    assert set(meta["normalization_scales_robust_z"]) == {"TA", "TB"}
     assert meta["frame_times_ms"] == pytest.approx([-8.0, 22.0, 39.0])
     with Image.open(out) as im:
         assert im.n_frames == 3

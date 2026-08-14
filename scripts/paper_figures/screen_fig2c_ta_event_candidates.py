@@ -44,7 +44,7 @@ from scripts.plot_topic5_interictal_event_envelope_field import (  # noqa: E402
 
 
 DEFAULT_OUT = (
-    ROOT / "results/paper-ready-figure/fig2c_interictal_event_envelope_field/ta_candidate_screen"
+    ROOT / "results/interictal_propagation_masked/event_envelope_fields/ta_candidate_screen"
 )
 FRAME_WINDOW_MS = (-8.0, 50.0)
 SCHEMA_ID = "fig2c_ta_event_candidate_screen_v1"
@@ -189,8 +189,8 @@ def _write_readme(figures_dir, current, selected, raw_global_q99):
         )
         blocks.append(
             f"### {row['figure_name']}\n\n"
-            f"{status}；固定 TB event 829、frozen geometry、participant-only support、6 mm "
-            f"display kernel 和 −8…+50 ms 窗；每行按本事件完整窗 q99 归一化到 0–1。"
+            f"{status}；固定当前 TB exemplar、frozen geometry、participant-only support、6 mm "
+            f"display kernel 和 −8…+50 ms 窗；每个静态 frame 按参与触点 top-3 mean 归一化到 0–1。"
             f"TA 沿 {row['axial_shaft']} 的"
             f"质心-轴 Spearman={row['centroid_vs_axis_rho']:+.3f}，左→右单调比例="
             f"{row['left_to_right_monotonic_fraction']:.3f}，右端减左端时差="
@@ -202,8 +202,8 @@ def _write_readme(figures_dir, current, selected, raw_global_q99):
         )
     text = (
         "# Fig2-C E1146 TA 单事件增强候选筛查\n\n"
-        f"中间场使用低视觉权重 `{CMAP_NAME}`；每对 TA/TB 的 5 个静态帧由同一 joint-visible "
-        "contact-level selector 确定，不按渲染像素手挑。"
+        f"中间场使用低视觉权重 `{CMAP_NAME}`；每对 TA/TB 的 4 个等间距静态帧由同一 "
+        "joint-visible contact-level selector 确定，不按渲染像素手挑。"
         f"全候选联合 raw robust-z q99={raw_global_q99:.3f} 仅作为幅度审计，不作为显示上限。"
         "候选排序只读取原始 envelope/centroid 数值，不读取渲染像素；归一化候选图不能用于"
         "比较候选间绝对幅度。\n\n" + "\n".join(blocks)
@@ -311,7 +311,10 @@ def run(ds_sid="epilepsiae_1146", *, output_dir=DEFAULT_OUT, n_candidates=4, top
         "display_contract": {
             "frame_window_ms": list(FRAME_WINDOW_MS),
             "raw_global_q99_robust_z_for_audit": float(global_vmax),
-            "normalization": "per-event participant-only complete-window q99 to 0..1",
+            "normalization": (
+                "static: per-frame participant top3 mean to 0..1; "
+                "GIF: per-event participant complete-window q99 to 0..1"
+            ),
             "display_sigma_mm": float(frozen["display_sigma_mm"]),
             "support": "participant-only", "cmap": CMAP_NAME,
             "geometry": "frozen shared plane", "static_frame_count": 5,

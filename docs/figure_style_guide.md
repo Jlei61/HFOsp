@@ -115,13 +115,13 @@
 ### 3d. 间期单事件包络传播 frame / GIF（Fig2-C 候选）
 
 - **唯一规范**：[`docs/fig2c_interictal_event_envelope_field_spec.md`](fig2c_interictal_event_envelope_field_spec.md)。之后所有“间期传播场 frame / event-envelope GIF”先读该文件；中间单事件 envelope field 不得套用 Fig2-E 的 viridis/rank 语法，只有最右群体模板参照场保留该语法。
-- **示范图**：[`results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png`](../results/paper-ready-figure/fig2c_interictal_event_envelope_field/figures/fig2c_candidate_E1146_interictal_event_envelope_field.png)。
-- **动态 sidecar**：同目录 `fig2c_candidate_E1146_interictal_event_envelope_field.gif`。
-- **复现入口**：`scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py --subject epilepsiae_1146`；core renderer 为 `scripts/plot_topic5_interictal_event_envelope_field.py`。
-- **视觉硬锁**：每行按 `单事件 readout | 5 个 envelope frames | 冻结群体 template-rank field` 排列；readout 标题固定为 `Sample from TA/TB` 并在轴内靠右避开 colorbar，两行都写 `time (ms)`；x limits 取两次真实 STFT 窗的交集，不能在两端留无数据白条。E1146 v6 时刻为 `0, +10, +26, +36, +44 ms`，由 2 ms 网格上的 contact-level joint-visible state-separation selector 得到：相邻≥8 ms、两行轴杆共同可见度≥0.38、TA/TB 相邻归一化触点状态 RMS distance≥0.10，整体轴向质心-时间方向相反且首末位移均≥12 mm；不读渲染像素。`t=0` 同时由 readout 黑色竖线标记。
-- **量纲硬锁**：中间低饱和蓝灰 `fig2c_muted_bluegray` 的源量是单带 80–250 Hz Hilbert amplitude envelope baseline robust-z；显示时 TA/TB 分别按本事件完整显示窗的 participant-only q99 归一化并 clip 到 0–1，colorbar 写 `Normalized HFO envelope`。该颜色只表达事件内传播形态，不比较 TA/TB 绝对幅度，也不得写成 energy/power；最右 `viridis` 表示冻结群体模板传播顺序并保持视觉主位，colorbar 顶部只写 `ranks` 并显示 artifact 实际 rank（E1146 为 0–14），端点分别写 early/late。两幅模板场都写简短 `y (mm)`。
+- **示范图**：[`results/paper-ready-figure/fig2/figures/fig2-panelc.png`](../results/paper-ready-figure/fig2/figures/fig2-panelc.png)。
+- **动态 sidecar**：不进入默认主图目录；需要时显式 `--fig2-gif --recompute-fig2c` 生成。
+- **复现入口**：`scripts/paper_figures/build_main_figures_1_2.py --figure 2`；需要重读原始 EEG 时加 `--recompute-fig2c`，动态 sidecar 再加 `--fig2-gif`。Fig2-C source producer 为 `scripts/paper_figures/plot_fig2c_interictal_event_envelope_field.py`，core renderer 为 `scripts/plot_topic5_interictal_event_envelope_field.py`。
+- **视觉硬锁**：每行按 `单事件 readout | 4 个 envelope frames | 冻结群体 template-rank field` 排列；readout 标题固定为 `Sample from TA/TB` 并在轴内靠右避开 colorbar，两行都写 `time (ms)`；x limits 取两次真实 STFT 窗的交集，不能在两端留无数据白条。E1146 v10 时刻为严格等间距的 `0, +16, +32, +48 ms`，由 2 ms 网格上的 contact-level full-field selector 得到：除轴杆方向、可见度和状态分离门外，最终二维场使用的全部参与触点共同可见度≥0.30，每一步全参与触点质心至少相反移动 2 mm，top-3 热点至少相反移动 4 mm；不读渲染像素。`t=0` 同时由 readout 黑色竖线和首张 field 标题标记。
+- **量纲硬锁**：中间低饱和蓝灰 `fig2c_muted_bluegray` 的源量是单带 80–250 Hz Hilbert amplitude envelope baseline robust-z。静态四帧分别以本帧最强三个参与触点的均值为 1 并 clip 到 0–1，固定使用 `PowerNorm(gamma=0.5)`，colorbar 写 `Relative HFO envelope`；它只表达每帧空间集中位置，禁止比较帧间或 TA/TB 绝对幅度。GIF 另用每事件完整显示窗 participant-only q99 的冻结尺度，以保留连续幅度并避免闪烁。不得把任何一者写成 energy/power；最右 `viridis` 表示冻结群体模板传播顺序并保持视觉主位，colorbar 顶部只写 `ranks` 并显示 artifact 实际 rank（E1146 为 0–14），端点分别写 early/late。两幅模板场都写简短 `y (mm)`。
 - **解释边界**：最右 template field 只提供群体顺序参照，不能把左/中单事件升级成 template-free、cohort replay、二维 traveling-wave 或机制证据。
-- **数据硬锁**：frozen fingerprint/contact order/shared plane 不重拟合；单带 `return_hil_enve`；participant-only support；6 mm 只作 display kernel；GIF 与静态图使用同一 exemplar/几何/cmap 和同一对 per-event q99 分母，原始分母写 metadata；2 ms biological step 与 playback fps 分开记录。
+- **数据硬锁**：frozen fingerprint/contact order/shared plane 不重拟合；单带 `return_hil_enve`；participant-only support；6 mm 只作 display kernel；GIF 与静态图使用同一 exemplar/几何/cmap，但 normalization 明确分工（静态 frame-top3 relative；GIF per-event complete-window q99），两类原始分母都写 metadata；2 ms biological step 与 playback fps 分开记录。
 - **适用范围硬锁**：这是单事件规范——TA/TB 每行各一个 exemplar。未来多事件 GIF 必须另立事件边界、事件间隔、逐事件 t0 和抽样合同，不得把 event train 塞进本 renderer。
 - **禁止**：不称 template-free，不把 Hilbert amplitude 写成 power，不把单被试两次事件写成 cohort 传播定律、跨未采样组织的 traveling wave 或机制证明。
 

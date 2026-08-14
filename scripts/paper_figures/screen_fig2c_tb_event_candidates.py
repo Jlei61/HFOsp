@@ -4,7 +4,7 @@
 This is an audit/screening producer, not the accepted Fig. 2c producer.  It keeps the
 canonical TA exemplar fixed, excludes the current TB medoid from the alternatives, and
 ranks raw-EEG-derived TB candidates without inspecting rendered pixels.  All comparison
-figures share one frame window, field geometry, display sigma, and per-event q99 normalization rule.
+figures share one frame window, field geometry, display sigma, and static frame-relative rule.
 """
 from __future__ import annotations
 
@@ -46,8 +46,8 @@ from scripts.plot_topic5_interictal_event_envelope_field import (  # noqa: E402
 DEFAULT_OUT = (
     ROOT
     / "results"
-    / "paper-ready-figure"
-    / "fig2c_interictal_event_envelope_field"
+    / "interictal_propagation_masked"
+    / "event_envelope_fields"
     / "tb_candidate_screen"
 )
 FRAME_WINDOW_MS = (-8.0, 50.0)
@@ -182,7 +182,7 @@ def _write_readme(
         blocks.append(
             f"### {filename}\n\n"
             f"{status}；TA exemplar、shared plane、6 mm display kernel 和 −8…+50 ms frame "
-            f"window 固定；每行按本事件完整窗 q99 归一化到 0–1。TB 沿 "
+            f"window 固定；每个静态 frame 按本帧参与触点 top-3 mean 归一化到 0–1。TB 沿 "
             f"{row['axial_shaft']} 的质心-轴 Spearman="
             f"{row['centroid_vs_axis_rho']:+.3f}，中段可用 {row['n_middle_usable']}/"
             f"{row['n_middle_expected']}，中段最低 peak-z={row['middle_peak_z_min']:.1f}，"
@@ -202,7 +202,7 @@ def _write_readme(
                 f"同一 TA 与 TB event {row['event_pos']} 的动态版本；生物学步长 "
                 f"{gif['biological_step_ms']:.0f} ms，播放 {gif['playback_fps']:.0f} fps，"
                 f"并复用静态候选的 −8…+50 ms 窗口、participant-only support、6 mm "
-                f"display kernel 和同一事件的冻结 q99 归一化分母。\n\n"
+                f"display kernel；GIF 另用同一事件的冻结完整窗 q99 分母。\n\n"
                 f"**关注点**：观察 TB 两根杆参与时热区从 shared-axis 右端向中部/左端转移；"
                 f"播放速度不代表真实生物学时间倍率。"
             )
@@ -214,9 +214,9 @@ def _write_readme(
     text = (
         "# Fig2-C E1146 TB 单事件候选筛查\n\n"
         "所有图固定同一个 TA exemplar，并锁定 frozen geometry、participant-only support、"
-        f"6 mm display kernel 与 −8…+50 ms frame window。每行按本事件完整窗 q99 归一化"
-        f"到 0–1；全候选联合 raw robust-z q99={raw_global_q99:.3f} 仅作幅度审计，不作显示上限。"
-        "每行依次显示单事件 readout、5 个 joint-visible normalized HFO envelope frames、以及冻结的 "
+        f"6 mm display kernel 与 −8…+50 ms frame window。静态 frame 分别按参与触点 top-3 mean "
+        f"归一化到 0–1；全候选联合 raw robust-z q99={raw_global_q99:.3f} 仅作幅度审计，不作显示上限。"
+        "每行依次显示单事件 readout、4 个等间距 joint-visible normalized HFO envelope frames、以及冻结的 "
         "viridis template propagation-rank field；readout 取两次真实 STFT 窗交集，rank colorbar "
         "显示 artifact 实际数值。候选按原始 readout 指标筛选，不读取渲染"
         f"像素；{selection_text}\n\n"
@@ -335,7 +335,8 @@ def run(ds_sid="epilepsiae_1146", *, output_dir=DEFAULT_OUT, n_candidates=4, top
         display_contract=dict(
             frame_window_ms=list(FRAME_WINDOW_MS),
             raw_global_q99_robust_z_for_audit=float(global_vmax),
-            normalization="per-event participant-only complete-window q99 to 0..1",
+            normalization=("static: per-frame participant top3 mean to 0..1; "
+                           "GIF: per-event participant complete-window q99 to 0..1"),
             display_sigma_mm=float(fz["display_sigma_mm"]), support="participant-only",
             cmap=CMAP_NAME, geometry="frozen shared plane",
         ),
@@ -410,7 +411,18 @@ def render_candidate_gif(
     event_pos = int(event_pos)
     selected = next((r for r in payload["selected"] if int(r["event_pos"]) == event_pos), None)
     if selected is None:
-        raise ValueError(f"TB event {event_pos} is not in the frozen candidate screen")
+        selected = next(
+            (
+                r for r in payload.get("all_ranked", [])
+                if int(r["event_pos"]) == event_pos
+                and r.get("gate_tier") in {"strict", "relaxed"}
+            ),
+            None,
+        )
+    if selected is None:
+        raise ValueError(
+            f"TB event {event_pos} is not a direction-qualified event in the frozen screen"
+        )
 
     fz = load_frozen(ds_sid)
     if fz["fingerprint"] != payload["frozen_fingerprint"]:
@@ -423,7 +435,11 @@ def render_candidate_gif(
     tb = build_event(ev, event_pos, inv, subject, fz)
     figures_dir = output_dir / "figures"
     figures_dir.mkdir(parents=True, exist_ok=True)
-    png_name = selected["figure_name"]
+    png_name = selected.get("figure_name")
+    if png_name is None:
+        safe_block = Path(str(selected.get("block", "event"))).name
+        png_name = f"candidate_locked_tb_pos_{event_pos:05d}_{safe_block}.png"
+        selected["figure_name"] = png_name
     gif_path = figures_dir / f"{Path(png_name).stem}.gif"
     display = payload["display_contract"]
     raw_global_q99 = float(display.get(
@@ -442,6 +458,8 @@ def render_candidate_gif(
     selected["static"] = static_meta
     selected["gif"] = gif_meta
     if mark_selected:
+        if not any(int(r["event_pos"]) == event_pos for r in payload["selected"]):
+            payload["selected"].append(selected)
         payload["selected_for_fig2c_event_pos"] = int(event_pos)
         payload["status"] = (
             "candidate screen retained as selection provenance; selected TB event is locked "

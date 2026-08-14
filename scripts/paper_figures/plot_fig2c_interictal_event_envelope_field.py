@@ -21,12 +21,13 @@ from scripts.plot_topic5_interictal_event_envelope_field import (  # noqa: E402
 DEFAULT_OUT = (
     ROOT
     / "results"
-    / "paper-ready-figure"
-    / "fig2c_interictal_event_envelope_field"
+    / "interictal_propagation_masked"
+    / "event_envelope_fields"
+    / "paper_source"
     / "figures"
 )
 LOCKED_TA_EVENT_POS = {"epilepsiae_1146": 6344}
-LOCKED_TB_EVENT_POS = {"epilepsiae_1146": 829}
+LOCKED_TB_EVENT_POS = {"epilepsiae_1146": 937}
 
 
 def main():
@@ -42,7 +43,7 @@ def main():
     )
     ap.add_argument(
         "--tb-event-pos", type=int,
-        help="explicit direction-qualified TB exemplar; E1146 defaults to accepted event 829",
+        help="explicit full-field-qualified TB exemplar; E1146 defaults to accepted event 937",
     )
     ap.add_argument(
         "--use-medoid-ta", action="store_true",
