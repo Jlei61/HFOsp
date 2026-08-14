@@ -63,6 +63,9 @@ def run_fcxr_perturbation(
     capture_final: bool = False,
     store_spikes: bool = True,
     v_th_per_neuron=None,
+    input_sink=None,
+    membrane_term_sink=None,
+    spike_sink=None,
 ):
     """Resume an exact checkpoint and apply one local-time additive pulse.
 
@@ -118,6 +121,8 @@ def run_fcxr_perturbation(
         s_E += ring_sE[slot]; ring_sE[slot] = 0.0
         s_I += ring_sI[slot]; ring_sI[slot] = 0.0
         ext = rng.poisson(np.full(n, nu_now) * dt, size=n).astype(np.float64)
+        if input_sink is not None:
+            input_sink(int(t), float(xi), ext.copy())
         s_E += ext * c["ext_incr"]
 
         I_E = s_E + (I_E - s_E) * c["decay_i_e"]
@@ -125,6 +130,10 @@ def run_fcxr_perturbation(
         I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * c["decay_i_e"]
 
         drive, g_rel, g_rev = slow.membrane_terms(I_E, I_I, labels, I_E_rec=I_E_rec)
+        if membrane_term_sink is not None:
+            membrane_term_sink(
+                int(k), V[:ne], drive[:ne], g_rel[:ne], g_rev[:ne], slow,
+            )
         if amplitude != 0.0 and pulse_start_step <= k < pulse_start_step + pulse_steps:
             drive = np.asarray(drive).copy()
             drive[:ne] += amplitude * pattern
@@ -146,6 +155,8 @@ def run_fcxr_perturbation(
         rate_i[k] = spk[ne:].sum()
         if store_spikes:
             e_spikes[k] = spk[:ne]
+        if spike_sink is not None and np.any(spk[:ne]):
+            spike_sink(int(k), np.flatnonzero(spk[:ne]).copy())
 
         if spk.any():
             sp_e = np.where(spk[:ne])[0]

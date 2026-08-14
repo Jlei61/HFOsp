@@ -184,6 +184,35 @@ def test_zero_current_perturbation_is_exact_continuation_byte_for_byte():
     assert state_hash(sham["checkpoint"]) == state_hash(ref["checkpoint"])
 
 
+def test_perturbation_observers_are_pure_and_share_exact_external_input():
+    p, net, slow, vth = _case()
+    pre = run_fcxr_loop(
+        p, net, slow=slow, n_steps=80, capture_final=True,
+        store_spikes=False, v_th_per_neuron=vth,
+    )["checkpoint"]
+    reference = run_fcxr_perturbation(
+        p, net, start=clone_loop_state(pre), n_steps=40,
+        current_pattern=np.ones(net["NE"]), amplitude=0.0, pulse_steps=20,
+        capture_final=True, store_spikes=False, v_th_per_neuron=vth,
+    )
+    input_rows, membrane_rows, spike_rows = [], [], []
+    observed = run_fcxr_perturbation(
+        p, net, start=clone_loop_state(pre), n_steps=40,
+        current_pattern=np.ones(net["NE"]), amplitude=0.0, pulse_steps=20,
+        capture_final=True, store_spikes=False, v_th_per_neuron=vth,
+        input_sink=lambda step, xi, ext: input_rows.append((step, xi, ext.copy())),
+        membrane_term_sink=lambda step, v, drive, g_rel, g_rev, mz: membrane_rows.append(
+            (step, v.shape, drive.shape, g_rel.shape, g_rev.shape, mz.NE)
+        ),
+        spike_sink=lambda step, cells: spike_rows.append((step, cells.copy())),
+    )
+    assert len(input_rows) == len(membrane_rows) == 40
+    assert all(row[1:] == ((net["NE"],),) * 4 + (net["NE"],) for row in membrane_rows)
+    assert all(np.all(cells >= 0) and np.all(cells < net["NE"]) for _, cells in spike_rows)
+    np.testing.assert_array_equal(observed["rate_E"], reference["rate_E"])
+    assert state_hash(observed["checkpoint"]) == state_hash(reference["checkpoint"])
+
+
 def test_current_accounting_separates_charge_and_rms():
     got = current_accounting(
         np.array([1.0, 1.0, 0.0, -1.0]), amplitude=2.0, duration_ms=10.0)
