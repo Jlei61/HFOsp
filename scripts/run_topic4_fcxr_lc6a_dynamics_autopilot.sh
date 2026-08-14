@@ -62,6 +62,10 @@ run_pool() {
         "$PY" scripts/run_topic4_fcxr_lc6a_natural_trajectory.py \
           --condition "$condition" --execution-manifest "$MANIFEST" --confirm-run \
           > "$OUT/logs/natural_${condition}.log" 2>&1 &
+      elif [[ "$stage" == "gain" ]]; then
+        "$PY" scripts/run_topic4_fcxr_lc6a_gain_forks.py run \
+          --condition "$condition" --execution-manifest "$MANIFEST" --confirm-run \
+          > "$OUT/logs/gain_${condition}.log" 2>&1 &
       else
         echo "unknown pool stage: $stage" >&2
         return 1
@@ -114,4 +118,21 @@ run_pool natural C1 Q1 Q2 Q3
 "$PY" scripts/aggregate_topic4_fcxr_lc6a_phenotypes.py --confirm-run \
   > "$OUT/logs/phenotype_map.log" 2>&1
 
-echo "LC6A fixed T4/T5 experiment block complete"
+"$PY" scripts/run_topic4_fcxr_lc6a_gain_forks.py lock --confirm-run \
+  > "$OUT/logs/gain_lock.log" 2>&1
+
+mapfile -t gain_conditions < <(
+  "$PY" - <<'PY'
+import json
+from pathlib import Path
+path = Path("results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/gain_fork_lock.json")
+for row in json.loads(path.read_text())["selected"]:
+    print(row["condition"])
+PY
+)
+run_pool gain "${gain_conditions[@]}"
+
+"$PY" scripts/run_topic4_fcxr_lc6a_gain_forks.py finalize --confirm-run \
+  > "$OUT/logs/gain_finalize.log" 2>&1
+
+echo "LC6A fixed T4/T5 and conditional T7 experiment blocks complete"

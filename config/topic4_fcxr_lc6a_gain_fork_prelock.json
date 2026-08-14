@@ -1,0 +1,38 @@
+{
+  "schema_version": 1,
+  "experiment_id": "fcxr_lc6a_gain_state_forks",
+  "scientific_role": "paired exact-state responsiveness assay after the fixed five-arm phenotype map",
+  "selection": {
+    "source": "phenotype_map.json::fork_candidates",
+    "maximum_conditions": 2,
+    "checkpoint_names": ["onset_plus_2s", "onset_plus_6s"],
+    "skip_checkpoint_when_previous_1s_global_rate_hz_ge": 250.0,
+    "skip_checkpoint_when_previous_1s_near_refractory_fraction_ge": 0.05
+  },
+  "perturbation": {
+    "location": "core_adjacent",
+    "amplitude_source": "functional_probe_lock.json::selected.amplitude",
+    "patch_radius_source": "topic4_fcxr_lc6a_functional_probe_prelock.json::geometry.patch_radius_mm",
+    "pulse_ms": 50.0,
+    "response_ms": 2000.0
+  },
+  "readout": {
+    "global_rate_bin_ms": 10.0,
+    "spatial_area_bin_ms": 100.0,
+    "susceptibility_window_ms": 500.0,
+    "relaxation_fraction_of_peak": 0.1,
+    "relaxation_hold_ms": 200.0,
+    "local_map_bins_per_axis": 32
+  },
+  "determinism": {
+    "duplicate_sham_for_first_selected_condition_at_each_eligible_checkpoint": true,
+    "expected_duplicate_checkpoints": 2,
+    "require_spike_input_and_final_state_exact": true
+  },
+  "interpretation": {
+    "responsiveness_is_independent_of_boundedness": true,
+    "gain_threshold_is_a_carrier_gate": false,
+    "termination_tested": false,
+    "lifecycle_tested": false
+  }
+}

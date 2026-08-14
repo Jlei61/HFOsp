@@ -26,3 +26,6 @@ def test_autopilot_preserves_c0_reference_order_and_fixed_five_arm_block():
     assert source.index("run_pool natural C1 Q1 Q2 Q3") < source.index(
         "aggregate_topic4_fcxr_lc6a_phenotypes.py"
     )
+    assert source.index("aggregate_topic4_fcxr_lc6a_phenotypes.py") < source.index(
+        "run_topic4_fcxr_lc6a_gain_forks.py lock"
+    )
