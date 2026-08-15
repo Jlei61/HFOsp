@@ -887,6 +887,14 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 
 ## 13. 历史文档索引
 
+- **数据驱动静态底物线（rev10-D → rev11-NLC，当前状态见复审报告）**：
+  `docs/archive/topic4/sef_hfo/rev11_nlc_frozen_substrate_review_2026-08-15.md`
+  —— 患者数据约束出来的连续兴奋度地形 + 在同一地形上按数据重分配的局部兴奋连接，
+  在 12 张全新网络上稳定产生两种可评价传播模式，与患者方向轴的一致性和顺序几何
+  **都显著高于匹配零假设**；但**只有地形、不学连接的对照同样越过两条固定判据**，
+  且不看患者标签自己分出的两簇（0.663）明显低于同一算法在真实患者事件上的水平
+  （患者匹配基准 5 分位 0.898）。**禁止**写成"局部连接学习是必要的"或"无监督两簇
+  复现了患者两个模板"。spec/plan 见 `docs/superpowers/{specs,plans}/2026-08-14-topic4-data-driven-node-local-connectivity-*`。
 - `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md` —— **病理→中观→参数映射纪律 + 首轮调参 plan**（连接性 E→E 核「定往哪传」+ E 阈值异质性「定哪里点着」，LIF/SNN 并行）；framework §2 / §7.3 / §8.4 的可执行细化；癫痫方向锚 Rich/Huberfeld/Lepeu
 - `docs/archive/topic4/sef_hfo_topic4_v2_plan_2026-06-01.md` —— **CURRENT v2 plan**，SEF-HFO 主模型路线（线性稳定性 → rate field → LIF SNN → 慢变量桥接）
 - **cm-SNN 观测层（Step 4 spiking 执行线，探索性）**：

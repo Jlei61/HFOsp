@@ -31,12 +31,29 @@
 
 ## NLC3: joint search and confirmation
 
-- [ ] Release all 12 low-frequency whole-sheet Node perturbation coordinates.
-- [ ] Jointly fit Node and retained E->E/E->I coefficients around the two
+- [x] Release all 12 low-frequency whole-sheet Node perturbation coordinates.
+- [x] Jointly fit Node and retained E->E/E->I coefficients around the two
   complementary NLC1 centres.
-- [ ] Separate fit, selection and confirmation network pools.
-- [ ] Produce canonical direct-readout and KMeans figures.
-- [ ] Report network-level paired effects and all negative arms.
+- [x] Separate fit, selection and confirmation network pools.
+- [x] Produce canonical direct-readout and KMeans figures.
+- [x] Report network-level paired effects and all negative arms.
+
+## NLC3R: post-hoc calibration of the confirmation statistics
+
+Review of 2026-08-15, `docs/archive/topic4/sef_hfo/rev11_nlc_frozen_substrate_review_2026-08-15.md`.
+
+- [x] Calibrate balanced alignment against a within-network direction-label
+  permutation null; the fixed 0.5 threshold sits below the null median.
+- [x] Calibrate the cross-fit margin against a contact-correspondence
+  permutation null, free and within-shaft.
+- [x] Restore the two D5.2 pooled diagnostics this rev dropped: seed-stratified
+  permutation p and the patient-matched purity benchmark.
+- [x] Replay both fixed-threshold statements on every arm; record that the
+  Node-only control also clears them.
+- [x] Rebuild Fig.4 so the acceptance quantities, the Node-only control and the
+  matrix of the plotted clusters are all on the canvas.
+- [ ] Carry the calibrated form of each acceptance statement into the NLC4 spec
+  before any Z/M transfer claim.
 
 ## NLC4: seizure-unification transfer
 
