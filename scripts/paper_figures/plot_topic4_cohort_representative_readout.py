@@ -68,9 +68,13 @@ def build(config: dict, result: dict) -> dict:
     index = next(position for position, subject in enumerate(cohort.subjects)
                  if subject["subject_id"] == subject_id)
     seed = _representative_seed(row)
-    npz_path = (
-        cohort.output_root / "workers" / f"{row['candidate_id']}_seed_{seed}.npz"
-    )
+    stem = cohort.output_root / "workers" / f"{row['candidate_id']}_seed_{seed}"
+    # The formal workers drop the per-contact envelope to keep the run inside a
+    # nearly full volume, so the waveform panel reads a byte-identical re-run
+    # written beside the original rather than over it; overwriting would break
+    # the aggregation's npz hash check.
+    envelope_path = stem.with_name(stem.name + "_envelope.npz")
+    npz_path = envelope_path if envelope_path.exists() else stem.with_suffix(".npz")
     key = f"canonical_{index:02d}"
     with np.load(npz_path, allow_pickle=False) as loaded:
         if f"{key}_contact_envelope" not in loaded:
