@@ -162,6 +162,10 @@ def _natural_clustering(features: np.ndarray, masked: np.ndarray, target: dict, 
     return {
         "cluster_counts": np.bincount(natural.labels_, minlength=2),
         "cluster_to_patient_mode": mapping,
+        "raw_labels": np.asarray(natural.labels_, int),
+        # 0 is the cluster matched to the patient's TA, 1 the one matched to TB;
+        # the figure must never show a raw KMeans id as a mode name.
+        "aligned_labels": mapping[np.asarray(natural.labels_, int)],
         "mode_losses": aligned_losses,
         "weakest_mode_loss": float(np.max(aligned_losses)),
         "patient_profile_matrix": profile_matrix,
