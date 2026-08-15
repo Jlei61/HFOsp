@@ -66,6 +66,13 @@ labels, template direction, event counts, recruitment frequency or field peaks.
 This supports a claim about internal contact-order structure, not anatomical
 localization.
 
+The two layouts still do not cover the sheet identically, and the residual
+difference is stated rather than smoothed over: both fill 16 mm on their
+principal axis, but the canonical shaft axis is uniformly 16 mm while the real
+minor axis ranges from 0.3 mm to 15 mm across subjects. The canonical layout
+therefore gives every subject the same maximal readout, and the real-geometry
+arm is the test of whether that uniformity changes the direction of the effect.
+
 For the 28 subjects with usable coordinates, real 3-D geometry is projected by
 deterministic PCA and isotropically fitted into the 20-mm sheet as a sensitivity
 analysis. The cohort conclusion is observation-invariant only if the canonical
