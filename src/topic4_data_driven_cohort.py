@@ -14,7 +14,7 @@ import numpy as np
 from scipy.optimize import linear_sum_assignment
 from scipy.stats import spearmanr
 from sklearn.cluster import KMeans
-from sklearn.metrics import adjusted_mutual_info_score
+from sklearn.metrics import adjusted_mutual_info_score, silhouette_score
 
 from src.lagpat_rank_audit import (
     build_masked_kmeans_features,
@@ -371,4 +371,136 @@ def build_crossfit_patient_target(data: dict, pair: dict, *, config: TargetConfi
             limit=config.stored_events_per_mode_per_split,
             seed=config.kmeans_seed + 200,
         ),
+    }
+
+
+def _model_features(ranks: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    ranks = np.asarray(ranks, float)
+    if ranks.ndim != 2:
+        raise ValueError("model ranks must have shape (event, contact)")
+    participation = np.isfinite(ranks)
+    features = build_masked_kmeans_features(
+        ranks.T, participation.T, impute="event_median",
+    )
+    masked = mask_phantom_ranks(ranks.T, participation.T, normalize=True).T
+    return features, masked
+
+
+def score_model_ranks_against_target(
+        model_ranks: np.ndarray, *, patient_centers: np.ndarray,
+        patient_profiles: np.ndarray, patient_recruitment: np.ndarray,
+        patient_precedence: np.ndarray, patient_ood_threshold: float,
+        minimum_contacts: int = 3, minimum_events_per_mode: int = 3,
+        kmeans_seed: int = 20260815, kmeans_n_init: int = 20) -> dict:
+    """Score one network's variable-contact events against one patient target."""
+    model_ranks = np.asarray(model_ranks, float)
+    patient_centers = np.asarray(patient_centers, float)
+    patient_profiles = np.asarray(patient_profiles, float)
+    patient_recruitment = np.asarray(patient_recruitment, float)
+    patient_precedence = np.asarray(patient_precedence, float)
+    readable = np.isfinite(model_ranks).sum(axis=1) >= int(minimum_contacts)
+    model_ranks = model_ranks[readable]
+    if len(model_ranks) < 2 * int(minimum_events_per_mode):
+        return {
+            "status": "INSUFFICIENT_EVENTS",
+            "n_readable_events": int(len(model_ranks)),
+        }
+    features, masked = _model_features(model_ranks)
+    distance = np.linalg.norm(
+        features[:, None, :] - patient_centers[None, :, :], axis=2,
+    )
+    supervised_labels = np.argmin(distance, axis=1)
+    assigned_distance = distance[np.arange(len(distance)), supervised_labels]
+    in_distribution = assigned_distance <= float(patient_ood_threshold)
+    supervised_counts = np.bincount(
+        supervised_labels[in_distribution], minlength=2,
+    )
+    if np.any(supervised_counts < int(minimum_events_per_mode)):
+        return {
+            "status": "INSUFFICIENT_IN_DISTRIBUTION_MODE_SUPPORT",
+            "n_readable_events": int(len(model_ranks)),
+            "n_in_distribution_events": int(in_distribution.sum()),
+            "supervised_mode_counts": supervised_counts,
+            "ood_fraction": float(1.0 - in_distribution.mean()),
+        }
+
+    use_ranks = masked[in_distribution]
+    use_labels = supervised_labels[in_distribution]
+    model_profiles = _profiles(use_ranks, use_labels)
+    supervised_matrix = _correlation_matrix(model_profiles, patient_profiles)
+    diagonal = np.diag(supervised_matrix)
+    crossed = supervised_matrix[[0, 1], [1, 0]]
+    model_descriptors = _mode_descriptors(use_ranks, use_labels)
+    mode_losses = []
+    recruitment_errors = []
+    precedence_errors = []
+    for mode, name in enumerate(MODE_NAMES):
+        recruitment_error = float(np.mean(np.abs(
+            model_descriptors[name]["recruitment"] - patient_recruitment[mode]
+        )))
+        precedence_error = float(np.mean(np.abs(
+            model_descriptors[name]["precedence"] - patient_precedence[mode]
+        )))
+        correlation_loss = 0.5 * (1.0 - float(diagonal[mode]))
+        mode_losses.append(np.mean([
+            correlation_loss, recruitment_error, precedence_error,
+        ]))
+        recruitment_errors.append(recruitment_error)
+        precedence_errors.append(precedence_error)
+
+    natural = KMeans(
+        n_clusters=2, n_init=int(kmeans_n_init), random_state=int(kmeans_seed),
+    ).fit(features)
+    natural_profiles = _profiles(masked, natural.labels_)
+    natural_raw_matrix = _correlation_matrix(natural_profiles, patient_profiles)
+    if np.isfinite(natural_raw_matrix).all():
+        rows, columns = linear_sum_assignment(-natural_raw_matrix)
+        natural_matrix = np.empty_like(natural_raw_matrix)
+        for raw_cluster, patient_mode in zip(rows, columns):
+            natural_matrix[patient_mode] = natural_raw_matrix[raw_cluster]
+        natural_diagonal = np.diag(natural_matrix)
+        natural_crossed = natural_matrix[[0, 1], [1, 0]]
+        natural_margin = float(np.mean(natural_diagonal) - np.mean(natural_crossed))
+        natural_mapping = np.full(2, -1, dtype=int)
+        natural_mapping[rows] = columns
+    else:
+        natural_matrix = natural_raw_matrix
+        natural_margin = float("nan")
+        natural_mapping = np.asarray([-1, -1], int)
+    stability_labels = [
+        KMeans(n_clusters=2, n_init=int(kmeans_n_init), random_state=seed).fit_predict(
+            features
+        )
+        for seed in range(int(kmeans_seed), int(kmeans_seed) + 5)
+    ]
+    stability = [
+        adjusted_mutual_info_score(stability_labels[i], stability_labels[j])
+        for i in range(len(stability_labels))
+        for j in range(i + 1, len(stability_labels))
+    ]
+    silhouette = (
+        float(silhouette_score(features, natural.labels_))
+        if len(features) > 2 and len(np.unique(natural.labels_)) == 2 else None
+    )
+    return {
+        "status": "EVALUABLE",
+        "n_readable_events": int(len(model_ranks)),
+        "n_in_distribution_events": int(in_distribution.sum()),
+        "supervised_mode_counts": supervised_counts,
+        "ood_fraction": float(1.0 - in_distribution.mean()),
+        "supervised_matrix": supervised_matrix,
+        "supervised_diagonal": diagonal,
+        "supervised_crossed": crossed,
+        "supervised_margin": float(np.mean(diagonal) - np.mean(crossed)),
+        "mode_losses": np.asarray(mode_losses, float),
+        "recruitment_errors": np.asarray(recruitment_errors, float),
+        "precedence_errors": np.asarray(precedence_errors, float),
+        "weakest_mode_loss": float(np.max(mode_losses)),
+        "selection_score": float(np.max(mode_losses) + 0.5 * (1.0 - in_distribution.mean())),
+        "natural_cluster_counts": np.bincount(natural.labels_, minlength=2),
+        "natural_cluster_to_patient": natural_mapping,
+        "natural_matrix": natural_matrix,
+        "natural_margin": natural_margin,
+        "natural_seed_ami_median": float(np.median(stability)),
+        "natural_silhouette": silhouette,
     }

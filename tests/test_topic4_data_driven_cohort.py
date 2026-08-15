@@ -7,6 +7,7 @@ from src.topic4_data_driven_cohort import (
     build_crossfit_patient_target,
     canonical_pair_contract,
     geometry_only_sheet_projection,
+    score_model_ranks_against_target,
     subset_pair_contract,
 )
 
@@ -113,3 +114,33 @@ def test_rank_displacement_contract_and_geometry_subset_preserve_order():
     subset = subset_pair_contract(pair, ["D", "A", "C"])
     assert subset["contact_order"] == ["D", "A", "C"]
     np.testing.assert_array_equal(subset["rank_a"], [3, 0, 2])
+
+
+def test_model_rank_scorer_separates_supervised_and_natural_modes():
+    data = _synthetic_patient()
+    target = build_crossfit_patient_target(data, _pair(), config=_config())
+    heldout_ranks = np.vstack([
+        target["heldout_samples"]["TA"][:20],
+        target["heldout_samples"]["TB"][:20],
+    ])
+    recruitment = np.asarray([
+        target["train_descriptors"][mode]["recruitment"]
+        for mode in ("TA", "TB")
+    ])
+    precedence = np.asarray([
+        target["train_descriptors"][mode]["precedence"]
+        for mode in ("TA", "TB")
+    ])
+    score = score_model_ranks_against_target(
+        heldout_ranks,
+        patient_centers=target["kmeans_centers"],
+        patient_profiles=target["train_profiles"],
+        patient_recruitment=recruitment,
+        patient_precedence=precedence,
+        patient_ood_threshold=target["train_distance_q95"],
+        minimum_events_per_mode=3,
+    )
+    assert score["status"] == "EVALUABLE"
+    assert score["supervised_margin"] > 1.0
+    assert score["natural_margin"] > 1.0
+    assert score["natural_seed_ami_median"] == 1.0

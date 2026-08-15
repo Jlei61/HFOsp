@@ -1,0 +1,62 @@
+{
+  "schema_version": "topic4_data_driven_snn_cohort_canary_v1",
+  "scientific_role": "development_only_multisubject_pretrained_continuous_substrate_canary",
+  "output_root": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/multisubject_canary",
+  "inputs": {
+    "cohort_config": {"path": "config/topic4_data_driven_snn_cohort_v1.json", "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"},
+    "cohort_target_audit": {"path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/target_audit/cohort_target_audit.json", "sha256": "7542c20c8c48902396ca6f4f2802adeb50565d8123a8b0a5687de6da704c00d4"},
+    "rev9_base_config": {"path": "config/topic4_rev9_exploratory.json", "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"},
+    "stage_config": {"path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json", "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"},
+    "common_detector_audit": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json", "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"},
+    "node_anchor_config": {"path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json", "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"},
+    "node_anchor_manifest": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json", "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"},
+    "nlc_selection_manifest": {"path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/joint_node_connectivity_selection/candidate_manifest.json", "sha256": "501dcc6a25c6903811449fd4069f96a7c455177eda17a9a820965d11517bd955"}
+  },
+  "pretrained_source": {
+    "subject": "epilepsiae_1146",
+    "candidate_id": "joint_04_control",
+    "primary_transfer_statistics_exclude_source_subject": true,
+    "field_rotations_deg": [0, 90, 180, 270],
+    "field_reflection": false,
+    "arms": ["Node", "Node+EE+EtoI"],
+    "interpretation": "pretrained morphology transfer canary, not a 34-subject refit"
+  },
+  "subjects": [
+    "epilepsiae_1077",
+    "epilepsiae_1146",
+    "epilepsiae_590",
+    "yuquan_huanghanwen",
+    "yuquan_songzishuo",
+    "yuquan_zhangbichen"
+  ],
+  "target_root": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/target_audit/per_subject",
+  "local_connectivity_basis": {
+    "representation": "continuous_field_coupled_local_E_source_flow_v1",
+    "E_to_E_length_scale_mm": 0.38,
+    "E_to_I_length_scale_mm": 0.25,
+    "topology": "frozen",
+    "delays": "frozen",
+    "incoming_weight_budget": "conserved separately for every E and I target"
+  },
+  "search": {
+    "phase": "fit",
+    "fit_network_seeds": [1661, 1662],
+    "selection_network_seeds": [1671, 1672],
+    "confirmation_network_seeds": [1681, 1682, 1683, 1684],
+    "simulation": {"duration_ms": 12000.0, "early_stop_runaway": true},
+    "detector": {"population_active_fraction_threshold": 0.0195703125, "role": "frozen common absolute detector"},
+    "contact_readout": {"participation_margin_fraction": 0.1, "timing_fraction": 0.5},
+    "beta": "closed",
+    "Z_M": "off"
+  },
+  "execution": {
+    "launcher": "systemd-run --user -> /usr/bin/nohup -> managed command",
+    "max_workers": 5,
+    "wait_seconds": 300,
+    "numeric_threads_per_worker": 1,
+    "minimum_available_memory_gib_per_worker": 8.0,
+    "notify_on_completion": true,
+    "upstream_wait_status": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/pathway_mechanism_confirmation/controller.status"
+  },
+  "canary_boundary": "Exploratory pretrained-transfer capacity only. A positive result does not yet establish per-subject refitting or a 34-subject cohort pass."
+}
