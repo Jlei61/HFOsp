@@ -1,0 +1,137 @@
+# Topic 4 data-driven SNN cohort: patient-conditioned continuous substrate
+
+## Scientific question
+
+The current rev11-NLC result is an E1146 development result. This cohort phase
+asks whether the same data-driven model family can recover patient-consistent
+interictal propagation repertoires across the masked stable-K=2 cohort.
+
+The scientific unit is the subject. Events and network seeds are nested
+replicates and must not be counted as independent cohort observations.
+
+## Denominator contract
+
+The upstream masked cohort contains 34 stable-K=2 subjects. Two separate
+eligibility layers are frozen:
+
+1. `PATIENT_TARGET_ELIGIBLE`: masked ranks, two train-derived modes, disjoint
+   recording-block held-out data and at least six joint-valid contacts;
+2. `SNN_GEOMETRY_ELIGIBLE`: real 3-D contact coordinates support a rank-2
+   geometry-only projection into the SNN sheet.
+
+Every one of the 34 subjects remains in the eligibility table. A subject that
+lacks geometry is a reported technical exclusion, not a failed model fit. The
+headline denominator must state both counts, for example `28/34 geometry
+eligible`, before reporting the model result among the eligible subjects.
+
+## Patient target
+
+For each subject, recording blocks are split before KMeans. KMeans is fitted on
+masked normalized ranks from training blocks only. Non-participating contacts
+are midpoint-imputed only for clustering; recruitment masks remain explicit in
+all scientific distances. Held-out blocks are transformed by the frozen train
+centres and never refit.
+
+The two train clusters are named TA/TB by maximum correlation with the already
+frozen masked rank-displacement templates. This naming step cannot change
+cluster membership. The per-mode target retains:
+
+- contact recruitment probability;
+- masked normalized rank profile;
+- unordered-pair precedence states;
+- a fixed event sample for event-cloud and KMeans checks;
+- train and held-out recording-block counts;
+- train-to-held-out prototype correlation and OOD distance.
+
+`PATIENT_TARGET_ELIGIBLE` requires both modes to have at least 20 events on
+both sides of the block split and a positive same-mode minus crossed-mode
+held-out margin.
+
+## Geometry and observation
+
+Contact coordinates are projected from real 3-D geometry by deterministic PCA
+and isotropically fitted into the 20-mm sheet. The projection may read contact
+coordinates and names, but it must not read rank values, mode labels, template
+direction or field peaks. This prevents the observation geometry from drawing
+the propagation target into the SNN.
+
+The same frozen readout kernel and detector are used for every candidate and
+subject. Contact count may vary by subject; no E1146-specific shaft or 15-contact
+assumption is allowed in the cohort scorer.
+
+## Data-driven model family
+
+All subjects share one candidate library generated before patient scoring:
+
+- a continuous full-sheet Node field represented by tensor B-splines plus
+  low-frequency spectral residuals;
+- continuous local E-to-E and E-to-I source-flow redistribution;
+- fixed topology and delays;
+- incoming excitatory weight conserved per target and pathway;
+- no component count, peak count or contact-conditioned field builder.
+
+Each subject selects a candidate using only its patient-training target and the
+fit/selection network pools. The selected candidate is then frozen for that
+subject and evaluated on disjoint patient held-out blocks and fresh network
+seeds. This is patient-conditioned selection from a shared family, not 34
+unconstrained bespoke optimizations.
+
+## Primary endpoints
+
+The subject-level primary endpoint is the weakest-mode held-out patient
+alignment, combining contact-rank profile, recruitment and precedence. The
+same model readout is also scored against within-subject contact-identity
+permutation nulls.
+
+Natural KMeans is mandatory but separate. It must show that the same network
+contains two reproducible event clusters and that, after one-to-one alignment,
+both clusters have positive patient-template margins. A supervised positive
+matrix alone is not a KMeans pass.
+
+Cohort inference reports subject-level medians and hierarchical intervals, but
+the sign/Wilcoxon or subject bootstrap resamples subjects only. A positive
+cohort claim requires:
+
+1. patient alignment better than the matched contact-permutation null;
+2. at least 60% of SNN-eligible subjects pass the frozen subject endpoint;
+3. no result is driven only by pooled event counts or one high-yield network;
+4. same-network K=2 support is reported separately from supervised geometry.
+
+## Execution stages
+
+1. build the 34-subject target and geometry eligibility audit;
+2. run a six-subject geometry-diverse canary with four frozen candidates;
+3. audit memory, detector parity, event support and Fig.4-style output;
+4. freeze the shared library and formal budget;
+5. run all SNN-eligible subjects under managed systemd/nohup workers;
+6. aggregate automatically, render PNG/PDF and notify on completion.
+
+The formal run cannot begin while the rev11 pathway confirmation still owns
+the memory budget.
+
+## Figure contract
+
+The final result is one cohort figure with:
+
+1. the 34-subject eligibility funnel;
+2. subject-level held-out patient alignment versus matched null;
+3. subject-level natural KMeans support and same-network dual-mode rate;
+4. one median-performing subject shown with the accepted Fig.4 direct readout;
+5. its paired Fig.4 KMeans heatmap, rank profiles and model-patient matrix.
+
+The representative subject is chosen by distance to the cohort median before
+rendering, not by the best score. The canvas and README must state the exact
+scientific verdict and denominator.
+
+## Claim boundary
+
+A positive result may support:
+
+> Across geometry-eligible stable-bidirectional subjects, patient-conditioned
+> continuous Node plus local-connectivity SNNs recovered held-out propagation
+> geometry and same-network stereotyped event structure more closely than
+> matched contact-identity nulls.
+
+It may not be shortened to “34 patients were reproduced” unless all 34 become
+geometry eligible and pass. It does not establish clinical waveform identity,
+a unique anatomical core, patient-blind generalization or seizure dynamics.
