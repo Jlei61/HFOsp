@@ -170,14 +170,36 @@ def _h_gate_readout(slow, cfg):
     }
 
 
-def run_arm(snapshot, arm, *, continuation_ms=None, tag=None):
+def _extension_parent(extend_from, *, snapshot, arm):
+    """Validate an extension's parent (spec section 6.2: one registered 4 s extension, once)."""
+
+    parent = json.loads((FORK_ROOT / extend_from / "summary.json").read_text())
+    if parent.get("extension_of"):
+        raise RuntimeError("registered_extension_max_count = 1; this parent is itself an extension")
+    if parent["source_snapshot"] != snapshot or parent["arm"] != arm:
+        raise RuntimeError("an extension must keep its parent's snapshot and arm")
+    verdict = parent["verdict"]
+    if verdict["label"] != "RIGHT_CENSORED" or verdict["reason"] != "STILL_ESCALATING_AT_WINDOW_END":
+        # An incomplete window is a resource stop, not a science outcome; it is re-run, not extended.
+        raise RuntimeError(
+            "only a RIGHT_CENSORED / STILL_ESCALATING_AT_WINDOW_END arm is extension-eligible, "
+            f"got {verdict['label']} / {verdict['reason']}")
+    return parent
+
+
+def run_arm(snapshot, arm, *, continuation_ms=None, tag=None, extend_from=None):
     manifest = _manifest()
     manifest_sha = _sha(MANIFEST)
     source_hashes = _source_hashes()
     snap = manifest["source_snapshots"][snapshot]
     clamp_d, clamp_h = ARMS[arm]
     observation = manifest["observation"]
-    total_ms = float(observation["continuation_ms"] if continuation_ms is None else continuation_ms)
+    if continuation_ms is not None:
+        total_ms = float(continuation_ms)
+    elif extend_from is not None:
+        total_ms = float(observation["registered_extension_ms"])
+    else:
+        total_ms = float(observation["continuation_ms"])
     chunk_ms = min(float(observation["chunk_ms"]), total_ms)
     bin_ms = float(observation["rate_bin_ms"])
 
@@ -195,19 +217,33 @@ def run_arm(snapshot, arm, *, continuation_ms=None, tag=None):
     work.mkdir(parents=True)
     started = time.time()
 
+    parent = None if extend_from is None else _extension_parent(
+        extend_from, snapshot=snapshot, arm=arm)
     checkpoint_path = ROOT / snap["checkpoint"]
     if _sha(checkpoint_path) != snap["checkpoint_sha256"]:
         raise RuntimeError("source checkpoint drift")
     S, template, cfg, graph_sha, graph_meta = _system()
     if graph_sha != manifest["upstream"]["graph_sha256"]:
         raise RuntimeError("runtime C0 graph differs from the registered artifact")
-    state = NAT.U2.load_into(str(checkpoint_path), template)
-    if state_hash(state) != snap["state_hash"]:
-        raise RuntimeError("loaded source checkpoint state hash mismatch")
-    if int(state.t) != int(snap["t_steps"]):
-        raise RuntimeError("loaded source checkpoint step counter mismatch")
+    if parent is None:
+        state = NAT.U2.load_into(str(checkpoint_path), template)
+        if state_hash(state) != snap["state_hash"]:
+            raise RuntimeError("loaded source checkpoint state hash mismatch")
+        if int(state.t) != int(snap["t_steps"]):
+            raise RuntimeError("loaded source checkpoint step counter mismatch")
+    else:
+        state = NAT.U2.load_into(str(FORK_ROOT / extend_from / "final_state.npz"), template)
+        if state_hash(state) != parent["final_checkpoint"]["state_hash"]:
+            raise RuntimeError("parent final state hash mismatch")
 
     child, clamp_record = apply_slow_clamp(state, clamp_d=clamp_d, clamp_h=clamp_h)
+    if parent is not None:
+        # load_into copies ARRAYS onto a template whose cfg is the fresh unclamped one, so the clamp
+        # config does not travel in the state file and must be re-applied.  The loaded z / h are
+        # bitwise identical to the parent's pinned fields, so re-applying must reproduce exactly the
+        # same frozen fields -- asserted here rather than assumed.
+        if clamp_record["frozen_field_sha256"] != parent["clamp"]["frozen_field_sha256"]:
+            raise RuntimeError("extension re-clamped to different fields than its parent")
     start_gate = _h_gate_readout(child.slow, cfg)
     start_d = 1.0 - np.asarray(child.slow.z[: S["NE"]], float)
 
@@ -261,9 +297,21 @@ def run_arm(snapshot, arm, *, continuation_ms=None, tag=None):
     except FloatingPointError as exc:
         numerical_fail, fail_detail = True, f"{type(exc).__name__}: {exc}"
 
-    completed_ms = completed_steps * NAT.U2.DT_MS
     all_steps = np.concatenate(steps) if steps else np.zeros(0, np.int64)
     all_cells = np.concatenate(cells) if cells else np.zeros(0, np.int32)
+    extension_steps, extension_ms = completed_steps, completed_steps * NAT.U2.DT_MS
+    if parent is not None:
+        # The verdict is read on the JOINED window: the registered extension exists to give the
+        # persistence question more data, so re-labelling only the 4 s tail would throw that away.
+        with np.load(FORK_ROOT / extend_from / "spikes.npz") as handle:
+            parent_steps = np.asarray(handle["steps"], np.int64)
+            parent_cells = np.asarray(handle["cells"], np.int32)
+            parent_n = int(handle["n_steps"][0])
+        all_steps = np.concatenate([parent_steps, all_steps + parent_n])
+        all_cells = np.concatenate([parent_cells, all_cells])
+        completed_steps += parent_n
+        total_ms = completed_steps * NAT.U2.DT_MS
+    completed_ms = completed_steps * NAT.U2.DT_MS
     rate_bins = binned_global_rate(
         all_steps, n_steps=completed_steps, n_cells=S["NE"], dt_ms=NAT.U2.DT_MS, bin_ms=bin_ms,
     ) if completed_steps else np.zeros(0)
@@ -294,6 +342,29 @@ def run_arm(snapshot, arm, *, continuation_ms=None, tag=None):
             "near_refractory_fraction_gate", "interictal_roll_hi_hz",
             "drift_ci_gate_per_s", "silence_bin_fraction_gate", "tail_s")},
     )
+    # Supplementary, explicitly NOT the registered gate.  The registered drift criterion always reads a
+    # fixed 2 s tail, and on a burst train that is ~20 noisy 100 ms bins, so it cannot separate a flat
+    # state from a slow ramp however long the window is.  These two read the whole window instead and
+    # are reported alongside the registered label, never in place of it.
+    from src.topic4_fcxr_lc6_phenotype import normalized_theil_sen
+    group = max(1, int(round(100.0 / bin_ms)))
+    usable = (rate_bins.size // group) * group
+    rate_100ms = rate_bins[:usable].reshape(-1, group).mean(axis=1) if usable else rate_bins
+    per_second = verdict["per_second_mean_hz"]
+    supplementary = {
+        "not_the_registered_gate": True,
+        "full_window_theil_sen": normalized_theil_sen(
+            rate_100ms, dt_s=0.1, tail_s=max(completed_ms / 1000.0, 0.2)),
+        "first_to_last_second_hz": (
+            [float(per_second[0]), float(per_second[-1])] if per_second else None),
+        "first_to_last_second_slope_hz_per_s": (
+            float((per_second[-1] - per_second[0]) / max(len(per_second) - 1, 1))
+            if len(per_second) > 1 else None),
+        "note": (
+            "the registered rate-drift gate uses a fixed 2 s tail; on this burst train that is about "
+            "20 noisy 100 ms bins, so it reports a wide CI for a flat state as readily as for a ramp"
+        ),
+    }
     config_sha = _digest({"manifest_sha256": manifest_sha, "clamp": clamp_record["clamp_config_sha256"]})
     final_state_path = work / "final_state.npz"
     NAT.U2.save_loop_state(str(final_state_path), child)
@@ -314,6 +385,10 @@ def run_arm(snapshot, arm, *, continuation_ms=None, tag=None):
         "relative_to_onset_ms": snap["relative_to_onset_ms"],
         "state_hash_after_clamp": clamp_record["state_hash_after_clamp"],
         "registered_continuation_ms": total_ms, "completed_ms": completed_ms,
+        "extension_of": extend_from, "extension_index": 0 if parent is None else 1,
+        "parent_window_ms": None if parent is None else float(parent["completed_ms"]),
+        "extension_window_ms": None if parent is None else float(extension_ms),
+        "supplementary_drift": supplementary,
         "rate_bin_ms": bin_ms, "trace_dt_ms": NAT.U2.TRACE_DT_MS,
         "external_input_sha256": hasher.sha256,
         "spike_count": int(all_steps.size),
@@ -412,7 +487,10 @@ def finalize():
     rows = []
     for snapshot in manifest["source_snapshots"]:
         for arm in ARMS:
-            path = FORK_ROOT / f"{snapshot}_{arm}" / "summary.json"
+            # A registered extension supersedes its parent: it carries the joined window and the
+            # parent's own 6 s remains on disk underneath it.
+            extended = FORK_ROOT / f"{snapshot}_{arm}_EXT" / "summary.json"
+            path = extended if extended.is_file() else FORK_ROOT / f"{snapshot}_{arm}" / "summary.json"
             if not path.is_file():
                 raise RuntimeError(f"LC6B arm incomplete: {path}")
             rows.append(json.loads(path.read_text()))
@@ -458,12 +536,17 @@ def main():
     parser.add_argument("--arm", choices=tuple(ARMS))
     parser.add_argument("--continuation-ms", type=float)
     parser.add_argument("--tag")
+    parser.add_argument(
+        "--extend-from", metavar="ARM_ID",
+        help="registered single extension (spec 6.2): resume that arm's exact final state")
     parser.add_argument("--confirm-run", action="store_true")
     args = parser.parse_args()
     if not args.confirm_run:
         raise SystemExit("LC6B clamp forks require --confirm-run")
     if args.stage == "run" and not (args.snapshot and args.arm):
         parser.error("run requires --snapshot and --arm")
+    if args.extend_from and args.tag is None:
+        args.tag = f"{args.snapshot}_{args.arm}_EXT"
     OUT.mkdir(parents=True, exist_ok=True)
     FORK_ROOT.mkdir(parents=True, exist_ok=True)
     label = "FINALIZE" if args.stage == "finalize" else (args.tag or f"{args.snapshot}_{args.arm}")
@@ -479,7 +562,8 @@ def main():
         try:
             if args.stage == "run":
                 result = run_arm(args.snapshot, args.arm,
-                                 continuation_ms=args.continuation_ms, tag=args.tag)
+                                 continuation_ms=args.continuation_ms, tag=args.tag,
+                                 extend_from=args.extend_from)
                 note = {"label": result["verdict"]["label"], "reason": result["verdict"]["reason"]}
             else:
                 result = finalize()
