@@ -497,3 +497,13 @@ E→I 重连的非成员 proposal 定义始终是同一 perpendicular bin 内按
 实现允许先做至多 64 次等价拒绝；若未命中，必须从显式条件分布直接抽样，防止 legacy 窄核 C1 因
 已选边占据高概率质量而饥饿。该切换只改变计算路径和 RNG 消耗，不改变 proposal 分布或科学合同；
 `conditional_fallback_draws`、抽样模式和 cap 必须写入 graph chain audit。
+
+## 17. 2026-08-15 后续编号前向说明（LC6B 改名为 LC6D）
+
+本 spec 的 §14 / §15 里出现的 "LC6B"（"carrier positive -> LC6B U recalibration"、
+"另立 LC6B，在新 carrier 上重标 U"、"本 spec 不授权 LC6B/U"）指的是**在新 carrier 上重新标定 U**
+这条条件性路线。该路线自 2026-08-15 起**改名为 `LC6D`**，内容、条件性与未授权状态都不变。
+
+`LC6B` 这个编号已重新指派给 frozen-slow fast-subsystem causal atlas，见
+`docs/superpowers/specs/2026-08-15-topic4-fcxr-lc6b-frozen-slow-causal-atlas-design.md`。
+上文旧措辞保留不改，读到时按本节换算。
