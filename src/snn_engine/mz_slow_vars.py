@@ -175,6 +175,7 @@ class MZSlowVarsConfig:
     k_h_lc2: float = 1.0           # smooth gate width in raw recurrent-conductance units
     rho_h_lc2: float = 0.0         # added pre-tanh recurrent conductance amplitude
     h_lc2_init_E: "np.ndarray | None" = None  # frozen-fork/restart field; shape (NE,), finite and >=0
+    h_lc2_frozen_E: "np.ndarray | None" = None  # FCXR-LC6B: hold h_i frozen at this per-E field (requires use_h_lc2=True)
     use_x: bool = False            # persistence-gated presynaptic E->E relay availability x_j
     x_relay_frozen_E: "np.ndarray | None" = None  # LC2 dev fork: fixed source availability field, same E->E scatter path
     tau_y: float = 120.0           # ms  persistence sensor time constant
@@ -341,6 +342,11 @@ class MZSlowVars:
             if h0.shape != (self.NE,):
                 raise ValueError(f"h_lc2_init_E must have length NE={self.NE}, got {h0.shape}")
             self.h_lc2_E[:] = h0
+        if self.cfg.h_lc2_frozen_E is not None:                    # FCXR-LC6B: hold E-cell H frozen
+            hf = np.asarray(self.cfg.h_lc2_frozen_E, float)
+            if hf.shape != (self.NE,):
+                raise ValueError(f"h_lc2_frozen_E must have length NE={self.NE}, got {hf.shape}")
+            self.h_lc2_E[:] = hf                                   # the membrane keeps reading this array
         self._gH_lc2_mean_last = 0.0
         self._gH_lc2_max_last = 0.0
         self._gA_raw_lc2_mean_last = 0.0
@@ -715,9 +721,14 @@ class MZSlowVars:
                     # Equal taus reduce EXACTLY to the symmetric relaxation above (per-element factor identical).
                     tau_sel = np.where(x_inf < self.x_relay, c.tau_x_down, c.tau_x_up)
                     self.x_relay += (x_inf - self.x_relay) * (1.0 - np.exp(-dt / tau_sel))
-        if c.use_h_lc2:
+        if c.use_h_lc2 and c.h_lc2_frozen_E is None:
             # Exact first-order update under the piecewise-constant post-X gA_raw sampled by the membrane
             # this frame.  Because this runs after membrane_terms, gA_raw,n cannot feed back until n+1.
+            #
+            # FCXR-LC6B freeze: the update is SKIPPED, not applied-then-overwritten.  Overwriting would
+            # leave one frame in which the membrane already consumed a moved h, and the float round trip
+            # would drift the field off its own recorded value.  membrane_terms still caches
+            # ``_h_source_lc2_E`` every frame, so the source trace stays readable while the state is held.
             decay_h = np.exp(-dt / c.tau_h_lc2)
             self.h_lc2_E *= decay_h
             self.h_lc2_E += (1.0 - decay_h) * self._h_source_lc2_E
@@ -1159,8 +1170,14 @@ class MZSlowVars:
                 h0 = np.asarray(c.h_lc2_init_E, float)
                 if h0.ndim != 1 or not np.all(np.isfinite(h0)) or np.any(h0 < 0.0):
                     raise ValueError("h_lc2_init_E must be a finite 1-D field with values >=0")
-        elif c.h_lc2_init_E is not None or c.rho_h_lc2 > 0.0:
-            raise ValueError("h_lc2_init_E/rho_h_lc2 require use_h_lc2=True")
+            if c.h_lc2_frozen_E is not None:
+                hf = np.asarray(c.h_lc2_frozen_E, float)
+                if hf.ndim != 1 or not np.all(np.isfinite(hf)) or np.any(hf < 0.0):
+                    raise ValueError("h_lc2_frozen_E must be a finite 1-D field with values >=0")
+        elif c.h_lc2_init_E is not None or c.rho_h_lc2 > 0.0 or c.h_lc2_frozen_E is not None:
+            # Same rule as eta_gba/g_m_max: a frozen field set with its mechanism off is a silently dead
+            # knob.  Freezing H is only meaningful while the H output path is the one feeding the membrane.
+            raise ValueError("h_lc2_init_E/rho_h_lc2/h_lc2_frozen_E require use_h_lc2=True")
         if c.use_x:
             if c.membrane_mode != "full_conductance":
                 raise ValueError("use_x (E->E relay) requires membrane_mode='full_conductance'")

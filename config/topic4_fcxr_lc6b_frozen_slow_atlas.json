@@ -1,0 +1,242 @@
+{
+ "arms": {
+  "DH_CLAMP": {
+   "clamp_d": true,
+   "clamp_h": true
+  },
+  "D_CLAMP": {
+   "clamp_d": true,
+   "clamp_h": false
+  },
+  "H_CLAMP": {
+   "clamp_d": false,
+   "clamp_h": true
+  },
+  "NAT": {
+   "clamp_d": false,
+   "clamp_h": false,
+   "role": "paired control for its own snapshot, not a fresh-t0 natural trajectory"
+  }
+ },
+ "blessed_engine_sha256": {
+  "src/snn_engine/connectivity.py": "5ad75ec5066b7fe9acbb66f6a3baa9cdcea7865dd8ab2124402d18e99ccaabe0",
+  "src/snn_engine/connectivity_rot.py": "2aa442624fef36a1bf2dbe52c12342184c6f4e05f98aa9a600d4ed10803a2f76",
+  "src/snn_engine/kick_probe.py": "febba30005cb42ce0a80e9d133a2c661121ad639d58a035b7914425e1b7994d2",
+  "src/snn_engine/lfp.py": "7f079081de4ef0215477df1ced4acb2ee60196e6e58c85416758c0064c365c47",
+  "src/snn_engine/model.py": "e77aad35cbfa2e48dbd597559bd63dbed142b3782ed7eddda94be411154da349",
+  "src/snn_engine/params.py": "c2036d1e1548c3db89adab27f8a7a57f9cdf584b5fed360963c966004cf88884"
+ },
+ "checkpoint_semantics_fix": {
+  "issue": "checkpoint_onset_detected.npz and checkpoint_onset_plus_1s.npz are byte-identical (both t=240000 = 12.0 s); LC6A already recorded onset_detected.timing_error_ms = 1000.0",
+  "new_checkpoint_required_fields": [
+   "snapshot_time_ms",
+   "onset_time_ms",
+   "relative_to_onset_ms",
+   "full_state_sha256",
+   "external_input_counter",
+   "external_input_state",
+   "graph_sha256",
+   "config_sha256"
+  ],
+  "rule": "the two must not be treated as two moments; LC6B round 1 uses onset_plus_2s and onset_plus_4s, whose times were verified from BOTH the saved state (t x dt) and the manifest actual_ms"
+ },
+ "classifier": {
+  "labels": [
+   "ESCALATING_SATURATION",
+   "BOUNDED_STATIONARY",
+   "BOUNDED_OSCILLATORY",
+   "LOW_STATE",
+   "SILENCE",
+   "AFTER_DISCHARGE",
+   "NUMERICAL_FAIL",
+   "RIGHT_CENSORED"
+  ],
+  "module": "src.topic4_fcxr_lc6b_clamp.classify_clamp_window",
+  "must_not_reuse": "src.topic4_fcxr_lc6_phenotype.classify_high_state",
+  "must_not_reuse_reason": "it requires rate AND D AND H drift to be flat; under a clamp D and H are bitwise constant, so two of its three criteria are satisfied by the intervention itself",
+  "perturbation_return_tested": false,
+  "thresholds": {
+   "cell_rate_bands_hz": [
+    250.0,
+    300.0,
+    350.0,
+    400.0,
+    450.0
+   ],
+   "drift_ci_gate_per_s": 0.05,
+   "global_saturation_hz": 250.0,
+   "interictal_roll_hi_hz": 9.7382291667,
+   "near_refractory_fraction_gate": 0.05,
+   "near_refractory_rate_hz": 450.0,
+   "refractory_ceiling_hz": 500.0,
+   "silence_bin_fraction_gate": 0.25,
+   "tail_s": 2.0
+  }
+ },
+ "engine_change": {
+  "added_field": "h_lc2_frozen_E",
+  "byte_parity_proof": {
+   "final_state_hash": "f5a2fc58bad755876bc44c19924202b5caa90da3ad8bf5d3c80b997314c72ccf",
+   "note": "with h_lc2_frozen_E=None the post-edit engine reproduces the pre-edit engine exactly, so finished LC6A artifacts stay reproducible",
+   "pass": true,
+   "path": "real LC6A C0 path resumed from checkpoint_onset_plus_2s for 2000 steps",
+   "rate_E_sha256": "6ee3736c80485d9fa991579254721cefb49f782aa9c250044439bf1b53676a15",
+   "spike_sha256": "43db32e84e7a96a4064df71d9849a2ca8f20435711154b0659a07f9667648838"
+  },
+  "file": "src/snn_engine/mz_slow_vars.py",
+  "off_by_default": true,
+  "sha256_after": "063d5a69af028270c2f466b3a38d209f68a9d3c8cffd9eb2d86b3661af8a8629",
+  "sha256_before": "87d382465145b548272c4656dab327e1dcf487f7cbf3c9c6c943b1e03cf5eea7"
+ },
+ "experiment_id": "fcxr_lc6b_frozen_slow_atlas",
+ "hard_gates": {
+  "G1_exact_state_input_hash": [
+   "loaded checkpoint state_hash must match the recorded value",
+   "all four arms of one snapshot must share a bitwise-identical external_input_sha256",
+   "mechanism source hashes must not drift during a run",
+   "graph and config sha256 recorded and stable"
+  ],
+  "G2_numerical": [
+   "non-finite values",
+   "negative conductance",
+   "fail_on_clip"
+  ],
+  "G3_resource_checkpoint": [
+   "stop submitting new workers when MemAvailable or swap trips",
+   "never delete completed products",
+   "rolling exact checkpoint must be recoverable"
+  ],
+  "scientific_results_are_not_gates": "saturation / silence / low state / bounded state are outcomes; none may abort the remaining pre-registered arms"
+ },
+ "model": {
+  "clamped_slow_fields": [
+   "z (D = 1 - z)",
+   "h_lc2_E (H)"
+  ],
+  "connection_seed": 1,
+  "dt_ms": 0.05,
+  "dynamic_h": true,
+  "dynamic_z": true,
+  "kick": false,
+  "m_enabled": false,
+  "noise_seed": 401,
+  "parameter_step": false,
+  "reset": false,
+  "u_enabled": false,
+  "x_frozen": 1.0
+ },
+ "not_authorized": [
+  "U",
+  "M",
+  "full lifecycle",
+  "termination stimulation map",
+  "large combinatorial parameter search",
+  "CP-S / CP-L center-preserving surround",
+  "threshold heterogeneity",
+  "global E-to-I tail",
+  "execution of H-EFF / H-CAP (spec+plan only)",
+  "LC6D U recalibration",
+  "push / merge / rebase",
+  "any change to scripts/nohup_subject_capture.sh"
+ ],
+ "observation": {
+  "chunk_ms": 1000.0,
+  "continuation_ms": 6000.0,
+  "extension_applies_to": "RIGHT_CENSORED / STILL_ESCALATING_AT_WINDOW_END only",
+  "rate_bin_ms": 20.0,
+  "registered_extension_max_count": 1,
+  "registered_extension_ms": 4000.0,
+  "spatial_bins_per_axis": 32,
+  "spatial_window_ms": 100.0,
+  "trace_dt_ms": 10.0
+ },
+ "prior_expectation": {
+  "d_mean": {
+   "onset_plus_2s": 0.1364,
+   "onset_plus_4s": 0.2752,
+   "onset_plus_6s": 0.4254
+  },
+  "does_not_change": "all four registered arms run at both snapshots regardless",
+  "expectation": "H_CLAMP at onset+4 s removes at most 4% of the H actuator's remaining range, so a null H_CLAMP effect is EXPECTED and must NOT be read as 'H is unrelated to escalation'; D keeps a large range, so D_CLAMP / DH_CLAMP carry this round's discriminating power",
+  "gh_mean": {
+   "onset_plus_2s": 0.3002,
+   "onset_plus_4s": 0.5176,
+   "onset_plus_6s": 0.54
+  },
+  "h_actuator_ceiling": "gH = rho_h_lc2 * S(h), rho_h_lc2 = 0.54 is a hard ceiling",
+  "h_gate_occupancy": {
+   "onset_plus_2s": 0.5559,
+   "onset_plus_4s": 0.9586,
+   "onset_plus_6s": 1.0
+  },
+  "note": "pre-registered so the result can contradict it, not appended afterwards"
+ },
+ "protocol": {
+  "numbering_note": "the old conditional LC6B/U route is renamed LC6D; LC6B is this atlas",
+  "plan": "docs/superpowers/plans/2026-08-15-topic4-fcxr-lc6b-frozen-slow-causal-atlas.md",
+  "protocol_commit": "fb1109944254c82a415f3782a4ef9814066ea6fb",
+  "spec": "docs/superpowers/specs/2026-08-15-topic4-fcxr-lc6b-frozen-slow-causal-atlas-design.md"
+ },
+ "resource": {
+  "env": {
+   "MKL_NUM_THREADS": "1",
+   "NUMEXPR_NUM_THREADS": "1",
+   "OMP_NUM_THREADS": "1",
+   "OPENBLAS_NUM_THREADS": "1"
+  },
+  "lc6a_measured_peak_rss_gib": 6.891483,
+  "max_workers": 4,
+  "required_mem_available_gib": 48.0,
+  "threads_per_worker": 1
+ },
+ "schema_version": 1,
+ "scientific_semantics": "frozen-slow causal atlas: does the fast subsystem have a bounded high branch when D and H are held fixed",
+ "source_snapshots": {
+  "S2": {
+   "checkpoint": "results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/trajectories/C0/checkpoint_onset_plus_2s.npz",
+   "checkpoint_sha256": "c93254a45eb14e78888a86ce9ba5432a74578d59ffb7a874c41e33f5e9acc40f",
+   "manifest_actual_ms": 13000.0,
+   "manifest_timing_error_ms": 0.0,
+   "onset_time_ms": 11000.0,
+   "preceding_1s_global_rate_hz": 34.27334375,
+   "relative_to_onset_ms": 2000.0,
+   "snapshot_time_ms": 13000.0,
+   "state_hash": "d0bd175ca78d90f74647d7d19b93c928c1acf7b39c2e14ef13630d86350ef462",
+   "t_steps": 260000
+  },
+  "S4": {
+   "checkpoint": "results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/trajectories/C0/checkpoint_onset_plus_4s.npz",
+   "checkpoint_sha256": "ac58953f46c3d63da63c965a7116fce65fca4b2aeff5b73c947d427206b4eb5d",
+   "manifest_actual_ms": 15000.0,
+   "manifest_timing_error_ms": 0.0,
+   "onset_time_ms": 11000.0,
+   "preceding_1s_global_rate_hz": 58.5735625,
+   "relative_to_onset_ms": 4000.0,
+   "snapshot_time_ms": 15000.0,
+   "state_hash": "5a6fc8d989dcfeb0f6b6d925d13e7d539b0e174af648560360936496e300fdab",
+   "t_steps": 300000
+  }
+ },
+ "upstream": {
+  "graph": "C0",
+  "graph_artifact": "results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/graphs/C0.npz",
+  "graph_artifact_sha256": "192e2d8f398ae43d7a4e2d3b1f5cf5a0b8d4f7902d37c1fbe4df4507b42f9d56",
+  "graph_sha256": "dcf6468aa69e26116b31f2aa5e20442fe6c179f539ee90f87db32e852791af31",
+  "lc5_continuation": {
+   "output_tag": "lc5v2p1_right_censor_extension_tau15000_gamma0003",
+   "post_offset_low_observation_ms": 2000.0,
+   "saturation_contiguous_ms": 1000.0,
+   "source_final_state_hash": "5a9cb82a203ed92dc050a4fee4bd12289fa6153462608cc04a5fae6d1b6a6bc5",
+   "source_final_state_sha256": "82a0731ee517b5fdaed56fa9b925320d023cd19f1fb354272519d0cf056c2385",
+   "source_onset_ms": 23000.0,
+   "source_summary": "results/topic4_sef_hfo/fcxr_lc5v2_finite_episode/lc5v2p1_boundary_patch_q099_tau15_gamma_milli003/summary.json",
+   "source_summary_sha256": "89b9fac954e6827a1aea9f9f89bde78af9a457c92a9eb8c7db7f305defc745e5",
+   "source_t_ms": 25000.0,
+   "target_total_ms": 40000.0
+  },
+  "lc6a_archive": "docs/archive/topic4/fcxr_lc6a_patient_axis_surround_no_carrier_2026-08-15.md",
+  "lc6a_manifest": "config/topic4_fcxr_lc6a_patient_axis_surround.json",
+  "lc6a_manifest_sha256": "f3f27e0fa73072ab07e1689b37d3083f6a66ad2c9ff3fc9a07f701783e9c5b0e",
+  "lc6a_result_label": "CANONICAL_SEED_AXIAL_REACH_FAMILY_NO_CARRIER"
+ }
+}

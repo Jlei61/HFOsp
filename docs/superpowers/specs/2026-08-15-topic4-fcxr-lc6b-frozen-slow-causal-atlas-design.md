@@ -194,15 +194,20 @@ LC6A 的 `classify_high_state` 要求 rate / D / H **三条** drift 同时平坦
 - rate 漂移门：末 2 s 归一化 Theil–Sen 斜率 CI 上界 ≤ `0.05 s⁻¹`
 - 静默比例门：末 2 s 中 population rate ≤ `roll_hi` 的 20 ms bin 比例 ≥ `0.25` 记为 bursty
 
-### 8.3 判决树（对完成的续跑窗口逐条求值，先命中先返回）
+### 8.3 判决树（逐条求值，先命中先返回）
 
 1. 出现非有限值 / 引擎抛数值异常 → `NUMERICAL_FAIL`
-2. 未跑完注册时长（资源停机、单次延长后仍未解决、或末 2 s 仍在正漂移且未饱和）→ `RIGHT_CENSORED`
+2. 未跑完注册时长（资源停机 / bundle 未完成）→ `RIGHT_CENSORED`（`INCOMPLETE_REGISTERED_WINDOW`）
 3. 越过全局或局部饱和线 → `ESCALATING_SATURATION`
 4. 末 500 ms 一个 E spike 都没有 → `SILENCE`
 5. 末 2 s 均值 ≤ `roll_hi` → 若全程高于 `roll_hi` 的累计时长 < 2000 ms 则 `AFTER_DISCHARGE`，否则 `LOW_STATE`
-6. 其余（末 2 s 全程高于间期带、未越饱和线、rate 漂移门通过）：
+6. 末 2 s rate 漂移门未过（仍在正漂移）→ `RIGHT_CENSORED`（`STILL_ESCALATING_AT_WINDOW_END`），
+   适用 §6.2 的单次注册延长
+7. 其余（末 2 s 全程高于间期带、未越饱和线、漂移门通过）：
    静默 bin 比例 ≥ 0.25 → `BOUNDED_OSCILLATORY`；否则 `BOUNDED_STATIONARY`
+
+求值顺序里，**饱和与"掉回间期带"都是已解决的结局，必须排在"仍在升级"这个删失判据之前**；
+否则一个正在缓慢恢复的低态会因为斜率为正而被误判成删失，而不是被如实报成 `LOW_STATE`。
 
 ### 8.4 bounded 的边界
 
