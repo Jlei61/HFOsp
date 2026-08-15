@@ -177,8 +177,14 @@ def score_model_ranks_shaft_balanced(
         model_ranks: np.ndarray, *, patient_centers: np.ndarray,
         target: dict, contact_names: list[str], patient_ood_threshold: float,
         minimum_contacts: int = 3, minimum_events_per_mode: int = 3,
-        kmeans_seed: int = 20260815, kmeans_n_init: int = 20) -> dict:
-    """Score one network without letting contact or shaft density set the loss."""
+        kmeans_seed: int = 20260815, kmeans_n_init: int = 20,
+        include_natural_kmeans: bool = True) -> dict:
+    """Score one network without letting contact or shaft density set the loss.
+
+    ``include_natural_kmeans`` exists for the permutation null, which only needs
+    the supervised statistic; running the unsupervised clustering for every one
+    of the 64 draws would cost far more than the simulation being scored.
+    """
     model_ranks = np.asarray(model_ranks, float)
     _assert_target_contact_contract(target, contact_names)
     contract = contact_shaft_contract(contact_names)
@@ -237,7 +243,7 @@ def score_model_ranks_shaft_balanced(
         features, masked, target, contact_names=contact_names,
         shaft_ids=contract["shaft_ids"], pair_indices=canonical_pairs,
         kmeans_seed=kmeans_seed, kmeans_n_init=kmeans_n_init,
-    )
+    ) if include_natural_kmeans else None
     mode_losses = np.asarray([row["loss"] for row in losses])
     return {
         "status": "EVALUABLE",
