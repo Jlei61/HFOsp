@@ -114,6 +114,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
                   dump_i_spikes=False, dump_drive=False,
+                  dump_pathway_trace=False, pathway_trace_dt_ms=1.0,
                   feedback_gain=0.0, feedback_tau_ms=0.0, dump_fb=False,
                   fb_override_trace=None, ee_std_mode="local",
                   external_e_rate_drive=None):
@@ -220,9 +221,25 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # ---- M4: recurrent-only AMPA accumulator (OFF by default -> no alloc/float touch on the default
     # path). Tracks the recurrent (delay-ring) component of I_E separately so the shared pool can DIVIDE
     # only recurrent E input; the combined I_E accumulation below is untouched (byte-parity). ----
-    track_rec = bool(getattr(getattr(slow, "cfg", None), "use_SG", False))
+    pathway_trace_on = bool(dump_pathway_trace)
+    track_rec = bool(
+        getattr(getattr(slow, "cfg", None), "use_SG", False)
+        or pathway_trace_on
+    )
     if track_rec:
         s_E_rec = np.zeros(N); I_E_rec = np.zeros(N)
+    if pathway_trace_on:
+        pathway_trace_stride = int(round(float(pathway_trace_dt_ms) / dt))
+        if pathway_trace_stride < 1 or not np.isclose(
+                pathway_trace_stride * dt, float(pathway_trace_dt_ms),
+                atol=1e-12, rtol=0.0):
+            raise ValueError("pathway_trace_dt_ms must lie on the simulation grid")
+        pathway_trace_size = (nsteps + pathway_trace_stride - 1) // pathway_trace_stride
+        pathway_time_ms = np.empty(pathway_trace_size, dtype=np.float32)
+        pathway_recurrent_E_to_E_mean = np.empty(pathway_trace_size, dtype=np.float32)
+        pathway_recurrent_E_to_I_mean = np.empty(pathway_trace_size, dtype=np.float32)
+        pathway_GABA_to_E_mean = np.empty(pathway_trace_size, dtype=np.float32)
+        pathway_trace_count = 0
     ring_sE = np.zeros((M, N))
     ring_sI = np.zeros((M, N))
 
@@ -344,6 +361,13 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         I_I = s_I + (I_I - s_I) * decay_II
         if track_rec:
             I_E_rec = s_E_rec + (I_E_rec - s_E_rec) * decay_IE
+        if pathway_trace_on and t % pathway_trace_stride == 0:
+            index = pathway_trace_count
+            pathway_time_ms[index] = tm
+            pathway_recurrent_E_to_E_mean[index] = np.mean(I_E_rec[:NE])
+            pathway_recurrent_E_to_I_mean[index] = np.mean(I_E_rec[NE:])
+            pathway_GABA_to_E_mean[index] = np.mean(I_I[:NE])
+            pathway_trace_count += 1
         if lfp_trace is not None:                       # current-based LFP at custom sites
             lfp_trace[t] = lfp_recorder.sample(I_E, I_I)
 
@@ -523,6 +547,17 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     if dump_drive:
         res["I_E_peak"] = I_E_peak
         res["I_I_peak"] = I_I_peak
+    if pathway_trace_on:
+        res["pathway_trace"] = {
+            "time_ms": pathway_time_ms[:pathway_trace_count],
+            "recurrent_E_to_E_mean": pathway_recurrent_E_to_E_mean[
+                :pathway_trace_count
+            ],
+            "recurrent_E_to_I_mean": pathway_recurrent_E_to_I_mean[
+                :pathway_trace_count
+            ],
+            "GABA_to_E_mean": pathway_GABA_to_E_mean[:pathway_trace_count],
+        }
     if fb_dyn and dump_fb:
         res["I_global_trace"] = I_global_trace                  # (nsteps,) the per-step scalar I_global
     elif fb_static and dump_fb:

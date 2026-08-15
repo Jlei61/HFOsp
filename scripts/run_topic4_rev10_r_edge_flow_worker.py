@@ -122,6 +122,7 @@ def main():
         "development_only_data_driven_node_local_connectivity_joint_fit",
         "development_only_data_driven_node_local_connectivity_joint_selection",
         "development_only_data_driven_node_local_connectivity_frozen_confirmation",
+        "development_only_data_driven_node_local_connectivity_mechanism_confirmation",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -161,6 +162,7 @@ def main():
         "REV11NLC_JOINT_NODE_CONNECTIVITY_FIT_LIBRARY_FROZEN",
         "REV11NLC_JOINT_NODE_CONNECTIVITY_SELECTION_LIBRARY_FROZEN",
         "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN",
+        "REV11NLC_PATHWAY_MECHANISM_CONFIRMATION_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -269,7 +271,8 @@ def main():
             "REV11NLC_LOCAL_CONNECTIVITY_LIBRARY_FROZEN",
             "REV11NLC_JOINT_NODE_CONNECTIVITY_FIT_LIBRARY_FROZEN",
             "REV11NLC_JOINT_NODE_CONNECTIVITY_SELECTION_LIBRARY_FROZEN",
-            "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN"}:
+            "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN",
+            "REV11NLC_PATHWAY_MECHANISM_CONFIRMATION_LIBRARY_FROZEN"}:
         if node_candidate["field_type"] != "spline_continuous":
             raise RuntimeError("rev11-NLC requires the frozen continuous spline Node field")
         from src.topic4_continuous_field import continuous_field_h_with_queries
@@ -433,6 +436,7 @@ def main():
                 seed=int(args.seed) + int(spatial_ou["seed_offset"]),
             ),
         )
+    mechanism_readout = config.get("mechanism_readout", {})
     result = simulate_kick(
         params, mapped_net, KICK_BOOST=0.0, t_kick=1e9,
         V_th_per_neuron=node["vtheta"], slow=slow,
@@ -446,6 +450,8 @@ def main():
             manifest["status"] == "REV10D3_DYNAMIC_EE_STD_LIBRARY_FROZEN"
         ),
         external_e_rate_drive=external_drive,
+        dump_pathway_trace=bool(mechanism_readout.get("enabled", False)),
+        pathway_trace_dt_ms=float(mechanism_readout.get("trace_dt_ms", 1.0)),
     )
     spikes = np.asarray(result["E_spk_bool"], bool)
     active, active_dt = cmrun.active_fraction(spikes, engine["dt"], cmrun.BIN_MS)
@@ -513,6 +519,30 @@ def main():
             for key in MZSlowVars.TRACE_NAMES
         }
     )
+    pathway_trace = result.get("pathway_trace", {
+        key: np.empty(0, dtype=np.float32)
+        for key in (
+            "time_ms", "recurrent_E_to_E_mean",
+            "recurrent_E_to_I_mean", "GABA_to_E_mean",
+        )
+    })
+    pathway_time_ms = np.asarray(pathway_trace["time_ms"], np.float32)
+    if len(pathway_time_ms):
+        pathway_indices = np.rint(
+            pathway_time_ms.astype(float) / float(engine["dt"])
+        ).astype(int)
+        if (np.any(pathway_indices < 0)
+                or np.any(pathway_indices >= len(result["rate_E"]))):
+            raise RuntimeError("pathway trace is not aligned to population rates")
+        pathway_rate_E_hz = np.asarray(result["rate_E"], np.float32)[
+            pathway_indices
+        ]
+        pathway_rate_I_hz = np.asarray(result["rate_I"], np.float32)[
+            pathway_indices
+        ]
+    else:
+        pathway_rate_E_hz = np.empty(0, dtype=np.float32)
+        pathway_rate_I_hz = np.empty(0, dtype=np.float32)
     _atomic_npz(
         output_npz,
         contact_names=np.asarray(contact_names, dtype="U16"),
@@ -575,6 +605,18 @@ def main():
         ],
         mz_spike_count_E=mz_trace["spike_count_E"],
         mz_spike_count_I=mz_trace["spike_count_I"],
+        mechanism_time_ms=pathway_time_ms,
+        mechanism_population_rate_E_hz=pathway_rate_E_hz,
+        mechanism_population_rate_I_hz=pathway_rate_I_hz,
+        mechanism_recurrent_E_to_E_mean=np.asarray(
+            pathway_trace["recurrent_E_to_E_mean"], np.float32,
+        ),
+        mechanism_recurrent_E_to_I_mean=np.asarray(
+            pathway_trace["recurrent_E_to_I_mean"], np.float32,
+        ),
+        mechanism_GABA_to_E_mean=np.asarray(
+            pathway_trace["GABA_to_E_mean"], np.float32,
+        ),
     )
     payload = {
         "status": "REV10R_EDGE_FLOW_WORKER_COMPLETE",
@@ -672,6 +714,12 @@ def main():
             "core_trace_mask": "h_i >= 0.5",
             "core_trace_neuron_count": int(np.sum(node["h"] >= 0.5)),
             "changes_node_threshold_field": False,
+        },
+        "mechanism_readout": {
+            **mechanism_readout,
+            "trace_samples": int(len(pathway_time_ms)),
+            "records_population_rates": bool(len(pathway_time_ms)),
+            "records_pathway_mean_currents": bool(len(pathway_time_ms)),
         },
         "network": {
             "n_E": int(n_e), "n_I": int(n_i),
