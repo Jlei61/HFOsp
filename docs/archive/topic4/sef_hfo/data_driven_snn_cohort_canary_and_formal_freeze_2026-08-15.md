@@ -155,10 +155,14 @@ Event support on the canonical layout, which is what the primary arm reads:
 - Known provenance gap, pre-existing and shared with the canary: worker
   provenance is captured before `src/sef_hfo_snn_adapter` is imported, so that
   module's hash is not in `runtime_module_sha256`. Not changed mid-flight.
-- The volume is at 99 % (13 GiB free). The formal controller pauses when free
-  space falls below 6 GiB rather than failing. `results/topic4_sef_hfo/`
-  holds 185 GiB, 178 GiB of it in `data_driven_core_field/` and
-  `data_driven_core_field_rev9/`; nothing has been deleted.
+- The volume was at 99 % (13 GiB free) when the run was launched, so the
+  controller pauses below 6 GiB rather than failing and the workers were built
+  to drop the per-contact envelope. During stage A roughly 170 GiB was freed
+  outside this line by clearing the bulk artifacts under
+  `data_driven_core_field/` and `data_driven_core_field_rev9/`; 180 GiB is now
+  free. All five inputs this run pins survived with hashes matching the config,
+  including `data_driven_core_field/config/stage_config.json` and the rev9
+  detector audit, and no worker failed across the cleanup.
 
 ## 7. Claim boundary
 
