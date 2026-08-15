@@ -313,28 +313,64 @@ def finalize():
             "verdict": ("BISTABILITY_CANDIDATE_PENDING_PERTURBATION_AND_SECOND_STREAM"
                         if low != high else "SINGLE_OUTCOME_FROM_BOTH_LOCKED_INITIALISATIONS"),
         }
-    # Free cross-check against round 1.  field_t13s / field_t15s reproduce the exact states round 1
-    # forked from, the canonical stream is field_t13s's own, and both are pinned on D and H -- so
-    # <field>__path_native must reproduce the corresponding round-1 extended arm second by second.
-    # Any mismatch means the path-field regeneration is not the trajectory round 1 actually ran.
-    round1 = {"field_t13s": "S2_DH_CLAMP_EXT", "field_t15s": "S4_DH_CLAMP_EXT"}
+    # Cross-check against round 1, in two different senses.
+    #
+    # field_t13s is the IDENTITY check: the canonical stream is taken from that field, so its
+    # path_native point receives exactly the input round 1 received and must reproduce it second by
+    # second.  A mismatch means the regenerated path fields are not the trajectory round 1 forked
+    # from, and publishing would build an atlas on a different trajectory -- so it raises.
+    #
+    # field_t15s cannot be an identity check and must not be asserted as one: it is handed
+    # field_t13s's generator state, while round 1 used the 15 s state's own.  That makes it something
+    # more useful instead -- the round-1 S4 arm re-run under a DIFFERENT noise stream -- so it is
+    # reported as a replication readout, which is a partial answer to the review's request for a
+    # second noise stream.
+    identity = {"field_t13s": "S2_DH_CLAMP_EXT"}
+    replication = {"field_t15s": "S4_DH_CLAMP_EXT"}
     cross = {}
-    for field, arm_id in round1.items():
+
+    def _round1(arm_id):
         path = CF.FORK_ROOT / arm_id / "summary.json"
-        if field not in fields or not path.is_file():
+        return json.loads(path.read_text()) if path.is_file() else None
+
+    for field, arm_id in identity.items():
+        parent = _round1(arm_id)
+        if field not in fields or parent is None:
             continue
-        want = [round(x, 6) for x in json.loads(path.read_text())["verdict"]["per_second_mean_hz"]]
+        want = [round(x, 6) for x in parent["verdict"]["per_second_mean_hz"]]
         got = [round(x, 6) for x in rows[(field, "path_native")]["verdict"]["per_second_mean_hz"]]
         n = min(len(want), len(got))
-        cross[field] = {
-            "round1_arm": arm_id, "n_compared_seconds": n,
-            "identical": want[:n] == got[:n],
-            "atlas_per_second_hz": got[:n], "round1_per_second_hz": want[:n],
-        }
+        cross[field] = {"kind": "identity", "round1_arm": arm_id, "n_compared_seconds": n,
+                        "identical": want[:n] == got[:n],
+                        "atlas_per_second_hz": got[:n], "round1_per_second_hz": want[:n]}
         if not cross[field]["identical"]:
             raise RuntimeError(
                 f"{field}__path_native does not reproduce round 1 arm {arm_id}; the regenerated "
                 "path fields are not the trajectory round 1 forked from")
+
+    for field, arm_id in replication.items():
+        parent = _round1(arm_id)
+        if field not in fields or parent is None:
+            continue
+        atlas_row = rows[(field, "path_native")]
+        want_rate = float(parent["verdict"]["per_second_mean_hz"][-1])
+        got_rate = float(atlas_row["verdict"]["per_second_mean_hz"][-1])
+        scale = max(abs(want_rate), abs(got_rate), 1e-9)
+        cross[field] = {
+            "kind": "different_noise_stream_replication",
+            "round1_arm": arm_id,
+            "note": ("this point runs the canonical stream taken from field_t13s, not the 15 s "
+                     "state's own, so it is round 1's S4 arm under a different noise stream; "
+                     "identity is not expected and is not asserted"),
+            "round1_label": parent["verdict"]["label"],
+            "atlas_label": atlas_row["verdict"]["label"],
+            "round1_final_second_hz": want_rate, "atlas_final_second_hz": got_rate,
+            "final_second_relative_difference": abs(want_rate - got_rate) / scale,
+            "round1_median_active_area_mm2": None,
+            "atlas_median_active_area_mm2": atlas_row["median_active_area_mm2"],
+            "same_regime": (parent["verdict"]["bounded_candidate"]
+                            == atlas_row["verdict"]["bounded_candidate"]),
+        }
 
     payload = {
         "status": "COMPLETE", "n_points": len(rows),
