@@ -6,6 +6,8 @@
 - Split patient data by recording block before fitting masked KMeans.
 - Freeze per-subject TA/TB descriptors and train/held-out samples.
 - Build a geometry-only PCA placement for every coordinate-eligible subject.
+- Build a target-blind canonical shaft layout from contact name and ordinal for
+  all 34 subjects; use real geometry only as the 28-subject sensitivity arm.
 - Write `cohort_eligibility.csv`, `cohort_target_audit.json`, per-subject
   JSON/NPZ files and a diagnostic figure with PNG/PDF/README.
 - Tests must cover phantom ranks, block leakage, label alignment, geometry sign
@@ -32,7 +34,11 @@
 
 - Freeze candidate library, detector, fit/selection/confirmation seeds and
   subject list after C2.
+- Freeze shaft-balanced recruitment and precedence losses before patient
+  scoring; no shaft or pair-count weighting by sampling density is allowed.
 - Run 20 s simulations on fresh confirmation seeds.
+- Read every simulation through all 34 canonical montages, then repeat the
+  selected-candidate endpoint under the 28 available real-geometry montages.
 - Use managed `systemd-run --user -> nohup` workers, one numeric thread each,
   measured-RSS memory admission and 300-s controller waits.
 - Do not launch while the rev11 pathway confirmation is running.
@@ -41,8 +47,11 @@
 
 ## C4: adjudication
 
-- Report 34 target subjects, geometry-eligible denominator and every exclusion.
+- Report 34 canonical-layout subjects and 28 real-geometry sensitivity subjects;
+  the six missing-coordinate cases are not removed from the primary cohort.
 - Use subject as the independent unit.
+- Require canonical and real-geometry effects to agree in direction before
+  calling the result observation-invariant.
 - Separate supervised patient geometry, natural KMeans, event support and OOD.
 - Select the representative figure subject by median performance.
 - Write the final claim only after the figure, sidecars and held-out audit agree.

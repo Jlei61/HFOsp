@@ -11,18 +11,22 @@ replicates and must not be counted as independent cohort observations.
 
 ## Denominator contract
 
-The upstream masked cohort contains 34 stable-K=2 subjects. Two separate
+The upstream masked cohort contains 34 stable-K=2 subjects. Three separate
 eligibility layers are frozen:
 
 1. `PATIENT_TARGET_ELIGIBLE`: masked ranks, two train-derived modes, disjoint
    recording-block held-out data and at least six joint-valid contacts;
-2. `SNN_GEOMETRY_ELIGIBLE`: real 3-D contact coordinates support a rank-2
-   geometry-only projection into the SNN sheet.
+2. `CANONICAL_SHAFT_LAYOUT_ELIGIBLE`: every target contact name can be parsed
+   into shaft identity and within-shaft ordinal, without reading event ranks;
+3. `REAL_GEOMETRY_SENSITIVITY_ELIGIBLE`: real 3-D contact coordinates support
+   a rank-2 geometry-only projection into the SNN sheet.
 
-Every one of the 34 subjects remains in the eligibility table. A subject that
-lacks geometry is a reported technical exclusion, not a failed model fit. The
-headline denominator must state both counts, for example `28/34 geometry
-eligible`, before reporting the model result among the eligible subjects.
+Every one of the 34 subjects remains in the primary canonical-layout analysis.
+Real geometry is a sensitivity stratum, not the primary denominator. The live
+audit found all 34 contact sets parseable, while only 28/34 have usable real
+3-D geometry. The headline must therefore state `34 canonical-layout subjects;
+28 real-geometry sensitivity subjects`, and must never imply that the
+canonical layout is patient anatomy.
 
 ## Patient target
 
@@ -49,15 +53,27 @@ held-out margin.
 
 ## Geometry and observation
 
-Contact coordinates are projected from real 3-D geometry by deterministic PCA
-and isotropically fitted into the 20-mm sheet. The projection may read contact
-coordinates and names, but it must not read rank values, mode labels, template
-direction or field peaks. This prevents the observation geometry from drawing
-the propagation target into the SNN.
+The primary observation model is a canonical shaft layout. Contact names are
+parsed into shaft identity and within-shaft ordinal; shafts are arranged by a
+fixed, data-independent rule and contacts retain their within-shaft spacing.
+The layout may not read rank values, mode labels, template direction, event
+counts, recruitment frequency or field peaks. This supports a claim about
+internal contact-order structure, not anatomical localization.
+
+For the 28 subjects with usable coordinates, real 3-D geometry is projected by
+deterministic PCA and isotropically fitted into the 20-mm sheet as a sensitivity
+analysis. The cohort conclusion is observation-invariant only if the canonical
+and real-geometry subject effects agree in direction. Disagreement is reported
+as `OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED`.
 
 The same frozen readout kernel and detector are used for every candidate and
-subject. Contact count may vary by subject; no E1146-specific shaft or 15-contact
-assumption is allowed in the cohort scorer.
+subject. Contact count may vary by subject; no E1146-specific shaft or
+15-contact assumption is allowed in the cohort scorer. Recruitment errors are
+first averaged within shaft and then across shafts. Precedence errors are first
+averaged within unordered shaft-pair class and then across classes, so one
+densely sampled shaft or a large cross-shaft pair count cannot dominate the
+fit. A one-shaft subject is eligible for within-shaft endpoints, while its
+cross-shaft endpoint is explicitly not applicable.
 
 ## Data-driven model family
 
@@ -100,11 +116,14 @@ cohort claim requires:
 ## Execution stages
 
 1. build the 34-subject target and geometry eligibility audit;
-2. run a six-subject geometry-diverse canary with four frozen candidates;
-3. audit memory, detector parity, event support and Fig.4-style output;
-4. freeze the shared library and formal budget;
-5. run all SNN-eligible subjects under managed systemd/nohup workers;
-6. aggregate automatically, render PNG/PDF and notify on completion.
+2. run the frozen six-subject real-geometry transfer canary as a capacity
+   preflight, not as the cohort result;
+3. freeze the canonical shaft layout and shaft-balanced scorer for all 34;
+4. audit memory, detector parity, event support and Fig.4-style output;
+5. freeze the shared library and formal budget;
+6. run all 34 canonical layouts plus the 28 real-geometry sensitivity layouts
+   under managed systemd/nohup workers;
+7. aggregate automatically, render PNG/PDF and notify on completion.
 
 The formal run cannot begin while the rev11 pathway confirmation still owns
 the memory budget.
@@ -113,7 +132,8 @@ the memory budget.
 
 The final result is one cohort figure with:
 
-1. the 34-subject eligibility funnel;
+1. the 34-subject canonical-layout cohort and 28-subject real-geometry
+   sensitivity denominator;
 2. subject-level held-out patient alignment versus matched null;
 3. subject-level natural KMeans support and same-network dual-mode rate;
 4. one median-performing subject shown with the accepted Fig.4 direct readout;
@@ -127,11 +147,13 @@ scientific verdict and denominator.
 
 A positive result may support:
 
-> Across geometry-eligible stable-bidirectional subjects, patient-conditioned
+> Across stable-bidirectional subjects, patient-conditioned
 > continuous Node plus local-connectivity SNNs recovered held-out propagation
 > geometry and same-network stereotyped event structure more closely than
 > matched contact-identity nulls.
 
-It may not be shortened to “34 patients were reproduced” unless all 34 become
-geometry eligible and pass. It does not establish clinical waveform identity,
-a unique anatomical core, patient-blind generalization or seizure dynamics.
+This wording is allowed only if the frozen subject endpoint passes in the
+canonical-layout cohort and the real-geometry sensitivity does not contradict
+it. It may not be shortened to “34 patients were reproduced”; the primary
+layout is not anatomy. It does not establish clinical waveform identity, a
+unique anatomical core, patient-blind generalization or seizure dynamics.
