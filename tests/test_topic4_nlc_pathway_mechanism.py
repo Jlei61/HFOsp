@@ -2,13 +2,37 @@ from __future__ import annotations
 
 import numpy as np
 
+from scripts.paper_figures.plot_fig4c_nlc_pathway_ablation import (
+    _metric_arrays,
+)
 from src.topic4_nlc_pathway_mechanism import (
+    ARM_IDS,
     bootstrap_mean,
     event_aligned_pathway_readout,
     factorial_bootstrap,
     network_mode_endpoints,
     paired_bootstrap,
 )
+
+
+def test_fig4c_displays_mode_shares_and_kmeans_alignment_as_percentages():
+    rows = {arm: {} for arm in ARM_IDS}
+    for index, arm in enumerate(ARM_IDS):
+        rows[arm]["7"] = {
+            "TA_like_count": 1 + index,
+            "TB_like_count": 3 - index if index < 3 else 1,
+            "natural_alignment": 0.5 + 0.1 * index,
+            "ood_fraction_returned": 0.4 - 0.1 * index,
+        }
+    metrics = _metric_arrays(rows, [7])
+    assert list(metrics) == [
+        "Mode 1 share (%)", "Mode 2 share (%)", "KMeans match (%)", "OOD (%)",
+    ]
+    np.testing.assert_allclose(
+        metrics["Mode 1 share (%)"] + metrics["Mode 2 share (%)"], 100.0,
+    )
+    np.testing.assert_allclose(metrics["KMeans match (%)"][0], [50, 60, 70, 80])
+    np.testing.assert_allclose(metrics["OOD (%)"][0], [40, 30, 20, 10])
 
 
 def test_mode_endpoints_count_absent_mode_as_zero():

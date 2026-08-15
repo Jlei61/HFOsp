@@ -37,7 +37,7 @@ DEFAULT_OUTPUT = (
     / "frozen_substrate_confirmation/figures"
 )
 MAIN_FIGURES = ROOT / "results/paper-ready-figure/fig4/figures"
-ARM_LABELS = ("Node", "+EE", "+E-to-I", "+both")
+ARM_LABELS = ("Node", "+EE", "+E-to-I", "+EE+EI")
 ARM_COLORS = ("#777777", "#D7892F", "#2A9D8F", "#202020")
 TA_COLOR = "#C43C39"
 TB_COLOR = "#277DA1"
@@ -109,20 +109,29 @@ def _mechanism_rows(root):
 
 
 def _metric_arrays(rows, seeds):
+    mode_1 = np.asarray([
+        [rows[arm][str(seed)]["TA_like_count"] for arm in ARM_IDS]
+        for seed in seeds
+    ], float)
+    mode_2 = np.asarray([
+        [rows[arm][str(seed)]["TB_like_count"] for arm in ARM_IDS]
+        for seed in seeds
+    ], float)
+    total = mode_1 + mode_2
+    mode_1_share = np.divide(
+        100.0 * mode_1, total, out=np.full_like(total, np.nan), where=total > 0,
+    )
+    mode_2_share = np.divide(
+        100.0 * mode_2, total, out=np.full_like(total, np.nan), where=total > 0,
+    )
     return {
-        "TA-like events": np.asarray([
-            [rows[arm][str(seed)]["TA_like_count"] for arm in ARM_IDS]
-            for seed in seeds
-        ], float),
-        "TB-like events": np.asarray([
-            [rows[arm][str(seed)]["TB_like_count"] for arm in ARM_IDS]
-            for seed in seeds
-        ], float),
-        "direction": np.asarray([
+        "Mode 1 share (%)": mode_1_share,
+        "Mode 2 share (%)": mode_2_share,
+        "KMeans match (%)": 100.0 * np.asarray([
             [rows[arm][str(seed)]["natural_alignment"] for arm in ARM_IDS]
             for seed in seeds
         ], float),
-        "OOD": np.asarray([
+        "OOD (%)": 100.0 * np.asarray([
             [rows[arm][str(seed)]["ood_fraction_returned"] for arm in ARM_IDS]
             for seed in seeds
         ], float),
@@ -205,8 +214,8 @@ def _install_main(stem, metadata):
             else "CANDIDATE_WITH_POSTHOC_NLC_PATHWAY_PANEL"
         )
         registry.setdefault("panel_contract", {})["c"] = (
-            "paired Node / +EE / +E-to-I / +both pathway ablation; "
-            "TA-like and TB-like yield, natural direction alignment and OOD"
+            "paired Node / +EE / +E-to-I / +EE+EI pathway ablation; "
+            "Mode 1/2 shares, natural KMeans match and OOD"
         )
         registry.setdefault("panel_metadata", {})["c"] = (
             "results/paper-ready-figure/fig4/figures/fig4-panelc-metadata.json"
@@ -270,8 +279,8 @@ def main():
         _draw_axis(axes[index], values, title, draws=4096, seed=20260820 + 20 * index)
     axes[0].title.set_color(TA_COLOR)
     axes[1].title.set_color(TB_COLOR)
-    axes[2].set_ylim(0.35, 1.02)
-    axes[3].set_ylim(0.0, max(0.65, np.nanmax(metrics["OOD"]) * 1.08))
+    for axis in axes:
+        axis.set_ylim(0.0, 102.0)
     fig.subplots_adjust(left=0.055, right=0.995, bottom=0.25, top=0.91, wspace=0.42)
     stem = Path(args.output_dir).resolve() / stem_name
     _save(fig, stem)
@@ -285,8 +294,14 @@ def main():
         "arm_order": list(ARM_IDS),
         "arm_labels": list(ARM_LABELS),
         "event_labels": {
-            "TA-like": "frozen patient classifier label 0",
-            "TB-like": "frozen patient classifier label 1",
+            "Mode 1": "frozen patient classifier label 0; no pathological meaning",
+            "Mode 2": "frozen patient classifier label 1; no pathological meaning",
+        },
+        "display_metrics": {
+            "Mode 1 share (%)": "Mode 1 / (Mode 1 + Mode 2) among formal events",
+            "Mode 2 share (%)": "Mode 2 / (Mode 1 + Mode 2) among formal events",
+            "KMeans match (%)": "balanced alignment of de novo KMeans K=2 clusters with frozen Mode 1/2 labels",
+            "OOD (%)": "fraction of returned events outside frozen patient support",
         },
         "natural_clusters_are_not_relabelled_as_patient_modes": True,
         "statistics": "equal-network mean and 90% network bootstrap interval; raw paired networks shown",
