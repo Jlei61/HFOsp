@@ -50,8 +50,8 @@ Review of 2026-08-15, `docs/archive/topic4/sef_hfo/rev11_nlc_frozen_substrate_re
   permutation p and the patient-matched purity benchmark.
 - [x] Replay both fixed-threshold statements on every arm; record that the
   Node-only control also clears them.
-- [x] Rebuild Fig.4 so the acceptance quantities, the Node-only control and the
-  matrix of the plotted clusters are all on the canvas.
+- [x] Leave Fig.4 unchanged; the calibration lives in null_calibration.json and
+  the review report, not as added text on the canvas.
 - [ ] Carry the calibrated form of each acceptance statement into the NLC4 spec
   before any Z/M transfer claim.
 
