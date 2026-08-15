@@ -88,6 +88,21 @@
 > `docs/archive/topic4/fcxr_lc6b_frozen_slow_causal_atlas_2026-08-15.md`。
 > 编号说明：旧文本里"carrier positive → LC6B 重标 U"那条路线**已改名 LC6D**，LC6B 现指本轮 atlas。
 >
+> **FCXR-LC6B round 2 — 沿自然路径的 atlas（2026-08-16，18 点各 10 s）**：沿这条轨迹自己走过的
+> 六个时刻（onset−1 s 到 onset+4 s）取慢变量场，每个场从三种起始快态出发（轨迹自身态、一份共用
+> 间期态、一份共用 420 Hz 高态），18 点共享同一条未来输入流。三条结果：① **有界区入口在 onset 与
+> onset+1 s 之间**（`D` 在 0.0656–0.0870），之前两个场在 1 s 尺度上从未越过间期带、活动面积恒为 0；
+> ② **六个场无一出现双稳** —— 共用低态与共用高态处处落到同一结局区（末秒率相对差 ≤ 0.091、面积
+> ≤ 0.011、静默占比 ≤ 0.030），在 onset 前与 onset 当刻更彻底：三种起点在末 5 s 的**放电序列逐位相同**，
+> 那里只有一个输入驱动的吸引子；③ 随 `D` 单调长大的是这个爆发串**有多强多大**（25→65 Hz、90→311 mm²），
+> **不是它是不是爆发串**（爆发频率恒在 10.0–10.5 次/秒）。
+> **⚠️ 注册标签在这个区里不携带双稳信息**：注册规则按标签把三个场标成 candidate，**全是**漂移判据
+> 的假象；该判据在 atlas 上共造出 4 次假标签且落在不同初始化上。引用时必须把注册标记
+> （`natural_path_atlas.json`）与结局量比较（`atlas_supplementary_readouts.json`）**一起**给出。
+> 两条对 round 1 的校验：`field_t13s__path_native` 与 `S2_DH_CLAMP_EXT` 放电序列逐位相同；
+> `field_t15s__path_native` 实为**换一条噪声流**重跑 `S4_DH_CLAMP_EXT`，末秒相对差 0.0008。
+> `perturbation_return` / `termination` / `lifecycle` 仍全部 `NOT_TESTED`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
@@ -975,7 +990,7 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
   - `docs/superpowers/specs/2026-08-14-topic4-fcxr-lc6a-patient-axis-surround-design.md` + 同名 plan —— LC6A 的设计与实施合同（五图家族、两跳几何审计、短功能探针、五臂固定自然轨迹、gain fork、条件性 confirmation）。
   - `docs/archive/topic4/fcxr_lc6a_patient_axis_surround_no_carrier_2026-08-15.md` —— **LC6A 最终结论 + 2026-08-15 复审重写**：加宽患者轴两跳抑制周边不产生 bounded carrier；六条被取代的旧表述与逐条证据在 `results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/run_manifest.json::post_hoc_corrections`。
   - `docs/superpowers/specs/2026-08-15-topic4-fcxr-lc6b-frozen-slow-causal-atlas-design.md` + 同名 plan + `config/topic4_fcxr_lc6b_frozen_slow_atlas.json` —— LC6B 的设计、实施与执行合同（D/H 冻结钩子、八条 clamp、分类语义、三类硬 gate、条件性 natural-path atlas）。
-  - `docs/archive/topic4/fcxr_lc6b_frozen_slow_causal_atlas_2026-08-15.md` —— **LC6B round 1 结论**：把 `D` 与 `H` 按在轨迹自身的值上后，快回路存在有界高分支；只按住 `D` 就够，只按住 `H` 不够 → `10S_BOUNDED_OSCILLATORY_CONTINUATION_EXPOSED_BY_D_CLAMP`。这也解答了 LC6A 留下的问题：LC6A 的"无 carrier"是**慢变量把系统推过了平台**，不是快回路没有平台，所以下一机制分支不再是继续加宽抑制周边。spec §10 分支 B 成立 → 条件性 natural-path atlas 已获授权；H-EFF / H-CAP 属分支 A，未触发。
+  - `docs/archive/topic4/fcxr_lc6b_frozen_slow_causal_atlas_2026-08-15.md` —— **LC6B round 1 结论**：把 `D` 与 `H` 按在轨迹自身的值上后，快回路存在有界高分支；只按住 `D` 就够，只按住 `H` 不够 → `10S_BOUNDED_OSCILLATORY_CONTINUATION_EXPOSED_BY_D_CLAMP`。这也解答了 LC6A 留下的问题：LC6A 的"无 carrier"是**慢变量把系统推过了平台**，不是快回路没有平台，所以下一机制分支不再是继续加宽抑制周边。spec §10 分支 B 成立，条件性 natural-path atlas 已执行（round 2，见同一 archive 的 §11–§16）；H-EFF / H-CAP 属分支 A，未触发。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档
