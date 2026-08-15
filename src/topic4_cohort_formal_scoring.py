@@ -166,14 +166,24 @@ def cohort_summary(canonical_rows: list[dict], real_rows: list[dict], *,
     kept = events <= np.quantile(events, 0.75)
     without_high_yield = _paired_test(deltas[kept])
 
-    if len(np.unique(events)) > 1 and len(events) > 2:
-        correlation = spearmanr(deltas, events)
-        event_confound = {
-            "spearman_rho": float(correlation.statistic),
-            "p": float(correlation.pvalue),
-        }
-    else:
-        event_confound = {"spearman_rho": float("nan"), "p": float("nan")}
+    def _confound(values: np.ndarray) -> dict:
+        if len(np.unique(values)) > 1 and len(values) > 2:
+            correlation = spearmanr(deltas, values)
+            return {
+                "spearman_rho": float(correlation.statistic),
+                "p": float(correlation.pvalue),
+            }
+        return {"spearman_rho": float("nan"), "p": float("nan")}
+
+    event_confound = _confound(events)
+    # The canary showed the raw same-minus-crossed margin rising as montages
+    # shrink, which is what a rank correlation over six contacts does on its
+    # own.  The endpoint here is null-relative, so that inflation should cancel
+    # inside each subject; this reports whether it actually did.
+    contacts = np.asarray([
+        row.get("n_contacts") or 0 for row in canonical_rows
+    ], float)
+    contact_confound = _confound(contacts)
 
     # Every subject uses all confirmation seeds, so the honest single-network
     # check is the cohort pass fraction computed inside each seed on its own.
@@ -235,6 +245,7 @@ def cohort_summary(canonical_rows: list[dict], real_rows: list[dict], *,
         "same_network_k2_fraction": same_network,
         "robustness": {
             "event_count_confound": event_confound,
+            "contact_count_confound": contact_confound,
             "without_top_event_quartile": without_high_yield,
             "pass_by_confirmation_seed": seed_contribution,
             "worst_single_seed_pass_fraction": (
