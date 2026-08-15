@@ -8,6 +8,9 @@ import numpy as np
 
 from scripts.paper_figures.plot_fig4_spatial_edge_flow_validation import (
     _bandpass_contact_activity,
+    _calibration_caption,
+    _calibration_columns,
+    _nlc_readme_text,
     _figure2a_context_geometry,
     _equal_network_row,
     _map_kmeans_clusters_to_modes,
@@ -332,3 +335,100 @@ def test_landscape_colorbar_stays_inside_its_own_cell():
     ).read_text()
     assert "plt.colorbar(surface, ax=ax" not in source
     assert "figure.colorbar(surface, cax=colorbar_ax)" in source
+
+
+def _calibration_fixture():
+    def arm(alignment, margin, purity, seeds):
+        return {
+            "per_network": {
+                str(seed): {
+                    "observed_balanced_alignment": alignment + 0.01 * index,
+                    "observed_crossfit_margin": margin + 0.01 * index,
+                }
+                for index, seed in enumerate(seeds)
+            },
+            "balanced_alignment_vs_label_permutation_null": {
+                "observed_equal_network_mean": alignment,
+                "null_median": 0.53, "null_q95": 0.57, "one_sided_p": 0.0005,
+            },
+            "crossfit_margin_vs_contact_permutation_null": {
+                "observed_equal_network_mean": margin,
+                "null_median": -0.25, "null_q95": -0.12, "one_sided_p": 0.001,
+            },
+            "equal_network_alignment_bootstrap": {"equal_network_mean": alignment},
+            "equal_network_margin_bootstrap": {"equal_network_mean": margin},
+            "pooled_diagnostics": {
+                "pooled_kmeans_direction_purity": purity,
+                "patient_matched_kmeans_direction_purity": {"q05": 0.898},
+            },
+        }
+
+    return {
+        "status": "REV11NLC_NULL_CALIBRATION_COMPLETE",
+        "gates_do_not_separate_arms": True,
+        "arms_passing_both_uncalibrated_gates": [
+            "node_baseline", "joint_04_control",
+        ],
+        "arms": {
+            "node_baseline": arm(0.662, 0.423, 0.674, (1561, 1562, 1563)),
+            "joint_04_ee_only": arm(0.765, 0.481, 0.700, (1561, 1562, 1563)),
+            "joint_04_etoi_only": arm(0.732, 0.398, 0.743, (1561, 1562)),
+            "joint_04_control": arm(0.705, 0.484, 0.663, (1561, 1562, 1563)),
+        },
+    }
+
+
+def test_calibration_columns_keep_arm_order_and_shared_networks():
+    columns, seeds, values = _calibration_columns(
+        _calibration_fixture(), "observed_balanced_alignment",
+    )
+    assert [candidate for candidate, _ in columns] == [
+        "node_baseline", "joint_04_ee_only", "joint_04_etoi_only",
+        "joint_04_control",
+    ]
+    # Only networks every arm evaluated may enter the paired comparison.
+    assert seeds == ["1561", "1562"]
+    assert values.shape == (2, 4)
+
+
+def test_calibration_caption_names_the_control_and_the_patient_benchmark():
+    text = _calibration_caption(_calibration_fixture())
+    assert "Node-only control also clears both fixed thresholds" in text
+    assert "0.662" in text and "0.423" in text
+    assert "patient-matched benchmark q05 0.898" in text
+    assert "label-permutation chance 0.530" in text
+    assert "contact-permutation chance -0.250" in text
+    assert "unsupervised KMeans clusters" in text
+
+
+def test_status_banner_leads_with_plain_language():
+    import matplotlib
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    fig = plt.figure()
+    text = _status_banner(fig, {
+        "figure_eligible": True,
+        "verdict_status": "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_PASS",
+    }, plain_prefix="development check: static substrate")
+    plt.close(fig)
+    assert text.startswith("development check: static substrate")
+    assert "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_PASS" in text
+
+
+def test_nlc_readme_states_the_control_arm_when_calibration_exists(tmp_path):
+    (tmp_path / "null_calibration.json").write_text(
+        json.dumps(_calibration_fixture())
+    )
+    bundle = {"output_root": tmp_path}
+    text = _nlc_readme_text(bundle, 12)
+    assert "只有地形" in text
+    assert "0.898" in text
+    assert "不是临床 SEEG" in text
+    assert "unavailable" not in text
+
+
+def test_nlc_readme_says_when_no_calibration_is_available(tmp_path):
+    text = _nlc_readme_text({"output_root": tmp_path}, 12)
+    assert "null_calibration.json" in text
+    assert "unavailable" in text

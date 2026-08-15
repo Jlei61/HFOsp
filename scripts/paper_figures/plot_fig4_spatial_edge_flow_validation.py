@@ -44,6 +44,16 @@ MODE_COLORS = {TA_MODE: TA_COLOR, TB_MODE: TB_COLOR}
 DISPLAY_MODE_COLORS = (TA_COLOR, TB_COLOR)
 SHAFT_COLORS = {"ICL": "#E67E22", "SCL": "#159EAE"}
 TRACE_BAND_HZ = (30.0, 80.0)
+NLC_PLAIN_PREFIX = (
+    "development check: static substrate vs patient interictal repertoire "
+    "(slow ictal variables off)"
+)
+NLC_ARM_DISPLAY = (
+    ("node_baseline", "Node"),
+    ("joint_04_ee_only", "+E-to-E"),
+    ("joint_04_etoi_only", "+E-to-I"),
+    ("joint_04_control", "+both"),
+)
 
 
 def _sha256(path):
@@ -633,9 +643,10 @@ def _plot_mode_density(ax, bundle, mode, display_name, *, show_ylabel):
         bundle.get("network_seed_key", "fit_network_seeds")
     ])
     ax.text(0.035, 0.965,
-            f"clean events  n={int(bundle['clean_counts'][mode])}\n"
-            f"pooled over {n_networks} networks",
-            transform=ax.transAxes, ha="left", va="top", fontsize=9.0,
+            f"n={int(bundle['clean_counts'][mode])} clean events"
+            f" · {n_networks} networks\n"
+            "supervised direction label",
+            transform=ax.transAxes, ha="left", va="top", fontsize=8.6,
             color="white", weight="bold",
             bbox={"facecolor": MODE_COLORS[mode], "edgecolor": "none",
                   "alpha": 0.86, "pad": 2.2})
@@ -712,7 +723,9 @@ def _plot_readout(ax, bundle, pair):
         ax.scatter(xs, ys, s=9, color="#222222", edgecolor="white",
                    linewidth=0.25, zorder=8)
     bar_x = 0.045 * max(stop - start, 1.0)
-    bar_y = offsets[-1] + 0.05
+    # Keep the amplitude bar in the headroom above the topmost trace instead of
+    # drawing it across that trace.
+    bar_y = offsets[-1] + 0.52
     ax.plot([bar_x, bar_x], [bar_y - 0.36, bar_y + 0.36],
             color="#222222", lw=1.6, clip_on=False)
     ax.text(bar_x + 0.015 * max(stop - start, 1.0), bar_y,
@@ -723,7 +736,7 @@ def _plot_readout(ax, bundle, pair):
     ax.set_xlim(0, stop - start)
     ax.set_ylim(-0.65, offsets[-1] + 0.95)
     ax.set_xlabel("simulation time (ms)", fontsize=11.5)
-    ax.set_ylabel("30-80 Hz virtual-contact activity", fontsize=11.5)
+    ax.set_ylabel("virtual-contact activity (a.u.)", fontsize=11.5)
     ax.tick_params(axis="x", labelsize=9.5)
     ax.spines[["top", "right"]].set_visible(False)
     ax.legend(handles=[
@@ -731,6 +744,19 @@ def _plot_readout(ax, bundle, pair):
         Patch(facecolor=TB_COLOR, alpha=0.2, label="MTB"),
     ], frameon=False, fontsize=9.5, ncol=2, loc="lower right",
        bbox_to_anchor=(1.0, 1.01))
+    # The spec requires the signal contract and the display selection rule on
+    # the canvas, not only in the README and the metadata sidecar. They sit on
+    # opposite edges so neither collides with the mode legend.
+    ax.text(0.0, 1.012,
+            f"{TRACE_BAND_HZ[0]:.0f}-{TRACE_BAND_HZ[1]:.0f} Hz model "
+            "firing-density proxy, not clinical SEEG HFO",
+            transform=ax.transAxes, ha="left", va="bottom", fontsize=9.0,
+            color="#4A5459")
+    ax.text(0.0, -0.165,
+            "one same-network MTA/MTB pair with the highest shared contact "
+            "support; black dots mark per-contact onsets",
+            transform=ax.transAxes, ha="left", va="top", fontsize=8.8,
+            color="#4A5459")
     return {"same_network_pair": True, "seed": block["seed"],
             "MTA_global_index": ta_index, "MTB_global_index": tb_index,
             "pair_contract": (
@@ -785,8 +811,13 @@ def _science_status(bundle):
     }
 
 
-def _status_banner(fig, status):
-    """Print the accepted verdict on the canvas, not only in the metadata."""
+def _status_banner(fig, status, *, plain_prefix=None):
+    """Print the accepted verdict on the canvas, not only in the metadata.
+
+    The machine verdict alone is unreadable outside this repository, so a
+    plain-language description of what the run tested leads the banner and the
+    frozen token follows it.
+    """
     if status is None:
         return None
     acceptance = status.get("fig4_acceptance")
@@ -800,6 +831,7 @@ def _status_banner(fig, status):
         return None
     text = " | ".join(
         part for part in (
+            plain_prefix,
             None if acceptance is None else f"Fig.4 status: {acceptance}",
             verdict,
             None if status.get("replication_pass") is not False
@@ -933,7 +965,12 @@ def _render_direct(bundle, output_dir):
     )
     readout = _plot_readout(axes[3], bundle, pair)
     science_status = _science_status(bundle)
-    banner = _status_banner(fig, science_status)
+    banner = _status_banner(
+        fig, science_status,
+        plain_prefix=(
+            NLC_PLAIN_PREFIX if _is_nlc_confirmation(bundle) else None
+        ),
+    )
     stem = Path(output_dir) / (
         "fig4a_nlc_direct_readout" if _is_nlc_confirmation(bundle)
         else "fig4a_spatial_ou_direct_readout" if _is_spatial_ou(bundle)
@@ -1126,9 +1163,166 @@ def _map_kmeans_clusters_to_modes(labels, contingency):
     return cluster_to_mode[np.asarray(labels, int)], cluster_to_mode
 
 
+def _null_calibration(bundle):
+    """Load the matched-null calibration of the accepted statistics, if built.
+
+    The acceptance thresholds (balanced alignment above 0.5, cross-fit margin
+    above 0) are not the null expectations of those statistics, so the figure
+    must show the calibrated chance level next to the observed value.
+    """
+    root = bundle.get("output_root")
+    path = None if root is None else Path(root) / "null_calibration.json"
+    if path is None or not path.exists():
+        return None
+    payload = _json(path)
+    payload["_path"] = str(path)
+    payload["_sha256"] = _sha256(path)
+    return payload
+
+
+def _calibration_columns(calibration, value_key):
+    arms = calibration["arms"]
+    columns = [
+        (candidate_id, name) for candidate_id, name in NLC_ARM_DISPLAY
+        if candidate_id in arms
+    ]
+    if not columns:
+        return None, None, None
+    seeds = sorted(set.intersection(*[
+        {
+            seed for seed, row in arms[candidate_id]["per_network"].items()
+            if row.get(value_key) is not None
+        }
+        for candidate_id, _ in columns
+    ]), key=int)
+    if not seeds:
+        return None, None, None
+    values = np.asarray([
+        [arms[candidate_id]["per_network"][seed][value_key]
+         for candidate_id, _ in columns]
+        for seed in seeds
+    ], float)
+    return columns, seeds, values
+
+
+def _plot_arm_calibration(
+        ax, calibration, *, value_key, null_key, title, ylabel, ylim,
+        threshold, threshold_label):
+    """Per-network arm comparison of one accepted statistic against its null."""
+    columns, seeds, values = _calibration_columns(calibration, value_key)
+    if columns is None:
+        ax.text(0.5, 0.5, "calibration unavailable", transform=ax.transAxes,
+                ha="center", va="center", fontsize=10, color="#9B2F2A")
+        ax.set_axis_off()
+        return None
+    x = np.arange(len(columns), dtype=float)
+    for row in values:
+        ax.plot(x, row, color="#B8C2C6", lw=0.8, alpha=0.95, zorder=2)
+    ax.scatter(np.tile(x, len(seeds)), values.ravel(), s=12, zorder=3,
+               color="#37474F", alpha=0.8, linewidth=0)
+    means = values.mean(axis=0)
+    for position, mean in zip(x, means):
+        ax.plot([position - 0.3, position + 0.3], [mean, mean],
+                color="#C43C39", lw=2.8, solid_capstyle="butt", zorder=5)
+    null = calibration["arms"][columns[-1][0]][null_key]
+    ax.axhline(null["null_q95"], color="#516168", lw=1.3, ls=(0, (4, 2)),
+               zorder=1)
+    ax.axhline(threshold, color="#9AA5A9", lw=1.0, ls=":", zorder=1)
+    # Opposite edges: the calibrated chance level and the fixed acceptance
+    # threshold are close together and must stay separately readable.
+    ax.text(-0.38, null["null_q95"], "chance q95 of the mean",
+            ha="left", va="bottom", fontsize=8.0, color="#516168")
+    ax.text(len(columns) - 0.5, threshold, threshold_label,
+            ha="right", va="top", fontsize=8.2, color="#8A9599")
+    wins = int(np.sum(values[:, -1] > values[:, 0]))
+    ax.set_xticks(x, [name for _, name in columns], fontsize=9.5)
+    ax.set_xlim(-0.45, len(columns) - 0.45)
+    ax.set_ylim(*ylim)
+    ax.tick_params(axis="y", labelsize=9)
+    ax.set_ylabel(ylabel, fontsize=10)
+    ax.set_title(title, fontsize=11.5, weight="bold", pad=6)
+    ax.text(0.02, 0.02,
+            f"{wins}/{len(seeds)} networks higher with both pathways"
+            f"  ·  p={null['one_sided_p']:.4f} vs null",
+            transform=ax.transAxes, ha="left", va="bottom", fontsize=8.4,
+            color="#37474F")
+    ax.spines[["top", "right"]].set_visible(False)
+    return {
+        "value_key": value_key,
+        "arms": [candidate_id for candidate_id, _ in columns],
+        "network_seeds": [int(seed) for seed in seeds],
+        "equal_network_means": means.tolist(),
+        "null": null,
+        "networks_higher_with_both_pathways": wins,
+        "fixed_acceptance_threshold": threshold,
+    }
+
+
+def _render_single_patient_matrix(fig, matrix_ax, matrix, matrix_valid, crossfit):
+    """Original single-matrix panel, kept unchanged for the non-NLC figures."""
+    matrix_ax.set_xticks((0, 1), ("TA", "TB"), fontsize=13, weight="bold")
+    matrix_ax.set_yticks((0, 1), ("MTA", "MTB"), fontsize=13, weight="bold")
+    for tick, color in zip(matrix_ax.get_xticklabels(), DISPLAY_MODE_COLORS):
+        tick.set_color(color)
+    for tick, color in zip(matrix_ax.get_yticklabels(), DISPLAY_MODE_COLORS):
+        tick.set_color(color)
+    matrix_ax.tick_params(axis="x", labelrotation=0, pad=5)
+    matrix_ax.set_aspect("equal")
+    matrix_ax.set_title(
+        "cross-fit vs patient" if crossfit else "cluster vs patient",
+        fontsize=14, weight="bold", pad=8,
+    )
+    matrix_cbar_ax = matrix_ax.inset_axes([1.08, 0.0, 0.065, 1.0])
+    if matrix_valid:
+        image = matrix_ax.imshow(matrix, cmap="RdBu_r", vmin=-1, vmax=1)
+        for row in range(2):
+            for column in range(2):
+                color = "white" if abs(matrix[row, column]) >= 0.55 else "#111111"
+                matrix_ax.text(column, row, f"{matrix[row, column]:+.2f}",
+                               ha="center", va="center", fontsize=13,
+                               color=color, weight="bold")
+        cbar = fig.colorbar(image, cax=matrix_cbar_ax)
+        cbar.set_label("Spearman rho", fontsize=12)
+        cbar.ax.tick_params(labelsize=10.5)
+    else:
+        matrix_cbar_ax.axis("off")
+        matrix_ax.text(0.5, 0.5, "N/A", transform=matrix_ax.transAxes,
+                       ha="center", va="center", fontsize=20,
+                       color="#9B2F2A", weight="bold")
+
+
+def _plot_patient_matrix(ax, matrix, title, subtitle, *, cbar_ax=None,
+                         title_fontsize=11.5):
+    ax.set_xticks((0, 1), ("TA", "TB"), fontsize=11.5, weight="bold")
+    ax.set_yticks((0, 1), ("MTA", "MTB"), fontsize=11.5, weight="bold")
+    for tick, color in zip(ax.get_xticklabels(), DISPLAY_MODE_COLORS):
+        tick.set_color(color)
+    for tick, color in zip(ax.get_yticklabels(), DISPLAY_MODE_COLORS):
+        tick.set_color(color)
+    ax.tick_params(axis="x", labelrotation=0, pad=4)
+    ax.set_aspect("equal")
+    ax.set_title(title, fontsize=title_fontsize, weight="bold", pad=5)
+    ax.text(0.5, -0.2, subtitle, transform=ax.transAxes, ha="center",
+            va="top", fontsize=8.6, color="#4A5459")
+    image = ax.imshow(matrix, cmap="RdBu_r", vmin=-1, vmax=1)
+    for row in range(2):
+        for column in range(2):
+            value = matrix[row, column]
+            if not np.isfinite(value):
+                continue
+            ax.text(column, row, f"{value:+.2f}", ha="center", va="center",
+                    fontsize=12, weight="bold",
+                    color="white" if abs(value) >= 0.55 else "#111111")
+    if cbar_ax is not None:
+        cbar = ax.figure.colorbar(image, cax=cbar_ax, orientation="horizontal")
+        cbar.set_label("Spearman rho", fontsize=10)
+        cbar.ax.tick_params(labelsize=8.5)
+    return image
+
+
 def _kmeans_qualifier_caption(
         fig, audit, supervised_matrix, patient_q05, network_row,
-        matrix_contract, pooled_matrix):
+        matrix_contract, pooled_matrix, calibration=None):
     """Render the Figure-B numbers the spec requires on the canvas itself.
 
     The displayed matrix is the most favourable of several readouts. Direction
@@ -1173,9 +1367,61 @@ def _kmeans_qualifier_caption(
             )
         )
     text = f"matrix = {matrix_contract}\n" + "  |  ".join(parts)
+    if calibration is not None:
+        text += "\n" + _calibration_caption(calibration)
     fig.text(0.008, -0.012, text, ha="left", va="top", fontsize=10,
              color="#333333", linespacing=1.5)
     return text
+
+
+def _calibration_caption(calibration):
+    """State the calibrated chance levels and the Node-only control on canvas.
+
+    Both fixed acceptance thresholds are cleared by the Node-only arm as well,
+    so the figure must say so instead of letting the joint numbers read as the
+    discriminating result.
+    """
+    arms = calibration["arms"]
+    joint = arms.get("joint_04_control", {})
+    alignment = joint.get("balanced_alignment_vs_label_permutation_null", {})
+    margin = joint.get("crossfit_margin_vs_contact_permutation_null", {})
+    pooled = joint.get("pooled_diagnostics", {})
+    benchmark = pooled.get("patient_matched_kmeans_direction_purity", {})
+    node = arms.get("node_baseline", {})
+    node_alignment = node.get("equal_network_alignment_bootstrap", {})
+    node_margin = node.get("equal_network_margin_bootstrap", {})
+    fragments = [
+        "null-calibrated: alignment {:.3f} vs label-permutation chance {:.3f} "
+        "(p={:.4f})".format(
+            alignment.get("observed_equal_network_mean", float("nan")),
+            alignment.get("null_median", float("nan")),
+            alignment.get("one_sided_p", float("nan")),
+        ),
+        "margin {:.3f} vs contact-permutation chance {:.3f} (p={:.4f})".format(
+            margin.get("observed_equal_network_mean", float("nan")),
+            margin.get("null_median", float("nan")),
+            margin.get("one_sided_p", float("nan")),
+        ),
+        "pooled purity {:.3f} stays below the patient-matched benchmark "
+        "q05 {:.3f}".format(
+            pooled.get("pooled_kmeans_direction_purity", float("nan")),
+            benchmark.get("q05", float("nan")),
+        ),
+    ]
+    if node_alignment and node_margin:
+        fragments.append(
+            "Node-only control also clears both fixed thresholds "
+            "(alignment {:.3f}, margin {:.3f})".format(
+                node_alignment.get("equal_network_mean", float("nan")),
+                node_margin.get("equal_network_mean", float("nan")),
+            )
+        )
+    layer = (
+        "MTA/MTB here are unsupervised KMeans clusters of masked event ranks; "
+        "the MTA/MTB counts in Fig.4a are supervised direction-classifier "
+        "labels on a different event subset"
+    )
+    return layer + "\n" + "  |  ".join(fragments)
 
 
 def _equal_network_row(bundle):
@@ -1278,14 +1524,26 @@ def _render_kmeans(bundle, output_dir):
         "channel_names": names.tolist(),
     }
 
+    calibration = _null_calibration(bundle) if _is_nlc_confirmation(bundle) else None
     fig = plt.figure(figsize=(19.2, 4.95), facecolor="white")
-    outer = fig.add_gridspec(
-        1, 5, width_ratios=(4.35, 0.16, 1.05, 1.82, 1.42),
-        left=0.047, right=0.975, bottom=0.15, top=0.91, wspace=0.34,
-    )
+    if calibration is None:
+        outer = fig.add_gridspec(
+            1, 5, width_ratios=(4.35, 0.16, 1.05, 1.82, 1.42),
+            left=0.047, right=0.975, bottom=0.15, top=0.91, wspace=0.34,
+        )
+        mean_column = 3
+    else:
+        # The per-contact rank ridge is the marginal of the heatmap next to it,
+        # so the calibrated layout spends that column on the arm/null evidence
+        # the acceptance statements actually rest on.
+        outer = fig.add_gridspec(
+            1, 5, width_ratios=(3.75, 0.16, 1.62, 1.55, 2.32),
+            left=0.047, right=0.972, bottom=0.15, top=0.91, wspace=0.40,
+        )
+        mean_column = 2
     draw = _draw_fig1e_cluster_row(
         fig, outer, 0, arr,
-        column_indices=(0, 1, 3),
+        column_indices=(0, 1, mean_column),
         gap_half_width_events=max(1, int(round(0.012 * len(labels)))),
         cluster_label_names=["MTA", "MTB"],
         cluster_colors=list(DISPLAY_MODE_COLORS),
@@ -1306,16 +1564,25 @@ def _render_kmeans(bundle, output_dir):
     )
     profile_ax.tick_params(axis="x", labelsize=11)
 
-    rank_grid = outer[0, 2].subgridspec(2, 1, height_ratios=(20, 1), hspace=0.06)
-    rank_ax = fig.add_subplot(rank_grid[0])
-    fig.add_subplot(rank_grid[1]).axis("off")
-    propagation_plot._plot_rank_histogram(
-        rank_ax, ranks, bools, valid_events, channel_order, names.tolist(),
-        title="rank distribution", show_ylabels=False,
-        label_fontsize=13, title_fontsize=14, xtick_fontsize=11,
-        ridge_spacing=0.10, smooth_sigma_bins=0.72,
-        smooth_ridge_height=0.12,
-    )
+    if calibration is None:
+        rank_grid = outer[0, 2].subgridspec(
+            2, 1, height_ratios=(20, 1), hspace=0.06,
+        )
+        rank_ax = fig.add_subplot(rank_grid[0])
+        fig.add_subplot(rank_grid[1]).axis("off")
+        propagation_plot._plot_rank_histogram(
+            rank_ax, ranks, bools, valid_events, channel_order, names.tolist(),
+            title="rank distribution", show_ylabels=False,
+            label_fontsize=13, title_fontsize=14, xtick_fontsize=11,
+            ridge_spacing=0.10, smooth_sigma_bins=0.72,
+            smooth_ridge_height=0.12,
+        )
+    else:
+        # Without the ridge column the profile no longer touches the heatmap
+        # labels, so it carries its own contact axis.
+        profile_ax.set_yticks(np.arange(n_contacts, dtype=float))
+        profile_ax.set_yticklabels(names[channel_order].tolist(), fontsize=9.5)
+        profile_ax.tick_params(axis="y", left=True, labelleft=True)
 
     y = np.arange(n_contacts, dtype=float)
     for mode in (0, 1):
@@ -1371,48 +1638,86 @@ def _render_kmeans(bundle, output_dir):
     supervised_matrix = _similarity(supervised_profiles, patient)
     display_counts = np.bincount(labels, minlength=2)
     matrix_valid = bool(np.all(display_counts >= bundle["required_per_mode"]))
-    matrix_grid = outer[0, 4].subgridspec(2, 1, height_ratios=(20, 1), hspace=0.06)
-    matrix_ax = fig.add_subplot(matrix_grid[0])
-    fig.add_subplot(matrix_grid[1]).axis("off")
-    matrix_ax.set_xticks((0, 1), ("TA", "TB"), fontsize=13, weight="bold")
-    matrix_ax.set_yticks((0, 1), ("MTA", "MTB"), fontsize=13, weight="bold")
-    for tick, color in zip(matrix_ax.get_xticklabels(), DISPLAY_MODE_COLORS):
-        tick.set_color(color)
-    for tick, color in zip(matrix_ax.get_yticklabels(), DISPLAY_MODE_COLORS):
-        tick.set_color(color)
-    matrix_ax.tick_params(axis="x", labelrotation=0, pad=5)
-    matrix_ax.set_aspect("equal")
-    matrix_ax.set_title(
-        "cross-fit vs patient" if d61_row is not None else "cluster vs patient",
-        fontsize=14, weight="bold", pad=8,
-    )
-    matrix_cbar_ax = matrix_ax.inset_axes([1.08, 0.0, 0.065, 1.0])
-    if matrix_valid:
-        image = matrix_ax.imshow(matrix, cmap="RdBu_r", vmin=-1, vmax=1)
-        for row in range(2):
-            for column in range(2):
-                color = "white" if abs(matrix[row, column]) >= 0.55 else "#111111"
-                matrix_ax.text(column, row, f"{matrix[row, column]:+.2f}",
-                               ha="center", va="center", fontsize=13,
-                               color=color, weight="bold")
-        cbar = fig.colorbar(image, cax=matrix_cbar_ax)
-        cbar.set_label("Spearman rho", fontsize=12)
-        cbar.ax.tick_params(labelsize=10.5)
+    calibration_panels = None
+    if calibration is not None:
+        # Two matrices at equal weight: the accepted cross-fit readout and the
+        # readout of the clusters this figure actually draws. Reporting only
+        # the first one lets the favourable labelling stand in for the plotted
+        # one.
+        pair_grid = outer[0, 3].subgridspec(
+            3, 1, height_ratios=(1.0, 1.0, 0.085), hspace=0.85,
+        )
+        crossfit_ax = fig.add_subplot(pair_grid[0])
+        pooled_ax = fig.add_subplot(pair_grid[1])
+        pair_cbar_ax = fig.add_subplot(pair_grid[2])
+        if matrix_valid:
+            _plot_patient_matrix(
+                crossfit_ax, matrix, "cross-fit vs patient",
+                "per-network, held-out contact fold", cbar_ax=pair_cbar_ax,
+            )
+            _plot_patient_matrix(
+                pooled_ax, cluster_matrix, "plotted clusters",
+                "pooled, same events as the heatmap",
+            )
+        else:
+            pair_cbar_ax.axis("off")
+            for axes in (crossfit_ax, pooled_ax):
+                axes.text(0.5, 0.5, "N/A", transform=axes.transAxes,
+                          ha="center", va="center", fontsize=18,
+                          color="#9B2F2A", weight="bold")
+                axes.set_axis_off()
+        calibration_grid = outer[0, 4].subgridspec(
+            2, 1, height_ratios=(1, 1), hspace=0.52,
+        )
+        calibration_panels = {
+            "direction_alignment": _plot_arm_calibration(
+                fig.add_subplot(calibration_grid[0]), calibration,
+                value_key="observed_balanced_alignment",
+                null_key="balanced_alignment_vs_label_permutation_null",
+                title="direction alignment per network",
+                ylabel="balanced alignment", ylim=(0.35, 1.06), threshold=0.5,
+                threshold_label="fixed 0.5 gate",
+            ),
+            "patient_margin": _plot_arm_calibration(
+                fig.add_subplot(calibration_grid[1]), calibration,
+                value_key="observed_crossfit_margin",
+                null_key="crossfit_margin_vs_contact_permutation_null",
+                title="patient rank margin per network",
+                ylabel="signed rank margin", ylim=(-0.45, 1.06), threshold=0.0,
+                threshold_label="fixed 0 gate",
+            ),
+        }
+        matrix_ax = crossfit_ax
     else:
-        matrix_cbar_ax.axis("off")
-        matrix_ax.text(0.5, 0.5, "N/A", transform=matrix_ax.transAxes,
-                       ha="center", va="center", fontsize=20,
-                       color="#9B2F2A", weight="bold")
+        matrix_grid = outer[0, 4].subgridspec(
+            2, 1, height_ratios=(20, 1), hspace=0.06,
+        )
+        matrix_ax = fig.add_subplot(matrix_grid[0])
+        fig.add_subplot(matrix_grid[1]).axis("off")
+        _render_single_patient_matrix(
+            fig, matrix_ax, matrix, matrix_valid, d61_row is not None,
+        )
     corrected_path = bundle["output_root"] / "confirmation_verdict.json"
     corrected = _json(corrected_path) if corrected_path.exists() else {}
     benchmark = corrected.get("patient_matched_kmeans_direction_purity", {})
     q05 = benchmark.get("q05")
+    if q05 is None and calibration is not None:
+        q05 = calibration["arms"].get("joint_04_control", {}).get(
+            "pooled_diagnostics", {},
+        ).get("patient_matched_kmeans_direction_purity", {}).get("q05")
     science_status = _science_status(bundle)
-    banner = _status_banner(fig, science_status)
+    banner = _status_banner(
+        fig, science_status,
+        plain_prefix=(
+            NLC_PLAIN_PREFIX if _is_nlc_confirmation(bundle) else None
+        ),
+    )
     qualifier = _kmeans_qualifier_caption(
         fig, audit, supervised_matrix, q05, d61_row, displayed_matrix_contract,
-        cluster_matrix,
+        cluster_matrix, calibration=calibration,
     )
+
+
     stem = Path(output_dir) / (
         "fig4b_nlc_kmeans_consistency" if _is_nlc_confirmation(bundle)
         else "fig4b_spatial_ou_kmeans_consistency" if _is_spatial_ou(bundle)
@@ -1477,9 +1782,90 @@ def _render_kmeans(bundle, output_dir):
             {"path": str(corrected_path), "sha256": _sha256(corrected_path)}
             if corrected_path.exists() else None
         ),
+        "patient_matched_purity_q05": q05,
+        "null_calibration": (
+            None if calibration is None else {
+                "path": calibration["_path"],
+                "sha256": calibration["_sha256"],
+                "status": calibration["status"],
+                "gates_do_not_separate_arms": calibration[
+                    "gates_do_not_separate_arms"
+                ],
+                "arms_passing_both_uncalibrated_gates": calibration[
+                    "arms_passing_both_uncalibrated_gates"
+                ],
+            }
+        ),
+        "arm_calibration_panels": calibration_panels,
+        "replaced_redundant_panel": (
+            None if calibration is None else
+            "per-contact rank ridge replaced by the arm/null calibration "
+            "column; the ridge was the marginal of the adjacent heatmap"
+        ),
+        "both_patient_matrices_displayed": bool(calibration is not None),
     })
     Path(str(stem) + "_metadata.json").write_text(json.dumps(metadata, indent=2))
     return stem
+
+
+def _nlc_readme_text(bundle, n_networks):
+    """Plain-language README for the NLC confirmation figures.
+
+    Reads the calibration artifact so the stated numbers cannot drift away from
+    the ones drawn on the canvas.
+    """
+    calibration = _null_calibration(bundle)
+    joint = {} if calibration is None else calibration["arms"].get(
+        "joint_04_control", {},
+    )
+    alignment = joint.get("balanced_alignment_vs_label_permutation_null", {})
+    margin = joint.get("crossfit_margin_vs_contact_permutation_null", {})
+    pooled = joint.get("pooled_diagnostics", {})
+    benchmark = pooled.get("patient_matched_kmeans_direction_purity", {})
+    node = {} if calibration is None else calibration["arms"].get(
+        "node_baseline", {},
+    )
+    node_alignment = node.get("equal_network_alignment_bootstrap", {})
+
+    def _value(container, key, digits=3):
+        value = container.get(key)
+        return "n/a" if value is None else f"{value:.{digits}f}"
+
+    if calibration is None:
+        calibrated = (
+            "（本目录还没有 `null_calibration.json`，最右两幅承重量面板会显示"
+            "unavailable，因此图上没有零假设参照。）"
+        )
+    else:
+        calibrated = (
+            "四个条件——包括完全没有学习连接的「只有地形」——都远高于各自的零假设"
+            f"（联合条件 {_value(alignment, 'observed_equal_network_mean')} 对零假设中位数 "
+            f"{_value(alignment, 'null_median')}，"
+            f"p={_value(alignment, 'one_sided_p', 4)}；患者顺序吻合度 "
+            f"{_value(margin, 'observed_equal_network_mean')} 对零假设中位数 "
+            f"{_value(margin, 'null_median')}，p={_value(margin, 'one_sided_p', 4)}），"
+            "也都越过了运行前写定的两个固定阈值（0.5 与 0），"
+            f"只有地形那一条的方向一致度是 "
+            f"{_value(node_alignment, 'equal_network_mean')}。"
+            "所以「比随机好」成立，「必须靠学出来的局部连接」不成立。"
+            "另外，不看患者标签自己分出的两簇与患者方向的一致度是 "
+            f"{_value(pooled, 'pooled_kmeans_direction_purity')}，"
+            "明显低于同一套算法在真实患者事件上能达到的 "
+            f"{_value(benchmark, 'q05')}（患者匹配基准的 5 分位），"
+            "因此还不能说这两簇就是患者的两个模板。"
+        )
+    return f"""### fig4a_nlc_direct_readout
+
+这张图回答「这套底物自己会不会产生两种方向相反的传播事件」。左边是模型里那张连续的易兴奋程度地形（continuous Node field `h`），并标出在同一张地形上按数据重新分配的局部兴奋连接权重（learned local E-to-E / E-to-I）；连接对象与传导延迟完全没动，每个下游细胞收到的总兴奋量按通路守恒。中间两幅把 {n_networks} 张网络里所有干净事件按患者方向分类器的判定分成两组，画各自的起始位置密度与平均行进方向——这两组是用患者标签判的，不是模型自己分出来的。右边取同一张网络里时间上分开的一对事件，画 15 个虚拟触点的活动包络，黑点是每个触点的起始时刻。
+
+**关注点**：波形是 30--80 Hz 的模型放电密度代理，不是临床 SEEG，也不是电流 LFP；慢变量本轮关闭（Z/M off），不能由这张图谈发作过程。中间两幅是 {n_networks} 张网络汇总值，不代表单张网络的可复现程度。
+
+### fig4b_nlc_kmeans_consistency
+
+这张图回答「不看患者标签，模型事件自己会不会分成两簇，这两簇像不像患者的两个传播模板」。左边热图是全部干净事件按无监督聚类排序后的逐触点先后顺序；中间是两簇的平均顺序曲线（实线）叠患者两个模板（虚线）。右边两个矩阵是同一件事的两种算法：上面那个先在一半触点上给事件配模板、再到互斥的另一半触点上打分（contact-split cross-fit），下面那个直接用左边画出来的这两簇算（pooled）。两个都画，是因为上面那个数值更好看，但它不是左图那两簇的数字。最右两幅是承重量：{n_networks} 张网络逐张的数值，四个条件（只有地形 / 加 E-to-E / 加 E-to-I / 两个都加）各一列，红杠是等权均值，虚线是把模型与患者的触点对应关系打乱后同样算法能达到的水平（零假设 95 分位）。
+
+**关注点**：{calibrated}这是 patient-development 结果，不是 patient-blind generalization，也不是完整患者间期波形复现。
+"""
 
 
 def _write_readme(output_dir, bundle):
@@ -1537,18 +1923,9 @@ def _write_readme(output_dir, bundle):
             + "\n\n"
         )
         if _is_nlc_confirmation(bundle):
-            path.write_text(f"""{status_text}### fig4a_nlc_direct_readout
-
-这张图展示 final fresh-network 确认中的冻结候选 `{bundle['candidate_id']}`。左侧是连续 Node field，并明确标注同一底物上的局部 E-to-E/E-to-I 权重重分配；连接 topology 与 delays 不变，每个 postsynaptic target 的 incoming-E 总量按 pathway 守恒。中间汇总 {n_networks} 张网络的 formal clean Model TA/Model TB onset density，右侧从同一张网络选择一对时间分离的 MTA/MTB 事件，展示全部 15 个虚拟触点的 30--80 Hz firing-density envelope。
-
-**关注点**：这是静态 Node-connectivity substrate 的 development confirmation。波形不是 clinical SEEG，也不是 current-LFP；Z/M 在本轮关闭，不能由此声称发作生命周期已经统一。
-
-### fig4b_nlc_kmeans_consistency
-
-这张图只使用同一冻结候选中 returned、双杆、patient-support 内、且至少有 3 个参与触点的 formal clean events。heatmap、missing-contact mask、固定触点顺序和 rank profile 复用 Figure 1E painter；KMeans 不读取患者标签。{matrix_text}图下方同时给出 pooled 描述统计和 {n_networks} 张网络等权的 natural alignment / contact-split cross-fit 区间。
-
-**关注点**：本轮通过的是同网络双簇、正 patient geometry 和相对 Node-only 的 composite-score 增益；它仍是 patient-development 结果，不是 patient-blind generalization 或完整患者间期波形复现。
-""")
+            path.write_text(
+                status_text + _nlc_readme_text(bundle, n_networks)
+            )
             return
         path.write_text(f"""{status_text}### fig4a_spatial_ou_direct_readout
 
