@@ -161,7 +161,7 @@ def draw_f1b(ax, audit, maxent, show_legend=True):
            label="max-entropy")
     ax.set_xticks(x)
     ax.set_xticklabels([f"{i}" for i in range(1, len(subs) + 1)], fontsize=6)
-    ax.set_xlabel("Subject (numbering as above)")
+    ax.set_xlabel("Subject index (1-6, ordered as in the null comparison)")
     ax.set_ylabel("Spread of per-contact\nmean firing order")
     ax.set_ylim(0, max(obs.max(), shuf.max(), mx.max()) * 1.62)
     ax.tick_params(length=1.8, pad=1.5)
