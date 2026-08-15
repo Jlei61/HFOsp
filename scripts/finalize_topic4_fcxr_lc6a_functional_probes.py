@@ -15,6 +15,7 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
+from matplotlib.patches import Patch
 import numpy as np
 
 
@@ -77,6 +78,40 @@ def _region_mean(curve: np.ndarray, centers: np.ndarray, region: str) -> float:
         raise ValueError(region)
     value = float(np.nanmean(np.asarray(curve, float)[keep]))
     return value
+
+
+FAR_FIELD_MM = 1.5
+
+
+def _perturbation_class(arrays: dict[str, np.ndarray], location: str) -> dict:
+    """Separate "no spike anywhere changed" from "a spike moved inside a window".
+
+    With an exactly shared external input and no spike change, every non-probed cell is
+    bit-identical, so every axial bin outside the patch must be exactly zero.  A nonzero
+    far-field bin therefore proves a spike moved -- which the registered ``excess_spikes``
+    (a net count) and the per-window rate deltas cannot see when the shift stays inside a
+    window.  The distinction is binary, so the late deflection it produces is not a graded
+    reach readout.
+    """
+
+    prefix = f"{location}__"
+    axis_edges = np.asarray(arrays[prefix + "axis_edges_mm"], float)
+    centers = 0.5 * (axis_edges[:-1] + axis_edges[1:])
+    signed = np.asarray(arrays[prefix + "delta_axis_components"], float)[
+        :, COMPONENTS.index("I_syn_signed")
+    ]
+    far = np.abs(centers) > FAR_FIELD_MM
+    far_max = [float(np.nanmax(np.abs(window[far]))) for window in signed]
+    map_rate = np.asarray(arrays[prefix + "delta_map_rate_hz"], float)
+    rate_all_zero = bool(np.all(np.nan_to_num(map_rate) == 0.0))
+    diverged = bool(any(value > 0.0 for value in far_max))
+    return {
+        "far_field_mm": FAR_FIELD_MM,
+        "far_field_max_abs_delta_I_syn_by_window": far_max,
+        "per_window_map_rate_delta_all_zero": rate_all_zero,
+        "excess_spikes_is_net_count": True,
+        "perturbation_class": "SPIKE_TIMING_DIVERGENT" if diverged else "NO_SPIKE_CHANGE",
+    }
 
 
 def _location_metrics(arrays: dict[str, np.ndarray], location: str) -> dict:
@@ -168,6 +203,7 @@ def aggregate(summaries: dict, responses: dict) -> dict:
             locations[location] = {
                 **row,
                 "response_metrics": _location_metrics(responses[condition], location),
+                **_perturbation_class(responses[condition], location),
             }
         conditions[condition] = {
             "graph_sha256": summary["graph_sha256"],
@@ -175,8 +211,22 @@ def aggregate(summaries: dict, responses: dict) -> dict:
             "locations": locations,
         }
     first = summaries[CONDITIONS[0]]
+    divergent = sorted(
+        f"{condition}:{location}"
+        for condition, row in conditions.items()
+        for location, entry in row["locations"].items()
+        if entry["perturbation_class"] == "SPIKE_TIMING_DIVERGENT"
+    )
     return {
         "status": "COMPLETE",
+        "spike_timing_divergent_locations": divergent,
+        "n_spike_timing_divergent_locations": len(divergent),
+        "late_deflection_orders_with_reach": False,
+        "zero_crossing_interpretation": (
+            "the registered late-window zero crossings occur only at the "
+            "SPIKE_TIMING_DIVERGENT locations, so they are not a graded "
+            "reach-dependent Mexican-hat signature"
+        ),
         "stage": "LC6A_FUNCTIONAL_CHARACTERIZATION",
         "scientific_role": "descriptive_functional_geometry_not_trajectory_gate",
         "condition_order": list(CONDITIONS),
@@ -201,68 +251,129 @@ def _plot(
 ) -> tuple[Path, Path]:
     figure_dir = output_root / "figures"
     figure_dir.mkdir(parents=True, exist_ok=True)
-    fig, axes = plt.subplots(2, 2, figsize=(12.2, 7.8))
-    profile_axes = (axes[0, 0], axes[0, 1], axes[1, 0])
-    for window, ax in enumerate(profile_axes):
+    fig, axes = plt.subplots(2, 2, figsize=(12.6, 8.4), constrained_layout=True)
+    signed_index = COMPONENTS.index("I_syn_signed")
+
+    def _profile(ax, window: int, title: str) -> None:
         for condition in CONDITIONS:
             arrays = responses[condition]
-            key = "neutral_axis__delta_axis_components"
             edges = np.asarray(arrays["neutral_axis__axis_edges_mm"], float)
             centers = 0.5 * (edges[:-1] + edges[1:])
-            curve = np.asarray(arrays[key], float)[window, COMPONENTS.index("I_syn_signed")]
+            curve = np.asarray(
+                arrays["neutral_axis__delta_axis_components"], float,
+            )[window, signed_index]
+            row = summaries[condition]["locations"]["neutral_axis"]
             background_event = max(
-                summaries[condition]["locations"]["neutral_axis"]["max_active_fraction_1ms_sham"],
-                summaries[condition]["locations"]["neutral_axis"]["max_active_fraction_1ms_probe"],
+                row["max_active_fraction_1ms_sham"], row["max_active_fraction_1ms_probe"],
             ) >= float(event_bar)
-            label = condition + ("†" if background_event else "")
             ax.plot(
-                centers, curve, color=COLORS[condition], lw=1.65, label=label,
-                ls="--" if background_event else "-", alpha=.72 if background_event else 1.0,
+                centers, curve, color=COLORS[condition], lw=1.7,
+                label=condition + ("†" if background_event else ""),
+                ls="--" if background_event else "-",
             )
         ax.axhline(0.0, color="#777777", lw=0.8, ls="--")
         ax.axvline(0.0, color="#AAAAAA", lw=0.7, ls=":")
         ax.set_xlim(-6.0, 6.0)
-        ax.set_title(WINDOW_LABELS[window], loc="left", fontsize=11, fontweight="bold")
+        ax.set_title(title, loc="left", fontsize=11)
         ax.set_xlabel("Distance along patient axis (mm)")
         ax.set_ylabel(r"Paired $\Delta I_{syn}$ (model units)")
         ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2))
         ax.spines[["top", "right"]].set_visible(False)
-    profile_axes[0].legend(frameon=False, ncol=5, loc="upper right", fontsize=8)
 
-    ax = axes[1, 1]
-    x = np.arange(len(CONDITIONS), dtype=float)
-    center_values, surround_values = [], []
-    for condition in CONDITIONS:
+    # a. Is the direct footprint local and confined to the stimulated patch?
+    _profile(axes[0, 0], 0, "a  0–50 ms: direct footprint stays inside the patch")
+    axes[0, 0].legend(frameon=False, ncol=1, loc="lower left", fontsize=8)
+
+    # b. What is the centre deflection made of -- recruited inhibition or driving force?
+    ax = axes[0, 1]
+    base = np.arange(len(WINDOW_LABELS), dtype=float)
+    offsets = np.linspace(-.3, .3, len(CONDITIONS))
+    for index, condition in enumerate(CONDITIONS):
         arrays = responses[condition]
         edges = np.asarray(arrays["neutral_axis__axis_edges_mm"], float)
         centers = 0.5 * (edges[:-1] + edges[1:])
-        curve = np.asarray(arrays["neutral_axis__delta_axis_components"], float)[
-            2, COMPONENTS.index("I_syn_signed")
+        components = np.asarray(arrays["neutral_axis__delta_axis_components"], float)
+        fe = [
+            abs(_region_mean(components[w, COMPONENTS.index("F_E")], centers, "center"))
+            for w in range(3)
         ]
-        center_values.append(_region_mean(curve, centers, "center"))
-        surround_values.append(_region_mean(curve, centers, "surround"))
-    for index, condition in enumerate(CONDITIONS):
-        ax.plot(
-            [x[index] - 0.12, x[index] + 0.12],
-            [center_values[index], surround_values[index]],
-            color=COLORS[condition], lw=1.2, alpha=0.8,
+        fi = [
+            abs(_region_mean(components[w, COMPONENTS.index("F_I")], centers, "center"))
+            for w in range(3)
+        ]
+        ax.bar(base + offsets[index] - .026, fi, width=.05, color=COLORS[condition])
+        ax.bar(
+            base + offsets[index] + .026, fe, width=.05, color=COLORS[condition],
+            alpha=.35, hatch="///", edgecolor=COLORS[condition],
         )
-    ax.scatter(x - 0.12, center_values, marker="o", s=30, color=[COLORS[c] for c in CONDITIONS], label="center")
-    ax.scatter(x + 0.12, surround_values, marker="s", s=30, color=[COLORS[c] for c in CONDITIONS], label="surround")
-    ax.axhline(0.0, color="#777777", lw=0.8, ls="--")
-    ax.set_xticks(x, CONDITIONS)
-    ax.set_ylabel(r"Late paired $\Delta I_{syn}$ (model units)")
-    ax.set_title("Late center and surround", loc="left", fontsize=11, fontweight="bold")
-    ax.ticklabel_format(axis="y", style="sci", scilimits=(-2, 2))
-    ax.legend(frameon=False, fontsize=8, loc="best")
-    ax.spines[["top", "right"]].set_visible(False)
-    fig.suptitle("LC6A paired functional response (descriptive)", fontsize=14, fontweight="bold")
-    fig.text(
-        0.5, 0.012,
-        "† matched sham/probe window contains a background population event; descriptive only",
-        ha="center", va="bottom", fontsize=8, color="#555555",
+    ax.set_yscale("log")
+    ax.set_xticks(base, WINDOW_LABELS)
+    ax.set_ylabel(r"$|\Delta|$ at centre (model units)")
+    ax.set_title(
+        "b  Centre deflection is inhibitory force, not recruited excitation",
+        loc="left", fontsize=11,
     )
-    fig.tight_layout(rect=(0.0, 0.055, 1.0, 0.94))
+    ax.legend(
+        handles=[
+            Patch(facecolor="#666666", label=r"$|\Delta F_I|$"),
+            Patch(facecolor="#666666", alpha=.35, hatch="///", label=r"$|\Delta F_E|$"),
+        ],
+        frameon=False, fontsize=8, loc="upper right",
+    )
+    ax.spines[["top", "right"]].set_visible(False)
+
+    # c. Did anything propagate away from the patch by the late window?
+    _profile(axes[1, 0], 2, "c  150–300 ms: only three of five probes propagate")
+
+    # d. Which probes stayed in the exact no-spike-change regime?
+    ax = axes[1, 1]
+    labels, values, colors, hatches = [], [], [], []
+    for condition in CONDITIONS:
+        arrays = responses[condition]
+        for location in sorted(summaries[condition]["locations"]):
+            edges = np.asarray(arrays[f"{location}__axis_edges_mm"], float)
+            centers = 0.5 * (edges[:-1] + edges[1:])
+            signed = np.asarray(
+                arrays[f"{location}__delta_axis_components"], float,
+            )[:, signed_index]
+            far = np.abs(centers) > FAR_FIELD_MM
+            labels.append(
+                f"{condition}\n{'neutral' if location == 'neutral_axis' else 'core-adj'}"
+            )
+            values.append(max(float(np.nanmax(np.abs(w[far]))) for w in signed))
+            colors.append(COLORS[condition])
+            hatches.append("" if location == "neutral_axis" else "///")
+    floor = 1e-8
+    x = np.arange(len(labels), dtype=float)
+    bars = ax.bar(x, [max(v, floor) for v in values], color=colors, width=.66)
+    for bar, hatch in zip(bars, hatches):
+        bar.set_hatch(hatch)
+    for index, value in enumerate(values):
+        if value == 0.0:
+            ax.text(
+                x[index], floor * 1.35, "exactly 0", rotation=90, ha="center",
+                va="bottom", fontsize=7.5, color="#333333",
+            )
+    ax.set_yscale("log")
+    ax.set_ylim(floor, max(values) * 6.0)
+    ax.set_xticks(x, labels, fontsize=8)
+    ax.set_ylabel(r"Far-field ($|x|>1.5$ mm) max $|\Delta I_{syn}|$")
+    ax.set_title(
+        "d  Far field is exactly zero unless a spike time moved", loc="left", fontsize=11,
+    )
+    ax.spines[["top", "right"]].set_visible(False)
+
+    fig.suptitle(
+        "LC6A paired functional response (descriptive; no spike-count change at any probe)",
+        fontsize=13,
+    )
+    fig.text(
+        .5, -.02,
+        "† matched sham/probe window contains a background population event.  Every probe left the "
+        "per-window firing rate unchanged in every spatial bin; a nonzero far field in panel d "
+        "therefore means a spike moved inside a window, and that is binary, not graded in reach.",
+        ha="center", va="top", fontsize=8, color="#555555",
+    )
     png = figure_dir / "lc6a_functional_response.png"
     pdf = figure_dir / "lc6a_functional_response.pdf"
     tmp_png = figure_dir / f".{png.name}.tmp.{os.getpid()}.png"
@@ -289,11 +400,13 @@ def _update_readme(output_root: Path) -> None:
     ).rstrip() + "\n\n"
     block = (
         "### lc6a_functional_response.png\n\n"
-        "前三格显示同一亚阈值 E patch 在三个预注册时间窗内，沿患者轴产生的配对带符号突触膜贡献；"
-        "第四格把晚窗的中心与周边均值并列。C0/C1/Q1/Q2/Q3 使用同一外源输入和同一刺激幅度，"
-        "该图只描述连接几何的功能响应，不决定自然轨迹是否准入。图例 † 表示该条件的 sham/probe"
-        "共同包含一次超过冻结 event bar 的背景群体事件，因此其响应受运行状态混杂。\n\n"
-        "**关注点**：看轴向周边是否随 E→I reach 改变，以及这种变化是否出现在晚窗；零交叉与弱响应都不是 gate。\n\n"
+        "四格各回答一个独立问题：(a) 弱 E patch 的直接足迹是否只落在被刺激的那一小块；"
+        "(b) 中心处的偏转由抑制力还是被招募的兴奋构成；(c) 到晚窗为止有没有东西传出去；"
+        "(d) 哪些探针始终停在“没有任何脉冲改变”的严格区间。八个探针位置的分窗放电率差在每个"
+        "空间格点上都精确为零，因此 (d) 里非零的远场只能来自窗内脉冲时刻的位移——这是一个"
+        "有/无的二元事件，不是随 reach 连续变化的读数。† 表示该 sham/probe 窗内含一次背景群体事件。\n\n"
+        "**关注点**：(c)(d) 里 C1/Q1/Q3 的晚窗偏转与 E→I reach 不成序（C0 与 Q2 为零、"
+        "Q3 换个位点也为零），不能读成 Mexican-hat 周边信号。\n\n"
         "### lc6a_functional_response.pdf\n\n"
         "与 PNG 相同的矢量版本。\n\n"
         "**关注点**：用于放大核对零线附近的微弱配对响应。\n"

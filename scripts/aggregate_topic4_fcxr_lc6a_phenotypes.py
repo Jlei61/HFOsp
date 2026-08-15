@@ -224,49 +224,170 @@ def _write_csv(rows):
     os.replace(tmp, CSV)
 
 
-def _plot(rows):
+COLORS = {
+    "C0": "#222222", "C1": "#8A8A8A", "Q1": "#3B6FB6", "Q2": "#D8842F", "Q3": "#B33B3B",
+}
+SATURATION_HZ = 250.0
+REFRACTORY_GATE = 0.05
+DRIFT_GATE = 0.05
+MICROSTATE_Q_TOLERANCE = 0.05
+BASELINE_TOLERANCE = 0.25
+
+
+def _per_second_rates(rows, natural_summaries=None):
+    if natural_summaries is None:
+        natural_summaries = {
+            row["condition"]: json.loads(
+                (OUT / f"trajectories/{row['condition']}/summary.json").read_text()
+            )
+            for row in rows
+        }
+    return {
+        row["condition"]: np.asarray(
+            natural_summaries[row["condition"]]["per_second_mean_rate_hz"], float,
+        )
+        for row in rows
+    }
+
+
+def _plot(rows, natural_summaries=None):
+    """Four independent questions: entry, escalation shape, which bound broke, baseline cost."""
+
     FIGURES.mkdir(parents=True, exist_ok=True)
     names = [row["condition"] for row in rows]
-    x = np.arange(len(rows))
-    fig, axes = plt.subplots(2, 2, figsize=(12, 8), constrained_layout=True)
+    per_second = _per_second_rates(rows, natural_summaries)
+    fig, axes = plt.subplots(2, 2, figsize=(12.6, 8.6), constrained_layout=True)
+
+    # a. Did entry timing move more than the same-q graph-microstate control spread?
     ax = axes[0, 0]
-    onset = [np.nan if row["effective_onset_ms"] is None else row["effective_onset_ms"] / 1000 for row in rows]
-    ax.bar(x, onset, color="#3B7EA1")
-    ax.set_xticks(x, names); ax.set_ylabel("Onset time (s)"); ax.set_title("a  Natural entry")
+    q = np.asarray([row["construction_q"] for row in rows], float)
+    onset = np.asarray(
+        [np.nan if row["effective_onset_ms"] is None else row["effective_onset_ms"] / 1000
+         for row in rows], float,
+    )
+    anchor = float(q[names.index("C0")])
+    inside = np.abs(q - anchor) <= MICROSTATE_Q_TOLERANCE
+    ax.axvspan(
+        anchor - MICROSTATE_Q_TOLERANCE, anchor + MICROSTATE_Q_TOLERANCE,
+        color="#BBBBBB", alpha=.28, lw=0,
+    )
+    ax.axhspan(
+        float(np.min(onset[inside])), float(np.max(onset[inside])),
+        color="#BBBBBB", alpha=.28, lw=0,
+    )
+    for index, name in enumerate(names):
+        ax.scatter(q[index], onset[index], s=70, color=COLORS[name], zorder=3)
+        ax.annotate(
+            name, (q[index], onset[index]), textcoords="offset points",
+            xytext=(7, 5), fontsize=9, color=COLORS[name],
+        )
+    ax.set_xlabel(r"Realized E$\to$I reach  $q_\parallel^{marginal}$")
+    ax.set_ylabel("Natural entry time (s)")
+    ax.set_title(
+        "a  Entry timing against the same-$q$ microstate band", loc="left", fontsize=11,
+    )
+    ax.text(
+        .02, .04,
+        f"grey band: three realizations inside the registered\n"
+        f"±{MICROSTATE_Q_TOLERANCE:g} same-$q$ tolerance "
+        f"({', '.join(np.asarray(names)[inside])}) span "
+        f"{np.min(onset[inside]):.0f}–{np.max(onset[inside]):.0f} s",
+        transform=ax.transAxes, fontsize=8, color="#444444", va="bottom",
+    )
+    ax.set_ylim(0, max(15.0, float(np.nanmax(onset)) + 3.0))
+    ax.spines[["top", "right"]].set_visible(False)
+
+    # b. Once entered, does reach change the escalation itself?
     ax = axes[0, 1]
-    ax.plot(x, [row["global_rate_100ms_peak_hz"] for row in rows], "o-", label="global peak")
-    ax.plot(x, [row["local_rate_q99_peak_hz"] for row in rows], "s-", label="local q99 peak")
-    ax.axhline(250, color="0.4", linestyle="--", label="registered saturation")
-    ax.set_xticks(x, names); ax.set_yscale("log"); ax.set_ylabel("Rate (Hz)")
-    ax.set_title("b  Global and local activity"); ax.legend(frameon=False, fontsize=8)
+    for row in rows:
+        name = row["condition"]
+        rate = per_second[name]
+        start = int(np.floor(float(row["effective_onset_ms"]) / 1000.0))
+        segment = rate[start:]
+        ax.plot(
+            np.arange(segment.size), segment, "o-", ms=4, lw=1.6,
+            color=COLORS[name], label=name,
+        )
+    ax.axhline(
+        SATURATION_HZ, color="0.35", ls="--", lw=1.0,
+        label=f"registered saturation ({SATURATION_HZ:.0f} Hz)",
+    )
+    ax.set_xlabel("Seconds after natural entry")
+    ax.set_ylabel("Global mean rate, 1 s (Hz)")
+    ax.set_title("b  Escalation after entry is reach-invariant", loc="left", fontsize=11)
+    ax.legend(frameon=False, fontsize=8, ncol=2, loc="upper left")
+    ax.spines[["top", "right"]].set_visible(False)
+
+    # c. Which of the three registered bounded-carrier limits actually broke?
     ax = axes[1, 0]
-    d_halo = [row["spatial_slow_flow"]["max_D_halo_lead_mm"] for row in rows]
-    active_area = [row["spatial_slow_flow"]["max_active_area_mm2"] for row in rows]
-    line_d = ax.plot(x, d_halo, "o-", color="#2166AC", label="D halo lead")
-    ax.set_xticks(x, names)
-    ax.set_ylabel("D-halo lead (mm)", color="#2166AC")
-    ax.tick_params(axis="y", labelcolor="#2166AC")
-    ax_area = ax.twinx()
-    line_area = ax_area.plot(
-        x, active_area, "s--", color="#D6604D", label="active area",
+    criteria = ("peak 1 s rate\n/ 250 Hz", "max refractory\nfraction / 5%", "late drift CI\n/ 0.05 s⁻¹")
+    offsets = np.linspace(-.3, .3, len(rows))
+    base = np.arange(len(criteria), dtype=float)
+    for index, row in enumerate(rows):
+        name = row["condition"]
+        drift = max(
+            float(row["boundedness"][key]["normalized_ci_high_per_s"])
+            for key in ("rate_drift", "D_drift", "H_drift")
+        )
+        values = [
+            float(np.max(per_second[name])) / SATURATION_HZ,
+            float(row["max_near_refractory_fraction"]) / REFRACTORY_GATE,
+            drift / DRIFT_GATE,
+        ]
+        ax.bar(base + offsets[index], values, width=.13, color=COLORS[name], label=name)
+        for slot, value in enumerate(values):
+            if value == 0.0:  # a log axis cannot draw an exact zero
+                ax.annotate(
+                    "0", (base[slot] + offsets[index], 0), xycoords=("data", "axes fraction"),
+                    xytext=(0, 3), textcoords="offset points", ha="center", va="bottom",
+                    fontsize=7.5, color=COLORS[name],
+                )
+    ax.axhline(1.0, color="#B2182B", lw=1.2, ls="--")
+    ax.text(
+        2.42, 1.25, "registered limit", color="#B2182B", fontsize=8, ha="right",
     )
-    ax_area.set_ylabel("Maximum active area (mm²)", color="#D6604D")
-    ax_area.tick_params(axis="y", labelcolor="#D6604D")
-    ax.set_title("c  Spatial slow-flow readouts")
-    ax.legend(
-        line_d + line_area,
-        [line.get_label() for line in line_d + line_area],
-        frameon=False,
-        fontsize=8,
-        loc="best",
+    ax.set_yscale("log")
+    ax.set_xticks(base, criteria, fontsize=9)
+    ax.set_ylabel("Measured / registered limit")
+    ax.set_title(
+        "c  Rate ceiling and late drift break; per-cell refractory does not",
+        loc="left", fontsize=11,
     )
+    ax.legend(frameon=False, fontsize=8, ncol=5, loc="upper left")
+    ax.spines[["top", "right"]].set_visible(False)
+
+    # d. What did the interictal baseline pay for the wider reach?
     ax = axes[1, 1]
-    margins = [row["boundedness"].get("boundedness_margin", np.nan) for row in rows]
-    colors = ["#2CA25F" if row["boundedness"].get("bounded_candidate") else "#B2182B" for row in rows]
-    ax.bar(x, margins, color=colors); ax.axhline(0, color="0.3", linewidth=1)
-    ax.set_xticks(x, names); ax.set_ylabel("Minimum normalized margin")
-    ax.set_title("d  Bounded-carrier margin")
-    fig.suptitle("FCXR-LC6A patient-axis E→I reach: fixed five-arm phenotype map")
+    metrics = ("event_rate_hz", "iei_median_ms", "duration_median_ms", "participation_median")
+    labels = ("event rate", "median IEI", "median duration", "median participation")
+    base = np.arange(len(metrics), dtype=float)
+    for index, row in enumerate(rows):
+        name = row["condition"]
+        values = [
+            0.0 if row["baseline_tradeoff"]["relative_differences"][key] is None
+            else float(row["baseline_tradeoff"]["relative_differences"][key])
+            for key in metrics
+        ]
+        ax.bar(base + offsets[index], values, width=.13, color=COLORS[name], label=name)
+    ax.axhspan(-BASELINE_TOLERANCE, BASELINE_TOLERANCE, color="#BBBBBB", alpha=.3, lw=0)
+    ax.axhline(0.0, color="0.3", lw=1.0)
+    ax.set_xticks(base, labels, fontsize=9)
+    ax.set_ylabel("Relative difference vs C0 pre-onset window")
+    ax.set_title(
+        "d  Q2/Q3 leave the ±25% baseline band; C1/Q1 do not", loc="left", fontsize=11,
+    )
+    ax.legend(frameon=False, fontsize=8, ncol=5, loc="upper left")
+    ax.spines[["top", "right"]].set_visible(False)
+
+    fig.suptitle(
+        "FCXR-LC6A patient-axis E→I reach: fixed five-arm phenotype map", fontsize=13,
+    )
+    fig.text(
+        .5, -.012,
+        "Axial D-halo / front-speed readouts are omitted: they carry no post-onset dynamic "
+        "range on this substrate (see run_manifest.json post_hoc_corrections).",
+        ha="center", va="top", fontsize=8, color="#555555",
+    )
     png = FIGURES / "lc6a_trajectory_phenotypes.png"
     pdf = FIGURES / "lc6a_trajectory_phenotypes.pdf"
     fig.savefig(png, dpi=220, bbox_inches="tight")
@@ -304,9 +425,9 @@ def run():
     existing = readme.read_text() if readme.is_file() else ""
     section = f"""### {png.name}
 
-这张图把 C0/C1/Q1/Q2/Q3 五条固定自然轨迹放在同一口径下比较：自然进入时刻、全局与局部放电、D halo/活动面积，以及 bounded-carrier 的最小余量。绿色余量只表示满足 LC6A 的 carrier 条件；它不表示已经自主终止，也不表示完整 lifecycle。
+四格各回答一个独立问题：(a) 进入时刻相对"同一 reach、只换连线微状态"的对照带有没有真的移动；(b) 一旦进入，逐秒放电的升级曲线是否随 reach 改变；(c) 三条注册的 bounded-carrier 上限里哪一条被突破；(d) 间期基线事件统计付出了什么代价。轴向 D-halo / front-speed 读数已移除——它们在这块 substrate 上没有进入后的动态范围。
 
-**关注点**：先看扩大患者轴 E→I reach 是否把 saturation 变成非饱和且 late drift 受控的高态，再看代价是否落在 baseline 或 D-halo 加速上。
+**关注点**：只有 Q3 的进入时刻落在同 q 对照带之外；进入之后五臂的升级曲线几乎重合。
 
 ### {pdf.name}
 

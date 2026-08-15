@@ -67,26 +67,95 @@ def _load_graph(path):
     return graph, metadata
 
 
+MICROSTATE_Q_TOLERANCE = 0.05
+
+
 def _plot(audits, figure_dir):
+    """Four independent graph-only questions; the ladder itself is one panel, not two."""
+
     figure_dir.mkdir(parents=True, exist_ok=True)
     ids = list(GRAPH_IDS)
     marginal = [audits[key]["construction_q_marginal"] for key in ids]
-    twohop = [audits[key]["operator"]["q_parallel_two_hop"] for key in ids]
-    surround = [audits[key]["operator"]["surround_center_ratio"] for key in ids]
-    latency = [audits[key]["latency"]["q95_ms"] for key in ids]
-    fig, axes = plt.subplots(1, 4, figsize=(13.5, 3.4), constrained_layout=True)
-    for ax, values, title, ylabel in zip(
-        axes,
-        (marginal, twohop, surround, latency),
-        ("a  Construction coordinate", "b  Actual two-hop width",
-         "c  Surround / center mass", "d  Two-hop latency q95"),
-        (r"$q_{\parallel}^{marginal}$", r"$q_{\parallel}^{2hop}$", "mass ratio", "ms"),
-    ):
-        ax.bar(ids, values, color=COLORS, edgecolor="white", linewidth=.7)
-        ax.set_title(title, fontsize=10)
-        ax.set_ylabel(ylabel)
+    operators = [audits[key]["operator"] for key in ids]
+    twohop = [row["q_parallel_two_hop"] for row in operators]
+    fig, axes = plt.subplots(1, 4, figsize=(15.0, 3.9), constrained_layout=True)
+
+    # a. Did the construction coordinate actually land on the functional two-hop loop?
+    ax = axes[0]
+    anchor = marginal[ids.index("C0")]
+    ax.axvspan(
+        anchor - MICROSTATE_Q_TOLERANCE, anchor + MICROSTATE_Q_TOLERANCE,
+        color="#BBBBBB", alpha=.3, lw=0,
+    )
+    span = [min(marginal + twohop) - .05, max(marginal + twohop) + .05]
+    ax.plot(span, span, color="#888888", lw=.9, ls="--", zorder=1)
+    for index, key in enumerate(ids):
+        ax.scatter(marginal[index], twohop[index], s=70, color=COLORS[index], zorder=3)
+        # C0/C1/Q1 sit on top of each other; stagger their labels off the cluster.
+        offset = ((-25, -11), (-25, 9), (10, -12), (10, -4), (10, -4))[index]
+        ax.annotate(
+            key, (marginal[index], twohop[index]), textcoords="offset points",
+            xytext=offset, fontsize=9, color=COLORS[index],
+        )
+    ax.set_xlabel(r"construction $q_{\parallel}^{marginal}$")
+    ax.set_ylabel(r"actual $q_{\parallel}^{2hop}$")
+    ax.set_title("a  Construction coordinate tracks the\n     real loop; C0/C1/Q1 are one rung", fontsize=9.5)
+    ax.text(
+        .04, .9, f"grey: registered ±{MICROSTATE_Q_TOLERANCE:g}\nsame-$q$ tolerance",
+        transform=ax.transAxes, fontsize=7.5, color="#444444", va="top",
+    )
+
+    # b. Did the widening stay axial, or did the perpendicular kernel drift with it?
+    ax = axes[1]
+    x = np.arange(len(ids), dtype=float)
+    ax.bar(
+        x - .19, [row["sigma_parallel_mm"] for row in operators], width=.36,
+        color=COLORS, edgecolor="white", linewidth=.7,
+    )
+    ax.bar(
+        x + .19, [row["sigma_perpendicular_mm"] for row in operators], width=.36,
+        color=COLORS, edgecolor="white", linewidth=.7, alpha=.4, hatch="///",
+    )
+    ax.set_xticks(x, ids)
+    ax.set_ylabel("two-hop σ (mm)")
+    ax.set_title("b  Axial σ grows, perpendicular σ\n     does not: the change is axial", fontsize=9.5)
+    ax.text(.04, .92, "solid: axial   hatched: perpendicular", transform=ax.transAxes, fontsize=7.5, color="#444444")
+
+    # c. Where did the fixed inhibitory mass move?
+    ax = axes[2]
+    total = [row["total_inhibitory_magnitude"] for row in operators]
+    ax.bar(
+        x - .19, [row["center_mass"] / t for row, t in zip(operators, total)], width=.36,
+        color=COLORS, edgecolor="white", linewidth=.7,
+    )
+    ax.bar(
+        x + .19, [row["surround_mass"] / t for row, t in zip(operators, total)], width=.36,
+        color=COLORS, edgecolor="white", linewidth=.7, alpha=.4, hatch="///",
+    )
+    ax.set_xticks(x, ids)
+    ax.set_ylabel("fraction of total inhibitory mass")
+    ax.set_title("c  Surround gains what the centre\n     loses (fixed 800 in-degree)", fontsize=9.5)
+    ax.text(.04, .92, "solid: centre   hatched: surround", transform=ax.transAxes, fontsize=7.5, color="#444444")
+
+    # d. What conduction delay did the wider reach cost?
+    ax = axes[3]
+    ax.bar(
+        x - .19, [audits[key]["latency"]["median_ms"] for key in ids], width=.36,
+        color=COLORS, edgecolor="white", linewidth=.7,
+    )
+    ax.bar(
+        x + .19, [audits[key]["latency"]["q95_ms"] for key in ids], width=.36,
+        color=COLORS, edgecolor="white", linewidth=.7, alpha=.4, hatch="///",
+    )
+    ax.set_xticks(x, ids)
+    ax.set_ylabel("two-hop latency (ms)")
+    ax.set_title("d  Wider reach also costs\n     disynaptic delay", fontsize=9.5)
+    ax.text(.04, .92, "solid: median   hatched: q95", transform=ax.transAxes, fontsize=7.5, color="#444444")
+
+    for ax in axes:
         ax.grid(axis="y", alpha=.18)
-    fig.suptitle("LC6A graph geometry: nominal reach versus functional E→I→E loop", fontsize=12)
+        ax.spines[["top", "right"]].set_visible(False)
+    fig.suptitle("LC6A graph geometry: realized reach, axial specificity, mass reallocation, delay cost", fontsize=12)
     png = figure_dir / "lc6a_graph_and_twohop.png"
     pdf = figure_dir / "lc6a_graph_and_twohop.pdf"
     fig.savefig(png, dpi=220, bbox_inches="tight")
@@ -94,12 +163,25 @@ def _plot(audits, figure_dir):
     plt.close(fig)
     (figure_dir / "README.md").write_text(
         "### lc6a_graph_and_twohop.png\n\n"
-        "这张图只审计连接，不包含任何自然发作轨迹。a 是用于构图的 E→I 与 I→E 协方差合成坐标；b 是实际加权两跳 E→I→E 算子相对冻结 E→E 轴宽的结果；c 比较患者轴远端抑制质量与中心抑制质量；d 检查扩大 reach 同时带来的物理 delay。\n\n"
-        "**关注点**：真正承重的是 b、c，而不是输入 sampler 的宽度；即使 a 达标，若 b/c 不变，也不能声称功能性 inhibitory surround 已建立。\n\n"
+        "只审计连接，不含任何自然发作轨迹。a 把构图坐标与实际两跳算子放在同一张散点上（对角线=两者一致），"
+        "并画出注册的同 q 容差带——C0/C1/Q1 三张图落在同一带里，实际只有 Q2、Q3 两个真 reach 档；"
+        "b 检查加宽是否只发生在轴向；c 显示在 800 条 E→I 输入总量不变的前提下，抑制质量从中心搬到了周边；"
+        "d 给出加宽同时付出的两跳传导延迟。\n\n"
+        "**关注点**：承重的是 a 的纵轴（实际两跳宽度）与 c 的搬运方向；b 是 confound 检查，"
+        "d 说明 reach 不是免费的。graph-only readout 不能单独证明 bounded carrier。\n\n"
         "### lc6a_graph_and_twohop.pdf\n\n与 PNG 相同的矢量版本。\n\n"
         "**关注点**：所有量均为 graph-only readout，不能单独证明 bounded carrier。\n"
     )
     return {"png": str(png), "pdf": str(pdf)}
+
+
+def replot_only():
+    """Re-render the frozen two-hop audit figure without recomputing the operator."""
+
+    payload = json.loads((OUT / "two_hop_kernel_audit.json").read_text())
+    if payload.get("status") != "COMPLETE":
+        raise RuntimeError("frozen two-hop audit is not complete")
+    return _plot(payload["audits"], OUT / "figures")
 
 
 def run(*, n_bins_axis=24, n_paths=20000, audit_seed=662000):
@@ -176,9 +258,16 @@ def main():
     parser.add_argument("--n-paths", type=int, default=20000)
     parser.add_argument("--audit-seed", type=int, default=662000)
     parser.add_argument("--confirm-run", action="store_true")
+    parser.add_argument(
+        "--replot-only", action="store_true",
+        help="re-render the figure from the frozen audit JSON; recomputes nothing",
+    )
     args = parser.parse_args()
     if not args.confirm_run:
         raise SystemExit("two-hop graph audit requires --confirm-run")
+    if args.replot_only:
+        print(json.dumps(replot_only(), indent=2, sort_keys=True))
+        return
     OUT.mkdir(parents=True, exist_ok=True)
     with (OUT / ".two_hop.lock").open("w") as lock:
         try:

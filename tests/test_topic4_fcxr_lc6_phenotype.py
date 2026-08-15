@@ -87,3 +87,51 @@ def test_fork_selection_prefers_margin_then_distinct_phenotype():
     ]
     selected = AGG.select_fork_candidates(rows)
     assert [row["condition"] for row in selected] == ["Q2", "Q3"]
+
+
+def test_front_readout_degeneracy_flags_first_bin_partial_fill():
+    """Only the first supra-threshold second has a finite lead, so there is no halo signal."""
+
+    from src.topic4_fcxr_lc6_phenotype import front_readout_degeneracy
+
+    result = front_readout_degeneracy(
+        {
+            "D_halo_lead_mm": [None, None, 1.236, 0.02, -0.004],
+            "D_halo_width_q05_q95_mm": [None, 18.13, 18.12, 18.11, 18.10],
+            "active_area_mm2": [0.0, 0.0, 39.8, 193.4, 400.0],
+        },
+        sheet_area_mm2=400.0, axial_bin_mm=0.625,
+    )
+
+    assert result["degenerate"] is True
+    assert result["n_finite_lead_bins"] == 3
+    assert result["first_supra_threshold_area_mm2"] == 39.8
+    assert result["first_supra_threshold_area_fraction"] == 39.8 / 400.0
+    assert result["later_bin_max_abs_lead_mm"] == 0.02
+
+
+def test_front_readout_degeneracy_accepts_a_moving_front():
+    from src.topic4_fcxr_lc6_phenotype import front_readout_degeneracy
+
+    result = front_readout_degeneracy(
+        {
+            "D_halo_lead_mm": [None, 1.0, 2.0, 3.0],
+            "D_halo_width_q05_q95_mm": [None, 5.0, 9.0, 14.0],
+            "active_area_mm2": [0.0, 40.0, 120.0, 260.0],
+        },
+        sheet_area_mm2=400.0, axial_bin_mm=0.625,
+    )
+
+    assert result["degenerate"] is False
+
+
+def test_q_matched_control_set_splits_realizations_from_reach_rungs():
+    from src.topic4_fcxr_lc6_phenotype import q_matched_control_set
+
+    result = q_matched_control_set(
+        {"C0": 0.9335, "C1": 0.9583, "Q1": 0.9792, "Q2": 1.2913, "Q3": 1.4994},
+        reference="C0", tolerance=0.05,
+    )
+
+    assert result["members"] == ["C0", "C1", "Q1"]
+    assert result["reach_rungs"] == ["Q2", "Q3"]

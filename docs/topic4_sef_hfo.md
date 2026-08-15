@@ -54,6 +54,20 @@
 > `docs/archive/topic4/sef_hfo/fcxr_lc4ef_review_closeout_2026-08-10.md` 与
 > `docs/superpowers/specs/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump-design.md`。
 >
+> **FCXR-LC5 收口 + LC6A 患者轴 E→I surround（2026-08-15，复审后）**：LC5 的逐细胞 `U_i`
+> 最后一个右删失格从 25 s exact state 续到 27 s，达 405.9 Hz 触发注册饱和，判
+> `ESCALATING_SATURATION`、无 offset。LC6A 随后只改生物学 E→I（代码 `IE`）的患者轴 reach，
+> 其余全部冻结：实际两跳抑制宽度 0.935→1.490、周边/中心质量比 1.73→3.07，垂轴宽度与
+> out-degree 容差都通过，因此**不是"图没改到位"的假阴性**。五臂仍全部从 returning IED 自然进入
+> 并升级到注册饱和，无 bounded carrier；标签 `CANONICAL_SEED_AXIAL_REACH_FAMILY_NO_CARRIER`。
+> **两条读法纪律**：① 实测 C0 的 `q_parallel^marginal` 是 0.934 而非 spec 预期的 0.66，所以
+> Q1 落进了 C1 的同 q 容差里——C0/C1/Q1 是三张同 q 图（onset 自散 10–13 s），只有 Q3（6 s）
+> 的进入提前到对照带之外，**不得说 Q1/Q2 推迟了进入**；② 轴向 D-halo / front-speed 读数在这块
+> substrate 上退化（全片在一个 1 s 窗内点亮），**不得说更宽 reach 改变了 D 耗竭 halo 的几何**。
+> 进入之后的升级曲线与 reach 无关。termination 与 lifecycle 固定 `NOT_TESTED`。详见
+> `docs/archive/topic4/fcxr_lc6a_patient_axis_surround_no_carrier_2026-08-15.md`
+> 与 `run_manifest.json` 的 `post_hoc_corrections`。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
@@ -936,6 +950,10 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
   - `docs/archive/topic4/sef_hfo/fcxr_lc4ef_review_closeout_2026-08-10.md` —— LC4e/f 的最终安全结论：自然 entry 成立，当前 X 实现无 offset；空间失配、剂量自限、移动 D/H 与作用通道仍耦合。
   - `docs/superpowers/specs/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump-design.md` —— **当前唯一机制入口**：不加空间场，逐细胞 `U_i` episode memory 的 3×3 high-state authority screen。
   - `docs/superpowers/plans/2026-08-10-topic4-fcxr-lc5-per-cell-episode-pump.md` —— U0–U2 锁定实施图；先 exact high-state fork，再最多两个自然闭环，U2/U2b 未过不跑 70 s。
+- **FCXR-LC5 收口 → LC6A 患者轴 E→I surround（2026-08-15 复审后当前入口）**：
+  - `docs/archive/topic4/sef_hfo/fcxr_lc5v2p1_timescale_dose_map_closeout_2026-08-14.md` —— LC5v2.1 时间尺度/剂量相图收口；最后一格右删失由 LC6A 的 T1 续跑裁决为 `ESCALATING_SATURATION`。
+  - `docs/superpowers/specs/2026-08-14-topic4-fcxr-lc6a-patient-axis-surround-design.md` + 同名 plan —— LC6A 的设计与实施合同（五图家族、两跳几何审计、短功能探针、五臂固定自然轨迹、gain fork、条件性 confirmation）。
+  - `docs/archive/topic4/fcxr_lc6a_patient_axis_surround_no_carrier_2026-08-15.md` —— **LC6A 最终结论 + 2026-08-15 复审重写**：加宽患者轴两跳抑制周边不产生 bounded carrier；六条被取代的旧表述与逐条证据在 `results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/run_manifest.json::post_hoc_corrections`。下一机制分支 = center-preserving 双成分 E→I 核（70–75% legacy local + 25–30% wide axial），本 spec 未授权。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档

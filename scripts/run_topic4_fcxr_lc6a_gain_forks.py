@@ -187,7 +187,7 @@ def lock_selection():
     return payload
 
 
-def _validate_lock():
+def _validate_lock(*, check_sources: bool = True):
     lock = json.loads(LOCK.read_text())
     if lock.get("status") != "LOCKED":
         raise RuntimeError("gain-fork selection is not locked")
@@ -198,7 +198,10 @@ def _validate_lock():
     ):
         if lock[key] != _sha(path):
             raise RuntimeError(f"gain-fork locked artifact drift: {path}")
-    if lock["source_sha256"] != _source_hashes():
+    # The source guard protects the simulated mechanism.  Re-rendering the figure and the
+    # claim wording recomputes nothing, so it is allowed to skip it -- but only after the
+    # rebuilt rows are proved byte-identical to the frozen ones (see finalize).
+    if check_sources and lock["source_sha256"] != _source_hashes():
         raise RuntimeError("gain-fork mechanism source drift")
     return lock
 
@@ -395,8 +398,8 @@ def run_condition(condition, manifest_path):
             shutil.rmtree(work, ignore_errors=True)
 
 
-def finalize():
-    lock = _validate_lock()
+def finalize(*, replot_only: bool = False):
+    lock = _validate_lock(check_sources=not replot_only)
     rows = []
     for selection in lock["selected"]:
         path = FORK_ROOT / selection["condition"] / "summary.json"
@@ -419,33 +422,102 @@ def finalize():
         "responsiveness_is_independent_of_boundedness": True,
         "gain_threshold_used_as_carrier_gate": False,
         "termination_tested": False, "lifecycle_tested": False,
-        "claim_boundary": "Paired weak-patch response measures high-state susceptibility only.",
+        "claim_boundary": (
+            "Paired weak-patch response measures susceptibility of the exact sampled state "
+            "only.  Report the preceding-1 s global rate with every fork: the onset+2 s "
+            "checkpoints sit on the escalation ramp, not in the high state."
+        ),
+        "duplicate_determinism_scope": (
+            "duplicate checkpoints were run for the first selected condition only; "
+            "all_duplicates_exact covers exactly those checkpoints"
+        ),
     }
+    if replot_only:
+        frozen = json.loads(FINAL.read_text())
+        if frozen["rows"] != rows:
+            raise RuntimeError("replot-only would change frozen gain-fork rows")
+        payload["replot_only_source_check_skipped"] = True
     _write_json(FINAL, payload)
     if rows:
-        labels, susceptibility, relaxation, rate_rms, area_l1 = [], [], [], [], []
+        labels, state_hz, peak_hz = [], [], []
+        susceptibility, relaxation, rate_rms, area_l1 = [], [], [], []
         for condition in rows:
+            arm = json.loads(
+                (OUT / f"trajectories/{condition['condition']}/summary.json").read_text()
+            )
+            arm_peak = max(arm["per_second_mean_rate_hz"])
             for checkpoint in condition["checkpoints"]:
-                labels.append(f"{condition['condition']}\n{checkpoint['checkpoint'].replace('onset_plus_', '+')}")
+                labels.append(
+                    f"{condition['condition']}\n"
+                    f"{checkpoint['checkpoint'].replace('onset_plus_', '+')}"
+                )
                 paired = checkpoint["paired"]
+                state_hz.append(checkpoint["preceding_1s"]["global_rate_hz"])
+                peak_hz.append(arm_peak)
                 susceptibility.append(paired["susceptibility_hz_s_per_l2_current_s"])
                 relaxation.append(paired["relaxation"]["relaxation_ms_after_pulse"])
                 rate_rms.append(paired["global_rate_rms_deviation_hz"])
                 area_l1.append(paired["active_area_l1_deviation_mm2_s"])
         x = np.arange(len(labels))
-        fig, axes = plt.subplots(2, 2, figsize=(11, 7.5), constrained_layout=True)
-        axes[0, 0].bar(x, susceptibility, color="#3B7EA1")
-        axes[0, 0].set_title("a  500 ms susceptibility"); axes[0, 0].set_ylabel("Hz·s / input L2·s")
+        fig, axes = plt.subplots(2, 2, figsize=(11.5, 7.8), constrained_layout=True)
+
+        # a. What state was each fork actually taken in?
+        ax = axes[0, 0]
+        ax.bar(x - .18, state_hz, width=.36, color="#3B7EA1", label="1 s before the fork")
+        ax.bar(
+            x + .18, peak_hz, width=.36, color="#3B7EA1", alpha=.35, hatch="///",
+            edgecolor="#3B7EA1", label="that arm's peak 1 s rate",
+        )
+        for index, value in enumerate(state_hz):
+            ax.text(
+                x[index] - .18, value, f"{value:.0f}", ha="center", va="bottom", fontsize=8,
+            )
+        ax.set_ylabel("Global mean rate (Hz)")
+        ax.set_title("a  onset+2 s forks sample the ramp, not the high state")
+        ax.legend(frameon=False, fontsize=8, loc="upper left")
+
+        # b. Did the paired weak patch produce any measurable rate response?
+        ax = axes[0, 1]
+        ax.bar(x, susceptibility, color="#8C6BB1")
+        for index, value in enumerate(susceptibility):
+            if value == 0.0:
+                ax.text(x[index], 0, " exactly 0", rotation=90, ha="center", va="bottom", fontsize=8)
+        ax.set_ylabel("Hz·s / input L2·s")
+        ax.set_title("b  500 ms susceptibility")
+
+        # c. How long did any deviation take to fall back?
+        ax = axes[1, 0]
         rel = [np.nan if value is None else value for value in relaxation]
-        axes[0, 1].bar(x, rel, color="#8C6BB1")
-        axes[0, 1].set_title("b  Relaxation after pulse"); axes[0, 1].set_ylabel("ms")
-        axes[1, 0].bar(x, rate_rms, color="#D95F0E")
-        axes[1, 0].set_title("c  Macroscopic rate deviation"); axes[1, 0].set_ylabel("RMS Hz")
-        axes[1, 1].bar(x, area_l1, color="#2CA25F")
-        axes[1, 1].set_title("d  Active-area deviation"); axes[1, 1].set_ylabel("mm²·s")
+        ax.bar(x, rel, color="#D95F0E")
+        ax.axhline(50.0, color="0.35", ls="--", lw=1.0)
+        ax.text(
+            x[-1] + .4, 55.0, "50 ms pulse floor", ha="right", va="bottom",
+            fontsize=8, color="#444444",
+        )
+        ax.set_ylabel("ms")
+        ax.set_title("c  Relaxation after pulse")
+
+        # d. Did the response appear in rate, in area, or in neither?
+        ax = axes[1, 1]
+        ax.bar(x - .18, rate_rms, width=.36, color="#2CA25F", label="rate RMS (Hz)")
+        ax.bar(
+            x + .18, area_l1, width=.36, color="#2CA25F", alpha=.35, hatch="///",
+            edgecolor="#2CA25F", label="active-area L1 (mm²·s)",
+        )
+        ax.set_ylabel("paired deviation")
+        ax.set_title("d  Rate and area deviations dissociate")
+        ax.legend(frameon=False, fontsize=8, loc="upper left")
+
         for ax in axes.ravel():
             ax.set_xticks(x, labels, fontsize=8)
+            ax.spines[["top", "right"]].set_visible(False)
         fig.suptitle("FCXR-LC6A paired exact-state gain forks")
+        fig.text(
+            .5, -.015,
+            "Q2 has no onset+6 s fork: that checkpoint falls at the end of the arm, after "
+            "registered saturation.  Duplicate-determinism checkpoints were run for C0 only.",
+            ha="center", va="top", fontsize=8, color="#555555",
+        )
         FIGURES.mkdir(parents=True, exist_ok=True)
         png = FIGURES / "lc6a_gain_forks.png"
         pdf = FIGURES / "lc6a_gain_forks.pdf"
@@ -456,9 +528,9 @@ def finalize():
         existing = readme.read_text() if readme.is_file() else ""
         section = f"""### {png.name}
 
-这张图比较 phenotype map 预注册选出的最多两个高态，在 onset 后两个 exact checkpoint 对同一 50 ms 弱局部输入的配对响应。四格分别给出 500 ms susceptibility、回落时间、全局 rate 偏离和活动面积偏离；这些是独立响应性读数，不覆盖 boundedness 标签。
+这张图比较 phenotype map 预注册选出的最多两个条件，在 onset 后的 exact checkpoint 上对同一 50 ms 弱局部输入的配对响应。a 先交代每个 fork 到底采到了什么状态（fork 前 1 s 的全局放电率，对比该臂自己的 1 s 峰值）；b/c/d 分别是 500 ms susceptibility、回落时间、以及 rate 与面积两条偏离。这些是独立响应性读数，不覆盖 boundedness 标签。
 
-**关注点**：静止但仍能响应的高态可以保留为 carrier；本图不检验 termination 或完整 lifecycle。
+**关注点**：onset+2 s 的两个 fork 采到的是 34/52 Hz 的升级斜坡（各自峰值的 9%/15%），不是高态——"早期响应为零"只能读作斜坡早期没有可测响应。Q2 没有 onset+6 s fork，因为那个时刻落在该臂结束之后。
 
 ### {pdf.name}
 
@@ -479,6 +551,10 @@ def finalize():
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("stage", choices=("lock", "run", "finalize"))
+    parser.add_argument(
+        "--replot-only", action="store_true",
+        help="finalize stage: re-render the figure/wording from frozen rows only",
+    )
     parser.add_argument("--condition", choices=NAT.GRAPH_IDS)
     parser.add_argument(
         "--execution-manifest", type=Path,
@@ -508,7 +584,7 @@ def main():
             elif args.stage == "run":
                 result = run_condition(args.condition, args.execution_manifest)
             else:
-                result = finalize()
+                result = finalize(replot_only=args.replot_only)
             _write_json(done, {"status": "DONE", "stage": args.stage, "condition": args.condition})
             failed.unlink(missing_ok=True)
             print(json.dumps(NAT._jsonable(result), indent=2, sort_keys=True))

@@ -38,6 +38,7 @@ def test_two_hop_runner_is_graph_only_and_has_required_readouts():
     text = SCRIPT.read_text()
     assert "run_fcxr_loop" not in text
     assert "trajectory_outcome_used" in text
-    assert "q_parallel_two_hop" in (ROOT / "src/topic4_fcxr_lc6_twohop.py").read_text()
-    assert "surround_center_ratio" in text
+    module = (ROOT / "src/topic4_fcxr_lc6_twohop.py").read_text()
+    assert "q_parallel_two_hop" in module
+    assert "surround_center_ratio" in module
     assert "q95_ms" in text

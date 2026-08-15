@@ -113,6 +113,71 @@ def spatial_slow_flow_readout(
     }
 
 
+def front_readout_degeneracy(spatial: dict, *, sheet_area_mm2: float, axial_bin_mm: float) -> dict:
+    """Report whether the axial front / D-halo readouts carry post-onset signal.
+
+    ``D_halo_lead_mm`` is only defined once some bin crosses the local rate threshold,
+    so its first finite entry is set by how much of the sheet was already recruited
+    inside that 1 s bin.  When every later entry sits below one axial grid bin the
+    readout has no post-onset dynamic range and must not be read as a halo geometry.
+    """
+
+    lead = np.asarray(
+        [np.nan if value is None else float(value) for value in spatial["D_halo_lead_mm"]], float,
+    )
+    width = np.asarray(
+        [np.nan if value is None else float(value)
+         for value in spatial["D_halo_width_q05_q95_mm"]], float,
+    )
+    area = np.asarray(spatial["active_area_mm2"], float)
+    finite = np.isfinite(lead)
+    if not np.any(finite):
+        return {"degenerate": True, "reason": "no supra-threshold second", "n_finite_lead_bins": 0}
+    first = int(np.argmax(finite))
+    later = lead[finite][1:]
+    later_max = float(np.max(np.abs(later))) if later.size else float("nan")
+    finite_width = width[np.isfinite(width)]
+    width_span = float(np.max(finite_width) - np.min(finite_width)) if finite_width.size else float("nan")
+    degenerate = bool(
+        (later.size == 0 or later_max < float(axial_bin_mm))
+        and (not np.isfinite(width_span) or width_span < float(axial_bin_mm))
+    )
+    return {
+        "degenerate": degenerate,
+        "reason": (
+            "post-onset lead stays below one axial grid bin and the halo width is pinned "
+            "to the sheet, so the only variation is first-bin partial fill"
+            if degenerate else "post-onset lead exceeds one axial grid bin"
+        ),
+        "axial_bin_mm": float(axial_bin_mm),
+        "n_finite_lead_bins": int(np.count_nonzero(finite)),
+        "first_supra_threshold_area_mm2": float(area[first]),
+        "first_supra_threshold_area_fraction": float(area[first] / float(sheet_area_mm2)),
+        "first_bin_lead_mm": float(lead[first]),
+        "later_bin_max_abs_lead_mm": later_max,
+        "halo_width_span_mm": width_span,
+    }
+
+
+def q_matched_control_set(construction_q: dict, *, reference: str, tolerance: float) -> dict:
+    """Conditions sitting inside the registered same-q microstate tolerance of ``reference``."""
+
+    anchor = float(construction_q[reference])
+    members = [
+        condition for condition, value in construction_q.items()
+        if abs(float(value) - anchor) <= float(tolerance)
+    ]
+    return {
+        "reference": reference,
+        "tolerance": float(tolerance),
+        "reference_construction_q": anchor,
+        "members": members,
+        "reach_rungs": [
+            condition for condition in construction_q if condition not in members
+        ],
+    }
+
+
 def event_metrics(events, *, end_ms: float) -> dict:
     use = [event for event in events if float(event["t_on"]) < float(end_ms)]
     onsets = np.asarray([event["t_on"] for event in use], float)
