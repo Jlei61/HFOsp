@@ -254,12 +254,14 @@ def adjudicate(summary: dict, *, same_network_k2_min: float) -> dict:
     reasons = []
     if not summary["pass_fraction_met"]:
         reasons.append(
-            f"pass fraction {summary['pass_fraction']:.2f} below "
-            f"{summary['pass_fraction_min']:.2f}"
+            f"only {summary['pass_fraction']:.0%} of patients beat their own "
+            f"shuffled-contact control, below the {summary['pass_fraction_min']:.0%} "
+            f"required"
         )
     if not summary["primary_significant"]:
         reasons.append(
-            "cohort weakest-mode loss is not significantly below the matched null"
+            "across patients the model is not reliably closer to held-out data "
+            "than the shuffled-contact control"
         )
     if reasons:
         return {"status": "COHORT_MODEL_SUPPORT_INSUFFICIENT", "reasons": reasons}
@@ -267,8 +269,9 @@ def adjudicate(summary: dict, *, same_network_k2_min: float) -> dict:
         return {
             "status": "SAME_NETWORK_K2_INSUFFICIENT",
             "reasons": [
-                f"same-network K=2 in {summary['same_network_k2_fraction']:.2f} of "
-                f"subjects, below {float(same_network_k2_min):.2f}"
+                f"only {summary['same_network_k2_fraction']:.0%} of patients had one "
+                f"network hold both propagation modes, below the "
+                f"{float(same_network_k2_min):.0%} required"
             ],
         }
     sensitivity = summary.get("sensitivity")
@@ -276,8 +279,8 @@ def adjudicate(summary: dict, *, same_network_k2_min: float) -> dict:
         return {
             "status": "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED",
             "reasons": [
-                "canonical and real-geometry cohort effects point in opposite "
-                "directions"
+                "the contact-order readout and the real implant geometry point in "
+                "opposite directions"
             ],
         }
     return {"status": "COHORT_MODEL_SUPPORT_SUPPORTED", "reasons": []}
