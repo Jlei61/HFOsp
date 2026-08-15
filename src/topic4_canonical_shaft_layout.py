@@ -33,19 +33,24 @@ def contact_shaft_contract(contact_names: list[str]) -> dict:
 
 
 def canonical_shaft_layout(contact_names: list[str], *, sheet_size_mm: float = 20.0,
-                           margin_mm: float = 2.0,
-                           preferred_contact_pitch_mm: float = 1.0) -> dict:
-    """Place shafts on fixed parallel rows while preserving contact ordinals."""
+                           margin_mm: float = 2.0) -> dict:
+    """Place shafts on fixed parallel rows while preserving contact ordinals.
+
+    The ordinal axis is stretched to fill the usable sheet, exactly as the
+    real-geometry projection stretches its largest-variance axis.  A fixed
+    physical pitch would instead leave montages with few distinct ordinals
+    inside a 2-mm strip while their real-geometry counterparts spread over
+    16 mm, so the canonical-versus-real sensitivity contrast would confound
+    contact arrangement with montage extent on the very axis that carries the
+    contact-order claim.
+    """
     contract = contact_shaft_contract(contact_names)
     usable = float(sheet_size_mm) - 2.0 * float(margin_mm)
-    if usable <= 0.0 or preferred_contact_pitch_mm <= 0.0:
+    if usable <= 0.0:
         raise ValueError("canonical layout dimensions must be positive")
     ordinals = contract["within_shaft_ordinals"]
-    ordinal_span = int(ordinals.max(initial=0) - ordinals.min(initial=0))
-    pitch = min(
-        float(preferred_contact_pitch_mm),
-        usable / float(max(ordinal_span, 1)),
-    )
+    ordinal_span = int(ordinals.max() - ordinals.min())
+    pitch = usable / float(max(ordinal_span, 1))
     center_ordinal = 0.5 * float(ordinals.min() + ordinals.max())
     x = 0.5 * float(sheet_size_mm) + (ordinals - center_ordinal) * pitch
     shaft_to_y = {}
@@ -64,7 +69,7 @@ def canonical_shaft_layout(contact_names: list[str], *, sheet_size_mm: float = 2
     return {
         **contract,
         "coords_sheet": coords,
-        "layout_type": "canonical_parallel_shaft_rows_v1",
+        "layout_type": "canonical_parallel_shaft_rows_v2_span_filling",
         "contact_pitch_mm": float(pitch),
         "uses_event_ranks": False,
         "uses_mode_labels": False,

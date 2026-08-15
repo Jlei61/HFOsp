@@ -54,11 +54,17 @@ held-out margin.
 ## Geometry and observation
 
 The primary observation model is a canonical shaft layout. Contact names are
-parsed into shaft identity and within-shaft ordinal; shafts are arranged by a
-fixed, data-independent rule and contacts retain their within-shaft spacing.
-The layout may not read rank values, mode labels, template direction, event
-counts, recruitment frequency or field peaks. This supports a claim about
-internal contact-order structure, not anatomical localization.
+parsed into shaft identity and within-shaft ordinal; shafts occupy fixed
+parallel rows and the ordinal axis is stretched to fill the usable sheet, which
+mirrors how the real-geometry projection stretches its largest-variance axis.
+A fixed physical contact pitch was rejected before any cohort simulation ran:
+it left low-ordinal-span montages inside a 2-mm strip while their real-geometry
+counterparts spread over 16 mm, so the canonical-versus-real contrast would
+have confounded contact arrangement with montage extent on the very axis that
+carries the contact-order claim. The layout may not read rank values, mode
+labels, template direction, event counts, recruitment frequency or field peaks.
+This supports a claim about internal contact-order structure, not anatomical
+localization.
 
 For the 28 subjects with usable coordinates, real 3-D geometry is projected by
 deterministic PCA and isotropically fitted into the 20-mm sheet as a sensitivity
@@ -98,6 +104,17 @@ The subject-level primary endpoint is the weakest-mode held-out patient
 alignment, combining contact-rank profile, recruitment and precedence. The
 same model readout is also scored against within-subject contact-identity
 permutation nulls.
+
+The within-shaft permutation null is requested at 64 draws, but four subjects
+do not have 64 distinct within-shaft permutations: `epilepsiae_583` has 3,
+`epilepsiae_1073` has 5, `epilepsiae_1077` has 11 and `epilepsiae_253` has 23.
+For those the whole non-identity group is enumerated, giving an exact but
+coarse null whose smallest reachable p-value is 1/4, 1/6, 1/12 and 1/24. The
+effective null size and that floor are stored per subject, and the cohort
+adjudication reports how many subjects could not reach conventional
+significance on the null test alone. Padding these nulls back to 64 rows by
+drawing with replacement is forbidden: it would advertise a resolution the
+montage does not have.
 
 Natural KMeans is mandatory but separate. It must show that the same network
 contains two reproducible event clusters and that, after one-to-one alignment,
