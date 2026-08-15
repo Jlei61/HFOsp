@@ -496,17 +496,29 @@ def finalize():
             rows.append(json.loads(path.read_text()))
     paired = {}
     for snapshot in manifest["source_snapshots"]:
-        hashes = {
-            row["arm"]: row["external_input_sha256"]
-            for row in rows if row["source_snapshot"] == snapshot
-        }
+        arms = [row for row in rows if row["source_snapshot"] == snapshot]
+        # The contract is over the window the arms have IN COMMON.  An extended arm ran 10 s while an
+        # arm that saturated ran 6 s, so their whole-run hashes differ by construction; comparing those
+        # would fail a contract that is in fact satisfied.  Resolve each arm to its registered 6 s
+        # window -- the parent bundle when the arm was extended -- and compare that.
+        registered, extension = {}, {}
+        for row in arms:
+            if row.get("extension_of"):
+                parent = json.loads(
+                    (FORK_ROOT / row["extension_of"] / "summary.json").read_text())
+                registered[row["arm"]] = parent["external_input_sha256"]
+                extension[row["arm"]] = row["external_input_sha256"]
+            else:
+                registered[row["arm"]] = row["external_input_sha256"]
         paired[snapshot] = {
-            "external_input_sha256": hashes,
-            "all_arms_share_future_input": len(set(hashes.values())) == 1,
+            "common_window_ms": min(
+                float(row.get("parent_window_ms") or row["completed_ms"]) for row in arms),
+            "registered_window_external_input_sha256": registered,
+            "all_arms_share_future_input": len(set(registered.values())) == 1,
+            "joined_window_external_input_sha256": extension,
             "state_hashes_distinct": len({
-                row["final_checkpoint"]["state_hash"]
-                for row in rows if row["source_snapshot"] == snapshot
-            }) == len(hashes),
+                row["final_checkpoint"]["state_hash"] for row in arms
+            }) == len(arms),
         }
         if not paired[snapshot]["all_arms_share_future_input"]:
             raise RuntimeError(f"G1: arms of {snapshot} do not share a future external input")

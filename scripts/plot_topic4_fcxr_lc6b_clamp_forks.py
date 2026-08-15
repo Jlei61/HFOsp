@@ -36,6 +36,9 @@ SHORT = {"ESCALATING_SATURATION": "escalates to saturation", "BOUNDED_STATIONARY
          "NUMERICAL_FAIL": "numerical failure", "RIGHT_CENSORED": "unresolved in window"}
 
 
+SLOW_TRACES = ("D_mean", "gH_mean", "H_mean", "H_source_mean", "gErec_mean", "gI_mean")
+
+
 def _load():
     payload = json.loads((OUT / "clamp_fork_summary.json").read_text())
     rows, traces = {}, {}
@@ -43,7 +46,17 @@ def _load():
         key = (row["source_snapshot"], row["arm"])
         rows[key] = row
         with np.load(OUT / f"forks/{row['arm_id']}/traces.npz") as handle:
-            traces[key] = {name: np.asarray(handle[name]) for name in handle.files}
+            trace = {name: np.asarray(handle[name]) for name in handle.files}
+        if row.get("extension_of"):
+            # The extension bundle's rate_bins_hz already covers the joined window, but the slow-field
+            # traces only cover the 4 s tail.  Reading Δ from the tail alone makes a FREE field look
+            # pinned whenever it happened to saturate inside the parent window -- which is exactly what
+            # the H gate does in the D-pinned arms.  Prepend the parent's own slow traces.
+            with np.load(OUT / f"forks/{row['extension_of']}/traces.npz") as parent:
+                for name in SLOW_TRACES:
+                    if name in trace and name in parent.files:
+                        trace[name] = np.concatenate([np.asarray(parent[name]), trace[name]])
+        traces[key] = trace
     return payload, rows, traces
 
 
@@ -84,7 +97,11 @@ def main():
             info = row
             rate, dt_s = _rate_100ms(traces[(snapshot, arm)])
             t = np.arange(rate.size) * dt_s
-            ax.plot(t, rate, color=ARM_COLOR[arm], lw=1.7, alpha=.92,
+            # NAT is drawn as a wide translucent band so an arm that lands on top of it (H pinned at
+            # onset+4 s is nearly identical to it) stays visible instead of erasing it.
+            wide = arm == "NAT"
+            ax.plot(t, rate, color=ARM_COLOR[arm], lw=3.6 if wide else 1.7,
+                    alpha=.40 if wide else .95, solid_capstyle="round",
                     label=f"{ARM_LABEL[arm]} — {SHORT.get(row['verdict']['label'], row['verdict']['label'])}")
         ax.axhline(sat, color="#B00020", ls="--", lw=1.0)
         ax.axhline(band, color="0.45", ls=":", lw=1.0)

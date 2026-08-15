@@ -68,6 +68,24 @@
 > `docs/archive/topic4/fcxr_lc6a_patient_axis_surround_no_carrier_2026-08-15.md`
 > 与 `run_manifest.json` 的 `post_hoc_corrections`。
 >
+> **FCXR-LC6B frozen-slow causal atlas（2026-08-15，round 1）**：LC6A 之后的问题是——冲顶到底
+> 是因为快回路本身没有中间平台，还是有平台但被两个慢变量推了过去。做法是取同一条 C0 轨迹的两个
+> 精确时刻（13 s / 15 s），各复制四份，**只改哪个慢变量被按住**，完整快态、图、参数与未来外部噪声
+> 逐位相同，各跑 10 s。结果：都放开与只按住 `H` 都冲过注册饱和线（420/398 与 444/444 Hz）；
+> 只按住 `D`（= 1 − z，突触疲劳）与两者都按住则停在 40–71 Hz 十秒不动，全程 0 个细胞达到近不应期率。
+> 标签 `FROZEN_SLOW_BOUNDED_BRANCH_EXISTS_D_DEPLETION_IS_THE_DRIVER`，两个快照一致。
+> **三条读法纪律**：① **不得说"H 与升级无关"**——`gH` 的硬上限是 `rho_h_lc2 = 0.54`，门占用在 13 s
+> 只有 55.6%、15 s 已 95.9%，实测在按住 D 之上再按住 H 分别把平台压低 24.4% 与 0.9%，即 H 的效应
+> 正比于剩余行程，只是永远不足以造成 runaway（该预期在跑之前已写入 spec §5 与 manifest
+> `prior_expectation`）；② 有界态是**爆发串**（末 2 s 有 53–56% 的 20 ms 窗落回间期带以下），
+> 标签是 `BOUNDED_OSCILLATORY` 而非 `BOUNDED_STATIONARY`，**不得说成平滑持续高态**；
+> ③ 注册漂移判据读固定 2 s 长的尾窗，6 s 窗的尾巴里仍含钳制后的弛豫暂态，四条有界臂在 6 s 时
+> 全被判 `RIGHT_CENSORED`——是 spec §6.2 预注册的单次 4 s 延长把尾窗挪过暂态后才翻成 bounded，
+> **判据未改**。单 seed、单图、单条轨迹的两个时刻，不是队列主张；
+> `perturbation_return` / `termination` / `lifecycle` 全部 `NOT_TESTED`。详见
+> `docs/archive/topic4/fcxr_lc6b_frozen_slow_causal_atlas_2026-08-15.md`。
+> 编号说明：旧文本里"carrier positive → LC6B 重标 U"那条路线**已改名 LC6D**，LC6B 现指本轮 atlas。
+>
 > **三条核心纪律（2026-06-02 lock）**：① 报 operating-point family 通过比例（不报单点）+ 自洽稳态 + 不用均值阈值/外部输入/连接强度抢救机制；② recovery 并列分支 report-both，由实测事件时长/范围定；③ 承重判别指标 = 模板方向随连接各向异性轴转、随电极杆旋转不变，isotropic+aligned-shaft 必须过不了。
 >
 > **LIF 数学路线（2026-06-03 lock）**：transfer = **LIF Siegert `Φ_LIF(μ,σ)`**（非 sigmoid F_eff）；真 LIF 工作点 = **稳健稳定但可激**（max Re λ≈−0.05，非 near-critical）；self-limited propagation = 非线性可激（全或无，波前推进幅度无关）。
@@ -953,7 +971,9 @@ scripts/run_sef_itp_phase1.py --dataset <epilepsiae|yuquan> --subject <sid> \
 - **FCXR-LC5 收口 → LC6A 患者轴 E→I surround（2026-08-15 复审后当前入口）**：
   - `docs/archive/topic4/sef_hfo/fcxr_lc5v2p1_timescale_dose_map_closeout_2026-08-14.md` —— LC5v2.1 时间尺度/剂量相图收口；最后一格右删失由 LC6A 的 T1 续跑裁决为 `ESCALATING_SATURATION`。
   - `docs/superpowers/specs/2026-08-14-topic4-fcxr-lc6a-patient-axis-surround-design.md` + 同名 plan —— LC6A 的设计与实施合同（五图家族、两跳几何审计、短功能探针、五臂固定自然轨迹、gain fork、条件性 confirmation）。
-  - `docs/archive/topic4/fcxr_lc6a_patient_axis_surround_no_carrier_2026-08-15.md` —— **LC6A 最终结论 + 2026-08-15 复审重写**：加宽患者轴两跳抑制周边不产生 bounded carrier；六条被取代的旧表述与逐条证据在 `results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/run_manifest.json::post_hoc_corrections`。下一机制分支 = center-preserving 双成分 E→I 核（70–75% legacy local + 25–30% wide axial），本 spec 未授权。
+  - `docs/archive/topic4/fcxr_lc6a_patient_axis_surround_no_carrier_2026-08-15.md` —— **LC6A 最终结论 + 2026-08-15 复审重写**：加宽患者轴两跳抑制周边不产生 bounded carrier；六条被取代的旧表述与逐条证据在 `results/topic4_sef_hfo/fcxr_lc6a_patient_axis_surround/run_manifest.json::post_hoc_corrections`。
+  - `docs/superpowers/specs/2026-08-15-topic4-fcxr-lc6b-frozen-slow-causal-atlas-design.md` + 同名 plan + `config/topic4_fcxr_lc6b_frozen_slow_atlas.json` —— LC6B 的设计、实施与执行合同（D/H 冻结钩子、八条 clamp、分类语义、三类硬 gate、条件性 natural-path atlas）。
+  - `docs/archive/topic4/fcxr_lc6b_frozen_slow_causal_atlas_2026-08-15.md` —— **LC6B round 1 结论**：把 `D` 与 `H` 按在轨迹自身的值上后，快回路存在有界高分支；只按住 `D` 就够，只按住 `H` 不够 → `FROZEN_SLOW_BOUNDED_BRANCH_EXISTS_D_DEPLETION_IS_THE_DRIVER`。这也解答了 LC6A 留下的问题：LC6A 的"无 carrier"是**慢变量把系统推过了平台**，不是快回路没有平台，所以下一机制分支不再是继续加宽抑制周边。spec §10 分支 B 成立 → 条件性 natural-path atlas 已获授权；H-EFF / H-CAP 属分支 A，未触发。
 - `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md` —— **SUPERSEDED as main route**，HR/FHN Phase 4 route，保留为历史探索 / sensitivity
 - `docs/paper1_framework_sba.md` v1.1.2 + PR-7 addendum 2026-05-01 lock —— 上游 SBA framework；本框架取代其 BHPN-toy 部分
 - `docs/archive/topic4/pr_t4_1_bhpn_toy/pr_t4_1_bhpn_toy_plan_2026-05-01.md` —— **SUPERSEDED**，BHPN-toy plan-of-record v2，归档
