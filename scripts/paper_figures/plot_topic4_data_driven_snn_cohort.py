@@ -32,10 +32,13 @@ VERDICT_TEXT = {
         "held-out contact-order structure recovered above matched nulls",
     "COHORT_MODEL_SUPPORT_INSUFFICIENT":
         "held-out contact-order structure NOT recovered above matched nulls",
+    # Deliberately does not say "supervised alignment holds": that is the very
+    # claim the readout-geometry gate can withdraw, and the two gates can fail
+    # together.
     "SAME_NETWORK_K2_INSUFFICIENT":
-        "supervised alignment holds but one network does not hold two clusters",
+        "one network rarely holds two clusters matching distinct patient modes",
     "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED":
-        "the two readout geometries disagree in direction",
+        "the effect does not survive the readout geometry",
     "TARGET_BLIND_FIELD_LIBRARY_CAPACITY_FAIL":
         "the target-blind field library had no capacity",
 }
@@ -73,9 +76,11 @@ def _banner(fig, result: dict) -> None:
     primary = cohort["primary_test"]
     verdict = result["verdict"]
     failed = verdict.get("failed_gates") or ([status] if verdict.get("reasons") else [])
-    headline = VERDICT_TEXT.get(status, status)
+    headline = " ; ".join(VERDICT_TEXT.get(gate, gate) for gate in failed) or (
+        VERDICT_TEXT.get(status, status)
+    )
     if len(failed) > 1:
-        headline += f"  (+{len(failed) - 1} more gate not met)"
+        headline = f"{len(failed)} gates not met: " + headline
     sensitivity = cohort.get("sensitivity") or {}
     detail = (
         f"{cohort['n_subjects']} patients | "
@@ -230,7 +235,8 @@ def _panel_layout(ax, result: dict) -> None:
     ax.set_ylabel("advantage over shuffle,\nreal implant geometry")
     ax.set_title(
         f"does it survive moving the contacts?\n"
-        f"{int(agree.sum())} of {len(shared)} agree in sign",
+        f"{int(agree.sum())} of {len(shared)} agree in sign "
+        f"(coin flip would give {len(shared) / 2:.0f})",
         loc="left", fontweight="bold", fontsize=11,
     )
     ax.spines[["top", "right"]].set_visible(False)
