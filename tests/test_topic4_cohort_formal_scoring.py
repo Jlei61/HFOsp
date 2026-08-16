@@ -200,6 +200,20 @@ def test_adjudication_reports_insufficient_support_before_any_other_gate():
     assert len(verdict["reasons"]) == 2
 
 
+def test_adjudication_lists_every_failed_gate_not_just_the_first():
+    """Two gates can break at once; naming one hides the other."""
+    canonical = [_row(f"s{index}", 0.05, True, seed=1681 + index % 4, k2=False)
+                 for index in range(12)]
+    real = [_row(f"s{index}", -0.05, False) for index in range(12)]
+    summary = cohort_summary(canonical, real, pass_fraction_min=0.6, alpha=0.05)
+    verdict = adjudicate(summary, same_network_k2_min=0.5)
+    assert verdict["status"] == "SAME_NETWORK_K2_INSUFFICIENT"
+    assert verdict["failed_gates"] == [
+        "SAME_NETWORK_K2_INSUFFICIENT", "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED",
+    ]
+    assert len(verdict["all_reasons"]) == 2
+
+
 def test_adjudication_reports_a_missing_same_network_k2_separately():
     rows = [_row(f"s{index}", 0.05, True, seed=1681 + index % 4, k2=False)
             for index in range(12)]

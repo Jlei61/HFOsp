@@ -261,37 +261,55 @@ def cohort_summary(canonical_rows: list[dict], real_rows: list[dict], *,
 
 
 def adjudicate(summary: dict, *, same_network_k2_min: float) -> dict:
-    """Turn the frozen gates into one status; never soften a failed gate."""
-    reasons = []
+    """Turn the frozen gates into one status; never soften a failed gate.
+
+    Every gate is evaluated and every failure is listed.  Returning on the
+    first failure named one broken gate and left the others invisible, which
+    reads as a single shortfall when several are missing.  The headline status
+    still follows the order the config froze in ``endpoint.failure_statuses``,
+    so which failure leads is not chosen after seeing the numbers.
+    """
+    support_reasons = []
     if not summary["pass_fraction_met"]:
-        reasons.append(
+        support_reasons.append(
             f"only {summary['pass_fraction']:.0%} of patients beat their own "
             f"shuffled-contact control, below the {summary['pass_fraction_min']:.0%} "
             f"required"
         )
     if not summary["primary_significant"]:
-        reasons.append(
+        support_reasons.append(
             "across patients the model is not reliably closer to held-out data "
             "than the shuffled-contact control"
         )
-    if reasons:
-        return {"status": "COHORT_MODEL_SUPPORT_INSUFFICIENT", "reasons": reasons}
+    k2_reasons = []
     if summary["same_network_k2_fraction"] < float(same_network_k2_min):
-        return {
-            "status": "SAME_NETWORK_K2_INSUFFICIENT",
-            "reasons": [
-                f"only {summary['same_network_k2_fraction']:.0%} of patients had one "
-                f"network hold both propagation modes, below the "
-                f"{float(same_network_k2_min):.0%} required"
-            ],
-        }
+        k2_reasons.append(
+            f"only {summary['same_network_k2_fraction']:.0%} of patients had one "
+            f"network hold both propagation modes, below the "
+            f"{float(same_network_k2_min):.0%} required"
+        )
+    layout_reasons = []
     sensitivity = summary.get("sensitivity")
     if sensitivity is not None and not sensitivity["directions_agree"]:
+        layout_reasons.append(
+            "the effect does not survive the readout geometry: contact-order "
+            f"median {sensitivity['canonical_median_delta']:+.5f} versus real "
+            f"implant geometry {sensitivity['real_geometry_median_delta']:+.5f}"
+        )
+    ordered = (
+        ("COHORT_MODEL_SUPPORT_INSUFFICIENT", support_reasons),
+        ("SAME_NETWORK_K2_INSUFFICIENT", k2_reasons),
+        ("OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED", layout_reasons),
+    )
+    failed = [(status, reasons) for status, reasons in ordered if reasons]
+    if not failed:
         return {
-            "status": "OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED",
-            "reasons": [
-                "the contact-order readout and the real implant geometry point in "
-                "opposite directions"
-            ],
+            "status": "COHORT_MODEL_SUPPORT_SUPPORTED", "reasons": [],
+            "failed_gates": [], "all_reasons": [],
         }
-    return {"status": "COHORT_MODEL_SUPPORT_SUPPORTED", "reasons": []}
+    return {
+        "status": failed[0][0],
+        "reasons": failed[0][1],
+        "failed_gates": [status for status, _ in failed],
+        "all_reasons": [reason for _, reasons in failed for reason in reasons],
+    }

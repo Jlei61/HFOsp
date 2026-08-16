@@ -52,6 +52,11 @@ def _readme(result: dict, config: dict, panels: list[dict]) -> str:
         (ROOT / config["output_root"] / "cohort_layout_audit.json").read_text()
     )["within_shaft_null"]
     coarse = null["subjects_that_cannot_reach_p_0_05_alone"]
+    verdict = result["verdict"]
+    failed_gates = verdict.get("failed_gates") or (
+        [result["status"]] if verdict.get("reasons") else []
+    )
+    all_reasons = verdict.get("all_reasons") or verdict.get("reasons") or []
     return f"""# 图说明
 
 ### topic4_data_driven_snn_cohort-complete-layout.png
@@ -60,7 +65,9 @@ def _readme(result: dict, config: dict, panels: list[dict]) -> str:
 
 ### topic4_data_driven_snn_cohort_statistics.png（A）
 
-队列层统计。四格各答一个独立问题：谁在队列里（{denominators['primary_canonical_layout']} 人按触点名摆位、其中 {denominators['real_geometry_sensitivity']} 人另有真实三维坐标）；每位患者的模型读数是不是比"同一根杆内部把触点标签打乱"更贴近没看过的那半段病人数据；同一张网络里是不是同时长出两簇可复现的事件（不告诉它病人标签）；把触点摆位换成真实几何后方向是否一致。当前裁定是 `{result['status']}`：{cohort['pass_fraction']:.0%} 的患者赢过自己的打乱对照（门槛 {cohort['pass_fraction_min']:.0%}），中位优势 {primary['median_delta']:+.4f}，p = {primary['wilcoxon_p']:.3g}；同网络双模式出现在 {cohort['same_network_k2_fraction']:.0%} 的患者上。
+队列层统计。四格各答一个独立问题：谁在队列里（{denominators['primary_canonical_layout']} 人按触点名摆位、其中 {denominators['real_geometry_sensitivity']} 人另有真实三维坐标）；每位患者的模型读数是不是比"同一根杆内部把触点标签打乱"更贴近没看过的那半段病人数据；同一张网络里是不是同时长出两簇可复现的事件（不告诉它病人标签）；把触点摆位换成真实几何后方向是否一致。
+
+实测：{cohort['pass_fraction']:.0%} 的患者赢过自己的打乱对照（门槛 {cohort['pass_fraction_min']:.0%}），中位优势 {primary['median_delta']:+.4f}、p = {primary['wilcoxon_p']:.3g}；但换成真实植入几何后中位优势是 {sensitivity.get('real_geometry_median_delta', float('nan')):+.4f}、p = {sensitivity.get('real_geometry_test', {}).get('wilcoxon_p', float('nan')):.3g}；同网络双模式只出现在 {cohort['same_network_k2_fraction']:.0%} 的患者上。裁定 `{result['status']}`，**未过的闸门共 {len(failed_gates)} 道**：{'；'.join(all_reasons) if all_reasons else '无'}。
 
 **关注点**：打乱对照的"备选数"因人而异 —— {len(coarse)} 位患者（{', '.join(coarse) if coarse else '无'}）的电极摆放凑不出足够多的杆内重排，单看这个对照永远够不到 p ≤ 0.05，所以他们的结论必须连同"能达到的最小 p 值"一起读；判据用的是"比自己对照的中位数更好"，不是逐人 p 值。
 

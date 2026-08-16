@@ -71,24 +71,31 @@ def _banner(fig, result: dict) -> None:
     cohort = result["cohort"]
     status = result["status"]
     primary = cohort["primary_test"]
+    verdict = result["verdict"]
+    failed = verdict.get("failed_gates") or ([status] if verdict.get("reasons") else [])
     headline = VERDICT_TEXT.get(status, status)
+    if len(failed) > 1:
+        headline += f"  (+{len(failed) - 1} more gate not met)"
+    sensitivity = cohort.get("sensitivity") or {}
     detail = (
         f"{cohort['n_subjects']} patients | "
         f"{cohort['pass_fraction']:.0%} beat their own shuffle "
         f"(gate {cohort['pass_fraction_min']:.0%}) | "
         f"median advantage {primary['median_delta']:+.4f}, "
         f"p = {_format_p(primary['wilcoxon_p'])} | "
-        f"two clusters in one network in "
+        f"real implant geometry {sensitivity.get('real_geometry_median_delta', float('nan')):+.4f}"
+        f" | two clusters in one network in "
         f"{cohort['same_network_k2_fraction']:.0%}"
     )
-    reasons = "; ".join(result["verdict"].get("reasons", []))
+    # Every broken gate goes on the canvas; naming one hides the others.
+    reasons = verdict.get("all_reasons") or verdict.get("reasons") or []
     if reasons:
-        detail += f"\nnot met: {reasons}"
+        detail += "\nnot met: " + " | ".join(reasons)
     color = PASS_COLOR if status == "COHORT_MODEL_SUPPORT_SUPPORTED" else FAIL_COLOR
     fig.text(0.5, 0.995, headline, ha="center", va="top", fontsize=13,
              fontweight="bold", color=color)
-    fig.text(0.5, 0.963, detail, ha="center", va="top", fontsize=10,
-             color="#333333", linespacing=1.4)
+    fig.text(0.5, 0.963, detail, ha="center", va="top", fontsize=9.2,
+             color="#333333", linespacing=1.45)
 
 
 def _panel_denominator(ax, result: dict) -> None:
