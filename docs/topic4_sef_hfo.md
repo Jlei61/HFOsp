@@ -31,6 +31,18 @@
 > **病理→参数映射（2026-06-06 lock）**：首轮只碰 E→E 连接核「定往哪传」+ E 阈值异质性「定哪里点着」，方向在工作点上算不预设。锚：Rich 2022 / Huberfeld 2007 / Lepeu 2024。详见 `docs/superpowers/specs/2026-06-06-sef-hfo-pathology-parameter-mapping-design.md`。
 >
 > **历史路线（全部归档）**：HR/FHN Phase 4 v1 整体归档 → `docs/superpowers/specs/2026-05-27-sef-itp-phase4-v1-design.md`；完整 v1.0.x amendment history + step 结果 → `docs/archive/topic4/sef_itp_phase4_v2/`；Phase 2 结果 → `docs/archive/topic4/sef_itp_phase2/`。
+>
+> **34 人 data-driven SNN cohort 收官（2026-08-16）：两道闸门未过，预注册正向主张不成立。**
+> 问题是：照着病人自己间期数据调出来的网络，能不能在**没看过的记录块**上把"哪个触点排在第几位"
+> 复现得比"同一根杆内部随机换触点标签"更好。在**只看电极名字**排出的摆位上，23/34 人赢过自己的
+> 对照，但中位优势只有 **+0.0063（零假设水平的 3.3%）**、Wilcoxon p=0.043（更保守的符号检验
+> p=0.058 过不了）；**换成患者真实植入几何，效应归零**（中位 −0.0007，p=0.98，两臂符号一致
+> 14/28 = 正好掷硬币）。同一张网络里长出两簇分别对上病人两条路线的只有 **15/34 = 44%**（门槛 50%）。
+> 这批数据**分不开**两种读法（理想摆位的假象 / 真实几何次轴仅 0.3–15mm 太弱测不出），所以状态是
+> `OBSERVATION_LAYOUT_DEPENDENCE_UNRESOLVED`，**不是模型被证伪**。禁止写成"复现了队列 / 复现了
+> 患者间期活动 / 复现了双模板 repertoire"。结果与全部数字见
+> `docs/archive/topic4/sef_hfo/data_driven_snn_cohort_formal_result_2026-08-16.md`，
+> 冻结与预检见同目录 `..._canary_and_formal_freeze_2026-08-15.md`。
 
 ---
 
