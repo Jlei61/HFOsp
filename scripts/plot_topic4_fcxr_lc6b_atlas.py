@@ -83,38 +83,20 @@ def spike_convergence(field, *, tail_ms=5000.0, dt_ms=0.05):
     }
 
 
-#: LC6A registered this tolerance for its baseline-tradeoff comparison; reused rather than invented.
-OUTCOME_RELATIVE_TOLERANCE = 0.25
-SUB_BAND_ABSOLUTE_TOLERANCE = 0.10
+def _adjudication():
+    """Read the verdict; never compute one here.
 
-
-def outcome_match(row_low, row_high, burst_low, burst_high):
-    """Did the two locked initialisations reach different END STATES, or only different labels?
-
-    Lock 4 is about end states.  The registered label can differ for a reason that is not an end
-    state at all: the drift criterion reads a fixed 2 s tail, and on a burst train that statistic
-    straddles its gate, so two arms sitting at the same rate on the same area can be labelled
-    differently.  This compares what the arms actually did.
+    Round 2 produced its outcome verdict inside this plotting script.  That is the wrong home for a
+    scientific adjudication -- it is not versioned with the result and it was never tested -- so the
+    comparison now lives in src/topic4_fcxr_lc6b_outcome.py behind
+    scripts/finalize_topic4_fcxr_lc6b_outcome.py, and this figure only draws what that wrote.
     """
-    def _rel(a, b):
-        scale = max(abs(float(a)), abs(float(b)), 1e-9)
-        return abs(float(a) - float(b)) / scale
-
-    rate = _rel(row_low["verdict"]["per_second_mean_hz"][-1],
-                row_high["verdict"]["per_second_mean_hz"][-1])
-    area = _rel(row_low["median_active_area_mm2"] or 0.0, row_high["median_active_area_mm2"] or 0.0)
-    sub = abs(burst_low["sub_band_fraction"] - burst_high["sub_band_fraction"])
-    same = (rate <= OUTCOME_RELATIVE_TOLERANCE and area <= OUTCOME_RELATIVE_TOLERANCE
-            and sub <= SUB_BAND_ABSOLUTE_TOLERANCE)
-    return {
-        "final_second_rate_relative_difference": rate,
-        "median_active_area_relative_difference": area,
-        "sub_band_fraction_absolute_difference": sub,
-        "same_outcome_regime": bool(same),
-        "tolerances": {"relative": OUTCOME_RELATIVE_TOLERANCE,
-                       "sub_band_absolute": SUB_BAND_ABSOLUTE_TOLERANCE,
-                       "relative_source": "LC6A baseline_tradeoff registered relative_tolerance"},
-    }
+    path = OUT / "atlas_outcome_adjudication.json"
+    if not path.is_file():
+        raise SystemExit(
+            "run scripts/finalize_topic4_fcxr_lc6b_outcome.py --confirm-run first: the outcome "
+            "verdict is produced there, not in this figure")
+    return json.loads(path.read_text())
 
 
 def _burst(trace, band):
@@ -153,7 +135,7 @@ def main():
     ax.set_yticks(range(len(INITS)), [INIT_LABEL[i] for i in INITS], fontsize=8)
     ax.set_xticks(x, [f"{v:+.0f}" for v in x])
     ax.set_xlabel("field taken from the natural trajectory at this time relative to onset (s)")
-    ax.set_title("a  which regime lives where along the path", loc="left", fontsize=10)
+    ax.set_title("a  common-input outcome map along the path", loc="left", fontsize=10)
     twin = ax.twinx()
     twin.plot(x, [per_field[f]["D_mean"] for f in fields], color="#D95F0E", marker="o", ms=4, lw=1.4,
               label="mean wear D of the pinned field")
@@ -177,9 +159,8 @@ def main():
         ax.plot(x, values, color=INIT_COLOR[init], marker="o", ms=5, lw=1.6, label=INIT_LABEL[init])
     convergence = {field: spike_convergence(field) for field in fields}
     bursts = {f"{f}__{i}": _burst(traces[f"{f}__{i}"], band) for f in fields for i in INITS}
-    outcomes = {f: outcome_match(row(f, "locked_low"), row(f, "locked_high"),
-                                 bursts[f"{f}__locked_low"], bursts[f"{f}__locked_high"])
-                for f in fields}
+    adjudication = _adjudication()
+    outcomes = {f: adjudication["per_field"][f]["outcome_locked_low_vs_locked_high"] for f in fields}
     for column, field in enumerate(fields):
         if per_field[field]["initialisation_split"]:
             same = outcomes[field]["same_outcome_regime"]
@@ -249,9 +230,13 @@ def main():
              "Every point pins D and H at the value the C0 trajectory reached at that time and runs "
              "10 s.  All 18 points share one future-input stream, so a difference between rows can "
              "only come from the starting fast state.  At every field the two locked initialisations "
-             "reached the SAME outcome regime (final-second rate within 9%, active area within 1.1%), "
-             "so no orange band appears: the registered label splits are drift-gate artefacts, not "
-             "basin differences.  No perturbation-return test was run.",
+             "reached the SAME outcome regime on all four readouts, so no orange band appears: the "
+             "registered label splits are drift-gate artefacts.  Zero-lag population correlation is "
+             "NEGATIVE (-0.42 to -0.47) while the phase-aligned correlation is 0.93-0.99: one rhythm "
+             "at two phases, not two outcomes.  Under one shared input this cannot separate a single "
+             "attractor from common-noise synchronisation, and no perturbation-return test was run, "
+             "so the bounded regime is a MONOSTABLE CANDIDATE -- not a demonstrated absence of a "
+             "carrier.",
              ha="center", va="top", fontsize=8, color="#555555", wrap=True)
 
     # The convergence readout is derived here, so it is written out where the report can cite it
@@ -272,13 +257,8 @@ def main():
             "'never rose above the band at one-second resolution' is recorded separately here rather "
             "than by relabelling"),
         "burst_structure": bursts,
-        "outcome_match_locked_low_vs_locked_high": outcomes,
-        "outcome_match_note": (
-            "lock 4 asks whether the two locked initialisations reach different END STATES.  The "
-            "registered split is computed on LABELS, and a label can differ for a reason that is not "
-            "an end state: the drift criterion reads a fixed 2 s tail and straddles its gate on a "
-            "burst train.  Where same_outcome_regime is true the registered flag is a drift-gate "
-            "artefact, not a basin difference; the registered flag is still reported unchanged."),
+        "outcome_verdict_source": "atlas_outcome_adjudication.json (produced by "
+                                  "scripts/finalize_topic4_fcxr_lc6b_outcome.py, not by this figure)",
     }, indent=1, sort_keys=True) + "\n")
 
     FIGURES.mkdir(parents=True, exist_ok=True)
