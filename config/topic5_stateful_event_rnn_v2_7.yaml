@@ -1,0 +1,59 @@
+contract: topic5_stateful_event_sequence_rnn_v2_7
+dataset_root: results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject
+source_mapping_root: results/topic5_event_indexed_evolving_rank_field/development/input_audit/per_subject
+output_root: results/topic5_stateful_event_sequence_rnn/v2_7
+n_modes: 2
+horizon: 20
+warmup_events: 20
+ewma_decay: 0.95
+ewma_alpha: 100.0
+screen_seed: 17
+final_seeds: [17, 29, 43]
+maximum_epochs: 40
+minimum_epochs: 8
+patience: 8
+torch_num_threads: 1
+base_profile:
+  cell: gru
+  hidden_size: 16
+  num_layers: 1
+  normalization: zscore
+  input_layer_norm: true
+  hidden_layer_norm: false
+  optimizer: adamw
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  gradient_clip: 1.0
+  tbptt_length: 50
+  update_chunks: 4
+  dropout: 0.0
+  participation_weight: 0.25
+architecture_profiles:
+  - {name: rnn_h16, cell: rnn, hidden_size: 16}
+  - {name: rnn_h32, cell: rnn, hidden_size: 32}
+  - {name: gru_h16, cell: gru, hidden_size: 16}
+  - {name: gru_h32, cell: gru, hidden_size: 32}
+  - {name: lstm_h16, cell: lstm, hidden_size: 16}
+  - {name: lstm_h32, cell: lstm, hidden_size: 32}
+training_refinements:
+  - {name: reference}
+  - {name: lr_3e-4, learning_rate: 0.0003}
+  - {name: lr_3e-3, learning_rate: 0.003}
+  - {name: optimizer_adam, optimizer: adam, weight_decay: 0.0}
+  - {name: optimizer_rmsprop, optimizer: rmsprop, weight_decay: 0.0}
+  - {name: normalize_none, normalization: none}
+  - {name: normalize_robust, normalization: robust}
+  - {name: tbptt_20, tbptt_length: 20}
+  - {name: tbptt_100, tbptt_length: 100}
+  - {name: tbptt_200, tbptt_length: 200}
+  - {name: update_1, update_chunks: 1}
+  - {name: update_8, update_chunks: 8}
+  - {name: hidden_8, hidden_size: 8}
+  - {name: hidden_64, hidden_size: 64}
+  - {name: two_layers, num_layers: 2, dropout: 0.1}
+  - {name: hidden_layer_norm, hidden_layer_norm: true}
+forbidden_inputs:
+  old_heldout20: true
+  ab_or_axis_labels: true
+  geometry_or_soz: true
+  ictal_or_snn: true

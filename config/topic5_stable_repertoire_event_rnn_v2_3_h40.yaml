@@ -1,0 +1,32 @@
+contract: topic5_stable_repertoire_event_rnn_v2_3_h40_sensitivity
+dataset_root: results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject
+source_mapping_root: results/topic5_event_indexed_evolving_rank_field/development/input_audit/per_subject
+output_root: results/topic5_stable_repertoire_event_rnn/development/v2_3_h40_r0_r3
+r4_output_root: results/topic5_stable_repertoire_event_rnn/development/v2_3_h40_r4
+pilot_subjects:
+  - epilepsiae_922
+  - epilepsiae_620
+  - epilepsiae_1096
+  - yuquan_chenziyang
+  - yuquan_zhangjiaqi
+  - yuquan_zhangkexuan
+n_modes: 2
+history_length: 80
+horizon: 40
+source_split: [0.6, 0.2, 0.2]
+ridge_alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0]
+linear_dimension_grid: [2, 4, 6]
+linear_decay_grid: [0.0, 0.5, 0.8, 0.95, 0.99]
+seeds: [0, 1, 2]
+gru_hidden_size_grid: [4, 8]
+gru_weight_decay_grid: [0.0001]
+gru_learning_rate: 0.01
+gru_batch_size: 128
+gru_maximum_epochs: 200
+gru_patience: 18
+minimum_mode_occupancy: 0.05
+forbidden_inputs:
+  old_heldout20: true
+  ab_or_axis_labels: true
+  geometry_or_soz: true
+  ictal_or_snn: true

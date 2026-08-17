@@ -1,0 +1,62 @@
+contract: topic5_stable_repertoire_event_history_v2_4_h40_sensitivity
+dataset_root: results/topic5_interictal_rank_distribution/dataset_v0_4/per_subject
+source_mapping_root: results/topic5_event_indexed_evolving_rank_field/development/input_audit/per_subject
+output_root: results/topic5_stable_repertoire_event_history/v2_4_h40
+development_subjects:
+  - epilepsiae_922
+  - epilepsiae_620
+  - epilepsiae_1096
+  - yuquan_chenziyang
+  - yuquan_zhangjiaqi
+  - yuquan_zhangkexuan
+locked_extension_subjects:
+  - epilepsiae_1073
+  - epilepsiae_1077
+  - epilepsiae_1084
+  - epilepsiae_1125
+  - epilepsiae_1146
+  - epilepsiae_1150
+  - epilepsiae_139
+  - epilepsiae_253
+  - epilepsiae_384
+  - epilepsiae_442
+  - epilepsiae_548
+  - epilepsiae_583
+  - epilepsiae_590
+  - epilepsiae_635
+  - epilepsiae_958
+  - yuquan_chengshuai
+  - yuquan_gaolan
+  - yuquan_hanyuxuan
+  - yuquan_huanghanwen
+  - yuquan_litengsheng
+  - yuquan_liyouran
+  - yuquan_pengzihang
+  - yuquan_songzishuo
+  - yuquan_sunyuanxin
+  - yuquan_wangyiyang
+  - yuquan_xuxinyi
+  - yuquan_zhangbichen
+  - yuquan_zhaochenxi
+n_modes: 2
+history_length: 80
+horizon: 40
+source_split: [0.6, 0.2, 0.2]
+ridge_alpha_grid: [0.01, 0.1, 1.0, 10.0, 100.0]
+decay_grid: [0.0, 0.5, 0.8, 0.95, 0.99]
+dimension_grid: [2, 4, 6]
+state_seeds: [0, 1, 2]
+equal_count_random_seeds: [13, 29, 47, 71, 97]
+null_block_size: 20
+null_block_seeds: [101, 211, 307]
+safe_circular_shift_fractions: [0.3333333333, 0.5, 0.6666666667]
+reliability_repeats: 20
+minimum_windows:
+  train: 12
+  validation: 4
+  test: 4
+forbidden_inputs:
+  old_heldout20: true
+  ab_or_axis_labels: true
+  geometry_or_soz: true
+  ictal_or_snn: true
