@@ -459,8 +459,23 @@ Storage: per-probe output is the aggregated per-neuron excess-spike field (32000
 most 6 exemplars (~64 MB each). Checkpoints ~130 MB × 36 ≈ 4.7 GB. Total under 6 GB against
 187 GiB free.
 
-Estimated wall clock at 8 workers: gates ~1 h, Phase 1 ~0.5 h, Phase 2 ~2 h, Phase 3 ~5 h,
-substrate null ~3.5 h, figures ~0.5 h — about 12.5 h unattended.
+The frozen network cache directory no longer exists on disk, so every seed is rebuilt. The
+rebuild guard has been verified to pass at the base commit (`params.py`, `connectivity.py`,
+`connectivity_rot.py` all match the hashes recorded in `node_kick_canary.json`, numpy 1.26.4),
+and the archived seed-1561 pickle hash `dba81d32d6c542bda4d1cfa0de196551c16f811a88c0864c7572a8db60852828`
+is the check that a rebuilt network is the same network.
+
+Because the pre-ictal and sensitivity checkpoints are defined relative to an onset that is not
+known in advance, each primary run is executed in two passes: pass 1 records the onset while
+emitting only the 2000 ms baseline checkpoint; pass 2 resumes from that checkpoint and stops at
+`onset - 500 ms`, emitting the two onset-relative checkpoints. Pass 2's overlap with pass 1 is
+asserted bit-identical, which is Gate B applied in production.
+
+Cost scales from the measured 94.5 s of wall clock per simulated second and therefore depends
+on the median onset time, which Phase 1 measures. At 8 workers the round is about **14 h** if
+onset lands near 10 s and about **24 h** if it lands near 18 s. Phase 1 recomputes this
+projection, and if it lands at the slow end the launcher asks before Phase 3 starts; the
+cheapest reduction is running the 7×7 probe grid on one seed instead of three.
 
 On completion: `DONE.json`, a desktop notification, a scientific report, the figure README,
 provenance, and scoped commits. The report's first paragraph answers, in order: can this
