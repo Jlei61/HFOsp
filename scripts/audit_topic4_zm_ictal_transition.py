@@ -239,19 +239,225 @@ def gate_cost_projection(config, args):
     print(json.dumps(projection, indent=1))
 
 
+# ---------------------------------------------------------------------------
+# Phase 1B gates
+# ---------------------------------------------------------------------------
+def _dose_rows(output_root, seeds, joint, rung):
+    rows = []
+    for seed in seeds:
+        path = output_root / "dose" / f"{joint}_seed_{seed}_baseline_n{rung}.json"
+        if path.exists():
+            rows.extend(json.loads(path.read_text())["rows"])
+    return rows
+
+
+def gate_dose(config, args):
+    """Smallest rung that is measurable, baseline-safe AND still linear.
+
+    Smallest, not largest: the largest baseline-safe rung is precisely the one
+    most likely to leave the sub-event regime once the network becomes more
+    excitable at the pre-ictal checkpoint, which would recycle the very
+    contamination the descendant metric removed. The ratio clause is the
+    linearity check -- the packet doubles between rungs, so a linear regime
+    gives ~2; below 1.2 the probe is saturating, above 3.0 it sits near a
+    threshold.
+    """
+    output_root = ROOT / config["output_root"]
+    perturbation = config["perturbation"]
+    ladder = list(perturbation["dose_ladder_cells"])
+    seeds = config["seeds"]["canary"]
+    joint = config["arms"]["Joint"]
+    floor = float(perturbation["dose_minimum_median_descendant_excess_spikes"])
+    ratio_lo, ratio_hi = perturbation["dose_linearity_ratio_range"]
+
+    summary = {}
+    for rung in ladder:
+        rows = _dose_rows(output_root, seeds, joint, rung)
+        if not rows:
+            summary[rung] = {"status": "NOT_RUN"}
+            continue
+        events = sum(r["probe_attributable_event_200ms"] for r in rows)
+        ictal = sum(r["reached_model_ictal_200ms"] for r in rows)
+        summary[rung] = {
+            "status": "OK", "n_units": len(rows),
+            "median_descendant_susceptibility": float(np.median(
+                [r["susceptibility"] for r in rows])),
+            "n_probe_attributable_events": int(events),
+            "n_reached_model_ictal": int(ictal),
+            "baseline_safe": bool(events == 0 and ictal == 0)}
+
+    selected, reasons = None, {}
+    for index, rung in enumerate(ladder):
+        row = summary[rung]
+        if row.get("status") != "OK":
+            reasons[rung] = "not run"; continue
+        clauses = {"baseline_safe": row["baseline_safe"],
+                   "measurable": row["median_descendant_susceptibility"] >= floor}
+        ratio = None
+        if index + 1 < len(ladder) and summary[ladder[index + 1]].get("status") == "OK":
+            nxt = summary[ladder[index + 1]]["median_descendant_susceptibility"]
+            cur = row["median_descendant_susceptibility"]
+            ratio = float(nxt / cur) if cur > 0 else float("inf")
+            clauses["linear"] = bool(ratio_lo <= ratio <= ratio_hi)
+        else:
+            clauses["linear"] = False
+        row["response_ratio_to_next_rung"] = ratio
+        row["clauses"] = clauses
+        if all(clauses.values()):
+            selected = rung
+            break
+        reasons[rung] = [k for k, v in clauses.items() if not v]
+
+    verdict = {"gate": "dose",
+               "status": "PASS" if selected else "NO_SUBEVENT_PROBE_REGIME",
+               "selected_dose_cells": selected, "ladder": ladder,
+               "rejection_reasons": reasons, "per_rung": summary,
+               "selection_rule": perturbation["dose_selection"],
+               "boundary": ("calibrated on BASELINE checkpoints only, blind to any "
+                            "pre-ictal or patient-derived quantity")}
+    atomic_write_json(verdict, str(output_root / "dose_freeze.json"))
+    print(json.dumps({k: verdict[k] for k in
+                      ("gate", "status", "selected_dose_cells", "rejection_reasons")},
+                     indent=1))
+    if not selected:
+        raise SystemExit("NO_SUBEVENT_PROBE_REGIME -- stop the round at Phase 1. "
+                         "Do not loosen the ignition criterion or drop linearity.")
+
+
+def gate_repertoire(config, args):
+    """Conjunctive claim gate. Not a run blocker; it governs WORDING."""
+    from src.topic4_d6_natural_kmeans import best_binary_alignment, natural_kmeans
+    from src.topic4_nlc_pathway_mechanism import formal_mode_assignments
+
+    output_root = ROOT / config["output_root"]
+    gate = config["repertoire_claim_gate"]
+    reference_dir = ROOT / gate["reference_workers"]
+    manifest = json.loads((ROOT / config["inputs"]["frozen_substrate_manifest"]["path"]).read_text())
+    classifier = manifest["direction_classifier"]
+    contract = json.loads((ROOT / config["inputs"]["contact_contract"]["path"]).read_text())
+    shafts = {}
+    for row in contract["contacts"]:
+        shafts.setdefault(row["shaft_id"], []).append(row["contact_index"])
+
+    def _measure(npz_path, returned_mask=None):
+        with np.load(npz_path, allow_pickle=False) as handle:
+            onsets = np.asarray(handle["onsets"], float)
+            returned = np.asarray(handle["event_returned"], bool)
+            if returned_mask is not None:
+                returned = returned & returned_mask(handle)
+        if not len(onsets):
+            return None
+        assigned = formal_mode_assignments(
+            onsets, returned, groups=shafts,
+            embedding=classifier.get("embedding", classifier),
+            classifier=classifier)
+        labels = np.asarray(assigned["labels"], int)
+        clean = np.asarray(assigned["clean"], bool)
+        counts = [int(np.sum(clean & (labels == mode))) for mode in (0, 1)]
+        ood = (float(np.mean(np.asarray(assigned["ood"], bool)[returned]))
+               if returned.any() else float("nan"))
+        alignment = float("nan")
+        if clean.sum() >= 6:
+            try:
+                km = natural_kmeans(onsets[clean], labels[clean])
+                alignment = float(best_binary_alignment(
+                    km["labels"], labels[clean])["balanced_alignment"])
+            except Exception:
+                alignment = float("nan")
+        return {"n_returned": int(returned.sum()), "ood_fraction": ood,
+                "mode_counts": counts, "balanced_alignment": alignment}
+
+    reference = []
+    for path in sorted(reference_dir.glob("*.npz")):
+        row = _measure(path)
+        if row:
+            reference.append(row)
+    ood_q95 = float(np.nanpercentile([r["ood_fraction"] for r in reference], 95))
+    align_q05 = float(np.nanpercentile(
+        [r["balanced_alignment"] for r in reference if np.isfinite(r["balanced_alignment"])], 5))
+    atomic_write_json({"n_reference_runs": len(reference), "ood_q95": ood_q95,
+                       "balanced_alignment_q05": align_q05,
+                       "reference_note": "48 archived Z/M-off runs, seeds 1561-1572"},
+                      str(output_root / "zm_off_reference_repertoire.json"))
+
+    joint = config["arms"]["Joint"]
+    networks = {}
+    for seed in config["seeds"]["canary"]:
+        npz = output_root / "workers" / f"{joint}_seed_{seed}.npz"
+        if not npz.exists():
+            continue
+        row = _measure(npz, returned_mask=lambda h: np.asarray(h["event_before_onset"], bool))
+        if row is None:
+            continue
+        clauses = {
+            "n_returned_before_onset_at_least_20":
+                row["n_returned"] >= gate["minimum_returned_events_before_onset"],
+            "ood_at_most_reference_q95":
+                bool(np.isfinite(row["ood_fraction"]) and row["ood_fraction"] <= ood_q95),
+            "both_modes_supported":
+                min(row["mode_counts"]) >= gate["minimum_events_per_mode"],
+            "kmeans_alignment_at_least_reference_q05":
+                bool(np.isfinite(row["balanced_alignment"])
+                     and row["balanced_alignment"] >= align_q05)}
+        networks[str(seed)] = {"retained": all(clauses.values()),
+                               "failing_clauses": [k for k, v in clauses.items() if not v],
+                               "measures": row, "clauses": clauses}
+
+    retained = sum(v["retained"] for v in networks.values())
+    verdict = {"gate": "repertoire",
+               "INTERICTAL_REPERTOIRE_RETAINED": retained > len(networks) / 2 if networks else False,
+               "n_retained": retained, "n_networks": len(networks),
+               "rule": gate["rule"], "networks": networks,
+               "thresholds": {"ood_q95": ood_q95, "alignment_q05": align_q05,
+                              "min_returned": gate["minimum_returned_events_before_onset"],
+                              "min_per_mode": gate["minimum_events_per_mode"]},
+               "wording": ("retained -> 'data-driven interictal modes to model ictal "
+                           "state'; not retained -> 'low-activity background to "
+                           "high-activity state', with every mode statement dropped"),
+               "is_run_blocker": False}
+    atomic_write_json(verdict, str(output_root / "repertoire_gate.json"))
+    print(json.dumps({k: verdict[k] for k in
+                      ("gate", "INTERICTAL_REPERTOIRE_RETAINED", "n_retained", "n_networks")},
+                     indent=1))
+
+
+def gate_recruitment(config, args):
+    """Descriptive: sequential local spread versus near-simultaneous ignition."""
+    output_root = ROOT / config["output_root"]
+    rows = {}
+    for arm_name, candidate in config["arms"].items():
+        for seed in config["seeds"]["canary"]:
+            path = output_root / "workers" / f"{candidate}_seed_{seed}.json"
+            if not path.exists():
+                continue
+            payload = json.loads(path.read_text())
+            if payload.get("recruitment"):
+                rows[f"{arm_name}_s{seed}"] = payload["recruitment"]
+    verdict = {"gate": "recruitment", "n_networks": len(rows), "networks": rows,
+               "reading": ("a long 10-90 % spread duration with a finite axial slope "
+                           "is sequential local spread; a near-zero duration is "
+                           "near-simultaneous whole-field ignition"),
+               "windows": config["recruitment"]}
+    atomic_write_json(verdict, str(output_root / "recruitment_audit.json"))
+    print(json.dumps({"gate": "recruitment", "n_networks": len(rows)}, indent=1))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--gate", required=True,
                         choices=("parity", "interictal-baseline",
-                                 "cost-projection"))
+                                 "cost-projection", "dose", "repertoire",
+                                 "recruitment"))
     parser.add_argument("--expected-commit", default="HEAD")
     parser.add_argument("--rerun", action="store_true")
     args = parser.parse_args()
     config = load_round_config(args.config)
     {"parity": gate_parity,
      "interictal-baseline": gate_interictal_baseline,
-     "cost-projection": gate_cost_projection}[args.gate](config, args)
+     "cost-projection": gate_cost_projection,
+     "dose": gate_dose, "repertoire": gate_repertoire,
+     "recruitment": gate_recruitment}[args.gate](config, args)
 
 
 if __name__ == "__main__":

@@ -161,10 +161,94 @@ def phase_canary(config, args):
     print(json.dumps({"phase": "canary", "launched": len(jobs)}))
 
 
+PERTURB = ROOT / "scripts/run_topic4_zm_perturbation_worker.py"
+
+
+def _checkpoint(output_root, candidate, seed, label):
+    path = output_root / "checkpoints" / f"{candidate}_seed_{seed}_{label}.npz"
+    return path if path.exists() else None
+
+
+def phase_dose(config, args):
+    """Ladder x 6 representative sites x 3 canary seeds, BASELINE only.
+
+    The worker itself refuses any label other than baseline for this phase, so
+    the dose can never be tuned on a pre-ictal or patient-derived quantity.
+    """
+    output_root = ROOT / config["output_root"]
+    controller_log = output_root / "controller.log"
+    joint = config["arms"]["Joint"]
+    extra = ["--allow-uncommitted-config"] if args.allow_uncommitted_config else []
+    jobs = []
+    for rung in config["perturbation"]["dose_ladder_cells"]:
+        for seed in config["seeds"]["canary"]:
+            checkpoint = _checkpoint(output_root, joint, seed, "baseline")
+            if checkpoint is None:
+                continue
+            out = output_root / "dose" / f"{joint}_seed_{seed}_baseline_n{rung}"
+            jobs.append((f"n{rung}-s{seed}",
+                         [PYTHON, str(PERTURB), "--config", args.config,
+                          "--candidate-id", joint, "--seed", str(seed),
+                          "--checkpoint", str(checkpoint), "--label", "baseline",
+                          "--sites", "representative", "--dose-cells", str(rung),
+                          "--expected-commit", args.expected_commit,
+                          "--out-json", str(out) + ".json",
+                          "--out-npz", str(out) + ".npz", *extra],
+                         output_root / "run_logs" / f"dose_n{rung}_s{seed}.log"))
+    _log(controller_log, {"progress": "dose_start", "n_jobs": len(jobs)})
+    _run_pool(jobs, config, "probe", "topic4-zmitx-dose-", controller_log, poll=10)
+    _log(controller_log, {"progress": "dose_done", "n_jobs": len(jobs)})
+    print(json.dumps({"phase": "dose", "launched": len(jobs)}))
+
+
+def phase_counterfactual(config, args):
+    """Six branches x 6 representative sites x 3 canary seeds at the frozen dose.
+
+    Four of the six are spliced states, which are OFF-MANIFOLD: the dynamics
+    never visit 'pre-ictal fast state with baseline z'. They answer which
+    variable is consistent with carrying the rise, not what would have happened.
+    """
+    output_root = ROOT / config["output_root"]
+    controller_log = output_root / "controller.log"
+    joint = config["arms"]["Joint"]
+    dose = json.loads((output_root / "dose_freeze.json").read_text())
+    if dose["status"] != "PASS":
+        raise SystemExit("no frozen dose -- run the dose gate first")
+    cells = int(dose["selected_dose_cells"])
+    extra = ["--allow-uncommitted-config"] if args.allow_uncommitted_config else []
+    jobs = []
+    for seed in config["seeds"]["canary"]:
+        baseline = _checkpoint(output_root, joint, seed, "baseline")
+        pre_ictal = _checkpoint(output_root, joint, seed, "pre_ictal")
+        if baseline is None or pre_ictal is None:
+            continue
+        for mode in config["counterfactual_splices"]:
+            host, label = (baseline, "baseline") if mode in (
+                "native_baseline", "slow_only") else (pre_ictal, "pre_ictal")
+            splice = "native" if mode.startswith("native") else mode
+            out = output_root / "counterfactual" / f"{joint}_seed_{seed}_{mode}"
+            jobs.append((f"{mode}-s{seed}",
+                         [PYTHON, str(PERTURB), "--config", args.config,
+                          "--candidate-id", joint, "--seed", str(seed),
+                          "--checkpoint", str(host),
+                          "--baseline-checkpoint", str(baseline),
+                          "--label", label, "--splice", splice,
+                          "--sites", "representative", "--dose-cells", str(cells),
+                          "--expected-commit", args.expected_commit,
+                          "--out-json", str(out) + ".json",
+                          "--out-npz", str(out) + ".npz", *extra],
+                         output_root / "run_logs" / f"cf_{mode}_s{seed}.log"))
+    _log(controller_log, {"progress": "counterfactual_start", "n_jobs": len(jobs)})
+    _run_pool(jobs, config, "probe", "topic4-zmitx-cf-", controller_log, poll=10)
+    _log(controller_log, {"progress": "counterfactual_done", "n_jobs": len(jobs)})
+    print(json.dumps({"phase": "counterfactual", "launched": len(jobs)}))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
-    parser.add_argument("--phase", required=True, choices=("canary",))
+    parser.add_argument("--phase", required=True,
+                        choices=("canary", "dose", "counterfactual"))
     parser.add_argument("--expected-commit", default="HEAD")
     parser.add_argument("--allow-uncommitted-config", action="store_true")
     args = parser.parse_args()
@@ -172,7 +256,8 @@ def main():
     args.expected_commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True).strip()
     (ROOT / config["output_root"] / "run_logs").mkdir(parents=True, exist_ok=True)
-    {"canary": phase_canary}[args.phase](config, args)
+    {"canary": phase_canary, "dose": phase_dose,
+     "counterfactual": phase_counterfactual}[args.phase](config, args)
 
 
 if __name__ == "__main__":
