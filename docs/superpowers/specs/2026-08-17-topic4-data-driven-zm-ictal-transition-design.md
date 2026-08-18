@@ -62,10 +62,14 @@ Four frozen arms, verbatim from `candidate_set.candidates` — no refitting:
 
 | arm id | manifest `candidate_id` | pathways | role this round |
 |---|---|---|---|
-| Joint | `joint_04_control` | node + E→E + E→I | **the only arm in the primary experiment** |
-| Node | `node_baseline` | node field only | latency-only, Phase 3 |
-| Node+EE | `joint_04_ee_only` | + E→E | latency-only, Phase 3 |
-| Node+EtoI | `joint_04_etoi_only` | + E→I | latency-only, Phase 3 |
+| Joint | `joint_04_control` | node + E→E + E→I | **Phase 2 primary**, full 7×7 grid |
+| Node | `node_baseline` | node field only | **Phase 2 primary**, full 7×7 grid — the Edge contrast |
+| Node+EE | `joint_04_ee_only` | + E→E | canary + representative sites; latency |
+| Node+EtoI | `joint_04_etoi_only` | + E→I | canary + representative sites; latency |
+
+Node is in the primary experiment, not merely a latency arm: `h` *is* the node field, so without
+a same-network Node map the round could only say "the bundled substrate is spatially organized"
+and never "the local connectivity does anything spatially".
 
 Every formal arm runs with:
 
@@ -326,6 +330,25 @@ Uniform sampling, because a per-network spatial correlation and its spatial null
 - A grid site is dropped only if fewer than the frozen dose's packet size of E neurons lie
   within 1.0 mm; dropped sites are listed.
 
+**The Edge pathways need their own spatial contrast, or the round cannot speak about them.**
+`h` *is* the node field, so "Joint susceptibility correlates with `h`" cannot distinguish the
+node field from the local connectivity — it only says the bundled substrate is spatially
+organized. The **Node arm therefore runs the same 7×7 grid on the same 12 network seeds**, and
+the Edge contribution is the within-seed difference of the two susceptibility-change maps:
+
+```
+delta_S_arm(x)     = S_pre_ictal(x) - S_baseline(x)
+Edge contribution  = delta_S_Joint(x) - delta_S_Node(x)
+```
+
+At the six representative sites the four arms additionally give the factorial interaction
+
+```
+I = Joint - (Node+EE) - (Node+EtoI) + Node
+```
+
+which separates "E→E and E→I each add something" from "they only matter together".
+
 Primary spatial endpoint: the spatial relation of the susceptibility field to the substrate's
 own structure —
 
@@ -564,23 +587,45 @@ Staged so the cheapest decisive result comes first and a dead end costs three ca
 | **0** | Gates A/B/C; parallel montage recording; descendant-spike metric | all three gates bit-exact |
 | **1A** | 3 Joint Z/M-on canary (seeds 1801-1803) + 3 same-seed Z/M-off canary | `INTERICTAL_BASELINE_AVAILABLE` in **≥ 2 of 3** networks |
 | **1B** | dose freeze over the 18 baseline units; counterfactual splices; repertoire gate; local-recruitment audit | dose found, i.e. not `NO_SUBEVENT_PROBE_REGIME` |
-| **2** | **Joint arm only**, 12 seeds; uniform 7×7 short response maps at baseline and pre-ictal | E1 resolved **upward**: `q05 > 0` (see below) |
+| **2** | **Joint AND Node**, 12 seeds each; uniform 7×7 short response maps at baseline and pre-ictal | endpoint classified as anything other than `NO_DETECTABLE_STATE_CHANGE` |
 | **3** | Node / Node+EE / Node+EtoI latency arms (pass 1 only); E2 ignition and onset advance at the representative sites; `r180` spatial control | — |
 | **4** | figures, report, freeze | — |
 
-The Phase 2 rule is **three-way and directional**, not "the interval excludes 0". A
-significantly *negative* interval also excludes 0, and continuing into five more hours of
-mechanism experiments on a result pointing the opposite way would be a straightforward error:
+**What Phase 2 gates on is whether there is a measurable state change to analyse spatially —
+not which way it went.** An earlier draft required `q05 > 0` before running the pathway
+decomposition at all. That conflates two separate questions: "does susceptibility rise?" and
+"does the substrate organize where it changes?". State-dependent susceptibility can rise or
+fall, and the human critical-slowing literature is split — Maturana et al. (2020) report
+susceptibility markers, while Milanowski & Suffczyński (2016) and Wilkat et al. (2019) find no
+consistent critical slowing in human cohorts. Discarding the spatial result whenever the mean
+went the other way would throw away the round's actual question.
+
+The Phase 2 endpoint is therefore **classified**, and only one class stops the round:
 
 ```
-q05 > 0            pre-ictal susceptibility is higher  -> continue to Phase 3
-q95 < 0            pre-ictal susceptibility is LOWER   -> stop, report the opposite direction
-q05 <= 0 <= q95    unresolved at n = 12                -> stop, report as unresolved
+FINITE_RESPONSE             E1 evaluable at most sites, probe-attributable ignition rare
+MIXED_RESPONSE_IGNITION     both a measurable finite response and ignition at some sites
+IGNITION_DOMINATED          pre-ictal ignition fraction > 0.25; the ignition probability
+                            becomes the endpoint instead of the complete-case E1 mean
+NO_DETECTABLE_STATE_CHANGE  neither differs from baseline anywhere -> stop and report
 ```
 
-Only the first branch launches the four latency arms, the long onset-advance continuations and
-the spatial re-registration control. Neither stopping branch may be written as "no effect": one
-says the effect runs the other way, the other says n = 12 could not tell.
+The directional interval still exists, but it governs **wording only**:
+
+```
+q05 > 0            pre-ictal susceptibility is higher
+q95 < 0            pre-ictal susceptibility is lower
+q05 <= 0 <= q95    unresolved at n = 12
+```
+
+Neither reading may be written as "no effect": one says the effect runs the other way, the
+other says n = 12 could not tell.
+
+**`MIXED_REGIME` override.** Whenever *any* site was excluded for igniting, a negative interval
+may only be reported as `MIXED_REGIME`. The excluded sites are the largest responses, so the
+complete-case mean is biased toward zero — conservative for a positive claim, and **not safe**
+for a negative one. The spec cannot admit that bias in one paragraph and then permit
+"susceptibility is lower" in another.
 
 If Phase 1A's gate fails,
 the finding reported is that the current Z/M work point has no interpretable interictal residence
