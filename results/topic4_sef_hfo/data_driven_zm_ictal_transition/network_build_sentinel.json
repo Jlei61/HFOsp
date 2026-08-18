@@ -1,0 +1,22 @@
+{
+  "status": "NETWORK_REBUILD_SENTINEL_COMPLETE",
+  "seed": 1561,
+  "candidate_id": "joint_04_control",
+  "build_wall_seconds": 63.3,
+  "peak_rss_kib": 2166404,
+  "pickle_bytes": 526731543,
+  "pickle_gib": 0.491,
+  "frozen_cache_key": "cf66fab7d943969cef1a68e2c55de9bb1e47f9dd69b6806887fc16781410985b",
+  "rebuilt_pickle_sha256": "dba81d32d6c542bda4d1cfa0de196551c16f811a88c0864c7572a8db60852828",
+  "archived_pickle_sha256": "dba81d32d6c542bda4d1cfa0de196551c16f811a88c0864c7572a8db60852828",
+  "byte_identical_to_frozen_network": true,
+  "decision_point_pickle_exceeds_2gib": false,
+  "decision": "pickle is 0.49 GiB, far under the 2.0 GiB threshold; cache all 16 networks for the whole round (16 x 0.49 = 7.9 GiB, cap was 60 GiB). No eviction policy needed.",
+  "undeclared_inputs_discovered": [
+    "results/interictal_propagation_masked/template_gradient_fields/per_subject/epilepsiae_1146.json",
+    "results/interictal_propagation_masked/rank_displacement/per_subject/epilepsiae_1146.json",
+    "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects/epilepsiae_1146_t_a.json",
+    "results/spatial_modulation/propagation_geometry/observation_readout/real_subjects/epilepsiae_1146_t_b.json"
+  ],
+  "undeclared_inputs_note": "src/sef_hfo_subject_placement.py reads these to derive theta_EE and the patient axis, but the rev11-NLC frozen contract never declared or hashed them. Added to this round's config inputs so they are hash-verified from now on."
+}
