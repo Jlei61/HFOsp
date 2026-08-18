@@ -82,8 +82,13 @@ def _launch(unit, command, log_path):
             f"--property=StandardError=append:{log_path}",
             "/usr/bin/nohup", "/usr/bin/time", "-v", *command]
     log_path.touch()
-    subprocess.run(full, cwd=ROOT, check=True,
-                   stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    outcome = subprocess.run(full, cwd=ROOT, capture_output=True, text=True)
+    if outcome.returncode != 0:
+        # Losing the whole launcher because one unit name collided cost an hour
+        # of wall clock. Report and carry on with the rest of the queue.
+        return {"unit": unit, "launched": False,
+                "reason": (outcome.stderr or outcome.stdout or "").strip()[:200]}
+    return {"unit": unit, "launched": True}
 
 
 def _active(prefix):
@@ -116,9 +121,13 @@ def _already_done(command):
 
 def _run_pool(jobs, config, job_class, prefix, controller_log, poll=20):
     """jobs: list of (unit_suffix, command, log_path). Nothing is killed."""
+    # systemctl reports unit names WITH the .service suffix; comparing against
+    # the bare name silently matched nothing, so the skip never fired and the
+    # launcher died on the first duplicate unit -- twelve of fifteen jobs never
+    # started and the chain was about to read that as a science verdict.
     live = _existing_units(prefix)
     pending = [j for j in jobs
-               if f"{prefix}{j[0]}" not in live and not _already_done(j[1])]
+               if f"{prefix}{j[0]}.service" not in live and not _already_done(j[1])]
     skipped = len(jobs) - len(pending)
     if skipped:
         _log(controller_log, {"progress": "skipped_already_running_or_done",
@@ -128,9 +137,10 @@ def _run_pool(jobs, config, job_class, prefix, controller_log, poll=20):
         running = _active(prefix)
         while pending and len(running) < size:
             suffix, command, log_path = pending.pop(0)
-            _launch(f"{prefix}{suffix}", command, log_path)
+            outcome = _launch(f"{prefix}{suffix}", command, log_path)
             running = _active(prefix)
-            _log(controller_log, {"progress": "launched", "unit": f"{prefix}{suffix}",
+            _log(controller_log, {"progress": "launched" if outcome["launched"]
+                                  else "launch_failed", **outcome,
                                   "active": len(running), "pending": len(pending),
                                   "pool": size})
         if not pending and not _active(prefix):
