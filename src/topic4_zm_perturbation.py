@@ -112,68 +112,74 @@ def response_metrics(probe, sham, *, dt_ms, positions_e, packet_mask, packet_xy,
             "excess_per_neuron": excess.astype(np.float32)}
 
 
-def _active_fraction(spikes, dt_ms, bin_ms=1.0):
-    spikes = np.asarray(spikes, bool)
-    step = max(1, int(round(bin_ms / dt_ms)))
-    n = spikes.shape[0] // step
-    if n == 0:
-        return np.zeros(0)
-    trimmed = spikes[:n * step].reshape(n, step, spikes.shape[1])
-    return trimmed.any(axis=1).mean(axis=1)
+def _overlaps(a, b):
+    return not (a[1] <= b[0] or b[1] <= a[0])
 
 
-def _runs(mask):
-    mask = np.asarray(mask, bool)
-    if not mask.any():
-        return []
-    padded = np.concatenate([[False], mask, [False]])
-    edges = np.flatnonzero(padded[1:] != padded[:-1])
-    return list(zip(edges[0::2], edges[1::2]))
-
-
-def in_window_ignition(probe, sham, *, dt_ms, detector_threshold, inject_step,
-                       window_ms, es_thresh_hz=120.0, es_dur_ms=100.0, bin_ms=1.0):
+def in_window_ignition(probe_active, sham_active, *, active_dt_ms,
+                       detector_threshold, inject_ms, window_ms,
+                       probe_rate_hz=None, es_thresh_hz=120.0, es_dur_ms=100.0,
+                       dt_ms=None):
     """Regime flags for EVERY E1 site, grid included.
 
+    Events come from the FROZEN detector (src/sef_hfo_events.detect_events), not
+    from a local threshold crossing: that detector requires MIN_DUR_MS = 8 ms,
+    merges intervals closer than MERGE_GAP_MS = 12 ms, and carries the return
+    semantics. Calling a single 1 ms excursion an event would over-detect
+    ignition, invalidate E1 sites that are fine, and could manufacture a
+    NO_SUBEVENT_PROBE_REGIME verdict out of nothing.
+
     Freezing the dose on baseline checkpoints guarantees nothing at the
-    pre-ictal checkpoint, which is exactly where excitability is hypothesised to
-    be higher. Without these flags a pre-ictal probe that ignites would have its
-    escape-dominated spike count recorded as a larger finite response.
+    pre-ictal checkpoint, which is where excitability is hypothesised to be
+    higher -- hence these flags travel with every E1 row.
     """
-    stop = int(inject_step) + int(round(window_ms / dt_ms))
-    probe_spikes = np.asarray(probe["E_spk_bool"], bool)[inject_step:stop]
-    sham_spikes = np.asarray(sham["E_spk_bool"], bool)[inject_step:stop]
-    probe_af = _active_fraction(probe_spikes, dt_ms, bin_ms)
-    sham_af = _active_fraction(sham_spikes, dt_ms, bin_ms)
-    probe_runs = _runs(probe_af > float(detector_threshold))
-    sham_mask = sham_af > float(detector_threshold)
-    attributable = False
-    for start, end in probe_runs:
-        if not sham_mask[start:end].any():
-            attributable = True
-            break
+    from src.sef_hfo_events import detect_events
 
-    n_e = np.asarray(probe["E_spk_bool"], bool).shape[1]
-    rate_hz = probe_spikes.sum(axis=1) / n_e / (dt_ms * 1e-3)
-    alpha = 1.0 - np.exp(-dt_ms / 20.0)
-    ema, run, need = 0.0, 0, int(round(es_dur_ms / dt_ms))
+    probe_active = np.asarray(probe_active, float)
+    sham_active = np.asarray(sham_active, float)
+    lo = int(round(float(inject_ms) / float(active_dt_ms)))
+    hi = lo + int(round(float(window_ms) / float(active_dt_ms)))
+    probe_window = probe_active[lo:hi]
+    sham_window = sham_active[lo:hi]
+
+    probe_events = detect_events(probe_window, float(active_dt_ms),
+                                 event_on_frac=float(detector_threshold))
+    sham_events = detect_events(sham_window, float(active_dt_ms),
+                                event_on_frac=float(detector_threshold))
+    sham_spans = [(float(e["t_on"]), float(e["t_off"])) for e in sham_events]
+    attributable = [e for e in probe_events
+                    if not any(_overlaps((float(e["t_on"]), float(e["t_off"])), span)
+                               for span in sham_spans)]
+
+    # a bare threshold excursion is recorded, but it is NOT an event
+    brief = bool(np.any(probe_window > float(detector_threshold))
+                 and not probe_events)
+
     reached = False
-    for value in rate_hz:
-        ema += alpha * (value - ema)
-        run = run + 1 if ema >= es_thresh_hz else 0
-        if run >= need:
-            reached = True
-            break
+    if probe_rate_hz is not None and dt_ms is not None:
+        alpha = 1.0 - np.exp(-float(dt_ms) / 20.0)
+        need = int(round(float(es_dur_ms) / float(dt_ms)))
+        ema, run = 0.0, 0
+        for value in np.asarray(probe_rate_hz, float):
+            ema += alpha * (value - ema)
+            run = run + 1 if ema >= float(es_thresh_hz) else 0
+            if run >= need:
+                reached = True
+                break
     return {"probe_attributable_event_200ms": bool(attributable),
+            "n_probe_events": int(len(probe_events)),
+            "n_sham_events": int(len(sham_events)),
+            "brief_threshold_excursion": brief,
             "reached_model_ictal_200ms": bool(reached),
-            "e1_evaluable": bool(not attributable and not reached)}
+            "e1_evaluable": bool(not attributable and not reached),
+            "detector_contract": "src.sef_hfo_events.detect_events (MIN_DUR_MS=8, MERGE_GAP_MS=12)"}
 
 
-def ignition_metrics(probe, sham, *, dt_ms, detector_threshold, inject_step,
-                     window_ms, probe_onset_ms, sham_onset_ms, **kwargs):
-    out = in_window_ignition(probe, sham, dt_ms=dt_ms,
+def ignition_metrics(probe_active, sham_active, *, active_dt_ms, detector_threshold,
+                     inject_ms, window_ms, probe_onset_ms, sham_onset_ms, **kwargs):
+    out = in_window_ignition(probe_active, sham_active, active_dt_ms=active_dt_ms,
                              detector_threshold=detector_threshold,
-                             inject_step=inject_step, window_ms=window_ms, **kwargs)
+                             inject_ms=inject_ms, window_ms=window_ms, **kwargs)
     censored = probe_onset_ms is None or sham_onset_ms is None
     out["onset_advance_ms"] = (float("nan") if censored
                                else float(sham_onset_ms) - float(probe_onset_ms))

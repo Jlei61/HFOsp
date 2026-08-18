@@ -105,25 +105,65 @@ def test_susceptibility_is_the_sum_of_its_two_parts():
     assert 0.0 < out["r90_mm"] <= np.sqrt(2) * 5.0
 
 
+def _active(pattern_ms, *, total_ms=200.0, dt=1.0, level=0.06):
+    """Active-fraction series in 1 ms bins with the given ON spans."""
+    n = int(round(total_ms / dt))
+    series = np.zeros(n)
+    for lo, hi in pattern_ms:
+        series[int(lo / dt):int(hi / dt)] = level
+    return series
+
+
 def test_ignition_requires_the_event_to_be_absent_from_the_sham():
     """The network is above the common detector 41 % of the time, so an event
     in the probe branch is only evidence if the sham branch lacks it."""
-    n_steps, n_e = 2000, 500
-    both = np.zeros((n_steps, n_e), bool)
-    both[500:700, :200] = True
-    shared = in_window_ignition({"E_spk_bool": both}, {"E_spk_bool": both},
-                                dt_ms=0.1, detector_threshold=0.02,
-                                inject_step=0, window_ms=200.0)
+    span = [(50.0, 90.0)]
+    shared = in_window_ignition(_active(span), _active(span), active_dt_ms=1.0,
+                                detector_threshold=0.02, inject_ms=0.0,
+                                window_ms=200.0)
+    assert shared["n_probe_events"] == 1 and shared["n_sham_events"] == 1
     assert shared["probe_attributable_event_200ms"] is False
+    assert shared["e1_evaluable"] is True
 
-    probe_only = np.zeros((n_steps, n_e), bool)
-    probe_only[500:700, :200] = True
-    only = in_window_ignition({"E_spk_bool": probe_only},
-                              {"E_spk_bool": np.zeros((n_steps, n_e), bool)},
-                              dt_ms=0.1, detector_threshold=0.02,
-                              inject_step=0, window_ms=200.0)
+    only = in_window_ignition(_active(span), _active([]), active_dt_ms=1.0,
+                              detector_threshold=0.02, inject_ms=0.0,
+                              window_ms=200.0)
     assert only["probe_attributable_event_200ms"] is True
     assert only["e1_evaluable"] is False
+
+
+def test_a_brief_excursion_is_recorded_but_is_not_a_detector_event():
+    """MIN_DUR_MS is 8 ms in the frozen detector. A 3 ms blip must not be able
+    to invalidate an E1 site -- over-detecting ignition would strip good sites
+    out of the map and could manufacture NO_SUBEVENT_PROBE_REGIME."""
+    out = in_window_ignition(_active([(50.0, 53.0)]), _active([]), active_dt_ms=1.0,
+                             detector_threshold=0.02, inject_ms=0.0, window_ms=200.0)
+    assert out["n_probe_events"] == 0
+    assert out["probe_attributable_event_200ms"] is False
+    assert out["brief_threshold_excursion"] is True
+    assert out["e1_evaluable"] is True
+
+
+def test_events_closer_than_the_merge_gap_are_one_event():
+    """MERGE_GAP_MS is 12 ms; two spans 5 ms apart are one event, not two."""
+    out = in_window_ignition(_active([(40.0, 60.0), (65.0, 85.0)]), _active([]),
+                             active_dt_ms=1.0, detector_threshold=0.02,
+                             inject_ms=0.0, window_ms=200.0)
+    assert out["n_probe_events"] == 1
+
+
+def test_model_ictal_flag_uses_the_frozen_120hz_100ms_criterion():
+    rate = np.concatenate([np.full(500, 10.0), np.full(2000, 300.0)])
+    out = in_window_ignition(_active([]), _active([]), active_dt_ms=1.0,
+                             detector_threshold=0.02, inject_ms=0.0,
+                             window_ms=200.0, probe_rate_hz=rate, dt_ms=0.1)
+    assert out["reached_model_ictal_200ms"] is True
+    assert out["e1_evaluable"] is False
+    quiet = in_window_ignition(_active([]), _active([]), active_dt_ms=1.0,
+                               detector_threshold=0.02, inject_ms=0.0,
+                               window_ms=200.0,
+                               probe_rate_hz=np.full(2500, 10.0), dt_ms=0.1)
+    assert quiet["reached_model_ictal_200ms"] is False
 
 
 def test_splice_only_touches_the_named_slow_variable():

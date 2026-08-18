@@ -13,8 +13,10 @@ checkpoints and stop after pass 1.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import os
+import subprocess
 import sys
 import time
 from pathlib import Path
@@ -31,7 +33,7 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
     _atomic_npz, _runtime_provenance)
 from src.sef_hfo_observation import VirtualMontage  # noqa: E402
 from src.snn_engine import checkpoint as ckpt  # noqa: E402
-from src.snn_engine.mz_slow_vars import MZSlowVars  # noqa: E402
+from src.topic4_zm_slow_vars import ZMTracedSlowVars as MZSlowVars  # noqa: E402
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_zm_d4 import D4_ELEMENTS, d4_matrix  # noqa: E402
 from src.topic4_zm_ictal_transition import (  # noqa: E402
@@ -65,10 +67,23 @@ def _montage_images(substrate, elements):
     return images
 
 
-def _h_weighted(trace_values, weights):
-    weights = np.asarray(weights, float)
-    total = float(weights.sum())
-    return float(np.dot(np.asarray(trace_values, float), weights) / total)
+def _audit_montages(substrate, images):
+    """Every transformed montage must be locally readable, or its contacts are
+    excluded and counted. A rotated contact can land where no E neuron is within
+    the summation radius; silently keeping it would put a zero trace into the
+    observation control."""
+    cmrun = substrate.extras["cmrun"]
+    audit = {}
+    for name, montage in images.items():
+        valid = np.asarray(cmrun.valid_mask(
+            montage, substrate.positions_e, substrate.engine["L"],
+            substrate.params.Rr), bool)
+        audit[name] = {"n_contacts": int(valid.size),
+                       "n_valid": int(valid.sum()),
+                       "n_excluded": int((~valid).sum()),
+                       "excluded_contacts": [str(montage.names[i])
+                                             for i in np.flatnonzero(~valid)]}
+    return audit
 
 
 def main():
@@ -85,6 +100,8 @@ def main():
     parser.add_argument("--out-npz")
     parser.add_argument("--cache-dir")
     parser.add_argument("--checkpoint-dir")
+    parser.add_argument("--allow-uncommitted-config", action="store_true",
+                        help="development escape hatch; formal runs must not use it")
     args = parser.parse_args()
 
     config = load_round_config(args.config)
@@ -99,6 +116,26 @@ def main():
         parser.error(f"onset-relative checkpoints are not defined for arm {arm_name}")
 
     provenance = _runtime_provenance(args.expected_commit)
+    # _runtime_provenance only covers LOADED PYTHON MODULES. The config is an
+    # input that changes numbers just as surely, so its identity is recorded and
+    # checked against the launcher commit here.
+    config_path = Path(args.config).resolve()
+    config_sha = hashlib.sha256(config_path.read_bytes()).hexdigest()
+    try:
+        committed = subprocess.check_output(
+            ["git", "show", f"{args.expected_commit}:{config_path.relative_to(ROOT)}"],
+            cwd=ROOT, stderr=subprocess.DEVNULL)
+        committed_sha = hashlib.sha256(committed).hexdigest()
+    except (subprocess.CalledProcessError, ValueError):
+        committed_sha = None
+    provenance["config_path"] = str(config_path.relative_to(ROOT))
+    provenance["config_sha256"] = config_sha
+    provenance["config_sha256_at_expected_commit"] = committed_sha
+    provenance["config_matches_expected_commit"] = (config_sha == committed_sha)
+    if not args.allow_uncommitted_config and committed_sha != config_sha:
+        raise RuntimeError(
+            "config differs from the launcher commit -- commit it or pass "
+            "--allow-uncommitted-config for a development run")
     if provenance["runtime_modules_dirty"]:
         raise RuntimeError("runtime modules are dirty")
     if not provenance["runtime_modules_match_expected_commit"]:
@@ -129,7 +166,7 @@ def main():
     from src.sef_hfo_events import detect_events
     from src.sef_hfo_snn_adapter import snn_event_envelope
 
-    slow = make_slow(substrate, zm_cfg)
+    slow = make_slow(substrate, zm_cfg, trace_weights_E=substrate.h_e)
     drive = make_external_drive(substrate, config["spatial_ou"], args.seed)
     baseline_step = int(round(BASELINE_MS / dt))
     captured = {}
@@ -152,11 +189,20 @@ def main():
     cmrun = substrate.extras["cmrun"]
     active, active_dt = cmrun.active_fraction(spikes, dt, cmrun.BIN_MS)
     detected = detect_events(active, active_dt, event_on_frac=substrate.detector_threshold)
-    envelopes, envelope_dt = {}, None
-    for name, montage in _montage_images(
-            substrate, config["observation_control"]["montage_transforms"]).items():
-        env, envelope_dt, _ = snn_event_envelope(spikes, substrate.positions_e, montage, dt)
-        envelopes[name] = np.asarray(env, np.float32)
+    # _bin_and_smooth is montage-INDEPENDENT and is the expensive half (it walks
+    # a 6.4 GB bool array); sample_envelopes is the cheap per-montage half. Doing
+    # the binning once instead of eight times is what keeps the observation
+    # control free rather than doubling every run.
+    from src.sef_hfo_observation import sample_envelopes
+    from src.sef_hfo_snn_adapter import _bin_and_smooth
+    binned_rate, envelope_dt = _bin_and_smooth(spikes, dt, 2.0, 5.0)
+    images = _montage_images(
+        substrate, config["observation_control"]["montage_transforms"])
+    montage_audit = _audit_montages(substrate, images)
+    envelopes = {name: np.asarray(sample_envelopes(binned_rate, substrate.positions_e,
+                                                   montage, 0.25), np.float32)
+                 for name, montage in images.items()}
+    del binned_rate
 
     readout = {"participation_margin_fraction": 0.1, "timing_fraction": 0.5}
     onset_rows, rank_rows, event_rows = [], [], []
@@ -180,6 +226,10 @@ def main():
     # the unweighted population mean would mostly report background) ----
     mz_trace = (slow.trace_arrays() if slow is not None
                 else {key: np.empty(0, np.float32) for key in MZSlowVars.TRACE_NAMES})
+    mz_weighted = (slow.weighted_trace_arrays() if slow is not None else None)
+    if mz_weighted is None:
+        mz_weighted = {key: np.empty(0, np.float32)
+                       for key in MZSlowVars.WEIGHTED_TRACE_NAMES}
 
     # ---- state characterization and local recruitment, recomputed here ----
     rate_hz = np.asarray(result["rate_E"], float)
@@ -243,7 +293,7 @@ def main():
                                  T=stop_ms - BASELINE_MS, dt=dt,
                                  nu_ext_ratio=substrate.params.nu_ext_ratio,
                                  seed=int(args.seed))
-            slow2 = make_slow(substrate, zm_cfg)
+            slow2 = make_slow(substrate, zm_cfg, trace_weights_E=substrate.h_e)
             drive2 = make_external_drive(substrate, config["spatial_ou"], args.seed)
             captured2 = {}
             tail = simulate_kick(
@@ -306,6 +356,7 @@ def main():
                                    if not isinstance(v, np.ndarray)},
         "recruitment": {k: v for k, v in recruitment_block.items()
                         if not k.startswith("_")},
+        "observation_control_montage_audit": montage_audit,
         "network": {"n_E": substrate.n_e, "n_I": substrate.n_i,
                     **substrate.network_cache},
         "simulation": {**simulation, "wall_seconds_pass1": pass1_wall,
@@ -341,6 +392,8 @@ def main():
                else "contact_envelope"] = env
     for key in MZSlowVars.TRACE_NAMES:
         arrays[f"mz_{key}"] = np.asarray(mz_trace[key], np.float32)
+    for key in MZSlowVars.WEIGHTED_TRACE_NAMES:
+        arrays[f"mz_h_weighted_{key}"] = np.asarray(mz_weighted[key], np.float32)
     if recruitment_block:
         arrays["recruitment_step"] = np.asarray(recruitment_block["_step"], np.float32)
         arrays["recruitment_bin_xy_mm"] = np.asarray(recruitment_block["_bin_xy"], np.float32)

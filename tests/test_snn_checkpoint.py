@@ -13,7 +13,8 @@ sys.path.insert(0, str(ROOT))
 from src.snn_engine.checkpoint import (  # noqa: E402
     CHECKPOINT_SCHEMA, REQUIRED_KEYS, capture, digest, load,
     restore_external_drive, restore_slow, save)
-from src.snn_engine.mz_slow_vars import MZSlowVars, MZSlowVarsConfig  # noqa: E402
+from src.snn_engine.mz_slow_vars import MZSlowVarsConfig  # noqa: E402
+from src.topic4_zm_slow_vars import ZMTracedSlowVars as MZSlowVars  # noqa: E402
 from src.topic4_spatial_ou_drive import SpatialOUConfig, SpatialOUDrive  # noqa: E402
 
 

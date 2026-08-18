@@ -279,9 +279,10 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     )
 
 
-def make_slow(substrate, zm_cfg):
+def make_slow(substrate, zm_cfg, *, trace_weights_E=None):
     """Z/M slow protocol, or None when the arm runs with slow state off."""
-    from src.snn_engine.mz_slow_vars import MZSlowVars, MZSlowVarsConfig
+    from src.topic4_zm_slow_vars import ZMTracedSlowVars as MZSlowVars
+    from src.snn_engine.mz_slow_vars import MZSlowVarsConfig
     if zm_cfg.get("mode", "off") == "off":
         return None
     if not (zm_cfg.get("use_z") and zm_cfg.get("use_m")):
@@ -295,7 +296,8 @@ def make_slow(substrate, zm_cfg):
                          eta_m=float(zm_cfg["eta_m"]),
                          trace_stride_steps=int(zm_cfg["trace_stride_steps"])),
         NE=substrate.n_e,
-        core_mask_E=np.asarray(substrate.h_e >= 0.5, bool))
+        core_mask_E=np.asarray(substrate.h_e >= 0.5, bool),
+        trace_weights_E=trace_weights_E)
 
 
 def make_external_drive(substrate, ou_cfg, seed):

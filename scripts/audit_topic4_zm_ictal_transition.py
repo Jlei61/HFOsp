@@ -56,8 +56,14 @@ def gate_parity(config, args):
         for key in PARITY_KEYS:
             if key not in old.files:
                 continue
+            # NaN-aware for float arrays: `onsets`/`ranks` carry NaN sentinels
+            # for non-recruited contacts, and NaN != NaN would report a
+            # difference where the NaN masks and every finite value agree. This
+            # is bit-identity for a sentinel-bearing float array, not a
+            # relaxation -- integer/bool/string arrays keep strict equality.
+            equal_nan = np.issubdtype(new[key].dtype, np.floating)
             same = (new[key].shape == old[key].shape
-                    and np.array_equal(new[key], old[key]))
+                    and np.array_equal(new[key], old[key], equal_nan=equal_nan))
             compared[key] = {"identical": bool(same), "shape": list(new[key].shape)}
             if not same:
                 first = None
@@ -65,6 +71,8 @@ def gate_parity(config, args):
                     diff = np.flatnonzero(np.asarray(new[key] != old[key]).ravel())
                     first = int(diff[0]) if diff.size else None
                 compared[key]["first_differing_flat_index"] = first
+                compared[key]["nan_masks_identical"] = bool(
+                    equal_nan and np.array_equal(np.isnan(new[key]), np.isnan(old[key])))
                 mismatched.append(key)
 
     archived = json.loads((ARCHIVE / f"joint_04_control_seed_{seed}.json").read_text())

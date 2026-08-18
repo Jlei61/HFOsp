@@ -157,3 +157,102 @@ def test_sham_and_probe_from_one_checkpoint_diverge_only_after_injection():
     inject = int(round((250.0 - 200.0) / 0.1))
     assert np.array_equal(sham["E_spk_bool"][:inject], probe["E_spk_bool"][:inject])
     assert not np.array_equal(sham["E_spk_bool"], probe["E_spk_bool"])
+
+
+# ---------------------------------------------------------------------------
+# Gate C on the branch the formal runs actually take. The tests above prove the
+# bare LIF delay ring and RNG resume exactly; they say nothing about Z/M or the
+# spatial OU field, and every formal arm runs both.
+# ---------------------------------------------------------------------------
+from src.snn_engine.mz_slow_vars import MZSlowVarsConfig  # noqa: E402
+from src.topic4_zm_slow_vars import ZMTracedSlowVars as MZSlowVars  # noqa: E402
+from src.topic4_spatial_ou_drive import SpatialOUConfig, SpatialOUDrive  # noqa: E402
+
+
+def _zm_and_ou(p, net):
+    NE = net["NE"]
+    slow = MZSlowVars(NE + net["NI"], p.V_th,
+                      MZSlowVarsConfig(use_z=True, use_m=True, I_th_EI=0.5,
+                                       tau_z=500.0, tau_adp=50.0, eta_m=0.02,
+                                       trace_stride_steps=10),
+                      NE=NE, core_mask_E=np.zeros(NE, bool),
+                      trace_weights_E=np.linspace(0.1, 1.0, NE))
+    drive = SpatialOUDrive(np.asarray(net["pos"][:NE], float), p.L, p.dt,
+                           SpatialOUConfig(mode="local", sigma_rate_per_ms=0.05,
+                                           tau_ms=20.0, ell_mm=0.2,
+                                           update_interval_ms=1.0,
+                                           grid_spacing_mm=0.1, seed=p.seed + 7))
+    return slow, drive
+
+
+def test_active_zm_and_ou_perturbed_resume_equals_full_rerun():
+    """Gate C on the real branch: Z/M slow state AND the spatial OU field must
+    both resume exactly, or every perturbation number in this round is wrong."""
+    p, net = _tiny(T=400.0)
+    packet = _packet(net)
+
+    slow_full, drive_full = _zm_and_ou(p, net)
+    net["rng"] = np.random.default_rng(p.seed)
+    full = simulate_kick(p, net, KICK_BOOST=0.0, t_kick=1e9, slow=slow_full,
+                         external_e_rate_drive=drive_full,
+                         forced_spike_mask=packet, forced_spike_ms=250.0)
+
+    slow_head, drive_head = _zm_and_ou(p, net)
+    captured = {}
+    net["rng"] = np.random.default_rng(p.seed)
+    sham_full = simulate_kick(
+        p, net, KICK_BOOST=0.0, t_kick=1e9, slow=slow_head,
+        external_e_rate_drive=drive_head, checkpoint_steps=[2000],
+        checkpoint_sink=lambda step, state: captured.setdefault(step, state))
+    assert np.array_equal(sham_full["E_spk_bool"][:2500], full["E_spk_bool"][:2500])
+
+    slow_tail, drive_tail = _zm_and_ou(p, net)
+    probe = simulate_kick(_tail_params(p.seed), net, KICK_BOOST=0.0, t_kick=1e9,
+                          slow=slow_tail, external_e_rate_drive=drive_tail,
+                          resume_state=captured[2000], time_offset_ms=200.0,
+                          forced_spike_mask=packet, forced_spike_ms=250.0)
+    assert np.array_equal(probe["E_spk_bool"], full["E_spk_bool"][2000:])
+    assert np.array_equal(probe["rate_E"], full["rate_E"][2000:])
+
+
+def test_zm_slow_state_itself_is_restored_not_merely_the_spikes():
+    """A checkpoint could reproduce 100 ms of spikes while carrying a subtly
+    wrong z/m; the slow variables are compared directly."""
+    p, net = _tiny(T=400.0)
+    slow_full, drive_full = _zm_and_ou(p, net)
+    net["rng"] = np.random.default_rng(p.seed)
+    simulate_kick(p, net, KICK_BOOST=0.0, t_kick=1e9, slow=slow_full,
+                  external_e_rate_drive=drive_full)
+    reference_z, reference_m = slow_full.z.copy(), slow_full.m.copy()
+
+    slow_head, drive_head = _zm_and_ou(p, net)
+    captured = {}
+    net["rng"] = np.random.default_rng(p.seed)
+    simulate_kick(p, net, KICK_BOOST=0.0, t_kick=1e9, slow=slow_head,
+                  external_e_rate_drive=drive_head, checkpoint_steps=[2000],
+                  checkpoint_sink=lambda step, state: captured.setdefault(step, state))
+
+    slow_tail, drive_tail = _zm_and_ou(p, net)
+    simulate_kick(_tail_params(p.seed), net, KICK_BOOST=0.0, t_kick=1e9,
+                  slow=slow_tail, external_e_rate_drive=drive_tail,
+                  resume_state=captured[2000], time_offset_ms=200.0)
+    assert np.array_equal(slow_tail.z, reference_z)
+    assert np.array_equal(slow_tail.m, reference_m)
+    assert np.array_equal(drive_tail._state, drive_full._state)
+
+
+def test_weighted_trace_survives_a_resume():
+    p, net = _tiny(T=400.0)
+    slow_head, drive_head = _zm_and_ou(p, net)
+    captured = {}
+    net["rng"] = np.random.default_rng(p.seed)
+    simulate_kick(p, net, KICK_BOOST=0.0, t_kick=1e9, slow=slow_head,
+                  external_e_rate_drive=drive_head, checkpoint_steps=[2000],
+                  checkpoint_sink=lambda step, state: captured.setdefault(step, state))
+    slow_tail, drive_tail = _zm_and_ou(p, net)
+    simulate_kick(_tail_params(p.seed), net, KICK_BOOST=0.0, t_kick=1e9,
+                  slow=slow_tail, external_e_rate_drive=drive_tail,
+                  resume_state=captured[2000], time_offset_ms=200.0)
+    weighted = slow_tail.weighted_trace_arrays()
+    assert weighted is not None and len(weighted["time_ms"]) > 0
+    assert np.all(np.isfinite(weighted["net_slow_current_weighted_mean"]))
