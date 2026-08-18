@@ -1,6 +1,6 @@
 # Topic 4 ZM-ITX: data-driven interictal-to-ictal transition under active Z/M
 
-Date: 2026-08-17
+Date: 2026-08-17 (rev 2, 2026-08-18 after design review)
 Branch: `codex/topic4-data-driven-zm-ictal-transition`
 Worktree: `.worktrees/topic4-data-driven-zm-ictal-transition`
 Base commit: `7393745c6777adaf88fbf0c5bc087e4c2f1c0a9e`
@@ -8,17 +8,34 @@ Base commit: `7393745c6777adaf88fbf0c5bc087e4c2f1c0a9e`
 ## Scientific question
 
 On the frozen, patient-constrained Node + E→E + E→I substrate for `epilepsiae_1146`,
-switching on the two per-neuron slow variables (Z disinhibition, M adaptation) drives the
-self-limited interictal event background into a sustained high-activity state. The question
-this round answers is **not** "how fast does it get there" but:
+switching on the two per-neuron slow variables drives the self-limited interictal event
+background into a sustained high-activity state. Prior work makes the bare version of that
+statement uninformative, so the question this round asks is the narrower one:
 
-> Does the local perturbation susceptibility rise before the transition, and is that rise
-> spatially organized along the data-driven node field and the data-driven local edge gains?
+> While the Fig.4 data-driven interictal repertoire is still present, does the frozen
+> data-driven node-and-edge substrate organize **where** the pre-transition local
+> susceptibility rises and **where** the transition ignites — or does it merely make an
+> already-unstable system destabilize sooner?
 
-Time-to-transition is retained as a *secondary* endpoint whose role is pathway
-factorization (which of E→E / E→I changes reachability), not as the headline result.
+Everything downstream follows from that framing. Time-to-transition is a *secondary* endpoint
+whose role is pathway factorization, not the headline.
 
-### Operational definition (this round)
+### Why latency cannot be the headline
+
+`results/topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_active_zm_d7_canary/d7_canary_verdict.json`
+records that this fixed Z/M reference ran away on **98 of 98** worker runs spanning 49 distinct
+continuous node fields on two development networks — `all_candidates_runaway_on_all_networks:
+true`, `n_nonrunaway_workers: 0`, `safe_candidate_ids: []`. Onset times: median **7989 ms**,
+min 5834, max 10291, q05 6458, q95 9981. Changing the node field across 49 candidates moved the
+per-candidate mean onset only between 6362 and 9887 ms.
+
+Boundary on that prior: D7 used a different node-field family (`d6_*` continuous fields), an
+**exact no-op edge mapper**, and network seeds 1421/1422. This round uses the rev11-NLC local
+connectivity mapper on 12 fresh seeds, so D7 is a strong prior on onset timing, not a guarantee.
+It is why incidence is expected at ceiling and why "the Joint arm also runs away, slightly
+sooner" would be a null result dressed as a finding.
+
+### Operational definition
 
 ```
 model ictal state = runaway_sustained
@@ -28,11 +45,10 @@ engine criterion, unchanged: 20 ms EMA of the population E rate ≥ 120 Hz susta
 ≥ 100 ms. The original engine field `runaway_early_stop_ms` is preserved verbatim and is
 displayed as `model ictal onset`. Neither recovery nor termination is required.
 
-**This label is operational only.** The project's own prior finding (2026-08-08,
-`docs/topic4_sef_hfo.md` LC3 line) is that this engine's sustained high-activity regime is a
-burst train that re-ignites from complete population silence, not a continuous carrier.
-That determination was made on a different work point and **must be recomputed on this
-round's trajectories** (see *State characterization* below); it may not be cited as-is.
+**This label is operational only.** The project's own 2026-08-08 finding was that this engine's
+sustained regime is a burst train re-igniting from population silence, not a continuous carrier.
+That was determined at a different work point and **is recomputed on this round's trajectories**
+(see *State characterization*); it may not be cited as-is.
 
 ## Frozen inputs (hash-verified before every run)
 
@@ -42,14 +58,14 @@ round's trajectories** (see *State characterization* below); it may not be cited
 | Z/M reference | `config/topic4_data_driven_snn_baseline_zm_v1.json` | `2b9586d274b85d9e3663557b5f4dfab7ac64292817667020503d144579ff8a91` |
 | Substrate producer commit | `ff6cb0b782788c8d50f5342ce72c5a3b51623611` (ancestor of base commit) | — |
 
-Four frozen arms, taken verbatim from `candidate_set.candidates` — no refitting:
+Four frozen arms, verbatim from `candidate_set.candidates` — no refitting:
 
-| arm id | manifest `candidate_id` | pathways |
-|---|---|---|
-| Node | `node_baseline` | node field only |
-| Node+EE | `joint_04_ee_only` | + E→E |
-| Node+EtoI | `joint_04_etoi_only` | + E→I |
-| Joint | `joint_04_control` | + E→E and E→I (primary) |
+| arm id | manifest `candidate_id` | pathways | role this round |
+|---|---|---|---|
+| Joint | `joint_04_control` | node + E→E + E→I | **the only arm in the primary experiment** |
+| Node | `node_baseline` | node field only | latency-only, Phase 3 |
+| Node+EE | `joint_04_ee_only` | + E→E | latency-only, Phase 3 |
+| Node+EtoI | `joint_04_etoi_only` | + E→I | latency-only, Phase 3 |
 
 Every formal arm runs with:
 
@@ -62,268 +78,325 @@ tau_adp = 500 ms
 eta_m   = 0.007451594355587098
 ```
 
-`q_I`, `g_K`, `h_G`, EE-STD and every other slow protocol stay off. Topology, delays,
-I→E, I→I, per-target incoming pathway budgets and the spatial OU accessibility process are
-frozen exactly as in the rev11-NLC confirmation.
+`q_I`, `g_K`, `h_G`, EE-STD and every other slow protocol stay off. Topology, delays, I→E,
+I→I, per-target incoming pathway budgets and the spatial OU accessibility process are frozen
+exactly as in the rev11-NLC confirmation.
 
 ### Substrate facts recorded here so downstream text cannot drift
 
-- Subject: `epilepsiae_1146`; 15 contacts (`ICL1..ICL11`, `SCL6..SCL9`); sheet `L = 20 mm`,
+- Subject `epilepsiae_1146`; 15 contacts (`ICL1..ICL11`, `SCL6..SCL9`); `L = 20 mm`,
   density 100 /mm², `N_E = 32000`, `N_I = 8000`, `dt = 0.1 ms`.
-- **`theta_EE = -22.805383965 deg`, unit axis `(0.92182673, -0.38760221)`**, derived from the
-  patient's interictal stereotyped rank-gradient shared axis: source centroid
-  `(4.199, 9.129)` → sink centroid `(16.479, 3.966)`, separation 13.32 mm. `AR = 2.0`.
-  **The connectivity anisotropy axis is itself patient-derived.** This constrains what the
-  spatial null can claim (see *Substrate null*).
-- Node field mass is exactly projected to `N_core_manual = 1129`, so any spatial transform
-  of the field preserves field mass exactly.
+- **`theta_EE = -22.805383965 deg`**, unit axis `(0.92182673, -0.38760221)`, from the patient's
+  interictal stereotyped rank-gradient shared axis: source centroid `(4.199, 9.129)` → sink
+  centroid `(16.479, 3.966)`, separation 13.32 mm. `AR = 2.0`. **The connectivity anisotropy
+  axis is itself patient-derived**, which bounds what the spatial control can claim.
+- Node field mass is exactly projected to `N_core_manual = 1129`, i.e. **3.53 % of the E
+  population**. Any population-mean Z/M statistic is therefore dominated by background, not by
+  the data-driven core — see *Slow-current fields*.
 - Virtual contact readout is a **firing-density envelope** (2 ms frames, 5 ms smoothing),
-  explicitly *not* a synaptic-current LFP. It may never be called an SEEG voltage.
+  explicitly *not* a synaptic-current LFP. It is never called an SEEG voltage.
+- In the Z/M-off reference the network sits above the common detector **41.2 %** of the time
+  (`fraction_time_above_common_detector = 0.4115`). Any "the probe triggered an event" test must
+  therefore be **probe-attributable** — an event present in the probe branch and absent from the
+  paired sham branch — never "an event occurred".
 
 ### Existing control this round inherits
 
-Under the identical frozen substrate with Z/M **off**, 48 runs (4 arms × 12 network seeds
-1561–1572, 20 s each) produced **0 transitions**, with ~105 self-limited events per 20 s run
-(`.../frozen_substrate_confirmation/workers/*.json`, field `runaway == null` in 48/48).
-Entering the sustained state is therefore not something this substrate does on its own.
-No fresh Z/M-off arm is run; this 48-run reference is the cited control, and the fact that it
-uses network seeds 1561–1572 rather than this round's 1811–1822 is stated wherever it is used.
+Under the identical frozen substrate with Z/M **off**, 48 runs (4 arms × seeds 1561-1572, 20 s)
+produced **0 transitions**, ~105 detected and ~87 returned events per run
+(`.../frozen_substrate_confirmation/workers/*.json`, `runaway == null` in 48/48). Entering the
+sustained state is not something this substrate does on its own. No formal Z/M-off arm is run at
+the formal seeds; this 48-run reference is the incidence control, and the fact that it uses
+seeds 1561-1572 rather than 1811-1822 is stated wherever it is used. Three **canary-only**
+Z/M-off runs at seeds 1801-1803 are run for a different purpose: they supply the same-seed
+interictal reference distribution the Phase 1 gate compares against.
 
 ## Engine changes
 
-All four are off by default and the default path must stay byte-identical, following the
-pattern already used by `dump_pathway_trace` in `src/snn_engine/kick_probe.py`.
+All off by default, default path byte-identical, following the `dump_pathway_trace` precedent
+in `src/snn_engine/kick_probe.py`.
 
 ```
 post_runaway_record_ms = 0.0    # keep recording this long after detection, then stop
 checkpoint_steps       = None   # absolute step indices at which to snapshot state
+checkpoint_sink        = None   # callable(absolute_step, state)
 resume_state           = None   # resume from a snapshot
 time_offset_ms         = 0.0    # absolute clock origin for a resumed segment
 ```
 
-`post_runaway_record_ms` stops at `min(detect_step + post_steps, nsteps)`; the hard duration
-cap is never lifted to keep a runaway running for a figure.
+`post_runaway_record_ms` stops at `min(detect_step + post_steps, nsteps)`; the hard duration cap
+is never lifted to keep a runaway running for a figure.
 
 Absolute time is mandatory for resumed segments: the spatial OU process advances on absolute
-step indices and the external drive, kick window and perturbation windows are all judged on
-absolute `tm`. A resumed segment allocates recorder arrays for the continuation length only
-(a 200 ms probe must not allocate 20 s of `E_spk_bool`).
+step indices, and the external drive, kick window, perturbation window and **forced-spike time**
+are all judged on the absolute clock. A resumed segment allocates recorder arrays for the
+continuation length only.
 
 ### Checkpoint contents (`src/snn_engine/checkpoint.py`, single enumeration point)
 
 `V`, `ref`, `s_E`, `I_E`, `s_I`, `I_I`, `ring_sE`, `ring_sI`, external-drive OU scalar `xi`,
 `net["rng"].bit_generator.state`, raster sampling indices `ras_keep`, early-stop EMA state,
-`MZSlowVars.{z, m, _I_I_last, _step_index}`, `SpatialOUDrive.{_state, _cached, _next_step,
-_last_step, _rng.bit_generator.state}`, and the absolute step index. Capture point is the top
-of a step, before any RNG draw, so resuming re-executes that step identically.
+`MZSlowVars.{z, m, _I_I_last, _step_index, accumulator}`, `SpatialOUDrive.{_state, _cached,
+_next_step, _last_step, _rng.bit_generator.state}`, and the absolute step index. Capture is at
+the top of a step, before any RNG draw, so resuming re-executes that step identically.
 
 ### Acceptance gates (all bit-level)
 
 | Gate | Content |
 |---|---|
-| **A — default-path parity** | With `mz.mode = off`, checkpoint off, perturbation off, `post_runaway_record_ms = 0`, a fresh run of `joint_04_control` at seed 1561 reproduces the archived `.../workers/joint_04_control_seed_1561.npz` bit-for-bit on `onsets`, `ranks`, `event_t_on_ms`, `event_t_off_ms`, `event_returned`, `active_fraction`, `contact_envelope` and the spatial OU traces. This is an engineering parity audit and does not conflict with all formal arms running Z/M on. |
-| **B — sham reload** | Reload a checkpoint and continue 100 ms with no perturbation; bit-identical to the original trajectory. |
-| **C — perturbed reload** | Reload a checkpoint, inject the forced E packet, and continue; bit-identical to a full run from `t = 0` with the same packet at the same absolute time. Gate B alone cannot catch state that the unperturbed window never exercises (delay-ring slots, RNG advance under a different spike set); the existing full-rerun + `forced_spike_mask` path in `scripts/run_topic4_rev9l_forced_source_worker.py` supplies the oracle. |
+| **A — default-path parity** | With `mz.mode = off`, checkpoint off, perturbation off, `post_runaway_record_ms = 0`, a fresh run of `joint_04_control` at seed 1561 reproduces the archived `.../workers/joint_04_control_seed_1561.npz` bit-for-bit. Engineering parity audit; does not conflict with all formal arms running Z/M on. |
+| **B — sham reload** | Reload a checkpoint, continue 100 ms unperturbed, bit-identical to the original trajectory. |
+| **C — perturbed reload** | Reload a checkpoint, inject the forced E packet, continue; bit-identical to a full run from `t = 0` with the same packet at the same absolute time. Gate B alone cannot catch state the unperturbed window never exercises; the existing full-rerun + `forced_spike_mask` path supplies the oracle. |
 
 ## Code layout
 
-The rev11-NLC producer script `scripts/run_topic4_rev10_r_edge_flow_worker.py` is **not
-modified** — changing it would make that round non-reproducible in place. New code:
+The rev11-NLC producer `scripts/run_topic4_rev10_r_edge_flow_worker.py` is **never modified**.
+New code:
 
 ```
 src/topic4_zm_ictal_transition.py                    substrate rebuild from the frozen manifest
 src/snn_engine/checkpoint.py                         state capture/restore
-scripts/run_topic4_zm_ictal_transition_worker.py     Phase 1/2 primary runs
-scripts/run_topic4_zm_perturbation_worker.py         Phase 3 (loads net + checkpoint once,
-                                                     loops all probe sites)
+src/topic4_zm_d4.py                                  covariant field+flow spatial transform
+src/topic4_zm_state_characterization.py              what the high-activity state is
+src/topic4_zm_recruitment.py                         local recruitment / spatial spread
+src/topic4_zm_perturbation.py                        sites, packets, descendant-only response
+src/topic4_zm_statistics.py                          paired bootstrap, censored latency, spatial null
+scripts/run_topic4_zm_ictal_transition_worker.py     primary runs
+scripts/run_topic4_zm_perturbation_worker.py         probe/sham pairs, incl. counterfactual splices
 scripts/{launch,aggregate,audit,freeze}_topic4_zm_ictal_transition*.py
+scripts/paper_figures/{plot_topic4_zm_ictal_transition_panels,build_main_figure_5}.py
 config/topic4_data_driven_zm_ictal_transition_v1.json
 ```
 
-Gate A is what proves the new rebuild path is the same substrate as the archived one.
+Gate A proves the new rebuild path is the same substrate as the archived one.
 
-## Phases
+## The perturbation endpoint, defined so it cannot be contaminated
 
-### Phase 1 — canary and the one science gate
+Two endpoints, kept separate. Collapsing them was the review's first finding.
 
-Fresh network seeds `1801-1803`, `joint_04_control` only, Z/M on, 20 s,
-`post_runaway_record_ms = 500`. Confirms the NLC mapper composes with Z/M, that onset is
-recordable, that the 15-contact readout / per-neuron Z, M / checkpoints are all present, and
-measures memory and wall time. It also freezes the perturbation dose.
-
-**This round's only new science blocker:**
+### E1 — sub-event finite response (PRIMARY)
 
 ```
-INTERICTAL_BASELINE_AVAILABLE =
-      model ictal onset >= 2500 ms
-  AND >= 3 returned (self-limited) events occur before onset
-  AND the baseline window [1500, 2000] ms shows no sustained high activity
-      criterion: median of the 20 ms-EMA population E rate over that window
-                 <= the 95th percentile of the same statistic across the 48
-                 Z/M-off reference runs
+susceptibility(site) = total descendant probe-minus-sham excess E spikes over 0-200 ms
 ```
 
-If it fails, the finding reported is that the current Z/M work point has no interpretable
-interictal residence segment, and a separate decision is taken about parameter calibration.
-**The baseline checkpoint is not moved earlier to rescue the run.**
+**Descendant**: the directly injected spikes are removed before counting, by reusing
+`src.topic4_forced_source_capacity.exclude_injected_packet_frame(forced, sham, packet_mask,
+trigger_step=...)`, which replaces the injection frame's packet-neuron entries with the sham's.
+Without this, a 256-cell packet contributes 256 excess spikes with zero recursive amplification
+and would trivially clear any threshold on the order of 200.
 
-Dose calibration (baseline only, blind to any pre-ictal or patient quantity): packet sizes
-`{16, 32, 64, 128, 256}` E cells; pick the **smallest** size whose median 50–200 ms excess E
-spikes across the 6 representative sites is **≥ 200** and which triggers a detector-qualified
-population event at **at most 1** of those 6 sites.
+E1 is only meaningful in a regime where the probe does **not** ignite. The dose is frozen so
+that it does not.
 
-### Phase 2 — paired formal runs
-
-Fresh network seeds `1811-1822`; 4 arms per network; Z/M on in all four; 20 s cap;
-`post_runaway_record_ms = 500`. Network seed is the independent unit; the three non-Node arms
-are compared to Node as paired differences with a network bootstrap 90 % CI.
-
-Recorded per run: transition incidence by 20 s, model ictal onset, returned interictal event
-rate before onset, Mode 1 / Mode 2 (TA-like / TB-like) occupancy before onset, OOD fraction
-before onset, pre-ictal virtual-contact burden, neuron-level spatial onset density, and the
-state-characterization block.
-
-### Phase 3 — baseline and pre-ictal perturbation
-
-Per network with a transition:
+### E2 — ignition (SECONDARY, nonlinear)
 
 ```
-baseline checkpoint     = 2000 ms
-pre-ictal checkpoint    = onset - 500 ms
-sensitivity checkpoint  = onset - 1000 ms
+ignition(site) = the probe branch shows a probe-attributable detector-qualified event,
+                 or reaches the model ictal criterion, within the response window
+onset advance  = sham onset - probe onset
 ```
 
-Networks with onset < 2500 ms stay in the onset analysis but leave the perturbation analysis.
-Networks with onset < 3500 ms lose only the sensitivity checkpoint.
+"Probe-attributable" means present in the probe branch and absent from the paired sham branch —
+required because the unperturbed network is already above the detector 41 % of the time.
 
-From each checkpoint, two branches share the RNG stream (the forced packet consumes no RNG):
-a **sham** continuation and a **matched local E-neuron packet** (the frozen dose, applied to
-the packet-size nearest E neurons to the site). Every reported response is `probe - sham`.
+E2 is measured **only at the 6 representative sites**, **only after E1 has resolved**, and is
+reported as a distinct endpoint. E1 numbers are never pooled with E2 numbers.
 
-Sites are frozen geometrically before Phase 1, from the sheet and the patient axis alone —
-never from any run's output:
+### Dose freeze
 
-- **7×7 grid**, spanning `[3, 17] mm` in both sheet axes at 2.333 mm spacing, on seeds
-  `1811-1813`. A site is dropped only if fewer than the dose's packet size of E neurons lie
-  within 1.0 mm of it; dropped sites are listed.
-- **6 representative sites**, on the other nine seeds and used for dose calibration in
-  Phase 1: the patient source centroid, the patient sink centroid, the axis midpoint, two
-  points at ±4 mm from the midpoint along the axis normal, and the sheet centre.
-
-Per site, with `t = 0` at packet injection: excess E spikes 0–50 ms, excess E spikes
-50–200 ms, response `r90` (radius holding 90 % of the excess spikes about the packet
-centroid), virtual-contact excess energy, and ictal-onset advance = sham onset − probe onset.
-
-**Canonical susceptibility scalar** (used for the primary endpoint and every map):
+Ladder `{16, 32, 64, 128, 256}` E cells, calibrated on **baseline checkpoints only**, blind to
+any pre-ictal or patient-derived quantity (the calibration script refuses any `--label` other
+than `baseline`). Across `3 canary seeds × 6 representative sites = 18` units, the frozen dose
+is the **largest** ladder rung satisfying **all** of:
 
 ```
-susceptibility(site) = total probe-minus-sham excess E spikes over 0-200 ms
+0 / 18 units show a probe-attributable detector-qualified event
+0 / 18 units reach the model ictal criterion
+median descendant susceptibility over the 18 units >= 50 excess spikes
 ```
 
-The 0–50 / 50–200 ms split is a reported decomposition of that scalar, not a competing
-definition. A network's susceptibility value is the **mean over its retained sites**; the
-paired primary contrast is `pre-ictal - baseline` within network, with a network bootstrap
-90 % CI over the 12 (or fewer) evaluable networks.
+Largest, not smallest: within the no-ignition regime a bigger probe gives a better-conditioned
+finite response. The 50-spike floor is a measurability floor on *descendant* spikes and is
+unrelated to the packet size.
 
-**Hotspot** = the set of grid sites in the top quintile of `susceptibility`; hotspot
-compactness = mean pairwise distance among those sites, compared against the same statistic
-for random equal-size site subsets drawn from the retained grid.
+If no rung satisfies all three, the verdict is **`NO_SUBEVENT_PROBE_REGIME`** and Phase 3 does
+not run. The finding reported is that this work point admits no sub-ignition probe, which is
+itself informative and must not be worked around by loosening the ignition criterion.
 
-**Neuron-level ictal onset density** = the spatial density of E neurons whose first spike
-inside the 100 ms window ending at the detection step falls in that window, i.e. where the
-sustained state first recruits, expressed on the same display grid as the susceptibility maps
-and independent of the contacts.
+## Attributing the susceptibility change: Z/M slow state versus fast-state proximity
 
-Onset advance is measured at **both** the baseline and the pre-ictal checkpoint. The pre-ictal
-continuation is short; the baseline continuation is capped at absolute 20 s and recorded as
-right-censored if the branch has not transitioned by then. The sensitivity checkpoint yields
-response metrics only, no onset advance.
+A pre-ictal checkpoint differs from a baseline checkpoint in `z` and `m` **and** in membrane
+potentials, synaptic currents, OU field state, and the fast-state residue of the most recent
+event. A larger pre-ictal response therefore only licenses "response grows as the transition
+approaches", not "the Z/M slow state drives the growth". The same confound bit the earlier
+slow-fast line.
 
-Products: baseline susceptibility map, pre-ictal susceptibility map, pre-minus-baseline map,
-baseline response field, pre-ictal response field. Every paired map shares grid, dose and
-colour scale.
+Five short branches at the canary checkpoints, 6 representative sites, 200 ms each, resolve it:
 
-### Nulls
+| id | fast state (V, currents, rings, OU, RNG) | `z` | `m` |
+|---|---|---|---|
+| `native_baseline` | baseline | baseline | baseline |
+| `native_pre_ictal` | pre-ictal | pre-ictal | pre-ictal |
+| `reset_z` | pre-ictal | **baseline** | pre-ictal |
+| `reset_m` | pre-ictal | pre-ictal | **baseline** |
+| `reset_zm` | pre-ictal | **baseline** | **baseline** |
+| `slow_only` | **baseline** | pre-ictal | pre-ictal |
 
-**Observation null (zero simulation).** Re-read an already-computed trajectory with the
-contacts moved / relabelled. Answers readout dependence only. It may never support a
-mechanism conclusion.
+`reset_*` measure necessity, `slow_only` measures sufficiency.
 
-**Substrate null (covariant D4).** Jointly transform the node field `h` **and** the two
-directed flow coefficients `(source_target_flow_x, source_target_flow_y)` of each pathway by
-the same element of the square's symmetry group, keeping the network, the contacts, the
-anisotropy axis and every Z/M parameter fixed.
+**Boundary, stated in the report and the figure caption:** a spliced state is off-manifold — the
+dynamics never visit "pre-ictal fast state with baseline `z`". These branches answer *which
+variable carries the elevated responsiveness*, not *what would have happened*. They are a
+counterfactual attribution test, not a trajectory.
 
-The flow features are signed and linear in displacement
-(`src/topic4_local_connectivity.py:50-62`,
-`displacement = (source_xy - target_xy) / length_scale`, features
-`interaction * displacement[:, 0]` and `interaction * displacement[:, 1]`). Rotating the
-field alone therefore reverses the correspondence between field structure and the flow it
-drives — the transformed substrate would no longer be a copy of the original. Rotating
-`(c_x, c_y)` covariantly restores it: for the 90°-multiple rotations and the mirrors, the two
-components are only swapped and negated, so the frozen coefficient bounds `±0.15` are
-preserved element-wise and no re-clipping is required. Field mass is preserved exactly by the
-budget projection. The transformed substrate is thus a **strict isometric copy**.
+**Without this block the permitted claim is only "pre-ictal susceptibility on a Z/M-active
+trajectory".** With it, the claim may name the carrying variable.
 
-Assignment: 12 paired null runs on the **Joint arm only**, one frozen non-identity D4 element
-per network seed `1811-1822`, chosen so all seven elements are used once or twice. This yields
-12 paired units against the 12 Joint data-driven runs at one quarter the cost of a 7 × 12
-factorial. Per-element values are reported descriptively and **no claim is made that all seven
-elements were surveyed at power**. Each null run also receives the 6-site perturbation
-protocol at both checkpoints, because the primary endpoint is a susceptibility contrast, not a
-latency.
+## Spatial sampling and the primary spatial endpoint
 
-A null run that does not transition within 20 s has a baseline checkpoint but no pre-ictal
-checkpoint. Such a network contributes to the censored latency endpoint and to the baseline
-susceptibility map, and is **excluded from the paired pre-minus-baseline contrast**, with the
-excluded count reported next to every null comparison. If more than half the null runs fail to
-transition, the paired susceptibility contrast is reported as not evaluable rather than
-computed on the surviving half.
+Uniform sampling, because a per-network spatial correlation and its spatial null need a grid:
 
-The 180° element is reported separately and first: under the covariant transform it preserves
-field-to-undirected-axis alignment while reversing the field's directed sense relative to the
-patient axis — the field's source end lands on the patient's sink end. Given that this project
-is about two approximately reversed propagation templates, this element is a substantive
-probe, not a filler control. It is named `axis-preserving, flow-consistent spatial transform`,
-never "electrode-alignment-only control".
+- **All 12 Joint networks** use the same frozen **7×7 grid** spanning `[3, 17] mm` in both sheet
+  axes (2.333 mm spacing), at **both** the baseline and pre-ictal checkpoints, **200 ms
+  sham/probe only**. No onset-advance continuation is run at grid points.
+- The **6 representative sites** — patient source centroid, sink centroid, axis midpoint, two
+  points ±4 mm from the midpoint along the axis normal, and the sheet centre — carry the dose
+  calibration, the counterfactual splices, and E2.
+- A grid site is dropped only if fewer than the frozen dose's packet size of E neurons lie
+  within 1.0 mm; dropped sites are listed.
+
+Primary spatial endpoint: the spatial relation of the susceptibility field to the substrate's
+own structure —
+
+```
+node field h
+outgoing E->E gain per E neuron   (post-mapping / pre-mapping outgoing weight)
+outgoing E->I gain per E neuron
+local ictal recruitment time      (see below)
+```
+
+each averaged over the E neurons within 1.0 mm of each grid site so it lives on the same grid.
+
+**Collinearity is reported before interpretation.** `h`, the E→E gain and the E→I gain are all
+functions of the same field and are expected to be strongly collinear; their pairwise Spearman
+correlations are reported first, and three separate correlations are **never** presented as
+three independent mechanisms. If the pairwise correlations exceed 0.7 the three are reported as
+one *data-driven substrate structure* family with a single headline number plus partial
+correlations as a diagnostic.
+
+Per-network statistic: Spearman r on the 49 sites, with a **block circular-shift** null
+(the covariate field is rigidly shifted on the 7×7 torus, preserving its autocorrelation); 49
+distinct shifts give an exact but coarse per-network p, floor 1/49. The load-bearing test is the
+cohort-level paired bootstrap over the 12 per-network r values, not the per-network p.
+
+Also reported: hotspot compactness (top-quintile sites, mean pairwise distance versus random
+equal-size subsets of the retained grid) at baseline and pre-ictal.
+
+## Local recruitment, replacing first-spike onset density
+
+A "first spike inside the 100 ms before detection" statistic is not a recruitment measure in
+this network: with the observed background the great majority of E neurons fire at least once in
+any 100 ms window, so the statistic is close to uniform noise. Replaced by:
+
+1. Assign E neurons to fixed 1 mm spatial bins.
+2. Compute each bin's smoothed local firing rate (5 ms kernel).
+3. Threshold each bin against **its own** interictal baseline — the q99 of that bin's rate over
+   a pre-onset reference window — requiring the excess to persist ≥ 15 ms.
+4. Report per bin the local recruitment time; across bins the **10 % → 90 % spatial recruitment
+   duration**, and the axial versus off-axial lag along the patient axis.
+
+This is the measurement that separates **sequential local spread** from **near-simultaneous
+whole-field ignition**, which is the distinction the earlier `q_I`/`g_K` line failed to make.
+
+## Is it still the Fig.4 interictal repertoire?
+
+If switching Z/M on produces high-OOD single-mode events that then run away, this round is not
+about "the data-driven interictal repertoire going ictal". A **claim gate**, not a run blocker:
+
+```
+INTERICTAL_REPERTOIRE_RETAINED
+```
+
+computed over all returned events before onset with the frozen patient direction classifier:
+out-of-distribution fraction, support for both modes, KMeans match — each compared against the
+distribution across the 48 Z/M-off reference runs.
+
+- Retained → the round may be written as *data-driven interictal modes → model ictal state*.
+- Not retained → the wording is *low-activity background → high-activity state*, and every mode
+  statement is dropped.
+
+The runaway itself is never assigned a Mode 1/2 label.
 
 ## Endpoint tiers (fixed here, before any run)
 
 ```
-Primary          pre-ictal susceptibility - baseline susceptibility
-                 (sham-subtracted, per-neuron, aggregated over probe sites)
-Primary spatial  spatial relation of susceptibility hotspots to
-                   - node field h
-                   - outgoing E->E gain per E neuron (post-mapping / pre-mapping
-                     outgoing weight; incoming budget is conserved by contract, so
-                     only the outgoing side carries the mapper's effect)
-                   - outgoing E->I gain per E neuron
-                   - subsequent neuron-level ictal onset density
-Secondary        four-arm time-to-model-ictal (serves pathway factorization)
-Descriptive      virtual-contact readout, projected Z/M trajectory,
-                 high-activity state morphology, Mode 1/2 and OOD evolution
+Primary          E1: pre-ictal minus baseline descendant susceptibility
+                 (sham-subtracted, per-neuron, mean over that network's retained grid sites)
+Primary spatial  spatial relation of the susceptibility field to h / outgoing E->E gain /
+                 outgoing E->I gain / local recruitment time, with collinearity reported first
+Attribution      the five counterfactual splices: which variable carries the change
+Secondary        E2 ignition and onset advance at the representative sites;
+                 four-arm time-to-model-ictal
+Descriptive      virtual-contact readout, projected Z/M trajectory, high-activity state
+                 morphology, Mode 1/2 and OOD evolution, spatial recruitment duration
 ```
 
-**Two orthogonal axes, never collapsed.** Tier (primary / secondary / descriptive) is fixed
-above. Contact dependence is a separate property: time-to-onset, per-neuron susceptibility,
-hotspot compactness and neuron-level onset density are contact-independent; contact envelope
-burden and contact recruitment are contact-dependent. A contact-dependent quantity may not
-carry a mechanism conclusion for a substrate transform. Time-to-onset is contact-independent
-*and* secondary; the two facts do not substitute for each other.
+**Two orthogonal axes, never collapsed.** Tier is fixed above. Contact dependence is separate:
+time-to-onset, per-neuron susceptibility, hotspot compactness, local recruitment time and
+spatial recruitment duration are contact-independent; contact envelope burden and contact
+recruitment are contact-dependent. A contact-dependent quantity may not carry a mechanism
+conclusion for a substrate transform.
 
 ### Latency under censoring
 
 ```
-primary latency endpoint (secondary tier):
-    restricted ictal-free time over [0, 20 s]
-secondary:
-    paired onset-time difference among networks where both arms entered
-also reported:
-    proportion entering within 20 s
+primary latency endpoint (secondary tier): restricted ictal-free time over [0, 20 s]
+secondary: paired onset-time difference among networks where both arms entered
+also reported: proportion entering within 20 s
 ```
 
-20 s is never used as an onset time. Incidence is expected at or near ceiling given the
-existing 3/3 Z/M-on record, and is reported as background, not as a result.
+20 s is never used as an onset time. Given D7, incidence is expected at ceiling and is reported
+as background.
+
+## Controls
+
+**Observation control (zero simulation).** The primary worker records the contact envelope for
+the original montage **and** for seven pre-frozen D4-transformed montages in the same SNN run —
+the spikes are already in memory, so this costs one extra envelope sampling per montage and no
+simulation. Offline reconstruction from the original envelope alone is impossible, which is why
+the montages must be declared before the run. This control answers **readout dependence only**
+and may never support a mechanism conclusion.
+
+**Substrate control — `matched spatial re-registration`.** The node field `h` and the two
+directed flow coefficients of each pathway are transformed together by the **same** square-
+symmetry element, keeping the network, the contacts, the anisotropy axis and every Z/M parameter
+fixed.
+
+The covariant coefficient transform is required because the flow features are signed and linear
+in displacement (`src/topic4_local_connectivity.py:50-62`: `displacement = (source_xy -
+target_xy) / length_scale`, features `interaction * displacement[:, 0]` and `[:, 1]`). Rotating
+the field alone reverses the correspondence between field structure and the flow it drives.
+Rotating `(c_x, c_y)` by the same matrix restores it, and because the group elements only swap
+and negate components, the frozen bounds `±0.15` survive element-wise with no re-clipping.
+
+**This is not an isometric copy of the substrate.** The field-and-flow *rule* is transformed as
+a rigid unit; the realized random graph, its patient-derived anisotropic topology and the
+contacts are not. The control therefore asks whether the node field must be **co-registered**
+with the patient axis, the realized graph and the electrodes — not whether patient structure
+matters at all.
+
+Design: the formal control uses **`r180` on all 12 Joint seeds**, one transform, one
+interpretation, paired 1:1 with the data-driven runs. Under `r180` the field's source end lands
+on the patient's sink end while the undirected axis alignment is preserved. `r90` and one mirror
+are run on the 3 canary seeds only and reported descriptively; **no claim is made that the
+square's seven non-identity elements were surveyed at power.**
+
+A control run that does not transition has a baseline checkpoint but no pre-ictal checkpoint; it
+contributes to the censored latency endpoint and the baseline map, is excluded from the paired
+contrast, and the excluded count is printed next to every control comparison. If more than half
+the control runs fail to transition, the paired contrast is emitted as not evaluable rather than
+computed on the survivors.
 
 ## Slow-current fields and the projected trajectory
 
@@ -336,41 +409,71 @@ A_i = mean_t[ eta_m * m_i(t) ]            over the same window
 net slow current = D_i - A_i
 ```
 
-Product averages, not products of averages. Neuron fields are mapped to a 2-D display grid
-with a uniform grid and a fixed isotropic kernel; **contact-density weighting is forbidden**.
-Baseline and pre-ictal `D - A` fields are shown with the static `h` overlaid as contours; the
-static `h` is not redrawn as its own field at two time points.
+Product averages, not products of averages. Neuron fields map to a display grid with a uniform
+grid and a fixed isotropic kernel; **contact-density weighting is forbidden**. Baseline and
+pre-ictal `D - A` fields share one colour scale with static `h` overlaid as contours; static `h`
+is not redrawn as its own field at two time points.
 
-Projected trajectory:
+Projected trajectory — **`h`-weighted**, because the core is only 3.53 % of the E population and
+a plain population mean would mostly report background:
 
 ```
-x(t) = 1 - mean_E[z_i(t)]
-y(t) = eta_m * mean_E[m_i(t)]
+x(t) = 1 - (sum_i h_i z_i(t)) / (sum_i h_i)
+y(t) = eta_m * (sum_i h_i m_i(t)) / (sum_i h_i)
 ```
 
-coloured by time, with baseline, pre-ictal and model ictal onset marked. The panel title is
-`Projected Z/M trajectory`; it may only be called a phase portrait if a 2-D drift field and
-nullclines are actually estimated, which this round does not do.
+The unweighted population mean is drawn as a thin grey reference line on the same axes and its
+full version goes to the supplement. Coloured by time, with baseline, pre-ictal and model ictal
+onset marked. The panel title is `Projected Z/M trajectory`; it may only be called a phase
+portrait if a 2-D drift field and nullclines are estimated, which this round does not do.
 
 ## State characterization (required, recomputed)
 
-Computed from the 500 ms post-detection recording on **this round's** trajectories:
-active/silent duration distributions, burst interval, re-ignition rate, fraction of 20 ms
-windows with zero population spiking, population peak rate, spatial recruitment fraction,
-15-contact recruitment, and a 30–80 Hz band proxy with its amplitude change.
+From the 500 ms post-detection recording on **this round's** trajectories: active/silent duration
+distributions, burst interval, re-ignition rate, fraction of 20 ms windows with zero population
+spiking, population peak rate, spatial recruitment fraction, 15-contact recruitment, and a
+30–80 Hz band proxy with its amplitude change.
 
-The 30–80 Hz proxy is compared against a **length-matched 500 ms interictal window**, and the
-resolution limit (500 ms gives ~15 cycles and ~2 Hz resolution at 30 Hz) is stated wherever
-the number appears. Figure captions state that the state is defined operationally by the
-runaway threshold.
+The band proxy is compared against a **length-matched 500 ms interictal window**, and the
+resolution limit (500 ms gives ~15 cycles and ~2 Hz resolution at 30 Hz) is stated wherever the
+number appears. Captions state that the state is defined operationally by the runaway threshold.
 
-## Interictal-mode analysis
+## Phase order
 
-Only events that still return are classified, using the frozen patient direction classifier
-from the manifest. Baseline versus the last 2 s before onset are compared on Mode 1 / Mode 2
-share, KMeans match and OOD fraction. **The runaway itself is never assigned a Mode 1/2 label.**
-The count of returned events inside the last 2 s is reported (it bounds this analysis) but is
-not a gate.
+Staged so the cheapest decisive result comes first and a dead end costs three canary networks.
+
+| Phase | Content | Gate to continue |
+|---|---|---|
+| **0** | Gates A/B/C; parallel montage recording; descendant-spike metric | all three gates bit-exact |
+| **1A** | 3 Joint Z/M-on canary (seeds 1801-1803) + 3 same-seed Z/M-off canary | `INTERICTAL_BASELINE_AVAILABLE` in **≥ 2 of 3** networks |
+| **1B** | dose freeze over the 18 baseline units; counterfactual splices; repertoire gate; local-recruitment audit | dose found, i.e. not `NO_SUBEVENT_PROBE_REGIME` |
+| **2** | **Joint arm only**, 12 seeds; uniform 7×7 short response maps at baseline and pre-ictal | E1 resolved: the 90 % CI of the paired pre-minus-baseline difference **excludes 0** |
+| **3** | Node / Node+EE / Node+EtoI latency arms (pass 1 only); E2 ignition and onset advance at the representative sites; `r180` spatial control | — |
+| **4** | figures, report, freeze | — |
+
+If Phase 2's interval includes 0, the round stops there and reports; the four arms, the spatial
+control and every long onset-advance continuation are not run. If Phase 1A's gate fails,
+the finding reported is that the current Z/M work point has no interpretable interictal residence
+segment; **the baseline checkpoint is not moved earlier to rescue it.**
+
+`INTERICTAL_BASELINE_AVAILABLE`, per network:
+
+```
+      model ictal onset >= 2500 ms
+  AND >= 3 returned (self-limited) events occur before onset
+  AND the baseline window [1500, 2000] ms shows no sustained high activity
+      criterion: median of the 20 ms-EMA population E rate over that window
+                 <= the 95th percentile of the same statistic across the
+                    same-seed Z/M-off canary runs
+```
+
+All three clauses are evaluated and **every failing clause is reported**, not only the first.
+Per D7's 5834 ms minimum across 98 runs, the first clause is expected to pass comfortably; in
+the formal phase a network failing it is excluded from the perturbation analysis individually
+rather than stopping the round.
+
+Non-Joint arms carry latency only and therefore run **pass 1 only** — they need no
+onset-relative checkpoints.
 
 ## Figure contract
 
@@ -384,53 +487,61 @@ README.md
 metadata.json
 ```
 
-Both assemblies are built from one set of producers; no simulation is re-run to make the
-second layout.
+Both assemblies come from one set of producers; no simulation is re-run for the second layout.
 
 ```
 A  frozen data-driven Node / E->E / E->I substrate + the Z/M mechanism
 B  continuous 15-contact virtual readout and population activity
-C  projected Z/M trajectory
+C  h-weighted projected Z/M trajectory, population mean as a thin grey reference
 D  baseline vs pre-ictal slow-current fields (D - A), static h as contours
 E  baseline vs pre-ictal perturbation response fields
 F  susceptibility maps and the pre-minus-baseline change
-G  pathway-arm model ictal-onset latency
-H  susceptibility growth vs onset advance
-I  data-driven substrate vs covariant spatial transform
+G  counterfactual attribution: which of z / m / fast state carries the change
+H  local recruitment map and the 10-90 % spatial recruitment duration
+I  data-driven substrate vs the r180 re-registration control
 J  pre-ictal Mode 1/2, KMeans match and OOD evolution
 ```
 
-Fig4's red/blue mode colours are reused; the model ictal state uses a separate dark grey.
-No PASS/FAIL text, no internal status codes, no long explanations inside the figure. The
-virtual readout is one continuous trace, never spliced, and is never labelled a clinical SEEG
-voltage. Panel redundancy is re-checked after the first render — E answers "where does
-activity go when one fixed site is perturbed", F answers "which site is more sensitive"; if
-they collapse to the same construct, one is replaced.
+B–F carry the primary evidence; G–J are mechanism decomposition and robustness. The four-arm
+latency panel and the observation control go to the supplement, not the main figure.
+
+Fig4's red/blue mode colours are reused; the model ictal state uses a separate dark grey. No
+PASS/FAIL text, no internal status codes, no long explanations inside the figure. The virtual
+readout is one continuous trace, never spliced, and is never labelled a clinical SEEG voltage.
+Panel redundancy is re-checked after the first render — E answers "where does activity go when
+one fixed site is perturbed", F answers "which site is more sensitive"; if they collapse, one is
+replaced.
 
 ## Claim boundary
 
 Permitted, if supported:
 
-> On a frozen patient-constrained node-edge substrate, Z/M slow state drives a self-limited
-> interictal event background into a sustained high-activity state; before that state,
-> local perturbation susceptibility increases and is spatially organized along the
-> data-driven substrate.
+> While the data-driven interictal repertoire is still present, local perturbation
+> susceptibility rises before the model ictal transition, that rise is carried by the Z/M slow
+> state rather than by fast-state proximity alone, and it is spatially organized along the
+> frozen data-driven substrate.
 
-If E→E / E→I only shift latency:
+If E1 grows but the counterfactual splices show the change is carried by fast state:
 
-> Static connectivity modulates the reachability of the model ictal state without changing
-> its spatial pattern.
+> Responsiveness grows as the transition approaches, but on this substrate the growth is not
+> attributable to the accumulated Z/M slow state.
 
-If the covariant transform is indistinguishable:
+If E1 grows and is Z/M-carried but shows no spatial relation to the substrate:
 
-> The mutual co-registration of the two patient-derived structures — the node field and the
-> patient interictal propagation axis carried by the edge anisotropy — is not a necessary
-> organizing factor for this transition **at this power**.
+> Z/M slow state raises pre-transition responsiveness without the data-driven node-edge
+> structure organizing where that responsiveness rises.
 
-**Because `theta_EE` is itself patient-derived and is held fixed under the transform, this
-round cannot test whether patient spatial structure matters at all. It tests only the mutual
-registration of the node field, the patient axis and the electrodes. Writing the null result
-as "patient spatial structure is unnecessary" is forbidden.**
+If the `r180` control is indistinguishable:
+
+> The co-registration of the node field with the patient axis, the realized graph and the
+> electrodes is not a necessary organizing factor **at this power**.
+
+**Because `theta_EE` is itself patient-derived and is held fixed under the transform, this round
+cannot test whether patient spatial structure matters at all. It tests only mutual registration.
+Writing the control's null result as "patient spatial structure is unnecessary" is forbidden.**
+
+If the repertoire gate fails, every sentence above replaces "interictal repertoire" with
+"low-activity background" and drops all mode language.
 
 Never permitted, regardless of outcome:
 
@@ -446,36 +557,35 @@ context, and this round's own state characterization is what is reported.
 
 ## Execution discipline
 
-New worktree only; the dirty main worktree is untouched. Long runs go through
-`systemd-run --user` + `nohup`. Numeric threads pinned to 1 per worker. Worker count derived
-from a measured memory sentinel, capped at 8, always leaving ≥ 32 GiB available (prior peak
-RSS was 14.6 GiB per 20 s worker; the machine has 251 GiB total, 229 GiB available, 80 cores).
-The monitor polls every 600 s for memory, disk, worker state and module hashes — no continuous
-polling. OOM, non-finite values, hash drift or a checkpoint-replay mismatch stops new work;
-processes belonging to other worktrees are never killed.
+New worktree only; the dirty main worktree is untouched. Long runs via `systemd-run --user` +
+`nohup`. Numeric threads pinned to 1 per worker. Worker count derived from a measured memory
+sentinel, capped at 8, always leaving ≥ 32 GiB available (prior peak RSS 14.6 GiB per 20 s
+worker; the machine has 251 GiB total, 229 GiB available, 80 cores). The monitor polls every
+600 s for memory, disk, worker state and module hashes. OOM, non-finite values, hash drift or a
+checkpoint-replay mismatch stops new work; processes belonging to other worktrees are never
+killed.
 
-Storage: per-probe output is the aggregated per-neuron excess-spike field (32000 float32,
-≈128 KB) plus scalar metrics — ~51 MB over ~400 probes. Raw per-neuron traces are kept for at
-most 6 exemplars (~64 MB each). Checkpoints ~130 MB × 36 ≈ 4.7 GB. Total under 6 GB against
-187 GiB free.
+The frozen network cache directory no longer exists, so every seed is rebuilt. The rebuild guard
+has been verified to pass at the base commit (`params.py`, `connectivity.py`,
+`connectivity_rot.py` match the hashes in `node_kick_canary.json`; numpy 1.26.4), and the
+archived seed-1561 pickle hash
+`dba81d32d6c542bda4d1cfa0de196551c16f811a88c0864c7572a8db60852828` checks that a rebuilt network
+is the same network.
 
-The frozen network cache directory no longer exists on disk, so every seed is rebuilt. The
-rebuild guard has been verified to pass at the base commit (`params.py`, `connectivity.py`,
-`connectivity_rot.py` all match the hashes recorded in `node_kick_canary.json`, numpy 1.26.4),
-and the archived seed-1561 pickle hash `dba81d32d6c542bda4d1cfa0de196551c16f811a88c0864c7572a8db60852828`
-is the check that a rebuilt network is the same network.
+Because the onset-relative checkpoints are defined against an onset not known in advance, each
+**Joint** primary run is two passes: pass 1 records the onset while emitting only the 2000 ms
+baseline checkpoint; pass 2 resumes from it and stops at `onset - 500 ms`, emitting the two
+onset-relative checkpoints. Pass 2's overlap with pass 1 is asserted bit-identical — Gate B in
+production. Non-Joint arms run pass 1 only.
 
-Because the pre-ictal and sensitivity checkpoints are defined relative to an onset that is not
-known in advance, each primary run is executed in two passes: pass 1 records the onset while
-emitting only the 2000 ms baseline checkpoint; pass 2 resumes from that checkpoint and stops at
-`onset - 500 ms`, emitting the two onset-relative checkpoints. Pass 2's overlap with pass 1 is
-asserted bit-identical, which is Gate B applied in production.
+`results/` is gitignored except three legacy files. Small decision artifacts (gate verdicts,
+manifests, cohort summaries, figure files) are committed with `git add -f`; bulk `.npz` is not
+committed.
 
-Cost scales from the measured 94.5 s of wall clock per simulated second and therefore depends
-on the median onset time, which Phase 1 measures. At 8 workers the round is about **14 h** if
-onset lands near 10 s and about **24 h** if it lands near 18 s. Phase 1 recomputes this
-projection, and if it lands at the slow end the launcher asks before Phase 3 starts; the
-cheapest reduction is running the 7×7 probe grid on one seed instead of three.
+Cost scales from the measured **94.5 s of wall clock per simulated second**. Taking D7's median
+onset of ~8 s as the working prior, at 8 workers: gates ~1.2 h, Phase 1A ~0.4 h, Phase 1B ~0.3 h,
+Phase 2 ~1.4 h, Phase 3 ~4.2 h, figures ~1 h — about **8.5 h**, of which only the first ~3.3 h is
+spent before the Phase 2 gate decides whether the rest runs.
 
 On completion: `DONE.json`, a desktop notification, a scientific report, the figure README,
 provenance, and scoped commits. The report's first paragraph answers, in order: can this
