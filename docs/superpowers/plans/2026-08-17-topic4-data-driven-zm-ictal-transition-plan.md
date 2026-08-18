@@ -26,8 +26,8 @@
 - Numeric threads pinned to 1 per worker (`OMP_NUM_THREADS=1`, `OPENBLAS_NUM_THREADS=1`, `MKL_NUM_THREADS=1`, `NUMEXPR_NUM_THREADS=1`).
 - Tests run from the worktree root: `/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -m pytest <path> -v`.
 - Commit after every task. Never `git add -A`; always name files. **`results/` is gitignored except three legacy files** — every commit of a result artifact uses `git add -f`, and only small decision artifacts (gate verdicts, manifests, cohort summaries, figure files) are committed. Bulk `.npz` is never committed.
-- **Phase gating is part of the contract, not an optimisation.** Phase 2 runs the Joint arm only; the four-arm latency runs, the spatial control and every long onset-advance continuation happen in Phase 3 and only if Phase 2's primary interval excludes 0. An executor must not "get ahead" by launching Phase 3 work early.
-- Two endpoints are kept separate and never pooled: **E1** sub-event finite response (primary) and **E2** ignition / onset advance (secondary, nonlinear).
+- **Phase gating is part of the contract, not an optimisation.** Phase 2 runs the Joint arm only; the four-arm latency runs, the spatial control and every long onset-advance continuation happen in Phase 3 and **only when Phase 2's paired E1 bootstrap gives `q05 > 0`**. A significantly negative result (`q95 < 0`) and a straddling interval both stop the round. An executor must not "get ahead" by launching Phase 3 work early.
+- Two endpoints are kept separate and never pooled: **E1** sub-event finite response (primary) and **E2** ignition / onset advance (secondary, nonlinear). Every E1 site nevertheless carries its own in-window ignition flags, because those flags decide whether the site is an E1 measurement at all.
 
 ## Facts established before planning (do not re-derive)
 
@@ -175,7 +175,7 @@ Create `config/topic4_data_driven_zm_ictal_transition_v1.json`. Copy the `inputs
     },
     "spec": {
       "path": "docs/superpowers/specs/2026-08-17-topic4-data-driven-zm-ictal-transition-design.md",
-      "sha256": "f9cd0ae7c2ab93ae3db9684f1023f2cc33c7c671ff3aeafd094207229912064c"
+      "sha256": "b97c442c1ca5bccc87a4d30ee73616c7703c14c9da146e3e96b4c1b91ad9249d"
     }
   },
   "arms": {
@@ -204,7 +204,7 @@ Create `config/topic4_data_driven_zm_ictal_transition_v1.json`. Copy the `inputs
     "phase2_arms": ["Joint"],
     "phase3_latency_arms": ["Node", "Node+EE", "Node+EtoI"],
     "onset_relative_checkpoints_for_arms": ["Joint"],
-    "phase2_continue_rule": "paired pre-minus-baseline E1 bootstrap 90% CI excludes 0",
+    "phase2_continue_rule": "see phase2_stop_rule: continue only when q05 > 0",
     "canary_gate_minimum_passing_networks": 2
   },
   "observation_control": {
@@ -229,23 +229,37 @@ Create `config/topic4_data_driven_zm_ictal_transition_v1.json`. Copy the `inputs
   "repertoire_claim_gate": {
     "name": "INTERICTAL_REPERTOIRE_RETAINED",
     "is_run_blocker": false,
+    "rule": "conjunctive: all four clauses must hold",
     "scope": "all returned events before onset",
     "reference_workers": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/workers",
-    "measures": ["ood_fraction", "both_mode_support", "kmeans_match"]
+    "minimum_returned_events_before_onset": 20,
+    "maximum_ood_fraction": "q95 across the 48 reference runs",
+    "minimum_events_per_mode": 3,
+    "minimum_kmeans_balanced_alignment": "q05 across the 48 reference runs",
+    "kmeans_metric": "src.topic4_d6_natural_kmeans.best_binary_alignment -> balanced_alignment"
+  },
+  "phase2_stop_rule": {
+    "q05_gt_0": "continue to Phase 3",
+    "q95_lt_0": "stop, report the opposite direction",
+    "straddles_zero": "stop, report unresolved at n=12"
   },
   "recruitment": {
     "bin_mm": 1.0,
     "rate_kernel_ms": 5.0,
     "bin_baseline_quantile": 0.99,
     "minimum_persistence_ms": 15.0,
-    "reference_window_ms": 1000.0
+    "reference_window_ms": [1000.0, 2000.0],
+    "reference_window_rationale": "early interictal, NOT pre-onset: tau_z=5000 ms means a window 1 s before onset is already inside the buildup",
+    "search_window_relative_to_onset_ms": [-300.0, 200.0],
+    "offaxial_uses_absolute_perpendicular_distance": true
   },
   "perturbation": {
     "dose_ladder_cells": [16, 32, 64, 128, 256],
-    "dose_selection": "largest rung satisfying all three clauses",
+    "dose_selection": "smallest rung satisfying all four clauses",
     "dose_minimum_median_descendant_excess_spikes": 50.0,
     "dose_maximum_probe_attributable_event_units": 0,
     "dose_maximum_model_ictal_units": 0,
+    "dose_linearity_ratio_range": [1.2, 3.0],
     "dose_calibration_units": "3 canary seeds x 6 representative sites = 18",
     "exclude_injected_frame_from_response": true,
     "packet_radius_mm": 1.0,
@@ -254,8 +268,9 @@ Create `config/topic4_data_driven_zm_ictal_transition_v1.json`. Copy the `inputs
     "grid_seeds": "all formal seeds",
     "grid_extent_mm": [3.0, 17.0],
     "grid_n": 7,
-    "grid_measures": ["E1_only"],
-    "ignition_sites": "representative",
+    "grid_measures": ["E1", "in_window_ignition_flags"],
+    "onset_advance_sites": "representative",
+    "regime_limited_ignition_fraction": 0.25,
     "baseline_onset_search_cap_ms": 20000.0
   },
   "counterfactual_splices": [
@@ -377,7 +392,7 @@ ee_out_gain = np.where(pre_ee > 0.0, post_ee / np.maximum(pre_ee, 1e-300), np.na
 
 and identically for `E_to_I`. `raw_net` must be a deep copy of the AMPA bins taken **before** `continuous_local_e_source_flow` mutates or replaces them; verify by asserting `pre_ee.sum()` is unchanged after mapping.
 
-`verify_frozen_inputs` hashes every entry of `config["inputs"]` and returns `{"all_match": bool, "records": {...}}`, raising `RuntimeError` on any mismatch. The recorded spec hash `f9cd0ae7c2ab93...` is the spec as it stands alongside this plan; if the spec is edited during review, recompute it with `sha256sum` and update the config before Task 13's freeze, which re-verifies it and fails on drift.
+`verify_frozen_inputs` hashes every entry of `config["inputs"]` and returns `{"all_match": bool, "records": {...}}`, raising `RuntimeError` on any mismatch. The recorded spec hash `b97c442c1ca5bc...` is the spec as it stands alongside this plan; if the spec is edited during review, recompute it with `sha256sum` and update the config before Task 13's freeze, which re-verifies it and fails on drift.
 
 `make_slow` returns `MZSlowVars(n_e + n_i, params.V_th, MZSlowVarsConfig(**zm_cfg_subset), NE=n_e, core_mask_E=(h_e >= 0.5))` when `zm_cfg["mode"] != "off"`, else `None` — `core_mask_E` matches the rev10-R worker exactly.
 
@@ -1506,6 +1521,21 @@ spread** from **near-simultaneous whole-field ignition** — the distinction the
       # {"axial_slope_ms_per_mm", "offaxial_slope_ms_per_mm", "axial_r", "offaxial_r"}
   ```
 
+  **Two frozen windows, both fixed here rather than derived at run time:**
+
+  - **Reference window `[1000, 2000] ms`, same seed**, for each bin's own q99 threshold. An
+    earlier draft took it from the second ending at `onset − 1000 ms`. With `tau_z = 5000 ms`
+    the slow drift operates on a five-second scale, so a window one second before onset is
+    already inside the buildup; thresholding against it would inflate every bin's q99 by exactly
+    the rise the measurement is meant to detect and mask real spread.
+  - **Search window `[onset − 300 ms, onset + 200 ms]`**, fixed relative to the operational
+    onset. `runaway_early_stop_ms` fires 100 ms after the EMA first crosses, so ignition starts
+    before the reported onset and the window is placed to contain it.
+
+  **`axial_lag` regresses on the SIGNED along-axis coordinate and the ABSOLUTE perpendicular
+  distance `|d_perp|`.** With a signed perpendicular coordinate, spread that is symmetric about
+  the axis cancels to a slope near zero and would be misread as "no off-axis propagation".
+
 - [ ] **Step 1: Write the failing test**
 
 ```python
@@ -1595,6 +1625,32 @@ def test_axial_lag_recovers_a_planted_axial_gradient():
                     axis_unit=np.array([1.0, 0.0]), origin_xy=np.zeros(2))
     assert np.isclose(out["axial_slope_ms_per_mm"], 10.0, atol=0.5)
     assert abs(out["axial_r"]) > 0.99
+
+
+def test_symmetric_offaxis_spread_is_not_cancelled_by_a_signed_coordinate():
+    """The decisive off-axis regression: bins spread symmetrically on BOTH sides
+    of the axis. A signed perpendicular coordinate averages the two sides to a
+    slope near zero; the absolute distance recovers the real 8 ms/mm."""
+    offsets = np.concatenate([np.arange(1.0, 11.0), -np.arange(1.0, 11.0)])
+    xy = np.stack([np.zeros(20), offsets], axis=-1)
+    recruitment_step = np.abs(offsets) * 80.0                 # 8 ms per mm at dt=0.1
+    out = axial_lag(recruitment_step, xy, dt_ms=0.1,
+                    axis_unit=np.array([1.0, 0.0]), origin_xy=np.zeros(2))
+    assert np.isclose(out["offaxial_slope_ms_per_mm"], 8.0, atol=0.5)
+    assert abs(out["offaxial_r"]) > 0.99
+    assert abs(out["axial_slope_ms_per_mm"]) < 1e-6           # nothing along the axis
+
+
+def test_offaxis_slope_is_not_confounded_by_the_axial_gradient():
+    rng = np.random.default_rng(9)
+    along = rng.uniform(-8.0, 8.0, 60)
+    perp = rng.uniform(-6.0, 6.0, 60)
+    xy = np.stack([along, perp], axis=-1)
+    recruitment_step = along * 50.0 + np.abs(perp) * 20.0     # 5 and 2 ms/mm
+    out = axial_lag(recruitment_step, xy, dt_ms=0.1,
+                    axis_unit=np.array([1.0, 0.0]), origin_xy=np.zeros(2))
+    assert np.isclose(out["axial_slope_ms_per_mm"], 5.0, atol=0.3)
+    assert np.isclose(out["offaxial_slope_ms_per_mm"], 2.0, atol=0.3)
 ```
 
 - [ ] **Step 2: Run to confirm failure**
@@ -1614,13 +1670,17 @@ sheet. `local_recruitment` finds, per bin, the first step inside the search wind
 rate exceeds that bin's threshold **and stays above it for at least `minimum_persistence_ms`**;
 `spread_10_90_ms` is the time between the 10th and 90th percentile of the finite recruitment
 times, which is the number that separates a travelling front from a simultaneous flash.
-`axial_lag` regresses recruitment time on the along-axis and across-axis coordinates and returns
-both slopes and correlations.
+
+`axial_lag` builds the design matrix from `d_along = (xy - origin) @ axis_unit` and
+`d_perp_abs = |(xy - origin) @ normal|`, fits recruitment time jointly on both columns, and
+returns each slope with its partial correlation. Fitting them **jointly** is what makes
+`test_offaxis_slope_is_not_confounded_by_the_axial_gradient` pass; two separate univariate fits
+would let an axial gradient leak into the off-axis slope.
 
 - [ ] **Step 4: Run the tests**
 
 Run: `/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -m pytest tests/test_zm_recruitment.py -v`
-Expected: 6 passed.
+Expected: 8 passed.
 
 - [ ] **Step 5: Commit**
 
@@ -1648,8 +1708,10 @@ git commit -m "topic4 zm-itx: bin-wise local recruitment replaces the noise-domi
   def response_metrics(probe, sham, *, dt_ms, positions_e, packet_mask, packet_xy,
                        envelope_probe, envelope_sham, envelope_dt_ms,
                        inject_step, split_ms, window_ms) -> dict          # E1
+  def in_window_ignition(probe, sham, *, dt_ms, detector_threshold,
+                         inject_step, window_ms) -> dict                  # ALWAYS, free
   def ignition_metrics(probe, sham, *, dt_ms, detector_threshold, window_ms,
-                       probe_onset_ms, sham_onset_ms) -> dict             # E2
+                       probe_onset_ms, sham_onset_ms) -> dict             # E2 long arm
   def splice_checkpoint(pre_ictal_state, baseline_state, *, mode) -> dict
   def susceptibility_map(rows, *, sites) -> dict
   def hotspot_compactness(sites_xy, values, *, quantile, n_null, seed) -> dict
@@ -1663,10 +1725,21 @@ git commit -m "topic4 zm-itx: bin-wise local recruitment replaces the noise-domi
   injection frame's packet-neuron entries with the sham's. **Without that step a 256-cell packet
   contributes 256 excess spikes with zero recursive amplification.**
 
-  **E2** (`ignition_metrics`) returns `probe_attributable_event` (bool), `reached_model_ictal`
-  (bool) and `onset_advance_ms`. An event counts only if it is present in the probe branch and
-  **absent from the paired sham branch** — the unperturbed network is above the common detector
-  41 % of the time, so "an event occurred" is not evidence of anything.
+  **`in_window_ignition` runs on EVERY E1 site, grid included**, and returns
+  `probe_attributable_event_200ms` and `reached_model_ictal_200ms`. It is computed from arrays
+  the run already holds and costs nothing. **Freezing the dose on baseline checkpoints
+  guarantees nothing at the pre-ictal checkpoint**, which is exactly where excitability is
+  hypothesised to be higher; without these flags a pre-ictal probe that ignites would have its
+  escape-dominated spike count recorded as "susceptibility grew".
+
+  A site with either flag true gets `e1_evaluable = False` and is excluded from the E1 mean, but
+  **is never deleted from the site set** — deleting igniting sites would strip the most excitable
+  locations out of the pre-ictal map. It is handed to E2 instead.
+
+  **E2** (`ignition_metrics`) additionally returns `onset_advance_ms` from the long
+  continuation, run only at the representative sites. An event counts only if it is present in
+  the probe branch and **absent from the paired sham branch** — the unperturbed network is above
+  the common detector 41 % of the time, so "an event occurred" is not evidence of anything.
 
   `splice_checkpoint` builds the counterfactual states. `mode` is one of
   `native_baseline`, `native_pre_ictal`, `reset_z`, `reset_m`, `reset_zm`, `slow_only`;
@@ -1688,8 +1761,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.topic4_zm_perturbation import (  # noqa: E402
-    hotspot_compactness, ignition_metrics, response_metrics, select_packet,
-    splice_checkpoint)
+    hotspot_compactness, ignition_metrics, in_window_ignition, response_metrics,
+    select_packet, splice_checkpoint)
 
 
 def test_packet_is_the_nearest_cells_and_respects_the_radius():
@@ -1813,6 +1886,44 @@ def test_onset_advance_is_nan_when_either_branch_is_censored():
     assert out["onset_censored"] is True
 
 
+def test_splice_leaves_every_non_slow_field_bit_identical():
+    """Splice integrity is a bit-level property, not an assumption: apart from
+    the named z/m arrays, the host's fast state, OU state, both RNG states, the
+    delay rings and the time index must be untouched."""
+    import copy
+
+    from src.snn_engine.checkpoint import digest
+
+    rng = np.random.default_rng(11)
+    def _state(tag):
+        return {
+            "schema": "topic4_snn_checkpoint_v1", "step": 20000 + tag,
+            "absolute_time_ms": 2000.0 + tag,
+            "V": rng.random(8), "ref": rng.integers(0, 4, 8).astype(np.int32),
+            "s_E": rng.random(8), "I_E": rng.random(8),
+            "s_I": rng.random(8), "I_I": rng.random(8),
+            "ring_sE": rng.random((5, 8)), "ring_sI": rng.random((5, 8)),
+            "xi": float(rng.random()), "rng_state": {"bit_generator": "PCG64", "n": tag},
+            "ras_keep": np.array([0, 2, 4]), "es_ema": 3.0 + tag, "es_run": tag,
+            "track_rec": False, "s_E_rec": None, "I_E_rec": None,
+            "slow": {"kind": "MZSlowVars", "z": rng.random(8), "m": rng.random(8),
+                     "I_I_last": rng.random(8), "step_index": 100 + tag},
+            "external_drive": {"field_state": rng.random((4, 4)), "cached": rng.random(8),
+                               "next_step": 30 + tag, "last_step": 29 + tag,
+                               "rng_state": {"bit_generator": "PCG64", "n": 99 + tag}},
+        }
+
+    pre, base = _state(1), _state(2)
+    for mode, host in (("reset_z", pre), ("reset_m", pre), ("reset_zm", pre),
+                       ("slow_only", base)):
+        out = splice_checkpoint(pre, base, mode=mode)
+        host_no_slow = copy.deepcopy(host); host_no_slow["slow"] = None
+        out_no_slow = copy.deepcopy(out); out_no_slow["slow"] = None
+        assert digest(out_no_slow) == digest(host_no_slow), mode
+        assert out["slow"]["step_index"] == host["slow"]["step_index"], mode
+        assert np.array_equal(out["slow"]["I_I_last"], host["slow"]["I_I_last"]), mode
+
+
 def test_splice_only_touches_the_named_slow_variable():
     pre = {"slow": {"z": np.full(4, 0.2), "m": np.full(4, 5.0)},
            "V": np.arange(4.0), "external_drive": {"next_step": 7}}
@@ -1893,11 +2004,14 @@ the scalar, computes `r90_mm` as the radius about `packet_xy` containing 90 % of
 excess, and integrates `clip(envelope_probe - envelope_sham, 0, None)` for
 `contact_excess_energy`.
 
-`ignition_metrics` computes the population active fraction of each branch in 1 ms bins, applies
-the frozen `detector_threshold`, and sets `probe_attributable_event` only when the probe branch
-has a supra-threshold run inside the window that the sham branch does not have overlapping it.
-`reached_model_ictal` applies the 120 Hz / 100 ms criterion to the probe branch. `onset_advance_ms
-= sham_onset_ms - probe_onset_ms`, or `nan` with `onset_censored=True` if either is `None`.
+`in_window_ignition` computes the population active fraction of each branch in 1 ms bins over
+`inject_step .. inject_step + window_ms/dt`, applies the frozen `detector_threshold`, and sets
+`probe_attributable_event_200ms` only when the probe branch has a supra-threshold run that the
+sham branch does not have overlapping it. `reached_model_ictal_200ms` applies the 120 Hz /
+100 ms criterion to the probe branch inside the same window. It is called on **every** E1 site.
+
+`ignition_metrics` wraps `in_window_ignition` and adds the long arm: `onset_advance_ms =
+sham_onset_ms - probe_onset_ms`, or `nan` with `onset_censored=True` if either is `None`.
 
 `splice_checkpoint` deep-copies the **host** state and overwrites only the named slow arrays:
 
@@ -1925,8 +2039,10 @@ returning a one-sided empirical p-value.
 - [ ] **Step 4: Run the tests**
 
 Run: `/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -m pytest tests/test_zm_perturbation.py -v`
-Expected: 9 passed. `test_injected_spikes_alone_produce_exactly_zero_susceptibility` is the
-regression that must never be weakened — it is the whole reason the descendant metric exists.
+Expected: 10 passed. `test_injected_spikes_alone_produce_exactly_zero_susceptibility` is the
+regression that must never be weakened — it is the whole reason the descendant metric exists —
+and `test_splice_leaves_every_non_slow_field_bit_identical` is what turns splice integrity from
+an assumption into a checked property.
 
 - [ ] **Step 5: Commit**
 
@@ -1951,12 +2067,27 @@ git commit -m "topic4 zm-itx: frozen probe geometry and sham-subtracted response
   def restricted_ictal_free_time(onset_ms, *, cap_ms) -> dict
       # onset_ms may contain None/NaN for censored networks
   def paired_onset_difference(onset_a, onset_b) -> dict     # both-entered subset only
-  def spatial_correlation(values, covariate, positions, *, draws, seed,
-                          block_mm=2.0) -> dict
-  def covariate_collinearity(covariates: dict, *, threshold) -> dict
-      # {"pairwise_spearman": {...}, "max_abs_r": float,
-      #  "report_as_single_family": bool, "partial_correlations": {...}}
+  def exact_toroidal_shifts(grid_n) -> np.ndarray
+      # (grid_n**2, 2) int, every (dx, dy) on the torus INCLUDING (0, 0)
+  def spatial_correlation_exact_shift(values, covariate, *, grid_n) -> dict
+      # {"spearman_r", "p_value", "n_distinct_shifts", "p_floor", "null_r"}
+  def covariate_collinearity(covariates: dict) -> dict
+      # {"pairwise_spearman": {...}, "max_abs_r": float}
   ```
+
+  **The spatial null is enumerated, not sampled.** On the frozen 7×7 grid the shift group has
+  exactly `49` elements including the identity, so `spatial_correlation_exact_shift` takes no
+  `draws` argument at all: it computes all 49 null correlations, returns
+  `n_distinct_shifts == 49` and `p_floor == 1/49`, and `p_value = mean(|null_r| >= |r_obs|)`
+  over that complete set. An earlier draft carried a generic `draws=2000` sampler here, which
+  contradicted the spec's "exactly 49 shifts" and would have implied a precision the design does
+  not have.
+
+  **`covariate_collinearity` reports, it does not decide.** `h` is the primary spatial covariate
+  and local recruitment time is the second primary; the outgoing E→E and E→I gains are
+  descriptive companions. There is no data-dependent merge rule and no composite: an earlier
+  draft collapsed all three into one "family" whenever any pair correlated above `0.7`, which
+  both left the composite undefined and made the reported quantity depend on the data.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1973,8 +2104,9 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from src.topic4_zm_statistics import (  # noqa: E402
-    covariate_collinearity, paired_bootstrap, paired_onset_difference,
-    restricted_ictal_free_time, spatial_correlation)
+    covariate_collinearity, exact_toroidal_shifts, paired_bootstrap,
+    paired_onset_difference, restricted_ictal_free_time,
+    spatial_correlation_exact_shift)
 
 
 def test_paired_bootstrap_is_paired_and_deterministic():
@@ -2012,37 +2144,50 @@ def test_paired_onset_difference_uses_only_networks_where_both_entered():
     assert out["n_dropped"] == 2
 
 
-def test_spatial_correlation_block_null_is_not_fooled_by_smooth_noise():
+def test_the_shift_group_is_enumerated_in_full():
+    shifts = exact_toroidal_shifts(7)
+    assert shifts.shape == (49, 2)
+    assert len({tuple(s) for s in shifts}) == 49
+    assert (0, 0) in {tuple(s) for s in shifts}
+
+
+def test_exact_shift_null_reports_49_shifts_and_a_1_over_49_floor():
     rng = np.random.default_rng(0)
-    grid = np.stack(np.meshgrid(np.linspace(0, 20, 30), np.linspace(0, 20, 30)),
+    values = rng.random(49)
+    covariate = rng.random(49)
+    out = spatial_correlation_exact_shift(values, covariate, grid_n=7)
+    assert out["n_distinct_shifts"] == 49
+    assert np.isclose(out["p_floor"], 1.0 / 49.0)
+    assert out["p_value"] >= out["p_floor"] - 1e-12
+    assert len(out["null_r"]) == 49
+
+
+def test_exact_shift_null_hits_its_floor_on_a_perfect_match():
+    grid = np.stack(np.meshgrid(np.arange(7), np.arange(7), indexing="ij"),
                     axis=-1).reshape(-1, 2)
-    smooth = np.sin(grid[:, 0] / 3.0) + np.cos(grid[:, 1] / 3.0)
-    unrelated = np.sin(grid[:, 1] / 3.1) + np.cos(grid[:, 0] / 2.9)
-    out = spatial_correlation(smooth, unrelated, grid, draws=500, seed=1, block_mm=2.0)
-    assert 0.0 <= out["p_value"] <= 1.0
-    assert out["n_null"] == 500
-    same = spatial_correlation(smooth, smooth, grid, draws=500, seed=1, block_mm=2.0)
-    assert np.isclose(same["spearman_r"], 1.0)
-    assert same["p_value"] < 0.05
+    field = np.sin(grid[:, 0] * 0.9) + np.cos(grid[:, 1] * 0.7)
+    out = spatial_correlation_exact_shift(field, field, grid_n=7)
+    assert np.isclose(out["spearman_r"], 1.0)
+    assert np.isclose(out["p_value"], 1.0 / 49.0)
 
 
-def test_collinear_covariates_are_flagged_as_one_family():
+def test_exact_shift_null_is_deterministic():
+    rng = np.random.default_rng(3)
+    values, covariate = rng.random(49), rng.random(49)
+    assert (spatial_correlation_exact_shift(values, covariate, grid_n=7)
+            == spatial_correlation_exact_shift(values, covariate, grid_n=7))
+
+
+def test_collinearity_reports_every_pair_and_decides_nothing():
     rng = np.random.default_rng(4)
     h = rng.random(49)
     covariates = {"h": h, "ee_gain": h * 2.0 + 0.01 * rng.random(49),
                   "etoi_gain": h * -1.5 + 0.01 * rng.random(49)}
-    out = covariate_collinearity(covariates, threshold=0.7)
+    out = covariate_collinearity(covariates)
     assert out["max_abs_r"] > 0.9
-    assert out["report_as_single_family"] is True
     assert set(out["pairwise_spearman"]) == {("ee_gain", "etoi_gain"),
                                              ("h", "ee_gain"), ("h", "etoi_gain")}
-
-
-def test_independent_covariates_are_not_flagged():
-    rng = np.random.default_rng(5)
-    covariates = {"a": rng.random(49), "b": rng.random(49), "c": rng.random(49)}
-    out = covariate_collinearity(covariates, threshold=0.7)
-    assert out["report_as_single_family"] is False
+    assert "report_as_single_family" not in out    # h is primary by design, not by data
 ```
 
 - [ ] **Step 2: Run to confirm failure**
@@ -2052,14 +2197,28 @@ Expected: `ModuleNotFoundError`.
 
 - [ ] **Step 3: Implement**
 
-`paired_bootstrap` asserts equal length, resamples **network indices** (not values independently), and reports quantiles of the mean paired difference `a - b`. `restricted_ictal_free_time` maps `None`/`NaN` to `cap_ms` and averages — this is the restricted mean ictal-free time and is the only latency number that may be reported across arms with censoring. `paired_onset_difference` keeps only indices where both entries are finite. `spatial_correlation` computes the Spearman correlation between `values` and `covariate` and builds the null by rigid **block circular shifts** of the covariate field on a `block_mm` grid, which preserves the covariate's spatial autocorrelation; a plain permutation null would be anticonservative here and must not be used. On the frozen 7×7 grid there are 49 distinct shifts, so the per-network p has a floor of 1/49 — `spatial_correlation` returns `n_distinct_shifts` and `p_floor` so the report states this rather than implying arbitrary precision. The load-bearing test is the cohort-level paired bootstrap over the 12 per-network r values, not the per-network p.
+`paired_bootstrap` asserts equal length, resamples **network indices** (not values independently), and reports quantiles of the mean paired difference `a - b`. `restricted_ictal_free_time` maps `None`/`NaN` to `cap_ms` and averages — this is the restricted mean ictal-free time and is the only latency number that may be reported across arms with censoring. `paired_onset_difference` keeps only indices where both entries are finite.
 
-`covariate_collinearity` returns every pairwise Spearman r among the supplied covariate fields, the maximum absolute value, and `report_as_single_family = max_abs_r >= threshold`. When it is `True`, downstream reporting emits **one** headline spatial number for the substrate-structure family plus partial correlations as a diagnostic; three separate correlations are never presented as three independent mechanisms.
+`exact_toroidal_shifts(grid_n)` returns all `grid_n**2` integer shifts including `(0, 0)`.
+`spatial_correlation_exact_shift` reshapes the covariate to `(grid_n, grid_n)`, applies each
+shift with `np.roll` on both axes, flattens, and computes the Spearman correlation against
+`values`; rigid shifts preserve the covariate's spatial autocorrelation, which a plain
+permutation null would destroy, making it anticonservative. Because the group is small the null
+is **enumerated in full** — no `draws`, no seed, deterministic — and the function returns
+`n_distinct_shifts = grid_n**2`, `p_floor = 1/grid_n**2` and the complete `null_r` vector so the
+report can state the floor rather than imply arbitrary precision. The load-bearing test remains
+the cohort-level paired bootstrap over the 12 per-network r values, not the per-network p.
+
+`covariate_collinearity` returns every pairwise Spearman r among the supplied covariate fields
+and the maximum absolute value — and nothing else. It deliberately has **no** decision output:
+`h` and local recruitment time are the primary spatial covariates by design, fixed before any
+run, and the outgoing pathway gains are descriptive companions. A data-dependent merge rule
+would be a degree of freedom, and the composite it implied was never defined.
 
 - [ ] **Step 4: Run the tests**
 
 Run: `/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python -m pytest tests/test_zm_statistics.py -v`
-Expected: 7 passed.
+Expected: 9 passed.
 
 - [ ] **Step 5: Commit**
 
@@ -2112,7 +2271,7 @@ Order of operations, which must not change:
 10. **Observation-control montages**: while `spikes` is still in memory, call `snn_event_envelope(spikes, positions, montage_k, dt)` once for each of the eight pre-frozen montages (identity plus the seven square-symmetry images of the contact set about the sheet centre). Assert each transformed montage passes `cmrun.valid_mask`; list and exclude any contact that does not, and record the excluded count. Store as `contact_envelope_ctl_<element>`.
 11. **`h`-weighted Z/M trajectory**: from the `MZSlowVars` trace stride, additionally accumulate `sum_i h_i z_i / sum_i h_i` and `eta_m * sum_i h_i m_i / sum_i h_i`. The node field is only 3.53 % of the E population, so the unweighted population mean mostly reports background and may not be the headline trajectory.
 12. State characterization over the post-detection recording, with the length-matched interictal reference taken from the 500 ms ending at `onset - 1000 ms`.
-13. Local recruitment (Task 8b) over the window ending at detection, with each bin's threshold taken from its own rate over the `reference_window_ms` ending at `onset - 1000 ms`.
+13. Local recruitment (Task 8b) over the **frozen search window `[onset − 300 ms, onset + 200 ms]`**, with each bin's threshold taken from its own rate over the **frozen reference window `[1000, 2000] ms`** — an early interictal segment, *not* a pre-onset one. With `tau_z = 5000 ms` the slow drift runs on a five-second scale, so a threshold window one second before onset already sits inside the buildup and would be inflated by the very rise the measurement is meant to detect.
 14. Write json + npz atomically.
 
 - [ ] **Step 2: Write the Gate A audit script and run it**
@@ -2150,23 +2309,32 @@ git commit -m "topic4 zm-itx: primary worker and the default-path parity gate"
 
 **Interfaces:**
 - Consumes: Tasks 1, 2, 4, 5, 6, 9; the checkpoints written by Task 11.
-- Produces: `<output_root>/perturbation/<arm>_seed_<seed>[_ctl_<element>]_<label>[_<splice>].json` and `.npz`, where `label ∈ {baseline, pre_ictal, sensitivity}` and `splice` defaults to `native`. The npz holds `site_id` (U8), `site_xy_mm`, and the **E1** block — `susceptibility`, `excess_spikes_early`, `excess_spikes_late`, `r90_mm`, `contact_excess_energy`, `excess_per_neuron` (n_sites × n_e float32) — plus, only when `--measure-ignition` is set, the **E2** block `probe_attributable_event`, `reached_model_ictal`, `onset_advance_ms`, `onset_censored`. Every record carries `off_manifold` (bool) from `splice_checkpoint`. `slow_field_D`, `slow_field_A`, `slow_field_net` (n_e float64) come from the sham run's accumulator.
+- Produces: `<output_root>/perturbation/<arm>_seed_<seed>[_ctl_<element>]_<label>[_<splice>].json` and `.npz`, where `label ∈ {baseline, pre_ictal, sensitivity}` and `splice` defaults to `native`. The npz holds `site_id` (U8), `site_xy_mm`, the **E1** block — `susceptibility`, `excess_spikes_early`, `excess_spikes_late`, `r90_mm`, `contact_excess_energy`, `excess_per_neuron` (n_sites × n_e float32) — and, **always**, the in-window regime block `probe_attributable_event_200ms`, `reached_model_ictal_200ms`, `e1_evaluable` (all n_sites bool). Only when `--measure-onset-advance` is set it additionally holds `onset_advance_ms`, `onset_censored`. Every record carries `off_manifold` (bool) from `splice_checkpoint`. `slow_field_D`, `slow_field_A`, `slow_field_net` (n_e float64) come from the sham run's accumulator.
 
-  **E1 and E2 are never written into the same column and never averaged together.** A grid job produces E1 only; an ignition job produces both, and the aggregation reads them from separate files.
+  **E1 and E2 are never written into the same column and never averaged together.** The in-window regime flags travel with every E1 row because they say whether that row is an E1 measurement at all; the ignition *endpoint* is assembled from them separately by the aggregation, and the long onset-advance arm lives in its own files.
 
 - [ ] **Step 1: Write the worker**
 
-CLI: `--config --candidate-id --seed --checkpoint --baseline-checkpoint --label --splice {native,reset_z,reset_m,reset_zm,slow_only} --sites {grid,representative} --dose-cells --measure-ignition --onset-cap-ms --expected-commit --out-json --out-npz`.
+CLI: `--config --candidate-id --seed --checkpoint --baseline-checkpoint --label --splice {native,reset_z,reset_m,reset_zm,slow_only} --sites {grid,representative} --dose-cells --measure-onset-advance --onset-cap-ms --expected-commit --out-json --out-npz`.
 
 The worker loads the network and the checkpoint **once**, then:
 
 1. If `--splice` is not `native`, load `--baseline-checkpoint` as well and build the host state with `splice_checkpoint(pre_ictal_state, baseline_state, mode=splice)`. Refuse a splice when `--label` is not `pre_ictal` (except `slow_only`, whose host is the baseline state), and stamp `off_manifold=True` into every record. Splices are only ever run with `--sites representative`.
 2. Run the **sham** continuation for `window_ms` with the slow-current accumulator enabled for the first 1000 steps (100 ms). The sham is identical for every site at this (checkpoint, splice), so compute it **once** and reuse — this halves the cost.
 3. Per site: deep-copy the host state, restore, run the **probe** continuation with `forced_spike_mask` from `select_packet` and `forced_spike_ms = checkpoint_absolute_time_ms` (injection on the first step of the continuation; the Task 4 clock fix is what makes this legal).
-4. `response_metrics(..., packet_mask=..., inject_step=0)` → E1.
-5. Only when `--measure-ignition`: run both branches again with `early_stop_runaway=True` and duration `onset_cap_ms - checkpoint_time`, then `ignition_metrics(...)` → E2. For `baseline`, `onset_cap_ms = 20000.0` (right-censored at the frozen duration cap); for `pre_ictal`, `sham_onset + 1500.0`.
+4. `response_metrics(..., packet_mask=..., inject_step=0)` → E1, **and always**
+   `in_window_ignition(..., inject_step=0)` → `probe_attributable_event_200ms`,
+   `reached_model_ictal_200ms`, `e1_evaluable = not (either flag)`.
+5. Only when `--measure-onset-advance`: run both branches again with `early_stop_runaway=True` and duration `onset_cap_ms - checkpoint_time`, then `ignition_metrics(...)` → the long E2 arm. For `baseline`, `onset_cap_ms = 20000.0` (right-censored at the frozen duration cap); for `pre_ictal`, `sham_onset + 1500.0`.
 
-`--measure-ignition` is **never** combined with `--sites grid`; the worker errors if both are given. Grid jobs are the primary E1 map and must stay cheap and uncontaminated by nonlinear escape.
+**The in-window flags run on grid jobs too — that is the point.** They come free from arrays the
+run already holds, and without them a pre-ictal grid probe that ignites would silently record an
+escape-dominated spike count as susceptibility. A site whose flag fires keeps its row with
+`e1_evaluable = False`; **the worker never drops the site**, because deleting igniting sites
+would strip the most excitable locations out of the pre-ictal map.
+
+What grid jobs still may not do is the **long** continuation: `--measure-onset-advance` is never
+combined with `--sites grid`, and the worker errors if both are given.
 
 Peak memory per continuation is bounded by `E_spk_bool` over the continuation only: 200 ms → 2000 × 32000 bytes = 64 MB; a baseline ignition continuation of ~6 s → 1.9 GB. Ignition jobs get their own concurrency budget in Task 13.
 
@@ -2300,19 +2468,24 @@ git commit -m "topic4 zm-itx: canary networks and the interictal-baseline gate"
   --config config/topic4_data_driven_zm_ictal_transition_v1.json
 ```
 
-Runs the perturbation worker at the **baseline** checkpoint only, 6 representative sites, 3 canary seeds — 18 units per rung — for each packet size in `[16, 32, 64, 128, 256]`, with `--measure-ignition` so both ignition tests are evaluated.
+Runs the perturbation worker at the **baseline** checkpoint only, 6 representative sites, 3 canary seeds — 18 units per rung — for each packet size in `[16, 32, 64, 128, 256]`. The in-window regime flags are produced automatically on every unit.
 
-Selection: the **largest** rung satisfying **all three**:
+Selection: the **smallest** rung satisfying **all four**:
 
 ```
 0 / 18 units with a probe-attributable detector-qualified event
 0 / 18 units reaching the model ictal criterion
 median descendant susceptibility over the 18 units >= 50 excess spikes
+median response ratio to the next larger rung lies in [1.2, 3.0]
 ```
 
-Largest, not smallest — inside the no-ignition regime a bigger probe gives a better-conditioned finite response. The 50-spike floor is on **descendant** spikes and is therefore independent of the packet size; the earlier "≥ 200 total excess spikes" rule was satisfied by a 256-cell packet with zero recursive amplification, which is precisely what this rewrite removes.
+**Smallest, not largest.** The previous draft picked the largest baseline-safe rung on the argument that a bigger probe is better conditioned. That argument does not apply: this is not an inversion needing conditioning, and the largest baseline-safe rung is precisely the one most likely to leave the sub-event regime once the network becomes more excitable at the pre-ictal checkpoint — which would recycle the contamination the descendant metric was introduced to remove.
 
-If no rung satisfies all three, write `{"verdict": "NO_SUBEVENT_PROBE_REGIME"}` and **stop the round at Phase 1**. Do not loosen the ignition criterion, do not shrink the response window, do not proceed with an igniting probe. That verdict is itself the finding: this work point admits no sub-ignition probe, so a finite-response susceptibility question cannot be posed here.
+The ratio clause is the linearity check. The packet doubles between rungs, so a linear regime gives a ratio near 2; below 1.2 the probe is saturating and above 3.0 it is sitting near a threshold. Compute it against the next rung up even when that rung is itself rejected for igniting — the ratio is a property of the response curve, not a candidate.
+
+The 50-spike floor is on **descendant** spikes and is therefore independent of the packet size; the original "≥ 200 total excess spikes" rule was satisfied outright by a 256-cell packet with zero recursive amplification.
+
+If no rung satisfies all four, write `{"verdict": "NO_SUBEVENT_PROBE_REGIME"}` and **stop the round at Phase 1**. Do not loosen the ignition criterion, do not shrink the response window, do not drop the linearity clause, do not proceed with an igniting probe. That verdict is itself the finding: this work point admits no sub-ignition probe, so a finite-response susceptibility question cannot be posed here.
 
 Writes `dose_freeze.json` with every rung's numbers and patches `candidate_manifest.json` with `perturbation.frozen_dose_cells`. The script refuses any `--label` other than `baseline`, so the dose can never be tuned on a pre-ictal or patient-derived quantity.
 
@@ -2347,9 +2520,29 @@ Writes `counterfactual_attribution.json` with, per branch, the mean descendant s
   --config config/topic4_data_driven_zm_ictal_transition_v1.json
 ```
 
-Over **all returned events before onset**, with the frozen patient direction classifier from the manifest via `formal_mode_assignments` in `src/topic4_nlc_pathway_mechanism.py`: out-of-distribution fraction, support for both modes, KMeans match — each compared against the distribution across the 48 Z/M-off reference runs.
+Over **all returned events before onset**, with the frozen patient direction classifier from the manifest via `formal_mode_assignments` in `src/topic4_nlc_pathway_mechanism.py`, and `best_binary_alignment` from `src/topic4_d6_natural_kmeans.py` for the clustering match.
 
-This is a **claim gate, not a run blocker**. It writes `INTERICTAL_REPERTOIRE_RETAINED: true|false` into `repertoire_gate.json`, and the report's wording follows it: retained → *data-driven interictal modes → model ictal state*; not retained → *low-activity background → high-activity state*, with every mode statement dropped.
+The decision rule is **conjunctive and fully specified**, because a list of measures without thresholds leaves the interpretation open once the figure exists:
+
+```
+INTERICTAL_REPERTOIRE_RETAINED = ALL of
+
+  n_returned_events_before_onset       >= 20
+  ood_fraction_returned                <= q95 over the 48 Z/M-off reference runs
+  min(TA_like_count, TB_like_count)    >= 3
+  balanced_alignment                   >= q05 over the 48 Z/M-off reference runs
+```
+
+Calibration, so none of these is arbitrary or unreachable:
+
+- Z/M-off on this substrate yields **4.4 returned events per second** — median 88 per 20 s over the 12 `joint_04_control` seeds, range 78–97. With D7's ~8 s onset prior a healthy pre-onset window holds roughly 35 returned events, so 20 is a real but clearable bar.
+- `>= 3` per mode is the repository's existing `fallback_events_per_mode` convention from the rev11 confirmation config, not a new number.
+- `balanced_alignment` is the mean of the two per-mode recalls from `best_binary_alignment`; it is used rather than raw `purity` because purity can be inflated by a single dominant mode.
+- Both reference quantiles are computed once from the 48 archived Z/M-off runs and cached to `zm_off_reference_repertoire.json` with its own hash; the fact that those runs use seeds 1561-1572 is printed wherever the gate is cited.
+
+Conjunctive because "the repertoire is retained" means all of it. Per-clause results are always written, including which clause failed.
+
+This is a **claim gate, not a run blocker**. It writes `INTERICTAL_REPERTOIRE_RETAINED: true|false` plus the four clause results into `repertoire_gate.json`, and the report's wording follows it: retained → *data-driven interictal modes → model ictal state*; not retained → *low-activity background → high-activity state*, with every mode statement dropped.
 
 - [ ] **Step 4: Run the local-recruitment audit**
 
@@ -2393,7 +2586,7 @@ Only the Joint arm runs here. The four-arm latency comparison, the spatial contr
   --config config/topic4_data_driven_zm_ictal_transition_v1.json
 ```
 
-For **every** transitioned Joint network, `--sites grid` (the frozen 7×7) at `--label baseline` and `--label pre_ictal`, 200 ms, **no** `--measure-ignition`. All 12 networks get the same grid — a 6-point irregular site set cannot support a per-network spatial correlation or its circular-shift null, and cannot be pooled with 49-point maps as equal-precision samples.
+For **every** transitioned Joint network, `--sites grid` (the frozen 7×7) at `--label baseline` and `--label pre_ictal`, 200 ms, **without** `--measure-onset-advance`. The in-window ignition flags are produced on every grid site regardless — they cost nothing and they are what stops a pre-ictal probe that ignites from being recorded as a larger finite response. All 12 networks get the same grid: a 6-point irregular site set cannot support a per-network spatial correlation or its 49-shift null, and cannot be pooled with 49-point maps as equal-precision samples.
 
 Networks with `onset < 2500 ms` are excluded and listed in `perturbation_exclusions.json`. The `sensitivity` label (`onset − 1000 ms`) runs only where `onset >= 3500 ms`, as a robustness row.
 
@@ -2414,14 +2607,21 @@ Expected: 12 worker jsons and 2 grid jobs per transitioned network. Re-run any m
   --config config/topic4_data_driven_zm_ictal_transition_v1.json
 ```
 
-Computes E1's paired pre-minus-baseline difference over the retained networks with a 4096-draw network bootstrap and writes `primary_endpoint.json`.
+Computes E1's paired pre-minus-baseline difference over the retained networks with a 4096-draw network bootstrap and writes `primary_endpoint.json`. Only grid sites with `e1_evaluable = True` at **both** checkpoints enter the network mean; the excluded count, the pre-ictal ignition fraction and the `REGIME_LIMITED` flag are written alongside.
+
+The rule is **three-way and directional**:
 
 ```
-90 % CI excludes 0  -> the primary is resolved; continue to Phase 3
-90 % CI includes 0  -> STOP. Report and ask.
+q05 >  0           pre-ictal susceptibility is higher  -> continue to Phase 3
+q95 <  0           pre-ictal susceptibility is LOWER   -> STOP, report the opposite direction
+q05 <= 0 <= q95    unresolved at n = 12                -> STOP, report as unresolved
 ```
 
-On a stop, the four-arm latency runs, the ignition continuations and the spatial re-registration control are **not** launched. Everything spent so far is ~3.3 h; everything saved is ~5 h. The report says the primary was unresolved at n = 12, not that the effect is absent.
+The earlier draft said "the 90 % CI excludes 0 → continue", which would have launched five more hours of mechanism experiments on a **significantly negative** result, since a negative interval also excludes 0.
+
+On either stop, the four-arm latency runs, the onset-advance continuations and the spatial re-registration control are **not** launched. Everything spent so far is ~3.3 h; everything saved is ~5 h. Neither stop may be written as "no effect": `q95 < 0` says the effect runs the other way, and a straddling interval says n = 12 could not tell.
+
+If `regime_limited` is true — more than 25 % of pre-ictal grid sites ignited — the same three-way rule is applied, but the headline susceptibility statement in the report becomes the pre-ictal ignition fraction rather than the E1 difference, per the pre-registered switch.
 
 - [ ] **Step 5: Commit**
 
@@ -2454,7 +2654,7 @@ git commit -m "topic4 zm-itx: Joint-arm trajectories, uniform response maps, pri
   --config config/topic4_data_driven_zm_ictal_transition_v1.json
 ```
 
-Representative sites only, `--measure-ignition`, at `baseline` and `pre_ictal`, on every transitioned Joint network. Because the dose was frozen to give 0/18 baseline ignitions, the informative reading is whether the same sub-threshold probe ignites at pre-ictal. A baseline ignition continuation allocates ~1.9 GB, so the launcher gives these jobs their own concurrency budget computed from the measured sentinel rather than the flat cap.
+Representative sites only, `--measure-onset-advance`, at `baseline` and `pre_ictal`, on every transitioned Joint network. Because the dose was frozen to give 0/18 baseline ignitions, the informative reading is whether the same sub-threshold probe ignites at pre-ictal — and that reading comes from the in-window flags already collected everywhere, including on the grid. What this phase adds is the **long** arm: how much earlier the transition arrives. A baseline continuation allocates ~1.9 GB, so the launcher gives these jobs their own concurrency budget computed from the measured sentinel rather than the flat cap.
 
 - [ ] **Step 3: Launch the spatial re-registration control**
 
@@ -2496,25 +2696,32 @@ git commit -m "topic4 zm-itx: latency arms, ignition endpoint, spatial re-regist
 
 - [ ] **Step 1: Implement the primary endpoint (E1)**
 
-For every network: `susceptibility_pre - susceptibility_baseline`, each the mean **descendant** susceptibility over that network's retained 7×7 grid sites. Report `paired_bootstrap(pre, baseline, draws=4096, seed=20260817)` with `n`, `mean_difference`, `q05/q50/q95` and `n_positive`. Report the `sensitivity` checkpoint the same way as a robustness row, clearly labelled. E2 numbers never enter this block.
+For every network: `susceptibility_pre - susceptibility_baseline`, each the mean **descendant** susceptibility over the 7×7 grid sites with `e1_evaluable = True` at **both** checkpoints. Report `paired_bootstrap(pre, baseline, draws=4096, seed=20260817)` with `n`, `mean_difference`, `q05/q50/q95` and `n_positive`, plus per network: the number of sites excluded, which checkpoint excluded them, and the pre-ictal ignition fraction. Set `regime_limited = pre_ictal_ignition_fraction > 0.25`.
+
+The report must carry the bias direction verbatim: excluded sites are the ones that ignited, i.e. the largest responses, so the complete-case difference is **conservative for a positive claim and unsafe for a negative one**.
+
+Report the `sensitivity` checkpoint the same way as a robustness row, clearly labelled. E2 numbers never enter this block.
 
 - [ ] **Step 2: Report collinearity BEFORE any spatial interpretation**
 
 ```python
 collinearity = covariate_collinearity(
-    {"h": h_site, "ee_out_gain": ee_site, "etoi_out_gain": etoi_site},
-    threshold=0.7)
+    {"h": h_site, "ee_out_gain": ee_site, "etoi_out_gain": etoi_site})
 ```
 
-`h`, the outgoing E→E gain and the outgoing E→I gain are all functions of the same field and are expected to be strongly collinear. When `report_as_single_family` is `True`, `spatial_endpoint.json` emits **one** headline number for the data-driven-substrate-structure family plus partial correlations as a diagnostic. Three separate correlations are **never** written as three independent mechanisms.
+`h`, the outgoing E→E gain and the outgoing E→I gain are all functions of the same field and are expected to be strongly collinear, which is exactly why **`h` is the primary spatial covariate by design** and the two gains are descriptive companions. The table is printed so a reader can see how little independent information the companions carry; it does **not** select anything. Three separate correlations are never written as three independent mechanisms, and there is no composite.
 
 - [ ] **Step 3: Implement the primary spatial endpoint**
 
-For each network, `spatial_correlation(susceptibility_field, covariate, site_xy, draws=2000, seed=20260817, block_mm=2.0)` for the substrate-structure family and, separately, for the **local recruitment time** from Task 8b (which is a genuinely different construct, not another function of `h`). Each covariate is averaged over the E neurons within 1.0 mm of each grid site so it lives on the same grid. Report per-network Spearman r together with `n_distinct_shifts` and `p_floor` — on a 7×7 torus there are 49 shifts, so the per-network p floors at 1/49 and the report must say so rather than imply arbitrary precision. The load-bearing test is the cohort-level `paired_bootstrap` of the 12 r values against zero. Also report `hotspot_compactness` at baseline and pre-ictal.
+For each network, `spatial_correlation_exact_shift(susceptibility_field, covariate, grid_n=7)` for the two primary covariates — `h`, and **local recruitment time** from Task 8b — and for the two descriptive gains. Each covariate is averaged over the E neurons within 1.0 mm of each grid site so it lives on the same grid.
+
+The null is enumerated, not sampled: all 49 toroidal shifts including the identity, so every per-network row carries `n_distinct_shifts = 49` and `p_floor = 1/49 ≈ 0.0204`, and the report states that floor rather than implying arbitrary precision. The load-bearing test is the cohort-level `paired_bootstrap` of the 12 per-network r values against zero. Also report `hotspot_compactness` at baseline and pre-ictal.
 
 - [ ] **Step 4: Implement the attribution block**
 
-From `counterfactual_attribution.json`: per branch, the mean descendant susceptibility and its paired difference against `native_baseline`, and the fraction of `native_pre_ictal − native_baseline` recovered by `reset_z`, `reset_m`, `reset_zm` and `slow_only`. Every spliced row carries `off_manifold: true`, and the block's header states that these are counterfactual attributions, not trajectories. If this block is absent, the aggregator writes `"zm_attribution": {"status": "NOT_ESTABLISHED"}` and the report's permitted claim degrades accordingly.
+From `counterfactual_attribution.json`: per branch, the mean descendant susceptibility and its paired difference against `native_baseline`, and the fraction of `native_pre_ictal − native_baseline` recovered by `reset_z`, `reset_m`, `reset_zm` and `slow_only`. Every spliced row carries `off_manifold: true`, and the block's header states that these are counterfactual attributions, not trajectories.
+
+**The output field is named `carrier_candidate`, never `carrier`.** The block runs on three canary networks, so the permitted wording is "identifies a counterfactual carrier candidate consistent with the pre-ictal rise". Naming a carrier outright would require running the block on the full formal cohort, which this round does not do. If the block is absent, the aggregator writes `"zm_attribution": {"status": "NOT_ESTABLISHED"}` and the report may not name any variable at all.
 
 - [ ] **Step 5: Implement the secondary endpoints**
 
@@ -2767,8 +2974,21 @@ name in Tasks 1, 7, 11, 16b. `frozen_sites(kind=...)` takes `"grid"` or `"repres
 Tasks 9, 12, 15, 16, 16b. `splice_checkpoint(mode=...)` takes the same six mode strings in Tasks
 9, 12, 15, 17.
 
-**Contamination guards that must not be relaxed.** Three tests encode findings that cost a
-review round to surface, and weakening any of them re-opens the corresponding contamination:
-`test_injected_spikes_alone_produce_exactly_zero_susceptibility` (Task 9),
-`test_ignition_requires_the_event_to_be_absent_from_the_sham` (Task 9), and
-`test_a_brief_blip_shorter_than_the_persistence_floor_is_not_recruitment` (Task 8b).
+**Contamination guards that must not be relaxed.** These tests encode findings that cost review
+rounds to surface; weakening any of them re-opens the corresponding contamination:
+
+| Test | Guards against |
+|---|---|
+| `test_injected_spikes_alone_produce_exactly_zero_susceptibility` (Task 9) | the packet's own spikes being scored as response |
+| `test_ignition_requires_the_event_to_be_absent_from_the_sham` (Task 9) | reading one of the network's own 41 %-of-the-time events as a probe effect |
+| `test_splice_leaves_every_non_slow_field_bit_identical` (Task 9) | a counterfactual that silently perturbs more than `z`/`m` |
+| `test_a_brief_blip_shorter_than_the_persistence_floor_is_not_recruitment` (Task 8b) | background fluctuation counted as recruitment |
+| `test_symmetric_offaxis_spread_is_not_cancelled_by_a_signed_coordinate` (Task 8b) | symmetric off-axis spread averaging to "no spread" |
+| `test_exact_shift_null_reports_49_shifts_and_a_1_over_49_floor` (Task 10) | a sampled null implying precision the 7×7 grid does not have |
+
+**Pre-registered decision rules, all fixed before any run.** Dose: smallest rung, 0/18 on both
+ignition tests, ≥ 50 descendant spikes, ratio in `[1.2, 3.0]`. Phase 1A: ≥ 2 of 3 networks.
+Phase 2: `q05 > 0` continue, `q95 < 0` stop-opposite, straddling stop-unresolved. Regime switch:
+pre-ictal grid ignition fraction > 0.25 → `REGIME_LIMITED`. Repertoire: four conjunctive clauses
+with the reference quantiles cached. Primary spatial covariates: `h` and local recruitment time,
+chosen by design and not by any data-dependent rule.

@@ -189,40 +189,87 @@ and would trivially clear any threshold on the order of 200.
 E1 is only meaningful in a regime where the probe does **not** ignite. The dose is frozen so
 that it does not.
 
-### E2 — ignition (SECONDARY, nonlinear)
+### Every E1 run carries its own regime check
+
+Freezing the dose on baseline checkpoints guarantees nothing about the pre-ictal checkpoint —
+which is precisely where excitability is hypothesised to be higher. A probe that stays
+sub-event at baseline and ignites at pre-ictal would produce a large descendant count dominated
+by nonlinear escape, and recording that as "susceptibility grew" is the exact confound E1 exists
+to avoid.
+
+Therefore **every** 200 ms E1 run, grid sites included, emits its own in-window regime flags:
 
 ```
-ignition(site) = the probe branch shows a probe-attributable detector-qualified event,
-                 or reaches the model ictal criterion, within the response window
-onset advance  = sham onset - probe onset
+probe_attributable_event_200ms   detector-qualified event in the probe branch,
+                                 absent from the paired sham branch
+reached_model_ictal_200ms        120 Hz / 100 ms criterion met inside the window
+```
+
+These are computed from the arrays the run already produces and cost nothing extra. They are
+**not** the long onset-advance continuation, which remains representative-sites-only.
+
+When either flag is true at a site:
+
+- that site's E1 value is marked `e1_evaluable = false` and is **not** used in the E1 mean;
+- the site is **not deleted** — deleting igniting sites would systematically remove the most
+  excitable locations from the pre-ictal map and silently bias both the paired difference and
+  the spatial map;
+- the site is handed to the E2 analysis as an ignition event.
+
+The **fraction of pre-ictal grid sites that ignite** is a pre-registered reported quantity, not
+a diagnostic. The paired E1 difference uses sites evaluable at **both** checkpoints, and the
+report states the resulting bias direction explicitly: dropping igniting sites removes the
+largest responses, so the complete-case difference is **conservative** for a positive claim and
+**unsafe** for a negative one.
+
+Pre-registered regime switch: if **more than 25 %** of pre-ictal grid sites ignite, the
+complete-case E1 analysis is labelled `REGIME_LIMITED` and the pre-ictal ignition fraction
+becomes the headline susceptibility statement instead. This switch is declared here, before any
+run, and is not a post-hoc choice.
+
+### E2 — ignition and onset advance (SECONDARY, nonlinear)
+
+```
+ignition(site)  = probe_attributable_event_200ms or reached_model_ictal_200ms
+onset advance   = sham onset - probe onset      (long continuation)
 ```
 
 "Probe-attributable" means present in the probe branch and absent from the paired sham branch —
 required because the unperturbed network is already above the detector 41 % of the time.
 
-E2 is measured **only at the 6 representative sites**, **only after E1 has resolved**, and is
-reported as a distinct endpoint. E1 numbers are never pooled with E2 numbers.
+The in-window ignition flags are collected everywhere; the **long onset-advance continuation**
+is run only at the 6 representative sites and only after E1 has resolved. E1 numbers are never
+pooled with E2 numbers.
 
 ### Dose freeze
 
 Ladder `{16, 32, 64, 128, 256}` E cells, calibrated on **baseline checkpoints only**, blind to
 any pre-ictal or patient-derived quantity (the calibration script refuses any `--label` other
 than `baseline`). Across `3 canary seeds × 6 representative sites = 18` units, the frozen dose
-is the **largest** ladder rung satisfying **all** of:
+is the **smallest** ladder rung satisfying **all** of:
 
 ```
 0 / 18 units show a probe-attributable detector-qualified event
 0 / 18 units reach the model ictal criterion
 median descendant susceptibility over the 18 units >= 50 excess spikes
+the response ratio to the next larger rung lies in [1.2, 3.0]
 ```
 
-Largest, not smallest: within the no-ignition regime a bigger probe gives a better-conditioned
-finite response. The 50-spike floor is a measurability floor on *descendant* spikes and is
-unrelated to the packet size.
+**Smallest, not largest.** The earlier draft chose the largest safe rung on the reasoning that a
+bigger probe is better conditioned; that reasoning is wrong here. This is not an inversion
+problem needing conditioning — the requirement is to stay inside the linear / sub-event regime,
+and the largest baseline-safe rung is the one most likely to leave that regime once the network
+becomes more excitable at the pre-ictal checkpoint.
 
-If no rung satisfies all three, the verdict is **`NO_SUBEVENT_PROBE_REGIME`** and Phase 3 does
-not run. The finding reported is that this work point admits no sub-ignition probe, which is
-itself informative and must not be worked around by loosening the ignition criterion.
+The ratio clause is the linearity check: the packet doubles between rungs, so a linear regime
+gives a response ratio near 2. Below 1.2 the probe is saturating — it is already recruiting
+everything it can reach; above 3.0 it is supralinear, i.e. sitting near a threshold. Either way
+the rung is rejected.
+
+If no rung satisfies all four, the verdict is **`NO_SUBEVENT_PROBE_REGIME`** and Phase 3 does not
+run. The finding reported is that this work point admits no sub-ignition probe, which is itself
+informative and must not be worked around by loosening the ignition criterion, shrinking the
+response window, or dropping the linearity clause.
 
 ## Attributing the susceptibility change: Z/M slow state versus fast-state proximity
 
@@ -247,11 +294,24 @@ Five short branches at the canary checkpoints, 6 representative sites, 200 ms ea
 
 **Boundary, stated in the report and the figure caption:** a spliced state is off-manifold — the
 dynamics never visit "pre-ictal fast state with baseline `z`". These branches answer *which
-variable carries the elevated responsiveness*, not *what would have happened*. They are a
-counterfactual attribution test, not a trajectory.
+variable is consistent with carrying the elevated responsiveness*, not *what would have
+happened*. They are a counterfactual attribution test, not a trajectory.
+
+**Strength of the resulting claim is bounded by n = 3.** The permitted wording is
+
+> identifies a **counterfactual carrier candidate** consistent with the pre-ictal rise
+
+and never "identifies the carrier". Naming a carrier outright would require the block to be run
+on the full formal cohort, which this round does not do.
 
 **Without this block the permitted claim is only "pre-ictal susceptibility on a Z/M-active
-trajectory".** With it, the claim may name the carrying variable.
+trajectory"**, with no variable named at all.
+
+**Splice integrity is a bit-level test, not an assumption.** Apart from the named `z` and/or `m`
+arrays, a spliced state must be byte-identical to its host: membrane potentials, refractory
+counters, all four synaptic variables, both delay rings, the OU field state, both RNG bit-
+generator states, the raster indices, the early-stop EMA and the absolute step index. The test
+compares full-state digests with the slow arrays excluded.
 
 ## Spatial sampling and the primary spatial endpoint
 
@@ -278,16 +338,26 @@ local ictal recruitment time      (see below)
 
 each averaged over the E neurons within 1.0 mm of each grid site so it lives on the same grid.
 
-**Collinearity is reported before interpretation.** `h`, the E→E gain and the E→I gain are all
-functions of the same field and are expected to be strongly collinear; their pairwise Spearman
-correlations are reported first, and three separate correlations are **never** presented as
-three independent mechanisms. If the pairwise correlations exceed 0.7 the three are reported as
-one *data-driven substrate structure* family with a single headline number plus partial
-correlations as a diagnostic.
+**One primary covariate, fixed here.** `h` is the **primary** spatial covariate. The outgoing
+E→E gain and the outgoing E→I gain are **descriptive** and are reported alongside it without
+their own claims. An earlier draft proposed collapsing all three into a "substrate structure"
+family whenever any pair correlated above 0.7; that is not defensible, because the composite was
+never defined and a data-dependent merge rule is a degree of freedom. Designating `h` primary in
+advance removes the choice entirely.
 
-Per-network statistic: Spearman r on the 49 sites, with a **block circular-shift** null
-(the covariate field is rigidly shifted on the 7×7 torus, preserving its autocorrelation); 49
-distinct shifts give an exact but coarse per-network p, floor 1/49. The load-bearing test is the
+Local recruitment time is a separate primary spatial covariate — it is a genuinely different
+construct, not another function of `h`.
+
+**Collinearity is still reported before interpretation**, as a table of pairwise Spearman
+correlations among `h`, the E→E gain and the E→I gain, so a reader can see that the descriptive
+covariates carry little independent information. Three separate correlations are **never**
+presented as three independent mechanisms.
+
+Per-network statistic: Spearman r on the 49 sites, with an **exact toroidal-shift** null. The
+covariate field is rigidly shifted on the 7×7 torus, which preserves its spatial
+autocorrelation; the shift group has exactly **49 elements including the identity**, so the null
+is enumerated in full rather than sampled, `n_distinct_shifts = 49` and the p-value floor is
+exactly `1/49 ≈ 0.0204`. No `draws` parameter applies to this null. The load-bearing test is the
 cohort-level paired bootstrap over the 12 per-network r values, not the per-network p.
 
 Also reported: hotspot compactness (top-quintile sites, mean pairwise distance versus random
@@ -302,9 +372,26 @@ any 100 ms window, so the statistic is close to uniform noise. Replaced by:
 1. Assign E neurons to fixed 1 mm spatial bins.
 2. Compute each bin's smoothed local firing rate (5 ms kernel).
 3. Threshold each bin against **its own** interictal baseline — the q99 of that bin's rate over
-   a pre-onset reference window — requiring the excess to persist ≥ 15 ms.
+   the frozen reference window — requiring the excess to persist ≥ 15 ms.
 4. Report per bin the local recruitment time; across bins the **10 % → 90 % spatial recruitment
    duration**, and the axial versus off-axial lag along the patient axis.
+
+**The reference window is `[1000, 2000] ms`, frozen, same seed** — an early interictal segment,
+not a pre-onset one. An earlier draft took it from the second ending at `onset − 1000 ms`; with
+`tau_z = 5000 ms` the slow drift operates on a five-second scale, so a window one second before
+onset is already inside the buildup. Taking the threshold from there would inflate every bin's
+q99 by the very rise the measurement is meant to detect, and would mask real spread. The
+same-seed Z/M-off canary run supplies a cross-check on the same window.
+
+**The search window is `[onset − 300 ms, onset + 200 ms]`**, frozen relative to the operational
+onset. Note the detection lag built into that definition: `runaway_early_stop_ms` fires 100 ms
+after the EMA first crosses, so ignition begins before the reported onset and the window is
+placed to contain it.
+
+**The off-axial slope uses the absolute perpendicular distance `|d_perp|`.** With a signed
+perpendicular coordinate, spread that is symmetric about the axis cancels to a slope near zero
+and would be misread as "no off-axis propagation". A dedicated synthetic test covers exactly
+this case.
 
 This is the measurement that separates **sequential local spread** from **near-simultaneous
 whole-field ignition**, which is the distinction the earlier `q_I`/`g_K` line failed to make.
@@ -318,9 +405,35 @@ about "the data-driven interictal repertoire going ictal". A **claim gate**, not
 INTERICTAL_REPERTOIRE_RETAINED
 ```
 
-computed over all returned events before onset with the frozen patient direction classifier:
-out-of-distribution fraction, support for both modes, KMeans match — each compared against the
-distribution across the 48 Z/M-off reference runs.
+computed over all returned events before onset with the frozen patient direction classifier. The
+decision rule is **conjunctive and fully specified here** — listing measures without thresholds
+would leave the interpretation open once the figure exists:
+
+```
+INTERICTAL_REPERTOIRE_RETAINED = ALL of
+
+  n_returned_events_before_onset          >= 20
+  ood_fraction_returned                   <= q95 over the 48 Z/M-off reference runs
+  min(TA_like_count, TB_like_count)       >= 3
+  kmeans balanced_alignment               >= q05 over the 48 Z/M-off reference runs
+```
+
+Calibration of those numbers, so they are neither arbitrary nor unreachable:
+
+- Under Z/M off this substrate produces **4.4 returned events per second** (median 88 per 20 s
+  across the 12 `joint_04_control` seeds, range 78–97). With D7's ~8 s onset prior the pre-onset
+  window should hold roughly 35 returned events, so a floor of 20 is a real bar that a healthy
+  run clears.
+- `>= 3` events per mode is the repository's existing `fallback_events_per_mode` convention from
+  the rev11 confirmation config, not a new number.
+- `balanced_alignment` is the mean of the two per-mode recalls from
+  `src.topic4_d6_natural_kmeans.best_binary_alignment`, chosen over raw purity because it cannot
+  be inflated by one dominant mode.
+- Both reference quantiles come from the same 48 archived Z/M-off runs, cached with their own
+  hash, and the fact that those runs use seeds 1561-1572 is stated wherever the gate is cited.
+
+Conjunctive, because "the repertoire is retained" means all of it, not one aspect. Per-clause
+results are always reported, including which clause failed.
 
 - Retained → the round may be written as *data-driven interictal modes → model ictal state*.
 - Not retained → the wording is *low-activity background → high-activity state*, and every mode
@@ -331,15 +444,19 @@ The runaway itself is never assigned a Mode 1/2 label.
 ## Endpoint tiers (fixed here, before any run)
 
 ```
-Primary          E1: pre-ictal minus baseline descendant susceptibility
-                 (sham-subtracted, per-neuron, mean over that network's retained grid sites)
-Primary spatial  spatial relation of the susceptibility field to h / outgoing E->E gain /
-                 outgoing E->I gain / local recruitment time, with collinearity reported first
-Attribution      the five counterfactual splices: which variable carries the change
-Secondary        E2 ignition and onset advance at the representative sites;
+Primary          E1: pre-ictal minus baseline descendant susceptibility, sham-subtracted,
+                 mean over the grid sites evaluable at BOTH checkpoints, paired within network;
+                 reported together with the pre-ictal ignition fraction and the
+                 REGIME_LIMITED flag
+Primary spatial  spatial relation of the susceptibility field to h (primary) and to local
+                 recruitment time (primary); outgoing E->E and E->I gains are descriptive
+                 companions, with the collinearity table printed first
+Attribution      the counterfactual splices: which variable is a carrier CANDIDATE, at n = 3
+Secondary        E2 ignition fraction everywhere and onset advance at the representative sites;
                  four-arm time-to-model-ictal
 Descriptive      virtual-contact readout, projected Z/M trajectory, high-activity state
-                 morphology, Mode 1/2 and OOD evolution, spatial recruitment duration
+                 morphology, Mode 1/2 and OOD evolution, spatial recruitment duration,
+                 outgoing pathway gains
 ```
 
 **Two orthogonal axes, never collapsed.** Tier is fixed above. Contact dependence is separate:
@@ -447,12 +564,25 @@ Staged so the cheapest decisive result comes first and a dead end costs three ca
 | **0** | Gates A/B/C; parallel montage recording; descendant-spike metric | all three gates bit-exact |
 | **1A** | 3 Joint Z/M-on canary (seeds 1801-1803) + 3 same-seed Z/M-off canary | `INTERICTAL_BASELINE_AVAILABLE` in **≥ 2 of 3** networks |
 | **1B** | dose freeze over the 18 baseline units; counterfactual splices; repertoire gate; local-recruitment audit | dose found, i.e. not `NO_SUBEVENT_PROBE_REGIME` |
-| **2** | **Joint arm only**, 12 seeds; uniform 7×7 short response maps at baseline and pre-ictal | E1 resolved: the 90 % CI of the paired pre-minus-baseline difference **excludes 0** |
+| **2** | **Joint arm only**, 12 seeds; uniform 7×7 short response maps at baseline and pre-ictal | E1 resolved **upward**: `q05 > 0` (see below) |
 | **3** | Node / Node+EE / Node+EtoI latency arms (pass 1 only); E2 ignition and onset advance at the representative sites; `r180` spatial control | — |
 | **4** | figures, report, freeze | — |
 
-If Phase 2's interval includes 0, the round stops there and reports; the four arms, the spatial
-control and every long onset-advance continuation are not run. If Phase 1A's gate fails,
+The Phase 2 rule is **three-way and directional**, not "the interval excludes 0". A
+significantly *negative* interval also excludes 0, and continuing into five more hours of
+mechanism experiments on a result pointing the opposite way would be a straightforward error:
+
+```
+q05 > 0            pre-ictal susceptibility is higher  -> continue to Phase 3
+q95 < 0            pre-ictal susceptibility is LOWER   -> stop, report the opposite direction
+q05 <= 0 <= q95    unresolved at n = 12                -> stop, report as unresolved
+```
+
+Only the first branch launches the four latency arms, the long onset-advance continuations and
+the spatial re-registration control. Neither stopping branch may be written as "no effect": one
+says the effect runs the other way, the other says n = 12 could not tell.
+
+If Phase 1A's gate fails,
 the finding reported is that the current Z/M work point has no interpretable interictal residence
 segment; **the baseline checkpoint is not moved earlier to rescue it.**
 
@@ -517,14 +647,33 @@ replaced.
 Permitted, if supported:
 
 > While the data-driven interictal repertoire is still present, local perturbation
-> susceptibility rises before the model ictal transition, that rise is carried by the Z/M slow
-> state rather than by fast-state proximity alone, and it is spatially organized along the
-> frozen data-driven substrate.
+> susceptibility rises before the model ictal transition; the accumulated Z/M slow state is a
+> counterfactual carrier candidate for that rise; and the rise is spatially organized along the
+> frozen data-driven node field.
 
-If E1 grows but the counterfactual splices show the change is carried by fast state:
+"Carrier candidate", never "the carrier" — the attribution block runs on three canary networks.
 
-> Responsiveness grows as the transition approaches, but on this substrate the growth is not
-> attributable to the accumulated Z/M slow state.
+If E1 grows but the counterfactual splices show the change survives resetting `z` and `m`:
+
+> Responsiveness grows as the transition approaches, but resetting the accumulated Z/M slow
+> state does not remove the growth, so on this substrate it is not attributable to slow-state
+> accumulation.
+
+If Phase 2 stops with `q95 < 0`:
+
+> Local perturbation susceptibility is **lower** before the model ictal transition than at
+> baseline on this substrate — the opposite of the hypothesised direction.
+
+If Phase 2 stops with the interval straddling zero:
+
+> The pre-ictal minus baseline susceptibility change was unresolved at n = 12. This is a
+> statement about resolution, not about absence.
+
+If more than a quarter of pre-ictal grid sites ignite (`REGIME_LIMITED`):
+
+> The frozen sub-ignition probe no longer stays sub-ignition at the pre-ictal checkpoint, so the
+> finite-response endpoint is regime-limited there; the reported susceptibility statement is the
+> pre-ictal ignition fraction.
 
 If E1 grows and is Z/M-carried but shows no spatial relation to the substrate:
 
