@@ -244,11 +244,49 @@ def phase_counterfactual(config, args):
     print(json.dumps({"phase": "counterfactual", "launched": len(jobs)}))
 
 
+def phase_fig5(config, args):
+    """Only what Figure 5 panels D/E/F need: the Joint arm, both checkpoints,
+    the frozen grid. Node's grid, the four-arm factorial and the spatial
+    re-registration control are deliberately NOT run here -- they answer the
+    connectivity question, which is deprioritised relative to producing the
+    figure.
+    """
+    output_root = ROOT / config["output_root"]
+    controller_log = output_root / "controller.log"
+    joint = config["arms"]["Joint"]
+    dose = json.loads((output_root / "dose_freeze.json").read_text())
+    if dose["status"] != "PASS":
+        raise SystemExit("no frozen dose; Figure 5 D/E/F cannot be built")
+    cells = int(dose["selected_dose_cells"])
+    extra = ["--allow-uncommitted-config"] if args.allow_uncommitted_config else []
+    jobs = []
+    for seed in config["seeds"]["canary"]:
+        for label in ("baseline", "pre_ictal"):
+            checkpoint = _checkpoint(output_root, joint, seed, label)
+            if checkpoint is None:
+                continue
+            out = output_root / "perturbation" / f"{joint}_seed_{seed}_{label}_grid"
+            jobs.append((f"{label}-s{seed}",
+                         [PYTHON, str(PERTURB), "--config", args.config,
+                          "--candidate-id", joint, "--seed", str(seed),
+                          "--checkpoint", str(checkpoint), "--label", label,
+                          "--sites", "grid", "--dose-cells", str(cells),
+                          "--expected-commit", args.expected_commit,
+                          "--out-json", str(out) + ".json",
+                          "--out-npz", str(out) + ".npz", *extra],
+                         output_root / "run_logs" / f"fig5_{label}_s{seed}.log"))
+    _log(controller_log, {"progress": "fig5_start", "n_jobs": len(jobs),
+                          "dose_cells": cells})
+    _run_pool(jobs, config, "probe", "topic4-zmitx-fig5-", controller_log, poll=15)
+    _log(controller_log, {"progress": "fig5_done", "n_jobs": len(jobs)})
+    print(json.dumps({"phase": "fig5", "launched": len(jobs), "dose_cells": cells}))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--phase", required=True,
-                        choices=("canary", "dose", "counterfactual"))
+                        choices=("canary", "dose", "counterfactual", "fig5"))
     parser.add_argument("--expected-commit", default="HEAD")
     parser.add_argument("--allow-uncommitted-config", action="store_true")
     args = parser.parse_args()
@@ -257,7 +295,8 @@ def main():
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True).strip()
     (ROOT / config["output_root"] / "run_logs").mkdir(parents=True, exist_ok=True)
     {"canary": phase_canary, "dose": phase_dose,
-     "counterfactual": phase_counterfactual}[args.phase](config, args)
+     "counterfactual": phase_counterfactual,
+     "fig5": phase_fig5}[args.phase](config, args)
 
 
 if __name__ == "__main__":
