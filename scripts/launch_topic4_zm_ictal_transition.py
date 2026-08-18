@@ -65,12 +65,17 @@ def _log(path, record):
 def _launch(unit, command, log_path):
     log_path.parent.mkdir(parents=True, exist_ok=True)
     env = [f"--setenv={name}=1" for name in THREAD_ENV]
+    # StandardOutput/Error append: without these the SERVICE's output goes to the
+    # journal and only systemd-run's own one-line output reaches log_path, so a
+    # crashing worker leaves an empty log file.
     full = ["systemd-run", "--user", f"--unit={unit}", "--quiet", *env,
             "--working-directory", str(ROOT),
+            f"--property=StandardOutput=append:{log_path}",
+            f"--property=StandardError=append:{log_path}",
             "/usr/bin/nohup", "/usr/bin/time", "-v", *command]
-    with open(log_path, "wb") as handle:
-        subprocess.run(full, cwd=ROOT, check=True,
-                       stdout=handle, stderr=subprocess.STDOUT)
+    log_path.touch()
+    subprocess.run(full, cwd=ROOT, check=True,
+                   stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
 
 
 def _active(prefix):

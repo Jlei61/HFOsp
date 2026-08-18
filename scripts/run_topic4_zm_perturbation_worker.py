@@ -75,6 +75,31 @@ def _continue(substrate, config, state, *, duration_ms, packet=None,
     return result, slow
 
 
+def _json_safe(value):
+    """Recursively convert numpy types for json.dump.
+
+    atomic_write_json uses a plain json.dump with no default=, and the state and
+    recruitment blocks carry nested dicts containing ndarrays. Filtering only the
+    TOP level let one through and killed a 92-minute run at its final write --
+    after the simulation, so the whole run was lost. Sanitise recursively.
+    """
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, np.ndarray):
+        return _json_safe(value.tolist())
+    if isinstance(value, (np.integer,)):
+        return int(value)
+    if isinstance(value, (np.floating,)):
+        return None if not np.isfinite(value) else float(value)
+    if isinstance(value, (np.bool_,)):
+        return bool(value)
+    if isinstance(value, float) and not np.isfinite(value):
+        return None
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
@@ -214,7 +239,7 @@ def main():
     out_json.parent.mkdir(parents=True, exist_ok=True)
 
     evaluable = [r for r in rows if r["e1_evaluable"]]
-    atomic_write_json({
+    atomic_write_json(_json_safe({
         "status": "ZM_ITX_PERTURBATION_COMPLETE",
         "candidate_id": args.candidate_id, "seed": int(args.seed),
         "label": args.label, "splice_mode": splice_mode,
@@ -230,7 +255,7 @@ def main():
         "rows": rows,
         "wall_seconds": time.time() - started,
         "provenance": provenance,
-    }, str(out_json))
+    }), str(out_json))
 
     arrays = {
         "site_id": np.asarray([r["site_id"] for r in rows], dtype="U12"),

@@ -86,6 +86,31 @@ def _audit_montages(substrate, images):
     return audit
 
 
+def _json_safe(value):
+    """Recursively convert numpy types for json.dump.
+
+    atomic_write_json uses a plain json.dump with no default=, and the state and
+    recruitment blocks carry nested dicts containing ndarrays. Filtering only the
+    TOP level let one through and killed a 92-minute run at its final write --
+    after the simulation, so the whole run was lost. Sanitise recursively.
+    """
+    if isinstance(value, dict):
+        return {str(k): _json_safe(v) for k, v in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_json_safe(v) for v in value]
+    if isinstance(value, np.ndarray):
+        return _json_safe(value.tolist())
+    if isinstance(value, (np.integer,)):
+        return int(value)
+    if isinstance(value, (np.floating,)):
+        return None if not np.isfinite(value) else float(value)
+    if isinstance(value, (np.bool_,)):
+        return bool(value)
+    if isinstance(value, float) and not np.isfinite(value):
+        return None
+    return value
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
@@ -352,8 +377,7 @@ def main():
         },
         "pass2": pass2,
         "checkpoints": checkpoint_records,
-        "state_characterization": {k: v for k, v in state_block.items()
-                                   if not isinstance(v, np.ndarray)},
+        "state_characterization": state_block,
         "recruitment": {k: v for k, v in recruitment_block.items()
                         if not k.startswith("_")},
         "observation_control_montage_audit": montage_audit,
@@ -364,8 +388,6 @@ def main():
         "events": event_rows,
         "provenance": provenance,
     }
-    atomic_write_json(payload, str(out_json))
-
     arrays = dict(
         contact_names=np.asarray(substrate.contact_names, dtype="U16"),
         shaft_ids=substrate.shaft_ids, contact_xy_mm=substrate.contact_xy,
@@ -397,7 +419,8 @@ def main():
     if recruitment_block:
         arrays["recruitment_step"] = np.asarray(recruitment_block["_step"], np.float32)
         arrays["recruitment_bin_xy_mm"] = np.asarray(recruitment_block["_bin_xy"], np.float32)
-    _atomic_npz(out_npz, **arrays)
+    _atomic_npz(out_npz, **arrays)          # arrays first: a json failure must
+    atomic_write_json(_json_safe(payload), str(out_json))   # never cost the run
     print(json.dumps({"stem": stem, "onset_ms": onset_ms,
                       "n_returned": payload["run"]["n_returned_events"],
                       "checkpoints": sorted(checkpoint_records),
