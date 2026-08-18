@@ -110,6 +110,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                   V_th_per_neuron=None, perturb=None,
                   forced_spike_mask=None, forced_spike_ms=None,
                   early_stop_runaway=False, es_thresh_hz=120.0, es_dur_ms=100.0,
+                  post_runaway_record_ms=0.0,
+                  checkpoint_steps=None, checkpoint_sink=None,
+                  resume_state=None, time_offset_ms=0.0,
                   ee_std_u=0.0, ee_std_tau_ms=0.0,
                   dump_ee_std_trace=False, ee_std_trace_maskE=None, t_kick2=None, KICK_BOOST2=0.0,
                   shunt_gaba=False, e_gaba=None, g_gaba_scale=0.0,
@@ -157,8 +160,13 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             raise ValueError("forced spike packet must contain excitatory neurons only")
         if not np.any(forced_spike_mask[:NE]):
             raise ValueError("forced spike packet must contain at least one E neuron")
-        forced_spike_step = int(round(float(forced_spike_ms) / dt))
-        if abs(forced_spike_step * dt - float(forced_spike_ms)) > 1e-9:
+        # ZM-ITX: resolve against the segment's clock origin. With
+        # time_offset_ms == 0 both lines are literally the pre-existing ones, so
+        # the default path is unchanged; without this a probe resumed at 2000 ms
+        # and injected at 2000 ms would compute step 20000 and fail the < nsteps
+        # bound of its 200 ms continuation.
+        forced_spike_step = int(round((float(forced_spike_ms) - time_offset_ms) / dt))
+        if abs(time_offset_ms + forced_spike_step * dt - float(forced_spike_ms)) > 1e-9:
             raise ValueError("forced spike time must lie on the simulation time grid")
         if forced_spike_step < 0 or forced_spike_step >= nsteps:
             raise ValueError("forced spike time lies outside the simulation")
@@ -286,11 +294,51 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     # OFF (early_stop_runaway=False) -> the block below never runs -> no behaviour change.
     _es_alpha = 1.0 - np.exp(-dt / 20.0)                 # 20ms EMA (matches runner _smooth win_ms=20)
     _es_ema = 0.0; _es_dur = int(round(es_dur_ms / dt)); _es_run = 0; _stop_t = nsteps
+    # ZM-ITX: keep recording a bounded tail AFTER detection so the state that was
+    # entered can be characterised. _post_steps=0 -> the break fires on the same step
+    # as before -> byte parity.
+    _post_steps = int(round(float(post_runaway_record_ms) / dt))
+    if _post_steps < 0:
+        raise ValueError('post_runaway_record_ms must be non-negative')
+    _detect_t = None
     spk_t = []; spk_i = []
     ras_keepE = rng.choice(NE, size=min(80, NE), replace=False)
     ras_keepI = NE + rng.choice(NI, size=min(20, NI), replace=False)
     ras_keep = np.concatenate([ras_keepE, ras_keepI])
     ras_mask = np.zeros(N, dtype=bool); ras_mask[ras_keep] = True
+    # ---- ZM-ITX resume. Placed AFTER the recorder RNG draws above so the
+    # restored bit-generator state overwrites whatever the setup consumed; that
+    # is what makes the continuation exact rather than merely similar. ----
+    _resume_step = 0
+    if resume_state is not None:
+        from checkpoint import restore_external_drive, restore_slow
+        if not np.isclose(float(resume_state["absolute_time_ms"]),
+                          float(time_offset_ms), atol=1e-9):
+            raise ValueError(
+                "time_offset_ms does not continue the checkpoint clock")
+        if resume_state["ring_sE"].shape != ring_sE.shape:
+            raise ValueError("checkpoint delay-ring shape differs from this network")
+        if bool(resume_state["track_rec"]) != bool(track_rec):
+            raise ValueError("checkpoint track_rec differs from this run")
+        V[:] = resume_state["V"]; ref[:] = resume_state["ref"]
+        s_E[:] = resume_state["s_E"]; I_E = np.array(resume_state["I_E"], copy=True)
+        s_I[:] = resume_state["s_I"]; I_I = np.array(resume_state["I_I"], copy=True)
+        ring_sE[:] = resume_state["ring_sE"]; ring_sI[:] = resume_state["ring_sI"]
+        xi = float(resume_state["xi"])
+        rng.bit_generator.state = resume_state["rng_state"]
+        ras_keep = np.array(resume_state["ras_keep"], copy=True)
+        ras_mask = np.zeros(N, dtype=bool); ras_mask[ras_keep] = True
+        _es_ema = float(resume_state["es_ema"]); _es_run = int(resume_state["es_run"])
+        if track_rec:
+            s_E_rec[:] = resume_state["s_E_rec"]
+            I_E_rec = np.array(resume_state["I_E_rec"], copy=True)
+        restore_slow(resume_state, slow)
+        restore_external_drive(resume_state, external_e_rate_drive)
+        _resume_step = int(resume_state["step"])
+    _ckpt_steps = set() if checkpoint_steps is None else {int(v) for v in checkpoint_steps}
+    if _ckpt_steps and checkpoint_sink is None:
+        raise ValueError("checkpoint_steps requires a checkpoint_sink")
+
     # ---- NEW recorders: spread readout + distinct-neuron active fraction ----
     spk_inside = np.zeros(nsteps)
     spk_outside = np.zeros(nsteps)
@@ -318,7 +366,19 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
 
     t0 = time.time()
     for t in range(nsteps):
-        tm = t * dt
+        _abs_step = _resume_step + t
+        if _abs_step in _ckpt_steps:                 # top of step, before any RNG draw
+            from checkpoint import capture
+            checkpoint_sink(_abs_step, capture(
+                step=_abs_step, absolute_time_ms=time_offset_ms + t * dt,
+                V=V, ref=ref, s_E=s_E, I_E=I_E, s_I=s_I, I_I=I_I,
+                ring_sE=ring_sE, ring_sI=ring_sI, xi=xi, rng=rng,
+                ras_keep=ras_keep, es_ema=_es_ema, es_run=_es_run,
+                track_rec=track_rec,
+                s_E_rec=(s_E_rec if track_rec else None),
+                I_E_rec=(I_E_rec if track_rec else None),
+                slow=slow, external_drive=external_e_rate_drive))
+        tm = time_offset_ms + t * dt
         # ----- external homogeneous Poisson rate (Eq 6) -----
         xi = ou_a * xi + ou_b * rng.standard_normal()
         nu_now = nu_signal_fn(tm) + xi
@@ -328,7 +388,7 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         # ----- synaptic gating s: decay, recurrent arrivals, external -----
         s_E *= decay_sE
         s_I *= decay_sI
-        slot = t % M
+        slot = _abs_step % M
         if track_rec:
             # HARD CONSTRAINT: read ring_sE[slot] HERE, BEFORE the next line clears it (ring_sE[slot]=0.0).
             # Moving this read after the clear makes I_E_rec read 0 -> divisive term silently no-ops.
@@ -444,7 +504,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
         if early_stop_runaway:                                       # runaway detected -> break before the O(N) scatter
             _es_ema += _es_alpha * (rate_E[t] / NE / dt * 1e3 - _es_ema)   # 20ms-EMA per-neuron rate (Hz)
             _es_run = _es_run + 1 if _es_ema >= es_thresh_hz else 0
-            if _es_run >= _es_dur:
+            if _detect_t is None and _es_run >= _es_dur:
+                _detect_t = t + 1
+            if _detect_t is not None and t + 1 >= _detect_t + _post_steps:
                 _stop_t = t + 1
                 if dump_ee_std_trace:            # break frame is KEPT (_stop_t=t+1) -> write its trace, else phantom 0
                     _rec_xdep(t)                 # (pre-depletion: this frame's O(N) scatter is skipped by design)
@@ -484,16 +546,16 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
                         )
                         x_per_edge = np.repeat(x_source, cnt)
                         w_eff = ee_std_apply(a_w[idx], a_dst[idx], x_per_edge, NE)
-                        np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), w_eff)
+                        np.add.at(ring_sE, ((_abs_step + a_dly[idx]) % M, a_dst[idx]), w_eff)
                         x_dep[spE] *= (1.0 - ee_std_u)
                     else:
-                        np.add.at(ring_sE, ((t + a_dly[idx]) % M, a_dst[idx]), a_w[idx])
+                        np.add.at(ring_sE, ((_abs_step + a_dly[idx]) % M, a_dst[idx]), a_w[idx])
             if spI.size:
                 st = g_indptr[spI]; cnt = g_indptr[spI + 1] - st; tot = int(cnt.sum())
                 if tot:
                     idx = (np.arange(tot) - np.repeat(np.cumsum(cnt) - cnt, cnt)
                            + np.repeat(st, cnt))
-                    np.add.at(ring_sI, ((t + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
+                    np.add.at(ring_sI, ((_abs_step + g_dly[idx]) % M, g_dst[idx]), g_w[idx])
 
         if verbose and (t % max(1, nsteps // 5) == 0):
             print(f"  sim {t}/{nsteps}  ({tm:.0f} ms)  "
@@ -519,8 +581,9 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
     rate_E_hz = rate_E / NE / dt * 1e3
     rate_I_hz = rate_I / NI / dt * 1e3
     res = dict(
-        times=np.arange(nsteps) * dt,
-        runaway_early_stop_ms=(None if _stop_t >= (int(round(p.T / dt))) else round(_stop_t * dt, 1)),
+        times=time_offset_ms + np.arange(nsteps) * dt,
+        runaway_early_stop_ms=(
+            None if _detect_t is None else round(time_offset_ms + _detect_t * dt, 1)),
         rate_E=rate_E_hz, rate_I=rate_I_hz,
         spk_inside=spk_inside, spk_outside=spk_outside,
         E_spk_bool=E_spk_bool,
@@ -542,6 +605,8 @@ def simulate_kick(p: Params, net, KICK_BOOST, slow=None, nu_signal_fn=None,
             }
         ),
     )
+    res["post_runaway_recorded_ms"] = (
+        0.0 if _detect_t is None else round((nsteps - _detect_t) * dt, 1))
     if dump_i_spikes:
         res["I_spk_bool"] = I_spk_bool
     if dump_drive:
