@@ -41,15 +41,23 @@ def _free_cores():
     return max(0.0, os.cpu_count() - load1)
 
 
-def _pool_size(config, job_class):
-    """Measured, not fixed. Recomputed before every launch round."""
+def _pool_size(config, job_class, prefix=""):
+    """Measured, not fixed. Recomputed before every launch round.
+
+    Our OWN running jobs are added back to the free-core count. Load average
+    includes them, so subtracting it without compensation makes every launch
+    shrink the next pool -- a negative feedback loop that capped the round at
+    two workers while 129 GiB and a fair share of cores were free. The
+    co-tenant's load still shrinks our pool, which is the intended direction.
+    """
     execution = config["execution"]
     per_worker = float(execution[f"measured_{job_class}_peak_rss_gib"])
     cap = int(execution[f"max_workers_{job_class}"])
     reserve = float(execution["minimum_available_memory_gib"])
     core_margin = int(execution["minimum_free_cores"])
+    mine = len(_active(prefix)) if prefix else 0
     by_memory = int((_mem_available_gib() - reserve) // per_worker)
-    by_cores = int(_free_cores()) - core_margin
+    by_cores = int(_free_cores()) + mine - core_margin
     return max(1, min(cap, by_memory, by_cores))
 
 
@@ -91,11 +99,32 @@ def _reset_failed(prefix):
                    capture_output=True)
 
 
+def _existing_units(prefix):
+    out = subprocess.run(["systemctl", "--user", "list-units", "--all",
+                          "--no-legend", "--plain", f"{prefix}*"],
+                         capture_output=True, text=True).stdout
+    return {line.split()[0] for line in out.splitlines() if line.strip()}
+
+
+def _already_done(command):
+    """Skip a job whose --out-json is already on disk. Makes the launcher
+    resumable after a restart instead of colliding with live units."""
+    if "--out-json" in command:
+        return Path(command[command.index("--out-json") + 1]).exists()
+    return False
+
+
 def _run_pool(jobs, config, job_class, prefix, controller_log, poll=20):
     """jobs: list of (unit_suffix, command, log_path). Nothing is killed."""
-    pending = list(jobs)
+    live = _existing_units(prefix)
+    pending = [j for j in jobs
+               if f"{prefix}{j[0]}" not in live and not _already_done(j[1])]
+    skipped = len(jobs) - len(pending)
+    if skipped:
+        _log(controller_log, {"progress": "skipped_already_running_or_done",
+                              "n": skipped, "prefix": prefix})
     while pending or _active(prefix):
-        size = _pool_size(config, job_class)
+        size = _pool_size(config, job_class, prefix)
         running = _active(prefix)
         while pending and len(running) < size:
             suffix, command, log_path = pending.pop(0)

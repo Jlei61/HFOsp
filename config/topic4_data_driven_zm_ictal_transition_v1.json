@@ -359,12 +359,13 @@
     "max_workers_full_run": 16,
     "max_workers_probe": 24,
     "minimum_available_memory_gib": 40.0,
-    "minimum_free_cores": 6,
+    "minimum_free_cores": 2,
     "measured_full_run_peak_rss_gib": 8.0,
     "measured_probe_peak_rss_gib": 3.0,
     "co_tenant_note": "this machine is shared: a Topic 5 Epi-PRSSM ladder was using ~36 cores and ~32 GiB when this round was sized. Reserve raised 32 -> 40 GiB and the launcher re-reads MemAvailable and the free-core count before each round, so a co-tenant starting mid-round shrinks OUR pool, not theirs. Processes outside this round's unit prefix are never signalled.",
     "numeric_threads_per_worker": 1,
-    "monitor_interval_seconds": 600
+    "monitor_interval_seconds": 600,
+    "core_rule_note": "our own running units are added back before subtracting the margin, otherwise each launch shrinks the next pool and the round self-throttles to 2 workers. The co-tenant's load still shrinks our pool, which is the intended direction. Margin lowered 6 -> 2 so memory is the binding constraint, per the instruction to use more workers whenever memory allows."
   },
   "claim_boundary": "Development-only. runaway_sustained is an OPERATIONAL label for the model ictal state. Never write: clinical seizure reproduced; patient seizure onset predicted; complete seizure lifecycle recovered; Z/M identified as the patient biological mechanism.",
   "phase2_endpoint_classification": {
