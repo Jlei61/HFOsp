@@ -81,3 +81,22 @@ def test_node_baseline_arm_has_a_noop_edge_mapper():
     sub = build_substrate(config, "node_baseline", 1561, cache_dir=str(CACHE))
     assert np.allclose(sub.edge_coefficients, 0.0)
     assert np.allclose(sub.ee_out_gain[np.isfinite(sub.ee_out_gain)], 1.0, atol=1e-9)
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+def test_transformed_substrate_preserves_field_mass_and_leaves_geometry_fixed():
+    config = load_round_config(CONFIG)
+    plain = build_substrate(config, "joint_04_control", 1561, cache_dir=str(CACHE))
+    rotated = build_substrate(config, "joint_04_control", 1561, cache_dir=str(CACHE),
+                              field_transform="r180")
+    assert np.isclose(rotated.h_e.sum(), 1129.0, atol=1e-8)
+    assert not np.allclose(rotated.h_e, plain.h_e)
+    # the control moves the FIELD, never the geometry it is registered against
+    assert np.array_equal(rotated.contact_xy, plain.contact_xy)
+    assert np.allclose(rotated.axis_unit, plain.axis_unit)
+    assert np.array_equal(rotated.positions_e, plain.positions_e)
+    bounds = np.array([0.5, 0.5, 0.15, 0.15, 0.15, 0.15])
+    assert np.all(np.abs(rotated.edge_coefficients) <= bounds + 1e-12)
+    assert np.allclose(np.linalg.norm(rotated.edge_coefficients[:, 4:], axis=1),
+                       np.linalg.norm(plain.edge_coefficients[:, 4:], axis=1))

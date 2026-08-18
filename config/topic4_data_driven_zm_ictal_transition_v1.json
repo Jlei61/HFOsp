@@ -284,7 +284,7 @@
     ],
     "dose_calibration_units": "3 canary seeds x 6 representative sites = 18",
     "exclude_injected_frame_from_response": true,
-    "packet_radius_mm": 1.0,
+    "packet_radius_mm": 1.2,
     "response_window_ms": 200.0,
     "response_split_ms": 50.0,
     "grid_seeds": "all formal seeds",
@@ -299,7 +299,8 @@
     ],
     "onset_advance_sites": "representative",
     "regime_limited_ignition_fraction": 0.25,
-    "baseline_onset_search_cap_ms": 20000.0
+    "baseline_onset_search_cap_ms": 20000.0,
+    "packet_radius_rationale": "32000 E over 400 mm^2 = 80/mm^2, so a 1.0 mm disk holds only ~251 cells and the 256-cell ladder rung would be unrealizable at most sites. 1.2 mm gives ~362. Smaller rungs are unaffected: select_packet takes the NEAREST n within the radius."
   },
   "counterfactual_splices": [
     "native_baseline",
