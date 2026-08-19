@@ -1,0 +1,101 @@
+{
+  "schema_version": "topic4_patient_specific_field_connectivity_cohort_v2",
+  "scientific_role": "development_only_patient_specific_real_geometry_node_local_connectivity_fit",
+  "source_workspace": "/home/honglab/leijiaxin/HFOsp",
+  "output_root": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/patient_specific_field_connectivity_cohort_v2",
+  "inputs": {
+    "target_audit": {"path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/target_audit/cohort_target_audit.json", "sha256": "7542c20c8c48902396ca6f4f2802adeb50565d8123a8b0a5687de6da704c00d4"},
+    "layout_audit": {"path": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/formal/cohort_layout_audit.json", "sha256": "c4f15ecc4f5128752b3bc5a88de0d2d656140fdc722af07fb84b6d4d71867ed3"},
+    "target_subject_root": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/target_audit/per_subject",
+    "layout_subject_root": "results/topic4_sef_hfo/data_driven_snn_cohort_v1/formal/per_subject",
+    "rev9_base_config": {"path": "config/topic4_rev9_exploratory.json", "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"},
+    "stage_config": {"path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json", "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"},
+    "node_anchor_config": {"path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json", "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"},
+    "common_detector_audit": {"path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json", "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471"},
+    "data_driven_snn_baseline": {"path": "config/topic4_data_driven_snn_baseline_zm_v1.json", "sha256": "2b9586d274b85d9e3663557b5f4dfab7ac64292817667020503d144579ff8a91", "baseline_id": "data_driven_snn_h_spatial_ou_zm_reference_v1"}
+  },
+  "cohort": {
+    "target_denominator": 34,
+    "real_geometry_denominator": 28,
+    "development_source_subject": "epilepsiae_1146",
+    "engineering_canary_subjects": ["epilepsiae_590", "epilepsiae_958", "yuquan_chengshuai"]
+  },
+  "field": {
+    "sheet_L_mm": 20.0,
+    "n_basis_per_axis": 18,
+    "degree": 3,
+    "projection_grid_per_axis": 96,
+    "residual_max_harmonic": 2,
+    "coordinate_clip_abs": 2.0,
+    "initial_coordinate_sd": 0.55,
+    "component_count": null,
+    "peak_count_constraint": null,
+    "contact_conditioned_basis": false
+  },
+  "local_connectivity": {
+    "coefficient_count": 12,
+    "coefficient_clip_abs": 1.25,
+    "raw_logit_clip_abs": 0.65,
+    "E_to_E_length_scale_mm": 0.38,
+    "E_to_I_length_scale_mm": 0.25,
+    "preserve_target_incoming_budget": true,
+    "topology_and_delays_frozen": true
+  },
+  "runtime": {
+    "mode": "active_z_plus_m",
+    "simulation_duration_ms": 20000.0,
+    "early_stop_runaway": true,
+    "late_runaway_invalid": true,
+    "detector": {"population_active_fraction_threshold": 0.0195703125},
+    "contact_readout": {"participation_margin_fraction": 0.1, "timing_fraction": 0.5},
+    "minimum_contacts_per_event": 3,
+    "minimum_events_per_mode": 3,
+    "kmeans_seed": 20260819,
+    "kmeans_n_init": 20
+  },
+  "objective": {
+    "supervised_weakest_mode_weight": 1.0,
+    "natural_kmeans_weakest_mode_weight": 0.75,
+    "ood_fraction_weight": 0.5,
+    "kmeans_instability_weight": 0.25,
+    "support_penalty_weight": 0.1,
+    "field_roughness_weight": 0.02,
+    "edge_l2_weight": 0.01,
+    "invalid_objective": 10.0
+  },
+  "search": {
+    "optimizer": "CMAES",
+    "dimension": 24,
+    "population_size": 10,
+    "generations": 6,
+    "sigma0": 0.45,
+    "fit_network_seeds": [1901, 1902, 1903, 1904, 1905, 1906],
+    "selection_network_seeds": [1911, 1912],
+    "confirmation_network_seeds": [1921, 1922, 1923, 1924],
+    "mechanism_network_seeds": [1931, 1932],
+    "selection_candidate_count": 4,
+    "restart_after_generations_without_evaluable": 2,
+    "maximum_restarts": 1,
+    "common_random_numbers_within_generation": true,
+    "heldout_never_selects": true
+  },
+  "execution": {
+    "max_workers": 8,
+    "numeric_threads_per_worker": 1,
+    "wait_seconds": 600,
+    "minimum_available_memory_gib": 150.0,
+    "reserved_available_memory_gib": 96.0,
+    "estimated_memory_gib_per_worker": 8.0,
+    "minimum_output_free_disk_gib": 120.0,
+    "maximum_load_fraction": 0.75,
+    "notify_on_completion": true
+  },
+  "claim_boundary": {
+    "patient_specific_fit_requires_real_geometry": true,
+    "canonical_layout_substitution_forbidden": true,
+    "patient_heldout_is_confirmation_only": true,
+    "global_optimum_claim_forbidden": true,
+    "core_interpretation_forbidden_without_causal_ablation": true,
+    "development_only_no_new_patient_blind": true
+  }
+}
