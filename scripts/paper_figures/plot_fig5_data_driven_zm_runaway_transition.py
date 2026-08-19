@@ -92,11 +92,17 @@ def _render(data, meta, out_dir, gif_stride):
     activity = counts / occupancy_safe / window_s
     activity = np.stack([gaussian_filter(np.nan_to_num(frame), sigma=1.0)
                          for frame in activity])
-    contact_xy = np.asarray(data["contact_xy_mm"], float)
-    shaft_ids = np.asarray(data["shaft_ids"]).astype(str)
-    names = [str(n) for n in data["contact_names"]]
+    contact_xy_raw = np.asarray(data["contact_xy_mm"], float)
+    names_raw = [str(n) for n in data["contact_names"]]
+    shafts_raw = np.asarray(data["shaft_ids"]).astype(str)
+    # group by shaft, as the original two-shaft montage did: the interleaved
+    # contract order hides which shaft a trace belongs to. The spatial panels
+    # keep the UNPERMUTED coordinates.
+    order = np.lexsort((np.arange(len(names_raw)), shafts_raw))
+    names = [names_raw[i] for i in order]
+    shaft_ids = shafts_raw[order]
     onset_ms = float(meta["model_ictal_onset_ms"])
-    envelope = np.abs(np.asarray(data["contact_envelope"], float))
+    envelope = np.abs(np.asarray(data["contact_envelope"], float))[order]
     envelope_dt = float(data["contact_envelope_dt_ms"])
     times, ztrace = _normalise_readout(envelope, envelope_dt, onset_ms)
     trace_y = np.arange(len(names)) * TRACE_OFF
@@ -129,7 +135,7 @@ def _render(data, meta, out_dir, gif_stride):
                          vmin=f_lo, vmax=f_hi)
         ax0.plot([axis_src[0], axis_snk[0]], [axis_src[1], axis_snk[1]],
                  color="white", lw=1.1, alpha=0.85, zorder=5)
-        _draw_contacts(ax0, contact_xy, shaft_ids)
+        _draw_contacts(ax0, contact_xy_raw, shafts_raw)
         _style_spatial(ax0, sheet_l)
         ax0.set_title("Z/M net slow current", fontsize=9.0, fontweight="bold", pad=4)
         cb0 = fig.colorbar(im0, ax=ax0, fraction=0.040, pad=0.015)
@@ -142,7 +148,7 @@ def _render(data, meta, out_dir, gif_stride):
                          vmin=0.0, vmax=a_hi)
         ax1.plot([axis_src[0], axis_snk[0]], [axis_src[1], axis_snk[1]],
                  color="white", lw=1.1, alpha=0.9, zorder=5)
-        _draw_contacts(ax1, contact_xy, shaft_ids)
+        _draw_contacts(ax1, contact_xy_raw, shafts_raw)
         _style_spatial(ax1, sheet_l)
         ax1.set_title("2D SNN activity", fontsize=9.0, fontweight="bold", pad=4)
         cb1 = fig.colorbar(im1, ax=ax1, fraction=0.040, pad=0.015)
@@ -162,7 +168,7 @@ def _render(data, meta, out_dir, gif_stride):
         ax2.set_xlim(0.0, readout_hi)
         ax2.set_yticks(trace_y); ax2.set_yticklabels(names, fontsize=6.8)
         for tick, name in zip(ax2.get_yticklabels(), names):
-            tick.set_color(SHAFT_COLORS.get(str(shaft_ids[names.index(name)]), "black"))
+            tick.set_color(SHAFT_COLORS.get(str(shaft_ids[list(names).index(name)]), "black"))
         ax2.set_ylim(trace_y[0] - TRACE_OFF, trace_y[-1] + TRACE_OFF)
         ax2.set_xlabel("time (ms)", fontsize=8)
         ax2.set_ylabel("virtual contact activity (firing-density envelope)",
