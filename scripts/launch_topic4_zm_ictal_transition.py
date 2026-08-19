@@ -280,9 +280,14 @@ def phase_control(config, args):
     extra = ["--allow-uncommitted-config"] if args.allow_uncommitted_config else []
 
     jobs = []
-    for element, seeds, tier in ((control["formal_element"], formal_seeds, "formal"),
-                                 *[(e, list(control["descriptive_seeds"]), "descriptive")
-                                   for e in control["descriptive_elements"]]):
+    # (element, seeds) pairs. The formal/descriptive split lives in the config
+    # and in control_launch.json, not in a loop variable -- an earlier version
+    # carried a `tier` name it then deleted inside the inner loop, which blew up
+    # on the second seed.
+    plan = [(control["formal_element"], formal_seeds)]
+    plan += [(e, list(control["descriptive_seeds"]))
+             for e in control["descriptive_elements"]]
+    for element, seeds in plan:
         for seed in seeds:
             stem = f"{arm}_seed_{seed}_ctl_{element}"
             jobs.append((f"{element}-s{seed}",
@@ -293,7 +298,6 @@ def phase_control(config, args):
                           *extra,
                           "--out-json", str(output_root / "workers" / f"{stem}.json")],
                          output_root / "run_logs" / f"ctl_{element}_s{seed}.log"))
-            del tier
     _log(controller_log, {"progress": "control_start", "n_jobs": len(jobs)})
     _run_pool(jobs, config, "full_run", "topic4-zmitx-control-", controller_log)
     _log(controller_log, {"progress": "control_done", "n_jobs": len(jobs)})
