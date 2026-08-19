@@ -93,3 +93,20 @@ def test_large_designs_fall_back_to_sampling():
     out = paired_sign_flip_test(np.full(30, -1.0), draws=4096)
     assert out["exact"] is False
     assert out["n_permutations"] == 4096
+
+
+def test_every_contrast_carries_the_meaning_of_its_sign():
+    """The endpoint is a time. Without this, "delta_EE = -3000 ms" reads as
+    "E->E weakened the effect" when it means the opposite."""
+    report = factorial_contrasts(_arms(9000.0, 6000.0, 4300.0, 4000.0), cap_ms=CAP)
+    for name, entry in report["contrasts"].items():
+        assert "EARLIER" in entry["sign_meaning"] or "earlier" in entry["sign_meaning"]
+        assert entry["n_seeds_earlier"] == (12 if entry["mean_ms"] < 0 else 0)
+
+
+def test_a_super_additive_interaction_is_labelled_as_such():
+    # Joint much earlier than the two separate effects predict
+    report = factorial_contrasts(_arms(9000.0, 6000.0, 4300.0, 500.0), cap_ms=CAP)
+    interaction = report["contrasts"]["interaction"]
+    assert interaction["mean_ms"] < 0
+    assert "super-additive" in interaction["sign_meaning"]

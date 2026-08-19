@@ -214,11 +214,25 @@ def factorial_contrasts(arm_values, *, cap_ms, draws=4096, seed=20260817):
                        and np.isfinite(arm_values[name][s]) for s in seeds]))}
                   for name in required},
               "contrasts": {}}
+    # The endpoint is a TIME, so a negative contrast means EARLIER, i.e. a
+    # stronger effect. Reporting only a signed number invites reading "delta_EE
+    # is negative" as "E->E weakened it".
+    meaning = {
+        "delta_EE": ("negative = adding the E->E mapping brings the transition "
+                     "EARLIER than the node field alone"),
+        "delta_EtoI": ("negative = adding the E->I mapping brings the transition "
+                       "EARLIER than the node field alone"),
+        "interaction": ("negative = the two mappings together bring it earlier "
+                        "than the sum of their separate effects (super-additive); "
+                        "positive = sub-additive / partly redundant"),
+    }
     for name, values in contrasts.items():
         boot = paired_bootstrap(values, np.zeros_like(values), draws=draws, seed=seed)
         report["contrasts"][name] = {
             "per_seed_ms": {s: float(v) for s, v in zip(seeds, values)},
             "mean_ms": float(values.mean()),
+            "sign_meaning": meaning[name],
+            "n_seeds_earlier": int((values < 0).sum()),
             "bootstrap": boot,
             "sign_flip": paired_sign_flip_test(values, draws=draws, seed=seed)}
     report["censoring_note"] = (
