@@ -30,6 +30,7 @@ from src.topic4_patient_specific_field_cohort import (  # noqa: E402
     initial_vector,
     load_config,
     load_frozen_basis,
+    null_substrate_candidate,
     sha256,
     verify_inputs,
 )
@@ -460,11 +461,20 @@ class Supervisor:
             "seed": int(seed), "phase": "confirmation", "store_envelope": True,
         } for seed in self.config["search"]["confirmation_network_seeds"]]
         outputs = self.run_jobs(jobs, f"confirmation:{subject_id}")
-        rows = [value["confirmation"] for value in outputs]
         payload = {
             "status": "PATIENT_HELDOUT_CONFIRMATION_COMPLETE",
             "subject_id": subject_id,
             "winner": winner,
+            **self._summarize_heldout(outputs),
+            "expected_git_commit": self.expected_commit,
+            "config_sha256": sha256(self.config_path),
+        }
+        atomic_json(payload, path)
+        return payload
+
+    def _summarize_heldout(self, outputs: list[dict]) -> dict:
+        rows = [value["confirmation"] for value in outputs]
+        return {
             "network_seeds": self.config["search"]["confirmation_network_seeds"],
             "per_network": rows,
             "mean_observed_weakest_mode_loss": float(np.mean([
@@ -481,6 +491,37 @@ class Supervisor:
                 row["ood_fraction"] if row["ood_fraction"] is not None else 1.0
                 for row in rows
             ])),
+        }
+
+    def null_baseline(self, subject_id: str) -> dict:
+        """Score the unfitted flat substrate on held-out blocks.
+
+        A uniform sheet read through the patient's own contacts already produces
+        two seed-stable modes, so this is the baseline the fitted winner has to
+        beat. It is a fixed candidate: it never enters fit or selection.
+        """
+        root = self._subject_root(subject_id)
+        path = root / "null_substrate.json"
+        if path.exists():
+            payload = json.loads(path.read_text())
+            if (payload.get("expected_git_commit") != self.expected_commit
+                    or payload.get("config_sha256") != sha256(self.config_path)):
+                raise RuntimeError(f"stale null substrate artifact: {path}")
+            return payload
+        candidate = null_substrate_candidate(subject_id, self.config, self.basis)
+        candidate_path = self._save_candidate(subject_id, candidate)
+        jobs = [{
+            "subject_id": subject_id, "candidate_id": candidate["candidate_id"],
+            "candidate_json": candidate_path, "seed": int(seed),
+            "phase": "confirmation", "store_envelope": True,
+        } for seed in self.config["search"]["confirmation_network_seeds"]]
+        outputs = self.run_jobs(jobs, f"null-substrate:{subject_id}")
+        payload = {
+            "status": "PATIENT_NULL_SUBSTRATE_HELDOUT_COMPLETE",
+            "subject_id": subject_id,
+            "candidate_id": candidate["candidate_id"],
+            "entered_selection": False,
+            **self._summarize_heldout(outputs),
             "expected_git_commit": self.expected_commit,
             "config_sha256": sha256(self.config_path),
         }
@@ -555,12 +596,13 @@ class Supervisor:
         state = self.ensure_fit(subject_id, int(self.config["search"]["generations"]))
         selection = self.select(subject_id, state)
         confirmation = self.confirm(subject_id, selection)
+        null_substrate = self.null_baseline(subject_id)
         mechanism = self.mechanism(subject_id, selection)
         payload = {
             "status": "PATIENT_PIPELINE_COMPLETE", "subject_id": subject_id,
             "n_fit_candidates": len(state["history"]),
             "selection": selection, "confirmation": confirmation,
-            "mechanism": mechanism,
+            "null_substrate": null_substrate, "mechanism": mechanism,
         }
         atomic_json(payload, self._subject_root(subject_id) / "FINAL.json")
         return payload
@@ -571,11 +613,20 @@ class Supervisor:
         for subject_id in subjects:
             final = json.loads((self._subject_root(subject_id) / "FINAL.json").read_text())
             confirmation = final["confirmation"]
+            baseline = final["null_substrate"]
             rows.append({
                 "subject_id": subject_id,
                 "development_source": subject_id == development,
                 "heldout_null_advantage": confirmation["mean_null_advantage"],
                 "heldout_weakest_mode_loss": confirmation["mean_observed_weakest_mode_loss"],
+                "null_substrate_weakest_mode_loss": baseline["mean_observed_weakest_mode_loss"],
+                # negative means the fitted substrate beat the unfitted flat one
+                "winner_minus_null_substrate": float(
+                    confirmation["mean_observed_weakest_mode_loss"]
+                    - baseline["mean_observed_weakest_mode_loss"]
+                ),
+                "null_substrate_same_network_k2_count_of_4": baseline["same_network_k2_count"],
+                "null_substrate_mean_ood_fraction": baseline["mean_ood_fraction"],
                 "same_network_k2_count_of_4": confirmation["same_network_k2_count"],
                 "mean_ood_fraction": confirmation["mean_ood_fraction"],
             })
@@ -584,6 +635,11 @@ class Supervisor:
         finite = deltas[np.isfinite(deltas)]
         nonzero = finite[finite != 0.0]
         n_positive = int(np.sum(nonzero > 0.0))
+        against_null = np.asarray(
+            [row["winner_minus_null_substrate"] for row in primary], float)
+        against_null = against_null[np.isfinite(against_null)]
+        beat = against_null[against_null != 0.0]
+        n_beat = int(np.sum(beat < 0.0))
         payload = {
             "status": "PATIENT_SPECIFIC_COHORT_SIMULATION_COMPLETE",
             "n_real_geometry_fitted": len(rows),
@@ -601,6 +657,21 @@ class Supervisor:
             "same_network_k2_majority": int(sum(
                 row["same_network_k2_count_of_4"] >= 3 for row in primary
             )),
+            "null_substrate_same_network_k2_majority": int(sum(
+                row["null_substrate_same_network_k2_count_of_4"] >= 3 for row in primary
+            )),
+            "n_better_than_null_substrate": n_beat,
+            "n_compared_against_null_substrate": int(len(beat)),
+            "median_winner_minus_null_substrate": (
+                float(np.median(against_null)) if len(against_null) else None
+            ),
+            "winner_vs_null_substrate_sign_test_p": (
+                float(binomtest(n_beat, len(beat), 0.5).pvalue) if len(beat) else None
+            ),
+            "winner_vs_null_substrate_wilcoxon_p": (
+                float(wilcoxon(against_null, zero_method="wilcox").pvalue)
+                if len(beat) >= 6 else None
+            ),
             "subjects": rows,
             "claim_boundary": self.config["claim_boundary"],
         }

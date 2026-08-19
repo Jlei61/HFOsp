@@ -162,3 +162,40 @@ def test_loading_a_tampered_basis_fails_loudly(tmp_path):
     (tmp_path / "SEARCH_BASIS.json").write_text(json.dumps(record))
     with pytest.raises(RuntimeError):
         load_frozen_basis(tmp_path)
+
+
+def test_search_starts_at_the_null_substrate():
+    """The flat field is the strongest single point measured, so it is the start.
+
+    Under the slow state off, the calibration probe scored the flat field at
+    0.382 while two structured prior draws scored 0.583 and 0.722. Drawing the
+    start from a non-zero prior therefore began the search below its own null
+    hypothesis. Every patient now starts at the origin and has to earn structure.
+    """
+    import numpy as np
+    from src.topic4_patient_specific_field_cohort import initial_vector, load_config
+
+    payload = json.loads(CONFIG_V2P1.read_text())
+    assert payload["field"]["initial_coordinate_sd"] == 0.0
+    assert payload["search"]["maximum_restarts"] == 0
+    config = load_config(CONFIG_V2P1)
+    for subject in ("epilepsiae_590", "yuquan_chengshuai"):
+        assert np.array_equal(initial_vector(subject, config), np.zeros(24))
+
+
+def test_null_substrate_candidate_is_flat_and_edge_free():
+    import numpy as np
+    from src.topic4_patient_specific_field_cohort import (
+        load_config, load_frozen_basis, null_substrate_candidate,
+    )
+
+    config = load_config(CONFIG_V2P1)
+    basis = load_frozen_basis(Path(config["output_root"]))
+    candidate = null_substrate_candidate("epilepsiae_590", config, basis)
+    assert candidate["candidate_id"] == "epilepsiae_590_null_substrate"
+    assert np.allclose(np.asarray(candidate["node_field"]["coefficients"]), 0.0)
+    assert np.allclose(np.asarray(candidate["edge_coefficients"]), 0.0)
+    assert candidate["node_field"]["roughness"] == 0.0
+    assert candidate["null_substrate"]["role"] == (
+        "unfitted_baseline_scored_on_heldout_never_selected"
+    )

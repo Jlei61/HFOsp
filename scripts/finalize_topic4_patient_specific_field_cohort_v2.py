@@ -175,7 +175,6 @@ def render_cohort(config: dict, result: dict) -> dict:
     figures.mkdir(parents=True, exist_ok=True)
     rows = [row for row in result["subjects"] if not row["development_source"]]
     delta = np.asarray([row["heldout_null_advantage"] for row in rows], float)
-    ood = np.asarray([row["mean_ood_fraction"] for row in rows], float)
     k2 = np.asarray([row["same_network_k2_count_of_4"] for row in rows], int)
     order = np.argsort(delta)
     fig, axes = plt.subplots(1, 3, figsize=(9.8, 3.1), constrained_layout=True)
@@ -189,17 +188,27 @@ def render_cohort(config: dict, result: dict) -> dict:
                 [int(np.sum(k2 == value)) for value in range(5)], color="#168aad")
     axes[1].set(xlabel="confirming networks", ylabel="patients",
                 title="two-mode recovery")
-    axes[2].scatter(ood, delta, c=np.where(k2 >= 3, "#d84a3a", "#808080"), s=34)
-    axes[2].axhline(0, color="black", lw=.8)
-    axes[2].set(xlabel="OOD event fraction", ylabel="null loss - model loss",
-                title="support vs match")
+    # The unfitted flat substrate already produces two modes through the real
+    # contacts, so the fitted substrate has to be scored against it, not zero.
+    substrate = -np.asarray([row["winner_minus_null_substrate"] for row in rows], float)
+    substrate_order = np.argsort(substrate)
+    axes[2].barh(np.arange(len(rows)), substrate[substrate_order],
+                 color=np.where(substrate[substrate_order] > 0, "#2878b5", "#b8b8b8"),
+                 height=.76)
+    axes[2].axvline(0, color="black", lw=.8)
+    axes[2].set(xlabel="flat substrate loss - fitted loss", ylabel="patients",
+                title="fitted vs unfitted substrate")
+    axes[2].set_yticks([])
     files = _save(fig, figures / "patient_specific_cohort_heldout")
     (figures / "README.md").write_text(
         "### patient_specific_cohort_heldout.png / .pdf\n"
-        "以患者为独立单位汇总 27 位非开发来源患者的 held-out 结果。左图为模型相对杆内触点身份"
-        "置换 null 的损失优势，中图为四张确认网络中自然 KMeans 双模式通过次数，右图显示患者"
-        "支持范围与匹配优势的关系。\n\n"
-        "**关注点**：正值表示模型优于配对 null；红点表示至少 3/4 确认网络恢复两种传播模式。\n"
+        "以患者为独立单位汇总非开发来源患者的 held-out 结果，三个面板各回答一个独立问题。"
+        "左图：拟合出的底物是否胜过把触点身份在同一根杆内随机调换的读出层零假设。"
+        "中图：不给标签让机器自己聚成两簇时，四张确认网络里有几张恢复出两种传播模式。"
+        "右图：拟合出的底物是否胜过完全没有拟合的均匀场——均匀场经由该患者真实触点摆位本身"
+        "就能产出两簇，所以它才是承重的基线。\n\n"
+        "**关注点**：左右两图正值都表示拟合底物更好；右图为零或负值表示这位患者的拟合没有"
+        "超过不含任何患者特异结构的均匀场。\n"
     )
     metadata = {
         "files": files, "n_real_geometry_fitted": result["n_real_geometry_fitted"],

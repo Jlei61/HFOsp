@@ -7,6 +7,8 @@
     "reason": "generation 0 of the v2 run returned 10/10 INVALID_RUNAWAY on epilepsiae_590, so every candidate scored the flat invalid penalty and CMA-ES received no ranking signal; the v2 controller then aborted on a restart path that calls tell() without ask(); an engineering probe then showed the runaway survives with the edge flow off, at reduced field amplitude and on a completely flat field with no core, so the active slow state, not the field family, sets the boundary",
     "changed": [
       "the interictal fit, selection and confirmation run with the slow state off; the frozen winner is replayed with active Z/M as a transition probe that measures runaway entry instead of discarding it",
+      "every patient's search starts at the origin, which is the flat null substrate, because two structured prior draws scored worse than it under the slow state off",
+      "each patient gets an unfitted flat-substrate baseline scored on held-out blocks with the same within-shaft null, so the cohort statistic compares the fitted winner against a null substrate rather than against zero",
       "objective.runaway_survival_gradient orders the invalid band by survival time without reordering any scored candidate",
       "field/search prior amplitude re-calibrated against an engineering accessibility probe",
       "execution limits widened and per-worker memory admission added",
@@ -18,7 +20,7 @@
       "objective terms and weights for every scored candidate",
       "20 s simulation, late runaway invalid, active Z/M runtime"
     ],
-    "calibration_is_not_selection": "the accessibility probe ran on training blocks of one canary subject and never enters any patient score"
+    "calibration_is_not_selection": "the accessibility probe ran on training blocks of one canary subject and never enters any patient score; the per-patient null substrate is a fixed unfitted candidate, scored on held-out only after the winner is frozen, and never enters selection"
   },
   "source_workspace": "/home/honglab/leijiaxin/HFOsp",
   "output_root": "/home/honglab/leijiaxin/HFOsp/results/topic4_sef_hfo/patient_specific_field_connectivity_cohort_v2p1",
@@ -72,7 +74,7 @@
     "projection_grid_per_axis": 96,
     "residual_max_harmonic": 2,
     "coordinate_clip_abs": 2.0,
-    "initial_coordinate_sd": 0.55,
+    "initial_coordinate_sd": 0.0,
     "component_count": null,
     "peak_count_constraint": null,
     "contact_conditioned_basis": false
@@ -144,13 +146,13 @@
     ],
     "selection_candidate_count": 4,
     "restart_after_generations_without_evaluable": 2,
-    "maximum_restarts": 1,
+    "maximum_restarts": 0,
     "common_random_numbers_within_generation": true,
     "heldout_never_selects": true
   },
   "execution": {
     "max_workers": 32,
-    "subject_concurrency": 4,
+    "subject_concurrency": 2,
     "numeric_threads_per_worker": 1,
     "wait_seconds": 600,
     "minimum_available_memory_gib": 30.0,

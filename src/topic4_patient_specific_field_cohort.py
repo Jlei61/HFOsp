@@ -178,6 +178,26 @@ def initial_vector(subject_id: str, config: dict, *, restart: int = 0) -> np.nda
     return vector
 
 
+def null_substrate_candidate(subject_id: str, config: dict, basis: dict) -> dict:
+    """The unfitted baseline: flat field, no edge redistribution.
+
+    A uniform sheet read through this patient's real contacts already produces
+    two seed-stable propagation modes, so the fitted winner has to be scored
+    against it rather than against zero. It is built, never searched.
+    """
+    candidate = candidate_from_vector(
+        subject_id, np.zeros(int(config["search"]["dimension"]), float),
+        config, basis, generation=0, candidate_index=0, restart=0,
+    )
+    candidate["candidate_id"] = f"{subject_id}_null_substrate"
+    candidate["node_field"]["candidate_id"] = candidate["candidate_id"]
+    candidate["null_substrate"] = {
+        "role": "unfitted_baseline_scored_on_heldout_never_selected",
+        "field": "uniform_sheet", "edge_terms_active": False,
+    }
+    return candidate
+
+
 def candidate_from_vector(subject_id: str, vector, config: dict, basis: dict,
                           *, generation: int, candidate_index: int,
                           restart: int = 0) -> dict:
