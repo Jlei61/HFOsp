@@ -11,6 +11,7 @@ from src.topic4_patient_specific_field_cohort import (
     load_subject_contract,
     objective_from_score,
     projected_field_basis,
+    resolve_network_source_artifact,
 )
 
 
@@ -99,3 +100,19 @@ def test_figure_labels_only_readable_events_and_aligns_kmeans_modes():
     assert ordered.shape == (2, 4)
     assert labels.tolist() == [0, 1]
     assert np.allclose(ordered[0, :3], [2.0, 1.0, 0.0])
+
+
+def test_nested_network_source_is_anchored_to_shared_workspace():
+    config = load_config(CONFIG)
+    base = {
+        "small_kick_instrument": {
+            "network_cache_source_artifact": "results/frozen_network.json",
+        },
+    }
+    resolved = resolve_network_source_artifact(config, base)
+    assert resolved["small_kick_instrument"]["network_cache_source_artifact"] == (
+        "/home/honglab/leijiaxin/HFOsp/results/frozen_network.json"
+    )
+    assert base["small_kick_instrument"]["network_cache_source_artifact"] == (
+        "results/frozen_network.json"
+    )

@@ -1,6 +1,7 @@
 """Contracts for patient-specific continuous-field/local-connectivity fitting."""
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
 import os
@@ -70,6 +71,16 @@ def load_config(path: str | Path) -> dict:
 
 def source_path(config: dict, relative: str) -> Path:
     return Path(config["source_workspace"]) / str(relative)
+
+
+def resolve_network_source_artifact(config: dict, base_config: dict) -> dict:
+    """Anchor the frozen network source artifact to the shared source workspace."""
+    output = copy.deepcopy(base_config)
+    instrument = output["small_kick_instrument"]
+    value = instrument.get("network_cache_source_artifact")
+    if value is not None and not Path(value).is_absolute():
+        instrument["network_cache_source_artifact"] = str(source_path(config, value))
+    return output
 
 
 def verify_inputs(config: dict, *, code_root: str | Path) -> None:

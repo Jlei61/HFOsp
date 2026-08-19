@@ -40,6 +40,7 @@ from src.topic4_patient_specific_field_cohort import (  # noqa: E402
     load_subject_contract,
     objective_from_score,
     patient_target_arrays,
+    resolve_network_source_artifact,
     sha256,
     source_path,
     verify_inputs,
@@ -138,7 +139,9 @@ def main() -> None:
     )
 
     base_record = config["inputs"]["rev9_base_config"]
-    base = _load_json(ROOT / base_record["path"], base_record["sha256"])
+    base = resolve_network_source_artifact(
+        config, _load_json(ROOT / base_record["path"], base_record["sha256"]),
+    )
     stage_record = config["inputs"]["stage_config"]
     stage = _load_json(source_path(config, stage_record["path"]), stage_record["sha256"])
     anchor_record = config["inputs"]["node_anchor_config"]
