@@ -194,6 +194,13 @@ def main():
     slow = make_slow(substrate, zm_cfg, trace_weights_E=substrate.h_e)
     drive = make_external_drive(substrate, config["spatial_ou"], args.seed)
     baseline_step = int(round(BASELINE_MS / dt))
+    # The real low-activity state, located by the Z/M-off support rule rather
+    # than asserted by a clock reading. Measured across all six Z/M-on canary
+    # runs, the first post-burn-in window inside support is [500, 1000] ms, so
+    # the checkpoint sits at its end. The 2 s point is already elevated and is
+    # labelled early_transition.
+    low_activity_step = int(round(
+        float(config["checkpoints"]["baseline_discovery"]["measured_location_ms"][1]) / dt))
     captured = {}
     substrate.net["rng"] = np.random.default_rng(int(args.seed))
     result = simulate_kick(
@@ -204,7 +211,7 @@ def main():
         es_dur_ms=float(simulation["es_dur_ms"]),
         post_runaway_record_ms=float(simulation["post_runaway_record_ms"]),
         external_e_rate_drive=drive,
-        checkpoint_steps=[baseline_step],
+        checkpoint_steps=[low_activity_step, baseline_step],
         checkpoint_sink=lambda step, state: captured.setdefault(step, state))
     pass1_wall = time.time() - started
     onset_ms = result["runaway_early_stop_ms"]
@@ -362,7 +369,7 @@ def main():
     # [1500, 2000] ms (37 / 64 / 50 Hz) exceeds the q95 of forty non-overlapping
     # 500 ms windows from the SAME-SEED Z/M-off run (30 / 30 / 31 Hz). The 2 s
     # point is already elevated on the Joint arm, so it is named for what it is.
-    labels = {baseline_step: "early_transition"}
+    labels = {low_activity_step: "low_activity", baseline_step: "early_transition"}
     if pass2["ran"]:
         for step in pass2["checkpoint_steps"]:
             offset_ms = float(onset_ms) - step * dt
