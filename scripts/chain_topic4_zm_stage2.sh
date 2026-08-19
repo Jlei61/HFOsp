@@ -70,6 +70,10 @@ for rung in 16 32 64 128 256; do
   for s in $SEEDS; do
     CK="$R/checkpoints/${JOINT}_seed_${s}_low_activity.npz"
     [ -f "$CK" ] || { say "dose_s${s}_n${rung}" NO_CHECKPOINT; continue; }
+    # Resumable: an earlier controller in this session already produced some
+    # rungs. Re-running them would burn ~10 min each for a byte-identical answer.
+    OUT="$R/dose/${JOINT}_seed_${s}_low_activity_n${rung}.json"
+    [ -s "$OUT" ] && { say "dose_s${s}_n${rung}" ALREADY_DONE; continue; }
     wait_slot
     launch "topic4-zmitx-dose-s${s}-n${rung}" "$R/chain_logs/dose_s${s}_n${rung}.log" \
       $PY scripts/run_topic4_zm_perturbation_worker.py \
@@ -109,6 +113,8 @@ for s in $SEEDS; do
   for label in low_activity pre_ictal; do
     CK="$R/checkpoints/${JOINT}_seed_${s}_${label}.npz"
     [ -f "$CK" ] || { say "pair_s${s}_${label}" NO_CHECKPOINT; continue; }
+    OUT="$R/perturbation/${JOINT}_seed_${s}_${label}_n${DOSE}.json"
+    [ -s "$OUT" ] && { say "pair_s${s}_${label}" ALREADY_DONE; continue; }
     wait_slot
     launch "topic4-zmitx-pair-s${s}-${label}" "$R/chain_logs/pair_s${s}_${label}.log" \
       $PY scripts/run_topic4_zm_perturbation_worker.py \
