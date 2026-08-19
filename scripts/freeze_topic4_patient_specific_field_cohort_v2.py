@@ -4,9 +4,14 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
+
+# lstsq is not bit-stable across BLAS thread counts, and this basis is frozen.
+for _name in ("OMP", "MKL", "OPENBLAS", "NUMEXPR"):
+    os.environ.setdefault(f"{_name}_NUM_THREADS", "1")
 
 import numpy as np
 

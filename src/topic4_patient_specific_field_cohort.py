@@ -137,6 +137,30 @@ def projected_field_basis(config: dict) -> dict:
     }
 
 
+def load_frozen_basis(output_root: str | Path) -> dict:
+    """Load the frozen search basis and check it against its recorded identity.
+
+    ``np.linalg.lstsq`` is not bit-stable across BLAS thread counts, so a basis
+    recomputed in a restarted process can differ in the last digits and silently
+    move every drawn field. The frozen artefact is the identity of record.
+    """
+    root = Path(output_root)
+    record = json.loads((root / "SEARCH_BASIS.json").read_text())
+    with np.load(root / "SEARCH_BASIS.npz") as data:
+        directions = np.asarray(data["directions"], float)
+        wavevectors = np.asarray(data["wavevectors_per_mm"], float)
+    if array_sha256(directions) != record["direction_sha256"]:
+        raise RuntimeError(f"frozen search basis does not match its identity: {root}")
+    return {
+        "directions": directions,
+        "direction_count": int(record["direction_count"]),
+        "direction_sha256": str(record["direction_sha256"]),
+        "maximum_projection_rmse": float(record["maximum_projection_rmse"]),
+        "wavevectors_per_mm": wavevectors,
+        "uses_contact_geometry": bool(record["uses_contact_geometry"]),
+    }
+
+
 def initial_vector(subject_id: str, config: dict, *, restart: int = 0) -> np.ndarray:
     """Observation-free smooth-prior start; subject ID only keys the RNG."""
     digest = hashlib.sha256(

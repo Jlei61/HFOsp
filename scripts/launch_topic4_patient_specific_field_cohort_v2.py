@@ -29,7 +29,7 @@ from src.topic4_patient_specific_field_cohort import (  # noqa: E402
     candidate_from_vector,
     initial_vector,
     load_config,
-    projected_field_basis,
+    load_frozen_basis,
     sha256,
     verify_inputs,
 )
@@ -149,7 +149,8 @@ class Supervisor:
         self.logs = self.output / "run_logs"
         self.logs.mkdir(parents=True, exist_ok=True)
         self.status_path = self.output / "controller.status"
-        self.basis = projected_field_basis(self.config)
+        # The frozen artefact, not a recomputation, defines the search basis.
+        self.basis = load_frozen_basis(self.output)
         self.worker_script = ROOT / "scripts/run_topic4_patient_specific_field_worker_v2.py"
         self.admission = WorkerAdmission.from_config(self.config["execution"])
         self.runtime_mode = str(self.config["runtime"]["mode"])

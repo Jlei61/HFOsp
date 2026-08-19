@@ -125,3 +125,40 @@ def test_v2p1_fits_with_the_slow_state_off():
     assert payload["runtime"]["mode"] == "paired_slow_off"
     assert payload["runtime"]["simulation_duration_ms"] == 20000.0
     assert payload["runtime"]["late_runaway_invalid"] is True
+
+
+def test_frozen_basis_is_loaded_not_recomputed_under_whatever_blas_threading():
+    """np.linalg.lstsq is not bit-stable across BLAS thread counts.
+
+    Recomputing the whole-sheet basis in each process makes the drawn field
+    depend on ambient threading, which would silently change candidates across a
+    supervisor restart. The frozen artefact is the identity; loading it must
+    verify that identity rather than trusting the file name.
+    """
+    import numpy as np
+    from src.topic4_patient_specific_field_cohort import load_frozen_basis
+
+    root = Path(json.loads(CONFIG_V2P1.read_text())["output_root"])
+    record = json.loads((root / "SEARCH_BASIS.json").read_text())
+    basis = load_frozen_basis(root)
+    assert basis["direction_sha256"] == record["direction_sha256"]
+    assert basis["direction_count"] == record["direction_count"]
+    assert np.asarray(basis["directions"]).shape == (12, 18, 18)
+    assert basis["uses_contact_geometry"] is False
+
+
+def test_loading_a_tampered_basis_fails_loudly(tmp_path):
+    import numpy as np
+    from src.topic4_patient_specific_field_cohort import load_frozen_basis
+
+    root = Path(json.loads(CONFIG_V2P1.read_text())["output_root"])
+    record = json.loads((root / "SEARCH_BASIS.json").read_text())
+    with np.load(root / "SEARCH_BASIS.npz") as data:
+        directions = np.asarray(data["directions"], float)
+        wavevectors = np.asarray(data["wavevectors_per_mm"], float)
+    directions[0, 0, 0] += 1e-12
+    np.savez_compressed(tmp_path / "SEARCH_BASIS.npz", directions=directions,
+                        wavevectors_per_mm=wavevectors)
+    (tmp_path / "SEARCH_BASIS.json").write_text(json.dumps(record))
+    with pytest.raises(RuntimeError):
+        load_frozen_basis(tmp_path)
