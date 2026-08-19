@@ -4,8 +4,9 @@
   "revision": {
     "supersedes": "topic4_patient_specific_field_connectivity_cohort_v2",
     "superseded_run_evidence": "results/topic4_sef_hfo/patient_specific_field_connectivity_cohort_v2",
-    "reason": "generation 0 of the v2 run returned 10/10 INVALID_RUNAWAY on epilepsiae_590, so every candidate scored the flat invalid penalty and CMA-ES received no ranking signal; the v2 controller then aborted on a restart path that calls tell() without ask()",
+    "reason": "generation 0 of the v2 run returned 10/10 INVALID_RUNAWAY on epilepsiae_590, so every candidate scored the flat invalid penalty and CMA-ES received no ranking signal; the v2 controller then aborted on a restart path that calls tell() without ask(); an engineering probe then showed the runaway survives with the edge flow off, at reduced field amplitude and on a completely flat field with no core, so the active slow state, not the field family, sets the boundary",
     "changed": [
+      "the interictal fit, selection and confirmation run with the slow state off; the frozen winner is replayed with active Z/M as a transition probe that measures runaway entry instead of discarding it",
       "objective.runaway_survival_gradient orders the invalid band by survival time without reordering any scored candidate",
       "field/search prior amplitude re-calibrated against an engineering accessibility probe",
       "execution limits widened and per-worker memory admission added",
@@ -86,7 +87,7 @@
     "topology_and_delays_frozen": true
   },
   "runtime": {
-    "mode": "active_z_plus_m",
+    "mode": "paired_slow_off",
     "simulation_duration_ms": 20000.0,
     "early_stop_runaway": true,
     "late_runaway_invalid": true,

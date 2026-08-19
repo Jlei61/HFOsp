@@ -70,6 +70,14 @@ def _resources(config: dict) -> dict:
     }
 
 
+def paired_runtime_mode(mode: str) -> str:
+    """The mechanism replay always pairs the fit against the other slow state."""
+    pairs = {"paired_slow_off": "active_z_plus_m", "active_z_plus_m": "paired_slow_off"}
+    if mode not in pairs:
+        raise ValueError(f"unknown runtime mode: {mode}")
+    return pairs[mode]
+
+
 class WorkerAdmission:
     """Admit workers one at a time under a global cap and a live memory floor.
 
@@ -144,6 +152,7 @@ class Supervisor:
         self.basis = projected_field_basis(self.config)
         self.worker_script = ROOT / "scripts/run_topic4_patient_specific_field_worker_v2.py"
         self.admission = WorkerAdmission.from_config(self.config["execution"])
+        self.runtime_mode = str(self.config["runtime"]["mode"])
         self.subject_concurrency = max(
             1, int(self.config["execution"].get("subject_concurrency", 1))
         )
@@ -205,7 +214,7 @@ class Supervisor:
             str(PYTHON), str(self.worker_script), "--config", str(self.config_path),
             "--subject-id", job["subject_id"], "--candidate-json", str(job["candidate_json"]),
             "--seed", str(job["seed"]), "--phase", job["phase"],
-            "--runtime-mode", job.get("runtime_mode", "active_z_plus_m"),
+            "--runtime-mode", job.get("runtime_mode", self.runtime_mode),
             "--expected-commit", self.expected_commit,
             "--out-json", str(out_json), "--out-npz", str(out_npz),
         ]
@@ -501,8 +510,9 @@ class Supervisor:
             candidate["candidate_id"] = f"{winner['candidate_id']}_{arm}"
             candidate["edge_coefficients"] = values.tolist()
             candidate["edge_coefficients_sha256"] = array_sha256(values)
-            variants.append((arm, self._save_candidate(subject_id, candidate), "active_z_plus_m"))
-        variants.append(("node_plus_joint_slow_off", winner_path, "paired_slow_off"))
+            variants.append((arm, self._save_candidate(subject_id, candidate), self.runtime_mode))
+        paired = paired_runtime_mode(self.runtime_mode)
+        variants.append((f"node_plus_joint_{paired}", winner_path, paired))
         jobs = []
         for arm, candidate_path, runtime_mode in variants:
             candidate_id = json.loads(candidate_path.read_text())["candidate_id"]
@@ -514,10 +524,13 @@ class Supervisor:
                 })
         outputs = self.run_jobs(jobs, f"mechanism:{subject_id}")
         summary, offset = {}, 0
-        for arm, _, _ in variants:
+        for arm, _, runtime_mode in variants:
             chunk = outputs[offset:offset + len(self.config["search"]["mechanism_network_seeds"])]
             offset += len(chunk)
             summary[arm] = {
+                "runtime_mode": runtime_mode,
+                "runaway_early_stop_ms": [value.get("runaway_early_stop_ms") for value in chunk],
+                "simulated_until_ms": [value.get("simulated_until_ms") for value in chunk],
                 "objectives": [value["objective"]["objective"] for value in chunk],
                 "score_statuses": [value["objective"]["status"] for value in chunk],
                 "events": [value["n_returned_events"] for value in chunk],

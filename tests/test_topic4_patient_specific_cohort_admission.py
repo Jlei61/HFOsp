@@ -102,3 +102,26 @@ def test_config_headroom_matches_the_measured_worker_footprint():
     admission = WorkerAdmission.from_config(payload)
     assert admission.headroom_gib == payload["estimated_memory_gib_per_worker"]
     assert admission.stagger_seconds == payload["worker_admission_stagger_seconds"]
+
+
+def test_mechanism_replay_pairs_the_fit_against_the_other_slow_state():
+    """Fitting and the transition probe are deliberately different runtimes.
+
+    The interictal fit runs with the slow state off, because active Z/M runs the
+    substrate away on every field tested and would set the objective instead of
+    the patient modes. The frozen winner is then replayed with Z/M on, which is
+    what turns runaway entry into a measurement rather than a failure.
+    """
+    from scripts.launch_topic4_patient_specific_field_cohort_v2 import paired_runtime_mode
+
+    assert paired_runtime_mode("paired_slow_off") == "active_z_plus_m"
+    assert paired_runtime_mode("active_z_plus_m") == "paired_slow_off"
+    with pytest.raises(ValueError):
+        paired_runtime_mode("something_else")
+
+
+def test_v2p1_fits_with_the_slow_state_off():
+    payload = json.loads(CONFIG_V2P1.read_text())
+    assert payload["runtime"]["mode"] == "paired_slow_off"
+    assert payload["runtime"]["simulation_duration_ms"] == 20000.0
+    assert payload["runtime"]["late_runaway_invalid"] is True
