@@ -24,7 +24,11 @@ COMMIT=$(git -C "$W" rev-parse HEAD)
 mkdir -p "$R/chain_logs" "$R/dose" "$R/perturbation"
 say() { echo "{\"step\": \"$1\", \"status\": \"$2\", \"t\": \"$(date '+%m-%d %H:%M:%S')\"}" | tee -a "$R/stage2.log"; }
 
-n_active() { systemctl --user list-units --no-legend --plain --state=active 'topic4-zmitx-*' 2>/dev/null | grep -c service; }
+# The chain's OWN unit matches 'topic4-zmitx-*', so counting it would make
+# wait_all() wait for itself forever. Same self-match trap as `pgrep -f`.
+SELF=topic4-zmitx-stage2-chain.service
+n_active() { systemctl --user list-units --no-legend --plain --state=active 'topic4-zmitx-*' 2>/dev/null \
+             | awk -v self="$SELF" '$1 ~ /\.service$/ && $1 != self' | wc -l ; }
 wait_slot() { while [ "$(n_active)" -ge "$MAXJOBS" ]; do sleep 30; done; }
 wait_all()  { while [ "$(n_active)" -gt 0 ]; do sleep 30; done; }
 
