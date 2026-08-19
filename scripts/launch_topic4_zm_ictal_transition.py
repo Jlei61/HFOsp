@@ -257,6 +257,56 @@ def phase_formal(config, args):
     print(json.dumps({"phase": "formal", "launched": len(jobs)}))
 
 
+def phase_control(config, args):
+    """Matched spatial re-registration control, on the SAME networks.
+
+    The factorial says redistributing outgoing weight along the patient-derived
+    registration brings the transition earlier. This asks whether that needs the
+    registration the patient's data produced, or whether any equivalent
+    structure does it: the node field and its directed flow coefficients are
+    moved together by a D4 element, while the geometry they are registered
+    against -- contacts, positions, axis, and the E->E kernel -- is left where
+    it is. Same network seed, so the comparison is paired.
+
+    Registered split (config: spatial_reregistration_control): r180 on all
+    formal seeds is the formal arm; r90 and mx on the canary seeds are
+    descriptive only and are not a second formal test.
+    """
+    output_root = ROOT / config["output_root"]
+    controller_log = output_root / "controller.log"
+    control = config["spatial_reregistration_control"]
+    arm = config["arms"][control["arm"]]
+    formal_seeds = list(config["seeds"]["formal"])
+    extra = ["--allow-uncommitted-config"] if args.allow_uncommitted_config else []
+
+    jobs = []
+    for element, seeds, tier in ((control["formal_element"], formal_seeds, "formal"),
+                                 *[(e, list(control["descriptive_seeds"]), "descriptive")
+                                   for e in control["descriptive_elements"]]):
+        for seed in seeds:
+            stem = f"{arm}_seed_{seed}_ctl_{element}"
+            jobs.append((f"{element}-s{seed}",
+                         [PYTHON, str(WORKER), "--config", args.config,
+                          "--candidate-id", arm, "--seed", str(seed),
+                          "--expected-commit", args.expected_commit,
+                          "--zm-mode", "z_plus_m", "--field-transform", element,
+                          *extra,
+                          "--out-json", str(output_root / "workers" / f"{stem}.json")],
+                         output_root / "run_logs" / f"ctl_{element}_s{seed}.log"))
+            del tier
+    _log(controller_log, {"progress": "control_start", "n_jobs": len(jobs)})
+    _run_pool(jobs, config, "full_run", "topic4-zmitx-control-", controller_log)
+    _log(controller_log, {"progress": "control_done", "n_jobs": len(jobs)})
+    atomic_write_json({"phase": "control", "n_jobs": len(jobs),
+                       "formal": {"element": control["formal_element"],
+                                  "seeds": formal_seeds, "arm": control["arm"]},
+                       "descriptive": {"elements": control["descriptive_elements"],
+                                       "seeds": control["descriptive_seeds"]},
+                       "expected_commit": args.expected_commit},
+                      str(output_root / "control_launch.json"))
+    print(json.dumps({"phase": "control", "launched": len(jobs)}))
+
+
 PERTURB = ROOT / "scripts/run_topic4_zm_perturbation_worker.py"
 
 
@@ -385,7 +435,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--phase", required=True,
-                        choices=("canary", "formal", "dose", "counterfactual", "fig5"))
+                        choices=("canary", "formal", "control", "dose",
+                                 "counterfactual", "fig5"))
     parser.add_argument("--expected-commit", default="HEAD")
     parser.add_argument("--allow-uncommitted-config", action="store_true")
     args = parser.parse_args()
@@ -393,7 +444,8 @@ def main():
     args.expected_commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True).strip()
     (ROOT / config["output_root"] / "run_logs").mkdir(parents=True, exist_ok=True)
-    {"canary": phase_canary, "formal": phase_formal, "dose": phase_dose,
+    {"canary": phase_canary, "formal": phase_formal,
+     "control": phase_control, "dose": phase_dose,
      "counterfactual": phase_counterfactual,
      "fig5": phase_fig5}[args.phase](config, args)
 
