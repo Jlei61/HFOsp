@@ -87,17 +87,29 @@ def main():
             if d is not None:
                 units.append({"seed": seed, "site": site, "delta": d,
                               "comparable": entry["comparable"]})
+        # Comparable sites ONLY. A site where the probe ignited the network at
+        # the pre-ictal state has a response two orders of magnitude larger than
+        # a sub-event response; leaving it in the median would manufacture a
+        # state difference out of the very contamination the exclusion exists
+        # to remove.
         deltas = [sites[s]["susceptibility"]["delta"] for s in shared
-                  if sites[s]["susceptibility"]["delta"] is not None]
+                  if sites[s]["comparable"]
+                  and sites[s]["susceptibility"]["delta"] is not None]
+        all_deltas = [sites[s]["susceptibility"]["delta"] for s in shared
+                      if sites[s]["susceptibility"]["delta"] is not None]
         per_seed[seed] = {
-            "n_sites": len(shared), "sites": sites,
+            "n_sites": len(shared), "n_comparable_sites": len(deltas), "sites": sites,
             "median_delta_susceptibility": float(np.median(deltas)) if deltas else None,
+            "median_delta_susceptibility_including_ignited": (
+                float(np.median(all_deltas)) if all_deltas else None),
             "checkpoint_time_ms": {
                 "low_activity": low_payload.get("checkpoint_absolute_time_ms"),
                 "pre_ictal": pre_payload.get("checkpoint_absolute_time_ms")}}
 
     seed_medians = [v["median_delta_susceptibility"] for v in per_seed.values()
                     if v["median_delta_susceptibility"] is not None]
+    seeds_with_no_comparable_site = [k for k, v in per_seed.items()
+                                     if v["median_delta_susceptibility"] is None]
     comparable = [u for u in units if u["comparable"]]
     n_pos = sum(1 for u in comparable if u["delta"] > 0)
 
@@ -110,6 +122,7 @@ def main():
         "site_units_comparable": len(comparable),
         "site_units_positive": n_pos,
         "site_units_excluded_probe_attributable": len(units) - len(comparable),
+        "seeds_with_no_comparable_site": seeds_with_no_comparable_site,
     }
     established = bool(screen["all_seed_medians_same_sign"] and len(seed_medians) == 3)
 
@@ -132,7 +145,9 @@ def main():
             "not independent draws; the 18 site units are descriptive only.",
             "Sites where the probe itself ignited the network are excluded from the "
             "comparison rather than counted, because their response is no longer a "
-            "sub-event response.",
+            "sub-event response. The per-seed median is over comparable sites only; "
+            "`median_delta_susceptibility_including_ignited` is reported alongside so "
+            "the size of that exclusion is visible rather than hidden.",
         ],
     }
     out = ROOT / config["output_root"] / "state_susceptibility_screen.json"

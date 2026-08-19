@@ -120,3 +120,46 @@ def test_claim_boundary_names_the_sample_size(sandbox):
     report = json.loads((out / "state_susceptibility_screen.json").read_text())
     text = " ".join(report["claim_boundary"])
     assert "n = 3" in text and "not a cohort claim" in text
+
+
+def test_an_ignited_site_cannot_inflate_the_seed_median(sandbox):
+    """The bug this pins: a probe that ignites the network at the pre-ictal state
+    answers with ~10^4 excess spikes. If that site stays in the median, three
+    seeds all 'agree' and the screen escalates on contamination alone."""
+    cfg, out = sandbox
+    for seed in (1801, 1802, 1803):
+        _write(out / "perturbation", "joint_04_control", seed, "low_activity", 64,
+               [_row(f"s{i}", 100.0) for i in range(6)], 1000.0)
+        # two comparable sites go DOWN, four ignited sites go hugely up. A median
+        # tolerates a minority of outliers, so the contamination only shows once
+        # the ignited sites are the majority -- which is exactly the situation
+        # the pre-ictal state makes likely.
+        rows = [_row(f"s{i}", 60.0) for i in range(2)]
+        rows += [_row(f"s{i}", 90000.0, event=True, ictal=True) for i in range(2, 6)]
+        _write(out / "perturbation", "joint_04_control", seed, "pre_ictal", 64,
+               rows, 3600.0)
+    _run(cfg, [1801, 1802, 1803])
+    report = json.loads((out / "state_susceptibility_screen.json").read_text())
+    for seed in ("1801", "1802", "1803"):
+        entry = report["per_seed"][seed]
+        assert entry["n_comparable_sites"] == 2
+        assert entry["median_delta_susceptibility"] == -40.0
+        assert entry["median_delta_susceptibility_including_ignited"] > 1000.0
+    # the reported screen must follow the comparable-only median
+    assert all(v < 0 for v in report["screen"]["seed_median_deltas"])
+    assert report["screen"]["site_units_excluded_probe_attributable"] == 12
+
+
+def test_a_seed_whose_every_site_ignited_is_named_not_dropped(sandbox):
+    cfg, out = sandbox
+    for seed in (1801, 1802, 1803):
+        _write(out / "perturbation", "joint_04_control", seed, "low_activity", 64,
+               [_row(f"s{i}", 100.0) for i in range(6)], 1000.0)
+        ignite = seed == 1803
+        _write(out / "perturbation", "joint_04_control", seed, "pre_ictal", 64,
+               [_row(f"s{i}", 180.0, event=ignite, ictal=ignite) for i in range(6)],
+               3600.0)
+    _run(cfg, [1801, 1802, 1803])
+    report = json.loads((out / "state_susceptibility_screen.json").read_text())
+    assert report["screen"]["seeds_with_no_comparable_site"] == [1803]
+    assert report["state_difference_established_for_escalation"] is False
