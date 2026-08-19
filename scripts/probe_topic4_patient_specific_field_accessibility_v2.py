@@ -42,17 +42,28 @@ PYTHON = Path("/home/honglab/leijiaxin/anaconda3/envs/cuda_env/bin/python")
 SUBJECT = "epilepsiae_590"
 SEED = 1901
 
-# (label, base candidate suffix or None for a flat field, alpha, keep edge terms)
+# (label, base candidate suffix or None for a flat field, alpha, keep edge terms,
+#  runtime mode). The alpha=1 edge-on cells of this design are the generation-0
+# candidates themselves, which already ran under active Z/M.
 ARMS = (
-    ("flat_edge_off", None, 0.0, False),
-    ("disperse_a100_edge_off", "c00", 1.0, False),
-    ("compact_a100_edge_off", "c09", 1.0, False),
-    ("disperse_a060", "c00", 0.60, True),
-    ("disperse_a040", "c00", 0.40, True),
-    ("disperse_a025", "c00", 0.25, True),
-    ("compact_a060", "c09", 0.60, True),
-    ("compact_a040", "c09", 0.40, True),
-    ("compact_a025", "c09", 0.25, True),
+    ("flat_edge_off", None, 0.0, False, "active_z_plus_m"),
+    ("disperse_a100_edge_off", "c00", 1.0, False, "active_z_plus_m"),
+    ("compact_a100_edge_off", "c09", 1.0, False, "active_z_plus_m"),
+    ("disperse_a060", "c00", 0.60, True, "active_z_plus_m"),
+    ("disperse_a040", "c00", 0.40, True, "active_z_plus_m"),
+    ("disperse_a025", "c00", 0.25, True, "active_z_plus_m"),
+    ("compact_a060", "c09", 0.60, True, "active_z_plus_m"),
+    ("compact_a040", "c09", 0.40, True, "active_z_plus_m"),
+    ("compact_a025", "c09", 0.25, True, "active_z_plus_m"),
+    # Matched edge-off cells at the reduced amplitude, so amplitude, geometry and
+    # edge redistribution can be told apart rather than confounded.
+    ("disperse_a040_edge_off", "c00", 0.40, False, "active_z_plus_m"),
+    ("compact_a040_edge_off", "c09", 0.40, False, "active_z_plus_m"),
+    # The same substrate the search actually draws, with the slow state off:
+    # does an interictal fit become possible once Z/M stops setting the boundary?
+    ("disperse_a100_slow_off", "c00", 1.0, True, "paired_slow_off"),
+    ("compact_a100_slow_off", "c09", 1.0, True, "paired_slow_off"),
+    ("flat_slow_off", None, 0.0, False, "paired_slow_off"),
 )
 
 
@@ -79,12 +90,12 @@ def _base_vectors(config: dict, cohort_root: Path) -> dict:
 
 
 def build_candidates(config: dict, basis: dict, cohort_root: Path,
-                     output: Path) -> list[dict]:
+                     output: Path, arms=ARMS) -> list[dict]:
     bases = _base_vectors(config, cohort_root)
     directory = output / "candidates"
     directory.mkdir(parents=True, exist_ok=True)
     jobs = []
-    for index, (label, base_key, alpha, keep_edge) in enumerate(ARMS):
+    for index, (label, base_key, alpha, keep_edge, runtime_mode) in enumerate(arms):
         if base_key is None:
             field = np.zeros(int(basis["direction_count"]), float)
             edge = np.zeros(int(config["local_connectivity"]["coefficient_count"]), float)
@@ -103,11 +114,12 @@ def build_candidates(config: dict, basis: dict, cohort_root: Path,
         candidate["calibration"] = {
             "role": "engineering_accessibility_probe_not_selection",
             "arm": label, "alpha": float(alpha), "edge_terms_active": bool(keep_edge),
-            "base_candidate_id": source,
+            "runtime_mode": runtime_mode, "base_candidate_id": source,
         }
         path = directory / f"calib_{label}.json"
         atomic_json(candidate, path)
-        jobs.append({"label": label, "candidate_json": path})
+        jobs.append({"label": label, "candidate_json": path,
+                     "runtime_mode": runtime_mode})
     return jobs
 
 
@@ -130,7 +142,7 @@ def run_probe(job: dict, config_path: Path, output: Path, expected_commit: str,
             str(PYTHON), str(ROOT / "scripts/run_topic4_patient_specific_field_worker_v2.py"),
             "--config", str(config_path), "--subject-id", SUBJECT,
             "--candidate-json", str(job["candidate_json"]), "--seed", str(SEED),
-            "--phase", "canary", "--runtime-mode", "active_z_plus_m",
+            "--phase", "canary", "--runtime-mode", job["runtime_mode"],
             "--expected-commit", expected_commit,
             "--out-json", str(out_json), "--out-npz", str(out_npz),
         ]
@@ -149,6 +161,9 @@ def main() -> None:
     parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--max-workers", type=int, default=9)
     parser.add_argument("--memory-floor-gib", type=float, default=30.0)
+    parser.add_argument("--arms", default=None,
+                        help="comma separated arm labels; default runs every arm")
+    parser.add_argument("--batch-name", default="primary")
     args = parser.parse_args()
 
     config = load_config(args.config.resolve())
@@ -156,11 +171,17 @@ def main() -> None:
     cohort_root = Path(config["output_root"])
     output = cohort_root / "engineering_calibration"
     output.mkdir(parents=True, exist_ok=True)
-    status = output / "calibration.status"
     expected_commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True).strip()
 
-    jobs = build_candidates(config, basis, cohort_root, output)
+    selected = ARMS
+    if args.arms:
+        wanted = {name.strip() for name in args.arms.split(",") if name.strip()}
+        selected = tuple(arm for arm in ARMS if arm[0] in wanted)
+        if len(selected) != len(wanted):
+            raise SystemExit(f"unknown arm label in {sorted(wanted)}")
+    jobs = build_candidates(config, basis, cohort_root, output, arms=selected)
+    status = output / f"calibration_{args.batch_name}.status"
     status.write_text(f"RUNNING arms={len(jobs)} workers={args.max_workers}\n")
     gate = threading.Semaphore(int(args.max_workers))
     with ThreadPoolExecutor(max_workers=len(jobs)) as pool:
@@ -170,12 +191,13 @@ def main() -> None:
         payloads = [future.result() for future in futures]
 
     rows = []
-    for (label, base_key, alpha, keep_edge), payload in zip(ARMS, payloads):
+    for (label, base_key, alpha, keep_edge, runtime_mode), payload in zip(selected, payloads):
         rows.append({
             "arm": label,
             "base_candidate": base_key,
             "alpha": float(alpha),
             "edge_terms_active": bool(keep_edge),
+            "runtime_mode": runtime_mode,
             "status": payload.get("status"),
             "runaway": payload.get("runaway"),
             "runaway_early_stop_ms": payload.get("runaway_early_stop_ms"),
@@ -186,14 +208,17 @@ def main() -> None:
             "objective": (payload.get("objective") or {}).get("objective"),
             "wall_seconds": payload.get("wall_seconds"),
         })
+    name = ("CALIBRATION_RESULT.json" if args.batch_name == "primary"
+            else f"CALIBRATION_RESULT_{args.batch_name}.json")
     atomic_json({
         "status": "ENGINEERING_ACCESSIBILITY_CALIBRATION_COMPLETE",
+        "batch": args.batch_name,
         "scientific_role": "engineering_accessibility_probe_not_selection",
         "subject_id": SUBJECT, "network_seed": SEED, "target_split": "train",
         "question": "does runaway follow node-field amplitude or the E-source edge redistribution",
         "expected_git_commit": expected_commit,
         "arms": rows,
-    }, output / "CALIBRATION_RESULT.json")
+    }, output / name)
     status.write_text("DONE\n")
     subprocess.run(["notify-send", "Topic 4 patient-specific calibration",
                     "Engineering accessibility probe complete"], check=False)

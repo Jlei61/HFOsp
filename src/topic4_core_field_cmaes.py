@@ -38,13 +38,19 @@ class CMAES:
         self.C = np.eye(n)
         self.chiN = np.sqrt(n) * (1 - 1 / (4 * n) + 1 / (21 * n ** 2))
         self._last = None
+        self._B = None
+        self._d = None
+
+    def _decompose(self):
+        """Eigen-decompose the current covariance; ``C`` is unchanged by ask."""
+        C = np.triu(self.C) + np.triu(self.C, 1).T
+        d, B = np.linalg.eigh(C)
+        self._B, self._d = B, np.sqrt(np.maximum(d, 1e-20))
 
     # ---- sampling -------------------------------------------------------
     def ask(self):
-        C = np.triu(self.C) + np.triu(self.C, 1).T
-        d, B = np.linalg.eigh(C)
-        d = np.sqrt(np.maximum(d, 1e-20))
-        self._B, self._d = B, d
+        self._decompose()
+        B, d = self._B, self._d
         z = self.rng.standard_normal((self.popsize, self.dim))
         y = z @ (B * d).T
         self._last = [self.mean + self.sigma * yi for yi in y]
@@ -71,6 +77,11 @@ class CMAES:
         self.mean = self.weights @ sel
 
         n = self.dim
+        if self._B is None:
+            # A supervisor restart can replay a dispatched generation from its
+            # pending file, so this process never called ask. C has not moved
+            # since that ask, so decomposing it here reproduces the same basis.
+            self._decompose()
         Cinv_sqrt = self._B @ np.diag(1.0 / self._d) @ self._B.T
         y = (self.mean - old_mean) / self.sigma
         self.ps = ((1 - self.cs) * self.ps

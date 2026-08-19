@@ -17,6 +17,7 @@ from src.topic4_patient_specific_field_cohort import (
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config/topic4_patient_specific_field_connectivity_cohort_v2.json"
+CONFIG_V2P1 = ROOT / "config/topic4_patient_specific_field_connectivity_cohort_v2p1.json"
 
 
 def test_whole_sheet_basis_matches_optimizer_without_contacts():
@@ -115,4 +116,78 @@ def test_nested_network_source_is_anchored_to_shared_workspace():
     )
     assert base["small_kick_instrument"]["network_cache_source_artifact"] == (
         "results/frozen_network.json"
+    )
+
+
+def _runaway_objective(config, candidate, runaway_ms):
+    return objective_from_score(
+        {"status": "INVALID_RUNAWAY", "n_readable_events": 0},
+        candidate, config, runaway_ms=runaway_ms,
+    )["objective"]
+
+
+def test_runaway_candidates_are_ordered_by_how_long_they_survived():
+    """A flat invalid score leaves CMA-ES with no ranking signal at all.
+
+    Generation 0 of the frozen cohort returned ten runaway candidates whose
+    stop times spread from 5.8 s to 12.9 s, so survival time carries the only
+    gradient available before any candidate becomes evaluable. Ordering it must
+    never let an invalid candidate outrank a scored one.
+    """
+    config = load_config(CONFIG_V2P1)
+    basis = projected_field_basis(config)
+    candidate = candidate_from_vector(
+        "epilepsiae_590", np.zeros(24), config, basis,
+        generation=0, candidate_index=0,
+    )
+    duration = float(config["runtime"]["simulation_duration_ms"])
+    assert float(config["objective"]["runaway_survival_gradient"]) > 0.0
+
+    early = _runaway_objective(config, candidate, 5800.0)
+    late = _runaway_objective(config, candidate, 12900.0)
+    assert late < early
+    assert early <= float(config["objective"]["invalid_objective"])
+
+    floor = _runaway_objective(config, candidate, duration)
+    worst_scored = objective_from_score(
+        {"status": "EVALUABLE", "weakest_mode_loss": 1.0, "ood_fraction": 1.0,
+         "natural_kmeans": {"weakest_mode_loss": 1.0, "seed_ami_median": 0.0,
+                            "cluster_counts": np.array([0, 0])}},
+        candidate, config,
+    )["objective"]
+    worst_unsupported = objective_from_score(
+        {"status": "INSUFFICIENT_EVENTS", "n_readable_events": 0},
+        candidate, config,
+    )["objective"]
+    assert worst_scored < floor
+    assert worst_unsupported < floor
+    assert _runaway_objective(config, candidate, 0.0) == float(
+        config["objective"]["invalid_objective"]
+    )
+
+
+def test_runaway_gradient_never_applies_to_other_invalid_statuses():
+    config = load_config(CONFIG_V2P1)
+    basis = projected_field_basis(config)
+    candidate = candidate_from_vector(
+        "epilepsiae_590", np.zeros(24), config, basis,
+        generation=0, candidate_index=0,
+    )
+    other = objective_from_score(
+        {"status": "INVALID_NON_FINITE_STATE"}, candidate, config,
+    )
+    assert other["objective"] == float(config["objective"]["invalid_objective"])
+
+
+def test_frozen_v2_config_keeps_the_flat_invalid_penalty_it_ran_with():
+    """The superseded run must stay reproducible from its own config."""
+    config = load_config(CONFIG)
+    basis = projected_field_basis(config)
+    candidate = candidate_from_vector(
+        "epilepsiae_590", np.zeros(24), config, basis,
+        generation=0, candidate_index=0,
+    )
+    assert "runaway_survival_gradient" not in config["objective"]
+    assert _runaway_objective(config, candidate, 12900.0) == float(
+        config["objective"]["invalid_objective"]
     )

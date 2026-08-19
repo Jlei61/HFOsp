@@ -19,7 +19,10 @@ from src.topic4_spectral_field import (
 )
 
 
-EXPECTED_SCHEMA = "topic4_patient_specific_field_connectivity_cohort_v2"
+EXPECTED_SCHEMAS = (
+    "topic4_patient_specific_field_connectivity_cohort_v2",
+    "topic4_patient_specific_field_connectivity_cohort_v2p1",
+)
 
 
 def sha256(path: str | Path) -> str:
@@ -60,7 +63,7 @@ def atomic_json(payload: dict, path: str | Path) -> None:
 
 def load_config(path: str | Path) -> dict:
     payload = json.loads(Path(path).read_text())
-    if payload.get("schema_version") != EXPECTED_SCHEMA:
+    if payload.get("schema_version") not in EXPECTED_SCHEMAS:
         raise RuntimeError("patient-specific cohort config schema changed")
     if payload.get("scientific_role") != (
         "development_only_patient_specific_real_geometry_node_local_connectivity_fit"
@@ -277,7 +280,8 @@ def patient_target_arrays(target_npz_path: str | Path, split: str) -> dict:
         }
 
 
-def objective_from_score(score: dict, candidate: dict, config: dict) -> dict:
+def objective_from_score(score: dict, candidate: dict, config: dict, *,
+                         runaway_ms: float | None = None) -> dict:
     weights = config["objective"]
     minimum = int(config["runtime"]["minimum_events_per_mode"])
     status = str(score.get("status", "UNKNOWN"))
@@ -287,6 +291,17 @@ def objective_from_score(score: dict, candidate: dict, config: dict) -> dict:
         float(weights["field_roughness_weight"]) * np.log1p(roughness)
         + float(weights["edge_l2_weight"]) * float(np.mean(edge ** 2))
     )
+    if runaway_ms is not None:
+        # A runaway candidate is always worse than any scored one, but the time
+        # it survived is the only gradient the search has while no candidate is
+        # evaluable. Zero gradient in the config reproduces the flat penalty.
+        duration = float(config["runtime"]["simulation_duration_ms"])
+        survived = float(np.clip(float(runaway_ms) / duration, 0.0, 1.0))
+        value = (float(weights["invalid_objective"])
+                 - float(weights.get("runaway_survival_gradient", 0.0)) * survived)
+        return {"objective": float(value), "status": "INVALID_RUNAWAY",
+                "runaway_survived_fraction": survived, "support_penalty": 1.0,
+                "regularization": regularization}
     if status == "INSUFFICIENT_EVENTS":
         count = int(score.get("n_readable_events", 0))
         deficit = max(0, 2 * minimum - count) / float(max(2 * minimum, 1))

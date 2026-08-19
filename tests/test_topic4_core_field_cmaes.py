@@ -71,3 +71,27 @@ def test_non_finite_keys_sort_last_rather_than_crashing():
     es.tell(xs, keys)
     assert np.isfinite(es.mean).all()
     assert np.isfinite(es.sigma)
+
+
+def test_tell_works_when_a_restart_replays_a_dispatched_generation():
+    """The unattended controller reloads pending candidates instead of re-asking.
+
+    A supervisor that dies after a generation was dispatched resumes from the
+    checkpoint plus the pending candidate file, so ``tell`` runs in a process
+    that never called ``ask``. That path must still update the distribution.
+    """
+    reference = CMAES(np.full(4, 0.5), sigma0=0.6, seed=5)
+    dispatched = reference.ask()
+    keys = [-float(x @ x) for x in dispatched]
+    reference.tell(dispatched, keys)
+
+    fresh = CMAES(np.full(4, 0.5), sigma0=0.6, seed=5)
+    fresh.tell(dispatched, keys)
+    assert np.allclose(fresh.mean, reference.mean)
+    assert fresh.sigma == pytest.approx(reference.sigma)
+    assert np.allclose(fresh.C, reference.C)
+
+    checkpointed = CMAES.from_state(CMAES(np.full(4, 0.5), sigma0=0.6, seed=5).get_state())
+    checkpointed.tell(dispatched, keys)
+    assert np.allclose(checkpointed.mean, reference.mean)
+    assert np.allclose(checkpointed.C, reference.C)

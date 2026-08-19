@@ -10,8 +10,10 @@ import os
 import shutil
 import subprocess
 import sys
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from contextlib import contextmanager
 from pathlib import Path
 
 import numpy as np
@@ -68,6 +70,55 @@ def _resources(config: dict) -> dict:
     }
 
 
+class WorkerAdmission:
+    """Admit workers one at a time under a global cap and a live memory floor.
+
+    A batch-level check cannot see memory move while its own workers start, and
+    several subjects now run at once, so admission is per worker: hold a global
+    slot, wait until the host has the floor plus one worker of headroom free,
+    then stagger the launch so the new footprint appears before the next check.
+    """
+
+    def __init__(self, max_workers: int, floor_gib: float, poll_seconds: float, *,
+                 headroom_gib: float = 0.0, stagger_seconds: float = 0.0,
+                 memory_reader=None, sleeper=time.sleep):
+        self.max_workers = int(max_workers)
+        self.floor_gib = float(floor_gib)
+        self.poll_seconds = float(poll_seconds)
+        self.headroom_gib = float(headroom_gib)
+        self.stagger_seconds = float(stagger_seconds)
+        self._memory_reader = memory_reader or _mem_available_gib
+        self._sleeper = sleeper
+        self._slots = threading.Semaphore(self.max_workers)
+        self._gate = threading.Lock()
+        self.launched = 0
+
+    @classmethod
+    def from_config(cls, execution: dict, **kwargs) -> "WorkerAdmission":
+        return cls(
+            int(execution["max_workers"]),
+            float(execution["worker_admission_memory_floor_gib"]),
+            float(execution["worker_admission_poll_seconds"]),
+            headroom_gib=float(execution["estimated_memory_gib_per_worker"]),
+            stagger_seconds=float(execution["worker_admission_stagger_seconds"]),
+            **kwargs,
+        )
+
+    @contextmanager
+    def slot(self):
+        self._slots.acquire()
+        try:
+            with self._gate:
+                while self._memory_reader() < self.floor_gib + self.headroom_gib:
+                    self._sleeper(self.poll_seconds)
+                self.launched += 1
+                if self.stagger_seconds:
+                    self._sleeper(self.stagger_seconds)
+            yield
+        finally:
+            self._slots.release()
+
+
 class Supervisor:
     def __init__(self, config_path: Path, expected_commit: str):
         self.config_path = config_path.resolve()
@@ -92,10 +143,29 @@ class Supervisor:
         self.status_path = self.output / "controller.status"
         self.basis = projected_field_basis(self.config)
         self.worker_script = ROOT / "scripts/run_topic4_patient_specific_field_worker_v2.py"
+        self.admission = WorkerAdmission.from_config(self.config["execution"])
+        self.subject_concurrency = max(
+            1, int(self.config["execution"].get("subject_concurrency", 1))
+        )
+        self._status_lock = threading.Lock()
+        self._active: set[str] = set()
 
     def status(self, state: str, **details) -> None:
-        tokens = [state] + [f"{key}={value}" for key, value in details.items()]
-        self.status_path.write_text(" ".join(tokens) + "\n")
+        with self._status_lock:
+            tokens = [state] + [f"{key}={value}" for key, value in details.items()]
+            if self._active:
+                tokens.append("active=" + ",".join(sorted(self._active)))
+            self.status_path.write_text(" ".join(tokens) + "\n")
+
+    @contextmanager
+    def _active_context(self, context: str):
+        with self._status_lock:
+            self._active.add(context)
+        try:
+            yield
+        finally:
+            with self._status_lock:
+                self._active.discard(context)
 
     def wait_for_resources(self, context: str) -> int:
         wait = int(self.config["execution"]["wait_seconds"])
@@ -149,11 +219,12 @@ class Supervisor:
         environment["TOPIC4_PATIENT_SPECIFIC_SYSTEMD_UNIT"] = environment.get(
             "SYSTEMD_UNIT", "topic4-patient-specific-v2"
         )
-        with log_path.open("a") as log:
-            result = subprocess.run(
-                command, cwd=ROOT, env=environment, stdout=log,
-                stderr=subprocess.STDOUT, text=True,
-            )
+        with self.admission.slot():
+            with log_path.open("a") as log:
+                result = subprocess.run(
+                    command, cwd=ROOT, env=environment, stdout=log,
+                    stderr=subprocess.STDOUT, text=True,
+                )
         if result.returncode != 0 or not out_json.exists():
             raise RuntimeError(
                 f"worker failed for {job['subject_id']} {job['candidate_id']} "
@@ -164,12 +235,17 @@ class Supervisor:
     def run_jobs(self, jobs: list[dict], context: str) -> list[dict]:
         if not jobs:
             return []
-        workers = self.wait_for_resources(context)
-        outputs = [None] * len(jobs)
-        with ThreadPoolExecutor(max_workers=workers) as pool:
-            futures = {pool.submit(self._run_one, job): index for index, job in enumerate(jobs)}
-            for future in as_completed(futures):
-                outputs[futures[future]] = future.result()
+        with self._active_context(context):
+            self.wait_for_resources(context)
+            outputs = [None] * len(jobs)
+            # Per-worker admission, not the pool size, is what caps concurrency
+            # now that several subjects share the host.
+            pool_size = min(len(jobs), self.admission.max_workers)
+            with ThreadPoolExecutor(max_workers=pool_size) as pool:
+                futures = {pool.submit(self._run_one, job): index
+                           for index, job in enumerate(jobs)}
+                for future in as_completed(futures):
+                    outputs[futures[future]] = future.result()
         return outputs
 
     def _subject_root(self, subject_id: str) -> Path:
@@ -535,9 +611,14 @@ def main() -> None:
             supervisor.status("CANARY_COMPLETE", commit=supervisor.expected_commit)
             return
         ordered = canaries + [subject for subject in subjects if subject not in canaries]
-        for index, subject_id in enumerate(ordered, start=1):
-            supervisor.status("RUNNING_SUBJECT", index=f"{index}/{len(ordered)}", subject=subject_id)
-            supervisor.finalize_subject(subject_id)
+        supervisor.status("RUNNING_COHORT", subjects=len(ordered),
+                          subject_concurrency=supervisor.subject_concurrency,
+                          max_workers=supervisor.admission.max_workers)
+        with ThreadPoolExecutor(max_workers=supervisor.subject_concurrency) as pool:
+            futures = {pool.submit(supervisor.finalize_subject, subject_id): subject_id
+                       for subject_id in ordered}
+            for future in as_completed(futures):
+                future.result()
         result = supervisor.aggregate(ordered)
         finalizer = ROOT / "scripts/finalize_topic4_patient_specific_field_cohort_v2.py"
         subprocess.run([

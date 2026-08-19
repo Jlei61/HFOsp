@@ -291,10 +291,9 @@ def main() -> None:
         )
     else:
         score = {"status": "INVALID_RUNAWAY", "n_readable_events": 0}
-        objective = {
-            "objective": float(config["objective"]["invalid_objective"]),
-            "status": "INVALID_RUNAWAY",
-        }
+        objective = objective_from_score(
+            score, candidate, config, runaway_ms=float(runaway_ms),
+        )
         confirmation = None
 
     mz_trace = (
