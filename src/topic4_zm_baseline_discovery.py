@@ -55,12 +55,15 @@ def zm_off_support(reference_series, bin_ms, *, window_ms=500.0, quantile=95.0):
 
 
 def slow_support(reference_values, *, quantile=95.0):
-    """Upper support of an h-weighted slow variable under Z/M-off.
+    """Upper support of an h-weighted slow quantity under Z/M-off.
 
-    With Z/M off there is no z or m to measure, so the reference is the value at
-    the trajectory's own start -- z begins at 1 and m at 0 by construction, and
-    the support is expressed as the deviation a run may accumulate and still be
-    called baseline.
+    Both slow clauses are stated on the quantity that GROWS as the network
+    approaches the transition -- disinhibition (1 - z) and adaptation m -- so a
+    single upper bound is the right shape for both. Stating the z clause on z
+    itself inverts it: z falls from 1, so `z <= q95(z)` demands that the
+    candidate window be at least as DISINHIBITED as the reference's 95th
+    percentile, which rejects exactly the windows that still look like the
+    non-transitioning network.
     """
     pooled = np.concatenate([np.asarray(v, float) for v in reference_values])
     return {"q95": float(np.percentile(pooled, quantile)),
@@ -68,9 +71,16 @@ def slow_support(reference_values, *, quantile=95.0):
 
 
 def find_baseline_window(rate_series, bin_ms, *, rate_q95, z_trace, m_trace,
-                         zm_time_ms, z_q95, m_q95, burn_in_ms=500.0,
+                         zm_time_ms, disinhibition_q95, m_q95, burn_in_ms=500.0,
                          window_ms=500.0, search_end_ms=None):
     """First post-burn-in window where ALL THREE quantities sit inside support.
+
+    All three clauses are upper bounds on quantities that GROW toward the
+    transition: population rate, disinhibition (1 - z), and adaptation m. The
+    disinhibition clause is deliberately NOT stated on z. z falls from 1, so an
+    upper bound on z asks the window to be at least as disinhibited as the
+    reference -- the opposite of the question, and it rejected the quietest
+    windows on all three canary seeds before this was corrected.
 
     Returns the window and a per-clause verdict. `found=False` is a legitimate
     outcome and must be reported, not worked around by relaxing a clause.
@@ -90,18 +100,24 @@ def find_baseline_window(rate_series, bin_ms, *, rate_q95, z_trace, m_trace,
         inside = (zm_time >= t0) & (zm_time < t1)
         z_median = float(np.median(z_trace[inside])) if inside.any() else np.nan
         m_median = float(np.median(m_trace[inside])) if inside.any() else np.nan
+        disinhibition = 1.0 - z_median
         clauses = {"rate_within_zm_off_support": rate_median <= rate_q95,
-                   "z_within_support": bool(np.isfinite(z_median) and z_median <= z_q95),
+                   "disinhibition_within_support": bool(
+                       np.isfinite(disinhibition) and disinhibition <= disinhibition_q95),
                    "m_within_support": bool(np.isfinite(m_median) and m_median <= m_q95)}
         attempts.append({"window_ms": [t0, t1], "rate_median_hz": rate_median,
-                         "z_median": z_median, "m_median": m_median,
+                         "z_median": z_median, "disinhibition_median": disinhibition,
+                         "m_median": m_median,
                          "clauses": clauses, "pass": all(clauses.values())})
         if all(clauses.values()):
             return {"found": True, "window_ms": [t0, t1],
                     "checkpoint_ms": float(t1), "attempts": attempts,
-                    "supports": {"rate_q95": rate_q95, "z_q95": z_q95, "m_q95": m_q95}}
+                    "supports": {"rate_q95": rate_q95,
+                                 "disinhibition_q95": disinhibition_q95,
+                                 "m_q95": m_q95}}
     return {"found": False, "attempts": attempts,
-            "supports": {"rate_q95": rate_q95, "z_q95": z_q95, "m_q95": m_q95},
+            "supports": {"rate_q95": rate_q95,
+                         "disinhibition_q95": disinhibition_q95, "m_q95": m_q95},
             "consequence": ("no window after burn-in has all three quantities inside "
                             "the Z/M-off support; the two states must be labelled "
                             "'early transition vs pre-ictal', not 'baseline vs "

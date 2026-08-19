@@ -1,1 +1,31 @@
-{"status": "ZM_ITX_FIG5_REPLAY_COMPLETE", "candidate_id": "joint_04_control", "seed": 1801, "model_ictal_onset_ms": 4115.0, "frame_dt_ms": 5.0, "n_frames": 923, "activity_window_ms": 10.0, "grid_n": 64, "verification_against_archived_run": {"archived_run": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/workers/joint_04_control_seed_1801.json", "contact_envelope_identical": true, "active_fraction_identical": true, "onset_identical": true, "archived_onset_ms": 4115.0, "replay_onset_ms": 4115.0, "all_match": true}, "frames_do_not_consume_random_numbers": true, "wall_seconds": 1987.3861899375916, "npz": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/fig5_replay/joint_04_control_seed_1801_frames.npz"}
+{
+  "status": "ZM_ITX_FIG5_REPLAY_COMPLETE",
+  "candidate_id": "joint_04_control",
+  "seed": 1801,
+  "model_ictal_onset_ms": 4115.0,
+  "frame_dt_ms": 5.0,
+  "n_frames": 923,
+  "activity_window_ms": 10.0,
+  "grid_n": 64,
+  "lfp_readout": "LFPRecorder current proxy at the frozen 15 contacts; signed display is produced by a 30-80 Hz zero-phase bandpass",
+  "sample_event_selection": {
+    "rule": "latest returned pre-transition event with at least 8 readable contacts; independent of direction, KMeans and appearance",
+    "index": 13,
+    "t_on_ms": 2798.0,
+    "t_off_ms": 3013.0,
+    "n_readable_contacts": 15
+  },
+  "verification_against_archived_run": {
+    "archived_run": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/workers/joint_04_control_seed_1801.json",
+    "contact_envelope_identical": true,
+    "active_fraction_identical": true,
+    "onset_identical": true,
+    "archived_onset_ms": 4115.0,
+    "replay_onset_ms": 4115.0,
+    "all_match": true
+  },
+  "frames_do_not_consume_random_numbers": true,
+  "wall_seconds": 2257.0,
+  "metadata_recovered_after_terminal_path_error": true,
+  "npz": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/fig5_replay/joint_04_control_seed_1801_frames.npz"
+}

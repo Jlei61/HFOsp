@@ -234,7 +234,7 @@
     "minimum_onset_for_sensitivity_ms": 3500.0,
     "baseline_discovery": {
       "method": "src.topic4_zm_baseline_discovery.find_baseline_window",
-      "definition": "first post-burn-in 500 ms window whose population rate, h-weighted z and h-weighted m all sit inside the Z/M-off q95 support",
+      "definition": "first post-burn-in 500 ms window whose population rate, h-weighted DISINHIBITION (1-z) and h-weighted adaptation m all sit inside the Z/M-off support. The two slow clauses bound the quantity that GROWS toward the transition; stating the first on z itself inverts it",
       "burn_in_ms": 500.0,
       "window_ms": 500.0,
       "measured_population_rate_q95_hz": 30.6,
@@ -242,7 +242,64 @@
         500.0,
         1000.0
       ],
-      "if_not_found": "label the two states 'early transition vs pre-ictal'; the word baseline is not used"
+      "if_not_found": "label the two states 'early transition vs pre-ictal'; the word baseline is not used",
+      "reference_construction": "shadow runs (--zm-mode shadow): z and m integrate and are recorded but never reach the membrane, so the trajectory is bit-identical to Z/M-off while the slow variables are observable. Without this the two slow clauses are untestable, because with Z/M off there is no z or m at all",
+      "measured_pooled_support": {
+        "rate_q95_hz": 30.6466,
+        "disinhibition_q95": 0.2445,
+        "m_q95": 11.7569,
+        "n_windows": 120
+      },
+      "measured_time_matched": {
+        "window_ms": [
+          500.0,
+          1000.0
+        ],
+        "rate_hz_on_vs_shadow": [
+          [
+            1.91,
+            5.21
+          ],
+          [
+            8.78,
+            8.99
+          ],
+          [
+            16.65,
+            9.57
+          ]
+        ],
+        "disinhibition_on_vs_shadow": [
+          [
+            0.0272,
+            0.03
+          ],
+          [
+            0.0315,
+            0.0307
+          ],
+          [
+            0.0299,
+            0.0277
+          ]
+        ],
+        "m_on_vs_shadow": [
+          [
+            6.56,
+            6.38
+          ],
+          [
+            7.22,
+            7.49
+          ],
+          [
+            5.71,
+            5.22
+          ]
+        ],
+        "note": "quote THESE, not the pooled q95: the pooled bound spans 20 s of z drift at tau_z = 5 s and every early window clears it easily"
+      },
+      "verdict": "all three canary seeds qualify at [500, 1000] ms; the label baseline is earned"
     },
     "two_second_checkpoint_is": "early_transition, NOT baseline",
     "early_transition_evidence": {

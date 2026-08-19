@@ -32,8 +32,9 @@ def test_a_quiet_run_finds_a_baseline_window():
     quiet = np.full(20000, 0.01)
     out = find_baseline_window(
         quiet, bin_ms=1.0, rate_q95=50.0,
-        z_trace=np.full(200, 0.05), m_trace=np.full(200, 0.05),
-        zm_time_ms=np.linspace(0, 20000, 200), z_q95=0.2, m_q95=0.2)
+        z_trace=np.full(200, 0.99), m_trace=np.full(200, 0.05),
+        zm_time_ms=np.linspace(0, 20000, 200),
+        disinhibition_q95=0.05, m_q95=0.2)
     assert out["found"] is True
     assert out["window_ms"][0] >= 500.0          # after burn-in
 
@@ -43,8 +44,9 @@ def test_an_already_elevated_run_reports_not_found_rather_than_relaxing():
     busy = np.full(20000, 0.9)
     out = find_baseline_window(
         busy, bin_ms=1.0, rate_q95=30.0,
-        z_trace=np.full(200, 0.9), m_trace=np.full(200, 0.9),
-        zm_time_ms=np.linspace(0, 20000, 200), z_q95=0.2, m_q95=0.2)
+        z_trace=np.full(200, 0.90), m_trace=np.full(200, 0.9),
+        zm_time_ms=np.linspace(0, 20000, 200),
+        disinhibition_q95=0.05, m_q95=0.2)
     assert out["found"] is False
     assert "early transition vs pre-ictal" in out["consequence"]
     assert all(not a["pass"] for a in out["attempts"])
@@ -53,12 +55,14 @@ def test_an_already_elevated_run_reports_not_found_rather_than_relaxing():
 def test_every_clause_is_reported_not_only_the_failing_one():
     out = find_baseline_window(
         np.full(6000, 0.9), bin_ms=1.0, rate_q95=30.0,
-        z_trace=np.full(60, 0.01), m_trace=np.full(60, 0.01),
-        zm_time_ms=np.linspace(0, 6000, 60), z_q95=0.2, m_q95=0.2)
+        z_trace=np.full(60, 0.99), m_trace=np.full(60, 0.01),
+        zm_time_ms=np.linspace(0, 6000, 60),
+        disinhibition_q95=0.05, m_q95=0.2)
     first = out["attempts"][0]
     assert set(first["clauses"]) == {"rate_within_zm_off_support",
-                                     "z_within_support", "m_within_support"}
-    assert first["clauses"]["z_within_support"] is True      # only rate fails
+                                     "disinhibition_within_support",
+                                     "m_within_support"}
+    assert first["clauses"]["disinhibition_within_support"] is True   # only rate fails
     assert first["clauses"]["rate_within_zm_off_support"] is False
 
 

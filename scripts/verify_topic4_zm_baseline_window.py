@@ -91,9 +91,15 @@ def main():
                     out.append(v)
         return np.asarray(out, float)
     z_pool, m_pool = _slow_pool("z"), _slow_pool("m")
+    # The bound is on DISINHIBITION, not on z. z falls from 1, so an upper bound
+    # on z would demand that a candidate window be at least as disinhibited as
+    # the reference's 95th percentile -- it rejects the quietest windows, which
+    # is what it did on all three seeds before this was corrected.
+    disinhibition_pool = 1.0 - z_pool
 
     support = {"rate_q95": float(np.percentile(rate_pool, 95)),
-               "z_q95": float(np.percentile(z_pool, 95)),
+               "disinhibition_q95": float(np.percentile(disinhibition_pool, 95)),
+               "z_floor_equivalent": float(1.0 - np.percentile(disinhibition_pool, 95)),
                "m_q95": float(np.percentile(m_pool, 95)),
                "n_windows": {"rate": int(rate_pool.size), "z": int(z_pool.size),
                              "m": int(m_pool.size)}}
@@ -104,7 +110,8 @@ def main():
         verdict = find_baseline_window(
             s["active_fraction"], s["bin_ms"], rate_q95=support["rate_q95"],
             z_trace=s["z"], m_trace=s["m"], zm_time_ms=s["t"],
-            z_q95=support["z_q95"], m_q95=support["m_q95"],
+            disinhibition_q95=support["disinhibition_q95"],
+            m_q95=support["m_q95"],
             burn_in_ms=args.burn_in_ms, window_ms=args.window_ms,
             search_end_ms=None)
         entry = {"pooled_reference": verdict}
@@ -120,8 +127,9 @@ def main():
                 "window_ms": [lo, hi],
                 "rate_hz": {"zm_on": float(np.median(ema_on[i0:i1])),
                             "shadow": float(np.median(ema_ref[i0:i1]))},
-                "z": {"zm_on": _window_median(s["t"], s["z"], lo, hi),
-                      "shadow": _window_median(ref["t"], ref["z"], lo, hi)},
+                "disinhibition": {
+                    "zm_on": 1.0 - _window_median(s["t"], s["z"], lo, hi),
+                    "shadow": 1.0 - _window_median(ref["t"], ref["z"], lo, hi)},
                 "m": {"zm_on": _window_median(s["t"], s["m"], lo, hi),
                       "shadow": _window_median(ref["t"], ref["m"], lo, hi)}}
         else:
