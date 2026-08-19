@@ -76,6 +76,13 @@ def _select_display_event(event_t_on, event_t_off, returned, before_onset, onset
     return int(eligible[np.argmax(np.asarray(event_t_off, float)[eligible])])
 
 
+def _repo_relative_output(path):
+    """Return a stable repository-relative path for absolute or CLI-relative output."""
+    path = Path(path)
+    resolved = path if path.is_absolute() else ROOT / path
+    return str(resolved.resolve().relative_to(ROOT.resolve()))
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
@@ -243,7 +250,7 @@ def main():
         "verification_against_archived_run": verification,
         "frames_do_not_consume_random_numbers": True,
         "wall_seconds": time.time() - started,
-        "npz": str(out.relative_to(ROOT)),
+        "npz": _repo_relative_output(out),
     }, str(out.with_suffix(".json")))
     print(json.dumps({"onset_ms": onset_ms, "n_frames": int(len(frame_steps)),
                       "verified": verification["all_match"],

@@ -6,7 +6,10 @@ from scripts.paper_figures.plot_fig5_data_driven_zm_main import (
     _sample_contact_field,
     _signed_bandpass,
 )
-from scripts.replay_topic4_zm_fig5_frames import _select_display_event
+from scripts.replay_topic4_zm_fig5_frames import (
+    _repo_relative_output,
+    _select_display_event,
+)
 
 
 def test_display_event_rule_uses_latest_complete_observed_event():
@@ -58,3 +61,8 @@ def test_contact_energy_samples_the_same_spatial_field():
     sampled = _sample_contact_field(positions, values, contacts, sigma_mm=0.5)
     assert sampled[0] < sampled[1]
     assert np.isclose(sampled[0], 2.0, atol=0.1)
+
+
+def test_replay_output_path_accepts_cli_relative_path():
+    relative = "results/topic4_sef_hfo/example.npz"
+    assert _repo_relative_output(relative) == relative
