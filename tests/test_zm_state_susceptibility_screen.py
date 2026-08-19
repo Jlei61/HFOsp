@@ -163,3 +163,56 @@ def test_a_seed_whose_every_site_ignited_is_named_not_dropped(sandbox):
     report = json.loads((out / "state_susceptibility_screen.json").read_text())
     assert report["screen"]["seeds_with_no_comparable_site"] == [1803]
     assert report["state_difference_established_for_escalation"] is False
+
+
+def test_a_dose_that_ignites_only_at_pre_ictal_still_establishes_a_difference(sandbox):
+    """The false negative this guards: the dose is calibrated to be sub-event at
+    the low-activity state, so igniting at the pre-ictal state IS the difference.
+    Reporting only the graded endpoint would call this 'no comparable units'."""
+    cfg, out = sandbox
+    for seed in (1801, 1802, 1803):
+        _write(out / "perturbation", "joint_04_control", seed, "low_activity", 64,
+               [_row(f"s{i}", 100.0) for i in range(6)], 1000.0)
+        _write(out / "perturbation", "joint_04_control", seed, "pre_ictal", 64,
+               [_row(f"s{i}", 90000.0, event=True, ictal=True) for i in range(6)],
+               3600.0)
+    _run(cfg, [1801, 1802, 1803])
+    report = json.loads((out / "state_susceptibility_screen.json").read_text())
+    assert report["screen"]["site_units_comparable"] == 0
+    assert report["established_by"]["graded"] is False
+    assert report["established_by"]["ignition"] is True
+    assert report["state_difference_established_for_escalation"] is True
+    assert report["ignition_endpoint"]["pre_ictal"] == 18
+    assert report["ignition_endpoint"]["low_activity"] == 0
+
+
+def test_equal_ignition_at_both_states_does_not_establish_anything(sandbox):
+    cfg, out = sandbox
+    for seed in (1801, 1802, 1803):
+        rows = [_row(f"s{i}", 100.0) for i in range(4)]
+        rows += [_row(f"s{i}", 90000.0, event=True, ictal=True) for i in (4, 5)]
+        _write(out / "perturbation", "joint_04_control", seed, "low_activity", 64,
+               rows, 1000.0)
+        rows2 = [_row(f"s{i}", 100.0) for i in range(4)]
+        rows2 += [_row(f"s{i}", 90000.0, event=True, ictal=True) for i in (4, 5)]
+        _write(out / "perturbation", "joint_04_control", seed, "pre_ictal", 64,
+               rows2, 3600.0)
+    _run(cfg, [1801, 1802, 1803])
+    report = json.loads((out / "state_susceptibility_screen.json").read_text())
+    assert report["ignition_endpoint"]["difference"] == 0
+    assert report["established_by"]["ignition"] is False
+    assert report["state_difference_established_for_escalation"] is False
+
+
+def test_ignition_endpoint_needs_all_three_seeds(sandbox):
+    cfg, out = sandbox
+    for seed in (1801, 1802):
+        _write(out / "perturbation", "joint_04_control", seed, "low_activity", 64,
+               [_row(f"s{i}", 100.0) for i in range(6)], 1000.0)
+        _write(out / "perturbation", "joint_04_control", seed, "pre_ictal", 64,
+               [_row(f"s{i}", 90000.0, event=True, ictal=True) for i in range(6)],
+               3600.0)
+    _run(cfg, [1801, 1802, 1803])
+    report = json.loads((out / "state_susceptibility_screen.json").read_text())
+    assert report["established_by"]["ignition"] is False
+    assert report["state_difference_established_for_escalation"] is False

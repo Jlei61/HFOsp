@@ -13,6 +13,17 @@ matter how large the effect looks, so what is reported is:
     warning that the six sites inside one network are not independent draws.
 
 The decision this feeds is narrow: escalate to the 7 x 7 grid, or not.
+
+TWO endpoints, because either one alone can miss the difference:
+
+  graded    the descendant-only response on units that stayed sub-event at both
+            states. This is the intended measurement.
+  ignition  how many units the SAME dose ignited at each state. The dose is
+            calibrated to be sub-event at the low-activity state, so if it
+            ignites at the pre-ictal state that IS the state difference -- the
+            most extreme form of it. Excluding those units and reporting only
+            the graded endpoint would turn the largest possible effect into
+            "no comparable units", a false negative built into the design.
 """
 from __future__ import annotations
 
@@ -106,6 +117,23 @@ def main():
                 "low_activity": low_payload.get("checkpoint_absolute_time_ms"),
                 "pre_ictal": pre_payload.get("checkpoint_absolute_time_ms")}}
 
+    ignition = {"low_activity": 0, "pre_ictal": 0, "n_units": 0,
+                "per_seed": {}}
+    for seed, entry in per_seed.items():
+        low_n = sum(1 for v in entry["sites"].values()
+                    if v["probe_attributable_event"]["low_activity"])
+        pre_n = sum(1 for v in entry["sites"].values()
+                    if v["probe_attributable_event"]["pre_ictal"])
+        ignition["low_activity"] += low_n
+        ignition["pre_ictal"] += pre_n
+        ignition["n_units"] += len(entry["sites"])
+        ignition["per_seed"][seed] = {"low_activity": low_n, "pre_ictal": pre_n,
+                                      "n_sites": len(entry["sites"])}
+    ignition["difference"] = ignition["pre_ictal"] - ignition["low_activity"]
+    ignition["every_seed_ignites_more_at_pre_ictal"] = bool(
+        per_seed and all(v["pre_ictal"] > v["low_activity"]
+                         for v in ignition["per_seed"].values()))
+
     seed_medians = [v["median_delta_susceptibility"] for v in per_seed.values()
                     if v["median_delta_susceptibility"] is not None]
     seeds_with_no_comparable_site = [k for k, v in per_seed.items()
@@ -124,7 +152,14 @@ def main():
         "site_units_excluded_probe_attributable": len(units) - len(comparable),
         "seeds_with_no_comparable_site": seeds_with_no_comparable_site,
     }
-    established = bool(screen["all_seed_medians_same_sign"] and len(seed_medians) == 3)
+    graded_established = bool(screen["all_seed_medians_same_sign"]
+                              and len(seed_medians) == 3)
+    # Either endpoint can establish that the states differ. Requiring the graded
+    # one alone would let a dose that ignites at every pre-ictal site read as
+    # "no comparable units, nothing found".
+    ignition_established = bool(ignition["every_seed_ignites_more_at_pre_ictal"]
+                                and len(per_seed) == 3)
+    established = graded_established or ignition_established
 
     report = {
         "status": "ZM_STATE_SUSCEPTIBILITY_SCREEN",
@@ -133,6 +168,9 @@ def main():
         "state_label": args.state_label,
         "endpoint": "delta_S(x) = S_pre_ictal(x) - S_low_activity(x), descendant-only",
         "screen": screen,
+        "ignition_endpoint": ignition,
+        "established_by": {"graded": graded_established,
+                           "ignition": ignition_established},
         "state_difference_established_for_escalation": established,
         "escalate_to_grid": established,
         "per_seed": per_seed,
@@ -144,16 +182,21 @@ def main():
             "The six sites inside one network share that network's trajectory and are "
             "not independent draws; the 18 site units are descriptive only.",
             "Sites where the probe itself ignited the network are excluded from the "
-            "comparison rather than counted, because their response is no longer a "
-            "sub-event response. The per-seed median is over comparable sites only; "
-            "`median_delta_susceptibility_including_ignited` is reported alongside so "
-            "the size of that exclusion is visible rather than hidden.",
+            "GRADED comparison rather than counted, because their response is no "
+            "longer a sub-event response. The per-seed median is over comparable "
+            "sites only; `median_delta_susceptibility_including_ignited` is reported "
+            "alongside so the size of that exclusion is visible rather than hidden.",
+            "Those same excluded units are the IGNITION endpoint. The dose is "
+            "calibrated to be sub-event at the low-activity state, so igniting at "
+            "the pre-ictal state is itself the state difference. Escalation follows "
+            "either endpoint; `established_by` records which one fired.",
         ],
     }
     out = ROOT / config["output_root"] / "state_susceptibility_screen.json"
     out.write_text(json.dumps(report, indent=2))
     print(json.dumps({k: report[k] for k in
-                      ("screen", "state_difference_established_for_escalation",
+                      ("screen", "ignition_endpoint", "established_by",
+                       "state_difference_established_for_escalation",
                        "dose_cells", "state_label", "missing")}, indent=2))
 
 
