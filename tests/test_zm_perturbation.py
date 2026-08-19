@@ -88,6 +88,9 @@ def test_descendant_spikes_are_still_counted():
     assert out["susceptibility"] == 15.0
     assert out["excess_spikes_early"] == 10.0   # the 4 ms group
     assert out["excess_spikes_late"] == 5.0     # the 90 ms group
+    assert out["excess_per_neuron_early"][400:410].sum() == 10.0
+    assert out["excess_per_neuron_early"][400:405].sum() == 5.0
+    assert out["excess_per_neuron_early"][packet].sum() == 0.0
 
 
 def test_susceptibility_is_the_sum_of_its_two_parts():

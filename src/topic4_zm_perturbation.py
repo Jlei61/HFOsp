@@ -81,12 +81,15 @@ def response_metrics(probe, sham, *, dt_ms, positions_e, packet_mask, packet_xy,
     probe_desc = _descendant(probe, sham, packet_mask, inject_step)
     stop = min(probe_desc.shape[0], int(inject_step) + int(round(window_ms / dt_ms)))
     split = int(inject_step) + int(round(split_ms / dt_ms))
-    excess = (probe_desc[inject_step:stop].sum(axis=0).astype(float)
-              - sham_spikes[inject_step:stop].sum(axis=0).astype(float))
-    early = (probe_desc[inject_step:min(split, stop)].sum()
-             - sham_spikes[inject_step:min(split, stop)].sum())
-    late = (probe_desc[min(split, stop):stop].sum()
-            - sham_spikes[min(split, stop):stop].sum())
+    early_per_neuron = (
+        probe_desc[inject_step:min(split, stop)].sum(axis=0).astype(float)
+        - sham_spikes[inject_step:min(split, stop)].sum(axis=0).astype(float))
+    late_per_neuron = (
+        probe_desc[min(split, stop):stop].sum(axis=0).astype(float)
+        - sham_spikes[min(split, stop):stop].sum(axis=0).astype(float))
+    excess = early_per_neuron + late_per_neuron
+    early = early_per_neuron.sum()
+    late = late_per_neuron.sum()
 
     positive = np.clip(excess, 0.0, None)
     if positive.sum() > 0:
@@ -109,6 +112,7 @@ def response_metrics(probe, sham, *, dt_ms, positions_e, packet_mask, packet_xy,
             "excess_spikes_late": float(late),
             "r90_mm": r90,
             "contact_excess_energy": float(contact.sum()),
+            "excess_per_neuron_early": early_per_neuron.astype(np.float32),
             "excess_per_neuron": excess.astype(np.float32)}
 
 

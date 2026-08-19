@@ -95,11 +95,13 @@ def _seed_from_path(path):
     return int(match.group(1))
 
 
-def _aggregate_probe_fields(paths, replay, output_root, extent, site_id="source"):
+def _aggregate_probe_fields(paths, replay, output_root, extent, site_id="source",
+                            field_key="excess_per_neuron_early",
+                            require_e1=False):
     axis_unit = np.asarray(replay["axis_unit"], float)
     origin = 0.5 * (np.asarray(replay["axis_source_xy"], float)
                     + np.asarray(replay["axis_sink_xy"], float))
-    grids, used, excluded = [], [], []
+    grids, used, excluded, ignited = [], [], [], []
     probe_xy = None
     for path in sorted(paths):
         block = _load_npz(path)
@@ -109,13 +111,19 @@ def _aggregate_probe_fields(paths, replay, output_root, extent, site_id="source"
             raise RuntimeError(f"{path} has no unique frozen {site_id!r} site")
         row = int(where[0])
         seed = _seed_from_path(path)
-        if not bool(block["e1_evaluable"][row]):
+        is_ignited = bool(block["probe_attributable_event_200ms"][row]
+                          or block["reached_model_ictal_200ms"][row])
+        if is_ignited:
+            ignited.append(seed)
+        if require_e1 and not bool(block["e1_evaluable"][row]):
             excluded.append(seed)
             continue
         worker = _load_npz(output_root / "workers"
                            / f"joint_04_control_seed_{seed}.npz")
         xy = _registered_xy(worker["positions_E"], axis_unit, origin)
-        grids.append(_grid_mean(xy, block["excess_per_neuron"][row], extent,
+        if field_key not in block:
+            raise RuntimeError(f"{path} predates the {field_key!r} map contract")
+        grids.append(_grid_mean(xy, block[field_key][row], extent,
                                 positive=True))
         current_probe = _registered_xy(block["site_xy_mm"][[row]], axis_unit, origin)[0]
         if probe_xy is None:
@@ -126,7 +134,7 @@ def _aggregate_probe_fields(paths, replay, output_root, extent, site_id="source"
     if len(grids) < 2:
         raise RuntimeError(
             f"Panel D needs >=2 evaluable network seeds; got {used}, excluded={excluded}")
-    return np.mean(grids, axis=0), probe_xy, used, excluded
+    return np.mean(grids, axis=0), probe_xy, used, excluded, ignited
 
 
 def _style_spatial(ax, extent, show_ylabel=False):
@@ -331,9 +339,9 @@ def main():
                     + np.asarray(replay["axis_sink_xy"], float))
     positions = _registered_xy(replay["positions_E"], axis_unit, origin)
     contacts = _registered_xy(replay["contact_xy_mm"], axis_unit, origin)
-    low_grid, low_probe, low_used, low_excluded = _aggregate_probe_fields(
+    low_grid, low_probe, low_used, low_excluded, low_ignited = _aggregate_probe_fields(
         low_paths, replay, output_root, extent)
-    pre_grid, pre_probe, pre_used, pre_excluded = _aggregate_probe_fields(
+    pre_grid, pre_probe, pre_used, pre_excluded, pre_ignited = _aggregate_probe_fields(
         pre_paths, replay, output_root, extent)
     if not np.allclose(low_probe, pre_probe, atol=1e-8, rtol=0.0):
         raise RuntimeError("low-activity and pre-transition probes differ")
@@ -361,7 +369,7 @@ def main():
         positions, contacts, extent)
     vmax = max(float(np.percentile(low_grid, 99)), float(np.percentile(pre_grid, 99)), 1e-9)
     response_map = _plot_response(ax_d1, low_grid, low_probe, extent,
-                                  "Low-activity response", vmax,
+                                  "Baseline probe response", vmax,
                                   show_ylabel=False, show_probe=True)
     _plot_response(ax_d2, pre_grid, pre_probe, extent,
                    "Pre-transition response (-500 ms)", vmax,
@@ -379,7 +387,8 @@ def main():
     cb_energy.set_label("contact energy\n(a.u.)", fontsize=7.2)
     cb_energy.ax.tick_params(labelsize=6.8)
     cb_resp = fig.colorbar(response_map, ax=[ax_d1, ax_d2], fraction=0.026, pad=0.018)
-    cb_resp.set_label("descendant response\n(excess spikes per local E cell)", fontsize=7.2)
+    cb_resp.set_label("immediate descendant response\n(0-50 ms excess spikes per local E cell)",
+                      fontsize=7.2)
     cb_resp.ax.tick_params(labelsize=6.8)
 
     out_dir = ROOT / args.out_dir
@@ -407,13 +416,19 @@ def main():
                     "energy": ("100 ms post-transition spike-rate-squared field; "
                                "contact colours sample that same field with a fixed 0.75 mm Gaussian kernel")},
         "panel_D": {"probe_site": "source (geometry-frozen; not response-selected)",
+                    "dose_cells": 64,
+                    "endpoint": ("exploratory 0-50 ms immediate descendant response; "
+                                 "the preregistered 200 ms finite-response gate remains failed"),
                     "paired_seeds": paired,
                     "low_activity_used": low_used, "pre_transition_used": pre_used,
                     "low_activity_excluded": low_excluded,
                     "pre_transition_excluded": pre_excluded,
-                    "response": "positive descendant excess over paired sham, 200 ms"},
+                    "baseline_source_ignited_seeds": low_ignited,
+                    "pre_transition_source_ignited_seeds": pre_ignited,
+                    "response": "positive descendant excess over paired sham, 0-50 ms"},
         "claim_boundary": ("single data-driven SNN trajectory plus three-network perturbation "
-                           "canary; operational model transition, not clinical seizure onset"),
+                           "canary; operational model transition, not clinical seizure onset; "
+                           "NO_SUBEVENT_PROBE_REGIME remains the formal 200 ms E1 result"),
         "outputs": outputs,
     }
     atomic_write_json(metadata, str(out_dir / f"{stem}-metadata.json"))

@@ -189,7 +189,7 @@ def main():
                                  early_stop=True)
         sham_onset = sham_long["runaway_early_stop_ms"]
 
-    rows, excess_fields, dropped = [], [], []
+    rows, excess_fields, early_excess_fields, dropped = [], [], [], []
     for site in sites:
         try:
             packet = select_packet(substrate.positions_e, site["xy_mm"],
@@ -217,7 +217,8 @@ def main():
         row = {"site_id": site["site_id"],
                "site_xy_mm": [float(v) for v in site["xy_mm"]],
                "off_manifold": off_manifold, "splice_mode": splice_mode,
-               **{k: v for k, v in metrics.items() if k != "excess_per_neuron"},
+               **{k: v for k, v in metrics.items()
+                  if k not in {"excess_per_neuron", "excess_per_neuron_early"}},
                **regime}
         if args.measure_onset_advance:
             remaining = float(args.onset_cap_ms) - float(host["absolute_time_ms"])
@@ -231,6 +232,7 @@ def main():
                 sham_onset_ms=sham_onset))
         rows.append(row)
         excess_fields.append(metrics["excess_per_neuron"])
+        early_excess_fields.append(metrics["excess_per_neuron_early"])
 
     stem = Path(args.checkpoint).stem + f"_{args.sites}"
     if splice_mode != "native":
@@ -272,6 +274,9 @@ def main():
             [r["reached_model_ictal_200ms"] for r in rows], bool),
         "excess_per_neuron": (np.asarray(excess_fields, np.float32)
                               if excess_fields else np.zeros((0, substrate.n_e), np.float32)),
+        "excess_per_neuron_early": (
+            np.asarray(early_excess_fields, np.float32)
+            if early_excess_fields else np.zeros((0, substrate.n_e), np.float32)),
     }
     if args.measure_onset_advance and rows:
         arrays["onset_advance_ms"] = np.asarray(
