@@ -234,11 +234,17 @@ def phase_formal(config, args):
         for arm_name in ("Node", "Node+EE", "Node+EtoI", "Joint"):
             candidate = arms[arm_name]
             slug = candidate.replace("+", "_")
+            # --out-json is passed explicitly, even though it names the default
+            # path, because _already_done() reads it: without it the resume path
+            # cannot tell a finished run from one that never started, and every
+            # interruption would re-run the whole 48-job factorial from zero.
             jobs.append((f"{slug}-s{seed}",
                          [PYTHON, str(WORKER), "--config", args.config,
                           "--candidate-id", candidate, "--seed", str(seed),
                           "--expected-commit", args.expected_commit,
-                          "--zm-mode", "z_plus_m", *extra],
+                          "--zm-mode", "z_plus_m", *extra,
+                          "--out-json",
+                          str(output_root / "workers" / f"{candidate}_seed_{seed}.json")],
                          output_root / "run_logs" / f"{slug}_s{seed}.log"))
     _log(controller_log, {"progress": "formal_start", "n_jobs": len(jobs)})
     _run_pool(jobs, config, "full_run", "topic4-zmitx-formal-", controller_log)
