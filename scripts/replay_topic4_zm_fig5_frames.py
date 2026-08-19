@@ -32,6 +32,13 @@ from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_zm_ictal_transition import (  # noqa: E402
     build_substrate, load_round_config, make_external_drive)
 from src.topic4_zm_slow_vars import ZMTracedSlowVars  # noqa: E402
+from src.topic4_runaway_morphology import (  # noqa: E402
+    classify_sustained_runaway,
+    contact_oscillation_metrics,
+    population_rate_frequency_metrics,
+    rolling_full_field_recruitment,
+    summarize_runaway_morphology,
+)
 
 
 def _activity_frames(spikes, positions, frame_steps, window_steps, grid_n, sheet_l):
@@ -90,6 +97,7 @@ def main():
     parser.add_argument("--frame-dt-ms", type=float, default=5.0)
     parser.add_argument("--activity-window-ms", type=float, default=10.0)
     parser.add_argument("--grid-n", type=int, default=64)
+    parser.add_argument("--post-runaway-record-ms", type=float)
     parser.add_argument("--out")
     args = parser.parse_args()
 
@@ -122,6 +130,9 @@ def main():
         substrate.params, substrate.net["pos"], substrate.net["labels"],
         sites=substrate.contact_xy)
     substrate.net["rng"] = np.random.default_rng(int(args.seed))
+    post_runaway_record_ms = float(
+        simulation["post_runaway_record_ms"]
+        if args.post_runaway_record_ms is None else args.post_runaway_record_ms)
     result = simulate_kick(
         substrate.params, substrate.net, KICK_BOOST=0.0, t_kick=1e9,
         V_th_per_neuron=substrate.vtheta, slow=slow,
@@ -129,9 +140,10 @@ def main():
         early_stop_runaway=bool(simulation["early_stop_runaway"]),
         es_thresh_hz=float(simulation["es_thresh_hz"]),
         es_dur_ms=float(simulation["es_dur_ms"]),
-        post_runaway_record_ms=float(simulation["post_runaway_record_ms"]),
+        post_runaway_record_ms=post_runaway_record_ms,
         external_e_rate_drive=drive)
     onset_ms = result["runaway_early_stop_ms"]
+    morphology_onset_ms = float(onset_ms) - float(simulation["es_dur_ms"])
     spikes = np.asarray(result["E_spk_bool"], bool)
 
     # ---- verify against the archived run BEFORE writing anything ----
@@ -196,6 +208,21 @@ def main():
     energy_window_s = max((energy_hi - energy_lo) * dt * 1e-3, 1e-9)
     early_rate_hz = spikes[energy_lo:energy_hi].sum(axis=0) / energy_window_s
     early_activity_energy = np.square(early_rate_hz).astype(np.float32)
+    recruitment = rolling_full_field_recruitment(
+        spikes, substrate.positions_e, dt_ms=dt, sheet_l_mm=float(engine["L"]))
+    oscillation = contact_oscillation_metrics(
+        result["lfp_trace"], dt_ms=dt, onset_ms=morphology_onset_ms)
+    population_frequency = population_rate_frequency_metrics(
+        result["rate_E"], dt_ms=dt, onset_ms=morphology_onset_ms)
+    morphology = summarize_runaway_morphology(
+        recruitment, oscillation, onset_ms=morphology_onset_ms,
+        population_frequency=population_frequency)
+    morphology["classification"] = classify_sustained_runaway(morphology)
+    morphology["operational_detection_ms"] = float(onset_ms)
+    morphology["scientific_onset_ms"] = morphology_onset_ms
+    morphology["onset_backdating_rule"] = (
+        "operational detection minus the frozen sustained-rate duration; the "
+        "rate detector itself is not part of the morphology verdict")
 
     out = Path(args.out or output_root / "fig5_replay" / f"{candidate}_seed_{args.seed}_frames.npz")
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -216,6 +243,11 @@ def main():
         active_fraction=np.asarray(active, np.float32),
         active_fraction_bin_ms=np.asarray(active_dt, float),
         rate_E_hz=np.asarray(result["rate_E"], np.float32),
+        full_field_time_ms=np.asarray(recruitment["time_ms"], np.float32),
+        active_neuron_fraction_20ms=np.asarray(
+            recruitment["active_neuron_fraction"], np.float32),
+        recruited_spatial_fraction_1mm=np.asarray(
+            recruitment["recruited_spatial_fraction"], np.float32),
         zm_h_weighted_time_ms=weighted["time_ms"],
         zm_h_weighted_z=weighted["z_weighted_mean"],
         zm_h_weighted_m=weighted["m_weighted_mean"],
@@ -234,6 +266,9 @@ def main():
         "status": "ZM_ITX_FIG5_REPLAY_COMPLETE",
         "candidate_id": candidate, "seed": int(args.seed),
         "model_ictal_onset_ms": onset_ms,
+        "morphology_onset_ms": morphology_onset_ms,
+        "post_runaway_record_ms": post_runaway_record_ms,
+        "runaway_morphology": morphology,
         "frame_dt_ms": float(args.frame_dt_ms), "n_frames": int(len(frame_steps)),
         "activity_window_ms": float(args.activity_window_ms),
         "grid_n": int(args.grid_n),
