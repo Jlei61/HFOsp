@@ -108,7 +108,8 @@ def main():
     parser.add_argument("--checkpoint", required=True)
     parser.add_argument("--baseline-checkpoint")
     parser.add_argument("--label", required=True,
-                        choices=("baseline", "pre_ictal", "sensitivity"))
+                        choices=("low_activity", "early_transition",
+                                 "pre_ictal", "sensitivity"))
     parser.add_argument("--splice", default="native", choices=("native",) + SPLICE_MODES)
     parser.add_argument("--sites", required=True, choices=("grid", "representative"))
     parser.add_argument("--dose-cells", required=True, type=int)

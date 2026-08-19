@@ -241,19 +241,27 @@ def _plot_event_order(ax, replay, registered_pos, registered_contacts, extent):
     return mappable
 
 
-def _plot_energy(ax, replay, registered_pos, registered_contacts, signed_lfp,
-                 onset_ms, extent):
+def _sample_contact_field(positions, values, contacts, sigma_mm=0.75):
+    positions = np.asarray(positions, float)
+    values = np.asarray(values, float)
+    out = np.empty(len(contacts), float)
+    for index, contact in enumerate(np.asarray(contacts, float)):
+        distance2 = np.sum(np.square(positions - contact), axis=1)
+        weights = np.exp(-0.5 * distance2 / float(sigma_mm) ** 2)
+        out[index] = float(np.dot(weights, values) / max(weights.sum(), 1e-12))
+    return out
+
+
+def _plot_energy(ax, replay, native_pos, native_contacts, registered_pos,
+                 registered_contacts, extent):
     values = np.asarray(replay["early_activity_energy"], float)
     high = float(np.percentile(values[values > 0], 99)) if np.any(values > 0) else 1.0
     ax.scatter(registered_pos[:, 0], registered_pos[:, 1], s=0.30,
                c=np.clip(values, 0, high), cmap="Blues", vmin=0, vmax=high,
                alpha=0.24, linewidths=0, rasterized=True)
-    dt = float(replay["lfp_dt_ms"])
-    lo = int(round(onset_ms / dt)); hi = min(len(signed_lfp), int(round((onset_ms + 100.0) / dt)))
-    contact_energy = np.mean(np.square(signed_lfp[lo:hi]), axis=0)
-    c_hi = max(float(np.percentile(contact_energy, 99)), 1e-12)
+    contact_energy = _sample_contact_field(native_pos, values, native_contacts)
     mappable = ax.scatter(registered_contacts[:, 0], registered_contacts[:, 1], s=43,
-                          c=contact_energy, cmap="Blues", vmin=0, vmax=c_hi,
+                          c=contact_energy, cmap="Blues", vmin=0, vmax=high,
                           ec="black", lw=0.75, zorder=5)
     ax.set_title("Early-transition activity energy", fontsize=10.0, fontweight="bold")
     _style_spatial(ax, extent, show_ylabel=False)
@@ -348,9 +356,9 @@ def main():
     trajectory_meta = _plot_trajectory(ax_b, replay, onset_ms,
                                        config["zm"]["eta_m"])
     rank_map = _plot_event_order(ax_c1, replay, positions, contacts, extent)
-    signed_lfp = _signed_bandpass(replay["lfp_trace"], float(replay["lfp_dt_ms"]))
-    energy_map = _plot_energy(ax_c2, replay, positions, contacts, signed_lfp,
-                              onset_ms, extent)
+    energy_map = _plot_energy(
+        ax_c2, replay, replay["positions_E"], replay["contact_xy_mm"],
+        positions, contacts, extent)
     vmax = max(float(np.percentile(low_grid, 99)), float(np.percentile(pre_grid, 99)), 1e-9)
     response_map = _plot_response(ax_d1, low_grid, low_probe, extent,
                                   "Low-activity response", vmax,
@@ -396,7 +404,8 @@ def main():
                     "scaling": "per-contact p99 within one continuous window"},
         "panel_B": trajectory_meta,
         "panel_C": {"event_order": "per-neuron first spike plus frozen contact order",
-                    "energy": "100 ms post-transition spike-rate-squared field; contact colours use current-proxy 30-80 Hz energy"},
+                    "energy": ("100 ms post-transition spike-rate-squared field; "
+                               "contact colours sample that same field with a fixed 0.75 mm Gaussian kernel")},
         "panel_D": {"probe_site": "source (geometry-frozen; not response-selected)",
                     "paired_seeds": paired,
                     "low_activity_used": low_used, "pre_transition_used": pre_used,

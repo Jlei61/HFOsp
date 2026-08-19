@@ -3,6 +3,7 @@ import numpy as np
 from scripts.paper_figures.plot_fig5_data_driven_zm_main import (
     _contact_order,
     _registered_xy,
+    _sample_contact_field,
     _signed_bandpass,
 )
 from scripts.replay_topic4_zm_fig5_frames import _select_display_event
@@ -48,3 +49,12 @@ def test_signed_bandpass_retains_50hz_and_rejects_10hz():
     amp_10 = abs(np.dot(filtered[centre], reference_10[centre]))
     assert amp_50 > 20.0 * amp_10
     assert np.min(filtered[centre]) < 0.0 < np.max(filtered[centre])
+
+
+def test_contact_energy_samples_the_same_spatial_field():
+    positions = np.array([[0.0, 0.0], [1.0, 0.0], [5.0, 0.0]])
+    values = np.array([2.0, 2.0, 10.0])
+    contacts = np.array([[0.5, 0.0], [5.0, 0.0]])
+    sampled = _sample_contact_field(positions, values, contacts, sigma_mm=0.5)
+    assert sampled[0] < sampled[1]
+    assert np.isclose(sampled[0], 2.0, atol=0.1)

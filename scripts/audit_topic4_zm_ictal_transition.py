@@ -245,14 +245,17 @@ def gate_cost_projection(config, args):
 def _dose_rows(output_root, seeds, joint, rung):
     rows = []
     for seed in seeds:
-        path = output_root / "dose" / f"{joint}_seed_{seed}_baseline_n{rung}.json"
+        # `low_activity`, not `baseline`: the state the dose is calibrated on is
+        # the window that passes the Z/M-off support rule, not the 2 s clock
+        # reading that was called baseline before it was measured.
+        path = output_root / "dose" / f"{joint}_seed_{seed}_low_activity_n{rung}.json"
         if path.exists():
             rows.extend(json.loads(path.read_text())["rows"])
     return rows
 
 
 def gate_dose(config, args):
-    """Smallest rung that is measurable, baseline-safe AND still linear.
+    """Smallest rung that is measurable, low-activity-safe AND still linear.
 
     Smallest, not largest: the largest baseline-safe rung is precisely the one
     most likely to leave the sub-event regime once the network becomes more
