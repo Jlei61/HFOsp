@@ -231,7 +231,34 @@
     "pre_ictal_offset_ms": 500.0,
     "sensitivity_offset_ms": 1000.0,
     "minimum_onset_for_perturbation_ms": 2500.0,
-    "minimum_onset_for_sensitivity_ms": 3500.0
+    "minimum_onset_for_sensitivity_ms": 3500.0,
+    "baseline_discovery": {
+      "method": "src.topic4_zm_baseline_discovery.find_baseline_window",
+      "definition": "first post-burn-in 500 ms window whose population rate, h-weighted z and h-weighted m all sit inside the Z/M-off q95 support",
+      "burn_in_ms": 500.0,
+      "window_ms": 500.0,
+      "measured_population_rate_q95_hz": 30.6,
+      "measured_location_ms": [
+        500.0,
+        1000.0
+      ],
+      "if_not_found": "label the two states 'early transition vs pre-ictal'; the word baseline is not used"
+    },
+    "two_second_checkpoint_is": "early_transition, NOT baseline",
+    "early_transition_evidence": {
+      "joint_median_ema_rate_1500_2000ms_hz": [
+        37.3,
+        63.6,
+        49.7
+      ],
+      "same_seed_zm_off_q95_hz": [
+        29.9,
+        30.1,
+        30.6
+      ],
+      "n_reference_windows_per_run": 40,
+      "verdict": "elevated on all three seeds"
+    }
   },
   "interictal_baseline_gate": {
     "minimum_onset_ms": 2500.0,
@@ -388,5 +415,15 @@
       "ee_out_gain",
       "etoi_out_gain"
     ]
+  },
+  "stage2_joint_perturbation": {
+    "scope": "Joint arm only, 3 canary networks, 6 representative sites",
+    "pairs": [
+      "baseline/sham",
+      "preictal/sham"
+    ],
+    "dose_determined_by": "baseline only",
+    "escalate_to_grid_only_if": "a state difference is first established at the 6 sites",
+    "rationale": "the 7x7 grid costs ~9 h at current machine load and answers a spatial question that only matters once a state difference exists"
   }
 }
