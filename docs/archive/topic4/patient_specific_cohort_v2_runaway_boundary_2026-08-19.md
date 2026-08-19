@@ -1,7 +1,7 @@
 # Patient-specific cohort v2: why the search never started, and what the runaway boundary is
 
 **Date:** 2026-08-19
-**Status:** `V2_RUN_ABANDONED_AFTER_GENERATION_0` / `V2P1_LAUNCHED_2026-08-19_19:35`
+**Status:** `V2_RUN_ABANDONED_AFTER_GENERATION_0` / `V2P1_LAUNCHED_2026-08-19_22:59`
 **Spec:** `docs/superpowers/specs/2026-08-19-topic4-patient-specific-field-connectivity-cohort-v2.md`
 **Plan:** `docs/superpowers/plans/2026-08-19-topic4-patient-specific-field-connectivity-cohort-v2.md`
 **Evidence root:** `results/topic4_sef_hfo/patient_specific_field_connectivity_cohort_v2/`
@@ -129,7 +129,7 @@ v2 的优化任务只存了整片放电比例（1 ms）、慢变量两条均值�
 - 关掉慢变量后，同一底物能否产出足量可打分的间期事件——3 个 `*_slow_off` 臂在跑，是 v2.1 全队列启动的前置门。
 - 慢变量打开后的**空间起点**与**扰动易感性**尚未装配（需逐细胞首次放电时刻 / 早期活动能量这类记录，参考 Fig5 回放的 `sample_first_spike_ms`、`early_activity_energy`）。
 - Fig5 形态判据中的"更高频"在现有单条轨迹上不成立，需要更多轨迹或收窄主张。
-- 28 人全队列已于 2026-08-19 19:35 以 commit `1c90a66d` 启动（`topic4-ps-cohort-v2p1-1c90a66d.service`，watchdog 最多 6 次重启）。慢变量关闭拟合、2 个病人并发、逐 worker 内存准入。
+- 28 人全队列已于 2026-08-19 22:59 以 commit `1c90a66d` 启动（`topic4-ps-cohort-v2p1-1c90a66d.service`，watchdog 最多 6 次重启）。慢变量关闭拟合、2 个病人并发、逐 worker 内存准入。
 
 ## 6. 允许 / 禁止的表述
 
