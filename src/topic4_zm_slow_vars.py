@@ -41,6 +41,7 @@ class ZMTracedSlowVars(MZSlowVars):
         self._acc_seen = 0
         self._acc_D = None
         self._acc_A = None
+        self._passive = False
         self._frame_stride = 0
         self._frame_calls = 0
         self._frames = []
@@ -95,7 +96,24 @@ class ZMTracedSlowVars(MZSlowVars):
             self._acc_D += (1.0 - self.z[:self.NE]) * inhibitory[:self.NE]
             self._acc_A += self.cfg.eta_m * self.m[:self.NE]
             self._acc_seen += 1
-        return super().apply_currents(I_E, I_I, labels, I_E_rec)
+        current = super().apply_currents(I_E, I_I, labels, I_E_rec)
+        if self._passive:
+            # z and m keep integrating and recording, but the membrane never
+            # sees them. This is what makes the baseline definition testable:
+            # with Z/M off there is no z or m to compare against, so the only
+            # non-circular reference is the pair of slow variables riding a
+            # trajectory they are not driving.
+            return np.asarray(I_E, dtype=float) - np.asarray(I_I, dtype=float)
+        return current
+
+    def enable_passive_mode(self):
+        """Integrate and record z/m without feeding them back into the current.
+
+        Off by default; the active path above is untouched, and
+        ``tests/test_zm_passive_mode.py`` asserts a passive run is bit-identical
+        to a run with no slow layer at all.
+        """
+        self._passive = True
 
     # ---- per-neuron spatial field frames (for the Figure 5 replay) ----
     def enable_field_frames(self, stride_steps):

@@ -226,7 +226,7 @@ def phase_dose(config, args):
     jobs = []
     for rung in config["perturbation"]["dose_ladder_cells"]:
         for seed in config["seeds"]["canary"]:
-            checkpoint = _checkpoint(output_root, joint, seed, "baseline")
+            checkpoint = _checkpoint(output_root, joint, seed, "low_activity")
             if checkpoint is None:
                 continue
             out = output_root / "dose" / f"{joint}_seed_{seed}_baseline_n{rung}"
@@ -262,7 +262,7 @@ def phase_counterfactual(config, args):
     extra = ["--allow-uncommitted-config"] if args.allow_uncommitted_config else []
     jobs = []
     for seed in config["seeds"]["canary"]:
-        baseline = _checkpoint(output_root, joint, seed, "baseline")
+        baseline = _checkpoint(output_root, joint, seed, "low_activity")
         pre_ictal = _checkpoint(output_root, joint, seed, "pre_ictal")
         if baseline is None or pre_ictal is None:
             continue
@@ -289,11 +289,13 @@ def phase_counterfactual(config, args):
 
 
 def phase_fig5(config, args):
-    """Only what Figure 5 panels D/E/F need: the Joint arm, both checkpoints,
-    the frozen grid. Node's grid, the four-arm factorial and the spatial
-    re-registration control are deliberately NOT run here -- they answer the
-    connectivity question, which is deprioritised relative to producing the
-    figure.
+    """Joint-arm response fields for the paper-facing Figure 5.
+
+    The accepted layout compares the response to one frozen spatial probe at
+    low activity and pre-transition. Six geometry-defined representative sites
+    are retained in the artifact, so the displayed source-site response is not
+    selected after looking at the response. A 7x7 scan asks a different
+    susceptibility-mapping question and is deferred to the connectivity round.
     """
     output_root = ROOT / config["output_root"]
     controller_log = output_root / "controller.log"
@@ -305,16 +307,17 @@ def phase_fig5(config, args):
     extra = ["--allow-uncommitted-config"] if args.allow_uncommitted_config else []
     jobs = []
     for seed in config["seeds"]["canary"]:
-        for label in ("baseline", "pre_ictal"):
-            checkpoint = _checkpoint(output_root, joint, seed, label)
+        for checkpoint_label, label in (("low_activity", "baseline"),
+                                        ("pre_ictal", "pre_ictal")):
+            checkpoint = _checkpoint(output_root, joint, seed, checkpoint_label)
             if checkpoint is None:
                 continue
-            out = output_root / "perturbation" / f"{joint}_seed_{seed}_{label}_grid"
+            out = output_root / "perturbation" / f"{joint}_seed_{seed}_{checkpoint_label}_representative"
             jobs.append((f"{label}-s{seed}",
                          [PYTHON, str(PERTURB), "--config", args.config,
                           "--candidate-id", joint, "--seed", str(seed),
                           "--checkpoint", str(checkpoint), "--label", label,
-                          "--sites", "grid", "--dose-cells", str(cells),
+                          "--sites", "representative", "--dose-cells", str(cells),
                           "--expected-commit", args.expected_commit,
                           "--out-json", str(out) + ".json",
                           "--out-npz", str(out) + ".npz", *extra],

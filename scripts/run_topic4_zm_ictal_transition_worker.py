@@ -117,7 +117,13 @@ def main():
     parser.add_argument("--candidate-id", required=True)
     parser.add_argument("--seed", required=True, type=int)
     parser.add_argument("--expected-commit", required=True)
-    parser.add_argument("--zm-mode", choices=("z_plus_m", "off"), default="z_plus_m")
+    parser.add_argument("--zm-mode", choices=("z_plus_m", "off", "shadow"),
+                        default="z_plus_m",
+                        help=("shadow = z and m integrate and are recorded but never "
+                              "reach the membrane. Its trajectory is bit-identical to "
+                              "'off' (tests/test_zm_passive_mode.py), which is what "
+                              "makes it a legitimate Z/M-off reference for the two "
+                              "slow-variable clauses of the baseline definition."))
     parser.add_argument("--field-transform", default="none",
                         choices=("none",) + D4_ELEMENTS)
     parser.add_argument("--emit-onset-checkpoints", action="store_true")
@@ -171,6 +177,8 @@ def main():
     stem = f"{args.candidate_id}_seed_{args.seed}"
     if args.zm_mode == "off":
         stem += "_zmoff"
+    elif args.zm_mode == "shadow":
+        stem += "_zmshadow"
     if transform:
         stem += f"_ctl_{transform}"
     out_json = Path(args.out_json or output_root / "workers" / f"{stem}.json")
@@ -185,7 +193,12 @@ def main():
                                 cache_dir=cache_dir, field_transform=transform)
     engine, dt = substrate.engine, float(substrate.engine["dt"])
     simulation = config["simulation"]
-    zm_cfg = config["zm"] if args.zm_mode == "z_plus_m" else {"mode": "off"}
+    if args.zm_mode == "z_plus_m":
+        zm_cfg = config["zm"]
+    elif args.zm_mode == "shadow":
+        zm_cfg = dict(config["zm"]); zm_cfg["passive"] = True
+    else:
+        zm_cfg = {"mode": "off"}
 
     from kick_probe import simulate_kick
     from src.sef_hfo_events import detect_events

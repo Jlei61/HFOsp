@@ -285,9 +285,10 @@ def make_slow(substrate, zm_cfg, *, trace_weights_E=None):
     from src.snn_engine.mz_slow_vars import MZSlowVarsConfig
     if zm_cfg.get("mode", "off") == "off":
         return None
+    passive = bool(zm_cfg.get("passive", False))
     if not (zm_cfg.get("use_z") and zm_cfg.get("use_m")):
         raise RuntimeError("the active Z/M arm must use Z and M together")
-    return MZSlowVars(
+    slow = MZSlowVars(
         substrate.n_e + substrate.n_i, substrate.params.V_th,
         MZSlowVarsConfig(use_z=True, use_m=True,
                          I_th_EI=float(zm_cfg["I_th_EI"]),
@@ -298,6 +299,9 @@ def make_slow(substrate, zm_cfg, *, trace_weights_E=None):
         NE=substrate.n_e,
         core_mask_E=np.asarray(substrate.h_e >= 0.5, bool),
         trace_weights_E=trace_weights_E)
+    if passive:
+        slow.enable_passive_mode()
+    return slow
 
 
 def make_external_drive(substrate, ou_cfg, seed):

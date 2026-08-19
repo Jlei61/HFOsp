@@ -2,8 +2,9 @@
 """Visualisation replay of one frozen Joint run, for the base Figure 5.
 
 Reproduces the archived trajectory exactly and additionally records what the
-three-panel figure needs and the worker never saved: the per-neuron net slow
-current every few milliseconds, and per-frame 2-D E activity.
+paper-facing Figure 5 needs and the worker never saved: the per-neuron net slow
+current every few milliseconds, per-frame 2-D E activity, and the current-based
+virtual-contact trace used for a signed 30--80 Hz display.
 
 Nothing here consumes a random number, and the replay is verified against the
 archived contact envelope, active fraction and onset before its frames are
@@ -56,6 +57,25 @@ def _activity_frames(spikes, positions, frame_steps, window_steps, grid_n, sheet
     return frames, occupancy.astype(np.float32)
 
 
+def _select_display_event(event_t_on, event_t_off, returned, before_onset, onsets,
+                          onset_ms, minimum_contacts=8):
+    """Choose the latest complete, well-observed event before transition.
+
+    This rule uses timing and observability only. It never looks at the rendered
+    waveform, a KMeans label, propagation direction, or spatial appearance.
+    """
+    valid_contacts = np.isfinite(onsets).sum(axis=1)
+    eligible = np.flatnonzero(
+        np.asarray(returned, bool)
+        & np.asarray(before_onset, bool)
+        & (np.asarray(event_t_off, float) < float(onset_ms))
+        & (valid_contacts >= int(minimum_contacts))
+    )
+    if eligible.size == 0:
+        raise RuntimeError("no complete pre-transition event meets the display rule")
+    return int(eligible[np.argmax(np.asarray(event_t_off, float)[eligible])])
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
@@ -90,10 +110,15 @@ def main():
     drive = make_external_drive(substrate, config["spatial_ou"], args.seed)
 
     from kick_probe import simulate_kick
+    from lfp import LFPRecorder
+    lfp_recorder = LFPRecorder(
+        substrate.params, substrate.net["pos"], substrate.net["labels"],
+        sites=substrate.contact_xy)
     substrate.net["rng"] = np.random.default_rng(int(args.seed))
     result = simulate_kick(
         substrate.params, substrate.net, KICK_BOOST=0.0, t_kick=1e9,
         V_th_per_neuron=substrate.vtheta, slow=slow,
+        lfp_recorder=lfp_recorder,
         early_stop_runaway=bool(simulation["early_stop_runaway"]),
         es_thresh_hz=float(simulation["es_thresh_hz"]),
         es_dur_ms=float(simulation["es_dur_ms"]),
@@ -121,6 +146,16 @@ def main():
         verification["active_fraction_identical"] = bool(np.array_equal(
             np.asarray(active, np.float32)[:m],
             np.asarray(handle["active_fraction"])[:m]))
+        sample_event_index = _select_display_event(
+            handle["event_t_on_ms"], handle["event_t_off_ms"],
+            handle["event_returned"], handle["event_before_onset"],
+            handle["onsets"], onset_ms)
+        sample_event_t_on_ms = float(handle["event_t_on_ms"][sample_event_index])
+        sample_event_t_off_ms = float(handle["event_t_off_ms"][sample_event_index])
+        sample_contact_onsets_ms = np.asarray(
+            handle["onsets"][sample_event_index], np.float32)
+        sample_contact_ranks = np.asarray(
+            handle["ranks"][sample_event_index], np.float32)
     verification["onset_identical"] = bool(
         onset_ms == archived["run"]["model_ictal_onset_ms"])
     verification["archived_onset_ms"] = archived["run"]["model_ictal_onset_ms"]
@@ -140,6 +175,20 @@ def main():
         int(round(float(args.activity_window_ms) / dt)),
         int(args.grid_n), float(engine["L"]))
     weighted = slow.weighted_trace_arrays()
+    sample_lo = max(0, int(round(sample_event_t_on_ms / dt)))
+    sample_hi = min(spikes.shape[0], int(round(sample_event_t_off_ms / dt)) + 1)
+    sample_spikes = spikes[sample_lo:sample_hi]
+    sample_active = np.any(sample_spikes, axis=0)
+    sample_first_spike_ms = np.full(substrate.n_e, np.nan, np.float32)
+    if np.any(sample_active):
+        sample_first_spike_ms[sample_active] = (
+            sample_lo + np.argmax(sample_spikes[:, sample_active], axis=0)
+        ) * dt
+    energy_lo = max(0, int(round(float(onset_ms) / dt)))
+    energy_hi = min(spikes.shape[0], int(round((float(onset_ms) + 100.0) / dt)))
+    energy_window_s = max((energy_hi - energy_lo) * dt * 1e-3, 1e-9)
+    early_rate_hz = spikes[energy_lo:energy_hi].sum(axis=0) / energy_window_s
+    early_activity_energy = np.square(early_rate_hz).astype(np.float32)
 
     out = Path(args.out or output_root / "fig5_replay" / f"{candidate}_seed_{args.seed}_frames.npz")
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -153,6 +202,8 @@ def main():
         h=substrate.h_e.astype(np.float32),
         contact_envelope=np.asarray(envelope, np.float32),
         contact_envelope_dt_ms=np.asarray(envelope_dt, float),
+        lfp_trace=np.asarray(result["lfp_trace"], np.float32),
+        lfp_dt_ms=np.asarray(dt, float),
         contact_names=np.asarray(substrate.contact_names, dtype="U16"),
         contact_xy_mm=substrate.contact_xy, shaft_ids=substrate.shaft_ids,
         active_fraction=np.asarray(active, np.float32),
@@ -162,6 +213,14 @@ def main():
         zm_h_weighted_z=weighted["z_weighted_mean"],
         zm_h_weighted_m=weighted["m_weighted_mean"],
         zm_h_weighted_net=weighted["net_slow_current_weighted_mean"],
+        sample_event_index=np.asarray(sample_event_index, np.int32),
+        sample_event_t_on_ms=np.asarray(sample_event_t_on_ms, float),
+        sample_event_t_off_ms=np.asarray(sample_event_t_off_ms, float),
+        sample_contact_onsets_ms=sample_contact_onsets_ms,
+        sample_contact_ranks=sample_contact_ranks,
+        sample_first_spike_ms=sample_first_spike_ms,
+        early_activity_energy=early_activity_energy,
+        early_activity_energy_window_ms=np.asarray(100.0, float),
         axis_source_xy=substrate.axis_source_xy, axis_sink_xy=substrate.axis_sink_xy,
         axis_unit=substrate.axis_unit)
     atomic_write_json({
@@ -171,6 +230,16 @@ def main():
         "frame_dt_ms": float(args.frame_dt_ms), "n_frames": int(len(frame_steps)),
         "activity_window_ms": float(args.activity_window_ms),
         "grid_n": int(args.grid_n),
+        "lfp_readout": ("LFPRecorder current proxy at the frozen 15 contacts; "
+                        "signed display is produced by a 30-80 Hz zero-phase bandpass"),
+        "sample_event_selection": {
+            "rule": ("latest returned pre-transition event with at least 8 readable "
+                     "contacts; independent of direction, KMeans and appearance"),
+            "index": sample_event_index,
+            "t_on_ms": sample_event_t_on_ms,
+            "t_off_ms": sample_event_t_off_ms,
+            "n_readable_contacts": int(np.isfinite(sample_contact_onsets_ms).sum()),
+        },
         "verification_against_archived_run": verification,
         "frames_do_not_consume_random_numbers": True,
         "wall_seconds": time.time() - started,
