@@ -57,3 +57,19 @@ def test_arrays_are_written_before_the_json():
     npz_at = source.index("_atomic_npz(out_npz")
     json_at = source.index("atomic_write_json(_json_safe(payload)")
     assert npz_at < json_at
+
+
+def test_pass2_segment_includes_the_target_checkpoint_step():
+    """Regression: the continuation length excluded its endpoint, and the
+    pre-ictal checkpoint sits exactly at that endpoint. Every pre-ictal
+    checkpoint in the first canary batch was lost to one missing step."""
+    source = (ROOT / "scripts/run_topic4_zm_ictal_transition_worker.py").read_text()
+    assert 'float(limits["pre_ictal_offset_ms"]) + dt' in source
+    assert "requested checkpoints were never reached" in source
+
+
+def test_the_two_second_checkpoint_is_not_called_baseline():
+    """Measured: the 2 s point already exceeds the same-seed Z/M-off q95 over
+    forty non-overlapping windows, on all three canary seeds."""
+    source = (ROOT / "scripts/run_topic4_zm_ictal_transition_worker.py").read_text()
+    assert 'labels = {baseline_step: "early_transition"}' in source

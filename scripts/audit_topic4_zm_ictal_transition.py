@@ -325,31 +325,49 @@ def gate_dose(config, args):
 
 
 def gate_repertoire(config, args):
-    """Conjunctive claim gate. Not a run blocker; it governs WORDING."""
-    from src.topic4_d6_natural_kmeans import best_binary_alignment, natural_kmeans
+    """Conjunctive claim gate. Not a run blocker; it governs WORDING.
+
+    Two implementation errors were found here by review and are fixed:
+      * the shaft-aware embedding must be loaded from the FROZEN SCORING
+        CONTRACT (load_scoring_contract), not read off the classifier manifest,
+        which has no `center` / `scale` / `components` at all;
+      * natural_kmeans returns `direction_balanced_alignment`, not `labels`;
+        the old code indexed a missing key inside a broad `except`, so every
+        network silently scored NaN and the gate was measuring nothing.
+    The broad except is gone: a failure here must be visible, not become a
+    quiet "not retained".
+    """
+    from src.topic4_d6_natural_kmeans import natural_kmeans
     from src.topic4_nlc_pathway_mechanism import formal_mode_assignments
+    from scripts.rescore_topic4_rev10_sa_historical_artifacts import (
+        load_scoring_contract)
 
     output_root = ROOT / config["output_root"]
     gate = config["repertoire_claim_gate"]
     reference_dir = ROOT / gate["reference_workers"]
-    manifest = json.loads((ROOT / config["inputs"]["frozen_substrate_manifest"]["path"]).read_text())
+    manifest = json.loads(
+        (ROOT / config["inputs"]["frozen_substrate_manifest"]["path"]).read_text())
     classifier = manifest["direction_classifier"]
-    contract = json.loads((ROOT / config["inputs"]["contact_contract"]["path"]).read_text())
-    shafts = {}
+    contact_names, embedding, _, _ = load_scoring_contract(
+        str(ROOT / config["inputs"]["shaft_aware_target_npz"]["path"]),
+        str(ROOT / config["inputs"]["shaft_aware_floors"]["path"]),
+        "FULL_TIMING", fixed_events_per_mode=6)
+    contract = json.loads(
+        (ROOT / config["inputs"]["contact_contract"]["path"]).read_text())
+    groups = {}
     for row in contract["contacts"]:
-        shafts.setdefault(row["shaft_id"], []).append(row["contact_index"])
+        groups.setdefault(row["shaft_id"], []).append(row["contact_index"])
 
-    def _measure(npz_path, returned_mask=None):
+    def _measure(npz_path, before_onset_only=False):
         with np.load(npz_path, allow_pickle=False) as handle:
             onsets = np.asarray(handle["onsets"], float)
             returned = np.asarray(handle["event_returned"], bool)
-            if returned_mask is not None:
-                returned = returned & returned_mask(handle)
+            if before_onset_only and "event_before_onset" in handle.files:
+                returned = returned & np.asarray(handle["event_before_onset"], bool)
         if not len(onsets):
             return None
         assigned = formal_mode_assignments(
-            onsets, returned, groups=shafts,
-            embedding=classifier.get("embedding", classifier),
+            onsets, returned, groups=groups, embedding=embedding,
             classifier=classifier)
         labels = np.asarray(assigned["labels"], int)
         clean = np.asarray(assigned["clean"], bool)
@@ -358,67 +376,75 @@ def gate_repertoire(config, args):
                if returned.any() else float("nan"))
         alignment = float("nan")
         if clean.sum() >= 6:
-            try:
-                km = natural_kmeans(onsets[clean], labels[clean])
-                alignment = float(best_binary_alignment(
-                    km["labels"], labels[clean])["balanced_alignment"])
-            except Exception:
-                alignment = float("nan")
+            km = natural_kmeans(onsets[clean], labels[clean])
+            if km.get("status") == "OK":
+                alignment = float(km["direction_balanced_alignment"])
         return {"n_returned": int(returned.sum()), "ood_fraction": ood,
-                "mode_counts": counts, "balanced_alignment": alignment}
+                "mode_counts": counts, "balanced_alignment": alignment,
+                "n_clean": int(clean.sum())}
 
-    reference = []
-    for path in sorted(reference_dir.glob("*.npz")):
-        row = _measure(path)
-        if row:
-            reference.append(row)
+    reference = [row for row in
+                 (_measure(path) for path in sorted(reference_dir.glob("*.npz")))
+                 if row]
     ood_q95 = float(np.nanpercentile([r["ood_fraction"] for r in reference], 95))
-    align_q05 = float(np.nanpercentile(
-        [r["balanced_alignment"] for r in reference if np.isfinite(r["balanced_alignment"])], 5))
+    aligned = [r["balanced_alignment"] for r in reference
+               if np.isfinite(r["balanced_alignment"])]
+    align_q05 = float(np.nanpercentile(aligned, 5)) if aligned else float("nan")
     atomic_write_json({"n_reference_runs": len(reference), "ood_q95": ood_q95,
                        "balanced_alignment_q05": align_q05,
+                       "n_reference_with_alignment": len(aligned),
                        "reference_note": "48 archived Z/M-off runs, seeds 1561-1572"},
                       str(output_root / "zm_off_reference_repertoire.json"))
 
-    joint = config["arms"]["Joint"]
     networks = {}
-    for seed in config["seeds"]["canary"]:
-        npz = output_root / "workers" / f"{joint}_seed_{seed}.npz"
-        if not npz.exists():
-            continue
-        row = _measure(npz, returned_mask=lambda h: np.asarray(h["event_before_onset"], bool))
-        if row is None:
-            continue
-        clauses = {
-            "n_returned_before_onset_at_least_20":
-                row["n_returned"] >= gate["minimum_returned_events_before_onset"],
-            "ood_at_most_reference_q95":
-                bool(np.isfinite(row["ood_fraction"]) and row["ood_fraction"] <= ood_q95),
-            "both_modes_supported":
-                min(row["mode_counts"]) >= gate["minimum_events_per_mode"],
-            "kmeans_alignment_at_least_reference_q05":
-                bool(np.isfinite(row["balanced_alignment"])
-                     and row["balanced_alignment"] >= align_q05)}
-        networks[str(seed)] = {"retained": all(clauses.values()),
-                               "failing_clauses": [k for k, v in clauses.items() if not v],
-                               "measures": row, "clauses": clauses}
+    for arm_name, candidate in config["arms"].items():
+        for seed in config["seeds"]["canary"]:
+            npz = output_root / "workers" / f"{candidate}_seed_{seed}.npz"
+            if not npz.exists():
+                continue
+            row = _measure(npz, before_onset_only=True)
+            if row is None:
+                continue
+            clauses = {
+                "n_returned_before_onset_at_least_20":
+                    row["n_returned"] >= gate["minimum_returned_events_before_onset"],
+                "ood_at_most_reference_q95":
+                    bool(np.isfinite(row["ood_fraction"])
+                         and row["ood_fraction"] <= ood_q95),
+                "both_modes_supported":
+                    min(row["mode_counts"]) >= gate["minimum_events_per_mode"],
+                "kmeans_alignment_at_least_reference_q05":
+                    bool(np.isfinite(row["balanced_alignment"])
+                         and row["balanced_alignment"] >= align_q05)}
+            networks[f"{arm_name}_s{seed}"] = {
+                "arm": arm_name, "seed": seed,
+                "retained": all(clauses.values()),
+                "failing_clauses": [k for k, v in clauses.items() if not v],
+                "measures": row, "clauses": clauses}
 
-    retained = sum(v["retained"] for v in networks.values())
-    verdict = {"gate": "repertoire",
-               "INTERICTAL_REPERTOIRE_RETAINED": retained > len(networks) / 2 if networks else False,
-               "n_retained": retained, "n_networks": len(networks),
-               "rule": gate["rule"], "networks": networks,
-               "thresholds": {"ood_q95": ood_q95, "alignment_q05": align_q05,
-                              "min_returned": gate["minimum_returned_events_before_onset"],
-                              "min_per_mode": gate["minimum_events_per_mode"]},
-               "wording": ("retained -> 'data-driven interictal modes to model ictal "
-                           "state'; not retained -> 'low-activity background to "
-                           "high-activity state', with every mode statement dropped"),
-               "is_run_blocker": False}
+    by_arm = {}
+    for key, row in networks.items():
+        by_arm.setdefault(row["arm"], []).append(row["retained"])
+    verdict = {
+        "gate": "repertoire",
+        "retained_by_arm": {k: f"{sum(v)}/{len(v)}" for k, v in by_arm.items()},
+        "networks": networks,
+        "thresholds": {"ood_q95": ood_q95, "alignment_q05": align_q05,
+                       "min_returned": gate["minimum_returned_events_before_onset"],
+                       "min_per_mode": gate["minimum_events_per_mode"]},
+        "is_run_blocker": False,
+        "power_caveat": (
+            "an arm that fails only because it has few returned events before "
+            "onset is NOT evidence that its modes were abolished. The Joint arm "
+            "transitions at ~4.1 s and therefore has an order of magnitude fewer "
+            "pre-onset events than the Node arm; a matched-count comparison is "
+            "required before any statement about mode loss."),
+        "wording": ("retained -> 'data-driven interictal modes to model ictal "
+                    "state'; not retained -> 'low-activity background to "
+                    "high-activity state', with every mode statement dropped"),
+    }
     atomic_write_json(verdict, str(output_root / "repertoire_gate.json"))
-    print(json.dumps({k: verdict[k] for k in
-                      ("gate", "INTERICTAL_REPERTOIRE_RETAINED", "n_retained", "n_networks")},
-                     indent=1))
+    print(json.dumps({k: verdict[k] for k in ("gate", "retained_by_arm")}, indent=1))
 
 
 def gate_recruitment(config, args):

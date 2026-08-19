@@ -41,6 +41,10 @@ class ZMTracedSlowVars(MZSlowVars):
         self._acc_seen = 0
         self._acc_D = None
         self._acc_A = None
+        self._frame_stride = 0
+        self._frame_calls = 0
+        self._frames = []
+        self._frame_steps = []
         if trace_weights_E is None:
             self._trace_weights = None
             self._weighted_trace = None
@@ -79,12 +83,43 @@ class ZMTracedSlowVars(MZSlowVars):
         # Accumulate the PRODUCT the membrane equation is about to use, at the
         # instant it uses it: mean_t[(1-z)*I_I] != (1-mean_t[z])*mean_t[I_I]
         # whenever z and I_I co-vary, which they do.
+        if getattr(self, "_frame_stride", 0) and self._frame_calls % self._frame_stride == 0:
+            inhibitory = np.asarray(I_I, dtype=float)[:self.NE]
+            self._frames.append(((1.0 - self.z[:self.NE]) * inhibitory
+                                 - self.cfg.eta_m * self.m[:self.NE]).astype(np.float32))
+            self._frame_steps.append(int(self._frame_calls))
+        if getattr(self, "_frame_stride", 0):
+            self._frame_calls += 1
         if self._acc_D is not None and self._acc_seen < self._acc_n:
             inhibitory = np.asarray(I_I, dtype=float)
             self._acc_D += (1.0 - self.z[:self.NE]) * inhibitory[:self.NE]
             self._acc_A += self.cfg.eta_m * self.m[:self.NE]
             self._acc_seen += 1
         return super().apply_currents(I_E, I_I, labels, I_E_rec)
+
+    # ---- per-neuron spatial field frames (for the Figure 5 replay) ----
+    def enable_field_frames(self, stride_steps):
+        """Record the per-neuron net slow current every `stride_steps` steps.
+
+        Recorded inside apply_currents, where z, m and I_I are the values the
+        membrane equation is about to use. Consumes NO random numbers, so a
+        replay with frames on is bit-identical to the archived run without them
+        -- which is the whole point: the figure must show the trajectory that
+        was actually analysed, not a re-randomised look-alike.
+        """
+        stride = int(stride_steps)
+        if stride < 1:
+            raise ValueError("field-frame stride must be at least one step")
+        self._frame_stride = stride
+        self._frame_calls = 0
+        self._frames = []
+        self._frame_steps = []
+
+    def field_frames(self):
+        if not getattr(self, "_frames", None):
+            return None
+        return {"net_slow_current": np.asarray(self._frames, dtype=np.float32),
+                "call_index": np.asarray(self._frame_steps, dtype=np.int64)}
 
     # ---- h-weighted trajectory ----
     def _record_trace(self, spikes, dt):

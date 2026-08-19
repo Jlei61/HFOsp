@@ -267,10 +267,16 @@ def main():
         state_block = characterize_state(
             rate_hz, dt_ms=dt, window_ms=tail,
             silence_threshold_hz=max(1e-9, 0.05 * reference["percentile_95_hz"]))
+        # NOT an interictal comparator: with tau_z = 5000 ms this window is
+        # already inside the buildup, as the spec itself concedes. Named for
+        # what it is. A true interictal comparator has to come from a matched
+        # Z/M-off run or from a checkpoint verified against the Z/M-off support.
         matched = (float(onset_ms) - 1000.0 - float(simulation["post_runaway_record_ms"]),
                    float(onset_ms) - 1000.0)
         state_block["interictal_reference"] = reference
-        state_block["length_matched_interictal"] = characterize_state(
+        state_block["pretransition_reference_window_ms"] = list(matched)
+        state_block["pretransition_reference_is_not_interictal"] = True
+        state_block["pretransition_reference"] = characterize_state(
             rate_hz, dt_ms=dt, window_ms=matched,
             silence_threshold_hz=max(1e-9, 0.05 * reference["percentile_95_hz"]))
         lo = int(round(tail[0] / dt)); hi = min(len(rate_hz), int(round(tail[1] / dt)))
@@ -278,7 +284,7 @@ def main():
             state_block["band_proxy_ictal"] = band_proxy(rate_hz[lo:hi], dt_ms=dt)
         mlo = int(round(matched[0] / dt)); mhi = int(round(matched[1] / dt))
         if mhi - mlo >= 8:
-            state_block["band_proxy_interictal"] = band_proxy(rate_hz[mlo:mhi], dt_ms=dt)
+            state_block["band_proxy_pretransition"] = band_proxy(rate_hz[mlo:mhi], dt_ms=dt)
 
         bins = spatial_bins(substrate.positions_e, bin_mm=float(rec["bin_mm"]),
                             sheet_l_mm=float(engine["L"]))
@@ -312,7 +318,11 @@ def main():
             if float(onset_ms) >= float(limits["minimum_onset_for_sensitivity_ms"]):
                 wanted.insert(0, int(round(
                     (float(onset_ms) - float(limits["sensitivity_offset_ms"])) / dt)))
-            stop_ms = float(onset_ms) - float(limits["pre_ictal_offset_ms"])
+            # +dt: the loop runs [0, nsteps), so a segment of exactly
+            # (stop_ms - BASELINE_MS) never reaches the step AT stop_ms -- which
+            # is precisely the pre-ictal checkpoint. Every pre-ictal checkpoint
+            # in the first canary batch was lost to this one missing step.
+            stop_ms = float(onset_ms) - float(limits["pre_ictal_offset_ms"]) + dt
             from params import Params
             tail_params = Params(g=engine["g"], L=engine["L"], density=engine["density"],
                                  T=stop_ms - BASELINE_MS, dt=dt,
@@ -336,12 +346,23 @@ def main():
                 raise RuntimeError(
                     "pass 2 diverged from pass 1 over the overlap -- the checkpoint "
                     "is incomplete; stop the round rather than trusting it")
+            missing = sorted(set(int(s) for s in wanted) - set(captured2))
+            if missing:
+                raise RuntimeError(
+                    f"requested checkpoints were never reached: {missing}; "
+                    f"segment covered absolute steps "
+                    f"[{baseline_step}, {baseline_step + overlap - 1}]")
             captured.update(captured2)
             pass2 = {"ran": True, "overlap_steps": int(overlap),
                      "overlap_bit_identical": True,
-                     "checkpoint_steps": sorted(int(s) for s in wanted)}
+                     "checkpoint_steps": sorted(int(s) for s in wanted),
+                     "all_requested_checkpoints_captured": True}
 
-    labels = {baseline_step: "baseline"}
+    # Verified across all three canary seeds: the median 20 ms-EMA rate over
+    # [1500, 2000] ms (37 / 64 / 50 Hz) exceeds the q95 of forty non-overlapping
+    # 500 ms windows from the SAME-SEED Z/M-off run (30 / 30 / 31 Hz). The 2 s
+    # point is already elevated on the Joint arm, so it is named for what it is.
+    labels = {baseline_step: "early_transition"}
     if pass2["ran"]:
         for step in pass2["checkpoint_steps"]:
             offset_ms = float(onset_ms) - step * dt
