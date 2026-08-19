@@ -1,0 +1,60 @@
+{
+  "status": "CANARY_ONLY_NOT_FORMAL_INFERENCE",
+  "n_seeds": 3,
+  "per_seed": [
+    {
+      "seed": 1801,
+      "onsets_ms": {
+        "Node": 8887.4,
+        "Node+EE": 5934.2,
+        "Node+EtoI": 4629.1,
+        "Joint": 4115.0
+      },
+      "latest_to_earliest": [
+        "Node",
+        "Node+EE",
+        "Node+EtoI",
+        "Joint"
+      ]
+    },
+    {
+      "seed": 1802,
+      "onsets_ms": {
+        "Node": 7714.7,
+        "Node+EE": 5861.9,
+        "Node+EtoI": 4097.6,
+        "Joint": 3876.8
+      },
+      "latest_to_earliest": [
+        "Node",
+        "Node+EE",
+        "Node+EtoI",
+        "Joint"
+      ]
+    },
+    {
+      "seed": 1803,
+      "onsets_ms": {
+        "Node": 9196.6,
+        "Node+EE": 6628.2,
+        "Node+EtoI": 4328.5,
+        "Joint": 4541.4
+      },
+      "latest_to_earliest": [
+        "Node",
+        "Node+EE",
+        "Joint",
+        "Node+EtoI"
+      ]
+    }
+  ],
+  "paired_counts_out_of_3": {
+    "every_edge_arm_earlier_than_Node": 3,
+    "EtoI_only_earlier_than_EE_only": 3,
+    "Joint_earlier_than_EtoI_only": 2,
+    "Joint_earlier_than_EE_only": 3
+  },
+  "corrected_statement": "All edge arms transition earlier than Node (3/3). E->I-only transitions earlier than E->E-only (3/3). Joint is NOT stably earlier than E->I-only (2/3): on seed 1803 E->I-only precedes Joint by 213 ms. An earlier claim of a strict per-seed monotonic ordering was wrong and is withdrawn.",
+  "mechanism_wording": "the incoming weight budget is conserved per target by contract, so these arms differ by connectivity REDISTRIBUTION, not by 'more connections added'",
+  "tier": "canary; formal inference requires the 12 paired seeds of stage 3"
+}

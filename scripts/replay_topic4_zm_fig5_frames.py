@@ -34,20 +34,26 @@ from src.topic4_zm_slow_vars import ZMTracedSlowVars  # noqa: E402
 
 
 def _activity_frames(spikes, positions, frame_steps, window_steps, grid_n, sheet_l):
-    """Fraction of E neurons active in each grid cell over a short window."""
+    """Per-cell SPIKE COUNT in each frame window, plus the static cell occupancy.
+
+    Counts, not 'fraction of cells active': at 32000 E neurons on a 64x64 grid a
+    cell holds ~7.8 neurons, so a 10 ms occupancy fraction saturates at 1.0 for
+    every cell containing a single spike -- the first render came out binary
+    because the measure, not the colour map, was wrong. Counts do not saturate,
+    and the rate field is formed and smoothed at render time.
+    """
     ix = np.clip((positions[:, 0] / sheet_l * grid_n).astype(int), 0, grid_n - 1)
     iy = np.clip((positions[:, 1] / sheet_l * grid_n).astype(int), 0, grid_n - 1)
     flat = ix * grid_n + iy
-    counts = np.bincount(flat, minlength=grid_n * grid_n).astype(float)
-    counts[counts == 0] = np.nan
+    occupancy = np.bincount(flat, minlength=grid_n * grid_n).reshape(grid_n, grid_n)
     frames = np.empty((len(frame_steps), grid_n, grid_n), np.float32)
     for index, step in enumerate(frame_steps):
         lo = max(0, int(step) - window_steps)
         hi = min(spikes.shape[0], int(step) + 1)
-        active = spikes[lo:hi].any(axis=0)
-        binned = np.bincount(flat[active], minlength=grid_n * grid_n).astype(float)
-        frames[index] = (binned / counts).reshape(grid_n, grid_n)
-    return frames
+        binned = np.bincount(flat, weights=spikes[lo:hi].sum(axis=0).astype(float),
+                             minlength=grid_n * grid_n)
+        frames[index] = binned.reshape(grid_n, grid_n)
+    return frames, occupancy.astype(np.float32)
 
 
 def main():
@@ -129,7 +135,7 @@ def main():
     frame_steps = np.asarray(frames["call_index"], int)
     frame_steps = frame_steps[frame_steps < spikes.shape[0]]
     net_field = frames["net_slow_current"][:len(frame_steps)]
-    activity = _activity_frames(
+    activity, occupancy = _activity_frames(
         spikes, substrate.positions_e, frame_steps,
         int(round(float(args.activity_window_ms) / dt)),
         int(args.grid_n), float(engine["L"]))
@@ -141,7 +147,8 @@ def main():
         out,
         frame_time_ms=(frame_steps * dt).astype(np.float32),
         net_slow_field=net_field,
-        activity_grid=activity,
+        activity_spike_counts=activity,
+        activity_cell_occupancy=occupancy,
         positions_E=substrate.positions_e.astype(np.float32),
         h=substrate.h_e.astype(np.float32),
         contact_envelope=np.asarray(envelope, np.float32),
