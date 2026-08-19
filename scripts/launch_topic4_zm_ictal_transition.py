@@ -205,6 +205,52 @@ def phase_canary(config, args):
     print(json.dumps({"phase": "canary", "launched": len(jobs)}))
 
 
+def phase_formal(config, args):
+    """The 2x2 connectivity factorial: 4 arms x 12 paired network seeds.
+
+    Every arm runs on the SAME twelve networks, because the contrasts are paired
+    within network seed. A seed that fails in one arm therefore invalidates that
+    seed's contrast, not just that arm's mean -- so nothing is dropped here; the
+    analysis censors non-entering runs at the cap instead.
+
+    The three canary seeds are NOT reused: they were the seeds that selected the
+    work point and chose seed 1801 for the figure.
+    """
+    output_root = ROOT / config["output_root"]
+    controller_log = output_root / "controller.log"
+    seeds = list(config["seeds"]["formal"])
+    canary = set(config["seeds"]["canary"])
+    overlap = canary & set(seeds)
+    if overlap:
+        raise RuntimeError(f"formal seeds overlap the canary seeds {sorted(overlap)}; "
+                           "the arms would be compared on the seeds that chose the "
+                           "work point")
+    _prebuild(config, seeds, controller_log, output_root, args.config)
+
+    arms = config["arms"]
+    extra = ["--allow-uncommitted-config"] if args.allow_uncommitted_config else []
+    jobs = []
+    for seed in seeds:
+        for arm_name in ("Node", "Node+EE", "Node+EtoI", "Joint"):
+            candidate = arms[arm_name]
+            slug = candidate.replace("+", "_")
+            jobs.append((f"{slug}-s{seed}",
+                         [PYTHON, str(WORKER), "--config", args.config,
+                          "--candidate-id", candidate, "--seed", str(seed),
+                          "--expected-commit", args.expected_commit,
+                          "--zm-mode", "z_plus_m", *extra],
+                         output_root / "run_logs" / f"{slug}_s{seed}.log"))
+    _log(controller_log, {"progress": "formal_start", "n_jobs": len(jobs)})
+    _run_pool(jobs, config, "full_run", "topic4-zmitx-formal-", controller_log)
+    _log(controller_log, {"progress": "formal_done", "n_jobs": len(jobs)})
+    atomic_write_json({"phase": "formal", "n_jobs": len(jobs), "seeds": seeds,
+                       "arms": ["Node", "Node+EE", "Node+EtoI", "Joint"],
+                       "paired_within_network_seed": True,
+                       "expected_commit": args.expected_commit},
+                      str(output_root / "formal_launch.json"))
+    print(json.dumps({"phase": "formal", "launched": len(jobs)}))
+
+
 PERTURB = ROOT / "scripts/run_topic4_zm_perturbation_worker.py"
 
 
@@ -333,7 +379,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
     parser.add_argument("--phase", required=True,
-                        choices=("canary", "dose", "counterfactual", "fig5"))
+                        choices=("canary", "formal", "dose", "counterfactual", "fig5"))
     parser.add_argument("--expected-commit", default="HEAD")
     parser.add_argument("--allow-uncommitted-config", action="store_true")
     args = parser.parse_args()
@@ -341,7 +387,7 @@ def main():
     args.expected_commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True).strip()
     (ROOT / config["output_root"] / "run_logs").mkdir(parents=True, exist_ok=True)
-    {"canary": phase_canary, "dose": phase_dose,
+    {"canary": phase_canary, "formal": phase_formal, "dose": phase_dose,
      "counterfactual": phase_counterfactual,
      "fig5": phase_fig5}[args.phase](config, args)
 
