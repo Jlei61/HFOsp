@@ -210,15 +210,39 @@ def splice_checkpoint(pre_ictal_state, baseline_state, *, mode):
     return out
 
 
-def hotspot_compactness(sites_xy, values, *, quantile, n_null, seed):
+def hotspot_compactness(sites_xy, values, *, quantile, n_null, seed, tail):
+    """Are the extreme sites clustered in space, or scattered?
+
+    `tail` is REQUIRED and has no default. The spatial endpoint this serves is
+    delta_S(x) = S_pre_ictal(x) - S_baseline(x), and the round registers that
+    susceptibility can rise OR fall (config: phase2_endpoint_classification).
+    When it falls, the spatially concentrated effect lives in the LOW tail, and
+    taking the high tail regardless would cluster the LEAST affected sites and
+    report no compactness -- a confident wrong answer of exactly the shape that
+    the baseline rule's z clause had before it was corrected.
+
+    Making it required rather than defaulting to "high" is deliberate: a default
+    silently restores the one-tailed path for every existing caller, which is
+    the failure mode CLAUDE.md section 5 names.
+
+    The tail must be fixed by the declared direction of the effect BEFORE this
+    is called, never chosen by whichever tail gives the smaller p.
+    """
+    if tail not in ("high", "low"):
+        raise ValueError("tail must be 'high' or 'low'; it is the registered "
+                         "direction of the effect, not something to optimise")
     xy = np.asarray(sites_xy, float)
     values = np.asarray(values, float)
     finite = np.isfinite(values)
     xy, values = xy[finite], values[finite]
     if len(values) < 4:
         return {"status": "NOT_EVALUABLE", "n_sites": int(len(values))}
-    cut = np.quantile(values, float(quantile))
-    selected = np.flatnonzero(values >= cut)
+    if tail == "high":
+        cut = np.quantile(values, float(quantile))
+        selected = np.flatnonzero(values >= cut)
+    else:
+        cut = np.quantile(values, 1.0 - float(quantile))
+        selected = np.flatnonzero(values <= cut)
     if selected.size < 2:
         return {"status": "NOT_EVALUABLE", "n_sites": int(len(values))}
 
@@ -234,6 +258,7 @@ def hotspot_compactness(sites_xy, values, *, quantile, n_null, seed):
     null = np.array([_mean_pairwise(rng.choice(len(values), selected.size, replace=False))
                      for _ in range(int(n_null))])
     return {"status": "OK", "n_sites": int(len(values)),
+            "tail": tail, "cut_value": float(cut),
             "n_hotspot_sites": int(selected.size),
             "observed_mean_pairwise_mm": observed,
             "null_mean_pairwise_mm": float(null.mean()),

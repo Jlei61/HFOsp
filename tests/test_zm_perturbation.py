@@ -235,9 +235,59 @@ def test_hotspot_compactness_detects_a_planted_cluster():
     values = np.zeros(len(xy))
     corner = np.linalg.norm(xy - np.array([4.0, 4.0]), axis=1)
     values[np.argsort(corner)[:10]] = 100.0
-    out = hotspot_compactness(xy, values, quantile=0.8, n_null=500, seed=1)
+    out = hotspot_compactness(xy, values, quantile=0.8, n_null=500, seed=1,
+                              tail="high")
     assert out["p_value"] < 0.01
     assert out["observed_mean_pairwise_mm"] < out["null_mean_pairwise_mm"]
+
+
+def _grid_with_corner_cluster(planted):
+    """Corner cluster at `planted`; everything else ranked by distance from the
+    sheet centre, so the OPPOSITE tail is the scattered perimeter. Constant
+    filler would tie 39 of 49 sites at the cut and make the wrong-tail arm
+    select almost the whole grid, which is degenerate rather than a control."""
+    xy = np.stack(np.meshgrid(np.linspace(3, 17, 7), np.linspace(3, 17, 7)),
+                  axis=-1).reshape(-1, 2)
+    corner = np.linalg.norm(xy - np.array([4.0, 4.0]), axis=1)
+    cluster = np.argsort(corner)[:10]
+    centre = np.linalg.norm(xy - np.array([10.0, 10.0]), axis=1)
+    values = centre / centre.max()          # 0 at centre, 1 at the perimeter
+    values[cluster] = planted
+    return xy, values
+
+
+def test_a_clustered_DECREASE_is_found_by_the_low_tail_and_missed_by_the_high():
+    """The endpoint is pre-ictal minus baseline and the round registers that it
+    can fall. A clustered fall lives in the LOW tail; taking the high tail
+    regardless clusters the LEAST affected sites and reports nothing."""
+    xy, values = _grid_with_corner_cluster(-100.0)
+    low = hotspot_compactness(xy, values, quantile=0.8, n_null=500, seed=1,
+                              tail="low")
+    high = hotspot_compactness(xy, values, quantile=0.8, n_null=500, seed=1,
+                               tail="high")
+    assert low["p_value"] < 0.01
+    assert low["observed_mean_pairwise_mm"] < low["null_mean_pairwise_mm"]
+    assert high["p_value"] > 0.05, "the wrong tail must not find the cluster"
+
+
+def test_the_tail_is_required_so_no_caller_silently_keeps_the_old_path():
+    xy, values = _grid_with_corner_cluster(100.0)
+    with pytest.raises(TypeError):
+        hotspot_compactness(xy, values, quantile=0.8, n_null=10, seed=1)
+    with pytest.raises(ValueError, match="registered direction"):
+        hotspot_compactness(xy, values, quantile=0.8, n_null=10, seed=1,
+                            tail="whichever_is_smaller")
+
+
+def test_both_tails_select_the_same_number_of_sites():
+    """Otherwise the two directions would not be comparable: a quantile applied
+    to the wrong side silently changes the hotspot size along with the tail."""
+    xy, values = _grid_with_corner_cluster(100.0)
+    high = hotspot_compactness(xy, values, quantile=0.8, n_null=10, seed=1,
+                               tail="high")
+    low = hotspot_compactness(xy, values, quantile=0.8, n_null=10, seed=1,
+                              tail="low")
+    assert high["n_hotspot_sites"] == low["n_hotspot_sites"]
 
 
 def test_top_ladder_rung_is_realizable_at_the_frozen_radius():
