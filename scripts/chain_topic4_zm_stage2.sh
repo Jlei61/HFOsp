@@ -76,7 +76,8 @@ for rung in 16 32 64 128 256; do
         --config "$CFG" --candidate-id "$JOINT" --seed "$s" \
         --checkpoint "$CK" --label low_activity --sites representative \
         --dose-cells "$rung" --expected-commit "$COMMIT" --allow-uncommitted-config \
-        --out-json "$R/dose/${JOINT}_seed_${s}_low_activity_n${rung}.json"
+        --out-json "$R/dose/${JOINT}_seed_${s}_low_activity_n${rung}.json" \
+        --out-npz "$R/dose/${JOINT}_seed_${s}_low_activity_n${rung}.npz"
   done
 done
 wait_all
