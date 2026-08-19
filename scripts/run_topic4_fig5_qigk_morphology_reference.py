@@ -42,7 +42,7 @@ def main():
     started = time.time()
     config = ProtocolConfig(
         seed=1,
-        T=1500.0,
+        T=2200.0,
         layout="subject1146",
         k_q=0.10,
         q_min=0.05,
@@ -88,7 +88,9 @@ def main():
         "role": "positive_control_for_model_state_morphology_instrument",
         "frozen_command_contract": (
             "subject1146, k_q=0.10, q_min=0.05, kick_boost=5.0, "
-            "r_kick=0.6, T=1500 ms, seed=1"),
+            "r_kick=0.6, seed=1; the frozen T=1500 ms figure trajectory is "
+            "extended deterministically to T=2200 ms only to provide a complete "
+            "500 ms post-onset morphology window"),
         "config": asdict(config),
         "legacy_rate_detector": legacy_metrics,
         "runaway_morphology": morphology,

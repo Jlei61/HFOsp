@@ -85,7 +85,9 @@ def contact_oscillation_metrics(
     time = np.arange(len(trace)) * float(dt_ms)
     pre = (time >= float(onset_ms) - float(pre_ms)) & (time < float(onset_ms))
     post = (time >= float(onset_ms)) & (time < float(onset_ms) + float(post_ms))
-    if int(pre.sum()) < 8 or int(post.sum()) < 8:
+    expected_pre = int(round(float(pre_ms) / float(dt_ms)))
+    expected_post = int(round(float(post_ms) / float(dt_ms)))
+    if int(pre.sum()) < expected_pre or int(post.sum()) < expected_post:
         raise ValueError("pre/post morphology windows are incomplete")
     sos = butter(4, band_hz, btype="bandpass", fs=fs_hz, output="sos")
     filtered = sosfiltfilt(sos, trace, axis=0)
@@ -165,7 +167,9 @@ def population_rate_frequency_metrics(
     time = np.arange(len(rate)) * float(dt_ms)
     pre = (time >= float(onset_ms) - float(pre_ms)) & (time < float(onset_ms))
     post = (time >= float(onset_ms)) & (time < float(onset_ms) + float(post_ms))
-    if int(pre.sum()) < 8 or int(post.sum()) < 8:
+    expected_pre = int(round(float(pre_ms) / float(dt_ms)))
+    expected_post = int(round(float(post_ms) / float(dt_ms)))
+    if int(pre.sum()) < expected_pre or int(post.sum()) < expected_post:
         raise ValueError("pre/post population-rate windows are incomplete")
 
     def _spectrum(values):

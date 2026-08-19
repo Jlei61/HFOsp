@@ -93,3 +93,11 @@ def test_summary_requires_post_onset_recruitment_samples():
     }
     with np.testing.assert_raises_regex(ValueError, "no post-onset"):
         summarize_runaway_morphology(recruitment, {}, onset_ms=30.0)
+
+
+def test_contact_frequency_rejects_truncated_post_window():
+    trace = np.zeros((750, 2), float)
+    with np.testing.assert_raises_regex(ValueError, "windows are incomplete"):
+        contact_oscillation_metrics(
+            trace, dt_ms=1.0, onset_ms=500.0, pre_ms=400.0, post_ms=400.0,
+            band_hz=(30.0, 120.0))
