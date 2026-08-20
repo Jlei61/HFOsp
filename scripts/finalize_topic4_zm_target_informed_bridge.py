@@ -163,6 +163,9 @@ def _report(out, terminal_status):
         "- full-dose 候选若未先通过模型内部资格，就不计算患者损失；因此该负结果不是患者目标拟合失败，而是拟合前的动力学容量失败。",
         "- 模型 current proxy、模型频率和患者 SEEG 不共享物理单位；本轮比较的是 baseline-normalized 接触点能量组织。",
         "- 没有新的未见患者或未见发作单元，因此不作泛化声明。",
+        "", "## 图", "",
+        "- 模型内部资格边界图：`results/paper-ready-figure/fig5_zm_qualification_boundary/figures/fig5-zm-qualification-boundary.png`。",
+        "- 因为没有 full-dose 合格 winner，本轮不生成患者能量拟合主图或 Z/M winner GIF。",
     ])
     return "\n".join(lines) + "\n"
 
@@ -193,7 +196,14 @@ def main():
         out / "clinical_target.json",
         out / "existing_candidate_rescore.json",
         out / "selection_controller.json",
+        out / "stage1b_manifest.json",
+        out / "final_report.md",
     ]
+    diagnostic_metadata = ROOT / (
+        "results/paper-ready-figure/fig5_zm_qualification_boundary/figures/"
+        "fig5-zm-qualification-boundary-metadata.json")
+    if diagnostic_metadata.exists():
+        tracked.append(diagnostic_metadata)
     tracked.extend(path for path in (
         out / "selection_results.json", out / "confirmation_results.json",
         out / "selection_aware_null.json", out / "WORKPOINT_TARGET_INFORMED_FROZEN.json",
