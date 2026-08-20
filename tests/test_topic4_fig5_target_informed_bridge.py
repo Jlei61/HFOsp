@@ -10,6 +10,7 @@ from src.topic4_fig5_target_informed_bridge import (
     select_state_defined_readout,
     shaft_balanced_scaled_l1,
     smooth_rate,
+    score_energy_burden,
 )
 
 
@@ -119,3 +120,16 @@ def test_selection_ranking_requires_two_eligible_seeds_before_loss():
     ranked = rank_selection_candidates(rows, minimum_eligible=2)
     assert ranked[0]["candidate_id"] == "b"
     assert ranked[0]["selection_eligible"] is True
+
+
+def test_all_positive_patient_fraction_uses_one_contact_resolution_floor():
+    target = {
+        "global_early_per_seizure": [2.0, 2.0, 2.0],
+        "positive_fraction_per_seizure": [1.0, 1.0, 1.0],
+        "contact_iqr_per_seizure": [1.0, 1.0, 1.0],
+    }
+    result = score_energy_burden(np.r_[np.ones(14), -1.0], target)
+    assert result["patient_iqr_unfloored"][1] == 0.0
+    assert result["patient_iqr"][1] == 1.0 / 15.0
+    assert np.isfinite(result["D_energy"])
+    assert np.isclose(result["scaled_components"][1], 1.0)

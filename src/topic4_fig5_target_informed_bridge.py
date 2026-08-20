@@ -296,16 +296,23 @@ def score_energy_burden(model_early, target: Mapping[str, object]):
         np.asarray(target["contact_iqr_per_seizure"], float),
     ]
     centers = np.asarray([np.median(values) for values in patient])
-    scales = np.asarray([
-        max(np.quantile(values, 0.75) - np.quantile(values, 0.25), 1e-6)
+    raw_scales = np.asarray([
+        np.quantile(values, 0.75) - np.quantile(values, 0.25)
         for values in patient
     ])
+    # Positive-contact fraction is discrete in steps of one contact.  When all
+    # patient seizures are 1.0, an ordinary bootstrap has zero IQR and would
+    # turn one discordant contact into an arbitrarily large loss.
+    scale_floors = np.asarray([1e-6, 1.0 / len(model), 1e-6])
+    scales = np.maximum(raw_scales, scale_floors)
     components = np.abs(observed - centers) / scales
     return {
         "D_energy": float(np.mean(components)),
         "model": observed,
         "patient_median": centers,
         "patient_iqr": scales,
+        "patient_iqr_unfloored": raw_scales,
+        "scale_floor": scale_floors,
         "scaled_components": components,
     }
 

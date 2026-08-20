@@ -184,7 +184,9 @@ Only model-ictal eligible trajectories receive a finite bridge score.
 
 `D_energy` compares model and patient distributions of global median robust-z, positive-contact
 fraction and contact IQR. Each term is scaled by the patient bootstrap IQR with a nonzero
-split-half floor.
+split-half floor. For the discrete positive-contact fraction, the scale floor is one contact
+(`1/15`); this prevents an all-positive patient sample from creating a zero-denominator loss
+while retaining the exact observed fraction difference.
 
 ### 8.2 Contact energy field
 
