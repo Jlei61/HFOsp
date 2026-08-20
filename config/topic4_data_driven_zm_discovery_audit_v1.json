@@ -1,0 +1,237 @@
+{
+  "schema_version": "topic4_data_driven_zm_discovery_audit_v1",
+  "scientific_role": "development_only_retrospective_discovery_audit",
+  "status": "DEVELOPMENT_ONLY_RETROSPECTIVE_DISCOVERY_AUDIT",
+  "not_blind_rationale": "The E1146 Fig.3 clinical target, the candidate morphology table and the 5% E-to-I trajectory were all viewed before this revision was written. Rewriting the selection rule cannot remove that exposure. No output of this round may be called BLIND, prospective, or patient-generalising.",
+  "output_root": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/discovery_audit_v1",
+  "supersedes_nothing": "The 2026-08-17 execution contract, config/topic4_data_driven_zm_ictal_transition_v1.json and every historical morphology artifact stay unchanged and readable at their original paths.",
+
+  "governing_documents": {
+    "spec": {
+      "path": "docs/superpowers/specs/2026-08-20-topic4-data-driven-zm-model-ictal-qualification-and-fig3-bridge-design.md",
+      "sha256": "c4c2ecdbbf929c18588c1fe40b2119fc329e5f24322929a2afe7ca914492cc33"
+    },
+    "plan": {
+      "path": "docs/superpowers/plans/2026-08-20-topic4-data-driven-zm-model-ictal-qualification-and-fig3-bridge-plan.md",
+      "sha256": "6e479986b6bea2d981a6753ef1621aca78bbe57f5286c88d7c626c5217bf54da"
+    }
+  },
+
+  "immutable_inputs": {
+    "round_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f",
+      "observed_drift": "Workers written before 2026-08-19 12:12 recorded config sha256 6348eafdc4da168b0ba9b2501eaa59d0fc6319c489f9bce790a1a5af145dc13b (commit e6a4447d). Commit 7e352e30 changed ONLY the checkpoints.baseline_discovery documentation block; zm, simulation, engine_detector, spatial_ou, arms, seeds, inputs, node_anchor, recruitment and repertoire_claim_gate are byte-identical between the two revisions, so trajectories written under either revision are physically comparable."
+    },
+    "zm_baseline_config": {
+      "path": "config/topic4_data_driven_snn_baseline_zm_v1.json",
+      "sha256": "2b9586d274b85d9e3663557b5f4dfab7ac64292817667020503d144579ff8a91",
+      "role": "origin of the reference Z/M protocol constants used by the exact Fig.4 carry-over arm"
+    },
+    "frozen_substrate_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/candidate_manifest.json",
+      "sha256": "545b029d2d7947de5a27979e7166f6bc55ea2b01c64a67a9b736977ec960fcbb",
+      "role": "Fig.4 substrate of record: node field, learned E-to-E / E-to-I coefficient rows, direction classifier"
+    },
+    "direction_classifier_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_d/continuous_field_kmeans_d6_3_fresh_replication/candidate_manifest.json",
+      "sha256": "7c8a059a47abcad2544be04789d3b5a3888c6641f30e54fd10b65adf952cd5e7"
+    },
+    "shaft_aware_target_npz": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_training_target.npz",
+      "sha256": "7d11100c0f431479f8decb17b6de97575a91dcb889887ce9e2cedbbdcd54140b",
+      "role": "frozen scoring contract: contact order and shaft-aware embedding center/scale/components"
+    },
+    "shaft_aware_floors": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/shaft_aware_patient_floors.json",
+      "sha256": "2f28c5ecd991d0a1b051337370fa7b975ecc2ce95b2f00f26a3ea88469299b94"
+    },
+    "contact_contract": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/shaft_aware_target/contact_shaft_contract.json",
+      "sha256": "548643b6e89b61408b8bdf4cbc1566133937204dc36e8d512049cb25762fde91",
+      "role": "montage of record: 15 contacts, shaft ids, sheet positions, display order"
+    },
+    "common_detector_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev9/review_audit_20260810/rev9_review_audit.json",
+      "sha256": "6ca18234bc1ee9c06a9a4f8f6007b2d2709b138ccffef1bbc0f3dfd84c066471",
+      "role": "frozen common absolute event detector threshold"
+    },
+    "node_anchor_config": {
+      "path": "config/topic4_rev10_sa_observation_invariant_field_v6_2.json",
+      "sha256": "1277dbc5620fe6b1cc06d85592c46a16e22d7b7b4a4de0ca3a9e0a1f714a0719"
+    },
+    "node_anchor_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field_rev10_sa/observation_invariant_field_v6_2_final/candidate_manifest.json",
+      "sha256": "1c30be6f2121ed54f1c42ab312a8fae334902bd0a4246fcb5bcf4e42bbbb7298"
+    },
+    "stage_config": {
+      "path": "results/topic4_sef_hfo/data_driven_core_field/config/stage_config.json",
+      "sha256": "470de45715194f357396084a9cdad2f2e6a3bae044206be394d05207f2dd9fae"
+    },
+    "rev9_base_config": {
+      "path": "config/topic4_rev9_exploratory.json",
+      "sha256": "92b18838edf06a8445955c6623f4025010b76e4f50b39e320f1160ea27473ab9"
+    },
+    "repertoire_reference_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/zm_off_reference_repertoire.json",
+      "sha256": "9636f7165cc6dbe6581eec935a8ce908ada7e1a64e47fd26dd33fa5ee758b578",
+      "role": "OOD q95 and natural-KMeans balanced-alignment q05 over the 48 archived Z/M-off reference runs"
+    },
+    "historical_repertoire_gate": {
+      "path": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/repertoire_gate.json",
+      "sha256": "306462875dbdc471e702d7b8d48d967c900212070401eada956435f357296cbb",
+      "role": "the 2026-08-19 canary-seed repertoire verdict this round must reproduce before extending it"
+    },
+    "baseline_window_verdict": {
+      "path": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/baseline_window_verdict.json",
+      "sha256": "a71960ae97df47118fdc97bf5014f5dd0c5b5cbdf8983f59108b761c8126d746",
+      "role": "evidence that t_base = [500,1000] ms is low activity on the exact carry-over arm at seeds 1801-1803"
+    },
+    "historical_morphology_module": {
+      "path": "src/topic4_runaway_morphology.py",
+      "sha256": "b4f62abd3b58d2ae373a3548d77af44f4d56a4b62cfb40f7dcc9ea23cf9f0cc1",
+      "role": "classify_sustained_runaway; never modified by this round"
+    },
+    "substrate_module": {
+      "path": "src/topic4_zm_ictal_transition.py",
+      "sha256": "2cf6a49d7df25e6d0832fad7a6ba3b9e5c8354b8b4cc354f3ec95acc9635af5f"
+    },
+    "trajectory_worker": {
+      "path": "scripts/run_topic4_zm_ictal_transition_worker.py",
+      "sha256": "004622c7c2e58df7a2769000ec211998108cb425a88d36e83175e18006ed56a4"
+    },
+    "morphology_canary_runner": {
+      "path": "scripts/run_topic4_zm_joint_morphology_canary.py",
+      "sha256": "3e8c7ddc1cb2579005e1c91c9752099e2ee7b4deb29828bfb036eb6af16da3fb"
+    }
+  },
+
+  "candidate_inventory_roots": {
+    "exact_carryover_and_pathway_arms": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/workers",
+    "calibrated_transition_candidates": [
+      "results/topic4_sef_hfo/data_driven_zm_ictal_transition/zm_joint_morphology_calibration",
+      "results/topic4_sef_hfo/data_driven_zm_ictal_transition/zm_joint_morphology_calibration_v2",
+      "results/topic4_sef_hfo/data_driven_zm_ictal_transition/zm_joint_morphology_calibration_v2r",
+      "results/topic4_sef_hfo/data_driven_zm_ictal_transition/zm_joint_morphology_calibration_v3_etoi_dose",
+      "results/topic4_sef_hfo/data_driven_zm_ictal_transition/zm_joint_morphology_calibration_v4_etoi_refine",
+      "results/topic4_sef_hfo/data_driven_zm_ictal_transition/zm_joint_morphology_calibration_v5_etoi_boundary"
+    ],
+    "repertoire_reference_workers": "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc/frozen_substrate_confirmation/workers",
+    "existing_fig5_artifacts": [
+      "results/paper-ready-figure/fig5",
+      "results/paper-ready-figure/fig5_supplement_zm_states",
+      "results/topic4_sef_hfo/data_driven_zm_ictal_transition/fig5_workpoint_etoi005"
+    ]
+  },
+
+  "exact_fig4_carryover": {
+    "definition": "the frozen rev11-NLC substrate joint_04_control at E-to-E dose 1.0 and E-to-I dose 1.0, with the reference Z/M protocol activated and nothing else changed",
+    "candidate_id": "joint_04_control",
+    "E_to_E_dose": 1.0,
+    "E_to_I_dose": 1.0,
+    "I_th_EI": 95.19851312666987,
+    "tau_z": 5000.0,
+    "tau_adp": 500.0,
+    "eta_m": 0.007451594355587098,
+    "log_parameter_distance_coordinates": ["I_th_EI", "tau_z", "tau_adp", "eta_m", "E_to_E_dose", "E_to_I_dose"],
+    "zero_dose_epsilon": 0.001
+  },
+
+  "model_ictal_v2": {
+    "name": "MODEL_ICTAL_ELIGIBLE_V2",
+    "t_base_ms": [500.0, 1000.0],
+    "t_ictal_offset_from_operational_onset_ms": -100.0,
+    "w_pre_ms_relative_to_t_ictal": [-500.0, 0.0],
+    "w_early_ms_relative_to_t_ictal": [100.0, 1100.0],
+    "w_freq_ms_relative_to_t_ictal": [500.0, 1000.0],
+    "activity_threshold": 0.5,
+    "duty_threshold": 0.8,
+    "duty_rule": "joint: a W_early window counts only when F_E >= threshold AND F_sheet >= threshold in the same window",
+    "population_rate_ratio_min": 2.0,
+    "contact_centroid_band_hz": [10.0, 250.0],
+    "contact_centroid_shift_min_hz": 5.0,
+    "contact_centroid_ratio_min": 1.25,
+    "sheet_bin_mm": 1.0,
+    "sheet_recruited_bin_fraction": 0.5,
+    "sheet_minimum_bin_occupancy": 20,
+    "sensitivities": {
+      "duty": [0.7, 0.8, 0.9],
+      "activity": [0.4, 0.5, 0.6],
+      "bin_mm": [0.5, 1.0, 2.0],
+      "minimum_bin_occupancy": [10, 20, 40],
+      "onset_shift_ms": [-100.0, 0.0, 100.0]
+    },
+    "primary_verdict_is_fixed": "The primary verdict uses duty 0.8, activity 0.5, bin 1.0 mm and occupancy 20 only. Sensitivities are reported to expose boundary dependence and may never be substituted for the primary rule."
+  },
+
+  "repertoire_gate": {
+    "name": "INTERICTAL_REPERTOIRE_RETAINED",
+    "rule": "conjunctive over four clauses; identical to the historical contract, reference quantiles reused without refitting",
+    "minimum_returned_events_before_onset": 20,
+    "minimum_events_per_mode": 3,
+    "ood_q95": 0.5893518518518518,
+    "balanced_alignment_q05": 0.5054050925925926,
+    "reference_note": "48 archived Z/M-off runs, seeds 1561-1572",
+    "displayed_event_rule": "the latest returned pre-onset event that satisfies the frozen classifier filter; the word clean is a diagnostic label, never a selection criterion"
+  },
+
+  "motif_reuse": {
+    "name": "MOTIF_REUSE_ABOVE_MATCHED_NULL",
+    "gate": "exploratory: observed network-level statistic must exceed the q95 of its matched null",
+    "aggregation": "each network carries equal weight; within-network event resampling quantifies within-network uncertainty only",
+    "early_ictal_first_passage_window_ms_relative_to_t_ictal": [0.0, 500.0],
+    "frozen_permutations": {
+      "within_shaft_contact_permutation": {"draws": 4096, "seed": 20260820},
+      "onset_circular_shift": {"draws": 4096, "seed": 20260821},
+      "edge_gain_permutation": {"draws": 1024, "seed": 20260822},
+      "matched_off_motif_node_sets": {"draws": 1024, "seed": 20260823}
+    },
+    "declared_before_scores": "These counts and seeds are frozen in this file before any candidate motif-reuse score has been computed in this round.",
+    "network_bootstrap": {"draws": 4096, "seed": 20260824}
+  },
+
+  "allowed_pre_freeze_inputs": [
+    "Fig.4 interictal train and reference artifacts and the frozen direction classifier",
+    "model-internal qualification, repertoire, reuse and numerical-safety metrics",
+    "parameter-neighbourhood and seed robustness of the model trajectories",
+    "log-parameter distance from the exact Fig.4 carry-over point"
+  ],
+
+  "forbidden_pre_freeze_inputs": {
+    "rationale": "spec section 8: clinical ictal endpoints are evaluation endpoints, never candidate-selection variables. A producer that touches any of these before WORKPOINT_FROZEN.json exists must fail hard, not warn.",
+    "path_prefixes": [
+      "results/paper-ready-figure/fig3a_raw_spectral_context",
+      "results/paper-ready-figure/fig3b_interictal_ictal_shared_field",
+      "results/paper-ready-figure/fig3f_ab_dominance_cohort",
+      "results/paper-ready-figure/fig3_field_concordance_cohort_stat",
+      "results/paper-ready-figure/fig3_gradient_multiband_significance",
+      "results/paper-ready-figure/fig3_peri_onset_field_similarity",
+      "results/topic5_ictal_recruitment",
+      "results/seizure_onset",
+      "results/data_driven_soz/layer_a_ictal_er_rank",
+      "scripts/paper_figures/plot_fig3",
+      "docs/fig3b_interictal_ictal_shared_field_spec.md"
+    ],
+    "path_substrings": [
+      "clinical_bridge",
+      "clinical_target",
+      "j_bridge",
+      "seizure_2",
+      "early_ictal_field",
+      "ictal_energy_field"
+    ],
+    "note": "results/interictal_propagation_masked/** and results/spatial_modulation/propagation_geometry/** stay ALLOWED: they carry the patient's interictal timing field, which is the Fig.4 training input, not an ictal endpoint."
+  },
+
+  "analyst_exposure": {
+    "status": "NOT_BLIND",
+    "already_viewed": [
+      "the E1146 Fig.3 clinical ictal target and its locked seizure-2 parity values",
+      "the complete 20-run calibration morphology table, including which candidate passed the historical classifier",
+      "the 2% and 5% E-to-I trajectories and the rendered 5% work-point replay"
+    ],
+    "consequence": "Every artifact of this round is labelled DEVELOPMENT_ONLY_RETROSPECTIVE_DISCOVERY_AUDIT. A prospective discovery claim requires a patient or sealed seizure unit that has not been opened before the work point is frozen."
+  },
+
+  "claim_boundary": "Development-only, retrospective, non-blind. Forbidden: blind discovery; patient generalisation; patient causal mechanism; clinical seizure reproduction; model current equated with SEEG voltage; model Hz equated with patient Hz; a representative seed treated as network-ensemble reproducibility."
+}
