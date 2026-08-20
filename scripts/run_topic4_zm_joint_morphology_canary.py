@@ -57,6 +57,7 @@ def main():
     parser.add_argument("--post-runaway-ms", type=float, default=2000.0)
     parser.add_argument("--zm-mode", choices=("z_plus_m", "off"),
                         default="z_plus_m")
+    parser.add_argument("--save-spatial-frames", action="store_true")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
@@ -124,6 +125,7 @@ def main():
         "candidate_id": candidate,
         "seed": int(args.seed),
         "zm_mode": args.zm_mode,
+        "spatial_frames_saved": bool(args.save_spatial_frames),
         "parameters": {
             "I_th_EI": float(args.i_th_ei),
             "tau_z": tau_z,
@@ -145,6 +147,33 @@ def main():
         "contact_names": np.asarray(substrate.contact_names, dtype="U16"),
         "shaft_ids": np.asarray(substrate.shaft_ids, dtype="U8"),
     }
+    if args.save_spatial_frames:
+        frame_ms = 20.0
+        grid_n = 40
+        frame_steps = max(1, int(round(frame_ms / dt)))
+        positions = np.asarray(substrate.positions_e, float)
+        sheet_l = float(substrate.engine["L"])
+        ix = np.clip((positions[:, 0] / sheet_l * grid_n).astype(int), 0, grid_n - 1)
+        iy = np.clip((positions[:, 1] / sheet_l * grid_n).astype(int), 0, grid_n - 1)
+        flat_bin = iy * grid_n + ix
+        spikes = np.asarray(result["E_spk_bool"], bool)
+        n_frames = spikes.shape[0] // frame_steps
+        spatial = np.empty((n_frames, grid_n, grid_n), np.float32)
+        for frame in range(n_frames):
+            counts = np.sum(
+                spikes[frame * frame_steps:(frame + 1) * frame_steps], axis=0)
+            spatial[frame] = np.bincount(
+                flat_bin, weights=counts, minlength=grid_n * grid_n
+            ).reshape(grid_n, grid_n)
+        arrays.update({
+            "spatial_frame_time_ms": (
+                np.arange(n_frames, dtype=np.float32) + 0.5) * frame_ms,
+            "spatial_spike_count_20ms": spatial,
+            "spatial_grid_x_mm": np.linspace(
+                0.0, sheet_l, grid_n + 1, dtype=np.float32),
+            "spatial_grid_y_mm": np.linspace(
+                0.0, sheet_l, grid_n + 1, dtype=np.float32),
+        })
     if slow is not None:
         arrays.update({
             f"slow_{name}": np.asarray(values, np.float32)

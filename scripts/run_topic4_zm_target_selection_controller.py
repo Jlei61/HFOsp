@@ -65,7 +65,7 @@ def _baseline_paths(stage, seed):
 
 
 def _worker_command(parameters, seed, out, *, zm_mode="z_plus_m", duration=10000):
-    return [
+    command = [
         PYTHON, "scripts/run_topic4_zm_joint_morphology_canary.py",
         "--config", BASE_CONFIG, "--seed", str(seed),
         "--i-th-ei", str(parameters["I_th_EI"]),
@@ -76,6 +76,9 @@ def _worker_command(parameters, seed, out, *, zm_mode="z_plus_m", duration=10000
         "--duration-ms", str(duration), "--post-runaway-ms", "2000",
         "--out", str(out.relative_to(ROOT)),
     ]
+    if zm_mode == "z_plus_m":
+        command.append("--save-spatial-frames")
+    return command
 
 
 def _wait_for(expected, units, interval, status_path, stage):
