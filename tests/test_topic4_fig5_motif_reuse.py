@@ -186,3 +186,15 @@ def test_edge_permutation_audit_flags_a_broken_null():
 def test_matched_off_motif_node_sets_raises_instead_of_guessing():
     with pytest.raises(NotImplementedError, match="edge flow"):
         matched_off_motif_node_sets()
+
+
+def test_a_negative_agreement_clearing_a_lower_null_is_not_called_reuse():
+    """The within-shaft null can sit below zero; clearing it is not reuse."""
+    from src.topic4_fig5_motif_reuse import _null_summary
+    draws = np.full(1000, -0.6)
+    row = _null_summary(-0.2, draws, 1000)
+    assert row["exceeds_q95"] is True
+    assert row["observed_is_positive"] is False
+    assert row["reuse_supported"] is False
+    positive = _null_summary(0.4, np.full(1000, 0.1), 1000)
+    assert positive["reuse_supported"] is True

@@ -160,16 +160,30 @@ def precedence_reuse(reference_matrix, early_values, shaft_ids, *, n_draws, seed
 
 
 def _null_summary(observed, draws, n_draws):
+    """Null position of an observed statistic, with the sign kept visible.
+
+    The within-shaft null can sit well below zero -- with two shafts, relabelling
+    inside each shaft leaves the between-shaft ordering intact and can force a
+    strongly negative agreement. An observed value can then clear the null's q95
+    while still being a NEGATIVE agreement, which is the opposite of reuse.
+    ``exceeds_q95`` is the spec's literal gate and is reported as such;
+    ``reuse_supported`` additionally requires the observed agreement to be
+    positive, and is the flag a reuse claim may rest on.
+    """
     if not len(draws):
         return {"status": NOT_EVALUABLE, "n_draws": int(n_draws)}
     q95 = float(np.quantile(draws, 0.95))
+    exceeds = bool(observed > q95)
     return {
         "status": "OK",
         "n_draws": int(n_draws),
         "n_finite_draws": int(len(draws)),
         "median": float(np.median(draws)),
         "q95": q95,
-        "exceeds_q95": bool(observed > q95),
+        "observed": float(observed),
+        "observed_is_positive": bool(observed > 0.0),
+        "exceeds_q95": exceeds,
+        "reuse_supported": bool(exceeds and observed > 0.0),
         "exceedance_probability": float(np.mean(draws >= observed)),
         "excess_over_null_median": float(observed - float(np.median(draws))),
     }

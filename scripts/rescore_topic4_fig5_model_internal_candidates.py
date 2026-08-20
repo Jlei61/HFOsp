@@ -380,9 +380,13 @@ def summarise_candidate(key, rows, config):
                 for row in rows]
     retained = [None if row["layer2_repertoire"]["status"] == NOT_EVALUABLE
                 else bool(row["layer2_repertoire"]["retained"]) for row in rows]
+    # a negative agreement that merely clears a more-negative null is not reuse
     reuse = [row["layer2_motif"].get("rank_reuse", {}).get("null", {})
-             .get("exceeds_q95") for row in rows
+             .get("reuse_supported") for row in rows
              if row["layer2_motif"].get("status") == "OK"]
+    reuse_exceeds_only = [row["layer2_motif"].get("rank_reuse", {}).get("null", {})
+                          .get("exceeds_q95") for row in rows
+                          if row["layer2_motif"].get("status") == "OK"]
     reuse_values = [row["layer2_motif"]["rank_reuse"]["median_event_spearman"]
                     for row in rows
                     if row["layer2_motif"].get("status") == "OK"
@@ -433,7 +437,9 @@ def summarise_candidate(key, rows, config):
         },
         "motif_reuse": {
             "n_evaluable": len(reuse_values),
-            "n_exceeding_null_q95": sum(1 for v in reuse if v),
+            "n_supporting_reuse": sum(1 for v in reuse if v),
+            "n_exceeding_null_q95_including_negative": sum(
+                1 for v in reuse_exceeds_only if v),
             "network_aggregate": aggregate,
             "edge_flow": NOT_EVALUABLE,
         },
@@ -523,7 +529,9 @@ def _csv_rows(summaries):
             "repertoire_retained_proportion": row["repertoire"]["retained_proportion"],
             "repertoire_failing": ";".join(row["repertoire"]["failing_clauses"]),
             "motif_n_evaluable": row["motif_reuse"]["n_evaluable"],
-            "motif_n_exceeding_null_q95": row["motif_reuse"]["n_exceeding_null_q95"],
+            "motif_n_supporting_reuse": row["motif_reuse"]["n_supporting_reuse"],
+            "motif_n_exceeding_null_q95_including_negative": row["motif_reuse"][
+                "n_exceeding_null_q95_including_negative"],
             "motif_median": aggregate.get("median"),
             "motif_bootstrap_q05": aggregate.get("bootstrap_q05"),
             "edge_flow_reuse": row["motif_reuse"]["edge_flow"],
