@@ -92,6 +92,45 @@ def _report(out, terminal_status):
                 f"- fit seed 最佳 full-dose 候选：`{best['candidate_id']}`，"
                 f"J_early={best['J_early_bridge']:.3f}，"
                 f"contact rho={best['field']['early_spearman']:.3f}。")
+        else:
+            qualified = [row for row in primary
+                         if row.get("model_ictal_qualification")]
+            frequency_pass = [
+                row for row in qualified
+                if (row["model_ictal_qualification"].get("clauses") or {}).get(
+                    "contact_frequency_increased") is True
+            ]
+            duty_pass = [
+                row for row in qualified
+                if (row["model_ictal_qualification"].get("clauses") or {}).get(
+                    "joint_broad_recruitment_duty") is True
+            ]
+            if frequency_pass:
+                closest = max(
+                    frequency_pass,
+                    key=lambda row: row["model_ictal_qualification"]["joint_duty"])
+                q = closest["model_ictal_qualification"]
+                lines.append(
+                    f"- 频率通过候选中最高一秒 recruitment duty："
+                    f"`{closest['candidate_id']}`，duty={q['joint_duty']:.3f}，"
+                    f"contact centroid shift={q['contact_centroid_shift_hz']:.2f} Hz。")
+            if duty_pass:
+                closest = max(
+                    duty_pass,
+                    key=lambda row: row["model_ictal_qualification"][
+                        "contact_centroid_shift_hz"])
+                q = closest["model_ictal_qualification"]
+                lines.append(
+                    f"- duty 通过候选中最大频率变化：`{closest['candidate_id']}`，"
+                    f"duty={q['joint_duty']:.3f}，"
+                    f"contact centroid shift={q['contact_centroid_shift_hz']:.2f} Hz。")
+            comparators = [row for row in stage1["records"]
+                           if row.get("edge_dose_comparator")]
+            comparator_evaluable = [row for row in comparators
+                                    if row.get("status") == "BRIDGE_EVALUABLE"]
+            lines.append(
+                f"- edge-expression 历史对照 bridge-evaluable："
+                f"{len(comparator_evaluable)}/{len(comparators)}；这些臂不能成为 Z/M-only winner。")
     lines.extend(["", "## Selection 与 confirmation", ""])
     if selection is not None:
         for row in selection["candidate_summary"]:
@@ -121,6 +160,7 @@ def _report(out, terminal_status):
         "", "## 结论边界", "",
         "- `FROZEN_CONFIRMATION_PASS` 仅支持一个开发阶段、患者目标导向的 Z/M 工作点。",
         "- 若 full-dose Z/M 未通过，2%/5% E→I 轨迹仍只能说明 fast-substrate expression 会移动动力学边界，不能等效解释为 Z/M 参数。",
+        "- full-dose 候选若未先通过模型内部资格，就不计算患者损失；因此该负结果不是患者目标拟合失败，而是拟合前的动力学容量失败。",
         "- 模型 current proxy、模型频率和患者 SEEG 不共享物理单位；本轮比较的是 baseline-normalized 接触点能量组织。",
         "- 没有新的未见患者或未见发作单元，因此不作泛化声明。",
     ])
