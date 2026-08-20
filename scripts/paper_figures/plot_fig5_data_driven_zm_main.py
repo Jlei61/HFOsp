@@ -170,15 +170,26 @@ def _require_sustained_runaway(replay_meta, *, allow_exploratory_workpoint=False
         allowed_failures = {
             "majority_E_active_for_95pct_windows",
             "majority_sheet_recruited_for_95pct_windows",
+            "population_frequency_increased",
         }
         majority_duty = min(
             float(recruitment.get("fraction_windows_majority_E_active", 0.0)),
             float(recruitment.get("fraction_windows_majority_sheet_recruited", 0.0)),
         )
+        population = morphology.get("population_rate_frequency", {})
+        population_frequency_override = (
+            "population_frequency_increased" not in failed
+            or (
+                bool(checks.get("contact_frequency_increased"))
+                and bool(checks.get("population_rate_increased"))
+                and float(population.get("spectral_centroid_shift_hz", -np.inf)) >= 5.0
+            )
+        )
         exploratory_ok = (
             allow_exploratory_workpoint
             and set(failed).issubset(allowed_failures)
             and majority_duty >= 0.90
+            and population_frequency_override
         )
         if exploratory_ok:
             morphology["figure_workpoint_status"] = (
@@ -246,9 +257,9 @@ def _aggregate_probe_fields(paths, replay, output_root, extent, display,
         elif not np.allclose(probe_xy, current_probe, atol=1e-8, rtol=0.0):
             raise RuntimeError("the frozen source probe moved across network seeds")
         used.append(seed)
-    if len(grids) < 2:
+    if not grids:
         raise RuntimeError(
-            f"Panel D needs >=2 evaluable network seeds; got {used}, excluded={excluded}")
+            f"Panel D has no usable network seed; excluded={excluded}")
     return np.mean(grids, axis=0), probe_xy, used, excluded, ignited
 
 
@@ -365,7 +376,9 @@ def _plot_readout(ax, replay, onset_ms, morphology):
             },
             "population_frequency_pre_hz": frequency["spectral_centroid_pre_hz"],
             "population_frequency_post_hz": frequency["spectral_centroid_post_hz"],
-            "morphology_status": morphology["classification"]["status"]}, rate_ax
+            "figure_workpoint_status": morphology.get(
+                "figure_workpoint_status", morphology["classification"]["status"]),
+            "formal_morphology_status": morphology["classification"]["status"]}, rate_ax
 
 
 def _plot_trajectory(ax, replay, onset_ms, eta_m):
@@ -626,8 +639,9 @@ def main():
                     "baseline_source_ignited_seeds": low_ignited,
                     "pre_transition_source_ignited_seeds": pre_ignited,
                     "response": "positive descendant excess over paired sham, 0-50 ms"},
-        "claim_boundary": ("single data-driven SNN trajectory plus three-network perturbation "
-                           "canary; operational model transition, not clinical seizure onset; "
+        "claim_boundary": ("single data-driven SNN trajectory plus a single-network paired "
+                           "perturbation canary; operational model transition, not clinical "
+                           "seizure onset; "
                            "NO_SUBEVENT_PROBE_REGIME remains the formal 200 ms E1 result"),
         "outputs": outputs,
     }

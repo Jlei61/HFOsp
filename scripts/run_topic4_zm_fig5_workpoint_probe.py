@@ -26,6 +26,18 @@ from src.topic4_zm_perturbation import (  # noqa: E402
 )
 
 
+def _jsonable(value):
+    if isinstance(value, np.ndarray):
+        return value.tolist()
+    if isinstance(value, np.generic):
+        return value.item()
+    if isinstance(value, dict):
+        return {key: _jsonable(item) for key, item in value.items()}
+    if isinstance(value, (list, tuple)):
+        return [_jsonable(item) for item in value]
+    return value
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True)
@@ -100,8 +112,7 @@ def main() -> None:
     field = sham_slow.field_accumulator_result()
     out = Path(args.out_prefix).resolve()
     out.parent.mkdir(parents=True, exist_ok=True)
-    _atomic_npz(
-        out.with_suffix(".npz"),
+    arrays = dict(
         site_id=np.asarray(["source"], dtype="U12"),
         site_xy_mm=np.asarray([site["xy_mm"]], float),
         susceptibility=np.asarray([metrics["susceptibility"]], np.float32),
@@ -113,10 +124,14 @@ def main() -> None:
         excess_per_neuron=np.asarray([metrics["excess_per_neuron"]], np.float32),
         excess_per_neuron_early=np.asarray(
             [metrics["excess_per_neuron_early"]], np.float32),
-        slow_field_D=field["disinhibition_D"].astype(np.float32),
-        slow_field_A=field["adaptation_A"].astype(np.float32),
-        slow_field_net=field["net_slow_current"].astype(np.float32),
     )
+    if field is not None:
+        arrays.update(
+            slow_field_D=field["disinhibition_D"].astype(np.float32),
+            slow_field_A=field["adaptation_A"].astype(np.float32),
+            slow_field_net=field["net_slow_current"].astype(np.float32),
+        )
+    _atomic_npz(out.with_suffix(".npz"), **arrays)
     head = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
     payload = {
         "status": "ZM_FIG5_WORKPOINT_PROBE_COMPLETE",
@@ -124,13 +139,13 @@ def main() -> None:
         "seed": seed,
         "label": args.label,
         "dose_cells": int(args.dose_cells),
-        "site": site,
+        "site": _jsonable(site),
         "workpoint_parameters": parameters,
         "checkpoint": str(Path(args.checkpoint).resolve()),
         "checkpoint_absolute_time_ms": float(state["absolute_time_ms"]),
-        "metrics": {key: value for key, value in metrics.items()
-                    if not isinstance(value, np.ndarray)},
-        "regime": regime,
+        "metrics": _jsonable({key: value for key, value in metrics.items()
+                              if not isinstance(value, np.ndarray)}),
+        "regime": _jsonable(regime),
         "git_head": head,
         "wall_seconds": time.time() - started,
     }

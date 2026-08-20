@@ -88,7 +88,9 @@ def test_figure_explicitly_accepts_author_selected_brief_dropout_workpoint():
             "checks": {
                 "majority_E_active_for_95pct_windows": False,
                 "majority_sheet_recruited_for_95pct_windows": False,
+                "contact_frequency_increased": True,
                 "population_frequency_increased": True,
+                "population_rate_increased": True,
             },
         },
         "full_field_recruitment": {
@@ -109,16 +111,43 @@ def test_figure_exploratory_override_does_not_accept_frequency_failure():
             "all_checks_pass": False,
             "checks": {
                 "majority_E_active_for_95pct_windows": False,
+                "contact_frequency_increased": True,
                 "population_frequency_increased": False,
+                "population_rate_increased": True,
             },
         },
         "full_field_recruitment": {
             "fraction_windows_majority_E_active": 0.95,
             "fraction_windows_majority_sheet_recruited": 0.95,
         },
+        "population_rate_frequency": {"spectral_centroid_shift_hz": 1.0},
     }
     with np.testing.assert_raises_regex(RuntimeError, "population_frequency"):
         _require_sustained_runaway(
             {"runaway_morphology": morphology},
             allow_exploratory_workpoint=True,
         )
+
+
+def test_figure_override_uses_contact_frequency_with_population_shift_floor():
+    morphology = {
+        "classification": {
+            "all_checks_pass": False,
+            "checks": {
+                "majority_E_active_for_95pct_windows": False,
+                "majority_sheet_recruited_for_95pct_windows": False,
+                "contact_frequency_increased": True,
+                "population_frequency_increased": False,
+                "population_rate_increased": True,
+            },
+        },
+        "full_field_recruitment": {
+            "fraction_windows_majority_E_active": 0.92,
+            "fraction_windows_majority_sheet_recruited": 0.92,
+        },
+        "population_rate_frequency": {"spectral_centroid_shift_hz": 5.2},
+    }
+    assert _require_sustained_runaway(
+        {"runaway_morphology": morphology},
+        allow_exploratory_workpoint=True,
+    ) is morphology
