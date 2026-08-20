@@ -254,6 +254,13 @@ holds `s_I=0.8`, `tau_z=2500 ms` and scans `tau_m={250,500,1000} ms` by
 `G_m/G_m0={0.5,1.0,1.5}`, with `eta_m=G_m/tau_m`. Patient bridge scores may not choose this grid
 or stop individual cells.
 
+The bounded grid may add exactly one three-cell corner-cross at `tau_m=62.5 ms` with the same
+three `G_m` ratios if, and only if, the initial nine cells produce no eligible point while the
+historical `tau_m=62.5, tau_z=5000 ms` point passes recruitment duty and the `tau_z=2500 ms`
+points pass frequency. This combines two model-internal one-clause successes; it is not selected
+from patient scores. Failure of this final cross closes Z/M-only fitting at full learned-edge
+expression for rev5.
+
 ### Stage 2: selection
 
 Run the top eligible Z/M-only candidates on a predeclared selection seed set. Rank by median

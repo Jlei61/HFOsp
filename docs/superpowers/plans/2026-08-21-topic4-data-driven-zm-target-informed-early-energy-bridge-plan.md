@@ -110,6 +110,12 @@ recruitment but fail frequency. The second grid is therefore frozen at that cros
 using patient bridge scores. Every candidate must first pass the complete one-second V2 gate;
 a qualifying 500 ms readout window alone is insufficient.
 
+If all nine cells fail but the failures separate exactly as anticipated, run one final
+model-internal corner-cross at `tau_m=62.5 ms`, `tau_z=2500 ms`, `s_I=0.8`, and
+`G_m/G_m0={0.5,1.0,1.5}`. This is authorized because the historical short-`tau_m` point passes
+duty while the fast-`tau_z` points pass frequency. No further grid or optimizer follows a failed
+corner-cross.
+
 ## Task 5: target-informed selection
 
 For up to three model-ictal full-dose candidates, run the predeclared selection seeds
