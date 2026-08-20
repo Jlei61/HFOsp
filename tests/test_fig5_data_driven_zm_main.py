@@ -2,7 +2,6 @@ import numpy as np
 
 from scripts.paper_figures.plot_fig5_data_driven_zm_main import (
     _contact_order,
-    _registered_xy,
     _sample_contact_field,
     _signed_bandpass,
 )
@@ -24,13 +23,6 @@ def test_display_event_rule_uses_latest_complete_observed_event():
     onsets[3, :] = 72.0
     assert _select_display_event(
         t_on, t_off, returned, before, onsets, onset_ms=100.0) == 1
-
-
-def test_registered_coordinates_align_axis_with_positive_x():
-    xy = np.array([[1.0, 1.0], [2.0, 1.0], [1.0, 2.0]])
-    got = _registered_xy(xy, axis_unit=np.array([1.0, 0.0]),
-                         origin=np.array([1.0, 1.0]))
-    assert np.allclose(got, [[0.0, 0.0], [1.0, 0.0], [0.0, 1.0]])
 
 
 def test_contact_order_places_scl_below_icl_and_preserves_numeric_order():

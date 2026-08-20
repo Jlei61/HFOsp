@@ -15,12 +15,9 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from scripts.paper_figures.plot_fig5_data_driven_zm_main import (
-    REFERENCE_FIGDATA,
-    _accepted_display_xy,
-    _load_accepted_display,
     _load_npz,
     _panel_label,
-    _plot_energy,
+    _plot_runaway_activity,
     _plot_event_order,
     _plot_readout,
     _plot_trajectory,
@@ -43,32 +40,42 @@ def main():
         "joint_04_control_seed_1801_frames.npz"))
     parser.add_argument("--out-dir", default=(
         "results/paper-ready-figure/fig5/figures/panels"))
-    parser.add_argument("--extent-mm", type=float, default=12.0)
-    parser.add_argument("--reference-figdata", default=REFERENCE_FIGDATA)
+    parser.add_argument("--sheet-size-mm", type=float, default=20.0)
+    parser.add_argument("--display-onset-offset-ms", type=float, default=300.0)
     args = parser.parse_args()
 
     replay_path = ROOT / args.replay
     replay = _load_npz(replay_path)
     metadata = json.loads(replay_path.with_suffix(".json").read_text())
-    if not metadata["verification_against_archived_run"]["all_match"]:
+    verification = metadata.get(
+        "verification_against_reference_run",
+        metadata.get("verification_against_archived_run"),
+    )
+    if not verification or not verification["all_match"]:
         raise RuntimeError("the Figure 5 replay does not match the archived run")
-    morphology = _require_sustained_runaway(metadata)
+    morphology = _require_sustained_runaway(
+        metadata, allow_exploratory_workpoint=True)
     config = json.loads((ROOT / args.config).read_text())
-    onset_ms = float(metadata["model_ictal_onset_ms"])
-    extent = (-float(args.extent_mm), float(args.extent_mm))
-    display = _load_accepted_display(replay, ROOT / args.reference_figdata)
-    positions = _accepted_display_xy(replay["positions_E"], display)
-    contacts = _accepted_display_xy(replay["contact_xy_mm"], display)
+    morphology_onset_ms = float(metadata.get(
+        "morphology_onset_ms", metadata["model_ictal_onset_ms"]))
+    display_onset_ms = morphology_onset_ms + float(args.display_onset_offset_ms)
+    display_window_start_ms = max(0.0, morphology_onset_ms - 1200.0)
+    extent = (0.0, float(args.sheet_size_mm))
+    positions = replay["positions_E"]
+    contacts = replay["contact_xy_mm"]
     out_dir = ROOT / args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(12.6, 3.5))
-    _, rate_ax = _plot_readout(ax, replay, onset_ms, morphology)
+    _, rate_ax = _plot_readout(
+        ax, replay, display_onset_ms, morphology,
+        window_start_ms=display_window_start_ms)
     _panel_label(rate_ax, "A", x=-0.055, y=1.35)
     _save(fig, out_dir / "fig5-panel-a-readout.png")
 
     fig, ax = plt.subplots(figsize=(4.0, 3.5))
-    _plot_trajectory(ax, replay, onset_ms, config["zm"]["eta_m"])
+    eta_m = metadata.get("workpoint_parameters", config["zm"])["eta_m"]
+    _plot_trajectory(ax, replay, display_onset_ms, eta_m)
     _panel_label(ax, "B", x=-0.23, y=1.12)
     _save(fig, out_dir / "fig5-panel-b-zm-trajectory.png")
 
@@ -81,19 +88,19 @@ def main():
     _save(fig, out_dir / "fig5-panel-c-event-order.png")
 
     fig, ax = plt.subplots(figsize=(4.6, 4.1))
-    energy_map = _plot_energy(
-        ax, replay, replay["positions_E"], replay["contact_xy_mm"],
-        positions, contacts, extent)
-    colorbar = fig.colorbar(energy_map, ax=ax, fraction=0.046, pad=0.03)
-    colorbar.set_label(r"activity energy ($\times 10^3$ Hz$^2$)", fontsize=8)
+    activity_map, _ = _plot_runaway_activity(
+        ax, replay, contacts, extent, display_onset_ms,
+        float(metadata["activity_window_ms"]), start_offset_ms=0.0)
+    colorbar = fig.colorbar(activity_map, ax=ax, fraction=0.046, pad=0.03)
+    colorbar.set_label("local E-neuron rate (Hz)", fontsize=8)
     colorbar.ax.tick_params(labelsize=7)
-    _save(fig, out_dir / "fig5-panel-c-early-energy.png")
+    _save(fig, out_dir / "fig5-panel-c-runaway-activity.png")
 
     (out_dir / "README.md").write_text(
         "### fig5-panel-a-readout.png\n"
         "同一条 Joint 轨迹的 15 触点连续有符号 30-80 Hz model-current readout。"
         "蓝色窗口是按冻结规则选择并经患者模板审计确认为 Model TB 的发作前事件，"
-        "红色虚线是 runaway 进入时刻；顶部灰线是群体 E 发放率。\n\n"
+        "红色虚线是全局持续高活动开始的展示时刻；顶部两条线是全局神经元与空间招募比例。\n\n"
         "**关注点**：runaway 由群体发放率持续升高定义；30-80 Hz 接触振幅本身只小幅改变，"
         "每触点尺度冻结在进入前。\n\n"
         "### fig5-panel-b-zm-trajectory.png\n"
@@ -101,12 +108,12 @@ def main():
         "**关注点**：这是轨迹投影，不是解析相图或分离曲线。\n\n"
         "### fig5-panel-c-event-order.png\n"
         "冻结规则选择的 Model TB 发作前事件。神经元和触点颜色都表示相对首次放电顺序，"
-        "并刚体注册到 Fig4 已验收的 E1146 平面。\n\n"
-        "**关注点**：触点方向与 Fig4 完全同合同，数字标签 0 的 MTB 语义来自患者模板审计。\n\n"
-        "### fig5-panel-c-early-energy.png\n"
-        "进入后 100 ms 的逐神经元 spike-rate-squared 场，显示单位为 10^3 Hz^2；"
-        "触点颜色由同一个场用固定 0.75 mm 核采样。\n\n"
-        "**关注点**：背景与触点使用同一活动量，不混用 current energy。\n",
+        "使用和 Fig4 完全一致的原始 0-20 mm sheet x/y 坐标。\n\n"
+        "**关注点**：不旋转、不镜像、不做显示注册；电极排布方向可直接与 Fig4 对照。\n\n"
+        "### fig5-panel-c-runaway-activity.png\n"
+        "红线后 0 至 +100 ms 的 64×64 局部 E 神经元发放率，不做空间平滑；"
+        "红线对应原形态检测后 300 ms、连续读出中约 1500 ms 的全局高活动开始段。\n\n"
+        "**关注点**：看实际招募范围，不把过早的 +0 至 +100 ms 当作已形成的 runaway。\n",
         encoding="utf-8")
     print(json.dumps({"out_dir": str(out_dir.relative_to(ROOT)), "panels": 4}))
 
