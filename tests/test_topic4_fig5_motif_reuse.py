@@ -198,3 +198,12 @@ def test_a_negative_agreement_clearing_a_lower_null_is_not_called_reuse():
     assert row["reuse_supported"] is False
     positive = _null_summary(0.4, np.full(1000, 0.1), 1000)
     assert positive["reuse_supported"] is True
+
+
+def test_precomputed_target_matrix_changes_nothing():
+    reference = precedence_matrix(_ordered())
+    target = _ordered(missing=(3, 7))
+    plain = precedence_agreement(reference, target)
+    cached = precedence_agreement(reference, target,
+                                  target_matrix=precedence_matrix(target))
+    assert plain == cached

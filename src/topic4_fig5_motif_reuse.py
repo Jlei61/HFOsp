@@ -78,16 +78,22 @@ def mode_precedence_matrix(event_values):
     return mean, support
 
 
-def precedence_agreement(reference_matrix, target_values, *, weights=None):
+def precedence_agreement(reference_matrix, target_values, *, weights=None,
+                         target_matrix=None):
     """Weighted fraction of comparable pairs ordered the same way.
 
     ``weights`` defaults to ``abs(reference_matrix)``, which is 1 for a single
     event (a hard +/-1 precedence) and the within-mode consistency for a mode
     matrix, so the same function serves both levels of the spec's phrase
     "event/frozen-mode contact-pair precedence matrix".
+
+    ``target_matrix`` lets a caller pass the already-built target precedence so a
+    permutation loop does not rebuild the same matrix once per event per draw.
+    It is an optimisation only; the returned values are identical.
     """
     reference = np.asarray(reference_matrix, float)
-    target = precedence_matrix(target_values)
+    target = (precedence_matrix(target_values) if target_matrix is None
+              else np.asarray(target_matrix, float))
     upper = np.triu(np.ones_like(reference, dtype=bool), k=1)
     comparable = upper & np.isfinite(reference) & np.isfinite(target)
     comparable &= (reference != 0.0) & (target != 0.0)
@@ -154,6 +160,7 @@ def precedence_reuse(reference_matrix, early_values, shaft_ids, *, n_draws, seed
         shuffled = within_shaft_label_permutation(early_values, shaft_ids, rng)
         draws[index] = precedence_agreement(
             reference_matrix, shuffled, weights=weights)["agreement"]
+    del index
     finite = draws[np.isfinite(draws)]
     return {"observed": observed,
             "null": _null_summary(observed["agreement"], finite, n_draws)}
@@ -423,9 +430,13 @@ def network_rank_reuse(event_ranks, early_ranks, shaft_ids, *, n_draws, seed):
     }
 
 
-def _median_event_precedence(event_values, early_values):
-    rows = [precedence_agreement(precedence_matrix(row), early_values)
-            for row in event_values]
+def _median_event_precedence(event_values, early_values, *,
+                             event_matrices=None):
+    target = precedence_matrix(early_values)
+    matrices = (event_matrices if event_matrices is not None
+                else [precedence_matrix(row) for row in event_values])
+    rows = [precedence_agreement(matrix, early_values, target_matrix=target)
+            for matrix in matrices]
     values = np.asarray([row["agreement"] for row in rows], float)
     finite = values[np.isfinite(values)]
     return (float(np.median(finite)) if len(finite) else float("nan")), rows
@@ -436,14 +447,19 @@ def network_precedence_reuse(event_values, early_values, shaft_ids, *, n_draws,
     """Primary: median per-event precedence agreement. Secondary: per frozen mode."""
     event_values = np.atleast_2d(np.asarray(event_values, float))
     early_values = np.asarray(early_values, float)
-    observed, rows = _median_event_precedence(event_values, early_values)
+    # the event precedence matrices do not depend on the draw; building them
+    # once instead of once per event per draw is the whole cost of this loop
+    event_matrices = [precedence_matrix(row) for row in event_values]
+    observed, rows = _median_event_precedence(event_values, early_values,
+                                              event_matrices=event_matrices)
     if not np.isfinite(observed):
         return {"status": NOT_EVALUABLE, "n_events": int(len(event_values))}
     rng = np.random.default_rng(int(seed))
     draws = np.empty(int(n_draws), float)
     for index in range(int(n_draws)):
         shuffled = within_shaft_label_permutation(early_values, shaft_ids, rng)
-        draws[index] = _median_event_precedence(event_values, shuffled)[0]
+        draws[index] = _median_event_precedence(
+            event_values, shuffled, event_matrices=event_matrices)[0]
     finite = draws[np.isfinite(draws)]
     output = {
         "status": "OK",

@@ -397,6 +397,26 @@ def summarise_candidate(key, rows, config):
                                          draws=int(bootstrap["draws"]),
                                          seed=int(bootstrap["seed"]))
                  if reuse_values else {"status": NOT_EVALUABLE})
+    # reported, never selected on: the lexicographic rule has no robustness
+    # step, and with one run per calibrated candidate its first step (eligible
+    # proportion) is degenerate, so the reader needs to see the boundary
+    # dependence next to the ranking rather than infer it.
+    sensitivity = []
+    for row in rows:
+        block = row["layer1_model_ictal"].get("sensitivities")
+        if not block:
+            continue
+        activity = block["activity_and_duty"].get("0.5", {})
+        sensitivity.append({
+            "run": row["run"],
+            "onset_shift": block["onset_shift"],
+            "onset_shift_stable": bool(len(set(block["onset_shift"].values())) == 1),
+            "joint_duty_at_activity": {
+                key: value.get("joint_duty")
+                for key, value in block["activity_and_duty"].items()},
+            "passes_duty_thresholds": activity.get("passes_duty"),
+            "bin_and_occupancy": block["bin_and_occupancy"],
+        })
     missing = sorted({note for row in rows
                       for note in row["layer1_model_ictal"].get(
                           "missing_evidence", [])}
@@ -444,6 +464,7 @@ def summarise_candidate(key, rows, config):
             "edge_flow": NOT_EVALUABLE,
         },
         "cross_state_discovery_eligible": _cross_state(eligible, retained, reuse),
+        "qualification_sensitivity": sensitivity,
         "missing_evidence": missing,
     }
 
@@ -536,6 +557,14 @@ def _csv_rows(summaries):
             "motif_bootstrap_q05": aggregate.get("bootstrap_q05"),
             "edge_flow_reuse": row["motif_reuse"]["edge_flow"],
             "cross_state_discovery_eligible": row["cross_state_discovery_eligible"],
+            "onset_shift_stable": all(
+                entry["onset_shift_stable"]
+                for entry in row["qualification_sensitivity"]) if row[
+                    "qualification_sensitivity"] else None,
+            "passes_duty_0p9": all(
+                (entry["passes_duty_thresholds"] or {}).get("0.9") is True
+                for entry in row["qualification_sensitivity"]) if row[
+                    "qualification_sensitivity"] else None,
         }
 
 
