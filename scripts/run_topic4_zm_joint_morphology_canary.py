@@ -55,6 +55,8 @@ def main():
     parser.add_argument("--etoi-dose", type=float, default=1.0)
     parser.add_argument("--duration-ms", type=float, default=10000.0)
     parser.add_argument("--post-runaway-ms", type=float, default=2000.0)
+    parser.add_argument("--zm-mode", choices=("z_plus_m", "off"),
+                        default="z_plus_m")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
@@ -72,22 +74,24 @@ def main():
     tau_adp = float(
         config["zm"]["tau_adp"] if args.tau_adp is None else args.tau_adp)
 
-    slow = ZMTracedSlowVars(
-        substrate.n_e + substrate.n_i,
-        substrate.params.V_th,
-        MZSlowVarsConfig(
-            use_z=True,
-            use_m=True,
-            I_th_EI=float(args.i_th_ei),
-            tau_z=tau_z,
-            tau_adp=tau_adp,
-            eta_m=float(args.eta_m),
-            trace_stride_steps=int(config["zm"]["trace_stride_steps"]),
-        ),
-        NE=substrate.n_e,
-        core_mask_E=np.asarray(substrate.h_e >= 0.5, bool),
-        trace_weights_E=substrate.h_e,
-    )
+    slow = None
+    if args.zm_mode == "z_plus_m":
+        slow = ZMTracedSlowVars(
+            substrate.n_e + substrate.n_i,
+            substrate.params.V_th,
+            MZSlowVarsConfig(
+                use_z=True,
+                use_m=True,
+                I_th_EI=float(args.i_th_ei),
+                tau_z=tau_z,
+                tau_adp=tau_adp,
+                eta_m=float(args.eta_m),
+                trace_stride_steps=int(config["zm"]["trace_stride_steps"]),
+            ),
+            NE=substrate.n_e,
+            core_mask_E=np.asarray(substrate.h_e >= 0.5, bool),
+            trace_weights_E=substrate.h_e,
+        )
     drive = make_external_drive(substrate, config["spatial_ou"], args.seed)
 
     from kick_probe import simulate_kick
@@ -119,6 +123,7 @@ def main():
         "status": "ZM_JOINT_MORPHOLOGY_CANARY_COMPLETE",
         "candidate_id": candidate,
         "seed": int(args.seed),
+        "zm_mode": args.zm_mode,
         "parameters": {
             "I_th_EI": float(args.i_th_ei),
             "tau_z": tau_z,
@@ -140,11 +145,12 @@ def main():
         "contact_names": np.asarray(substrate.contact_names, dtype="U16"),
         "shaft_ids": np.asarray(substrate.shaft_ids, dtype="U8"),
     }
-    arrays.update({
-        f"slow_{name}": np.asarray(values, np.float32)
-        for name, values in slow.trace_arrays().items()
-    })
-    payload["slow_state_summary"] = slow.summary()
+    if slow is not None:
+        arrays.update({
+            f"slow_{name}": np.asarray(values, np.float32)
+            for name, values in slow.trace_arrays().items()
+        })
+        payload["slow_state_summary"] = slow.summary()
     if operational_onset is None:
         payload["verdict"] = "NO_TRANSITION_WITHIN_CANARY"
     else:
