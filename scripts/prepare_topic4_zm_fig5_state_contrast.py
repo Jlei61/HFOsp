@@ -122,11 +122,45 @@ def _state_probe(substrate, config, state, site, doses, window_ms):
     }
 
 
-def _select_dose(low_rows):
-    eligible = [row for row in low_rows if bool(row["e1_evaluable"])]
+def _select_dose(low_rows, *, max_abs_early_excess=50.0):
+    eligible = [
+        row for row in low_rows
+        if bool(row["e1_evaluable"])
+        and abs(float(row["excess_spikes_early"])) <= float(max_abs_early_excess)
+    ]
     if not eligible:
-        raise RuntimeError("no baseline subevent probe dose exists in the scanned ladder")
+        raise RuntimeError("no near-zero baseline subevent probe dose exists in the scanned ladder")
     return int(max(eligible, key=lambda row: int(row["dose_cells"]))["dose_cells"])
+
+
+def _reuse_low_contrast(path, replay_meta, doses):
+    """Reuse only the frozen low-activity branches from an exact prior contrast."""
+    path = Path(path).resolve()
+    meta = json.loads(path.with_suffix(".json").read_text())
+    if not bool(meta.get("continuation_rate_exact")):
+        raise RuntimeError("reused low contrast is not tied to an exact replay")
+    if int(meta["seed"]) != int(replay_meta["seed"]):
+        raise RuntimeError("reused low contrast has a different seed")
+    if meta["workpoint_parameters"] != replay_meta["workpoint_parameters"]:
+        raise RuntimeError("reused low contrast has a different work point")
+    with np.load(path, allow_pickle=False) as handle:
+        block = {key: handle[key] for key in handle.files}
+    old_doses = np.asarray(block["dose_cells"], int)
+    indices = []
+    for dose in doses:
+        where = np.flatnonzero(old_doses == int(dose))
+        if where.size != 1:
+            raise RuntimeError(f"reused low contrast has no unique dose {dose}")
+        indices.append(int(where[0]))
+    rows = {int(row["dose_cells"]): row for row in meta["low_probe_scan"]}
+    return {
+        "rows": [rows[int(dose)] for dose in doses],
+        "early_fields": np.asarray(block["low_response_early"])[indices],
+        "full_fields": np.asarray(block["low_response_full"])[indices],
+        "slow_D": np.asarray(block["low_slow_D"]),
+        "slow_A": np.asarray(block["low_slow_A"]),
+        "slow_net": np.asarray(block["low_slow_net"]),
+    }
 
 
 def main():
@@ -138,6 +172,8 @@ def main():
     parser.add_argument("--post-offset-ms", type=float, default=120.0)
     parser.add_argument("--dose-ladder", type=int, nargs="+", default=(8, 16, 32, 64))
     parser.add_argument("--window-ms", type=float, default=200.0)
+    parser.add_argument("--max-baseline-early-excess", type=float, default=50.0)
+    parser.add_argument("--reuse-low-contrast")
     parser.add_argument("--out", required=True)
     args = parser.parse_args()
 
@@ -184,9 +220,14 @@ def main():
     doses = sorted(set(int(value) for value in args.dose_ladder))
     if any(value <= 0 for value in doses):
         raise ValueError("probe doses must be positive")
-    low = _state_probe(substrate, config, low_state, site, doses, float(args.window_ms))
+    if args.reuse_low_contrast:
+        low = _reuse_low_contrast(args.reuse_low_contrast, replay_meta, doses)
+    else:
+        low = _state_probe(
+            substrate, config, low_state, site, doses, float(args.window_ms))
     post = _state_probe(substrate, config, post_state, site, doses, float(args.window_ms))
-    selected_dose = _select_dose(low["rows"])
+    selected_dose = _select_dose(
+        low["rows"], max_abs_early_excess=float(args.max_baseline_early_excess))
     eta_m = float(parameters["eta_m"])
     low_disinh, low_adapt = _slow_snapshot(low_state, substrate.n_e, eta_m)
     post_disinh, post_adapt = _slow_snapshot(post_state, substrate.n_e, eta_m)
@@ -227,8 +268,12 @@ def main():
         "post_time_ms": float(post_state["absolute_time_ms"]),
         "post_offset_from_scientific_onset_ms": float(args.post_offset_ms),
         "continuation_rate_exact": bool(exact_rate),
+        "reused_low_contrast": (None if not args.reuse_low_contrast else
+                                str(Path(args.reuse_low_contrast).resolve().relative_to(ROOT))),
         "selected_dose_cells": selected_dose,
-        "selection_rule": "largest scanned dose with no attributable baseline event or model-ictal crossing",
+        "selection_rule": ("largest scanned dose with no attributable baseline event, "
+                           "no model-ictal crossing, and absolute 0-50 ms baseline "
+                           f"excess <= {float(args.max_baseline_early_excess):g} spikes"),
         "low_probe_scan": low["rows"],
         "post_probe_scan": post["rows"],
         "h_weighted_state": {

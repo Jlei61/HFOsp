@@ -21,13 +21,15 @@ def test_workpoint_parameters_override_round_defaults():
 
 def test_selects_largest_baseline_subevent_dose():
     rows = [
-        {"dose_cells": 8, "e1_evaluable": True},
-        {"dose_cells": 16, "e1_evaluable": True},
-        {"dose_cells": 32, "e1_evaluable": False},
+        {"dose_cells": 8, "e1_evaluable": True, "excess_spikes_early": -13},
+        {"dose_cells": 16, "e1_evaluable": True, "excess_spikes_early": -19},
+        {"dose_cells": 32, "e1_evaluable": True, "excess_spikes_early": 17712},
+        {"dose_cells": 64, "e1_evaluable": False, "excess_spikes_early": 10},
     ]
     assert _select_dose(rows) == 16
 
 
 def test_refuses_scan_without_baseline_subevent_regime():
-    with np.testing.assert_raises_regex(RuntimeError, "no baseline subevent"):
-        _select_dose([{"dose_cells": 8, "e1_evaluable": False}])
+    with np.testing.assert_raises_regex(RuntimeError, "no near-zero baseline subevent"):
+        _select_dose([{"dose_cells": 8, "e1_evaluable": False,
+                       "excess_spikes_early": 0}])
