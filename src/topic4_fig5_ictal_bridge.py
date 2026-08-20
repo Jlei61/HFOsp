@@ -189,19 +189,45 @@ def contact_frequency_against_base(contact_trace, dt_ms, landmarks, *, band_hz):
     }
 
 
+def rate_quantum_hz(rate_hz):
+    """Smallest positive step the stored rate can represent."""
+    unique = np.unique(np.asarray(rate_hz, float))
+    if len(unique) < 2:
+        return float("nan")
+    return float(np.min(np.diff(unique)))
+
+
 def population_rate_summary(rate_hz, dt_ms, landmarks):
-    """Spec 5.2 clause 3 plus the broad-band rate-envelope diagnostics."""
+    """Spec 5.2 clause 3 plus the broad-band rate-envelope diagnostics.
+
+    The spec's ratio is a median over ``W_early`` divided by a median over
+    ``t_base``. ``t_base`` is quiet by construction and the stored rate is
+    quantised, so in 11 of the 20 archived calibration runs the baseline median
+    is exactly zero. Flooring that denominator would make the clause pass with a
+    meaningless ratio of order 1e14 for every transitioning run, i.e. pass
+    vacuously. The ratio is therefore reported as unresolved in that case, the
+    clause abstains, and the mean-based ratio is reported beside it as the
+    quantity an alternative estimator would use.
+    """
     base = _slice(rate_hz, dt_ms, landmarks["t_base_ms"])
     early = _slice(rate_hz, dt_ms, landmarks["w_early_ms"])
     pre = _slice(rate_hz, dt_ms, landmarks["w_pre_ms"])
     if not len(base) or not len(early):
         raise NotEvaluableError("population-rate windows are empty")
     median_base = float(np.median(base))
+    resolvable = median_base > 0.0
     summary = {
         "median_rate_base_hz": median_base,
         "median_rate_early_hz": float(np.median(early)),
         "median_rate_pre_hz": float(np.median(pre)) if len(pre) else None,
-        "ratio_early_over_base": float(np.median(early)) / max(median_base, 1e-12),
+        "baseline_median_resolvable": bool(resolvable),
+        "baseline_zero_sample_fraction": float(np.mean(base <= 0.0)),
+        "rate_quantum_hz": rate_quantum_hz(rate_hz),
+        "ratio_early_over_base": (float(np.median(early)) / median_base
+                                  if resolvable else None),
+        "mean_ratio_early_over_base_diagnostic": (
+            float(np.mean(early)) / float(np.mean(base))
+            if float(np.mean(base)) > 0.0 else None),
         "ratio_early_over_pre": (float(np.median(early))
                                  / max(float(np.median(pre)), 1e-12)
                                  if len(pre) else None),
@@ -307,25 +333,41 @@ def qualify_model_ictal_v2(
 
     resolution = max(float(contact["frequency_resolution_hz"]),
                      float(spec["contact_centroid_shift_min_hz"]))
+    # three-valued: True passes, False fails, None means the archive cannot
+    # answer the clause. A None must never collapse into a pass.
     clauses = {
         "operational_detector_reached": True,
         "joint_broad_recruitment_duty": (
             duty["joint_duty"] >= float(spec["duty_threshold"])),
         "population_rate_ratio": (
+            None if rate["ratio_early_over_base"] is None else
             rate["ratio_early_over_base"] >= float(spec["population_rate_ratio_min"])),
         "contact_frequency_increased": (
             contact["primary_shift_hz"] >= resolution
             and contact["primary_ratio"] >= float(spec["contact_centroid_ratio_min"])),
         "numerically_safe": bool(finite and not simulator_error),
     }
-    eligible = all(clauses.values())
+    failing = [name for name, value in clauses.items() if value is False]
+    unresolved = [name for name, value in clauses.items() if value is None]
+    eligible = not failing and not unresolved
+    if failing:
+        status = NOT_ELIGIBLE
+    elif unresolved:
+        status = NOT_EVALUABLE
+    else:
+        status = ELIGIBLE
     return {
-        "status": ELIGIBLE if eligible else NOT_ELIGIBLE,
-        "eligible": bool(eligible),
+        "status": status,
+        "eligible": bool(eligible) if not unresolved else None,
         "onset_shift_ms": float(onset_shift_ms),
         "landmarks": landmarks,
         "clauses": clauses,
-        "failing_clauses": [name for name, value in clauses.items() if not value],
+        "failing_clauses": failing,
+        "unresolved_clauses": unresolved,
+        "missing_evidence": ([
+            "the population-rate median over t_base is zero at the stored "
+            "quantisation, so the spec's median ratio has no resolvable "
+            "denominator"] if "population_rate_ratio" in unresolved else []),
         "thresholds": {
             "duty": float(spec["duty_threshold"]),
             "activity": float(spec["activity_threshold"]),

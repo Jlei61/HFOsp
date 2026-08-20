@@ -140,6 +140,40 @@ def test_rate_reference_is_t_base_not_the_pre_onset_window(config):
     assert verdict["clauses"]["population_rate_ratio"] is True
 
 
+def test_zero_baseline_median_abstains_instead_of_passing_vacuously(config):
+    """t_base is quiet and the stored rate is quantised, so its median is often
+    exactly 0; a floored denominator would pass every transitioning run."""
+    time, f_e, f_sheet = _recruitment(0.95)
+    rate = _rate(base_hz=0.0, early_hz=300.0)
+    verdict = qualify_model_ictal_v2(
+        operational_onset_ms=ONSET, recruitment_time_ms=time, f_e=f_e,
+        f_sheet=f_sheet, f_sheet_provenance=_provenance(),
+        occupancy_audit=_occupancy(), rate_hz=rate, rate_dt_ms=DT,
+        contact_trace=_contact(), contact_dt_ms=DT, config=config)
+    assert verdict["status"] == NOT_EVALUABLE
+    assert verdict["eligible"] is None
+    assert verdict["unresolved_clauses"] == ["population_rate_ratio"]
+    assert verdict["population_rate"]["ratio_early_over_base"] is None
+    assert verdict["population_rate"]["baseline_median_resolvable"] is False
+    assert verdict["population_rate"][
+        "mean_ratio_early_over_base_diagnostic"] is None
+    with pytest.raises(NotEvaluableError):
+        require_model_ictal_eligible(verdict)
+
+
+def test_a_failing_clause_outranks_an_unresolved_one(config):
+    """A real failure is a failure even when another clause is unanswerable."""
+    time, f_e, f_sheet = _recruitment(0.10)
+    verdict = qualify_model_ictal_v2(
+        operational_onset_ms=ONSET, recruitment_time_ms=time, f_e=f_e,
+        f_sheet=f_sheet, f_sheet_provenance=_provenance(),
+        occupancy_audit=_occupancy(), rate_hz=_rate(base_hz=0.0), rate_dt_ms=DT,
+        contact_trace=_contact(), contact_dt_ms=DT, config=config)
+    assert verdict["status"] == NOT_ELIGIBLE
+    assert verdict["failing_clauses"] == ["joint_broad_recruitment_duty"]
+    assert verdict["unresolved_clauses"] == ["population_rate_ratio"]
+
+
 def test_sparse_bins_cannot_inflate_f_sheet(config):
     """A trace built on possibly-sparse bins is refused, never passed."""
     sparse = _occupancy(bin_mm=1.0)
