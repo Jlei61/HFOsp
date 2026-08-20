@@ -38,7 +38,8 @@ from src.topic4_fig5_motif_reuse import (  # noqa: E402
     within_shaft_label_permutation)
 
 
-def synthetic_edge_audit(seed=0, n_e=60, n_i=15, n_bins=3, n_distance_bins=4):
+def synthetic_edge_audit(seed=0, n_e=60, n_i=15, n_bins=3, n_distance_bins=4,
+                         weight_tolerance=0.02):
     import scipy.sparse as sp
     rng = np.random.default_rng(seed)
     n_total = n_e + n_i
@@ -69,8 +70,9 @@ def synthetic_edge_audit(seed=0, n_e=60, n_i=15, n_bins=3, n_distance_bins=4):
     permuted = permute_edge_weights(bins, n_e, positions,
                                     rng=np.random.default_rng(seed + 1),
                                     n_distance_bins=n_distance_bins)
-    report = audit_edge_permutation(bins, permuted, n_e, positions,
-                                    n_distance_bins=n_distance_bins)
+    report = audit_edge_permutation(
+        bins, permuted, n_e, positions, n_distance_bins=n_distance_bins,
+        weight_quantile_relative_tolerance=weight_tolerance)
     report["planted_motif_alignment_before"] = alignment(bins)
     report["planted_motif_alignment_after"] = alignment(permuted)
     report["motif_identity_destroyed"] = bool(
@@ -109,7 +111,7 @@ def contact_null_audit(config, draws=512, seed=0):
     }
 
 
-def frozen_graph_audit(config, seed, n_distance_bins):
+def frozen_graph_audit(config, seed, n_distance_bins, weight_tolerance=0.02):
     from src.topic4_zm_ictal_transition import build_substrate
     round_config = json.loads(
         (ROOT / config["immutable_inputs"]["round_config"]["path"]).read_text())
@@ -121,8 +123,10 @@ def frozen_graph_audit(config, seed, n_distance_bins):
     permuted = permute_edge_weights(
         original, substrate.n_e, positions,
         rng=np.random.default_rng(int(seed)), n_distance_bins=n_distance_bins)
-    report = audit_edge_permutation(original, permuted, substrate.n_e, positions,
-                                    n_distance_bins=n_distance_bins)
+    report = audit_edge_permutation(
+        original, permuted, substrate.n_e, positions,
+        n_distance_bins=n_distance_bins,
+        weight_quantile_relative_tolerance=weight_tolerance)
     report["seed"] = int(seed)
     report["n_edges"] = int(sum(matrix.nnz for matrix in original))
     report["n_distance_bins"] = int(n_distance_bins)
@@ -139,6 +143,8 @@ def main():
 
     config = load_audit_config(args.config)
     frozen = config["motif_reuse"]["frozen_permutations"]
+    tolerance = float(config["motif_reuse"]["edge_null_structural_contract"][
+        "weight_quantile_relative_tolerance"])
     report = {
         "status": config["status"],
         "frozen_permutation_counts": frozen,
@@ -151,10 +157,15 @@ def main():
             "applies_to": "the reuse-versus-time-to-transition trajectory only",
         },
         "learned_edge_gain_permutation": {
+            "structural_contract": config["motif_reuse"][
+                "edge_null_structural_contract"],
             "synthetic": synthetic_edge_audit(
                 seed=int(frozen["edge_gain_permutation"]["seed"]),
-                n_distance_bins=args.distance_bins),
+                n_distance_bins=args.distance_bins,
+                weight_tolerance=tolerance),
         },
+        "within_shaft_null_limitations": config["motif_reuse"][
+            "contact_null_limitations"],
         "matched_off_motif_node_sets": {
             "status": NOT_EVALUABLE,
             "reason": ("needs a node-level motif from a per-window recurrent-E "
@@ -171,7 +182,7 @@ def main():
     }
     if not args.skip_frozen_graph:
         report["learned_edge_gain_permutation"]["frozen_graph"] = frozen_graph_audit(
-            config, args.seed, args.distance_bins)
+            config, args.seed, args.distance_bins, weight_tolerance=tolerance)
 
     output_root = ROOT / config["output_root"]
     output_root.mkdir(parents=True, exist_ok=True)
@@ -181,8 +192,13 @@ def main():
     print(json.dumps({
         "synthetic_structural_pass": synthetic["all_structural_clauses_pass"],
         "synthetic_motif_destroyed": synthetic["motif_identity_destroyed"],
+        "synthetic_max_weight_quantile_deviation": synthetic[
+            "max_weight_quantile_relative_deviation"],
         "frozen_graph_structural_pass": report["learned_edge_gain_permutation"]
         .get("frozen_graph", {}).get("all_structural_clauses_pass"),
+        "frozen_graph_max_weight_quantile_deviation": report[
+            "learned_edge_gain_permutation"].get("frozen_graph", {}).get(
+                "max_weight_quantile_relative_deviation"),
         "contact_null_preserved": report["within_shaft_contact_permutation"][
             "per_shaft_recruitment_count_and_values_preserved"],
     }, indent=1))

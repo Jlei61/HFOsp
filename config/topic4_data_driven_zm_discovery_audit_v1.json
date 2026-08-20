@@ -5,7 +5,6 @@
   "not_blind_rationale": "The E1146 Fig.3 clinical target, the candidate morphology table and the 5% E-to-I trajectory were all viewed before this revision was written. Rewriting the selection rule cannot remove that exposure. No output of this round may be called BLIND, prospective, or patient-generalising.",
   "output_root": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/discovery_audit_v1",
   "supersedes_nothing": "The 2026-08-17 execution contract, config/topic4_data_driven_zm_ictal_transition_v1.json and every historical morphology artifact stay unchanged and readable at their original paths.",
-
   "governing_documents": {
     "spec": {
       "path": "docs/superpowers/specs/2026-08-20-topic4-data-driven-zm-model-ictal-qualification-and-fig3-bridge-design.md",
@@ -16,7 +15,6 @@
       "sha256": "6e479986b6bea2d981a6753ef1621aca78bbe57f5286c88d7c626c5217bf54da"
     }
   },
-
   "immutable_inputs": {
     "round_config": {
       "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
@@ -105,7 +103,6 @@
       "sha256": "3e8c7ddc1cb2579005e1c91c9752099e2ee7b4deb29828bfb036eb6af16da3fb"
     }
   },
-
   "candidate_inventory_roots": {
     "exact_carryover_and_pathway_arms": "results/topic4_sef_hfo/data_driven_zm_ictal_transition/workers",
     "calibrated_transition_candidates": [
@@ -123,7 +120,6 @@
       "results/topic4_sef_hfo/data_driven_zm_ictal_transition/fig5_workpoint_etoi005"
     ]
   },
-
   "exact_fig4_carryover": {
     "definition": "the frozen rev11-NLC substrate joint_04_control at E-to-E dose 1.0 and E-to-I dose 1.0, with the reference Z/M protocol activated and nothing else changed",
     "candidate_id": "joint_04_control",
@@ -133,37 +129,77 @@
     "tau_z": 5000.0,
     "tau_adp": 500.0,
     "eta_m": 0.007451594355587098,
-    "log_parameter_distance_coordinates": ["I_th_EI", "tau_z", "tau_adp", "eta_m", "E_to_E_dose", "E_to_I_dose"],
+    "log_parameter_distance_coordinates": [
+      "I_th_EI",
+      "tau_z",
+      "tau_adp",
+      "eta_m",
+      "E_to_E_dose",
+      "E_to_I_dose"
+    ],
     "zero_dose_epsilon": 0.001
   },
-
   "model_ictal_v2": {
     "name": "MODEL_ICTAL_ELIGIBLE_V2",
-    "t_base_ms": [500.0, 1000.0],
+    "t_base_ms": [
+      500.0,
+      1000.0
+    ],
     "t_ictal_offset_from_operational_onset_ms": -100.0,
-    "w_pre_ms_relative_to_t_ictal": [-500.0, 0.0],
-    "w_early_ms_relative_to_t_ictal": [100.0, 1100.0],
-    "w_freq_ms_relative_to_t_ictal": [500.0, 1000.0],
+    "w_pre_ms_relative_to_t_ictal": [
+      -500.0,
+      0.0
+    ],
+    "w_early_ms_relative_to_t_ictal": [
+      100.0,
+      1100.0
+    ],
+    "w_freq_ms_relative_to_t_ictal": [
+      500.0,
+      1000.0
+    ],
     "activity_threshold": 0.5,
     "duty_threshold": 0.8,
     "duty_rule": "joint: a W_early window counts only when F_E >= threshold AND F_sheet >= threshold in the same window",
     "population_rate_ratio_min": 2.0,
-    "contact_centroid_band_hz": [10.0, 250.0],
+    "contact_centroid_band_hz": [
+      10.0,
+      250.0
+    ],
     "contact_centroid_shift_min_hz": 5.0,
     "contact_centroid_ratio_min": 1.25,
     "sheet_bin_mm": 1.0,
     "sheet_recruited_bin_fraction": 0.5,
     "sheet_minimum_bin_occupancy": 20,
     "sensitivities": {
-      "duty": [0.7, 0.8, 0.9],
-      "activity": [0.4, 0.5, 0.6],
-      "bin_mm": [0.5, 1.0, 2.0],
-      "minimum_bin_occupancy": [10, 20, 40],
-      "onset_shift_ms": [-100.0, 0.0, 100.0]
+      "duty": [
+        0.7,
+        0.8,
+        0.9
+      ],
+      "activity": [
+        0.4,
+        0.5,
+        0.6
+      ],
+      "bin_mm": [
+        0.5,
+        1.0,
+        2.0
+      ],
+      "minimum_bin_occupancy": [
+        10,
+        20,
+        40
+      ],
+      "onset_shift_ms": [
+        -100.0,
+        0.0,
+        100.0
+      ]
     },
     "primary_verdict_is_fixed": "The primary verdict uses duty 0.8, activity 0.5, bin 1.0 mm and occupancy 20 only. Sensitivities are reported to expose boundary dependence and may never be substituted for the primary rule."
   },
-
   "repertoire_gate": {
     "name": "INTERICTAL_REPERTOIRE_RETAINED",
     "rule": "conjunctive over four clauses; identical to the historical contract, reference quantiles reused without refitting",
@@ -174,29 +210,74 @@
     "reference_note": "48 archived Z/M-off runs, seeds 1561-1572",
     "displayed_event_rule": "the latest returned pre-onset event that satisfies the frozen classifier filter; the word clean is a diagnostic label, never a selection criterion"
   },
-
   "motif_reuse": {
     "name": "MOTIF_REUSE_ABOVE_MATCHED_NULL",
     "gate": "exploratory: observed network-level statistic must exceed the q95 of its matched null",
     "aggregation": "each network carries equal weight; within-network event resampling quantifies within-network uncertainty only",
-    "early_ictal_first_passage_window_ms_relative_to_t_ictal": [0.0, 500.0],
+    "early_ictal_first_passage_window_ms_relative_to_t_ictal": [
+      0.0,
+      500.0
+    ],
     "frozen_permutations": {
-      "within_shaft_contact_permutation": {"draws": 4096, "seed": 20260820},
-      "onset_circular_shift": {"draws": 4096, "seed": 20260821},
-      "edge_gain_permutation": {"draws": 1024, "seed": 20260822},
-      "matched_off_motif_node_sets": {"draws": 1024, "seed": 20260823}
+      "within_shaft_contact_permutation": {
+        "draws": 4096,
+        "seed": 20260820
+      },
+      "onset_circular_shift": {
+        "draws": 4096,
+        "seed": 20260821
+      },
+      "edge_gain_permutation": {
+        "draws": 1024,
+        "seed": 20260822
+      },
+      "matched_off_motif_node_sets": {
+        "draws": 1024,
+        "seed": 20260823
+      }
     },
     "declared_before_scores": "These counts and seeds are frozen in this file before any candidate motif-reuse score has been computed in this round.",
-    "network_bootstrap": {"draws": 4096, "seed": 20260824}
+    "network_bootstrap": {
+      "draws": 4096,
+      "seed": 20260824
+    },
+    "edge_null_structural_contract": {
+      "weight_quantile_relative_tolerance": 0.02,
+      "quantiles": [
+        0.05,
+        0.5,
+        0.95
+      ],
+      "stratification": "pathway x distance bin, the same strata the permutation uses",
+      "joint_contract": [
+        "incoming EE budget",
+        "incoming E-to-I budget",
+        "source degree",
+        "target degree"
+      ],
+      "tolerance_provenance": "set at 2 percent AFTER both audits had been run, because the clause was missing from the first implementation. It is disclosed as a post-observation choice: the synthetic fixture fails it and the frozen graph passes it, and that difference is the finding, not a tuning outcome."
+    },
+    "contact_null_limitations": {
+      "matches": [
+        "shaft identity",
+        "per-shaft recruitment count",
+        "the multiset of times inside each shaft"
+      ],
+      "does_not_match": [
+        "distance from the contact to the high-excitability core",
+        "the contact's local baseline excitability h",
+        "any monotone spatial gradient along a shaft",
+        "local connection strength at the contact"
+      ],
+      "consequence": "the contact families measure order similarity under correct spatial registration; they cannot be reported as motif reuse"
+    }
   },
-
   "allowed_pre_freeze_inputs": [
     "Fig.4 interictal train and reference artifacts and the frozen direction classifier",
     "model-internal qualification, repertoire, reuse and numerical-safety metrics",
     "parameter-neighbourhood and seed robustness of the model trajectories",
     "log-parameter distance from the exact Fig.4 carry-over point"
   ],
-
   "forbidden_pre_freeze_inputs": {
     "rationale": "spec section 8: clinical ictal endpoints are evaluation endpoints, never candidate-selection variables. A producer that touches any of these before WORKPOINT_FROZEN.json exists must fail hard, not warn.",
     "path_prefixes": [
@@ -222,7 +303,6 @@
     ],
     "note": "results/interictal_propagation_masked/** and results/spatial_modulation/propagation_geometry/** stay ALLOWED: they carry the patient's interictal timing field, which is the Fig.4 training input, not an ictal endpoint."
   },
-
   "analyst_exposure": {
     "status": "NOT_BLIND",
     "already_viewed": [
@@ -232,6 +312,5 @@
     ],
     "consequence": "Every artifact of this round is labelled DEVELOPMENT_ONLY_RETROSPECTIVE_DISCOVERY_AUDIT. A prospective discovery claim requires a patient or sealed seizure unit that has not been opened before the work point is frozen."
   },
-
   "claim_boundary": "Development-only, retrospective, non-blind. Forbidden: blind discovery; patient generalisation; patient causal mechanism; clinical seizure reproduction; model current equated with SEEG voltage; model Hz equated with patient Hz; a representative seed treated as network-ensemble reproducibility."
 }

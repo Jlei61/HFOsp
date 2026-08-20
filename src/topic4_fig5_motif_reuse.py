@@ -302,9 +302,33 @@ def permute_edge_weights(ampa_by_delay, n_e, positions_all, *, rng, n_distance_b
     return permuted
 
 
+def _quantile_deviation(before, after, quantiles=(0.05, 0.5, 0.95)):
+    before, after = np.asarray(before, float), np.asarray(after, float)
+    if not len(before) or not len(after):
+        return {"quantiles": list(quantiles), "before": [], "after": [],
+                "max_relative_deviation": float("nan")}
+    qb = [float(np.quantile(before, q)) for q in quantiles]
+    qa = [float(np.quantile(after, q)) for q in quantiles]
+    deviation = [abs(a - b) / max(abs(b), 1e-12) for a, b in zip(qb, qa)]
+    return {"quantiles": list(quantiles), "before": qb, "after": qa,
+            "relative_deviation": deviation,
+            "max_relative_deviation": float(max(deviation))}
+
+
 def audit_edge_permutation(original, permuted, n_e, positions_all, *,
-                           n_distance_bins=8, tolerance=1e-9):
-    """Everything the null must preserve, checked as values not as intent."""
+                           n_distance_bins=8, tolerance=1e-9,
+                           weight_quantile_relative_tolerance=0.02):
+    """Everything the null must preserve, checked as values not as intent.
+
+    The weight distribution is part of the contract, not a diagnostic. A plain
+    within-stratum permutation preserves it exactly, but the exact target-wise
+    budget renormalisation that follows does not: where incoming budgets are
+    heterogeneous, rescaling per target moves the marginal weight distribution.
+    Reporting those quantiles without gating on them let a permutation whose
+    median weight moved by 42% still be called structure-preserving, so the
+    deviation is now stratified by pathway and distance bin and enters the
+    conjunction.
+    """
     from src.topic4_core_connectivity import _hash_sparse_bins
     from src.topic4_local_connectivity import _incoming_by_pathway
 
@@ -363,14 +387,51 @@ def audit_edge_permutation(original, permuted, n_e, positions_all, *,
         "quantiles": [0.05, 0.5, 0.95],
         "original": [float(np.quantile(data_a, q)) for q in (0.05, 0.5, 0.95)],
         "permuted": [float(np.quantile(data_b, q)) for q in (0.05, 0.5, 0.95)],
+        **_quantile_deviation(data_a, data_b),
     }
+
+    # stratified exactly as the permutation is: pathway x distance bin
+    pathway_a = (rows_a >= n_e).astype(np.int64)
+    strata = {}
+    worst = 0.0
+    for pathway_id, name in ((0, "E_to_E"), (1, "E_to_I")):
+        mask = pathway_a == pathway_id
+        if not np.any(mask):
+            continue
+        local_distance = distance[mask]
+        edges = np.quantile(local_distance,
+                            np.linspace(0.0, 1.0, n_distance_bins + 1))
+        edges[0] -= 1e-9
+        edges[-1] += 1e-9
+        which = np.clip(np.digitize(local_distance, edges[1:-1]), 0,
+                        n_distance_bins - 1)
+        for stratum in range(n_distance_bins):
+            members = np.flatnonzero(mask)[which == stratum]
+            if len(members) < 2:
+                continue
+            row = _quantile_deviation(data_a[members], data_b[members])
+            strata[f"{name}_d{stratum}"] = row
+            worst = max(worst, float(row["max_relative_deviation"]))
+    report["weight_quantiles_by_pathway_and_distance_bin"] = strata
+    report["weight_quantile_relative_tolerance"] = float(
+        weight_quantile_relative_tolerance)
+    report["max_weight_quantile_relative_deviation"] = float(max(
+        worst, float(report["weight_distribution"]["max_relative_deviation"])))
+    report["weight_distribution_preserved"] = bool(
+        report["max_weight_quantile_relative_deviation"]
+        <= float(weight_quantile_relative_tolerance))
+    report["budget_and_degree_joint_contract"] = bool(
+        report["E_to_E_incoming_budget_preserved"]
+        and report["E_to_I_incoming_budget_preserved"]
+        and report["source_degree_identical"]
+        and report["target_degree_identical"])
+
     report["all_structural_clauses_pass"] = bool(
         report["topology_unchanged"] and report["n_delay_bins_unchanged"]
         and report["delay_assignment_unchanged"]
         and report["edge_index_sets_identical"]
-        and report["source_degree_identical"] and report["target_degree_identical"]
-        and report["E_to_E_incoming_budget_preserved"]
-        and report["E_to_I_incoming_budget_preserved"]
+        and report["budget_and_degree_joint_contract"]
+        and report["weight_distribution_preserved"]
         and report["data_changed"])
     return report
 
@@ -395,6 +456,68 @@ def _median_event_rank_agreement(event_ranks, early_ranks):
     finite = values[np.isfinite(values)]
     coverage = [row["n_common"] for row in rows]
     return (float(np.median(finite)) if len(finite) else float("nan")), rows, coverage
+
+
+NULL_MATCHES = ["shaft identity", "per-shaft recruitment count",
+                "the multiset of times inside each shaft"]
+NULL_DOES_NOT_MATCH = [
+    "distance from the contact to the high-excitability core",
+    "the contact's local baseline excitability h",
+    "any monotone spatial gradient along a shaft",
+    "local connection strength at the contact",
+]
+CONTACT_CLAIM_BOUNDARY = (
+    "This is contact-ORDER similarity between a trajectory's interictal events "
+    "and its own early high state, above a shaft-matched relabelling. Because "
+    "the null does not match distance to core, local excitability or a monotone "
+    "along-shaft gradient, it cannot separate 'the early dynamics reuse the "
+    "interictal propagation motif' from 'both orders are dictated by the same "
+    "fixed spatial gradient'. It may not be reported as motif reuse.")
+
+
+def contact_geometry_diagnostic(contact_xy, positions_e, h_e, event_ranks,
+                                early_ranks, *, local_radius_mm=1.0):
+    """How much of the order is explained by a fixed geometry alone.
+
+    Not a null and not a control: a null that matched these covariates has not
+    been built. This reports whether the confound the shaft-matched null leaves
+    open is actually present in this substrate, so the size of the gap is a
+    number rather than a caveat.
+    """
+    contact_xy = np.asarray(contact_xy, float)
+    positions = np.asarray(positions_e, float)
+    h_e = np.asarray(h_e, float)
+    weight = h_e / max(float(h_e.sum()), 1e-12)
+    core_xy = np.asarray([float(np.dot(weight, positions[:, 0])),
+                          float(np.dot(weight, positions[:, 1]))])
+    distance = np.linalg.norm(contact_xy - core_xy[None, :], axis=1)
+    local_h = np.asarray([
+        float(np.mean(h_e[np.linalg.norm(positions - point[None, :], axis=1)
+                          <= float(local_radius_mm)]))
+        if np.any(np.linalg.norm(positions - point[None, :], axis=1)
+                  <= float(local_radius_mm)) else float("nan")
+        for point in contact_xy])
+    event_ranks = np.atleast_2d(np.asarray(event_ranks, float))
+    per_event = [spearman_with_coverage(row, distance)["rho"]
+                 for row in event_ranks]
+    finite = np.asarray([v for v in per_event if np.isfinite(v)], float)
+    return {
+        "core_centroid_xy_mm": core_xy.tolist(),
+        "local_radius_mm": float(local_radius_mm),
+        "contact_distance_to_core_mm": distance.tolist(),
+        "contact_local_h": local_h.tolist(),
+        "median_event_rank_vs_distance_spearman": (
+            float(np.median(finite)) if len(finite) else float("nan")),
+        "early_rank_vs_distance_spearman": spearman_with_coverage(
+            early_ranks, distance)["rho"],
+        "early_rank_vs_local_h_spearman": spearman_with_coverage(
+            early_ranks, local_h)["rho"],
+        "interpretation": (
+            "if both the event ranks and the early ranks track distance to core, "
+            "the shaft-matched agreement is at least partly a fixed-geometry "
+            "effect and the contact-order result cannot be attributed to a "
+            "reused propagation motif"),
+    }
 
 
 def network_rank_reuse(event_ranks, early_ranks, shaft_ids, *, n_draws, seed):
@@ -427,6 +550,9 @@ def network_rank_reuse(event_ranks, early_ranks, shaft_ids, *, n_draws, seed):
         "median_common_contacts": float(np.median(coverage)),
         "min_common_contacts": int(np.min(coverage)),
         "null": _null_summary(observed, finite, n_draws),
+        "null_matches": list(NULL_MATCHES),
+        "null_does_not_match": list(NULL_DOES_NOT_MATCH),
+        "claim_boundary": CONTACT_CLAIM_BOUNDARY,
     }
 
 
@@ -469,6 +595,9 @@ def network_precedence_reuse(event_values, early_values, shaft_ids, *, n_draws,
         "median_pairs_per_event": float(np.median(
             [row["n_pairs"] for row in rows])),
         "null": _null_summary(observed, finite, n_draws),
+        "null_matches": list(NULL_MATCHES),
+        "null_does_not_match": list(NULL_DOES_NOT_MATCH),
+        "claim_boundary": CONTACT_CLAIM_BOUNDARY,
     }
     if mode_labels is not None:
         modes = {}

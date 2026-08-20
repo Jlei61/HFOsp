@@ -159,7 +159,6 @@ def test_edge_permutation_preserves_structure_and_destroys_the_motif():
 
     report = audit_edge_permutation(bins, permuted, n_e, positions,
                                     n_distance_bins=4)
-    assert report["all_structural_clauses_pass"] is True
     assert report["topology_unchanged"] is True
     assert report["edge_index_sets_identical"] is True
     assert report["source_degree_identical"] is True
@@ -167,6 +166,7 @@ def test_edge_permutation_preserves_structure_and_destroys_the_motif():
     assert report["data_changed"] is True
     assert report["E_to_E_max_abs_incoming_error"] < 1e-9
     assert report["E_to_I_max_abs_incoming_error"] < 1e-9
+    assert report["budget_and_degree_joint_contract"] is True
 
 
 def test_edge_permutation_audit_flags_a_broken_null():
@@ -207,3 +207,24 @@ def test_precomputed_target_matrix_changes_nothing():
     cached = precedence_agreement(reference, target,
                                   target_matrix=precedence_matrix(target))
     assert plain == cached
+
+
+def test_weight_distribution_is_a_clause_not_a_diagnostic():
+    """Renormalisation after permutation moves the marginal weights; the audit
+    must fail on that rather than report it beside a passing verdict."""
+    bins, positions, _, n_e = _synthetic_graph()
+    permuted = permute_edge_weights(bins, n_e, positions,
+                                    rng=np.random.default_rng(11),
+                                    n_distance_bins=4)
+    strict = audit_edge_permutation(bins, permuted, n_e, positions,
+                                    n_distance_bins=4,
+                                    weight_quantile_relative_tolerance=0.02)
+    assert strict["max_weight_quantile_relative_deviation"] > 0.02
+    assert strict["weight_distribution_preserved"] is False
+    assert strict["all_structural_clauses_pass"] is False
+    assert strict["weight_quantiles_by_pathway_and_distance_bin"]
+    loose = audit_edge_permutation(bins, permuted, n_e, positions,
+                                   n_distance_bins=4,
+                                   weight_quantile_relative_tolerance=10.0)
+    assert loose["weight_distribution_preserved"] is True
+    assert loose["all_structural_clauses_pass"] is True
