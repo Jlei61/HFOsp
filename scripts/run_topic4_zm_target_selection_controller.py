@@ -173,6 +173,12 @@ def main():
             "next_action": "bounded adaptation refinement required; selection not launched",
         })
         return
+    null_path = OUT / "selection_aware_null.json"
+    if not null_path.exists():
+        subprocess.run([
+            PYTHON, "scripts/compute_topic4_zm_bridge_selection_null.py",
+            "--config", str(CONFIG.relative_to(ROOT)), "--draws", "4096",
+        ], check=True, cwd=ROOT)
     selection_seeds = list(map(int, config["fit"]["selection_seeds"]))
     _atomic(status_path, {"status": "SELECTION_LAUNCHING", "candidates": candidates,
                           "seeds": selection_seeds, "commit": _git_head()})
