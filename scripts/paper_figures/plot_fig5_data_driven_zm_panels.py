@@ -24,6 +24,7 @@ from scripts.paper_figures.plot_fig5_data_driven_zm_main import (
     _plot_event_order,
     _plot_readout,
     _plot_trajectory,
+    _require_sustained_runaway,
 )
 
 
@@ -51,6 +52,7 @@ def main():
     metadata = json.loads(replay_path.with_suffix(".json").read_text())
     if not metadata["verification_against_archived_run"]["all_match"]:
         raise RuntimeError("the Figure 5 replay does not match the archived run")
+    morphology = _require_sustained_runaway(metadata)
     config = json.loads((ROOT / args.config).read_text())
     onset_ms = float(metadata["model_ictal_onset_ms"])
     extent = (-float(args.extent_mm), float(args.extent_mm))
@@ -61,7 +63,7 @@ def main():
     out_dir.mkdir(parents=True, exist_ok=True)
 
     fig, ax = plt.subplots(figsize=(12.6, 3.5))
-    _, rate_ax = _plot_readout(ax, replay, onset_ms)
+    _, rate_ax = _plot_readout(ax, replay, onset_ms, morphology)
     _panel_label(rate_ax, "A", x=-0.055, y=1.35)
     _save(fig, out_dir / "fig5-panel-a-readout.png")
 

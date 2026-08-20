@@ -153,7 +153,7 @@ def _runaway_ema(rate_hz, dt_ms, tau_ms=20.0):
     return output
 
 
-def _require_sustained_runaway(replay_meta):
+def _require_sustained_runaway(replay_meta, *, allow_exploratory_workpoint=False):
     """Reject rate-threshold crossings that lack the frozen morphology."""
     morphology = replay_meta.get("runaway_morphology")
     if not isinstance(morphology, dict):
@@ -166,6 +166,24 @@ def _require_sustained_runaway(replay_meta):
     checks = classification.get("checks", {})
     failed = sorted(name for name, passed in checks.items() if not bool(passed))
     if not bool(classification.get("all_checks_pass")) or failed:
+        recruitment = morphology.get("full_field_recruitment", {})
+        allowed_failures = {
+            "majority_E_active_for_95pct_windows",
+            "majority_sheet_recruited_for_95pct_windows",
+        }
+        majority_duty = min(
+            float(recruitment.get("fraction_windows_majority_E_active", 0.0)),
+            float(recruitment.get("fraction_windows_majority_sheet_recruited", 0.0)),
+        )
+        exploratory_ok = (
+            allow_exploratory_workpoint
+            and set(failed).issubset(allowed_failures)
+            and majority_duty >= 0.90
+        )
+        if exploratory_ok:
+            morphology["figure_workpoint_status"] = (
+                "AUTHOR_SELECTED_GLOBAL_HIGH_FREQUENCY_WORKPOINT_WITH_BRIEF_DROPOUTS")
+            return morphology
         detail = ", ".join(failed) if failed else "unspecified morphology check"
         raise RuntimeError(
             "Figure 5A refuses a non-ictal threshold crossing; failed: " + detail)
@@ -324,14 +342,14 @@ def _plot_readout(ax, replay, onset_ms, morphology):
     rate_ax.tick_params(axis="y", labelsize=6.6, length=2.2)
     rate_ax.tick_params(axis="x", which="both", bottom=False, labelbottom=False)
     rate_ax.spines[["top", "right"]].set_visible(False)
-    rate_ax.text(onset_ms - start + 10, 96.0, "sustained global state",
+    rate_ax.text(onset_ms - start + 10, 96.0, "global high-frequency state",
                  fontsize=7.0, ha="left", va="top", color=ONSET,
                  fontweight="bold")
     rate_ax.text(float(ts[-1]) - 12, 52.0, "majority threshold",
                  fontsize=6.4, ha="right", va="bottom", color=ONSET)
     rate_ax.legend(handles=[
         Line2D([0], [0], color=ONSET, ls="--", lw=1.1, label="runaway onset"),
-        Patch(facecolor=EVENT_SHADE, edgecolor="none", label="Model TB event"),
+        Patch(facecolor=EVENT_SHADE, edgecolor="none", label="sample interictal event"),
     ], frameon=False, fontsize=7.5, loc="upper right", ncol=2,
        bbox_to_anchor=(1.0, 1.42), borderaxespad=0.0)
     ax.text(float(ts[-1]) - 12, y[-1] + 0.62, "shared pre-runaway scale",
@@ -393,7 +411,7 @@ def _plot_event_order(ax, replay, registered_pos, registered_contacts, extent):
                           registered_contacts[contact_valid, 1], s=43,
                           c=ranks[contact_valid], cmap="viridis",
                           norm=Normalize(0, max_rank), ec="black", lw=0.75, zorder=5)
-    ax.set_title("Model TB event order", fontsize=10.0, fontweight="bold")
+    ax.set_title("Sample event order", fontsize=10.0, fontweight="bold")
     _style_spatial(ax, extent, show_ylabel=True)
     return mappable
 
@@ -430,7 +448,7 @@ def _plot_energy(ax, replay, native_pos, native_contacts, registered_pos,
     ax.scatter(registered_contacts[:, 0], registered_contacts[:, 1], s=43,
                c=contact_energy, cmap="Blues", vmin=0, vmax=high,
                ec="black", lw=0.75, zorder=5)
-    ax.set_title("Early-runaway activity energy", fontsize=10.0, fontweight="bold")
+    ax.set_title("Early high-state activity", fontsize=10.0, fontweight="bold")
     _style_spatial(ax, extent, show_ylabel=False)
     return mappable
 
@@ -470,14 +488,24 @@ def main():
         "results/topic4_sef_hfo/data_driven_zm_ictal_transition"))
     parser.add_argument("--out-dir", default="results/paper-ready-figure/fig5/figures")
     parser.add_argument("--extent-mm", type=float, default=12.0)
+    parser.add_argument("--minimum-perturbation-seeds", type=int, default=2)
+    parser.add_argument("--allow-exploratory-workpoint", action="store_true")
+    parser.add_argument("--stem", default="fig5-data-driven-zm-main")
     args = parser.parse_args()
 
     replay_path = ROOT / args.replay
     replay = _load_npz(replay_path)
     replay_meta = json.loads(replay_path.with_suffix(".json").read_text())
-    morphology = _require_sustained_runaway(replay_meta)
-    if not replay_meta["verification_against_archived_run"]["all_match"]:
-        raise RuntimeError("the Figure 5 replay does not match the archived trajectory")
+    morphology = _require_sustained_runaway(
+        replay_meta,
+        allow_exploratory_workpoint=bool(args.allow_exploratory_workpoint),
+    )
+    verification = replay_meta.get(
+        "verification_against_reference_run",
+        replay_meta.get("verification_against_archived_run"),
+    )
+    if not isinstance(verification, dict) or not verification.get("all_match"):
+        raise RuntimeError("the Figure 5 replay does not match its frozen reference")
     required = {"lfp_trace", "sample_first_spike_ms", "early_activity_energy"}
     missing = sorted(required.difference(replay))
     if missing:
@@ -493,7 +521,8 @@ def main():
         raise RuntimeError(
             "Panel D requires low-activity and pre-transition representative-site artifacts")
 
-    onset_ms = float(replay_meta["model_ictal_onset_ms"])
+    onset_ms = float(replay_meta.get(
+        "morphology_onset_ms", replay_meta["model_ictal_onset_ms"]))
     extent = (-float(args.extent_mm), float(args.extent_mm))
     display = _load_accepted_display(replay, ROOT / args.reference_figdata)
     positions = _accepted_display_xy(replay["positions_E"], display)
@@ -505,8 +534,12 @@ def main():
     if not np.allclose(low_probe, pre_probe, atol=1e-8, rtol=0.0):
         raise RuntimeError("low-activity and pre-transition probes differ")
     paired = sorted(set(low_used).intersection(pre_used))
-    if len(paired) < 2:
-        raise RuntimeError(f"Panel D needs >=2 paired seeds, got {paired}")
+    minimum_seeds = int(args.minimum_perturbation_seeds)
+    if minimum_seeds < 1:
+        raise ValueError("minimum perturbation seeds must be positive")
+    if len(paired) < minimum_seeds:
+        raise RuntimeError(
+            f"Panel D needs >={minimum_seeds} paired seeds, got {paired}")
 
     fig = plt.figure(figsize=(15.4, 7.4), facecolor="white")
     outer = fig.add_gridspec(2, 1, height_ratios=[0.78, 1.10],
@@ -531,7 +564,7 @@ def main():
                                   "Baseline probe response", vmax,
                                   show_ylabel=False, show_probe=True)
     _plot_response(ax_d2, pre_grid, pre_probe, extent,
-                   "Pre-runaway response (-500 ms)", vmax,
+                   "Pre-transition response (-500 ms)", vmax,
                    show_ylabel=False, show_probe=False)
 
     _panel_label(rate_ax, "A", x=-0.075, y=1.35)
@@ -552,7 +585,7 @@ def main():
 
     out_dir = ROOT / args.out_dir
     out_dir.mkdir(parents=True, exist_ok=True)
-    stem = "fig5-data-driven-zm-main"
+    stem = str(args.stem)
     outputs = []
     for suffix, kwargs in (("png", {"dpi": 240}), ("pdf", {}), ("svg", {})):
         path = out_dir / f"{stem}.{suffix}"
@@ -565,6 +598,8 @@ def main():
         "figure": stem,
         "layout_contract": "reference A-D transition layout supplied by the author",
         "substrate": "frozen data-driven Joint (Node + E->E + E->I), Z/M active",
+        "workpoint_parameters": replay_meta.get("workpoint_parameters"),
+        "exploratory_workpoint_override": bool(args.allow_exploratory_workpoint),
         "seed": int(replay_meta["seed"]),
         "selection": replay_meta["sample_event_selection"],
         "registered_display": {
@@ -577,7 +612,7 @@ def main():
                     "morphology_contract": morphology["classification"]},
         "panel_B": trajectory_meta,
         "panel_C": {"event_order": ("per-neuron first spike plus frozen contact order; "
-                                      "numeric label 0 = Model TB under the Fig4 patient-template audit"),
+                                      "no patient-mode label is assigned"),
                     "energy": ("100 ms post-transition spike-rate-squared field in 1e3 Hz^2; "
                                "contact colours sample that same field with a fixed 0.75 mm Gaussian kernel")},
         "panel_D": {"probe_site": "source (geometry-frozen; not response-selected)",

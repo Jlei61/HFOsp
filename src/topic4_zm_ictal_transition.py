@@ -118,6 +118,18 @@ def _gain(pre, post):
     return out
 
 
+def dose_local_connectivity_coefficients(coefficients, *, ee_dose=1.0,
+                                         etoi_dose=1.0):
+    """Scale the two learned pathway rows without changing their direction."""
+    values = np.asarray(coefficients, float)
+    if values.ndim != 2 or values.shape[0] != 2:
+        raise ValueError("local connectivity coefficients must have shape (2, n)")
+    doses = np.asarray([ee_dose, etoi_dose], float)
+    if not np.all(np.isfinite(doses)) or np.any(doses < 0.0):
+        raise ValueError("pathway doses must be finite and non-negative")
+    return values.copy() * doses[:, None]
+
+
 def _cache_record(cache_hit, cache_source):
     """Always carry the pickle hash. ``_load_network`` only reports
     ``cache_sha256`` on the cache-HIT path, so a freshly built network would
@@ -130,7 +142,8 @@ def _cache_record(cache_hit, cache_source):
     return record
 
 
-def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=None):
+def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=None,
+                    ee_dose=1.0, etoi_dose=1.0):
     """Reconstruct one frozen arm on one network seed.
 
     ``field_transform`` is a square-symmetry element name; when given, the node
@@ -212,6 +225,8 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         query_e = inverse_query_positions(positions, field_transform, L=engine["L"])
         query_i = inverse_query_positions(positions_i, field_transform, L=engine["L"])
         coefficients_eff = transform_flow_coefficients(coefficients, field_transform)
+    coefficients_eff = dose_local_connectivity_coefficients(
+        coefficients_eff, ee_dose=ee_dose, etoi_dose=etoi_dose)
     h_e, h_i, field_query_audit = continuous_field_h_with_queries(
         node_candidate["coefficients"], query_e, query_i,
         n_basis=node_candidate["n_basis"], degree=node_candidate["degree"],
@@ -275,6 +290,8 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         field_transform=field_transform,
         extras={"field_query_audit": field_query_audit, "cmrun": cmrun,
                 "placement": reg, "candidate": candidate,
+                "pathway_dose": {"E_to_E": float(ee_dose),
+                                   "E_to_I": float(etoi_dose)},
                 "contact_contract": contract, "manifest": manifest},
     )
 

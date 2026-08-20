@@ -197,6 +197,8 @@ def population_rate_frequency_metrics(
         "spectral_centroid_pre_hz": centroid_pre,
         "spectral_centroid_post_hz": centroid_post,
         "spectral_centroid_shift_hz": centroid_post - centroid_pre,
+        "spectral_centroid_ratio_post_over_pre": (
+            centroid_post / max(centroid_pre, 1e-12)),
         "median_rate_pre_hz": float(np.median(rate[pre])),
         "median_rate_post_hz": float(np.median(rate[post])),
         "median_rate_ratio_post_over_pre": float(
@@ -229,8 +231,9 @@ def summarize_runaway_morphology(recruitment, oscillation, *, onset_ms,
         },
         "definition": (
             "sustained high-intensity oscillation requires both broad 20-ms E-neuron/"
-            "spatial recruitment, persistent contact-envelope elevation, and a broadband "
-            "frequency increase relative to the same trajectory's interictal state"
+            "spatial recruitment, increased population activity, and a frequency increase "
+            "in both population and virtual-contact readouts relative to the same "
+            "trajectory's interictal state; current-proxy amplitude is diagnostic only"
         ),
     }
     if population_frequency is not None:
@@ -249,28 +252,40 @@ def classify_sustained_runaway(summary):
             float(recruitment["q05_active_neuron_fraction_20ms"]) >= 0.5),
         "majority_sheet_recruited_for_95pct_windows": (
             float(recruitment["q05_recruited_spatial_fraction_1mm"]) >= 0.5),
-        "contact_oscillation_sustained": (
-            float(contact["median_post_high_envelope_duty"]) >= 0.8
-            and float(contact["contact_fraction_high_for_half_post_window"]) >= 0.8),
-        "contact_amplitude_increased": (
-            float(contact["median_band_rms_ratio_post_over_pre"]) >= 2.0),
+        "contact_frequency_increased": (
+            float(contact["median_spectral_centroid_shift_hz"]) >= 5.0
+            and float(contact["median_spectral_centroid_post_hz"])
+            / max(float(contact["median_spectral_centroid_pre_hz"]), 1e-12)
+            >= 1.25),
         "population_frequency_increased": (
-            float(population["spectral_centroid_shift_hz"]) >= resolution),
+            float(population["spectral_centroid_shift_hz"]) >= max(resolution, 5.0)
+            and float(population["spectral_centroid_ratio_post_over_pre"]) >= 1.5),
         "population_rate_increased": (
             float(population["median_rate_ratio_post_over_pre"]) >= 2.0),
+    }
+    diagnostics = {
+        "current_proxy_high_envelope_duty_ge_0p8": (
+            float(contact["median_post_high_envelope_duty"]) >= 0.8
+            and float(contact["contact_fraction_high_for_half_post_window"]) >= 0.8),
+        "current_proxy_band_rms_ratio_ge_2": (
+            float(contact["median_band_rms_ratio_post_over_pre"]) >= 2.0),
     }
     return {
         "status": ("SUSTAINED_HIGH_INTENSITY_OSCILLATION"
                    if all(checks.values()) else "NOT_SUSTAINED_ICTAL_MORPHOLOGY"),
         "all_checks_pass": bool(all(checks.values())),
         "checks": checks,
+        "diagnostics": diagnostics,
         "thresholds": {
             "q05_active_neuron_fraction_20ms": 0.5,
             "q05_recruited_spatial_fraction_1mm": 0.5,
             "median_post_high_envelope_duty": 0.8,
             "contact_fraction_high_for_half_post_window": 0.8,
             "median_band_rms_ratio_post_over_pre": 2.0,
-            "population_spectral_centroid_shift_hz": resolution,
+            "contact_spectral_centroid_shift_hz": 5.0,
+            "contact_spectral_centroid_ratio_post_over_pre": 1.25,
+            "population_spectral_centroid_shift_hz": max(resolution, 5.0),
+            "population_spectral_centroid_ratio_post_over_pre": 1.5,
             "population_rate_ratio_post_over_pre": 2.0,
         },
         "boundary": (

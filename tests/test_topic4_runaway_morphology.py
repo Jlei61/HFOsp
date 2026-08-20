@@ -67,18 +67,23 @@ def test_classification_requires_broad_sustained_and_faster_state():
             "q05_recruited_spatial_fraction_1mm": 0.8,
         },
         "contact_oscillation": {
-            "median_post_high_envelope_duty": 0.9,
-            "contact_fraction_high_for_half_post_window": 0.9,
-            "median_band_rms_ratio_post_over_pre": 3.0,
+            "median_post_high_envelope_duty": 0.1,
+            "contact_fraction_high_for_half_post_window": 0.0,
+            "median_band_rms_ratio_post_over_pre": 0.8,
+            "median_spectral_centroid_pre_hz": 40.0,
+            "median_spectral_centroid_post_hz": 90.0,
+            "median_spectral_centroid_shift_hz": 50.0,
         },
         "population_rate_frequency": {
             "frequency_resolution_hz": 2.0,
             "spectral_centroid_shift_hz": 20.0,
+            "spectral_centroid_ratio_post_over_pre": 2.0,
             "median_rate_ratio_post_over_pre": 3.0,
         },
     }
     accepted = classify_sustained_runaway(summary)
     assert accepted["all_checks_pass"]
+    assert not accepted["diagnostics"]["current_proxy_band_rms_ratio_ge_2"]
     summary["population_rate_frequency"]["spectral_centroid_shift_hz"] = -1.0
     rejected = classify_sustained_runaway(summary)
     assert not rejected["all_checks_pass"]

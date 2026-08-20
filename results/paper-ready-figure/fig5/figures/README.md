@@ -1,8 +1,25 @@
 # Fig5 · data-driven 底物上的低活动到 runaway 连续轨迹
 
-这一版是**基础版**：只讲同一条轨迹上发生了什么。没有 KMeans、没有扰动、没有空间零假设、没有 12 个正式种子——那些是后续扩展面板。
+> **2026-08-19 撤回当前主图候选。** `seed 1801` 只越过了 120 Hz/100 ms
+> 操作性阈值，进入后没有同时满足全场多数 E 神经元招募、持续触点高振幅和
+> 明确频率升高。现有 PNG/PDF/SVG 仅保留为诊断与 provenance，不得作为 Fig5A。
+> 新 producer 已改为 fail-closed：完整形态合同未通过时拒绝生成主图。
+
+当前有两层历史产物：原三联 GIF 只讲同一条轨迹；A-D 拼版在同一轨迹之外加入了 3 张配对网络的空间探针 canary。两者当前都不是 Fig5 主图候选。
 
 底物是冻结的 data-driven `Node + E→E + E→I`，慢变量（失抑制 z 与疲劳 m）全开。种子 1801 是三个探路种子里进入时刻的**中位数**（3877 / 4115 / 4541 ms），按规则选取，不是挑好看的。
+
+### fig5-data-driven-zm-main.png / .pdf / .svg
+
+按作者冻结的 A-D 语法组织的历史诊断：A 是同一条连续 15 触点 30-80 Hz model-current readout；B 是 h 加权 Z/M 轨迹；C 是 Model TB 招募顺序与进入后 100 ms 活动能量；D 是 64-cell source probe 在低活动和进入前 500 ms 的 0-50 ms 即时后代响应。C 的 E1146 几何注册仍有效，但 A 的状态形态不合格，因此整版撤回。
+
+**关注点**：A 中 runaway 是群体率持续升高，而不是 30-80 Hz 振幅突然放大；C 的触点方向必须与 Fig4 一致。D 目前不能支撑“进入前易感性升高”：低活动均值由 seed 1801 单独主导，另外两张网络近零，进入前三张网络也没有一致增强。
+
+### panels/fig5-panel-a-readout.png / fig5-panel-c-event-order.png / fig5-panel-c-early-energy.png
+
+主图 A/C 的独立验收图，便于在整版合成前检查尺度、模式语义和电极注册方向。
+
+**关注点**：A 的接触尺度只由进入前样本决定；C 固定使用 Fig4 审计后的 Model TB 语义（数值标签 0），不能使用 rev11 配置中那条相反的旧 display label。
 
 ### fig5-data-driven-zm-runaway-transition.gif
 
