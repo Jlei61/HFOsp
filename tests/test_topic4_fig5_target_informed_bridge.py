@@ -8,6 +8,7 @@ from src.topic4_fig5_target_informed_bridge import (
     robust_z_against_reference,
     select_state_defined_readout,
     shaft_balanced_scaled_l1,
+    smooth_rate,
 )
 
 
@@ -93,3 +94,10 @@ def test_patient_bootstrap_excludes_display_seizure_upstream_and_is_deterministi
 
 def test_lse_is_equal_to_common_value_for_equal_inputs():
     assert lse([3.0, 3.0, 3.0]) == 3.0
+
+
+def test_smoothed_rate_makes_sparse_reference_median_resolvable():
+    rate = np.zeros(1000)
+    rate[::50] = 1000.0
+    assert np.median(rate) == 0.0
+    assert np.median(smooth_rate(rate, 0.1, 20.0)) > 0.0

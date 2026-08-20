@@ -11,6 +11,7 @@ from typing import Mapping, Sequence
 
 import numpy as np
 from scipy.signal import welch
+from scipy.stats import spearmanr
 
 
 SCHEMA_ID = "topic4_fig5_target_informed_zm_bridge_v1"
@@ -129,6 +130,12 @@ def robust_z_against_reference(reference_log_power, values):
     if np.any(~np.isfinite(mad)) or np.any(mad <= 1e-12):
         raise ValueError("reference baseline has unresolved contact scale")
     return (x - med) / mad, {"median": med, "mad": mad}
+
+
+def smooth_rate(rate_hz, dt_ms, window_ms=20.0):
+    rate = np.asarray(rate_hz, float)
+    n = max(1, int(round(float(window_ms) / float(dt_ms))))
+    return np.convolve(rate, np.ones(n, float) / n, mode="same")
 
 
 def _window_slice(values, dt_ms, start_ms, width_ms):
@@ -273,6 +280,33 @@ def score_energy_field(model_pre, model_early, target: Mapping[str, object], sha
         "J_field": lse([contact, increment]),
         "model_increment_demeaned": model_inc,
         "target_increment_demeaned": target_inc,
+        "early_spearman": float(spearmanr(model_early, early_target).statistic),
+    }
+
+
+def score_energy_burden(model_early, target: Mapping[str, object]):
+    model = np.asarray(model_early, float)
+    observed = np.asarray([
+        np.median(model), np.mean(model > 0),
+        np.quantile(model, 0.75) - np.quantile(model, 0.25),
+    ])
+    patient = [
+        np.asarray(target["global_early_per_seizure"], float),
+        np.asarray(target["positive_fraction_per_seizure"], float),
+        np.asarray(target["contact_iqr_per_seizure"], float),
+    ]
+    centers = np.asarray([np.median(values) for values in patient])
+    scales = np.asarray([
+        max(np.quantile(values, 0.75) - np.quantile(values, 0.25), 1e-6)
+        for values in patient
+    ])
+    components = np.abs(observed - centers) / scales
+    return {
+        "D_energy": float(np.mean(components)),
+        "model": observed,
+        "patient_median": centers,
+        "patient_iqr": scales,
+        "scaled_components": components,
     }
 
 

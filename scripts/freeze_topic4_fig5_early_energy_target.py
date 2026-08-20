@@ -36,11 +36,16 @@ from src.topic4_fig5_target_informed_bridge import (  # noqa: E402
     jsonable,
 )
 from src.topic5_ictal_recruitment import bipolar_alias_label  # noqa: E402
+from src.topic5_template_axis_field import scorers_from_interictal_record  # noqa: E402
 from src.topic5_tspectral_field_concordance import (  # noqa: E402
     DISTAL_BASELINE_EEG_SEC,
     aggregate_complete_windows,
     distal_baseline_robust_z,
     exact_name_align_matrix,
+    score_observed_bundle,
+)
+from scripts.run_topic5_eeg_onset_shared_field_concordance import (  # noqa: E402
+    select_shared_scorers,
 )
 
 
@@ -185,12 +190,34 @@ def main():
         "windows_sec": {"pre": [-10.0, 0.0], "early": [0.0, 10.0]},
         "summaries": summaries,
         "per_seizure_metadata": metadata,
+        "display_parity": {},
         "source_hashes": {
             "config": _sha256(config_path),
             "field_record": _sha256(FIELD_RECORD),
             "checkpoints": {path.name: _sha256(path) for path in files},
         },
     }
+    display_activation = arrays["primary_1_150_display_early"]
+    display_score = score_observed_bundle(
+        select_shared_scorers(scorers_from_interictal_record(record)),
+        display_activation)
+    direct_rank = float(np.corrcoef(
+        -np.asarray(record["interictal_field"]["rank_a"], float),
+        display_activation)[0, 1])
+    payload["display_parity"] = {
+        "shared_a_signed": float(display_score["shared_a_signed"]),
+        "expected_shared_a_signed": 0.7191267825782517,
+        "shared_a_absolute_error": abs(
+            float(display_score["shared_a_signed"]) - 0.7191267825782517),
+        "direct_early_rank_correlation": direct_rank,
+        "expected_direct_early_rank_correlation": 0.5708840461636431,
+        "parity_pass": bool(
+            np.isclose(float(display_score["shared_a_signed"]),
+                       0.7191267825782517, atol=1e-12)
+            and np.isclose(direct_rank, 0.5708840461636431, atol=1e-12)),
+    }
+    if not payload["display_parity"]["parity_pass"]:
+        raise RuntimeError(f"seizure-2 parity failed: {payload['display_parity']}")
     (out / "clinical_target.json").write_text(
         json.dumps(jsonable(payload), indent=2) + "\n", encoding="utf-8")
     (out / "target_provenance.json").write_text(

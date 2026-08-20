@@ -128,6 +128,10 @@ interval and robust scale. It additionally stores:
 Patient `10--150 Hz` is a required sensitivity. Seizure 2 values
 `shared_a_signed=0.719127` and direct early-rank correlation `0.570884` are parity checks only.
 
+The numerical model-versus-patient loss uses the matched `10--150 Hz` patient target. The
+Fig.3-native `1--150 Hz` target remains the clinical primary display and a required sensitivity;
+it is not directly subtracted from a model vector computed in a different band.
+
 ## 6. Model-ictal qualification
 
 Rev5 reuses `MODEL_ICTAL_ELIGIBLE_V2`. Patient data cannot rescue a failed trajectory.
@@ -137,7 +141,7 @@ eligible only if a complete 1 s post-onset interval exists and:
 
 1. at least 80% of post-onset 20 ms windows have both `F_E >= 0.5` and
    `F_sheet >= 0.5`;
-2. median population E rate is at least twice its paired low-state reference;
+2. median 20 ms-smoothed population E rate is at least twice its paired low-state reference;
 3. median contact spectral centroid rises by at least 5 Hz and by a factor of 1.25;
 4. no non-finite state or simulator failure occurs through the analysis interval.
 
@@ -319,4 +323,3 @@ seed role, Z/M parameters, edge doses, onset/readout windows and score version.
 | only 2%/5% comparator succeeds | bridge depends on attenuating learned E-to-I redistribution |
 | confirmation loses model-ictal morphology | work point unstable; no final Fig.5 freeze |
 | no unseen patient/seizure unit | retain development-only, non-generalization language |
-
