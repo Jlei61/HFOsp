@@ -17,7 +17,7 @@ sys.path.insert(0, str(ROOT))
 from scripts.paper_figures.plot_fig5_data_driven_zm_main import (
     _load_npz,
     _panel_label,
-    _plot_runaway_activity,
+    _plot_runaway_energy,
     _plot_event_order,
     _plot_readout,
     _plot_trajectory,
@@ -88,13 +88,13 @@ def main():
     _save(fig, out_dir / "fig5-panel-c-event-order.png")
 
     fig, ax = plt.subplots(figsize=(4.6, 4.1))
-    activity_map, _ = _plot_runaway_activity(
+    energy_map, _ = _plot_runaway_energy(
         ax, replay, contacts, extent, display_onset_ms,
         float(metadata["activity_window_ms"]), start_offset_ms=0.0)
-    colorbar = fig.colorbar(activity_map, ax=ax, fraction=0.046, pad=0.03)
-    colorbar.set_label("local E-neuron rate (Hz)", fontsize=8)
+    colorbar = fig.colorbar(energy_map, ax=ax, fraction=0.046, pad=0.03)
+    colorbar.set_label(r"activity energy ($\times 10^3$ Hz$^2$)", fontsize=8)
     colorbar.ax.tick_params(labelsize=7)
-    _save(fig, out_dir / "fig5-panel-c-runaway-activity.png")
+    _save(fig, out_dir / "fig5-panel-c-runaway-energy.png")
 
     (out_dir / "README.md").write_text(
         "### fig5-panel-a-readout.png\n"
@@ -107,13 +107,15 @@ def main():
         "同一条轨迹在 h 加权的失抑制 D=1-z 与适应 A=eta_m*m 平面上的投影。三角、空心圆和红点分别标记样本事件、进入前 500 ms 和进入时刻。\n\n"
         "**关注点**：这是轨迹投影，不是解析相图或分离曲线。\n\n"
         "### fig5-panel-c-event-order.png\n"
-        "冻结规则选择的 Model TB 发作前事件。神经元和触点颜色都表示相对首次放电顺序，"
+        "冻结规则选择的一次真实间期事件。每一个点都是一个 SNN E 神经元，颜色表示该神经元"
+        "在这次事件里的真实首次放电时间；触点颜色表示同一次事件的 contact order，"
         "使用和 Fig4 完全一致的原始 0-20 mm sheet x/y 坐标。\n\n"
-        "**关注点**：不旋转、不镜像、不做显示注册；电极排布方向可直接与 Fig4 对照。\n\n"
-        "### fig5-panel-c-runaway-activity.png\n"
-        "红线后 0 至 +100 ms 的 64×64 局部 E 神经元发放率，不做空间平滑；"
+        "**关注点**：没有 onset 分箱或平均场；亮暗先后来自逐神经元 spike。\n\n"
+        "### fig5-panel-c-runaway-energy.png\n"
+        "红线后 0 至 +100 ms 的全场活动能量图，定义为局部 E 神经元 100 ms 平均"
+        "发放率的平方，单位为 10^3 Hz^2，使用与患者发作场图一致的蓝色色标；"
         "红线对应原形态检测后 300 ms、连续读出中约 1500 ms 的全局高活动开始段。\n\n"
-        "**关注点**：看实际招募范围，不把过早的 +0 至 +100 ms 当作已形成的 runaway。\n",
+        "**关注点**：看 runaway 时刻全场能量招募，不把普通发放率误作能量。\n",
         encoding="utf-8")
     print(json.dumps({"out_dir": str(out_dir.relative_to(ROOT)), "panels": 4}))
 

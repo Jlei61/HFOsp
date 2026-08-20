@@ -1,7 +1,10 @@
 import numpy as np
+import matplotlib.pyplot as plt
 
 from scripts.paper_figures.plot_fig5_data_driven_zm_main import (
     _contact_order,
+    _plot_event_order,
+    _runaway_energy_grid,
     _sample_contact_field,
     _signed_bandpass,
 )
@@ -29,6 +32,36 @@ def test_contact_order_places_scl_below_icl_and_preserves_numeric_order():
     names = np.array(["ICL11", "SCL9", "ICL1", "SCL6", "ICL2"])
     order = _contact_order(names)
     assert names[order].tolist() == ["SCL6", "SCL9", "ICL1", "ICL2", "ICL11"]
+
+
+def test_event_order_uses_exact_neuron_scatter_without_spatial_image():
+    replay = {
+        "sample_first_spike_ms": np.array([1.0, np.nan, 3.0, 2.0]),
+        "sample_contact_ranks": np.array([0.0, 2.0]),
+    }
+    positions = np.array([[1.0, 1.0], [2.0, 2.0], [3.0, 3.0], [4.0, 4.0]])
+    contacts = np.array([[1.0, 1.0], [4.0, 4.0]])
+    fig, ax = plt.subplots()
+    _plot_event_order(ax, replay, positions, contacts, (0.0, 5.0))
+    try:
+        assert len(ax.images) == 0
+        assert len(ax.collections[0].get_offsets()) == 1
+        assert len(ax.collections[1].get_offsets()) == 3
+    finally:
+        plt.close(fig)
+
+
+def test_runaway_energy_is_square_of_mean_local_rate():
+    replay = {
+        "frame_time_ms": np.array([0.0, 5.0]),
+        "activity_spike_counts": np.ones((2, 1, 1)),
+        "activity_cell_occupancy": np.array([[2.0]]),
+    }
+    energy, start, stop = _runaway_energy_grid(
+        replay, onset_ms=0.0, activity_window_ms=10.0, duration_ms=10.0)
+    assert start == 0.0
+    assert stop == 10.0
+    assert np.allclose(energy, [[2.5]])  # (1 spike / 2 cells / 10 ms)^2 / 1e3
 
 
 def test_signed_bandpass_retains_50hz_and_rejects_10hz():

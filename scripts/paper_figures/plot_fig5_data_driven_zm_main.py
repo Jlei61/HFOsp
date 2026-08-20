@@ -3,7 +3,7 @@
 
 A  one continuous signed 30-80 Hz virtual-contact current-proxy readout
 B  h-weighted Z/M trajectory
-C  one rule-selected interictal event and early-runaway recruitment
+C  one rule-selected interictal event and early-runaway activity energy
 D  signed response to one frozen probe at low activity and runaway onset
 
 The diagnostic three-panel GIF remains a supplement. This producer never
@@ -288,62 +288,26 @@ def _plot_trajectory(ax, replay, onset_ms, eta_m):
     return {"event_time_ms": event_mid, "pre_transition_time_ms": onset_ms - 500.0}
 
 
-def _event_order_grid(positions, first_spike_ms, extent, n=64):
-    positions = np.asarray(positions, float)
-    first = np.asarray(first_spike_ms, float)
-    lo, hi = float(extent[0]), float(extent[1])
-    edges = np.linspace(lo, hi, int(n) + 1)
-    occupancy, _, _ = np.histogram2d(
-        positions[:, 0], positions[:, 1], bins=(edges, edges))
-    valid = np.isfinite(first)
-    participating, _, _ = np.histogram2d(
-        positions[valid, 0], positions[valid, 1], bins=(edges, edges))
-    relative = first[valid] - float(np.nanmin(first))
-    weighted, _, _ = np.histogram2d(
-        positions[valid, 0], positions[valid, 1], bins=(edges, edges),
-        weights=relative)
-    with np.errstate(invalid="ignore", divide="ignore"):
-        mean_onset = weighted / participating
-        participation = participating / occupancy
-    mean_onset[participating == 0] = np.nan
-    participation = np.nan_to_num(participation)
-    return mean_onset, participation
-
-
 def _plot_event_order(ax, replay, positions, contacts, extent):
     first = np.asarray(replay["sample_first_spike_ms"], float)
     valid = np.isfinite(first)
     ranks = np.asarray(replay["sample_contact_ranks"], float)
     max_rank = max(1.0, float(np.nanmax(ranks)))
-    mean_onset, participation = _event_order_grid(
-        positions, first, extent, n=64)
-    duration = max(float(np.nanmax(first[valid]) - np.nanmin(first[valid])), 1e-9)
-    order_grid = mean_onset / duration * max_rank
-    alpha = np.clip((participation - 0.05) / 0.75, 0.0, 1.0)
-    image = ax.imshow(
-        order_grid.T, origin="lower", extent=(*extent, *extent),
-        cmap="viridis", norm=Normalize(0, max_rank), interpolation="nearest",
-        alpha=alpha.T)
-    axis = np.linspace(extent[0], extent[1], participation.shape[0])
-    if np.nanmax(participation) >= 0.5:
-        ax.contour(axis, axis, participation.T, levels=[0.5], colors=["0.2"],
-                   linewidths=0.65, alpha=0.8)
-    quantiles = np.quantile(first[valid], [0.15, 0.85])
-    early = np.mean(positions[valid & (first <= quantiles[0])], axis=0)
-    late = np.mean(positions[valid & (first >= quantiles[1])], axis=0)
-    ax.annotate("", xy=late, xytext=early,
-                arrowprops={"arrowstyle": "-|>", "color": "white",
-                            "lw": 3.0, "mutation_scale": 12}, zorder=6)
-    ax.annotate("", xy=late, xytext=early,
-                arrowprops={"arrowstyle": "-|>", "color": "0.15",
-                            "lw": 1.25, "mutation_scale": 11}, zorder=7)
+    ax.scatter(positions[~valid, 0], positions[~valid, 1], s=0.20,
+               color="0.80", alpha=0.18, linewidths=0, rasterized=True)
+    if np.any(valid):
+        relative = first[valid] - float(np.nanmin(first[valid]))
+        duration = max(float(np.nanmax(relative)), 1e-9)
+        neuron_order = relative / duration * max_rank
+        ax.scatter(positions[valid, 0], positions[valid, 1], s=0.70,
+                   c=neuron_order, cmap="viridis",
+                   norm=Normalize(0, max_rank), alpha=0.48,
+                   linewidths=0, rasterized=True)
     contact_valid = np.isfinite(ranks)
     mappable = ax.scatter(contacts[contact_valid, 0], contacts[contact_valid, 1], s=43,
                           c=ranks[contact_valid], cmap="viridis",
                           norm=Normalize(0, max_rank), ec="black", lw=0.75, zorder=5)
-    # Keep the image and contacts on the identical normalization contract.
-    image.set_norm(mappable.norm)
-    ax.set_title("Interictal event propagation", fontsize=10.0, fontweight="bold")
+    ax.set_title("Interictal event order", fontsize=10.0, fontweight="bold")
     _style_spatial(ax, extent, show_ylabel=True)
     return mappable
 
@@ -359,8 +323,8 @@ def _sample_contact_field(positions, values, contacts, sigma_mm=0.75):
     return out
 
 
-def _runaway_activity_grid(replay, onset_ms, activity_window_ms,
-                           *, start_offset_ms=0.0, duration_ms=100.0):
+def _runaway_energy_grid(replay, onset_ms, activity_window_ms,
+                         *, start_offset_ms=0.0, duration_ms=100.0):
     time = np.asarray(replay["frame_time_ms"], float)
     start = float(onset_ms) + float(start_offset_ms)
     stop = start + float(duration_ms)
@@ -371,26 +335,37 @@ def _runaway_activity_grid(replay, onset_ms, activity_window_ms,
     occupancy = np.asarray(replay["activity_cell_occupancy"], float)
     with np.errstate(invalid="ignore", divide="ignore"):
         rate = np.mean(counts, axis=0) / occupancy / (float(activity_window_ms) * 1e-3)
-    return np.nan_to_num(rate), start, stop
+    energy = np.square(np.nan_to_num(rate)) / 1e3
+    return energy, start, stop
 
 
-def _plot_runaway_activity(ax, replay, contacts, extent, onset_ms,
-                           activity_window_ms, start_offset_ms=0.0):
-    grid, start, stop = _runaway_activity_grid(
+def _plot_runaway_energy(ax, replay, contacts, extent, onset_ms,
+                         activity_window_ms, start_offset_ms=0.0):
+    energy, start, stop = _runaway_energy_grid(
         replay, onset_ms, activity_window_ms,
         start_offset_ms=start_offset_ms, duration_ms=100.0)
+    grid = gaussian_filter(energy, sigma=1.15)
     positive = grid[grid > 0]
     high = float(np.percentile(positive, 99.0)) if positive.size else 1.0
     mappable = ax.imshow(
-        grid.T, origin="lower", extent=(*extent, *extent), cmap="magma",
-        vmin=0.0, vmax=high, interpolation="nearest")
+        grid.T, origin="lower", extent=(*extent, *extent), cmap="Blues",
+        vmin=0.0, vmax=high, interpolation="bilinear")
+    n = grid.shape[0]
+    lo, hi = float(extent[0]), float(extent[1])
+    contact_index = np.clip(
+        np.floor((np.asarray(contacts, float) - lo) / (hi - lo) * n).astype(int),
+        0, n - 1)
+    contact_energy = grid[contact_index[:, 0], contact_index[:, 1]]
     ax.scatter(contacts[:, 0], contacts[:, 1], s=43,
-               fc="white", ec="black", lw=0.75, zorder=5)
-    ax.set_title("Runaway recruitment (0 to +100 ms)",
+               c=contact_energy, cmap="Blues", vmin=0.0, vmax=high,
+               ec="black", lw=0.75, zorder=5)
+    ax.set_title("Runaway activity energy (0 to +100 ms)",
                  fontsize=10.0, fontweight="bold")
     _style_spatial(ax, extent, show_ylabel=False)
     return mappable, {"window_start_ms": start, "window_stop_ms": stop,
-                      "measure": "mean 10-ms local E-neuron firing rate"}
+                      "measure": ("square of the 100-ms mean local E-neuron "
+                                  "firing rate, displayed in 1e3 Hz^2"),
+                      "spatial_smoothing_sigma_bins": 1.15}
 
 
 def _probe_inset(ax):
@@ -533,7 +508,7 @@ def main():
     eta_m = replay_meta.get("workpoint_parameters", config["zm"])["eta_m"]
     trajectory_meta = _plot_trajectory(ax_b, replay, display_onset_ms, eta_m)
     rank_map = _plot_event_order(ax_c1, replay, positions, contacts, extent)
-    activity_map, activity_meta = _plot_runaway_activity(
+    energy_map, energy_meta = _plot_runaway_energy(
         ax_c2, replay, contacts, extent, display_onset_ms,
         float(replay_meta["activity_window_ms"]), start_offset_ms=0.0)
     response_map = _plot_response(
@@ -553,9 +528,10 @@ def main():
     cb_rank = fig.colorbar(rank_map, ax=ax_c1, fraction=0.045, pad=0.025)
     cb_rank.set_label("contact order\n(0 = first)", fontsize=7.2)
     cb_rank.ax.tick_params(labelsize=6.8)
-    cb_activity = fig.colorbar(activity_map, ax=ax_c2, fraction=0.045, pad=0.025)
-    cb_activity.set_label("local E-neuron rate (Hz)", fontsize=7.2)
-    cb_activity.ax.tick_params(labelsize=6.8)
+    cb_energy = fig.colorbar(energy_map, ax=ax_c2, fraction=0.045, pad=0.025)
+    cb_energy.set_label("activity energy\n" + r"($\times 10^3$ Hz$^2$)",
+                        fontsize=7.2)
+    cb_energy.ax.tick_params(labelsize=6.8)
     cb_resp = fig.colorbar(response_map, ax=[ax_d1, ax_d2], fraction=0.026, pad=0.018)
     cb_resp.set_label("signed probe effect\n(0-50 ms excess spikes per local E cell)",
                       fontsize=7.2)
@@ -595,10 +571,10 @@ def main():
             "reason": ("author-selected onset of visibly global sustained high "
                        "activity; the formal detector onset remains unchanged"),
         },
-        "panel_C": {"event_order": ("per-neuron first spike plus frozen contact order; "
-                                      "64x64 unsmoothed onset bins, 50% recruitment contour, "
-                                      "15%-to-85% onset-centroid arrow; no patient-mode label"),
-                    "runaway_activity": activity_meta},
+        "panel_C": {"event_order": ("exact per-neuron first-spike time for one "
+                                      "rule-selected interictal event plus frozen "
+                                      "contact order; no spatial binning or smoothing"),
+                    "runaway_energy": energy_meta},
         "panel_D": {
             "state_contrast": str((ROOT / args.state_contrast).relative_to(ROOT)),
             "probe_site": "source (geometry-frozen; not response-selected)",
