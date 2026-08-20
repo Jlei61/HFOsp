@@ -114,7 +114,7 @@ def _score_stage(stage, candidates, seeds, config):
             jpath, npath = _run_paths(stage, candidate["candidate_id"], seed)
             records.append(_score_one(
                 jpath, npath, _json(jpath), baseline, target_payload, target_npz,
-                config["model_readout"]))
+                config))
             records[-1]["candidate_id"] = candidate["candidate_id"]
             records[-1]["seed"] = int(seed)
     return records

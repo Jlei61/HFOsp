@@ -5,6 +5,7 @@ from src.topic4_fig5_target_informed_bridge import (
     exact_contact_reorder,
     lse,
     nonoverlap_log_power_windows,
+    qualify_model_ictal_for_bridge,
     rank_selection_candidates,
     robust_z_against_reference,
     select_state_defined_readout,
@@ -133,3 +134,43 @@ def test_all_positive_patient_fraction_uses_one_contact_resolution_floor():
     assert result["patient_iqr"][1] == 1.0 / 15.0
     assert np.isfinite(result["D_energy"])
     assert np.isclose(result["scaled_components"][1], 1.0)
+
+
+def test_bridge_qualification_requires_full_one_second_not_one_good_readout():
+    dt = 1.0
+    trace = np.concatenate([
+        _oscillation(12.0, 1.0),
+        _oscillation(40.0, 0.5),
+        _oscillation(12.0, 1.0),
+    ])
+    time_ms = np.arange(20.0, 2500.1, 20.0)
+    active = np.where((time_ms >= 1000.0) & (time_ms < 1500.0), 0.9, 0.1)
+    config = {
+        "t_ictal_offset_from_operational_onset_ms": -100.0,
+        "early_window_ms_relative_to_t_ictal": [100.0, 1100.0],
+        "frequency_window_ms_relative_to_t_ictal": [100.0, 600.0],
+        "recruitment_window_ms": 20.0,
+        "activity_threshold": 0.5,
+        "joint_duty_threshold": 0.8,
+        "rate_smoothing_ms": 20.0,
+        "population_rate_ratio": 2.0,
+        "contact_centroid_band_hz": [10.0, 150.0],
+        "contact_frequency_shift_hz": 5.0,
+        "contact_frequency_ratio": 1.25,
+    }
+    verdict = qualify_model_ictal_for_bridge(
+        operational_onset_ms=1100.0,
+        full_field_time_ms=time_ms,
+        active_fraction=active,
+        spatial_fraction=active,
+        rate_hz=np.where(np.arange(2500) >= 1000, 100.0, 10.0),
+        rate_dt_ms=dt,
+        contact_trace=trace,
+        contact_dt_ms=dt,
+        paired_baseline_rate_hz=np.full(500, 10.0),
+        paired_baseline_trace=_oscillation(12.0, 0.5),
+        config=config,
+    )
+    assert verdict["eligible"] is False
+    assert verdict["joint_duty"] < 0.8
+    assert "joint_broad_recruitment_duty" in verdict["reason"]

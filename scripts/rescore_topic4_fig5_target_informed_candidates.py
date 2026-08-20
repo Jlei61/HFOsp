@@ -24,6 +24,7 @@ from src.topic4_fig5_target_informed_bridge import (  # noqa: E402
     robust_z_against_reference,
     score_energy_burden,
     score_energy_field,
+    qualify_model_ictal_for_bridge,
     select_state_defined_readout,
     smooth_rate,
 )
@@ -58,7 +59,8 @@ def _slice(values, dt_ms, start_ms, stop_ms):
 
 
 def _score_one(json_path, npz_path, payload, baseline, target_payload, target_npz,
-               readout_cfg):
+               config):
+    readout_cfg = config["model_readout"]
     parameters = dict(payload.get("parameters") or {})
     ee = float(parameters.get("E_to_E_dose", 1.0))
     etoi = float(parameters.get("E_to_I_dose", 1.0))
@@ -86,6 +88,28 @@ def _score_one(json_path, npz_path, payload, baseline, target_payload, target_np
         trace = np.asarray(data["lfp_trace"], float)
         dt = float(data["lfp_dt_ms"])
         names = np.asarray(data["contact_names"]).astype(str)
+        qualification = qualify_model_ictal_for_bridge(
+            operational_onset_ms=onset_op,
+            full_field_time_ms=data["full_field_time_ms"],
+            active_fraction=data["active_neuron_fraction_20ms"],
+            spatial_fraction=data["recruited_spatial_fraction_1mm"],
+            rate_hz=data["rate_E_hz"],
+            rate_dt_ms=dt,
+            contact_trace=trace,
+            contact_dt_ms=dt,
+            paired_baseline_rate_hz=baseline["rate_E_hz"],
+            paired_baseline_trace=baseline["centroid_reference_trace"],
+            config=config["model_ictal_qualification"],
+            simulator_error=(payload.get("status")
+                             != "ZM_JOINT_MORPHOLOGY_CANARY_COMPLETE"),
+        )
+        if qualification["eligible"] is not True:
+            row.update(
+                status=qualification["status"],
+                reason=qualification["reason"],
+                model_ictal_qualification=qualification,
+            )
+            return row
         read = select_state_defined_readout(
             trace=trace,
             dt_ms=dt,
@@ -104,7 +128,8 @@ def _score_one(json_path, npz_path, payload, baseline, target_payload, target_np
         )
         if read is None:
             row.update(status="MODEL_ICTAL_NOT_ELIGIBLE",
-                       reason="no state-qualified 500 ms readout window")
+                       reason="no state-qualified 500 ms readout window",
+                       model_ictal_qualification=qualification)
             return row
         read_trace = _slice(trace, dt, read.start_ms, read.stop_ms)
         pre_trace = _slice(trace, dt, t_ictal - 500.0, t_ictal)
@@ -124,6 +149,7 @@ def _score_one(json_path, npz_path, payload, baseline, target_payload, target_np
         if read_rate < 2.0 * baseline["median_smoothed_rate_hz"]:
             row.update(status="MODEL_ICTAL_NOT_ELIGIBLE",
                        reason="20 ms-smoothed population rate ratio below 2",
+                       model_ictal_qualification=qualification,
                        rate_ratio=read_rate / max(baseline["median_smoothed_rate_hz"], 1e-12))
             return row
     target_names = target_npz["contact_names"].astype(str)
@@ -139,6 +165,7 @@ def _score_one(json_path, npz_path, payload, baseline, target_payload, target_np
                      + lse([energy["D_energy"], field["J_field"]]))
     row.update({
         "status": "BRIDGE_EVALUABLE",
+        "model_ictal_qualification": qualification,
         "readout_window": read.__dict__,
         "rate_ratio": read_rate / baseline["median_smoothed_rate_hz"],
         "model_pre_robust_z": model_pre_z,
@@ -166,6 +193,7 @@ def build_paired_baseline(baseline_path, readout_cfg):
         "log_power_windows": windows,
         "contact_names": names,
         "centroid_reference_trace": _slice(trace, dt, 500.0, 1000.0),
+        "rate_E_hz": _slice(rate, dt, 500.0, 1000.0),
         "median_smoothed_rate_hz": float(np.median(
             _slice(rate_smoothed, dt, 500.0, 1000.0))),
     }
@@ -185,7 +213,7 @@ def main():
     baseline = build_paired_baseline(baseline_path, config["model_readout"])
     records = [
         _score_one(jpath, npath, payload, baseline, target_payload, target_data,
-                   config["model_readout"])
+                   config)
         for jpath, npath, payload in _candidate_rows(
             ROOT / "results/topic4_sef_hfo/data_driven_zm_ictal_transition")
     ]

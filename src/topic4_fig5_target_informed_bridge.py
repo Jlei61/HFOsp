@@ -138,6 +138,122 @@ def smooth_rate(rate_hz, dt_ms, window_ms=20.0):
     return np.convolve(rate, np.ones(n, float) / n, mode="same")
 
 
+def qualify_model_ictal_for_bridge(
+    *,
+    operational_onset_ms,
+    full_field_time_ms,
+    active_fraction,
+    spatial_fraction,
+    rate_hz,
+    rate_dt_ms,
+    contact_trace,
+    contact_dt_ms,
+    paired_baseline_rate_hz,
+    paired_baseline_trace,
+    config,
+    simulator_error=False,
+):
+    """Apply the full model-internal ictal gate before patient scoring.
+
+    The bridge uses an independent, same-seed Z/M-off reference for rate and
+    contact frequency.  Recruitment is evaluated for a complete one-second
+    interval using only fully contained rolling windows.  This is deliberately
+    separate from the later 500 ms readout-window selection.
+    """
+    if operational_onset_ms is None:
+        return {
+            "status": "MODEL_ICTAL_NOT_ELIGIBLE",
+            "eligible": False,
+            "reason": "operational detector not reached",
+        }
+    spec = config
+    t_ictal = (float(operational_onset_ms)
+               + float(spec["t_ictal_offset_from_operational_onset_ms"]))
+    early = np.asarray(spec["early_window_ms_relative_to_t_ictal"], float) + t_ictal
+    freq = np.asarray(spec["frequency_window_ms_relative_to_t_ictal"], float) + t_ictal
+    recruitment_time_ms = np.asarray(full_field_time_ms, float)
+    rolling_ms = float(spec["recruitment_window_ms"])
+    selected = ((recruitment_time_ms - rolling_ms >= early[0])
+                & (recruitment_time_ms <= early[1]))
+    missing = []
+    if not np.any(selected):
+        missing.append("no fully contained recruitment window in the 1 s interval")
+    candidate_rate = _window_slice(rate_hz, rate_dt_ms, early[0], early[1] - early[0])
+    candidate_freq = _window_slice(
+        contact_trace, contact_dt_ms, freq[0], freq[1] - freq[0])
+    if candidate_rate is None:
+        missing.append("population-rate trace does not cover the complete 1 s interval")
+    if candidate_freq is None:
+        missing.append("contact trace does not cover the fixed frequency interval")
+    if missing:
+        return {
+            "status": "MODEL_ICTAL_NOT_EVALUABLE",
+            "eligible": None,
+            "reason": "; ".join(missing),
+            "t_ictal_ms": t_ictal,
+            "early_window_ms": early,
+            "frequency_window_ms": freq,
+        }
+
+    joint = ((np.asarray(active_fraction, float)[selected]
+              >= float(spec["activity_threshold"]))
+             & (np.asarray(spatial_fraction, float)[selected]
+                >= float(spec["activity_threshold"])))
+    duty = float(np.mean(joint))
+    candidate_rate_smoothed = smooth_rate(
+        candidate_rate, rate_dt_ms, float(spec["rate_smoothing_ms"]))
+    baseline_rate_smoothed = smooth_rate(
+        paired_baseline_rate_hz, rate_dt_ms, float(spec["rate_smoothing_ms"]))
+    rate_early = float(np.median(candidate_rate_smoothed))
+    rate_base = float(np.median(baseline_rate_smoothed))
+    rate_ratio = (rate_early / rate_base) if rate_base > 0 else np.nan
+    band = spec["contact_centroid_band_hz"]
+    centroid_base = float(np.nanmedian(spectral_centroid(
+        paired_baseline_trace, contact_dt_ms, band)))
+    centroid_early = float(np.nanmedian(spectral_centroid(
+        candidate_freq, contact_dt_ms, band)))
+    centroid_shift = centroid_early - centroid_base
+    centroid_ratio = centroid_early / max(centroid_base, 1e-12)
+    finite = bool(
+        np.all(np.isfinite(np.asarray(candidate_rate, float)))
+        and np.all(np.isfinite(np.asarray(candidate_freq, float)))
+        and np.isfinite(duty)
+        and np.isfinite(rate_ratio)
+        and np.isfinite(centroid_shift)
+        and np.isfinite(centroid_ratio)
+        and not simulator_error
+    )
+    clauses = {
+        "complete_one_second_recruitment": True,
+        "joint_broad_recruitment_duty": duty >= float(spec["joint_duty_threshold"]),
+        "population_rate_ratio": rate_ratio >= float(spec["population_rate_ratio"]),
+        "contact_frequency_increased": (
+            centroid_shift >= float(spec["contact_frequency_shift_hz"])
+            and centroid_ratio >= float(spec["contact_frequency_ratio"])),
+        "numerically_safe": finite,
+    }
+    failing = [name for name, value in clauses.items() if not value]
+    return {
+        "status": ("MODEL_ICTAL_ELIGIBLE" if not failing
+                   else "MODEL_ICTAL_NOT_ELIGIBLE"),
+        "eligible": not failing,
+        "reason": None if not failing else "; ".join(failing),
+        "t_ictal_ms": t_ictal,
+        "early_window_ms": early,
+        "frequency_window_ms": freq,
+        "n_recruitment_windows": int(np.sum(selected)),
+        "joint_duty": duty,
+        "rate_base_hz": rate_base,
+        "rate_early_hz": rate_early,
+        "rate_ratio": rate_ratio,
+        "contact_centroid_base_hz": centroid_base,
+        "contact_centroid_early_hz": centroid_early,
+        "contact_centroid_shift_hz": centroid_shift,
+        "contact_centroid_ratio": centroid_ratio,
+        "clauses": clauses,
+    }
+
+
 def _window_slice(values, dt_ms, start_ms, width_ms):
     start = int(round(float(start_ms) / float(dt_ms)))
     stop = int(round((float(start_ms) + float(width_ms)) / float(dt_ms)))

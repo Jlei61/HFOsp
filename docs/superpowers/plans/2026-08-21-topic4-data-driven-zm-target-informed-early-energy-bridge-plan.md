@@ -95,8 +95,8 @@ Reuse already completed exact duplicates. Run only missing cells on fit seed 180
 at least 1.5 s after transition, the full contact trace, global recruitment, population rate and
 Z/M traces. A no-transition run continues to the fixed horizon.
 
-If no candidate is model-ictal, use a second bounded adaptation refinement around the best broad
-state:
+If no candidate is model-ictal, use a second bounded adaptation refinement around the
+model-internal crossing at `s_I=0.8`, `tau_z=2500 ms`:
 
 ```text
 tau_m          = 250, 500, 1000 ms
@@ -104,8 +104,11 @@ G_m/G_m0       = 0.5, 1.0, 1.5
 eta_m          = G_m/tau_m
 ```
 
-Do not combine both grids into a blind 36-cell sweep. The second grid is frozen only after the
-first grid's morphology results identify one centre without using patient bridge scores.
+Do not combine both grids into a blind 36-cell sweep. The first grid showed that `tau_z=2500 ms`
+passes frequency but reaches only 0.69--0.72 recruitment duty, while slower settings can sustain
+recruitment but fail frequency. The second grid is therefore frozen at that crossing without
+using patient bridge scores. Every candidate must first pass the complete one-second V2 gate;
+a qualifying 500 ms readout window alone is insufficient.
 
 ## Task 5: target-informed selection
 
@@ -176,4 +179,3 @@ Write `final_report.md` and update the archive only after numeric and visual QA.
 
 Mark the goal complete only when the frozen result, figures and report are all present or when the
 predeclared stop rule yields a defensible negative result with complete evidence.
-

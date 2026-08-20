@@ -137,12 +137,14 @@ it is not directly subtracted from a model vector computed in a different band.
 Rev5 reuses `MODEL_ICTAL_ELIGIBLE_V2`. Patient data cannot rescue a failed trajectory.
 
 Let `t_ictal` be 100 ms before the unchanged 120 Hz/100 ms operational detector. A trajectory is
-eligible only if a complete 1 s post-onset interval exists and:
+eligible only if the complete V2 early interval `[t_ictal+100, t_ictal+1100] ms` exists and:
 
 1. at least 80% of post-onset 20 ms windows have both `F_E >= 0.5` and
    `F_sheet >= 0.5`;
-2. median 20 ms-smoothed population E rate is at least twice its paired low-state reference;
-3. median contact spectral centroid rises by at least 5 Hz and by a factor of 1.25;
+2. median 20 ms-smoothed population E rate is at least twice its paired, same-seed Z/M-off
+   low-state reference;
+3. over `[t_ictal+500, t_ictal+1000] ms`, median contact spectral centroid rises from the paired
+   reference by at least 5 Hz and by a factor of 1.25;
 4. no non-finite state or simulator failure occurs through the analysis interval.
 
 The 70/80/90% duty, activity thresholds, bin sizes, onset shifts, population frequency and
@@ -240,6 +242,14 @@ Use common random numbers on the frozen full-dose substrate. Start with a determ
 design around the best existing full-dose point, prioritizing the previously underexplored
 `s_I x tau_z` plane. Do not launch a high-dimensional optimizer before the local design yields at
 least one model-ictal eligible candidate.
+
+If the first plane separates the requirements rather than satisfying them, freeze one bounded
+crossing refinement using only model-internal evidence. The observed crossing is: `tau_z=2500 ms`
+passes the frequency clause but misses one-second recruitment duty, whereas slower `tau_z` can
+sustain recruitment but loses the frequency increase. Therefore the only authorized refinement
+holds `s_I=0.8`, `tau_z=2500 ms` and scans `tau_m={250,500,1000} ms` by
+`G_m/G_m0={0.5,1.0,1.5}`, with `eta_m=G_m/tau_m`. Patient bridge scores may not choose this grid
+or stop individual cells.
 
 ### Stage 2: selection
 
