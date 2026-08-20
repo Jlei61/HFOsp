@@ -16,12 +16,32 @@ from src.snn_engine.checkpoint import digest  # noqa: E402
 from src.topic4_zm_perturbation import (  # noqa: E402
     hotspot_compactness, in_window_ignition, response_metrics, select_packet,
     splice_checkpoint)
+from scripts.run_topic4_zm_perturbation_worker import (  # noqa: E402
+    _resume_with_accumulator,
+)
 
 
 def _flat():
     envelope = np.zeros((15, 200), np.float32)
     return dict(dt_ms=0.1, envelope_probe=envelope, envelope_sham=envelope,
                 envelope_dt_ms=2.0, inject_step=0, split_ms=50.0, window_ms=200.0)
+
+
+def test_resume_accumulator_survives_restore_without_mutating_checkpoint():
+    state = {"slow": {"acc_n": 0, "acc_seen": 0,
+                      "acc_D": None, "acc_A": None}}
+    resume = _resume_with_accumulator(state, n_e=3, n_steps=100)
+    assert resume["slow"]["acc_n"] == 100
+    assert resume["slow"]["acc_seen"] == 0
+    assert np.array_equal(resume["slow"]["acc_D"], np.zeros(3))
+    assert np.array_equal(resume["slow"]["acc_A"], np.zeros(3))
+    assert state["slow"]["acc_n"] == 0
+    assert state["slow"]["acc_D"] is None
+
+
+def test_resume_accumulator_rejects_checkpoint_without_slow_state():
+    with pytest.raises(ValueError, match="needs a slow checkpoint"):
+        _resume_with_accumulator({"slow": None}, n_e=3, n_steps=100)
 
 
 def test_packet_is_the_nearest_cells_and_respects_the_radius():

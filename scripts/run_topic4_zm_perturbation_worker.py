@@ -42,6 +42,18 @@ from src.topic4_zm_perturbation import (  # noqa: E402
     response_metrics, select_packet, splice_checkpoint)
 
 
+def _resume_with_accumulator(state, *, n_e, n_steps):
+    """Copy a checkpoint and enable a fresh read-only slow-current recorder."""
+    resume = copy.deepcopy(state)
+    if resume.get("slow") is None:
+        raise ValueError("a slow-current accumulator needs a slow checkpoint")
+    resume["slow"]["acc_n"] = int(n_steps)
+    resume["slow"]["acc_seen"] = 0
+    resume["slow"]["acc_D"] = np.zeros(int(n_e), dtype=float)
+    resume["slow"]["acc_A"] = np.zeros(int(n_e), dtype=float)
+    return resume
+
+
 def _continue(substrate, config, state, *, duration_ms, packet=None,
               accumulate_steps=0, early_stop=False, checkpoint_steps=None,
               checkpoint_sink=None):
@@ -58,8 +70,12 @@ def _continue(substrate, config, state, *, duration_ms, packet=None,
     slow = make_slow(substrate, config["zm"], trace_weights_E=substrate.h_e)
     drive = make_external_drive(substrate, config["spatial_ou"],
                                 int(substrate.params.seed))
+    resume_state = copy.deepcopy(state)
     if accumulate_steps and slow is not None:
-        slow.enable_field_accumulator(int(accumulate_steps))
+        # restore_slow runs after the live object is built, so enabling only on
+        # `slow` is silently undone by an ordinary checkpoint's acc_n=0.
+        resume_state = _resume_with_accumulator(
+            state, n_e=substrate.n_e, n_steps=int(accumulate_steps))
     kwargs = {}
     if packet is not None:
         full = np.zeros(substrate.n_e + substrate.n_i, bool)
@@ -72,7 +88,7 @@ def _continue(substrate, config, state, *, duration_ms, packet=None,
         es_thresh_hz=float(config["simulation"]["es_thresh_hz"]),
         es_dur_ms=float(config["simulation"]["es_dur_ms"]),
         external_e_rate_drive=drive,
-        resume_state=copy.deepcopy(state), time_offset_ms=offset,
+        resume_state=resume_state, time_offset_ms=offset,
         checkpoint_steps=checkpoint_steps, checkpoint_sink=checkpoint_sink,
         **kwargs)
     return result, slow
