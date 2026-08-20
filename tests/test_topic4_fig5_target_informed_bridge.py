@@ -109,13 +109,13 @@ def test_smoothed_rate_makes_sparse_reference_median_resolvable():
 def test_selection_ranking_requires_two_eligible_seeds_before_loss():
     rows = [
         {"candidate_id": "a", "status": "BRIDGE_EVALUABLE",
-         "J_bridge_without_time": 1.0, "parameters": {}},
+         "J_early_bridge": 1.0, "parameters": {}},
         {"candidate_id": "a", "status": "FAIL", "parameters": {}},
         {"candidate_id": "a", "status": "FAIL", "parameters": {}},
         {"candidate_id": "b", "status": "BRIDGE_EVALUABLE",
-         "J_bridge_without_time": 5.0, "parameters": {}},
+         "J_early_bridge": 5.0, "parameters": {}},
         {"candidate_id": "b", "status": "BRIDGE_EVALUABLE",
-         "J_bridge_without_time": 6.0, "parameters": {}},
+         "J_early_bridge": 6.0, "parameters": {}},
         {"candidate_id": "b", "status": "FAIL", "parameters": {}},
     ]
     ranked = rank_selection_candidates(rows, minimum_eligible=2)

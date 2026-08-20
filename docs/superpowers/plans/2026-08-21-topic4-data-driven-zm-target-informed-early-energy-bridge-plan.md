@@ -53,7 +53,7 @@ Add pure helpers for:
 - paired Z/M-off robust-z baseline;
 - 500 ms `10--150 Hz` Welch contact power;
 - earliest state-qualified `W_read` on a 25 ms grid;
-- energy, contact-field, increment and time-course distances;
+- energy, contact-field and increment distances, plus a non-selecting time-course diagnostic;
 - model-ictal fail-closed scoring;
 - selection-aware target permutations.
 
@@ -116,8 +116,8 @@ For up to three model-ictal full-dose candidates, run the predeclared selection 
 `1811,1812,1813` with common random numbers and the complete recorder. Rank by:
 
 1. model-ictal eligible proportion;
-2. median `J_bridge`;
-3. worst-seed `J_bridge`;
+2. median `J_early_bridge`;
+3. worst-seed `J_early_bridge`;
 4. distance from the exact Z/M reference.
 
 Write `selection_results.json` and freeze one winner. If no candidate is eligible on at least
@@ -140,7 +140,7 @@ Repeat the complete candidate/window scoring under:
 - gradient-preserving surrogate targets;
 - static-axis amplitude-only and uniform-energy controls.
 
-Report the null minimum `J_bridge`. Rescore 2% and 5% comparators using the same target and readout
+Report the null minimum `J_early_bridge`. Rescore 2% and 5% comparators using the same target and readout
 algorithm, but do not allow them to become the primary Z/M-only winner.
 
 ## Task 8: figures and GIF

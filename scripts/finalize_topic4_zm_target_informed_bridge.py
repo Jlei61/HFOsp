@@ -87,17 +87,18 @@ def _report(out, terminal_status):
             f"- 全部候选总数（含 2%/5% 等历史 edge-dose 对照）：{stage1['n_candidates']}。",
         ])
         if evaluable:
-            best = min(evaluable, key=lambda row: row["J_bridge_without_time"])
+            best = min(evaluable, key=lambda row: row["J_early_bridge"])
             lines.append(
                 f"- fit seed 最佳 full-dose 候选：`{best['candidate_id']}`，"
-                f"J={best['J_bridge_without_time']:.3f}，"
+                f"J_early={best['J_early_bridge']:.3f}，"
                 f"contact rho={best['field']['early_spearman']:.3f}。")
     lines.extend(["", "## Selection 与 confirmation", ""])
     if selection is not None:
         for row in selection["candidate_summary"]:
             lines.append(
                 f"- `{row['candidate_id']}`：eligible {row['n_eligible']}/{row['n_runs']}，"
-                f"median J={_fmt(row['median_J_bridge'])}，worst J={_fmt(row['worst_J_bridge'])}。")
+                f"median J_early={_fmt(row['median_J_early_bridge'])}，"
+                f"worst J_early={_fmt(row['worst_J_early_bridge'])}。")
     else:
         lines.append("未进入 selection 或 selection 未完成。")
     if confirmation is not None:
@@ -106,7 +107,7 @@ def _report(out, terminal_status):
             f"{confirmation['n_eligible']}/{confirmation['n_seeds']}。")
         for row in confirmation["records"]:
             lines.append(
-                f"- seed {row['seed']}：{row['status']}，J={_fmt(row.get('J_bridge_without_time'))}，"
+                f"- seed {row['seed']}：{row['status']}，J_early={_fmt(row.get('J_early_bridge'))}，"
                 f"rho={_fmt((row.get('field') or {}).get('early_spearman'))}。")
     lines.extend(["", "## Selection-aware null", ""])
     if nulls is None:
@@ -114,7 +115,7 @@ def _report(out, terminal_status):
     else:
         for row in nulls["nulls"]:
             lines.append(
-                f"- {row['mode']}：observed min J={row['observed_minimum_J']:.3f}，"
+                f"- {row['mode']}：observed min J_early={row['observed_minimum_J_early']:.3f}，"
                 f"null median={row['null_median']:.3f}，P={row['lower_tail_p']:.4f}。")
     lines.extend([
         "", "## 结论边界", "",

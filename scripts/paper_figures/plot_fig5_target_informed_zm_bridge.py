@@ -39,9 +39,9 @@ def _display_record(confirmation):
                 if row["status"] == "BRIDGE_EVALUABLE"]
     if not eligible:
         raise RuntimeError("confirmation has no bridge-evaluable trajectory")
-    median = float(np.median([row["J_bridge_without_time"] for row in eligible]))
+    median = float(np.median([row["J_early_bridge"] for row in eligible]))
     return min(eligible, key=lambda row: (
-        abs(row["J_bridge_without_time"] - median), row["seed"]))
+        abs(row["J_early_bridge"] - median), row["seed"]))
 
 
 def _filter(trace, dt_ms, band=(30.0, 80.0)):
@@ -271,7 +271,7 @@ def main():
     target_npz = np.load(results / "clinical_target_vectors.npz", allow_pickle=False)
     null_payload = _load(results / "selection_aware_null.json")
     null_summary = [{key: value for key, value in row.items()
-                     if key != "null_minimum_J"}
+                     if key != "null_minimum_J_early"}
                     for row in null_payload["nulls"]]
     metadata = _main_figure(
         out, candidate_npz, candidate_payload, record, confirmation,

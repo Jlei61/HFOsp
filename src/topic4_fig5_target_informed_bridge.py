@@ -441,7 +441,7 @@ def rank_selection_candidates(records, minimum_eligible=2):
     summary = []
     for candidate_id, rows in grouped.items():
         scores = np.asarray([
-            row["J_bridge_without_time"] for row in rows
+            row["J_early_bridge"] for row in rows
             if row.get("status") == "BRIDGE_EVALUABLE"
         ], float)
         parameters = dict(rows[0].get("parameters") or {})
@@ -451,15 +451,15 @@ def rank_selection_candidates(records, minimum_eligible=2):
             "n_runs": len(rows),
             "n_eligible": int(len(scores)),
             "eligible_proportion": float(len(scores) / len(rows)),
-            "median_J_bridge": (float(np.median(scores)) if len(scores) else None),
-            "worst_J_bridge": (float(np.max(scores)) if len(scores) else None),
+            "median_J_early_bridge": (float(np.median(scores)) if len(scores) else None),
+            "worst_J_early_bridge": (float(np.max(scores)) if len(scores) else None),
             "selection_eligible": bool(len(scores) >= int(minimum_eligible)),
         })
     summary.sort(key=lambda row: (
         not row["selection_eligible"],
         -row["eligible_proportion"],
-        float("inf") if row["median_J_bridge"] is None else row["median_J_bridge"],
-        float("inf") if row["worst_J_bridge"] is None else row["worst_J_bridge"],
+        float("inf") if row["median_J_early_bridge"] is None else row["median_J_early_bridge"],
+        float("inf") if row["worst_J_early_bridge"] is None else row["worst_J_early_bridge"],
         row["candidate_id"],
     ))
     return summary

@@ -162,10 +162,10 @@ def main():
     eligible = [row for row in stage1["records"]
                 if row.get("status") == "BRIDGE_EVALUABLE"
                 and row.get("primary_zm_only")]
-    eligible.sort(key=lambda row: row["J_bridge_without_time"])
+    eligible.sort(key=lambda row: row["J_early_bridge"])
     candidates = [{"candidate_id": row["candidate_id"],
                    "parameters": row["parameters"],
-                   "stage1_J_bridge": row["J_bridge_without_time"]}
+                   "stage1_J_early_bridge": row["J_early_bridge"]}
                   for row in eligible[:3]]
     if not candidates:
         _atomic(status_path, {
@@ -202,6 +202,7 @@ def main():
         "selection_summary": viable[0],
         "frozen_commit": _git_head(),
         "readout_algorithm": config["model_readout"],
+        "model_ictal_qualification": config["model_ictal_qualification"],
         "claim_boundary": "development-only target-informed Z/M bridge",
     }
     _atomic(OUT / "WORKPOINT_TARGET_INFORMED_FROZEN.json", workpoint)

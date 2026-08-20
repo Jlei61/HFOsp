@@ -66,12 +66,12 @@ def selection_null(records, target, shafts, *, mode, draws, seed):
         "mode": mode,
         "draws": int(draws),
         "seed": int(seed),
-        "observed_minimum_J": float(observed),
+        "observed_minimum_J_early": float(observed),
         "null_q05": float(np.quantile(null, 0.05)),
         "null_median": float(np.median(null)),
         "null_q95": float(np.quantile(null, 0.95)),
         "lower_tail_p": float((1 + np.sum(null <= observed + 1e-15)) / (len(null) + 1)),
-        "null_minimum_J": null,
+        "null_minimum_J_early": null,
     }
 
 

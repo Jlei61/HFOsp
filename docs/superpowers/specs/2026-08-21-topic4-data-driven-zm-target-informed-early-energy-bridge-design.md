@@ -210,24 +210,27 @@ For both model and patient, subtract the contact median from the early-minus-pre
 the two vectors with patient-bootstrap-scaled L1 distance. This prevents a candidate from winning
 only because the static interictal axis was already present before onset.
 
-### 8.4 Time course
+### 8.4 Time-course diagnostic
 
 `D_time` compares the normalized progression of global energy, TA similarity and spatial
 increment over fixed pre/early landmarks. It does not match patient seconds to model
-milliseconds.
+milliseconds. Because this rev5 experiment is authorized specifically to fit the *early* energy
+gradient, `D_time` is a frozen post-selection diagnostic and does not enter work-point selection.
+It may motivate a later lifecycle experiment but cannot silently change the rev5 winner.
 
 ### 8.5 Combined objective
 
 ```text
-J_field  = LSE_0.25(D_contact, D_increment)
-J_bridge = mean(D_energy, J_field, D_time)
-           + LSE_0.25(D_energy, J_field, D_time)
-           + R_robustness
+J_field        = LSE_0.25(D_contact, D_increment)
+J_early_bridge = mean(D_energy, J_field)
+                 + LSE_0.25(D_energy, J_field)
+                 + R_robustness
 ```
 
-`R_robustness` penalizes model-ictal failure, missing readout windows and strong seed or onset
-sensitivity. It never rewards higher absolute patient correlation alone. Every component and
-unscaled vector is saved.
+Model-ictal failure and missing readout windows receive no finite score. Seed robustness is
+implemented as the predeclared 2/3 selection and confirmation requirement rather than an
+arbitrary additive penalty. Onset sensitivity is reported after freezing. The score never rewards
+higher absolute patient correlation alone. Every component and unscaled vector is saved.
 
 ## 9. Fit, selection and confirmation
 
@@ -254,7 +257,7 @@ or stop individual cells.
 ### Stage 2: selection
 
 Run the top eligible Z/M-only candidates on a predeclared selection seed set. Rank by median
-`J_bridge`, then worst-seed `J_bridge`, then distance from the exact Z/M reference. A candidate
+`J_early_bridge`, then worst-seed `J_early_bridge`, then distance from the exact Z/M reference. A candidate
 must remain model-ictal eligible on most selection seeds. The patient target is fixed throughout.
 
 ### Stage 3: frozen confirmation
@@ -273,7 +276,7 @@ Before interpreting the minimum fitted loss:
 1. rerun the complete candidate/window selection against contact-permuted patient targets;
 2. use within-shaft permutations and spatial-gradient-preserving surrogate targets;
 3. compare against static-axis amplitude-only and uniform-energy model controls;
-4. report the null distribution of the minimum `J_bridge`, not only the selected candidate's
+4. report the null distribution of the minimum `J_early_bridge`, not only the selected candidate's
    nominal correlation;
 5. compare the winner with 2%/5% edge-dose comparators without allowing those comparators to alter
    the primary Z/M-only conclusion.

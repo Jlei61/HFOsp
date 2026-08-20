@@ -161,8 +161,8 @@ def _score_one(json_path, npz_path, payload, baseline, target_payload, target_np
     shaft_ids = target_npz["shaft_ids"].astype(str)
     field = score_energy_field(model_pre_z, model_early_z, target, shaft_ids)
     energy = score_energy_burden(model_early_z, target)
-    j_bridge = float(np.mean([energy["D_energy"], field["J_field"]])
-                     + lse([energy["D_energy"], field["J_field"]]))
+    j_early = float(np.mean([energy["D_energy"], field["J_field"]])
+                    + lse([energy["D_energy"], field["J_field"]]))
     row.update({
         "status": "BRIDGE_EVALUABLE",
         "model_ictal_qualification": qualification,
@@ -172,8 +172,8 @@ def _score_one(json_path, npz_path, payload, baseline, target_payload, target_np
         "model_early_robust_z": model_early_z,
         "energy": energy,
         "field": field,
-        "J_bridge_without_time": j_bridge,
-        "time_component_status": "PENDING_FINE_GRAINED_TARGET",
+        "J_early_bridge": j_early,
+        "time_course_status": "FROZEN_POST_SELECTION_DIAGNOSTIC_NOT_IN_OBJECTIVE",
     })
     return row
 
@@ -219,7 +219,7 @@ def main():
     ]
     records.sort(key=lambda row: (
         row["status"] != "BRIDGE_EVALUABLE",
-        row.get("J_bridge_without_time", float("inf")),
+        row.get("J_early_bridge", float("inf")),
         row["candidate_id"],
     ))
     payload = {
@@ -241,7 +241,7 @@ def main():
     with (out / "existing_candidate_rescore.csv").open("w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=[
             "candidate_id", "status", "primary_zm_only", "edge_dose_comparator",
-            "J_bridge_without_time", "D_energy", "D_contact", "D_increment",
+            "J_early_bridge", "D_energy", "D_contact", "D_increment",
             "early_spearman", "rate_ratio", "reason"])
         writer.writeheader()
         for row in records:
@@ -250,7 +250,7 @@ def main():
                 "status": row["status"],
                 "primary_zm_only": row["primary_zm_only"],
                 "edge_dose_comparator": row["edge_dose_comparator"],
-                "J_bridge_without_time": row.get("J_bridge_without_time"),
+                "J_early_bridge": row.get("J_early_bridge"),
                 "D_energy": (row.get("energy") or {}).get("D_energy"),
                 "D_contact": (row.get("field") or {}).get("D_contact"),
                 "D_increment": (row.get("field") or {}).get("D_increment"),
