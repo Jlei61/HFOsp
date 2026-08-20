@@ -100,6 +100,11 @@ def main():
         "candidates": candidates,
     }
     _atomic(out / "stage1b_manifest.json", manifest)
+    _atomic(out / "selection_controller.json", {
+        "status": "STAGE1B_REFINEMENT_RUNNING",
+        "source": "stage1b_controller",
+        "timestamp_epoch": time.time(),
+    })
     pending = [row for row in candidates if "reuse" not in row]
     units = {}
     seed = int(config["fit"]["fit_seed"])
