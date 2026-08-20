@@ -151,6 +151,26 @@ def _score_one(json_path, npz_path, payload, baseline, target_payload, target_np
     return row
 
 
+def build_paired_baseline(baseline_path, readout_cfg):
+    baseline_path = Path(baseline_path)
+    with np.load(baseline_path, allow_pickle=False) as z:
+        trace = np.asarray(z["lfp_trace"], float)
+        dt = float(z["lfp_dt_ms"])
+        names = np.asarray(z["contact_names"]).astype(str)
+        rate = np.asarray(z["rate_E_hz"], float)
+    windows = nonoverlap_log_power_windows(
+        trace, dt, window_ms=float(readout_cfg["baseline_window_ms"]),
+        band_hz=readout_cfg["primary_band_hz"])
+    rate_smoothed = smooth_rate(rate, dt, 20.0)
+    return {
+        "log_power_windows": windows,
+        "contact_names": names,
+        "centroid_reference_trace": _slice(trace, dt, 500.0, 1000.0),
+        "median_smoothed_rate_hz": float(np.median(
+            _slice(rate_smoothed, dt, 500.0, 1000.0))),
+    }
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", default="config/topic4_data_driven_zm_target_informed_bridge_v1.json")
@@ -161,26 +181,8 @@ def main():
     baseline_path = out / "paired_baseline/seed1801_zmoff.npz"
     if not baseline_path.exists():
         raise FileNotFoundError(baseline_path)
-    with np.load(baseline_path, allow_pickle=False) as z:
-        baseline_trace = np.asarray(z["lfp_trace"], float)
-        baseline_dt = float(z["lfp_dt_ms"])
-        baseline_names = np.asarray(z["contact_names"]).astype(str)
-        baseline_rate = np.asarray(z["rate_E_hz"], float)
     target_data = np.load(out / "clinical_target_vectors.npz", allow_pickle=False)
-    target_names = target_data["contact_names"].astype(str)
-    baseline_windows = nonoverlap_log_power_windows(
-        baseline_trace, baseline_dt,
-        window_ms=float(config["model_readout"]["baseline_window_ms"]),
-        band_hz=config["model_readout"]["primary_band_hz"])
-    baseline_reference_trace = _slice(baseline_trace, baseline_dt, 500.0, 1000.0)
-    baseline_rate_smoothed = smooth_rate(baseline_rate, baseline_dt, 20.0)
-    baseline = {
-        "log_power_windows": baseline_windows,
-        "contact_names": baseline_names,
-        "centroid_reference_trace": baseline_reference_trace,
-        "median_smoothed_rate_hz": float(np.median(_slice(
-            baseline_rate_smoothed, baseline_dt, 500.0, 1000.0))),
-    }
+    baseline = build_paired_baseline(baseline_path, config["model_readout"])
     records = [
         _score_one(jpath, npath, payload, baseline, target_payload, target_data,
                    config["model_readout"])
@@ -199,7 +201,7 @@ def main():
         "patient_target_role": "development target; display seizure 2 excluded",
         "baseline": {
             "path": str(baseline_path.relative_to(ROOT)),
-            "n_nonoverlap_windows": int(len(baseline_windows)),
+            "n_nonoverlap_windows": int(len(baseline["log_power_windows"])),
             "median_smoothed_rate_hz": baseline["median_smoothed_rate_hz"],
         },
         "n_candidates": len(records),

@@ -310,6 +310,38 @@ def score_energy_burden(model_early, target: Mapping[str, object]):
     }
 
 
+def rank_selection_candidates(records, minimum_eligible=2):
+    """Rank candidate groups without pooling seeds as independent replicates."""
+    grouped = {}
+    for row in records:
+        grouped.setdefault(str(row["candidate_id"]), []).append(row)
+    summary = []
+    for candidate_id, rows in grouped.items():
+        scores = np.asarray([
+            row["J_bridge_without_time"] for row in rows
+            if row.get("status") == "BRIDGE_EVALUABLE"
+        ], float)
+        parameters = dict(rows[0].get("parameters") or {})
+        summary.append({
+            "candidate_id": candidate_id,
+            "parameters": parameters,
+            "n_runs": len(rows),
+            "n_eligible": int(len(scores)),
+            "eligible_proportion": float(len(scores) / len(rows)),
+            "median_J_bridge": (float(np.median(scores)) if len(scores) else None),
+            "worst_J_bridge": (float(np.max(scores)) if len(scores) else None),
+            "selection_eligible": bool(len(scores) >= int(minimum_eligible)),
+        })
+    summary.sort(key=lambda row: (
+        not row["selection_eligible"],
+        -row["eligible_proportion"],
+        float("inf") if row["median_J_bridge"] is None else row["median_J_bridge"],
+        float("inf") if row["worst_J_bridge"] is None else row["worst_J_bridge"],
+        row["candidate_id"],
+    ))
+    return summary
+
+
 def jsonable(value):
     if isinstance(value, np.ndarray):
         return value.tolist()

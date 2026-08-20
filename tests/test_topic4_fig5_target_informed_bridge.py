@@ -5,6 +5,7 @@ from src.topic4_fig5_target_informed_bridge import (
     exact_contact_reorder,
     lse,
     nonoverlap_log_power_windows,
+    rank_selection_candidates,
     robust_z_against_reference,
     select_state_defined_readout,
     shaft_balanced_scaled_l1,
@@ -101,3 +102,20 @@ def test_smoothed_rate_makes_sparse_reference_median_resolvable():
     rate[::50] = 1000.0
     assert np.median(rate) == 0.0
     assert np.median(smooth_rate(rate, 0.1, 20.0)) > 0.0
+
+
+def test_selection_ranking_requires_two_eligible_seeds_before_loss():
+    rows = [
+        {"candidate_id": "a", "status": "BRIDGE_EVALUABLE",
+         "J_bridge_without_time": 1.0, "parameters": {}},
+        {"candidate_id": "a", "status": "FAIL", "parameters": {}},
+        {"candidate_id": "a", "status": "FAIL", "parameters": {}},
+        {"candidate_id": "b", "status": "BRIDGE_EVALUABLE",
+         "J_bridge_without_time": 5.0, "parameters": {}},
+        {"candidate_id": "b", "status": "BRIDGE_EVALUABLE",
+         "J_bridge_without_time": 6.0, "parameters": {}},
+        {"candidate_id": "b", "status": "FAIL", "parameters": {}},
+    ]
+    ranked = rank_selection_candidates(rows, minimum_eligible=2)
+    assert ranked[0]["candidate_id"] == "b"
+    assert ranked[0]["selection_eligible"] is True
