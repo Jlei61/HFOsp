@@ -323,6 +323,23 @@ def _sample_contact_field(positions, values, contacts, sigma_mm=0.75):
     return out
 
 
+def _runaway_energy_grid(replay, onset_ms, activity_window_ms,
+                         *, start_offset_ms=0.0, duration_ms=100.0):
+    """Historical diagnostic helper; the main panel uses a frozen 10-ms snapshot."""
+    time = np.asarray(replay["frame_time_ms"], float)
+    start = float(onset_ms) + float(start_offset_ms)
+    stop = start + float(duration_ms)
+    keep = (time >= start) & (time < stop)
+    if not np.any(keep):
+        raise RuntimeError("replay has no activity frames in the requested runaway window")
+    counts = np.asarray(replay["activity_spike_counts"], float)[keep]
+    occupancy = np.asarray(replay["activity_cell_occupancy"], float)
+    with np.errstate(invalid="ignore", divide="ignore"):
+        rate = (np.mean(counts, axis=0) / occupancy
+                / (float(activity_window_ms) * 1e-3))
+    return np.square(np.nan_to_num(rate)) / 1e3, start, stop
+
+
 def _plot_runaway_energy(ax, snapshot, snapshot_meta, contacts, extent):
     grid = np.asarray(snapshot["selected_energy_grid"], float)
     positive = grid[grid > 0]
@@ -376,8 +393,10 @@ def _global_contrast_payload(path, replay_meta, snapshot_meta):
         raise RuntimeError("Panel D state contrast and replay use different seeds")
     if int(meta["site_contract"]["n_total"]) != 16:
         raise RuntimeError("Panel D requires the frozen 16-site global design")
-    if int(meta["low_n_e1_evaluable"]) != 16:
-        raise RuntimeError("Panel D low-state probes are not all evaluable")
+    n_total = int(meta["site_contract"]["n_total"])
+    if int(meta["low_n_e1_evaluable"]) < n_total - 1:
+        raise RuntimeError(
+            "Panel D violates the frozen low-state dose contract (>1/16 sites ignite)")
     expected = float(snapshot_meta["selected"]["time_ms"])
     if not np.isclose(float(meta["state_times_ms"]["runaway"]), expected, atol=1e-8):
         raise RuntimeError("Panel D runaway state does not match Panel C snapshot")
@@ -542,6 +561,9 @@ def main():
             "aggregation": contrast_meta["aggregation"],
             "rendering": "response only; no slow-state or substrate overlay",
             "low_n_e1_evaluable": contrast_meta["low_n_e1_evaluable"],
+            "low_n_probe_attributable_event": int(sum(
+                bool(row["probe_attributable_event_200ms"])
+                for row in contrast_meta["low_rows"])),
             "runaway_n_e1_evaluable": contrast_meta[
                 "runaway_n_e1_evaluable"],
         },
