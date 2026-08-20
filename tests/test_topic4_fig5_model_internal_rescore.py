@@ -7,7 +7,9 @@ import pytest
 from scripts.freeze_topic4_zm_discovery_boundary import (
     ForbiddenInputError, load_audit_config)
 from scripts.rescore_topic4_fig5_model_internal_candidates import (
-    _open_npz, build_shortlist, load_calibration_run, load_worker_run)
+    _aggregate_over_runs, _open_npz, build_shortlist, load_calibration_run,
+    load_worker_run, run_contact_layer_joint, run_cross_state,
+    run_layer_verdicts)
 from src.topic4_fig5_ictal_bridge import NOT_EVALUABLE
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,6 +43,7 @@ def _summary(key, *, arm="calibrated_transition", eligible=1.0, retained=None,
                         "network_aggregate": aggregate,
                         "edge_flow": NOT_EVALUABLE},
         "cross_state_discovery_eligible": cross_state,
+        "qualification_sensitivity": [],
         "missing_evidence": [],
     }
 
@@ -62,11 +65,88 @@ def test_shortlist_never_exceeds_three_and_reads_no_clinical_input():
     assert len(shortlist["shortlist"]) == 3
     assert shortlist["maximum_shortlist_size"] == 3
     assert shortlist["clinical_inputs_used"] is False
+    assert shortlist["is_frozen_workpoint"] is False
 
 
-def test_without_a_layer2_candidate_the_status_is_model_ictal_only():
+def test_without_a_layer2_candidate_it_is_a_replication_design_set():
     shortlist = build_shortlist([_summary("a"), _summary("b")])
-    assert shortlist["status"] == "MODEL_ICTAL_ONLY_SHORTLIST"
+    assert shortlist["status"] == "REPLICATION_DESIGN_SET"
+    assert shortlist["is_frozen_workpoint"] is False
+    assert "not a frozen shortlist" in shortlist["why_not_frozen"]
+
+
+def test_a_degenerate_ordering_is_declared_as_such():
+    """All keys above the distance tie-break equal means no science ranked it."""
+    tied = [_summary(f"c{i}", distance=float(i)) for i in range(4)]
+    assert build_shortlist(tied)["ordering_is_degenerate"] is True
+    separated = tied + [_summary("better", eligible=0.5, distance=0.0)]
+    assert build_shortlist(separated)["ordering_is_degenerate"] is False
+
+
+def test_the_canary_and_its_stop_rule_are_recorded():
+    requirements = build_shortlist([_summary("a")])["next_round_requirements"]
+    canary = requirements["canary_before_any_replication"]
+    assert canary["post_onset_record_ms_minimum"] >= 1200.0
+    assert canary["combined_recorder"] is True
+    assert "STOP" in canary["stop_rule"]
+    assert requirements["if_the_canary_stops"]["name"] == (
+        "staged_release_continuity_assay")
+
+
+def _verdict_row(eligible, repertoire_verdict, rank_ok, precedence_ok):
+    layer1 = ({"status": NOT_EVALUABLE} if eligible is None
+              else {"status": "x", "eligible": eligible})
+    repertoire = ({"status": NOT_EVALUABLE} if repertoire_verdict is None
+                  else {"status": "OK", "verdict": repertoire_verdict})
+    if rank_ok is None or precedence_ok is None:
+        motif = {"status": NOT_EVALUABLE}
+    else:
+        motif = {"status": "OK",
+                 "rank_reuse": {"status": "OK",
+                                "null": {"reuse_supported": rank_ok}},
+                 "precedence_reuse": {"status": "OK",
+                                      "null": {"reuse_supported": precedence_ok}}}
+    return {"run": "r", "seed": 1, "layer1_model_ictal": layer1,
+            "layer2_repertoire": repertoire, "layer2_motif": motif}
+
+
+def test_layers_cannot_be_assembled_from_different_runs():
+    """One run supplying each layer must not add up to a cross-state candidate."""
+    runs = [_verdict_row(True, None, None, None),
+            _verdict_row(None, "REPERTOIRE_RETAINED", None, None),
+            _verdict_row(None, None, True, True)]
+    per_run = [run_cross_state(run_layer_verdicts(row)) for row in runs]
+    assert per_run == [None, None, None]
+    assert _aggregate_over_runs(per_run) == NOT_EVALUABLE
+    contact = [run_contact_layer_joint(run_layer_verdicts(row)) for row in runs]
+    assert contact == [None, None, None]
+    assert _aggregate_over_runs(contact) == NOT_EVALUABLE
+
+
+def test_insufficient_preictal_evidence_is_none_not_false():
+    verdict = run_layer_verdicts(
+        _verdict_row(True, "PREICTAL_EVIDENCE_INSUFFICIENT", True, True))
+    assert verdict["repertoire_retained"] is None
+    assert run_cross_state(verdict) is None
+    assert run_contact_layer_joint(verdict) is None
+
+
+def test_one_contact_family_alone_does_not_support_the_contact_layer():
+    verdict = run_layer_verdicts(
+        _verdict_row(True, "REPERTOIRE_RETAINED", True, False))
+    assert verdict["contact_order_supported"] is False
+    both = run_layer_verdicts(
+        _verdict_row(True, "REPERTOIRE_RETAINED", True, True))
+    assert both["contact_order_supported"] is True
+    assert run_contact_layer_joint(both) is True
+
+
+def test_the_motif_gate_stays_unanswerable_while_edge_flow_is_missing():
+    verdict = run_layer_verdicts(
+        _verdict_row(True, "REPERTOIRE_RETAINED", True, True))
+    assert verdict["motif_gate"] is None
+    assert "edge-flow" in verdict["motif_gate_reason"]
+    assert run_cross_state(verdict) is None
 
 
 def test_a_layer2_candidate_flips_the_status_and_outranks_a_closer_one():
@@ -105,14 +185,19 @@ def test_spatial_reregistration_controls_never_enter_the_pool():
     assert "ctl" not in {row["candidate_key"] for row in shortlist["excluded"]}
 
 
-@pytest.mark.skipif(not (AUDIT / "model_internal_shortlist.json").exists(),
-                    reason="rescore artifact not built in this checkout")
-def test_written_shortlist_declares_no_clinical_input_and_respects_the_cap():
-    shortlist = json.loads((AUDIT / "model_internal_shortlist.json").read_text())
+@pytest.mark.skipif(
+    not (AUDIT / "model_internal_replication_design_set.json").exists(),
+    reason="rescore artifact not built in this checkout")
+def test_written_design_set_declares_no_clinical_input_and_respects_the_cap():
+    shortlist = json.loads(
+        (AUDIT / "model_internal_replication_design_set.json").read_text())
     assert shortlist["clinical_inputs_used"] is False
+    assert shortlist["is_frozen_workpoint"] is False
     assert len(shortlist["shortlist"]) <= 3
     rescore = json.loads((AUDIT / "model_internal_candidate_rescore.json").read_text())
     assert rescore["simulation_launched"] is False
     assert rescore["clinical_ictal_target_read"] is False
     for row in rescore["candidates"]:
         assert row["motif_reuse"]["edge_flow"] == NOT_EVALUABLE
+        assert row["motif_reuse"]["gate_status"] == NOT_EVALUABLE
+        assert row["cross_state_discovery_eligible"] == NOT_EVALUABLE

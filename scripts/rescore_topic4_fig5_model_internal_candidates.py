@@ -39,11 +39,14 @@ from scripts.freeze_topic4_zm_discovery_boundary import (  # noqa: E402
 from scripts.run_topic4_rev10_sa_spectral_field_worker import (  # noqa: E402
     _contact_onsets)
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
-from src.topic4_fig5_cross_state import evaluate_repertoire, shaft_groups  # noqa: E402
+from src.topic4_fig5_cross_state import (  # noqa: E402
+    PREICTAL_EVIDENCE_INSUFFICIENT, REPERTOIRE_RETAINED, evaluate_repertoire,
+    shaft_groups)
 from src.topic4_fig5_ictal_bridge import (  # noqa: E402
     NOT_EVALUABLE, qualification_sensitivities, qualify_model_ictal_v2,
     sheet_bin_occupancy)
 from src.topic4_fig5_motif_reuse import (  # noqa: E402
+    CONTACT_CLAIM_BOUNDARY, contact_geometry_diagnostic,
     network_precedence_reuse, network_rank_reuse, reuse_trajectory)
 
 READOUT = {"participation_margin_fraction": 0.1, "timing_fraction": 0.5}
@@ -95,6 +98,8 @@ def load_worker_run(config, json_path):
             "rate_E_hz": np.asarray(handle["rate_E_hz"], float),
             "contact_names": [str(v) for v in handle["contact_names"]],
             "positions_E": np.asarray(handle["positions_E"], float),
+            "h": np.asarray(handle["h"], float),
+            "contact_xy_mm": np.asarray(handle["contact_xy_mm"], float),
         }
     return payload, arrays
 
@@ -161,15 +166,19 @@ def layer2_repertoire(config, contracts, payload, arrays):
     onset_ms = payload["run"]["model_ictal_onset_ms"]
     duration_ms = len(arrays["rate_E_hz"]) * 0.1
     t_ictal = (float(onset_ms) - 100.0) if onset_ms is not None else None
+    # a pre-onset event can only be observed before the transition, so the
+    # exposure is the time up to the detector, not the whole record
+    exposure_ms = float(onset_ms) if onset_ms is not None else duration_ms
     row = evaluate_repertoire(
         arrays["onsets"], arrays["event_returned"], arrays["event_before_onset"],
         groups=contracts["groups"], embedding=contracts["embedding"],
         classifier=contracts["classifier"], contact_xy=contracts["contact_xy"],
         contact_names=contracts["contact_names"],
-        gate=config["repertoire_gate"], duration_ms=duration_ms,
+        gate=config["repertoire_gate"], preictal_exposure_ms=exposure_ms,
         event_t_on_ms=arrays["event_t_on_ms"],
         event_t_off_ms=arrays["event_t_off_ms"], t_ictal_ms=t_ictal)
     row["status"] = "OK"
+    row["recorded_duration_ms"] = duration_ms
     return row
 
 
@@ -236,12 +245,17 @@ def layer2_motif(config, contracts, payload, arrays, repertoire):
         rank.get("per_event_spearman", []), time_to_transition,
         n_draws=int(frozen["onset_circular_shift"]["draws"]),
         seed=int(frozen["onset_circular_shift"]["seed"]))
+    geometry = contact_geometry_diagnostic(
+        arrays["contact_xy_mm"], arrays["positions_E"], arrays["h"],
+        event_ranks, early_ranks)
     return {
         "status": "OK",
         "early_ictal_window_notes": notes,
         "n_early_recruited_contacts": int(np.isfinite(early_onsets).sum()),
+        "claim_boundary": CONTACT_CLAIM_BOUNDARY,
         "rank_reuse": rank,
         "precedence_reuse": precedence,
+        "fixed_geometry_diagnostic": geometry,
         "trajectory": trajectory,
         "edge_flow_reuse": {
             "status": NOT_EVALUABLE,
@@ -258,6 +272,71 @@ def _candidate_key(row):
         row["arm"], parameters["candidate_id"], row.get("field_transform", "none"),
         *[f"{name}={float(parameters[name]):.12g}" for name in
           ("I_th_EI", "tau_z", "tau_adp", "eta_m", "E_to_E_dose", "E_to_I_dose")]])
+
+
+def run_layer_verdicts(row):
+    """Three-valued verdict per LAYER for ONE run.
+
+    None means the archive cannot answer the layer for this run. It must never
+    be read as False, and it must never be filled in from a different run.
+    """
+    layer1 = row["layer1_model_ictal"]
+    eligible = (None if layer1["status"] == NOT_EVALUABLE
+                else bool(layer1.get("eligible")))
+
+    repertoire = row["layer2_repertoire"]
+    if repertoire.get("status") != "OK":
+        retained = None
+    elif repertoire.get("verdict") == PREICTAL_EVIDENCE_INSUFFICIENT:
+        retained = None                      # observation time, not content
+    else:
+        retained = repertoire.get("verdict") == REPERTOIRE_RETAINED
+
+    motif = row["layer2_motif"]
+    if motif.get("status") != "OK":
+        contact_order = None
+    else:
+        rank = motif.get("rank_reuse", {})
+        precedence = motif.get("precedence_reuse", {})
+        if rank.get("status") != "OK" or precedence.get("status") != "OK":
+            contact_order = None
+        else:
+            # both contact families must hold; one of them alone is not the
+            # contact-level result, let alone the whole motif gate
+            contact_order = bool(rank["null"].get("reuse_supported")
+                                 and precedence["null"].get("reuse_supported"))
+    return {
+        "run": row.get("run"),
+        "seed": row.get("seed"),
+        "model_ictal_eligible": eligible,
+        "repertoire_retained": retained,
+        "contact_order_supported": contact_order,
+        # the spec's motif gate spans the rank, precedence AND edge-flow
+        # families. No archived artifact carries a per-window recurrent-E edge
+        # flow, so the gate itself is unanswerable for every run in this round;
+        # substituting the contact families for it would be a different claim.
+        "motif_gate": None,
+        "motif_gate_reason": ("edge-flow family has no observed statistic in the "
+                              "archive"),
+    }
+
+
+def run_cross_state(verdict):
+    """Same-run conjunction. A missing layer makes the run unanswerable."""
+    parts = (verdict["model_ictal_eligible"], verdict["repertoire_retained"],
+             verdict["motif_gate"])
+    if any(part is None for part in parts):
+        return None
+    return bool(all(parts))
+
+
+def run_contact_layer_joint(verdict):
+    """Same-run conjunction over the layers that CAN be answered."""
+    parts = (verdict["model_ictal_eligible"], verdict["repertoire_retained"],
+             verdict["contact_order_supported"])
+    if any(part is None for part in parts):
+        return None
+    return bool(all(parts))
 
 
 def _proportion(values):
@@ -375,11 +454,14 @@ def rescore(config, *, limit_seeds=None, with_sensitivities=True):
 
 def summarise_candidate(key, rows, config):
     first = rows[0]
-    eligible = [None if row["layer1_model_ictal"]["status"] == NOT_EVALUABLE
-                else bool(row["layer1_model_ictal"].get("eligible"))
-                for row in rows]
-    retained = [None if row["layer2_repertoire"]["status"] == NOT_EVALUABLE
-                else bool(row["layer2_repertoire"]["retained"]) for row in rows]
+    verdicts = [run_layer_verdicts(row) for row in rows]
+    cross_per_run = [run_cross_state(v) for v in verdicts]
+    contact_joint_per_run = [run_contact_layer_joint(v) for v in verdicts]
+    eligible = [v["model_ictal_eligible"] for v in verdicts]
+    retained = [v["repertoire_retained"] for v in verdicts]
+    insufficient = sum(1 for row in rows
+                       if row["layer2_repertoire"].get("verdict")
+                       == PREICTAL_EVIDENCE_INSUFFICIENT)
     # a negative agreement that merely clears a more-negative null is not reuse
     reuse = [row["layer2_motif"].get("rank_reuse", {}).get("null", {})
              .get("reuse_supported") for row in rows
@@ -449,6 +531,7 @@ def summarise_candidate(key, rows, config):
         },
         "repertoire": {
             "n_evaluable": sum(1 for v in retained if v is not None),
+            "n_preictal_evidence_insufficient": insufficient,
             "retained_proportion": _proportion(retained),
             "n_retained": sum(1 for v in retained if v),
             "failing_clauses": sorted({clause for row in rows for clause in
@@ -456,6 +539,11 @@ def summarise_candidate(key, rows, config):
                                            "failing_clauses", [])}),
         },
         "motif_reuse": {
+            "gate_status": NOT_EVALUABLE,
+            "gate_reason": ("the spec's gate spans the rank, precedence AND "
+                            "edge-flow families; the edge family has no observed "
+                            "statistic in the archive"),
+            "claim_boundary": CONTACT_CLAIM_BOUNDARY,
             "n_evaluable": len(reuse_values),
             "n_supporting_reuse": sum(1 for v in reuse if v),
             "n_exceeding_null_q95_including_negative": sum(
@@ -463,19 +551,36 @@ def summarise_candidate(key, rows, config):
             "network_aggregate": aggregate,
             "edge_flow": NOT_EVALUABLE,
         },
-        "cross_state_discovery_eligible": _cross_state(eligible, retained, reuse),
+        "per_run_layer_verdicts": verdicts,
+        "same_run_joint": {
+            "n_runs": len(rows),
+            "n_runs_all_three_layers_evaluable": sum(
+                1 for value in cross_per_run if value is not None),
+            "n_runs_contact_layers_evaluable": sum(
+                1 for value in contact_joint_per_run if value is not None),
+            "n_runs_contact_layers_joint_true": sum(
+                1 for value in contact_joint_per_run if value is True),
+            "contact_layer_joint": _aggregate_over_runs(contact_joint_per_run),
+        },
+        "cross_state_discovery_eligible": _aggregate_over_runs(cross_per_run),
         "qualification_sensitivity": sensitivity,
         "missing_evidence": missing,
     }
 
 
-def _cross_state(eligible, retained, reuse):
-    """Layer 2 gate: it can be False, but it can also be simply unanswerable."""
-    if all(v is None for v in eligible) or all(v is None for v in retained):
+def _aggregate_over_runs(per_run):
+    """Aggregate a same-run conjunction over paired network seeds.
+
+    Combining the three layers with a separate ``any()`` each would let one
+    network supply the high state, a second the repertoire and a third the
+    order agreement, and still call the candidate a cross-state candidate. The
+    conjunction is formed inside each run first; only then is it aggregated.
+    """
+    if all(value is None for value in per_run):
         return NOT_EVALUABLE
-    if not any(eligible) or not any(retained) or not any(reuse):
-        return False
-    return bool(any(eligible) and any(retained) and any(reuse))
+    if any(value is True for value in per_run):
+        return True
+    return False
 
 
 def build_shortlist(summaries):
@@ -511,8 +616,35 @@ def build_shortlist(summaries):
     shortlist = ranked[:3]
     layer2 = [row for row in shortlist
               if row["cross_state_discovery_eligible"] is True]
+
+    # Is the ordering actually being decided by science, or has it collapsed onto
+    # the last tie-break? With one run per calibrated candidate and Layer 2
+    # unanswerable, the first four keys are constant across the pool and only the
+    # parameter distance separates the entries. Saying so is part of the result.
+    prefixes = {tuple(sort_key(row)[:4]) for row in pool}
+    degenerate = len(prefixes) <= 1 and len(pool) > 1
     return {
-        "status": ("CROSS_STATE_SHORTLIST" if layer2 else "MODEL_ICTAL_ONLY_SHORTLIST"),
+        "status": ("CROSS_STATE_SHORTLIST" if layer2
+                   else "REPLICATION_DESIGN_SET"),
+        "is_frozen_workpoint": False,
+        "why_not_frozen": (
+            "no candidate satisfies the cross-state gate on a single run, and "
+            "with one run per calibrated candidate the eligible proportion is "
+            "binary, so nothing here selects a work point. This is a design set "
+            "for replication, not a frozen shortlist."),
+        "ordering_is_degenerate": bool(degenerate),
+        "ordering_note": (
+            "the first four lexicographic keys are constant across the pool; the "
+            "order shown is decided entirely by distance from the exact Fig.4 "
+            "point and carries no evidential ranking"
+            if degenerate else
+            "at least one lexicographic key above the distance tie-break "
+            "separates the pool"),
+        "robustness_is_reported_not_selected_on": (
+            "onset_shift_stable and passes_duty_0p9 appear in the table but do "
+            "not enter the ordering; the pre-registered rule has no robustness "
+            "step. The top entry may therefore be less robust than the ones "
+            "below it."),
         "selection_rule": [
             "1 highest model-ictal eligible proportion",
             "2 passes repertoire retention and matched-null motif reuse",
@@ -525,6 +657,38 @@ def build_shortlist(summaries):
         "shortlist_detail": shortlist,
         "excluded": excluded,
         "maximum_shortlist_size": 3,
+        "next_round_requirements": {
+            "rationale": (
+                "the exact Fig.4 carry-over arm ALREADY runs the event detector "
+                "and still yields only 1-12 pre-onset returned events, because it "
+                "enters the high state at 2.5-4.5 s. Merging the two recorders "
+                "does not create a twentieth event, so a combined recorder is "
+                "necessary but not sufficient and a large replication must not be "
+                "launched on the assumption that it is."),
+            "canary_before_any_replication": {
+                "combined_recorder": True,
+                "post_onset_record_ms_minimum": 1200.0,
+                "must_store": ["per-event contact onsets and ranks",
+                               "rolling F_E and F_sheet traces",
+                               "contact traces through W_freq"],
+                "readout": "returned pre-onset event count",
+                "stop_rule": (
+                    "if the pre-onset returned-event count is still well below "
+                    "20, STOP. Do not lower the gate and do not scale up."),
+            },
+            "if_the_canary_stops": {
+                "name": "staged_release_continuity_assay",
+                "design": (
+                    "collect interictal events with the slow variables frozen "
+                    "until the event budget is met, then release Z/M "
+                    "continuously without resetting fast state or the noise "
+                    "stream"),
+                "answers": "controlled cross-state continuity",
+                "does_not_answer": (
+                    "natural onset latency; the assay must be labelled as such "
+                    "and never reported as a spontaneous transition"),
+            },
+        },
     }
 
 
@@ -609,7 +773,8 @@ def main():
         "runs": runs,
     }
     atomic_write_json(payload, str(output_root / "model_internal_candidate_rescore.json"))
-    atomic_write_json(shortlist, str(output_root / "model_internal_shortlist.json"))
+    atomic_write_json(shortlist,
+                      str(output_root / "model_internal_replication_design_set.json"))
     rows = list(_csv_rows(summaries))
     with open(output_root / "model_internal_candidate_rescore.csv", "w",
               newline="") as handle:
@@ -618,7 +783,8 @@ def main():
         writer.writerows(rows)
     print(json.dumps({
         "n_runs": len(runs), "n_candidates": len(summaries),
-        "shortlist_status": shortlist["status"],
+        "status": shortlist["status"],
+        "ordering_is_degenerate": shortlist["ordering_is_degenerate"],
         "shortlist": shortlist["shortlist"],
         "n_pool": shortlist["n_pool"],
     }, indent=1))
