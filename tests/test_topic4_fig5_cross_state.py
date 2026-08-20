@@ -59,12 +59,13 @@ def _fixture(reference_events, index):
 
 
 def _evaluate(config, contracts, onsets, returned, before, t_on, t_off,
-              gate=None, duration_ms=20000.0, t_ictal_ms=None):
+              gate=None, preictal_exposure_ms=20000.0, t_ictal_ms=None):
     return evaluate_repertoire(
         onsets, returned, before, groups=contracts["groups"],
         embedding=contracts["embedding"], classifier=contracts["classifier"],
         contact_xy=contracts["contact_xy"], contact_names=contracts["contact_names"],
-        gate=gate or config["repertoire_gate"], duration_ms=duration_ms,
+        gate=gate or config["repertoire_gate"],
+        preictal_exposure_ms=preictal_exposure_ms,
         event_t_on_ms=t_on, event_t_off_ms=t_off, t_ictal_ms=t_ictal_ms)
 
 
@@ -77,17 +78,52 @@ def test_a_healthy_event_set_is_retained(config, contracts, reference_events):
     index = np.concatenate([reference_events["mode0"][:15],
                             reference_events["mode1"][:15]])
     row = _evaluate(config, contracts, *_fixture(reference_events, index))
-    assert row["retained"] is True, row["failing_clauses"]
+    assert row["verdict"] == "REPERTOIRE_RETAINED", row["failing_clauses"]
+    assert row["evidence_sufficient"] is True
     assert row["measures"]["n_returned"] == 30
     assert min(row["measures"]["mode_counts"]) >= 3
 
 
-def test_too_few_events_fails_only_the_count_clause(config, contracts,
-                                                    reference_events):
+def test_too_few_events_is_insufficient_evidence_not_a_lost_repertoire(
+        config, contracts, reference_events):
+    """The clause that fails is observation time, so the verdict must say so."""
     index = np.concatenate([reference_events["mode0"][:6],
                             reference_events["mode1"][:6]])
     row = _evaluate(config, contracts, *_fixture(reference_events, index))
     assert row["failing_clauses"] == ["n_returned_before_onset_at_least_20"]
+    assert row["verdict"] == "PREICTAL_EVIDENCE_INSUFFICIENT"
+    assert row["evidence_sufficient"] is False
+    assert "observation-time limit" in row["insufficiency_reason"]
+
+
+def test_uncomputable_alignment_is_insufficient_evidence(config, contracts,
+                                                         reference_events):
+    """Too few clean events to regroup at all is missing evidence, not content."""
+    pool = np.concatenate([reference_events["mode0"], reference_events["mode1"]])
+    index = np.resize(pool, 25)       # 25 returned events, enough for the count
+    onsets, returned, before, t_on, t_off = _fixture(reference_events, index)
+    censored = onsets.copy()
+    censored[3:, :] = np.nan          # only 3 events remain readable
+    row = _evaluate(config, contracts, censored, returned, before, t_on, t_off)
+    assert row["measures"]["n_returned"] == 25
+    assert row["measures"]["balanced_alignment_status"] == NOT_EVALUABLE
+    assert row["verdict"] == "PREICTAL_EVIDENCE_INSUFFICIENT"
+
+
+def test_event_rate_uses_preonset_exposure_not_record_length(
+        config, contracts, reference_events):
+    index = np.concatenate([reference_events["mode0"][:15],
+                            reference_events["mode1"][:15]])
+    args = _fixture(reference_events, index)
+    early = _evaluate(config, contracts, *args, preictal_exposure_ms=4000.0)
+    late = _evaluate(config, contracts, *args, preictal_exposure_ms=20000.0)
+    assert early["preictal_exposure_ms"] == 4000.0
+    assert early["distributions"]["event_rate_hz"] == pytest.approx(30 / 4.0)
+    assert late["distributions"]["event_rate_hz"] == pytest.approx(30 / 20.0)
+    assert early["distributions"]["event_rate_hz"] > late["distributions"][
+        "event_rate_hz"]
+    with pytest.raises(ValueError):
+        _evaluate(config, contracts, *args, preictal_exposure_ms=0.0)
 
 
 def test_a_missing_mode_fails_the_mode_clause(config, contracts, reference_events):
@@ -130,7 +166,7 @@ def test_censoring_one_shaft_worsens_the_metrics_instead_of_hiding_events(
     assert censored["measures"]["n_returned"] == intact["measures"]["n_returned"]
     assert sum(censored["measures"]["mode_counts"]) < sum(
         intact["measures"]["mode_counts"])
-    assert censored["retained"] is False
+    assert censored["verdict"] != "REPERTOIRE_RETAINED"
     assert censored["distributions"]["shaft_participation"]["n_joint"] == 0
     assert (censored["distributions"]["recruitment_size"]["median"]
             < intact["distributions"]["recruitment_size"]["median"])
@@ -223,6 +259,8 @@ def test_reproduces_the_historical_canary_repertoire_numbers(config, contracts):
         assert row["measures"]["ood_fraction"] == pytest.approx(
             expected["measures"]["ood_fraction"], rel=1e-9)
         assert row["retained"] == expected["retained"]
+        assert row["verdict"] in ("REPERTOIRE_RETAINED", "REPERTOIRE_NOT_RETAINED",
+                                  "PREICTAL_EVIDENCE_INSUFFICIENT")
         assert row["failing_clauses"] == expected["failing_clauses"]
         checked += 1
     assert checked >= 12, f"only {checked} historical networks re-scored"

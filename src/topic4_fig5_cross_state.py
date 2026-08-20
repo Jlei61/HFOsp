@@ -165,11 +165,36 @@ def rank_profile_similarity(onsets, labels, clean):
     return output
 
 
+REPERTOIRE_RETAINED = "REPERTOIRE_RETAINED"
+REPERTOIRE_NOT_RETAINED = "REPERTOIRE_NOT_RETAINED"
+PREICTAL_EVIDENCE_INSUFFICIENT = "PREICTAL_EVIDENCE_INSUFFICIENT"
+
+
 def evaluate_repertoire(onsets, event_returned, event_before_onset, *, groups,
                         embedding, classifier, contact_xy, contact_names,
-                        gate, duration_ms, event_t_on_ms=None,
+                        gate, preictal_exposure_ms, event_t_on_ms=None,
                         event_t_off_ms=None, t_ictal_ms=None):
-    """The four historical clauses, plus the full returned-event distribution."""
+    """The four historical clauses, as a THREE-valued verdict.
+
+    The historical gate is conjunctive and binary, so "fewer than 20 returned
+    events before onset" collapses into "the repertoire was not retained". Those
+    are different statements, and across the Z/M arms they are systematically
+    confounded: the arms enter the high state at very different times (roughly
+    2.5-4.5 s for the exact carry-over arm against 7.0-10.0 s for the node-only
+    arm), so the arm with the shortest pre-transition dwell has the fewest
+    chances to emit an event. A binary verdict turns that difference in
+    OBSERVATION TIME into an apparent difference in mode content.
+
+    The count clause is therefore treated as an evidence precondition. When it
+    fails -- or when too few clean events exist for the alignment to be computed
+    at all -- the verdict is PREICTAL_EVIDENCE_INSUFFICIENT, never
+    REPERTOIRE_NOT_RETAINED.
+
+    ``preictal_exposure_ms`` is required rather than defaulted: the event rate
+    must be divided by the time during which a pre-onset event could have been
+    observed, not by the whole record, which includes the post-transition tail.
+    A default would silently restore the wrong denominator.
+    """
     scored = score_events(
         onsets, event_returned, event_before_onset, groups=groups,
         embedding=embedding, classifier=classifier, contact_xy=contact_xy,
@@ -203,9 +228,12 @@ def evaluate_repertoire(onsets, event_returned, event_before_onset, *, groups,
             bool(np.isfinite(alignment)
                  and alignment >= float(gate["balanced_alignment_q05"])),
     }
+    exposure_ms = float(preictal_exposure_ms)
+    if not np.isfinite(exposure_ms) or exposure_ms <= 0.0:
+        raise ValueError("preictal_exposure_ms must be finite and positive")
     endpoints = network_mode_endpoints(
         {**scored["assigned"], "clean": clean, "returned": eligible},
-        duration_ms)
+        exposure_ms)
     participation = all_event_shaft_participation(onsets[eligible], groups) \
         if n_returned else {"n_events": 0}
 
@@ -221,8 +249,32 @@ def evaluate_repertoire(onsets, event_returned, event_before_onset, *, groups,
     ranges = [row["spatial_range_mm"] for row in scored["rows"] if row["scored"]]
     recruitment = [row["n_recruited_contacts"] for row in scored["rows"]
                    if row["scored"]]
+    enough_events = clauses["n_returned_before_onset_at_least_20"]
+    alignment_computable = alignment_status == "OK"
+    if not enough_events:
+        verdict = PREICTAL_EVIDENCE_INSUFFICIENT
+        insufficiency = (
+            f"only {n_returned} returned events before the transition; the gate "
+            f"needs {int(gate['minimum_returned_events_before_onset'])}. This is "
+            f"an observation-time limit, not evidence that a mode was lost.")
+    elif not alignment_computable:
+        verdict = PREICTAL_EVIDENCE_INSUFFICIENT
+        insufficiency = (
+            f"only {int(clean.sum())} events pass the frozen classifier filter, "
+            f"too few for the unsupervised regrouping to be computed at all")
+    elif all(clauses.values()):
+        verdict = REPERTOIRE_RETAINED
+        insufficiency = None
+    else:
+        verdict = REPERTOIRE_NOT_RETAINED
+        insufficiency = None
     return {
+        "verdict": verdict,
+        # kept for continuity with the historical gate; never read as a
+        # content statement on its own
         "retained": all(clauses.values()),
+        "evidence_sufficient": verdict != PREICTAL_EVIDENCE_INSUFFICIENT,
+        "insufficiency_reason": insufficiency,
         "clauses": clauses,
         "failing_clauses": [name for name, ok in clauses.items() if not ok],
         "measures": {
@@ -233,8 +285,10 @@ def evaluate_repertoire(onsets, event_returned, event_before_onset, *, groups,
             "balanced_alignment_status": alignment_status,
             "n_clean": int(clean.sum()),
         },
+        "preictal_exposure_ms": exposure_ms,
         "distributions": {
-            "event_rate_hz": n_returned / max(float(duration_ms) / 1000.0, 1e-9),
+            # per second of PRE-ONSET exposure, not per second of record
+            "event_rate_hz": n_returned / (exposure_ms / 1000.0),
             "mode_endpoints": endpoints,
             "classifier_confidence": {
                 "median": float(np.median(confidences)) if confidences else None,
