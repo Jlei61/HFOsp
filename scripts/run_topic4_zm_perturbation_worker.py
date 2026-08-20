@@ -43,7 +43,8 @@ from src.topic4_zm_perturbation import (  # noqa: E402
 
 
 def _continue(substrate, config, state, *, duration_ms, packet=None,
-              accumulate_steps=0, early_stop=False):
+              accumulate_steps=0, early_stop=False, checkpoint_steps=None,
+              checkpoint_sink=None):
     """One continuation from a checkpoint. `packet=None` is the sham."""
     from kick_probe import simulate_kick
     from params import Params
@@ -71,7 +72,9 @@ def _continue(substrate, config, state, *, duration_ms, packet=None,
         es_thresh_hz=float(config["simulation"]["es_thresh_hz"]),
         es_dur_ms=float(config["simulation"]["es_dur_ms"]),
         external_e_rate_drive=drive,
-        resume_state=copy.deepcopy(state), time_offset_ms=offset, **kwargs)
+        resume_state=copy.deepcopy(state), time_offset_ms=offset,
+        checkpoint_steps=checkpoint_steps, checkpoint_sink=checkpoint_sink,
+        **kwargs)
     return result, slow
 
 
