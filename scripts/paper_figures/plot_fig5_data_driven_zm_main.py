@@ -3,12 +3,12 @@
 
 A  one continuous signed 30-80 Hz virtual-contact current-proxy readout
 B  h-weighted Z/M trajectory
-C  one rule-selected interictal event and early-runaway activity energy
-D  signed response to one frozen probe at low activity and runaway onset
+C  one rule-selected interictal event and a TA/TB-matched runaway snapshot
+D  response averaged over paired full-sheet random probe locations
 
 The diagnostic three-panel GIF remains a supplement. This producer never
-re-simulates the SNN.  Panel C uses the same raw 0-20 mm sheet coordinates as
-Figure 4; Panel D consumes an exact-resume state contrast from this trajectory.
+re-simulates the SNN. Panel C uses the same raw 0-20 mm sheet coordinates as
+Figure 4; Panel D consumes an exact-resume global state contrast.
 """
 from __future__ import annotations
 
@@ -299,9 +299,9 @@ def _plot_event_order(ax, replay, positions, contacts, extent):
         relative = first[valid] - float(np.nanmin(first[valid]))
         duration = max(float(np.nanmax(relative)), 1e-9)
         neuron_order = relative / duration * max_rank
-        ax.scatter(positions[valid, 0], positions[valid, 1], s=0.70,
+        ax.scatter(positions[valid, 0], positions[valid, 1], s=1.45,
                    c=neuron_order, cmap="viridis",
-                   norm=Normalize(0, max_rank), alpha=0.48,
+                   norm=Normalize(0, max_rank), alpha=0.82,
                    linewidths=0, rasterized=True)
     contact_valid = np.isfinite(ranks)
     mappable = ax.scatter(contacts[contact_valid, 0], contacts[contact_valid, 1], s=43,
@@ -323,28 +323,8 @@ def _sample_contact_field(positions, values, contacts, sigma_mm=0.75):
     return out
 
 
-def _runaway_energy_grid(replay, onset_ms, activity_window_ms,
-                         *, start_offset_ms=0.0, duration_ms=100.0):
-    time = np.asarray(replay["frame_time_ms"], float)
-    start = float(onset_ms) + float(start_offset_ms)
-    stop = start + float(duration_ms)
-    keep = (time >= start) & (time < stop)
-    if not np.any(keep):
-        raise RuntimeError("replay has no activity frames in the requested runaway window")
-    counts = np.asarray(replay["activity_spike_counts"], float)[keep]
-    occupancy = np.asarray(replay["activity_cell_occupancy"], float)
-    with np.errstate(invalid="ignore", divide="ignore"):
-        rate = np.mean(counts, axis=0) / occupancy / (float(activity_window_ms) * 1e-3)
-    energy = np.square(np.nan_to_num(rate)) / 1e3
-    return energy, start, stop
-
-
-def _plot_runaway_energy(ax, replay, contacts, extent, onset_ms,
-                         activity_window_ms, start_offset_ms=0.0):
-    energy, start, stop = _runaway_energy_grid(
-        replay, onset_ms, activity_window_ms,
-        start_offset_ms=start_offset_ms, duration_ms=100.0)
-    grid = gaussian_filter(energy, sigma=1.15)
+def _plot_runaway_energy(ax, snapshot, snapshot_meta, contacts, extent):
+    grid = np.asarray(snapshot["selected_energy_grid"], float)
     positive = grid[grid > 0]
     high = float(np.percentile(positive, 99.0)) if positive.size else 1.0
     mappable = ax.imshow(
@@ -359,67 +339,49 @@ def _plot_runaway_energy(ax, replay, contacts, extent, onset_ms,
     ax.scatter(contacts[:, 0], contacts[:, 1], s=43,
                c=contact_energy, cmap="Blues", vmin=0.0, vmax=high,
                ec="black", lw=0.75, zorder=5)
-    ax.set_title("Runaway activity energy (0 to +100 ms)",
+    ax.set_title("Early-runaway activity energy",
                  fontsize=10.0, fontweight="bold")
     _style_spatial(ax, extent, show_ylabel=False)
-    return mappable, {"window_start_ms": start, "window_stop_ms": stop,
-                      "measure": ("square of the 100-ms mean local E-neuron "
-                                  "firing rate, displayed in 1e3 Hz^2"),
-                      "spatial_smoothing_sigma_bins": 1.15}
+    selected = snapshot_meta["selected"]
+    return mappable, {
+        "snapshot_time_ms": float(selected["time_ms"]),
+        "winning_template": str(selected["winning_template"]),
+        "winning_template_identity_r": float(selected["selection_score"]),
+        "ta_identity_r": float(selected["ta_identity_r"]),
+        "tb_identity_r": float(selected["tb_identity_r"]),
+        "active_E_fraction": float(selected["active_E_fraction"]),
+        "recruited_sheet_fraction": float(selected["recruited_sheet_fraction"]),
+        "sustained_global_fraction": float(selected["sustained_global_fraction"]),
+        "measure": snapshot_meta["spatial_energy"]["measure"],
+        "selection_contract": snapshot_meta["selection_contract"],
+    }
 
 
-def _probe_inset(ax):
-    inset = ax.inset_axes([0.05, 0.66, 0.27, 0.27])
-    xx = np.linspace(-1, 1, 35)
-    x, y = np.meshgrid(xx, xx)
-    g = np.exp(-(x * x + y * y) / 0.12)
-    inset.imshow(g, origin="lower", cmap="Greys", extent=(-1, 1, -1, 1))
-    inset.set_xticks([]); inset.set_yticks([])
-    for side in inset.spines.values(): side.set_visible(False)
-    inset.set_title("spatial probe", fontsize=6.8, loc="left", pad=1.5)
-
-
-def _plot_response(ax, contacts, response_grid, probe_xy, extent, title, vmax,
-                   show_ylabel=False, show_probe=False):
+def _plot_response(ax, contacts, response_grid, extent, title, vmax,
+                   show_ylabel=False):
     image = ax.imshow(response_grid.T, origin="lower", extent=(*extent, *extent),
                       cmap="RdBu_r", vmin=-vmax, vmax=vmax,
                       interpolation="bilinear")
     ax.scatter(contacts[:, 0], contacts[:, 1], s=16, fc="white", ec="0.2",
                lw=0.45, alpha=0.85, zorder=4)
-    ax.scatter([probe_xy[0]], [probe_xy[1]], s=36, fc="none", ec="white",
-               lw=1.0, zorder=5)
     ax.set_title(title, fontsize=10.0, fontweight="bold")
     _style_spatial(ax, extent, show_ylabel=show_ylabel)
-    if show_probe:
-        _probe_inset(ax)
     return image
 
 
-def _state_contrast_payload(path, replay_meta, *, baseline_early_ceiling):
+def _global_contrast_payload(path, replay_meta, snapshot_meta):
     block = _load_npz(path)
     meta = json.loads(Path(path).with_suffix(".json").read_text())
-    if not bool(meta.get("continuation_rate_exact")):
-        raise RuntimeError("Panel D continuation does not match the verified replay")
     if int(meta["seed"]) != int(replay_meta["seed"]):
         raise RuntimeError("Panel D state contrast and replay use different seeds")
-    if meta["workpoint_parameters"] != replay_meta["workpoint_parameters"]:
-        raise RuntimeError("Panel D state contrast and replay use different work points")
-    doses = np.asarray(block["dose_cells"], int)
-    eligible = [
-        row for row in meta["low_probe_scan"]
-        if bool(row["e1_evaluable"])
-        and abs(float(row["excess_spikes_early"])) <= float(baseline_early_ceiling)
-    ]
-    if not eligible:
-        raise RuntimeError("Panel D has no near-zero low-activity probe dose")
-    selected = max(int(row["dose_cells"]) for row in eligible)
-    where = np.flatnonzero(doses == selected)
-    if where.size != 1:
-        raise RuntimeError("Panel D selected probe dose is not unique")
-    low_rows = {int(row["dose_cells"]): row for row in meta["low_probe_scan"]}
-    if not bool(low_rows[selected]["e1_evaluable"]):
-        raise RuntimeError("Panel D selected dose ignites the low-activity network")
-    return block, meta, int(where[0]), selected
+    if int(meta["site_contract"]["n_total"]) != 16:
+        raise RuntimeError("Panel D requires the frozen 16-site global design")
+    if int(meta["low_n_e1_evaluable"]) != 16:
+        raise RuntimeError("Panel D low-state probes are not all evaluable")
+    expected = float(snapshot_meta["selected"]["time_ms"])
+    if not np.isclose(float(meta["state_times_ms"]["runaway"]), expected, atol=1e-8):
+        raise RuntimeError("Panel D runaway state does not match Panel C snapshot")
+    return block, meta
 
 
 def main():
@@ -428,11 +390,10 @@ def main():
     parser.add_argument("--replay", default=(
         "results/topic4_sef_hfo/data_driven_zm_ictal_transition/fig5_replay/"
         "joint_04_control_seed_1801_frames.npz"))
-    parser.add_argument("--state-contrast", required=True)
+    parser.add_argument("--mode-snapshot", required=True)
+    parser.add_argument("--global-state-contrast", required=True)
     parser.add_argument("--out-dir", default="results/paper-ready-figure/fig5/figures")
     parser.add_argument("--sheet-size-mm", type=float, default=20.0)
-    parser.add_argument("--baseline-early-response-ceiling", type=float, default=50.0)
-    parser.add_argument("--display-onset-offset-ms", type=float, default=300.0)
     parser.add_argument("--allow-exploratory-workpoint", action="store_true")
     parser.add_argument("--stem", default="fig5-data-driven-zm-main")
     args = parser.parse_args()
@@ -457,9 +418,12 @@ def main():
         raise RuntimeError(f"replay predates the main-figure contract; missing {missing}")
 
     config = json.loads((ROOT / args.config).read_text())
+    snapshot_path = ROOT / args.mode_snapshot
+    snapshot = _load_npz(snapshot_path)
+    snapshot_meta = json.loads(snapshot_path.with_suffix(".json").read_text())
     morphology_onset_ms = float(replay_meta.get(
         "morphology_onset_ms", replay_meta["model_ictal_onset_ms"]))
-    display_onset_ms = morphology_onset_ms + float(args.display_onset_offset_ms)
+    display_onset_ms = float(snapshot_meta["selected"]["time_ms"])
     display_window_start_ms = max(0.0, morphology_onset_ms - 1200.0)
     extent = (0.0, float(args.sheet_size_mm))
     positions = np.asarray(replay["positions_E"], float)
@@ -467,14 +431,12 @@ def main():
     if (np.min(positions) < extent[0] - 1e-9
             or np.max(positions) > extent[1] + 1e-9):
         raise RuntimeError("Panel C positions fall outside the Figure 4 sheet coordinates")
-    contrast, contrast_meta, dose_index, selected_dose = _state_contrast_payload(
-        ROOT / args.state_contrast, replay_meta,
-        baseline_early_ceiling=float(args.baseline_early_response_ceiling))
+    contrast, contrast_meta = _global_contrast_payload(
+        ROOT / args.global_state_contrast, replay_meta, snapshot_meta)
     if not np.array_equal(positions.astype(np.float32), contrast["positions_E"]):
         raise RuntimeError("Panel D state contrast uses a different neuron sheet")
-    probe_xy = np.asarray(contrast["site_xy_mm"], float)
-    low_response = np.asarray(contrast["low_response_early"][dose_index], float)
-    post_response = np.asarray(contrast["post_response_early"][dose_index], float)
+    low_response = np.asarray(contrast["low_response_early_mean"], float)
+    post_response = np.asarray(contrast["runaway_response_early_mean"], float)
     low_response_grid = _grid_mean(
         positions, low_response, extent, n=100, positive=False)
     post_response_grid = _grid_mean(
@@ -485,12 +447,6 @@ def main():
     if grid_values.size == 0:
         raise RuntimeError("Panel D has no nonzero signed response in either state")
     vmax = max(float(np.percentile(grid_values, 99.5)), 1e-6)
-    expected_post_time = display_onset_ms
-    if not np.isclose(float(contrast_meta["post_time_ms"]), expected_post_time,
-                      atol=1e-6):
-        raise RuntimeError(
-            "Panel D post state does not match the figure high-state onset")
-
     fig = plt.figure(figsize=(15.4, 7.4), facecolor="white")
     outer = fig.add_gridspec(2, 1, height_ratios=[0.78, 1.10],
                              left=0.055, right=0.985, bottom=0.09, top=0.96,
@@ -509,16 +465,13 @@ def main():
     trajectory_meta = _plot_trajectory(ax_b, replay, display_onset_ms, eta_m)
     rank_map = _plot_event_order(ax_c1, replay, positions, contacts, extent)
     energy_map, energy_meta = _plot_runaway_energy(
-        ax_c2, replay, contacts, extent, display_onset_ms,
-        float(replay_meta["activity_window_ms"]), start_offset_ms=0.0)
+        ax_c2, snapshot, snapshot_meta, contacts, extent)
     response_map = _plot_response(
-        ax_d1, contacts, low_response_grid, probe_xy, extent,
-        "Low-activity response (1.0 s)", vmax,
-        show_ylabel=False, show_probe=True)
+        ax_d1, contacts, low_response_grid, extent,
+        "Low-activity mean response", vmax, show_ylabel=False)
     _plot_response(
-        ax_d2, contacts, post_response_grid, probe_xy, extent,
-        "Runaway-onset response", vmax,
-        show_ylabel=False, show_probe=False)
+        ax_d2, contacts, post_response_grid, extent,
+        "Early-runaway mean response", vmax, show_ylabel=False)
 
     _panel_label(rate_ax, "A", x=-0.075, y=1.35)
     _panel_label(ax_b, "B", x=-0.18, y=1.16)
@@ -533,7 +486,7 @@ def main():
                         fontsize=7.2)
     cb_energy.ax.tick_params(labelsize=6.8)
     cb_resp = fig.colorbar(response_map, ax=[ax_d1, ax_d2], fraction=0.026, pad=0.018)
-    cb_resp.set_label("signed probe effect\n(0-50 ms excess spikes per local E cell)",
+    cb_resp.set_label("mean signed probe effect\n(0-50 ms excess spikes per local E cell)",
                       fontsize=7.2)
     cb_resp.ax.tick_params(labelsize=6.8)
 
@@ -567,30 +520,30 @@ def main():
             "formal_morphology_onset_ms": morphology_onset_ms,
             "figure_high_state_onset_ms": display_onset_ms,
             "figure_offset_from_formal_onset_ms": float(
-                args.display_onset_offset_ms),
-            "reason": ("author-selected onset of visibly global sustained high "
-                       "activity; the formal detector onset remains unchanged"),
+                display_onset_ms - morphology_onset_ms),
+            "reason": ("frozen early-runaway snapshot with strongest positive "
+                       "identity similarity to patient TA/TB field"),
         },
         "panel_C": {"event_order": ("exact per-neuron first-spike time for one "
                                       "rule-selected interictal event plus frozen "
                                       "contact order; no spatial binning or smoothing"),
                     "runaway_energy": energy_meta},
         "panel_D": {
-            "state_contrast": str((ROOT / args.state_contrast).relative_to(ROOT)),
-            "probe_site": "source (geometry-frozen; not response-selected)",
-            "dose_cells": selected_dose,
-            "dose_selection": ("largest low-activity non-igniting dose with "
-                               "absolute 0-50 ms excess <= "
-                               f"{float(args.baseline_early_response_ceiling):g} spikes; "
-                               "post-onset response was not used for selection"),
-            "low_time_ms": contrast_meta["low_time_ms"],
-            "post_time_ms": contrast_meta["post_time_ms"],
-            "post_offset_from_scientific_onset_ms": contrast_meta[
-                "post_offset_from_scientific_onset_ms"],
-            "response": "signed descendant probe-minus-sham effect, 0-50 ms",
+            "state_contrast": str(
+                (ROOT / args.global_state_contrast).relative_to(ROOT)),
+            "probe_sites": contrast_meta["site_contract"],
+            "dose_cells": int(contrast_meta["dose_cells"]),
+            "dose_selection": ("frozen 16-cell weak probe inherited from the "
+                               "low-activity source-site calibration; high-state "
+                               "responses were not used for dose selection"),
+            "low_time_ms": contrast_meta["state_times_ms"]["low_activity"],
+            "post_time_ms": contrast_meta["state_times_ms"]["runaway"],
+            "response": contrast_meta["response_window"],
+            "aggregation": contrast_meta["aggregation"],
             "rendering": "response only; no slow-state or substrate overlay",
-            "not_rendered_slow_state_context": contrast_meta["h_weighted_state"],
-            "continuation_rate_exact": contrast_meta["continuation_rate_exact"],
+            "low_n_e1_evaluable": contrast_meta["low_n_e1_evaluable"],
+            "runaway_n_e1_evaluable": contrast_meta[
+                "runaway_n_e1_evaluable"],
         },
         "claim_boundary": ("single selected data-driven SNN trajectory and its exact-resume "
                            "paired perturbation contrast; operational model transition, not "
@@ -599,7 +552,7 @@ def main():
     }
     atomic_write_json(metadata, str(out_dir / f"{stem}-metadata.json"))
     print(json.dumps({"figure": stem, "outputs": outputs,
-                      "selected_dose_cells": selected_dose}))
+                      "selected_dose_cells": int(contrast_meta["dose_cells"])}))
 
 
 if __name__ == "__main__":
