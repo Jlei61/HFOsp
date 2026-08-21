@@ -1,0 +1,61 @@
+{
+  "status": "TOPIC4_DUAL_CORE_VS_FREE_FIELD_FIGURES_COMPLETE",
+  "comparison_summary": "/home/honglab/leijiaxin/HFOsp/.worktrees/topic4-dual-core-vs-free-field/results/topic4_sef_hfo/data_driven_dual_core_vs_free_field/comparison_summary.json",
+  "kmeans_pooled_descriptive": {
+    "hand_dual_core": {
+      "status": "OK",
+      "n_events": 339,
+      "cluster_counts": [
+        185,
+        154
+      ],
+      "direction_purity": 0.672566371681416,
+      "direction_balanced_alignment": 0.6742334494773519,
+      "direction_contingency": [
+        [
+          66,
+          119
+        ],
+        [
+          109,
+          45
+        ]
+      ],
+      "n_crossfit_direction_labeled": 339,
+      "crossfit_direction_fraction": 1.0,
+      "kmeans_seed_ami_median": 1.0,
+      "silhouette": 0.258569084949202,
+      "heldout_gmm_k2_minus_k1_loglik_per_event": 1.6818514961527857,
+      "centroid_axis_valley_gap_sd": 0.5101068362762724,
+      "absolute_cluster_extent_correlation": 0.24217308683841704
+    },
+    "continuous_free_field": {
+      "status": "OK",
+      "n_events": 457,
+      "cluster_counts": [
+        326,
+        131
+      ],
+      "direction_purity": 0.6739606126914661,
+      "direction_balanced_alignment": 0.61547670405522,
+      "direction_contingency": [
+        [
+          85,
+          241
+        ],
+        [
+          67,
+          64
+        ]
+      ],
+      "n_crossfit_direction_labeled": 457,
+      "crossfit_direction_fraction": 1.0,
+      "kmeans_seed_ami_median": 1.0,
+      "silhouette": 0.29599122200881534,
+      "heldout_gmm_k2_minus_k1_loglik_per_event": 3.236440006833854,
+      "centroid_axis_valley_gap_sd": 0.7074418689184387,
+      "absolute_cluster_extent_correlation": 0.2791666796950723
+    }
+  },
+  "claim_boundary": "development-only comparison of Node-field representations; no connectivity, Z/M, ictal, patient-blind, anatomical-core or clinical-waveform claim"
+}

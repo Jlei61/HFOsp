@@ -4,6 +4,7 @@ from pathlib import Path
 import numpy as np
 
 from scripts.run_topic4_rev10_sa_spectral_field_worker import _candidate_node
+from scripts.aggregate_topic4_dual_core_vs_free_field import _event_masks
 from src.topic4_continuous_field import continuous_field_h
 from src.topic4_core_field_rev9 import reconstruct_node_from_h
 from src.topic4_manual_dual_core import (
@@ -110,3 +111,16 @@ def test_comparison_config_freezes_equal_budget_and_zero_edge_rows():
     assert config["search"]["simulation"]["duration_ms"] == 20000.0
     assert config["search"]["confirmation_network_seeds"] == list(range(1561, 1573))
     assert config["search"]["beta"] == "closed"
+
+
+def test_single_shaft_event_remains_in_distribution_but_not_kmeans():
+    onsets = np.asarray([
+        [0.0, 1.0, 2.0, np.nan, np.nan],
+        [0.0, 1.0, 2.0, 3.0, np.nan],
+    ])
+    masks = _event_masks(
+        onsets, np.asarray([True, True]), np.asarray([False, False]),
+        {"ICL": np.asarray([0, 1, 2]), "SCL": np.asarray([3, 4])},
+    )
+    assert np.array_equal(masks["distribution"], [True, True])
+    assert np.array_equal(masks["formal_kmeans"], [False, True])
