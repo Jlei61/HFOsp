@@ -40,6 +40,7 @@ from src.topic4_graph_edge_flow import (  # noqa: E402
 from src.topic4_local_connectivity import (  # noqa: E402
     continuous_local_e_source_flow,
 )
+from src.topic4_manual_dual_core import dual_core_query_h  # noqa: E402
 from src.topic4_spatial_edge_flow import spatial_vector_ee_flow  # noqa: E402
 from src.topic4_spatial_ou_drive import (  # noqa: E402
     SpatialOUConfig,
@@ -123,6 +124,7 @@ def main():
         "development_only_data_driven_node_local_connectivity_joint_selection",
         "development_only_data_driven_node_local_connectivity_frozen_confirmation",
         "development_only_data_driven_node_local_connectivity_mechanism_confirmation",
+        "development_only_hand_dual_core_vs_continuous_field_distribution_comparison",
     }
     if config["scientific_role"] not in allowed_roles:
         raise RuntimeError("rev10-R scientific role changed")
@@ -163,6 +165,7 @@ def main():
         "REV11NLC_JOINT_NODE_CONNECTIVITY_SELECTION_LIBRARY_FROZEN",
         "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN",
         "REV11NLC_PATHWAY_MECHANISM_CONFIRMATION_LIBRARY_FROZEN",
+        "REV11NLC_DUAL_CORE_COMPARISON_LIBRARY_FROZEN",
     }
     if (manifest.get("status") not in allowed_manifests
             or manifest.get("config", {}).get("sha256") != _sha256(config_path)):
@@ -272,18 +275,37 @@ def main():
             "REV11NLC_JOINT_NODE_CONNECTIVITY_FIT_LIBRARY_FROZEN",
             "REV11NLC_JOINT_NODE_CONNECTIVITY_SELECTION_LIBRARY_FROZEN",
             "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN",
-            "REV11NLC_PATHWAY_MECHANISM_CONFIRMATION_LIBRARY_FROZEN"}:
-        if node_candidate["field_type"] != "spline_continuous":
-            raise RuntimeError("rev11-NLC requires the frozen continuous spline Node field")
-        from src.topic4_continuous_field import continuous_field_h_with_queries
-        h_e, h_i, field_query_audit = continuous_field_h_with_queries(
-            node_candidate["coefficients"], positions,
-            np.asarray(net["pos"][n_e:], float),
-            n_basis=node_candidate["n_basis"], degree=node_candidate["degree"],
-            target_count=stage["N_core_manual"], L=engine["L"],
-        )
-        if not np.array_equal(h_e, node["h"]):
-            raise RuntimeError("rev11-NLC E/I field query changed the frozen E-node field")
+            "REV11NLC_PATHWAY_MECHANISM_CONFIRMATION_LIBRARY_FROZEN",
+            "REV11NLC_DUAL_CORE_COMPARISON_LIBRARY_FROZEN"}:
+        if node_candidate["field_type"] == "spline_continuous":
+            from src.topic4_continuous_field import continuous_field_h_with_queries
+            h_e, h_i, field_query_audit = continuous_field_h_with_queries(
+                node_candidate["coefficients"], positions,
+                np.asarray(net["pos"][n_e:], float),
+                n_basis=node_candidate["n_basis"], degree=node_candidate["degree"],
+                target_count=stage["N_core_manual"], L=engine["L"],
+            )
+            if not np.array_equal(h_e, node["h"]):
+                raise RuntimeError(
+                    "rev11-NLC E/I field query changed the frozen E-node field"
+                )
+        elif node_candidate["field_type"] == "manual_dual_core_budget_matched":
+            h_e = node["h"]
+            field_audit = node["field_audit"]
+            h_i = dual_core_query_h(
+                np.asarray(net["pos"][n_e:], float),
+                np.asarray(node_candidate["centers_mm"], float),
+                distance_cutoff_mm=field_audit["distance_cutoff_mm"],
+            )
+            field_query_audit = {
+                **field_audit,
+                "query_semantics": (
+                    "E budget is exact; I field uses the frozen E distance cutoff; "
+                    "edge coefficients are exact zero in this comparison"
+                ),
+            }
+        else:
+            raise RuntimeError("rev11-NLC Node field type is unsupported")
         h_i_for_edge = h_i
         local = config["local_connectivity_basis"]
         mapped_net, edge_audit = continuous_local_e_source_flow(
