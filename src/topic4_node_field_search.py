@@ -77,7 +77,8 @@ def sobol_coarse_residuals(*, n_residuals: int, n_basis: int = 4,
 
 
 def residual_candidate(anchor: dict, residual: np.ndarray, *, amplitude: float,
-                       candidate_id: str, residual_index: int) -> dict:
+                       candidate_id: str, residual_index: int,
+                       coarse_n_basis: int = 4) -> dict:
     """Add one normalized whole-sheet residual to a frozen spline field."""
     coefficients = np.asarray(anchor["coefficients"], float)
     residual = np.asarray(residual, float)
@@ -97,7 +98,7 @@ def residual_candidate(anchor: dict, residual: np.ndarray, *, amplitude: float,
         "role": "rev12_whole_sheet_coarse_residual",
         "source_field_sha256": anchor["field_sha256"],
         "residual_coordinates": {
-            "coarse_n_basis": 4,
+            "coarse_n_basis": int(coarse_n_basis),
             "residual_index": int(residual_index),
             "signed_log_surface_rms": float(amplitude),
             "observation_coordinates_used": False,

@@ -41,3 +41,12 @@ def test_residual_candidate_changes_the_field_hash_without_components():
     assert candidate["field_sha256"] != "anchor"
     assert candidate["component_count"] is None
     assert candidate["residual_coordinates"]["observation_coordinates_used"] is False
+
+
+def test_residual_candidate_records_stage_b_control_resolution():
+    residual = np.ones((18, 18), dtype=float)
+    candidate = residual_candidate(
+        _anchor(), residual, amplitude=0.2, candidate_id="stage_b",
+        residual_index=0, coarse_n_basis=6,
+    )
+    assert candidate["residual_coordinates"]["coarse_n_basis"] == 6
