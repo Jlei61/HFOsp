@@ -1,0 +1,82 @@
+{
+  "schema_id": "topic4_rev12_nd_node_stage_b_v1",
+  "scientific_role": "development_only_node_dualmode_refit",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_b",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_b/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "selection_decision": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_selection/aggregate/selection_decision.json",
+      "sha256": "1b1824d60c7240cc4052d299934fd838fadd4e59bc51703a624c7eaf79038914"
+    },
+    "selection_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_selection/aggregate/selection_summary.json",
+      "sha256": "0740bfffeba2c0889dcdfe0a798ed3adc6a3c3e03eac9665caf060489fd5663e"
+    },
+    "selection_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_selection/candidate_manifest.json",
+      "sha256": "52ad9f8f27ce20215125a472487cff250accface421cb21d5f0230558cf1c5c8"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [],
+    "fit_network_seeds": [2141, 2142],
+    "selection_network_seeds": [2151, 2152, 2153, 2154],
+    "confirmation_network_seeds": [2131, 2132, 2133, 2134, 2135, 2136],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    },
+    "component_calibration": {
+      "events_per_side": 6,
+      "draws": 256,
+      "seed": 20260821,
+      "unit": "patient_recording_block_median_to_q95"
+    }
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 80.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2
+  },
+  "field_search": {
+    "representation": "whole_sheet_6x6_spline_residual_projected_to_18x18",
+    "stage_b_residual_count": 8,
+    "stage_b_signed_log_surface_rms": 0.2,
+    "sobol_seed": 20260822,
+    "observation_coordinates_used": false,
+    "total_field_mass_fixed": true,
+    "parent_must_improve_both_modes": true,
+    "minimum_relative_topology_separation": 0.8,
+    "maximum_reproducibility_drop": 0.05
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 4,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Stage B is a local continuous-field refinement around a fresh-network-selected parent. It remains development-only; EE, E-to-I and Z/M remain off."
+}
