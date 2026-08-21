@@ -151,6 +151,7 @@ def main() -> None:
             npz_path = output_root / "workers" / f"{stem}.npz"
             if not npz_path.exists() or not npz_path.with_suffix(".json").exists():
                 continue
+            worker_payload = json.loads(npz_path.with_suffix(".json").read_text())
             worker = _load_network_worker(
                 npz_path, patient["contact_names"], classifier,
                 semantics["raw_to_patient"],
@@ -175,6 +176,13 @@ def main() -> None:
                 "n_source_maps": int(len(maps)),
                 "worker_npz": str(npz_path),
                 "worker_npz_sha256": _sha256(npz_path),
+                "worker_status": worker_payload.get("status"),
+                "runaway_early_stop_ms": worker_payload.get(
+                    "simulation", {}
+                ).get("runaway_early_stop_ms"),
+                "expected_git_commit": worker_payload.get(
+                    "provenance", {}
+                ).get("expected_git_commit"),
             })
         if not workers:
             continue
