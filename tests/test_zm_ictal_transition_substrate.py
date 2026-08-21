@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 ROOT = Path(__file__).resolve().parents[1]
+ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 sys.path.insert(0, str(ROOT / "src" / "snn_engine"))
 sys.path.insert(0, str(ROOT))
 
@@ -16,14 +17,24 @@ from src.topic4_zm_ictal_transition import (  # noqa: E402
     build_substrate, load_round_config, verify_frozen_inputs)
 
 CONFIG = ROOT / "config/topic4_data_driven_zm_ictal_transition_v1.json"
-ARCHIVE = ROOT / ("results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc"
-                  "/frozen_substrate_confirmation/workers")
-CACHE = ROOT / "results/topic4_sef_hfo/data_driven_zm_ictal_transition/network_cache"
+ARCHIVE = ARTIFACT_ROOT / (
+    "results/topic4_sef_hfo/data_driven_local_connectivity_rev11_nlc"
+    "/frozen_substrate_confirmation/workers"
+)
+CACHE = ARTIFACT_ROOT / (
+    "results/topic4_sef_hfo/data_driven_zm_ictal_transition/network_cache"
+)
+SHARED_CACHE = ARTIFACT_ROOT / "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache"
+D62_MANIFEST = ARTIFACT_ROOT / (
+    "results/topic4_sef_hfo/data_driven_core_field_rev10_d/"
+    "continuous_field_kmeans_d6_2_joint_surface/candidate_manifest.json"
+)
+D62_WORKERS = D62_MANIFEST.parent / "workers"
 
 
 def test_frozen_inputs_verify():
     config = load_round_config(CONFIG)
-    report = verify_frozen_inputs(config)
+    report = verify_frozen_inputs(config, artifact_root=ARTIFACT_ROOT)
     assert report["all_match"] is True
     assert len(report["records"]) >= 14
 
@@ -32,14 +43,17 @@ def test_frozen_inputs_raise_on_drift(tmp_path):
     config = load_round_config(CONFIG)
     config["inputs"]["zm_baseline"]["sha256"] = "0" * 64
     with pytest.raises(RuntimeError, match="input hash changed"):
-        verify_frozen_inputs(config)
+        verify_frozen_inputs(config, artifact_root=ARTIFACT_ROOT)
 
 
 @pytest.mark.slow
 @pytest.mark.integration
 def test_seed_1561_substrate_matches_archive():
     config = load_round_config(CONFIG)
-    sub = build_substrate(config, "joint_04_control", 1561, cache_dir=str(CACHE))
+    sub = build_substrate(
+        config, "joint_04_control", 1561, cache_dir=str(CACHE),
+        artifact_root=ARTIFACT_ROOT,
+    )
     archived = json.loads((ARCHIVE / "joint_04_control_seed_1561.json").read_text())
 
     assert sub.n_e == 32000 and sub.n_i == 8000
@@ -66,7 +80,10 @@ def test_pathway_gains_are_outgoing_and_not_conserved():
     """Incoming budget is conserved per target by contract, so only the
     OUTGOING side carries the mapper's effect."""
     config = load_round_config(CONFIG)
-    sub = build_substrate(config, "joint_04_control", 1561, cache_dir=str(CACHE))
+    sub = build_substrate(
+        config, "joint_04_control", 1561, cache_dir=str(CACHE),
+        artifact_root=ARTIFACT_ROOT,
+    )
     for gain in (sub.ee_out_gain, sub.etoi_out_gain):
         finite = gain[np.isfinite(gain)]
         assert finite.size > 0.9 * sub.n_e
@@ -78,7 +95,10 @@ def test_pathway_gains_are_outgoing_and_not_conserved():
 @pytest.mark.integration
 def test_node_baseline_arm_has_a_noop_edge_mapper():
     config = load_round_config(CONFIG)
-    sub = build_substrate(config, "node_baseline", 1561, cache_dir=str(CACHE))
+    sub = build_substrate(
+        config, "node_baseline", 1561, cache_dir=str(CACHE),
+        artifact_root=ARTIFACT_ROOT,
+    )
     assert np.allclose(sub.edge_coefficients, 0.0)
     assert np.allclose(sub.ee_out_gain[np.isfinite(sub.ee_out_gain)], 1.0, atol=1e-9)
 
@@ -87,9 +107,14 @@ def test_node_baseline_arm_has_a_noop_edge_mapper():
 @pytest.mark.integration
 def test_transformed_substrate_preserves_field_mass_and_leaves_geometry_fixed():
     config = load_round_config(CONFIG)
-    plain = build_substrate(config, "joint_04_control", 1561, cache_dir=str(CACHE))
-    rotated = build_substrate(config, "joint_04_control", 1561, cache_dir=str(CACHE),
-                              field_transform="r180")
+    plain = build_substrate(
+        config, "joint_04_control", 1561, cache_dir=str(CACHE),
+        artifact_root=ARTIFACT_ROOT,
+    )
+    rotated = build_substrate(
+        config, "joint_04_control", 1561, cache_dir=str(CACHE),
+        field_transform="r180", artifact_root=ARTIFACT_ROOT,
+    )
     assert np.isclose(rotated.h_e.sum(), 1129.0, atol=1e-8)
     assert not np.allclose(rotated.h_e, plain.h_e)
     # the control moves the FIELD, never the geometry it is registered against
@@ -100,3 +125,26 @@ def test_transformed_substrate_preserves_field_mass_and_leaves_geometry_fixed():
     assert np.all(np.abs(rotated.edge_coefficients) <= bounds + 1e-12)
     assert np.allclose(np.linalg.norm(rotated.edge_coefficients[:, 4:], axis=1),
                        np.linalg.norm(plain.edge_coefficients[:, 4:], axis=1))
+
+
+@pytest.mark.slow
+@pytest.mark.integration
+def test_node_override_replays_historical_field_with_edges_off():
+    config = load_round_config(CONFIG)
+    manifest = json.loads(D62_MANIFEST.read_text())
+    candidate = next(
+        row for row in manifest["candidate_set"]["candidates"]
+        if row["candidate_id"] == "d62_a0p5_b0p5"
+    )
+    substrate = build_substrate(
+        config, "node_baseline", 1361, cache_dir=str(SHARED_CACHE),
+        node_candidate_override=candidate["node_field"], artifact_root=ARTIFACT_ROOT,
+    )
+    with np.load(D62_WORKERS / "d62_a0p5_b0p5_seed_1361.npz",
+                 allow_pickle=False) as archived:
+        assert np.array_equal(substrate.h_e.astype(np.float32), archived["h"])
+        assert np.array_equal(
+            substrate.delta_vtheta.astype(np.float32), archived["delta_vtheta"],
+        )
+    assert substrate.extras["node_candidate_override"] is True
+    assert np.allclose(substrate.edge_coefficients, 0.0)

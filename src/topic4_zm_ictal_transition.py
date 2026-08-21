@@ -14,6 +14,7 @@ from __future__ import annotations
 import hashlib
 import os
 import sys
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
@@ -26,6 +27,19 @@ for _path in (str(ROOT), os.path.join(str(ROOT), "src", "snn_engine")):
         sys.path.insert(0, _path)
 
 PATHWAYS = ("E_to_E", "E_to_I")
+
+
+@contextmanager
+def _artifact_working_directory(artifact_root):
+    if artifact_root is None:
+        yield
+        return
+    previous = os.getcwd()
+    os.chdir(artifact_root)
+    try:
+        yield
+    finally:
+        os.chdir(previous)
 
 
 @dataclass
@@ -71,13 +85,20 @@ def _sha256_file(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def verify_frozen_inputs(config):
+def _input_path(relative_path, artifact_root=None):
+    local = ROOT / relative_path
+    if local.exists() or artifact_root is None:
+        return local
+    return Path(artifact_root) / relative_path
+
+
+def verify_frozen_inputs(config, *, artifact_root=None):
     """Hash every declared input. Raises rather than warning -- a drifted input
     means the substrate is not the frozen one and every number downstream is
     about a different model."""
     records = {}
     for key, record in config["inputs"].items():
-        path = ROOT / record["path"]
+        path = _input_path(record["path"], artifact_root)
         if not path.exists():
             raise RuntimeError(f"input missing: {record['path']}")
         digest = _sha256_file(path)
@@ -88,9 +109,9 @@ def verify_frozen_inputs(config):
     return {"all_match": True, "records": records}
 
 
-def _load_json_input(record):
+def _load_json_input(record, *, artifact_root=None):
     import json
-    return json.loads((ROOT / record["path"]).read_text())
+    return json.loads(_input_path(record["path"], artifact_root).read_text())
 
 
 def _outgoing_by_pathway(matrices, n_e, pathway):
@@ -118,6 +139,25 @@ def _gain(pre, post):
     return out
 
 
+def _placement_with_artifact_root(stage, artifact_root):
+    """Mirror the frozen placement while resolving its result inputs explicitly."""
+    from src.sef_hfo_subject_placement import (
+        gradient_shared_template_foci, register_to_sheet, template_source_foci,
+    )
+    root = "." if artifact_root is None else str(artifact_root)
+    montage, _, _, _ = gradient_shared_template_foci(stage["subject"], 3, root=root)
+    _, source_names, sink_names = template_source_foci(
+        stage["subject"], "narrow", 3, root=root,
+    )
+    registered = register_to_sheet(
+        montage, source_names, sink_names,
+        L=stage["engine"]["L"], target_inter_core_mm=None,
+    )
+    axis = registered["sink_centroid"] - registered["source_centroid"]
+    registered["axis_unit_vec"] = axis / np.linalg.norm(axis)
+    return registered
+
+
 def dose_local_connectivity_coefficients(coefficients, *, ee_dose=1.0,
                                          etoi_dose=1.0):
     """Scale the two learned pathway rows without changing their direction."""
@@ -143,7 +183,8 @@ def _cache_record(cache_hit, cache_source):
 
 
 def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=None,
-                    ee_dose=1.0, etoi_dose=1.0):
+                    ee_dose=1.0, etoi_dose=1.0,
+                    node_candidate_override=None, artifact_root=None):
     """Reconstruct one frozen arm on one network seed.
 
     ``field_transform`` is a square-symmetry element name; when given, the node
@@ -165,9 +206,11 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     from src.topic4_graph_edge_flow import array_sha256
     from src.topic4_local_connectivity import continuous_local_e_source_flow
 
-    verify_frozen_inputs(config)
+    verify_frozen_inputs(config, artifact_root=artifact_root)
     inputs = config["inputs"]
-    manifest = _load_json_input(inputs["frozen_substrate_manifest"])
+    manifest = _load_json_input(
+        inputs["frozen_substrate_manifest"], artifact_root=artifact_root,
+    )
     if manifest["status"] != "REV11NLC_FROZEN_SUBSTRATE_CONFIRMATION_LIBRARY_FROZEN":
         raise RuntimeError("frozen substrate manifest status changed")
     matches = [row for row in manifest["candidate_set"]["candidates"]
@@ -176,11 +219,15 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         raise RuntimeError(f"candidate {candidate_id!r} is outside the frozen library")
     candidate = matches[0]
 
-    base = _load_json_input(inputs["rev9_base_config"])
-    stage = _load_json_input(inputs["stage_config"])
-    contract = _load_json_input(inputs["contact_contract"])
-    anchor_config = _load_json_input(inputs["node_anchor_config"])
-    detector_audit = _load_json_input(inputs["common_detector_audit"])
+    base = _load_json_input(inputs["rev9_base_config"], artifact_root=artifact_root)
+    stage = _load_json_input(inputs["stage_config"], artifact_root=artifact_root)
+    contract = _load_json_input(inputs["contact_contract"], artifact_root=artifact_root)
+    anchor_config = _load_json_input(
+        inputs["node_anchor_config"], artifact_root=artifact_root,
+    )
+    detector_audit = _load_json_input(
+        inputs["common_detector_audit"], artifact_root=artifact_root,
+    )
     detector = float(config["engine_detector"]["population_active_fraction_threshold"])
     if detector != float(detector_audit["common_detector"]["central_threshold"]):
         raise RuntimeError("common detector changed")
@@ -195,14 +242,24 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
     params = Params(g=engine["g"], L=engine["L"], density=engine["density"],
                     T=float(config["simulation"]["duration_ms"]), dt=engine["dt"],
                     nu_ext_ratio=cmrun.DRIVE, seed=int(seed))
-    reg = _placement(stage)
-    net, n_e, n_i, cache_hit, cache_source = _load_network(
-        params, stage, reg, int(seed), base, str(cache_dir))
+    reg = (
+        _placement(stage) if artifact_root is None
+        else _placement_with_artifact_root(stage, artifact_root)
+    )
+    with _artifact_working_directory(artifact_root):
+        net, n_e, n_i, cache_hit, cache_source = _load_network(
+            params, stage, reg, int(seed), base, str(cache_dir))
     positions = np.asarray(net["pos"][:n_e], float)
     positions_i = np.asarray(net["pos"][n_e:], float)
 
     # ---- 4-5: node field and coefficient hash ----
-    node_candidate = candidate["node_field"]
+    frozen_node_candidate = candidate["node_field"]
+    node_candidate = (
+        frozen_node_candidate if node_candidate_override is None
+        else dict(node_candidate_override)
+    )
+    if node_candidate.get("field_type") != "spline_continuous":
+        raise RuntimeError("Node override must be a continuous spline field")
     node = _candidate_node(node_candidate, positions, n_total=n_e + n_i,
                            stage=stage, config=anchor_config)
     if not np.isclose(node["h"].sum(), float(stage["N_core_manual"]), atol=1e-8):
@@ -290,6 +347,9 @@ def build_substrate(config, candidate_id, seed, *, cache_dir, field_transform=No
         field_transform=field_transform,
         extras={"field_query_audit": field_query_audit, "cmrun": cmrun,
                 "placement": reg, "candidate": candidate,
+                "node_candidate": node_candidate,
+                "node_candidate_override": node_candidate_override is not None,
+                "frozen_node_field_sha256": frozen_node_candidate["field_sha256"],
                 "pathway_dose": {"E_to_E": float(ee_dose),
                                    "E_to_I": float(etoi_dose)},
                 "contact_contract": contract, "manifest": manifest},

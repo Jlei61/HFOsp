@@ -1,0 +1,673 @@
+"""Metrics for the rev12-ND Node-only dual-mode refit.
+
+The module contains no patient or simulator I/O.  It keeps contact-distribution
+fit and sheet-level source-topology reproducibility separate so that a good rank
+prototype cannot hide unstable multi-site nucleation.
+"""
+from __future__ import annotations
+
+from itertools import combinations
+
+import numpy as np
+
+
+def event_features(normalized_ranks: np.ndarray) -> np.ndarray:
+    """Build fixed-contact [recruitment, masked normalized rank] features."""
+    ranks = np.asarray(normalized_ranks, float)
+    if ranks.ndim != 2:
+        raise ValueError("normalized_ranks must have shape (event, contact)")
+    mask = np.isfinite(ranks).astype(float)
+    return np.concatenate([mask, np.nan_to_num(ranks, nan=0.0)], axis=1)
+
+
+def normalize_event_ranks(ranks: np.ndarray) -> np.ndarray:
+    """Normalize every finite event row to [0, 1] without filling missing contacts."""
+    values = np.asarray(ranks, float)
+    if values.ndim != 2:
+        raise ValueError("ranks must have shape (event, contact)")
+    output = np.full_like(values, np.nan, dtype=float)
+    for index, row in enumerate(values):
+        finite = np.isfinite(row)
+        if not np.any(finite):
+            continue
+        low = float(np.min(row[finite]))
+        span = float(np.max(row[finite]) - low)
+        output[index, finite] = (row[finite] - low) / span if span > 0 else 0.0
+    return output
+
+
+def _shaft_names(contact_names: np.ndarray) -> np.ndarray:
+    return np.asarray([
+        "".join(character for character in str(name) if not character.isdigit())
+        for name in np.asarray(contact_names).astype(str)
+    ])
+
+
+def shaft_balanced_feature_weights(contact_names: np.ndarray) -> np.ndarray:
+    """Give recruitment/rank and ICL/SCL equal total weight."""
+    shafts = _shaft_names(contact_names)
+    weights = np.zeros(2 * len(shafts), float)
+    for offset in (0, len(shafts)):
+        for shaft in ("ICL", "SCL"):
+            selected = np.flatnonzero(shafts == shaft)
+            if not len(selected):
+                raise ValueError(f"contact contract misses shaft {shaft}")
+            weights[offset + selected] = 0.25 / len(selected)
+    return weights
+
+
+def weighted_r2(events: np.ndarray, labels: np.ndarray, prototypes: np.ndarray,
+                global_mean: np.ndarray, weights: np.ndarray) -> float:
+    """Variance explained relative to a fixed global-mean reference."""
+    events = np.asarray(events, float)
+    labels = np.asarray(labels, int)
+    prototypes = np.asarray(prototypes, float)
+    global_mean = np.asarray(global_mean, float)
+    weights = np.asarray(weights, float)
+    if events.ndim != 2 or labels.shape != (len(events),):
+        raise ValueError("events and labels do not align")
+    if np.any((labels < 0) | (labels >= len(prototypes))):
+        raise ValueError("labels do not index prototypes")
+    sst = float(np.sum((events - global_mean) ** 2 * weights))
+    sse = float(np.sum((events - prototypes[labels]) ** 2 * weights))
+    return float("nan") if sst <= 0.0 else float(1.0 - sse / sst)
+
+
+def contrast_r2(model_prototypes: np.ndarray,
+                patient_train_prototypes: np.ndarray,
+                patient_heldout_prototypes: np.ndarray,
+                weights: np.ndarray) -> dict:
+    """Evaluate a TA-TB contrast with one nonnegative scale fitted on train."""
+    model = np.asarray(model_prototypes, float)
+    train = np.asarray(patient_train_prototypes, float)
+    heldout = np.asarray(patient_heldout_prototypes, float)
+    weights = np.asarray(weights, float)
+    model_delta = model[0] - model[1]
+    train_delta = train[0] - train[1]
+    heldout_delta = heldout[0] - heldout[1]
+    energy = float(np.sum(weights * model_delta ** 2))
+    scale = (
+        0.0 if energy <= 0.0 else max(
+            0.0, float(np.sum(weights * train_delta * model_delta) / energy),
+        )
+    )
+    denominator = float(np.sum(weights * heldout_delta ** 2))
+    raw_sse = float(np.sum(weights * (heldout_delta - model_delta) ** 2))
+    scaled_sse = float(np.sum(weights * (heldout_delta - scale * model_delta) ** 2))
+    cosine_denominator = float(np.sqrt(
+        np.sum(weights * heldout_delta ** 2) * np.sum(weights * model_delta ** 2)
+    ))
+    return {
+        "train_fitted_nonnegative_scale": scale,
+        "heldout_raw_r2": (
+            float("nan") if denominator <= 0.0 else float(1.0 - raw_sse / denominator)
+        ),
+        "heldout_train_scaled_r2": (
+            float("nan") if denominator <= 0.0 else float(1.0 - scaled_sse / denominator)
+        ),
+        "heldout_weighted_cosine": (
+            float("nan") if cosine_denominator <= 0.0
+            else float(np.sum(weights * heldout_delta * model_delta) / cosine_denominator)
+        ),
+    }
+
+
+def lse_max(values: np.ndarray, tau: float = 0.25) -> float:
+    """Smooth maximum with zero offset for equal inputs."""
+    values = np.asarray(values, float)
+    if values.ndim != 1 or not len(values) or not np.all(np.isfinite(values)):
+        raise ValueError("LSE inputs must be a finite non-empty vector")
+    tau = float(tau)
+    if tau <= 0.0:
+        raise ValueError("tau must be positive")
+    maximum = float(np.max(values))
+    return float(maximum + tau * np.log(np.mean(np.exp((values - maximum) / tau))))
+
+
+def _weighted_quantile_grid(values: np.ndarray, n_quantiles: int) -> np.ndarray:
+    values = np.asarray(values, float)
+    if not len(values):
+        raise ValueError("cannot form quantiles from an empty sample")
+    quantiles = np.linspace(0.0, 1.0, int(n_quantiles))
+    # An empirical inverse CDF is invariant to exact replication of a sample.
+    # Linear order-statistic interpolation is not: repeating every event changes
+    # interpolation knots and would let event count leak into the objective.
+    return np.quantile(values, quantiles, method="inverted_cdf")
+
+
+def fixed_projection_matrix(n_features: int, *, n_directions: int = 64,
+                            seed: int = 20260821) -> np.ndarray:
+    """Generate deterministic unit directions for sliced-Wasserstein scoring."""
+    rng = np.random.default_rng(int(seed))
+    matrix = rng.normal(size=(int(n_directions), int(n_features)))
+    norm = np.linalg.norm(matrix, axis=1, keepdims=True)
+    if np.any(norm == 0.0):
+        raise RuntimeError("projection generator produced a zero direction")
+    return matrix / norm
+
+
+def sliced_wasserstein(x: np.ndarray, y: np.ndarray, *, weights: np.ndarray,
+                       projections: np.ndarray, n_quantiles: int = 101) -> float:
+    """Matched-quantile sliced-Wasserstein distance with fixed feature weights."""
+    x = np.asarray(x, float)
+    y = np.asarray(y, float)
+    weights = np.asarray(weights, float)
+    projections = np.asarray(projections, float)
+    if x.ndim != 2 or y.ndim != 2 or x.shape[1] != y.shape[1]:
+        raise ValueError("event samples must share a feature dimension")
+    if not len(x) or not len(y):
+        raise ValueError("event samples must be non-empty")
+    if weights.shape != (x.shape[1],) or projections.shape[1] != x.shape[1]:
+        raise ValueError("weights or projections do not match event features")
+    scale = np.sqrt(weights / np.sum(weights))
+    x_projection = (x * scale) @ projections.T
+    y_projection = (y * scale) @ projections.T
+    distances = []
+    for direction in range(projections.shape[0]):
+        xq = _weighted_quantile_grid(x_projection[:, direction], n_quantiles)
+        yq = _weighted_quantile_grid(y_projection[:, direction], n_quantiles)
+        distances.append(float(np.sqrt(np.mean((xq - yq) ** 2))))
+    return float(np.mean(distances))
+
+
+def js_divergence(p: np.ndarray, q: np.ndarray, epsilon: float = 1e-12) -> float:
+    """Jensen-Shannon divergence in nats."""
+    p = np.asarray(p, float)
+    q = np.asarray(q, float)
+    if p.shape != q.shape or p.ndim != 1:
+        raise ValueError("probability vectors must align")
+    if np.any(p < 0.0) or np.any(q < 0.0) or p.sum() <= 0.0 or q.sum() <= 0.0:
+        raise ValueError("probability vectors must be nonnegative and non-empty")
+    p = p / p.sum()
+    q = q / q.sum()
+    midpoint = 0.5 * (p + q)
+    return float(0.5 * np.sum(p * np.log((p + epsilon) / (midpoint + epsilon)))
+                 + 0.5 * np.sum(q * np.log((q + epsilon) / (midpoint + epsilon))))
+
+
+def recruitment_loss(model_ranks: np.ndarray, patient_ranks: np.ndarray,
+                     contact_names: np.ndarray) -> float:
+    """Shaft-balanced recruitment-probability MAE."""
+    model = np.isfinite(np.asarray(model_ranks, float)).mean(axis=0)
+    patient = np.isfinite(np.asarray(patient_ranks, float)).mean(axis=0)
+    shafts = _shaft_names(contact_names)
+    errors = []
+    for shaft in ("ICL", "SCL"):
+        selected = shafts == shaft
+        errors.append(float(np.mean(np.abs(model[selected] - patient[selected]))))
+    return float(np.mean(errors))
+
+
+def _precedence_distribution(ranks: np.ndarray, i: int, j: int) -> np.ndarray:
+    values = np.asarray(ranks, float)
+    both = np.isfinite(values[:, i]) & np.isfinite(values[:, j])
+    i_before = both & (values[:, i] < values[:, j])
+    j_before = both & (values[:, j] < values[:, i])
+    tied = both & ~(i_before | j_before)
+    # Ties contribute equally to the two directional states; missing remains explicit.
+    return np.asarray([
+        np.sum(i_before) + 0.5 * np.sum(tied),
+        np.sum(j_before) + 0.5 * np.sum(tied),
+        np.sum(~both),
+    ], float) / max(1, len(values))
+
+
+def precedence_loss(model_ranks: np.ndarray, patient_ranks: np.ndarray,
+                    contact_names: np.ndarray) -> dict:
+    """Pair-class balanced JS loss including not-jointly-recruited events."""
+    shafts = _shaft_names(contact_names)
+    classes = {"ICL-ICL": [], "SCL-SCL": [], "ICL-SCL": []}
+    for i, j in combinations(range(len(shafts)), 2):
+        pair = f"{shafts[i]}-{shafts[j]}"
+        if pair == "SCL-ICL":
+            pair = "ICL-SCL"
+        model = _precedence_distribution(model_ranks, i, j)
+        patient = _precedence_distribution(patient_ranks, i, j)
+        classes[pair].append(js_divergence(model, patient))
+    output = {
+        name: float(np.mean(values)) for name, values in classes.items()
+    }
+    output["balanced_mean"] = float(np.mean(list(output.values())))
+    return output
+
+
+def profile_loss(model_ranks: np.ndarray, patient_ranks: np.ndarray,
+                 contact_names: np.ndarray) -> float:
+    """Weighted error between mode mean recruitment/rank profiles."""
+    model = np.mean(event_features(normalize_event_ranks(model_ranks)), axis=0)
+    patient = np.mean(event_features(normalize_event_ranks(patient_ranks)), axis=0)
+    weights = shaft_balanced_feature_weights(contact_names)
+    return float(np.sqrt(np.sum(weights * (model - patient) ** 2)))
+
+
+def mode_distribution_components(model_ranks: np.ndarray, patient_ranks: np.ndarray,
+                                 contact_names: np.ndarray,
+                                 projections: np.ndarray) -> dict:
+    """Four complementary distances for one patient-defined mode."""
+    model_normalized = normalize_event_ranks(model_ranks)
+    patient_normalized = normalize_event_ranks(patient_ranks)
+    weights = shaft_balanced_feature_weights(contact_names)
+    model_features = event_features(model_normalized)
+    patient_features = event_features(patient_normalized)
+    precedence = precedence_loss(model_normalized, patient_normalized, contact_names)
+    return {
+        "recruitment": recruitment_loss(model_normalized, patient_normalized, contact_names),
+        "precedence": precedence["balanced_mean"],
+        "precedence_classes": precedence,
+        "profile": profile_loss(model_normalized, patient_normalized, contact_names),
+        "cloud": sliced_wasserstein(
+            model_features, patient_features, weights=weights,
+            projections=projections,
+        ),
+    }
+
+
+def calibrate_component_scales(patient_ranks: np.ndarray,
+                               patient_labels: np.ndarray,
+                               patient_blocks: np.ndarray,
+                               contact_names: np.ndarray,
+                               projections: np.ndarray, *,
+                               sample_size: int = 6,
+                               draws: int = 256,
+                               seed: int = 20260821) -> dict:
+    """Put all four distances in patient recording-block excess-noise units."""
+    ranks = np.asarray(patient_ranks, float)
+    labels = np.asarray(patient_labels, int)
+    blocks = np.asarray(patient_blocks)
+    if (ranks.ndim != 2 or labels.shape != (len(ranks),)
+            or blocks.shape != (len(ranks),)):
+        raise ValueError("patient calibration arrays do not align")
+    rng = np.random.default_rng(int(seed))
+    keys = ("recruitment", "precedence", "profile", "cloud")
+    output = {}
+    for mode in (0, 1):
+        mode_index = np.flatnonzero(labels == mode)
+        eligible_blocks = np.asarray([
+            block for block in np.unique(blocks)
+            if np.sum((blocks == block) & (labels == mode)) >= int(sample_size)
+        ])
+        if len(eligible_blocks) < 2:
+            raise ValueError("patient mode lacks two eligible recording blocks")
+        floor = {key: [] for key in keys}
+        null = {key: [] for key in keys}
+        for _ in range(int(draws)):
+            target_block, self_block = rng.choice(
+                eligible_blocks, size=2, replace=False,
+            )
+            target_index = np.flatnonzero(
+                (blocks == target_block) & (labels == mode)
+            )
+            self_index = np.flatnonzero(
+                (blocks == self_block) & (labels == mode)
+            )
+            target = ranks[rng.choice(
+                target_index, size=int(sample_size), replace=False,
+            )]
+            self_sample = ranks[rng.choice(
+                self_index, size=int(sample_size), replace=False,
+            )]
+            pooled = ranks[rng.choice(len(ranks), size=int(sample_size), replace=False)]
+            self_components = mode_distribution_components(
+                self_sample, target, contact_names, projections,
+            )
+            null_components = mode_distribution_components(
+                pooled, target, contact_names, projections,
+            )
+            for key in keys:
+                floor[key].append(float(self_components[key]))
+                null[key].append(float(null_components[key]))
+        output[str(mode)] = {}
+        for key in keys:
+            floor_median = float(np.median(floor[key]))
+            floor_q95 = float(np.quantile(floor[key], 0.95))
+            null_median = float(np.median(null[key]))
+            null_q95 = float(np.quantile(null[key], 0.95))
+            scale = floor_q95 - floor_median
+            reference = "patient_block_floor_q95"
+            if scale <= 1e-8:
+                scale = null_q95 - floor_median
+                reference = "pooled_global_null_q95_fallback"
+            if scale <= 1e-8:
+                raise RuntimeError(
+                    f"patient calibration has no {key} dynamic range for mode {mode}"
+                )
+            output[str(mode)][key] = {
+                "floor_median": floor_median,
+                "floor_q95": floor_q95,
+                "global_null_median": null_median,
+                "global_null_q95": null_q95,
+                "scale": scale,
+                "scale_reference": reference,
+            }
+    return {
+        "modes": output,
+        "sample_size_per_side": int(sample_size),
+        "draws": int(draws),
+        "seed": int(seed),
+        "floor_resampling": "different recording blocks within the same mode",
+        "global_null_resampling": "pooled patient training events across modes",
+        "unit": (
+            "0=patient block floor median; 1=patient block floor q95; "
+            "pooled-null q95 is used only if the block floor is degenerate"
+        ),
+    }
+
+
+def normalize_components(components: dict, calibration: dict, mode: int) -> dict:
+    normalized = {}
+    for key in ("recruitment", "precedence", "profile", "cloud"):
+        contract = calibration["modes"][str(int(mode))][key]
+        normalized[key] = max(
+            0.0,
+            (float(components[key]) - float(contract["floor_median"]))
+            / float(contract["scale"]),
+        )
+    return normalized
+
+
+def dual_mode_objective(model_ranks: np.ndarray, model_labels: np.ndarray,
+                        patient_ranks: np.ndarray, patient_labels: np.ndarray,
+                        contact_names: np.ndarray, *,
+                        missing_mode_penalty: float,
+                        projections: np.ndarray,
+                        calibration: dict | None = None,
+                        tau: float = 0.25) -> dict:
+    """Worst-mode patient loss with explicit occupancy mismatch."""
+    model_labels = np.asarray(model_labels, int)
+    patient_labels = np.asarray(patient_labels, int)
+    per_mode, losses = {}, []
+    for mode in (0, 1):
+        model_selected = np.asarray(model_ranks)[model_labels == mode]
+        patient_selected = np.asarray(patient_ranks)[patient_labels == mode]
+        if not len(model_selected):
+            if calibration is None:
+                raw = None
+                components = {
+                    key: float(missing_mode_penalty)
+                    for key in ("recruitment", "precedence", "profile", "cloud")
+                }
+            else:
+                raw = mode_distribution_components(
+                    np.full((1, np.asarray(patient_ranks).shape[1]), np.nan),
+                    patient_selected, contact_names, projections,
+                )
+                normalized = normalize_components(raw, calibration, mode)
+                components = {
+                    key: max(float(missing_mode_penalty), normalized[key])
+                    for key in ("recruitment", "precedence", "profile", "cloud")
+                }
+            components["raw"] = raw
+            components["missing"] = True
+        else:
+            raw = mode_distribution_components(
+                model_selected, patient_selected, contact_names, projections,
+            )
+            components = (
+                dict(raw) if calibration is None
+                else normalize_components(raw, calibration, mode)
+            )
+            components["raw"] = dict(raw)
+            components["missing"] = False
+        components["mean"] = float(np.mean([
+            components[key] for key in ("recruitment", "precedence", "profile", "cloud")
+        ]))
+        per_mode[str(mode)] = components
+        losses.append(components["mean"])
+    model_count = np.bincount(model_labels, minlength=2).astype(float)
+    patient_count = np.bincount(patient_labels, minlength=2).astype(float)
+    # Zero returned events are a valid negative simulation result, not missing
+    # data.  They carry the maximum binary JS occupancy penalty while both mode
+    # distances above retain the explicit missing-mode penalty.
+    occupancy = (
+        float(np.log(2.0)) if model_count.sum() == 0.0
+        else js_divergence(model_count, patient_count)
+    )
+    weakest = lse_max(np.asarray(losses), tau=tau)
+    return {
+        "modes": per_mode,
+        "weakest_mode_lse": weakest,
+        "occupancy_js": occupancy,
+        "objective": float(weakest + 0.25 * occupancy),
+    }
+
+
+def persistent_recruitment_onsets(event_counts: np.ndarray,
+                                  baseline_counts: np.ndarray,
+                                  relative_times_ms: np.ndarray, *,
+                                  minimum_active_neurons: int = 2,
+                                  persistence_frames: int = 2) -> np.ndarray:
+    """First binwise pre-event-q99 exceedance sustained across frames."""
+    event_counts = np.asarray(event_counts, float)
+    baseline_counts = np.asarray(baseline_counts, float)
+    times = np.asarray(relative_times_ms, float)
+    if event_counts.ndim != 3 or baseline_counts.ndim != 3:
+        raise ValueError("source counts must have shape (time, y, x)")
+    if event_counts.shape[1:] != baseline_counts.shape[1:] or len(times) != len(event_counts):
+        raise ValueError("source count arrays do not align")
+    threshold = np.maximum(
+        np.quantile(baseline_counts, 0.99, axis=0),
+        float(minimum_active_neurons - 1),
+    )
+    above = event_counts > threshold
+    sustained = np.zeros_like(above)
+    for frame in range(len(above) - int(persistence_frames) + 1):
+        sustained[frame] = np.all(above[frame:frame + int(persistence_frames)], axis=0)
+    onset = np.full(above.shape[1:], np.nan)
+    for frame, time_ms in enumerate(times):
+        new = sustained[frame] & ~np.isfinite(onset)
+        onset[new] = time_ms
+    return onset
+
+
+def sheet_bin_indices(positions: np.ndarray, *, bin_mm: float,
+                      sheet_mm: float) -> tuple[np.ndarray, int]:
+    """Map E-neuron positions to a fixed square sheet grid."""
+    positions = np.asarray(positions, float)
+    if positions.ndim != 2 or positions.shape[1] != 2:
+        raise ValueError("positions must have shape (neuron, 2)")
+    size = int(round(float(sheet_mm) / float(bin_mm)))
+    if size <= 0 or not np.isclose(size * float(bin_mm), float(sheet_mm)):
+        raise ValueError("bin size must tile the square sheet")
+    xy = np.floor(positions / float(bin_mm)).astype(int)
+    xy = np.clip(xy, 0, size - 1)
+    return xy[:, 1] * size + xy[:, 0], size
+
+
+def _distinct_activity_frames(spikes: np.ndarray, *, dt_ms: float,
+                              centers_ms: np.ndarray, width_ms: float,
+                              neuron_bins: np.ndarray, size: int) -> np.ndarray:
+    spikes = np.asarray(spikes, bool)
+    centers_ms = np.asarray(centers_ms, float)
+    if spikes.ndim != 2 or neuron_bins.shape != (spikes.shape[1],):
+        raise ValueError("spikes and neuron bins must align")
+    half_steps = int(round(0.5 * float(width_ms) / float(dt_ms)))
+    output = np.zeros((len(centers_ms), size, size), float)
+    for frame, center_ms in enumerate(centers_ms):
+        center = int(round(float(center_ms) / float(dt_ms)))
+        low, high = center - half_steps, center + half_steps + 1
+        if low < 0 or high > len(spikes):
+            raise ValueError("source-topology frame falls outside the simulation")
+        active = np.any(spikes[low:high], axis=0)
+        output[frame] = np.bincount(
+            neuron_bins[active], minlength=size * size,
+        ).reshape(size, size)
+    return output
+
+
+def event_source_onset_maps(spikes: np.ndarray, positions: np.ndarray,
+                            event_onsets_ms: np.ndarray,
+                            event_selected: np.ndarray, *, dt_ms: float,
+                            sheet_mm: float, bin_mm: float = 1.0,
+                            event_relative_ms: np.ndarray | None = None,
+                            baseline_relative_ms: np.ndarray | None = None,
+                            frame_width_ms: float = 3.0) -> dict:
+    """Reduce full spikes to one 1-mm local recruitment-onset map per event."""
+    spikes = np.asarray(spikes, bool)
+    event_onsets_ms = np.asarray(event_onsets_ms, float)
+    selected = np.asarray(event_selected, bool)
+    if selected.shape != event_onsets_ms.shape:
+        raise ValueError("event selection and onset times must align")
+    relative = (
+        np.arange(-20.0, 80.0 + 1e-9, 2.0) if event_relative_ms is None
+        else np.asarray(event_relative_ms, float)
+    )
+    baseline_relative = (
+        np.arange(-120.0, -20.0 + 1e-9, 2.0) if baseline_relative_ms is None
+        else np.asarray(baseline_relative_ms, float)
+    )
+    neuron_bins, size = sheet_bin_indices(
+        positions, bin_mm=bin_mm, sheet_mm=sheet_mm,
+    )
+    maps = np.full((len(event_onsets_ms), size, size), np.nan, dtype=np.float32)
+    evaluable = np.zeros(len(event_onsets_ms), bool)
+    for event_index in np.flatnonzero(selected):
+        center = float(event_onsets_ms[event_index])
+        all_centers = center + np.concatenate([baseline_relative, relative])
+        half_width = 0.5 * float(frame_width_ms)
+        if (np.min(all_centers) - half_width < 0.0
+                or np.max(all_centers) + half_width >= len(spikes) * float(dt_ms)):
+            continue
+        baseline = _distinct_activity_frames(
+            spikes, dt_ms=dt_ms, centers_ms=center + baseline_relative,
+            width_ms=frame_width_ms, neuron_bins=neuron_bins, size=size,
+        )
+        event = _distinct_activity_frames(
+            spikes, dt_ms=dt_ms, centers_ms=center + relative,
+            width_ms=frame_width_ms, neuron_bins=neuron_bins, size=size,
+        )
+        maps[event_index] = persistent_recruitment_onsets(
+            event, baseline, relative,
+        ).astype(np.float32)
+        evaluable[event_index] = True
+    return {
+        "onset_maps_ms": maps,
+        "evaluable": evaluable,
+        "relative_times_ms": relative,
+        "baseline_relative_times_ms": baseline_relative,
+        "bin_mm": float(bin_mm),
+        "sheet_mm": float(sheet_mm),
+    }
+
+
+def source_topology_features(onset_maps: np.ndarray) -> np.ndarray:
+    """Encode early source support and normalized local onset for each event."""
+    values = np.asarray(onset_maps, float)
+    if values.ndim != 3:
+        raise ValueError("onset maps must have shape (event, y, x)")
+    output = []
+    for onset in values:
+        finite = np.isfinite(onset)
+        early = np.zeros_like(onset, dtype=float)
+        normalized = np.zeros_like(onset, dtype=float)
+        if np.any(finite):
+            count = int(np.sum(finite))
+            early_count = min(count, max(1, int(np.ceil(0.10 * count))))
+            threshold = np.partition(onset[finite], early_count - 1)[early_count - 1]
+            early[finite & (onset <= threshold)] = 1.0
+            low = float(np.min(onset[finite]))
+            span = float(np.max(onset[finite]) - low)
+            normalized[finite] = (onset[finite] - low) / span if span > 0.0 else 0.0
+        output.append(np.concatenate([early.ravel(), normalized.ravel()]))
+    return np.asarray(output, float)
+
+
+def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
+    a = np.asarray(a, float)
+    b = np.asarray(b, float)
+    denominator = float(np.linalg.norm(a) * np.linalg.norm(b))
+    return float("nan") if denominator <= 0.0 else float(np.dot(a, b) / denominator)
+
+
+def topology_reproducibility(onset_maps: np.ndarray, labels: np.ndarray) -> dict:
+    """Odd-even within-mode reliability and between-mode template distance."""
+    features = source_topology_features(onset_maps)
+    labels = np.asarray(labels, int)
+    if labels.shape != (len(features),):
+        raise ValueError("topology labels do not align")
+    modes, reliabilities, templates = {}, [], []
+    for mode in (0, 1):
+        selected = features[labels == mode]
+        if len(selected) < 2:
+            reliability = float("nan")
+            template = np.mean(selected, axis=0) if len(selected) else np.zeros(features.shape[1])
+        else:
+            first = np.mean(selected[::2], axis=0)
+            second = np.mean(selected[1::2], axis=0)
+            reliability = cosine_similarity(first, second)
+            template = np.mean(selected, axis=0)
+        modes[str(mode)] = {"n_events": int(len(selected)), "split_half_cosine": reliability}
+        reliabilities.append(reliability)
+        templates.append(template)
+    separation = 1.0 - cosine_similarity(templates[0], templates[1])
+    finite = np.asarray(reliabilities, float)
+    mean_reliability = float(np.mean(finite[np.isfinite(finite)])) if np.any(np.isfinite(finite)) else float("nan")
+    loss = (
+        float("nan") if not np.isfinite(mean_reliability) or not np.isfinite(separation)
+        else float(0.5 * (1.0 - mean_reliability) + 0.5 * (1.0 - separation))
+    )
+    return {
+        "modes": modes,
+        "mean_within_mode_reliability": mean_reliability,
+        "between_mode_distance": separation,
+        "topology_loss": loss,
+    }
+
+
+def topology_network_reproducibility(onset_maps_by_network: list[np.ndarray],
+                                     labels_by_network: list[np.ndarray]) -> dict:
+    """Equal-network source-template reliability and mode separation."""
+    if len(onset_maps_by_network) != len(labels_by_network):
+        raise ValueError("network source maps and labels do not align")
+    mode_templates = {0: [], 1: []}
+    within_network = []
+    for maps, labels in zip(onset_maps_by_network, labels_by_network):
+        maps = np.asarray(maps, float)
+        labels = np.asarray(labels, int)
+        if maps.ndim != 3 or labels.shape != (len(maps),):
+            raise ValueError("one network source map bundle does not align")
+        if len(maps):
+            diagnostic = topology_reproducibility(maps, labels)
+            if np.isfinite(diagnostic["mean_within_mode_reliability"]):
+                within_network.append(diagnostic["mean_within_mode_reliability"])
+            features = source_topology_features(maps)
+            for mode in (0, 1):
+                if np.any(labels == mode):
+                    mode_templates[mode].append(np.mean(features[labels == mode], axis=0))
+    modes, equal_network_templates = {}, []
+    for mode in (0, 1):
+        templates = mode_templates[mode]
+        similarities = [
+            cosine_similarity(templates[left], templates[right])
+            for left, right in combinations(range(len(templates)), 2)
+        ]
+        similarities = np.asarray(similarities, float)
+        similarities = similarities[np.isfinite(similarities)]
+        modes[str(mode)] = {
+            "n_networks": int(len(templates)),
+            "pairwise_network_cosine_mean": (
+                float(np.mean(similarities)) if len(similarities) else float("nan")
+            ),
+        }
+        equal_network_templates.append(
+            np.mean(templates, axis=0) if templates else None
+        )
+    if any(template is None for template in equal_network_templates):
+        separation = float("nan")
+    else:
+        separation = 1.0 - cosine_similarity(
+            equal_network_templates[0], equal_network_templates[1],
+        )
+    across = np.asarray([
+        modes[str(mode)]["pairwise_network_cosine_mean"] for mode in (0, 1)
+    ], float)
+    across = across[np.isfinite(across)]
+    return {
+        "modes": modes,
+        "mean_within_network_split_half_cosine": (
+            float(np.mean(within_network)) if within_network else float("nan")
+        ),
+        "mean_across_network_template_cosine": (
+            float(np.mean(across)) if len(across) else float("nan")
+        ),
+        "equal_network_between_mode_distance": separation,
+    }
