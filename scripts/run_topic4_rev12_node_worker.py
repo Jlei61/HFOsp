@@ -215,6 +215,8 @@ def main() -> None:
         contact_envelope=np.asarray(envelope, np.float32),
         contact_envelope_dt_ms=np.asarray(envelope_dt, float),
         source_onset_maps_ms=source["onset_maps_ms"],
+        source_activity_counts=source["activity_counts"],
+        source_activity_relative_ms=source["relative_times_ms"],
         source_onset_evaluable=source["evaluable"],
         source_bin_mm=np.asarray(source["bin_mm"], float),
         source_sheet_mm=np.asarray(source["sheet_mm"], float),

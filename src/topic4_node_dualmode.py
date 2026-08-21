@@ -519,6 +519,9 @@ def event_source_onset_maps(spikes: np.ndarray, positions: np.ndarray,
         positions, bin_mm=bin_mm, sheet_mm=sheet_mm,
     )
     maps = np.full((len(event_onsets_ms), size, size), np.nan, dtype=np.float32)
+    activity = np.zeros(
+        (len(event_onsets_ms), len(relative), size, size), dtype=np.uint16,
+    )
     evaluable = np.zeros(len(event_onsets_ms), bool)
     for event_index in np.flatnonzero(selected):
         center = float(event_onsets_ms[event_index])
@@ -538,9 +541,13 @@ def event_source_onset_maps(spikes: np.ndarray, positions: np.ndarray,
         maps[event_index] = persistent_recruitment_onsets(
             event, baseline, relative,
         ).astype(np.float32)
+        if np.max(event) > np.iinfo(np.uint16).max:
+            raise RuntimeError("event source activity exceeds uint16 storage")
+        activity[event_index] = event.astype(np.uint16)
         evaluable[event_index] = True
     return {
         "onset_maps_ms": maps,
+        "activity_counts": activity,
         "evaluable": evaluable,
         "relative_times_ms": relative,
         "baseline_relative_times_ms": baseline_relative,

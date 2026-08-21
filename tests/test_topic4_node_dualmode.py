@@ -221,3 +221,6 @@ def test_full_spikes_reduce_to_evaluable_event_source_map():
     assert np.isfinite(onset[2, 2])
     assert onset[0, 0] < onset[2, 2]
     assert np.isnan(result["onset_maps_ms"][1]).all()
+    assert result["activity_counts"].dtype == np.uint16
+    assert result["activity_counts"][0, :, 0, 0].max() == 2
+    assert not np.any(result["activity_counts"][1])
