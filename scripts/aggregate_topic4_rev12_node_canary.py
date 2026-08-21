@@ -45,6 +45,11 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _resolve(artifact_root: Path, relative_path: str) -> Path:
+    local = ROOT / relative_path
+    return local if local.exists() else artifact_root / relative_path
+
+
 def _jsonable(value):
     if isinstance(value, dict):
         return {str(key): _jsonable(item) for key, item in value.items()}
@@ -106,7 +111,7 @@ def main() -> None:
     artifact_root = args.artifact_root.resolve()
     config = json.loads(config_path.read_text())
     for record in config["inputs"].values():
-        path = artifact_root / record["path"]
+        path = _resolve(artifact_root, record["path"])
         if _sha256(path) != record["sha256"]:
             raise RuntimeError(f"input hash changed: {record['path']}")
     manifest_path = artifact_root / config["candidate_manifest"]
@@ -114,8 +119,12 @@ def main() -> None:
     if manifest["config_sha256"] != _sha256(config_path):
         raise RuntimeError("candidate manifest is stale")
 
-    cohort_path = artifact_root / config["inputs"]["cohort_config"]["path"]
-    classifier_path = artifact_root / config["inputs"]["classifier_config"]["path"]
+    cohort_path = _resolve(
+        artifact_root, config["inputs"]["cohort_config"]["path"],
+    )
+    classifier_path = _resolve(
+        artifact_root, config["inputs"]["classifier_config"]["path"],
+    )
     cohort = json.loads(cohort_path.read_text())
     classifier_config = json.loads(classifier_path.read_text())
     patient = _patient_data(cohort, artifact_root)
