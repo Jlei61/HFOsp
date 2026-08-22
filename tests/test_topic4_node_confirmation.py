@@ -1,8 +1,14 @@
+import json
+from pathlib import Path
+
 import pytest
 
 from scripts.freeze_topic4_rev12_node_confirmation import (
     build_confirmation_candidates,
 )
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _manifest(*ids):
@@ -44,3 +50,10 @@ def test_confirmation_rejects_configured_selection_drift():
             "anchor_field",
             "stage_b_r01_m",
         )
+
+
+def test_confirmation_config_uses_worker_scientific_role():
+    config = json.loads(
+        (ROOT / "config/topic4_rev12_nd_node_confirmation.json").read_text()
+    )
+    assert config["scientific_role"] == "development_only_node_dualmode_refit"
