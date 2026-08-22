@@ -104,3 +104,38 @@ def residual_candidate(anchor: dict, residual: np.ndarray, *, amplitude: float,
             "observation_coordinates_used": False,
         },
     }
+
+
+def interpolate_spline_candidates(left: dict, right: dict, *, weight: float,
+                                  candidate_id: str) -> dict:
+    """Interpolate two whole-sheet spline fields without observation coordinates."""
+    weight = float(weight)
+    if not 0.0 <= weight <= 1.0:
+        raise ValueError("interpolation weight must lie in [0, 1]")
+    for key in ("field_type", "n_basis", "degree"):
+        if left[key] != right[key]:
+            raise ValueError(f"spline candidates differ in {key}")
+    if left["field_type"] != "spline_continuous":
+        raise ValueError("only spline_continuous fields can be interpolated")
+    left_values = np.asarray(left["coefficients"], float)
+    right_values = np.asarray(right["coefficients"], float)
+    if left_values.shape != right_values.shape:
+        raise ValueError("spline coefficient tensors do not align")
+    values = (1.0 - weight) * left_values + weight * right_values
+    return {
+        "candidate_id": str(candidate_id),
+        "field_type": "spline_continuous",
+        "n_basis": int(left["n_basis"]),
+        "degree": int(left["degree"]),
+        "coefficients": values.tolist(),
+        "field_sha256": array_sha256(values),
+        "roughness": spline_roughness(values),
+        "component_count": None,
+        "peak_count_constraint": None,
+        "role": "rev12_whole_sheet_candidate_interpolation",
+        "source_field_sha256": [left["field_sha256"], right["field_sha256"]],
+        "residual_coordinates": {
+            "interpolation_weight_toward_right": weight,
+            "observation_coordinates_used": False,
+        },
+    }

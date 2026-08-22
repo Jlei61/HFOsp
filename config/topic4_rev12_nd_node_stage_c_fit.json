@@ -1,0 +1,84 @@
+{
+  "schema_id": "topic4_rev12_nd_node_stage_c_fit_v1",
+  "scientific_role": "development_only_node_dualmode_refit",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_c_fit",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_c_fit/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "source_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_b_selection/candidate_manifest.json",
+      "sha256": "f07134da6ee4fadb67661221febdea248a9152ec508df831a8b5d235a1bc6809"
+    },
+    "settled_episode_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_b_selection/aggregate/event_fragmentation_audit.json",
+      "sha256": "bd3a7a65abc24ea8436c9e79c8d114d7366bb1fa2cc67917011634fb373c9941"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [],
+    "fit_network_seeds": [2161, 2162],
+    "selection_network_seeds": [2171, 2172, 2173, 2174],
+    "confirmation_network_seeds": [2181, 2182, 2183, 2184, 2185, 2186],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    },
+    "component_calibration": {
+      "events_per_side": 6,
+      "draws": 256,
+      "seed": 20260821,
+      "unit": "patient_recording_block_median_to_q95"
+    }
+  },
+  "event_unit": {
+    "name": "settled_episode",
+    "episode_merge_gap_ms": 50.0,
+    "source": "frozen detector SETTLE_MS",
+    "sensitivity_gap_ms": [25.0, 50.0, 75.0, 100.0]
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 80.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2
+  },
+  "field_search": {
+    "source_candidate_ids": ["stage_b_r02_m", "stage_b_r01_m", "stage_b_r03_p"],
+    "interpolation_weights_toward_r01": [0.25, 0.5, 0.75],
+    "residual_anchor_weight_toward_r01": 0.5,
+    "residual_control_grid": [6, 6],
+    "signed_residual_count": 12,
+    "signed_log_surface_rms": 0.12,
+    "sobol_seed": 20260823,
+    "observation_coordinates_used": false,
+    "total_field_mass_fixed": true
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 12,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Stage C is a corrected settled-episode development fit. It uses only opened development pools; confirmation seeds 2131-2136 are excluded from candidate generation. EE, E-to-I and Z/M remain off."
+}
