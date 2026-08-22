@@ -464,12 +464,17 @@ def main() -> None:
         ))
         for arm in ("dominant", "secondary", "matched_off_template"):
             # Exact spike parity is required before the threshold pulse begins.
-            branch_records[arm]["pre_intervention_spike_parity"] = bool(
+            parity = bool(
                 np.array_equal(
                     branch_spikes[arm][:pulse_step],
                     branch_spikes["sham"][:pulse_step],
                 )
             )
+            branch_records[arm]["pre_intervention_spike_parity"] = parity
+            if not parity:
+                raise RuntimeError(
+                    f"mode {mode} {arm} diverged before the intervention pulse"
+                )
             if branch_records[arm]["event_occurred"]:
                 branch_records[arm]["rank_distance_from_sham"] = _rank_distance(
                     branch_arrays[f"mode{mode}_{arm}_rank"],
