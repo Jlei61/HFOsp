@@ -4,8 +4,10 @@ import pytest
 from src.topic4_node_intervention import (
     early_support_probability,
     grid_covariates,
+    network_balanced_early_support,
     representative_event_index,
     select_hotspot_triplet,
+    select_representative_seed,
 )
 
 
@@ -18,6 +20,28 @@ def test_early_support_probability_recovers_repeated_two_site_sources():
     assert probability[2, 2] == 1.0
     assert probability[6, 6] == 1.0
     assert probability[0, 0] == 0.0
+
+
+def test_early_support_is_equal_network_not_equal_event():
+    many = np.full((10, 4, 4), np.nan)
+    many[:, 0, 0] = 0.0
+    one = np.full((1, 4, 4), np.nan)
+    one[:, 3, 3] = 0.0
+    probability = network_balanced_early_support(
+        [many, one], [np.zeros(10, int), np.zeros(1, int)], mode=0,
+    )
+    assert probability[0, 0] == pytest.approx(0.5)
+    assert probability[3, 3] == pytest.approx(0.5)
+
+
+def test_representative_seed_uses_median_eligible_network():
+    scores = [
+        {"seed": 3, "objective": 0.9, "n_events": 50, "mode_counts": [20, 30]},
+        {"seed": 1, "objective": 0.3, "n_events": 40, "mode_counts": [20, 20]},
+        {"seed": 2, "objective": 0.5, "n_events": 45, "mode_counts": [20, 25]},
+        {"seed": 4, "objective": 0.4, "n_events": 50, "mode_counts": [50, 0]},
+    ]
+    assert select_representative_seed(scores, {1: 10, 2: 10, 3: 10, 4: 10}) == 2
 
 
 def test_hotspot_triplet_uses_spatially_separated_matched_control():

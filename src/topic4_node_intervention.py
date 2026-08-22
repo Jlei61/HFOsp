@@ -34,6 +34,52 @@ def early_support_probability(onset_maps: np.ndarray,
     return np.mean(support[evaluable], axis=0)
 
 
+def network_balanced_early_support(onset_maps_by_network: list[np.ndarray],
+                                   labels_by_network: list[np.ndarray],
+                                   mode: int, fraction: float = 0.10) -> np.ndarray:
+    """Average within-network early probabilities so event-rich seeds do not dominate."""
+    if len(onset_maps_by_network) != len(labels_by_network):
+        raise ValueError("network maps and labels do not align")
+    probabilities = []
+    for maps, labels in zip(onset_maps_by_network, labels_by_network):
+        maps = np.asarray(maps, float)
+        labels = np.asarray(labels, int)
+        if maps.ndim != 3 or labels.shape != (len(maps),):
+            raise ValueError("one network map bundle does not align")
+        selected = maps[labels == int(mode)]
+        if len(selected):
+            probabilities.append(early_support_probability(selected, fraction=fraction))
+    if not probabilities:
+        raise ValueError(f"mode {mode} has no evaluable network")
+    return np.mean(probabilities, axis=0)
+
+
+def select_representative_seed(network_scores: list[dict],
+                               source_counts: dict[int, int]) -> int:
+    """Select a fully dual-mode seed nearest the candidate's median objective."""
+    eligible = [
+        row for row in network_scores
+        if np.all(np.asarray(row.get("mode_counts", []), int) > 0)
+        and int(source_counts.get(int(row["seed"]), 0)) >= 2
+        and np.isfinite(float(row["objective"]))
+    ]
+    if not eligible:
+        raise ValueError("no dual-mode source-evaluable confirmation seed")
+    objectives = np.asarray([float(row["objective"]) for row in eligible])
+    events = np.asarray([int(row["n_events"]) for row in eligible])
+    objective_median = float(np.median(objectives))
+    event_median = float(np.median(events))
+    ranked = sorted(
+        eligible,
+        key=lambda row: (
+            abs(float(row["objective"]) - objective_median),
+            abs(int(row["n_events"]) - event_median),
+            int(row["seed"]),
+        ),
+    )
+    return int(ranked[0]["seed"])
+
+
 def grid_covariates(positions_e: np.ndarray, h_e: np.ndarray,
                     baseline_spikes: np.ndarray, *, dt_ms: float,
                     sheet_mm: float, bin_mm: float) -> dict:
