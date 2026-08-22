@@ -146,9 +146,13 @@ def select_hotspot_triplet(early_probability: np.ndarray, covariates: dict, *,
     valid_flat = valid.ravel()
     dominant = int(np.flatnonzero(valid_flat)[np.argmax(p[valid_flat])])
     distance_to_dominant = np.linalg.norm(centers - centers[dominant], axis=1)
-    secondary_pool = valid_flat & (distance_to_dominant >= minimum_separation_mm)
+    secondary_pool = (
+        valid_flat
+        & (distance_to_dominant >= minimum_separation_mm)
+        & (p > 0.0)
+    )
     if not np.any(secondary_pool):
-        raise ValueError("no spatially separated secondary hotspot is available")
+        raise ValueError("no supported spatially separated secondary hotspot is available")
     secondary_candidates = np.flatnonzero(secondary_pool)
     secondary = int(secondary_candidates[np.argmax(p[secondary_candidates])])
 

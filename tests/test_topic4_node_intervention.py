@@ -67,6 +67,18 @@ def test_hotspot_triplet_uses_spatially_separated_matched_control():
     ) >= 3.0
 
 
+def test_hotspot_triplet_rejects_an_invented_zero_support_secondary():
+    probability = np.zeros((8, 8))
+    probability[2, 2] = 1.0
+    covariates = {
+        "h_mean": np.ones((8, 8)),
+        "e_density": np.ones((8, 8)),
+        "baseline_rate_hz": np.ones((8, 8)),
+    }
+    with pytest.raises(ValueError, match="supported spatially separated"):
+        select_hotspot_triplet(probability, covariates, bin_mm=1.0)
+
+
 def test_grid_covariates_preserve_density_h_and_rate_units():
     positions = np.asarray([[0.2, 0.2], [0.8, 0.7], [1.2, 1.4]])
     h = np.asarray([0.2, 0.6, 0.9])
