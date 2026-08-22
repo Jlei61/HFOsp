@@ -77,11 +77,19 @@ def main() -> None:
         if _sha256(path) != record["sha256"]:
             raise RuntimeError(f"selection input changed: {record['path']}")
     provenance = _provenance(config_path, args.expected_commit)
+    summary_key = (
+        "source_summary" if "source_summary" in config["inputs"]
+        else "stage_a_summary"
+    )
+    manifest_key = (
+        "source_manifest" if "source_manifest" in config["inputs"]
+        else "stage_a_manifest"
+    )
     summary = json.loads(_resolve(
-        artifact_root, config["inputs"]["stage_a_summary"]["path"],
+        artifact_root, config["inputs"][summary_key]["path"],
     ).read_text())
     source_manifest = json.loads(_resolve(
-        artifact_root, config["inputs"]["stage_a_manifest"]["path"],
+        artifact_root, config["inputs"][manifest_key]["path"],
     ).read_text())
     expected_networks = len(summary["requested_seeds"])
     complete = {
@@ -118,6 +126,9 @@ def main() -> None:
         "candidates": candidates,
         "fit_metrics": fit_metrics,
         "selection_contract": {
+            "source_stage": config["field_search"].get(
+                "source_stage", "stage_a",
+            ),
             "patient_heldout_used": False,
             "fresh_network_seeds": config["search"]["selection_network_seeds"],
             "paired_reference_retained": "stage_a_base",

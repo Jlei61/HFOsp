@@ -1,0 +1,84 @@
+{
+  "schema_id": "topic4_rev12_nd_node_stage_b_selection_v1",
+  "scientific_role": "development_only_node_dualmode_refit",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_b_selection",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_b_selection/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "source_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_b/aggregate/fit_summary.json",
+      "sha256": "65a1e8c1ff4189a4a768441cb22f5509665eb3d1010bc4cc91c9da66e9dae77d"
+    },
+    "source_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_b/candidate_manifest.json",
+      "sha256": "a931bed4c4a4056513708bef74ce361f0bb227c7ebf5b5c932225a6eb9a3ab76"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [],
+    "fit_network_seeds": [],
+    "selection_network_seeds": [2151, 2152, 2153, 2154],
+    "confirmation_network_seeds": [2131, 2132, 2133, 2134, 2135, 2136],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    },
+    "component_calibration": {
+      "events_per_side": 6,
+      "draws": 256,
+      "seed": 20260821,
+      "unit": "patient_recording_block_median_to_q95"
+    }
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 80.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2
+  },
+  "field_search": {
+    "source_stage": "stage_b",
+    "selection_candidate_ids": [
+      "stage_b_base",
+      "stage_b_r02_m",
+      "stage_b_r01_m",
+      "stage_b_r03_p"
+    ],
+    "selection_roles": {
+      "stage_b_base": "paired_reference",
+      "stage_b_r02_m": "lowest_fit_objective_and_best_complete_distribution",
+      "stage_b_r01_m": "best_weak_mode_balance",
+      "stage_b_r03_p": "both_modes_improved_with_smaller_topology_loss"
+    },
+    "observation_coordinates_used": false,
+    "total_field_mass_fixed": true
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 12,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Stage-B selection uses fresh model networks and remains development-only. Patient held-out metrics are evaluated only after the shortlist is frozen; EE, E-to-I and Z/M remain off."
+}
