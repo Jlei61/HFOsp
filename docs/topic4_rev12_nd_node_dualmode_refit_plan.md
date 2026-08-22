@@ -15,8 +15,21 @@
 2. Implement the four-component per-mode distance, recording-block excess-noise
    calibration and weakest-mode LSE; retain raw and normalized components.
 3. Implement event-level source maps and mode-template reliability.
-4. Add the seven synthetic controls from the spec.
+4. Add the eight synthetic controls from the spec.
 5. Freeze a versioned patient-scoring sidecar.
+
+## Phase 1b: settled-episode correction
+
+1. Preserve the shared 12 ms detector-fragment contract for upstream activity
+   detection.
+2. Merge adjacent fragments across the detector's frozen 50 ms settling scale
+   before contact readout, classification, KMeans or source-topology extraction.
+3. Store fragment membership for every episode and verify exact parity when no
+   fragments merge.
+4. Re-score all completed development pools at 25/50/75/100 ms.  Do not use the
+   already-opened confirmation pool to select the next field.
+5. Reject any direct-readout figure that displays two fragments from one episode
+   as separate modes.
 
 ## Phase 2: historical rescore
 
@@ -62,6 +75,15 @@
 3. Generate the five figure products in the spec and inspect PNG/PDF/GIF.
 4. Write a result report with safe claim, largest remaining gap and the exact
    handoff boundary for EE/E-to-I/Z/M.
+
+## Phase 7: corrected local continuation
+
+The first confirmation candidate failed: complete held-out event-cloud R2 stayed
+negative and the two modes did not both improve. Continue only on new fit,
+selection and confirmation seed pools using the settled-episode worker. The
+next local library may inherit fields from development pools, but not from the
+opened confirmation results. EE, E-to-I and Z/M remain closed until the three
+minimal scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 

@@ -11,6 +11,40 @@ from itertools import combinations
 import numpy as np
 
 
+def merge_detected_event_fragments(events: list[dict], *,
+                                   maximum_gap_ms: float,
+                                   sample_dt_ms: float) -> list[dict]:
+    """Merge detector fragments into settling-consistent biological episodes."""
+    maximum_gap_ms = float(maximum_gap_ms)
+    sample_dt_ms = float(sample_dt_ms)
+    if maximum_gap_ms < 0.0 or sample_dt_ms <= 0.0:
+        raise ValueError("merge gap must be nonnegative and sample_dt_ms positive")
+    merged: list[dict] = []
+    for detector_index, event in enumerate(events):
+        row = dict(event)
+        row["detector_fragment_indices"] = [int(detector_index)]
+        row["fragment_count"] = 1
+        if merged:
+            gap = float(row["t_on"]) - float(merged[-1]["t_off"])
+            if gap <= maximum_gap_ms:
+                previous = merged[-1]
+                previous["t_off"] = float(max(previous["t_off"], row["t_off"]))
+                previous["dur_ms"] = float(
+                    previous["t_off"] - previous["t_on"] + sample_dt_ms
+                )
+                previous["peak_ext"] = float(max(
+                    previous["peak_ext"], row["peak_ext"],
+                ))
+                previous["returned"] = bool(
+                    previous["returned"] and row["returned"]
+                )
+                previous["detector_fragment_indices"].append(int(detector_index))
+                previous["fragment_count"] += 1
+                continue
+        merged.append(row)
+    return merged
+
+
 def event_features(normalized_ranks: np.ndarray) -> np.ndarray:
     """Build fixed-contact [recruitment, masked normalized rank] features."""
     ranks = np.asarray(normalized_ranks, float)

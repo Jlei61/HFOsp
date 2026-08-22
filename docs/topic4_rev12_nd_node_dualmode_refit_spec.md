@@ -23,6 +23,23 @@ a travelling recruitment sequence from several spatially separated regions
 whose activity is coupled in time.  Optimizing the old rank objective further
 would preserve this ambiguity.
 
+### Event-unit amendment (2026-08-22)
+
+Fresh confirmation exposed a second ambiguity: the shared detector merges ON
+segments across only 12 ms, while its own return decision observes a 50 ms
+settling window.  A direct-readout panel therefore selected two fragments of one
+wave packet, separated by 28 ms, and displayed them as opposite modes.  Across
+the six selected-field confirmation networks, the 50 ms rule merged 64 adjacent
+fragment pairs; 37 had received opposite patient-mode labels before merging.
+
+For rev12-ND, a detector segment is no longer an event-level statistical unit.
+Consecutive detector segments separated by at most 50 ms are first merged into
+one `settled_episode`.  Contact recruitment, rank, patient assignment, natural
+KMeans, source topology and all objective terms are then recomputed on the whole
+episode.  The shared detector constants are not changed.  Sensitivities at
+25/50/75/100 ms remain reported; 50 ms is primary because it is inherited from
+the detector's frozen settling timescale, not selected from model fit.
+
 ## 2. Scientific question
 
 Can a continuous Node-only excitability field, with total field mass, topology,
@@ -77,6 +94,10 @@ These grids are numerical degrees of freedom, not biological cores.  They cover
 the entire sheet and do not receive extra support near observed contacts.
 
 ## 5. Patient event representation
+
+The model event unit is a `settled_episode`, not an unmerged threshold fragment.
+Every episode stores its constituent detector-fragment indices and count.  A
+figure or scorer that consumes pre-merge fragment ranks is invalid for rev12-ND.
 
 For event `e` and contact `i`, retain fixed contact identity:
 
@@ -180,6 +201,8 @@ The scoring implementation must pass:
 6. two identical mode templates fail mode-topology separation;
 7. changing only event count cannot create an artificial improvement after
    matched-sample scoring.
+8. splitting one synthetic travelling event around a 20-50 ms subthreshold dip
+   and then remerging it must reproduce the unsplit contact-rank event unit.
 
 Failure of a control blocks long simulation because it means the objective does
 not encode the scientific question.

@@ -23,7 +23,10 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
     _atomic_npz, _runtime_provenance,
 )
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
-from src.topic4_node_dualmode import event_source_onset_maps  # noqa: E402
+from src.topic4_node_dualmode import (  # noqa: E402
+    event_source_onset_maps,
+    merge_detected_event_fragments,
+)
 from src.topic4_zm_ictal_transition import (  # noqa: E402
     build_substrate, load_round_config, make_external_drive,
 )
@@ -163,8 +166,17 @@ def main() -> None:
     active, active_dt = cmrun.active_fraction(
         spikes, float(substrate.engine["dt"]), cmrun.BIN_MS,
     )
-    detected = detect_events(
+    detector_fragments = detect_events(
         active, active_dt, event_on_frac=substrate.detector_threshold,
+    )
+    event_unit = config.get("event_unit")
+    detected = (
+        detector_fragments if event_unit is None
+        else merge_detected_event_fragments(
+            detector_fragments,
+            maximum_gap_ms=float(event_unit["episode_merge_gap_ms"]),
+            sample_dt_ms=float(active_dt),
+        )
     )
     envelope, envelope_dt, _ = snn_event_envelope(
         spikes, substrate.positions_e, substrate.montage,
@@ -188,6 +200,10 @@ def main() -> None:
             "peak_active_fraction": float(event["peak_ext"]),
             "returned": bool(event["returned"]),
             "n_recruited_contacts": int(np.isfinite(onset).sum()),
+            "n_detector_fragments": int(event.get("fragment_count", 1)),
+            "detector_fragment_indices": event.get(
+                "detector_fragment_indices", [int(index)],
+            ),
         })
     onsets = np.asarray(onset_rows, float).reshape((-1, len(substrate.contact_names)))
     ranks = np.asarray(rank_rows, float).reshape((-1, len(substrate.contact_names)))
@@ -210,6 +226,9 @@ def main() -> None:
         event_t_on_ms=event_t_on.astype(np.float32),
         event_t_off_ms=np.asarray([row["t_off_ms"] for row in event_rows], np.float32),
         event_returned=returned,
+        event_fragment_count=np.asarray([
+            row["n_detector_fragments"] for row in event_rows
+        ], np.int16),
         active_fraction=np.asarray(active, np.float32),
         active_fraction_bin_ms=np.asarray(active_dt, float),
         contact_envelope=np.asarray(envelope, np.float32),
@@ -237,6 +256,18 @@ def main() -> None:
             "wall_seconds": float(time.time() - started),
         },
         "events": event_rows,
+        "event_unit": {
+            "raw_detector_fragment_count": int(len(detector_fragments)),
+            "episode_count": int(len(detected)),
+            "episode_merge_gap_ms": (
+                None if event_unit is None
+                else float(event_unit["episode_merge_gap_ms"])
+            ),
+            "rationale": (
+                "rev12-only settling-consistent episode grouping; shared detector "
+                "constants and all other Topic 4 artifacts remain unchanged"
+            ),
+        },
         "source_topology": {
             "n_evaluable_returned_events": int(np.sum(source["evaluable"] & returned)),
             "bin_mm": source["bin_mm"],
