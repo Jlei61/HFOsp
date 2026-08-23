@@ -26,12 +26,14 @@ from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
     event_source_onset_maps,
     merge_detected_event_fragments,
+    population_excursion_episodes,
+    sheet_activity_movie,
 )
 from src.topic4_zm_ictal_transition import (  # noqa: E402
     build_substrate, load_round_config, make_external_drive,
 )
 from kick_probe import simulate_kick  # noqa: E402
-from src.sef_hfo_events import detect_events  # noqa: E402
+from src.sef_hfo_events import RETURN_FRAC, detect_events  # noqa: E402
 from src.sef_hfo_snn_adapter import snn_event_envelope  # noqa: E402
 
 
@@ -170,14 +172,58 @@ def main() -> None:
         active, active_dt, event_on_frac=substrate.detector_threshold,
     )
     event_unit = config.get("event_unit")
-    detected = (
-        detector_fragments if event_unit is None
-        else merge_detected_event_fragments(
+    if event_unit is None:
+        detected = detector_fragments
+        event_unit_runtime = {"name": "detector_fragment"}
+    elif event_unit["name"] == "settled_episode":
+        detected = merge_detected_event_fragments(
             detector_fragments,
             maximum_gap_ms=float(event_unit["episode_merge_gap_ms"]),
             sample_dt_ms=float(active_dt),
         )
-    )
+        event_unit_runtime = {
+            "name": "settled_episode",
+            "episode_merge_gap_ms": float(event_unit["episode_merge_gap_ms"]),
+        }
+    elif event_unit["name"] == "population_excursion":
+        low_fraction = float(event_unit["low_threshold_fraction"])
+        if not np.isclose(low_fraction, float(RETURN_FRAC)):
+            raise RuntimeError("population-excursion low fraction drifted from detector")
+        fast_tau_ms = max(
+            float(substrate.params.tau_m_E),
+            float(substrate.params.tau_d_GABA),
+        )
+        delay_ms = (
+            int(substrate.net["max_delay_steps"])
+            * float(substrate.engine["dt"])
+        )
+        reset_ms = (
+            float(event_unit["fast_state_decay_multiples"]) * fast_tau_ms
+            + delay_ms
+        )
+        pre_roll_ms = float(event_unit.get("pre_roll_ms", fast_tau_ms))
+        detected = population_excursion_episodes(
+            detector_fragments, active, sample_dt_ms=float(active_dt),
+            event_on_threshold=float(substrate.detector_threshold),
+            low_threshold_fraction=low_fraction, reset_ms=reset_ms,
+            pre_roll_ms=pre_roll_ms,
+        )
+        event_unit_runtime = {
+            "name": "population_excursion",
+            "event_on_threshold": float(substrate.detector_threshold),
+            "low_threshold_fraction": low_fraction,
+            "low_threshold": low_fraction * float(substrate.detector_threshold),
+            "fast_tau_ms": fast_tau_ms,
+            "fast_state_decay_multiples": float(
+                event_unit["fast_state_decay_multiples"]
+            ),
+            "maximum_delay_ms": delay_ms,
+            "reset_ms": reset_ms,
+            "pre_roll_ms": pre_roll_ms,
+            "contact_geometry_used_for_boundary": False,
+        }
+    else:
+        raise RuntimeError(f"unknown event unit: {event_unit['name']}")
     envelope, envelope_dt, _ = snn_event_envelope(
         spikes, substrate.positions_e, substrate.montage,
         float(substrate.engine["dt"]),
@@ -196,6 +242,9 @@ def main() -> None:
         event_rows.append({
             "event_index": int(index), "t_on_ms": float(event["t_on"]),
             "t_off_ms": float(event["t_off"]),
+            "trigger_t_on_ms": float(event.get("trigger_t_on", event["t_on"])),
+            "trigger_t_off_ms": float(event.get("trigger_t_off", event["t_off"])),
+            "reset_start_ms": event.get("reset_start_ms"),
             "duration_ms": float(event["dur_ms"]),
             "peak_active_fraction": float(event["peak_ext"]),
             "returned": bool(event["returned"]),
@@ -209,12 +258,29 @@ def main() -> None:
     ranks = np.asarray(rank_rows, float).reshape((-1, len(substrate.contact_names)))
     returned = np.asarray([row["returned"] for row in event_rows], bool)
     event_t_on = np.asarray([row["t_on_ms"] for row in event_rows], float)
+    event_trigger_t_on = np.asarray([
+        row["trigger_t_on_ms"] for row in event_rows
+    ], float)
     source = event_source_onset_maps(
-        spikes, substrate.positions_e, event_t_on, returned,
+        spikes, substrate.positions_e, event_trigger_t_on, returned,
         dt_ms=float(substrate.engine["dt"]),
         sheet_mm=float(substrate.engine["L"]),
         bin_mm=float(config["source_topology"]["bin_mm"]),
     )
+    movie_config = config["source_topology"].get("full_sheet_movie", {})
+    movie_arrays = {}
+    if bool(movie_config.get("enabled", False)):
+        movie = sheet_activity_movie(
+            spikes, substrate.positions_e,
+            dt_ms=float(substrate.engine["dt"]),
+            frame_ms=float(movie_config["frame_ms"]),
+            bin_mm=float(config["source_topology"]["bin_mm"]),
+            sheet_mm=float(substrate.engine["L"]),
+        )
+        movie_arrays = {
+            "sheet_activity_counts": movie["activity_counts"],
+            "sheet_activity_frame_ms": np.asarray(movie["frame_ms"], float),
+        }
     del spikes
 
     _atomic_npz(
@@ -224,6 +290,7 @@ def main() -> None:
         contact_xy_mm=np.asarray(substrate.contact_xy, np.float64),
         onsets=onsets.astype(np.float32), ranks=ranks.astype(np.float32),
         event_t_on_ms=event_t_on.astype(np.float32),
+        event_trigger_t_on_ms=event_trigger_t_on.astype(np.float32),
         event_t_off_ms=np.asarray([row["t_off_ms"] for row in event_rows], np.float32),
         event_returned=returned,
         event_fragment_count=np.asarray([
@@ -243,6 +310,7 @@ def main() -> None:
         h=np.asarray(substrate.h_e, np.float32),
         delta_vtheta=np.asarray(substrate.delta_vtheta, np.float32),
         edge_coefficients=np.asarray(substrate.edge_coefficients, np.float64),
+        **movie_arrays,
     )
     payload = {
         "status": "REV12ND_NODE_WORKER_COMPLETE",
@@ -259,13 +327,10 @@ def main() -> None:
         "event_unit": {
             "raw_detector_fragment_count": int(len(detector_fragments)),
             "episode_count": int(len(detected)),
-            "episode_merge_gap_ms": (
-                None if event_unit is None
-                else float(event_unit["episode_merge_gap_ms"])
-            ),
+            **event_unit_runtime,
             "rationale": (
-                "rev12-only settling-consistent episode grouping; shared detector "
-                "constants and all other Topic 4 artifacts remain unchanged"
+                "rev12 event grouping uses latent population activity only; virtual "
+                "contacts are read out after episode boundaries are frozen"
             ),
         },
         "source_topology": {
@@ -273,6 +338,13 @@ def main() -> None:
             "bin_mm": source["bin_mm"],
             "window_ms": [-20.0, 80.0],
             "baseline_window_ms": [-120.0, -20.0],
+            "full_sheet_movie": {
+                "stored": bool(movie_arrays),
+                "frame_ms": (
+                    None if not movie_arrays
+                    else float(movie_config["frame_ms"])
+                ),
+            },
         },
         "mechanism_freeze": {
             "EE": "off", "E_to_I": "off", "Z_M": "off",

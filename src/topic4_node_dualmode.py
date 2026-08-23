@@ -45,6 +45,118 @@ def merge_detected_event_fragments(events: list[dict], *,
     return merged
 
 
+def _stable_low_start(values: np.ndarray, *, start: int, stop: int,
+                      threshold: float, required_steps: int) -> int | None:
+    """Return the first low-state dwell start inside ``[start, stop)``."""
+    values = np.asarray(values, float)
+    start = max(0, int(start))
+    stop = min(len(values), int(stop))
+    required_steps = int(required_steps)
+    if required_steps <= 0:
+        raise ValueError("required_steps must be positive")
+    if stop - start < required_steps:
+        return None
+    low = values[start:stop] <= float(threshold)
+    padded = np.concatenate(([False], low, [False])).astype(np.int8)
+    changes = np.flatnonzero(np.diff(padded))
+    for left, right in zip(changes[::2], changes[1::2]):
+        if right - left >= required_steps:
+            return int(start + left)
+    return None
+
+
+def population_excursion_episodes(events: list[dict], active_fraction: np.ndarray,
+                                  *, sample_dt_ms: float,
+                                  event_on_threshold: float,
+                                  low_threshold_fraction: float,
+                                  reset_ms: float,
+                                  pre_roll_ms: float) -> list[dict]:
+    """Group threshold fragments until the fast population state truly resets.
+
+    Boundaries depend only on the latent population activity, never on virtual
+    contact placement or recruitment.  A new episode starts only after activity
+    has stayed below ``low_threshold_fraction * event_on_threshold`` for a full
+    fast-state reset interval.
+    """
+    values = np.asarray(active_fraction, float)
+    sample_dt_ms = float(sample_dt_ms)
+    event_on_threshold = float(event_on_threshold)
+    low_threshold_fraction = float(low_threshold_fraction)
+    reset_ms = float(reset_ms)
+    pre_roll_ms = float(pre_roll_ms)
+    if values.ndim != 1 or not np.all(np.isfinite(values)):
+        raise ValueError("active_fraction must be a finite one-dimensional trace")
+    if sample_dt_ms <= 0.0 or event_on_threshold <= 0.0:
+        raise ValueError("sample_dt_ms and event_on_threshold must be positive")
+    if not 0.0 < low_threshold_fraction < 1.0:
+        raise ValueError("low_threshold_fraction must lie in (0, 1)")
+    if reset_ms <= 0.0 or pre_roll_ms < 0.0:
+        raise ValueError("reset_ms must be positive and pre_roll_ms nonnegative")
+    if not events:
+        return []
+    required_steps = max(1, int(np.ceil(reset_ms / sample_dt_ms)))
+    low_threshold = low_threshold_fraction * event_on_threshold
+    ordered = sorted(
+        enumerate(events), key=lambda item: (float(item[1]["t_on"]), item[0]),
+    )
+    groups: list[tuple[list[tuple[int, dict]], int | None]] = []
+    current = [ordered[0]]
+    for detector_index, event in ordered[1:]:
+        previous = current[-1][1]
+        gap_start = int(np.floor(float(previous["t_off"]) / sample_dt_ms)) + 1
+        gap_stop = int(np.ceil(float(event["t_on"]) / sample_dt_ms))
+        reset_start = _stable_low_start(
+            values, start=gap_start, stop=gap_stop,
+            threshold=low_threshold, required_steps=required_steps,
+        )
+        if reset_start is None:
+            current.append((detector_index, event))
+        else:
+            groups.append((current, reset_start))
+            current = [(detector_index, event)]
+    last_event = current[-1][1]
+    final_start = int(np.floor(float(last_event["t_off"]) / sample_dt_ms)) + 1
+    final_reset = _stable_low_start(
+        values, start=final_start, stop=len(values),
+        threshold=low_threshold, required_steps=required_steps,
+    )
+    groups.append((current, final_reset))
+
+    output = []
+    total_ms = len(values) * sample_dt_ms
+    for group, reset_start in groups:
+        fragment_indices = [int(index) for index, _ in group]
+        trigger_on = float(group[0][1]["t_on"])
+        trigger_off = float(group[-1][1]["t_off"])
+        analysis_on = max(0.0, trigger_on - pre_roll_ms)
+        analysis_off = (
+            float(reset_start * sample_dt_ms)
+            if reset_start is not None else total_ms
+        )
+        start_step = max(0, int(np.floor(analysis_on / sample_dt_ms)))
+        stop_step = min(len(values), int(np.ceil(analysis_off / sample_dt_ms)) + 1)
+        peak = float(np.max(values[start_step:stop_step]))
+        output.append({
+            "t_on": analysis_on,
+            "t_off": analysis_off,
+            "dur_ms": float(max(sample_dt_ms, analysis_off - analysis_on)),
+            "peak_ext": peak,
+            "returned": reset_start is not None,
+            "trigger_t_on": trigger_on,
+            "trigger_t_off": trigger_off,
+            "reset_start_ms": (
+                None if reset_start is None else float(reset_start * sample_dt_ms)
+            ),
+            "detector_fragment_indices": fragment_indices,
+            "fragment_count": int(len(fragment_indices)),
+            "event_unit": "population_excursion",
+            "low_threshold": float(low_threshold),
+            "reset_ms": reset_ms,
+            "pre_roll_ms": pre_roll_ms,
+        })
+    return output
+
+
 def event_features(normalized_ranks: np.ndarray) -> np.ndarray:
     """Build fixed-contact [recruitment, masked normalized rank] features."""
     ranks = np.asarray(normalized_ranks, float)
@@ -526,6 +638,41 @@ def _distinct_activity_frames(spikes: np.ndarray, *, dt_ms: float,
             neuron_bins[active], minlength=size * size,
         ).reshape(size, size)
     return output
+
+
+def sheet_activity_movie(spikes: np.ndarray, positions: np.ndarray, *,
+                         dt_ms: float, frame_ms: float,
+                         bin_mm: float, sheet_mm: float) -> dict:
+    """Store a whole-run neuron-level sheet movie for event-unit re-audits."""
+    spikes = np.asarray(spikes, bool)
+    dt_ms = float(dt_ms)
+    frame_ms = float(frame_ms)
+    if spikes.ndim != 2 or dt_ms <= 0.0 or frame_ms <= 0.0:
+        raise ValueError("spikes must be 2-D and movie time steps positive")
+    steps = int(round(frame_ms / dt_ms))
+    if steps <= 0 or not np.isclose(steps * dt_ms, frame_ms):
+        raise ValueError("frame_ms must be an integer multiple of dt_ms")
+    neuron_bins, size = sheet_bin_indices(
+        positions, bin_mm=bin_mm, sheet_mm=sheet_mm,
+    )
+    if neuron_bins.shape != (spikes.shape[1],):
+        raise ValueError("spikes and positions do not align")
+    n_frames = int(np.ceil(len(spikes) / steps))
+    output = np.zeros((n_frames, size, size), dtype=np.uint16)
+    for frame in range(n_frames):
+        active = np.any(
+            spikes[frame * steps:min(len(spikes), (frame + 1) * steps)], axis=0,
+        )
+        counts = np.bincount(neuron_bins[active], minlength=size * size)
+        if np.max(counts, initial=0) > np.iinfo(np.uint16).max:
+            raise RuntimeError("sheet movie frame exceeds uint16 storage")
+        output[frame] = counts.reshape(size, size).astype(np.uint16)
+    return {
+        "activity_counts": output,
+        "frame_ms": frame_ms,
+        "bin_mm": float(bin_mm),
+        "sheet_mm": float(sheet_mm),
+    }
 
 
 def event_source_onset_maps(spikes: np.ndarray, positions: np.ndarray,

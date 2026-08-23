@@ -18,7 +18,7 @@
 4. Add the eight synthetic controls from the spec.
 5. Freeze a versioned patient-scoring sidecar.
 
-## Phase 1b: settled-episode correction
+## Phase 1b: settled-episode correction (historical, insufficient)
 
 1. Preserve the shared 12 ms detector-fragment contract for upstream activity
    detection.
@@ -30,6 +30,25 @@
    already-opened confirmation pool to select the next field.
 5. Reject any direct-readout figure that displays two fragments from one episode
    as separate modes.
+
+## Phase 1c: population-excursion correction (current blocker)
+
+1. Stop selection, confirmation, intervention and all new field optimization.
+2. Define event boundaries from population active fraction only.  Start from the
+   frozen high threshold; end only after activity stays below
+   `RETURN_FRAC * high` for `5 * max(tau_m,E, tau_d,GABA) + max_delay`.
+3. Recompute contact recruitment and rank on the whole excursion.  Store the
+   high-threshold trigger, full analysis window, reset interval and constituent
+   fragments separately.
+4. Store a whole-run 1 mm neuron-activity movie at 2 ms resolution for canary
+   workers, so any grouping can be audited without rerunning the SNN.
+5. Run zero-simulation rescoring at four, five and six fast-state decay
+   constants.  Candidate ranking and natural K=2 must be stable across all three.
+6. Run one Node-only canary field on two development networks, generate full-
+   excursion GIFs, and verify that every visually continuous wave packet belongs
+   to the same statistical event.
+7. Mark all 50 ms Stage-B/C rankings and figures invalid for field selection.
+   Resume Phase 5 only after this correction is accepted.
 
 ## Phase 2: historical rescore
 
@@ -76,14 +95,15 @@
 4. Write a result report with safe claim, largest remaining gap and the exact
    handoff boundary for EE/E-to-I/Z/M.
 
-## Phase 7: corrected local continuation
+## Phase 7: corrected local continuation (paused by Phase 1c)
 
 The first confirmation candidate failed: complete held-out event-cloud R2 stayed
 negative and the two modes did not both improve. Continue only on new fit,
 selection and confirmation seed pools using the settled-episode worker. The
-next local library may inherit fields from development pools, but not from the
-opened confirmation results. EE, E-to-I and Z/M remain closed until the three
-minimal scientific acceptance conditions in the spec are jointly met.
+next local library may inherit fields from development pools only after
+population-excursion stability is established, and never from the opened
+confirmation results. EE, E-to-I and Z/M remain closed until the three minimal
+scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 

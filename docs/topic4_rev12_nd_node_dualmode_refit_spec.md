@@ -40,6 +40,38 @@ episode.  The shared detector constants are not changed.  Sensitivities at
 25/50/75/100 ms remain reported; 50 ms is primary because it is inherited from
 the detector's frozen settling timescale, not selected from model fit.
 
+### Population-excursion correction (2026-08-23; supersedes the 50 ms primary)
+
+The 50 ms correction was necessary but insufficient.  In the Stage-C fit pool,
+natural-KMeans direction purity for one apparent leading candidate changed from
+0.93 at 50 ms to 0.65 at 100 ms and 0.55 at 150 ms.  One displayed blue event
+also recruited only three contacts and was followed 113 ms later by a ten-contact
+packet.  Thus the optimizer could still profit from splitting a recurrent
+population excursion into favourable contact-rank fragments.
+
+The primary event unit is now a `population_excursion`.  The absolute detector
+threshold still identifies high-activity fragments, but fragment grouping and
+event boundaries use only the latent whole-network active-fraction trace:
+
+```text
+high threshold = frozen common detector threshold
+low threshold  = RETURN_FRAC * high threshold
+reset time     = 5 * max(tau_m,E, tau_d,GABA) + maximum network delay
+```
+
+A new episode may begin only after activity remains below the low threshold for
+the complete reset time.  Temporary dips shorter than this do not split an
+episode.  The analysis window begins one fast time constant before the first
+high-threshold crossing and ends at the start of the stable low-state dwell.
+Contact geometry, virtual-contact amplitude and patient labels are forbidden
+inputs to these boundaries.
+
+The factor five is the primary fast-state decay reference.  Factors four and six
+are mandatory sensitivities.  Candidate ranking, natural K=2 and both mode
+prototypes must remain qualitatively stable across all three before any new
+field optimization.  The 50 ms Stage-B/C results remain an invalidated
+development audit and cannot seed selection or confirmation.
+
 ## 2. Scientific question
 
 Can a continuous Node-only excitability field, with total field mass, topology,
@@ -95,9 +127,11 @@ the entire sheet and do not receive extra support near observed contacts.
 
 ## 5. Patient event representation
 
-The model event unit is a `settled_episode`, not an unmerged threshold fragment.
-Every episode stores its constituent detector-fragment indices and count.  A
-figure or scorer that consumes pre-merge fragment ranks is invalid for rev12-ND.
+The model event unit is a `population_excursion`, not an unmerged threshold
+fragment or fixed-gap `settled_episode`.  Every excursion stores its constituent
+detector-fragment indices, high-threshold trigger interval, complete analysis
+window, reset threshold and reset duration.  A figure or scorer that consumes
+pre-group fragment ranks is invalid for rev12-ND.
 
 For event `e` and contact `i`, retain fixed contact identity:
 
@@ -203,6 +237,12 @@ The scoring implementation must pass:
    matched-sample scoring.
 8. splitting one synthetic travelling event around a 20-50 ms subthreshold dip
    and then remerging it must reproduce the unsplit contact-rank event unit.
+9. changing virtual-contact locations or gains must leave population-excursion
+   boundaries exactly unchanged;
+10. two packets without a complete fast-state reset must form one excursion,
+    whereas a full low-state dwell must separate them;
+11. the full-sheet movie must cover the entire analysis window so that repeated
+    waves cannot be hidden by a fixed 100 ms display.
 
 Failure of a control blocks long simulation because it means the objective does
 not encode the scientific question.
@@ -272,6 +312,10 @@ Use fresh networks and a frozen Pareto rule over:
 No single KMeans scalar selects the field.  The selected point is the fixed
 knee of normalized Pareto coordinates, with field roughness as the last
 tie-break.
+
+No search resumes until the same shortlist and two-mode interpretation are
+stable at four, five and six fast-state decay constants.  Instability is an
+event-definition failure, not optimizer uncertainty.
 
 ### Confirmation
 

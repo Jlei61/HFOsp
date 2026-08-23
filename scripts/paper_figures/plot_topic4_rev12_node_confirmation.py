@@ -122,10 +122,17 @@ def _representative_detected_events(npz_path: Path, worker: dict) -> dict[int, i
         returned_indices = np.flatnonzero(np.asarray(loaded["event_returned"], bool))
     output = {}
     for mode in (0, 1):
+        mode_pool = labels == mode
+        supported_pool = mode_pool & ~np.asarray(worker["ood"], bool)[evaluable_positions]
+        pool = supported_pool if np.any(supported_pool) else mode_pool
+        pool_positions = np.flatnonzero(pool)
+        if not len(pool_positions):
+            raise RuntimeError(f"representative network lacks mode {mode + 1}")
         local = representative_event_index(
-            maps, np.asarray(worker["ranks"])[evaluable_positions], labels, mode,
+            maps[pool], np.asarray(worker["ranks"])[evaluable_positions][pool],
+            labels[pool], mode,
         )
-        returned_position = int(evaluable_positions[local])
+        returned_position = int(evaluable_positions[pool_positions[local]])
         output[mode] = int(returned_indices[returned_position])
     return output
 
@@ -224,7 +231,10 @@ def _settled_episode_pair(payload_events: list[dict], labels: np.ndarray,
         if returned is None or int(labels[returned]) != mode:
             raise RuntimeError("representative event does not match its patient mode")
     fragment_sets = [
-        set(int(value) for value in payload_events[index].get("fragment_indices", [index]))
+        set(int(value) for value in payload_events[index].get(
+            "detector_fragment_indices",
+            payload_events[index].get("fragment_indices", [index]),
+        ))
         for index in pair
     ]
     if fragment_sets[0] & fragment_sets[1]:
@@ -416,7 +426,10 @@ def render_dynamics(config: dict, aggregate: dict, candidate_id: str,
         "seed": seed,
         "seed_rule": "dual-mode source-evaluable seed nearest median objective",
         "representative_detected_events": {str(key): value for key, value in detected.items()},
-        "event_rule": "joint source-topology/contact-rank medoid within each model mode",
+        "event_rule": (
+            "joint source-topology/contact-rank medoid within each model mode; "
+            "in-support returned episodes preferred"
+        ),
         "readout": readout,
         "worker_npz": str(npz_path),
         "worker_npz_sha256": _sha256(npz_path),
