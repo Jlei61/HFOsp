@@ -62,6 +62,21 @@ def _stop_units(units: list[str]) -> None:
         )
 
 
+def _resource_contract(resources: dict, *, maximum_workers: int | None,
+                       estimated_worker_gib: float | None) -> tuple[int, float]:
+    workers = (
+        int(resources["maximum_workers"])
+        if maximum_workers is None else int(maximum_workers)
+    )
+    estimate = (
+        float(resources.get("estimated_worker_gib", 14.0))
+        if estimated_worker_gib is None else float(estimated_worker_gib)
+    )
+    if workers <= 0 or estimate <= 0.0:
+        raise RuntimeError("worker count and estimated memory must be positive")
+    return workers, estimate
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
@@ -73,6 +88,8 @@ def main() -> None:
     parser.add_argument("--expected-commit", required=True)
     parser.add_argument("--artifact-root", type=Path, default=ARTIFACT_ROOT)
     parser.add_argument("--unit-prefix", default="codex-t4-r12")
+    parser.add_argument("--maximum-workers", type=int)
+    parser.add_argument("--estimated-worker-gib", type=float)
     args = parser.parse_args()
 
     config_path = args.config.resolve()
@@ -89,13 +106,13 @@ def main() -> None:
     worker_dir.mkdir(parents=True, exist_ok=True)
 
     resources = config["resources"]
-    max_workers = int(resources["maximum_workers"])
+    max_workers, estimated_worker_gib = _resource_contract(
+        resources, maximum_workers=args.maximum_workers,
+        estimated_worker_gib=args.estimated_worker_gib,
+    )
     reserve_gib = float(resources["reserved_available_memory_gib"])
     interval = int(resources["monitor_interval_seconds"])
     disk_floor_gib = 40.0
-    estimated_worker_gib = float(resources.get("estimated_worker_gib", 14.0))
-    if estimated_worker_gib <= 0.0:
-        raise RuntimeError("estimated worker memory must be positive")
     expected_commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
     ).strip()
@@ -173,6 +190,8 @@ def main() -> None:
         "n_candidates": len(candidates),
         "n_seeds": len(seeds),
         "n_launched": len(launched),
+        "maximum_workers": max_workers,
+        "estimated_worker_gib": estimated_worker_gib,
         "elapsed_minutes": (time.time() - started_at) / 60.0,
         "launched": launched,
     }, indent=2) + "\n")

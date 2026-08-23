@@ -177,7 +177,10 @@ scientific acceptance conditions in the spec are jointly met.
 
 The native-worker parity canary passed exactly for the shared arrays, event
 metadata and root identifiers.  Stage I is therefore the next runnable phase.
-Measured canary RSS was about 2.3 GiB; the controller uses a conservative 4 GiB
-per worker estimate, a maximum of 24 workers, one numerical thread each and a
-32 GiB available-memory reserve.  Duration is not shortened and fit, selection
-and confirmation network pools remain disjoint.
+The short canary initially used about 2.3 GiB, but the first 24-worker fit batch
+grew to about 6.5-8 GiB per worker as spike buffers accumulated.  The controller
+was stopped before the 32 GiB reserve was crossed; eight incomplete workers were
+discarded and will be rerun.  Continuation uses an explicit runtime safety
+override of 8 GiB per worker and at most 16 workers, with the same 600 s monitor
+and 32 GiB reserve.  This changes scheduling only.  Duration is not shortened
+and fit, selection and confirmation network pools remain disjoint.
