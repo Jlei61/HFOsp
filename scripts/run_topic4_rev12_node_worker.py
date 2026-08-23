@@ -76,6 +76,20 @@ def _config_at_commit(config_path: Path, commit: str) -> str | None:
     return hashlib.sha256(content).hexdigest()
 
 
+def _event_peak_active_fraction(event: dict, active: np.ndarray,
+                                active_dt_ms: float) -> float:
+    """Read the peak population activity inside the frozen event window."""
+    values = np.asarray(active, float)
+    active_dt_ms = float(active_dt_ms)
+    if values.ndim != 1 or active_dt_ms <= 0.0:
+        raise ValueError("active fraction must be one-dimensional with positive dt")
+    start = max(0, int(np.floor(float(event["t_on"]) / active_dt_ms)))
+    stop = min(len(values), int(np.ceil(float(event["t_off"]) / active_dt_ms)))
+    if stop <= start:
+        raise ValueError("event window contains no population-activity sample")
+    return float(np.max(values[start:stop]))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
@@ -306,7 +320,9 @@ def main() -> None:
             "trigger_t_off_ms": float(event.get("trigger_t_off", event["t_off"])),
             "reset_start_ms": event.get("reset_start_ms"),
             "duration_ms": float(event["dur_ms"]),
-            "peak_active_fraction": float(event["peak_ext"]),
+            "peak_active_fraction": _event_peak_active_fraction(
+                event, active, active_dt,
+            ),
             "returned": bool(event["returned"]),
             "n_recruited_contacts": int(np.isfinite(onset).sum()),
             "n_detector_fragments": int(len(event.get(
