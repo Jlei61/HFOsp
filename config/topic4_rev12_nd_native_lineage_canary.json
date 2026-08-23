@@ -1,0 +1,86 @@
+{
+  "schema_id": "topic4_rev12_nd_native_lineage_canary_v1",
+  "scientific_role": "development_only_node_dualmode_refit",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_h_native_lineage_canary",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_h_native_lineage_canary/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "source_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_g_lineage_restricted_readout_rescore/candidate_manifest.json",
+      "sha256": "40f5ea3e8c9cca6fa697e9db03333c6e992b63eb48501cfe7d0dfe41f06fbc0d"
+    },
+    "source_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_g_lineage_restricted_readout_rescore/aggregate/lineage_restricted_readout_audit.json",
+      "sha256": "488acb3c00bb63469efc35fad369a9e2adc97771d3eb777be0a82537618ba449"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [2201],
+    "fit_network_seeds": [],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_sheet_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "minimum_full_trace_pearson": 0.98,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "directed_spatiotemporal_lineage",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "forward_parent_frame_gap": 1,
+    "forward_parent_neighborhood_bins": 1,
+    "collision_rule": "seeded_watershed_preserves_roots_and_marks_only_equidistant_boundaries",
+    "boundary_signal": "whole_sheet_E_activity_movie_only",
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 80.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {
+      "enabled": true,
+      "frame_ms": 2.0
+    }
+  },
+  "field_search": {
+    "candidate_ids": ["stage_c_r04_p"],
+    "new_field_parameters_released": false,
+    "purpose": "native-worker parity against the frozen zero-simulation causal-lineage rescore"
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 1,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Engineering parity canary only. It cannot establish patient fit or dual-mode recovery. EE, E-to-I and Z/M remain off."
+}

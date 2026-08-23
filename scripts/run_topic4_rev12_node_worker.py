@@ -26,12 +26,16 @@ from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
     assign_detector_fragments_to_directed_lineages,
     assign_detector_fragments_to_cascades,
+    binned_contact_envelope,
     cascade_event_windows,
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
     event_source_onset_maps,
+    lineage_restricted_contact_readout,
     merge_detected_event_fragments,
     population_excursion_episodes,
+    sheet_bin_indices,
+    sheet_contact_sampling_weights,
     sheet_activity_movie,
     spatiotemporal_cascade_labels,
 )
@@ -91,6 +95,92 @@ def _event_peak_active_fraction(event: dict, active: np.ndarray,
     if stop <= start:
         raise ValueError("event window contains no population-activity sample")
     return float(np.max(values[start:stop]))
+
+
+def _event_contact_readout(*, events: list[dict], envelope: np.ndarray,
+                           envelope_dt_ms: float, montage, valid_contacts: np.ndarray,
+                           positions_e: np.ndarray, movie: dict | None,
+                           lineage_labels: np.ndarray | None,
+                           readout: dict) -> tuple[np.ndarray, np.ndarray, dict]:
+    """Apply the configured contact readout after event roots are frozen."""
+    source = str(readout.get(
+        "source", "full_contact_envelope_within_event_window",
+    ))
+    n_contacts = len(montage.names)
+    audit = {"source": source}
+    if source == "lineage_restricted_sheet_activity":
+        if movie is None or lineage_labels is None:
+            raise RuntimeError("lineage-restricted readout requires a directed movie")
+        neuron_bins, sheet_size = sheet_bin_indices(
+            np.asarray(positions_e, float),
+            bin_mm=float(movie["bin_mm"]), sheet_mm=float(movie["sheet_mm"]),
+        )
+        population = np.bincount(
+            neuron_bins, minlength=sheet_size * sheet_size,
+        ).reshape(sheet_size, sheet_size)
+        weights = sheet_contact_sampling_weights(
+            np.asarray(montage.contacts, float), population,
+            bin_mm=float(movie["bin_mm"]),
+            kernel_width_mm=float(readout["kernel_width_mm"]),
+        )
+        proxy = binned_contact_envelope(
+            np.asarray(movie["activity_counts"]), weights,
+            frame_ms=float(movie["frame_ms"]),
+            smooth_ms=float(readout["smooth_ms"]),
+        )
+        frozen = np.asarray(envelope, float)
+        if proxy.shape != frozen.shape:
+            raise RuntimeError(
+                "binned and frozen contact envelopes have different shapes"
+            )
+        correlations = np.asarray([
+            np.corrcoef(proxy[index], frozen[index])[0, 1]
+            for index in range(n_contacts)
+        ], float)
+        minimum = float(readout["minimum_full_trace_pearson"])
+        if (not np.all(np.isfinite(correlations))
+                or float(np.min(correlations)) < minimum):
+            raise RuntimeError("binned contact sampler fails full-trace parity")
+        restricted = lineage_restricted_contact_readout(
+            np.asarray(movie["activity_counts"]), np.asarray(lineage_labels),
+            events, weights, frame_ms=float(movie["frame_ms"]),
+            smooth_ms=float(readout["smooth_ms"]),
+            participation_margin_fraction=float(
+                readout["participation_margin_fraction"]
+            ),
+            timing_fraction=float(readout["timing_fraction"]),
+        )
+        audit.update({
+            "kernel_width_mm": float(readout["kernel_width_mm"]),
+            "smooth_ms": float(readout["smooth_ms"]),
+            "minimum_full_trace_pearson": minimum,
+            "full_trace_pearson_per_contact": correlations,
+            "full_trace_pearson_median": float(np.median(correlations)),
+            "full_trace_pearson_minimum": float(np.min(correlations)),
+            "parity_status": "PASS",
+        })
+        return restricted["onsets"], restricted["ranks"], audit
+
+    if source not in {
+        "full_contact_envelope_within_event_window",
+        "full_contact_envelope_within_lineage_window",
+    }:
+        raise RuntimeError(f"unknown contact readout source: {source}")
+    onset_rows, rank_rows = [], []
+    for event in events:
+        onset, rank = _contact_onsets(
+            envelope, envelope_dt_ms, montage, valid_contacts,
+            (event["t_on"], event["t_off"]),
+            readout["participation_margin_fraction"],
+            readout["timing_fraction"],
+        )
+        onset_rows.append(onset)
+        rank_rows.append(rank)
+    return (
+        np.asarray(onset_rows, float).reshape((-1, n_contacts)),
+        np.asarray(rank_rows, float).reshape((-1, n_contacts)),
+        audit,
+    )
 
 
 def main() -> None:
@@ -197,6 +287,7 @@ def main() -> None:
     cascade_arrays = {}
     compound_fragments = []
     directed_source = None
+    lineage_labels = None
     if event_unit is None:
         detected = detector_fragments
         event_unit_runtime = {"name": "detector_fragment"}
@@ -381,16 +472,15 @@ def main() -> None:
         float(substrate.engine["dt"]),
     )
     readout = config["search"]["contact_readout"]
-    onset_rows, rank_rows, event_rows = [], [], []
+    onsets, ranks, contact_readout_audit = _event_contact_readout(
+        events=detected, envelope=envelope, envelope_dt_ms=envelope_dt,
+        montage=substrate.montage, valid_contacts=substrate.valid_contacts,
+        positions_e=substrate.positions_e, movie=movie,
+        lineage_labels=lineage_labels, readout=readout,
+    )
+    event_rows = []
     for index, event in enumerate(detected):
-        onset, rank = _contact_onsets(
-            envelope, envelope_dt, substrate.montage, substrate.valid_contacts,
-            (event["t_on"], event["t_off"]),
-            readout["participation_margin_fraction"],
-            readout["timing_fraction"],
-        )
-        onset_rows.append(onset)
-        rank_rows.append(rank)
+        onset = onsets[index]
         event_rows.append({
             "event_index": int(index), "t_on_ms": float(event["t_on"]),
             "t_off_ms": float(event["t_off"]),
@@ -411,8 +501,6 @@ def main() -> None:
             ),
             "cascade_id": event.get("cascade_id"),
         })
-    onsets = np.asarray(onset_rows, float).reshape((-1, len(substrate.contact_names)))
-    ranks = np.asarray(rank_rows, float).reshape((-1, len(substrate.contact_names)))
     returned = np.asarray([row["returned"] for row in event_rows], bool)
     event_t_on = np.asarray([row["t_on_ms"] for row in event_rows], float)
     event_trigger_t_on = np.asarray([
@@ -503,6 +591,7 @@ def main() -> None:
                 "contacts are read out after episode boundaries are frozen"
             ),
         },
+        "contact_readout": contact_readout_audit,
         "source_topology": {
             "n_evaluable_returned_events": int(np.sum(source["evaluable"] & returned)),
             "bin_mm": source["bin_mm"],
