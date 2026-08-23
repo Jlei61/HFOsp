@@ -171,6 +171,7 @@ def main() -> None:
         2 * len(patient["contact_names"]), n_directions=64, seed=20260824,
     )
     objective_config = config["cascade_objective"]
+    expected_event_unit = config["event_unit"]["name"]
     calibration = calibrate_component_scales(
         patient["train_ranks"], patient["train_labels"], patient["train_blocks"],
         patient["contact_names"], projections,
@@ -192,8 +193,8 @@ def main() -> None:
             if not npz_path.exists() or not json_path.exists():
                 continue
             payload = json.loads(json_path.read_text())
-            if payload["event_unit"].get("name") != "spatiotemporal_cascade":
-                raise RuntimeError("aggregate received a non-cascade worker")
+            if payload["event_unit"].get("name") != expected_event_unit:
+                raise RuntimeError("aggregate received the wrong frozen event unit")
             worker = _load_network_worker(
                 npz_path, patient["contact_names"], classifier,
                 semantics["raw_to_patient"],

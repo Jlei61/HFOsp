@@ -50,7 +50,7 @@
 7. Mark all 50 ms Stage-B/C rankings and figures invalid for field selection.
    Resume Phase 5 only after this correction is accepted.
 
-## Phase 1d: spatiotemporal-cascade correction (current primary)
+## Phase 1d: spatiotemporal-cascade correction (historical, still insufficient)
 
 1. Retain population excursions only as contact-independent outer envelopes.
 2. Label 2 ms by 1 mm sheet-activity nodes with a 3 x 3 spatial neighborhood
@@ -65,10 +65,27 @@
    objective must use cascade events and retain compound/OOD fractions as
    explicit continuous penalties.
 
-Observed development result: both legacy fields are stable negative controls
+Observed canary result: both legacy fields were stable negative controls
 under the cascade unit (patient-direction purity about 0.56-0.59; held-out R2
 -0.35 to -0.44).  This closes the false dual-direction interpretation but does
 not yet recover the patient repertoire.
+
+## Phase 1e: directed-lineage correction (current primary)
+
+1. Preserve the frozen whole-sheet movie, detector fragments and contact readout;
+   do not rerun the SNN for this correction.
+2. Trace roots forward one movie frame at a time.  Partition multi-root patches
+   by seeded watershed and retain separate roots after collision.
+3. Count equidistant collision mass in the fragment denominator.  Keep the 70%
+   root-dominance rule and retain compound fragments explicitly.
+4. Require the frozen detector return decision for every constituent fragment;
+   ending before the recording boundary alone is insufficient.
+5. Recompute contact onset/rank and root first-arrival maps after event windows
+   are frozen.  Never reuse source maps from the undirected event unit.
+6. Zero-simulation resegment all 18 historical fields x 2 fit networks, then
+   recompute matched patient loss, equal-network KMeans, OOD and compound rate.
+7. Treat the undirected library's apparent 0.93 alignment as non-selective until
+   the directed resegmentation reproduces it.
 
 ## Phase 2: historical rescore
 
@@ -115,11 +132,11 @@ not yet recover the patient repertoire.
 4. Write a result report with safe claim, largest remaining gap and the exact
    handoff boundary for EE/E-to-I/Z/M.
 
-## Phase 7: corrected local continuation (paused until Phase 1d producer freeze)
+## Phase 7: corrected local continuation (paused until Phase 1e producer freeze)
 
 The first confirmation candidate failed: complete held-out event-cloud R2 stayed
 negative and the two modes did not both improve. Continue only on new fit,
-selection and confirmation seed pools using the cascade-event worker. The next
+selection and confirmation seed pools using the directed-lineage worker. The next
 local library may inherit fields from development pools only after cascade
 stability is established, and never from the opened
 confirmation results. EE, E-to-I and Z/M remain closed until the three minimal

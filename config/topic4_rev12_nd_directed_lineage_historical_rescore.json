@@ -1,0 +1,61 @@
+{
+  "schema_id": "topic4_rev12_nd_directed_lineage_historical_rescore_v1",
+  "scientific_role": "development_only_node_dualmode_directed_lineage_rescore",
+  "source_output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_e_cascade_historical_library",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_f_directed_lineage_historical_rescore",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_f_directed_lineage_historical_rescore/candidate_manifest.json",
+  "inputs": {
+    "source_worker_config": {
+      "path": "config/topic4_rev12_nd_cascade_historical_library.json",
+      "sha256": "7071f63880c3e3326cebfd67a4eb1d8f458ea0770177a0a6177c58cd5367b6e4"
+    },
+    "source_worker_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_e_cascade_historical_library/candidate_manifest.json",
+      "sha256": "0c6d983bcc759d444a454a80030949db70de979d30312ef2d10bf7b018fb2584"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [],
+    "fit_network_seeds": [2201, 2202],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [],
+    "contact_readout": {
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "directed_spatiotemporal_lineage",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "forward_parent_frame_gap": 1,
+    "forward_parent_neighborhood_bins": 1,
+    "collision_rule": "seeded_watershed_preserves_roots_and_marks_only_equidistant_boundaries",
+    "boundary_signal": "whole_sheet_E_activity_movie_only",
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "source_map": "directed_lineage_first_arrival_at_movie_resolution"
+  },
+  "cascade_objective": {
+    "sample_size_per_side": 6,
+    "calibration_draws": 256,
+    "score_draws": 64,
+    "seed": 20260824,
+    "patient_distance_normalization": "raw_distance_divided_by_patient_block_floor_q95",
+    "kmeans_auxiliary": "pooled_natural_k2_vs_frozen_patient_direction_balanced_alignment",
+    "compound_and_ood": "continuous_penalties"
+  },
+  "claim_boundary": "Zero-simulation resegmentation of frozen whole-sheet movies. Directed roots are operational causal lineages at 2 ms x 1 mm resolution, not identified synaptic paths."
+}

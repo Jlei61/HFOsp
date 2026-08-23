@@ -9,6 +9,7 @@ from __future__ import annotations
 from itertools import combinations
 
 import numpy as np
+from scipy.ndimage import binary_dilation
 from scipy.ndimage import label as connected_component_labels
 
 
@@ -720,6 +721,186 @@ def spatiotemporal_cascade_labels(activity_counts: np.ndarray, *,
     }
 
 
+def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
+                                     minimum_active_neurons: int) -> dict:
+    """Trace forward-time activity lineages without merging colliding roots.
+
+    A contiguous active patch inherits roots only from its one-frame-back spatial
+    neighborhood.  Patches reached by multiple roots are marked as collisions;
+    their parents remain separate.  This is a directed observational lineage at
+    the frozen movie resolution, not proof of a particular synaptic path.
+    """
+    counts = np.asarray(activity_counts)
+    minimum_active_neurons = int(minimum_active_neurons)
+    if counts.ndim != 3 or not np.issubdtype(counts.dtype, np.number):
+        raise ValueError("activity_counts must have shape (time, y, x)")
+    if minimum_active_neurons <= 0 or np.any(counts < 0):
+        raise ValueError("activity counts and threshold must be nonnegative")
+
+    active = counts >= minimum_active_neurons
+    patch_structure = np.ones((3, 3), dtype=bool)
+    lineage_labels = np.zeros(counts.shape, dtype=np.int32)
+    collision_mask = np.zeros(counts.shape, dtype=bool)
+    roots: dict[int, dict] = {}
+    next_root = 1
+    previous_lineages = np.zeros(active.shape[1:], dtype=np.int32)
+
+    for frame in range(len(active)):
+        patches, n_patches = connected_component_labels(
+            active[frame], structure=patch_structure,
+        )
+        for patch_id in range(1, n_patches + 1):
+            patch = patches == patch_id
+            neighborhood = binary_dilation(patch, structure=patch_structure)
+            inherited = np.unique(previous_lineages[neighborhood])
+            inherited = inherited[inherited > 0].astype(int)
+            if not len(inherited):
+                inherited = np.asarray([next_root], int)
+                roots[next_root] = {
+                    "cascade_id": next_root,
+                    "lineage_id": next_root,
+                    "start_frame": int(frame),
+                    "stop_frame": int(frame),
+                    "last_any_frame": int(frame),
+                    "active_bin_frames": 0,
+                    "activity_mass": 0.0,
+                    "collision_bin_frames": 0,
+                    "collision_activity_mass": 0.0,
+                }
+                next_root += 1
+            if len(inherited) == 1:
+                lineage_labels[frame][patch] = int(inherited[0])
+            else:
+                coordinates = np.argwhere(patch)
+                distance_rows = []
+                for root_id in inherited:
+                    source = np.argwhere(previous_lineages == root_id)
+                    delta = coordinates[:, None, :] - source[None, :, :]
+                    distance_rows.append(np.min(np.sum(delta * delta, axis=2), axis=1))
+                distances = np.asarray(distance_rows, float)
+                minimum = np.min(distances, axis=0)
+                winners = np.isclose(distances, minimum[None, :])
+                unique = np.sum(winners, axis=0) == 1
+                selected = np.argmax(winners, axis=0)
+                for local_index, coordinate in enumerate(coordinates):
+                    location = (int(coordinate[0]), int(coordinate[1]))
+                    if unique[local_index]:
+                        lineage_labels[frame][location] = int(inherited[selected[local_index]])
+                    else:
+                        lineage_labels[frame][location] = -1
+                        collision_mask[frame][location] = True
+
+            for root_id in inherited:
+                selected = (lineage_labels[frame] == root_id) & patch
+                if np.any(selected):
+                    row = roots[int(root_id)]
+                    row["stop_frame"] = int(frame)
+                    row["last_any_frame"] = int(frame)
+                    row["active_bin_frames"] += int(np.sum(selected))
+                    row["activity_mass"] += float(np.sum(counts[frame][selected]))
+            collision = collision_mask[frame] & patch
+            if np.any(collision):
+                collision_bins = int(np.sum(collision))
+                collision_mass = float(np.sum(counts[frame][collision]))
+                for root_id in inherited:
+                    row = roots[int(root_id)]
+                    row["last_any_frame"] = int(frame)
+                    row["collision_bin_frames"] += collision_bins
+                    row["collision_activity_mass"] += collision_mass
+        previous_lineages = lineage_labels[frame]
+
+    components = []
+    for root_id in sorted(roots):
+        row = dict(roots[root_id])
+        row["duration_frames"] = int(row["stop_frame"] - row["start_frame"] + 1)
+        row["root_collision_observed"] = bool(row["collision_bin_frames"] > 0)
+        components.append(row)
+    return {
+        "labels": lineage_labels,
+        "collision_mask": collision_mask,
+        "components": components,
+        "minimum_active_neurons": minimum_active_neurons,
+        "causal_rule": (
+            "forward seeded watershed from one-frame-back 3x3 spatial neighborhood; "
+            "multiple inherited roots remain separate and only equidistant boundaries "
+            "are marked as collisions"
+        ),
+    }
+
+
+def assign_detector_fragments_to_directed_lineages(
+        activity_counts: np.ndarray, lineage_labels: np.ndarray,
+        fragments: list[dict], *, frame_ms: float,
+        minimum_dominance: float) -> list[dict]:
+    """Assign fragments by root mass while counting collision mass as ambiguity."""
+    counts = np.asarray(activity_counts, float)
+    labels = np.asarray(lineage_labels, int)
+    frame_ms = float(frame_ms)
+    minimum_dominance = float(minimum_dominance)
+    if counts.shape != labels.shape or counts.ndim != 3:
+        raise ValueError("activity counts and directed lineage labels must align")
+    if frame_ms <= 0.0 or not 0.5 < minimum_dominance <= 1.0:
+        raise ValueError("invalid frame duration or lineage dominance threshold")
+    output = []
+    for index, fragment in enumerate(fragments):
+        start = max(0, int(np.floor(float(fragment["t_on"]) / frame_ms)))
+        stop = min(len(counts), int(np.floor(float(fragment["t_off"]) / frame_ms)) + 1)
+        local_labels = labels[start:stop].ravel()
+        local_counts = counts[start:stop].ravel()
+        positive = local_labels > 0
+        collision = local_labels < 0
+        masses = np.bincount(
+            local_labels[positive], weights=local_counts[positive],
+        ) if np.any(positive) else np.zeros(1, float)
+        positive_mass = float(np.sum(masses[1:])) if len(masses) > 1 else 0.0
+        collision_mass = float(np.sum(local_counts[collision]))
+        total = positive_mass + collision_mass
+        if positive_mass <= 0.0 or total <= 0.0:
+            dominant_id, dominance, second = None, 0.0, 0.0
+        else:
+            order = np.argsort(masses[1:])[::-1] + 1
+            dominant_id = int(order[0])
+            dominance = float(masses[dominant_id] / total)
+            second = float(masses[order[1]] / total) if len(order) > 1 else 0.0
+        output.append({
+            "detector_fragment_index": int(index),
+            "dominant_cascade_id": dominant_id,
+            "dominant_lineage_id": dominant_id,
+            "dominant_activity_fraction": dominance,
+            "second_activity_fraction": second,
+            "collision_activity_fraction": (
+                float(collision_mass / total) if total > 0.0 else 0.0
+            ),
+            "compound": bool(dominant_id is None or dominance < minimum_dominance),
+        })
+    return output
+
+
+def directed_lineage_onset_maps(lineage_labels: np.ndarray,
+                                events: list[dict], *,
+                                frame_ms: float) -> dict:
+    """Return each directed root's first-arrival map at movie resolution."""
+    labels = np.asarray(lineage_labels, int)
+    frame_ms = float(frame_ms)
+    if labels.ndim != 3 or frame_ms <= 0.0:
+        raise ValueError("lineage labels must be 3-D and frame_ms positive")
+    maps = np.full((len(events), *labels.shape[1:]), np.nan, np.float32)
+    evaluable = np.zeros(len(events), bool)
+    for event_index, event in enumerate(events):
+        lineage_id = int(event["cascade_id"])
+        support = labels == lineage_id
+        if not np.any(support):
+            continue
+        frames, ys, xs = np.nonzero(support)
+        first = np.full(labels.shape[1:], np.inf, float)
+        np.minimum.at(first, (ys, xs), frames.astype(float) * frame_ms)
+        finite = np.isfinite(first)
+        first[finite] -= float(np.min(first[finite]))
+        maps[event_index, finite] = first[finite].astype(np.float32)
+        evaluable[event_index] = True
+    return {"onset_maps_ms": maps, "evaluable": evaluable}
+
+
 def assign_detector_fragments_to_cascades(activity_counts: np.ndarray,
                                           cascade_labels: np.ndarray,
                                           fragments: list[dict], *,
@@ -814,7 +995,10 @@ def cascade_event_windows(components: list[dict], assignments: list[dict],
             "t_on": t_on,
             "t_off": t_off,
             "dur_ms": float(max(frame_ms, t_off - t_on)),
-            "returned": bool(t_off < total_ms),
+            "returned": bool(
+                t_off < total_ms
+                and all(bool(fragment.get("returned", True)) for fragment in selected)
+            ),
             "compound": False,
             "activity_mass": float(component["activity_mass"]),
             "active_bin_frames": int(component["active_bin_frames"]),

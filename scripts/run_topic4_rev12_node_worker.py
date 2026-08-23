@@ -24,8 +24,11 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
 )
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
+    assign_detector_fragments_to_directed_lineages,
     assign_detector_fragments_to_cascades,
     cascade_event_windows,
+    directed_lineage_onset_maps,
+    directed_spatiotemporal_lineages,
     event_source_onset_maps,
     merge_detected_event_fragments,
     population_excursion_episodes,
@@ -193,6 +196,7 @@ def main() -> None:
     movie_arrays = {}
     cascade_arrays = {}
     compound_fragments = []
+    directed_source = None
     if event_unit is None:
         detected = detector_fragments
         event_unit_runtime = {"name": "detector_fragment"}
@@ -296,6 +300,80 @@ def main() -> None:
                 row["compound"] for row in assignments
             ], bool),
         }
+    elif event_unit["name"] == "directed_spatiotemporal_lineage":
+        movie_config = config["source_topology"]["full_sheet_movie"]
+        if not bool(movie_config.get("enabled", False)):
+            raise RuntimeError("directed lineage events require the whole-run sheet movie")
+        movie = sheet_activity_movie(
+            spikes, substrate.positions_e,
+            dt_ms=float(substrate.engine["dt"]),
+            frame_ms=float(movie_config["frame_ms"]),
+            bin_mm=float(config["source_topology"]["bin_mm"]),
+            sheet_mm=float(substrate.engine["L"]),
+        )
+        lineage = directed_spatiotemporal_lineages(
+            movie["activity_counts"],
+            minimum_active_neurons=int(event_unit["minimum_active_neurons"]),
+        )
+        assignments = assign_detector_fragments_to_directed_lineages(
+            movie["activity_counts"], lineage["labels"], detector_fragments,
+            frame_ms=float(movie["frame_ms"]),
+            minimum_dominance=float(event_unit["minimum_dominance"]),
+        )
+        detected, compound_fragments = cascade_event_windows(
+            lineage["components"], assignments, detector_fragments,
+            frame_ms=float(movie["frame_ms"]),
+            total_ms=len(active) * float(active_dt),
+        )
+        directed_source = directed_lineage_onset_maps(
+            lineage["labels"], detected, frame_ms=float(movie["frame_ms"]),
+        )
+        active_local = (
+            movie["activity_counts"] >= int(event_unit["minimum_active_neurons"])
+        )
+        active_mass = float(np.sum(movie["activity_counts"][active_local]))
+        collision_mass = float(np.sum(
+            movie["activity_counts"][lineage["collision_mask"]]
+        ))
+        event_unit_runtime = {
+            "name": "directed_spatiotemporal_lineage",
+            "event_on_threshold": float(substrate.detector_threshold),
+            "minimum_active_neurons": int(event_unit["minimum_active_neurons"]),
+            "minimum_dominance": float(event_unit["minimum_dominance"]),
+            "movie_frame_ms": float(movie["frame_ms"]),
+            "movie_bin_mm": float(movie["bin_mm"]),
+            "contact_geometry_used_for_boundary": False,
+            "n_directed_roots": int(len(lineage["components"])),
+            "n_compound_detector_fragments": int(len(compound_fragments)),
+            "compound_detector_fragment_fraction": float(
+                len(compound_fragments) / max(1, len(detector_fragments))
+            ),
+            "collision_activity_mass_fraction": float(
+                collision_mass / active_mass if active_mass > 0.0 else 0.0
+            ),
+            "causal_rule": lineage["causal_rule"],
+            "compound_fragments": compound_fragments,
+        }
+        lineage_labels = lineage["labels"]
+        label_dtype = np.int16 if np.max(lineage_labels, initial=0) <= 32767 else np.int32
+        cascade_arrays = {
+            "directed_lineage_labels": lineage_labels.astype(label_dtype),
+            "directed_lineage_collision_mask": lineage["collision_mask"],
+            "detector_fragment_dominant_lineage_id": np.asarray([
+                -1 if row["dominant_lineage_id"] is None
+                else int(row["dominant_lineage_id"])
+                for row in assignments
+            ], np.int32),
+            "detector_fragment_dominance": np.asarray([
+                row["dominant_activity_fraction"] for row in assignments
+            ], np.float32),
+            "detector_fragment_collision_fraction": np.asarray([
+                row["collision_activity_fraction"] for row in assignments
+            ], np.float32),
+            "detector_fragment_compound": np.asarray([
+                row["compound"] for row in assignments
+            ], bool),
+        }
     else:
         raise RuntimeError(f"unknown event unit: {event_unit['name']}")
     envelope, envelope_dt, _ = snn_event_envelope(
@@ -340,12 +418,24 @@ def main() -> None:
     event_trigger_t_on = np.asarray([
         row["trigger_t_on_ms"] for row in event_rows
     ], float)
-    source = event_source_onset_maps(
-        spikes, substrate.positions_e, event_trigger_t_on, returned,
-        dt_ms=float(substrate.engine["dt"]),
-        sheet_mm=float(substrate.engine["L"]),
-        bin_mm=float(config["source_topology"]["bin_mm"]),
-    )
+    if directed_source is None:
+        source = event_source_onset_maps(
+            spikes, substrate.positions_e, event_trigger_t_on, returned,
+            dt_ms=float(substrate.engine["dt"]),
+            sheet_mm=float(substrate.engine["L"]),
+            bin_mm=float(config["source_topology"]["bin_mm"]),
+        )
+    else:
+        source = {
+            **directed_source,
+            "activity_counts": np.zeros(
+                (len(detected), 0, *movie["activity_counts"].shape[1:]),
+                dtype=np.uint16,
+            ),
+            "relative_times_ms": np.asarray([], float),
+            "bin_mm": float(movie["bin_mm"]),
+            "sheet_mm": float(movie["sheet_mm"]),
+        }
     movie_config = config["source_topology"].get("full_sheet_movie", {})
     if movie is None and bool(movie_config.get("enabled", False)):
         movie = sheet_activity_movie(
@@ -418,6 +508,11 @@ def main() -> None:
             "bin_mm": source["bin_mm"],
             "window_ms": [-20.0, 80.0],
             "baseline_window_ms": [-120.0, -20.0],
+            "source_map": (
+                "event_triggered_persistent_recruitment"
+                if directed_source is None
+                else "directed_lineage_first_arrival"
+            ),
             "full_sheet_movie": {
                 "stored": bool(movie_arrays),
                 "frame_ms": (

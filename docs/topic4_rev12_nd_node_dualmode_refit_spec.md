@@ -72,7 +72,7 @@ prototypes must remain qualitatively stable across all three before any new
 field optimization.  The 50 ms Stage-B/C results remain an invalidated
 development audit and cannot seed selection or confirmation.
 
-### Spatiotemporal-cascade correction (2026-08-24; current primary event unit)
+### Spatiotemporal-cascade correction (2026-08-24; necessary but insufficient)
 
 Fresh canaries showed that a global population reset is still only an outer
 envelope.  One apparent pattern-2 excursion lasted about 0.8 s and contained
@@ -97,9 +97,33 @@ The three-neuron bin threshold and 0.65/0.75 dominance thresholds are mandatory
 sensitivities.  In the fresh canary they preserved the negative conclusion:
 natural-KMeans patient-direction purity remained 0.56-0.59 and complete
 held-out prototype R2 remained -0.35 to -0.44 for both historical fields.
-This operational definition tests causal consistency; it does not prove a
-particular synapse caused each spike.  Exact edge-supported ancestry remains a
-later mechanism audit if the coarse cascade assignment is unstable.
+This correction removed grossly disconnected packets, but its 3-D connected
+components were undirected.  Two independent roots that met later in time were
+therefore merged retrospectively.  A full 18-field historical run under this
+definition produced balanced KMeans/patient-direction alignment as high as
+0.93, but that value is an intermediate diagnostic and cannot select a field.
+
+### Directed-lineage correction (2026-08-24; current primary event unit)
+
+The current event identity is a `directed_spatiotemporal_lineage`.  The same
+2 ms by 1 mm whole-sheet movie and two-neuron activity threshold are retained,
+but ancestry is propagated forward in time:
+
+1. contiguous active patches in a frame receive roots only from the immediately
+   preceding frame's 3 x 3 spatial neighborhood;
+2. a patch with one parent root inherits that root;
+3. a patch reached by several roots is partitioned by a seeded watershed, so
+   the roots remain distinct after collision;
+4. only equidistant watershed boundaries are marked as collision mass;
+5. a detector fragment enters a lineage only if one root explains at least 70%
+   of active-bin mass, counting collision mass in the denominator;
+6. a lineage is `returned` only if all constituent detector fragments satisfy
+   the frozen return rule and the lineage ends before the recording boundary.
+
+Virtual contacts and patient labels are read only after root identity and event
+windows are frozen.  The definition is an operational directed lineage at the
+movie resolution, not proof of a synaptic path.  Root collision, compound
+fraction and threshold sensitivity remain explicit diagnostics.
 
 ## 2. Scientific question
 
@@ -157,10 +181,10 @@ the entire sheet and do not receive extra support near observed contacts.
 ## 5. Patient event representation
 
 The model event unit used by KMeans and the patient objective is a
-`spatiotemporal_cascade`, not an unmerged threshold fragment, fixed-gap
+`directed_spatiotemporal_lineage`, not an unmerged threshold fragment, fixed-gap
 `settled_episode`, or complete population-excursion envelope.  The population
-excursion is retained as an outer diagnostic window.  Every cascade stores its
-constituent detector-fragment indices and activity component; compounds remain
+excursion is retained as an outer diagnostic window.  Every lineage stores its
+constituent detector-fragment indices and root identity; compounds remain
 in the denominator but are not forced into direction labels.  A figure or
 scorer that consumes pre-group fragment ranks is invalid for rev12-ND.
 
@@ -207,7 +231,7 @@ The global mean distance and the full event-cloud held-out `R2` are reported
 separately.  `R2` is not replaced by squared Spearman correlation.
 
 There is no arbitrary requirement for 20 returned events.  A network with fewer
-than six cascade events in either patient-assigned mode receives a finite
+than six directed-lineage events in either patient-assigned mode receives a finite
 missing-mode penalty and remains in the record.
 
 The exploratory fit objective adds three continuous diagnostics:

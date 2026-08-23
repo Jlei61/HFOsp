@@ -1,8 +1,11 @@
 import numpy as np
 
 from src.topic4_node_dualmode import (
+    assign_detector_fragments_to_directed_lineages,
     assign_detector_fragments_to_cascades,
     cascade_event_windows,
+    directed_lineage_onset_maps,
+    directed_spatiotemporal_lineages,
     spatiotemporal_cascade_labels,
 )
 
@@ -83,3 +86,80 @@ def test_cascade_windows_merge_only_fragments_with_shared_spatiotemporal_ancestr
         "detector_fragment_indices": [2], "t_on": 40.0, "t_off": 48.0,
         "compound": True, "dominant_activity_fraction": 0.6,
     }]
+
+
+def test_directed_lineage_preserves_one_travelling_root():
+    counts = np.zeros((5, 5, 5), np.uint16)
+    for frame in range(5):
+        counts[frame, 2, frame] = 3
+    result = directed_spatiotemporal_lineages(
+        counts, minimum_active_neurons=2,
+    )
+    assert len(result["components"]) == 1
+    assert set(np.unique(result["labels"])) == {0, 1}
+    assert not np.any(result["collision_mask"])
+
+
+def test_directed_lineage_does_not_merge_roots_that_later_collide():
+    counts = np.zeros((4, 7, 7), np.uint16)
+    counts[0, 3, [0, 6]] = 3
+    counts[1, 3, [1, 5]] = 3
+    counts[2, 3, [2, 4]] = 3
+    counts[3, 3, 3] = 6
+    undirected = spatiotemporal_cascade_labels(
+        counts, minimum_active_neurons=2,
+    )
+    directed = directed_spatiotemporal_lineages(
+        counts, minimum_active_neurons=2,
+    )
+    assert len(undirected["components"]) == 1
+    assert len(directed["components"]) == 2
+    assert directed["labels"][3, 3, 3] == -1
+    assert directed["collision_mask"][3, 3, 3]
+
+
+def test_directed_fragment_counts_collision_mass_against_dominance():
+    counts = np.zeros((3, 5, 5), np.uint16)
+    labels = np.zeros_like(counts, np.int32)
+    counts[0, 2, 1] = 4
+    labels[0, 2, 1] = 1
+    counts[1, 2, 2] = 4
+    labels[1, 2, 2] = 2
+    counts[2, 2, 3] = 4
+    labels[2, 2, 3] = -1
+    assignment = assign_detector_fragments_to_directed_lineages(
+        counts, labels, [_fragment(0, 5)],
+        frame_ms=2.0, minimum_dominance=0.7,
+    )[0]
+    assert assignment["compound"] is True
+    assert np.isclose(assignment["dominant_activity_fraction"], 1 / 3)
+    assert np.isclose(assignment["collision_activity_fraction"], 1 / 3)
+
+
+def test_directed_lineage_onset_map_tracks_first_arrival_per_sheet_bin():
+    labels = np.zeros((4, 3, 4), np.int32)
+    labels[0, 1, 0] = 7
+    labels[1, 1, 0:2] = 7
+    labels[2, 1, 2] = 7
+    labels[3, 1, 3] = 7
+    result = directed_lineage_onset_maps(
+        labels, [{"cascade_id": 7}], frame_ms=2.0,
+    )
+    assert result["evaluable"].tolist() == [True]
+    assert result["onset_maps_ms"][0, 1].tolist() == [0.0, 2.0, 4.0, 6.0]
+
+
+def test_cascade_window_does_not_call_nonreturning_fragment_returned():
+    components = [{
+        "cascade_id": 3, "start_frame": 1, "stop_frame": 3,
+        "activity_mass": 10.0, "active_bin_frames": 3,
+    }]
+    assignments = [{
+        "detector_fragment_index": 0, "dominant_cascade_id": 3,
+        "dominant_activity_fraction": 1.0, "compound": False,
+    }]
+    fragment = {"t_on": 2.0, "t_off": 6.0, "returned": False}
+    events, _ = cascade_event_windows(
+        components, assignments, [fragment], frame_ms=2.0, total_ms=100.0,
+    )
+    assert events[0]["returned"] is False
