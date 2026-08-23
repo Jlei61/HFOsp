@@ -105,3 +105,8 @@ def test_aggregate_fails_closed_on_contact_readout_drift():
             "parity_status": "PASS",
             "full_trace_pearson_minimum": 0.97,
         }}, expected)
+    validate_contact_readout({"contact_readout": {
+        "source": "lineage_restricted_neuron_activity",
+        "parity_status": "EXACT_SHARED_PER_NEURON_KERNEL",
+        "spatial_sampler": "exact_normalized_per_neuron_gaussian",
+    }}, {"source": "lineage_restricted_neuron_activity"})

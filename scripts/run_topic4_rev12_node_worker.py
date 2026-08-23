@@ -26,14 +26,17 @@ from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
     assign_detector_fragments_to_directed_lineages,
     assign_detector_fragments_to_cascades,
+    bin_neuron_spikes,
     binned_contact_envelope,
     cascade_event_windows,
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
     event_source_onset_maps,
     lineage_restricted_contact_readout,
+    lineage_restricted_neuron_contact_readout,
     merge_detected_event_fragments,
     population_excursion_episodes,
+    neuron_contact_sampling_weights,
     sheet_bin_indices,
     sheet_contact_sampling_weights,
     sheet_activity_movie,
@@ -101,6 +104,8 @@ def _event_contact_readout(*, events: list[dict], envelope: np.ndarray,
                            envelope_dt_ms: float, montage, valid_contacts: np.ndarray,
                            positions_e: np.ndarray, movie: dict | None,
                            lineage_labels: np.ndarray | None,
+                           spikes: np.ndarray | None = None,
+                           spike_dt_ms: float | None = None,
                            readout: dict) -> tuple[np.ndarray, np.ndarray, dict]:
     """Apply the configured contact readout after event roots are frozen."""
     source = str(readout.get(
@@ -108,6 +113,40 @@ def _event_contact_readout(*, events: list[dict], envelope: np.ndarray,
     ))
     n_contacts = len(montage.names)
     audit = {"source": source}
+    if source == "lineage_restricted_neuron_activity":
+        if (movie is None or lineage_labels is None or spikes is None
+                or spike_dt_ms is None):
+            raise RuntimeError("exact lineage readout requires spikes and a directed movie")
+        neuron_bins, _ = sheet_bin_indices(
+            np.asarray(positions_e, float),
+            bin_mm=float(movie["bin_mm"]), sheet_mm=float(movie["sheet_mm"]),
+        )
+        weights = neuron_contact_sampling_weights(
+            np.asarray(positions_e, float), np.asarray(montage.contacts, float),
+            kernel_width_mm=float(readout["kernel_width_mm"]),
+        )
+        binned_spikes = bin_neuron_spikes(
+            np.asarray(spikes, bool), dt_ms=float(spike_dt_ms),
+            frame_ms=float(movie["frame_ms"]),
+        )
+        restricted = lineage_restricted_neuron_contact_readout(
+            binned_spikes, neuron_bins, np.asarray(lineage_labels), events, weights,
+            frame_ms=float(movie["frame_ms"]),
+            smooth_ms=float(readout["smooth_ms"]),
+            participation_margin_fraction=float(
+                readout["participation_margin_fraction"]
+            ),
+            timing_fraction=float(readout["timing_fraction"]),
+        )
+        audit.update({
+            "kernel_width_mm": float(readout["kernel_width_mm"]),
+            "smooth_ms": float(readout["smooth_ms"]),
+            "spatial_sampler": "exact_normalized_per_neuron_gaussian",
+            "root_assignment": "movie_lineage_label_at_each_neuron_bin_and_frame",
+            "parity_status": "EXACT_SHARED_PER_NEURON_KERNEL",
+        })
+        return restricted["onsets"], restricted["ranks"], audit
+
     if source == "lineage_restricted_sheet_activity":
         if movie is None or lineage_labels is None:
             raise RuntimeError("lineage-restricted readout requires a directed movie")
@@ -480,7 +519,8 @@ def main() -> None:
         events=detected, envelope=envelope, envelope_dt_ms=envelope_dt,
         montage=substrate.montage, valid_contacts=substrate.valid_contacts,
         positions_e=substrate.positions_e, movie=movie,
-        lineage_labels=lineage_labels, readout=readout,
+        lineage_labels=lineage_labels, spikes=spikes,
+        spike_dt_ms=float(substrate.engine["dt"]), readout=readout,
     )
     event_rows = []
     for index, event in enumerate(detected):

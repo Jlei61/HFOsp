@@ -962,6 +962,125 @@ def binned_contact_envelope(activity_counts: np.ndarray,
     return np.stack(output)
 
 
+def neuron_contact_sampling_weights(positions: np.ndarray,
+                                    contacts: np.ndarray, *,
+                                    kernel_width_mm: float) -> np.ndarray:
+    """Return the exact normalized per-neuron Gaussian contact sampler."""
+    positions = np.asarray(positions, float)
+    contacts = np.asarray(contacts, float)
+    kernel_width_mm = float(kernel_width_mm)
+    if (positions.ndim != 2 or positions.shape[1] != 2
+            or contacts.ndim != 2 or contacts.shape[1] != 2
+            or kernel_width_mm <= 0.0):
+        raise ValueError("neuron positions, contacts and kernel width are invalid")
+    distance2 = np.sum(
+        (contacts[:, None, :] - positions[None, :, :]) ** 2, axis=2,
+    )
+    weights = np.exp(-distance2 / (2.0 * kernel_width_mm ** 2))
+    denominator = np.sum(weights, axis=1, keepdims=True)
+    if np.any(denominator <= 0.0):
+        raise RuntimeError("contact Gaussian footprint contains no E neurons")
+    return weights / denominator
+
+
+def bin_neuron_spikes(spikes: np.ndarray, *, dt_ms: float,
+                      frame_ms: float) -> np.ndarray:
+    """Bin per-neuron spikes onto the directed-lineage movie frames."""
+    spikes = np.asarray(spikes, bool)
+    dt_ms = float(dt_ms)
+    frame_ms = float(frame_ms)
+    if spikes.ndim != 2 or dt_ms <= 0.0 or frame_ms <= 0.0:
+        raise ValueError("spikes and frame durations are invalid")
+    steps = int(round(frame_ms / dt_ms))
+    if steps <= 0 or not np.isclose(steps * dt_ms, frame_ms):
+        raise ValueError("frame_ms must be an integer multiple of dt_ms")
+    n_frames = len(spikes) // steps
+    maximum = steps
+    dtype = np.uint8 if maximum <= np.iinfo(np.uint8).max else np.uint16
+    return spikes[:n_frames * steps].reshape(
+        n_frames, steps, spikes.shape[1],
+    ).sum(axis=1, dtype=dtype)
+
+
+def _smooth_contact_series(raw: np.ndarray, *, frame_ms: float,
+                           smooth_ms: float) -> np.ndarray:
+    raw = np.asarray(raw, float)
+    sigma = float(smooth_ms) / float(frame_ms)
+    if raw.ndim != 2 or sigma <= 0.0:
+        raise ValueError("contact series and smoothing scale are invalid")
+    half = int(np.ceil(3.0 * sigma))
+    axis = np.arange(-half, half + 1)
+    kernel = np.exp(-(axis ** 2) / (2.0 * sigma ** 2))
+    kernel /= np.sum(kernel)
+    center = (len(kernel) - 1) // 2
+    output = []
+    for contact in range(raw.shape[1]):
+        full = np.convolve(raw[:, contact], kernel, mode="full")
+        output.append(full[center:center + len(raw)])
+    return np.stack(output)
+
+
+def lineage_restricted_neuron_contact_readout(
+        binned_spikes: np.ndarray, neuron_bins: np.ndarray,
+        lineage_labels: np.ndarray, events: list[dict],
+        contact_weights: np.ndarray, *, frame_ms: float, smooth_ms: float,
+        participation_margin_fraction: float,
+        timing_fraction: float) -> dict:
+    """Read contacts from exact neuron spikes assigned to one directed root."""
+    binned = np.asarray(binned_spikes)
+    neuron_bins = np.asarray(neuron_bins, int)
+    labels = np.asarray(lineage_labels, int)
+    weights = np.asarray(contact_weights, float)
+    frame_ms = float(frame_ms)
+    smooth_ms = float(smooth_ms)
+    margin = float(participation_margin_fraction)
+    timing = float(timing_fraction)
+    if (binned.ndim != 2 or labels.ndim != 3
+            or len(binned) > len(labels)
+            or neuron_bins.shape != (binned.shape[1],)
+            or weights.shape[1] != binned.shape[1]
+            or frame_ms <= 0.0 or smooth_ms <= 0.0
+            or not 0.0 < margin < 1.0 or not 0.0 < timing <= 1.0):
+        raise ValueError("neuron lineage readout arrays do not align")
+    flat_labels = labels[:len(binned)].reshape(len(binned), -1)
+    if np.any(neuron_bins < 0) or np.max(neuron_bins, initial=-1) >= flat_labels.shape[1]:
+        raise ValueError("neuron bin index lies outside lineage movie")
+    n_contacts = len(weights)
+    onset_rows = np.full((len(events), n_contacts), np.nan)
+    rank_rows = np.full((len(events), n_contacts), np.nan)
+    pad = int(np.ceil(3.0 * smooth_ms / frame_ms))
+    for event_index, event in enumerate(events):
+        lineage_id = int(event["cascade_id"])
+        start = max(0, int(round(float(event["t_on"]) / frame_ms)))
+        stop = min(len(binned), int(round(float(event["t_off"]) / frame_ms)))
+        if stop <= start:
+            continue
+        local_start, local_stop = max(0, start - pad), min(len(binned), stop + pad)
+        root_per_neuron = (
+            flat_labels[local_start:local_stop, neuron_bins] == lineage_id
+        )
+        selected = binned[local_start:local_stop] * root_per_neuron
+        raw = np.asarray(selected, float) @ weights.T
+        envelope = _smooth_contact_series(
+            raw, frame_ms=frame_ms, smooth_ms=smooth_ms,
+        )
+        segment = envelope[:, start - local_start:stop - local_start]
+        if not segment.size:
+            continue
+        floor = float(np.min(segment))
+        peak = np.max(segment, axis=1)
+        participation_bar = floor + margin * (float(np.max(segment)) - floor)
+        participating = peak > participation_bar
+        onsets = np.full(n_contacts, np.nan)
+        for contact in np.flatnonzero(participating):
+            crossing = np.flatnonzero(segment[contact] >= timing * peak[contact])
+            if len(crossing):
+                onsets[contact] = (start + int(crossing[0])) * frame_ms
+        onset_rows[event_index] = onsets
+        rank_rows[event_index] = _dense_onset_ranks(onsets)
+    return {"onsets": onset_rows, "ranks": rank_rows}
+
+
 def _dense_onset_ranks(onsets: np.ndarray) -> np.ndarray:
     ranks = np.full(len(onsets), np.nan)
     finite = np.flatnonzero(np.isfinite(onsets))

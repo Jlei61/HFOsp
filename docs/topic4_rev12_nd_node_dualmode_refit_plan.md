@@ -112,6 +112,14 @@ not yet recover the patient repertoire.
    parity canary is exact.  The canary is an engineering equivalence test, not a
    new patient-fit result.
 
+The historical-field canary passed, but the first new-field batch exposed a
+support problem: two workers fell below r=0.98 because the 1 mm population-
+averaged contact approximation is not invariant to new spatial activity
+patterns.  Stage-I v1 is therefore invalidated without scoring.  The replacement
+keeps the 1 mm/2 ms movie for root identity, assigns each neuron's binned spikes
+to that root, and applies the original normalized 0.25 mm per-neuron Gaussian
+contact sampler.  No threshold relaxation is allowed.
+
 ## Phase 2: historical rescore
 
 1. Inventory compatible V3-V6, D6 and rev11 Node artifacts.

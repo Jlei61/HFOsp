@@ -136,6 +136,11 @@ def validate_contact_readout(payload: dict, expected: dict) -> None:
         if (observed.get("parity_status") != "PASS" or minimum is None
                 or float(minimum) < required):
             raise RuntimeError("worker contact sampler parity is not acceptable")
+    elif source == "lineage_restricted_neuron_activity":
+        if (observed.get("parity_status") != "EXACT_SHARED_PER_NEURON_KERNEL"
+                or observed.get("spatial_sampler") != (
+                    "exact_normalized_per_neuron_gaussian")):
+            raise RuntimeError("worker did not use the exact neuron contact sampler")
 
 
 def equal_network_natural_kmeans(workers: list[dict], *, seed: int) -> dict:
