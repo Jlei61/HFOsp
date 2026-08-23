@@ -805,6 +805,12 @@ def cascade_event_windows(components: list[dict], assignments: list[dict],
         events.append({
             "cascade_id": cascade_id,
             "detector_fragment_indices": sorted(fragment_indices),
+            "trigger_t_on": float(min(
+                fragment["t_on"] for fragment in selected
+            )),
+            "trigger_t_off": float(max(
+                fragment["t_off"] for fragment in selected
+            )),
             "t_on": t_on,
             "t_off": t_off,
             "dur_ms": float(max(frame_ms, t_off - t_on)),
@@ -816,6 +822,117 @@ def cascade_event_windows(components: list[dict], assignments: list[dict],
     events.sort(key=lambda row: (row["t_on"], row["cascade_id"]))
     compounds.sort(key=lambda row: row["t_on"])
     return events, compounds
+
+
+def normalize_components_floor_ratio(components: dict, calibration: dict,
+                                     mode: int) -> dict:
+    """Continuously scale distances by the patient block-floor q95."""
+    output = {}
+    for key in ("recruitment", "precedence", "profile", "cloud"):
+        q95 = float(calibration["modes"][str(int(mode))][key]["floor_q95"])
+        if not np.isfinite(q95) or q95 <= 0.0:
+            raise ValueError("patient floor q95 must be finite and positive")
+        output[key] = float(components[key]) / q95
+    return output
+
+
+def matched_sample_dual_mode_objective(model_ranks: np.ndarray,
+                                       model_labels: np.ndarray,
+                                       patient_ranks: np.ndarray,
+                                       patient_labels: np.ndarray,
+                                       patient_blocks: np.ndarray,
+                                       contact_names: np.ndarray, *,
+                                       projections: np.ndarray,
+                                       calibration: dict,
+                                       sample_size: int = 6,
+                                       draws: int = 64,
+                                       seed: int = 20260824,
+                                       missing_mode_penalty: float = 2.0,
+                                       tau: float = 0.25) -> dict:
+    """Matched 6-vs-6 continuous loss for the cascade-event objective."""
+    model_ranks = np.asarray(model_ranks, float)
+    model_labels = np.asarray(model_labels, int)
+    patient_ranks = np.asarray(patient_ranks, float)
+    patient_labels = np.asarray(patient_labels, int)
+    patient_blocks = np.asarray(patient_blocks)
+    sample_size, draws = int(sample_size), int(draws)
+    if (model_ranks.ndim != 2 or patient_ranks.ndim != 2
+            or model_ranks.shape[1] != patient_ranks.shape[1]
+            or model_labels.shape != (len(model_ranks),)
+            or patient_labels.shape != (len(patient_ranks),)
+            or patient_blocks.shape != (len(patient_ranks),)
+            or sample_size <= 0 or draws <= 0):
+        raise ValueError("matched-sample objective arrays do not align")
+    rng = np.random.default_rng(int(seed))
+    per_mode, losses = {}, []
+    for mode in (0, 1):
+        model_index = np.flatnonzero(model_labels == mode)
+        eligible_blocks = [
+            block for block in np.unique(patient_blocks)
+            if np.sum((patient_blocks == block) & (patient_labels == mode))
+            >= sample_size
+        ]
+        if not eligible_blocks:
+            raise ValueError(f"patient mode {mode} has no matched-sample block")
+        if len(model_index) < sample_size:
+            normalized = {
+                key: float(missing_mode_penalty)
+                for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            raw_mean = None
+            missing = True
+        else:
+            normalized_draws = []
+            raw_draws = []
+            for _ in range(draws):
+                block = eligible_blocks[int(rng.integers(len(eligible_blocks)))]
+                patient_index = np.flatnonzero(
+                    (patient_blocks == block) & (patient_labels == mode)
+                )
+                model_sample = model_ranks[rng.choice(
+                    model_index, size=sample_size, replace=False,
+                )]
+                patient_sample = patient_ranks[rng.choice(
+                    patient_index, size=sample_size, replace=False,
+                )]
+                raw = mode_distribution_components(
+                    model_sample, patient_sample, contact_names, projections,
+                )
+                raw_draws.append(raw)
+                normalized_draws.append(
+                    normalize_components_floor_ratio(raw, calibration, mode)
+                )
+            normalized = {
+                key: float(np.mean([row[key] for row in normalized_draws]))
+                for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            raw_mean = {
+                key: float(np.mean([row[key] for row in raw_draws]))
+                for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            missing = False
+        mean = float(np.mean(list(normalized.values())))
+        per_mode[str(mode)] = {
+            **normalized, "raw": raw_mean, "missing": missing, "mean": mean,
+            "n_model_events": int(len(model_index)),
+        }
+        losses.append(mean)
+    model_count = np.bincount(model_labels, minlength=2).astype(float)
+    patient_count = np.bincount(patient_labels, minlength=2).astype(float)
+    occupancy = (
+        float(np.log(2.0)) if model_count.sum() == 0.0
+        else js_divergence(model_count, patient_count)
+    )
+    weakest = lse_max(np.asarray(losses), tau=tau)
+    return {
+        "modes": per_mode,
+        "weakest_mode_lse": weakest,
+        "occupancy_js": occupancy,
+        "objective": float(weakest + 0.25 * occupancy),
+        "sample_size_per_side": sample_size,
+        "draws": draws,
+        "normalization": "raw_distance_divided_by_patient_block_floor_q95",
+    }
 
 
 def event_source_onset_maps(spikes: np.ndarray, positions: np.ndarray,

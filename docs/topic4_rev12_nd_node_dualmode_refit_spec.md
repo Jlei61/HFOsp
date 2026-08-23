@@ -192,12 +192,12 @@ D_k = mean(D_rec,k, D_prec,k, D_profile,k, D_cloud,k)
 - `D_profile`: weighted mode prototype error;
 - `D_cloud`: sliced-Wasserstein distance in a patient-training-only embedding.
 
-Every component is put in patient recording-block excess-noise units.  For each
-mode, two different training blocks are sampled with six events per side.  The
-block-to-block median is zero and its q95 is one.  A pooled-mode null is retained
-as a diagnostic and is used as a fallback scale only if the block floor is
-degenerate.  Raw distances are always stored beside normalized distances.  The
-primary patient loss protects the weaker mode:
+Every objective draw compares exactly six model events with six patient events
+from one eligible training block.  Component distances are divided by that
+mode's patient block-to-block q95.  They are not clipped below the floor median,
+so a field cannot obtain a zero loss merely by producing more events than the
+floor calibration.  Raw distances are always stored beside normalized
+distances.  The primary patient loss protects the weaker mode:
 
 ```text
 J_patient = LSE_tau(D_TA, D_TB) + 0.25 * JS(pi_model, pi_patient)
@@ -206,11 +206,21 @@ J_patient = LSE_tau(D_TA, D_TB) + 0.25 * JS(pi_model, pi_patient)
 The global mean distance and the full event-cloud held-out `R2` are reported
 separately.  `R2` is not replaced by squared Spearman correlation.
 
-Candidates with few events are scored with all available events and an explicit
-uncertainty interval.  There is no arbitrary requirement for 20 returned events.
-If one mode is absent, its finite penalty is the calibrated distance from that
-patient mode to an all-contacts-unrecruited negative control, bounded below by
-one excess-noise unit.  The candidate is not removed from the record.
+There is no arbitrary requirement for 20 returned events.  A network with fewer
+than six cascade events in either patient-assigned mode receives a finite
+missing-mode penalty and remains in the record.
+
+The exploratory fit objective adds three continuous diagnostics:
+
+```text
+J_fit = J_patient
+      + 0.50 * (1 - balanced KMeans/patient-direction alignment)
+      + 0.25 * OOD fraction
+      + 0.25 * compound-fragment fraction
+```
+
+KMeans is computed after drawing the same event count from every network.
+Patient held-out R2 and source topology do not select the fit library.
 
 ## 7. Natural same-network repertoire
 

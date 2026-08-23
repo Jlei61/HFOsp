@@ -10,6 +10,8 @@ from src.topic4_node_dualmode import (
     event_features,
     fixed_projection_matrix,
     lse_max,
+    matched_sample_dual_mode_objective,
+    normalize_components_floor_ratio,
     normalize_event_ranks,
     shaft_balanced_feature_weights,
     sliced_wasserstein,
@@ -129,6 +131,51 @@ def test_recording_block_calibration_normalizes_component_scales():
     assert collapsed["objective"] > exact["objective"]
     assert "raw" in exact["modes"]["0"]
     json.dumps(exact)
+
+
+def _unit_floor_calibration():
+    return {
+        "modes": {
+            str(mode): {
+                key: {"floor_q95": 1.0}
+                for key in ("recruitment", "precedence", "profile", "cloud")
+            }
+            for mode in (0, 1)
+        }
+    }
+
+
+def test_continuous_floor_ratio_does_not_clip_subfloor_differences():
+    values = {
+        "recruitment": 0.2, "precedence": 0.3,
+        "profile": 0.4, "cloud": 0.5,
+    }
+    normalized = normalize_components_floor_ratio(
+        values, _unit_floor_calibration(), 0,
+    )
+    assert normalized == values
+
+
+def test_matched_sampling_prevents_extra_model_events_from_buying_a_lower_score():
+    patient, labels = _patient_modes()
+    blocks = np.tile(np.repeat(np.arange(4), 2), 2)
+    projections = fixed_projection_matrix(2 * len(NAMES), n_directions=16, seed=33)
+    kwargs = dict(
+        patient_ranks=patient, patient_labels=labels, patient_blocks=blocks,
+        contact_names=NAMES, projections=projections,
+        calibration=_unit_floor_calibration(), sample_size=2, draws=32, seed=34,
+    )
+    once = matched_sample_dual_mode_objective(
+        patient, labels, **kwargs,
+    )
+    repeated = matched_sample_dual_mode_objective(
+        np.repeat(patient, 5, axis=0), np.repeat(labels, 5), **kwargs,
+    )
+    assert np.isclose(once["objective"], repeated["objective"])
+    shuffled = matched_sample_dual_mode_objective(
+        patient[:, [0, 3, 1, 4, 2]], labels, **kwargs,
+    )
+    assert once["objective"] < shuffled["objective"]
 
 
 def test_duplicate_event_count_does_not_change_sliced_wasserstein():

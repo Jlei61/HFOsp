@@ -24,10 +24,13 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
 )
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
+    assign_detector_fragments_to_cascades,
+    cascade_event_windows,
     event_source_onset_maps,
     merge_detected_event_fragments,
     population_excursion_episodes,
     sheet_activity_movie,
+    spatiotemporal_cascade_labels,
 )
 from src.topic4_zm_ictal_transition import (  # noqa: E402
     build_substrate, load_round_config, make_external_drive,
@@ -172,6 +175,10 @@ def main() -> None:
         active, active_dt, event_on_frac=substrate.detector_threshold,
     )
     event_unit = config.get("event_unit")
+    movie = None
+    movie_arrays = {}
+    cascade_arrays = {}
+    compound_fragments = []
     if event_unit is None:
         detected = detector_fragments
         event_unit_runtime = {"name": "detector_fragment"}
@@ -222,6 +229,59 @@ def main() -> None:
             "pre_roll_ms": pre_roll_ms,
             "contact_geometry_used_for_boundary": False,
         }
+    elif event_unit["name"] == "spatiotemporal_cascade":
+        movie_config = config["source_topology"]["full_sheet_movie"]
+        if not bool(movie_config.get("enabled", False)):
+            raise RuntimeError("cascade events require the whole-run sheet movie")
+        movie = sheet_activity_movie(
+            spikes, substrate.positions_e,
+            dt_ms=float(substrate.engine["dt"]),
+            frame_ms=float(movie_config["frame_ms"]),
+            bin_mm=float(config["source_topology"]["bin_mm"]),
+            sheet_mm=float(substrate.engine["L"]),
+        )
+        cascade = spatiotemporal_cascade_labels(
+            movie["activity_counts"],
+            minimum_active_neurons=int(event_unit["minimum_active_neurons"]),
+        )
+        assignments = assign_detector_fragments_to_cascades(
+            movie["activity_counts"], cascade["labels"], detector_fragments,
+            frame_ms=float(movie["frame_ms"]),
+            minimum_dominance=float(event_unit["minimum_dominance"]),
+        )
+        detected, compound_fragments = cascade_event_windows(
+            cascade["components"], assignments, detector_fragments,
+            frame_ms=float(movie["frame_ms"]),
+            total_ms=len(active) * float(active_dt),
+        )
+        event_unit_runtime = {
+            "name": "spatiotemporal_cascade",
+            "event_on_threshold": float(substrate.detector_threshold),
+            "minimum_active_neurons": int(event_unit["minimum_active_neurons"]),
+            "minimum_dominance": float(event_unit["minimum_dominance"]),
+            "movie_frame_ms": float(movie["frame_ms"]),
+            "movie_bin_mm": float(movie["bin_mm"]),
+            "contact_geometry_used_for_boundary": False,
+            "n_spatiotemporal_components": int(len(cascade["components"])),
+            "n_compound_detector_fragments": int(len(compound_fragments)),
+            "compound_detector_fragment_fraction": float(
+                len(compound_fragments) / max(1, len(detector_fragments))
+            ),
+            "compound_fragments": compound_fragments,
+        }
+        cascade_arrays = {
+            "detector_fragment_dominant_cascade_id": np.asarray([
+                -1 if row["dominant_cascade_id"] is None
+                else int(row["dominant_cascade_id"])
+                for row in assignments
+            ], np.int32),
+            "detector_fragment_dominance": np.asarray([
+                row["dominant_activity_fraction"] for row in assignments
+            ], np.float32),
+            "detector_fragment_compound": np.asarray([
+                row["compound"] for row in assignments
+            ], bool),
+        }
     else:
         raise RuntimeError(f"unknown event unit: {event_unit['name']}")
     envelope, envelope_dt, _ = snn_event_envelope(
@@ -249,10 +309,13 @@ def main() -> None:
             "peak_active_fraction": float(event["peak_ext"]),
             "returned": bool(event["returned"]),
             "n_recruited_contacts": int(np.isfinite(onset).sum()),
-            "n_detector_fragments": int(event.get("fragment_count", 1)),
+            "n_detector_fragments": int(len(event.get(
+                "detector_fragment_indices", [int(index)],
+            ))),
             "detector_fragment_indices": event.get(
                 "detector_fragment_indices", [int(index)],
             ),
+            "cascade_id": event.get("cascade_id"),
         })
     onsets = np.asarray(onset_rows, float).reshape((-1, len(substrate.contact_names)))
     ranks = np.asarray(rank_rows, float).reshape((-1, len(substrate.contact_names)))
@@ -268,8 +331,7 @@ def main() -> None:
         bin_mm=float(config["source_topology"]["bin_mm"]),
     )
     movie_config = config["source_topology"].get("full_sheet_movie", {})
-    movie_arrays = {}
-    if bool(movie_config.get("enabled", False)):
+    if movie is None and bool(movie_config.get("enabled", False)):
         movie = sheet_activity_movie(
             spikes, substrate.positions_e,
             dt_ms=float(substrate.engine["dt"]),
@@ -277,6 +339,7 @@ def main() -> None:
             bin_mm=float(config["source_topology"]["bin_mm"]),
             sheet_mm=float(substrate.engine["L"]),
         )
+    if movie is not None:
         movie_arrays = {
             "sheet_activity_counts": movie["activity_counts"],
             "sheet_activity_frame_ms": np.asarray(movie["frame_ms"], float),
@@ -311,6 +374,7 @@ def main() -> None:
         delta_vtheta=np.asarray(substrate.delta_vtheta, np.float32),
         edge_coefficients=np.asarray(substrate.edge_coefficients, np.float64),
         **movie_arrays,
+        **cascade_arrays,
     )
     payload = {
         "status": "REV12ND_NODE_WORKER_COMPLETE",

@@ -77,6 +77,7 @@ def test_cascade_windows_merge_only_fragments_with_shared_spatiotemporal_ancestr
     )
     assert len(events) == 1
     assert events[0]["detector_fragment_indices"] == [0, 1]
+    assert (events[0]["trigger_t_on"], events[0]["trigger_t_off"]) == (4.0, 16.0)
     assert (events[0]["t_on"], events[0]["t_off"]) == (4.0, 18.0)
     assert compounds == [{
         "detector_fragment_indices": [2], "t_on": 40.0, "t_off": 48.0,
