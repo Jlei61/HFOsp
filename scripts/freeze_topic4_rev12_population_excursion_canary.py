@@ -123,7 +123,7 @@ def main() -> None:
     _atomic_json(output, payload)
     print(json.dumps({
         "status": payload["status"], "output": str(output),
-        "n_candidates": len(candidates),
+        "n_candidates": len(payload["candidates"]),
     }, indent=2))
 
 
