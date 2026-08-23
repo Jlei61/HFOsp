@@ -50,6 +50,26 @@
 7. Mark all 50 ms Stage-B/C rankings and figures invalid for field selection.
    Resume Phase 5 only after this correction is accepted.
 
+## Phase 1d: spatiotemporal-cascade correction (current primary)
+
+1. Retain population excursions only as contact-independent outer envelopes.
+2. Label 2 ms by 1 mm sheet-activity nodes with a 3 x 3 spatial neighborhood
+   across adjacent frames; do not use contacts or patient labels.
+3. Group detector fragments only when they share a cascade component.  Mark
+   multi-origin fragments as compound instead of assigning them a direction.
+4. Run synthetic travelling-wave, detector-dip and simultaneous-origin controls.
+5. Rescore the fresh canary at two/three active neurons per bin and dominance
+   0.65/0.70/0.75.  Report event count, compound rate, natural KMeans alignment
+   and complete held-out R2.
+6. Freeze this event producer before creating another field library.  The new
+   objective must use cascade events and retain compound/OOD fractions as
+   explicit continuous penalties.
+
+Observed development result: both legacy fields are stable negative controls
+under the cascade unit (patient-direction purity about 0.56-0.59; held-out R2
+-0.35 to -0.44).  This closes the false dual-direction interpretation but does
+not yet recover the patient repertoire.
+
 ## Phase 2: historical rescore
 
 1. Inventory compatible V3-V6, D6 and rev11 Node artifacts.
@@ -95,13 +115,13 @@
 4. Write a result report with safe claim, largest remaining gap and the exact
    handoff boundary for EE/E-to-I/Z/M.
 
-## Phase 7: corrected local continuation (paused by Phase 1c)
+## Phase 7: corrected local continuation (paused until Phase 1d producer freeze)
 
 The first confirmation candidate failed: complete held-out event-cloud R2 stayed
 negative and the two modes did not both improve. Continue only on new fit,
-selection and confirmation seed pools using the settled-episode worker. The
-next local library may inherit fields from development pools only after
-population-excursion stability is established, and never from the opened
+selection and confirmation seed pools using the cascade-event worker. The next
+local library may inherit fields from development pools only after cascade
+stability is established, and never from the opened
 confirmation results. EE, E-to-I and Z/M remain closed until the three minimal
 scientific acceptance conditions in the spec are jointly met.
 

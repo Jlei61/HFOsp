@@ -9,6 +9,7 @@ from __future__ import annotations
 from itertools import combinations
 
 import numpy as np
+from scipy.ndimage import label as connected_component_labels
 
 
 def merge_detected_event_fragments(events: list[dict], *,
@@ -673,6 +674,148 @@ def sheet_activity_movie(spikes: np.ndarray, positions: np.ndarray, *,
         "bin_mm": float(bin_mm),
         "sheet_mm": float(sheet_mm),
     }
+
+
+def spatiotemporal_cascade_labels(activity_counts: np.ndarray, *,
+                                  minimum_active_neurons: int) -> dict:
+    """Find contact-independent cascades in a binned neuron-activity movie.
+
+    Nodes are active sheet bins in one movie frame.  Nodes in the same or
+    adjacent sheet bins connect within a frame and to the immediately adjacent
+    frames.  At the frozen 2 ms / 1 mm resolution this is the conservative
+    propagation cone for the 0.3 mm/ms axonal velocity.  This is an operational
+    cascade definition, not proof of synaptic causation.
+    """
+    counts = np.asarray(activity_counts)
+    minimum_active_neurons = int(minimum_active_neurons)
+    if counts.ndim != 3 or not np.issubdtype(counts.dtype, np.number):
+        raise ValueError("activity_counts must have shape (time, y, x)")
+    if minimum_active_neurons <= 0 or np.any(counts < 0):
+        raise ValueError("activity counts and threshold must be nonnegative")
+    structure = np.ones((3, 3, 3), dtype=bool)
+    labels, n_components = connected_component_labels(
+        counts >= minimum_active_neurons, structure=structure,
+    )
+    flat_labels = labels.ravel()
+    node_count = np.bincount(flat_labels, minlength=n_components + 1)[1:]
+    activity_mass = np.bincount(
+        flat_labels, weights=counts.ravel(), minlength=n_components + 1,
+    )[1:]
+    components = []
+    for component in range(1, n_components + 1):
+        frames = np.flatnonzero(np.any(labels == component, axis=(1, 2)))
+        components.append({
+            "cascade_id": component,
+            "start_frame": int(frames[0]),
+            "stop_frame": int(frames[-1]),
+            "duration_frames": int(frames[-1] - frames[0] + 1),
+            "active_bin_frames": int(node_count[component - 1]),
+            "activity_mass": float(activity_mass[component - 1]),
+        })
+    return {
+        "labels": labels.astype(np.int32, copy=False),
+        "components": components,
+        "minimum_active_neurons": minimum_active_neurons,
+        "neighborhood": "3x3 sheet bins across adjacent movie frames",
+    }
+
+
+def assign_detector_fragments_to_cascades(activity_counts: np.ndarray,
+                                          cascade_labels: np.ndarray,
+                                          fragments: list[dict], *,
+                                          frame_ms: float,
+                                          minimum_dominance: float) -> list[dict]:
+    """Assign detector fragments to a dominant cascade or mark them compound."""
+    counts = np.asarray(activity_counts, float)
+    labels = np.asarray(cascade_labels, int)
+    frame_ms = float(frame_ms)
+    minimum_dominance = float(minimum_dominance)
+    if counts.shape != labels.shape or counts.ndim != 3:
+        raise ValueError("activity counts and cascade labels must align")
+    if frame_ms <= 0.0 or not 0.5 < minimum_dominance <= 1.0:
+        raise ValueError("invalid frame duration or cascade dominance threshold")
+    output = []
+    for index, fragment in enumerate(fragments):
+        start = max(0, int(np.floor(float(fragment["t_on"]) / frame_ms)))
+        stop = min(len(counts), int(np.floor(float(fragment["t_off"]) / frame_ms)) + 1)
+        local_labels = labels[start:stop].ravel()
+        local_counts = counts[start:stop].ravel()
+        valid = local_labels > 0
+        masses = np.bincount(
+            local_labels[valid], weights=local_counts[valid],
+        ) if np.any(valid) else np.zeros(1, float)
+        if len(masses) <= 1 or float(np.sum(masses[1:])) <= 0.0:
+            dominant_id, dominance, second = None, 0.0, 0.0
+        else:
+            order = np.argsort(masses[1:])[::-1] + 1
+            total = float(np.sum(masses[1:]))
+            dominant_id = int(order[0])
+            dominance = float(masses[dominant_id] / total)
+            second = float(masses[order[1]] / total) if len(order) > 1 else 0.0
+        output.append({
+            "detector_fragment_index": int(index),
+            "dominant_cascade_id": dominant_id,
+            "dominant_activity_fraction": dominance,
+            "second_activity_fraction": second,
+            "compound": bool(dominant_id is None or dominance < minimum_dominance),
+        })
+    return output
+
+
+def cascade_event_windows(components: list[dict], assignments: list[dict],
+                          fragments: list[dict], *, frame_ms: float,
+                          total_ms: float) -> tuple[list[dict], list[dict]]:
+    """Build causal-consistent event windows and retain compounds separately."""
+    frame_ms = float(frame_ms)
+    total_ms = float(total_ms)
+    if frame_ms <= 0.0 or total_ms <= 0.0 or len(assignments) != len(fragments):
+        raise ValueError("cascade event inputs are inconsistent")
+    component_by_id = {int(row["cascade_id"]): row for row in components}
+    groups: dict[int, list[int]] = {}
+    compounds = []
+    for assignment, fragment in zip(assignments, fragments):
+        fragment_index = int(assignment["detector_fragment_index"])
+        if assignment["compound"] or assignment["dominant_cascade_id"] is None:
+            compounds.append({
+                "detector_fragment_indices": [fragment_index],
+                "t_on": float(fragment["t_on"]),
+                "t_off": float(fragment["t_off"]),
+                "compound": True,
+                "dominant_activity_fraction": float(
+                    assignment["dominant_activity_fraction"]
+                ),
+            })
+            continue
+        cascade_id = int(assignment["dominant_cascade_id"])
+        if cascade_id not in component_by_id:
+            raise RuntimeError("fragment references an absent cascade")
+        groups.setdefault(cascade_id, []).append(fragment_index)
+    events = []
+    for cascade_id, fragment_indices in groups.items():
+        component = component_by_id[cascade_id]
+        selected = [fragments[index] for index in fragment_indices]
+        component_on = float(component["start_frame"]) * frame_ms
+        component_off = float(component["stop_frame"] + 1) * frame_ms
+        t_on = max(0.0, min(component_on, min(
+            float(fragment["t_on"]) for fragment in selected
+        )))
+        t_off = min(total_ms, max(component_off, max(
+            float(fragment["t_off"]) for fragment in selected
+        )))
+        events.append({
+            "cascade_id": cascade_id,
+            "detector_fragment_indices": sorted(fragment_indices),
+            "t_on": t_on,
+            "t_off": t_off,
+            "dur_ms": float(max(frame_ms, t_off - t_on)),
+            "returned": bool(t_off < total_ms),
+            "compound": False,
+            "activity_mass": float(component["activity_mass"]),
+            "active_bin_frames": int(component["active_bin_frames"]),
+        })
+    events.sort(key=lambda row: (row["t_on"], row["cascade_id"]))
+    compounds.sort(key=lambda row: row["t_on"])
+    return events, compounds
 
 
 def event_source_onset_maps(spikes: np.ndarray, positions: np.ndarray,

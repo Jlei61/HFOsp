@@ -72,6 +72,35 @@ prototypes must remain qualitatively stable across all three before any new
 field optimization.  The 50 ms Stage-B/C results remain an invalidated
 development audit and cannot seed selection or confirmation.
 
+### Spatiotemporal-cascade correction (2026-08-24; current primary event unit)
+
+Fresh canaries showed that a global population reset is still only an outer
+envelope.  One apparent pattern-2 excursion lasted about 0.8 s and contained
+five detector fragments assigned to five disconnected sheet-level cascades;
+one fragment was itself a two-origin compound.  Across all four canary runs,
+16-18 returned population excursions per run contained multiple cascades.
+
+The primary optimization event is therefore a `spatiotemporal_cascade` inside
+the population-excursion envelope.  It is defined from the 2 ms by 1 mm
+whole-sheet E-neuron activity movie, with no virtual-contact input:
+
+1. a sheet bin is active when at least two E neurons fire in the frame;
+2. active nodes connect within the same or adjacent sheet bin and in the same
+   or immediately adjacent movie frame;
+3. detector fragments whose dominant activity belongs to the same connected
+   component form one cascade event, even if the high detector briefly drops;
+4. a fragment whose largest component carries less than 70% of its activity is
+   a `compound` observation and cannot be silently assigned a propagation
+   direction.
+
+The three-neuron bin threshold and 0.65/0.75 dominance thresholds are mandatory
+sensitivities.  In the fresh canary they preserved the negative conclusion:
+natural-KMeans patient-direction purity remained 0.56-0.59 and complete
+held-out prototype R2 remained -0.35 to -0.44 for both historical fields.
+This operational definition tests causal consistency; it does not prove a
+particular synapse caused each spike.  Exact edge-supported ancestry remains a
+later mechanism audit if the coarse cascade assignment is unstable.
+
 ## 2. Scientific question
 
 Can a continuous Node-only excitability field, with total field mass, topology,
@@ -127,11 +156,13 @@ the entire sheet and do not receive extra support near observed contacts.
 
 ## 5. Patient event representation
 
-The model event unit is a `population_excursion`, not an unmerged threshold
-fragment or fixed-gap `settled_episode`.  Every excursion stores its constituent
-detector-fragment indices, high-threshold trigger interval, complete analysis
-window, reset threshold and reset duration.  A figure or scorer that consumes
-pre-group fragment ranks is invalid for rev12-ND.
+The model event unit used by KMeans and the patient objective is a
+`spatiotemporal_cascade`, not an unmerged threshold fragment, fixed-gap
+`settled_episode`, or complete population-excursion envelope.  The population
+excursion is retained as an outer diagnostic window.  Every cascade stores its
+constituent detector-fragment indices and activity component; compounds remain
+in the denominator but are not forced into direction labels.  A figure or
+scorer that consumes pre-group fragment ranks is invalid for rev12-ND.
 
 For event `e` and contact `i`, retain fixed contact identity:
 
@@ -243,6 +274,12 @@ The scoring implementation must pass:
     whereas a full low-state dwell must separate them;
 11. the full-sheet movie must cover the entire analysis window so that repeated
     waves cannot be hidden by a fixed 100 ms display.
+12. a synthetic travelling wave interrupted by a detector dip remains one
+    cascade;
+13. simultaneous spatially disconnected sources remain separate components and
+    are marked compound if one detector fragment contains both;
+14. cascade conclusions remain stable at two versus three active neurons per
+    bin and 0.65/0.70/0.75 dominance.
 
 Failure of a control blocks long simulation because it means the objective does
 not encode the scientific question.
