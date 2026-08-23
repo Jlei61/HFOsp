@@ -16,6 +16,7 @@ os.environ.setdefault("OMP_NUM_THREADS", "1")
 os.environ.setdefault("MKL_NUM_THREADS", "1")
 
 import numpy as np
+from scipy.special import expit
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -86,29 +87,55 @@ def _atomic_json(path: Path, payload: dict) -> None:
 def cascade_selection_objective(*, patient_loss: float,
                                 kmeans_balanced_alignment: float,
                                 ood_fraction: float,
-                                compound_fraction: float) -> dict:
+                                compound_fraction: float,
+                                k2_support: float | None = None,
+                                k2_support_weight: float = 0.0) -> dict:
     values = np.asarray([
         patient_loss, kmeans_balanced_alignment, ood_fraction, compound_fraction,
     ], float)
     if not np.all(np.isfinite(values)) or not 0.0 <= kmeans_balanced_alignment <= 1.0:
         raise ValueError("cascade objective inputs must be finite and bounded")
+    if (k2_support is not None and not 0.0 <= float(k2_support) <= 1.0) \
+            or float(k2_support_weight) < 0.0:
+        raise ValueError("K2 support and weight must be bounded")
     kmeans_loss = 1.0 - float(kmeans_balanced_alignment)
+    k2_loss = 0.0 if k2_support is None else 1.0 - float(k2_support)
     return {
         "matched_patient_loss": float(patient_loss),
         "kmeans_direction_loss": kmeans_loss,
         "ood_fraction": float(ood_fraction),
         "compound_fraction": float(compound_fraction),
+        "k2_support": None if k2_support is None else float(k2_support),
+        "k2_support_loss": float(k2_loss),
         "objective": float(
             patient_loss + 0.5 * kmeans_loss
             + 0.25 * ood_fraction + 0.25 * compound_fraction
+            + float(k2_support_weight) * k2_loss
         ),
         "weights": {
             "matched_patient_loss": 1.0,
             "kmeans_direction_loss": 0.5,
             "ood_fraction": 0.25,
             "compound_fraction": 0.25,
+            "k2_support_loss": float(k2_support_weight),
         },
     }
+
+
+def validate_contact_readout(payload: dict, expected: dict) -> None:
+    """Fail closed when a worker used another event-to-contact mapping."""
+    source = expected.get("source")
+    if source is None:
+        return
+    observed = payload.get("contact_readout", {})
+    if observed.get("source") != source:
+        raise RuntimeError("aggregate received the wrong contact readout source")
+    if source == "lineage_restricted_sheet_activity":
+        required = float(expected["minimum_full_trace_pearson"])
+        minimum = observed.get("full_trace_pearson_minimum")
+        if (observed.get("parity_status") != "PASS" or minimum is None
+                or float(minimum) < required):
+            raise RuntimeError("worker contact sampler parity is not acceptable")
 
 
 def equal_network_natural_kmeans(workers: list[dict], *, seed: int) -> dict:
@@ -135,6 +162,51 @@ def equal_network_natural_kmeans(workers: list[dict], *, seed: int) -> dict:
     result["n_per_network"] = int(n_per_network)
     result["network_weighting"] = "equal event count per network"
     return result
+
+
+def k2_support_score(delta_loglik_per_event: float | None, *,
+                     scale: float = 0.5) -> float:
+    """Map held-out K2-vs-K1 evidence to a bounded continuous score."""
+    if delta_loglik_per_event is None or not np.isfinite(delta_loglik_per_event):
+        return 0.0
+    if float(scale) <= 0.0:
+        raise ValueError("K2 support scale must be positive")
+    return float(expit(float(delta_loglik_per_event) / float(scale)))
+
+
+def per_network_natural_kmeans(workers: list[dict], *, seed: int,
+                               support_scale: float = 0.5) -> dict:
+    """Keep network seed as the unit for natural two-cluster evidence."""
+    rows = []
+    for index, worker in enumerate(workers):
+        result = _strip_natural_arrays(natural_kmeans(
+            worker["ranks"], worker["labels"],
+            random_state=int(seed) + index,
+        ))
+        result["seed"] = int(worker["seed"])
+        result["k2_support_score"] = k2_support_score(
+            result.get("heldout_gmm_k2_minus_k1_loglik_per_event"),
+            scale=float(support_scale),
+        )
+        rows.append(result)
+    evaluable = [row for row in rows if row.get("status") == "OK"]
+    return {
+        "rows": rows,
+        "n_networks": len(rows),
+        "n_evaluable": len(evaluable),
+        "equal_network_mean_balanced_alignment": float(np.mean([
+            row["direction_balanced_alignment"] for row in evaluable
+        ])) if evaluable else 0.0,
+        "equal_network_mean_k2_support": float(np.mean([
+            row["k2_support_score"] for row in rows
+        ])) if rows else 0.0,
+        "networks_with_positive_k2_delta": int(np.sum([
+            row.get("heldout_gmm_k2_minus_k1_loglik_per_event") is not None
+            and row["heldout_gmm_k2_minus_k1_loglik_per_event"] > 0.0
+            for row in rows
+        ])),
+        "support_scale_loglik_per_event": float(support_scale),
+    }
 
 
 def main() -> None:
@@ -195,6 +267,9 @@ def main() -> None:
             payload = json.loads(json_path.read_text())
             if payload["event_unit"].get("name") != expected_event_unit:
                 raise RuntimeError("aggregate received the wrong frozen event unit")
+            validate_contact_readout(
+                payload, config["search"].get("contact_readout", {}),
+            )
             worker = _load_network_worker(
                 npz_path, patient["contact_names"], classifier,
                 semantics["raw_to_patient"],
@@ -225,6 +300,10 @@ def main() -> None:
         natural = equal_network_natural_kmeans(
             workers, seed=int(objective_config["seed"]),
         )
+        network_natural = per_network_natural_kmeans(
+            workers, seed=int(objective_config["seed"]),
+            support_scale=float(objective_config.get("k2_support_scale", 0.5)),
+        )
         ood_fraction = float(np.mean([
             float(np.mean(worker["ood"])) if len(worker["ood"]) else 1.0
             for worker in workers
@@ -234,11 +313,24 @@ def main() -> None:
             for payload in worker_payloads
         ]))
         matched_loss = float(np.mean([score["objective"] for score in matched_scores]))
+        alignment_source = objective_config.get(
+            "kmeans_alignment_source", "pooled_equal_event_count",
+        )
+        if alignment_source == "pooled_equal_event_count":
+            balanced_alignment = float(natural["direction_balanced_alignment"])
+        elif alignment_source == "equal_network_mean":
+            balanced_alignment = float(
+                network_natural["equal_network_mean_balanced_alignment"]
+            )
+        else:
+            raise RuntimeError(f"unknown KMeans alignment source: {alignment_source}")
         selection = cascade_selection_objective(
             patient_loss=matched_loss,
-            kmeans_balanced_alignment=float(natural["direction_balanced_alignment"]),
+            kmeans_balanced_alignment=balanced_alignment,
             ood_fraction=ood_fraction,
             compound_fraction=compound_fraction,
+            k2_support=float(network_natural["equal_network_mean_k2_support"]),
+            k2_support_weight=float(objective_config.get("k2_support_weight", 0.0)),
         )
         historical_diagnostics = score_candidate(
             candidate, workers, patient, projections, calibration,
@@ -251,6 +343,7 @@ def main() -> None:
             "selection_objective": selection,
             "matched_network_scores": matched_scores,
             "equal_network_natural_kmeans": natural,
+            "per_network_natural_kmeans": network_natural,
             "historical_unmatched_diagnostics": historical_diagnostics,
             "source_topology": topology,
             "per_seed": [{
@@ -285,6 +378,13 @@ def main() -> None:
             "patient_sampling": "matched 6 model vs 6 one-block patient events",
             "normalization": "raw distance / patient block floor q95; no clipping",
             "patient_data": "training only",
+            "kmeans_alignment_source": objective_config.get(
+                "kmeans_alignment_source", "pooled_equal_event_count",
+            ),
+            "k2_support": (
+                "per-network held-out diagonal-GMM K2-vs-K1 log likelihood, "
+                "mapped continuously; no hard blocker"
+            ),
             "heldout_r2_used_for_selection": False,
             "hard_scientific_gates": [],
         },
@@ -305,8 +405,8 @@ def main() -> None:
             "w", newline="") as handle:
         fields = [
             "candidate_id", "objective", "matched_patient_loss",
-            "kmeans_balanced_alignment", "ood_fraction", "compound_fraction",
-            "heldout_r2_diagnostic",
+            "kmeans_balanced_alignment", "k2_support", "ood_fraction",
+            "compound_fraction", "heldout_r2_diagnostic",
         ]
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
@@ -319,6 +419,7 @@ def main() -> None:
                 "kmeans_balanced_alignment": (
                     1.0 - selection["kmeans_direction_loss"]
                 ),
+                "k2_support": selection["k2_support"],
                 "ood_fraction": selection["ood_fraction"],
                 "compound_fraction": selection["compound_fraction"],
                 "heldout_r2_diagnostic": row[

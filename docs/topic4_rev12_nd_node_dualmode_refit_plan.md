@@ -96,8 +96,21 @@ not yet recover the patient repertoire.
    continuous-field search.
    Completed: all 36 workers passed contact-sampler parity, but every historical
    field remained above the patient q95 floor and had negative held-out R2.
-7. Treat the undirected library's apparent 0.93 alignment as non-selective until
+8. Treat the undirected library's apparent 0.93 alignment as non-selective until
    the directed resegmentation reproduces it.
+
+## Phase 1f: native-worker parity before refitting
+
+1. Make `lineage_restricted_sheet_activity` the formal contact readout in the
+   simulation worker, rather than a retrospective rescoring option.
+2. Store the readout source and per-contact full-trace sampler parity in every
+   worker JSON.  Fail the worker if any contact has Pearson r below 0.98.
+3. Rerun `stage_c_r04_p` on seed 2201 with Node only and compare all shared
+   arrays, event boundaries, root identifiers, returned status, onsets and ranks
+   exactly against the frozen Stage-G zero-simulation rescore.
+4. Do not release a new field parameter or start the fit queue unless this
+   parity canary is exact.  The canary is an engineering equivalence test, not a
+   new patient-fit result.
 
 ## Phase 2: historical rescore
 
@@ -128,11 +141,17 @@ not yet recover the patient repertoire.
 ## Phase 5: Node-only field search
 
 1. Freeze current field and historical non-dominated fields as initial points.
-2. Stage A: 4 x 4 smooth residual, common-random-number fit pool.
-3. Select a small Pareto shortlist on fresh networks.
-4. Stage B: optional 6 x 6 residual only around a Stage-A candidate that improves
+2. Stage I: use the three best final Stage-G fields, their pairwise midpoints and
+   signed 4 x 4 whole-sheet smooth residuals at two amplitudes.  The residual
+   basis is uniform over the sheet and never receives contact coordinates.
+3. Rank on matched patient-training loss, equal-network KMeans alignment, a
+   small continuous per-network K2-vs-K1 support term, OOD and compound rate.
+   Do not use held-out patient R2 for selection.
+4. Run all 54 frozen fields on a two-network common-random-number fit pool.
+5. Select a small Pareto shortlist on fresh networks.
+6. Stage B: optional 6 x 6 residual only around a Stage-A candidate that improves
    both patient modes without topology collapse.
-5. Long runs use `systemd-run --user` plus `nohup`, one numerical thread per
+7. Long runs use `systemd-run --user` plus `nohup`, one numerical thread per
    worker, memory sentinels and a 600 s monitor.  Worker count is selected from
    measured RSS while retaining at least 32 GiB available RAM.
 
@@ -156,8 +175,9 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-The machine currently carries another high-load Topic 4 cohort.  Phases 0-2 are
-zero-simulation and proceed immediately.  Phase 3 begins only when measured
-resources allow at least three Node workers without reducing the reserved memory
-margin.  The run is not accelerated by lowering duration or reusing selection
-networks.
+The native-worker parity canary passed exactly for the shared arrays, event
+metadata and root identifiers.  Stage I is therefore the next runnable phase.
+Measured canary RSS was about 2.3 GiB; the controller uses a conservative 4 GiB
+per worker estimate, a maximum of 24 workers, one numerical thread each and a
+32 GiB available-memory reserve.  Duration is not shortened and fit, selection
+and confirmation network pools remain disjoint.

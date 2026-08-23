@@ -288,6 +288,7 @@ def main() -> None:
     compound_fragments = []
     directed_source = None
     lineage_labels = None
+    directed_assignment_by_fragment = {}
     if event_unit is None:
         detected = detector_fragments
         event_unit_runtime = {"name": "detector_fragment"}
@@ -411,6 +412,9 @@ def main() -> None:
             frame_ms=float(movie["frame_ms"]),
             minimum_dominance=float(event_unit["minimum_dominance"]),
         )
+        directed_assignment_by_fragment = {
+            int(row["detector_fragment_index"]): row for row in assignments
+        }
         detected, compound_fragments = cascade_event_windows(
             lineage["components"], assignments, detector_fragments,
             frame_ms=float(movie["frame_ms"]),
@@ -481,7 +485,7 @@ def main() -> None:
     event_rows = []
     for index, event in enumerate(detected):
         onset = onsets[index]
-        event_rows.append({
+        event_row = {
             "event_index": int(index), "t_on_ms": float(event["t_on"]),
             "t_off_ms": float(event["t_off"]),
             "trigger_t_on_ms": float(event.get("trigger_t_on", event["t_on"])),
@@ -500,7 +504,23 @@ def main() -> None:
                 "detector_fragment_indices", [int(index)],
             ),
             "cascade_id": event.get("cascade_id"),
-        })
+        }
+        if event_unit is not None and event_unit["name"] == (
+                "directed_spatiotemporal_lineage"):
+            fragment_rows = [
+                directed_assignment_by_fragment[int(fragment)]
+                for fragment in event_row["detector_fragment_indices"]
+            ]
+            event_row.update({
+                "lineage_id": event.get("cascade_id"),
+                "minimum_fragment_dominance": float(min(
+                    row["dominant_activity_fraction"] for row in fragment_rows
+                )),
+                "maximum_fragment_collision_fraction": float(max(
+                    row["collision_activity_fraction"] for row in fragment_rows
+                )),
+            })
+        event_rows.append(event_row)
     returned = np.asarray([row["returned"] for row in event_rows], bool)
     event_t_on = np.asarray([row["t_on_ms"] for row in event_rows], float)
     event_trigger_t_on = np.asarray([
@@ -553,6 +573,10 @@ def main() -> None:
         event_fragment_count=np.asarray([
             row["n_detector_fragments"] for row in event_rows
         ], np.int16),
+        event_directed_root_id=np.asarray([
+            -1 if row.get("lineage_id") is None else int(row["lineage_id"])
+            for row in event_rows
+        ], np.int32),
         active_fraction=np.asarray(active, np.float32),
         active_fraction_bin_ms=np.asarray(active_dt, float),
         contact_envelope=np.asarray(envelope, np.float32),

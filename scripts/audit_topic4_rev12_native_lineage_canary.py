@@ -99,7 +99,8 @@ def main() -> None:
         raise RuntimeError("canary contains non-Node mechanism coefficients")
     event_keys = (
         "t_on_ms", "t_off_ms", "trigger_t_on_ms", "trigger_t_off_ms",
-        "returned", "n_recruited_contacts", "cascade_id",
+        "returned", "n_recruited_contacts", "n_detector_fragments",
+        "detector_fragment_indices",
     )
     native_events = [
         {key: row.get(key) for key in event_keys}
@@ -111,6 +112,16 @@ def main() -> None:
     ]
     if native_events != historical_events:
         raise RuntimeError("native event metadata differs from Stage G")
+    native_roots = [
+        row.get("lineage_id", row.get("cascade_id"))
+        for row in native_payload["events"]
+    ]
+    historical_roots = [
+        row.get("lineage_id", row.get("cascade_id"))
+        for row in historical_payload["events"]
+    ]
+    if native_roots != historical_roots:
+        raise RuntimeError("native root identifiers differ from Stage G")
     payload = {
         "schema_id": "topic4_rev12_nd_native_lineage_canary_audit_v1",
         "status": "REV12ND_NATIVE_LINEAGE_CANARY_PARITY_COMPLETE",
@@ -118,6 +129,7 @@ def main() -> None:
         "seed": seed,
         "shared_arrays_exact": True,
         "event_metadata_exact": True,
+        "root_identifiers_exact": True,
         "n_events": len(native_events),
         "n_returned": int(np.sum(native["event_returned"])),
         "contact_readout": native_payload["contact_readout"],

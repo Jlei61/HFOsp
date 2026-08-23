@@ -93,7 +93,9 @@ def main() -> None:
     reserve_gib = float(resources["reserved_available_memory_gib"])
     interval = int(resources["monitor_interval_seconds"])
     disk_floor_gib = 40.0
-    estimated_worker_gib = 14.0
+    estimated_worker_gib = float(resources.get("estimated_worker_gib", 14.0))
+    if estimated_worker_gib <= 0.0:
+        raise RuntimeError("estimated worker memory must be positive")
     expected_commit = subprocess.check_output(
         ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
     ).strip()

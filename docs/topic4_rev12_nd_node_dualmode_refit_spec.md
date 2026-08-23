@@ -285,7 +285,14 @@ For every network report:
 - counts of TA/TB events in that same network;
 - equal-network mode occupancy and OOD fraction.
 
-Pooled KMeans is descriptive only.  Network seed is the independent unit.
+KMeans K=2 is not evidence for two modes by itself because it always returns two
+clusters.  The formal exploratory fit therefore also compares held-out diagonal-
+GMM likelihood under K=2 versus K=1 in every network.  This value is mapped to a
+bounded continuous support score and receives weight 0.25; it is not a hard
+blocker.  Patient training subsamples show positive K2-minus-K1 likelihood,
+whereas the best final historical field is strongly negative despite moderate
+KMeans/patient-label alignment.  Pooled KMeans remains descriptive only.
+Network seed is the independent unit.
 
 ## 8. Mode-specific source topology
 
