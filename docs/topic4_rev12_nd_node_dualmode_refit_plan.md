@@ -84,6 +84,16 @@ not yet recover the patient repertoire.
    are frozen.  Never reuse source maps from the undirected event unit.
 6. Zero-simulation resegment all 18 historical fields x 2 fit networks, then
    recompute matched patient loss, equal-network KMeans, OOD and compound rate.
+   This completed with no historical field below the matched patient q95 floor,
+   negative held-out R2 for all fields, and substantial compound detector
+   fragments.  Before any new field fit, render one algorithmically selected
+   representative from each natural KMeans cluster with all concurrent activity
+   visible and the selected directed root explicitly outlined.
+7. Recompute contact recruitment from activity assigned to that same root.  Audit
+   the 1 mm binned Gaussian sampler against the frozen per-neuron full-contact
+   envelope and require Pearson r >= 0.98 for every contact.  Re-score all 18
+   historical fields again; only this lineage-restricted result may seed a new
+   continuous-field search.
 7. Treat the undirected library's apparent 0.93 alignment as non-selective until
    the directed resegmentation reproduces it.
 

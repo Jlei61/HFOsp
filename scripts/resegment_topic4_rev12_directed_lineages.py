@@ -24,9 +24,13 @@ from src.sef_hfo_observation import VirtualMontage  # noqa: E402
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
     assign_detector_fragments_to_directed_lineages,
+    binned_contact_envelope,
     cascade_event_windows,
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
+    lineage_restricted_contact_readout,
+    sheet_bin_indices,
+    sheet_contact_sampling_weights,
 )
 
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
@@ -104,19 +108,74 @@ def _directed_bundle(source_npz: Path, source_payload: dict,
     valid = np.ones(len(names), bool)
     envelope = np.asarray(arrays["contact_envelope"], float)
     envelope_dt = float(arrays["contact_envelope_dt_ms"])
-    onset_rows, rank_rows, event_rows = [], [], []
+    readout_source = readout.get(
+        "source", "full_contact_envelope_within_lineage_window",
+    )
+    readout_audit = {"source": readout_source}
+    if readout_source == "lineage_restricted_sheet_activity":
+        positions = np.asarray(arrays["positions_E"], float)
+        neuron_bins, sheet_size = sheet_bin_indices(
+            positions, bin_mm=float(event_unit["movie_bin_mm"]),
+            sheet_mm=float(arrays["source_sheet_mm"]),
+        )
+        population = np.bincount(
+            neuron_bins, minlength=sheet_size * sheet_size,
+        ).reshape(sheet_size, sheet_size)
+        weights = sheet_contact_sampling_weights(
+            np.asarray(arrays["contact_xy_mm"], float), population,
+            bin_mm=float(event_unit["movie_bin_mm"]),
+            kernel_width_mm=float(readout["kernel_width_mm"]),
+        )
+        proxy = binned_contact_envelope(
+            movie, weights, frame_ms=frame_ms,
+            smooth_ms=float(readout["smooth_ms"]),
+        )
+        correlations = np.asarray([
+            np.corrcoef(proxy[index], envelope[index])[0, 1]
+            for index in range(len(names))
+        ], float)
+        minimum_parity = float(readout["minimum_full_trace_pearson"])
+        if not np.all(np.isfinite(correlations)) or np.min(correlations) < minimum_parity:
+            raise RuntimeError("binned contact sampler fails full-trace parity")
+        restricted = lineage_restricted_contact_readout(
+            movie, lineage["labels"], events, weights,
+            frame_ms=frame_ms, smooth_ms=float(readout["smooth_ms"]),
+            participation_margin_fraction=float(
+                readout["participation_margin_fraction"]
+            ),
+            timing_fraction=float(readout["timing_fraction"]),
+        )
+        onset_rows = list(restricted["onsets"])
+        rank_rows = list(restricted["ranks"])
+        readout_audit.update({
+            "kernel_width_mm": float(readout["kernel_width_mm"]),
+            "smooth_ms": float(readout["smooth_ms"]),
+            "full_trace_pearson_per_contact": correlations,
+            "full_trace_pearson_median": float(np.median(correlations)),
+            "full_trace_pearson_minimum": float(np.min(correlations)),
+            "minimum_full_trace_pearson": minimum_parity,
+            "parity_status": "PASS",
+        })
+    elif readout_source == "full_contact_envelope_within_lineage_window":
+        onset_rows, rank_rows = [], []
+        for event in events:
+            onset, rank = _contact_onsets(
+                envelope, envelope_dt, montage, valid,
+                (float(event["t_on"]), float(event["t_off"])),
+                float(readout["participation_margin_fraction"]),
+                float(readout["timing_fraction"]),
+            )
+            onset_rows.append(onset)
+            rank_rows.append(rank)
+    else:
+        raise RuntimeError(f"unknown directed contact readout: {readout_source}")
+
+    event_rows = []
     assignment_by_fragment = {
         int(row["detector_fragment_index"]): row for row in assignments
     }
     for event_index, event in enumerate(events):
-        onset, rank = _contact_onsets(
-            envelope, envelope_dt, montage, valid,
-            (float(event["t_on"]), float(event["t_off"])),
-            float(readout["participation_margin_fraction"]),
-            float(readout["timing_fraction"]),
-        )
-        onset_rows.append(onset)
-        rank_rows.append(rank)
+        onset = np.asarray(onset_rows[event_index], float)
         fragment_rows = [
             assignment_by_fragment[index]
             for index in event["detector_fragment_indices"]
@@ -169,6 +228,7 @@ def _directed_bundle(source_npz: Path, source_payload: dict,
         "detector_threshold": detector_threshold,
         "active_dt": active_dt,
         "frame_ms": frame_ms,
+        "contact_readout": readout_audit,
     }
 
 
@@ -305,6 +365,7 @@ def main() -> None:
                     "source_map": config["source_topology"]["source_map"],
                     "bin_mm": config["source_topology"]["bin_mm"],
                 },
+                "contact_readout": bundle["contact_readout"],
                 "mechanism_freeze": source_payload["mechanism_freeze"],
                 "source_worker": {
                     "json": str(source_json), "json_sha256": _sha256(source_json),

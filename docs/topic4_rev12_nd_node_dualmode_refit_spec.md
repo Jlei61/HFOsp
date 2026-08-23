@@ -97,6 +97,24 @@ The three-neuron bin threshold and 0.65/0.75 dominance thresholds are mandatory
 sensitivities.  In the fresh canary they preserved the negative conclusion:
 natural-KMeans patient-direction purity remained 0.56-0.59 and complete
 held-out prototype R2 remained -0.35 to -0.44 for both historical fields.
+
+The later root-preserving historical rescore materially tightened this negative
+result.  Across all 18 historical continuous fields, every matched patient loss
+remained above the patient block q95 floor and held-out prototype R2 remained
+negative (approximately -0.58 to -0.78).  Natural KMeans still retained a
+two-direction tendency for some fields, but 37-54% of detector fragments were
+compound under the directed-lineage audit.  Therefore detector-window dual-mode
+appearance is not an acceptable optimization endpoint; the directed lineage is
+the primary event unit for every subsequent fit.
+
+The optimization readout must also be lineage-restricted.  Cropping the original
+whole-network contact envelope to a directed-root window is insufficient because
+a concurrent independent root can still recruit a contact inside that window.
+For the corrected readout, the selected root's 2 ms x 1 mm activity is projected
+through the frozen 0.25 mm Gaussian contact sampler and 5 ms temporal smoothing.
+The binned sampler must reproduce the original whole-network contact traces with
+Pearson r >= 0.98 at every contact before its lineage-restricted ranks are used.
+The unconditioned 15-contact traces remain a visual diagnostic only.
 This correction removed grossly disconnected packets, but its 3-D connected
 components were undirected.  Two independent roots that met later in time were
 therefore merged retrospectively.  A full 18-field historical run under this

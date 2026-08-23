@@ -901,6 +901,142 @@ def directed_lineage_onset_maps(lineage_labels: np.ndarray,
     return {"onset_maps_ms": maps, "evaluable": evaluable}
 
 
+def sheet_contact_sampling_weights(contact_xy: np.ndarray,
+                                   bin_population: np.ndarray, *,
+                                   bin_mm: float,
+                                   kernel_width_mm: float) -> np.ndarray:
+    """Approximate the per-neuron Gaussian readout on a binned sheet.
+
+    The denominator uses the number of E neurons in each sheet bin.  This is the
+    binned equivalent of normalizing the original per-neuron Gaussian weights,
+    rather than incorrectly giving every occupied sheet bin equal weight.
+    """
+    contacts = np.asarray(contact_xy, float)
+    population = np.asarray(bin_population, float)
+    bin_mm = float(bin_mm)
+    kernel_width_mm = float(kernel_width_mm)
+    if (contacts.ndim != 2 or contacts.shape[1] != 2
+            or population.ndim != 2 or np.any(population < 0)
+            or bin_mm <= 0.0 or kernel_width_mm <= 0.0):
+        raise ValueError("invalid contact geometry or sheet population")
+    y_index, x_index = np.indices(population.shape)
+    centers = np.column_stack((
+        (x_index.ravel() + 0.5) * bin_mm,
+        (y_index.ravel() + 0.5) * bin_mm,
+    ))
+    weights = []
+    for contact in contacts:
+        distance2 = np.sum((centers - contact[None, :]) ** 2, axis=1)
+        row = np.exp(-distance2 / (2.0 * kernel_width_mm ** 2))
+        denominator = float(np.sum(row * population.ravel()))
+        if denominator <= 0.0:
+            raise RuntimeError("contact Gaussian footprint contains no E neurons")
+        weights.append(row / denominator)
+    return np.asarray(weights, float).reshape(len(contacts), *population.shape)
+
+
+def binned_contact_envelope(activity_counts: np.ndarray,
+                            contact_weights: np.ndarray, *,
+                            frame_ms: float,
+                            smooth_ms: float) -> np.ndarray:
+    """Project a binned E-activity movie through the frozen contact sampler."""
+    counts = np.asarray(activity_counts, float)
+    weights = np.asarray(contact_weights, float)
+    frame_ms = float(frame_ms)
+    smooth_ms = float(smooth_ms)
+    if (counts.ndim != 3 or weights.ndim != 3
+            or counts.shape[1:] != weights.shape[1:]
+            or frame_ms <= 0.0 or smooth_ms <= 0.0):
+        raise ValueError("activity movie and contact weights do not align")
+    raw = counts.reshape(len(counts), -1) @ weights.reshape(len(weights), -1).T
+    sigma = max(1e-6, smooth_ms / frame_ms)
+    half = int(np.ceil(3.0 * sigma))
+    axis = np.arange(-half, half + 1)
+    kernel = np.exp(-(axis ** 2) / (2.0 * sigma ** 2))
+    kernel /= np.sum(kernel)
+    output = []
+    center = (len(kernel) - 1) // 2
+    for contact in range(raw.shape[1]):
+        full = np.convolve(raw[:, contact], kernel, mode="full")
+        output.append(full[center:center + len(raw)])
+    return np.stack(output)
+
+
+def _dense_onset_ranks(onsets: np.ndarray) -> np.ndarray:
+    ranks = np.full(len(onsets), np.nan)
+    finite = np.flatnonzero(np.isfinite(onsets))
+    if not len(finite):
+        return ranks
+    order = finite[np.argsort(onsets[finite], kind="mergesort")]
+    rank = 0.0
+    previous = float(onsets[order[0]])
+    ranks[order[0]] = rank
+    for index in order[1:]:
+        value = float(onsets[index])
+        if value > previous:
+            rank += 1.0
+            previous = value
+        ranks[index] = rank
+    return ranks
+
+
+def lineage_restricted_contact_readout(activity_counts: np.ndarray,
+                                       lineage_labels: np.ndarray,
+                                       events: list[dict],
+                                       contact_weights: np.ndarray, *,
+                                       frame_ms: float,
+                                       smooth_ms: float,
+                                       participation_margin_fraction: float,
+                                       timing_fraction: float) -> dict:
+    """Extract contact ranks using only activity assigned to each event root."""
+    counts = np.asarray(activity_counts, float)
+    labels = np.asarray(lineage_labels, int)
+    weights = np.asarray(contact_weights, float)
+    frame_ms = float(frame_ms)
+    smooth_ms = float(smooth_ms)
+    margin = float(participation_margin_fraction)
+    timing = float(timing_fraction)
+    if counts.shape != labels.shape or counts.ndim != 3:
+        raise ValueError("activity counts and lineage labels must align")
+    if (weights.ndim != 3 or weights.shape[1:] != counts.shape[1:]
+            or frame_ms <= 0.0 or smooth_ms <= 0.0
+            or not 0.0 < margin < 1.0 or not 0.0 < timing <= 1.0):
+        raise ValueError("invalid lineage contact-readout contract")
+    n_contacts = len(weights)
+    onset_rows = np.full((len(events), n_contacts), np.nan)
+    rank_rows = np.full((len(events), n_contacts), np.nan)
+    sigma = smooth_ms / frame_ms
+    pad = int(np.ceil(3.0 * sigma))
+    for event_index, event in enumerate(events):
+        lineage_id = int(event["cascade_id"])
+        start = max(0, int(round(float(event["t_on"]) / frame_ms)))
+        stop = min(len(counts), int(round(float(event["t_off"]) / frame_ms)))
+        if stop <= start:
+            continue
+        local_start, local_stop = max(0, start - pad), min(len(counts), stop + pad)
+        selected = counts[local_start:local_stop] * (
+            labels[local_start:local_stop] == lineage_id
+        )
+        envelope = binned_contact_envelope(
+            selected, weights, frame_ms=frame_ms, smooth_ms=smooth_ms,
+        )
+        segment = envelope[:, start - local_start:stop - local_start]
+        if not segment.size:
+            continue
+        floor = float(np.min(segment))
+        peak = np.max(segment, axis=1)
+        participation_bar = floor + margin * (float(np.max(segment)) - floor)
+        participating = peak > participation_bar
+        onsets = np.full(n_contacts, np.nan)
+        for contact in np.flatnonzero(participating):
+            crossing = np.flatnonzero(segment[contact] >= timing * peak[contact])
+            if len(crossing):
+                onsets[contact] = (start + int(crossing[0])) * frame_ms
+        onset_rows[event_index] = onsets
+        rank_rows[event_index] = _dense_onset_ranks(onsets)
+    return {"onsets": onset_rows, "ranks": rank_rows}
+
+
 def assign_detector_fragments_to_cascades(activity_counts: np.ndarray,
                                           cascade_labels: np.ndarray,
                                           fragments: list[dict], *,
