@@ -1,0 +1,119 @@
+#!/usr/bin/env python3
+"""Refreeze identical Stage-I fields under the exact-neuron readout contract."""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import subprocess
+import tempfile
+from pathlib import Path
+
+
+ROOT = Path(__file__).resolve().parents[1]
+ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
+
+
+def _sha256(path: Path) -> str:
+    return hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def _resolve(root: Path, relative: str) -> Path:
+    local = ROOT / relative
+    return local if local.exists() else root / relative
+
+
+def _atomic_json(path: Path, payload: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    handle, temporary = tempfile.mkstemp(dir=path.parent, suffix=".tmp")
+    os.close(handle)
+    try:
+        Path(temporary).write_text(json.dumps(payload, indent=2) + "\n")
+        os.replace(temporary, path)
+    finally:
+        if os.path.exists(temporary):
+            os.unlink(temporary)
+
+
+def copy_exact_candidates(source: dict, *, expected_count: int) -> list[dict]:
+    candidates = list(source["candidates"])
+    identifiers = [row["candidate_id"] for row in candidates]
+    hashes = [row["node_field"]["field_sha256"] for row in candidates]
+    if (len(candidates) != int(expected_count)
+            or len(set(identifiers)) != len(candidates)
+            or len(set(hashes)) != len(candidates)):
+        raise RuntimeError("exact-neuron field library identity drifted")
+    return candidates
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", required=True, type=Path)
+    parser.add_argument("--expected-commit", required=True)
+    parser.add_argument("--artifact-root", type=Path, default=ARTIFACT_ROOT)
+    args = parser.parse_args()
+    config_path = args.config.resolve()
+    root = args.artifact_root.resolve()
+    config = json.loads(config_path.read_text())
+    expected = subprocess.check_output(
+        ["git", "rev-parse", args.expected_commit], cwd=ROOT, text=True,
+    ).strip()
+    if subprocess.check_output(
+        ["git", "rev-parse", "HEAD"], cwd=ROOT, text=True,
+    ).strip() != expected:
+        raise RuntimeError("exact-neuron fit freezer is not at expected commit")
+    tracked = [
+        str(config_path.relative_to(ROOT)),
+        str(Path(__file__).resolve().relative_to(ROOT)),
+        "scripts/run_topic4_rev12_node_worker.py",
+        "scripts/aggregate_topic4_rev12_cascade_fit.py",
+        "src/topic4_node_dualmode.py",
+    ]
+    if subprocess.check_output(
+        ["git", "status", "--porcelain", "--", *tracked], cwd=ROOT, text=True,
+    ).strip():
+        raise RuntimeError("exact-neuron fit runtime paths are dirty")
+    inputs = {}
+    for key, record in config["inputs"].items():
+        path = _resolve(root, record["path"])
+        digest = _sha256(path)
+        if digest != record["sha256"]:
+            raise RuntimeError(f"exact-neuron fit input changed: {record['path']}")
+        inputs[key] = {"path": str(path), "sha256": digest}
+    invalidation = json.loads(Path(inputs["fit_v1_invalidation"]["path"]).read_text())
+    canary = json.loads(Path(inputs["exact_neuron_canary_audit"]["path"]).read_text())
+    if invalidation["status"] != "INVALIDATED_APPROXIMATE_BINNED_CONTACT_READOUT":
+        raise RuntimeError("approximate fit invalidation is absent")
+    if canary["status"] != "REV12ND_EXACT_NEURON_LINEAGE_CANARY_COMPLETE":
+        raise RuntimeError("exact-neuron canary has not passed")
+    if config["search"]["contact_readout"]["source"] != (
+            "lineage_restricted_neuron_activity"):
+        raise RuntimeError("exact-neuron fit readout drifted")
+    source = json.loads(Path(inputs["source_manifest"]["path"]).read_text())
+    candidates = copy_exact_candidates(
+        source, expected_count=int(config["field_search"]["expected_candidate_count"]),
+    )
+    payload = {
+        "schema_id": "topic4_rev12_exact_neuron_causal_field_fit_manifest_v1",
+        "status": "REV12ND_EXACT_NEURON_CAUSAL_FIELD_FIT_FROZEN",
+        "config": str(config_path.relative_to(ROOT)),
+        "config_sha256": _sha256(config_path),
+        "candidates": candidates,
+        "event_unit": config["event_unit"],
+        "contact_readout": config["search"]["contact_readout"],
+        "cascade_objective": config["cascade_objective"],
+        "inputs": inputs,
+        "provenance": {"git_commit": expected},
+        "field_library_identical_to_stage_i_v1": True,
+    }
+    output = root / config["candidate_manifest"]
+    _atomic_json(output, payload)
+    print(json.dumps({
+        "status": payload["status"], "n_candidates": len(candidates),
+        "output": str(output),
+    }, indent=2))
+
+
+if __name__ == "__main__":
+    main()

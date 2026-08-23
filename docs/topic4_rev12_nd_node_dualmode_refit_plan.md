@@ -120,6 +120,13 @@ keeps the 1 mm/2 ms movie for root identity, assigns each neuron's binned spikes
 to that root, and applies the original normalized 0.25 mm per-neuron Gaussian
 contact sampler.  No threshold relaxation is allowed.
 
+The exact-neuron canary then passed with the frozen activity trajectory, all 50
+event boundaries and all directed root identifiers unchanged.  Ten of 50 events
+changed their recruited-contact mask relative to the 1 mm approximation; the
+minimum event-level Jaccard was 0.5.  This confirms that the correction is
+scientifically material.  Stage K now reruns the identical 54 fields under the
+exact-neuron readout; no field parameter is regenerated.
+
 ## Phase 2: historical rescore
 
 1. Inventory compatible V3-V6, D6 and rev11 Node artifacts.
