@@ -213,77 +213,105 @@ def _bandpass(values: np.ndarray, dt_ms: float) -> np.ndarray:
     return sosfiltfilt(sos, np.asarray(values, float), axis=1)
 
 
-def _closest_opposite_pair(payload_events: list[dict], labels: np.ndarray,
-                           detected_to_returned: dict[int, int]) -> tuple[int, int]:
-    returned = sorted(detected_to_returned)
-    pairs = [
-        (left, right) for index, left in enumerate(returned)
-        for right in returned[index + 1:]
-        if int(labels[detected_to_returned[left]])
-        != int(labels[detected_to_returned[right]])
+def _settled_episode_pair(payload_events: list[dict], labels: np.ndarray,
+                          detected_to_returned: dict[int, int],
+                          representative_events: dict[int, int]) -> tuple[tuple[int, int], list[set[int]]]:
+    pair = tuple(int(representative_events[mode]) for mode in (0, 1))
+    if pair[0] == pair[1]:
+        raise RuntimeError("representative modes share the same settled episode")
+    for mode, detected in enumerate(pair):
+        returned = detected_to_returned.get(detected)
+        if returned is None or int(labels[returned]) != mode:
+            raise RuntimeError("representative event does not match its patient mode")
+    fragment_sets = [
+        set(int(value) for value in payload_events[index].get("fragment_indices", [index]))
+        for index in pair
     ]
-    if not pairs:
-        raise RuntimeError("representative network lacks an opposite-mode event pair")
-    return min(
-        pairs,
-        key=lambda pair: abs(
-            0.5 * (payload_events[pair[0]]["t_on_ms"] + payload_events[pair[0]]["t_off_ms"])
-            - 0.5 * (payload_events[pair[1]]["t_on_ms"] + payload_events[pair[1]]["t_off_ms"])
-        ),
-    )
+    if fragment_sets[0] & fragment_sets[1]:
+        raise RuntimeError("representative settled episodes share detector fragments")
+    return pair, fragment_sets
 
 
 def _plot_readout(ax, loaded, worker: dict, payload_events: list[dict],
-                  detected_to_returned: dict[int, int]) -> dict:
-    pair = _closest_opposite_pair(payload_events, worker["labels"], detected_to_returned)
-    pair_start = min(payload_events[index]["t_on_ms"] for index in pair)
-    pair_stop = max(payload_events[index]["t_off_ms"] for index in pair)
-    center = 0.5 * (pair_start + pair_stop)
-    width = max(900.0, pair_stop - pair_start + 200.0)
-    start, stop = max(0.0, center - width / 2), center + width / 2
+                  detected_to_returned: dict[int, int],
+                  representative_events: dict[int, int]) -> dict:
+    pair, fragment_sets = _settled_episode_pair(
+        payload_events, np.asarray(worker["labels"], int), detected_to_returned,
+        representative_events,
+    )
+
     envelope = np.asarray(loaded["contact_envelope"], float)
     dt_ms = float(loaded["contact_envelope_dt_ms"])
-    traces = _bandpass(envelope, dt_ms)
+    traces_full = _bandpass(envelope, dt_ms)
     names = np.asarray(loaded["contact_names"]).astype(str)
     shafts = np.asarray(loaded["shaft_ids"]).astype(str)
     order = np.concatenate([
         np.flatnonzero(shafts == shaft) for shaft in ("ICL", "SCL")
     ])
-    names, shafts, traces = names[order], shafts[order], traces[order]
-    time_ms = np.arange(traces.shape[1]) * dt_ms
-    selected = (time_ms >= start) & (time_ms <= stop)
-    time_shown = time_ms[selected] - start
-    traces = traces[:, selected]
-    amplitude = max(float(np.quantile(np.abs(traces), 0.995)), 1e-12)
-    traces /= amplitude
+    names, shafts, traces_full = names[order], shafts[order], traces_full[order]
+    time_ms = np.arange(traces_full.shape[1]) * dt_ms
+    durations = [
+        float(payload_events[index]["t_off_ms"] - payload_events[index]["t_on_ms"])
+        for index in pair
+    ]
+    pre_ms = 125.0
+    width_ms = max(400.0, max(durations) + 250.0)
+    windows = []
+    trace_windows = []
+    for detected in pair:
+        onset = float(payload_events[detected]["t_on_ms"])
+        start = max(0.0, onset - pre_ms)
+        stop = min(float(time_ms[-1]), start + width_ms)
+        selected = (time_ms >= start) & (time_ms <= stop)
+        windows.append((start, stop, onset))
+        trace_windows.append(traces_full[:, selected])
+    amplitude = max(
+        float(np.quantile(np.abs(np.concatenate(trace_windows, axis=1)), 0.995)),
+        1e-12,
+    )
     offsets = np.arange(len(names))[::-1] * 1.35
-    for row, offset in enumerate(offsets):
-        ax.plot(
-            time_shown, 0.52 * traces[row] + offset,
-            color=SHAFT_COLORS[shafts[row]], lw=0.8,
-        )
+    ax.set_axis_off()
     displayed = []
-    for detected, returned_position in detected_to_returned.items():
+    for mode, (detected, window, trace_window) in enumerate(zip(pair, windows, trace_windows)):
+        start, stop, onset = window
+        child = ax.inset_axes([0.02 + 0.50 * mode, 0.0, 0.46, 1.0])
+        selected_time = time_ms[(time_ms >= start) & (time_ms <= stop)] - onset
+        for row, offset in enumerate(offsets):
+            child.plot(
+                selected_time, 0.52 * trace_window[row] / amplitude + offset,
+                color=SHAFT_COLORS[shafts[row]], lw=0.8,
+            )
         event = payload_events[detected]
-        if event["t_off_ms"] < start or event["t_on_ms"] > stop:
-            continue
-        mode = int(worker["labels"][returned_position])
-        ax.axvspan(
-            event["t_on_ms"] - start, event["t_off_ms"] - start,
+        child.axvspan(
+            0.0, float(event["t_off_ms"] - onset),
             color=MODE_COLORS[mode], alpha=0.10, lw=0,
         )
-        displayed.append({"detected_index": detected, "mode": mode})
-    ax.set_yticks(offsets, names, fontsize=6.5)
-    ax.tick_params(axis="y", length=0, pad=2)
-    ax.set(
-        xlim=(0, stop - start), ylim=(-0.9, offsets[0] + 0.9),
-        xlabel="simulation time in displayed window (ms)",
-        ylabel="30-80 Hz virtual-contact activity",
-    )
-    ax.spines[["top", "right", "left"]].set_visible(False)
-    ax.plot([15, 65], [offsets[0] + 0.55] * 2, color="#222222", lw=1.5)
-    ax.text(40, offsets[0] + 0.66, "50 ms", ha="center", va="bottom", fontsize=7)
-    return {"display_window_ms": [start, stop], "events": displayed}
+        child.axvline(0.0, color=MODE_COLORS[mode], lw=0.9, ls="--")
+        child.set(
+            xlim=(-pre_ms, width_ms - pre_ms),
+            ylim=(-0.9, offsets[0] + 0.9),
+            xlabel="time from episode onset (ms)",
+        )
+        child.set_title(f"mode {mode + 1} episode", color=MODE_COLORS[mode], fontsize=9)
+        if mode == 0:
+            child.set_yticks(offsets, names, fontsize=6.2)
+            child.set_ylabel("30-80 Hz virtual-contact activity", fontsize=8)
+        else:
+            child.set_yticks(offsets, [])
+        child.tick_params(axis="y", length=0, pad=2)
+        child.spines[["top", "right", "left"]].set_visible(False)
+        displayed.append({
+            "detected_index": detected,
+            "mode": mode,
+            "fragment_indices": sorted(fragment_sets[mode]),
+            "absolute_window_ms": [start, stop],
+            "absolute_onset_ms": onset,
+        })
+    return {
+        "window_rule": "separate windows around mode-specific settled-episode medoids",
+        "shared_amplitude_scale": amplitude,
+        "events": displayed,
+    }
 
 
 def _block_profile_band(ranks: np.ndarray, labels: np.ndarray,
@@ -376,7 +404,9 @@ def render_dynamics(config: dict, aggregate: dict, candidate_id: str,
         _plot_mechanism(axes[0], loaded)
         _plot_source(axes[1], loaded, detected[0], 0)
         _plot_source(axes[2], loaded, detected[1], 1)
-        readout = _plot_readout(axes[3], loaded, worker, payload_events, mapping)
+        readout = _plot_readout(
+            axes[3], loaded, worker, payload_events, mapping, detected,
+        )
         output.mkdir(parents=True, exist_ok=True)
         stem = output / "node_dualmode_dynamics"
         fig.savefig(stem.with_suffix(".png"), dpi=240, facecolor="white")
@@ -450,7 +480,7 @@ def render_kmeans(config: dict, aggregate: dict, candidate_id: str,
     split = int(np.sum(labels[order] == 0))
     ax_heat.axvline(split - 0.5, color="#B22222", lw=1.2)
     ax_heat.set_yticks(np.arange(len(patient["contact_names"])), patient["contact_names"], fontsize=7)
-    ax_heat.set(xlabel="confirmation events", ylabel="virtual contact")
+    ax_heat.set(xlabel=f"{aggregate['seed_pool']} events", ylabel="virtual contact")
     ax_heat.set_title("clustered event heatmap", weight="bold", pad=24)
     ax_heat.text(
         max(0, split / 2), -0.75, f"mode 1  {split / len(labels):.0%}",
@@ -567,7 +597,8 @@ def main() -> None:
         config, aggregate, args.candidate_id, workers, patient, output,
     )
     metadata = {
-        "status": "REV12ND_NODE_CONFIRMATION_FIGURES_COMPLETE",
+        "status": "REV12ND_NODE_FIGURES_COMPLETE",
+        "seed_pool": aggregate["seed_pool"],
         "candidate_id": args.candidate_id,
         "config": {"path": str(args.config.resolve()), "sha256": _sha256(args.config.resolve())},
         "summary": {"path": str(args.summary.resolve()), "sha256": _sha256(args.summary.resolve())},
@@ -582,13 +613,13 @@ def main() -> None:
     (output / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
     (output / "README.md").write_text(f"""### node_dualmode_dynamics.png
 
-连续 Node field、两个算法选出的模式事件和同一网络的连续 virtual-contact readout。代表网络取确认池中最接近中位目标的 seed {dynamics['seed']}；两次事件分别是各模式在空间起始图与触点 rank 联合空间中的 medoid。
+连续 Node field、两个算法选出的模式事件和同一网络的 virtual-contact readout。代表网络取 {aggregate['seed_pool']} 池中最接近中位目标的 seed {dynamics['seed']}；两次事件分别是各模式在空间起始图与触点 rank 联合空间中的 medoid，并以互相独立的时间窗显示。
 
 **关注点**：两种触点顺序背后是否具有可区分的局部起始拓扑，而不只是同一多点活动被分成两类。
 
 ### node_dualmode_natural_kmeans.png
 
-汇总所有确认网络的 returned events 后独立执行 K=2；患者标签只在聚类完成后用于语义对齐。左侧显示逐事件 rank 与 missing contact，中间比较模型和患者留出 prototype，右侧给出杆内 contact-shuffle 的方向性检验。
+汇总所有 {aggregate['seed_pool']} 网络的 returned episodes 后独立执行 K=2；患者标签只在聚类完成后用于语义对齐。左侧显示逐 episode rank 与 missing contact，中间比较模型和患者留出 prototype，右侧给出杆内 contact-shuffle 的方向性检验。
 
 **关注点**：自然两簇是否稳定、是否在两种模式上同时对齐患者，而不是仅恢复占优模式。
 """)
