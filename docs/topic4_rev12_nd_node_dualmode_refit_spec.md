@@ -115,6 +115,13 @@ through the frozen 0.25 mm Gaussian contact sampler and 5 ms temporal smoothing.
 The binned sampler must reproduce the original whole-network contact traces with
 Pearson r >= 0.98 at every contact before its lineage-restricted ranks are used.
 The unconditioned 15-contact traces remain a visual diagnostic only.
+
+Under this final event/readout contract, all 18 historical fields still failed
+patient-distribution reconstruction.  The best corrected historical candidate
+had matched patient loss 1.161, OOD fraction 0.471 and held-out prototype R2
+-0.836.  Across all 36 frozen trajectories, only 159 of 1,574 returned roots
+recruited at least ten contacts.  This library is therefore an initialization
+and negative control for a new Node fit, not an accepted substrate.
 This correction removed grossly disconnected packets, but its 3-D connected
 components were undirected.  Two independent roots that met later in time were
 therefore merged retrospectively.  A full 18-field historical run under this

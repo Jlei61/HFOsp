@@ -297,7 +297,10 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
             "maximum_fragment_collision_fraction"
         ],
         "n_recruited_contacts": event["n_recruited_contacts"],
-        "contact_onsets_ms": contact_onsets.tolist(),
+        "contact_onsets_ms": [
+            None if not np.isfinite(value) else float(value)
+            for value in contact_onsets
+        ],
         "display_context_ms": 20.0,
         "all_sheet_activity_visible": True,
         "selected_lineage_encoding": "white open bin outline",

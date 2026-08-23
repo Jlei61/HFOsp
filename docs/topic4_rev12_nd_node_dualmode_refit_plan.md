@@ -94,6 +94,8 @@ not yet recover the patient repertoire.
    envelope and require Pearson r >= 0.98 for every contact.  Re-score all 18
    historical fields again; only this lineage-restricted result may seed a new
    continuous-field search.
+   Completed: all 36 workers passed contact-sampler parity, but every historical
+   field remained above the patient q95 floor and had negative held-out R2.
 7. Treat the undirected library's apparent 0.93 alignment as non-selective until
    the directed resegmentation reproduces it.
 
