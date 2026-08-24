@@ -38,6 +38,7 @@ from src.topic4_d6_natural_kmeans import natural_kmeans  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
     calibrate_component_scales,
     causal_direction_alignment,
+    causal_wave_monotonicity_alignment,
     fixed_projection_matrix,
     matched_sample_dual_mode_objective,
     topology_network_reproducibility,
@@ -302,6 +303,33 @@ def equal_network_causal_direction(onset_maps_by_network: list[np.ndarray],
         "per_network": rows,
         "n_networks": int(len(rows)),
         "network_weighting": "equal network weight; weakest mode within network",
+    }
+
+
+def equal_network_causal_monotonicity(
+        onset_maps_by_network: list[np.ndarray],
+        labels_by_network: list[np.ndarray], *, contract: dict,
+        bin_mm: float) -> dict:
+    """Give every network equal weight in the full-map wave diagnostic."""
+    if len(onset_maps_by_network) != len(labels_by_network):
+        raise ValueError("network causal monotonicity bundles do not align")
+    rows = [
+        causal_wave_monotonicity_alignment(
+            maps, labels,
+            axis_unit=np.asarray(contract["axis_unit_xy"], float),
+            expected_mode_signs=np.asarray(
+                contract["expected_mode_signs"], float,
+            ),
+            bin_mm=float(bin_mm),
+        )
+        for maps, labels in zip(onset_maps_by_network, labels_by_network)
+    ]
+    return {
+        "score": float(np.mean([row["score"] for row in rows])) if rows else 0.0,
+        "per_network": rows,
+        "n_networks": int(len(rows)),
+        "network_weighting": "equal network weight; weakest mode within network",
+        "selection_role": "diagnostic_only",
     }
 
 
@@ -616,6 +644,10 @@ def main() -> None:
                 "causal_direction_tail_fraction", 0.2,
             )),
         )
+        monotonicity = equal_network_causal_monotonicity(
+            source_maps, source_labels, contract=direction_contract,
+            bin_mm=float(config["source_topology"]["bin_mm"]),
+        )
         selection = cascade_selection_objective(
             patient_loss=robust["matched_patient_loss"],
             kmeans_balanced_alignment=robust["kmeans_balanced_alignment"],
@@ -634,6 +666,8 @@ def main() -> None:
         topology = topology_network_reproducibility(source_maps, source_labels)
         rows.append({
             "candidate_id": candidate["candidate_id"],
+            "candidate_role": candidate.get("role", "unspecified"),
+            "selection_eligible": bool(candidate.get("selection_eligible", True)),
             "field_sha256": candidate["node_field"]["field_sha256"],
             "n_networks": len(workers),
             "selection_objective": selection,
@@ -645,6 +679,7 @@ def main() -> None:
             "historical_unmatched_diagnostics": historical_diagnostics,
             "source_topology": topology,
             "causal_direction_alignment": direction,
+            "causal_wave_monotonicity": monotonicity,
             "per_seed": [{
                 "seed": worker["seed"],
                 "n_cascade_events": worker["n_returned"],
@@ -663,12 +698,13 @@ def main() -> None:
     if not rows:
         raise RuntimeError(f"no completed {args.seed_pool} cascade workers")
     rows.sort(key=lambda row: (
+        not row["selection_eligible"],
         row["selection_objective"]["objective"], row["candidate_id"],
     ))
     payload = {
         "schema_id": "topic4_rev12_cascade_fit_aggregate_v1",
         "status": "REV12ND_CASCADE_FIT_AGGREGATE_COMPLETE",
-        "scientific_role": "development_only_node_dualmode_refit",
+        "scientific_role": config["scientific_role"],
         "seed_pool": args.seed_pool,
         "requested_seeds": seeds,
         "rows": rows,
@@ -683,8 +719,14 @@ def main() -> None:
             ),
             "k2_support": (
                 "per-network held-out diagonal-GMM K2-vs-K1 log likelihood, "
-                "mapped continuously; no hard blocker"
+                "mapped continuously; diagnostic only when weight is zero"
             ),
+            "k2_support_role": objective_config.get(
+                "k2_support_role", "selection_auxiliary",
+            ),
+            "k2_support_weight": float(objective_config.get(
+                "k2_support_weight", 0.0,
+            )),
             "event_sensitivity": (
                 "componentwise worst case across frozen one-axis memory and "
                 "root-dominance variants"
@@ -693,7 +735,15 @@ def main() -> None:
                 "patient-training rank-contrast axis; equal network weight; "
                 "weakest patient-labelled causal-root mode protected"
             ),
+            "causal_wave_monotonicity": (
+                "full root-onset-map Spearman along the frozen patient-training "
+                "axis; diagnostic only"
+            ),
             "heldout_r2_used_for_selection": False,
+            "selection_eligible_candidate_ids": [
+                row["candidate_id"] for row in rows if row["selection_eligible"]
+            ],
+            "capacity_controls_are_selection_eligible": False,
             "hard_scientific_gates": [],
         },
         "inputs": {
@@ -713,7 +763,8 @@ def main() -> None:
     with (aggregate / f"{args.seed_pool}_cascade_summary.csv").open(
             "w", newline="") as handle:
         fields = [
-            "candidate_id", "objective", "matched_patient_loss",
+            "candidate_id", "candidate_role", "selection_eligible",
+            "objective", "matched_patient_loss",
             "kmeans_balanced_alignment", "k2_support", "ood_fraction",
             "compound_fraction", "causal_direction_score",
             "heldout_r2_diagnostic",
@@ -724,6 +775,8 @@ def main() -> None:
             selection = row["selection_objective"]
             writer.writerow({
                 "candidate_id": row["candidate_id"],
+                "candidate_role": row["candidate_role"],
+                "selection_eligible": row["selection_eligible"],
                 "objective": selection["objective"],
                 "matched_patient_loss": selection["matched_patient_loss"],
                 "kmeans_balanced_alignment": (

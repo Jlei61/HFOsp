@@ -1,0 +1,143 @@
+{
+  "schema_id": "topic4_rev12_nd_causal_continuation_v1",
+  "scientific_role": "development_only_causal_continuation_and_capacity",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_t_causal_continuation_capacity",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_t_causal_continuation_capacity/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "source_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_s_edge_supported_field_refit/candidate_manifest.json",
+      "sha256": "6c8dc1e655c92edba908548904498d3d2c28cda82f6151f7c1d3a5d86ccd0fc4"
+    },
+    "source_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_s_edge_supported_field_refit/aggregate/fit_cascade_summary.json",
+      "sha256": "ffae067783ac528f026d014b18576f56b5f51c448a195c2e935f0fdfc343df84"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "fit_network_seeds": [2241, 2242],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "edge_supported_causal_family_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "minimum_parent_support": 0.001,
+    "sensitivity_minimum_parent_supports": [0.0003, 0.001, 0.003],
+    "minimum_parent_dominance": 0.7,
+    "edge_delay_rounding": "nearest",
+    "sensitivity_edge_delay_roundings": ["floor", "nearest", "ceil"],
+    "causal_memory_formula": "descending E_to_E PSP support at 50 percent of peak plus maximum local-compatible E_to_E delay",
+    "edge_support_formula": "active source count times delayed E_to_E weight divided by source-bin population and target-bin total incoming-E budget",
+    "observation_rule": "one edge-supported directed root family is one KMeans observation; detector fragments establish observability but cannot change family boundaries",
+    "compound_rule": "mixed-family detector fragments remain explicit compound observations outside A and B",
+    "root_inclusion": "local roots merge only through dominant delayed E_to_E support above the frozen incoming-budget fraction",
+    "boundary_signal": "whole_sheet_E_activity_movie_frozen_E_to_E_weights_and_delays_only",
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 180.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "cascade_objective": {
+    "sample_size_per_side": 6,
+    "calibration_draws": 256,
+    "score_draws": 64,
+    "seed": 20260824,
+    "patient_distance_normalization": "raw_distance_divided_by_patient_block_floor_q95",
+    "kmeans_auxiliary": "per-network natural K2 aligned to frozen patient direction",
+    "kmeans_alignment_source": "equal_network_mean",
+    "k2_support_scale": 0.5,
+    "k2_support_weight": 0.0,
+    "k2_support_role": "diagnostic_only_due_single_event_instability",
+    "compound_and_ood": "continuous_penalties",
+    "event_sensitivity_aggregation": "componentwise_worst_case",
+    "causal_direction_axis": "patient_training_rank_contrast_gradient",
+    "causal_direction_tail_fraction": 0.2,
+    "causal_direction_weight": 0.5
+  },
+  "continuation_design": {
+    "anchor_candidate_ids": [
+      "stage_i_anchor_00",
+      "stage_i_anchor_01",
+      "stage_i_anchor_02"
+    ],
+    "n_directions": 4,
+    "finite_difference_amplitudes": [0.08, 0.16],
+    "residual_control_grid": 4,
+    "stored_n_basis": 18,
+    "degree": 3,
+    "manual_fit_grid_per_axis": 61,
+    "proposal_surface_rms": [0.08, 0.16],
+    "proposal_objectives": {
+      "balanced": {
+        "patient_loss": 1.0,
+        "kmeans_loss": 0.5,
+        "ood_loss": 0.25,
+        "compound_loss": 0.25,
+        "causal_direction_loss": 0.5
+      },
+      "patient_coherence": {
+        "patient_loss": 1.0,
+        "kmeans_loss": 0.25,
+        "ood_loss": 0.5,
+        "compound_loss": 0.5,
+        "causal_direction_loss": 0.25
+      },
+      "directional_coherence": {
+        "patient_loss": 0.25,
+        "kmeans_loss": 0.75,
+        "ood_loss": 0.25,
+        "compound_loss": 0.75,
+        "causal_direction_loss": 1.0
+      }
+    },
+    "expected_candidate_count": 19
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 20,
+    "estimated_worker_gib": 10.0,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Fit-only Node continuation and rigid capacity test under the corrected event unit. The manual smooth control is observation-informed and cannot be selected. Selection and confirmation seeds remain closed; EE, E-to-I and Z/M remain off."
+}

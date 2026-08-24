@@ -139,3 +139,29 @@ def interpolate_spline_candidates(left: dict, right: dict, *, weight: float,
             "observation_coordinates_used": False,
         },
     }
+
+
+def normalize_surface_residual(residuals: list[np.ndarray], weights: np.ndarray,
+                               *, n_basis: int = 18, degree: int = 3,
+                               sheet_mm: float = 20.0,
+                               grid_per_axis: int = 31) -> np.ndarray:
+    """Combine coefficient directions and normalize their sheet-surface RMS."""
+    values = [np.asarray(residual, float) for residual in residuals]
+    weights = np.asarray(weights, float)
+    expected = (int(n_basis), int(n_basis))
+    if not values or weights.shape != (len(values),):
+        raise ValueError("residual directions and weights do not align")
+    if any(value.shape != expected for value in values) \
+            or not np.all(np.isfinite(weights)):
+        raise ValueError("combined residual has invalid shape or weights")
+    combined = np.sum([
+        weight * value for weight, value in zip(weights, values)
+    ], axis=0)
+    grid = uniform_sheet_grid(int(grid_per_axis), sheet_mm=sheet_mm)
+    surface = continuous_surface(
+        combined, grid, n_basis=int(n_basis), degree=int(degree), L=sheet_mm,
+    )
+    rms = float(np.sqrt(np.mean(surface ** 2)))
+    if not np.isfinite(rms) or rms <= 1e-12:
+        raise ValueError("combined residual has zero sheet-surface RMS")
+    return combined / rms

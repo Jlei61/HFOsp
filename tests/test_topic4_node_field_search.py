@@ -2,9 +2,11 @@ import numpy as np
 
 from src.topic4_node_field_search import (
     coarse_residual_to_coefficients,
+    normalize_surface_residual,
     residual_candidate,
     sobol_coarse_residuals,
 )
+from src.topic4_continuous_field import continuous_surface
 
 
 def _anchor():
@@ -50,3 +52,19 @@ def test_residual_candidate_records_stage_b_control_resolution():
         residual_index=0, coarse_n_basis=6,
     )
     assert candidate["residual_coordinates"]["coarse_n_basis"] == 6
+
+
+def test_combined_residual_is_normalized_in_sheet_space():
+    directions = [
+        coarse_residual_to_coefficients(row)["coefficients"]
+        for row in sobol_coarse_residuals(n_residuals=2, seed=9)
+    ]
+    combined = normalize_surface_residual(
+        directions, np.asarray([2.0, -0.5]),
+    )
+    axis = np.linspace(0.0, 20.0, 31)
+    xx, yy = np.meshgrid(axis, axis, indexing="xy")
+    surface = continuous_surface(
+        combined, np.column_stack([xx.ravel(), yy.ravel()]), n_basis=18,
+    )
+    assert np.isclose(np.sqrt(np.mean(surface ** 2)), 1.0)

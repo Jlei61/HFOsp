@@ -463,7 +463,6 @@ J_fit = J_patient
       + 0.50 * (1 - balanced KMeans/patient-direction alignment)
       + 0.25 * OOD fraction
       + 0.25 * compound detector-fragment fraction
-      + 0.25 * (1 - per-network K2 support)
       + 0.50 * (1 - causal direction score)
 ```
 
@@ -475,10 +474,14 @@ one optimization sample must have one identifiable latent causal root.
 
 KMeans is computed after drawing the same event count from every network.
 Patient held-out R2 and source topology do not select the fit library.
-The formal candidate value is computed across the five frozen one-axis-at-a-time
-causal-root memory and purity variants.  It uses the componentwise conservative
-envelope: maximum patient loss, OOD and compound fraction, and minimum KMeans
-alignment and K2 support.  No best-window selection is allowed.
+The formal candidate value is computed across the frozen one-axis-at-a-time
+causal-memory, purity and delayed-edge-support variants.  It uses the
+componentwise conservative envelope: maximum patient loss, OOD and compound
+fraction, and minimum KMeans alignment.  No best-window selection is allowed.
+Per-network held-out diagonal-GMM K2 support is stored as a diagnostic with zero
+selection weight because one recovered event changed that statistic from
+intermediate support to effectively zero without changing the trajectory,
+silhouette or natural-KMeans direction alignment.
 
 The causal direction score is computed from the root-restricted 1 mm onset map.
 For each event, the centroid of the latest 20% recruited bins minus the centroid
@@ -504,13 +507,40 @@ For every network report:
 - equal-network mode occupancy and OOD fraction.
 
 KMeans K=2 is not evidence for two modes by itself because it always returns two
-clusters.  The formal exploratory fit therefore also compares held-out diagonal-
-GMM likelihood under K=2 versus K=1 in every network.  This value is mapped to a
-bounded continuous support score and receives weight 0.25; it is not a hard
-blocker.  Patient training subsamples show positive K2-minus-K1 likelihood,
-whereas the best final historical field is strongly negative despite moderate
-KMeans/patient-label alignment.  Pooled KMeans remains descriptive only.
-Network seed is the independent unit.
+clusters.  Held-out diagonal-GMM likelihood under K=2 versus K=1 is therefore
+reported in every network, but receives zero selection weight after its
+single-event instability audit.  Natural KMeans remains an auxiliary continuous
+alignment endpoint, not proof of two biological generators.  Network seed is
+the independent unit.
+
+### Corrected-event Stage-S result and continuation decision
+
+All 54 frozen fields were replayed on fit seeds 2241 and 2242 under the final
+edge-supported causal-family event unit: 108/108 workers completed and none
+failed.  The best scalar field had `J_fit = 1.787`, patient loss 1.205, balanced
+natural-KMeans alignment 0.842, OOD 0.510, compound fraction 0.632 and weakest-
+mode causal direction 0.566.  No field jointly reached KMeans alignment 0.8,
+causal direction 0.6 and OOD at most 0.5; no field reduced compound fraction to
+0.5.  Selection and confirmation seeds therefore remain closed.
+
+A zero-simulation full-onset-map audit replaced the early/late centroid summary
+with event-wise Spearman monotonicity along the frozen patient-training axis.
+The two direction scores correlated 0.928 across all 54 fields and preserved the
+same leading neighborhood.  The failure is therefore not explained by the
+centroid score hiding a stable reverse travelling wave.  The current smooth
+field neighborhood lacks a robust weaker-direction solution under the corrected
+event definition.
+
+The next fit stage has two deliberately separate roles.  Eighteen selectable
+continuous fields follow finite-difference response directions estimated from
+the already completed fit library.  One non-selectable continuous-spline
+approximation of the historical smooth two-core field is a rigid capacity
+control.  It may use the historical source/sink geometry only because it cannot
+become the data-driven answer.  If that control also fails to produce two
+opposite causal modes, the fixed Node-only scaffold lacks demonstrated capacity
+and further field optimization stops before EE, E-to-I or Z/M is opened.  If it
+passes while the selectable proposals fail, the capacity exists but the current
+patient objective/search directions have not recovered it.
 
 ## 8. Mode-specific source topology
 

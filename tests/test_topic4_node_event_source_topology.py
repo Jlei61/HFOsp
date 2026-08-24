@@ -8,6 +8,8 @@ from scripts.paper_figures.audit_fig4_node_event_source_topology import (
 from src.topic4_node_dualmode import (
     causal_direction_alignment,
     causal_root_displacement,
+    causal_wave_monotonicity,
+    causal_wave_monotonicity_alignment,
 )
 
 
@@ -67,6 +69,35 @@ def test_causal_direction_alignment_requires_two_opposite_root_modes():
         expected_mode_signs=np.asarray([1.0, -1.0]),
     )
     same_direction = causal_direction_alignment(
+        np.asarray([_horizontal_wave(), _horizontal_wave()]),
+        np.asarray([0, 1]), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    assert opposite["score"] > 0.99
+    assert same_direction["score"] == 0.0
+
+
+def test_causal_wave_monotonicity_uses_the_complete_onset_map():
+    forward = causal_wave_monotonicity(
+        _horizontal_wave(), axis_unit=np.asarray([1.0, 0.0]),
+    )
+    flash = _horizontal_wave()
+    flash[np.isfinite(flash)] = 0.0
+    synchronous = causal_wave_monotonicity(
+        flash, axis_unit=np.asarray([1.0, 0.0]),
+    )
+    assert forward["evaluable"]
+    assert forward["axis_time_spearman"] > 0.99
+    assert not synchronous["evaluable"]
+
+
+def test_causal_wave_monotonicity_requires_opposite_mode_sequences():
+    opposite = causal_wave_monotonicity_alignment(
+        np.asarray([_horizontal_wave(), _horizontal_wave(reverse=True)]),
+        np.asarray([0, 1]), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    same_direction = causal_wave_monotonicity_alignment(
         np.asarray([_horizontal_wave(), _horizontal_wave()]),
         np.asarray([0, 1]), axis_unit=np.asarray([1.0, 0.0]),
         expected_mode_signs=np.asarray([1.0, -1.0]),

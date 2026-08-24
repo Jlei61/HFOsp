@@ -243,6 +243,42 @@ event unit before any selection seed is opened.
    scientifically competitive fit candidates before deciding how to generate
    the next field proposals.
 
+Observed result: 108/108 field-network workers completed.  The scalar leader
+reached patient loss 1.205, balanced natural-KMeans alignment 0.842, OOD 0.510,
+compound fraction 0.632 and weakest-mode causal direction 0.566.  No field
+jointly satisfied the exploratory KMeans, OOD and causal-direction reference
+levels, and every field retained compound fraction above 0.5.  Full-map axial
+onset monotonicity correlated 0.928 with the frozen centroid direction score,
+so metric coarseness did not hide a qualifying reverse wave.  Do not open fresh
+selection networks from this library.
+
+## Phase 1m: response-surface continuation and Node capacity control (current)
+
+1. Use only the completed Stage-S fit pool.  Estimate symmetric finite-
+   difference slopes along the four frozen whole-sheet Sobol directions around
+   each of the three original anchors.
+2. Combine those directions under three declared endpoint weightings:
+   balanced, patient/coherence and directional/coherence.  Normalize every
+   proposal by continuous sheet-surface RMS and test amplitudes 0.08 and 0.16.
+   This yields 18 selectable continuous fields and introduces no contact-centred
+   basis or new component count.
+3. Add one historical smooth dual-core field represented in the same 18 x 18
+   tensor spline.  Require latent-surface correlation at least 0.995.  Mark it
+   `selection_eligible = false`; it is a rigid capacity control, not a candidate
+   patient recovery.
+4. Run all 19 fields only on fit seeds 2241 and 2242 with common random numbers,
+   the corrected event family and exact per-neuron contact readout.  Keep EE,
+   E-to-I and Z/M off.
+5. Aggregate the continuous patient loss, KMeans direction alignment, OOD,
+   compound fraction, weakest-mode causal direction and full-map onset
+   monotonicity.  Rank only the 18 eligible fields; show the rigid control beside
+   them without allowing it into selection.
+6. Continue to fresh selection seeds only if an eligible field improves the
+   weaker patient mode and supports opposite directions without worsening OOD or
+   compound fraction.  If only the rigid control passes, revise the field search
+   or patient objective.  If even the rigid control fails, stop Node-field
+   optimization and diagnose scaffold capacity before changing connectivity.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the
@@ -339,9 +375,10 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-Phase 1j is accepted for event identity.  Freeze the 54-field Phase 5 library at
-the current commit, run two common-random-number fit networks, aggregate with the
-five-variant conservative event envelope and causal-direction term, and inspect
-the shortlist before opening selection networks.  Intervention, confirmation,
-EE, E-to-I and Z/M remain closed until a field improves both patient modes and
-shows opposite causal propagation on the fit and fresh selection pools.
+Phase 1l is complete and did not produce a qualifying field.  Freeze Phase 1m at
+the current commit, run the 18 response-surface proposals plus the non-selectable
+smooth dual-core capacity control on the same two fit networks, aggregate with
+the corrected-event conservative envelope and inspect Fig.4-style GIFs for every
+competitive field and the control.  Intervention, fresh selection, confirmation,
+EE, E-to-I and Z/M remain closed until Node capacity and a selectable two-mode
+field are demonstrated under the corrected event unit.

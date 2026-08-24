@@ -11,6 +11,7 @@ from itertools import combinations
 import numpy as np
 from scipy.ndimage import binary_dilation
 from scipy.ndimage import label as connected_component_labels
+from scipy.stats import spearmanr
 
 
 def merge_detected_event_fragments(events: list[dict], *,
@@ -2311,5 +2312,94 @@ def causal_direction_alignment(onset_maps: np.ndarray, labels: np.ndarray, *,
         "modes": modes,
         "n_evaluable": int(len(rows)),
         "tail_fraction": float(tail_fraction),
+        "bin_mm": float(bin_mm),
+    }
+
+
+def causal_wave_monotonicity(onset_map: np.ndarray, *, axis_unit: np.ndarray,
+                             bin_mm: float = 1.0) -> dict:
+    """Measure whether recruitment time changes monotonically along one axis.
+
+    Unlike the early-to-late centroid displacement, this diagnostic uses every
+    recruited sheet bin.  A spatially broad flash or two synchronous hotspots
+    therefore cannot receive credit merely because their outer centroids are
+    separated.
+    """
+    onset = np.asarray(onset_map, float)
+    axis = np.asarray(axis_unit, float)
+    if onset.ndim != 2 or axis.shape != (2,) or float(bin_mm) <= 0.0:
+        raise ValueError("one onset map, a 2-D axis and positive bin size are required")
+    norm = float(np.linalg.norm(axis))
+    if not np.isfinite(norm) or norm <= 0.0:
+        raise ValueError("axis_unit must be finite and non-zero")
+    axis = axis / norm
+    y_index, x_index = np.where(np.isfinite(onset))
+    if len(x_index) < 4:
+        return {
+            "evaluable": False, "n_bins": int(len(x_index)),
+            "axis_time_spearman": float("nan"),
+            "axis_span_mm": float("nan"),
+        }
+    coordinates = float(bin_mm) * np.column_stack([
+        x_index.astype(float) + 0.5,
+        y_index.astype(float) + 0.5,
+    ])
+    projection = coordinates @ axis
+    values = onset[y_index, x_index]
+    axis_span = float(np.ptp(projection))
+    if axis_span <= 0.0 or float(np.ptp(values)) <= 0.0:
+        correlation = float("nan")
+    else:
+        correlation = float(spearmanr(projection, values).statistic)
+    return {
+        "evaluable": bool(np.isfinite(correlation)),
+        "n_bins": int(len(x_index)),
+        "axis_time_spearman": correlation,
+        "axis_span_mm": axis_span,
+    }
+
+
+def causal_wave_monotonicity_alignment(
+        onset_maps: np.ndarray, labels: np.ndarray, *, axis_unit: np.ndarray,
+        expected_mode_signs: np.ndarray, bin_mm: float = 1.0) -> dict:
+    """Protect the weaker mode's full-map axial onset monotonicity."""
+    maps = np.asarray(onset_maps, float)
+    labels = np.asarray(labels, int)
+    signs = np.asarray(expected_mode_signs, float)
+    if maps.ndim != 3 or labels.shape != (len(maps),):
+        raise ValueError("causal-root onset maps and labels do not align")
+    if signs.shape != (2,) or set(np.sign(signs).tolist()) != {-1.0, 1.0}:
+        raise ValueError("opposite expected mode signs are required")
+    rows = []
+    for onset, label in zip(maps, labels):
+        record = causal_wave_monotonicity(
+            onset, axis_unit=axis_unit, bin_mm=bin_mm,
+        )
+        if not record["evaluable"] or label not in (0, 1):
+            continue
+        signed = float(signs[label] * record["axis_time_spearman"])
+        rows.append({
+            "mode": int(label), "signed_axis_time_spearman": signed,
+            "aligned_score": float(max(0.0, signed)), **record,
+        })
+    modes, scores = {}, []
+    for mode in (0, 1):
+        selected = [row for row in rows if row["mode"] == mode]
+        score = float(np.mean([row["aligned_score"] for row in selected])) \
+            if selected else 0.0
+        signed = float(np.mean([
+            row["signed_axis_time_spearman"] for row in selected
+        ])) if selected else float("nan")
+        modes[str(mode)] = {
+            "n_evaluable": int(len(selected)),
+            "mean_signed_axis_time_spearman": signed,
+            "alignment_score": score,
+        }
+        scores.append(score)
+    return {
+        "score": float(min(scores)),
+        "weakest_mode_protected": True,
+        "modes": modes,
+        "n_evaluable": int(len(rows)),
         "bin_mm": float(bin_mm),
     }
