@@ -367,6 +367,7 @@ def main() -> None:
     compound_fragments = []
     directed_source = None
     lineage_labels = None
+    lineage_sensitivity = []
     directed_assignment_by_fragment = {}
     if event_unit is None:
         detected = detector_fragments
@@ -541,6 +542,58 @@ def main() -> None:
             "causal_rule": lineage["causal_rule"],
             "compound_fragments": compound_fragments,
         }
+        if event_unit["name"] == "persistent_directed_spatiotemporal_lineage":
+            sensitivity_multiples = [
+                float(value) for value in event_unit.get(
+                    "sensitivity_fast_state_decay_multiples",
+                    [event_unit["fast_state_decay_multiples"]],
+                )
+            ]
+            if (len(set(sensitivity_multiples)) != len(sensitivity_multiples)
+                    or float(event_unit["fast_state_decay_multiples"])
+                    not in sensitivity_multiples):
+                raise RuntimeError("persistent-lineage sensitivity grid is invalid")
+            for multiple in sensitivity_multiples:
+                if np.isclose(multiple, float(event_unit["fast_state_decay_multiples"])):
+                    variant_lineage = lineage
+                    variant_assignments = assignments
+                    variant_events = detected
+                    variant_compounds = compound_fragments
+                    variant_contract = parent_contract
+                else:
+                    variant_unit = {**event_unit, "fast_state_decay_multiples": multiple}
+                    variant_contract = _directed_parent_contract(
+                        variant_unit, params=substrate.params, net=substrate.net,
+                        engine=substrate.engine, frame_ms=float(movie["frame_ms"]),
+                    )
+                    variant_lineage = directed_spatiotemporal_lineages(
+                        movie["activity_counts"],
+                        minimum_active_neurons=int(event_unit["minimum_active_neurons"]),
+                        maximum_parent_gap_frames=int(
+                            variant_contract["forward_parent_frame_gap"]
+                        ),
+                        parent_neighborhood_bins=int(
+                            variant_contract["forward_parent_neighborhood_bins"]
+                        ),
+                    )
+                    variant_assignments = assign_detector_fragments_to_directed_lineages(
+                        movie["activity_counts"], variant_lineage["labels"],
+                        detector_fragments, frame_ms=float(movie["frame_ms"]),
+                        minimum_dominance=float(event_unit["minimum_dominance"]),
+                    )
+                    variant_events, variant_compounds = cascade_event_windows(
+                        variant_lineage["components"], variant_assignments,
+                        detector_fragments, frame_ms=float(movie["frame_ms"]),
+                        total_ms=len(active) * float(active_dt),
+                    )
+                lineage_sensitivity.append({
+                    "multiple": multiple,
+                    "contract": variant_contract,
+                    "lineage": variant_lineage,
+                    "assignments": variant_assignments,
+                    "events": variant_events,
+                    "compounds": variant_compounds,
+                })
         lineage_labels = lineage["labels"]
         label_dtype = np.int16 if np.max(lineage_labels, initial=0) <= 32767 else np.int32
         cascade_arrays = {
@@ -575,6 +628,84 @@ def main() -> None:
         lineage_labels=lineage_labels, spikes=spikes,
         spike_dt_ms=float(substrate.engine["dt"]), readout=readout,
     )
+    if lineage_sensitivity:
+        n_variants = len(lineage_sensitivity)
+        maximum_events = max(len(row["events"]) for row in lineage_sensitivity)
+        n_contacts = len(substrate.contact_names)
+        sensitivity_onsets = np.full(
+            (n_variants, maximum_events, n_contacts), np.nan, np.float32,
+        )
+        sensitivity_ranks = np.full_like(sensitivity_onsets, np.nan)
+        sensitivity_returned = np.zeros((n_variants, maximum_events), bool)
+        sensitivity_event_counts = np.zeros(n_variants, np.int16)
+        sensitivity_fragment_partition = np.full(
+            (n_variants, len(detector_fragments)), -32768, np.int32,
+        )
+        sensitivity_rows = []
+        for variant_index, variant in enumerate(lineage_sensitivity):
+            variant_events = variant["events"]
+            if np.isclose(
+                    variant["multiple"], float(event_unit["fast_state_decay_multiples"])):
+                variant_onsets, variant_ranks = onsets, ranks
+            else:
+                variant_onsets, variant_ranks, _ = _event_contact_readout(
+                    events=variant_events, envelope=envelope,
+                    envelope_dt_ms=envelope_dt, montage=substrate.montage,
+                    valid_contacts=substrate.valid_contacts,
+                    positions_e=substrate.positions_e, movie=movie,
+                    lineage_labels=variant["lineage"]["labels"], spikes=spikes,
+                    spike_dt_ms=float(substrate.engine["dt"]), readout=readout,
+                )
+            count = len(variant_events)
+            sensitivity_event_counts[variant_index] = count
+            sensitivity_onsets[variant_index, :count] = variant_onsets
+            sensitivity_ranks[variant_index, :count] = variant_ranks
+            sensitivity_returned[variant_index, :count] = np.asarray([
+                event["returned"] for event in variant_events
+            ], bool)
+            root_to_event = {
+                int(event["cascade_id"]): index
+                for index, event in enumerate(variant_events)
+            }
+            for assignment in variant["assignments"]:
+                fragment = int(assignment["detector_fragment_index"])
+                root_id = assignment["dominant_lineage_id"]
+                if assignment["compound"] or root_id is None:
+                    sensitivity_fragment_partition[variant_index, fragment] = -(fragment + 1)
+                else:
+                    sensitivity_fragment_partition[variant_index, fragment] = root_to_event[
+                        int(root_id)
+                    ]
+            components = variant["lineage"]["components"]
+            sensitivity_rows.append({
+                "fast_state_decay_multiples": variant["multiple"],
+                **variant["contract"],
+                "n_directed_roots": len(components),
+                "n_events": count,
+                "n_compound_fragments": len(variant["compounds"]),
+                "compound_fragment_fraction": (
+                    len(variant["compounds"]) / max(1, len(detector_fragments))
+                ),
+                "n_roots_resumed_after_gap": int(np.sum([
+                    component["resumed_after_gap_count"] > 0
+                    for component in components
+                ])),
+                "maximum_observed_parent_gap_frames": int(max([
+                    component["maximum_parent_gap_frames_observed"]
+                    for component in components
+                ], default=0)),
+            })
+        event_unit_runtime["memory_sensitivity"] = sensitivity_rows
+        cascade_arrays.update({
+            "lineage_sensitivity_multiples": np.asarray([
+                row["multiple"] for row in lineage_sensitivity
+            ], np.float32),
+            "lineage_sensitivity_event_counts": sensitivity_event_counts,
+            "lineage_sensitivity_onsets": sensitivity_onsets,
+            "lineage_sensitivity_ranks": sensitivity_ranks,
+            "lineage_sensitivity_returned": sensitivity_returned,
+            "lineage_sensitivity_fragment_partition": sensitivity_fragment_partition,
+        })
     event_rows = []
     for index, event in enumerate(detected):
         onset = onsets[index]
