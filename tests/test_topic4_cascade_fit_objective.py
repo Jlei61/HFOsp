@@ -1,10 +1,14 @@
+import json
+
 import numpy as np
 import pytest
 
+import scripts.aggregate_topic4_rev12_cascade_fit as cascade_aggregate
 from scripts.aggregate_topic4_rev12_cascade_fit import (
     cascade_selection_objective,
     equal_network_natural_kmeans,
     k2_support_score,
+    load_event_sensitivity_workers,
     patient_direction_contract,
     per_network_natural_kmeans,
     robust_sensitivity_envelope,
@@ -162,3 +166,45 @@ def test_aggregate_fails_closed_on_contact_readout_drift():
         "parity_status": "EXACT_SHARED_PER_NEURON_KERNEL",
         "spatial_sampler": "exact_normalized_per_neuron_gaussian",
     }}, {"source": "lineage_restricted_neuron_activity"})
+
+
+def test_event_sensitivity_loader_preserves_edge_axes(tmp_path, monkeypatch):
+    path = tmp_path / "worker.npz"
+    np.savez_compressed(
+        path,
+        lineage_sensitivity_values=np.asarray([0.5, 0.5], np.float32),
+        lineage_sensitivity_minimum_dominances=np.asarray([0.7, 0.7], np.float32),
+        lineage_sensitivity_minimum_parent_supports=np.asarray(
+            [0.001, 0.003], np.float32,
+        ),
+        lineage_sensitivity_edge_delay_roundings=np.asarray(
+            ["nearest", "nearest"],
+        ),
+        lineage_sensitivity_primary=np.asarray([True, False]),
+        lineage_sensitivity_event_counts=np.asarray([1, 1]),
+        lineage_sensitivity_onsets=np.asarray([
+            [[0.0, 1.0, 2.0]], [[0.0, 1.0, 2.0]],
+        ]),
+        lineage_sensitivity_ranks=np.asarray([
+            [[0.0, 1.0, 2.0]], [[0.0, 1.0, 2.0]],
+        ]),
+        lineage_sensitivity_returned=np.asarray([[True], [True]]),
+        lineage_sensitivity_fragment_partition=np.asarray([[0], [0]]),
+        contact_names=np.asarray(["A", "B", "C"]),
+    )
+    path.with_suffix(".json").write_text(json.dumps({"seed": 7}))
+    monkeypatch.setattr(
+        cascade_aggregate, "assign_direction_modes",
+        lambda onsets, **kwargs: {
+            "labels": np.zeros(len(onsets), int),
+            "ood": np.zeros(len(onsets), bool),
+        },
+    )
+    rows = load_event_sensitivity_workers(
+        path, np.asarray(["A", "B", "C"]),
+        {"groups": {}, "embedding": {}, "classifier": {}},
+        np.asarray([0, 1]),
+    )
+    assert rows[0]["variant"]["minimum_parent_support"] == pytest.approx(0.001)
+    assert rows[0]["variant"]["edge_delay_rounding"] == "nearest"
+    assert rows[1]["variant"]["minimum_parent_support"] == pytest.approx(0.003)

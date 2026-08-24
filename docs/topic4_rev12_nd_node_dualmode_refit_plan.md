@@ -221,6 +221,14 @@ no clean detector fragment became compound.  The weak-support sensitivity
 changed at most 4.2% of pooled clean roots.  This is small but non-zero, so exact
 replay rather than immediate selection is required.
 
+Exact replay result: all eight population trajectories and contact envelopes
+were sample-identical.  The same leading field remained first, but one additional
+event caused the held-out diagonal-GMM K2 auxiliary to jump from intermediate
+support to effectively zero despite stable KMeans alignment and silhouette.
+Therefore retain the 54 field geometries, invalidate their old objective order,
+set the GMM K2 weight to zero, and replay all 54 fields under the edge-supported
+event unit before any selection seed is opened.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the

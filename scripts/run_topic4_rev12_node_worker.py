@@ -1073,6 +1073,10 @@ def main() -> None:
                 "sensitivity_parameter": variant["parameter"],
                 "sensitivity_value": variant["value"],
                 "minimum_dominance": variant["minimum_dominance"],
+                "minimum_parent_support": variant.get(
+                    "minimum_parent_support"
+                ),
+                "edge_delay_rounding": variant.get("edge_delay_rounding"),
                 "is_primary": variant["is_primary"],
                 **variant["contract"],
                 "n_directed_roots": len(components),

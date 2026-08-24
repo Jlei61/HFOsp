@@ -336,6 +336,16 @@ spike replay of four fit-only representatives confirms that patient loss,
 natural KMeans, direction and compound conclusions are stable.  Selection and
 confirmation seeds remain closed during this replay.
 
+The exact replay preserved every population activity, sheet movie and contact
+envelope sample.  The leading field remained the same, but one recovered event
+made the diagonal-GMM K2-vs-K1 auxiliary collapse while natural KMeans direction
+alignment remained high.  This is an estimator instability, not a change in SNN
+dynamics or evidence that the second mode vanished.  From the next fit onward,
+the GMM K2 score is diagnostic only (`k2_support_weight = 0`).  The continuous
+patient-distribution loss and balanced natural-KMeans/patient-direction
+alignment remain in the objective.  The Stage-Q fields may be retained as a
+geometry library, but their old scalar ranking is invalid for selection.
+
 ## 2. Scientific question
 
 Can a continuous Node-only excitability field, with total field mass, topology,

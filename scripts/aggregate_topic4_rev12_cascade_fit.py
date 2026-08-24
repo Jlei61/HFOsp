@@ -365,8 +365,23 @@ def load_event_sensitivity_workers(npz_path: Path, target_names: np.ndarray,
         partitions = np.asarray(
             loaded["lineage_sensitivity_fragment_partition"], int,
         )
+        parent_supports = (
+            np.asarray(
+                loaded["lineage_sensitivity_minimum_parent_supports"], float,
+            )
+            if "lineage_sensitivity_minimum_parent_supports" in loaded.files
+            else np.full(len(values), np.nan, float)
+        )
+        delay_roundings = (
+            np.asarray(
+                loaded["lineage_sensitivity_edge_delay_roundings"],
+            ).astype(str)
+            if "lineage_sensitivity_edge_delay_roundings" in loaded.files
+            else np.full(len(values), "", dtype="U1")
+        )
     if not (len(values) == len(dominances) == len(primary) == len(counts)
-            == len(onsets) == len(ranks) == len(returned) == len(partitions)):
+            == len(onsets) == len(ranks) == len(returned) == len(partitions)
+            == len(parent_supports) == len(delay_roundings)):
         raise RuntimeError("event sensitivity variant arrays do not align")
     label_map = np.asarray(label_map, int)
     seed = int(payload["seed"])
@@ -386,6 +401,14 @@ def load_event_sensitivity_workers(npz_path: Path, target_names: np.ndarray,
             "variant": {
                 "sensitivity_value": float(values[index]),
                 "minimum_dominance": float(dominances[index]),
+                "minimum_parent_support": (
+                    None if not np.isfinite(parent_supports[index])
+                    else float(parent_supports[index])
+                ),
+                "edge_delay_rounding": (
+                    None if not str(delay_roundings[index])
+                    else str(delay_roundings[index])
+                ),
                 "primary": bool(primary[index]),
             },
             "worker": {
