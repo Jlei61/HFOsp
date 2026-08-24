@@ -146,6 +146,7 @@ def validate_event_unit_name(name: str) -> None:
         "persistent_directed_spatiotemporal_lineage",
         "persistent_root_coactivity_episode",
         "causal_root_observation",
+        "edge_supported_causal_family_observation",
     }
     if name not in supported_event_units:
         raise RuntimeError("GIF input is not a supported frozen event unit")
@@ -275,7 +276,10 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
         xlim=(trace_time[0], trace_time[-1]), ylim=(-1.0, offsets[0] + 1.0),
         xlabel=(
             "time from causal-root onset (ms)"
-            if worker_json["event_unit"]["name"] == "causal_root_observation"
+            if worker_json["event_unit"]["name"] in {
+                "causal_root_observation",
+                "edge_supported_causal_family_observation",
+            }
             else "time from complete-event onset (ms)"
         ),
         ylabel="30-80 Hz virtual-contact activity",
@@ -366,8 +370,11 @@ def main() -> None:
         worker, worker_json, source_evaluable, random_state=args.seed,
     )
     figures = output_root / "figures" / stem
-    causal_root = worker_json["event_unit"]["name"] == "causal_root_observation"
-    suffix = "causal_root" if causal_root else "complete_event"
+    root_family = worker_json["event_unit"]["name"] in {
+        "causal_root_observation",
+        "edge_supported_causal_family_observation",
+    }
+    suffix = "causal_root" if root_family else "complete_event"
     records = [
         _render_lineage(
             npz_path=npz_path, worker_json=worker_json, patient=patient,

@@ -186,3 +186,29 @@ def test_causal_root_sensitivity_changes_one_axis_at_a_time():
         (0.8, 0.7), (0.5, 0.7), (0.2, 0.7),
         (0.5, 0.6), (0.5, 0.8),
     }
+
+
+def test_edge_supported_sensitivity_changes_one_axis_at_a_time():
+    variants = _segmentation_variants({
+        "name": "edge_supported_causal_family_observation",
+        "causal_memory_method": "local_ee_psp_tail",
+        "psp_tail_fraction": 0.5,
+        "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+        "minimum_dominance": 0.7,
+        "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+        "minimum_parent_support": 0.001,
+        "sensitivity_minimum_parent_supports": [0.0003, 0.001, 0.003],
+        "edge_delay_rounding": "nearest",
+        "sensitivity_edge_delay_roundings": ["floor", "nearest", "ceil"],
+    })
+    assert len(variants) == 9
+    assert sum(row["is_primary"] for row in variants) == 1
+    primary = next(row for row in variants if row["is_primary"])
+    assert primary == {
+        "memory_parameter": "psp_tail_fraction",
+        "memory_value": 0.5,
+        "minimum_dominance": 0.7,
+        "minimum_parent_support": 0.001,
+        "edge_delay_rounding": "nearest",
+        "is_primary": True,
+    }

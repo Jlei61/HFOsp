@@ -283,7 +283,7 @@ the transitive coactivity grouping: if A overlaps B and B overlaps C, all three
 become one observation even when A and C never share an initiation.  This event
 unit is rejected and cannot reopen the field fit.
 
-### Observable causal-root event (2026-08-24; current primary)
+### Observable causal-root event (2026-08-24; local partition retained)
 
 The formal model event is now one directed latent root.  Virtual-contact
 detector fragments determine whether the root is observable, but they cannot
@@ -301,6 +301,40 @@ or purity threshold may be selected from patient loss or KMeans performance.
 The required GIF shows all sheet activity while outlining only the causal root
 used for contact ranks.  Concurrent activity must remain visible, but mixed
 activity is labelled compound instead of being hidden or forced into A/B.
+
+### Delayed E-to-E support amendment (2026-08-24; replay required)
+
+The local 1 mm parent cone removes detector-window leakage but is not by itself
+a complete causal graph.  A root may jump farther than one movie bin through a
+frozen E-to-E edge and its axonal delay.  Conversely, edge existence alone is
+not sufficient because the 25.6-million-edge graph contains many weak possible
+routes.  The event producer therefore adds a contact-independent second pass.
+
+For every local-root birth patch, delayed E-to-E support from each earlier root
+family is estimated as:
+
+```text
+active source neurons * frozen delayed E-to-E weight
+----------------------------------------------------
+source-bin neuron count * target-bin incoming-E budget
+```
+
+The child joins the dominant earlier family only when that family explains at
+least 70% of all candidate parent support and contributes at least 0.001 of the
+target incoming-E budget.  Support 0.0003/0.001/0.003 and floor/nearest/ceil
+delay-to-movie-frame mappings are frozen one-axis sensitivities.  None may be
+selected by patient loss or KMeans.  Detector contacts still establish only
+observability and cannot alter family boundaries.
+
+A zero-simulation audit of four representative fields on both fit networks
+changed three of 477 clean roots (0.63%) and recovered one of 983 detector
+fragments from compound to a single supported family at the primary setting.
+At the weakest support sensitivity, 4.2% of clean roots changed.  Thus the old
+fit is not wholesale invalid, but its objective is not exactly identical to the
+new estimand.  Stage-Q ranking remains provisional until deterministic exact-
+spike replay of four fit-only representatives confirms that patient loss,
+natural KMeans, direction and compound conclusions are stable.  Selection and
+confirmation seeds remain closed during this replay.
 
 ## 2. Scientific question
 

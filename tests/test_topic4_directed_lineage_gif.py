@@ -41,5 +41,6 @@ def test_lineage_outline_includes_all_roots_in_complete_event():
 
 def test_causal_root_event_unit_is_supported_by_gif_renderer():
     validate_event_unit_name("causal_root_observation")
+    validate_event_unit_name("edge_supported_causal_family_observation")
     with pytest.raises(RuntimeError, match="supported frozen event unit"):
         validate_event_unit_name("detector_fragment")

@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import sparse
 
 from src.topic4_node_dualmode import (
     annotate_population_excursions_with_lineages,
@@ -6,8 +7,10 @@ from src.topic4_node_dualmode import (
     assign_detector_fragments_to_cascades,
     causal_root_event_windows,
     cascade_event_windows,
+    binned_ee_delay_support,
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
+    edge_supported_root_families,
     root_coactivity_event_windows,
     spatiotemporal_cascade_labels,
 )
@@ -169,6 +172,106 @@ def test_directed_lineage_does_not_merge_roots_that_later_collide():
     assert len(directed["components"]) == 2
     assert directed["labels"][3, 3, 3] == -1
     assert directed["collision_mask"][3, 3, 3]
+
+
+def test_edge_support_rejoins_a_long_range_child_root():
+    counts = np.zeros((4, 4, 4), np.uint16)
+    labels = np.zeros_like(counts, np.int32)
+    counts[0, 0, 0] = 3
+    labels[0, 0, 0] = 1
+    counts[2, 3, 3] = 3
+    labels[2, 3, 3] = 2
+    support = np.zeros((3, 16, 16), float)
+    support[2, 15, 0] = 0.002
+    result = edge_supported_root_families(
+        counts, labels, support, minimum_active_neurons=2,
+        minimum_parent_support=0.001, minimum_parent_dominance=0.7,
+    )
+    assert result["n_local_roots"] == 2
+    assert result["n_edge_supported_families"] == 1
+    assert result["family_map"] == {1: 1, 2: 1}
+    assert result["birth_audit"][1]["merged"] is True
+
+
+def test_weak_long_range_edge_does_not_merge_independent_roots():
+    counts = np.zeros((4, 4, 4), np.uint16)
+    labels = np.zeros_like(counts, np.int32)
+    counts[0, 0, 0] = 3
+    labels[0, 0, 0] = 1
+    counts[2, 3, 3] = 3
+    labels[2, 3, 3] = 2
+    support = np.zeros((3, 16, 16), float)
+    support[2, 15, 0] = 0.0002
+    result = edge_supported_root_families(
+        counts, labels, support, minimum_active_neurons=2,
+        minimum_parent_support=0.001, minimum_parent_dominance=0.7,
+    )
+    assert result["n_edge_supported_families"] == 2
+    assert result["family_map"] == {1: 1, 2: 2}
+    assert result["birth_audit"][1]["merged"] is False
+
+
+def test_ambiguous_two_parent_support_keeps_roots_separate():
+    counts = np.zeros((4, 4, 4), np.uint16)
+    labels = np.zeros_like(counts, np.int32)
+    counts[0, 0, [0, 3]] = 3
+    labels[0, 0, 0] = 1
+    labels[0, 0, 3] = 2
+    counts[2, 3, 1] = 3
+    labels[2, 3, 1] = 3
+    support = np.zeros((3, 16, 16), float)
+    support[2, 13, 0] = 0.001
+    support[2, 13, 3] = 0.001
+    result = edge_supported_root_families(
+        counts, labels, support, minimum_active_neurons=2,
+        minimum_parent_support=0.001, minimum_parent_dominance=0.7,
+    )
+    assert result["n_edge_supported_families"] == 3
+    assert result["birth_audit"][2]["parent_dominance"] == 0.5
+    assert result["birth_audit"][2]["merged"] is False
+
+
+def test_edge_supported_family_is_independent_of_detector_windows():
+    counts = np.zeros((3, 3, 3), np.uint16)
+    labels = np.zeros_like(counts, np.int32)
+    counts[0, 1, 0] = 3
+    labels[0, 1, 0] = 1
+    counts[1, 1, 2] = 3
+    labels[1, 1, 2] = 2
+    support = np.zeros((2, 9, 9), float)
+    support[1, 5, 3] = 0.002
+    first = edge_supported_root_families(
+        counts, labels, support, minimum_active_neurons=2,
+        minimum_parent_support=0.001, minimum_parent_dominance=0.7,
+    )
+    second = edge_supported_root_families(
+        counts.copy(), labels.copy(), support.copy(), minimum_active_neurons=2,
+        minimum_parent_support=0.001, minimum_parent_dominance=0.7,
+    )
+    assert np.array_equal(first["labels"], second["labels"])
+    assert first["family_map"] == second["family_map"]
+
+
+def test_binned_ee_support_respects_weight_delay_and_budget():
+    positions = np.asarray([
+        [0.25, 0.25], [0.75, 0.75], [1.25, 0.25], [1.75, 0.75],
+    ])
+    matrices = [sparse.csc_matrix((4, 4)) for _ in range(5)]
+    # Two source neurons in bin 0 project to one target neuron in bin 1 after 2 ms.
+    matrices[2] = sparse.csc_matrix((
+        np.asarray([2.0, 2.0]),
+        (np.asarray([2, 2]), np.asarray([0, 1])),
+    ), shape=(4, 4))
+    result = binned_ee_delay_support(
+        matrices, positions, dt_ms=1.0, frame_ms=1.0,
+        bin_mm=1.0, sheet_mm=2.0, delay_rounding="nearest",
+    )
+    support = result["support_by_lag"]
+    assert result["edge_count"] == 2
+    assert support.shape == (3, 4, 4)
+    # One active source neuron contributes half of the target bin's incoming budget.
+    assert np.isclose(support[2, 1, 0], 0.5)
+    assert np.count_nonzero(support) == 1
 
 
 def test_directed_fragment_counts_collision_mass_against_dominance():

@@ -932,6 +932,253 @@ def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
     }
 
 
+def binned_ee_delay_support(ampa_by_delay: list, positions_e: np.ndarray, *,
+                            dt_ms: float, frame_ms: float, bin_mm: float,
+                            sheet_mm: float,
+                            delay_rounding: str = "nearest") -> dict:
+    """Aggregate frozen E-to-E weights into delayed sheet-bin support.
+
+    The returned tensor is normalized so multiplying one ``[source_bin]`` row
+    by the number of active source neurons estimates the fraction of the
+    target bin's total incoming E budget attributable to those sources.  It is
+    an observation-independent structural support measure; contacts and event
+    labels are not inputs.
+    """
+    positions = np.asarray(positions_e, float)
+    dt_ms, frame_ms = float(dt_ms), float(frame_ms)
+    if dt_ms <= 0.0 or frame_ms <= 0.0:
+        raise ValueError("delay-support time steps must be positive")
+    if delay_rounding not in {"floor", "nearest", "ceil"}:
+        raise ValueError("delay rounding must be floor, nearest or ceil")
+    neuron_bins, size = sheet_bin_indices(
+        positions, bin_mm=float(bin_mm), sheet_mm=float(sheet_mm),
+    )
+    n_e = len(positions)
+    n_bins = size * size
+    source_population = np.bincount(
+        neuron_bins, minlength=n_bins,
+    ).astype(float)
+
+    def delay_frame(delay_ms: float) -> int:
+        value = delay_ms / frame_ms
+        if delay_rounding == "floor":
+            rounded = int(np.floor(value))
+        elif delay_rounding == "ceil":
+            rounded = int(np.ceil(value))
+        else:
+            rounded = int(np.floor(value + 0.5))
+        # The movie does not resolve within-frame spike order.  A parent must
+        # therefore precede its child by at least one complete movie frame.
+        return max(1, rounded)
+
+    maximum_lag = max(
+        [delay_frame(index * dt_ms) for index, matrix in enumerate(ampa_by_delay)
+         if matrix.nnz] or [1]
+    )
+    weights = np.zeros(
+        (maximum_lag + 1, n_bins, n_bins), dtype=np.float32,
+    )
+    incoming = np.zeros(n_bins, dtype=float)
+    edge_count = 0
+    for delay_index, matrix in enumerate(ampa_by_delay):
+        ee = matrix[:n_e, :n_e]
+        if not ee.nnz:
+            continue
+        coo = ee.tocoo()
+        target_bins = neuron_bins[np.asarray(coo.row, int)]
+        source_bins = neuron_bins[np.asarray(coo.col, int)]
+        values = np.asarray(coo.data, np.float32)
+        lag = delay_frame(delay_index * dt_ms)
+        np.add.at(weights[lag], (target_bins, source_bins), values)
+        np.add.at(incoming, target_bins, values.astype(float))
+        edge_count += int(coo.nnz)
+    if edge_count == 0:
+        raise RuntimeError("E-to-E support requires at least one frozen edge")
+    source_denominator = np.where(
+        source_population > 0.0, source_population, 1.0,
+    ).astype(np.float32)
+    incoming_denominator = np.where(incoming > 0.0, incoming, 1.0).astype(
+        np.float32,
+    )
+    weights /= source_denominator[None, None, :]
+    weights /= incoming_denominator[None, :, None]
+    return {
+        "support_by_lag": weights,
+        "source_population": source_population,
+        "target_incoming_weight": incoming,
+        "empty_source_bins": np.flatnonzero(source_population == 0.0),
+        "zero_incoming_target_bins": np.flatnonzero(incoming == 0.0),
+        "delay_rounding": delay_rounding,
+        "frame_ms": frame_ms,
+        "bin_mm": float(bin_mm),
+        "sheet_mm": float(sheet_mm),
+        "edge_count": edge_count,
+    }
+
+
+def edge_supported_root_families(activity_counts: np.ndarray,
+                                 root_labels: np.ndarray,
+                                 support_by_lag: np.ndarray, *,
+                                 minimum_active_neurons: int,
+                                 minimum_parent_support: float,
+                                 minimum_parent_dominance: float) -> dict:
+    """Merge local roots only when frozen delayed E-to-E support is strong.
+
+    Local movie lineages remain the conservative starting partition.  A later
+    root joins an earlier family only when active neurons in that family can
+    deliver enough delayed E-to-E input to the new root's birth patch and one
+    family accounts for the frozen dominance fraction.  This repairs long-range
+    propagation that a local geometric cone would otherwise split, without
+    allowing a long detector window to merge unrelated roots.
+    """
+    counts = np.asarray(activity_counts)
+    labels = np.asarray(root_labels, int)
+    support = np.asarray(support_by_lag, float)
+    minimum_active_neurons = int(minimum_active_neurons)
+    minimum_parent_support = float(minimum_parent_support)
+    minimum_parent_dominance = float(minimum_parent_dominance)
+    if counts.shape != labels.shape or counts.ndim != 3:
+        raise ValueError("activity and local-root labels must align")
+    n_bins = counts.shape[1] * counts.shape[2]
+    if support.ndim != 3 or support.shape[1:] != (n_bins, n_bins):
+        raise ValueError("delayed E-to-E support does not match the sheet grid")
+    if (minimum_active_neurons <= 0 or minimum_parent_support < 0.0
+            or not 0.5 < minimum_parent_dominance <= 1.0
+            or np.any(support < 0.0) or not np.all(np.isfinite(support))):
+        raise ValueError("invalid edge-supported root-family contract")
+
+    root_ids = np.unique(labels)
+    root_ids = root_ids[root_ids > 0].astype(int)
+    parent = {int(root_id): int(root_id) for root_id in root_ids}
+
+    def find(root_id: int) -> int:
+        root_id = int(root_id)
+        trail = []
+        while parent[root_id] != root_id:
+            trail.append(root_id)
+            root_id = parent[root_id]
+        for member in trail:
+            parent[member] = root_id
+        return root_id
+
+    positive_coordinates = np.argwhere(labels > 0)
+    positive_roots = labels[labels > 0].astype(int)
+    coordinates_by_root: dict[int, list[np.ndarray]] = {
+        int(root_id): [] for root_id in root_ids
+    }
+    for coordinate, root_id in zip(positive_coordinates, positive_roots):
+        coordinates_by_root[int(root_id)].append(coordinate)
+    births = []
+    for root_id in root_ids:
+        coordinates = np.asarray(coordinates_by_root[int(root_id)], int)
+        births.append((int(np.min(coordinates[:, 0])), int(root_id), coordinates))
+    births.sort()
+    active = counts >= minimum_active_neurons
+    birth_audit = []
+    merged = 0
+    for frame, root_id, coordinates in births:
+        target = coordinates[coordinates[:, 0] == frame]
+        target_bins = np.unique(
+            target[:, 1] * counts.shape[2] + target[:, 2]
+        ).astype(int)
+        family_support: dict[int, float] = {}
+        for lag in range(1, min(len(support), frame + 1)):
+            source_frame = frame - lag
+            source_bins = np.flatnonzero(active[source_frame].ravel())
+            if not len(source_bins):
+                continue
+            source_roots = labels[source_frame].ravel()[source_bins]
+            keep = source_roots > 0
+            source_bins = source_bins[keep]
+            source_roots = source_roots[keep]
+            if not len(source_bins):
+                continue
+            source_activity = counts[source_frame].ravel()[source_bins].astype(float)
+            contribution = np.mean(
+                support[lag][np.ix_(target_bins, source_bins)], axis=0,
+            ) * source_activity
+            for source_root in np.unique(source_roots):
+                family = find(int(source_root))
+                value = float(np.sum(contribution[source_roots == source_root]))
+                family_support[family] = family_support.get(family, 0.0) + value
+        total_support = float(sum(family_support.values()))
+        if family_support:
+            dominant_family, dominant_support = max(
+                family_support.items(), key=lambda item: item[1],
+            )
+            dominance = (
+                float(dominant_support / total_support)
+                if total_support > 0.0 else 0.0
+            )
+        else:
+            dominant_family, dominant_support, dominance = None, 0.0, 0.0
+        should_merge = bool(
+            dominant_family is not None
+            and dominant_support >= minimum_parent_support
+            and dominance >= minimum_parent_dominance
+        )
+        if should_merge:
+            parent[int(root_id)] = find(int(dominant_family))
+            merged += 1
+        birth_audit.append({
+            "root_id": int(root_id),
+            "birth_frame": int(frame),
+            "dominant_parent_family": (
+                None if dominant_family is None else int(dominant_family)
+            ),
+            "dominant_parent_support": float(dominant_support),
+            "total_parent_support": total_support,
+            "parent_dominance": dominance,
+            "merged": should_merge,
+        })
+
+    family_map = {int(root_id): find(int(root_id)) for root_id in root_ids}
+    family_labels = np.array(labels, copy=True)
+    lookup = np.arange(int(np.max(root_ids)) + 1, dtype=np.int32)
+    for root_id, family in family_map.items():
+        lookup[int(root_id)] = int(family)
+    positive = labels > 0
+    family_labels[positive] = lookup[labels[positive]]
+    positive_coordinates = np.argwhere(family_labels > 0)
+    positive_families = family_labels[family_labels > 0].astype(int)
+    positive_mass = counts[family_labels > 0].astype(float)
+    coordinates_by_family: dict[int, list[np.ndarray]] = {}
+    mass_by_family: dict[int, float] = {}
+    for coordinate, family, mass in zip(
+            positive_coordinates, positive_families, positive_mass):
+        family = int(family)
+        coordinates_by_family.setdefault(family, []).append(coordinate)
+        mass_by_family[family] = mass_by_family.get(family, 0.0) + float(mass)
+    components = []
+    for family in sorted(set(family_map.values())):
+        coordinates = np.asarray(coordinates_by_family[int(family)], int)
+        frames = coordinates[:, 0]
+        members = sorted([
+            root_id for root_id, mapped in family_map.items() if mapped == family
+        ])
+        components.append({
+            "cascade_id": int(family),
+            "lineage_id": int(family),
+            "member_lineage_ids": members,
+            "start_frame": int(np.min(frames)),
+            "stop_frame": int(np.max(frames)),
+            "duration_frames": int(np.max(frames) - np.min(frames) + 1),
+            "active_bin_frames": int(len(coordinates)),
+            "activity_mass": float(mass_by_family[int(family)]),
+        })
+    return {
+        "labels": family_labels,
+        "components": components,
+        "family_map": family_map,
+        "birth_audit": birth_audit,
+        "n_local_roots": int(len(root_ids)),
+        "n_edge_supported_families": int(len(components)),
+        "n_merged_births": int(merged),
+        "minimum_parent_support": minimum_parent_support,
+        "minimum_parent_dominance": minimum_parent_dominance,
+    }
+
+
 def assign_detector_fragments_to_directed_lineages(
         activity_counts: np.ndarray, lineage_labels: np.ndarray,
         fragments: list[dict], *, frame_ms: float,

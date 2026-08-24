@@ -28,11 +28,13 @@ from src.topic4_node_dualmode import (  # noqa: E402
     assign_detector_fragments_to_directed_lineages,
     assign_detector_fragments_to_cascades,
     bin_neuron_spikes,
+    binned_ee_delay_support,
     binned_contact_envelope,
     cascade_event_windows,
     causal_root_event_windows,
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
+    edge_supported_root_families,
     event_source_onset_maps,
     excitatory_psp_tail_support_ms,
     lineage_restricted_contact_readout,
@@ -111,11 +113,62 @@ def _segmentation_variants(event_unit: dict) -> list[dict]:
             "memory_parameter": parameter,
             "memory_value": memory,
             "minimum_dominance": dominance,
+            "minimum_parent_support": event_unit.get(
+                "minimum_parent_support"
+            ),
+            "edge_delay_rounding": event_unit.get(
+                "edge_delay_rounding"
+            ),
             "is_primary": bool(
                 np.isclose(memory, primary_memory)
                 and np.isclose(dominance, primary_dominance)
             ),
         })
+    if event_unit.get("name") == "edge_supported_causal_family_observation":
+        primary_support = float(event_unit["minimum_parent_support"])
+        supports = [
+            float(value) for value in event_unit.get(
+                "sensitivity_minimum_parent_supports", [primary_support],
+            )
+        ]
+        primary_rounding = str(event_unit["edge_delay_rounding"])
+        roundings = [
+            str(value) for value in event_unit.get(
+                "sensitivity_edge_delay_roundings", [primary_rounding],
+            )
+        ]
+        if (primary_support not in supports or primary_rounding not in roundings
+                or len(set(supports)) != len(supports)
+                or len(set(roundings)) != len(roundings)):
+            raise RuntimeError("edge-support sensitivity grid is invalid")
+        for support in supports:
+            if np.isclose(support, primary_support):
+                continue
+            output.append({
+                "memory_parameter": parameter,
+                "memory_value": primary_memory,
+                "minimum_dominance": primary_dominance,
+                "minimum_parent_support": support,
+                "edge_delay_rounding": primary_rounding,
+                "is_primary": False,
+            })
+        for rounding in roundings:
+            if rounding == primary_rounding:
+                continue
+            output.append({
+                "memory_parameter": parameter,
+                "memory_value": primary_memory,
+                "minimum_dominance": primary_dominance,
+                "minimum_parent_support": primary_support,
+                "edge_delay_rounding": rounding,
+                "is_primary": False,
+            })
+        for row in output:
+            row["is_primary"] = bool(
+                row["is_primary"]
+                and np.isclose(row["minimum_parent_support"], primary_support)
+                and row["edge_delay_rounding"] == primary_rounding
+            )
     return output
 
 
@@ -184,7 +237,8 @@ def _directed_parent_contract(event_unit: dict, *, params, net: dict,
             "persistent_directed_spatiotemporal_lineage",
             "causal_population_excursion",
             "persistent_root_coactivity_episode",
-            "causal_root_observation"}:
+            "causal_root_observation",
+            "edge_supported_causal_family_observation"}:
         method = str(event_unit.get(
             "causal_memory_method", "global_fast_state_decay",
         ))
@@ -481,6 +535,7 @@ def main() -> None:
     lineage_labels = None
     lineage_sensitivity = []
     directed_assignment_by_fragment = {}
+    edge_support_cache = {}
     if event_unit is None:
         detected = detector_fragments
         event_unit_runtime = {"name": "detector_fragment"}
@@ -589,7 +644,8 @@ def main() -> None:
             "persistent_directed_spatiotemporal_lineage",
             "causal_population_excursion",
             "persistent_root_coactivity_episode",
-            "causal_root_observation"}:
+            "causal_root_observation",
+            "edge_supported_causal_family_observation"}:
         movie_config = config["source_topology"]["full_sheet_movie"]
         if not bool(movie_config.get("enabled", False)):
             raise RuntimeError("directed lineage events require the whole-run sheet movie")
@@ -608,12 +664,44 @@ def main() -> None:
         parent_neighborhood_bins = int(
             parent_contract["forward_parent_neighborhood_bins"]
         )
-        lineage = directed_spatiotemporal_lineages(
+        local_lineage = directed_spatiotemporal_lineages(
             movie["activity_counts"],
             minimum_active_neurons=int(event_unit["minimum_active_neurons"]),
             maximum_parent_gap_frames=parent_gap_frames,
             parent_neighborhood_bins=parent_neighborhood_bins,
         )
+        edge_family = None
+        if event_unit["name"] == "edge_supported_causal_family_observation":
+            rounding = str(event_unit["edge_delay_rounding"])
+            edge_support_cache[rounding] = binned_ee_delay_support(
+                substrate.net["ampa_by_delay"], substrate.positions_e,
+                dt_ms=float(substrate.engine["dt"]),
+                frame_ms=float(movie["frame_ms"]),
+                bin_mm=float(movie["bin_mm"]),
+                sheet_mm=float(movie["sheet_mm"]),
+                delay_rounding=rounding,
+            )
+            edge_family = edge_supported_root_families(
+                movie["activity_counts"], local_lineage["labels"],
+                edge_support_cache[rounding]["support_by_lag"],
+                minimum_active_neurons=int(event_unit["minimum_active_neurons"]),
+                minimum_parent_support=float(
+                    event_unit["minimum_parent_support"]
+                ),
+                minimum_parent_dominance=float(
+                    event_unit["minimum_parent_dominance"]
+                ),
+            )
+            lineage = {
+                **edge_family,
+                "collision_mask": local_lineage["collision_mask"],
+                "causal_rule": (
+                    "local directed roots merged only by delayed frozen E-to-E "
+                    "support above the incoming-budget and parent-dominance contract"
+                ),
+            }
+        else:
+            lineage = local_lineage
         assignments = assign_detector_fragments_to_directed_lineages(
             movie["activity_counts"], lineage["labels"], detector_fragments,
             frame_ms=float(movie["frame_ms"]),
@@ -647,7 +735,9 @@ def main() -> None:
                 total_ms=len(active) * float(active_dt),
             )
             compound_fragments = []
-        elif event_unit["name"] == "causal_root_observation":
+        elif event_unit["name"] in {
+                "causal_root_observation",
+                "edge_supported_causal_family_observation"}:
             detected, compound_fragments = causal_root_event_windows(
                 lineage["components"], assignments, detector_fragments,
                 frame_ms=float(movie["frame_ms"]),
@@ -709,11 +799,40 @@ def main() -> None:
                 + len(compound_fragments) - len(detector_fragments)
             ),
         }
+        if edge_family is not None:
+            event_unit_runtime["edge_support"] = {
+                "minimum_parent_support": float(
+                    event_unit["minimum_parent_support"]
+                ),
+                "minimum_parent_dominance": float(
+                    event_unit["minimum_parent_dominance"]
+                ),
+                "edge_delay_rounding": str(event_unit["edge_delay_rounding"]),
+                "n_local_roots": int(edge_family["n_local_roots"]),
+                "n_edge_supported_families": int(
+                    edge_family["n_edge_supported_families"]
+                ),
+                "n_merged_births": int(edge_family["n_merged_births"]),
+                "n_local_roots_resumed_after_gap": int(np.sum([
+                    component["resumed_after_gap_count"] > 0
+                    for component in local_lineage["components"]
+                ])),
+                "maximum_local_parent_gap_frames_observed": int(max([
+                    component["maximum_parent_gap_frames_observed"]
+                    for component in local_lineage["components"]
+                ], default=0)),
+                "edge_count": int(
+                    edge_support_cache[str(event_unit["edge_delay_rounding"])][
+                        "edge_count"
+                    ]
+                ),
+            }
         if event_unit["name"] in {
                 "persistent_directed_spatiotemporal_lineage",
                 "causal_population_excursion",
                 "persistent_root_coactivity_episode",
-                "causal_root_observation"}:
+                "causal_root_observation",
+                "edge_supported_causal_family_observation"}:
             memory_method = str(event_unit.get(
                 "causal_memory_method", "global_fast_state_decay",
             ))
@@ -725,6 +844,18 @@ def main() -> None:
                     variant["minimum_dominance"],
                     float(event_unit["minimum_dominance"]),
                 )
+                same_parent_support = (
+                    event_unit["name"] != "edge_supported_causal_family_observation"
+                    or np.isclose(
+                        float(variant["minimum_parent_support"]),
+                        float(event_unit["minimum_parent_support"]),
+                    )
+                )
+                same_delay_rounding = (
+                    event_unit["name"] != "edge_supported_causal_family_observation"
+                    or str(variant["edge_delay_rounding"])
+                    == str(event_unit["edge_delay_rounding"])
+                )
                 variant_unit = {
                     **event_unit,
                     variant["memory_parameter"]: variant["memory_value"],
@@ -732,7 +863,7 @@ def main() -> None:
                 }
                 if same_memory:
                     variant_contract = parent_contract
-                    variant_lineage = lineage
+                    variant_local_lineage = local_lineage
                 else:
                     variant_contract = _directed_parent_contract(
                         variant_unit, params=substrate.params, net=substrate.net,
@@ -741,7 +872,7 @@ def main() -> None:
                             "local_or_global_delay_support_ms"
                         ) if memory_method == "local_ee_psp_tail" else None,
                     )
-                    variant_lineage = directed_spatiotemporal_lineages(
+                    variant_local_lineage = directed_spatiotemporal_lineages(
                         movie["activity_counts"],
                         minimum_active_neurons=int(event_unit["minimum_active_neurons"]),
                         maximum_parent_gap_frames=int(
@@ -751,7 +882,39 @@ def main() -> None:
                             variant_contract["forward_parent_neighborhood_bins"]
                         ),
                     )
-                if same_memory and same_dominance:
+                if event_unit["name"] == "edge_supported_causal_family_observation":
+                    rounding = str(variant["edge_delay_rounding"])
+                    if rounding not in edge_support_cache:
+                        edge_support_cache[rounding] = binned_ee_delay_support(
+                            substrate.net["ampa_by_delay"], substrate.positions_e,
+                            dt_ms=float(substrate.engine["dt"]),
+                            frame_ms=float(movie["frame_ms"]),
+                            bin_mm=float(movie["bin_mm"]),
+                            sheet_mm=float(movie["sheet_mm"]),
+                            delay_rounding=rounding,
+                        )
+                    variant_family = edge_supported_root_families(
+                        movie["activity_counts"], variant_local_lineage["labels"],
+                        edge_support_cache[rounding]["support_by_lag"],
+                        minimum_active_neurons=int(
+                            event_unit["minimum_active_neurons"]
+                        ),
+                        minimum_parent_support=float(
+                            variant["minimum_parent_support"]
+                        ),
+                        minimum_parent_dominance=float(
+                            event_unit["minimum_parent_dominance"]
+                        ),
+                    )
+                    variant_lineage = {
+                        **variant_family,
+                        "collision_mask": variant_local_lineage["collision_mask"],
+                        "causal_rule": lineage["causal_rule"],
+                    }
+                else:
+                    variant_lineage = variant_local_lineage
+                if (same_memory and same_dominance and same_parent_support
+                        and same_delay_rounding):
                     variant_assignments = assignments
                     variant_events = detected
                     variant_compounds = compound_fragments
@@ -788,7 +951,9 @@ def main() -> None:
                             total_ms=len(active) * float(active_dt),
                         )
                         variant_compounds = []
-                    elif event_unit["name"] == "causal_root_observation":
+                    elif event_unit["name"] in {
+                            "causal_root_observation",
+                            "edge_supported_causal_family_observation"}:
                         variant_events, variant_compounds = causal_root_event_windows(
                             variant_lineage["components"], variant_assignments,
                             detector_fragments, frame_ms=float(movie["frame_ms"]),
@@ -804,6 +969,10 @@ def main() -> None:
                     "parameter": variant["memory_parameter"],
                     "value": variant["memory_value"],
                     "minimum_dominance": variant["minimum_dominance"],
+                    "minimum_parent_support": variant.get(
+                        "minimum_parent_support"
+                    ),
+                    "edge_delay_rounding": variant.get("edge_delay_rounding"),
                     "is_primary": variant["is_primary"],
                     "contract": variant_contract,
                     "lineage": variant_lineage,
@@ -831,6 +1000,14 @@ def main() -> None:
                 row["compound"] for row in assignments
             ], bool),
         }
+        if event_unit["name"] == "edge_supported_causal_family_observation":
+            local_dtype = (
+                np.int16 if np.max(local_lineage["labels"], initial=0) <= 32767
+                else np.int32
+            )
+            cascade_arrays["local_directed_lineage_labels"] = np.asarray(
+                local_lineage["labels"], dtype=local_dtype,
+            )
     else:
         raise RuntimeError(f"unknown event unit: {event_unit['name']}")
     envelope, envelope_dt, _ = snn_event_envelope(
@@ -908,11 +1085,11 @@ def main() -> None:
                     ])) if variant["assignments"] else 0.0
                 ),
                 "n_roots_resumed_after_gap": int(np.sum([
-                    component["resumed_after_gap_count"] > 0
+                    component.get("resumed_after_gap_count", 0) > 0
                     for component in components
                 ])),
                 "maximum_observed_parent_gap_frames": int(max([
-                    component["maximum_parent_gap_frames_observed"]
+                    component.get("maximum_parent_gap_frames_observed", 0)
                     for component in components
                 ], default=0)),
                 "multi_root_event_fraction": float(np.mean([
@@ -928,6 +1105,16 @@ def main() -> None:
             "lineage_sensitivity_minimum_dominances": np.asarray([
                 row["minimum_dominance"] for row in lineage_sensitivity
             ], np.float32),
+            "lineage_sensitivity_minimum_parent_supports": np.asarray([
+                np.nan if row.get("minimum_parent_support") is None
+                else float(row["minimum_parent_support"])
+                for row in lineage_sensitivity
+            ], np.float32),
+            "lineage_sensitivity_edge_delay_roundings": np.asarray([
+                "" if row.get("edge_delay_rounding") is None
+                else str(row["edge_delay_rounding"])
+                for row in lineage_sensitivity
+            ]),
             "lineage_sensitivity_primary": np.asarray([
                 row["is_primary"] for row in lineage_sensitivity
             ], bool),
@@ -969,7 +1156,8 @@ def main() -> None:
                 "persistent_directed_spatiotemporal_lineage",
                 "causal_population_excursion",
                 "persistent_root_coactivity_episode",
-                "causal_root_observation"}:
+                "causal_root_observation",
+                "edge_supported_causal_family_observation"}:
             fragment_rows = [
                 directed_assignment_by_fragment[int(fragment)]
                 for fragment in event_row["detector_fragment_indices"]

@@ -193,6 +193,34 @@ worsened to 1.17-1.27 after mixed observations were removed, and the two natural
 clusters usually propagate in the same spatial direction on at least one seed.
 The old field ranking therefore benefited from detector-window composition.
 
+## Phase 1k: delayed E-to-E supported event-family replay (current)
+
+1. Keep the accepted local directed roots as the starting partition, but audit
+   every new root against active earlier roots through frozen E-to-E weights and
+   axonal delays.  Contacts and patient labels remain forbidden inputs.
+2. Merge only when one earlier family supplies at least 70% of candidate parent
+   support and at least 0.001 of the target incoming-E budget.  Audit support
+   0.0003/0.001/0.003 and floor/nearest/ceil delay rounding one axis at a time.
+3. First rescore four representative Stage-Q fields x two fit seeds without a
+   new simulation.  Report clean-root merges, compound-to-clean recovery and
+   clean-to-compound errors.
+4. Deterministically replay the same eight field/seed pairs with exact per-
+   neuron root-family contact readout.  Do not open selection or confirmation
+   seeds and do not regenerate any field.
+5. Compare the complete conservative objective, both patient-mode losses,
+   natural KMeans alignment, K2 support, OOD, compound fraction and causal
+   direction against Stage Q.  Also render the Fig.4-style event GIFs.
+6. Preserve the 54-field fit funnel only if the Pareto representatives retain
+   their scientific ordering and no candidate gains its result from one changed
+   event.  Otherwise invalidate Stage Q and rerun the full fit under the new
+   event unit.
+
+Observed zero-simulation result: at primary support only three of 477 clean
+roots changed and one of 983 detector fragments became a clean supported family;
+no clean detector fragment became compound.  The weak-support sensitivity
+changed at most 4.2% of pooled clean roots.  This is small but non-zero, so exact
+replay rather than immediate selection is required.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the
