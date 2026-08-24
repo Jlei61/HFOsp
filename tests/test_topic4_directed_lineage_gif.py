@@ -30,3 +30,9 @@ def test_lineage_outline_excludes_concurrent_other_root_and_collision():
     ])
     coordinates = lineage_bin_coordinates(labels, 1)
     assert coordinates.tolist() == [[0.5, 0.5], [1.5, 0.5], [2.5, 1.5]]
+
+
+def test_lineage_outline_includes_all_roots_in_complete_event():
+    labels = np.asarray([[1, 0], [0, 2]])
+    coordinates = lineage_bin_coordinates(labels, [1, 2])
+    assert coordinates.tolist() == [[0.5, 0.5], [1.5, 1.5]]

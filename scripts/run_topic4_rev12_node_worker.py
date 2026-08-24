@@ -38,6 +38,7 @@ from src.topic4_node_dualmode import (  # noqa: E402
     merge_detected_event_fragments,
     population_excursion_episodes,
     neuron_contact_sampling_weights,
+    root_coactivity_event_windows,
     sheet_bin_indices,
     sheet_contact_sampling_weights,
     sheet_activity_movie,
@@ -113,7 +114,8 @@ def _directed_parent_contract(event_unit: dict, *, params, net: dict,
         raise ValueError("lineage parent neighborhood cannot be negative")
     if name in {
             "persistent_directed_spatiotemporal_lineage",
-            "causal_population_excursion"}:
+            "causal_population_excursion",
+            "persistent_root_coactivity_episode"}:
         multiple = float(event_unit["fast_state_decay_multiples"])
         if multiple <= 0.0:
             raise ValueError("fast-state decay multiple must be positive")
@@ -478,7 +480,8 @@ def main() -> None:
     elif event_unit["name"] in {
             "directed_spatiotemporal_lineage",
             "persistent_directed_spatiotemporal_lineage",
-            "causal_population_excursion"}:
+            "causal_population_excursion",
+            "persistent_root_coactivity_episode"}:
         movie_config = config["source_topology"]["full_sheet_movie"]
         if not bool(movie_config.get("enabled", False)):
             raise RuntimeError("directed lineage events require the whole-run sheet movie")
@@ -529,6 +532,13 @@ def main() -> None:
                 frame_ms=float(movie["frame_ms"]),
             )
             compound_fragments = []
+        elif event_unit["name"] == "persistent_root_coactivity_episode":
+            detected = root_coactivity_event_windows(
+                lineage["components"], assignments, detector_fragments,
+                lineage["labels"], frame_ms=float(movie["frame_ms"]),
+                total_ms=len(active) * float(active_dt),
+            )
+            compound_fragments = []
         else:
             detected, compound_fragments = cascade_event_windows(
                 lineage["components"], assignments, detector_fragments,
@@ -572,13 +582,23 @@ def main() -> None:
                 for event in detected
             ])) if detected else 0.0,
             "all_detector_fragments_represented": bool(
+                {
+                    int(fragment) for event in detected
+                    for fragment in event["detector_fragment_indices"]
+                }.union({
+                    int(row["detector_fragment_index"])
+                    for row in compound_fragments
+                }) == set(range(len(detector_fragments)))
+            ),
+            "detector_fragment_membership_excess": int(
                 sum(len(event["detector_fragment_indices"]) for event in detected)
-                + len(compound_fragments) == len(detector_fragments)
+                + len(compound_fragments) - len(detector_fragments)
             ),
         }
         if event_unit["name"] in {
                 "persistent_directed_spatiotemporal_lineage",
-                "causal_population_excursion"}:
+                "causal_population_excursion",
+                "persistent_root_coactivity_episode"}:
             sensitivity_multiples = [
                 float(value) for value in event_unit.get(
                     "sensitivity_fast_state_decay_multiples",
@@ -634,6 +654,14 @@ def main() -> None:
                             variant_episodes, movie["activity_counts"],
                             variant_lineage["labels"],
                             frame_ms=float(movie["frame_ms"]),
+                        )
+                        variant_compounds = []
+                    elif event_unit["name"] == "persistent_root_coactivity_episode":
+                        variant_events = root_coactivity_event_windows(
+                            variant_lineage["components"], variant_assignments,
+                            detector_fragments, variant_lineage["labels"],
+                            frame_ms=float(movie["frame_ms"]),
+                            total_ms=len(active) * float(active_dt),
                         )
                         variant_compounds = []
                     else:
@@ -721,7 +749,13 @@ def main() -> None:
             ], bool)
             for event_index, event in enumerate(variant_events):
                 for fragment in event["detector_fragment_indices"]:
-                    sensitivity_fragment_partition[variant_index, int(fragment)] = event_index
+                    fragment = int(fragment)
+                    previous = sensitivity_fragment_partition[
+                        variant_index, fragment
+                    ]
+                    sensitivity_fragment_partition[variant_index, fragment] = (
+                        event_index if previous == -32768 else -(fragment + 1)
+                    )
             for fragment in range(len(detector_fragments)):
                 if sensitivity_fragment_partition[variant_index, fragment] == -32768:
                     sensitivity_fragment_partition[variant_index, fragment] = -(fragment + 1)
@@ -788,7 +822,8 @@ def main() -> None:
         if event_unit is not None and event_unit["name"] in {
                 "directed_spatiotemporal_lineage",
                 "persistent_directed_spatiotemporal_lineage",
-                "causal_population_excursion"}:
+                "causal_population_excursion",
+                "persistent_root_coactivity_episode"}:
             fragment_rows = [
                 directed_assignment_by_fragment[int(fragment)]
                 for fragment in event_row["detector_fragment_indices"]

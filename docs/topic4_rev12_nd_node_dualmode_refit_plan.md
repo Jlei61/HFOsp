@@ -117,6 +117,27 @@ not yet recover the patient repertoire.
 7. Only after this canary is accepted may Phase 5 regenerate a Node-field library.
    EE, E-to-I and Z/M remain frozen throughout.
 
+Observed result: the population reset definition overmerged six or seven packets
+into 0.7-0.8 s episodes and changed substantially across 4/5/6 time constants.
+It remains an outer GIF diagnostic, not the scoring event.
+
+## Phase 1h: persistent-root coactivity episode (current blocker)
+
+1. Within every detector fragment, group roots only when their activity actually
+   overlaps in a movie frame.  Split roots that are merely sequential inside a
+   long detector window.
+2. Across detector fragments, merge only through a shared persistent root.
+3. Include every positive-mass root in the exact per-neuron contact readout; remove
+   the 70% dominance exclusion from the patient objective.
+4. Run synthetic simultaneous-root, sequential-root and shared-root detector-dip
+   controls, with complete detector-fragment coverage as an invariant.
+5. Run the same three fields x two seeds at 4/5/6 root memories.  Candidate
+   summaries use worst patient loss and minimum KMeans alignment, never the best
+   segmentation.
+6. Render both complete outer excursions and root-coactivity events.  Accept the
+   event producer only when the latter no longer hides simultaneous upper-sheet
+   activity or splits one persistent wave into opposite modes.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the

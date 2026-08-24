@@ -193,7 +193,7 @@ the opposite error: an unusually long observation window could merge unrelated
 roots.  Persistent roots are therefore retained as topology annotations, but no
 longer define or exclude statistical event rows.
 
-### Causal population-episode correction (2026-08-24; current primary)
+### Causal population-episode correction (2026-08-24; necessary but overmerging)
 
 The statistical unit for KMeans and patient scoring is one complete population
 excursion bounded by fast-state reset.  The high-threshold fragments are detected
@@ -218,6 +218,37 @@ of spikes, or impose a penalty merely because several roots exist.  If the 4/5/6
 reset choices materially change episode partition, patient-mode assignment or
 natural KMeans, event identity remains unresolved and field optimization stays
 closed.
+
+The six-trajectory canary failed that stability check.  Moving from four to six
+fast-state constants reduced returned episode counts by roughly one half; boundary
+ARI was 0.67-0.86 and patient-mode agreement on shared fragments was 0.54-0.91.
+Representative 5-tau episodes lasted about 0.7-0.8 s and visibly contained six
+or seven separate population packets.  A global quiet-state dwell therefore
+overmerges observations in this active background and cannot be the optimization
+unit.  These complete-excursion GIFs remain the required outer diagnostic.
+
+### Persistent-root coactivity episode (2026-08-24; current primary)
+
+The current statistical unit combines the stable part of the two corrections:
+
+1. persistent roots retain local causal continuity across short detector dips;
+2. every positive-mass root in a detector fragment is retained;
+3. roots that are active in at least one common 2 ms movie frame form one complete
+   observable ensemble;
+4. ensembles across detector fragments merge only through a shared persistent
+   root;
+5. roots that are merely sequential inside one unusually long detector window
+   remain separate observations;
+6. a fragment may map to several observations only when it truly contains several
+   temporally disjoint root ensembles; this multiplicity is stored explicitly.
+
+Contact geometry and patient labels enter only after these groups are frozen.
+Exact per-neuron contact readout uses the union of all roots in an ensemble and
+excludes activity from concurrent roots outside that ensemble.  No dominance
+threshold deletes an event.  Root memory is evaluated at 4/5/6 fast-state
+constants, and fitting uses the worst matched patient loss plus the minimum
+natural-KMeans alignment over this segmentation ensemble.  A field therefore
+cannot win by exploiting one favourable root-memory value.
 
 ## 2. Scientific question
 
@@ -275,11 +306,12 @@ the entire sheet and do not receive extra support near observed contacts.
 ## 5. Patient event representation
 
 The model event unit used by KMeans and the patient objective is a
-`causal_population_excursion`, not an unmerged threshold fragment, fixed-gap
-`settled_episode`, or one selected directed root.  Every episode stores all of
-its detector-fragment indices and persistent-root topology.  Multi-root episodes
-remain complete observations.  A figure or scorer that consumes pre-group
-fragment ranks or drops compound events is invalid for rev12-ND.
+`persistent_root_coactivity_episode`, not an unmerged threshold fragment,
+fixed-gap `settled_episode`, global quiet-state excursion, or one selected root.
+Every episode stores all constituent detector-fragment indices and every
+coactive persistent root.  Multi-root episodes remain complete observations.
+A figure or scorer that consumes pre-group fragment ranks or drops compound
+events is invalid for rev12-ND.
 
 For event `e` and contact `i`, retain fixed contact identity:
 
@@ -342,6 +374,9 @@ trying to test.
 
 KMeans is computed after drawing the same event count from every network.
 Patient held-out R2 and source topology do not select the fit library.
+The formal candidate value is computed at 4/5/6 fast-state constants.  The
+worst `J_patient`, minimum balanced KMeans alignment and their across-segmentation
+spread are retained; no best-window selection is allowed.
 
 ## 7. Natural same-network repertoire
 

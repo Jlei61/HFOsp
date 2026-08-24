@@ -1384,6 +1384,139 @@ def annotate_population_excursions_with_lineages(
     return output
 
 
+def root_coactivity_event_windows(
+        components: list[dict], assignments: list[dict], fragments: list[dict],
+        lineage_labels: np.ndarray, *, frame_ms: float,
+        total_ms: float) -> list[dict]:
+    """Build complete observations from persistent roots that truly co-occur.
+
+    A long detector fragment cannot merge roots that are only sequential.  Roots
+    active in the same movie frame form one observable ensemble, and ensembles
+    from separate fragments merge only when they share a persistent root.
+    Every positive-mass root is retained; detector dominance is not used.
+    """
+    labels = np.asarray(lineage_labels, int)
+    frame_ms = float(frame_ms)
+    total_ms = float(total_ms)
+    if (labels.ndim != 3 or frame_ms <= 0.0 or total_ms <= 0.0
+            or len(assignments) != len(fragments)):
+        raise ValueError("root-coactivity event inputs are inconsistent")
+    components_by_id = {int(row["cascade_id"]): row for row in components}
+    root_frames = {
+        root_id: set(map(int, np.flatnonzero(np.any(labels == root_id, axis=(1, 2)))))
+        for root_id in components_by_id
+    }
+    nodes: list[dict] = []
+    for fragment_index, (assignment, fragment) in enumerate(zip(assignments, fragments)):
+        roots = sorted({
+            int(row["lineage_id"])
+            for row in assignment.get("lineage_activity_fractions", [])
+            if float(row["fraction"]) > 0.0
+        })
+        if not roots:
+            raise RuntimeError("detector fragment contains no persistent root")
+        start = max(0, int(np.floor(float(fragment["t_on"]) / frame_ms)))
+        stop = min(len(labels), int(np.floor(float(fragment["t_off"]) / frame_ms)) + 1)
+        local_frames = set(range(start, stop))
+        parent = {root_id: root_id for root_id in roots}
+
+        def find(root_id: int) -> int:
+            while parent[root_id] != root_id:
+                parent[root_id] = parent[parent[root_id]]
+                root_id = parent[root_id]
+            return root_id
+
+        def union(left: int, right: int) -> None:
+            left, right = find(left), find(right)
+            if left != right:
+                parent[right] = left
+
+        for left_index, left in enumerate(roots):
+            left_frames = root_frames[left] & local_frames
+            for right in roots[left_index + 1:]:
+                if left_frames & root_frames[right]:
+                    union(left, right)
+        groups: dict[int, set[int]] = {}
+        for root_id in roots:
+            groups.setdefault(find(root_id), set()).add(root_id)
+        for group in groups.values():
+            nodes.append({
+                "fragment_index": int(fragment_index),
+                "lineage_ids": set(group),
+            })
+
+    parent_nodes = list(range(len(nodes)))
+
+    def find_node(index: int) -> int:
+        while parent_nodes[index] != index:
+            parent_nodes[index] = parent_nodes[parent_nodes[index]]
+            index = parent_nodes[index]
+        return index
+
+    def union_nodes(left: int, right: int) -> None:
+        left, right = find_node(left), find_node(right)
+        if left != right:
+            parent_nodes[right] = left
+
+    root_to_nodes: dict[int, list[int]] = {}
+    for node_index, node in enumerate(nodes):
+        for root_id in node["lineage_ids"]:
+            root_to_nodes.setdefault(root_id, []).append(node_index)
+    for indices in root_to_nodes.values():
+        for index in indices[1:]:
+            union_nodes(indices[0], index)
+    groups: dict[int, list[int]] = {}
+    for node_index in range(len(nodes)):
+        groups.setdefault(find_node(node_index), []).append(node_index)
+
+    events = []
+    for node_indices in groups.values():
+        lineage_ids = sorted({
+            root_id for index in node_indices for root_id in nodes[index]["lineage_ids"]
+        })
+        fragment_indices = sorted({
+            int(nodes[index]["fragment_index"]) for index in node_indices
+        })
+        selected_fragments = [fragments[index] for index in fragment_indices]
+        selected_components = [components_by_id[root_id] for root_id in lineage_ids]
+        t_on = max(0.0, min(
+            float(row["start_frame"]) * frame_ms for row in selected_components
+        ))
+        t_off = min(total_ms, max(
+            float(row["stop_frame"] + 1) * frame_ms for row in selected_components
+        ))
+        events.append({
+            "cascade_id": int(lineage_ids[0]),
+            "lineage_ids": lineage_ids,
+            "root_count": int(len(lineage_ids)),
+            "detector_fragment_indices": fragment_indices,
+            "trigger_t_on": float(min(row["t_on"] for row in selected_fragments)),
+            "trigger_t_off": float(max(row["t_off"] for row in selected_fragments)),
+            "t_on": t_on,
+            "t_off": t_off,
+            "dur_ms": float(max(frame_ms, t_off - t_on)),
+            "returned": bool(
+                t_off < total_ms
+                and all(bool(row.get("returned", True)) for row in selected_fragments)
+            ),
+            "compound": bool(len(lineage_ids) > 1),
+            "activity_mass": float(sum(
+                row["activity_mass"] for row in selected_components
+            )),
+            "active_bin_frames": int(sum(
+                row["active_bin_frames"] for row in selected_components
+            )),
+        })
+    events.sort(key=lambda row: (row["t_on"], row["cascade_id"]))
+    represented = {
+        int(fragment_index) for event in events
+        for fragment_index in event["detector_fragment_indices"]
+    }
+    if represented != set(range(len(fragments))):
+        raise RuntimeError("root-coactivity events dropped detector fragments")
+    return events
+
+
 def normalize_components_floor_ratio(components: dict, calibration: dict,
                                      mode: int) -> dict:
     """Continuously scale distances by the patient block-floor q95."""

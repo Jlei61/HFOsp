@@ -7,6 +7,7 @@ from src.topic4_node_dualmode import (
     cascade_event_windows,
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
+    root_coactivity_event_windows,
     spatiotemporal_cascade_labels,
 )
 
@@ -248,3 +249,62 @@ def test_population_episode_topology_cannot_change_event_boundaries():
     assert event["t_on"] == original["t_on"]
     assert event["t_off"] == original["t_off"]
     assert event["detector_fragment_indices"] == [4]
+
+
+def _root_component(root, start, stop):
+    return {"cascade_id": root, "start_frame": start, "stop_frame": stop,
+            "activity_mass": 10.0, "active_bin_frames": stop - start + 1}
+
+
+def test_root_coactivity_keeps_simultaneous_roots_in_one_complete_event():
+    labels = np.zeros((8, 1, 2), int)
+    labels[1:5, 0, 0] = 1
+    labels[2:6, 0, 1] = 2
+    assignments = [{"lineage_activity_fractions": [
+        {"lineage_id": 1, "fraction": 0.5},
+        {"lineage_id": 2, "fraction": 0.5},
+    ]}]
+    events = root_coactivity_event_windows(
+        [_root_component(1, 1, 4), _root_component(2, 2, 5)], assignments,
+        [{"t_on": 2.0, "t_off": 10.0, "returned": True}], labels,
+        frame_ms=2.0, total_ms=20.0,
+    )
+    assert len(events) == 1
+    assert events[0]["lineage_ids"] == [1, 2]
+
+
+def test_root_coactivity_splits_sequential_roots_inside_one_long_detector_window():
+    labels = np.zeros((10, 1, 2), int)
+    labels[1:3, 0, 0] = 1
+    labels[6:8, 0, 1] = 2
+    assignments = [{"lineage_activity_fractions": [
+        {"lineage_id": 1, "fraction": 0.5},
+        {"lineage_id": 2, "fraction": 0.5},
+    ]}]
+    events = root_coactivity_event_windows(
+        [_root_component(1, 1, 2), _root_component(2, 6, 7)], assignments,
+        [{"t_on": 2.0, "t_off": 16.0, "returned": True}], labels,
+        frame_ms=2.0, total_ms=20.0,
+    )
+    assert len(events) == 2
+    assert [row["lineage_ids"] for row in events] == [[1], [2]]
+    assert all(row["detector_fragment_indices"] == [0] for row in events)
+
+
+def test_root_coactivity_merges_detector_dips_only_through_same_root():
+    labels = np.zeros((10, 1, 1), int)
+    labels[1:8, 0, 0] = 1
+    assignments = [
+        {"lineage_activity_fractions": [{"lineage_id": 1, "fraction": 1.0}]},
+        {"lineage_activity_fractions": [{"lineage_id": 1, "fraction": 1.0}]},
+    ]
+    fragments = [
+        {"t_on": 2.0, "t_off": 6.0, "returned": True},
+        {"t_on": 10.0, "t_off": 14.0, "returned": True},
+    ]
+    events = root_coactivity_event_windows(
+        [_root_component(1, 1, 7)], assignments, fragments, labels,
+        frame_ms=2.0, total_ms=20.0,
+    )
+    assert len(events) == 1
+    assert events[0]["detector_fragment_indices"] == [0, 1]

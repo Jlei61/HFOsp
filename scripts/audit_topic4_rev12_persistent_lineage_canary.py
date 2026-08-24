@@ -125,8 +125,9 @@ def main() -> None:
             npz_path = json_path.with_suffix(".npz")
             reference_path = artifact_root / REFERENCE_ROOT / f"{stem}.npz"
             payload = json.loads(json_path.read_text())
-            if payload["event_unit"].get("name") != (
-                    "persistent_directed_spatiotemporal_lineage"):
+            if payload["event_unit"].get("name") not in {
+                    "persistent_directed_spatiotemporal_lineage",
+                    "persistent_root_coactivity_episode"}:
                 raise RuntimeError("canary worker used another event identity")
             with np.load(npz_path, allow_pickle=False) as loaded:
                 arrays = {key: np.asarray(loaded[key]) for key in loaded.files}

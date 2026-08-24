@@ -58,9 +58,11 @@ def lineage_display_frames(*, event_on_ms: float, event_off_ms: float,
     return np.arange(start, stop, dtype=int)
 
 
-def lineage_bin_coordinates(labels: np.ndarray, lineage_id: int) -> np.ndarray:
-    """Return x/y bin centers for one root without hiding other roots."""
-    coordinates = np.argwhere(np.asarray(labels, int) == int(lineage_id))
+def lineage_bin_coordinates(labels: np.ndarray,
+                            lineage_ids: int | list[int]) -> np.ndarray:
+    """Return x/y bin centers for every root in one complete observation."""
+    ids = np.atleast_1d(np.asarray(lineage_ids, int))
+    coordinates = np.argwhere(np.isin(np.asarray(labels, int), ids))
     if not len(coordinates):
         return np.empty((0, 2), float)
     return np.column_stack((coordinates[:, 1] + 0.5, coordinates[:, 0] + 0.5))
@@ -143,7 +145,9 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
     mode = int(selection["mode"])
     detected_index = int(selection["detected_index"])
     event = worker_json["events"][detected_index]
-    lineage_id = int(event["lineage_id"])
+    lineage_ids = [
+        int(value) for value in event.get("lineage_ids", [event["lineage_id"]])
+    ]
     with np.load(npz_path, allow_pickle=False) as loaded:
         required = {
             "sheet_activity_counts", "sheet_activity_frame_ms",
@@ -169,7 +173,8 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
         contact_onsets = np.asarray(loaded["onsets"][detected_index], float)
     if worker_json["event_unit"].get("name") not in {
             "directed_spatiotemporal_lineage",
-            "persistent_directed_spatiotemporal_lineage"}:
+            "persistent_directed_spatiotemporal_lineage",
+            "persistent_root_coactivity_episode"}:
         raise RuntimeError("GIF input is not the frozen directed event unit")
     if not bool(event["returned"]):
         raise RuntimeError("selected directed lineage is not returned")
@@ -212,7 +217,7 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
     )
     root_outline = ax_field.scatter(
         [], [], s=30, facecolors="none", edgecolors="white", linewidths=0.8,
-        label="selected causal lineage",
+        label="complete event roots",
     )
     collision_marks = ax_field.scatter(
         [], [], s=18, marker="x", color="#D73027", linewidths=0.8,
@@ -269,7 +274,7 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
     def update(frame: int):
         image.set_data(activity[frame])
         root_outline.set_offsets(lineage_bin_coordinates(
-            selected_labels[frame], lineage_id,
+            selected_labels[frame], lineage_ids,
         ))
         collision = np.argwhere(selected_collisions[frame])
         collision_marks.set_offsets(
