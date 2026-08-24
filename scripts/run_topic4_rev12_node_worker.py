@@ -30,6 +30,7 @@ from src.topic4_node_dualmode import (  # noqa: E402
     bin_neuron_spikes,
     binned_contact_envelope,
     cascade_event_windows,
+    causal_root_event_windows,
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
     event_source_onset_maps,
@@ -64,6 +65,58 @@ ALLOWED_SCIENTIFIC_ROLES = {
 def _validate_scientific_role(role: str) -> None:
     if str(role) not in ALLOWED_SCIENTIFIC_ROLES:
         raise RuntimeError("rev12-ND scientific role changed")
+
+
+def _segmentation_variants(event_unit: dict) -> list[dict]:
+    """Freeze memory and purity sensitivities without a best-window search."""
+    method = str(event_unit.get(
+        "causal_memory_method", "global_fast_state_decay",
+    ))
+    if method == "local_ee_psp_tail":
+        parameter = "psp_tail_fraction"
+        primary_memory = float(event_unit[parameter])
+        memories = [
+            float(value) for value in event_unit.get(
+                "sensitivity_psp_tail_fractions", [primary_memory],
+            )
+        ]
+    else:
+        parameter = "fast_state_decay_multiples"
+        primary_memory = float(event_unit[parameter])
+        memories = [
+            float(value) for value in event_unit.get(
+                "sensitivity_fast_state_decay_multiples", [primary_memory],
+            )
+        ]
+    primary_dominance = float(event_unit["minimum_dominance"])
+    dominances = [
+        float(value) for value in event_unit.get(
+            "sensitivity_minimum_dominances", [primary_dominance],
+        )
+    ]
+    if (primary_memory not in memories or primary_dominance not in dominances
+            or len(set(memories)) != len(memories)
+            or len(set(dominances)) != len(dominances)):
+        raise RuntimeError("event-segmentation sensitivity grid is invalid")
+    pairs = [(memory, primary_dominance) for memory in memories]
+    pairs.extend(
+        (primary_memory, dominance) for dominance in dominances
+        if not np.isclose(dominance, primary_dominance)
+    )
+    output = []
+    for memory, dominance in pairs:
+        if not 0.5 < dominance <= 1.0:
+            raise RuntimeError("root-purity sensitivity lies outside (0.5, 1]")
+        output.append({
+            "memory_parameter": parameter,
+            "memory_value": memory,
+            "minimum_dominance": dominance,
+            "is_primary": bool(
+                np.isclose(memory, primary_memory)
+                and np.isclose(dominance, primary_dominance)
+            ),
+        })
+    return output
 
 
 def _sha256(path: Path) -> str:
@@ -130,7 +183,8 @@ def _directed_parent_contract(event_unit: dict, *, params, net: dict,
     if name in {
             "persistent_directed_spatiotemporal_lineage",
             "causal_population_excursion",
-            "persistent_root_coactivity_episode"}:
+            "persistent_root_coactivity_episode",
+            "causal_root_observation"}:
         method = str(event_unit.get(
             "causal_memory_method", "global_fast_state_decay",
         ))
@@ -534,7 +588,8 @@ def main() -> None:
             "directed_spatiotemporal_lineage",
             "persistent_directed_spatiotemporal_lineage",
             "causal_population_excursion",
-            "persistent_root_coactivity_episode"}:
+            "persistent_root_coactivity_episode",
+            "causal_root_observation"}:
         movie_config = config["source_topology"]["full_sheet_movie"]
         if not bool(movie_config.get("enabled", False)):
             raise RuntimeError("directed lineage events require the whole-run sheet movie")
@@ -592,6 +647,12 @@ def main() -> None:
                 total_ms=len(active) * float(active_dt),
             )
             compound_fragments = []
+        elif event_unit["name"] == "causal_root_observation":
+            detected, compound_fragments = causal_root_event_windows(
+                lineage["components"], assignments, detector_fragments,
+                frame_ms=float(movie["frame_ms"]),
+                total_ms=len(active) * float(active_dt),
+            )
         else:
             detected, compound_fragments = cascade_event_windows(
                 lineage["components"], assignments, detector_fragments,
@@ -651,40 +712,28 @@ def main() -> None:
         if event_unit["name"] in {
                 "persistent_directed_spatiotemporal_lineage",
                 "causal_population_excursion",
-                "persistent_root_coactivity_episode"}:
+                "persistent_root_coactivity_episode",
+                "causal_root_observation"}:
             memory_method = str(event_unit.get(
                 "causal_memory_method", "global_fast_state_decay",
             ))
-            if memory_method == "local_ee_psp_tail":
-                sensitivity_parameter = "psp_tail_fraction"
-                primary_value = float(event_unit["psp_tail_fraction"])
-                sensitivity_values = [
-                    float(value) for value in event_unit.get(
-                        "sensitivity_psp_tail_fractions", [primary_value],
-                    )
-                ]
-            else:
-                sensitivity_parameter = "fast_state_decay_multiples"
-                primary_value = float(event_unit["fast_state_decay_multiples"])
-                sensitivity_values = [
-                    float(value) for value in event_unit.get(
-                        "sensitivity_fast_state_decay_multiples", [primary_value],
-                    )
-                ]
-            if (len(set(sensitivity_values)) != len(sensitivity_values)
-                    or primary_value not in sensitivity_values):
-                raise RuntimeError("persistent-lineage sensitivity grid is invalid")
-            for sensitivity_value in sensitivity_values:
-                if np.isclose(sensitivity_value, primary_value):
-                    variant_lineage = lineage
-                    variant_assignments = assignments
-                    variant_events = detected
-                    variant_compounds = compound_fragments
+            for variant in _segmentation_variants(event_unit):
+                same_memory = np.isclose(
+                    variant["memory_value"], parent_contract["sensitivity_value"],
+                )
+                same_dominance = np.isclose(
+                    variant["minimum_dominance"],
+                    float(event_unit["minimum_dominance"]),
+                )
+                variant_unit = {
+                    **event_unit,
+                    variant["memory_parameter"]: variant["memory_value"],
+                    "minimum_dominance": variant["minimum_dominance"],
+                }
+                if same_memory:
                     variant_contract = parent_contract
+                    variant_lineage = lineage
                 else:
-                    variant_unit = {
-                        **event_unit, sensitivity_parameter: sensitivity_value,
-                    }
                     variant_contract = _directed_parent_contract(
                         variant_unit, params=substrate.params, net=substrate.net,
                         engine=substrate.engine, frame_ms=float(movie["frame_ms"]),
@@ -702,10 +751,15 @@ def main() -> None:
                             variant_contract["forward_parent_neighborhood_bins"]
                         ),
                     )
+                if same_memory and same_dominance:
+                    variant_assignments = assignments
+                    variant_events = detected
+                    variant_compounds = compound_fragments
+                else:
                     variant_assignments = assign_detector_fragments_to_directed_lineages(
                         movie["activity_counts"], variant_lineage["labels"],
                         detector_fragments, frame_ms=float(movie["frame_ms"]),
-                        minimum_dominance=float(event_unit["minimum_dominance"]),
+                        minimum_dominance=variant["minimum_dominance"],
                     )
                     if event_unit["name"] == "causal_population_excursion":
                         variant_episodes = population_excursion_episodes(
@@ -734,6 +788,12 @@ def main() -> None:
                             total_ms=len(active) * float(active_dt),
                         )
                         variant_compounds = []
+                    elif event_unit["name"] == "causal_root_observation":
+                        variant_events, variant_compounds = causal_root_event_windows(
+                            variant_lineage["components"], variant_assignments,
+                            detector_fragments, frame_ms=float(movie["frame_ms"]),
+                            total_ms=len(active) * float(active_dt),
+                        )
                     else:
                         variant_events, variant_compounds = cascade_event_windows(
                             variant_lineage["components"], variant_assignments,
@@ -741,8 +801,10 @@ def main() -> None:
                             total_ms=len(active) * float(active_dt),
                         )
                 lineage_sensitivity.append({
-                    "parameter": sensitivity_parameter,
-                    "value": sensitivity_value,
+                    "parameter": variant["memory_parameter"],
+                    "value": variant["memory_value"],
+                    "minimum_dominance": variant["minimum_dominance"],
+                    "is_primary": variant["is_primary"],
                     "contract": variant_contract,
                     "lineage": variant_lineage,
                     "assignments": variant_assignments,
@@ -799,8 +861,7 @@ def main() -> None:
         sensitivity_rows = []
         for variant_index, variant in enumerate(lineage_sensitivity):
             variant_events = variant["events"]
-            if np.isclose(
-                    variant["value"], float(parent_contract["sensitivity_value"])):
+            if variant["is_primary"]:
                 variant_onsets, variant_ranks = onsets, ranks
             else:
                 variant_onsets, variant_ranks, _ = _event_contact_readout(
@@ -834,6 +895,8 @@ def main() -> None:
             sensitivity_rows.append({
                 "sensitivity_parameter": variant["parameter"],
                 "sensitivity_value": variant["value"],
+                "minimum_dominance": variant["minimum_dominance"],
+                "is_primary": variant["is_primary"],
                 **variant["contract"],
                 "n_directed_roots": len(components),
                 "n_events": count,
@@ -862,6 +925,12 @@ def main() -> None:
             "lineage_sensitivity_values": np.asarray([
                 row["value"] for row in lineage_sensitivity
             ], np.float32),
+            "lineage_sensitivity_minimum_dominances": np.asarray([
+                row["minimum_dominance"] for row in lineage_sensitivity
+            ], np.float32),
+            "lineage_sensitivity_primary": np.asarray([
+                row["is_primary"] for row in lineage_sensitivity
+            ], bool),
             "lineage_sensitivity_event_counts": sensitivity_event_counts,
             "lineage_sensitivity_onsets": sensitivity_onsets,
             "lineage_sensitivity_ranks": sensitivity_ranks,
@@ -899,7 +968,8 @@ def main() -> None:
                 "directed_spatiotemporal_lineage",
                 "persistent_directed_spatiotemporal_lineage",
                 "causal_population_excursion",
-                "persistent_root_coactivity_episode"}:
+                "persistent_root_coactivity_episode",
+                "causal_root_observation"}:
             fragment_rows = [
                 directed_assignment_by_fragment[int(fragment)]
                 for fragment in event_row["detector_fragment_indices"]

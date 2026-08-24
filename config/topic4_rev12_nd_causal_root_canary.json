@@ -1,0 +1,98 @@
+{
+  "schema_id": "topic4_rev12_nd_causal_root_canary_v1",
+  "scientific_role": "development_only_engine_derived_event_identity_canary",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_p_causal_root_canary",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_p_causal_root_canary/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "source_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_o_root_coactivity_psp_canary/candidate_manifest.json",
+      "sha256": "57235097689d8d9943e43d96ce3001365f25e372f09eb494e0e096570f9785ee"
+    },
+    "causal_episode_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_m_causal_episode_canary/aggregate/population_excursion_canary_audit.json",
+      "sha256": "3a85fde5ab2586f5f6518e1fe907a81686ac3a314e2ebb2edfe3afb54f3b9b7d"
+    },
+    "root_coactivity_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_o_root_coactivity_psp_canary/aggregate/root_coactivity_canary_audit.json",
+      "sha256": "f8000937f7fff5bc1b027e95941c7d4900c3a39879244080e8d8b1da4bbc75bd"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [2211, 2212],
+    "fit_network_seeds": [],
+    "selection_network_seeds": [],
+    "confirmation_network_seeds": [],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "causal_root_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "causal_memory_formula": "descending E_to_E PSP support at 50 percent of peak plus maximum local-compatible E_to_E delay",
+    "observation_rule": "one directed root is one KMeans observation; detector fragments establish observability but cannot change root start or stop",
+    "compound_rule": "mixed-root detector fragments remain explicit compound observations and never enter A or B",
+    "root_inclusion": "one directed causal root per evaluable observation; compound detector fragments retained outside KMeans",
+    "boundary_signal": "whole_sheet_E_activity_movie_and_engine_derived_effective_excitatory_response_only",
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 80.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "field_search": {
+    "candidate_ids": [
+      "stage_i_a02_d01_s01_p",
+      "stage_i_a00_d03_s00_p",
+      "stage_i_anchor_00"
+    ],
+    "new_field_parameters_released": false,
+    "purpose": "causal-root event identity canary only; no field selection"
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 6,
+    "estimated_worker_gib": 10.0,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Event-identity canary only. It cannot select a Node field. EE, E-to-I and Z/M remain off."
+}

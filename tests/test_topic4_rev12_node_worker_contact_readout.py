@@ -7,6 +7,7 @@ from scipy import sparse
 from scripts.run_topic4_rev12_node_worker import (
     _directed_parent_contract,
     _event_contact_readout,
+    _segmentation_variants,
     _validate_scientific_role,
 )
 from src.sef_hfo_observation import VirtualMontage
@@ -169,3 +170,19 @@ def test_worker_accepts_engine_derived_event_identity_canary_role():
     )
     with pytest.raises(RuntimeError, match="scientific role"):
         _validate_scientific_role("patient_selected_event_window")
+
+
+def test_causal_root_sensitivity_changes_one_axis_at_a_time():
+    variants = _segmentation_variants({
+        "causal_memory_method": "local_ee_psp_tail",
+        "psp_tail_fraction": 0.5,
+        "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+        "minimum_dominance": 0.7,
+        "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    })
+    assert len(variants) == 5
+    assert sum(row["is_primary"] for row in variants) == 1
+    assert {(row["memory_value"], row["minimum_dominance"]) for row in variants} == {
+        (0.8, 0.7), (0.5, 0.7), (0.2, 0.7),
+        (0.5, 0.6), (0.5, 0.8),
+    }

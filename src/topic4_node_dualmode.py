@@ -1393,6 +1393,85 @@ def cascade_event_windows(components: list[dict], assignments: list[dict],
     return events, compounds
 
 
+def causal_root_event_windows(components: list[dict], assignments: list[dict],
+                              fragments: list[dict], *, frame_ms: float,
+                              total_ms: float) -> tuple[list[dict], list[dict]]:
+    """Use one directed root as one event and retain mixed fragments separately.
+
+    Detector fragments establish observability only.  They never expand a
+    root's latent start or stop time, and a mixed fragment is not forced into a
+    patient direction class.
+    """
+    frame_ms = float(frame_ms)
+    total_ms = float(total_ms)
+    if frame_ms <= 0.0 or total_ms <= 0.0 or len(assignments) != len(fragments):
+        raise ValueError("causal-root event inputs are inconsistent")
+    component_by_id = {int(row["cascade_id"]): row for row in components}
+    groups: dict[int, list[int]] = {}
+    compounds = []
+    for assignment, fragment in zip(assignments, fragments):
+        fragment_index = int(assignment["detector_fragment_index"])
+        root_id = assignment.get("dominant_lineage_id")
+        if assignment["compound"] or root_id is None:
+            compounds.append({
+                "detector_fragment_index": fragment_index,
+                "detector_fragment_indices": [fragment_index],
+                "trigger_t_on": float(fragment["t_on"]),
+                "trigger_t_off": float(fragment["t_off"]),
+                "compound": True,
+                "dominant_activity_fraction": float(
+                    assignment["dominant_activity_fraction"]
+                ),
+                "second_activity_fraction": float(
+                    assignment["second_activity_fraction"]
+                ),
+                "collision_activity_fraction": float(
+                    assignment["collision_activity_fraction"]
+                ),
+            })
+            continue
+        root_id = int(root_id)
+        if root_id not in component_by_id:
+            raise RuntimeError("fragment references an absent directed root")
+        groups.setdefault(root_id, []).append(fragment_index)
+
+    events = []
+    for root_id, fragment_indices in groups.items():
+        component = component_by_id[root_id]
+        selected = [fragments[index] for index in fragment_indices]
+        t_on = max(0.0, float(component["start_frame"]) * frame_ms)
+        t_off = min(total_ms, float(component["stop_frame"] + 1) * frame_ms)
+        events.append({
+            "cascade_id": root_id,
+            "lineage_ids": [root_id],
+            "root_count": 1,
+            "detector_fragment_indices": sorted(fragment_indices),
+            "trigger_t_on": float(min(row["t_on"] for row in selected)),
+            "trigger_t_off": float(max(row["t_off"] for row in selected)),
+            "t_on": t_on,
+            "t_off": t_off,
+            "dur_ms": float(max(frame_ms, t_off - t_on)),
+            "returned": bool(
+                t_off < total_ms
+                and all(bool(row.get("returned", True)) for row in selected)
+            ),
+            "compound": False,
+            "activity_mass": float(component["activity_mass"]),
+            "active_bin_frames": int(component["active_bin_frames"]),
+        })
+    events.sort(key=lambda row: (row["t_on"], row["cascade_id"]))
+    compounds.sort(key=lambda row: row["trigger_t_on"])
+    represented = {
+        int(index) for event in events
+        for index in event["detector_fragment_indices"]
+    }.union({
+        int(row["detector_fragment_indices"][0]) for row in compounds
+    })
+    if represented != set(range(len(fragments))):
+        raise RuntimeError("causal-root observations dropped detector fragments")
+    return events, compounds
+
+
 def annotate_population_excursions_with_lineages(
         events: list[dict], activity_counts: np.ndarray,
         lineage_labels: np.ndarray, *, frame_ms: float) -> list[dict]:

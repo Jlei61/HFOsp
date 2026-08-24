@@ -4,6 +4,7 @@ from src.topic4_node_dualmode import (
     annotate_population_excursions_with_lineages,
     assign_detector_fragments_to_directed_lineages,
     assign_detector_fragments_to_cascades,
+    causal_root_event_windows,
     cascade_event_windows,
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
@@ -215,6 +216,43 @@ def test_cascade_window_does_not_call_nonreturning_fragment_returned():
         components, assignments, [fragment], frame_ms=2.0, total_ms=100.0,
     )
     assert events[0]["returned"] is False
+
+
+def test_causal_root_window_is_never_expanded_by_a_long_detector_fragment():
+    components = [_root_component(7, 3, 7)]
+    assignments = [{
+        "detector_fragment_index": 0, "dominant_lineage_id": 7,
+        "dominant_activity_fraction": 0.9,
+        "second_activity_fraction": 0.1,
+        "collision_activity_fraction": 0.0, "compound": False,
+    }]
+    events, compounds = causal_root_event_windows(
+        components, assignments,
+        [{"t_on": 0.0, "t_off": 30.0, "returned": True}],
+        frame_ms=2.0, total_ms=100.0,
+    )
+    assert compounds == []
+    assert (events[0]["t_on"], events[0]["t_off"]) == (6.0, 16.0)
+    assert (events[0]["trigger_t_on"], events[0]["trigger_t_off"]) == (0.0, 30.0)
+    assert events[0]["lineage_ids"] == [7]
+
+
+def test_causal_root_window_keeps_mixed_detector_fragment_outside_kmeans():
+    components = [_root_component(1, 1, 3), _root_component(2, 1, 3)]
+    assignments = [{
+        "detector_fragment_index": 0, "dominant_lineage_id": 1,
+        "dominant_activity_fraction": 0.55,
+        "second_activity_fraction": 0.45,
+        "collision_activity_fraction": 0.0, "compound": True,
+    }]
+    events, compounds = causal_root_event_windows(
+        components, assignments,
+        [{"t_on": 2.0, "t_off": 8.0, "returned": True}],
+        frame_ms=2.0, total_ms=20.0,
+    )
+    assert events == []
+    assert len(compounds) == 1
+    assert compounds[0]["detector_fragment_indices"] == [0]
 
 
 def test_population_episode_keeps_multiple_roots_in_one_statistical_event():

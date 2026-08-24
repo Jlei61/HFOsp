@@ -266,7 +266,11 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
     ax_trace.tick_params(axis="y", length=0, pad=3)
     ax_trace.set(
         xlim=(trace_time[0], trace_time[-1]), ylim=(-1.0, offsets[0] + 1.0),
-        xlabel="time from complete-event onset (ms)",
+        xlabel=(
+            "time from causal-root onset (ms)"
+            if worker_json["event_unit"]["name"] == "causal_root_observation"
+            else "time from complete-event onset (ms)"
+        ),
         ylabel="30-80 Hz virtual-contact activity",
     )
     ax_trace.spines[["top", "right", "left"]].set_visible(False)
@@ -355,16 +359,21 @@ def main() -> None:
         worker, worker_json, source_evaluable, random_state=args.seed,
     )
     figures = output_root / "figures" / stem
+    causal_root = worker_json["event_unit"]["name"] == "causal_root_observation"
+    suffix = "causal_root" if causal_root else "complete_event"
     records = [
         _render_lineage(
             npz_path=npz_path, worker_json=worker_json, patient=patient,
             selection=selection,
-            output=figures / f"{stem}_pattern{selection['mode'] + 1}_complete_event.gif",
+            output=figures / f"{stem}_pattern{selection['mode'] + 1}_{suffix}.gif",
         )
         for selection in selections
     ]
     metadata = {
-        "status": "REV12ND_ROOT_COACTIVITY_GIFS_COMPLETE",
+        "status": (
+            "REV12ND_CAUSAL_ROOT_GIFS_COMPLETE" if causal_root
+            else "REV12ND_ROOT_COACTIVITY_GIFS_COMPLETE"
+        ),
         "candidate_id": args.candidate_id,
         "seed": args.seed,
         "event_unit": worker_json["event_unit"],
@@ -378,7 +387,21 @@ def main() -> None:
     }
     figures.mkdir(parents=True, exist_ok=True)
     (figures / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
-    (figures / "README.md").write_text(f"""### {stem}_pattern1_complete_event.gif
+    if causal_root:
+        readme = f"""### {stem}_pattern1_causal_root.gif
+
+纯 Node field 在 seed {args.seed} 中由自然 KMeans 第一种传播模式自动选出的单根 causal event。左侧 `viridis` 底图保留同一时刻全场全部 E 神经元活动，白色空框只标用于读出的 causal root；其他热点不会被隐藏，但混合 detector 窗已作为 compound 留在 A/B 之外。右侧圆点是该 root 的 exact-neuron contact onset，阴影严格使用 latent root 起止，虚线只表示电极 detector 首次越阈。
+
+**关注点**：检查白框活动是否形成一段连续传播，以及框外并发活动是否被诚实显示但未混入该模式。
+
+### {stem}_pattern2_causal_root.gif
+
+使用完全相同的因果根、接触点读出和自动选例合同，展示自然 KMeans 第二种传播模式；不按患者模板外观或动画效果挑选。
+
+**关注点**：比较两种 root 的起点和传播方向，确认 A/B 不再来自同一长 detector 窗的不同片段。
+"""
+    else:
+        readme = f"""### {stem}_pattern1_complete_event.gif
 
 纯 Node field 在 seed {args.seed} 中由自然 KMeans 第一种传播模式自动选出的完整事件。左侧 `viridis` 底图显示同一时刻全场所有 E 神经元活动；白色空框标出该事件包含的全部根，红叉标记根相遇时无法唯一归属的边界。右侧保留全部 15 个 virtual-contact readout，彩色圆点标完整事件的 exact-neuron contact onset，阴影范围是完整事件窗口，虚线是原 detector 首次越阈时刻。
 
@@ -389,7 +412,8 @@ def main() -> None:
 与上图使用完全相同的事件、颜色和时间合同，展示自然 KMeans 第二种传播模式。事件按簇中心距离自动选择，不按患者模板外观或动画效果挑选。
 
 **关注点**：比较两种模式的根位置和传播方向；不能再把同一 detector 长窗口中互不相干的上下活动合并成一个双向事件。
-""")
+"""
+    (figures / "README.md").write_text(readme)
     print(json.dumps(metadata, indent=2))
 
 

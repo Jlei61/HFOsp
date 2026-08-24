@@ -56,6 +56,17 @@ def partition_coassignment_jaccard(left: np.ndarray, right: np.ndarray) -> float
     return float(np.sum(same_left & same_right) / union) if union else 1.0
 
 
+def clean_fragment_jaccard(left: np.ndarray, right: np.ndarray) -> float:
+    """Compare which detector fragments remain causal-root evaluable."""
+    left = np.asarray(left, int)
+    right = np.asarray(right, int)
+    if left.shape != right.shape or left.ndim != 1:
+        raise ValueError("fragment partitions must be aligned vectors")
+    clean_left, clean_right = left >= 0, right >= 0
+    union = int(np.sum(clean_left | clean_right))
+    return float(np.sum(clean_left & clean_right) / union) if union else 1.0
+
+
 def _reorder(values: np.ndarray, source: np.ndarray, target: np.ndarray) -> np.ndarray:
     source = np.asarray(source).astype(str)
     target = np.asarray(target).astype(str)
@@ -144,7 +155,7 @@ def main() -> None:
     )
     calibration, calibration_source = _component_calibration(config, artifact_root)
     rows = []
-    grouped_workers: dict[tuple[str, float], list[dict]] = {}
+    grouped_workers: dict[tuple[str, float, float], list[dict]] = {}
     parity_keys = (
         "contact_names", "shaft_ids", "contact_xy_mm", "active_fraction",
         "active_fraction_bin_ms", "contact_envelope", "contact_envelope_dt_ms",
@@ -160,7 +171,8 @@ def main() -> None:
             payload = json.loads(json_path.read_text())
             if payload["event_unit"].get("name") not in {
                     "persistent_directed_spatiotemporal_lineage",
-                    "persistent_root_coactivity_episode"}:
+                    "persistent_root_coactivity_episode",
+                    "causal_root_observation"}:
                 raise RuntimeError("canary worker used another event identity")
             with np.load(npz_path, allow_pickle=False) as loaded:
                 arrays = {key: np.asarray(loaded[key]) for key in loaded.files}
@@ -181,6 +193,10 @@ def main() -> None:
             )
             counts = np.asarray(arrays["lineage_sensitivity_event_counts"], int)
             partitions = np.asarray(arrays["lineage_sensitivity_fragment_partition"], int)
+            dominances = np.asarray(arrays.get(
+                "lineage_sensitivity_minimum_dominances",
+                np.full(len(values), config["event_unit"]["minimum_dominance"]),
+            ), float)
             sensitivity_parameter = str(payload["event_unit"].get(
                 "sensitivity_parameter", "fast_state_decay_multiples",
             ))
@@ -188,9 +204,15 @@ def main() -> None:
                 "sensitivity_value",
                 config["event_unit"].get("fast_state_decay_multiples"),
             ))
-            primary_index = int(np.flatnonzero(np.isclose(
-                values, primary_value,
-            ))[0])
+            primary_flags = np.asarray(arrays.get(
+                "lineage_sensitivity_primary",
+                np.isclose(values, primary_value) & np.isclose(
+                    dominances, float(config["event_unit"]["minimum_dominance"]),
+                ),
+            ), bool)
+            if np.sum(primary_flags) != 1:
+                raise RuntimeError("canary has no unique primary segmentation")
+            primary_index = int(np.flatnonzero(primary_flags)[0])
             sensitivity_rows = []
             for index, value in enumerate(values):
                 count = int(counts[index])
@@ -224,7 +246,10 @@ def main() -> None:
                     seed=20260824 + int(seed) + index,
                 )
                 grouped_workers.setdefault(
-                    (str(candidate["candidate_id"]), float(value)), [],
+                    (
+                        str(candidate["candidate_id"]), float(value),
+                        float(dominances[index]),
+                    ), [],
                 ).append({
                     "ranks": ranks[selected], "labels": labels[selected],
                     "matched_patient": matched,
@@ -232,6 +257,8 @@ def main() -> None:
                 sensitivity_rows.append({
                     "sensitivity_parameter": sensitivity_parameter,
                     "sensitivity_value": float(value),
+                    "minimum_dominance": float(dominances[index]),
+                    "is_primary": bool(primary_flags[index]),
                     "n_events": count,
                     "n_returned": int(np.sum(selected)),
                     "mode_counts": np.bincount(labels[selected], minlength=2),
@@ -241,8 +268,18 @@ def main() -> None:
                     "partition_jaccard_vs_primary": partition_coassignment_jaccard(
                         partitions[index], partitions[primary_index],
                     ),
-                    "n_detector_fragments_with_multiple_event_memberships": int(
+                    "clean_fragment_jaccard_vs_primary": clean_fragment_jaccard(
+                        partitions[index], partitions[primary_index],
+                    ),
+                    "clean_fragment_status_agreement_vs_primary": float(np.mean(
+                        (partitions[index] >= 0)
+                        == (partitions[primary_index] >= 0)
+                    )),
+                    "n_compound_or_unassigned_detector_fragments": int(
                         np.sum(partitions[index] < 0)
+                    ),
+                    "compound_or_unassigned_detector_fraction": float(
+                        np.mean(partitions[index] < 0)
                     ),
                     "matched_patient": matched,
                     "natural_kmeans": natural,
@@ -262,7 +299,7 @@ def main() -> None:
             config["search"]["canary_network_seeds"]):
         raise RuntimeError("persistent-lineage canary inventory is incomplete")
     grouped = []
-    for (candidate_id, value), workers in sorted(grouped_workers.items()):
+    for (candidate_id, value, dominance), workers in sorted(grouped_workers.items()):
         objectives = np.asarray([
             worker["matched_patient"]["objective"] for worker in workers
         ], float)
@@ -275,6 +312,7 @@ def main() -> None:
                 else "fast_state_decay_multiples"
             ),
             "sensitivity_value": value,
+            "minimum_dominance": dominance,
             "n_networks": len(workers),
             "n_returned_events": int(sum(len(worker["ranks"]) for worker in workers)),
             "mode_counts": np.bincount(
@@ -283,7 +321,8 @@ def main() -> None:
             "mean_matched_patient_objective": float(np.mean(objectives)),
             "worst_network_matched_patient_objective": float(np.max(objectives)),
             "pooled_natural_kmeans": _natural_summary(
-                workers, 20260824 + int(round(100 * value)),
+                workers,
+                20260824 + int(round(100 * value)) + int(round(1000 * dominance)),
             ),
         })
     robustness = []
@@ -297,17 +336,40 @@ def main() -> None:
             row["pooled_natural_kmeans"]["direction_balanced_alignment"]
             for row in selected
         ], float)
+        worker_sensitivities = [
+            sensitivity
+            for row in rows if row["candidate_id"] == candidate_id
+            for sensitivity in row["sensitivity"]
+        ]
         robustness.append({
             "candidate_id": candidate_id,
             "worst_matched_patient_objective": float(np.max(objectives)),
             "mean_matched_patient_objective": float(np.mean(objectives)),
             "minimum_kmeans_direction_balanced_alignment": float(np.min(alignments)),
             "maximum_kmeans_direction_balanced_alignment": float(np.max(alignments)),
+            "minimum_clean_fragment_jaccard_vs_primary": float(min(
+                row["clean_fragment_jaccard_vs_primary"]
+                for row in worker_sensitivities
+            )),
+            "maximum_compound_detector_fraction": float(max(
+                row["compound_or_unassigned_detector_fraction"]
+                for row in worker_sensitivities
+            )),
+            "minimum_returned_causal_root_events": int(min(
+                row["n_returned"] for row in worker_sensitivities
+            )),
             "selection_eligible": False,
         })
+    causal_root = config["event_unit"]["name"] == "causal_root_observation"
     payload = {
-        "schema_id": "topic4_rev12_root_coactivity_canary_audit_v1",
-        "status": "REV12ND_ROOT_COACTIVITY_CANARY_AUDIT_COMPLETE",
+        "schema_id": (
+            "topic4_rev12_causal_root_canary_audit_v1" if causal_root
+            else "topic4_rev12_root_coactivity_canary_audit_v1"
+        ),
+        "status": (
+            "REV12ND_CAUSAL_ROOT_CANARY_AUDIT_COMPLETE" if causal_root
+            else "REV12ND_ROOT_COACTIVITY_CANARY_AUDIT_COMPLETE"
+        ),
         "n_workers": len(rows),
         "component_calibration": calibration_source,
         "rows": rows,
@@ -318,7 +380,10 @@ def main() -> None:
             "held-out data, EE, E-to-I and Z/M do not select this result."
         ),
     }
-    output = output_root / "aggregate" / "root_coactivity_canary_audit.json"
+    output = output_root / "aggregate" / (
+        "causal_root_canary_audit.json" if causal_root
+        else "root_coactivity_canary_audit.json"
+    )
     _atomic_json(output, _safe(payload))
     print(json.dumps({"status": payload["status"], "output": str(output)}, indent=2))
 

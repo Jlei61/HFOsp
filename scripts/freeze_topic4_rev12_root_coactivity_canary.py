@@ -38,11 +38,22 @@ def _atomic_json(path: Path, payload: dict) -> None:
 def validate_event_canary_contract(config: dict) -> None:
     """Reject any drift that turns the event canary into field selection."""
     event_unit = config["event_unit"]
-    if (event_unit["name"] != "persistent_root_coactivity_episode"
-            or event_unit["contact_geometry_used_for_boundary"]
-            or event_unit["root_inclusion"] != (
-                "all positive activity mass; no dominance exclusion")):
+    name = str(event_unit["name"])
+    if (name not in {
+            "persistent_root_coactivity_episode", "causal_root_observation"}
+            or event_unit["contact_geometry_used_for_boundary"]):
         raise RuntimeError("root-coactivity event contract drifted")
+    if name == "persistent_root_coactivity_episode":
+        expected_inclusion = "all positive activity mass; no dominance exclusion"
+        expected_purpose = "engine-derived event identity canary only; no field selection"
+    else:
+        expected_inclusion = (
+            "one directed causal root per evaluable observation; compound detector "
+            "fragments retained outside KMeans"
+        )
+        expected_purpose = "causal-root event identity canary only; no field selection"
+    if event_unit["root_inclusion"] != expected_inclusion:
+        raise RuntimeError("causal-root inclusion contract drifted")
     if event_unit.get("causal_memory_method") != "local_ee_psp_tail":
         raise RuntimeError("engine-derived causal-memory method drifted")
     primary = float(event_unit["psp_tail_fraction"])
@@ -55,10 +66,18 @@ def validate_event_canary_contract(config: dict) -> None:
             or len(set(fractions)) != len(fractions)
             or float(event_unit["local_ee_delay_quantile"]) != 1.0):
         raise RuntimeError("engine-derived causal-memory contract drifted")
+    dominances = [
+        float(value) for value in event_unit.get(
+            "sensitivity_minimum_dominances", [event_unit["minimum_dominance"]],
+        )
+    ]
+    if (float(event_unit["minimum_dominance"]) not in dominances
+            or any(not 0.5 < value <= 1.0 for value in dominances)
+            or len(set(dominances)) != len(dominances)):
+        raise RuntimeError("causal-root purity sensitivity drifted")
     field_search = config["field_search"]
     if (bool(field_search["new_field_parameters_released"])
-            or field_search["purpose"] != (
-                "engine-derived event identity canary only; no field selection")):
+            or field_search["purpose"] != expected_purpose):
         raise RuntimeError("event canary cannot release or select a Node field")
 
 

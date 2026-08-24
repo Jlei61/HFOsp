@@ -18,6 +18,12 @@ def _config():
     )
 
 
+def _causal_config():
+    return json.loads(
+        (ROOT / "config/topic4_rev12_nd_causal_root_canary.json").read_text()
+    )
+
+
 def test_psp_canary_is_engine_derived_and_nonselective():
     config = _config()
     validate_event_canary_contract(config)
@@ -29,6 +35,17 @@ def test_psp_canary_is_engine_derived_and_nonselective():
     assert config["search"]["fit_network_seeds"] == []
     assert config["search"]["selection_network_seeds"] == []
     assert config["search"]["confirmation_network_seeds"] == []
+
+
+def test_causal_root_canary_keeps_compounds_outside_kmeans():
+    config = _causal_config()
+    validate_event_canary_contract(config)
+    event_unit = config["event_unit"]
+    assert event_unit["name"] == "causal_root_observation"
+    assert event_unit["psp_tail_fraction"] == 0.5
+    assert event_unit["sensitivity_psp_tail_fractions"] == [0.8, 0.5, 0.2]
+    assert event_unit["sensitivity_minimum_dominances"] == [0.6, 0.7, 0.8]
+    assert "never enter A or B" in event_unit["compound_rule"]
 
 
 @pytest.mark.parametrize(("path", "value"), [

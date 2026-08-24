@@ -163,6 +163,28 @@ audit artifact and cannot reopen the field fit.
    episodes or segmentation-dependent A/B labels remain, keep Node fitting
    closed and revise the event producer rather than tuning the field.
 
+Observed result: the canary remained invalid.  The primary events had median
+duration 144-164 ms and 91-97% contained multiple roots.  Complete-event GIFs
+showed successive hotspots inside both natural clusters.  The 10% PSP memory
+was shorter than the old global formula, but transitive root coactivity still
+merged distinct packets.
+
+## Phase 1j: observable causal-root canary (current blocker)
+
+1. Use one directed root as one model observation.  A detector fragment may
+   establish observability but cannot extend latent root boundaries.
+2. Keep mixed-root fragments as explicit compounds outside KMeans and report
+   their fraction; never force them into A or B and never silently delete them.
+3. Freeze half-maximum E-to-E PSP support plus maximum local delay as primary.
+   Audit 80%/20% support and root dominance 0.60/0.70/0.80 one axis at a time.
+4. Run the same three fields x two network seeds, with Node only and exact
+   per-neuron root-restricted contact readout.
+5. Report clean event counts, compound fraction, latent root duration, matched
+   patient loss, natural KMeans alignment and partition sensitivity.
+6. Render one algorithmic root representative per natural cluster with all
+   concurrent sheet activity visible.  Reopen fitting only if the GIF and
+   metrics agree that A/B are different causal propagation events.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the
@@ -254,7 +276,8 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-Phase 1i is the only runnable phase.  Freeze and run the six-trajectory
-engine-derived event-identity canary, audit all three PSP-tail definitions and
-inspect complete-event GIFs.  Stage I field generation, selection, intervention,
-EE, E-to-I and Z/M remain closed until this event producer is accepted.
+Phase 1j is the only runnable phase.  Freeze and run the six-trajectory causal-
+root canary, audit all five memory/purity variants and inspect root-specific
+GIFs with full concurrent activity visible.  Stage I field generation,
+selection, intervention, EE, E-to-I and Z/M remain closed until this event
+producer is accepted.

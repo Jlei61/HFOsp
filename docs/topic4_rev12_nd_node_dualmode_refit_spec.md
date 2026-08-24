@@ -255,7 +255,7 @@ local 1 mm parent search with the maximum delay anywhere in the 20 mm network
 and retained a PSP after only 0.7% of a membrane exponential remained.  This
 memory definition is rejected before field optimization.
 
-### Engine-derived root memory (2026-08-24; current primary)
+### Engine-derived root memory (2026-08-24; rejected grouping canary)
 
 The coactivity grouping above is retained, but root memory is derived from the
 excitatory pathway that can propagate E-neuron activity:
@@ -274,10 +274,33 @@ inside the same 1 mm parent cone and takes their maximum frozen delay.  For seed
 100 ms plus 35.2 ms global delay.  These values use no contact geometry, patient
 label or fit score.
 
-Candidate summaries retain the worst matched patient loss and minimum natural-
-KMeans alignment over the 5%/10%/20% PSP-tail definitions.  No Node field fit
-may resume until event partitions and the two-mode interpretation are stable in
-this engine-derived canary.
+Candidate summaries retained the worst matched patient loss and minimum natural-
+KMeans alignment over the 5%/10%/20% PSP-tail definitions.  Shortening memory
+did not repair event identity: 91-97% of events still contained several roots,
+the median event contained 5-7 roots, and representative A/B windows showed
+successive spatial packets rather than one propagation cause.  The failure is
+the transitive coactivity grouping: if A overlaps B and B overlaps C, all three
+become one observation even when A and C never share an initiation.  This event
+unit is rejected and cannot reopen the field fit.
+
+### Observable causal-root event (2026-08-24; current primary)
+
+The formal model event is now one directed latent root.  Virtual-contact
+detector fragments determine whether the root is observable, but they cannot
+move its start or stop.  Fragments dominated by no single root remain explicit
+`compound` observations and never enter the two patient direction classes.
+They are retained as a field-quality endpoint rather than silently dropped.
+
+Root continuation uses the descending half-maximum E-to-E PSP support plus the
+maximum delay among local E-to-E edges compatible with the 1 mm movie cone.
+The 80% and 20% PSP landmarks are mandatory memory sensitivities.  Root purity
+uses 0.70 as primary and 0.60/0.80 as mandatory sensitivities.  The five
+one-axis-at-a-time variants are all reported; no best event window, tail value
+or purity threshold may be selected from patient loss or KMeans performance.
+
+The required GIF shows all sheet activity while outlining only the causal root
+used for contact ranks.  Concurrent activity must remain visible, but mixed
+activity is labelled compound instead of being hidden or forced into A/B.
 
 ## 2. Scientific question
 
@@ -403,7 +426,8 @@ trying to test.
 
 KMeans is computed after drawing the same event count from every network.
 Patient held-out R2 and source topology do not select the fit library.
-The formal candidate value is computed at 5%/10%/20% PSP-tail support.  The
+The formal candidate value is computed across the frozen causal-root memory and
+purity sensitivities.  The
 worst `J_patient`, minimum balanced KMeans alignment and their across-segmentation
 spread are retained; no best-window selection is allowed.
 
@@ -553,7 +577,8 @@ knee of normalized Pareto coordinates, with field roughness as the last
 tie-break.
 
 No search resumes until the same shortlist and two-mode interpretation are
-stable at 5%, 10% and 20% excitatory-PSP tail support.  Instability is an
+stable across 80%/50%/20% excitatory-PSP support and 0.60/0.70/0.80 root
+purity.  Instability is an
 event-definition failure, not optimizer uncertainty.
 
 ### Confirmation
