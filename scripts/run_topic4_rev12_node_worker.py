@@ -24,6 +24,7 @@ from scripts.run_topic4_rev9l_forced_source_worker import (  # noqa: E402
 )
 from src.topic4_core_field_runner import atomic_write_json  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
+    annotate_population_excursions_with_lineages,
     assign_detector_fragments_to_directed_lineages,
     assign_detector_fragments_to_cascades,
     bin_neuron_spikes,
@@ -110,7 +111,9 @@ def _directed_parent_contract(event_unit: dict, *, params, net: dict,
     neighborhood = int(event_unit.get("forward_parent_neighborhood_bins", 1))
     if neighborhood < 0:
         raise ValueError("lineage parent neighborhood cannot be negative")
-    if name == "persistent_directed_spatiotemporal_lineage":
+    if name in {
+            "persistent_directed_spatiotemporal_lineage",
+            "causal_population_excursion"}:
         multiple = float(event_unit["fast_state_decay_multiples"])
         if multiple <= 0.0:
             raise ValueError("fast-state decay multiple must be positive")
@@ -474,7 +477,8 @@ def main() -> None:
         }
     elif event_unit["name"] in {
             "directed_spatiotemporal_lineage",
-            "persistent_directed_spatiotemporal_lineage"}:
+            "persistent_directed_spatiotemporal_lineage",
+            "causal_population_excursion"}:
         movie_config = config["source_topology"]["full_sheet_movie"]
         if not bool(movie_config.get("enabled", False)):
             raise RuntimeError("directed lineage events require the whole-run sheet movie")
@@ -507,11 +511,30 @@ def main() -> None:
         directed_assignment_by_fragment = {
             int(row["detector_fragment_index"]): row for row in assignments
         }
-        detected, compound_fragments = cascade_event_windows(
-            lineage["components"], assignments, detector_fragments,
-            frame_ms=float(movie["frame_ms"]),
-            total_ms=len(active) * float(active_dt),
-        )
+        if event_unit["name"] == "causal_population_excursion":
+            low_fraction = float(event_unit["low_threshold_fraction"])
+            if not np.isclose(low_fraction, float(RETURN_FRAC)):
+                raise RuntimeError("causal episode low fraction drifted from detector")
+            episodes = population_excursion_episodes(
+                detector_fragments, active, sample_dt_ms=float(active_dt),
+                event_on_threshold=float(substrate.detector_threshold),
+                low_threshold_fraction=low_fraction,
+                reset_ms=float(parent_contract["causal_memory_ms"]),
+                pre_roll_ms=float(event_unit.get(
+                    "pre_roll_ms", parent_contract["fast_state_tau_ms"],
+                )),
+            )
+            detected = annotate_population_excursions_with_lineages(
+                episodes, movie["activity_counts"], lineage["labels"],
+                frame_ms=float(movie["frame_ms"]),
+            )
+            compound_fragments = []
+        else:
+            detected, compound_fragments = cascade_event_windows(
+                lineage["components"], assignments, detector_fragments,
+                frame_ms=float(movie["frame_ms"]),
+                total_ms=len(active) * float(active_dt),
+            )
         directed_source = directed_lineage_onset_maps(
             lineage["labels"], detected, frame_ms=float(movie["frame_ms"]),
         )
@@ -532,17 +555,30 @@ def main() -> None:
             **parent_contract,
             "contact_geometry_used_for_boundary": False,
             "n_directed_roots": int(len(lineage["components"])),
-            "n_compound_detector_fragments": int(len(compound_fragments)),
+            "n_compound_detector_fragments": int(np.sum([
+                assignment["compound"] for assignment in assignments
+            ])),
             "compound_detector_fragment_fraction": float(
-                len(compound_fragments) / max(1, len(detector_fragments))
+                np.mean([assignment["compound"] for assignment in assignments])
+                if assignments else 0.0
             ),
             "collision_activity_mass_fraction": float(
                 collision_mass / active_mass if active_mass > 0.0 else 0.0
             ),
             "causal_rule": lineage["causal_rule"],
             "compound_fragments": compound_fragments,
+            "multi_root_event_fraction": float(np.mean([
+                len(event.get("lineage_ids", [])) > 1
+                for event in detected
+            ])) if detected else 0.0,
+            "all_detector_fragments_represented": bool(
+                sum(len(event["detector_fragment_indices"]) for event in detected)
+                + len(compound_fragments) == len(detector_fragments)
+            ),
         }
-        if event_unit["name"] == "persistent_directed_spatiotemporal_lineage":
+        if event_unit["name"] in {
+                "persistent_directed_spatiotemporal_lineage",
+                "causal_population_excursion"}:
             sensitivity_multiples = [
                 float(value) for value in event_unit.get(
                     "sensitivity_fast_state_decay_multiples",
@@ -581,11 +617,31 @@ def main() -> None:
                         detector_fragments, frame_ms=float(movie["frame_ms"]),
                         minimum_dominance=float(event_unit["minimum_dominance"]),
                     )
-                    variant_events, variant_compounds = cascade_event_windows(
-                        variant_lineage["components"], variant_assignments,
-                        detector_fragments, frame_ms=float(movie["frame_ms"]),
-                        total_ms=len(active) * float(active_dt),
-                    )
+                    if event_unit["name"] == "causal_population_excursion":
+                        variant_episodes = population_excursion_episodes(
+                            detector_fragments, active,
+                            sample_dt_ms=float(active_dt),
+                            event_on_threshold=float(substrate.detector_threshold),
+                            low_threshold_fraction=float(
+                                event_unit["low_threshold_fraction"]
+                            ),
+                            reset_ms=float(variant_contract["causal_memory_ms"]),
+                            pre_roll_ms=float(event_unit.get(
+                                "pre_roll_ms", variant_contract["fast_state_tau_ms"],
+                            )),
+                        )
+                        variant_events = annotate_population_excursions_with_lineages(
+                            variant_episodes, movie["activity_counts"],
+                            variant_lineage["labels"],
+                            frame_ms=float(movie["frame_ms"]),
+                        )
+                        variant_compounds = []
+                    else:
+                        variant_events, variant_compounds = cascade_event_windows(
+                            variant_lineage["components"], variant_assignments,
+                            detector_fragments, frame_ms=float(movie["frame_ms"]),
+                            total_ms=len(active) * float(active_dt),
+                        )
                 lineage_sensitivity.append({
                     "multiple": multiple,
                     "contract": variant_contract,
@@ -663,19 +719,12 @@ def main() -> None:
             sensitivity_returned[variant_index, :count] = np.asarray([
                 event["returned"] for event in variant_events
             ], bool)
-            root_to_event = {
-                int(event["cascade_id"]): index
-                for index, event in enumerate(variant_events)
-            }
-            for assignment in variant["assignments"]:
-                fragment = int(assignment["detector_fragment_index"])
-                root_id = assignment["dominant_lineage_id"]
-                if assignment["compound"] or root_id is None:
+            for event_index, event in enumerate(variant_events):
+                for fragment in event["detector_fragment_indices"]:
+                    sensitivity_fragment_partition[variant_index, int(fragment)] = event_index
+            for fragment in range(len(detector_fragments)):
+                if sensitivity_fragment_partition[variant_index, fragment] == -32768:
                     sensitivity_fragment_partition[variant_index, fragment] = -(fragment + 1)
-                else:
-                    sensitivity_fragment_partition[variant_index, fragment] = root_to_event[
-                        int(root_id)
-                    ]
             components = variant["lineage"]["components"]
             sensitivity_rows.append({
                 "fast_state_decay_multiples": variant["multiple"],
@@ -684,7 +733,10 @@ def main() -> None:
                 "n_events": count,
                 "n_compound_fragments": len(variant["compounds"]),
                 "compound_fragment_fraction": (
-                    len(variant["compounds"]) / max(1, len(detector_fragments))
+                    float(np.mean([
+                        assignment["compound"]
+                        for assignment in variant["assignments"]
+                    ])) if variant["assignments"] else 0.0
                 ),
                 "n_roots_resumed_after_gap": int(np.sum([
                     component["resumed_after_gap_count"] > 0
@@ -694,6 +746,10 @@ def main() -> None:
                     component["maximum_parent_gap_frames_observed"]
                     for component in components
                 ], default=0)),
+                "multi_root_event_fraction": float(np.mean([
+                    len(event.get("lineage_ids", [])) > 1
+                    for event in variant_events
+                ])) if variant_events else 0.0,
             })
         event_unit_runtime["memory_sensitivity"] = sensitivity_rows
         cascade_arrays.update({
@@ -731,13 +787,16 @@ def main() -> None:
         }
         if event_unit is not None and event_unit["name"] in {
                 "directed_spatiotemporal_lineage",
-                "persistent_directed_spatiotemporal_lineage"}:
+                "persistent_directed_spatiotemporal_lineage",
+                "causal_population_excursion"}:
             fragment_rows = [
                 directed_assignment_by_fragment[int(fragment)]
                 for fragment in event_row["detector_fragment_indices"]
             ]
             event_row.update({
                 "lineage_id": event.get("cascade_id"),
+                "lineage_ids": event.get("lineage_ids", [event.get("cascade_id")]),
+                "root_count": int(event.get("root_count", 1)),
                 "minimum_fragment_dominance": float(min(
                     row["dominant_activity_fraction"] for row in fragment_rows
                 )),
@@ -801,6 +860,9 @@ def main() -> None:
         event_directed_root_id=np.asarray([
             -1 if row.get("lineage_id") is None else int(row["lineage_id"])
             for row in event_rows
+        ], np.int32),
+        event_root_count=np.asarray([
+            int(row.get("root_count", 1)) for row in event_rows
         ], np.int32),
         active_fraction=np.asarray(active, np.float32),
         active_fraction_bin_ms=np.asarray(active_dt, float),

@@ -1,0 +1,60 @@
+{
+  "schema_id": "topic4_rev12_nd_causal_episode_canary_v1",
+  "scientific_role": "development_only_event_identity_canary",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_m_causal_episode_canary",
+  "source_output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_l_persistent_lineage_canary",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_m_causal_episode_canary/candidate_manifest.json",
+  "inputs": {
+    "source_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_l_persistent_lineage_canary/candidate_manifest.json",
+      "sha256": "9830dfb805dc5b31410f73b22eb288a4266d7506b4a4cda5e94462f39e35f8ba"
+    },
+    "source_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_k_exact_neuron_causal_field_fit/aggregate/fit_cascade_summary.json",
+      "sha256": "936aa1362339cf2970fe9dce4bc3178e56b858580a169713491c8a778be5b746"
+    },
+    "persistent_lineage_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_l_persistent_lineage_canary/aggregate/persistent_lineage_canary_audit.json",
+      "sha256": "9a96f13f58f1338080b0572458b9dc10e333f2d5dea26b5c19c6cbe481cb042c"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [2211, 2212],
+    "contact_readout": {
+      "source": "full_contact_envelope_within_event_window",
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "causal_population_excursion",
+    "low_threshold_fraction": 0.2,
+    "fast_state_decay_multiples": 5.0,
+    "pre_roll_ms": 20.0,
+    "sensitivity_decay_multiples": [4.0, 5.0, 6.0],
+    "persistent_root_topology": true,
+    "minimum_active_neurons": 2,
+    "forward_parent_neighborhood_bins": 1,
+    "boundary_signal": "whole_network_E_active_fraction_and_fast_state_reset_only",
+    "contact_geometry_used_for_boundary": false,
+    "statistical_unit": "one_complete_population_excursion",
+    "root_role": "topology_annotation_not_event_splitting_or_exclusion"
+  },
+  "field_search": {
+    "source_candidate_ids": [
+      "stage_i_a02_d01_s01_p",
+      "stage_i_a00_d03_s00_p",
+      "stage_i_anchor_00"
+    ],
+    "purpose": "event-unit canary only; no candidate selection"
+  },
+  "claim_boundary": "Zero-simulation event-identity canary. No Node field may be selected and EE, E-to-I and Z/M remain closed."
+}

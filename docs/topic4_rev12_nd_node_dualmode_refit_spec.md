@@ -158,7 +158,7 @@ neurons could therefore reset root identity even though membrane, inhibitory
 synaptic and delayed-network state had not reset.  The resulting 108-run field
 ranking is retained as a diagnostic but is formally invalid for selection.
 
-### Persistent directed-lineage correction (2026-08-24; current primary)
+### Persistent directed-lineage correction (2026-08-24; necessary but insufficient)
 
 The primary unit is now a `persistent_directed_spatiotemporal_lineage`.  It keeps
 the same whole-sheet movie, exact per-neuron contact sampler and root-preserving
@@ -183,6 +183,41 @@ memory expires receives a new root.  Three frozen fields on two networks then fo
 an event-identity canary.  Event partition, compound fraction and mode assignment
 must be qualitatively stable for three, four and five fast-state time constants.
 This is an event-definition canary only and cannot select a field.
+
+The canary reduced immediate-frame root fragmentation, but 40-52% of detector
+observations still contained several persistent roots and were excluded from the
+patient objective.  This lets a field score well by producing a small favourable
+single-root subset while complete multi-site events remain unseen.  Moreover,
+grouping roots merely because they occur inside one detector window would make
+the opposite error: an unusually long observation window could merge unrelated
+roots.  Persistent roots are therefore retained as topology annotations, but no
+longer define or exclude statistical event rows.
+
+### Causal population-episode correction (2026-08-24; current primary)
+
+The statistical unit for KMeans and patient scoring is one complete population
+excursion bounded by fast-state reset.  The high-threshold fragments are detected
+from whole-network E active fraction, and consecutive fragments remain one event
+until activity has stayed below `RETURN_FRAC * detector_threshold` for:
+
+```text
+reset time = c * max(tau_m,E, tau_d,GABA) + maximum network delay
+```
+
+with `c=5` primary and `c in {4,5,6}` mandatory sensitivities.  Contact position,
+contact amplitude, contact recruitment and patient labels are absent from this
+boundary calculation.  Every detector fragment belongs to exactly one episode.
+The complete virtual-contact envelope within that episode supplies one onset-rank
+row.  Thus a long or multi-site event cannot be split into favourable A/B rows,
+and a multi-root event cannot disappear from the objective.
+
+Persistent directed roots are computed on the same whole-sheet movie and stored
+inside each episode.  Root count, root activity fractions, collisions and source
+maps describe event topology only.  They do not split an episode, select a subset
+of spikes, or impose a penalty merely because several roots exist.  If the 4/5/6
+reset choices materially change episode partition, patient-mode assignment or
+natural KMeans, event identity remains unresolved and field optimization stays
+closed.
 
 ## 2. Scientific question
 
@@ -240,12 +275,11 @@ the entire sheet and do not receive extra support near observed contacts.
 ## 5. Patient event representation
 
 The model event unit used by KMeans and the patient objective is a
-`persistent_directed_spatiotemporal_lineage`, not an unmerged threshold fragment, fixed-gap
-`settled_episode`, or complete population-excursion envelope.  The population
-excursion is retained as an outer diagnostic window.  Every lineage stores its
-constituent detector-fragment indices and root identity; compounds remain
-in the denominator but are not forced into direction labels.  A figure or
-scorer that consumes pre-group fragment ranks is invalid for rev12-ND.
+`causal_population_excursion`, not an unmerged threshold fragment, fixed-gap
+`settled_episode`, or one selected directed root.  Every episode stores all of
+its detector-fragment indices and persistent-root topology.  Multi-root episodes
+remain complete observations.  A figure or scorer that consumes pre-group
+fragment ranks or drops compound events is invalid for rev12-ND.
 
 For event `e` and contact `i`, retain fixed contact identity:
 
@@ -299,8 +333,12 @@ The exploratory fit objective adds three continuous diagnostics:
 J_fit = J_patient
       + 0.50 * (1 - balanced KMeans/patient-direction alignment)
       + 0.25 * OOD fraction
-      + 0.25 * compound-fragment fraction
 ```
+
+Root multiplicity and detector-fragment compound fraction are reported topology
+diagnostics, not optimization penalties.  Penalizing them would assume in advance
+that a real patient event has one source, which is precisely what this round is
+trying to test.
 
 KMeans is computed after drawing the same event count from every network.
 Patient held-out R2 and source topology do not select the fit library.

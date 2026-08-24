@@ -167,7 +167,9 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
         event_off = float(loaded["event_t_off_ms"][detected_index])
         trigger_on = float(loaded["event_trigger_t_on_ms"][detected_index])
         contact_onsets = np.asarray(loaded["onsets"][detected_index], float)
-    if worker_json["event_unit"].get("name") != "directed_spatiotemporal_lineage":
+    if worker_json["event_unit"].get("name") not in {
+            "directed_spatiotemporal_lineage",
+            "persistent_directed_spatiotemporal_lineage"}:
         raise RuntimeError("GIF input is not the frozen directed event unit")
     if not bool(event["returned"]):
         raise RuntimeError("selected directed lineage is not returned")

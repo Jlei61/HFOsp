@@ -70,7 +70,7 @@ under the cascade unit (patient-direction purity about 0.56-0.59; held-out R2
 -0.35 to -0.44).  This closes the false dual-direction interpretation but does
 not yet recover the patient repertoire.
 
-## Phase 1e: directed-lineage correction (current primary)
+## Phase 1e: directed-lineage correction (necessary but insufficient)
 
 1. Preserve the frozen whole-sheet movie, detector fragments and contact readout;
    do not rerun the SNN for this correction.
@@ -98,6 +98,24 @@ not yet recover the patient repertoire.
    field remained above the patient q95 floor and had negative held-out R2.
 8. Treat the undirected library's apparent 0.93 alignment as non-selective until
    the directed resegmentation reproduces it.
+
+## Phase 1g: causal population episode with root topology (current blocker)
+
+1. Formally invalidate every field ranking that drops multi-root detector events.
+2. Use contact-independent whole-network active fraction and the frozen fast-state
+   reset to define one complete statistical episode.  Contacts only read the
+   already-frozen episode.
+3. Retain all persistent roots inside each episode as topology annotations.  Do
+   not split an episode by root and do not exclude multi-root events.
+4. Verify exact detector-fragment conservation and split invariance with synthetic
+   controls, including a detector dip inside one continuing population state.
+5. Re-score the same three fields and two networks at four, five and six fast-state
+   decay constants without rerunning the SNN.  Require stable episode partitions,
+   mode assignments and natural-KMeans interpretation before reopening a fit.
+6. Render one complete-episode GIF per natural cluster with every simultaneous
+   sheet activation visible.  The figure must not outline only one selected root.
+7. Only after this canary is accepted may Phase 5 regenerate a Node-field library.
+   EE, E-to-I and Z/M remain frozen throughout.
 
 ## Phase 1f: native-worker parity before refitting
 

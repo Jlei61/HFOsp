@@ -1,6 +1,7 @@
 import numpy as np
 
 from src.topic4_node_dualmode import (
+    annotate_population_excursions_with_lineages,
     assign_detector_fragments_to_directed_lineages,
     assign_detector_fragments_to_cascades,
     cascade_event_windows,
@@ -213,3 +214,37 @@ def test_cascade_window_does_not_call_nonreturning_fragment_returned():
         components, assignments, [fragment], frame_ms=2.0, total_ms=100.0,
     )
     assert events[0]["returned"] is False
+
+
+def test_population_episode_keeps_multiple_roots_in_one_statistical_event():
+    counts = np.zeros((6, 2, 2), float)
+    labels = np.zeros((6, 2, 2), int)
+    counts[1:4, 0, 0] = 3.0
+    labels[1:4, 0, 0] = 1
+    counts[2:5, 1, 1] = 4.0
+    labels[2:5, 1, 1] = 2
+    events = annotate_population_excursions_with_lineages(
+        [{"t_on": 2.0, "t_off": 10.0, "dur_ms": 8.0,
+          "returned": True, "detector_fragment_indices": [0, 1]}],
+        counts, labels, frame_ms=2.0,
+    )
+    assert len(events) == 1
+    assert events[0]["lineage_ids"] == [1, 2]
+    assert events[0]["root_count"] == 2
+    assert events[0]["detector_fragment_indices"] == [0, 1]
+
+
+def test_population_episode_topology_cannot_change_event_boundaries():
+    counts = np.zeros((10, 1, 2), float)
+    labels = np.zeros((10, 1, 2), int)
+    counts[2:8, 0] = 3.0
+    labels[2:8, 0, 0] = 1
+    labels[2:8, 0, 1] = 2
+    original = {"t_on": 3.0, "t_off": 17.0, "dur_ms": 14.0,
+                "returned": True, "detector_fragment_indices": [4]}
+    event = annotate_population_excursions_with_lineages(
+        [original], counts, labels, frame_ms=2.0,
+    )[0]
+    assert event["t_on"] == original["t_on"]
+    assert event["t_off"] == original["t_off"]
+    assert event["detector_fragment_indices"] == [4]

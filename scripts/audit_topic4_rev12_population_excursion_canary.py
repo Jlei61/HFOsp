@@ -104,8 +104,11 @@ def _worker_at_multiple(npz_path: Path, json_path: Path,
     detector_fragments = detect_events(
         active, active_dt, event_on_frac=float(runtime["event_on_threshold"]),
     )
+    fast_tau_ms = runtime.get("fast_tau_ms", runtime.get("fast_state_tau_ms"))
+    if fast_tau_ms is None:
+        raise RuntimeError("source worker lacks the frozen fast-state timescale")
     reset_ms = (
-        float(multiple) * float(runtime["fast_tau_ms"])
+        float(multiple) * float(fast_tau_ms)
         + float(runtime["maximum_delay_ms"])
     )
     episodes = population_excursion_episodes(
@@ -223,6 +226,9 @@ def main() -> None:
     )
     calibration = source_summary["component_calibration"]
     output_root = artifact_root / config["output_root"]
+    source_root = artifact_root / config.get(
+        "source_output_root", config["output_root"],
+    )
     seeds = [int(seed) for seed in config["search"]["canary_network_seeds"]]
     multiples = [
         float(value) for value in config["event_unit"]["sensitivity_decay_multiples"]
@@ -237,8 +243,8 @@ def main() -> None:
             for seed in seeds:
                 stem = f"{candidate_id}_seed_{seed}"
                 worker, diagnostic = _worker_at_multiple(
-                    output_root / "workers" / f"{stem}.npz",
-                    output_root / "workers" / f"{stem}.json",
+                    source_root / "workers" / f"{stem}.npz",
+                    source_root / "workers" / f"{stem}.json",
                     patient["contact_names"], classifier,
                     semantics["raw_to_patient"], multiple=multiple,
                     low_fraction=float(config["event_unit"]["low_threshold_fraction"]),

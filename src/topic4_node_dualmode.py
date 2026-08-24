@@ -907,6 +907,14 @@ def assign_detector_fragments_to_directed_lineages(
             "collision_activity_fraction": (
                 float(collision_mass / total) if total > 0.0 else 0.0
             ),
+            "lineage_activity_fractions": [
+                {
+                    "lineage_id": int(root_id),
+                    "fraction": float(masses[root_id] / total),
+                }
+                for root_id in np.flatnonzero(masses > 0.0)
+                if int(root_id) > 0 and total > 0.0
+            ],
             "compound": bool(dominant_id is None or dominance < minimum_dominance),
         })
     return output
@@ -923,8 +931,20 @@ def directed_lineage_onset_maps(lineage_labels: np.ndarray,
     maps = np.full((len(events), *labels.shape[1:]), np.nan, np.float32)
     evaluable = np.zeros(len(events), bool)
     for event_index, event in enumerate(events):
-        lineage_id = int(event["cascade_id"])
-        support = labels == lineage_id
+        lineage_ids = event.get("lineage_ids")
+        if lineage_ids is None:
+            cascade_id = event.get("cascade_id")
+            lineage_ids = [] if cascade_id is None else [cascade_id]
+        lineage_ids = np.asarray(lineage_ids, int)
+        if not len(lineage_ids):
+            continue
+        support = np.isin(labels, lineage_ids)
+        start = max(0, int(np.floor(float(event.get("t_on", 0.0)) / frame_ms)))
+        stop = min(len(labels), int(np.ceil(
+            float(event.get("t_off", len(labels) * frame_ms)) / frame_ms,
+        )))
+        support[:start] = False
+        support[stop:] = False
         if not np.any(support):
             continue
         frames, ys, xs = np.nonzero(support)
@@ -1086,14 +1106,18 @@ def lineage_restricted_neuron_contact_readout(
     rank_rows = np.full((len(events), n_contacts), np.nan)
     pad = int(np.ceil(3.0 * smooth_ms / frame_ms))
     for event_index, event in enumerate(events):
-        lineage_id = int(event["cascade_id"])
+        lineage_ids = np.asarray(
+            event.get("lineage_ids", [event["cascade_id"]]), int,
+        )
         start = max(0, int(round(float(event["t_on"]) / frame_ms)))
         stop = min(len(binned), int(round(float(event["t_off"]) / frame_ms)))
         if stop <= start:
             continue
         local_start, local_stop = max(0, start - pad), min(len(binned), stop + pad)
         root_per_neuron = (
-            flat_labels[local_start:local_stop, neuron_bins] == lineage_id
+            np.isin(
+                flat_labels[local_start:local_stop, neuron_bins], lineage_ids,
+            )
         )
         selected = binned[local_start:local_stop] * root_per_neuron
         raw = np.asarray(selected, float) @ weights.T
@@ -1163,14 +1187,16 @@ def lineage_restricted_contact_readout(activity_counts: np.ndarray,
     sigma = smooth_ms / frame_ms
     pad = int(np.ceil(3.0 * sigma))
     for event_index, event in enumerate(events):
-        lineage_id = int(event["cascade_id"])
+        lineage_ids = np.asarray(
+            event.get("lineage_ids", [event["cascade_id"]]), int,
+        )
         start = max(0, int(round(float(event["t_on"]) / frame_ms)))
         stop = min(len(counts), int(round(float(event["t_off"]) / frame_ms)))
         if stop <= start:
             continue
         local_start, local_stop = max(0, start - pad), min(len(counts), stop + pad)
         selected = counts[local_start:local_stop] * (
-            labels[local_start:local_stop] == lineage_id
+            np.isin(labels[local_start:local_stop], lineage_ids)
         )
         envelope = binned_contact_envelope(
             selected, weights, frame_ms=frame_ms, smooth_ms=smooth_ms,
@@ -1297,6 +1323,65 @@ def cascade_event_windows(components: list[dict], assignments: list[dict],
     events.sort(key=lambda row: (row["t_on"], row["cascade_id"]))
     compounds.sort(key=lambda row: row["t_on"])
     return events, compounds
+
+
+def annotate_population_excursions_with_lineages(
+        events: list[dict], activity_counts: np.ndarray,
+        lineage_labels: np.ndarray, *, frame_ms: float) -> list[dict]:
+    """Attach persistent-root topology without changing population episodes.
+
+    Event boundaries are already fixed from the contact-independent population
+    reset.  Every root active inside that interval remains a separate topology
+    label, while the complete episode stays one statistical observation.
+    """
+    counts = np.asarray(activity_counts, float)
+    labels = np.asarray(lineage_labels, int)
+    frame_ms = float(frame_ms)
+    if counts.shape != labels.shape or counts.ndim != 3 or frame_ms <= 0.0:
+        raise ValueError("population episode topology arrays do not align")
+    output = []
+    for event in events:
+        start = max(0, int(np.floor(float(event["t_on"]) / frame_ms)))
+        stop = min(len(counts), int(np.ceil(float(event["t_off"]) / frame_ms)))
+        if stop <= start:
+            raise ValueError("population episode contains no movie frame")
+        local_labels = labels[start:stop].ravel()
+        local_counts = counts[start:stop].ravel()
+        positive = local_labels > 0
+        collision = local_labels < 0
+        masses = np.bincount(
+            local_labels[positive], weights=local_counts[positive],
+        ) if np.any(positive) else np.zeros(1, float)
+        lineage_ids = [
+            int(root_id) for root_id in np.flatnonzero(masses > 0.0)
+            if int(root_id) > 0
+        ]
+        attributable = float(np.sum(masses[1:])) if len(masses) > 1 else 0.0
+        collision_mass = float(np.sum(local_counts[collision]))
+        total = attributable + collision_mass
+        row = dict(event)
+        row.update({
+            "event_unit": "causal_population_excursion",
+            "cascade_id": lineage_ids[0] if lineage_ids else None,
+            "lineage_ids": lineage_ids,
+            "root_count": int(len(lineage_ids)),
+            "multi_root": bool(len(lineage_ids) > 1),
+            "root_activity_fractions": [
+                {
+                    "lineage_id": int(root_id),
+                    "fraction": float(masses[root_id] / total),
+                }
+                for root_id in lineage_ids if total > 0.0
+            ],
+            "root_attributable_activity_fraction": (
+                attributable / total if total > 0.0 else 0.0
+            ),
+            "collision_activity_fraction": (
+                collision_mass / total if total > 0.0 else 0.0
+            ),
+        })
+        output.append(row)
+    return output
 
 
 def normalize_components_floor_ratio(components: dict, calibration: dict,
