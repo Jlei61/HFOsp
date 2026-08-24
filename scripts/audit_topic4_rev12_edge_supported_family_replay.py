@@ -6,14 +6,18 @@ import argparse
 import hashlib
 import json
 import subprocess
+import sys
 from pathlib import Path
 
 import numpy as np
 
+ROOT = Path(__file__).resolve().parents[1]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
 from src.topic4_core_field_runner import atomic_write_json
 
 
-ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 DEFAULT_OLD = (
     "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/"
