@@ -1,7 +1,14 @@
+import subprocess
+import sys
+from pathlib import Path
+
 from scripts.rescore_topic4_rev12_mode_mean_direction import (
     corrected_equal_network_direction,
     rescore_payload,
 )
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_rescore_clips_only_after_mode_mean():
@@ -101,3 +108,11 @@ def test_payload_rescore_updates_only_direction_dependent_selection_terms():
     assert row["selection_objective"]["causal_direction_score"] == 0.0
     assert row["selection_objective"]["objective"] == 1.85
     assert row["retrospective_invalid_eventwise_direction_objective"] == old_selection
+
+
+def test_rescore_script_is_directly_invocable():
+    result = subprocess.run(
+        [sys.executable, "scripts/rescore_topic4_rev12_mode_mean_direction.py", "--help"],
+        cwd=ROOT, text=True, capture_output=True, check=False,
+    )
+    assert result.returncode == 0, result.stderr

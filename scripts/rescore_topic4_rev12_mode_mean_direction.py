@@ -8,15 +8,18 @@ import hashlib
 import json
 import os
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 
 from scripts.aggregate_topic4_rev12_cascade_fit import (
     cascade_selection_objective,
 )
 
 
-ROOT = Path(__file__).resolve().parents[1]
 ARTIFACT_ROOT = Path("/home/honglab/leijiaxin/HFOsp")
 
 
