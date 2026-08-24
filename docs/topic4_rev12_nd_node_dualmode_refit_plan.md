@@ -290,6 +290,13 @@ networks, while failing patient loss (1.411) and OOD (0.679).  Therefore record
 Before another simulation, freeze the corrected direction aggregation and
 recompute every Stage-S/Stage-T objective from existing artifacts.
 
+Correction result: the mode-mean rescore completed at commit `454b005d` and
+preserved all patient-distance, KMeans, OOD, compound-event and SNN trajectory
+values.  The corrected Stage-S leader is `stage_i_a02_d01_s00_p`
+(`J=1.9448`, direction `0.2502`); the corrected Stage-T leader is
+`stage_t_a02_directional_coherence_s00` (`J=2.0107`, direction `0.1816`).
+Thus Stage-T did not improve the selectable field library.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the
@@ -386,10 +393,10 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-Phase 1m simulation is complete, but its first scalar aggregation is invalidated
-by event-wise direction clipping.  Run the frozen zero-simulation mode-mean
-direction rescore for Stage-S and Stage-T, retain the old JSON as audit evidence,
-and compare the corrected Pareto set with the 16 algorithmic GIFs.  Do not open
-fresh selection, intervention, confirmation, EE, E-to-I or Z/M.  The next field
+Phase 1m simulation and the frozen zero-simulation mode-mean direction rescore
+are complete.  Compare the corrected Pareto set with the 16 algorithmic GIFs
+and diagnose whether the existing continuous-field coordinates contain a
+predictive gradient before freezing another fit library.  Do not open fresh
+selection, intervention, confirmation, EE, E-to-I or Z/M.  The next field
 library must be designed from the corrected objective and cannot use the manual
 capacity control as a selectable initialization.

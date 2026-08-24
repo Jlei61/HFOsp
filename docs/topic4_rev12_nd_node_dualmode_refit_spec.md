@@ -559,6 +559,16 @@ current data-driven field family has not jointly recovered stable direction and
 the patient event distribution.  This result does not license using the manual
 control as an initialization for a claimed free-field recovery.
 
+The correction was executed at commit `454b005d` without rerunning the SNN.
+The immutable corrected sidecars are
+`node_stage_s_edge_supported_field_refit/aggregate/fit_cascade_summary_mode_mean_direction.json`
+(SHA-256 `1efc07fdebf112bdac3c139f78fa9c7b90f046d041941f5c5b4cba423517485b`)
+and
+`node_stage_t_causal_continuation_capacity/aggregate/fit_cascade_summary_mode_mean_direction.json`
+(SHA-256 `26137f7a5a2030fbfc6411f54e8ec068677b358557bef1567cafb25dbfcc9dda`).
+The original aggregates remain audit evidence and must not be used for field
+ranking.
+
 ## 8. Mode-specific source topology
 
 The SNN worker derives a 1 mm sheet-bin onset map for every returned event from
