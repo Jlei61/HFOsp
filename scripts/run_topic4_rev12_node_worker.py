@@ -33,8 +33,10 @@ from src.topic4_node_dualmode import (  # noqa: E402
     directed_lineage_onset_maps,
     directed_spatiotemporal_lineages,
     event_source_onset_maps,
+    excitatory_psp_tail_support_ms,
     lineage_restricted_contact_readout,
     lineage_restricted_neuron_contact_readout,
+    local_ee_delay_quantile_ms,
     merge_detected_event_fragments,
     population_excursion_episodes,
     neuron_contact_sampling_weights,
@@ -103,7 +105,8 @@ def _event_peak_active_fraction(event: dict, active: np.ndarray,
 
 
 def _directed_parent_contract(event_unit: dict, *, params, net: dict,
-                              engine: dict, frame_ms: float) -> dict:
+                              engine: dict, frame_ms: float,
+                              local_delay_ms: float | None = None) -> dict:
     """Resolve root memory from frozen model timescales, never contact data."""
     name = str(event_unit["name"])
     frame_ms = float(frame_ms)
@@ -116,18 +119,54 @@ def _directed_parent_contract(event_unit: dict, *, params, net: dict,
             "persistent_directed_spatiotemporal_lineage",
             "causal_population_excursion",
             "persistent_root_coactivity_episode"}:
-        multiple = float(event_unit["fast_state_decay_multiples"])
-        if multiple <= 0.0:
-            raise ValueError("fast-state decay multiple must be positive")
-        fast_tau_ms = max(float(params.tau_m_E), float(params.tau_d_GABA))
-        maximum_delay_ms = int(net["max_delay_steps"]) * float(engine["dt"])
-        memory_ms = multiple * fast_tau_ms + maximum_delay_ms
+        method = str(event_unit.get(
+            "causal_memory_method", "global_fast_state_decay",
+        ))
+        if method == "global_fast_state_decay":
+            multiple = float(event_unit["fast_state_decay_multiples"])
+            if multiple <= 0.0:
+                raise ValueError("fast-state decay multiple must be positive")
+            fast_tau_ms = max(float(params.tau_m_E), float(params.tau_d_GABA))
+            delay_ms = int(net["max_delay_steps"]) * float(engine["dt"])
+            response_support_ms = multiple * fast_tau_ms
+            sensitivity_parameter = "fast_state_decay_multiples"
+            sensitivity_value = multiple
+        elif method == "local_ee_psp_tail":
+            multiple = None
+            fast_tau_ms = None
+            tail_fraction = float(event_unit["psp_tail_fraction"])
+            delay_quantile = float(event_unit["local_ee_delay_quantile"])
+            delay_ms = (
+                float(local_delay_ms) if local_delay_ms is not None
+                else local_ee_delay_quantile_ms(
+                    net["ampa_by_delay"], np.asarray(net["pos"][:net["NE"]], float),
+                    dt_ms=float(engine["dt"]),
+                    bin_mm=float(event_unit["movie_bin_mm"]),
+                    neighborhood_bins=neighborhood,
+                    quantile=delay_quantile,
+                )
+            )
+            response_support_ms = excitatory_psp_tail_support_ms(
+                tau_r_ms=float(params.tau_r_AMPA),
+                tau_d_ms=float(params.tau_d_AMPA),
+                tau_m_ms=float(params.tau_m_E), dt_ms=float(engine["dt"]),
+                tail_fraction=tail_fraction,
+            )
+            sensitivity_parameter = "psp_tail_fraction"
+            sensitivity_value = tail_fraction
+        else:
+            raise ValueError(f"unknown causal-memory method: {method}")
+        memory_ms = response_support_ms + delay_ms
         gap_frames = max(1, int(np.ceil(memory_ms / frame_ms)))
     elif name == "directed_spatiotemporal_lineage":
+        method = "adjacent_movie_frame"
         multiple = None
         fast_tau_ms = None
-        maximum_delay_ms = None
+        delay_ms = None
+        response_support_ms = None
         memory_ms = None
+        sensitivity_parameter = None
+        sensitivity_value = None
         gap_frames = int(event_unit.get("forward_parent_frame_gap", 1))
     else:
         raise ValueError(f"unsupported directed event unit: {name}")
@@ -136,7 +175,12 @@ def _directed_parent_contract(event_unit: dict, *, params, net: dict,
     return {
         "fast_state_decay_multiples": multiple,
         "fast_state_tau_ms": fast_tau_ms,
-        "maximum_delay_ms": maximum_delay_ms,
+        "causal_memory_method": method,
+        "sensitivity_parameter": sensitivity_parameter,
+        "sensitivity_value": sensitivity_value,
+        "response_support_ms": response_support_ms,
+        "local_or_global_delay_support_ms": delay_ms,
+        "maximum_delay_ms": delay_ms,
         "causal_memory_ms": memory_ms,
         "forward_parent_frame_gap": gap_frames,
         "forward_parent_neighborhood_bins": neighborhood,
@@ -599,28 +643,45 @@ def main() -> None:
                 "persistent_directed_spatiotemporal_lineage",
                 "causal_population_excursion",
                 "persistent_root_coactivity_episode"}:
-            sensitivity_multiples = [
-                float(value) for value in event_unit.get(
-                    "sensitivity_fast_state_decay_multiples",
-                    [event_unit["fast_state_decay_multiples"]],
-                )
-            ]
-            if (len(set(sensitivity_multiples)) != len(sensitivity_multiples)
-                    or float(event_unit["fast_state_decay_multiples"])
-                    not in sensitivity_multiples):
+            memory_method = str(event_unit.get(
+                "causal_memory_method", "global_fast_state_decay",
+            ))
+            if memory_method == "local_ee_psp_tail":
+                sensitivity_parameter = "psp_tail_fraction"
+                primary_value = float(event_unit["psp_tail_fraction"])
+                sensitivity_values = [
+                    float(value) for value in event_unit.get(
+                        "sensitivity_psp_tail_fractions", [primary_value],
+                    )
+                ]
+            else:
+                sensitivity_parameter = "fast_state_decay_multiples"
+                primary_value = float(event_unit["fast_state_decay_multiples"])
+                sensitivity_values = [
+                    float(value) for value in event_unit.get(
+                        "sensitivity_fast_state_decay_multiples", [primary_value],
+                    )
+                ]
+            if (len(set(sensitivity_values)) != len(sensitivity_values)
+                    or primary_value not in sensitivity_values):
                 raise RuntimeError("persistent-lineage sensitivity grid is invalid")
-            for multiple in sensitivity_multiples:
-                if np.isclose(multiple, float(event_unit["fast_state_decay_multiples"])):
+            for sensitivity_value in sensitivity_values:
+                if np.isclose(sensitivity_value, primary_value):
                     variant_lineage = lineage
                     variant_assignments = assignments
                     variant_events = detected
                     variant_compounds = compound_fragments
                     variant_contract = parent_contract
                 else:
-                    variant_unit = {**event_unit, "fast_state_decay_multiples": multiple}
+                    variant_unit = {
+                        **event_unit, sensitivity_parameter: sensitivity_value,
+                    }
                     variant_contract = _directed_parent_contract(
                         variant_unit, params=substrate.params, net=substrate.net,
                         engine=substrate.engine, frame_ms=float(movie["frame_ms"]),
+                        local_delay_ms=parent_contract.get(
+                            "local_or_global_delay_support_ms"
+                        ) if memory_method == "local_ee_psp_tail" else None,
                     )
                     variant_lineage = directed_spatiotemporal_lineages(
                         movie["activity_counts"],
@@ -671,7 +732,8 @@ def main() -> None:
                             total_ms=len(active) * float(active_dt),
                         )
                 lineage_sensitivity.append({
-                    "multiple": multiple,
+                    "parameter": sensitivity_parameter,
+                    "value": sensitivity_value,
                     "contract": variant_contract,
                     "lineage": variant_lineage,
                     "assignments": variant_assignments,
@@ -729,7 +791,7 @@ def main() -> None:
         for variant_index, variant in enumerate(lineage_sensitivity):
             variant_events = variant["events"]
             if np.isclose(
-                    variant["multiple"], float(event_unit["fast_state_decay_multiples"])):
+                    variant["value"], float(parent_contract["sensitivity_value"])):
                 variant_onsets, variant_ranks = onsets, ranks
             else:
                 variant_onsets, variant_ranks, _ = _event_contact_readout(
@@ -761,7 +823,8 @@ def main() -> None:
                     sensitivity_fragment_partition[variant_index, fragment] = -(fragment + 1)
             components = variant["lineage"]["components"]
             sensitivity_rows.append({
-                "fast_state_decay_multiples": variant["multiple"],
+                "sensitivity_parameter": variant["parameter"],
+                "sensitivity_value": variant["value"],
                 **variant["contract"],
                 "n_directed_roots": len(components),
                 "n_events": count,
@@ -787,8 +850,8 @@ def main() -> None:
             })
         event_unit_runtime["memory_sensitivity"] = sensitivity_rows
         cascade_arrays.update({
-            "lineage_sensitivity_multiples": np.asarray([
-                row["multiple"] for row in lineage_sensitivity
+            "lineage_sensitivity_values": np.asarray([
+                row["value"] for row in lineage_sensitivity
             ], np.float32),
             "lineage_sensitivity_event_counts": sensitivity_event_counts,
             "lineage_sensitivity_onsets": sensitivity_onsets,
@@ -796,6 +859,10 @@ def main() -> None:
             "lineage_sensitivity_returned": sensitivity_returned,
             "lineage_sensitivity_fragment_partition": sensitivity_fragment_partition,
         })
+        if parent_contract["sensitivity_parameter"] == "fast_state_decay_multiples":
+            cascade_arrays["lineage_sensitivity_multiples"] = np.asarray([
+                row["value"] for row in lineage_sensitivity
+            ], np.float32)
     event_rows = []
     for index, event in enumerate(detected):
         onset = onsets[index]

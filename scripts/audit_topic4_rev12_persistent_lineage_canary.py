@@ -21,7 +21,12 @@ from scripts.rescore_topic4_rev12_node_historical import (
     _patient_data,
     _reorder_patient_contract,
 )
+from scripts.audit_topic4_rev12_event_fragmentation import _natural_summary
 from src.topic4_d6_natural_kmeans import natural_kmeans
+from src.topic4_node_dualmode import (
+    fixed_projection_matrix,
+    matched_sample_dual_mode_objective,
+)
 from src.topic4_shaft_aware_direction import assign_direction_modes
 
 
@@ -94,6 +99,29 @@ def _safe(value):
     return value
 
 
+def _component_calibration(config: dict, artifact_root: Path) -> tuple[dict, dict]:
+    """Resolve the frozen patient floor through the declared predecessor audit."""
+    audit_contract = config["inputs"]["causal_episode_audit"]
+    audit_path = artifact_root / audit_contract["path"]
+    if _sha256(audit_path) != audit_contract["sha256"]:
+        raise RuntimeError("causal-episode audit hash drifted")
+    audit = json.loads(audit_path.read_text())
+    predecessor_config_path = Path(audit["config"]["path"])
+    if not predecessor_config_path.is_absolute():
+        predecessor_config_path = artifact_root / predecessor_config_path
+    if _sha256(predecessor_config_path) != audit["config"]["sha256"]:
+        raise RuntimeError("causal-episode config hash drifted")
+    predecessor = json.loads(predecessor_config_path.read_text())
+    summary_contract = predecessor["inputs"]["source_summary"]
+    summary_path = artifact_root / summary_contract["path"]
+    if _sha256(summary_path) != summary_contract["sha256"]:
+        raise RuntimeError("component-calibration source hash drifted")
+    summary = json.loads(summary_path.read_text())
+    return summary["component_calibration"], {
+        "path": str(summary_path), "sha256": _sha256(summary_path),
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
@@ -111,7 +139,12 @@ def main() -> None:
     classifier = _classifier_contract(classifier_config, artifact_root)
     semantics = _old_to_patient_label_map(patient, classifier)
     patient = _reorder_patient_contract(patient, classifier["names"])
+    projections = fixed_projection_matrix(
+        2 * len(patient["contact_names"]), n_directions=64, seed=20260824,
+    )
+    calibration, calibration_source = _component_calibration(config, artifact_root)
     rows = []
+    grouped_workers: dict[tuple[str, float], list[dict]] = {}
     parity_keys = (
         "contact_names", "shaft_ids", "contact_xy_mm", "active_fraction",
         "active_fraction_bin_ms", "contact_envelope", "contact_envelope_dt_ms",
@@ -140,14 +173,26 @@ def main() -> None:
             ]
             if mismatches:
                 raise RuntimeError(f"persistent canary changed trajectory: {mismatches}")
-            multiples = np.asarray(arrays["lineage_sensitivity_multiples"], float)
+            values = np.asarray(
+                arrays.get(
+                    "lineage_sensitivity_values",
+                    arrays.get("lineage_sensitivity_multiples"),
+                ), float,
+            )
             counts = np.asarray(arrays["lineage_sensitivity_event_counts"], int)
             partitions = np.asarray(arrays["lineage_sensitivity_fragment_partition"], int)
+            sensitivity_parameter = str(payload["event_unit"].get(
+                "sensitivity_parameter", "fast_state_decay_multiples",
+            ))
+            primary_value = float(payload["event_unit"].get(
+                "sensitivity_value",
+                config["event_unit"].get("fast_state_decay_multiples"),
+            ))
             primary_index = int(np.flatnonzero(np.isclose(
-                multiples, float(config["event_unit"]["fast_state_decay_multiples"]),
+                values, primary_value,
             ))[0])
             sensitivity_rows = []
-            for index, multiple in enumerate(multiples):
+            for index, value in enumerate(values):
                 count = int(counts[index])
                 onsets = _reorder(
                     arrays["lineage_sensitivity_onsets"][index, :count],
@@ -171,8 +216,22 @@ def main() -> None:
                     ranks[selected], labels[selected],
                     random_state=20260824 + int(seed) + index,
                 )
+                matched = matched_sample_dual_mode_objective(
+                    ranks[selected], labels[selected], patient["train_ranks"],
+                    patient["train_labels"], patient["train_blocks"],
+                    patient["contact_names"], projections=projections,
+                    calibration=calibration, sample_size=6, draws=64,
+                    seed=20260824 + int(seed) + index,
+                )
+                grouped_workers.setdefault(
+                    (str(candidate["candidate_id"]), float(value)), [],
+                ).append({
+                    "ranks": ranks[selected], "labels": labels[selected],
+                    "matched_patient": matched,
+                })
                 sensitivity_rows.append({
-                    "fast_state_decay_multiples": float(multiple),
+                    "sensitivity_parameter": sensitivity_parameter,
+                    "sensitivity_value": float(value),
                     "n_events": count,
                     "n_returned": int(np.sum(selected)),
                     "mode_counts": np.bincount(labels[selected], minlength=2),
@@ -182,6 +241,10 @@ def main() -> None:
                     "partition_jaccard_vs_primary": partition_coassignment_jaccard(
                         partitions[index], partitions[primary_index],
                     ),
+                    "n_detector_fragments_with_multiple_event_memberships": int(
+                        np.sum(partitions[index] < 0)
+                    ),
+                    "matched_patient": matched,
                     "natural_kmeans": natural,
                 })
             runtime_sensitivity = payload["event_unit"].get("memory_sensitivity", [])
@@ -198,17 +261,64 @@ def main() -> None:
     if len(rows) != len(manifest["candidates"]) * len(
             config["search"]["canary_network_seeds"]):
         raise RuntimeError("persistent-lineage canary inventory is incomplete")
+    grouped = []
+    for (candidate_id, value), workers in sorted(grouped_workers.items()):
+        objectives = np.asarray([
+            worker["matched_patient"]["objective"] for worker in workers
+        ], float)
+        grouped.append({
+            "candidate_id": candidate_id,
+            "sensitivity_parameter": (
+                "psp_tail_fraction"
+                if config["event_unit"].get("causal_memory_method")
+                == "local_ee_psp_tail"
+                else "fast_state_decay_multiples"
+            ),
+            "sensitivity_value": value,
+            "n_networks": len(workers),
+            "n_returned_events": int(sum(len(worker["ranks"]) for worker in workers)),
+            "mode_counts": np.bincount(
+                np.concatenate([worker["labels"] for worker in workers]), minlength=2,
+            ),
+            "mean_matched_patient_objective": float(np.mean(objectives)),
+            "worst_network_matched_patient_objective": float(np.max(objectives)),
+            "pooled_natural_kmeans": _natural_summary(
+                workers, 20260824 + int(round(100 * value)),
+            ),
+        })
+    robustness = []
+    for candidate in manifest["candidates"]:
+        candidate_id = str(candidate["candidate_id"])
+        selected = [row for row in grouped if row["candidate_id"] == candidate_id]
+        objectives = np.asarray([
+            row["mean_matched_patient_objective"] for row in selected
+        ], float)
+        alignments = np.asarray([
+            row["pooled_natural_kmeans"]["direction_balanced_alignment"]
+            for row in selected
+        ], float)
+        robustness.append({
+            "candidate_id": candidate_id,
+            "worst_matched_patient_objective": float(np.max(objectives)),
+            "mean_matched_patient_objective": float(np.mean(objectives)),
+            "minimum_kmeans_direction_balanced_alignment": float(np.min(alignments)),
+            "maximum_kmeans_direction_balanced_alignment": float(np.max(alignments)),
+            "selection_eligible": False,
+        })
     payload = {
-        "schema_id": "topic4_rev12_persistent_lineage_canary_audit_v1",
-        "status": "REV12ND_PERSISTENT_LINEAGE_CANARY_AUDIT_COMPLETE",
+        "schema_id": "topic4_rev12_root_coactivity_canary_audit_v1",
+        "status": "REV12ND_ROOT_COACTIVITY_CANARY_AUDIT_COMPLETE",
         "n_workers": len(rows),
+        "component_calibration": calibration_source,
         "rows": rows,
+        "grouped_sensitivity": grouped,
+        "segmentation_robustness": robustness,
         "claim_boundary": (
             "Event-identity canary only. Field ranking remains closed; patient "
             "held-out data, EE, E-to-I and Z/M do not select this result."
         ),
     }
-    output = output_root / "aggregate" / "persistent_lineage_canary_audit.json"
+    output = output_root / "aggregate" / "root_coactivity_canary_audit.json"
     _atomic_json(output, _safe(payload))
     print(json.dumps({"status": payload["status"], "output": str(output)}, indent=2))
 

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Render root-preserving Node events with all concurrent sheet activity visible."""
+"""Render complete root-coactivity events with all sheet activity visible."""
 from __future__ import annotations
 
 import argparse
@@ -48,7 +48,7 @@ def _sha256(path: Path) -> str:
 def lineage_display_frames(*, event_on_ms: float, event_off_ms: float,
                            frame_ms: float, n_frames: int,
                            context_ms: float = 20.0) -> np.ndarray:
-    """Return a bounded movie window around one directed root."""
+    """Return a bounded movie window around one complete event."""
     if not 0.0 <= event_on_ms < event_off_ms or frame_ms <= 0.0:
         raise ValueError("invalid directed-lineage display interval")
     start = max(0, int(np.floor((event_on_ms - context_ms) / frame_ms)))
@@ -71,7 +71,7 @@ def lineage_bin_coordinates(labels: np.ndarray,
 def _representative_lineages(worker: dict, worker_json: dict,
                              source_evaluable: np.ndarray,
                              *, random_state: int) -> tuple[list[dict], dict]:
-    """Select one medoid-like lineage from each natural KMeans cluster."""
+    """Select one medoid-like complete event from each natural KMeans cluster."""
     result = natural_kmeans(
         worker["ranks"], worker["labels"], random_state=int(random_state),
     )
@@ -266,7 +266,7 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
     ax_trace.tick_params(axis="y", length=0, pad=3)
     ax_trace.set(
         xlim=(trace_time[0], trace_time[-1]), ylim=(-1.0, offsets[0] + 1.0),
-        xlabel="time from directed-lineage onset (ms)",
+        xlabel="time from complete-event onset (ms)",
         ylabel="30-80 Hz virtual-contact activity",
     )
     ax_trace.spines[["top", "right", "left"]].set_visible(False)
@@ -293,7 +293,8 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
     plt.close(fig)
     return {
         **selection,
-        "lineage_id": lineage_id,
+        "lineage_ids": lineage_ids,
+        "root_count": len(lineage_ids),
         "event_on_ms": event_on,
         "event_off_ms": event_off,
         "event_duration_ms": event_off - event_on,
@@ -358,12 +359,12 @@ def main() -> None:
         _render_lineage(
             npz_path=npz_path, worker_json=worker_json, patient=patient,
             selection=selection,
-            output=figures / f"{stem}_pattern{selection['mode'] + 1}_directed_lineage.gif",
+            output=figures / f"{stem}_pattern{selection['mode'] + 1}_complete_event.gif",
         )
         for selection in selections
     ]
     metadata = {
-        "status": "REV12ND_DIRECTED_LINEAGE_GIFS_COMPLETE",
+        "status": "REV12ND_ROOT_COACTIVITY_GIFS_COMPLETE",
         "candidate_id": args.candidate_id,
         "seed": args.seed,
         "event_unit": worker_json["event_unit"],
@@ -377,13 +378,13 @@ def main() -> None:
     }
     figures.mkdir(parents=True, exist_ok=True)
     (figures / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
-    (figures / "README.md").write_text(f"""### {stem}_pattern1_directed_lineage.gif
+    (figures / "README.md").write_text(f"""### {stem}_pattern1_complete_event.gif
 
-纯 Node field 在 seed {args.seed} 中由自然 KMeans 第一种传播模式自动选出的代表事件。左侧 `viridis` 底图显示同一时刻全场所有 E 神经元活动；白色空框只标当前有向 lineage，红叉标记两个根相遇时无法唯一归属的边界。右侧保留全部 15 个 virtual-contact readout，彩色圆点标用于打分的 lineage-restricted contact onset，阴影范围是完整 lineage 窗口，虚线是原 detector 首次越阈时刻。
+纯 Node field 在 seed {args.seed} 中由自然 KMeans 第一种传播模式自动选出的完整事件。左侧 `viridis` 底图显示同一时刻全场所有 E 神经元活动；白色空框标出该事件包含的全部根，红叉标记根相遇时无法唯一归属的边界。右侧保留全部 15 个 virtual-contact readout，彩色圆点标完整事件的 exact-neuron contact onset，阴影范围是完整事件窗口，虚线是原 detector 首次越阈时刻。
 
-**关注点**：检查该模式是否由一个可追踪起点向外传播，以及同时出现但属于其他根的活动是否仍清楚可见。
+**关注点**：检查该模式是否真是一段完整传播，而不是从长窗口里截出的局部波包；同时检查多根是否属于同一次共激活事件。
 
-### {stem}_pattern2_directed_lineage.gif
+### {stem}_pattern2_complete_event.gif
 
 与上图使用完全相同的事件、颜色和时间合同，展示自然 KMeans 第二种传播模式。事件按簇中心距离自动选择，不按患者模板外观或动画效果挑选。
 

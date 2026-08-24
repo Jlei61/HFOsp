@@ -138,6 +138,31 @@ It remains an outer GIF diagnostic, not the scoring event.
    event producer only when the latter no longer hides simultaneous upper-sheet
    activity or splits one persistent wave into opposite modes.
 
+Observed result: detector-window dependence was removed and no fragment was
+dropped, but the inherited 4/5/6-tau root memory remained too broad.  More than
+90% of events were multi-root, representative windows lasted 120-330 ms, and
+event counts changed 20-30% across the sensitivity range.  This version is an
+audit artifact and cannot reopen the field fit.
+
+## Phase 1i: engine-derived excitatory root memory (current blocker)
+
+1. Replace `c * max(tau_m,E, tau_d,GABA) + global maximum delay` with the
+   simulated E-to-E AMPA-to-membrane PSP tail plus delay support from E-to-E
+   edges inside the same 1 mm movie-parent cone.
+2. Freeze 10% of PSP peak as primary and 20%/5% as sensitivities.  Use the
+   maximum local compatible delay; do not inspect KMeans or patient loss when
+   setting these values.
+3. Add synthetic tests for the exact exponential-Euler PSP response, local-edge
+   delay filtering, simultaneous roots, sequential roots and detector dips.
+4. Run the same three frozen fields x two network seeds with exact per-neuron
+   contact readout.  No field parameter is released and selection remains
+   forbidden.
+5. Report event count, partition stability, multi-root fraction, matched 6-vs-6
+   patient loss and natural KMeans for all three tail definitions.
+6. Render algorithmic complete-event representatives.  If long multi-packet
+   episodes or segmentation-dependent A/B labels remain, keep Node fitting
+   closed and revise the event producer rather than tuning the field.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the
@@ -229,12 +254,7 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-The native-worker parity canary passed exactly for the shared arrays, event
-metadata and root identifiers.  Stage I is therefore the next runnable phase.
-The short canary initially used about 2.3 GiB, but the first 24-worker fit batch
-grew to about 6.5-8 GiB per worker as spike buffers accumulated.  The controller
-was stopped before the 32 GiB reserve was crossed; eight incomplete workers were
-discarded and will be rerun.  Continuation uses an explicit runtime safety
-override of 8 GiB per worker and at most 16 workers, with the same 600 s monitor
-and 32 GiB reserve.  This changes scheduling only.  Duration is not shortened
-and fit, selection and confirmation network pools remain disjoint.
+Phase 1i is the only runnable phase.  Freeze and run the six-trajectory
+engine-derived event-identity canary, audit all three PSP-tail definitions and
+inspect complete-event GIFs.  Stage I field generation, selection, intervention,
+EE, E-to-I and Z/M remain closed until this event producer is accepted.

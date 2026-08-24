@@ -227,7 +227,7 @@ or seven separate population packets.  A global quiet-state dwell therefore
 overmerges observations in this active background and cannot be the optimization
 unit.  These complete-excursion GIFs remain the required outer diagnostic.
 
-### Persistent-root coactivity episode (2026-08-24; current primary)
+### Persistent-root coactivity episode (2026-08-24; grouping retained, memory superseded)
 
 The current statistical unit combines the stable part of the two corrections:
 
@@ -245,10 +245,39 @@ The current statistical unit combines the stable part of the two corrections:
 Contact geometry and patient labels enter only after these groups are frozen.
 Exact per-neuron contact readout uses the union of all roots in an ensemble and
 excludes activity from concurrent roots outside that ensemble.  No dominance
-threshold deletes an event.  Root memory is evaluated at 4/5/6 fast-state
-constants, and fitting uses the worst matched patient loss plus the minimum
-natural-KMeans alignment over this segmentation ensemble.  A field therefore
-cannot win by exploiting one favourable root-memory value.
+threshold deletes an event.
+
+The first canary used `4/5/6 * max(tau_m,E, tau_d,GABA) + maximum network
+delay`.  It improved natural KMeans alignment over the global-excursion unit,
+but remained overlong: 91-96% of observations contained several roots and
+algorithmically selected examples lasted 120-330 ms.  The formula combined a
+local 1 mm parent search with the maximum delay anywhere in the 20 mm network
+and retained a PSP after only 0.7% of a membrane exponential remained.  This
+memory definition is rejected before field optimization.
+
+### Engine-derived root memory (2026-08-24; current primary)
+
+The coactivity grouping above is retained, but root memory is derived from the
+excitatory pathway that can propagate E-neuron activity:
+
+```text
+root memory = E-to-E AMPA-to-membrane PSP tail support
+            + local E-to-E axonal-delay support
+```
+
+The PSP support is computed with the same exponential-Euler AMPA gating,
+synaptic-current and E-membrane updates as the simulator.  The primary endpoint
+is the descending time at 10% of PSP peak; 20% and 5% are mandatory
+sensitivities.  Delay support uses only E-to-E edges whose source and target lie
+inside the same 1 mm parent cone and takes their maximum frozen delay.  For seed
+2211 this gives 58.0 ms PSP support plus 9.4 ms local delay, rather than the old
+100 ms plus 35.2 ms global delay.  These values use no contact geometry, patient
+label or fit score.
+
+Candidate summaries retain the worst matched patient loss and minimum natural-
+KMeans alignment over the 5%/10%/20% PSP-tail definitions.  No Node field fit
+may resume until event partitions and the two-mode interpretation are stable in
+this engine-derived canary.
 
 ## 2. Scientific question
 
@@ -374,7 +403,7 @@ trying to test.
 
 KMeans is computed after drawing the same event count from every network.
 Patient held-out R2 and source topology do not select the fit library.
-The formal candidate value is computed at 4/5/6 fast-state constants.  The
+The formal candidate value is computed at 5%/10%/20% PSP-tail support.  The
 worst `J_patient`, minimum balanced KMeans alignment and their across-segmentation
 spread are retained; no best-window selection is allowed.
 
@@ -524,7 +553,7 @@ knee of normalized Pareto coordinates, with field roughness as the last
 tie-break.
 
 No search resumes until the same shortlist and two-mode interpretation are
-stable at four, five and six fast-state decay constants.  Instability is an
+stable at 5%, 10% and 20% excitatory-PSP tail support.  Instability is an
 event-definition failure, not optimizer uncertainty.
 
 ### Confirmation

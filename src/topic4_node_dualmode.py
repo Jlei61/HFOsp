@@ -677,6 +677,74 @@ def sheet_activity_movie(spikes: np.ndarray, positions: np.ndarray, *,
     }
 
 
+def excitatory_psp_tail_support_ms(*, tau_r_ms: float, tau_d_ms: float,
+                                   tau_m_ms: float, dt_ms: float,
+                                   tail_fraction: float) -> float:
+    """Time from AMPA arrival until the linear E-cell PSP falls below a tail.
+
+    The recurrence follows the same exponential-Euler order as the SNN engine:
+    AMPA gating drives synaptic current, which then drives the membrane.  The
+    absolute spike weight cancels because only a fraction of the peak is used.
+    """
+    tau_r_ms, tau_d_ms = float(tau_r_ms), float(tau_d_ms)
+    tau_m_ms, dt_ms = float(tau_m_ms), float(dt_ms)
+    tail_fraction = float(tail_fraction)
+    if (min(tau_r_ms, tau_d_ms, tau_m_ms, dt_ms) <= 0.0
+            or not 0.0 < tail_fraction < 1.0):
+        raise ValueError("PSP timescales and tail fraction are invalid")
+    decay_s = np.exp(-dt_ms / tau_r_ms)
+    decay_i = np.exp(-dt_ms / tau_d_ms)
+    decay_v = np.exp(-dt_ms / tau_m_ms)
+    gating, current, voltage = tau_m_ms / tau_r_ms, 0.0, 0.0
+    values = []
+    maximum_steps = int(np.ceil(20.0 * max(
+        tau_r_ms, tau_d_ms, tau_m_ms,
+    ) / dt_ms))
+    for _ in range(maximum_steps):
+        current = gating + (current - gating) * decay_i
+        voltage = current + (voltage - current) * decay_v
+        values.append(voltage)
+        gating *= decay_s
+    response = np.asarray(values, float)
+    peak_index = int(np.argmax(response))
+    threshold = tail_fraction * float(response[peak_index])
+    crossing = np.flatnonzero(response[peak_index:] <= threshold)
+    if not len(crossing):
+        raise RuntimeError("PSP tail did not decay inside the integration horizon")
+    return float((peak_index + int(crossing[0])) * dt_ms)
+
+
+def local_ee_delay_quantile_ms(ampa_by_delay: list, positions_e: np.ndarray, *,
+                               dt_ms: float, bin_mm: float,
+                               neighborhood_bins: int,
+                               quantile: float) -> float:
+    """Delay support for E-to-E edges compatible with the movie parent cone."""
+    positions = np.asarray(positions_e, float)
+    dt_ms, bin_mm = float(dt_ms), float(bin_mm)
+    neighborhood_bins, quantile = int(neighborhood_bins), float(quantile)
+    if (positions.ndim != 2 or positions.shape[1] != 2 or dt_ms <= 0.0
+            or bin_mm <= 0.0 or neighborhood_bins < 0
+            or not 0.0 < quantile <= 1.0):
+        raise ValueError("local E-to-E delay contract is invalid")
+    n_e = len(positions)
+    bins = np.floor(positions / bin_mm).astype(np.int32)
+    counts = np.zeros(len(ampa_by_delay), np.int64)
+    for delay_index, matrix in enumerate(ampa_by_delay):
+        edges = matrix[:n_e, :n_e].tocoo()
+        if not edges.nnz:
+            continue
+        compatible = np.max(
+            np.abs(bins[edges.row] - bins[edges.col]), axis=1,
+        ) <= neighborhood_bins
+        counts[delay_index] = int(np.sum(compatible))
+    total = int(np.sum(counts))
+    if total == 0:
+        raise RuntimeError("movie parent cone contains no E-to-E edge")
+    target = quantile * total
+    delay_index = int(np.searchsorted(np.cumsum(counts), target, side="left"))
+    return float(delay_index * dt_ms)
+
+
 def spatiotemporal_cascade_labels(activity_counts: np.ndarray, *,
                                   minimum_active_neurons: int) -> dict:
     """Find contact-independent cascades in a binned neuron-activity movie.

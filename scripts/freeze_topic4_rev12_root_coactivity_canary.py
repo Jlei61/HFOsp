@@ -35,6 +35,33 @@ def _atomic_json(path: Path, payload: dict) -> None:
             os.unlink(temporary)
 
 
+def validate_event_canary_contract(config: dict) -> None:
+    """Reject any drift that turns the event canary into field selection."""
+    event_unit = config["event_unit"]
+    if (event_unit["name"] != "persistent_root_coactivity_episode"
+            or event_unit["contact_geometry_used_for_boundary"]
+            or event_unit["root_inclusion"] != (
+                "all positive activity mass; no dominance exclusion")):
+        raise RuntimeError("root-coactivity event contract drifted")
+    if event_unit.get("causal_memory_method") != "local_ee_psp_tail":
+        raise RuntimeError("engine-derived causal-memory method drifted")
+    primary = float(event_unit["psp_tail_fraction"])
+    fractions = [
+        float(value) for value in event_unit["sensitivity_psp_tail_fractions"]
+    ]
+    if (not 0.0 < primary < 1.0
+            or primary not in fractions
+            or any(not 0.0 < value < 1.0 for value in fractions)
+            or len(set(fractions)) != len(fractions)
+            or float(event_unit["local_ee_delay_quantile"]) != 1.0):
+        raise RuntimeError("engine-derived causal-memory contract drifted")
+    field_search = config["field_search"]
+    if (bool(field_search["new_field_parameters_released"])
+            or field_search["purpose"] != (
+                "engine-derived event identity canary only; no field selection")):
+        raise RuntimeError("event canary cannot release or select a Node field")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
@@ -70,12 +97,12 @@ def main() -> None:
     audit = json.loads(Path(inputs["causal_episode_audit"]["path"]).read_text())
     if audit["status"] != "REV12ND_POPULATION_EXCURSION_CANARY_AUDIT_COMPLETE":
         raise RuntimeError("causal-population episode audit is incomplete")
+    if "root_coactivity_audit" in inputs:
+        root_audit = json.loads(Path(inputs["root_coactivity_audit"]["path"]).read_text())
+        if root_audit["status"] != "REV12ND_ROOT_COACTIVITY_CANARY_AUDIT_COMPLETE":
+            raise RuntimeError("predecessor root-coactivity audit is incomplete")
+    validate_event_canary_contract(config)
     event_unit = config["event_unit"]
-    if (event_unit["name"] != "persistent_root_coactivity_episode"
-            or event_unit["contact_geometry_used_for_boundary"]
-            or event_unit["root_inclusion"] != (
-                "all positive activity mass; no dominance exclusion")):
-        raise RuntimeError("root-coactivity event contract drifted")
     source = json.loads(Path(inputs["source_manifest"]["path"]).read_text())
     by_id = {row["candidate_id"]: row for row in source["candidates"]}
     requested = list(config["field_search"]["candidate_ids"])
