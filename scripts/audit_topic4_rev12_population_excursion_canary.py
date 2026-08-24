@@ -31,6 +31,7 @@ from scripts.run_topic4_rev10_sa_spectral_field_worker import _contact_onsets  #
 from src.sef_hfo_events import detect_events  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
     fixed_projection_matrix,
+    matched_sample_dual_mode_objective,
     population_excursion_episodes,
 )
 from src.topic4_shaft_aware_direction import assign_direction_modes  # noqa: E402
@@ -197,6 +198,36 @@ def _pair_sensitivity(primary: dict, other: dict) -> dict:
     }
 
 
+def _matched_patient_summary(workers: list[dict], patient: dict,
+                             projections: np.ndarray,
+                             calibration: dict) -> dict:
+    rows = []
+    for worker in workers:
+        score = matched_sample_dual_mode_objective(
+            worker["ranks"], worker["labels"], patient["train_ranks"],
+            patient["train_labels"], patient["train_blocks"],
+            patient["contact_names"], projections=projections,
+            calibration=calibration, sample_size=6, draws=64,
+            seed=20260824 + int(worker["seed"]),
+        )
+        score["seed"] = int(worker["seed"])
+        rows.append(score)
+    return {
+        "mean_objective": float(np.mean([row["objective"] for row in rows])),
+        "mean_weakest_mode_lse": float(np.mean([
+            row["weakest_mode_lse"] for row in rows
+        ])),
+        "mean_mode_0_loss": float(np.mean([
+            row["modes"]["0"]["mean"] for row in rows
+        ])),
+        "mean_mode_1_loss": float(np.mean([
+            row["modes"]["1"]["mean"] for row in rows
+        ])),
+        "network_scores": rows,
+        "normalization": "matched_6_vs_6_divided_by_patient_block_floor_q95_no_clipping",
+    }
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
@@ -260,6 +291,9 @@ def main() -> None:
                 "candidate_id": candidate_id,
                 "decay_multiple": multiple,
                 "score": score,
+                "matched_patient": _matched_patient_summary(
+                    workers, patient, projections, calibration,
+                ),
                 "pooled_natural_kmeans": _natural_summary(workers, 20260823),
                 "per_seed": [{
                     key: value for key, value in row.items()
@@ -282,6 +316,26 @@ def main() -> None:
                     "comparison_decay_multiple": multiple,
                     **_pair_sensitivity(primary[seed], by_multiple[multiple][seed]),
                 })
+    robust_candidates = []
+    for candidate_id in diagnostics:
+        candidate_rows = [
+            row for row in rows if row["candidate_id"] == candidate_id
+        ]
+        objectives = np.asarray([
+            row["matched_patient"]["mean_objective"] for row in candidate_rows
+        ], float)
+        alignments = np.asarray([
+            row["pooled_natural_kmeans"]["direction_balanced_alignment"]
+            for row in candidate_rows
+        ], float)
+        robust_candidates.append({
+            "candidate_id": candidate_id,
+            "worst_matched_patient_objective": float(np.max(objectives)),
+            "mean_matched_patient_objective": float(np.mean(objectives)),
+            "minimum_kmeans_direction_balanced_alignment": float(np.min(alignments)),
+            "maximum_kmeans_direction_balanced_alignment": float(np.max(alignments)),
+            "selection_eligible": False,
+        })
     payload = {
         "schema_id": "topic4_rev12_population_excursion_canary_audit_v1",
         "status": "REV12ND_POPULATION_EXCURSION_CANARY_AUDIT_COMPLETE",
@@ -290,6 +344,7 @@ def main() -> None:
         "selection_forbidden": True,
         "rows": rows,
         "reset_sensitivity": sensitivity,
+        "segmentation_robustness": robust_candidates,
         "claim_boundary": (
             "Fresh event-unit canary only. Results diagnose boundary, KMeans and score "
             "stability; they cannot select a Node field or support dual-mode recovery."
