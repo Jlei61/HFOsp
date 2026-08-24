@@ -385,7 +385,7 @@ def main() -> None:
     ]
     metadata = {
         "status": (
-            "REV12ND_CAUSAL_ROOT_GIFS_COMPLETE" if causal_root
+            "REV12ND_CAUSAL_ROOT_GIFS_COMPLETE" if root_family
             else "REV12ND_ROOT_COACTIVITY_GIFS_COMPLETE"
         ),
         "candidate_id": args.candidate_id,
@@ -401,7 +401,7 @@ def main() -> None:
     }
     figures.mkdir(parents=True, exist_ok=True)
     (figures / "metadata.json").write_text(json.dumps(metadata, indent=2) + "\n")
-    if causal_root:
+    if root_family:
         readme = f"""### {stem}_pattern1_causal_root.gif
 
 纯 Node field 在 seed {args.seed} 中由自然 KMeans 第一种传播模式自动选出的单根 causal event。左侧 `viridis` 底图保留同一时刻全场全部 E 神经元活动，白色空框只标用于读出的 causal root；其他热点不会被隐藏，但混合 detector 窗已作为 compound 留在 A/B 之外。右侧圆点是该 root 的 exact-neuron contact onset，阴影严格使用 latent root 起止，虚线只表示电极 detector 首次越阈。
