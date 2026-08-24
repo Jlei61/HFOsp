@@ -5,6 +5,10 @@ from scripts.paper_figures.audit_fig4_node_event_source_topology import (
     persistent_recruitment_onsets,
     source_model_cv,
 )
+from src.topic4_node_dualmode import (
+    causal_direction_alignment,
+    causal_root_displacement,
+)
 
 
 def test_persistent_onset_rejects_single_frame_flash():
@@ -36,3 +40,36 @@ def test_radial_wave_prefers_single_source_without_large_two_source_gain():
     two = source_model_cv(onset, source_count=2)
     assert one["cv_r2"] > 0.95
     assert two["cv_r2"] - one["cv_r2"] < 0.05
+
+
+def _horizontal_wave(reverse=False):
+    onset = np.full((5, 8), np.nan)
+    onset[1:4] = np.arange(8, dtype=float)[None, :]
+    if reverse:
+        onset[1:4] = onset[1:4, ::-1]
+    return onset
+
+
+def test_causal_root_displacement_recovers_early_to_late_direction():
+    forward = causal_root_displacement(_horizontal_wave(), tail_fraction=0.2)
+    reverse = causal_root_displacement(
+        _horizontal_wave(reverse=True), tail_fraction=0.2,
+    )
+    assert forward["evaluable"] and reverse["evaluable"]
+    assert forward["displacement_xy_mm"][0] > 0.0
+    assert reverse["displacement_xy_mm"][0] < 0.0
+
+
+def test_causal_direction_alignment_requires_two_opposite_root_modes():
+    opposite = causal_direction_alignment(
+        np.asarray([_horizontal_wave(), _horizontal_wave(reverse=True)]),
+        np.asarray([0, 1]), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    same_direction = causal_direction_alignment(
+        np.asarray([_horizontal_wave(), _horizontal_wave()]),
+        np.asarray([0, 1]), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    assert opposite["score"] > 0.99
+    assert same_direction["score"] == 0.0

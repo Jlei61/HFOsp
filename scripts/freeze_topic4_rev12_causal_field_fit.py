@@ -166,6 +166,12 @@ def main() -> None:
     ).read_text())
     if canary["status"] != "REV12ND_NATIVE_LINEAGE_CANARY_PARITY_COMPLETE":
         raise RuntimeError("native causal-lineage parity has not passed")
+    root_audit_record = inputs.get("causal_root_canary_audit")
+    if root_audit_record is None:
+        raise RuntimeError("causal-root event canary audit is not frozen")
+    root_audit = json.loads(Path(root_audit_record["path"]).read_text())
+    if root_audit.get("status") != "REV12ND_CAUSAL_ROOT_CANARY_AUDIT_COMPLETE":
+        raise RuntimeError("causal-root event producer has not completed its audit")
     source = json.loads(Path(inputs["source_manifest"]["path"]).read_text())
     candidates = build_causal_field_candidates(source, config["field_search"])
     payload = {

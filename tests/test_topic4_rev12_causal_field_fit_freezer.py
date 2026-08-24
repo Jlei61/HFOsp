@@ -1,9 +1,15 @@
+import json
+from pathlib import Path
+
 import numpy as np
 
 from scripts.freeze_topic4_rev12_causal_field_fit import (
     build_causal_field_candidates,
 )
 from src.topic4_observation_invariant_spline import array_sha256
+
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def _field(index):
@@ -48,3 +54,17 @@ def test_causal_field_fit_is_whole_sheet_continuous_and_observation_invariant():
         for row in residuals
     )
 
+
+def test_causal_root_fit_freezes_event_and_direction_contracts():
+    config = json.loads(
+        (ROOT / "config/topic4_rev12_nd_causal_root_field_fit.json").read_text()
+    )
+    assert config["event_unit"]["name"] == "causal_root_observation"
+    assert config["event_unit"]["contact_geometry_used_for_boundary"] is False
+    assert config["cascade_objective"]["event_sensitivity_aggregation"] == (
+        "componentwise_worst_case"
+    )
+    assert config["cascade_objective"]["causal_direction_weight"] > 0.0
+    assert set(config["search"]["fit_network_seeds"]).isdisjoint(
+        config["search"]["selection_network_seeds"]
+    )

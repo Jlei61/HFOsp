@@ -1959,3 +1959,110 @@ def topology_network_reproducibility(onset_maps_by_network: list[np.ndarray],
         ),
         "equal_network_between_mode_distance": separation,
     }
+
+
+def causal_root_displacement(onset_map: np.ndarray, *, bin_mm: float = 1.0,
+                             tail_fraction: float = 0.2) -> dict:
+    """Measure one root's early-to-late displacement from its onset map.
+
+    The map is indexed as ``(y, x)`` and contains onset times only for bins that
+    belong to the selected causal root.  Earliest and latest quantile supports
+    are disjoint by construction, so simultaneous or spatially stationary roots
+    cannot look directional merely because their support is broad.
+    """
+    onset = np.asarray(onset_map, float)
+    if onset.ndim != 2 or float(bin_mm) <= 0.0:
+        raise ValueError("one causal-root onset map and positive bin size are required")
+    if not 0.0 < float(tail_fraction) <= 0.5:
+        raise ValueError("tail_fraction must be in (0, 0.5]")
+    y_index, x_index = np.where(np.isfinite(onset))
+    n_bins = int(len(x_index))
+    if n_bins < 4:
+        return {
+            "evaluable": False, "n_bins": n_bins,
+            "displacement_xy_mm": [float("nan"), float("nan")],
+            "distance_mm": float("nan"),
+        }
+    values = onset[y_index, x_index]
+    order = np.argsort(values, kind="stable")
+    count = min(n_bins // 2, max(1, int(np.ceil(float(tail_fraction) * n_bins))))
+    early = order[:count]
+    late = order[-count:]
+    coordinates = float(bin_mm) * np.column_stack([
+        x_index.astype(float) + 0.5,
+        y_index.astype(float) + 0.5,
+    ])
+    displacement = coordinates[late].mean(axis=0) - coordinates[early].mean(axis=0)
+    distance = float(np.linalg.norm(displacement))
+    return {
+        "evaluable": bool(np.isfinite(distance) and distance > 0.0),
+        "n_bins": n_bins,
+        "tail_count": int(count),
+        "displacement_xy_mm": displacement.tolist(),
+        "distance_mm": distance,
+    }
+
+
+def causal_direction_alignment(onset_maps: np.ndarray, labels: np.ndarray, *,
+                               axis_unit: np.ndarray,
+                               expected_mode_signs: np.ndarray,
+                               bin_mm: float = 1.0,
+                               tail_fraction: float = 0.2) -> dict:
+    """Score whether two patient-labelled root modes propagate oppositely.
+
+    A mode earns credit only for displacement along its patient-training
+    direction.  Orthogonal, stationary and sign-reversed roots receive zero,
+    which prevents two contact-rank clusters on one spatial wave from satisfying
+    the bidirectional endpoint.
+    """
+    maps = np.asarray(onset_maps, float)
+    labels = np.asarray(labels, int)
+    axis = np.asarray(axis_unit, float)
+    signs = np.asarray(expected_mode_signs, float)
+    if maps.ndim != 3 or labels.shape != (len(maps),):
+        raise ValueError("causal-root onset maps and labels do not align")
+    if axis.shape != (2,) or not np.all(np.isfinite(axis)):
+        raise ValueError("axis_unit must be a finite 2-D vector")
+    norm = float(np.linalg.norm(axis))
+    if norm <= 0.0 or signs.shape != (2,) or set(np.sign(signs).tolist()) != {-1.0, 1.0}:
+        raise ValueError("patient axis and opposite mode signs are required")
+    axis = axis / norm
+    rows = []
+    for onset, label in zip(maps, labels):
+        record = causal_root_displacement(
+            onset, bin_mm=bin_mm, tail_fraction=tail_fraction,
+        )
+        if not record["evaluable"] or label not in (0, 1):
+            continue
+        displacement = np.asarray(record["displacement_xy_mm"], float)
+        signed_cosine = float(
+            signs[label] * np.dot(displacement, axis) / record["distance_mm"]
+        )
+        rows.append({
+            "mode": int(label),
+            "signed_axis_cosine": signed_cosine,
+            "aligned_score": float(max(0.0, signed_cosine)),
+            **record,
+        })
+    modes = {}
+    mode_scores = []
+    for mode in (0, 1):
+        selected = [row for row in rows if row["mode"] == mode]
+        score = float(np.mean([row["aligned_score"] for row in selected])) \
+            if selected else 0.0
+        signed = float(np.mean([row["signed_axis_cosine"] for row in selected])) \
+            if selected else float("nan")
+        modes[str(mode)] = {
+            "n_evaluable": int(len(selected)),
+            "mean_signed_axis_cosine": signed,
+            "alignment_score": score,
+        }
+        mode_scores.append(score)
+    return {
+        "score": float(min(mode_scores)),
+        "weakest_mode_protected": True,
+        "modes": modes,
+        "n_evaluable": int(len(rows)),
+        "tail_fraction": float(tail_fraction),
+        "bin_mm": float(bin_mm),
+    }

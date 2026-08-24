@@ -169,7 +169,7 @@ showed successive hotspots inside both natural clusters.  The 10% PSP memory
 was shorter than the old global formula, but transitive root coactivity still
 merged distinct packets.
 
-## Phase 1j: observable causal-root canary (current blocker)
+## Phase 1j: observable causal-root canary (completed)
 
 1. Use one directed root as one model observation.  A detector fragment may
    establish observability but cannot extend latent root boundaries.
@@ -184,6 +184,14 @@ merged distinct packets.
 6. Render one algorithmic root representative per natural cluster with all
    concurrent sheet activity visible.  Reopen fitting only if the GIF and
    metrics agree that A/B are different causal propagation events.
+
+Observed result: event identity passed but all three fields failed scientific
+acceptance.  Every scored event contains exactly one latent root, detector
+fragments no longer determine its boundaries, and the memory-tail variants are
+stable.  However 40-58% of detector fragments are compound, matched patient loss
+worsened to 1.17-1.27 after mixed observations were removed, and the two natural
+clusters usually propagate in the same spatial direction on at least one seed.
+The old field ranking therefore benefited from detector-window composition.
 
 ## Phase 1f: native-worker parity before refitting
 
@@ -239,20 +247,25 @@ exact-neuron readout; no field parameter is regenerated.
    same RNG and spatial OU state.
 4. Confirm pre-intervention byte parity and quantify mode-selective effects.
 
-## Phase 5: Node-only field search
+## Phase 5: causal-root Node-only field search (current runnable phase)
 
 1. Freeze current field and historical non-dominated fields as initial points.
 2. Stage I: use the three best final Stage-G fields, their pairwise midpoints and
    signed 4 x 4 whole-sheet smooth residuals at two amplitudes.  The residual
    basis is uniform over the sheet and never receives contact coordinates.
-3. Rank on matched patient-training loss, equal-network KMeans alignment, a
-   small continuous per-network K2-vs-K1 support term, OOD and compound rate.
-   Do not use held-out patient R2 for selection.
-4. Run all 54 frozen fields on a two-network common-random-number fit pool.
-5. Select a small Pareto shortlist on fresh networks.
-6. Stage B: optional 6 x 6 residual only around a Stage-A candidate that improves
+3. Rank on the componentwise worst case across the five frozen causal-root
+   memory/dominance variants: matched patient-training loss, equal-network
+   KMeans alignment, per-network K2-vs-K1 support, OOD and compound rate.
+4. Add the root-onset-map directional endpoint: patient-labelled modes must have
+   opposite early-to-late displacement along the training-only TA/TB contrast
+   axis.  Protect the weaker mode and give networks equal weight.
+5. Do not use held-out patient R2 for selection.  Event formation itself never
+   sees contact geometry; the patient axis enters only after a root is frozen.
+6. Run all 54 frozen fields on a two-network common-random-number fit pool.
+7. Select a small Pareto shortlist on fresh networks.
+8. Stage B: optional 6 x 6 residual only around a Stage-A candidate that improves
    both patient modes without topology collapse.
-7. Long runs use `systemd-run --user` plus `nohup`, one numerical thread per
+9. Long runs use `systemd-run --user` plus `nohup`, one numerical thread per
    worker, memory sentinels and a 600 s monitor.  Worker count is selected from
    measured RSS while retaining at least 32 GiB available RAM.
 
@@ -264,11 +277,11 @@ exact-neuron readout; no field parameter is regenerated.
 4. Write a result report with safe claim, largest remaining gap and the exact
    handoff boundary for EE/E-to-I/Z/M.
 
-## Phase 7: corrected local continuation (paused until Phase 1e producer freeze)
+## Phase 7: corrected local continuation (paused until Phase 5 fit result)
 
 The first confirmation candidate failed: complete held-out event-cloud R2 stayed
 negative and the two modes did not both improve. Continue only on new fit,
-selection and confirmation seed pools using the directed-lineage worker. The next
+selection and confirmation seed pools using the causal-root worker. The next
 local library may inherit fields from development pools only after cascade
 stability is established, and never from the opened
 confirmation results. EE, E-to-I and Z/M remain closed until the three minimal
@@ -276,8 +289,9 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-Phase 1j is the only runnable phase.  Freeze and run the six-trajectory causal-
-root canary, audit all five memory/purity variants and inspect root-specific
-GIFs with full concurrent activity visible.  Stage I field generation,
-selection, intervention, EE, E-to-I and Z/M remain closed until this event
-producer is accepted.
+Phase 1j is accepted for event identity.  Freeze the 54-field Phase 5 library at
+the current commit, run two common-random-number fit networks, aggregate with the
+five-variant conservative event envelope and causal-direction term, and inspect
+the shortlist before opening selection networks.  Intervention, confirmation,
+EE, E-to-I and Z/M remain closed until a field improves both patient modes and
+shows opposite causal propagation on the fit and fresh selection pools.

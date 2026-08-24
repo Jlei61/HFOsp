@@ -37,10 +37,12 @@ from scripts.rescore_topic4_rev12_node_historical import (  # noqa: E402
 from src.topic4_d6_natural_kmeans import natural_kmeans  # noqa: E402
 from src.topic4_node_dualmode import (  # noqa: E402
     calibrate_component_scales,
+    causal_direction_alignment,
     fixed_projection_matrix,
     matched_sample_dual_mode_objective,
     topology_network_reproducibility,
 )
+from src.topic4_shaft_aware_direction import assign_direction_modes  # noqa: E402
 
 
 def _sha256(path: Path) -> str:
@@ -89,17 +91,26 @@ def cascade_selection_objective(*, patient_loss: float,
                                 ood_fraction: float,
                                 compound_fraction: float,
                                 k2_support: float | None = None,
-                                k2_support_weight: float = 0.0) -> dict:
+                                k2_support_weight: float = 0.0,
+                                causal_direction_score: float | None = None,
+                                causal_direction_weight: float = 0.0) -> dict:
     values = np.asarray([
         patient_loss, kmeans_balanced_alignment, ood_fraction, compound_fraction,
     ], float)
     if not np.all(np.isfinite(values)) or not 0.0 <= kmeans_balanced_alignment <= 1.0:
         raise ValueError("cascade objective inputs must be finite and bounded")
-    if (k2_support is not None and not 0.0 <= float(k2_support) <= 1.0) \
-            or float(k2_support_weight) < 0.0:
-        raise ValueError("K2 support and weight must be bounded")
+    if ((k2_support is not None and not 0.0 <= float(k2_support) <= 1.0)
+            or float(k2_support_weight) < 0.0
+            or (causal_direction_score is not None
+                and not 0.0 <= float(causal_direction_score) <= 1.0)
+            or float(causal_direction_weight) < 0.0):
+        raise ValueError("auxiliary scores and weights must be bounded")
     kmeans_loss = 1.0 - float(kmeans_balanced_alignment)
     k2_loss = 0.0 if k2_support is None else 1.0 - float(k2_support)
+    direction_loss = (
+        0.0 if causal_direction_score is None
+        else 1.0 - float(causal_direction_score)
+    )
     return {
         "matched_patient_loss": float(patient_loss),
         "kmeans_direction_loss": kmeans_loss,
@@ -107,10 +118,16 @@ def cascade_selection_objective(*, patient_loss: float,
         "compound_fraction": float(compound_fraction),
         "k2_support": None if k2_support is None else float(k2_support),
         "k2_support_loss": float(k2_loss),
+        "causal_direction_score": (
+            None if causal_direction_score is None
+            else float(causal_direction_score)
+        ),
+        "causal_direction_loss": float(direction_loss),
         "objective": float(
             patient_loss + 0.5 * kmeans_loss
             + 0.25 * ood_fraction + 0.25 * compound_fraction
             + float(k2_support_weight) * k2_loss
+            + float(causal_direction_weight) * direction_loss
         ),
         "weights": {
             "matched_patient_loss": 1.0,
@@ -118,6 +135,7 @@ def cascade_selection_objective(*, patient_loss: float,
             "ood_fraction": 0.25,
             "compound_fraction": 0.25,
             "k2_support_loss": float(k2_support_weight),
+            "causal_direction_loss": float(causal_direction_weight),
         },
     }
 
@@ -214,6 +232,180 @@ def per_network_natural_kmeans(workers: list[dict], *, seed: int,
     }
 
 
+def patient_direction_contract(patient_ranks: np.ndarray,
+                               patient_labels: np.ndarray,
+                               contact_xy: np.ndarray) -> dict:
+    """Freeze a training-only spatial axis and each mode's expected sign."""
+    ranks = np.asarray(patient_ranks, float)
+    labels = np.asarray(patient_labels, int)
+    coordinates = np.asarray(contact_xy, float)
+    if ranks.ndim != 2 or labels.shape != (len(ranks),) \
+            or coordinates.shape != (ranks.shape[1], 2):
+        raise ValueError("patient direction inputs do not align")
+    prototypes = np.asarray([
+        np.nanmean(ranks[labels == mode], axis=0) for mode in (0, 1)
+    ])
+    contrast = prototypes[0] - prototypes[1]
+    valid = np.isfinite(contrast) & np.all(np.isfinite(coordinates), axis=1)
+    if int(np.sum(valid)) < 6:
+        raise RuntimeError("patient direction axis has insufficient contacts")
+    centered = coordinates[valid] - np.mean(coordinates[valid], axis=0)
+    target = contrast[valid] - float(np.mean(contrast[valid]))
+    beta, *_ = np.linalg.lstsq(centered, target, rcond=0.05)
+    norm = float(np.linalg.norm(beta))
+    if not np.isfinite(norm) or norm <= 1e-9:
+        raise RuntimeError("patient direction axis is degenerate")
+    axis = beta / norm
+    along = (coordinates - np.mean(coordinates[valid], axis=0)) @ axis
+    expected_signs = []
+    mode_slopes = []
+    for mode in (0, 1):
+        selected = np.isfinite(prototypes[mode]) & np.isfinite(along)
+        slope = float(np.dot(
+            along[selected] - np.mean(along[selected]),
+            prototypes[mode, selected] - np.mean(prototypes[mode, selected]),
+        ))
+        mode_slopes.append(slope)
+        expected_signs.append(float(np.sign(slope)))
+    if set(expected_signs) != {-1.0, 1.0}:
+        raise RuntimeError("patient training modes are not oppositely directed")
+    fitted = centered @ beta
+    denominator = float(np.sum(target ** 2))
+    r2 = float(1.0 - np.sum((target - fitted) ** 2) / denominator)
+    return {
+        "axis_unit_xy": axis.tolist(),
+        "expected_mode_signs": expected_signs,
+        "mode_rank_slopes": mode_slopes,
+        "contrast_gradient_r2": r2,
+        "n_contacts": int(np.sum(valid)),
+        "source": "patient-training TA/TB rank-contrast gradient",
+    }
+
+
+def equal_network_causal_direction(onset_maps_by_network: list[np.ndarray],
+                                   labels_by_network: list[np.ndarray], *,
+                                   contract: dict, bin_mm: float,
+                                   tail_fraction: float) -> dict:
+    """Give every network equal weight in the causal direction endpoint."""
+    if len(onset_maps_by_network) != len(labels_by_network):
+        raise ValueError("network causal direction bundles do not align")
+    rows = []
+    for maps, labels in zip(onset_maps_by_network, labels_by_network):
+        rows.append(causal_direction_alignment(
+            maps, labels,
+            axis_unit=np.asarray(contract["axis_unit_xy"], float),
+            expected_mode_signs=np.asarray(contract["expected_mode_signs"], float),
+            bin_mm=float(bin_mm), tail_fraction=float(tail_fraction),
+        ))
+    return {
+        "score": float(np.mean([row["score"] for row in rows])) if rows else 0.0,
+        "per_network": rows,
+        "n_networks": int(len(rows)),
+        "network_weighting": "equal network weight; weakest mode within network",
+    }
+
+
+def robust_sensitivity_envelope(rows: list[dict]) -> dict:
+    """Combine one-axis event-definition sensitivities conservatively."""
+    if not rows:
+        raise ValueError("sensitivity envelope requires at least one variant")
+    fields = {
+        "matched_patient_loss": max,
+        "kmeans_balanced_alignment": min,
+        "k2_support": min,
+        "ood_fraction": max,
+        "compound_fraction": max,
+    }
+    output = {}
+    for field, reducer in fields.items():
+        values = [float(row[field]) for row in rows]
+        if not np.all(np.isfinite(values)):
+            raise ValueError(f"non-finite event sensitivity field: {field}")
+        output[field] = float(reducer(values))
+    output["n_variants"] = int(len(rows))
+    output["componentwise_worst_case"] = True
+    return output
+
+
+def load_event_sensitivity_workers(npz_path: Path, target_names: np.ndarray,
+                                   classifier_contract: dict,
+                                   label_map: np.ndarray) -> list[dict]:
+    """Load all frozen event-definition variants from one simulation."""
+    payload = json.loads(npz_path.with_suffix(".json").read_text())
+    with np.load(npz_path, allow_pickle=False) as loaded:
+        required = {
+            "lineage_sensitivity_values",
+            "lineage_sensitivity_minimum_dominances",
+            "lineage_sensitivity_primary",
+            "lineage_sensitivity_event_counts",
+            "lineage_sensitivity_onsets",
+            "lineage_sensitivity_ranks",
+            "lineage_sensitivity_returned",
+            "lineage_sensitivity_fragment_partition",
+            "contact_names",
+        }
+        if not required.issubset(loaded.files):
+            raise RuntimeError("causal-root worker lacks event sensitivity arrays")
+        names = np.asarray(loaded["contact_names"]).astype(str)
+        order = []
+        for name in np.asarray(target_names).astype(str):
+            matches = np.flatnonzero(names == name)
+            if len(matches) != 1:
+                raise RuntimeError("event sensitivity contact order is ambiguous")
+            order.append(int(matches[0]))
+        values = np.asarray(loaded["lineage_sensitivity_values"], float)
+        dominances = np.asarray(
+            loaded["lineage_sensitivity_minimum_dominances"], float,
+        )
+        primary = np.asarray(loaded["lineage_sensitivity_primary"], bool)
+        counts = np.asarray(loaded["lineage_sensitivity_event_counts"], int)
+        onsets = np.asarray(loaded["lineage_sensitivity_onsets"], float)[..., order]
+        ranks = np.asarray(loaded["lineage_sensitivity_ranks"], float)[..., order]
+        returned = np.asarray(loaded["lineage_sensitivity_returned"], bool)
+        partitions = np.asarray(
+            loaded["lineage_sensitivity_fragment_partition"], int,
+        )
+    if not (len(values) == len(dominances) == len(primary) == len(counts)
+            == len(onsets) == len(ranks) == len(returned) == len(partitions)):
+        raise RuntimeError("event sensitivity variant arrays do not align")
+    label_map = np.asarray(label_map, int)
+    seed = int(payload["seed"])
+    rows = []
+    for index in range(len(values)):
+        n_events = int(counts[index])
+        current_onsets = onsets[index, :n_events]
+        current_ranks = ranks[index, :n_events]
+        current_returned = returned[index, :n_events]
+        assigned = assign_direction_modes(
+            current_onsets,
+            groups=classifier_contract["groups"],
+            embedding=classifier_contract["embedding"],
+            classifier=classifier_contract["classifier"],
+        )
+        rows.append({
+            "variant": {
+                "sensitivity_value": float(values[index]),
+                "minimum_dominance": float(dominances[index]),
+                "primary": bool(primary[index]),
+            },
+            "worker": {
+                "seed": seed,
+                "ranks": current_ranks[current_returned],
+                "onsets": current_onsets[current_returned],
+                "labels": label_map[np.asarray(assigned["labels"], int)][
+                    current_returned
+                ],
+                "ood": np.asarray(assigned["ood"], bool)[current_returned],
+                "n_detected": n_events,
+                "n_returned": int(np.sum(current_returned)),
+            },
+            "compound_fraction": float(np.mean(partitions[index] < 0)),
+        })
+    if int(np.sum(primary)) != 1:
+        raise RuntimeError("event sensitivity arrays lack one primary variant")
+    return rows
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
@@ -260,9 +452,27 @@ def main() -> None:
         int(seed) for seed in config["search"][f"{args.seed_pool}_network_seeds"]
     ]
     output_root = artifact_root / config["output_root"]
+    first_npz = output_root / "workers" / (
+        f"{manifest['candidates'][0]['candidate_id']}_seed_{seeds[0]}.npz"
+    )
+    if not first_npz.exists():
+        raise RuntimeError("first completed worker is absent for direction contract")
+    with np.load(first_npz, allow_pickle=False) as loaded:
+        names = np.asarray(loaded["contact_names"]).astype(str)
+        contact_xy = np.asarray(loaded["contact_xy_mm"], float)
+    order = []
+    for name in patient["contact_names"]:
+        matches = np.flatnonzero(names == name)
+        if len(matches) != 1:
+            raise RuntimeError("worker contact geometry does not match patient target")
+        order.append(int(matches[0]))
+    direction_contract = patient_direction_contract(
+        patient["train_ranks"], patient["train_labels"], contact_xy[order],
+    )
     rows = []
     for candidate in manifest["candidates"]:
         workers, worker_payloads, source_maps, source_labels = [], [], [], []
+        sensitivity_by_network = []
         for seed in seeds:
             stem = f"{candidate['candidate_id']}_seed_{seed}"
             npz_path = output_root / "workers" / f"{stem}.npz"
@@ -284,58 +494,116 @@ def main() -> None:
             worker_payloads.append(payload)
             source_maps.append(maps)
             source_labels.append(labels)
+            sensitivity_by_network.append(load_event_sensitivity_workers(
+                npz_path, patient["contact_names"], classifier,
+                semantics["raw_to_patient"],
+            ))
         if not workers:
             continue
         if len(workers) != len(seeds):
             raise RuntimeError(
                 f"candidate {candidate['candidate_id']} is missing a frozen network"
             )
-        matched_scores = [
-            matched_sample_dual_mode_objective(
-                worker["ranks"], worker["labels"],
-                patient["train_ranks"], patient["train_labels"],
-                patient["train_blocks"], patient["contact_names"],
-                projections=projections, calibration=calibration,
-                sample_size=int(objective_config["sample_size_per_side"]),
-                draws=int(objective_config["score_draws"]),
-                seed=int(objective_config["seed"]) + int(worker["seed"]),
-            )
-            for worker in workers
-        ]
-        natural = equal_network_natural_kmeans(
-            workers, seed=int(objective_config["seed"]),
-        )
-        network_natural = per_network_natural_kmeans(
-            workers, seed=int(objective_config["seed"]),
-            support_scale=float(objective_config.get("k2_support_scale", 0.5)),
-        )
-        ood_fraction = float(np.mean([
-            float(np.mean(worker["ood"])) if len(worker["ood"]) else 1.0
-            for worker in workers
-        ]))
-        compound_fraction = float(np.mean([
-            payload["event_unit"]["compound_detector_fragment_fraction"]
-            for payload in worker_payloads
-        ]))
-        matched_loss = float(np.mean([score["objective"] for score in matched_scores]))
         alignment_source = objective_config.get(
             "kmeans_alignment_source", "pooled_equal_event_count",
         )
-        if alignment_source == "pooled_equal_event_count":
-            balanced_alignment = float(natural["direction_balanced_alignment"])
-        elif alignment_source == "equal_network_mean":
-            balanced_alignment = float(
-                network_natural["equal_network_mean_balanced_alignment"]
+        variant_rows = []
+        for variant_index, reference in enumerate(sensitivity_by_network[0]):
+            reference_variant = reference["variant"]
+            current = []
+            compound_values = []
+            for network_variants in sensitivity_by_network:
+                row = network_variants[variant_index]
+                if row["variant"] != reference_variant:
+                    raise RuntimeError("event sensitivity ordering differs across networks")
+                current.append(row["worker"])
+                compound_values.append(row["compound_fraction"])
+            current_scores = [
+                matched_sample_dual_mode_objective(
+                    worker["ranks"], worker["labels"],
+                    patient["train_ranks"], patient["train_labels"],
+                    patient["train_blocks"], patient["contact_names"],
+                    projections=projections, calibration=calibration,
+                    sample_size=int(objective_config["sample_size_per_side"]),
+                    draws=int(objective_config["score_draws"]),
+                    seed=int(objective_config["seed"]) + int(worker["seed"]),
+                )
+                for worker in current
+            ]
+            current_natural = equal_network_natural_kmeans(
+                current, seed=int(objective_config["seed"]),
             )
-        else:
-            raise RuntimeError(f"unknown KMeans alignment source: {alignment_source}")
+            current_network_natural = per_network_natural_kmeans(
+                current, seed=int(objective_config["seed"]),
+                support_scale=float(objective_config.get("k2_support_scale", 0.5)),
+            )
+            if alignment_source == "pooled_equal_event_count":
+                current_alignment = float(
+                    current_natural["direction_balanced_alignment"]
+                )
+            elif alignment_source == "equal_network_mean":
+                current_alignment = float(
+                    current_network_natural[
+                        "equal_network_mean_balanced_alignment"
+                    ]
+                )
+            else:
+                raise RuntimeError(
+                    f"unknown KMeans alignment source: {alignment_source}"
+                )
+            variant_rows.append({
+                **reference_variant,
+                "matched_patient_loss": float(np.mean([
+                    score["objective"] for score in current_scores
+                ])),
+                "kmeans_balanced_alignment": current_alignment,
+                "k2_support": float(
+                    current_network_natural["equal_network_mean_k2_support"]
+                ),
+                "ood_fraction": float(np.mean([
+                    float(np.mean(worker["ood"])) if len(worker["ood"]) else 1.0
+                    for worker in current
+                ])),
+                "compound_fraction": float(np.mean(compound_values)),
+                "matched_network_scores": current_scores,
+                "equal_network_natural_kmeans": current_natural,
+                "per_network_natural_kmeans": current_network_natural,
+            })
+        primary_rows = [row for row in variant_rows if row["primary"]]
+        if len(primary_rows) != 1:
+            raise RuntimeError("candidate does not have one primary event variant")
+        for worker, variants in zip(workers, sensitivity_by_network):
+            primary_workers = [
+                row["worker"] for row in variants if row["variant"]["primary"]
+            ]
+            if len(primary_workers) != 1 or not np.array_equal(
+                    worker["ranks"], primary_workers[0]["ranks"], equal_nan=True):
+                raise RuntimeError("primary event sensitivity arrays drifted from worker output")
+        primary = primary_rows[0]
+        matched_scores = primary["matched_network_scores"]
+        natural = primary["equal_network_natural_kmeans"]
+        network_natural = primary["per_network_natural_kmeans"]
+        ood_fraction = primary["ood_fraction"]
+        compound_fraction = primary["compound_fraction"]
+        robust = robust_sensitivity_envelope(variant_rows)
+        direction = equal_network_causal_direction(
+            source_maps, source_labels, contract=direction_contract,
+            bin_mm=float(config["source_topology"]["bin_mm"]),
+            tail_fraction=float(objective_config.get(
+                "causal_direction_tail_fraction", 0.2,
+            )),
+        )
         selection = cascade_selection_objective(
-            patient_loss=matched_loss,
-            kmeans_balanced_alignment=balanced_alignment,
-            ood_fraction=ood_fraction,
-            compound_fraction=compound_fraction,
-            k2_support=float(network_natural["equal_network_mean_k2_support"]),
+            patient_loss=robust["matched_patient_loss"],
+            kmeans_balanced_alignment=robust["kmeans_balanced_alignment"],
+            ood_fraction=robust["ood_fraction"],
+            compound_fraction=robust["compound_fraction"],
+            k2_support=robust["k2_support"],
             k2_support_weight=float(objective_config.get("k2_support_weight", 0.0)),
+            causal_direction_score=float(direction["score"]),
+            causal_direction_weight=float(objective_config.get(
+                "causal_direction_weight", 0.0,
+            )),
         )
         historical_diagnostics = score_candidate(
             candidate, workers, patient, projections, calibration,
@@ -346,11 +614,14 @@ def main() -> None:
             "field_sha256": candidate["node_field"]["field_sha256"],
             "n_networks": len(workers),
             "selection_objective": selection,
+            "event_sensitivity_envelope": robust,
+            "event_sensitivity_rows": variant_rows,
             "matched_network_scores": matched_scores,
             "equal_network_natural_kmeans": natural,
             "per_network_natural_kmeans": network_natural,
             "historical_unmatched_diagnostics": historical_diagnostics,
             "source_topology": topology,
+            "causal_direction_alignment": direction,
             "per_seed": [{
                 "seed": worker["seed"],
                 "n_cascade_events": worker["n_returned"],
@@ -379,6 +650,7 @@ def main() -> None:
         "requested_seeds": seeds,
         "rows": rows,
         "component_calibration": calibration,
+        "patient_direction_contract": direction_contract,
         "selection_contract": {
             "patient_sampling": "matched 6 model vs 6 one-block patient events",
             "normalization": "raw distance / patient block floor q95; no clipping",
@@ -390,6 +662,14 @@ def main() -> None:
                 "per-network held-out diagonal-GMM K2-vs-K1 log likelihood, "
                 "mapped continuously; no hard blocker"
             ),
+            "event_sensitivity": (
+                "componentwise worst case across frozen one-axis memory and "
+                "root-dominance variants"
+            ),
+            "causal_direction": (
+                "patient-training rank-contrast axis; equal network weight; "
+                "weakest patient-labelled causal-root mode protected"
+            ),
             "heldout_r2_used_for_selection": False,
             "hard_scientific_gates": [],
         },
@@ -399,8 +679,9 @@ def main() -> None:
             "candidate_manifest_sha256": _sha256(manifest_path),
         },
         "claim_boundary": (
-            "Exploratory cascade-event field ranking. Patient held-out R2, topology "
-            "and figures are diagnostics and do not select this fit library."
+            "Exploratory causal-root field ranking. Patient held-out R2 and "
+            "unconditioned topology figures are diagnostics. Training-only patient "
+            "event distributions and the frozen patient direction axis select the fit."
         ),
     }
     aggregate = output_root / "aggregate"
@@ -411,7 +692,8 @@ def main() -> None:
         fields = [
             "candidate_id", "objective", "matched_patient_loss",
             "kmeans_balanced_alignment", "k2_support", "ood_fraction",
-            "compound_fraction", "heldout_r2_diagnostic",
+            "compound_fraction", "causal_direction_score",
+            "heldout_r2_diagnostic",
         ]
         writer = csv.DictWriter(handle, fieldnames=fields)
         writer.writeheader()
@@ -427,6 +709,7 @@ def main() -> None:
                 "k2_support": selection["k2_support"],
                 "ood_fraction": selection["ood_fraction"],
                 "compound_fraction": selection["compound_fraction"],
+                "causal_direction_score": selection["causal_direction_score"],
                 "heldout_r2_diagnostic": row[
                     "historical_unmatched_diagnostics"
                 ]["model_prototype_r2_on_heldout"],

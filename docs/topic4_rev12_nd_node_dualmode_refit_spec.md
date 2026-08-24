@@ -357,13 +357,14 @@ the entire sheet and do not receive extra support near observed contacts.
 
 ## 5. Patient event representation
 
-The model event unit used by KMeans and the patient objective is a
-`persistent_root_coactivity_episode`, not an unmerged threshold fragment,
-fixed-gap `settled_episode`, global quiet-state excursion, or one selected root.
-Every episode stores all constituent detector-fragment indices and every
-coactive persistent root.  Multi-root episodes remain complete observations.
-A figure or scorer that consumes pre-group fragment ranks or drops compound
-events is invalid for rev12-ND.
+The model event unit used by KMeans and the patient objective is one
+`causal_root_observation`, not an unmerged threshold fragment, fixed-gap
+`settled_episode`, global quiet-state excursion or transitive multi-root
+episode.  A detector fragment establishes that a latent root is observable but
+cannot alter that root's start or stop.  A fragment without one root carrying
+at least the frozen dominance fraction is retained as `compound` and does not
+enter either patient direction class.  A figure or scorer that uses detector
+fragment boundaries or forces compounds into A/B is invalid for rev12-ND.
 
 For event `e` and contact `i`, retain fixed contact identity:
 
@@ -417,19 +418,32 @@ The exploratory fit objective adds three continuous diagnostics:
 J_fit = J_patient
       + 0.50 * (1 - balanced KMeans/patient-direction alignment)
       + 0.25 * OOD fraction
+      + 0.25 * compound detector-fragment fraction
+      + 0.25 * (1 - per-network K2 support)
+      + 0.50 * (1 - causal direction score)
 ```
 
-Root multiplicity and detector-fragment compound fraction are reported topology
-diagnostics, not optimization penalties.  Penalizing them would assume in advance
-that a real patient event has one source, which is precisely what this round is
-trying to test.
+Compound fraction is a continuous penalty, not a hard exclusion.  Without this
+term an optimizer can generate mostly mixed observations and obtain a good score
+from a small lucky clean subset.  This penalty does not assert that patient
+events have one biological source; it enforces the declared model estimand that
+one optimization sample must have one identifiable latent causal root.
 
 KMeans is computed after drawing the same event count from every network.
 Patient held-out R2 and source topology do not select the fit library.
-The formal candidate value is computed across the frozen causal-root memory and
-purity sensitivities.  The
-worst `J_patient`, minimum balanced KMeans alignment and their across-segmentation
-spread are retained; no best-window selection is allowed.
+The formal candidate value is computed across the five frozen one-axis-at-a-time
+causal-root memory and purity variants.  It uses the componentwise conservative
+envelope: maximum patient loss, OOD and compound fraction, and minimum KMeans
+alignment and K2 support.  No best-window selection is allowed.
+
+The causal direction score is computed from the root-restricted 1 mm onset map.
+For each event, the centroid of the latest 20% recruited bins minus the centroid
+of the earliest 20% gives an early-to-late displacement.  The patient-training
+TA/TB rank-contrast gradient freezes a 2-D axis and opposite expected signs for
+the two modes.  Each network receives equal weight, and the weaker mode's mean
+positive signed cosine is the network score.  A same-direction pair, stationary
+activation or transverse wave therefore cannot pass merely because contact
+KMeans finds two clusters.
 
 ## 7. Natural same-network repertoire
 

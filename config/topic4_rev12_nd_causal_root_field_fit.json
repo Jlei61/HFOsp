@@ -1,0 +1,116 @@
+{
+  "schema_id": "topic4_rev12_nd_causal_root_field_fit_v1",
+  "scientific_role": "development_only_node_dualmode_refit",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_q_causal_root_field_fit",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_q_causal_root_field_fit/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "source_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_g_lineage_restricted_readout_rescore/candidate_manifest.json",
+      "sha256": "40f5ea3e8c9cca6fa697e9db03333c6e992b63eb48501cfe7d0dfe41f06fbc0d"
+    },
+    "native_lineage_canary_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_h_native_lineage_canary/aggregate/native_lineage_canary_audit.json",
+      "sha256": "cc84e716c2faae2928f635d4167c599b018cfec911f518d9aa1f2d2af0c3b904"
+    },
+    "causal_root_canary_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_p_causal_root_canary/aggregate/causal_root_canary_audit.json",
+      "sha256": "b2d60622b32893b15acadd3294dd36004209b28bd23ef39905757491affd4202"
+    },
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    }
+  },
+  "search": {
+    "canary_network_seeds": [],
+    "fit_network_seeds": [2241, 2242],
+    "selection_network_seeds": [2251, 2252, 2253, 2254],
+    "confirmation_network_seeds": [2261, 2262, 2263, 2264, 2265, 2266],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "event_unit": {
+    "name": "causal_root_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "causal_memory_formula": "descending E_to_E PSP support at 50 percent of peak plus maximum local-compatible E_to_E delay",
+    "observation_rule": "one directed root is one KMeans observation; detector fragments establish observability but cannot change root start or stop",
+    "compound_rule": "mixed-root detector fragments remain explicit compound observations outside A and B and contribute a continuous fit penalty",
+    "root_inclusion": "one directed causal root per evaluable observation",
+    "boundary_signal": "whole_sheet_E_activity_movie_and_engine_derived_effective_excitatory_response_only",
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 180.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "cascade_objective": {
+    "sample_size_per_side": 6,
+    "calibration_draws": 256,
+    "score_draws": 64,
+    "seed": 20260824,
+    "patient_distance_normalization": "raw_distance_divided_by_patient_block_floor_q95",
+    "kmeans_auxiliary": "per-network natural K2 aligned to frozen patient direction",
+    "kmeans_alignment_source": "equal_network_mean",
+    "k2_support_scale": 0.5,
+    "k2_support_weight": 0.25,
+    "compound_and_ood": "continuous_penalties",
+    "event_sensitivity_aggregation": "componentwise_worst_case",
+    "causal_direction_axis": "patient_training_rank_contrast_gradient",
+    "causal_direction_tail_fraction": 0.2,
+    "causal_direction_weight": 0.5
+  },
+  "field_search": {
+    "source_candidate_ids": ["stage_c_r04_p", "stage_c_r03_anchor", "stage_c_r00_p"],
+    "pairwise_midpoints": true,
+    "residual_control_grid": [4, 4],
+    "residual_directions_per_anchor": 4,
+    "signed_log_surface_rms": [0.08, 0.16],
+    "sobol_seed": 20260824,
+    "observation_coordinates_used": false,
+    "total_field_mass_fixed": true,
+    "expected_candidate_count": 54
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 16,
+    "estimated_worker_gib": 10.0,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Development-only Node field fit on observable causal roots. Event boundaries use no contact geometry. Patient training distributions and the frozen training direction axis select candidates; held-out patient data do not. EE, E-to-I and Z/M remain off."
+}
