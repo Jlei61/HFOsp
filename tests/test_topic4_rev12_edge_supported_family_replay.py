@@ -6,6 +6,7 @@ from scripts.run_topic4_rev12_node_worker import _segmentation_variants
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG = ROOT / "config/topic4_rev12_nd_edge_supported_family_replay.json"
+REFIT_CONFIG = ROOT / "config/topic4_rev12_nd_edge_supported_field_refit.json"
 
 
 def test_replay_freezes_connection_aware_event_identity_before_selection():
@@ -39,3 +40,17 @@ def test_replay_worker_supports_exact_per_neuron_family_readout():
     assert "binned_ee_delay_support(" in source
     assert "edge_supported_root_families(" in source
     assert '"lineage_restricted_neuron_activity"' in CONFIG.read_text()
+
+
+def test_full_refit_reuses_all_fields_without_opening_new_seeds():
+    config = json.loads(REFIT_CONFIG.read_text())
+    assert config["field_refit"]["candidate_source"] == (
+        "all_54_stage_q_geometries"
+    )
+    assert config["search"]["fit_network_seeds"] == [2241, 2242]
+    assert "selection_network_seeds" not in config["search"]
+    assert "confirmation_network_seeds" not in config["search"]
+    assert config["cascade_objective"]["k2_support_weight"] == 0.0
+    assert config["cascade_objective"]["k2_support_role"] == (
+        "diagnostic_only_due_single_event_instability"
+    )

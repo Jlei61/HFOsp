@@ -229,6 +229,20 @@ Therefore retain the 54 field geometries, invalidate their old objective order,
 set the GMM K2 weight to zero, and replay all 54 fields under the edge-supported
 event unit before any selection seed is opened.
 
+## Phase 1l: full corrected-event field refit
+
+1. Replay all 54 frozen Stage-Q geometries on the same two fit networks.  This is
+   a score reconstruction, not a new field search.
+2. Use the edge-supported causal-family event unit and exact per-neuron contact
+   readout from Phase 1k.
+3. Keep patient-distribution loss, balanced KMeans/patient-direction alignment,
+   OOD, compound rate and causal direction in the objective.  Report the GMM K2
+   score but give it zero selection weight.
+4. Open no selection or confirmation seed.  After aggregation, compare the new
+   Pareto set with the four exact-replay representatives and render GIFs for all
+   scientifically competitive fit candidates before deciding how to generate
+   the next field proposals.
+
 ## Phase 1f: native-worker parity before refitting
 
 1. Make `lineage_restricted_sheet_activity` the formal contact readout in the
