@@ -103,7 +103,9 @@ def _render_mode(*, npz_path: Path, worker_json: dict, patient: dict,
         envelope_dt = float(loaded["contact_envelope_dt_ms"])
     event_row = worker_json["events"][detected_index]
     if (not event_row["returned"]
-            or worker_json["event_unit"].get("name") != "population_excursion"):
+            or worker_json["event_unit"].get("name") not in {
+                "population_excursion", "causal_population_excursion",
+            }):
         raise RuntimeError("selected event is not a returned population excursion")
     reset_ms = float(worker_json["event_unit"]["reset_ms"])
     display_stop = min(movie.shape[0] * frame_ms, reset_start + reset_ms)
