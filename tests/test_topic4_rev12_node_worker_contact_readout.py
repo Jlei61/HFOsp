@@ -1,6 +1,11 @@
+from types import SimpleNamespace
+
 import numpy as np
 
-from scripts.run_topic4_rev12_node_worker import _event_contact_readout
+from scripts.run_topic4_rev12_node_worker import (
+    _directed_parent_contract,
+    _event_contact_readout,
+)
 from src.sef_hfo_observation import VirtualMontage
 from src.topic4_node_dualmode import (
     binned_contact_envelope,
@@ -89,3 +94,18 @@ def test_worker_exact_neuron_readout_uses_the_original_contact_kernel():
     assert np.isfinite(onsets[0, 0]) and np.isnan(onsets[0, 1])
     assert ranks[0, 0] == 0.0 and np.isnan(ranks[0, 1])
     assert audit["parity_status"] == "EXACT_SHARED_PER_NEURON_KERNEL"
+
+
+def test_persistent_lineage_memory_comes_from_fast_state_and_delay():
+    contract = _directed_parent_contract(
+        {
+            "name": "persistent_directed_spatiotemporal_lineage",
+            "fast_state_decay_multiples": 5.0,
+            "forward_parent_neighborhood_bins": 1,
+        },
+        params=SimpleNamespace(tau_m_E=20.0, tau_d_GABA=18.0),
+        net={"max_delay_steps": 50}, engine={"dt": 0.1}, frame_ms=2.0,
+    )
+    assert contract["causal_memory_ms"] == 105.0
+    assert contract["forward_parent_frame_gap"] == 53
+    assert contract["forward_parent_neighborhood_bins"] == 1

@@ -722,19 +722,26 @@ def spatiotemporal_cascade_labels(activity_counts: np.ndarray, *,
 
 
 def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
-                                     minimum_active_neurons: int) -> dict:
+                                     minimum_active_neurons: int,
+                                     maximum_parent_gap_frames: int = 1,
+                                     parent_neighborhood_bins: int = 1) -> dict:
     """Trace forward-time activity lineages without merging colliding roots.
 
-    A contiguous active patch inherits roots only from its one-frame-back spatial
-    neighborhood.  Patches reached by multiple roots are marked as collisions;
-    their parents remain separate.  This is a directed observational lineage at
-    the frozen movie resolution, not proof of a particular synaptic path.
+    A contiguous active patch inherits roots from the nearest recent frame that
+    still lies inside the frozen fast-state memory.  Patches reached by multiple
+    roots are marked as collisions; their parents remain separate.  This is a
+    directed observational lineage at the frozen movie resolution, not proof of
+    a particular synaptic path.
     """
     counts = np.asarray(activity_counts)
     minimum_active_neurons = int(minimum_active_neurons)
+    maximum_parent_gap_frames = int(maximum_parent_gap_frames)
+    parent_neighborhood_bins = int(parent_neighborhood_bins)
     if counts.ndim != 3 or not np.issubdtype(counts.dtype, np.number):
         raise ValueError("activity_counts must have shape (time, y, x)")
-    if minimum_active_neurons <= 0 or np.any(counts < 0):
+    if (minimum_active_neurons <= 0 or np.any(counts < 0)
+            or maximum_parent_gap_frames <= 0
+            or parent_neighborhood_bins < 0):
         raise ValueError("activity counts and threshold must be nonnegative")
 
     active = counts >= minimum_active_neurons
@@ -743,17 +750,31 @@ def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
     collision_mask = np.zeros(counts.shape, dtype=bool)
     roots: dict[int, dict] = {}
     next_root = 1
-    previous_lineages = np.zeros(active.shape[1:], dtype=np.int32)
-
     for frame in range(len(active)):
+        resumed_roots_this_frame: set[int] = set()
         patches, n_patches = connected_component_labels(
             active[frame], structure=patch_structure,
         )
         for patch_id in range(1, n_patches + 1):
             patch = patches == patch_id
-            neighborhood = binary_dilation(patch, structure=patch_structure)
-            inherited = np.unique(previous_lineages[neighborhood])
-            inherited = inherited[inherited > 0].astype(int)
+            neighborhood = (
+                patch if parent_neighborhood_bins == 0 else binary_dilation(
+                    patch, structure=patch_structure,
+                    iterations=parent_neighborhood_bins,
+                )
+            )
+            inherited = np.asarray([], int)
+            parent_labels = None
+            parent_gap = None
+            for gap in range(1, min(maximum_parent_gap_frames, frame) + 1):
+                prior = lineage_labels[frame - gap]
+                candidates = np.unique(prior[neighborhood])
+                candidates = candidates[candidates > 0].astype(int)
+                if len(candidates):
+                    inherited = candidates
+                    parent_labels = prior
+                    parent_gap = gap
+                    break
             if not len(inherited):
                 inherited = np.asarray([next_root], int)
                 roots[next_root] = {
@@ -766,15 +787,20 @@ def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
                     "activity_mass": 0.0,
                     "collision_bin_frames": 0,
                     "collision_activity_mass": 0.0,
+                    "resumed_after_gap_count": 0,
+                    "maximum_parent_gap_frames_observed": 0,
                 }
                 next_root += 1
+                parent_gap = 0
             if len(inherited) == 1:
                 lineage_labels[frame][patch] = int(inherited[0])
             else:
+                if parent_labels is None:
+                    raise RuntimeError("multiple roots require a resolved parent frame")
                 coordinates = np.argwhere(patch)
                 distance_rows = []
                 for root_id in inherited:
-                    source = np.argwhere(previous_lineages == root_id)
+                    source = np.argwhere(parent_labels == root_id)
                     delta = coordinates[:, None, :] - source[None, :, :]
                     distance_rows.append(np.min(np.sum(delta * delta, axis=2), axis=1))
                 distances = np.asarray(distance_rows, float)
@@ -798,6 +824,14 @@ def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
                     row["last_any_frame"] = int(frame)
                     row["active_bin_frames"] += int(np.sum(selected))
                     row["activity_mass"] += float(np.sum(counts[frame][selected]))
+                    row["maximum_parent_gap_frames_observed"] = max(
+                        int(row["maximum_parent_gap_frames_observed"]),
+                        int(parent_gap),
+                    )
+                    if (int(parent_gap) > 1
+                            and int(root_id) not in resumed_roots_this_frame):
+                        row["resumed_after_gap_count"] += 1
+                        resumed_roots_this_frame.add(int(root_id))
             collision = collision_mask[frame] & patch
             if np.any(collision):
                 collision_bins = int(np.sum(collision))
@@ -807,8 +841,6 @@ def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
                     row["last_any_frame"] = int(frame)
                     row["collision_bin_frames"] += collision_bins
                     row["collision_activity_mass"] += collision_mass
-        previous_lineages = lineage_labels[frame]
-
     components = []
     for root_id in sorted(roots):
         row = dict(roots[root_id])
@@ -820,8 +852,12 @@ def directed_spatiotemporal_lineages(activity_counts: np.ndarray, *,
         "collision_mask": collision_mask,
         "components": components,
         "minimum_active_neurons": minimum_active_neurons,
+        "maximum_parent_gap_frames": maximum_parent_gap_frames,
+        "parent_neighborhood_bins": parent_neighborhood_bins,
         "causal_rule": (
-            "forward seeded watershed from one-frame-back 3x3 spatial neighborhood; "
+            "forward seeded watershed from the nearest recent parent frame within "
+            f"{maximum_parent_gap_frames} frame(s) and a "
+            f"{parent_neighborhood_bins}-bin spatial neighborhood; "
             "multiple inherited roots remain separate and only equidistant boundaries "
             "are marked as collisions"
         ),

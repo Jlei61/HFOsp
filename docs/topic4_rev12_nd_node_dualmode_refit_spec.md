@@ -128,7 +128,7 @@ therefore merged retrospectively.  A full 18-field historical run under this
 definition produced balanced KMeans/patient-direction alignment as high as
 0.93, but that value is an intermediate diagnostic and cannot select a field.
 
-### Directed-lineage correction (2026-08-24; current primary event unit)
+### Directed-lineage correction (2026-08-24; superseded)
 
 The current event identity is a `directed_spatiotemporal_lineage`.  The same
 2 ms by 1 mm whole-sheet movie and two-neuron activity threshold are retained,
@@ -149,6 +149,40 @@ Virtual contacts and patient labels are read only after root identity and event
 windows are frozen.  The definition is an operational directed lineage at the
 movie resolution, not proof of a synaptic path.  Root collision, compound
 fraction and threshold sensitivity remain explicit diagnostics.
+
+The first implementation nevertheless inspected only the immediately preceding
+2 ms movie frame.  In the exact-neuron 54-field fit this generated a median of
+2,504.5 roots for only 120 detector fragments per network, and 47.2% of detector
+fragments were compound.  A local frame that briefly fell below two active
+neurons could therefore reset root identity even though membrane, inhibitory
+synaptic and delayed-network state had not reset.  The resulting 108-run field
+ranking is retained as a diagnostic but is formally invalid for selection.
+
+### Persistent directed-lineage correction (2026-08-24; current primary)
+
+The primary unit is now a `persistent_directed_spatiotemporal_lineage`.  It keeps
+the same whole-sheet movie, exact per-neuron contact sampler and root-preserving
+collision rule, but a patch searches backwards to the nearest recent local
+parent.  The parent memory is frozen from model timescales:
+
+```text
+causal memory = 5 * max(tau_m,E, tau_d,GABA) + maximum network delay
+```
+
+The factor five is inherited from the existing fast-state reset contract.  It is
+not fit to contact ranks or patient labels.  A root can resume only within the
+same or an adjacent 1 mm sheet bin; a spatially separate activation remains a
+new root even inside the memory interval.  If several recent roots reach a patch,
+the seeded watershed keeps them separate.  Only the nearest eligible parent
+frame contributes ancestry, so a stale root cannot compete with an active one.
+
+Before any further field fit, the event identity must pass four synthetic tests:
+one travelling wave remains one root, two independent waves remain distinct after
+collision, a short local interruption retains identity, and activity after the
+memory expires receives a new root.  Three frozen fields on two networks then form
+an event-identity canary.  Event partition, compound fraction and mode assignment
+must be qualitatively stable for three, four and five fast-state time constants.
+This is an event-definition canary only and cannot select a field.
 
 ## 2. Scientific question
 
@@ -206,7 +240,7 @@ the entire sheet and do not receive extra support near observed contacts.
 ## 5. Patient event representation
 
 The model event unit used by KMeans and the patient objective is a
-`directed_spatiotemporal_lineage`, not an unmerged threshold fragment, fixed-gap
+`persistent_directed_spatiotemporal_lineage`, not an unmerged threshold fragment, fixed-gap
 `settled_episode`, or complete population-excursion envelope.  The population
 excursion is retained as an outer diagnostic window.  Every lineage stores its
 constituent detector-fragment indices and root identity; compounds remain

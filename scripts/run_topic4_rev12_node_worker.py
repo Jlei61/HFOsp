@@ -100,6 +100,44 @@ def _event_peak_active_fraction(event: dict, active: np.ndarray,
     return float(np.max(values[start:stop]))
 
 
+def _directed_parent_contract(event_unit: dict, *, params, net: dict,
+                              engine: dict, frame_ms: float) -> dict:
+    """Resolve root memory from frozen model timescales, never contact data."""
+    name = str(event_unit["name"])
+    frame_ms = float(frame_ms)
+    if frame_ms <= 0.0:
+        raise ValueError("lineage frame duration must be positive")
+    neighborhood = int(event_unit.get("forward_parent_neighborhood_bins", 1))
+    if neighborhood < 0:
+        raise ValueError("lineage parent neighborhood cannot be negative")
+    if name == "persistent_directed_spatiotemporal_lineage":
+        multiple = float(event_unit["fast_state_decay_multiples"])
+        if multiple <= 0.0:
+            raise ValueError("fast-state decay multiple must be positive")
+        fast_tau_ms = max(float(params.tau_m_E), float(params.tau_d_GABA))
+        maximum_delay_ms = int(net["max_delay_steps"]) * float(engine["dt"])
+        memory_ms = multiple * fast_tau_ms + maximum_delay_ms
+        gap_frames = max(1, int(np.ceil(memory_ms / frame_ms)))
+    elif name == "directed_spatiotemporal_lineage":
+        multiple = None
+        fast_tau_ms = None
+        maximum_delay_ms = None
+        memory_ms = None
+        gap_frames = int(event_unit.get("forward_parent_frame_gap", 1))
+    else:
+        raise ValueError(f"unsupported directed event unit: {name}")
+    if gap_frames <= 0:
+        raise ValueError("lineage parent gap must be positive")
+    return {
+        "fast_state_decay_multiples": multiple,
+        "fast_state_tau_ms": fast_tau_ms,
+        "maximum_delay_ms": maximum_delay_ms,
+        "causal_memory_ms": memory_ms,
+        "forward_parent_frame_gap": gap_frames,
+        "forward_parent_neighborhood_bins": neighborhood,
+    }
+
+
 def _event_contact_readout(*, events: list[dict], envelope: np.ndarray,
                            envelope_dt_ms: float, montage, valid_contacts: np.ndarray,
                            positions_e: np.ndarray, movie: dict | None,
@@ -236,7 +274,9 @@ def main() -> None:
 
     config_path = args.config.resolve()
     config = json.loads(config_path.read_text())
-    if config["scientific_role"] != "development_only_node_dualmode_refit":
+    if config["scientific_role"] not in {
+            "development_only_node_dualmode_refit",
+            "development_only_event_identity_canary"}:
         raise RuntimeError("rev12-ND scientific role changed")
     active_seeds = {
         int(seed) for key in (
@@ -431,7 +471,9 @@ def main() -> None:
                 row["compound"] for row in assignments
             ], bool),
         }
-    elif event_unit["name"] == "directed_spatiotemporal_lineage":
+    elif event_unit["name"] in {
+            "directed_spatiotemporal_lineage",
+            "persistent_directed_spatiotemporal_lineage"}:
         movie_config = config["source_topology"]["full_sheet_movie"]
         if not bool(movie_config.get("enabled", False)):
             raise RuntimeError("directed lineage events require the whole-run sheet movie")
@@ -442,9 +484,19 @@ def main() -> None:
             bin_mm=float(config["source_topology"]["bin_mm"]),
             sheet_mm=float(substrate.engine["L"]),
         )
+        parent_contract = _directed_parent_contract(
+            event_unit, params=substrate.params, net=substrate.net,
+            engine=substrate.engine, frame_ms=float(movie["frame_ms"]),
+        )
+        parent_gap_frames = int(parent_contract["forward_parent_frame_gap"])
+        parent_neighborhood_bins = int(
+            parent_contract["forward_parent_neighborhood_bins"]
+        )
         lineage = directed_spatiotemporal_lineages(
             movie["activity_counts"],
             minimum_active_neurons=int(event_unit["minimum_active_neurons"]),
+            maximum_parent_gap_frames=parent_gap_frames,
+            parent_neighborhood_bins=parent_neighborhood_bins,
         )
         assignments = assign_detector_fragments_to_directed_lineages(
             movie["activity_counts"], lineage["labels"], detector_fragments,
@@ -470,12 +522,13 @@ def main() -> None:
             movie["activity_counts"][lineage["collision_mask"]]
         ))
         event_unit_runtime = {
-            "name": "directed_spatiotemporal_lineage",
+            "name": event_unit["name"],
             "event_on_threshold": float(substrate.detector_threshold),
             "minimum_active_neurons": int(event_unit["minimum_active_neurons"]),
             "minimum_dominance": float(event_unit["minimum_dominance"]),
             "movie_frame_ms": float(movie["frame_ms"]),
             "movie_bin_mm": float(movie["bin_mm"]),
+            **parent_contract,
             "contact_geometry_used_for_boundary": False,
             "n_directed_roots": int(len(lineage["components"])),
             "n_compound_detector_fragments": int(len(compound_fragments)),
@@ -545,8 +598,9 @@ def main() -> None:
             ),
             "cascade_id": event.get("cascade_id"),
         }
-        if event_unit is not None and event_unit["name"] == (
-                "directed_spatiotemporal_lineage"):
+        if event_unit is not None and event_unit["name"] in {
+                "directed_spatiotemporal_lineage",
+                "persistent_directed_spatiotemporal_lineage"}:
             fragment_rows = [
                 directed_assignment_by_fragment[int(fragment)]
                 for fragment in event_row["detector_fragment_indices"]

@@ -100,6 +100,56 @@ def test_directed_lineage_preserves_one_travelling_root():
     assert not np.any(result["collision_mask"])
 
 
+def test_persistent_lineage_bridges_a_short_local_fast_state_gap():
+    counts = np.zeros((7, 5, 5), np.uint16)
+    counts[0:2, 2, 1] = 3
+    counts[4:7, 2, 2] = 3
+    immediate = directed_spatiotemporal_lineages(
+        counts, minimum_active_neurons=2, maximum_parent_gap_frames=1,
+    )
+    persistent = directed_spatiotemporal_lineages(
+        counts, minimum_active_neurons=2, maximum_parent_gap_frames=3,
+    )
+    assert len(immediate["components"]) == 2
+    assert len(persistent["components"]) == 1
+    assert persistent["components"][0]["resumed_after_gap_count"] == 1
+    assert persistent["components"][0]["maximum_parent_gap_frames_observed"] == 3
+
+
+def test_persistent_lineage_starts_a_new_root_after_fast_state_memory_expires():
+    counts = np.zeros((8, 5, 5), np.uint16)
+    counts[0:2, 2, 1] = 3
+    counts[6:8, 2, 2] = 3
+    result = directed_spatiotemporal_lineages(
+        counts, minimum_active_neurons=2, maximum_parent_gap_frames=3,
+    )
+    assert len(result["components"]) == 2
+
+
+def test_persistent_lineage_does_not_join_spatially_separate_reactivations():
+    counts = np.zeros((7, 9, 9), np.uint16)
+    counts[0:2, 1, 1] = 3
+    counts[4:7, 7, 7] = 3
+    result = directed_spatiotemporal_lineages(
+        counts, minimum_active_neurons=2, maximum_parent_gap_frames=5,
+        parent_neighborhood_bins=1,
+    )
+    assert len(result["components"]) == 2
+
+
+def test_persistent_lineage_uses_nearest_parent_frame_not_a_stale_root():
+    counts = np.zeros((5, 7, 7), np.uint16)
+    counts[0, 3, 2] = 3
+    counts[2, 3, 4] = 3
+    counts[3, 3, 3] = 3
+    result = directed_spatiotemporal_lineages(
+        counts, minimum_active_neurons=2, maximum_parent_gap_frames=4,
+        parent_neighborhood_bins=1,
+    )
+    assert result["labels"][3, 3, 3] == result["labels"][2, 3, 4]
+    assert result["labels"][3, 3, 3] != result["labels"][0, 3, 2]
+
+
 def test_directed_lineage_does_not_merge_roots_that_later_collide():
     counts = np.zeros((4, 7, 7), np.uint16)
     counts[0, 3, [0, 6]] = 3
