@@ -81,6 +81,18 @@ def validate_event_canary_contract(config: dict) -> None:
         raise RuntimeError("event canary cannot release or select a Node field")
 
 
+def event_canary_identity(event_name: str) -> tuple[str, str]:
+    if str(event_name) == "causal_root_observation":
+        return (
+            "topic4_rev12_causal_root_canary_manifest_v1",
+            "REV12ND_CAUSAL_ROOT_CANARY_FROZEN",
+        )
+    return (
+        "topic4_rev12_root_coactivity_canary_manifest_v1",
+        "REV12ND_ROOT_COACTIVITY_CANARY_FROZEN",
+    )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", required=True, type=Path)
@@ -127,9 +139,10 @@ def main() -> None:
     requested = list(config["field_search"]["candidate_ids"])
     if len(set(requested)) != len(requested) or any(key not in by_id for key in requested):
         raise RuntimeError("root-coactivity canary candidates are invalid")
+    schema_id, status = event_canary_identity(event_unit["name"])
     payload = {
-        "schema_id": "topic4_rev12_root_coactivity_canary_manifest_v1",
-        "status": "REV12ND_ROOT_COACTIVITY_CANARY_FROZEN",
+        "schema_id": schema_id,
+        "status": status,
         "config": str(config_path.relative_to(ROOT)),
         "config_sha256": _sha256(config_path),
         "candidates": [by_id[key] for key in requested],

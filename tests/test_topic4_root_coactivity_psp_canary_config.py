@@ -5,6 +5,7 @@ from pathlib import Path
 import pytest
 
 from scripts.freeze_topic4_rev12_root_coactivity_canary import (
+    event_canary_identity,
     validate_event_canary_contract,
 )
 
@@ -46,6 +47,10 @@ def test_causal_root_canary_keeps_compounds_outside_kmeans():
     assert event_unit["sensitivity_psp_tail_fractions"] == [0.8, 0.5, 0.2]
     assert event_unit["sensitivity_minimum_dominances"] == [0.6, 0.7, 0.8]
     assert "never enter A or B" in event_unit["compound_rule"]
+    assert event_canary_identity(event_unit["name"]) == (
+        "topic4_rev12_causal_root_canary_manifest_v1",
+        "REV12ND_CAUSAL_ROOT_CANARY_FROZEN",
+    )
 
 
 @pytest.mark.parametrize(("path", "value"), [
