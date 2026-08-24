@@ -140,8 +140,20 @@ def _representative_lineages(worker: dict, worker_json: dict,
     return records, audit
 
 
+def validate_event_unit_name(name: str) -> None:
+    supported_event_units = {
+        "directed_spatiotemporal_lineage",
+        "persistent_directed_spatiotemporal_lineage",
+        "persistent_root_coactivity_episode",
+        "causal_root_observation",
+    }
+    if name not in supported_event_units:
+        raise RuntimeError("GIF input is not a supported frozen event unit")
+
+
 def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
                     selection: dict, output: Path) -> dict:
+    validate_event_unit_name(worker_json["event_unit"].get("name"))
     mode = int(selection["mode"])
     detected_index = int(selection["detected_index"])
     event = worker_json["events"][detected_index]
@@ -171,11 +183,6 @@ def _render_lineage(*, npz_path: Path, worker_json: dict, patient: dict,
         event_off = float(loaded["event_t_off_ms"][detected_index])
         trigger_on = float(loaded["event_trigger_t_on_ms"][detected_index])
         contact_onsets = np.asarray(loaded["onsets"][detected_index], float)
-    if worker_json["event_unit"].get("name") not in {
-            "directed_spatiotemporal_lineage",
-            "persistent_directed_spatiotemporal_lineage",
-            "persistent_root_coactivity_episode"}:
-        raise RuntimeError("GIF input is not the frozen directed event unit")
     if not bool(event["returned"]):
         raise RuntimeError("selected directed lineage is not returned")
 

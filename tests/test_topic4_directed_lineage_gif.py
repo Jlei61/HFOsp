@@ -4,6 +4,7 @@ import pytest
 from scripts.paper_figures.plot_topic4_rev12_directed_lineage_gif import (
     lineage_bin_coordinates,
     lineage_display_frames,
+    validate_event_unit_name,
 )
 
 
@@ -36,3 +37,9 @@ def test_lineage_outline_includes_all_roots_in_complete_event():
     labels = np.asarray([[1, 0], [0, 2]])
     coordinates = lineage_bin_coordinates(labels, [1, 2])
     assert coordinates.tolist() == [[0.5, 0.5], [1.5, 1.5]]
+
+
+def test_causal_root_event_unit_is_supported_by_gif_renderer():
+    validate_event_unit_name("causal_root_observation")
+    with pytest.raises(RuntimeError, match="supported frozen event unit"):
+        validate_event_unit_name("detector_fragment")
