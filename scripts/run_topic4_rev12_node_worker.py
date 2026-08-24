@@ -54,6 +54,18 @@ from src.sef_hfo_events import RETURN_FRAC, detect_events  # noqa: E402
 from src.sef_hfo_snn_adapter import snn_event_envelope  # noqa: E402
 
 
+ALLOWED_SCIENTIFIC_ROLES = {
+    "development_only_node_dualmode_refit",
+    "development_only_event_identity_canary",
+    "development_only_engine_derived_event_identity_canary",
+}
+
+
+def _validate_scientific_role(role: str) -> None:
+    if str(role) not in ALLOWED_SCIENTIFIC_ROLES:
+        raise RuntimeError("rev12-ND scientific role changed")
+
+
 def _sha256(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
@@ -323,10 +335,7 @@ def main() -> None:
 
     config_path = args.config.resolve()
     config = json.loads(config_path.read_text())
-    if config["scientific_role"] not in {
-            "development_only_node_dualmode_refit",
-            "development_only_event_identity_canary"}:
-        raise RuntimeError("rev12-ND scientific role changed")
+    _validate_scientific_role(config["scientific_role"])
     active_seeds = {
         int(seed) for key in (
             "canary_network_seeds", "fit_network_seeds",

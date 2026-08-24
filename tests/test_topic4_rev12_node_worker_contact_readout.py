@@ -1,11 +1,13 @@
 from types import SimpleNamespace
 
 import numpy as np
+import pytest
 from scipy import sparse
 
 from scripts.run_topic4_rev12_node_worker import (
     _directed_parent_contract,
     _event_contact_readout,
+    _validate_scientific_role,
 )
 from src.sef_hfo_observation import VirtualMontage
 from src.topic4_node_dualmode import (
@@ -159,3 +161,11 @@ def test_psp_tail_memory_uses_excitatory_path_and_local_delay():
     assert np.isclose(contract["local_or_global_delay_support_ms"], 0.3)
     assert np.isclose(contract["causal_memory_ms"], psp_ms + 0.3)
     assert contract["forward_parent_frame_gap"] == int(np.ceil((psp_ms + 0.3) / 2.0))
+
+
+def test_worker_accepts_engine_derived_event_identity_canary_role():
+    _validate_scientific_role(
+        "development_only_engine_derived_event_identity_canary"
+    )
+    with pytest.raises(RuntimeError, match="scientific role"):
+        _validate_scientific_role("patient_selected_event_window")
