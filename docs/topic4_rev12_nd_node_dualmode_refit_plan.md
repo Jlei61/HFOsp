@@ -244,13 +244,15 @@ event unit before any selection seed is opened.
    the next field proposals.
 
 Observed result: 108/108 field-network workers completed.  The scalar leader
-reached patient loss 1.205, balanced natural-KMeans alignment 0.842, OOD 0.510,
-compound fraction 0.632 and weakest-mode causal direction 0.566.  No field
+reached patient loss 1.205, balanced natural-KMeans alignment 0.842, OOD 0.510
+and compound fraction 0.632.  Its originally reported direction 0.566 was
+invalid because signed direction was clipped event by event before averaging;
+the corrected mode-mean value is 0.250 and corrected objective 1.945.  No field
 jointly satisfied the exploratory KMeans, OOD and causal-direction reference
 levels, and every field retained compound fraction above 0.5.  Full-map axial
-onset monotonicity correlated 0.928 with the frozen centroid direction score,
-so metric coarseness did not hide a qualifying reverse wave.  Do not open fresh
-selection networks from this library.
+onset monotonicity correlated 0.928 with the original centroid diagnostic, but
+both must aggregate signed evidence within mode before clipping.  Do not open
+fresh selection networks from this library.
 
 ## Phase 1m: response-surface continuation and Node capacity control (current)
 
@@ -278,6 +280,15 @@ selection networks from this library.
    compound fraction.  If only the rigid control passes, revise the field search
    or patient objective.  If even the rigid control fails, stop Node-field
    optimization and diagnose scaffold capacity before changing connectivity.
+
+Observed result: 38/38 workers completed without runaway.  No selectable field
+improved the corrected Stage-S scalar.  The apparent Stage-T leader fell from
+direction 0.520 to 0.182 after mode-mean correction.  The non-selectable smooth
+dual-core control retained direction 0.573 and monotonicity 0.467 across both
+networks, while failing patient loss (1.411) and OOD (0.679).  Therefore record
+`NODE_DIRECTIONAL_CAPACITY_POSITIVE / DATA_DRIVEN_JOINT_RECOVERY_UNRESOLVED`.
+Before another simulation, freeze the corrected direction aggregation and
+recompute every Stage-S/Stage-T objective from existing artifacts.
 
 ## Phase 1f: native-worker parity before refitting
 
@@ -375,10 +386,10 @@ scientific acceptance conditions in the spec are jointly met.
 
 ## Current execution order
 
-Phase 1l is complete and did not produce a qualifying field.  Freeze Phase 1m at
-the current commit, run the 18 response-surface proposals plus the non-selectable
-smooth dual-core capacity control on the same two fit networks, aggregate with
-the corrected-event conservative envelope and inspect Fig.4-style GIFs for every
-competitive field and the control.  Intervention, fresh selection, confirmation,
-EE, E-to-I and Z/M remain closed until Node capacity and a selectable two-mode
-field are demonstrated under the corrected event unit.
+Phase 1m simulation is complete, but its first scalar aggregation is invalidated
+by event-wise direction clipping.  Run the frozen zero-simulation mode-mean
+direction rescore for Stage-S and Stage-T, retain the old JSON as audit evidence,
+and compare the corrected Pareto set with the 16 algorithmic GIFs.  Do not open
+fresh selection, intervention, confirmation, EE, E-to-I or Z/M.  The next field
+library must be designed from the corrected objective and cannot use the manual
+capacity control as a selectable initialization.

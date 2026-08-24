@@ -487,10 +487,13 @@ The causal direction score is computed from the root-restricted 1 mm onset map.
 For each event, the centroid of the latest 20% recruited bins minus the centroid
 of the earliest 20% gives an early-to-late displacement.  The patient-training
 TA/TB rank-contrast gradient freezes a 2-D axis and opposite expected signs for
-the two modes.  Each network receives equal weight, and the weaker mode's mean
-positive signed cosine is the network score.  A same-direction pair, stationary
-activation or transverse wave therefore cannot pass merely because contact
-KMeans finds two clusters.
+the two modes.  Signed cosine is first averaged across all evaluable events in
+one mode and only then clipped below at zero.  The weaker corrected mode is the
+network score and networks receive equal weight.  Event-wise clipping is
+forbidden: it would give a positive score to a 50/50 mixture of forward and
+reverse events even though that mode has no reproducible direction.  A same-
+direction pair, stationary activation, transverse wave or sign-cancelling mode
+therefore cannot pass merely because contact KMeans finds two clusters.
 
 ## 7. Natural same-network repertoire
 
@@ -517,11 +520,13 @@ the independent unit.
 
 All 54 frozen fields were replayed on fit seeds 2241 and 2242 under the final
 edge-supported causal-family event unit: 108/108 workers completed and none
-failed.  The best scalar field had `J_fit = 1.787`, patient loss 1.205, balanced
-natural-KMeans alignment 0.842, OOD 0.510, compound fraction 0.632 and weakest-
-mode causal direction 0.566.  No field jointly reached KMeans alignment 0.8,
-causal direction 0.6 and OOD at most 0.5; no field reduced compound fraction to
-0.5.  Selection and confirmation seeds therefore remain closed.
+failed.  The first aggregation reported `J_fit = 1.787` and weakest-mode causal
+direction 0.566 for its leader.  Those two values are retrospectively invalid:
+the implementation clipped each event before the mode mean.  Zero-simulation
+correction reduced that field's direction score to 0.250 and increased its
+objective to 1.945.  Patient loss 1.205, balanced natural-KMeans alignment
+0.842, OOD 0.510 and compound fraction 0.632 are unaffected.  Selection and
+confirmation seeds remain closed.
 
 A zero-simulation full-onset-map audit replaced the early/late centroid summary
 with event-wise Spearman monotonicity along the frozen patient-training axis.
@@ -541,6 +546,18 @@ opposite causal modes, the fixed Node-only scaffold lacks demonstrated capacity
 and further field optimization stops before EE, E-to-I or Z/M is opened.  If it
 passes while the selectable proposals fail, the capacity exists but the current
 patient objective/search directions have not recovered it.
+
+Stage-T completed 38/38 field-network runs without runaway.  No selectable
+proposal improved the corrected Stage-S objective.  Its pre-correction scalar
+leader had patient loss 1.244, KMeans alignment 0.803, OOD 0.469, compound
+fraction 0.565 and event-wise-clipped direction 0.520; mode-mean correction
+reduced direction to 0.182 and increased `J_fit` to 2.011.  The non-selectable
+smooth dual-core control retained a corrected direction score of 0.573 and
+full-map monotonicity 0.467 across both networks, but had patient loss 1.411 and
+OOD 0.679.  Thus the frozen Node scaffold has directional capacity, while the
+current data-driven field family has not jointly recovered stable direction and
+the patient event distribution.  This result does not license using the manual
+control as an initialization for a claimed free-field recovery.
 
 ## 8. Mode-specific source topology
 

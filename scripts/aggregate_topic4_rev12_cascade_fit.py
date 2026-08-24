@@ -303,6 +303,7 @@ def equal_network_causal_direction(onset_maps_by_network: list[np.ndarray],
         "per_network": rows,
         "n_networks": int(len(rows)),
         "network_weighting": "equal network weight; weakest mode within network",
+        "within_mode_aggregation": "clip_after_mode_mean_signed_direction",
     }
 
 
@@ -329,6 +330,7 @@ def equal_network_causal_monotonicity(
         "per_network": rows,
         "n_networks": int(len(rows)),
         "network_weighting": "equal network weight; weakest mode within network",
+        "within_mode_aggregation": "clip_after_mode_mean_signed_direction",
         "selection_role": "diagnostic_only",
     }
 
@@ -733,7 +735,8 @@ def main() -> None:
             ),
             "causal_direction": (
                 "patient-training rank-contrast axis; equal network weight; "
-                "weakest patient-labelled causal-root mode protected"
+                "weakest patient-labelled causal-root mode protected; signed "
+                "direction averaged within mode before clipping"
             ),
             "causal_wave_monotonicity": (
                 "full root-onset-map Spearman along the frozen patient-training "

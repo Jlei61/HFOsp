@@ -2289,21 +2289,27 @@ def causal_direction_alignment(onset_maps: np.ndarray, labels: np.ndarray, *,
         rows.append({
             "mode": int(label),
             "signed_axis_cosine": signed_cosine,
-            "aligned_score": float(max(0.0, signed_cosine)),
             **record,
         })
     modes = {}
     mode_scores = []
     for mode in (0, 1):
         selected = [row for row in rows if row["mode"] == mode]
-        score = float(np.mean([row["aligned_score"] for row in selected])) \
-            if selected else 0.0
         signed = float(np.mean([row["signed_axis_cosine"] for row in selected])) \
             if selected else float("nan")
+        # Clip only after the mode-level signed mean.  Event-wise clipping would
+        # reward a 50/50 mixture of opposite waves even though the mode has no
+        # reproducible direction.
+        score = float(max(0.0, signed)) if selected else 0.0
         modes[str(mode)] = {
             "n_evaluable": int(len(selected)),
             "mean_signed_axis_cosine": signed,
             "alignment_score": score,
+            "positive_direction_fraction": (
+                float(np.mean([
+                    row["signed_axis_cosine"] > 0.0 for row in selected
+                ])) if selected else 0.0
+            ),
         }
         mode_scores.append(score)
     return {
@@ -2380,20 +2386,25 @@ def causal_wave_monotonicity_alignment(
         signed = float(signs[label] * record["axis_time_spearman"])
         rows.append({
             "mode": int(label), "signed_axis_time_spearman": signed,
-            "aligned_score": float(max(0.0, signed)), **record,
+            **record,
         })
     modes, scores = {}, []
     for mode in (0, 1):
         selected = [row for row in rows if row["mode"] == mode]
-        score = float(np.mean([row["aligned_score"] for row in selected])) \
-            if selected else 0.0
         signed = float(np.mean([
             row["signed_axis_time_spearman"] for row in selected
         ])) if selected else float("nan")
+        score = float(max(0.0, signed)) if selected else 0.0
         modes[str(mode)] = {
             "n_evaluable": int(len(selected)),
             "mean_signed_axis_time_spearman": signed,
             "alignment_score": score,
+            "positive_direction_fraction": (
+                float(np.mean([
+                    row["signed_axis_time_spearman"] > 0.0
+                    for row in selected
+                ])) if selected else 0.0
+            ),
         }
         scores.append(score)
     return {

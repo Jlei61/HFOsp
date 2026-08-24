@@ -1,0 +1,23 @@
+{
+  "schema_id": "topic4_rev12_nd_mode_mean_direction_rescore_v1",
+  "scientific_role": "zero_simulation_objective_correction",
+  "inputs": {
+    "stage_s": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_s_edge_supported_field_refit/aggregate/fit_cascade_summary.json",
+      "sha256": "ffae067783ac528f026d014b18576f56b5f51c448a195c2e935f0fdfc343df84",
+      "output": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_s_edge_supported_field_refit/aggregate/fit_cascade_summary_mode_mean_direction.json"
+    },
+    "stage_t": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_t_causal_continuation_capacity/aggregate/fit_cascade_summary.json",
+      "sha256": "69271d8ee1d205ecd2a449017a48c1c37e4e823d68a65a846399342daaccf4fc",
+      "output": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_t_causal_continuation_capacity/aggregate/fit_cascade_summary_mode_mean_direction.json"
+    }
+  },
+  "correction": {
+    "invalid_old_rule": "mean(max(0, event_signed_direction))",
+    "correct_rule": "max(0, mean(event_signed_direction within mode))",
+    "network_rule": "minimum corrected mode score",
+    "cohort_rule": "equal mean across network seeds"
+  },
+  "claim_boundary": "Zero-simulation correction of direction aggregation only. SNN trajectories, events, patient losses, KMeans, OOD and compound fractions remain unchanged."
+}

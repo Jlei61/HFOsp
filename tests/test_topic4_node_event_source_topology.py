@@ -77,6 +77,20 @@ def test_causal_direction_alignment_requires_two_opposite_root_modes():
     assert same_direction["score"] == 0.0
 
 
+def test_causal_direction_does_not_reward_eventwise_sign_cancellation():
+    mixed = causal_direction_alignment(
+        np.asarray([
+            _horizontal_wave(), _horizontal_wave(reverse=True),
+            _horizontal_wave(reverse=True), _horizontal_wave(),
+        ]),
+        np.asarray([0, 0, 1, 1]), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    assert abs(mixed["modes"]["0"]["mean_signed_axis_cosine"]) < 1e-12
+    assert abs(mixed["modes"]["1"]["mean_signed_axis_cosine"]) < 1e-12
+    assert mixed["score"] == 0.0
+
+
 def test_causal_wave_monotonicity_uses_the_complete_onset_map():
     forward = causal_wave_monotonicity(
         _horizontal_wave(), axis_unit=np.asarray([1.0, 0.0]),
@@ -104,3 +118,15 @@ def test_causal_wave_monotonicity_requires_opposite_mode_sequences():
     )
     assert opposite["score"] > 0.99
     assert same_direction["score"] == 0.0
+
+
+def test_causal_wave_monotonicity_clips_after_mode_mean():
+    mixed = causal_wave_monotonicity_alignment(
+        np.asarray([
+            _horizontal_wave(), _horizontal_wave(reverse=True),
+            _horizontal_wave(reverse=True), _horizontal_wave(),
+        ]),
+        np.asarray([0, 0, 1, 1]), axis_unit=np.asarray([1.0, 0.0]),
+        expected_mode_signs=np.asarray([1.0, -1.0]),
+    )
+    assert mixed["score"] == 0.0
