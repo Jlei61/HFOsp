@@ -66,6 +66,7 @@ ALLOWED_SCIENTIFIC_ROLES = {
     "development_only_orthogonal_free_field_screen",
     "development_only_local_curvature_canary",
     "development_only_local_curvature_replication",
+    "development_only_global_continuous_node_field_screen",
 }
 
 
