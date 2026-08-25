@@ -1,0 +1,132 @@
+{
+  "schema_id": "topic4_rev12_nd_omitted_pareto_recovery_v1",
+  "scientific_role": "development_only_global_continuous_node_field_screen",
+  "output_root": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ab_omitted_pareto_recovery",
+  "candidate_manifest": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_ab_omitted_pareto_recovery/candidate_manifest.json",
+  "network_cache": "results/topic4_sef_hfo/data_driven_core_field_rev9/network_cache",
+  "inputs": {
+    "cohort_config": {
+      "path": "config/topic4_data_driven_snn_cohort_v1.json",
+      "sha256": "1dda710517a65002d21618f26569df91077ba6d02953fbfcee9b2f98b0ac4249"
+    },
+    "transition_config": {
+      "path": "config/topic4_data_driven_zm_ictal_transition_v1.json",
+      "sha256": "2ce70caf70ca1225ba9a95721692cf7fc9ce0f8fa9b977c85d0370c78941b20f"
+    },
+    "classifier_config": {
+      "path": "config/topic4_rev11_nlc_frozen_substrate_confirmation.json",
+      "sha256": "7e3ff4786a96ed5fc5b27f7b6b292eb5d7cd51fedb847f669c0e648165835df7"
+    },
+    "stage_z_manifest": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_z_global_soft_field_screen/candidate_manifest.json",
+      "sha256": "e7f31298b7a1687d105379078535537a4bdef9a2ffa13572820eda31af7340d9"
+    },
+    "stage_z_summary": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_z_global_soft_field_screen/aggregate/fit_soft_global_summary.json",
+      "sha256": "6613078fd433a78ae30a6e66e4d3315d520884f37c5529078ea3cbad3887fefc"
+    },
+    "stage_z_nomination": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_z_global_soft_field_screen/aggregate/fit_nomination_decision.json",
+      "sha256": "e70d40704d763a498c3ea4a81cc5b33370943d222689d1a4805ae886859f1cbf"
+    },
+    "stage_aa_paired_audit": {
+      "path": "results/topic4_sef_hfo/data_driven_node_dualmode_rev12/node_stage_aa_global_soft_field_expansion/analysis/paired_expansion_audit.json",
+      "sha256": "7e7517a2ac41a6b7e1174669e5a94d935a2938fc86dc3cca53b5f496cdc3168a"
+    }
+  },
+  "search": {
+    "fit_network_seeds": [2271, 2272, 2273, 2274, 2275, 2276, 2277, 2278, 2279],
+    "simulation": {
+      "duration_ms": 20000.0,
+      "early_stop_runaway": true,
+      "late_runaway_is_invalid": true
+    },
+    "contact_readout": {
+      "source": "lineage_restricted_neuron_activity",
+      "kernel_width_mm": 0.25,
+      "smooth_ms": 5.0,
+      "participation_margin_fraction": 0.1,
+      "timing_fraction": 0.5
+    }
+  },
+  "recovery": {
+    "candidate_id": "stage_z_g11_p",
+    "expected_candidate_count": 1,
+    "required_stage_z_pareto_member": true,
+    "required_absence_from_stage_z_nomination": true,
+    "selection_reason": "second-lowest Stage-Z soft objective with jointly low mode losses and positive direction; omitted after RMS-0.52 quota was filled",
+    "patient_heldout_used": false,
+    "natural_kmeans_used_for_selection": false
+  },
+  "event_unit": {
+    "name": "edge_supported_causal_family_observation",
+    "minimum_active_neurons": 2,
+    "minimum_dominance": 0.7,
+    "sensitivity_minimum_dominances": [0.6, 0.7, 0.8],
+    "movie_frame_ms": 2.0,
+    "movie_bin_mm": 1.0,
+    "causal_memory_method": "local_ee_psp_tail",
+    "psp_tail_fraction": 0.5,
+    "sensitivity_psp_tail_fractions": [0.8, 0.5, 0.2],
+    "local_ee_delay_quantile": 1.0,
+    "forward_parent_neighborhood_bins": 1,
+    "minimum_parent_support": 0.001,
+    "sensitivity_minimum_parent_supports": [0.0003, 0.001, 0.003],
+    "minimum_parent_dominance": 0.7,
+    "edge_delay_rounding": "nearest",
+    "sensitivity_edge_delay_roundings": ["floor", "nearest", "ceil"],
+    "causal_memory_formula": "descending E_to_E PSP support at 50 percent of peak plus maximum local-compatible E_to_E delay",
+    "edge_support_formula": "active source count times delayed E_to_E weight divided by source-bin population and target-bin total incoming-E budget",
+    "observation_rule": "one edge-supported directed root family is one KMeans observation; detector fragments establish observability but cannot change family boundaries",
+    "compound_rule": "mixed-family detector fragments remain explicit compound observations outside A and B",
+    "root_inclusion": "local roots merge only through dominant delayed E_to_E support above the frozen incoming-budget fraction",
+    "boundary_signal": "whole_sheet_E_activity_movie_frozen_E_to_E_weights_and_delays_only",
+    "contact_geometry_used_for_boundary": false
+  },
+  "source_topology": {
+    "bin_mm": 1.0,
+    "event_window_ms": [-20.0, 180.0],
+    "baseline_window_ms": [-120.0, -20.0],
+    "frame_step_ms": 2.0,
+    "frame_width_ms": 3.0,
+    "minimum_active_neurons": 2,
+    "persistence_frames": 2,
+    "full_sheet_movie": {"enabled": true, "frame_ms": 2.0}
+  },
+  "soft_objective": {
+    "tau": 0.25,
+    "occupancy_weight": 0.5,
+    "ambiguity_weight": 0.25,
+    "contrast_weight": 0.5,
+    "projection_seed": 20260825,
+    "projection_count": 64,
+    "calibration_sample_size": 6,
+    "calibration_draws": 256,
+    "calibration_seed": 20260825,
+    "patient_reference_events_per_mode": 512,
+    "event_sensitivity_role": "mean plus standard-deviation diagnostic; primary event unit ranks the screen"
+  },
+  "pareto_selection": {
+    "axes": [
+      "mean_soft_objective:min",
+      "mean_soft_causal_direction:max",
+      "mean_soft_causal_monotonicity:max",
+      "soft_topology_across_network:max",
+      "soft_topology_mode_separation:max"
+    ],
+    "maximum_nominees": 1,
+    "maximum_per_radius": 1,
+    "required_sentinels": ["best_soft_objective", "best_causal_direction"],
+    "patient_heldout_used": false,
+    "natural_kmeans_used": false
+  },
+  "resources": {
+    "numerical_threads_per_worker": 1,
+    "maximum_workers": 9,
+    "estimated_worker_gib": 14.0,
+    "reserved_available_memory_gib": 32,
+    "monitor_interval_seconds": 600,
+    "long_run_launcher": "systemd-run --user plus nohup"
+  },
+  "claim_boundary": "Fit-only recovery of one pre-existing Stage-Z Pareto field omitted by the radius diversity quota. It reuses the already opened Stage-AA fit networks and existing anchor trajectories. Patient held-out and natural KMeans remain unopened; EE, E-to-I and Z/M remain off."
+}
