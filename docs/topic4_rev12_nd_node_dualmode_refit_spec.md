@@ -894,3 +894,18 @@ any worker completed, so the controller stopped the batch before OOM. The
 frozen rerun therefore uses at most 14 workers, a 14 GiB per-worker estimate,
 at least 32 GiB reserved memory and a 600 s controller interval. This resource
 correction changes no candidate, seed, simulation or selection rule.
+
+Stage-Z completed 102/102 runs with 34/34 fields evaluable on three networks.
+The screen exposed a fit-direction tradeoff rather than a frozen solution.
+`stage_z_g09_m` had the lowest mean soft patient-training objective and improved
+both mode losses in aggregate, but the improvement occurred in only two of
+three networks and its causal-direction score was zero in two networks.
+`stage_z_g05_p` had positive causal direction in all three networks, but worsened
+the mean patient fit. Therefore Stage-Z does not freeze Node and does not open
+held-out, KMeans selection, intervention, EE, E-to-I or Z/M.
+
+Stage-AA copies the six candidates nominated by the predeclared Stage-Z Pareto
+rule plus the unchanged anchor onto nine fresh fit networks 2271--2279. All
+seven field hashes remain unchanged. This 63-run expansion measures whether the
+fit-direction tradeoff is stable; it may reduce the fit shortlist but still
+cannot select the final Node field or inspect patient held-out data.

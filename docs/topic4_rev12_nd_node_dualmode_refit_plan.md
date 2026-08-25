@@ -519,3 +519,23 @@ confirmation, intervention, EE, E-to-I and Z/M remain closed.
    19 GiB; it produced no completed artifact and changes no scientific split.
    The launcher and one-shot finisher run under `systemd-run --user` plus
    `nohup`; both wait at 600 s intervals rather than continuous polling.
+
+Stage-Z completed all 102 runs. The soft-fit sentinel `stage_z_g09_m` improved
+the aggregate soft objective and both patient-mode losses but only on two of
+three networks; the causal-direction sentinel `stage_z_g05_p` was directional
+on all three networks but worsened the mean patient fit. No field is frozen.
+
+## Stage-AA fresh fit expansion
+
+1. Copy the six automatically nominated Stage-Z fields and `stage_z_anchor`
+   without changing a coefficient or field hash.
+2. Run all seven fields on new fit networks 2271--2279 using identical 20 s
+   Node-only simulations and causal-family observations (63 runs).
+3. Report paired network deltas against the anchor for soft objective, both
+   patient modes, causal direction, monotonicity and source topology.
+4. Use the frozen five-axis Pareto summary to reduce the exploration to at most
+   three fields. Keep fit and direction sentinels explicit; do not call either
+   one a final candidate solely because it wins one axis.
+5. Do not read patient held-out endpoints or use natural KMeans for this
+   reduction. A final shortlist must be frozen before fresh selection networks
+   are opened.
